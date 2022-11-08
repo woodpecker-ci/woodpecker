@@ -42,67 +42,69 @@
       <span>{{ $t('repo.pipeline.no_pipeline_steps') }}</span>
     </div>
 
-    <div class="flex flex-grow flex-col relative min-h-0 overflow-y-auto gap-2">
-      <div
-        v-for="workflow in pipeline.steps"
-        :key="workflow.id"
-        class="p-2 md:rounded-md bg-white shadow dark:border-b-dark-gray-600 dark:bg-dark-gray-700"
-      >
-        <div class="flex flex-col gap-2">
-          <div v-if="workflow.environ" class="flex flex-wrap gap-x-1 gap-y-2 text-xs justify-end pt-1">
-            <div v-for="(value, key) in workflow.environ" :key="key">
-              <span
-                class="pl-2 pr-1 py-0.5 bg-gray-800 text-gray-200 dark:bg-gray-600 border-2 border-gray-800 dark:border-gray-600 rounded-l-full"
-              >
-                {{ key }}
-              </span>
-              <span class="pl-1 pr-2 py-0.5 border-2 border-gray-800 dark:border-gray-600 rounded-r-full">
-                {{ value }}
-              </span>
-            </div>
-          </div>
-          <button
-            v-if="pipeline.steps && pipeline.steps.length > 1"
-            type="button"
-            :title="workflow.name"
-            class="flex items-center gap-2 py-2 px-1 hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-5 rounded-md"
-            @click="workflowsCollapsed[workflow.id] = !workflowsCollapsed[workflow.id]"
-          >
-            <Icon
-              name="chevron-right"
-              class="transition-transform duration-150 min-w-6 h-6"
-              :class="{ 'transform rotate-90': !workflowsCollapsed[workflow.id] }"
-            />
-            <PipelineStatusIcon :status="workflow.state" class="!h-4 !w-4" />
-            <span class="truncate">{{ workflow.name }}</span>
-          </button>
-        </div>
+    <div class="flex-grow min-h-0 w-full relative">
+      <div class="absolute top-0 left-0 -right-3 h-full flex flex-col overflow-y-scroll gap-y-2">
         <div
-          class="transition-height duration-150 overflow-hidden"
-          :class="{
-            'max-h-screen': !workflowsCollapsed[workflow.id],
-            'max-h-0': workflowsCollapsed[workflow.id],
-            'ml-6': pipeline.steps && pipeline.steps.length > 1,
-          }"
+          v-for="workflow in pipeline.steps"
+          :key="workflow.id"
+          class="p-2 md:rounded-md bg-white shadow dark:border-b-dark-gray-600 dark:bg-dark-gray-700"
         >
-          <button
-            v-for="step in workflow.children"
-            :key="step.pid"
-            type="button"
-            :title="step.name"
-            class="flex p-2 gap-2 border-2 border-transparent rounded-md items-center hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-5 w-full"
+          <div class="flex flex-col gap-2">
+            <div v-if="workflow.environ" class="flex flex-wrap gap-x-1 gap-y-2 text-xs justify-end pt-1">
+              <div v-for="(value, key) in workflow.environ" :key="key">
+                <span
+                  class="pl-2 pr-1 py-0.5 bg-gray-800 text-gray-200 dark:bg-gray-600 border-2 border-gray-800 dark:border-gray-600 rounded-l-full"
+                >
+                  {{ key }}
+                </span>
+                <span class="pl-1 pr-2 py-0.5 border-2 border-gray-800 dark:border-gray-600 rounded-r-full">
+                  {{ value }}
+                </span>
+              </div>
+            </div>
+            <button
+              v-if="pipeline.steps && pipeline.steps.length > 1"
+              type="button"
+              :title="workflow.name"
+              class="flex items-center gap-2 py-2 px-1 hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-5 rounded-md"
+              @click="workflowsCollapsed[workflow.id] = !workflowsCollapsed[workflow.id]"
+            >
+              <Icon
+                name="chevron-right"
+                class="transition-transform duration-150 min-w-6 h-6"
+                :class="{ 'transform rotate-90': !workflowsCollapsed[workflow.id] }"
+              />
+              <PipelineStatusIcon :status="workflow.state" class="!h-4 !w-4" />
+              <span class="truncate">{{ workflow.name }}</span>
+            </button>
+          </div>
+          <div
+            class="transition-height duration-150 overflow-hidden"
             :class="{
-              'bg-black bg-opacity-10 dark:bg-white dark:bg-opacity-5': selectedStepId && selectedStepId === step.pid,
-              'mt-1':
-                (pipeline.steps && pipeline.steps.length > 1) ||
-                (workflow.children && step.pid !== workflow.children[0].pid),
+              'max-h-screen': !workflowsCollapsed[workflow.id],
+              'max-h-0': workflowsCollapsed[workflow.id],
+              'ml-6': pipeline.steps && pipeline.steps.length > 1,
             }"
-            @click="$emit('update:selected-step-id', step.pid)"
           >
-            <PipelineStatusIcon :status="step.state" class="!h-4 !w-4" />
-            <span class="truncate">{{ step.name }}</span>
-            <PipelineStepDuration :step="step" />
-          </button>
+            <button
+              v-for="step in workflow.children"
+              :key="step.pid"
+              type="button"
+              :title="step.name"
+              class="flex p-2 gap-2 border-2 border-transparent rounded-md items-center hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-5 w-full"
+              :class="{
+                'bg-black bg-opacity-10 dark:bg-white dark:bg-opacity-5': selectedStepId && selectedStepId === step.pid,
+                'mt-1':
+                  (pipeline.steps && pipeline.steps.length > 1) ||
+                  (workflow.children && step.pid !== workflow.children[0].pid),
+              }"
+              @click="$emit('update:selected-step-id', step.pid)"
+            >
+              <PipelineStatusIcon :status="step.state" class="!h-4 !w-4" />
+              <span class="truncate">{{ step.name }}</span>
+              <PipelineStepDuration :step="step" />
+            </button>
+          </div>
         </div>
       </div>
     </div>
