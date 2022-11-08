@@ -44,13 +44,13 @@
 
     <div class="flex flex-grow flex-col relative min-h-0 overflow-y-auto gap-2">
       <div
-        v-for="step in pipeline.steps"
-        :key="step.id"
+        v-for="workflow in pipeline.steps"
+        :key="workflow.id"
         class="p-2 md:rounded-md bg-white shadow dark:border-b-dark-gray-600 dark:bg-dark-gray-700"
       >
         <div class="flex flex-col gap-2">
-          <div v-if="step.environ" class="flex flex-wrap gap-x-1 gap-y-2 text-xs justify-end pt-1">
-            <div v-for="(value, key) in step.environ" :key="key">
+          <div v-if="workflow.environ" class="flex flex-wrap gap-x-1 gap-y-2 text-xs justify-end pt-1">
+            <div v-for="(value, key) in workflow.environ" :key="key">
               <span
                 class="pl-2 pr-1 py-0.5 bg-gray-800 text-gray-200 dark:bg-gray-600 border-2 border-gray-800 dark:border-gray-600 rounded-l-full"
               >
@@ -64,61 +64,44 @@
           <button
             v-if="pipeline.steps && pipeline.steps.length > 1"
             type="button"
-            :title="step.name"
+            :title="workflow.name"
             class="flex items-center gap-2 py-2 px-1 hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-5 rounded-md"
-            @click="stepsCollapsed[step.id] = !!!stepsCollapsed[step.id]"
+            @click="workflowsCollapsed[workflow.id] = !workflowsCollapsed[workflow.id]"
           >
             <Icon
               name="chevron-right"
               class="transition-transform duration-150 min-w-6 h-6"
-              :class="{ 'transform rotate-90': !stepsCollapsed[step.id] }"
+              :class="{ 'transform rotate-90': !workflowsCollapsed[workflow.id] }"
             />
-            <div
-              class="min-w-2 h-2 rounded-full -ml-0.75"
-              :class="{
-                'bg-lime-400': ['success'].includes(step.state),
-                'bg-gray-400': ['pending', 'skipped'].includes(step.state),
-                'bg-red-400': ['killed', 'error', 'failure', 'blocked', 'declined'].includes(step.state),
-                'bg-blue-400': ['started', 'running'].includes(step.state),
-              }"
-            />
-            <span class="truncate">{{ step.name }}</span>
+            <PipelineStatusIcon :status="workflow.state" />
+            <span class="truncate">{{ workflow.name }}</span>
           </button>
         </div>
         <div
           class="transition-height duration-150 overflow-hidden"
           :class="{
-            'max-h-screen': !stepsCollapsed[step.id],
-            'max-h-0': stepsCollapsed[step.id],
+            'max-h-screen': !workflowsCollapsed[workflow.id],
+            'max-h-0': workflowsCollapsed[workflow.id],
             'ml-6': pipeline.steps && pipeline.steps.length > 1,
           }"
         >
           <button
-            v-for="subStep in step.children"
-            :key="subStep.pid"
+            v-for="step in workflow.children"
+            :key="step.pid"
             type="button"
-            :title="subStep.name"
+            :title="step.name"
             class="flex p-2 gap-2 border-2 border-transparent rounded-md items-center hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-5 w-full"
             :class="{
-              'bg-black bg-opacity-10 dark:bg-white dark:bg-opacity-5':
-                selectedStepId && selectedStepId === subStep.pid,
+              'bg-black bg-opacity-10 dark:bg-white dark:bg-opacity-5': selectedStepId && selectedStepId === step.pid,
               'mt-1':
                 (pipeline.steps && pipeline.steps.length > 1) ||
-                (step.children && subStep.pid !== step.children[0].pid),
+                (workflow.children && step.pid !== workflow.children[0].pid),
             }"
-            @click="$emit('update:selected-step-id', subStep.pid)"
+            @click="$emit('update:selected-step-id', step.pid)"
           >
-            <div
-              class="min-w-2 h-2 rounded-full"
-              :class="{
-                'bg-lime-400': ['success'].includes(subStep.state),
-                'bg-gray-400': ['pending', 'skipped'].includes(subStep.state),
-                'bg-red-400': ['killed', 'error', 'failure', 'blocked', 'declined'].includes(subStep.state),
-                'bg-blue-400': ['started', 'running'].includes(subStep.state),
-              }"
-            />
-            <span class="truncate">{{ subStep.name }}</span>
-            <PipelineStepDuration :step="subStep" />
+            <PipelineStatusIcon :status="step.state" />
+            <span class="truncate">{{ step.name }}</span>
+            <PipelineStepDuration :step="step" />
           </button>
         </div>
       </div>
@@ -130,6 +113,7 @@
 import { ref, toRef } from 'vue';
 
 import Icon from '~/components/atomic/Icon.vue';
+import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import PipelineStepDuration from '~/components/repo/pipeline/PipelineStepDuration.vue';
 import usePipeline from '~/compositions/usePipeline';
 import { Pipeline, PipelineStep } from '~/lib/api/types';
@@ -146,10 +130,13 @@ defineEmits<{
 const pipeline = toRef(props, 'pipeline');
 const { prettyRef } = usePipeline(pipeline);
 
-const stepsCollapsed = ref<Record<PipelineStep['id'], boolean>>(
+const workflowsCollapsed = ref<Record<PipelineStep['id'], boolean>>(
   props.pipeline.steps && props.pipeline.steps.length > 1
     ? (props.pipeline.steps || []).reduce(
-        (collapsed, step) => ({ ...collapsed, [step.id]: !['started', 'running', 'pending'].includes(step.state) }),
+        (collapsed, workflow) => ({
+          ...collapsed,
+          [workflow.id]: ['success', 'skipped', 'blocked'].includes(workflow.state),
+        }),
         {},
       )
     : {},
