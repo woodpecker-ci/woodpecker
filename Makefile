@@ -45,6 +45,8 @@ ifeq (in_docker,$(firstword $(MAKECMDGOALS)))
 		-e GO_PACKAGES="$(GO_PACKAGES)" \
 		-e TARGETOS="$(TARGETOS)" \
 		-e TARGETARCH="$(TARGETARCH)" \
+		-e GOPATH=/tmp/go \
+		-e HOME=/tmp/home \
 		-v $(PWD):/build --rm woodpecker/make:local make $(MAKE_ARGS)
 else
 
