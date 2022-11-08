@@ -192,7 +192,7 @@ func setupForge(c *cli.Context) (forge.Forge, error) {
 	case c.Bool("github"):
 		return setupGitHub(c)
 	case c.Bool("gitlab"):
-		return setupGitlab(c)
+		return setupGitLab(c)
 	case c.Bool("bitbucket"):
 		return setupBitbucket(c)
 	case c.Bool("stash"):
@@ -266,7 +266,7 @@ func setupStash(c *cli.Context) (forge.Forge, error) {
 }
 
 // helper function to setup the Gitlab forge from the CLI arguments.
-func setupGitlab(c *cli.Context) (forge.Forge, error) {
+func setupGitLab(c *cli.Context) (forge.Forge, error) {
 	return gitlab.New(gitlab.Opts{
 		URL:          c.String("gitlab-server"),
 		ClientID:     c.String("gitlab-client"),
