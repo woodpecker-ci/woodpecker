@@ -1,6 +1,6 @@
 # docker build --rm  -f docker/Dockerfile.server -t woodpeckerci/woodpecker-server .
 FROM golang:1.18-alpine as golang_image
-FROM node:16-alpine
+FROM node:18-alpine
 
 RUN apk add make gcc musl-dev
 
