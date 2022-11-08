@@ -73,7 +73,7 @@
               class="transition-transform duration-150 min-w-6 h-6"
               :class="{ 'transform rotate-90': !workflowsCollapsed[workflow.id] }"
             />
-            <PipelineStatusIcon :status="workflow.state" />
+            <PipelineStatusIcon :status="workflow.state" class="!h-4 !w-4" />
             <span class="truncate">{{ workflow.name }}</span>
           </button>
         </div>
@@ -99,7 +99,7 @@
             }"
             @click="$emit('update:selected-step-id', step.pid)"
           >
-            <PipelineStatusIcon :status="step.state" />
+            <PipelineStatusIcon :status="step.state" class="!h-4 !w-4" />
             <span class="truncate">{{ step.name }}</span>
             <PipelineStepDuration :step="step" />
           </button>
