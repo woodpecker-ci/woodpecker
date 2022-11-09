@@ -147,7 +147,7 @@ paths:
             Unable to activate the Repository because it is already activate
         500:
           description: |
-            Unable to activate the Repository due to an internal server error. This may indicate a problem adding hooks to the remote system (ie Github), generating SSH deployment keys, or persisting to the database.
+            Unable to activate the Repository due to an internal server error. This may indicate a problem adding hooks to the remote system (ie GitHub), generating SSH deployment keys, or persisting to the database.
 
     delete:
       parameters:
@@ -198,7 +198,7 @@ paths:
       tags:
         - Repos
       summary: Encrypt repo secrets
-      description: Encryptes a Yaml file with secret environment variables for secure public storage.
+      description: Encrypts a Yaml file with secret environment variables for secure public storage.
       security:
         - accessToken: []
       responses:

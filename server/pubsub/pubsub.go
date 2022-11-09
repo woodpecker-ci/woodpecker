@@ -17,7 +17,7 @@ type Message struct {
 	// Data is the actual data in the entry.
 	Data []byte `json:"data"`
 
-	// Labels represents the key-value pairs the entry is lebeled with.
+	// Labels represents the key-value pairs the entry is labeled with.
 	Labels map[string]string `json:"labels,omitempty"`
 }
 

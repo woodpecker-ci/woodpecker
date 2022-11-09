@@ -49,7 +49,7 @@ func Start(ctx context.Context, store store.Store, forge forge.Forge) error {
 
 				crons, err := store.CronListNextExecute(now.Unix(), checkItems)
 				if err != nil {
-					log.Error().Err(err).Int64("now", now.Unix()).Msg("obtain cron cron list")
+					log.Error().Err(err).Int64("now", now.Unix()).Msg("obtain cron list")
 					return
 				}
 

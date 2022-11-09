@@ -64,7 +64,7 @@
     },
     {
       "// todo": true,
-      "name": "Github release",
+      "name": "GitHub release",
       "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-github-release/master/docs.md",
       "verified": true
     },

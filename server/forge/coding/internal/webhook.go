@@ -49,7 +49,7 @@ func (c *Client) AddWebhook(globalKey, projectName, link string) error {
 		u := fmt.Sprintf("/user/%s/project/%s/git/hook/%d", globalKey, projectName, webhook.ID)
 		params := url.Values{}
 		params.Set("hook_url", link)
-		params.Set("type_pust", "true")
+		params.Set("type_push", "true")
 		params.Set("type_mr_pr", "true")
 
 		_, err := c.Do("PUT", u, params)

@@ -112,7 +112,7 @@ func Test_github(t *testing.T) {
 
 		g.It("Should return a user team list")
 
-		g.It("Should register repositroy hooks")
+		g.It("Should register repository hooks")
 
 		g.It("Should return a repository file")
 
