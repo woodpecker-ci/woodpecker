@@ -265,7 +265,7 @@ func setupStash(c *cli.Context) (forge.Forge, error) {
 	return bitbucketserver.New(opts)
 }
 
-// helper function to setup the Gitlab forge from the CLI arguments.
+// helper function to setup the GitLab forge from the CLI arguments.
 func setupGitLab(c *cli.Context) (forge.Forge, error) {
 	return gitlab.New(gitlab.Opts{
 		URL:          c.String("gitlab-server"),
