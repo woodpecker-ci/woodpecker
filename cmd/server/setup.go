@@ -190,7 +190,7 @@ func setupMembershipService(_ *cli.Context, r forge.Forge) cache.MembershipServi
 func setupForge(c *cli.Context) (forge.Forge, error) {
 	switch {
 	case c.Bool("github"):
-		return setupGithub(c)
+		return setupGitHub(c)
 	case c.Bool("gitlab"):
 		return setupGitlab(c)
 	case c.Bool("bitbucket"):
@@ -276,7 +276,7 @@ func setupGitlab(c *cli.Context) (forge.Forge, error) {
 }
 
 // helper function to setup the GitHub forge from the CLI arguments.
-func setupGithub(c *cli.Context) (forge.Forge, error) {
+func setupGitHub(c *cli.Context) (forge.Forge, error) {
 	opts := github.Opts{
 		URL:        c.String("github-server"),
 		Client:     c.String("github-client"),

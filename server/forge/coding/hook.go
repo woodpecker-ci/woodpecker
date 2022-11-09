@@ -107,7 +107,7 @@ func parseHook(r *http.Request) (*model.Repo, *model.Pipeline, error) {
 	case hookPR:
 		return parsePullRequestHook(raw)
 	case hookMR:
-		return parseMergeReuqestHook(raw)
+		return parseMergeRequestHook(raw)
 	}
 	return nil, nil, nil
 }
@@ -213,7 +213,7 @@ func parsePullRequestHook(raw []byte) (*model.Repo, *model.Pipeline, error) {
 	return repo, pipeline, nil
 }
 
-func parseMergeReuqestHook(raw []byte) (*model.Repo, *model.Pipeline, error) {
+func parseMergeRequestHook(raw []byte) (*model.Repo, *model.Pipeline, error) {
 	hook := &MergeRequestHook{}
 	err := json.Unmarshal(raw, hook)
 	if err != nil {
