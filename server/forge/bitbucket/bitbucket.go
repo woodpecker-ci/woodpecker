@@ -256,7 +256,7 @@ func (c *config) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 	})
 }
 
-// Deactivate deactives the repository be removing repository push hooks from
+// Deactivate deactivates the repository be removing repository push hooks from
 // the Bitbucket repository.
 func (c *config) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
 	client := c.newClient(ctx, u)
@@ -296,7 +296,7 @@ func (c *config) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]
 	return branches, nil
 }
 
-// BranchHead returns the sha of the head (lastest commit) of the specified branch
+// BranchHead returns the sha of the head (latest commit) of the specified branch
 func (c *config) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
 	// TODO(1138): missing implementation
 	return "", forge_types.ErrNotImplemented

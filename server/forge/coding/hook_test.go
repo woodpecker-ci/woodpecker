@@ -196,7 +196,7 @@ func Test_hook(t *testing.T) {
 				Refspec:  "branch1:master",
 			}
 
-			actualRepo, actualPipeline, err := parseMergeReuqestHook([]byte(fixtures.MergeRequestHook))
+			actualRepo, actualPipeline, err := parseMergeRequestHook([]byte(fixtures.MergeRequestHook))
 			g.Assert(err).IsNil()
 			g.Assert(actualRepo).Equal(repo)
 			g.Assert(actualPipeline).Equal(pipeline)

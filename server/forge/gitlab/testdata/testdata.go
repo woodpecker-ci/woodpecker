@@ -43,10 +43,10 @@ func NewServer(t *testing.T) *httptest.Server {
 
 			return
 		case "/api/v4/projects/diaspora/diaspora-client":
-			w.Write(project4Paylod)
+			w.Write(project4Payload)
 			return
 		case "/api/v4/projects/brightbox/puppet":
-			w.Write(project6Paylod)
+			w.Write(project6Payload)
 			return
 		case "/api/v4/projects/4/hooks":
 			switch r.Method {
