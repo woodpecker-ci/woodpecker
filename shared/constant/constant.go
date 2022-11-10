@@ -22,6 +22,15 @@ var PrivilegedPlugins = []string{
 	"woodpeckerci/plugin-docker-buildx",
 }
 
+// DefaultConfigOrder represent the priority in witch woodpecker search for a pipeline config by default
+// folders are indicated by supplying a trailing /
+var DefaultConfigOrder = [...]string{
+	".woodpecker/",
+	".woodpecker.yml",
+	".woodpecker.yaml",
+	".drone.yml",
+}
+
 const (
 	DefaultCloneImage = "docker.io/woodpeckerci/plugin-git:v1.6.0"
 )

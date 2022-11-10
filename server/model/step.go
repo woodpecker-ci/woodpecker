@@ -97,7 +97,7 @@ func Tree(steps []*Step) ([]*Step, error) {
 		}
 	}
 
-	// assign children to parrents
+	// assign children to parents
 	for i := range steps {
 		if !steps[i].IsParent() {
 			parent, err := findNode(nodes, steps[i].PPID)
