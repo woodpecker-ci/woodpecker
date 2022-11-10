@@ -78,7 +78,7 @@ export default defineComponent({
     const { doSubmit: activateRepo, isLoading: isActivatingRepo } = useAsyncAction(async (repo: Repo) => {
       repoToActivate.value = repo;
       await apiClient.activateRepo(repo.owner, repo.name);
-      notifications.notify({ title: i18n.t('repo.enabled.success'), type: 'success' });
+      notifications.notify({ title: i18n.t('repo.enable.success'), type: 'success' });
       repoToActivate.value = undefined;
       await router.push({ name: 'repo', params: { repoName: repo.name, repoOwner: repo.owner } });
     });
