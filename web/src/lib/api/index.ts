@@ -23,6 +23,12 @@ type PipelineOptions = {
   branch: string;
   variables: Record<string, string>;
 };
+
+type DeploymentOptions = {
+  id: string;
+  environment: string;
+  variables: Record<string, string>;
+};
 export default class WoodpeckerClient extends ApiClient {
   getRepoList(opts?: RepoListOptions): Promise<Repo[]> {
     const query = encodeQueryString(opts);
@@ -60,6 +66,18 @@ export default class WoodpeckerClient extends ApiClient {
 
   createPipeline(owner: string, repo: string, options: PipelineOptions): Promise<Pipeline> {
     return this._post(`/api/repos/${owner}/${repo}/pipelines`, options) as Promise<Pipeline>;
+  }
+
+  // Deploy triggers a deployment for an existing pipeline using the
+  // specified target environment.
+  deployPipeline(owner: string, repo: string, number: number, options: DeploymentOptions): Promise<Pipeline> {
+    const vars = {
+      ...options.variables,
+      event: 'deployment',
+      deploy_to: options.environment,
+    };
+    const query = encodeQueryString(vars);
+    return this._post(`/api/repos/${owner}/${repo}/pipelines/${number}?${query}`) as Promise<Pipeline>;
   }
 
   getPipelineList(owner: string, repo: string, opts?: Record<string, string | number | boolean>): Promise<Pipeline[]> {

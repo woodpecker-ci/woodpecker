@@ -77,11 +77,11 @@
         "cancel": "Abbrechen",
         "cancel_success": "Pipeline abgebrochen",
         "canceled": "Dieser Schritt wurde abgebrochen.",
+        "deploy": "Deployment starten",
         "log_auto_scroll": "Automatisches folgen",
         "log_auto_scroll_off": "Schalte automatisches folgen aus",
         "log_download": "Herunterladen",
-        "restart": "Neustarten",
-        "restart_success": "Pipeline neu gestartet"
+        "restart": "Neustarten"
       },
       "config": "Konfiguration",
       "created": "Erstellt",
@@ -133,12 +133,25 @@
         "value": "Variablenwert"
       }
     },
+    "deploy_pipeline": {
+      "title": "Aktuelle Pipeline deployen",
+      "enter_target": "Deployment Target angeben",
+      "trigger": "Deploy",
+      "variables": {
+        "add": "Variable hinzufügen",
+        "desc": "Spezifiziere weitere Variablen für deine Pipeline. Vordefinierte Variablen mit dem selben Namen werden überschrieben.",
+        "name": "Variablenname",
+        "title": "Zusätzliche Pipeline-Variablen",
+        "value": "Variablenwert"
+      }
+    },
     "not_allowed": "Zugriff auf dieses Repository nicht erlaubt",
     "pipeline": {
       "actions": {
         "cancel": "Abbrechen",
         "cancel_success": "Pipeline abgebrochen",
         "canceled": "Dieser Schritt wurde abgebrochen.",
+        "deploy": "Deploy",
         "log_auto_scroll": "Automatisches folgen",
         "log_auto_scroll_off": "Schalte automatisches folgen aus",
         "log_download": "Herunterladen",
