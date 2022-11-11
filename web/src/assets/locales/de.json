@@ -81,7 +81,8 @@
         "log_auto_scroll": "Automatisches folgen",
         "log_auto_scroll_off": "Schalte automatisches folgen aus",
         "log_download": "Herunterladen",
-        "restart": "Neustarten"
+        "restart": "Neustarten",
+        "restart_success": "Pipeline neu gestartet"
       },
       "config": "Konfiguration",
       "created": "Erstellt",
