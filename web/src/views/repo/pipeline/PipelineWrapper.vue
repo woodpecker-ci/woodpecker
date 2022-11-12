@@ -89,7 +89,6 @@ import { useRouteBackOrDefault } from '~/compositions/useRouteBackOrDefault';
 import { Repo, RepoPermissions } from '~/lib/api/types';
 import PipelineStore from '~/store/pipelines';
 
-
 export default defineComponent({
   name: 'PipelineWrapper',
 
