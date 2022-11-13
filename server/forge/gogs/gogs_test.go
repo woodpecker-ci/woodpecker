@@ -130,7 +130,7 @@ func Test_gogs(t *testing.T) {
 			})
 		})
 
-		g.It("Should register repositroy hooks", func() {
+		g.It("Should register repository hooks", func() {
 			err := c.Activate(ctx, fakeUser, fakeRepo, "http://localhost")
 			g.Assert(err).IsNil()
 		})
@@ -160,7 +160,7 @@ func Test_gogs(t *testing.T) {
 			g.It("Should handle a parsing error")
 		})
 
-		g.It("Should return no-op for usupporeted features", func() {
+		g.It("Should return no-op for unsupported features", func() {
 			_, err1 := c.Auth(ctx, "octocat", "4vyW6b49Z")
 			err2 := c.Status(ctx, nil, nil, nil, nil)
 			err3 := c.Deactivate(ctx, nil, nil, "")

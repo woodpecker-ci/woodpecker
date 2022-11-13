@@ -133,7 +133,7 @@ var notArchivedProjectsPayload = []byte(`
 ]
 `)
 
-var project4Paylod = []byte(`
+var project4Payload = []byte(`
 {
 	"id": 4,
 	"description": null,
@@ -182,7 +182,7 @@ var project4Paylod = []byte(`
 }
 `)
 
-var project6Paylod = []byte(`
+var project6Payload = []byte(`
 {
 	"id": 6,
 	"description": null,

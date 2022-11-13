@@ -370,7 +370,7 @@ Specify a configuration service endpoint, see [Configuration Extension](./100-ex
 
 ### `WOODPECKER_GITHUB_...`
 
-See [Github configuration](forges/github/#configuration)
+See [GitHub configuration](forges/github/#configuration)
 
 ### `WOODPECKER_GOGS_...`
 
