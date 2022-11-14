@@ -1,6 +1,6 @@
 import { PipelineStatus } from '~/lib/api/types';
 
-export const pipelineStatusColors: Record<PipelineStatus, string> = {
+export const pipelineStatusColors: Record<PipelineStatus, 'green' | 'gray' | 'red' | 'blue'> = {
   blocked: 'gray',
   declined: 'red',
   error: 'red',
