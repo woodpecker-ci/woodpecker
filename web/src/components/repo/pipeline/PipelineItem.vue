@@ -13,7 +13,7 @@
       />
       <div class="w-8 flex flex-wrap justify-between items-center h-full">
         <PipelineRunningIcon v-if="pipeline.status === 'started' || pipeline.status === 'running'" />
-        <PipelineStatusIcon v-else class="mx-2 md:mx-3" :pipeline="pipeline" />
+        <PipelineStatusIcon v-else class="mx-2 md:mx-3" :status="pipeline.status" />
       </div>
     </div>
 

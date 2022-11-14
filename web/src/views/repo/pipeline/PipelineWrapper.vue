@@ -8,7 +8,7 @@
       </template>
 
       <template #titleActions>
-        <PipelineStatusIcon :pipeline="pipeline" class="flex flex-shrink-0" />
+        <PipelineStatusIcon :status="pipeline.status" class="flex flex-shrink-0" />
 
         <template v-if="repoPermissions.push">
           <Button

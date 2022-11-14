@@ -250,6 +250,19 @@
                 "deploy": "Deploy",
                 "cron": "Cron",
                 "manual": "Manual"
+            },
+            "status": {
+              "status": "Status: {status}",
+              "blocked": "blocked",
+              "pending": "pending",
+              "running": "running",
+              "started": "started",
+              "skipped": "skipped",
+              "success": "success",
+              "declined": "declined",
+              "error": "error",
+              "failure": "failure",
+              "killed": "killed"
             }
         }
     },
