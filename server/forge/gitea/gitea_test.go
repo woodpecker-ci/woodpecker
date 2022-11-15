@@ -85,7 +85,7 @@ func Test_gitea(t *testing.T) {
 
 		g.Describe("Requesting a repository", func() {
 			g.It("Should return the repository details", func() {
-				repo, err := c.Repo(ctx, fakeUser, fakeRepo.ForgeID, fakeRepo.Owner, fakeRepo.Name)
+				repo, err := c.Repo(ctx, fakeUser, fakeRepo.ForgeRemoteID, fakeRepo.Owner, fakeRepo.Name)
 				g.Assert(err).IsNil()
 				g.Assert(repo.Owner).Equal(fakeRepo.Owner)
 				g.Assert(repo.Name).Equal(fakeRepo.Name)
@@ -118,7 +118,7 @@ func Test_gitea(t *testing.T) {
 			g.It("Should return the repository list", func() {
 				repos, err := c.Repos(ctx, fakeUser)
 				g.Assert(err).IsNil()
-				g.Assert(repos[0].ForgeID).Equal(fakeRepo.ForgeID)
+				g.Assert(repos[0].ForgeRemoteID).Equal(fakeRepo.ForgeRemoteID)
 				g.Assert(repos[0].Owner).Equal(fakeRepo.Owner)
 				g.Assert(repos[0].Name).Equal(fakeRepo.Name)
 				g.Assert(repos[0].FullName).Equal(fakeRepo.Owner + "/" + fakeRepo.Name)
@@ -192,11 +192,11 @@ var (
 	}
 
 	fakeRepo = &model.Repo{
-		Clone:    "http://gitea.com/test_name/repo_name.git",
-		ForgeID:  "5",
-		Owner:    "test_name",
-		Name:     "repo_name",
-		FullName: "test_name/repo_name",
+		Clone:         "http://gitea.com/test_name/repo_name.git",
+		ForgeRemoteID: "5",
+		Owner:         "test_name",
+		Name:          "repo_name",
+		FullName:      "test_name/repo_name",
 	}
 
 	fakeRepoNotFound = &model.Repo{

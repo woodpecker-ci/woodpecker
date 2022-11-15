@@ -166,7 +166,7 @@ func (c *client) Teams(ctx context.Context, u *model.User) ([]*model.Team, error
 }
 
 // Repo returns the GitHub repository.
-func (c *client) Repo(ctx context.Context, u *model.User, id model.ForgeID, owner, name string) (*model.Repo, error) {
+func (c *client) Repo(ctx context.Context, u *model.User, id model.ForgeRemoteID, owner, name string) (*model.Repo, error) {
 	client := c.newClientToken(ctx, u.Token)
 
 	if id.IsValid() {
@@ -546,7 +546,7 @@ func (c *client) loadChangedFilesFromPullRequest(ctx context.Context, pull *gith
 		return pipeline, nil
 	}
 
-	repo, err := _store.GetRepoNameFallback(tmpRepo.ForgeID, tmpRepo.FullName)
+	repo, err := _store.GetRepoNameFallback(tmpRepo.ForgeRemoteID, tmpRepo.FullName)
 	if err != nil {
 		return nil, err
 	}

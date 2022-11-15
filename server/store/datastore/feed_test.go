@@ -34,11 +34,11 @@ func TestGetPipelineQueue(t *testing.T) {
 	assert.NoError(t, store.CreateUser(user))
 
 	repo1 := &model.Repo{
-		Owner:    "bradrydzewski",
-		Name:     "test",
-		FullName: "bradrydzewski/test",
-		ForgeID:  "1",
-		IsActive: true,
+		Owner:         "bradrydzewski",
+		Name:          "test",
+		FullName:      "bradrydzewski/test",
+		ForgeRemoteID: "1",
+		IsActive:      true,
 	}
 
 	assert.NoError(t, store.CreateRepo(repo1))
@@ -75,18 +75,18 @@ func TestUserFeed(t *testing.T) {
 	assert.NoError(t, store.CreateUser(user))
 
 	repo1 := &model.Repo{
-		Owner:    "bradrydzewski",
-		Name:     "test1",
-		FullName: "bradrydzewski/test1",
-		ForgeID:  "1",
-		IsActive: true,
+		Owner:         "bradrydzewski",
+		Name:          "test1",
+		FullName:      "bradrydzewski/test1",
+		ForgeRemoteID: "1",
+		IsActive:      true,
 	}
 	repo2 := &model.Repo{
-		Owner:    "johndoe",
-		Name:     "test",
-		FullName: "johndoe/test2",
-		ForgeID:  "2",
-		IsActive: true,
+		Owner:         "johndoe",
+		Name:          "test",
+		FullName:      "johndoe/test2",
+		ForgeRemoteID: "2",
+		IsActive:      true,
 	}
 
 	assert.NoError(t, store.CreateRepo(repo1))
@@ -126,25 +126,25 @@ func TestRepoListLatest(t *testing.T) {
 	assert.NoError(t, store.CreateUser(user))
 
 	repo1 := &model.Repo{
-		Owner:    "bradrydzewski",
-		Name:     "test",
-		FullName: "bradrydzewski/test",
-		ForgeID:  "1",
-		IsActive: true,
+		Owner:         "bradrydzewski",
+		Name:          "test",
+		FullName:      "bradrydzewski/test",
+		ForgeRemoteID: "1",
+		IsActive:      true,
 	}
 	repo2 := &model.Repo{
-		Owner:    "test",
-		Name:     "test",
-		FullName: "test/test",
-		ForgeID:  "2",
-		IsActive: true,
+		Owner:         "test",
+		Name:          "test",
+		FullName:      "test/test",
+		ForgeRemoteID: "2",
+		IsActive:      true,
 	}
 	repo3 := &model.Repo{
-		Owner:    "octocat",
-		Name:     "hello-world",
-		FullName: "octocat/hello-world",
-		ForgeID:  "3",
-		IsActive: true,
+		Owner:         "octocat",
+		Name:          "hello-world",
+		FullName:      "octocat/hello-world",
+		ForgeRemoteID: "3",
+		IsActive:      true,
 	}
 	assert.NoError(t, store.CreateRepo(repo1))
 	assert.NoError(t, store.CreateRepo(repo2))
