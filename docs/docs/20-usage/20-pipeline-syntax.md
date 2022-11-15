@@ -206,6 +206,20 @@ Woodpecker provides the ability to store named parameters external to the YAML c
 
 For more details check the [secrets docs](./40-secrets.md).
 
+### `failure`
+
+Some of the pipeline steps may be allowed to fail without causing the whole pipeline to report a failure (e.g., a step executing a linting check). To enable this, add `failure: ignore` to your pipeline step. If Woodpecker encounters an error while executing the step, it will report it as failed but still execute the next steps of the pipeline, if any, without affecting the status of the pipeline.
+
+```diff
+ pipeline:
+   backend:
+     image: golang
+     commands:
+       - go build
+       - go test
++    failure: ignore
+```
+
 ### `caches`
 
 Woodpecker gives the ability to define caches as Docker volumes in the YAML. You can use this parameter to mount files or folders into your containers that will persist between pipelines.

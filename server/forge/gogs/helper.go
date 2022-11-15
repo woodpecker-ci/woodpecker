@@ -36,16 +36,16 @@ func toRepo(from *gogs.Repository, privateMode bool) *model.Repo {
 		from.Owner.AvatarUrl,
 	)
 	return &model.Repo{
-		ForgeID:      model.ForgeID(fmt.Sprint(from.ID)),
-		SCMKind:      model.RepoGit,
-		Name:         name,
-		Owner:        from.Owner.UserName,
-		FullName:     from.FullName,
-		Avatar:       avatar,
-		Link:         from.HTMLURL,
-		IsSCMPrivate: from.Private || privateMode,
-		Clone:        from.CloneURL,
-		Branch:       from.DefaultBranch,
+		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(from.ID)),
+		SCMKind:       model.RepoGit,
+		Name:          name,
+		Owner:         from.Owner.UserName,
+		FullName:      from.FullName,
+		Avatar:        avatar,
+		Link:          from.HTMLURL,
+		IsSCMPrivate:  from.Private || privateMode,
+		Clone:         from.CloneURL,
+		Branch:        from.DefaultBranch,
 	}
 }
 

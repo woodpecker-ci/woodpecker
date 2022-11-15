@@ -150,7 +150,7 @@ func (c *client) Teams(ctx context.Context, u *model.User) ([]*model.Team, error
 }
 
 // Repo returns the named Gogs repository.
-func (c *client) Repo(ctx context.Context, u *model.User, _ model.ForgeID, owner, name string) (*model.Repo, error) {
+func (c *client) Repo(ctx context.Context, u *model.User, _ model.ForgeRemoteID, owner, name string) (*model.Repo, error) {
 	client := c.newClientToken(u.Token)
 	repo, err := client.GetRepo(owner, name)
 	if err != nil {

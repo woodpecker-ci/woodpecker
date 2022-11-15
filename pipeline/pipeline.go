@@ -11,6 +11,7 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/multipart"
 )
 
@@ -193,7 +194,11 @@ func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 			}
 
 			// Return the error after tracing it.
-			return r.traceStep(processState, err, step)
+			err = r.traceStep(processState, err, step)
+			if err != nil && step.Failure == frontend.FailureIgnore {
+				return nil
+			}
+			return err
 		})
 	}
 
