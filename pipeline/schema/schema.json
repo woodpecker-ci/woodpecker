@@ -237,6 +237,12 @@
         "detach": {
           "description": "Detach a step to run in background until pipeline finishes. Read more: https://woodpecker-ci.org/docs/usage/services#detachment",
           "type": "boolean"
+        },
+        "failure": {
+          "description": "How to handle the failure of this step. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#failure",
+          "type": "string",
+          "enum": ["fail", "ignore"],
+          "default": "fail"
         }
       }
     },
