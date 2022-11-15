@@ -415,6 +415,117 @@ func (_m *Store) FileRead(_a0 *model.Step, _a1 string) (io.ReadCloser, error) {
 	return r0, r1
 }
 
+// ForgeCreate provides a mock function with given fields: _a0
+func (_m *Store) ForgeCreate(_a0 *model.Forge) error {
+	ret := _m.Called(_a0)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*model.Forge) error); ok {
+		r0 = rf(_a0)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// ForgeDelete provides a mock function with given fields: _a0
+func (_m *Store) ForgeDelete(_a0 *model.Forge) error {
+	ret := _m.Called(_a0)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*model.Forge) error); ok {
+		r0 = rf(_a0)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// ForgeFind provides a mock function with given fields: _a0
+func (_m *Store) ForgeFind(_a0 *model.Repo) (*model.Forge, error) {
+	ret := _m.Called(_a0)
+
+	var r0 *model.Forge
+	if rf, ok := ret.Get(0).(func(*model.Repo) *model.Forge); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Forge)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*model.Repo) error); ok {
+		r1 = rf(_a0)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ForgeGet provides a mock function with given fields: _a0
+func (_m *Store) ForgeGet(_a0 int64) (*model.Forge, error) {
+	ret := _m.Called(_a0)
+
+	var r0 *model.Forge
+	if rf, ok := ret.Get(0).(func(int64) *model.Forge); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Forge)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(int64) error); ok {
+		r1 = rf(_a0)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ForgeList provides a mock function with given fields:
+func (_m *Store) ForgeList() ([]*model.Forge, error) {
+	ret := _m.Called()
+
+	var r0 []*model.Forge
+	if rf, ok := ret.Get(0).(func() []*model.Forge); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.Forge)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ForgeUpdate provides a mock function with given fields: _a0
+func (_m *Store) ForgeUpdate(_a0 *model.Forge) error {
+	ret := _m.Called(_a0)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*model.Forge) error); ok {
+		r0 = rf(_a0)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // GetActivePipelineList provides a mock function with given fields: repo, page
 func (_m *Store) GetActivePipelineList(repo *model.Repo, page int) ([]*model.Pipeline, error) {
 	ret := _m.Called(repo, page)
@@ -711,11 +822,11 @@ func (_m *Store) GetRepoCount() (int64, error) {
 }
 
 // GetRepoForgeID provides a mock function with given fields: _a0
-func (_m *Store) GetRepoForgeID(_a0 model.ForgeID) (*model.Repo, error) {
+func (_m *Store) GetRepoForgeID(_a0 model.ForgeRemoteID) (*model.Repo, error) {
 	ret := _m.Called(_a0)
 
 	var r0 *model.Repo
-	if rf, ok := ret.Get(0).(func(model.ForgeID) *model.Repo); ok {
+	if rf, ok := ret.Get(0).(func(model.ForgeRemoteID) *model.Repo); ok {
 		r0 = rf(_a0)
 	} else {
 		if ret.Get(0) != nil {
@@ -724,7 +835,7 @@ func (_m *Store) GetRepoForgeID(_a0 model.ForgeID) (*model.Repo, error) {
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(model.ForgeID) error); ok {
+	if rf, ok := ret.Get(1).(func(model.ForgeRemoteID) error); ok {
 		r1 = rf(_a0)
 	} else {
 		r1 = ret.Error(1)
@@ -756,13 +867,13 @@ func (_m *Store) GetRepoName(_a0 string) (*model.Repo, error) {
 	return r0, r1
 }
 
-// GetRepoNameFallback provides a mock function with given fields: forgeID, fullName
-func (_m *Store) GetRepoNameFallback(forgeID model.ForgeID, fullName string) (*model.Repo, error) {
-	ret := _m.Called(forgeID, fullName)
+// GetRepoNameFallback provides a mock function with given fields: forgeRemoteID, fullName
+func (_m *Store) GetRepoNameFallback(forgeRemoteID model.ForgeRemoteID, fullName string) (*model.Repo, error) {
+	ret := _m.Called(forgeRemoteID, fullName)
 
 	var r0 *model.Repo
-	if rf, ok := ret.Get(0).(func(model.ForgeID, string) *model.Repo); ok {
-		r0 = rf(forgeID, fullName)
+	if rf, ok := ret.Get(0).(func(model.ForgeRemoteID, string) *model.Repo); ok {
+		r0 = rf(forgeRemoteID, fullName)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*model.Repo)
@@ -770,8 +881,8 @@ func (_m *Store) GetRepoNameFallback(forgeID model.ForgeID, fullName string) (*m
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(model.ForgeID, string) error); ok {
-		r1 = rf(forgeID, fullName)
+	if rf, ok := ret.Get(1).(func(model.ForgeRemoteID, string) error); ok {
+		r1 = rf(forgeRemoteID, fullName)
 	} else {
 		r1 = ret.Error(1)
 	}

@@ -40,6 +40,7 @@ var migrationTasks = []*task{
 	&renameColumnsBuildsToPipeline,
 	&renameTableProcsToSteps,
 	&renameRemoteToForge,
+	&renameForgeIdToForgeRemoteId,
 }
 
 var allBeans = []interface{}{
@@ -59,6 +60,7 @@ var allBeans = []interface{}{
 	new(model.ServerConfig),
 	new(model.Cron),
 	new(model.Redirection),
+	new(model.Forge),
 }
 
 type migrations struct {

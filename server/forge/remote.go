@@ -45,7 +45,7 @@ type Forge interface {
 	Teams(ctx context.Context, u *model.User) ([]*model.Team, error)
 
 	// Repo fetches the repository from the forge, preferred is using the ID, fallback is owner/name.
-	Repo(ctx context.Context, u *model.User, id model.ForgeID, owner, name string) (*model.Repo, error)
+	Repo(ctx context.Context, u *model.User, remoteID model.ForgeRemoteID, owner, name string) (*model.Repo, error)
 
 	// Repos fetches a list of repos from the forge.
 	Repos(ctx context.Context, u *model.User) ([]*model.Repo, error)
@@ -90,6 +90,15 @@ type Forge interface {
 	// OrgMembership returns if user is member of organization and if user
 	// is admin/owner in that organization.
 	OrgMembership(ctx context.Context, u *model.User, owner string) (*model.OrgPerm, error)
+}
+
+func NewContext(ctx context.Context, f Forge) context.Context {
+	return context.WithValue(ctx, "forge", f)
+}
+
+func FromContext(ctx context.Context) (Forge, bool) {
+	f, ok := ctx.Value("forge").(Forge)
+	return f, ok
 }
 
 // Refresher refreshes an oauth token and expiration for the given user. It

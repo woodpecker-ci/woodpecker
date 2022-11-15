@@ -28,7 +28,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/store/types"
 
 	"github.com/gin-gonic/gin"
@@ -43,6 +42,7 @@ import (
 func CreatePipeline(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
+	forge := session.Forge(c)
 
 	var p model.PipelineOptions
 
@@ -54,7 +54,7 @@ func CreatePipeline(c *gin.Context) {
 
 	user := session.User(c)
 
-	lastCommit, _ := server.Config.Services.Forge.BranchHead(c, user, repo, p.Branch)
+	lastCommit, _ := forge.BranchHead(c, user, repo, p.Branch)
 
 	tmpBuild := createTmpPipeline(model.EventManual, lastCommit, repo, user, &p)
 

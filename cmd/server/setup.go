@@ -22,10 +22,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"errors"
-	"fmt"
-	"net/url"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -36,14 +33,6 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/cache"
-	"github.com/woodpecker-ci/woodpecker/server/forge"
-	"github.com/woodpecker-ci/woodpecker/server/forge/bitbucket"
-	"github.com/woodpecker-ci/woodpecker/server/forge/bitbucketserver"
-	"github.com/woodpecker-ci/woodpecker/server/forge/coding"
-	"github.com/woodpecker-ci/woodpecker/server/forge/gitea"
-	"github.com/woodpecker-ci/woodpecker/server/forge/github"
-	"github.com/woodpecker-ci/woodpecker/server/forge/gitlab"
-	"github.com/woodpecker-ci/woodpecker/server/forge/gogs"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/environments"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/registry"
@@ -182,125 +171,9 @@ func setupEnvironService(c *cli.Context, s store.Store) model.EnvironService {
 	return environments.Parse(c.StringSlice("environment"))
 }
 
-func setupMembershipService(_ *cli.Context, r forge.Forge) cache.MembershipService {
+func setupMembershipService(_ *cli.Context) cache.MembershipService {
+	// TODO: implement membership service without forge
 	return cache.NewMembershipService(r)
-}
-
-// setupForge helper function to setup the forge from the CLI arguments.
-func setupForge(c *cli.Context) (forge.Forge, error) {
-	switch {
-	case c.Bool("github"):
-		return setupGitHub(c)
-	case c.Bool("gitlab"):
-		return setupGitLab(c)
-	case c.Bool("bitbucket"):
-		return setupBitbucket(c)
-	case c.Bool("stash"):
-		return setupStash(c)
-	case c.Bool("gogs"):
-		return setupGogs(c)
-	case c.Bool("gitea"):
-		return setupGitea(c)
-	case c.Bool("coding"):
-		return setupCoding(c)
-	default:
-		return nil, fmt.Errorf("version control system not configured")
-	}
-}
-
-// helper function to setup the Bitbucket forge from the CLI arguments.
-func setupBitbucket(c *cli.Context) (forge.Forge, error) {
-	opts := &bitbucket.Opts{
-		Client: c.String("bitbucket-client"),
-		Secret: c.String("bitbucket-secret"),
-	}
-	log.Trace().Msgf("Forge (bitbucket) opts: %#v", opts)
-	return bitbucket.New(opts)
-}
-
-// helper function to setup the Gogs forge from the CLI arguments.
-func setupGogs(c *cli.Context) (forge.Forge, error) {
-	opts := gogs.Opts{
-		URL:         c.String("gogs-server"),
-		Username:    c.String("gogs-git-username"),
-		Password:    c.String("gogs-git-password"),
-		PrivateMode: c.Bool("gogs-private-mode"),
-		SkipVerify:  c.Bool("gogs-skip-verify"),
-	}
-	log.Trace().Msgf("Forge (gogs) opts: %#v", opts)
-	return gogs.New(opts)
-}
-
-// helper function to setup the Gitea forge from the CLI arguments.
-func setupGitea(c *cli.Context) (forge.Forge, error) {
-	server, err := url.Parse(c.String("gitea-server"))
-	if err != nil {
-		return nil, err
-	}
-	opts := gitea.Opts{
-		URL:        strings.TrimRight(server.String(), "/"),
-		Client:     c.String("gitea-client"),
-		Secret:     c.String("gitea-secret"),
-		SkipVerify: c.Bool("gitea-skip-verify"),
-	}
-	if len(opts.URL) == 0 {
-		log.Fatal().Msg("WOODPECKER_GITEA_URL must be set")
-	}
-	log.Trace().Msgf("Forge (gitea) opts: %#v", opts)
-	return gitea.New(opts)
-}
-
-// helper function to setup the Stash forge from the CLI arguments.
-func setupStash(c *cli.Context) (forge.Forge, error) {
-	opts := bitbucketserver.Opts{
-		URL:               c.String("stash-server"),
-		Username:          c.String("stash-git-username"),
-		Password:          c.String("stash-git-password"),
-		ConsumerKey:       c.String("stash-consumer-key"),
-		ConsumerRSA:       c.String("stash-consumer-rsa"),
-		ConsumerRSAString: c.String("stash-consumer-rsa-string"),
-		SkipVerify:        c.Bool("stash-skip-verify"),
-	}
-	log.Trace().Msgf("Forge (bitbucketserver) opts: %#v", opts)
-	return bitbucketserver.New(opts)
-}
-
-// helper function to setup the GitLab forge from the CLI arguments.
-func setupGitLab(c *cli.Context) (forge.Forge, error) {
-	return gitlab.New(gitlab.Opts{
-		URL:          c.String("gitlab-server"),
-		ClientID:     c.String("gitlab-client"),
-		ClientSecret: c.String("gitlab-secret"),
-		SkipVerify:   c.Bool("gitlab-skip-verify"),
-	})
-}
-
-// helper function to setup the GitHub forge from the CLI arguments.
-func setupGitHub(c *cli.Context) (forge.Forge, error) {
-	opts := github.Opts{
-		URL:        c.String("github-server"),
-		Client:     c.String("github-client"),
-		Secret:     c.String("github-secret"),
-		SkipVerify: c.Bool("github-skip-verify"),
-		MergeRef:   c.Bool("github-merge-ref"),
-	}
-	log.Trace().Msgf("Forge (github) opts: %#v", opts)
-	return github.New(opts)
-}
-
-// helper function to setup the Coding forge from the CLI arguments.
-func setupCoding(c *cli.Context) (forge.Forge, error) {
-	opts := coding.Opts{
-		URL:        c.String("coding-server"),
-		Client:     c.String("coding-client"),
-		Secret:     c.String("coding-secret"),
-		Scopes:     c.StringSlice("coding-scope"),
-		Username:   c.String("coding-git-username"),
-		Password:   c.String("coding-git-password"),
-		SkipVerify: c.Bool("coding-skip-verify"),
-	}
-	log.Trace().Msgf("Forge (coding) opts: %#v", opts)
-	return coding.New(opts)
 }
 
 func setupMetrics(g *errgroup.Group, _store store.Store) {

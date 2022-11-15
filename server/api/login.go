@@ -25,6 +25,7 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/shared/httputil"
 	"github.com/woodpecker-ci/woodpecker/shared/token"
@@ -44,12 +45,13 @@ func HandleLogin(c *gin.Context) {
 
 func HandleAuth(c *gin.Context) {
 	_store := store.FromContext(c)
+	forge := session.Forge(c)
 
 	// when dealing with redirects we may need to adjust the content type. I
 	// cannot, however, remember why, so need to revisit this line.
 	c.Writer.Header().Del("Content-Type")
 
-	tmpuser, err := server.Config.Services.Forge.Login(c, c.Writer, c.Request)
+	tmpuser, err := forge.Login(c, c.Writer, c.Request)
 	if err != nil {
 		log.Error().Msgf("cannot authenticate user. %s", err)
 		c.Redirect(303, "/login?error=oauth_error")
@@ -75,7 +77,7 @@ func HandleAuth(c *gin.Context) {
 		// if self-registration is enabled for whitelisted organizations we need to
 		// check the user's organization membership.
 		if len(config.Orgs) != 0 {
-			teams, terr := server.Config.Services.Forge.Teams(c, tmpuser)
+			teams, terr := forge.Teams(c, tmpuser)
 			if terr != nil || !config.IsMember(teams) {
 				log.Error().Msgf("cannot verify team membership for %s.", u.Login)
 				c.Redirect(303, "/login?error=access_denied")
@@ -112,7 +114,7 @@ func HandleAuth(c *gin.Context) {
 	// if self-registration is enabled for whitelisted organizations we need to
 	// check the user's organization membership.
 	if len(config.Orgs) != 0 {
-		teams, terr := server.Config.Services.Forge.Teams(c, u)
+		teams, terr := forge.Teams(c, u)
 		if terr != nil || !config.IsMember(teams) {
 			log.Error().Msgf("cannot verify team membership for %s.", u.Login)
 			c.Redirect(303, "/login?error=access_denied")
@@ -147,6 +149,7 @@ func GetLogout(c *gin.Context) {
 
 func GetLoginToken(c *gin.Context) {
 	_store := store.FromContext(c)
+	forge := session.Forge(c)
 
 	in := &tokenPayload{}
 	err := c.Bind(in)
@@ -155,7 +158,7 @@ func GetLoginToken(c *gin.Context) {
 		return
 	}
 
-	login, err := server.Config.Services.Forge.Auth(c, in.Access, in.Refresh)
+	login, err := forge.Auth(c, in.Access, in.Refresh)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusUnauthorized, err)
 		return

@@ -39,10 +39,10 @@ const (
 )
 
 func PostRepo(c *gin.Context) {
-	forge := server.Config.Services.Forge
 	_store := store.FromContext(c)
 	user := session.User(c)
 	repo := session.Repo(c)
+	forge := session.Forge(c)
 
 	if repo.IsActive {
 		c.String(http.StatusConflict, "Repository is already active.")
@@ -87,7 +87,7 @@ func PostRepo(c *gin.Context) {
 		sig,
 	)
 
-	from, err := forge.Repo(c, user, repo.ForgeID, repo.Owner, repo.Name)
+	from, err := forge.Repo(c, user, repo.ForgeRemoteID, repo.Owner, repo.Name)
 	if err == nil {
 		if repo.FullName != from.FullName {
 			// create a redirection
@@ -198,9 +198,9 @@ func GetRepoPermissions(c *gin.Context) {
 func GetRepoBranches(c *gin.Context) {
 	repo := session.Repo(c)
 	user := session.User(c)
-	f := server.Config.Services.Forge
+	forge := session.Forge(c)
 
-	branches, err := f.Branches(c, user, repo)
+	branches, err := forge.Branches(c, user, repo)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -212,7 +212,7 @@ func GetRepoBranches(c *gin.Context) {
 func DeleteRepo(c *gin.Context) {
 	remove, _ := strconv.ParseBool(c.Query("remove"))
 	_store := store.FromContext(c)
-
+	forge := session.Forge(c)
 	repo := session.Repo(c)
 	user := session.User(c)
 
@@ -231,7 +231,7 @@ func DeleteRepo(c *gin.Context) {
 		}
 	}
 
-	if err := server.Config.Services.Forge.Deactivate(c, user, repo, server.Config.Server.Host); err != nil {
+	if err := forge.Deactivate(c, user, repo, server.Config.Server.Host); err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
@@ -239,7 +239,7 @@ func DeleteRepo(c *gin.Context) {
 }
 
 func RepairRepo(c *gin.Context) {
-	forge := server.Config.Services.Forge
+	forge := session.Forge(c)
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
 	user := session.User(c)
@@ -260,7 +260,7 @@ func RepairRepo(c *gin.Context) {
 		sig,
 	)
 
-	from, err := forge.Repo(c, user, repo.ForgeID, repo.Owner, repo.Name)
+	from, err := forge.Repo(c, user, repo.ForgeRemoteID, repo.Owner, repo.Name)
 	if err != nil {
 		log.Error().Err(err).Msgf("get repo '%s/%s' from forge", repo.Owner, repo.Name)
 		c.AbortWithStatus(http.StatusInternalServerError)
@@ -294,7 +294,7 @@ func RepairRepo(c *gin.Context) {
 }
 
 func MoveRepo(c *gin.Context) {
-	forge := server.Config.Services.Forge
+	forge := session.Forge(c)
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
 	user := session.User(c)

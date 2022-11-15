@@ -47,9 +47,9 @@ type Store interface {
 	// GetRepo gets a repo by unique ID.
 	GetRepo(int64) (*model.Repo, error)
 	// GetRepoForgeID gets a repo by its forge ID.
-	GetRepoForgeID(model.ForgeID) (*model.Repo, error)
+	GetRepoForgeID(model.ForgeRemoteID) (*model.Repo, error)
 	// GetRepoNameFallback gets the repo by its forge ID and if this doesn't exist by its full name.
-	GetRepoNameFallback(forgeID model.ForgeID, fullName string) (*model.Repo, error)
+	GetRepoNameFallback(forgeRemoteID model.ForgeRemoteID, fullName string) (*model.Repo, error)
 	// GetRepoName gets a repo by its full name.
 	GetRepoName(string) (*model.Repo, error)
 	// GetRepoCount gets a count of all repositories in the system.
@@ -176,6 +176,14 @@ type Store interface {
 	CronDelete(*model.Repo, int64) error
 	CronListNextExecute(int64, int64) ([]*model.Cron, error)
 	CronGetLock(*model.Cron, int64) (bool, error)
+
+	// Forge
+	ForgeList() ([]*model.Forge, error)
+	ForgeGet(int64) (*model.Forge, error)
+	ForgeFind(*model.Repo) (*model.Forge, error)
+	ForgeCreate(*model.Forge) error
+	ForgeUpdate(*model.Forge) error
+	ForgeDelete(*model.Forge) error
 
 	// Store operations
 	Ping() error

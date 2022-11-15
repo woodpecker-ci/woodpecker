@@ -51,7 +51,7 @@ func Config(c *gin.Context) {
 		"syncing": syncing,
 		"docs":    server.Config.Server.Docs,
 		"version": version.String(),
-		"forge":   server.Config.Services.Forge.Name(),
+		"forge":   "deprecated", // TODO: remove this and use the forge type from the corresponding repo
 	}
 
 	// default func map with json parser.

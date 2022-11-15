@@ -21,7 +21,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
@@ -86,6 +85,7 @@ func SetPerm() gin.HandlerFunc {
 		_store := store.FromContext(c)
 		user := User(c)
 		repo := Repo(c)
+		forge := Forge(c)
 		perm := new(model.Perm)
 
 		switch {
@@ -97,7 +97,7 @@ func SetPerm() gin.HandlerFunc {
 					user.Login, repo.FullName, err)
 			}
 			if time.Unix(perm.Synced, 0).Add(time.Hour).Before(time.Now()) {
-				perm, err = server.Config.Services.Forge.Perm(c, user, repo)
+				perm, err = forge.Perm(c, user, repo)
 				if err == nil {
 					log.Debug().Msgf("Synced user permission for %s %s", user.Login, repo.FullName)
 					perm.Repo = repo

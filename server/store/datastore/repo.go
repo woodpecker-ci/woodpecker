@@ -30,24 +30,24 @@ func (s storage) GetRepo(id int64) (*model.Repo, error) {
 	return repo, wrapGet(s.engine.ID(id).Get(repo))
 }
 
-func (s storage) GetRepoForgeID(id model.ForgeID) (*model.Repo, error) {
+func (s storage) GetRepoForgeID(id model.ForgeRemoteID) (*model.Repo, error) {
 	sess := s.engine.NewSession()
 	defer sess.Close()
 	return s.getRepoForgeID(sess, id)
 }
 
-func (s storage) getRepoForgeID(e *xorm.Session, id model.ForgeID) (*model.Repo, error) {
+func (s storage) getRepoForgeID(e *xorm.Session, id model.ForgeRemoteID) (*model.Repo, error) {
 	repo := new(model.Repo)
-	return repo, wrapGet(e.Where("forge_id = ?", id).Get(repo))
+	return repo, wrapGet(e.Where("forge_remote_id = ?", id).Get(repo))
 }
 
-func (s storage) GetRepoNameFallback(forgeID model.ForgeID, fullName string) (*model.Repo, error) {
+func (s storage) GetRepoNameFallback(forgeID model.ForgeRemoteID, fullName string) (*model.Repo, error) {
 	sess := s.engine.NewSession()
 	defer sess.Close()
 	return s.getRepoNameFallback(sess, forgeID, fullName)
 }
 
-func (s storage) getRepoNameFallback(e *xorm.Session, forgeID model.ForgeID, fullName string) (*model.Repo, error) {
+func (s storage) getRepoNameFallback(e *xorm.Session, forgeID model.ForgeRemoteID, fullName string) (*model.Repo, error) {
 	repo, err := s.getRepoForgeID(e, forgeID)
 	if errors.Is(err, types.RecordNotExist) {
 		return s.getRepoName(e, fullName)
@@ -169,7 +169,7 @@ func (s storage) RepoBatch(repos []*model.Repo) error {
 		}
 
 		exist := true
-		repo, err := s.getRepoNameFallback(sess, repos[i].ForgeID, repos[i].FullName)
+		repo, err := s.getRepoNameFallback(sess, repos[i].ForgeRemoteID, repos[i].FullName)
 		if err != nil {
 			if errors.Is(err, types.RecordNotExist) {
 				exist = false
@@ -186,9 +186,9 @@ func (s storage) RepoBatch(repos []*model.Repo) error {
 					return err
 				}
 			}
-			if repos[i].ForgeID.IsValid() {
+			if repos[i].ForgeRemoteID.IsValid() {
 				if _, err := sess.
-					Where("forge_id = ?", repos[i].ForgeID).
+					Where("forge_remote_id = ?", repos[i].ForgeRemoteID).
 					Cols("repo_owner", "repo_name", "repo_full_name", "repo_scm", "repo_avatar", "repo_link", "repo_private", "repo_clone", "repo_branch", "forge_id").
 					Update(repos[i]); err != nil {
 					return err

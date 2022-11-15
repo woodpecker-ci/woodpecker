@@ -23,6 +23,7 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/forge"
+	"github.com/woodpecker-ci/woodpecker/server/forge/loader"
 	"github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store"
@@ -37,10 +38,17 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		return nil, fmt.Errorf(msg)
 	}
 
+	_forge, err := loader.GetForge(_store, repo)
+	if err != nil {
+		msg := fmt.Sprintf("failure to load forge for repo '%s'", repo.FullName)
+		log.Error().Err(err).Str("repo", repo.FullName).Msg(msg)
+		return nil, fmt.Errorf(msg)
+	}
+
 	// if the forge has a refresh token, the current access token
 	// may be stale. Therefore, we should refresh prior to dispatching
 	// the pipeline.
-	if refresher, ok := server.Config.Services.Forge.(forge.Refresher); ok {
+	if refresher, ok := _forge.(forge.Refresher); ok {
 		refreshed, err := refresher.Refresh(ctx, repoUser)
 		if err != nil {
 			log.Error().Err(err).Msgf("failed to refresh oauth2 token for repoUser: %s", repoUser.Login)
@@ -60,7 +68,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	)
 
 	// fetch the pipeline file from the forge
-	configFetcher := forge.NewConfigFetcher(server.Config.Services.Forge, server.Config.Services.ConfigService, repoUser, repo, pipeline)
+	configFetcher := forge.NewConfigFetcher(_forge, server.Config.Services.ConfigService, repoUser, repo, pipeline)
 	forgeYamlConfigs, configFetchErr = configFetcher.Fetch(ctx)
 	if configFetchErr == nil {
 		filtered, parseErr = checkIfFiltered(pipeline, forgeYamlConfigs)
@@ -123,14 +131,14 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 			log.Error().Err(err).Msg("publishToTopic")
 		}
 
-		if err := updatePipelineStatus(ctx, pipeline, repo, repoUser); err != nil {
+		if err := updatePipelineStatus(ctx, _forge, pipeline, repo, repoUser); err != nil {
 			log.Error().Err(err).Msg("updatePipelineStatus")
 		}
 
 		return pipeline, nil
 	}
 
-	pipeline, pipelineItems, err := createPipelineItems(ctx, _store, pipeline, repoUser, repo, forgeYamlConfigs, nil)
+	pipeline, pipelineItems, err := createPipelineItems(ctx, _forge, _store, pipeline, repoUser, repo, forgeYamlConfigs, nil)
 	if err != nil {
 		msg := fmt.Sprintf("failure to createPipelineItems for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
@@ -142,14 +150,14 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 			log.Error().Err(err).Msg("publishToTopic")
 		}
 
-		if err := updatePipelineStatus(ctx, pipeline, repo, repoUser); err != nil {
+		if err := updatePipelineStatus(ctx, _forge, pipeline, repo, repoUser); err != nil {
 			log.Error().Err(err).Msg("updatePipelineStatus")
 		}
 
 		return pipeline, nil
 	}
 
-	pipeline, err = start(ctx, _store, pipeline, repoUser, repo, pipelineItems)
+	pipeline, err = start(ctx, _forge, _store, pipeline, repoUser, repo, pipelineItems)
 	if err != nil {
 		msg := fmt.Sprintf("failure to start pipeline for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)

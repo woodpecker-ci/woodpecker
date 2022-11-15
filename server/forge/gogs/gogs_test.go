@@ -86,7 +86,7 @@ func Test_gogs(t *testing.T) {
 
 		g.Describe("Requesting a repository", func() {
 			g.It("Should return the repository details", func() {
-				repo, err := c.Repo(ctx, fakeUser, fakeRepo.ForgeID, fakeRepo.Owner, fakeRepo.Name)
+				repo, err := c.Repo(ctx, fakeUser, fakeRepo.ForgeRemoteID, fakeRepo.Owner, fakeRepo.Name)
 				g.Assert(err).IsNil()
 				g.Assert(repo.Owner).Equal(fakeRepo.Owner)
 				g.Assert(repo.Name).Equal(fakeRepo.Name)
@@ -183,11 +183,11 @@ var (
 	}
 
 	fakeRepo = &model.Repo{
-		ForgeID:  "5",
-		Clone:    "http://gogs.com/test_name/repo_name.git",
-		Owner:    "test_name",
-		Name:     "repo_name",
-		FullName: "test_name/repo_name",
+		ForgeRemoteID: "5",
+		Clone:         "http://gogs.com/test_name/repo_name.git",
+		Owner:         "test_name",
+		Name:          "repo_name",
+		FullName:      "test_name/repo_name",
 	}
 
 	fakeRepoNotFound = &model.Repo{

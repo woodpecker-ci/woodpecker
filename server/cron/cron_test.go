@@ -49,7 +49,7 @@ func TestCreateBuild(t *testing.T) {
 	store.On("GetUser", mock.Anything).Return(creator, nil)
 	forge.On("BranchHead", mock.Anything, creator, repo1, "default").Return("sha1", nil)
 
-	_, pipeline, err := CreatePipeline(ctx, store, forge, &model.Cron{
+	_, pipeline, err := CreatePipeline(ctx, store, &model.Cron{
 		Name: "test",
 	})
 	assert.NoError(t, err)

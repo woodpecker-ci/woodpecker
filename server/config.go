@@ -22,7 +22,6 @@ import (
 	"time"
 
 	"github.com/woodpecker-ci/woodpecker/server/cache"
-	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/logging"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/config"
@@ -38,7 +37,6 @@ var Config = struct {
 		Secrets             model.SecretService
 		Registries          model.RegistryService
 		Environ             model.EnvironService
-		Forge               forge.Forge
 		Membership          cache.MembershipService
 		ConfigService       config.Extension
 		SignaturePrivateKey crypto.PrivateKey

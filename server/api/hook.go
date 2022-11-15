@@ -31,6 +31,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/pipeline"
+	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/shared/token"
 )
@@ -70,7 +71,7 @@ func BlockTilQueueHasRunningItem(c *gin.Context) {
 // PostHook start a pipeline triggered by a forges post webhook
 func PostHook(c *gin.Context) {
 	_store := store.FromContext(c)
-	forge := server.Config.Services.Forge
+	forge := session.Forge(c)
 
 	tmpRepo, tmpBuild, err := forge.Hook(c, c.Request)
 	if err != nil {
@@ -102,7 +103,7 @@ func PostHook(c *gin.Context) {
 		return
 	}
 
-	repo, err := _store.GetRepoNameFallback(tmpRepo.ForgeID, tmpRepo.FullName)
+	repo, err := _store.GetRepoNameFallback(tmpRepo.ForgeRemoteID, tmpRepo.FullName)
 	if err != nil {
 		msg := fmt.Sprintf("failure to get repo %s from store", tmpRepo.FullName)
 		log.Error().Err(err).Msg(msg)

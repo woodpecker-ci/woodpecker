@@ -24,6 +24,7 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
 	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/forge/loader"
 	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store"
@@ -35,6 +36,13 @@ func Restart(ctx context.Context, store store.Store, lastBuild *model.Pipeline, 
 	case model.StatusDeclined,
 		model.StatusBlocked:
 		return nil, ErrBadRequest{Msg: fmt.Sprintf("cannot restart a pipeline with status %s", lastBuild.Status)}
+	}
+
+	forge, err := loader.GetForge(store, repo)
+	if err != nil {
+		msg := fmt.Sprintf("failure to load forge for repo '%s'", repo.FullName)
+		log.Error().Err(err).Str("repo", repo.FullName).Msg(msg)
+		return nil, fmt.Errorf(msg)
 	}
 
 	var pipelineFiles []*forge_types.FileMeta
@@ -92,7 +100,7 @@ func Restart(ctx context.Context, store store.Store, lastBuild *model.Pipeline, 
 		return nil, fmt.Errorf(msg)
 	}
 
-	newBuild, pipelineItems, err := createPipelineItems(ctx, store, newBuild, user, repo, pipelineFiles, envs)
+	newBuild, pipelineItems, err := createPipelineItems(ctx, forge, store, newBuild, user, repo, pipelineFiles, envs)
 	if err != nil {
 		if errors.Is(err, &yaml.PipelineParseError{}) {
 			return newBuild, nil
@@ -102,7 +110,7 @@ func Restart(ctx context.Context, store store.Store, lastBuild *model.Pipeline, 
 		return nil, fmt.Errorf(msg)
 	}
 
-	newBuild, err = start(ctx, store, newBuild, user, repo, pipelineItems)
+	newBuild, err = start(ctx, forge, store, newBuild, user, repo, pipelineItems)
 	if err != nil {
 		msg := fmt.Sprintf("failure to start pipeline for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)

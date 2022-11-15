@@ -20,10 +20,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/pipeline"
+	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
@@ -42,7 +42,7 @@ func handlePipelineErr(c *gin.Context, err error) {
 // if the forge has a refresh token, the current access token may be stale.
 // Therefore, we should refresh prior to dispatching the job.
 func refreshUserToken(c *gin.Context, user *model.User) {
-	_forge := server.Config.Services.Forge
+	_forge := session.Forge(c)
 	_store := store.FromContext(c)
 	if refresher, ok := _forge.(forge.Refresher); ok {
 		ok, err := refresher.Refresh(c, user)

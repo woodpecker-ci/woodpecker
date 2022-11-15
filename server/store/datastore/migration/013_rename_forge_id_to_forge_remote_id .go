@@ -12,30 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package pipeline
+package migration
 
 import (
-	"context"
-
-	"github.com/rs/zerolog/log"
-
-	"github.com/woodpecker-ci/woodpecker/server/forge"
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"xorm.io/xorm"
 )
 
-func updatePipelineStatus(ctx context.Context, forge forge.Forge, pipeline *model.Pipeline, repo *model.Repo, user *model.User) error {
-	for _, step := range pipeline.Steps {
-		// skip child steps
-		if !step.IsParent() {
-			continue
-		}
-
-		err := forge.Status(ctx, user, repo, pipeline, step)
-		if err != nil {
-			log.Error().Err(err).Msgf("error setting commit status for %s/%d", repo.FullName, pipeline.Number)
+var renameForgeIdToForgeRemoteId = task{
+	name:     "rename-forge-id-to-forge-remote-id",
+	required: true,
+	fn: func(sess *xorm.Session) error {
+		if err := renameColumn(sess, "repos", "forge_id", "forge_remote_id"); err != nil {
 			return err
 		}
-	}
 
-	return nil
+		return nil
+	},
 }

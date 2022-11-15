@@ -20,12 +20,13 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline"
+	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
 // start a pipeline, make sure it was stored persistent in the store before
-func start(ctx context.Context, store store.Store, activePipeline *model.Pipeline, user *model.User, repo *model.Repo, pipelineItems []*pipeline.Item) (*model.Pipeline, error) {
+func start(ctx context.Context, forge forge.Forge, store store.Store, activePipeline *model.Pipeline, user *model.User, repo *model.Repo, pipelineItems []*pipeline.Item) (*model.Pipeline, error) {
 	// call to cancel previous pipelines if needed
 	if err := cancelPreviousPipelines(ctx, store, activePipeline, repo); err != nil {
 		// should be not breaking
@@ -46,7 +47,7 @@ func start(ctx context.Context, store store.Store, activePipeline *model.Pipelin
 		return nil, err
 	}
 
-	if err := updatePipelineStatus(ctx, activePipeline, repo, user); err != nil {
+	if err := updatePipelineStatus(ctx, forge, activePipeline, repo, user); err != nil {
 		log.Error().Err(err).Msg("updateBuildStatus")
 	}
 

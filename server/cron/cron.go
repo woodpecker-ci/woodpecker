@@ -22,7 +22,7 @@ import (
 	"github.com/robfig/cron"
 	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/server/forge"
+	"github.com/woodpecker-ci/woodpecker/server/forge/loader"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/pipeline"
 	"github.com/woodpecker-ci/woodpecker/server/store"
@@ -37,7 +37,7 @@ const (
 )
 
 // Start starts the cron scheduler loop
-func Start(ctx context.Context, store store.Store, forge forge.Forge) error {
+func Start(ctx context.Context, store store.Store) error {
 	for {
 		select {
 		case <-ctx.Done():
@@ -54,7 +54,7 @@ func Start(ctx context.Context, store store.Store, forge forge.Forge) error {
 				}
 
 				for _, cron := range crons {
-					if err := runCron(store, forge, cron, now); err != nil {
+					if err := runCron(store, cron, now); err != nil {
 						log.Error().Err(err).Int64("cronID", cron.ID).Msg("run cron failed")
 					}
 				}
@@ -77,7 +77,7 @@ func CalcNewNext(schedule string, now time.Time) (time.Time, error) {
 	return c.Next(now), nil
 }
 
-func runCron(store store.Store, forge forge.Forge, cron *model.Cron, now time.Time) error {
+func runCron(store store.Store, cron *model.Cron, now time.Time) error {
 	log.Trace().Msgf("Cron: run id[%d]", cron.ID)
 	ctx := context.Background()
 
@@ -96,7 +96,7 @@ func runCron(store store.Store, forge forge.Forge, cron *model.Cron, now time.Ti
 		return nil
 	}
 
-	repo, newPipeline, err := CreatePipeline(ctx, store, forge, cron)
+	repo, newPipeline, err := CreatePipeline(ctx, store, cron)
 	if err != nil {
 		return err
 	}
@@ -105,8 +105,13 @@ func runCron(store store.Store, forge forge.Forge, cron *model.Cron, now time.Ti
 	return err
 }
 
-func CreatePipeline(ctx context.Context, store store.Store, forge forge.Forge, cron *model.Cron) (*model.Repo, *model.Pipeline, error) {
+func CreatePipeline(ctx context.Context, store store.Store, cron *model.Cron) (*model.Repo, *model.Pipeline, error) {
 	repo, err := store.GetRepo(cron.RepoID)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	forge, err := loader.GetForge(store, repo)
 	if err != nil {
 		return nil, nil, err
 	}

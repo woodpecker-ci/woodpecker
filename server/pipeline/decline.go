@@ -19,17 +19,25 @@ import (
 	"fmt"
 
 	"github.com/rs/zerolog/log"
+	"github.com/woodpecker-ci/woodpecker/server/forge/loader"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
 // Decline update the status to declined for blocked pipeline because of a gated repo
 func Decline(ctx context.Context, store store.Store, pipeline *model.Pipeline, user *model.User, repo *model.Repo) (*model.Pipeline, error) {
+	forge, err := loader.GetForge(store, repo)
+	if err != nil {
+		msg := fmt.Sprintf("failure to load forge for repo '%s'", repo.FullName)
+		log.Error().Err(err).Str("repo", repo.FullName).Msg(msg)
+		return nil, fmt.Errorf(msg)
+	}
+
 	if pipeline.Status != model.StatusBlocked {
 		return nil, fmt.Errorf("cannot decline a pipeline with status %s", pipeline.Status)
 	}
 
-	_, err := UpdateToStatusDeclined(store, *pipeline, user.Login)
+	_, err = UpdateToStatusDeclined(store, *pipeline, user.Login)
 	if err != nil {
 		return nil, fmt.Errorf("error updating pipeline. %s", err)
 	}
@@ -41,7 +49,7 @@ func Decline(ctx context.Context, store store.Store, pipeline *model.Pipeline, u
 		log.Error().Err(err).Msg("can not build tree from step list")
 	}
 
-	if err := updatePipelineStatus(ctx, pipeline, repo, user); err != nil {
+	if err := updatePipelineStatus(ctx, forge, pipeline, repo, user); err != nil {
 		log.Error().Err(err).Msg("updateBuildStatus")
 	}
 

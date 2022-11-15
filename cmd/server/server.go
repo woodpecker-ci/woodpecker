@@ -39,7 +39,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc/proto"
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/cron"
-	"github.com/woodpecker-ci/woodpecker/server/forge"
 	woodpeckerGrpcServer "github.com/woodpecker-ci/woodpecker/server/grpc"
 	"github.com/woodpecker-ci/woodpecker/server/logging"
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -101,10 +100,11 @@ func run(c *cli.Context) error {
 		)
 	}
 
-	_forge, err := setupForge(c)
-	if err != nil {
-		log.Fatal().Err(err).Msg("")
-	}
+	// TODO: add configured forge to database
+	// _forge, err := setupForge(c)
+	// if err != nil {
+	// 	log.Fatal().Err(err).Msg("")
+	// }
 
 	_store, err := setupStore(c)
 	if err != nil {
@@ -116,14 +116,14 @@ func run(c *cli.Context) error {
 		}
 	}()
 
-	setupEvilGlobals(c, _store, _forge)
+	setupEvilGlobals(c, _store)
 
 	var g errgroup.Group
 
 	setupMetrics(&g, _store)
 
 	g.Go(func() error {
-		return cron.Start(c.Context, _store, _forge)
+		return cron.Start(c.Context, _store)
 	})
 
 	// start the grpc server
@@ -144,7 +144,6 @@ func run(c *cli.Context) error {
 			}),
 		)
 		woodpeckerServer := woodpeckerGrpcServer.NewWoodpeckerServer(
-			_forge,
 			server.Config.Services.Queue,
 			server.Config.Services.Logs,
 			server.Config.Services.Pubsub,
@@ -253,12 +252,9 @@ func run(c *cli.Context) error {
 	return g.Wait()
 }
 
-func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
+func setupEvilGlobals(c *cli.Context, v store.Store) {
 	// storage
 	server.Config.Storage.Files = v
-
-	// forge
-	server.Config.Services.Forge = f
 
 	// services
 	server.Config.Services.Queue = setupQueue(c, v)
@@ -270,7 +266,7 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 	server.Config.Services.Registries = setupRegistryService(c, v)
 	server.Config.Services.Secrets = setupSecretService(c, v)
 	server.Config.Services.Environ = setupEnvironService(c, v)
-	server.Config.Services.Membership = setupMembershipService(c, f)
+	server.Config.Services.Membership = setupMembershipService(c)
 
 	server.Config.Services.SignaturePrivateKey, server.Config.Services.SignaturePublicKey = setupSignatureKeys(v)
 
