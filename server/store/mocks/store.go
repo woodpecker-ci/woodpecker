@@ -867,13 +867,13 @@ func (_m *Store) GetRepoName(_a0 string) (*model.Repo, error) {
 	return r0, r1
 }
 
-// GetRepoNameFallback provides a mock function with given fields: forgeRemoteID, fullName
-func (_m *Store) GetRepoNameFallback(forgeRemoteID model.ForgeRemoteID, fullName string) (*model.Repo, error) {
-	ret := _m.Called(forgeRemoteID, fullName)
+// GetRepoNameFallback provides a mock function with given fields: remoteID, fullName
+func (_m *Store) GetRepoNameFallback(remoteID model.ForgeRemoteID, fullName string) (*model.Repo, error) {
+	ret := _m.Called(remoteID, fullName)
 
 	var r0 *model.Repo
 	if rf, ok := ret.Get(0).(func(model.ForgeRemoteID, string) *model.Repo); ok {
-		r0 = rf(forgeRemoteID, fullName)
+		r0 = rf(remoteID, fullName)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*model.Repo)
@@ -882,7 +882,7 @@ func (_m *Store) GetRepoNameFallback(forgeRemoteID model.ForgeRemoteID, fullName
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(model.ForgeRemoteID, string) error); ok {
-		r1 = rf(forgeRemoteID, fullName)
+		r1 = rf(remoteID, fullName)
 	} else {
 		r1 = ret.Error(1)
 	}

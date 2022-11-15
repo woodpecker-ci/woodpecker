@@ -30,25 +30,25 @@ func (s storage) GetRepo(id int64) (*model.Repo, error) {
 	return repo, wrapGet(s.engine.ID(id).Get(repo))
 }
 
-func (s storage) GetRepoForgeID(id model.ForgeRemoteID) (*model.Repo, error) {
+func (s storage) GetRepoForgeID(remoteID model.ForgeRemoteID) (*model.Repo, error) {
 	sess := s.engine.NewSession()
 	defer sess.Close()
-	return s.getRepoForgeID(sess, id)
+	return s.getRepoForgeID(sess, remoteID)
 }
 
-func (s storage) getRepoForgeID(e *xorm.Session, id model.ForgeRemoteID) (*model.Repo, error) {
+func (s storage) getRepoForgeID(e *xorm.Session, remoteID model.ForgeRemoteID) (*model.Repo, error) {
 	repo := new(model.Repo)
-	return repo, wrapGet(e.Where("forge_remote_id = ?", id).Get(repo))
+	return repo, wrapGet(e.Where("forge_remote_id = ?", remoteID).Get(repo))
 }
 
-func (s storage) GetRepoNameFallback(forgeID model.ForgeRemoteID, fullName string) (*model.Repo, error) {
+func (s storage) GetRepoNameFallback(remoteID model.ForgeRemoteID, fullName string) (*model.Repo, error) {
 	sess := s.engine.NewSession()
 	defer sess.Close()
-	return s.getRepoNameFallback(sess, forgeID, fullName)
+	return s.getRepoNameFallback(sess, remoteID, fullName)
 }
 
-func (s storage) getRepoNameFallback(e *xorm.Session, forgeID model.ForgeRemoteID, fullName string) (*model.Repo, error) {
-	repo, err := s.getRepoForgeID(e, forgeID)
+func (s storage) getRepoNameFallback(e *xorm.Session, remoteID model.ForgeRemoteID, fullName string) (*model.Repo, error) {
+	repo, err := s.getRepoForgeID(e, remoteID)
 	if errors.Is(err, types.RecordNotExist) {
 		return s.getRepoName(e, fullName)
 	}
@@ -204,7 +204,7 @@ func (s storage) RepoBatch(repos []*model.Repo) error {
 			}
 
 			_, err := sess.
-				Where("forge_id = ?", repos[i].ForgeID).
+				Where("forge_remote_id = ?", repos[i].ForgeRemoteID).
 				Get(repos[i])
 			if err != nil {
 				return err

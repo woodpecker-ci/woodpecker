@@ -80,7 +80,7 @@ func Test_github(t *testing.T) {
 			g.It("Should return the repository details", func() {
 				repo, err := c.Repo(ctx, fakeUser, fakeRepo.ForgeRemoteID, fakeRepo.Owner, fakeRepo.Name)
 				g.Assert(err).IsNil()
-				g.Assert(repo.ForgeID).Equal(fakeRepo.ForgeID)
+				g.Assert(repo.ForgeRemoteID).Equal(fakeRepo.ForgeRemoteID)
 				g.Assert(repo.Owner).Equal(fakeRepo.Owner)
 				g.Assert(repo.Name).Equal(fakeRepo.Name)
 				g.Assert(repo.FullName).Equal(fakeRepo.FullName)

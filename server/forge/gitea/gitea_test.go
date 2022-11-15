@@ -118,7 +118,7 @@ func Test_gitea(t *testing.T) {
 			g.It("Should return the repository list", func() {
 				repos, err := c.Repos(ctx, fakeUser)
 				g.Assert(err).IsNil()
-				g.Assert(repos[0].ForgeID).Equal(fakeRepo.ForgeID)
+				g.Assert(repos[0].ForgeRemoteID).Equal(fakeRepo.ForgeRemoteID)
 				g.Assert(repos[0].Owner).Equal(fakeRepo.Owner)
 				g.Assert(repos[0].Name).Equal(fakeRepo.Name)
 				g.Assert(repos[0].FullName).Equal(fakeRepo.Owner + "/" + fakeRepo.Name)
