@@ -38,6 +38,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/forge/common"
+	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
@@ -112,7 +113,7 @@ func (c *Gitea) Login(ctx context.Context, w http.ResponseWriter, req *http.Requ
 
 	// get the OAuth errors
 	if err := req.FormValue("error"); err != "" {
-		return nil, &forge.AuthError{
+		return nil, &forge_types.AuthError{
 			Err:         err,
 			Description: req.FormValue("error_description"),
 			URI:         req.FormValue("error_uri"),
@@ -217,14 +218,14 @@ func (c *Gitea) TeamPerm(u *model.User, org string) (*model.Perm, error) {
 }
 
 // Repo returns the Gitea repository.
-func (c *Gitea) Repo(ctx context.Context, u *model.User, id model.ForgeID, owner, name string) (*model.Repo, error) {
+func (c *Gitea) Repo(ctx context.Context, u *model.User, remoteID model.ForgeRemoteID, owner, name string) (*model.Repo, error) {
 	client, err := c.newClientToken(ctx, u.Token)
 	if err != nil {
 		return nil, err
 	}
 
-	if id.IsValid() {
-		intID, err := strconv.ParseInt(string(id), 10, 64)
+	if remoteID.IsValid() {
+		intID, err := strconv.ParseInt(string(remoteID), 10, 64)
 		if err != nil {
 			return nil, err
 		}
@@ -292,8 +293,8 @@ func (c *Gitea) File(ctx context.Context, u *model.User, r *model.Repo, b *model
 	return cfg, err
 }
 
-func (c *Gitea) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*forge.FileMeta, error) {
-	var configs []*forge.FileMeta
+func (c *Gitea) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*forge_types.FileMeta, error) {
+	var configs []*forge_types.FileMeta
 
 	client, err := c.newClientToken(ctx, u.Token)
 	if err != nil {
@@ -316,7 +317,7 @@ func (c *Gitea) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.
 				return nil, fmt.Errorf("multi-pipeline cannot get %s: %s", e.Path, err)
 			}
 
-			configs = append(configs, &forge.FileMeta{
+			configs = append(configs, &forge_types.FileMeta{
 				Name: e.Path,
 				Data: data,
 			})
@@ -405,7 +406,7 @@ func (c *Gitea) Activate(ctx context.Context, u *model.User, r *model.Repo, link
 	return nil
 }
 
-// Deactivate deactives the repository be removing repository push hooks from
+// Deactivate deactivates the repository be removing repository push hooks from
 // the Gitea repository.
 func (c *Gitea) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
 	client, err := c.newClientToken(ctx, u.Token)
@@ -454,7 +455,7 @@ func (c *Gitea) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]s
 	return branches, nil
 }
 
-// BranchHead returns the sha of the head (lastest commit) of the specified branch
+// BranchHead returns the sha of the head (latest commit) of the specified branch
 func (c *Gitea) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
 	token := ""
 	if u != nil {
@@ -565,7 +566,7 @@ func (c *Gitea) getChangedFilesForPR(ctx context.Context, repo *model.Repo, inde
 		return []string{}, nil
 	}
 
-	repo, err := _store.GetRepoNameFallback(repo.ForgeID, repo.FullName)
+	repo, err := _store.GetRepoNameFallback(repo.ForgeRemoteID, repo.FullName)
 	if err != nil {
 		return nil, err
 	}

@@ -33,6 +33,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/forge/bitbucketserver/internal"
 	"github.com/woodpecker-ci/woodpecker/server/forge/common"
+	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
@@ -152,7 +153,7 @@ func (*Config) TeamPerm(u *model.User, org string) (*model.Perm, error) {
 	return nil, nil
 }
 
-func (c *Config) Repo(ctx context.Context, u *model.User, _ model.ForgeID, owner, name string) (*model.Repo, error) {
+func (c *Config) Repo(ctx context.Context, u *model.User, _ model.ForgeRemoteID, owner, name string) (*model.Repo, error) {
 	repo, err := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token).FindRepo(owner, name)
 	if err != nil {
 		return nil, err
@@ -185,8 +186,8 @@ func (c *Config) File(ctx context.Context, u *model.User, r *model.Repo, p *mode
 	return client.FindFileForRepo(r.Owner, r.Name, f, p.Ref)
 }
 
-func (c *Config) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model.Pipeline, f string) ([]*forge.FileMeta, error) {
-	return nil, fmt.Errorf("Not implemented")
+func (c *Config) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model.Pipeline, f string) ([]*forge_types.FileMeta, error) {
+	return nil, forge_types.ErrNotImplemented
 }
 
 // Status is not supported by the bitbucketserver driver.
@@ -237,10 +238,10 @@ func (c *Config) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]
 	return branches, nil
 }
 
-// BranchHead returns the sha of the head (lastest commit) of the specified branch
+// BranchHead returns the sha of the head (latest commit) of the specified branch
 func (c *Config) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
 	// TODO(1138): missing implementation
-	return "", fmt.Errorf("missing implementation")
+	return "", forge_types.ErrNotImplemented
 }
 
 func (c *Config) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {

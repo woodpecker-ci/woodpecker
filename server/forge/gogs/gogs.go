@@ -28,6 +28,7 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/forge/common"
+	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
@@ -149,7 +150,7 @@ func (c *client) Teams(ctx context.Context, u *model.User) ([]*model.Team, error
 }
 
 // Repo returns the named Gogs repository.
-func (c *client) Repo(ctx context.Context, u *model.User, _ model.ForgeID, owner, name string) (*model.Repo, error) {
+func (c *client) Repo(ctx context.Context, u *model.User, _ model.ForgeRemoteID, owner, name string) (*model.Repo, error) {
 	client := c.newClientToken(u.Token)
 	repo, err := client.GetRepo(owner, name)
 	if err != nil {
@@ -209,8 +210,8 @@ func (c *client) File(ctx context.Context, u *model.User, r *model.Repo, b *mode
 	return cfg, err
 }
 
-func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*forge.FileMeta, error) {
-	return nil, fmt.Errorf("Not implemented")
+func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*forge_types.FileMeta, error) {
+	return nil, forge_types.ErrNotImplemented
 }
 
 // Status is not supported by the Gogs driver.

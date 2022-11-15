@@ -1,4 +1,4 @@
-// Copyright 2018 Drone.IO Inc.
+// Copyright 2022 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,26 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package forge
+package migration
 
-// AuthError represents forge authentication error.
-type AuthError struct {
-	Err         string
-	Description string
-	URI         string
+import (
+	"xorm.io/xorm"
+)
+
+var renameForgeIDToForgeRemoteID = task{
+	name:     "rename-forge-id-to-forge-remote-id",
+	required: true,
+	fn: func(sess *xorm.Session) error {
+		if err := renameColumn(sess, "repos", "forge_id", "forge_remote_id"); err != nil {
+			return err
+		}
+
+		return nil
+	},
 }
-
-// Error implements error interface.
-func (ae *AuthError) Error() string {
-	err := ae.Err
-	if ae.Description != "" {
-		err += " " + ae.Description
-	}
-	if ae.URI != "" {
-		err += " " + ae.URI
-	}
-	return err
-}
-
-// check interface
-var _ error = new(AuthError)

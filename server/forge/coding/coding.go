@@ -28,6 +28,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/forge/coding/internal"
 	"github.com/woodpecker-ci/woodpecker/server/forge/common"
+	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
@@ -87,7 +88,7 @@ func (c *Coding) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 
 	// get the OAuth errors
 	if err := req.FormValue("error"); err != "" {
-		return nil, &forge.AuthError{
+		return nil, &forge_types.AuthError{
 			Err:         err,
 			Description: req.FormValue("error_description"),
 			URI:         req.FormValue("error_uri"),
@@ -133,7 +134,7 @@ func (c *Coding) Auth(ctx context.Context, token, secret string) (string, error)
 
 // Refresh refreshes an oauth token and expiration for the given
 // user. It returns true if the token was refreshed, false if the
-// token was not refreshed, and error if it failed to refersh.
+// token was not refreshed, and error if it failed to refresh.
 func (c *Coding) Refresh(ctx context.Context, u *model.User) (bool, error) {
 	config := c.newConfig("")
 	source := config.TokenSource(c.newContext(ctx), &oauth2.Token{RefreshToken: u.Secret})
@@ -151,7 +152,7 @@ func (c *Coding) Refresh(ctx context.Context, u *model.User) (bool, error) {
 // Teams fetches a list of team memberships from the forge.
 func (c *Coding) Teams(ctx context.Context, u *model.User) ([]*model.Team, error) {
 	// EMPTY: not implemented in Coding OAuth API
-	return nil, fmt.Errorf("Not implemented")
+	return nil, forge_types.ErrNotImplemented
 }
 
 // TeamPerm fetches the named organization permissions from
@@ -162,7 +163,7 @@ func (c *Coding) TeamPerm(u *model.User, org string) (*model.Perm, error) {
 }
 
 // Repo fetches the repository from the forge.
-func (c *Coding) Repo(ctx context.Context, u *model.User, _ model.ForgeID, owner, name string) (*model.Repo, error) {
+func (c *Coding) Repo(ctx context.Context, u *model.User, _ model.ForgeRemoteID, owner, name string) (*model.Repo, error) {
 	client := c.newClient(ctx, u)
 	project, err := client.GetProject(owner, name)
 	if err != nil {
@@ -244,8 +245,8 @@ func (c *Coding) File(ctx context.Context, u *model.User, r *model.Repo, b *mode
 	return data, nil
 }
 
-func (c *Coding) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*forge.FileMeta, error) {
-	return nil, fmt.Errorf("Not implemented")
+func (c *Coding) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*forge_types.FileMeta, error) {
+	return nil, forge_types.ErrNotImplemented
 }
 
 // Status sends the commit status to the forge.
@@ -294,10 +295,10 @@ func (c *Coding) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]
 	return []string{r.Branch}, nil
 }
 
-// BranchHead returns the sha of the head (lastest commit) of the specified branch
+// BranchHead returns the sha of the head (latest commit) of the specified branch
 func (c *Coding) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
 	// TODO(1138): missing implementation
-	return "", fmt.Errorf("missing implementation")
+	return "", forge_types.ErrNotImplemented
 }
 
 // Hook parses the post-commit hook from the Request body and returns the

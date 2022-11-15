@@ -78,9 +78,9 @@ func Test_github(t *testing.T) {
 
 		g.Describe("Requesting a repository", func() {
 			g.It("Should return the repository details", func() {
-				repo, err := c.Repo(ctx, fakeUser, fakeRepo.ForgeID, fakeRepo.Owner, fakeRepo.Name)
+				repo, err := c.Repo(ctx, fakeUser, fakeRepo.ForgeRemoteID, fakeRepo.Owner, fakeRepo.Name)
 				g.Assert(err).IsNil()
-				g.Assert(repo.ForgeID).Equal(fakeRepo.ForgeID)
+				g.Assert(repo.ForgeRemoteID).Equal(fakeRepo.ForgeRemoteID)
 				g.Assert(repo.Owner).Equal(fakeRepo.Owner)
 				g.Assert(repo.Name).Equal(fakeRepo.Name)
 				g.Assert(repo.FullName).Equal(fakeRepo.FullName)
@@ -112,7 +112,7 @@ func Test_github(t *testing.T) {
 
 		g.It("Should return a user team list")
 
-		g.It("Should register repositroy hooks")
+		g.It("Should register repository hooks")
 
 		g.It("Should return a repository file")
 
@@ -133,14 +133,14 @@ var (
 	}
 
 	fakeRepo = &model.Repo{
-		ForgeID:      "5",
-		Owner:        "octocat",
-		Name:         "Hello-World",
-		FullName:     "octocat/Hello-World",
-		Avatar:       "https://github.com/images/error/octocat_happy.gif",
-		Link:         "https://github.com/octocat/Hello-World",
-		Clone:        "https://github.com/octocat/Hello-World.git",
-		IsSCMPrivate: true,
+		ForgeRemoteID: "5",
+		Owner:         "octocat",
+		Name:          "Hello-World",
+		FullName:      "octocat/Hello-World",
+		Avatar:        "https://github.com/images/error/octocat_happy.gif",
+		Link:          "https://github.com/octocat/Hello-World",
+		Clone:         "https://github.com/octocat/Hello-World.git",
+		IsSCMPrivate:  true,
 	}
 
 	fakeRepoNotFound = &model.Repo{

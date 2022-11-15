@@ -22,6 +22,7 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
@@ -44,7 +45,7 @@ type Forge interface {
 	Teams(ctx context.Context, u *model.User) ([]*model.Team, error)
 
 	// Repo fetches the repository from the forge, preferred is using the ID, fallback is owner/name.
-	Repo(ctx context.Context, u *model.User, id model.ForgeID, owner, name string) (*model.Repo, error)
+	Repo(ctx context.Context, u *model.User, remoteID model.ForgeRemoteID, owner, name string) (*model.Repo, error)
 
 	// Repos fetches a list of repos from the forge.
 	Repos(ctx context.Context, u *model.User) ([]*model.Repo, error)
@@ -58,7 +59,7 @@ type Forge interface {
 	File(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]byte, error)
 
 	// Dir fetches a folder from the forge repository
-	Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*FileMeta, error)
+	Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*types.FileMeta, error)
 
 	// Status sends the commit status to the forge.
 	// An example would be the GitHub pull request status.
@@ -79,7 +80,7 @@ type Forge interface {
 	// TODO: Add proper pagination handling and remove workaround in gitea forge
 	Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error)
 
-	// BranchHead returns the sha of the head (lastest commit) of the specified branch
+	// BranchHead returns the sha of the head (latest commit) of the specified branch
 	BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error)
 
 	// Hook parses the post-commit hook from the Request body and returns the
@@ -91,21 +92,9 @@ type Forge interface {
 	OrgMembership(ctx context.Context, u *model.User, owner string) (*model.OrgPerm, error)
 }
 
-// FileMeta represents a file in version control
-type FileMeta struct {
-	Name string
-	Data []byte
-}
-
-type ByName []*FileMeta
-
-func (a ByName) Len() int           { return len(a) }
-func (a ByName) Less(i, j int) bool { return a[i].Name < a[j].Name }
-func (a ByName) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-
 // Refresher refreshes an oauth token and expiration for the given user. It
 // returns true if the token was refreshed, false if the token was not refreshed,
-// and error if it failed to refersh.
+// and error if it failed to refresh.
 type Refresher interface {
 	Refresh(context.Context, *model.User) (bool, error)
 }

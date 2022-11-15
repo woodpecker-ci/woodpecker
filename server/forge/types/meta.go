@@ -12,25 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package constant
+package types
 
-var PrivilegedPlugins = []string{
-	"plugins/docker",
-	"plugins/gcr",
-	"plugins/ecr",
-	"woodpeckerci/plugin-docker",
-	"woodpeckerci/plugin-docker-buildx",
+import "sort"
+
+// FileMeta represents a file in version control
+type FileMeta struct {
+	Name string
+	Data []byte
 }
 
-// DefaultConfigOrder represent the priority in witch woodpecker search for a pipeline config by default
-// folders are indicated by supplying a trailing /
-var DefaultConfigOrder = [...]string{
-	".woodpecker/",
-	".woodpecker.yml",
-	".woodpecker.yaml",
-	".drone.yml",
-}
+type fileMetaList []*FileMeta
 
-const (
-	DefaultCloneImage = "docker.io/woodpeckerci/plugin-git:v1.6.0"
-)
+func (a fileMetaList) Len() int           { return len(a) }
+func (a fileMetaList) Less(i, j int) bool { return a[i].Name < a[j].Name }
+func (a fileMetaList) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+
+func SortByName(fm []*FileMeta) []*FileMeta {
+	l := fileMetaList(fm)
+	sort.Sort(l)
+	return l
+}

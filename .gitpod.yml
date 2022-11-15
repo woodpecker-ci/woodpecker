@@ -14,8 +14,12 @@ tasks:
       touch web/dist/index.html
       make build-server
     command: |
-      echo WOODPECKER_GITEA_URL=https://3000-${GITPOD_WORKSPACE_ID}.${GITPOD_WORKSPACE_CLUSTER_HOST} >> .env
-      echo WOODPECKER_DEV_OAUTH_HOST=https://8000-${GITPOD_WORKSPACE_ID}.${GITPOD_WORKSPACE_CLUSTER_HOST} >> .env
+      grep "WOODPECKER_GITEA_URL=" .env \
+        && sed "s,^WOODPECKER_GITEA_URL=.*,WOODPECKER_GITEA_URL=$(gp url 3000)," .env \
+        || echo WOODPECKER_GITEA_URL=$(gp url 3000) >> .env
+      grep "WOODPECKER_DEV_OAUTH_HOST=" .env \
+        && sed "s,^WOODPECKER_DEV_OAUTH_HOST=.*,WOODPECKER_DEV_OAUTH_HOST=$(gp url 8000)," .env \
+        || echo WOODPECKER_DEV_OAUTH_HOST=$(gp url 8000) >> .env
       gp sync-await gitea
       gp sync-done woodpecker-server
       go run github.com/woodpecker-ci/woodpecker/cmd/server
@@ -39,8 +43,12 @@ tasks:
       GITEA_OAUTH_APP=$(curl -X 'POST' 'http://localhost:3000/api/v1/user/applications/oauth2' \
         -H 'accept: application/json' -H 'Content-Type: application/json' -H "Authorization: token ${GITEA_TOKEN}" \
         -d "{ \"name\": \"Woodpecker CI\", \"confidential_client\": true, \"redirect_uris\": [ \"https://8000-${GITPOD_WORKSPACE_ID}.${GITPOD_WORKSPACE_CLUSTER_HOST}/authorize\" ] }")
-      echo WOODPECKER_GITEA_CLIENT=$(echo $GITEA_OAUTH_APP | jq -r .client_id) >> .env
-      echo WOODPECKER_GITEA_SECRET=$(echo $GITEA_OAUTH_APP | jq -r .client_secret) >> .env
+      grep "WOODPECKER_GITEA_CLIENT=" .env \
+        && sed "s,^WOODPECKER_GITEA_CLIENT=.*,WOODPECKER_GITEA_CLIENT=$(echo $GITEA_OAUTH_APP | jq -r .client_id)," .env \
+        || echo WOODPECKER_GITEA_CLIENT=$(echo $GITEA_OAUTH_APP | jq -r .client_id) >> .env
+      grep "WOODPECKER_GITEA_SECRET=" .env \
+        && sed "s,^WOODPECKER_GITEA_SECRET=.*,WOODPECKER_GITEA_SECRET=$(echo $GITEA_OAUTH_APP | jq -r .client_secret)," .env \
+        || echo WOODPECKER_GITEA_SECRET=$(echo $GITEA_OAUTH_APP | jq -r .client_secret) >> .env
       curl -X 'POST' \
         'http://localhost:3000/api/v1/user/repos' \
         -H 'accept: application/json' \

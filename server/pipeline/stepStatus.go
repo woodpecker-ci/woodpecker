@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package shared
+package pipeline
 
 import (
 	"time"
@@ -21,8 +21,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
-
-// TODO(974) move to server/pipeline/*
 
 func UpdateStepStatus(store model.UpdateStepStore, step model.Step, state rpc.State, started int64) (*model.Step, error) {
 	if state.Exited {

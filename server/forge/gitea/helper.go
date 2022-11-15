@@ -37,16 +37,16 @@ func toRepo(from *gitea.Repository) *model.Repo {
 		from.Owner.AvatarURL,
 	)
 	return &model.Repo{
-		ForgeID:      model.ForgeID(fmt.Sprint(from.ID)),
-		SCMKind:      model.RepoGit,
-		Name:         name,
-		Owner:        from.Owner.UserName,
-		FullName:     from.FullName,
-		Avatar:       avatar,
-		Link:         from.HTMLURL,
-		IsSCMPrivate: from.Private || from.Owner.Visibility != gitea.VisibleTypePublic,
-		Clone:        from.CloneURL,
-		Branch:       from.DefaultBranch,
+		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(from.ID)),
+		SCMKind:       model.RepoGit,
+		Name:          name,
+		Owner:         from.Owner.UserName,
+		FullName:      from.FullName,
+		Avatar:        avatar,
+		Link:          from.HTMLURL,
+		IsSCMPrivate:  from.Private || from.Owner.Visibility != gitea.VisibleTypePublic,
+		Clone:         from.CloneURL,
+		Branch:        from.DefaultBranch,
 	}
 }
 

@@ -28,7 +28,7 @@ import (
 )
 
 const (
-	hookEvent  = "X-Github-Event"
+	hookEvent  = "X-GitHub-Event"
 	hookDeploy = "deployment"
 	hookPush   = "push"
 	hookPull   = "pull_request"

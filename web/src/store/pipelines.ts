@@ -92,8 +92,8 @@ export default defineStore({
       this.setPipeline(owner, repo, pipelines);
     },
     async loadPipelineFeed() {
-      const pipeliness = await apiClient.getPipelineFeed();
-      this.pipelineFeed = pipeliness;
+      const pipelines = await apiClient.getPipelineFeed();
+      this.pipelineFeed = pipelines;
     },
   },
 });

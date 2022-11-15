@@ -2,7 +2,6 @@ package ssh
 
 import (
 	"context"
-	"encoding/base64"
 	"fmt"
 	"io"
 	"os"
@@ -109,10 +108,9 @@ func (e *ssh) Exec(ctx context.Context, step *types.Step) error {
 		command = append(command, "-c")
 
 		// TODO: use commands directly
-		script, _ := base64.StdEncoding.DecodeString(common.GenerateScript(step.Commands))
-		scriptStr := string(script)
+		script := common.GenerateScript(step.Commands)
 		// Deleting the initial lines removes netrc support but adds compatibility for more shells like fish
-		command = append(command, "cd "+e.workingdir+"/"+step.Environment["CI_REPO"]+" && "+scriptStr[strings.Index(scriptStr, "\n\n")+2:])
+		command = append(command, "cd "+e.workingdir+"/"+step.Environment["CI_REPO"]+" && "+script[strings.Index(script, "\n\n")+2:])
 	}
 
 	// Prepare command

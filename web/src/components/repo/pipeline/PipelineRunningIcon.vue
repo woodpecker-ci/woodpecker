@@ -1,5 +1,5 @@
 <template>
-  <WoodpeckerIcon class="woodpecker h-16" />
+  <WoodpeckerIcon class="woodpecker h-20" />
 </template>
 
 <script lang="ts" setup>
