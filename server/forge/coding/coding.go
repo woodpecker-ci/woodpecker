@@ -163,7 +163,7 @@ func (c *Coding) TeamPerm(u *model.User, org string) (*model.Perm, error) {
 }
 
 // Repo fetches the repository from the forge.
-func (c *Coding) Repo(ctx context.Context, u *model.User, _ model.ForgeID, owner, name string) (*model.Repo, error) {
+func (c *Coding) Repo(ctx context.Context, u *model.User, _ model.ForgeRemoteID, owner, name string) (*model.Repo, error) {
 	client := c.newClient(ctx, u)
 	project, err := client.GetProject(owner, name)
 	if err != nil {
