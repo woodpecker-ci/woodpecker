@@ -31,7 +31,7 @@ const (
 	mergeRefs = "refs/merge-requests/%d/head" // merge request merged with base
 )
 
-func (g *Gitlab) convertGitlabRepo(_repo *gitlab.Project) (*model.Repo, error) {
+func (g *GitLab) convertGitLabRepo(_repo *gitlab.Project) (*model.Repo, error) {
 	parts := strings.Split(_repo.PathWithNamespace, "/")
 	// TODO(648) save repo id (support nested repos)
 	owner := strings.Join(parts[:len(parts)-1], "/")

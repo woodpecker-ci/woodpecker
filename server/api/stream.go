@@ -142,7 +142,7 @@ func LogStreamSSE(c *gin.Context) {
 	_store := store.FromContext(c)
 
 	// // parse the pipeline number and step sequence number from
-	// // the repquest parameter.
+	// // the request parameter.
 	pipelinen, _ := strconv.ParseInt(c.Param("pipeline"), 10, 64)
 	stepn, _ := strconv.Atoi(c.Param("number"))
 

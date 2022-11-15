@@ -1,6 +1,6 @@
 <template>
   <div v-if="pipeline" class="flex text-color w-full">
-    <PipelineStatusIcon :pipeline="pipeline" class="flex items-center" />
+    <PipelineStatusIcon :status="pipeline.status" class="flex items-center" />
     <div class="flex flex-col ml-4 min-w-0">
       <span class="underline">{{ pipeline.owner }} / {{ pipeline.name }}</span>
       <span class="whitespace-nowrap overflow-hidden overflow-ellipsis">{{ message }}</span>

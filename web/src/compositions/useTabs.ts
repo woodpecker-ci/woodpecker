@@ -57,7 +57,7 @@ export function useTabsClient() {
   const activeTab = inject<Ref<string>>('active-tab');
 
   if (activeTab === undefined || tabs === undefined || disableHashMode === undefined) {
-    throw new Error('Please use this "useTabsClient" composition inside a compoent running "useTabsProvider".');
+    throw new Error('Please use this "useTabsClient" composition inside a component running "useTabsProvider".');
   }
 
   return { activeTab, tabs, disableHashMode };
