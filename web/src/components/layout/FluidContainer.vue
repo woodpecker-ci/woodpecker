@@ -1,13 +1,13 @@
 <template>
-  <div class="w-full max-w-5xl p-2 md:p-4 lg:px-0 mx-auto">
+  <div class="w-full p-2 md:p-4 lg:px-0 mx-auto" :class="{ 'max-w-5xl': !fullWidth }">
     <slot />
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+export interface Props {
+  fullWidth?: boolean;
+}
 
-export default defineComponent({
-  name: 'FluidContainer',
-});
+defineProps<Props>();
 </script>
