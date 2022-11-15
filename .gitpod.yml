@@ -27,7 +27,7 @@ tasks:
     env:
       WOODPECKER_SERVER: localhost:9000
       WOODPECKER_SECRET: "1234"
-      WOODPECKER_MAX_PROCS: 1
+      WOODPECKER_MAX_WORKFLOWS: 1
       WOODPECKER_HEALTHCHECK: false
     command: |
       gp sync-await woodpecker-server
@@ -37,7 +37,7 @@ tasks:
       export DOCKER_COMPOSE_CMD="docker-compose -f docker-compose.gitpod.yml -p woodpecker"
       export GITEA_CLI_CMD="$DOCKER_COMPOSE_CMD exec -u git gitea gitea"
       $DOCKER_COMPOSE_CMD up -d
-      sleep 10s
+      until curl --output /dev/null --silent --head --fail http://localhost:3000; do printf '.'; sleep 1; done
       $GITEA_CLI_CMD admin user create --username woodpecker --password password --email woodpecker@localhost --admin
       export GITEA_TOKEN=$($GITEA_CLI_CMD admin user generate-access-token -u woodpecker --raw)
       GITEA_OAUTH_APP=$(curl -X 'POST' 'http://localhost:3000/api/v1/user/applications/oauth2' \
@@ -82,16 +82,21 @@ tasks:
 
 ports:
   - port: 3000
+    name: Gitea
     onOpen: ignore
     visibility: public # TODO: https://github.com/woodpecker-ci/woodpecker/issues/856
   - port: 8000
+    name: Woodpecker
     onOpen: notify
     visibility: public # TODO: https://github.com/woodpecker-ci/woodpecker/issues/856
   - port: 9000
+    name: Woodpecker GRPC
     onOpen: ignore
   - port: 8010
+    description: Do not use! Access woodpecker on port 8000
     onOpen: ignore
   - port: 4000
+    name: Docs
     onOpen: notify
 
 vscode:

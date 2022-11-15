@@ -21,33 +21,36 @@ import (
 
 	"github.com/rs/zerolog/log"
 
+	"github.com/woodpecker-ci/woodpecker/pipeline"
 	"github.com/woodpecker-ci/woodpecker/server"
+	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/remote"
-	"github.com/woodpecker-ci/woodpecker/server/shared"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
-func createPipelineItems(ctx context.Context, store store.Store, pipeline *model.Pipeline, user *model.User, repo *model.Repo, yamls []*remote.FileMeta, envs map[string]string) (*model.Pipeline, []*shared.PipelineItem, error) {
-	netrc, err := server.Config.Services.Remote.Netrc(user, repo)
+func createPipelineItems(ctx context.Context, store store.Store,
+	currentPipeline *model.Pipeline, user *model.User, repo *model.Repo,
+	yamls []*forge_types.FileMeta, envs map[string]string,
+) (*model.Pipeline, []*pipeline.Item, error) {
+	netrc, err := server.Config.Services.Forge.Netrc(user, repo)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to generate netrc file")
 	}
 
 	// get the previous pipeline so that we can send status change notifications
-	last, err := store.GetPipelineLastBefore(repo, pipeline.Branch, pipeline.ID)
+	last, err := store.GetPipelineLastBefore(repo, currentPipeline.Branch, currentPipeline.ID)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		log.Error().Err(err).Str("repo", repo.FullName).Msgf("Error getting last pipeline before pipeline number '%d'", pipeline.Number)
+		log.Error().Err(err).Str("repo", repo.FullName).Msgf("Error getting last pipeline before pipeline number '%d'", currentPipeline.Number)
 	}
 
-	secs, err := server.Config.Services.Secrets.SecretListPipeline(repo, pipeline)
+	secs, err := server.Config.Services.Secrets.SecretListPipeline(repo, currentPipeline)
 	if err != nil {
-		log.Error().Err(err).Msgf("Error getting secrets for %s#%d", repo.FullName, pipeline.Number)
+		log.Error().Err(err).Msgf("Error getting secrets for %s#%d", repo.FullName, currentPipeline.Number)
 	}
 
 	regs, err := server.Config.Services.Registries.RegistryList(repo)
 	if err != nil {
-		log.Error().Err(err).Msgf("Error getting registry credentials for %s#%d", repo.FullName, pipeline.Number)
+		log.Error().Err(err).Msgf("Error getting registry credentials for %s#%d", repo.FullName, currentPipeline.Number)
 	}
 
 	if envs == nil {
@@ -60,13 +63,13 @@ func createPipelineItems(ctx context.Context, store store.Store, pipeline *model
 		}
 	}
 
-	for k, v := range pipeline.AdditionalVariables {
+	for k, v := range currentPipeline.AdditionalVariables {
 		envs[k] = v
 	}
 
-	b := shared.ProcBuilder{
+	b := pipeline.StepBuilder{
 		Repo:  repo,
-		Curr:  pipeline,
+		Curr:  currentPipeline,
 		Last:  last,
 		Netrc: netrc,
 		Secs:  secs,
@@ -77,14 +80,14 @@ func createPipelineItems(ctx context.Context, store store.Store, pipeline *model
 	}
 	pipelineItems, err := b.Build()
 	if err != nil {
-		pipeline, uerr := shared.UpdateToStatusError(store, *pipeline, err)
+		currentPipeline, uerr := UpdateToStatusError(store, *currentPipeline, err)
 		if uerr != nil {
-			log.Error().Err(err).Msgf("Error setting error status of pipeline for %s#%d", repo.FullName, pipeline.Number)
+			log.Error().Err(err).Msgf("Error setting error status of pipeline for %s#%d", repo.FullName, currentPipeline.Number)
 		}
-		return pipeline, nil, err
+		return currentPipeline, nil, err
 	}
 
-	pipeline = shared.SetPipelineStepsOnPipeline(b.Curr, pipelineItems)
+	currentPipeline = pipeline.SetPipelineStepsOnPipeline(b.Curr, pipelineItems)
 
-	return pipeline, pipelineItems, nil
+	return currentPipeline, pipelineItems, nil
 }

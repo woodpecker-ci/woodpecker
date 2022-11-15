@@ -24,7 +24,7 @@ import (
 )
 
 func TestUsers(t *testing.T) {
-	store, closer := newTestStore(t, new(model.User), new(model.Repo), new(model.Pipeline), new(model.Proc), new(model.Perm))
+	store, closer := newTestStore(t, new(model.User), new(model.Repo), new(model.Pipeline), new(model.Step), new(model.Perm))
 	defer closer()
 
 	g := goblin.Goblin(t)
@@ -38,7 +38,7 @@ func TestUsers(t *testing.T) {
 			g.Assert(err).IsNil()
 			_, err = store.engine.Exec("DELETE FROM pipelines")
 			g.Assert(err).IsNil()
-			_, err = store.engine.Exec("DELETE FROM procs")
+			_, err = store.engine.Exec("DELETE FROM steps")
 			g.Assert(err).IsNil()
 		})
 
@@ -196,21 +196,21 @@ func TestUsers(t *testing.T) {
 				Name:     "test",
 				FullName: "bradrydzewski/test",
 				IsActive: true,
-				RemoteID: "1",
+				ForgeID:  "1",
 			}
 			repo2 := &model.Repo{
 				Owner:    "test",
 				Name:     "test",
 				FullName: "test/test",
 				IsActive: true,
-				RemoteID: "2",
+				ForgeID:  "2",
 			}
 			repo3 := &model.Repo{
 				Owner:    "octocat",
 				Name:     "hello-world",
 				FullName: "octocat/hello-world",
 				IsActive: true,
-				RemoteID: "3",
+				ForgeID:  "3",
 			}
 			g.Assert(store.CreateRepo(repo1)).IsNil()
 			g.Assert(store.CreateRepo(repo2)).IsNil()

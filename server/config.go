@@ -22,12 +22,12 @@ import (
 	"time"
 
 	"github.com/woodpecker-ci/woodpecker/server/cache"
+	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/logging"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/config"
 	"github.com/woodpecker-ci/woodpecker/server/pubsub"
 	"github.com/woodpecker-ci/woodpecker/server/queue"
-	"github.com/woodpecker-ci/woodpecker/server/remote"
 )
 
 var Config = struct {
@@ -38,7 +38,7 @@ var Config = struct {
 		Secrets             model.SecretService
 		Registries          model.RegistryService
 		Environ             model.EnvironService
-		Remote              remote.Remote
+		Forge               forge.Forge
 		Membership          cache.MembershipService
 		ConfigService       config.Extension
 		SignaturePrivateKey crypto.PrivateKey
@@ -50,7 +50,7 @@ var Config = struct {
 		// Builds model.BuildStore
 		// Logs   model.LogStore
 		Files model.FileStore
-		Procs model.ProcStore
+		Steps model.StepStore
 		// Registries model.RegistryStore
 		// Secrets model.SecretStore
 	}

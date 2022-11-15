@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { computed, Ref, ref, toRef } from 'vue';
 
 import useApiClient from '~/compositions/useApiClient';
-import { Pipeline, PipelineFeed, PipelineProc } from '~/lib/api/types';
+import { Pipeline, PipelineFeed, PipelineStep } from '~/lib/api/types';
 import { comparePipelines, isPipelineActive, repoSlug } from '~/utils/helpers';
 
 const apiClient = useApiClient();
@@ -43,17 +43,17 @@ export default defineStore({
         [_repoSlug]: repoPipelines,
       };
     },
-    setProc(owner: string, repo: string, pipelineNumber: number, proc: PipelineProc) {
+    setStep(owner: string, repo: string, pipelineNumber: number, step: PipelineStep) {
       const pipeline = this.getPipeline(ref(owner), ref(repo), ref(pipelineNumber.toString())).value;
       if (!pipeline) {
         throw new Error("Can't find pipeline");
       }
 
-      if (!pipeline.procs) {
-        pipeline.procs = [];
+      if (!pipeline.steps) {
+        pipeline.steps = [];
       }
 
-      pipeline.procs = [...pipeline.procs.filter((p) => p.pid !== proc.pid), proc];
+      pipeline.steps = [...pipeline.steps.filter((p) => p.pid !== step.pid), step];
       this.setPipeline(owner, repo, pipeline);
     },
     setPipelineFeedItem(pipeline: PipelineFeed) {
@@ -92,8 +92,8 @@ export default defineStore({
       this.setPipeline(owner, repo, pipelines);
     },
     async loadPipelineFeed() {
-      const pipeliness = await apiClient.getPipelineFeed();
-      this.pipelineFeed = pipeliness;
+      const pipelines = await apiClient.getPipelineFeed();
+      this.pipelineFeed = pipelines;
     },
   },
 });

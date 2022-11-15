@@ -71,7 +71,7 @@ func FileGet(c *gin.Context) {
 		return
 	}
 
-	pid, err := strconv.Atoi(c.Param("proc"))
+	pid, err := strconv.Atoi(c.Param("step"))
 	if err != nil {
 		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
@@ -83,13 +83,13 @@ func FileGet(c *gin.Context) {
 		return
 	}
 
-	proc, err := _store.ProcFind(pipeline, pid)
+	step, err := _store.StepFind(pipeline, pid)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
-	file, err := _store.FileFind(proc, name)
+	file, err := _store.FileFind(step, name)
 	if err != nil {
 		c.String(404, "Error getting file %q. %s", name, err)
 		return
@@ -100,7 +100,7 @@ func FileGet(c *gin.Context) {
 		return
 	}
 
-	rc, err := _store.FileRead(proc, file.Name)
+	rc, err := _store.FileRead(step, file.Name)
 	if err != nil {
 		c.String(404, "Error getting file stream %q. %s", name, err)
 		return

@@ -14,6 +14,7 @@
     "color_scheme_dark": "Switch to light mode",
     "unknown_error": "An unknown error occurred",
     "documentation_for": "Documentation for \"{topic}\"",
+    "pipeline_feed": "Pipeline feed",
     "not_found": {
         "not_found": "Whoa 404, either we broke something or you had a typing mishap :-/",
         "back_home": "Back to home"
@@ -236,6 +237,19 @@
                 "deploy": "Deploy",
                 "cron": "Cron",
                 "manual": "Manual"
+            },
+            "status": {
+              "status": "Status: {status}",
+              "blocked": "blocked",
+              "pending": "pending",
+              "running": "running",
+              "started": "started",
+              "skipped": "skipped",
+              "success": "success",
+              "declined": "declined",
+              "error": "error",
+              "failure": "failure",
+              "killed": "killed"
             }
         }
     },

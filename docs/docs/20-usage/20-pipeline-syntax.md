@@ -412,8 +412,7 @@ when:
 
 :::info
 Path conditions are applied only to **push** and **pull_request** events.
-It is currently **only available** for GitHub, GitLab.
-Gitea only supports **push** at the moment ([go-gitea/gitea#18228](https://github.com/go-gitea/gitea/pull/18228)).
+It is currently **only available** for GitHub, GitLab and Gitea (version 1.18.0 and newer)
 :::
 
 Execute a step only on a pipeline with certain files being changed:
@@ -715,13 +714,14 @@ Woodpecker gives the ability to skip whole pipelines (not just steps #when---con
 Example conditional execution by repository:
 
 ```diff
++when:
++  repo: test/test
++
  pipeline:
    slack:
      image: plugins/slack
      settings:
        channel: dev
-+    when:
-+      repo: test/test
 ```
 
 ### `branch`
@@ -733,13 +733,14 @@ Branch conditions are not applied to tags.
 Example conditional execution by branch:
 
 ```diff
-pipeline:
-  slack:
-    image: plugins/slack
-    settings:
-      channel: dev
-+   when:
-+     branch: master
++when:
++  branch: master
++
+ pipeline:
+   slack:
+     image: plugins/slack
+     settings:
+       channel: dev
 ```
 
 > The step now triggers on master, but also if the target branch of a pull request is `master`. Add an event condition to limit it further to pushes on master only.

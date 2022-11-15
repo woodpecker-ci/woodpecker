@@ -32,7 +32,7 @@ const (
 
 // Line is a line of console output.
 type Line struct {
-	Proc string `json:"proc,omitempty"`
+	Step string `json:"step,omitempty"`
 	Time int64  `json:"time,omitempty"`
 	Type int    `json:"type,omitempty"`
 	Pos  int    `json:"pos,omitempty"`
@@ -66,7 +66,7 @@ func (w *LineWriter) Write(p []byte) (n int, err error) {
 
 	line := &Line{
 		Out:  out,
-		Proc: w.name,
+		Step: w.name,
 		Pos:  w.num,
 		Time: int64(time.Since(w.now).Seconds()),
 		Type: LineStdout,

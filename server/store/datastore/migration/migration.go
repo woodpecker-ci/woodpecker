@@ -38,6 +38,8 @@ var migrationTasks = []*task{
 	&lowercaseSecretNames,
 	&renameBuildsToPipeline,
 	&renameColumnsBuildsToPipeline,
+	&renameTableProcsToSteps,
+	&renameRemoteToForge,
 }
 
 var allBeans = []interface{}{
@@ -48,7 +50,7 @@ var allBeans = []interface{}{
 	new(model.File),
 	new(model.Logs),
 	new(model.Perm),
-	new(model.Proc),
+	new(model.Step),
 	new(model.Registry),
 	new(model.Repo),
 	new(model.Secret),
