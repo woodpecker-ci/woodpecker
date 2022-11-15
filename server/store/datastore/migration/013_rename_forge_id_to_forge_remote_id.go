@@ -18,7 +18,7 @@ import (
 	"xorm.io/xorm"
 )
 
-var renameForgeIDToForgeRemoteId = task{
+var renameForgeIDToForgeRemoteID = task{
 	name:     "rename-forge-id-to-forge-remote-id",
 	required: true,
 	fn: func(sess *xorm.Session) error {
