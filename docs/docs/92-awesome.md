@@ -9,7 +9,7 @@ If you have some missing resources, please feel free to [open a pull-request](ht
 - [Woodpecker CI pipeline configs](https://github.com/woodpecker-ci/woodpecker/tree/master/.woodpecker) - Complex setup containing different kind of pipelines
   - [Golang tests](https://github.com/woodpecker-ci/woodpecker/blob/master/.woodpecker/test.yml)
   - [Typescript, eslint & Vue](https://github.com/woodpecker-ci/woodpecker/blob/master/.woodpecker/web.yml)
-  - [Docusaurus & publishing to Github Pages](https://github.com/woodpecker-ci/woodpecker/blob/master/.woodpecker/docs.yml)
+  - [Docusaurus & publishing to GitHub Pages](https://github.com/woodpecker-ci/woodpecker/blob/master/.woodpecker/docs.yml)
   - [Docker container building](https://github.com/woodpecker-ci/woodpecker/blob/master/.woodpecker/docker.yml)
   - [Helm chart linting & releasing](https://github.com/woodpecker-ci/woodpecker/blob/master/.woodpecker/helm.yml)
 

@@ -406,7 +406,7 @@ func (c *Gitea) Activate(ctx context.Context, u *model.User, r *model.Repo, link
 	return nil
 }
 
-// Deactivate deactives the repository be removing repository push hooks from
+// Deactivate deactivates the repository be removing repository push hooks from
 // the Gitea repository.
 func (c *Gitea) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
 	client, err := c.newClientToken(ctx, u.Token)
@@ -455,7 +455,7 @@ func (c *Gitea) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]s
 	return branches, nil
 }
 
-// BranchHead returns the sha of the head (lastest commit) of the specified branch
+// BranchHead returns the sha of the head (latest commit) of the specified branch
 func (c *Gitea) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
 	token := ""
 	if u != nil {

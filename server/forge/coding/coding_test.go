@@ -82,7 +82,7 @@ func Test_coding(t *testing.T) {
 		})
 
 		g.Describe("Given an access token", func() {
-			g.It("Should return the anthenticated user", func() {
+			g.It("Should return the authenticated user", func() {
 				login, err := c.Auth(ctx, fakeUser.Token, fakeUser.Secret)
 				g.Assert(err).IsNil()
 				g.Assert(login).Equal(fakeUser.Login)
