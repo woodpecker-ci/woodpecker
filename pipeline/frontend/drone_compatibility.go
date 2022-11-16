@@ -33,6 +33,7 @@ func (m *Metadata) setDroneEnviron(env map[string]string) {
 	env["DRONE_BUILD_FINISHED"] = env["CI_PIPELINE_FINISHED"]
 	// commit
 	env["DRONE_COMMIT"] = env["CI_COMMIT_SHA"]
+	env["DRONE_COMMIT_SHA"] = env["CI_COMMIT_SHA"]
 	env["DRONE_COMMIT_BEFORE"] = env["CI_PREV_COMMIT_SHA"]
 	env["DRONE_COMMIT_REF"] = env["CI_COMMIT_REF"]
 	env["DRONE_COMMIT_BRANCH"] = env["CI_COMMIT_BRANCH"]
