@@ -78,7 +78,12 @@ var counter = &agent.State{
 // handles pinging the endpoint and returns an error if the
 // agent is in an unhealthy state.
 func pinger(c *cli.Context) error {
-	resp, err := http.Get("http://localhost:3000/healthz")
+	healthcheckAddress := c.String("healthcheck-addr")
+	if healthcheckAddress[0] == ':' {
+		// this seems sufficient according to https://pkg.go.dev/net#Dial
+		healthcheckAddress = "localhost" + healthcheckAddress
+	}
+	resp, err := http.Get("http://" + healthcheckAddress + "/healthz")
 	if err != nil {
 		return err
 	}
