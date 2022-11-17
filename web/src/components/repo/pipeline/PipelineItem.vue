@@ -1,5 +1,5 @@
 <template>
-  <ListItem v-if="pipeline" clickable class="p-0 w-full">
+  <ListItem v-if="pipeline" class="p-0 w-full">
     <div class="flex h-full w-11 items-center md:mr-4">
       <div
         class="min-h-full w-3"

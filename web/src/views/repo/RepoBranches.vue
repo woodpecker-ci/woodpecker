@@ -3,7 +3,6 @@
     <ListItem
       v-for="branch in branches"
       :key="branch"
-      clickable
       class="text-color"
       :to="{ name: 'repo-branch', params: { branch } }"
     >
