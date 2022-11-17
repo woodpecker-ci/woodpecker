@@ -22,13 +22,13 @@
       <IconButton
         :icon="darkMode ? 'dark' : 'light'"
         :title="$t(darkMode ? 'color_scheme_dark' : 'color_scheme_light')"
-        class="navbar-icon navbar-clickable"
+        class="navbar-icon"
         @click="darkMode = !darkMode"
       />
       <!-- Admin Settings -->
       <IconButton
         v-if="user?.admin"
-        class="navbar-icon navbar-clickable"
+        class="navbar-icon"
         :title="$t('admin.settings.settings')"
         :to="{ name: 'admin-settings' }"
       >
@@ -36,14 +36,9 @@
       </IconButton>
 
       <!-- Active Pipelines Indicator -->
-      <ActivePipelines v-if="user" class="navbar-icon navbar-clickable" />
+      <ActivePipelines v-if="user" class="navbar-icon" />
       <!-- User Avatar -->
-      <IconButton
-        v-if="user"
-        :to="{ name: 'user' }"
-        :title="$t('user.settings')"
-        class="navbar-icon navbar-clickable !p-1.5"
-      >
+      <IconButton v-if="user" :to="{ name: 'user' }" :title="$t('user.settings')" class="navbar-icon !p-1.5">
         <img v-if="user && user.avatar_url" class="rounded-md" :src="`${user.avatar_url}`" />
       </IconButton>
       <!-- Login Button -->
@@ -97,10 +92,6 @@ export default defineComponent({
 }
 
 .navbar-link {
-  @apply px-3 py-2 -my-1 rounded-md;
-}
-
-.navbar-clickable {
-  @apply hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-5 transition-colors duration-100;
+  @apply px-3 py-2 -my-1 rounded-md hover-effect;
 }
 </style>
