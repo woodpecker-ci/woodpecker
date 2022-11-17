@@ -110,7 +110,7 @@ func (e *ssh) Exec(ctx context.Context, step *types.Step) error {
 		// TODO: use commands directly
 		script := common.GenerateScript(step.Commands)
 		// Deleting the initial lines removes netrc support but adds compatibility for more shells like fish
-		command = append(command, "cd "+e.workingdir+"/"+step.Environment["CI_REPO"]+" && "+string(script)[strings.Index(string(script), "\n\n")+2:])
+		command = append(command, "cd "+e.workingdir+"/"+step.Environment["CI_REPO"]+" && "+script[strings.Index(script, "\n\n")+2:])
 	}
 
 	// Prepare command

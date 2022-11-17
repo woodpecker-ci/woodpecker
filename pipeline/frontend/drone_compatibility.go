@@ -33,6 +33,7 @@ func (m *Metadata) setDroneEnviron(env map[string]string) {
 	env["DRONE_BUILD_FINISHED"] = env["CI_PIPELINE_FINISHED"]
 	// commit
 	env["DRONE_COMMIT"] = env["CI_COMMIT_SHA"]
+	env["DRONE_COMMIT_SHA"] = env["CI_COMMIT_SHA"]
 	env["DRONE_COMMIT_BEFORE"] = env["CI_PREV_COMMIT_SHA"]
 	env["DRONE_COMMIT_REF"] = env["CI_COMMIT_REF"]
 	env["DRONE_COMMIT_BRANCH"] = env["CI_COMMIT_BRANCH"]
@@ -51,8 +52,8 @@ func (m *Metadata) setDroneEnviron(env map[string]string) {
 	env["DRONE_REPO_BRANCH"] = env["CI_REPO_DEFAULT_BRANCH"]
 	env["DRONE_REPO_PRIVATE"] = env["CI_REPO_PRIVATE"]
 	// clone
-	env["DRONE_REMOTE_URL"] = env["CI_REPO_REMOTE"]
-	env["DRONE_GIT_HTTP_URL"] = env["CI_REPO_REMOTE"]
+	env["DRONE_REMOTE_URL"] = env["CI_REPO_CLONE_URL"]
+	env["DRONE_GIT_HTTP_URL"] = env["CI_REPO_CLONE_URL"]
 	// misc
 	env["DRONE_SYSTEM_HOST"] = env["CI_SYSTEM_HOST"]
 	env["DRONE_STEP_NUMBER"] = env["CI_STEP_NUMBER"]

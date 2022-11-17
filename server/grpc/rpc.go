@@ -32,17 +32,17 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
 	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/logging"
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/pipeline"
 	"github.com/woodpecker-ci/woodpecker/server/pubsub"
 	"github.com/woodpecker-ci/woodpecker/server/queue"
-	"github.com/woodpecker-ci/woodpecker/server/remote"
-	"github.com/woodpecker-ci/woodpecker/server/shared"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
 type RPC struct {
-	remote        remote.Remote
+	forge         forge.Forge
 	queue         queue.Queue
 	pubsub        pubsub.Publisher
 	logger        logging.Log
@@ -108,13 +108,13 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 		return err
 	}
 
-	pipeline, err := s.store.GetPipeline(pstep.PipelineID)
+	currentPipeline, err := s.store.GetPipeline(pstep.PipelineID)
 	if err != nil {
 		log.Error().Msgf("error: cannot find pipeline with id %d: %s", pstep.PipelineID, err)
 		return err
 	}
 
-	step, err := s.store.StepChild(pipeline, pstep.PID, state.Step)
+	step, err := s.store.StepChild(currentPipeline, pstep.PID, state.Step)
 	if err != nil {
 		log.Error().Msgf("error: cannot find step with name %s: %s", state.Step, err)
 		return err
@@ -128,20 +128,20 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 		}
 	}
 
-	repo, err := s.store.GetRepo(pipeline.RepoID)
+	repo, err := s.store.GetRepo(currentPipeline.RepoID)
 	if err != nil {
-		log.Error().Msgf("error: cannot find repo with id %d: %s", pipeline.RepoID, err)
+		log.Error().Msgf("error: cannot find repo with id %d: %s", currentPipeline.RepoID, err)
 		return err
 	}
 
-	if _, err = shared.UpdateStepStatus(s.store, *step, state, pipeline.Started); err != nil {
+	if _, err = pipeline.UpdateStepStatus(s.store, *step, state, currentPipeline.Started); err != nil {
 		log.Error().Err(err).Msg("rpc.update: cannot update step")
 	}
 
-	if pipeline.Steps, err = s.store.StepList(pipeline); err != nil {
+	if currentPipeline.Steps, err = s.store.StepList(currentPipeline); err != nil {
 		log.Error().Err(err).Msg("can not get step list from store")
 	}
-	if pipeline.Steps, err = model.Tree(pipeline.Steps); err != nil {
+	if currentPipeline.Steps, err = model.Tree(currentPipeline.Steps); err != nil {
 		log.Error().Err(err).Msg("can not build tree from step list")
 		return err
 	}
@@ -153,7 +153,7 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 	}
 	message.Data, _ = json.Marshal(model.Event{
 		Repo:     *repo,
-		Pipeline: *pipeline,
+		Pipeline: *currentPipeline,
 	})
 	if err := s.pubsub.Publish(c, "topic/events", message); err != nil {
 		log.Error().Err(err).Msg("can not publish step list to")
@@ -255,26 +255,26 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 		}
 	}
 
-	pipeline, err := s.store.GetPipeline(step.PipelineID)
+	currentPipeline, err := s.store.GetPipeline(step.PipelineID)
 	if err != nil {
 		log.Error().Msgf("error: cannot find pipeline with id %d: %s", step.PipelineID, err)
 		return err
 	}
 
-	repo, err := s.store.GetRepo(pipeline.RepoID)
+	repo, err := s.store.GetRepo(currentPipeline.RepoID)
 	if err != nil {
-		log.Error().Msgf("error: cannot find repo with id %d: %s", pipeline.RepoID, err)
+		log.Error().Msgf("error: cannot find repo with id %d: %s", currentPipeline.RepoID, err)
 		return err
 	}
 
-	if pipeline.Status == model.StatusPending {
-		if pipeline, err = shared.UpdateToStatusRunning(s.store, *pipeline, state.Started); err != nil {
-			log.Error().Msgf("error: init: cannot update build_id %d state: %s", pipeline.ID, err)
+	if currentPipeline.Status == model.StatusPending {
+		if currentPipeline, err = pipeline.UpdateToStatusRunning(s.store, *currentPipeline, state.Started); err != nil {
+			log.Error().Msgf("error: init: cannot update build_id %d state: %s", currentPipeline.ID, err)
 		}
 	}
 
 	defer func() {
-		pipeline.Steps, _ = s.store.StepList(pipeline)
+		currentPipeline.Steps, _ = s.store.StepList(currentPipeline)
 		message := pubsub.Message{
 			Labels: map[string]string{
 				"repo":    repo.FullName,
@@ -283,14 +283,14 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 		}
 		message.Data, _ = json.Marshal(model.Event{
 			Repo:     *repo,
-			Pipeline: *pipeline,
+			Pipeline: *currentPipeline,
 		})
 		if err := s.pubsub.Publish(c, "topic/events", message); err != nil {
 			log.Error().Err(err).Msg("can not publish step list to")
 		}
 	}()
 
-	_, err = shared.UpdateStepToStatusStarted(s.store, *step, state)
+	_, err = pipeline.UpdateStepToStatusStarted(s.store, *step, state)
 	return err
 }
 
@@ -307,25 +307,25 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 		return err
 	}
 
-	pipeline, err := s.store.GetPipeline(step.PipelineID)
+	currentPipeline, err := s.store.GetPipeline(step.PipelineID)
 	if err != nil {
 		log.Error().Msgf("error: cannot find pipeline with id %d: %s", step.PipelineID, err)
 		return err
 	}
 
-	repo, err := s.store.GetRepo(pipeline.RepoID)
+	repo, err := s.store.GetRepo(currentPipeline.RepoID)
 	if err != nil {
-		log.Error().Msgf("error: cannot find repo with id %d: %s", pipeline.RepoID, err)
+		log.Error().Msgf("error: cannot find repo with id %d: %s", currentPipeline.RepoID, err)
 		return err
 	}
 
 	log.Trace().
 		Str("repo_id", fmt.Sprint(repo.ID)).
-		Str("build_id", fmt.Sprint(pipeline.ID)).
+		Str("build_id", fmt.Sprint(currentPipeline.ID)).
 		Str("step_id", id).
 		Msgf("gRPC Done with state: %#v", state)
 
-	if step, err = shared.UpdateStepStatusToDone(s.store, *step, state); err != nil {
+	if step, err = pipeline.UpdateStepStatusToDone(s.store, *step, state); err != nil {
 		log.Error().Msgf("error: done: cannot update step_id %d state: %s", step.ID, err)
 	}
 
@@ -339,34 +339,34 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 		log.Error().Msgf("error: done: cannot ack step_id %d: %s", stepID, err)
 	}
 
-	steps, err := s.store.StepList(pipeline)
+	steps, err := s.store.StepList(currentPipeline)
 	if err != nil {
 		return err
 	}
 	s.completeChildrenIfParentCompleted(steps, step)
 
 	if !model.IsThereRunningStage(steps) {
-		if pipeline, err = shared.UpdateStatusToDone(s.store, *pipeline, model.PipelineStatus(steps), step.Stopped); err != nil {
-			log.Error().Err(err).Msgf("error: done: cannot update build_id %d final state", pipeline.ID)
+		if currentPipeline, err = pipeline.UpdateStatusToDone(s.store, *currentPipeline, model.PipelineStatus(steps), step.Stopped); err != nil {
+			log.Error().Err(err).Msgf("error: done: cannot update build_id %d final state", currentPipeline.ID)
 		}
 	}
 
-	s.updateRemoteStatus(c, repo, pipeline, step)
+	s.updateForgeStatus(c, repo, currentPipeline, step)
 
 	if err := s.logger.Close(c, id); err != nil {
 		log.Error().Err(err).Msgf("done: cannot close build_id %d logger", step.ID)
 	}
 
-	if err := s.notify(c, repo, pipeline, steps); err != nil {
+	if err := s.notify(c, repo, currentPipeline, steps); err != nil {
 		return err
 	}
 
-	if pipeline.Status == model.StatusSuccess || pipeline.Status == model.StatusFailure {
-		s.pipelineCount.WithLabelValues(repo.FullName, pipeline.Branch, string(pipeline.Status), "total").Inc()
-		s.pipelineTime.WithLabelValues(repo.FullName, pipeline.Branch, string(pipeline.Status), "total").Set(float64(pipeline.Finished - pipeline.Started))
+	if currentPipeline.Status == model.StatusSuccess || currentPipeline.Status == model.StatusFailure {
+		s.pipelineCount.WithLabelValues(repo.FullName, currentPipeline.Branch, string(currentPipeline.Status), "total").Inc()
+		s.pipelineTime.WithLabelValues(repo.FullName, currentPipeline.Branch, string(currentPipeline.Status), "total").Set(float64(currentPipeline.Finished - currentPipeline.Started))
 	}
 	if model.IsMultiPipeline(steps) {
-		s.pipelineTime.WithLabelValues(repo.FullName, pipeline.Branch, string(step.State), step.Name).Set(float64(step.Stopped - step.Started))
+		s.pipelineTime.WithLabelValues(repo.FullName, currentPipeline.Branch, string(step.State), step.Name).Set(float64(step.Stopped - step.Started))
 	}
 
 	return nil
@@ -385,21 +385,21 @@ func (s *RPC) Log(c context.Context, id string, line *rpc.Line) error {
 func (s *RPC) completeChildrenIfParentCompleted(steps []*model.Step, completedStep *model.Step) {
 	for _, p := range steps {
 		if p.Running() && p.PPID == completedStep.PID {
-			if _, err := shared.UpdateStepToStatusSkipped(s.store, *p, completedStep.Stopped); err != nil {
+			if _, err := pipeline.UpdateStepToStatusSkipped(s.store, *p, completedStep.Stopped); err != nil {
 				log.Error().Msgf("error: done: cannot update step_id %d child state: %s", p.ID, err)
 			}
 		}
 	}
 }
 
-func (s *RPC) updateRemoteStatus(ctx context.Context, repo *model.Repo, pipeline *model.Pipeline, step *model.Step) {
+func (s *RPC) updateForgeStatus(ctx context.Context, repo *model.Repo, pipeline *model.Pipeline, step *model.Step) {
 	user, err := s.store.GetUser(repo.UserID)
 	if err != nil {
 		log.Error().Err(err).Msgf("can not get user with id '%d'", repo.UserID)
 		return
 	}
 
-	if refresher, ok := s.remote.(remote.Refresher); ok {
+	if refresher, ok := s.forge.(forge.Refresher); ok {
 		ok, err := refresher.Refresh(ctx, user)
 		if err != nil {
 			log.Error().Err(err).Msgf("grpc: refresh oauth token of user '%s' failed", user.Login)
@@ -412,7 +412,7 @@ func (s *RPC) updateRemoteStatus(ctx context.Context, repo *model.Repo, pipeline
 
 	// only do status updates for parent steps
 	if step != nil && step.IsParent() {
-		err = s.remote.Status(ctx, user, repo, pipeline, step)
+		err = s.forge.Status(ctx, user, repo, pipeline, step)
 		if err != nil {
 			log.Error().Err(err).Msgf("error setting commit status for %s/%d", repo.FullName, pipeline.Number)
 		}

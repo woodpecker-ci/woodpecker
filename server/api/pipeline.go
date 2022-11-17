@@ -54,7 +54,7 @@ func CreatePipeline(c *gin.Context) {
 
 	user := session.User(c)
 
-	lastCommit, _ := server.Config.Services.Remote.BranchHead(c, user, repo, p.Branch)
+	lastCommit, _ := server.Config.Services.Forge.BranchHead(c, user, repo, p.Branch)
 
 	tmpBuild := createTmpPipeline(model.EventManual, lastCommit, repo, user, &p)
 
@@ -354,7 +354,7 @@ func PostPipeline(c *gin.Context) {
 		return
 	}
 
-	// refresh the token to make sure, pipeline.ReStart can still obtain the pipeline config if nessessary again
+	// refresh the token to make sure, pipeline.ReStart can still obtain the pipeline config if necessary again
 	refreshUserToken(c, user)
 
 	// make Deploy overridable
