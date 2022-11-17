@@ -82,19 +82,18 @@ func apiRoutes(e *gin.Engine) {
 
 			// requires push permissions
 			repo.POST("/pipelines/:number", session.MustPush, api.PostPipeline)
-			repo.DELETE("/pipelines/:number", session.MustPush, api.DeletePipeline)
+			repo.POST("/pipelines/:number/cancel", session.MustPush, api.CancelPipeline)
 			repo.POST("/pipelines/:number/approve", session.MustPush, api.PostApproval)
 			repo.POST("/pipelines/:number/decline", session.MustPush, api.PostDecline)
-			repo.DELETE("/pipelines/:number/:job", session.MustPush, api.DeletePipeline)
 
-			repo.GET("/logs/:number/:pid", api.GetProcLogs)
-			repo.GET("/logs/:number/:pid/:proc", api.GetPipelineLogs)
+			repo.GET("/logs/:number/:pid", api.GetStepLogs)
+			repo.GET("/logs/:number/:pid/:step", api.GetPipelineLogs)
 
 			// requires push permissions
 			repo.DELETE("/logs/:number", session.MustPush, api.DeletePipelineLogs)
 
 			repo.GET("/files/:number", api.FileList)
-			repo.GET("/files/:number/:proc/*file", api.FileGet)
+			repo.GET("/files/:number/:step/*file", api.FileGet)
 
 			// requires push permissions
 			repo.GET("/secrets", session.MustPush, api.GetSecretList)

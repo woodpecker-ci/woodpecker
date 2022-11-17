@@ -1,7 +1,8 @@
 <template>
-  <div
+  <aside
     v-if="isPipelineFeedOpen"
     class="flex flex-col z-50 overflow-y-auto items-center bg-white dark:bg-dark-gray-800 dark:border-dark-500"
+    :aria-label="$t('pipeline_feed')"
   >
     <router-link
       v-for="pipeline in sortedPipelineFeed"
@@ -16,7 +17,7 @@
     </router-link>
 
     <span v-if="sortedPipelineFeed.length === 0" class="text-color m-4">{{ $t('repo.pipeline.no_pipelines') }}</span>
-  </div>
+  </aside>
 </template>
 
 <script lang="ts">

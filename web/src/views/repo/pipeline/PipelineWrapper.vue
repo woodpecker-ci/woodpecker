@@ -145,18 +145,18 @@ export default defineComponent({
         throw new Error('Unexpected: Repo is undefined');
       }
 
-      if (!pipeline.value.procs) {
-        throw new Error('Unexpected: Pipeline procs not loaded');
+      if (!pipeline.value.steps) {
+        throw new Error('Unexpected: Pipeline steps not loaded');
       }
 
-      // TODO: is selectedProcId right?
-      // const proc = findProc(pipeline.value.procs, selectedProcId.value || 2);
+      // TODO: is selectedStepId right?
+      // const step = findStep(pipeline.value.steps, selectedStepId.value || 2);
 
-      // if (!proc) {
-      //   throw new Error('Unexpected: Proc not found');
+      // if (!step) {
+      //   throw new Error('Unexpected: Step not found');
       // }
 
-      await apiClient.cancelPipeline(repo.value.owner, repo.value.name, parseInt(pipelineId.value, 10), 0);
+      await apiClient.cancelPipeline(repo.value.owner, repo.value.name, parseInt(pipelineId.value, 10));
       notifications.notify({ title: i18n.t('repo.pipeline.actions.cancel_success'), type: 'success' });
     });
 
