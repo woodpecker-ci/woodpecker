@@ -61,37 +61,39 @@
               </span>
             </div>
           </div>
-          <button
-            v-if="pipeline.steps && pipeline.steps.length > 0 && ['pending'].includes(step.state)"
-            type="button"
-            class="flex justify-center items-center gap-2 py-2 px-1 hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-5 rounded-md"
-            @click="skipWorkflow(step)"
-          >
-            skip
-          </button>
-          <button
-            v-if="pipeline.steps && pipeline.steps.length > 1"
-            type="button"
-            :title="step.name"
-            class="flex items-center gap-2 py-2 px-1 hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-5 rounded-md"
-            @click="stepsCollapsed[step.id] = !!!stepsCollapsed[step.id]"
-          >
-            <Icon
-              name="chevron-right"
-              class="transition-transform duration-150 min-w-6 h-6"
-              :class="{ 'transform rotate-90': !stepsCollapsed[step.id] }"
-            />
-            <div
-              class="min-w-2 h-2 rounded-full -ml-0.75"
-              :class="{
-                'bg-lime-400': ['success'].includes(step.state),
-                'bg-gray-400': ['pending', 'skipped'].includes(step.state),
-                'bg-red-400': ['killed', 'error', 'failure', 'blocked', 'declined'].includes(step.state),
-                'bg-blue-400': ['started', 'running'].includes(step.state),
-              }"
-            />
-            <span class="truncate">{{ step.name }}</span>
-          </button>
+          <div class="flex justify-between gap-2">
+            <button
+              v-if="pipeline.steps && pipeline.steps.length > 1"
+              type="button"
+              :title="step.name"
+              class="flex items-center gap-2 py-2 px-1 hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-5 rounded-md"
+              @click="stepsCollapsed[step.id] = !!!stepsCollapsed[step.id]"
+            >
+              <Icon
+                name="chevron-right"
+                class="transition-transform duration-150 min-w-6 h-6"
+                :class="{ 'transform rotate-90': !stepsCollapsed[step.id] }"
+              />
+              <div
+                class="min-w-2 h-2 rounded-full -ml-0.75"
+                :class="{
+                  'bg-lime-400': ['success'].includes(step.state),
+                  'bg-gray-400': ['pending', 'skipped'].includes(step.state),
+                  'bg-red-400': ['killed', 'error', 'failure', 'blocked', 'declined'].includes(step.state),
+                  'bg-blue-400': ['started', 'running'].includes(step.state),
+                }"
+              />
+              <span class="truncate">{{ step.name }}</span>
+            </button>
+            <button
+              v-if="pipeline.steps && pipeline.steps.length > 0 && ['pending'].includes(step.state)"
+              type="button"
+              class="flex justify-center items-center gap-2 py-2 px-1 hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-5 rounded-md"
+              @click="skipWorkflow(step)"
+            >
+              skip
+            </button>
+          </div>
         </div>
         <div
           class="transition-height duration-150 overflow-hidden"
