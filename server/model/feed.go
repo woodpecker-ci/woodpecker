@@ -23,7 +23,7 @@ type Feed struct {
 	Name     string `json:"name"                    xorm:"feed_repo_name"`
 	FullName string `json:"full_name"               xorm:"feed_repo_full_name"`
 
-	Id       int64  `json:"id,omitempty"            xorm:"feed_pipeline_id"`
+	ID       int64  `json:"id,omitempty"            xorm:"feed_pipeline_id"`
 	Number   int64  `json:"number,omitempty"        xorm:"feed_pipeline_number"`
 	Event    string `json:"event,omitempty"         xorm:"feed_pipeline_event"`
 	Status   string `json:"status,omitempty"        xorm:"feed_pipeline_status"`
