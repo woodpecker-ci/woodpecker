@@ -1,5 +1,5 @@
 <template>
-  <header class="bg-white dark:bg-dark-gray-900 border-b dark:border-gray-700">
+  <header class="bg-white dark:bg-dark-gray-900 border-b dark:border-gray-700 text-color">
     <FluidContainer class="!py-0">
       <div class="flex flex-wrap items-center justify-between py-4 <md:flex-row <md:gap-y-4">
         <div
@@ -15,8 +15,7 @@
         </div>
         <TextField
           v-if="searchBoxPresent"
-          class="w-auto !bg-gray-100 !dark:bg-dark-gray-600 <md:w-full <md:order-3"
-          input-class="!placeholder-gray-500"
+          class="w-auto !bg-gray-100 !dark:bg-dark-gray-600 placeholder-gray-500 <md:w-full <md:order-3"
           :placeholder="$t('search')"
           :model-value="search"
           @update:model-value="(value: string) => $emit('update:search', value)"

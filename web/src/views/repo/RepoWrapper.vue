@@ -17,17 +17,13 @@
       <a v-if="badgeUrl" :href="badgeUrl" target="_blank" class="ml-2">
         <img :src="badgeUrl" />
       </a>
-      <a
-        :href="repo.link_url"
-        target="_blank"
-        class="flex p-1 rounded-full text-color hover:bg-gray-200 hover:text-gray-700 dark:hover:bg-gray-600"
-      >
+      <IconButton :href="repo.link_url" :title="$t('repo.open_in_forge')">
         <Icon v-if="forge === 'github'" name="github" />
         <Icon v-else-if="forge === 'gitea'" name="gitea" />
         <Icon v-else-if="forge === 'gitlab'" name="gitlab" />
         <Icon v-else-if="forge === 'bitbucket' || forge === 'stash'" name="bitbucket" />
         <Icon v-else name="repo" />
-      </a>
+      </IconButton>
       <IconButton
         v-if="repoPermissions.admin"
         :to="{ name: 'repo-settings' }"
