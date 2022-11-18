@@ -22,7 +22,6 @@ import (
 	"github.com/robfig/cron"
 	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/pipeline"
@@ -125,7 +124,7 @@ func CreatePipeline(ctx context.Context, store store.Store, f forge.Forge, cron 
 	// if the forge has a refresh token, the current access token
 	// may be stale. Therefore, we should refresh prior to dispatching
 	// the pipeline.
-	if refresher, ok := server.Config.Services.Forge.(forge.Refresher); ok {
+	if refresher, ok := f.(forge.Refresher); ok {
 		refreshed, err := refresher.Refresh(ctx, creator)
 		log.Debug().Msgf("token refreshed: %s", refreshed)
 		if err != nil {
