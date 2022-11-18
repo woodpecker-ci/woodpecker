@@ -92,6 +92,14 @@ export default class WoodpeckerClient extends ApiClient {
     return this._post(`/api/repos/${owner}/${repo}/pipelines/${pipeline}/decline`);
   }
 
+  skipPipeline(owner: string, repo: string, pipeline: string): Promise<unknown> {
+    return this._post(`/api/repos/${owner}/${repo}/pipelines/${pipeline}/skip`);
+  }
+
+  skipPipelineStep(owner: string, repo: string, pipeline: string, stepPid: string): Promise<unknown> {
+    return this._post(`/api/repos/${owner}/${repo}/pipelines/${pipeline}/skip/${stepPid}`);
+  }
+
   restartPipeline(
     owner: string,
     repo: string,

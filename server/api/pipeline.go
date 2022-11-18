@@ -320,6 +320,52 @@ func PostDecline(c *gin.Context) {
 	}
 }
 
+// PostSkip skips the pipeline in gated repos
+func PostSkip(c *gin.Context) {
+	var (
+		_store = store.FromContext(c)
+		repo   = session.Repo(c)
+		user   = session.User(c)
+		num, _ = strconv.ParseInt(c.Params.ByName("number"), 10, 64)
+	)
+
+	pl, err := _store.GetPipelineNumber(repo, num)
+	if err != nil {
+		c.String(http.StatusNotFound, "%v", err)
+		return
+	}
+
+	pl, err = pipeline.Skip(c, _store, pl, user, repo)
+	if err != nil {
+		handlePipelineErr(c, err)
+	} else {
+		c.JSON(200, pl)
+	}
+}
+
+func PostSkipStep(c *gin.Context) {
+	var (
+		_store     = store.FromContext(c)
+		repo       = session.Repo(c)
+		user       = session.User(c)
+		num, _     = strconv.ParseInt(c.Params.ByName("number"), 10, 64)
+		stepPid, _ = strconv.Atoi(c.Params.ByName("stepPid"))
+	)
+
+	pl, err := _store.GetPipelineNumber(repo, num)
+	if err != nil {
+		c.String(http.StatusNotFound, "%v", err)
+		return
+	}
+
+	pl, err = pipeline.SkipStep(c, _store, pl, stepPid, user, repo)
+	if err != nil {
+		handlePipelineErr(c, err)
+	} else {
+		c.JSON(200, pl)
+	}
+}
+
 func GetPipelineQueue(c *gin.Context) {
 	out, err := store.FromContext(c).GetPipelineQueue()
 	if err != nil {

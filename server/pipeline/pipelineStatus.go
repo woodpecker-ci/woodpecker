@@ -34,6 +34,13 @@ func UpdateToStatusPending(store model.UpdatePipelineStore, pipeline model.Pipel
 	return &pipeline, store.UpdatePipeline(&pipeline)
 }
 
+func UpdateToStatusSkipped(store model.UpdatePipelineStore, pipeline model.Pipeline, reviewer string) (*model.Pipeline, error) {
+	pipeline.Reviewer = reviewer
+	pipeline.Status = model.StatusSkipped
+	pipeline.Reviewed = time.Now().Unix()
+	return &pipeline, store.UpdatePipeline(&pipeline)
+}
+
 func UpdateToStatusDeclined(store model.UpdatePipelineStore, pipeline model.Pipeline, reviewer string) (*model.Pipeline, error) {
 	pipeline.Reviewer = reviewer
 	pipeline.Status = model.StatusDeclined

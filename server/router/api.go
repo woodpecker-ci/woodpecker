@@ -82,6 +82,8 @@ func apiRoutes(e *gin.Engine) {
 
 			// requires push permissions
 			repo.POST("/pipelines/:number", session.MustPush, api.PostPipeline)
+			repo.POST("/pipelines/:number/skip", session.MustPush, api.PostSkip)
+			repo.POST("/pipelines/:number/skip/:stepPid", session.MustPush, api.PostSkipStep)
 			repo.POST("/pipelines/:number/cancel", session.MustPush, api.CancelPipeline)
 			repo.POST("/pipelines/:number/approve", session.MustPush, api.PostApproval)
 			repo.POST("/pipelines/:number/decline", session.MustPush, api.PostDecline)

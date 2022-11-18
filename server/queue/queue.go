@@ -154,6 +154,8 @@ type Queue interface {
 	// ErrorAtOnce signals the task is complete with errors.
 	ErrorAtOnce(c context.Context, id []string, err error) error
 
+	EvictCurrent(c context.Context, id string, exitStatus model.StatusValue) error
+
 	// Evict removes a pending task from the queue.
 	Evict(c context.Context, id string) error
 
