@@ -66,7 +66,7 @@
               v-if="pipeline.steps && pipeline.steps.length > 1"
               type="button"
               :title="workflow.name"
-              class="flex items-center gap-2 py-2 px-1 hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-5 rounded-md"
+              class="flex items-center gap-2 py-2 px-1 hover-effect rounded-md"
               @click="workflowsCollapsed[workflow.id] = !workflowsCollapsed[workflow.id]"
             >
               <Icon
@@ -91,7 +91,7 @@
               :key="step.pid"
               type="button"
               :title="step.name"
-              class="flex p-2 gap-2 border-2 border-transparent rounded-md items-center hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-5 w-full"
+              class="flex p-2 gap-2 border-2 border-transparent rounded-md items-center hover-effect w-full"
               :class="{
                 'bg-black bg-opacity-10 dark:bg-white dark:bg-opacity-5': selectedStepId && selectedStepId === step.pid,
                 'mt-1':

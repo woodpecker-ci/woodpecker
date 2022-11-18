@@ -822,11 +822,11 @@ func (_m *Store) GetRepoCount() (int64, error) {
 }
 
 // GetRepoForgeID provides a mock function with given fields: _a0
-func (_m *Store) GetRepoForgeID(_a0 model.ForgeID) (*model.Repo, error) {
+func (_m *Store) GetRepoForgeID(_a0 model.ForgeRemoteID) (*model.Repo, error) {
 	ret := _m.Called(_a0)
 
 	var r0 *model.Repo
-	if rf, ok := ret.Get(0).(func(model.ForgeID) *model.Repo); ok {
+	if rf, ok := ret.Get(0).(func(model.ForgeRemoteID) *model.Repo); ok {
 		r0 = rf(_a0)
 	} else {
 		if ret.Get(0) != nil {
@@ -835,7 +835,7 @@ func (_m *Store) GetRepoForgeID(_a0 model.ForgeID) (*model.Repo, error) {
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(model.ForgeID) error); ok {
+	if rf, ok := ret.Get(1).(func(model.ForgeRemoteID) error); ok {
 		r1 = rf(_a0)
 	} else {
 		r1 = ret.Error(1)
@@ -867,13 +867,13 @@ func (_m *Store) GetRepoName(_a0 string) (*model.Repo, error) {
 	return r0, r1
 }
 
-// GetRepoNameFallback provides a mock function with given fields: forgeID, fullName
-func (_m *Store) GetRepoNameFallback(forgeID model.ForgeID, fullName string) (*model.Repo, error) {
-	ret := _m.Called(forgeID, fullName)
+// GetRepoNameFallback provides a mock function with given fields: remoteID, fullName
+func (_m *Store) GetRepoNameFallback(remoteID model.ForgeRemoteID, fullName string) (*model.Repo, error) {
+	ret := _m.Called(remoteID, fullName)
 
 	var r0 *model.Repo
-	if rf, ok := ret.Get(0).(func(model.ForgeID, string) *model.Repo); ok {
-		r0 = rf(forgeID, fullName)
+	if rf, ok := ret.Get(0).(func(model.ForgeRemoteID, string) *model.Repo); ok {
+		r0 = rf(remoteID, fullName)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*model.Repo)
@@ -881,8 +881,8 @@ func (_m *Store) GetRepoNameFallback(forgeID model.ForgeID, fullName string) (*m
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(model.ForgeID, string) error); ok {
-		r1 = rf(forgeID, fullName)
+	if rf, ok := ret.Get(1).(func(model.ForgeRemoteID, string) error); ok {
+		r1 = rf(remoteID, fullName)
 	} else {
 		r1 = ret.Error(1)
 	}

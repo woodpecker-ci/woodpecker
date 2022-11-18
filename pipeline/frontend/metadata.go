@@ -32,6 +32,13 @@ const (
 	EventManual = "manual"
 )
 
+// Different ways to handle failure states
+const (
+	FailureIgnore = "ignore"
+	FailureFail   = "fail"
+	// FailureCancel = "cancel" // Not implemented yet
+)
+
 type (
 	// Metadata defines runtime m.
 	Metadata struct {

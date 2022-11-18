@@ -28,6 +28,7 @@ type Step struct {
 	CPUSet       string            `json:"cpu_set,omitempty"`
 	OnFailure    bool              `json:"on_failure,omitempty"`
 	OnSuccess    bool              `json:"on_success,omitempty"`
+	Failure      string            `json:"failure,omitempty"`
 	AuthConfig   Auth              `json:"auth_config,omitempty"`
 	NetworkMode  string            `json:"network_mode,omitempty"`
 	IpcMode      string            `json:"ipc_mode,omitempty"`

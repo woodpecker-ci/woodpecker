@@ -1,16 +1,14 @@
 <template>
   <div v-if="pipelines" class="space-y-4">
-    <router-link
+    <PipelineItem
       v-for="pipeline in pipelines"
       :key="pipeline.id"
       :to="{
         name: 'repo-pipeline',
         params: { repoOwner: repo.owner, repoName: repo.name, pipelineId: pipeline.number },
       }"
-      class="flex"
-    >
-      <PipelineItem :pipeline="pipeline" />
-    </router-link>
+      :pipeline="pipeline"
+    />
     <Panel v-if="pipelines.length === 0">
       <span class="text-color">{{ $t('repo.pipeline.no_pipelines') }}</span>
     </Panel>
