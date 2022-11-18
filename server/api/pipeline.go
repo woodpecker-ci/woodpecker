@@ -400,7 +400,7 @@ func PostPipeline(c *gin.Context) {
 		return
 	}
 
-	// refresh the token to make sure, pipeline.ReStart can still obtain the pipeline config if nessessary again
+	// refresh the token to make sure, pipeline.ReStart can still obtain the pipeline config if necessary again
 	refreshUserToken(c, user)
 
 	// make Deploy overridable

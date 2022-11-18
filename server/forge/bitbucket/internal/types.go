@@ -158,7 +158,7 @@ type PullRequestHook struct {
 		Updated time.Time `json:"updated_on"`
 
 		Source struct {
-			Repo   Repo `json:"repsoitory"`
+			Repo   Repo `json:"repository"`
 			Commit struct {
 				Hash  string `json:"hash"`
 				Links Links  `json:"links"`
@@ -169,7 +169,7 @@ type PullRequestHook struct {
 		} `json:"source"`
 
 		Dest struct {
-			Repo   Repo `json:"repsoitory"`
+			Repo   Repo `json:"repository"`
 			Commit struct {
 				Hash  string `json:"hash"`
 				Links Links  `json:"links"`

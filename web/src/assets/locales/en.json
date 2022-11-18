@@ -53,6 +53,7 @@
             "success": "Repository enabled",
             "list_reloaded": "Repository list reloaded"
         },
+        "open_in_forge": "Open Repository in Version Control System",
         "settings": {
             "settings": "Settings",
             "not_allowed": "You are not allowed to access this repository's settings",
@@ -237,6 +238,19 @@
                 "deploy": "Deploy",
                 "cron": "Cron",
                 "manual": "Manual"
+            },
+            "status": {
+              "status": "Status: {status}",
+              "blocked": "blocked",
+              "pending": "pending",
+              "running": "running",
+              "started": "started",
+              "skipped": "skipped",
+              "success": "success",
+              "declined": "declined",
+              "error": "error",
+              "failure": "failure",
+              "killed": "killed"
             }
         }
     },

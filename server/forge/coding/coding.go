@@ -134,7 +134,7 @@ func (c *Coding) Auth(ctx context.Context, token, secret string) (string, error)
 
 // Refresh refreshes an oauth token and expiration for the given
 // user. It returns true if the token was refreshed, false if the
-// token was not refreshed, and error if it failed to refersh.
+// token was not refreshed, and error if it failed to refresh.
 func (c *Coding) Refresh(ctx context.Context, u *model.User) (bool, error) {
 	config := c.newConfig("")
 	source := config.TokenSource(c.newContext(ctx), &oauth2.Token{RefreshToken: u.Secret})
@@ -163,7 +163,7 @@ func (c *Coding) TeamPerm(u *model.User, org string) (*model.Perm, error) {
 }
 
 // Repo fetches the repository from the forge.
-func (c *Coding) Repo(ctx context.Context, u *model.User, _ model.ForgeID, owner, name string) (*model.Repo, error) {
+func (c *Coding) Repo(ctx context.Context, u *model.User, _ model.ForgeRemoteID, owner, name string) (*model.Repo, error) {
 	client := c.newClient(ctx, u)
 	project, err := client.GetProject(owner, name)
 	if err != nil {
@@ -295,7 +295,7 @@ func (c *Coding) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]
 	return []string{r.Branch}, nil
 }
 
-// BranchHead returns the sha of the head (lastest commit) of the specified branch
+// BranchHead returns the sha of the head (latest commit) of the specified branch
 func (c *Coding) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
 	// TODO(1138): missing implementation
 	return "", forge_types.ErrNotImplemented

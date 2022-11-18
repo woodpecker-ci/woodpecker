@@ -294,7 +294,7 @@ const HookPullRequest = `
 `
 
 // HookPullRequestInvalidAction is a sample hook pull request that has an
-// action not equal to synchrize or opened, and is expected to be ignored.
+// action not equal to synchronize or opened, and is expected to be ignored.
 const HookPullRequestInvalidAction = `
 {
   "action": "reopened",

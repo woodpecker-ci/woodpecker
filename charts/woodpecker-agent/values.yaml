@@ -85,7 +85,7 @@ tolerations: []
 affinity: {}
 
 ## Using topology spread constraints, you can ensure that there is at least one agent
-## pod for each topology zone, e.g. one per arch for for multi-architecture clusters
+## pod for each topology zone, e.g. one per arch for multi-architecture clusters
 ## or one for each region for geographically distributed cloud-hosted clusters.
 ## Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/
 topologySpreadConstraints: []
