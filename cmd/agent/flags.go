@@ -90,11 +90,11 @@ var flags = []cli.Flag{
 		Usage:   "enable healthcheck endpoint",
 		Value:   true,
 	},
-	&cli.IntFlag{
-		EnvVars: []string{"WOODPECKER_HEALTHCHECK_PORT"},
-		Name:    "healthcheck-port",
-		Usage:   "port used for healthcheck endpoint",
-		Value:   3000,
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_HEALTHCHECK_ADDR"},
+		Name:    "healthcheck-addr",
+		Usage:   "healthcheck endpoint address",
+		Value:   ":3000",
 	},
 	&cli.DurationFlag{
 		EnvVars: []string{"WOODPECKER_KEEPALIVE_TIME"},

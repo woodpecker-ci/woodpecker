@@ -3,7 +3,7 @@
     <input
       :id="`checkbox-${id}`"
       type="checkbox"
-      class="checkbox flex-shrink-0 relative border border-gray-400 dark:border-gray-600 cursor-pointer rounded-md transition-colors duration-150 w-5 h-5 checked:bg-lime-600 checked:border-lime-600 dark:checked:bg-lime-800 dark:checked:border-lime-800"
+      class="checkbox flex-shrink-0 relative border border-gray-400 dark:border-gray-600 cursor-pointer rounded-md transition-colors duration-150 w-5 h-5 checked:bg-lime-600 checked:border-lime-600 dark:checked:bg-lime-800 dark:checked:border-lime-800 focus-visible:border-gray-600 dark:focus-visible:border-gray-400"
       :checked="innerValue"
       @click="innerValue = !innerValue"
     />
