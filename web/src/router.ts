@@ -79,7 +79,7 @@ const routes: RouteRecordRaw[] = [
         props: true,
         children: [
           {
-            path: ':procId?',
+            path: ':stepId?',
             name: 'repo-pipeline',
             component: (): Component => import('~/views/repo/pipeline/Pipeline.vue'),
             props: true,
@@ -112,6 +112,20 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'build/:pipelineId',
         redirect: (route) => ({ name: 'repo-pipeline', params: route.params }),
+        children: [
+          {
+            path: ':procId?',
+            redirect: (route) => ({ name: 'repo-pipeline', params: route.params }),
+          },
+          {
+            path: 'changed-files',
+            redirect: (route) => ({ name: 'repo-pipeline-changed-files', params: route.params }),
+          },
+          {
+            path: 'config',
+            redirect: (route) => ({ name: 'repo-pipeline-config', params: route.params }),
+          },
+        ],
       },
     ],
   },

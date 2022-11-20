@@ -290,7 +290,7 @@ Example: `WOODPECKER_LIMIT_CPU_SET=1,2`
 
 ### `WOODPECKER_GITHUB_...`
 
-See [Github configuration](vcs/github/#configuration)
+See [GitHub configuration](vcs/github/#configuration)
 
 ### `WOODPECKER_GOGS_...`
 

@@ -9,6 +9,7 @@ import (
 	"github.com/rs/zerolog/log"
 
 	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/compiler/settings"
 )
@@ -20,8 +21,6 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 
 		workspace   = fmt.Sprintf("%s_default:%s", c.prefix, c.base)
 		privileged  = container.Privileged
-		entrypoint  = container.Entrypoint
-		command     = container.Command
 		networkMode = container.NetworkMode
 		ipcMode     = container.IpcMode
 		// network    = container.Network
@@ -85,26 +84,8 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		}
 	}
 
-	if len(container.Commands) != 0 {
-		if c.metadata.Sys.Platform == "windows/amd64" {
-			entrypoint = []string{"powershell", "-noprofile", "-noninteractive", "-command"}
-			command = []string{"[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($Env:CI_SCRIPT)) | iex"}
-			environment["CI_SCRIPT"] = generateScriptWindows(container.Commands)
-			environment["HOME"] = "c:\\root"
-			environment["SHELL"] = "powershell.exe"
-		} else {
-			entrypoint = []string{"/bin/sh", "-c"}
-			command = []string{"echo $CI_SCRIPT | base64 -d | /bin/sh -e"}
-			environment["CI_SCRIPT"] = generateScriptPosix(container.Commands)
-			environment["HOME"] = "/root"
-			environment["SHELL"] = "/bin/sh"
-		}
-	}
-
 	if matchImage(container.Image, c.escalated...) {
 		privileged = true
-		entrypoint = []string{}
-		command = []string{}
 	}
 
 	authConfig := backend.Auth{
@@ -159,6 +140,11 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 	// at least one constraint must include the status failure.
 	onFailure := container.When.IncludesStatus("failure")
 
+	failure := container.Failure
+	if container.Failure == "" {
+		failure = frontend.FailureFail
+	}
+
 	return &backend.Step{
 		Name:         name,
 		Alias:        container.Name,
@@ -169,8 +155,7 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		WorkingDir:   workingdir,
 		Environment:  environment,
 		Labels:       container.Labels,
-		Entrypoint:   entrypoint,
-		Command:      command,
+		Commands:     container.Commands,
 		ExtraHosts:   container.ExtraHosts,
 		Volumes:      volumes,
 		Tmpfs:        container.Tmpfs,
@@ -188,6 +173,7 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		AuthConfig:   authConfig,
 		OnSuccess:    onSuccess,
 		OnFailure:    onFailure,
+		Failure:      failure,
 		NetworkMode:  networkMode,
 		IpcMode:      ipcMode,
 	}

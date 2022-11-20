@@ -123,8 +123,8 @@ var flags = []cli.Flag{
 		Name:    "repo-link",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_REPO_REMOTE"},
-		Name:    "repo-remote-url",
+		EnvVars: []string{"CI_REPO_CLONE_URL", "CI_REPO_REMOTE"},
+		Name:    "repo-clone-url",
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"CI_REPO_PRIVATE"},
@@ -260,8 +260,8 @@ var flags = []cli.Flag{
 		Name:    "prev-commit-author-email",
 	},
 	&cli.IntFlag{
-		EnvVars: []string{"CI_JOB_NUMBER"},
-		Name:    "job-number",
+		EnvVars: []string{"CI_STEP_NUMBER", "CI_JOB_NUMBER"},
+		Name:    "step-number",
 	},
 	&cli.StringSliceFlag{
 		EnvVars: []string{"CI_ENV"},

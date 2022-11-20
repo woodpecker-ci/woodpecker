@@ -12,7 +12,7 @@ type Step struct {
 	Environment  map[string]string `json:"environment,omitempty"`
 	Labels       map[string]string `json:"labels,omitempty"`
 	Entrypoint   []string          `json:"entrypoint,omitempty"`
-	Command      []string          `json:"command,omitempty"`
+	Commands     []string          `json:"commands,omitempty"`
 	ExtraHosts   []string          `json:"extra_hosts,omitempty"`
 	Volumes      []string          `json:"volumes,omitempty"`
 	Tmpfs        []string          `json:"tmpfs,omitempty"`
@@ -28,6 +28,7 @@ type Step struct {
 	CPUSet       string            `json:"cpu_set,omitempty"`
 	OnFailure    bool              `json:"on_failure,omitempty"`
 	OnSuccess    bool              `json:"on_success,omitempty"`
+	Failure      string            `json:"failure,omitempty"`
 	AuthConfig   Auth              `json:"auth_config,omitempty"`
 	NetworkMode  string            `json:"network_mode,omitempty"`
 	IpcMode      string            `json:"ipc_mode,omitempty"`

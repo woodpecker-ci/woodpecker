@@ -79,8 +79,8 @@ var flags = []cli.Flag{
 		Usage:   "List of labels to filter tasks on. An agent must be assigned every tag listed in a task to be selected.",
 	},
 	&cli.IntFlag{
-		EnvVars: []string{"WOODPECKER_MAX_PROCS"},
-		Name:    "max-procs",
+		EnvVars: []string{"WOODPECKER_MAX_WORKFLOWS", "WOODPECKER_MAX_PROCS"},
+		Name:    "max-workflows",
 		Usage:   "agent parallel workflows",
 		Value:   1,
 	},
@@ -90,11 +90,11 @@ var flags = []cli.Flag{
 		Usage:   "enable healthcheck endpoint",
 		Value:   true,
 	},
-	&cli.IntFlag{
-		EnvVars: []string{"WOODPECKER_HEALTHCHECK_PORT"},
-		Name:    "healthcheck-port",
-		Usage:   "port used for healthcheck endpoint",
-		Value:   3000,
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_HEALTHCHECK_ADDR"},
+		Name:    "healthcheck-addr",
+		Usage:   "healthcheck endpoint address",
+		Value:   ":3000",
 	},
 	&cli.DurationFlag{
 		EnvVars: []string{"WOODPECKER_KEEPALIVE_TIME"},

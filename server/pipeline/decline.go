@@ -20,7 +20,6 @@ import (
 
 	"github.com/rs/zerolog/log"
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/shared"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
@@ -30,16 +29,16 @@ func Decline(ctx context.Context, store store.Store, pipeline *model.Pipeline, u
 		return nil, fmt.Errorf("cannot decline a pipeline with status %s", pipeline.Status)
 	}
 
-	_, err := shared.UpdateToStatusDeclined(store, *pipeline, user.Login)
+	_, err := UpdateToStatusDeclined(store, *pipeline, user.Login)
 	if err != nil {
 		return nil, fmt.Errorf("error updating pipeline. %s", err)
 	}
 
-	if pipeline.Procs, err = store.ProcList(pipeline); err != nil {
-		log.Error().Err(err).Msg("can not get proc list from store")
+	if pipeline.Steps, err = store.StepList(pipeline); err != nil {
+		log.Error().Err(err).Msg("can not get step list from store")
 	}
-	if pipeline.Procs, err = model.Tree(pipeline.Procs); err != nil {
-		log.Error().Err(err).Msg("can not build tree from proc list")
+	if pipeline.Steps, err = model.Tree(pipeline.Steps); err != nil {
+		log.Error().Err(err).Msg("can not build tree from step list")
 	}
 
 	if err := updatePipelineStatus(ctx, pipeline, repo, user); err != nil {

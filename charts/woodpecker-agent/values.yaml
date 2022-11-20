@@ -31,13 +31,27 @@ nameOverride: ""
 fullnameOverride: ""
 
 serviceAccount:
-  # Specifies whether a service account should be created
+  # Specifies whether a service account should be created (also see RBAC subsection)
   create: true
   # Annotations to add to the service account
   annotations: {}
   # The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
   name: ""
+  rbac:
+    # If your cluster has RBAC enabled and you're using the Kubernetes agent-
+    # backend you'll need this. (this is true for almost all production clusters)
+    # only change this if you have a non CNCF compliant cluster, missing the RBAC endpoints
+    # the Role and RoleBinding are only created if serviceAccount.create is also true
+    create: true
+    # additional annotations and labels in role and roleBinding are only needed, if you
+    # are using additional tooling to manage / verify roles or roleBindings (OPA, etc.)
+    role:
+      annotations: {}
+      labels: {}
+    roleBinding:
+      annotations: {}
+      labels: {}
 
 podAnnotations: {}
 
@@ -71,7 +85,7 @@ tolerations: []
 affinity: {}
 
 ## Using topology spread constraints, you can ensure that there is at least one agent
-## pod for each topology zone, e.g. one per arch for for multi-architecture clusters
+## pod for each topology zone, e.g. one per arch for multi-architecture clusters
 ## or one for each region for geographically distributed cloud-hosted clusters.
 ## Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/
 topologySpreadConstraints: []

@@ -36,7 +36,7 @@ type Pipeline struct {
 	Branch              string            `json:"branch"                  xorm:"pipeline_branch"`
 	Ref                 string            `json:"ref"                     xorm:"pipeline_ref"`
 	Refspec             string            `json:"refspec"                 xorm:"pipeline_refspec"`
-	Remote              string            `json:"remote"                  xorm:"pipeline_remote"`
+	CloneURL            string            `json:"clone_url"                  xorm:"pipeline_clone_url"`
 	Title               string            `json:"title"                   xorm:"pipeline_title"`
 	Message             string            `json:"message"                 xorm:"TEXT 'pipeline_message'"`
 	Timestamp           int64             `json:"timestamp"               xorm:"pipeline_timestamp"`
@@ -48,7 +48,7 @@ type Pipeline struct {
 	Verified            bool              `json:"verified"                xorm:"pipeline_verified"` // deprecate
 	Reviewer            string            `json:"reviewed_by"             xorm:"pipeline_reviewer"`
 	Reviewed            int64             `json:"reviewed_at"             xorm:"pipeline_reviewed"`
-	Procs               []*Proc           `json:"procs,omitempty"         xorm:"-"`
+	Steps               []*Step           `json:"steps,omitempty"         xorm:"-"`
 	Files               []*File           `json:"files,omitempty"         xorm:"-"`
 	ChangedFiles        []string          `json:"changed_files,omitempty" xorm:"json 'changed_files'"`
 	AdditionalVariables map[string]string `json:"variables,omitempty"     xorm:"json 'additional_variables'"`

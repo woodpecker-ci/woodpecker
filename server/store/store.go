@@ -46,10 +46,10 @@ type Store interface {
 	// Repos
 	// GetRepo gets a repo by unique ID.
 	GetRepo(int64) (*model.Repo, error)
-	// GetRepoRemoteID gets a repo by its remote ID.
-	GetRepoRemoteID(model.RemoteID) (*model.Repo, error)
-	// GetRepoNameFallback gets the repo by its remote ID and if this doesn't exist by its full name.
-	GetRepoNameFallback(remoteID model.RemoteID, fullName string) (*model.Repo, error)
+	// GetRepoForgeID gets a repo by its forge ID.
+	GetRepoForgeID(model.ForgeRemoteID) (*model.Repo, error)
+	// GetRepoNameFallback gets the repo by its forge ID and if this doesn't exist by its full name.
+	GetRepoNameFallback(remoteID model.ForgeRemoteID, fullName string) (*model.Repo, error)
 	// GetRepoName gets a repo by its full name.
 	GetRepoName(string) (*model.Repo, error)
 	// GetRepoCount gets a count of all repositories in the system.
@@ -91,8 +91,8 @@ type Store interface {
 	GetPipelineQueue() ([]*model.Feed, error)
 	// GetPipelineCount gets a count of all pipelines in the system.
 	GetPipelineCount() (int64, error)
-	// CreatePipeline creates a new pipeline and jobs.
-	CreatePipeline(*model.Pipeline, ...*model.Proc) error
+	// CreatePipeline creates a new pipeline and steps.
+	CreatePipeline(*model.Pipeline, ...*model.Step) error
 	// UpdatePipeline updates a pipeline.
 	UpdatePipeline(*model.Pipeline) error
 
@@ -130,32 +130,32 @@ type Store interface {
 	GlobalSecretFind(string) (*model.Secret, error)
 	GlobalSecretList() ([]*model.Secret, error)
 
-	// Registrys
+	// Registries
 	RegistryFind(*model.Repo, string) (*model.Registry, error)
 	RegistryList(*model.Repo) ([]*model.Registry, error)
 	RegistryCreate(*model.Registry) error
 	RegistryUpdate(*model.Registry) error
 	RegistryDelete(repo *model.Repo, addr string) error
 
-	// Procs
-	ProcLoad(int64) (*model.Proc, error)
-	ProcFind(*model.Pipeline, int) (*model.Proc, error)
-	ProcChild(*model.Pipeline, int, string) (*model.Proc, error)
-	ProcList(*model.Pipeline) ([]*model.Proc, error)
-	ProcCreate([]*model.Proc) error
-	ProcUpdate(*model.Proc) error
-	ProcClear(*model.Pipeline) error
+	// Steps
+	StepLoad(int64) (*model.Step, error)
+	StepFind(*model.Pipeline, int) (*model.Step, error)
+	StepChild(*model.Pipeline, int, string) (*model.Step, error)
+	StepList(*model.Pipeline) ([]*model.Step, error)
+	StepCreate([]*model.Step) error
+	StepUpdate(*model.Step) error
+	StepClear(*model.Pipeline) error
 
 	// Logs
-	LogFind(*model.Proc) (io.ReadCloser, error)
-	// TODO: since we do ReadAll in any case a ioReader is not the best idear
+	LogFind(*model.Step) (io.ReadCloser, error)
+	// TODO: since we do ReadAll in any case a ioReader is not the best idea
 	// so either find a way to write log in chunks by xorm ...
-	LogSave(*model.Proc, io.Reader) error
+	LogSave(*model.Step, io.Reader) error
 
 	// Files
 	FileList(*model.Pipeline) ([]*model.File, error)
-	FileFind(*model.Proc, string) (*model.File, error)
-	FileRead(*model.Proc, string) (io.ReadCloser, error)
+	FileFind(*model.Step, string) (*model.File, error)
+	FileRead(*model.Step, string) (io.ReadCloser, error)
 	FileCreate(*model.File, io.Reader) error
 
 	// Tasks
