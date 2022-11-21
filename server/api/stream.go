@@ -85,8 +85,7 @@ func EventStreamSSE(c *gin.Context) {
 				log.Trace().Msgf("pubsub subscribe recover return: %v", obj)
 			}()
 			name := m.Labels["repo"]
-			priv := m.Labels["private"]
-			if repo[name] || priv == "false" {
+			if repo[name] {
 				select {
 				case <-ctx.Done():
 					return
