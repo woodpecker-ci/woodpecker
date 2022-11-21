@@ -52,5 +52,8 @@ var DefaultTracer = TraceFunc(func(state *State) error {
 		state.Pipeline.Step.Environment["CI_BUILD_STATUS"] = "failure"
 		state.Pipeline.Step.Environment["CI_JOB_STATUS"] = "failure"
 	}
+
+	SetDroneEnviron(state.Pipeline.Step.Environment)
+
 	return nil
 })

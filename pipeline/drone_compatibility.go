@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package frontend
+package pipeline
 
-// setDroneEnviron set dedicated to DroneCI environment vars as compatibility layer
-func (m *Metadata) setDroneEnviron(env map[string]string) {
+// SetDroneEnviron set dedicated to DroneCI environment vars as compatibility
+// layer. Main purpose is to be compatible with drone plugins.
+func SetDroneEnviron(env map[string]string) {
 	// webhook
 	env["DRONE_BRANCH"] = env["CI_COMMIT_BRANCH"]
 	env["DRONE_PULL_REQUEST"] = env["CI_COMMIT_PULL_REQUEST"]
