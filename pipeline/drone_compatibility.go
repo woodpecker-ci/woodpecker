@@ -18,44 +18,54 @@ package pipeline
 // layer. Main purpose is to be compatible with drone plugins.
 func SetDroneEnviron(env map[string]string) {
 	// webhook
-	env["DRONE_BRANCH"] = env["CI_COMMIT_BRANCH"]
-	env["DRONE_PULL_REQUEST"] = env["CI_COMMIT_PULL_REQUEST"]
-	env["DRONE_TAG"] = env["CI_COMMIT_TAG"]
-	env["DRONE_SOURCE_BRANCH"] = env["CI_COMMIT_SOURCE_BRANCH"]
-	env["DRONE_TARGET_BRANCH"] = env["CI_COMMIT_TARGET_BRANCH"]
+	copy("CI_COMMIT_BRANCH", "DRONE_BRANCH", env)
+	copy("CI_COMMIT_PULL_REQUEST", "DRONE_PULL_REQUEST", env)
+	copy("CI_COMMIT_TAG", "DRONE_TAG", env)
+	copy("CI_COMMIT_SOURCE_BRANCH", "DRONE_SOURCE_BRANCH", env)
+	copy("CI_COMMIT_TARGET_BRANCH", "DRONE_TARGET_BRANCH", env)
 	// pipeline
-	env["DRONE_BUILD_NUMBER"] = env["CI_PIPELINE_NUMBER"]
-	env["DRONE_BUILD_PARENT"] = env["CI_PIPELINE_PARENT"]
-	env["DRONE_BUILD_EVENT"] = env["CI_PIPELINE_EVENT"]
-	env["DRONE_BUILD_STATUS"] = env["CI_PIPELINE_STATUS"]
-	env["DRONE_BUILD_LINK"] = env["CI_PIPELINE_LINK"]
-	env["DRONE_BUILD_CREATED"] = env["CI_PIPELINE_CREATED"]
-	env["DRONE_BUILD_STARTED"] = env["CI_PIPELINE_STARTED"]
-	env["DRONE_BUILD_FINISHED"] = env["CI_PIPELINE_FINISHED"]
+	copy("CI_PIPELINE_NUMBER", "DRONE_BUILD_NUMBER", env)
+	copy("CI_PIPELINE_PARENT", "DRONE_BUILD_PARENT", env)
+	copy("CI_PIPELINE_EVENT", "DRONE_BUILD_EVENT", env)
+	copy("CI_PIPELINE_STATUS", "DRONE_BUILD_STATUS", env)
+	copy("CI_PIPELINE_LINK", "DRONE_BUILD_LINK", env)
+	copy("CI_PIPELINE_CREATED", "DRONE_BUILD_CREATED", env)
+	copy("CI_PIPELINE_STARTED", "DRONE_BUILD_STARTED", env)
+	copy("CI_PIPELINE_FINISHED", "DRONE_BUILD_FINISHED", env)
 	// commit
-	env["DRONE_COMMIT"] = env["CI_COMMIT_SHA"]
-	env["DRONE_COMMIT_SHA"] = env["CI_COMMIT_SHA"]
-	env["DRONE_COMMIT_BEFORE"] = env["CI_PREV_COMMIT_SHA"]
-	env["DRONE_COMMIT_REF"] = env["CI_COMMIT_REF"]
-	env["DRONE_COMMIT_BRANCH"] = env["CI_COMMIT_BRANCH"]
-	env["DRONE_COMMIT_LINK"] = env["CI_COMMIT_LINK"]
-	env["DRONE_COMMIT_MESSAGE"] = env["CI_COMMIT_MESSAGE"]
-	env["DRONE_COMMIT_AUTHOR"] = env["CI_COMMIT_AUTHOR"]
-	env["DRONE_COMMIT_AUTHOR_NAME"] = env["CI_COMMIT_AUTHOR"]
-	env["DRONE_COMMIT_AUTHOR_EMAIL"] = env["CI_COMMIT_AUTHOR_EMAIL"]
-	env["DRONE_COMMIT_AUTHOR_AVATAR"] = env["CI_COMMIT_AUTHOR_AVATAR"]
+	copy("CI_COMMIT_SHA", "DRONE_COMMIT", env)
+	copy("CI_COMMIT_SHA", "DRONE_COMMIT_SHA", env)
+	copy("CI_PREV_COMMIT_SHA", "DRONE_COMMIT_BEFORE", env)
+	copy("CI_COMMIT_REF", "DRONE_COMMIT_REF", env)
+	copy("CI_COMMIT_BRANCH", "DRONE_COMMIT_BRANCH", env)
+	copy("CI_COMMIT_LINK", "DRONE_COMMIT_LINK", env)
+	copy("CI_COMMIT_MESSAGE", "DRONE_COMMIT_MESSAGE", env)
+	copy("CI_COMMIT_AUTHOR", "DRONE_COMMIT_AUTHOR", env)
+	copy("CI_COMMIT_AUTHOR", "DRONE_COMMIT_AUTHOR_NAME", env)
+	copy("CI_COMMIT_AUTHOR_EMAIL", "DRONE_COMMIT_AUTHOR_EMAIL", env)
+	copy("CI_COMMIT_AUTHOR_AVATAR", "DRONE_COMMIT_AUTHOR_AVATAR", env)
 	// repo
-	env["DRONE_REPO"] = env["CI_REPO"]
-	env["DRONE_REPO_SCM"] = env["CI_REPO_SCM"]
-	env["DRONE_REPO_OWNER"] = env["CI_REPO_OWNER"]
-	env["DRONE_REPO_NAME"] = env["CI_REPO_NAME"]
-	env["DRONE_REPO_LINK"] = env["CI_REPO_LINK"]
-	env["DRONE_REPO_BRANCH"] = env["CI_REPO_DEFAULT_BRANCH"]
-	env["DRONE_REPO_PRIVATE"] = env["CI_REPO_PRIVATE"]
+	copy("CI_REPO", "DRONE_REPO", env)
+	copy("CI_REPO_SCM", "DRONE_REPO_SCM", env)
+	copy("CI_REPO_OWNER", "DRONE_REPO_OWNER", env)
+	copy("CI_REPO_NAME", "DRONE_REPO_NAME", env)
+	copy("CI_REPO_LINK", "DRONE_REPO_LINK", env)
+	copy("CI_REPO_DEFAULT_BRANCH", "DRONE_REPO_BRANCH", env)
+	copy("CI_REPO_PRIVATE", "DRONE_REPO_PRIVATE", env)
 	// clone
-	env["DRONE_REMOTE_URL"] = env["CI_REPO_CLONE_URL"]
-	env["DRONE_GIT_HTTP_URL"] = env["CI_REPO_CLONE_URL"]
+	copy("CI_REPO_CLONE_URL", "DRONE_REMOTE_URL", env)
+	copy("CI_REPO_CLONE_URL", "DRONE_GIT_HTTP_URL", env)
 	// misc
-	env["DRONE_SYSTEM_HOST"] = env["CI_SYSTEM_HOST"]
-	env["DRONE_STEP_NUMBER"] = env["CI_STEP_NUMBER"]
+	copy("CI_SYSTEM_HOST", "DRONE_SYSTEM_HOST", env)
+	copy("CI_STEP_NUMBER", "DRONE_STEP_NUMBER", env)
+}
+
+func copy(woodpecker, drone string, env map[string]string) {
+	var present bool
+	var value string
+
+	value, present = env[woodpecker]
+	if present {
+		env[drone] = value
+	}
 }
