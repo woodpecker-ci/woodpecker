@@ -30,6 +30,7 @@ type WoodpeckerClient interface {
 	Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*Empty, error)
 	Upload(ctx context.Context, in *UploadRequest, opts ...grpc.CallOption) (*Empty, error)
 	Log(ctx context.Context, in *LogRequest, opts ...grpc.CallOption) (*Empty, error)
+	Info(ctx context.Context, in *InfoRequest, opts ...grpc.CallOption) (*InfoReply, error)
 }
 
 type woodpeckerClient struct {
@@ -112,6 +113,15 @@ func (c *woodpeckerClient) Log(ctx context.Context, in *LogRequest, opts ...grpc
 	return out, nil
 }
 
+func (c *woodpeckerClient) Info(ctx context.Context, in *InfoRequest, opts ...grpc.CallOption) (*InfoReply, error) {
+	out := new(InfoReply)
+	err := c.cc.Invoke(ctx, "/proto.Woodpecker/Info", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // WoodpeckerServer is the server API for Woodpecker service.
 // All implementations must embed UnimplementedWoodpeckerServer
 // for forward compatibility
@@ -124,6 +134,7 @@ type WoodpeckerServer interface {
 	Update(context.Context, *UpdateRequest) (*Empty, error)
 	Upload(context.Context, *UploadRequest) (*Empty, error)
 	Log(context.Context, *LogRequest) (*Empty, error)
+	Info(context.Context, *InfoRequest) (*InfoReply, error)
 	mustEmbedUnimplementedWoodpeckerServer()
 }
 
@@ -154,6 +165,9 @@ func (UnimplementedWoodpeckerServer) Upload(context.Context, *UploadRequest) (*E
 }
 func (UnimplementedWoodpeckerServer) Log(context.Context, *LogRequest) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Log not implemented")
+}
+func (UnimplementedWoodpeckerServer) Info(context.Context, *InfoRequest) (*InfoReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Info not implemented")
 }
 func (UnimplementedWoodpeckerServer) mustEmbedUnimplementedWoodpeckerServer() {}
 
@@ -312,6 +326,24 @@ func _Woodpecker_Log_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Woodpecker_Info_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(InfoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WoodpeckerServer).Info(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.Woodpecker/Info",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WoodpeckerServer).Info(ctx, req.(*InfoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Woodpecker_ServiceDesc is the grpc.ServiceDesc for Woodpecker service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -350,6 +382,10 @@ var Woodpecker_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Log",
 			Handler:    _Woodpecker_Log_Handler,
+		},
+		{
+			MethodName: "Info",
+			Handler:    _Woodpecker_Info_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

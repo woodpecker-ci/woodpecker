@@ -320,6 +320,7 @@ func (r *Runner) Run(ctx context.Context) error {
 		return nil
 	})
 
+	// crate func to kill still running worflow if r.client.Info tell us it got cancled
 	err = pipeline.New(work.Config,
 		pipeline.WithContext(ctx),
 		pipeline.WithLogger(defaultLogger),

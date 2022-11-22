@@ -46,6 +46,9 @@ type Peer interface {
 	// Next returns the next pipeline in the queue.
 	Next(c context.Context, f Filter) (*Pipeline, error)
 
+	// Info get the current workflow
+	// Info(c context.Context, id string) (*Pipeline, error)
+
 	// Wait blocks until the pipeline is complete.
 	Wait(c context.Context, id string) error
 

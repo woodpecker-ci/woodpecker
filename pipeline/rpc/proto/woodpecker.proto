@@ -61,6 +61,7 @@ service Woodpecker {
   rpc Update (UpdateRequest) returns (Empty) {}
   rpc Upload (UploadRequest) returns (Empty) {}
   rpc Log    (LogRequest)    returns (Empty) {}
+  rpc Info   (InfoRequest)   returns (InfoReply) {}
 }
 
 service Health {
@@ -110,6 +111,14 @@ message UpdateRequest {
 message LogRequest {
   string id = 1;
   Line   line = 2;
+}
+
+message InfoRequest {
+  string id = 1;
+}
+
+message InfoReply {
+  Pipeline pipeline = 1;
 }
 
 message Empty {
