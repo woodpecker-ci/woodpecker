@@ -179,7 +179,7 @@ func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 
 			logger.Debug().
 				Str("Step", step.Name).
-				Msgf("environment after SetDroneEnviron(): %s", step.Environment)
+				Msg("Executing")
 
 			processState, err := r.exec(step)
 
