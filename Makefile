@@ -20,15 +20,13 @@ endif
 
 LDFLAGS := -s -w -extldflags "-static" -X github.com/woodpecker-ci/woodpecker/version.Version=${BUILD_VERSION}
 CGO_ENABLED ?= 1 # only used to compile server
-CGO_CFLAGS ?=
 
 HAS_GO = $(shell hash go > /dev/null 2>&1 && echo "GO" || echo "NOGO" )
-ifeq ($(HAS_GO), GO)
+ifeq ($(HAS_GO),GO)
 	XGO_VERSION ?= go-1.18.x
-	ifeq ($(CGO_ENABLED), 1)
-		CGO_CFLAGS ?= $(shell $(GO) env CGO_CFLAGS)
-	endif
+	CGO_CFLAGS ?= $(shell go env CGO_CFLAGS)
 endif
+CGO_CFLAGS ?=
 
 # If the first argument is "in_docker"...
 ifeq (in_docker,$(firstword $(MAKECMDGOALS)))
