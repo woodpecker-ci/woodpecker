@@ -10,9 +10,9 @@
     "style": "mkdir -p dist/theme/ && cp src/theme/style.css dist/theme/style.css"
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "^2.1.0",
-    "@docusaurus/theme-classic": "^2.1.0",
-    "@docusaurus/types": "^2.1.0",
+    "@docusaurus/module-type-aliases": "^2.2.0",
+    "@docusaurus/theme-classic": "^2.2.0",
+    "@docusaurus/types": "^2.2.0",
     "@tsconfig/docusaurus": "^1.0.6",
     "@types/marked": "^4.0.7",
     "@types/node": "^18.11.2",

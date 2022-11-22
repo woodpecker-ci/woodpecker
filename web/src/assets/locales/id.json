@@ -68,6 +68,7 @@
     }
   },
   "password": "Kata sandi",
+  "pipeline_feed": "Umpan jalur pipa",
   "repo": {
     "activity": "Aktivitas",
     "add": "Tambahkan repositori",

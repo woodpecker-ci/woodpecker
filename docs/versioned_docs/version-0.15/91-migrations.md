@@ -55,7 +55,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 
 - Plugin Settings moved into `settings` section:
   ```diff
-   pipline:
+   pipeline:
    something:
      image: my/plugin
   -  setting1: foo

@@ -18,6 +18,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
@@ -78,7 +79,12 @@ var counter = &agent.State{
 // handles pinging the endpoint and returns an error if the
 // agent is in an unhealthy state.
 func pinger(c *cli.Context) error {
-	resp, err := http.Get("http://localhost:3000/healthz")
+	healthcheckAddress := c.String("healthcheck-addr")
+	if strings.HasPrefix(healthcheckAddress, ":") {
+		// this seems sufficient according to https://pkg.go.dev/net#Dial
+		healthcheckAddress = "localhost" + healthcheckAddress
+	}
+	resp, err := http.Get("http://" + healthcheckAddress + "/healthz")
 	if err != nil {
 		return err
 	}
