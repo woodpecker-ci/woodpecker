@@ -23,6 +23,7 @@ import (
 var feedItemSelect = `repos.repo_owner as feed_repo_owner,
 repos.repo_name as feed_repo_name,
 repos.repo_full_name as feed_repo_full_name,
+pipelines.pipeline_id as feed_pipeline_id,
 pipelines.pipeline_number as feed_pipeline_number,
 pipelines.pipeline_event as feed_pipeline_event,
 pipelines.pipeline_status as feed_pipeline_status,

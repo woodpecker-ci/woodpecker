@@ -65,6 +65,7 @@
             "success": "Repository enabled",
             "list_reloaded": "Repository list reloaded"
         },
+        "open_in_forge": "Open Repository in Version Control System",
         "settings": {
             "settings": "Settings",
             "not_allowed": "You are not allowed to access this repository's settings",

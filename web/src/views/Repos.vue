@@ -12,8 +12,7 @@
       <ListItem
         v-for="repo in searchedRepos"
         :key="repo.id"
-        clickable
-        @click="$router.push({ name: 'repo', params: { repoName: repo.name, repoOwner: repo.owner } })"
+        :to="{ name: 'repo', params: { repoName: repo.name, repoOwner: repo.owner } }"
       >
         <span class="text-color">{{ `${repo.owner} / ${repo.name}` }}</span>
       </ListItem>

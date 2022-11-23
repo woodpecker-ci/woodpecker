@@ -13,8 +13,7 @@
         v-for="repo in searchedRepos"
         :key="repo.id"
         class="items-center"
-        :clickable="repo.active"
-        @click="repo.active && $router.push({ name: 'repo', params: { repoOwner: repo.owner, repoName: repo.name } })"
+        :to="repo.active ? { name: 'repo', params: { repoOwner: repo.owner, repoName: repo.name } } : undefined"
       >
         <span class="text-color">{{ repo.full_name }}</span>
         <span v-if="repo.active" class="ml-auto text-color-alt">{{ $t('repo.enable.enabled') }}</span>

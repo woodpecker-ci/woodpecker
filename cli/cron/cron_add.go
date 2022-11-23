@@ -13,7 +13,7 @@ import (
 
 var cronCreateCmd = &cli.Command{
 	Name:      "add",
-	Usage:     "adds a cron",
+	Usage:     "add a cron job",
 	ArgsUsage: "[repo/name]",
 	Action:    cronCreate,
 	Flags: append(common.GlobalFlags,

@@ -50,16 +50,16 @@ func convertStatus(status model.StatusValue) string {
 // structure to the common Woodpecker repository structure.
 func convertRepo(from *internal.Repo) *model.Repo {
 	repo := model.Repo{
-		ForgeID:      model.ForgeID(from.UUID),
-		Clone:        cloneLink(from),
-		Owner:        strings.Split(from.FullName, "/")[0],
-		Name:         strings.Split(from.FullName, "/")[1],
-		FullName:     from.FullName,
-		Link:         from.Links.HTML.Href,
-		IsSCMPrivate: from.IsPrivate,
-		Avatar:       from.Owner.Links.Avatar.Href,
-		SCMKind:      model.SCMKind(from.Scm),
-		Branch:       "master",
+		ForgeRemoteID: model.ForgeRemoteID(from.UUID),
+		Clone:         cloneLink(from),
+		Owner:         strings.Split(from.FullName, "/")[0],
+		Name:          strings.Split(from.FullName, "/")[1],
+		FullName:      from.FullName,
+		Link:          from.Links.HTML.Href,
+		IsSCMPrivate:  from.IsPrivate,
+		Avatar:        from.Owner.Links.Avatar.Href,
+		SCMKind:       model.SCMKind(from.Scm),
+		Branch:        "master",
 	}
 	if repo.SCMKind == model.RepoHg {
 		repo.Branch = "default"

@@ -52,7 +52,7 @@ func (s storage) permUpsert(sess *xorm.Session, perm *model.Perm) error {
 
 	// lookup repo based on name or forge ID if possible
 	if perm.RepoID == 0 && perm.Repo != nil {
-		r, err := s.getRepoNameFallback(sess, perm.Repo.ForgeID, perm.Repo.FullName)
+		r, err := s.getRepoNameFallback(sess, perm.Repo.ForgeRemoteID, perm.Repo.FullName)
 		if err != nil {
 			return err
 		}
