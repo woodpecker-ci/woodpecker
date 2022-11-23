@@ -30,7 +30,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
 )
 
-func (r *Runner) createLogger(logger zerolog.Logger, ctxmeta context.Context, uploads sync.WaitGroup, work *rpc.Pipeline) pipeline.LogFunc {
+func (r *Runner) createLogger(logger zerolog.Logger, ctxmeta context.Context, uploads *sync.WaitGroup, work *rpc.Pipeline) pipeline.LogFunc {
 	return func(step *backend.Step, rc multipart.Reader) error {
 		loglogger := logger.With().
 			Str("image", step.Image).
