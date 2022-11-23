@@ -316,6 +316,7 @@ func (r *Runner) Run(ctx context.Context) error {
 			state.Pipeline.Step.Environment["CI_BUILD_STATUS"] = "failure"
 			state.Pipeline.Step.Environment["CI_JOB_STATUS"] = "failure"
 		}
+
 		return nil
 	})
 
