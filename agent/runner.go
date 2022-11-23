@@ -175,6 +175,7 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 	logger.Debug().
 		Str("error", state.Error).
 		Int("exit_code", state.ExitCode).
+		Bool("canceled", canceled.IsSet()).
 		Msg("pipeline complete")
 
 	logger.Debug().Msg("uploading logs")
