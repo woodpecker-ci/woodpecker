@@ -2,6 +2,7 @@ package pipeline
 
 import (
 	"context"
+	"errors"
 	"strings"
 	"sync"
 	"time"
@@ -190,7 +191,7 @@ func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 
 			// if we got a nil process but an error state
 			// then we need to log the internal error to the step.
-			if r.logger != nil && err != nil && processState == nil {
+			if r.logger != nil && err != nil && !errors.Is(err, ErrCancel) && processState == nil {
 				_ = r.logger.Log(step, multipart.New(strings.NewReader(
 					"Backend engine error while running step: "+err.Error(),
 				)))
@@ -247,6 +248,9 @@ func (r *Runtime) exec(step *backend.Step) (*backend.State, error) {
 	wg.Wait()
 	waitState, err := r.engine.Wait(r.ctx, step)
 	if err != nil {
+		if errors.Is(err, context.Canceled) {
+			return waitState, ErrCancel
+		}
 		return nil, err
 	}
 
