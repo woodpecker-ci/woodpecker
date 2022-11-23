@@ -155,7 +155,7 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 			"Repo":     repoName,
 			"Pipeline": pipelineNumber,
 		}),
-	).Run()
+	).Run(runnerCtx)
 
 	state.Finished = time.Now().Unix()
 	state.Exited = true

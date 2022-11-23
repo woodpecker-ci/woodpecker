@@ -69,7 +69,7 @@ func (r *Runtime) MakeLogger() zerolog.Logger {
 }
 
 // Starts the execution of the pipeline and waits for it to complete
-func (r *Runtime) Run() error {
+func (r *Runtime) Run(runnerCtx context.Context) error {
 	logger := r.MakeLogger()
 	logger.Debug().Msgf("Executing %d stages, in order of:", len(r.spec.Stages))
 	for _, stage := range r.spec.Stages {
@@ -85,7 +85,7 @@ func (r *Runtime) Run() error {
 	}
 
 	defer func() {
-		if err := r.engine.Destroy(r.ctx, r.spec); err != nil {
+		if err := r.engine.Destroy(runnerCtx, r.spec); err != nil {
 			logger.Error().Err(err).Msg("could not destroy engine")
 		}
 	}()
