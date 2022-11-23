@@ -17,6 +17,7 @@ package agent
 
 import (
 	"context"
+	"errors"
 	"sync"
 	"time"
 
@@ -159,16 +160,23 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 
 	state.Finished = time.Now().Unix()
 	state.Exited = true
-	if err != nil {
-		switch xerr := err.(type) {
-		case *pipeline.ExitError:
-			state.ExitCode = xerr.Code
-		default:
-			state.ExitCode = 1
-			state.Error = err.Error()
-		}
-		if canceled.IsSet() {
-			state.ExitCode = 137
+
+	if canceled.IsSet() {
+		state.Error = ""
+		state.ExitCode = 137
+	} else {
+		if err != nil {
+			pExitError := &pipeline.ExitError{}
+			if errors.As(err, &pExitError) {
+				state.ExitCode = pExitError.Code
+			} else if errors.Is(err, pipeline.ErrCancel) {
+				state.Error = ""
+				state.ExitCode = 137
+				canceled.SetTo(true)
+			} else {
+				state.ExitCode = 1
+				state.Error = err.Error()
+			}
 		}
 	}
 
