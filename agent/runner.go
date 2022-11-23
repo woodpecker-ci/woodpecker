@@ -179,9 +179,7 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 		Msg("pipeline complete")
 
 	logger.Debug().Msg("uploading logs")
-
 	uploads.Wait()
-
 	logger.Debug().Msg("uploading logs complete")
 
 	logger.Debug().
