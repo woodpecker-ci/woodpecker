@@ -26,7 +26,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
 )
 
-func (r *Runner) createTracer(logger zerolog.Logger, ctxmeta context.Context, work *rpc.Pipeline) pipeline.TraceFunc {
+func (r *Runner) createTracer(ctxmeta context.Context, logger zerolog.Logger, work *rpc.Pipeline) pipeline.TraceFunc {
 	return func(state *pipeline.State) error {
 		steplogger := logger.With().
 			Str("image", state.Pipeline.Step.Image).
