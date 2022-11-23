@@ -296,20 +296,20 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 
 // Done implements the rpc.Done function
 func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
-	stepID, err := strconv.ParseInt(id, 10, 64)
+	workflowID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		return err
 	}
 
-	step, err := s.store.StepLoad(stepID)
+	workflow, err := s.store.StepLoad(workflowID)
 	if err != nil {
-		log.Error().Msgf("error: cannot find step with id %d: %s", stepID, err)
+		log.Error().Msgf("error: cannot find step with id %d: %s", workflowID, err)
 		return err
 	}
 
-	currentPipeline, err := s.store.GetPipeline(step.PipelineID)
+	currentPipeline, err := s.store.GetPipeline(workflow.PipelineID)
 	if err != nil {
-		log.Error().Msgf("error: cannot find pipeline with id %d: %s", step.PipelineID, err)
+		log.Error().Msgf("error: cannot find pipeline with id %d: %s", workflow.PipelineID, err)
 		return err
 	}
 
@@ -325,36 +325,36 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 		Str("step_id", id).
 		Msgf("gRPC Done with state: %#v", state)
 
-	if step, err = pipeline.UpdateStepStatusToDone(s.store, *step, state); err != nil {
-		log.Error().Msgf("error: done: cannot update step_id %d state: %s", step.ID, err)
+	if workflow, err = pipeline.UpdateStepStatusToDone(s.store, *workflow, state); err != nil {
+		log.Error().Msgf("error: done: cannot update step_id %d state: %s", workflow.ID, err)
 	}
 
 	var queueErr error
-	if step.Failing() {
+	if workflow.Failing() {
 		queueErr = s.queue.Error(c, id, fmt.Errorf("Step finished with exitcode %d, %s", state.ExitCode, state.Error))
 	} else {
-		queueErr = s.queue.Done(c, id, step.State)
+		queueErr = s.queue.Done(c, id, workflow.State)
 	}
 	if queueErr != nil {
-		log.Error().Msgf("error: done: cannot ack step_id %d: %s", stepID, err)
+		log.Error().Msgf("error: done: cannot ack step_id %d: %s", workflowID, err)
 	}
 
 	steps, err := s.store.StepList(currentPipeline)
 	if err != nil {
 		return err
 	}
-	s.completeChildrenIfParentCompleted(steps, step)
+	s.completeChildrenIfParentCompleted(steps, workflow)
 
 	if !model.IsThereRunningStage(steps) {
-		if currentPipeline, err = pipeline.UpdateStatusToDone(s.store, *currentPipeline, model.PipelineStatus(steps), step.Stopped); err != nil {
+		if currentPipeline, err = pipeline.UpdateStatusToDone(s.store, *currentPipeline, model.PipelineStatus(steps), workflow.Stopped); err != nil {
 			log.Error().Err(err).Msgf("error: done: cannot update build_id %d final state", currentPipeline.ID)
 		}
 	}
 
-	s.updateForgeStatus(c, repo, currentPipeline, step)
+	s.updateForgeStatus(c, repo, currentPipeline, workflow)
 
 	if err := s.logger.Close(c, id); err != nil {
-		log.Error().Err(err).Msgf("done: cannot close build_id %d logger", step.ID)
+		log.Error().Err(err).Msgf("done: cannot close build_id %d logger", workflow.ID)
 	}
 
 	if err := s.notify(c, repo, currentPipeline, steps); err != nil {
@@ -366,7 +366,7 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 		s.pipelineTime.WithLabelValues(repo.FullName, currentPipeline.Branch, string(currentPipeline.Status), "total").Set(float64(currentPipeline.Finished - currentPipeline.Started))
 	}
 	if model.IsMultiPipeline(steps) {
-		s.pipelineTime.WithLabelValues(repo.FullName, currentPipeline.Branch, string(step.State), step.Name).Set(float64(step.Stopped - step.Started))
+		s.pipelineTime.WithLabelValues(repo.FullName, currentPipeline.Branch, string(workflow.State), workflow.Name).Set(float64(workflow.Stopped - workflow.Started))
 	}
 
 	return nil
@@ -382,10 +382,10 @@ func (s *RPC) Log(c context.Context, id string, line *rpc.Line) error {
 	return nil
 }
 
-func (s *RPC) completeChildrenIfParentCompleted(steps []*model.Step, completedStep *model.Step) {
+func (s *RPC) completeChildrenIfParentCompleted(steps []*model.Step, completedWorkflow *model.Step) {
 	for _, p := range steps {
-		if p.Running() && p.PPID == completedStep.PID {
-			if _, err := pipeline.UpdateStepToStatusSkipped(s.store, *p, completedStep.Stopped); err != nil {
+		if p.Running() && p.PPID == completedWorkflow.PID {
+			if _, err := pipeline.UpdateStepToStatusSkipped(s.store, *p, completedWorkflow.Stopped); err != nil {
 				log.Error().Msgf("error: done: cannot update step_id %d child state: %s", p.ID, err)
 			}
 		}
