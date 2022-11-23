@@ -38,7 +38,7 @@
             @click="showDeployPipelinePopup = true"
           />
           <DeployPipelinePopup
-            :id="pipeline.id"
+            :id="pipelineId"
             :open="showDeployPipelinePopup"
             @close="showDeployPipelinePopup = false"
           />

@@ -135,7 +135,7 @@
       }
     },
     "deploy_pipeline": {
-      "title": "Aktuelle Pipeline deployen",
+      "title": "Aktuelle Pipeline (#{pipelineId}) deployen",
       "enter_target": "Deployment Target angeben",
       "trigger": "Deploy",
       "variables": {

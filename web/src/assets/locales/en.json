@@ -42,7 +42,7 @@
           }
         },
         "deploy_pipeline": {
-          "title": "Trigger deployment event for current pipeline",
+          "title": "Trigger deployment event for current pipeline #{pipelineId}",
           "enter_target": "Target deployment environment",
           "trigger": "Deploy",
           "variables": {
