@@ -68,6 +68,7 @@
     }
   },
   "password": "Kata sandi",
+  "pipeline_feed": "Umpan jalur pipa",
   "repo": {
     "activity": "Aktivitas",
     "add": "Tambahkan repositori",
@@ -92,6 +93,7 @@
       }
     },
     "not_allowed": "Anda tidak diperbolehkan untuk mengakses repositori ini",
+    "open_in_forge": "Buka Repositori dalam Sistem Kendali Versi",
     "pipeline": {
       "actions": {
         "cancel": "Batalkan",
@@ -130,6 +132,19 @@
         "decline": "Tolak",
         "decline_success": "Jalur pipa ditolak",
         "declined": "Jalur pipa ini telah ditolak!"
+      },
+      "status": {
+        "blocked": "diblokir",
+        "declined": "ditolak",
+        "error": "terjadi kesalahan",
+        "failure": "gagal",
+        "killed": "dibatalkan",
+        "pending": "menunggu",
+        "running": "berjalan",
+        "skipped": "dilewati",
+        "started": "dimulai",
+        "status": "Status: {status}",
+        "success": "berhasil"
       },
       "step_not_started": "Langkah ini belum dijalankan.",
       "tasks": "Tugas"
