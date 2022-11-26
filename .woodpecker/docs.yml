@@ -1,5 +1,5 @@
 variables:
-  - &golang_image 'golang:1.18'
+  - &golang_image 'golang:1.18.7'
   - &node_image 'node:18-alpine'
   - &when_path
     - "docs/**"
