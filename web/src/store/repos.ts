@@ -35,11 +35,11 @@ export const useRepoStore = defineStore('repos', () => {
   }
 
   async function loadRepos() {
-    const _repos = await apiClient.getRepoList();
-    _repos.forEach((repo) => {
+    const _ownedRepos = await apiClient.getRepoList();
+    _ownedRepos.forEach((repo) => {
       repos.set(repoSlug(repo), repo);
     });
-    ownedRepoSlugs.value = _repos.map((repo) => repoSlug(repo));
+    ownedRepoSlugs.value = _ownedRepos.map((repo) => repoSlug(repo));
   }
 
   return {
