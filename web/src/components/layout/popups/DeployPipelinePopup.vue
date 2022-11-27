@@ -1,8 +1,8 @@
 <template>
   <Popup :open="open" @close="$emit('close')">
     <Panel v-if="!loading">
-      <form @submit.prevent="triggerDeployPipeline(id)">
-        <span class="text-xl text-color">{{ $t('repo.deploy_pipeline.title', { pipelineId: id }) }}</span>
+      <form @submit.prevent="triggerDeployPipeline">
+        <span class="text-xl text-color">{{ $t('repo.deploy_pipeline.title', { pipelineId: pipelineNumber }) }}</span>
         <InputField :label="$t('repo.deploy_pipeline.enter_target')">
           <TextField v-model="payload.environment" required />
         </InputField>
@@ -45,7 +45,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, toRef } from 'vue';
 import { useRouter } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
@@ -56,9 +56,9 @@ import Popup from '~/components/layout/Popup.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { inject } from '~/compositions/useInjectProvide';
 
-defineProps<{
+const props = defineProps<{
   open: boolean;
-  id: number;
+  pipelineNumber: number;
 }>();
 
 const emit = defineEmits<{
@@ -96,9 +96,15 @@ function deleteVar(key: string) {
   delete payload.value.variables[key];
 }
 
-async function triggerDeployPipeline(id: number) {
+const pipelineNumber = toRef(props, 'pipelineNumber');
+async function triggerDeployPipeline() {
   loading.value = true;
-  const newPipeline = await apiClient.deployPipeline(repo.value.owner, repo.value.name, id, payload.value);
+  const newPipeline = await apiClient.deployPipeline(
+    repo.value.owner,
+    repo.value.name,
+    pipelineNumber.value,
+    payload.value,
+  );
 
   emit('close');
 
