@@ -108,7 +108,6 @@ export default class ApiClient {
     const query = encodeQueryString({
       access_token: this.token || undefined,
     });
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     let _path = this.server ? this.server + path : path;
     _path = this.token ? `${path}?${query}` : path;
 
