@@ -142,7 +142,7 @@ export default defineComponent({
 
       await pipelineStore.loadPipeline(repo.value.owner, repo.value.name, parseInt(pipelineId.value, 10));
 
-      favicon.updateStatus(pipeline.value.status);
+      favicon.updateStatus(pipeline.value?.status);
     }
 
     const { doSubmit: cancelPipeline, isLoading: isCancelingPipeline } = useAsyncAction(async () => {
@@ -150,7 +150,7 @@ export default defineComponent({
         throw new Error('Unexpected: Repo is undefined');
       }
 
-      if (!pipeline.value.steps) {
+      if (!pipeline.value?.steps) {
         throw new Error('Unexpected: Pipeline steps not loaded');
       }
 
