@@ -132,7 +132,7 @@ watch([repoOwner, repoName], () => {
   loadRepo();
 });
 
-const badgeUrl = computed(() => `/api/badges/${repo.value?.owner}/${repo.value?.name}/status.svg`);
+const badgeUrl = computed(() => repo.value && `/api/badges/${repo.value.owner}/${repo.value.name}/status.svg`);
 
 const activeTab = computed({
   get() {
