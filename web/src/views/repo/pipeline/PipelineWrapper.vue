@@ -81,7 +81,7 @@ import useNotifications from '~/compositions/useNotifications';
 import usePipeline from '~/compositions/usePipeline';
 import { useRouteBackOrDefault } from '~/compositions/useRouteBackOrDefault';
 import { Repo, RepoPermissions } from '~/lib/api/types';
-import PipelineStore from '~/store/pipelines';
+import { usePipelineStore } from '~/store/pipelines';
 
 export default defineComponent({
   name: 'PipelineWrapper',
@@ -119,7 +119,7 @@ export default defineComponent({
     const favicon = useFavicon();
     const i18n = useI18n();
 
-    const pipelineStore = PipelineStore();
+    const pipelineStore = usePipelineStore();
     const pipelineId = toRef(props, 'pipelineId');
     const repoOwner = toRef(props, 'repoOwner');
     const repoName = toRef(props, 'repoName');
