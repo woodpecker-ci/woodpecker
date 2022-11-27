@@ -62,7 +62,7 @@ export const usePipelineStore = defineStore('pipelines', () => {
 
   const pipelineFeed = computed(() =>
     Array.from(pipelines.entries())
-      .reduce((acc, [_repoSlug, repoPipelines]) => {
+      .reduce<PipelineFeed[]>((acc, [_repoSlug, repoPipelines]) => {
         const repoPipelinesArray = Array.from(repoPipelines.entries()).map(
           ([_pipelineNumber, pipeline]) =>
             <PipelineFeed>{
@@ -74,7 +74,7 @@ export const usePipelineStore = defineStore('pipelines', () => {
             },
         );
         return [...acc, ...repoPipelinesArray];
-      }, [] as PipelineFeed[])
+      }, [])
       .sort(comparePipelines)
       .filter((pipeline) => repoStore.ownedRepoSlugs.includes(pipeline.full_name)),
   );
