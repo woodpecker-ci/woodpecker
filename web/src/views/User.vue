@@ -35,7 +35,7 @@
 import { useLocalStorage } from '@vueuse/core';
 import dayjs from 'dayjs';
 import TimeAgo from 'javascript-time-ago';
-import { SUPPORTED_LOCALES } from 'virtual:my-module';
+import { SUPPORTED_LOCALES } from 'virtual:vue-i18n-supported-locales';
 import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 

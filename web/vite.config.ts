@@ -32,18 +32,20 @@ export default defineConfig({
       include: path.resolve(__dirname, 'src/assets/locales/**'),
     }),
     (() => {
-      const virtualModuleId = 'virtual:my-module';
+      const virtualModuleId = 'virtual:vue-i18n-supported-locales';
       const resolvedVirtualModuleId = `\0${virtualModuleId}`;
 
       const filenames = readdirSync('src/assets/locales/').map((filename) => filename.replace('.json', ''));
 
       return {
-        name: 'vue-i18n-available-locales',
+        name: 'vue-i18n-supported-locales',
+        // eslint-disable-next-line consistent-return
         resolveId(id) {
           if (id === virtualModuleId) {
             return resolvedVirtualModuleId;
           }
         },
+        // eslint-disable-next-line consistent-return
         load(id) {
           if (id === resolvedVirtualModuleId) {
             return `export const SUPPORTED_LOCALES = ${JSON.stringify(filenames)}`;
