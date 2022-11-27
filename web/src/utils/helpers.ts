@@ -64,8 +64,3 @@ export function repoSlug(ownerOrRepo: string | Repo, name?: string): string {
 
   return `${ownerOrRepo.owner}/${ownerOrRepo.name}`;
 }
-
-export const isOwnedRepo =
-  (ownedRepos: Repo[]) =>
-  (repo: Repo): boolean =>
-    ownedRepos.find((ownedRepo) => ownedRepo.name === repo.name) !== undefined;

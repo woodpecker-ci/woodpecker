@@ -4,7 +4,7 @@ import { computed, reactive, Ref, ref } from 'vue';
 import useApiClient from '~/compositions/useApiClient';
 import { Pipeline, PipelineFeed, PipelineStep } from '~/lib/api/types';
 import { useRepoStore } from '~/store/repos';
-import { comparePipelines, isOwnedRepo, isPipelineActive, repoSlug } from '~/utils/helpers';
+import { comparePipelines, isPipelineActive, repoSlug } from '~/utils/helpers';
 
 export const usePipelineStore = defineStore('pipelines', () => {
   const apiClient = useApiClient();
