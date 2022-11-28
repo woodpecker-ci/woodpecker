@@ -1,8 +1,8 @@
 <template>
-  <ListItem v-if="pipeline" clickable class="p-0 w-full">
-    <div class="flex h-full w-11 items-center md:mr-4">
+  <ListItem v-if="pipeline" class="p-0 w-full">
+    <div class="flex w-11 items-center md:mr-4">
       <div
-        class="min-h-full w-3"
+        class="h-full w-3"
         :class="{
           'bg-yellow-400 dark:bg-dark-200': pipeline.status === 'pending',
           'bg-red-400 dark:bg-red-800': pipelineStatusColors[pipeline.status] === 'red',
@@ -13,7 +13,7 @@
       />
       <div class="w-8 flex flex-wrap justify-between items-center h-full">
         <PipelineRunningIcon v-if="pipeline.status === 'started' || pipeline.status === 'running'" />
-        <PipelineStatusIcon v-else class="mx-2 md:mx-3" :pipeline="pipeline" />
+        <PipelineStatusIcon v-else class="mx-2 md:mx-3" :status="pipeline.status" />
       </div>
     </div>
 

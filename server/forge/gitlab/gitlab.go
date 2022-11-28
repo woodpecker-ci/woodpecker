@@ -229,14 +229,14 @@ func (g *GitLab) getProject(ctx context.Context, client *gitlab.Client, owner, n
 }
 
 // Repo fetches the repository from the forge.
-func (g *GitLab) Repo(ctx context.Context, user *model.User, id model.ForgeID, owner, name string) (*model.Repo, error) {
+func (g *GitLab) Repo(ctx context.Context, user *model.User, remoteID model.ForgeRemoteID, owner, name string) (*model.Repo, error) {
 	client, err := newClient(g.URL, user.Token, g.SkipVerify)
 	if err != nil {
 		return nil, err
 	}
 
-	if id.IsValid() {
-		intID, err := strconv.ParseInt(string(id), 10, 64)
+	if remoteID.IsValid() {
+		intID, err := strconv.ParseInt(string(remoteID), 10, 64)
 		if err != nil {
 			return nil, err
 		}
@@ -682,7 +682,7 @@ func (g *GitLab) loadChangedFilesFromMergeRequest(ctx context.Context, tmpRepo *
 		return pipeline, nil
 	}
 
-	repo, err := _store.GetRepoNameFallback(tmpRepo.ForgeID, tmpRepo.FullName)
+	repo, err := _store.GetRepoNameFallback(tmpRepo.ForgeRemoteID, tmpRepo.FullName)
 	if err != nil {
 		return nil, err
 	}

@@ -17,7 +17,6 @@ package main
 import (
 	"context"
 	"crypto/tls"
-	"fmt"
 	"net/http"
 	"os"
 	"runtime"
@@ -90,8 +89,8 @@ func loop(c *cli.Context) error {
 
 	if c.Bool("healthcheck") {
 		go func() {
-			if err := http.ListenAndServe(fmt.Sprintf(":%d", c.Int("healthcheck-port")), nil); err != nil {
-				log.Error().Msgf("can not listen on port 3000: %v", err)
+			if err := http.ListenAndServe(c.String("healthcheck-addr"), nil); err != nil {
+				log.Error().Msgf("cannot listen on address %s: %v", c.String("healthcheck-addr"), err)
 			}
 		}()
 	}

@@ -52,13 +52,13 @@ func convertStatus(status model.StatusValue) string {
 // structure to the common Woodpecker repository structure.
 func convertRepo(from *internal.Repo) *model.Repo {
 	repo := model.Repo{
-		ForgeID:      model.ForgeID(fmt.Sprint(from.ID)),
-		Name:         from.Slug,
-		Owner:        from.Project.Key,
-		Branch:       "master",
-		SCMKind:      model.RepoGit,
-		IsSCMPrivate: true, // Since we have to use Netrc it has to always be private :/
-		FullName:     fmt.Sprintf("%s/%s", from.Project.Key, from.Slug),
+		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(from.ID)),
+		Name:          from.Slug,
+		Owner:         from.Project.Key,
+		Branch:        "master",
+		SCMKind:       model.RepoGit,
+		IsSCMPrivate:  true, // Since we have to use Netrc it has to always be private :/
+		FullName:      fmt.Sprintf("%s/%s", from.Project.Key, from.Slug),
 	}
 
 	for _, item := range from.Links.Clone {

@@ -144,9 +144,9 @@ func (c *config) Teams(ctx context.Context, u *model.User) ([]*model.Team, error
 }
 
 // Repo returns the named Bitbucket repository.
-func (c *config) Repo(ctx context.Context, u *model.User, id model.ForgeID, owner, name string) (*model.Repo, error) {
-	if id.IsValid() {
-		name = string(id)
+func (c *config) Repo(ctx context.Context, u *model.User, remoteID model.ForgeRemoteID, owner, name string) (*model.Repo, error) {
+	if remoteID.IsValid() {
+		name = string(remoteID)
 	}
 	repo, err := c.newClient(ctx, u).FindRepo(owner, name)
 	if err != nil {

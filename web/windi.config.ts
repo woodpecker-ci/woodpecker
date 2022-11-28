@@ -35,5 +35,9 @@ export default defineConfig({
       ],
     },
   },
+  shortcuts: {
+    'hover-effect':
+      'hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-5 transition-colors duration-100',
+  },
   plugins: [typography],
 });

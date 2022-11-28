@@ -13,7 +13,7 @@ import (
 
 var cronUpdateCmd = &cli.Command{
 	Name:      "update",
-	Usage:     "update a cron",
+	Usage:     "update a cron job",
 	ArgsUsage: "[repo/name]",
 	Action:    cronUpdate,
 	Flags: append(common.GlobalFlags,

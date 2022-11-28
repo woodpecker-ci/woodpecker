@@ -228,7 +228,7 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 		pipeline.WithDescription(map[string]string{
 			"CLI": "exec",
 		}),
-	).Run()
+	).Run(c.Context)
 }
 
 // return the metadata from the cli context.
