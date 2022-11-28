@@ -83,7 +83,6 @@ const selectedLocale = computed<string>({
   async set(_selectedLocale) {
     await setI18nLanguage(_selectedLocale);
     storedLocale.value = _selectedLocale;
-    locale.value = _selectedLocale;
     dayjs.locale(_selectedLocale);
     TimeAgo.setDefaultLocale(_selectedLocale);
   },
