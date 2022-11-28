@@ -2,7 +2,7 @@
   <input
     v-if="lines === 1"
     v-model="innerValue"
-    class="w-full border border-gray-200 py-1 px-2 rounded-md bg-white dark:bg-dark-gray-700 dark:border-dark-400 focus-visible:outline-none focus-visible:border-gray-600 dark:focus-visible:border-gray-300"
+    class="w-full border border-gray-200 py-1 px-2 rounded-md bg-white dark:bg-dark-gray-700 dark:border-dark-400 focus-visible:outline-none focus-visible:border-gray-600 dark:focus-visible:border-gray-400"
     :class="{ 'bg-gray-200 dark:bg-gray-600': disabled }"
     :disabled="disabled"
     :type="type"
@@ -11,7 +11,7 @@
   <textarea
     v-else
     v-model="innerValue"
-    class="w-full border border-gray-200 py-1 px-2 rounded-md bg-white dark:bg-dark-gray-700 dark:border-dark-400 focus-visible:outline-none focus-visible:border-gray-600 dark:focus-visible:border-gray-300"
+    class="w-full border border-gray-200 py-1 px-2 rounded-md bg-white dark:bg-dark-gray-700 dark:border-dark-400 focus-visible:outline-none focus-visible:border-gray-600 dark:focus-visible:border-gray-400"
     :class="{ 'bg-gray-200 dark:bg-gray-600': disabled }"
     :disabled="disabled"
     :placeholder="placeholder"
