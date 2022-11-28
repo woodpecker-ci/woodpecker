@@ -134,6 +134,7 @@
       }
     },
     "not_allowed": "Vous n'êtes pas autorisé à accéder à ce dépôt",
+    "open_in_forge": "Ouvrir le dépôt dans un système de contrôle de version",
     "pipeline": {
       "actions": {
         "cancel": "Annuler",
@@ -172,6 +173,19 @@
         "decline": "Refuser",
         "decline_success": "Pipeline refusé",
         "declined": "Le pipeline a été refusé !"
+      },
+      "status": {
+        "blocked": "bloqué",
+        "declined": "refusé",
+        "error": "en erreur",
+        "failure": "échoué",
+        "killed": "tué",
+        "pending": "en attente",
+        "running": "en cours",
+        "skipped": "sauté",
+        "started": "démarré",
+        "status": "Status : {status}",
+        "success": "réussi"
       },
       "step_not_started": "L'étape n'a pas démarré encore.",
       "tasks": "Tâches"
