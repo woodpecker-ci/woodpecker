@@ -3,7 +3,7 @@
     <input
       :id="`checkbox-${id}`"
       type="checkbox"
-      class="checkbox flex-shrink-0 relative border border-gray-400 dark:border-gray-600 cursor-pointer rounded-md transition-colors duration-150 w-5 h-5 checked:bg-lime-600 checked:border-lime-600 dark:checked:bg-lime-800 dark:checked:border-lime-800 focus-visible:border-gray-600 dark:focus-visible:border-gray-400"
+      class="checkbox flex-shrink-0 relative border border-gray-400 cursor-pointer rounded-md transition-colors duration-150 w-5 h-5 checked:bg-lime-600 checked:border-lime-600 focus-visible:border-gray-600 dark:(border-gray-600 checked:bg-lime-700 checked:border-lime-700 focus-visible:border-gray-300 checked:focus-visible:border-gray-300)"
       :checked="innerValue"
       @click="innerValue = !innerValue"
     />
@@ -82,7 +82,7 @@ export default defineComponent({
   border-width: 0 2px 2px 0;
   transform: translate(-50%, -60%) rotate(45deg);
   opacity: 0;
-  @apply dark:border-gray-400;
+  @apply dark:border-gray-300;
 }
 
 .checkbox:checked::before {
