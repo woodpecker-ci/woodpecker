@@ -394,3 +394,33 @@ func (q *fifo) removeFromPending(taskID string) {
 		}
 	}
 }
+
+// EvictCurrent removes a task either from pending or waitingOnDeps
+// And update dep status
+func (q *fifo) EvictCurrent(c context.Context, id string, exitStatus model.StatusValue) error {
+	q.Lock()
+	defer q.Unlock()
+
+	var next *list.Element
+	for e := q.pending.Front(); e != nil; e = next {
+		next = e.Next()
+		task, ok := e.Value.(*Task)
+		if ok && task.ID == id {
+			q.pending.Remove(e)
+			q.updateDepStatusInQueue(id, string(exitStatus))
+			return nil
+		}
+	}
+
+	for e := q.waitingOnDeps.Front(); e != nil; e = next {
+		next = e.Next()
+		task, ok := e.Value.(*Task)
+		if ok && task.ID == id {
+			q.waitingOnDeps.Remove(e)
+			q.updateDepStatusInQueue(id, string(exitStatus))
+			return nil
+		}
+	}
+
+	return ErrNotFound
+}

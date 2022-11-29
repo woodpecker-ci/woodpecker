@@ -76,6 +76,15 @@
               />
               <PipelineStatusIcon :status="workflow.state" class="!h-4 !w-4" />
               <span class="truncate">{{ workflow.name }}</span>
+              <button
+                v-if="pipeline.steps && pipeline.steps.length > 0 && ['pending'].includes(workflow.state)"
+                title="skip"
+                type="button"
+                class="flex justify-center items-center gap-2 py-2 px-1 hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-5 rounded-md"
+                @click="skipWorkflow(workflow)"
+              >
+                <Icon name="status-skipped" class="!h-4 !w-4" />
+              </button>
             </button>
           </div>
           <div
@@ -112,13 +121,17 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, toRef } from 'vue';
+import { inject, Ref, ref, toRef } from 'vue';
 
+import { useI18n } from 'vue-i18n';
 import Icon from '~/components/atomic/Icon.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import PipelineStepDuration from '~/components/repo/pipeline/PipelineStepDuration.vue';
 import usePipeline from '~/compositions/usePipeline';
-import { Pipeline, PipelineStep } from '~/lib/api/types';
+import useApiClient from '~/compositions/useApiClient';
+import { useAsyncAction } from '~/compositions/useAsyncAction';
+import { Pipeline, PipelineStep, Repo } from '~/lib/api/types';
+import { notifications } from '~/compositions/useNotifications';
 
 const props = defineProps<{
   pipeline: Pipeline;
@@ -129,8 +142,15 @@ defineEmits<{
   (event: 'update:selected-step-id', selectedStepId: number): void;
 }>();
 
+const apiClient = useApiClient();
+const i18n = useI18n();
 const pipeline = toRef(props, 'pipeline');
 const { prettyRef } = usePipeline(pipeline);
+const repo = inject<Ref<Repo>>('repo');
+
+if (!repo) {
+  throw new Error('Unexpected: "repo", "repoPermissions" & "pipeline" should be provided at this place');
+}
 
 const workflowsCollapsed = ref<Record<PipelineStep['id'], boolean>>(
   props.pipeline.steps && props.pipeline.steps.length > 1
@@ -143,4 +163,8 @@ const workflowsCollapsed = ref<Record<PipelineStep['id'], boolean>>(
       )
     : {},
 );
+
+const { doSubmit: skipWorkflow, isLoading: isSkippingWorkflow } = useAsyncAction(async (step) => {
+  await apiClient.skipPipelineStep(repo.value.owner, repo.value.name, `${pipeline.value.number}`, `${step.pid}`);
+});
 </script>
