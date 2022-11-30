@@ -29,6 +29,7 @@ type DeploymentOptions = {
   environment: string;
   variables: Record<string, string>;
 };
+
 export default class WoodpeckerClient extends ApiClient {
   getRepoList(opts?: RepoListOptions): Promise<Repo[]> {
     const query = encodeQueryString(opts);
