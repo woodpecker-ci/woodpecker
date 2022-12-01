@@ -134,18 +134,6 @@
         "value": "Variablenwert"
       }
     },
-    "deploy_pipeline": {
-      "title": "Aktuelle Pipeline (#{pipelineId}) deployen",
-      "enter_target": "Deployment Target angeben",
-      "trigger": "Deploy",
-      "variables": {
-        "add": "Variable hinzufügen",
-        "desc": "Spezifiziere weitere Variablen für deine Pipeline. Vordefinierte Variablen mit dem selben Namen werden überschrieben.",
-        "name": "Variablenname",
-        "title": "Zusätzliche Pipeline-Variablen",
-        "value": "Variablenwert"
-      }
-    },
     "not_allowed": "Zugriff auf dieses Repository nicht erlaubt",
     "pipeline": {
       "actions": {
