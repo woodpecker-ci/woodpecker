@@ -80,6 +80,7 @@
                 v-if="pipeline.steps && pipeline.steps.length > 0 && ['pending'].includes(workflow.state)"
                 title="skip"
                 type="button"
+                :is-loading="isSkippingWorkflow"
                 class="flex justify-center items-center gap-2 py-2 px-1 hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-5 rounded-md"
                 @click="skipWorkflow(workflow)"
               >
@@ -123,7 +124,6 @@
 <script lang="ts" setup>
 import { inject, Ref, ref, toRef } from 'vue';
 
-import { useI18n } from 'vue-i18n';
 import Icon from '~/components/atomic/Icon.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import PipelineStepDuration from '~/components/repo/pipeline/PipelineStepDuration.vue';
@@ -131,7 +131,6 @@ import usePipeline from '~/compositions/usePipeline';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import { Pipeline, PipelineStep, Repo } from '~/lib/api/types';
-import { notifications } from '~/compositions/useNotifications';
 
 const props = defineProps<{
   pipeline: Pipeline;
@@ -143,7 +142,6 @@ defineEmits<{
 }>();
 
 const apiClient = useApiClient();
-const i18n = useI18n();
 const pipeline = toRef(props, 'pipeline');
 const { prettyRef } = usePipeline(pipeline);
 const repo = inject<Ref<Repo>>('repo');
@@ -164,7 +162,7 @@ const workflowsCollapsed = ref<Record<PipelineStep['id'], boolean>>(
     : {},
 );
 
-const { doSubmit: skipWorkflow, isLoading: isSkippingWorkflow } = useAsyncAction(async (step) => {
-  await apiClient.skipPipelineStep(repo.value.owner, repo.value.name, `${pipeline.value.number}`, `${step.pid}`);
+const { doSubmit: skipWorkflow, isLoading: isSkippingWorkflow } = useAsyncAction(async (workflow) => {
+  await apiClient.skipPipelineStep(repo.value.owner, repo.value.name, `${pipeline.value.number}`, `${workflow.pid}`);
 });
 </script>

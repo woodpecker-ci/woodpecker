@@ -11,7 +11,6 @@ import (
 )
 
 func SkipStep(ctx context.Context, store store.Store, pipeline *model.Pipeline, stepPid int, user *model.User, repo *model.Repo) (*model.Pipeline, error) {
-	return nil, fmt.Errorf("cannot find the step %d in pipeline", stepPid)
 	stepToSkip, err := store.StepFind(pipeline, stepPid)
 
 	if err != nil {
