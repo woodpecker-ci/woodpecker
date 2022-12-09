@@ -1,5 +1,52 @@
 # Changelog
 
+## [0.15.5](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.5) - 2022-10-13
+
+* BUGFIXES
+  * Change build message column type to text (#1252) (#1253)
+* ENHANCEMENTS
+  * Bump DefaultCloneImage version to v1.6.0 (#1254)
+  * On Repo update, keep old "Clone" if update would empty it (#1170) (#1195)
+
+## [0.15.4](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.4) - 2022-09-06
+
+* BUGFIXES
+  * Extract commit message from branch creation (#1150) (#1153)
+  * Respect WOODPECKER_GITEA_SKIP_VERIFY (#1152) (#1151)
+  * update golang.org/x/crypto (#1124)
+  * Implement Refresher for GitLab (#1031) (#1120)
+  * Make returned proc list to be returned always in correct order (#1060) (#1065)
+  * Update type of 'log_data' from blob to longblob (#1050) (#1052)
+  * Make ListItem component more accessible by using a button tag when clickable (#1044) (#1046)
+* MISC
+  * Update base images (#1024) (#1025)
+
+## [0.15.3](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.3) - 2022-06-16
+
+* SECURITY
+  * Update github.com/containerd/containerd (#978) (#980)
+* BUGFIXES
+  * Return to page after clikcing login at navbar (#975) (#976)
+
+## [0.15.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.2) - 2022-06-14
+
+* BUGFIXES
+  * Fix uppercase from_secrets (#842) (#925)
+  * Fix key/val format for dind env vars (#889) (#890)
+  * Update helm chart releasing (#882) (#888)
+* DOCUMENTATION
+  * Fix run_on references with runs_on in docs (#965)
+
+## [0.15.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.1) - 2022-04-13
+
+* SECURITY
+  * Escape html / xml in log view (#879) (#880)
+* FEATURES
+  * Build multiarch images for server (#821) (#822)
+* BUGFIXES
+  * Branch list enhancements (#808) (#809)
+  * Get Netrc machine from clone url (#800) (#803)
+
 ## [v0.15.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.0) - 2022-02-24
 
 * BREAKING
@@ -104,7 +151,7 @@
   * Format code with 'simplify' flag and check via CI (#509)
   * Use Goblin Assert as intended (#501)
   * Embedding libcompose types for yaml parsing (#495)
-  * Use std methode to get SystemCertPool (#488)
+  * Use std method to get SystemCertPool (#488)
   * Upgrade urfave/cli to v2 (#483)
   * Remove some wrapper and make code more redable (#478)
   * More logging and refactor (#457)
