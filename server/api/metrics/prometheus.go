@@ -35,7 +35,7 @@ func PromHandler() gin.HandlerFunc {
 		token := server.Config.Prometheus.AuthToken
 
 		if token == "" {
-			handler.ServeHTTP(c.Writer, c.Request)
+			c.String(401, errInvalidToken.Error())
 			return
 		}
 
