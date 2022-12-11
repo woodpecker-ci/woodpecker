@@ -27,8 +27,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/woodpecker-ci/woodpecker/server/plugins/encrypted_secrets"
-
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/rs/zerolog/log"
@@ -46,6 +44,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/forge/gitlab"
 	"github.com/woodpecker-ci/woodpecker/server/forge/gogs"
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/plugins/encrypted_secrets"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/environments"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/registry"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/secrets"
@@ -167,21 +166,24 @@ func setupQueue(c *cli.Context, s store.Store) queue.Queue {
 
 func setupSecretService(c *cli.Context, s store.Store) model.SecretService {
 	_, err := s.ServerConfigGet("secrets-encryption-key-id")
-	encryptionEnabled := errors.Is(err, types.RecordNotExist)
+	if err != nil && !errors.Is(err, types.RecordNotExist) {
+		log.Fatal().Msgf("Failed to read server configuration: %s", err)
+	}
+	encryptionEnabled := !errors.Is(err, types.RecordNotExist)
 	decryptionKeysetProvided := c.IsSet("secrets-encryption-decrypt-all-keyset")
 	keysetProvided := c.IsSet("secrets-encryption-keyset")
 
 	if keysetProvided {
 		if decryptionKeysetProvided {
-			log.Fatal().Msg("Secret service config conflict: you should specify either encryption or decryption keyset, " +
-				"not the both ones")
+			log.Fatal().Msg("Secret service configuration conflict: either encryption or decryption keyset should be " +
+				"set, not the both ones")
 		}
 		return encrypted_secrets.New(c, s)
 	}
 
 	if encryptionEnabled {
 		if !decryptionKeysetProvided {
-			log.Fatal().Msg("Failed to initialize secret service: secrets are encrypted but no keyset provided")
+			log.Fatal().Msg("Failed to initialize secret service: secrets are encrypted but no encryption keyset provided")
 		}
 		encrypted_secrets.DecryptAll(c, s)
 	}
