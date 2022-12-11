@@ -290,6 +290,16 @@ WOODPECKER_DATABASE_DATASOURCE=postgres://root:password@1.2.3.4:5432/woodpecker?
 
 Read the value for `WOODPECKER_DATABASE_DATASOURCE` from the specified filepath
 
+### `WOODPECKER_SECRETS_ENCRYPTION_KEYSET_FILE`
+> Default: empty
+
+Filepath to encryption keyset used to encrypt all secrets in DB. See [secrets encryption](./35-secrets-encryption.md)
+
+### `WOODPECKER_SECRETS_DECRYPT_ALL_KEYSET_FILE`
+> Default: empty
+
+Filepath to encryption keyset used to decrypt all secrets and disable secrets encryption on server. See [secrets encryption](./35-secrets-encryption.md)
+
 ### `WOODPECKER_PROMETHEUS_AUTH_TOKEN`
 > Default: empty
 
