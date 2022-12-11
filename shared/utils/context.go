@@ -26,13 +26,13 @@ import (
 func WithContextSigtermCallback(ctx context.Context, f func()) context.Context {
 	ctx, cancel := context.WithCancel(ctx)
 	go func() {
-		recivedSignal := make(chan os.Signal, 1)
-		signal.Notify(recivedSignal, syscall.SIGINT, syscall.SIGTERM)
-		defer signal.Stop(recivedSignal)
+		receivedSignal := make(chan os.Signal, 1)
+		signal.Notify(receivedSignal, syscall.SIGINT, syscall.SIGTERM)
+		defer signal.Stop(receivedSignal)
 
 		select {
 		case <-ctx.Done():
-		case <-recivedSignal:
+		case <-receivedSignal:
 			cancel()
 			if f != nil {
 				f()

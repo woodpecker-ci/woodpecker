@@ -23,6 +23,7 @@ type Feed struct {
 	Name     string `json:"name"                    xorm:"feed_repo_name"`
 	FullName string `json:"full_name"               xorm:"feed_repo_full_name"`
 
+	ID       int64  `json:"id,omitempty"            xorm:"feed_pipeline_id"`
 	Number   int64  `json:"number,omitempty"        xorm:"feed_pipeline_number"`
 	Event    string `json:"event,omitempty"         xorm:"feed_pipeline_event"`
 	Status   string `json:"status,omitempty"        xorm:"feed_pipeline_status"`
@@ -33,7 +34,7 @@ type Feed struct {
 	Branch   string `json:"branch,omitempty"        xorm:"feed_pipeline_branch"`
 	Ref      string `json:"ref,omitempty"           xorm:"feed_pipeline_ref"`
 	Refspec  string `json:"refspec,omitempty"       xorm:"feed_pipeline_refspec"`
-	Remote   string `json:"remote,omitempty"        xorm:"feed_pipeline_remote"`
+	Remote   string `json:"remote,omitempty"        xorm:"feed_pipeline_clone_url"`
 	Title    string `json:"title,omitempty"         xorm:"feed_pipeline_title"`
 	Message  string `json:"message,omitempty"       xorm:"feed_pipeline_message"`
 	Author   string `json:"author,omitempty"        xorm:"feed_pipeline_author"`

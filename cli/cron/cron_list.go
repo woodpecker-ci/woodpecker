@@ -26,7 +26,7 @@ import (
 
 var cronListCmd = &cli.Command{
 	Name:      "ls",
-	Usage:     "list registries",
+	Usage:     "list cron jobs",
 	ArgsUsage: "[repo/name]",
 	Action:    cronList,
 	Flags: append(common.GlobalFlags,

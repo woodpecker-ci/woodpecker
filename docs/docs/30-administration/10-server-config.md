@@ -294,6 +294,7 @@ Read the value for `WOODPECKER_DATABASE_DATASOURCE` from the specified filepath
 > Default: empty
 
 Token to secure the Prometheus metrics endpoint.
+Must be set to enable the endpoint.
 
 ### `WOODPECKER_PROMETHEUS_AUTH_TOKEN_FILE`
 > Default: empty
@@ -360,7 +361,7 @@ Specify a configuration service endpoint, see [Configuration Extension](./100-ex
 
 ### `WOODPECKER_GITHUB_...`
 
-See [Github configuration](forges/github/#configuration)
+See [GitHub configuration](forges/github/#configuration)
 
 ### `WOODPECKER_GOGS_...`
 

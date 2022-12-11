@@ -32,6 +32,13 @@ const (
 	EventManual = "manual"
 )
 
+// Different ways to handle failure states
+const (
+	FailureIgnore = "ignore"
+	FailureFail   = "fail"
+	// FailureCancel = "cancel" // Not implemented yet
+)
+
 type (
 	// Metadata defines runtime m.
 	Metadata struct {
@@ -45,12 +52,12 @@ type (
 
 	// Repo defines runtime metadata for a repository.
 	Repo struct {
-		Name    string   `json:"name,omitempty"`
-		Link    string   `json:"link,omitempty"`
-		Remote  string   `json:"remote,omitempty"`
-		Private bool     `json:"private,omitempty"`
-		Secrets []Secret `json:"secrets,omitempty"`
-		Branch  string   `json:"default_branch,omitempty"`
+		Name     string   `json:"name,omitempty"`
+		Link     string   `json:"link,omitempty"`
+		CloneURL string   `json:"clone_url,omitempty"`
+		Private  bool     `json:"private,omitempty"`
+		Secrets  []Secret `json:"secrets,omitempty"`
+		Branch   string   `json:"default_branch,omitempty"`
 	}
 
 	// Pipeline defines runtime metadata for a pipeline.
@@ -142,7 +149,7 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_REPO_NAME":           repoName,
 		"CI_REPO_SCM":            "git",
 		"CI_REPO_LINK":           m.Repo.Link,
-		"CI_REPO_REMOTE":         m.Repo.Remote,
+		"CI_REPO_CLONE_URL":      m.Repo.CloneURL,
 		"CI_REPO_DEFAULT_BRANCH": m.Repo.Branch,
 		"CI_REPO_PRIVATE":        strconv.FormatBool(m.Repo.Private),
 		"CI_REPO_TRUSTED":        "false", // TODO should this be added?
@@ -229,6 +236,8 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_JOB_STATUS":   "", // will be set by agent
 		"CI_JOB_STARTED":  "", // will be set by agent
 		"CI_JOB_FINISHED": "", // will be set by agent
+		// CI_REPO_CLONE_URL
+		"CI_REPO_REMOTE": m.Repo.CloneURL,
 	}
 	if m.Curr.Event == EventTag {
 		params["CI_COMMIT_TAG"] = strings.TrimPrefix(m.Curr.Commit.Ref, "refs/tags/")
@@ -236,8 +245,6 @@ func (m *Metadata) Environ() map[string]string {
 	if m.Curr.Event == EventPull {
 		params["CI_COMMIT_PULL_REQUEST"] = pullRegexp.FindString(m.Curr.Commit.Ref)
 	}
-
-	m.setDroneEnviron(params)
 
 	return params
 }

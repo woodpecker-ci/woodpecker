@@ -3,7 +3,7 @@
     <input
       :id="`radio-${id}-${option.value}`"
       type="radio"
-      class="radio relative flex-shrink-0 border border-gray-400 dark:border-gray-600 cursor-pointer rounded-full w-5 h-5 checked:bg-lime-600 checked:border-lime-600 dark:checked:bg-lime-700 dark:checked:border-lime-700"
+      class="radio relative flex-shrink-0 border border-gray-400 cursor-pointer rounded-full w-5 h-5 checked:bg-lime-600 checked:border-lime-600 focus-visible:border-gray-600 dark:(border-gray-600 checked:bg-lime-700 checked:border-lime-700 focus-visible:border-gray-300 checked:focus-visible:border-gray-300)"
       :value="option.value"
       :checked="innerValue.includes(option.value)"
       @click="innerValue = option.value"
@@ -81,7 +81,7 @@ export default defineComponent({
   background: white;
   transform: translate(-50%, -50%);
   opacity: 0;
-  @apply dark:bg-gray-400;
+  @apply dark:bg-gray-300;
 }
 
 .radio:checked::before {

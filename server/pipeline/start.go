@@ -19,13 +19,13 @@ import (
 
 	"github.com/rs/zerolog/log"
 
+	"github.com/woodpecker-ci/woodpecker/pipeline"
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/shared"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
 // start a pipeline, make sure it was stored persistent in the store before
-func start(ctx context.Context, store store.Store, activePipeline *model.Pipeline, user *model.User, repo *model.Repo, pipelineItems []*shared.PipelineItem) (*model.Pipeline, error) {
+func start(ctx context.Context, store store.Store, activePipeline *model.Pipeline, user *model.User, repo *model.Repo, pipelineItems []*pipeline.Item) (*model.Pipeline, error) {
 	// call to cancel previous pipelines if needed
 	if err := cancelPreviousPipelines(ctx, store, activePipeline, repo); err != nil {
 		// should be not breaking

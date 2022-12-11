@@ -14,18 +14,21 @@
 
 package common
 
-import "runtime"
+import (
+	"encoding/base64"
+	"runtime"
+)
 
 func GenerateContainerConf(commands []string) (env map[string]string, entry, cmd []string) {
 	env = make(map[string]string)
 	if runtime.GOOS == "windows" {
-		env["CI_SCRIPT"] = generateScriptWindows(commands)
+		env["CI_SCRIPT"] = base64.StdEncoding.EncodeToString([]byte(generateScriptWindows(commands)))
 		env["HOME"] = "c:\\root"
 		env["SHELL"] = "powershell.exe"
 		entry = []string{"powershell", "-noprofile", "-noninteractive", "-command"}
 		cmd = []string{"[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($Env:CI_SCRIPT)) | iex"}
 	} else {
-		env["CI_SCRIPT"] = generateScriptPosix(commands)
+		env["CI_SCRIPT"] = base64.StdEncoding.EncodeToString([]byte(generateScriptPosix(commands)))
 		env["HOME"] = "/root"
 		env["SHELL"] = "/bin/sh"
 		entry = []string{"/bin/sh", "-c"}
