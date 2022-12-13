@@ -294,6 +294,7 @@ Read the value for `WOODPECKER_DATABASE_DATASOURCE` from the specified filepath
 > Default: empty
 
 Token to secure the Prometheus metrics endpoint.
+Must be set to enable the endpoint.
 
 ### `WOODPECKER_PROMETHEUS_AUTH_TOKEN_FILE`
 > Default: empty
