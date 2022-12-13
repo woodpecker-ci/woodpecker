@@ -3,7 +3,7 @@ import { computed, Ref, ref, toRef } from 'vue';
 
 import useApiClient from '~/compositions/useApiClient';
 import { Pipeline, PipelineFeed, PipelineStep } from '~/lib/api/types';
-import { comparePipelines, isPipelineActive, repoSlug } from '~/utils/helpers';
+import { comparePipelines, comparePipelinesWithStatus, isPipelineActive, repoSlug } from '~/utils/helpers';
 
 const apiClient = useApiClient();
 
@@ -69,7 +69,7 @@ export default defineStore({
       });
     },
     getSortedPipelines(owner: Ref<string>, repo: Ref<string>) {
-      return computed(() => Object.values(this.getPipelines(owner, repo).value || []).sort(comparePipelines));
+      return computed(() => Object.values(this.getPipelines(owner, repo).value || []).sort(comparePipelines).sort(comparePipelinesWithStatus));
     },
     getActivePipelines(owner: Ref<string>, repo: Ref<string>) {
       const pipelines = this.getPipelines(owner, repo);
