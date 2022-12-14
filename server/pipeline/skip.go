@@ -32,6 +32,20 @@ func SkipStep(ctx context.Context, store store.Store, pipeline *model.Pipeline, 
 		log.Error().Err(err).Msg("can not get step list from store")
 	}
 
+	// Skip the children of the skipped step
+	for _, child := range pipeline.Steps {
+		if child.PPID == stepPid {
+			if _, err = UpdateStepToStatusSkipped(store, *child, 0); err != nil {
+				log.Error().Msgf("error: done: cannot update step_id %d state: %s", child.ID, err)
+				return nil, fmt.Errorf("cannot skip %d in pipeline", child.PID)
+			}
+		}
+	}
+
+	if pipeline.Steps, err = store.StepList(pipeline); err != nil {
+		log.Error().Err(err).Msg("can not get step list from store")
+	}
+
 	if pipeline.Steps, err = model.Tree(pipeline.Steps); err != nil {
 		log.Error().Err(err).Msg("can not build tree from step list")
 	}

@@ -81,7 +81,7 @@
                 title="skip"
                 type="button"
                 :is-loading="isSkippingWorkflow"
-                class="flex justify-center items-center gap-2 py-2 px-1 hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-5 rounded-md"
+                class="flex justify-center items-center ml-auto gap-2 py-2 px-1 hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-5 rounded-md"
                 @click="skipWorkflow(workflow)"
               >
                 <Icon name="status-skipped" class="!h-4 !w-4" />
