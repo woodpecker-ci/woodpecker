@@ -124,6 +124,7 @@
 <script lang="ts" setup>
 import { inject, Ref, ref, toRef } from 'vue';
 
+import { useI18n } from 'vue-i18n';
 import Icon from '~/components/atomic/Icon.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import PipelineStepDuration from '~/components/repo/pipeline/PipelineStepDuration.vue';
@@ -131,6 +132,7 @@ import usePipeline from '~/compositions/usePipeline';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import { Pipeline, PipelineStep, Repo } from '~/lib/api/types';
+import useNotifications from '~/compositions/useNotifications';
 
 const props = defineProps<{
   pipeline: Pipeline;
@@ -141,6 +143,8 @@ defineEmits<{
   (event: 'update:selected-step-id', selectedStepId: number): void;
 }>();
 
+const i18n = useI18n();
+const notifications = useNotifications();
 const apiClient = useApiClient();
 const pipeline = toRef(props, 'pipeline');
 const { prettyRef } = usePipeline(pipeline);
@@ -164,5 +168,6 @@ const workflowsCollapsed = ref<Record<PipelineStep['id'], boolean>>(
 
 const { doSubmit: skipWorkflow, isLoading: isSkippingWorkflow } = useAsyncAction(async (workflow) => {
   await apiClient.skipPipelineStep(repo.value.owner, repo.value.name, `${pipeline.value.number}`, `${workflow.pid}`);
+  notifications.notify({ title: i18n.t('repo.pipeline.actions.skip_success'), type: 'success' });
 });
 </script>
