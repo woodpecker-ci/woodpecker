@@ -23,6 +23,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/woodpecker-ci/woodpecker/server/plugins/encryption"
 	"net/url"
 	"os"
 	"strings"
@@ -166,7 +167,7 @@ func setupQueue(c *cli.Context, s store.Store) queue.Queue {
 }
 
 func setupSecretService(c *cli.Context, s store.Store) model.SecretService {
-	_, err := s.ServerConfigGet("secrets-encryption-key-id")
+	_, err := s.ServerConfigGet(encryption.tinkCiphertextSampleConfigKey)
 	if err != nil && !errors.Is(err, types.RecordNotExist) {
 		log.Fatal().Msgf("Failed to read server configuration: %s", err)
 	}
