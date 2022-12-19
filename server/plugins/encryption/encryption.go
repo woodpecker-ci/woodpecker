@@ -56,15 +56,24 @@ func (b builder) WithClient(client model.EncryptionClient) model.EncryptionBuild
 }
 
 func (b builder) Build() {
-	isEnabled := b.isEnabled()
-	keyType := b.detectKeyType()
-	if isEnabled && keyType == keyTypeNone {
+	enabled := b.isEnabled()
+	disableFlag := b.ctx.Bool(disableEncryptionConfigFlag)
+
+	if !enabled && disableFlag {
+		noEncryptionBuilder{}.WithClients(b.clients).Build()
+		return
+	}
+	svc := b.getService(b.detectKeyType())
+	if disableFlag {
+		svc.Disable()
+	}
+}
+
+func (b builder) getService(keyType string) model.EncryptionService {
+	if keyType == keyTypeNone {
 		log.Fatal().Msg("Encryption enabled but no keys provided")
 	}
-	service := b.serviceBuilder(keyType).WithClients(b.clients).Build()
-	if b.ctx.IsSet(disableEncryptionConfigFlag) {
-		service.Disable()
-	}
+	return b.serviceBuilder(keyType).WithClients(b.clients).Build()
 }
 
 func (b builder) isEnabled() bool {
