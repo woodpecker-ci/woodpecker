@@ -23,7 +23,6 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/woodpecker-ci/woodpecker/server/plugins/encryption"
 	"net/url"
 	"os"
 	"strings"
@@ -46,7 +45,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/forge/gitlab"
 	"github.com/woodpecker-ci/woodpecker/server/forge/gogs"
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/plugins/encrypted_secrets"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/environments"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/registry"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/secrets"
@@ -166,30 +164,7 @@ func setupQueue(c *cli.Context, s store.Store) queue.Queue {
 	return queue.WithTaskStore(queue.New(c.Context), s)
 }
 
-func setupSecretService(c *cli.Context, s store.Store) model.SecretService {
-	_, err := s.ServerConfigGet(encryption.tinkCiphertextSampleConfigKey)
-	if err != nil && !errors.Is(err, types.RecordNotExist) {
-		log.Fatal().Msgf("Failed to read server configuration: %s", err)
-	}
-	encryptionEnabled := !errors.Is(err, types.RecordNotExist)
-	decryptionKeysetProvided := c.IsSet("secrets-encryption-decrypt-all-keyset")
-	keysetProvided := c.IsSet("secrets-encryption-keyset")
-
-	if keysetProvided {
-		if decryptionKeysetProvided {
-			log.Fatal().Msg("Secret service configuration conflict: either encryption or decryption keyset should be " +
-				"set, not the both ones")
-		}
-		return encrypted_secrets.New(c, s)
-	}
-
-	if encryptionEnabled {
-		if !decryptionKeysetProvided {
-			log.Fatal().Msg("Failed to initialize secret service: secrets are encrypted but no encryption keyset provided")
-		}
-		encrypted_secrets.DecryptAll(c, s)
-	}
-
+func setupSecretService(c *cli.Context, s model.SecretStore) model.SecretService {
 	return secrets.New(c.Context, s)
 }
 

@@ -25,13 +25,11 @@ import (
 	"strconv"
 )
 
-const tinkCiphertextSampleConfigKey = "secrets-encryption-key-id"
-
 func (svc *tinkEncryptionService) loadKeyset() {
 	log.Warn().Msgf("Loading secrets encryption keyset from file: %s", svc.keysetFilePath)
 	file, err := os.Open(svc.keysetFilePath)
 	if err != nil {
-		log.Fatal().Err(err).Msgf("Error opening secret encryption keyset file")
+		log.Fatal().Err(err).Msgf("encryptionError opening secret encryption keyset file")
 	}
 	defer func(file *os.File) {
 		err = file.Close()
@@ -43,19 +41,19 @@ func (svc *tinkEncryptionService) loadKeyset() {
 	jsonKeyset := keyset.NewJSONReader(file)
 	keysetHandle, err := insecurecleartextkeyset.Read(jsonKeyset)
 	if err != nil {
-		log.Fatal().Err(err).Msgf("Error reading secret encryption keyset")
+		log.Fatal().Err(err).Msgf("encryptionError reading secret encryption keyset")
 	}
 	svc.primaryKeyId = strconv.FormatUint(uint64(keysetHandle.KeysetInfo().PrimaryKeyId), 10)
 
 	encryptionInstance, err := aead.New(keysetHandle)
 	if err != nil {
-		log.Fatal().Err(err).Msgf("Error initializing secret encryption")
+		log.Fatal().Err(err).Msgf("encryptionError initializing secret encryption")
 	}
 	svc.encryption = encryptionInstance
 }
 
 func (svc *tinkEncryptionService) validateKeyset() error {
-	ciphertextSample, err := svc.store.ServerConfigGet(tinkCiphertextSampleConfigKey)
+	ciphertextSample, err := svc.store.ServerConfigGet(ciphertextSampleConfigKey)
 	if errors.Is(err, types.RecordNotExist) {
 		return encryptionNotEnabledError
 	} else if err != nil {

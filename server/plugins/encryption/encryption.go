@@ -15,19 +15,29 @@
 package encryption
 
 import (
+	"errors"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store"
+	"github.com/woodpecker-ci/woodpecker/server/store/types"
 )
 
-type Error string
+const (
+	rawKeyConfigFlag             = "encryption-raw-key"
+	tinkKeysetFilepathConfigFlag = "encryption-tink-keyset"
+	disableEncryptionConfigFlag  = "encryption-disable-flag"
 
-func (e Error) Error() string { return string(e) }
+	ciphertextSampleConfigKey = "encryption-ciphertext-sample"
 
-const encryptionNotEnabledError = Error("encryption is not enabled")
-const encryptionKeyInvalidError = Error("encryption key is invalid")
-const encryptionKeyRotatedError = Error("encryption key is being rotated")
+	keyTypeTink = "tink"
+	keyTypeRaw  = "raw"
+	keyTypeNone = "none"
+
+	encryptionNotEnabledError = encryptionError("encryption is not enabled")
+	encryptionKeyInvalidError = encryptionError("encryption key is invalid")
+	encryptionKeyRotatedError = encryptionError("encryption key is being rotated")
+)
 
 type builder struct {
 	store   store.Store
@@ -40,23 +50,55 @@ func Encryption(ctx *cli.Context, s store.Store) model.EncryptionBuilder {
 	return &builder{store: s, ctx: ctx}
 }
 
-func (b builder) OfType(encryptionType string) model.EncryptionBuilder {
-	if b.service != nil {
-		log.Fatal().Msg("invalid encryption configuration flow: attempt to set encryption type more than once")
-	}
-	if encryptionType == model.TinkEncryptionType {
-		b.service = newTink(b.ctx, b.store)
-		return b
-	}
-	log.Fatal().Msgf("invalid encryption configuration flow: unknown encryption type %s", encryptionType)
-	return nil
-}
-
 func (b builder) WithClient(client model.EncryptionClient) model.EncryptionBuilder {
 	b.clients = append(b.clients, client)
 	return b
 }
 
-func (b builder) Init() model.EncryptionService {
-	return b.service.WithClients(b.clients).Build()
+func (b builder) Build() {
+	isEnabled := b.isEnabled()
+	keyType := b.detectKeyType()
+	if isEnabled && keyType == keyTypeNone {
+		log.Fatal().Msg("Encryption enabled but no keys provided")
+	}
+	service := b.serviceBuilder(keyType).WithClients(b.clients).Build()
+	if b.ctx.IsSet(disableEncryptionConfigFlag) {
+		service.Disable()
+	}
 }
+
+func (b builder) isEnabled() bool {
+	_, err := b.store.ServerConfigGet(ciphertextSampleConfigKey)
+	if err != nil && !errors.Is(err, types.RecordNotExist) {
+		log.Fatal().Msgf("Failed to read server configuration: %s", err)
+	}
+	return !errors.Is(err, types.RecordNotExist)
+}
+
+func (b builder) detectKeyType() string {
+	rawKeyPresent := b.ctx.IsSet(rawKeyConfigFlag)
+	tinkKeysetPresent := b.ctx.IsSet(tinkKeysetFilepathConfigFlag)
+	if rawKeyPresent && tinkKeysetPresent {
+		log.Fatal().Msg("Can not use raw encryption key and tink keyset at the same time")
+	} else if rawKeyPresent {
+		return keyTypeRaw
+	} else if tinkKeysetPresent {
+		return keyTypeTink
+	}
+	return keyTypeNone
+}
+
+func (b builder) serviceBuilder(encryptionType string) model.EncryptionServiceBuilder {
+	if encryptionType == keyTypeTink {
+		return newTink(b.ctx, b.store)
+	} else if encryptionType == keyTypeNone {
+		return &noEncryptionBuilder{}
+	} else {
+		log.Fatal().Msgf("unsupported encryption type: %s", encryptionType)
+		return nil
+	}
+}
+
+type encryptionError string
+
+func (e encryptionError) Error() string { return string(e) }

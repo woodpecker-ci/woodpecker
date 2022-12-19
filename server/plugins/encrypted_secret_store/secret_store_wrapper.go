@@ -11,7 +11,7 @@ type EncryptedSecretStore struct {
 	encryption model.EncryptionService
 }
 
-func New(secretStore model.SecretStore) model.SecretStore {
+func New(secretStore model.SecretStore) *EncryptedSecretStore {
 	wrapper := EncryptedSecretStore{secretStore, nil}
 	return &wrapper
 }
@@ -23,7 +23,7 @@ func (wrapper *EncryptedSecretStore) InitEncryption(encryption model.EncryptionS
 	wrapper.encryption = encryption
 }
 
-func (wrapper *EncryptedSecretStore) EncryptStore() {
+func (wrapper *EncryptedSecretStore) EnableEncryption() {
 	log.Warn().Msg("Encrypting all secrets in database")
 	secrets, err := wrapper.store.GlobalSecretList()
 	if err != nil {
@@ -36,11 +36,11 @@ func (wrapper *EncryptedSecretStore) EncryptStore() {
 	log.Warn().Msg("All secrets are encrypted")
 }
 
-func (wrapper *EncryptedSecretStore) ReEncryptStore(newEncryptionService model.EncryptionService) {
-	log.Warn().Msg("Re-encrypting all secrets in database")
+func (wrapper *EncryptedSecretStore) MigrateEncryption(newEncryptionService model.EncryptionService) {
+	log.Warn().Msg("Migrating secrets encryption")
 	secrets, err := wrapper.store.GlobalSecretList()
 	if err != nil {
-		log.Fatal().Err(err).Msg("Secrets key rotation failed: could not fetch secrets from DB")
+		log.Fatal().Err(err).Msg("Secrets encryption migration failed: could not fetch secrets from DB")
 	}
 	wrapper.decryptList(secrets)
 	wrapper.encryption = newEncryptionService
@@ -48,20 +48,7 @@ func (wrapper *EncryptedSecretStore) ReEncryptStore(newEncryptionService model.E
 		wrapper.encrypt(secret)
 		wrapper._save(secret)
 	}
-	log.Warn().Msg("All secrets are re-encrypted")
-}
-
-func (wrapper *EncryptedSecretStore) DecryptStore() {
-	log.Warn().Msg("Decrypting all secrets")
-	secrets, err := wrapper.store.GlobalSecretList()
-	if err != nil {
-		log.Fatal().Err(err).Msg("Secrets decryption failed: could not fetch secrets from DB")
-	}
-	for _, secret := range secrets {
-		wrapper.decrypt(secret)
-		wrapper._save(secret)
-	}
-	log.Warn().Msg("Secrets are decrypted")
+	log.Warn().Msg("Secrets encryption migrated successfully")
 }
 
 func (wrapper *EncryptedSecretStore) encrypt(secret *model.Secret) {

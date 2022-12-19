@@ -529,13 +529,18 @@ var flags = []cli.Flag{
 	// secrets encryption in DB
 	//
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_SECRETS_ENCRYPTION_KEYSET_FILE"},
-		Name:    "secrets-encryption-keyset",
-		Usage:   "Google tink DAEAD-compatible keyset to encrypt secrets in DB",
+		EnvVars: []string{"WOODPECKER_ENCRYPTION_KEY_RAW"},
+		Name:    "encryption-raw-key",
+		Usage:   "Raw encryption key",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_SECRETS_DECRYPT_ALL_KEYSET_FILE"},
-		Name:    "secrets-encryption-decrypt-all-keyset",
-		Usage:   "Google tink DAEAD-compatible keyset to decrypt all secrets in database and disable secrets encryption on server",
+		EnvVars: []string{"WOODPECKER_ENCRYPTION_TINK_KEYSET_PATH"},
+		Name:    "encryption-tink-keyset",
+		Usage:   "Google tink AEAD-compatible keyset to encrypt secrets in DB",
+	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_SECRETS_ENCRYPTION_DISABLE"},
+		Name:    "encryption-disable-flag",
+		Usage:   "Flag to decrypt all encrypted data and disable encryption on server",
 	},
 }

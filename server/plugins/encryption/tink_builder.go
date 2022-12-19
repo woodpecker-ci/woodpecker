@@ -40,7 +40,7 @@ func (c tinkConfiguration) WithClients(clients []model.EncryptionClient) model.E
 }
 
 func (c tinkConfiguration) Build() model.EncryptionService {
-	svc := tinkEncryptionService{
+	svc := &tinkEncryptionService{
 		keysetFilePath:    c.keysetFilePath,
 		primaryKeyId:      "",
 		encryption:        nil,
@@ -48,6 +48,7 @@ func (c tinkConfiguration) Build() model.EncryptionService {
 		keysetFileWatcher: nil,
 		clients:           c.clients,
 	}
+	svc.initClients()
 	svc.loadKeyset()
 	err := svc.validateKeyset()
 	if err == encryptionNotEnabledError {
@@ -58,5 +59,5 @@ func (c tinkConfiguration) Build() model.EncryptionService {
 		svc.rotate()
 	}
 	svc.initFileWatcher()
-	return &svc
+	return svc
 }

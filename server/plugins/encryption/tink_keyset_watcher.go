@@ -23,11 +23,11 @@ import (
 func (svc *tinkEncryptionService) initFileWatcher() {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		log.Fatal().Err(err).Msgf("Error subscribing on encryption keyset file changes")
+		log.Fatal().Err(err).Msgf("encryptionError subscribing on encryption keyset file changes")
 	}
 	err = watcher.Add(svc.keysetFilePath)
 	if err != nil {
-		log.Fatal().Err(err).Msgf("Error subscribing on encryption keyset file changes")
+		log.Fatal().Err(err).Msgf("encryptionError subscribing on encryption keyset file changes")
 	}
 
 	svc.keysetFileWatcher = watcher
@@ -39,7 +39,7 @@ func (svc *tinkEncryptionService) handleFileEvents() {
 		select {
 		case event, ok := <-svc.keysetFileWatcher.Events:
 			if !ok {
-				log.Fatal().Msg("Error watching encryption keyset file changes")
+				log.Fatal().Msg("encryptionError watching encryption keyset file changes")
 			}
 			if (event.Op == fsnotify.Write) || (event.Op == fsnotify.Create) {
 				log.Warn().Msgf("Changes detected in encryption keyset file: '%s'. Encryption service will be reloaded", event.Name)
@@ -48,7 +48,7 @@ func (svc *tinkEncryptionService) handleFileEvents() {
 			}
 		case err, ok := <-svc.keysetFileWatcher.Errors:
 			if !ok {
-				log.Fatal().Err(err).Msgf("Error watching encryption keyset file changes")
+				log.Fatal().Err(err).Msgf("encryptionError watching encryption keyset file changes")
 			}
 		}
 	}

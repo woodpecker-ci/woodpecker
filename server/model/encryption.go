@@ -1,16 +1,9 @@
 package model
 
-const (
-	TinkEncryptionType            = "tink"
-	SimpleSymmetricEncryptionType = "simple_symmetric"
-	DisabledEncryptionType        = "none"
-)
-
 // EncryptionBuilder is user API to obtain correctly configured encryption
 type EncryptionBuilder interface {
-	OfType(encryptionType string) EncryptionBuilder
 	WithClient(client EncryptionClient) EncryptionBuilder
-	Init() EncryptionService
+	Build()
 }
 
 // EncryptionServiceBuilder should be used only in encryption configuration process
@@ -28,11 +21,10 @@ type EncryptionService interface {
 
 // EncryptionClient should be used only in encryption configuration process
 type EncryptionClient interface {
+	// InitEncryption should be available only once
 	InitEncryption(encryption EncryptionService)
-	// OnEnableEncryption should encrypt all service data
-	OnEnableEncryption()
-	// OnRotateEncryption should decrypt all existing data and encrypt it with new encryption
-	OnRotateEncryption(newEncryption EncryptionService)
-	// OnDisableEncryption should decrypt all data and guarantee that EncryptionClient service will stop processing requests
-	OnDisableEncryption()
+	// EnableEncryption should encrypt all service data
+	EnableEncryption()
+	// MigrateEncryption should decrypt all existing data and encrypt it with new encryption service
+	MigrateEncryption(newEncryption EncryptionService)
 }

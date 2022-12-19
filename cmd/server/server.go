@@ -18,6 +18,8 @@ import (
 	"context"
 	"crypto/tls"
 	"errors"
+	"github.com/woodpecker-ci/woodpecker/server/plugins/encrypted_secret_store"
+	"github.com/woodpecker-ci/woodpecker/server/plugins/encryption"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -260,6 +262,10 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 	// forge
 	server.Config.Services.Forge = f
 
+	// encryption
+	encryptedSecretStore := encrypted_secret_store.New(v)
+	encryption.Encryption(c, v).WithClient(encryptedSecretStore).Build()
+
 	// services
 	server.Config.Services.Queue = setupQueue(c, v)
 	server.Config.Services.Logs = logging.New()
@@ -268,7 +274,7 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 		log.Error().Err(err).Msg("could not create pubsub service")
 	}
 	server.Config.Services.Registries = setupRegistryService(c, v)
-	server.Config.Services.Secrets = setupSecretService(c, v)
+	server.Config.Services.Secrets = setupSecretService(c, encryptedSecretStore)
 	server.Config.Services.Environ = setupEnvironService(c, v)
 	server.Config.Services.Membership = setupMembershipService(c, f)
 

@@ -54,7 +54,7 @@ func (svc *tinkEncryptionService) rotate() {
 
 func (svc *tinkEncryptionService) updateCiphertextSample() {
 	ciphertext := svc.Encrypt(svc.primaryKeyId, keyIdAAD)
-	err := svc.store.ServerConfigSet(tinkCiphertextSampleConfigKey, ciphertext)
+	err := svc.store.ServerConfigSet(ciphertextSampleConfigKey, ciphertext)
 	if err != nil {
 		log.Fatal().Err(err).Msgf("Rotating secrets encryption key failed: could not update server config")
 	}
@@ -62,29 +62,36 @@ func (svc *tinkEncryptionService) updateCiphertextSample() {
 }
 
 func (svc *tinkEncryptionService) deleteCiphertextSample() {
-	err := svc.store.ServerConfigDelete(tinkCiphertextSampleConfigKey)
+	err := svc.store.ServerConfigDelete(ciphertextSampleConfigKey)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Disabling secrets encryption failed: could not update server config")
 	}
 }
 
+func (svc *tinkEncryptionService) initClients() {
+	for _, client := range svc.clients {
+		client.InitEncryption(svc)
+	}
+	log.Info().Msg("Initialized encryption on registered services")
+}
+
 func (svc *tinkEncryptionService) callbackOnEnable() {
 	for _, client := range svc.clients {
-		client.OnEnableEncryption()
+		client.EnableEncryption()
 	}
 	log.Info().Msg("Enabled secrets encryption on registered services")
 }
 
 func (svc *tinkEncryptionService) callbackOnRotation() {
 	for _, client := range svc.clients {
-		client.OnRotateEncryption(svc)
+		client.MigrateEncryption(svc)
 	}
 	log.Info().Msg("Rotated secrets encryption key on registered services")
 }
 
 func (svc *tinkEncryptionService) callbackOnDisable() {
 	for _, client := range svc.clients {
-		client.OnDisableEncryption()
+		client.MigrateEncryption(&noEncryption{})
 	}
 	log.Info().Msg("Disabled secrets encryption on registered services")
 }
