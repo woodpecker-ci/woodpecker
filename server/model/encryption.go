@@ -18,8 +18,8 @@ type EncryptionService interface {
 }
 
 type EncryptionClient interface {
-	// InitEncryption should be available only once
-	InitEncryption(encryption EncryptionService)
+	// SetEncryptionService should be used only by EncryptionServiceBuilder
+	SetEncryptionService(encryption EncryptionService)
 	// EnableEncryption should encrypt all service data
 	EnableEncryption()
 	// MigrateEncryption should decrypt all existing data and encrypt it with new encryption service

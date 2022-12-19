@@ -14,7 +14,7 @@ func (b noEncryptionBuilder) WithClients(clients []model.EncryptionClient) model
 func (b noEncryptionBuilder) Build() model.EncryptionService {
 	svc := &noEncryption{}
 	for _, client := range b.clients {
-		client.InitEncryption(svc)
+		client.SetEncryptionService(svc)
 	}
 	return svc
 }

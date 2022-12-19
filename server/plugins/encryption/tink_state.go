@@ -70,7 +70,7 @@ func (svc *tinkEncryptionService) deleteCiphertextSample() {
 
 func (svc *tinkEncryptionService) initClients() {
 	for _, client := range svc.clients {
-		client.InitEncryption(svc)
+		client.SetEncryptionService(svc)
 	}
 	log.Info().Msg("Initialized encryption on registered services")
 }

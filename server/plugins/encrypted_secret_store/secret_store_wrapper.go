@@ -16,7 +16,7 @@ func New(secretStore model.SecretStore) *EncryptedSecretStore {
 	return &wrapper
 }
 
-func (wrapper *EncryptedSecretStore) InitEncryption(encryption model.EncryptionService) {
+func (wrapper *EncryptedSecretStore) SetEncryptionService(encryption model.EncryptionService) {
 	if wrapper.encryption != nil {
 		log.Fatal().Msg("Attempt to init more than once")
 	}
