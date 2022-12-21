@@ -58,12 +58,13 @@ func (b builder) WithClient(client model.EncryptionClient) model.EncryptionBuild
 func (b builder) Build() {
 	enabled := b.isEnabled()
 	disableFlag := b.ctx.Bool(disableEncryptionConfigFlag)
+	keyType := b.detectKeyType()
 
-	if !enabled && disableFlag {
+	if !enabled && (disableFlag || keyType == keyTypeNone) {
 		noEncryptionBuilder{}.WithClients(b.clients).Build()
 		return
 	}
-	svc := b.getService(b.detectKeyType())
+	svc := b.getService(keyType)
 	if disableFlag {
 		svc.Disable()
 	}
