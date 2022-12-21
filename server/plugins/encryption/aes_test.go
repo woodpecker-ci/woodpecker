@@ -6,18 +6,18 @@ import (
 	"testing"
 )
 
-func TestShortEncryptDecrypt(t *testing.T) {
+func TestEncryptDecryptShortMessage(t *testing.T) {
 	aes := &aesEncryptionService{}
-	aes.loadCipher([]byte("eThWmZq4t7w!z%C*F-JaNdRfUjXn2r5u"))
+	aes.loadCipher(random.GetRandomBytes(32))
 	input := string(random.GetRandomBytes(4))
 	cipher := aes.Encrypt(input, "")
 	output := aes.Decrypt(cipher, "")
 	assert.Equal(t, input, output)
 }
 
-func TestLongEncryptDecrypt(t *testing.T) {
+func TestEncryptDecryptLongMessage(t *testing.T) {
 	aes := &aesEncryptionService{}
-	aes.loadCipher([]byte("eThWmZq4t7w!z%C*F-JaNdRfUjXn2r5u"))
+	aes.loadCipher(random.GetRandomBytes(32))
 	input := string(random.GetRandomBytes(1024))
 	cipher := aes.Encrypt(input, "")
 	output := aes.Decrypt(cipher, "")
