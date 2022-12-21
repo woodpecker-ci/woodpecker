@@ -23,8 +23,14 @@ func (wrapper *EncryptedSecretStore) SecretList(repo *model.Repo, b bool) ([]*mo
 }
 
 func (wrapper *EncryptedSecretStore) SecretCreate(secret *model.Secret) error {
+	new := &model.Secret{}
+	err := wrapper.store.SecretCreate(new)
+	if err != nil {
+		return err
+	}
+	secret.ID = new.ID
 	wrapper.encrypt(secret)
-	err := wrapper.store.SecretCreate(secret)
+	err = wrapper.store.SecretUpdate(secret)
 	wrapper.decrypt(secret)
 	return err
 }

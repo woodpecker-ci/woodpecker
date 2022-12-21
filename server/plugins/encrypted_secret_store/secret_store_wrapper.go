@@ -25,7 +25,7 @@ func (wrapper *EncryptedSecretStore) SetEncryptionService(encryption model.Encry
 
 func (wrapper *EncryptedSecretStore) EnableEncryption() {
 	log.Warn().Msg("Encrypting all secrets in database")
-	secrets, err := wrapper.store.GlobalSecretList()
+	secrets, err := wrapper.store.SecretListAll()
 	if err != nil {
 		log.Fatal().Err(err).Msg("Secrets encryption failed: could not fetch secrets from DB")
 	}
@@ -38,7 +38,7 @@ func (wrapper *EncryptedSecretStore) EnableEncryption() {
 
 func (wrapper *EncryptedSecretStore) MigrateEncryption(newEncryptionService model.EncryptionService) {
 	log.Warn().Msg("Migrating secrets encryption")
-	secrets, err := wrapper.store.GlobalSecretList()
+	secrets, err := wrapper.store.SecretListAll()
 	if err != nil {
 		log.Fatal().Err(err).Msg("Secrets encryption migration failed: could not fetch secrets from DB")
 	}
