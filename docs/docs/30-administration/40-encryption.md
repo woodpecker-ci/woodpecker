@@ -55,7 +55,7 @@ tinkey create-keyset --key-template AES256_GCM --out-format json --out keyset.js
 ### Key rotation
 Use `tinkey` to rotate encryption keys in your existing keyset:
 ```shell
-tinkey rotate-keyset —in keyset_v1.json —out keyset_v2.json —key-template AES256_GCM
+tinkey rotate-keyset --in keyset_v1.json --out keyset_v2.json --key-template AES256_GCM
 ```
 
 Then you just need to replace server keyset file with the new one. At the moment server detects new encryption

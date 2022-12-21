@@ -96,11 +96,12 @@ func (svc *aesEncryptionService) alignDataByChainSize(data []byte) []byte {
 	chainSize := svc.blockSize()
 	var resultChains = len(data) / chainSize
 	if resultChains*chainSize < len(data) {
-		addSz := len(data) - resultChains*chainSize
 		// add some salt to last aesChain
 		if len(data) > chainSize {
+			addSz := len(data) - resultChains*chainSize
 			data = append(data, data[len(data)-chainSize-addSz:len(data)-addSz]...)
 		} else {
+			addSz := chainSize - len(data)
 			data = append(data, bytes.Repeat([]byte{data[0]}, addSz)...)
 		}
 	}

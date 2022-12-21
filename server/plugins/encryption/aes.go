@@ -50,7 +50,7 @@ func (svc *aesEncryptionService) Encrypt(plaintext string, _ string) string {
 	return base64.StdEncoding.EncodeToString(encrypted)
 }
 
-func (svc *aesEncryptionService) Decrypt(ciphertext string, associatedData string) string {
+func (svc *aesEncryptionService) Decrypt(ciphertext string, _ string) string {
 	ct, err := base64.StdEncoding.DecodeString(ciphertext)
 	if err != nil {
 		log.Fatal().Err(err).Msgf("encryption error: Base64 decryption failed")
