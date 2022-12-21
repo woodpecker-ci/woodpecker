@@ -26,10 +26,10 @@ import (
 )
 
 func (svc *tinkEncryptionService) loadKeyset() {
-	log.Warn().Msgf("Loading secrets encryption keyset from file: %s", svc.keysetFilePath)
+	log.Warn().Msgf("loading encryption keyset from file: %s", svc.keysetFilePath)
 	file, err := os.Open(svc.keysetFilePath)
 	if err != nil {
-		log.Fatal().Err(err).Msgf("encryptionError opening secret encryption keyset file")
+		log.Fatal().Err(err).Msgf("encryption error: failed opening encryption keyset file")
 	}
 	defer func(file *os.File) {
 		err = file.Close()
@@ -41,13 +41,13 @@ func (svc *tinkEncryptionService) loadKeyset() {
 	jsonKeyset := keyset.NewJSONReader(file)
 	keysetHandle, err := insecurecleartextkeyset.Read(jsonKeyset)
 	if err != nil {
-		log.Fatal().Err(err).Msgf("encryptionError reading secret encryption keyset")
+		log.Fatal().Err(err).Msgf("encryption error: failed reading encryption keyset")
 	}
 	svc.primaryKeyId = strconv.FormatUint(uint64(keysetHandle.KeysetInfo().PrimaryKeyId), 10)
 
 	encryptionInstance, err := aead.New(keysetHandle)
 	if err != nil {
-		log.Fatal().Err(err).Msgf("encryptionError initializing secret encryption")
+		log.Fatal().Err(err).Msgf("encryption error: failed initializing encryption")
 	}
 	svc.encryption = encryptionInstance
 }
@@ -57,7 +57,7 @@ func (svc *tinkEncryptionService) validateKeyset() error {
 	if errors.Is(err, types.RecordNotExist) {
 		return encryptionNotEnabledError
 	} else if err != nil {
-		log.Fatal().Err(err).Msgf("Could not fetch server configuration")
+		log.Fatal().Err(err).Msgf("could not fetch server configuration")
 	}
 
 	plaintext := svc.Decrypt(ciphertextSample, keyIdAAD)

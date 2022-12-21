@@ -97,13 +97,15 @@ func (b builder) detectKeyType() string {
 	return keyTypeNone
 }
 
-func (b builder) serviceBuilder(encryptionType string) model.EncryptionServiceBuilder {
-	if encryptionType == keyTypeTink {
+func (b builder) serviceBuilder(keyType string) model.EncryptionServiceBuilder {
+	if keyType == keyTypeTink {
 		return newTink(b.ctx, b.store)
-	} else if encryptionType == keyTypeNone {
+	} else if keyType == keyTypeRaw {
+		return newAES(b.ctx, b.store)
+	} else if keyType == keyTypeNone {
 		return &noEncryptionBuilder{}
 	} else {
-		log.Fatal().Msgf("unsupported encryption type: %s", encryptionType)
+		log.Fatal().Msgf("unsupported encryption key type: %s", keyType)
 		return nil
 	}
 }

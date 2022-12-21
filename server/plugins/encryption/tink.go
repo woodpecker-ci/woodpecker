@@ -39,7 +39,7 @@ func (svc *tinkEncryptionService) Encrypt(plaintext string, associatedData strin
 	aad := []byte(associatedData)
 	ciphertext, err := svc.encryption.Encrypt(msg, aad)
 	if err != nil {
-		log.Fatal().Err(err).Msgf("Encryption error")
+		log.Fatal().Err(err).Msgf("encryption error")
 	}
 	return base64.StdEncoding.EncodeToString(ciphertext)
 }
@@ -47,12 +47,12 @@ func (svc *tinkEncryptionService) Encrypt(plaintext string, associatedData strin
 func (svc *tinkEncryptionService) Decrypt(ciphertext string, associatedData string) string {
 	ct, err := base64.StdEncoding.DecodeString(ciphertext)
 	if err != nil {
-		log.Fatal().Err(err).Msgf("Secrets encryption: Base64 decryption error")
+		log.Fatal().Err(err).Msgf("encryption error: Base64 decryption failed")
 	}
 
 	plaintext, err := svc.encryption.Decrypt(ct, []byte(associatedData))
 	if err != nil {
-		log.Fatal().Err(err).Msgf("Decryption error")
+		log.Fatal().Err(err).Msgf("decryption error")
 	}
 
 	return string(plaintext)

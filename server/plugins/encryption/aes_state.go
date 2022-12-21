@@ -14,46 +14,29 @@
 
 package encryption
 
-import (
-	"github.com/rs/zerolog/log"
-)
+import "github.com/rs/zerolog/log"
 
-func (svc *tinkEncryptionService) enable() {
+func (svc *aesEncryptionService) initClients() {
+	for _, client := range svc.clients {
+		client.SetEncryptionService(svc)
+	}
+	log.Info().Msg("initialized encryption on registered services")
+}
+
+func (svc *aesEncryptionService) enable() {
 	svc.callbackOnEnable()
 	svc.updateCiphertextSample()
 	log.Warn().Msg("encryption enabled")
 }
 
-func (svc *tinkEncryptionService) disable() {
+func (svc *aesEncryptionService) disable() {
 	svc.callbackOnDisable()
 	svc.deleteCiphertextSample()
 	log.Warn().Msg("encryption disabled")
 }
 
-func (svc *tinkEncryptionService) rotate() {
-	newSvc := &tinkEncryptionService{
-		keysetFilePath:    svc.keysetFilePath,
-		primaryKeyId:      "",
-		encryption:        nil,
-		store:             svc.store,
-		keysetFileWatcher: nil,
-		clients:           svc.clients,
-	}
-	newSvc.loadKeyset()
-
-	err := newSvc.validateKeyset()
-	if err == encryptionKeyRotatedError {
-		newSvc.updateCiphertextSample()
-	} else if err != nil {
-		log.Fatal().Err(err).Msgf("rotated encryption key validation failed")
-	}
-
-	newSvc.callbackOnRotation()
-	newSvc.initFileWatcher()
-}
-
-func (svc *tinkEncryptionService) updateCiphertextSample() {
-	ciphertext := svc.Encrypt(svc.primaryKeyId, keyIdAAD)
+func (svc *aesEncryptionService) updateCiphertextSample() {
+	ciphertext := svc.Encrypt(svc.keyId, keyIdAAD)
 	err := svc.store.ServerConfigSet(ciphertextSampleConfigKey, ciphertext)
 	if err != nil {
 		log.Fatal().Err(err).Msgf("updating encryption key failed: could not update server config")
@@ -61,37 +44,23 @@ func (svc *tinkEncryptionService) updateCiphertextSample() {
 	log.Info().Msg("registered new encryption key")
 }
 
-func (svc *tinkEncryptionService) deleteCiphertextSample() {
+func (svc *aesEncryptionService) deleteCiphertextSample() {
 	err := svc.store.ServerConfigDelete(ciphertextSampleConfigKey)
 	if err != nil {
 		log.Fatal().Err(err).Msg("disabling encryption failed: could not update server config")
 	}
 }
 
-func (svc *tinkEncryptionService) initClients() {
-	for _, client := range svc.clients {
-		client.SetEncryptionService(svc)
-	}
-	log.Info().Msg("Initialized encryption on registered services")
-}
-
-func (svc *tinkEncryptionService) callbackOnEnable() {
+func (svc *aesEncryptionService) callbackOnEnable() {
 	for _, client := range svc.clients {
 		client.EnableEncryption()
 	}
 	log.Info().Msg("enabled encryption on registered services")
 }
 
-func (svc *tinkEncryptionService) callbackOnRotation() {
-	for _, client := range svc.clients {
-		client.MigrateEncryption(svc)
-	}
-	log.Info().Msg("updated encryption key on registered services")
-}
-
-func (svc *tinkEncryptionService) callbackOnDisable() {
+func (svc *aesEncryptionService) callbackOnDisable() {
 	for _, client := range svc.clients {
 		client.MigrateEncryption(&noEncryption{})
 	}
-	log.Info().Msg("disabled encryption on registered services")
+	log.Info().Msg("Disabled encryption on registered services")
 }

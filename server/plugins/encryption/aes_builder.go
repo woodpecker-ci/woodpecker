@@ -21,41 +21,35 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
-type tinkConfiguration struct {
-	keysetFilePath string
-	store          store.Store
-	clients        []model.EncryptionClient
+type aesConfiguration struct {
+	key     string
+	store   store.Store
+	clients []model.EncryptionClient
 }
 
-func newTink(ctx *cli.Context, s store.Store) model.EncryptionServiceBuilder {
-	filepath := ctx.String(tinkKeysetFilepathConfigFlag)
-	return &tinkConfiguration{filepath, s, nil}
+func newAES(ctx *cli.Context, s store.Store) model.EncryptionServiceBuilder {
+	key := ctx.String(rawKeyConfigFlag)
+	return &aesConfiguration{key, s, nil}
 }
 
-func (c tinkConfiguration) WithClients(clients []model.EncryptionClient) model.EncryptionServiceBuilder {
+func (c aesConfiguration) WithClients(clients []model.EncryptionClient) model.EncryptionServiceBuilder {
 	c.clients = clients
 	return c
 }
 
-func (c tinkConfiguration) Build() model.EncryptionService {
-	svc := &tinkEncryptionService{
-		keysetFilePath:    c.keysetFilePath,
-		primaryKeyId:      "",
-		encryption:        nil,
-		store:             c.store,
-		keysetFileWatcher: nil,
-		clients:           c.clients,
+func (c aesConfiguration) Build() model.EncryptionService {
+	svc := &aesEncryptionService{
+		cipher:  nil,
+		store:   c.store,
+		clients: c.clients,
 	}
 	svc.initClients()
-	svc.loadKeyset()
-	err := svc.validateKeyset()
+	svc.loadCipher([]byte(c.key))
+	err := svc.validateCipher()
 	if err == encryptionNotEnabledError {
 		svc.enable()
 	} else if err == encryptionKeyInvalidError {
 		log.Fatal().Err(err)
-	} else if err == encryptionKeyRotatedError {
-		svc.rotate()
 	}
-	svc.initFileWatcher()
 	return svc
 }
