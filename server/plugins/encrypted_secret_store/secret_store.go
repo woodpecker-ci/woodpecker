@@ -23,12 +23,12 @@ func (wrapper *EncryptedSecretStore) SecretList(repo *model.Repo, b bool) ([]*mo
 }
 
 func (wrapper *EncryptedSecretStore) SecretCreate(secret *model.Secret) error {
-	new := &model.Secret{}
-	err := wrapper.store.SecretCreate(new)
+	newSecret := &model.Secret{}
+	err := wrapper.store.SecretCreate(newSecret)
 	if err != nil {
 		return err
 	}
-	secret.ID = new.ID
+	secret.ID = newSecret.ID
 	wrapper.encrypt(secret)
 	err = wrapper.store.SecretUpdate(secret)
 	wrapper.decrypt(secret)
@@ -75,6 +75,15 @@ func (wrapper *EncryptedSecretStore) GlobalSecretFind(s string) (*model.Secret, 
 
 func (wrapper *EncryptedSecretStore) GlobalSecretList() ([]*model.Secret, error) {
 	results, err := wrapper.store.GlobalSecretList()
+	if err != nil {
+		return nil, err
+	}
+	wrapper.decryptList(results)
+	return results, nil
+}
+
+func (wrapper *EncryptedSecretStore) SecretListAll() ([]*model.Secret, error) {
+	results, err := wrapper.store.SecretListAll()
 	if err != nil {
 		return nil, err
 	}
