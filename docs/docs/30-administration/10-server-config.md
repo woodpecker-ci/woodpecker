@@ -295,7 +295,12 @@ Read the value for `WOODPECKER_DATABASE_DATASOURCE` from the specified filepath
 
 Encryption key used to encrypt secrets in DB. See [secrets encryption](./40-encryption.md)
 
-### `WOODPECKER_ENCRYPTION_TINK_KEYSET_PATH`
+### `WOODPECKER_ENCRYPTION_KEY_FILE`
+> Default: empty
+
+Read the value for `WOODPECKER_ENCRYPTION_KEY` from the specified filepath
+
+### `WOODPECKER_ENCRYPTION_TINK_KEYSET_FILE`
 > Default: empty
 
 Filepath to encryption keyset used to encrypt secrets in DB. See [secrets encryption](./40-encryption.md)
