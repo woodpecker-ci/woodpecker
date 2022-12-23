@@ -12,25 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package constant
+package migration
 
-var PrivilegedPlugins = []string{
-	"plugins/docker",
-	"plugins/gcr",
-	"plugins/ecr",
-	"woodpeckerci/plugin-docker",
-	"woodpeckerci/plugin-docker-buildx",
-}
-
-// DefaultConfigOrder represent the priority in witch woodpecker search for a pipeline config by default
-// folders are indicated by supplying a trailing /
-var DefaultConfigOrder = [...]string{
-	".woodpecker/",
-	".woodpecker.yml",
-	".woodpecker.yaml",
-	".drone.yml",
-}
-
-const (
-	DefaultCloneImage = "docker.io/woodpeckerci/plugin-git:2.0"
+import (
+	"xorm.io/xorm"
 )
+
+var renameForgeIDToForgeRemoteID = task{
+	name:     "rename-forge-id-to-forge-remote-id",
+	required: true,
+	fn: func(sess *xorm.Session) error {
+		if err := renameColumn(sess, "repos", "forge_id", "forge_remote_id"); err != nil {
+			return err
+		}
+
+		return nil
+	},
+}

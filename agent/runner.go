@@ -17,10 +17,7 @@ package agent
 
 import (
 	"context"
-	"encoding/json"
-	"io"
-	"runtime"
-	"strconv"
+	"errors"
 	"sync"
 	"time"
 
@@ -30,7 +27,6 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/pipeline"
 	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
-	"github.com/woodpecker-ci/woodpecker/pipeline/multipart"
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
 	"github.com/woodpecker-ci/woodpecker/shared/utils"
 )
@@ -61,14 +57,14 @@ func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, state *State, backen
 	}
 }
 
-func (r *Runner) Run(ctx context.Context) error {
+func (r *Runner) Run(runnerCtx context.Context) error {
 	log.Debug().Msg("request next execution")
 
-	meta, _ := metadata.FromOutgoingContext(ctx)
+	meta, _ := metadata.FromOutgoingContext(runnerCtx)
 	ctxmeta := metadata.NewOutgoingContext(context.Background(), meta)
 
 	// get the next workflow from the queue
-	work, err := r.client.Next(ctx, r.filter)
+	work, err := r.client.Next(runnerCtx, r.filter)
 	if err != nil {
 		return err
 	}
@@ -100,13 +96,13 @@ func (r *Runner) Run(ctx context.Context) error {
 
 	logger.Debug().Msg("received execution")
 
-	ctx, cancel := context.WithTimeout(ctxmeta, timeout)
+	workflowCtx, cancel := context.WithTimeout(ctxmeta, timeout)
 	defer cancel()
 
 	// Add sigterm support for internal context.
 	// Required when the pipeline is terminated by external signals
 	// like kubernetes.
-	ctx = utils.WithContextSigtermCallback(ctx, func() {
+	workflowCtx = utils.WithContextSigtermCallback(workflowCtx, func() {
 		logger.Error().Msg("Received sigterm termination signal")
 	})
 
@@ -114,7 +110,7 @@ func (r *Runner) Run(ctx context.Context) error {
 	go func() {
 		logger.Debug().Msg("listen for cancel signal")
 
-		if werr := r.client.Wait(ctx, work.ID); werr != nil {
+		if werr := r.client.Wait(workflowCtx, work.ID); werr != nil {
 			canceled.SetTo(true)
 			logger.Warn().Err(werr).Msg("cancel signal received")
 
@@ -127,14 +123,14 @@ func (r *Runner) Run(ctx context.Context) error {
 	go func() {
 		for {
 			select {
-			case <-ctx.Done():
+			case <-workflowCtx.Done():
 				logger.Debug().Msg("pipeline done")
 
 				return
 			case <-time.After(time.Minute):
 				logger.Debug().Msg("pipeline lease renewed")
 
-				if err := r.client.Extend(ctx, work.ID); err != nil {
+				if err := r.client.Extend(workflowCtx, work.ID); err != nil {
 					log.Error().Err(err).Msg("extending pipeline deadline failed")
 				}
 			}
@@ -150,211 +146,46 @@ func (r *Runner) Run(ctx context.Context) error {
 	}
 
 	var uploads sync.WaitGroup
-	defaultLogger := pipeline.LogFunc(func(step *backend.Step, rc multipart.Reader) error {
-		loglogger := logger.With().
-			Str("image", step.Image).
-			Str("stage", step.Alias).
-			Logger()
-
-		part, rerr := rc.NextPart()
-		if rerr != nil {
-			return rerr
-		}
-		uploads.Add(1)
-
-		var secrets []string
-		for _, secret := range work.Config.Secrets {
-			if secret.Mask {
-				secrets = append(secrets, secret.Value)
-			}
-		}
-
-		loglogger.Debug().Msg("log stream opened")
-
-		limitedPart := io.LimitReader(part, maxLogsUpload)
-		logStream := rpc.NewLineWriter(r.client, work.ID, step.Alias, secrets...)
-		if _, err := io.Copy(logStream, limitedPart); err != nil {
-			log.Error().Err(err).Msg("copy limited logStream part")
-		}
-
-		loglogger.Debug().Msg("log stream copied")
-
-		data, err := json.Marshal(logStream.Lines())
-		if err != nil {
-			loglogger.Err(err).Msg("could not marshal logstream")
-		}
-
-		file := &rpc.File{
-			Mime: "application/json+logs",
-			Step: step.Alias,
-			Name: "logs.json",
-			Data: data,
-			Size: len(data),
-			Time: time.Now().Unix(),
-		}
-
-		loglogger.Debug().Msg("log stream uploading")
-		if serr := r.client.Upload(ctxmeta, work.ID, file); serr != nil {
-			loglogger.Error().Err(serr).Msg("log stream upload error")
-		} else {
-			loglogger.Debug().Msg("log stream upload complete")
-		}
-
-		defer func() {
-			loglogger.Debug().Msg("log stream closed")
-			uploads.Done()
-		}()
-
-		part, rerr = rc.NextPart()
-		if rerr != nil {
-			return nil
-		}
-		// TODO should be configurable
-		limitedPart = io.LimitReader(part, maxFileUpload)
-		data, err = io.ReadAll(limitedPart)
-		if err != nil {
-			loglogger.Err(err).Msg("could not read limited part")
-		}
-
-		file = &rpc.File{
-			Mime: part.Header().Get("Content-Type"),
-			Step: step.Alias,
-			Name: part.FileName(),
-			Data: data,
-			Size: len(data),
-			Time: time.Now().Unix(),
-			Meta: make(map[string]string),
-		}
-		for key, value := range part.Header() {
-			file.Meta[key] = value[0]
-		}
-
-		loglogger.Debug().
-			Str("file", file.Name).
-			Str("mime", file.Mime).
-			Msg("file stream uploading")
-
-		if serr := r.client.Upload(ctxmeta, work.ID, file); serr != nil {
-			loglogger.Error().
-				Err(serr).
-				Str("file", file.Name).
-				Str("mime", file.Mime).
-				Msg("file stream upload error")
-		}
-
-		loglogger.Debug().
-			Str("file", file.Name).
-			Str("mime", file.Mime).
-			Msg("file stream upload complete")
-		return nil
-	})
-
-	defaultTracer := pipeline.TraceFunc(func(state *pipeline.State) error {
-		steplogger := logger.With().
-			Str("image", state.Pipeline.Step.Image).
-			Str("stage", state.Pipeline.Step.Alias).
-			Err(state.Process.Error).
-			Int("exit_code", state.Process.ExitCode).
-			Bool("exited", state.Process.Exited).
-			Logger()
-
-		stepState := rpc.State{
-			Step:     state.Pipeline.Step.Alias,
-			Exited:   state.Process.Exited,
-			ExitCode: state.Process.ExitCode,
-			Started:  time.Now().Unix(), // TODO do not do this
-			Finished: time.Now().Unix(),
-		}
-		if state.Process.Error != nil {
-			stepState.Error = state.Process.Error.Error()
-		}
-
-		defer func() {
-			steplogger.Debug().Msg("update step status")
-
-			if uerr := r.client.Update(ctxmeta, work.ID, stepState); uerr != nil {
-				steplogger.Debug().
-					Err(uerr).
-					Msg("update step status error")
-			}
-
-			steplogger.Debug().Msg("update step status complete")
-		}()
-		if state.Process.Exited {
-			return nil
-		}
-		if state.Pipeline.Step.Environment == nil {
-			state.Pipeline.Step.Environment = map[string]string{}
-		}
-
-		// TODO: find better way to update this state and move it to pipeline to have the same env in cli-exec
-		state.Pipeline.Step.Environment["CI_MACHINE"] = r.hostname
-
-		state.Pipeline.Step.Environment["CI_PIPELINE_STATUS"] = "success"
-		state.Pipeline.Step.Environment["CI_PIPELINE_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
-		state.Pipeline.Step.Environment["CI_PIPELINE_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
-
-		state.Pipeline.Step.Environment["CI_STEP_STATUS"] = "success"
-		state.Pipeline.Step.Environment["CI_STEP_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
-		state.Pipeline.Step.Environment["CI_STEP_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
-
-		state.Pipeline.Step.Environment["CI_SYSTEM_ARCH"] = runtime.GOOS + "/" + runtime.GOARCH
-
-		// DEPRECATED
-		state.Pipeline.Step.Environment["CI_BUILD_STATUS"] = "success"
-		state.Pipeline.Step.Environment["CI_BUILD_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
-		state.Pipeline.Step.Environment["CI_BUILD_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
-		state.Pipeline.Step.Environment["CI_JOB_STATUS"] = "success"
-		state.Pipeline.Step.Environment["CI_JOB_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
-		state.Pipeline.Step.Environment["CI_JOB_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
-
-		if state.Pipeline.Error != nil {
-			state.Pipeline.Step.Environment["CI_PIPELINE_STATUS"] = "failure"
-			state.Pipeline.Step.Environment["CI_STEP_STATUS"] = "failure"
-
-			// DEPRECATED
-			state.Pipeline.Step.Environment["CI_BUILD_STATUS"] = "failure"
-			state.Pipeline.Step.Environment["CI_JOB_STATUS"] = "failure"
-		}
-		return nil
-	})
-
 	err = pipeline.New(work.Config,
-		pipeline.WithContext(ctx),
-		pipeline.WithLogger(defaultLogger),
-		pipeline.WithTracer(defaultTracer),
+		pipeline.WithContext(workflowCtx),
+		pipeline.WithLogger(r.createLogger(ctxmeta, logger, &uploads, work)),
+		pipeline.WithTracer(r.createTracer(ctxmeta, logger, work)),
 		pipeline.WithEngine(*r.engine),
 		pipeline.WithDescription(map[string]string{
 			"ID":       work.ID,
 			"Repo":     repoName,
 			"Pipeline": pipelineNumber,
 		}),
-	).Run()
+	).Run(runnerCtx)
 
 	state.Finished = time.Now().Unix()
 	state.Exited = true
-	if err != nil {
-		switch xerr := err.(type) {
-		case *pipeline.ExitError:
-			state.ExitCode = xerr.Code
-		default:
+
+	if canceled.IsSet() {
+		state.Error = ""
+		state.ExitCode = 137
+	} else if err != nil {
+		pExitError := &pipeline.ExitError{}
+		if errors.As(err, &pExitError) {
+			state.ExitCode = pExitError.Code
+		} else if errors.Is(err, pipeline.ErrCancel) {
+			state.Error = ""
+			state.ExitCode = 137
+			canceled.SetTo(true)
+		} else {
 			state.ExitCode = 1
 			state.Error = err.Error()
-		}
-		if canceled.IsSet() {
-			state.ExitCode = 137
 		}
 	}
 
 	logger.Debug().
 		Str("error", state.Error).
 		Int("exit_code", state.ExitCode).
+		Bool("canceled", canceled.IsSet()).
 		Msg("pipeline complete")
 
 	logger.Debug().Msg("uploading logs")
-
 	uploads.Wait()
-
 	logger.Debug().Msg("uploading logs complete")
 
 	logger.Debug().
@@ -362,8 +193,7 @@ func (r *Runner) Run(ctx context.Context) error {
 		Int("exit_code", state.ExitCode).
 		Msg("updating pipeline status")
 
-	err = r.client.Done(ctxmeta, work.ID, state)
-	if err != nil {
+	if err := r.client.Done(ctxmeta, work.ID, state); err != nil {
 		logger.Error().Err(err).Msg("updating pipeline status failed")
 	} else {
 		logger.Debug().Msg("updating pipeline status complete")

@@ -17,6 +17,7 @@ package metrics
 import (
 	"errors"
 	"fmt"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -35,7 +36,7 @@ func PromHandler() gin.HandlerFunc {
 		token := server.Config.Prometheus.AuthToken
 
 		if token == "" {
-			handler.ServeHTTP(c.Writer, c.Request)
+			c.AbortWithStatus(http.StatusNotFound)
 			return
 		}
 

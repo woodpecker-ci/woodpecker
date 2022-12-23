@@ -218,14 +218,14 @@ func (c *Gitea) TeamPerm(u *model.User, org string) (*model.Perm, error) {
 }
 
 // Repo returns the Gitea repository.
-func (c *Gitea) Repo(ctx context.Context, u *model.User, id model.ForgeID, owner, name string) (*model.Repo, error) {
+func (c *Gitea) Repo(ctx context.Context, u *model.User, remoteID model.ForgeRemoteID, owner, name string) (*model.Repo, error) {
 	client, err := c.newClientToken(ctx, u.Token)
 	if err != nil {
 		return nil, err
 	}
 
-	if id.IsValid() {
-		intID, err := strconv.ParseInt(string(id), 10, 64)
+	if remoteID.IsValid() {
+		intID, err := strconv.ParseInt(string(remoteID), 10, 64)
 		if err != nil {
 			return nil, err
 		}
@@ -566,7 +566,7 @@ func (c *Gitea) getChangedFilesForPR(ctx context.Context, repo *model.Repo, inde
 		return []string{}, nil
 	}
 
-	repo, err := _store.GetRepoNameFallback(repo.ForgeID, repo.FullName)
+	repo, err := _store.GetRepoNameFallback(repo.ForgeRemoteID, repo.FullName)
 	if err != nil {
 		return nil, err
 	}

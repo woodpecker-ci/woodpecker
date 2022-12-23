@@ -37,16 +37,16 @@ func (g *GitLab) convertGitLabRepo(_repo *gitlab.Project) (*model.Repo, error) {
 	owner := strings.Join(parts[:len(parts)-1], "/")
 	name := parts[len(parts)-1]
 	repo := &model.Repo{
-		ForgeID:      model.ForgeID(fmt.Sprint(_repo.ID)),
-		Owner:        owner,
-		Name:         name,
-		FullName:     _repo.PathWithNamespace,
-		Avatar:       _repo.AvatarURL,
-		Link:         _repo.WebURL,
-		Clone:        _repo.HTTPURLToRepo,
-		Branch:       _repo.DefaultBranch,
-		Visibility:   model.RepoVisibly(_repo.Visibility),
-		IsSCMPrivate: !_repo.Public,
+		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(_repo.ID)),
+		Owner:         owner,
+		Name:          name,
+		FullName:      _repo.PathWithNamespace,
+		Avatar:        _repo.AvatarURL,
+		Link:          _repo.WebURL,
+		Clone:         _repo.HTTPURLToRepo,
+		Branch:        _repo.DefaultBranch,
+		Visibility:    model.RepoVisibly(_repo.Visibility),
+		IsSCMPrivate:  !_repo.Public,
 	}
 
 	if len(repo.Branch) == 0 { // TODO: do we need that?
@@ -88,7 +88,7 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 		repo.FullName = fmt.Sprintf("%s/%s", repo.Owner, repo.Name)
 	}
 
-	repo.ForgeID = model.ForgeID(fmt.Sprint(obj.TargetProjectID))
+	repo.ForgeRemoteID = model.ForgeRemoteID(fmt.Sprint(obj.TargetProjectID))
 	repo.Link = target.WebURL
 
 	if target.GitHTTPURL != "" {
@@ -142,7 +142,7 @@ func convertPushHook(hook *gitlab.PushEvent) (*model.Repo, *model.Pipeline, erro
 		return nil, nil, err
 	}
 
-	repo.ForgeID = model.ForgeID(fmt.Sprint(hook.ProjectID))
+	repo.ForgeRemoteID = model.ForgeRemoteID(fmt.Sprint(hook.ProjectID))
 	repo.Avatar = hook.Project.AvatarURL
 	repo.Link = hook.Project.WebURL
 	repo.Clone = hook.Project.GitHTTPURL
@@ -194,7 +194,7 @@ func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Pipeline, error)
 		return nil, nil, err
 	}
 
-	repo.ForgeID = model.ForgeID(fmt.Sprint(hook.ProjectID))
+	repo.ForgeRemoteID = model.ForgeRemoteID(fmt.Sprint(hook.ProjectID))
 	repo.Avatar = hook.Project.AvatarURL
 	repo.Link = hook.Project.WebURL
 	repo.Clone = hook.Project.GitHTTPURL

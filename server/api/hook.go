@@ -102,7 +102,7 @@ func PostHook(c *gin.Context) {
 		return
 	}
 
-	repo, err := _store.GetRepoNameFallback(tmpRepo.ForgeID, tmpRepo.FullName)
+	repo, err := _store.GetRepoNameFallback(tmpRepo.ForgeRemoteID, tmpRepo.FullName)
 	if err != nil {
 		msg := fmt.Sprintf("failure to get repo %s from store", tmpRepo.FullName)
 		log.Error().Err(err).Msg(msg)

@@ -85,17 +85,17 @@ func convertDesc(status model.StatusValue) string {
 // structure to the common Woodpecker repository structure.
 func convertRepo(from *github.Repository) *model.Repo {
 	repo := &model.Repo{
-		ForgeID:      model.ForgeID(fmt.Sprint(from.GetID())),
-		Name:         from.GetName(),
-		FullName:     from.GetFullName(),
-		Link:         from.GetHTMLURL(),
-		IsSCMPrivate: from.GetPrivate(),
-		Clone:        from.GetCloneURL(),
-		Branch:       from.GetDefaultBranch(),
-		Owner:        from.GetOwner().GetLogin(),
-		Avatar:       from.GetOwner().GetAvatarURL(),
-		Perm:         convertPerm(from.GetPermissions()),
-		SCMKind:      model.RepoGit,
+		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(from.GetID())),
+		Name:          from.GetName(),
+		FullName:      from.GetFullName(),
+		Link:          from.GetHTMLURL(),
+		IsSCMPrivate:  from.GetPrivate(),
+		Clone:         from.GetCloneURL(),
+		Branch:        from.GetDefaultBranch(),
+		Owner:         from.GetOwner().GetLogin(),
+		Avatar:        from.GetOwner().GetAvatarURL(),
+		Perm:          convertPerm(from.GetPermissions()),
+		SCMKind:       model.RepoGit,
 	}
 	if len(repo.Branch) == 0 {
 		repo.Branch = defaultBranch
@@ -146,15 +146,15 @@ func convertTeam(from *github.Organization) *model.Team {
 // from a webhook and convert to the common Woodpecker repository structure.
 func convertRepoHook(eventRepo *github.PushEventRepository) *model.Repo {
 	repo := &model.Repo{
-		ForgeID:      model.ForgeID(fmt.Sprint(eventRepo.GetID())),
-		Owner:        eventRepo.GetOwner().GetLogin(),
-		Name:         eventRepo.GetName(),
-		FullName:     eventRepo.GetFullName(),
-		Link:         eventRepo.GetHTMLURL(),
-		IsSCMPrivate: eventRepo.GetPrivate(),
-		Clone:        eventRepo.GetCloneURL(),
-		Branch:       eventRepo.GetDefaultBranch(),
-		SCMKind:      model.RepoGit,
+		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(eventRepo.GetID())),
+		Owner:         eventRepo.GetOwner().GetLogin(),
+		Name:          eventRepo.GetName(),
+		FullName:      eventRepo.GetFullName(),
+		Link:          eventRepo.GetHTMLURL(),
+		IsSCMPrivate:  eventRepo.GetPrivate(),
+		Clone:         eventRepo.GetCloneURL(),
+		Branch:        eventRepo.GetDefaultBranch(),
+		SCMKind:       model.RepoGit,
 	}
 	if repo.Branch == "" {
 		repo.Branch = defaultBranch
