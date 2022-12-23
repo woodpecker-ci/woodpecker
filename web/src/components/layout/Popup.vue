@@ -14,11 +14,23 @@
 </template>
 
 <script lang="ts" setup>
-defineProps<{
+import { onKeyStroke } from '@vueuse/core';
+import { toRef } from 'vue';
+
+const props = defineProps<{
   open: boolean;
 }>();
 
-defineEmits<{
+const emit = defineEmits<{
   (event: 'close'): void;
 }>();
+
+const open = toRef(props, 'open');
+
+onKeyStroke('Escape', (e) => {
+  e.preventDefault();
+  if (open.value) {
+    emit('close');
+  }
+});
 </script>

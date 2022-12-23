@@ -32,6 +32,13 @@ const (
 	EventManual = "manual"
 )
 
+// Different ways to handle failure states
+const (
+	FailureIgnore = "ignore"
+	FailureFail   = "fail"
+	// FailureCancel = "cancel" // Not implemented yet
+)
+
 type (
 	// Metadata defines runtime m.
 	Metadata struct {
@@ -238,8 +245,6 @@ func (m *Metadata) Environ() map[string]string {
 	if m.Curr.Event == EventPull {
 		params["CI_COMMIT_PULL_REQUEST"] = pullRegexp.FindString(m.Curr.Commit.Ref)
 	}
-
-	m.setDroneEnviron(params)
 
 	return params
 }

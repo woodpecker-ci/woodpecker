@@ -12,33 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package utils
+package migration
 
 import (
-	"context"
-	"os"
-	"os/signal"
-	"syscall"
+	"xorm.io/xorm"
 )
 
-// Returns a copy of parent context that is canceled when
-// an os interrupt signal is received.
-func WithContextSigtermCallback(ctx context.Context, f func()) context.Context {
-	ctx, cancel := context.WithCancel(ctx)
-	go func() {
-		receivedSignal := make(chan os.Signal, 1)
-		signal.Notify(receivedSignal, syscall.SIGINT, syscall.SIGTERM)
-		defer signal.Stop(receivedSignal)
-
-		select {
-		case <-ctx.Done():
-		case <-receivedSignal:
-			cancel()
-			if f != nil {
-				f()
-			}
+var renameForgeIDToForgeRemoteID = task{
+	name:     "rename-forge-id-to-forge-remote-id",
+	required: true,
+	fn: func(sess *xorm.Session) error {
+		if err := renameColumn(sess, "repos", "forge_id", "forge_remote_id"); err != nil {
+			return err
 		}
-	}()
 
-	return ctx
+		return nil
+	},
 }

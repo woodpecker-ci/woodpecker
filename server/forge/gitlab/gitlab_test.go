@@ -30,7 +30,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-func load(t *testing.T, config string) *Gitlab {
+func load(t *testing.T, config string) *GitLab {
 	_url, err := url.Parse(config)
 	if err != nil {
 		t.FailNow()
@@ -38,7 +38,7 @@ func load(t *testing.T, config string) *Gitlab {
 	params := _url.Query()
 	_url.RawQuery = ""
 
-	gitlab := Gitlab{}
+	gitlab := GitLab{}
 	gitlab.URL = _url.String()
 	gitlab.ClientID = params.Get("client_id")
 	gitlab.ClientSecret = params.Get("client_secret")
@@ -51,7 +51,7 @@ func load(t *testing.T, config string) *Gitlab {
 	return &gitlab
 }
 
-func Test_Gitlab(t *testing.T) {
+func Test_GitLab(t *testing.T) {
 	// setup a dummy gitlab server
 	server := testdata.NewServer(t)
 	defer server.Close()
@@ -72,7 +72,7 @@ func Test_Gitlab(t *testing.T) {
 
 	ctx := context.Background()
 	g := goblin.Goblin(t)
-	g.Describe("Gitlab Plugin", func() {
+	g.Describe("GitLab Plugin", func() {
 		// Test projects method
 		g.Describe("AllProjects", func() {
 			g.It("Should return only non-archived projects is hidden", func() {

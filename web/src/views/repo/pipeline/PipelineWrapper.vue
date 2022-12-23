@@ -1,6 +1,12 @@
 <template>
   <template v-if="pipeline && repo">
-    <Scaffold v-model:activeTab="activeTab" enable-tabs disable-hash-mode :go-back="goBack">
+    <Scaffold
+      v-model:activeTab="activeTab"
+      enable-tabs
+      disable-hash-mode
+      :go-back="goBack"
+      :fluid-content="activeTab !== 'tasks'"
+    >
       <template #title>
         <span class="w-full md:w-auto text-center">{{ $t('repo.pipeline.pipeline', { pipelineId }) }}</span>
         <span class="<md:hidden">-</span>
@@ -8,7 +14,7 @@
       </template>
 
       <template #titleActions>
-        <PipelineStatusIcon :pipeline="pipeline" class="flex flex-shrink-0" />
+        <PipelineStatusIcon :status="pipeline.status" class="flex flex-shrink-0" />
 
         <template v-if="repoPermissions.push">
           <Button
@@ -24,6 +30,17 @@
             :text="$t('repo.pipeline.actions.restart')"
             :is-loading="isRestartingPipeline"
             @click="restartPipeline"
+          />
+          <Button
+            v-if="pipeline.status === 'success'"
+            class="flex-shrink-0"
+            :text="$t('repo.pipeline.actions.deploy')"
+            @click="showDeployPipelinePopup = true"
+          />
+          <DeployPipelinePopup
+            :pipeline-number="pipelineId"
+            :open="showDeployPipelinePopup"
+            @close="showDeployPipelinePopup = false"
           />
         </template>
       </template>
@@ -53,15 +70,14 @@
         id="changed-files"
         :title="$t('repo.pipeline.files', { files: pipeline.changed_files?.length || 0 })"
       />
+      <router-view />
     </Scaffold>
-
-    <router-view />
   </template>
 </template>
 
 <script lang="ts">
 import { Tooltip } from 'floating-vue';
-import { computed, defineComponent, inject, onBeforeUnmount, onMounted, provide, Ref, toRef, watch } from 'vue';
+import { computed, defineComponent, inject, onBeforeUnmount, onMounted, provide, Ref, ref, toRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -129,6 +145,8 @@ export default defineComponent({
     provide('pipeline', pipeline);
 
     const { message } = usePipeline(pipeline);
+
+    const showDeployPipelinePopup = ref(false);
 
     async function loadPipeline(): Promise<void> {
       if (!repo) {
@@ -211,6 +229,7 @@ export default defineComponent({
       message,
       isCancelingPipeline,
       isRestartingPipeline,
+      showDeployPipelinePopup,
       activeTab,
       since,
       duration,

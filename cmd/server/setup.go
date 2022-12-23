@@ -190,9 +190,9 @@ func setupMembershipService(_ *cli.Context, r forge.Forge) cache.MembershipServi
 func setupForge(c *cli.Context) (forge.Forge, error) {
 	switch {
 	case c.Bool("github"):
-		return setupGithub(c)
+		return setupGitHub(c)
 	case c.Bool("gitlab"):
-		return setupGitlab(c)
+		return setupGitLab(c)
 	case c.Bool("bitbucket"):
 		return setupBitbucket(c)
 	case c.Bool("stash"):
@@ -265,8 +265,8 @@ func setupStash(c *cli.Context) (forge.Forge, error) {
 	return bitbucketserver.New(opts)
 }
 
-// helper function to setup the Gitlab forge from the CLI arguments.
-func setupGitlab(c *cli.Context) (forge.Forge, error) {
+// helper function to setup the GitLab forge from the CLI arguments.
+func setupGitLab(c *cli.Context) (forge.Forge, error) {
 	return gitlab.New(gitlab.Opts{
 		URL:          c.String("gitlab-server"),
 		ClientID:     c.String("gitlab-client"),
@@ -276,7 +276,7 @@ func setupGitlab(c *cli.Context) (forge.Forge, error) {
 }
 
 // helper function to setup the GitHub forge from the CLI arguments.
-func setupGithub(c *cli.Context) (forge.Forge, error) {
+func setupGitHub(c *cli.Context) (forge.Forge, error) {
 	opts := github.Opts{
 		URL:        c.String("github-server"),
 		Client:     c.String("github-client"),

@@ -12,7 +12,7 @@ import (
 
 var cronInfoCmd = &cli.Command{
 	Name:      "info",
-	Usage:     "display cron info",
+	Usage:     "display info about a cron job",
 	ArgsUsage: "[repo/name]",
 	Action:    cronInfo,
 	Flags: append(common.GlobalFlags,

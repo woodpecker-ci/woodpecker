@@ -296,13 +296,13 @@ func (_m *Forge) Perm(ctx context.Context, u *model.User, r *model.Repo) (*model
 	return r0, r1
 }
 
-// Repo provides a mock function with given fields: ctx, u, id, owner, name
-func (_m *Forge) Repo(ctx context.Context, u *model.User, id model.ForgeID, owner string, name string) (*model.Repo, error) {
-	ret := _m.Called(ctx, u, id, owner, name)
+// Repo provides a mock function with given fields: ctx, u, remoteID, owner, name
+func (_m *Forge) Repo(ctx context.Context, u *model.User, remoteID model.ForgeRemoteID, owner string, name string) (*model.Repo, error) {
+	ret := _m.Called(ctx, u, remoteID, owner, name)
 
 	var r0 *model.Repo
-	if rf, ok := ret.Get(0).(func(context.Context, *model.User, model.ForgeID, string, string) *model.Repo); ok {
-		r0 = rf(ctx, u, id, owner, name)
+	if rf, ok := ret.Get(0).(func(context.Context, *model.User, model.ForgeRemoteID, string, string) *model.Repo); ok {
+		r0 = rf(ctx, u, remoteID, owner, name)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*model.Repo)
@@ -310,8 +310,8 @@ func (_m *Forge) Repo(ctx context.Context, u *model.User, id model.ForgeID, owne
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, *model.User, model.ForgeID, string, string) error); ok {
-		r1 = rf(ctx, u, id, owner, name)
+	if rf, ok := ret.Get(1).(func(context.Context, *model.User, model.ForgeRemoteID, string, string) error); ok {
+		r1 = rf(ctx, u, remoteID, owner, name)
 	} else {
 		r1 = ret.Error(1)
 	}

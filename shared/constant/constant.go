@@ -22,7 +22,7 @@ var PrivilegedPlugins = []string{
 	"woodpeckerci/plugin-docker-buildx",
 }
 
-// DefaultConfigOrder represent the priority in witch woodpecker serarch for a pipeline config by default
+// DefaultConfigOrder represent the priority in witch woodpecker search for a pipeline config by default
 // folders are indicated by supplying a trailing /
 var DefaultConfigOrder = [...]string{
 	".woodpecker/",
@@ -32,7 +32,7 @@ var DefaultConfigOrder = [...]string{
 }
 
 const (
-	DefaultCloneImage = "docker.io/woodpeckerci/plugin-git:v1.6.0"
+	DefaultCloneImage = "docker.io/woodpeckerci/plugin-git:2.0"
 )
 
 var TrustedCloneImages = []string{
