@@ -5,7 +5,7 @@ import {
   PipelineConfig,
   PipelineFeed,
   PipelineLog,
-  PipelineProc,
+  PipelineStep,
   Registry,
   Repo,
   RepoPermissions,
@@ -23,6 +23,13 @@ type PipelineOptions = {
   branch: string;
   variables: Record<string, string>;
 };
+
+type DeploymentOptions = {
+  id: string;
+  environment: string;
+  variables: Record<string, string>;
+};
+
 export default class WoodpeckerClient extends ApiClient {
   getRepoList(opts?: RepoListOptions): Promise<Repo[]> {
     const query = encodeQueryString(opts);
@@ -62,6 +69,18 @@ export default class WoodpeckerClient extends ApiClient {
     return this._post(`/api/repos/${owner}/${repo}/pipelines`, options) as Promise<Pipeline>;
   }
 
+  // Deploy triggers a deployment for an existing pipeline using the
+  // specified target environment.
+  deployPipeline(owner: string, repo: string, number: number, options: DeploymentOptions): Promise<Pipeline> {
+    const vars = {
+      ...options.variables,
+      event: 'deployment',
+      deploy_to: options.environment,
+    };
+    const query = encodeQueryString(vars);
+    return this._post(`/api/repos/${owner}/${repo}/pipelines/${number}?${query}`) as Promise<Pipeline>;
+  }
+
   getPipelineList(owner: string, repo: string, opts?: Record<string, string | number | boolean>): Promise<Pipeline[]> {
     const query = encodeQueryString(opts);
     return this._get(`/api/repos/${owner}/${repo}/pipelines?${query}`) as Promise<Pipeline[]>;
@@ -80,8 +99,8 @@ export default class WoodpeckerClient extends ApiClient {
     return this._get(`/api/user/feed?${query}`) as Promise<PipelineFeed[]>;
   }
 
-  cancelPipeline(owner: string, repo: string, number: number, ppid: number): Promise<unknown> {
-    return this._delete(`/api/repos/${owner}/${repo}/pipelines/${number}/${ppid}`);
+  cancelPipeline(owner: string, repo: string, number: number): Promise<unknown> {
+    return this._post(`/api/repos/${owner}/${repo}/pipelines/${number}/cancel`);
   }
 
   approvePipeline(owner: string, repo: string, pipeline: string): Promise<unknown> {
@@ -102,12 +121,12 @@ export default class WoodpeckerClient extends ApiClient {
     return this._post(`/api/repos/${owner}/${repo}/pipelines/${pipeline}?${query}`);
   }
 
-  getLogs(owner: string, repo: string, pipeline: number, proc: number): Promise<PipelineLog[]> {
-    return this._get(`/api/repos/${owner}/${repo}/logs/${pipeline}/${proc}`) as Promise<PipelineLog[]>;
+  getLogs(owner: string, repo: string, pipeline: number, step: number): Promise<PipelineLog[]> {
+    return this._get(`/api/repos/${owner}/${repo}/logs/${pipeline}/${step}`) as Promise<PipelineLog[]>;
   }
 
-  getArtifact(owner: string, repo: string, pipeline: string, proc: string, file: string): Promise<unknown> {
-    return this._get(`/api/repos/${owner}/${repo}/files/${pipeline}/${proc}/${file}?raw=true`);
+  getArtifact(owner: string, repo: string, pipeline: string, step: string, file: string): Promise<unknown> {
+    return this._get(`/api/repos/${owner}/${repo}/files/${pipeline}/${step}/${file}?raw=true`);
   }
 
   getArtifactList(owner: string, repo: string, pipeline: string): Promise<unknown> {
@@ -162,6 +181,10 @@ export default class WoodpeckerClient extends ApiClient {
     return this._delete(`/api/repos/${owner}/${repo}/cron/${cronId}`);
   }
 
+  runCron(owner: string, repo: string, cronId: number): Promise<Pipeline> {
+    return this._post(`/api/repos/${owner}/${repo}/cron/${cronId}`) as Promise<Pipeline>;
+  }
+
   getOrgPermissions(owner: string): Promise<OrgPermissions> {
     return this._get(`/api/orgs/${owner}/permissions`) as Promise<OrgPermissions>;
   }
@@ -207,7 +230,7 @@ export default class WoodpeckerClient extends ApiClient {
   }
 
   // eslint-disable-next-line promise/prefer-await-to-callbacks
-  on(callback: (data: { pipeline?: Pipeline; repo?: Repo; proc?: PipelineProc }) => void): EventSource {
+  on(callback: (data: { pipeline?: Pipeline; repo?: Repo; step?: PipelineStep }) => void): EventSource {
     return this._subscribe('/stream/events', callback, {
       reconnect: true,
     });
@@ -217,11 +240,11 @@ export default class WoodpeckerClient extends ApiClient {
     owner: string,
     repo: string,
     pipeline: number,
-    proc: number,
+    step: number,
     // eslint-disable-next-line promise/prefer-await-to-callbacks
     callback: (data: PipelineLog) => void,
   ): EventSource {
-    return this._subscribe(`/stream/logs/${owner}/${repo}/${pipeline}/${proc}`, callback, {
+    return this._subscribe(`/stream/logs/${owner}/${repo}/${pipeline}/${step}`, callback, {
       reconnect: true,
     });
   }

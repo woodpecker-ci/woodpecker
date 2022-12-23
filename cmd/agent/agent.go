@@ -17,7 +17,6 @@ package main
 import (
 	"context"
 	"crypto/tls"
-	"fmt"
 	"net/http"
 	"os"
 	"runtime"
@@ -85,13 +84,13 @@ func loop(c *cli.Context) error {
 		log.Logger = log.With().Caller().Logger()
 	}
 
-	counter.Polling = c.Int("max-procs")
+	counter.Polling = c.Int("max-workflows")
 	counter.Running = 0
 
 	if c.Bool("healthcheck") {
 		go func() {
-			if err := http.ListenAndServe(fmt.Sprintf(":%d", c.Int("healthcheck-port")), nil); err != nil {
-				log.Error().Msgf("can not listen on port 3000: %v", err)
+			if err := http.ListenAndServe(c.String("healthcheck-addr"), nil); err != nil {
+				log.Error().Msgf("cannot listen on address %s: %v", c.String("healthcheck-addr"), err)
 			}
 		}()
 	}
@@ -139,7 +138,7 @@ func loop(c *cli.Context) error {
 	backend.Init(context.WithValue(ctx, types.CliContext, c))
 
 	var wg sync.WaitGroup
-	parallel := c.Int("max-procs")
+	parallel := c.Int("max-workflows")
 	wg.Add(parallel)
 
 	// new engine
@@ -169,7 +168,7 @@ func loop(c *cli.Context) error {
 					return
 				}
 
-				log.Debug().Msg("polling new jobs")
+				log.Debug().Msg("polling new steps")
 				if err := r.Run(ctx); err != nil {
 					log.Error().Err(err).Msg("pipeline done with error")
 					return

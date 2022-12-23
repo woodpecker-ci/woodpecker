@@ -19,21 +19,21 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/woodpecker-ci/woodpecker/pipeline"
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/queue"
-	"github.com/woodpecker-ci/woodpecker/server/shared"
 )
 
-func queueBuild(pipeline *model.Pipeline, repo *model.Repo, pipelineItems []*shared.PipelineItem) error {
+func queueBuild(pipeline *model.Pipeline, repo *model.Repo, pipelineItems []*pipeline.Item) error {
 	var tasks []*queue.Task
 	for _, item := range pipelineItems {
-		if item.Proc.State == model.StatusSkipped {
+		if item.Step.State == model.StatusSkipped {
 			continue
 		}
 		task := new(queue.Task)
-		task.ID = fmt.Sprint(item.Proc.ID)
+		task.ID = fmt.Sprint(item.Step.ID)
 		task.Labels = map[string]string{}
 		for k, v := range item.Labels {
 			task.Labels[k] = v
@@ -45,7 +45,7 @@ func queueBuild(pipeline *model.Pipeline, repo *model.Repo, pipelineItems []*sha
 		task.DepStatus = make(map[string]string)
 
 		task.Data, _ = json.Marshal(rpc.Pipeline{
-			ID:      fmt.Sprint(item.Proc.ID),
+			ID:      fmt.Sprint(item.Step.ID),
 			Config:  item.Config,
 			Timeout: repo.Timeout,
 		})
@@ -58,11 +58,11 @@ func queueBuild(pipeline *model.Pipeline, repo *model.Repo, pipelineItems []*sha
 	return server.Config.Services.Queue.PushAtOnce(context.Background(), tasks)
 }
 
-func taskIds(dependsOn []string, pipelineItems []*shared.PipelineItem) (taskIds []string) {
+func taskIds(dependsOn []string, pipelineItems []*pipeline.Item) (taskIds []string) {
 	for _, dep := range dependsOn {
 		for _, pipelineItem := range pipelineItems {
-			if pipelineItem.Proc.Name == dep {
-				taskIds = append(taskIds, fmt.Sprint(pipelineItem.Proc.ID))
+			if pipelineItem.Step.Name == dep {
+				taskIds = append(taskIds, fmt.Sprint(pipelineItem.Step.ID))
 			}
 		}
 	}

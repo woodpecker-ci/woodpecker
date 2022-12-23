@@ -23,7 +23,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/queue"
-	"github.com/woodpecker-ci/woodpecker/server/shared"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
@@ -33,69 +32,69 @@ func Cancel(ctx context.Context, store store.Store, repo *model.Repo, pipeline *
 		return &ErrBadRequest{Msg: "Cannot cancel a non-running or non-pending or non-blocked pipeline"}
 	}
 
-	procs, err := store.ProcList(pipeline)
+	steps, err := store.StepList(pipeline)
 	if err != nil {
 		return &ErrNotFound{Msg: err.Error()}
 	}
 
-	// First cancel/evict procs in the queue in one go
+	// First cancel/evict steps in the queue in one go
 	var (
-		procsToCancel []string
-		procsToEvict  []string
+		stepsToCancel []string
+		stepsToEvict  []string
 	)
-	for _, proc := range procs {
-		if proc.PPID != 0 {
+	for _, step := range steps {
+		if step.PPID != 0 {
 			continue
 		}
-		if proc.State == model.StatusRunning {
-			procsToCancel = append(procsToCancel, fmt.Sprint(proc.ID))
+		if step.State == model.StatusRunning {
+			stepsToCancel = append(stepsToCancel, fmt.Sprint(step.ID))
 		}
-		if proc.State == model.StatusPending {
-			procsToEvict = append(procsToEvict, fmt.Sprint(proc.ID))
+		if step.State == model.StatusPending {
+			stepsToEvict = append(stepsToEvict, fmt.Sprint(step.ID))
 		}
 	}
 
-	if len(procsToEvict) != 0 {
-		if err := server.Config.Services.Queue.EvictAtOnce(ctx, procsToEvict); err != nil {
-			log.Error().Err(err).Msgf("queue: evict_at_once: %v", procsToEvict)
+	if len(stepsToEvict) != 0 {
+		if err := server.Config.Services.Queue.EvictAtOnce(ctx, stepsToEvict); err != nil {
+			log.Error().Err(err).Msgf("queue: evict_at_once: %v", stepsToEvict)
 		}
-		if err := server.Config.Services.Queue.ErrorAtOnce(ctx, procsToEvict, queue.ErrCancel); err != nil {
-			log.Error().Err(err).Msgf("queue: evict_at_once: %v", procsToEvict)
+		if err := server.Config.Services.Queue.ErrorAtOnce(ctx, stepsToEvict, queue.ErrCancel); err != nil {
+			log.Error().Err(err).Msgf("queue: evict_at_once: %v", stepsToEvict)
 		}
 	}
-	if len(procsToCancel) != 0 {
-		if err := server.Config.Services.Queue.ErrorAtOnce(ctx, procsToCancel, queue.ErrCancel); err != nil {
-			log.Error().Err(err).Msgf("queue: evict_at_once: %v", procsToCancel)
+	if len(stepsToCancel) != 0 {
+		if err := server.Config.Services.Queue.ErrorAtOnce(ctx, stepsToCancel, queue.ErrCancel); err != nil {
+			log.Error().Err(err).Msgf("queue: evict_at_once: %v", stepsToCancel)
 		}
 	}
 
 	// Then update the DB status for pending pipelines
 	// Running ones will be set when the agents stop on the cancel signal
-	for _, proc := range procs {
-		if proc.State == model.StatusPending {
-			if proc.PPID != 0 {
-				if _, err = shared.UpdateProcToStatusSkipped(store, *proc, 0); err != nil {
-					log.Error().Msgf("error: done: cannot update proc_id %d state: %s", proc.ID, err)
+	for _, step := range steps {
+		if step.State == model.StatusPending {
+			if step.PPID != 0 {
+				if _, err = UpdateStepToStatusSkipped(store, *step, 0); err != nil {
+					log.Error().Msgf("error: done: cannot update step_id %d state: %s", step.ID, err)
 				}
 			} else {
-				if _, err = shared.UpdateProcToStatusKilled(store, *proc); err != nil {
-					log.Error().Msgf("error: done: cannot update proc_id %d state: %s", proc.ID, err)
+				if _, err = UpdateStepToStatusKilled(store, *step); err != nil {
+					log.Error().Msgf("error: done: cannot update step_id %d state: %s", step.ID, err)
 				}
 			}
 		}
 	}
 
-	killedBuild, err := shared.UpdateToStatusKilled(store, *pipeline)
+	killedBuild, err := UpdateToStatusKilled(store, *pipeline)
 	if err != nil {
 		log.Error().Err(err).Msgf("UpdateToStatusKilled: %v", pipeline)
 		return err
 	}
 
-	procs, err = store.ProcList(killedBuild)
+	steps, err = store.StepList(killedBuild)
 	if err != nil {
 		return &ErrNotFound{Msg: err.Error()}
 	}
-	if killedBuild.Procs, err = model.Tree(procs); err != nil {
+	if killedBuild.Steps, err = model.Tree(steps); err != nil {
 		return err
 	}
 	if err := publishToTopic(ctx, killedBuild, repo); err != nil {

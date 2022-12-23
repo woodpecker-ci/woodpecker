@@ -1,15 +1,15 @@
 <template>
   <button
     type="button"
-    class="relative flex items-center py-1 px-2 rounded-md border shadow-sm cursor-pointer transition-all duration-150 focus:outline-none overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
+    class="relative flex items-center py-1 px-2 rounded-md border shadow-sm cursor-pointer transition-all duration-150 overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
     :class="{
-      'bg-white hover:bg-gray-200 border-gray-300 text-color dark:bg-dark-gray-700 dark:border-dark-400 dark:hover:bg-dark-gray-800':
+      'bg-white hover:bg-gray-200 border-gray-300 text-color dark:bg-dark-gray-600 dark:border-dark-400 dark:hover:bg-dark-gray-800':
         color === 'gray',
-      'bg-lime-600 hover:bg-lime-700 border-lime-800 text-white dark:text-gray-400 dark:bg-lime-900 dark:hover:bg-lime-800':
+      'bg-lime-600 hover:bg-lime-700 border-lime-800 text-white dark:text-gray-300 dark:bg-lime-900 dark:hover:bg-lime-800':
         color === 'green',
-      'bg-cyan-600 hover:bg-cyan-700 border-cyan-800 text-white dark:text-gray-400 dark:bg-cyan-900 dark:hover:bg-cyan-800':
+      'bg-cyan-600 hover:bg-cyan-700 border-cyan-800 text-white dark:text-gray-300 dark:bg-cyan-900 dark:hover:bg-cyan-800':
         color === 'blue',
-      'bg-red-500 hover:bg-red-600 border-red-700 text-white dark:text-gray-400 dark:bg-red-900 dark:hover:bg-red-800':
+      'bg-red-500 hover:bg-red-600 border-red-700 text-white dark:text-gray-300 dark:bg-red-900 dark:hover:bg-red-800':
         color === 'red',
       ...passedClasses,
     }"

@@ -1,6 +1,6 @@
 # Agent configuration
 
-Agents are configured by the command line or environement variables. At the minimum you need the following information:
+Agents are configured by the command line or environment variables. At the minimum you need the following information:
 
 ```yaml
 # docker-compose.yml
@@ -22,7 +22,7 @@ The following are automatically set and can be overridden:
 
 ## Processes per agent
 
-By default the maximum processes that are run per agent is 1. If required you can add `WOODPECKER_MAX_PROCS` to increase your parellel processing on a per-agent basis.
+By default the maximum processes that are run per agent is 1. If required you can add `WOODPECKER_MAX_PROCS` to increase your parallel processing on a per-agent basis.
 
 ```yaml
 # docker-compose.yml

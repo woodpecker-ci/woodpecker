@@ -55,7 +55,7 @@ This is the reference list of all environment variables available to your pipeli
 | `CI_REPO_NAME`                   | repository name                                                                              |
 | `CI_REPO_SCM`                    | repository SCM (git)                                                                         |
 | `CI_REPO_LINK`                   | repository link                                                                              |
-| `CI_REPO_REMOTE`                 | repository clone URL                                                                         |
+| `CI_REPO_CLONE_URL`              | repository clone URL                                                                         |
 | `CI_REPO_DEFAULT_BRANCH`         | repository default branch (master)                                                           |
 | `CI_REPO_PRIVATE`                | repository is private                                                                        |
 | `CI_REPO_TRUSTED`                | repository is trusted                                                                        |
@@ -68,14 +68,14 @@ This is the reference list of all environment variables available to your pipeli
 | `CI_COMMIT_TARGET_BRANCH`        | commit target branch                                                                         |
 | `CI_COMMIT_TAG`                  | commit tag name (empty if event is not `tag`)                                                |
 | `CI_COMMIT_PULL_REQUEST`         | commit pull request number (empty if event is not `pull_request`)                            |
-| `CI_COMMIT_LINK`                 | commit link in remote                                                                        |
+| `CI_COMMIT_LINK`                 | commit link in forge                                                                         |
 | `CI_COMMIT_MESSAGE`              | commit message                                                                               |
 | `CI_COMMIT_AUTHOR`               | commit author username                                                                       |
 | `CI_COMMIT_AUTHOR_EMAIL`         | commit author email address                                                                  |
 | `CI_COMMIT_AUTHOR_AVATAR`        | commit author avatar                                                                         |
 |                                  | **Current pipeline**                                                                         |
 | `CI_PIPELINE_NUMBER`             | pipeline number                                                                              |
-| `CI_PIPELINE_PARENT`             | number of parent pipeline                                                           |
+| `CI_PIPELINE_PARENT`             | number of parent pipeline                                                                    |
 | `CI_PIPELINE_EVENT`              | pipeline event (push, pull_request, tag, deployment)                                         |
 | `CI_PIPELINE_LINK`               | pipeline link in CI                                                                          |
 | `CI_PIPELINE_DEPLOY_TARGET`      | pipeline deploy target for `deployment` events (ie production)                               |
@@ -83,11 +83,11 @@ This is the reference list of all environment variables available to your pipeli
 | `CI_PIPELINE_CREATED`            | pipeline created UNIX timestamp                                                              |
 | `CI_PIPELINE_STARTED`            | pipeline started UNIX timestamp                                                              |
 | `CI_PIPELINE_FINISHED`           | pipeline finished UNIX timestamp                                                             |
-|                                  | **Current job**                                                                              |
-| `CI_JOB_NUMBER`                  | job number                                                                                   |
-| `CI_JOB_STATUS`                  | job status (success, failure)                                                                |
-| `CI_JOB_STARTED`                 | job started UNIX timestamp                                                                   |
-| `CI_JOB_FINISHED`                | job finished UNIX timestamp                                                                  |
+|                                  | **Current step**                                                                             |
+| `CI_STEP_NUMBER`                 | step number                                                                                  |
+| `CI_STEP_STATUS`                 | step status (success, failure)                                                               |
+| `CI_STEP_STARTED`                | step started UNIX timestamp                                                                  |
+| `CI_STEP_FINISHED`               | step finished UNIX timestamp                                                                 |
 |                                  | **Previous commit**                                                                          |
 | `CI_PREV_COMMIT_SHA`             | previous commit SHA                                                                          |
 | `CI_PREV_COMMIT_REF`             | previous commit ref                                                                          |
@@ -95,7 +95,7 @@ This is the reference list of all environment variables available to your pipeli
 | `CI_PREV_COMMIT_BRANCH`          | previous commit branch                                                                       |
 | `CI_PREV_COMMIT_SOURCE_BRANCH`   | previous commit source branch                                                                |
 | `CI_PREV_COMMIT_TARGET_BRANCH`   | previous commit target branch                                                                |
-| `CI_PREV_COMMIT_LINK`            | previous commit link in remote                                                               |
+| `CI_PREV_COMMIT_LINK`            | previous commit link in forge                                                                |
 | `CI_PREV_COMMIT_MESSAGE`         | previous commit message                                                                      |
 | `CI_PREV_COMMIT_AUTHOR`          | previous commit author username                                                              |
 | `CI_PREV_COMMIT_AUTHOR_EMAIL`    | previous commit author email address                                                         |

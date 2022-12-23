@@ -76,7 +76,7 @@ var legacy2Xorm = task{
 		} {
 			exist, err := sess.Exist(&migrations{mig})
 			if err != nil {
-				return fmt.Errorf("test migration existence: %w", err)
+				return fmt.Errorf("test migration existence: %v", err)
 			}
 			if !exist {
 				log.Error().Msgf("migration step '%s' missing, please upgrade to last stable v0.14.x version first", mig)
@@ -96,10 +96,10 @@ var legacy2Xorm = task{
 				return err
 			}
 			if _, err := sess.Exec("INSERT INTO build_config (config_id, build_id) SELECT config_id,build_id FROM old_build_config;"); err != nil {
-				return fmt.Errorf("unable to set copy data in to temp table %s. Error: %w", "old_build_config", err)
+				return fmt.Errorf("unable to set copy data into temp table %s. Error: %v", "old_build_config", err)
 			}
 			if err := sess.DropTable("old_build_config"); err != nil {
-				return fmt.Errorf("could not drop table '%s': %w", "old_build_config", err)
+				return fmt.Errorf("could not drop table '%s': %v", "old_build_config", err)
 			}
 		}
 
@@ -120,7 +120,7 @@ var legacy2Xorm = task{
 				"DROP INDEX IF EXISTS ix_perms_user ON perms;",
 			} {
 				if _, err := sess.Exec(exec); err != nil {
-					return fmt.Errorf("exec: '%s' failed: %w", exec, err)
+					return fmt.Errorf("exec: '%s' failed: %v", exec, err)
 				}
 			}
 		case schemas.SQLITE, schemas.POSTGRES:
@@ -138,7 +138,7 @@ var legacy2Xorm = task{
 				"DROP INDEX IF EXISTS ix_perms_user;",
 			} {
 				if _, err := sess.Exec(exec); err != nil {
-					return fmt.Errorf("exec: '%s' failed: %w", exec, err)
+					return fmt.Errorf("exec: '%s' failed: %v", exec, err)
 				}
 			}
 		default:

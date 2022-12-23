@@ -59,7 +59,7 @@ type User struct {
 	// Activate indicates the user is active in the system.
 	Active bool `json:"active" xorm:"user_active"`
 
-	// Synced is the timestamp when the user was synced with the remote system.
+	// Synced is the timestamp when the user was synced with the forge.
 	Synced int64 `json:"synced" xorm:"user_synced"`
 
 	// Admin indicates the user is a system administrator.

@@ -3,10 +3,10 @@ depends_on:
   - web
 
 variables:
-  - &golang_image 'golang:1.18'
-  - &node_image 'node:16-alpine'
-  - &xgo_image 'techknowlogick/xgo:go-1.18.x'
-  - &xgo_version 'go-1.18.x'
+  - &golang_image 'golang:1.18.7'
+  - &node_image 'node:18-alpine'
+  - &xgo_image 'techknowlogick/xgo:go-1.18.7'
+  - &xgo_version 'go-1.18.7'
   - &platforms_release 'linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/386,linux/amd64,linux/ppc64le,linux/riscv64,linux/s390x,windows/amd64,freebsd/arm64,freebsd/amd64,openbsd/arm64,openbsd/amd64'
   - &platforms_server 'linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le,linux/riscv64'
   - &platforms_preview 'linux/arm/v6,linux/arm64/v8,linux/amd64,linux/riscv64,windows/amd64'
@@ -24,8 +24,8 @@ pipeline:
   ###############
   build-web:
     image: *node_image
+    directory: web/
     commands:
-      - cd web/
       - corepack enable
       - pnpm install --frozen-lockfile
       - pnpm build
@@ -74,7 +74,7 @@ pipeline:
       repo: woodpeckerci/woodpecker-server
       dockerfile: docker/Dockerfile.server.multiarch
       platforms: *platforms_server
-      tag: next
+      tag: [next, "next-${CI_COMMIT_SHA:0:10}"]
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
@@ -87,7 +87,7 @@ pipeline:
       repo: woodpeckerci/woodpecker-server
       dockerfile: docker/Dockerfile.server.alpine.multiarch
       platforms: *platforms_alpine
-      tag: next-alpine
+      tag: [next-alpine, "next-${CI_COMMIT_SHA:0:10}-alpine"]
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
@@ -168,7 +168,7 @@ pipeline:
       repo: woodpeckerci/woodpecker-agent
       dockerfile: docker/Dockerfile.agent.multiarch
       platforms: *platforms_release
-      tag: next
+      tag: [next, "next-${CI_COMMIT_SHA:0:10}"]
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
@@ -181,7 +181,7 @@ pipeline:
       repo: woodpeckerci/woodpecker-agent
       dockerfile: docker/Dockerfile.agent.alpine.multiarch
       platforms: *platforms_alpine
-      tag: next-alpine
+      tag: [next-alpine, "next-${CI_COMMIT_SHA:0:10}-alpine"]
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
@@ -262,7 +262,7 @@ pipeline:
       repo: woodpeckerci/woodpecker-cli
       dockerfile: docker/Dockerfile.cli.multiarch
       platforms: *platforms_release
-      tag: next
+      tag: [next, "next-${CI_COMMIT_SHA:0:10}"]
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
@@ -275,7 +275,7 @@ pipeline:
       repo: woodpeckerci/woodpecker-cli
       dockerfile: docker/Dockerfile.cli.alpine.multiarch
       platforms: *platforms_alpine
-      tag: next-alpine
+      tag: [next-alpine, "next-${CI_COMMIT_SHA:0:10}-alpine"]
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push

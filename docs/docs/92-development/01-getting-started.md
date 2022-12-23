@@ -47,7 +47,7 @@ A common config for debugging would look like this:
 WOODPECKER_OPEN=true
 WOODPECKER_ADMIN=your-username
 
-# if you want to test webhooks with an online forge like Github this address needs to be accessible from public server
+# if you want to test webhooks with an online forge like GitHub this address needs to be accessible from public server
 WOODPECKER_HOST=http://your-dev-address.com/
 
 # github (sample for a forge config - see /docs/administration/forge/overview for other forges)
@@ -58,7 +58,7 @@ WOODPECKER_GITHUB_SECRET=<redacted>
 # agent
 WOODPECKER_SERVER=localhost:9000
 WOODPECKER_SECRET=a-long-and-secure-password-used-for-the-local-development-system
-WOODPECKER_MAX_PROCS=1
+WOODPECKER_MAX_WORKFLOWS=1
 
 # enable if you want to develop the UI
 # WOODPECKER_DEV_WWW_PROXY=http://localhost:8010
@@ -75,7 +75,7 @@ WOODPECKER_HEALTHCHECK=false
 
 ### Setup O-Auth
 
-Create an O-Auth app for your forge as describe in the [forges documentation](../30-administration/11-forges/10-overview.md). If you set `WOODPECKER_DEV_OAUTH_HOST=http://localhost:8000` you can use that address with the path as explained for the specific forge to login without the need for a public address. For example for Github you would use `http://localhost:8000/authorize` as authorization callback URL.
+Create an O-Auth app for your forge as describe in the [forges documentation](../30-administration/11-forges/10-overview.md). If you set `WOODPECKER_DEV_OAUTH_HOST=http://localhost:8000` you can use that address with the path as explained for the specific forge to login without the need for a public address. For example for GitHub you would use `http://localhost:8000/authorize` as authorization callback URL.
 
 ## Developing with VS-Code
 

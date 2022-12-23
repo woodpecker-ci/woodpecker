@@ -14,6 +14,7 @@
     "color_scheme_dark": "Switch to light mode",
     "unknown_error": "An unknown error occurred",
     "documentation_for": "Documentation for \"{topic}\"",
+    "pipeline_feed": "Pipeline feed",
     "not_found": {
         "not_found": "Whoa 404, either we broke something or you had a typing mishap :-/",
         "back_home": "Back to home"
@@ -40,6 +41,18 @@
             "value": "Variable value"
           }
         },
+        "deploy_pipeline": {
+          "title": "Trigger deployment event for current pipeline #{pipelineId}",
+          "enter_target": "Target deployment environment",
+          "trigger": "Deploy",
+          "variables": {
+            "add": "Add variable",
+            "title": "Additional pipeline variables",
+            "desc": "Specify additional variables to use in your pipeline. Variables with the same name will be overwritten.",
+            "name": "Variable name",
+            "value": "Variable value"
+          }
+        },
         "activity": "Activity",
         "branches": "Branches",
         "add": "Add repository",
@@ -52,6 +65,7 @@
             "success": "Repository enabled",
             "list_reloaded": "Repository list reloaded"
         },
+        "open_in_forge": "Open Repository in Version Control System",
         "settings": {
             "settings": "Settings",
             "not_allowed": "You are not allowed to access this repository's settings",
@@ -121,6 +135,7 @@
                     "events": "Available at following events",
                     "pr_warning": "Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets."
                 },
+                "plugins_only": "Only available for plugins",
                 "edit": "Edit secret",
                 "delete":"Delete secret"
             },
@@ -154,6 +169,7 @@
                 "deleted": "Cron deleted",
                 "next_exec": "Next execution",
                 "not_executed_yet": "Not executed yet",
+                "run": "Run now",
                 "branch": {
                     "title": "Branch",
                     "placeholder": "Branch (uses default branch if empty)"
@@ -214,6 +230,7 @@
                 "restart": "Restart",
                 "canceled": "This step has been canceled.",
                 "cancel_success": "Pipeline canceled",
+                "deploy": "Deploy",
                 "restart_success": "Pipeline restarted",
                 "log_download": "Download",
                 "log_auto_scroll": "Automatically scroll down",
@@ -234,6 +251,19 @@
                 "deploy": "Deploy",
                 "cron": "Cron",
                 "manual": "Manual"
+            },
+            "status": {
+              "status": "Status: {status}",
+              "blocked": "blocked",
+              "pending": "pending",
+              "running": "running",
+              "started": "started",
+              "skipped": "skipped",
+              "success": "success",
+              "declined": "declined",
+              "error": "error",
+              "failure": "failure",
+              "killed": "killed"
             }
         }
     },
@@ -257,6 +287,7 @@
                     "images": "Available for following images",
                     "desc": "Comma separated list of images where this secret is available, leave empty to allow all images"
                 },
+                "plugins_only": "Only available for plugins",
                 "events": {
                     "events": "Available at following events",
                     "pr_warning": "Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets."
@@ -285,6 +316,7 @@
                     "images": "Available for following images",
                     "desc": "Comma separated list of images where this secret is available, leave empty to allow all images"
                 },
+                "plugins_only": "Only available for plugins",
                 "events": {
                     "events": "Available at following events",
                     "pr_warning": "Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets."

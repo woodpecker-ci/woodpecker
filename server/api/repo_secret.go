@@ -50,11 +50,12 @@ func PostSecret(c *gin.Context) {
 		return
 	}
 	secret := &model.Secret{
-		RepoID: repo.ID,
-		Name:   strings.ToLower(in.Name),
-		Value:  in.Value,
-		Events: in.Events,
-		Images: in.Images,
+		RepoID:      repo.ID,
+		Name:        strings.ToLower(in.Name),
+		Value:       in.Value,
+		Events:      in.Events,
+		Images:      in.Images,
+		PluginsOnly: in.PluginsOnly,
 	}
 	if err := secret.Validate(); err != nil {
 		c.String(400, "Error inserting secret. %s", err)
@@ -95,6 +96,7 @@ func PatchSecret(c *gin.Context) {
 	if in.Images != nil {
 		secret.Images = in.Images
 	}
+	secret.PluginsOnly = in.PluginsOnly
 
 	if err := secret.Validate(); err != nil {
 		c.String(400, "Error updating secret. %s", err)

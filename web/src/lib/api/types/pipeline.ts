@@ -48,11 +48,11 @@ export type Pipeline = {
   // The alias for the commit.
   ref: string;
 
-  // The mapping from the local repository to a branch in the remote.
+  // The mapping from the local repository to a branch in the forge.
   refspec: string;
 
-  // The remote repository.
-  remote: string;
+  // The clone URL of the forge repository.
+  clone_url: string;
 
   title: string;
 
@@ -79,9 +79,9 @@ export type Pipeline = {
 
   reviewed_at: number;
 
-  // The jobs associated with this pipeline.
-  // A pipeline will have multiple jobs if a matrix pipeline was used or if a rebuild was requested.
-  procs?: PipelineProc[];
+  // The steps associated with this pipeline.
+  // A pipeline will have multiple steps if a matrix pipeline was used or if a rebuild was requested.
+  steps?: PipelineStep[];
 
   changed_files?: string[];
 };
@@ -98,7 +98,7 @@ export type PipelineStatus =
   | 'started'
   | 'success';
 
-export type PipelineProc = {
+export type PipelineStep = {
   id: number;
   pipeline_id: number;
   pid: number;
@@ -112,11 +112,11 @@ export type PipelineProc = {
   end_time?: number;
   machine?: string;
   error?: string;
-  children?: PipelineProc[];
+  children?: PipelineStep[];
 };
 
 export type PipelineLog = {
-  proc: string;
+  step: string;
   pos: number;
   out: string;
   time?: number;

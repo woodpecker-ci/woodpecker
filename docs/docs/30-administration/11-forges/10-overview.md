@@ -12,4 +12,4 @@
 | [Multi pipeline](../../20-usage/25-multi-pipeline.md) | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | :x: | :x: | :x: |
 | [when.path filter](../../20-usage/20-pipeline-syntax.md#path) | :white_check_mark: | :white_check_mark:¹ | :white_check_mark: | :x: | :x: | :x: | :x: |
 
-¹) [except for pull requests](https://github.com/woodpecker-ci/woodpecker/issues/754)
+¹) for Gitea versions 1.17 or lower not for pull requests

@@ -17,6 +17,7 @@
         },
         "name": "Nama",
         "none": "Belum ada rahasia global.",
+        "plugins_only": "Hanya tersedia untuk plugin",
         "save": "Simpan rahasia",
         "saved": "Rahasia global disimpan",
         "secrets": "Rahasia",
@@ -56,6 +57,7 @@
         },
         "name": "Nama",
         "none": "Belum ada rahasia organisasi.",
+        "plugins_only": "Hanya tersedia untuk plugin",
         "save": "Simpan rahasia",
         "saved": "Rahasia organisasi disimpan",
         "secrets": "Rahasia",
@@ -66,6 +68,7 @@
     }
   },
   "password": "Kata sandi",
+  "pipeline_feed": "Umpan jalur pipa",
   "repo": {
     "activity": "Aktivitas",
     "add": "Tambahkan repositori",
@@ -90,6 +93,7 @@
       }
     },
     "not_allowed": "Anda tidak diperbolehkan untuk mengakses repositori ini",
+    "open_in_forge": "Buka Repositori dalam Sistem Kendali Versi",
     "pipeline": {
       "actions": {
         "cancel": "Batalkan",
@@ -128,6 +132,19 @@
         "decline": "Tolak",
         "decline_success": "Jalur pipa ditolak",
         "declined": "Jalur pipa ini telah ditolak!"
+      },
+      "status": {
+        "blocked": "diblokir",
+        "declined": "ditolak",
+        "error": "terjadi kesalahan",
+        "failure": "gagal",
+        "killed": "dibatalkan",
+        "pending": "menunggu",
+        "running": "berjalan",
+        "skipped": "dilewati",
+        "started": "dimulai",
+        "status": "Status: {status}",
+        "success": "berhasil"
       },
       "step_not_started": "Langkah ini belum dijalankan.",
       "tasks": "Tugas"
@@ -176,6 +193,7 @@
         "next_exec": "Eksekusi berikutnya",
         "none": "Belum ada cron.",
         "not_executed_yet": "Belum dieksekusi",
+        "run": "Jalankan sekarang",
         "save": "Simpan cron",
         "saved": "Kron disimpan",
         "schedule": {
@@ -266,6 +284,7 @@
         },
         "name": "Nama",
         "none": "Belum ada rahasia.",
+        "plugins_only": "Hanya tersedia untuk plugin",
         "save": "Simpan rahasia",
         "saved": "Rahasia disimpan",
         "secrets": "Rahasia",
