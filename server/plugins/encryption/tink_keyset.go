@@ -16,13 +16,15 @@ package encryption
 
 import (
 	"errors"
+	"os"
+	"strconv"
+
 	"github.com/google/tink/go/aead"
 	"github.com/google/tink/go/insecurecleartextkeyset"
 	"github.com/google/tink/go/keyset"
 	"github.com/rs/zerolog/log"
+
 	"github.com/woodpecker-ci/woodpecker/server/store/types"
-	"os"
-	"strconv"
 )
 
 func (svc *tinkEncryptionService) loadKeyset() {

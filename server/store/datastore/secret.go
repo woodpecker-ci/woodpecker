@@ -15,9 +15,9 @@
 package datastore
 
 import (
-	"github.com/woodpecker-ci/woodpecker/server/model"
-
 	"xorm.io/builder"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 const orderSecretsBy = "secret_name"

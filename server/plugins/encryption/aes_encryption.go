@@ -20,10 +20,12 @@ import (
 	"crypto/rand"
 	"errors"
 	"fmt"
-	"github.com/rs/zerolog/log"
-	"github.com/woodpecker-ci/woodpecker/server/store/types"
-	"golang.org/x/crypto/sha3"
 	"strconv"
+
+	"github.com/rs/zerolog/log"
+	"golang.org/x/crypto/sha3"
+
+	"github.com/woodpecker-ci/woodpecker/server/store/types"
 )
 
 func (svc *aesEncryptionService) loadCipher(key []byte) {
