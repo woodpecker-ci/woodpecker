@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.15.6](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.6) - 2022-12-23
+
+* SECURITY
+  * Update golang.org/x/net (#1494)
+  * [**BREAKING**] Disable metrics access if no token is set (#1469) (#1470)
+  * Update dep moby (#1263) (#1264)
+* BUGFIXES
+  * Update json schema for cli lint to cover valid cases (#1384)
+  * Add pipeline.step.when.branch string-array type to schema.json (#1380)
+  * Display system CA error only if there is an error (#870) (#1286)
+* ENHANCEMENTS
+  * Bump Frontend Deps and remove unused (#1404)
+
 ## [0.15.5](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.5) - 2022-10-13
 
 * BUGFIXES
