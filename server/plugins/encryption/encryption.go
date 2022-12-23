@@ -16,8 +16,10 @@ package encryption
 
 import (
 	"errors"
+
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/server/store/types"

@@ -15,9 +15,11 @@
 package encrypted_secret_store
 
 import (
-	"github.com/rs/zerolog/log"
-	"github.com/woodpecker-ci/woodpecker/server/model"
 	"strconv"
+
+	"github.com/rs/zerolog/log"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 type EncryptedSecretStore struct {

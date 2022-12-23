@@ -15,9 +15,10 @@
 package encryption
 
 import (
+	"testing"
+
 	"github.com/google/tink/go/subtle/random"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestEncryptDecryptShortMessage(t *testing.T) {

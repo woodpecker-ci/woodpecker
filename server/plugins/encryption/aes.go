@@ -17,7 +17,9 @@ package encryption
 import (
 	"crypto/cipher"
 	"encoding/base64"
+
 	"github.com/rs/zerolog/log"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )

@@ -6,6 +6,7 @@ import (
 	io "io"
 
 	mock "github.com/stretchr/testify/mock"
+
 	model "github.com/woodpecker-ci/woodpecker/server/model"
 )
 

@@ -16,9 +16,11 @@ package encryption
 
 import (
 	"encoding/base64"
+
 	"github.com/fsnotify/fsnotify"
 	"github.com/google/tink/go/tink"
 	"github.com/rs/zerolog/log"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
