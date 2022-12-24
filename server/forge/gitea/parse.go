@@ -16,10 +16,11 @@
 package gitea
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"strings"
+
+	"github.com/rs/zerolog/log"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
@@ -42,7 +43,8 @@ const (
 // parseHook parses a Gitea hook from an http.Request request and returns
 // Repo and Pipeline detail. If a hook type is unsupported nil values are returned.
 func parseHook(r *http.Request) (*model.Repo, *model.Pipeline, error) {
-	switch r.Header.Get(hookEvent) {
+	hookType := r.Header.Get(hookEvent)
+	switch hookType {
 	case hookPush:
 		return parsePushHook(r.Body)
 	case hookCreated:
@@ -50,7 +52,8 @@ func parseHook(r *http.Request) (*model.Repo, *model.Pipeline, error) {
 	case hookPullRequest:
 		return parsePullRequestHook(r.Body)
 	}
-	return nil, nil, fmt.Errorf("hook type unknown")
+	log.Debug().Msgf("unsuported hook type: '%s'", hookType)
+	return nil, nil, nil
 }
 
 // parsePushHook parses a push hook and returns the Repo and Pipeline details.
@@ -105,12 +108,15 @@ func parsePullRequestHook(payload io.Reader) (*model.Repo, *model.Pipeline, erro
 		return nil, nil, err
 	}
 
-	// Don't trigger pipelines for non-code changes, or if PR is not open
+	// Don't trigger pipelines for non-code changes ...
 	if pr.Action != actionOpen && pr.Action != actionSync {
-		return nil, nil, fmt.Errorf("pull_request action is no open or sync")
+		log.Debug().Msgf("pull_request action is '%s' and no open or sync", pr.Action)
+		return nil, nil, nil
 	}
+	// ... or if PR is not open
 	if pr.PullRequest.State != stateOpen {
-		return nil, nil, fmt.Errorf("pull_request is closed")
+		log.Debug().Msg("pull_request is closed")
+		return nil, nil, nil
 	}
 
 	repo = toRepo(pr.Repo)
