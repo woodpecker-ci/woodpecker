@@ -16,6 +16,7 @@
 package gitea
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -49,7 +50,7 @@ func parseHook(r *http.Request) (*model.Repo, *model.Pipeline, error) {
 	case hookPullRequest:
 		return parsePullRequestHook(r.Body)
 	}
-	return nil, nil, nil
+	return nil, nil, fmt.Errorf("hook type unknown")
 }
 
 // parsePushHook parses a push hook and returns the Repo and Pipeline details.
@@ -106,10 +107,10 @@ func parsePullRequestHook(payload io.Reader) (*model.Repo, *model.Pipeline, erro
 
 	// Don't trigger pipelines for non-code changes, or if PR is not open
 	if pr.Action != actionOpen && pr.Action != actionSync {
-		return nil, nil, nil
+		return nil, nil, fmt.Errorf("pull_request action is no open or sync")
 	}
 	if pr.PullRequest.State != stateOpen {
-		return nil, nil, nil
+		return nil, nil, fmt.Errorf("pull_request is closed")
 	}
 
 	repo = toRepo(pr.Repo)
