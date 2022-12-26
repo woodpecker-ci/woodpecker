@@ -8,7 +8,7 @@ using simple AES key or more advanced [Google TINK](https://developers.google.co
 ### Enabling secrets encryption
 
 To enable secrets encryption and encrypt all existing secrets in database set
-`WOODPECKER_ENCRYPTION_KEY`, `WOODPECKER_ENCRYPTION_KEY`  or `WOODPECKER_ENCRYPTION_TINK_KEYSET_PATH` environment 
+`WOODPECKER_ENCRYPTION_KEY`, `WOODPECKER_ENCRYPTION_KEY_FILE` or `WOODPECKER_ENCRYPTION_TINK_KEYSET_PATH` environment 
 variable depending on encryption method of your choice.
 
 After encryption is enabled you will be unable to start Woodpecker server without providing valid encryption key!
@@ -50,7 +50,7 @@ to use while encrypting new data.
 
 Keyset generation example:
 ```shell
-tinkey create-keyset --key-template AES256_GCM --out-format json --out keyset.json`
+tinkey create-keyset --key-template AES256_GCM --out-format json --out keyset.json
 ```
 
 ### Key rotation
