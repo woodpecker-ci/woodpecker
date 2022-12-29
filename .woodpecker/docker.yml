@@ -39,7 +39,7 @@ pipeline:
       - make cross-compile-server
     environment:
       PLATFORMS: linux|arm/v7;linux|arm64/v8;linux|amd64;linux|ppc64le;linux|riscv64
-      TAGS: bindata sqlite sqlite_unlock_notify
+      TAGS: bindata sqlite sqlite_unlock_notify netgo
       XGO_VERSION: *xgo_version
 
   publish-server-preview:

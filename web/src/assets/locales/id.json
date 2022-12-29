@@ -73,6 +73,18 @@
     "activity": "Aktivitas",
     "add": "Tambahkan repositori",
     "branches": "Cabang",
+    "deploy_pipeline": {
+      "enter_target": "Lingkungan sasaran peluncuran",
+      "title": "Picu perisitiwa peluncuran untuk jalur pipa #{pipelineId}",
+      "trigger": "Luncurkan",
+      "variables": {
+        "add": "Tambahkan variabel",
+        "desc": "Tetapkan variabel tambahan untuk digunakan dalam jalur pipa Anda. Variabel dengan nama yang sama akan ditimpa.",
+        "name": "Nama variabel",
+        "title": "Variabel jalur pipa tambahan",
+        "value": "Nilai variabel"
+      }
+    },
     "enable": {
       "enable": "Aktifkan",
       "enabled": "Sudah diaktifkan",
@@ -99,6 +111,7 @@
         "cancel": "Batalkan",
         "cancel_success": "Jalur pipa dibatalkan",
         "canceled": "Langkah ini telah dibatalkan.",
+        "deploy": "Luncurkan",
         "log_auto_scroll": "Gulir ke bawah secara otomatis",
         "log_auto_scroll_off": "Matikan pengguliran otomatis",
         "log_download": "Unduh",
