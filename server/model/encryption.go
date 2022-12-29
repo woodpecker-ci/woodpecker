@@ -26,8 +26,8 @@ type EncryptionServiceBuilder interface {
 }
 
 type EncryptionService interface {
-	Encrypt(plaintext string, associatedData string) string
-	Decrypt(ciphertext string, associatedData string) string
+	Encrypt(plaintext, associatedData string) string
+	Decrypt(ciphertext, associatedData string) string
 	Disable()
 }
 

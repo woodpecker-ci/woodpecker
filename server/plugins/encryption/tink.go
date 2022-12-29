@@ -25,18 +25,18 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
-const keyIdAAD = "Primary key id"
+const keyIDAssociatedData = "Primary key id"
 
 type tinkEncryptionService struct {
 	keysetFilePath    string
-	primaryKeyId      string
+	primaryKeyID      string
 	encryption        tink.AEAD
 	store             store.Store
 	keysetFileWatcher *fsnotify.Watcher
 	clients           []model.EncryptionClient
 }
 
-func (svc *tinkEncryptionService) Encrypt(plaintext string, associatedData string) string {
+func (svc *tinkEncryptionService) Encrypt(plaintext, associatedData string) string {
 	msg := []byte(plaintext)
 	aad := []byte(associatedData)
 	ciphertext, err := svc.encryption.Encrypt(msg, aad)
@@ -46,7 +46,7 @@ func (svc *tinkEncryptionService) Encrypt(plaintext string, associatedData strin
 	return base64.StdEncoding.EncodeToString(ciphertext)
 }
 
-func (svc *tinkEncryptionService) Decrypt(ciphertext string, associatedData string) string {
+func (svc *tinkEncryptionService) Decrypt(ciphertext, associatedData string) string {
 	ct, err := base64.StdEncoding.DecodeString(ciphertext)
 	if err != nil {
 		log.Fatal().Err(err).Msgf("encryption error: Base64 decryption failed")

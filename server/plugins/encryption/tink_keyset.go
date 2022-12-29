@@ -45,7 +45,7 @@ func (svc *tinkEncryptionService) loadKeyset() {
 	if err != nil {
 		log.Fatal().Err(err).Msgf("encryption error: failed reading encryption keyset")
 	}
-	svc.primaryKeyId = strconv.FormatUint(uint64(keysetHandle.KeysetInfo().PrimaryKeyId), 10)
+	svc.primaryKeyID = strconv.FormatUint(uint64(keysetHandle.KeysetInfo().PrimaryKeyId), 10)
 
 	encryptionInstance, err := aead.New(keysetHandle)
 	if err != nil {
@@ -62,10 +62,10 @@ func (svc *tinkEncryptionService) validateKeyset() error {
 		log.Fatal().Err(err).Msgf("could not fetch server configuration")
 	}
 
-	plaintext := svc.Decrypt(ciphertextSample, keyIdAAD)
+	plaintext := svc.Decrypt(ciphertextSample, keyIDAssociatedData)
 	if err != nil {
 		return encryptionKeyInvalidError
-	} else if plaintext != svc.primaryKeyId {
+	} else if plaintext != svc.primaryKeyID {
 		return encryptionKeyRotatedError
 	}
 	return nil

@@ -33,7 +33,7 @@ func (svc *tinkEncryptionService) disable() {
 func (svc *tinkEncryptionService) rotate() {
 	newSvc := &tinkEncryptionService{
 		keysetFilePath:    svc.keysetFilePath,
-		primaryKeyId:      "",
+		primaryKeyID:      "",
 		encryption:        nil,
 		store:             svc.store,
 		keysetFileWatcher: nil,
@@ -53,7 +53,7 @@ func (svc *tinkEncryptionService) rotate() {
 }
 
 func (svc *tinkEncryptionService) updateCiphertextSample() {
-	ciphertext := svc.Encrypt(svc.primaryKeyId, keyIdAAD)
+	ciphertext := svc.Encrypt(svc.primaryKeyID, keyIDAssociatedData)
 	err := svc.store.ServerConfigSet(ciphertextSampleConfigKey, ciphertext)
 	if err != nil {
 		log.Fatal().Err(err).Msgf("updating encryption key failed: could not update server config")

@@ -35,14 +35,12 @@ func (b noEncryptionBuilder) Build() model.EncryptionService {
 
 type noEncryption struct{}
 
-func (svc *noEncryption) Encrypt(plaintext string, _ string) string {
+func (svc *noEncryption) Encrypt(plaintext, _ string) string {
 	return plaintext
 }
 
-func (svc *noEncryption) Decrypt(ciphertext string, _ string) string {
+func (svc *noEncryption) Decrypt(ciphertext, _ string) string {
 	return ciphertext
 }
 
-func (svc *noEncryption) Disable() {
-	return
-}
+func (svc *noEncryption) Disable() {}

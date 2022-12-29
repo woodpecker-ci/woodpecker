@@ -44,7 +44,6 @@ const (
 type builder struct {
 	store   store.Store
 	ctx     *cli.Context
-	service model.EncryptionServiceBuilder
 	clients []model.EncryptionClient
 }
 

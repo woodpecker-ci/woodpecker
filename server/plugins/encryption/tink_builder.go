@@ -41,7 +41,7 @@ func (c tinkConfiguration) WithClients(clients []model.EncryptionClient) model.E
 func (c tinkConfiguration) Build() model.EncryptionService {
 	svc := &tinkEncryptionService{
 		keysetFilePath:    c.keysetFilePath,
-		primaryKeyId:      "",
+		primaryKeyID:      "",
 		encryption:        nil,
 		store:             c.store,
 		keysetFileWatcher: nil,
@@ -53,7 +53,7 @@ func (c tinkConfiguration) Build() model.EncryptionService {
 	if err == encryptionNotEnabledError {
 		svc.enable()
 	} else if err == encryptionKeyInvalidError {
-		log.Fatal().Err(err)
+		log.Fatal().Err(err).Msg("Error initializing TINK encryption")
 	} else if err == encryptionKeyRotatedError {
 		svc.rotate()
 	}

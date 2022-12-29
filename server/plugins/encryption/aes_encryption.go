@@ -34,7 +34,7 @@ func (svc *aesEncryptionService) loadCipher(key []byte) {
 		log.Fatal().Err(err).Msgf("encryption error: failed initializing encryption")
 	}
 	svc.cipher = block
-	svc.keyId = svc.hash(key)
+	svc.keyID = svc.hash(key)
 }
 
 func (svc *aesEncryptionService) validateCipher() error {
@@ -45,8 +45,8 @@ func (svc *aesEncryptionService) validateCipher() error {
 		log.Fatal().Err(err).Msgf("could not fetch server configuration")
 	}
 
-	plaintext := svc.Decrypt(ciphertextSample, keyIdAAD)
-	if err != nil || plaintext != svc.keyId {
+	plaintext := svc.Decrypt(ciphertextSample, keyIDAssociatedData)
+	if err != nil || plaintext != svc.keyID {
 		return encryptionKeyInvalidError
 	}
 	return nil
@@ -83,7 +83,7 @@ func (svc *aesEncryptionService) newSizeInfoChunk(dataLen int) (result []byte) {
 }
 
 func (svc *aesEncryptionService) getRandByteNaN() byte {
-	var b = make([]byte, 1)
+	b := make([]byte, 1)
 	for {
 		if _, err := rand.Read(b[:1]); err != nil {
 			panic(err) // newer happens
@@ -96,7 +96,7 @@ func (svc *aesEncryptionService) getRandByteNaN() byte {
 
 func (svc *aesEncryptionService) alignDataByChainSize(data []byte) []byte {
 	chainSize := svc.blockSize()
-	var resultChains = len(data) / chainSize
+	resultChains := len(data) / chainSize
 	if resultChains*chainSize < len(data) {
 		// add some salt to last aesChain
 		if len(data) > chainSize {
@@ -112,7 +112,7 @@ func (svc *aesEncryptionService) alignDataByChainSize(data []byte) []byte {
 
 func (svc *aesEncryptionService) getDataSize(data []byte) (int, error) {
 	chainSize := svc.blockSize()
-	var lenStart = 0
+	lenStart := 0
 	for ; lenStart < chainSize; lenStart++ {
 		if data[lenStart] >= '0' && data[lenStart] <= '9' {
 			break

@@ -50,7 +50,7 @@ func (c aesConfiguration) Build() model.EncryptionService {
 	if err == encryptionNotEnabledError {
 		svc.enable()
 	} else if err == encryptionKeyInvalidError {
-		log.Fatal().Err(err)
+		log.Fatal().Err(err).Msg("Error initializing AES encryption")
 	}
 	return svc
 }

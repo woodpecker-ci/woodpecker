@@ -26,12 +26,12 @@ import (
 
 type aesEncryptionService struct {
 	cipher  cipher.Block
-	keyId   string
+	keyID   string
 	store   store.Store
 	clients []model.EncryptionClient
 }
 
-func (svc *aesEncryptionService) Encrypt(plaintext string, _ string) string {
+func (svc *aesEncryptionService) Encrypt(plaintext, _ string) string {
 	msg := []byte(plaintext)
 	chainSize := svc.blockSize()
 	infoBlock := svc.newSizeInfoChunk(len(msg))
@@ -43,7 +43,7 @@ func (svc *aesEncryptionService) Encrypt(plaintext string, _ string) string {
 	}
 
 	for n := 0; n < len(msg)/chainSize; n++ {
-		var dst, src = encrypted[(n+1)*chainSize : (n+2)*chainSize], msg[n*chainSize : (n+1)*chainSize]
+		dst, src := encrypted[(n+1)*chainSize:(n+2)*chainSize], msg[n*chainSize:(n+1)*chainSize]
 		err = svc.encode(dst, src)
 		if err != nil {
 			log.Fatal().Err(err).Msgf("encryption error")
@@ -52,7 +52,7 @@ func (svc *aesEncryptionService) Encrypt(plaintext string, _ string) string {
 	return base64.StdEncoding.EncodeToString(encrypted)
 }
 
-func (svc *aesEncryptionService) Decrypt(ciphertext string, _ string) string {
+func (svc *aesEncryptionService) Decrypt(ciphertext, _ string) string {
 	ct, err := base64.StdEncoding.DecodeString(ciphertext)
 	if err != nil {
 		log.Fatal().Err(err).Msgf("encryption error: Base64 decryption failed")
@@ -61,7 +61,7 @@ func (svc *aesEncryptionService) Decrypt(ciphertext string, _ string) string {
 	chainSize := svc.blockSize()
 	decrypted := make([]byte, len(ct))
 	for n := 0; n < len(ct)/chainSize; n++ {
-		var dst, src = decrypted[n*chainSize : (n+1)*chainSize], ct[n*chainSize : (n+1)*chainSize]
+		dst, src := decrypted[n*chainSize:(n+1)*chainSize], ct[n*chainSize:(n+1)*chainSize]
 		err = svc.decode(dst, src)
 		if err != nil {
 			log.Fatal().Err(err).Msgf("decryption error")

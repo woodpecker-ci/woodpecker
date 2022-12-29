@@ -44,8 +44,8 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/logging"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/config"
-	"github.com/woodpecker-ci/woodpecker/server/plugins/encrypted_secret_store"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/encryption"
+	encryptedStore "github.com/woodpecker-ci/woodpecker/server/plugins/encryption/wrapper/store"
 	"github.com/woodpecker-ci/woodpecker/server/pubsub"
 	"github.com/woodpecker-ci/woodpecker/server/router"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware"
@@ -263,7 +263,7 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 	server.Config.Services.Forge = f
 
 	// encryption
-	encryptedSecretStore := encrypted_secret_store.New(v)
+	encryptedSecretStore := encryptedStore.NewSecretStore(v)
 	encryption.Encryption(c, v).WithClient(encryptedSecretStore).Build()
 
 	// services

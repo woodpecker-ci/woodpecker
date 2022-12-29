@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package encrypted_secret_store
+package store
 
 import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -60,7 +60,7 @@ func (wrapper *EncryptedSecretStore) SecretDelete(secret *model.Secret) error {
 	return wrapper.store.SecretDelete(secret)
 }
 
-func (wrapper *EncryptedSecretStore) OrgSecretFind(s string, s2 string) (*model.Secret, error) {
+func (wrapper *EncryptedSecretStore) OrgSecretFind(s, s2 string) (*model.Secret, error) {
 	result, err := wrapper.store.OrgSecretFind(s, s2)
 	if err != nil {
 		return nil, err

@@ -36,7 +36,7 @@ func (svc *aesEncryptionService) disable() {
 }
 
 func (svc *aesEncryptionService) updateCiphertextSample() {
-	ciphertext := svc.Encrypt(svc.keyId, keyIdAAD)
+	ciphertext := svc.Encrypt(svc.keyID, keyIDAssociatedData)
 	err := svc.store.ServerConfigSet(ciphertextSampleConfigKey, ciphertext)
 	if err != nil {
 		log.Fatal().Err(err).Msgf("updating encryption key failed: could not update server config")
