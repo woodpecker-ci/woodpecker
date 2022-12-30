@@ -11,6 +11,7 @@ import (
 
 	"github.com/rs/zerolog/log"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
+	"gopkg.in/yaml.v3"
 
 	"github.com/urfave/cli/v2"
 	v1 "k8s.io/api/core/v1"
@@ -39,20 +40,24 @@ type kube struct {
 }
 
 type Config struct {
-	Namespace    string
-	StorageClass string
-	VolumeSize   string
-	StorageRwx   bool
+	Namespace      string
+	StorageClass   string
+	VolumeSize     string
+	PodLabels      string
+	PodAnnotations string
+	StorageRwx     bool
 }
 
 func configFromCliContext(ctx context.Context) (*Config, error) {
 	if ctx != nil {
 		if c, ok := ctx.Value(types.CliContext).(*cli.Context); ok {
 			return &Config{
-				Namespace:    c.String("backend-k8s-namespace"),
-				StorageClass: c.String("backend-k8s-storage-class"),
-				VolumeSize:   c.String("backend-k8s-volume-size"),
-				StorageRwx:   c.Bool("backend-k8s-storage-rwx"),
+				Namespace:      c.String("backend-k8s-namespace"),
+				StorageClass:   c.String("backend-k8s-storage-class"),
+				VolumeSize:     c.String("backend-k8s-volume-size"),
+				PodLabels:      c.String("backend-k8s-pod-labels"),
+				PodAnnotations: c.String("backend-k8s-pod-annotations"),
+				StorageRwx:     c.Bool("backend-k8s-storage-rwx"),
 			}, nil
 		}
 	}
@@ -147,9 +152,21 @@ func (e *kube) Setup(ctx context.Context, conf *types.Config) error {
 
 // Start the pipeline step.
 func (e *kube) Exec(ctx context.Context, step *types.Step) error {
-	pod := Pod(e.config.Namespace, step)
+	labels := make(map[string]string)
+	err := yaml.Unmarshal([]byte(e.config.PodLabels), &labels)
+	if err != nil {
+		log.Error().Msgf("creating pod manifest failed: could not unmarshal labels '%s': %s", e.config.PodLabels, err)
+		return err
+	}
+	annotations := make(map[string]string)
+	err = yaml.Unmarshal([]byte(e.config.PodAnnotations), &annotations)
+	if err != nil {
+		log.Error().Msgf("creating pod manifest failed: could not unmarshal annotations '%s': %s", e.config.PodAnnotations, err)
+		return err
+	}
+	pod := Pod(e.config.Namespace, step, labels, annotations)
 	log.Trace().Msgf("Creating pod: %s", pod.Name)
-	_, err := e.client.CoreV1().Pods(e.config.Namespace).Create(ctx, pod, metav1.CreateOptions{})
+	_, err = e.client.CoreV1().Pods(e.config.Namespace).Create(ctx, pod, metav1.CreateOptions{})
 	return err
 }
 
