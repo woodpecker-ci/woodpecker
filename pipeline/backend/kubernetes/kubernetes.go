@@ -250,6 +250,7 @@ func (e *kube) Tail(ctx context.Context, step *types.Step) (io.ReadCloser, error
 
 	opts := &v1.PodLogOptions{
 		Follow: true,
+		Container: podName,
 	}
 
 	logs, err := e.client.CoreV1().RESTClient().Get().
