@@ -249,7 +249,7 @@ func (e *kube) Tail(ctx context.Context, step *types.Step) (io.ReadCloser, error
 	<-up
 
 	opts := &v1.PodLogOptions{
-		Follow: true,
+		Follow:    true,
 		Container: podName,
 	}
 

@@ -10,7 +10,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func Pod(namespace string, step *types.Step, labels map[string]string, annotations map[string]string) *v1.Pod {
+func Pod(namespace string, step *types.Step, labels, annotations map[string]string) *v1.Pod {
 	var (
 		vols       []v1.Volume
 		volMounts  []v1.VolumeMount
