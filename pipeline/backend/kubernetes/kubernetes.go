@@ -43,22 +43,32 @@ type Config struct {
 	Namespace      string
 	StorageClass   string
 	VolumeSize     string
-	PodLabels      string
-	PodAnnotations string
+	PodLabels      map[string]string
+	PodAnnotations map[string]string
 	StorageRwx     bool
 }
 
 func configFromCliContext(ctx context.Context) (*Config, error) {
 	if ctx != nil {
 		if c, ok := ctx.Value(types.CliContext).(*cli.Context); ok {
-			return &Config{
-				Namespace:      c.String("backend-k8s-namespace"),
-				StorageClass:   c.String("backend-k8s-storage-class"),
-				VolumeSize:     c.String("backend-k8s-volume-size"),
-				PodLabels:      c.String("backend-k8s-pod-labels"),
-				PodAnnotations: c.String("backend-k8s-pod-annotations"),
-				StorageRwx:     c.Bool("backend-k8s-storage-rwx"),
-			}, nil
+			config := Config{
+				Namespace:    c.String("backend-k8s-namespace"),
+				StorageClass: c.String("backend-k8s-storage-class"),
+				VolumeSize:   c.String("backend-k8s-volume-size"),
+				StorageRwx:   c.Bool("backend-k8s-storage-rwx"),
+			}
+			// Unmarshal label and annotation settings here to ensure they're valid on startup
+			err := yaml.Unmarshal([]byte(c.String("backend-k8s-pod-labels")), &config.PodLabels)
+			if err != nil {
+				log.Error().Msgf("could not unmarshal pod labels '%s': %s", c.String("backend-k8s-pod-labels"), err)
+				return nil, err
+			}
+			err = yaml.Unmarshal([]byte(c.String("backend-k8s-pod-annotations")), &config.PodAnnotations)
+			if err != nil {
+				log.Error().Msgf("could not unmarshal pod annotations '%s': %s", c.String("backend-k8s-pod-annotations"), err)
+				return nil, err
+			}
+			return &config, nil
 		}
 	}
 
@@ -152,21 +162,9 @@ func (e *kube) Setup(ctx context.Context, conf *types.Config) error {
 
 // Start the pipeline step.
 func (e *kube) Exec(ctx context.Context, step *types.Step) error {
-	labels := make(map[string]string)
-	err := yaml.Unmarshal([]byte(e.config.PodLabels), &labels)
-	if err != nil {
-		log.Error().Msgf("creating pod manifest failed: could not unmarshal labels '%s': %s", e.config.PodLabels, err)
-		return err
-	}
-	annotations := make(map[string]string)
-	err = yaml.Unmarshal([]byte(e.config.PodAnnotations), &annotations)
-	if err != nil {
-		log.Error().Msgf("creating pod manifest failed: could not unmarshal annotations '%s': %s", e.config.PodAnnotations, err)
-		return err
-	}
-	pod := Pod(e.config.Namespace, step, labels, annotations)
+	pod := Pod(e.config.Namespace, step, e.config.PodLabels, e.config.PodAnnotations)
 	log.Trace().Msgf("Creating pod: %s", pod.Name)
-	_, err = e.client.CoreV1().Pods(e.config.Namespace).Create(ctx, pod, metav1.CreateOptions{})
+	_, err := e.client.CoreV1().Pods(e.config.Namespace).Create(ctx, pod, metav1.CreateOptions{})
 	return err
 }
 
