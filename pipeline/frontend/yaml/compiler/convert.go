@@ -134,11 +134,10 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		cpuSet = c.reslimit.CPUSet
 	}
 
-	// all constraints must exclude success.
-	onSuccess := container.When.IsEmpty() ||
-		!container.When.ExcludesStatus("success")
+	// all constraints must not include success.
+	onSuccess := container.When.IncludesStatusSuccess()
 	// at least one constraint must include the status failure.
-	onFailure := container.When.IncludesStatus("failure")
+	onFailure := container.When.IncludesStatusFailure()
 
 	failure := container.Failure
 	if container.Failure == "" {
