@@ -32,6 +32,10 @@ For security reasons, Owners must use 2FA.
 To honor the past owners, here's the history of the owners and the time
 they served:
 
+* 2023-01-01 ~ 2023-12-31 - [https://github.com/woodpecker-ci/woodpecker/issues/633](https://github.com/woodpecker-ci/woodpecker/issues/1467)
+  * [6543](https://github.com/6543)
+  * [Anbraten](https://github.com/anbraten)
+
 * 2021-09-28 ~ 2022-12-31 - https://github.com/woodpecker-ci/woodpecker/issues/633
   * [6543](https://github.com/6543)
   * [Anbraten](https://github.com/anbraten)
