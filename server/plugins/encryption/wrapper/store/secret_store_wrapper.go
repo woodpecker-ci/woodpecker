@@ -46,7 +46,7 @@ func (wrapper *EncryptedSecretStore) EnableEncryption() error {
 	log.Warn().Msg("Encrypting all secrets in database")
 	secrets, err := wrapper.store.SecretListAll()
 	if err != nil {
-		log.Fatal().Err(err).Msg("Secrets encryption failed: could not fetch secrets from DB")
+		return fmt.Errorf("failed enabling secret store encryption: %w", err)
 	}
 	for _, secret := range secrets {
 		if err := wrapper.encrypt(secret); err != nil {
@@ -64,7 +64,7 @@ func (wrapper *EncryptedSecretStore) MigrateEncryption(newEncryptionService mode
 	log.Warn().Msg("Migrating secrets encryption")
 	secrets, err := wrapper.store.SecretListAll()
 	if err != nil {
-		log.Fatal().Err(err).Msg("Secrets encryption migration failed: could not fetch secrets from DB")
+		return fmt.Errorf("failed migrating secret store encryption: %w", err)
 	}
 	if err := wrapper.decryptList(secrets); err != nil {
 		return err

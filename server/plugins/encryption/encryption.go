@@ -16,8 +16,8 @@ package encryption
 
 import (
 	"errors"
+	"fmt"
 
-	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -59,23 +59,35 @@ func (b builder) WithClient(client model.EncryptionClient) model.EncryptionBuild
 	return b
 }
 
-func (b builder) Build() {
-	enabled := b.isEnabled()
+func (b builder) Build() error {
+	enabled, err := b.isEnabled()
+	if err != nil {
+		return fmt.Errorf("failed fetching server encryption status: %w", err)
+	}
+
 	disableFlag := b.ctx.Bool(disableEncryptionConfigFlag)
-	keyType := b.detectKeyType()
+
+	keyType, err := b.detectKeyType()
+	if err != nil {
+		return fmt.Errorf("failed determining encryption key type: %w", err)
+	}
 
 	if !enabled && (disableFlag || keyType == keyTypeNone) {
 		_, err := noEncryptionBuilder{}.WithClients(b.clients).Build()
 		if err != nil {
-			log.Fatal().Err(err).Msg("failed initializing server in unencrypted mode")
+			return fmt.Errorf("failed initializing server in unencrypted mode: %w", err)
 		}
-		return
 	}
-	svc := b.getService(keyType)
+	svc, err := b.getService(keyType)
+	if err != nil {
+		return fmt.Errorf("failed initializing encryption service: %w", err)
+	}
+
 	if disableFlag {
 		err := svc.Disable()
 		if err != nil {
-			log.Fatal().Err(err).Msg("failed disabling encryption")
+			return fmt.Errorf("failed disabling encryption: %w", err)
 		}
 	}
+	return nil
 }

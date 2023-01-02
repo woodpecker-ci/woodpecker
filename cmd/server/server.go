@@ -264,7 +264,10 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 
 	// encryption
 	encryptedSecretStore := encryptedStore.NewSecretStore(v)
-	encryption.Encryption(c, v).WithClient(encryptedSecretStore).Build()
+	err := encryption.Encryption(c, v).WithClient(encryptedSecretStore).Build()
+	if err != nil {
+		log.Fatal().Err(err).Msg("could not create encryption service")
+	}
 
 	// services
 	server.Config.Services.Queue = setupQueue(c, v)

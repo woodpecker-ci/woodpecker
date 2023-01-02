@@ -17,7 +17,7 @@ package model
 // EncryptionBuilder is user API to obtain correctly configured encryption
 type EncryptionBuilder interface {
 	WithClient(client EncryptionClient) EncryptionBuilder
-	Build()
+	Build() error
 }
 
 type EncryptionServiceBuilder interface {
