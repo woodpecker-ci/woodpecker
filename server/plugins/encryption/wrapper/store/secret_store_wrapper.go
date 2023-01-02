@@ -29,6 +29,9 @@ type EncryptedSecretStore struct {
 	encryption model.EncryptionService
 }
 
+// ensure wrapper match interface
+var _ model.SecretStore = new(EncryptedSecretStore)
+
 func NewSecretStore(secretStore model.SecretStore) *EncryptedSecretStore {
 	wrapper := EncryptedSecretStore{secretStore, nil}
 	return &wrapper
