@@ -428,6 +428,7 @@ Example configuration to override depth:
    git:
      image: woodpeckerci/plugin-git
 +    settings:
++      partial: false
 +      depth: 50
 ```
 
