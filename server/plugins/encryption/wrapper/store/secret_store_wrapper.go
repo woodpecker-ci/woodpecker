@@ -16,6 +16,7 @@ package store
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 
 	"github.com/rs/zerolog/log"
@@ -84,7 +85,7 @@ func (wrapper *EncryptedSecretStore) MigrateEncryption(newEncryptionService mode
 func (wrapper *EncryptedSecretStore) encrypt(secret *model.Secret) error {
 	encryptedValue, err := wrapper.encryption.Encrypt(secret.Value, strconv.Itoa(int(secret.ID)))
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to encrypt secret id=%d: %w", secret.ID, err)
 	}
 	secret.Value = encryptedValue
 	return nil
@@ -93,7 +94,7 @@ func (wrapper *EncryptedSecretStore) encrypt(secret *model.Secret) error {
 func (wrapper *EncryptedSecretStore) decrypt(secret *model.Secret) error {
 	decryptedValue, err := wrapper.encryption.Decrypt(secret.Value, strconv.Itoa(int(secret.ID)))
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to decrypt secret id=%d: %w", secret.ID, err)
 	}
 	secret.Value = decryptedValue
 	return nil
@@ -103,7 +104,7 @@ func (wrapper *EncryptedSecretStore) decryptList(secrets []*model.Secret) error 
 	for _, secret := range secrets {
 		err := wrapper.decrypt(secret)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to decrypt secret id=%d: %w", secret.ID, err)
 		}
 	}
 	return nil

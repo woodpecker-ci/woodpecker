@@ -56,23 +56,23 @@ func (wrapper *EncryptedSecretStore) SecretCreate(secret *model.Secret) error {
 	if err != nil {
 		deleteErr := wrapper.store.SecretDelete(newSecret)
 		if deleteErr != nil {
-			return fmt.Errorf("failed encrypting new secret value: %w. Also failed deleting temporary secret record from store: %s", err, deleteErr.Error())
+			return fmt.Errorf("failed creating secret: %w. Also failed deleting temporary secret record from store: %s", err, deleteErr.Error())
 		}
-		return fmt.Errorf("failed encrypting new secret value: %w", err)
+		return err
 	}
 
 	err = wrapper.store.SecretUpdate(secret)
 	if err != nil {
 		deleteErr := wrapper.store.SecretDelete(newSecret)
 		if deleteErr != nil {
-			return fmt.Errorf("failed saving secret: %w. Also failed deleting temporary secret record from store: %s", err, deleteErr.Error())
+			return fmt.Errorf("failed updating secret: %w. Also failed deleting temporary secret record from store: %s", err, deleteErr.Error())
 		}
-		return fmt.Errorf("failed saving secret: %w", err)
+		return err
 	}
 
 	err = wrapper.decrypt(secret)
 	if err != nil {
-		return fmt.Errorf("failed to decrypt created secret: %w", err)
+		return err
 	}
 	return nil
 }
@@ -80,7 +80,7 @@ func (wrapper *EncryptedSecretStore) SecretCreate(secret *model.Secret) error {
 func (wrapper *EncryptedSecretStore) SecretUpdate(secret *model.Secret) error {
 	err := wrapper.encrypt(secret)
 	if err != nil {
-		return fmt.Errorf("failed encrypting new secret value: %w", err)
+		return err
 	}
 
 	err = wrapper.store.SecretUpdate(secret)
@@ -90,7 +90,7 @@ func (wrapper *EncryptedSecretStore) SecretUpdate(secret *model.Secret) error {
 
 	err = wrapper.decrypt(secret)
 	if err != nil {
-		return fmt.Errorf("failed to decrypt updated secret: %w", err)
+		return err
 	}
 	return nil
 }
@@ -107,7 +107,7 @@ func (wrapper *EncryptedSecretStore) OrgSecretFind(s, s2 string) (*model.Secret,
 
 	err = wrapper.decrypt(result)
 	if err != nil {
-		return nil, fmt.Errorf("failed to decrypt secret: %w", err)
+		return nil, err
 	}
 	return result, nil
 }
@@ -120,7 +120,7 @@ func (wrapper *EncryptedSecretStore) OrgSecretList(s string) ([]*model.Secret, e
 
 	err = wrapper.decryptList(results)
 	if err != nil {
-		return nil, fmt.Errorf("failed to decrypt one of secrets: %w", err)
+		return nil, err
 	}
 	return results, nil
 }
@@ -133,7 +133,7 @@ func (wrapper *EncryptedSecretStore) GlobalSecretFind(s string) (*model.Secret, 
 
 	err = wrapper.decrypt(result)
 	if err != nil {
-		return nil, fmt.Errorf("failed to decrypt one of secrets: %w", err)
+		return nil, err
 	}
 	return result, nil
 }
@@ -146,7 +146,7 @@ func (wrapper *EncryptedSecretStore) GlobalSecretList() ([]*model.Secret, error)
 
 	err = wrapper.decryptList(results)
 	if err != nil {
-		return nil, fmt.Errorf("failed to decrypt one of secrets: %w", err)
+		return nil, err
 	}
 	return results, nil
 }
@@ -159,7 +159,7 @@ func (wrapper *EncryptedSecretStore) SecretListAll() ([]*model.Secret, error) {
 
 	err = wrapper.decryptList(results)
 	if err != nil {
-		return nil, fmt.Errorf("failed to decrypt one of secrets: %w", err)
+		return nil, err
 	}
 	return results, nil
 }
