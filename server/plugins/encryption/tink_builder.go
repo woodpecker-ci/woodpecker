@@ -16,6 +16,7 @@ package encryption
 
 import (
 	"fmt"
+
 	"github.com/urfave/cli/v2"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -58,10 +59,9 @@ func (c tinkConfiguration) Build() (model.EncryptionService, error) {
 	}
 
 	err = svc.validateKeyset()
-	if err == encryptionNotEnabledError {
+	if err == errEncryptionNotEnabled {
 		err = svc.enable()
-
-	} else if err == encryptionKeyRotatedError {
+	} else if err == errEncryptionKeyRotated {
 		err = svc.rotate()
 	}
 

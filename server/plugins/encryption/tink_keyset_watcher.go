@@ -16,6 +16,7 @@ package encryption
 
 import (
 	"fmt"
+
 	"github.com/fsnotify/fsnotify"
 	"github.com/rs/zerolog/log"
 )

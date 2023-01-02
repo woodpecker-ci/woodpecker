@@ -24,8 +24,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
-const keyIDAssociatedData = "Primary key id"
-
 type tinkEncryptionService struct {
 	keysetFilePath    string
 	primaryKeyID      string

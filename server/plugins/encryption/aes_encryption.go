@@ -40,14 +40,14 @@ func (svc *aesEncryptionService) loadCipher(key []byte) error {
 func (svc *aesEncryptionService) validateKey() error {
 	ciphertextSample, err := svc.store.ServerConfigGet(ciphertextSampleConfigKey)
 	if errors.Is(err, types.RecordNotExist) {
-		return encryptionNotEnabledError
+		return errEncryptionNotEnabled
 	} else if err != nil {
 		return fmt.Errorf("failed to load server encryption config: %w", err)
 	}
 
 	plaintext, err := svc.Decrypt(ciphertextSample, keyIDAssociatedData)
 	if plaintext != svc.keyID {
-		return encryptionKeyInvalidError
+		return errEncryptionKeyInvalid
 	} else if err != nil {
 		return fmt.Errorf("failed validating encryption key: %w", err)
 	}

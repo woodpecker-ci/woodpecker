@@ -16,6 +16,7 @@ package encryption
 
 import (
 	"fmt"
+
 	"github.com/urfave/cli/v2"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -55,7 +56,7 @@ func (c aesConfiguration) Build() (model.EncryptionService, error) {
 	}
 
 	err = svc.validateKey()
-	if err == encryptionNotEnabledError {
+	if err == errEncryptionNotEnabled {
 		err = svc.enable()
 	}
 	if err != nil {

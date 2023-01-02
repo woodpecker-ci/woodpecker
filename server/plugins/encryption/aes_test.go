@@ -23,18 +23,28 @@ import (
 
 func TestEncryptDecryptShortMessage(t *testing.T) {
 	aes := &aesEncryptionService{}
-	aes.loadCipher(random.GetRandomBytes(32))
+	err := aes.loadCipher(random.GetRandomBytes(32))
+	assert.Nil(t, err)
+
 	input := string(random.GetRandomBytes(4))
-	cipher := aes.Encrypt(input, "")
-	output := aes.Decrypt(cipher, "")
+	cipher, err := aes.Encrypt(input, "")
+	assert.Nil(t, err)
+
+	output, err := aes.Decrypt(cipher, "")
+	assert.Nil(t, err)
 	assert.Equal(t, input, output)
 }
 
 func TestEncryptDecryptLongMessage(t *testing.T) {
 	aes := &aesEncryptionService{}
-	aes.loadCipher(random.GetRandomBytes(32))
+	err := aes.loadCipher(random.GetRandomBytes(32))
+	assert.Nil(t, err)
+
 	input := string(random.GetRandomBytes(1024))
-	cipher := aes.Encrypt(input, "")
-	output := aes.Decrypt(cipher, "")
+	cipher, err := aes.Encrypt(input, "")
+	assert.Nil(t, err)
+
+	output, err := aes.Decrypt(cipher, "")
+	assert.Nil(t, err)
 	assert.Equal(t, input, output)
 }

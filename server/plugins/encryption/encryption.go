@@ -34,12 +34,14 @@ const (
 	keyTypeTink = "tink"
 	keyTypeRaw  = "raw"
 	keyTypeNone = "none"
+
+	keyIDAssociatedData = "Primary key id"
 )
 
 var (
-	encryptionNotEnabledError = errors.New("encryption is not enabled")
-	encryptionKeyInvalidError = errors.New("encryption key is invalid")
-	encryptionKeyRotatedError = errors.New("encryption key is being rotated")
+	errEncryptionNotEnabled = errors.New("encryption is not enabled")
+	errEncryptionKeyInvalid = errors.New("encryption key is invalid")
+	errEncryptionKeyRotated = errors.New("encryption key is being rotated")
 )
 
 type builder struct {
@@ -76,5 +78,4 @@ func (b builder) Build() {
 			log.Fatal().Err(err).Msg("failed disabling encryption")
 		}
 	}
-
 }

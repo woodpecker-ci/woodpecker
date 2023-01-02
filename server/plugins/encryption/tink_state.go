@@ -16,6 +16,7 @@ package encryption
 
 import (
 	"fmt"
+
 	"github.com/rs/zerolog/log"
 )
 
@@ -60,7 +61,7 @@ func (svc *tinkEncryptionService) rotate() error {
 	}
 
 	err = newSvc.validateKeyset()
-	if err == encryptionKeyRotatedError {
+	if err == errEncryptionKeyRotated {
 		err = newSvc.updateCiphertextSample()
 	}
 	if err != nil {
@@ -82,14 +83,14 @@ func (svc *tinkEncryptionService) rotate() error {
 func (svc *tinkEncryptionService) updateCiphertextSample() error {
 	ciphertext, err := svc.Encrypt(svc.primaryKeyID, keyIDAssociatedData)
 	if err != nil {
-		err = fmt.Errorf("failed updating server encryption configuration: %w", err)
+		return fmt.Errorf("failed updating server encryption configuration: %w", err)
 	}
 	err = svc.store.ServerConfigSet(ciphertextSampleConfigKey, ciphertext)
 	if err != nil {
-		err = fmt.Errorf("failed updating server encryption configuration: %w", err)
+		return fmt.Errorf("failed updating server encryption configuration: %w", err)
 	}
 	log.Info().Msg("registered new encryption key")
-	return err
+	return nil
 }
 
 func (svc *tinkEncryptionService) deleteCiphertextSample() error {
