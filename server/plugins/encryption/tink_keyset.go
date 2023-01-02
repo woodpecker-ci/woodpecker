@@ -16,6 +16,7 @@ package encryption
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"strconv"
 
@@ -27,31 +28,32 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store/types"
 )
 
-func (svc *tinkEncryptionService) loadKeyset() {
+func (svc *tinkEncryptionService) loadKeyset() error {
 	log.Warn().Msgf("loading encryption keyset from file: %s", svc.keysetFilePath)
 	file, err := os.Open(svc.keysetFilePath)
 	if err != nil {
-		log.Fatal().Err(err).Msgf("encryption error: failed opening encryption keyset file")
+		return fmt.Errorf("failed opening encryption keyset file: %w", err)
 	}
 	defer func(file *os.File) {
 		err = file.Close()
 		if err != nil {
-			log.Err(err).Msgf("Could not close keyset file: %s", svc.keysetFilePath)
+			log.Err(err).Msgf("could not close keyset file: %s", svc.keysetFilePath)
 		}
 	}(file)
 
 	jsonKeyset := keyset.NewJSONReader(file)
 	keysetHandle, err := insecurecleartextkeyset.Read(jsonKeyset)
 	if err != nil {
-		log.Fatal().Err(err).Msgf("encryption error: failed reading encryption keyset")
+		return fmt.Errorf("failed reading encryption keyset from file: %w", err)
 	}
 	svc.primaryKeyID = strconv.FormatUint(uint64(keysetHandle.KeysetInfo().PrimaryKeyId), 10)
 
 	encryptionInstance, err := aead.New(keysetHandle)
 	if err != nil {
-		log.Fatal().Err(err).Msgf("encryption error: failed initializing encryption")
+		return fmt.Errorf("failed initializing AEAD instance: %w", err)
 	}
 	svc.encryption = encryptionInstance
+	return nil
 }
 
 func (svc *tinkEncryptionService) validateKeyset() error {
@@ -59,14 +61,14 @@ func (svc *tinkEncryptionService) validateKeyset() error {
 	if errors.Is(err, types.RecordNotExist) {
 		return encryptionNotEnabledError
 	} else if err != nil {
-		log.Fatal().Err(err).Msgf("could not fetch server configuration")
+		return fmt.Errorf("failed to load server encryption config: %w", err)
 	}
 
-	plaintext := svc.Decrypt(ciphertextSample, keyIDAssociatedData)
-	if err != nil {
-		return encryptionKeyInvalidError
-	} else if plaintext != svc.primaryKeyID {
+	plaintext, err := svc.Decrypt(ciphertextSample, keyIDAssociatedData)
+	if plaintext != svc.primaryKeyID {
 		return encryptionKeyRotatedError
+	} else if err != nil {
+		return fmt.Errorf("failed validating encryption keyset: %w", err)
 	}
 	return nil
 }

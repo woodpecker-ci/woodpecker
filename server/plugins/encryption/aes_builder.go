@@ -15,7 +15,7 @@
 package encryption
 
 import (
-	"github.com/rs/zerolog/log"
+	"fmt"
 	"github.com/urfave/cli/v2"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -38,19 +38,28 @@ func (c aesConfiguration) WithClients(clients []model.EncryptionClient) model.En
 	return c
 }
 
-func (c aesConfiguration) Build() model.EncryptionService {
+func (c aesConfiguration) Build() (model.EncryptionService, error) {
 	svc := &aesEncryptionService{
 		cipher:  nil,
 		store:   c.store,
 		clients: c.clients,
 	}
-	svc.initClients()
-	svc.loadCipher([]byte(c.key))
-	err := svc.validateCipher()
-	if err == encryptionNotEnabledError {
-		svc.enable()
-	} else if err == encryptionKeyInvalidError {
-		log.Fatal().Err(err).Msg("Error initializing AES encryption")
+	err := svc.initClients()
+	if err != nil {
+		return nil, fmt.Errorf("failed initializing encryption clients: %w", err)
 	}
-	return svc
+
+	err = svc.loadCipher([]byte(c.key))
+	if err != nil {
+		return nil, fmt.Errorf("failed loading encryption cipher: %w", err)
+	}
+
+	err = svc.validateKey()
+	if err == encryptionNotEnabledError {
+		err = svc.enable()
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed validating encryption key: %w", err)
+	}
+	return svc, nil
 }

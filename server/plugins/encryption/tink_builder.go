@@ -15,7 +15,7 @@
 package encryption
 
 import (
-	"github.com/rs/zerolog/log"
+	"fmt"
 	"github.com/urfave/cli/v2"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -38,7 +38,7 @@ func (c tinkConfiguration) WithClients(clients []model.EncryptionClient) model.E
 	return c
 }
 
-func (c tinkConfiguration) Build() model.EncryptionService {
+func (c tinkConfiguration) Build() (model.EncryptionService, error) {
 	svc := &tinkEncryptionService{
 		keysetFilePath:    c.keysetFilePath,
 		primaryKeyID:      "",
@@ -47,16 +47,31 @@ func (c tinkConfiguration) Build() model.EncryptionService {
 		keysetFileWatcher: nil,
 		clients:           c.clients,
 	}
-	svc.initClients()
-	svc.loadKeyset()
-	err := svc.validateKeyset()
-	if err == encryptionNotEnabledError {
-		svc.enable()
-	} else if err == encryptionKeyInvalidError {
-		log.Fatal().Err(err).Msg("Error initializing TINK encryption")
-	} else if err == encryptionKeyRotatedError {
-		svc.rotate()
+	err := svc.initClients()
+	if err != nil {
+		return nil, fmt.Errorf("failed initializing encryption clients: %w", err)
 	}
-	svc.initFileWatcher()
-	return svc
+
+	err = svc.loadKeyset()
+	if err != nil {
+		return nil, fmt.Errorf("failed loading encryption keyset: %w", err)
+	}
+
+	err = svc.validateKeyset()
+	if err == encryptionNotEnabledError {
+		err = svc.enable()
+
+	} else if err == encryptionKeyRotatedError {
+		err = svc.rotate()
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf("failed validating encryption keyset: %w", err)
+	}
+
+	err = svc.initFileWatcher()
+	if err != nil {
+		return nil, fmt.Errorf("failed initializing keyset file watcher: %w", err)
+	}
+	return svc, nil
 }

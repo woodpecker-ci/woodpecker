@@ -15,6 +15,7 @@
 package store
 
 import (
+	"errors"
 	"strconv"
 
 	"github.com/rs/zerolog/log"
@@ -32,60 +33,87 @@ func NewSecretStore(secretStore model.SecretStore) *EncryptedSecretStore {
 	return &wrapper
 }
 
-func (wrapper *EncryptedSecretStore) SetEncryptionService(encryption model.EncryptionService) {
+func (wrapper *EncryptedSecretStore) SetEncryptionService(service model.EncryptionService) error {
 	if wrapper.encryption != nil {
-		log.Fatal().Msg("Attempt to init more than once")
+		return errors.New("attempt to init encryption service more than once")
 	}
-	wrapper.encryption = encryption
+	wrapper.encryption = service
+	return nil
 }
 
-func (wrapper *EncryptedSecretStore) EnableEncryption() {
+func (wrapper *EncryptedSecretStore) EnableEncryption() error {
 	log.Warn().Msg("Encrypting all secrets in database")
 	secrets, err := wrapper.store.SecretListAll()
 	if err != nil {
 		log.Fatal().Err(err).Msg("Secrets encryption failed: could not fetch secrets from DB")
 	}
 	for _, secret := range secrets {
-		wrapper.encrypt(secret)
-		wrapper._save(secret)
+		if err := wrapper.encrypt(secret); err != nil {
+			return err
+		}
+		if err := wrapper._save(secret); err != nil {
+			return err
+		}
 	}
 	log.Warn().Msg("All secrets are encrypted")
+	return nil
 }
 
-func (wrapper *EncryptedSecretStore) MigrateEncryption(newEncryptionService model.EncryptionService) {
+func (wrapper *EncryptedSecretStore) MigrateEncryption(newEncryptionService model.EncryptionService) error {
 	log.Warn().Msg("Migrating secrets encryption")
 	secrets, err := wrapper.store.SecretListAll()
 	if err != nil {
 		log.Fatal().Err(err).Msg("Secrets encryption migration failed: could not fetch secrets from DB")
 	}
-	wrapper.decryptList(secrets)
+	if err := wrapper.decryptList(secrets); err != nil {
+		return err
+	}
 	wrapper.encryption = newEncryptionService
 	for _, secret := range secrets {
-		wrapper.encrypt(secret)
-		wrapper._save(secret)
+		if err := wrapper.encrypt(secret); err != nil {
+			return err
+		}
+		if err := wrapper._save(secret); err != nil {
+			return err
+		}
 	}
 	log.Warn().Msg("Secrets encryption migrated successfully")
+	return nil
 }
 
-func (wrapper *EncryptedSecretStore) encrypt(secret *model.Secret) {
-	encryptedValue := wrapper.encryption.Encrypt(secret.Value, strconv.Itoa(int(secret.ID)))
-	secret.Value = encryptedValue
-}
-
-func (wrapper *EncryptedSecretStore) decrypt(secret *model.Secret) {
-	decryptedValue := wrapper.encryption.Decrypt(secret.Value, strconv.Itoa(int(secret.ID)))
-	secret.Value = decryptedValue
-}
-
-func (wrapper *EncryptedSecretStore) decryptList(secrets []*model.Secret) {
-	for _, secret := range secrets {
-		wrapper.decrypt(secret)
+func (wrapper *EncryptedSecretStore) encrypt(secret *model.Secret) error {
+	encryptedValue, err := wrapper.encryption.Encrypt(secret.Value, strconv.Itoa(int(secret.ID)))
+	if err != nil {
+		return err
 	}
+	secret.Value = encryptedValue
+	return nil
 }
 
-func (wrapper *EncryptedSecretStore) _save(secret *model.Secret) {
+func (wrapper *EncryptedSecretStore) decrypt(secret *model.Secret) error {
+	decryptedValue, err := wrapper.encryption.Decrypt(secret.Value, strconv.Itoa(int(secret.ID)))
+	if err != nil {
+		return err
+	}
+	secret.Value = decryptedValue
+	return nil
+}
+
+func (wrapper *EncryptedSecretStore) decryptList(secrets []*model.Secret) error {
+	for _, secret := range secrets {
+		err := wrapper.decrypt(secret)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (wrapper *EncryptedSecretStore) _save(secret *model.Secret) error {
 	err := wrapper.store.SecretUpdate(secret)
 	if err != nil {
-		log.Fatal().Err(err).Msg("Storage error: could not update secret in DB")
+		log.Err(err).Msg("Storage error: could not update secret in DB")
+		return err
 	}
+	return nil
 }

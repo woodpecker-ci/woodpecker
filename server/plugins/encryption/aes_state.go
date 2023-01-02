@@ -14,53 +14,87 @@
 
 package encryption
 
-import "github.com/rs/zerolog/log"
+import (
+	"fmt"
+	"github.com/rs/zerolog/log"
+)
 
-func (svc *aesEncryptionService) initClients() {
+func (svc *aesEncryptionService) initClients() error {
 	for _, client := range svc.clients {
-		client.SetEncryptionService(svc)
+		err := client.SetEncryptionService(svc)
+		if err != nil {
+			return fmt.Errorf("failed initializing encryption clients with AES encryption: %w", err)
+		}
 	}
 	log.Info().Msg("initialized encryption on registered services")
+	return nil
 }
 
-func (svc *aesEncryptionService) enable() {
-	svc.callbackOnEnable()
-	svc.updateCiphertextSample()
-	log.Warn().Msg("encryption enabled")
-}
-
-func (svc *aesEncryptionService) disable() {
-	svc.callbackOnDisable()
-	svc.deleteCiphertextSample()
-	log.Warn().Msg("encryption disabled")
-}
-
-func (svc *aesEncryptionService) updateCiphertextSample() {
-	ciphertext := svc.Encrypt(svc.keyID, keyIDAssociatedData)
-	err := svc.store.ServerConfigSet(ciphertextSampleConfigKey, ciphertext)
+func (svc *aesEncryptionService) enable() error {
+	err := svc.callbackOnEnable()
 	if err != nil {
-		log.Fatal().Err(err).Msgf("updating encryption key failed: could not update server config")
+		return fmt.Errorf("failed enabling AES encryption: %w", err)
+	}
+	err = svc.updateCiphertextSample()
+	if err != nil {
+		return fmt.Errorf("failed enabling AES encryption: %w", err)
+	}
+	log.Warn().Msg("encryption enabled")
+	return nil
+}
+
+func (svc *aesEncryptionService) disable() error {
+	err := svc.callbackOnDisable()
+	if err != nil {
+		return fmt.Errorf("failed disabling AES encryption: %w", err)
+	}
+	err = svc.deleteCiphertextSample()
+	if err != nil {
+		return fmt.Errorf("failed disabling AES encryption: %w", err)
+	}
+	log.Warn().Msg("encryption disabled")
+	return nil
+}
+
+func (svc *aesEncryptionService) updateCiphertextSample() error {
+	ciphertext, err := svc.Encrypt(svc.keyID, keyIDAssociatedData)
+	if err != nil {
+		return fmt.Errorf("failed updating server encryption configuration: %w", err)
+	}
+	err = svc.store.ServerConfigSet(ciphertextSampleConfigKey, ciphertext)
+	if err != nil {
+		return fmt.Errorf("failed updating server encryption configuration: %w", err)
 	}
 	log.Info().Msg("registered new encryption key")
+	return nil
 }
 
-func (svc *aesEncryptionService) deleteCiphertextSample() {
+func (svc *aesEncryptionService) deleteCiphertextSample() error {
 	err := svc.store.ServerConfigDelete(ciphertextSampleConfigKey)
 	if err != nil {
-		log.Fatal().Err(err).Msg("disabling encryption failed: could not update server config")
+		err = fmt.Errorf("failed updating server encryption configuration: %w", err)
 	}
+	return err
 }
 
-func (svc *aesEncryptionService) callbackOnEnable() {
+func (svc *aesEncryptionService) callbackOnEnable() error {
 	for _, client := range svc.clients {
-		client.EnableEncryption()
+		err := client.EnableEncryption()
+		if err != nil {
+			return fmt.Errorf("failed enabling AES encryption: %w", err)
+		}
 	}
 	log.Info().Msg("enabled encryption on registered services")
+	return nil
 }
 
-func (svc *aesEncryptionService) callbackOnDisable() {
+func (svc *aesEncryptionService) callbackOnDisable() error {
 	for _, client := range svc.clients {
-		client.MigrateEncryption(&noEncryption{})
+		err := client.MigrateEncryption(&noEncryption{})
+		if err != nil {
+			return fmt.Errorf("failed disabling AES encryption: %w", err)
+		}
 	}
-	log.Info().Msg("Disabled encryption on registered services")
+	log.Info().Msg("disabled encryption on registered services")
+	return nil
 }

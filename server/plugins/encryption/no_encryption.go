@@ -25,22 +25,27 @@ func (b noEncryptionBuilder) WithClients(clients []model.EncryptionClient) model
 	return b
 }
 
-func (b noEncryptionBuilder) Build() model.EncryptionService {
+func (b noEncryptionBuilder) Build() (model.EncryptionService, error) {
 	svc := &noEncryption{}
 	for _, client := range b.clients {
-		client.SetEncryptionService(svc)
+		err := client.SetEncryptionService(svc)
+		if err != nil {
+			return nil, err
+		}
 	}
-	return svc
+	return svc, nil
 }
 
 type noEncryption struct{}
 
-func (svc *noEncryption) Encrypt(plaintext, _ string) string {
-	return plaintext
+func (svc *noEncryption) Encrypt(plaintext, _ string) (string, error) {
+	return plaintext, nil
 }
 
-func (svc *noEncryption) Decrypt(ciphertext, _ string) string {
-	return ciphertext
+func (svc *noEncryption) Decrypt(ciphertext, _ string) (string, error) {
+	return ciphertext, nil
 }
 
-func (svc *noEncryption) Disable() {}
+func (svc *noEncryption) Disable() error {
+	return nil
+}

@@ -22,49 +22,51 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/rs/zerolog/log"
 	"golang.org/x/crypto/sha3"
 
 	"github.com/woodpecker-ci/woodpecker/server/store/types"
 )
 
-func (svc *aesEncryptionService) loadCipher(key []byte) {
+func (svc *aesEncryptionService) loadCipher(key []byte) error {
 	block, err := aes.NewCipher(key)
 	if err != nil {
-		log.Fatal().Err(err).Msgf("encryption error: failed initializing encryption")
+		return err
 	}
 	svc.cipher = block
-	svc.keyID = svc.hash(key)
+	svc.keyID, err = svc.hash(key)
+	return err
 }
 
-func (svc *aesEncryptionService) validateCipher() error {
+func (svc *aesEncryptionService) validateKey() error {
 	ciphertextSample, err := svc.store.ServerConfigGet(ciphertextSampleConfigKey)
 	if errors.Is(err, types.RecordNotExist) {
 		return encryptionNotEnabledError
 	} else if err != nil {
-		log.Fatal().Err(err).Msgf("could not fetch server configuration")
+		return fmt.Errorf("failed to load server encryption config: %w", err)
 	}
 
-	plaintext := svc.Decrypt(ciphertextSample, keyIDAssociatedData)
-	if err != nil || plaintext != svc.keyID {
+	plaintext, err := svc.Decrypt(ciphertextSample, keyIDAssociatedData)
+	if plaintext != svc.keyID {
 		return encryptionKeyInvalidError
+	} else if err != nil {
+		return fmt.Errorf("failed validating encryption key: %w", err)
 	}
 	return nil
 }
 
-func (svc *aesEncryptionService) hash(data []byte) string {
+func (svc *aesEncryptionService) hash(data []byte) (string, error) {
 	result := make([]byte, 32)
 	sha := sha3.NewShake256()
 
 	_, err := sha.Write(data)
 	if err != nil {
-		log.Fatal().Msg("encryption error: failed calculating hash")
+		return "", fmt.Errorf("failed calculating hash: %w", err)
 	}
 	_, err = sha.Read(result)
 	if err != nil {
-		log.Fatal().Msg("encryption error: failed calculating hash")
+		return "", fmt.Errorf("failed calculating hash: %w", err)
 	}
-	return fmt.Sprintf("%x", result)
+	return fmt.Sprintf("%x", result), nil
 }
 
 func (svc *aesEncryptionService) newSizeInfoChunk(dataLen int) (result []byte) {

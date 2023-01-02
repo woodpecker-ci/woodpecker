@@ -17,8 +17,7 @@ package encryption
 import (
 	"crypto/cipher"
 	"encoding/base64"
-
-	"github.com/rs/zerolog/log"
+	"fmt"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store"
@@ -31,7 +30,7 @@ type aesEncryptionService struct {
 	clients []model.EncryptionClient
 }
 
-func (svc *aesEncryptionService) Encrypt(plaintext, _ string) string {
+func (svc *aesEncryptionService) Encrypt(plaintext, _ string) (string, error) {
 	msg := []byte(plaintext)
 	chainSize := svc.blockSize()
 	infoBlock := svc.newSizeInfoChunk(len(msg))
@@ -39,23 +38,23 @@ func (svc *aesEncryptionService) Encrypt(plaintext, _ string) string {
 	encrypted := make([]byte, len(infoBlock)+len(msg))
 	err := svc.encode(encrypted[0:len(infoBlock)], infoBlock)
 	if err != nil {
-		log.Fatal().Err(err).Msgf("encryption error")
+		return "", fmt.Errorf("encryption error: %w", err)
 	}
 
 	for n := 0; n < len(msg)/chainSize; n++ {
 		dst, src := encrypted[(n+1)*chainSize:(n+2)*chainSize], msg[n*chainSize:(n+1)*chainSize]
 		err = svc.encode(dst, src)
 		if err != nil {
-			log.Fatal().Err(err).Msgf("encryption error")
+			return "", fmt.Errorf("encryption error: %s", err)
 		}
 	}
-	return base64.StdEncoding.EncodeToString(encrypted)
+	return base64.StdEncoding.EncodeToString(encrypted), nil
 }
 
-func (svc *aesEncryptionService) Decrypt(ciphertext, _ string) string {
+func (svc *aesEncryptionService) Decrypt(ciphertext, _ string) (string, error) {
 	ct, err := base64.StdEncoding.DecodeString(ciphertext)
 	if err != nil {
-		log.Fatal().Err(err).Msgf("encryption error: Base64 decryption failed")
+		return "", fmt.Errorf("decryption error: Base64 decryption failed. Cause: %w", err)
 	}
 
 	chainSize := svc.blockSize()
@@ -64,17 +63,17 @@ func (svc *aesEncryptionService) Decrypt(ciphertext, _ string) string {
 		dst, src := decrypted[n*chainSize:(n+1)*chainSize], ct[n*chainSize:(n+1)*chainSize]
 		err = svc.decode(dst, src)
 		if err != nil {
-			log.Fatal().Err(err).Msgf("decryption error")
+			return "", fmt.Errorf("decryption error: %w", err)
 		}
 	}
 
 	dataLen, err := svc.getDataSize(decrypted)
 	if err != nil {
-		log.Fatal().Err(err).Msgf("decryption error")
+		return "", fmt.Errorf("decryption error: %w", err)
 	}
-	return string(decrypted[chainSize : chainSize+dataLen])
+	return string(decrypted[chainSize : chainSize+dataLen]), nil
 }
 
-func (svc *aesEncryptionService) Disable() {
-	svc.disable()
+func (svc *aesEncryptionService) Disable() error {
+	return svc.disable()
 }

@@ -16,11 +16,10 @@ package encryption
 
 import (
 	"encoding/base64"
+	"fmt"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/google/tink/go/tink"
-	"github.com/rs/zerolog/log"
-
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
@@ -36,30 +35,29 @@ type tinkEncryptionService struct {
 	clients           []model.EncryptionClient
 }
 
-func (svc *tinkEncryptionService) Encrypt(plaintext, associatedData string) string {
+func (svc *tinkEncryptionService) Encrypt(plaintext, associatedData string) (string, error) {
 	msg := []byte(plaintext)
 	aad := []byte(associatedData)
 	ciphertext, err := svc.encryption.Encrypt(msg, aad)
 	if err != nil {
-		log.Fatal().Err(err).Msgf("encryption error")
+		return "", fmt.Errorf("encryption error: %w", err)
 	}
-	return base64.StdEncoding.EncodeToString(ciphertext)
+	return base64.StdEncoding.EncodeToString(ciphertext), nil
 }
 
-func (svc *tinkEncryptionService) Decrypt(ciphertext, associatedData string) string {
+func (svc *tinkEncryptionService) Decrypt(ciphertext, associatedData string) (string, error) {
 	ct, err := base64.StdEncoding.DecodeString(ciphertext)
 	if err != nil {
-		log.Fatal().Err(err).Msgf("encryption error: Base64 decryption failed")
+		return "", fmt.Errorf("decryption error: Base64 decryption failed. Cause: %w", err)
 	}
 
 	plaintext, err := svc.encryption.Decrypt(ct, []byte(associatedData))
 	if err != nil {
-		log.Fatal().Err(err).Msgf("decryption error")
+		return "", fmt.Errorf("decryption error: %w", err)
 	}
-
-	return string(plaintext)
+	return string(plaintext), nil
 }
 
-func (svc *tinkEncryptionService) Disable() {
-	svc.disable()
+func (svc *tinkEncryptionService) Disable() error {
+	return svc.disable()
 }
