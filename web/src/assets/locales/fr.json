@@ -114,6 +114,18 @@
       "step_not_started": "L'étape n'a pas démarré encore.",
       "tasks": "Tâches"
     },
+    "deploy_pipeline": {
+      "enter_target": "Environnement de déploiement ciblé",
+      "title": "Déclenchement d'un événement de déploiement pour le pipeline courant #{pipelineId}",
+      "trigger": "Déployer",
+      "variables": {
+        "add": "Ajouter une variable",
+        "desc": "Spécifiez les variables additionnelles que votre pipeline va utiliser. Les variables portant le même nom seront écrasées.",
+        "name": "Nom de la variable",
+        "title": "Variables additionnelles du pipeline",
+        "value": "Valeur de la variable"
+      }
+    },
     "enable": {
       "enable": "Activer",
       "enabled": "Déjà activé",

@@ -79,9 +79,9 @@ func (when *When) Match(metadata frontend.Metadata, global bool) (bool, error) {
 	return false, nil
 }
 
-func (when *When) IncludesStatus(status string) bool {
+func (when *When) IncludesStatusFailure() bool {
 	for _, c := range when.Constraints {
-		if c.Status.Includes(status) {
+		if c.Status.Includes("failure") {
 			return true
 		}
 	}
@@ -89,14 +89,19 @@ func (when *When) IncludesStatus(status string) bool {
 	return false
 }
 
-func (when *When) ExcludesStatus(status string) bool {
+func (when *When) IncludesStatusSuccess() bool {
+	// "success" acts differently than "failure" in that it's
+	// presumed to be included unless it's specifically not part
+	// of the list
+	if when.IsEmpty() {
+		return true
+	}
 	for _, c := range when.Constraints {
-		if !c.Status.Excludes(status) {
-			return false
+		if len(c.Status.Include) == 0 || c.Status.Includes("success") {
+			return true
 		}
 	}
-
-	return len(when.Constraints) > 0
+	return false
 }
 
 // False if (any) non local
