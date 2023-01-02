@@ -36,17 +36,17 @@ func NewSecretStore(secretStore model.SecretStore) *EncryptedSecretStore {
 
 func (wrapper *EncryptedSecretStore) SetEncryptionService(service model.EncryptionService) error {
 	if wrapper.encryption != nil {
-		return errors.New("attempt to init encryption service more than once")
+		return errors.New(errMessageInitSeveralTimes)
 	}
 	wrapper.encryption = service
 	return nil
 }
 
 func (wrapper *EncryptedSecretStore) EnableEncryption() error {
-	log.Warn().Msg("Encrypting all secrets in database")
+	log.Warn().Msg(logMessageEnablingSecretsEncryption)
 	secrets, err := wrapper.store.SecretListAll()
 	if err != nil {
-		return fmt.Errorf("failed enabling secret store encryption: %w", err)
+		return fmt.Errorf(errMessageTemplateFailedToEnable, err)
 	}
 	for _, secret := range secrets {
 		if err := wrapper.encrypt(secret); err != nil {
@@ -56,15 +56,15 @@ func (wrapper *EncryptedSecretStore) EnableEncryption() error {
 			return err
 		}
 	}
-	log.Warn().Msg("All secrets are encrypted")
+	log.Warn().Msg(logMessageEnablingSecretsEncryptionSuccess)
 	return nil
 }
 
 func (wrapper *EncryptedSecretStore) MigrateEncryption(newEncryptionService model.EncryptionService) error {
-	log.Warn().Msg("Migrating secrets encryption")
+	log.Warn().Msg(logMessageMigratingSecretsEncryption)
 	secrets, err := wrapper.store.SecretListAll()
 	if err != nil {
-		return fmt.Errorf("failed migrating secret store encryption: %w", err)
+		return fmt.Errorf(errMessageTemplateFailedToMigrate, err)
 	}
 	if err := wrapper.decryptList(secrets); err != nil {
 		return err
@@ -78,14 +78,14 @@ func (wrapper *EncryptedSecretStore) MigrateEncryption(newEncryptionService mode
 			return err
 		}
 	}
-	log.Warn().Msg("Secrets encryption migrated successfully")
+	log.Warn().Msg(logMessageMigratingSecretsEncryptionSuccess)
 	return nil
 }
 
 func (wrapper *EncryptedSecretStore) encrypt(secret *model.Secret) error {
 	encryptedValue, err := wrapper.encryption.Encrypt(secret.Value, strconv.Itoa(int(secret.ID)))
 	if err != nil {
-		return fmt.Errorf("failed to encrypt secret id=%d: %w", secret.ID, err)
+		return fmt.Errorf(errMessageTemplateFailedToEncryptSecret, secret.ID, err)
 	}
 	secret.Value = encryptedValue
 	return nil
@@ -94,7 +94,7 @@ func (wrapper *EncryptedSecretStore) encrypt(secret *model.Secret) error {
 func (wrapper *EncryptedSecretStore) decrypt(secret *model.Secret) error {
 	decryptedValue, err := wrapper.encryption.Decrypt(secret.Value, strconv.Itoa(int(secret.ID)))
 	if err != nil {
-		return fmt.Errorf("failed to decrypt secret id=%d: %w", secret.ID, err)
+		return fmt.Errorf(errMessageTemplateFailedToDecryptSecret, secret.ID, err)
 	}
 	secret.Value = decryptedValue
 	return nil
@@ -104,7 +104,7 @@ func (wrapper *EncryptedSecretStore) decryptList(secrets []*model.Secret) error 
 	for _, secret := range secrets {
 		err := wrapper.decrypt(secret)
 		if err != nil {
-			return fmt.Errorf("failed to decrypt secret id=%d: %w", secret.ID, err)
+			return fmt.Errorf(errMessageTemplateFailedToDecryptSecret, secret.ID, err)
 		}
 	}
 	return nil
@@ -113,7 +113,7 @@ func (wrapper *EncryptedSecretStore) decryptList(secrets []*model.Secret) error 
 func (wrapper *EncryptedSecretStore) _save(secret *model.Secret) error {
 	err := wrapper.store.SecretUpdate(secret)
 	if err != nil {
-		log.Err(err).Msg("Storage error: could not update secret in DB")
+		log.Err(err).Msg(errMessageTemplateStorageError)
 		return err
 	}
 	return nil

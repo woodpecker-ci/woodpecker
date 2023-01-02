@@ -38,14 +38,14 @@ func (svc *aesEncryptionService) Encrypt(plaintext, _ string) (string, error) {
 	encrypted := make([]byte, len(infoBlock)+len(msg))
 	err := svc.encode(encrypted[0:len(infoBlock)], infoBlock)
 	if err != nil {
-		return "", fmt.Errorf("encryption error: %w", err)
+		return "", fmt.Errorf(errTemplateEncryptionFailed, err)
 	}
 
 	for n := 0; n < len(msg)/chainSize; n++ {
 		dst, src := encrypted[(n+1)*chainSize:(n+2)*chainSize], msg[n*chainSize:(n+1)*chainSize]
 		err = svc.encode(dst, src)
 		if err != nil {
-			return "", fmt.Errorf("encryption error: %s", err)
+			return "", fmt.Errorf(errTemplateEncryptionFailed, err)
 		}
 	}
 	return base64.StdEncoding.EncodeToString(encrypted), nil
@@ -54,7 +54,7 @@ func (svc *aesEncryptionService) Encrypt(plaintext, _ string) (string, error) {
 func (svc *aesEncryptionService) Decrypt(ciphertext, _ string) (string, error) {
 	ct, err := base64.StdEncoding.DecodeString(ciphertext)
 	if err != nil {
-		return "", fmt.Errorf("decryption error: Base64 decryption failed. Cause: %w", err)
+		return "", fmt.Errorf(errTemplateBase64DecryptionFailed, err)
 	}
 
 	chainSize := svc.blockSize()
@@ -63,13 +63,13 @@ func (svc *aesEncryptionService) Decrypt(ciphertext, _ string) (string, error) {
 		dst, src := decrypted[n*chainSize:(n+1)*chainSize], ct[n*chainSize:(n+1)*chainSize]
 		err = svc.decode(dst, src)
 		if err != nil {
-			return "", fmt.Errorf("decryption error: %w", err)
+			return "", fmt.Errorf(errTemplateDecryptionFailed, err)
 		}
 	}
 
 	dataLen, err := svc.getDataSize(decrypted)
 	if err != nil {
-		return "", fmt.Errorf("decryption error: %w", err)
+		return "", fmt.Errorf(errTemplateDecryptionFailed, err)
 	}
 	return string(decrypted[chainSize : chainSize+dataLen]), nil
 }

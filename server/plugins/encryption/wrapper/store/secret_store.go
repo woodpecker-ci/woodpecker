@@ -56,7 +56,7 @@ func (wrapper *EncryptedSecretStore) SecretCreate(secret *model.Secret) error {
 	if err != nil {
 		deleteErr := wrapper.store.SecretDelete(newSecret)
 		if deleteErr != nil {
-			return fmt.Errorf("failed creating secret: %w. Also failed deleting temporary secret record from store: %s", err, deleteErr.Error())
+			return fmt.Errorf(errMessageTemplateFailedToRollbackSecretCreation, err, deleteErr.Error())
 		}
 		return err
 	}
@@ -65,7 +65,7 @@ func (wrapper *EncryptedSecretStore) SecretCreate(secret *model.Secret) error {
 	if err != nil {
 		deleteErr := wrapper.store.SecretDelete(newSecret)
 		if deleteErr != nil {
-			return fmt.Errorf("failed updating secret: %w. Also failed deleting temporary secret record from store: %s", err, deleteErr.Error())
+			return fmt.Errorf(errMessageTemplateFailedToRollbackSecretCreation, err, deleteErr.Error())
 		}
 		return err
 	}

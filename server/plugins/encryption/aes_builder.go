@@ -47,12 +47,12 @@ func (c aesConfiguration) Build() (model.EncryptionService, error) {
 	}
 	err := svc.initClients()
 	if err != nil {
-		return nil, fmt.Errorf("failed initializing encryption clients: %w", err)
+		return nil, fmt.Errorf(errTemplateFailedInitializingClients, err)
 	}
 
 	err = svc.loadCipher([]byte(c.key))
 	if err != nil {
-		return nil, fmt.Errorf("failed loading encryption cipher: %w", err)
+		return nil, fmt.Errorf(errTemplateAesFailedLoadingCipher, err)
 	}
 
 	err = svc.validateKey()
@@ -60,7 +60,7 @@ func (c aesConfiguration) Build() (model.EncryptionService, error) {
 		err = svc.enable()
 	}
 	if err != nil {
-		return nil, fmt.Errorf("failed validating encryption key: %w", err)
+		return nil, fmt.Errorf(errTemplateFailedValidatingKey, err)
 	}
 	return svc, nil
 }

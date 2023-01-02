@@ -29,28 +29,28 @@ import (
 )
 
 func (svc *tinkEncryptionService) loadKeyset() error {
-	log.Warn().Msgf("loading encryption keyset from file: %s", svc.keysetFilePath)
+	log.Warn().Msgf(logTemplateTinkLoadingKeyset, svc.keysetFilePath)
 	file, err := os.Open(svc.keysetFilePath)
 	if err != nil {
-		return fmt.Errorf("failed opening encryption keyset file: %w", err)
+		return fmt.Errorf(errTemplateTinkFailedOpeningKeyset, err)
 	}
 	defer func(file *os.File) {
 		err = file.Close()
 		if err != nil {
-			log.Err(err).Msgf("could not close keyset file: %s", svc.keysetFilePath)
+			log.Err(err).Msgf(logTemplateTinkFailedClosingKeysetFile, svc.keysetFilePath)
 		}
 	}(file)
 
 	jsonKeyset := keyset.NewJSONReader(file)
 	keysetHandle, err := insecurecleartextkeyset.Read(jsonKeyset)
 	if err != nil {
-		return fmt.Errorf("failed reading encryption keyset from file: %w", err)
+		return fmt.Errorf(errTemplateTinkFailedReadingKeyset, err)
 	}
 	svc.primaryKeyID = strconv.FormatUint(uint64(keysetHandle.KeysetInfo().PrimaryKeyId), 10)
 
 	encryptionInstance, err := aead.New(keysetHandle)
 	if err != nil {
-		return fmt.Errorf("failed initializing AEAD instance: %w", err)
+		return fmt.Errorf(errTemplateTinkFailedInitializingAEAD, err)
 	}
 	svc.encryption = encryptionInstance
 	return nil
@@ -61,14 +61,14 @@ func (svc *tinkEncryptionService) validateKeyset() error {
 	if errors.Is(err, types.RecordNotExist) {
 		return errEncryptionNotEnabled
 	} else if err != nil {
-		return fmt.Errorf("failed to load server encryption config: %w", err)
+		return fmt.Errorf(errTemplateFailedLoadingServerConfig, err)
 	}
 
 	plaintext, err := svc.Decrypt(ciphertextSample, keyIDAssociatedData)
 	if plaintext != svc.primaryKeyID {
 		return errEncryptionKeyRotated
 	} else if err != nil {
-		return fmt.Errorf("failed validating encryption keyset: %w", err)
+		return fmt.Errorf(errTemplateFailedValidatingKey, err)
 	}
 	return nil
 }

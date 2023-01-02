@@ -25,11 +25,11 @@ import (
 func (svc *tinkEncryptionService) initFileWatcher() error {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		return fmt.Errorf("failed subscribing on encryption keyset file changes: %w", err)
+		return fmt.Errorf(errTemplateTinkFailedSubscribeKeysetFileChanges, err)
 	}
 	err = watcher.Add(svc.keysetFilePath)
 	if err != nil {
-		return fmt.Errorf("failed subscribing on encryption keyset file changes: %w", err)
+		return fmt.Errorf(errTemplateTinkFailedSubscribeKeysetFileChanges, err)
 	}
 
 	svc.keysetFileWatcher = watcher
@@ -42,19 +42,19 @@ func (svc *tinkEncryptionService) handleFileEvents() {
 		select {
 		case event, ok := <-svc.keysetFileWatcher.Events:
 			if !ok {
-				log.Fatal().Msg("failed watching encryption keyset file changes")
+				log.Fatal().Msg(errMessageTinkKeysetFileWatchFailed)
 			}
 			if (event.Op == fsnotify.Write) || (event.Op == fsnotify.Create) {
-				log.Warn().Msgf("changes detected in encryption keyset file: '%s'. Encryption service will be reloaded", event.Name)
+				log.Warn().Msgf(logTemplateTinkKeysetFileChanged, event.Name)
 				err := svc.rotate()
 				if err != nil {
-					log.Fatal().Err(err).Msgf("failed rotating TINK encryption keyset")
+					log.Fatal().Err(err).Msgf(errTemplateFailedRotatingEncryption)
 				}
 				return
 			}
 		case err, ok := <-svc.keysetFileWatcher.Errors:
 			if !ok {
-				log.Fatal().Err(err).Msgf("failed watching encryption keyset file changes")
+				log.Fatal().Err(err).Msgf(errMessageTinkKeysetFileWatchFailed)
 			}
 		}
 	}

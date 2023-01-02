@@ -24,56 +24,56 @@ func (svc *aesEncryptionService) initClients() error {
 	for _, client := range svc.clients {
 		err := client.SetEncryptionService(svc)
 		if err != nil {
-			return fmt.Errorf("failed initializing encryption clients with AES encryption: %w", err)
+			return fmt.Errorf(errTemplateFailedInitializingClients, err)
 		}
 	}
-	log.Info().Msg("initialized encryption on registered services")
+	log.Info().Msg(logMessageClientsInitialized)
 	return nil
 }
 
 func (svc *aesEncryptionService) enable() error {
 	err := svc.callbackOnEnable()
 	if err != nil {
-		return fmt.Errorf("failed enabling AES encryption: %w", err)
+		return fmt.Errorf(errTemplateFailedEnablingEncryption, err)
 	}
 	err = svc.updateCiphertextSample()
 	if err != nil {
-		return fmt.Errorf("failed enabling AES encryption: %w", err)
+		return fmt.Errorf(errTemplateFailedEnablingEncryption, err)
 	}
-	log.Warn().Msg("encryption enabled")
+	log.Warn().Msg(logMessageEncryptionEnabled)
 	return nil
 }
 
 func (svc *aesEncryptionService) disable() error {
 	err := svc.callbackOnDisable()
 	if err != nil {
-		return fmt.Errorf("failed disabling AES encryption: %w", err)
+		return fmt.Errorf(errTemplateFailedDisablingEncryption, err)
 	}
 	err = svc.deleteCiphertextSample()
 	if err != nil {
-		return fmt.Errorf("failed disabling AES encryption: %w", err)
+		return fmt.Errorf(errTemplateFailedDisablingEncryption, err)
 	}
-	log.Warn().Msg("encryption disabled")
+	log.Warn().Msg(logMessageEncryptionDisabled)
 	return nil
 }
 
 func (svc *aesEncryptionService) updateCiphertextSample() error {
 	ciphertext, err := svc.Encrypt(svc.keyID, keyIDAssociatedData)
 	if err != nil {
-		return fmt.Errorf("failed updating server encryption configuration: %w", err)
+		return fmt.Errorf(errTemplateFailedUpdatingServerConfig, err)
 	}
 	err = svc.store.ServerConfigSet(ciphertextSampleConfigKey, ciphertext)
 	if err != nil {
-		return fmt.Errorf("failed updating server encryption configuration: %w", err)
+		return fmt.Errorf(errTemplateFailedUpdatingServerConfig, err)
 	}
-	log.Info().Msg("registered new encryption key")
+	log.Info().Msg(logMessageEncryptionKeyRegistered)
 	return nil
 }
 
 func (svc *aesEncryptionService) deleteCiphertextSample() error {
 	err := svc.store.ServerConfigDelete(ciphertextSampleConfigKey)
 	if err != nil {
-		err = fmt.Errorf("failed updating server encryption configuration: %w", err)
+		err = fmt.Errorf(errTemplateFailedUpdatingServerConfig, err)
 	}
 	return err
 }
@@ -82,10 +82,10 @@ func (svc *aesEncryptionService) callbackOnEnable() error {
 	for _, client := range svc.clients {
 		err := client.EnableEncryption()
 		if err != nil {
-			return fmt.Errorf("failed enabling AES encryption: %w", err)
+			return fmt.Errorf(errTemplateFailedEnablingEncryption, err)
 		}
 	}
-	log.Info().Msg("enabled encryption on registered services")
+	log.Info().Msg(logMessageClientsEnabled)
 	return nil
 }
 
@@ -93,9 +93,9 @@ func (svc *aesEncryptionService) callbackOnDisable() error {
 	for _, client := range svc.clients {
 		err := client.MigrateEncryption(&noEncryption{})
 		if err != nil {
-			return fmt.Errorf("failed disabling AES encryption: %w", err)
+			return fmt.Errorf(errTemplateFailedDisablingEncryption, err)
 		}
 	}
-	log.Info().Msg("disabled encryption on registered services")
+	log.Info().Msg(logMessageEncryptionDisabled)
 	return nil
 }

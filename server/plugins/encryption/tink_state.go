@@ -23,26 +23,26 @@ import (
 func (svc *tinkEncryptionService) enable() error {
 	err := svc.callbackOnEnable()
 	if err != nil {
-		return fmt.Errorf("failed enabling TINK encryption: %w", err)
+		return fmt.Errorf(errTemplateFailedEnablingEncryption, err)
 	}
 	err = svc.updateCiphertextSample()
 	if err != nil {
-		return fmt.Errorf("failed enabling TINK encryption: %w", err)
+		return fmt.Errorf(errTemplateFailedEnablingEncryption, err)
 	}
-	log.Warn().Msg("encryption enabled")
+	log.Warn().Msg(logMessageEncryptionEnabled)
 	return nil
 }
 
 func (svc *tinkEncryptionService) disable() error {
 	err := svc.callbackOnDisable()
 	if err != nil {
-		return fmt.Errorf("failed disabling TINK encryption: %w", err)
+		return fmt.Errorf(errTemplateFailedDisablingEncryption, err)
 	}
 	err = svc.deleteCiphertextSample()
 	if err != nil {
-		return fmt.Errorf("failed disabling TINK encryption: %w", err)
+		return fmt.Errorf(errTemplateFailedDisablingEncryption, err)
 	}
-	log.Warn().Msg("encryption disabled")
+	log.Warn().Msg(logMessageEncryptionDisabled)
 	return nil
 }
 
@@ -57,7 +57,7 @@ func (svc *tinkEncryptionService) rotate() error {
 	}
 	err := newSvc.loadKeyset()
 	if err != nil {
-		return fmt.Errorf("failed rotating TINK encryption: %w", err)
+		return fmt.Errorf(errTemplateFailedRotatingEncryption, err)
 	}
 
 	err = newSvc.validateKeyset()
@@ -65,17 +65,17 @@ func (svc *tinkEncryptionService) rotate() error {
 		err = newSvc.updateCiphertextSample()
 	}
 	if err != nil {
-		return fmt.Errorf("failed rotating TINK encryption: %w", err)
+		return fmt.Errorf(errTemplateFailedRotatingEncryption, err)
 	}
 
 	err = newSvc.callbackOnRotation()
 	if err != nil {
-		return fmt.Errorf("failed rotating TINK encryption: %w", err)
+		return fmt.Errorf(errTemplateFailedRotatingEncryption, err)
 	}
 
 	err = newSvc.initFileWatcher()
 	if err != nil {
-		return fmt.Errorf("failed rotating TINK encryption: %w", err)
+		return fmt.Errorf(errTemplateFailedRotatingEncryption, err)
 	}
 	return nil
 }
@@ -83,20 +83,20 @@ func (svc *tinkEncryptionService) rotate() error {
 func (svc *tinkEncryptionService) updateCiphertextSample() error {
 	ciphertext, err := svc.Encrypt(svc.primaryKeyID, keyIDAssociatedData)
 	if err != nil {
-		return fmt.Errorf("failed updating server encryption configuration: %w", err)
+		return fmt.Errorf(errTemplateFailedUpdatingServerConfig, err)
 	}
 	err = svc.store.ServerConfigSet(ciphertextSampleConfigKey, ciphertext)
 	if err != nil {
-		return fmt.Errorf("failed updating server encryption configuration: %w", err)
+		return fmt.Errorf(errTemplateFailedUpdatingServerConfig, err)
 	}
-	log.Info().Msg("registered new encryption key")
+	log.Info().Msg(logMessageEncryptionKeyRegistered)
 	return nil
 }
 
 func (svc *tinkEncryptionService) deleteCiphertextSample() error {
 	err := svc.store.ServerConfigDelete(ciphertextSampleConfigKey)
 	if err != nil {
-		err = fmt.Errorf("failed updating server encryption configuration: %w", err)
+		err = fmt.Errorf(errTemplateFailedUpdatingServerConfig, err)
 	}
 	return err
 }
@@ -105,10 +105,10 @@ func (svc *tinkEncryptionService) initClients() error {
 	for _, client := range svc.clients {
 		err := client.SetEncryptionService(svc)
 		if err != nil {
-			return fmt.Errorf("failed initializing encryption clients with TINK encryption: %w", err)
+			return err
 		}
 	}
-	log.Info().Msg("Initialized encryption on registered services")
+	log.Info().Msg(logMessageClientsInitialized)
 	return nil
 }
 
@@ -116,10 +116,10 @@ func (svc *tinkEncryptionService) callbackOnEnable() error {
 	for _, client := range svc.clients {
 		err := client.EnableEncryption()
 		if err != nil {
-			return fmt.Errorf("failed enabling TINK encryption: %w", err)
+			return err
 		}
 	}
-	log.Info().Msg("enabled encryption on registered services")
+	log.Info().Msg(logMessageClientsEnabled)
 	return nil
 }
 
@@ -127,10 +127,10 @@ func (svc *tinkEncryptionService) callbackOnRotation() error {
 	for _, client := range svc.clients {
 		err := client.MigrateEncryption(svc)
 		if err != nil {
-			return fmt.Errorf("failed rotating TINK encryption key: %w", err)
+			return err
 		}
 	}
-	log.Info().Msg("updated encryption key on registered services")
+	log.Info().Msg(logMessageClientsRotated)
 	return nil
 }
 
@@ -138,9 +138,9 @@ func (svc *tinkEncryptionService) callbackOnDisable() error {
 	for _, client := range svc.clients {
 		err := client.MigrateEncryption(&noEncryption{})
 		if err != nil {
-			return fmt.Errorf("failed disabling TINK encryption: %w", err)
+			return err
 		}
 	}
-	log.Info().Msg("disabled encryption on registered services")
+	log.Info().Msg(logMessageClientsDecrypted)
 	return nil
 }

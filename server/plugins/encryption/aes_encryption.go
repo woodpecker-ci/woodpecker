@@ -42,14 +42,14 @@ func (svc *aesEncryptionService) validateKey() error {
 	if errors.Is(err, types.RecordNotExist) {
 		return errEncryptionNotEnabled
 	} else if err != nil {
-		return fmt.Errorf("failed to load server encryption config: %w", err)
+		return fmt.Errorf(errTemplateFailedLoadingServerConfig, err)
 	}
 
 	plaintext, err := svc.Decrypt(ciphertextSample, keyIDAssociatedData)
 	if plaintext != svc.keyID {
 		return errEncryptionKeyInvalid
 	} else if err != nil {
-		return fmt.Errorf("failed validating encryption key: %w", err)
+		return err
 	}
 	return nil
 }
@@ -60,11 +60,11 @@ func (svc *aesEncryptionService) hash(data []byte) (string, error) {
 
 	_, err := sha.Write(data)
 	if err != nil {
-		return "", fmt.Errorf("failed calculating hash: %w", err)
+		return "", fmt.Errorf(errTemplateAesFailedCalculatingHash, err)
 	}
 	_, err = sha.Read(result)
 	if err != nil {
-		return "", fmt.Errorf("failed calculating hash: %w", err)
+		return "", fmt.Errorf(errTemplateAesFailedCalculatingHash, err)
 	}
 	return fmt.Sprintf("%x", result), nil
 }
@@ -170,7 +170,7 @@ func (chain *aesChain) mixInput() error {
 func (chain *aesChain) encrypt(crp interface{ Encrypt(dst, src []byte) }) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			err = fmt.Errorf("encryption error: %v", r)
+			err = fmt.Errorf("%v", r)
 		}
 	}()
 	crp.Encrypt(chain.out, chain.inter)
@@ -180,7 +180,7 @@ func (chain *aesChain) encrypt(crp interface{ Encrypt(dst, src []byte) }) (err e
 func (chain *aesChain) decrypt(crp interface{ Decrypt(dst, src []byte) }) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			err = fmt.Errorf("decryption error: %v", r)
+			err = fmt.Errorf("%v", r)
 		}
 	}()
 	crp.Decrypt(chain.inter, chain.inp)
@@ -193,7 +193,7 @@ func (chain *aesChain) mixOutput() error {
 
 func (chain *aesChain) xorData(a, b, c []byte) error {
 	if len(a) != len(b) || len(b) != len(c) {
-		return fmt.Errorf("must be same len, but got %d, %d and %d", len(a), len(b), len(c))
+		return fmt.Errorf(errTemplateAesXorDifferentLenError, len(a), len(b), len(c))
 	}
 	for i := 0; i < len(a); i++ {
 		c[i] = a[i] ^ b[i]

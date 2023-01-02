@@ -15,33 +15,12 @@
 package encryption
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/urfave/cli/v2"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store"
-)
-
-const (
-	rawKeyConfigFlag             = "encryption-raw-key"
-	tinkKeysetFilepathConfigFlag = "encryption-tink-keyset"
-	disableEncryptionConfigFlag  = "encryption-disable-flag"
-
-	ciphertextSampleConfigKey = "encryption-ciphertext-sample"
-
-	keyTypeTink = "tink"
-	keyTypeRaw  = "raw"
-	keyTypeNone = "none"
-
-	keyIDAssociatedData = "Primary key id"
-)
-
-var (
-	errEncryptionNotEnabled = errors.New("encryption is not enabled")
-	errEncryptionKeyInvalid = errors.New("encryption key is invalid")
-	errEncryptionKeyRotated = errors.New("encryption key is being rotated")
 )
 
 type builder struct {
@@ -62,31 +41,31 @@ func (b builder) WithClient(client model.EncryptionClient) model.EncryptionBuild
 func (b builder) Build() error {
 	enabled, err := b.isEnabled()
 	if err != nil {
-		return fmt.Errorf("failed fetching server encryption status: %w", err)
+		return err
 	}
 
 	disableFlag := b.ctx.Bool(disableEncryptionConfigFlag)
 
 	keyType, err := b.detectKeyType()
 	if err != nil {
-		return fmt.Errorf("failed determining encryption key type: %w", err)
+		return err
 	}
 
 	if !enabled && (disableFlag || keyType == keyTypeNone) {
 		_, err := noEncryptionBuilder{}.WithClients(b.clients).Build()
 		if err != nil {
-			return fmt.Errorf("failed initializing server in unencrypted mode: %w", err)
+			return fmt.Errorf(errTemplateFailedInitializingUnencrypted, err)
 		}
 	}
 	svc, err := b.getService(keyType)
 	if err != nil {
-		return fmt.Errorf("failed initializing encryption service: %w", err)
+		return fmt.Errorf(errTemplateFailedInitializing, err)
 	}
 
 	if disableFlag {
 		err := svc.Disable()
 		if err != nil {
-			return fmt.Errorf("failed disabling encryption: %w", err)
+			return err
 		}
 	}
 	return nil

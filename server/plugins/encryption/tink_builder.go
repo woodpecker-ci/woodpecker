@@ -50,12 +50,12 @@ func (c tinkConfiguration) Build() (model.EncryptionService, error) {
 	}
 	err := svc.initClients()
 	if err != nil {
-		return nil, fmt.Errorf("failed initializing encryption clients: %w", err)
+		return nil, fmt.Errorf(errTemplateFailedInitializingClients, err)
 	}
 
 	err = svc.loadKeyset()
 	if err != nil {
-		return nil, fmt.Errorf("failed loading encryption keyset: %w", err)
+		return nil, fmt.Errorf(errTemplateTinkFailedLoadingKeyset, err)
 	}
 
 	err = svc.validateKeyset()
@@ -66,12 +66,12 @@ func (c tinkConfiguration) Build() (model.EncryptionService, error) {
 	}
 
 	if err != nil {
-		return nil, fmt.Errorf("failed validating encryption keyset: %w", err)
+		return nil, fmt.Errorf(errTemplateTinkFailedValidatingKeyset, err)
 	}
 
 	err = svc.initFileWatcher()
 	if err != nil {
-		return nil, fmt.Errorf("failed initializing keyset file watcher: %w", err)
+		return nil, fmt.Errorf(errTemplateTinkFailedInitializeFileWatcher, err)
 	}
 	return svc, nil
 }
