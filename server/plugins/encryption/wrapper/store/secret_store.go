@@ -65,14 +65,14 @@ func (wrapper *EncryptedSecretStore) SecretCreate(secret *model.Secret) error {
 	if err != nil {
 		deleteErr := wrapper.store.SecretDelete(newSecret)
 		if deleteErr != nil {
-			return fmt.Errorf("failed writing secret data to store: %w. Also failed deleting temporary secret record from store: %s", err, deleteErr.Error())
+			return fmt.Errorf("failed saving secret: %w. Also failed deleting temporary secret record from store: %s", err, deleteErr.Error())
 		}
-		return fmt.Errorf("failed writing secret data to store: %w", err)
+		return fmt.Errorf("failed saving secret: %w", err)
 	}
 
 	err = wrapper.decrypt(secret)
 	if err != nil {
-		return fmt.Errorf("secret created, but failed to decrypt it: %w", err)
+		return fmt.Errorf("failed to decrypt created secret: %w", err)
 	}
 	return nil
 }
@@ -90,7 +90,7 @@ func (wrapper *EncryptedSecretStore) SecretUpdate(secret *model.Secret) error {
 
 	err = wrapper.decrypt(secret)
 	if err != nil {
-		return fmt.Errorf("secret updated, but failed to decrypt it: %w", err)
+		return fmt.Errorf("failed to decrypt updated secret: %w", err)
 	}
 	return nil
 }
