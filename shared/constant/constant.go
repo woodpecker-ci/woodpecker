@@ -14,6 +14,7 @@
 
 package constant
 
+// PrivilegedPlugins can be changed by 'WOODPECKER_ESCALATE' at runntime
 var PrivilegedPlugins = []string{
 	"docker.io/plugins/docker:20.14.0",
 	"docker.io/plugins/gcr:20.14.0",
@@ -32,5 +33,6 @@ var DefaultConfigOrder = [...]string{
 }
 
 const (
+	// DefaultCloneImage can be changed by 'WOODPECKER_DEFAULT_CLONE_IMAGE' at runntime
 	DefaultCloneImage = "docker.io/woodpeckerci/plugin-git:2.0.3"
 )
