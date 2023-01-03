@@ -57,6 +57,7 @@ pipeline:
       - apk add --no-cache git rsync
       # copy all docs files and delete all old ones, but leave CNAME and index.yaml untouched
       - git clone -b ${CI_REPO_DEFAULT_BRANCH} --single-branch https://github.com/woodpecker-ci/woodpecker-ci.github.io pages_repo
+      - rsync -r --exclude .git --exclude CNAME --exclude index.yaml --exclude README.md --delete docs/build/ pages_repo
     when:
       event: push
       branch: ${CI_REPO_DEFAULT_BRANCH}
