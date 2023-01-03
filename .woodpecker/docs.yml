@@ -51,27 +51,30 @@ pipeline:
 
   # TODO: add step to remove preview again after PR is closed (waiting for #286)
 
+  deploy-prepare:
+    image: alpine
+    commands:
+      - apk add --no-cache git rsync
+      # copy all docs files and delete all old ones, but leave CNAME and index.yaml untouched
+      - git clone -b ${CI_REPO_DEFAULT_BRANCH} --single-branch https://github.com/woodpecker-ci/woodpecker-ci.github.io pages_repo
+    when:
+      event: push
+      branch: ${CI_REPO_DEFAULT_BRANCH}
+      path: *when_path
+
   deploy:
-    image: alpine:3.14.2
+    image: appleboy/drone-git-push
     secrets:
       - BOT_PRIVATE_KEY
-    commands:
-      - apk add openssh-client git rsync
-      - mkdir -p $HOME/.ssh
-      - ssh-keyscan -t rsa github.com >> $HOME/.ssh/known_hosts
-      - echo "$BOT_PRIVATE_KEY" > $HOME/.ssh/id_rsa
-      - chmod 0600 $HOME/.ssh/id_rsa
-      - git config --global user.email "woodpecker-bot@obermui.de"
-      - git config --global user.name "woodpecker-bot"
-      - git clone -b ${CI_REPO_DEFAULT_BRANCH} --single-branch git@github.com:woodpecker-ci/woodpecker-ci.github.io.git /repo
-      # copy all docs files and delete all old ones, but leave CNAME and index.yaml untouched
-      - rsync -r --exclude .git --exclude CNAME --exclude index.yaml --exclude README.md --delete docs/build/ /repo
-      - cd /repo
-      - git add .
-      # exit successfully if nothing changed
-      - test -n "$(git status --porcelain)" || exit 0
-      - git commit -m "Deploy website - based on ${CI_COMMIT_SHA}"
-      - git push
+    settings:
+      branch: ${CI_REPO_DEFAULT_BRANCH}
+      ssh_key:
+        from_secret: BOT_PRIVATE_KEY
+      remote: git@github.com:woodpecker-ci/woodpecker-ci.github.io.git
+      author_name: woodpecker-bot
+      author_email: woodpecker-bot@obermui.de
+      commit_message: Deploy website - based on ${CI_COMMIT_SHA}
+      path: pages_repo
     when:
       event: push
       branch: ${CI_REPO_DEFAULT_BRANCH}
