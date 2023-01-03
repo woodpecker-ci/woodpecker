@@ -15,11 +15,11 @@
 package constant
 
 var PrivilegedPlugins = []string{
-	"plugins/docker",
-	"plugins/gcr",
-	"plugins/ecr",
-	"woodpeckerci/plugin-docker",
-	"woodpeckerci/plugin-docker-buildx",
+	"docker.io/plugins/docker:20.14.0",
+	"docker.io/plugins/gcr:20.14.0",
+	"docker.io/plugins/ecr:20.14.0",
+	"docker.io/woodpeckerci/plugin-docker-buildx:2.1.0",
+	// "docker.io/woodpeckerci/plugin-docker",
 }
 
 // DefaultConfigOrder represent the priority in witch woodpecker search for a pipeline config by default
@@ -32,5 +32,5 @@ var DefaultConfigOrder = [...]string{
 }
 
 const (
-	DefaultCloneImage = "docker.io/woodpeckerci/plugin-git:2.0"
+	DefaultCloneImage = "docker.io/woodpeckerci/plugin-git:2.0.3"
 )
