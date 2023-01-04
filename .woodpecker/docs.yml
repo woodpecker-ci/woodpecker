@@ -65,8 +65,6 @@ pipeline:
 
   deploy:
     image: appleboy/drone-git-push
-    secrets:
-      - BOT_PRIVATE_KEY
     settings:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       ssh_key:
