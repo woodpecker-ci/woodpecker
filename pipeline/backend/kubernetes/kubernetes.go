@@ -43,9 +43,9 @@ type Config struct {
 	Namespace      string
 	StorageClass   string
 	VolumeSize     string
+	StorageRwx     bool
 	PodLabels      map[string]string
 	PodAnnotations map[string]string
-	StorageRwx     bool
 }
 
 func configFromCliContext(ctx context.Context) (*Config, error) {
