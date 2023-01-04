@@ -52,10 +52,12 @@ func configFromCliContext(ctx context.Context) (*Config, error) {
 	if ctx != nil {
 		if c, ok := ctx.Value(types.CliContext).(*cli.Context); ok {
 			config := Config{
-				Namespace:    c.String("backend-k8s-namespace"),
-				StorageClass: c.String("backend-k8s-storage-class"),
-				VolumeSize:   c.String("backend-k8s-volume-size"),
-				StorageRwx:   c.Bool("backend-k8s-storage-rwx"),
+				Namespace:      c.String("backend-k8s-namespace"),
+				StorageClass:   c.String("backend-k8s-storage-class"),
+				VolumeSize:     c.String("backend-k8s-volume-size"),
+				StorageRwx:     c.Bool("backend-k8s-storage-rwx"),
+				PodLabels:      make(map[string]string), // just init empty map to prevent nil panic
+				PodAnnotations: make(map[string]string), // just init empty map to prevent nil panic
 			}
 			// Unmarshal label and annotation settings here to ensure they're valid on startup
 			if labels := c.String("backend-k8s-pod-labels"); labels != "" {
