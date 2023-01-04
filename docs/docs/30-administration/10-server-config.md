@@ -203,7 +203,7 @@ Always use authentication to clone repositories even if they are public. Needed 
 List of event names that will be canceled when a new pipeline for the same context (tag, branch) is created.
 
 ### `WOODPECKER_DEFAULT_CLONE_IMAGE`
-> Default is defined in [shared/constant/constant.go](https://github.com/woodpecker-ci/woodpecker/blob/release/v0.15/shared/constant/constant.go)
+> Default is defined in [shared/constant/constant.go](https://github.com/woodpecker-ci/woodpecker/blob/master/shared/constant/constant.go)
 
 The default docker image to be used when cloning the repo
 
