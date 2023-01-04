@@ -48,7 +48,7 @@ func (svc *tinkEncryptionService) handleFileEvents() {
 				log.Warn().Msgf(logTemplateTinkKeysetFileChanged, event.Name)
 				err := svc.rotate()
 				if err != nil {
-					log.Fatal().Err(err).Msgf(errTemplateFailedRotatingEncryption, err)
+					log.Fatal().Err(err).Msgf(errMessageFailedRotatingEncryption)
 				}
 				return
 			}

@@ -42,6 +42,7 @@ const (
 	errMessageTemplateUnsupportedKeyType = "unsupported encryption key type: %s"
 	errMessageCantUseBothServices        = "can not use raw encryption key and tink keyset at the same time"
 	errMessageNoKeysProvided             = "encryption enabled but no keys provided"
+	errMessageFailedRotatingEncryption   = "failed rotating encryption"
 
 	// log messages
 	logMessageEncryptionEnabled       = "encryption enabled"
