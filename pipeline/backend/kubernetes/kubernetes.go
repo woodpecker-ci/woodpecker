@@ -58,15 +58,17 @@ func configFromCliContext(ctx context.Context) (*Config, error) {
 				StorageRwx:   c.Bool("backend-k8s-storage-rwx"),
 			}
 			// Unmarshal label and annotation settings here to ensure they're valid on startup
-			err := yaml.Unmarshal([]byte(c.String("backend-k8s-pod-labels")), &config.PodLabels)
-			if err != nil {
-				log.Error().Msgf("could not unmarshal pod labels '%s': %s", c.String("backend-k8s-pod-labels"), err)
-				return nil, err
+			if labels := c.String("backend-k8s-pod-labels"); labels != "" {
+				if err := yaml.Unmarshal([]byte(labels), &config.PodLabels); err != nil {
+					log.Error().Msgf("could not unmarshal pod labels '%s': %s", c.String("backend-k8s-pod-labels"), err)
+					return nil, err
+				}
 			}
-			err = yaml.Unmarshal([]byte(c.String("backend-k8s-pod-annotations")), &config.PodAnnotations)
-			if err != nil {
-				log.Error().Msgf("could not unmarshal pod annotations '%s': %s", c.String("backend-k8s-pod-annotations"), err)
-				return nil, err
+			if annotations := c.String("backend-k8s-pod-annotations"); annotations != "" {
+				if err := yaml.Unmarshal([]byte(c.String("backend-k8s-pod-annotations")), &config.PodAnnotations); err != nil {
+					log.Error().Msgf("could not unmarshal pod annotations '%s': %s", c.String("backend-k8s-pod-annotations"), err)
+					return nil, err
+				}
 			}
 			return &config, nil
 		}
