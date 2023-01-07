@@ -443,7 +443,7 @@ var deleteStr = `[
 	}
 ]`
 
-func PostSkipStep(c *gin.Context) {
+func PostSkipWorkflow(c *gin.Context) {
 	var (
 		_store     = store.FromContext(c)
 		repo       = session.Repo(c)
@@ -458,7 +458,7 @@ func PostSkipStep(c *gin.Context) {
 		return
 	}
 
-	pl, err = pipeline.SkipStep(c, _store, pl, stepPid, user, repo)
+	pl, err = pipeline.SkipWorkflow(c, _store, pl, stepPid, user, repo)
 	if err != nil {
 		handlePipelineErr(c, err)
 	} else {

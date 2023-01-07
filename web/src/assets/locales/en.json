@@ -230,7 +230,7 @@
                 "restart": "Restart",
                 "canceled": "This step has been canceled.",
                 "cancel_success": "Pipeline canceled",
-                "skip_success": "Step skipped",
+                "skip_success": "Workflow skipped",
                 "deploy": "Deploy",
                 "restart_success": "Pipeline restarted",
                 "log_download": "Download",

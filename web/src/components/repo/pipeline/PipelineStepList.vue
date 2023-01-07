@@ -167,7 +167,7 @@ const workflowsCollapsed = ref<Record<PipelineStep['id'], boolean>>(
 );
 
 const { doSubmit: skipWorkflow, isLoading: isSkippingWorkflow } = useAsyncAction(async (workflow) => {
-  await apiClient.skipPipelineStep(repo.value.owner, repo.value.name, `${pipeline.value.number}`, `${workflow.pid}`);
+  await apiClient.skipPipelineWorkflow(repo.value.owner, repo.value.name, `${pipeline.value.number}`, `${workflow.pid}`);
   notifications.notify({ title: i18n.t('repo.pipeline.actions.skip_success'), type: 'success' });
 });
 </script>

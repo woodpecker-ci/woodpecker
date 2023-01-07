@@ -87,7 +87,7 @@ func apiRoutes(e *gin.Engine) {
 				repo.POST("/pipelines/:number/cancel", session.MustPush, api.CancelPipeline)
 				repo.POST("/pipelines/:number/approve", session.MustPush, api.PostApproval)
 				repo.POST("/pipelines/:number/decline", session.MustPush, api.PostDecline)
-				repo.POST("/pipelines/:number/skip/:stepPid", session.MustPush, api.PostSkipStep)
+				repo.POST("/pipelines/:number/skip/:stepPid", session.MustPush, api.PostSkipWorkflow)
 
 				repo.GET("/logs/:number/:pid", api.GetStepLogs)
 				repo.GET("/logs/:number/:pid/:step", api.GetPipelineLogs)

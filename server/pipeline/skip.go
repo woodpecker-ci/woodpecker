@@ -10,7 +10,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
-func SkipStep(ctx context.Context, store store.Store, pipeline *model.Pipeline, stepPid int, user *model.User, repo *model.Repo) (*model.Pipeline, error) {
+func SkipWorkflow(ctx context.Context, store store.Store, pipeline *model.Pipeline, stepPid int, user *model.User, repo *model.Repo) (*model.Pipeline, error) {
 	stepToSkip, err := store.StepFind(pipeline, stepPid)
 
 	if err != nil {
