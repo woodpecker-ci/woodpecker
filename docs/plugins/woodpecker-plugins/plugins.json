@@ -83,6 +83,11 @@
       "name": "Aptly publish",
       "docs": "https://gitea.zionetrix.net/bn8/aptly-publish/raw/branch/master/docs.md",
       "verified": false
+    },
+    {
+      "name": "Trigger",
+      "docs": "https://codeberg.org/woodpecker-plugins/trigger/raw/branch/main/docs.md",
+      "verified": true
     }
   ]
 }
