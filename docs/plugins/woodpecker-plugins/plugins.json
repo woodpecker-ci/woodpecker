@@ -7,7 +7,7 @@
     },
     {
       "name": "Docker Buildx",
-      "docs": "https://codeberg.org/woodpecker-plugins/plugin-docker-buildx/raw/branch/main/docs.md",
+      "docs": "https://codeberg.org/woodpecker-plugins/docker-buildx/raw/branch/main/docs.md",
       "verified": true
     },
     {
@@ -87,6 +87,11 @@
     {
       "name": "Trigger",
       "docs": "https://codeberg.org/woodpecker-plugins/trigger/raw/branch/main/docs.md",
+      "verified": true
+    },
+    {
+      "name": "Gitea Release",
+      "docs": "https://codeberg.org/woodpecker-plugins/gitea-release/raw/branch/main/docs.md",
       "verified": true
     }
   ]
