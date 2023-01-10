@@ -55,9 +55,9 @@ export function comparePipelines(a: Pipeline, b: Pipeline): number {
  * @returns {number}
  */
 export function comparePipelinesWithStatus(a: Pipeline, b: Pipeline): number {
-  const bPrioirty = ['pending', 'running', 'started'].includes(b.status) ? 1 : 0;
+  const bPriority = ['pending', 'running', 'started'].includes(b.status) ? 1 : 0;
   const aPriority = ['pending', 'running', 'started'].includes(a.status) ? 1 : 0;
-  return bPrioirty - aPriority;
+  return bPriority - aPriority;
 }
 
 export function isPipelineActive(pipeline: Pipeline): boolean {
