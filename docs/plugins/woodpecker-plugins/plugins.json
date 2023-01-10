@@ -7,7 +7,7 @@
     },
     {
       "name": "Docker Buildx",
-      "docs": "https://codeberg.org/woodpecker-plugins/plugin-docker-buildx/raw/branch/main/docs.md",
+      "docs": "https://codeberg.org/woodpecker-plugins/docker-buildx/raw/branch/main/docs.md",
       "verified": true
     },
     {
