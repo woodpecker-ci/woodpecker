@@ -152,6 +152,7 @@
         "cancel": "Annuler",
         "cancel_success": "Pipeline annulé",
         "canceled": "Cette étape a été annulée.",
+        "deploy": "Déployer",
         "log_auto_scroll": "Automatiquement défiler vers le bas",
         "log_auto_scroll_off": "Désactiver le défilement automatique",
         "log_download": "Télécharger",
