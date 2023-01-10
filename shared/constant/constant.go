@@ -16,11 +16,11 @@ package constant
 
 // PrivilegedPlugins can be changed by 'WOODPECKER_ESCALATE' at runtime
 var PrivilegedPlugins = []string{
-	"docker.io/plugins/docker:20.14.0",
-	"docker.io/plugins/gcr:20.14.0",
-	"docker.io/plugins/ecr:20.14.0",
-	"docker.io/woodpeckerci/plugin-docker-buildx:2.1.0",
-	// "docker.io/woodpeckerci/plugin-docker",
+	"plugins/docker",
+	"plugins/gcr",
+	"plugins/ecr",
+	"woodpeckerci/plugin-docker",
+	"woodpeckerci/plugin-docker-buildx",
 }
 
 // DefaultConfigOrder represent the priority in witch woodpecker search for a pipeline config by default
