@@ -1,4 +1,4 @@
-// Copyright 2022 Woodpecker Authors
+// Copyright 2023 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,9 +21,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestEncryptDecryptShortMessage(t *testing.T) {
+func TestShortMessageLongKey(t *testing.T) {
 	aes := &aesEncryptionService{}
-	err := aes.loadCipher(random.GetRandomBytes(32))
+	err := aes.loadCipher(string(random.GetRandomBytes(32)))
 	assert.Nil(t, err)
 
 	input := string(random.GetRandomBytes(4))
@@ -35,9 +35,9 @@ func TestEncryptDecryptShortMessage(t *testing.T) {
 	assert.Equal(t, input, output)
 }
 
-func TestEncryptDecryptLongMessage(t *testing.T) {
+func TestLongMessageShortKey(t *testing.T) {
 	aes := &aesEncryptionService{}
-	err := aes.loadCipher(random.GetRandomBytes(32))
+	err := aes.loadCipher(string(random.GetRandomBytes(12)))
 	assert.Nil(t, err)
 
 	input := string(random.GetRandomBytes(1024))

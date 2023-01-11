@@ -1,4 +1,4 @@
-// Copyright 2022 Woodpecker Authors
+// Copyright 2023 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,59 +19,47 @@ import (
 	"encoding/base64"
 	"fmt"
 
+	"github.com/google/tink/go/subtle/random"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
 type aesEncryptionService struct {
-	cipher  cipher.Block
+	cipher  cipher.AEAD
 	keyID   string
 	store   store.Store
 	clients []model.EncryptionClient
 }
 
-func (svc *aesEncryptionService) Encrypt(plaintext, _ string) (string, error) {
+func (svc *aesEncryptionService) Encrypt(plaintext, associatedData string) (string, error) {
 	msg := []byte(plaintext)
-	chainSize := svc.blockSize()
-	infoBlock := svc.newSizeInfoChunk(len(msg))
-	msg = svc.alignDataByChainSize(msg)
-	encrypted := make([]byte, len(infoBlock)+len(msg))
-	err := svc.encode(encrypted[0:len(infoBlock)], infoBlock)
-	if err != nil {
-		return "", fmt.Errorf(errTemplateEncryptionFailed, err)
-	}
+	aad := []byte(associatedData)
 
-	for n := 0; n < len(msg)/chainSize; n++ {
-		dst, src := encrypted[(n+1)*chainSize:(n+2)*chainSize], msg[n*chainSize:(n+1)*chainSize]
-		err = svc.encode(dst, src)
-		if err != nil {
-			return "", fmt.Errorf(errTemplateEncryptionFailed, err)
-		}
-	}
-	return base64.StdEncoding.EncodeToString(encrypted), nil
+	nonce := random.GetRandomBytes(uint32(AESGCMSIVNonceSize))
+	ciphertext := svc.cipher.Seal(nil, nonce, msg, aad)
+
+	result := make([]byte, 0, AESGCMSIVNonceSize+len(ciphertext))
+	result = append(result, nonce...)
+	result = append(result, ciphertext...)
+
+	return base64.StdEncoding.EncodeToString(result), nil
 }
 
-func (svc *aesEncryptionService) Decrypt(ciphertext, _ string) (string, error) {
-	ct, err := base64.StdEncoding.DecodeString(ciphertext)
+func (svc *aesEncryptionService) Decrypt(ciphertext, associatedData string) (string, error) {
+	bytes, err := base64.StdEncoding.DecodeString(ciphertext)
 	if err != nil {
 		return "", fmt.Errorf(errTemplateBase64DecryptionFailed, err)
 	}
 
-	chainSize := svc.blockSize()
-	decrypted := make([]byte, len(ct))
-	for n := 0; n < len(ct)/chainSize; n++ {
-		dst, src := decrypted[n*chainSize:(n+1)*chainSize], ct[n*chainSize:(n+1)*chainSize]
-		err = svc.decode(dst, src)
-		if err != nil {
-			return "", fmt.Errorf(errTemplateDecryptionFailed, err)
-		}
-	}
+	nonce := bytes[:AESGCMSIVNonceSize]
+	message := bytes[AESGCMSIVNonceSize:]
 
-	dataLen, err := svc.getDataSize(decrypted)
+	plaintext, err := svc.cipher.Open(nil, nonce, message, []byte(associatedData))
 	if err != nil {
 		return "", fmt.Errorf(errTemplateDecryptionFailed, err)
 	}
-	return string(decrypted[chainSize : chainSize+dataLen]), nil
+	return string(plaintext), nil
 }
 
 func (svc *aesEncryptionService) Disable() error {

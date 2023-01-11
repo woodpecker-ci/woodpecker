@@ -1,4 +1,4 @@
-// Copyright 2022 Woodpecker Authors
+// Copyright 2023 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,9 +24,9 @@ import (
 )
 
 type aesConfiguration struct {
-	key     string
-	store   store.Store
-	clients []model.EncryptionClient
+	password string
+	store    store.Store
+	clients  []model.EncryptionClient
 }
 
 func newAES(ctx *cli.Context, s store.Store) model.EncryptionServiceBuilder {
@@ -50,7 +50,7 @@ func (c aesConfiguration) Build() (model.EncryptionService, error) {
 		return nil, fmt.Errorf(errTemplateFailedInitializingClients, err)
 	}
 
-	err = svc.loadCipher([]byte(c.key))
+	err = svc.loadCipher(c.password)
 	if err != nil {
 		return nil, fmt.Errorf(errTemplateAesFailedLoadingCipher, err)
 	}
