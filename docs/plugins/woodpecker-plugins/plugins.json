@@ -7,7 +7,7 @@
     },
     {
       "name": "Docker Buildx",
-      "docs": "https://codeberg.org/woodpecker-plugins/plugin-docker-buildx/raw/branch/main/docs.md",
+      "docs": "https://codeberg.org/woodpecker-plugins/docker-buildx/raw/branch/main/docs.md",
       "verified": true
     },
     {
@@ -77,6 +77,21 @@
       "// todo": true,
       "name": "Chart releaser",
       "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-chart-releaser/master/docs.md",
+      "verified": true
+    },
+    {
+      "name": "Aptly publish",
+      "docs": "https://gitea.zionetrix.net/bn8/aptly-publish/raw/branch/master/docs.md",
+      "verified": false
+    },
+    {
+      "name": "Trigger",
+      "docs": "https://codeberg.org/woodpecker-plugins/trigger/raw/branch/main/docs.md",
+      "verified": true
+    },
+    {
+      "name": "Gitea Release",
+      "docs": "https://codeberg.org/woodpecker-plugins/gitea-release/raw/branch/main/docs.md",
       "verified": true
     }
   ]
