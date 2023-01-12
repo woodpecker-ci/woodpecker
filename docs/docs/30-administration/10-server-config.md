@@ -367,6 +367,10 @@ See [GitHub configuration](forges/github/#configuration)
 
 See [Gogs configuration](forges/gogs/#configuration)
 
+### `WOODPECKER_FORGEJO_...`
+
+See [Forgejo configuration](forges/forgejo/#configuration)
+
 ### `WOODPECKER_GITEA_...`
 
 See [Gitea configuration](forges/gitea/#configuration)
