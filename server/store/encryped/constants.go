@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package store
+package encrypted
 
 const (
 	errMessageTemplateFailedToEnable        = "failed enabling secret store encryption: %w"
