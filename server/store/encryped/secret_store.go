@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package store
+package encrypted
 
 import (
 	"errors"
@@ -22,40 +22,41 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
-type EncryptedSecretStore struct {
-	store      model.SecretStore
+type EncryptedStore struct {
+	store.Store
+	store      store.Store
 	encryption model.EncryptionService
 }
 
 // ensure wrapper match interface
-var _ model.SecretStore = new(EncryptedSecretStore)
+var _ store.Store = new(EncryptedStore)
 
-func NewSecretStore(secretStore model.SecretStore) *EncryptedSecretStore {
-	wrapper := EncryptedSecretStore{secretStore, nil}
-	return &wrapper
+func NewEncryptedStore(store store.Store) *EncryptedStore {
+	return &EncryptedStore{store, store, nil}
 }
 
-func (wrapper *EncryptedSecretStore) SetEncryptionService(service model.EncryptionService) error {
-	if wrapper.encryption != nil {
+func (s *EncryptedStore) SetEncryptionService(service model.EncryptionService) error {
+	if s.encryption != nil {
 		return errors.New(errMessageInitSeveralTimes)
 	}
-	wrapper.encryption = service
+	s.encryption = service
 	return nil
 }
 
-func (wrapper *EncryptedSecretStore) EnableEncryption() error {
+func (e *EncryptedStore) EnableEncryption() error {
 	log.Warn().Msg(logMessageEnablingSecretsEncryption)
-	secrets, err := wrapper.store.SecretListAll()
+	secrets, err := e.SecretListAll()
 	if err != nil {
 		return fmt.Errorf(errMessageTemplateFailedToEnable, err)
 	}
 	for _, secret := range secrets {
-		if err := wrapper.encrypt(secret); err != nil {
+		if err := e.encrypt(secret); err != nil {
 			return err
 		}
-		if err := wrapper._save(secret); err != nil {
+		if err := e._save(secret); err != nil {
 			return err
 		}
 	}
@@ -63,21 +64,21 @@ func (wrapper *EncryptedSecretStore) EnableEncryption() error {
 	return nil
 }
 
-func (wrapper *EncryptedSecretStore) MigrateEncryption(newEncryptionService model.EncryptionService) error {
+func (e *EncryptedStore) MigrateEncryption(newEncryptionService model.EncryptionService) error {
 	log.Warn().Msg(logMessageMigratingSecretsEncryption)
-	secrets, err := wrapper.store.SecretListAll()
+	secrets, err := e.SecretListAll()
 	if err != nil {
 		return fmt.Errorf(errMessageTemplateFailedToMigrate, err)
 	}
-	if err := wrapper.decryptList(secrets); err != nil {
+	if err := e.decryptList(secrets); err != nil {
 		return err
 	}
-	wrapper.encryption = newEncryptionService
+	e.encryption = newEncryptionService
 	for _, secret := range secrets {
-		if err := wrapper.encrypt(secret); err != nil {
+		if err := e.encrypt(secret); err != nil {
 			return err
 		}
-		if err := wrapper._save(secret); err != nil {
+		if err := e._save(secret); err != nil {
 			return err
 		}
 	}
@@ -85,8 +86,8 @@ func (wrapper *EncryptedSecretStore) MigrateEncryption(newEncryptionService mode
 	return nil
 }
 
-func (wrapper *EncryptedSecretStore) encrypt(secret *model.Secret) error {
-	encryptedValue, err := wrapper.encryption.Encrypt(secret.Value, strconv.Itoa(int(secret.ID)))
+func (e *EncryptedStore) encrypt(secret *model.Secret) error {
+	encryptedValue, err := e.encryption.Encrypt(secret.Value, strconv.Itoa(int(secret.ID)))
 	if err != nil {
 		return fmt.Errorf(errMessageTemplateFailedToEncryptSecret, secret.ID, err)
 	}
@@ -94,8 +95,8 @@ func (wrapper *EncryptedSecretStore) encrypt(secret *model.Secret) error {
 	return nil
 }
 
-func (wrapper *EncryptedSecretStore) decrypt(secret *model.Secret) error {
-	decryptedValue, err := wrapper.encryption.Decrypt(secret.Value, strconv.Itoa(int(secret.ID)))
+func (e *EncryptedStore) decrypt(secret *model.Secret) error {
+	decryptedValue, err := e.encryption.Decrypt(secret.Value, strconv.Itoa(int(secret.ID)))
 	if err != nil {
 		return fmt.Errorf(errMessageTemplateFailedToDecryptSecret, secret.ID, err)
 	}
@@ -103,9 +104,9 @@ func (wrapper *EncryptedSecretStore) decrypt(secret *model.Secret) error {
 	return nil
 }
 
-func (wrapper *EncryptedSecretStore) decryptList(secrets []*model.Secret) error {
+func (e *EncryptedStore) decryptList(secrets []*model.Secret) error {
 	for _, secret := range secrets {
-		err := wrapper.decrypt(secret)
+		err := e.decrypt(secret)
 		if err != nil {
 			return fmt.Errorf(errMessageTemplateFailedToDecryptSecret, secret.ID, err)
 		}
@@ -113,8 +114,8 @@ func (wrapper *EncryptedSecretStore) decryptList(secrets []*model.Secret) error 
 	return nil
 }
 
-func (wrapper *EncryptedSecretStore) _save(secret *model.Secret) error {
-	err := wrapper.store.SecretUpdate(secret)
+func (e *EncryptedStore) _save(secret *model.Secret) error {
+	err := e.SecretUpdate(secret)
 	if err != nil {
 		log.Err(err).Msg(errMessageTemplateStorageError)
 		return err

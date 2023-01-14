@@ -18,13 +18,15 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/server/store/datastore/migration"
+	"github.com/woodpecker-ci/woodpecker/server/store/encryption"
 
 	"xorm.io/xorm"
 	xlog "xorm.io/xorm/log"
 )
 
 type storage struct {
-	engine *xorm.Engine
+	engine     *xorm.Engine
+	encryption encryption.EncryptionService
 }
 
 const perPage = 50

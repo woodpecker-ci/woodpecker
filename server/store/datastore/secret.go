@@ -15,6 +15,8 @@
 package datastore
 
 import (
+	"strconv"
+
 	"xorm.io/builder"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -22,11 +24,44 @@ import (
 
 const orderSecretsBy = "secret_name"
 
+func (s storage) secretDecrypt(secret *model.Secret) error {
+	decryptedValue, err := s.encryption.Decrypt(secret.Value, strconv.Itoa(int(secret.ID)))
+	if err != nil {
+		return err
+	}
+
+	secret.Value = decryptedValue
+
+	return nil
+}
+
+func (s storage) secretEncrypt(secret *model.Secret) error {
+	encryptedValue, err := s.encryption.Encrypt(secret.Value, strconv.Itoa(int(secret.ID)))
+	if err != nil {
+		return err
+	}
+
+	secret.Value = encryptedValue
+
+	return nil
+}
+
 func (s storage) SecretFind(repo *model.Repo, name string) (*model.Secret, error) {
 	secret := new(model.Secret)
-	return secret, wrapGet(s.engine.Where(
+
+	err := wrapGet(s.engine.Where(
 		builder.Eq{"secret_repo_id": repo.ID, "secret_name": name},
 	).Get(secret))
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.secretDecrypt(secret)
+	if err != nil {
+		return nil, err
+	}
+
+	return secret, nil
 }
 
 func (s storage) SecretList(repo *model.Repo, includeGlobalAndOrgSecrets bool, p *model.ListOptions) ([]*model.Secret, error) {
@@ -45,13 +80,23 @@ func (s storage) SecretListAll() ([]*model.Secret, error) {
 }
 
 func (s storage) SecretCreate(secret *model.Secret) error {
+	err := s.secretEncrypt(secret)
+	if err != nil {
+		return err
+	}
+
 	// only Insert set auto created ID back to object
-	_, err := s.engine.Insert(secret)
+	_, err = s.engine.Insert(secret)
 	return err
 }
 
 func (s storage) SecretUpdate(secret *model.Secret) error {
-	_, err := s.engine.ID(secret.ID).AllCols().Update(secret)
+	err := s.secretEncrypt(secret)
+	if err != nil {
+		return err
+	}
+
+	_, err = s.engine.ID(secret.ID).AllCols().Update(secret)
 	return err
 }
 

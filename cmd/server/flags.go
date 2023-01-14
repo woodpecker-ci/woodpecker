@@ -468,9 +468,4 @@ var flags = append([]cli.Flag{
 		Name:    "encryption-tink-keyset",
 		Usage:   "Google tink AEAD-compatible keyset file to encrypt secrets in DB",
 	},
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_ENCRYPTION_DISABLE"},
-		Name:    "encryption-disable-flag",
-		Usage:   "Flag to decrypt all encrypted data and disable encryption on server",
-	},
 }, common.GlobalLoggerFlags...)
