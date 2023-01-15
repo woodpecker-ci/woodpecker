@@ -23,22 +23,22 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store"
+	"github.com/woodpecker-ci/woodpecker/server/store/encryption"
 )
 
 type EncryptedStore struct {
 	store.Store
-	store      store.Store
-	encryption model.EncryptionService
+	encryption encryption.EncryptionService
 }
 
 // ensure wrapper match interface
 var _ store.Store = new(EncryptedStore)
 
 func NewEncryptedStore(store store.Store) *EncryptedStore {
-	return &EncryptedStore{store, store, nil}
+	return &EncryptedStore{Store: store, encryption: &encryption.NoEncryption{}}
 }
 
-func (s *EncryptedStore) SetEncryptionService(service model.EncryptionService) error {
+func (s *EncryptedStore) SetEncryptionService(service encryption.EncryptionService) error {
 	if s.encryption != nil {
 		return errors.New(errMessageInitSeveralTimes)
 	}
@@ -64,7 +64,7 @@ func (e *EncryptedStore) EnableEncryption() error {
 	return nil
 }
 
-func (e *EncryptedStore) MigrateEncryption(newEncryptionService model.EncryptionService) error {
+func (e *EncryptedStore) MigrateEncryption(newEncryptionService encryption.EncryptionService) error {
 	log.Warn().Msg(logMessageMigratingSecretsEncryption)
 	secrets, err := e.SecretListAll()
 	if err != nil {
