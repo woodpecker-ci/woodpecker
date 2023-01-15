@@ -22,3 +22,9 @@ type PipelineParseError struct {
 func (e PipelineParseError) Error() string {
 	return e.Err.Error()
 }
+
+func (e PipelineParseError) Is(target error) bool {
+	_, ok1 := target.(PipelineParseError)
+	_, ok2 := target.(*PipelineParseError)
+	return ok1 || ok2
+}
