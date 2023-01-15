@@ -243,6 +243,14 @@
           "type": "string",
           "enum": ["fail", "ignore"],
           "default": "fail"
+        },
+        "ports": {
+          "description": "expose ports to which other steps can connect to",
+          "type": "array",
+          "items": {
+            "oneOf": [{ "type": "number" }, { "type": "string" }]
+          },
+          "minLength": 1
         }
       }
     },
