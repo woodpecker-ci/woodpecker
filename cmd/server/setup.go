@@ -164,7 +164,7 @@ func setupQueue(c *cli.Context, s store.Store) queue.Queue {
 	return queue.WithTaskStore(queue.New(c.Context), s)
 }
 
-func setupSecretService(c *cli.Context, s store.Store) model.SecretService {
+func setupSecretService(c *cli.Context, s model.SecretStore) model.SecretService {
 	return secrets.New(c.Context, s)
 }
 
