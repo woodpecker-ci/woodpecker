@@ -93,6 +93,11 @@
       "name": "Gitea Release",
       "docs": "https://codeberg.org/woodpecker-plugins/gitea-release/raw/branch/main/docs.md",
       "verified": true
+    },
+    {
+      "name": "Woodpecker Email",
+      "docs": "https://gitnet.fr/deblan/woodpecker-email/src/branch/develop/DOCS.md",
+      "verified": false
     }
   ]
 }
