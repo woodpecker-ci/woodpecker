@@ -15,6 +15,7 @@
 package encryption
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/urfave/cli/v2"
@@ -48,20 +49,19 @@ func (c tinkConfiguration) Build() (model.EncryptionService, error) {
 		keysetFileWatcher: nil,
 		clients:           c.clients,
 	}
-	err := svc.initClients()
-	if err != nil {
+
+	if err := svc.initClients(); err != nil {
 		return nil, fmt.Errorf(errTemplateFailedInitializingClients, err)
 	}
 
-	err = svc.loadKeyset()
-	if err != nil {
+	if err := svc.loadKeyset(); err != nil {
 		return nil, fmt.Errorf(errTemplateTinkFailedLoadingKeyset, err)
 	}
 
-	err = svc.validateKeyset()
-	if err == errEncryptionNotEnabled {
+	err := svc.validateKeyset()
+	if errors.Is(err, errEncryptionNotEnabled) {
 		err = svc.enable()
-	} else if err == errEncryptionKeyRotated {
+	} else if errors.Is(err, errEncryptionKeyRotated) {
 		err = svc.rotate()
 	}
 
@@ -69,8 +69,7 @@ func (c tinkConfiguration) Build() (model.EncryptionService, error) {
 		return nil, fmt.Errorf(errTemplateTinkFailedValidatingKeyset, err)
 	}
 
-	err = svc.initFileWatcher()
-	if err != nil {
+	if err := svc.initFileWatcher(); err != nil {
 		return nil, fmt.Errorf(errTemplateTinkFailedInitializeFileWatcher, err)
 	}
 	return svc, nil

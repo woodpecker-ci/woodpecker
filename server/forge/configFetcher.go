@@ -119,7 +119,7 @@ func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config 
 	case <-ctx.Done():
 		return nil, ctx.Err()
 	default:
-		return []*types.FileMeta{}, fmt.Errorf("ConfigFetcher: Fallback did not find config: %s", err)
+		return []*types.FileMeta{}, fmt.Errorf("ConfigFetcher: Fallback did not find config: %w", err)
 	}
 }
 
