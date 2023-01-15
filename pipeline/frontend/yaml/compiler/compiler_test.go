@@ -16,11 +16,11 @@ func TestSecretAvailable(t *testing.T) {
 	}
 	assert.True(t, secret.Available(&yaml.Container{
 		Image:    "golang",
-		Commands: types.Stringorslice(strslice.StrSlice{"echo 'this is not a plugin'"}),
+		Commands: types.StringOrSlice(strslice.StrSlice{"echo 'this is not a plugin'"}),
 	}))
 	assert.False(t, secret.Available(&yaml.Container{
 		Image:    "not-golang",
-		Commands: types.Stringorslice(strslice.StrSlice{"echo 'this is not a plugin'"}),
+		Commands: types.StringOrSlice(strslice.StrSlice{"echo 'this is not a plugin'"}),
 	}))
 	// secret only available for "golang" plugin
 	secret = Secret{
@@ -29,14 +29,14 @@ func TestSecretAvailable(t *testing.T) {
 	}
 	assert.True(t, secret.Available(&yaml.Container{
 		Image:    "golang",
-		Commands: types.Stringorslice(strslice.StrSlice{}),
+		Commands: types.StringOrSlice(strslice.StrSlice{}),
 	}))
 	assert.False(t, secret.Available(&yaml.Container{
 		Image:    "not-golang",
-		Commands: types.Stringorslice(strslice.StrSlice{}),
+		Commands: types.StringOrSlice(strslice.StrSlice{}),
 	}))
 	assert.False(t, secret.Available(&yaml.Container{
 		Image:    "not-golang",
-		Commands: types.Stringorslice(strslice.StrSlice{"echo 'this is not a plugin'"}),
+		Commands: types.StringOrSlice(strslice.StrSlice{"echo 'this is not a plugin'"}),
 	}))
 }

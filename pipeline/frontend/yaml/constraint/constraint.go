@@ -239,11 +239,11 @@ func (c *List) Excludes(v string) bool {
 // UnmarshalYAML unmarshals the constraint.
 func (c *List) UnmarshalYAML(value *yaml.Node) error {
 	out1 := struct {
-		Include types.Stringorslice
-		Exclude types.Stringorslice
+		Include types.StringOrSlice
+		Exclude types.StringOrSlice
 	}{}
 
-	var out2 types.Stringorslice
+	var out2 types.StringOrSlice
 
 	err1 := value.Decode(&out1)
 	err2 := value.Decode(&out2)
@@ -292,7 +292,7 @@ func (c *Map) Match(params map[string]string) bool {
 	return true
 }
 
-// UnmarshalYAML unmarshals the constraint map.
+// UnmarshalYAML unmarshal the constraint map.
 func (c *Map) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	out1 := struct {
 		Include map[string]string
@@ -315,15 +315,15 @@ func (c *Map) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return nil
 }
 
-// UnmarshalYAML unmarshals the constraint.
+// UnmarshalYAML unmarshal the constraint.
 func (c *Path) UnmarshalYAML(value *yaml.Node) error {
 	out1 := struct {
-		Include       types.Stringorslice `yaml:"include,omitempty"`
-		Exclude       types.Stringorslice `yaml:"exclude,omitempty"`
+		Include       types.StringOrSlice `yaml:"include,omitempty"`
+		Exclude       types.StringOrSlice `yaml:"exclude,omitempty"`
 		IgnoreMessage string              `yaml:"ignore_message,omitempty"`
 	}{}
 
-	var out2 types.Stringorslice
+	var out2 types.StringOrSlice
 
 	err1 := value.Decode(&out1)
 	err2 := value.Decode(&out2)
