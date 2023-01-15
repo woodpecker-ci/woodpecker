@@ -10,7 +10,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func Pod(namespace string, step *types.Step) *v1.Pod {
+func Pod(namespace string, step *types.Step, labels, annotations map[string]string) *v1.Pod {
 	var (
 		vols       []v1.Volume
 		volMounts  []v1.VolumeMount
@@ -88,13 +88,14 @@ func Pod(namespace string, step *types.Step) *v1.Pod {
 		},
 	}
 
+	labels["step"] = podName(step)
+
 	return &v1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      podName(step),
-			Namespace: namespace,
-			Labels: map[string]string{
-				"step": podName(step),
-			},
+			Name:        podName(step),
+			Namespace:   namespace,
+			Labels:      labels,
+			Annotations: annotations,
 		},
 		Spec: v1.PodSpec{
 			RestartPolicy: v1.RestartPolicyNever,

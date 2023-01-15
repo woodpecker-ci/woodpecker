@@ -27,7 +27,10 @@
       "settings": "设置"
     }
   },
+  "color_scheme_dark": "切换到浅色模式",
+  "color_scheme_light": "切换到深色模式",
   "docs": "文档",
+  "documentation_for": "\"{topic}\"的文档",
   "login": "登录",
   "logout": "退出登录",
   "not_found": {

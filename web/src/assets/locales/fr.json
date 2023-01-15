@@ -114,6 +114,18 @@
       "step_not_started": "L'étape n'a pas démarré encore.",
       "tasks": "Tâches"
     },
+    "deploy_pipeline": {
+      "enter_target": "Environnement de déploiement ciblé",
+      "title": "Déclenchement d'un événement de déploiement pour le pipeline courant #{pipelineId}",
+      "trigger": "Déployer",
+      "variables": {
+        "add": "Ajouter une variable",
+        "desc": "Spécifiez les variables additionnelles que votre pipeline va utiliser. Les variables portant le même nom seront écrasées.",
+        "name": "Nom de la variable",
+        "title": "Variables additionnelles du pipeline",
+        "value": "Valeur de la variable"
+      }
+    },
     "enable": {
       "enable": "Activer",
       "enabled": "Déjà activé",
@@ -140,6 +152,7 @@
         "cancel": "Annuler",
         "cancel_success": "Pipeline annulé",
         "canceled": "Cette étape a été annulée.",
+        "deploy": "Déployer",
         "log_auto_scroll": "Automatiquement défiler vers le bas",
         "log_auto_scroll_off": "Désactiver le défilement automatique",
         "log_download": "Télécharger",
