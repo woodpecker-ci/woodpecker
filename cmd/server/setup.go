@@ -51,6 +51,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/queue"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/server/store/datastore"
+	"github.com/woodpecker-ci/woodpecker/server/store/encryped"
 	"github.com/woodpecker-ci/woodpecker/server/store/encryption"
 	"github.com/woodpecker-ci/woodpecker/server/store/types"
 )
@@ -84,25 +85,25 @@ func setupStore(c *cli.Context) (store.Store, error) {
 		Config: datasource,
 	}
 	log.Trace().Msgf("setup datastore: %#v", *opts)
-	store, err := datastore.NewEngine(opts)
+	_store, err := datastore.NewEngine(opts)
 	if err != nil {
 		log.Fatal().Err(err).Msg("could not open datastore")
 	}
 
 	// load store encryption if aes or tink key wass provided
 	if c.String("encryption-key") != "" {
-		store = encryption.NewEncryptedStore(store)
-		err := encryption.Encryption(c, store).WithClient(encryptedSecretStore).Build()
+		_store = encrypted.NewEncryptedStore(_store)
+		err := encryption.Encryption(c, _store).WithClient(encryptedSecretStore).Build()
 		if err != nil {
 			log.Fatal().Err(err).Msg("could not create encryption service")
 		}
 	}
 
-	if err := store.Migrate(); err != nil {
+	if err := _store.Migrate(); err != nil {
 		log.Fatal().Err(err).Msg("could not migrate datastore")
 	}
 
-	return store, nil
+	return _store, nil
 }
 
 // TODO: remove it in v1.1.0
