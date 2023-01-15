@@ -120,7 +120,7 @@ var legacy2Xorm = task{
 				"DROP INDEX IF EXISTS ix_perms_user ON perms;",
 			} {
 				if _, err := sess.Exec(exec); err != nil {
-					return fmt.Errorf("exec: '%s' failed: %v", exec, err)
+					return fmt.Errorf("exec: '%s' failed: %w", exec, err)
 				}
 			}
 		case schemas.SQLITE, schemas.POSTGRES:
@@ -138,7 +138,7 @@ var legacy2Xorm = task{
 				"DROP INDEX IF EXISTS ix_perms_user;",
 			} {
 				if _, err := sess.Exec(exec); err != nil {
-					return fmt.Errorf("exec: '%s' failed: %v", exec, err)
+					return fmt.Errorf("exec: '%s' failed: %w", exec, err)
 				}
 			}
 		default:
