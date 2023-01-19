@@ -42,6 +42,8 @@
   <i-ic-baseline-file-download v-else-if="name === 'auto-scroll'" class="h-6 w-6" />
   <i-ic-baseline-file-download-off v-else-if="name === 'auto-scroll-off'" class="h-6 w-6" />
   <i-ic-baseline-play-arrow v-else-if="name === 'play'" class="h-6 w-6" />
+  <i-bx-show v-else-if="name === 'show'" class="h-6 w-6" />
+  <i-material-symbols-content-copy v-else-if="name === 'copy'" class="h-6 w-6" />
   <div v-else-if="name === 'blank'" class="h-6 w-6" />
 </template>
 
