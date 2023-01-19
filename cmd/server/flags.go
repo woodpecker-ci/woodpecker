@@ -544,4 +544,9 @@ var flags = []cli.Flag{
 		Name:    "encryption-disable-flag",
 		Usage:   "Flag to decrypt all encrypted data and disable encryption on server",
 	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_SECRET_ALLOW_SHOW_VALUE"},
+		Name:    "secret-allow-show-value",
+		Usage:   "Allow to show secret value",
+	},
 }
