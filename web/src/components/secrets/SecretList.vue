@@ -2,6 +2,28 @@
   <div class="space-y-4 text-color">
     <ListItem v-for="secret in secrets" :key="secret.id" class="items-center">
       <span>{{ secret.name }}</span>
+
+      <div v-if="secret.value" class="ml-auto">
+        <span v-if="secret.showSecret" class="secret-value secret-value--visible" v-text="secret.value">
+        </span>
+        <span v-else class="secret-value secret-value--hidden">
+          ****************
+        </span>
+        <IconButton
+          icon="copy"
+          class="ml-2 w-8 h-8 secret-action secret-action--copy"
+          :class="{invisible: !secret.showSecret}"
+          :title="$t('repo.settings.secrets.copy')"
+          @click="copySecret(secret)"
+        />
+        <IconButton
+          icon="show"
+          class="ml-2 w-8 h-8 secret-action"
+          :title="$t('repo.settings.secrets.toggle')"
+          @click="toggleSecret(secret)"
+        />
+      </div>
+
       <div class="ml-auto">
         <span
           v-for="event in secret.event"
@@ -57,4 +79,46 @@ function editSecret(secret: Secret) {
 function deleteSecret(secret: Secret) {
   emit('delete', secret);
 }
+
+function toggleSecret(secret: Secret) {
+  secret.showSecret = !secret.showSecret
+}
+
+function copySecret(secret: Secret) {
+  navigator.clipboard.writeText(secret.value)
+}
 </script>
+
+<style scoped>
+.secret-value {
+  width: 120px;
+  max-width: 120px;
+  display: inline-block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: monospace;
+  white-space: nowrap;
+}
+
+.secret-action {
+  display: inline-block !important;
+}
+
+.secret-action--copy:active {
+  border: 1px solid var(--fbc-secondary-text);
+  border-radius: 100%;
+  padding: 3px;
+}
+
+.secret-value--visible {
+  color: var(--fbc-secondary-text);
+}
+
+.secret-value--hidden {
+  opacity: 0.5;
+}
+
+.invisible {
+  visibility: hidden;
+}
+</style>
