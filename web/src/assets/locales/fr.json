@@ -62,7 +62,9 @@
         "saved": "Secret d'organisation enregistré",
         "secrets": "Secrets",
         "show": "Afficher les secrets",
-        "value": "Valeur"
+        "value": "Valeur",
+        "toggle": "Afficher/Masquer",
+        "copy": "Copier"
       },
       "settings": "Réglages"
     }
@@ -345,7 +347,9 @@
         "saved": "Secret enregistré",
         "secrets": "Secrets",
         "show": "Afficher les secrets",
-        "value": "Valeur"
+        "value": "Valeur",
+        "toggle": "Afficher/Masquer",
+        "copy": "Copier"
       },
       "settings": "Paramètres"
     },
