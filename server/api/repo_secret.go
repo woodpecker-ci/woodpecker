@@ -16,6 +16,7 @@ package api
 
 import (
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -118,11 +119,15 @@ func GetSecretList(c *gin.Context) {
 		c.String(500, "Error getting secret list. %s", err)
 		return
 	}
-	// copy the secret detail to remove the sensitive
-	// password and token fields.
-	for i, secret := range list {
-		list[i] = secret.Copy()
+
+	if os.Getenv("WOODPECKER_SECRET_ALLOW_SHOW_VALUE") != "true" {
+		// copy the secret detail to remove the sensitive
+		// password and token fields.
+		for i, secret := range list {
+			list[i] = secret.Copy()
+		}
 	}
+
 	c.JSON(200, list)
 }
 

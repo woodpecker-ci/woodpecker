@@ -16,6 +16,7 @@ package api
 
 import (
 	"net/http"
+	"os"
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -31,11 +32,15 @@ func GetGlobalSecretList(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "Error getting global secret list. %s", err)
 		return
 	}
-	// copy the secret detail to remove the sensitive
-	// password and token fields.
-	for i, secret := range list {
-		list[i] = secret.Copy()
+
+	if os.Getenv("WOODPECKER_SECRET_ALLOW_SHOW_VALUE") != "true" {
+		// copy the secret detail to remove the sensitive
+		// password and token fields.
+		for i, secret := range list {
+			list[i] = secret.Copy()
+		}
 	}
+
 	c.JSON(http.StatusOK, list)
 }
 
