@@ -310,6 +310,12 @@ Filepath to encryption keyset used to encrypt secrets in DB. See [secrets encryp
 
 Boolean flag to decrypt secrets in DB and disable server encryption. See [secrets encryption](./40-encryption.md)
 
+### `WOODPECKER_SECRET_ALLOW_SHOW_VALUE`
+> Default: `false`
+
+Boolean flag to allow secrets to be displayed in the user interface. Enable this option is not recommended.
+
+
 ### `WOODPECKER_PROMETHEUS_AUTH_TOKEN`
 > Default: empty
 
