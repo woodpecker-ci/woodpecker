@@ -261,6 +261,7 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 
 	// forge
 	server.Config.Services.Forge = f
+	server.Config.Services.Timeout = c.Duration("forge-timeout")
 
 	// services
 	server.Config.Services.Queue = setupQueue(c, v)
