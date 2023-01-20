@@ -16,7 +16,6 @@ package api
 
 import (
 	"net/http"
-	"os"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -120,7 +119,7 @@ func GetSecretList(c *gin.Context) {
 		return
 	}
 
-	if os.Getenv("WOODPECKER_SECRET_ALLOW_SHOW_VALUE") != "true" {
+	if !server.Config.Secret.AllowShowValue {
 		// copy the secret detail to remove the sensitive
 		// password and token fields.
 		for i, secret := range list {

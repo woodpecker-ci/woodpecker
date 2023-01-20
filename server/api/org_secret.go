@@ -16,7 +16,6 @@ package api
 
 import (
 	"net/http"
-	"os"
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -49,7 +48,7 @@ func GetOrgSecretList(c *gin.Context) {
 		return
 	}
 
-	if os.Getenv("WOODPECKER_SECRET_ALLOW_SHOW_VALUE") != "true" {
+	if !server.Config.Secret.AllowShowValue {
 		// copy the secret detail to remove the sensitive
 		// password and token fields.
 		for i, secret := range list {
