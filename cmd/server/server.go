@@ -339,6 +339,10 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 
 	// Secrets
 	server.Config.Secret.AllowShowValue = c.Bool("secret-allow-show-value")
+
+	if server.Config.Secret.AllowShowValue {
+		log.Warn().Msg("Secrets can be displayed. This is not recommanded.")
+	}
 }
 
 type authorizer struct {
