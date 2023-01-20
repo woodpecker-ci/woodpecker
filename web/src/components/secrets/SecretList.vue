@@ -4,15 +4,19 @@
       <span>{{ secret.name }}</span>
 
       <div v-if="secret.value" class="ml-auto">
-        <span v-if="secret.showSecret" class="secret-value secret-value--visible" v-text="secret.value">
+        <span
+          v-if="secret.showSecret"
+          v-text="secret.value"
+          class="secret-value font-mono truncate white-space max-w-130px w-130px text-color inline-block"
+        >
         </span>
-        <span v-else class="secret-value secret-value--hidden">
-          ****************
-        </span>
+        <span
+          v-else
+          class="secret-value font-mono truncate white-space max-w-130px w-130px opacity-50 inline-block"
+        >************</span>
         <IconButton
           icon="copy"
           class="ml-2 w-8 h-8 secret-action secret-action--copy"
-          :class="{invisible: !secret.showSecret}"
           :title="$t('repo.settings.secrets.copy')"
           @click="copySecret(secret)"
         />
@@ -81,25 +85,15 @@ function deleteSecret(secret: Secret) {
 }
 
 function toggleSecret(secret: Secret) {
-  secret.showSecret = !secret.showSecret
+  secret.showSecret = !secret.showSecret;
 }
 
 function copySecret(secret: Secret) {
-  navigator.clipboard.writeText(secret.value)
+  navigator.clipboard.writeText(secret.value);
 }
 </script>
 
 <style scoped>
-.secret-value {
-  width: 120px;
-  max-width: 120px;
-  display: inline-block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-family: monospace;
-  white-space: nowrap;
-}
-
 .secret-action {
   display: inline-block !important;
 }
@@ -108,17 +102,5 @@ function copySecret(secret: Secret) {
   border: 1px solid var(--fbc-secondary-text);
   border-radius: 100%;
   padding: 3px;
-}
-
-.secret-value--visible {
-  color: var(--fbc-secondary-text);
-}
-
-.secret-value--hidden {
-  opacity: 0.5;
-}
-
-.invisible {
-  visibility: hidden;
 }
 </style>
