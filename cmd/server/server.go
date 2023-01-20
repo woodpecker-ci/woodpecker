@@ -336,6 +336,9 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 
 	// TODO(485) temporary workaround to not hit api rate limits
 	server.Config.FlatPermissions = c.Bool("flat-permissions")
+
+	// Secrets
+	server.Config.Secret.AllowShowValue = c.Bool("secret-allow-show-value")
 }
 
 type authorizer struct {
