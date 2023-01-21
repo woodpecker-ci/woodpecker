@@ -212,7 +212,7 @@ var flags = []cli.Flag{
 	&cli.DurationFlag{
 		EnvVars: []string{"WOODPECKER_FORGE_TIMEOUT"},
 		Name:    "forge-timeout",
-		Usage:   "how many seconds before timeout when fetching the Woodpecker configuration from a Forge ",
+		Usage:   "how many seconds before timeout when fetching the Woodpecker configuration from a Forge",
 		Value:   time.Second * 3,
 	},
 	&cli.Int64Flag{
