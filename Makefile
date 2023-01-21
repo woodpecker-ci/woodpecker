@@ -132,6 +132,9 @@ test-agent: ## Test agent code
 test-server: ## Test server code
 	go test -race -cover -coverprofile server-coverage.out -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/server $(shell go list github.com/woodpecker-ci/woodpecker/server/... | grep -v '/store')
 
+test-server-forgejo: ## Test only Forgejo server code
+	go test -v -race -cover -coverprofile server-coverage.out -timeout 120s $(shell go list github.com/woodpecker-ci/woodpecker/server/... | grep '/forgejo')
+
 test-cli: ## Test cli code
 	go test -race -cover -coverprofile cli-coverage.out -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/cli github.com/woodpecker-ci/woodpecker/cli/...
 

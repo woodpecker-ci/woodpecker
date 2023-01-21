@@ -313,6 +313,42 @@ var flags = []cli.Flag{
 		Usage:   "gogs skip ssl verification",
 	},
 	//
+	// Forgejo
+	//
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_FORGEJO"},
+		Name:    "forgejo",
+		Usage:   "forgejo driver is enabled",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_FORGEJO_URL"},
+		Name:    "forgejo-server",
+		Usage:   "forgejo server address",
+		Value:   "https://codeberg.org",
+	},
+	&cli.StringFlag{
+		EnvVars:  []string{"WOODPECKER_FORGEJO_CLIENT"},
+		Name:     "forgejo-client",
+		Usage:    "forgejo oauth2 client id",
+		FilePath: os.Getenv("WOODPECKER_FORGEJO_CLIENT_FILE"),
+	},
+	&cli.StringFlag{
+		EnvVars:  []string{"WOODPECKER_FORGEJO_SECRET"},
+		Name:     "forgejo-secret",
+		Usage:    "forgejo oauth2 client secret",
+		FilePath: os.Getenv("WOODPECKER_FORGEJO_SECRET_FILE"),
+	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_FORGEJO_SKIP_VERIFY"},
+		Name:    "forgejo-skip-verify",
+		Usage:   "forgejo skip ssl verification",
+	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_FORGEJO_DEBUG"},
+		Name:    "forgejo-debug",
+		Usage:   "forgejo debug messages",
+	},
+	//
 	// Gitea
 	//
 	&cli.BoolFlag{

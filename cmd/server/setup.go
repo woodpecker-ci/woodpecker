@@ -40,6 +40,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/forge/bitbucket"
 	"github.com/woodpecker-ci/woodpecker/server/forge/bitbucketserver"
 	"github.com/woodpecker-ci/woodpecker/server/forge/coding"
+	"github.com/woodpecker-ci/woodpecker/server/forge/forgejo"
 	"github.com/woodpecker-ci/woodpecker/server/forge/gitea"
 	"github.com/woodpecker-ci/woodpecker/server/forge/github"
 	"github.com/woodpecker-ci/woodpecker/server/forge/gitlab"
@@ -199,6 +200,8 @@ func setupForge(c *cli.Context) (forge.Forge, error) {
 		return setupStash(c)
 	case c.Bool("gogs"):
 		return setupGogs(c)
+	case c.Bool("forgejo"):
+		return setupForgejo(c)
 	case c.Bool("gitea"):
 		return setupGitea(c)
 	case c.Bool("coding"):
@@ -229,6 +232,26 @@ func setupGogs(c *cli.Context) (forge.Forge, error) {
 	}
 	log.Trace().Msgf("Forge (gogs) opts: %#v", opts)
 	return gogs.New(opts)
+}
+
+// helper function to setup the Forgejo forge from the CLI arguments.
+func setupForgejo(c *cli.Context) (forge.Forge, error) {
+	server, err := url.Parse(c.String("forgejo-server"))
+	if err != nil {
+		return nil, err
+	}
+	opts := forgejo.Opts{
+		URL:        strings.TrimRight(server.String(), "/"),
+		Client:     c.String("forgejo-client"),
+		Secret:     c.String("forgejo-secret"),
+		SkipVerify: c.Bool("forgejo-skip-verify"),
+		Debug:      c.Bool("forgejo-debug"),
+	}
+	if len(opts.URL) == 0 {
+		log.Fatal().Msg("WOODPECKER_FORGEJO_URL must be set")
+	}
+	log.Trace().Msgf("Forge (forgejo) opts: %#v", opts)
+	return forgejo.New(opts)
 }
 
 // helper function to setup the Gitea forge from the CLI arguments.

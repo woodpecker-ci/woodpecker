@@ -1,0 +1,63 @@
+variables:
+  - &golang_image 'golang:1.19'
+  - &when_path
+      - ".woodpecker/forgejo.yml"
+      - "server/forge/forgejo/**"
+      - "cmd/server/flags.go"
+      - "cmd/server/setup.go"
+      - "contrib/woodpecker-test-repo/*"
+
+pipeline:
+  forgejo:
+    detach: true
+    image: codeberg.org/forgejo/forgejo:1.18
+    pull: true
+    ports: ["80"]
+    environment:
+      - FORGEJO__security__INSTALL_LOCK=true
+      - FORGEJO__server__HTTP_PORT=80
+      - FORGEJO__server__ROOT_URL=http://forgejo/
+      - FORGEJO__repository__ENABLE_PUSH_CREATE_USER=true
+    commands: |
+      /usr/bin/entrypoint &
+      sleep 5
+      su git -c 'gitea admin user create --admin --username root --password admin1234 --email root@example.com'
+      cd contrib/woodpecker-test-repo
+      git init
+      git checkout -b main
+      git config user.email root@example.com
+      git config user.name username
+      git remote add origin http':'//root':'admin1234@forgejo/root/forgejo-test.git
+      git add .
+      git commit -m "Initial commit"
+      git push -u origin main
+      git rev-parse HEAD > /woodpecker/commit
+      su git -c 'gitea admin user generate-access-token -u root --raw' > /woodpecker/token-admin
+      ( echo -n 'Authorization: token ' ; cat /woodpecker/token-admin ) > /woodpecker/header
+      ( echo "/bin/sh" ; echo 'curl -sS -H "Content-Type: application/json" -H @/woodpecker/header "$@"' ) > /woodpecker/api && chmod +x /woodpecker/api
+      su git -c 'gitea admin user create --must-change-password=false --username normaluser --password admin1234 --email normaluser@example.com'
+      su git -c 'gitea admin user generate-access-token -u normaluser --raw' > /woodpecker/token-user
+      wait
+    when:
+      path: *when_path
+
+  forgejo-wait:
+    image:  *golang_image
+    commands:
+      - for i in $(seq 60) ; do test -f /woodpecker/token-admin && break ; sleep 1 ; done
+      - test -f /woodpecker/token-admin
+    when:
+      path: *when_path
+
+  test:
+    image: *golang_image
+    group: test
+    commands: |
+      apt-get update --quiet && apt-get install -y -qq jq
+      /woodpecker/api -X POST --data-binary '{"username": "myorg"}' http://forgejo/api/v1/orgs
+      owners=$(/woodpecker/api http://forgejo/api/v1/orgs/myorg/teams | jq '.[0].id')
+      /woodpecker/api -X PUT http://forgejo/api/v1/teams/$owners/members/normaluser
+      myteam=$(/woodpecker/api -X POST --data-binary '{"name": "myteam", "units": ["repo.code"], "permission": "read"}' http://forgejo/api/v1/orgs/myorg/teams | jq .id)
+      make FORGEJO_COMMIT=$(cat /woodpecker/commit) FORGEJO_TOKEN_ADMIN=$(cat /woodpecker/token-admin) FORGEJO_TOKEN_USER=$(cat /woodpecker/token-user) FORGEJO_URL=http://forgejo/ test-server-forgejo
+    when:
+      path: *when_path
