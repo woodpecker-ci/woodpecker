@@ -103,6 +103,17 @@ When using the `local` backend, the `image` entry is used to specify the shell, 
 +    image: mysql
 ```
 
+When using the `lxc` backend, the `image` entry is used to specify the  `--template`  and `--release`argument to lxc-create, such as  or `debian:bullseye`, that is used to run the commands.
+
+```diff
+ pipeline:
+   build:
++    image: debian:bullseye
+     commands:
+       - go build
+       - go test
+```
+
 Woodpecker supports any valid Docker image from any Docker registry:
 
 ```text
@@ -648,7 +659,7 @@ For more details and examples check the [Advanced YAML syntax docs](./35-advance
 
 ## `clone`
 
-Woodpecker automatically configures a default clone step if not explicitly defined. When using the `local` backend, the [plugin-git](https://github.com/woodpecker-ci/plugin-git) binary must be on your `$PATH` for the default clone step to work. If not, you can still write a manual clone step.
+Woodpecker automatically configures a default clone step if not explicitly defined. When using the `local` or `lxc` backend, the [plugin-git](https://github.com/woodpecker-ci/plugin-git) binary must be on your `$PATH` for the default clone step to work. If not, you can still write a manual clone step.
 
 You can manually configure the clone step in your pipeline for customization:
 

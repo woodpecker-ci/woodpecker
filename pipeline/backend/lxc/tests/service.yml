@@ -1,0 +1,13 @@
+pipeline:
+   job:
+     image: debian:bullseye
+     commands: |
+       cat /etc/hosts
+       getent hosts server
+
+services:
+   server:
+     image: debian:bullseye
+     commands: |
+       sleep infinity
+

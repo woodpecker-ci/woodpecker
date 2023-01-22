@@ -1,0 +1,7 @@
+pipeline:
+   one:
+     image: debian:bullseye
+     commands: echo ONE > /woodpecker/FILE
+   two:
+     image: debian:bullseye
+     commands: grep ONE /woodpecker/FILE
