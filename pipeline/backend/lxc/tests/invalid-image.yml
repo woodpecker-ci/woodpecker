@@ -1,0 +1,3 @@
+pipeline:
+   job:
+     image: "invalid release with space in it:bullseye"

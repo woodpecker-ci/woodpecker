@@ -7,6 +7,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/docker"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/kubernetes"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/local"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/lxc"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/ssh"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
@@ -17,6 +18,7 @@ func Init(ctx context.Context) {
 	loadedEngines := []types.Engine{
 		docker.New(),
 		local.New(),
+		lxc.New(),
 		ssh.New(),
 		kubernetes.New(ctx),
 	}
