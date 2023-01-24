@@ -121,7 +121,7 @@
       "config": "Konfigurasi",
       "created": "Dibuat",
       "event": {
-        "cron": "Cron",
+        "cron": "Kron",
         "deploy": "Luncur",
         "manual": "Manual",
         "pr": "Permintaan Penarikan",

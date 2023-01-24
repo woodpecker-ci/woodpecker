@@ -1,1 +1,213 @@
-{}
+{
+  "admin": {
+    "settings": {
+      "not_allowed": "Nie masz pozwolenia na dostęp do ustawień serwera",
+      "secrets": {
+        "add": "Dodaj sekret",
+        "created": "Dodano sekret globalny",
+        "deleted": "Usunięto sekret globalny",
+        "events": {
+          "pr_warning": "Używaj tej opcji ostrożnie, osoba atakująca może złożyć szkodliwy pull request który ujawni twoje sekrety."
+        },
+        "name": "Nazwa",
+        "none": "Nie ma jeszcze żadnych globalnych sekretów.",
+        "save": "Zapisz sekret",
+        "saved": "Zapisano sekret globalny",
+        "secrets": "Sekrety",
+        "show": "Pokaż sekrety",
+        "value": "Wartość",
+        "warning": "Te sekrety będą dostępne dla wszystkich użytkowników serwera."
+      },
+      "settings": "Ustawienia"
+    }
+  },
+  "back": "Powrót",
+  "color_scheme_dark": "Przełącz na tryb jasny",
+  "color_scheme_light": "Przełącz na tryb ciemny",
+  "docs": "Dokumentacja",
+  "login": "Zaloguj",
+  "logout": "Wyloguj",
+  "not_found": {
+    "back_home": "Powrót do strony głównej",
+    "not_found": "Ojoj, 404, albo coś zepsuliśmy, albo pomyliłeś się przy wpisywaniu :-/"
+  },
+  "org": {
+    "settings": {
+      "not_allowed": "Nie masz pozwolenia na dostęp do ustawień tej organizacji",
+      "secrets": {
+        "add": "Dodaj sekret",
+        "created": "Dodano sekret organizacji",
+        "deleted": "Usunięto sekret organizacji",
+        "events": {
+          "pr_warning": "Używaj tej opcji ostrożnie, osoba atakująca może złożyć szkodliwy pull request który ujawni twoje sekrety."
+        },
+        "name": "Nazwa",
+        "none": "Nie ma jeszcze żadnych sekretów organizacji.",
+        "save": "Zapisz sekret",
+        "saved": "Zapisano sekret organizacji",
+        "secrets": "Sekrety",
+        "show": "Pokaż sekrety",
+        "value": "Wartość"
+      },
+      "settings": "Ustawienia"
+    }
+  },
+  "password": "Hasło",
+  "repo": {
+    "add": "Dodaj repozytorium",
+    "deploy_pipeline": {
+      "variables": {
+        "add": "Dodaj zmienną",
+        "name": "Nazwa zmiennej",
+        "value": "Wartość zmiennej"
+      }
+    },
+    "manual_pipeline": {
+      "variables": {
+        "add": "Dodaj zmienną",
+        "name": "Nazwa zmiennej",
+        "value": "Wartość zmiennej"
+      }
+    },
+    "not_allowed": "Nie masz pozwolenia na dostęp do tego repozytorium",
+    "open_in_forge": "Otwórz repozytorium w systemie kontroli wersji",
+    "pipeline": {
+      "actions": {
+        "cancel": "Anuluj",
+        "canceled": "Ten krok został anulowany.",
+        "log_auto_scroll": "Przewijaj automatycznie",
+        "log_auto_scroll_off": "Wyłącz automatyczne przewijanie",
+        "log_download": "Pobierz",
+        "restart": "Uruchom ponownie"
+      },
+      "config": "Konfiguracja",
+      "event": {
+        "cron": "Cron",
+        "pr": "Pull Request",
+        "push": "Push",
+        "tag": "Tag"
+      },
+      "execution_error": "Błąd wykonania",
+      "exit_code": "kod wyjścia {exitCode}",
+      "loading": "Ładowanie…",
+      "log_download_error": "Wystąpił błąd przy pobieraniu pliku z logiem",
+      "status": {
+        "blocked": "zablokowany",
+        "pending": "oczekujący na wykonanie",
+        "running": "w trakcie uruchomienia",
+        "skipped": "pominięty",
+        "started": "rozpoczęty",
+        "status": "Status: {status}",
+        "success": "sukces"
+      },
+      "step_not_started": "Ten krok jeszcze się nie rozpoczął."
+    },
+    "settings": {
+      "actions": {
+        "actions": "Operacje",
+        "delete": {
+          "confirm": "Wszystkie dane zostaną utracone po wykonaniu tej operacji!!!\n\nCzy na pewno chcesz kontynuować?",
+          "delete": "Usuń repozytorium",
+          "success": "Usunięto repozytorium"
+        },
+        "repair": {
+          "repair": "Napraw repozytorium",
+          "success": "Naprawiono repozytorium"
+        }
+      },
+      "badge": {
+        "badge": "Plakietka",
+        "branch": "Gałąź",
+        "type": "Składnia",
+        "type_html": "HTML",
+        "type_markdown": "Markdown",
+        "type_url": "URL"
+      },
+      "crons": {
+        "crons": "Crony",
+        "name": {
+          "name": "Nazwa"
+        },
+        "next_exec": "Następne uruchomienie",
+        "not_executed_yet": "Jeszcze nigdy nie uruchomiono",
+        "run": "Uruchom teraz",
+        "schedule": {
+          "title": "Zaplanuj (wyrażone w UTC)"
+        }
+      },
+      "general": {
+        "allow_pr": {
+          "allow": "Zezwól na pull requesty"
+        },
+        "general": "Ogólne",
+        "pipeline_path": {
+          "default": "Domyślnie: .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml"
+        },
+        "project": "Ustawienia projektu",
+        "protected": {
+          "protected": "Chroniony"
+        },
+        "save": "Zapisz ustawienia",
+        "success": "Zaktualizowano ustawienia projektu",
+        "trusted": {
+          "trusted": "Zaufany"
+        },
+        "visibility": {
+          "internal": {
+            "desc": "Tylko zalogowani użytkownicy instancji Woodpecker mogą zobaczyć ten projekt.",
+            "internal": "Wewnętrzny"
+          },
+          "private": {
+            "desc": "Tylko ty i inni właściciele repozytorium mogą zobaczyć ten projekt.",
+            "private": "Prywatny"
+          },
+          "public": {
+            "desc": "Każdy użytkownik może zobaczyć twój projekt bez bycia zalogowanym.",
+            "public": "Publiczny"
+          },
+          "visibility": "Widoczność projektu"
+        }
+      },
+      "not_allowed": "Nie masz pozwolenia na dostęp do ustawień tego repozytorium",
+      "registries": {
+        "address": {
+          "address": "Adres"
+        }
+      },
+      "secrets": {
+        "add": "Dodaj sekret",
+        "created": "Dodano sekret",
+        "delete": "Usuń sekret",
+        "deleted": "Usunięto sekret",
+        "edit": "Edytuj sekret",
+        "events": {
+          "pr_warning": "Używaj tej opcji ostrożnie, osoba atakująca może złożyć szkodliwy pull request który ujawni twoje sekrety."
+        },
+        "name": "Nazwa",
+        "none": "Nie ma jeszcze żadnych sekretów.",
+        "save": "Zapisz sekret",
+        "saved": "Zapisano sekret",
+        "secrets": "Sekrety",
+        "show": "Pokaż sekrety",
+        "value": "Wartość"
+      },
+      "settings": "Ustawienia"
+    },
+    "user_none": "Ta organizacja / użytkownik nie ma jeszcze żadnych projektów."
+  },
+  "repositories": "Repozytoria",
+  "search": "Szukaj…",
+  "unknown_error": "Wystąpił nieznany błąd",
+  "url": "URL",
+  "user": {
+    "access_denied": "Nie masz pozwolenia na zalogowanie",
+    "api_usage": "Przykładowe użycie API",
+    "cli_usage": "Przykładowe użycie CLI",
+    "dl_cli": "Pobierz CLI",
+    "internal_error": "Wystąpił błąd wewnętrzny",
+    "oauth_error": "Błąd podczas uwierzytelnienia u dostawcy OAuth",
+    "settings": "Ustawienia użytkownika"
+  },
+  "username": "Nazwa użytkownika",
+  "welcome": "Witamy w Woodpecker"
+}
