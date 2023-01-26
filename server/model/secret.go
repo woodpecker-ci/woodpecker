@@ -63,6 +63,7 @@ type SecretStore interface {
 	OrgSecretList(string) ([]*Secret, error)
 	GlobalSecretFind(string) (*Secret, error)
 	GlobalSecretList() ([]*Secret, error)
+	SecretListAll() ([]*Secret, error)
 }
 
 // Secret represents a secret variable, such as a password or token.

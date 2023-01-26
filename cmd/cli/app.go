@@ -65,7 +65,9 @@ func newApp() *cli.App {
 			Out: os.Stderr,
 		},
 	)
-	app.Before = common.SetupConsoleLogger
+	for _, command := range app.Commands {
+		command.Before = common.SetupConsoleLogger
+	}
 
 	return app
 }
