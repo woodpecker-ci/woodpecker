@@ -77,6 +77,7 @@ declare module '@vue/runtime-core' {
     IPhXCircle: typeof import('~icons/ph/x-circle')['default']
     ISimpleIconsGitea: typeof import('~icons/simple-icons/gitea')['default']
     ITeenyiconsGitSolid: typeof import('~icons/teenyicons/git-solid')['default']
+    ITeenyiconsRefreshOutline: typeof import('~icons/teenyicons/refresh-outline')['default']
     IUiwCircleCheck: typeof import('~icons/uiw/circle-check')['default']
     IUiwCircleClose: typeof import('~icons/uiw/circle-close')['default']
     IUiwStop: typeof import('~icons/uiw/stop')['default']

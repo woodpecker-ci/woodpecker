@@ -82,6 +82,8 @@ export const usePipelineStore = defineStore('pipelines', () => {
   const activePipelines = computed(() => pipelineFeed.value.filter(isPipelineActive));
 
   async function loadPipelineFeed() {
+    await repoStore.loadRepos();
+
     const _pipelines = await apiClient.getPipelineFeed();
     _pipelines.forEach((pipeline) => {
       setPipeline(pipeline.owner, pipeline.name, pipeline);
