@@ -172,7 +172,7 @@ func loop(c *cli.Context) error {
 		return err
 	}
 
-	log.Debug().Msgf("agent registered with id %d", agentID)
+	log.Debug().Msgf("Agent registered with ID %d", agentID)
 
 	go func() {
 		for {

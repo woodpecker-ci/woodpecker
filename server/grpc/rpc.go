@@ -22,6 +22,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strconv"
 	"time"
@@ -410,7 +411,7 @@ func (s *RPC) ReportHealth(ctx context.Context, status string) error {
 	}
 
 	if status != "I am alive!" {
-		return fmt.Errorf("Are you alive?")
+		return errors.New("Are you alive?")
 	}
 
 	agent.LastContact = time.Now().Unix()
@@ -478,18 +479,18 @@ func (s *RPC) notify(c context.Context, repo *model.Repo, pipeline *model.Pipeli
 func (s *RPC) getAgentFromContext(ctx context.Context) (*model.Agent, error) {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
-		return nil, fmt.Errorf("metadata is not provided")
+		return nil, errors.New("metadata is not provided")
 	}
 
 	values := md["agent_id"]
 	if len(values) == 0 {
-		return nil, fmt.Errorf("agent_id is not provided")
+		return nil, errors.New("agent_id is not provided")
 	}
 
 	_agentID := values[0]
 	agentID, err := strconv.ParseInt(_agentID, 10, 64)
 	if err != nil {
-		return nil, fmt.Errorf("agent_id is not a valid integer")
+		return nil, errors.New("agent_id is not a valid integer")
 	}
 
 	return s.store.AgentFind(agentID)

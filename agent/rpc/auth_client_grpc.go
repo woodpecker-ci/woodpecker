@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc/proto"
+
 	"google.golang.org/grpc"
 )
 

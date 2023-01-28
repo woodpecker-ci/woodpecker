@@ -1,6 +1,7 @@
 package grpc
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
@@ -53,7 +54,7 @@ func (manager *JWTManager) Verify(accessToken string) (*AgentTokenClaims, error)
 		func(token *jwt.Token) (interface{}, error) {
 			_, ok := token.Method.(*jwt.SigningMethodHMAC)
 			if !ok {
-				return nil, fmt.Errorf("unexpected token signing method")
+				return nil, errors.New("unexpected token signing method")
 			}
 
 			return []byte(manager.secretKey), nil
@@ -65,7 +66,7 @@ func (manager *JWTManager) Verify(accessToken string) (*AgentTokenClaims, error)
 
 	claims, ok := token.Claims.(*AgentTokenClaims)
 	if !ok {
-		return nil, fmt.Errorf("invalid token claims")
+		return nil, errors.New("invalid token claims")
 	}
 
 	return claims, nil
