@@ -46,8 +46,7 @@
         <InputField :label="$t('admin.settings.agents.no_schedule.name')">
           <Checkbox
             :model-value="selectedAgent.no_schedule || false"
-            :label="$t('admin.settings.agents.no_schedule.name')"
-            :description="$t('admin.settings.agents.no_schedule.placeholder')"
+            :label="$t('admin.settings.agents.no_schedule.placeholder')"
             @update:model-value="selectedAgent!.no_schedule = $event"
           />
         </InputField>
