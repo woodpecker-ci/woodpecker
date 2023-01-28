@@ -14,18 +14,25 @@
 
 package model
 
-// TODO: check if it is actually used or just some relict from the past
-
 type Agent struct {
-	ID       int64  `xorm:"pk autoincr 'agent_id'"`
-	Addr     string `xorm:"UNIQUE VARCHAR(250) 'agent_addr'"`
-	Platform string `xorm:"VARCHAR(500) 'agent_platform'"`
-	Capacity int64  `xorm:"agent_capacity"`
-	Created  int64  `xorm:"created 'agent_created'"`
-	Updated  int64  `xorm:"updated 'agent_updated'"`
+	ID          int64  `json:"id"            xorm:"pk autoincr 'id'"`
+	Created     int64  `json:"created"       xorm:"created"`
+	Updated     int64  `json:"updated"       xorm:"updated"`
+	Name        string `json:"name"`
+	OwnerID     int64  `json:"owner_id"      xorm:"'owner_id'"`
+	Token       string `json:"token"`
+	LastContact int64  `json:"last_contact"`
+	Platform    string `json:"platform"      xorm:"VARCHAR(100)"`
+	Backend     string `json:"backend"       xorm:"VARCHAR(100)"`
+	Capacity    int32  `json:"capacity"`
+	Version     string `json:"version"`
 }
 
 // TableName return database table name for xorm
 func (Agent) TableName() string {
 	return "agents"
+}
+
+func (a *Agent) IsSystemAgent() bool {
+	return a.OwnerID == -1
 }

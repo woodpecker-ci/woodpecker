@@ -9,6 +9,7 @@ declare module '@vue/runtime-core' {
   export interface GlobalComponents {
     ActionsTab: typeof import('./src/components/repo/settings/ActionsTab.vue')['default']
     ActivePipelines: typeof import('./src/components/layout/header/ActivePipelines.vue')['default']
+    AdminAgentsTab: typeof import('./src/components/admin/settings/AdminAgentsTab.vue')['default']
     AdminSecretsTab: typeof import('./src/components/admin/settings/AdminSecretsTab.vue')['default']
     BadgeTab: typeof import('./src/components/repo/settings/BadgeTab.vue')['default']
     Button: typeof import('./src/components/atomic/Button.vue')['default']
