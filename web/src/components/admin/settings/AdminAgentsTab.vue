@@ -43,6 +43,15 @@
           />
         </InputField>
 
+        <InputField :label="$t('admin.settings.agents.no_schedule.name')">
+          <Checkbox
+            :model-value="selectedAgent.no_schedule || false"
+            :label="$t('admin.settings.agents.no_schedule.name')"
+            :description="$t('admin.settings.agents.no_schedule.placeholder')"
+            @update:model-value="selectedAgent!.no_schedule = $event"
+          />
+        </InputField>
+
         <template v-if="isEditingAgent">
           <InputField :label="$t('admin.settings.agents.token')">
             <TextField v-model="selectedAgent.token" :placeholder="$t('admin.settings.agents.token')" disabled />
@@ -97,6 +106,7 @@ import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
+import Checkbox from '~/components/form/Checkbox.vue';
 import InputField from '~/components/form/InputField.vue';
 import TextField from '~/components/form/TextField.vue';
 import Panel from '~/components/layout/Panel.vue';

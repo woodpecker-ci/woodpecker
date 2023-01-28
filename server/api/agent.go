@@ -73,6 +73,7 @@ func PatchAgent(c *gin.Context) {
 		return
 	}
 	agent.Name = in.Name
+	agent.NoSchedule = in.NoSchedule
 
 	err = _store.AgentUpdate(agent)
 	if err != nil {
@@ -95,8 +96,9 @@ func PostAgent(c *gin.Context) {
 	user := session.User(c)
 
 	agent := &model.Agent{
-		Name:    in.Name,
-		OwnerID: user.ID,
+		Name:       in.Name,
+		NoSchedule: in.NoSchedule,
+		OwnerID:    user.ID,
 		Token: base32.StdEncoding.EncodeToString(
 			securecookie.GenerateRandomKey(32),
 		),
