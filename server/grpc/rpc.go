@@ -70,6 +70,13 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Pipeline, er
 		return nil, err
 	}
 	for {
+		agent, err := s.getAgentFromContext(c)
+		if err != nil {
+			return nil, err
+		} else if agent.NoSchedule {
+			return nil, nil
+		}
+
 		task, err := s.queue.Poll(c, fn)
 		if err != nil {
 			return nil, err
@@ -82,6 +89,7 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Pipeline, er
 			err = json.Unmarshal(task.Data, pipeline)
 			return pipeline, err
 		}
+
 		if err := s.Done(c, task.ID, rpc.State{}); err != nil {
 			log.Error().Err(err).Msgf("mark task '%s' done failed", task.ID)
 		}
