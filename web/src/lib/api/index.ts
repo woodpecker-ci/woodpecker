@@ -24,6 +24,13 @@ type PipelineOptions = {
   branch: string;
   variables: Record<string, string>;
 };
+
+type DeploymentOptions = {
+  id: string;
+  environment: string;
+  variables: Record<string, string>;
+};
+
 export default class WoodpeckerClient extends ApiClient {
   getRepoList(opts?: RepoListOptions): Promise<Repo[]> {
     const query = encodeQueryString(opts);
@@ -63,17 +70,29 @@ export default class WoodpeckerClient extends ApiClient {
     return this._post(`/api/repos/${owner}/${repo}/pipelines`, options) as Promise<Pipeline>;
   }
 
+  // Deploy triggers a deployment for an existing pipeline using the
+  // specified target environment.
+  deployPipeline(owner: string, repo: string, pipelineNumber: number, options: DeploymentOptions): Promise<Pipeline> {
+    const vars = {
+      ...options.variables,
+      event: 'deployment',
+      deploy_to: options.environment,
+    };
+    const query = encodeQueryString(vars);
+    return this._post(`/api/repos/${owner}/${repo}/pipelines/${pipelineNumber}?${query}`) as Promise<Pipeline>;
+  }
+
   getPipelineList(owner: string, repo: string, opts?: Record<string, string | number | boolean>): Promise<Pipeline[]> {
     const query = encodeQueryString(opts);
     return this._get(`/api/repos/${owner}/${repo}/pipelines?${query}`) as Promise<Pipeline[]>;
   }
 
-  getPipeline(owner: string, repo: string, number: number | 'latest'): Promise<Pipeline> {
-    return this._get(`/api/repos/${owner}/${repo}/pipelines/${number}`) as Promise<Pipeline>;
+  getPipeline(owner: string, repo: string, pipelineNumber: number | 'latest'): Promise<Pipeline> {
+    return this._get(`/api/repos/${owner}/${repo}/pipelines/${pipelineNumber}`) as Promise<Pipeline>;
   }
 
-  getPipelineConfig(owner: string, repo: string, number: number): Promise<PipelineConfig[]> {
-    return this._get(`/api/repos/${owner}/${repo}/pipelines/${number}/config`) as Promise<PipelineConfig[]>;
+  getPipelineConfig(owner: string, repo: string, pipelineNumber: number): Promise<PipelineConfig[]> {
+    return this._get(`/api/repos/${owner}/${repo}/pipelines/${pipelineNumber}/config`) as Promise<PipelineConfig[]>;
   }
 
   getPipelineFeed(opts?: Record<string, string | number | boolean>): Promise<PipelineFeed[]> {
@@ -81,16 +100,16 @@ export default class WoodpeckerClient extends ApiClient {
     return this._get(`/api/user/feed?${query}`) as Promise<PipelineFeed[]>;
   }
 
-  cancelPipeline(owner: string, repo: string, number: number): Promise<unknown> {
-    return this._post(`/api/repos/${owner}/${repo}/pipelines/${number}/cancel`);
+  cancelPipeline(owner: string, repo: string, pipelineNumber: number): Promise<unknown> {
+    return this._post(`/api/repos/${owner}/${repo}/pipelines/${pipelineNumber}/cancel`);
   }
 
-  approvePipeline(owner: string, repo: string, pipeline: string): Promise<unknown> {
-    return this._post(`/api/repos/${owner}/${repo}/pipelines/${pipeline}/approve`);
+  approvePipeline(owner: string, repo: string, pipelineNumber: string): Promise<unknown> {
+    return this._post(`/api/repos/${owner}/${repo}/pipelines/${pipelineNumber}/approve`);
   }
 
-  declinePipeline(owner: string, repo: string, pipeline: string): Promise<unknown> {
-    return this._post(`/api/repos/${owner}/${repo}/pipelines/${pipeline}/decline`);
+  declinePipeline(owner: string, repo: string, pipelineNumber: string): Promise<unknown> {
+    return this._post(`/api/repos/${owner}/${repo}/pipelines/${pipelineNumber}/decline`);
   }
 
   restartPipeline(
