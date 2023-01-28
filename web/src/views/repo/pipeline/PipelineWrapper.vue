@@ -31,6 +31,17 @@
             :is-loading="isRestartingPipeline"
             @click="restartPipeline"
           />
+          <Button
+            v-if="pipeline.status === 'success'"
+            class="flex-shrink-0"
+            :text="$t('repo.pipeline.actions.deploy')"
+            @click="showDeployPipelinePopup = true"
+          />
+          <DeployPipelinePopup
+            :pipeline-number="pipelineId"
+            :open="showDeployPipelinePopup"
+            @close="showDeployPipelinePopup = false"
+          />
         </template>
       </template>
 
@@ -66,7 +77,7 @@
 
 <script lang="ts">
 import { Tooltip } from 'floating-vue';
-import { computed, defineComponent, inject, onBeforeUnmount, onMounted, provide, Ref, toRef, watch } from 'vue';
+import { computed, defineComponent, inject, onBeforeUnmount, onMounted, provide, Ref, ref, toRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -134,6 +145,8 @@ export default defineComponent({
     provide('pipeline', pipeline);
 
     const { message } = usePipeline(pipeline);
+
+    const showDeployPipelinePopup = ref(false);
 
     async function loadPipeline(): Promise<void> {
       if (!repo) {
@@ -216,6 +229,7 @@ export default defineComponent({
       message,
       isCancelingPipeline,
       isRestartingPipeline,
+      showDeployPipelinePopup,
       activeTab,
       since,
       duration,

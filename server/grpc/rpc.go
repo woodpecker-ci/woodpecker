@@ -22,12 +22,15 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/rs/zerolog/log"
 
 	"github.com/prometheus/client_golang/prometheus"
+	"google.golang.org/grpc/metadata"
 	grpcMetadata "google.golang.org/grpc/metadata"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
@@ -382,6 +385,40 @@ func (s *RPC) Log(c context.Context, id string, line *rpc.Line) error {
 	return nil
 }
 
+func (s *RPC) RegisterAgent(ctx context.Context, platform, backend, version string, capacity int32) (int64, error) {
+	agent, err := s.getAgentFromContext(ctx)
+	if err != nil {
+		return -1, err
+	}
+
+	agent.Backend = backend
+	agent.Platform = platform
+	agent.Capacity = capacity
+	agent.Version = version
+
+	err = s.store.AgentUpdate(agent)
+	if err != nil {
+		return -1, err
+	}
+
+	return agent.ID, nil
+}
+
+func (s *RPC) ReportHealth(ctx context.Context, status string) error {
+	agent, err := s.getAgentFromContext(ctx)
+	if err != nil {
+		return err
+	}
+
+	if status != "I am alive!" {
+		return errors.New("Are you alive?")
+	}
+
+	agent.LastContact = time.Now().Unix()
+
+	return s.store.AgentUpdate(agent)
+}
+
 func (s *RPC) completeChildrenIfParentCompleted(steps []*model.Step, completedWorkflow *model.Step) {
 	for _, p := range steps {
 		if p.Running() && p.PPID == completedWorkflow.PID {
@@ -437,4 +474,24 @@ func (s *RPC) notify(c context.Context, repo *model.Repo, pipeline *model.Pipeli
 		log.Error().Err(err).Msgf("grpc could not notify event: '%v'", message)
 	}
 	return nil
+}
+
+func (s *RPC) getAgentFromContext(ctx context.Context) (*model.Agent, error) {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return nil, errors.New("metadata is not provided")
+	}
+
+	values := md["agent_id"]
+	if len(values) == 0 {
+		return nil, errors.New("agent_id is not provided")
+	}
+
+	_agentID := values[0]
+	agentID, err := strconv.ParseInt(_agentID, 10, 64)
+	if err != nil {
+		return nil, errors.New("agent_id is not a valid integer")
+	}
+
+	return s.store.AgentFind(agentID)
 }

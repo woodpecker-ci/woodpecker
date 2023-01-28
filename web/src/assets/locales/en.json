@@ -41,6 +41,18 @@
             "value": "Variable value"
           }
         },
+        "deploy_pipeline": {
+          "title": "Trigger deployment event for current pipeline #{pipelineId}",
+          "enter_target": "Target deployment environment",
+          "trigger": "Deploy",
+          "variables": {
+            "add": "Add variable",
+            "title": "Additional pipeline variables",
+            "desc": "Specify additional variables to use in your pipeline. Variables with the same name will be overwritten.",
+            "name": "Variable name",
+            "value": "Variable value"
+          }
+        },
         "activity": "Activity",
         "branches": "Branches",
         "add": "Add repository",
@@ -218,6 +230,7 @@
                 "restart": "Restart",
                 "canceled": "This step has been canceled.",
                 "cancel_success": "Pipeline canceled",
+                "deploy": "Deploy",
                 "restart_success": "Pipeline restarted",
                 "log_download": "Download",
                 "log_auto_scroll": "Automatically scroll down",
@@ -308,6 +321,29 @@
                     "events": "Available at following events",
                     "pr_warning": "Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets."
                 }
+            },
+            "agents": {
+                "agents": "Agents",
+                "desc": "Agents registered for this server",
+                "none": "There are no agents yet.",
+                "add": "Add agent",
+                "save": "Save agent",
+                "show": "Show agents",
+                "created": "Agent created",
+                "saved": "Agent saved",
+                "deleted": "Agent deleted",
+                "name": {
+                    "name": "Name",
+                    "placeholder": "Name of the agent"
+                },
+                "token": "Token",
+                "platform": "Platform",
+                "backend": "Backend",
+                "capacity": "Capacity",
+                "version": "Version",
+                "last_contact": "Last contact",
+                "never": "Never",
+                "delete_confirm": "Do you really want to delete this agent? It wont be able to connected to the server anymore."
             }
         }
     },

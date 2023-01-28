@@ -122,6 +122,7 @@ type Store interface {
 	// Secrets
 	SecretFind(*model.Repo, string) (*model.Secret, error)
 	SecretList(*model.Repo, bool) ([]*model.Secret, error)
+	SecretListAll() ([]*model.Secret, error)
 	SecretCreate(*model.Secret) error
 	SecretUpdate(*model.Secret) error
 	SecretDelete(*model.Secret) error
@@ -167,6 +168,7 @@ type Store interface {
 	// ServerConfig
 	ServerConfigGet(string) (string, error)
 	ServerConfigSet(string, string) error
+	ServerConfigDelete(string) error
 
 	// Cron
 	CronCreate(*model.Cron) error
@@ -176,6 +178,14 @@ type Store interface {
 	CronDelete(*model.Repo, int64) error
 	CronListNextExecute(int64, int64) ([]*model.Cron, error)
 	CronGetLock(*model.Cron, int64) (bool, error)
+
+	// Agent
+	AgentCreate(*model.Agent) error
+	AgentFind(int64) (*model.Agent, error)
+	AgentFindByToken(string) (*model.Agent, error)
+	AgentList() ([]*model.Agent, error)
+	AgentUpdate(*model.Agent) error
+	AgentDelete(*model.Agent) error
 
 	// Store operations
 	Ping() error
