@@ -79,3 +79,7 @@ spec:
         persistentVolumeClaim:
           claimName: {{ if .Values.persistentVolume.existingClaim }}{{ .Values.persistentVolume.existingClaim }}{{- else }}{{ template "woodpecker-server.fullname" . }}{{- end }}
         {{- end -}}
+      dnsConfig:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
