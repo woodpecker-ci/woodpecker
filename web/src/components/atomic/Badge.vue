@@ -1,9 +1,11 @@
 <template>
   <span class="text-xs font-medium inline-flex">
-    <span class="bg-gray-500 dark:bg-dark-700 dark:text-gray-400 text-white pl-2 pr-1 py-0.5 rounded-l">
+    <span
+      class="pl-2 pr-1 py-0.5 bg-gray-800 text-gray-200 dark:bg-gray-600 border-2 border-gray-800 dark:border-gray-600 rounded-l-full"
+    >
       {{ label }}
     </span>
-    <span class="bg-blue-600 text-blue-100 dark:bg-blue-800 dark:text-blue-300 pl-1 pr-2 py-0.5 rounded-r">
+    <span class="pl-1 pr-2 py-0.5 border-2 border-gray-800 dark:border-gray-600 rounded-r-full">
       {{ value }}
     </span>
   </span>
