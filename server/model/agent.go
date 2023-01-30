@@ -26,6 +26,7 @@ type Agent struct {
 	Backend     string `json:"backend"       xorm:"VARCHAR(100)"`
 	Capacity    int32  `json:"capacity"`
 	Version     string `json:"version"`
+	NoSchedule  bool   `json:"no_schedule"`
 }
 
 // TableName return database table name for xorm

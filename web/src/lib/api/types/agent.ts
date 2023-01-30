@@ -9,4 +9,5 @@ export type Agent = {
   backend: string;
   capacity: number;
   version: string;
+  no_schedule: boolean;
 };

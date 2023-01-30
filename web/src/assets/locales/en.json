@@ -336,6 +336,10 @@
                     "name": "Name",
                     "placeholder": "Name of the agent"
                 },
+                "no_schedule": {
+                    "name": "Disable agent",
+                    "placeholder": "Stop agent from taking new tasks"
+                },
                 "token": "Token",
                 "platform": "Platform",
                 "backend": "Backend",
