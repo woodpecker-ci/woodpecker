@@ -17,7 +17,6 @@ package main
 import (
 	"context"
 	"crypto/tls"
-	"errors"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -34,7 +33,6 @@ import (
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
-	"google.golang.org/grpc/metadata"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc/proto"
 	"github.com/woodpecker-ci/woodpecker/server"
@@ -135,16 +133,19 @@ func run(c *cli.Context) error {
 			log.Err(err).Msg("")
 			return err
 		}
-		authorizer := &authorizer{
-			password: c.String("agent-secret"),
-		}
+
+		jwtSecret := "secret" // TODO: make configurable
+		jwtManager := woodpeckerGrpcServer.NewJWTManager(jwtSecret)
+
+		authorizer := woodpeckerGrpcServer.NewAuthorizer(jwtManager)
 		grpcServer := grpc.NewServer(
-			grpc.StreamInterceptor(authorizer.streamInterceptor),
-			grpc.UnaryInterceptor(authorizer.unaryInterceptor),
+			grpc.StreamInterceptor(authorizer.StreamInterceptor),
+			grpc.UnaryInterceptor(authorizer.UnaryInterceptor),
 			grpc.KeepaliveEnforcementPolicy(keepalive.EnforcementPolicy{
 				MinTime: c.Duration("keepalive-min-time"),
 			}),
 		)
+
 		woodpeckerServer := woodpeckerGrpcServer.NewWoodpeckerServer(
 			_forge,
 			server.Config.Services.Queue,
@@ -154,6 +155,13 @@ func run(c *cli.Context) error {
 			server.Config.Server.Host,
 		)
 		proto.RegisterWoodpeckerServer(grpcServer, woodpeckerServer)
+
+		woodpeckerAuthServer := woodpeckerGrpcServer.NewWoodpeckerAuthServer(
+			jwtManager,
+			server.Config.Server.AgentToken,
+			_store,
+		)
+		proto.RegisterWoodpeckerAuthServer(grpcServer, woodpeckerAuthServer)
 
 		err = grpcServer.Serve(lis)
 		if err != nil {
@@ -316,7 +324,7 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 	// server configuration
 	server.Config.Server.Cert = c.String("server-cert")
 	server.Config.Server.Key = c.String("server-key")
-	server.Config.Server.Pass = c.String("agent-secret")
+	server.Config.Server.AgentToken = c.String("agent-secret")
 	server.Config.Server.Host = c.String("server-host")
 	if c.IsSet("server-dev-oauth-host") {
 		server.Config.Server.OAuthHost = c.String("server-dev-oauth-host")
@@ -337,32 +345,4 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 
 	// TODO(485) temporary workaround to not hit api rate limits
 	server.Config.FlatPermissions = c.Bool("flat-permissions")
-}
-
-type authorizer struct {
-	password string
-}
-
-func (a *authorizer) streamInterceptor(srv interface{}, stream grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
-	if err := a.authorize(stream.Context()); err != nil {
-		return err
-	}
-	return handler(srv, stream)
-}
-
-func (a *authorizer) unaryInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
-	if err := a.authorize(ctx); err != nil {
-		return nil, err
-	}
-	return handler(ctx, req)
-}
-
-func (a *authorizer) authorize(ctx context.Context) error {
-	if md, ok := metadata.FromIncomingContext(ctx); ok {
-		if len(md["password"]) > 0 && md["password"][0] == a.password {
-			return nil
-		}
-		return errors.New("invalid agent token")
-	}
-	return errors.New("missing agent token")
 }

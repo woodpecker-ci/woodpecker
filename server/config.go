@@ -61,7 +61,7 @@ var Config = struct {
 		OAuthHost           string
 		Host                string
 		Port                string
-		Pass                string
+		AgentToken          string
 		Docs                string
 		StatusContext       string
 		StatusContextFormat string
