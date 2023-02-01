@@ -4,8 +4,14 @@
       "agents": {
         "add": "Tambahkan agen",
         "agents": "Agen",
-        "backend": "Backend",
-        "capacity": "Kapasitas",
+        "backend": {
+          "backend": "Backend",
+          "badge": "backend"
+        },
+        "capacity": {
+          "badge": "kapasitas",
+          "capacity": "Kapasitas"
+        },
         "created": "Agen dibuat",
         "delete_confirm": "Apakah Anda ingin menghapus agen ini. Itu tidak akan terhubung lagi ke server.",
         "deleted": "Agen dihapus",
@@ -16,8 +22,15 @@
           "placeholder": "Nama agen"
         },
         "never": "Tidak pernah",
+        "no_schedule": {
+          "name": "Nonaktifkan agen",
+          "placeholder": "Hentikan agen untuk mengambil tugas baru"
+        },
         "none": "Belum ada agen.",
-        "platform": "Platform",
+        "platform": {
+          "badge": "platform",
+          "platform": "Platform"
+        },
         "save": "Simpan agen",
         "saved": "Agen disimpan",
         "show": "Tampilkan agen",
