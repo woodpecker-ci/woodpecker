@@ -48,14 +48,14 @@ func (l *Linter) Lint(rawConfig string, c *yaml.Config) error {
 		linterErr = multierr.Append(linterErr, err)
 	}
 
-	schemaErrors, err := schema.LintString(rawConfig)
-	if err != nil {
-		for _, schemaError := range schemaErrors {
-			linterErr = multierr.Append(linterErr, &LinterError{
-				Message: schemaError.Description(),
-				Field:   schemaError.Field(),
-			})
-		}
+	if err := l.lintSchema(rawConfig); err != nil {
+		linterErr = multierr.Append(linterErr, err)
+	}
+	if err := l.lintDeprecations(c); err != nil {
+		linterErr = multierr.Append(linterErr, err)
+	}
+	if err := l.lintBadHabits(c); err != nil {
+		linterErr = multierr.Append(linterErr, err)
 	}
 
 	return linterErr
@@ -139,5 +139,30 @@ func (l *Linter) lintTrusted(c *yaml.Container) error {
 	if len(c.Tmpfs) != 0 {
 		return &LinterError{Message: "Insufficient privileges to use tmpfs", Field: fmt.Sprintf("pipeline.%s", c.Name)}
 	}
+	return nil
+}
+
+func (l *Linter) lintSchema(rawConfig string) error {
+	var linterErr error
+	schemaErrors, err := schema.LintString(rawConfig)
+	if err != nil {
+		for _, schemaError := range schemaErrors {
+			linterErr = multierr.Append(linterErr, &LinterError{
+				Message: schemaError.Description(),
+				Field:   schemaError.Field(),
+				Warning: true, // TODO: let pipelines fail if the schema is invalid
+			})
+		}
+	}
+	return linterErr
+}
+
+func (l *Linter) lintDeprecations(c *yaml.Config) error {
+	// TODO: add deprecation warnings
+	return nil
+}
+
+func (l *Linter) lintBadHabits(c *yaml.Config) error {
+	// TODO: add bad habit warnings
 	return nil
 }
