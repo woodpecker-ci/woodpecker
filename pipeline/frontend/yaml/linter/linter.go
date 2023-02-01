@@ -1,6 +1,7 @@
 package linter
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
@@ -165,4 +166,20 @@ func (l *Linter) lintDeprecations(c *yaml.Config) error {
 func (l *Linter) lintBadHabits(c *yaml.Config) error {
 	// TODO: add bad habit warnings
 	return nil
+}
+
+func IsBlockingError(e error) bool {
+	linterErrors := multierr.Errors(e)
+	for _, err := range linterErrors {
+		var linterError *LinterError
+		if errors.As(err, &linterError) {
+			if linterError.Warning {
+			} else {
+				return true
+			}
+		} else {
+			return true
+		}
+	}
+	return false
 }
