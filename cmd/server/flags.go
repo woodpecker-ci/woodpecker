@@ -209,6 +209,12 @@ var flags = []cli.Flag{
 	//
 	// resource limit parameters
 	//
+	&cli.DurationFlag{
+		EnvVars: []string{"WOODPECKER_FORGE_TIMEOUT"},
+		Name:    "forge-timeout",
+		Usage:   "how many seconds before timeout when fetching the Woodpecker configuration from a Forge",
+		Value:   time.Second * 3,
+	},
 	&cli.Int64Flag{
 		EnvVars: []string{"WOODPECKER_LIMIT_MEM_SWAP"},
 		Name:    "limit-mem-swap",
