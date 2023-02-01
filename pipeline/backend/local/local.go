@@ -16,6 +16,7 @@ package local
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -133,11 +134,14 @@ func (e *local) Exec(ctx context.Context, step *types.Step) error {
 func (e *local) Wait(context.Context, *types.Step) (*types.State, error) {
 	err := e.cmd.Wait()
 	ExitCode := 0
-	if eerr, ok := err.(*exec.ExitError); ok {
-		ExitCode = eerr.ExitCode()
+
+	var execExitError *exec.ExitError
+	if errors.As(err, &execExitError) {
+		ExitCode = execExitError.ExitCode()
 		// Non-zero exit code is a pipeline failure, but not an agent error.
 		err = nil
 	}
+
 	return &types.State{
 		Exited:   true,
 		ExitCode: ExitCode,

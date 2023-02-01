@@ -24,6 +24,7 @@ linters:
     - unused
     - whitespace
     - gofumpt
+    - errorlint
 
 run:
   timeout: 5m

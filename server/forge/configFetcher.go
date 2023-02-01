@@ -75,7 +75,7 @@ func (cf *configFetcher) Fetch(ctx context.Context) (files []*types.FileMeta, er
 			newConfigs, useOld, err := cf.configExtension.FetchConfig(fetchCtx, cf.repo, cf.pipeline, files)
 			if err != nil {
 				log.Error().Msg("Got error " + err.Error())
-				return nil, fmt.Errorf("On Fetching config via http : %s", err)
+				return nil, fmt.Errorf("On Fetching config via http : %w", err)
 			}
 
 			if !useOld {
@@ -104,7 +104,7 @@ func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config 
 			return fileMeta, err
 		}
 
-		return nil, fmt.Errorf("user defined config '%s' not found: %s", config, err)
+		return nil, fmt.Errorf("user defined config '%s' not found: %w", config, err)
 	}
 
 	log.Trace().Msgf("ConfigFetch[%s]: user did not defined own config, following default procedure", cf.repo.FullName)
@@ -118,7 +118,7 @@ func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config 
 	case <-ctx.Done():
 		return nil, ctx.Err()
 	default:
-		return []*types.FileMeta{}, fmt.Errorf("ConfigFetcher: Fallback did not find config: %s", err)
+		return []*types.FileMeta{}, fmt.Errorf("ConfigFetcher: Fallback did not find config: %w", err)
 	}
 }
 
