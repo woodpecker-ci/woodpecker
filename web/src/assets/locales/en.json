@@ -336,10 +336,23 @@
                     "name": "Name",
                     "placeholder": "Name of the agent"
                 },
+                "no_schedule": {
+                    "name": "Disable agent",
+                    "placeholder": "Stop agent from taking new tasks"
+                },
                 "token": "Token",
-                "platform": "Platform",
-                "backend": "Backend",
-                "capacity": "Capacity",
+                "platform": {
+                  "platform": "Platform",
+                  "badge": "platform"
+                },
+                "backend": {
+                  "backend": "Backend",
+                  "badge": "backend"
+                },
+                "capacity": {
+                  "capacity": "Capacity",
+                  "badge": "capacity"
+                },
                 "version": "Version",
                 "last_contact": "Last contact",
                 "never": "Never",
