@@ -1,6 +1,42 @@
 {
   "admin": {
     "settings": {
+      "agents": {
+        "add": "Tambahkan agen",
+        "agents": "Agen",
+        "backend": {
+          "backend": "Backend",
+          "badge": "backend"
+        },
+        "capacity": {
+          "badge": "kapasitas",
+          "capacity": "Kapasitas"
+        },
+        "created": "Agen dibuat",
+        "delete_confirm": "Apakah Anda ingin menghapus agen ini. Itu tidak akan terhubung lagi ke server.",
+        "deleted": "Agen dihapus",
+        "desc": "Agen terdaftar untuk server",
+        "last_contact": "Hubungan terakhir",
+        "name": {
+          "name": "Nama",
+          "placeholder": "Nama agen"
+        },
+        "never": "Tidak pernah",
+        "no_schedule": {
+          "name": "Nonaktifkan agen",
+          "placeholder": "Hentikan agen untuk mengambil tugas baru"
+        },
+        "none": "Belum ada agen.",
+        "platform": {
+          "badge": "platform",
+          "platform": "Platform"
+        },
+        "save": "Simpan agen",
+        "saved": "Agen disimpan",
+        "show": "Tampilkan agen",
+        "token": "Token",
+        "version": "Versi"
+      },
       "not_allowed": "Anda tidak diperbolehkan untuk mengakses pengaturan peladen",
       "secrets": {
         "add": "Tambahkan rahasia",
@@ -121,7 +157,7 @@
       "config": "Konfigurasi",
       "created": "Dibuat",
       "event": {
-        "cron": "Cron",
+        "cron": "Kron",
         "deploy": "Luncur",
         "manual": "Manual",
         "pr": "Permintaan Penarikan",

@@ -60,7 +60,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	)
 
 	// fetch the pipeline file from the forge
-	configFetcher := forge.NewConfigFetcher(server.Config.Services.Forge, server.Config.Services.ConfigService, repoUser, repo, pipeline)
+	configFetcher := forge.NewConfigFetcher(server.Config.Services.Forge, server.Config.Services.Timeout, server.Config.Services.ConfigService, repoUser, repo, pipeline)
 	forgeYamlConfigs, configFetchErr = configFetcher.Fetch(ctx)
 	if configFetchErr == nil {
 		filtered, parseErr = checkIfFiltered(pipeline, forgeYamlConfigs)

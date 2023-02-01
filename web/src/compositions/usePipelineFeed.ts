@@ -1,14 +1,14 @@
 import { computed, toRef } from 'vue';
 
 import useUserConfig from '~/compositions/useUserConfig';
-import PipelineStore from '~/store/pipelines';
+import { usePipelineStore } from '~/store/pipelines';
 
 import useAuthentication from './useAuthentication';
 
 const { userConfig, setUserConfig } = useUserConfig();
 
 export default () => {
-  const pipelineStore = PipelineStore();
+  const pipelineStore = usePipelineStore();
   const { isAuthenticated } = useAuthentication();
 
   const isOpen = computed(() => userConfig.value.isPipelineFeedOpen && !!isAuthenticated);
@@ -17,7 +17,7 @@ export default () => {
     setUserConfig('isPipelineFeedOpen', !userConfig.value.isPipelineFeedOpen);
   }
 
-  const sortedPipelines = toRef(pipelineStore, 'sortedPipelineFeed');
+  const sortedPipelines = toRef(pipelineStore, 'pipelineFeed');
   const activePipelines = toRef(pipelineStore, 'activePipelines');
 
   return {

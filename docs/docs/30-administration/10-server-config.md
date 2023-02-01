@@ -377,6 +377,13 @@ Example: `WOODPECKER_LIMIT_CPU_SET=1,2`
 
 Specify a configuration service endpoint, see [Configuration Extension](./100-external-configuration-api.md)
 
+
+### `WOODPECKER_FORGE_TIMEOUT`
+> Default: 3sec
+
+Specify how many seconds before timeout when fetching the Woodpecker configuration from a Forge
+
+
 ---
 
 ### `WOODPECKER_GITHUB_...`

@@ -22,6 +22,7 @@ import (
 	"runtime"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -34,6 +35,7 @@ import (
 	"google.golang.org/grpc/metadata"
 
 	"github.com/woodpecker-ci/woodpecker/agent"
+	agentRpc "github.com/woodpecker-ci/woodpecker/agent/rpc"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
@@ -47,9 +49,11 @@ func loop(c *cli.Context) error {
 		hostname, _ = os.Hostname()
 	}
 
+	platform := runtime.GOOS + "/" + runtime.GOARCH
+
 	labels := map[string]string{
 		"hostname": hostname,
-		"platform": runtime.GOOS + "/" + runtime.GOARCH,
+		"platform": platform,
 		"repo":     "*", // allow all repos by default
 	}
 
@@ -95,10 +99,6 @@ func loop(c *cli.Context) error {
 		}()
 	}
 
-	// TODO pass version information to grpc server
-	// TODO authenticate to grpc server
-
-	// grpc.Dial(target, ))
 	var transport grpc.DialOption
 	if c.Bool("grpc-secure") {
 		transport = grpc.WithTransportCredentials(grpccredentials.NewTLS(&tls.Config{InsecureSkipVerify: c.Bool("skip-insecure-grpc")}))
@@ -106,13 +106,9 @@ func loop(c *cli.Context) error {
 		transport = grpc.WithTransportCredentials(insecure.NewCredentials())
 	}
 
-	conn, err := grpc.Dial(
+	authConn, err := grpc.Dial(
 		c.String("server"),
 		transport,
-		grpc.WithPerRPCCredentials(&credentials{
-			username: c.String("grpc-username"),
-			password: c.String("grpc-password"),
-		}),
 		grpc.WithKeepaliveParams(keepalive.ClientParameters{
 			Time:    c.Duration("grpc-keepalive-time"),
 			Timeout: c.Duration("grpc-keepalive-timeout"),
@@ -121,9 +117,32 @@ func loop(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
+	defer authConn.Close()
+
+	agentID := int64(-1) // TODO: store agent id in a file
+	agentToken := c.String("grpc-token")
+	authClient := agentRpc.NewAuthGrpcClient(authConn, agentToken, agentID)
+	authInterceptor, err := agentRpc.NewAuthInterceptor(authClient, 30*time.Minute)
+	if err != nil {
+		return err
+	}
+
+	conn, err := grpc.Dial(
+		c.String("server"),
+		transport,
+		grpc.WithKeepaliveParams(keepalive.ClientParameters{
+			Time:    c.Duration("grpc-keepalive-time"),
+			Timeout: c.Duration("grpc-keepalive-timeout"),
+		}),
+		grpc.WithUnaryInterceptor(authInterceptor.Unary()),
+		grpc.WithStreamInterceptor(authInterceptor.Stream()),
+	)
+	if err != nil {
+		return err
+	}
 	defer conn.Close()
 
-	client := rpc.NewGrpcClient(conn)
+	client := agentRpc.NewGrpcClient(conn)
 
 	sigterm := abool.New()
 	ctx := metadata.NewOutgoingContext(
@@ -147,6 +166,29 @@ func loop(c *cli.Context) error {
 		log.Error().Err(err).Msgf("cannot find backend engine '%s'", c.String("backend-engine"))
 		return err
 	}
+
+	agentID, err = client.RegisterAgent(ctx, platform, engine.Name(), version.String(), parallel)
+	if err != nil {
+		return err
+	}
+
+	log.Debug().Msgf("Agent registered with ID %d", agentID)
+
+	go func() {
+		for {
+			if sigterm.IsSet() {
+				return
+			}
+
+			err := client.ReportHealth(ctx)
+			if err != nil {
+				log.Err(err).Msgf("Failed to report health")
+				return
+			}
+
+			<-time.After(time.Second * 10)
+		}
+	}()
 
 	for i := 0; i < parallel; i++ {
 		go func() {
@@ -178,25 +220,9 @@ func loop(c *cli.Context) error {
 	}
 
 	log.Info().Msgf(
-		"Starting Woodpecker agent with version '%s' and backend '%s' running up to %d pipelines in parallel",
-		version.String(), engine.Name(), parallel)
+		"Starting Woodpecker agent with version '%s' and backend '%s' using platform '%s' running up to %d pipelines in parallel",
+		version.String(), engine.Name(), platform, parallel)
 
 	wg.Wait()
 	return nil
-}
-
-type credentials struct {
-	username string
-	password string
-}
-
-func (c *credentials) GetRequestMetadata(context.Context, ...string) (map[string]string, error) {
-	return map[string]string{
-		"username": c.username,
-		"password": c.password,
-	}, nil
-}
-
-func (c *credentials) RequireTransportSecurity() bool {
-	return false
 }
