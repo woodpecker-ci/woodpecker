@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/urfave/cli/v2"
+	"go.uber.org/multierr"
 
 	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
@@ -79,14 +80,17 @@ func lintFile(_ *cli.Context, file string) error {
 	if lerr != nil {
 		fmt.Println("❌ Config is invalid")
 
-		var linterError *linter.LinterErrors
-		if errors.As(lerr, &linterError) {
-			for _, err := range linterError.Errors {
-				fmt.Printf("\tIn %s: %s\n", err.Field, err.Message)
+		linterErrors := multierr.Errors(lerr)
+		for _, err := range linterErrors {
+			var linterError *linter.LinterError
+			if errors.As(err, &linterError) {
+				fmt.Printf("\tIn %s: %s\n", linterError.Field, linterError.Message)
+			} else {
+				return err
 			}
 		}
 
-		return lerr
+		return nil
 	}
 
 	fmt.Println("✅ Config is valid")

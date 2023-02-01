@@ -5,6 +5,7 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/linter/schema"
+	"go.uber.org/multierr"
 )
 
 const (
@@ -29,77 +30,65 @@ func New(opts ...Option) *Linter {
 
 // Lint lints the configuration.
 func (l *Linter) Lint(rawConfig string, c *yaml.Config) error {
-	linterErrors := make([]*LinterError, 0)
+	var linterErr error
 
 	if len(c.Pipeline.Containers) == 0 {
-		linterErrors = append(linterErrors, &LinterError{
+		linterErr = multierr.Append(linterErr, &LinterError{
 			Message: "Invalid or missing pipeline section",
-			Field:   "",
+			Field:   "pipeline",
 		})
 	}
 	if err := l.lint(c.Clone.Containers, blockClone); err != nil {
-		for _, e := range err {
-			linterErrors = append(linterErrors, e)
-		}
+		linterErr = multierr.Append(linterErr, err)
 	}
 	if err := l.lint(c.Pipeline.Containers, blockPipeline); err != nil {
-		for _, e := range err {
-			linterErrors = append(linterErrors, e)
-		}
+		linterErr = multierr.Append(linterErr, err)
 	}
 	if err := l.lint(c.Services.Containers, blockServices); err != nil {
-		for _, e := range err {
-			linterErrors = append(linterErrors, e)
-		}
+		linterErr = multierr.Append(linterErr, err)
 	}
 
 	schemaErrors, err := schema.LintString(rawConfig)
 	if err != nil {
 		for _, schemaError := range schemaErrors {
-			linterErrors = append(linterErrors, &LinterError{
+			linterErr = multierr.Append(linterErr, &LinterError{
 				Message: schemaError.Description(),
 				Field:   schemaError.Field(),
 			})
 		}
 	}
 
-	if len(linterErrors) != 0 {
-		return &LinterErrors{
-			Errors: linterErrors,
-		}
-	}
-
-	return nil
+	return linterErr
 }
 
-func (l *Linter) lint(containers []*yaml.Container, block uint8) []*LinterError {
-	linterErrors := make([]*LinterError, 0)
+func (l *Linter) lint(containers []*yaml.Container, block uint8) error {
+	var linterErr error
 
 	for _, container := range containers {
 		if err := l.lintImage(container); err != nil {
-			linterErrors = append(linterErrors, err)
+			linterErr = multierr.Append(linterErr, err)
 		}
 		if !l.trusted {
 			if err := l.lintTrusted(container); err != nil {
-				linterErrors = append(linterErrors, err)
+				linterErr = multierr.Append(linterErr, err)
 			}
 		}
 		if err := l.lintCommands(container); err != nil {
-			linterErrors = append(linterErrors, err)
+			linterErr = multierr.Append(linterErr, err)
 		}
 	}
 
-	return linterErrors
+	return linterErr
 }
 
-func (l *Linter) lintImage(c *yaml.Container) *LinterError {
+func (l *Linter) lintImage(c *yaml.Container) error {
 	if len(c.Image) == 0 {
 		return &LinterError{Message: "Invalid or missing image", Field: fmt.Sprintf("pipeline.%s", c.Name)}
 	}
 	return nil
 }
 
-func (l *Linter) lintCommands(c *yaml.Container) *LinterError {
+func (l *Linter) lintCommands(c *yaml.Container) error {
 	if len(c.Commands) == 0 {
 		return nil
 	}
@@ -113,7 +102,7 @@ func (l *Linter) lintCommands(c *yaml.Container) *LinterError {
 	return nil
 }
 
-func (l *Linter) lintTrusted(c *yaml.Container) *LinterError {
+func (l *Linter) lintTrusted(c *yaml.Container) error {
 	if c.Privileged {
 		return &LinterError{Message: "Insufficient privileges to use privileged mode", Field: fmt.Sprintf("pipeline.%s", c.Name)}
 	}
