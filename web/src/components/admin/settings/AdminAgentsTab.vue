@@ -21,7 +21,14 @@
     <div v-if="!selectedAgent" class="space-y-4 text-color">
       <ListItem v-for="agent in agents" :key="agent.id" class="items-center">
         <span>{{ agent.name || `Agent ${agent.id}` }}</span>
-        <span class="ml-auto">{{ agent.last_contact ? timeAgo.format(agent.last_contact * 1000) : 'never' }}</span>
+        <span class="ml-auto">
+          <span class="hidden md:inline-block space-x-2">
+            <Badge :label="$t('admin.settings.agents.platform.badge')" :value="agent.platform" />
+            <Badge :label="$t('admin.settings.agents.backend.badge')" :value="agent.backend" />
+            <Badge :label="$t('admin.settings.agents.capacity.badge')" :value="agent.capacity" />
+          </span>
+          <span class="ml-2">{{ agent.last_contact ? timeAgo.format(agent.last_contact * 1000) : 'never' }}</span>
+        </span>
         <IconButton icon="edit" class="ml-2 w-8 h-8" @click="editAgent(agent)" />
         <IconButton
           icon="trash"
@@ -43,21 +50,32 @@
           />
         </InputField>
 
+        <InputField :label="$t('admin.settings.agents.no_schedule.name')">
+          <Checkbox
+            :model-value="selectedAgent.no_schedule || false"
+            :label="$t('admin.settings.agents.no_schedule.placeholder')"
+            @update:model-value="selectedAgent!.no_schedule = $event"
+          />
+        </InputField>
+
         <template v-if="isEditingAgent">
           <InputField :label="$t('admin.settings.agents.token')">
             <TextField v-model="selectedAgent.token" :placeholder="$t('admin.settings.agents.token')" disabled />
           </InputField>
 
-          <InputField :label="$t('admin.settings.agents.backend')" docs-url="docs/next/administration/backends/docker">
+          <InputField
+            :label="$t('admin.settings.agents.backend.backend')"
+            docs-url="docs/next/administration/backends/docker"
+          >
             <TextField v-model="selectedAgent.backend" disabled />
           </InputField>
 
-          <InputField :label="$t('admin.settings.agents.platform')">
+          <InputField :label="$t('admin.settings.agents.platform.platform')">
             <TextField v-model="selectedAgent.platform" disabled />
           </InputField>
 
           <InputField
-            :label="$t('admin.settings.agents.capacity')"
+            :label="$t('admin.settings.agents.capacity.capacity')"
             docs-url="docs/next/administration/agent-config#woodpecker_max_procs"
           >
             <span class="text-color-alt">The max amount of parallel pipelines executed by this agent.</span>
@@ -95,8 +113,10 @@ import { cloneDeep } from 'lodash';
 import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import Badge from '~/components/atomic/Badge.vue';
 import Button from '~/components/atomic/Button.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
+import Checkbox from '~/components/form/Checkbox.vue';
 import InputField from '~/components/form/InputField.vue';
 import TextField from '~/components/form/TextField.vue';
 import Panel from '~/components/layout/Panel.vue';
