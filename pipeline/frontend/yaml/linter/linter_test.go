@@ -48,9 +48,10 @@ pipeline:
 		t.Run(testd.Title, func(t *testing.T) {
 			conf, err := yaml.ParseString(testd.Data)
 			if err != nil {
-				t.Fatalf("Cannot unmarshal yaml %q. Error: %s", testd, err)
+				t.Fatalf("Cannot unmarshal yaml %q. Error: %s", testd.Title, err)
 			}
-			if err := New(WithTrusted(true)).Lint(conf); err != nil {
+
+			if err := New(WithTrusted(true)).Lint(testd.Data, conf); err != nil {
 				t.Errorf("Expected lint returns no errors, got %q", err)
 			}
 		})
@@ -123,7 +124,7 @@ func TestLintErrors(t *testing.T) {
 			t.Fatalf("Cannot unmarshal yaml %q. Error: %s", test.from, err)
 		}
 
-		lerr := New().Lint(conf)
+		lerr := New().Lint(test.from, conf)
 		if lerr == nil {
 			t.Errorf("Expected lint error for configuration %q", test.from)
 		} else if lerr.Error() != test.want {

@@ -1,7 +1,9 @@
 package lint
 
 import (
+	"errors"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -9,7 +11,8 @@ import (
 	"github.com/urfave/cli/v2"
 
 	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/pipeline/schema"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/linter"
 )
 
 // Command exports the info command.
@@ -60,13 +63,30 @@ func lintFile(_ *cli.Context, file string) error {
 	}
 	defer fi.Close()
 
-	configErrors, err := schema.Lint(fi)
+	buf, err := ioutil.ReadFile(file)
 	if err != nil {
-		fmt.Println("❌ Config is invalid")
-		for _, configError := range configErrors {
-			fmt.Println("In", configError.Field()+":", configError.Description())
-		}
 		return err
+	}
+
+	rawConfig := string(buf)
+
+	c, err := yaml.ParseString(rawConfig)
+	if err != nil {
+		return err
+	}
+
+	lerr := linter.New(linter.WithTrusted(true)).Lint(string(buf), c)
+	if lerr != nil {
+		fmt.Println("❌ Config is invalid")
+
+		var linterError *linter.LinterErrors
+		if errors.As(lerr, &linterError) {
+			for _, err := range linterError.Errors {
+				fmt.Printf("\tIn %s: %s\n", err.Field, err.Message)
+			}
+		}
+
+		return lerr
 	}
 
 	fmt.Println("✅ Config is valid")

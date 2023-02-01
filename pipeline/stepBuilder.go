@@ -112,7 +112,7 @@ func (b *StepBuilder) Build() ([]*Item, error) {
 			// lint pipeline
 			if err := linter.New(
 				linter.WithTrusted(b.Repo.IsTrusted),
-			).Lint(parsed); err != nil {
+			).Lint(substituted, parsed); err != nil {
 				return nil, &yaml.PipelineParseError{Err: err}
 			}
 
