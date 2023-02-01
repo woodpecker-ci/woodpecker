@@ -1,14 +1,13 @@
 variables:
   - &golang_image 'golang:1.19.5'
-  - &when_path
-      # related config files
-      - ".woodpecker/test.yml"
-      - ".golangci.yml"
-      # go source code
-      - "**/*.go"
-      - "go.*"
-      # schema changes
-      - "pipeline/schema/**"
+  - &when_path # related config files
+    - '.woodpecker/test.yml'
+    - '.golangci.yml'
+    # go source code
+    - '**/*.go'
+    - 'go.*'
+    # schema changes
+    - 'pipeline/frontend/yaml/linter/schema/**'
 
 pipeline:
   vendor:
@@ -25,8 +24,8 @@ pipeline:
       - go run github.com/woodpecker-ci/woodpecker/cmd/cli lint
     when:
       path:
-        - ".woodpecker/**"
-        - "pipeline/schema/**"
+        - '.woodpecker/**'
+        - 'pipeline/frontend/yaml/linter/schema/**'
 
   dummy-web:
     image: *golang_image
@@ -119,7 +118,7 @@ pipeline:
 services:
   service-postgres:
     image: postgres:11
-    ports: ["5432"]
+    ports: ['5432']
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_HOST_AUTH_METHOD=trust
@@ -128,7 +127,7 @@ services:
 
   service-mysql:
     image: mysql:5.6.27
-    ports: ["3306"]
+    ports: ['3306']
     environment:
       - MYSQL_DATABASE=test
       - MYSQL_ALLOW_EMPTY_PASSWORD=yes
