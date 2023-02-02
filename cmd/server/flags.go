@@ -61,6 +61,11 @@ var flags = []cli.Flag{
 		Name:    "server-key",
 		Usage:   "server ssl key path",
 	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_LETS_ENCRYPT_EMAIL"},
+		Name:    "lets-encrypt-email",
+		Usage:   "let's encrypt email",
+	},
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_LETS_ENCRYPT"},
 		Name:    "lets-encrypt",
@@ -97,11 +102,17 @@ var flags = []cli.Flag{
 		Name:    "authenticate-public-repos",
 		Usage:   "Always use authentication to clone repositories even if they are public. Needed if the SCM requires to always authenticate as used by many companies.",
 	},
+	&cli.StringSliceFlag{
+		EnvVars: []string{"WOODPECKER_DEFAULT_CANCEL_PREVIOUS_PIPELINE_EVENTS"},
+		Name:    "default-cancel-previous-pipeline-events",
+		Usage:   "List of event names that will be canceled when a new pipeline for the same context (tag, branch) is created.",
+		Value:   cli.NewStringSlice("push", "pull_request"),
+	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_DEFAULT_CLONE_IMAGE"},
 		Name:    "default-clone-image",
 		Usage:   "The default docker image to be used when cloning the repo",
-		Value:   "woodpeckerci/plugin-git:latest",
+		Value:   constant.DefaultCloneImage,
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_DOCS"},
@@ -159,20 +170,9 @@ var flags = []cli.Flag{
 		Usage:   "registry plugin endpoint",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_GATEKEEPER_ENDPOINT"},
-		Name:    "gating-service",
-		Usage:   "gated build endpoint",
-	},
-	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_CONFIG_SERVICE_ENDPOINT"},
 		Name:    "config-service-endpoint",
 		Usage:   "url used for calling configuration service endpoint",
-	},
-	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_CONFIG_SERVICE_SECRET"},
-		Name:     "config-service-secret",
-		Usage:    "secret to sign requests send to configuration service",
-		FilePath: os.Getenv("WOODPECKER_CONFIG_SERVICE_SECRET_FILE"),
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_DATABASE_DRIVER"},
@@ -200,9 +200,21 @@ var flags = []cli.Flag{
 		Usage:   "status context prefix",
 		Value:   "ci/woodpecker",
 	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_STATUS_CONTEXT_FORMAT"},
+		Name:    "status-context-format",
+		Usage:   "status context format",
+		Value:   "{{ .context }}/{{ .event }}/{{ .pipeline }}",
+	},
 	//
 	// resource limit parameters
 	//
+	&cli.DurationFlag{
+		EnvVars: []string{"WOODPECKER_FORGE_TIMEOUT"},
+		Name:    "forge-timeout",
+		Usage:   "how many seconds before timeout when fetching the Woodpecker configuration from a Forge",
+		Value:   time.Second * 3,
+	},
 	&cli.Int64Flag{
 		EnvVars: []string{"WOODPECKER_LIMIT_MEM_SWAP"},
 		Name:    "limit-mem-swap",
@@ -234,7 +246,7 @@ var flags = []cli.Flag{
 		Usage:   "set the cpus allowed to execute containers",
 	},
 	//
-	// Github
+	// GitHub
 	//
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_GITHUB"},
@@ -282,7 +294,7 @@ var flags = []cli.Flag{
 		EnvVars: []string{"WOODPECKER_GOGS_URL"},
 		Name:    "gogs-server",
 		Usage:   "gogs server address",
-		Value:   "https://github.com",
+		Value:   "https://try.gogs.io",
 	},
 	&cli.StringFlag{
 		EnvVars:  []string{"WOODPECKER_GOGS_GIT_USERNAME"},
@@ -515,8 +527,27 @@ var flags = []cli.Flag{
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_FLAT_PERMISSIONS"},
 		Name:    "flat-permissions",
-		Usage:   "no remote call for permissions should be made",
+		Usage:   "no forge call for permissions should be made",
 		Hidden:  true,
 		// TODO(485) temporary workaround to not hit api rate limits
+	},
+	//
+	// secrets encryption in DB
+	//
+	&cli.StringFlag{
+		EnvVars:  []string{"WOODPECKER_ENCRYPTION_KEY"},
+		Name:     "encryption-raw-key",
+		Usage:    "Raw encryption key",
+		FilePath: os.Getenv("WOODPECKER_ENCRYPTION_KEY_FILE"),
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_ENCRYPTION_TINK_KEYSET_FILE"},
+		Name:    "encryption-tink-keyset",
+		Usage:   "Google tink AEAD-compatible keyset file to encrypt secrets in DB",
+	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_ENCRYPTION_DISABLE"},
+		Name:    "encryption-disable-flag",
+		Usage:   "Flag to decrypt all encrypted data and disable encryption on server",
 	},
 }

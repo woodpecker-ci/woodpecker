@@ -1,5 +1,65 @@
 # Changelog
 
+## [0.15.6](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.6) - 2022-12-23
+
+* SECURITY
+  * Update golang.org/x/net (#1494)
+  * [**BREAKING**] Disable metrics access if no token is set (#1469) (#1470)
+  * Update dep moby (#1263) (#1264)
+* BUGFIXES
+  * Update json schema for cli lint to cover valid cases (#1384)
+  * Add pipeline.step.when.branch string-array type to schema.json (#1380)
+  * Display system CA error only if there is an error (#870) (#1286)
+* ENHANCEMENTS
+  * Bump Frontend Deps and remove unused (#1404)
+
+## [0.15.5](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.5) - 2022-10-13
+
+* BUGFIXES
+  * Change build message column type to text (#1252) (#1253)
+* ENHANCEMENTS
+  * Bump DefaultCloneImage version to v1.6.0 (#1254)
+  * On Repo update, keep old "Clone" if update would empty it (#1170) (#1195)
+
+## [0.15.4](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.4) - 2022-09-06
+
+* BUGFIXES
+  * Extract commit message from branch creation (#1150) (#1153)
+  * Respect WOODPECKER_GITEA_SKIP_VERIFY (#1152) (#1151)
+  * update golang.org/x/crypto (#1124)
+  * Implement Refresher for GitLab (#1031) (#1120)
+  * Make returned proc list to be returned always in correct order (#1060) (#1065)
+  * Update type of 'log_data' from blob to longblob (#1050) (#1052)
+  * Make ListItem component more accessible by using a button tag when clickable (#1044) (#1046)
+* MISC
+  * Update base images (#1024) (#1025)
+
+## [0.15.3](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.3) - 2022-06-16
+
+* SECURITY
+  * Update github.com/containerd/containerd (#978) (#980)
+* BUGFIXES
+  * Return to page after clicking login at navbar (#975) (#976)
+
+## [0.15.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.2) - 2022-06-14
+
+* BUGFIXES
+  * Fix uppercase from_secrets (#842) (#925)
+  * Fix key/val format for dind env vars (#889) (#890)
+  * Update helm chart releasing (#882) (#888)
+* DOCUMENTATION
+  * Fix run_on references with runs_on in docs (#965)
+
+## [0.15.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.1) - 2022-04-13
+
+* SECURITY
+  * Escape html / xml in log view (#879) (#880)
+* FEATURES
+  * Build multiarch images for server (#821) (#822)
+* BUGFIXES
+  * Branch list enhancements (#808) (#809)
+  * Get Netrc machine from clone url (#800) (#803)
+
 ## [v0.15.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.0) - 2022-02-24
 
 * BREAKING
@@ -37,7 +97,7 @@
   * Skip nested GitLab repositories during sync (#656), (#652)
   * Build proc tree function should not depend on sorted procs list (#647)
   * Fix sqlite migration on column drop of abnormal schemas (#629)
-  * Fix gRPC incomapatability in helm chart (#627)
+  * Fix gRPC incompatibility in helm chart (#627)
   * Fix new pipeline not published to UI if protected repo mode enabled (#619)
   * Dont panic, report error back (#582)
   * Improve status updates (#561)
@@ -58,7 +118,7 @@
   * Add page to view all projects of a user / group (#741)
   * Let non required migration tasks fail and continue (#729)
   * Improve pipeline compiler (#699)
-  * Support ChangedFiles for Github & Gitlab PRs and pushes and Gitea pushes (#697)
+  * Support ChangedFiles for GitHub & Gitlab PRs and pushes and Gitea pushes (#697)
   * Remove unused flags / options (#693)
   * Automatically determine platform of agent (#690)
   * Build ref link point to commit not compare if only one commit was pushed (#673)
@@ -100,13 +160,13 @@
   * Serve index.html directly without template (#539)
   * Add linter revive, unused, ineffassign, varcheck, structcheck, staticcheck, whitespace, misspell (#550), (#551), (#554), (#538), (#537), (#535), (#531), (#530)
   * Rename struct field and add new types into server/model's (#523)
-  * Update database in one transaction on syncing user repositorys (#513)
+  * Update database in one transaction on syncing user repositories (#513)
   * Format code with 'simplify' flag and check via CI (#509)
   * Use Goblin Assert as intended (#501)
   * Embedding libcompose types for yaml parsing (#495)
   * Use std method to get SystemCertPool (#488)
   * Upgrade urfave/cli to v2 (#483)
-  * Remove some wrapper and make code more redable (#478)
+  * Remove some wrapper and make code more readable (#478)
   * More logging and refactor (#457)
   * Simplify routes (#437)
   * Move api-routes to separate file (#434)
@@ -182,7 +242,7 @@
 ## [v0.14.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.14.2) - 2021-10-19
 
 * BUGFIXES
-  * Fix sanitziePath (#326) (aa4fa9aab3)
+  * Fix sanitizePath (#326) (aa4fa9aab3)
   * Fix json tag for `Pos` at struct `Line` (#422) (#424)
   * Fix channel buffer used with signal.Notify (#421) (#423)
 * ENHANCEMENTS
@@ -214,7 +274,7 @@
   * Add support to gitea remote for path-prefix condition (#235)
   * Enable go vet for ci (#230)
   * Enforce code format (#228)
-  * Add mutli-pipeline to Gitea (#225)
+  * Add multi-pipeline to Gitea (#225)
   * Move flag definitions into extra files (#215)
   * Remove unused code in server (#213)
   * Docs URL configuration (#206)

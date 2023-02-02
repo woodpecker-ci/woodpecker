@@ -1,126 +1,152 @@
 <template>
-  <FluidContainer v-if="repo && repoPermissions && $route.meta.repoHeader">
-    <div class="flex flex-wrap border-b items-center pb-4 mb-4 dark:border-gray-600 justify-center">
-      <h1 class="text-xl text-gray-500 w-full md:w-auto text-center mb-4 md:mb-0">
-        <router-link :to="{ name: 'repos-owner', params: { repoOwner } }">{{ repoOwner }}</router-link>
-        {{ ` / ${repo.name}` }}
-      </h1>
-      <a v-if="badgeUrl" :href="badgeUrl" target="_blank" class="md:ml-auto">
+  <Scaffold
+    v-if="repo && repoPermissions && $route.meta.repoHeader"
+    v-model:activeTab="activeTab"
+    enable-tabs
+    disable-hash-mode
+  >
+    <template #title>
+      <span class="flex">
+        <router-link :to="{ name: 'repos-owner', params: { repoOwner } }" class="hover:underline">{{
+          repoOwner
+        }}</router-link>
+        {{ `&nbsp;/&nbsp;${repo.name}` }}
+      </span>
+    </template>
+    <template #titleActions>
+      <a v-if="badgeUrl" :href="badgeUrl" target="_blank" class="ml-2">
         <img :src="badgeUrl" />
       </a>
-      <a
-        :href="repo.link_url"
-        target="_blank"
-        class="flex ml-4 p-1 rounded-full text-gray-500 hover:bg-gray-200 hover:text-gray-700 dark:hover:bg-gray-600"
-      >
-        <Icon v-if="repo.link_url.startsWith('https://github.com/')" name="github" />
+      <IconButton :href="repo.link_url" :title="$t('repo.open_in_forge')">
+        <Icon v-if="forge === 'github'" name="github" />
+        <Icon v-else-if="forge === 'gitea'" name="gitea" />
+        <Icon v-else-if="forge === 'gitlab'" name="gitlab" />
+        <Icon v-else-if="forge === 'bitbucket' || forge === 'stash'" name="bitbucket" />
         <Icon v-else name="repo" />
-      </a>
-      <IconButton v-if="repoPermissions.admin" class="ml-2" :to="{ name: 'repo-settings' }" icon="settings" />
-    </div>
+      </IconButton>
+      <IconButton
+        v-if="repoPermissions.admin"
+        :to="{ name: 'repo-settings' }"
+        :title="$t('repo.settings.settings')"
+        icon="settings"
+      />
+    </template>
 
-    <Tabs v-model="activeTab" disable-hash-mode class="mb-4">
-      <Tab title="Activity" />
-      <Tab title="Branches" />
-    </Tabs>
+    <template #tabActions>
+      <Button
+        v-if="repoPermissions.push"
+        :text="$t('repo.manual_pipeline.trigger')"
+        @click="showManualPipelinePopup = true"
+      />
+      <ManualPipelinePopup :open="showManualPipelinePopup" @close="showManualPipelinePopup = false" />
+    </template>
+
+    <Tab id="activity" :title="$t('repo.activity')" />
+    <Tab id="branches" :title="$t('repo.branches')" />
 
     <router-view />
-  </FluidContainer>
+  </Scaffold>
   <router-view v-else-if="repo && repoPermissions" />
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, onMounted, provide, ref, toRef, watch } from 'vue';
+<script lang="ts" setup>
+import { computed, onMounted, provide, ref, toRef, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
 import Icon from '~/components/atomic/Icon.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
-import FluidContainer from '~/components/layout/FluidContainer.vue';
-import Tab from '~/components/tabs/Tab.vue';
-import Tabs from '~/components/tabs/Tabs.vue';
+import ManualPipelinePopup from '~/components/layout/popups/ManualPipelinePopup.vue';
+import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
+import Tab from '~/components/layout/scaffold/Tab.vue';
 import useApiClient from '~/compositions/useApiClient';
+import useAuthentication from '~/compositions/useAuthentication';
+import useConfig from '~/compositions/useConfig';
 import useNotifications from '~/compositions/useNotifications';
 import { RepoPermissions } from '~/lib/api/types';
-import BuildStore from '~/store/builds';
-import RepoStore from '~/store/repos';
+import { usePipelineStore } from '~/store/pipelines';
+import { useRepoStore } from '~/store/repos';
 
-export default defineComponent({
-  name: 'RepoWrapper',
-
-  components: { FluidContainer, IconButton, Icon, Tabs, Tab },
-
-  props: {
-    // used by toRef
-    // eslint-disable-next-line vue/no-unused-properties
-    repoOwner: {
-      type: String,
-      required: true,
-    },
-
-    // used by toRef
-    // eslint-disable-next-line vue/no-unused-properties
-    repoName: {
-      type: String,
-      required: true,
-    },
+const props = defineProps({
+  repoOwner: {
+    type: String,
+    required: true,
   },
 
-  setup(props) {
-    const repoOwner = toRef(props, 'repoOwner');
-    const repoName = toRef(props, 'repoName');
-    const repoStore = RepoStore();
-    const buildStore = BuildStore();
-    const apiClient = useApiClient();
-    const notifications = useNotifications();
-    const route = useRoute();
-    const router = useRouter();
+  repoName: {
+    type: String,
+    required: true,
+  },
+});
 
-    const repo = repoStore.getRepo(repoOwner, repoName);
-    const repoPermissions = ref<RepoPermissions>();
-    const builds = buildStore.getSortedBuilds(repoOwner, repoName);
-    provide('repo', repo);
-    provide('repo-permissions', repoPermissions);
-    provide('builds', builds);
+const repoOwner = toRef(props, 'repoOwner');
+const repoName = toRef(props, 'repoName');
+const repoStore = useRepoStore();
+const pipelineStore = usePipelineStore();
+const apiClient = useApiClient();
+const notifications = useNotifications();
+const { isAuthenticated } = useAuthentication();
+const route = useRoute();
+const router = useRouter();
+const i18n = useI18n();
 
-    async function loadRepo() {
-      repoPermissions.value = await apiClient.getRepoPermissions(repoOwner.value, repoName.value);
-      if (!repoPermissions.value.pull) {
-        notifications.notify({ type: 'error', title: 'Not allowed to access this repository' });
-        await router.replace({ name: 'home' });
-        return;
-      }
+const { forge } = useConfig();
+const repo = repoStore.getRepo(repoOwner, repoName);
+const repoPermissions = ref<RepoPermissions>();
+const pipelines = pipelineStore.getRepoPipelines(repoOwner, repoName);
+provide('repo', repo);
+provide('repo-permissions', repoPermissions);
+provide('pipelines', pipelines);
 
-      await repoStore.loadRepo(repoOwner.value, repoName.value);
-      await buildStore.loadBuilds(repoOwner.value, repoName.value);
+const showManualPipelinePopup = ref(false);
+
+async function loadRepo() {
+  repoPermissions.value = await apiClient.getRepoPermissions(repoOwner.value, repoName.value);
+  if (!repoPermissions.value.pull) {
+    notifications.notify({ type: 'error', title: i18n.t('repo.not_allowed') });
+    // no access and not authenticated, redirect to login
+    if (!isAuthenticated) {
+      await router.replace({ name: 'login', query: { url: route.fullPath } });
+      return;
     }
+    await router.replace({ name: 'home' });
+    return;
+  }
 
-    onMounted(() => {
-      loadRepo();
+  const apiRepo = await repoStore.loadRepo(repoOwner.value, repoName.value);
+  if (apiRepo.full_name !== `${repoOwner.value}/${repoName.value}`) {
+    await router.replace({
+      name: route.name ? route.name : 'repo',
+      params: { repoOwner: apiRepo.owner, repoName: apiRepo.name },
     });
+    return;
+  }
+  await pipelineStore.loadRepoPipelines(repoOwner.value, repoName.value);
+}
 
-    watch([repoOwner, repoName], () => {
-      loadRepo();
-    });
+onMounted(() => {
+  loadRepo();
+});
 
-    const badgeUrl = computed(() => `/api/badges/${repo.value.owner}/${repo.value.name}/status.svg`);
+watch([repoOwner, repoName], () => {
+  loadRepo();
+});
 
-    const activeTab = computed({
-      get() {
-        if (route.name === 'repo-branches' || route.name === 'repo-branch') {
-          return 'branches';
-        }
-        return 'activity';
-      },
-      set(tab: string) {
-        if (tab === 'branches') {
-          router.push({ name: 'repo-branches' });
-        } else {
-          router.push({ name: 'repo' });
-        }
-      },
-    });
+const badgeUrl = computed(() => repo.value && `/api/badges/${repo.value.owner}/${repo.value.name}/status.svg`);
 
-    return { repo, repoPermissions, badgeUrl, activeTab };
+const activeTab = computed({
+  get() {
+    if (route.name === 'repo-branches' || route.name === 'repo-branch') {
+      return 'branches';
+    }
+    return 'activity';
+  },
+  set(tab: string) {
+    if (tab === 'branches') {
+      router.push({ name: 'repo-branches' });
+    } else {
+      router.push({ name: 'repo' });
+    }
   },
 });
 </script>

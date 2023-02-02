@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://github.com/woodpecker-ci/woodpecker/">
-    <img alt="Woodpecker" src="https://raw.githubusercontent.com/woodpecker-ci/woodpecker/master/docs/static/img/logo.svg" width="220"/>
+    <img alt="Woodpecker" src="docs/static/img/logo.svg" width="220"/>
   </a>
 </p>
 <br/>
@@ -10,6 +10,9 @@
   </a>
   <a href="https://codecov.io/gh/woodpecker-ci/woodpecker">
     <img src="https://codecov.io/gh/woodpecker-ci/woodpecker/branch/master/graph/badge.svg"/>
+  </a>
+  <a href="https://translate.woodpecker-ci.org/engage/woodpecker-ci/">
+    <img src="https://translate.woodpecker-ci.org/widgets/woodpecker-ci/-/ui/svg-badge.svg" alt="Translation status" />
   </a>
   <a href="https://discord.gg/fcMQqSMXJy" title="Join the Discord chat at https://discord.gg/fcMQqSMXJy">
     <img src="https://img.shields.io/discord/838698813463724034.svg?label=discord">
@@ -32,6 +35,9 @@
   <a href="https://opensource.org/licenses/Apache-2.0" title="License: Apache-2.0">
     <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg">
   </a>
+  <a href="https://bestpractices.coreinfrastructure.org/projects/5309">
+    <img src="https://bestpractices.coreinfrastructure.org/projects/5309/badge">
+  </a>
   <a href="https://www.tickgit.com/browse?repo=github.com/woodpecker-ci/woodpecker" title="TODOs">
     <img src="https://badgen.net/https/api.tickgit.com/badgen/github.com/woodpecker-ci/woodpecker">
   </a>
@@ -44,12 +50,13 @@
 
 ![woodpecker](docs/docs/woodpecker.png)
 
-## Support
+## 🫶 Support
 
 Please consider to donate and become a backer. 🙏 [[Become a backer](https://opencollective.com/woodpecker-ci#category-CONTRIBUTE)]
+
 <a href="https://opencollective.com/woodpecker-ci" target="_blank"><img src="https://opencollective.com/woodpecker-ci/backers.svg?width=890"></a>
 
-## Usage
+## 🚀 Usage
 
 ### .woodpecker.yml
 
@@ -72,22 +79,31 @@ Woodpecker has [official plugins](https://woodpecker-ci.org/plugins), but you ca
 
 [Read More](https://woodpecker-ci.org/docs/usage/plugins/plugins)
 
-## Documentation
+## 📖 Documentation
 
 https://woodpecker-ci.org/
 
-## Contribution
+## ✨ Contribute
 
 See [Contributing Guide](CONTRIBUTING.md)
 
-## Who uses Woodpecker?
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://woodpecker-ci.org/docs/next/development/getting-started#gitpod)
 
-[Codeberg](https://codeberg.org), the woodpecker project itself, and many others.
+## 📣 Translate
 
-Leave a [comment](https://github.com/woodpecker-ci/woodpecker/issues/122) if you're using it.
+We use an own [Weblate](https://weblate.org/en/) instance at [translate.woodpecker-ci.org](https://translate.woodpecker-ci.org).
 
-Also consider using the topic `WoodpeckerCI` in your repository, so others can learn
-from your config and use the hashtag `#WoodpeckerCI` when talking about the project on social media!
+<a href="https://translate.woodpecker-ci.org/engage/woodpecker-ci/">
+  <img src="https://translate.woodpecker-ci.org/widgets/woodpecker-ci/-/ui/multi-blue.svg" alt="Translation status" />
+</a>
+
+## 👋 Who uses Woodpecker?
+
+[Codeberg](https://codeberg.org), the Woodpecker project itself, and many others.
+
+Leave a [comment](https://github.com/woodpecker-ci/woodpecker/issues/122) if you're using it as well.
+
+Also consider using the topic `WoodpeckerCI` in your repository, so others can learn from your config and use the hashtag `#WoodpeckerCI` when talking about the project on social media!
 
 Here are some places where people mention Woodpecker:
 
@@ -96,7 +112,8 @@ Here are some places where people mention Woodpecker:
 - [Twitter](https://twitter.com/hashtag/WoodpeckerCI?f=live)
 - [Fediverse](https://mastodon.social/tags/WoodpeckerCI)
 
-## Stars over time
+## ✨ Stars over time
+
 [![Stargazers over time](https://starchart.cc/woodpecker-ci/woodpecker.svg)](https://starchart.cc/woodpecker-ci/woodpecker)
 
 ## License

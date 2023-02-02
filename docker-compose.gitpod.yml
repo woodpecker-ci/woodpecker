@@ -1,0 +1,42 @@
+version: '3'
+
+services:
+  gitea-database:
+    image: postgres:12.6-alpine
+    environment:
+      POSTGRES_USER: gitea
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: gitea
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - pgsql:/var/lib/postgresql/data/pgdata
+
+  gitea:
+    image: gitea/gitea:dev
+    ports:
+      - 3000:3000
+    volumes:
+      - gitea:/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    depends_on:
+      - gitea-database
+    environment:
+      USER_UID: 1000
+      USER_GID: 1000
+      # GITEA__server__DOMAIN: gitea.local.self
+      GITEA__server__ROOT_URL: https://3000-${GITPOD_WORKSPACE_ID}.${GITPOD_WORKSPACE_CLUSTER_HOST}
+      GITEA__database__DB_TYPE: postgres
+      GITEA__database__HOST: gitea-database:5432
+      GITEA__database__NAME: gitea
+      GITEA__database__USER: gitea
+      GITEA__database__PASSWD: 123456
+      GITEA__webhook__ALLOWED_HOST_LIST: "*"
+      GITEA__security__INSTALL_LOCK: "true"
+      GITEA__security__INTERNAL_TOKEN: "123456"
+    extra_hosts:
+    - "host.docker.internal:host-gateway"
+
+volumes:
+  gitea:
+  pgsql:

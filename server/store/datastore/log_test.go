@@ -16,48 +16,48 @@ package datastore
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"testing"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 func TestLogCreateFind(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Proc), new(model.Logs))
+	store, closer := newTestStore(t, new(model.Step), new(model.Logs))
 	defer closer()
 
-	proc := model.Proc{
+	step := model.Step{
 		ID: 1,
 	}
 	buf := bytes.NewBufferString("echo hi")
-	err := store.LogSave(&proc, buf)
+	err := store.LogSave(&step, buf)
 	if err != nil {
 		t.Errorf("Unexpected error: log create: %s", err)
 	}
 
-	rc, err := store.LogFind(&proc)
+	rc, err := store.LogFind(&step)
 	if err != nil {
 		t.Errorf("Unexpected error: log create: %s", err)
 	}
 
 	defer rc.Close()
-	out, _ := ioutil.ReadAll(rc)
+	out, _ := io.ReadAll(rc)
 	if got, want := string(out), "echo hi"; got != want {
 		t.Errorf("Want log data %s, got %s", want, got)
 	}
 }
 
 func TestLogUpdate(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Proc), new(model.Logs))
+	store, closer := newTestStore(t, new(model.Step), new(model.Logs))
 	defer closer()
 
-	proc := model.Proc{
+	step := model.Step{
 		ID: 1,
 	}
 	buf1 := bytes.NewBufferString("echo hi")
 	buf2 := bytes.NewBufferString("echo allo?")
-	err1 := store.LogSave(&proc, buf1)
-	err2 := store.LogSave(&proc, buf2)
+	err1 := store.LogSave(&step, buf1)
+	err2 := store.LogSave(&step, buf2)
 	if err1 != nil {
 		t.Errorf("Unexpected error: log create: %s", err1)
 	}
@@ -65,13 +65,13 @@ func TestLogUpdate(t *testing.T) {
 		t.Errorf("Unexpected error: log update: %s", err2)
 	}
 
-	rc, err := store.LogFind(&proc)
+	rc, err := store.LogFind(&step)
 	if err != nil {
 		t.Errorf("Unexpected error: log create: %s", err)
 	}
 
 	defer rc.Close()
-	out, _ := ioutil.ReadAll(rc)
+	out, _ := io.ReadAll(rc)
 	if got, want := string(out), "echo allo?"; got != want {
 		t.Errorf("Want log data %s, got %s", want, got)
 	}

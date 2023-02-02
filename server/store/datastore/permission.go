@@ -17,6 +17,7 @@ package datastore
 import (
 	"fmt"
 
+	"xorm.io/builder"
 	"xorm.io/xorm"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -45,13 +46,13 @@ func (s storage) PermUpsert(perm *model.Perm) error {
 }
 
 func (s storage) permUpsert(sess *xorm.Session, perm *model.Perm) error {
-	if perm.RepoID == 0 && len(perm.Repo) == 0 {
+	if perm.RepoID == 0 && perm.Repo == nil {
 		return fmt.Errorf("could not determine repo for permission: %v", perm)
 	}
 
-	// lookup repo based on name if possible
-	if perm.RepoID == 0 && len(perm.Repo) != 0 {
-		r, err := s.getRepoName(sess, perm.Repo)
+	// lookup repo based on name or forge ID if possible
+	if perm.RepoID == 0 && perm.Repo != nil {
+		r, err := s.getRepoNameFallback(sess, perm.Repo.ForgeRemoteID, perm.Repo.FullName)
 		if err != nil {
 			return err
 		}
@@ -86,4 +87,12 @@ func (s storage) PermFlush(user *model.User, before int64) error {
 		Where("perm_user_id = ? AND perm_synced < ?", user.ID, before).
 		Delete(new(model.Perm))
 	return err
+}
+
+// userPushOrAdminCondition return condition where user must have push or admin rights
+// if used make sure to have permission table ("perms") joined
+func userPushOrAdminCondition(userID int64) builder.Cond {
+	return builder.Eq{"perms.perm_user_id": userID}.
+		And(builder.Eq{"perms.perm_push": true}.
+			Or(builder.Eq{"perms.perm_admin": true}))
 }

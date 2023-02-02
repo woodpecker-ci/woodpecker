@@ -15,11 +15,14 @@
 package datastore
 
 import (
+	"errors"
+
 	"github.com/rs/zerolog/log"
 	"xorm.io/builder"
 	"xorm.io/xorm"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/store/types"
 )
 
 func (s storage) GetRepo(id int64) (*model.Repo, error) {
@@ -27,10 +30,44 @@ func (s storage) GetRepo(id int64) (*model.Repo, error) {
 	return repo, wrapGet(s.engine.ID(id).Get(repo))
 }
 
+func (s storage) GetRepoForgeID(remoteID model.ForgeRemoteID) (*model.Repo, error) {
+	sess := s.engine.NewSession()
+	defer sess.Close()
+	return s.getRepoForgeID(sess, remoteID)
+}
+
+func (s storage) getRepoForgeID(e *xorm.Session, remoteID model.ForgeRemoteID) (*model.Repo, error) {
+	repo := new(model.Repo)
+	return repo, wrapGet(e.Where("forge_remote_id = ?", remoteID).Get(repo))
+}
+
+func (s storage) GetRepoNameFallback(remoteID model.ForgeRemoteID, fullName string) (*model.Repo, error) {
+	sess := s.engine.NewSession()
+	defer sess.Close()
+	return s.getRepoNameFallback(sess, remoteID, fullName)
+}
+
+func (s storage) getRepoNameFallback(e *xorm.Session, remoteID model.ForgeRemoteID, fullName string) (*model.Repo, error) {
+	repo, err := s.getRepoForgeID(e, remoteID)
+	if errors.Is(err, types.RecordNotExist) {
+		return s.getRepoName(e, fullName)
+	}
+	return repo, err
+}
+
 func (s storage) GetRepoName(fullName string) (*model.Repo, error) {
 	sess := s.engine.NewSession()
 	defer sess.Close()
-	return s.getRepoName(sess, fullName)
+	repo, err := s.getRepoName(sess, fullName)
+	if errors.Is(err, types.RecordNotExist) {
+		// the repository does not exist, so look for a redirection
+		redirect, err := s.getRedirection(sess, fullName)
+		if err != nil {
+			return nil, err
+		}
+		return s.GetRepo(redirect.RepoID)
+	}
+	return repo, err
 }
 
 func (s storage) getRepoName(e *xorm.Session, fullName string) (*model.Repo, error) {
@@ -61,9 +98,6 @@ func (s storage) DeleteRepo(repo *model.Repo) error {
 		return err
 	}
 
-	if _, err := sess.Where("sender_repo_id = ?", repo.ID).Delete(new(model.Sender)); err != nil {
-		return err
-	}
 	if _, err := sess.Where("config_repo_id = ?", repo.ID).Delete(new(model.Config)); err != nil {
 		return err
 	}
@@ -76,19 +110,22 @@ func (s storage) DeleteRepo(repo *model.Repo) error {
 	if _, err := sess.Where("secret_repo_id = ?", repo.ID).Delete(new(model.Secret)); err != nil {
 		return err
 	}
+	if _, err := sess.Where("repo_id = ?", repo.ID).Delete(new(model.Redirection)); err != nil {
+		return err
+	}
 
-	// delete related builds
-	for startBuilds := 0; ; startBuilds += batchSize {
-		buildIDs := make([]int64, 0, batchSize)
-		if err := sess.Limit(batchSize, startBuilds).Table("builds").Cols("build_id").Where("build_repo_id = ?", repo.ID).Find(&buildIDs); err != nil {
+	// delete related pipelines
+	for startPipelines := 0; ; startPipelines += batchSize {
+		pipelineIDs := make([]int64, 0, batchSize)
+		if err := sess.Limit(batchSize, startPipelines).Table("pipelines").Cols("pipeline_id").Where("pipeline_repo_id = ?", repo.ID).Find(&pipelineIDs); err != nil {
 			return err
 		}
-		if len(buildIDs) == 0 {
+		if len(pipelineIDs) == 0 {
 			break
 		}
 
-		for i := range buildIDs {
-			if err := deleteBuild(sess, buildIDs[i]); err != nil {
+		for i := range pipelineIDs {
+			if err := deletePipeline(sess, pipelineIDs[i]); err != nil {
 				return err
 			}
 		}
@@ -131,23 +168,43 @@ func (s storage) RepoBatch(repos []*model.Repo) error {
 			continue
 		}
 
-		exist, err := sess.
-			Where("repo_owner = ? AND repo_name = ?", repos[i].Owner, repos[i].Name).
-			Exist(new(model.Repo))
+		exist := true
+		repo, err := s.getRepoNameFallback(sess, repos[i].ForgeRemoteID, repos[i].FullName)
 		if err != nil {
-			return err
+			if errors.Is(err, types.RecordNotExist) {
+				exist = false
+			} else {
+				return err
+			}
 		}
 
 		if exist {
-			if _, err := sess.
-				Where("repo_owner = ? AND repo_name = ?", repos[i].Owner, repos[i].Name).
-				Cols("repo_scm", "repo_avatar", "repo_link", "repo_private", "repo_clone", "repo_branch").
-				Update(repos[i]); err != nil {
-				return err
+			if repos[i].FullName != repo.FullName {
+				// create redirection
+				err := s.createRedirection(sess, &model.Redirection{RepoID: repo.ID, FullName: repo.FullName})
+				if err != nil {
+					return err
+				}
+			}
+			if repos[i].ForgeRemoteID.IsValid() {
+				if _, err := sess.
+					Where("forge_remote_id = ?", repos[i].ForgeRemoteID).
+					Cols("repo_owner", "repo_name", "repo_full_name", "repo_scm", "repo_avatar", "repo_link", "repo_private", "repo_clone", "repo_branch", "forge_id").
+					Update(repos[i]); err != nil {
+					return err
+				}
+			} else {
+				if _, err := sess.
+					Where("repo_owner = ?", repos[i].Owner).
+					And(" repo_name = ?", repos[i].Name).
+					Cols("repo_owner", "repo_name", "repo_full_name", "repo_scm", "repo_avatar", "repo_link", "repo_private", "repo_clone", "repo_branch", "forge_id").
+					Update(repos[i]); err != nil {
+					return err
+				}
 			}
 
 			_, err := sess.
-				Where("repo_owner = ? AND repo_name = ?", repos[i].Owner, repos[i].Name).
+				Where("forge_remote_id = ?", repos[i].ForgeRemoteID).
 				Get(repos[i])
 			if err != nil {
 				return err
@@ -161,7 +218,7 @@ func (s storage) RepoBatch(repos []*model.Repo) error {
 
 		if repos[i].Perm != nil {
 			repos[i].Perm.RepoID = repos[i].ID
-			repos[i].Perm.Repo = repos[i].FullName
+			repos[i].Perm.Repo = repos[i]
 			if err := s.permUpsert(sess, repos[i].Perm); err != nil {
 				return err
 			}

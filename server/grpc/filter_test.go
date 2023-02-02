@@ -26,72 +26,70 @@ import (
 func TestCreateFilterFunc(t *testing.T) {
 	t.Parallel()
 
-	type filterTests struct {
-		tsk queue.Task
-		exp bool
+	tests := []struct {
+		name        string
+		agentLabels map[string]string
+		task        queue.Task
+		exp         bool
+	}{
+		{
+			name:        "agent with missing labels",
+			agentLabels: map[string]string{"repo": "test/woodpecker"},
+			task: queue.Task{
+				Labels: map[string]string{"platform": "linux/amd64", "repo": "test/woodpecker"},
+			},
+			exp: false,
+		},
+		{
+			name:        "agent with wrong labels",
+			agentLabels: map[string]string{"platform": "linux/arm64"},
+			task: queue.Task{
+				Labels: map[string]string{"platform": "linux/amd64"},
+			},
+			exp: false,
+		},
+		{
+			name:        "agent with correct labels",
+			agentLabels: map[string]string{"platform": "linux/amd64", "location": "europe"},
+			task: queue.Task{
+				Labels: map[string]string{"platform": "linux/amd64", "location": "europe"},
+			},
+			exp: true,
+		},
+		{
+			name:        "agent with additional labels",
+			agentLabels: map[string]string{"platform": "linux/amd64", "location": "europe"},
+			task: queue.Task{
+				Labels: map[string]string{"platform": "linux/amd64"},
+			},
+			exp: true,
+		},
+		{
+			name:        "agent with wildcard label",
+			agentLabels: map[string]string{"platform": "linux/amd64", "location": "*"},
+			task: queue.Task{
+				Labels: map[string]string{"platform": "linux/amd64", "location": "america"},
+			},
+			exp: true,
+		},
+		{
+			name:        "agent with platform label and task without",
+			agentLabels: map[string]string{"platform": "linux/amd64"},
+			task: queue.Task{
+				Labels: map[string]string{"platform": ""},
+			},
+			exp: true,
+		},
 	}
 
-	tests := []struct {
-		struc rpc.Filter
-		ft    []filterTests
-	}{{
-		struc: rpc.Filter{},
-		ft: []filterTests{{
-			tsk: queue.Task{
-				Labels: map[string]string{"platform": "", "repo": "test/woodpecker"},
-			},
-			exp: true,
-		}, {
-			tsk: queue.Task{
-				Labels: map[string]string{"platform": ""},
-			},
-			exp: true,
-		}},
-	}, {
-		struc: rpc.Filter{
-			Labels: map[string]string{"platform": "abc"},
-		},
-		ft: []filterTests{{
-			tsk: queue.Task{
-				Labels: map[string]string{"platform": "def"},
-			},
-			exp: false,
-		}, {
-			tsk: queue.Task{
-				Labels: map[string]string{"platform": ""},
-			},
-			exp: true,
-		}},
-	}, {
-		struc: rpc.Filter{
-			Expr: "platform = 'abc' OR repo = 'test/woodpecker'",
-		},
-		ft: []filterTests{{
-			tsk: queue.Task{
-				Labels: map[string]string{"platform": "", "repo": "test/woodpecker"},
-			},
-			exp: true,
-		}, {
-			tsk: queue.Task{
-				Labels: map[string]string{"platform": "abc", "repo": "else"},
-			},
-			exp: true,
-		}, {
-			tsk: queue.Task{
-				Labels: map[string]string{"platform": "also", "repo": "else"},
-			},
-			exp: false,
-		}},
-	}}
-
 	for _, test := range tests {
-		fn, err := createFilterFunc(test.struc)
-		if !assert.NoError(t, err) {
-			t.Fail()
-		}
+		t.Run(test.name, func(t *testing.T) {
+			fn, err := createFilterFunc(rpc.Filter{Labels: test.agentLabels})
+			if !assert.NoError(t, err) {
+				t.Fail()
+			}
 
-		for _, ft := range test.ft {
-			assert.EqualValues(t, ft.exp, fn(&ft.tsk))
-		}
+			assert.EqualValues(t, test.exp, fn(&test.task))
+		})
 	}
 }

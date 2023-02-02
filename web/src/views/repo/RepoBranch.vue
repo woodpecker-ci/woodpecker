@@ -1,24 +1,22 @@
 <template>
   <div class="flex w-full mb-4 justify-center">
-    <span class="text-gray-600 dark:text-gray-500 text-xl">Pipelines for branch "{{ branch }}"</span>
+    <span class="text-color text-xl">{{ $t('repo.pipeline.pipelines_for', { branch }) }}</span>
   </div>
-  <BuildList :builds="builds" :repo="repo" />
+  <PipelineList :pipelines="pipelines" :repo="repo" />
 </template>
 
 <script lang="ts">
 import { computed, defineComponent, inject, Ref, toRef } from 'vue';
 
-import BuildList from '~/components/repo/build/BuildList.vue';
-import { Build, Repo, RepoPermissions } from '~/lib/api/types';
+import PipelineList from '~/components/repo/pipeline/PipelineList.vue';
+import { Pipeline, Repo, RepoPermissions } from '~/lib/api/types';
 
 export default defineComponent({
   name: 'RepoBranch',
 
-  components: { BuildList },
+  components: { PipelineList },
 
   props: {
-    // used by toRef
-    // eslint-disable-next-line vue/no-unused-properties
     branch: {
       type: String,
       required: true,
@@ -33,10 +31,10 @@ export default defineComponent({
       throw new Error('Unexpected: "repo" & "repoPermissions" should be provided at this place');
     }
 
-    const allBuilds = inject<Ref<Build[]>>('builds');
-    const builds = computed(() => allBuilds?.value.filter((b) => b.branch === branch.value));
+    const allPipelines = inject<Ref<Pipeline[]>>('pipelines');
+    const pipelines = computed(() => allPipelines?.value.filter((b) => b.branch === branch.value));
 
-    return { builds, repo };
+    return { pipelines, repo };
   },
 });
 </script>

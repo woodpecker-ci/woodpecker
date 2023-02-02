@@ -10,12 +10,11 @@ type (
 	// Filter defines filters for fetching items from the queue.
 	Filter struct {
 		Labels map[string]string `json:"labels"`
-		Expr   string            `json:"expr"`
 	}
 
 	// State defines the pipeline state.
 	State struct {
-		Proc     string `json:"proc"`
+		Step     string `json:"step"`
 		Exited   bool   `json:"exited"`
 		ExitCode int    `json:"exit_code"`
 		Started  int64  `json:"started"`
@@ -33,7 +32,7 @@ type (
 	// File defines a pipeline artifact.
 	File struct {
 		Name string            `json:"name"`
-		Proc string            `json:"proc"`
+		Step string            `json:"step"`
 		Mime string            `json:"mime"`
 		Time int64             `json:"time"`
 		Size int               `json:"size"`
@@ -67,4 +66,10 @@ type Peer interface {
 
 	// Log writes the pipeline log entry.
 	Log(c context.Context, id string, line *Line) error
+
+	// RegisterAgent register our agent to the server
+	RegisterAgent(ctx context.Context, platform, backend, version string, capacity int) (int64, error)
+
+	// ReportHealth reports health status of the agent to the server
+	ReportHealth(c context.Context) error
 }

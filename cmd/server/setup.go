@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,6 +17,11 @@ package main
 
 import (
 	"context"
+	"crypto"
+	"crypto/ed25519"
+	"crypto/rand"
+	"encoding/hex"
+	"errors"
 	"fmt"
 	"net/url"
 	"os"
@@ -29,21 +35,23 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/cache"
+	"github.com/woodpecker-ci/woodpecker/server/forge"
+	"github.com/woodpecker-ci/woodpecker/server/forge/bitbucket"
+	"github.com/woodpecker-ci/woodpecker/server/forge/bitbucketserver"
+	"github.com/woodpecker-ci/woodpecker/server/forge/coding"
+	"github.com/woodpecker-ci/woodpecker/server/forge/gitea"
+	"github.com/woodpecker-ci/woodpecker/server/forge/github"
+	"github.com/woodpecker-ci/woodpecker/server/forge/gitlab"
+	"github.com/woodpecker-ci/woodpecker/server/forge/gogs"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/environments"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/registry"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/secrets"
 	"github.com/woodpecker-ci/woodpecker/server/queue"
-	"github.com/woodpecker-ci/woodpecker/server/remote"
-	"github.com/woodpecker-ci/woodpecker/server/remote/bitbucket"
-	"github.com/woodpecker-ci/woodpecker/server/remote/bitbucketserver"
-	"github.com/woodpecker-ci/woodpecker/server/remote/coding"
-	"github.com/woodpecker-ci/woodpecker/server/remote/gitea"
-	"github.com/woodpecker-ci/woodpecker/server/remote/github"
-	"github.com/woodpecker-ci/woodpecker/server/remote/gitlab"
-	"github.com/woodpecker-ci/woodpecker/server/remote/gogs"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/server/store/datastore"
+	"github.com/woodpecker-ci/woodpecker/server/store/types"
 )
 
 func setupStore(c *cli.Context) (store.Store, error) {
@@ -54,7 +62,7 @@ func setupStore(c *cli.Context) (store.Store, error) {
 		if datastore.SupportedDriver("sqlite3") {
 			log.Debug().Msgf("server has sqlite3 support")
 		} else {
-			log.Debug().Msgf("server was build with no sqlite3 support!")
+			log.Debug().Msgf("server was built without sqlite3 support!")
 		}
 	}
 
@@ -87,7 +95,7 @@ func setupStore(c *cli.Context) (store.Store, error) {
 	return store, nil
 }
 
-// TODO: convert it to a check and fail hard only function in v0.16.0 to be able to remove it in v0.17.0
+// TODO: remove it in v1.1.0
 // TODO: add it to the "how to migrate from drone docs"
 func fallbackSqlite3File(path string) (string, error) {
 	const dockerDefaultPath = "/var/lib/woodpecker/woodpecker.sqlite"
@@ -144,9 +152,7 @@ func fallbackSqlite3File(path string) (string, error) {
 	// file is still at old location
 	_, err = os.Stat(dockerOldPath)
 	if err == nil {
-		// TODO: use log.Fatal()... in next version
-		log.Error().Msgf("found sqlite3 file at deprecated path '%s', please move it to '%s' and update your volume path if necessary", dockerOldPath, dockerDefaultPath)
-		return dockerOldPath, nil
+		log.Fatal().Msgf("found sqlite3 file at old path '%s', please move it to '%s' and update your volume path if necessary", dockerOldPath, dockerDefaultPath)
 	}
 
 	// file does not exist at all
@@ -158,7 +164,7 @@ func setupQueue(c *cli.Context, s store.Store) queue.Queue {
 	return queue.WithTaskStore(queue.New(c.Context), s)
 }
 
-func setupSecretService(c *cli.Context, s store.Store) model.SecretService {
+func setupSecretService(c *cli.Context, s model.SecretStore) model.SecretService {
 	return secrets.New(c.Context, s)
 }
 
@@ -176,13 +182,17 @@ func setupEnvironService(c *cli.Context, s store.Store) model.EnvironService {
 	return environments.Parse(c.StringSlice("environment"))
 }
 
-// setupRemote helper function to setup the remote from the CLI arguments.
-func setupRemote(c *cli.Context) (remote.Remote, error) {
+func setupMembershipService(_ *cli.Context, r forge.Forge) cache.MembershipService {
+	return cache.NewMembershipService(r)
+}
+
+// setupForge helper function to setup the forge from the CLI arguments.
+func setupForge(c *cli.Context) (forge.Forge, error) {
 	switch {
 	case c.Bool("github"):
-		return setupGithub(c)
+		return setupGitHub(c)
 	case c.Bool("gitlab"):
-		return setupGitlab(c)
+		return setupGitLab(c)
 	case c.Bool("bitbucket"):
 		return setupBitbucket(c)
 	case c.Bool("stash"):
@@ -198,18 +208,18 @@ func setupRemote(c *cli.Context) (remote.Remote, error) {
 	}
 }
 
-// helper function to setup the Bitbucket remote from the CLI arguments.
-func setupBitbucket(c *cli.Context) (remote.Remote, error) {
+// helper function to setup the Bitbucket forge from the CLI arguments.
+func setupBitbucket(c *cli.Context) (forge.Forge, error) {
 	opts := &bitbucket.Opts{
 		Client: c.String("bitbucket-client"),
 		Secret: c.String("bitbucket-secret"),
 	}
-	log.Trace().Msgf("Remote (bitbucket) opts: %#v", opts)
+	log.Trace().Msgf("Forge (bitbucket) opts: %#v", opts)
 	return bitbucket.New(opts)
 }
 
-// helper function to setup the Gogs remote from the CLI arguments.
-func setupGogs(c *cli.Context) (remote.Remote, error) {
+// helper function to setup the Gogs forge from the CLI arguments.
+func setupGogs(c *cli.Context) (forge.Forge, error) {
 	opts := gogs.Opts{
 		URL:         c.String("gogs-server"),
 		Username:    c.String("gogs-git-username"),
@@ -217,12 +227,12 @@ func setupGogs(c *cli.Context) (remote.Remote, error) {
 		PrivateMode: c.Bool("gogs-private-mode"),
 		SkipVerify:  c.Bool("gogs-skip-verify"),
 	}
-	log.Trace().Msgf("Remote (gogs) opts: %#v", opts)
+	log.Trace().Msgf("Forge (gogs) opts: %#v", opts)
 	return gogs.New(opts)
 }
 
-// helper function to setup the Gitea remote from the CLI arguments.
-func setupGitea(c *cli.Context) (remote.Remote, error) {
+// helper function to setup the Gitea forge from the CLI arguments.
+func setupGitea(c *cli.Context) (forge.Forge, error) {
 	server, err := url.Parse(c.String("gitea-server"))
 	if err != nil {
 		return nil, err
@@ -236,12 +246,12 @@ func setupGitea(c *cli.Context) (remote.Remote, error) {
 	if len(opts.URL) == 0 {
 		log.Fatal().Msg("WOODPECKER_GITEA_URL must be set")
 	}
-	log.Trace().Msgf("Remote (gitea) opts: %#v", opts)
+	log.Trace().Msgf("Forge (gitea) opts: %#v", opts)
 	return gitea.New(opts)
 }
 
-// helper function to setup the Stash remote from the CLI arguments.
-func setupStash(c *cli.Context) (remote.Remote, error) {
+// helper function to setup the Stash forge from the CLI arguments.
+func setupStash(c *cli.Context) (forge.Forge, error) {
 	opts := bitbucketserver.Opts{
 		URL:               c.String("stash-server"),
 		Username:          c.String("stash-git-username"),
@@ -251,12 +261,12 @@ func setupStash(c *cli.Context) (remote.Remote, error) {
 		ConsumerRSAString: c.String("stash-consumer-rsa-string"),
 		SkipVerify:        c.Bool("stash-skip-verify"),
 	}
-	log.Trace().Msgf("Remote (bitbucketserver) opts: %#v", opts)
+	log.Trace().Msgf("Forge (bitbucketserver) opts: %#v", opts)
 	return bitbucketserver.New(opts)
 }
 
-// helper function to setup the Gitlab remote from the CLI arguments.
-func setupGitlab(c *cli.Context) (remote.Remote, error) {
+// helper function to setup the GitLab forge from the CLI arguments.
+func setupGitLab(c *cli.Context) (forge.Forge, error) {
 	return gitlab.New(gitlab.Opts{
 		URL:          c.String("gitlab-server"),
 		ClientID:     c.String("gitlab-client"),
@@ -265,8 +275,8 @@ func setupGitlab(c *cli.Context) (remote.Remote, error) {
 	})
 }
 
-// helper function to setup the GitHub remote from the CLI arguments.
-func setupGithub(c *cli.Context) (remote.Remote, error) {
+// helper function to setup the GitHub forge from the CLI arguments.
+func setupGitHub(c *cli.Context) (forge.Forge, error) {
 	opts := github.Opts{
 		URL:        c.String("github-server"),
 		Client:     c.String("github-client"),
@@ -274,12 +284,12 @@ func setupGithub(c *cli.Context) (remote.Remote, error) {
 		SkipVerify: c.Bool("github-skip-verify"),
 		MergeRef:   c.Bool("github-merge-ref"),
 	}
-	log.Trace().Msgf("Remote (github) opts: %#v", opts)
+	log.Trace().Msgf("Forge (github) opts: %#v", opts)
 	return github.New(opts)
 }
 
-// helper function to setup the Coding remote from the CLI arguments.
-func setupCoding(c *cli.Context) (remote.Remote, error) {
+// helper function to setup the Coding forge from the CLI arguments.
+func setupCoding(c *cli.Context) (forge.Forge, error) {
 	opts := coding.Opts{
 		URL:        c.String("coding-server"),
 		Client:     c.String("coding-client"),
@@ -289,35 +299,35 @@ func setupCoding(c *cli.Context) (remote.Remote, error) {
 		Password:   c.String("coding-git-password"),
 		SkipVerify: c.Bool("coding-skip-verify"),
 	}
-	log.Trace().Msgf("Remote (coding) opts: %#v", opts)
+	log.Trace().Msgf("Forge (coding) opts: %#v", opts)
 	return coding.New(opts)
 }
 
 func setupMetrics(g *errgroup.Group, _store store.Store) {
-	pendingJobs := promauto.NewGauge(prometheus.GaugeOpts{
+	pendingSteps := promauto.NewGauge(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
-		Name:      "pending_jobs",
-		Help:      "Total number of pending build processes.",
+		Name:      "pending_steps",
+		Help:      "Total number of pending pipeline steps.",
 	})
-	waitingJobs := promauto.NewGauge(prometheus.GaugeOpts{
+	waitingSteps := promauto.NewGauge(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
-		Name:      "waiting_jobs",
-		Help:      "Total number of builds waiting on deps.",
+		Name:      "waiting_steps",
+		Help:      "Total number of pipeline waiting on deps.",
 	})
-	runningJobs := promauto.NewGauge(prometheus.GaugeOpts{
+	runningSteps := promauto.NewGauge(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
-		Name:      "running_jobs",
-		Help:      "Total number of running build processes.",
+		Name:      "running_steps",
+		Help:      "Total number of running pipeline steps.",
 	})
 	workers := promauto.NewGauge(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
 		Name:      "worker_count",
 		Help:      "Total number of workers.",
 	})
-	builds := promauto.NewGauge(prometheus.GaugeOpts{
+	pipelines := promauto.NewGauge(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
-		Name:      "build_total_count",
-		Help:      "Total number of builds.",
+		Name:      "pipeline_total_count",
+		Help:      "Total number of pipelines.",
 	})
 	users := promauto.NewGauge(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
@@ -333,9 +343,9 @@ func setupMetrics(g *errgroup.Group, _store store.Store) {
 	g.Go(func() error {
 		for {
 			stats := server.Config.Services.Queue.Info(context.TODO())
-			pendingJobs.Set(float64(stats.Stats.Pending))
-			waitingJobs.Set(float64(stats.Stats.WaitingOnDeps))
-			runningJobs.Set(float64(stats.Stats.Running))
+			pendingSteps.Set(float64(stats.Stats.Pending))
+			waitingSteps.Set(float64(stats.Stats.WaitingOnDeps))
+			runningSteps.Set(float64(stats.Stats.Running))
 			workers.Set(float64(stats.Stats.Workers))
 			time.Sleep(500 * time.Millisecond)
 		}
@@ -344,11 +354,43 @@ func setupMetrics(g *errgroup.Group, _store store.Store) {
 		for {
 			repoCount, _ := _store.GetRepoCount()
 			userCount, _ := _store.GetUserCount()
-			buildCount, _ := _store.GetBuildCount()
-			builds.Set(float64(buildCount))
+			pipelineCount, _ := _store.GetPipelineCount()
+			pipelines.Set(float64(pipelineCount))
 			users.Set(float64(userCount))
 			repos.Set(float64(repoCount))
 			time.Sleep(10 * time.Second)
 		}
 	})
+}
+
+// generate or load key pair to sign webhooks requests (i.e. used for extensions)
+func setupSignatureKeys(_store store.Store) (crypto.PrivateKey, crypto.PublicKey) {
+	privKeyID := "signature-private-key"
+
+	privKey, err := _store.ServerConfigGet(privKeyID)
+	if errors.Is(err, types.RecordNotExist) {
+		_, privKey, err := ed25519.GenerateKey(rand.Reader)
+		if err != nil {
+			log.Fatal().Err(err).Msgf("Failed to generate private key")
+			return nil, nil
+		}
+		err = _store.ServerConfigSet(privKeyID, hex.EncodeToString(privKey))
+		if err != nil {
+			log.Fatal().Err(err).Msgf("Failed to generate private key")
+			return nil, nil
+		}
+		log.Debug().Msg("Created private key")
+		return privKey, privKey.Public()
+	} else if err != nil {
+		log.Fatal().Err(err).Msgf("Failed to load private key")
+		return nil, nil
+	} else {
+		privKeyStr, err := hex.DecodeString(privKey)
+		if err != nil {
+			log.Fatal().Err(err).Msgf("Failed to decode private key")
+			return nil, nil
+		}
+		privKey := ed25519.PrivateKey(privKeyStr)
+		return privKey, privKey.Public()
+	}
 }

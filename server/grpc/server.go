@@ -23,10 +23,10 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc/proto"
+	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/logging"
 	"github.com/woodpecker-ci/woodpecker/server/pubsub"
 	"github.com/woodpecker-ci/woodpecker/server/queue"
-	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
@@ -36,26 +36,26 @@ type WoodpeckerServer struct {
 	peer RPC
 }
 
-func NewWoodpeckerServer(remote remote.Remote, queue queue.Queue, logger logging.Log, pubsub pubsub.Publisher, store store.Store, host string) *WoodpeckerServer {
-	buildTime := promauto.NewGaugeVec(prometheus.GaugeOpts{
+func NewWoodpeckerServer(forge forge.Forge, queue queue.Queue, logger logging.Log, pubsub pubsub.Publisher, store store.Store, host string) *WoodpeckerServer {
+	pipelineTime := promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
-		Name:      "build_time",
-		Help:      "Build time.",
+		Name:      "pipeline_time",
+		Help:      "Pipeline time.",
 	}, []string{"repo", "branch", "status", "pipeline"})
-	buildCount := promauto.NewCounterVec(prometheus.CounterOpts{
+	pipelineCount := promauto.NewCounterVec(prometheus.CounterOpts{
 		Namespace: "woodpecker",
-		Name:      "build_count",
-		Help:      "Build count.",
+		Name:      "pipeline_count",
+		Help:      "Pipeline count.",
 	}, []string{"repo", "branch", "status", "pipeline"})
 	peer := RPC{
-		remote:     remote,
-		store:      store,
-		queue:      queue,
-		pubsub:     pubsub,
-		logger:     logger,
-		host:       host,
-		buildTime:  buildTime,
-		buildCount: buildCount,
+		forge:         forge,
+		store:         store,
+		queue:         queue,
+		pubsub:        pubsub,
+		logger:        logger,
+		host:          host,
+		pipelineTime:  pipelineTime,
+		pipelineCount: pipelineCount,
 	}
 	return &WoodpeckerServer{peer: peer}
 }
@@ -63,7 +63,6 @@ func NewWoodpeckerServer(remote remote.Remote, queue queue.Queue, logger logging
 func (s *WoodpeckerServer) Next(c context.Context, req *proto.NextRequest) (*proto.NextReply, error) {
 	filter := rpc.Filter{
 		Labels: req.GetFilter().GetLabels(),
-		Expr:   req.GetFilter().GetExpr(),
 	}
 
 	res := new(proto.NextReply)
@@ -89,7 +88,7 @@ func (s *WoodpeckerServer) Init(c context.Context, req *proto.InitRequest) (*pro
 		ExitCode: int(req.GetState().GetExitCode()),
 		Finished: req.GetState().GetFinished(),
 		Started:  req.GetState().GetStarted(),
-		Proc:     req.GetState().GetName(),
+		Step:     req.GetState().GetName(),
 		Exited:   req.GetState().GetExited(),
 	}
 	res := new(proto.Empty)
@@ -103,7 +102,7 @@ func (s *WoodpeckerServer) Update(c context.Context, req *proto.UpdateRequest) (
 		ExitCode: int(req.GetState().GetExitCode()),
 		Finished: req.GetState().GetFinished(),
 		Started:  req.GetState().GetStarted(),
-		Proc:     req.GetState().GetName(),
+		Step:     req.GetState().GetName(),
 		Exited:   req.GetState().GetExited(),
 	}
 	res := new(proto.Empty)
@@ -116,7 +115,7 @@ func (s *WoodpeckerServer) Upload(c context.Context, req *proto.UploadRequest) (
 		Data: req.GetFile().GetData(),
 		Mime: req.GetFile().GetMime(),
 		Name: req.GetFile().GetName(),
-		Proc: req.GetFile().GetProc(),
+		Step: req.GetFile().GetStep(),
 		Size: int(req.GetFile().GetSize()),
 		Time: req.GetFile().GetTime(),
 		Meta: req.GetFile().GetMeta(),
@@ -133,7 +132,7 @@ func (s *WoodpeckerServer) Done(c context.Context, req *proto.DoneRequest) (*pro
 		ExitCode: int(req.GetState().GetExitCode()),
 		Finished: req.GetState().GetFinished(),
 		Started:  req.GetState().GetStarted(),
-		Proc:     req.GetState().GetName(),
+		Step:     req.GetState().GetName(),
 		Exited:   req.GetState().GetExited(),
 	}
 	res := new(proto.Empty)
@@ -158,9 +157,22 @@ func (s *WoodpeckerServer) Log(c context.Context, req *proto.LogRequest) (*proto
 		Out:  req.GetLine().GetOut(),
 		Pos:  int(req.GetLine().GetPos()),
 		Time: req.GetLine().GetTime(),
-		Proc: req.GetLine().GetProc(),
+		Step: req.GetLine().GetStep(),
 	}
 	res := new(proto.Empty)
 	err := s.peer.Log(c, req.GetId(), line)
+	return res, err
+}
+
+func (s *WoodpeckerServer) RegisterAgent(c context.Context, req *proto.RegisterAgentRequest) (*proto.RegisterAgentResponse, error) {
+	res := new(proto.RegisterAgentResponse)
+	agentID, err := s.peer.RegisterAgent(c, req.GetPlatform(), req.GetBackend(), req.GetVersion(), req.GetCapacity())
+	res.AgentId = agentID
+	return res, err
+}
+
+func (s *WoodpeckerServer) ReportHealth(c context.Context, req *proto.ReportHealthRequest) (*proto.Empty, error) {
+	res := new(proto.Empty)
+	err := s.peer.ReportHealth(c, req.GetStatus())
 	return res, err
 }

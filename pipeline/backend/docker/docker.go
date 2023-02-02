@@ -1,9 +1,24 @@
+// Copyright 2022 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package docker
 
 import (
 	"context"
 	"io"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/docker/docker/api/types"
@@ -16,10 +31,14 @@ import (
 	"github.com/rs/zerolog/log"
 
 	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
+	"github.com/woodpecker-ci/woodpecker/shared/utils"
 )
 
 type docker struct {
-	client client.APIClient
+	client     client.APIClient
+	enableIPv6 bool
+	network    string
+	volumes    []string
 }
 
 // make sure docker implements Engine
@@ -52,6 +71,25 @@ func (e *docker) Load() error {
 	}
 	e.client = cli
 
+	e.enableIPv6, _ = strconv.ParseBool(os.Getenv("WOODPECKER_BACKEND_DOCKER_ENABLE_IPV6"))
+
+	e.network = os.Getenv("WOODPECKER_BACKEND_DOCKER_NETWORK")
+
+	volumes := strings.Split(os.Getenv("WOODPECKER_BACKEND_DOCKER_VOLUMES"), ",")
+	e.volumes = make([]string, 0, len(volumes))
+	// Validate provided volume definitions
+	for _, v := range volumes {
+		if v == "" {
+			continue
+		}
+		parts, err := splitVolumeParts(v)
+		if err != nil {
+			log.Error().Err(err).Msgf("invalid volume '%s' provided in WOODPECKER_BACKEND_DOCKER_VOLUMES", v)
+			continue
+		}
+		e.volumes = append(e.volumes, strings.Join(parts, ":"))
+	}
+
 	return nil
 }
 
@@ -69,8 +107,9 @@ func (e *docker) Setup(_ context.Context, conf *backend.Config) error {
 	}
 	for _, n := range conf.Networks {
 		_, err := e.client.NetworkCreate(noContext, n.Name, types.NetworkCreate{
-			Driver:  n.Driver,
-			Options: n.DriverOpts,
+			Driver:     n.Driver,
+			Options:    n.DriverOpts,
+			EnableIPv6: e.enableIPv6,
 			// Labels:  defaultLabels,
 		})
 		if err != nil {
@@ -80,35 +119,38 @@ func (e *docker) Setup(_ context.Context, conf *backend.Config) error {
 	return nil
 }
 
-func (e *docker) Exec(ctx context.Context, proc *backend.Step) error {
-	config := toConfig(proc)
-	hostConfig := toHostConfig(proc)
+func (e *docker) Exec(ctx context.Context, step *backend.Step) error {
+	config := toConfig(step)
+	hostConfig := toHostConfig(step)
 
 	// create pull options with encoded authorization credentials.
 	pullopts := types.ImagePullOptions{}
-	if proc.AuthConfig.Username != "" && proc.AuthConfig.Password != "" {
-		pullopts.RegistryAuth, _ = encodeAuthToBase64(proc.AuthConfig)
+	if step.AuthConfig.Username != "" && step.AuthConfig.Password != "" {
+		pullopts.RegistryAuth, _ = encodeAuthToBase64(step.AuthConfig)
 	}
 
 	// automatically pull the latest version of the image if requested
 	// by the process configuration.
-	if proc.Pull {
+	if step.Pull {
 		responseBody, perr := e.client.ImagePull(ctx, config.Image, pullopts)
 		if perr == nil {
-			defer responseBody.Close()
-
 			fd, isTerminal := term.GetFdInfo(os.Stdout)
 			if err := jsonmessage.DisplayJSONMessagesStream(responseBody, os.Stdout, fd, isTerminal, nil); err != nil {
 				log.Error().Err(err).Msg("DisplayJSONMessagesStream")
 			}
+			responseBody.Close()
 		}
-		// fix for drone/drone#1917
-		if perr != nil && proc.AuthConfig.Password != "" {
+		// Fix "Show warning when fail to auth to docker registry"
+		// (https://web.archive.org/web/20201023145804/https://github.com/drone/drone/issues/1917)
+		if perr != nil && step.AuthConfig.Password != "" {
 			return perr
 		}
 	}
 
-	_, err := e.client.ContainerCreate(ctx, config, hostConfig, nil, nil, proc.Name)
+	// add default volumes to the host configuration
+	hostConfig.Binds = utils.DedupStrings(append(hostConfig.Binds, e.volumes...))
+
+	_, err := e.client.ContainerCreate(ctx, config, hostConfig, nil, nil, step.Name)
 	if client.IsErrNotFound(err) {
 		// automatically pull and try to re-create the image if the
 		// failure is caused because the image does not exist.
@@ -116,49 +158,48 @@ func (e *docker) Exec(ctx context.Context, proc *backend.Step) error {
 		if perr != nil {
 			return perr
 		}
-		defer responseBody.Close()
 		fd, isTerminal := term.GetFdInfo(os.Stdout)
 		if err := jsonmessage.DisplayJSONMessagesStream(responseBody, os.Stdout, fd, isTerminal, nil); err != nil {
 			log.Error().Err(err).Msg("DisplayJSONMessagesStream")
 		}
+		responseBody.Close()
 
-		_, err = e.client.ContainerCreate(ctx, config, hostConfig, nil, nil, proc.Name)
+		_, err = e.client.ContainerCreate(ctx, config, hostConfig, nil, nil, step.Name)
 	}
 	if err != nil {
 		return err
 	}
 
-	if len(proc.NetworkMode) == 0 {
-		for _, net := range proc.Networks {
-			err = e.client.NetworkConnect(ctx, net.Name, proc.Name, &network.EndpointSettings{
+	if len(step.NetworkMode) == 0 {
+		for _, net := range step.Networks {
+			err = e.client.NetworkConnect(ctx, net.Name, step.Name, &network.EndpointSettings{
 				Aliases: net.Aliases,
 			})
 			if err != nil {
 				return err
 			}
 		}
+
+		// join the container to an existing network
+		if e.network != "" {
+			err = e.client.NetworkConnect(ctx, e.network, step.Name, &network.EndpointSettings{})
+			if err != nil {
+				return err
+			}
+		}
 	}
 
-	// if proc.Network != "host" { // or bridge, overlay, none, internal, container:<name> ....
-	// 	err = e.client.NetworkConnect(ctx, proc.Network, proc.Name, &network.EndpointSettings{
-	// 		Aliases: proc.NetworkAliases,
-	// 	})
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// }
-
-	return e.client.ContainerStart(ctx, proc.Name, startOpts)
+	return e.client.ContainerStart(ctx, step.Name, startOpts)
 }
 
-func (e *docker) Wait(ctx context.Context, proc *backend.Step) (*backend.State, error) {
-	wait, errc := e.client.ContainerWait(ctx, proc.Name, "")
+func (e *docker) Wait(ctx context.Context, step *backend.Step) (*backend.State, error) {
+	wait, errc := e.client.ContainerWait(ctx, step.Name, "")
 	select {
 	case <-wait:
 	case <-errc:
 	}
 
-	info, err := e.client.ContainerInspect(ctx, proc.Name)
+	info, err := e.client.ContainerInspect(ctx, step.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -173,8 +214,8 @@ func (e *docker) Wait(ctx context.Context, proc *backend.Step) (*backend.State, 
 	}, nil
 }
 
-func (e *docker) Tail(ctx context.Context, proc *backend.Step) (io.ReadCloser, error) {
-	logs, err := e.client.ContainerLogs(ctx, proc.Name, logsOpts)
+func (e *docker) Tail(ctx context.Context, step *backend.Step) (io.ReadCloser, error) {
+	logs, err := e.client.ContainerLogs(ctx, step.Name, logsOpts)
 	if err != nil {
 		return nil, err
 	}

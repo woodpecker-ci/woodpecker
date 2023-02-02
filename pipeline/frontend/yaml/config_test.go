@@ -5,6 +5,7 @@ import (
 
 	"github.com/franela/goblin"
 
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
 )
 
@@ -19,6 +20,8 @@ func TestParse(t *testing.T) {
 					g.Fail(err)
 				}
 
+				g.Assert(out.When.Constraints[0].Event.Match("tester")).Equal(true)
+
 				g.Assert(out.Workspace.Base).Equal("/go")
 				g.Assert(out.Workspace.Path).Equal("src/github.com/octocat/hello-world")
 				g.Assert(out.Volumes.Volumes[0].Name).Equal("custom")
@@ -29,10 +32,10 @@ func TestParse(t *testing.T) {
 				g.Assert(out.Services.Containers[0].Image).Equal("mysql")
 				g.Assert(out.Pipeline.Containers[0].Name).Equal("test")
 				g.Assert(out.Pipeline.Containers[0].Image).Equal("golang")
-				g.Assert(out.Pipeline.Containers[0].Commands).Equal(types.Stringorslice{"go install", "go test"})
+				g.Assert(out.Pipeline.Containers[0].Commands).Equal(types.StringOrSlice{"go install", "go test"})
 				g.Assert(out.Pipeline.Containers[1].Name).Equal("build")
 				g.Assert(out.Pipeline.Containers[1].Image).Equal("golang")
-				g.Assert(out.Pipeline.Containers[1].Commands).Equal(types.Stringorslice{"go build"})
+				g.Assert(out.Pipeline.Containers[1].Commands).Equal(types.StringOrSlice{"go build"})
 				g.Assert(out.Pipeline.Containers[2].Name).Equal("notify")
 				g.Assert(out.Pipeline.Containers[2].Image).Equal("slack")
 				// g.Assert(out.Pipeline.Containers[2].NetworkMode).Equal("container:name")
@@ -61,10 +64,60 @@ func TestParse(t *testing.T) {
 				}
 				g.Assert(out.Pipeline.Containers[0].Name).Equal("notify_fail")
 				g.Assert(out.Pipeline.Containers[0].Image).Equal("plugins/slack")
-				g.Assert(len(out.Pipeline.Containers[0].Constraints.Event.Include)).Equal(0)
 				g.Assert(out.Pipeline.Containers[1].Name).Equal("notify_success")
 				g.Assert(out.Pipeline.Containers[1].Image).Equal("plugins/slack")
-				g.Assert(out.Pipeline.Containers[1].Constraints.Event.Include).Equal([]string{"success"})
+
+				g.Assert(len(out.Pipeline.Containers[0].When.Constraints)).Equal(0)
+				g.Assert(out.Pipeline.Containers[1].Name).Equal("notify_success")
+				g.Assert(out.Pipeline.Containers[1].Image).Equal("plugins/slack")
+				g.Assert(out.Pipeline.Containers[1].When.Constraints[0].Event.Include).Equal([]string{"success"})
+			})
+
+			matchConfig, err := ParseString(sampleYaml)
+			if err != nil {
+				g.Fail(err)
+			}
+
+			g.It("Should match event tester", func() {
+				match, err := matchConfig.When.Match(frontend.Metadata{
+					Curr: frontend.Pipeline{
+						Event: "tester",
+					},
+				}, false)
+				g.Assert(match).Equal(true)
+				g.Assert(err).IsNil()
+			})
+
+			g.It("Should match event tester2", func() {
+				match, err := matchConfig.When.Match(frontend.Metadata{
+					Curr: frontend.Pipeline{
+						Event: "tester2",
+					},
+				}, false)
+				g.Assert(match).Equal(true)
+				g.Assert(err).IsNil()
+			})
+
+			g.It("Should match branch tester", func() {
+				match, err := matchConfig.When.Match(frontend.Metadata{
+					Curr: frontend.Pipeline{
+						Commit: frontend.Commit{
+							Branch: "tester",
+						},
+					},
+				}, true)
+				g.Assert(match).Equal(true)
+				g.Assert(err).IsNil()
+			})
+
+			g.It("Should not match event push", func() {
+				match, err := matchConfig.When.Match(frontend.Metadata{
+					Curr: frontend.Pipeline{
+						Event: "push",
+					},
+				}, false)
+				g.Assert(match).Equal(false)
+				g.Assert(err).IsNil()
 			})
 		})
 	})
@@ -72,6 +125,12 @@ func TestParse(t *testing.T) {
 
 var sampleYaml = `
 image: hello-world
+when:
+  - event:
+    - tester
+    - tester2
+  - branch:
+    - tester
 build:
   context: .
   dockerfile: Dockerfile

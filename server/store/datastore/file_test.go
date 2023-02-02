@@ -16,7 +16,7 @@ package datastore
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -25,16 +25,16 @@ import (
 )
 
 func TestFileFind(t *testing.T) {
-	store, closer := newTestStore(t, new(model.File), new(model.Proc))
+	store, closer := newTestStore(t, new(model.File), new(model.Step))
 	defer closer()
 
 	if err := store.FileCreate(
 		&model.File{
-			BuildID: 2,
-			ProcID:  1,
-			Name:    "hello.txt",
-			Mime:    "text/plain",
-			Size:    11,
+			PipelineID: 2,
+			StepID:     1,
+			Name:       "hello.txt",
+			Mime:       "text/plain",
+			Size:       11,
 		},
 		bytes.NewBufferString("hello world"),
 	); err != nil {
@@ -42,7 +42,7 @@ func TestFileFind(t *testing.T) {
 		return
 	}
 
-	file, err := store.FileFind(&model.Proc{ID: 1}, "hello.txt")
+	file, err := store.FileFind(&model.Step{ID: 1}, "hello.txt")
 	if err != nil {
 		t.Error(err)
 		return
@@ -50,11 +50,11 @@ func TestFileFind(t *testing.T) {
 	if got, want := file.ID, int64(1); got != want {
 		t.Errorf("Want file id %d, got %d", want, got)
 	}
-	if got, want := file.BuildID, int64(2); got != want {
-		t.Errorf("Want file build id %d, got %d", want, got)
+	if got, want := file.PipelineID, int64(2); got != want {
+		t.Errorf("Want file pipeline id %d, got %d", want, got)
 	}
-	if got, want := file.ProcID, int64(1); got != want {
-		t.Errorf("Want file proc id %d, got %d", want, got)
+	if got, want := file.StepID, int64(1); got != want {
+		t.Errorf("Want file step id %d, got %d", want, got)
 	}
 	if got, want := file.Name, "hello.txt"; got != want {
 		t.Errorf("Want file name %s, got %s", want, got)
@@ -66,43 +66,43 @@ func TestFileFind(t *testing.T) {
 		t.Errorf("Want file size %d, got %d", want, got)
 	}
 
-	rc, err := store.FileRead(&model.Proc{ID: 1}, "hello.txt")
+	rc, err := store.FileRead(&model.Step{ID: 1}, "hello.txt")
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	out, _ := ioutil.ReadAll(rc)
+	out, _ := io.ReadAll(rc)
 	if got, want := string(out), "hello world"; got != want {
 		t.Errorf("Want file data %s, got %s", want, got)
 	}
 }
 
 func TestFileList(t *testing.T) {
-	store, closer := newTestStore(t, new(model.File), new(model.Build))
+	store, closer := newTestStore(t, new(model.File), new(model.Pipeline))
 	defer closer()
 
 	assert.NoError(t, store.FileCreate(
 		&model.File{
-			BuildID: 1,
-			ProcID:  1,
-			Name:    "hello.txt",
-			Mime:    "text/plain",
-			Size:    11,
+			PipelineID: 1,
+			StepID:     1,
+			Name:       "hello.txt",
+			Mime:       "text/plain",
+			Size:       11,
 		},
 		bytes.NewBufferString("hello world"),
 	))
 	assert.NoError(t, store.FileCreate(
 		&model.File{
-			BuildID: 1,
-			ProcID:  1,
-			Name:    "hola.txt",
-			Mime:    "text/plain",
-			Size:    11,
+			PipelineID: 1,
+			StepID:     1,
+			Name:       "hola.txt",
+			Mime:       "text/plain",
+			Size:       11,
 		},
 		bytes.NewBufferString("hola mundo"),
 	))
 
-	files, err := store.FileList(&model.Build{ID: 1})
+	files, err := store.FileList(&model.Pipeline{ID: 1})
 	if err != nil {
 		t.Errorf("Unexpected error: select files: %s", err)
 		return
@@ -114,16 +114,16 @@ func TestFileList(t *testing.T) {
 }
 
 func TestFileIndexes(t *testing.T) {
-	store, closer := newTestStore(t, new(model.File), new(model.Build))
+	store, closer := newTestStore(t, new(model.File), new(model.Pipeline))
 	defer closer()
 
 	if err := store.FileCreate(
 		&model.File{
-			BuildID: 1,
-			ProcID:  1,
-			Name:    "hello.txt",
-			Size:    11,
-			Mime:    "text/plain",
+			PipelineID: 1,
+			StepID:     1,
+			Name:       "hello.txt",
+			Size:       11,
+			Mime:       "text/plain",
 		},
 		bytes.NewBufferString("hello world"),
 	); err != nil {
@@ -134,11 +134,11 @@ func TestFileIndexes(t *testing.T) {
 	// fail due to duplicate file name
 	if err := store.FileCreate(
 		&model.File{
-			BuildID: 1,
-			ProcID:  1,
-			Name:    "hello.txt",
-			Mime:    "text/plain",
-			Size:    11,
+			PipelineID: 1,
+			StepID:     1,
+			Name:       "hello.txt",
+			Mime:       "text/plain",
+			Size:       11,
 		},
 		bytes.NewBufferString("hello world"),
 	); err == nil {
@@ -147,44 +147,44 @@ func TestFileIndexes(t *testing.T) {
 }
 
 func TestFileCascade(t *testing.T) {
-	store, closer := newTestStore(t, new(model.File), new(model.Proc), new(model.Build))
+	store, closer := newTestStore(t, new(model.File), new(model.Step), new(model.Pipeline))
 	defer closer()
 
-	procOne := &model.Proc{
-		BuildID: 1,
-		PID:     1,
-		PGID:    1,
-		Name:    "build",
-		State:   "success",
+	stepOne := &model.Step{
+		PipelineID: 1,
+		PID:        1,
+		PGID:       1,
+		Name:       "build",
+		State:      "success",
 	}
-	err1 := store.ProcCreate([]*model.Proc{procOne})
-	assert.EqualValues(t, int64(1), procOne.ID)
+	err1 := store.StepCreate([]*model.Step{stepOne})
+	assert.EqualValues(t, int64(1), stepOne.ID)
 
 	err2 := store.FileCreate(
 		&model.File{
-			BuildID: 1,
-			ProcID:  1,
-			Name:    "hello.txt",
-			Mime:    "text/plain",
-			Size:    11,
+			PipelineID: 1,
+			StepID:     1,
+			Name:       "hello.txt",
+			Mime:       "text/plain",
+			Size:       11,
 		},
 		bytes.NewBufferString("hello world"),
 	)
 
 	if err1 != nil {
-		t.Errorf("Unexpected error: cannot insert proc: %s", err1)
+		t.Errorf("Unexpected error: cannot insert step: %s", err1)
 	} else if err2 != nil {
 		t.Errorf("Unexpected error: cannot insert file: %s", err2)
 	}
 
-	if _, err3 := store.ProcFind(&model.Build{ID: 1}, 1); err3 != nil {
-		t.Errorf("Unexpected error: cannot get inserted proc: %s", err3)
+	if _, err3 := store.StepFind(&model.Pipeline{ID: 1}, 1); err3 != nil {
+		t.Errorf("Unexpected error: cannot get inserted step: %s", err3)
 	}
 
-	err := store.ProcClear(&model.Build{ID: 1, Procs: []*model.Proc{procOne}})
+	err := store.StepClear(&model.Pipeline{ID: 1, Steps: []*model.Step{stepOne}})
 	assert.NoError(t, err)
 
-	file, err4 := store.FileFind(&model.Proc{ID: 1}, "hello.txt")
+	file, err4 := store.FileFind(&model.Step{ID: 1}, "hello.txt")
 	if err4 == nil {
 		t.Errorf("Expected no rows in result set error")
 		t.Log(file)

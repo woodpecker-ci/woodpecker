@@ -3,10 +3,13 @@ package compiler
 import (
 	"fmt"
 	"path"
+	"path/filepath"
 	"strings"
 
 	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/compiler/settings"
 )
 
 func (c *Compiler) createProcess(name string, container *yaml.Container, section string) (*backend.Step, error) {
@@ -16,9 +19,6 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 
 		workspace   = fmt.Sprintf("%s_default:%s", c.prefix, c.base)
 		privileged  = container.Privileged
-		entrypoint  = container.Entrypoint
-		command     = container.Command
-		image       = expandImage(container.Image)
 		networkMode = container.NetworkMode
 		ipcMode     = container.IpcMode
 		// network    = container.Network
@@ -66,35 +66,24 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 	}
 
 	if !detached || len(container.Commands) != 0 {
-		workingdir = path.Join(c.base, c.path)
+		workingdir = c.stepWorkdir(container)
 	}
 
 	if !detached {
-		if err := paramsToEnv(container.Settings, environment, c.secrets); err != nil {
-			return nil, err
+		pluginSecrets := secretMap{}
+		for name, secret := range c.secrets {
+			if secret.Available(container) {
+				pluginSecrets[name] = secret
+			}
 		}
-	}
 
-	if len(container.Commands) != 0 {
-		if c.metadata.Sys.Arch == "windows/amd64" {
-			entrypoint = []string{"powershell", "-noprofile", "-noninteractive", "-command"}
-			command = []string{"[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($Env:CI_SCRIPT)) | iex"}
-			environment["CI_SCRIPT"] = generateScriptWindows(container.Commands)
-			environment["HOME"] = "c:\\root"
-			environment["SHELL"] = "powershell.exe"
-		} else {
-			entrypoint = []string{"/bin/sh", "-c"}
-			command = []string{"echo $CI_SCRIPT | base64 -d | /bin/sh -e"}
-			environment["CI_SCRIPT"] = generateScriptPosix(container.Commands)
-			environment["HOME"] = "/root"
-			environment["SHELL"] = "/bin/sh"
+		if err := settings.ParamsToEnv(container.Settings, environment, pluginSecrets.toStringMap()); err != nil {
+			return nil, err
 		}
 	}
 
 	if matchImage(container.Image, c.escalated...) {
 		privileged = true
-		entrypoint = []string{}
-		command = []string{}
 	}
 
 	authConfig := backend.Auth{
@@ -103,7 +92,7 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		Email:    container.AuthConfig.Email,
 	}
 	for _, registry := range c.registries {
-		if matchHostname(image, registry.Hostname) {
+		if matchHostname(container.Image, registry.Hostname) {
 			authConfig.Username = registry.Username
 			authConfig.Password = registry.Password
 			authConfig.Email = registry.Email
@@ -113,7 +102,7 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 
 	for _, requested := range container.Secrets.Secrets {
 		secret, ok := c.secrets[strings.ToLower(requested.Source)]
-		if ok && (len(secret.Match) == 0 || matchImage(image, secret.Match...)) {
+		if ok && secret.Available(container) {
 			environment[strings.ToUpper(requested.Target)] = secret.Value
 		}
 	}
@@ -143,18 +132,27 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		cpuSet = c.reslimit.CPUSet
 	}
 
+	// at least one constraint contain status success, or all constraints have no status set
+	onSuccess := container.When.IncludesStatusSuccess()
+	// at least one constraint must include the status failure.
+	onFailure := container.When.IncludesStatusFailure()
+
+	failure := container.Failure
+	if container.Failure == "" {
+		failure = frontend.FailureFail
+	}
+
 	return &backend.Step{
 		Name:         name,
 		Alias:        container.Name,
-		Image:        image,
+		Image:        container.Image,
 		Pull:         container.Pull,
 		Detached:     detached,
 		Privileged:   privileged,
 		WorkingDir:   workingdir,
 		Environment:  environment,
 		Labels:       container.Labels,
-		Entrypoint:   entrypoint,
-		Command:      command,
+		Commands:     container.Commands,
 		ExtraHosts:   container.ExtraHosts,
 		Volumes:      volumes,
 		Tmpfs:        container.Tmpfs,
@@ -170,11 +168,17 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		CPUShares:    cpuShares,
 		CPUSet:       cpuSet,
 		AuthConfig:   authConfig,
-		OnSuccess:    container.Constraints.Status.Match("success"),
-		OnFailure: (len(container.Constraints.Status.Include)+
-			len(container.Constraints.Status.Exclude) != 0) &&
-			container.Constraints.Status.Match("failure"),
-		NetworkMode: networkMode,
-		IpcMode:     ipcMode,
+		OnSuccess:    onSuccess,
+		OnFailure:    onFailure,
+		Failure:      failure,
+		NetworkMode:  networkMode,
+		IpcMode:      ipcMode,
 	}, nil
+}
+
+func (c *Compiler) stepWorkdir(container *yaml.Container) string {
+	if filepath.IsAbs(container.Directory) {
+		return container.Directory
+	}
+	return filepath.Join(c.base, c.path, container.Directory)
 }

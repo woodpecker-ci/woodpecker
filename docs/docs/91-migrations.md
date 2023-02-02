@@ -2,6 +2,20 @@
 
 Some versions need some changes to the server configuration or the pipeline configuration files.
 
+## 1.0.0
+
+- The signature used to verify extensions calls (like those used for the [config-extension](./30-administration/100-external-configuration-api.md)) done by the Woodpecker server switched from using a shared-secret HMac to an ed25519 key-pair. Read more about it at the [config-extensions](./30-administration/100-external-configuration-api.md) documentation.
+- Refactored support of old agent filter labels and expression. Learn how to use the new [filter](./20-usage/20-pipeline-syntax.md#labels)
+- Renamed step environment variable `CI_SYSTEM_ARCH` to `CI_SYSTEM_PLATFORM`. Same applies for the cli exec variable.
+- Renamed environment variables `CI_BUILD_*` and `CI_PREV_BUILD_*` to `CI_PIPELINE_*` and `CI_PREV_PIPELINE_*`, old ones are still available but deprecated
+- Renamed environment variables `CI_JOB_*` to `CI_STEP_*`, old ones are still available but deprecated
+- Renamed environment variable `CI_REPO_REMOTE` to `CI_REPO_CLONE_URL`
+- Renamed API endpoints for pipelines (`<owner>/<repo>/builds/<buildId>` -> `<owner>/<repo>/pipelines/<pipelineId>`), old ones are still available but deprecated
+- Updated Prometheus gauge `build_*` to `pipeline_*`
+- Updated Prometheus gauge `*_job_*` to `*_step_*`
+- Renamed config env `WOODPECKER_MAX_PROCS` to `WOODPECKER_MAX_WORKFLOWS` (still available as fallback)
+- The pipelines are now also read from `.yaml` files, the new default order is `.woodpecker/*.yml` and `.woodpecker/*.yaml` (without any prioritization) -> `.woodpecker.yml` ->  `.woodpecker.yaml` -> `.drone.yml`
+
 ## 0.15.0
 
 - Default value for custom pipeline path is now empty / un-set which results in following resolution:
@@ -10,7 +24,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 
   Only projects created after updating will have an empty value by default. Existing projects will stick to the current pipeline path which is `.drone.yml` in most cases.
 
-  Read more about it at the [Project Settings](/docs/usage/project-settings#pipeline-path)
+  Read more about it at the [Project Settings](./20-usage/71-project-settings.md#pipeline-path)
 
 - From version `0.15.0` ongoing there will be three types of docker images: `latest`, `next` and `x.x.x` with an alpine variant for each type like `latest-alpine`.
   If you used `latest` before to try pre-release features you should switch to `next` after this release.
@@ -43,19 +57,22 @@ Some versions need some changes to the server configuration or the pipeline conf
     - CI_SOURCE_BRANCH => use CI_COMMIT_SOURCE_BRANCH
     - CI_TARGET_BRANCH => use CI_COMMIT_TARGET_BRANCH
 
-  For all available variables and their descriptions have a look at [built-in-environment-variables](/docs/usage/environment#built-in-environment-variables).
+  For all available variables and their descriptions have a look at [built-in-environment-variables](./20-usage/50-environment.md#built-in-environment-variables).
 
 - Prometheus metrics have been changed from `drone_*` to `woodpecker_*`
 
 - Base path has moved from `/var/lib/drone` to `/var/lib/woodpecker`
+
+- Default workspace base path has moved from `/drone` to `/woodpecker`
 
 - Default SQLite database location has changed:
   - `/var/lib/drone/drone.sqlite` -> `/var/lib/woodpecker/woodpecker.sqlite`
   - `drone.sqlite` -> `woodpecker.sqlite`
 
 - Plugin Settings moved into `settings` section:
+
   ```diff
-   pipline:
+   pipeline:
    something:
      image: my/plugin
   -  setting1: foo

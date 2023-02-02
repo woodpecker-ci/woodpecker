@@ -3,6 +3,7 @@ package yaml
 import (
 	"testing"
 
+	"github.com/docker/docker/api/types/strslice"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 
@@ -17,7 +18,6 @@ auth_config:
   password: password
 cap_add: [ ALL ]
 cap_drop: [ NET_ADMIN, SYS_ADMIN ]
-command: bundle exec thin -p 3000
 commands:
   - go build
   - go test
@@ -27,9 +27,9 @@ cpu_shares: 99
 detach: true
 devices:
   - /dev/ttyUSB0:/dev/ttyUSB0
+directory: example/
 dns: 8.8.8.8
 dns_search: example.com
-entrypoint: /code/entrypoint.sh
 environment:
   - RACK_ENV=development
   - SHOW=true
@@ -58,11 +58,12 @@ volumes:
 tmpfs:
   - /var/lib/test
 when:
-  branch: master
+  - branch: master
+  - event: cron
+    cron: job1
 settings:
   foo: bar
   baz: false
-deprecated_setting: fallback
 `)
 
 func TestUnmarshalContainer(t *testing.T) {
@@ -73,16 +74,15 @@ func TestUnmarshalContainer(t *testing.T) {
 		},
 		CapAdd:        []string{"ALL"},
 		CapDrop:       []string{"NET_ADMIN", "SYS_ADMIN"},
-		Command:       types.Command{"bundle", "exec", "thin", "-p", "3000"},
-		Commands:      types.Stringorslice{"go build", "go test"},
+		Commands:      types.StringOrSlice{"go build", "go test"},
 		CPUQuota:      types.StringorInt(11),
 		CPUSet:        "1,2",
 		CPUShares:     types.StringorInt(99),
 		Detached:      true,
 		Devices:       []string{"/dev/ttyUSB0:/dev/ttyUSB0"},
-		DNS:           types.Stringorslice{"8.8.8.8"},
-		DNSSearch:     types.Stringorslice{"example.com"},
-		Entrypoint:    types.Command{"/code/entrypoint.sh"},
+		Directory:     "example/",
+		DNS:           types.StringOrSlice{"8.8.8.8"},
+		DNSSearch:     types.StringOrSlice{"example.com"},
 		Environment:   types.SliceorMap{"RACK_ENV": "development", "SHOW": "true"},
 		ExtraHosts:    []string{"somehost:162.242.195.82", "otherhost:50.31.209.229"},
 		Image:         "golang:latest",
@@ -102,7 +102,7 @@ func TestUnmarshalContainer(t *testing.T) {
 		Pull:        true,
 		Privileged:  true,
 		ShmSize:     types.MemStringorInt(1024),
-		Tmpfs:       types.Stringorslice{"/var/lib/test"},
+		Tmpfs:       types.StringOrSlice{"/var/lib/test"},
 		Volumes: types.Volumes{
 			Volumes: []*types.Volume{
 				{Source: "", Destination: "/var/lib/mysql"},
@@ -110,17 +110,26 @@ func TestUnmarshalContainer(t *testing.T) {
 				{Source: "/etc/configs", Destination: "/etc/configs/", AccessMode: "ro"},
 			},
 		},
-		Constraints: constraint.Constraints{
-			Branch: constraint.List{
-				Include: []string{"master"},
+		When: constraint.When{
+			Constraints: []constraint.Constraint{
+				{
+					Branch: constraint.List{
+						Include: []string{"master"},
+					},
+				},
+				{
+					Event: constraint.List{
+						Include: []string{"cron"},
+					},
+					Cron: constraint.List{
+						Include: []string{"job1"},
+					},
+				},
 			},
 		},
 		Settings: map[string]interface{}{
 			"foo": "bar",
 			"baz": false,
-		},
-		Vargs: map[string]interface{}{
-			"deprecated_setting": "fallback",
 		},
 	}
 	got := Container{}
@@ -147,14 +156,13 @@ func TestUnmarshalContainers(t *testing.T) {
 			},
 		},
 		{
-			from: "test: { name: unit_test, image: node, deprecated_setting: fallback, settings: { normal_setting: true } }",
+			from: "test: { name: unit_test, image: node, settings: { normal_setting: true } }",
 			want: []*Container{
 				{
 					Name:  "unit_test",
 					Image: "node",
 					Settings: map[string]interface{}{
-						"deprecated_setting": "fallback",
-						"normal_setting":     true,
+						"normal_setting": true,
 					},
 				},
 			},
@@ -163,11 +171,12 @@ func TestUnmarshalContainers(t *testing.T) {
 			from: `publish-agent:
     group: bundle
     image: print/env
-    repo: woodpeckerci/woodpecker-agent
-    dockerfile: docker/Dockerfile.agent
+    settings:
+      repo: woodpeckerci/woodpecker-agent
+      dry_run: true
+      dockerfile: docker/Dockerfile.agent
+      tag: [next, latest]
     secrets: [docker_username, docker_password]
-    tag: [next, latest]
-    dry_run: true
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push`,
@@ -189,9 +198,13 @@ func TestUnmarshalContainers(t *testing.T) {
 						"tag":        stringsToInterface("next", "latest"),
 						"dry_run":    true,
 					},
-					Constraints: constraint.Constraints{
-						Event:  constraint.List{Include: []string{"push"}},
-						Branch: constraint.List{Include: []string{"${CI_REPO_DEFAULT_BRANCH}"}},
+					When: constraint.When{
+						Constraints: []constraint.Constraint{
+							{
+								Event:  constraint.List{Include: []string{"push"}},
+								Branch: constraint.List{Include: []string{"${CI_REPO_DEFAULT_BRANCH}"}},
+							},
+						},
 					},
 				},
 			},
@@ -217,9 +230,38 @@ func TestUnmarshalContainers(t *testing.T) {
 						"dockerfile": "docker/Dockerfile.cli",
 						"tag":        stringsToInterface("next"),
 					},
-					Constraints: constraint.Constraints{
-						Event:  constraint.List{Include: []string{"push"}},
-						Branch: constraint.List{Include: []string{"${CI_REPO_DEFAULT_BRANCH}"}},
+					When: constraint.When{
+						Constraints: []constraint.Constraint{
+							{
+								Event:  constraint.List{Include: []string{"push"}},
+								Branch: constraint.List{Include: []string{"${CI_REPO_DEFAULT_BRANCH}"}},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			from: `publish-cli:
+    image: print/env
+    when:
+      - branch: ${CI_REPO_DEFAULT_BRANCH}
+        event: push
+      - event: pull_request`,
+			want: []*Container{
+				{
+					Name:  "publish-cli",
+					Image: "print/env",
+					When: constraint.When{
+						Constraints: []constraint.Constraint{
+							{
+								Event:  constraint.List{Include: []string{"push"}},
+								Branch: constraint.List{Include: []string{"${CI_REPO_DEFAULT_BRANCH}"}},
+							},
+							{
+								Event: constraint.List{Include: []string{"pull_request"}},
+							},
+						},
 					},
 				},
 			},
@@ -255,4 +297,14 @@ func stringsToInterface(val ...string) []interface{} {
 		res[i] = val[i]
 	}
 	return res
+}
+
+func TestIsPlugin(t *testing.T) {
+	assert.True(t, (&Container{}).IsPlugin())
+	assert.True(t, (&Container{
+		Commands: types.StringOrSlice(strslice.StrSlice{}),
+	}).IsPlugin())
+	assert.False(t, (&Container{
+		Commands: types.StringOrSlice(strslice.StrSlice{"echo 'this is not a plugin'"}),
+	}).IsPlugin())
 }

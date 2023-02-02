@@ -19,24 +19,25 @@ package model
 //
 // swagger:model feed
 type Feed struct {
-	Owner    string `json:"owner"                   xorm:"repo_owner"`
-	Name     string `json:"name"                    xorm:"repo_name"`
-	FullName string `json:"full_name"               xorm:"repo_full_name"`
+	Owner    string `json:"owner"                   xorm:"feed_repo_owner"`
+	Name     string `json:"name"                    xorm:"feed_repo_name"`
+	FullName string `json:"full_name"               xorm:"feed_repo_full_name"`
 
-	Number   int64  `json:"number,omitempty"        xorm:"build_number"`
-	Event    string `json:"event,omitempty"         xorm:"build_event"`
-	Status   string `json:"status,omitempty"        xorm:"build_status"`
-	Created  int64  `json:"created_at,omitempty"    xorm:"build_created"`
-	Started  int64  `json:"started_at,omitempty"    xorm:"build_started"`
-	Finished int64  `json:"finished_at,omitempty"   xorm:"build_finished"`
-	Commit   string `json:"commit,omitempty"        xorm:"build_commit"`
-	Branch   string `json:"branch,omitempty"        xorm:"build_branch"`
-	Ref      string `json:"ref,omitempty"           xorm:"build_ref"`
-	Refspec  string `json:"refspec,omitempty"       xorm:"build_refspec"`
-	Remote   string `json:"remote,omitempty"        xorm:"build_remote"`
-	Title    string `json:"title,omitempty"         xorm:"build_title"`
-	Message  string `json:"message,omitempty"       xorm:"build_message"`
-	Author   string `json:"author,omitempty"        xorm:"build_author"`
-	Avatar   string `json:"author_avatar,omitempty" xorm:"build_avatar"`
-	Email    string `json:"author_email,omitempty"  xorm:"build_email"`
+	ID       int64  `json:"id,omitempty"            xorm:"feed_pipeline_id"`
+	Number   int64  `json:"number,omitempty"        xorm:"feed_pipeline_number"`
+	Event    string `json:"event,omitempty"         xorm:"feed_pipeline_event"`
+	Status   string `json:"status,omitempty"        xorm:"feed_pipeline_status"`
+	Created  int64  `json:"created_at,omitempty"    xorm:"feed_pipeline_created"`
+	Started  int64  `json:"started_at,omitempty"    xorm:"feed_pipeline_started"`
+	Finished int64  `json:"finished_at,omitempty"   xorm:"feed_pipeline_finished"`
+	Commit   string `json:"commit,omitempty"        xorm:"feed_pipeline_commit"`
+	Branch   string `json:"branch,omitempty"        xorm:"feed_pipeline_branch"`
+	Ref      string `json:"ref,omitempty"           xorm:"feed_pipeline_ref"`
+	Refspec  string `json:"refspec,omitempty"       xorm:"feed_pipeline_refspec"`
+	Remote   string `json:"remote,omitempty"        xorm:"feed_pipeline_clone_url"`
+	Title    string `json:"title,omitempty"         xorm:"feed_pipeline_title"`
+	Message  string `json:"message,omitempty"       xorm:"feed_pipeline_message"`
+	Author   string `json:"author,omitempty"        xorm:"feed_pipeline_author"`
+	Avatar   string `json:"author_avatar,omitempty" xorm:"feed_pipeline_avatar"`
+	Email    string `json:"author_email,omitempty"  xorm:"feed_pipeline_email"`
 }

@@ -1,6 +1,6 @@
 # Secrets
 
-Woodpecker provides the ability to store named parameters external to the Yaml configuration file, in a central secret store. These secrets can be passed to individual steps of the pipeline at runtime.
+Woodpecker provides the ability to store named parameters external to the YAML configuration file, in a central secret store. These secrets can be passed to individual steps of the pipeline at runtime.
 
 Secrets are exposed to your pipeline steps and plugins as uppercase environment variables and can therefore be referenced in the commands section of your pipeline.
 
@@ -14,7 +14,7 @@ pipeline:
 +   secrets: [ docker_username, docker_password ]
 ```
 
-Alternatively, you can get a `setting` from secrets using the `from_secret` syntax.  
+Alternatively, you can get a `setting` from secrets using the `from_secret` syntax.
 In this example, the secret named `secret_token` would be passed to the pipeline as `PLUGIN_TOKEN`.
 
 **NOTE:** the `from_secret` syntax only works with the newer `settings` block.
@@ -78,6 +78,15 @@ woodpecker-cli secret add \
 ```
 
 Please be careful when exposing secrets to pull requests. If your repository is open source and accepts pull requests your secrets are not safe. A bad actor can submit a malicious pull request that exposes your secrets.
+
+## Image filter
+
+To prevent abusing your secrets with malicious pull requests, you can limit a secret to a list of images. They are not available to any other container. In addition, you can make the secret available only for plugins (steps without user-defined commands).
+
+:::warning
+If you enable the option "Only available for plugins", always set an image filter too. Otherwise, the secret can be accessed by a very simple self-developed plugin and is thus *not* safe.
+If you only set an image filter, you could still access the secret using the same image and by specifying a command that prints it.
+:::
 
 ## Examples
 

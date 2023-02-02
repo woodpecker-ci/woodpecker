@@ -1,10 +1,23 @@
+// Copyright 2022 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package exec
 
 import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -17,6 +30,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/pipeline"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	backendTypes "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
@@ -30,7 +44,7 @@ import (
 // Command exports the exec command.
 var Command = &cli.Command{
 	Name:      "exec",
-	Usage:     "execute a local build",
+	Usage:     "execute a local pipeline",
 	ArgsUsage: "[path/to/.woodpecker.yml]",
 	Action:    run,
 	Flags:     append(common.GlobalFlags, flags...),
@@ -72,7 +86,7 @@ func execFile(c *cli.Context, file string) error {
 }
 
 func runExec(c *cli.Context, file, repoPath string) error {
-	dat, err := ioutil.ReadFile(file)
+	dat, err := os.ReadFile(file)
 	if err != nil {
 		return err
 	}
@@ -98,7 +112,7 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 	metadata := metadataFromContext(c, axis)
 	environ := metadata.Environ()
 	var secrets []compiler.Secret
-	for key, val := range metadata.Job.Matrix {
+	for key, val := range metadata.Step.Matrix {
 		environ[key] = val
 		secrets = append(secrets, compiler.Secret{
 			Name:  key,
@@ -110,6 +124,11 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 	for _, env := range c.StringSlice("env") {
 		envs := strings.SplitN(env, "=", 2)
 		droneEnv[envs[0]] = envs[1]
+		if _, exists := environ[envs[0]]; exists {
+			// don't override existing values
+			continue
+		}
+		environ[envs[0]] = envs[1]
 	}
 
 	tmpl, err := envsubst.ParseFile(file)
@@ -184,6 +203,8 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 		return err
 	}
 
+	backend.Init(context.WithValue(c.Context, types.CliContext, c))
+
 	engine, err := backend.FindEngine(c.String("backend-engine"))
 	if err != nil {
 		return err
@@ -204,28 +225,36 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 		pipeline.WithTracer(pipeline.DefaultTracer),
 		pipeline.WithLogger(defaultLogger),
 		pipeline.WithEngine(engine),
-	).Run()
+		pipeline.WithDescription(map[string]string{
+			"CLI": "exec",
+		}),
+	).Run(c.Context)
 }
 
 // return the metadata from the cli context.
 func metadataFromContext(c *cli.Context, axis matrix.Axis) frontend.Metadata {
+	platform := c.String("system-platform")
+	if platform == "" {
+		platform = runtime.GOOS + "/" + runtime.GOARCH
+	}
+
 	return frontend.Metadata{
 		Repo: frontend.Repo{
-			Name:    c.String("repo-name"),
-			Link:    c.String("repo-link"),
-			Remote:  c.String("repo-remote-url"),
-			Private: c.Bool("repo-private"),
+			Name:     c.String("repo-name"),
+			Link:     c.String("repo-link"),
+			CloneURL: c.String("repo-clone-url"),
+			Private:  c.Bool("repo-private"),
 		},
-		Curr: frontend.Build{
-			Number:   c.Int64("build-number"),
-			Parent:   c.Int64("parent-build-number"),
-			Created:  c.Int64("build-created"),
-			Started:  c.Int64("build-started"),
-			Finished: c.Int64("build-finished"),
-			Status:   c.String("build-status"),
-			Event:    c.String("build-event"),
-			Link:     c.String("build-link"),
-			Target:   c.String("build-target"),
+		Curr: frontend.Pipeline{
+			Number:   c.Int64("pipeline-number"),
+			Parent:   c.Int64("pipeline-parent"),
+			Created:  c.Int64("pipeline-created"),
+			Started:  c.Int64("pipeline-started"),
+			Finished: c.Int64("pipeline-finished"),
+			Status:   c.String("pipeline-status"),
+			Event:    c.String("pipeline-event"),
+			Link:     c.String("pipeline-link"),
+			Target:   c.String("pipeline-target"),
 			Commit: frontend.Commit{
 				Sha:     c.String("commit-sha"),
 				Ref:     c.String("commit-ref"),
@@ -239,14 +268,14 @@ func metadataFromContext(c *cli.Context, axis matrix.Axis) frontend.Metadata {
 				},
 			},
 		},
-		Prev: frontend.Build{
-			Number:   c.Int64("prev-build-number"),
-			Created:  c.Int64("prev-build-created"),
-			Started:  c.Int64("prev-build-started"),
-			Finished: c.Int64("prev-build-finished"),
-			Status:   c.String("prev-build-status"),
-			Event:    c.String("prev-build-event"),
-			Link:     c.String("prev-build-link"),
+		Prev: frontend.Pipeline{
+			Number:   c.Int64("prev-pipeline-number"),
+			Created:  c.Int64("prev-pipeline-created"),
+			Started:  c.Int64("prev-pipeline-started"),
+			Finished: c.Int64("prev-pipeline-finished"),
+			Status:   c.String("prev-pipeline-status"),
+			Event:    c.String("prev-pipeline-event"),
+			Link:     c.String("prev-pipeline-link"),
 			Commit: frontend.Commit{
 				Sha:     c.String("prev-commit-sha"),
 				Ref:     c.String("prev-commit-ref"),
@@ -260,14 +289,14 @@ func metadataFromContext(c *cli.Context, axis matrix.Axis) frontend.Metadata {
 				},
 			},
 		},
-		Job: frontend.Job{
-			Number: c.Int("job-number"),
+		Step: frontend.Step{
+			Number: c.Int("step-number"),
 			Matrix: axis,
 		},
 		Sys: frontend.System{
-			Name: c.String("system-name"),
-			Link: c.String("system-link"),
-			Arch: c.String("system-arch"),
+			Name:     c.String("system-name"),
+			Link:     c.String("system-link"),
+			Platform: platform,
 		},
 	}
 }
@@ -283,13 +312,13 @@ func convertPathForWindows(path string) string {
 	return filepath.ToSlash(path)
 }
 
-var defaultLogger = pipeline.LogFunc(func(proc *backendTypes.Step, rc multipart.Reader) error {
+var defaultLogger = pipeline.LogFunc(func(step *backendTypes.Step, rc multipart.Reader) error {
 	part, err := rc.NextPart()
 	if err != nil {
 		return err
 	}
 
-	logStream := NewLineWriter(proc.Alias)
+	logStream := NewLineWriter(step.Alias)
 	_, err = io.Copy(logStream, part)
 	return err
 })

@@ -4,14 +4,13 @@ linters-settings:
   misspell:
     locale: US
   gofumpt:
-    lang-version: "1.16"
+    lang-version: "1.19"
     extra-rules: true
 
 linters:
   disable-all: true
   enable:
     - bidichk
-    - deadcode
     - errcheck
     - gofmt
     - goimports
@@ -21,15 +20,15 @@ linters:
     - misspell
     - revive
     - staticcheck
-    - structcheck
     - typecheck
     - unused
-    - varcheck
     - whitespace
     - gofumpt
+    - errorlint
 
 run:
   timeout: 5m
+  go: '1.19'
 
 issues:
   exclude-rules:
@@ -37,3 +36,8 @@ issues:
       linters:
         - deadcode
         - unused
+    # gin force us to use string as context key
+    - path: server/store/context.go
+      linters:
+        - staticcheck
+        - revive

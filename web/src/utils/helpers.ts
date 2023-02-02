@@ -1,54 +1,54 @@
-import { Build, BuildProc, Repo } from '~/lib/api/types';
+import { Pipeline, PipelineStep, Repo } from '~/lib/api/types';
 
-export function findProc(procs: BuildProc[], pid: number): BuildProc | undefined {
-  return procs.reduce((prev, proc) => {
-    if (proc.pid === pid) {
-      return proc;
+export function findStep(steps: PipelineStep[], pid: number): PipelineStep | undefined {
+  return steps.reduce((prev, step) => {
+    if (step.pid === pid) {
+      return step;
     }
 
-    if (proc.children) {
-      const result = findProc(proc.children, pid);
+    if (step.children) {
+      const result = findStep(step.children, pid);
       if (result) {
         return result;
       }
     }
 
     return prev;
-  }, undefined as BuildProc | undefined);
+  }, undefined as PipelineStep | undefined);
 }
 
 /**
  * Returns true if the process is in a completed state.
  *
- * @param {Object} proc - The process object.
+ * @param {Object} step - The process object.
  * @returns {boolean}
  */
-export function isProcFinished(proc: BuildProc): boolean {
-  return proc.state !== 'running' && proc.state !== 'pending';
+export function isStepFinished(step: PipelineStep): boolean {
+  return step.state !== 'running' && step.state !== 'pending';
 }
 
 /**
  * Returns true if the process is running.
  *
- * @param {Object} proc - The process object.
+ * @param {Object} step - The process object.
  * @returns {boolean}
  */
-export function isProcRunning(proc: BuildProc): boolean {
-  return proc.state === 'running';
+export function isStepRunning(step: PipelineStep): boolean {
+  return step.state === 'running';
 }
 
 /**
- * Compare two builds by name.
- * @param {Object} a - A build.
- * @param {Object} b - A build.
+ * Compare two pipelines by creation timestamp.
+ * @param {Object} a - A pipeline.
+ * @param {Object} b - A pipeline.
  * @returns {number}
  */
-export function compareBuilds(a: Build, b: Build): number {
-  return (b.started_at || b.created_at || -1) - (a.started_at || a.created_at || -1);
+export function comparePipelines(a: Pipeline, b: Pipeline): number {
+  return (b.created_at || -1) - (a.created_at || -1);
 }
 
-export function isBuildActive(build: Build): boolean {
-  return ['pending', 'running', 'started'].includes(build.status);
+export function isPipelineActive(pipeline: Pipeline): boolean {
+  return ['pending', 'running', 'started'].includes(pipeline.status);
 }
 
 export function repoSlug(ownerOrRepo: Repo): string;

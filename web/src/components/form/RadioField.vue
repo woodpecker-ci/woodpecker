@@ -3,28 +3,14 @@
     <input
       :id="`radio-${id}-${option.value}`"
       type="radio"
-      class="
-        radio
-        relative
-        flex-shrink-0
-        border border-gray-400
-        dark:border-gray-600
-        cursor-pointer
-        rounded-full
-        w-5
-        h-5
-        checked:bg-lime-600 checked:border-lime-600
-        dark:checked:bg-lime-700 dark:checked:border-lime-700
-      "
+      class="radio relative flex-shrink-0 border border-gray-400 cursor-pointer rounded-full w-5 h-5 checked:bg-lime-600 checked:border-lime-600 focus-visible:border-gray-600 dark:(border-gray-600 checked:bg-lime-700 checked:border-lime-700 focus-visible:border-gray-300 checked:focus-visible:border-gray-300)"
       :value="option.value"
       :checked="innerValue.includes(option.value)"
       @click="innerValue = option.value"
     />
     <div class="flex flex-col ml-4">
-      <label class="cursor-pointer text-gray-600 dark:text-gray-500" :for="`radio-${id}-${option.value}`">{{
-        option.text
-      }}</label>
-      <span v-if="option.description" class="text-sm text-gray-400 dark:text-gray-600">{{ option.description }}</span>
+      <label class="cursor-pointer text-color" :for="`radio-${id}-${option.value}`">{{ option.text }}</label>
+      <span v-if="option.description" class="text-sm text-color-alt">{{ option.description }}</span>
     </div>
   </div>
 </template>
@@ -40,8 +26,6 @@ export default defineComponent({
   components: {},
 
   props: {
-    // used by toRef
-    // eslint-disable-next-line vue/no-unused-properties
     modelValue: {
       type: String,
       required: true,
@@ -97,7 +81,7 @@ export default defineComponent({
   background: white;
   transform: translate(-50%, -50%);
   opacity: 0;
-  @apply dark:bg-gray-400;
+  @apply dark:bg-gray-300;
 }
 
 .radio:checked::before {

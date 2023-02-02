@@ -1,20 +1,50 @@
+// Copyright 2022 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package local
 
 import (
 	"context"
-	"encoding/base64"
+	"errors"
+	"fmt"
 	"io"
 	"os"
 	"os/exec"
 	"strings"
 
+	"github.com/alessio/shellescape"
+	"golang.org/x/exp/slices"
+
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
-	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/shared/constant"
 )
 
+// notAllowedEnvVarOverwrites are all env vars that can not be overwritten by step config
+var notAllowedEnvVarOverwrites = []string{
+	"CI_NETRC_MACHINE",
+	"CI_NETRC_USERNAME",
+	"CI_NETRC_PASSWORD",
+	"CI_SCRIPT",
+	"HOME",
+	"SHELL",
+}
+
 type local struct {
-	cmd    *exec.Cmd
-	output io.ReadCloser
+	// TODO: make cmd a cmd list to iterate over, the hard part is to have a common ReadCloser
+	cmd        *exec.Cmd
+	output     io.ReadCloser
+	workingdir string
 }
 
 // make sure local implements Engine
@@ -34,56 +64,64 @@ func (e *local) IsAvailable() bool {
 }
 
 func (e *local) Load() error {
-	return nil
+	dir, err := os.MkdirTemp("", "woodpecker-local-*")
+	e.workingdir = dir
+	return err
 }
 
 // Setup the pipeline environment.
-func (e *local) Setup(ctx context.Context, proc *types.Config) error {
+func (e *local) Setup(ctx context.Context, config *types.Config) error {
 	return nil
 }
 
 // Exec the pipeline step.
-func (e *local) Exec(ctx context.Context, proc *types.Step) error {
+func (e *local) Exec(ctx context.Context, step *types.Step) error {
 	// Get environment variables
-	Command := []string{}
-	for a, b := range proc.Environment {
-		if a != "HOME" && a != "SHELL" { // Don't override $HOME and $SHELL
-			Command = append(Command, a+"="+b)
+	env := os.Environ()
+	for a, b := range step.Environment {
+		// append allowed env vars to command env
+		if !slices.Contains(notAllowedEnvVarOverwrites, a) {
+			env = append(env, a+"="+b)
 		}
 	}
 
-	// Get default clone image
-	defaultCloneImage := "docker.io/woodpeckerci/plugin-git:latest"
-	if len(server.Config.Pipeline.DefaultCloneImage) > 0 {
-		defaultCloneImage = server.Config.Pipeline.DefaultCloneImage
-	}
-
-	if proc.Image == defaultCloneImage {
+	var command []string
+	if step.Image == constant.DefaultCloneImage {
 		// Default clone step
-		Command = append(Command, "CI_WORKSPACE=/tmp/woodpecker/"+proc.Environment["CI_REPO"])
-		Command = append(Command, "plugin-git")
+		// TODO: creat tmp HOME and insert netrc
+		// TODO: download plugin-git binary if not exist
+		env = append(env, "CI_WORKSPACE="+e.workingdir+"/"+step.Environment["CI_REPO"])
+		command = append(command, "plugin-git")
 	} else {
 		// Use "image name" as run command
-		Command = append(Command, proc.Image[18:len(proc.Image)-7])
-		Command = append(Command, "-c")
+		command = append(command, step.Image)
+		command = append(command, "-c")
 
-		// Decode script and delete initial lines
+		// TODO: use commands directly
+		script := ""
+		for _, cmd := range step.Commands {
+			script += fmt.Sprintf("echo + %s\n%s\n\n", shellescape.Quote(cmd), cmd)
+		}
+		script = strings.TrimSpace(script)
+
 		// Deleting the initial lines removes netrc support but adds compatibility for more shells like fish
-		Script, _ := base64.RawStdEncoding.DecodeString(proc.Environment["CI_SCRIPT"])
-		Command = append(Command, string(Script)[strings.Index(string(Script), "\n\n")+2:])
+		command = append(command, script)
 	}
 
 	// Prepare command
-	e.cmd = exec.CommandContext(ctx, "/bin/env", Command...)
+	e.cmd = exec.CommandContext(ctx, command[0], command[1:]...)
+	e.cmd.Env = env
 
 	// Prepare working directory
-	if proc.Image == defaultCloneImage {
-		e.cmd.Dir = "/tmp/woodpecker/" + proc.Environment["CI_REPO_OWNER"]
+	if step.Image == constant.DefaultCloneImage {
+		e.cmd.Dir = e.workingdir + "/" + step.Environment["CI_REPO_OWNER"]
 	} else {
-		e.cmd.Dir = "/tmp/woodpecker/" + proc.Environment["CI_REPO"]
+		e.cmd.Dir = e.workingdir + "/" + step.Environment["CI_REPO"]
 	}
-	_ = os.MkdirAll(e.cmd.Dir, 0o700)
-
+	err := os.MkdirAll(e.cmd.Dir, 0o700)
+	if err != nil {
+		return err
+	}
 	// Get output and redirect Stderr to Stdout
 	e.output, _ = e.cmd.StdoutPipe()
 	e.cmd.Stderr = e.cmd.Stdout
@@ -94,9 +132,20 @@ func (e *local) Exec(ctx context.Context, proc *types.Step) error {
 // Wait for the pipeline step to complete and returns
 // the completion results.
 func (e *local) Wait(context.Context, *types.Step) (*types.State, error) {
+	err := e.cmd.Wait()
+	ExitCode := 0
+
+	var execExitError *exec.ExitError
+	if errors.As(err, &execExitError) {
+		ExitCode = execExitError.ExitCode()
+		// Non-zero exit code is a pipeline failure, but not an agent error.
+		err = nil
+	}
+
 	return &types.State{
-		Exited: true,
-	}, e.cmd.Wait()
+		Exited:   true,
+		ExitCode: ExitCode,
+	}, err
 }
 
 // Tail the pipeline step logs.
@@ -106,6 +155,5 @@ func (e *local) Tail(context.Context, *types.Step) (io.ReadCloser, error) {
 
 // Destroy the pipeline environment.
 func (e *local) Destroy(context.Context, *types.Config) error {
-	os.RemoveAll(e.cmd.Dir)
-	return nil
+	return os.RemoveAll(e.cmd.Dir)
 }

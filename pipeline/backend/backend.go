@@ -1,20 +1,24 @@
 package backend
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/docker"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/kubernetes"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/local"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/ssh"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
 
 var engines map[string]types.Engine
 
-func init() {
+func Init(ctx context.Context) {
 	loadedEngines := []types.Engine{
 		docker.New(),
 		local.New(),
-		// kubernetes.New(), // TODO: disabled for now as kubernetes backend has not been implemented yet
+		ssh.New(),
+		kubernetes.New(ctx),
 	}
 
 	engines = make(map[string]types.Engine)

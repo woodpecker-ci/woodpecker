@@ -1,3 +1,17 @@
+// Copyright 2022 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package queue
 
 import (
@@ -26,7 +40,7 @@ type entry struct {
 }
 
 type worker struct {
-	filter  Filter
+	filter  FilterFn
 	channel chan *Task
 }
 
@@ -74,7 +88,7 @@ func (q *fifo) PushAtOnce(c context.Context, tasks []*Task) error {
 }
 
 // Poll retrieves and removes the head of this queue.
-func (q *fifo) Poll(c context.Context, f Filter) (*Task, error) {
+func (q *fifo) Poll(c context.Context, f FilterFn) (*Task, error) {
 	q.Lock()
 	w := &worker{
 		channel: make(chan *Task, 1),
@@ -241,7 +255,7 @@ func (q *fifo) process() {
 		}
 	}()
 
-	q.resubmitExpiredBuilds()
+	q.resubmitExpiredPipelines()
 	q.filterWaiting()
 	for pending, worker := q.assignToWorker(); pending != nil && worker != nil; pending, worker = q.assignToWorker() {
 		task := pending.Value.(*Task)
@@ -303,7 +317,7 @@ func (q *fifo) assignToWorker() (*list.Element, *worker) {
 	return nil, nil
 }
 
-func (q *fifo) resubmitExpiredBuilds() {
+func (q *fifo) resubmitExpiredPipelines() {
 	for id, state := range q.running {
 		if time.Now().After(state.deadline) {
 			q.pending.PushFront(state.item)

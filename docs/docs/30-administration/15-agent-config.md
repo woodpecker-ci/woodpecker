@@ -12,17 +12,16 @@ services:
   environment:
 +   - WOODPECKER_SERVER=localhost:9000
 +   - WOODPECKER_AGENT_SECRET="your-shared-secret-goes-here"
-
 ```
 
 The following are automatically set and can be overridden:
 
 - WOODPECKER_HOSTNAME if not set, becomes the OS' hostname
-- WOODPECKER_MAX_PROCS if not set, defaults to 1
+- WOODPECKER_MAX_WORKFLOWS if not set, defaults to 1
 
 ## Processes per agent
 
-By default the maximum processes that are run per agent is 1. If required you can add `WOODPECKER_MAX_PROCS` to increase your parellel processing on a per-agent basis.
+By default the maximum processes that are run per agent is 1. If required you can add `WOODPECKER_MAX_WORKFLOWS` to increase your parallel processing on a per-agent basis.
 
 ```yaml
 # docker-compose.yml
@@ -34,47 +33,8 @@ services:
   environment:
     - WOODPECKER_SERVER=localhost:9000
     - WOODPECKER_AGENT_SECRET="your-shared-secret-goes-here"
-+    - WOODPECKER_MAX_PROCS=4
++    - WOODPECKER_MAX_WORKFLOWS=4
 ```
-
-## Filtering agents
-
-When building your pipelines as long as you have set the platform or filter, builds can be made to only run code on certain agents.
-
-```
-- WOODPECKER_HOSTNAME=mycompany-ci-01.example.com
-- WOODPECKER_FILTER=
-```
-
-### Filter on Platform
-
-Only want certain pipelines or steps to run on certain agents with specific platforms? Such as arm vs amd64?
-
-```yaml
-# .woodpecker.yml
-pipeline:
-  build:
-   image: golang
-   commands:
-     - go build
-     - go test
-  when:
-    platform: linux/amd64
-
-
-  testing:
-   image: golang
-   commands:
-     - go build
-     - go test
-  when:
-    platform: linux/arm*
-
-
-```
-
-See [Conditionals Pipeline](/docs/usage/pipeline-syntax#step-when---conditional-execution) syntax for more
-
 
 ## All agent configuration options
 
@@ -120,15 +80,25 @@ Disable colored debug output.
 
 Configures the agent hostname.
 
-### `WOODPECKER_MAX_PROCS`
+### `WOODPECKER_MAX_WORKFLOWS`
 > Default: `1`
 
-Configures the number of parallel builds.
+Configures the number of parallel workflows.
+
+### `WOODPECKER_FILTER_LABELS`
+> Default: empty
+
+Configures labels to filter pipeline pick up. Use a list of key-value pairs like `key=value,second-key=*`. `*` can be used as a wildcard. By default agents provide three additional labels `platform=os/arch`, `hostname=my-agent` and `repo=*` which can be overwritten if needed. To learn how labels work check out the [pipeline syntax page](../20-usage/20-pipeline-syntax.md#labels).
 
 ### `WOODPECKER_HEALTHCHECK`
 > Default: `true`
 
 Enable healthcheck endpoint.
+
+### `WOODPECKER_HEALTHCHECK_ADDR`
+> Default: `:3000`
+
+Configures healthcheck endpoint address.
 
 ### `WOODPECKER_KEEPALIVE_TIME`
 > Default: empty
@@ -153,4 +123,12 @@ Configures if the gRPC server certificate should be verified, only valid when `W
 ### `WOODPECKER_BACKEND`
 > Default: `auto-detect`
 
-Configures the backend engine to run pipelines on. Possible values are `auto-detect`, `docker`, or `local`.
+Configures the backend engine to run pipelines on. Possible values are `auto-detect`, `docker`, `local` or `ssh`.
+
+### `WOODPECKER_BACKEND_DOCKER_*`
+
+See [Docker backend configuration](backends/docker/#configuration)
+
+### `WOODPECKER_BACKEND_SSH_*`
+
+See [SSH backend configuration](backends/ssh/#configuration)

@@ -1,45 +1,66 @@
+variables:
+  - &node_image 'node:18-alpine'
+  - &when_path
+      # related config files
+      - ".woodpecker/web.yml"
+      # web source code
+      - "web/**"
+
 pipeline:
   deps:
-    image: node:16-alpine
+    image: *node_image
+    directory: web/
     commands:
-      - cd web/
-      - yarn install --frozen-lockfile
+      - corepack enable
+      - pnpm install --frozen-lockfile
     when:
-      path: "web/**"
+      path: *when_path
 
   lint:
     group: test
-    image: node:16-alpine
+    image: *node_image
+    directory: web/
     commands:
-      - cd web/
-      - yarn lint
+      - corepack enable
+      - pnpm lint
     when:
-      path: "web/**"
+      path: *when_path
 
   formatcheck:
     group: test
-    image: node:16-alpine
+    image: *node_image
+    directory: web/
     commands:
-      - cd web/
-      - yarn formatcheck
+      - corepack enable
+      - pnpm formatcheck
     when:
-      path: "web/**"
+      path: *when_path
 
   typecheck:
     group: test
-    image: node:16-alpine
+    image: *node_image
+    directory: web/
     commands:
-      - cd web/
-      - yarn typecheck
+      - corepack enable
+      - pnpm typecheck
     when:
-      path: "web/**"
+      path: *when_path
+
+  securitycheck:
+    group: test
+    image: aquasec/trivy:latest
+    commands:
+      - trivy fs --exit-code 0 --skip-dirs node_modules/ --severity UNKNOWN,LOW web/
+      - trivy fs --exit-code 1 --skip-dirs node_modules/ --severity MEDIUM,HIGH,CRITICAL web/
+    when:
+      path: *when_path
 
   test:
     group: test
-    image: node:16-alpine
+    image: *node_image
+    directory: web/
     commands:
-      - cd web/
-      - yarn test
+      - corepack enable
+      - pnpm test
     when:
-      path: "web/**"
-
+      path: *when_path

@@ -14,9 +14,9 @@
 
 package datastore
 
-import "database/sql"
-
-var RecordNotExist = sql.ErrNoRows
+import (
+	"github.com/woodpecker-ci/woodpecker/server/store/types"
+)
 
 // wrapGet return error if err not nil or if requested entry do not exist
 func wrapGet(exist bool, err error) error {
@@ -24,7 +24,7 @@ func wrapGet(exist bool, err error) error {
 		return err
 	}
 	if !exist {
-		return RecordNotExist
+		return types.RecordNotExist
 	}
 	return nil
 }

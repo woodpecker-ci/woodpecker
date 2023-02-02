@@ -1,43 +1,54 @@
 import { defineStore } from 'pinia';
-import { computed, Ref, toRef } from 'vue';
+import { computed, reactive, Ref, ref } from 'vue';
 
 import useApiClient from '~/compositions/useApiClient';
 import { Repo } from '~/lib/api/types';
 import { repoSlug } from '~/utils/helpers';
 
-const apiClient = useApiClient();
+export const useRepoStore = defineStore('repos', () => {
+  const apiClient = useApiClient();
 
-export default defineStore({
-  id: 'repos',
+  const repos: Map<string, Repo> = reactive(new Map());
+  const ownedRepoSlugs = ref<string[]>([]);
 
-  state: () => ({
-    repos: {} as Record<string, Repo>,
-  }),
+  const ownedRepos = computed(() =>
+    Array.from(repos.entries())
+      .filter(([slug]) => ownedRepoSlugs.value.includes(slug))
+      .map(([, repo]) => repo),
+  );
 
-  actions: {
-    // getter
-    getRepo(owner: Ref<string>, name: Ref<string>) {
-      return computed(() => {
-        const slug = repoSlug(owner.value, name.value);
-        return toRef(this.repos, slug).value;
-      });
-    },
+  function getRepo(owner: Ref<string>, name: Ref<string>) {
+    return computed(() => {
+      const slug = repoSlug(owner.value, name.value);
+      return repos.get(slug);
+    });
+  }
 
-    // setter
-    setRepo(repo: Repo) {
-      this.repos[repoSlug(repo)] = repo;
-    },
+  function setRepo(repo: Repo) {
+    repos.set(repoSlug(repo), repo);
+  }
 
-    // loading
-    async loadRepo(owner: string, name: string) {
-      const repo = await apiClient.getRepo(owner, name);
-      this.repos[repoSlug(repo)] = repo;
-    },
-    async loadRepos() {
-      const repos = await apiClient.getRepoList();
-      repos.forEach((repo) => {
-        this.repos[repoSlug(repo.owner, repo.name)] = repo;
-      });
-    },
-  },
+  async function loadRepo(owner: string, name: string) {
+    const repo = await apiClient.getRepo(owner, name);
+    repos.set(repoSlug(repo), repo);
+    return repo;
+  }
+
+  async function loadRepos() {
+    const _ownedRepos = await apiClient.getRepoList();
+    _ownedRepos.forEach((repo) => {
+      repos.set(repoSlug(repo), repo);
+    });
+    ownedRepoSlugs.value = _ownedRepos.map((repo) => repoSlug(repo));
+  }
+
+  return {
+    repos,
+    ownedRepos,
+    ownedRepoSlugs,
+    getRepo,
+    setRepo,
+    loadRepo,
+    loadRepos,
+  };
 });

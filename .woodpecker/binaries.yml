@@ -2,120 +2,95 @@ depends_on:
   - test
   - web
 
+variables:
+  - &golang_image 'golang:1.19.5'
+  - &node_image 'node:18-alpine'
+  - &when_path
+      # related config files
+      - ".woodpecker/binaries.yml"
+      - "nfpm/*.yml"
+      # go source code
+      - "**/*.go"
+      - "go.*"
+      # web source code
+      - "web/**"
+
 pipeline:
   build-web:
-    image: node:16-alpine
+    group: prepare
+    image: *node_image
+    directory: web/
     commands:
-      - cd web/
-      - yarn install --frozen-lockfile
-      - yarn build
+      - corepack enable
+      - pnpm install --frozen-lockfile
+      - pnpm build
     when:
-      path:
-        # related config files
-        - ".woodpecker/binaries.yml"
-        - "nfpm/*.yml"
-        # go source code
-        - "**/*.go"
-        - "go.*"
-        # web source code
-        - "web/**"
+      path: *when_path
+
+  vendor:
+    group: prepare
+    image: *golang_image
+    commands:
+      - go mod vendor
+    when:
+      path: *when_path
 
   build-server:
     group: build
-    image: golang:1.17
+    image: *golang_image
     commands:
       - make release-server
     when:
-      path:
-        # related config files
-        - ".woodpecker/binaries.yml"
-        - "nfpm/*.yml"
-        # go source code
-        - "**/*.go"
-        - "go.*"
-        # web source code
-        - "web/**"
+      path: *when_path
 
   build-agent:
     group: build
-    image: golang:1.17
+    image: *golang_image
     commands:
       - make release-agent
     when:
-      path:
-        # related config files
-        - ".woodpecker/binaries.yml"
-        - "nfpm/*.yml"
-        # go source code
-        - "**/*.go"
-        - "go.*"
-        # web source code
-        - "web/**"
+      path: *when_path
 
   build-cli:
     group: build
-    image: golang:1.17
+    image: *golang_image
     commands:
       - make release-cli
     when:
-      path:
-        # related config files
-        - ".woodpecker/binaries.yml"
-        - "nfpm/*.yml"
-        # go source code
-        - "**/*.go"
-        - "go.*"
-        # web source code
-        - "web/**"
+      path: *when_path
 
   build-deb-rpm:
     group: bundle
-    image: golang:1.17
+    image: *golang_image
     commands:
       - make bundle
     when:
-      path:
-        # related config files
-        - ".woodpecker/binaries.yml"
-        - "nfpm/*.yml"
-        # go source code
-        - "**/*.go"
-        - "go.*"
-        # web source code
-        - "web/**"
+      path: *when_path
+
+  build-tarball:
+    group: bundle
+    image: *golang_image
+    commands:
+      - make release-tarball
+    when:
+      path: *when_path
 
   checksums:
-    image: golang:1.17
+    image: *golang_image
     commands:
       - make release-checksums
     when:
-      path:
-        # related config files
-        - ".woodpecker/binaries.yml"
-        - "nfpm/*.yml"
-        # go source code
-        - "**/*.go"
-        - "go.*"
-        # web source code
-        - "web/**"
+      path: *when_path
 
   # TODO: upload build artifacts for pushes to ${CI_REPO_DEFAULT_BRANCH}
 
   release-dryrun:
-    image: golang:1.17
+    image: *golang_image
     commands:
     - ls -la dist/*.*
     - cat dist/checksums.txt
     when:
-      path:
-        # related config files
-        - ".woodpecker/binaries.yml"
-        - "nfpm/*.yml"
-        # go source code
-        - "**/*.go"
-        - "go.*"
-        # web source code
-        - "web/**"
+      path: *when_path
 
   release:
     image: plugins/github-release
@@ -131,4 +106,3 @@ pipeline:
       title: ${CI_COMMIT_TAG##v}
     when:
       event: tag
-      # path conditions are ignored for tag events

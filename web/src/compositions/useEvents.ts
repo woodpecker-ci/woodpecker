@@ -1,6 +1,5 @@
-import BuildStore from '~/store/builds';
-import RepoStore from '~/store/repos';
-import { repoSlug } from '~/utils/helpers';
+import { usePipelineStore } from '~/store/pipelines';
+import { useRepoStore } from '~/store/repos';
 
 import useApiClient from './useApiClient';
 
@@ -11,8 +10,8 @@ export default () => {
   if (initialized) {
     return;
   }
-  const repoStore = RepoStore();
-  const buildStore = BuildStore();
+  const repoStore = useRepoStore();
+  const pipelineStore = usePipelineStore();
 
   initialized = true;
 
@@ -24,19 +23,18 @@ export default () => {
     const { repo } = data;
     repoStore.setRepo(repo);
 
-    // contains build update
-    if (!data.build) {
+    // contains pipeline update
+    if (!data.pipeline) {
       return;
     }
-    const { build } = data;
-    buildStore.setBuild(repo.owner, repo.name, build);
-    buildStore.setBuildFeedItem({ ...build, name: repo.name, owner: repo.owner, full_name: repoSlug(repo) });
+    const { pipeline } = data;
+    pipelineStore.setPipeline(repo.owner, repo.name, pipeline);
 
-    // contains proc update
-    if (!data.proc) {
+    // contains step update
+    if (!data.step) {
       return;
     }
-    const { proc } = data;
-    buildStore.setProc(repo.owner, repo.name, build.number, proc);
+    const { step } = data;
+    pipelineStore.setStep(repo.owner, repo.name, pipeline.number, step);
   });
 };

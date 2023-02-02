@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,12 +34,12 @@ import (
 
 // TODO: make it set system wide via environment variables
 const (
-	defaultTimeout int64 = 60 // 1 hour default build time
+	defaultTimeout int64 = 60 // 1 hour default pipeline time
 	maxTimeout     int64 = defaultTimeout * 2
 )
 
 func PostRepo(c *gin.Context) {
-	remote := server.Config.Services.Remote
+	forge := server.Config.Services.Forge
 	_store := store.FromContext(c)
 	user := session.User(c)
 	repo := session.Repo(c)
@@ -51,6 +52,7 @@ func PostRepo(c *gin.Context) {
 	repo.IsActive = true
 	repo.UserID = user.ID
 	repo.AllowPull = true
+	repo.CancelPreviousPipelineEvents = server.Config.Pipeline.DefaultCancelPreviousPipelineEvents
 
 	if repo.Visibility == "" {
 		repo.Visibility = model.VisibilityPublic
@@ -85,15 +87,23 @@ func PostRepo(c *gin.Context) {
 		sig,
 	)
 
-	err = remote.Activate(c, user, repo, link)
+	from, err := forge.Repo(c, user, repo.ForgeRemoteID, repo.Owner, repo.Name)
+	if err == nil {
+		if repo.FullName != from.FullName {
+			// create a redirection
+			err = _store.CreateRedirection(&model.Redirection{RepoID: repo.ID, FullName: repo.FullName})
+			if err != nil {
+				_ = c.AbortWithError(http.StatusInternalServerError, err)
+				return
+			}
+		}
+		repo.Update(from)
+	}
+
+	err = forge.Activate(c, user, repo, link)
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
-	}
-
-	from, err := remote.Repo(c, user, repo.Owner, repo.Name)
-	if err == nil {
-		repo.Update(from)
 	}
 
 	err = _store.UpdateRepo(repo)
@@ -140,6 +150,9 @@ func PatchRepo(c *gin.Context) {
 	if in.Config != nil {
 		repo.Config = *in.Config
 	}
+	if in.CancelPreviousPipelineEvents != nil {
+		repo.CancelPreviousPipelineEvents = *in.CancelPreviousPipelineEvents
+	}
 	if in.Visibility != nil {
 		switch *in.Visibility {
 		case string(model.VisibilityInternal), string(model.VisibilityPrivate), string(model.VisibilityPublic):
@@ -185,9 +198,9 @@ func GetRepoPermissions(c *gin.Context) {
 func GetRepoBranches(c *gin.Context) {
 	repo := session.Repo(c)
 	user := session.User(c)
-	r := server.Config.Services.Remote
+	f := server.Config.Services.Forge
 
-	branches, err := r.Branches(c, user, repo)
+	branches, err := f.Branches(c, user, repo)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -218,7 +231,7 @@ func DeleteRepo(c *gin.Context) {
 		}
 	}
 
-	if err := server.Config.Services.Remote.Deactivate(c, user, repo, server.Config.Server.Host); err != nil {
+	if err := server.Config.Services.Forge.Deactivate(c, user, repo, server.Config.Server.Host); err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
@@ -226,7 +239,7 @@ func DeleteRepo(c *gin.Context) {
 }
 
 func RepairRepo(c *gin.Context) {
-	remote := server.Config.Services.Remote
+	forge := server.Config.Services.Forge
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
 	user := session.User(c)
@@ -247,32 +260,33 @@ func RepairRepo(c *gin.Context) {
 		sig,
 	)
 
-	if err := remote.Deactivate(c, user, repo, host); err != nil {
-		log.Trace().Err(err).Msgf("deactivate repo '%s' to repair failed", repo.FullName)
-	}
-	if err := remote.Activate(c, user, repo, link); err != nil {
-		c.String(500, err.Error())
-		return
-	}
-
-	from, err := remote.Repo(c, user, repo.Owner, repo.Name)
+	from, err := forge.Repo(c, user, repo.ForgeRemoteID, repo.Owner, repo.Name)
 	if err != nil {
-		log.Error().Err(err).Msgf("get repo '%s/%s' from remote", repo.Owner, repo.Name)
+		log.Error().Err(err).Msgf("get repo '%s/%s' from forge", repo.Owner, repo.Name)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
-	repo.Name = from.Name
-	repo.Owner = from.Owner
-	repo.FullName = from.FullName
-	repo.Avatar = from.Avatar
-	repo.Link = from.Link
-	repo.Clone = from.Clone
-	repo.IsSCMPrivate = from.IsSCMPrivate
-	if repo.IsSCMPrivate != from.IsSCMPrivate {
-		repo.ResetVisibility()
+
+	if repo.FullName != from.FullName {
+		// create a redirection
+		err = _store.CreateRedirection(&model.Redirection{RepoID: repo.ID, FullName: repo.FullName})
+		if err != nil {
+			_ = c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
 	}
+
+	repo.Update(from)
 	if err := _store.UpdateRepo(repo); err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := forge.Deactivate(c, user, repo, host); err != nil {
+		log.Trace().Err(err).Msgf("deactivate repo '%s' to repair failed", repo.FullName)
+	}
+	if err := forge.Activate(c, user, repo, link); err != nil {
+		c.String(500, err.Error())
 		return
 	}
 
@@ -280,7 +294,7 @@ func RepairRepo(c *gin.Context) {
 }
 
 func MoveRepo(c *gin.Context) {
-	remote := server.Config.Services.Remote
+	forge := server.Config.Services.Forge
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
 	user := session.User(c)
@@ -298,7 +312,7 @@ func MoveRepo(c *gin.Context) {
 		return
 	}
 
-	from, err := remote.Repo(c, user, owner, name)
+	from, err := forge.Repo(c, user, "", owner, name)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -308,16 +322,13 @@ func MoveRepo(c *gin.Context) {
 		return
 	}
 
-	repo.Name = from.Name
-	repo.Owner = from.Owner
-	repo.FullName = from.FullName
-	repo.Avatar = from.Avatar
-	repo.Link = from.Link
-	repo.Clone = from.Clone
-	repo.IsSCMPrivate = from.IsSCMPrivate
-	if repo.IsSCMPrivate != from.IsSCMPrivate {
-		repo.ResetVisibility()
+	err = _store.CreateRedirection(&model.Redirection{RepoID: repo.ID, FullName: repo.FullName})
+	if err != nil {
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		return
 	}
+
+	repo.Update(from)
 
 	errStore := _store.UpdateRepo(repo)
 	if errStore != nil {
@@ -341,10 +352,10 @@ func MoveRepo(c *gin.Context) {
 		sig,
 	)
 
-	if err := remote.Deactivate(c, user, repo, host); err != nil {
+	if err := forge.Deactivate(c, user, repo, host); err != nil {
 		log.Trace().Err(err).Msgf("deactivate repo '%s' for move to activate later, got an error", repo.FullName)
 	}
-	if err := remote.Activate(c, user, repo, link); err != nil {
+	if err := forge.Activate(c, user, repo, link); err != nil {
 		c.String(500, err.Error())
 		return
 	}

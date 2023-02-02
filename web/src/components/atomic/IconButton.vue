@@ -1,43 +1,35 @@
 <template>
-  <div
-    :disabled="disabled"
-    class="
-      relative
-      flex
-      items-center
-      justify-center
-      text-gray-500
-      px-1
-      py-1
-      rounded-full
-      bg-transparent
-      hover:bg-gray-200 hover:text-gray-700
-      dark:hover:bg-gray-600 dark:text-gray-500 dark:hover:text-gray-700
-      cursor-pointer
-      transition-all
-      duration-150
-      focus:outline-none
-      overflow-hidden
-      disabled:opacity-50 disabled:cursor-not-allowed
-    "
-    @click="doClick"
+  <router-link v-if="to" :to="to" :title="title" :aria-label="title" class="icon-button">
+    <slot>
+      <Icon :name="icon" />
+    </slot>
+  </router-link>
+  <a
+    v-else-if="href"
+    :href="href"
+    :title="title"
+    :aria-label="title"
+    class="icon-button"
+    target="_blank"
+    rel="noopener noreferrer"
   >
-    <Icon :name="icon" />
-    <div
-      class="absolute left-0 top-0 right-0 bottom-0 flex items-center justify-center"
-      :class="{
-        'opacity-100': isLoading,
-        'opacity-0': !isLoading,
-      }"
-    >
+    <slot>
+      <Icon :name="icon" />
+    </slot>
+  </a>
+  <button v-else :disabled="disabled" class="icon-button" type="button" :title="title" :aria-label="title">
+    <slot>
+      <Icon :name="icon" />
+    </slot>
+    <div v-if="isLoading" class="absolute left-0 top-0 right-0 bottom-0 flex items-center justify-center">
       <Icon name="loading" class="animate-spin" />
     </div>
-  </div>
+  </button>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import { RouteLocationRaw, useRouter } from 'vue-router';
+import { RouteLocationRaw } from 'vue-router';
 
 import Icon, { IconNames } from '~/components/atomic/Icon.vue';
 
@@ -49,7 +41,7 @@ export default defineComponent({
   props: {
     icon: {
       type: String as PropType<IconNames>,
-      required: true,
+      default: '',
     },
 
     disabled: {
@@ -65,29 +57,22 @@ export default defineComponent({
     isLoading: {
       type: Boolean,
     },
-  },
 
-  setup(props) {
-    const router = useRouter();
+    title: {
+      type: String,
+      required: true,
+    },
 
-    async function doClick() {
-      if (props.isLoading) {
-        return;
-      }
-
-      if (!props.to) {
-        return;
-      }
-
-      if (typeof props.to === 'string' && props.to.startsWith('http')) {
-        window.location.href = props.to;
-        return;
-      }
-
-      await router.push(props.to);
-    }
-
-    return { doClick };
+    href: {
+      type: String,
+      default: '',
+    },
   },
 });
 </script>
+
+<style scoped>
+.icon-button {
+  @apply relative flex items-center justify-center px-1 py-1 rounded-full bg-transparent hover-effect overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed;
+}
+</style>

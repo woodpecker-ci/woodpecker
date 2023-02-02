@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2019 Laszlo Fogas
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,15 +30,9 @@ var flags = []cli.Flag{
 		Value:   "localhost:9000",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_USERNAME"},
-		Name:    "grpc-username",
-		Usage:   "auth username",
-		Value:   "x-oauth-basic",
-	},
-	&cli.StringFlag{
 		EnvVars:  []string{"WOODPECKER_AGENT_SECRET"},
-		Name:     "grpc-password",
-		Usage:    "server-agent shared password",
+		Name:     "grpc-token",
+		Usage:    "server-agent shared token",
 		FilePath: os.Getenv("WOODPECKER_AGENT_SECRET_FILE"),
 	},
 	&cli.BoolFlag{
@@ -72,15 +67,15 @@ var flags = []cli.Flag{
 		Name:    "hostname",
 		Usage:   "agent hostname",
 	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_FILTER"},
+	&cli.StringSliceFlag{
+		EnvVars: []string{"WOODPECKER_FILTER_LABELS"},
 		Name:    "filter",
-		Usage:   "filter expression to restrict builds by label",
+		Usage:   "List of labels to filter tasks on. An agent must be assigned every tag listed in a task to be selected.",
 	},
 	&cli.IntFlag{
-		EnvVars: []string{"WOODPECKER_MAX_PROCS"},
-		Name:    "max-procs",
-		Usage:   "agent parallel builds",
+		EnvVars: []string{"WOODPECKER_MAX_WORKFLOWS", "WOODPECKER_MAX_PROCS"},
+		Name:    "max-workflows",
+		Usage:   "agent parallel workflows",
 		Value:   1,
 	},
 	&cli.BoolFlag{
@@ -88,6 +83,12 @@ var flags = []cli.Flag{
 		Name:    "healthcheck",
 		Usage:   "enable healthcheck endpoint",
 		Value:   true,
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_HEALTHCHECK_ADDR"},
+		Name:    "healthcheck-addr",
+		Usage:   "healthcheck endpoint address",
+		Value:   ":3000",
 	},
 	&cli.DurationFlag{
 		EnvVars: []string{"WOODPECKER_KEEPALIVE_TIME"},
@@ -105,5 +106,45 @@ var flags = []cli.Flag{
 		Name:    "backend-engine",
 		Usage:   "backend engine to run pipelines on",
 		Value:   "auto-detect",
+	},
+
+	// TODO: add flags of backends
+
+	// backend k8s
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_K8S_NAMESPACE"},
+		Name:    "backend-k8s-namespace",
+		Usage:   "backend k8s namespace",
+		Value:   "woodpecker",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_K8S_VOLUME_SIZE"},
+		Name:    "backend-k8s-volume-size",
+		Usage:   "backend k8s volume size (default 10G)",
+		Value:   "10G",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_K8S_STORAGE_CLASS"},
+		Name:    "backend-k8s-storage-class",
+		Usage:   "backend k8s storage class",
+		Value:   "",
+	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_K8S_STORAGE_RWX"},
+		Name:    "backend-k8s-storage-rwx",
+		Usage:   "backend k8s storage access mode, should ReadWriteMany (RWX) instead of ReadWriteOnce (RWO) be used? (default: true)",
+		Value:   true,
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_K8S_POD_LABELS"},
+		Name:    "backend-k8s-pod-labels",
+		Usage:   "backend k8s additional worker pod labels",
+		Value:   "",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_K8S_POD_ANNOTATIONS"},
+		Name:    "backend-k8s-pod-annotations",
+		Usage:   "backend k8s additional worker pod annotations",
+		Value:   "",
 	},
 }

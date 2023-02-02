@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/antonmedv/expr"
 	"github.com/bmatcuk/doublestar/v4"
+	"go.uber.org/multierr"
 	"gopkg.in/yaml.v3"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
@@ -12,8 +14,13 @@ import (
 )
 
 type (
-	// Constraints defines a set of runtime constraints.
-	Constraints struct {
+	// When defines a set of runtime constraints.
+	When struct {
+		// If true then read from a list of constraint
+		Constraints []Constraint
+	}
+
+	Constraint struct {
 		Ref         List
 		Repo        List
 		Instance    List
@@ -21,10 +28,12 @@ type (
 		Environment List
 		Event       List
 		Branch      List
+		Cron        List
 		Status      List
 		Matrix      Map
 		Local       types.BoolTrue
 		Path        Path
+		Evaluate    string `yaml:"evaluate,omitempty"`
 	}
 
 	// List defines a runtime constraint for exclude & include string slices.
@@ -47,24 +56,149 @@ type (
 	}
 )
 
+func (when *When) IsEmpty() bool {
+	return len(when.Constraints) == 0
+}
+
+// Returns true if at least one of the internal constraints is true.
+func (when *When) Match(metadata frontend.Metadata, global bool) (bool, error) {
+	for _, c := range when.Constraints {
+		match, err := c.Match(metadata, global)
+		if err != nil {
+			return false, err
+		}
+		if match {
+			return true, nil
+		}
+	}
+
+	if when.IsEmpty() {
+		// test against default Constraints
+		empty := &Constraint{}
+		return empty.Match(metadata, global)
+	}
+	return false, nil
+}
+
+func (when *When) IncludesStatusFailure() bool {
+	for _, c := range when.Constraints {
+		if c.Status.Includes("failure") {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (when *When) IncludesStatusSuccess() bool {
+	// "success" acts differently than "failure" in that it's
+	// presumed to be included unless it's specifically not part
+	// of the list
+	if when.IsEmpty() {
+		return true
+	}
+	for _, c := range when.Constraints {
+		if len(c.Status.Include) == 0 || c.Status.Includes("success") {
+			return true
+		}
+	}
+	return false
+}
+
+// False if (any) non local
+func (when *When) IsLocal() bool {
+	for _, c := range when.Constraints {
+		if !c.Local.Bool() {
+			return false
+		}
+	}
+	return true
+}
+
+func (when *When) UnmarshalYAML(value *yaml.Node) error {
+	switch value.Kind {
+	case yaml.SequenceNode:
+		if err := value.Decode(&when.Constraints); err != nil {
+			return err
+		}
+
+	case yaml.MappingNode:
+		c := Constraint{}
+		if err := value.Decode(&c); err != nil {
+			return err
+		}
+		when.Constraints = append(when.Constraints, c)
+
+	default:
+		return fmt.Errorf("not supported yaml kind: %v", value.Kind)
+	}
+
+	return nil
+}
+
 // Match returns true if all constraints match the given input. If a single
 // constraint fails a false value is returned.
-func (c *Constraints) Match(metadata frontend.Metadata) bool {
-	match := c.Platform.Match(metadata.Sys.Arch) &&
+func (c *Constraint) Match(metadata frontend.Metadata, global bool) (bool, error) {
+	match := true
+	if !global {
+		c.SetDefaultEventFilter()
+
+		// apply step only filters
+		match = c.Matrix.Match(metadata.Step.Matrix)
+	}
+
+	match = match && c.Platform.Match(metadata.Sys.Platform) &&
 		c.Environment.Match(metadata.Curr.Target) &&
 		c.Event.Match(metadata.Curr.Event) &&
-		c.Branch.Match(metadata.Curr.Commit.Branch) &&
 		c.Repo.Match(metadata.Repo.Name) &&
 		c.Ref.Match(metadata.Curr.Commit.Ref) &&
-		c.Instance.Match(metadata.Sys.Host) &&
-		c.Matrix.Match(metadata.Job.Matrix)
+		c.Instance.Match(metadata.Sys.Host)
 
-	// changed files filter do only apply for pull-request and push events
+	// changed files filter apply only for pull-request and push events
 	if metadata.Curr.Event == frontend.EventPull || metadata.Curr.Event == frontend.EventPush {
 		match = match && c.Path.Match(metadata.Curr.Commit.ChangedFiles, metadata.Curr.Commit.Message)
 	}
 
-	return match
+	if metadata.Curr.Event != frontend.EventTag {
+		match = match && c.Branch.Match(metadata.Curr.Commit.Branch)
+	}
+
+	if metadata.Curr.Event == frontend.EventCron {
+		match = match && c.Cron.Match(metadata.Curr.Cron)
+	}
+
+	if c.Evaluate != "" {
+		env := metadata.Environ()
+		out, err := expr.Compile(c.Evaluate, expr.Env(env), expr.AsBool())
+		if err != nil {
+			return false, err
+		}
+		result, err := expr.Run(out, env)
+		if err != nil {
+			return false, err
+		}
+		match = match && result.(bool)
+	}
+
+	return match, nil
+}
+
+// SetDefaultEventFilter set default e event filter if not event filter is already set
+func (c *Constraint) SetDefaultEventFilter() {
+	if c.Event.IsEmpty() {
+		c.Event.Include = []string{
+			frontend.EventPush,
+			frontend.EventPull,
+			frontend.EventTag,
+			frontend.EventDeploy,
+			frontend.EventManual,
+		}
+	}
+}
+
+// IsEmpty return true if a constraint has no conditions
+func (c List) IsEmpty() bool {
+	return len(c.Include) == 0 && len(c.Exclude) == 0
 }
 
 // Match returns true if the string matches the include patterns and does not
@@ -105,11 +239,11 @@ func (c *List) Excludes(v string) bool {
 // UnmarshalYAML unmarshals the constraint.
 func (c *List) UnmarshalYAML(value *yaml.Node) error {
 	out1 := struct {
-		Include types.Stringorslice
-		Exclude types.Stringorslice
+		Include types.StringOrSlice
+		Exclude types.StringOrSlice
 	}{}
 
-	var out2 types.Stringorslice
+	var out2 types.StringOrSlice
 
 	err1 := value.Decode(&out1)
 	err2 := value.Decode(&out2)
@@ -122,7 +256,7 @@ func (c *List) UnmarshalYAML(value *yaml.Node) error {
 
 	if err1 != nil && err2 != nil {
 		y, _ := yaml.Marshal(value)
-		return fmt.Errorf("Could not parse condition: %s", y)
+		return fmt.Errorf("Could not parse condition: %s: %w", y, multierr.Combine(err1, err2))
 	}
 
 	return nil
@@ -135,6 +269,7 @@ func (c *Map) Match(params map[string]string) bool {
 	if len(c.Include) == 0 && len(c.Exclude) == 0 {
 		return true
 	}
+
 	// exclusions are processed first. So we can include everything and then
 	// selectively include others.
 	if len(c.Exclude) != 0 {
@@ -157,7 +292,7 @@ func (c *Map) Match(params map[string]string) bool {
 	return true
 }
 
-// UnmarshalYAML unmarshals the constraint map.
+// UnmarshalYAML unmarshal the constraint map.
 func (c *Map) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	out1 := struct {
 		Include map[string]string
@@ -180,15 +315,15 @@ func (c *Map) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return nil
 }
 
-// UnmarshalYAML unmarshals the constraint.
+// UnmarshalYAML unmarshal the constraint.
 func (c *Path) UnmarshalYAML(value *yaml.Node) error {
 	out1 := struct {
-		Include       types.Stringorslice `yaml:"include,omitempty"`
-		Exclude       types.Stringorslice `yaml:"exclude,omitempty"`
+		Include       types.StringOrSlice `yaml:"include,omitempty"`
+		Exclude       types.StringOrSlice `yaml:"exclude,omitempty"`
 		IgnoreMessage string              `yaml:"ignore_message,omitempty"`
 	}{}
 
-	var out2 types.Stringorslice
+	var out2 types.StringOrSlice
 
 	err1 := value.Decode(&out1)
 	err2 := value.Decode(&out2)
@@ -209,12 +344,13 @@ func (c *Path) UnmarshalYAML(value *yaml.Node) error {
 }
 
 // Match returns true if file paths in string slice matches the include and not exclude patterns
-//  or if commit message contains ignore message.
+// or if commit message contains ignore message.
 func (c *Path) Match(v []string, message string) bool {
 	// ignore file pattern matches if the commit message contains a pattern
 	if len(c.IgnoreMessage) > 0 && strings.Contains(strings.ToLower(message), strings.ToLower(c.IgnoreMessage)) {
 		return true
 	}
+
 	// always match if there are no commit files (empty commit)
 	if len(v) == 0 {
 		return true

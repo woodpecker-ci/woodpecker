@@ -1,6 +1,6 @@
 # Welcome to Woodpecker
 
-Woodpecker is a simple CI engine with great extensibility. It runs your pipelines inside [Docker](https://www.docker.com/) containers, so if you are already using them in your daily workflow, you'll love Woodpecker for sure.
+Woodpecker is a simple CI engine with great extensibility. It runs your pipelines inside [containers](https://opencontainers.org/), so if you are already using them in your daily workflow, you'll love Woodpecker for sure.
 
 ![woodpecker](woodpecker.png)
 
@@ -23,11 +23,11 @@ pipeline:
       - echo "Testing.."
 ```
 
-### Build steps are containers
+### Pipeline steps are containers
 
-- Define any Docker image as context
-  - either use your own and install the needed tools in custom Docker images, or
-  - search [Docker Hub](https://hub.docker.com/search?type=image) for images that are already tailored for your needs) 
+- Define any container image as context
+  - either use your own and install the needed tools in custom image or
+  - search for available images that are already tailored for your needs on container registries like [Docker Hub](https://hub.docker.com/search?type=image)
 - List the commands that should be executed in your container, in order to build or test your application
 
 ```diff
@@ -81,7 +81,8 @@ kubectl apply -f $PLUGIN_TEMPLATE
 pipeline:
   deploy-to-k8s:
     image: laszlocloud/my-k8s-plugin
-    template: config/k8s/service.yml
+    settings:
+      template: config/k8s/service.yml
 ```
 
-See [plugin docs](/docs/usage/plugins/plugins).
+See [plugin docs](./20-usage/51-plugins/10-plugins.md).

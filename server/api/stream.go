@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -140,24 +141,24 @@ func LogStreamSSE(c *gin.Context) {
 	repo := session.Repo(c)
 	_store := store.FromContext(c)
 
-	// // parse the build number and job sequence number from
-	// // the repquest parameter.
-	buildn, _ := strconv.ParseInt(c.Param("build"), 10, 64)
-	jobn, _ := strconv.Atoi(c.Param("number"))
+	// // parse the pipeline number and step sequence number from
+	// // the request parameter.
+	pipelinen, _ := strconv.ParseInt(c.Param("pipeline"), 10, 64)
+	stepn, _ := strconv.Atoi(c.Param("number"))
 
-	build, err := _store.GetBuildNumber(repo, buildn)
+	pipeline, err := _store.GetPipelineNumber(repo, pipelinen)
 	if err != nil {
-		log.Debug().Msgf("stream cannot get build number: %v", err)
-		logWriteStringErr(io.WriteString(rw, "event: error\ndata: build not found\n\n"))
+		log.Debug().Msgf("stream cannot get pipeline number: %v", err)
+		logWriteStringErr(io.WriteString(rw, "event: error\ndata: pipeline not found\n\n"))
 		return
 	}
-	proc, err := _store.ProcFind(build, jobn)
+	step, err := _store.StepFind(pipeline, stepn)
 	if err != nil {
-		log.Debug().Msgf("stream cannot get proc number: %v", err)
+		log.Debug().Msgf("stream cannot get step number: %v", err)
 		logWriteStringErr(io.WriteString(rw, "event: error\ndata: process not found\n\n"))
 		return
 	}
-	if proc.State != model.StatusRunning {
+	if step.State != model.StatusRunning {
 		log.Debug().Msg("stream not found.")
 		logWriteStringErr(io.WriteString(rw, "event: error\ndata: stream not found\n\n"))
 		return
@@ -178,7 +179,7 @@ func LogStreamSSE(c *gin.Context) {
 
 	go func() {
 		// TODO remove global variable
-		err := server.Config.Services.Logs.Tail(ctx, fmt.Sprint(proc.ID), func(entries ...*logging.Entry) {
+		err := server.Config.Services.Logs.Tail(ctx, fmt.Sprint(step.ID), func(entries ...*logging.Entry) {
 			defer func() {
 				obj := recover() // fix #2480 // TODO: check if it's still needed
 				log.Trace().Msgf("pubsub subscribe recover return: %v", obj)

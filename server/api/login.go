@@ -38,12 +38,7 @@ func HandleLogin(c *gin.Context) {
 	if err := r.FormValue("error"); err != "" {
 		http.Redirect(w, r, "/login/error?code="+err, 303)
 	} else {
-		intendedURL := r.URL.Query()["url"]
-		if len(intendedURL) > 0 {
-			http.Redirect(w, r, "/authorize?url="+intendedURL[0], 303)
-		} else {
-			http.Redirect(w, r, "/authorize", 303)
-		}
+		http.Redirect(w, r, "/authorize", 303)
 	}
 }
 
@@ -54,13 +49,13 @@ func HandleAuth(c *gin.Context) {
 	// cannot, however, remember why, so need to revisit this line.
 	c.Writer.Header().Del("Content-Type")
 
-	tmpuser, err := server.Config.Services.Remote.Login(c, c.Writer, c.Request)
+	tmpuser, err := server.Config.Services.Forge.Login(c, c.Writer, c.Request)
 	if err != nil {
 		log.Error().Msgf("cannot authenticate user. %s", err)
 		c.Redirect(303, "/login?error=oauth_error")
 		return
 	}
-	// this will happen when the user is redirected by the remote provider as
+	// this will happen when the user is redirected by the forge as
 	// part of the authorization workflow.
 	if tmpuser == nil {
 		return
@@ -80,7 +75,7 @@ func HandleAuth(c *gin.Context) {
 		// if self-registration is enabled for whitelisted organizations we need to
 		// check the user's organization membership.
 		if len(config.Orgs) != 0 {
-			teams, terr := server.Config.Services.Remote.Teams(c, tmpuser)
+			teams, terr := server.Config.Services.Forge.Teams(c, tmpuser)
 			if terr != nil || !config.IsMember(teams) {
 				log.Error().Msgf("cannot verify team membership for %s.", u.Login)
 				c.Redirect(303, "/login?error=access_denied")
@@ -117,7 +112,7 @@ func HandleAuth(c *gin.Context) {
 	// if self-registration is enabled for whitelisted organizations we need to
 	// check the user's organization membership.
 	if len(config.Orgs) != 0 {
-		teams, terr := server.Config.Services.Remote.Teams(c, u)
+		teams, terr := server.Config.Services.Forge.Teams(c, u)
 		if terr != nil || !config.IsMember(teams) {
 			log.Error().Msgf("cannot verify team membership for %s.", u.Login)
 			c.Redirect(303, "/login?error=access_denied")
@@ -141,12 +136,7 @@ func HandleAuth(c *gin.Context) {
 
 	httputil.SetCookie(c.Writer, c.Request, "user_sess", tokenString)
 
-	intendedURL := c.Request.URL.Query()["url"]
-	if len(intendedURL) > 0 {
-		c.Redirect(303, intendedURL[0])
-	} else {
-		c.Redirect(303, "/")
-	}
+	c.Redirect(303, "/")
 }
 
 func GetLogout(c *gin.Context) {
@@ -165,7 +155,7 @@ func GetLoginToken(c *gin.Context) {
 		return
 	}
 
-	login, err := server.Config.Services.Remote.Auth(c, in.Access, in.Refresh)
+	login, err := server.Config.Services.Forge.Auth(c, in.Access, in.Refresh)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusUnauthorized, err)
 		return

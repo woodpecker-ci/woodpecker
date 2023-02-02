@@ -1,7 +1,7 @@
 package secret
 
 import (
-	"io/ioutil"
+	"os"
 	"strings"
 
 	"github.com/urfave/cli/v2"
@@ -14,13 +14,18 @@ import (
 var secretUpdateCmd = &cli.Command{
 	Name:      "update",
 	Usage:     "update a secret",
-	ArgsUsage: "[repo/name]",
+	ArgsUsage: "[org/repo|org]",
 	Action:    secretUpdate,
 	Flags: append(common.GlobalFlags,
-		&cli.StringFlag{
-			Name:  "repository",
-			Usage: "repository name (e.g. octocat/hello-world)",
+		&cli.BoolFlag{
+			Name:  "global",
+			Usage: "global secret",
 		},
+		&cli.StringFlag{
+			Name:  "organization",
+			Usage: "organization name (e.g. octocat)",
+		},
+		common.RepoFlag,
 		&cli.StringFlag{
 			Name:  "name",
 			Usage: "secret name",
@@ -37,36 +42,48 @@ var secretUpdateCmd = &cli.Command{
 			Name:  "image",
 			Usage: "secret limited to these images",
 		},
+		&cli.BoolFlag{
+			Name:  "plugins-only",
+			Usage: "secret limited to plugins",
+		},
 	),
 }
 
 func secretUpdate(c *cli.Context) error {
-	reponame := c.String("repository")
-	if reponame == "" {
-		reponame = c.Args().First()
-	}
-	owner, name, err := internal.ParseRepo(reponame)
-	if err != nil {
-		return err
-	}
 	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
 	}
+
 	secret := &woodpecker.Secret{
-		Name:   c.String("name"),
-		Value:  c.String("value"),
-		Images: c.StringSlice("image"),
-		Events: c.StringSlice("event"),
+		Name:        strings.ToLower(c.String("name")),
+		Value:       c.String("value"),
+		Images:      c.StringSlice("image"),
+		PluginsOnly: c.Bool("plugins-only"),
+		Events:      c.StringSlice("event"),
 	}
 	if strings.HasPrefix(secret.Value, "@") {
 		path := strings.TrimPrefix(secret.Value, "@")
-		out, ferr := ioutil.ReadFile(path)
-		if ferr != nil {
-			return ferr
+		out, err := os.ReadFile(path)
+		if err != nil {
+			return err
 		}
 		secret.Value = string(out)
 	}
-	_, err = client.SecretUpdate(owner, name, secret)
+
+	global, owner, repo, err := parseTargetArgs(c)
+	if err != nil {
+		return err
+	}
+
+	if global {
+		_, err = client.GlobalSecretUpdate(secret)
+		return err
+	}
+	if repo == "" {
+		_, err = client.OrgSecretUpdate(owner, secret)
+		return err
+	}
+	_, err = client.SecretUpdate(owner, repo, secret)
 	return err
 }

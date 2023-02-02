@@ -1,3 +1,17 @@
+// Copyright 2022 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package exec
 
 import (
@@ -18,7 +32,7 @@ const (
 
 // Line is a line of console output.
 type Line struct {
-	Proc string `json:"proc,omitempty"`
+	Step string `json:"step,omitempty"`
 	Time int64  `json:"time,omitempty"`
 	Type int    `json:"type,omitempty"`
 	Pos  int    `json:"pos,omitempty"`
@@ -52,7 +66,7 @@ func (w *LineWriter) Write(p []byte) (n int, err error) {
 
 	line := &Line{
 		Out:  out,
-		Proc: w.name,
+		Step: w.name,
 		Pos:  w.num,
 		Time: int64(time.Since(w.now).Seconds()),
 		Type: LineStdout,

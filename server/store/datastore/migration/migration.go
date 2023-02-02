@@ -32,23 +32,35 @@ var migrationTasks = []*task{
 	&alterTableReposDropAllowDeploysAllowTags,
 	&fixPRSecretEventName,
 	&alterTableReposDropCounter,
+	&dropSenders,
+	&alterTableLogUpdateColumnLogDataType,
+	&alterTableSecretsAddUserCol,
+	&recreateAgentsTable,
+	&lowercaseSecretNames,
+	&renameBuildsToPipeline,
+	&renameColumnsBuildsToPipeline,
+	&renameTableProcsToSteps,
+	&renameRemoteToForge,
+	&renameForgeIDToForgeRemoteID,
 }
 
 var allBeans = []interface{}{
 	new(model.Agent),
-	new(model.Build),
-	new(model.BuildConfig),
+	new(model.Pipeline),
+	new(model.PipelineConfig),
 	new(model.Config),
 	new(model.File),
 	new(model.Logs),
 	new(model.Perm),
-	new(model.Proc),
+	new(model.Step),
 	new(model.Registry),
 	new(model.Repo),
 	new(model.Secret),
-	new(model.Sender),
 	new(model.Task),
 	new(model.User),
+	new(model.ServerConfig),
+	new(model.Cron),
+	new(model.Redirection),
 }
 
 type migrations struct {
@@ -109,6 +121,10 @@ func Migrate(e *xorm.Engine) error {
 		return err
 	}
 
+	if err := e.ClearCache(allBeans...); err != nil {
+		return err
+	}
+
 	return syncAll(e)
 }
 
@@ -139,7 +155,7 @@ func runTasks(sess *xorm.Session, tasks []*task) error {
 				log.Error().Err(err).Msgf("migration task '%s' failed but is not required", task.name)
 				continue
 			}
-			log.Info().Msgf("migration task '%s' done", task.name)
+			log.Debug().Msgf("migration task '%s' done", task.name)
 		} else {
 			log.Trace().Msgf("skip migration task '%s'", task.name)
 		}
@@ -159,7 +175,7 @@ type syncEngine interface {
 func syncAll(sess syncEngine) error {
 	for _, bean := range allBeans {
 		if err := sess.Sync2(bean); err != nil {
-			return fmt.Errorf("sync2 error '%s': %v", reflect.TypeOf(bean), err)
+			return fmt.Errorf("sync2 error '%s': %w", reflect.TypeOf(bean), err)
 		}
 	}
 	return nil

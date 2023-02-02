@@ -100,10 +100,10 @@ func TestWithPrefix(t *testing.T) {
 func TestWithMetadata(t *testing.T) {
 	metadata := frontend.Metadata{
 		Repo: frontend.Repo{
-			Name:    "octocat/hello-world",
-			Private: true,
-			Link:    "https://github.com/octocat/hello-world",
-			Remote:  "https://github.com/octocat/hello-world.git",
+			Name:     "octocat/hello-world",
+			Private:  true,
+			Link:     "https://github.com/octocat/hello-world",
+			CloneURL: "https://github.com/octocat/hello-world.git",
 		},
 	}
 	compiler := New(
@@ -119,8 +119,8 @@ func TestWithMetadata(t *testing.T) {
 	if compiler.env["CI_REPO_LINK"] != metadata.Repo.Link {
 		t.Errorf("WithMetadata must set CI_REPO_LINK")
 	}
-	if compiler.env["CI_REPO_REMOTE"] != metadata.Repo.Remote {
-		t.Errorf("WithMetadata must set CI_REPO_REMOTE")
+	if compiler.env["CI_REPO_CLONE_URL"] != metadata.Repo.CloneURL {
+		t.Errorf("WithMetadata must set CI_REPO_CLONE_URL")
 	}
 }
 
@@ -161,7 +161,7 @@ func TestWithProxy(t *testing.T) {
 	}
 
 	// alter the default values
-	noProxy = "foo.com"
+	noProxy = "example.com"
 	httpProxy = "bar.com"
 	httpsProxy = "baz.com"
 

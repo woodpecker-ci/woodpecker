@@ -10,9 +10,9 @@ import (
 type (
 	// Config defines a pipeline configuration.
 	Config struct {
-		Cache     types.Stringorslice
+		When      constraint.When `yaml:"when,omitempty"`
+		Cache     types.StringOrSlice
 		Platform  string
-		Branches  constraint.List
 		Workspace Workspace
 		Clone     Containers
 		Pipeline  Containers
@@ -23,6 +23,8 @@ type (
 		DependsOn []string `yaml:"depends_on,omitempty"`
 		RunsOn    []string `yaml:"runs_on,omitempty"`
 		SkipClone bool     `yaml:"skip_clone"`
+		// Deprecated use When.Branch
+		Branches constraint.List
 	}
 
 	// Workspace defines a pipeline workspace.

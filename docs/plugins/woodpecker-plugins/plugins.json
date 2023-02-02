@@ -1,0 +1,103 @@
+{
+  "plugins": [
+    {
+      "name": "Clone plugin",
+      "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-git/master/docs.md",
+      "verified": true
+    },
+    {
+      "name": "Docker Buildx",
+      "docs": "https://codeberg.org/woodpecker-plugins/docker-buildx/raw/branch/main/docs.md",
+      "verified": true
+    },
+    {
+      "name": "Codecov",
+      "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-codecov/master/docs.md",
+      "verified": true
+    },
+    {
+      "name": "Surge preview",
+      "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-surge-preview/main/docs.md",
+      "verified": true
+    },
+    {
+      "name": "S3 upload",
+      "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-s3/master/docs.md",
+      "verified": true
+    },
+    {
+      "name": "Node PM",
+      "docs": "https://codeberg.org/woodpecker-plugins/node-pm/raw/branch/main/docs.md",
+      "verified": true
+    },
+    {
+      "name": "Block Git changes",
+      "docs": "https://codeberg.org/qwerty287/woodpecker-block-git-changes/raw/branch/main/docs.md",
+      "verified": false
+    },
+    {
+      "name": "Regex check",
+      "docs": "https://codeberg.org/qwerty287/woodpecker-regex-check/raw/branch/main/docs.md",
+      "verified": false
+    },
+    {
+      "name": "Gitea Pull comment",
+      "docs": "https://raw.githubusercontent.com/markopolo123/gitea-comment-plugin/main/docs.md",
+      "verified": false
+    },
+    {
+      "name": "Git Push",
+      "docs": "https://raw.githubusercontent.com/appleboy/drone-git-push/master/DOCS.md",
+      "verified": false
+    },
+    {
+      "name": "WebDAV",
+      "docs": "https://raw.githubusercontent.com/ViViDboarder/drone-webdav/master/docs.md",
+      "verified": false
+    },
+    {
+      "// todo": true,
+      "name": "Email",
+      "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-email/master/docs.md",
+      "verified": true
+    },
+    {
+      "// todo": true,
+      "name": "Docker",
+      "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-docker/master/docs.md",
+      "verified": true
+    },
+    {
+      "// todo": true,
+      "name": "GitHub release",
+      "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-github-release/master/docs.md",
+      "verified": true
+    },
+    {
+      "// todo": true,
+      "name": "Chart releaser",
+      "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-chart-releaser/master/docs.md",
+      "verified": true
+    },
+    {
+      "name": "Aptly publish",
+      "docs": "https://gitea.zionetrix.net/bn8/aptly-publish/raw/branch/master/docs.md",
+      "verified": false
+    },
+    {
+      "name": "Trigger",
+      "docs": "https://codeberg.org/woodpecker-plugins/trigger/raw/branch/main/docs.md",
+      "verified": true
+    },
+    {
+      "name": "Gitea Release",
+      "docs": "https://codeberg.org/woodpecker-plugins/gitea-release/raw/branch/main/docs.md",
+      "verified": true
+    },
+    {
+      "name": "Woodpecker Email",
+      "docs": "https://gitnet.fr/deblan/woodpecker-email/raw/branch/develop/DOCS.md",
+      "verified": false
+    }
+  ]
+}

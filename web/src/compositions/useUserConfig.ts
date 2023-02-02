@@ -3,11 +3,13 @@ import { computed, ref } from 'vue';
 const USER_CONFIG_KEY = 'woodpecker-user-config';
 
 type UserConfig = {
-  isBuildFeedOpen: boolean;
+  isPipelineFeedOpen: boolean;
+  redirectUrl: string;
 };
 
 const defaultUserConfig: UserConfig = {
-  isBuildFeedOpen: false,
+  isPipelineFeedOpen: false,
+  redirectUrl: '',
 };
 
 function loadUserConfig(): UserConfig {

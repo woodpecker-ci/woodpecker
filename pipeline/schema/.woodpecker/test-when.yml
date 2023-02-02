@@ -111,3 +111,39 @@ pipeline:
       - echo "test"
     when:
       repo: test/test
+
+  when-multi:
+    image: alpine
+    commands:
+      - echo "test"
+    when:
+      - event: pull_request
+        repo: test/test
+      - event: push
+        branch: main
+
+  when-cron:
+    image: alpine
+    commands:
+      - echo "test"
+    when:
+      cron: "update locales"
+      event: cron
+
+  when-cron-list:
+    image: alpine
+    commands: echo "test"
+    when:
+      - event: cron
+        cron:
+          include:
+            - test
+            - hello
+          exclude: hi
+
+  when-evaluate:
+    image: alpine
+    commands: echo "test"
+    when:
+      - event: push
+        evaluate: 'CI_BUILD_EVENT == "push" && CI_REPO == "owner/repo"'

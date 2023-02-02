@@ -1,0 +1,5 @@
+pipeline:
+  demo:
+    image: 'alpine'
+    commands:
+      - echo 'Demo'

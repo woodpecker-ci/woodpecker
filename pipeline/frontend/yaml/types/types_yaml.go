@@ -59,12 +59,12 @@ func (s *MemStringorInt) UnmarshalYAML(unmarshal func(interface{}) error) error 
 	return errors.New("Failed to unmarshal MemStringorInt")
 }
 
-// Stringorslice represents
+// StringOrSlice represents
 // Using engine-api Strslice and augment it with YAML marshaling stuff. a string or an array of strings.
-type Stringorslice strslice.StrSlice
+type StringOrSlice strslice.StrSlice
 
 // UnmarshalYAML implements the Unmarshaler interface.
-func (s *Stringorslice) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (s *StringOrSlice) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	var stringType string
 	if err := unmarshal(&stringType); err == nil {
 		*s = []string{stringType}
@@ -81,7 +81,7 @@ func (s *Stringorslice) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		return nil
 	}
 
-	return errors.New("Failed to unmarshal Stringorslice")
+	return errors.New("Failed to unmarshal StringOrSlice")
 }
 
 // SliceorMap represents a slice or a map of strings.
