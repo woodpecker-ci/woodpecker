@@ -41,7 +41,7 @@ func Approve(ctx context.Context, store store.Store, currentPipeline *model.Pipe
 	}
 
 	if currentPipeline, err = UpdateToStatusPending(store, *currentPipeline, user.Login); err != nil {
-		return nil, fmt.Errorf("error updating pipeline. %s", err)
+		return nil, fmt.Errorf("error updating pipeline. %w", err)
 	}
 
 	var yamls []*forge_types.FileMeta

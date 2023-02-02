@@ -2,6 +2,7 @@ package queue
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sync"
 	"testing"
@@ -116,7 +117,7 @@ func TestFifoEvict(t *testing.T) {
 	if len(info.Pending) != 0 {
 		t.Errorf("expect pending queue has zero items")
 	}
-	if err := q.Evict(noContext, t1.ID); err != ErrNotFound {
+	if err := q.Evict(noContext, t1.ID); !errors.Is(err, ErrNotFound) {
 		t.Errorf("expect not found error when evicting item not in queue, got %s", err)
 	}
 }

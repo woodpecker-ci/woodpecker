@@ -15,6 +15,7 @@
 package api
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -28,12 +29,12 @@ import (
 )
 
 func handlePipelineErr(c *gin.Context, err error) {
-	if pipeline.IsErrNotFound(err) {
-		c.String(http.StatusNotFound, "%v", err)
-	} else if pipeline.IsErrBadRequest(err) {
-		c.String(http.StatusBadRequest, "%v", err)
-	} else if pipeline.IsErrFiltered(err) {
-		c.String(http.StatusNoContent, "%v", err)
+	if errors.Is(err, &pipeline.ErrNotFound{}) {
+		c.String(http.StatusNotFound, "%s", err)
+	} else if errors.Is(err, &pipeline.ErrBadRequest{}) {
+		c.String(http.StatusBadRequest, "%s", err)
+	} else if errors.Is(err, &pipeline.ErrFiltered{}) {
+		c.String(http.StatusNoContent, "%s", err)
 	} else {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 	}
