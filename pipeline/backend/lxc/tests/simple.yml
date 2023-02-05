@@ -1,5 +1,0 @@
-pipeline:
-   job:
-     image: debian:bullseye
-     commands: |
-       echo SOMETHING
