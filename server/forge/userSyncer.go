@@ -86,7 +86,7 @@ func (s *Syncer) Sync(ctx context.Context, user *model.User, flatPermissions boo
 			} else {
 				forgePerm, err := s.Forge.Perm(ctx, user, repo)
 				if err != nil {
-					return fmt.Errorf("could not fetch permission of repo '%s': %v", repo.FullName, err)
+					return fmt.Errorf("could not fetch permission of repo '%s': %w", repo.FullName, err)
 				}
 				repo.Perm.Pull = forgePerm.Pull
 				repo.Perm.Push = forgePerm.Push

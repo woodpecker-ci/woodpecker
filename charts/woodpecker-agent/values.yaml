@@ -86,6 +86,8 @@ tolerations: []
 
 affinity: {}
 
+dnsConfig: {}
+
 ## Using topology spread constraints, you can ensure that there is at least one agent
 ## pod for each topology zone, e.g. one per arch for multi-architecture clusters
 ## or one for each region for geographically distributed cloud-hosted clusters.

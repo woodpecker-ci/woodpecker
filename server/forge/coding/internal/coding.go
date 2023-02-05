@@ -72,13 +72,13 @@ func (c *Client) Do(method, u string, params url.Values) ([]byte, error) {
 		req, err = http.NewRequestWithContext(c.ctx, "GET", rawURL+"?"+params.Encode(), nil)
 	}
 	if err != nil {
-		return nil, fmt.Errorf("fail to create request for url %q: %v", rawURL, err)
+		return nil, fmt.Errorf("fail to create request for url %q: %w", rawURL, err)
 	}
 	req.Header.Set("User-Agent", c.agent)
 
 	resp, err := c.client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("fail to request %s %s: %v", req.Method, req.URL, err)
+		return nil, fmt.Errorf("fail to request %s %s: %w", req.Method, req.URL, err)
 	}
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("%s %s respond %d", req.Method, req.URL, resp.StatusCode)
@@ -86,13 +86,13 @@ func (c *Client) Do(method, u string, params url.Values) ([]byte, error) {
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("fail to read response from %s %s: %v", req.Method, req.URL.String(), err)
+		return nil, fmt.Errorf("fail to read response from %s %s: %w", req.Method, req.URL.String(), err)
 	}
 
 	apiResp := &GenericAPIResponse{}
 	err = json.Unmarshal(body, apiResp)
 	if err != nil {
-		return nil, fmt.Errorf("fail to parse response from %s %s: %v", req.Method, req.URL.String(), err)
+		return nil, fmt.Errorf("fail to parse response from %s %s: %w", req.Method, req.URL.String(), err)
 	}
 	if apiResp.Code != 0 {
 		return nil, fmt.Errorf("Coding OAuth API respond error: %s", string(body))

@@ -92,7 +92,7 @@ import useNotifications from '~/compositions/useNotifications';
 import usePipeline from '~/compositions/usePipeline';
 import { useRouteBackOrDefault } from '~/compositions/useRouteBackOrDefault';
 import { Repo, RepoPermissions } from '~/lib/api/types';
-import PipelineStore from '~/store/pipelines';
+import { usePipelineStore } from '~/store/pipelines';
 
 export default defineComponent({
   name: 'PipelineWrapper',
@@ -130,7 +130,7 @@ export default defineComponent({
     const favicon = useFavicon();
     const i18n = useI18n();
 
-    const pipelineStore = PipelineStore();
+    const pipelineStore = usePipelineStore();
     const pipelineId = toRef(props, 'pipelineId');
     const repoOwner = toRef(props, 'repoOwner');
     const repoName = toRef(props, 'repoName');
@@ -155,7 +155,7 @@ export default defineComponent({
 
       await pipelineStore.loadPipeline(repo.value.owner, repo.value.name, parseInt(pipelineId.value, 10));
 
-      favicon.updateStatus(pipeline.value.status);
+      favicon.updateStatus(pipeline.value?.status);
     }
 
     const { doSubmit: cancelPipeline, isLoading: isCancelingPipeline } = useAsyncAction(async () => {
@@ -163,7 +163,7 @@ export default defineComponent({
         throw new Error('Unexpected: Repo is undefined');
       }
 
-      if (!pipeline.value.steps) {
+      if (!pipeline.value?.steps) {
         throw new Error('Unexpected: Pipeline steps not loaded');
       }
 

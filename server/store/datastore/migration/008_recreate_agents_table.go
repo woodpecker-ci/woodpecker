@@ -12,21 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package yaml
+package migration
 
-import "errors"
+import (
+	"xorm.io/xorm"
 
-// PipelineParseError is an error that occurs when the pipeline parsing fails.
-type PipelineParseError struct {
-	Err error
-}
+	"github.com/woodpecker-ci/woodpecker/server/model"
+)
 
-func (e PipelineParseError) Error() string {
-	return e.Err.Error()
-}
-
-func (e PipelineParseError) Is(err error) bool {
-	target1 := PipelineParseError{}
-	target2 := &target1
-	return errors.As(err, &target1) || errors.As(err, &target2)
+var recreateAgentsTable = task{
+	name: "recreate-agents-table",
+	fn: func(sess *xorm.Session) error {
+		if err := dropTable(sess, "agents"); err != nil {
+			return err
+		}
+		return sess.Sync2(new(model.Agent))
+	},
 }

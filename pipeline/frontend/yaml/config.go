@@ -11,7 +11,7 @@ type (
 	// Config defines a pipeline configuration.
 	Config struct {
 		When      constraint.When `yaml:"when,omitempty"`
-		Cache     types.Stringorslice
+		Cache     types.StringOrSlice
 		Platform  string
 		Workspace Workspace
 		Clone     Containers

@@ -1,5 +1,7 @@
 import ApiClient, { encodeQueryString } from './client';
 import {
+  Agent,
+  Cron,
   OrgPermissions,
   Pipeline,
   PipelineConfig,
@@ -12,7 +14,6 @@ import {
   RepoSettings,
   Secret,
 } from './types';
-import { Cron } from './types/cron';
 
 type RepoListOptions = {
   all?: boolean;
@@ -227,6 +228,26 @@ export default class WoodpeckerClient extends ApiClient {
 
   getToken(): Promise<string> {
     return this._post('/api/user/token') as Promise<string>;
+  }
+
+  getAgents(): Promise<Agent[]> {
+    return this._get('/api/agents') as Promise<Agent[]>;
+  }
+
+  getAgent(agentId: Agent['id']): Promise<Agent> {
+    return this._get(`/api/agents/${agentId}`) as Promise<Agent>;
+  }
+
+  createAgent(agent: Partial<Agent>): Promise<Agent> {
+    return this._post('/api/agents', agent) as Promise<Agent>;
+  }
+
+  updateAgent(agent: Partial<Agent>): Promise<unknown> {
+    return this._patch(`/api/agents/${agent.id}`, agent);
+  }
+
+  deleteAgent(agent: Agent): Promise<unknown> {
+    return this._delete(`/api/agents/${agent.id}`);
   }
 
   // eslint-disable-next-line promise/prefer-await-to-callbacks
