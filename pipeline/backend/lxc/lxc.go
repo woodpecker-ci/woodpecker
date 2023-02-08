@@ -114,10 +114,10 @@ done | tee -a /etc/hosts
 # Wait until internet connectivity is ready
 #
 for d in $(seq 60); do
-  getent hosts wikipedia.org > /dev/null && break
+  getent hosts {{.Host}} > /dev/null && break
   sleep 1
 done
-getent hosts wikipedia.org
+getent hosts {{.Host}}
 `))
 
 func (e *lxc) ContainerName(name string) string {
@@ -127,7 +127,15 @@ func (e *lxc) ContainerName(name string) string {
 func (e *lxc) Setup(ctx context.Context, config *types.Config) error {
 	e.workspace = e.rundir + "/workspace"
 	log.Debug().Msgf("config %d %+v", len(config.Volumes), config.Volumes[0])
-	if err := writeScript(serviceHostnameTemplate, struct{}{}, e.rundir+"/networking.sh"); err != nil {
+	host := os.Getenv("WOODPECKER_BACKEND_LXC_NETWORK_READY_HOST")
+	if host == "" {
+		host = "wikipedia.org"
+	}
+	if err := writeScript(serviceHostnameTemplate, struct {
+		Host string
+	}{
+		Host: host,
+	}, e.rundir+"/networking.sh"); err != nil {
 		log.Error().Err(err)
 		return err
 	}

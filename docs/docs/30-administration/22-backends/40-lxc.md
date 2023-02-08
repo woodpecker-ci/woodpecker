@@ -14,6 +14,12 @@ agent, configure it and run it on the host machine.
 
 ## Configuration
 
+### `WOODPECKER_BACKEND_LXC_NETWORK_READY_HOST`
+> Default: wikipedia.org
+
+When a LXC container is created, it needs to wait until it gets network connectivity
+before running commands. It does so by running `getent hosts $WOODPECKER_BACKEND_LXC_NETWORK_READY_HOST`.
+
 ### Server
 
 Enable connection to the server from the outside of the docker environment by
