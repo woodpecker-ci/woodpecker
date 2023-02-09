@@ -3,7 +3,7 @@
     "settings": {
       "agents": {
         "add": "Добавить обработчик",
-        "agents": "Обработчик",
+        "agents": "Обработчики",
         "backend": {
           "backend": "Бэкенд",
           "badge": "бэкенд"
