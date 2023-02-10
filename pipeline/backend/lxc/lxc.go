@@ -16,6 +16,7 @@ package lxc
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -248,10 +249,13 @@ func (e *lxc) Exec(ctx context.Context, step *types.Step) error {
 func (e *lxc) Wait(context.Context, *types.Step) (*types.State, error) {
 	err := e.cmd.Wait()
 	ExitCode := 0
-	if eerr, ok := err.(*exec.ExitError); ok {
-		ExitCode = eerr.ExitCode()
+
+	var execExitError *exec.ExitError
+	if errors.As(err, &execExitError) {
+		ExitCode = execExitError.ExitCode()
 		err = nil
 	}
+
 	return &types.State{
 		Exited:   true,
 		ExitCode: ExitCode,
