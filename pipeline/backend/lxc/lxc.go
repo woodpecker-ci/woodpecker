@@ -34,7 +34,7 @@ import (
 
 var scriptTemplate = template.Must(template.New("script").Parse(`#!/bin/sh -xe
 lxc-create --name="{{.Name}}" --template={{.Template}} -- --release {{.Release}} $packages
-tee -a /var/lib/lxc/{{.Name}}/config <<'EOF'                                                                                                                   
+tee -a /var/lib/lxc/{{.Name}}/config <<'EOF'
 security.nesting = true
 lxc.cap.drop =
 lxc.apparmor.profile = unconfined
@@ -105,18 +105,18 @@ var serviceHostnameTemplate = template.Must(template.New("hostnames").Parse(`#!/
 # Wait until service containers get an IP and set /etc/hosts with their name
 #
 cat /rundir/service-alias | while read name alias ; do
-  for d in $(seq 60); do
-    getent hosts $name > /dev/null && break
-    sleep 1
-  done
-  echo $(getent hosts $name) $alias
+	for d in $(seq 60); do
+		getent hosts $name > /dev/null && break
+		sleep 1
+	done
+	echo $(getent hosts $name) $alias
 done | tee -a /etc/hosts
 #
 # Wait until internet connectivity is ready
 #
 for d in $(seq 60); do
-  getent hosts {{.Host}} > /dev/null && break
-  sleep 1
+	getent hosts {{.Host}} > /dev/null && break
+	sleep 1
 done
 getent hosts {{.Host}}
 `))
@@ -268,10 +268,10 @@ func (e *lxc) Tail(context.Context, *types.Step) (io.ReadCloser, error) {
 
 var destroyTemplate = template.Must(template.New("destroy").Parse(`#!/bin/sh -x
 lxc-ls -1 --filter="^{{.Name}}" | while read container ; do
-   lxc-stop --kill --name="$container"
-   umount "/var/lib/lxc/$container/rootfs/woodpecker"
-   umount "/var/lib/lxc/$container/rootfs/rundir"
-   lxc-destroy --force --name="$container"
+	lxc-stop --kill --name="$container"
+	umount "/var/lib/lxc/$container/rootfs/woodpecker"
+	umount "/var/lib/lxc/$container/rootfs/rundir"
+	lxc-destroy --force --name="$container"
 done
 `))
 
