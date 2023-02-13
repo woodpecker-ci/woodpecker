@@ -137,12 +137,12 @@ func (e *lxc) Setup(ctx context.Context, config *types.Config) error {
 	}{
 		Host: host,
 	}, e.rundir+"/networking.sh"); err != nil {
-		log.Error().Err(err)
+		log.Error().Err(err).Msg("serviceHostnameTemplate")
 		return err
 	}
 	f, err := os.Create(e.rundir + "/service-alias")
 	if err != nil {
-		log.Error().Err(err)
+		log.Error().Err(err).Msg("touch service-alias")
 		return err
 	}
 	for _, stage := range config.Stages {
@@ -151,7 +151,7 @@ func (e *lxc) Setup(ctx context.Context, config *types.Config) error {
 		}
 		for _, step := range stage.Steps {
 			if _, err := f.WriteString(fmt.Sprintf("%s %s\n", e.ContainerName(step.Name), step.Alias)); err != nil {
-				log.Error().Err(err)
+				log.Error().Err(err).Msg("writing service-alias")
 				return err
 			}
 		}
@@ -175,7 +175,7 @@ func (e *lxc) Exec(ctx context.Context, step *types.Step) error {
 	defaultCloneImage := strings.Split(constant.DefaultCloneImage, ":")
 	if len(defaultCloneImage) != 2 {
 		err := fmt.Errorf("%s does not split in two but in %v", constant.DefaultCloneImage, defaultCloneImage)
-		log.Error().Err(err)
+		log.Error().Err(err).Msg("")
 		return err
 	}
 	log.Debug().Msgf("Step %+v", step)
@@ -188,13 +188,13 @@ func (e *lxc) Exec(ctx context.Context, step *types.Step) error {
 		image := strings.Split(step.Image, ":")
 		if len(image) != 2 {
 			err := fmt.Errorf("step image %s does not split in two but in %v", step.Image, image)
-			log.Error().Err(err)
+			log.Error().Err(err).Msg("")
 			return err
 		}
 		for _, s := range image {
 			if !acceptableRegexp.MatchString(s) {
 				err := fmt.Errorf("in image name %s, %s does not match %s", step.Image, s, acceptable)
-				log.Error().Err(err)
+				log.Error().Err(err).Msg("")
 				return err
 			}
 		}
@@ -219,14 +219,14 @@ func (e *lxc) Exec(ctx context.Context, step *types.Step) error {
 			RunDir:    e.rundir,
 			Script:    "commands-" + step.Name,
 		}, script); err != nil {
-			log.Error().Err(err)
+			log.Error().Err(err).Msg("scriptTemplate")
 			return err
 		}
 		var command []string
 		command = append(command, script)
 
 		if err := os.WriteFile(e.rundir+"/"+"commands-"+step.Name, []byte(strings.Join(step.Commands, "\n")), 0o755); err != nil {
-			log.Error().Err(err)
+			log.Error().Err(err).Msg("writing script")
 			return err
 		}
 
@@ -282,7 +282,7 @@ func (e *lxc) Destroy(ctx context.Context, conf *types.Config) error {
 	}{
 		Name: e.name,
 	}, script); err != nil {
-		log.Error().Err(err)
+		log.Error().Err(err).Msg("destroyTemplate")
 		return err
 	}
 	cmd := exec.CommandContext(ctx, script)
