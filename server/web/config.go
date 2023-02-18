@@ -40,11 +40,12 @@ func Config(c *gin.Context) {
 	}
 
 	configData := map[string]interface{}{
-		"user":    user,
-		"csrf":    csrf,
-		"docs":    server.Config.Server.Docs,
-		"version": version.String(),
-		"forge":   server.Config.Services.Forge.Name(),
+		"user":     user,
+		"csrf":     csrf,
+		"docs":     server.Config.Server.Docs,
+		"version":  version.String(),
+		"forge":    server.Config.Services.Forge.Name(),
+		"url_root": server.Config.Server.URLRoot,
 	}
 
 	// default func map with json parser.
@@ -58,6 +59,7 @@ func Config(c *gin.Context) {
 	c.Header("Content-Type", "text/javascript; charset=utf-8")
 	tmpl := template.Must(template.New("").Funcs(funcMap).Parse(configTemplate))
 
+	c.Status(200)
 	if err := tmpl.Execute(c.Writer, configData); err != nil {
 		log.Error().Err(err).Msgf("could not execute template")
 		c.AbortWithStatus(http.StatusInternalServerError)
@@ -70,4 +72,5 @@ window.WOODPECKER_CSRF = "{{ .csrf }}";
 window.WOODPECKER_VERSION = "{{ .version }}";
 window.WOODPECKER_DOCS = "{{ .docs }}";
 window.WOODPECKER_FORGE = "{{ .forge }}";
+window.WOODPECKER_URL_ROOT = "{{ .url_root }}";
 `

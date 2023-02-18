@@ -199,7 +199,13 @@ func run(c *cli.Context) error {
 
 	// setup the server and start the listener
 	handler := router.Load(
-		webUIServe,
+		func(c *gin.Context) {
+			if strings.HasSuffix(c.Request.RequestURI, "web-config.js") {
+				web.Config(c)
+			} else {
+				webUIServe(c.Writer, c.Request)
+			}
+		},
 		middleware.Logger(time.RFC3339, true),
 		middleware.Version,
 		middleware.Config(c),
@@ -354,6 +360,7 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 	server.Config.Server.StatusContext = c.String("status-context")
 	server.Config.Server.StatusContextFormat = c.String("status-context-format")
 	server.Config.Server.SessionExpires = c.Duration("session-expires")
+	server.Config.Server.URLRoot = c.String("url-root")
 	server.Config.Pipeline.Networks = c.StringSlice("network")
 	server.Config.Pipeline.Volumes = c.StringSlice("volume")
 	server.Config.Pipeline.Privileged = c.StringSlice("escalate")

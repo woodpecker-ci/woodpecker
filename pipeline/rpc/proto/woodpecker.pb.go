@@ -22,10 +22,11 @@
 package proto
 
 import (
-	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
-	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
 	sync "sync"
+
+	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
+	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 )
 
 const (
@@ -1406,32 +1407,33 @@ func file_woodpecker_proto_rawDescGZIP() []byte {
 	return file_woodpecker_proto_rawDescData
 }
 
-var file_woodpecker_proto_msgTypes = make([]protoimpl.MessageInfo, 23)
-var file_woodpecker_proto_goTypes = []interface{}{
-	(*File)(nil),                  // 0: proto.File
-	(*State)(nil),                 // 1: proto.State
-	(*Line)(nil),                  // 2: proto.Line
-	(*Filter)(nil),                // 3: proto.Filter
-	(*Pipeline)(nil),              // 4: proto.Pipeline
-	(*NextRequest)(nil),           // 5: proto.NextRequest
-	(*InitRequest)(nil),           // 6: proto.InitRequest
-	(*WaitRequest)(nil),           // 7: proto.WaitRequest
-	(*DoneRequest)(nil),           // 8: proto.DoneRequest
-	(*ExtendRequest)(nil),         // 9: proto.ExtendRequest
-	(*UploadRequest)(nil),         // 10: proto.UploadRequest
-	(*UpdateRequest)(nil),         // 11: proto.UpdateRequest
-	(*LogRequest)(nil),            // 12: proto.LogRequest
-	(*Empty)(nil),                 // 13: proto.Empty
-	(*ReportHealthRequest)(nil),   // 14: proto.ReportHealthRequest
-	(*RegisterAgentRequest)(nil),  // 15: proto.RegisterAgentRequest
-	(*VersionResponse)(nil),       // 16: proto.VersionResponse
-	(*NextResponse)(nil),          // 17: proto.NextResponse
-	(*RegisterAgentResponse)(nil), // 18: proto.RegisterAgentResponse
-	(*AuthRequest)(nil),           // 19: proto.AuthRequest
-	(*AuthResponse)(nil),          // 20: proto.AuthResponse
-	nil,                           // 21: proto.File.MetaEntry
-	nil,                           // 22: proto.Filter.LabelsEntry
-}
+var (
+	file_woodpecker_proto_msgTypes = make([]protoimpl.MessageInfo, 22)
+	file_woodpecker_proto_goTypes  = []interface{}{
+		(*File)(nil),                  // 0: proto.File
+		(*State)(nil),                 // 1: proto.State
+		(*Line)(nil),                  // 2: proto.Line
+		(*Filter)(nil),                // 3: proto.Filter
+		(*Pipeline)(nil),              // 4: proto.Pipeline
+		(*NextRequest)(nil),           // 5: proto.NextRequest
+		(*NextReply)(nil),             // 6: proto.NextReply
+		(*InitRequest)(nil),           // 7: proto.InitRequest
+		(*WaitRequest)(nil),           // 8: proto.WaitRequest
+		(*DoneRequest)(nil),           // 9: proto.DoneRequest
+		(*ExtendRequest)(nil),         // 10: proto.ExtendRequest
+		(*UploadRequest)(nil),         // 11: proto.UploadRequest
+		(*UpdateRequest)(nil),         // 12: proto.UpdateRequest
+		(*LogRequest)(nil),            // 13: proto.LogRequest
+		(*Empty)(nil),                 // 14: proto.Empty
+		(*ReportHealthRequest)(nil),   // 15: proto.ReportHealthRequest
+		(*RegisterAgentRequest)(nil),  // 16: proto.RegisterAgentRequest
+		(*RegisterAgentResponse)(nil), // 17: proto.RegisterAgentResponse
+		(*AuthRequest)(nil),           // 18: proto.AuthRequest
+		(*AuthReply)(nil),             // 19: proto.AuthReply
+		nil,                           // 20: proto.File.MetaEntry
+		nil,                           // 21: proto.Filter.LabelsEntry
+	}
+)
 var file_woodpecker_proto_depIdxs = []int32{
 	21, // 0: proto.File.meta:type_name -> proto.File.MetaEntry
 	22, // 1: proto.Filter.labels:type_name -> proto.Filter.LabelsEntry
