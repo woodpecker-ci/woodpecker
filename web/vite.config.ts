@@ -10,6 +10,7 @@ import { defineConfig } from 'vite';
 import prismjs from 'vite-plugin-prismjs';
 import WindiCSS from 'vite-plugin-windicss';
 import svgLoader from 'vite-svg-loader';
+import { viteStaticCopy } from 'vite-plugin-static-copy';
 
 function woodpeckerInfoPlugin() {
   return {
@@ -63,6 +64,15 @@ export default defineConfig({
     prismjs({
       languages: ['yaml'],
     }),
+    viteStaticCopy({
+      targets: [
+        {
+          src: 'build.html',
+          dest: '',
+          rename: 'index.html',
+        },
+      ],
+    }),
   ],
   resolve: {
     alias: {
@@ -72,5 +82,11 @@ export default defineConfig({
   logLevel: 'warn',
   server: {
     port: 8010,
+  },
+  build: {
+    manifest: true,
+    rollupOptions: {
+      input: 'src/main.ts',
+    },
   },
 });
