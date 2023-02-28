@@ -3,15 +3,21 @@ package kubernetes
 import (
 	"strings"
 
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/common"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func Pod(namespace string, step *types.Step) *v1.Pod {
-	var vols []v1.Volume
-	var volMounts []v1.VolumeMount
+func Pod(namespace string, step *types.Step, labels, annotations map[string]string) *v1.Pod {
+	var (
+		vols       []v1.Volume
+		volMounts  []v1.VolumeMount
+		entrypoint []string
+		args       []string
+	)
+
 	if step.WorkingDir != "" {
 		for _, vol := range step.Volumes {
 			vols = append(vols, v1.Volume{
@@ -36,13 +42,13 @@ func Pod(namespace string, step *types.Step) *v1.Pod {
 		pullPolicy = v1.PullAlways
 	}
 
-	command := step.Entrypoint
-	args := step.Command
-	envs := mapToEnvVars(step.Environment)
-
-	if _, hasScript := step.Environment["CI_SCRIPT"]; !strings.HasSuffix(step.Name, "_clone") && hasScript {
-		command = []string{"/bin/sh", "-c"}
-		args = []string{"echo $CI_SCRIPT | base64 -d | /bin/sh -e"}
+	if len(step.Commands) != 0 {
+		scriptEnv, entry, cmds := common.GenerateContainerConf(step.Commands)
+		for k, v := range scriptEnv {
+			step.Environment[k] = v
+		}
+		entrypoint = entry
+		args = cmds
 	}
 
 	hostAliases := []v1.HostAlias{}
@@ -82,13 +88,14 @@ func Pod(namespace string, step *types.Step) *v1.Pod {
 		},
 	}
 
+	labels["step"] = podName(step)
+
 	return &v1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      podName(step),
-			Namespace: namespace,
-			Labels: map[string]string{
-				"step": podName(step),
-			},
+			Name:        podName(step),
+			Namespace:   namespace,
+			Labels:      labels,
+			Annotations: annotations,
 		},
 		Spec: v1.PodSpec{
 			RestartPolicy: v1.RestartPolicyNever,
@@ -97,10 +104,10 @@ func Pod(namespace string, step *types.Step) *v1.Pod {
 				Name:            podName(step),
 				Image:           step.Image,
 				ImagePullPolicy: pullPolicy,
-				Command:         command,
+				Command:         entrypoint,
 				Args:            args,
 				WorkingDir:      step.WorkingDir,
-				Env:             envs,
+				Env:             mapToEnvVars(step.Environment),
 				VolumeMounts:    volMounts,
 				Resources:       resources,
 				SecurityContext: &v1.SecurityContext{

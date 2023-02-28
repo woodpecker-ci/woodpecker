@@ -1,6 +1,12 @@
 <template>
   <template v-if="pipeline && repo">
-    <Scaffold v-model:activeTab="activeTab" enable-tabs disable-hash-mode :go-back="goBack">
+    <Scaffold
+      v-model:activeTab="activeTab"
+      enable-tabs
+      disable-hash-mode
+      :go-back="goBack"
+      :fluid-content="activeTab !== 'tasks'"
+    >
       <template #title>
         <span class="w-full md:w-auto text-center">{{ $t('repo.pipeline.pipeline', { pipelineId }) }}</span>
         <span class="<md:hidden">-</span>
@@ -8,7 +14,7 @@
       </template>
 
       <template #titleActions>
-        <PipelineStatusIcon :pipeline="pipeline" class="flex flex-shrink-0" />
+        <PipelineStatusIcon :status="pipeline.status" class="flex flex-shrink-0" />
 
         <template v-if="repoPermissions.push">
           <Button
@@ -24,6 +30,17 @@
             :text="$t('repo.pipeline.actions.restart')"
             :is-loading="isRestartingPipeline"
             @click="restartPipeline"
+          />
+          <Button
+            v-if="pipeline.status === 'success'"
+            class="flex-shrink-0"
+            :text="$t('repo.pipeline.actions.deploy')"
+            @click="showDeployPipelinePopup = true"
+          />
+          <DeployPipelinePopup
+            :pipeline-number="pipelineId"
+            :open="showDeployPipelinePopup"
+            @close="showDeployPipelinePopup = false"
           />
         </template>
       </template>
@@ -53,15 +70,14 @@
         id="changed-files"
         :title="$t('repo.pipeline.files', { files: pipeline.changed_files?.length || 0 })"
       />
+      <router-view />
     </Scaffold>
-
-    <router-view />
   </template>
 </template>
 
 <script lang="ts">
 import { Tooltip } from 'floating-vue';
-import { computed, defineComponent, inject, onBeforeUnmount, onMounted, provide, Ref, toRef, watch } from 'vue';
+import { computed, defineComponent, inject, onBeforeUnmount, onMounted, provide, Ref, ref, toRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -76,7 +92,7 @@ import useNotifications from '~/compositions/useNotifications';
 import usePipeline from '~/compositions/usePipeline';
 import { useRouteBackOrDefault } from '~/compositions/useRouteBackOrDefault';
 import { Repo, RepoPermissions } from '~/lib/api/types';
-import PipelineStore from '~/store/pipelines';
+import { usePipelineStore } from '~/store/pipelines';
 
 export default defineComponent({
   name: 'PipelineWrapper',
@@ -114,7 +130,7 @@ export default defineComponent({
     const favicon = useFavicon();
     const i18n = useI18n();
 
-    const pipelineStore = PipelineStore();
+    const pipelineStore = usePipelineStore();
     const pipelineId = toRef(props, 'pipelineId');
     const repoOwner = toRef(props, 'repoOwner');
     const repoName = toRef(props, 'repoName');
@@ -130,6 +146,8 @@ export default defineComponent({
 
     const { message } = usePipeline(pipeline);
 
+    const showDeployPipelinePopup = ref(false);
+
     async function loadPipeline(): Promise<void> {
       if (!repo) {
         throw new Error('Unexpected: Repo is undefined');
@@ -137,7 +155,7 @@ export default defineComponent({
 
       await pipelineStore.loadPipeline(repo.value.owner, repo.value.name, parseInt(pipelineId.value, 10));
 
-      favicon.updateStatus(pipeline.value.status);
+      favicon.updateStatus(pipeline.value?.status);
     }
 
     const { doSubmit: cancelPipeline, isLoading: isCancelingPipeline } = useAsyncAction(async () => {
@@ -145,7 +163,7 @@ export default defineComponent({
         throw new Error('Unexpected: Repo is undefined');
       }
 
-      if (!pipeline.value.steps) {
+      if (!pipeline.value?.steps) {
         throw new Error('Unexpected: Pipeline steps not loaded');
       }
 
@@ -156,7 +174,7 @@ export default defineComponent({
       //   throw new Error('Unexpected: Step not found');
       // }
 
-      await apiClient.cancelPipeline(repo.value.owner, repo.value.name, parseInt(pipelineId.value, 10), 0);
+      await apiClient.cancelPipeline(repo.value.owner, repo.value.name, parseInt(pipelineId.value, 10));
       notifications.notify({ title: i18n.t('repo.pipeline.actions.cancel_success'), type: 'success' });
     });
 
@@ -211,6 +229,7 @@ export default defineComponent({
       message,
       isCancelingPipeline,
       isRestartingPipeline,
+      showDeployPipelinePopup,
       activeTab,
       since,
       duration,

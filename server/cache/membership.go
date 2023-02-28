@@ -18,8 +18,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/remote"
 
 	"github.com/lafriks/ttlcache/v3"
 )
@@ -31,17 +31,17 @@ type MembershipService interface {
 }
 
 type membershipCache struct {
-	Remote remote.Remote
-	Cache  *ttlcache.Cache[string, *model.OrgPerm]
-	TTL    time.Duration
+	Forge forge.Forge
+	Cache *ttlcache.Cache[string, *model.OrgPerm]
+	TTL   time.Duration
 }
 
 // NewMembershipService creates a new membership service.
-func NewMembershipService(r remote.Remote) MembershipService {
+func NewMembershipService(f forge.Forge) MembershipService {
 	return &membershipCache{
-		TTL:    10 * time.Minute,
-		Remote: r,
-		Cache:  ttlcache.New(ttlcache.WithDisableTouchOnHit[string, *model.OrgPerm]()),
+		TTL:   10 * time.Minute,
+		Forge: f,
+		Cache: ttlcache.New(ttlcache.WithDisableTouchOnHit[string, *model.OrgPerm]()),
 	}
 }
 
@@ -54,7 +54,7 @@ func (c *membershipCache) Get(ctx context.Context, u *model.User, name string) (
 		return item.Value(), nil
 	}
 
-	perm, err := c.Remote.OrgMembership(ctx, u, name)
+	perm, err := c.Forge.OrgMembership(ctx, u, name)
 	if err != nil {
 		return nil, err
 	}

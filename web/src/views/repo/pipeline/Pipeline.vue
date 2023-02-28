@@ -1,7 +1,8 @@
 <template>
-  <div class="flex flex-col flex-grow">
+  <FluidContainer full-width class="flex flex-col flex-grow">
     <div class="flex w-full min-h-0 flex-grow">
       <PipelineStepList
+        v-if="pipeline?.steps?.length || 0 > 0"
         v-model:selected-step-id="selectedStepId"
         :class="{ 'hidden md:flex': pipeline.status === 'blocked' }"
         :pipeline="pipeline"
@@ -45,7 +46,7 @@
         />
       </div>
     </div>
-  </div>
+  </FluidContainer>
 </template>
 
 <script lang="ts">
@@ -55,6 +56,7 @@ import { useRoute, useRouter } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
 import Icon from '~/components/atomic/Icon.vue';
+import FluidContainer from '~/components/layout/FluidContainer.vue';
 import PipelineLog from '~/components/repo/pipeline/PipelineLog.vue';
 import PipelineStepList from '~/components/repo/pipeline/PipelineStepList.vue';
 import useApiClient from '~/compositions/useApiClient';
@@ -71,6 +73,7 @@ export default defineComponent({
     PipelineStepList,
     Icon,
     PipelineLog,
+    FluidContainer,
   },
 
   props: {

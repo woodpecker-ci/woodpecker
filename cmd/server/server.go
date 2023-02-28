@@ -17,7 +17,6 @@ package main
 import (
 	"context"
 	"crypto/tls"
-	"errors"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -34,22 +33,23 @@ import (
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
-	"google.golang.org/grpc/metadata"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc/proto"
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/cron"
+	"github.com/woodpecker-ci/woodpecker/server/forge"
 	woodpeckerGrpcServer "github.com/woodpecker-ci/woodpecker/server/grpc"
 	"github.com/woodpecker-ci/woodpecker/server/logging"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/config"
 	"github.com/woodpecker-ci/woodpecker/server/pubsub"
-	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/router"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/server/web"
 	"github.com/woodpecker-ci/woodpecker/version"
+	// "github.com/woodpecker-ci/woodpecker/server/plugins/encryption"
+	// encryptedStore "github.com/woodpecker-ci/woodpecker/server/plugins/encryption/wrapper/store"
 )
 
 func run(c *cli.Context) error {
@@ -101,7 +101,7 @@ func run(c *cli.Context) error {
 		)
 	}
 
-	_remote, err := setupRemote(c)
+	_forge, err := setupForge(c)
 	if err != nil {
 		log.Fatal().Err(err).Msg("")
 	}
@@ -116,14 +116,14 @@ func run(c *cli.Context) error {
 		}
 	}()
 
-	setupEvilGlobals(c, _store, _remote)
+	setupEvilGlobals(c, _store, _forge)
 
 	var g errgroup.Group
 
 	setupMetrics(&g, _store)
 
 	g.Go(func() error {
-		return cron.Start(c.Context, _store, _remote)
+		return cron.Start(c.Context, _store, _forge)
 	})
 
 	// start the grpc server
@@ -133,18 +133,21 @@ func run(c *cli.Context) error {
 			log.Err(err).Msg("")
 			return err
 		}
-		authorizer := &authorizer{
-			password: c.String("agent-secret"),
-		}
+
+		jwtSecret := "secret" // TODO: make configurable
+		jwtManager := woodpeckerGrpcServer.NewJWTManager(jwtSecret)
+
+		authorizer := woodpeckerGrpcServer.NewAuthorizer(jwtManager)
 		grpcServer := grpc.NewServer(
-			grpc.StreamInterceptor(authorizer.streamInterceptor),
-			grpc.UnaryInterceptor(authorizer.unaryIntercaptor),
+			grpc.StreamInterceptor(authorizer.StreamInterceptor),
+			grpc.UnaryInterceptor(authorizer.UnaryInterceptor),
 			grpc.KeepaliveEnforcementPolicy(keepalive.EnforcementPolicy{
 				MinTime: c.Duration("keepalive-min-time"),
 			}),
 		)
+
 		woodpeckerServer := woodpeckerGrpcServer.NewWoodpeckerServer(
-			_remote,
+			_forge,
 			server.Config.Services.Queue,
 			server.Config.Services.Logs,
 			server.Config.Services.Pubsub,
@@ -152,6 +155,13 @@ func run(c *cli.Context) error {
 			server.Config.Server.Host,
 		)
 		proto.RegisterWoodpeckerServer(grpcServer, woodpeckerServer)
+
+		woodpeckerAuthServer := woodpeckerGrpcServer.NewWoodpeckerAuthServer(
+			jwtManager,
+			server.Config.Server.AgentToken,
+			_store,
+		)
+		proto.RegisterWoodpeckerAuthServer(grpcServer, woodpeckerAuthServer)
 
 		err = grpcServer.Serve(lis)
 		if err != nil {
@@ -253,12 +263,13 @@ func run(c *cli.Context) error {
 	return g.Wait()
 }
 
-func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
+func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 	// storage
 	server.Config.Storage.Files = v
 
-	// remote
-	server.Config.Services.Remote = r
+	// forge
+	server.Config.Services.Forge = f
+	server.Config.Services.Timeout = c.Duration("forge-timeout")
 
 	// services
 	server.Config.Services.Queue = setupQueue(c, v)
@@ -268,9 +279,19 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 		log.Error().Err(err).Msg("could not create pubsub service")
 	}
 	server.Config.Services.Registries = setupRegistryService(c, v)
+
+	// TODO(1544): fix encrypted store
+	// // encryption
+	// encryptedSecretStore := encryptedStore.NewSecretStore(v)
+	// err := encryption.Encryption(c, v).WithClient(encryptedSecretStore).Build()
+	// if err != nil {
+	// 	log.Fatal().Err(err).Msg("could not create encryption service")
+	// }
+	// server.Config.Services.Secrets = setupSecretService(c, encryptedSecretStore)
 	server.Config.Services.Secrets = setupSecretService(c, v)
+
 	server.Config.Services.Environ = setupEnvironService(c, v)
-	server.Config.Services.Membership = setupMembershipService(c, r)
+	server.Config.Services.Membership = setupMembershipService(c, f)
 
 	server.Config.Services.SignaturePrivateKey, server.Config.Services.SignaturePublicKey = setupSignatureKeys(v)
 
@@ -303,7 +324,7 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 	// server configuration
 	server.Config.Server.Cert = c.String("server-cert")
 	server.Config.Server.Key = c.String("server-key")
-	server.Config.Server.Pass = c.String("agent-secret")
+	server.Config.Server.AgentToken = c.String("agent-secret")
 	server.Config.Server.Host = c.String("server-host")
 	if c.IsSet("server-dev-oauth-host") {
 		server.Config.Server.OAuthHost = c.String("server-dev-oauth-host")
@@ -324,32 +345,4 @@ func setupEvilGlobals(c *cli.Context, v store.Store, r remote.Remote) {
 
 	// TODO(485) temporary workaround to not hit api rate limits
 	server.Config.FlatPermissions = c.Bool("flat-permissions")
-}
-
-type authorizer struct {
-	password string
-}
-
-func (a *authorizer) streamInterceptor(srv interface{}, stream grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
-	if err := a.authorize(stream.Context()); err != nil {
-		return err
-	}
-	return handler(srv, stream)
-}
-
-func (a *authorizer) unaryIntercaptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
-	if err := a.authorize(ctx); err != nil {
-		return nil, err
-	}
-	return handler(ctx, req)
-}
-
-func (a *authorizer) authorize(ctx context.Context) error {
-	if md, ok := metadata.FromIncomingContext(ctx); ok {
-		if len(md["password"]) > 0 && md["password"][0] == a.password {
-			return nil
-		}
-		return errors.New("invalid agent token")
-	}
-	return errors.New("missing agent token")
 }

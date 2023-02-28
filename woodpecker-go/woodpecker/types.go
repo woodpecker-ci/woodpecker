@@ -74,7 +74,7 @@ type (
 		Branch    string  `json:"branch"`
 		Ref       string  `json:"ref"`
 		Refspec   string  `json:"refspec"`
-		Remote    string  `json:"remote"`
+		CloneURL  string  `json:"clone_url"`
 		Title     string  `json:"title"`
 		Message   string  `json:"message"`
 		Timestamp int64   `json:"timestamp"`
@@ -141,7 +141,7 @@ type (
 		Branch   string `json:"branch,omitempty"`
 		Ref      string `json:"ref,omitempty"`
 		Refspec  string `json:"refspec,omitempty"`
-		Remote   string `json:"remote,omitempty"`
+		CloneURL string `json:"clone_url,omitempty"`
 		Title    string `json:"title,omitempty"`
 		Message  string `json:"message,omitempty"`
 		Author   string `json:"author,omitempty"`

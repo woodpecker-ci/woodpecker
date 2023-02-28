@@ -27,22 +27,21 @@ type (
 		AuthConfig    AuthConfig             `yaml:"auth_config,omitempty"`
 		CapAdd        []string               `yaml:"cap_add,omitempty"`
 		CapDrop       []string               `yaml:"cap_drop,omitempty"`
-		Command       types.Command          `yaml:"command,omitempty"`
-		Commands      types.Stringorslice    `yaml:"commands,omitempty"`
+		Commands      types.StringOrSlice    `yaml:"commands,omitempty"`
 		CPUQuota      types.StringorInt      `yaml:"cpu_quota,omitempty"`
 		CPUSet        string                 `yaml:"cpuset,omitempty"`
 		CPUShares     types.StringorInt      `yaml:"cpu_shares,omitempty"`
 		Detached      bool                   `yaml:"detach,omitempty"`
 		Devices       []string               `yaml:"devices,omitempty"`
 		Tmpfs         []string               `yaml:"tmpfs,omitempty"`
-		DNS           types.Stringorslice    `yaml:"dns,omitempty"`
-		DNSSearch     types.Stringorslice    `yaml:"dns_search,omitempty"`
+		DNS           types.StringOrSlice    `yaml:"dns,omitempty"`
+		DNSSearch     types.StringOrSlice    `yaml:"dns_search,omitempty"`
 		Directory     string                 `yaml:"directory,omitempty"`
-		Entrypoint    types.Command          `yaml:"entrypoint,omitempty"`
 		Environment   types.SliceorMap       `yaml:"environment,omitempty"`
 		ExtraHosts    []string               `yaml:"extra_hosts,omitempty"`
 		Group         string                 `yaml:"group,omitempty"`
 		Image         string                 `yaml:"image,omitempty"`
+		Failure       string                 `yaml:"failure,omitempty"`
 		Isolation     string                 `yaml:"isolation,omitempty"`
 		Labels        types.SliceorMap       `yaml:"labels,omitempty"`
 		MemLimit      types.MemStringorInt   `yaml:"mem_limit,omitempty"`
@@ -113,5 +112,5 @@ func (c *Containers) UnmarshalYAML(value *yaml.Node) error {
 }
 
 func (c *Container) IsPlugin() bool {
-	return len(c.Commands) == 0 && len(c.Command) == 0
+	return len(c.Commands) == 0
 }

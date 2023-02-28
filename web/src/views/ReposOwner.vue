@@ -17,8 +17,7 @@
       <ListItem
         v-for="repo in searchedRepos"
         :key="repo.id"
-        clickable
-        @click="$router.push({ name: 'repo', params: { repoName: repo.name, repoOwner: repo.owner } })"
+        :to="{ name: 'repo', params: { repoName: repo.name, repoOwner: repo.owner } }"
       >
         <span class="text-color">{{ `${repo.name}` }}</span>
       </ListItem>
@@ -38,7 +37,7 @@ import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useRepoSearch } from '~/compositions/useRepoSearch';
 import { OrgPermissions } from '~/lib/api/types';
-import RepoStore from '~/store/repos';
+import { useRepoStore } from '~/store/repos';
 
 export default defineComponent({
   name: 'ReposOwner',
@@ -58,9 +57,9 @@ export default defineComponent({
 
   setup(props) {
     const apiClient = useApiClient();
-    const repoStore = RepoStore();
+    const repoStore = useRepoStore();
     // TODO: filter server side
-    const repos = computed(() => Object.values(repoStore.repos).filter((v) => v.owner === props.repoOwner));
+    const repos = computed(() => Array.from(repoStore.repos.values()).filter((repo) => repo.owner === props.repoOwner));
     const search = ref('');
     const orgPermissions = ref<OrgPermissions>({ member: false, admin: false });
 

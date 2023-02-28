@@ -381,6 +381,24 @@ func TestConstraintMap(t *testing.T) {
 	}
 }
 
+func TestConstraintStatusSuccess(t *testing.T) {
+	testdata := []struct {
+		conf string
+		want bool
+	}{
+		{conf: "", want: true},
+		{conf: "{status: [failure]}", want: false},
+		{conf: "{status: [success]}", want: true},
+		{conf: "{status: [failure, success]}", want: true},
+		{conf: "{status: {exclude: [success], include: [failure]}}", want: false},
+		{conf: "{status: {exclude: [failure], include: [success]}}", want: true},
+	}
+	for _, test := range testdata {
+		c := parseConstraints(t, test.conf)
+		assert.Equal(t, test.want, c.IncludesStatusSuccess(), "when: '%s'", test.conf)
+	}
+}
+
 func TestConstraints(t *testing.T) {
 	testdata := []struct {
 		desc string

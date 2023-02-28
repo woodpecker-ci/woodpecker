@@ -209,6 +209,12 @@ var flags = []cli.Flag{
 	//
 	// resource limit parameters
 	//
+	&cli.DurationFlag{
+		EnvVars: []string{"WOODPECKER_FORGE_TIMEOUT"},
+		Name:    "forge-timeout",
+		Usage:   "how many seconds before timeout when fetching the Woodpecker configuration from a Forge",
+		Value:   time.Second * 3,
+	},
 	&cli.Int64Flag{
 		EnvVars: []string{"WOODPECKER_LIMIT_MEM_SWAP"},
 		Name:    "limit-mem-swap",
@@ -240,7 +246,7 @@ var flags = []cli.Flag{
 		Usage:   "set the cpus allowed to execute containers",
 	},
 	//
-	// Github
+	// GitHub
 	//
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_GITHUB"},
@@ -521,8 +527,27 @@ var flags = []cli.Flag{
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_FLAT_PERMISSIONS"},
 		Name:    "flat-permissions",
-		Usage:   "no remote call for permissions should be made",
+		Usage:   "no forge call for permissions should be made",
 		Hidden:  true,
 		// TODO(485) temporary workaround to not hit api rate limits
+	},
+	//
+	// secrets encryption in DB
+	//
+	&cli.StringFlag{
+		EnvVars:  []string{"WOODPECKER_ENCRYPTION_KEY"},
+		Name:     "encryption-raw-key",
+		Usage:    "Raw encryption key",
+		FilePath: os.Getenv("WOODPECKER_ENCRYPTION_KEY_FILE"),
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_ENCRYPTION_TINK_KEYSET_FILE"},
+		Name:    "encryption-tink-keyset",
+		Usage:   "Google tink AEAD-compatible keyset file to encrypt secrets in DB",
+	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_ENCRYPTION_DISABLE"},
+		Name:    "encryption-disable-flag",
+		Usage:   "Flag to decrypt all encrypted data and disable encryption on server",
 	},
 }

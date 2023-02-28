@@ -21,7 +21,7 @@ func (f TraceFunc) Trace(state *State) error {
 
 // DefaultTracer provides a tracer that updates the CI_ environment
 // variables to include the correct timestamp and status.
-// TODO(bradrydzewski) find either a new home or better name for this.
+// TODO: find either a new home or better name for this.
 var DefaultTracer = TraceFunc(func(state *State) error {
 	if state.Process.Exited {
 		return nil

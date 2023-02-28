@@ -18,7 +18,6 @@ auth_config:
   password: password
 cap_add: [ ALL ]
 cap_drop: [ NET_ADMIN, SYS_ADMIN ]
-command: bundle exec thin -p 3000
 commands:
   - go build
   - go test
@@ -31,7 +30,6 @@ devices:
 directory: example/
 dns: 8.8.8.8
 dns_search: example.com
-entrypoint: /code/entrypoint.sh
 environment:
   - RACK_ENV=development
   - SHOW=true
@@ -76,17 +74,15 @@ func TestUnmarshalContainer(t *testing.T) {
 		},
 		CapAdd:        []string{"ALL"},
 		CapDrop:       []string{"NET_ADMIN", "SYS_ADMIN"},
-		Command:       types.Command{"bundle exec thin -p 3000"},
-		Commands:      types.Stringorslice{"go build", "go test"},
+		Commands:      types.StringOrSlice{"go build", "go test"},
 		CPUQuota:      types.StringorInt(11),
 		CPUSet:        "1,2",
 		CPUShares:     types.StringorInt(99),
 		Detached:      true,
 		Devices:       []string{"/dev/ttyUSB0:/dev/ttyUSB0"},
 		Directory:     "example/",
-		DNS:           types.Stringorslice{"8.8.8.8"},
-		DNSSearch:     types.Stringorslice{"example.com"},
-		Entrypoint:    types.Command{"/code/entrypoint.sh"},
+		DNS:           types.StringOrSlice{"8.8.8.8"},
+		DNSSearch:     types.StringOrSlice{"example.com"},
 		Environment:   types.SliceorMap{"RACK_ENV": "development", "SHOW": "true"},
 		ExtraHosts:    []string{"somehost:162.242.195.82", "otherhost:50.31.209.229"},
 		Image:         "golang:latest",
@@ -106,7 +102,7 @@ func TestUnmarshalContainer(t *testing.T) {
 		Pull:        true,
 		Privileged:  true,
 		ShmSize:     types.MemStringorInt(1024),
-		Tmpfs:       types.Stringorslice{"/var/lib/test"},
+		Tmpfs:       types.StringOrSlice{"/var/lib/test"},
 		Volumes: types.Volumes{
 			Volumes: []*types.Volume{
 				{Source: "", Destination: "/var/lib/mysql"},
@@ -306,9 +302,9 @@ func stringsToInterface(val ...string) []interface{} {
 func TestIsPlugin(t *testing.T) {
 	assert.True(t, (&Container{}).IsPlugin())
 	assert.True(t, (&Container{
-		Commands: types.Stringorslice(strslice.StrSlice{}),
+		Commands: types.StringOrSlice(strslice.StrSlice{}),
 	}).IsPlugin())
 	assert.False(t, (&Container{
-		Commands: types.Stringorslice(strslice.StrSlice{"echo 'this is not a plugin'"}),
+		Commands: types.StringOrSlice(strslice.StrSlice{"echo 'this is not a plugin'"}),
 	}).IsPlugin())
 }

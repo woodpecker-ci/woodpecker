@@ -16,17 +16,32 @@ package local
 
 import (
 	"context"
-	"encoding/base64"
+	"errors"
+	"fmt"
 	"io"
 	"os"
 	"os/exec"
 	"strings"
 
+	"github.com/alessio/shellescape"
+	"golang.org/x/exp/slices"
+
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/shared/constant"
 )
 
+// notAllowedEnvVarOverwrites are all env vars that can not be overwritten by step config
+var notAllowedEnvVarOverwrites = []string{
+	"CI_NETRC_MACHINE",
+	"CI_NETRC_USERNAME",
+	"CI_NETRC_PASSWORD",
+	"CI_SCRIPT",
+	"HOME",
+	"SHELL",
+}
+
 type local struct {
+	// TODO: make cmd a cmd list to iterate over, the hard part is to have a common ReadCloser
 	cmd        *exec.Cmd
 	output     io.ReadCloser
 	workingdir string
@@ -62,32 +77,40 @@ func (e *local) Setup(ctx context.Context, config *types.Config) error {
 // Exec the pipeline step.
 func (e *local) Exec(ctx context.Context, step *types.Step) error {
 	// Get environment variables
-	Env := os.Environ()
+	env := os.Environ()
 	for a, b := range step.Environment {
-		if a != "HOME" && a != "SHELL" { // Don't override $HOME and $SHELL
-			Env = append(Env, a+"="+b)
+		// append allowed env vars to command env
+		if !slices.Contains(notAllowedEnvVarOverwrites, a) {
+			env = append(env, a+"="+b)
 		}
 	}
 
-	Command := []string{}
+	var command []string
 	if step.Image == constant.DefaultCloneImage {
 		// Default clone step
-		Env = append(Env, "CI_WORKSPACE="+e.workingdir+"/"+step.Environment["CI_REPO"])
-		Command = append(Command, "plugin-git")
+		// TODO: creat tmp HOME and insert netrc
+		// TODO: download plugin-git binary if not exist
+		env = append(env, "CI_WORKSPACE="+e.workingdir+"/"+step.Environment["CI_REPO"])
+		command = append(command, "plugin-git")
 	} else {
 		// Use "image name" as run command
-		Command = append(Command, step.Image)
-		Command = append(Command, "-c")
+		command = append(command, step.Image)
+		command = append(command, "-c")
 
-		// Decode script and delete initial lines
+		// TODO: use commands directly
+		script := ""
+		for _, cmd := range step.Commands {
+			script += fmt.Sprintf("echo + %s\n%s\n\n", shellescape.Quote(cmd), cmd)
+		}
+		script = strings.TrimSpace(script)
+
 		// Deleting the initial lines removes netrc support but adds compatibility for more shells like fish
-		Script, _ := base64.RawStdEncoding.DecodeString(step.Environment["CI_SCRIPT"])
-		Command = append(Command, string(Script)[strings.Index(string(Script), "\n\n")+2:])
+		command = append(command, script)
 	}
 
 	// Prepare command
-	e.cmd = exec.CommandContext(ctx, Command[0], Command[1:]...)
-	e.cmd.Env = Env
+	e.cmd = exec.CommandContext(ctx, command[0], command[1:]...)
+	e.cmd.Env = env
 
 	// Prepare working directory
 	if step.Image == constant.DefaultCloneImage {
@@ -111,11 +134,14 @@ func (e *local) Exec(ctx context.Context, step *types.Step) error {
 func (e *local) Wait(context.Context, *types.Step) (*types.State, error) {
 	err := e.cmd.Wait()
 	ExitCode := 0
-	if eerr, ok := err.(*exec.ExitError); ok {
-		ExitCode = eerr.ExitCode()
+
+	var execExitError *exec.ExitError
+	if errors.As(err, &execExitError) {
+		ExitCode = execExitError.ExitCode()
 		// Non-zero exit code is a pipeline failure, but not an agent error.
 		err = nil
 	}
+
 	return &types.State{
 		Exited:   true,
 		ExitCode: ExitCode,

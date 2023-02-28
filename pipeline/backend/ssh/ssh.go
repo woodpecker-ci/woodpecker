@@ -2,7 +2,6 @@ package ssh
 
 import (
 	"context"
-	"encoding/base64"
 	"fmt"
 	"io"
 	"os"
@@ -10,6 +9,7 @@ import (
 
 	"github.com/melbahja/goph"
 
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/common"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/shared/constant"
 )
@@ -91,31 +91,31 @@ func (e *ssh) Setup(ctx context.Context, config *types.Config) error {
 // Exec the pipeline step.
 func (e *ssh) Exec(ctx context.Context, step *types.Step) error {
 	// Get environment variables
-	Command := []string{}
+	command := []string{}
 	for a, b := range step.Environment {
 		if a != "HOME" && a != "SHELL" { // Don't override $HOME and $SHELL
-			Command = append(Command, a+"="+b)
+			command = append(command, a+"="+b)
 		}
 	}
 
 	if step.Image == constant.DefaultCloneImage {
 		// Default clone step
-		Command = append(Command, "CI_WORKSPACE="+e.workingdir+"/"+step.Environment["CI_REPO"])
-		Command = append(Command, "plugin-git")
+		command = append(command, "CI_WORKSPACE="+e.workingdir+"/"+step.Environment["CI_REPO"])
+		command = append(command, "plugin-git")
 	} else {
 		// Use "image name" as run command
-		Command = append(Command, step.Image)
-		Command = append(Command, "-c")
+		command = append(command, step.Image)
+		command = append(command, "-c")
 
-		// Decode script and delete initial lines
+		// TODO: use commands directly
+		script := common.GenerateScript(step.Commands)
 		// Deleting the initial lines removes netrc support but adds compatibility for more shells like fish
-		Script, _ := base64.RawStdEncoding.DecodeString(step.Environment["CI_SCRIPT"])
-		Command = append(Command, "cd "+e.workingdir+"/"+step.Environment["CI_REPO"]+" && "+string(Script)[strings.Index(string(Script), "\n\n")+2:])
+		command = append(command, "cd "+e.workingdir+"/"+step.Environment["CI_REPO"]+" && "+script[strings.Index(script, "\n\n")+2:])
 	}
 
 	// Prepare command
 	var err error
-	e.cmd, err = e.client.CommandContext(ctx, "/bin/env", Command...)
+	e.cmd, err = e.client.CommandContext(ctx, "/bin/env", command...)
 	if err != nil {
 		return err
 	}

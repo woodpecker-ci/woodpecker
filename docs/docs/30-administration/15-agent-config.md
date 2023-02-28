@@ -95,6 +95,11 @@ Configures labels to filter pipeline pick up. Use a list of key-value pairs like
 
 Enable healthcheck endpoint.
 
+### `WOODPECKER_HEALTHCHECK_ADDR`
+> Default: `:3000`
+
+Configures healthcheck endpoint address.
+
 ### `WOODPECKER_KEEPALIVE_TIME`
 > Default: empty
 

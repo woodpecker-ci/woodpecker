@@ -1,6 +1,42 @@
 {
   "admin": {
     "settings": {
+      "agents": {
+        "add": "Tambahkan agen",
+        "agents": "Agen",
+        "backend": {
+          "backend": "Backend",
+          "badge": "backend"
+        },
+        "capacity": {
+          "badge": "kapasitas",
+          "capacity": "Kapasitas"
+        },
+        "created": "Agen dibuat",
+        "delete_confirm": "Apakah Anda ingin menghapus agen ini. Itu tidak akan terhubung lagi ke server.",
+        "deleted": "Agen dihapus",
+        "desc": "Agen terdaftar untuk server",
+        "last_contact": "Hubungan terakhir",
+        "name": {
+          "name": "Nama",
+          "placeholder": "Nama agen"
+        },
+        "never": "Tidak pernah",
+        "no_schedule": {
+          "name": "Nonaktifkan agen",
+          "placeholder": "Hentikan agen untuk mengambil tugas baru"
+        },
+        "none": "Belum ada agen.",
+        "platform": {
+          "badge": "platform",
+          "platform": "Platform"
+        },
+        "save": "Simpan agen",
+        "saved": "Agen disimpan",
+        "show": "Tampilkan agen",
+        "token": "Token",
+        "version": "Versi"
+      },
       "not_allowed": "Anda tidak diperbolehkan untuk mengakses pengaturan peladen",
       "secrets": {
         "add": "Tambahkan rahasia",
@@ -68,10 +104,23 @@
     }
   },
   "password": "Kata sandi",
+  "pipeline_feed": "Umpan jalur pipa",
   "repo": {
     "activity": "Aktivitas",
     "add": "Tambahkan repositori",
     "branches": "Cabang",
+    "deploy_pipeline": {
+      "enter_target": "Lingkungan sasaran peluncuran",
+      "title": "Picu perisitiwa peluncuran untuk jalur pipa #{pipelineId}",
+      "trigger": "Luncurkan",
+      "variables": {
+        "add": "Tambahkan variabel",
+        "desc": "Tetapkan variabel tambahan untuk digunakan dalam jalur pipa Anda. Variabel dengan nama yang sama akan ditimpa.",
+        "name": "Nama variabel",
+        "title": "Variabel jalur pipa tambahan",
+        "value": "Nilai variabel"
+      }
+    },
     "enable": {
       "enable": "Aktifkan",
       "enabled": "Sudah diaktifkan",
@@ -92,11 +141,13 @@
       }
     },
     "not_allowed": "Anda tidak diperbolehkan untuk mengakses repositori ini",
+    "open_in_forge": "Buka Repositori dalam Sistem Kendali Versi",
     "pipeline": {
       "actions": {
         "cancel": "Batalkan",
         "cancel_success": "Jalur pipa dibatalkan",
         "canceled": "Langkah ini telah dibatalkan.",
+        "deploy": "Luncurkan",
         "log_auto_scroll": "Gulir ke bawah secara otomatis",
         "log_auto_scroll_off": "Matikan pengguliran otomatis",
         "log_download": "Unduh",
@@ -106,7 +157,7 @@
       "config": "Konfigurasi",
       "created": "Dibuat",
       "event": {
-        "cron": "Cron",
+        "cron": "Kron",
         "deploy": "Luncur",
         "manual": "Manual",
         "pr": "Permintaan Penarikan",
@@ -130,6 +181,19 @@
         "decline": "Tolak",
         "decline_success": "Jalur pipa ditolak",
         "declined": "Jalur pipa ini telah ditolak!"
+      },
+      "status": {
+        "blocked": "diblokir",
+        "declined": "ditolak",
+        "error": "terjadi kesalahan",
+        "failure": "gagal",
+        "killed": "dibatalkan",
+        "pending": "menunggu",
+        "running": "berjalan",
+        "skipped": "dilewati",
+        "started": "dimulai",
+        "status": "Status: {status}",
+        "success": "berhasil"
       },
       "step_not_started": "Langkah ini belum dijalankan.",
       "tasks": "Tugas"

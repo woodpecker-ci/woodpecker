@@ -46,10 +46,10 @@ type Store interface {
 	// Repos
 	// GetRepo gets a repo by unique ID.
 	GetRepo(int64) (*model.Repo, error)
-	// GetRepoRemoteID gets a repo by its remote ID.
-	GetRepoRemoteID(model.RemoteID) (*model.Repo, error)
-	// GetRepoNameFallback gets the repo by its remote ID and if this doesn't exist by its full name.
-	GetRepoNameFallback(remoteID model.RemoteID, fullName string) (*model.Repo, error)
+	// GetRepoForgeID gets a repo by its forge ID.
+	GetRepoForgeID(model.ForgeRemoteID) (*model.Repo, error)
+	// GetRepoNameFallback gets the repo by its forge ID and if this doesn't exist by its full name.
+	GetRepoNameFallback(remoteID model.ForgeRemoteID, fullName string) (*model.Repo, error)
 	// GetRepoName gets a repo by its full name.
 	GetRepoName(string) (*model.Repo, error)
 	// GetRepoCount gets a count of all repositories in the system.
@@ -122,6 +122,7 @@ type Store interface {
 	// Secrets
 	SecretFind(*model.Repo, string) (*model.Secret, error)
 	SecretList(*model.Repo, bool) ([]*model.Secret, error)
+	SecretListAll() ([]*model.Secret, error)
 	SecretCreate(*model.Secret) error
 	SecretUpdate(*model.Secret) error
 	SecretDelete(*model.Secret) error
@@ -130,7 +131,7 @@ type Store interface {
 	GlobalSecretFind(string) (*model.Secret, error)
 	GlobalSecretList() ([]*model.Secret, error)
 
-	// Registrys
+	// Registries
 	RegistryFind(*model.Repo, string) (*model.Registry, error)
 	RegistryList(*model.Repo) ([]*model.Registry, error)
 	RegistryCreate(*model.Registry) error
@@ -148,7 +149,7 @@ type Store interface {
 
 	// Logs
 	LogFind(*model.Step) (io.ReadCloser, error)
-	// TODO: since we do ReadAll in any case a ioReader is not the best idear
+	// TODO: since we do ReadAll in any case a ioReader is not the best idea
 	// so either find a way to write log in chunks by xorm ...
 	LogSave(*model.Step, io.Reader) error
 
@@ -167,6 +168,7 @@ type Store interface {
 	// ServerConfig
 	ServerConfigGet(string) (string, error)
 	ServerConfigSet(string, string) error
+	ServerConfigDelete(string) error
 
 	// Cron
 	CronCreate(*model.Cron) error
@@ -176,6 +178,14 @@ type Store interface {
 	CronDelete(*model.Repo, int64) error
 	CronListNextExecute(int64, int64) ([]*model.Cron, error)
 	CronGetLock(*model.Cron, int64) (bool, error)
+
+	// Agent
+	AgentCreate(*model.Agent) error
+	AgentFind(int64) (*model.Agent, error)
+	AgentFindByToken(string) (*model.Agent, error)
+	AgentList() ([]*model.Agent, error)
+	AgentUpdate(*model.Agent) error
+	AgentDelete(*model.Agent) error
 
 	// Store operations
 	Ping() error
