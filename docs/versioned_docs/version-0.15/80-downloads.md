@@ -1,5 +1,11 @@
 # Downloads
 
+## Which version of Woodpecker should I use?
+
+Woodpecker is having two different kinds of releases: **stable** and **next**.
+
+To find out more about the differences between the two releases, please read the [FAQ](/faq).
+
 ## Binaries & DEB, RPM
 
 [Latest release](https://github.com/woodpecker-ci/woodpecker/releases/latest)
