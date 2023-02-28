@@ -39,6 +39,8 @@ body:
       options:
         # - label: Follow our [Code of Conduct](https://github.com/woodpecker-ci/woodpecker/blob/master/CODE_OF_CONDUCT.md)
         #   required: true
+        - label: Checked that the feature isn't part of the `next` version already [https://woodpecker-ci.org/faq#which-version-of-woodpecker-should-i-use]
+          required: true
         - label: Read the [Contributing Guidelines](https://github.com/woodpecker-ci/woodpecker/blob/master/CONTRIBUTING.md).
           required: true
         - label: Read the [docs](https://woodpecker-ci.org/docs/intro).
