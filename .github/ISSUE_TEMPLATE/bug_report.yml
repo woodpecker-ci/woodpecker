@@ -1,7 +1,7 @@
 # Credits to: https://github.com/vitejs/vite/blob/main/.github/ISSUE_TEMPLATE/bug_report.yml
 name: "\U0001F41E Bug report"
 description: Report an issue with Woodpecker
-labels: ["pending:bug"]
+labels: ['bug']
 body:
   - type: markdown
     attributes:
