@@ -1,6 +1,42 @@
 {
   "admin": {
     "settings": {
+      "agents": {
+        "add": "Ajouter un agent",
+        "agents": "Agents",
+        "backend": {
+          "backend": "Backend",
+          "badge": "backend"
+        },
+        "capacity": {
+          "badge": "capacité",
+          "capacity": "Capacité"
+        },
+        "created": "Agent crée",
+        "delete_confirm": "Voulez vous vraiment effacer cet agent ? Il ne pourra plus se connecter sur le serveur.",
+        "deleted": "Agent effacé",
+        "desc": "Agents enregistrés sur ce serveur",
+        "last_contact": "Dernier contact",
+        "name": {
+          "name": "Nom",
+          "placeholder": "Nom de l'agent"
+        },
+        "never": "Jamais",
+        "no_schedule": {
+          "name": "Désactiver l'agent",
+          "placeholder": "Bloquer l'assignation de nouvelles taches sur l'agent"
+        },
+        "none": "Il n'y a pas d'agent pour le moment.",
+        "platform": {
+          "badge": "platforme",
+          "platform": "Platforme"
+        },
+        "save": "Enregistrer l'agent",
+        "saved": "Agent enregistré",
+        "show": "Afficher les agents",
+        "token": "Jeton",
+        "version": "Version"
+      },
       "not_allowed": "Vous n'êtes pas autorisé à accéder aux réglages du serveur",
       "secrets": {
         "add": "Ajouter un secret",

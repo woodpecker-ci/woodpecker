@@ -321,6 +321,42 @@
                     "events": "Available at following events",
                     "pr_warning": "Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets."
                 }
+            },
+            "agents": {
+                "agents": "Agents",
+                "desc": "Agents registered for this server",
+                "none": "There are no agents yet.",
+                "add": "Add agent",
+                "save": "Save agent",
+                "show": "Show agents",
+                "created": "Agent created",
+                "saved": "Agent saved",
+                "deleted": "Agent deleted",
+                "name": {
+                    "name": "Name",
+                    "placeholder": "Name of the agent"
+                },
+                "no_schedule": {
+                    "name": "Disable agent",
+                    "placeholder": "Stop agent from taking new tasks"
+                },
+                "token": "Token",
+                "platform": {
+                  "platform": "Platform",
+                  "badge": "platform"
+                },
+                "backend": {
+                  "backend": "Backend",
+                  "badge": "backend"
+                },
+                "capacity": {
+                  "capacity": "Capacity",
+                  "badge": "capacity"
+                },
+                "version": "Version",
+                "last_contact": "Last contact",
+                "never": "Never",
+                "delete_confirm": "Do you really want to delete this agent? It wont be able to connected to the server anymore."
             }
         }
     },
