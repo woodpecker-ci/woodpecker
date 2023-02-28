@@ -12,7 +12,7 @@ By placing the configurations in a folder which is by default named `.woodpecker
 
 You can also set some custom path like `.my-ci/pipelines/` instead of `.woodpecker/` in the [project settings](./71-project-settings.md).
 
-## Rational
+## Benefits of using workflows
 
 - faster lint/test feedback, the workflow doesn't have to run fully to have a lint status pushed to the remote
 - better organization of a pipeline along various concerns using one workflow for: testing, linting, building and deploying
