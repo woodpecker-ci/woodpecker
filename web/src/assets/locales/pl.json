@@ -301,8 +301,18 @@
     },
     "user_none": "Ta organizacja / użytkownik nie ma jeszcze żadnych projektów."
   },
+  "repos": "Repozytoria",
   "repositories": "Repozytoria",
   "search": "Szukaj…",
+  "time": {
+    "days_short": "d",
+    "hours_short": "godz",
+    "min_short": "min",
+    "not_started": "jeszcze nie rozpoczęto",
+    "sec_short": "sek",
+    "tmpl": "DD.MM.YYYY, HH:mm z",
+    "weeks_short": "tyg"
+  },
   "unknown_error": "Wystąpił nieznany błąd",
   "url": "URL",
   "user": {

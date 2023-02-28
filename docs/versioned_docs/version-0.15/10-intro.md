@@ -27,7 +27,7 @@ pipeline:
 
 - Define any Docker image as context
   - either use your own and install the needed tools in custom Docker images, or
-  - search [Docker Hub](https://hub.docker.com/search?type=image) for images that are already tailored for your needs) 
+  - search [Docker Hub](https://hub.docker.com/search?type=image) for images that are already tailored for your needs)
 - List the commands that should be executed in your container, in order to build or test your application
 
 ```diff
@@ -85,3 +85,8 @@ pipeline:
 ```
 
 See [plugin docs](./20-usage/51-plugins/10-plugins.md).
+
+## Continue reading
+
+- [Create a Woodpecker pipeline for your repository](./20-usage/10-intro.md)
+- [Setup your own Woodpecker instance](./30-administration/00-setup.md)
