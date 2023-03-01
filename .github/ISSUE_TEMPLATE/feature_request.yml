@@ -1,7 +1,7 @@
 # Credits to: https://github.com/vitejs/vite/blob/main/.github/ISSUE_TEMPLATE/feature_request.yml
 name: "\U0001F680 New feature proposal"
 description: Propose a new feature to be added to Woodpecker
-labels: ["pending:feature"]
+labels: ['feature']
 body:
   - type: markdown
     attributes:
@@ -11,14 +11,14 @@ body:
     id: feature-description
     attributes:
       label: Clear and concise description of the problem
-      description: "As a user of Woodpecker I want [goal / wish] so that [benefit]. If you intend to submit a PR for this issue, tell us in the description."
+      description: 'As a user of Woodpecker I want [goal / wish] so that [benefit]. If you intend to submit a PR for this issue, tell us in the description.'
     validations:
       required: true
   - type: textarea
     id: suggested-solution
     attributes:
       label: Suggested solution
-      description: "In web-ui / config we could provide following functionality..."
+      description: 'In web-ui / config we could provide following functionality...'
     validations:
       required: true
   - type: textarea
@@ -39,6 +39,8 @@ body:
       options:
         # - label: Follow our [Code of Conduct](https://github.com/woodpecker-ci/woodpecker/blob/master/CODE_OF_CONDUCT.md)
         #   required: true
+        - label: Checked that the feature isn't part of the `next` version already [https://woodpecker-ci.org/faq#which-version-of-woodpecker-should-i-use]
+          required: true
         - label: Read the [Contributing Guidelines](https://github.com/woodpecker-ci/woodpecker/blob/master/CONTRIBUTING.md).
           required: true
         - label: Read the [docs](https://woodpecker-ci.org/docs/intro).

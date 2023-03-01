@@ -1,6 +1,6 @@
 # Matrix pipelines
 
-Woodpecker has integrated support for matrix pipeline. Woodpecker executes a separate pipeline for each combination in the matrix, allowing you to build and test a single commit against multiple configurations.
+Woodpecker has integrated support for matrix workflows. Woodpecker executes a separate workflow for each combination in the matrix, allowing you to build and test a single commit against multiple configurations.
 
 Example matrix definition:
 

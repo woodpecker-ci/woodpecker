@@ -17,7 +17,6 @@ import (
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -200,7 +199,9 @@ func (e *kube) Wait(ctx context.Context, step *types.Step) (*types.State, error)
 			UpdateFunc: podUpdated,
 		},
 	)
-	si.Start(wait.NeverStop)
+	stop := make(chan struct{})
+	si.Start(stop)
+	defer close(stop)
 
 	// TODO Cancel on ctx.Done
 	<-finished
@@ -246,7 +247,9 @@ func (e *kube) Tail(ctx context.Context, step *types.Step) (io.ReadCloser, error
 			UpdateFunc: podUpdated,
 		},
 	)
-	si.Start(wait.NeverStop)
+	stop := make(chan struct{})
+	si.Start(stop)
+	defer close(stop)
 
 	<-up
 
@@ -323,7 +326,7 @@ func (e *kube) Destroy(_ context.Context, conf *types.Config) error {
 				}
 				if err := e.client.CoreV1().Services(e.config.Namespace).Delete(noContext, svc.Name, deleteOpts); err != nil {
 					if errors.IsNotFound(err) {
-						log.Trace().Err(err).Msgf("Unable to service pod %s", svc.Name)
+						log.Trace().Err(err).Msgf("Unable to delete service %s", svc.Name)
 					} else {
 						return err
 					}
