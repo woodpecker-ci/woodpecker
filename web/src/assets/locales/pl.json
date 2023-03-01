@@ -1,11 +1,44 @@
 {
   "admin": {
     "settings": {
+      "agents": {
+        "add": "Dodaj agenta",
+        "agents": "Agenty",
+        "backend": {
+          "backend": "Backend",
+          "badge": "backend"
+        },
+        "created": "Utworzono agenta",
+        "delete_confirm": "Czy na pewno chcesz usunąć tego agenta? Nie będzie można go więcej połączyć z serwerem.",
+        "deleted": "Usunięto agenta",
+        "desc": "Agenty zarejestrowane na tym serwerze",
+        "last_contact": "Ostatni kontakt",
+        "name": {
+          "name": "Nazwa",
+          "placeholder": "Nazwa agenta"
+        },
+        "never": "Nigdy",
+        "no_schedule": {
+          "name": "Dezaktywuj agenta",
+          "placeholder": "Nie pozwalaj agentowi brać nowych zadań"
+        },
+        "none": "Nie ma jeszcze żadnego agenta.",
+        "platform": {
+          "badge": "platforma",
+          "platform": "Platforma"
+        },
+        "save": "Zapisz agenta",
+        "saved": "Zapisano agenta",
+        "show": "Pokaż agenty",
+        "token": "Token",
+        "version": "Wersja"
+      },
       "not_allowed": "Nie masz pozwolenia na dostęp do ustawień serwera",
       "secrets": {
         "add": "Dodaj sekret",
         "created": "Dodano sekret globalny",
         "deleted": "Usunięto sekret globalny",
+        "desc": "Globalne sekrety mogą być przekazane jako zmienne środowiskowe do poszczególnych kroków potoku wszystkich repozytoriów.",
         "events": {
           "events": "Dostępny dla wybranych zdarzeń",
           "pr_warning": "Używaj tej opcji ostrożnie, osoba atakująca może złożyć szkodliwy pull request który ujawni twoje sekrety."
@@ -45,6 +78,7 @@
         "add": "Dodaj sekret",
         "created": "Dodano sekret organizacji",
         "deleted": "Usunięto sekret organizacji",
+        "desc": "Sekrety organizacji mogą być przekazane jako zmienne środowiskowe do poszczególnych kroków potoku wszystkich repozytoriów tej organizacji.",
         "events": {
           "events": "Dostępny dla wybranych zdarzeń",
           "pr_warning": "Używaj tej opcji ostrożnie, osoba atakująca może złożyć szkodliwy pull request który ujawni twoje sekrety."
@@ -324,6 +358,7 @@
     "oauth_error": "Błąd podczas uwierzytelnienia u dostawcy OAuth",
     "settings": "Ustawienia użytkownika",
     "shell_setup": "Konfiguracja powłoki systemowej",
+    "shell_setup_before": "wykonaj wcześniej konfigurację powłoki",
     "token": "Twój token osobisty"
   },
   "username": "Nazwa użytkownika",
