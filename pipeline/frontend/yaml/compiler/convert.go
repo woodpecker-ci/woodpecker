@@ -6,15 +6,13 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/rs/zerolog/log"
-
 	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/compiler/settings"
 )
 
-func (c *Compiler) createProcess(name string, container *yaml.Container, section string) *backend.Step {
+func (c *Compiler) createProcess(name string, container *yaml.Container, section string) (*backend.Step, error) {
 	var (
 		detached   bool
 		workingdir string
@@ -80,7 +78,7 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		}
 
 		if err := settings.ParamsToEnv(container.Settings, environment, pluginSecrets.toStringMap()); err != nil {
-			log.Error().Err(err).Msg("paramsToEnv")
+			return nil, err
 		}
 	}
 
@@ -175,7 +173,7 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		Failure:      failure,
 		NetworkMode:  networkMode,
 		IpcMode:      ipcMode,
-	}
+	}, nil
 }
 
 func (c *Compiler) stepWorkdir(container *yaml.Container) string {

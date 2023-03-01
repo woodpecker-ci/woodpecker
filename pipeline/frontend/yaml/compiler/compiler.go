@@ -163,7 +163,10 @@ func (c *Compiler) Compile(conf *yaml.Config) (*backend.Config, error) {
 			Environment: c.cloneEnv,
 		}
 		name := fmt.Sprintf("%s_clone", c.prefix)
-		step := c.createProcess(name, container, defaultCloneName)
+		step, err := c.createProcess(name, container, defaultCloneName)
+		if err != nil {
+			return nil, err
+		}
 
 		stage := new(backend.Stage)
 		stage.Name = name
@@ -184,7 +187,11 @@ func (c *Compiler) Compile(conf *yaml.Config) (*backend.Config, error) {
 			stage.Alias = container.Name
 
 			name := fmt.Sprintf("%s_clone_%d", c.prefix, i)
-			step := c.createProcess(name, container, defaultCloneName)
+			step, err := c.createProcess(name, container, defaultCloneName)
+			if err != nil {
+				return nil, err
+			}
+
 			for k, v := range c.cloneEnv {
 				step.Environment[k] = v
 			}
@@ -194,7 +201,10 @@ func (c *Compiler) Compile(conf *yaml.Config) (*backend.Config, error) {
 		}
 	}
 
-	c.setupCache(conf, config)
+	err := c.setupCache(conf, config)
+	if err != nil {
+		return nil, err
+	}
 
 	// add services steps
 	if len(conf.Services.Containers) != 0 {
@@ -210,7 +220,11 @@ func (c *Compiler) Compile(conf *yaml.Config) (*backend.Config, error) {
 			}
 
 			name := fmt.Sprintf("%s_%s_%d", c.prefix, nameServices, i)
-			step := c.createProcess(name, container, nameServices)
+			step, err := c.createProcess(name, container, nameServices)
+			if err != nil {
+				return nil, err
+			}
+
 			stage.Steps = append(stage.Steps, step)
 		}
 		config.Stages = append(config.Stages, stage)
@@ -241,23 +255,33 @@ func (c *Compiler) Compile(conf *yaml.Config) (*backend.Config, error) {
 		}
 
 		name := fmt.Sprintf("%s_step_%d", c.prefix, i)
-		step := c.createProcess(name, container, namePipeline)
+		step, err := c.createProcess(name, container, namePipeline)
+		if err != nil {
+			return nil, err
+		}
+
 		stage.Steps = append(stage.Steps, step)
 	}
 
-	c.setupCacheRebuild(conf, config)
+	err = c.setupCacheRebuild(conf, config)
+	if err != nil {
+		return nil, err
+	}
 
 	return config, nil
 }
 
-func (c *Compiler) setupCache(conf *yaml.Config, ir *backend.Config) {
+func (c *Compiler) setupCache(conf *yaml.Config, ir *backend.Config) error {
 	if c.local || len(conf.Cache) == 0 || c.cacher == nil {
-		return
+		return nil
 	}
 
 	container := c.cacher.Restore(c.metadata.Repo.Name, c.metadata.Curr.Commit.Branch, conf.Cache)
 	name := fmt.Sprintf("%s_restore_cache", c.prefix)
-	step := c.createProcess(name, container, "cache")
+	step, err := c.createProcess(name, container, "cache")
+	if err != nil {
+		return err
+	}
 
 	stage := new(backend.Stage)
 	stage.Name = name
@@ -265,16 +289,20 @@ func (c *Compiler) setupCache(conf *yaml.Config, ir *backend.Config) {
 	stage.Steps = append(stage.Steps, step)
 
 	ir.Stages = append(ir.Stages, stage)
+	return nil
 }
 
-func (c *Compiler) setupCacheRebuild(conf *yaml.Config, ir *backend.Config) {
+func (c *Compiler) setupCacheRebuild(conf *yaml.Config, ir *backend.Config) error {
 	if c.local || len(conf.Cache) == 0 || c.metadata.Curr.Event != frontend.EventPush || c.cacher == nil {
-		return
+		return nil
 	}
 	container := c.cacher.Rebuild(c.metadata.Repo.Name, c.metadata.Curr.Commit.Branch, conf.Cache)
 
 	name := fmt.Sprintf("%s_rebuild_cache", c.prefix)
-	step := c.createProcess(name, container, "cache")
+	step, err := c.createProcess(name, container, "cache")
+	if err != nil {
+		return err
+	}
 
 	stage := new(backend.Stage)
 	stage.Name = name
@@ -282,4 +310,5 @@ func (c *Compiler) setupCacheRebuild(conf *yaml.Config, ir *backend.Config) {
 	stage.Steps = append(stage.Steps, step)
 
 	ir.Stages = append(ir.Stages, stage)
+	return nil
 }
