@@ -30,6 +30,14 @@ pipeline:
 
 Plugins are just pipeline steps. They share the build workspace, mounted as a volume, and therefore have access to your source tree.
 
+## Finding Plugins
+
+For existing plugins there's a few places you can look:
+
+- [Official Woodpecker Plugins](https://github.com/woodpecker-ci?q=plugin&type=all)
+- [Drone Plugins](http://plugins.drone.io)
+- [The Geek Lab Drone Plugins](https://drone-plugin-index.geekdocs.de/plugins/drone-matrix/)
+
 ## Creating a plugin
 
 See a [detailed plugin example](./20-sample-plugin.md).
