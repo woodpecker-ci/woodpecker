@@ -35,7 +35,7 @@ import (
 func GetBadge(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo, err := _store.GetRepoName(c.Param("owner") + "/" + c.Param("name"))
-	if err != nil {
+	if err != nil || !repo.IsActive {
 		c.AbortWithStatus(404)
 		return
 	}
