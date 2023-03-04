@@ -1,6 +1,7 @@
 <template>
-  <button
-    type="button"
+  <component
+    :is="to === null ? 'button' : httpLink ? 'a' : 'router-link'"
+    v-bind="btnAttrs"
     class="relative flex items-center py-1 px-2 rounded-md border shadow-sm cursor-pointer transition-all duration-150 overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
     :class="{
       'bg-white hover:bg-gray-200 border-gray-300 text-color dark:bg-dark-gray-600 dark:border-dark-400 dark:hover:bg-dark-gray-800':
@@ -15,7 +16,6 @@
     }"
     :title="title"
     :disabled="disabled"
-    @click="doClick"
   >
     <slot>
       <Icon v-if="startIcon" :name="startIcon" class="mr-1 !w-6 !h-6" :class="{ invisible: isLoading }" />
@@ -35,12 +35,12 @@
         <Icon name="loading" class="animate-spin" />
       </div>
     </slot>
-  </button>
+  </component>
 </template>
 
 <script lang="ts">
 import { computed, defineComponent, PropType } from 'vue';
-import { RouteLocationRaw, useRouter } from 'vue-router';
+import { RouteLocationRaw } from 'vue-router';
 
 import Icon, { IconNames } from '~/components/atomic/Icon.vue';
 
@@ -91,24 +91,19 @@ export default defineComponent({
   },
 
   setup(props, { attrs }) {
-    const router = useRouter();
+    const httpLink = computed(() => typeof props.to === 'string' && props.to.startsWith('http'));
 
-    async function doClick() {
-      if (props.isLoading) {
-        return;
+    const btnAttrs = computed(() => {
+      if (props.to === null) {
+        return { type: 'button' };
       }
 
-      if (!props.to) {
-        return;
+      if (httpLink.value) {
+        return { href: props.to };
       }
 
-      if (typeof props.to === 'string' && props.to.startsWith('http')) {
-        window.location.href = props.to;
-        return;
-      }
-
-      await router.push(props.to);
-    }
+      return { to: props.to };
+    });
 
     const passedClasses = computed(() => {
       const classes: Record<string, boolean> = {};
@@ -118,8 +113,7 @@ export default defineComponent({
       });
       return classes;
     });
-
-    return { doClick, passedClasses };
+    return { passedClasses, btnAttrs, httpLink };
   },
 });
 </script>
