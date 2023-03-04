@@ -34,7 +34,7 @@ Plugins are just pipeline steps. They share the build workspace, mounted as a vo
 
 For existing plugins there's a few places you can look:
 
-- [Official Woodpecker Plugins](https://github.com/woodpecker-ci?q=plugin&type=all)
+- [Official Woodpecker Plugins](https://woodpecker-ci.org/plugins)
 - [Drone Plugins](http://plugins.drone.io)
 - [The Geek Lab Drone Plugins](https://drone-plugin-index.geekdocs.de/plugins/drone-matrix/)
 
