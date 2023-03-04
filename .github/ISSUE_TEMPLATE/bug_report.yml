@@ -1,7 +1,7 @@
 # Credits to: https://github.com/vitejs/vite/blob/main/.github/ISSUE_TEMPLATE/bug_report.yml
 name: "\U0001F41E Bug report"
 description: Report an issue with Woodpecker
-labels: ["pending:bug"]
+labels: ['bug']
 body:
   - type: markdown
     attributes:
@@ -63,6 +63,8 @@ body:
         - label: Read the [docs](https://woodpecker-ci.org/docs/intro).
           required: true
         - label: Check that there isn't [already an issue](https://github.com/woodpecker-ci/woodpecker/issues) that reports the same bug to avoid creating a duplicate.
+          required: true
+        - label: Checked that the bug isn't fixed in the `next` version already [https://woodpecker-ci.org/faq#which-version-of-woodpecker-should-i-use]
           required: true
         - label: Check that this is a concrete bug. For Q&A join our [Discord Chat Server](https://discord.gg/fcMQqSMXJy) or the [Matrix room](https://matrix.to/#/#woodpecker:matrix.org).
           required: true
