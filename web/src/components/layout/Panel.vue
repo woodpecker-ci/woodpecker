@@ -5,20 +5,20 @@
       v-if="title"
       type="button"
       class="flex w-full font-bold gap-2 text-gray-200 bg-gray-400 dark:bg-dark-gray-800 px-4 py-2"
-      @click="collapsed = !collapsed"
+      @click="collapsed && (_collapsed = !_collapsed)"
     >
       <Icon
         v-if="collapsable"
         name="chevron-right"
         class="transition-transform duration-150 min-w-6 h-6"
-        :class="{ 'transform rotate-90': !isCollapsable }"
+        :class="{ 'transform rotate-90': !collapsed }"
       />
       {{ title }}
     </component>
     <div
       :class="{
-        'max-h-screen': !isCollapsable,
-        'max-h-0': isCollapsable,
+        'max-h-screen': !collapsed,
+        'max-h-0': collapsed,
       }"
       class="transition-height duration-150 overflow-hidden"
     >
@@ -29,35 +29,26 @@
   </div>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, ref } from 'vue';
+<script lang="ts" setup>
+import { computed, ref } from 'vue';
 
 import Icon from '~/components/atomic/Icon.vue';
 
-export default defineComponent({
-  name: 'Panel',
-  components: { Icon },
-
-  props: {
-    title: {
-      type: String,
-      default: '',
-    },
-
-    collapsable: {
-      type: Boolean,
-    },
+const props = withDefaults(
+  defineProps<{
+    title?: string;
+    collapsable?: boolean;
+  }>(),
+  {
+    title: '',
   },
+);
 
-  setup(props) {
-    const collapsed = ref(false);
+/**
+ * _collapsed is used to store the internal state of the panel, but is
+ * ignored if the panel is not collapsable.
+ */
+const _collapsed = ref(false);
 
-    const isCollapsable = computed(() => props.collapsable && collapsed.value);
-
-    return {
-      isCollapsable,
-      collapsed,
-    };
-  },
-});
+const collapsed = computed(() => props.collapsable && _collapsed.value);
 </script>
