@@ -283,8 +283,6 @@
                 "deleted": "Organization secret deleted",
                 "created": "Organization secret created",
                 "saved": "Organization secret saved",
-                "toggle": "Afficher/Masquer",
-                "copy": "Copier",
                 "images": {
                     "images": "Available for following images",
                     "desc": "Comma separated list of images where this secret is available, leave empty to allow all images"
@@ -309,8 +307,6 @@
                 "add": "Add secret",
                 "save": "Save secret",
                 "show": "Show secrets",
-                "toggle": "Afficher/Masquer",
-                "copy": "Copier",
                 "name": "Name",
                 "value": "Value",
                 "deleted": "Global secret deleted",
