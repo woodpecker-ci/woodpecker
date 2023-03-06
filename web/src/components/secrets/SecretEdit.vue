@@ -24,6 +24,7 @@
         <CheckboxesField v-model="innerValue.event" :options="secretEventsOptions" />
       </InputField>
 
+      <Button type="button" color="gray" :text="$t('cancel')" @click="$emit('cancel')" />
       <Button
         type="submit"
         color="green"
@@ -54,6 +55,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (event: 'update:modelValue', value: Partial<Secret> | undefined): void;
   (event: 'save', value: Partial<Secret>): void;
+  (event: 'cancel'): void;
 }>();
 
 const i18n = useI18n();
