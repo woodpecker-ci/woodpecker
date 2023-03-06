@@ -32,11 +32,16 @@ Plugins are just pipeline steps. They share the build workspace, mounted as a vo
 
 ## Finding Plugins
 
-For existing plugins there's a few places you can look:
+For official plugins, you can use the Woodpecker plugin index:
 
 - [Official Woodpecker Plugins](https://woodpecker-ci.org/plugins)
+
+:::tip
+There are also other plugin lists with additional plugins. Keep in mind that [Drone](https://www.drone.io/) plugins are generally supported, but could need some adjustments and tweaking.
+
 - [Drone Plugins](http://plugins.drone.io)
 - [The Geek Lab Drone Plugins](https://drone-plugin-index.geekdocs.de/plugins/drone-matrix/)
+:::
 
 ## Creating a plugin
 
