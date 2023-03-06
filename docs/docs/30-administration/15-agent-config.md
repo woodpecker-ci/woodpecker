@@ -132,26 +132,3 @@ See [Docker backend configuration](backends/docker/#configuration)
 ### `WOODPECKER_BACKEND_SSH_*`
 
 See [SSH backend configuration](backends/ssh/#configuration)
-
-
-## Image Cleanup
-
-The agent **will not** automatically remove images from the host. This task should be managed by the host system. For example, you can use a cron job to periodically do clean-up tasks for the CI runner.
-
-:::danger
-
-The following commands **are destructive** and **irreversible** it is highly recommended that you test these commands on your system before running them in production via a cron job or other automation.
-
-:::
-
-### Remove all unused images
-
-```sh
-docker image rm $(docker images --filter "dangling=true" -q --no-trunc)
-```
-
-### Remove Woodpecker Volumes
-
-```sh
-docker volume rm $(docker volume ls --filter name=^wp_* --filter dangling=true  -q)
-```
