@@ -1,1 +1,14 @@
-{}
+{
+  "back": "Takaisin",
+  "cancel": "Peru",
+  "color_scheme_dark": "Vaihda valoisaan tilaan",
+  "color_scheme_light": "Vaihda tummaan tilaan",
+  "docs": "Dokumentaatio",
+  "login": "Kirjaudu",
+  "logout": "Kirjaudu ulos",
+  "password": "Salasana",
+  "search": "Etsi…",
+  "url": "URL",
+  "username": "Käyttäjätunnus",
+  "welcome": "Tervetuloa Woodpeckeriin"
+}

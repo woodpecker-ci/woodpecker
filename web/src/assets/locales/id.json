@@ -321,6 +321,7 @@
         "add": "Tambahkan rahasia",
         "created": "Rahasia dibuat",
         "delete": "Hapus rahasia",
+        "delete_confirm": "Apakah Anda ingin menghapus rahasia ini?",
         "deleted": "Rahasia dihapus",
         "desc": "Rahasia dapat diberikan ke langkah jalur pipa individu saat dijalankan sebagai variabel lingkungan.",
         "edit": "Sunting rahasia",

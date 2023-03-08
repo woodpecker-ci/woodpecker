@@ -364,6 +364,7 @@
         "add": "Ajouter un secret",
         "created": "Secret crée",
         "delete": "Effacer le secret",
+        "delete_confirm": "Voulez vous vraiment effacer ce secret ?",
         "deleted": "Secret effacé",
         "desc": "Les secrets sont transmis sous forme de variable d’environnement lors de l’exécution d'une étape d'un pipeline.",
         "edit": "Modifier le secret",
