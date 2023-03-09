@@ -15,6 +15,7 @@
 package datastore
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -27,9 +28,10 @@ func TestTaskList(t *testing.T) {
 	defer closer()
 
 	assert.NoError(t, store.TaskInsert(&model.Task{
-		ID:     "some_random_id",
-		Data:   []byte("foo"),
-		Labels: map[string]string{"foo": "bar"},
+		ID:        "some_random_id",
+		Data:      []byte("foo"),
+		Labels:    map[string]string{"foo": "bar"},
+		DepStatus: map[string]string{"test": "dep"},
 	}))
 
 	list, err := store.TaskList()
@@ -46,6 +48,9 @@ func TestTaskList(t *testing.T) {
 	}
 	if got, want := list[0].Data, "foo"; string(got) != want {
 		t.Errorf("Want task data %s, got %s", want, string(got))
+	}
+	if got, want := list[0].DepStatus, map[string]string{"test": "dep"}; !reflect.DeepEqual(got, want) {
+		t.Errorf("Want task data %s, got %s", want, got)
 	}
 
 	err = store.TaskDelete("some_random_id")
