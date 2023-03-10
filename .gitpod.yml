@@ -39,7 +39,7 @@ tasks:
       $DOCKER_COMPOSE_CMD up -d
       until curl --output /dev/null --silent --head --fail http://localhost:3000; do printf '.'; sleep 1; done
       $GITEA_CLI_CMD admin user create --username woodpecker --password password --email woodpecker@localhost --admin
-      export GITEA_TOKEN=$($GITEA_CLI_CMD admin user generate-access-token -u woodpecker --scopes repo,user --raw)
+      export GITEA_TOKEN=$($GITEA_CLI_CMD admin user generate-access-token -u woodpecker --scopes write:application --raw)
       GITEA_OAUTH_APP=$(curl -X 'POST' 'http://localhost:3000/api/v1/user/applications/oauth2' \
         -H 'accept: application/json' -H 'Content-Type: application/json' -H "Authorization: token ${GITEA_TOKEN}" \
         -d "{ \"name\": \"Woodpecker CI\", \"confidential_client\": true, \"redirect_uris\": [ \"https://8000-${GITPOD_WORKSPACE_ID}.${GITPOD_WORKSPACE_CLUSTER_HOST}/authorize\" ] }")
@@ -62,6 +62,7 @@ tasks:
       git add .
       git commit -m ":tada: Initial commit"
       git push -u origin main
+      cd ../..
       gp sync-done gitea
       $DOCKER_COMPOSE_CMD logs -f
   - name: App
