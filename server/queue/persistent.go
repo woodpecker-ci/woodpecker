@@ -36,7 +36,7 @@ func WithTaskStore(q Queue, s model.TaskStore) Queue {
 			Labels:       task.Labels,
 			Dependencies: task.Dependencies,
 			RunOn:        task.RunOn,
-			DepStatus:    make(map[string]string),
+			DepStatus:    task.DepStatus,
 		})
 	}
 	if err := q.PushAtOnce(context.Background(), toEnqueue); err != nil {
@@ -58,6 +58,7 @@ func (q *persistentQueue) Push(c context.Context, task *Task) error {
 		Labels:       task.Labels,
 		Dependencies: task.Dependencies,
 		RunOn:        task.RunOn,
+		DepStatus:    task.DepStatus,
 	}); err != nil {
 		return err
 	}
@@ -80,6 +81,7 @@ func (q *persistentQueue) PushAtOnce(c context.Context, tasks []*Task) error {
 			Labels:       task.Labels,
 			Dependencies: task.Dependencies,
 			RunOn:        task.RunOn,
+			DepStatus:    task.DepStatus,
 		}); err != nil {
 			return err
 		}
