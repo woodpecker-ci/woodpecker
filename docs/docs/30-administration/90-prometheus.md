@@ -30,6 +30,12 @@ scrape_configs:
        - targets: ['woodpecker.domain.com']
 ```
 
+## Unauthenticated Access
+
+Alternatively, the unprotected `/metrics` endpoint is exposed on the internal port (9001 by default). Port is configurable via the `WOODPECKER_METRICS_SERVER_ADDR` environment variable.
+
+```diff
+
 ## Metric Reference
 
 List of Prometheus metrics specific to Woodpecker:

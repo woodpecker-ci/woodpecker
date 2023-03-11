@@ -27,6 +27,7 @@ import (
 
 	"github.com/caddyserver/certmagic"
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
@@ -255,6 +256,14 @@ func run(c *cli.Context) error {
 				c.String("server-addr"),
 				handler,
 			)
+		})
+	}
+
+	if metricsServer := c.String("metrics-server-addr"); metricsServer != "" {
+		g.Go(func() error {
+			metricsRouter := gin.New()
+			metricsRouter.GET("/metrics", gin.WrapH(promhttp.Handler()))
+			return http.ListenAndServe(metricsServer, metricsRouter)
 		})
 	}
 
