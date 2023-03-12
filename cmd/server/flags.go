@@ -81,7 +81,7 @@ var flags = []cli.Flag{
 		EnvVars: []string{"WOODPECKER_METRICS_SERVER_ADDR"},
 		Name:    "metrics-server-addr",
 		Usage:   "metrics server address",
-		Value:   ":9001",
+		Value:   "",
 	},
 	&cli.StringSliceFlag{
 		EnvVars: []string{"WOODPECKER_ADMIN"},

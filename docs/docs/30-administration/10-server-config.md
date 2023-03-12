@@ -161,9 +161,11 @@ Automatically generates an SSL certificate using Let's Encrypt, and configures t
 Configures the gRPC listener port.
 
 ### `WOODPECKER_METRICS_SERVER_ADDR`
-> Default: `:9001`
+> Default: empty
 
 Configures an unprotected metrics endpoint. An empty value disables the metrics endpoint completely.
+
+Example: `:9001`
 
 ### `WOODPECKER_ADMIN`
 > Default: empty
