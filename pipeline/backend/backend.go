@@ -11,19 +11,20 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
 
-var engines map[string]types.Engine
+var enginesByName map[string]types.Engine
+var engines []types.Engine
 
 func Init(ctx context.Context) {
-	loadedEngines := []types.Engine{
+	engines = []types.Engine{
 		docker.New(),
 		local.New(),
 		ssh.New(),
 		kubernetes.New(ctx),
 	}
 
-	engines = make(map[string]types.Engine)
-	for _, engine := range loadedEngines {
-		engines[engine.Name()] = engine
+	enginesByName = make(map[string]types.Engine)
+	for _, engine := range engines {
+		enginesByName[engine.Name()] = engine
 	}
 }
 
@@ -38,7 +39,7 @@ func FindEngine(engineName string) (types.Engine, error) {
 		return nil, fmt.Errorf("Can't detect an available backend engine")
 	}
 
-	engine, ok := engines[engineName]
+	engine, ok := enginesByName[engineName]
 	if !ok {
 		return nil, fmt.Errorf("Backend engine '%s' not found", engineName)
 	}
