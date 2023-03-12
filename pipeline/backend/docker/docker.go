@@ -184,7 +184,6 @@ func (e *docker) Tail(ctx context.Context, proc *backend.Step) (io.ReadCloser, e
 		_, _ = stdcopy.StdCopy(wc, wc, logs)
 		_ = logs.Close()
 		_ = wc.Close()
-		_ = rc.Close()
 	}()
 	return rc, nil
 }
