@@ -259,11 +259,11 @@ func run(c *cli.Context) error {
 		})
 	}
 
-	if metricsServer := c.String("metrics-server-addr"); metricsServer != "" {
+	if metricsServerAddr := c.String("metrics-server-addr"); metricsServerAddr != "" {
 		g.Go(func() error {
 			metricsRouter := gin.New()
 			metricsRouter.GET("/metrics", gin.WrapH(promhttp.Handler()))
-			return http.ListenAndServe(metricsServer, metricsRouter)
+			return http.ListenAndServe(metricsServerAddr, metricsRouter)
 		})
 	}
 
