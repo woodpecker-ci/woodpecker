@@ -163,7 +163,7 @@ Configures the gRPC listener port.
 ### `WOODPECKER_METRICS_SERVER_ADDR`
 > Default: `:9001`
 
-Configures the unprotected metrics listener port. Empty value disables the metrics server completely.
+Configures an unprotected metrics endpoint. An empty value disables the metrics endpoint completely.
 
 ### `WOODPECKER_ADMIN`
 > Default: empty
