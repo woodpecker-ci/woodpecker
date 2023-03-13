@@ -11,8 +11,10 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
 
-var enginesByName map[string]types.Engine
-var engines []types.Engine
+var (
+	enginesByName map[string]types.Engine
+	engines       []types.Engine
+)
 
 func Init(ctx context.Context) {
 	engines = []types.Engine{
