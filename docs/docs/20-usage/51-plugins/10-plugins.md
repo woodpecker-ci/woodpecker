@@ -2,7 +2,7 @@
 
 Plugins are pipeline steps that perform pre-defined tasks and are configured as steps in your pipeline. Plugins can be used to deploy code, publish artifacts, send notification, and more.
 
-They are automatically pulled from [plugins.drone.io](http://plugins.drone.io).
+They are automatically pulled from the default container registry the agent's have configured.
 
 Example pipeline using the Docker and Slack plugins:
 
