@@ -65,6 +65,7 @@
     }
   },
   "back": "Kembali",
+  "cancel": "Batal",
   "color_scheme_dark": "Ubah ke mode terang",
   "color_scheme_light": "Ubah ke mode gelap",
   "docs": "Dokumentasi",
@@ -320,6 +321,7 @@
         "add": "Tambahkan rahasia",
         "created": "Rahasia dibuat",
         "delete": "Hapus rahasia",
+        "delete_confirm": "Apakah Anda ingin menghapus rahasia ini?",
         "deleted": "Rahasia dihapus",
         "desc": "Rahasia dapat diberikan ke langkah jalur pipa individu saat dijalankan sebagai variabel lingkungan.",
         "edit": "Sunting rahasia",

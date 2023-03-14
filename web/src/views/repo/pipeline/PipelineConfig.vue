@@ -1,6 +1,11 @@
 <template>
   <div class="flex flex-col gap-y-6">
-    <Panel v-for="pipelineConfig in pipelineConfigs || []" :key="pipelineConfig.hash" :title="pipelineConfig.name">
+    <Panel
+      v-for="pipelineConfig in pipelineConfigs || []"
+      :key="pipelineConfig.hash"
+      collapsable
+      :title="pipelineConfig.name"
+    >
       <SyntaxHighlight class="font-mono whitespace-pre overflow-auto" language="yaml" :code="pipelineConfig.data" />
     </Panel>
   </div>
