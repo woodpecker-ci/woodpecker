@@ -101,7 +101,7 @@ func GetPipelines(c *gin.Context) {
 			c.AbortWithStatus(http.StatusNotFound)
 			return
 		}
-		c.AbortWithError(http.StatusInternalServerError, err)
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 	c.JSON(http.StatusOK, pipelines)
