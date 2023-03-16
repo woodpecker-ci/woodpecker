@@ -28,9 +28,9 @@ import (
 // ensures the task Queue can be restored when the system starts.
 func WithTaskStore(q Queue, s model.TaskStore) Queue {
 	tasks, _ := s.TaskList()
-	var toEnqueue []*Task
+	var toEnqueue []*model.Task
 	for _, task := range tasks {
-		toEnqueue = append(toEnqueue, &Task{
+		toEnqueue = append(toEnqueue, &model.Task{
 			ID:           task.ID,
 			Data:         task.Data,
 			Labels:       task.Labels,
@@ -51,7 +51,7 @@ type persistentQueue struct {
 }
 
 // Push pushes a task to the tail of this queue.
-func (q *persistentQueue) Push(c context.Context, task *Task) error {
+func (q *persistentQueue) Push(c context.Context, task *model.Task) error {
 	if err := q.store.TaskInsert(&model.Task{
 		ID:           task.ID,
 		Data:         task.Data,
@@ -72,7 +72,7 @@ func (q *persistentQueue) Push(c context.Context, task *Task) error {
 }
 
 // PushAtOnce pushes multiple tasks to the tail of this queue.
-func (q *persistentQueue) PushAtOnce(c context.Context, tasks []*Task) error {
+func (q *persistentQueue) PushAtOnce(c context.Context, tasks []*model.Task) error {
 	// TODO: invent store.NewSession who return context including a session and make TaskInsert & TaskDelete use it
 	for _, task := range tasks {
 		if err := q.store.TaskInsert(&model.Task{
@@ -98,7 +98,7 @@ func (q *persistentQueue) PushAtOnce(c context.Context, tasks []*Task) error {
 }
 
 // Poll retrieves and removes a task head of this queue.
-func (q *persistentQueue) Poll(c context.Context, f FilterFn) (*Task, error) {
+func (q *persistentQueue) Poll(c context.Context, f FilterFn) (*model.Task, error) {
 	task, err := q.Queue.Poll(c, f)
 	if task != nil {
 		log.Debug().Msgf("pull queue item: %s: remove from backup", task.ID)
