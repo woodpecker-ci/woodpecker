@@ -29,13 +29,13 @@ type Task struct {
 	Labels map[string]string `json:"labels,omitempty"`
 
 	// Task IDs this task depend
-	Dependencies []string
+	Dependencies []string `json:"dependencies,omitempty"`
 
 	// Dependency's exit status
-	DepStatus map[string]string
+	DepStatus map[string]string `json:"dep_status,omitempty"`
 
 	// RunOn failure or success
-	RunOn []string
+	RunOn []string `json:"run_on,omitempty"`
 }
 
 // ShouldRun tells if a task should be run or skipped, based on dependencies
@@ -105,7 +105,7 @@ type InfoT struct {
 		Running       int `json:"running_count"`
 		Complete      int `json:"completed_count"`
 	} `json:"stats"`
-	Paused bool
+	Paused bool `json:"paused"`
 }
 
 func (t *InfoT) String() string {

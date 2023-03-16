@@ -357,6 +357,12 @@
                 "last_contact": "Last contact",
                 "never": "Never",
                 "delete_confirm": "Do you really want to delete this agent? It wont be able to connected to the server anymore."
+            },
+            "queue": {
+              "queue": "Queue",
+              "desc": "Tasks waiting to be executed by agents",
+              "pause": "Pause",
+              "resume": "Resume"
             }
         }
     },
