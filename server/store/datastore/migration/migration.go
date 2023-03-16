@@ -25,7 +25,7 @@ import (
 )
 
 // APPEND NEW MIGRATIONS
-// they are executed in order and if one fail woodpecker will try to rollback and quit
+// they are executed in order and if one fails woodpecker will try to rollback and quit
 var migrationTasks = []*task{
 	&legacy2Xorm,
 	&alterTableReposDropFallback,
