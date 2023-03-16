@@ -51,6 +51,6 @@ func (s storage) AgentDelete(agent *model.Agent) error {
 	return err
 }
 
-func (s storage) AgentGetAvailableAgentCounts() (int64, error) {
+func (s storage) AgentGetAvailableCount() (int64, error) {
 	return s.engine.Count(new(model.Agent))
 }
