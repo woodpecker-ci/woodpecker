@@ -23,6 +23,7 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.4.2
 	github.com/google/go-github/v39 v39.2.0
 	github.com/google/tink/go v1.7.0
+	github.com/google/uuid v1.3.0
 	github.com/gorilla/securecookie v1.1.1
 	github.com/joho/godotenv v1.4.0
 	github.com/lafriks/ttlcache/v3 v3.2.0
@@ -41,7 +42,6 @@ require (
 	github.com/urfave/cli/v2 v2.20.2
 	github.com/xanzy/go-gitlab v0.73.1
 	github.com/xeipuuv/gojsonschema v1.2.0
-	go.uber.org/multierr v1.9.0
 	golang.org/x/crypto v0.7.0
 	golang.org/x/exp v0.0.0-20230307190834-24139beb5833
 	golang.org/x/net v0.8.0
@@ -87,7 +87,6 @@ require (
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
-	github.com/google/uuid v1.3.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-hclog v1.0.0 // indirect
 	github.com/hashicorp/go-retryablehttp v0.7.1 // indirect
@@ -129,6 +128,7 @@ require (
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
+	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.23.0 // indirect
 	golang.org/x/mod v0.8.0 // indirect
 	golang.org/x/sys v0.6.0 // indirect
