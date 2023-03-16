@@ -17,7 +17,7 @@
     </component>
     <div
       :class="{
-        'max-h-screen': !collapsed,
+        'max-h-auto': !collapsed,
         'max-h-0': collapsed,
       }"
       class="transition-height duration-150 overflow-hidden"
