@@ -116,7 +116,7 @@ async function pauseQueue() {
   await apiClient.pauseQueue();
   await loadQueueInfo();
   notifications.notify({
-    title: i18n.t('admin.settings.queue.paused').toString(),
+    title: i18n.t('admin.settings.queue.paused'),
     type: 'success',
   });
 }
@@ -125,7 +125,7 @@ async function resumeQueue() {
   await apiClient.resumeQueue();
   await loadQueueInfo();
   notifications.notify({
-    title: i18n.t('admin.settings.queue.resumed').toString(),
+    title: i18n.t('admin.settings.queue.resumed'),
     type: 'success',
   });
 }
