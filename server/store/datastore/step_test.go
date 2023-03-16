@@ -37,7 +37,7 @@ func TestStepFind(t *testing.T) {
 			State:      model.StatusSuccess,
 			Error:      "pc load letter",
 			ExitCode:   255,
-			AgentID:    1,
+			Machine:    "localhost",
 			Platform:   "linux/amd64",
 			Environ:    map[string]string{"GOLANG": "tip"},
 		},
@@ -147,7 +147,7 @@ func TestStepUpdate(t *testing.T) {
 		State:      "pending",
 		Error:      "pc load letter",
 		ExitCode:   255,
-		AgentID:    1,
+		Machine:    "localhost",
 		Platform:   "linux/amd64",
 		Environ:    map[string]string{"GOLANG": "tip"},
 	}

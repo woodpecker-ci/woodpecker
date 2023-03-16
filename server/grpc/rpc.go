@@ -131,6 +131,14 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 		return err
 	}
 
+	metadata, ok := grpcMetadata.FromIncomingContext(c)
+	if ok {
+		hostname, ok := metadata["hostname"]
+		if ok && len(hostname) != 0 {
+			step.Machine = hostname[0]
+		}
+	}
+
 	repo, err := s.store.GetRepo(currentPipeline.RepoID)
 	if err != nil {
 		log.Error().Msgf("error: cannot find repo with id %d: %s", currentPipeline.RepoID, err)
@@ -250,12 +258,13 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 		log.Error().Msgf("error: cannot find step with id %d: %s", stepID, err)
 		return err
 	}
-
-	agent, err := s.getAgentFromContext(c)
-	if err != nil {
-		return err
+	metadata, ok := grpcMetadata.FromIncomingContext(c)
+	if ok {
+		hostname, ok := metadata["hostname"]
+		if ok && len(hostname) != 0 {
+			step.Machine = hostname[0]
+		}
 	}
-	step.AgentID = agent.ID
 
 	currentPipeline, err := s.store.GetPipeline(step.PipelineID)
 	if err != nil {

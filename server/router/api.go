@@ -172,7 +172,6 @@ func apiRoutes(e *gin.Engine) {
 			agentBase.GET("", api.GetAgents)
 			agentBase.POST("", api.PostAgent)
 			agentBase.GET("/:agent", api.GetAgent)
-			agentBase.GET("/:agent/pipelines", api.GetAgentPipelines)
 			agentBase.PATCH("/:agent", api.PatchAgent)
 			agentBase.DELETE("/:agent", api.DeleteAgent)
 		}
