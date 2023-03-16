@@ -36,12 +36,12 @@ const (
 
 // Task defines scheduled pipeline Task.
 type Task struct {
-	ID           string                 `xorm:"PK UNIQUE 'task_id'"`
-	Data         []byte                 `xorm:"'task_data'"`
-	Labels       map[string]string      `xorm:"json 'task_labels'"`
-	Dependencies []string               `xorm:"json 'task_dependencies'"`
-	RunOn        []string               `xorm:"json 'task_run_on'"`
-	DepStatus    map[string]StatusValue `xorm:"json 'task_dep_status'"`
+	ID           string                 `json:"id"           xorm:"PK UNIQUE 'task_id'"`
+	Data         []byte                 `json:"data"         xorm:"'task_data'"`
+	Labels       map[string]string      `json:"labels"       xorm:"json 'task_labels'"`
+	Dependencies []string               `json:"dependencies" xorm:"json 'task_dependencies'"`
+	RunOn        []string               `json:"run_on"       xorm:"json 'task_run_on'"`
+	DepStatus    map[string]StatusValue `json:"dep_status"   xorm:"json 'task_dep_status'"`
 }
 
 // TableName return database table name for xorm

@@ -66,7 +66,6 @@
           <span class="flex ml-auto gap-2">
             <span>{{ task.labels }}</span>
             <span>{{ task.dependencies }}</span>
-            <span>{{ task.dep_status }}</span>
           </span>
         </ListItem>
       </div>
@@ -98,15 +97,15 @@ const tasks = computed(() => {
     t.push(...queueInfo.value.running.map((task) => ({ ...task, status: 'running' })));
   }
 
-  if (queueInfo.value?.waiting_on_deps) {
-    t.push(...queueInfo.value.waiting_on_deps.map((task) => ({ ...task, status: 'waiting_on_deps' })));
-  }
-
   if (queueInfo.value?.pending) {
     t.push(...queueInfo.value.pending.map((task) => ({ ...task, status: 'pending' })));
   }
 
-  return t;
+  if (queueInfo.value?.waiting_on_deps) {
+    t.push(...queueInfo.value.waiting_on_deps.map((task) => ({ ...task, status: 'waiting_on_deps' })));
+  }
+
+  return t.sort((a, b) => a.id - b.id);
 });
 
 async function loadQueueInfo() {
