@@ -62,31 +62,31 @@ type (
 
 	// Pipeline defines runtime metadata for a pipeline.
 	Pipeline struct {
-		Number   int64    `json:"number,omitempty"`
-		Created  int64    `json:"created,omitempty"`
-		Started  int64    `json:"started,omitempty"`
-		Finished int64    `json:"finished,omitempty"`
-		Timeout  int64    `json:"timeout,omitempty"`
-		Status   string   `json:"status,omitempty"`
-		Event    string   `json:"event,omitempty"`
-		Link     string   `json:"link,omitempty"`
-		Target   string   `json:"target,omitempty"`
-		Trusted  bool     `json:"trusted,omitempty"`
-		Commit   Commit   `json:"commit,omitempty"`
-		Parent   int64    `json:"parent,omitempty"`
-		Cron     string   `json:"cron,omitempty"`
-		Labels   []string `json:"labels,omitempty"`
+		Number   int64  `json:"number,omitempty"`
+		Created  int64  `json:"created,omitempty"`
+		Started  int64  `json:"started,omitempty"`
+		Finished int64  `json:"finished,omitempty"`
+		Timeout  int64  `json:"timeout,omitempty"`
+		Status   string `json:"status,omitempty"`
+		Event    string `json:"event,omitempty"`
+		Link     string `json:"link,omitempty"`
+		Target   string `json:"target,omitempty"`
+		Trusted  bool   `json:"trusted,omitempty"`
+		Commit   Commit `json:"commit,omitempty"`
+		Parent   int64  `json:"parent,omitempty"`
+		Cron     string `json:"cron,omitempty"`
 	}
 
 	// Commit defines runtime metadata for a commit.
 	Commit struct {
-		Sha          string   `json:"sha,omitempty"`
-		Ref          string   `json:"ref,omitempty"`
-		Refspec      string   `json:"refspec,omitempty"`
-		Branch       string   `json:"branch,omitempty"`
-		Message      string   `json:"message,omitempty"`
-		Author       Author   `json:"author,omitempty"`
-		ChangedFiles []string `json:"changed_files,omitempty"`
+		Sha               string   `json:"sha,omitempty"`
+		Ref               string   `json:"ref,omitempty"`
+		Refspec           string   `json:"refspec,omitempty"`
+		Branch            string   `json:"branch,omitempty"`
+		Message           string   `json:"message,omitempty"`
+		Author            Author   `json:"author,omitempty"`
+		ChangedFiles      []string `json:"changed_files,omitempty"`
+		PullRequestLabels []string `json:"labels,omitempty"`
 	}
 
 	// Author defines runtime metadata for a commit author.
@@ -246,7 +246,7 @@ func (m *Metadata) Environ() map[string]string {
 	}
 	if m.Curr.Event == EventPull {
 		params["CI_COMMIT_PULL_REQUEST"] = pullRegexp.FindString(m.Curr.Commit.Ref)
-		params["CI_COMMIT_PULL_REQUEST_LABELS"] = strings.Join(m.Curr.Labels, ",")
+		params["CI_COMMIT_PULL_REQUEST_LABELS"] = strings.Join(m.Curr.Commit.PullRequestLabels, ",")
 	}
 
 	return params
