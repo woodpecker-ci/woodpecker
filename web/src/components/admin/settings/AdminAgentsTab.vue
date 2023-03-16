@@ -12,10 +12,7 @@
         start-icon="back"
         @click="selectedAgent = undefined"
       />
-      <template v-else>
-        <Button class="ml-auto" :text="$t('admin.settings.agents.add')" start-icon="plus" @click="showAddAgent" />
-        <Button class="ml-2" start-icon="refresh" @click="loadAgents" />
-      </template>
+      <Button v-else class="ml-auto" :text="$t('admin.settings.agents.add')" start-icon="plus" @click="showAddAgent" />
     </div>
 
     <div v-if="!selectedAgent" class="space-y-4 text-color">
@@ -23,9 +20,9 @@
         <span>{{ agent.name || `Agent ${agent.id}` }}</span>
         <span class="ml-auto">
           <span class="hidden md:inline-block space-x-2">
-            <Badge :label="$t('admin.settings.agents.platform.badge')" :value="agent.platform" />
-            <Badge :label="$t('admin.settings.agents.backend.badge')" :value="agent.backend" />
-            <Badge :label="$t('admin.settings.agents.capacity.badge')" :value="agent.capacity" />
+            <Badge :label="$t('admin.settings.agents.platform.badge')" :value="agent.platform || '???'" />
+            <Badge :label="$t('admin.settings.agents.backend.badge')" :value="agent.backend || '???'" />
+            <Badge :label="$t('admin.settings.agents.capacity.badge')" :value="agent.capacity || '???'" />
           </span>
           <span class="ml-2">{{ agent.last_contact ? timeAgo.format(agent.last_contact * 1000) : 'never' }}</span>
         </span>
@@ -110,7 +107,7 @@
 
 <script lang="ts" setup>
 import { cloneDeep } from 'lodash';
-import { computed, onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Badge from '~/components/atomic/Badge.vue';
@@ -175,7 +172,18 @@ function showAddAgent() {
   selectedAgent.value = cloneDeep({ name: '' });
 }
 
+const reloadInterval = ref<unknown>();
+
 onMounted(async () => {
   await loadAgents();
+  reloadInterval.value = setInterval(async () => {
+    await loadAgents();
+  }, 5000);
+});
+
+onBeforeUnmount(() => {
+  if (reloadInterval.value) {
+    clearInterval(reloadInterval.value as number);
+  }
 });
 </script>

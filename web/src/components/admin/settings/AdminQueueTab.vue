@@ -31,49 +31,51 @@
       </div>
     </div>
 
-    <div class="flex flex-col overflow-auto">
+    <div class="flex flex-col">
       <pre>{{ queueInfo?.stats }}</pre>
 
-      <p class="mt-6 mb-2 text-xl">{{ i18n.t('admin.settings.queue.tasks') }}</p>
-      <ListItem v-for="task in tasks" :key="task.id" class="items-center mb-2">
-        <div
-          class="flex items-center"
-          :title="
-            task.status === 'pending'
-              ? i18n.t('admin.settings.queue.task_pending')
-              : task.status === 'running'
-              ? i18n.t('admin.settings.queue.task_running')
-              : i18n.t('admin.settings.queue.task_waiting_on_deps')
-          "
-        >
-          <Icon
-            :name="
+      <div v-if="tasks.length > 0" class="flex flex-col">
+        <p class="mt-6 mb-2 text-xl">{{ i18n.t('admin.settings.queue.tasks') }}</p>
+        <ListItem v-for="task in tasks" :key="task.id" class="items-center mb-2">
+          <div
+            class="flex items-center"
+            :title="
               task.status === 'pending'
-                ? 'status-pending'
+                ? i18n.t('admin.settings.queue.task_pending')
                 : task.status === 'running'
-                ? 'status-running'
-                : 'status-declined'
+                ? i18n.t('admin.settings.queue.task_running')
+                : i18n.t('admin.settings.queue.task_waiting_on_deps')
             "
-            :class="{
-              'text-red-400': task.status === 'waiting_on_deps',
-              'text-lime-400': task.status === 'running',
-              'text-blue-400': task.status === 'pending',
-            }"
-          />
-        </div>
-        <span class="ml-2">{{ task.id }}</span>
-        <span class="flex ml-auto gap-2">
-          <span>{{ task.labels }}</span>
-          <span>{{ task.dependencies }}</span>
-          <span>{{ task.dep_status }}</span>
-        </span>
-      </ListItem>
+          >
+            <Icon
+              :name="
+                task.status === 'pending'
+                  ? 'status-pending'
+                  : task.status === 'running'
+                  ? 'status-running'
+                  : 'status-declined'
+              "
+              :class="{
+                'text-red-400': task.status === 'waiting_on_deps',
+                'text-lime-400': task.status === 'running',
+                'text-blue-400': task.status === 'pending',
+              }"
+            />
+          </div>
+          <span class="ml-2">{{ task.id }}</span>
+          <span class="flex ml-auto gap-2">
+            <span>{{ task.labels }}</span>
+            <span>{{ task.dependencies }}</span>
+            <span>{{ task.dep_status }}</span>
+          </span>
+        </ListItem>
+      </div>
     </div>
   </Panel>
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Icon from '~/components/atomic/Icon.vue';
@@ -129,10 +131,18 @@ async function resumeQueue() {
   });
 }
 
+const reloadInterval = ref<unknown>();
+
 onMounted(async () => {
   await loadQueueInfo();
-  setInterval(async () => {
+  reloadInterval.value = setInterval(async () => {
     await loadQueueInfo();
   }, 5000);
+});
+
+onBeforeUnmount(() => {
+  if (reloadInterval.value) {
+    clearInterval(reloadInterval.value as number);
+  }
 });
 </script>
