@@ -78,15 +78,13 @@ func (s *Syncer) Sync(ctx context.Context, user *model.User, flatPermissions boo
 
 			// TODO(485) temporary workaround to not hit api rate limits
 			if flatPermissions {
-				if repo.Perm == nil {
-					repo.Perm.Pull = true
-					repo.Perm.Push = true
-					repo.Perm.Admin = true
-				}
+				repo.Perm.Pull = true
+				repo.Perm.Push = true
+				repo.Perm.Admin = true
 			} else {
 				forgePerm, err := s.Forge.Perm(ctx, user, repo)
 				if err != nil {
-					return fmt.Errorf("could not fetch permission of repo '%s': %v", repo.FullName, err)
+					return fmt.Errorf("could not fetch permission of repo '%s': %w", repo.FullName, err)
 				}
 				repo.Perm.Pull = forgePerm.Pull
 				repo.Perm.Push = forgePerm.Push

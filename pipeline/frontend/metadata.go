@@ -249,8 +249,6 @@ func (m *Metadata) Environ() map[string]string {
 		params["CI_COMMIT_PULL_REQUEST_LABELS"] = strings.Join(m.Curr.Labels, ",")
 	}
 
-	m.setDroneEnviron(params)
-
 	return params
 }
 

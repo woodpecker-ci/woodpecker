@@ -2,6 +2,7 @@ package pipeline
 
 import (
 	"context"
+	"errors"
 	"strings"
 	"sync"
 	"time"
@@ -69,7 +70,7 @@ func (r *Runtime) MakeLogger() zerolog.Logger {
 }
 
 // Starts the execution of the pipeline and waits for it to complete
-func (r *Runtime) Run() error {
+func (r *Runtime) Run(runnerCtx context.Context) error {
 	logger := r.MakeLogger()
 	logger.Debug().Msgf("Executing %d stages, in order of:", len(r.spec.Stages))
 	for _, stage := range r.spec.Stages {
@@ -85,7 +86,7 @@ func (r *Runtime) Run() error {
 	}
 
 	defer func() {
-		if err := r.engine.Destroy(r.ctx, r.spec); err != nil {
+		if err := r.engine.Destroy(runnerCtx, r.spec); err != nil {
 			logger.Error().Err(err).Msg("could not destroy engine")
 		}
 	}()
@@ -175,6 +176,9 @@ func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 				return err
 			}
 
+			// add compatibility for drone-ci plugins
+			SetDroneEnviron(step.Environment)
+
 			logger.Debug().
 				Str("Step", step.Name).
 				Msg("Executing")
@@ -187,7 +191,7 @@ func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 
 			// if we got a nil process but an error state
 			// then we need to log the internal error to the step.
-			if r.logger != nil && err != nil && processState == nil {
+			if r.logger != nil && err != nil && !errors.Is(err, ErrCancel) && processState == nil {
 				_ = r.logger.Log(step, multipart.New(strings.NewReader(
 					"Backend engine error while running step: "+err.Error(),
 				)))
@@ -244,6 +248,9 @@ func (r *Runtime) exec(step *backend.Step) (*backend.State, error) {
 	wg.Wait()
 	waitState, err := r.engine.Wait(r.ctx, step)
 	if err != nil {
+		if errors.Is(err, context.Canceled) {
+			return waitState, ErrCancel
+		}
 		return nil, err
 	}
 

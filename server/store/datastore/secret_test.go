@@ -78,6 +78,17 @@ func TestSecretList(t *testing.T) {
 	assert.Len(t, list, 2)
 }
 
+func TestSecretListAll(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Secret))
+	defer closer()
+
+	createTestSecrets(t, store)
+
+	list, err := store.SecretListAll()
+	assert.NoError(t, err)
+	assert.Len(t, list, 4)
+}
+
 func TestSecretPipelineList(t *testing.T) {
 	store, closer := newTestStore(t, new(model.Secret))
 	defer closer()

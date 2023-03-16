@@ -160,6 +160,12 @@ Automatically generates an SSL certificate using Let's Encrypt, and configures t
 
 Configures the gRPC listener port.
 
+### `WOODPECKER_METRICS_SERVER_ADDR`
+> Default: empty
+
+Configures an unprotected metrics endpoint. An empty value disables the metrics endpoint completely.
+
+Example: `:9001`
 
 ### `WOODPECKER_ADMIN`
 > Default: empty
@@ -203,7 +209,7 @@ Always use authentication to clone repositories even if they are public. Needed 
 List of event names that will be canceled when a new pipeline for the same context (tag, branch) is created.
 
 ### `WOODPECKER_DEFAULT_CLONE_IMAGE`
-> Default: `woodpeckerci/plugin-git:latest`
+> Default is defined in [shared/constant/constant.go](https://github.com/woodpecker-ci/woodpecker/blob/master/shared/constant/constant.go)
 
 The default docker image to be used when cloning the repo
 
@@ -213,7 +219,7 @@ The default docker image to be used when cloning the repo
 Configures the session expiration time.
 
 ### `WOODPECKER_ESCALATE`
-> Default: `plugins/docker,plugins/gcr,plugins/ecr,woodpeckerci/plugin-docker,woodpeckerci/plugin-docker-buildx`
+> Defaults are defined in [shared/constant/constant.go](https://github.com/woodpecker-ci/woodpecker/blob/master/shared/constant/constant.go)
 
 Docker images to run in privileged mode. Only change if you are sure what you do!
 
@@ -290,10 +296,31 @@ WOODPECKER_DATABASE_DATASOURCE=postgres://root:password@1.2.3.4:5432/woodpecker?
 
 Read the value for `WOODPECKER_DATABASE_DATASOURCE` from the specified filepath
 
+### `WOODPECKER_ENCRYPTION_KEY`
+> Default: empty
+
+Encryption key used to encrypt secrets in DB. See [secrets encryption](./40-encryption.md)
+
+### `WOODPECKER_ENCRYPTION_KEY_FILE`
+> Default: empty
+
+Read the value for `WOODPECKER_ENCRYPTION_KEY` from the specified filepath
+
+### `WOODPECKER_ENCRYPTION_TINK_KEYSET_FILE`
+> Default: empty
+
+Filepath to encryption keyset used to encrypt secrets in DB. See [secrets encryption](./40-encryption.md)
+
+### `WOODPECKER_ENCRYPTION_DISABLE`
+> Default: empty
+
+Boolean flag to decrypt secrets in DB and disable server encryption. See [secrets encryption](./40-encryption.md)
+
 ### `WOODPECKER_PROMETHEUS_AUTH_TOKEN`
 > Default: empty
 
 Token to secure the Prometheus metrics endpoint.
+Must be set to enable the endpoint.
 
 ### `WOODPECKER_PROMETHEUS_AUTH_TOKEN_FILE`
 > Default: empty
@@ -355,6 +382,13 @@ Example: `WOODPECKER_LIMIT_CPU_SET=1,2`
 > Default: ``
 
 Specify a configuration service endpoint, see [Configuration Extension](./100-external-configuration-api.md)
+
+
+### `WOODPECKER_FORGE_TIMEOUT`
+> Default: 3sec
+
+Specify how many seconds before timeout when fetching the Woodpecker configuration from a Forge
+
 
 ---
 

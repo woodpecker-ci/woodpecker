@@ -165,7 +165,7 @@ Link to documentation in the UI.
 Always use authentication to clone repositories even if they are public. Needed if the SCM requires to always authenticate as used by many companies.
 
 ### `WOODPECKER_DEFAULT_CLONE_IMAGE`
-> Default: `woodpeckerci/plugin-git:latest`
+> Default is defined in [shared/constant/constant.go](https://github.com/woodpecker-ci/woodpecker/blob/release/v0.15/shared/constant/constant.go)
 
 The default docker image to be used when cloning the repo
 
