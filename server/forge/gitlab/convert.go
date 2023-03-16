@@ -129,7 +129,7 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 
 	pipeline.Title = obj.Title
 	pipeline.Link = obj.URL
-	pipeline.Labels = convertLabels(hook.Labels)
+	pipeline.PullRequestLabels = convertLabels(hook.Labels)
 
 	return obj.IID, repo, pipeline, nil
 }

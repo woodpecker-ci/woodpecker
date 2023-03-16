@@ -388,10 +388,10 @@ func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent b
 				Email:  pipeline.Email,
 				Avatar: pipeline.Avatar,
 			},
-			ChangedFiles: pipeline.ChangedFiles,
+			ChangedFiles:      pipeline.ChangedFiles,
+			PullRequestLabels: pipeline.PullRequestLabels,
 		},
-		Cron:   cron,
-		Labels: pipeline.Labels,
+		Cron: cron,
 	}
 }
 
