@@ -358,7 +358,8 @@
                 "version": "Version",
                 "last_contact": "Last contact",
                 "never": "Never",
-                "delete_confirm": "Do you really want to delete this agent? It wont be able to connected to the server anymore."
+                "delete_confirm": "Do you really want to delete this agent? It wont be able to connected to the server anymore.",
+                "cancel": "Cancel"
             },
             "users": {
               "users": "Users",
@@ -366,7 +367,7 @@
               "login": "Login",
               "email": "Email",
               "avatar_url": "Avatar URL",
-              "save": "Save",
+              "save": "Save user",
               "cancel": "Cancel",
               "show":"Show users",
               "add":"Add user",

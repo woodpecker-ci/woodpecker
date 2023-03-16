@@ -98,11 +98,16 @@
           </InputField>
         </template>
 
-        <Button
-          :is-loading="isSaving"
-          type="submit"
-          :text="isEditingAgent ? $t('admin.settings.agents.save') : $t('admin.settings.agents.add')"
-        />
+        <div class="flex gap-2 justify-center">
+          <Button :text="$t('admin.settings.agents.cancel')" @click="selectedAgent = undefined" />
+
+          <Button
+            :is-loading="isSaving"
+            type="submit"
+            color="green"
+            :text="isEditingAgent ? $t('admin.settings.agents.save') : $t('admin.settings.agents.add')"
+          />
+        </div>
       </form>
     </div>
   </Panel>

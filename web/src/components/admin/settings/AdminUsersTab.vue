@@ -61,14 +61,15 @@
           />
         </InputField> -->
 
-        <div class="flex gap-2">
+        <div class="flex gap-2 justify-center">
+          <Button :text="$t('admin.settings.users.cancel')" @click="selectedUser = undefined" />
+
           <Button
             :is-loading="isSaving"
             type="submit"
+            color="green"
             :text="isEditingUser ? $t('admin.settings.users.save') : $t('admin.settings.users.add')"
           />
-
-          <Button v-if="isEditingUser" :text="$t('admin.settings.users.cancel')" @click="selectedUser = undefined" />
         </div>
       </form>
     </div>
