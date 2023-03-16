@@ -1,6 +1,6 @@
 module github.com/woodpecker-ci/woodpecker
 
-go 1.18
+go 1.20
 
 require (
 	code.gitea.io/sdk/gitea v0.15.1-0.20221016183512-2d9ee57af1e0
