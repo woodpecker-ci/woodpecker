@@ -4,8 +4,15 @@ linters-settings:
   misspell:
     locale: US
   gofumpt:
-    lang-version: "1.19"
+    lang-version: "1.20"
     extra-rules: true
+  forbidigo:
+    forbid:
+      - context\.WithCancel
+      - ^print.*$
+      - panic
+  errorlint:
+    errorf-multi: true
 
 linters:
   disable-all: true
@@ -25,10 +32,11 @@ linters:
     - whitespace
     - gofumpt
     - errorlint
+    - forbidigo
 
 run:
   timeout: 5m
-  go: '1.19'
+  go: '1.20'
 
 issues:
   exclude-rules:
@@ -41,3 +49,8 @@ issues:
       linters:
         - staticcheck
         - revive
+
+    # let cli use print and panic
+    - path: "cmd/*|cli/*"
+      linters:
+        - forbidigo
