@@ -8,6 +8,7 @@ package proto
 
 import (
 	context "context"
+
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -150,36 +151,44 @@ type WoodpeckerServer interface {
 }
 
 // UnimplementedWoodpeckerServer must be embedded to have forward compatible implementations.
-type UnimplementedWoodpeckerServer struct {
-}
+type UnimplementedWoodpeckerServer struct{}
 
 func (UnimplementedWoodpeckerServer) Next(context.Context, *NextRequest) (*NextReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Next not implemented")
 }
+
 func (UnimplementedWoodpeckerServer) Init(context.Context, *InitRequest) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Init not implemented")
 }
+
 func (UnimplementedWoodpeckerServer) Wait(context.Context, *WaitRequest) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Wait not implemented")
 }
+
 func (UnimplementedWoodpeckerServer) Done(context.Context, *DoneRequest) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Done not implemented")
 }
+
 func (UnimplementedWoodpeckerServer) Extend(context.Context, *ExtendRequest) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Extend not implemented")
 }
+
 func (UnimplementedWoodpeckerServer) Update(context.Context, *UpdateRequest) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
 }
+
 func (UnimplementedWoodpeckerServer) Upload(context.Context, *UploadRequest) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Upload not implemented")
 }
+
 func (UnimplementedWoodpeckerServer) Log(context.Context, *LogRequest) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Log not implemented")
 }
+
 func (UnimplementedWoodpeckerServer) RegisterAgent(context.Context, *RegisterAgentRequest) (*RegisterAgentResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RegisterAgent not implemented")
 }
+
 func (UnimplementedWoodpeckerServer) ReportHealth(context.Context, *ReportHealthRequest) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReportHealth not implemented")
 }
@@ -461,8 +470,7 @@ type WoodpeckerAuthServer interface {
 }
 
 // UnimplementedWoodpeckerAuthServer must be embedded to have forward compatible implementations.
-type UnimplementedWoodpeckerAuthServer struct {
-}
+type UnimplementedWoodpeckerAuthServer struct{}
 
 func (UnimplementedWoodpeckerAuthServer) Auth(context.Context, *AuthRequest) (*AuthReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Auth not implemented")
