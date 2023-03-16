@@ -186,6 +186,7 @@ type Store interface {
 	AgentList() ([]*model.Agent, error)
 	AgentUpdate(*model.Agent) error
 	AgentDelete(*model.Agent) error
+	AgentGetAvailableCount() (int64, error)
 
 	// Store operations
 	Ping() error
