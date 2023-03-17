@@ -111,6 +111,11 @@ func sanitizeParamValue(v interface{}, secrets map[string]string) (string, error
 			for i := 0; i < vv.Len(); i++ {
 				v := vv.Index(i).Interface()
 
+				// if we handle a list with a nil entry we just return a empty list
+				if v == nil {
+					continue
+				}
+
 				// ensure each element is not complex
 				if isComplex(reflect.TypeOf(v).Kind()) {
 					containsComplex = true
