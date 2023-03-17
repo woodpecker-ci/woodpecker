@@ -361,10 +361,7 @@
                 "version": "Version",
                 "last_contact": "Last contact",
                 "never": "Never",
-                "delete_confirm": "Do you really want to delete this agent? It wont be able to connected to the server anymore.",
-                "cancel": "Cancel",
-                "delete_agent": "Delete agent",
-                "edit_agent": "Edit agent"
+                "delete_confirm": "Do you really want to delete this agent? It wont be able to connected to the server anymore."
             },
             "users": {
               "users": "Users",
