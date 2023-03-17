@@ -20,7 +20,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/queue"
 )
 
 func TestCreateFilterFunc(t *testing.T) {
@@ -29,13 +29,13 @@ func TestCreateFilterFunc(t *testing.T) {
 	tests := []struct {
 		name        string
 		agentLabels map[string]string
-		task        model.Task
+		task        queue.Task
 		exp         bool
 	}{
 		{
 			name:        "agent with missing labels",
 			agentLabels: map[string]string{"repo": "test/woodpecker"},
-			task: model.Task{
+			task: queue.Task{
 				Labels: map[string]string{"platform": "linux/amd64", "repo": "test/woodpecker"},
 			},
 			exp: false,
@@ -43,7 +43,7 @@ func TestCreateFilterFunc(t *testing.T) {
 		{
 			name:        "agent with wrong labels",
 			agentLabels: map[string]string{"platform": "linux/arm64"},
-			task: model.Task{
+			task: queue.Task{
 				Labels: map[string]string{"platform": "linux/amd64"},
 			},
 			exp: false,
@@ -51,7 +51,7 @@ func TestCreateFilterFunc(t *testing.T) {
 		{
 			name:        "agent with correct labels",
 			agentLabels: map[string]string{"platform": "linux/amd64", "location": "europe"},
-			task: model.Task{
+			task: queue.Task{
 				Labels: map[string]string{"platform": "linux/amd64", "location": "europe"},
 			},
 			exp: true,
@@ -59,7 +59,7 @@ func TestCreateFilterFunc(t *testing.T) {
 		{
 			name:        "agent with additional labels",
 			agentLabels: map[string]string{"platform": "linux/amd64", "location": "europe"},
-			task: model.Task{
+			task: queue.Task{
 				Labels: map[string]string{"platform": "linux/amd64"},
 			},
 			exp: true,
@@ -67,7 +67,7 @@ func TestCreateFilterFunc(t *testing.T) {
 		{
 			name:        "agent with wildcard label",
 			agentLabels: map[string]string{"platform": "linux/amd64", "location": "*"},
-			task: model.Task{
+			task: queue.Task{
 				Labels: map[string]string{"platform": "linux/amd64", "location": "america"},
 			},
 			exp: true,
@@ -75,7 +75,7 @@ func TestCreateFilterFunc(t *testing.T) {
 		{
 			name:        "agent with platform label and task without",
 			agentLabels: map[string]string{"platform": "linux/amd64"},
-			task: model.Task{
+			task: queue.Task{
 				Labels: map[string]string{"platform": ""},
 			},
 			exp: true,

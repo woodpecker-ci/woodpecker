@@ -3,7 +3,6 @@ export * from './cron';
 export * from './org';
 export * from './pipeline';
 export * from './pipelineConfig';
-export * from './queue';
 export * from './registry';
 export * from './repo';
 export * from './secret';

@@ -26,8 +26,14 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+const (
+	StatusSkipped = "skipped"
+	StatusSuccess = "success"
+	StatusFailure = "failure"
+)
+
 type entry struct {
-	item     *model.Task
+	item     *Task
 	done     chan bool
 	error    error
 	deadline time.Time
@@ -35,7 +41,7 @@ type entry struct {
 
 type worker struct {
 	filter  FilterFn
-	channel chan *model.Task
+	channel chan *Task
 }
 
 type fifo struct {
@@ -62,7 +68,7 @@ func New(ctx context.Context) Queue {
 }
 
 // Push pushes an item to the tail of this queue.
-func (q *fifo) Push(c context.Context, task *model.Task) error {
+func (q *fifo) Push(c context.Context, task *Task) error {
 	q.Lock()
 	q.pending.PushBack(task)
 	q.Unlock()
@@ -71,7 +77,7 @@ func (q *fifo) Push(c context.Context, task *model.Task) error {
 }
 
 // Push pushes an item to the tail of this queue.
-func (q *fifo) PushAtOnce(c context.Context, tasks []*model.Task) error {
+func (q *fifo) PushAtOnce(c context.Context, tasks []*Task) error {
 	q.Lock()
 	for _, task := range tasks {
 		q.pending.PushBack(task)
@@ -82,10 +88,10 @@ func (q *fifo) PushAtOnce(c context.Context, tasks []*model.Task) error {
 }
 
 // Poll retrieves and removes the head of this queue.
-func (q *fifo) Poll(c context.Context, f FilterFn) (*model.Task, error) {
+func (q *fifo) Poll(c context.Context, f FilterFn) (*Task, error) {
 	q.Lock()
 	w := &worker{
-		channel: make(chan *model.Task, 1),
+		channel: make(chan *Task, 1),
 		filter:  f,
 	}
 	q.workers[w] = struct{}{}
@@ -107,20 +113,20 @@ func (q *fifo) Poll(c context.Context, f FilterFn) (*model.Task, error) {
 
 // Done signals that the item is done executing.
 func (q *fifo) Done(c context.Context, id string, exitStatus model.StatusValue) error {
-	return q.finished([]string{id}, exitStatus, nil)
+	return q.finished([]string{id}, string(exitStatus), nil)
 }
 
 // Error signals that the item is done executing with error.
 func (q *fifo) Error(c context.Context, id string, err error) error {
-	return q.finished([]string{id}, "failure", err)
+	return q.finished([]string{id}, StatusFailure, err)
 }
 
 // Error signals that the item is done executing with error.
 func (q *fifo) ErrorAtOnce(c context.Context, id []string, err error) error {
-	return q.finished(id, "failure", err)
+	return q.finished(id, StatusFailure, err)
 }
 
-func (q *fifo) finished(ids []string, exitStatus model.StatusValue, err error) error {
+func (q *fifo) finished(ids []string, exitStatus string, err error) error {
 	q.Lock()
 
 	for _, id := range ids {
@@ -153,7 +159,7 @@ func (q *fifo) EvictAtOnce(c context.Context, ids []string) error {
 		var next *list.Element
 		for e := q.pending.Front(); e != nil; e = next {
 			next = e.Next()
-			task, ok := e.Value.(*model.Task)
+			task, ok := e.Value.(*Task)
 			if ok && task.ID == id {
 				q.pending.Remove(e)
 				return nil
@@ -199,13 +205,12 @@ func (q *fifo) Info(c context.Context) InfoT {
 	stats.Stats.Pending = q.pending.Len()
 	stats.Stats.WaitingOnDeps = q.waitingOnDeps.Len()
 	stats.Stats.Running = len(q.running)
-	stats.Stats.Complete = 0 // TODO: implement this
 
 	for e := q.pending.Front(); e != nil; e = e.Next() {
-		stats.Pending = append(stats.Pending, e.Value.(*model.Task))
+		stats.Pending = append(stats.Pending, e.Value.(*Task))
 	}
 	for e := q.waitingOnDeps.Front(); e != nil; e = e.Next() {
-		stats.WaitingOnDeps = append(stats.WaitingOnDeps, e.Value.(*model.Task))
+		stats.WaitingOnDeps = append(stats.WaitingOnDeps, e.Value.(*Task))
 	}
 	for _, entry := range q.running {
 		stats.Running = append(stats.Running, entry.item)
@@ -253,7 +258,7 @@ func (q *fifo) process() {
 	q.resubmitExpiredPipelines()
 	q.filterWaiting()
 	for pending, worker := q.assignToWorker(); pending != nil && worker != nil; pending, worker = q.assignToWorker() {
-		task := pending.Value.(*model.Task)
+		task := pending.Value.(*Task)
 		delete(q.workers, worker)
 		q.pending.Remove(pending)
 		q.running[task.ID] = &entry{
@@ -270,7 +275,7 @@ func (q *fifo) filterWaiting() {
 	var nextWaiting *list.Element
 	for e := q.waitingOnDeps.Front(); e != nil; e = nextWaiting {
 		nextWaiting = e.Next()
-		task := e.Value.(*model.Task)
+		task := e.Value.(*Task)
 		q.pending.PushBack(task)
 	}
 
@@ -280,7 +285,7 @@ func (q *fifo) filterWaiting() {
 	var nextPending *list.Element
 	for e := q.pending.Front(); e != nil; e = nextPending {
 		nextPending = e.Next()
-		task := e.Value.(*model.Task)
+		task := e.Value.(*Task)
 		if q.depsInQueue(task) {
 			log.Debug().Msgf("queue: waiting due to unmet dependencies %v", task.ID)
 			q.waitingOnDeps.PushBack(task)
@@ -298,7 +303,7 @@ func (q *fifo) assignToWorker() (*list.Element, *worker) {
 	var next *list.Element
 	for e := q.pending.Front(); e != nil; e = next {
 		next = e.Next()
-		task := e.Value.(*model.Task)
+		task := e.Value.(*Task)
 		log.Debug().Msgf("queue: trying to assign task: %v with deps %v", task.ID, task.Dependencies)
 
 		for w := range q.workers {
@@ -322,11 +327,11 @@ func (q *fifo) resubmitExpiredPipelines() {
 	}
 }
 
-func (q *fifo) depsInQueue(task *model.Task) bool {
+func (q *fifo) depsInQueue(task *Task) bool {
 	var next *list.Element
 	for e := q.pending.Front(); e != nil; e = next {
 		next = e.Next()
-		possibleDep, ok := e.Value.(*model.Task)
+		possibleDep, ok := e.Value.(*Task)
 		log.Debug().Msgf("queue: pending right now: %v", possibleDep.ID)
 		for _, dep := range task.Dependencies {
 			if ok && possibleDep.ID == dep {
@@ -345,11 +350,11 @@ func (q *fifo) depsInQueue(task *model.Task) bool {
 	return false
 }
 
-func (q *fifo) updateDepStatusInQueue(taskID string, status model.StatusValue) {
+func (q *fifo) updateDepStatusInQueue(taskID, status string) {
 	var next *list.Element
 	for e := q.pending.Front(); e != nil; e = next {
 		next = e.Next()
-		pending, ok := e.Value.(*model.Task)
+		pending, ok := e.Value.(*Task)
 		for _, dep := range pending.Dependencies {
 			if ok && taskID == dep {
 				pending.DepStatus[dep] = status
@@ -367,7 +372,7 @@ func (q *fifo) updateDepStatusInQueue(taskID string, status model.StatusValue) {
 
 	for e := q.waitingOnDeps.Front(); e != nil; e = next {
 		next = e.Next()
-		waiting, ok := e.Value.(*model.Task)
+		waiting, ok := e.Value.(*Task)
 		for _, dep := range waiting.Dependencies {
 			if ok && taskID == dep {
 				waiting.DepStatus[dep] = status
@@ -381,7 +386,7 @@ func (q *fifo) removeFromPending(taskID string) {
 	var next *list.Element
 	for e := q.pending.Front(); e != nil; e = next {
 		next = e.Next()
-		task := e.Value.(*model.Task)
+		task := e.Value.(*Task)
 		if task.ID == taskID {
 			log.Debug().Msgf("queue: %s is removed from pending", taskID)
 			q.pending.Remove(e)

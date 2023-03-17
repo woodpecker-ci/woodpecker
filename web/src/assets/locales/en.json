@@ -20,6 +20,9 @@
         "not_found": "Whoa 404, either we broke something or you had a typing mishap :-/",
         "back_home": "Back to home"
     },
+    "errors": {
+      "not_found": "Server could not find requested object"
+    },
     "time": {
         "tmpl": "MMM D, YYYY, HH:mm z",
         "weeks_short": "w",
@@ -358,22 +361,7 @@
                 "version": "Version",
                 "last_contact": "Last contact",
                 "never": "Never",
-                "delete_confirm": "Do you really want to delete this agent? It wont be able to connected to the server anymore.",
-                "cancel": "Cancel",
-                "delete_agent": "Delete agent",
-                "edit_agent": "Edit agent"
-              },
-            "queue": {
-              "queue": "Queue",
-              "desc": "Tasks waiting to be executed by agents",
-              "pause": "Pause",
-              "resume": "Resume",
-              "paused": "Queue is paused",
-              "resumed": "Queue is resumed",
-              "tasks": "Tasks",
-              "task_running": "Task is running",
-              "task_pending": "Task is pending",
-              "task_waiting_on_deps": "Task is waiting on dependencies"
+                "delete_confirm": "Do you really want to delete this agent? It wont be able to connected to the server anymore."
             }
         }
     },

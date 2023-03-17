@@ -30,7 +30,7 @@ func TestTaskList(t *testing.T) {
 		ID:        "some_random_id",
 		Data:      []byte("foo"),
 		Labels:    map[string]string{"foo": "bar"},
-		DepStatus: map[string]model.StatusValue{"test": "dep"},
+		DepStatus: map[string]string{"test": "dep"},
 	}))
 
 	list, err := store.TaskList()

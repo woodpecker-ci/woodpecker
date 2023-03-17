@@ -23,15 +23,16 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/queue"
 )
 
 func queueBuild(pipeline *model.Pipeline, repo *model.Repo, pipelineItems []*pipeline.Item) error {
-	var tasks []*model.Task
+	var tasks []*queue.Task
 	for _, item := range pipelineItems {
 		if item.Step.State == model.StatusSkipped {
 			continue
 		}
-		task := new(model.Task)
+		task := new(queue.Task)
 		task.ID = fmt.Sprint(item.Step.ID)
 		task.Labels = map[string]string{}
 		for k, v := range item.Labels {
@@ -41,7 +42,7 @@ func queueBuild(pipeline *model.Pipeline, repo *model.Repo, pipelineItems []*pip
 		task.Labels["repo"] = repo.FullName
 		task.Dependencies = taskIds(item.DependsOn, pipelineItems)
 		task.RunOn = item.RunsOn
-		task.DepStatus = make(map[string]model.StatusValue)
+		task.DepStatus = make(map[string]string)
 
 		task.Data, _ = json.Marshal(rpc.Pipeline{
 			ID:      fmt.Sprint(item.Step.ID),
