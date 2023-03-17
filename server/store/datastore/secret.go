@@ -22,6 +22,13 @@ import (
 
 const orderSecretsBy = "secret_name"
 
+// GetSecret return secret by ID
+// make sure the function that calls this performs permission checks!
+func (s storage) GetSecret(secretID int64) (*model.Secret, error) {
+	result := new(model.Secret)
+	return result, wrapGet(s.engine.ID(secretID).Get(result))
+}
+
 func (s storage) SecretFind(repo *model.Repo, name string) (*model.Secret, error) {
 	secret := &model.Secret{
 		RepoID: repo.ID,

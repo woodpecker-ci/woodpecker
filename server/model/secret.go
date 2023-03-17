@@ -101,6 +101,11 @@ func (s Secret) Organization() bool {
 	return s.RepoID == 0 && s.Owner != ""
 }
 
+// Repository secret.
+func (s Secret) Repository() bool {
+	return !(s.Global() || s.Organization())
+}
+
 // Match returns true if an image and event match the restricted list.
 func (s *Secret) Match(event WebhookEvent) bool {
 	if len(s.Events) == 0 {

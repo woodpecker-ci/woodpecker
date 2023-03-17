@@ -15,10 +15,15 @@
 package api
 
 import (
+	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
+	"github.com/woodpecker-ci/woodpecker/server/store"
+	"github.com/woodpecker-ci/woodpecker/server/store/types"
 
 	"github.com/gin-gonic/gin"
 )
@@ -31,15 +36,11 @@ func GetGlobalSecretList(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "Error getting global secret list. %s", err)
 		return
 	}
-
-	if !server.Config.Secret.AllowShowValue {
-		// copy the secret detail to remove the sensitive
-		// password and token fields.
-		for i, secret := range list {
-			list[i] = secret.Copy()
-		}
+	// copy the secret detail to remove the sensitive
+	// password and token fields.
+	for i, secret := range list {
+		list[i] = secret.Copy()
 	}
-
 	c.JSON(http.StatusOK, list)
 }
 
@@ -122,8 +123,66 @@ func PatchGlobalSecret(c *gin.Context) {
 func DeleteGlobalSecret(c *gin.Context) {
 	name := c.Param("secret")
 	if err := server.Config.Services.Secrets.GlobalSecretDelete(name); err != nil {
-		c.String(500, "Error deleting global secret %q. %s", name, err)
+		c.String(http.StatusInternalServerError, "Error deleting global secret %q. %s", name, err)
 		return
 	}
-	c.String(204, "")
+	c.String(http.StatusNoContent, "")
+}
+
+// GetSecretValue return secret with value
+// it also checks if the user is allowed to do so
+func GetSecretValue(c *gin.Context) {
+	secretID, err := strconv.ParseInt(c.Param("secret_id"), 10, 64)
+	if err != nil {
+		_ = c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	_store := store.FromContext(c)
+	_user := session.User(c)
+
+	secret, err := _store.GetSecret(secretID)
+	if err != nil {
+		if errors.Is(err, types.RecordNotExist) {
+			c.AbortWithStatus(http.StatusNotFound)
+			return
+		}
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	// check if user is able to retrieve value
+	if !_user.Admin {
+		switch {
+		case secret.Global():
+			// global secret values are only visible vor admins
+			c.AbortWithStatus(http.StatusForbidden)
+			return
+		case secret.Organization():
+			perm, err := server.Config.Services.Membership.Get(c, _user, secret.Owner)
+			if err != nil {
+				_ = c.AbortWithError(http.StatusInternalServerError, err)
+				return
+			}
+			// organization secret values are only visible vor organization admins
+			if !perm.Admin {
+				c.AbortWithStatus(http.StatusForbidden)
+				return
+			}
+		case secret.Repository():
+			perm, err := _store.PermFind(_user, &model.Repo{ID: secret.RepoID})
+			if err != nil {
+				_ = c.AbortWithError(http.StatusInternalServerError, err)
+				return
+			}
+			// repository secret values are only visible vor repository admins
+			if !perm.Admin {
+				c.AbortWithStatus(http.StatusForbidden)
+				return
+			}
+		}
+	}
+
+	// we passed all permission checks so we can return
+	c.JSON(http.StatusOK, secret)
 }

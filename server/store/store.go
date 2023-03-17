@@ -120,6 +120,8 @@ type Store interface {
 	PipelineConfigCreate(*model.PipelineConfig) error
 
 	// Secrets
+	// GetSecret return secret by ID, make sure the function that calls this performs permission checks!
+	GetSecret(secretID int64) (*model.Secret, error)
 	SecretFind(*model.Repo, string) (*model.Secret, error)
 	SecretList(*model.Repo, bool) ([]*model.Secret, error)
 	SecretListAll() ([]*model.Secret, error)

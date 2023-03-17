@@ -18,6 +18,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
 
+	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/api"
 	"github.com/woodpecker-ci/woodpecker/server/api/debug"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
@@ -157,6 +158,11 @@ func apiRoutes(e *gin.Engine) {
 			secrets.GET("/:secret", api.GetGlobalSecret)
 			secrets.PATCH("/:secret", api.PatchGlobalSecret)
 			secrets.DELETE("/:secret", api.DeleteGlobalSecret)
+		}
+		if server.Config.Secret.AllowShowValue {
+			secretValues := apiBase.Group("/secret_value")
+			secretValues.Use(session.MustUser())
+			secretValues.GET("/:secret_id", api.GetSecretValue)
 		}
 
 		logLevel := apiBase.Group("/log-level")

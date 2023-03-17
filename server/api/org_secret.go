@@ -47,15 +47,11 @@ func GetOrgSecretList(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "Error getting secret list for %q. %s", owner, err)
 		return
 	}
-
-	if !server.Config.Secret.AllowShowValue {
-		// copy the secret detail to remove the sensitive
-		// password and token fields.
-		for i, secret := range list {
-			list[i] = secret.Copy()
-		}
+	// copy the secret detail to remove the sensitive
+	// password and token fields.
+	for i, secret := range list {
+		list[i] = secret.Copy()
 	}
-
 	c.JSON(http.StatusOK, list)
 }
 
