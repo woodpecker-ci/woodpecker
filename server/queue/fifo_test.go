@@ -375,7 +375,7 @@ func TestFifoTransitiveErrors(t *testing.T) {
 		t.Errorf("expect task2 should not run, since task1 failed")
 		return
 	}
-	assert.NoError(t, q.Done(noContext, got.ID, model.StatusSuccess))
+	assert.NoError(t, q.Done(noContext, got.ID, model.StatusSkipped))
 
 	got, _ = q.Poll(noContext, func(*model.Task) bool { return true })
 	if got != task3 {
