@@ -72,7 +72,7 @@ export default class WoodpeckerClient extends ApiClient {
 
   // Deploy triggers a deployment for an existing pipeline using the
   // specified target environment.
-  deployPipeline(owner: string, repo: string, pipelineNumber: number, options: DeploymentOptions): Promise<Pipeline> {
+  deployPipeline(owner: string, repo: string, pipelineNumber: string, options: DeploymentOptions): Promise<Pipeline> {
     const vars = {
       ...options.variables,
       event: 'deployment',
