@@ -362,7 +362,9 @@
                 "last_contact": "Last contact",
                 "never": "Never",
                 "delete_confirm": "Do you really want to delete this agent? It wont be able to connected to the server anymore.",
-                "cancel": "Cancel"
+                "cancel": "Cancel",
+                "delete_agent": "Delete agent",
+                "edit_agent": "Edit agent"
             },
             "users": {
               "users": "Users",
@@ -378,7 +380,13 @@
               "delete_confirm": "Do you really want to delete this user?",
               "deleted": "User deleted",
               "created": "User created",
-              "saved": "User saved"
+              "saved": "User saved",
+              "admin": {
+                "admin": "Admin",
+                "placeholder": "User is an admin"
+              },
+              "delete_user": "Delete user",
+              "edit_user": "Edit user"
             }
         }
     },

@@ -29,9 +29,15 @@
           </span>
           <span class="ml-2">{{ agent.last_contact ? timeAgo.format(agent.last_contact * 1000) : 'never' }}</span>
         </span>
-        <IconButton icon="edit" class="ml-2 w-8 h-8" @click="editAgent(agent)" />
+        <IconButton
+          icon="edit"
+          :title="$t('admin.settings.agents.edit_agent')"
+          class="ml-2 w-8 h-8"
+          @click="editAgent(agent)"
+        />
         <IconButton
           icon="trash"
+          :title="$t('admin.settings.agents.delete_agent')"
           class="ml-2 w-8 h-8 hover:text-red-400 hover:dark:text-red-500"
           :is-loading="isDeleting"
           @click="deleteAgent(agent)"
@@ -120,6 +126,7 @@ import { useI18n } from 'vue-i18n';
 
 import Badge from '~/components/atomic/Badge.vue';
 import Button from '~/components/atomic/Button.vue';
+import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import Checkbox from '~/components/form/Checkbox.vue';
 import InputField from '~/components/form/InputField.vue';
@@ -133,7 +140,7 @@ import timeAgo from '~/utils/timeAgo';
 
 const apiClient = useApiClient();
 const notifications = useNotifications();
-const i18n = useI18n();
+const { t } = useI18n();
 
 const agents = ref<Agent[]>([]);
 const selectedAgent = ref<Partial<Agent>>();
@@ -155,7 +162,7 @@ const { doSubmit: saveAgent, isLoading: isSaving } = useAsyncAction(async () => 
     selectedAgent.value = await apiClient.createAgent(selectedAgent.value);
   }
   notifications.notify({
-    title: i18n.t(isEditingAgent.value ? 'admin.settings.agents.saved' : 'admin.settings.agents.created'),
+    title: t(isEditingAgent.value ? 'admin.settings.agents.saved' : 'admin.settings.agents.created'),
     type: 'success',
   });
   await loadAgents();
@@ -163,12 +170,12 @@ const { doSubmit: saveAgent, isLoading: isSaving } = useAsyncAction(async () => 
 
 const { doSubmit: deleteAgent, isLoading: isDeleting } = useAsyncAction(async (_agent: Agent) => {
   // eslint-disable-next-line no-restricted-globals, no-alert
-  if (!confirm(i18n.t('admin.settings.agents.delete_confirm'))) {
+  if (!confirm(t('admin.settings.agents.delete_confirm'))) {
     return;
   }
 
   await apiClient.deleteAgent(_agent);
-  notifications.notify({ title: i18n.t('admin.settings.agents.deleted'), type: 'success' });
+  notifications.notify({ title: t('admin.settings.agents.deleted'), type: 'success' });
   await loadAgents();
 });
 

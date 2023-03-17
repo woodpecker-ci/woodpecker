@@ -19,15 +19,20 @@
       <ListItem v-for="user in users" :key="user.id" class="items-center gap-2">
         <img v-if="user.avatar_url" class="rounded-md h-6" :src="user.avatar_url" />
         <span>{{ user.login }}</span>
-        <!-- <Badge
-            v-if="user.admin"
-            class="ml-auto hidden md:inline-block"
-            :label="$t('admin.settings.users.is_admin')"
-            value="admin"
-          /> -->
-        <IconButton icon="edit" class="ml-auto w-8 h-8" @click="editUser(user)" />
+        <Badge
+          v-if="user.admin"
+          class="ml-auto hidden md:inline-block"
+          :label="$t('admin.settings.users.admin.admin')"
+        />
+        <IconButton
+          icon="edit"
+          :title="$t('admin.settings.users.edit_user')"
+          class="ml-2 w-8 h-8"
+          @click="editUser(user)"
+        />
         <IconButton
           icon="trash"
+          :title="$t('admin.settings.users.delete_user')"
           class="ml-2 w-8 h-8 hover:text-red-400 hover:dark:text-red-500"
           :is-loading="isDeleting"
           @click="deleteUser(user)"
@@ -43,13 +48,13 @@
         </InputField>
 
         <InputField :label="$t('admin.settings.users.email')">
-          <TextField v-model="selectedUser.email" :disabled="isEditingUser" />
+          <TextField v-model="selectedUser.email" />
         </InputField>
 
         <InputField :label="$t('admin.settings.users.avatar_url')">
           <div class="flex gap-2">
             <img v-if="selectedUser.avatar_url" class="rounded-md h-8 w-8" :src="selectedUser.avatar_url" />
-            <TextField v-model="selectedUser.avatar_url" :disabled="isEditingUser" />
+            <TextField v-model="selectedUser.avatar_url" />
           </div>
         </InputField>
 
@@ -81,7 +86,9 @@ import { cloneDeep } from 'lodash';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import Badge from '~/components/atomic/Badge.vue';
 import Button from '~/components/atomic/Button.vue';
+import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import InputField from '~/components/form/InputField.vue';
 import TextField from '~/components/form/TextField.vue';
@@ -93,7 +100,7 @@ import { User } from '~/lib/api/types';
 
 const apiClient = useApiClient();
 const notifications = useNotifications();
-const i18n = useI18n();
+const { t } = useI18n();
 
 const users = ref<User[]>([]);
 const selectedUser = ref<Partial<User>>();
@@ -115,7 +122,7 @@ const { doSubmit: saveUser, isLoading: isSaving } = useAsyncAction(async () => {
     selectedUser.value = await apiClient.createUser(selectedUser.value);
   }
   notifications.notify({
-    title: i18n.t(isEditingUser.value ? 'admin.settings.users.saved' : 'admin.settings.users.created'),
+    title: t(isEditingUser.value ? 'admin.settings.users.saved' : 'admin.settings.users.created'),
     type: 'success',
   });
   await loadUsers();
@@ -123,12 +130,12 @@ const { doSubmit: saveUser, isLoading: isSaving } = useAsyncAction(async () => {
 
 const { doSubmit: deleteUser, isLoading: isDeleting } = useAsyncAction(async (_user: User) => {
   // eslint-disable-next-line no-restricted-globals, no-alert
-  if (!confirm(i18n.t('admin.settings.users.delete_confirm'))) {
+  if (!confirm(t('admin.settings.users.delete_confirm'))) {
     return;
   }
 
   await apiClient.deleteUser(_user);
-  notifications.notify({ title: i18n.t('admin.settings.users.deleted'), type: 'success' });
+  notifications.notify({ title: t('admin.settings.users.deleted'), type: 'success' });
   await loadUsers();
 });
 

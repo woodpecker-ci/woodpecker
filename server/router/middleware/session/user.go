@@ -48,6 +48,8 @@ func SetUser() gin.HandlerFunc {
 			return user.Hash, err
 		})
 		if err == nil {
+			c.Set("user", user)
+
 			// if this is a session token (ie not the API token)
 			// this means the user is accessing with a web browser,
 			// so we should implement CSRF protection measures.
