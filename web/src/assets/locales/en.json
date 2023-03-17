@@ -20,6 +20,9 @@
         "not_found": "Whoa 404, either we broke something or you had a typing mishap :-/",
         "back_home": "Back to home"
     },
+    "errors": {
+      "not_found": "Server could not find requested object"
+    },
     "time": {
         "tmpl": "MMM D, YYYY, HH:mm z",
         "weeks_short": "w",
