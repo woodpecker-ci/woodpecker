@@ -35,16 +35,16 @@
       <pre>{{ queueInfo?.stats }}</pre>
 
       <div v-if="tasks.length > 0" class="flex flex-col">
-        <p class="mt-6 mb-2 text-xl">{{ i18n.t('admin.settings.queue.tasks') }}</p>
+        <p class="mt-6 mb-2 text-xl">{{ $t('admin.settings.queue.tasks') }}</p>
         <ListItem v-for="task in tasks" :key="task.id" class="items-center mb-2">
           <div
             class="flex items-center"
             :title="
               task.status === 'pending'
-                ? i18n.t('admin.settings.queue.task_pending')
+                ? $t('admin.settings.queue.task_pending')
                 : task.status === 'running'
-                ? i18n.t('admin.settings.queue.task_running')
-                : i18n.t('admin.settings.queue.task_waiting_on_deps')
+                ? $t('admin.settings.queue.task_running')
+                : $t('admin.settings.queue.task_waiting_on_deps')
             "
           >
             <Icon
@@ -77,6 +77,7 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import Button from '~/components/atomic/Button.vue';
 import Icon from '~/components/atomic/Icon.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import Panel from '~/components/layout/Panel.vue';
@@ -86,26 +87,26 @@ import { QueueInfo } from '~/lib/api/types/queue';
 
 const apiClient = useApiClient();
 const notifications = useNotifications();
-const i18n = useI18n();
+const { t } = useI18n();
 
 const queueInfo = ref<QueueInfo>();
 
 const tasks = computed(() => {
-  const t = [];
+  const _tasks = [];
 
   if (queueInfo.value?.running) {
-    t.push(...queueInfo.value.running.map((task) => ({ ...task, status: 'running' })));
+    _tasks.push(...queueInfo.value.running.map((task) => ({ ...task, status: 'running' })));
   }
 
   if (queueInfo.value?.pending) {
-    t.push(...queueInfo.value.pending.map((task) => ({ ...task, status: 'pending' })));
+    _tasks.push(...queueInfo.value.pending.map((task) => ({ ...task, status: 'pending' })));
   }
 
   if (queueInfo.value?.waiting_on_deps) {
-    t.push(...queueInfo.value.waiting_on_deps.map((task) => ({ ...task, status: 'waiting_on_deps' })));
+    _tasks.push(...queueInfo.value.waiting_on_deps.map((task) => ({ ...task, status: 'waiting_on_deps' })));
   }
 
-  return t.sort((a, b) => a.id - b.id);
+  return _tasks.sort((a, b) => a.id - b.id);
 });
 
 async function loadQueueInfo() {
@@ -116,7 +117,7 @@ async function pauseQueue() {
   await apiClient.pauseQueue();
   await loadQueueInfo();
   notifications.notify({
-    title: i18n.t('admin.settings.queue.paused'),
+    title: t('admin.settings.queue.paused'),
     type: 'success',
   });
 }
@@ -125,23 +126,22 @@ async function resumeQueue() {
   await apiClient.resumeQueue();
   await loadQueueInfo();
   notifications.notify({
-    title: i18n.t('admin.settings.queue.resumed'),
+    title: t('admin.settings.queue.resumed'),
     type: 'success',
   });
 }
 
-const reloadInterval = ref<unknown>();
-
+const reloadInterval = ref<number>();
 onMounted(async () => {
   await loadQueueInfo();
-  reloadInterval.value = setInterval(async () => {
+  reloadInterval.value = window.setInterval(async () => {
     await loadQueueInfo();
   }, 5000);
 });
 
 onBeforeUnmount(() => {
   if (reloadInterval.value) {
-    clearInterval(reloadInterval.value as number);
+    window.clearInterval(reloadInterval.value);
   }
 });
 </script>
