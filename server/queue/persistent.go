@@ -28,18 +28,7 @@ import (
 // ensures the task Queue can be restored when the system starts.
 func WithTaskStore(q Queue, s model.TaskStore) Queue {
 	tasks, _ := s.TaskList()
-	var toEnqueue []*model.Task
-	for _, task := range tasks {
-		toEnqueue = append(toEnqueue, &model.Task{
-			ID:           task.ID,
-			Data:         task.Data,
-			Labels:       task.Labels,
-			Dependencies: task.Dependencies,
-			RunOn:        task.RunOn,
-			DepStatus:    task.DepStatus,
-		})
-	}
-	if err := q.PushAtOnce(context.Background(), toEnqueue); err != nil {
+	if err := q.PushAtOnce(context.Background(), tasks); err != nil {
 		log.Error().Err(err).Msg("PushAtOnce failed")
 	}
 	return &persistentQueue{q, s}
@@ -52,14 +41,7 @@ type persistentQueue struct {
 
 // Push pushes a task to the tail of this queue.
 func (q *persistentQueue) Push(c context.Context, task *model.Task) error {
-	if err := q.store.TaskInsert(&model.Task{
-		ID:           task.ID,
-		Data:         task.Data,
-		Labels:       task.Labels,
-		Dependencies: task.Dependencies,
-		RunOn:        task.RunOn,
-		DepStatus:    task.DepStatus,
-	}); err != nil {
+	if err := q.store.TaskInsert(task); err != nil {
 		return err
 	}
 	err := q.Queue.Push(c, task)
@@ -75,14 +57,7 @@ func (q *persistentQueue) Push(c context.Context, task *model.Task) error {
 func (q *persistentQueue) PushAtOnce(c context.Context, tasks []*model.Task) error {
 	// TODO: invent store.NewSession who return context including a session and make TaskInsert & TaskDelete use it
 	for _, task := range tasks {
-		if err := q.store.TaskInsert(&model.Task{
-			ID:           task.ID,
-			Data:         task.Data,
-			Labels:       task.Labels,
-			Dependencies: task.Dependencies,
-			RunOn:        task.RunOn,
-			DepStatus:    task.DepStatus,
-		}); err != nil {
+		if err := q.store.TaskInsert(task); err != nil {
 			return err
 		}
 	}
