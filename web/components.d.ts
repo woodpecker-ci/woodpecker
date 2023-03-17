@@ -12,6 +12,7 @@ declare module '@vue/runtime-core' {
     AdminAgentsTab: typeof import('./src/components/admin/settings/AdminAgentsTab.vue')['default']
     AdminQueueTab: typeof import('./src/components/admin/settings/AdminQueueTab.vue')['default']
     AdminSecretsTab: typeof import('./src/components/admin/settings/AdminSecretsTab.vue')['default']
+    AdminUsersTab: typeof import('./src/components/admin/settings/AdminUsersTab.vue')['default']
     Badge: typeof import('./src/components/atomic/Badge.vue')['default']
     BadgeTab: typeof import('./src/components/repo/settings/BadgeTab.vue')['default']
     Button: typeof import('./src/components/atomic/Button.vue')['default']
