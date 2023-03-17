@@ -59,7 +59,11 @@ func PatchUser(c *gin.Context) {
 		return
 	}
 
-	// TODO: currently nothing is updatable
+	// TODO: allow to change login (currently used as primary key)
+	// TODO: disallow to change login, email, avatar if the user is using oauth
+	user.Email = in.Email
+	user.Avatar = in.Avatar
+	user.Admin = in.Admin
 
 	err = _store.UpdateUser(user)
 	if err != nil {

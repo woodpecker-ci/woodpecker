@@ -53,13 +53,13 @@
           </div>
         </InputField>
 
-        <!-- <InputField :label="$t('admin.settings.users.admin.admin')">
+        <InputField :label="$t('admin.settings.users.admin.admin')">
           <Checkbox
             :model-value="selectedUser.admin || false"
             :label="$t('admin.settings.users.admin.placeholder')"
             @update:model-value="selectedUser!.admin = $event"
           />
-        </InputField> -->
+        </InputField>
 
         <div class="flex gap-2 justify-center">
           <Button :text="$t('admin.settings.users.cancel')" @click="selectedUser = undefined" />

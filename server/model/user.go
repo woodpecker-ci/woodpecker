@@ -61,15 +61,12 @@ type User struct {
 
 	// Admin indicates the user is a system administrator.
 	//
-	// NOTE: This is sourced from the WOODPECKER_ADMINS environment variable and is no
-	// longer persisted in the database.
-	Admin bool `json:"admin,omitempty" xorm:"-"`
+	// NOTE: If the username is part of the WOODPECKER_ADMINS
+	// environment variable this value will be set to true on login.
+	Admin bool `json:"admin,omitempty" xorm:"user_admin"`
 
 	// Hash is a unique token used to sign tokens.
 	Hash string `json:"-" xorm:"UNIQUE varchar(500) 'user_hash'"`
-
-	// DEPRECATED Admin indicates the user is a system administrator.
-	XAdmin bool `json:"-" xorm:"user_admin"`
 }
 
 // TableName return database table name for xorm
