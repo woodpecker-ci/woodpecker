@@ -168,7 +168,7 @@ const { doSubmit: restartPipeline, isLoading: isRestartingPipeline } = useAsyncA
 });
 
 onMounted(loadPipeline);
-watch([repo, pipelineId], loadPipeline);
+watch([repoName, repoOwner, pipelineId], loadPipeline);
 onBeforeUnmount(() => {
   favicon.updateStatus('default');
 });
