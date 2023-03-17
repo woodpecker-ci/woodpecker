@@ -33,6 +33,10 @@ const i18n = useI18n();
 
 // eslint-disable-next-line promise/prefer-await-to-callbacks
 apiClient.setErrorHandler((err) => {
+  if (err.status === 404) {
+    notify({ title: i18n.t('errors.not_found'), type: 'error' });
+    return;
+  }
   notify({ title: err.message || i18n.t('unknown_error'), type: 'error' });
 });
 
