@@ -160,6 +160,11 @@ Automatically generates an SSL certificate using Let's Encrypt, and configures t
 
 Configures the gRPC listener port.
 
+### `WOODPECKER_GRPC_SECRET`
+> Default: `secret`
+
+Configures the gRPC JWT secret.
+
 ### `WOODPECKER_METRICS_SERVER_ADDR`
 > Default: empty
 

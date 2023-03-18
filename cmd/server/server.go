@@ -135,7 +135,7 @@ func run(c *cli.Context) error {
 			return err
 		}
 
-		jwtSecret := "secret" // TODO: make configurable
+		jwtSecret := c.String("grpc-secret")
 		jwtManager := woodpeckerGrpcServer.NewJWTManager(jwtSecret)
 
 		authorizer := woodpeckerGrpcServer.NewAuthorizer(jwtManager)
