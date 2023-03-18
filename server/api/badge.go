@@ -19,10 +19,12 @@
 package api
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
 	"github.com/rs/zerolog/log"
+	"github.com/woodpecker-ci/woodpecker/server/store/types"
 
 	"github.com/gin-gonic/gin"
 
@@ -36,7 +38,11 @@ func GetBadge(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo, err := _store.GetRepoName(c.Param("owner") + "/" + c.Param("name"))
 	if err != nil || !repo.IsActive {
-		c.AbortWithStatus(404)
+		if err == nil || errors.Is(err, types.RecordNotExist) {
+			c.AbortWithStatus(http.StatusNotFound)
+			return
+		}
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
@@ -63,17 +69,17 @@ func GetCC(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo, err := _store.GetRepoName(c.Param("owner") + "/" + c.Param("name"))
 	if err != nil {
-		c.AbortWithStatus(404)
+		handleDbGetError(c, err)
 		return
 	}
 
 	pipelines, err := _store.GetPipelineList(repo, 1)
 	if err != nil || len(pipelines) == 0 {
-		c.AbortWithStatus(404)
+		c.AbortWithStatus(http.StatusNotFound)
 		return
 	}
 
 	url := fmt.Sprintf("%s/%s/%d", server.Config.Server.Host, repo.FullName, pipelines[0].Number)
 	cc := ccmenu.New(repo, pipelines[0], url)
-	c.XML(200, cc)
+	c.XML(http.StatusOK, cc)
 }

@@ -15,11 +15,13 @@
 package session
 
 import (
+	"errors"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
+	"github.com/woodpecker-ci/woodpecker/server/store/types"
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -62,7 +64,11 @@ func SetRepo() gin.HandlerFunc {
 		)
 
 		if user != nil {
-			c.AbortWithStatus(http.StatusNotFound)
+			if errors.Is(err, types.RecordNotExist) {
+				c.AbortWithStatus(http.StatusNotFound)
+				return
+			}
+			_ = c.AbortWithError(http.StatusInternalServerError, err)
 		} else {
 			c.AbortWithStatus(http.StatusUnauthorized)
 		}

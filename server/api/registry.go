@@ -15,7 +15,6 @@
 package api
 
 import (
-	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -23,7 +22,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
-	"github.com/woodpecker-ci/woodpecker/server/store/types"
 )
 
 // GetRegistry gets the name registry from the database and writes
@@ -35,7 +33,7 @@ func GetRegistry(c *gin.Context) {
 	)
 	registry, err := server.Config.Services.Registries.RegistryFind(repo, name)
 	if err != nil {
-		c.String(404, "Error getting registry %q. %s", name, err)
+		handleDbGetError(c, err)
 		return
 	}
 	c.JSON(200, registry.Copy())
@@ -59,14 +57,14 @@ func PostRegistry(c *gin.Context) {
 		Email:    in.Email,
 	}
 	if err := registry.Validate(); err != nil {
-		c.String(400, "Error inserting registry. %s", err)
+		c.String(http.StatusBadRequest, "Error inserting registry. %s", err)
 		return
 	}
 	if err := server.Config.Services.Registries.RegistryCreate(repo, registry); err != nil {
-		c.String(500, "Error inserting registry %q. %s", in.Address, err)
+		c.String(http.StatusInternalServerError, "Error inserting registry %q. %s", in.Address, err)
 		return
 	}
-	c.JSON(200, in.Copy())
+	c.JSON(http.StatusOK, in.Copy())
 }
 
 // PatchRegistry updates the registry in the database.
@@ -85,7 +83,7 @@ func PatchRegistry(c *gin.Context) {
 
 	registry, err := server.Config.Services.Registries.RegistryFind(repo, name)
 	if err != nil {
-		c.String(404, "Error getting registry %q. %s", name, err)
+		handleDbGetError(c, err)
 		return
 	}
 	if in.Username != "" {
@@ -102,14 +100,14 @@ func PatchRegistry(c *gin.Context) {
 	}
 
 	if err := registry.Validate(); err != nil {
-		c.String(400, "Error updating registry. %s", err)
+		c.String(http.StatusBadRequest, "Error updating registry. %s", err)
 		return
 	}
 	if err := server.Config.Services.Registries.RegistryUpdate(repo, registry); err != nil {
-		c.String(500, "Error updating registry %q. %s", in.Address, err)
+		c.String(http.StatusInternalServerError, "Error updating registry %q. %s", in.Address, err)
 		return
 	}
-	c.JSON(200, in.Copy())
+	c.JSON(http.StatusOK, in.Copy())
 }
 
 // GetRegistryList gets the registry list from the database and writes
@@ -118,7 +116,7 @@ func GetRegistryList(c *gin.Context) {
 	repo := session.Repo(c)
 	list, err := server.Config.Services.Registries.RegistryList(repo)
 	if err != nil {
-		c.String(500, "Error getting registry list. %s", err)
+		c.String(http.StatusInternalServerError, "Error getting registry list. %s", err)
 		return
 	}
 	// copy the registry detail to remove the sensitive
@@ -126,7 +124,7 @@ func GetRegistryList(c *gin.Context) {
 	for i, registry := range list {
 		list[i] = registry.Copy()
 	}
-	c.JSON(200, list)
+	c.JSON(http.StatusOK, list)
 }
 
 // DeleteRegistry deletes the named registry from the database.
@@ -137,12 +135,8 @@ func DeleteRegistry(c *gin.Context) {
 	)
 	err := server.Config.Services.Registries.RegistryDelete(repo, name)
 	if err != nil {
-		if errors.Is(err, types.RecordNotExist) {
-			c.String(404, "no records found, cannot delete registry")
-			return
-		}
-		c.String(500, "Error deleting registry %q. %s", name, err)
+		c.String(http.StatusInternalServerError, "Error deleting registry %q. %s", name, err)
 		return
 	}
-	c.String(204, "")
+	c.String(http.StatusNoContent, "")
 }

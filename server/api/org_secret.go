@@ -17,10 +17,9 @@ package api
 import (
 	"net/http"
 
+	"github.com/gin-gonic/gin"
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
-
-	"github.com/gin-gonic/gin"
 )
 
 // GetOrgSecret gets the named organization secret from the database
@@ -32,10 +31,10 @@ func GetOrgSecret(c *gin.Context) {
 	)
 	secret, err := server.Config.Services.Secrets.OrgSecretFind(owner, name)
 	if err != nil {
-		c.String(404, "Error getting org %q secret %q. %s", owner, name, err)
+		handleDbGetError(c, err)
 		return
 	}
-	c.JSON(200, secret.Copy())
+	c.JSON(http.StatusOK, secret.Copy())
 }
 
 // GetOrgSecretList gest the organization secret list from
@@ -73,14 +72,14 @@ func PostOrgSecret(c *gin.Context) {
 		PluginsOnly: in.PluginsOnly,
 	}
 	if err := secret.Validate(); err != nil {
-		c.String(400, "Error inserting org %q secret. %s", owner, err)
+		c.String(http.StatusBadRequest, "Error inserting org %q secret. %s", owner, err)
 		return
 	}
 	if err := server.Config.Services.Secrets.OrgSecretCreate(owner, secret); err != nil {
-		c.String(500, "Error inserting org %q secret %q. %s", owner, in.Name, err)
+		c.String(http.StatusInternalServerError, "Error inserting org %q secret %q. %s", owner, in.Name, err)
 		return
 	}
-	c.JSON(200, secret.Copy())
+	c.JSON(http.StatusOK, secret.Copy())
 }
 
 // PatchOrgSecret updates an organization secret in the database.
@@ -99,7 +98,7 @@ func PatchOrgSecret(c *gin.Context) {
 
 	secret, err := server.Config.Services.Secrets.OrgSecretFind(owner, name)
 	if err != nil {
-		c.String(404, "Error getting org %q secret %q. %s", owner, name, err)
+		handleDbGetError(c, err)
 		return
 	}
 	if in.Value != "" {
@@ -114,14 +113,14 @@ func PatchOrgSecret(c *gin.Context) {
 	secret.PluginsOnly = in.PluginsOnly
 
 	if err := secret.Validate(); err != nil {
-		c.String(400, "Error updating org %q secret. %s", owner, err)
+		c.String(http.StatusBadRequest, "Error updating org %q secret. %s", owner, err)
 		return
 	}
 	if err := server.Config.Services.Secrets.OrgSecretUpdate(owner, secret); err != nil {
-		c.String(500, "Error updating org %q secret %q. %s", owner, in.Name, err)
+		c.String(http.StatusInternalServerError, "Error updating org %q secret %q. %s", owner, in.Name, err)
 		return
 	}
-	c.JSON(200, secret.Copy())
+	c.JSON(http.StatusOK, secret.Copy())
 }
 
 // DeleteOrgSecret deletes the named organization secret from the database.
@@ -131,8 +130,8 @@ func DeleteOrgSecret(c *gin.Context) {
 		name  = c.Param("secret")
 	)
 	if err := server.Config.Services.Secrets.OrgSecretDelete(owner, name); err != nil {
-		c.String(500, "Error deleting org %q secret %q. %s", owner, name, err)
+		c.String(http.StatusInternalServerError, "Error deleting org %q secret %q. %s", owner, name, err)
 		return
 	}
-	c.String(204, "")
+	c.String(http.StatusNoContent, "")
 }
