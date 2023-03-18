@@ -74,8 +74,8 @@
           <span v-else class="text-color">{{ $t('repo.settings.crons.not_executed_yet') }}</span>
         </div>
 
-        <div class="inline-flex">
-          <Button class="mr-1" type="button" color="gray" :text="$t('cancel')" @click="selectedCron = undefined" />
+        <div class="flex gap-2">
+          <Button type="button" color="gray" :text="$t('cancel')" @click="selectedCron = undefined" />
           <Button
             type="submit"
             color="green"

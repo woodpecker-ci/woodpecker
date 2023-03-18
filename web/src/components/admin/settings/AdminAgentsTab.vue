@@ -98,8 +98,8 @@
           </InputField>
         </template>
 
-        <div class="inline-flex">
-          <Button class="mr-1" type="button" color="gray" :text="$t('cancel')" @click="selectedAgent = undefined" />
+        <div class="flex gap-2">
+          <Button type="button" color="gray" :text="$t('cancel')" @click="selectedAgent = undefined" />
           <Button
             :is-loading="isSaving"
             type="submit"

@@ -65,8 +65,8 @@
           <TextField v-model="selectedRegistry.password" :placeholder="$t('password')" required />
         </InputField>
 
-        <div class="inline-flex">
-          <Button class="mr-1" type="button" color="gray" :text="$t('cancel')" @click="selectedRegistry = undefined" />
+        <div class="flex gap-2">
+          <Button type="button" color="gray" :text="$t('cancel')" @click="selectedRegistry = undefined" />
           <Button
             type="submit"
             color="green"
