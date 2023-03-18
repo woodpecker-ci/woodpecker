@@ -41,7 +41,7 @@ func (s storage) CronList(repo *model.Repo) ([]*model.Cron, error) {
 	return crons, s.engine.Where("repo_id = ?", repo.ID).Find(&crons)
 }
 
-func (s storage) CronUpdate(repo *model.Repo, cron *model.Cron) error {
+func (s storage) CronUpdate(_ *model.Repo, cron *model.Cron) error {
 	_, err := s.engine.ID(cron.ID).AllCols().Update(cron)
 	return err
 }

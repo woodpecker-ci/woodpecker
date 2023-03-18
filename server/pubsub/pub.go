@@ -22,7 +22,7 @@ func New() Publisher {
 	}
 }
 
-func (p *publisher) Create(c context.Context, dest string) error {
+func (p *publisher) Create(_ context.Context, dest string) error {
 	p.Lock()
 	_, ok := p.topics[dest]
 	if !ok {
@@ -33,7 +33,7 @@ func (p *publisher) Create(c context.Context, dest string) error {
 	return nil
 }
 
-func (p *publisher) Publish(c context.Context, dest string, message Message) error {
+func (p *publisher) Publish(_ context.Context, dest string, message Message) error {
 	p.Lock()
 	t, ok := p.topics[dest]
 	p.Unlock()
@@ -63,7 +63,7 @@ func (p *publisher) Subscribe(c context.Context, dest string, receiver Receiver)
 	return nil
 }
 
-func (p *publisher) Remove(c context.Context, dest string) error {
+func (p *publisher) Remove(_ context.Context, dest string) error {
 	p.Lock()
 	t, ok := p.topics[dest]
 	if ok {
