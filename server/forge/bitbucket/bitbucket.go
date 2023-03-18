@@ -224,12 +224,12 @@ func (c *config) File(ctx context.Context, u *model.User, r *model.Repo, p *mode
 	return []byte(*config), err
 }
 
-func (c *config) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model.Pipeline, f string) ([]*forge_types.FileMeta, error) {
+func (c *config) Dir(_ context.Context, _ *model.User, _ *model.Repo, _ *model.Pipeline, _ string) ([]*forge_types.FileMeta, error) {
 	return nil, forge_types.ErrNotImplemented
 }
 
 // Status creates a pipeline status for the Bitbucket commit.
-func (c *config) Status(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, step *model.Step) error {
+func (c *config) Status(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, _ *model.Step) error {
 	status := internal.PipelineStatus{
 		State: convertStatus(pipeline.Status),
 		Desc:  common.GetPipelineStatusDescription(pipeline.Status),
@@ -275,7 +275,7 @@ func (c *config) Deactivate(ctx context.Context, u *model.User, r *model.Repo, l
 
 // Netrc returns a netrc file capable of authenticating Bitbucket requests and
 // cloning Bitbucket repositories.
-func (c *config) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
+func (c *config) Netrc(u *model.User, _ *model.Repo) (*model.Netrc, error) {
 	return &model.Netrc{
 		Machine:  "bitbucket.org",
 		Login:    "x-token-auth",
@@ -298,7 +298,7 @@ func (c *config) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]
 }
 
 // BranchHead returns the sha of the head (latest commit) of the specified branch
-func (c *config) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
+func (c *config) BranchHead(_ context.Context, _ *model.User, _ *model.Repo, _ string) (string, error) {
 	// TODO(1138): missing implementation
 	return "", forge_types.ErrNotImplemented
 }
@@ -309,7 +309,7 @@ func (c *config) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 
 // Hook parses the incoming Bitbucket hook and returns the Repository and
 // Pipeline details. If the hook is unsupported nil values are returned.
-func (c *config) Hook(ctx context.Context, req *http.Request) (*model.Repo, *model.Pipeline, error) {
+func (c *config) Hook(_ context.Context, req *http.Request) (*model.Repo, *model.Pipeline, error) {
 	return parseHook(req)
 }
 

@@ -46,15 +46,16 @@ func (c *client) Next(ctx context.Context, f rpc.Filter) (*rpc.Pipeline, error) 
 		res, err = c.client.Next(ctx, req)
 		if err == nil {
 			break
-		} else {
-			// TODO: remove after adding continuous data exchange by something like #536
-			if strings.Contains(err.Error(), "\"too_many_pings\"") {
-				// https://github.com/woodpecker-ci/woodpecker/issues/717#issuecomment-1049365104
-				log.Trace().Err(err).Msg("grpc: to many keepalive pings without sending data")
-			} else {
-				log.Err(err).Msgf("grpc error: done(): code: %v: %s", status.Code(err), err)
-			}
 		}
+
+		// TODO: remove after adding continuous data exchange by something like #536
+		if strings.Contains(err.Error(), "\"too_many_pings\"") {
+			// https://github.com/woodpecker-ci/woodpecker/issues/717#issuecomment-1049365104
+			log.Trace().Err(err).Msg("grpc: to many keepalive pings without sending data")
+		} else {
+			log.Err(err).Msgf("grpc error: done(): code: %v: %s", status.Code(err), err)
+		}
+
 		switch status.Code(err) {
 		case
 			codes.Aborted,
@@ -94,9 +95,10 @@ func (c *client) Wait(ctx context.Context, id string) (err error) {
 		_, err = c.client.Wait(ctx, req)
 		if err == nil {
 			break
-		} else {
-			log.Err(err).Msgf("grpc error: wait(): code: %v: %s", status.Code(err), err)
 		}
+
+		log.Err(err).Msgf("grpc error: wait(): code: %v: %s", status.Code(err), err)
+
 		switch status.Code(err) {
 		case
 			codes.Aborted,
@@ -128,9 +130,10 @@ func (c *client) Init(ctx context.Context, id string, state rpc.State) (err erro
 		_, err = c.client.Init(ctx, req)
 		if err == nil {
 			break
-		} else {
-			log.Err(err).Msgf("grpc error: init(): code: %v: %s", status.Code(err), err)
 		}
+
+		log.Err(err).Msgf("grpc error: init(): code: %v: %s", status.Code(err), err)
+
 		switch status.Code(err) {
 		case
 			codes.Aborted,
@@ -162,9 +165,10 @@ func (c *client) Done(ctx context.Context, id string, state rpc.State) (err erro
 		_, err = c.client.Done(ctx, req)
 		if err == nil {
 			break
-		} else {
-			log.Err(err).Msgf("grpc error: done(): code: %v: %s", status.Code(err), err)
 		}
+
+		log.Err(err).Msgf("grpc error: done(): code: %v: %s", status.Code(err), err)
+
 		switch status.Code(err) {
 		case
 			codes.Aborted,
@@ -189,9 +193,10 @@ func (c *client) Extend(ctx context.Context, id string) (err error) {
 		_, err = c.client.Extend(ctx, req)
 		if err == nil {
 			break
-		} else {
-			log.Err(err).Msgf("grpc error: extend(): code: %v: %s", status.Code(err), err)
 		}
+
+		log.Err(err).Msgf("grpc error: extend(): code: %v: %s", status.Code(err), err)
+
 		switch status.Code(err) {
 		case
 			codes.Aborted,
@@ -223,9 +228,10 @@ func (c *client) Update(ctx context.Context, id string, state rpc.State) (err er
 		_, err = c.client.Update(ctx, req)
 		if err == nil {
 			break
-		} else {
-			log.Err(err).Msgf("grpc error: update(): code: %v: %s", status.Code(err), err)
 		}
+
+		log.Err(err).Msgf("grpc error: update(): code: %v: %s", status.Code(err), err)
+
 		switch status.Code(err) {
 		case
 			codes.Aborted,
@@ -258,9 +264,10 @@ func (c *client) Upload(ctx context.Context, id string, file *rpc.File) (err err
 		_, err = c.client.Upload(ctx, req)
 		if err == nil {
 			break
-		} else {
-			log.Err(err).Msgf("grpc error: upload(): code: %v: %s", status.Code(err), err)
 		}
+
+		log.Err(err).Msgf("grpc error: upload(): code: %v: %s", status.Code(err), err)
+
 		switch status.Code(err) {
 		case
 			codes.Aborted,
@@ -290,9 +297,10 @@ func (c *client) Log(ctx context.Context, id string, line *rpc.Line) (err error)
 		_, err = c.client.Log(ctx, req)
 		if err == nil {
 			break
-		} else {
-			log.Err(err).Msgf("grpc error: log(): code: %v: %s", status.Code(err), err)
 		}
+
+		log.Err(err).Msgf("grpc error: log(): code: %v: %s", status.Code(err), err)
+
 		switch status.Code(err) {
 		case
 			codes.Aborted,

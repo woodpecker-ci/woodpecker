@@ -125,7 +125,7 @@ func (c *Coding) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 
 // Auth authenticates the session and returns the forge user
 // login for the given token and secret
-func (c *Coding) Auth(ctx context.Context, token, secret string) (string, error) {
+func (c *Coding) Auth(ctx context.Context, token, _ string) (string, error) {
 	user, err := c.newClientToken(ctx, token).GetCurrentUser()
 	if err != nil {
 		return "", err
@@ -151,14 +151,14 @@ func (c *Coding) Refresh(ctx context.Context, u *model.User) (bool, error) {
 }
 
 // Teams fetches a list of team memberships from the forge.
-func (c *Coding) Teams(ctx context.Context, u *model.User) ([]*model.Team, error) {
+func (c *Coding) Teams(_ context.Context, _ *model.User) ([]*model.Team, error) {
 	// EMPTY: not implemented in Coding OAuth API
 	return nil, forge_types.ErrNotImplemented
 }
 
 // TeamPerm fetches the named organization permissions from
 // the forge for the specified user.
-func (c *Coding) TeamPerm(u *model.User, org string) (*model.Perm, error) {
+func (c *Coding) TeamPerm(_ *model.User, _ string) (*model.Perm, error) {
 	// EMPTY: not implemented in Coding OAuth API
 	return nil, nil
 }
@@ -246,12 +246,12 @@ func (c *Coding) File(ctx context.Context, u *model.User, r *model.Repo, b *mode
 	return data, nil
 }
 
-func (c *Coding) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*forge_types.FileMeta, error) {
+func (c *Coding) Dir(_ context.Context, _ *model.User, _ *model.Repo, _ *model.Pipeline, _ string) ([]*forge_types.FileMeta, error) {
 	return nil, forge_types.ErrNotImplemented
 }
 
 // Status sends the commit status to the forge.
-func (c *Coding) Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, step *model.Step) error {
+func (c *Coding) Status(_ context.Context, _ *model.User, _ *model.Repo, _ *model.Pipeline, _ *model.Step) error {
 	// EMPTY: not implemented in Coding OAuth API
 	return nil
 }
@@ -291,13 +291,13 @@ func (c *Coding) Deactivate(ctx context.Context, u *model.User, r *model.Repo, l
 }
 
 // Branches returns the names of all branches for the named repository.
-func (c *Coding) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
+func (c *Coding) Branches(_ context.Context, _ *model.User, r *model.Repo) ([]string, error) {
 	// TODO: fetch all branches
 	return []string{r.Branch}, nil
 }
 
 // BranchHead returns the sha of the head (latest commit) of the specified branch
-func (c *Coding) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
+func (c *Coding) BranchHead(_ context.Context, _ *model.User, _ *model.Repo, _ string) (string, error) {
 	// TODO(1138): missing implementation
 	return "", forge_types.ErrNotImplemented
 }
@@ -308,7 +308,7 @@ func (c *Coding) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 
 // Hook parses the post-commit hook from the Request body and returns the
 // required data in a standard format.
-func (c *Coding) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error) {
+func (c *Coding) Hook(_ context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error) {
 	repo, pipeline, err := parseHook(r)
 	if pipeline != nil {
 		pipeline.Avatar = c.resourceLink(pipeline.Avatar)
@@ -318,7 +318,7 @@ func (c *Coding) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model
 
 // OrgMembership returns if user is member of organization and if user
 // is admin/owner in this organization.
-func (c *Coding) OrgMembership(ctx context.Context, u *model.User, owner string) (*model.OrgPerm, error) {
+func (c *Coding) OrgMembership(_ context.Context, _ *model.User, _ string) (*model.OrgPerm, error) {
 	// TODO: Not supported in Coding OAuth API
 	return nil, nil
 }

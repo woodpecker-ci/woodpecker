@@ -364,6 +364,28 @@
                 "last_contact": "Last contact",
                 "never": "Never",
                 "delete_confirm": "Do you really want to delete this agent? It wont be able to connected to the server anymore."
+            },
+            "users": {
+              "users": "Users",
+              "desc": "Users registered for this server",
+              "login": "Login",
+              "email": "Email",
+              "avatar_url": "Avatar URL",
+              "save": "Save user",
+              "cancel": "Cancel",
+              "show":"Show users",
+              "add":"Add user",
+              "none":"There are no users yet.",
+              "delete_confirm": "Do you really want to delete this user?",
+              "deleted": "User deleted",
+              "created": "User created",
+              "saved": "User saved",
+              "admin": {
+                "admin": "Admin",
+                "placeholder": "User is an admin"
+              },
+              "delete_user": "Delete user",
+              "edit_user": "Edit user"
             }
         }
     },

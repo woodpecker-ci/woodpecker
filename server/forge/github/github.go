@@ -137,7 +137,7 @@ func (c *client) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 }
 
 // Auth returns the GitHub user login for the given access token.
-func (c *client) Auth(ctx context.Context, token, secret string) (string, error) {
+func (c *client) Auth(ctx context.Context, token, _ string) (string, error) {
 	client := c.newClientToken(ctx, token)
 	user, _, err := client.Users.Get(ctx, "")
 	if err != nil {
