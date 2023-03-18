@@ -218,6 +218,16 @@ List of event names that will be canceled when a new pipeline for the same conte
 
 The default docker image to be used when cloning the repo
 
+### `WOODPECKER_DEFAULT_PIPELINE_TIMEOUT`
+> 60 (minutes)
+
+The default time for a repo in minutes before a pipeline gets killed
+
+### `WOODPECKER_MAX_PIPELINE_TIMEOUT`
+> 120 (minutes)
+
+The maximum time in minutes you can set in the repo settings before a pipeline gets killed
+
 ### `WOODPECKER_SESSION_EXPIRES`
 > Default: `72h`
 
