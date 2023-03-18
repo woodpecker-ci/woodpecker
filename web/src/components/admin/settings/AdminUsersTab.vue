@@ -66,7 +66,7 @@
           />
         </InputField>
 
-        <div class="flex gap-2 justify-center">
+        <div class="flex gap-2">
           <Button :text="$t('admin.settings.users.cancel')" @click="selectedUser = undefined" />
 
           <Button
