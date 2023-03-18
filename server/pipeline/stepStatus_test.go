@@ -25,7 +25,7 @@ import (
 
 type mockUpdateStepStore struct{}
 
-func (m *mockUpdateStepStore) StepUpdate(build *model.Step) error {
+func (m *mockUpdateStepStore) StepUpdate(_ *model.Step) error {
 	return nil
 }
 
