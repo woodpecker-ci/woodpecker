@@ -339,6 +339,11 @@ func setupMetrics(g *errgroup.Group, _store store.Store) {
 		Name:      "repo_count",
 		Help:      "Total number of repos.",
 	})
+	agents := promauto.NewGauge(prometheus.GaugeOpts{
+		Namespace: "woodpecker",
+		Name:      "agents_available_count",
+		Help:      "Total number of available agents.",
+	})
 
 	g.Go(func() error {
 		for {
@@ -355,9 +360,11 @@ func setupMetrics(g *errgroup.Group, _store store.Store) {
 			repoCount, _ := _store.GetRepoCount()
 			userCount, _ := _store.GetUserCount()
 			pipelineCount, _ := _store.GetPipelineCount()
+			agentsCount, _ := _store.AgentGetAvailableCount()
 			pipelines.Set(float64(pipelineCount))
 			users.Set(float64(userCount))
 			repos.Set(float64(repoCount))
+			agents.Set(float64(agentsCount))
 			time.Sleep(10 * time.Second)
 		}
 	})
