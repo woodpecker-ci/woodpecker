@@ -26,7 +26,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/queue"
 )
 
-func queueBuild(pipeline *model.Pipeline, repo *model.Repo, pipelineItems []*pipeline.Item) error {
+func queuePipeline(repo *model.Repo, pipelineItems []*pipeline.Item) error {
 	var tasks []*queue.Task
 	for _, item := range pipelineItems {
 		if item.Step.State == model.StatusSkipped {

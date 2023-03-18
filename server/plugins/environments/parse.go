@@ -28,6 +28,6 @@ func Parse(params []string) model.EnvironService {
 	return &builtin{globals}
 }
 
-func (b *builtin) EnvironList(repo *model.Repo) ([]*model.Environ, error) {
+func (b *builtin) EnvironList(_ *model.Repo) ([]*model.Environ, error) {
 	return b.globals, nil
 }
