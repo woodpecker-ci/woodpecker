@@ -30,20 +30,20 @@ func Init(ctx context.Context) {
 	}
 }
 
-func FindEngine(engineName string) (types.Engine, error) {
+func FindEngine(engineName string, ctx context.Context) (types.Engine, error) {
 	if engineName == "auto-detect" {
 		for _, engine := range engines {
-			if engine.IsAvailable() {
+			if engine.IsAvailable(ctx) {
 				return engine, nil
 			}
 		}
 
-		return nil, fmt.Errorf("Can't detect an available backend engine")
+		return nil, fmt.Errorf("can't detect an available backend engine")
 	}
 
 	engine, ok := enginesByName[engineName]
 	if !ok {
-		return nil, fmt.Errorf("Backend engine '%s' not found", engineName)
+		return nil, fmt.Errorf("backend engine '%s' not found", engineName)
 	}
 
 	return engine, nil

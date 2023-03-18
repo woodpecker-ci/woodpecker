@@ -154,14 +154,15 @@ func loop(c *cli.Context) error {
 		sigterm.Set()
 	})
 
-	backend.Init(context.WithValue(ctx, types.CliContext, c))
+	backendCtx := context.WithValue(ctx, types.CliContext, c)
+	backend.Init(backendCtx)
 
 	var wg sync.WaitGroup
 	parallel := c.Int("max-workflows")
 	wg.Add(parallel)
 
 	// new engine
-	engine, err := backend.FindEngine(c.String("backend-engine"))
+	engine, err := backend.FindEngine(c.String("backend-engine"), backendCtx)
 	if err != nil {
 		log.Error().Err(err).Msgf("cannot find backend engine '%s'", c.String("backend-engine"))
 		return err
@@ -195,7 +196,7 @@ func loop(c *cli.Context) error {
 			defer wg.Done()
 
 			// load engine (e.g. init api client)
-			err = engine.Load()
+			err = engine.Load(backendCtx)
 			if err != nil {
 				log.Error().Err(err).Msg("cannot load backend engine")
 				return
