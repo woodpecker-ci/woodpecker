@@ -65,12 +65,15 @@
           <TextField v-model="selectedRegistry.password" :placeholder="$t('password')" required />
         </InputField>
 
-        <Button
-          type="submit"
-          color="green"
-          :is-loading="isSaving"
-          :text="isEditingRegistry ? $t('repo.settings.registries.save') : $t('repo.settings.registries.add')"
-        />
+        <div class="inline-flex">
+          <Button class="mr-1" type="button" color="gray" :text="$t('cancel')" @click="selectedRegistry = undefined" />
+          <Button
+            type="submit"
+            color="green"
+            :is-loading="isSaving"
+            :text="isEditingRegistry ? $t('repo.settings.registries.save') : $t('repo.settings.registries.add')"
+          />
+        </div>
       </form>
     </div>
   </Panel>
