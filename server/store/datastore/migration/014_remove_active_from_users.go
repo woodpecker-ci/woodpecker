@@ -22,10 +22,6 @@ var removeActiveFromUsers = task{
 	name:     "remove-active-from-users",
 	required: true,
 	fn: func(sess *xorm.Session) error {
-		if err := dropTableColumns(sess, "users", "user_active"); err != nil {
-			return err
-		}
-
-		return nil
+		return dropTableColumns(sess, "users", "user_active")
 	},
 }
