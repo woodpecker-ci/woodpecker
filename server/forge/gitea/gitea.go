@@ -314,7 +314,7 @@ func (c *Gitea) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.
 		if m, _ := filepath.Match(f, e.Path); m && e.Type == "blob" {
 			data, err := c.File(ctx, u, r, b, e.Path)
 			if err != nil {
-				return nil, fmt.Errorf("multi-pipeline cannot get %s: %s", e.Path, err)
+				return nil, fmt.Errorf("multi-pipeline cannot get %s: %w", e.Path, err)
 			}
 
 			configs = append(configs, &forge_types.FileMeta{
@@ -480,6 +480,11 @@ func (c *Gitea) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.
 	repo, pipeline, err := parseHook(r)
 	if err != nil {
 		return nil, nil, err
+	}
+
+	if repo == nil || pipeline == nil {
+		// ignore  hook
+		return nil, nil, nil
 	}
 
 	if pipeline.Event == model.EventPull && len(pipeline.ChangedFiles) == 0 {

@@ -28,6 +28,7 @@ type Task struct {
 	Labels       map[string]string `xorm:"json 'task_labels'"`
 	Dependencies []string          `xorm:"json 'task_dependencies'"`
 	RunOn        []string          `xorm:"json 'task_run_on'"`
+	DepStatus    map[string]string `xorm:"json 'task_dep_status'"`
 }
 
 // TableName return database table name for xorm

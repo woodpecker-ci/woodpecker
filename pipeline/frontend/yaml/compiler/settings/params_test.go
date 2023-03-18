@@ -59,6 +59,11 @@ func TestParamsToEnv(t *testing.T) {
 	got := map[string]string{}
 	assert.NoError(t, ParamsToEnv(from, got, secrets))
 	assert.EqualValues(t, want, got, "Problem converting plugin parameters to environment variables")
+
+	// handle edge cases (#1609)
+	got = map[string]string{}
+	assert.NoError(t, ParamsToEnv(map[string]interface{}{"a": []interface{}{"a", nil}}, got, nil))
+	assert.EqualValues(t, map[string]string{"PLUGIN_A": "a,"}, got)
 }
 
 func TestSanitizeParamKey(t *testing.T) {

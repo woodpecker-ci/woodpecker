@@ -1,5 +1,7 @@
 import ApiClient, { encodeQueryString } from './client';
 import {
+  Agent,
+  Cron,
   OrgPermissions,
   Pipeline,
   PipelineConfig,
@@ -12,7 +14,6 @@ import {
   RepoSettings,
   Secret,
 } from './types';
-import { Cron } from './types/cron';
 
 type RepoListOptions = {
   all?: boolean;
@@ -71,14 +72,14 @@ export default class WoodpeckerClient extends ApiClient {
 
   // Deploy triggers a deployment for an existing pipeline using the
   // specified target environment.
-  deployPipeline(owner: string, repo: string, number: number, options: DeploymentOptions): Promise<Pipeline> {
+  deployPipeline(owner: string, repo: string, pipelineNumber: number, options: DeploymentOptions): Promise<Pipeline> {
     const vars = {
       ...options.variables,
       event: 'deployment',
       deploy_to: options.environment,
     };
     const query = encodeQueryString(vars);
-    return this._post(`/api/repos/${owner}/${repo}/pipelines/${number}?${query}`) as Promise<Pipeline>;
+    return this._post(`/api/repos/${owner}/${repo}/pipelines/${pipelineNumber}?${query}`) as Promise<Pipeline>;
   }
 
   getPipelineList(owner: string, repo: string, opts?: Record<string, string | number | boolean>): Promise<Pipeline[]> {
@@ -86,12 +87,12 @@ export default class WoodpeckerClient extends ApiClient {
     return this._get(`/api/repos/${owner}/${repo}/pipelines?${query}`) as Promise<Pipeline[]>;
   }
 
-  getPipeline(owner: string, repo: string, number: number | 'latest'): Promise<Pipeline> {
-    return this._get(`/api/repos/${owner}/${repo}/pipelines/${number}`) as Promise<Pipeline>;
+  getPipeline(owner: string, repo: string, pipelineNumber: number | 'latest'): Promise<Pipeline> {
+    return this._get(`/api/repos/${owner}/${repo}/pipelines/${pipelineNumber}`) as Promise<Pipeline>;
   }
 
-  getPipelineConfig(owner: string, repo: string, number: number): Promise<PipelineConfig[]> {
-    return this._get(`/api/repos/${owner}/${repo}/pipelines/${number}/config`) as Promise<PipelineConfig[]>;
+  getPipelineConfig(owner: string, repo: string, pipelineNumber: number): Promise<PipelineConfig[]> {
+    return this._get(`/api/repos/${owner}/${repo}/pipelines/${pipelineNumber}/config`) as Promise<PipelineConfig[]>;
   }
 
   getPipelineFeed(opts?: Record<string, string | number | boolean>): Promise<PipelineFeed[]> {
@@ -99,16 +100,16 @@ export default class WoodpeckerClient extends ApiClient {
     return this._get(`/api/user/feed?${query}`) as Promise<PipelineFeed[]>;
   }
 
-  cancelPipeline(owner: string, repo: string, number: number): Promise<unknown> {
-    return this._post(`/api/repos/${owner}/${repo}/pipelines/${number}/cancel`);
+  cancelPipeline(owner: string, repo: string, pipelineNumber: number): Promise<unknown> {
+    return this._post(`/api/repos/${owner}/${repo}/pipelines/${pipelineNumber}/cancel`);
   }
 
-  approvePipeline(owner: string, repo: string, pipeline: string): Promise<unknown> {
-    return this._post(`/api/repos/${owner}/${repo}/pipelines/${pipeline}/approve`);
+  approvePipeline(owner: string, repo: string, pipelineNumber: string): Promise<unknown> {
+    return this._post(`/api/repos/${owner}/${repo}/pipelines/${pipelineNumber}/approve`);
   }
 
-  declinePipeline(owner: string, repo: string, pipeline: string): Promise<unknown> {
-    return this._post(`/api/repos/${owner}/${repo}/pipelines/${pipeline}/decline`);
+  declinePipeline(owner: string, repo: string, pipelineNumber: string): Promise<unknown> {
+    return this._post(`/api/repos/${owner}/${repo}/pipelines/${pipelineNumber}/decline`);
   }
 
   restartPipeline(
@@ -227,6 +228,26 @@ export default class WoodpeckerClient extends ApiClient {
 
   getToken(): Promise<string> {
     return this._post('/api/user/token') as Promise<string>;
+  }
+
+  getAgents(): Promise<Agent[]> {
+    return this._get('/api/agents') as Promise<Agent[]>;
+  }
+
+  getAgent(agentId: Agent['id']): Promise<Agent> {
+    return this._get(`/api/agents/${agentId}`) as Promise<Agent>;
+  }
+
+  createAgent(agent: Partial<Agent>): Promise<Agent> {
+    return this._post('/api/agents', agent) as Promise<Agent>;
+  }
+
+  updateAgent(agent: Partial<Agent>): Promise<unknown> {
+    return this._patch(`/api/agents/${agent.id}`, agent);
+  }
+
+  deleteAgent(agent: Agent): Promise<unknown> {
+    return this._delete(`/api/agents/${agent.id}`);
   }
 
   // eslint-disable-next-line promise/prefer-await-to-callbacks

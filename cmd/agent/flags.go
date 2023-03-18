@@ -30,15 +30,9 @@ var flags = []cli.Flag{
 		Value:   "localhost:9000",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_USERNAME"},
-		Name:    "grpc-username",
-		Usage:   "auth username",
-		Value:   "x-oauth-basic",
-	},
-	&cli.StringFlag{
 		EnvVars:  []string{"WOODPECKER_AGENT_SECRET"},
-		Name:     "grpc-password",
-		Usage:    "server-agent shared password",
+		Name:     "grpc-token",
+		Usage:    "server-agent shared token",
 		FilePath: os.Getenv("WOODPECKER_AGENT_SECRET_FILE"),
 	},
 	&cli.BoolFlag{
@@ -140,5 +134,17 @@ var flags = []cli.Flag{
 		Name:    "backend-k8s-storage-rwx",
 		Usage:   "backend k8s storage access mode, should ReadWriteMany (RWX) instead of ReadWriteOnce (RWO) be used? (default: true)",
 		Value:   true,
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_K8S_POD_LABELS"},
+		Name:    "backend-k8s-pod-labels",
+		Usage:   "backend k8s additional worker pod labels",
+		Value:   "",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_K8S_POD_ANNOTATIONS"},
+		Name:    "backend-k8s-pod-annotations",
+		Usage:   "backend k8s additional worker pod annotations",
+		Value:   "",
 	},
 }

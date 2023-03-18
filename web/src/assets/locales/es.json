@@ -1,5 +1,20 @@
 {
+  "admin": {
+    "settings": {
+      "secrets": {
+        "add": "Agregar secreto",
+        "created": "Secreto global creado",
+        "deleted": "Secreto global eliminado",
+        "name": "Nombre",
+        "save": "Guardar secreto",
+        "secrets": "Secretos",
+        "show": "Mostrar secretos",
+        "value": "Valor"
+      }
+    }
+  },
   "back": "Atrás",
+  "cancel": "Cancelar",
   "color_scheme_dark": "Cambiar al modo claro",
   "color_scheme_light": "Cambiar al modo oscuro",
   "docs": "Documentación",

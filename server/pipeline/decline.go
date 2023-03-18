@@ -31,7 +31,7 @@ func Decline(ctx context.Context, store store.Store, pipeline *model.Pipeline, u
 
 	_, err := UpdateToStatusDeclined(store, *pipeline, user.Login)
 	if err != nil {
-		return nil, fmt.Errorf("error updating pipeline. %s", err)
+		return nil, fmt.Errorf("error updating pipeline. %w", err)
 	}
 
 	if pipeline.Steps, err = store.StepList(pipeline); err != nil {

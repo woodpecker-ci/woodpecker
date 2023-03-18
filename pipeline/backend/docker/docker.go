@@ -31,6 +31,7 @@ import (
 	"github.com/rs/zerolog/log"
 
 	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
+	"github.com/woodpecker-ci/woodpecker/shared/utils"
 )
 
 type docker struct {
@@ -133,12 +134,11 @@ func (e *docker) Exec(ctx context.Context, step *backend.Step) error {
 	if step.Pull {
 		responseBody, perr := e.client.ImagePull(ctx, config.Image, pullopts)
 		if perr == nil {
-			defer responseBody.Close()
-
 			fd, isTerminal := term.GetFdInfo(os.Stdout)
 			if err := jsonmessage.DisplayJSONMessagesStream(responseBody, os.Stdout, fd, isTerminal, nil); err != nil {
 				log.Error().Err(err).Msg("DisplayJSONMessagesStream")
 			}
+			responseBody.Close()
 		}
 		// Fix "Show warning when fail to auth to docker registry"
 		// (https://web.archive.org/web/20201023145804/https://github.com/drone/drone/issues/1917)
@@ -148,7 +148,7 @@ func (e *docker) Exec(ctx context.Context, step *backend.Step) error {
 	}
 
 	// add default volumes to the host configuration
-	hostConfig.Binds = append(hostConfig.Binds, e.volumes...)
+	hostConfig.Binds = utils.DedupStrings(append(hostConfig.Binds, e.volumes...))
 
 	_, err := e.client.ContainerCreate(ctx, config, hostConfig, nil, nil, step.Name)
 	if client.IsErrNotFound(err) {
@@ -158,11 +158,11 @@ func (e *docker) Exec(ctx context.Context, step *backend.Step) error {
 		if perr != nil {
 			return perr
 		}
-		defer responseBody.Close()
 		fd, isTerminal := term.GetFdInfo(os.Stdout)
 		if err := jsonmessage.DisplayJSONMessagesStream(responseBody, os.Stdout, fd, isTerminal, nil); err != nil {
 			log.Error().Err(err).Msg("DisplayJSONMessagesStream")
 		}
+		responseBody.Close()
 
 		_, err = e.client.ContainerCreate(ctx, config, hostConfig, nil, nil, step.Name)
 	}
@@ -226,7 +226,6 @@ func (e *docker) Tail(ctx context.Context, step *backend.Step) (io.ReadCloser, e
 		_, _ = stdcopy.StdCopy(wc, wc, logs)
 		_ = logs.Close()
 		_ = wc.Close()
-		_ = rc.Close()
 	}()
 	return rc, nil
 }

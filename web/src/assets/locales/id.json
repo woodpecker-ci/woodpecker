@@ -1,6 +1,42 @@
 {
   "admin": {
     "settings": {
+      "agents": {
+        "add": "Tambahkan agen",
+        "agents": "Agen",
+        "backend": {
+          "backend": "Backend",
+          "badge": "backend"
+        },
+        "capacity": {
+          "badge": "kapasitas",
+          "capacity": "Kapasitas"
+        },
+        "created": "Agen dibuat",
+        "delete_confirm": "Apakah Anda ingin menghapus agen ini. Itu tidak akan terhubung lagi ke server.",
+        "deleted": "Agen dihapus",
+        "desc": "Agen terdaftar untuk server",
+        "last_contact": "Hubungan terakhir",
+        "name": {
+          "name": "Nama",
+          "placeholder": "Nama agen"
+        },
+        "never": "Tidak pernah",
+        "no_schedule": {
+          "name": "Nonaktifkan agen",
+          "placeholder": "Hentikan agen untuk mengambil tugas baru"
+        },
+        "none": "Belum ada agen.",
+        "platform": {
+          "badge": "platform",
+          "platform": "Platform"
+        },
+        "save": "Simpan agen",
+        "saved": "Agen disimpan",
+        "show": "Tampilkan agen",
+        "token": "Token",
+        "version": "Versi"
+      },
       "not_allowed": "Anda tidak diperbolehkan untuk mengakses pengaturan peladen",
       "secrets": {
         "add": "Tambahkan rahasia",
@@ -29,6 +65,7 @@
     }
   },
   "back": "Kembali",
+  "cancel": "Batal",
   "color_scheme_dark": "Ubah ke mode terang",
   "color_scheme_light": "Ubah ke mode gelap",
   "docs": "Dokumentasi",
@@ -73,6 +110,18 @@
     "activity": "Aktivitas",
     "add": "Tambahkan repositori",
     "branches": "Cabang",
+    "deploy_pipeline": {
+      "enter_target": "Lingkungan sasaran peluncuran",
+      "title": "Picu perisitiwa peluncuran untuk jalur pipa #{pipelineId}",
+      "trigger": "Luncurkan",
+      "variables": {
+        "add": "Tambahkan variabel",
+        "desc": "Tetapkan variabel tambahan untuk digunakan dalam jalur pipa Anda. Variabel dengan nama yang sama akan ditimpa.",
+        "name": "Nama variabel",
+        "title": "Variabel jalur pipa tambahan",
+        "value": "Nilai variabel"
+      }
+    },
     "enable": {
       "enable": "Aktifkan",
       "enabled": "Sudah diaktifkan",
@@ -99,6 +148,7 @@
         "cancel": "Batalkan",
         "cancel_success": "Jalur pipa dibatalkan",
         "canceled": "Langkah ini telah dibatalkan.",
+        "deploy": "Luncurkan",
         "log_auto_scroll": "Gulir ke bawah secara otomatis",
         "log_auto_scroll_off": "Matikan pengguliran otomatis",
         "log_download": "Unduh",
@@ -108,7 +158,7 @@
       "config": "Konfigurasi",
       "created": "Dibuat",
       "event": {
-        "cron": "Cron",
+        "cron": "Kron",
         "deploy": "Luncur",
         "manual": "Manual",
         "pr": "Permintaan Penarikan",
@@ -271,6 +321,7 @@
         "add": "Tambahkan rahasia",
         "created": "Rahasia dibuat",
         "delete": "Hapus rahasia",
+        "delete_confirm": "Apakah Anda ingin menghapus rahasia ini?",
         "deleted": "Rahasia dihapus",
         "desc": "Rahasia dapat diberikan ke langkah jalur pipa individu saat dijalankan sebagai variabel lingkungan.",
         "edit": "Sunting rahasia",
