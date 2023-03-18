@@ -24,7 +24,7 @@
         <CheckboxesField v-model="innerValue.event" :options="secretEventsOptions" />
       </InputField>
 
-        <div class="flex gap-2">
+      <div class="flex gap-2">
         <Button type="button" color="gray" :text="$t('cancel')" @click="$emit('cancel')" />
         <Button
           type="submit"
