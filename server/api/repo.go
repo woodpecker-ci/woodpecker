@@ -153,6 +153,9 @@ func PatchRepo(c *gin.Context) {
 	if in.CancelPreviousPipelineEvents != nil {
 		repo.CancelPreviousPipelineEvents = *in.CancelPreviousPipelineEvents
 	}
+	if in.NetrcOnlyTrusted != nil {
+		repo.NetrcOnlyTrusted = *in.NetrcOnlyTrusted
+	}
 	if in.Visibility != nil {
 		switch *in.Visibility {
 		case string(model.VisibilityInternal), string(model.VisibilityPrivate), string(model.VisibilityPublic):

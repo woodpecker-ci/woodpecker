@@ -91,7 +91,11 @@
                     "protected": "Protected",
                     "desc": "Every pipeline needs to be approved before being executed."
                 },
-                "trusted": {
+                "netrc_only_trusted": {
+                    "netrc_only_trusted": "Only inject netrc credentials into trusted containers",
+                    "desc": "Only inject netrc credentials into trusted containers (recommended)."
+                },
+              "trusted": {
                     "trusted": "Trusted",
                     "desc": "Underlying pipeline containers get access to escalated capabilities like mounting volumes."
                 },

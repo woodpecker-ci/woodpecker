@@ -226,6 +226,13 @@ func WithTrusted(trusted bool) Option {
 	}
 }
 
+// WithNetrcOnlyTrusted configures the compiler with the netrcOnlyTrusted repo option
+func WithNetrcOnlyTrusted(only bool) Option {
+	return func(compiler *Compiler) {
+		compiler.netrcOnlyTrusted = only
+	}
+}
+
 // TODO(bradrydzewski) consider an alternate approach to
 // WithProxy where the proxy strings are passed directly
 // to the function as named parameters.

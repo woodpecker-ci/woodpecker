@@ -82,6 +82,7 @@ type Compiler struct {
 	reslimit          ResourceLimit
 	defaultCloneImage string
 	trustedPipeline   bool
+	netrcOnlyTrusted  bool
 }
 
 // New creates a new Compiler with options.
@@ -189,7 +190,7 @@ func (c *Compiler) Compile(conf *yaml.Config) (*backend.Config, error) {
 			step := c.createProcess(name, container, defaultCloneName)
 
 			// only inject netrc if it's a trusted repo or a trusted plugin
-			if c.trustedPipeline || (container.IsPlugin() && container.IsTrusted()) {
+			if !c.netrcOnlyTrusted || c.trustedPipeline || (container.IsPlugin() && container.IsTrusted()) {
 				for k, v := range c.cloneEnv {
 					step.Environment[k] = v
 				}
