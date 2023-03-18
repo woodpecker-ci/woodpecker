@@ -40,6 +40,7 @@
       i18n-prefix="admin.settings.secrets."
       :is-saving="isSaving"
       @save="createSecret"
+      @cancel="selectedSecret = undefined"
     />
   </Panel>
 </template>

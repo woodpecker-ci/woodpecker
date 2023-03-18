@@ -2,6 +2,7 @@ package pubsub
 
 import (
 	"context"
+	"errors"
 	"sync"
 	"testing"
 	"time"
@@ -56,7 +57,7 @@ func TestPublishNotFound(t *testing.T) {
 	)
 	broker := New()
 	err := broker.Publish(context.Background(), testTopic, testMessage)
-	if err != ErrNotFound {
+	if !errors.Is(err, ErrNotFound) {
 		t.Errorf("Expect Not Found error when topic does not exist")
 	}
 }
@@ -68,7 +69,7 @@ func TestSubscribeNotFound(t *testing.T) {
 	)
 	broker := New()
 	err := broker.Subscribe(context.Background(), testTopic, testCallback)
-	if err != ErrNotFound {
+	if !errors.Is(err, ErrNotFound) {
 		t.Errorf("Expect Not Found error when topic does not exist")
 	}
 }

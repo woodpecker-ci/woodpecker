@@ -15,12 +15,14 @@ require (
 	github.com/docker/go-units v0.5.0
 	github.com/drone/envsubst v1.0.3
 	github.com/franela/goblin v0.0.0-20211003143422-0a4f594942bf
+	github.com/fsnotify/fsnotify v1.5.1
 	github.com/gin-gonic/gin v1.8.1
 	github.com/go-ap/httpsig v0.0.0-20210714162115-62a09257db51
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/gogits/go-gogs-client v0.0.0-20210131175652-1d7215cd8d85
 	github.com/golang-jwt/jwt/v4 v4.4.2
 	github.com/google/go-github/v39 v39.2.0
+	github.com/google/tink/go v1.7.0
 	github.com/gorilla/securecookie v1.1.1
 	github.com/joho/godotenv v1.4.0
 	github.com/lafriks/ttlcache/v3 v3.2.0
@@ -39,9 +41,11 @@ require (
 	github.com/urfave/cli/v2 v2.20.2
 	github.com/xanzy/go-gitlab v0.73.1
 	github.com/xeipuuv/gojsonschema v1.2.0
-	golang.org/x/exp v0.0.0-20221031165847-c99f073a8326
-	golang.org/x/net v0.4.0
-	golang.org/x/oauth2 v0.0.0-20221014153046-6fdb5e3db783
+	go.uber.org/multierr v1.9.0
+	golang.org/x/crypto v0.7.0
+	golang.org/x/exp v0.0.0-20230307190834-24139beb5833
+	golang.org/x/net v0.8.0
+	golang.org/x/oauth2 v0.6.0
 	golang.org/x/sync v0.1.0
 	google.golang.org/grpc v1.50.1
 	google.golang.org/protobuf v1.28.1
@@ -66,7 +70,6 @@ require (
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/emicklei/go-restful/v3 v3.9.0 // indirect
 	github.com/fatih/color v1.13.0 // indirect
-	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-fed/httpsig v1.1.0 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
@@ -125,15 +128,13 @@ require (
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
-	go.uber.org/multierr v1.8.0 // indirect
 	go.uber.org/zap v1.23.0 // indirect
-	golang.org/x/crypto v0.1.0 // indirect
-	golang.org/x/mod v0.6.0 // indirect
-	golang.org/x/sys v0.3.0 // indirect
-	golang.org/x/term v0.3.0 // indirect
-	golang.org/x/text v0.5.0 // indirect
+	golang.org/x/mod v0.8.0 // indirect
+	golang.org/x/sys v0.6.0 // indirect
+	golang.org/x/term v0.6.0 // indirect
+	golang.org/x/text v0.8.0 // indirect
 	golang.org/x/time v0.1.0 // indirect
-	golang.org/x/tools v0.2.0 // indirect
+	golang.org/x/tools v0.6.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20221018160656-63c7b68cfc55 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect

@@ -86,3 +86,8 @@ pipeline:
 ```
 
 See [plugin docs](./20-usage/51-plugins/10-plugins.md).
+
+## Continue reading
+
+- [Create a Woodpecker pipeline for your repository](./20-usage/10-intro.md)
+- [Setup your own Woodpecker instance](./30-administration/00-setup.md)

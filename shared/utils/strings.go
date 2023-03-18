@@ -15,20 +15,24 @@
 package utils
 
 // DedupStrings deduplicate string list, empty items are dropped
-func DedupStrings(list []string) []string {
-	m := make(map[string]struct{}, len(list))
+func DedupStrings(src []string) []string {
+	m := make(map[string]struct{}, len(src))
+	dst := make([]string, 0, len(src))
 
-	for i := range list {
-		if s := list[i]; len(s) > 0 {
-			m[list[i]] = struct{}{}
+	for _, v := range src {
+		// Skip empty items
+		if len(v) == 0 {
+			continue
 		}
+		// Skip duplicates
+		if _, ok := m[v]; ok {
+			continue
+		}
+		m[v] = struct{}{}
+		dst = append(dst, v)
 	}
 
-	newList := make([]string, 0, len(m))
-	for k := range m {
-		newList = append(newList, k)
-	}
-	return newList
+	return dst
 }
 
 // EqualStringSlice compare two string slices if they have equal values independent of how they are sorted

@@ -79,13 +79,14 @@ type (
 
 	// Commit defines runtime metadata for a commit.
 	Commit struct {
-		Sha          string   `json:"sha,omitempty"`
-		Ref          string   `json:"ref,omitempty"`
-		Refspec      string   `json:"refspec,omitempty"`
-		Branch       string   `json:"branch,omitempty"`
-		Message      string   `json:"message,omitempty"`
-		Author       Author   `json:"author,omitempty"`
-		ChangedFiles []string `json:"changed_files,omitempty"`
+		Sha               string   `json:"sha,omitempty"`
+		Ref               string   `json:"ref,omitempty"`
+		Refspec           string   `json:"refspec,omitempty"`
+		Branch            string   `json:"branch,omitempty"`
+		Message           string   `json:"message,omitempty"`
+		Author            Author   `json:"author,omitempty"`
+		ChangedFiles      []string `json:"changed_files,omitempty"`
+		PullRequestLabels []string `json:"labels,omitempty"`
 	}
 
 	// Author defines runtime metadata for a commit author.
@@ -154,19 +155,20 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_REPO_PRIVATE":        strconv.FormatBool(m.Repo.Private),
 		"CI_REPO_TRUSTED":        "false", // TODO should this be added?
 
-		"CI_COMMIT_SHA":           m.Curr.Commit.Sha,
-		"CI_COMMIT_REF":           m.Curr.Commit.Ref,
-		"CI_COMMIT_REFSPEC":       m.Curr.Commit.Refspec,
-		"CI_COMMIT_BRANCH":        m.Curr.Commit.Branch,
-		"CI_COMMIT_SOURCE_BRANCH": sourceBranch,
-		"CI_COMMIT_TARGET_BRANCH": targetBranch,
-		"CI_COMMIT_LINK":          m.Curr.Link,
-		"CI_COMMIT_MESSAGE":       m.Curr.Commit.Message,
-		"CI_COMMIT_AUTHOR":        m.Curr.Commit.Author.Name,
-		"CI_COMMIT_AUTHOR_EMAIL":  m.Curr.Commit.Author.Email,
-		"CI_COMMIT_AUTHOR_AVATAR": m.Curr.Commit.Author.Avatar,
-		"CI_COMMIT_TAG":           "", // will be set if event is tag
-		"CI_COMMIT_PULL_REQUEST":  "", // will be set if event is pr
+		"CI_COMMIT_SHA":                 m.Curr.Commit.Sha,
+		"CI_COMMIT_REF":                 m.Curr.Commit.Ref,
+		"CI_COMMIT_REFSPEC":             m.Curr.Commit.Refspec,
+		"CI_COMMIT_BRANCH":              m.Curr.Commit.Branch,
+		"CI_COMMIT_SOURCE_BRANCH":       sourceBranch,
+		"CI_COMMIT_TARGET_BRANCH":       targetBranch,
+		"CI_COMMIT_LINK":                m.Curr.Link,
+		"CI_COMMIT_MESSAGE":             m.Curr.Commit.Message,
+		"CI_COMMIT_AUTHOR":              m.Curr.Commit.Author.Name,
+		"CI_COMMIT_AUTHOR_EMAIL":        m.Curr.Commit.Author.Email,
+		"CI_COMMIT_AUTHOR_AVATAR":       m.Curr.Commit.Author.Avatar,
+		"CI_COMMIT_TAG":                 "", // will be set if event is tag
+		"CI_COMMIT_PULL_REQUEST":        "", // will be set if event is pr
+		"CI_COMMIT_PULL_REQUEST_LABELS": "", // will be set if event is pr
 
 		"CI_PIPELINE_NUMBER":        strconv.FormatInt(m.Curr.Number, 10),
 		"CI_PIPELINE_PARENT":        strconv.FormatInt(m.Curr.Parent, 10),
@@ -244,6 +246,7 @@ func (m *Metadata) Environ() map[string]string {
 	}
 	if m.Curr.Event == EventPull {
 		params["CI_COMMIT_PULL_REQUEST"] = pullRegexp.FindString(m.Curr.Commit.Ref)
+		params["CI_COMMIT_PULL_REQUEST_LABELS"] = strings.Join(m.Curr.Commit.PullRequestLabels, ",")
 	}
 
 	return params
