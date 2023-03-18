@@ -280,6 +280,31 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 	return files, nil
 }
 
+func (c *client) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.PaginationData) ([]*model.PullRequest, error) {
+	token := ""
+	if u != nil {
+		token = u.Token
+	}
+	client := c.newClientToken(ctx, token)
+
+	pullRequests, _, err := client.PullRequests.List(ctx, r.Owner, r.Name, &github.PullRequestListOptions{
+		ListOptions: github.ListOptions{Page: int(p.Page), PerPage: int(p.PerPage)},
+		State:       "open",
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]*model.PullRequest, len(pullRequests))
+	for i := range pullRequests {
+		result[i] = &model.PullRequest{
+			Index: int64(pullRequests[i].GetNumber()),
+			Title: pullRequests[i].GetTitle(),
+		}
+	}
+	return result, err
+}
+
 // Netrc returns a netrc file capable of authenticating GitHub requests and
 // cloning GitHub repositories. The netrc will use the global machine account
 // when configured.

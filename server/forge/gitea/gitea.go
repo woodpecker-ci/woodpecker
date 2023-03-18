@@ -474,6 +474,34 @@ func (c *Gitea) BranchHead(ctx context.Context, u *model.User, r *model.Repo, br
 	return b.Commit.ID, nil
 }
 
+func (c *Gitea) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.PaginationData) ([]*model.PullRequest, error) {
+	token := ""
+	if u != nil {
+		token = u.Token
+	}
+	client, err := c.newClientToken(ctx, token)
+	if err != nil {
+		return nil, err
+	}
+
+	pullRequests, _, err := client.ListRepoPullRequests(r.Owner, r.Name, gitea.ListPullRequestsOptions{
+		ListOptions: gitea.ListOptions{Page: int(p.Page), PageSize: int(p.PerPage)},
+		State:       gitea.StateOpen,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]*model.PullRequest, len(pullRequests))
+	for i := range pullRequests {
+		result[i] = &model.PullRequest{
+			Index: pullRequests[i].Index,
+			Title: pullRequests[i].Title,
+		}
+	}
+	return result, err
+}
+
 // Hook parses the incoming Gitea hook and returns the Repository and Pipeline
 // details. If the hook is unsupported nil values are returned.
 func (c *Gitea) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error) {

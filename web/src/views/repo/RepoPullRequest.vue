@@ -1,6 +1,6 @@
 <template>
   <div class="flex w-full mb-4 justify-center">
-    <span class="text-color text-xl">{{ $t('repo.pipeline.pipelines_for', { branch }) }}</span>
+    <span class="text-color text-xl">{{ $t('repo.pipeline.pipelines_for_pr', { index: pullRequest }) }}</span>
   </div>
   <PipelineList :pipelines="pipelines" :repo="repo" />
 </template>
@@ -12,28 +12,36 @@ import PipelineList from '~/components/repo/pipeline/PipelineList.vue';
 import { Pipeline, Repo, RepoPermissions } from '~/lib/api/types';
 
 export default defineComponent({
-  name: 'RepoBranch',
+  name: 'RepoPullRequest',
 
   components: { PipelineList },
 
   props: {
-    branch: {
+    pullRequest: {
       type: String,
       required: true,
     },
   },
 
   setup(props) {
-    const branch = toRef(props, 'branch');
+    const pullRequest = toRef(props, 'pullRequest');
     const repo = inject<Ref<Repo>>('repo');
     const repoPermissions = inject<Ref<RepoPermissions>>('repo-permissions');
     if (!repo || !repoPermissions) {
-      throw new Error('Unexpected: "repo" & "repoPermissions" should be provided at this place');
+      throw new Error('Unexpected: "repo" and "repoPermissions" should be provided at this place');
     }
 
     const allPipelines = inject<Ref<Pipeline[]>>('pipelines');
     const pipelines = computed(() =>
-      allPipelines?.value.filter((b) => b.branch === branch.value && b.event !== 'pull_request'),
+      allPipelines?.value.filter(
+        (b) =>
+          b.event === 'pull_request' &&
+          b.ref
+            .replaceAll('refs/pull/', '')
+            .replaceAll('refs/merge-requests/', '')
+            .replaceAll('/merge', '')
+            .replaceAll('/head', '') === pullRequest.value,
+      ),
     );
 
     return { pipelines, repo };

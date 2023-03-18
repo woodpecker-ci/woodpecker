@@ -18,6 +18,7 @@ package coding
 import (
 	"context"
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -299,6 +300,10 @@ func (c *Coding) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]
 func (c *Coding) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
 	// TODO(1138): missing implementation
 	return "", forge_types.ErrNotImplemented
+}
+
+func (c *Coding) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.PaginationData) ([]*model.PullRequest, error) {
+	return nil, errors.New("Coding does not support pull requests yet")
 }
 
 // Hook parses the post-commit hook from the Request body and returns the
