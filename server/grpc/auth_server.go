@@ -22,8 +22,8 @@ func NewWoodpeckerAuthServer(jwtManager *JWTManager, agentMasterToken string, st
 	return &WoodpeckerAuthServer{jwtManager: jwtManager, agentMasterToken: agentMasterToken, store: store}
 }
 
-func (s *WoodpeckerAuthServer) Auth(c context.Context, req *proto.AuthRequest) (*proto.AuthReply, error) {
-	agent, err := s.getAgent(c, req.AgentId, req.AgentToken)
+func (s *WoodpeckerAuthServer) Auth(_ context.Context, req *proto.AuthRequest) (*proto.AuthReply, error) {
+	agent, err := s.getAgent(req.AgentId, req.AgentToken)
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (s *WoodpeckerAuthServer) Auth(c context.Context, req *proto.AuthRequest) (
 	}, nil
 }
 
-func (s *WoodpeckerAuthServer) getAgent(c context.Context, agentID int64, agentToken string) (*model.Agent, error) {
+func (s *WoodpeckerAuthServer) getAgent(agentID int64, agentToken string) (*model.Agent, error) {
 	if agentToken == s.agentMasterToken && agentID == -1 {
 		agent := new(model.Agent)
 		agent.Name = ""
