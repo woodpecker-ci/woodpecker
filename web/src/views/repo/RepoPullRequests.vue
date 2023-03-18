@@ -2,7 +2,7 @@
   <div v-if="pullRequests" class="space-y-4">
     <ListItem
       v-for="pullRequest in pullRequests"
-      :key="pullRequest"
+      :key="pullRequest.index"
       class="text-color"
       :to="{ name: 'repo-pull-request', params: { pullRequest: pullRequest.index } }"
     >
