@@ -39,7 +39,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/forge/bitbucket"
 	"github.com/woodpecker-ci/woodpecker/server/forge/bitbucketserver"
-	"github.com/woodpecker-ci/woodpecker/server/forge/coding"
 	"github.com/woodpecker-ci/woodpecker/server/forge/gitea"
 	"github.com/woodpecker-ci/woodpecker/server/forge/github"
 	"github.com/woodpecker-ci/woodpecker/server/forge/gitlab"
@@ -201,8 +200,6 @@ func setupForge(c *cli.Context) (forge.Forge, error) {
 		return setupGogs(c)
 	case c.Bool("gitea"):
 		return setupGitea(c)
-	case c.Bool("coding"):
-		return setupCoding(c)
 	default:
 		return nil, fmt.Errorf("version control system not configured")
 	}
@@ -286,21 +283,6 @@ func setupGitHub(c *cli.Context) (forge.Forge, error) {
 	}
 	log.Trace().Msgf("Forge (github) opts: %#v", opts)
 	return github.New(opts)
-}
-
-// helper function to setup the Coding forge from the CLI arguments.
-func setupCoding(c *cli.Context) (forge.Forge, error) {
-	opts := coding.Opts{
-		URL:        c.String("coding-server"),
-		Client:     c.String("coding-client"),
-		Secret:     c.String("coding-secret"),
-		Scopes:     c.StringSlice("coding-scope"),
-		Username:   c.String("coding-git-username"),
-		Password:   c.String("coding-git-password"),
-		SkipVerify: c.Bool("coding-skip-verify"),
-	}
-	log.Trace().Msgf("Forge (coding) opts: %#v", opts)
-	return coding.New(opts)
 }
 
 func setupMetrics(g *errgroup.Group, _store store.Store) {
