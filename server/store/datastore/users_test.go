@@ -75,7 +75,6 @@ func TestUsers(t *testing.T) {
 				Secret: "976f22a5eef7caacb7e678d6c52f49b1",
 				Email:  "foo@bar.com",
 				Avatar: "b9015b0857e16ac4d94a0ffd9a0b79c8",
-				Active: true,
 			}
 
 			g.Assert(store.CreateUser(user)).IsNil()
@@ -87,7 +86,6 @@ func TestUsers(t *testing.T) {
 			g.Assert(user.Secret).Equal(getuser.Secret)
 			g.Assert(user.Email).Equal(getuser.Email)
 			g.Assert(user.Avatar).Equal(getuser.Avatar)
-			g.Assert(user.Active).Equal(getuser.Active)
 		})
 
 		g.It("Should Get a User By Login", func() {

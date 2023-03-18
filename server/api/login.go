@@ -108,6 +108,7 @@ func HandleAuth(c *gin.Context) {
 	u.Secret = tmpuser.Secret
 	u.Email = tmpuser.Email
 	u.Avatar = tmpuser.Avatar
+	u.Admin = u.Admin || config.IsAdmin(tmpuser)
 
 	// if self-registration is enabled for whitelisted organizations we need to
 	// check the user's organization membership.

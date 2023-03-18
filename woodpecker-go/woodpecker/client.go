@@ -530,9 +530,9 @@ func (c *client) post(rawurl string, in, out interface{}) error {
 }
 
 // helper function for making an http PUT request.
-func (c *client) put(rawurl string, in, out interface{}) error {
-	return c.do(rawurl, "PUT", in, out)
-}
+// func (c *client) put(rawurl string, in, out interface{}) error {
+// 	return c.do(rawurl, "PUT", in, out)
+// }
 
 // helper function for making an http PATCH request.
 func (c *client) patch(rawurl string, in, out interface{}) error {
@@ -546,7 +546,7 @@ func (c *client) delete(rawurl string) error {
 
 // helper function to make an http request
 func (c *client) do(rawurl, method string, in, out interface{}) error {
-	body, err := c.open(rawurl, method, in, out)
+	body, err := c.open(rawurl, method, in)
 	if err != nil {
 		return err
 	}
@@ -558,7 +558,7 @@ func (c *client) do(rawurl, method string, in, out interface{}) error {
 }
 
 // helper function to open an http request
-func (c *client) open(rawurl, method string, in, out interface{}) (io.ReadCloser, error) {
+func (c *client) open(rawurl, method string, in interface{}) (io.ReadCloser, error) {
 	uri, err := url.Parse(rawurl)
 	if err != nil {
 		return nil, err

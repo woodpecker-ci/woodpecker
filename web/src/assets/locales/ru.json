@@ -70,6 +70,9 @@
   "color_scheme_light": "Использовать тёмную тему",
   "docs": "Документация",
   "documentation_for": "Документация о \"{topic}\"",
+  "errors": {
+    "not_found": "Серверу не удалось найти запрошенный объект"
+  },
   "login": "Вход",
   "logout": "Выйти",
   "not_found": {

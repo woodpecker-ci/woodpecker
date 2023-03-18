@@ -15,7 +15,10 @@ export const usePipelineStore = defineStore('pipelines', () => {
   function setPipeline(owner: string, repo: string, pipeline: Pipeline) {
     const _repoSlug = repoSlug(owner, repo);
     const repoPipelines = pipelines.get(_repoSlug) || new Map();
-    repoPipelines.set(pipeline.number, { ...(repoPipelines.get(pipeline.number) || {}), ...pipeline });
+    repoPipelines.set(pipeline.number, {
+      ...(repoPipelines.get(pipeline.number) || {}),
+      ...pipeline,
+    });
     pipelines.set(_repoSlug, repoPipelines);
   }
 

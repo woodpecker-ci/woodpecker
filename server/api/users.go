@@ -58,7 +58,12 @@ func PatchUser(c *gin.Context) {
 		c.AbortWithStatus(http.StatusNotFound)
 		return
 	}
-	user.Active = in.Active
+
+	// TODO: allow to change login (currently used as primary key)
+	// TODO: disallow to change login, email, avatar if the user is using oauth
+	user.Email = in.Email
+	user.Avatar = in.Avatar
+	user.Admin = in.Admin
 
 	err = _store.UpdateUser(user)
 	if err != nil {
@@ -77,7 +82,6 @@ func PostUser(c *gin.Context) {
 		return
 	}
 	user := &model.User{
-		Active: true,
 		Login:  in.Login,
 		Email:  in.Email,
 		Avatar: in.Avatar,
