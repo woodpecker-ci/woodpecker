@@ -415,7 +415,3 @@ See [Bitbucket server configuration](forges/bitbucket_server/#configuration)
 ### `WOODPECKER_GITLAB_...`
 
 See [Gitlab configuration](forges/gitlab/#configuration)
-
-### `WOODPECKER_CODING_...`
-
-See [Coding configuration](forges/coding/#configuration)
