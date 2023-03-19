@@ -30,7 +30,7 @@ func Init(ctx context.Context) {
 	}
 }
 
-func FindEngine(engineName string, ctx context.Context) (types.Engine, error) {
+func FindEngine(ctx context.Context, engineName string) (types.Engine, error) {
 	if engineName == "auto-detect" {
 		for _, engine := range engines {
 			if engine.IsAvailable(ctx) {

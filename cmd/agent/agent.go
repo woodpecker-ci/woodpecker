@@ -162,7 +162,7 @@ func loop(c *cli.Context) error {
 	wg.Add(parallel)
 
 	// new engine
-	engine, err := backend.FindEngine(c.String("backend-engine"), backendCtx)
+	engine, err := backend.FindEngine(backendCtx, c.String("backend-engine"))
 	if err != nil {
 		log.Error().Err(err).Msgf("cannot find backend engine '%s'", c.String("backend-engine"))
 		return err
