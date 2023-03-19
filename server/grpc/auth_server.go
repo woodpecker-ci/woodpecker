@@ -1,3 +1,17 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package grpc
 
 import (
@@ -22,7 +36,7 @@ func NewWoodpeckerAuthServer(jwtManager *JWTManager, agentMasterToken string, st
 	return &WoodpeckerAuthServer{jwtManager: jwtManager, agentMasterToken: agentMasterToken, store: store}
 }
 
-func (s *WoodpeckerAuthServer) Auth(_ context.Context, req *proto.AuthRequest) (*proto.AuthReply, error) {
+func (s *WoodpeckerAuthServer) Auth(_ context.Context, req *proto.AuthRequest) (*proto.AuthResponse, error) {
 	agent, err := s.getAgent(req.AgentId, req.AgentToken)
 	if err != nil {
 		return nil, err
@@ -33,7 +47,7 @@ func (s *WoodpeckerAuthServer) Auth(_ context.Context, req *proto.AuthRequest) (
 		return nil, err
 	}
 
-	return &proto.AuthReply{
+	return &proto.AuthResponse{
 		Status:      "ok",
 		AgentId:     agent.ID,
 		AccessToken: accessToken,
