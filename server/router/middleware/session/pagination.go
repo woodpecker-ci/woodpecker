@@ -13,11 +13,11 @@ const (
 )
 
 func Pagination(c *gin.Context) *model.PaginationData {
-	page, err := strconv.ParseInt(c.Param("page"), 10, 64)
+	page, err := strconv.ParseInt(c.Query("page"), 10, 64)
 	if err != nil {
 		page = defaultPage
 	}
-	perPage, err := strconv.ParseInt(c.Param("perPage"), 10, 64)
+	perPage, err := strconv.ParseInt(c.Query("perPage"), 10, 64)
 	if err != nil {
 		perPage = defaultPerPage
 	}

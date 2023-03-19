@@ -51,8 +51,8 @@ export default class WoodpeckerClient extends ApiClient {
     return this._get(`/api/repos/${owner}/${repo}/branches`) as Promise<string[]>;
   }
 
-  getRepoPullRequests(owner: string, repo: string): Promise<PullRequest[]> {
-    return this._get(`/api/repos/${owner}/${repo}/pull_requests`) as Promise<PullRequest[]>;
+  getRepoPullRequests(owner: string, repo: string, page: number): Promise<PullRequest[]> {
+    return this._get(`/api/repos/${owner}/${repo}/pull_requests?page=${page}`) as Promise<PullRequest[]>;
   }
 
   activateRepo(owner: string, repo: string): Promise<unknown> {
