@@ -6,7 +6,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, defineComponent, inject, Ref, toRef } from 'vue';
+import { computed, inject, Ref, toRef } from 'vue';
 
 import PipelineList from '~/components/repo/pipeline/PipelineList.vue';
 import { Pipeline, Repo, RepoPermissions } from '~/lib/api/types';
