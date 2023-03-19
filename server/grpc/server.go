@@ -61,7 +61,7 @@ func NewWoodpeckerServer(forge forge.Forge, queue queue.Queue, logger logging.Lo
 	return &WoodpeckerServer{peer: peer}
 }
 
-func (s *WoodpeckerServer) Version(c context.Context, req *proto.Empty) (*proto.VersionResponse, error) {
+func (s *WoodpeckerServer) Version(_ context.Context, req *proto.Empty) (*proto.VersionResponse, error) {
 	return &proto.VersionResponse{
 		GrpcVersion:   proto.Version,
 		ServerVersion: version.String(),
