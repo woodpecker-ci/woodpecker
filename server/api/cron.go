@@ -97,7 +97,7 @@ func PostCron(c *gin.Context) {
 		Branch:    in.Branch,
 	}
 	if err := cron.Validate(); err != nil {
-		c.String(http.StatusBadRequest, "Error inserting cron. validate failed: %s", err)
+		c.String(http.StatusUnprocessableEntity, "Error inserting cron. validate failed: %s", err)
 		return
 	}
 
@@ -173,7 +173,7 @@ func PatchCron(c *gin.Context) {
 	cron.CreatorID = user.ID
 
 	if err := cron.Validate(); err != nil {
-		c.String(http.StatusBadRequest, "Error inserting cron. validate failed: %s", err)
+		c.String(http.StatusUnprocessableEntity, "Error inserting cron. validate failed: %s", err)
 		return
 	}
 	if err := _store.CronUpdate(repo, cron); err != nil {
