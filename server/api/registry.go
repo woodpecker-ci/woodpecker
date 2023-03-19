@@ -100,7 +100,7 @@ func PatchRegistry(c *gin.Context) {
 	}
 
 	if err := registry.Validate(); err != nil {
-		c.String(http.StatusBadRequest, "Error updating registry. %s", err)
+		c.String(http.StatusUnprocessableEntity, "Error updating registry. %s", err)
 		return
 	}
 	if err := server.Config.Services.Registries.RegistryUpdate(repo, registry); err != nil {

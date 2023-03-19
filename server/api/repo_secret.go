@@ -57,7 +57,7 @@ func PostSecret(c *gin.Context) {
 		PluginsOnly: in.PluginsOnly,
 	}
 	if err := secret.Validate(); err != nil {
-		c.String(http.StatusBadRequest, "Error inserting secret. %s", err)
+		c.String(http.StatusUnprocessableEntity, "Error inserting secret. %s", err)
 		return
 	}
 	if err := server.Config.Services.Secrets.SecretCreate(repo, secret); err != nil {
@@ -98,7 +98,7 @@ func PatchSecret(c *gin.Context) {
 	secret.PluginsOnly = in.PluginsOnly
 
 	if err := secret.Validate(); err != nil {
-		c.String(http.StatusBadRequest, "Error updating secret. %s", err)
+		c.String(http.StatusUnprocessableEntity, "Error updating secret. %s", err)
 		return
 	}
 	if err := server.Config.Services.Secrets.SecretUpdate(repo, secret); err != nil {

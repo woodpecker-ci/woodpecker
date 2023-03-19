@@ -425,7 +425,7 @@ func DeletePipelineLogs(c *gin.Context) {
 
 	switch pl.Status {
 	case model.StatusRunning, model.StatusPending:
-		c.String(http.StatusBadRequest, "Cannot delete logs for a pending or running pipeline")
+		c.String(http.StatusUnprocessableEntity, "Cannot delete logs for a pending or running pipeline")
 		return
 	}
 
@@ -438,7 +438,7 @@ func DeletePipelineLogs(c *gin.Context) {
 		}
 	}
 	if err != nil {
-		c.String(http.StatusBadRequest, "There was a problem deleting your logs. %s", err)
+		c.String(http.StatusInternalServerError, "There was a problem deleting your logs. %s", err)
 		return
 	}
 

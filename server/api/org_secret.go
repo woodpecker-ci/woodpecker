@@ -72,7 +72,7 @@ func PostOrgSecret(c *gin.Context) {
 		PluginsOnly: in.PluginsOnly,
 	}
 	if err := secret.Validate(); err != nil {
-		c.String(http.StatusBadRequest, "Error inserting org %q secret. %s", owner, err)
+		c.String(http.StatusUnprocessableEntity, "Error inserting org %q secret. %s", owner, err)
 		return
 	}
 	if err := server.Config.Services.Secrets.OrgSecretCreate(owner, secret); err != nil {
@@ -113,7 +113,7 @@ func PatchOrgSecret(c *gin.Context) {
 	secret.PluginsOnly = in.PluginsOnly
 
 	if err := secret.Validate(); err != nil {
-		c.String(http.StatusBadRequest, "Error updating org %q secret. %s", owner, err)
+		c.String(http.StatusUnprocessableEntity, "Error updating org %q secret. %s", owner, err)
 		return
 	}
 	if err := server.Config.Services.Secrets.OrgSecretUpdate(owner, secret); err != nil {
