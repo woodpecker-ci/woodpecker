@@ -22,14 +22,6 @@ import ListItem from '~/components/atomic/ListItem.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { PullRequest, Repo } from '~/lib/api/types';
 
-/*export default defineComponent({
-  name: 'RepoPullRequests',
-
-  components: {
-    ListItem,
-  },
-
-  setup() {*/
 const apiClient = useApiClient();
 
 const pullRequests = ref<PullRequest[]>();
@@ -53,8 +45,4 @@ onMounted(() => {
 watch(repo, () => {
   loadPullRequests();
 });
-
-//  return { pullRequests };
-//  },
-//});
 </script>
