@@ -23,15 +23,14 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/rs/zerolog/log"
-	"github.com/woodpecker-ci/woodpecker/server/store/types"
-
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/badges"
 	"github.com/woodpecker-ci/woodpecker/server/ccmenu"
 	"github.com/woodpecker-ci/woodpecker/server/store"
+	"github.com/woodpecker-ci/woodpecker/server/store/types"
 )
 
 func GetBadge(c *gin.Context) {
