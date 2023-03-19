@@ -91,6 +91,10 @@ clean: ## Clean build artifacts
 	rm -rf build
 	@[ "1" != "$(shell docker image ls woodpecker/make:local -a | wc -l)" ] && docker image rm woodpecker/make:local || echo no docker image to clean
 
+.PHONY: generate
+generate: # Code Generate all (and replace old)
+	go generate ./...
+
 check-xgo: ## Check if xgo is installed
 	@hash xgo > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		$(GO) install src.techknowlogick.com/xgo@latest; \
