@@ -84,7 +84,7 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		}
 	}
 
-	if matchImage(container.Image, c.escalated...) {
+	if matchImage(container.Image, c.escalated...) && container.IsPlugin() {
 		privileged = true
 	}
 

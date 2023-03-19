@@ -209,6 +209,21 @@ func GetRepoBranches(c *gin.Context) {
 	c.JSON(http.StatusOK, branches)
 }
 
+func GetRepoPullRequests(c *gin.Context) {
+	repo := session.Repo(c)
+	user := session.User(c)
+	page := session.Pagination(c)
+	f := server.Config.Services.Forge
+
+	prs, err := f.PullRequests(c, user, repo, page)
+	if err != nil {
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, prs)
+}
+
 func DeleteRepo(c *gin.Context) {
 	remove, _ := strconv.ParseBool(c.Query("remove"))
 	_store := store.FromContext(c)
@@ -248,7 +263,7 @@ func RepairRepo(c *gin.Context) {
 	t := token.New(token.HookToken, repo.FullName)
 	sig, err := t.Sign(repo.Hash)
 	if err != nil {
-		c.String(500, err.Error())
+		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -286,7 +301,7 @@ func RepairRepo(c *gin.Context) {
 		log.Trace().Err(err).Msgf("deactivate repo '%s' to repair failed", repo.FullName)
 	}
 	if err := forge.Activate(c, user, repo, link); err != nil {
-		c.String(500, err.Error())
+		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -340,7 +355,7 @@ func MoveRepo(c *gin.Context) {
 	t := token.New(token.HookToken, repo.FullName)
 	sig, err := t.Sign(repo.Hash)
 	if err != nil {
-		c.String(500, err.Error())
+		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -356,7 +371,7 @@ func MoveRepo(c *gin.Context) {
 		log.Trace().Err(err).Msgf("deactivate repo '%s' for move to activate later, got an error", repo.FullName)
 	}
 	if err := forge.Activate(c, user, repo, link); err != nil {
-		c.String(500, err.Error())
+		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 	c.Writer.WriteHeader(http.StatusOK)

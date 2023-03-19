@@ -37,13 +37,10 @@ func (l *Linter) Lint(c *yaml.Config) error {
 	if err := l.lint(c.Pipeline.Containers, blockPipeline); err != nil {
 		return err
 	}
-	if err := l.lint(c.Services.Containers, blockServices); err != nil {
-		return err
-	}
-	return nil
+	return l.lint(c.Services.Containers, blockServices)
 }
 
-func (l *Linter) lint(containers []*yaml.Container, block uint8) error {
+func (l *Linter) lint(containers []*yaml.Container, _ uint8) error {
 	for _, container := range containers {
 		if err := l.lintImage(container); err != nil {
 			return err

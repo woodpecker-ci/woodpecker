@@ -74,12 +74,15 @@
           <span v-else class="text-color">{{ $t('repo.settings.crons.not_executed_yet') }}</span>
         </div>
 
-        <Button
-          type="submit"
-          color="green"
-          :is-loading="isSaving"
-          :text="isEditingCron ? $t('repo.settings.crons.save') : $t('repo.settings.crons.add')"
-        />
+        <div class="flex gap-2">
+          <Button type="button" color="gray" :text="$t('cancel')" @click="selectedCron = undefined" />
+          <Button
+            type="submit"
+            color="green"
+            :is-loading="isSaving"
+            :text="isEditingCron ? $t('repo.settings.crons.save') : $t('repo.settings.crons.add')"
+          />
+        </div>
       </form>
     </div>
   </Panel>

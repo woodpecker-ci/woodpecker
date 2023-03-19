@@ -453,65 +453,6 @@ var flags = []cli.Flag{
 		Usage:   "stash skip ssl verification",
 	},
 	//
-	// Coding
-	//
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_CODING"},
-		Name:    "coding",
-		Usage:   "coding driver is enabled",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_CODING_URL"},
-		Name:    "coding-server",
-		Usage:   "coding server address",
-		Value:   "https://coding.net",
-	},
-	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_CODING_CLIENT"},
-		Name:     "coding-client",
-		Usage:    "coding oauth2 client id",
-		FilePath: os.Getenv("WOODPECKER_CODING_CLIENT_FILE"),
-	},
-	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_CODING_SECRET"},
-		Name:     "coding-secret",
-		Usage:    "coding oauth2 client secret",
-		FilePath: os.Getenv("WOODPECKER_CODING_SECRET_FILE"),
-	},
-	&cli.StringSliceFlag{
-		EnvVars: []string{"WOODPECKER_CODING_SCOPE"},
-		Name:    "coding-scope",
-		Usage:   "coding oauth scope",
-		Value: cli.NewStringSlice(
-			"user",
-			"project",
-			"project:depot",
-		),
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_CODING_GIT_MACHINE"},
-		Name:    "coding-git-machine",
-		Usage:   "coding machine name",
-		Value:   "git.coding.net",
-	},
-	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_CODING_GIT_USERNAME"},
-		Name:     "coding-git-username",
-		Usage:    "coding machine user username",
-		FilePath: os.Getenv("WOODPECKER_CODING_GIT_USERNAME_FILE"),
-	},
-	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_CODING_GIT_PASSWORD"},
-		Name:     "coding-git-password",
-		Usage:    "coding machine user password",
-		FilePath: os.Getenv("WOODPECKER_CODING_GIT_PASSWORD_FILE"),
-	},
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_CODING_SKIP_VERIFY"},
-		Name:    "coding-skip-verify",
-		Usage:   "coding skip ssl verification",
-	},
-	//
 	// development flags
 	//
 	&cli.StringFlag{

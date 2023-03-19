@@ -48,7 +48,7 @@ func EventStreamSSE(c *gin.Context) {
 
 	flusher, ok := rw.(http.Flusher)
 	if !ok {
-		c.String(500, "Streaming not supported")
+		c.String(http.StatusInternalServerError, "Streaming not supported")
 		return
 	}
 
@@ -131,7 +131,7 @@ func LogStreamSSE(c *gin.Context) {
 
 	flusher, ok := rw.(http.Flusher)
 	if !ok {
-		c.String(500, "Streaming not supported")
+		c.String(http.StatusInternalServerError, "Streaming not supported")
 		return
 	}
 

@@ -76,6 +76,7 @@ func apiRoutes(e *gin.Engine) {
 				repo.GET("", api.GetRepo)
 
 				repo.GET("/branches", api.GetRepoBranches)
+				repo.GET("/pull_requests", api.GetRepoPullRequests)
 
 				repo.GET("/pipelines", api.GetPipelines)
 				repo.POST("/pipelines", session.MustPush, api.CreatePipeline)

@@ -50,7 +50,7 @@ type fifo struct {
 }
 
 // New returns a new fifo queue.
-func New(ctx context.Context) Queue {
+func New(_ context.Context) Queue {
 	return &fifo{
 		workers:       map[*worker]struct{}{},
 		running:       map[string]*entry{},
@@ -62,7 +62,7 @@ func New(ctx context.Context) Queue {
 }
 
 // Push pushes an item to the tail of this queue.
-func (q *fifo) Push(c context.Context, task *model.Task) error {
+func (q *fifo) Push(_ context.Context, task *model.Task) error {
 	q.Lock()
 	q.pending.PushBack(task)
 	q.Unlock()
@@ -71,7 +71,7 @@ func (q *fifo) Push(c context.Context, task *model.Task) error {
 }
 
 // Push pushes an item to the tail of this queue.
-func (q *fifo) PushAtOnce(c context.Context, tasks []*model.Task) error {
+func (q *fifo) PushAtOnce(_ context.Context, tasks []*model.Task) error {
 	q.Lock()
 	for _, task := range tasks {
 		q.pending.PushBack(task)
@@ -106,18 +106,18 @@ func (q *fifo) Poll(c context.Context, f FilterFn) (*model.Task, error) {
 }
 
 // Done signals that the item is done executing.
-func (q *fifo) Done(c context.Context, id string, exitStatus model.StatusValue) error {
+func (q *fifo) Done(_ context.Context, id string, exitStatus model.StatusValue) error {
 	return q.finished([]string{id}, exitStatus, nil)
 }
 
 // Error signals that the item is done executing with error.
-func (q *fifo) Error(c context.Context, id string, err error) error {
-	return q.finished([]string{id}, "failure", err)
+func (q *fifo) Error(_ context.Context, id string, err error) error {
+	return q.finished([]string{id}, model.StatusFailure, err)
 }
 
 // Error signals that the item is done executing with error.
-func (q *fifo) ErrorAtOnce(c context.Context, id []string, err error) error {
-	return q.finished(id, "failure", err)
+func (q *fifo) ErrorAtOnce(_ context.Context, id []string, err error) error {
+	return q.finished(id, model.StatusFailure, err)
 }
 
 func (q *fifo) finished(ids []string, exitStatus model.StatusValue, err error) error {
@@ -145,7 +145,7 @@ func (q *fifo) Evict(c context.Context, id string) error {
 }
 
 // Evict removes a pending task from the queue.
-func (q *fifo) EvictAtOnce(c context.Context, ids []string) error {
+func (q *fifo) EvictAtOnce(_ context.Context, ids []string) error {
 	q.Lock()
 	defer q.Unlock()
 
@@ -179,7 +179,7 @@ func (q *fifo) Wait(c context.Context, id string) error {
 }
 
 // Extend extends the task execution deadline.
-func (q *fifo) Extend(c context.Context, id string) error {
+func (q *fifo) Extend(_ context.Context, id string) error {
 	q.Lock()
 	defer q.Unlock()
 
@@ -192,7 +192,7 @@ func (q *fifo) Extend(c context.Context, id string) error {
 }
 
 // Info returns internal queue information.
-func (q *fifo) Info(c context.Context) InfoT {
+func (q *fifo) Info(_ context.Context) InfoT {
 	q.Lock()
 	stats := InfoT{}
 	stats.Stats.Workers = len(q.workers)

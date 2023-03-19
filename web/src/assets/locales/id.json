@@ -61,7 +61,29 @@
         "value": "Nilai",
         "warning": "Rahasia ini akan tersedia untuk pengguna peladen."
       },
-      "settings": "Pengaturan"
+      "settings": "Pengaturan",
+      "users": {
+        "add": "Tambahkan pengguna",
+        "admin": {
+          "admin": "Admin",
+          "placeholder": "Pengguna adalah admin"
+        },
+        "avatar_url": "URL Avatar",
+        "cancel": "Batal",
+        "created": "Pengguna dibuat",
+        "delete_confirm": "Apakah Anda ingin menghapus pengguna ini?",
+        "delete_user": "Hapus pengguna",
+        "deleted": "Pengguna dihapus",
+        "desc": "Pengguna terdaftar untuk server ini",
+        "edit_user": "Sunting pengguna",
+        "email": "Surel",
+        "login": "Masuk",
+        "none": "Belum ada pengguna.",
+        "save": "Simpan pengguna",
+        "saved": "Pengguna disimpan",
+        "show": "Tampilkan pengguna",
+        "users": "Pengguna"
+      }
     }
   },
   "back": "Kembali",
@@ -70,6 +92,9 @@
   "color_scheme_light": "Ubah ke mode gelap",
   "docs": "Dokumentasi",
   "documentation_for": "Dokumentasi untuk \"{topic}\"",
+  "errors": {
+    "not_found": "Server tidak dapat mencari objek yang diminta"
+  },
   "login": "Masuk",
   "logout": "Keluar",
   "not_found": {

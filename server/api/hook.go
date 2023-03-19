@@ -42,7 +42,7 @@ func init() {
 }
 
 func GetQueueInfo(c *gin.Context) {
-	c.IndentedJSON(200,
+	c.IndentedJSON(http.StatusOK,
 		server.Config.Services.Queue.Info(c),
 	)
 }
@@ -179,6 +179,6 @@ func PostHook(c *gin.Context) {
 	if err != nil {
 		handlePipelineErr(c, err)
 	} else {
-		c.JSON(200, pl)
+		c.JSON(http.StatusOK, pl)
 	}
 }

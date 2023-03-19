@@ -28,15 +28,15 @@ import (
 // Health endpoint returns a 500 if the server state is unhealthy.
 func Health(c *gin.Context) {
 	if err := store.FromContext(c).Ping(); err != nil {
-		c.String(500, err.Error())
+		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
-	c.String(200, "")
+	c.String(http.StatusOK, "")
 }
 
 // Version endpoint returns the server version and build information.
 func Version(c *gin.Context) {
-	c.JSON(200, gin.H{
+	c.JSON(http.StatusOK, gin.H{
 		"source":  "https://github.com/woodpecker-ci/woodpecker",
 		"version": version.String(),
 	})
@@ -44,7 +44,7 @@ func Version(c *gin.Context) {
 
 // LogLevel endpoint returns the current logging level
 func LogLevel(c *gin.Context) {
-	c.JSON(200, gin.H{
+	c.JSON(http.StatusOK, gin.H{
 		"log-level": zerolog.GlobalLevel().String(),
 	})
 }
@@ -67,5 +67,5 @@ func SetLogLevel(c *gin.Context) {
 
 	log.Log().Msgf("log level set to %s", lvl.String())
 	zerolog.SetGlobalLevel(lvl)
-	c.JSON(200, logLevel)
+	c.JSON(http.StatusOK, logLevel)
 }
