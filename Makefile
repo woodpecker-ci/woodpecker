@@ -92,7 +92,7 @@ clean: ## Clean build artifacts
 	@[ "1" != "$(shell docker image ls woodpecker/make:local -a | wc -l)" ] && docker image rm woodpecker/make:local || echo no docker image to clean
 
 .PHONY: generate
-generate: # Code Generate all (and replace old)
+generate: ## Code Generate all (and replace old)
 	go generate ./...
 
 check-xgo: ## Check if xgo is installed
