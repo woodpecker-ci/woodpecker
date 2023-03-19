@@ -36,9 +36,9 @@ func (s storage) CronFind(repo *model.Repo, id int64) (*model.Cron, error) {
 	return cron, wrapGet(s.engine.Get(cron))
 }
 
-func (s storage) CronList(repo *model.Repo) ([]*model.Cron, error) {
-	crons := make([]*model.Cron, 0, perPage)
-	return crons, s.engine.Where("repo_id = ?", repo.ID).Find(&crons)
+func (s storage) CronList(repo *model.Repo, p *model.PaginationData) ([]*model.Cron, error) {
+	crons := make([]*model.Cron, 0, p.PerPage)
+	return crons, s.engine.Where("repo_id = ?", repo.ID).Limit(int(p.PerPage), int(p.PerPage*(p.Page-1))).Find(&crons)
 }
 
 func (s storage) CronUpdate(_ *model.Repo, cron *model.Cron) error {

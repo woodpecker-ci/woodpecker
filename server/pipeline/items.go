@@ -43,12 +43,14 @@ func createPipelineItems(_ context.Context, store store.Store,
 		log.Error().Err(err).Str("repo", repo.FullName).Msgf("Error getting last pipeline before pipeline number '%d'", currentPipeline.Number)
 	}
 
-	secs, err := server.Config.Services.Secrets.SecretListPipeline(repo, currentPipeline)
+	// TODO get all
+	secs, err := server.Config.Services.Secrets.SecretListPipeline(repo, currentPipeline, &model.PaginationData{Page: 1, PerPage: 50})
 	if err != nil {
 		log.Error().Err(err).Msgf("Error getting secrets for %s#%d", repo.FullName, currentPipeline.Number)
 	}
 
-	regs, err := server.Config.Services.Registries.RegistryList(repo)
+	// TODO get all
+	regs, err := server.Config.Services.Registries.RegistryList(repo, &model.PaginationData{Page: 1, PerPage: 50})
 	if err != nil {
 		log.Error().Err(err).Msgf("Error getting registry credentials for %s#%d", repo.FullName, currentPipeline.Number)
 	}

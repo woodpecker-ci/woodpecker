@@ -83,8 +83,7 @@ type Store interface {
 	// GetPipelineLastBefore gets the last pipeline before pipeline number N.
 	GetPipelineLastBefore(*model.Repo, string, int64) (*model.Pipeline, error)
 	// GetPipelineList gets a list of pipelines for the repository
-	// TODO: paginate
-	GetPipelineList(*model.Repo, int) ([]*model.Pipeline, error)
+	GetPipelineList(*model.Repo, *model.PaginationData) ([]*model.Pipeline, error)
 	// GetPipelineList gets a list of the active pipelines for the repository
 	GetActivePipelineList(repo *model.Repo, page int) ([]*model.Pipeline, error)
 	// GetPipelineQueue gets a list of pipelines in queue.
@@ -101,7 +100,7 @@ type Store interface {
 
 	// Repositories
 	// RepoList TODO: paginate
-	RepoList(user *model.User, owned bool) ([]*model.Repo, error)
+	RepoList(user *model.User, owned bool, p *model.PaginationData) ([]*model.Repo, error)
 	RepoListLatest(*model.User) ([]*model.Feed, error)
 	// RepoBatch Sync batch of repos from SCM (with permissions) to store (create if not exist else update)
 	RepoBatch([]*model.Repo) error
@@ -121,7 +120,7 @@ type Store interface {
 
 	// Secrets
 	SecretFind(*model.Repo, string) (*model.Secret, error)
-	SecretList(*model.Repo, bool) ([]*model.Secret, error)
+	SecretList(*model.Repo, bool, *model.PaginationData) ([]*model.Secret, error)
 	SecretListAll() ([]*model.Secret, error)
 	SecretCreate(*model.Secret) error
 	SecretUpdate(*model.Secret) error
@@ -133,7 +132,7 @@ type Store interface {
 
 	// Registries
 	RegistryFind(*model.Repo, string) (*model.Registry, error)
-	RegistryList(*model.Repo) ([]*model.Registry, error)
+	RegistryList(*model.Repo, *model.PaginationData) ([]*model.Registry, error)
 	RegistryCreate(*model.Registry) error
 	RegistryUpdate(*model.Registry) error
 	RegistryDelete(repo *model.Repo, addr string) error
@@ -142,7 +141,7 @@ type Store interface {
 	StepLoad(int64) (*model.Step, error)
 	StepFind(*model.Pipeline, int) (*model.Step, error)
 	StepChild(*model.Pipeline, int, string) (*model.Step, error)
-	StepList(*model.Pipeline) ([]*model.Step, error)
+	StepList(*model.Pipeline, *model.PaginationData) ([]*model.Step, error)
 	StepCreate([]*model.Step) error
 	StepUpdate(*model.Step) error
 	StepClear(*model.Pipeline) error
@@ -154,7 +153,7 @@ type Store interface {
 	LogSave(*model.Step, io.Reader) error
 
 	// Files
-	FileList(*model.Pipeline) ([]*model.File, error)
+	FileList(*model.Pipeline, *model.PaginationData) ([]*model.File, error)
 	FileFind(*model.Step, string) (*model.File, error)
 	FileRead(*model.Step, string) (io.ReadCloser, error)
 	FileCreate(*model.File, io.Reader) error
@@ -173,7 +172,7 @@ type Store interface {
 	// Cron
 	CronCreate(*model.Cron) error
 	CronFind(*model.Repo, int64) (*model.Cron, error)
-	CronList(*model.Repo) ([]*model.Cron, error)
+	CronList(*model.Repo, *model.PaginationData) ([]*model.Cron, error)
 	CronUpdate(*model.Repo, *model.Cron) error
 	CronDelete(*model.Repo, int64) error
 	CronListNextExecute(int64, int64) ([]*model.Cron, error)

@@ -32,10 +32,10 @@ var (
 
 // SecretService defines a service for managing secrets.
 type SecretService interface {
-	SecretListPipeline(*Repo, *Pipeline) ([]*Secret, error)
+	SecretListPipeline(*Repo, *Pipeline, *PaginationData) ([]*Secret, error)
 	// Repository secrets
 	SecretFind(*Repo, string) (*Secret, error)
-	SecretList(*Repo) ([]*Secret, error)
+	SecretList(*Repo, *PaginationData) ([]*Secret, error)
 	SecretCreate(*Repo, *Secret) error
 	SecretUpdate(*Repo, *Secret) error
 	SecretDelete(*Repo, string) error
@@ -56,7 +56,7 @@ type SecretService interface {
 // SecretStore persists secret information to storage.
 type SecretStore interface {
 	SecretFind(*Repo, string) (*Secret, error)
-	SecretList(*Repo, bool) ([]*Secret, error)
+	SecretList(*Repo, bool, *PaginationData) ([]*Secret, error)
 	SecretCreate(*Secret) error
 	SecretUpdate(*Secret) error
 	SecretDelete(*Secret) error

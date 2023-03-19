@@ -61,7 +61,8 @@ func EventStreamSSE(c *gin.Context) {
 	user := session.User(c)
 	repo := map[string]bool{}
 	if user != nil {
-		repos, _ := store.FromContext(c).RepoList(user, false)
+		// TODO get all
+		repos, _ := store.FromContext(c).RepoList(user, false, &model.PaginationData{Page: 1, PerPage: 50})
 		for _, r := range repos {
 			repo[r.FullName] = true
 		}

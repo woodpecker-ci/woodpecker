@@ -24,7 +24,6 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/pem"
-	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -246,7 +245,7 @@ func (c *Config) BranchHead(_ context.Context, _ *model.User, _ *model.Repo, _ s
 }
 
 func (c *Config) PullRequests(_ context.Context, _ *model.User, _ *model.Repo, _ *model.PaginationData) ([]*model.PullRequest, error) {
-	return nil, errors.New("Bitbucket server does not support pull requests yet")
+	return nil, forge_types.ErrNotImplemented
 }
 
 func (c *Config) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {

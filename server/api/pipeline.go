@@ -89,13 +89,8 @@ func createTmpPipeline(event model.WebhookEvent, commitSHA string, repo *model.R
 
 func GetPipelines(c *gin.Context) {
 	repo := session.Repo(c)
-	page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
-	if err != nil {
-		_ = c.AbortWithError(http.StatusBadRequest, err)
-		return
-	}
 
-	pipelines, err := store.FromContext(c).GetPipelineList(repo, page)
+	pipelines, err := store.FromContext(c).GetPipelineList(repo, session.Pagination(c))
 	if err != nil {
 		if errors.Is(err, types.RecordNotExist) {
 			c.AbortWithStatus(http.StatusNotFound)
@@ -130,8 +125,9 @@ func GetPipeline(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	files, _ := _store.FileList(pl)
-	steps, _ := _store.StepList(pl)
+	// TODO get all
+	files, _ := _store.FileList(pl, &model.PaginationData{Page: 1, PerPage: 50})
+	steps, _ := _store.StepList(pl, &model.PaginationData{Page: 1, PerPage: 50})
 	if pl.Steps, err = model.Tree(steps); err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -152,7 +148,8 @@ func GetPipelineLast(c *gin.Context) {
 		return
 	}
 
-	steps, err := _store.StepList(pl)
+	// TODO get all
+	steps, err := _store.StepList(pl, &model.PaginationData{Page: 1, PerPage: 50})
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -417,7 +414,8 @@ func DeletePipelineLogs(c *gin.Context) {
 		return
 	}
 
-	steps, err := _store.StepList(pl)
+	// TODO get all
+	steps, err := _store.StepList(pl, &model.PaginationData{Page: 1, PerPage: 50})
 	if err != nil {
 		_ = c.AbortWithError(http.StatusNotFound, err)
 		return

@@ -24,6 +24,7 @@ import (
 	"net/http"
 
 	"github.com/rs/zerolog/log"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store/types"
 
 	"github.com/gin-gonic/gin"
@@ -73,7 +74,8 @@ func GetCC(c *gin.Context) {
 		return
 	}
 
-	pipelines, err := _store.GetPipelineList(repo, 1)
+	// TODO PerPage configurable
+	pipelines, err := _store.GetPipelineList(repo, &model.PaginationData{Page: 1, PerPage: 50})
 	if err != nil || len(pipelines) == 0 {
 		c.AbortWithStatus(http.StatusNotFound)
 		return

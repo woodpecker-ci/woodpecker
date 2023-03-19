@@ -117,7 +117,7 @@ func GetRepos(c *gin.Context) {
 		}
 	}
 
-	repos, err := _store.RepoList(user, true)
+	repos, err := _store.RepoList(user, true, session.Pagination(c))
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error fetching repository list. %s", err)
 		return

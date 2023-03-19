@@ -32,7 +32,8 @@ func Cancel(ctx context.Context, store store.Store, repo *model.Repo, pipeline *
 		return &ErrBadRequest{Msg: "Cannot cancel a non-running or non-pending or non-blocked pipeline"}
 	}
 
-	steps, err := store.StepList(pipeline)
+	// TODO get all
+	steps, err := store.StepList(pipeline, &model.PaginationData{Page: 1, PerPage: 50})
 	if err != nil {
 		return &ErrNotFound{Msg: err.Error()}
 	}
@@ -90,7 +91,8 @@ func Cancel(ctx context.Context, store store.Store, repo *model.Repo, pipeline *
 		return err
 	}
 
-	steps, err = store.StepList(killedBuild)
+	// TODO get all
+	steps, err = store.StepList(killedBuild, &model.PaginationData{Page: 1, PerPage: 50})
 	if err != nil {
 		return &ErrNotFound{Msg: err.Error()}
 	}

@@ -30,10 +30,12 @@ func (c combined) RegistryFind(repo *model.Repo, name string) (*model.Registry, 
 	return nil, nil
 }
 
-func (c combined) RegistryList(repo *model.Repo) ([]*model.Registry, error) {
+// RegistryList TODO respect model.PaginationData
+func (c combined) RegistryList(repo *model.Repo, _ *model.PaginationData) ([]*model.Registry, error) {
 	var registries []*model.Registry
 	for _, registry := range c.registries {
-		list, err := registry.RegistryList(repo)
+		// TODO get all
+		list, err := registry.RegistryList(repo, &model.PaginationData{Page: 1, PerPage: 50})
 		if err != nil {
 			return nil, err
 		}

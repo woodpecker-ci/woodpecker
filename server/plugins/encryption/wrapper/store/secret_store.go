@@ -32,8 +32,8 @@ func (wrapper *EncryptedSecretStore) SecretFind(repo *model.Repo, s string) (*mo
 	return result, nil
 }
 
-func (wrapper *EncryptedSecretStore) SecretList(repo *model.Repo, b bool) ([]*model.Secret, error) {
-	results, err := wrapper.store.SecretList(repo, b)
+func (wrapper *EncryptedSecretStore) SecretList(repo *model.Repo, b bool, p *model.PaginationData) ([]*model.Secret, error) {
+	results, err := wrapper.store.SecretList(repo, b, p)
 	if err != nil {
 		return nil, err
 	}

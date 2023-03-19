@@ -149,7 +149,8 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 		log.Error().Err(err).Msg("rpc.update: cannot update step")
 	}
 
-	if currentPipeline.Steps, err = s.store.StepList(currentPipeline); err != nil {
+	// TODO get all
+	if currentPipeline.Steps, err = s.store.StepList(currentPipeline, &model.PaginationData{Page: 1, PerPage: 50}); err != nil {
 		log.Error().Err(err).Msg("can not get step list from store")
 	}
 	if currentPipeline.Steps, err = model.Tree(currentPipeline.Steps); err != nil {
@@ -285,7 +286,8 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 	}
 
 	defer func() {
-		currentPipeline.Steps, _ = s.store.StepList(currentPipeline)
+		// TODO get all
+		currentPipeline.Steps, _ = s.store.StepList(currentPipeline, &model.PaginationData{Page: 1, PerPage: 50})
 		message := pubsub.Message{
 			Labels: map[string]string{
 				"repo":    repo.FullName,
@@ -350,7 +352,8 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 		log.Error().Msgf("error: done: cannot ack step_id %d: %s", workflowID, err)
 	}
 
-	steps, err := s.store.StepList(currentPipeline)
+	// TODO get all
+	steps, err := s.store.StepList(currentPipeline, &model.PaginationData{Page: 1, PerPage: 50})
 	if err != nil {
 		return err
 	}

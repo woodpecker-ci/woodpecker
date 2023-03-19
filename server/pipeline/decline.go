@@ -34,7 +34,8 @@ func Decline(ctx context.Context, store store.Store, pipeline *model.Pipeline, u
 		return nil, fmt.Errorf("error updating pipeline. %w", err)
 	}
 
-	if pipeline.Steps, err = store.StepList(pipeline); err != nil {
+	// TODO get all
+	if pipeline.Steps, err = store.StepList(pipeline, &model.PaginationData{Page: 1, PerPage: 50}); err != nil {
 		log.Error().Err(err).Msg("can not get step list from store")
 	}
 	if pipeline.Steps, err = model.Tree(pipeline.Steps); err != nil {

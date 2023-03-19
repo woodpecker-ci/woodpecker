@@ -72,11 +72,11 @@ func (s storage) GetPipelineLastBefore(repo *model.Repo, branch string, num int6
 		Get(pipeline))
 }
 
-func (s storage) GetPipelineList(repo *model.Repo, page int) ([]*model.Pipeline, error) {
-	pipelines := make([]*model.Pipeline, 0, perPage)
+func (s storage) GetPipelineList(repo *model.Repo, p *model.PaginationData) ([]*model.Pipeline, error) {
+	pipelines := make([]*model.Pipeline, 0, p.PerPage)
 	return pipelines, s.engine.Where("pipeline_repo_id = ?", repo.ID).
 		Desc("pipeline_number").
-		Limit(perPage, perPage*(page-1)).
+		Limit(int(p.PerPage), int(p.PerPage*(p.Page-1))).
 		Find(&pipelines)
 }
 
