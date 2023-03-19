@@ -5,46 +5,35 @@
   <PipelineList :pipelines="pipelines" :repo="repo" />
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { computed, defineComponent, inject, Ref, toRef } from 'vue';
 
 import PipelineList from '~/components/repo/pipeline/PipelineList.vue';
 import { Pipeline, Repo, RepoPermissions } from '~/lib/api/types';
 
-export default defineComponent({
-  name: 'RepoPullRequest',
-
-  components: { PipelineList },
-
-  props: {
-    pullRequest: {
-      type: String,
-      required: true,
-    },
-  },
-
-  setup(props) {
-    const pullRequest = toRef(props, 'pullRequest');
-    const repo = inject<Ref<Repo>>('repo');
-    const repoPermissions = inject<Ref<RepoPermissions>>('repo-permissions');
-    if (!repo || !repoPermissions) {
-      throw new Error('Unexpected: "repo" and "repoPermissions" should be provided at this place');
-    }
-
-    const allPipelines = inject<Ref<Pipeline[]>>('pipelines');
-    const pipelines = computed(() =>
-      allPipelines?.value.filter(
-        (b) =>
-          b.event === 'pull_request' &&
-          b.ref
-            .replaceAll('refs/pull/', '')
-            .replaceAll('refs/merge-requests/', '')
-            .replaceAll('/merge', '')
-            .replaceAll('/head', '') === pullRequest.value,
-      ),
-    );
-
-    return { pipelines, repo };
+const props = defineProps({
+  pullRequest: {
+    type: String,
+    required: true,
   },
 });
+const pullRequest = toRef(props, 'pullRequest');
+const repo = inject<Ref<Repo>>('repo');
+const repoPermissions = inject<Ref<RepoPermissions>>('repo-permissions');
+if (!repo || !repoPermissions) {
+  throw new Error('Unexpected: "repo" and "repoPermissions" should be provided at this place');
+}
+
+const allPipelines = inject<Ref<Pipeline[]>>('pipelines');
+const pipelines = computed(() =>
+  allPipelines?.value.filter(
+    (b) =>
+      b.event === 'pull_request' &&
+      b.ref
+        .replaceAll('refs/pull/', '')
+        .replaceAll('refs/merge-requests/', '')
+        .replaceAll('/merge', '')
+        .replaceAll('/head', '') === pullRequest.value,
+  ),
+);
 </script>

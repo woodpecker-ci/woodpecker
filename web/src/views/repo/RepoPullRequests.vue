@@ -15,46 +15,46 @@
   </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { defineComponent, inject, onMounted, Ref, ref, watch } from 'vue';
 
 import ListItem from '~/components/atomic/ListItem.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { PullRequest, Repo } from '~/lib/api/types';
 
-export default defineComponent({
+/*export default defineComponent({
   name: 'RepoPullRequests',
 
   components: {
     ListItem,
   },
 
-  setup() {
-    const apiClient = useApiClient();
+  setup() {*/
+const apiClient = useApiClient();
 
-    const pullRequests = ref<PullRequest[]>();
-    const repo = inject<Ref<Repo>>('repo');
-    if (!repo) {
-      throw new Error('Unexpected: "repo" should be provided at this place');
-    }
+const pullRequests = ref<PullRequest[]>();
+const repo = inject<Ref<Repo>>('repo');
+if (!repo) {
+  throw new Error('Unexpected: "repo" should be provided at this place');
+}
 
-    async function loadPullRequests() {
-      if (!repo) {
-        throw new Error('Unexpected: "repo" should be provided at this place');
-      }
+async function loadPullRequests() {
+  if (!repo) {
+    throw new Error('Unexpected: "repo" should be provided at this place');
+  }
 
-      pullRequests.value = await apiClient.getRepoPullRequests(repo.value.owner, repo.value.name);
-    }
+  pullRequests.value = await apiClient.getRepoPullRequests(repo.value.owner, repo.value.name);
+}
 
-    onMounted(() => {
-      loadPullRequests();
-    });
-
-    watch(repo, () => {
-      loadPullRequests();
-    });
-
-    return { pullRequests };
-  },
+onMounted(() => {
+  loadPullRequests();
 });
+
+watch(repo, () => {
+  loadPullRequests();
+});
+
+//  return { pullRequests };
+//  },
+//});
 </script>
