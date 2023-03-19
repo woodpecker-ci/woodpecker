@@ -128,13 +128,13 @@ func persistPipelineConfigs(store store.Store, configs []*model.Config, pipeline
 }
 
 func createNewOutOfOld(old *model.Pipeline) *model.Pipeline {
-	new := *old
-	new.ID = 0
-	new.Number = 0
-	new.Status = model.StatusPending
-	new.Started = 0
-	new.Finished = 0
-	new.Enqueued = time.Now().UTC().Unix()
-	new.Error = ""
-	return &new
+	newPipeline := *old
+	newPipeline.ID = 0
+	newPipeline.Number = 0
+	newPipeline.Status = model.StatusPending
+	newPipeline.Started = 0
+	newPipeline.Finished = 0
+	newPipeline.Enqueued = time.Now().UTC().Unix()
+	newPipeline.Error = ""
+	return &newPipeline
 }

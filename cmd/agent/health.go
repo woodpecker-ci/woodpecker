@@ -37,7 +37,7 @@ func init() {
 	http.HandleFunc("/version", handleVersion)
 }
 
-func handleHeartbeat(w http.ResponseWriter, r *http.Request) {
+func handleHeartbeat(w http.ResponseWriter, _ *http.Request) {
 	if counter.Healthy() {
 		w.WriteHeader(200)
 	} else {
@@ -45,7 +45,7 @@ func handleHeartbeat(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func handleVersion(w http.ResponseWriter, r *http.Request) {
+func handleVersion(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(200)
 	w.Header().Add("Content-Type", "text/json")
 	_ = json.NewEncoder(w).Encode(versionResp{
@@ -54,7 +54,7 @@ func handleVersion(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func handleStats(w http.ResponseWriter, r *http.Request) {
+func handleStats(w http.ResponseWriter, _ *http.Request) {
 	if counter.Healthy() {
 		w.WriteHeader(200)
 	} else {

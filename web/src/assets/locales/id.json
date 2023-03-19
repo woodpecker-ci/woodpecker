@@ -70,6 +70,9 @@
   "color_scheme_light": "Ubah ke mode gelap",
   "docs": "Dokumentasi",
   "documentation_for": "Dokumentasi untuk \"{topic}\"",
+  "errors": {
+    "not_found": "Server tidak dapat mencari objek yang diminta"
+  },
   "login": "Masuk",
   "logout": "Keluar",
   "not_found": {
