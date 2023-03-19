@@ -27,7 +27,8 @@
         <IconButton
           icon="edit"
           :title="$t('admin.settings.users.edit_user')"
-          class="ml-2 w-8 h-8"
+          class="w-8 h-8"
+          :class="{ 'ml-auto': !user.admin, 'ml-2': user.admin }"
           @click="editUser(user)"
         />
         <IconButton
