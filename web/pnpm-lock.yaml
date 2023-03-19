@@ -42,7 +42,7 @@ specifiers:
   vite: ^4.2.0
   vite-plugin-prismjs: ^0.0.8
   vite-plugin-static-copy: ^0.13.0
-  vite-plugin-windicss: ^1.8.8
+  vite-plugin-windicss: ^1.8.10
   vite-svg-loader: ^4.0.0
   vue: ^3.2.47
   vue-eslint-parser: ^9.1.0
