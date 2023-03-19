@@ -358,6 +358,7 @@
                 },
                 "capacity": {
                   "capacity": "Capacity",
+                  "desc": "The max amount of parallel pipelines executed by this agent.",
                   "badge": "capacity"
                 },
                 "version": "Version",

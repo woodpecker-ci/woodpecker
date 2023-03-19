@@ -23,7 +23,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
-
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
@@ -40,7 +39,7 @@ func FileList(c *gin.Context) {
 	repo := session.Repo(c)
 	pipeline, err := _store.GetPipelineNumber(repo, num)
 	if err != nil {
-		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		handleDbGetError(c, err)
 		return
 	}
 
@@ -79,7 +78,7 @@ func FileGet(c *gin.Context) {
 
 	pipeline, err := _store.GetPipelineNumber(repo, num)
 	if err != nil {
-		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		handleDbGetError(c, err)
 		return
 	}
 
@@ -91,18 +90,18 @@ func FileGet(c *gin.Context) {
 
 	file, err := _store.FileFind(step, name)
 	if err != nil {
-		c.String(404, "Error getting file %q. %s", name, err)
+		c.String(http.StatusNotFound, "Error getting file %q. %s", name, err)
 		return
 	}
 
 	if !raw {
-		c.JSON(200, file)
+		c.JSON(http.StatusOK, file)
 		return
 	}
 
 	rc, err := _store.FileRead(step, file.Name)
 	if err != nil {
-		c.String(404, "Error getting file stream %q. %s", name, err)
+		c.String(http.StatusNotFound, "Error getting file stream %q. %s", name, err)
 		return
 	}
 	defer rc.Close()
