@@ -301,7 +301,7 @@ func (g *GitLab) Repos(ctx context.Context, user *model.User) ([]*model.Repo, er
 	return repos, err
 }
 
-func (g *GitLab) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.PaginationData) ([]*model.PullRequest, error) {
+func (g *GitLab) PullRequests(_ context.Context, u *model.User, r *model.Repo, p *model.PaginationData) ([]*model.PullRequest, error) {
 	token := ""
 	if u != nil {
 		token = u.Token
