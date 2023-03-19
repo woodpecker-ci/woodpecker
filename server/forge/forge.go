@@ -83,6 +83,9 @@ type Forge interface {
 	// BranchHead returns the sha of the head (latest commit) of the specified branch
 	BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error)
 
+	// PullRequests returns all pull requests for the named repository.
+	PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.PaginationData) ([]*model.PullRequest, error)
+
 	// Hook parses the post-commit hook from the Request body and returns the
 	// required data in a standard format.
 	Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error)

@@ -18,6 +18,7 @@ package gogs
 import (
 	"context"
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"net"
 	"net/http"
@@ -297,6 +298,10 @@ func (c *client) BranchHead(_ context.Context, u *model.User, r *model.Repo, bra
 		return "", err
 	}
 	return b.Commit.ID, nil
+}
+
+func (c *client) PullRequests(_ context.Context, _ *model.User, _ *model.Repo, _ *model.PaginationData) ([]*model.PullRequest, error) {
+	return nil, errors.New("Gogs does not support pull requests yet")
 }
 
 // Hook parses the incoming Gogs hook and returns the Repository and Pipeline
