@@ -212,6 +212,21 @@ func GetRepoBranches(c *gin.Context) {
 	c.JSON(http.StatusOK, branches)
 }
 
+func GetRepoPullRequests(c *gin.Context) {
+	repo := session.Repo(c)
+	user := session.User(c)
+	page := session.Pagination(c)
+	f := server.Config.Services.Forge
+
+	prs, err := f.PullRequests(c, user, repo, page)
+	if err != nil {
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, prs)
+}
+
 func DeleteRepo(c *gin.Context) {
 	remove, _ := strconv.ParseBool(c.Query("remove"))
 	_store := store.FromContext(c)

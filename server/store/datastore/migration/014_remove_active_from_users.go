@@ -1,4 +1,4 @@
-// Copyright 2018 Drone.IO Inc.
+// Copyright 2022 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,18 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package internal
+package migration
 
 import (
-	"fmt"
+	"xorm.io/xorm"
 )
 
-type APIClientErr struct {
-	Message string
-	URL     string
-	Cause   error
-}
-
-func (e APIClientErr) Error() string {
-	return fmt.Sprintf("%s (Requested %s): %v", e.Message, e.URL, e.Cause)
+var removeActiveFromUsers = task{
+	name:     "remove-active-from-users",
+	required: true,
+	fn: func(sess *xorm.Session) error {
+		return dropTableColumns(sess, "users", "user_active")
+	},
 }

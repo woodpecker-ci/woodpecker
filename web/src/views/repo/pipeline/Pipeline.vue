@@ -15,8 +15,8 @@
         </div>
 
         <div v-else-if="pipeline.status === 'blocked'" class="flex flex-col flex-grow justify-center items-center p-2">
-          <Icon name="status-blocked" class="w-32 h-32 text-color" />
-          <p class="text-xl text-color">{{ $t('repo.pipeline.protected.awaits') }}</p>
+          <Icon name="status-blocked" class="w-16 h-16 text-color mb-4" />
+          <p class="text-xl text-color mb-4">{{ $t('repo.pipeline.protected.awaits') }}</p>
           <div v-if="repoPermissions.push" class="flex mt-2 space-x-4">
             <Button
               color="green"
@@ -49,8 +49,8 @@
   </FluidContainer>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, inject, PropType, Ref, toRef } from 'vue';
+<script lang="ts" setup>
+import { computed, inject, Ref, toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -65,112 +65,84 @@ import useNotifications from '~/compositions/useNotifications';
 import { Pipeline, PipelineStep, Repo, RepoPermissions } from '~/lib/api/types';
 import { findStep } from '~/utils/helpers';
 
-export default defineComponent({
-  name: 'Pipeline',
+const props = defineProps<{
+  stepId?: string | null;
+}>();
 
-  components: {
-    Button,
-    PipelineStepList,
-    Icon,
-    PipelineLog,
-    FluidContainer,
-  },
+const apiClient = useApiClient();
+const router = useRouter();
+const route = useRoute();
+const notifications = useNotifications();
+const i18n = useI18n();
 
-  props: {
-    stepId: {
-      type: String as PropType<string | null>,
-      default: null,
-    },
-  },
+const pipeline = inject<Ref<Pipeline>>('pipeline');
+const repo = inject<Ref<Repo>>('repo');
+const repoPermissions = inject<Ref<RepoPermissions>>('repo-permissions');
+if (!repo || !repoPermissions || !pipeline) {
+  throw new Error('Unexpected: "repo", "repoPermissions" & "pipeline" should be provided at this place');
+}
 
-  setup(props) {
-    const apiClient = useApiClient();
-    const router = useRouter();
-    const route = useRoute();
-    const notifications = useNotifications();
-    const i18n = useI18n();
+const stepId = toRef(props, 'stepId');
 
-    const pipeline = inject<Ref<Pipeline>>('pipeline');
-    const repo = inject<Ref<Repo>>('repo');
-    const repoPermissions = inject<Ref<RepoPermissions>>('repo-permissions');
-    if (!repo || !repoPermissions || !pipeline) {
-      throw new Error('Unexpected: "repo", "repoPermissions" & "pipeline" should be provided at this place');
+const defaultStepId = computed(() => {
+  if (!pipeline.value || !pipeline.value.steps || !pipeline.value.steps[0].children) {
+    return null;
+  }
+
+  return pipeline.value.steps[0].children[0].pid;
+});
+
+const selectedStepId = computed({
+  get() {
+    if (stepId.value !== '' && stepId.value !== null && stepId.value !== undefined) {
+      const id = parseInt(stepId.value, 10);
+      const step = pipeline.value?.steps?.reduce(
+        (prev, p) => prev || p.children?.find((c) => c.pid === id),
+        undefined as PipelineStep | undefined,
+      );
+      if (step) {
+        return step.pid;
+      }
+
+      // return fallback if step-id is provided, but step can not be found
+      return defaultStepId.value;
     }
 
-    const stepId = toRef(props, 'stepId');
+    // is opened on >= md-screen
+    if (window.innerWidth > 768) {
+      return defaultStepId.value;
+    }
 
-    const defaultStepId = computed(() => {
-      if (!pipeline.value || !pipeline.value.steps || !pipeline.value.steps[0].children) {
-        return null;
-      }
-
-      return pipeline.value.steps[0].children[0].pid;
-    });
-
-    const selectedStepId = computed({
-      get() {
-        if (stepId.value !== '' && stepId.value !== null) {
-          const id = parseInt(stepId.value, 10);
-          const step = pipeline.value?.steps?.reduce(
-            (prev, p) => prev || p.children?.find((c) => c.pid === id),
-            undefined as PipelineStep | undefined,
-          );
-          if (step) {
-            return step.pid;
-          }
-
-          // return fallback if step-id is provided, but step can not be found
-          return defaultStepId.value;
-        }
-
-        // is opened on >= md-screen
-        if (window.innerWidth > 768) {
-          return defaultStepId.value;
-        }
-
-        return null;
-      },
-      set(_selectedStepId: number | null) {
-        if (!_selectedStepId) {
-          router.replace({ params: { ...route.params, stepId: '' } });
-          return;
-        }
-
-        router.replace({ params: { ...route.params, stepId: `${_selectedStepId}` } });
-      },
-    });
-
-    const selectedStep = computed(() => findStep(pipeline.value.steps || [], selectedStepId.value || -1));
-    const error = computed(() => pipeline.value?.error || selectedStep.value?.error);
-
-    const { doSubmit: approvePipeline, isLoading: isApprovingPipeline } = useAsyncAction(async () => {
-      if (!repo) {
-        throw new Error('Unexpected: Repo is undefined');
-      }
-
-      await apiClient.approvePipeline(repo.value.owner, repo.value.name, `${pipeline.value.number}`);
-      notifications.notify({ title: i18n.t('repo.pipeline.protected.approve_success'), type: 'success' });
-    });
-
-    const { doSubmit: declinePipeline, isLoading: isDecliningPipeline } = useAsyncAction(async () => {
-      if (!repo) {
-        throw new Error('Unexpected: Repo is undefined');
-      }
-
-      await apiClient.declinePipeline(repo.value.owner, repo.value.name, `${pipeline.value.number}`);
-      notifications.notify({ title: i18n.t('repo.pipeline.protected.decline_success'), type: 'success' });
-    });
-
-    return {
-      repoPermissions,
-      selectedStepId,
-      pipeline,
-      error,
-      isApprovingPipeline,
-      isDecliningPipeline,
-      approvePipeline,
-      declinePipeline,
-    };
+    return null;
   },
+  set(_selectedStepId: number | null) {
+    if (!_selectedStepId) {
+      router.replace({ params: { ...route.params, stepId: '' } });
+      return;
+    }
+
+    router.replace({ params: { ...route.params, stepId: `${_selectedStepId}` } });
+  },
+});
+
+const selectedStep = computed(() => findStep(pipeline.value.steps || [], selectedStepId.value || -1));
+const error = computed(() => pipeline.value?.error || selectedStep.value?.error);
+
+const { doSubmit: approvePipeline, isLoading: isApprovingPipeline } = useAsyncAction(async () => {
+  if (!repo) {
+    throw new Error('Unexpected: Repo is undefined');
+  }
+
+  await apiClient.approvePipeline(repo.value.owner, repo.value.name, `${pipeline.value.number}`);
+  notifications.notify({ title: i18n.t('repo.pipeline.protected.approve_success'), type: 'success' });
+});
+
+const { doSubmit: declinePipeline, isLoading: isDecliningPipeline } = useAsyncAction(async () => {
+  if (!repo) {
+    throw new Error('Unexpected: Repo is undefined');
+  }
+
+  await apiClient.declinePipeline(repo.value.owner, repo.value.name, `${pipeline.value.number}`);
+  notifications.notify({ title: i18n.t('repo.pipeline.protected.decline_success'), type: 'success' });
 });
 </script>
