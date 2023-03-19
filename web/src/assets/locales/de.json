@@ -61,7 +61,29 @@
         "value": "Wert",
         "warning": "Diese Geheimnisse können von allen Nutzern des Server eingesehen werden."
       },
-      "settings": "Einstellungen"
+      "settings": "Einstellungen",
+      "users": {
+        "add": "Benutzer hinzufügen",
+        "admin": {
+          "admin": "Admin",
+          "placeholder": "Benutzer ist ein Admin"
+        },
+        "avatar_url": "URL des Profilbilds",
+        "cancel": "Abbrechen",
+        "created": "Benutzer erstellt",
+        "delete_confirm": "Möchtest du diesen Benutzer wirklich löschen?",
+        "delete_user": "Benutzer löschen",
+        "deleted": "Benutzer gelöscht",
+        "desc": "Auf diesem Server registrierte Benutzer",
+        "edit_user": "Benutzer bearbeiten",
+        "email": "E-Mail",
+        "login": "Benutzername",
+        "none": "Es gibt noch keine Benutzer.",
+        "save": "Benutzer speichern",
+        "saved": "Benutzer gespeichert",
+        "show": "Benutzer anzeigen",
+        "users": "Benutzer"
+      }
     }
   },
   "back": "Zurück",
