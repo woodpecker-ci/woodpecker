@@ -129,7 +129,7 @@ var flags = []cli.Flag{
 	&cli.Int64Flag{
 		EnvVars: []string{"WOODPECKER_DEFAULT_PIPELINE_TIMEOUT"},
 		Name:    "default-pipeline-timeout",
-		Usage:   "The default time for a repo in minutes before a pipeline gets killed",
+		Usage:   "The default time in minutes for a repo in minutes before a pipeline gets killed",
 		Value:   60,
 	},
 	&cli.Int64Flag{
