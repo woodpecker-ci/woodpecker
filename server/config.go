@@ -39,6 +39,7 @@ var Config = struct {
 		Registries          model.RegistryService
 		Environ             model.EnvironService
 		Forge               forge.Forge
+		Timeout             time.Duration
 		Membership          cache.MembershipService
 		ConfigService       config.Extension
 		SignaturePrivateKey crypto.PrivateKey
@@ -60,7 +61,7 @@ var Config = struct {
 		OAuthHost           string
 		Host                string
 		Port                string
-		Pass                string
+		AgentToken          string
 		Docs                string
 		StatusContext       string
 		StatusContextFormat string
@@ -80,6 +81,8 @@ var Config = struct {
 		Volumes                             []string
 		Networks                            []string
 		Privileged                          []string
+		DefaultTimeout                      int64
+		MaxTimeout                          int64
 	}
 	FlatPermissions bool // TODO(485) temporary workaround to not hit api rate limits
 	Secret          struct {

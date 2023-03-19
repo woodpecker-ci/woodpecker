@@ -49,7 +49,7 @@ func (c *Cron) Validate() error {
 
 	_, err := cron.Parse(c.Schedule)
 	if err != nil {
-		return fmt.Errorf("can't parse schedule: %v", err)
+		return fmt.Errorf("can't parse schedule: %w", err)
 	}
 
 	return nil

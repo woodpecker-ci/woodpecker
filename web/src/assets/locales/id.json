@@ -1,6 +1,42 @@
 {
   "admin": {
     "settings": {
+      "agents": {
+        "add": "Tambahkan agen",
+        "agents": "Agen",
+        "backend": {
+          "backend": "Backend",
+          "badge": "backend"
+        },
+        "capacity": {
+          "badge": "kapasitas",
+          "capacity": "Kapasitas"
+        },
+        "created": "Agen dibuat",
+        "delete_confirm": "Apakah Anda ingin menghapus agen ini. Itu tidak akan terhubung lagi ke server.",
+        "deleted": "Agen dihapus",
+        "desc": "Agen terdaftar untuk server",
+        "last_contact": "Hubungan terakhir",
+        "name": {
+          "name": "Nama",
+          "placeholder": "Nama agen"
+        },
+        "never": "Tidak pernah",
+        "no_schedule": {
+          "name": "Nonaktifkan agen",
+          "placeholder": "Hentikan agen untuk mengambil tugas baru"
+        },
+        "none": "Belum ada agen.",
+        "platform": {
+          "badge": "platform",
+          "platform": "Platform"
+        },
+        "save": "Simpan agen",
+        "saved": "Agen disimpan",
+        "show": "Tampilkan agen",
+        "token": "Token",
+        "version": "Versi"
+      },
       "not_allowed": "Anda tidak diperbolehkan untuk mengakses pengaturan peladen",
       "secrets": {
         "add": "Tambahkan rahasia",
@@ -25,14 +61,40 @@
         "value": "Nilai",
         "warning": "Rahasia ini akan tersedia untuk pengguna peladen."
       },
-      "settings": "Pengaturan"
+      "settings": "Pengaturan",
+      "users": {
+        "add": "Tambahkan pengguna",
+        "admin": {
+          "admin": "Admin",
+          "placeholder": "Pengguna adalah admin"
+        },
+        "avatar_url": "URL Avatar",
+        "cancel": "Batal",
+        "created": "Pengguna dibuat",
+        "delete_confirm": "Apakah Anda ingin menghapus pengguna ini?",
+        "delete_user": "Hapus pengguna",
+        "deleted": "Pengguna dihapus",
+        "desc": "Pengguna terdaftar untuk server ini",
+        "edit_user": "Sunting pengguna",
+        "email": "Surel",
+        "login": "Masuk",
+        "none": "Belum ada pengguna.",
+        "save": "Simpan pengguna",
+        "saved": "Pengguna disimpan",
+        "show": "Tampilkan pengguna",
+        "users": "Pengguna"
+      }
     }
   },
   "back": "Kembali",
+  "cancel": "Batal",
   "color_scheme_dark": "Ubah ke mode terang",
   "color_scheme_light": "Ubah ke mode gelap",
   "docs": "Dokumentasi",
   "documentation_for": "Dokumentasi untuk \"{topic}\"",
+  "errors": {
+    "not_found": "Server tidak dapat mencari objek yang diminta"
+  },
   "login": "Masuk",
   "logout": "Keluar",
   "not_found": {
@@ -284,6 +346,7 @@
         "add": "Tambahkan rahasia",
         "created": "Rahasia dibuat",
         "delete": "Hapus rahasia",
+        "delete_confirm": "Apakah Anda ingin menghapus rahasia ini?",
         "deleted": "Rahasia dihapus",
         "desc": "Rahasia dapat diberikan ke langkah jalur pipa individu saat dijalankan sebagai variabel lingkungan.",
         "edit": "Sunting rahasia",

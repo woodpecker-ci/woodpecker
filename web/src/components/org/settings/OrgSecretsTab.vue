@@ -33,6 +33,7 @@
       i18n-prefix="org.settings.secrets."
       :is-saving="isSaving"
       @save="createSecret"
+      @cancel="selectedSecret = undefined"
     />
   </Panel>
 </template>

@@ -181,6 +181,14 @@ type Store interface {
 	CronListNextExecute(int64, int64) ([]*model.Cron, error)
 	CronGetLock(*model.Cron, int64) (bool, error)
 
+	// Agent
+	AgentCreate(*model.Agent) error
+	AgentFind(int64) (*model.Agent, error)
+	AgentFindByToken(string) (*model.Agent, error)
+	AgentList() ([]*model.Agent, error)
+	AgentUpdate(*model.Agent) error
+	AgentDelete(*model.Agent) error
+
 	// Store operations
 	Ping() error
 	Close() error

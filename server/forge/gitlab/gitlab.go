@@ -119,7 +119,7 @@ func (g *GitLab) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 
 	token, err := config.Exchange(oauth2Ctx, code)
 	if err != nil {
-		return nil, fmt.Errorf("Error exchanging token. %s", err)
+		return nil, fmt.Errorf("Error exchanging token. %w", err)
 	}
 
 	client, err := newClient(g.URL, token.AccessToken, g.SkipVerify)
@@ -299,6 +299,40 @@ func (g *GitLab) Repos(ctx context.Context, user *model.User) ([]*model.Repo, er
 	}
 
 	return repos, err
+}
+
+func (g *GitLab) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.PaginationData) ([]*model.PullRequest, error) {
+	token := ""
+	if u != nil {
+		token = u.Token
+	}
+	client, err := newClient(g.URL, token, g.SkipVerify)
+	if err != nil {
+		return nil, err
+	}
+
+	_repo, err := g.getProject(ctx, client, r.Owner, r.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	state := "open"
+	pullRequests, _, err := client.MergeRequests.ListProjectMergeRequests(_repo.ID, &gitlab.ListProjectMergeRequestsOptions{
+		ListOptions: gitlab.ListOptions{Page: int(p.Page), PerPage: int(p.PerPage)},
+		State:       &state,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]*model.PullRequest, len(pullRequests))
+	for i := range pullRequests {
+		result[i] = &model.PullRequest{
+			Index: int64(pullRequests[i].ID),
+			Title: pullRequests[i].Title,
+		}
+	}
+	return result, err
 }
 
 // Perm fetches the named repository from the forge.

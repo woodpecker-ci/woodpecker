@@ -14,6 +14,8 @@
 
 package yaml
 
+import "errors"
+
 // PipelineParseError is an error that occurs when the pipeline parsing fails.
 type PipelineParseError struct {
 	Err error
@@ -23,8 +25,8 @@ func (e PipelineParseError) Error() string {
 	return e.Err.Error()
 }
 
-func (e PipelineParseError) Is(target error) bool {
-	_, ok1 := target.(PipelineParseError)
-	_, ok2 := target.(*PipelineParseError)
-	return ok1 || ok2
+func (e PipelineParseError) Is(err error) bool {
+	target1 := PipelineParseError{}
+	target2 := &target1
+	return errors.As(err, &target1) || errors.As(err, &target2)
 }

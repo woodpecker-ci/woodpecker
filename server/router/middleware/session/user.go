@@ -48,10 +48,6 @@ func SetUser() gin.HandlerFunc {
 			return user.Hash, err
 		})
 		if err == nil {
-			confv := c.MustGet("config")
-			if conf, ok := confv.(*model.Settings); ok {
-				user.Admin = conf.IsAdmin(user)
-			}
 			c.Set("user", user)
 
 			// if this is a session token (ie not the API token)

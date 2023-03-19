@@ -1,6 +1,5 @@
-import PipelineStore from '~/store/pipelines';
-import RepoStore from '~/store/repos';
-import { repoSlug } from '~/utils/helpers';
+import { usePipelineStore } from '~/store/pipelines';
+import { useRepoStore } from '~/store/repos';
 
 import useApiClient from './useApiClient';
 
@@ -11,8 +10,8 @@ export default () => {
   if (initialized) {
     return;
   }
-  const repoStore = RepoStore();
-  const pipelineStore = PipelineStore();
+  const repoStore = useRepoStore();
+  const pipelineStore = usePipelineStore();
 
   initialized = true;
 
@@ -30,7 +29,6 @@ export default () => {
     }
     const { pipeline } = data;
     pipelineStore.setPipeline(repo.owner, repo.name, pipeline);
-    pipelineStore.setPipelineFeedItem({ ...pipeline, name: repo.name, owner: repo.owner, full_name: repoSlug(repo) });
 
     // contains step update
     if (!data.step) {

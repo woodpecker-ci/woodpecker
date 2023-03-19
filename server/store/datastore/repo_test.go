@@ -103,6 +103,22 @@ func TestRepos(t *testing.T) {
 			g.Assert(repo.Name).Equal(getrepo.Name)
 		})
 
+		g.It("Should Get a Repo by Name (case-insensitive)", func() {
+			repo := model.Repo{
+				UserID:   1,
+				FullName: "bradrydzewski/TEST",
+				Owner:    "bradrydzewski",
+				Name:     "TEST",
+			}
+			g.Assert(store.CreateRepo(&repo)).IsNil()
+			getrepo, err := store.GetRepoName("Bradrydzewski/test")
+			g.Assert(err).IsNil()
+			g.Assert(repo.ID).Equal(getrepo.ID)
+			g.Assert(repo.UserID).Equal(getrepo.UserID)
+			g.Assert(repo.Owner).Equal(getrepo.Owner)
+			g.Assert(repo.Name).Equal(getrepo.Name)
+		})
+
 		g.It("Should Enforce Unique Repo Name", func() {
 			repo1 := model.Repo{
 				UserID:   1,

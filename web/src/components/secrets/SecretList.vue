@@ -58,6 +58,7 @@
 
 <script lang="ts" setup>
 import { toRef } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
@@ -74,6 +75,8 @@ const emit = defineEmits<{
   (event: 'delete', secret: Secret): void;
 }>();
 
+const i18n = useI18n();
+
 const secrets = toRef(props, 'modelValue');
 
 function editSecret(secret: Secret) {
@@ -81,6 +84,11 @@ function editSecret(secret: Secret) {
 }
 
 function deleteSecret(secret: Secret) {
+  // TODO use proper dialog
+  // eslint-disable-next-line no-alert, no-restricted-globals
+  if (!confirm(i18n.t('repo.settings.secrets.delete_confirm'))) {
+    return;
+  }
   emit('delete', secret);
 }
 

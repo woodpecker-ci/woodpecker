@@ -77,6 +77,7 @@ func apiRoutes(e *gin.Engine) {
 				repo.GET("", api.GetRepo)
 
 				repo.GET("/branches", api.GetRepoBranches)
+				repo.GET("/pull_requests", api.GetRepoPullRequests)
 
 				repo.GET("/pipelines", api.GetPipelines)
 				repo.POST("/pipelines", session.MustPush, api.CreatePipeline)
@@ -170,6 +171,16 @@ func apiRoutes(e *gin.Engine) {
 			logLevel.Use(session.MustAdmin())
 			logLevel.GET("", api.LogLevel)
 			logLevel.POST("", api.SetLogLevel)
+		}
+
+		agentBase := apiBase.Group("/agents")
+		{
+			agentBase.Use(session.MustAdmin())
+			agentBase.GET("", api.GetAgents)
+			agentBase.POST("", api.PostAgent)
+			agentBase.GET("/:agent", api.GetAgent)
+			agentBase.PATCH("/:agent", api.PatchAgent)
+			agentBase.DELETE("/:agent", api.DeleteAgent)
 		}
 
 		apiBase.GET("/signature/public-key", session.MustUser(), api.GetSignaturePublicKey)

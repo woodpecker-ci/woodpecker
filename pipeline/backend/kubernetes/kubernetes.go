@@ -2,7 +2,6 @@ package kubernetes
 
 import (
 	"context"
-	std_errors "errors"
 	"fmt"
 	"io"
 	"os"
@@ -17,7 +16,6 @@ import (
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -28,10 +26,7 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
-var (
-	ErrNoCliContextFound = std_errors.New("No CliContext in context found.")
-	noContext            = context.Background()
-)
+var noContext = context.Background()
 
 type kube struct {
 	ctx    context.Context
@@ -76,7 +71,7 @@ func configFromCliContext(ctx context.Context) (*Config, error) {
 		}
 	}
 
-	return nil, ErrNoCliContextFound
+	return nil, types.ErrNoCliContextFound
 }
 
 // New returns a new Kubernetes Engine.
@@ -90,12 +85,12 @@ func (e *kube) Name() string {
 	return "kubernetes"
 }
 
-func (e *kube) IsAvailable() bool {
+func (e *kube) IsAvailable(context.Context) bool {
 	host := os.Getenv("KUBERNETES_SERVICE_HOST")
 	return len(host) > 0
 }
 
-func (e *kube) Load() error {
+func (e *kube) Load(context.Context) error {
 	config, err := configFromCliContext(e.ctx)
 	if err != nil {
 		return err
@@ -200,7 +195,9 @@ func (e *kube) Wait(ctx context.Context, step *types.Step) (*types.State, error)
 			UpdateFunc: podUpdated,
 		},
 	)
-	si.Start(wait.NeverStop)
+	stop := make(chan struct{})
+	si.Start(stop)
+	defer close(stop)
 
 	// TODO Cancel on ctx.Done
 	<-finished
@@ -246,7 +243,9 @@ func (e *kube) Tail(ctx context.Context, step *types.Step) (io.ReadCloser, error
 			UpdateFunc: podUpdated,
 		},
 	)
-	si.Start(wait.NeverStop)
+	stop := make(chan struct{})
+	si.Start(stop)
+	defer close(stop)
 
 	<-up
 
@@ -323,7 +322,7 @@ func (e *kube) Destroy(_ context.Context, conf *types.Config) error {
 				}
 				if err := e.client.CoreV1().Services(e.config.Namespace).Delete(noContext, svc.Name, deleteOpts); err != nil {
 					if errors.IsNotFound(err) {
-						log.Trace().Err(err).Msgf("Unable to service pod %s", svc.Name)
+						log.Trace().Err(err).Msgf("Unable to delete service %s", svc.Name)
 					} else {
 						return err
 					}

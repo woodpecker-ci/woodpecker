@@ -15,33 +15,34 @@
 package encryption
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/rs/zerolog/log"
 )
 
 func (svc *tinkEncryptionService) enable() error {
-	err := svc.callbackOnEnable()
-	if err != nil {
+	if err := svc.callbackOnEnable(); err != nil {
 		return fmt.Errorf(errTemplateFailedEnablingEncryption, err)
 	}
-	err = svc.updateCiphertextSample()
-	if err != nil {
+
+	if err := svc.updateCiphertextSample(); err != nil {
 		return fmt.Errorf(errTemplateFailedEnablingEncryption, err)
 	}
+
 	log.Warn().Msg(logMessageEncryptionEnabled)
 	return nil
 }
 
 func (svc *tinkEncryptionService) disable() error {
-	err := svc.callbackOnDisable()
-	if err != nil {
+	if err := svc.callbackOnDisable(); err != nil {
 		return fmt.Errorf(errTemplateFailedDisablingEncryption, err)
 	}
-	err = svc.deleteCiphertextSample()
-	if err != nil {
+
+	if err := svc.deleteCiphertextSample(); err != nil {
 		return fmt.Errorf(errTemplateFailedDisablingEncryption, err)
 	}
+
 	log.Warn().Msg(logMessageEncryptionDisabled)
 	return nil
 }
@@ -55,26 +56,24 @@ func (svc *tinkEncryptionService) rotate() error {
 		keysetFileWatcher: nil,
 		clients:           svc.clients,
 	}
-	err := newSvc.loadKeyset()
-	if err != nil {
+
+	if err := newSvc.loadKeyset(); err != nil {
 		return fmt.Errorf(errTemplateFailedRotatingEncryption, err)
 	}
 
-	err = newSvc.validateKeyset()
-	if err == errEncryptionKeyRotated {
+	err := newSvc.validateKeyset()
+	if errors.Is(err, errEncryptionKeyRotated) {
 		err = newSvc.updateCiphertextSample()
 	}
 	if err != nil {
 		return fmt.Errorf(errTemplateFailedRotatingEncryption, err)
 	}
 
-	err = newSvc.callbackOnRotation()
-	if err != nil {
+	if err := newSvc.callbackOnRotation(); err != nil {
 		return fmt.Errorf(errTemplateFailedRotatingEncryption, err)
 	}
 
-	err = newSvc.initFileWatcher()
-	if err != nil {
+	if err := newSvc.initFileWatcher(); err != nil {
 		return fmt.Errorf(errTemplateFailedRotatingEncryption, err)
 	}
 	return nil
@@ -85,26 +84,25 @@ func (svc *tinkEncryptionService) updateCiphertextSample() error {
 	if err != nil {
 		return fmt.Errorf(errTemplateFailedUpdatingServerConfig, err)
 	}
-	err = svc.store.ServerConfigSet(ciphertextSampleConfigKey, ciphertext)
-	if err != nil {
+
+	if err := svc.store.ServerConfigSet(ciphertextSampleConfigKey, ciphertext); err != nil {
 		return fmt.Errorf(errTemplateFailedUpdatingServerConfig, err)
 	}
+
 	log.Info().Msg(logMessageEncryptionKeyRegistered)
 	return nil
 }
 
 func (svc *tinkEncryptionService) deleteCiphertextSample() error {
-	err := svc.store.ServerConfigDelete(ciphertextSampleConfigKey)
-	if err != nil {
-		err = fmt.Errorf(errTemplateFailedUpdatingServerConfig, err)
+	if err := svc.store.ServerConfigDelete(ciphertextSampleConfigKey); err != nil {
+		return fmt.Errorf(errTemplateFailedUpdatingServerConfig, err)
 	}
-	return err
+	return nil
 }
 
 func (svc *tinkEncryptionService) initClients() error {
 	for _, client := range svc.clients {
-		err := client.SetEncryptionService(svc)
-		if err != nil {
+		if err := client.SetEncryptionService(svc); err != nil {
 			return err
 		}
 	}
@@ -114,8 +112,7 @@ func (svc *tinkEncryptionService) initClients() error {
 
 func (svc *tinkEncryptionService) callbackOnEnable() error {
 	for _, client := range svc.clients {
-		err := client.EnableEncryption()
-		if err != nil {
+		if err := client.EnableEncryption(); err != nil {
 			return err
 		}
 	}
@@ -125,8 +122,7 @@ func (svc *tinkEncryptionService) callbackOnEnable() error {
 
 func (svc *tinkEncryptionService) callbackOnRotation() error {
 	for _, client := range svc.clients {
-		err := client.MigrateEncryption(svc)
-		if err != nil {
+		if err := client.MigrateEncryption(svc); err != nil {
 			return err
 		}
 	}
@@ -136,8 +132,7 @@ func (svc *tinkEncryptionService) callbackOnRotation() error {
 
 func (svc *tinkEncryptionService) callbackOnDisable() error {
 	for _, client := range svc.clients {
-		err := client.MigrateEncryption(&noEncryption{})
-		if err != nil {
+		if err := client.MigrateEncryption(&noEncryption{}); err != nil {
 			return err
 		}
 	}

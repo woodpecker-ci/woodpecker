@@ -2,7 +2,7 @@
 
 Some versions need some changes to the server configuration or the pipeline configuration files.
 
-## 1.0.0
+## 1.0.0 (next)
 
 - The signature used to verify extensions calls (like those used for the [config-extension](./30-administration/100-external-configuration-api.md)) done by the Woodpecker server switched from using a shared-secret HMac to an ed25519 key-pair. Read more about it at the [config-extensions](./30-administration/100-external-configuration-api.md) documentation.
 - Refactored support of old agent filter labels and expression. Learn how to use the new [filter](./20-usage/20-pipeline-syntax.md#labels)
@@ -15,6 +15,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Updated Prometheus gauge `*_job_*` to `*_step_*`
 - Renamed config env `WOODPECKER_MAX_PROCS` to `WOODPECKER_MAX_WORKFLOWS` (still available as fallback)
 - The pipelines are now also read from `.yaml` files, the new default order is `.woodpecker/*.yml` and `.woodpecker/*.yaml` (without any prioritization) -> `.woodpecker.yml` ->  `.woodpecker.yaml` -> `.drone.yml`
+- Dropped support for [Coding](https://coding.net/).
 
 ## 0.15.0
 

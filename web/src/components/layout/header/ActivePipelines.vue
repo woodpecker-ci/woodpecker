@@ -14,26 +14,18 @@
   </IconButton>
 </template>
 
-<script lang="ts">
-import { defineComponent, onMounted } from 'vue';
+<script lang="ts" setup>
+import { onMounted, toRef } from 'vue';
 
 import IconButton from '~/components/atomic/IconButton.vue';
 import usePipelineFeed from '~/compositions/usePipelineFeed';
 
-export default defineComponent({
-  name: 'ActivePipelines',
+const pipelineFeed = usePipelineFeed();
+const activePipelines = toRef(pipelineFeed, 'activePipelines');
+const { toggle } = pipelineFeed;
 
-  components: { IconButton },
-
-  setup() {
-    const pipelineFeed = usePipelineFeed();
-
-    onMounted(() => {
-      pipelineFeed.load();
-    });
-
-    return pipelineFeed;
-  },
+onMounted(async () => {
+  await pipelineFeed.load();
 });
 </script>
 

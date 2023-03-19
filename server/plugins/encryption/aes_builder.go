@@ -15,6 +15,7 @@
 package encryption
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/urfave/cli/v2"
@@ -56,7 +57,7 @@ func (c aesConfiguration) Build() (model.EncryptionService, error) {
 	}
 
 	err = svc.validateKey()
-	if err == errEncryptionNotEnabled {
+	if errors.Is(err, errEncryptionNotEnabled) {
 		err = svc.enable()
 	}
 	if err != nil {

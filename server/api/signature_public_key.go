@@ -37,5 +37,5 @@ func GetSignaturePublicKey(c *gin.Context) {
 		Bytes: b,
 	}
 
-	c.String(200, "%s", pem.EncodeToMemory(block))
+	c.String(http.StatusOK, "%s", pem.EncodeToMemory(block))
 }
