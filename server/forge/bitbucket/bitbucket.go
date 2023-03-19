@@ -17,7 +17,6 @@ package bitbucket
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -304,7 +303,7 @@ func (c *config) BranchHead(_ context.Context, _ *model.User, _ *model.Repo, _ s
 }
 
 func (c *config) PullRequests(_ context.Context, _ *model.User, _ *model.Repo, _ *model.PaginationData) ([]*model.PullRequest, error) {
-	return nil, errors.New("Bitbucket does not support pull requests yet")
+	return nil, forge_types.ErrNotImplemented
 }
 
 // Hook parses the incoming Bitbucket hook and returns the Repository and
