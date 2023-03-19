@@ -41,7 +41,7 @@ func TestTaskList(t *testing.T) {
 	assert.Len(t, list, 1, "Expected one task in list")
 	assert.Equal(t, "some_random_id", list[0].ID)
 	assert.Equal(t, "foo", string(list[0].Data))
-	assert.EqualValues(t, map[string]string{"test": "dep"}, list[0].DepStatus)
+	assert.EqualValues(t, map[string]model.StatusValue{"test": "dep"}, list[0].DepStatus)
 
 	err = store.TaskDelete("some_random_id")
 	if err != nil {
