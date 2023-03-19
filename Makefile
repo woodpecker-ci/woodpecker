@@ -1,4 +1,3 @@
-GOFILES_NOVENDOR = $(shell find . -type f -name '*.go' -not -path "./vendor/*" -not -path "./.git/*")
 GO_PACKAGES ?= $(shell go list ./... | grep -v /vendor/)
 
 TARGETOS ?= linux
@@ -83,7 +82,7 @@ vendor: ## Update the vendor directory
 	go mod vendor
 
 format: install-tools ## Format source code
-	@gofumpt -extra -w ${GOFILES_NOVENDOR}
+	@gofumpt -extra -w .
 
 .PHONY: clean
 clean: ## Clean build artifacts
