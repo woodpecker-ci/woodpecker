@@ -66,7 +66,7 @@ func handleIndex(c *gin.Context) {
 	rw := c.Writer
 	data, err := web.Lookup("index.html")
 	if err != nil {
-		log.Fatal().Err(err)
+		log.Fatal().Err(err).Msg("can not find index.html")
 	}
 	rw.Header().Set("Content-Type", "text/html; charset=UTF-8")
 	rw.WriteHeader(200)
