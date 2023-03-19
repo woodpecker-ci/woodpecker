@@ -28,7 +28,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
-func createPipelineItems(ctx context.Context, store store.Store,
+func createPipelineItems(_ context.Context, store store.Store,
 	currentPipeline *model.Pipeline, user *model.User, repo *model.Repo,
 	yamls []*forge_types.FileMeta, envs map[string]string,
 ) (*model.Pipeline, []*pipeline.Item, error) {

@@ -80,7 +80,7 @@ func (e *ssh) Load(ctx context.Context) error {
 }
 
 // Setup the pipeline environment.
-func (e *ssh) Setup(ctx context.Context, config *types.Config) error {
+func (e *ssh) Setup(_ context.Context, _ *types.Config) error {
 	return nil
 }
 

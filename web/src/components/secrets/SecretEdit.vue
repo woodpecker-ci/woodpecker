@@ -24,13 +24,15 @@
         <CheckboxesField v-model="innerValue.event" :options="secretEventsOptions" />
       </InputField>
 
-      <Button type="button" color="gray" :text="$t('cancel')" @click="$emit('cancel')" />
-      <Button
-        type="submit"
-        color="green"
-        :is-loading="isSaving"
-        :text="isEditingSecret ? $t(i18nPrefix + 'save') : $t(i18nPrefix + 'add')"
-      />
+      <div class="flex gap-2 justify-center">
+        <Button type="button" color="gray" :text="$t('cancel')" @click="$emit('cancel')" />
+        <Button
+          type="submit"
+          color="green"
+          :is-loading="isSaving"
+          :text="isEditingSecret ? $t(i18nPrefix + 'save') : $t(i18nPrefix + 'add')"
+        />
+      </div>
     </form>
   </div>
 </template>

@@ -58,7 +58,7 @@ import { inject } from '~/compositions/useInjectProvide';
 
 const props = defineProps<{
   open: boolean;
-  pipelineNumber: number;
+  pipelineNumber: string;
 }>();
 
 const emit = defineEmits<{
