@@ -194,11 +194,14 @@ func (e *kube) Wait(ctx context.Context, step *types.Step) (*types.State, error)
 
 	// TODO 5 seconds is against best practice, k3s didn't work otherwise
 	si := informers.NewSharedInformerFactoryWithOptions(e.client, 5*time.Second, informers.WithNamespace(e.config.Namespace))
-	si.Core().V1().Pods().Informer().AddEventHandler(
+	if _, err := si.Core().V1().Pods().Informer().AddEventHandler(
 		cache.ResourceEventHandlerFuncs{
 			UpdateFunc: podUpdated,
 		},
-	)
+	); err != nil {
+		return nil, err
+	}
+
 	stop := make(chan struct{})
 	si.Start(stop)
 	defer close(stop)
@@ -242,11 +245,14 @@ func (e *kube) Tail(ctx context.Context, step *types.Step) (io.ReadCloser, error
 
 	// TODO 5 seconds is against best practice, k3s didn't work otherwise
 	si := informers.NewSharedInformerFactoryWithOptions(e.client, 5*time.Second, informers.WithNamespace(e.config.Namespace))
-	si.Core().V1().Pods().Informer().AddEventHandler(
+	if _, err := si.Core().V1().Pods().Informer().AddEventHandler(
 		cache.ResourceEventHandlerFuncs{
 			UpdateFunc: podUpdated,
 		},
-	)
+	); err != nil {
+		return nil, err
+	}
+
 	stop := make(chan struct{})
 	si.Start(stop)
 	defer close(stop)
