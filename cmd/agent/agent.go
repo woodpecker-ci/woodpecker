@@ -17,6 +17,7 @@ package main
 import (
 	"context"
 	"crypto/tls"
+	"errors"
 	"net/http"
 	"os"
 	"runtime"
@@ -153,6 +154,21 @@ func loop(c *cli.Context) error {
 		println("ctrl+c received, terminating process")
 		sigterm.Set()
 	})
+
+	// check if grpc server version is compatible with agent
+	grpcServerVersion, err := client.Version(ctx)
+	if err != nil {
+		log.Error().Err(err).Msg("could not get grpc server version")
+		return err
+	}
+	if grpcServerVersion.GrpcVersion != agentRpc.ClientGrpcVersion {
+		err := errors.New("GRPC version mismatch")
+		log.Error().Err(err).Msgf("Server version %s does report grpc version %d but we only understand %d",
+			grpcServerVersion.ServerVersion,
+			grpcServerVersion.GrpcVersion,
+			agentRpc.ClientGrpcVersion)
+		return err
+	}
 
 	backend.Init(context.WithValue(ctx, types.CliContext, c))
 

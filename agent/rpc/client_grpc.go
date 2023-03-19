@@ -18,6 +18,9 @@ import (
 
 var backoff = time.Second
 
+// set grpc version on compile time to compare against server version response
+const ClientGrpcVersion int32 = proto.Version
+
 type client struct {
 	client proto.WoodpeckerClient
 	conn   *grpc.ClientConn
@@ -35,9 +38,21 @@ func (c *client) Close() error {
 	return c.conn.Close()
 }
 
+// Version returns the server- & grpc-version
+func (c *client) Version(ctx context.Context) (*rpc.Version, error) {
+	res, err := c.client.Version(ctx, &proto.Empty{})
+	if err != nil {
+		return nil, err
+	}
+	return &rpc.Version{
+		GrpcVersion:   res.GrpcVersion,
+		ServerVersion: res.ServerVersion,
+	}, nil
+}
+
 // Next returns the next pipeline in the queue.
 func (c *client) Next(ctx context.Context, f rpc.Filter) (*rpc.Pipeline, error) {
-	var res *proto.NextReply
+	var res *proto.NextResponse
 	var err error
 	req := new(proto.NextRequest)
 	req.Filter = new(proto.Filter)

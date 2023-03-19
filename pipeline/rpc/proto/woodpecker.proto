@@ -3,6 +3,10 @@ syntax = "proto3";
 option go_package = "github.com/woodpecker-ci/woodpecker/pipeline/rpc/proto";
 package proto;
 
+// !IMPORTANT!
+// Increased Version in version.go by 1 if you change something here!
+// !IMPORTANT!
+
 // Woodpecker Server Service
 service Woodpecker {
   rpc Version       (Empty)                returns (VersionResponse) {}
@@ -118,8 +122,8 @@ message RegisterAgentRequest {
 //
 
 message VersionResponse {
-  int32  grpc_version = 1;
-  string server_version      = 2;
+  int32  grpc_version   = 1;
+  string server_version = 2;
 }
 
 message NextResponse {

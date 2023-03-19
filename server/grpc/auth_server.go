@@ -22,7 +22,7 @@ func NewWoodpeckerAuthServer(jwtManager *JWTManager, agentMasterToken string, st
 	return &WoodpeckerAuthServer{jwtManager: jwtManager, agentMasterToken: agentMasterToken, store: store}
 }
 
-func (s *WoodpeckerAuthServer) Auth(_ context.Context, req *proto.AuthRequest) (*proto.AuthReply, error) {
+func (s *WoodpeckerAuthServer) Auth(_ context.Context, req *proto.AuthRequest) (*proto.AuthResponse, error) {
 	agent, err := s.getAgent(req.AgentId, req.AgentToken)
 	if err != nil {
 		return nil, err
@@ -33,7 +33,7 @@ func (s *WoodpeckerAuthServer) Auth(_ context.Context, req *proto.AuthRequest) (
 		return nil, err
 	}
 
-	return &proto.AuthReply{
+	return &proto.AuthResponse{
 		Status:      "ok",
 		AgentId:     agent.ID,
 		AccessToken: accessToken,

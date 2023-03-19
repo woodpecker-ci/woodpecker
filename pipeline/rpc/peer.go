@@ -39,10 +39,18 @@ type (
 		Data []byte            `json:"data"`
 		Meta map[string]string `json:"meta"`
 	}
+
+	Version struct {
+		GrpcVersion   int32  `json:"grpc_version,omitempty"`
+		ServerVersion string `json:"server_version,omitempty"`
+	}
 )
 
 // Peer defines a peer-to-peer connection.
 type Peer interface {
+	// Version returns the server- & grpc-version
+	Version(c context.Context) (*Version, error)
+
 	// Next returns the next pipeline in the queue.
 	Next(c context.Context, f Filter) (*Pipeline, error)
 
