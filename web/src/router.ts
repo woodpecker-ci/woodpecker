@@ -74,14 +74,14 @@ const routes: RouteRecordRaw[] = [
         props: (route) => ({ branch: route.params.branch }),
       },
       {
-        path: 'pull_requests',
+        path: 'pull-requests',
         name: 'repo-pull-requests',
         component: (): Component => import('~/views/repo/RepoPullRequests.vue'),
         meta: { repoHeader: true },
         props: (route) => ({ pullRequest: route.params.pullRequest }),
       },
       {
-        path: 'pull_requests/:pullRequest',
+        path: 'pull-requests/:pullRequest',
         name: 'repo-pull-request',
         component: (): Component => import('~/views/repo/RepoPullRequest.vue'),
         meta: { repoHeader: true },
