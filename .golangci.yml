@@ -8,7 +8,7 @@ linters-settings:
     extra-rules: true
   forbidigo:
     forbid:
-      - context\.WithCancel
+      - context\.WithCancel$
       - ^print.*$
       - panic
   errorlint:
