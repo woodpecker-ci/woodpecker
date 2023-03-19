@@ -81,25 +81,25 @@ func (_m *Forge) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 	return r0, r1
 }
 
-// Branches provides a mock function with given fields: ctx, u, r
-func (_m *Forge) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
-	ret := _m.Called(ctx, u, r)
+// Branches provides a mock function with given fields: ctx, u, r, p
+func (_m *Forge) Branches(ctx context.Context, u *model.User, r *model.Repo, p *model.PaginationData) ([]string, error) {
+	ret := _m.Called(ctx, u, r, p)
 
 	var r0 []string
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, *model.User, *model.Repo) ([]string, error)); ok {
-		return rf(ctx, u, r)
+	if rf, ok := ret.Get(0).(func(context.Context, *model.User, *model.Repo, *model.PaginationData) ([]string, error)); ok {
+		return rf(ctx, u, r, p)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, *model.User, *model.Repo) []string); ok {
-		r0 = rf(ctx, u, r)
+	if rf, ok := ret.Get(0).(func(context.Context, *model.User, *model.Repo, *model.PaginationData) []string); ok {
+		r0 = rf(ctx, u, r, p)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]string)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, *model.User, *model.Repo) error); ok {
-		r1 = rf(ctx, u, r)
+	if rf, ok := ret.Get(1).(func(context.Context, *model.User, *model.Repo, *model.PaginationData) error); ok {
+		r1 = rf(ctx, u, r, p)
 	} else {
 		r1 = ret.Error(1)
 	}

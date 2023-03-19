@@ -49,6 +49,7 @@ import SelectField from '~/components/form/SelectField.vue';
 import Panel from '~/components/layout/Panel.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { Repo } from '~/lib/api/types';
+import usePaginate from '~/compositions/usePaginate';
 
 export default defineComponent({
   name: 'BadgeTab',
@@ -74,7 +75,7 @@ export default defineComponent({
         throw new Error('Unexpected: "repo" should be provided at this place');
       }
 
-      branches.value = (await apiClient.getRepoBranches(repo.value.owner, repo.value.name))
+      branches.value = (await usePaginate((page) => apiClient.getRepoBranches(repo.value.owner, repo.value.name, page)))
         .map((b) => ({
           value: b,
           text: b,

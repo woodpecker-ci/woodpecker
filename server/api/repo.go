@@ -198,9 +198,10 @@ func GetRepoPermissions(c *gin.Context) {
 func GetRepoBranches(c *gin.Context) {
 	repo := session.Repo(c)
 	user := session.User(c)
+	page := session.Pagination(c)
 	f := server.Config.Services.Forge
 
-	branches, err := f.Branches(c, user, repo)
+	branches, err := f.Branches(c, user, repo, page)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return

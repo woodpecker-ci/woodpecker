@@ -567,7 +567,7 @@ func (g *GitLab) Deactivate(ctx context.Context, user *model.User, repo *model.R
 }
 
 // Branches returns the names of all branches for the named repository.
-func (g *GitLab) Branches(ctx context.Context, user *model.User, repo *model.Repo) ([]string, error) {
+func (g *GitLab) Branches(ctx context.Context, user *model.User, repo *model.Repo, p *model.PaginationData) ([]string, error) {
 	token := ""
 	if user != nil {
 		token = user.Token
@@ -582,7 +582,9 @@ func (g *GitLab) Branches(ctx context.Context, user *model.User, repo *model.Rep
 		return nil, err
 	}
 
-	gitlabBranches, _, err := client.Branches.ListBranches(_repo.ID, &gitlab.ListBranchesOptions{}, gitlab.WithContext(ctx))
+	gitlabBranches, _, err := client.Branches.ListBranches(_repo.ID,
+		&gitlab.ListBranchesOptions{ListOptions: gitlab.ListOptions{Page: int(p.Page), PerPage: int(p.PerPage)}},
+		gitlab.WithContext(ctx))
 	if err != nil {
 		return nil, err
 	}

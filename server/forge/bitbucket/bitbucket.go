@@ -284,7 +284,7 @@ func (c *config) Netrc(u *model.User, _ *model.Repo) (*model.Netrc, error) {
 }
 
 // Branches returns the names of all branches for the named repository.
-func (c *config) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
+func (c *config) Branches(ctx context.Context, u *model.User, r *model.Repo, _ *model.PaginationData) ([]string, error) {
 	bitbucketBranches, err := c.newClient(ctx, u).ListBranches(r.Owner, r.Name)
 	if err != nil {
 		return nil, err

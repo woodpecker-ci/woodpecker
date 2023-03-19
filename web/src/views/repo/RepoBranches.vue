@@ -11,46 +11,62 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, inject, onMounted, Ref, ref, watch } from 'vue';
+<script lang="ts" setup>
+import { defineComponent, inject, onMounted, onUnmounted, Ref, ref, watch } from 'vue';
 
 import ListItem from '~/components/atomic/ListItem.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { Repo } from '~/lib/api/types';
+import numberField from '~/components/form/NumberField.vue';
 
-export default defineComponent({
-  name: 'RepoBranches',
+const apiClient = useApiClient();
 
-  components: {
-    ListItem,
-  },
+let page = 1;
+let getNextPage = true;
 
-  setup() {
-    const apiClient = useApiClient();
+const branches = ref<string[]>();
+const repo = inject<Ref<Repo>>('repo');
+const scrollComponent = document.querySelector('main > div');
+if (!repo) {
+  throw new Error('Unexpected: "repo" should be provided at this place');
+}
 
-    const branches = ref<string[]>();
-    const repo = inject<Ref<Repo>>('repo');
-    if (!repo) {
-      throw new Error('Unexpected: "repo" should be provided at this place');
-    }
+async function loadBranches(page: number) {
+  getNextPage = false;
+  if (!repo) {
+    throw new Error('Unexpected: "repo" should be provided at this place');
+  }
 
-    async function loadBranches() {
-      if (!repo) {
-        throw new Error('Unexpected: "repo" should be provided at this place');
-      }
+  const _branches = await apiClient.getRepoBranches(repo.value.owner, repo.value.name, page);
 
-      branches.value = await apiClient.getRepoBranches(repo.value.owner, repo.value.name);
-    }
+  if (page === 1) {
+    branches.value = _branches;
+  } else {
+    branches.value?.push(..._branches);
+  }
+  getNextPage = _branches.length !== 0;
+}
 
-    onMounted(() => {
-      loadBranches();
-    });
+const handleScroll = () => {
+  if (getNextPage && scrollComponent.scrollTop + scrollComponent.clientHeight === scrollComponent.scrollHeight) {
+    page++;
+    loadBranches(page);
+  }
+};
 
-    watch(repo, () => {
-      loadBranches();
-    });
+onMounted(() => {
+  page = 1;
+  loadBranches(page);
+  scrollComponent.addEventListener('scroll', handleScroll);
+});
 
-    return { branches };
-  },
+onUnmounted(() => {
+  page = 1;
+  scrollComponent.removeEventListener('scroll', handleScroll);
+});
+
+watch(repo, () => {
+  page = 1;
+  loadBranches(page);
 });
 </script>

@@ -429,7 +429,7 @@ func (c *Gitea) Deactivate(ctx context.Context, u *model.User, r *model.Repo, li
 }
 
 // Branches returns the names of all branches for the named repository.
-func (c *Gitea) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
+func (c *Gitea) Branches(ctx context.Context, u *model.User, r *model.Repo, p *model.PaginationData) ([]string, error) {
 	token := ""
 	if u != nil {
 		token = u.Token
@@ -439,20 +439,16 @@ func (c *Gitea) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]s
 		return nil, err
 	}
 
-	branches, err := common.Paginate(func(page int) ([]string, error) {
-		branches, _, err := client.ListRepoBranches(r.Owner, r.Name,
-			gitea.ListRepoBranchesOptions{ListOptions: gitea.ListOptions{Page: page}})
-		result := make([]string, len(branches))
-		for i := range branches {
-			result[i] = branches[i].Name
-		}
-		return result, err
-	})
+	branches, _, err := client.ListRepoBranches(r.Owner, r.Name,
+		gitea.ListRepoBranchesOptions{ListOptions: gitea.ListOptions{Page: int(p.Page), PageSize: int(p.PerPage)}})
 	if err != nil {
 		return nil, err
 	}
-
-	return branches, nil
+	result := make([]string, len(branches))
+	for i := range branches {
+		result[i] = branches[i].Name
+	}
+	return result, err
 }
 
 // BranchHead returns the sha of the head (latest commit) of the specified branch

@@ -26,8 +26,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-// TODO: use pagination
-// TODO: add Driver() who return source forge back
+// TODO: use pagination: repos, dir, teams, changed files
 
 type Forge interface {
 	// Name returns the string name of this driver
@@ -77,8 +76,7 @@ type Forge interface {
 	Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error
 
 	// Branches returns the names of all branches for the named repository.
-	// TODO: Add proper pagination handling and remove workaround in gitea forge
-	Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error)
+	Branches(ctx context.Context, u *model.User, r *model.Repo, p *model.PaginationData) ([]string, error)
 
 	// BranchHead returns the sha of the head (latest commit) of the specified branch
 	BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error)
