@@ -9,8 +9,8 @@ import (
 // to create and manage container resources.
 type Engine interface {
 	Name() string
-	IsAvailable() bool
-	Load() error
+	IsAvailable(context.Context) bool
+	Load(context.Context) error
 
 	// Setup the pipeline environment.
 	Setup(context.Context, *Config) error
