@@ -78,6 +78,12 @@ var flags = []cli.Flag{
 		Value:   ":9000",
 	},
 	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_GRPC_SECRET"},
+		Name:    "grpc-secret",
+		Usage:   "grpc jwt secret",
+		Value:   "secret",
+	},
+	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_METRICS_SERVER_ADDR"},
 		Name:    "metrics-server-addr",
 		Usage:   "metrics server address",
@@ -119,6 +125,18 @@ var flags = []cli.Flag{
 		Name:    "default-clone-image",
 		Usage:   "The default docker image to be used when cloning the repo",
 		Value:   constant.DefaultCloneImage,
+	},
+	&cli.Int64Flag{
+		EnvVars: []string{"WOODPECKER_DEFAULT_PIPELINE_TIMEOUT"},
+		Name:    "default-pipeline-timeout",
+		Usage:   "The default time in minutes for a repo in minutes before a pipeline gets killed",
+		Value:   60,
+	},
+	&cli.Int64Flag{
+		EnvVars: []string{"WOODPECKER_MAX_PIPELINE_TIMEOUT"},
+		Name:    "max-pipeline-timeout",
+		Usage:   "The maximum time in minutes you can set in the repo settings before a pipeline gets killed",
+		Value:   120,
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_DOCS"},
