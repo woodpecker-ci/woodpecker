@@ -43,6 +43,11 @@
 
     <Tab id="activity" :title="$t('repo.activity')" />
     <Tab id="branches" :title="$t('repo.branches')" />
+    <Tab
+      v-if="config.forge === 'gitea' || config.forge === 'github' || config.forge === 'gitlab'"
+      id="pull_requests"
+      :title="$t('repo.pull_requests')"
+    />
 
     <router-view />
   </Scaffold>
@@ -89,6 +94,7 @@ const { isAuthenticated } = useAuthentication();
 const route = useRoute();
 const router = useRouter();
 const i18n = useI18n();
+const config = useConfig();
 
 const { forge } = useConfig();
 const repo = repoStore.getRepo(repoOwner, repoName);
@@ -139,11 +145,16 @@ const activeTab = computed({
     if (route.name === 'repo-branches' || route.name === 'repo-branch') {
       return 'branches';
     }
+    if (route.name === 'repo-pull-requests' || route.name === 'repo-pull-request') {
+      return 'pull_requests';
+    }
     return 'activity';
   },
   set(tab: string) {
     if (tab === 'branches') {
       router.push({ name: 'repo-branches' });
+    } else if (tab === 'pull_requests') {
+      router.push({ name: 'repo-pull-requests' });
     } else {
       router.push({ name: 'repo' });
     }
