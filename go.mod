@@ -23,7 +23,6 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/google/go-github/v39 v39.2.0
 	github.com/google/tink/go v1.7.0
-	github.com/google/uuid v1.3.0
 	github.com/gorilla/securecookie v1.1.1
 	github.com/joho/godotenv v1.5.1
 	github.com/lafriks/ttlcache/v3 v3.2.0
@@ -33,6 +32,7 @@ require (
 	github.com/moby/moby v20.10.23+incompatible
 	github.com/moby/term v0.0.0-20221205130635-1aeaba878587
 	github.com/mrjones/oauth v0.0.0-20190623134757-126b35219450
+	github.com/oklog/ulid/v2 v2.1.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.14.0
 	github.com/robfig/cron v1.2.0
