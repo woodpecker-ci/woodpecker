@@ -300,7 +300,7 @@ func (c *client) BranchHead(_ context.Context, u *model.User, r *model.Repo, bra
 	return b.Commit.ID, nil
 }
 
-func (c *client) PullRequests(_- context.Context, _ *model.User, _ *model.Repo, _ *model.PaginationData) ([]*model.PullRequest, error) {
+func (c *client) PullRequests(_ context.Context, _ *model.User, _ *model.Repo, _ *model.PaginationData) ([]*model.PullRequest, error) {
 	return nil, errors.New("Gogs does not support pull requests yet")
 }
 
