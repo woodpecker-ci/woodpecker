@@ -1,4 +1,4 @@
-// Copyright 2018 Drone.IO Inc.
+// Copyright 2022 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,20 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package middleware
+package migration
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/urfave/cli/v2"
-
-	"github.com/woodpecker-ci/woodpecker/server/store"
+	"xorm.io/xorm"
 )
 
-// Store is a middleware function that initializes the Datastore and attaches to
-// the context of every http.Request.
-func Store(_ *cli.Context, v store.Store) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		store.ToContext(c, v)
-		c.Next()
-	}
+var removeActiveFromUsers = task{
+	name:     "remove-active-from-users",
+	required: true,
+	fn: func(sess *xorm.Session) error {
+		return dropTableColumns(sess, "users", "user_active")
+	},
 }

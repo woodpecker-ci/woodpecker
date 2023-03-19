@@ -70,10 +70,10 @@ func setupStore(c *cli.Context) (store.Store, error) {
 	}
 
 	if driver == "sqlite3" {
-		if new, err := fallbackSqlite3File(datasource); err != nil {
+		if newDatasource, err := fallbackSqlite3File(datasource); err != nil {
 			log.Fatal().Err(err).Msg("fallback to old sqlite3 file failed")
 		} else {
-			datasource = new
+			datasource = newDatasource
 		}
 	}
 
@@ -177,7 +177,7 @@ func setupRegistryService(c *cli.Context, s store.Store) model.RegistryService {
 	return registry.New(s)
 }
 
-func setupEnvironService(c *cli.Context, s store.Store) model.EnvironService {
+func setupEnvironService(c *cli.Context, _ store.Store) model.EnvironService {
 	return environments.Parse(c.StringSlice("environment"))
 }
 
