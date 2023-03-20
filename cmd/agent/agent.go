@@ -1,3 +1,4 @@
+// Copyright 2023 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +18,7 @@ package main
 import (
 	"context"
 	"crypto/tls"
+	"errors"
 	"net/http"
 	"os"
 	"runtime"
@@ -154,14 +156,30 @@ func loop(c *cli.Context) error {
 		sigterm.Set()
 	})
 
-	backend.Init(context.WithValue(ctx, types.CliContext, c))
+	// check if grpc server version is compatible with agent
+	grpcServerVersion, err := client.Version(ctx)
+	if err != nil {
+		log.Error().Err(err).Msg("could not get grpc server version")
+		return err
+	}
+	if grpcServerVersion.GrpcVersion != agentRpc.ClientGrpcVersion {
+		err := errors.New("GRPC version mismatch")
+		log.Error().Err(err).Msgf("Server version %s does report grpc version %d but we only understand %d",
+			grpcServerVersion.ServerVersion,
+			grpcServerVersion.GrpcVersion,
+			agentRpc.ClientGrpcVersion)
+		return err
+	}
+
+	backendCtx := context.WithValue(ctx, types.CliContext, c)
+	backend.Init(backendCtx)
 
 	var wg sync.WaitGroup
 	parallel := c.Int("max-workflows")
 	wg.Add(parallel)
 
 	// new engine
-	engine, err := backend.FindEngine(c.String("backend-engine"))
+	engine, err := backend.FindEngine(backendCtx, c.String("backend-engine"))
 	if err != nil {
 		log.Error().Err(err).Msgf("cannot find backend engine '%s'", c.String("backend-engine"))
 		return err
@@ -195,7 +213,7 @@ func loop(c *cli.Context) error {
 			defer wg.Done()
 
 			// load engine (e.g. init api client)
-			err = engine.Load()
+			err = engine.Load(backendCtx)
 			if err != nil {
 				log.Error().Err(err).Msg("cannot load backend engine")
 				return
