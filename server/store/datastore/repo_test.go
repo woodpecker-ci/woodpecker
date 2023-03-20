@@ -369,6 +369,7 @@ func TestRepoRedirection(t *testing.T) {
 	assert.NoError(t, store.CreateRepo(&repo))
 
 	repoUpdated := model.Repo{
+		ID:            repo.ID,
 		ForgeRemoteID: "1",
 		FullName:      "bradrydzewski/test-renamed",
 		Owner:         "bradrydzewski",
