@@ -132,7 +132,7 @@ func run(c *cli.Context) error {
 	g.Go(func() error {
 		lis, err := net.Listen("tcp", c.String("grpc-addr"))
 		if err != nil {
-			log.Err(err).Msg("")
+			log.Error().Err(err).Msg("failed to listen on grpc-addr")
 			return err
 		}
 
@@ -167,7 +167,7 @@ func run(c *cli.Context) error {
 
 		err = grpcServer.Serve(lis)
 		if err != nil {
-			log.Err(err).Msg("")
+			log.Error().Err(err).Msg("failed to serve grpc server")
 			return err
 		}
 		return nil
@@ -177,7 +177,12 @@ func run(c *cli.Context) error {
 	var webUIServe func(w http.ResponseWriter, r *http.Request)
 
 	if proxyWebUI == "" {
-		webUIServe = web.New().ServeHTTP
+		webEngine, err := web.New()
+		if err != nil {
+			log.Error().Err(err).Msg("failed to create web engine")
+			return err
+		}
+		webUIServe = webEngine.ServeHTTP
 	} else {
 		origin, _ := url.Parse(proxyWebUI)
 

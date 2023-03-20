@@ -1,12 +1,12 @@
 package constraint
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
 	"github.com/antonmedv/expr"
 	"github.com/bmatcuk/doublestar/v4"
-	"go.uber.org/multierr"
 	"gopkg.in/yaml.v3"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
@@ -256,7 +256,7 @@ func (c *List) UnmarshalYAML(value *yaml.Node) error {
 
 	if err1 != nil && err2 != nil {
 		y, _ := yaml.Marshal(value)
-		return fmt.Errorf("Could not parse condition: %s: %w", y, multierr.Combine(err1, err2))
+		return fmt.Errorf("Could not parse condition: %s: %w", y, errors.Join(err1, err2))
 	}
 
 	return nil
