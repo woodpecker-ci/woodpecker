@@ -81,7 +81,7 @@
             :label="$t('admin.settings.agents.capacity.capacity')"
             docs-url="docs/next/administration/agent-config#woodpecker_max_procs"
           >
-            <span class="text-color-alt">The max amount of parallel pipelines executed by this agent.</span>
+            <span class="text-color-alt">{{ $t('admin.settings.agents.capacity.desc') }}</span>
             <TextField :model-value="selectedAgent.capacity?.toString()" disabled />
           </InputField>
 
@@ -101,8 +101,8 @@
           </InputField>
         </template>
 
-        <div class="flex gap-2 justify-center">
-          <Button :text="$t('admin.settings.agents.cancel')" @click="selectedAgent = undefined" />
+        <div class="flex gap-2">
+          <Button type="button" color="gray" :text="$t('cancel')" @click="selectedAgent = undefined" />
           <Button
             :is-loading="isSaving"
             type="submit"

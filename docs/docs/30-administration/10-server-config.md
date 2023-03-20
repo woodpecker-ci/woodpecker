@@ -160,6 +160,11 @@ Automatically generates an SSL certificate using Let's Encrypt, and configures t
 
 Configures the gRPC listener port.
 
+### `WOODPECKER_GRPC_SECRET`
+> Default: `secret`
+
+Configures the gRPC JWT secret.
+
 ### `WOODPECKER_METRICS_SERVER_ADDR`
 > Default: empty
 
@@ -212,6 +217,16 @@ List of event names that will be canceled when a new pipeline for the same conte
 > Default is defined in [shared/constant/constant.go](https://github.com/woodpecker-ci/woodpecker/blob/master/shared/constant/constant.go)
 
 The default docker image to be used when cloning the repo
+
+### `WOODPECKER_DEFAULT_PIPELINE_TIMEOUT`
+> 60 (minutes)
+
+The default time for a repo in minutes before a pipeline gets killed
+
+### `WOODPECKER_MAX_PIPELINE_TIMEOUT`
+> 120 (minutes)
+
+The maximum time in minutes you can set in the repo settings before a pipeline gets killed
 
 ### `WOODPECKER_SESSION_EXPIRES`
 > Default: `72h`
@@ -415,7 +430,3 @@ See [Bitbucket server configuration](forges/bitbucket_server/#configuration)
 ### `WOODPECKER_GITLAB_...`
 
 See [Gitlab configuration](forges/gitlab/#configuration)
-
-### `WOODPECKER_CODING_...`
-
-See [Coding configuration](forges/coding/#configuration)

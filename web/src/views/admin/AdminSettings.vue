@@ -6,8 +6,14 @@
     <Tab id="secrets" :title="$t('admin.settings.secrets.secrets')">
       <AdminSecretsTab />
     </Tab>
+    <Tab id="users" :title="$t('admin.settings.users.users')">
+      <AdminUsersTab />
+    </Tab>
     <Tab id="agents" :title="$t('admin.settings.agents.agents')">
       <AdminAgentsTab />
+    </Tab>
+    <Tab id="queue" :title="$t('admin.settings.queue.queue')">
+      <AdminQueueTab />
     </Tab>
   </Scaffold>
 </template>
@@ -18,7 +24,9 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
 import AdminAgentsTab from '~/components/admin/settings/AdminAgentsTab.vue';
+import AdminQueueTab from '~/components/admin/settings/AdminQueueTab.vue';
 import AdminSecretsTab from '~/components/admin/settings/AdminSecretsTab.vue';
+import AdminUsersTab from '~/components/admin/settings/AdminUsersTab.vue';
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import Tab from '~/components/layout/scaffold/Tab.vue';
 import useAuthentication from '~/compositions/useAuthentication';

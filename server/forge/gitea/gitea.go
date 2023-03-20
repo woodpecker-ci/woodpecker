@@ -153,7 +153,7 @@ func (c *Gitea) Login(ctx context.Context, w http.ResponseWriter, req *http.Requ
 
 // Auth uses the Gitea oauth2 access token and refresh token to authenticate
 // a session and return the Gitea account login.
-func (c *Gitea) Auth(ctx context.Context, token, secret string) (string, error) {
+func (c *Gitea) Auth(ctx context.Context, token, _ string) (string, error) {
 	client, err := c.newClientToken(ctx, token)
 	if err != nil {
 		return "", err
@@ -213,7 +213,7 @@ func (c *Gitea) Teams(ctx context.Context, u *model.User) ([]*model.Team, error)
 }
 
 // TeamPerm is not supported by the Gitea driver.
-func (c *Gitea) TeamPerm(u *model.User, org string) (*model.Perm, error) {
+func (c *Gitea) TeamPerm(_ *model.User, _ string) (*model.Perm, error) {
 	return nil, nil
 }
 
@@ -472,6 +472,34 @@ func (c *Gitea) BranchHead(ctx context.Context, u *model.User, r *model.Repo, br
 		return "", err
 	}
 	return b.Commit.ID, nil
+}
+
+func (c *Gitea) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.PaginationData) ([]*model.PullRequest, error) {
+	token := ""
+	if u != nil {
+		token = u.Token
+	}
+	client, err := c.newClientToken(ctx, token)
+	if err != nil {
+		return nil, err
+	}
+
+	pullRequests, _, err := client.ListRepoPullRequests(r.Owner, r.Name, gitea.ListPullRequestsOptions{
+		ListOptions: gitea.ListOptions{Page: int(p.Page), PageSize: int(p.PerPage)},
+		State:       gitea.StateOpen,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]*model.PullRequest, len(pullRequests))
+	for i := range pullRequests {
+		result[i] = &model.PullRequest{
+			Index: pullRequests[i].Index,
+			Title: pullRequests[i].Title,
+		}
+	}
+	return result, err
 }
 
 // Hook parses the incoming Gitea hook and returns the Repository and Pipeline

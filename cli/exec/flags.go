@@ -268,7 +268,50 @@ var flags = []cli.Flag{
 		Name:    "env",
 	},
 
-	// TODO: add flags of backends
+	// backend docker
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_DOCKER_ENABLE_IPV6"},
+		Name:    "backend-docker-ipv6",
+		Usage:   "backend docker enable IPV6",
+		Value:   false,
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_DOCKER_NETWORK"},
+		Name:    "backend-docker-network",
+		Usage:   "backend docker network",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_DOCKER_VOLUMES"},
+		Name:    "backend-docker-volumes",
+		Usage:   "backend docker volumes (comma separated)",
+	},
+
+	// backend ssh
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_SSH_ADDRESS"},
+		Name:    "backend-ssh-address",
+		Usage:   "backend ssh address",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_SSH_USER"},
+		Name:    "backend-ssh-user",
+		Usage:   "backend ssh user",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_SSH_KEY"},
+		Name:    "backend-ssh-key",
+		Usage:   "backend ssh key file",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_SSH_KEY_PASSWORD"},
+		Name:    "backend-ssh-key-password",
+		Usage:   "backend ssh key password",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_SSH_PASSWORD"},
+		Name:    "backend-ssh-password",
+		Usage:   "backend ssh password",
+	},
 
 	// backend k8s
 	&cli.StringFlag{

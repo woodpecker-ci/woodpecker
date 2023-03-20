@@ -129,6 +129,7 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 
 	pipeline.Title = obj.Title
 	pipeline.Link = obj.URL
+	pipeline.PullRequestLabels = convertLabels(hook.Labels)
 
 	return obj.IID, repo, pipeline, nil
 }
@@ -249,4 +250,12 @@ func extractFromPath(str string) (string, string, error) {
 		return "", "", fmt.Errorf("Minimum match not found")
 	}
 	return s[0], s[1], nil
+}
+
+func convertLabels(from []*gitlab.Label) []string {
+	labels := make([]string, len(from))
+	for i, label := range from {
+		labels[i] = label.Name
+	}
+	return labels
 }

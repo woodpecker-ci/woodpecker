@@ -70,6 +70,9 @@
   "color_scheme_light": "Basculer en couleurs sombres",
   "docs": "Docs",
   "documentation_for": "Documentation sur \"{topic}\"",
+  "errors": {
+    "not_found": "Le serveur n'a pas pu trouver l'objet demandé"
+  },
   "login": "Connexion",
   "logout": "Déconnexion",
   "not_found": {

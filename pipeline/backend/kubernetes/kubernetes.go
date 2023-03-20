@@ -2,7 +2,6 @@ package kubernetes
 
 import (
 	"context"
-	std_errors "errors"
 	"fmt"
 	"io"
 	"os"
@@ -27,10 +26,7 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
-var (
-	ErrNoCliContextFound = std_errors.New("No CliContext in context found.")
-	noContext            = context.Background()
-)
+var noContext = context.Background()
 
 type kube struct {
 	ctx    context.Context
@@ -75,7 +71,7 @@ func configFromCliContext(ctx context.Context) (*Config, error) {
 		}
 	}
 
-	return nil, ErrNoCliContextFound
+	return nil, types.ErrNoCliContextFound
 }
 
 // New returns a new Kubernetes Engine.
@@ -89,12 +85,12 @@ func (e *kube) Name() string {
 	return "kubernetes"
 }
 
-func (e *kube) IsAvailable() bool {
+func (e *kube) IsAvailable(context.Context) bool {
 	host := os.Getenv("KUBERNETES_SERVICE_HOST")
 	return len(host) > 0
 }
 
-func (e *kube) Load() error {
+func (e *kube) Load(context.Context) error {
 	config, err := configFromCliContext(e.ctx)
 	if err != nil {
 		return err

@@ -301,6 +301,40 @@ func (g *GitLab) Repos(ctx context.Context, user *model.User) ([]*model.Repo, er
 	return repos, err
 }
 
+func (g *GitLab) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.PaginationData) ([]*model.PullRequest, error) {
+	token := ""
+	if u != nil {
+		token = u.Token
+	}
+	client, err := newClient(g.URL, token, g.SkipVerify)
+	if err != nil {
+		return nil, err
+	}
+
+	_repo, err := g.getProject(ctx, client, r.Owner, r.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	state := "open"
+	pullRequests, _, err := client.MergeRequests.ListProjectMergeRequests(_repo.ID, &gitlab.ListProjectMergeRequestsOptions{
+		ListOptions: gitlab.ListOptions{Page: int(p.Page), PerPage: int(p.PerPage)},
+		State:       &state,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]*model.PullRequest, len(pullRequests))
+	for i := range pullRequests {
+		result[i] = &model.PullRequest{
+			Index: int64(pullRequests[i].ID),
+			Title: pullRequests[i].Title,
+		}
+	}
+	return result, err
+}
+
 // Perm fetches the named repository from the forge.
 func (g *GitLab) Perm(ctx context.Context, user *model.User, r *model.Repo) (*model.Perm, error) {
 	client, err := newClient(g.URL, user.Token, g.SkipVerify)

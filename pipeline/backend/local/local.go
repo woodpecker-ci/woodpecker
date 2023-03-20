@@ -47,9 +47,6 @@ type local struct {
 	workingdir string
 }
 
-// make sure local implements Engine
-var _ types.Engine = &local{}
-
 // New returns a new local Engine.
 func New() types.Engine {
 	return &local{}
@@ -59,18 +56,18 @@ func (e *local) Name() string {
 	return "local"
 }
 
-func (e *local) IsAvailable() bool {
+func (e *local) IsAvailable(context.Context) bool {
 	return true
 }
 
-func (e *local) Load() error {
+func (e *local) Load(context.Context) error {
 	dir, err := os.MkdirTemp("", "woodpecker-local-*")
 	e.workingdir = dir
 	return err
 }
 
 // Setup the pipeline environment.
-func (e *local) Setup(ctx context.Context, config *types.Config) error {
+func (e *local) Setup(_ context.Context, _ *types.Config) error {
 	return nil
 }
 

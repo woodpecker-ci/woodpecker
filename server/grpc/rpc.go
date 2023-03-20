@@ -166,7 +166,7 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 }
 
 // Upload implements the rpc.Upload function
-func (s *RPC) Upload(c context.Context, id string, file *rpc.File) error {
+func (s *RPC) Upload(_ context.Context, id string, file *rpc.File) error {
 	stepID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		return err

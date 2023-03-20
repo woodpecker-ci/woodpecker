@@ -78,6 +78,12 @@ var flags = []cli.Flag{
 		Value:   ":9000",
 	},
 	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_GRPC_SECRET"},
+		Name:    "grpc-secret",
+		Usage:   "grpc jwt secret",
+		Value:   "secret",
+	},
+	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_METRICS_SERVER_ADDR"},
 		Name:    "metrics-server-addr",
 		Usage:   "metrics server address",
@@ -119,6 +125,18 @@ var flags = []cli.Flag{
 		Name:    "default-clone-image",
 		Usage:   "The default docker image to be used when cloning the repo",
 		Value:   constant.DefaultCloneImage,
+	},
+	&cli.Int64Flag{
+		EnvVars: []string{"WOODPECKER_DEFAULT_PIPELINE_TIMEOUT"},
+		Name:    "default-pipeline-timeout",
+		Usage:   "The default time in minutes for a repo in minutes before a pipeline gets killed",
+		Value:   60,
+	},
+	&cli.Int64Flag{
+		EnvVars: []string{"WOODPECKER_MAX_PIPELINE_TIMEOUT"},
+		Name:    "max-pipeline-timeout",
+		Usage:   "The maximum time in minutes you can set in the repo settings before a pipeline gets killed",
+		Value:   120,
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_DOCS"},
@@ -451,65 +469,6 @@ var flags = []cli.Flag{
 		EnvVars: []string{"WOODPECKER_STASH_SKIP_VERIFY"},
 		Name:    "stash-skip-verify",
 		Usage:   "stash skip ssl verification",
-	},
-	//
-	// Coding
-	//
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_CODING"},
-		Name:    "coding",
-		Usage:   "coding driver is enabled",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_CODING_URL"},
-		Name:    "coding-server",
-		Usage:   "coding server address",
-		Value:   "https://coding.net",
-	},
-	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_CODING_CLIENT"},
-		Name:     "coding-client",
-		Usage:    "coding oauth2 client id",
-		FilePath: os.Getenv("WOODPECKER_CODING_CLIENT_FILE"),
-	},
-	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_CODING_SECRET"},
-		Name:     "coding-secret",
-		Usage:    "coding oauth2 client secret",
-		FilePath: os.Getenv("WOODPECKER_CODING_SECRET_FILE"),
-	},
-	&cli.StringSliceFlag{
-		EnvVars: []string{"WOODPECKER_CODING_SCOPE"},
-		Name:    "coding-scope",
-		Usage:   "coding oauth scope",
-		Value: cli.NewStringSlice(
-			"user",
-			"project",
-			"project:depot",
-		),
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_CODING_GIT_MACHINE"},
-		Name:    "coding-git-machine",
-		Usage:   "coding machine name",
-		Value:   "git.coding.net",
-	},
-	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_CODING_GIT_USERNAME"},
-		Name:     "coding-git-username",
-		Usage:    "coding machine user username",
-		FilePath: os.Getenv("WOODPECKER_CODING_GIT_USERNAME_FILE"),
-	},
-	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_CODING_GIT_PASSWORD"},
-		Name:     "coding-git-password",
-		Usage:    "coding machine user password",
-		FilePath: os.Getenv("WOODPECKER_CODING_GIT_PASSWORD_FILE"),
-	},
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_CODING_SKIP_VERIFY"},
-		Name:    "coding-skip-verify",
-		Usage:   "coding skip ssl verification",
 	},
 	//
 	// development flags

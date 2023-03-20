@@ -475,6 +475,13 @@ when:
   - evaluate: 'not (CI_COMMIT_MESSAGE contains "please ignore me")'
 ```
 
+Run on pull requests with the label `deploy`:
+
+```yaml
+when:
+  - evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "deploy"'
+```
+
 ### `group` - Parallel execution
 
 Woodpecker supports parallel step execution for same-machine fan-in and fan-out. Parallel steps are configured using the `group` attribute. This instructs the pipeline runner to execute the named group in parallel.
