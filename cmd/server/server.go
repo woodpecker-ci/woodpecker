@@ -347,6 +347,7 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 	server.Config.Server.StatusContext = c.String("status-context")
 	server.Config.Server.StatusContextFormat = c.String("status-context-format")
 	server.Config.Server.SessionExpires = c.Duration("session-expires")
+	server.Config.Server.DatabasePageSize = c.Int("database-page-size")
 	server.Config.Pipeline.Networks = c.StringSlice("network")
 	server.Config.Pipeline.Volumes = c.StringSlice("volume")
 	server.Config.Pipeline.Privileged = c.StringSlice("escalate")

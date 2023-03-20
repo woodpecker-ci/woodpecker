@@ -30,6 +30,7 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/store/types"
+	shared_utils "github.com/woodpecker-ci/woodpecker/shared/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
@@ -125,9 +126,12 @@ func GetPipeline(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	// TODO get all
-	files, _ := _store.FileList(pl, &model.PaginationData{Page: 1, PerPage: 50})
-	steps, _ := _store.StepList(pl, &model.PaginationData{Page: 1, PerPage: 50})
+	files, _ := shared_utils.Paginate(func(page int) ([]*model.File, error) {
+		return _store.FileList(pl, &model.PaginationData{Page: page, PerPage: server.Config.Server.DatabasePageSize})
+	})
+	steps, _ := shared_utils.Paginate(func(page int) ([]*model.Step, error) {
+		return _store.StepList(pl, &model.PaginationData{Page: page, PerPage: server.Config.Server.DatabasePageSize})
+	})
 	if pl.Steps, err = model.Tree(steps); err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -148,8 +152,9 @@ func GetPipelineLast(c *gin.Context) {
 		return
 	}
 
-	// TODO get all
-	steps, err := _store.StepList(pl, &model.PaginationData{Page: 1, PerPage: 50})
+	steps, err := shared_utils.Paginate(func(page int) ([]*model.Step, error) {
+		return _store.StepList(pl, &model.PaginationData{Page: page, PerPage: server.Config.Server.DatabasePageSize})
+	})
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -414,8 +419,9 @@ func DeletePipelineLogs(c *gin.Context) {
 		return
 	}
 
-	// TODO get all
-	steps, err := _store.StepList(pl, &model.PaginationData{Page: 1, PerPage: 50})
+	steps, err := shared_utils.Paginate(func(page int) ([]*model.Step, error) {
+		return _store.StepList(pl, &model.PaginationData{Page: page, PerPage: server.Config.Server.DatabasePageSize})
+	})
 	if err != nil {
 		_ = c.AbortWithError(http.StatusNotFound, err)
 		return

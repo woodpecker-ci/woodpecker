@@ -22,7 +22,7 @@ func Pagination(c *gin.Context) *model.PaginationData {
 		perPage = defaultPerPage
 	}
 	return &model.PaginationData{
-		Page:    page,
-		PerPage: perPage,
+		Page:    int(page),
+		PerPage: int(perPage),
 	}
 }

@@ -41,6 +41,7 @@ import (
 	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store"
+	shared_utils "github.com/woodpecker-ci/woodpecker/shared/utils"
 )
 
 const (
@@ -195,7 +196,7 @@ func (c *Gitea) Teams(ctx context.Context, u *model.User) ([]*model.Team, error)
 		return nil, err
 	}
 
-	return common.Paginate(func(page int) ([]*model.Team, error) {
+	return shared_utils.Paginate(func(page int) ([]*model.Team, error) {
 		orgs, _, err := client.ListMyOrgs(
 			gitea.ListOrgsOptions{
 				ListOptions: gitea.ListOptions{
@@ -251,7 +252,7 @@ func (c *Gitea) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error)
 		return nil, err
 	}
 
-	return common.Paginate(func(page int) ([]*model.Repo, error) {
+	return shared_utils.Paginate(func(page int) ([]*model.Repo, error) {
 		repos, _, err := client.ListMyRepos(
 			gitea.ListReposOptions{
 				ListOptions: gitea.ListOptions{
@@ -440,7 +441,7 @@ func (c *Gitea) Branches(ctx context.Context, u *model.User, r *model.Repo, p *m
 	}
 
 	branches, _, err := client.ListRepoBranches(r.Owner, r.Name,
-		gitea.ListRepoBranchesOptions{ListOptions: gitea.ListOptions{Page: int(p.Page), PageSize: int(p.PerPage)}})
+		gitea.ListRepoBranchesOptions{ListOptions: gitea.ListOptions{Page: p.Page, PageSize: p.PerPage}})
 	if err != nil {
 		return nil, err
 	}
@@ -481,7 +482,7 @@ func (c *Gitea) PullRequests(ctx context.Context, u *model.User, r *model.Repo, 
 	}
 
 	pullRequests, _, err := client.ListRepoPullRequests(r.Owner, r.Name, gitea.ListPullRequestsOptions{
-		ListOptions: gitea.ListOptions{Page: int(p.Page), PageSize: int(p.PerPage)},
+		ListOptions: gitea.ListOptions{Page: p.Page, PageSize: p.PerPage},
 		State:       gitea.StateOpen,
 	})
 	if err != nil {
@@ -616,7 +617,7 @@ func (c *Gitea) getChangedFilesForPR(ctx context.Context, repo *model.Repo, inde
 		return []string{}, nil
 	}
 
-	return common.Paginate(func(page int) ([]string, error) {
+	return shared_utils.Paginate(func(page int) ([]string, error) {
 		giteaFiles, _, err := client.ListPullRequestFiles(repo.Owner, repo.Name, index,
 			gitea.ListPullRequestFilesOptions{ListOptions: gitea.ListOptions{Page: page}})
 		if err != nil {

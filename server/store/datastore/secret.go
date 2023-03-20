@@ -37,7 +37,7 @@ func (s storage) SecretList(repo *model.Repo, includeGlobalAndOrgSecrets bool, p
 		cond = cond.Or(builder.Eq{"secret_owner": repo.Owner}).
 			Or(builder.And(builder.Eq{"secret_owner": ""}, builder.Eq{"secret_repo_id": 0}))
 	}
-	return secrets, s.engine.Where(cond).Limit(int(p.PerPage), int(p.PerPage*(p.Page-1))).OrderBy(orderSecretsBy).Find(&secrets)
+	return secrets, s.engine.Where(cond).Limit(p.PerPage, p.PerPage*(p.Page-1)).OrderBy(orderSecretsBy).Find(&secrets)
 }
 
 func (s storage) SecretListAll() ([]*model.Secret, error) {

@@ -1,7 +1,9 @@
 package registry
 
 import (
+	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	shared_utils "github.com/woodpecker-ci/woodpecker/shared/utils"
 )
 
 type combined struct {
@@ -30,18 +32,18 @@ func (c combined) RegistryFind(repo *model.Repo, name string) (*model.Registry, 
 	return nil, nil
 }
 
-// RegistryList TODO respect model.PaginationData
-func (c combined) RegistryList(repo *model.Repo, _ *model.PaginationData) ([]*model.Registry, error) {
+func (c combined) RegistryList(repo *model.Repo, p *model.PaginationData) ([]*model.Registry, error) {
 	var registries []*model.Registry
 	for _, registry := range c.registries {
-		// TODO get all
-		list, err := registry.RegistryList(repo, &model.PaginationData{Page: 1, PerPage: 50})
+		list, err := shared_utils.Paginate(func(page int) ([]*model.Registry, error) {
+			return registry.RegistryList(repo, &model.PaginationData{Page: page, PerPage: server.Config.Server.DatabasePageSize})
+		})
 		if err != nil {
 			return nil, err
 		}
 		registries = append(registries, list...)
 	}
-	return registries, nil
+	return registries[p.PerPage*(p.Page-1) : p.PerPage*(p.Page)], nil
 }
 
 func (c combined) RegistryCreate(repo *model.Repo, registry *model.Registry) error {

@@ -19,6 +19,7 @@ import (
 	"fmt"
 
 	"github.com/rs/zerolog/log"
+	shared_utils "github.com/woodpecker-ci/woodpecker/shared/utils"
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -32,8 +33,9 @@ func Cancel(ctx context.Context, store store.Store, repo *model.Repo, pipeline *
 		return &ErrBadRequest{Msg: "Cannot cancel a non-running or non-pending or non-blocked pipeline"}
 	}
 
-	// TODO get all
-	steps, err := store.StepList(pipeline, &model.PaginationData{Page: 1, PerPage: 50})
+	steps, err := shared_utils.Paginate(func(page int) ([]*model.Step, error) {
+		return store.StepList(pipeline, &model.PaginationData{Page: page, PerPage: server.Config.Server.DatabasePageSize})
+	})
 	if err != nil {
 		return &ErrNotFound{Msg: err.Error()}
 	}
@@ -91,8 +93,9 @@ func Cancel(ctx context.Context, store store.Store, repo *model.Repo, pipeline *
 		return err
 	}
 
-	// TODO get all
-	steps, err = store.StepList(killedBuild, &model.PaginationData{Page: 1, PerPage: 50})
+	steps, err = shared_utils.Paginate(func(page int) ([]*model.Step, error) {
+		return store.StepList(killedBuild, &model.PaginationData{Page: page, PerPage: server.Config.Server.DatabasePageSize})
+	})
 	if err != nil {
 		return &ErrNotFound{Msg: err.Error()}
 	}

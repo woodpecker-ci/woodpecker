@@ -73,8 +73,7 @@ func GetCC(c *gin.Context) {
 		return
 	}
 
-	// TODO PerPage configurable
-	pipelines, err := _store.GetPipelineList(repo, &model.PaginationData{Page: 1, PerPage: 50})
+	pipelines, err := _store.GetPipelineList(repo, &model.PaginationData{Page: 1, PerPage: server.Config.Server.DatabasePageSize})
 	if err != nil || len(pipelines) == 0 {
 		c.AbortWithStatus(http.StatusNotFound)
 		return

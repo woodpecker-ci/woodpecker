@@ -76,7 +76,7 @@ func (s storage) GetPipelineList(repo *model.Repo, p *model.PaginationData) ([]*
 	pipelines := make([]*model.Pipeline, 0, p.PerPage)
 	return pipelines, s.engine.Where("pipeline_repo_id = ?", repo.ID).
 		Desc("pipeline_number").
-		Limit(int(p.PerPage), int(p.PerPage*(p.Page-1))).
+		Limit(p.PerPage, p.PerPage*(p.Page-1)).
 		Find(&pipelines)
 }
 

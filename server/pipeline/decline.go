@@ -19,8 +19,10 @@ import (
 	"fmt"
 
 	"github.com/rs/zerolog/log"
+	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store"
+	shared_utils "github.com/woodpecker-ci/woodpecker/shared/utils"
 )
 
 // Decline update the status to declined for blocked pipeline because of a gated repo
@@ -34,8 +36,10 @@ func Decline(ctx context.Context, store store.Store, pipeline *model.Pipeline, u
 		return nil, fmt.Errorf("error updating pipeline. %w", err)
 	}
 
-	// TODO get all
-	if pipeline.Steps, err = store.StepList(pipeline, &model.PaginationData{Page: 1, PerPage: 50}); err != nil {
+	pipeline.Steps, err = shared_utils.Paginate(func(page int) ([]*model.Step, error) {
+		return store.StepList(pipeline, &model.PaginationData{Page: page, PerPage: server.Config.Server.DatabasePageSize})
+	})
+	if err != nil {
 		log.Error().Err(err).Msg("can not get step list from store")
 	}
 	if pipeline.Steps, err = model.Tree(pipeline.Steps); err != nil {

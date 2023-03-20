@@ -288,7 +288,7 @@ func (c *client) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 	client := c.newClientToken(ctx, token)
 
 	pullRequests, _, err := client.PullRequests.List(ctx, r.Owner, r.Name, &github.PullRequestListOptions{
-		ListOptions: github.ListOptions{Page: int(p.Page), PerPage: int(p.PerPage)},
+		ListOptions: github.ListOptions{Page: p.Page, PerPage: p.PerPage},
 		State:       "open",
 	})
 	if err != nil {
@@ -522,7 +522,7 @@ func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo, p *
 	client := c.newClientToken(ctx, token)
 
 	githubBranches, _, err := client.Repositories.ListBranches(ctx, r.Owner, r.Name, &github.BranchListOptions{
-		ListOptions: github.ListOptions{Page: int(p.Page), PerPage: int(p.PerPage)},
+		ListOptions: github.ListOptions{Page: p.Page, PerPage: p.PerPage},
 	})
 	if err != nil {
 		return nil, err

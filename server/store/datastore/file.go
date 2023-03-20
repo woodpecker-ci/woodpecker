@@ -24,7 +24,7 @@ import (
 func (s storage) FileList(pipeline *model.Pipeline, p *model.PaginationData) ([]*model.File, error) {
 	files := make([]*model.File, 0, p.PerPage)
 	return files, s.engine.Where("file_pipeline_id = ?", pipeline.ID).
-		Limit(int(p.PerPage), int(p.PerPage*(p.Page-1))).
+		Limit(p.PerPage, p.PerPage*(p.Page-1)).
 		Find(&files)
 }
 

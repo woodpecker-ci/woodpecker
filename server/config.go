@@ -66,6 +66,7 @@ var Config = struct {
 		StatusContext       string
 		StatusContextFormat string
 		SessionExpires      time.Duration
+		DatabasePageSize    int
 		// Open bool
 		// Orgs map[string]struct{}
 		// Admins map[string]struct{}

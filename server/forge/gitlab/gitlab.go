@@ -318,7 +318,7 @@ func (g *GitLab) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 
 	state := "open"
 	pullRequests, _, err := client.MergeRequests.ListProjectMergeRequests(_repo.ID, &gitlab.ListProjectMergeRequestsOptions{
-		ListOptions: gitlab.ListOptions{Page: int(p.Page), PerPage: int(p.PerPage)},
+		ListOptions: gitlab.ListOptions{Page: p.Page, PerPage: p.PerPage},
 		State:       &state,
 	})
 	if err != nil {
@@ -583,7 +583,7 @@ func (g *GitLab) Branches(ctx context.Context, user *model.User, repo *model.Rep
 	}
 
 	gitlabBranches, _, err := client.Branches.ListBranches(_repo.ID,
-		&gitlab.ListBranchesOptions{ListOptions: gitlab.ListOptions{Page: int(p.Page), PerPage: int(p.PerPage)}},
+		&gitlab.ListBranchesOptions{ListOptions: gitlab.ListOptions{Page: p.Page, PerPage: p.PerPage}},
 		gitlab.WithContext(ctx))
 	if err != nil {
 		return nil, err

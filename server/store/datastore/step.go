@@ -47,7 +47,7 @@ func (s storage) StepList(pipeline *model.Pipeline, p *model.PaginationData) ([]
 	return stepList, s.engine.
 		Where("step_pipeline_id = ?", pipeline.ID).
 		OrderBy("step_pid").
-		Limit(int(p.PerPage), int(p.PerPage*(p.Page-1))).
+		Limit(p.PerPage, p.PerPage*(p.Page-1)).
 		Find(&stepList)
 }
 
