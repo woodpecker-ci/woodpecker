@@ -46,6 +46,7 @@ func PostRepo(c *gin.Context) {
 	repo.IsActive = true
 	repo.UserID = user.ID
 	repo.AllowPull = true
+	repo.NetrcOnlyTrusted = true
 	repo.CancelPreviousPipelineEvents = server.Config.Pipeline.DefaultCancelPreviousPipelineEvents
 
 	if repo.Visibility == "" {
