@@ -155,7 +155,6 @@ func (s storage) RepoList(user *model.User, owned bool) ([]*model.Repo, error) {
 }
 
 // RepoBatch Sync batch of repos from SCM (with permissions) to store (create if not exist else update)
-// TODO: only store activated repos ...
 func (s storage) RepoBatch(repos []*model.Repo) error {
 	sess := s.engine.NewSession()
 	defer sess.Close()
@@ -179,6 +178,7 @@ func (s storage) RepoBatch(repos []*model.Repo) error {
 			}
 		}
 
+		// If it exists, just update. If it does not exist, it is not active, so we don't store it.
 		if exist {
 			if repos[i].FullName != repo.FullName {
 				// create redirection
@@ -190,7 +190,7 @@ func (s storage) RepoBatch(repos []*model.Repo) error {
 			if repos[i].ForgeRemoteID.IsValid() {
 				if _, err := sess.
 					Where("forge_remote_id = ?", repos[i].ForgeRemoteID).
-					Cols("repo_owner", "repo_name", "repo_full_name", "repo_scm", "repo_avatar", "repo_link", "repo_private", "repo_clone", "repo_branch", "forge_id").
+					Cols("repo_owner", "repo_name", "repo_full_name", "repo_scm", "repo_avatar", "repo_link", "repo_private", "repo_clone", "repo_branch", "forge_remote_id").
 					Update(repos[i]); err != nil {
 					return err
 				}
@@ -198,7 +198,7 @@ func (s storage) RepoBatch(repos []*model.Repo) error {
 				if _, err := sess.
 					Where("repo_owner = ?", repos[i].Owner).
 					And(" repo_name = ?", repos[i].Name).
-					Cols("repo_owner", "repo_name", "repo_full_name", "repo_scm", "repo_avatar", "repo_link", "repo_private", "repo_clone", "repo_branch", "forge_id").
+					Cols("repo_owner", "repo_name", "repo_full_name", "repo_scm", "repo_avatar", "repo_link", "repo_private", "repo_clone", "repo_branch", "forge_remote_id").
 					Update(repos[i]); err != nil {
 					return err
 				}
@@ -208,11 +208,6 @@ func (s storage) RepoBatch(repos []*model.Repo) error {
 				Where("forge_remote_id = ?", repos[i].ForgeRemoteID).
 				Get(repos[i])
 			if err != nil {
-				return err
-			}
-		} else {
-			// only Insert on single object ref set auto created ID back to object
-			if _, err := sess.Insert(repos[i]); err != nil {
 				return err
 			}
 		}

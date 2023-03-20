@@ -50,10 +50,6 @@ type Forge interface {
 	// Repos fetches a list of repos from the forge.
 	Repos(ctx context.Context, u *model.User) ([]*model.Repo, error)
 
-	// Perm fetches the named repository permissions from
-	// the forge for the specified user.
-	Perm(ctx context.Context, u *model.User, r *model.Repo) (*model.Perm, error)
-
 	// File fetches a file from the forge repository and returns in string
 	// format.
 	File(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]byte, error)

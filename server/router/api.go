@@ -61,6 +61,7 @@ func apiRoutes(e *gin.Engine) {
 			}
 		}
 
+		apiBase.POST("/repos/:owner/:name", session.MustUser(), api.PostRepo)
 		repoBase := apiBase.Group("/repos/:owner/:name")
 		{
 			repoBase.Use(session.SetRepo())
@@ -72,7 +73,6 @@ func apiRoutes(e *gin.Engine) {
 			{
 				repo.Use(session.MustPull)
 
-				repo.POST("", session.MustRepoAdmin(), api.PostRepo)
 				repo.GET("", api.GetRepo)
 
 				repo.GET("/branches", api.GetRepoBranches)

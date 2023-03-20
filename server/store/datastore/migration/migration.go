@@ -43,6 +43,7 @@ var migrationTasks = []*task{
 	&renameRemoteToForge,
 	&renameForgeIDToForgeRemoteID,
 	&removeActiveFromUsers,
+	&removeInactiveRepos,
 }
 
 var allBeans = []interface{}{

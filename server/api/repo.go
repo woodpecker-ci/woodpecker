@@ -17,13 +17,16 @@ package api
 
 import (
 	"encoding/base32"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/securecookie"
 	"github.com/rs/zerolog/log"
+	"github.com/woodpecker-ci/woodpecker/server/store/types"
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -36,17 +39,37 @@ func PostRepo(c *gin.Context) {
 	forge := server.Config.Services.Forge
 	_store := store.FromContext(c)
 	user := session.User(c)
-	repo := session.Repo(c)
 
-	if repo.IsActive {
+	owner := c.Param("owner")
+	name := c.Param("name")
+	repo, err := _store.GetRepoName(owner + "/" + name)
+	enabledOnce := err == nil // if there's no error, the repo was found and enabled once already
+	if err == nil && repo.IsActive {
 		c.String(http.StatusConflict, "Repository is already active.")
+		return
+	} else if err != nil && !errors.Is(err, types.RecordNotExist) {
+		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 
+	from, err := forge.Repo(c, user, "0", owner, name)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Could not fetch repository from forge.")
+		return
+	}
+	if !from.Perm.Admin {
+		c.String(http.StatusForbidden, "User not authorized")
+	}
+
+	if enabledOnce {
+		repo.Update(from)
+	} else {
+		repo = from
+		repo.AllowPull = true
+		repo.CancelPreviousPipelineEvents = server.Config.Pipeline.DefaultCancelPreviousPipelineEvents
+	}
 	repo.IsActive = true
 	repo.UserID = user.ID
-	repo.AllowPull = true
-	repo.CancelPreviousPipelineEvents = server.Config.Pipeline.DefaultCancelPreviousPipelineEvents
 
 	if repo.Visibility == "" {
 		repo.Visibility = model.VisibilityPublic
@@ -81,26 +104,27 @@ func PostRepo(c *gin.Context) {
 		sig,
 	)
 
-	from, err := forge.Repo(c, user, repo.ForgeRemoteID, repo.Owner, repo.Name)
-	if err == nil {
-		if repo.FullName != from.FullName {
-			// create a redirection
-			err = _store.CreateRedirection(&model.Redirection{RepoID: repo.ID, FullName: repo.FullName})
-			if err != nil {
-				_ = c.AbortWithError(http.StatusInternalServerError, err)
-				return
-			}
-		}
-		repo.Update(from)
-	}
-
 	err = forge.Activate(c, user, repo, link)
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	err = _store.UpdateRepo(repo)
+	if enabledOnce {
+		err = _store.UpdateRepo(repo)
+	} else {
+		err = _store.CreateRepo(repo)
+	}
+	if err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+	repo.Perm = from.Perm
+	repo.Perm.Synced = time.Now().Unix()
+	repo.Perm.UserID = user.ID
+	repo.Perm.RepoID = repo.ID
+	repo.Perm.Repo = repo
+	err = _store.PermUpsert(repo.Perm)
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
@@ -244,7 +268,7 @@ func DeleteRepo(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	c.JSON(200, repo)
+	c.JSON(http.StatusOK, repo)
 }
 
 func RepairRepo(c *gin.Context) {
@@ -287,6 +311,11 @@ func RepairRepo(c *gin.Context) {
 
 	repo.Update(from)
 	if err := _store.UpdateRepo(repo); err != nil {
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	repo.Perm = from.Perm
+	if err := _store.PermUpsert(repo.Perm); err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
@@ -338,8 +367,13 @@ func MoveRepo(c *gin.Context) {
 	}
 
 	repo.Update(from)
-
 	errStore := _store.UpdateRepo(repo)
+	if errStore != nil {
+		_ = c.AbortWithError(http.StatusInternalServerError, errStore)
+		return
+	}
+	repo.Perm = from.Perm
+	errStore = _store.PermUpsert(repo.Perm)
 	if errStore != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, errStore)
 		return
