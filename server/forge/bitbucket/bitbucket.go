@@ -21,6 +21,7 @@ import (
 	"net/http"
 	"net/url"
 
+	shared_utils "github.com/woodpecker-ci/woodpecker/shared/utils"
 	"golang.org/x/oauth2"
 
 	"github.com/woodpecker-ci/woodpecker/server"
@@ -132,15 +133,18 @@ func (c *config) Refresh(ctx context.Context, user *model.User) (bool, error) {
 
 // Teams returns a list of all team membership for the Bitbucket account.
 func (c *config) Teams(ctx context.Context, u *model.User) ([]*model.Team, error) {
-	opts := &internal.ListWorkspacesOpts{
-		PageLen: 100,
-		Role:    "member",
-	}
-	resp, err := c.newClient(ctx, u).ListWorkspaces(opts)
-	if err != nil {
-		return nil, err
-	}
-	return convertWorkspaceList(resp.Values), nil
+	return shared_utils.Paginate(func(page int) ([]*model.Team, error) {
+		opts := &internal.ListWorkspacesOpts{
+			PageLen: 100,
+			Page:    page,
+			Role:    "member",
+		}
+		resp, err := c.newClient(ctx, u).ListWorkspaces(opts)
+		if err != nil {
+			return nil, err
+		}
+		return convertWorkspaceList(resp.Values), nil
+	})
 }
 
 // Repo returns the named Bitbucket repository.
