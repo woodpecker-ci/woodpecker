@@ -60,13 +60,6 @@ const props = defineProps<{
   stats?: QueueStats;
 }>();
 
-const colors = {
-  workers: 'bg-green-500',
-  running: 'bg-blue-500',
-  pending: 'bg-red-500',
-  waiting_on_deps: 'bg-red-800',
-};
-
 const total = computed(() => {
   if (!props.stats) {
     return 0;
@@ -88,28 +81,28 @@ const data = computed(() => {
       label: t('admin.settings.queue.stats.worker_count'),
       value: props.stats.worker_count,
       perc: total.value > 0 ? (props.stats.worker_count / total.value) * 100 : 0,
-      color: colors.workers,
+      color: 'bg-green-500',
     },
     {
       key: 'running_count',
       label: t('admin.settings.queue.stats.running_count'),
       value: props.stats.running_count,
       perc: total.value > 0 ? (props.stats.running_count / total.value) * 100 : 100,
-      color: colors.running,
+      color: 'bg-blue-500',
     },
     {
       key: 'pending_count',
       label: t('admin.settings.queue.stats.pending_count'),
       value: props.stats.pending_count,
       perc: total.value > 0 ? (props.stats.pending_count / total.value) * 100 : 0,
-      color: colors.pending,
+      color: 'bg-red-500',
     },
     {
       key: 'waiting_on_deps_count',
       label: t('admin.settings.queue.stats.waiting_on_deps_count'),
       value: props.stats.waiting_on_deps_count,
       perc: total.value > 0 ? (props.stats.waiting_on_deps_count / total.value) * 100 : 0,
-      color: colors.waiting_on_deps,
+      color: 'bg-red-800',
     },
   ];
 });
