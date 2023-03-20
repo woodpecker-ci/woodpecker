@@ -37,7 +37,7 @@ func GetUsers(c *gin.Context) {
 func GetUser(c *gin.Context) {
 	user, err := store.FromContext(c).GetUserLogin(c.Param("login"))
 	if err != nil {
-		c.String(404, "Cannot find user. %s", err)
+		handleDbGetError(c, err)
 		return
 	}
 	c.JSON(200, user)
@@ -55,7 +55,7 @@ func PatchUser(c *gin.Context) {
 
 	user, err := _store.GetUserLogin(c.Param("login"))
 	if err != nil {
-		c.AbortWithStatus(http.StatusNotFound)
+		handleDbGetError(c, err)
 		return
 	}
 

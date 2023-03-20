@@ -27,7 +27,8 @@
         <IconButton
           icon="edit"
           :title="$t('admin.settings.users.edit_user')"
-          class="ml-2 w-8 h-8"
+          class="w-8 h-8"
+          :class="{ 'ml-auto': !user.admin, 'ml-2': user.admin }"
           @click="editUser(user)"
         />
         <IconButton
@@ -117,14 +118,18 @@ const { doSubmit: saveUser, isLoading: isSaving } = useAsyncAction(async () => {
 
   if (isEditingUser.value) {
     await apiClient.updateUser(selectedUser.value);
+    notifications.notify({
+      title: t('admin.settings.users.saved'),
+      type: 'success',
+    });
     selectedUser.value = undefined;
   } else {
     selectedUser.value = await apiClient.createUser(selectedUser.value);
+    notifications.notify({
+      title: t('admin.settings.users.created'),
+      type: 'success',
+    });
   }
-  notifications.notify({
-    title: t(isEditingUser.value ? 'admin.settings.users.saved' : 'admin.settings.users.created'),
-    type: 'success',
-  });
   await loadUsers();
 });
 

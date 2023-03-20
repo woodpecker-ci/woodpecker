@@ -136,7 +136,7 @@ func run(c *cli.Context) error {
 			return err
 		}
 
-		jwtSecret := "secret" // TODO: make configurable
+		jwtSecret := c.String("grpc-secret")
 		jwtManager := woodpeckerGrpcServer.NewJWTManager(jwtSecret)
 
 		authorizer := woodpeckerGrpcServer.NewAuthorizer(jwtManager)
@@ -323,6 +323,8 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 		events = append(events, model.WebhookEvent(v))
 	}
 	server.Config.Pipeline.DefaultCancelPreviousPipelineEvents = events
+	server.Config.Pipeline.DefaultTimeout = c.Int64("default-pipeline-timeout")
+	server.Config.Pipeline.MaxTimeout = c.Int64("max-pipeline-timeout")
 
 	// limits
 	server.Config.Pipeline.Limits.MemSwapLimit = c.Int64("limit-mem-swap")

@@ -295,7 +295,7 @@ func (c *client) PipelineLogs(owner, name string, num, step int) ([]*Logs, error
 func (c *client) Deploy(owner, name string, num int, env string, params map[string]string) (*Pipeline, error) {
 	out := new(Pipeline)
 	val := mapValues(params)
-	val.Set("event", "deployment")
+	val.Set("event", EventDeploy)
 	val.Set("deploy_to", env)
 	uri := fmt.Sprintf(pathPipeline, c.addr, owner, name, num)
 	err := c.post(uri+"?"+val.Encode(), nil, out)
@@ -521,27 +521,22 @@ func (c *client) CronGet(owner, repo string, cronID int64) (*Cron, error) {
 
 // helper function for making an http GET request.
 func (c *client) get(rawurl string, out interface{}) error {
-	return c.do(rawurl, "GET", nil, out)
+	return c.do(rawurl, http.MethodGet, nil, out)
 }
 
 // helper function for making an http POST request.
 func (c *client) post(rawurl string, in, out interface{}) error {
-	return c.do(rawurl, "POST", in, out)
+	return c.do(rawurl, http.MethodPost, in, out)
 }
-
-// helper function for making an http PUT request.
-// func (c *client) put(rawurl string, in, out interface{}) error {
-// 	return c.do(rawurl, "PUT", in, out)
-// }
 
 // helper function for making an http PATCH request.
 func (c *client) patch(rawurl string, in, out interface{}) error {
-	return c.do(rawurl, "PATCH", in, out)
+	return c.do(rawurl, http.MethodPatch, in, out)
 }
 
 // helper function for making an http DELETE request.
 func (c *client) delete(rawurl string) error {
-	return c.do(rawurl, "DELETE", nil, nil)
+	return c.do(rawurl, http.MethodDelete, nil, nil)
 }
 
 // helper function to make an http request

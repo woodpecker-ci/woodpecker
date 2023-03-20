@@ -32,12 +32,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/shared/token"
 )
 
-// TODO: make it set system wide via environment variables
-const (
-	defaultTimeout int64 = 60 // 1 hour default pipeline time
-	maxTimeout     int64 = defaultTimeout * 2
-)
-
 func PostRepo(c *gin.Context) {
 	forge := server.Config.Services.Forge
 	_store := store.FromContext(c)
@@ -62,9 +56,9 @@ func PostRepo(c *gin.Context) {
 	}
 
 	if repo.Timeout == 0 {
-		repo.Timeout = defaultTimeout
-	} else if repo.Timeout > maxTimeout {
-		repo.Timeout = maxTimeout
+		repo.Timeout = server.Config.Pipeline.DefaultTimeout
+	} else if repo.Timeout > server.Config.Pipeline.MaxTimeout {
+		repo.Timeout = server.Config.Pipeline.MaxTimeout
 	}
 
 	if repo.Hash == "" {
@@ -126,8 +120,8 @@ func PatchRepo(c *gin.Context) {
 		return
 	}
 
-	if in.Timeout != nil && *in.Timeout > maxTimeout && !user.Admin {
-		c.String(http.StatusForbidden, fmt.Sprintf("Timeout is not allowed to be higher than max timeout (%dmin)", maxTimeout))
+	if in.Timeout != nil && *in.Timeout > server.Config.Pipeline.MaxTimeout && !user.Admin {
+		c.String(http.StatusForbidden, fmt.Sprintf("Timeout is not allowed to be higher than max timeout (%dmin)", server.Config.Pipeline.MaxTimeout))
 	}
 	if in.IsTrusted != nil && *in.IsTrusted != repo.IsTrusted && !user.Admin {
 		log.Trace().Msgf("user '%s' wants to make repo trusted without being an instance admin ", user.Login)
@@ -266,7 +260,7 @@ func RepairRepo(c *gin.Context) {
 	t := token.New(token.HookToken, repo.FullName)
 	sig, err := t.Sign(repo.Hash)
 	if err != nil {
-		c.String(500, err.Error())
+		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -304,7 +298,7 @@ func RepairRepo(c *gin.Context) {
 		log.Trace().Err(err).Msgf("deactivate repo '%s' to repair failed", repo.FullName)
 	}
 	if err := forge.Activate(c, user, repo, link); err != nil {
-		c.String(500, err.Error())
+		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -358,7 +352,7 @@ func MoveRepo(c *gin.Context) {
 	t := token.New(token.HookToken, repo.FullName)
 	sig, err := t.Sign(repo.Hash)
 	if err != nil {
-		c.String(500, err.Error())
+		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -374,7 +368,7 @@ func MoveRepo(c *gin.Context) {
 		log.Trace().Err(err).Msgf("deactivate repo '%s' for move to activate later, got an error", repo.FullName)
 	}
 	if err := forge.Activate(c, user, repo, link); err != nil {
-		c.String(500, err.Error())
+		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 	c.Writer.WriteHeader(http.StatusOK)
