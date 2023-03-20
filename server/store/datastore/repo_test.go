@@ -375,7 +375,11 @@ func TestRepoRedirection(t *testing.T) {
 		Name:          "test-renamed",
 	}
 
-	assert.NoError(t, store.RepoBatch([]*model.Repo{&repoUpdated}))
+	assert.NoError(t, store.UpdateRepo(&repoUpdated))
+	assert.NoError(t, store.CreateRedirection(&model.Redirection{
+		RepoID:   repo.ID,
+		FullName: repo.FullName,
+	}))
 
 	// test redirection from old repo name
 	repoFromStore, err := store.GetRepoNameFallback("1", "bradrydzewski/test")

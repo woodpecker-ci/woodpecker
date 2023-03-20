@@ -1451,20 +1451,6 @@ func (_m *Store) RegistryUpdate(_a0 *model.Registry) error {
 	return r0
 }
 
-// RepoBatch provides a mock function with given fields: _a0
-func (_m *Store) RepoBatch(_a0 []*model.Repo) error {
-	ret := _m.Called(_a0)
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func([]*model.Repo) error); ok {
-		r0 = rf(_a0)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
 // RepoList provides a mock function with given fields: user, owned
 func (_m *Store) RepoList(user *model.User, owned bool) ([]*model.Repo, error) {
 	ret := _m.Called(user, owned)
