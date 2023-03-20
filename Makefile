@@ -1,4 +1,3 @@
-GOFILES_NOVENDOR = $(shell find . -type f -name '*.go' -not -path "./vendor/*" -not -path "./.git/*")
 GO_PACKAGES ?= $(shell go list ./... | grep -v /vendor/)
 
 TARGETOS ?= linux
@@ -83,13 +82,17 @@ vendor: ## Update the vendor directory
 	go mod vendor
 
 format: install-tools ## Format source code
-	@gofumpt -extra -w ${GOFILES_NOVENDOR}
+	@gofumpt -extra -w .
 
 .PHONY: clean
 clean: ## Clean build artifacts
 	go clean -i ./...
 	rm -rf build
 	@[ "1" != "$(shell docker image ls woodpecker/make:local -a | wc -l)" ] && docker image rm woodpecker/make:local || echo no docker image to clean
+
+.PHONY: generate
+generate: ## Run all code generations
+	go generate ./...
 
 check-xgo: ## Check if xgo is installed
 	@hash xgo > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
