@@ -10,7 +10,8 @@
         },
         "capacity": {
           "badge": "kapasitas",
-          "capacity": "Kapasitas"
+          "capacity": "Kapasitas",
+          "desc": "Jumlah maksimal jalur pipa paralel yang dijalankan oleh agen ini."
         },
         "created": "Agen dibuat",
         "delete_confirm": "Apakah Anda ingin menghapus agen ini. Itu tidak akan terhubung lagi ke server.",
@@ -200,6 +201,7 @@
       "no_pipelines": "Belum ada jalur pipa yang dimulai.",
       "pipeline": "Jalur pipa #{pipelineId}",
       "pipelines_for": "Jalur pipa untuk cabang \"{branch}\"",
+      "pipelines_for_pr": "Jalur pipa untuk permintaan penarikan #{index}",
       "protected": {
         "approve": "Setujui",
         "approve_success": "Jalur pipa disetujui",
@@ -224,6 +226,7 @@
       "step_not_started": "Langkah ini belum dijalankan.",
       "tasks": "Tugas"
     },
+    "pull_requests": "Permintaan penarikan",
     "settings": {
       "actions": {
         "actions": "Tindakan",
