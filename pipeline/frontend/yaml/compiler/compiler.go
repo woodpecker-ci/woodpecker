@@ -190,7 +190,7 @@ func (c *Compiler) Compile(conf *yaml.Config) (*backend.Config, error) {
 			step := c.createProcess(name, container, defaultCloneName)
 
 			// only inject netrc if it's a trusted repo or a trusted plugin
-			if !c.netrcOnlyTrusted || c.trustedPipeline || (container.IsPlugin() && container.IsTrusted()) {
+			if !c.netrcOnlyTrusted || c.trustedPipeline || (container.IsPlugin() && container.IsTrustedCloneImage()) {
 				for k, v := range c.cloneEnv {
 					step.Environment[k] = v
 				}

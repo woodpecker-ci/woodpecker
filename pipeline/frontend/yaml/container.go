@@ -117,6 +117,6 @@ func (c *Container) IsPlugin() bool {
 	return len(c.Commands) == 0
 }
 
-func (c *Container) IsTrusted() bool {
+func (c *Container) IsTrustedCloneImage() bool {
 	return c.IsPlugin() && slices.Contains(constant.TrustedCloneImages, c.Image)
 }
