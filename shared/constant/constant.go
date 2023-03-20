@@ -21,6 +21,7 @@ var PrivilegedPlugins = []string{
 	"docker.io/plugins/ecr",
 	"docker.io/woodpeckerci/plugin-docker-buildx",
 	"quay.io/woodpeckerci/plugin-docker-buildx",
+	"codeberg.org/woodpecker-plugins/docker-buildx",
 }
 
 // DefaultConfigOrder represent the priority in witch woodpecker search for a pipeline config by default
