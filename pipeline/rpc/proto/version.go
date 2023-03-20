@@ -1,4 +1,4 @@
-// Copyright 2019 Woodpecker Authors
+// Copyright 2023 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,21 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package rpc
+package proto
 
-import (
-	"testing"
-)
-
-func TestLine(t *testing.T) {
-	line := Line{
-		Step: "redis",
-		Time: 60,
-		Pos:  1,
-		Out:  "starting redis server",
-	}
-	got, want := line.String(), "[redis:L1:60s] starting redis server"
-	if got != want {
-		t.Errorf("Wanted line string %q, got %q", want, got)
-	}
-}
+// Version is the version of the woodpecker.proto file,
+// !IMPORTANT! increased by 1 each time it get changed !IMPORTANT!
+const Version int32 = 1

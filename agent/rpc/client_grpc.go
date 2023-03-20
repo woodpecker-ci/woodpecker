@@ -1,3 +1,17 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package rpc
 
 import (
@@ -18,6 +32,9 @@ import (
 
 var backoff = time.Second
 
+// set grpc version on compile time to compare against server version response
+const ClientGrpcVersion int32 = proto.Version
+
 type client struct {
 	client proto.WoodpeckerClient
 	conn   *grpc.ClientConn
@@ -35,9 +52,21 @@ func (c *client) Close() error {
 	return c.conn.Close()
 }
 
+// Version returns the server- & grpc-version
+func (c *client) Version(ctx context.Context) (*rpc.Version, error) {
+	res, err := c.client.Version(ctx, &proto.Empty{})
+	if err != nil {
+		return nil, err
+	}
+	return &rpc.Version{
+		GrpcVersion:   res.GrpcVersion,
+		ServerVersion: res.ServerVersion,
+	}, nil
+}
+
 // Next returns the next pipeline in the queue.
 func (c *client) Next(ctx context.Context, f rpc.Filter) (*rpc.Pipeline, error) {
-	var res *proto.NextReply
+	var res *proto.NextResponse
 	var err error
 	req := new(proto.NextRequest)
 	req.Filter = new(proto.Filter)

@@ -145,8 +145,8 @@ func apiRoutes(e *gin.Engine) {
 		{
 			queue.Use(session.MustAdmin())
 			queue.GET("/info", api.GetQueueInfo)
-			queue.GET("/pause", api.PauseQueue)
-			queue.GET("/resume", api.ResumeQueue)
+			queue.POST("/pause", api.PauseQueue)
+			queue.POST("/resume", api.ResumeQueue)
 			queue.GET("/norunningpipelines", api.BlockTilQueueHasRunningItem)
 		}
 

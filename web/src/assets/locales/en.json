@@ -92,7 +92,11 @@
                     "protected": "Protected",
                     "desc": "Every pipeline needs to be approved before being executed."
                 },
-                "trusted": {
+                "netrc_only_trusted": {
+                    "netrc_only_trusted": "Only inject netrc credentials into trusted containers",
+                    "desc": "Only inject netrc credentials into trusted containers (recommended)."
+                },
+              "trusted": {
                     "trusted": "Trusted",
                     "desc": "Underlying pipeline containers get access to escalated capabilities like mounting volumes."
                 },
@@ -365,6 +369,25 @@
                 "last_contact": "Last contact",
                 "never": "Never",
                 "delete_confirm": "Do you really want to delete this agent? It wont be able to connected to the server anymore."
+            },
+            "queue": {
+              "queue": "Queue",
+              "desc": "Tasks waiting to be executed by agents",
+              "pause": "Pause",
+              "resume": "Resume",
+              "paused": "Queue is paused",
+              "resumed": "Queue is resumed",
+              "tasks": "Tasks",
+              "task_running": "Task is running",
+              "task_pending": "Task is pending",
+              "task_waiting_on_deps": "Task is waiting on dependencies",
+              "stats": {
+                "completed_count": "Completed Tasks",
+                "worker_count": "Free",
+                "running_count": "Running",
+                "pending_count": "Pending",
+                "waiting_on_deps_count": "Waiting on dependencies"
+              }
             },
             "users": {
               "users": "Users",

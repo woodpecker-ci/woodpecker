@@ -57,6 +57,7 @@ export type Repo = {
 
   // Events that will cancel running pipelines before starting a new one
   cancel_previous_pipeline_events: string[];
+  netrc_only_trusted: boolean;
 };
 
 export enum RepoVisibility {
@@ -67,7 +68,14 @@ export enum RepoVisibility {
 
 export type RepoSettings = Pick<
   Repo,
-  'config_file' | 'timeout' | 'visibility' | 'trusted' | 'gated' | 'allow_pr' | 'cancel_previous_pipeline_events'
+  | 'config_file'
+  | 'timeout'
+  | 'visibility'
+  | 'trusted'
+  | 'gated'
+  | 'allow_pr'
+  | 'cancel_previous_pipeline_events'
+  | 'netrc_only_trusted'
 >;
 
 export type RepoPermissions = {

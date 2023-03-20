@@ -9,6 +9,7 @@ import {
   PipelineLog,
   PipelineStep,
   PullRequest,
+  QueueInfo,
   Registry,
   Repo,
   RepoPermissions,
@@ -254,6 +255,18 @@ export default class WoodpeckerClient extends ApiClient {
 
   deleteAgent(agent: Agent): Promise<unknown> {
     return this._delete(`/api/agents/${agent.id}`);
+  }
+
+  getQueueInfo(): Promise<QueueInfo> {
+    return this._get('/api/queue/info') as Promise<QueueInfo>;
+  }
+
+  pauseQueue(): Promise<unknown> {
+    return this._post('/api/queue/pause');
+  }
+
+  resumeQueue(): Promise<unknown> {
+    return this._post('/api/queue/resume');
   }
 
   getUsers(): Promise<User[]> {
