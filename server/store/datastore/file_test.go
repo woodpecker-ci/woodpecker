@@ -102,7 +102,7 @@ func TestFileList(t *testing.T) {
 		bytes.NewBufferString("hola mundo"),
 	))
 
-	files, err := store.FileList(&model.Pipeline{ID: 1})
+	files, err := store.FileList(&model.Pipeline{ID: 1}, &model.PaginationData{Page: 1, PerPage: 50})
 	if err != nil {
 		t.Errorf("Unexpected error: select files: %s", err)
 		return

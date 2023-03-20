@@ -73,7 +73,7 @@ func TestSecretList(t *testing.T) {
 
 	createTestSecrets(t, store)
 
-	list, err := store.SecretList(&model.Repo{ID: 1, Owner: "org"}, false)
+	list, err := store.SecretList(&model.Repo{ID: 1, Owner: "org"}, false, &model.PaginationData{Page: 1, PerPage: 50})
 	assert.NoError(t, err)
 	assert.Len(t, list, 2)
 }
@@ -95,7 +95,7 @@ func TestSecretPipelineList(t *testing.T) {
 
 	createTestSecrets(t, store)
 
-	list, err := store.SecretList(&model.Repo{ID: 1, Owner: "org"}, true)
+	list, err := store.SecretList(&model.Repo{ID: 1, Owner: "org"}, true, &model.PaginationData{Page: 1, PerPage: 50})
 	assert.NoError(t, err)
 	assert.Len(t, list, 4)
 }
