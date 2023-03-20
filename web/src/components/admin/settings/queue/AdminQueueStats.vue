@@ -81,28 +81,28 @@ const data = computed(() => {
       label: t('admin.settings.queue.stats.worker_count'),
       value: props.stats.worker_count,
       perc: total.value > 0 ? (props.stats.worker_count / total.value) * 100 : 0,
-      color: 'bg-lime-400',
+      color: 'bg-green-500',
     },
     {
       key: 'running_count',
       label: t('admin.settings.queue.stats.running_count'),
       value: props.stats.running_count,
       perc: total.value > 0 ? (props.stats.running_count / total.value) * 100 : 100,
-      color: 'bg-blue-400',
+      color: 'bg-blue-500',
     },
     {
       key: 'pending_count',
       label: t('admin.settings.queue.stats.pending_count'),
       value: props.stats.pending_count,
       perc: total.value > 0 ? (props.stats.pending_count / total.value) * 100 : 0,
-      color: 'bg-gray-400',
+      color: 'bg-red-500',
     },
     {
       key: 'waiting_on_deps_count',
       label: t('admin.settings.queue.stats.waiting_on_deps_count'),
       value: props.stats.waiting_on_deps_count,
       perc: total.value > 0 ? (props.stats.waiting_on_deps_count / total.value) * 100 : 0,
-      color: 'bg-red-400',
+      color: 'bg-red-800',
     },
   ];
 });
