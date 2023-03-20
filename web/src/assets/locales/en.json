@@ -376,7 +376,14 @@
               "tasks": "Tasks",
               "task_running": "Task is running",
               "task_pending": "Task is pending",
-              "task_waiting_on_deps": "Task is waiting on dependencies"
+              "task_waiting_on_deps": "Task is waiting on dependencies",
+              "stats": {
+                "completed_count": "Completed Workflows",
+                "worker_count": "Free",
+                "running_count": "Running",
+                "pending_count": "Pending",
+                "waiting_on_deps_count": "Waiting on dependencies"
+              }
             },
             "users": {
               "users": "Users",

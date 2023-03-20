@@ -32,7 +32,7 @@
     </div>
 
     <div class="flex flex-col">
-      <pre>{{ queueInfo?.stats }}</pre>
+      <AdminQueueStats :stats="queueInfo?.stats" />
 
       <div v-if="tasks.length > 0" class="flex flex-col">
         <p class="mt-6 mb-2 text-xl">{{ $t('admin.settings.queue.tasks') }}</p>
@@ -84,6 +84,8 @@ import Panel from '~/components/layout/Panel.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useNotifications from '~/compositions/useNotifications';
 import { QueueInfo } from '~/lib/api/types/queue';
+
+import AdminQueueStats from './queue/AdminQueueStats.vue';
 
 const apiClient = useApiClient();
 const notifications = useNotifications();
