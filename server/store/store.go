@@ -99,7 +99,6 @@ type Store interface {
 	UserFeed(*model.User) ([]*model.Feed, error)
 
 	// Repositories
-	// RepoList TODO: paginate
 	RepoList(user *model.User, owned bool, p *model.PaginationData) ([]*model.Repo, error)
 	RepoListLatest(*model.User) ([]*model.Feed, error)
 	// RepoBatch Sync batch of repos from SCM (with permissions) to store (create if not exist else update)
