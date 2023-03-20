@@ -77,7 +77,7 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Pipeline, er
 			return nil, nil
 		}
 
-		task, err := s.queue.Poll(c, fn)
+		task, err := s.queue.Poll(c, agent.ID, fn)
 		if err != nil {
 			return nil, err
 		} else if task == nil {

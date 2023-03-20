@@ -34,6 +34,7 @@ type entry struct {
 }
 
 type worker struct {
+	agentID int64
 	filter  FilterFn
 	channel chan *model.Task
 }
@@ -82,9 +83,10 @@ func (q *fifo) PushAtOnce(_ context.Context, tasks []*model.Task) error {
 }
 
 // Poll retrieves and removes the head of this queue.
-func (q *fifo) Poll(c context.Context, f FilterFn) (*model.Task, error) {
+func (q *fifo) Poll(c context.Context, agentID int64, f FilterFn) (*model.Task, error) {
 	q.Lock()
 	w := &worker{
+		agentID: agentID,
 		channel: make(chan *model.Task, 1),
 		filter:  f,
 	}
@@ -254,6 +256,7 @@ func (q *fifo) process() {
 	q.filterWaiting()
 	for pending, worker := q.assignToWorker(); pending != nil && worker != nil; pending, worker = q.assignToWorker() {
 		task := pending.Value.(*model.Task)
+		task.ExecutedByAgent = worker.agentID
 		delete(q.workers, worker)
 		q.pending.Remove(pending)
 		q.running[task.ID] = &entry{
