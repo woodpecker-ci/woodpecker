@@ -36,8 +36,8 @@ import (
 func GetBadge(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo, err := _store.GetRepoName(c.Param("owner") + "/" + c.Param("name"))
-	if err != nil {
-		if errors.Is(err, types.RecordNotExist) {
+	if err != nil || !repo.IsActive {
+		if err == nil || errors.Is(err, types.RecordNotExist) {
 			c.AbortWithStatus(http.StatusNotFound)
 			return
 		}
