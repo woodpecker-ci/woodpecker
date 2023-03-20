@@ -583,21 +583,23 @@ func (c *client) loadChangedFilesFromPullRequest(ctx context.Context, pull *gith
 		return nil, err
 	}
 
-	opts := &github.ListOptions{Page: 1}
-	fileList := make([]string, 0, 16)
-	for opts.Page > 0 {
-		files, resp, err := c.newClientToken(ctx, user.Token).PullRequests.ListFiles(ctx, repo.Owner, repo.Name, pull.GetNumber(), opts)
-		if err != nil {
-			return nil, err
+	pipeline.ChangedFiles, err = utils.Paginate(func(page int) ([]string, error) {
+		opts := &github.ListOptions{Page: page}
+		fileList := make([]string, 0, 16)
+		for opts.Page > 0 {
+			files, resp, err := c.newClientToken(ctx, user.Token).PullRequests.ListFiles(ctx, repo.Owner, repo.Name, pull.GetNumber(), opts)
+			if err != nil {
+				return nil, err
+			}
+
+			for _, file := range files {
+				fileList = append(fileList, file.GetFilename(), file.GetPreviousFilename())
+			}
+
+			opts.Page = resp.NextPage
 		}
+		return utils.DedupStrings(fileList), nil
+	})
 
-		for _, file := range files {
-			fileList = append(fileList, file.GetFilename(), file.GetPreviousFilename())
-		}
-
-		opts.Page = resp.NextPage
-	}
-	pipeline.ChangedFiles = utils.DedupStrings(fileList)
-
-	return pipeline, nil
+	return pipeline, err
 }
