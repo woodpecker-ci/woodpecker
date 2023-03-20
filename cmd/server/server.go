@@ -48,6 +48,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/server/web"
+	"github.com/woodpecker-ci/woodpecker/shared/constant"
 	"github.com/woodpecker-ci/woodpecker/version"
 	// "github.com/woodpecker-ci/woodpecker/server/plugins/encryption"
 	// encryptedStore "github.com/woodpecker-ci/woodpecker/server/plugins/encryption/wrapper/store"
@@ -313,6 +314,7 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 
 	// Cloning
 	server.Config.Pipeline.DefaultCloneImage = c.String("default-clone-image")
+	constant.TrustedCloneImages = append(constant.TrustedCloneImages, server.Config.Pipeline.DefaultCloneImage)
 
 	// Execution
 	_events := c.StringSlice("default-cancel-previous-pipeline-events")

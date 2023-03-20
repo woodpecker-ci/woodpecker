@@ -287,6 +287,8 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[
 		compiler.WithProxy(),
 		compiler.WithWorkspaceFromURL("/woodpecker", b.Repo.Link),
 		compiler.WithMetadata(metadata),
+		compiler.WithTrusted(b.Repo.IsTrusted),
+		compiler.WithNetrcOnlyTrusted(b.Repo.NetrcOnlyTrusted),
 	).Compile(parsed)
 }
 
