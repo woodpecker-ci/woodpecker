@@ -378,7 +378,7 @@
               "task_pending": "Task is pending",
               "task_waiting_on_deps": "Task is waiting on dependencies",
               "stats": {
-                "completed_count": "Completed Workflows",
+                "completed_count": "Completed Tasks",
                 "worker_count": "Free",
                 "running_count": "Running",
                 "pending_count": "Pending",
