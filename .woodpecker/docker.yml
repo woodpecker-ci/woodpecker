@@ -3,9 +3,10 @@ depends_on:
   - web
 
 variables:
-  - &golang_image 'golang:1.19.5'
-  - &node_image 'node:18-alpine'
-  - &xgo_image 'techknowlogick/xgo:go-1.19.5'
+  - &golang_image 'docker.io/golang:1.19.5'
+  - &node_image 'docker.io/node:18-alpine'
+  - &xgo_image 'docker.io/techknowlogick/xgo:go-1.19.5'
+  - &buildx_plugin 'quay.io/woodpeckerci/plugin-docker-buildx'
   - &xgo_version 'go-1.19.5'
   - &platforms_release 'linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/386,linux/amd64,linux/ppc64le,linux/riscv64,linux/s390x,windows/amd64,freebsd/arm64,freebsd/amd64,openbsd/arm64,openbsd/amd64'
   - &platforms_server 'linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le,linux/riscv64'
@@ -43,7 +44,7 @@ pipeline:
       XGO_VERSION: *xgo_version
 
   publish-server-preview:
-    image: woodpeckerci/plugin-docker-buildx
+    image: *buildx_plugin
     secrets: [ docker_username, docker_password ]
     group: docker
     settings:
@@ -55,7 +56,7 @@ pipeline:
       event: pull_request
 
   publish-server-alpine-preview:
-    image: woodpeckerci/plugin-docker-buildx
+    image: *buildx_plugin
     secrets: [ docker_username, docker_password ]
     group: docker
     settings:
@@ -67,7 +68,7 @@ pipeline:
       event: pull_request
 
   publish-next-server:
-    image: woodpeckerci/plugin-docker-buildx
+    image: *buildx_plugin
     group: docker
     secrets: [docker_username, docker_password]
     settings:
@@ -80,7 +81,7 @@ pipeline:
       event: push
 
   publish-next-server-alpine:
-    image: woodpeckerci/plugin-docker-buildx
+    image: *buildx_plugin
     group: docker
     secrets: [ docker_username, docker_password ]
     settings:
@@ -93,7 +94,7 @@ pipeline:
       event: push
 
   publish-release-branch-server:
-    image: woodpeckerci/plugin-docker-buildx
+    image: *buildx_plugin
     group: docker
     secrets: [docker_username, docker_password]
     settings:
@@ -106,7 +107,7 @@ pipeline:
       event: push
 
   publish-release-branch-server-alpine:
-    image: woodpeckerci/plugin-docker-buildx
+    image: *buildx_plugin
     group: docker
     secrets: [ docker_username, docker_password ]
     settings:
@@ -120,7 +121,7 @@ pipeline:
 
   release-server:
     group: docker
-    image: woodpeckerci/plugin-docker-buildx
+    image: *buildx_plugin
     secrets: [docker_username, docker_password]
     settings:
       repo: woodpeckerci/woodpecker-server
@@ -133,7 +134,7 @@ pipeline:
 
   release-server-alpine:
     group: docker
-    image: woodpeckerci/plugin-docker-buildx
+    image: *buildx_plugin
     secrets: [ docker_username, docker_password ]
     settings:
       repo: woodpeckerci/woodpecker-server
@@ -150,7 +151,7 @@ pipeline:
 
   publish-agent-preview:
     group: docker
-    image: woodpeckerci/plugin-docker-buildx
+    image: *buildx_plugin
     secrets: [ docker_username, docker_password ]
     settings:
       repo: woodpeckerci/woodpecker-agent
@@ -162,7 +163,7 @@ pipeline:
 
   publish-next-agent:
     group: docker
-    image: woodpeckerci/plugin-docker-buildx
+    image: *buildx_plugin
     secrets: [docker_username, docker_password]
     settings:
       repo: woodpeckerci/woodpecker-agent
@@ -175,7 +176,7 @@ pipeline:
 
   publish-next-agent-alpine:
     group: docker
-    image: woodpeckerci/plugin-docker-buildx
+    image: *buildx_plugin
     secrets: [ docker_username, docker_password ]
     settings:
       repo: woodpeckerci/woodpecker-agent
@@ -188,7 +189,7 @@ pipeline:
 
   publish-release-branch-agent:
     group: docker
-    image: woodpeckerci/plugin-docker-buildx
+    image: *buildx_plugin
     secrets: [docker_username, docker_password]
     settings:
       repo: woodpeckerci/woodpecker-agent
@@ -201,7 +202,7 @@ pipeline:
 
   publish-release-branch-agent-alpine:
     group: docker
-    image: woodpeckerci/plugin-docker-buildx
+    image: *buildx_plugin
     secrets: [ docker_username, docker_password ]
     settings:
       repo: woodpeckerci/woodpecker-agent
@@ -214,7 +215,7 @@ pipeline:
 
   release-agent:
     group: docker
-    image: woodpeckerci/plugin-docker-buildx
+    image: *buildx_plugin
     secrets: [docker_username, docker_password]
     settings:
       repo: woodpeckerci/woodpecker-agent
@@ -227,7 +228,7 @@ pipeline:
 
   release-agent-alpine:
     group: docker
-    image: woodpeckerci/plugin-docker-buildx
+    image: *buildx_plugin
     secrets: [ docker_username, docker_password ]
     settings:
       repo: woodpeckerci/woodpecker-agent
@@ -244,7 +245,7 @@ pipeline:
 
   publish-cli-preview:
     group: docker
-    image: woodpeckerci/plugin-docker-buildx
+    image: *buildx_plugin
     secrets: [ docker_username, docker_password ]
     settings:
       repo: woodpeckerci/woodpecker-cli
@@ -256,7 +257,7 @@ pipeline:
 
   publish-next-cli:
     group: docker
-    image: woodpeckerci/plugin-docker-buildx
+    image: *buildx_plugin
     secrets: [docker_username, docker_password]
     settings:
       repo: woodpeckerci/woodpecker-cli
@@ -269,7 +270,7 @@ pipeline:
 
   publish-next-cli-alpine:
     group: docker
-    image: woodpeckerci/plugin-docker-buildx
+    image: *buildx_plugin
     secrets: [ docker_username, docker_password ]
     settings:
       repo: woodpeckerci/woodpecker-cli
@@ -282,7 +283,7 @@ pipeline:
 
   publish-release-branch-cli:
     group: docker
-    image: woodpeckerci/plugin-docker-buildx
+    image: *buildx_plugin
     secrets: [docker_username, docker_password]
     settings:
       repo: woodpeckerci/woodpecker-cli
@@ -295,7 +296,7 @@ pipeline:
 
   publish-release-branch-cli-alpine:
     group: docker
-    image: woodpeckerci/plugin-docker-buildx
+    image: *buildx_plugin
     secrets: [ docker_username, docker_password ]
     settings:
       repo: woodpeckerci/woodpecker-cli
@@ -308,7 +309,7 @@ pipeline:
 
   release-cli:
     group: docker
-    image: woodpeckerci/plugin-docker-buildx
+    image: *buildx_plugin
     secrets: [docker_username, docker_password]
     settings:
       repo: woodpeckerci/woodpecker-cli
@@ -321,7 +322,7 @@ pipeline:
 
   release-cli-alpine:
     group: docker
-    image: woodpeckerci/plugin-docker-buildx
+    image: *buildx_plugin
     secrets: [ docker_username, docker_password ]
     settings:
       repo: woodpeckerci/woodpecker-cli

@@ -1,6 +1,6 @@
 variables:
-  - &golang_image 'golang:1.19.5'
-  - &node_image 'node:18-alpine'
+  - &golang_image 'docker.io/golang:1.19.5'
+  - &node_image 'docker.io/node:18-alpine'
   - &when_path
     - "docs/**"
     - ".woodpecker/docs.yml"
@@ -27,7 +27,7 @@ pipeline:
       path: *when_path
 
   securitycheck:
-    image: aquasec/trivy:latest
+    image: ghcr.io/aquasecurity/trivy:latest
     commands:
       - trivy fs --exit-code 0 --skip-dirs node_modules/ --skip-dirs plugins/woodpecker-plugins/node_modules --severity UNKNOWN,LOW docs/
       # TODO currently it is not fixable so just do not block currently
@@ -36,7 +36,7 @@ pipeline:
       path: *when_path
 
   deploy-preview:
-    image: woodpeckerci/plugin-surge-preview:next
+    image: quay.io/woodpeckerci/plugin-surge-preview:next
     settings:
       path: "docs/build/"
       surge_token:
@@ -52,7 +52,7 @@ pipeline:
   # TODO: add step to remove preview again after PR is closed (waiting for #286)
 
   deploy:
-    image: alpine:3.14.2
+    image: docker.io/alpine:3.14.2
     secrets:
       - BOT_PRIVATE_KEY
     commands:

@@ -1,5 +1,5 @@
 variables:
-  - &golang_image 'golang:1.19.5'
+  - &golang_image 'docker.io/golang:1.19.5'
   - &when_path
       # related config files
       - ".woodpecker/test.yml"
@@ -46,12 +46,13 @@ pipeline:
       path: *when_path
 
   lint-editorconfig:
-    image: mstruebing/editorconfig-checker
+    image: docker.io/mstruebing/editorconfig-checker
     group: test
 
   securitycheck:
     group: test
-    image: aquasec/trivy:latest
+    pull: true
+    image: ghcr.io/aquasecurity/trivy:latest
     commands:
       - trivy fs --exit-code 0 --skip-dirs web/ --skip-dirs docs/ --severity UNKNOWN,LOW .
       - trivy fs --exit-code 1 --skip-dirs web/ --skip-dirs docs/ --severity MEDIUM,HIGH,CRITICAL .
@@ -103,7 +104,7 @@ pipeline:
 
   codecov:
     pull: true
-    image: woodpeckerci/plugin-codecov:next-alpine
+    image: quay.io/woodpeckerci/plugin-codecov:next-alpine
     settings:
       files:
         - agent-coverage.out
@@ -118,7 +119,7 @@ pipeline:
 
 services:
   service-postgres:
-    image: postgres:11
+    image: docker.io/postgres:11
     ports: ["5432"]
     environment:
       - POSTGRES_USER=postgres
@@ -127,7 +128,7 @@ services:
       path: *when_path
 
   service-mysql:
-    image: mysql:5.6.27
+    image: docker.io/mysql:5.6.27
     ports: ["3306"]
     environment:
       - MYSQL_DATABASE=test

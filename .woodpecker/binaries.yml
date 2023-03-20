@@ -3,8 +3,8 @@ depends_on:
   - web
 
 variables:
-  - &golang_image 'golang:1.19.5'
-  - &node_image 'node:18-alpine'
+  - &golang_image 'docker.io/golang:1.19.5'
+  - &node_image 'docker.io/node:18-alpine'
   - &when_path
       # related config files
       - ".woodpecker/binaries.yml"
@@ -93,7 +93,7 @@ pipeline:
       path: *when_path
 
   release:
-    image: plugins/github-release
+    image: docker.io/plugins/github-release
     secrets:
       - source: github_token
         target: github_release_api_key

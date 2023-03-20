@@ -1,5 +1,5 @@
 variables:
-  - &node_image 'node:18-alpine'
+  - &node_image 'docker.io/node:18-alpine'
   - &when_path
       # related config files
       - ".woodpecker/web.yml"
@@ -48,7 +48,7 @@ pipeline:
 
   securitycheck:
     group: test
-    image: aquasec/trivy:latest
+    image: ghcr.io/aquasecurity/trivy:latest
     commands:
       - trivy fs --exit-code 0 --skip-dirs node_modules/ --severity UNKNOWN,LOW web/
       - trivy fs --exit-code 1 --skip-dirs node_modules/ --severity MEDIUM,HIGH,CRITICAL web/

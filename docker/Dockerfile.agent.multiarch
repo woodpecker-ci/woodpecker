@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM golang:1.18 AS build
+FROM --platform=$BUILDPLATFORM docker.io/golang:1.18 AS build
 
 WORKDIR /src
 COPY . .
