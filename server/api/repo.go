@@ -318,7 +318,9 @@ func RepairRepo(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	repo.Perm = from.Perm
+	repo.Perm.Pull = from.Perm.Pull
+	repo.Perm.Push = from.Perm.Push
+	repo.Perm.Admin = from.Perm.Admin
 	if err := _store.PermUpsert(repo.Perm); err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
