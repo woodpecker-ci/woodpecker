@@ -256,7 +256,7 @@ func (q *fifo) process() {
 	q.filterWaiting()
 	for pending, worker := q.assignToWorker(); pending != nil && worker != nil; pending, worker = q.assignToWorker() {
 		task := pending.Value.(*model.Task)
-		task.ExecutedByAgent = worker.agentID
+		task.AgentID = worker.agentID
 		delete(q.workers, worker)
 		q.pending.Remove(pending)
 		q.running[task.ID] = &entry{

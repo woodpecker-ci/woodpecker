@@ -5,6 +5,7 @@ export type Task = {
   dependencies: string[];
   dep_status: { [key: string]: string };
   run_on: string[];
+  agent_id: number;
 };
 
 export type QueueStats = {

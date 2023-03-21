@@ -22,6 +22,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/securecookie"
 
+	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/server/store"
@@ -51,7 +52,7 @@ func GetAgent(c *gin.Context) {
 	c.JSON(http.StatusOK, agent)
 }
 
-func GetAgentPipelines(c *gin.Context) {
+func GetAgentTasks(c *gin.Context) {
 	agentID, err := strconv.ParseInt(c.Param("agent"), 10, 64)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusBadRequest, err)
@@ -64,14 +65,15 @@ func GetAgentPipelines(c *gin.Context) {
 		return
 	}
 
-	// TODO: implement
-	// pipelines, err := store.FromContext(c).AgentListActivePipeline(agent)
-	// if err != nil {
-	// 	c.String(500, "Error getting pipeline list. %s", err)
-	// 	return
-	// }
+	tasks := []*model.Task{}
+	info := server.Config.Services.Queue.Info(c)
+	for _, task := range info.Running {
+		if task.AgentID == agent.ID {
+			tasks = append(tasks, task)
+		}
+	}
 
-	c.JSON(http.StatusOK, agent)
+	c.JSON(http.StatusOK, tasks)
 }
 
 func PatchAgent(c *gin.Context) {
