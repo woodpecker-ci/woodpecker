@@ -22,7 +22,8 @@ var removeInactiveRepos = task{
 	name:     "remove-inactive-repos",
 	required: true,
 	fn: func(sess *xorm.Session) error {
-		_, err := sess.Table("repos").Where("repo_active = ?", false).Delete()
+		// If the timeout is 0, the repo was never activated, so we remove it.
+		_, err := sess.Table("repos").Where("repo_active = ?", false).Where("repo_timeout != ?", 0).Delete()
 		if err != nil {
 			return err
 		}
