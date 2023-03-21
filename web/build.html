@@ -10,15 +10,15 @@
     <script src="web-config.js"></script>
     <script type="module">
       (async () => {
-        const configFilesResp = await fetch(`${window.WOODPECKER_URL_ROOT}/manifest.json`);
+        const configFilesResp = await fetch(`${window.WOODPECKER_ROOT_URL}/manifest.json`);
         const configFiles = await configFilesResp.json();
 
         let script = document.createElement('script');
         script.type = 'module';
-        script.src = window.WOODPECKER_URL_ROOT + '/' + configFiles['src/main.ts'].file;
+        script.src = window.WOODPECKER_ROOT_URL + '/' + configFiles['src/main.ts'].file;
 
         let link = document.createElement('link');
-        link.href = window.WOODPECKER_URL_ROOT + '/' + configFiles['src/main.ts'].css[0];
+        link.href = window.WOODPECKER_ROOT_URL + '/' + configFiles['src/main.ts'].css[0];
         link.rel = 'stylesheet';
 
         document.head.appendChild(script);

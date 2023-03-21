@@ -45,7 +45,7 @@ func Config(c *gin.Context) {
 		"docs":     server.Config.Server.Docs,
 		"version":  version.String(),
 		"forge":    server.Config.Services.Forge.Name(),
-		"url_root": server.Config.Server.URLRoot,
+		"root_url": server.Config.Server.RootURL,
 	}
 
 	// default func map with json parser.
@@ -72,5 +72,5 @@ window.WOODPECKER_CSRF = "{{ .csrf }}";
 window.WOODPECKER_VERSION = "{{ .version }}";
 window.WOODPECKER_DOCS = "{{ .docs }}";
 window.WOODPECKER_FORGE = "{{ .forge }}";
-window.WOODPECKER_URL_ROOT = "{{ .url_root }}";
+window.WOODPECKER_ROOT_URL = "{{ .root_url }}";
 `
