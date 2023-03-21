@@ -368,7 +368,9 @@
                 "version": "Version",
                 "last_contact": "Last contact",
                 "never": "Never",
-                "delete_confirm": "Do you really want to delete this agent? It wont be able to connected to the server anymore."
+                "delete_confirm": "Do you really want to delete this agent? It wont be able to connected to the server anymore.",
+                "edit_agent": "Edit agent",
+                "delete_agent": "Delete agent"
             },
             "queue": {
               "queue": "Queue",
@@ -381,6 +383,8 @@
               "task_running": "Task is running",
               "task_pending": "Task is pending",
               "task_waiting_on_deps": "Task is waiting on dependencies",
+              "agent": "agent",
+              "waiting_for": "waiting for",
               "stats": {
                 "completed_count": "Completed Tasks",
                 "worker_count": "Free",

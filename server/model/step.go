@@ -32,7 +32,7 @@ type StepStore interface {
 // swagger:model step
 type Step struct {
 	ID         int64             `json:"id"                   xorm:"pk autoincr 'step_id'"`
-	PipelineID int64             `json:"pipeline_id"             xorm:"UNIQUE(s) INDEX 'step_pipeline_id'"`
+	PipelineID int64             `json:"pipeline_id"          xorm:"UNIQUE(s) INDEX 'step_pipeline_id'"`
 	PID        int               `json:"pid"                  xorm:"UNIQUE(s) 'step_pid'"`
 	PPID       int               `json:"ppid"                 xorm:"step_ppid"`
 	PGID       int               `json:"pgid"                 xorm:"step_pgid"`
@@ -42,7 +42,7 @@ type Step struct {
 	ExitCode   int               `json:"exit_code"            xorm:"step_exit_code"`
 	Started    int64             `json:"start_time,omitempty" xorm:"step_started"`
 	Stopped    int64             `json:"end_time,omitempty"   xorm:"step_stopped"`
-	Machine    string            `json:"machine,omitempty"    xorm:"step_machine"`
+	AgentID    int64             `json:"agent_id,omitempty"   xorm:"step_agent_id"`
 	Platform   string            `json:"platform,omitempty"   xorm:"step_platform"`
 	Environ    map[string]string `json:"environ,omitempty"    xorm:"json 'step_environ'"`
 	Children   []*Step           `json:"children,omitempty"   xorm:"-"`
