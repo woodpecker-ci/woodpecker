@@ -16,6 +16,7 @@ package datastore
 
 import (
 	"errors"
+	"strings"
 
 	"github.com/rs/zerolog/log"
 	"xorm.io/builder"
@@ -30,25 +31,25 @@ func (s storage) GetRepo(id int64) (*model.Repo, error) {
 	return repo, wrapGet(s.engine.ID(id).Get(repo))
 }
 
-func (s storage) GetRepoRemoteID(id model.RemoteID) (*model.Repo, error) {
+func (s storage) GetRepoForgeID(remoteID model.ForgeRemoteID) (*model.Repo, error) {
 	sess := s.engine.NewSession()
 	defer sess.Close()
-	return s.getRepoRemoteID(sess, id)
+	return s.getRepoForgeID(sess, remoteID)
 }
 
-func (s storage) getRepoRemoteID(e *xorm.Session, id model.RemoteID) (*model.Repo, error) {
+func (s storage) getRepoForgeID(e *xorm.Session, remoteID model.ForgeRemoteID) (*model.Repo, error) {
 	repo := new(model.Repo)
-	return repo, wrapGet(e.Where("remote_id = ?", id).Get(repo))
+	return repo, wrapGet(e.Where("forge_remote_id = ?", remoteID).Get(repo))
 }
 
-func (s storage) GetRepoNameFallback(remoteID model.RemoteID, fullName string) (*model.Repo, error) {
+func (s storage) GetRepoNameFallback(remoteID model.ForgeRemoteID, fullName string) (*model.Repo, error) {
 	sess := s.engine.NewSession()
 	defer sess.Close()
 	return s.getRepoNameFallback(sess, remoteID, fullName)
 }
 
-func (s storage) getRepoNameFallback(e *xorm.Session, remoteID model.RemoteID, fullName string) (*model.Repo, error) {
-	repo, err := s.getRepoRemoteID(e, remoteID)
+func (s storage) getRepoNameFallback(e *xorm.Session, remoteID model.ForgeRemoteID, fullName string) (*model.Repo, error) {
+	repo, err := s.getRepoForgeID(e, remoteID)
 	if errors.Is(err, types.RecordNotExist) {
 		return s.getRepoName(e, fullName)
 	}
@@ -72,7 +73,7 @@ func (s storage) GetRepoName(fullName string) (*model.Repo, error) {
 
 func (s storage) getRepoName(e *xorm.Session, fullName string) (*model.Repo, error) {
 	repo := new(model.Repo)
-	return repo, wrapGet(e.Where("repo_full_name = ?", fullName).Get(repo))
+	return repo, wrapGet(e.Where("LOWER(repo_full_name) = ?", strings.ToLower(fullName)).Get(repo))
 }
 
 func (s storage) GetRepoCount() (int64, error) {
@@ -169,7 +170,7 @@ func (s storage) RepoBatch(repos []*model.Repo) error {
 		}
 
 		exist := true
-		repo, err := s.getRepoNameFallback(sess, repos[i].RemoteID, repos[i].FullName)
+		repo, err := s.getRepoNameFallback(sess, repos[i].ForgeRemoteID, repos[i].FullName)
 		if err != nil {
 			if errors.Is(err, types.RecordNotExist) {
 				exist = false
@@ -186,10 +187,10 @@ func (s storage) RepoBatch(repos []*model.Repo) error {
 					return err
 				}
 			}
-			if repos[i].RemoteID.IsValid() {
+			if repos[i].ForgeRemoteID.IsValid() {
 				if _, err := sess.
-					Where("remote_id = ?", repos[i].RemoteID).
-					Cols("repo_owner", "repo_name", "repo_full_name", "repo_scm", "repo_avatar", "repo_link", "repo_private", "repo_clone", "repo_branch", "remote_id").
+					Where("forge_remote_id = ?", repos[i].ForgeRemoteID).
+					Cols("repo_owner", "repo_name", "repo_full_name", "repo_scm", "repo_avatar", "repo_link", "repo_private", "repo_clone", "repo_branch", "forge_id").
 					Update(repos[i]); err != nil {
 					return err
 				}
@@ -197,14 +198,14 @@ func (s storage) RepoBatch(repos []*model.Repo) error {
 				if _, err := sess.
 					Where("repo_owner = ?", repos[i].Owner).
 					And(" repo_name = ?", repos[i].Name).
-					Cols("repo_owner", "repo_name", "repo_full_name", "repo_scm", "repo_avatar", "repo_link", "repo_private", "repo_clone", "repo_branch", "remote_id").
+					Cols("repo_owner", "repo_name", "repo_full_name", "repo_scm", "repo_avatar", "repo_link", "repo_private", "repo_clone", "repo_branch", "forge_id").
 					Update(repos[i]); err != nil {
 					return err
 				}
 			}
 
 			_, err := sess.
-				Where("remote_id = ?", repos[i].RemoteID).
+				Where("forge_remote_id = ?", repos[i].ForgeRemoteID).
 				Get(repos[i])
 			if err != nil {
 				return err

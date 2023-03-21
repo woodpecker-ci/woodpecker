@@ -16,11 +16,12 @@ package grpc
 
 import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/queue"
 )
 
 func createFilterFunc(agentFilter rpc.Filter) (queue.FilterFn, error) {
-	return func(task *queue.Task) bool {
+	return func(task *model.Task) bool {
 		for taskLabel, taskLabelValue := range task.Labels {
 			// if a task label is empty it will be ignored
 			if taskLabelValue == "" {

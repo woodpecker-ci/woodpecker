@@ -13,8 +13,7 @@
         v-for="repo in searchedRepos"
         :key="repo.id"
         class="items-center"
-        :clickable="repo.active"
-        @click="repo.active && $router.push({ name: 'repo', params: { repoOwner: repo.owner, repoName: repo.name } })"
+        :to="repo.active ? { name: 'repo', params: { repoOwner: repo.owner, repoName: repo.name } } : undefined"
       >
         <span class="text-color">{{ repo.full_name }}</span>
         <span v-if="repo.active" class="ml-auto text-color-alt">{{ $t('repo.enable.enabled') }}</span>
@@ -78,7 +77,7 @@ export default defineComponent({
     const { doSubmit: activateRepo, isLoading: isActivatingRepo } = useAsyncAction(async (repo: Repo) => {
       repoToActivate.value = repo;
       await apiClient.activateRepo(repo.owner, repo.name);
-      notifications.notify({ title: i18n.t('repo.enabled.success'), type: 'success' });
+      notifications.notify({ title: i18n.t('repo.enable.success'), type: 'success' });
       repoToActivate.value = undefined;
       await router.push({ name: 'repo', params: { repoName: repo.name, repoOwner: repo.owner } });
     });

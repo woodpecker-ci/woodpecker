@@ -11,7 +11,7 @@ import (
 // the stream. This should be resolved.
 
 // TODO (bradrydzewski) implement a mux.Info to fetch information and
-// statistics for the multiplexier. Streams, subscribers, etc
+// statistics for the multiplexer. Streams, subscribers, etc
 // mux.Info()
 
 // TODO (bradrydzewski) refactor code to place publisher and subscriber
@@ -46,7 +46,7 @@ func New() Log {
 	}
 }
 
-func (l *log) Open(c context.Context, path string) error {
+func (l *log) Open(_ context.Context, path string) error {
 	l.Lock()
 	_, ok := l.streams[path]
 	if !ok {
@@ -60,7 +60,7 @@ func (l *log) Open(c context.Context, path string) error {
 	return nil
 }
 
-func (l *log) Write(c context.Context, path string, entry *Entry) error {
+func (l *log) Write(_ context.Context, path string, entry *Entry) error {
 	l.Lock()
 	s, ok := l.streams[path]
 	l.Unlock()
@@ -105,7 +105,7 @@ func (l *log) Tail(c context.Context, path string, handler Handler) error {
 	return nil
 }
 
-func (l *log) Close(c context.Context, path string) error {
+func (l *log) Close(_ context.Context, path string) error {
 	l.Lock()
 	s, ok := l.streams[path]
 	l.Unlock()
@@ -123,7 +123,7 @@ func (l *log) Close(c context.Context, path string) error {
 	return nil
 }
 
-func (l *log) Snapshot(c context.Context, path string, w io.Writer) error {
+func (l *log) Snapshot(_ context.Context, path string, w io.Writer) error {
 	l.Lock()
 	s, ok := l.streams[path]
 	l.Unlock()

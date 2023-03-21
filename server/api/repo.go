@@ -32,14 +32,8 @@ import (
 	"github.com/woodpecker-ci/woodpecker/shared/token"
 )
 
-// TODO: make it set system wide via environment variables
-const (
-	defaultTimeout int64 = 60 // 1 hour default pipeline time
-	maxTimeout     int64 = defaultTimeout * 2
-)
-
 func PostRepo(c *gin.Context) {
-	remote := server.Config.Services.Remote
+	forge := server.Config.Services.Forge
 	_store := store.FromContext(c)
 	user := session.User(c)
 	repo := session.Repo(c)
@@ -52,6 +46,7 @@ func PostRepo(c *gin.Context) {
 	repo.IsActive = true
 	repo.UserID = user.ID
 	repo.AllowPull = true
+	repo.NetrcOnlyTrusted = true
 	repo.CancelPreviousPipelineEvents = server.Config.Pipeline.DefaultCancelPreviousPipelineEvents
 
 	if repo.Visibility == "" {
@@ -62,9 +57,9 @@ func PostRepo(c *gin.Context) {
 	}
 
 	if repo.Timeout == 0 {
-		repo.Timeout = defaultTimeout
-	} else if repo.Timeout > maxTimeout {
-		repo.Timeout = maxTimeout
+		repo.Timeout = server.Config.Pipeline.DefaultTimeout
+	} else if repo.Timeout > server.Config.Pipeline.MaxTimeout {
+		repo.Timeout = server.Config.Pipeline.MaxTimeout
 	}
 
 	if repo.Hash == "" {
@@ -87,7 +82,7 @@ func PostRepo(c *gin.Context) {
 		sig,
 	)
 
-	from, err := remote.Repo(c, user, repo.RemoteID, repo.Owner, repo.Name)
+	from, err := forge.Repo(c, user, repo.ForgeRemoteID, repo.Owner, repo.Name)
 	if err == nil {
 		if repo.FullName != from.FullName {
 			// create a redirection
@@ -100,7 +95,7 @@ func PostRepo(c *gin.Context) {
 		repo.Update(from)
 	}
 
-	err = remote.Activate(c, user, repo, link)
+	err = forge.Activate(c, user, repo, link)
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
@@ -126,8 +121,8 @@ func PatchRepo(c *gin.Context) {
 		return
 	}
 
-	if in.Timeout != nil && *in.Timeout > maxTimeout && !user.Admin {
-		c.String(http.StatusForbidden, fmt.Sprintf("Timeout is not allowed to be higher than max timeout (%dmin)", maxTimeout))
+	if in.Timeout != nil && *in.Timeout > server.Config.Pipeline.MaxTimeout && !user.Admin {
+		c.String(http.StatusForbidden, fmt.Sprintf("Timeout is not allowed to be higher than max timeout (%dmin)", server.Config.Pipeline.MaxTimeout))
 	}
 	if in.IsTrusted != nil && *in.IsTrusted != repo.IsTrusted && !user.Admin {
 		log.Trace().Msgf("user '%s' wants to make repo trusted without being an instance admin ", user.Login)
@@ -152,6 +147,9 @@ func PatchRepo(c *gin.Context) {
 	}
 	if in.CancelPreviousPipelineEvents != nil {
 		repo.CancelPreviousPipelineEvents = *in.CancelPreviousPipelineEvents
+	}
+	if in.NetrcOnlyTrusted != nil {
+		repo.NetrcOnlyTrusted = *in.NetrcOnlyTrusted
 	}
 	if in.Visibility != nil {
 		switch *in.Visibility {
@@ -198,15 +196,30 @@ func GetRepoPermissions(c *gin.Context) {
 func GetRepoBranches(c *gin.Context) {
 	repo := session.Repo(c)
 	user := session.User(c)
-	r := server.Config.Services.Remote
+	f := server.Config.Services.Forge
 
-	branches, err := r.Branches(c, user, repo)
+	branches, err := f.Branches(c, user, repo)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
 	c.JSON(http.StatusOK, branches)
+}
+
+func GetRepoPullRequests(c *gin.Context) {
+	repo := session.Repo(c)
+	user := session.User(c)
+	page := session.Pagination(c)
+	f := server.Config.Services.Forge
+
+	prs, err := f.PullRequests(c, user, repo, page)
+	if err != nil {
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, prs)
 }
 
 func DeleteRepo(c *gin.Context) {
@@ -231,7 +244,7 @@ func DeleteRepo(c *gin.Context) {
 		}
 	}
 
-	if err := server.Config.Services.Remote.Deactivate(c, user, repo, server.Config.Server.Host); err != nil {
+	if err := server.Config.Services.Forge.Deactivate(c, user, repo, server.Config.Server.Host); err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
@@ -239,7 +252,7 @@ func DeleteRepo(c *gin.Context) {
 }
 
 func RepairRepo(c *gin.Context) {
-	remote := server.Config.Services.Remote
+	forge := server.Config.Services.Forge
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
 	user := session.User(c)
@@ -248,7 +261,7 @@ func RepairRepo(c *gin.Context) {
 	t := token.New(token.HookToken, repo.FullName)
 	sig, err := t.Sign(repo.Hash)
 	if err != nil {
-		c.String(500, err.Error())
+		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -260,9 +273,9 @@ func RepairRepo(c *gin.Context) {
 		sig,
 	)
 
-	from, err := remote.Repo(c, user, repo.RemoteID, repo.Owner, repo.Name)
+	from, err := forge.Repo(c, user, repo.ForgeRemoteID, repo.Owner, repo.Name)
 	if err != nil {
-		log.Error().Err(err).Msgf("get repo '%s/%s' from remote", repo.Owner, repo.Name)
+		log.Error().Err(err).Msgf("get repo '%s/%s' from forge", repo.Owner, repo.Name)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -282,11 +295,11 @@ func RepairRepo(c *gin.Context) {
 		return
 	}
 
-	if err := remote.Deactivate(c, user, repo, host); err != nil {
+	if err := forge.Deactivate(c, user, repo, host); err != nil {
 		log.Trace().Err(err).Msgf("deactivate repo '%s' to repair failed", repo.FullName)
 	}
-	if err := remote.Activate(c, user, repo, link); err != nil {
-		c.String(500, err.Error())
+	if err := forge.Activate(c, user, repo, link); err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -294,7 +307,7 @@ func RepairRepo(c *gin.Context) {
 }
 
 func MoveRepo(c *gin.Context) {
-	remote := server.Config.Services.Remote
+	forge := server.Config.Services.Forge
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
 	user := session.User(c)
@@ -312,7 +325,7 @@ func MoveRepo(c *gin.Context) {
 		return
 	}
 
-	from, err := remote.Repo(c, user, "", owner, name)
+	from, err := forge.Repo(c, user, "", owner, name)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -340,7 +353,7 @@ func MoveRepo(c *gin.Context) {
 	t := token.New(token.HookToken, repo.FullName)
 	sig, err := t.Sign(repo.Hash)
 	if err != nil {
-		c.String(500, err.Error())
+		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -352,11 +365,11 @@ func MoveRepo(c *gin.Context) {
 		sig,
 	)
 
-	if err := remote.Deactivate(c, user, repo, host); err != nil {
+	if err := forge.Deactivate(c, user, repo, host); err != nil {
 		log.Trace().Err(err).Msgf("deactivate repo '%s' for move to activate later, got an error", repo.FullName)
 	}
-	if err := remote.Activate(c, user, repo, link); err != nil {
-		c.String(500, err.Error())
+	if err := forge.Activate(c, user, repo, link); err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 	c.Writer.WriteHeader(http.StatusOK)

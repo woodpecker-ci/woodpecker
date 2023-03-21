@@ -43,16 +43,16 @@ func createSQLiteDB(t *testing.T) string {
 	return tmpF.Name()
 }
 
-func testDB(t *testing.T, new bool) (engine *xorm.Engine, close func()) {
+func testDB(t *testing.T, new bool) (engine *xorm.Engine, closeDB func()) {
 	driver := testDriver()
 	var err error
-	close = func() {}
+	closeDB = func() {}
 	switch driver {
 	case "sqlite3":
 		config := ":memory:"
 		if !new {
 			config = createSQLiteDB(t)
-			close = func() {
+			closeDB = func() {
 				_ = os.Remove(config)
 			}
 		}
@@ -125,19 +125,19 @@ func TestMigrate(t *testing.T) {
 	}
 
 	//	// init new db
-	//	engine, close := testDB(t, true)
+	//	engine, closeDB := testDB(t, true)
 	//	assert.NoError(t, Migrate(engine))
-	//	close()
+	//	closeDB()
 	//
 	//	dbType := engine.Dialect().URI().DBType
 	//	if dbType == schemas.MYSQL || dbType == schemas.POSTGRES {
 	//		// wait for mysql/postgres to sync ...
-	//		time.Sleep(10 * time.Millisecond)
+	//		time.Sleep(100 * time.Millisecond)
 	//	}
 	//	assert.NoError(t, engine.ClearCache(allBeans...))
 
 	// migrate old db
-	engine, close := testDB(t, false)
+	engine, closeDB := testDB(t, false)
 	assert.NoError(t, Migrate(engine))
-	close()
+	closeDB()
 }

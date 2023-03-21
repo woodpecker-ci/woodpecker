@@ -54,7 +54,7 @@ func CreatePipeline(c *gin.Context) {
 
 	user := session.User(c)
 
-	lastCommit, _ := server.Config.Services.Remote.BranchHead(c, user, repo, p.Branch)
+	lastCommit, _ := server.Config.Services.Forge.BranchHead(c, user, repo, p.Branch)
 
 	tmpBuild := createTmpPipeline(model.EventManual, lastCommit, repo, user, &p)
 
@@ -101,7 +101,7 @@ func GetPipelines(c *gin.Context) {
 			c.AbortWithStatus(http.StatusNotFound)
 			return
 		}
-		c.AbortWithStatus(http.StatusInternalServerError)
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 	c.JSON(http.StatusOK, pipelines)
@@ -123,6 +123,10 @@ func GetPipeline(c *gin.Context) {
 
 	pl, err := _store.GetPipelineNumber(repo, num)
 	if err != nil {
+		if errors.Is(err, types.RecordNotExist) {
+			c.AbortWithStatus(http.StatusNotFound)
+			return
+		}
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
@@ -144,7 +148,7 @@ func GetPipelineLast(c *gin.Context) {
 
 	pl, err := _store.GetPipelineLast(repo, branch)
 	if err != nil {
-		c.String(http.StatusInternalServerError, err.Error())
+		handleDbGetError(c, err)
 		return
 	}
 
@@ -172,19 +176,19 @@ func GetPipelineLogs(c *gin.Context) {
 
 	pl, err := _store.GetPipelineNumber(repo, num)
 	if err != nil {
-		_ = c.AbortWithError(404, err)
+		handleDbGetError(c, err)
 		return
 	}
 
 	step, err := _store.StepChild(pl, ppid, name)
 	if err != nil {
-		_ = c.AbortWithError(404, err)
+		handleDbGetError(c, err)
 		return
 	}
 
 	rc, err := _store.LogFind(step)
 	if err != nil {
-		_ = c.AbortWithError(404, err)
+		handleDbGetError(c, err)
 		return
 	}
 
@@ -207,19 +211,19 @@ func GetStepLogs(c *gin.Context) {
 
 	pl, err := _store.GetPipelineNumber(repo, num)
 	if err != nil {
-		_ = c.AbortWithError(http.StatusNotFound, err)
+		handleDbGetError(c, err)
 		return
 	}
 
 	step, err := _store.StepFind(pl, pid)
 	if err != nil {
-		_ = c.AbortWithError(http.StatusNotFound, err)
+		handleDbGetError(c, err)
 		return
 	}
 
 	rc, err := _store.LogFind(step)
 	if err != nil {
-		_ = c.AbortWithError(http.StatusNotFound, err)
+		handleDbGetError(c, err)
 		return
 	}
 
@@ -242,7 +246,7 @@ func GetPipelineConfig(c *gin.Context) {
 
 	pl, err := _store.GetPipelineNumber(repo, num)
 	if err != nil {
-		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		handleDbGetError(c, err)
 		return
 	}
 
@@ -263,7 +267,7 @@ func CancelPipeline(c *gin.Context) {
 
 	pl, err := _store.GetPipelineNumber(repo, num)
 	if err != nil {
-		_ = c.AbortWithError(http.StatusNotFound, err)
+		handleDbGetError(c, err)
 		return
 	}
 
@@ -285,7 +289,7 @@ func PostApproval(c *gin.Context) {
 
 	pl, err := _store.GetPipelineNumber(repo, num)
 	if err != nil {
-		_ = c.AbortWithError(404, err)
+		handleDbGetError(c, err)
 		return
 	}
 
@@ -293,7 +297,7 @@ func PostApproval(c *gin.Context) {
 	if err != nil {
 		handlePipelineErr(c, err)
 	} else {
-		c.JSON(200, newpipeline)
+		c.JSON(http.StatusOK, newpipeline)
 	}
 }
 
@@ -316,17 +320,17 @@ func PostDecline(c *gin.Context) {
 	if err != nil {
 		handlePipelineErr(c, err)
 	} else {
-		c.JSON(200, pl)
+		c.JSON(http.StatusOK, pl)
 	}
 }
 
 func GetPipelineQueue(c *gin.Context) {
 	out, err := store.FromContext(c).GetPipelineQueue()
 	if err != nil {
-		c.String(500, "Error getting pipeline queue. %s", err)
+		c.String(http.StatusInternalServerError, "Error getting pipeline queue. %s", err)
 		return
 	}
-	c.JSON(200, out)
+	c.JSON(http.StatusOK, out)
 }
 
 // PostPipeline restarts a pipeline optional with altered event, deploy or environment
@@ -342,19 +346,25 @@ func PostPipeline(c *gin.Context) {
 
 	user, err := _store.GetUser(repo.UserID)
 	if err != nil {
-		log.Error().Msgf("failure to find repo owner %s. %s", repo.FullName, err)
-		_ = c.AbortWithError(500, err)
+		if errors.Is(err, types.RecordNotExist) {
+			c.AbortWithStatus(http.StatusNotFound)
+			return
+		}
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
 	pl, err := _store.GetPipelineNumber(repo, num)
 	if err != nil {
-		log.Error().Msgf("failure to get pipeline %d. %s", num, err)
-		_ = c.AbortWithError(404, err)
+		if errors.Is(err, types.RecordNotExist) {
+			c.AbortWithStatus(http.StatusNotFound)
+			return
+		}
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
-	// refresh the token to make sure, pipeline.ReStart can still obtain the pipeline config if nessessary again
+	// refresh the token to make sure, pipeline.ReStart can still obtain the pipeline config if necessary again
 	refreshUserToken(c, user)
 
 	// make Deploy overridable
@@ -390,7 +400,7 @@ func PostPipeline(c *gin.Context) {
 	if err != nil {
 		handlePipelineErr(c, err)
 	} else {
-		c.JSON(200, newpipeline)
+		c.JSON(http.StatusOK, newpipeline)
 	}
 }
 
@@ -403,19 +413,19 @@ func DeletePipelineLogs(c *gin.Context) {
 
 	pl, err := _store.GetPipelineNumber(repo, num)
 	if err != nil {
-		_ = c.AbortWithError(404, err)
+		handleDbGetError(c, err)
 		return
 	}
 
 	steps, err := _store.StepList(pl)
 	if err != nil {
-		_ = c.AbortWithError(404, err)
+		_ = c.AbortWithError(http.StatusNotFound, err)
 		return
 	}
 
 	switch pl.Status {
 	case model.StatusRunning, model.StatusPending:
-		c.String(400, "Cannot delete logs for a pending or running pipeline")
+		c.String(http.StatusUnprocessableEntity, "Cannot delete logs for a pending or running pipeline")
 		return
 	}
 
@@ -428,11 +438,11 @@ func DeletePipelineLogs(c *gin.Context) {
 		}
 	}
 	if err != nil {
-		c.String(400, "There was a problem deleting your logs. %s", err)
+		c.String(http.StatusInternalServerError, "There was a problem deleting your logs. %s", err)
 		return
 	}
 
-	c.String(204, "")
+	c.String(http.StatusNoContent, "")
 }
 
 var deleteStr = `[

@@ -16,6 +16,7 @@ package api
 
 import (
 	"encoding/base32"
+	"errors"
 	"net/http"
 	"time"
 
@@ -26,6 +27,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store"
+	"github.com/woodpecker-ci/woodpecker/server/store/types"
 	"github.com/woodpecker-ci/woodpecker/shared/httputil"
 	"github.com/woodpecker-ci/woodpecker/shared/token"
 )
@@ -49,13 +51,13 @@ func HandleAuth(c *gin.Context) {
 	// cannot, however, remember why, so need to revisit this line.
 	c.Writer.Header().Del("Content-Type")
 
-	tmpuser, err := server.Config.Services.Remote.Login(c, c.Writer, c.Request)
+	tmpuser, err := server.Config.Services.Forge.Login(c, c.Writer, c.Request)
 	if err != nil {
 		log.Error().Msgf("cannot authenticate user. %s", err)
-		c.Redirect(303, "/login?error=oauth_error")
+		c.Redirect(http.StatusSeeOther, "/login?error=oauth_error")
 		return
 	}
-	// this will happen when the user is redirected by the remote provider as
+	// this will happen when the user is redirected by the forge as
 	// part of the authorization workflow.
 	if tmpuser == nil {
 		return
@@ -65,17 +67,22 @@ func HandleAuth(c *gin.Context) {
 	// get the user from the database
 	u, err := _store.GetUserLogin(tmpuser.Login)
 	if err != nil {
+		if !errors.Is(err, types.RecordNotExist) {
+			_ = c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
+
 		// if self-registration is disabled we should return a not authorized error
 		if !config.Open && !config.IsAdmin(tmpuser) {
 			log.Error().Msgf("cannot register %s. registration closed", tmpuser.Login)
-			c.Redirect(303, "/login?error=access_denied")
+			c.Redirect(http.StatusSeeOther, "/login?error=access_denied")
 			return
 		}
 
 		// if self-registration is enabled for whitelisted organizations we need to
 		// check the user's organization membership.
 		if len(config.Orgs) != 0 {
-			teams, terr := server.Config.Services.Remote.Teams(c, tmpuser)
+			teams, terr := server.Config.Services.Forge.Teams(c, tmpuser)
 			if terr != nil || !config.IsMember(teams) {
 				log.Error().Msgf("cannot verify team membership for %s.", u.Login)
 				c.Redirect(303, "/login?error=access_denied")
@@ -98,7 +105,7 @@ func HandleAuth(c *gin.Context) {
 		// insert the user into the database
 		if err := _store.CreateUser(u); err != nil {
 			log.Error().Msgf("cannot insert %s. %s", u.Login, err)
-			c.Redirect(303, "/login?error=internal_error")
+			c.Redirect(http.StatusSeeOther, "/login?error=internal_error")
 			return
 		}
 	}
@@ -108,21 +115,22 @@ func HandleAuth(c *gin.Context) {
 	u.Secret = tmpuser.Secret
 	u.Email = tmpuser.Email
 	u.Avatar = tmpuser.Avatar
+	u.Admin = u.Admin || config.IsAdmin(tmpuser)
 
 	// if self-registration is enabled for whitelisted organizations we need to
 	// check the user's organization membership.
 	if len(config.Orgs) != 0 {
-		teams, terr := server.Config.Services.Remote.Teams(c, u)
+		teams, terr := server.Config.Services.Forge.Teams(c, u)
 		if terr != nil || !config.IsMember(teams) {
 			log.Error().Msgf("cannot verify team membership for %s.", u.Login)
-			c.Redirect(303, "/login?error=access_denied")
+			c.Redirect(http.StatusSeeOther, "/login?error=access_denied")
 			return
 		}
 	}
 
 	if err := _store.UpdateUser(u); err != nil {
 		log.Error().Msgf("cannot update %s. %s", u.Login, err)
-		c.Redirect(303, "/login?error=internal_error")
+		c.Redirect(http.StatusSeeOther, "/login?error=internal_error")
 		return
 	}
 
@@ -130,19 +138,19 @@ func HandleAuth(c *gin.Context) {
 	tokenString, err := token.New(token.SessToken, u.Login).SignExpires(u.Hash, exp)
 	if err != nil {
 		log.Error().Msgf("cannot create token for %s. %s", u.Login, err)
-		c.Redirect(303, "/login?error=internal_error")
+		c.Redirect(http.StatusSeeOther, "/login?error=internal_error")
 		return
 	}
 
 	httputil.SetCookie(c.Writer, c.Request, "user_sess", tokenString)
 
-	c.Redirect(303, "/")
+	c.Redirect(http.StatusSeeOther, "/")
 }
 
 func GetLogout(c *gin.Context) {
 	httputil.DelCookie(c.Writer, c.Request, "user_sess")
 	httputil.DelCookie(c.Writer, c.Request, "user_last")
-	c.Redirect(303, "/")
+	c.Redirect(http.StatusSeeOther, "/")
 }
 
 func GetLoginToken(c *gin.Context) {
@@ -155,7 +163,7 @@ func GetLoginToken(c *gin.Context) {
 		return
 	}
 
-	login, err := server.Config.Services.Remote.Auth(c, in.Access, in.Refresh)
+	login, err := server.Config.Services.Forge.Auth(c, in.Access, in.Refresh)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusUnauthorized, err)
 		return

@@ -22,9 +22,9 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/forge"
+	"github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/remote"
-	"github.com/woodpecker-ci/woodpecker/server/shared"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
@@ -37,10 +37,10 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		return nil, fmt.Errorf(msg)
 	}
 
-	// if the remote has a refresh token, the current access token
+	// if the forge has a refresh token, the current access token
 	// may be stale. Therefore, we should refresh prior to dispatching
 	// the pipeline.
-	if refresher, ok := server.Config.Services.Remote.(remote.Refresher); ok {
+	if refresher, ok := server.Config.Services.Forge.(forge.Refresher); ok {
 		refreshed, err := refresher.Refresh(ctx, repoUser)
 		if err != nil {
 			log.Error().Err(err).Msgf("failed to refresh oauth2 token for repoUser: %s", repoUser.Login)
@@ -53,17 +53,17 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	}
 
 	var (
-		remoteYamlConfigs []*remote.FileMeta
-		configFetchErr    error
-		filtered          bool
-		parseErr          error
+		forgeYamlConfigs []*types.FileMeta
+		configFetchErr   error
+		filtered         bool
+		parseErr         error
 	)
 
-	// fetch the pipeline file from the remote
-	configFetcher := shared.NewConfigFetcher(server.Config.Services.Remote, server.Config.Services.ConfigService, repoUser, repo, pipeline)
-	remoteYamlConfigs, configFetchErr = configFetcher.Fetch(ctx)
+	// fetch the pipeline file from the forge
+	configFetcher := forge.NewConfigFetcher(server.Config.Services.Forge, server.Config.Services.Timeout, server.Config.Services.ConfigService, repoUser, repo, pipeline)
+	forgeYamlConfigs, configFetchErr = configFetcher.Fetch(ctx)
 	if configFetchErr == nil {
-		filtered, parseErr = checkIfFiltered(pipeline, remoteYamlConfigs)
+		filtered, parseErr = checkIfFiltered(pipeline, forgeYamlConfigs)
 		if parseErr == nil {
 			if filtered {
 				err := ErrFiltered{Msg: "branch does not match restrictions defined in yaml"}
@@ -71,7 +71,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 				return nil, err
 			}
 
-			if zeroSteps(pipeline, remoteYamlConfigs) {
+			if zeroSteps(pipeline, forgeYamlConfigs) {
 				err := ErrFiltered{Msg: "step conditions yield zero runnable steps"}
 				log.Debug().Str("repo", repo.FullName).Msgf("%v", err)
 				return nil, err
@@ -109,8 +109,8 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	}
 
 	// persist the pipeline config for historical correctness, restarts, etc
-	for _, remoteYamlConfig := range remoteYamlConfigs {
-		_, err := findOrPersistPipelineConfig(_store, pipeline, remoteYamlConfig)
+	for _, forgeYamlConfig := range forgeYamlConfigs {
+		_, err := findOrPersistPipelineConfig(_store, pipeline, forgeYamlConfig)
 		if err != nil {
 			msg := fmt.Sprintf("failure to find or persist pipeline config for %s", repo.FullName)
 			log.Error().Err(err).Msg(msg)
@@ -130,7 +130,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		return pipeline, nil
 	}
 
-	pipeline, pipelineItems, err := createPipelineItems(ctx, _store, pipeline, repoUser, repo, remoteYamlConfigs, nil)
+	pipeline, pipelineItems, err := createPipelineItems(ctx, _store, pipeline, repoUser, repo, forgeYamlConfigs, nil)
 	if err != nil {
 		msg := fmt.Sprintf("failure to createPipelineItems for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)

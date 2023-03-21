@@ -206,6 +206,20 @@ Woodpecker provides the ability to store named parameters external to the YAML c
 
 For more details check the [secrets docs](./40-secrets.md).
 
+### `failure`
+
+Some of the pipeline steps may be allowed to fail without causing the whole pipeline to report a failure (e.g., a step executing a linting check). To enable this, add `failure: ignore` to your pipeline step. If Woodpecker encounters an error while executing the step, it will report it as failed but still execute the next steps of the pipeline, if any, without affecting the status of the pipeline.
+
+```diff
+ pipeline:
+   backend:
+     image: golang
+     commands:
+       - go build
+       - go test
++    failure: ignore
+```
+
 ### `when` - Conditional Execution
 
 Woodpecker supports defining a list of conditions for a pipeline step by using a `when` block. If at least one of the conditions in the `when` block evaluate to true the step is executed, otherwise it is skipped. A condition can be a check like:
@@ -461,6 +475,13 @@ when:
   - evaluate: 'not (CI_COMMIT_MESSAGE contains "please ignore me")'
 ```
 
+Run on pull requests with the label `deploy`:
+
+```yaml
+when:
+  - evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "deploy"'
+```
+
 ### `group` - Parallel execution
 
 Woodpecker supports parallel step execution for same-machine fan-in and fan-out. Parallel steps are configured using the `group` attribute. This instructs the pipeline runner to execute the named group in parallel.
@@ -658,6 +679,7 @@ Example configuration to override depth:
    git:
      image: woodpeckerci/plugin-git
 +    settings:
++      partial: false
 +      depth: 50
 ```
 
@@ -714,13 +736,14 @@ Woodpecker gives the ability to skip whole pipelines (not just steps #when---con
 Example conditional execution by repository:
 
 ```diff
++when:
++  repo: test/test
++
  pipeline:
    slack:
      image: plugins/slack
      settings:
        channel: dev
-+    when:
-+      repo: test/test
 ```
 
 ### `branch`
@@ -732,13 +755,14 @@ Branch conditions are not applied to tags.
 Example conditional execution by branch:
 
 ```diff
-pipeline:
-  slack:
-    image: plugins/slack
-    settings:
-      channel: dev
-+   when:
-+     branch: master
++when:
++  branch: master
++
+ pipeline:
+   slack:
+     image: plugins/slack
+     settings:
+       channel: dev
 ```
 
 > The step now triggers on master, but also if the target branch of a pull request is `master`. Add an event condition to limit it further to pushes on master only.
@@ -831,8 +855,7 @@ when:
 
 :::info
 Path conditions are applied only to **push** and **pull_request** events.
-It is currently **only available** for GitHub, GitLab.
-Gitea only supports **push** at the moment ([go-gitea/gitea#18228](https://github.com/go-gitea/gitea/pull/18228)).
+It is currently **only available** for GitHub, GitLab and Gitea (version 1.18.0 and newer)
 :::
 
 Execute a step only on a pipeline with certain files being changed:
@@ -856,7 +879,7 @@ when:
 
 ## `depends_on`
 
-Woodpecker supports to define multiple pipelines for a repository. Those pipelines will run independent from each other. To depend them on each other you can use the [`depends_on`](https://woodpecker-ci.org/docs/usage/multi-pipeline#flow-control) keyword.
+Woodpecker supports to define multiple workflows for a repository. Those workflows will run independent from each other. To depend them on each other you can use the [`depends_on`](https://woodpecker-ci.org/docs/usage/workflows#flow-control) keyword.
 
 ## Privileged mode
 

@@ -1,5 +1,5 @@
 <template>
-  <NavbarIcon :title="$t('pipeline_feed')" class="!p-1.5 relative" @click="toggle">
+  <IconButton :title="$t('pipeline_feed')" class="!p-1.5 relative text-current" @click="toggle">
     <div v-if="activePipelines.length > 0" class="spinner">
       <div class="spinner-ring ring1" />
       <div class="spinner-ring ring2" />
@@ -11,30 +11,21 @@
     >
       {{ activePipelines.length || 0 }}
     </div>
-  </NavbarIcon>
+  </IconButton>
 </template>
 
-<script lang="ts">
-import { defineComponent, onMounted } from 'vue';
+<script lang="ts" setup>
+import { onMounted, toRef } from 'vue';
 
+import IconButton from '~/components/atomic/IconButton.vue';
 import usePipelineFeed from '~/compositions/usePipelineFeed';
 
-import NavbarIcon from './NavbarIcon.vue';
+const pipelineFeed = usePipelineFeed();
+const activePipelines = toRef(pipelineFeed, 'activePipelines');
+const { toggle } = pipelineFeed;
 
-export default defineComponent({
-  name: 'ActivePipelines',
-
-  components: { NavbarIcon },
-
-  setup() {
-    const pipelineFeed = usePipelineFeed();
-
-    onMounted(() => {
-      pipelineFeed.load();
-    });
-
-    return pipelineFeed;
-  },
+onMounted(async () => {
+  await pipelineFeed.load();
 });
 </script>
 

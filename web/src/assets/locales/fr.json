@@ -1,6 +1,42 @@
 {
   "admin": {
     "settings": {
+      "agents": {
+        "add": "Ajouter un agent",
+        "agents": "Agents",
+        "backend": {
+          "backend": "Backend",
+          "badge": "backend"
+        },
+        "capacity": {
+          "badge": "capacité",
+          "capacity": "Capacité"
+        },
+        "created": "Agent crée",
+        "delete_confirm": "Voulez vous vraiment effacer cet agent ? Il ne pourra plus se connecter sur le serveur.",
+        "deleted": "Agent effacé",
+        "desc": "Agents enregistrés sur ce serveur",
+        "last_contact": "Dernier contact",
+        "name": {
+          "name": "Nom",
+          "placeholder": "Nom de l'agent"
+        },
+        "never": "Jamais",
+        "no_schedule": {
+          "name": "Désactiver l'agent",
+          "placeholder": "Bloquer l'assignation de nouvelles taches sur l'agent"
+        },
+        "none": "Il n'y a pas d'agent pour le moment.",
+        "platform": {
+          "badge": "platforme",
+          "platform": "Platforme"
+        },
+        "save": "Enregistrer l'agent",
+        "saved": "Agent enregistré",
+        "show": "Afficher les agents",
+        "token": "Jeton",
+        "version": "Version"
+      },
       "not_allowed": "Vous n'êtes pas autorisé à accéder aux réglages du serveur",
       "secrets": {
         "add": "Ajouter un secret",
@@ -29,10 +65,14 @@
     }
   },
   "back": "Revenir en arrière",
+  "cancel": "Annuler",
   "color_scheme_dark": "Basculer en couleurs claires",
   "color_scheme_light": "Basculer en couleurs sombres",
   "docs": "Docs",
   "documentation_for": "Documentation sur \"{topic}\"",
+  "errors": {
+    "not_found": "Le serveur n'a pas pu trouver l'objet demandé"
+  },
   "login": "Connexion",
   "logout": "Déconnexion",
   "not_found": {
@@ -68,6 +108,7 @@
     }
   },
   "password": "Mot de passe",
+  "pipeline_feed": "Fil du pipeline",
   "repo": {
     "activity": "Activité",
     "add": "Ajouter un dépôt",
@@ -113,6 +154,18 @@
       "step_not_started": "L'étape n'a pas démarré encore.",
       "tasks": "Tâches"
     },
+    "deploy_pipeline": {
+      "enter_target": "Environnement de déploiement ciblé",
+      "title": "Déclenchement d'un événement de déploiement pour le pipeline courant #{pipelineId}",
+      "trigger": "Déployer",
+      "variables": {
+        "add": "Ajouter une variable",
+        "desc": "Spécifiez les variables additionnelles que votre pipeline va utiliser. Les variables portant le même nom seront écrasées.",
+        "name": "Nom de la variable",
+        "title": "Variables additionnelles du pipeline",
+        "value": "Valeur de la variable"
+      }
+    },
     "enable": {
       "enable": "Activer",
       "enabled": "Déjà activé",
@@ -133,11 +186,13 @@
       }
     },
     "not_allowed": "Vous n'êtes pas autorisé à accéder à ce dépôt",
+    "open_in_forge": "Ouvrir le dépôt dans un système de contrôle de version",
     "pipeline": {
       "actions": {
         "cancel": "Annuler",
         "cancel_success": "Pipeline annulé",
         "canceled": "Cette étape a été annulée.",
+        "deploy": "Déployer",
         "log_auto_scroll": "Automatiquement défiler vers le bas",
         "log_auto_scroll_off": "Désactiver le défilement automatique",
         "log_download": "Télécharger",
@@ -171,6 +226,19 @@
         "decline": "Refuser",
         "decline_success": "Pipeline refusé",
         "declined": "Le pipeline a été refusé !"
+      },
+      "status": {
+        "blocked": "bloqué",
+        "declined": "refusé",
+        "error": "en erreur",
+        "failure": "échoué",
+        "killed": "tué",
+        "pending": "en attente",
+        "running": "en cours",
+        "skipped": "sauté",
+        "started": "démarré",
+        "status": "Status : {status}",
+        "success": "réussi"
       },
       "step_not_started": "L'étape n'a pas démarré encore.",
       "tasks": "Tâches"
@@ -299,6 +367,7 @@
         "add": "Ajouter un secret",
         "created": "Secret crée",
         "delete": "Effacer le secret",
+        "delete_confirm": "Voulez vous vraiment effacer ce secret ?",
         "deleted": "Secret effacé",
         "desc": "Les secrets sont transmis sous forme de variable d’environnement lors de l’exécution d'une étape d'un pipeline.",
         "edit": "Modifier le secret",

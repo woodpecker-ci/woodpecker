@@ -81,7 +81,13 @@ kubectl apply -f $PLUGIN_TEMPLATE
 pipeline:
   deploy-to-k8s:
     image: laszlocloud/my-k8s-plugin
-    template: config/k8s/service.yml
+    settings:
+      template: config/k8s/service.yml
 ```
 
 See [plugin docs](./20-usage/51-plugins/10-plugins.md).
+
+## Continue reading
+
+- [Create a Woodpecker pipeline for your repository](./20-usage/10-intro.md)
+- [Setup your own Woodpecker instance](./30-administration/00-setup.md)

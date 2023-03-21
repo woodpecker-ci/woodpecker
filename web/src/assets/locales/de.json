@@ -1,7 +1,56 @@
 {
   "admin": {
     "settings": {
+      "agents": {
+        "add": "Agent hinzufügen",
+        "agents": "Agents",
+        "backend": {
+          "backend": "Backend",
+          "badge": "Backend"
+        },
+        "capacity": {
+          "badge": "Kapazität",
+          "capacity": "Kapazität",
+          "desc": "Die maximale Anzahl von Pipelines, die ein Agent ausführt."
+        },
+        "created": "Agent erstellt",
+        "delete_confirm": "Wollen Sie diesen Agent wirklich löschen? Dieser kann sich dann nicht mehr mit dem Server verbinden.",
+        "deleted": "Agent gelöscht",
+        "desc": "Für diesen Server registrierte Agents",
+        "last_contact": "Letzter Kontakt",
+        "name": {
+          "name": "Name",
+          "placeholder": "Name des Agents"
+        },
+        "never": "Nie",
+        "no_schedule": {
+          "name": "Agent deaktivieren",
+          "placeholder": "Agent daran hindern, neue Aufgaben zu nehmen"
+        },
+        "none": "Es gibt noch keine Agents.",
+        "platform": {
+          "badge": "Plattform",
+          "platform": "Plattform"
+        },
+        "save": "Agent speichern",
+        "saved": "Agent gespeichert",
+        "show": "Agents anzeigen",
+        "token": "Schlüssel",
+        "version": "Version"
+      },
       "not_allowed": "Du darfst nicht auf die Server-Einstellungen zugreifen",
+      "queue": {
+        "desc": "Aufgaben, die darauf warten, von Agents ausgeführt zu werden",
+        "pause": "Pausieren",
+        "paused": "Warteschlange wurde pausiert",
+        "queue": "Warteschlange",
+        "resume": "Wieder aufnehmen",
+        "resumed": "Warteschlange wurde wieder aufgenommen",
+        "task_pending": "Aufgabe steht aus",
+        "task_running": "Aufgabe läuft",
+        "task_waiting_on_deps": "Aufgabe wartet auf Abhängigkeiten",
+        "tasks": "Aufgaben"
+      },
       "secrets": {
         "add": "Geheimnis hinzufügen",
         "created": "Globales Geheimnis erstellt",
@@ -25,14 +74,40 @@
         "value": "Wert",
         "warning": "Diese Geheimnisse können von allen Nutzern des Server eingesehen werden."
       },
-      "settings": "Einstellungen"
+      "settings": "Einstellungen",
+      "users": {
+        "add": "Benutzer hinzufügen",
+        "admin": {
+          "admin": "Admin",
+          "placeholder": "Benutzer ist ein Admin"
+        },
+        "avatar_url": "URL des Profilbilds",
+        "cancel": "Abbrechen",
+        "created": "Benutzer erstellt",
+        "delete_confirm": "Möchtest du diesen Benutzer wirklich löschen?",
+        "delete_user": "Benutzer löschen",
+        "deleted": "Benutzer gelöscht",
+        "desc": "Auf diesem Server registrierte Benutzer",
+        "edit_user": "Benutzer bearbeiten",
+        "email": "E-Mail",
+        "login": "Benutzername",
+        "none": "Es gibt noch keine Benutzer.",
+        "save": "Benutzer speichern",
+        "saved": "Benutzer gespeichert",
+        "show": "Benutzer anzeigen",
+        "users": "Benutzer"
+      }
     }
   },
   "back": "Zurück",
+  "cancel": "Abbrechen",
   "color_scheme_dark": "Wechsle zu hellem Modus",
   "color_scheme_light": "Wechsle zu dunklem Modus",
   "docs": "Docs",
   "documentation_for": "Dokumentation für „{topic}“",
+  "errors": {
+    "not_found": "Angefragtes Objekt wurde nicht gefunden"
+  },
   "login": "Anmelden",
   "logout": "Abmelden",
   "not_found": {
@@ -68,6 +143,7 @@
     }
   },
   "password": "Passwort",
+  "pipeline_feed": "Pipeline-Feed",
   "repo": {
     "activity": "Aktivitäten",
     "add": "Repository hinzufügen",
@@ -114,6 +190,18 @@
       "step_not_started": "Dieser Schritt hat noch nicht begonnen.",
       "tasks": "Vorgänge"
     },
+    "deploy_pipeline": {
+      "enter_target": "Zielumgebung des Deployments",
+      "title": "Deployment für aktuelle Pipeline #{pipelineId} starten",
+      "trigger": "Deploy",
+      "variables": {
+        "add": "Variable hinzufügen",
+        "desc": "Zusätzliche Variablen für diese Pipeline hinzufügen. Variablen mit dem gleichen Namen werden überschrieben.",
+        "name": "Variablenname",
+        "title": "Zusätzliche Pipeline-Variablen",
+        "value": "Variablenwert"
+      }
+    },
     "enable": {
       "enable": "Aktivieren",
       "enabled": "Bereits aktiviert",
@@ -134,11 +222,13 @@
       }
     },
     "not_allowed": "Zugriff auf dieses Repository nicht erlaubt",
+    "open_in_forge": "Repository im Versionskontrollsystem öffnen",
     "pipeline": {
       "actions": {
         "cancel": "Abbrechen",
         "cancel_success": "Pipeline abgebrochen",
         "canceled": "Dieser Schritt wurde abgebrochen.",
+        "deploy": "Deploy",
         "log_auto_scroll": "Automatisches folgen",
         "log_auto_scroll_off": "Schalte automatisches folgen aus",
         "log_download": "Herunterladen",
@@ -165,6 +255,7 @@
       "no_pipelines": "Bisher wurden noch keine Pipelines gestartet.",
       "pipeline": "Pipeline #{pipelineId}",
       "pipelines_for": "Pipelines für den Branch „{branch}“",
+      "pipelines_for_pr": "Pipelines für Pull-Request #{index}",
       "protected": {
         "approve": "Genehmigen",
         "approve_success": "Pipeline genehmigt",
@@ -173,9 +264,23 @@
         "decline_success": "Pipeline abgelehnt",
         "declined": "Diese Pipeline ist abgelehnt worden!"
       },
+      "status": {
+        "blocked": "blockiert",
+        "declined": "abgelehnt",
+        "error": "Fehler",
+        "failure": "fehlgeschlagen",
+        "killed": "abgebrochen",
+        "pending": "ausstehend",
+        "running": "laufend",
+        "skipped": "übersprungen",
+        "started": "gestartet",
+        "status": "Status: {status}",
+        "success": "erfolgreich"
+      },
       "step_not_started": "Dieser Schritt hat noch nicht begonnen.",
       "tasks": "Vorgänge"
     },
+    "pull_requests": "Pull-Requests",
     "settings": {
       "actions": {
         "actions": "Aktionen",
@@ -300,6 +405,7 @@
         "add": "Geheimnis hinzufügen",
         "created": "Geheimnis erstellt",
         "delete": "Geheimnis löschen",
+        "delete_confirm": "Möchtest du dieses Geheimnis wirklich löschen?",
         "deleted": "Geheimnis gelöscht",
         "desc": "Geheimnisse können zur Laufzeit als Umgebungsvariablen an einzelne Pipelineschritte übergeben werden.",
         "edit": "Geheimnis bearbeiten",

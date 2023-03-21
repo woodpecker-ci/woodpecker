@@ -12,8 +12,7 @@
       <ListItem
         v-for="repo in searchedRepos"
         :key="repo.id"
-        clickable
-        @click="$router.push({ name: 'repo', params: { repoName: repo.name, repoOwner: repo.owner } })"
+        :to="{ name: 'repo', params: { repoName: repo.name, repoOwner: repo.owner } }"
       >
         <span class="text-color">{{ `${repo.owner} / ${repo.name}` }}</span>
       </ListItem>
@@ -21,36 +20,22 @@
   </Scaffold>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, onMounted, ref } from 'vue';
+<script lang="ts" setup>
+import { computed, onMounted, ref } from 'vue';
 
 import Button from '~/components/atomic/Button.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import { useRepoSearch } from '~/compositions/useRepoSearch';
-import RepoStore from '~/store/repos';
+import { useRepoStore } from '~/store/repos';
 
-export default defineComponent({
-  name: 'Repos',
+const repoStore = useRepoStore();
+const repos = computed(() => Object.values(repoStore.ownedRepos));
+const search = ref('');
 
-  components: {
-    Button,
-    ListItem,
-    Scaffold,
-  },
+const { searchedRepos } = useRepoSearch(repos, search);
 
-  setup() {
-    const repoStore = RepoStore();
-    const repos = computed(() => Object.values(repoStore.repos));
-    const search = ref('');
-
-    const { searchedRepos } = useRepoSearch(repos, search);
-
-    onMounted(async () => {
-      await repoStore.loadRepos();
-    });
-
-    return { searchedRepos, search };
-  },
+onMounted(async () => {
+  await repoStore.loadRepos();
 });
 </script>

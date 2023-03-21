@@ -16,6 +16,7 @@ package utils
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -24,16 +25,16 @@ import (
 // Returns a copy of parent context that is canceled when
 // an os interrupt signal is received.
 func WithContextSigtermCallback(ctx context.Context, f func()) context.Context {
-	ctx, cancel := context.WithCancel(ctx)
+	ctx, cancel := context.WithCancelCause(ctx)
 	go func() {
-		recivedSignal := make(chan os.Signal, 1)
-		signal.Notify(recivedSignal, syscall.SIGINT, syscall.SIGTERM)
-		defer signal.Stop(recivedSignal)
+		receivedSignal := make(chan os.Signal, 1)
+		signal.Notify(receivedSignal, syscall.SIGINT, syscall.SIGTERM)
+		defer signal.Stop(receivedSignal)
 
 		select {
 		case <-ctx.Done():
-		case <-recivedSignal:
-			cancel()
+		case <-receivedSignal:
+			cancel(fmt.Errorf("received signal: %v", receivedSignal))
 			if f != nil {
 				f()
 			}

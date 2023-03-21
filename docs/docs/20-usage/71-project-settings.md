@@ -6,7 +6,7 @@ As the owner of a project in Woodpecker you can change project related settings 
 
 ## Pipeline path
 
-The path to the pipeline config file or folder. By default it is left empty which will use the following configuration resolution `.woodpecker/*.yml` -> `.woodpecker.yml` -> `.drone.yml`. If you set a custom path Woodpecker tries to load your configuration or fails if no configuration could be found at the specified location. To use a [multi pipeline](./25-multi-pipeline.md) you have to change it to a folder path ending with a `/` like `.woodpecker/`.
+The path to the pipeline config file or folder. By default it is left empty which will use the following configuration resolution `.woodpecker/*.yml` -> `.woodpecker/*.yaml` -> `.woodpecker.yml` -> `.woodpecker.yaml` -> `.drone.yml`. If you set a custom path Woodpecker tries to load your configuration or fails if no configuration could be found at the specified location. To use a [multiple workflows](./25-workflows.md) with a custom path you have to change it to a folder path ending with a `/` like `.woodpecker/`.
 
 ## Repository hooks
 

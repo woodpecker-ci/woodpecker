@@ -15,9 +15,9 @@
 package datastore
 
 import (
-	"github.com/woodpecker-ci/woodpecker/server/model"
-
 	"xorm.io/builder"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 const orderSecretsBy = "secret_name"
@@ -38,6 +38,11 @@ func (s storage) SecretList(repo *model.Repo, includeGlobalAndOrgSecrets bool) (
 			Or(builder.And(builder.Eq{"secret_owner": ""}, builder.Eq{"secret_repo_id": 0}))
 	}
 	return secrets, s.engine.Where(cond).OrderBy(orderSecretsBy).Find(&secrets)
+}
+
+func (s storage) SecretListAll() ([]*model.Secret, error) {
+	var secrets []*model.Secret
+	return secrets, s.engine.Find(&secrets)
 }
 
 func (s storage) SecretCreate(secret *model.Secret) error {

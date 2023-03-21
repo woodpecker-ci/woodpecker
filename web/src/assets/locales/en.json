@@ -1,4 +1,5 @@
 {
+    "cancel": "Cancel",
     "login": "Login",
     "welcome": "Welcome to Woodpecker",
     "repos": "Repos",
@@ -18,6 +19,9 @@
     "not_found": {
         "not_found": "Whoa 404, either we broke something or you had a typing mishap :-/",
         "back_home": "Back to home"
+    },
+    "errors": {
+      "not_found": "Server could not find requested object"
     },
     "time": {
         "tmpl": "MMM D, YYYY, HH:mm z",
@@ -41,8 +45,21 @@
             "value": "Variable value"
           }
         },
+        "deploy_pipeline": {
+          "title": "Trigger deployment event for current pipeline #{pipelineId}",
+          "enter_target": "Target deployment environment",
+          "trigger": "Deploy",
+          "variables": {
+            "add": "Add variable",
+            "title": "Additional pipeline variables",
+            "desc": "Specify additional variables to use in your pipeline. Variables with the same name will be overwritten.",
+            "name": "Variable name",
+            "value": "Variable value"
+          }
+        },
         "activity": "Activity",
         "branches": "Branches",
+        "pull_requests": "Pull requests",
         "add": "Add repository",
         "user_none": "This organization / user does not have any projects yet.",
         "not_allowed": "You are not allowed to access this repository",
@@ -53,6 +70,7 @@
             "success": "Repository enabled",
             "list_reloaded": "Repository list reloaded"
         },
+        "open_in_forge": "Open Repository in Version Control System",
         "settings": {
             "settings": "Settings",
             "not_allowed": "You are not allowed to access this repository's settings",
@@ -74,7 +92,11 @@
                     "protected": "Protected",
                     "desc": "Every pipeline needs to be approved before being executed."
                 },
-                "trusted": {
+                "netrc_only_trusted": {
+                    "netrc_only_trusted": "Only inject netrc credentials into trusted containers",
+                    "desc": "Only inject netrc credentials into trusted containers (recommended)."
+                },
+              "trusted": {
                     "trusted": "Trusted",
                     "desc": "Underlying pipeline containers get access to escalated capabilities like mounting volumes."
                 },
@@ -111,6 +133,7 @@
                 "show": "Show secrets",
                 "name": "Name",
                 "value": "Value",
+                "delete_confirm": "Do you really want to delete this secret?",
                 "deleted": "Secret deleted",
                 "created": "Secret created",
                 "saved": "Secret saved",
@@ -208,6 +231,7 @@
             "no_pipeline_steps": "No pipeline steps available!",
             "step_not_started": "This step hasn't started yet.",
             "pipelines_for": "Pipelines for branch \"{branch}\"",
+            "pipelines_for_pr": "Pipelines for pull request #{index}",
             "exit_code": "exit code {exitCode}",
             "loading": "Loading…",
             "pipeline": "Pipeline #{pipelineId}",
@@ -217,6 +241,7 @@
                 "restart": "Restart",
                 "canceled": "This step has been canceled.",
                 "cancel_success": "Pipeline canceled",
+                "deploy": "Deploy",
                 "restart_success": "Pipeline restarted",
                 "log_download": "Download",
                 "log_auto_scroll": "Automatically scroll down",
@@ -237,6 +262,19 @@
                 "deploy": "Deploy",
                 "cron": "Cron",
                 "manual": "Manual"
+            },
+            "status": {
+              "status": "Status: {status}",
+              "blocked": "blocked",
+              "pending": "pending",
+              "running": "running",
+              "started": "started",
+              "skipped": "skipped",
+              "success": "success",
+              "declined": "declined",
+              "error": "error",
+              "failure": "failure",
+              "killed": "killed"
             }
         }
     },
@@ -294,6 +332,84 @@
                     "events": "Available at following events",
                     "pr_warning": "Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets."
                 }
+            },
+            "agents": {
+                "agents": "Agents",
+                "desc": "Agents registered for this server",
+                "none": "There are no agents yet.",
+                "add": "Add agent",
+                "save": "Save agent",
+                "show": "Show agents",
+                "created": "Agent created",
+                "saved": "Agent saved",
+                "deleted": "Agent deleted",
+                "name": {
+                    "name": "Name",
+                    "placeholder": "Name of the agent"
+                },
+                "no_schedule": {
+                    "name": "Disable agent",
+                    "placeholder": "Stop agent from taking new tasks"
+                },
+                "token": "Token",
+                "platform": {
+                  "platform": "Platform",
+                  "badge": "platform"
+                },
+                "backend": {
+                  "backend": "Backend",
+                  "badge": "backend"
+                },
+                "capacity": {
+                  "capacity": "Capacity",
+                  "desc": "The max amount of parallel pipelines executed by this agent.",
+                  "badge": "capacity"
+                },
+                "version": "Version",
+                "last_contact": "Last contact",
+                "never": "Never",
+                "delete_confirm": "Do you really want to delete this agent? It wont be able to connected to the server anymore."
+            },
+            "queue": {
+              "queue": "Queue",
+              "desc": "Tasks waiting to be executed by agents",
+              "pause": "Pause",
+              "resume": "Resume",
+              "paused": "Queue is paused",
+              "resumed": "Queue is resumed",
+              "tasks": "Tasks",
+              "task_running": "Task is running",
+              "task_pending": "Task is pending",
+              "task_waiting_on_deps": "Task is waiting on dependencies",
+              "stats": {
+                "completed_count": "Completed Tasks",
+                "worker_count": "Free",
+                "running_count": "Running",
+                "pending_count": "Pending",
+                "waiting_on_deps_count": "Waiting on dependencies"
+              }
+            },
+            "users": {
+              "users": "Users",
+              "desc": "Users registered for this server",
+              "login": "Login",
+              "email": "Email",
+              "avatar_url": "Avatar URL",
+              "save": "Save user",
+              "cancel": "Cancel",
+              "show":"Show users",
+              "add":"Add user",
+              "none":"There are no users yet.",
+              "delete_confirm": "Do you really want to delete this user?",
+              "deleted": "User deleted",
+              "created": "User created",
+              "saved": "User saved",
+              "admin": {
+                "admin": "Admin",
+                "placeholder": "User is an admin"
+              },
+              "delete_user": "Delete user",
+              "edit_user": "Edit user"
             }
         }
     },

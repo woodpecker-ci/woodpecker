@@ -23,11 +23,12 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc/proto"
+	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/logging"
 	"github.com/woodpecker-ci/woodpecker/server/pubsub"
 	"github.com/woodpecker-ci/woodpecker/server/queue"
-	"github.com/woodpecker-ci/woodpecker/server/remote"
 	"github.com/woodpecker-ci/woodpecker/server/store"
+	"github.com/woodpecker-ci/woodpecker/version"
 )
 
 // WoodpeckerServer is a grpc server implementation.
@@ -36,7 +37,7 @@ type WoodpeckerServer struct {
 	peer RPC
 }
 
-func NewWoodpeckerServer(remote remote.Remote, queue queue.Queue, logger logging.Log, pubsub pubsub.Publisher, store store.Store, host string) *WoodpeckerServer {
+func NewWoodpeckerServer(forge forge.Forge, queue queue.Queue, logger logging.Log, pubsub pubsub.Publisher, store store.Store, host string) proto.WoodpeckerServer {
 	pipelineTime := promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
 		Name:      "pipeline_time",
@@ -48,7 +49,7 @@ func NewWoodpeckerServer(remote remote.Remote, queue queue.Queue, logger logging
 		Help:      "Pipeline count.",
 	}, []string{"repo", "branch", "status", "pipeline"})
 	peer := RPC{
-		remote:        remote,
+		forge:         forge,
 		store:         store,
 		queue:         queue,
 		pubsub:        pubsub,
@@ -60,12 +61,19 @@ func NewWoodpeckerServer(remote remote.Remote, queue queue.Queue, logger logging
 	return &WoodpeckerServer{peer: peer}
 }
 
-func (s *WoodpeckerServer) Next(c context.Context, req *proto.NextRequest) (*proto.NextReply, error) {
+func (s *WoodpeckerServer) Version(_ context.Context, _ *proto.Empty) (*proto.VersionResponse, error) {
+	return &proto.VersionResponse{
+		GrpcVersion:   proto.Version,
+		ServerVersion: version.String(),
+	}, nil
+}
+
+func (s *WoodpeckerServer) Next(c context.Context, req *proto.NextRequest) (*proto.NextResponse, error) {
 	filter := rpc.Filter{
 		Labels: req.GetFilter().GetLabels(),
 	}
 
-	res := new(proto.NextReply)
+	res := new(proto.NextResponse)
 	pipeline, err := s.peer.Next(c, filter)
 	if err != nil {
 		return res, err
@@ -161,5 +169,18 @@ func (s *WoodpeckerServer) Log(c context.Context, req *proto.LogRequest) (*proto
 	}
 	res := new(proto.Empty)
 	err := s.peer.Log(c, req.GetId(), line)
+	return res, err
+}
+
+func (s *WoodpeckerServer) RegisterAgent(c context.Context, req *proto.RegisterAgentRequest) (*proto.RegisterAgentResponse, error) {
+	res := new(proto.RegisterAgentResponse)
+	agentID, err := s.peer.RegisterAgent(c, req.GetPlatform(), req.GetBackend(), req.GetVersion(), req.GetCapacity())
+	res.AgentId = agentID
+	return res, err
+}
+
+func (s *WoodpeckerServer) ReportHealth(c context.Context, req *proto.ReportHealthRequest) (*proto.Empty, error) {
+	res := new(proto.Empty)
+	err := s.peer.ReportHealth(c, req.GetStatus())
 	return res, err
 }

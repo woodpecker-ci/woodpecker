@@ -3,26 +3,23 @@ package common
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/urfave/cli/v2"
+
+	"github.com/woodpecker-ci/woodpecker/shared/constant"
 )
 
-func DetectPipelineConfig() (multiplies bool, config string, _ error) {
-	config = ".woodpecker"
-	if fi, err := os.Stat(config); err == nil && fi.IsDir() {
-		return true, config, nil
+func DetectPipelineConfig() (isDir bool, config string, _ error) {
+	for _, config := range constant.DefaultConfigOrder {
+		shouldBeDir := strings.HasSuffix(config, "/")
+		config = strings.TrimSuffix(config, "/")
+
+		if fi, err := os.Stat(config); err == nil && shouldBeDir == fi.IsDir() {
+			return fi.IsDir(), config, nil
+		}
 	}
 
-	config = ".woodpecker.yml"
-	if fi, err := os.Stat(config); err == nil && !fi.IsDir() {
-		return true, config, nil
-	}
-
-	config = ".drone.yml"
-	fi, err := os.Stat(config)
-	if err == nil && !fi.IsDir() {
-		return false, config, nil
-	}
 	return false, "", fmt.Errorf("could not detect pipeline config")
 }
 

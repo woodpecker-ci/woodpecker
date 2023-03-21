@@ -22,12 +22,12 @@ import (
 	"time"
 
 	"github.com/woodpecker-ci/woodpecker/server/cache"
+	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/logging"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/config"
 	"github.com/woodpecker-ci/woodpecker/server/pubsub"
 	"github.com/woodpecker-ci/woodpecker/server/queue"
-	"github.com/woodpecker-ci/woodpecker/server/remote"
 )
 
 var Config = struct {
@@ -38,7 +38,8 @@ var Config = struct {
 		Secrets             model.SecretService
 		Registries          model.RegistryService
 		Environ             model.EnvironService
-		Remote              remote.Remote
+		Forge               forge.Forge
+		Timeout             time.Duration
 		Membership          cache.MembershipService
 		ConfigService       config.Extension
 		SignaturePrivateKey crypto.PrivateKey
@@ -60,7 +61,7 @@ var Config = struct {
 		OAuthHost           string
 		Host                string
 		Port                string
-		Pass                string
+		AgentToken          string
 		Docs                string
 		StatusContext       string
 		StatusContextFormat string
@@ -80,6 +81,8 @@ var Config = struct {
 		Volumes                             []string
 		Networks                            []string
 		Privileged                          []string
+		DefaultTimeout                      int64
+		MaxTimeout                          int64
 	}
 	FlatPermissions bool // TODO(485) temporary workaround to not hit api rate limits
 }{}

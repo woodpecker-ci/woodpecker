@@ -23,19 +23,18 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/queue"
-	"github.com/woodpecker-ci/woodpecker/server/shared"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
 // Cancel the pipeline and returns the status.
 func Cancel(ctx context.Context, store store.Store, repo *model.Repo, pipeline *model.Pipeline) error {
 	if pipeline.Status != model.StatusRunning && pipeline.Status != model.StatusPending && pipeline.Status != model.StatusBlocked {
-		return ErrBadRequest{Msg: "Cannot cancel a non-running or non-pending or non-blocked pipeline"}
+		return &ErrBadRequest{Msg: "Cannot cancel a non-running or non-pending or non-blocked pipeline"}
 	}
 
 	steps, err := store.StepList(pipeline)
 	if err != nil {
-		return ErrNotFound{Msg: err.Error()}
+		return &ErrNotFound{Msg: err.Error()}
 	}
 
 	// First cancel/evict steps in the queue in one go
@@ -74,18 +73,18 @@ func Cancel(ctx context.Context, store store.Store, repo *model.Repo, pipeline *
 	for _, step := range steps {
 		if step.State == model.StatusPending {
 			if step.PPID != 0 {
-				if _, err = shared.UpdateStepToStatusSkipped(store, *step, 0); err != nil {
+				if _, err = UpdateStepToStatusSkipped(store, *step, 0); err != nil {
 					log.Error().Msgf("error: done: cannot update step_id %d state: %s", step.ID, err)
 				}
 			} else {
-				if _, err = shared.UpdateStepToStatusKilled(store, *step); err != nil {
+				if _, err = UpdateStepToStatusKilled(store, *step); err != nil {
 					log.Error().Msgf("error: done: cannot update step_id %d state: %s", step.ID, err)
 				}
 			}
 		}
 	}
 
-	killedBuild, err := shared.UpdateToStatusKilled(store, *pipeline)
+	killedBuild, err := UpdateToStatusKilled(store, *pipeline)
 	if err != nil {
 		log.Error().Err(err).Msgf("UpdateToStatusKilled: %v", pipeline)
 		return err
@@ -93,7 +92,7 @@ func Cancel(ctx context.Context, store store.Store, repo *model.Repo, pipeline *
 
 	steps, err = store.StepList(killedBuild)
 	if err != nil {
-		return ErrNotFound{Msg: err.Error()}
+		return &ErrNotFound{Msg: err.Error()}
 	}
 	if killedBuild.Steps, err = model.Tree(steps); err != nil {
 		return err

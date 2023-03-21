@@ -203,14 +203,15 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 		return err
 	}
 
-	backend.Init(context.WithValue(c.Context, types.CliContext, c))
+	backendCtx := context.WithValue(c.Context, types.CliContext, c)
+	backend.Init(backendCtx)
 
-	engine, err := backend.FindEngine(c.String("backend-engine"))
+	engine, err := backend.FindEngine(backendCtx, c.String("backend-engine"))
 	if err != nil {
 		return err
 	}
 
-	if err = engine.Load(); err != nil {
+	if err = engine.Load(backendCtx); err != nil {
 		return err
 	}
 
@@ -228,7 +229,7 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 		pipeline.WithDescription(map[string]string{
 			"CLI": "exec",
 		}),
-	).Run()
+	).Run(c.Context)
 }
 
 // return the metadata from the cli context.
@@ -240,10 +241,10 @@ func metadataFromContext(c *cli.Context, axis matrix.Axis) frontend.Metadata {
 
 	return frontend.Metadata{
 		Repo: frontend.Repo{
-			Name:    c.String("repo-name"),
-			Link:    c.String("repo-link"),
-			Remote:  c.String("repo-remote-url"),
-			Private: c.Bool("repo-private"),
+			Name:     c.String("repo-name"),
+			Link:     c.String("repo-link"),
+			CloneURL: c.String("repo-clone-url"),
+			Private:  c.Bool("repo-private"),
 		},
 		Curr: frontend.Pipeline{
 			Number:   c.Int64("pipeline-number"),

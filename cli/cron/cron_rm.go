@@ -11,7 +11,7 @@ import (
 
 var cronDeleteCmd = &cli.Command{
 	Name:      "rm",
-	Usage:     "remove a cron",
+	Usage:     "remove a cron job",
 	ArgsUsage: "[repo/name]",
 	Action:    cronDelete,
 	Flags: append(common.GlobalFlags,

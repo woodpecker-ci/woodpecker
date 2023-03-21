@@ -25,20 +25,20 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
-	"github.com/woodpecker-ci/woodpecker/server/shared"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/shared/token"
 )
 
 func GetSelf(c *gin.Context) {
-	c.JSON(200, session.User(c))
+	c.JSON(http.StatusOK, session.User(c))
 }
 
 func GetFeed(c *gin.Context) {
 	_store := store.FromContext(c)
-	remote := server.Config.Services.Remote
+	_forge := server.Config.Services.Forge
 
 	user := session.User(c)
 	latest, _ := strconv.ParseBool(c.Query("latest"))
@@ -54,11 +54,11 @@ func GetFeed(c *gin.Context) {
 
 		config := ToConfig(c)
 
-		sync := shared.Syncer{
-			Remote: remote,
-			Store:  _store,
-			Perms:  _store,
-			Match:  shared.NamespaceFilter(config.OwnersWhitelist),
+		sync := forge.Syncer{
+			Forge: _forge,
+			Store: _store,
+			Perms: _store,
+			Match: forge.NamespaceFilter(config.OwnersWhitelist),
 		}
 		if err := sync.Sync(c, user, server.Config.FlatPermissions); err != nil {
 			log.Debug().Msgf("sync error: %s: %s", user.Login, err)
@@ -70,24 +70,24 @@ func GetFeed(c *gin.Context) {
 	if latest {
 		feed, err := _store.RepoListLatest(user)
 		if err != nil {
-			c.String(500, "Error fetching feed. %s", err)
+			c.String(http.StatusInternalServerError, "Error fetching feed. %s", err)
 		} else {
-			c.JSON(200, feed)
+			c.JSON(http.StatusOK, feed)
 		}
 		return
 	}
 
 	feed, err := _store.UserFeed(user)
 	if err != nil {
-		c.String(500, "Error fetching user feed. %s", err)
+		c.String(http.StatusInternalServerError, "Error fetching user feed. %s", err)
 		return
 	}
-	c.JSON(200, feed)
+	c.JSON(http.StatusOK, feed)
 }
 
 func GetRepos(c *gin.Context) {
 	_store := store.FromContext(c)
-	remote := server.Config.Services.Remote
+	_forge := server.Config.Services.Forge
 
 	user := session.User(c)
 	all, _ := strconv.ParseBool(c.Query("all"))
@@ -103,11 +103,11 @@ func GetRepos(c *gin.Context) {
 
 		config := ToConfig(c)
 
-		sync := shared.Syncer{
-			Remote: remote,
-			Store:  _store,
-			Perms:  _store,
-			Match:  shared.NamespaceFilter(config.OwnersWhitelist),
+		sync := forge.Syncer{
+			Forge: _forge,
+			Store: _store,
+			Perms: _store,
+			Match: forge.NamespaceFilter(config.OwnersWhitelist),
 		}
 
 		if err := sync.Sync(c, user, server.Config.FlatPermissions); err != nil {
@@ -119,7 +119,7 @@ func GetRepos(c *gin.Context) {
 
 	repos, err := _store.RepoList(user, true)
 	if err != nil {
-		c.String(500, "Error fetching repository list. %s", err)
+		c.String(http.StatusInternalServerError, "Error fetching repository list. %s", err)
 		return
 	}
 
@@ -155,7 +155,7 @@ func DeleteToken(c *gin.Context) {
 		securecookie.GenerateRandomKey(32),
 	)
 	if err := _store.UpdateUser(user); err != nil {
-		c.String(500, "Error revoking tokens. %s", err)
+		c.String(http.StatusInternalServerError, "Error revoking tokens. %s", err)
 		return
 	}
 

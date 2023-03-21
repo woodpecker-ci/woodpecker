@@ -1,10 +1,10 @@
 variables:
-  - &golang_image 'golang:1.18'
+  - &golang_image 'golang:1.20.2'
   - &node_image 'node:18-alpine'
   - &when_path
     - "docs/**"
     - ".woodpecker/docs.yml"
-    # since we genereate docs for cli tool we have to watch this too
+    # since we generate docs for cli tool we have to watch this too
     - "cli/**"
     - "cmd/cli/**"
 

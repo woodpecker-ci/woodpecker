@@ -75,7 +75,6 @@ func TestUsers(t *testing.T) {
 				Secret: "976f22a5eef7caacb7e678d6c52f49b1",
 				Email:  "foo@bar.com",
 				Avatar: "b9015b0857e16ac4d94a0ffd9a0b79c8",
-				Active: true,
 			}
 
 			g.Assert(store.CreateUser(user)).IsNil()
@@ -87,7 +86,6 @@ func TestUsers(t *testing.T) {
 			g.Assert(user.Secret).Equal(getuser.Secret)
 			g.Assert(user.Email).Equal(getuser.Email)
 			g.Assert(user.Avatar).Equal(getuser.Avatar)
-			g.Assert(user.Active).Equal(getuser.Active)
 		})
 
 		g.It("Should Get a User By Login", func() {
@@ -192,25 +190,25 @@ func TestUsers(t *testing.T) {
 			g.Assert(store.CreateUser(user)).IsNil()
 
 			repo1 := &model.Repo{
-				Owner:    "bradrydzewski",
-				Name:     "test",
-				FullName: "bradrydzewski/test",
-				IsActive: true,
-				RemoteID: "1",
+				Owner:         "bradrydzewski",
+				Name:          "test",
+				FullName:      "bradrydzewski/test",
+				IsActive:      true,
+				ForgeRemoteID: "1",
 			}
 			repo2 := &model.Repo{
-				Owner:    "test",
-				Name:     "test",
-				FullName: "test/test",
-				IsActive: true,
-				RemoteID: "2",
+				Owner:         "test",
+				Name:          "test",
+				FullName:      "test/test",
+				IsActive:      true,
+				ForgeRemoteID: "2",
 			}
 			repo3 := &model.Repo{
-				Owner:    "octocat",
-				Name:     "hello-world",
-				FullName: "octocat/hello-world",
-				IsActive: true,
-				RemoteID: "3",
+				Owner:         "octocat",
+				Name:          "hello-world",
+				FullName:      "octocat/hello-world",
+				IsActive:      true,
+				ForgeRemoteID: "3",
 			}
 			g.Assert(store.CreateRepo(repo1)).IsNil()
 			g.Assert(store.CreateRepo(repo2)).IsNil()

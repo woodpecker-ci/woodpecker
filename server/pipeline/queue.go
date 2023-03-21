@@ -19,20 +19,19 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/woodpecker-ci/woodpecker/pipeline"
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/queue"
-	"github.com/woodpecker-ci/woodpecker/server/shared"
 )
 
-func queueBuild(pipeline *model.Pipeline, repo *model.Repo, pipelineItems []*shared.PipelineItem) error {
-	var tasks []*queue.Task
+func queuePipeline(repo *model.Repo, pipelineItems []*pipeline.Item) error {
+	var tasks []*model.Task
 	for _, item := range pipelineItems {
 		if item.Step.State == model.StatusSkipped {
 			continue
 		}
-		task := new(queue.Task)
+		task := new(model.Task)
 		task.ID = fmt.Sprint(item.Step.ID)
 		task.Labels = map[string]string{}
 		for k, v := range item.Labels {
@@ -42,7 +41,7 @@ func queueBuild(pipeline *model.Pipeline, repo *model.Repo, pipelineItems []*sha
 		task.Labels["repo"] = repo.FullName
 		task.Dependencies = taskIds(item.DependsOn, pipelineItems)
 		task.RunOn = item.RunsOn
-		task.DepStatus = make(map[string]string)
+		task.DepStatus = make(map[string]model.StatusValue)
 
 		task.Data, _ = json.Marshal(rpc.Pipeline{
 			ID:      fmt.Sprint(item.Step.ID),
@@ -58,7 +57,7 @@ func queueBuild(pipeline *model.Pipeline, repo *model.Repo, pipelineItems []*sha
 	return server.Config.Services.Queue.PushAtOnce(context.Background(), tasks)
 }
 
-func taskIds(dependsOn []string, pipelineItems []*shared.PipelineItem) (taskIds []string) {
+func taskIds(dependsOn []string, pipelineItems []*pipeline.Item) (taskIds []string) {
 	for _, dep := range dependsOn {
 		for _, pipelineItem := range pipelineItems {
 			if pipelineItem.Step.Name == dep {
