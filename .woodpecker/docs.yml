@@ -30,10 +30,10 @@ pipeline:
     image: ghcr.io/aquasecurity/trivy:latest
     commands:
       - trivy fs --exit-code 0 --skip-dirs node_modules/ --skip-dirs plugins/woodpecker-plugins/node_modules --severity UNKNOWN,LOW docs/
-      # TODO currently it is not fixable so just do not block currently
-      - trivy fs --exit-code 0 --skip-dirs node_modules/ --skip-dirs plugins/woodpecker-plugins/node_modules --severity MEDIUM,HIGH,CRITICAL docs/
+      - trivy fs --exit-code 1 --skip-dirs node_modules/ --skip-dirs plugins/woodpecker-plugins/node_modules --severity MEDIUM,HIGH,CRITICAL docs/
     when:
       path: *when_path
+    failure: ignore
 
   deploy-preview:
     image: quay.io/woodpeckerci/plugin-surge-preview:next
