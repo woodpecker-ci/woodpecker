@@ -52,8 +52,11 @@ func Test_helper(t *testing.T) {
 			}
 			from.Owner.Links.Avatar.Href = "http://..."
 			from.Links.HTML.Href = "https://bitbucket.org/foo/bar"
+			fromPerm := &internal.RepoPerm{
+				Permission: "write",
+			}
 
-			to := convertRepo(from)
+			to := convertRepo(from, fromPerm)
 			g.Assert(to.Avatar).Equal(from.Owner.Links.Avatar.Href)
 			g.Assert(to.FullName).Equal(from.FullName)
 			g.Assert(to.Owner).Equal("octocat")
@@ -63,6 +66,8 @@ func Test_helper(t *testing.T) {
 			g.Assert(to.IsSCMPrivate).Equal(from.IsPrivate)
 			g.Assert(to.Clone).Equal(from.Links.HTML.Href)
 			g.Assert(to.Link).Equal(from.Links.HTML.Href)
+			g.Assert(to.Perm.Push).IsTrue()
+			g.Assert(to.Perm.Admin).IsFalse()
 		})
 
 		g.It("should convert team", func() {

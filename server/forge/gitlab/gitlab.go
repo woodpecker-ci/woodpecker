@@ -335,30 +335,6 @@ func (g *GitLab) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 	return result, err
 }
 
-// Perm fetches the named repository from the forge.
-func (g *GitLab) Perm(ctx context.Context, user *model.User, r *model.Repo) (*model.Perm, error) {
-	client, err := newClient(g.URL, user.Token, g.SkipVerify)
-	if err != nil {
-		return nil, err
-	}
-	repo, err := g.getProject(ctx, client, r.Owner, r.Name)
-	if err != nil {
-		return nil, err
-	}
-
-	// repo owner is granted full access
-	if repo.Owner != nil && repo.Owner.Username == user.Login {
-		return &model.Perm{Push: true, Pull: true, Admin: true}, nil
-	}
-
-	// return permission for current user
-	return &model.Perm{
-		Pull:  isRead(repo),
-		Push:  isWrite(repo),
-		Admin: isAdmin(repo),
-	}, nil
-}
-
 // File fetches a file from the forge repository and returns in string format.
 func (g *GitLab) File(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, fileName string) ([]byte, error) {
 	client, err := newClient(g.URL, user.Token, g.SkipVerify)

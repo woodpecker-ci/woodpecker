@@ -84,5 +84,4 @@ var Config = struct {
 		DefaultTimeout                      int64
 		MaxTimeout                          int64
 	}
-	FlatPermissions bool // TODO(485) temporary workaround to not hit api rate limits
 }{}

@@ -487,16 +487,6 @@ var flags = []cli.Flag{
 		Hidden:  true,
 	},
 	//
-	// misc
-	//
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_FLAT_PERMISSIONS"},
-		Name:    "flat-permissions",
-		Usage:   "no forge call for permissions should be made",
-		Hidden:  true,
-		// TODO(485) temporary workaround to not hit api rate limits
-	},
-	//
 	// secrets encryption in DB
 	//
 	&cli.StringFlag{

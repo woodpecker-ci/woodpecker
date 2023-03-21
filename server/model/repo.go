@@ -40,7 +40,6 @@ type Repo struct {
 	Visibility                   RepoVisibly    `json:"visibility"                      xorm:"varchar(10) 'repo_visibility'"`
 	IsSCMPrivate                 bool           `json:"private"                         xorm:"repo_private"`
 	IsTrusted                    bool           `json:"trusted"                         xorm:"repo_trusted"`
-	IsStarred                    bool           `json:"starred,omitempty"               xorm:"-"`
 	IsGated                      bool           `json:"gated"                           xorm:"repo_gated"`
 	IsActive                     bool           `json:"active"                          xorm:"repo_active"`
 	AllowPull                    bool           `json:"allow_pr"                        xorm:"repo_allow_pr"`

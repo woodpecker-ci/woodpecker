@@ -360,7 +360,4 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 
 	// prometheus
 	server.Config.Prometheus.AuthToken = c.String("prometheus-auth-token")
-
-	// TODO(485) temporary workaround to not hit api rate limits
-	server.Config.FlatPermissions = c.Bool("flat-permissions")
 }

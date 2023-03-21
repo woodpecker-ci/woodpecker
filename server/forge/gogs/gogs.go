@@ -176,16 +176,6 @@ func (c *client) Repos(_ context.Context, u *model.User) ([]*model.Repo, error) 
 	return repos, err
 }
 
-// Perm returns the user permissions for the named Gogs repository.
-func (c *client) Perm(_ context.Context, u *model.User, r *model.Repo) (*model.Perm, error) {
-	client := c.newClientToken(u.Token)
-	repo, err := client.GetRepo(r.Owner, r.Name)
-	if err != nil {
-		return nil, err
-	}
-	return toPerm(repo.Permissions), nil
-}
-
 // File fetches the file from the Gogs repository and returns its contents.
 func (c *client) File(_ context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]byte, error) {
 	client := c.newClientToken(u.Token)

@@ -103,8 +103,6 @@ type Store interface {
 	// RepoList TODO: paginate
 	RepoList(user *model.User, owned bool) ([]*model.Repo, error)
 	RepoListLatest(*model.User) ([]*model.Feed, error)
-	// RepoBatch Sync batch of repos from SCM (with permissions) to store (create if not exist else update)
-	RepoBatch([]*model.Repo) error
 
 	// Permissions
 	PermFind(user *model.User, repo *model.Repo) (*model.Perm, error)
