@@ -65,9 +65,9 @@
           <span class="ml-2">{{ task.id }}</span>
           <span class="flex ml-auto gap-2">
             <Badge v-if="task.agent_id !== 0" :label="$t('admin.settings.queue.agent')" :value="task.agent_id" />
-            <span v-for="(value, label) in task.labels">
+            <template v-for="(value, label) in task.labels">
               <Badge v-if="value" :key="label" :label="label.toString()" :value="value" />
-            </span>
+            </template>
             <Badge
               v-if="task.dependencies"
               :label="$t('admin.settings.queue.waiting_for')"
