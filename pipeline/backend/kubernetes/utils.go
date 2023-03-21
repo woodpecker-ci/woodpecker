@@ -1,7 +1,7 @@
 package kubernetes
 
 import (
-	"log"
+	"errors"
 	"os"
 	"regexp"
 	"strings"
@@ -12,16 +12,19 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-var dnsPattern = regexp.MustCompile(`[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*`)
+var (
+	dnsPattern           = regexp.MustCompile(`^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$`)
+	ErrDNSPatternInvalid = errors.New("name is not a valid kubernetes DNS name")
+)
 
-func dnsName(i string) string {
-	res := strings.Replace(strings.ToLower(i), "_", "-", -1)
+func dnsName(i string) (string, error) {
+	res := strings.Replace(i, "_", "-", -1)
 
-	match := dnsPattern.MatchString(res)
-	if !match {
-		log.Panic("name not valid kubernetes DNS name")
+	if found := dnsPattern.FindStringIndex(res); found == nil {
+		return "", ErrDNSPatternInvalid
 	}
-	return res
+
+	return res, nil
 }
 
 func isImagePullBackOffState(pod *v1.Pod) bool {
