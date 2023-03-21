@@ -46,6 +46,13 @@
         "queue": "Warteschlange",
         "resume": "Wieder aufnehmen",
         "resumed": "Warteschlange wurde wieder aufgenommen",
+        "stats": {
+          "completed_count": "Beendete Aufgaben",
+          "pending_count": "Ausstehend",
+          "running_count": "Läuft",
+          "waiting_on_deps_count": "Wartet auf Abhängigkeiten",
+          "worker_count": "Frei"
+        },
         "task_pending": "Aufgabe steht aus",
         "task_running": "Aufgabe läuft",
         "task_waiting_on_deps": "Aufgabe wartet auf Abhängigkeiten",
@@ -346,6 +353,10 @@
           "desc": "Aktiviere diese Option, um laufende Pipelines desselben Ereignisses und Kontexts abzubrechen, bevor die neue Pipeline startet."
         },
         "general": "Allgemein",
+        "netrc_only_trusted": {
+          "desc": "Netrc-Zugangsdaten nur in vertrauenswürdigen Containern bereitstellen (empfohlen).",
+          "netrc_only_trusted": "Netrc-Zugangsdaten nur in vertrauenswürdigen Containern zum Klonen bereitstellen"
+        },
         "pipeline_path": {
           "default": "Standardmäßig: .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml",
           "desc": "Pfad zu deiner Pipeline-Konfiguration (z. B. <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">mein/pfad/</span>). Verzeichnisse sollten mit einem <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">/</span> enden.",

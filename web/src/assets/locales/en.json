@@ -213,6 +213,10 @@
                     "disable": "Disable repository",
                     "success": "Repository disabled"
                 },
+                "enable": {
+                  "enable": "Enable repository",
+                  "success": "Repository enabled"
+                },
                 "delete": {
                     "delete": "Delete repository",
                     "confirm": "All data will be lost after this action!!!\n\nDo you really want to proceed?",
