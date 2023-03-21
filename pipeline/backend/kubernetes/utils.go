@@ -36,7 +36,7 @@ func getClientOutOfCluster() (kubernetes.Interface, error) {
 	// use the current context in kubeconfig
 	config, err := clientcmd.BuildConfigFromFlags("", kubeconfigPath)
 	if err != nil {
-		panic(err.Error())
+		return nil, err
 	}
 
 	return kubernetes.NewForConfig(config)
