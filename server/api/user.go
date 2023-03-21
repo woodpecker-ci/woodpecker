@@ -63,30 +63,6 @@ func GetRepos(c *gin.Context) {
 	user := session.User(c)
 	all, _ := strconv.ParseBool(c.Query("all"))
 
-	/*if flush || time.Unix(user.Synced, 0).Add(time.Hour*72).Before(time.Now()) {
-		log.Debug().Msgf("sync begin: %s", user.Login)
-		user.Synced = time.Now().Unix()
-		if err := _store.UpdateUser(user); err != nil {
-			log.Err(err).Msgf("update user '%s'", user.Login)
-			return
-		}
-
-		config := ToConfig(c)
-
-		sync := forge.Syncer{
-			Forge: _forge,
-			Store: _store,
-			Perms: _store,
-			Match: forge.NamespaceFilter(config.OwnersWhitelist),
-		}
-
-		if err := sync.Sync(c, user, server.Config.FlatPermissions); err != nil {
-			log.Debug().Msgf("sync error: %s: %s", user.Login, err)
-		} else {
-			log.Debug().Msgf("sync complete: %s", user.Login)
-		}
-	}*/
-
 	dbRepos, err := _store.RepoList(user, true)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error fetching repository list. %s", err)
