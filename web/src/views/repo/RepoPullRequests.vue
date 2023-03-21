@@ -30,11 +30,11 @@ let getNextPage = true;
 const pullRequests = ref<PullRequest[]>();
 const repo = inject<Ref<Repo>>('repo');
 const scrollComponent = document.querySelector('main > div');
-if (!repo) {
-  throw new Error('Unexpected: "repo" should be provided at this place');
+if (!repo || !scrollComponent) {
+  throw new Error('Unexpected: "repo" and "scrollComponent" should be provided at this place');
 }
 
-async function loadPullRequests(page: number) {
+async function loadPullRequests() {
   getNextPage = false;
   if (!repo) {
     throw new Error('Unexpected: "repo" should be provided at this place');
@@ -52,14 +52,14 @@ async function loadPullRequests(page: number) {
 
 const handleScroll = () => {
   if (getNextPage && scrollComponent.scrollTop + scrollComponent.clientHeight === scrollComponent.scrollHeight) {
-    page++;
-    loadPullRequests(page);
+    page += 1;
+    loadPullRequests();
   }
 };
 
 onMounted(() => {
   page = 1;
-  loadPullRequests(1);
+  loadPullRequests();
   scrollComponent.addEventListener('scroll', handleScroll);
 });
 
@@ -70,6 +70,6 @@ onUnmounted(() => {
 
 watch(repo, () => {
   page = 1;
-  loadPullRequests(1);
+  loadPullRequests();
 });
 </script>

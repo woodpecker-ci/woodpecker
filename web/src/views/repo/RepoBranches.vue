@@ -12,12 +12,11 @@
 </template>
 
 <script lang="ts" setup>
-import { defineComponent, inject, onMounted, onUnmounted, Ref, ref, watch } from 'vue';
+import { inject, onMounted, onUnmounted, Ref, ref, watch } from 'vue';
 
 import ListItem from '~/components/atomic/ListItem.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { Repo } from '~/lib/api/types';
-import numberField from '~/components/form/NumberField.vue';
 
 const apiClient = useApiClient();
 
@@ -27,11 +26,11 @@ let getNextPage = true;
 const branches = ref<string[]>();
 const repo = inject<Ref<Repo>>('repo');
 const scrollComponent = document.querySelector('main > div');
-if (!repo) {
-  throw new Error('Unexpected: "repo" should be provided at this place');
+if (!repo || !scrollComponent) {
+  throw new Error('Unexpected: "repo" and "scrollComponent" should be provided at this place');
 }
 
-async function loadBranches(page: number) {
+async function loadBranches() {
   getNextPage = false;
   if (!repo) {
     throw new Error('Unexpected: "repo" should be provided at this place');
@@ -49,14 +48,14 @@ async function loadBranches(page: number) {
 
 const handleScroll = () => {
   if (getNextPage && scrollComponent.scrollTop + scrollComponent.clientHeight === scrollComponent.scrollHeight) {
-    page++;
-    loadBranches(page);
+    page += 1;
+    loadBranches();
   }
 };
 
 onMounted(() => {
   page = 1;
-  loadBranches(page);
+  loadBranches();
   scrollComponent.addEventListener('scroll', handleScroll);
 });
 
@@ -67,6 +66,6 @@ onUnmounted(() => {
 
 watch(repo, () => {
   page = 1;
-  loadBranches(page);
+  loadBranches();
 });
 </script>
