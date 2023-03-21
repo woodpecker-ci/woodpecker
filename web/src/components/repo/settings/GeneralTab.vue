@@ -35,6 +35,11 @@
           :description="$t('repo.settings.general.protected.desc')"
         />
         <Checkbox
+          v-model="repoSettings.netrc_only_trusted"
+          :label="$t('repo.settings.general.netrc_only_trusted.netrc_only_trusted')"
+          :description="$t('repo.settings.general.netrc_only_trusted.desc')"
+        />
+        <Checkbox
           v-if="user?.admin"
           v-model="repoSettings.trusted"
           :label="$t('repo.settings.general.trusted.trusted')"
@@ -130,6 +135,7 @@ export default defineComponent({
         trusted: repo.value.trusted,
         allow_pr: repo.value.allow_pr,
         cancel_previous_pipeline_events: repo.value.cancel_previous_pipeline_events || [],
+        netrc_only_trusted: repo.value.netrc_only_trusted,
       };
     }
 

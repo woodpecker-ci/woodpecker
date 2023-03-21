@@ -20,7 +20,7 @@ func TestPubsub(t *testing.T) {
 		}
 	)
 
-	ctx, cancel := context.WithCancel(
+	ctx, cancel := context.WithCancelCause(
 		context.Background(),
 	)
 
@@ -45,7 +45,7 @@ func TestPubsub(t *testing.T) {
 	}()
 
 	wg.Wait()
-	cancel()
+	cancel(nil)
 }
 
 func TestPublishNotFound(t *testing.T) {
