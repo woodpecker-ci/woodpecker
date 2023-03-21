@@ -3,10 +3,12 @@ package yaml
 import (
 	"fmt"
 
+	"golang.org/x/exp/slices"
 	"gopkg.in/yaml.v3"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/constraint"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
+	"github.com/woodpecker-ci/woodpecker/shared/constant"
 )
 
 type (
@@ -113,4 +115,8 @@ func (c *Containers) UnmarshalYAML(value *yaml.Node) error {
 
 func (c *Container) IsPlugin() bool {
 	return len(c.Commands) == 0
+}
+
+func (c *Container) IsTrustedCloneImage() bool {
+	return c.IsPlugin() && slices.Contains(constant.TrustedCloneImages, c.Image)
 }

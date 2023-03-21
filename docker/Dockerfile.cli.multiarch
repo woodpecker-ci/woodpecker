@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM docker.io/golang:1.18 AS build
+FROM --platform=$BUILDPLATFORM docker.io/golang:1.20 AS build
 
 WORKDIR /src
 COPY . .
@@ -10,7 +10,7 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
 FROM scratch
 ENV GODEBUG=netdns=go
 
-# copy certs from golang:1.18 image
+# copy certs from build image
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 # copy cli binary
 COPY --from=build /src/dist/woodpecker-cli /bin/

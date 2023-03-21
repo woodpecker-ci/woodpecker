@@ -36,3 +36,7 @@ const (
 	// DefaultCloneImage can be changed by 'WOODPECKER_DEFAULT_CLONE_IMAGE' at runtime
 	DefaultCloneImage = "quay.io/woodpeckerci/plugin-git:2.0.3"
 )
+
+var TrustedCloneImages = []string{
+	DefaultCloneImage,
+}

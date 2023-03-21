@@ -4,7 +4,15 @@
       "agents": {
         "add": "Pievienot aģentu",
         "agents": "Aģenti",
-        "backend": "Aizmugures dzinis",
+        "backend": {
+          "backend": "Aizmugures sistēma",
+          "badge": "aizmugures sistēma"
+        },
+        "capacity": {
+          "badge": "paralēlie darbi",
+          "capacity": "Paralēlie darbi",
+          "desc": "Maksimālais aģenta paralēli izpildāmo konvejerdarbu skaits."
+        },
         "created": "Aģents izveidots",
         "delete_confirm": "Vai patiešām dzēst šo aģentu? Tam vairs nebūs iespējas savienoties ar serveri.",
         "deleted": "Aģents izdzēsts",
@@ -15,8 +23,15 @@
           "placeholder": "Aģenta nosaukums"
         },
         "never": "nekad",
+        "no_schedule": {
+          "name": "Atspējot aģentu",
+          "placeholder": "Apturēt aģentu no jaunu darbu pieņemšanas"
+        },
         "none": "Pagaidām nav neviena aģenta.",
-        "platform": "Platforma",
+        "platform": {
+          "badge": "platforma",
+          "platform": "Platforma"
+        },
         "save": "Saglabāt aģentu",
         "saved": "Aģents saglabāts",
         "show": "Parādīt aģentus",
@@ -47,14 +62,40 @@
         "value": "Vērtība",
         "warning": "Šie noslēpumi būs pieejami visiem servera lietotājiem."
       },
-      "settings": "Iestatījumi"
+      "settings": "Iestatījumi",
+      "users": {
+        "add": "Pievienot lietotāju",
+        "admin": {
+          "admin": "Administrators",
+          "placeholder": "Lietotājs ir administrators"
+        },
+        "avatar_url": "Avatāra URL",
+        "cancel": "Atcelt",
+        "created": "Lietotājs izveidots",
+        "delete_confirm": "Vai patiešām vēlaties dzēst šo lietotāju?",
+        "delete_user": "Dzēst lietotāju",
+        "deleted": "Lietotājs izdzēsts",
+        "desc": "Lietotāji, kas ir reģistrēti šajā serverī",
+        "edit_user": "Labot lietotāju",
+        "email": "E-pasta adrese",
+        "login": "Lietotāja vārds",
+        "none": "Pašlaik vēl nav neviena lietotāja.",
+        "save": "Saglabāt lietotāju",
+        "saved": "Lietotāja dati saglabāti",
+        "show": "Parādīt lietotājus",
+        "users": "Lietotāji"
+      }
     }
   },
   "back": "Atpakaļ",
+  "cancel": "Atcelt",
   "color_scheme_dark": "Pārslēgties uz gaišo režīmu",
   "color_scheme_light": "Pārslēgties uz tumšo režīmu",
   "docs": "Dokumentācija",
   "documentation_for": "Dokumentācija par \"{topic}\"",
+  "errors": {
+    "not_found": "Nevarēja atrast pieprasīto objektu"
+  },
   "login": "Autorizēties",
   "logout": "Iziet",
   "not_found": {
@@ -90,6 +131,7 @@
     }
   },
   "password": "Parole",
+  "pipeline_feed": "Konvejerdarba padeve",
   "repo": {
     "activity": "Aktivitāte",
     "add": "Pievienot repozitoriju",
@@ -137,10 +179,13 @@
     },
     "deploy_pipeline": {
       "enter_target": "Mērķa uzstādīšanas vide",
+      "title": "Iniciēt uzstādīšanas notikumu šim konvejerdarbam #{pipelineId}",
       "trigger": "Uzstādīt",
       "variables": {
         "add": "Pievienot mainīgo",
+        "desc": "Norādiet papildus mainīgos, ko izmantot konvejerdarbā. Mainīgie ar šādu pašu nosaukumu tiks pārrakstīti.",
         "name": "Mainīgā nosaukums",
+        "title": "Papildus konvejerdarba mainīgie",
         "value": "Mainīgā vērtība"
       }
     },
@@ -197,6 +242,7 @@
       "no_pipelines": "Neviens konvejerdarbs vēl nav uzsākts.",
       "pipeline": "Konvejerdarbs #{pipelineId}",
       "pipelines_for": "Konvejerdarbi atzaram \"{branch}\"",
+      "pipelines_for_pr": "Konvejerdarbi izmaiņu pieprasījumam #{index}",
       "protected": {
         "approve": "Apstiprināt",
         "approve_success": "Konvejerdarbs apstiprināts",
@@ -221,6 +267,7 @@
       "step_not_started": "Šis solis vēl nav uzsākts.",
       "tasks": "Uzdevumi"
     },
+    "pull_requests": "Izmaiņu pieprasījumi",
     "settings": {
       "actions": {
         "actions": "Darbības",
@@ -345,6 +392,7 @@
         "add": "Pievienot noslēpumu",
         "created": "Noslēpums izveidots",
         "delete": "Dzēst noslēpumu",
+        "delete_confirm": "Vai patiešām vēlaties dzēst šo noslēpumu?",
         "deleted": "Noslēpums dzēsts",
         "desc": "Noslēpumus var padot individuāliem konvejerdarba soļiem izpildes laikā kā vides mainīgos.",
         "edit": "Labot noslēpumu",
