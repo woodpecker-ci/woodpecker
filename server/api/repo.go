@@ -44,7 +44,7 @@ func PostRepo(c *gin.Context) {
 	name := c.Param("name")
 	repo, err := _store.GetRepoName(owner + "/" + name)
 	enabledOnce := err == nil // if there's no error, the repo was found and enabled once already
-	if err == nil && repo.IsActive {
+	if enabledOnce && repo.IsActive {
 		c.String(http.StatusConflict, "Repository is already active.")
 		return
 	} else if err != nil && !errors.Is(err, types.RecordNotExist) {
@@ -58,7 +58,7 @@ func PostRepo(c *gin.Context) {
 		return
 	}
 	if !from.Perm.Admin {
-		c.String(http.StatusForbidden, "User not authorized")
+		c.String(http.StatusForbidden, "User has to be a admin of this repository")
 	}
 
 	if enabledOnce {
