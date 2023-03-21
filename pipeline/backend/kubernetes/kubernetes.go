@@ -119,8 +119,12 @@ func (e *kube) Setup(ctx context.Context, conf *types.Config) error {
 	log.Trace().Msgf("Setting up Kubernetes primitives")
 
 	for _, vol := range conf.Volumes {
-		pvc := PersistentVolumeClaim(e.config.Namespace, vol.Name, e.config.StorageClass, e.config.VolumeSize, e.config.StorageRwx)
-		_, err := e.client.CoreV1().PersistentVolumeClaims(e.config.Namespace).Create(ctx, pvc, metav1.CreateOptions{})
+		pvc, err := PersistentVolumeClaim(e.config.Namespace, vol.Name, e.config.StorageClass, e.config.VolumeSize, e.config.StorageRwx)
+		if err != nil {
+			return err
+		}
+
+		_, err = e.client.CoreV1().PersistentVolumeClaims(e.config.Namespace).Create(ctx, pvc, metav1.CreateOptions{})
 		if err != nil {
 			return err
 		}
@@ -131,10 +135,14 @@ func (e *kube) Setup(ctx context.Context, conf *types.Config) error {
 	for _, stage := range conf.Stages {
 		if stage.Alias == "services" {
 			for _, step := range stage.Steps {
-				log.Trace().Str("pod-name", podName(step)).Msgf("Creating service: %s", step.Name)
+				stepName, err := dnsName(step.Name)
+				if err != nil {
+					return err
+				}
+				log.Trace().Str("pod-name", stepName).Msgf("Creating service: %s", step.Name)
 				// TODO: support ports setting
-				// svc, err := Service(e.config.Namespace, step.Name, podName(step), step.Ports)
-				svc, err := Service(e.config.Namespace, step.Name, podName(step), []string{})
+				// svc, err := Service(e.config.Namespace, step.Name, stepName, step.Ports)
+				svc, err := Service(e.config.Namespace, step.Name, stepName, []string{})
 				if err != nil {
 					return err
 				}
@@ -161,16 +169,23 @@ func (e *kube) Setup(ctx context.Context, conf *types.Config) error {
 
 // Start the pipeline step.
 func (e *kube) Exec(ctx context.Context, step *types.Step) error {
-	pod := Pod(e.config.Namespace, step, e.config.PodLabels, e.config.PodAnnotations)
+	pod, err := Pod(e.config.Namespace, step, e.config.PodLabels, e.config.PodAnnotations)
+	if err != nil {
+		return err
+	}
+
 	log.Trace().Msgf("Creating pod: %s", pod.Name)
-	_, err := e.client.CoreV1().Pods(e.config.Namespace).Create(ctx, pod, metav1.CreateOptions{})
+	_, err = e.client.CoreV1().Pods(e.config.Namespace).Create(ctx, pod, metav1.CreateOptions{})
 	return err
 }
 
 // Wait for the pipeline step to complete and returns
 // the completion results.
 func (e *kube) Wait(ctx context.Context, step *types.Step) (*types.State, error) {
-	podName := podName(step)
+	podName, err := dnsName(step.Name)
+	if err != nil {
+		return nil, err
+	}
 
 	finished := make(chan bool)
 
@@ -225,7 +240,10 @@ func (e *kube) Wait(ctx context.Context, step *types.Step) (*types.State, error)
 
 // Tail the pipeline step logs.
 func (e *kube) Tail(ctx context.Context, step *types.Step) (io.ReadCloser, error) {
-	podName := podName(step)
+	podName, err := dnsName(step.Name)
+	if err != nil {
+		return nil, err
+	}
 
 	up := make(chan bool)
 
@@ -305,10 +323,14 @@ func (e *kube) Destroy(_ context.Context, conf *types.Config) error {
 
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
-			log.Trace().Msgf("Deleting pod: %s", podName(step))
-			if err := e.client.CoreV1().Pods(e.config.Namespace).Delete(noContext, podName(step), deleteOpts); err != nil {
+			stepName, err := dnsName(step.Name)
+			if err != nil {
+				return err
+			}
+			log.Trace().Msgf("Deleting pod: %s", stepName)
+			if err := e.client.CoreV1().Pods(e.config.Namespace).Delete(noContext, stepName, deleteOpts); err != nil {
 				if errors.IsNotFound(err) {
-					log.Trace().Err(err).Msgf("Unable to delete pod %s", podName(step))
+					log.Trace().Err(err).Msgf("Unable to delete pod %s", stepName)
 				} else {
 					return err
 				}
@@ -338,8 +360,11 @@ func (e *kube) Destroy(_ context.Context, conf *types.Config) error {
 	}
 
 	for _, vol := range conf.Volumes {
-		pvc := PersistentVolumeClaim(e.config.Namespace, vol.Name, e.config.StorageClass, e.config.VolumeSize, e.config.StorageRwx)
-		err := e.client.CoreV1().PersistentVolumeClaims(e.config.Namespace).Delete(noContext, pvc.Name, deleteOpts)
+		pvc, err := PersistentVolumeClaim(e.config.Namespace, vol.Name, e.config.StorageClass, e.config.VolumeSize, e.config.StorageRwx)
+		if err != nil {
+			return err
+		}
+		err = e.client.CoreV1().PersistentVolumeClaims(e.config.Namespace).Delete(noContext, pvc.Name, deleteOpts)
 		if err != nil {
 			if errors.IsNotFound(err) {
 				log.Trace().Err(err).Msgf("Unable to delete pvc %s", pvc.Name)
