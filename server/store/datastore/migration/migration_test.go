@@ -76,7 +76,7 @@ func testDB(t *testing.T, new bool) (engine *xorm.Engine, closeDB func()) {
 		config := os.Getenv("WOODPECKER_DATABASE_DATASOURCE")
 		if !new {
 			restorePostgresDump(t, config)
-			close = func() {
+			closeDB = func() {
 				cleanDB(t, engine)
 			}
 		}
