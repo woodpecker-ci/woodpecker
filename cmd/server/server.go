@@ -48,6 +48,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/server/web"
+	"github.com/woodpecker-ci/woodpecker/shared/constant"
 	"github.com/woodpecker-ci/woodpecker/version"
 	// "github.com/woodpecker-ci/woodpecker/server/plugins/encryption"
 	// encryptedStore "github.com/woodpecker-ci/woodpecker/server/plugins/encryption/wrapper/store"
@@ -131,7 +132,7 @@ func run(c *cli.Context) error {
 	g.Go(func() error {
 		lis, err := net.Listen("tcp", c.String("grpc-addr"))
 		if err != nil {
-			log.Err(err).Msg("")
+			log.Error().Err(err).Msg("failed to listen on grpc-addr")
 			return err
 		}
 
@@ -166,7 +167,7 @@ func run(c *cli.Context) error {
 
 		err = grpcServer.Serve(lis)
 		if err != nil {
-			log.Err(err).Msg("")
+			log.Error().Err(err).Msg("failed to serve grpc server")
 			return err
 		}
 		return nil
@@ -176,7 +177,12 @@ func run(c *cli.Context) error {
 	var webUIServe func(w http.ResponseWriter, r *http.Request)
 
 	if proxyWebUI == "" {
-		webUIServe = web.New().ServeHTTP
+		webEngine, err := web.New()
+		if err != nil {
+			log.Error().Err(err).Msg("failed to create web engine")
+			return err
+		}
+		webUIServe = webEngine.ServeHTTP
 	} else {
 		origin, _ := url.Parse(proxyWebUI)
 
@@ -313,6 +319,7 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 
 	// Cloning
 	server.Config.Pipeline.DefaultCloneImage = c.String("default-clone-image")
+	constant.TrustedCloneImages = append(constant.TrustedCloneImages, server.Config.Pipeline.DefaultCloneImage)
 
 	// Execution
 	_events := c.StringSlice("default-cancel-previous-pipeline-events")

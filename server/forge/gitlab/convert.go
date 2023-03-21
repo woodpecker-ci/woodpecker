@@ -252,10 +252,10 @@ func extractFromPath(str string) (string, string, error) {
 	return s[0], s[1], nil
 }
 
-func convertLabels(from []*gitlab.Label) []string {
+func convertLabels(from []*gitlab.EventLabel) []string {
 	labels := make([]string, len(from))
 	for i, label := range from {
-		labels[i] = label.Name
+		labels[i] = label.Title
 	}
 	return labels
 }

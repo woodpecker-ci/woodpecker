@@ -71,12 +71,12 @@ func EventStreamSSE(c *gin.Context) {
 	}
 
 	eventc := make(chan []byte, 10)
-	ctx, cancel := context.WithCancel(
+	ctx, cancel := context.WithCancelCause(
 		context.Background(),
 	)
 
 	defer func() {
-		cancel()
+		cancel(nil)
 		close(eventc)
 		log.Debug().Msg("user feed: connection closed")
 	}()
@@ -101,7 +101,7 @@ func EventStreamSSE(c *gin.Context) {
 		if err != nil {
 			log.Error().Err(err).Msg("Subscribe failed")
 		}
-		cancel()
+		cancel(err)
 	}()
 
 	for {
@@ -168,14 +168,14 @@ func LogStreamSSE(c *gin.Context) {
 	}
 
 	logc := make(chan []byte, 10)
-	ctx, cancel := context.WithCancel(
+	ctx, cancel := context.WithCancelCause(
 		context.Background(),
 	)
 
 	log.Debug().Msgf("log stream: connection opened")
 
 	defer func() {
-		cancel()
+		cancel(nil)
 		close(logc)
 		log.Debug().Msgf("log stream: connection closed")
 	}()
@@ -202,7 +202,7 @@ func LogStreamSSE(c *gin.Context) {
 
 		logWriteStringErr(io.WriteString(rw, "event: error\ndata: eof\n\n"))
 
-		cancel()
+		cancel(err)
 	}()
 
 	id := 1
