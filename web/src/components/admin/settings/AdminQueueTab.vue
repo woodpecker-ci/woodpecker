@@ -57,15 +57,25 @@
               "
               :class="{
                 'text-red-400': task.status === 'waiting_on_deps',
-                'text-lime-400': task.status === 'running',
-                'text-blue-400': task.status === 'pending',
+                'text-blue-400': task.status === 'running',
+                'text-gray-400': task.status === 'pending',
               }"
             />
           </div>
           <span class="ml-2">{{ task.id }}</span>
           <span class="flex ml-auto gap-2">
-            <span>{{ task.labels }}</span>
-            <span>{{ task.dependencies }}</span>
+            <Badge v-if="task.agent_id !== 0" :label="$t('admin.settings.queue.agent')" :value="task.agent_id" />
+            <Badge
+              v-for="(value, label) in task.labels"
+              :key="label"
+              :label="label.toString()"
+              :value="value || '???'"
+            />
+            <Badge
+              v-if="task.dependencies"
+              :label="$t('admin.settings.queue.waiting_for')"
+              :value="task.dependencies.join(', ')"
+            />
           </span>
         </ListItem>
       </div>
@@ -77,6 +87,7 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import Badge from '~/components/atomic/Badge.vue';
 import Button from '~/components/atomic/Button.vue';
 import Icon from '~/components/atomic/Icon.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
