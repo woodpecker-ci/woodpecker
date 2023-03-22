@@ -59,7 +59,7 @@ func parsePushHook(payload []byte) (*model.Repo, *model.Pipeline, error) {
 		if change.New.Target.Hash == "" {
 			continue
 		}
-		return convertRepo(&hook.Repo), convertPushHook(&hook, &change), nil
+		return convertRepo(&hook.Repo, &internal.RepoPerm{}), convertPushHook(&hook, &change), nil
 	}
 	return nil, nil, nil
 }
@@ -75,5 +75,5 @@ func parsePullHook(payload []byte) (*model.Repo, *model.Pipeline, error) {
 	if hook.PullRequest.State != stateOpen {
 		return nil, nil, nil
 	}
-	return convertRepo(&hook.Repo), convertPullHook(&hook), nil
+	return convertRepo(&hook.Repo, &internal.RepoPerm{}), convertPullHook(&hook), nil
 }

@@ -154,30 +154,34 @@ func (*Config) TeamPerm(_ *model.User, _ string) (*model.Perm, error) {
 }
 
 func (c *Config) Repo(ctx context.Context, u *model.User, _ model.ForgeRemoteID, owner, name string) (*model.Repo, error) {
-	repo, err := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token).FindRepo(owner, name)
+	client := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token)
+	repo, err := client.FindRepo(owner, name)
 	if err != nil {
 		return nil, err
 	}
-	return convertRepo(repo), nil
+	perm, err := client.FindRepoPerms(repo.Project.Key, repo.Name)
+	if err != nil {
+		return nil, err
+	}
+	return convertRepo(repo, perm), nil
 }
 
 func (c *Config) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {
-	repos, err := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token).FindRepos()
+	client := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token)
+	repos, err := client.FindRepos()
 	if err != nil {
 		return nil, err
 	}
 	var all []*model.Repo
 	for _, repo := range repos {
-		all = append(all, convertRepo(repo))
+		perm, err := client.FindRepoPerms(repo.Project.Key, repo.Name)
+		if err != nil {
+			return nil, err
+		}
+		all = append(all, convertRepo(repo, perm))
 	}
 
 	return all, nil
-}
-
-func (c *Config) Perm(ctx context.Context, u *model.User, repo *model.Repo) (*model.Perm, error) {
-	client := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token)
-
-	return client.FindRepoPerms(repo.Owner, repo.Name)
 }
 
 func (c *Config) File(ctx context.Context, u *model.User, r *model.Repo, p *model.Pipeline, f string) ([]byte, error) {

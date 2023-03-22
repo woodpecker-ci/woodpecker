@@ -20,7 +20,6 @@ import {
 
 type RepoListOptions = {
   all?: boolean;
-  flush?: boolean;
 };
 
 type PipelineOptions = {

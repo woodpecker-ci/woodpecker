@@ -300,32 +300,6 @@ func (_m *Forge) OrgMembership(ctx context.Context, u *model.User, owner string)
 	return r0, r1
 }
 
-// Perm provides a mock function with given fields: ctx, u, r
-func (_m *Forge) Perm(ctx context.Context, u *model.User, r *model.Repo) (*model.Perm, error) {
-	ret := _m.Called(ctx, u, r)
-
-	var r0 *model.Perm
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, *model.User, *model.Repo) (*model.Perm, error)); ok {
-		return rf(ctx, u, r)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context, *model.User, *model.Repo) *model.Perm); ok {
-		r0 = rf(ctx, u, r)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*model.Perm)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(context.Context, *model.User, *model.Repo) error); ok {
-		r1 = rf(ctx, u, r)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // PullRequests provides a mock function with given fields: ctx, u, r, p
 func (_m *Forge) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.PaginationData) ([]*model.PullRequest, error) {
 	ret := _m.Called(ctx, u, r, p)

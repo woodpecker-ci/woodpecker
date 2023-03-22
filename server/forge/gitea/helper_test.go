@@ -202,6 +202,7 @@ func Test_parse(t *testing.T) {
 				HTMLURL:       "http://gitea.golang.org/gophers/hello-world",
 				Private:       true,
 				DefaultBranch: "master",
+				Permissions:   &gitea.Permission{Admin: true},
 			}
 			repo := toRepo(&from)
 			g.Assert(repo.FullName).Equal(from.FullName)
@@ -212,6 +213,7 @@ func Test_parse(t *testing.T) {
 			g.Assert(repo.Clone).Equal(from.CloneURL)
 			g.Assert(repo.Avatar).Equal(from.Owner.AvatarURL)
 			g.Assert(repo.IsSCMPrivate).Equal(from.Private)
+			g.Assert(repo.Perm.Admin).IsTrue()
 		})
 
 		g.It("Should correct a malformed avatar url", func() {

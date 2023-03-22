@@ -269,20 +269,6 @@ func (c *Gitea) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error)
 	})
 }
 
-// Perm returns the user permissions for the named Gitea repository.
-func (c *Gitea) Perm(ctx context.Context, u *model.User, r *model.Repo) (*model.Perm, error) {
-	client, err := c.newClientToken(ctx, u.Token)
-	if err != nil {
-		return nil, err
-	}
-
-	repo, _, err := client.GetRepo(r.Owner, r.Name)
-	if err != nil {
-		return nil, err
-	}
-	return toPerm(repo.Permissions), nil
-}
-
 // File fetches the file from the Gitea repository and returns its contents.
 func (c *Gitea) File(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]byte, error) {
 	client, err := c.newClientToken(ctx, u.Token)

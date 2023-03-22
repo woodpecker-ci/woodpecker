@@ -18,7 +18,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"text/template"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
@@ -40,15 +39,9 @@ func Config(c *gin.Context) {
 		).Sign(user.Hash)
 	}
 
-	var syncing bool
-	if user != nil {
-		syncing = time.Unix(user.Synced, 0).Add(time.Hour * 72).Before(time.Now())
-	}
-
 	configData := map[string]interface{}{
 		"user":    user,
 		"csrf":    csrf,
-		"syncing": syncing,
 		"docs":    server.Config.Server.Docs,
 		"version": version.String(),
 		"forge":   server.Config.Services.Forge.Name(),
@@ -73,7 +66,6 @@ func Config(c *gin.Context) {
 
 const configTemplate = `
 window.WOODPECKER_USER = {{ json .user }};
-window.WOODPECKER_SYNC = {{ .syncing }};
 window.WOODPECKER_CSRF = "{{ .csrf }}";
 window.WOODPECKER_VERSION = "{{ .version }}";
 window.WOODPECKER_DOCS = "{{ .docs }}";

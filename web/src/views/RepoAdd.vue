@@ -4,10 +4,6 @@
       {{ $t('repo.add') }}
     </template>
 
-    <template #titleActions>
-      <Button start-icon="sync" :text="$t('repo.enable.reload')" :is-loading="isReloadingRepos" @click="reloadRepos" />
-    </template>
-
     <div class="space-y-4">
       <ListItem
         v-for="repo in searchedRepos"
@@ -68,12 +64,6 @@ export default defineComponent({
       repos.value = await apiClient.getRepoList({ all: true });
     });
 
-    const { doSubmit: reloadRepos, isLoading: isReloadingRepos } = useAsyncAction(async () => {
-      repos.value = undefined;
-      repos.value = await apiClient.getRepoList({ all: true, flush: true });
-      notifications.notify({ title: i18n.t('repo.enable.list_reloaded'), type: 'success' });
-    });
-
     const { doSubmit: activateRepo, isLoading: isActivatingRepo } = useAsyncAction(async (repo: Repo) => {
       repoToActivate.value = repo;
       await apiClient.activateRepo(repo.owner, repo.name);
@@ -85,11 +75,9 @@ export default defineComponent({
     const goBack = useRouteBackOrDefault({ name: 'repos' });
 
     return {
-      isReloadingRepos,
       isActivatingRepo,
       repoToActivate,
       goBack,
-      reloadRepos,
       activateRepo,
       searchedRepos,
       search,

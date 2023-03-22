@@ -31,7 +31,7 @@ func parseHook(r *http.Request, baseURL string) (*model.Repo, *model.Pipeline, e
 		return nil, nil, err
 	}
 	pipeline := convertPushHook(hook, baseURL)
-	repo := convertRepo(&hook.Repository)
+	repo := convertRepo(&hook.Repository, &model.Perm{})
 
 	return repo, pipeline, nil
 }

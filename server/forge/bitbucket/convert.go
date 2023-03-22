@@ -48,7 +48,7 @@ func convertStatus(status model.StatusValue) string {
 
 // convertRepo is a helper function used to convert a Bitbucket repository
 // structure to the common Woodpecker repository structure.
-func convertRepo(from *internal.Repo) *model.Repo {
+func convertRepo(from *internal.Repo, perm *internal.RepoPerm) *model.Repo {
 	repo := model.Repo{
 		ForgeRemoteID: model.ForgeRemoteID(from.UUID),
 		Clone:         cloneLink(from),
@@ -60,11 +60,27 @@ func convertRepo(from *internal.Repo) *model.Repo {
 		Avatar:        from.Owner.Links.Avatar.Href,
 		SCMKind:       model.SCMKind(from.Scm),
 		Branch:        "master",
+		Perm:          convertPerm(perm),
 	}
 	if repo.SCMKind == model.RepoHg {
 		repo.Branch = "default"
 	}
 	return &repo
+}
+
+func convertPerm(from *internal.RepoPerm) *model.Perm {
+	perms := new(model.Perm)
+	switch from.Permission {
+	case "admin":
+		perms.Admin = true
+		fallthrough
+	case "write":
+		perms.Push = true
+		fallthrough
+	default:
+		perms.Pull = true
+	}
+	return perms
 }
 
 // cloneLink is a helper function that tries to extract the clone url from the

@@ -379,25 +379,25 @@ func (_m *Store) CronGetLock(_a0 *model.Cron, _a1 int64) (bool, error) {
 	return r0, r1
 }
 
-// CronList provides a mock function with given fields: _a0, _a1
-func (_m *Store) CronList(_a0 *model.Repo, _a1 *model.PaginationData) ([]*model.Cron, error) {
-	ret := _m.Called(_a0, _a1)
+// CronList provides a mock function with given fields: _a0
+func (_m *Store) CronList(_a0 *model.Repo) ([]*model.Cron, error) {
+	ret := _m.Called(_a0)
 
 	var r0 []*model.Cron
 	var r1 error
-	if rf, ok := ret.Get(0).(func(*model.Repo, *model.PaginationData) ([]*model.Cron, error)); ok {
-		return rf(_a0, _a1)
+	if rf, ok := ret.Get(0).(func(*model.Repo) ([]*model.Cron, error)); ok {
+		return rf(_a0)
 	}
-	if rf, ok := ret.Get(0).(func(*model.Repo, *model.PaginationData) []*model.Cron); ok {
-		r0 = rf(_a0, _a1)
+	if rf, ok := ret.Get(0).(func(*model.Repo) []*model.Cron); ok {
+		r0 = rf(_a0)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*model.Cron)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(*model.Repo, *model.PaginationData) error); ok {
-		r1 = rf(_a0, _a1)
+	if rf, ok := ret.Get(1).(func(*model.Repo) error); ok {
+		r1 = rf(_a0)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -513,25 +513,25 @@ func (_m *Store) FileFind(_a0 *model.Step, _a1 string) (*model.File, error) {
 	return r0, r1
 }
 
-// FileList provides a mock function with given fields: _a0, _a1
-func (_m *Store) FileList(_a0 *model.Pipeline, _a1 *model.PaginationData) ([]*model.File, error) {
-	ret := _m.Called(_a0, _a1)
+// FileList provides a mock function with given fields: _a0
+func (_m *Store) FileList(_a0 *model.Pipeline) ([]*model.File, error) {
+	ret := _m.Called(_a0)
 
 	var r0 []*model.File
 	var r1 error
-	if rf, ok := ret.Get(0).(func(*model.Pipeline, *model.PaginationData) ([]*model.File, error)); ok {
-		return rf(_a0, _a1)
+	if rf, ok := ret.Get(0).(func(*model.Pipeline) ([]*model.File, error)); ok {
+		return rf(_a0)
 	}
-	if rf, ok := ret.Get(0).(func(*model.Pipeline, *model.PaginationData) []*model.File); ok {
-		r0 = rf(_a0, _a1)
+	if rf, ok := ret.Get(0).(func(*model.Pipeline) []*model.File); ok {
+		r0 = rf(_a0)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*model.File)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(*model.Pipeline, *model.PaginationData) error); ok {
-		r1 = rf(_a0, _a1)
+	if rf, ok := ret.Get(1).(func(*model.Pipeline) error); ok {
+		r1 = rf(_a0)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -720,15 +720,15 @@ func (_m *Store) GetPipelineLastBefore(_a0 *model.Repo, _a1 string, _a2 int64) (
 }
 
 // GetPipelineList provides a mock function with given fields: _a0, _a1
-func (_m *Store) GetPipelineList(_a0 *model.Repo, _a1 *model.PaginationData) ([]*model.Pipeline, error) {
+func (_m *Store) GetPipelineList(_a0 *model.Repo, _a1 int) ([]*model.Pipeline, error) {
 	ret := _m.Called(_a0, _a1)
 
 	var r0 []*model.Pipeline
 	var r1 error
-	if rf, ok := ret.Get(0).(func(*model.Repo, *model.PaginationData) ([]*model.Pipeline, error)); ok {
+	if rf, ok := ret.Get(0).(func(*model.Repo, int) ([]*model.Pipeline, error)); ok {
 		return rf(_a0, _a1)
 	}
-	if rf, ok := ret.Get(0).(func(*model.Repo, *model.PaginationData) []*model.Pipeline); ok {
+	if rf, ok := ret.Get(0).(func(*model.Repo, int) []*model.Pipeline); ok {
 		r0 = rf(_a0, _a1)
 	} else {
 		if ret.Get(0) != nil {
@@ -736,7 +736,7 @@ func (_m *Store) GetPipelineList(_a0 *model.Repo, _a1 *model.PaginationData) ([]
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(*model.Repo, *model.PaginationData) error); ok {
+	if rf, ok := ret.Get(1).(func(*model.Repo, int) error); ok {
 		r1 = rf(_a0, _a1)
 	} else {
 		r1 = ret.Error(1)
@@ -1411,25 +1411,25 @@ func (_m *Store) RegistryFind(_a0 *model.Repo, _a1 string) (*model.Registry, err
 	return r0, r1
 }
 
-// RegistryList provides a mock function with given fields: _a0, _a1
-func (_m *Store) RegistryList(_a0 *model.Repo, _a1 *model.PaginationData) ([]*model.Registry, error) {
-	ret := _m.Called(_a0, _a1)
+// RegistryList provides a mock function with given fields: _a0
+func (_m *Store) RegistryList(_a0 *model.Repo) ([]*model.Registry, error) {
+	ret := _m.Called(_a0)
 
 	var r0 []*model.Registry
 	var r1 error
-	if rf, ok := ret.Get(0).(func(*model.Repo, *model.PaginationData) ([]*model.Registry, error)); ok {
-		return rf(_a0, _a1)
+	if rf, ok := ret.Get(0).(func(*model.Repo) ([]*model.Registry, error)); ok {
+		return rf(_a0)
 	}
-	if rf, ok := ret.Get(0).(func(*model.Repo, *model.PaginationData) []*model.Registry); ok {
-		r0 = rf(_a0, _a1)
+	if rf, ok := ret.Get(0).(func(*model.Repo) []*model.Registry); ok {
+		r0 = rf(_a0)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*model.Registry)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(*model.Repo, *model.PaginationData) error); ok {
-		r1 = rf(_a0, _a1)
+	if rf, ok := ret.Get(1).(func(*model.Repo) error); ok {
+		r1 = rf(_a0)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1451,39 +1451,25 @@ func (_m *Store) RegistryUpdate(_a0 *model.Registry) error {
 	return r0
 }
 
-// RepoBatch provides a mock function with given fields: _a0
-func (_m *Store) RepoBatch(_a0 []*model.Repo) error {
-	ret := _m.Called(_a0)
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func([]*model.Repo) error); ok {
-		r0 = rf(_a0)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
-// RepoList provides a mock function with given fields: user, owned, p
-func (_m *Store) RepoList(user *model.User, owned bool, p *model.PaginationData) ([]*model.Repo, error) {
-	ret := _m.Called(user, owned, p)
+// RepoList provides a mock function with given fields: user, owned
+func (_m *Store) RepoList(user *model.User, owned bool) ([]*model.Repo, error) {
+	ret := _m.Called(user, owned)
 
 	var r0 []*model.Repo
 	var r1 error
-	if rf, ok := ret.Get(0).(func(*model.User, bool, *model.PaginationData) ([]*model.Repo, error)); ok {
-		return rf(user, owned, p)
+	if rf, ok := ret.Get(0).(func(*model.User, bool) ([]*model.Repo, error)); ok {
+		return rf(user, owned)
 	}
-	if rf, ok := ret.Get(0).(func(*model.User, bool, *model.PaginationData) []*model.Repo); ok {
-		r0 = rf(user, owned, p)
+	if rf, ok := ret.Get(0).(func(*model.User, bool) []*model.Repo); ok {
+		r0 = rf(user, owned)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*model.Repo)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(*model.User, bool, *model.PaginationData) error); ok {
-		r1 = rf(user, owned, p)
+	if rf, ok := ret.Get(1).(func(*model.User, bool) error); ok {
+		r1 = rf(user, owned)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1571,25 +1557,25 @@ func (_m *Store) SecretFind(_a0 *model.Repo, _a1 string) (*model.Secret, error) 
 	return r0, r1
 }
 
-// SecretList provides a mock function with given fields: _a0, _a1, _a2
-func (_m *Store) SecretList(_a0 *model.Repo, _a1 bool, _a2 *model.PaginationData) ([]*model.Secret, error) {
-	ret := _m.Called(_a0, _a1, _a2)
+// SecretList provides a mock function with given fields: _a0, _a1
+func (_m *Store) SecretList(_a0 *model.Repo, _a1 bool) ([]*model.Secret, error) {
+	ret := _m.Called(_a0, _a1)
 
 	var r0 []*model.Secret
 	var r1 error
-	if rf, ok := ret.Get(0).(func(*model.Repo, bool, *model.PaginationData) ([]*model.Secret, error)); ok {
-		return rf(_a0, _a1, _a2)
+	if rf, ok := ret.Get(0).(func(*model.Repo, bool) ([]*model.Secret, error)); ok {
+		return rf(_a0, _a1)
 	}
-	if rf, ok := ret.Get(0).(func(*model.Repo, bool, *model.PaginationData) []*model.Secret); ok {
-		r0 = rf(_a0, _a1, _a2)
+	if rf, ok := ret.Get(0).(func(*model.Repo, bool) []*model.Secret); ok {
+		r0 = rf(_a0, _a1)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*model.Secret)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(*model.Repo, bool, *model.PaginationData) error); ok {
-		r1 = rf(_a0, _a1, _a2)
+	if rf, ok := ret.Get(1).(func(*model.Repo, bool) error); ok {
+		r1 = rf(_a0, _a1)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1769,25 +1755,25 @@ func (_m *Store) StepFind(_a0 *model.Pipeline, _a1 int) (*model.Step, error) {
 	return r0, r1
 }
 
-// StepList provides a mock function with given fields: _a0, _a1
-func (_m *Store) StepList(_a0 *model.Pipeline, _a1 *model.PaginationData) ([]*model.Step, error) {
-	ret := _m.Called(_a0, _a1)
+// StepList provides a mock function with given fields: _a0
+func (_m *Store) StepList(_a0 *model.Pipeline) ([]*model.Step, error) {
+	ret := _m.Called(_a0)
 
 	var r0 []*model.Step
 	var r1 error
-	if rf, ok := ret.Get(0).(func(*model.Pipeline, *model.PaginationData) ([]*model.Step, error)); ok {
-		return rf(_a0, _a1)
+	if rf, ok := ret.Get(0).(func(*model.Pipeline) ([]*model.Step, error)); ok {
+		return rf(_a0)
 	}
-	if rf, ok := ret.Get(0).(func(*model.Pipeline, *model.PaginationData) []*model.Step); ok {
-		r0 = rf(_a0, _a1)
+	if rf, ok := ret.Get(0).(func(*model.Pipeline) []*model.Step); ok {
+		r0 = rf(_a0)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*model.Step)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(*model.Pipeline, *model.PaginationData) error); ok {
-		r1 = rf(_a0, _a1)
+	if rf, ok := ret.Get(1).(func(*model.Pipeline) error); ok {
+		r1 = rf(_a0)
 	} else {
 		r1 = ret.Error(1)
 	}

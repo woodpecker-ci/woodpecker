@@ -280,7 +280,7 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[
 		compiler.WithPrefix(
 			fmt.Sprintf(
 				"wp_%s_%d",
-				ulid.Make().String(),
+				strings.ToLower(ulid.Make().String()),
 				stepID,
 			),
 		),
