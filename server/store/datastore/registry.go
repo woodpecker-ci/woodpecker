@@ -27,8 +27,8 @@ func (s storage) RegistryFind(repo *model.Repo, addr string) (*model.Registry, e
 }
 
 func (s storage) RegistryList(repo *model.Repo, p *model.PaginationData) ([]*model.Registry, error) {
-	regs := make([]*model.Registry, 0, p.PerPage)
-	return regs, s.engine.Where("registry_repo_id = ?", repo.ID).Limit(p.PerPage, p.PerPage*(p.Page-1)).Find(&regs)
+	var regs []*model.Registry
+	return regs, s.paginate(p).Where("registry_repo_id = ?", repo.ID).Find(&regs)
 }
 
 func (s storage) RegistryCreate(registry *model.Registry) error {

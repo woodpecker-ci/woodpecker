@@ -28,12 +28,10 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/store/types"
-	shared_utils "github.com/woodpecker-ci/woodpecker/shared/utils"
-
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
+	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/store/types"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/pipeline"
@@ -126,9 +124,7 @@ func GetPipeline(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	files, _ := shared_utils.Paginate(func(page int) ([]*model.File, error) {
-		return _store.FileList(pl, &model.PaginationData{Page: page, PerPage: server.Config.Server.DatabasePageSize})
-	})
+	files, _ := _store.FileList(pl, &model.PaginationData{All: true})
 	steps, _ := _store.StepList(pl)
 	if pl.Steps, err = model.Tree(steps); err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)

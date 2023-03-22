@@ -73,23 +73,19 @@ func (s storage) GetPipelineLastBefore(repo *model.Repo, branch string, num int6
 }
 
 func (s storage) GetPipelineList(repo *model.Repo, p *model.PaginationData) ([]*model.Pipeline, error) {
-	pipelines := make([]*model.Pipeline, 0, p.PerPage)
-	return pipelines, s.engine.Where("pipeline_repo_id = ?", repo.ID).
+	var pipelines []*model.Pipeline
+	return pipelines, s.paginate(p).Where("pipeline_repo_id = ?", repo.ID).
 		Desc("pipeline_number").
-		Limit(p.PerPage, p.PerPage*(p.Page-1)).
 		Find(&pipelines)
 }
 
 // GetActivePipelineList get all pipelines that are pending, running or blocked
-func (s storage) GetActivePipelineList(repo *model.Repo, page int) ([]*model.Pipeline, error) {
-	pipelines := make([]*model.Pipeline, 0, perPage)
+func (s storage) GetActivePipelineList(repo *model.Repo) ([]*model.Pipeline, error) {
+	pipelines := make([]*model.Pipeline, 0)
 	query := s.engine.
 		Where("pipeline_repo_id = ?", repo.ID).
 		In("pipeline_status", model.StatusPending, model.StatusRunning, model.StatusBlocked).
 		Desc("pipeline_number")
-	if page > 0 {
-		query = query.Limit(perPage, perPage*(page-1))
-	}
 	return pipelines, query.Find(&pipelines)
 }
 

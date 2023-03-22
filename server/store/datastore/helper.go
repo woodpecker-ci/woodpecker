@@ -15,7 +15,9 @@
 package datastore
 
 import (
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store/types"
+	"xorm.io/xorm"
 )
 
 // wrapGet return error if err not nil or if requested entry do not exist
@@ -27,4 +29,11 @@ func wrapGet(exist bool, err error) error {
 		return types.RecordNotExist
 	}
 	return nil
+}
+
+func (s storage) paginate(p *model.PaginationData) *xorm.Session {
+	if p.All {
+		return s.engine.NewSession()
+	}
+	return s.engine.Limit(p.PerPage, p.PerPage*(p.Page-1))
 }

@@ -84,7 +84,7 @@ type Store interface {
 	// GetPipelineList gets a list of pipelines for the repository
 	GetPipelineList(*model.Repo, *model.PaginationData) ([]*model.Pipeline, error)
 	// GetActivePipelineList gets a list of the active pipelines for the repository
-	GetActivePipelineList(repo *model.Repo, page int) ([]*model.Pipeline, error)
+	GetActivePipelineList(repo *model.Repo) ([]*model.Pipeline, error)
 	// GetPipelineQueue gets a list of pipelines in queue.
 	GetPipelineQueue() ([]*model.Feed, error)
 	// GetPipelineCount gets a count of all pipelines in the system.

@@ -20,8 +20,6 @@ import (
 	"errors"
 
 	"github.com/rs/zerolog/log"
-	shared_utils "github.com/woodpecker-ci/woodpecker/shared/utils"
-
 	"github.com/woodpecker-ci/woodpecker/pipeline"
 	"github.com/woodpecker-ci/woodpecker/server"
 	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
@@ -44,16 +42,12 @@ func createPipelineItems(_ context.Context, store store.Store,
 		log.Error().Err(err).Str("repo", repo.FullName).Msgf("Error getting last pipeline before pipeline number '%d'", currentPipeline.Number)
 	}
 
-	secs, err := shared_utils.Paginate(func(page int) ([]*model.Secret, error) {
-		return server.Config.Services.Secrets.SecretListPipeline(repo, currentPipeline, &model.PaginationData{Page: page, PerPage: server.Config.Server.DatabasePageSize})
-	})
+	secs, err := server.Config.Services.Secrets.SecretListPipeline(repo, currentPipeline, &model.PaginationData{All: true})
 	if err != nil {
 		log.Error().Err(err).Msgf("Error getting secrets for %s#%d", repo.FullName, currentPipeline.Number)
 	}
 
-	regs, err := shared_utils.Paginate(func(page int) ([]*model.Registry, error) {
-		return server.Config.Services.Registries.RegistryList(repo, &model.PaginationData{Page: page, PerPage: server.Config.Server.DatabasePageSize})
-	})
+	regs, err := server.Config.Services.Registries.RegistryList(repo, &model.PaginationData{All: true})
 	if err != nil {
 		log.Error().Err(err).Msgf("Error getting registry credentials for %s#%d", repo.FullName, currentPipeline.Number)
 	}

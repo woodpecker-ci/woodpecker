@@ -19,8 +19,8 @@ import (
 )
 
 func (s storage) AgentList(p *model.PaginationData) ([]*model.Agent, error) {
-	agents := make([]*model.Agent, 0, p.PerPage)
-	return agents, s.engine.Limit(p.PerPage, p.PerPage*(p.Page-1)).Find(&agents)
+	var agents []*model.Agent
+	return agents, s.paginate(p).Find(&agents)
 }
 
 func (s storage) AgentFind(id int64) (*model.Agent, error) {

@@ -31,13 +31,13 @@ func (s storage) SecretFind(repo *model.Repo, name string) (*model.Secret, error
 }
 
 func (s storage) SecretList(repo *model.Repo, includeGlobalAndOrgSecrets bool, p *model.PaginationData) ([]*model.Secret, error) {
-	secrets := make([]*model.Secret, 0, p.PerPage)
+	var secrets []*model.Secret
 	var cond builder.Cond = builder.Eq{"secret_repo_id": repo.ID}
 	if includeGlobalAndOrgSecrets {
 		cond = cond.Or(builder.Eq{"secret_owner": repo.Owner}).
 			Or(builder.And(builder.Eq{"secret_owner": ""}, builder.Eq{"secret_repo_id": 0}))
 	}
-	return secrets, s.engine.Where(cond).Limit(p.PerPage, p.PerPage*(p.Page-1)).OrderBy(orderSecretsBy).Find(&secrets)
+	return secrets, s.paginate(p).Where(cond).OrderBy(orderSecretsBy).Find(&secrets)
 }
 
 func (s storage) SecretListAll() ([]*model.Secret, error) {
