@@ -8,9 +8,9 @@ import Icons from 'unplugin-icons/vite';
 import Components from 'unplugin-vue-components/vite';
 import { defineConfig } from 'vite';
 import prismjs from 'vite-plugin-prismjs';
+import { viteStaticCopy } from 'vite-plugin-static-copy';
 import WindiCSS from 'vite-plugin-windicss';
 import svgLoader from 'vite-svg-loader';
-import { viteStaticCopy } from 'vite-plugin-static-copy';
 
 function woodpeckerInfoPlugin() {
   return {
