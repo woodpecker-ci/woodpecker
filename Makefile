@@ -207,7 +207,6 @@ release-tarball:
 		web/package.json \
 		web/public \
 		web/src \
-		web/package.json \
 		web/tsconfig.* \
 		web/*.ts \
 		web/yarn.lock \
