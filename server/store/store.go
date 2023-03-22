@@ -32,8 +32,7 @@ type Store interface {
 	// GetUserLogin gets a user by unique Login name.
 	GetUserLogin(string) (*model.User, error)
 	// GetUserList gets a list of all users in the system.
-	// TODO: paginate
-	GetUserList() ([]*model.User, error)
+	GetUserList(p *model.PaginationData) ([]*model.User, error)
 	// GetUserCount gets a count of all users in the system.
 	GetUserCount() (int64, error)
 	// CreateUser creates a new user account.

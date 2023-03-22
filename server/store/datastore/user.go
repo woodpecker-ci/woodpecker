@@ -28,9 +28,9 @@ func (s storage) GetUserLogin(login string) (*model.User, error) {
 	return user, wrapGet(s.engine.Where("user_login=?", login).Get(user))
 }
 
-func (s storage) GetUserList() ([]*model.User, error) {
+func (s storage) GetUserList(p *model.PaginationData) ([]*model.User, error) {
 	users := make([]*model.User, 0, 10)
-	return users, s.engine.Find(&users)
+	return users, s.engine.Limit(p.PerPage, p.PerPage*(p.Page-1)).Find(&users)
 }
 
 func (s storage) GetUserCount() (int64, error) {
