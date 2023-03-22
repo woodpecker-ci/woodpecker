@@ -26,8 +26,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-// TODO: use pagination: repos
-
 type Forge interface {
 	// Name returns the string name of this driver
 	Name() string
