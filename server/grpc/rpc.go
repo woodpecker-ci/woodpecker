@@ -27,10 +27,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/rs/zerolog/log"
-	shared_utils "github.com/woodpecker-ci/woodpecker/shared/utils"
-
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc/metadata"
 	grpcMetadata "google.golang.org/grpc/metadata"
 
@@ -142,9 +140,7 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 		log.Error().Err(err).Msg("rpc.update: cannot update step")
 	}
 
-	currentPipeline.Steps, err = shared_utils.Paginate(func(page int) ([]*model.Step, error) {
-		return s.store.StepList(currentPipeline, &model.PaginationData{Page: page, PerPage: server.Config.Server.DatabasePageSize})
-	})
+	currentPipeline.Steps, err = s.store.StepList(currentPipeline)
 	if err != nil {
 		log.Error().Err(err).Msg("can not get step list from store")
 	}
@@ -280,9 +276,7 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 	}
 
 	defer func() {
-		currentPipeline.Steps, _ = shared_utils.Paginate(func(page int) ([]*model.Step, error) {
-			return s.store.StepList(currentPipeline, &model.PaginationData{Page: page, PerPage: server.Config.Server.DatabasePageSize})
-		})
+		currentPipeline.Steps, _ = s.store.StepList(currentPipeline)
 		message := pubsub.Message{
 			Labels: map[string]string{
 				"repo":    repo.FullName,
@@ -347,9 +341,7 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 		log.Error().Msgf("error: done: cannot ack step_id %d: %s", workflowID, err)
 	}
 
-	steps, err := shared_utils.Paginate(func(page int) ([]*model.Step, error) {
-		return s.store.StepList(currentPipeline, &model.PaginationData{Page: page, PerPage: server.Config.Server.DatabasePageSize})
-	})
+	steps, err := s.store.StepList(currentPipeline)
 	if err != nil {
 		return err
 	}

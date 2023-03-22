@@ -124,7 +124,7 @@ func TestStepList(t *testing.T) {
 		t.Errorf("Unexpected error: insert steps: %s", err)
 		return
 	}
-	steps, err := store.StepList(&model.Pipeline{ID: 1}, &model.PaginationData{Page: 1, PerPage: 50})
+	steps, err := store.StepList(&model.Pipeline{ID: 1})
 	if err != nil {
 		t.Error(err)
 		return

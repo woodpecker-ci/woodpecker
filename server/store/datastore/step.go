@@ -42,12 +42,11 @@ func (s storage) StepChild(pipeline *model.Pipeline, ppid int, child string) (*m
 	return step, wrapGet(s.engine.Get(step))
 }
 
-func (s storage) StepList(pipeline *model.Pipeline, p *model.PaginationData) ([]*model.Step, error) {
-	stepList := make([]*model.Step, 0, p.PerPage)
+func (s storage) StepList(pipeline *model.Pipeline) ([]*model.Step, error) {
+	stepList := make([]*model.Step, 0)
 	return stepList, s.engine.
 		Where("step_pipeline_id = ?", pipeline.ID).
 		OrderBy("step_pid").
-		Limit(p.PerPage, p.PerPage*(p.Page-1)).
 		Find(&stepList)
 }
 

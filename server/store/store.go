@@ -84,7 +84,7 @@ type Store interface {
 	GetPipelineLastBefore(*model.Repo, string, int64) (*model.Pipeline, error)
 	// GetPipelineList gets a list of pipelines for the repository
 	GetPipelineList(*model.Repo, *model.PaginationData) ([]*model.Pipeline, error)
-	// GetPipelineList gets a list of the active pipelines for the repository
+	// GetActivePipelineList gets a list of the active pipelines for the repository
 	GetActivePipelineList(repo *model.Repo, page int) ([]*model.Pipeline, error)
 	// GetPipelineQueue gets a list of pipelines in queue.
 	GetPipelineQueue() ([]*model.Feed, error)
@@ -99,7 +99,7 @@ type Store interface {
 	UserFeed(*model.User) ([]*model.Feed, error)
 
 	// Repositories
-	RepoList(user *model.User, owned bool, p *model.PaginationData) ([]*model.Repo, error)
+	RepoList(user *model.User, owned bool, active bool) ([]*model.Repo, error)
 	RepoListLatest(*model.User) ([]*model.Feed, error)
 
 	// Permissions
@@ -138,7 +138,7 @@ type Store interface {
 	StepLoad(int64) (*model.Step, error)
 	StepFind(*model.Pipeline, int) (*model.Step, error)
 	StepChild(*model.Pipeline, int, string) (*model.Step, error)
-	StepList(*model.Pipeline, *model.PaginationData) ([]*model.Step, error)
+	StepList(*model.Pipeline) ([]*model.Step, error)
 	StepCreate([]*model.Step) error
 	StepUpdate(*model.Step) error
 	StepClear(*model.Pipeline) error

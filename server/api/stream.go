@@ -25,8 +25,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
-	shared_utils "github.com/woodpecker-ci/woodpecker/shared/utils"
-
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/logging"
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -62,9 +60,7 @@ func EventStreamSSE(c *gin.Context) {
 	user := session.User(c)
 	repo := map[string]bool{}
 	if user != nil {
-		repos, _ := shared_utils.Paginate(func(page int) ([]*model.Repo, error) {
-			return store.FromContext(c).RepoList(user, false, &model.PaginationData{Page: page, PerPage: server.Config.Server.DatabasePageSize})
-		})
+		repos, _ := store.FromContext(c).RepoList(user, false, true)
 		for _, r := range repos {
 			repo[r.FullName] = true
 		}

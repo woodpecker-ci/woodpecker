@@ -129,9 +129,7 @@ func GetPipeline(c *gin.Context) {
 	files, _ := shared_utils.Paginate(func(page int) ([]*model.File, error) {
 		return _store.FileList(pl, &model.PaginationData{Page: page, PerPage: server.Config.Server.DatabasePageSize})
 	})
-	steps, _ := shared_utils.Paginate(func(page int) ([]*model.Step, error) {
-		return _store.StepList(pl, &model.PaginationData{Page: page, PerPage: server.Config.Server.DatabasePageSize})
-	})
+	steps, _ := _store.StepList(pl)
 	if pl.Steps, err = model.Tree(steps); err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -152,9 +150,7 @@ func GetPipelineLast(c *gin.Context) {
 		return
 	}
 
-	steps, err := shared_utils.Paginate(func(page int) ([]*model.Step, error) {
-		return _store.StepList(pl, &model.PaginationData{Page: page, PerPage: server.Config.Server.DatabasePageSize})
-	})
+	steps, err := _store.StepList(pl)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -419,9 +415,7 @@ func DeletePipelineLogs(c *gin.Context) {
 		return
 	}
 
-	steps, err := shared_utils.Paginate(func(page int) ([]*model.Step, error) {
-		return _store.StepList(pl, &model.PaginationData{Page: page, PerPage: server.Config.Server.DatabasePageSize})
-	})
+	steps, err := _store.StepList(pl)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusNotFound, err)
 		return

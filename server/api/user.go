@@ -26,7 +26,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/shared/token"
-	shared_utils "github.com/woodpecker-ci/woodpecker/shared/utils"
 )
 
 func GetSelf(c *gin.Context) {
@@ -64,9 +63,7 @@ func GetRepos(c *gin.Context) {
 	user := session.User(c)
 	all, _ := strconv.ParseBool(c.Query("all"))
 
-	dbRepos, err := shared_utils.Paginate(func(page int) ([]*model.Repo, error) {
-		return _store.RepoList(user, true, &model.PaginationData{Page: page, PerPage: server.Config.Server.DatabasePageSize})
-	})
+	activeRepos, err := _store.RepoList(user, true, true)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error fetching repository list. %s", err)
 		return
@@ -74,7 +71,7 @@ func GetRepos(c *gin.Context) {
 
 	if all {
 		active := map[string]bool{}
-		for _, r := range dbRepos {
+		for _, r := range activeRepos {
 			active[r.FullName] = r.IsActive
 		}
 
@@ -97,13 +94,7 @@ func GetRepos(c *gin.Context) {
 		return
 	}
 
-	active := make([]*model.Repo, 0)
-	for _, repo := range dbRepos {
-		if repo.IsActive {
-			active = append(active, repo)
-		}
-	}
-	c.JSON(http.StatusOK, active)
+	c.JSON(http.StatusOK, activeRepos)
 }
 
 func PostToken(c *gin.Context) {
