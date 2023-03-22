@@ -94,25 +94,25 @@ func (_m *Store) AgentFindByToken(_a0 string) (*model.Agent, error) {
 	return r0, r1
 }
 
-// AgentList provides a mock function with given fields:
-func (_m *Store) AgentList() ([]*model.Agent, error) {
-	ret := _m.Called()
+// AgentList provides a mock function with given fields: p
+func (_m *Store) AgentList(p *model.PaginationData) ([]*model.Agent, error) {
+	ret := _m.Called(p)
 
 	var r0 []*model.Agent
 	var r1 error
-	if rf, ok := ret.Get(0).(func() ([]*model.Agent, error)); ok {
-		return rf()
+	if rf, ok := ret.Get(0).(func(*model.PaginationData) ([]*model.Agent, error)); ok {
+		return rf(p)
 	}
-	if rf, ok := ret.Get(0).(func() []*model.Agent); ok {
-		r0 = rf()
+	if rf, ok := ret.Get(0).(func(*model.PaginationData) []*model.Agent); ok {
+		r0 = rf(p)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*model.Agent)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func() error); ok {
-		r1 = rf()
+	if rf, ok := ret.Get(1).(func(*model.PaginationData) error); ok {
+		r1 = rf(p)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1027,25 +1027,25 @@ func (_m *Store) GetUserCount() (int64, error) {
 	return r0, r1
 }
 
-// GetUserList provides a mock function with given fields:
-func (_m *Store) GetUserList() ([]*model.User, error) {
-	ret := _m.Called()
+// GetUserList provides a mock function with given fields: p
+func (_m *Store) GetUserList(p *model.PaginationData) ([]*model.User, error) {
+	ret := _m.Called(p)
 
 	var r0 []*model.User
 	var r1 error
-	if rf, ok := ret.Get(0).(func() ([]*model.User, error)); ok {
-		return rf()
+	if rf, ok := ret.Get(0).(func(*model.PaginationData) ([]*model.User, error)); ok {
+		return rf(p)
 	}
-	if rf, ok := ret.Get(0).(func() []*model.User); ok {
-		r0 = rf()
+	if rf, ok := ret.Get(0).(func(*model.PaginationData) []*model.User); ok {
+		r0 = rf(p)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*model.User)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func() error); ok {
-		r1 = rf()
+	if rf, ok := ret.Get(1).(func(*model.PaginationData) error); ok {
+		r1 = rf(p)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1451,25 +1451,25 @@ func (_m *Store) RegistryUpdate(_a0 *model.Registry) error {
 	return r0
 }
 
-// RepoList provides a mock function with given fields: user, owned, p
-func (_m *Store) RepoList(user *model.User, owned bool, p *model.PaginationData) ([]*model.Repo, error) {
-	ret := _m.Called(user, owned, p)
+// RepoList provides a mock function with given fields: user, owned, active
+func (_m *Store) RepoList(user *model.User, owned bool, active bool) ([]*model.Repo, error) {
+	ret := _m.Called(user, owned, active)
 
 	var r0 []*model.Repo
 	var r1 error
-	if rf, ok := ret.Get(0).(func(*model.User, bool, *model.PaginationData) ([]*model.Repo, error)); ok {
-		return rf(user, owned, p)
+	if rf, ok := ret.Get(0).(func(*model.User, bool, bool) ([]*model.Repo, error)); ok {
+		return rf(user, owned, active)
 	}
-	if rf, ok := ret.Get(0).(func(*model.User, bool, *model.PaginationData) []*model.Repo); ok {
-		r0 = rf(user, owned, p)
+	if rf, ok := ret.Get(0).(func(*model.User, bool, bool) []*model.Repo); ok {
+		r0 = rf(user, owned, active)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*model.Repo)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(*model.User, bool, *model.PaginationData) error); ok {
-		r1 = rf(user, owned, p)
+	if rf, ok := ret.Get(1).(func(*model.User, bool, bool) error); ok {
+		r1 = rf(user, owned, active)
 	} else {
 		r1 = ret.Error(1)
 	}
