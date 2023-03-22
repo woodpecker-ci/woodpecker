@@ -270,7 +270,7 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 	return files, nil
 }
 
-func (c *client) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.PaginationData) ([]*model.PullRequest, error) {
+func (c *client) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error) {
 	token := ""
 	if u != nil {
 		token = u.Token
@@ -504,7 +504,7 @@ func (c *client) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 }
 
 // Branches returns the names of all branches for the named repository.
-func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo, p *model.PaginationData) ([]string, error) {
+func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]string, error) {
 	token := ""
 	if u != nil {
 		token = u.Token

@@ -21,7 +21,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-func (s storage) FileList(pipeline *model.Pipeline, p *model.PaginationData) ([]*model.File, error) {
+func (s storage) FileList(pipeline *model.Pipeline, p *model.ListOptions) ([]*model.File, error) {
 	var files []*model.File
 	return files, s.paginate(p).Where("file_pipeline_id = ?", pipeline.ID).
 		Find(&files)

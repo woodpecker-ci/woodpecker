@@ -75,7 +75,7 @@ func (b *filesystem) RegistryFind(*model.Repo, string) (*model.Registry, error) 
 	return nil, nil
 }
 
-func (b *filesystem) RegistryList(_ *model.Repo, p *model.PaginationData) ([]*model.Registry, error) {
+func (b *filesystem) RegistryList(_ *model.Repo, p *model.ListOptions) ([]*model.Registry, error) {
 	regs, err := parseDockerConfig(b.path)
 	if err != nil {
 		return nil, err

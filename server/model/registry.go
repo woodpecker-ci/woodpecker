@@ -29,7 +29,7 @@ var (
 // RegistryService defines a service for managing registries.
 type RegistryService interface {
 	RegistryFind(*Repo, string) (*Registry, error)
-	RegistryList(*Repo, *PaginationData) ([]*Registry, error)
+	RegistryList(*Repo, *ListOptions) ([]*Registry, error)
 	RegistryCreate(*Repo, *Registry) error
 	RegistryUpdate(*Repo, *Registry) error
 	RegistryDelete(*Repo, string) error
@@ -38,13 +38,13 @@ type RegistryService interface {
 // ReadOnlyRegistryService defines a service for managing registries.
 type ReadOnlyRegistryService interface {
 	RegistryFind(*Repo, string) (*Registry, error)
-	RegistryList(*Repo, *PaginationData) ([]*Registry, error)
+	RegistryList(*Repo, *ListOptions) ([]*Registry, error)
 }
 
 // RegistryStore persists registry information to storage.
 type RegistryStore interface {
 	RegistryFind(*Repo, string) (*Registry, error)
-	RegistryList(*Repo, *PaginationData) ([]*Registry, error)
+	RegistryList(*Repo, *ListOptions) ([]*Registry, error)
 	RegistryCreate(*Registry) error
 	RegistryUpdate(*Registry) error
 	RegistryDelete(repo *Repo, addr string) error

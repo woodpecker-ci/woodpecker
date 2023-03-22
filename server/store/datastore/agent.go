@@ -18,7 +18,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-func (s storage) AgentList(p *model.PaginationData) ([]*model.Agent, error) {
+func (s storage) AgentList(p *model.ListOptions) ([]*model.Agent, error) {
 	var agents []*model.Agent
 	return agents, s.paginate(p).Find(&agents)
 }

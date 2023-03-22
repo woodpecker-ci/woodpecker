@@ -416,7 +416,7 @@ func (c *Gitea) Deactivate(ctx context.Context, u *model.User, r *model.Repo, li
 }
 
 // Branches returns the names of all branches for the named repository.
-func (c *Gitea) Branches(ctx context.Context, u *model.User, r *model.Repo, p *model.PaginationData) ([]string, error) {
+func (c *Gitea) Branches(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]string, error) {
 	token := ""
 	if u != nil {
 		token = u.Token
@@ -457,7 +457,7 @@ func (c *Gitea) BranchHead(ctx context.Context, u *model.User, r *model.Repo, br
 	return b.Commit.ID, nil
 }
 
-func (c *Gitea) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.PaginationData) ([]*model.PullRequest, error) {
+func (c *Gitea) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error) {
 	token := ""
 	if u != nil {
 		token = u.Token

@@ -30,7 +30,7 @@ func (s storage) SecretFind(repo *model.Repo, name string) (*model.Secret, error
 	return secret, wrapGet(s.engine.Get(secret))
 }
 
-func (s storage) SecretList(repo *model.Repo, includeGlobalAndOrgSecrets bool, p *model.PaginationData) ([]*model.Secret, error) {
+func (s storage) SecretList(repo *model.Repo, includeGlobalAndOrgSecrets bool, p *model.ListOptions) ([]*model.Secret, error) {
 	var secrets []*model.Secret
 	var cond builder.Cond = builder.Eq{"secret_repo_id": repo.ID}
 	if includeGlobalAndOrgSecrets {

@@ -301,7 +301,7 @@ func (g *GitLab) Repos(ctx context.Context, user *model.User) ([]*model.Repo, er
 	return repos, err
 }
 
-func (g *GitLab) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.PaginationData) ([]*model.PullRequest, error) {
+func (g *GitLab) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error) {
 	token := ""
 	if u != nil {
 		token = u.Token
@@ -543,7 +543,7 @@ func (g *GitLab) Deactivate(ctx context.Context, user *model.User, repo *model.R
 }
 
 // Branches returns the names of all branches for the named repository.
-func (g *GitLab) Branches(ctx context.Context, user *model.User, repo *model.Repo, p *model.PaginationData) ([]string, error) {
+func (g *GitLab) Branches(ctx context.Context, user *model.User, repo *model.Repo, p *model.ListOptions) ([]string, error) {
 	token := ""
 	if user != nil {
 		token = user.Token

@@ -70,13 +70,13 @@ type Forge interface {
 	Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error
 
 	// Branches returns the names of all branches for the named repository.
-	Branches(ctx context.Context, u *model.User, r *model.Repo, p *model.PaginationData) ([]string, error)
+	Branches(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]string, error)
 
 	// BranchHead returns the sha of the head (latest commit) of the specified branch
 	BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error)
 
 	// PullRequests returns all pull requests for the named repository.
-	PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.PaginationData) ([]*model.PullRequest, error)
+	PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error)
 
 	// Hook parses the post-commit hook from the Request body and returns the
 	// required data in a standard format.

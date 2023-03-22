@@ -26,7 +26,7 @@ func (s storage) RegistryFind(repo *model.Repo, addr string) (*model.Registry, e
 	return reg, wrapGet(s.engine.Get(reg))
 }
 
-func (s storage) RegistryList(repo *model.Repo, p *model.PaginationData) ([]*model.Registry, error) {
+func (s storage) RegistryList(repo *model.Repo, p *model.ListOptions) ([]*model.Registry, error) {
 	var regs []*model.Registry
 	return regs, s.paginate(p).Where("registry_repo_id = ?", repo.ID).Find(&regs)
 }

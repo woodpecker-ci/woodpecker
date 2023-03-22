@@ -124,7 +124,7 @@ func GetPipeline(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	files, _ := _store.FileList(pl, &model.PaginationData{All: true})
+	files, _ := _store.FileList(pl, &model.ListOptions{All: true})
 	steps, _ := _store.StepList(pl)
 	if pl.Steps, err = model.Tree(steps); err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)

@@ -34,11 +34,11 @@ func (b *builtin) SecretFind(repo *model.Repo, name string) (*model.Secret, erro
 	return b.store.SecretFind(repo, name)
 }
 
-func (b *builtin) SecretList(repo *model.Repo, p *model.PaginationData) ([]*model.Secret, error) {
+func (b *builtin) SecretList(repo *model.Repo, p *model.ListOptions) ([]*model.Secret, error) {
 	return b.store.SecretList(repo, false, p)
 }
 
-func (b *builtin) SecretListPipeline(repo *model.Repo, _ *model.Pipeline, p *model.PaginationData) ([]*model.Secret, error) {
+func (b *builtin) SecretListPipeline(repo *model.Repo, _ *model.Pipeline, p *model.ListOptions) ([]*model.Secret, error) {
 	s, err := b.store.SecretList(repo, true, p)
 	if err != nil {
 		return nil, err

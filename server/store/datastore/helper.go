@@ -31,7 +31,7 @@ func wrapGet(exist bool, err error) error {
 	return nil
 }
 
-func (s storage) paginate(p *model.PaginationData) *xorm.Session {
+func (s storage) paginate(p *model.ListOptions) *xorm.Session {
 	if p.All {
 		return s.engine.NewSession()
 	}

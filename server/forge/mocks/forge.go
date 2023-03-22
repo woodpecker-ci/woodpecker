@@ -82,15 +82,15 @@ func (_m *Forge) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 }
 
 // Branches provides a mock function with given fields: ctx, u, r, p
-func (_m *Forge) Branches(ctx context.Context, u *model.User, r *model.Repo, p *model.PaginationData) ([]string, error) {
+func (_m *Forge) Branches(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]string, error) {
 	ret := _m.Called(ctx, u, r, p)
 
 	var r0 []string
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, *model.User, *model.Repo, *model.PaginationData) ([]string, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, *model.User, *model.Repo, *model.ListOptions) ([]string, error)); ok {
 		return rf(ctx, u, r, p)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, *model.User, *model.Repo, *model.PaginationData) []string); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, *model.User, *model.Repo, *model.ListOptions) []string); ok {
 		r0 = rf(ctx, u, r, p)
 	} else {
 		if ret.Get(0) != nil {
@@ -98,7 +98,7 @@ func (_m *Forge) Branches(ctx context.Context, u *model.User, r *model.Repo, p *
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, *model.User, *model.Repo, *model.PaginationData) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, *model.User, *model.Repo, *model.ListOptions) error); ok {
 		r1 = rf(ctx, u, r, p)
 	} else {
 		r1 = ret.Error(1)
@@ -301,15 +301,15 @@ func (_m *Forge) OrgMembership(ctx context.Context, u *model.User, owner string)
 }
 
 // PullRequests provides a mock function with given fields: ctx, u, r, p
-func (_m *Forge) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.PaginationData) ([]*model.PullRequest, error) {
+func (_m *Forge) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error) {
 	ret := _m.Called(ctx, u, r, p)
 
 	var r0 []*model.PullRequest
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, *model.User, *model.Repo, *model.PaginationData) ([]*model.PullRequest, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, *model.User, *model.Repo, *model.ListOptions) ([]*model.PullRequest, error)); ok {
 		return rf(ctx, u, r, p)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, *model.User, *model.Repo, *model.PaginationData) []*model.PullRequest); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, *model.User, *model.Repo, *model.ListOptions) []*model.PullRequest); ok {
 		r0 = rf(ctx, u, r, p)
 	} else {
 		if ret.Get(0) != nil {
@@ -317,7 +317,7 @@ func (_m *Forge) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, *model.User, *model.Repo, *model.PaginationData) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, *model.User, *model.Repo, *model.ListOptions) error); ok {
 		r1 = rf(ctx, u, r, p)
 	} else {
 		r1 = ret.Error(1)

@@ -12,7 +12,7 @@ const (
 	defaultPerPage = 25
 )
 
-func Pagination(c *gin.Context) *model.PaginationData {
+func Pagination(c *gin.Context) *model.ListOptions {
 	page, err := strconv.ParseInt(c.Query("page"), 10, 64)
 	if err != nil {
 		page = defaultPage
@@ -21,7 +21,7 @@ func Pagination(c *gin.Context) *model.PaginationData {
 	if err != nil {
 		perPage = defaultPerPage
 	}
-	return &model.PaginationData{
+	return &model.ListOptions{
 		Page:    int(page),
 		PerPage: int(perPage),
 	}
