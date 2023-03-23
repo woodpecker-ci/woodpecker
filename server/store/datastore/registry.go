@@ -16,6 +16,7 @@ package datastore
 
 import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/store/types"
 
 	"xorm.io/builder"
 )
@@ -50,7 +51,10 @@ func (s storage) RegistryUpdate(registry *model.Registry) error {
 }
 
 func (s storage) RegistryDelete(registry *model.Registry) error {
-	_, err := s.engine.ID(registry.ID).Delete(new(model.Registry))
+	c, err := s.engine.ID(registry.ID).Delete(new(model.Registry))
+	if err == nil && c == 0 {
+		return types.RecordNotExist
+	}
 	return err
 }
 
