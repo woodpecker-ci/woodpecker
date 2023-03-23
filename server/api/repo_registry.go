@@ -135,7 +135,7 @@ func DeleteRegistry(c *gin.Context) {
 	)
 	err := server.Config.Services.Registries.RegistryDelete(repo, name)
 	if err != nil {
-		c.String(http.StatusInternalServerError, "Error deleting registry %q. %s", name, err)
+		handleDbGetError(c, err)
 		return
 	}
 	c.String(http.StatusNoContent, "")
