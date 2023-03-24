@@ -98,6 +98,11 @@
       "name": "Woodpecker Email",
       "docs": "https://gitnet.fr/deblan/woodpecker-email/raw/branch/develop/DOCS.md",
       "verified": false
+    },
+    {
+      "name": "Woodpecker Feishu Bot",
+      "docs": "https://github.com/wenerme/wode/raw/main/apps/woodpecker-feishu-bot/README.md",
+      "verified": false
     }
   ]
 }
