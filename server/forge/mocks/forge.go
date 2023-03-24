@@ -34,7 +34,7 @@ func (_m *Forge) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 }
 
 // Auth provides a mock function with given fields: ctx, token, secret
-func (_m *Forge) Auth(ctx context.Context, token, secret string) (string, error) {
+func (_m *Forge) Auth(ctx context.Context, token string, secret string) (string, error) {
 	ret := _m.Called(ctx, token, secret)
 
 	var r0 string
@@ -327,7 +327,7 @@ func (_m *Forge) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 }
 
 // Repo provides a mock function with given fields: ctx, u, remoteID, owner, name
-func (_m *Forge) Repo(ctx context.Context, u *model.User, remoteID model.ForgeRemoteID, owner, name string) (*model.Repo, error) {
+func (_m *Forge) Repo(ctx context.Context, u *model.User, remoteID model.ForgeRemoteID, owner string, name string) (*model.Repo, error) {
 	ret := _m.Called(ctx, u, remoteID, owner, name)
 
 	var r0 *model.Repo

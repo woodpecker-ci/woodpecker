@@ -16,14 +16,6 @@ export type QueueStats = {
   completed_count: number;
 };
 
-export type QueueStats = {
-  worker_count: number;
-  pending_count: number;
-  waiting_on_deps_count: number;
-  running_count: number;
-  completed_count: number;
-};
-
 export type QueueInfo = {
   pending: Task[];
   waiting_on_deps: Task[];

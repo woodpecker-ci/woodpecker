@@ -58,6 +58,7 @@ func Config(c *gin.Context) {
 
 	c.Header("Content-Type", "text/javascript; charset=utf-8")
 	tmpl := template.Must(template.New("").Funcs(funcMap).Parse(configTemplate))
+
 	if err := tmpl.Execute(c.Writer, configData); err != nil {
 		log.Error().Err(err).Msgf("could not execute template")
 		c.AbortWithStatus(http.StatusInternalServerError)
