@@ -252,7 +252,6 @@ release-tarball: ## Create tarball for release
 		web/package.json \
 		web/public \
 		web/src \
-		web/package.json \
 		web/tsconfig.* \
 		web/*.ts \
 		web/pnpm-lock.yaml \
