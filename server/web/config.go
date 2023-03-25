@@ -62,6 +62,7 @@ func Config(c *gin.Context) {
 	if err := tmpl.Execute(c.Writer, configData); err != nil {
 		log.Error().Err(err).Msgf("could not execute template")
 		c.AbortWithStatus(http.StatusInternalServerError)
+		return
 	}
 
 	c.Status(http.StatusOK)
