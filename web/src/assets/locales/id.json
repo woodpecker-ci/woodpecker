@@ -323,7 +323,8 @@
         },
         "pipeline_path": {
           "default": "Secara bawaan: .woodpecker/*.yml → .woodpecker.yml → .drone.yml",
-          "desc": "Jalur ke konfigurasi jalur pipa Anda (misalnya <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">jalur/saya/</span>). Folder seharusnya berakhir dengan sebuah <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">/</span>.",
+          "desc": "Jalur ke konfigurasi jalur pipa Anda (misalnya {0}). Folder seharusnya berakhir dengan sebuah {1}.",
+          "desc_path_example": "jalur/saya/",
           "path": "Jalur pipa"
         },
         "project": "Pengaturan proyek",
