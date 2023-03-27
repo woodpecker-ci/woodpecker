@@ -190,4 +190,17 @@ var flags = []cli.Flag{
 		Usage:   "backend k8s additional worker pod annotations",
 		Value:   "",
 	},
+	// backend nomad
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_NOMAD_NAMESPACE"},
+		Name:    "backend-nomad-namespace",
+		Usage:   "nomad namespace to launch jobs",
+		Value:   "default",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_NOMAD_DATACENTERS"},
+		Name:    "backend-nomad-datacenters",
+		Usage:   "comma separated list of nomad datacenters jobs can be launched in",
+		Value:   "",
+	},
 }
