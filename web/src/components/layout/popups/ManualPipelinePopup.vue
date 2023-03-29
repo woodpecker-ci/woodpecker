@@ -56,7 +56,7 @@ import Panel from '~/components/layout/Panel.vue';
 import Popup from '~/components/layout/Popup.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { inject } from '~/compositions/useInjectProvide';
-import usePaginate from '~/compositions/usePaginate';
+import { usePaginate } from '~/compositions/usePaginate';
 
 defineProps<{
   open: boolean;

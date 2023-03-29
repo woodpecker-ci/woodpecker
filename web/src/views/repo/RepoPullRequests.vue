@@ -21,21 +21,19 @@ import { inject, onMounted, onUnmounted, Ref, ref, watch } from 'vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { PullRequest, Repo } from '~/lib/api/types';
+import { PaginatedList } from '~/compositions/usePaginate';
 
 const apiClient = useApiClient();
 
-let page = 1;
-let getNextPage = true;
-
 const pullRequests = ref<PullRequest[]>();
 const repo = inject<Ref<Repo>>('repo');
-const scrollComponent = document.querySelector('main > div');
-if (!repo || !scrollComponent) {
-  throw new Error('Unexpected: "repo" and "scrollComponent" should be provided at this place');
+if (!repo) {
+  throw new Error('Unexpected: "repo" should be provided at this place');
 }
 
-async function loadPullRequests() {
-  getNextPage = false;
+const list = new PaginatedList(loadPullRequests);
+
+async function loadPullRequests(page: number): Promise<boolean> {
   if (!repo) {
     throw new Error('Unexpected: "repo" should be provided at this place');
   }
@@ -47,29 +45,18 @@ async function loadPullRequests() {
   } else {
     pullRequests.value?.push(...pulls);
   }
-  getNextPage = pulls.length !== 0;
+  return pulls.length !== 0;
 }
 
-const handleScroll = () => {
-  if (getNextPage && scrollComponent.scrollTop + scrollComponent.clientHeight === scrollComponent.scrollHeight) {
-    page += 1;
-    loadPullRequests();
-  }
-};
-
 onMounted(() => {
-  page = 1;
-  loadPullRequests();
-  scrollComponent.addEventListener('scroll', handleScroll);
+  list.onMounted();
 });
 
 onUnmounted(() => {
-  page = 1;
-  scrollComponent.removeEventListener('scroll', handleScroll);
+  list.onUnmounted();
 });
 
 watch(repo, () => {
-  page = 1;
-  loadPullRequests();
+  list.reset(true);
 });
 </script>

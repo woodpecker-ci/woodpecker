@@ -17,21 +17,20 @@ import { inject, onMounted, onUnmounted, Ref, ref, watch } from 'vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { Repo } from '~/lib/api/types';
+import { PaginatedList } from '~/compositions/usePaginate';
 
 const apiClient = useApiClient();
 
-let page = 1;
-let getNextPage = true;
-
 const branches = ref<string[]>();
 const repo = inject<Ref<Repo>>('repo');
-const scrollComponent = document.querySelector('main > div');
-if (!repo || !scrollComponent) {
+if (!repo) {
   throw new Error('Unexpected: "repo" and "scrollComponent" should be provided at this place');
 }
 
-async function loadBranches() {
-  getNextPage = false;
+const list = new PaginatedList(loadBranches);
+
+// TODO it seems this also runs if Pr list is open
+async function loadBranches(page: number): Promise<boolean> {
   if (!repo) {
     throw new Error('Unexpected: "repo" should be provided at this place');
   }
@@ -43,29 +42,18 @@ async function loadBranches() {
   } else {
     branches.value?.push(..._branches);
   }
-  getNextPage = _branches.length !== 0;
+  return _branches.length !== 0;
 }
 
-const handleScroll = () => {
-  if (getNextPage && scrollComponent.scrollTop + scrollComponent.clientHeight === scrollComponent.scrollHeight) {
-    page += 1;
-    loadBranches();
-  }
-};
-
 onMounted(() => {
-  page = 1;
-  loadBranches();
-  scrollComponent.addEventListener('scroll', handleScroll);
+  list.onMounted();
 });
 
 onUnmounted(() => {
-  page = 1;
-  scrollComponent.removeEventListener('scroll', handleScroll);
+  list.onUnmounted();
 });
 
 watch(repo, () => {
-  page = 1;
-  loadBranches();
+  list.reset(true);
 });
 </script>

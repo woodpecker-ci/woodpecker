@@ -48,7 +48,7 @@ import InputField from '~/components/form/InputField.vue';
 import SelectField from '~/components/form/SelectField.vue';
 import Panel from '~/components/layout/Panel.vue';
 import useApiClient from '~/compositions/useApiClient';
-import usePaginate from '~/compositions/usePaginate';
+import { usePaginate } from '~/compositions/usePaginate';
 import { Repo } from '~/lib/api/types';
 
 export default defineComponent({
