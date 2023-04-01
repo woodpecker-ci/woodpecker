@@ -117,7 +117,7 @@
 
 <script lang="ts" setup>
 import { cloneDeep } from 'lodash';
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Badge from '~/components/atomic/Badge.vue';
@@ -133,6 +133,7 @@ import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
 import { Agent } from '~/lib/api/types';
 import timeAgo from '~/utils/timeAgo';
+import { PaginatedList } from '~/compositions/usePaginate';
 
 const apiClient = useApiClient();
 const notifications = useNotifications();
@@ -141,9 +142,16 @@ const { t } = useI18n();
 const agents = ref<Agent[]>([]);
 const selectedAgent = ref<Partial<Agent>>();
 const isEditingAgent = computed(() => !!selectedAgent.value?.id);
+const list = new PaginatedList(loadAgents);
 
-async function loadAgents() {
-  agents.value = await apiClient.getAgents();
+async function loadAgents(page: number): Promise<boolean> {
+  const a = await apiClient.getAgents(page);
+  if (page === 1 && a !== null) {
+    agents.value = a;
+  } else if (a != null) {
+    agents.value?.push(...a);
+  }
+  return a != null && a.length != 0;
 }
 
 const { doSubmit: saveAgent, isLoading: isSaving } = useAsyncAction(async () => {
@@ -161,7 +169,7 @@ const { doSubmit: saveAgent, isLoading: isSaving } = useAsyncAction(async () => 
     title: t(isEditingAgent.value ? 'admin.settings.agents.saved' : 'admin.settings.agents.created'),
     type: 'success',
   });
-  await loadAgents();
+  list.reset(true);
 });
 
 const { doSubmit: deleteAgent, isLoading: isDeleting } = useAsyncAction(async (_agent: Agent) => {
@@ -172,7 +180,7 @@ const { doSubmit: deleteAgent, isLoading: isDeleting } = useAsyncAction(async (_
 
   await apiClient.deleteAgent(_agent);
   notifications.notify({ title: t('admin.settings.agents.deleted'), type: 'success' });
-  await loadAgents();
+  list.reset(true);
 });
 
 function editAgent(agent: Agent) {
@@ -183,17 +191,11 @@ function showAddAgent() {
   selectedAgent.value = cloneDeep({ name: '' });
 }
 
-const reloadInterval = ref<number>();
-onMounted(async () => {
-  await loadAgents();
-  reloadInterval.value = window.setInterval(async () => {
-    await loadAgents();
-  }, 5000);
+onMounted(() => {
+  list.onMounted();
 });
 
-onBeforeUnmount(() => {
-  if (reloadInterval.value) {
-    window.clearInterval(reloadInterval.value);
-  }
+onUnmounted(() => {
+  list.onUnmounted();
 });
 </script>

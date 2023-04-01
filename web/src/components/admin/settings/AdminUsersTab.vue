@@ -84,7 +84,7 @@
 
 <script lang="ts" setup>
 import { cloneDeep } from 'lodash';
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Badge from '~/components/atomic/Badge.vue';
@@ -98,6 +98,7 @@ import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
 import { User } from '~/lib/api/types';
+import { PaginatedList } from '~/compositions/usePaginate';
 
 const apiClient = useApiClient();
 const notifications = useNotifications();
@@ -106,9 +107,16 @@ const { t } = useI18n();
 const users = ref<User[]>([]);
 const selectedUser = ref<Partial<User>>();
 const isEditingUser = computed(() => !!selectedUser.value?.id);
+const list = new PaginatedList(loadUsers);
 
-async function loadUsers() {
-  users.value = await apiClient.getUsers();
+async function loadUsers(page: number): Promise<boolean> {
+  const u = await apiClient.getUsers(page);
+  if (page === 1 && u !== null) {
+    users.value = u;
+  } else if (u != null) {
+    users.value?.push(...u);
+  }
+  return u != null && u.length != 0;
 }
 
 const { doSubmit: saveUser, isLoading: isSaving } = useAsyncAction(async () => {
@@ -130,7 +138,7 @@ const { doSubmit: saveUser, isLoading: isSaving } = useAsyncAction(async () => {
       type: 'success',
     });
   }
-  await loadUsers();
+  list.reset(true);
 });
 
 const { doSubmit: deleteUser, isLoading: isDeleting } = useAsyncAction(async (_user: User) => {
@@ -141,7 +149,7 @@ const { doSubmit: deleteUser, isLoading: isDeleting } = useAsyncAction(async (_u
 
   await apiClient.deleteUser(_user);
   notifications.notify({ title: t('admin.settings.users.deleted'), type: 'success' });
-  await loadUsers();
+  list.reset(true);
 });
 
 function editUser(user: User) {
@@ -152,15 +160,11 @@ function showAddUser() {
   selectedUser.value = cloneDeep({ login: '' });
 }
 
-const reloadInterval = ref<number>();
 onMounted(async () => {
-  await loadUsers();
-  reloadInterval.value = window.setInterval(loadUsers, 5000);
+  list.onMounted();
 });
 
-onBeforeUnmount(() => {
-  if (reloadInterval.value) {
-    window.clearInterval(reloadInterval.value);
-  }
+onUnmounted(() => {
+  list.onUnmounted();
 });
 </script>

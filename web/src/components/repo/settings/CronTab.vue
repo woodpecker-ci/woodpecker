@@ -89,7 +89,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, onMounted, Ref, ref } from 'vue';
+import { computed, inject, onMounted, onUnmounted, Ref, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
@@ -105,6 +105,7 @@ import { useDate } from '~/compositions/useDate';
 import useNotifications from '~/compositions/useNotifications';
 import { Cron, Repo } from '~/lib/api/types';
 import router from '~/router';
+import { PaginatedList } from '~/compositions/usePaginate';
 
 const apiClient = useApiClient();
 const notifications = useNotifications();
@@ -115,13 +116,20 @@ const crons = ref<Cron[]>();
 const selectedCron = ref<Partial<Cron>>();
 const isEditingCron = computed(() => !!selectedCron.value?.id);
 const date = useDate();
+const list = new PaginatedList(loadCrons);
 
-async function loadCrons() {
+async function loadCrons(page: number): Promise<boolean> {
   if (!repo?.value) {
     throw new Error("Unexpected: Can't load repo");
   }
 
-  crons.value = await apiClient.getCronList(repo.value.owner, repo.value.name);
+  const c = await apiClient.getCronList(repo.value.owner, repo.value.name, page);
+  if (page === 1 && c !== null) {
+    crons.value = c;
+  } else if (c != null) {
+    crons.value?.push(...c);
+  }
+  return c != null && c.length != 0;
 }
 
 const { doSubmit: createCron, isLoading: isSaving } = useAsyncAction(async () => {
@@ -143,7 +151,7 @@ const { doSubmit: createCron, isLoading: isSaving } = useAsyncAction(async () =>
     type: 'success',
   });
   selectedCron.value = undefined;
-  await loadCrons();
+  list.reset(true);
 });
 
 const { doSubmit: deleteCron, isLoading: isDeleting } = useAsyncAction(async (_cron: Cron) => {
@@ -153,7 +161,7 @@ const { doSubmit: deleteCron, isLoading: isDeleting } = useAsyncAction(async (_c
 
   await apiClient.deleteCron(repo.value.owner, repo.value.name, _cron.id);
   notifications.notify({ title: i18n.t('repo.settings.crons.deleted'), type: 'success' });
-  await loadCrons();
+  list.reset(true);
 });
 
 const { doSubmit: runCron } = useAsyncAction(async (_cron: Cron) => {
@@ -172,7 +180,10 @@ const { doSubmit: runCron } = useAsyncAction(async (_cron: Cron) => {
   });
 });
 
-onMounted(async () => {
-  await loadCrons();
+onMounted(() => {
+  list.onMounted();
+});
+onUnmounted(() => {
+  list.onUnmounted();
 });
 </script>

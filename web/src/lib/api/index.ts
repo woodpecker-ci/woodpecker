@@ -172,8 +172,8 @@ export default class WoodpeckerClient extends ApiClient {
     return this._delete(`/api/repos/${owner}/${repo}/registry/${registryAddress}`);
   }
 
-  getCronList(owner: string, repo: string): Promise<Cron[]> {
-    return this._get(`/api/repos/${owner}/${repo}/cron`) as Promise<Cron[]>;
+  getCronList(owner: string, repo: string, page: number): Promise<Cron[] | null> {
+    return this._get(`/api/repos/${owner}/${repo}/cron?page=${page}`) as Promise<Cron[] | null>;
   }
 
   createCron(owner: string, repo: string, cron: Partial<Cron>): Promise<unknown> {
@@ -236,8 +236,8 @@ export default class WoodpeckerClient extends ApiClient {
     return this._post('/api/user/token') as Promise<string>;
   }
 
-  getAgents(): Promise<Agent[]> {
-    return this._get('/api/agents') as Promise<Agent[]>;
+  getAgents(page: number): Promise<Agent[] | null> {
+    return this._get(`/api/agents?page=${page}`) as Promise<Agent[] | null>;
   }
 
   getAgent(agentId: Agent['id']): Promise<Agent> {
@@ -268,8 +268,8 @@ export default class WoodpeckerClient extends ApiClient {
     return this._post('/api/queue/resume');
   }
 
-  getUsers(): Promise<User[]> {
-    return this._get('/api/users') as Promise<User[]>;
+  getUsers(page: number): Promise<User[] | null> {
+    return this._get(`/api/users?page=${page}`) as Promise<User[] | null>;
   }
 
   getUser(username: string): Promise<User> {
