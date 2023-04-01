@@ -249,7 +249,7 @@ func TestOrgSecretList(t *testing.T) {
 
 	createTestSecrets(t, store)
 
-	list, err := store.OrgSecretList("org")
+	list, err := store.OrgSecretList("org", &model.ListOptions{All: true})
 	assert.NoError(t, err)
 	assert.Len(t, list, 1)
 
@@ -302,7 +302,7 @@ func TestGlobalSecretList(t *testing.T) {
 
 	createTestSecrets(t, store)
 
-	list, err := store.GlobalSecretList()
+	list, err := store.GlobalSecretList(&model.ListOptions{All: true})
 	assert.NoError(t, err)
 	assert.Len(t, list, 1)
 

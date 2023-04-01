@@ -140,8 +140,8 @@ export default class WoodpeckerClient extends ApiClient {
     return this._get(`/api/repos/${owner}/${repo}/files/${pipeline}`);
   }
 
-  getSecretList(owner: string, repo: string): Promise<Secret[]> {
-    return this._get(`/api/repos/${owner}/${repo}/secrets`) as Promise<Secret[]>;
+  getSecretList(owner: string, repo: string, page: number): Promise<Secret[] | null> {
+    return this._get(`/api/repos/${owner}/${repo}/secrets?page=${page}`) as Promise<Secret[] | null>;
   }
 
   createSecret(owner: string, repo: string, secret: Partial<Secret>): Promise<unknown> {
@@ -156,8 +156,8 @@ export default class WoodpeckerClient extends ApiClient {
     return this._delete(`/api/repos/${owner}/${repo}/secrets/${secretName}`);
   }
 
-  getRegistryList(owner: string, repo: string): Promise<Registry[]> {
-    return this._get(`/api/repos/${owner}/${repo}/registry`) as Promise<Registry[]>;
+  getRegistryList(owner: string, repo: string, page: number): Promise<Registry[] | null> {
+    return this._get(`/api/repos/${owner}/${repo}/registry?page=${page}`) as Promise<Registry[] | null>;
   }
 
   createRegistry(owner: string, repo: string, registry: Partial<Registry>): Promise<unknown> {
@@ -196,8 +196,8 @@ export default class WoodpeckerClient extends ApiClient {
     return this._get(`/api/orgs/${owner}/permissions`) as Promise<OrgPermissions>;
   }
 
-  getOrgSecretList(owner: string): Promise<Secret[]> {
-    return this._get(`/api/orgs/${owner}/secrets`) as Promise<Secret[]>;
+  getOrgSecretList(owner: string, page: number): Promise<Secret[] | null> {
+    return this._get(`/api/orgs/${owner}/secrets?page=${page}`) as Promise<Secret[] | null>;
   }
 
   createOrgSecret(owner: string, secret: Partial<Secret>): Promise<unknown> {
@@ -212,8 +212,8 @@ export default class WoodpeckerClient extends ApiClient {
     return this._delete(`/api/orgs/${owner}/secrets/${secretName}`);
   }
 
-  getGlobalSecretList(): Promise<Secret[]> {
-    return this._get(`/api/secrets`) as Promise<Secret[]>;
+  getGlobalSecretList(page: number): Promise<Secret[] | null> {
+    return this._get(`/api/secrets?page=${page}`) as Promise<Secret[] | null>;
   }
 
   createGlobalSecret(secret: Partial<Secret>): Promise<unknown> {

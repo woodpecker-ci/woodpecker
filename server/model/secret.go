@@ -41,13 +41,13 @@ type SecretService interface {
 	SecretDelete(*Repo, string) error
 	// Organization secrets
 	OrgSecretFind(string, string) (*Secret, error)
-	OrgSecretList(string) ([]*Secret, error)
+	OrgSecretList(string, *ListOptions) ([]*Secret, error)
 	OrgSecretCreate(string, *Secret) error
 	OrgSecretUpdate(string, *Secret) error
 	OrgSecretDelete(string, string) error
 	// Global secrets
 	GlobalSecretFind(string) (*Secret, error)
-	GlobalSecretList() ([]*Secret, error)
+	GlobalSecretList(*ListOptions) ([]*Secret, error)
 	GlobalSecretCreate(*Secret) error
 	GlobalSecretUpdate(*Secret) error
 	GlobalSecretDelete(string) error
@@ -61,9 +61,9 @@ type SecretStore interface {
 	SecretUpdate(*Secret) error
 	SecretDelete(*Secret) error
 	OrgSecretFind(string, string) (*Secret, error)
-	OrgSecretList(string) ([]*Secret, error)
+	OrgSecretList(string, *ListOptions) ([]*Secret, error)
 	GlobalSecretFind(string) (*Secret, error)
-	GlobalSecretList() ([]*Secret, error)
+	GlobalSecretList(*ListOptions) ([]*Secret, error)
 	SecretListAll() ([]*Secret, error)
 }
 

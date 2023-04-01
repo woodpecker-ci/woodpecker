@@ -47,7 +47,7 @@
 
 <script lang="ts">
 import { cloneDeep } from 'lodash';
-import { computed, defineComponent, onMounted, ref } from 'vue';
+import { computed, defineComponent, onMounted, onUnmounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
@@ -60,6 +60,7 @@ import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
 import { Secret, WebhookEvents } from '~/lib/api/types';
+import { PaginatedList } from '~/compositions/usePaginate';
 
 const emptySecret = {
   name: '',
@@ -88,9 +89,16 @@ export default defineComponent({
     const secrets = ref<Secret[]>([]);
     const selectedSecret = ref<Partial<Secret>>();
     const isEditingSecret = computed(() => !!selectedSecret.value?.id);
+    const list = new PaginatedList(loadSecrets);
 
-    async function loadSecrets() {
-      secrets.value = await apiClient.getGlobalSecretList();
+    async function loadSecrets(page: number): Promise<boolean> {
+      const sec = await apiClient.getGlobalSecretList(page);
+      if (page === 1 && sec !== null) {
+        secrets.value = sec;
+      } else if (sec != null) {
+        secrets.value?.push(...sec);
+      }
+      return sec != null && sec.length != 0;
     }
 
     const { doSubmit: createSecret, isLoading: isSaving } = useAsyncAction(async () => {
@@ -108,13 +116,13 @@ export default defineComponent({
         type: 'success',
       });
       selectedSecret.value = undefined;
-      await loadSecrets();
+      list.reset(true);
     });
 
     const { doSubmit: deleteSecret, isLoading: isDeleting } = useAsyncAction(async (_secret: Secret) => {
       await apiClient.deleteGlobalSecret(_secret.name);
       notifications.notify({ title: i18n.t('admin.settings.secrets.deleted'), type: 'success' });
-      await loadSecrets();
+      list.reset(true);
     });
 
     function editSecret(secret: Secret) {
@@ -125,8 +133,12 @@ export default defineComponent({
       selectedSecret.value = cloneDeep(emptySecret);
     }
 
-    onMounted(async () => {
-      await loadSecrets();
+    onMounted(() => {
+      list.onMounted();
+    });
+
+    onUnmounted(() => {
+      list.onUnmounted();
     });
 
     return {

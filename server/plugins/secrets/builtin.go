@@ -90,8 +90,8 @@ func (b *builtin) OrgSecretFind(owner, name string) (*model.Secret, error) {
 	return b.store.OrgSecretFind(owner, name)
 }
 
-func (b *builtin) OrgSecretList(owner string) ([]*model.Secret, error) {
-	return b.store.OrgSecretList(owner)
+func (b *builtin) OrgSecretList(owner string, p *model.ListOptions) ([]*model.Secret, error) {
+	return b.store.OrgSecretList(owner, p)
 }
 
 func (b *builtin) OrgSecretCreate(_ string, in *model.Secret) error {
@@ -114,8 +114,8 @@ func (b *builtin) GlobalSecretFind(owner string) (*model.Secret, error) {
 	return b.store.GlobalSecretFind(owner)
 }
 
-func (b *builtin) GlobalSecretList() ([]*model.Secret, error) {
-	return b.store.GlobalSecretList()
+func (b *builtin) GlobalSecretList(p *model.ListOptions) ([]*model.Secret, error) {
+	return b.store.GlobalSecretList(p)
 }
 
 func (b *builtin) GlobalSecretCreate(in *model.Secret) error {

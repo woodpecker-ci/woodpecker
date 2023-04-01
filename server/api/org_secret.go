@@ -18,6 +18,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -38,11 +39,11 @@ func GetOrgSecret(c *gin.Context) {
 	c.JSON(http.StatusOK, secret.Copy())
 }
 
-// GetOrgSecretList gest the organization secret list from
+// GetOrgSecretList gets the organization secret list from
 // the database and writes to the response in json format.
 func GetOrgSecretList(c *gin.Context) {
 	owner := c.Param("owner")
-	list, err := server.Config.Services.Secrets.OrgSecretList(owner)
+	list, err := server.Config.Services.Secrets.OrgSecretList(owner, session.Pagination(c))
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error getting secret list for %q. %s", owner, err)
 		return

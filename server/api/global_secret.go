@@ -18,6 +18,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -26,7 +27,7 @@ import (
 // GetGlobalSecretList gets the global secret list from
 // the database and writes to the response in json format.
 func GetGlobalSecretList(c *gin.Context) {
-	list, err := server.Config.Services.Secrets.GlobalSecretList()
+	list, err := server.Config.Services.Secrets.GlobalSecretList(session.Pagination(c))
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error getting global secret list. %s", err)
 		return

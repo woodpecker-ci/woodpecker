@@ -80,7 +80,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, onMounted, Ref, ref } from 'vue';
+import { computed, defineComponent, inject, onMounted, onUnmounted, Ref, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
@@ -95,6 +95,7 @@ import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
 import { Repo } from '~/lib/api/types';
 import { Registry } from '~/lib/api/types/registry';
+import { PaginatedList } from '~/compositions/usePaginate';
 
 export default defineComponent({
   name: 'RegistriesTab',
@@ -118,13 +119,20 @@ export default defineComponent({
     const registries = ref<Registry[]>();
     const selectedRegistry = ref<Partial<Registry>>();
     const isEditingRegistry = computed(() => !!selectedRegistry.value?.id);
+    const list = new PaginatedList(loadRegistries);
 
-    async function loadRegistries() {
+    async function loadRegistries(page: number): Promise<boolean> {
       if (!repo?.value) {
         throw new Error("Unexpected: Can't load repo");
       }
 
-      registries.value = await apiClient.getRegistryList(repo.value.owner, repo.value.name);
+      const regs = await apiClient.getRegistryList(repo.value.owner, repo.value.name, page);
+      if (page === 1 && regs !== null) {
+        registries.value = regs;
+      } else if (regs != null) {
+        registries.value?.push(...regs);
+      }
+      return regs != null && regs.length != 0;
     }
 
     const { doSubmit: createRegistry, isLoading: isSaving } = useAsyncAction(async () => {
@@ -148,7 +156,7 @@ export default defineComponent({
         type: 'success',
       });
       selectedRegistry.value = undefined;
-      await loadRegistries();
+      list.reset(true);
     });
 
     const { doSubmit: deleteRegistry, isLoading: isDeleting } = useAsyncAction(async (_registry: Registry) => {
@@ -159,11 +167,15 @@ export default defineComponent({
       const registryAddress = encodeURIComponent(_registry.address);
       await apiClient.deleteRegistry(repo.value.owner, repo.value.name, registryAddress);
       notifications.notify({ title: i18n.t('repo.settings.registries.deleted'), type: 'success' });
-      await loadRegistries();
+      list.reset(true);
     });
 
-    onMounted(async () => {
-      await loadRegistries();
+    onMounted(() => {
+      list.onMounted();
+    });
+
+    onUnmounted(() => {
+      list.onUnmounted();
     });
 
     return { selectedRegistry, registries, isEditingRegistry, isSaving, isDeleting, createRegistry, deleteRegistry };
