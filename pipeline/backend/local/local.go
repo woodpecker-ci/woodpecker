@@ -82,6 +82,9 @@ func (e *local) Exec(ctx context.Context, step *types.Step) error {
 		}
 	}
 
+	// Set HOME to the temporary workspace
+	env = append(env, "HOME="+e.workingdir)
+
 	var command []string
 	if step.Image == constant.DefaultCloneImage {
 		// Default clone step
