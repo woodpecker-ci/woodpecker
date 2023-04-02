@@ -93,9 +93,9 @@ import Panel from '~/components/layout/Panel.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
+import { PaginatedList } from '~/compositions/usePaginate';
 import { Repo } from '~/lib/api/types';
 import { Registry } from '~/lib/api/types/registry';
-import { PaginatedList } from '~/compositions/usePaginate';
 
 export default defineComponent({
   name: 'RegistriesTab',

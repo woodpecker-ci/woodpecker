@@ -139,7 +139,7 @@ func (s storage) DeleteRepo(repo *model.Repo) error {
 }
 
 // RepoList list all repos where permissions for specific user are stored
-func (s storage) RepoList(user *model.User, owned bool, active bool) ([]*model.Repo, error) {
+func (s storage) RepoList(user *model.User, owned, active bool) ([]*model.Repo, error) {
 	repos := make([]*model.Repo, 0)
 	sess := s.engine.Table("repos").
 		Join("INNER", "perms", "perms.perm_repo_id = repos.repo_id").

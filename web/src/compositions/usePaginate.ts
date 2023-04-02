@@ -13,12 +13,15 @@ export async function usePaginate<T>(getSingle: (page: number) => Promise<T[]>):
 }
 
 export class PaginatedList {
-  private page: number = 1;
-  private hasMore: boolean = true;
+  private page = 1;
+
+  private hasMore = true;
+
   private readonly load: (page: number) => Promise<boolean>;
+
   private readonly scrollComponent: Element;
 
-  constructor(load: (page: number) => Promise<boolean>, elem: String = 'main > div') {
+  constructor(load: (page: number) => Promise<boolean>, elem = 'main > div') {
     this.load = load;
     this.scrollComponent = document.querySelector(elem);
     if (!this.scrollComponent) {

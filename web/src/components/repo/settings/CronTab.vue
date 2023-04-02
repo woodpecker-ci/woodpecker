@@ -103,9 +103,9 @@ import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import { useDate } from '~/compositions/useDate';
 import useNotifications from '~/compositions/useNotifications';
+import { PaginatedList } from '~/compositions/usePaginate';
 import { Cron, Repo } from '~/lib/api/types';
 import router from '~/router';
-import { PaginatedList } from '~/compositions/usePaginate';
 
 const apiClient = useApiClient();
 const notifications = useNotifications();

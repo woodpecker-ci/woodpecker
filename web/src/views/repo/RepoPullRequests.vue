@@ -20,8 +20,8 @@ import { inject, onMounted, onUnmounted, Ref, ref, watch } from 'vue';
 
 import ListItem from '~/components/atomic/ListItem.vue';
 import useApiClient from '~/compositions/useApiClient';
-import { PullRequest, Repo } from '~/lib/api/types';
 import { PaginatedList } from '~/compositions/usePaginate';
+import { PullRequest, Repo } from '~/lib/api/types';
 
 const apiClient = useApiClient();
 

@@ -59,8 +59,8 @@ import SecretList from '~/components/secrets/SecretList.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
-import { Secret, WebhookEvents } from '~/lib/api/types';
 import { PaginatedList } from '~/compositions/usePaginate';
+import { Secret, WebhookEvents } from '~/lib/api/types';
 
 const emptySecret = {
   name: '',

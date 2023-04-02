@@ -97,8 +97,8 @@ import Panel from '~/components/layout/Panel.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
-import { User } from '~/lib/api/types';
 import { PaginatedList } from '~/compositions/usePaginate';
+import { User } from '~/lib/api/types';
 
 const apiClient = useApiClient();
 const notifications = useNotifications();
