@@ -565,25 +565,25 @@ func (_m *Store) FileRead(_a0 *model.Step, _a1 string) (io.ReadCloser, error) {
 	return r0, r1
 }
 
-// GetActivePipelineList provides a mock function with given fields: repo, page
-func (_m *Store) GetActivePipelineList(repo *model.Repo, page int) ([]*model.Pipeline, error) {
-	ret := _m.Called(repo, page)
+// GetActivePipelineList provides a mock function with given fields: repo
+func (_m *Store) GetActivePipelineList(repo *model.Repo) ([]*model.Pipeline, error) {
+	ret := _m.Called(repo)
 
 	var r0 []*model.Pipeline
 	var r1 error
-	if rf, ok := ret.Get(0).(func(*model.Repo, int) ([]*model.Pipeline, error)); ok {
-		return rf(repo, page)
+	if rf, ok := ret.Get(0).(func(*model.Repo) ([]*model.Pipeline, error)); ok {
+		return rf(repo)
 	}
-	if rf, ok := ret.Get(0).(func(*model.Repo, int) []*model.Pipeline); ok {
-		r0 = rf(repo, page)
+	if rf, ok := ret.Get(0).(func(*model.Repo) []*model.Pipeline); ok {
+		r0 = rf(repo)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*model.Pipeline)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(*model.Repo, int) error); ok {
-		r1 = rf(repo, page)
+	if rf, ok := ret.Get(1).(func(*model.Repo) error); ok {
+		r1 = rf(repo)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1105,25 +1105,25 @@ func (_m *Store) GlobalSecretFind(_a0 string) (*model.Secret, error) {
 	return r0, r1
 }
 
-// GlobalSecretList provides a mock function with given fields:
-func (_m *Store) GlobalSecretList() ([]*model.Secret, error) {
-	ret := _m.Called()
+// GlobalSecretList provides a mock function with given fields: _a0
+func (_m *Store) GlobalSecretList(_a0 *model.ListOptions) ([]*model.Secret, error) {
+	ret := _m.Called(_a0)
 
 	var r0 []*model.Secret
 	var r1 error
-	if rf, ok := ret.Get(0).(func() ([]*model.Secret, error)); ok {
-		return rf()
+	if rf, ok := ret.Get(0).(func(*model.ListOptions) ([]*model.Secret, error)); ok {
+		return rf(_a0)
 	}
-	if rf, ok := ret.Get(0).(func() []*model.Secret); ok {
-		r0 = rf()
+	if rf, ok := ret.Get(0).(func(*model.ListOptions) []*model.Secret); ok {
+		r0 = rf(_a0)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*model.Secret)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func() error); ok {
-		r1 = rf()
+	if rf, ok := ret.Get(1).(func(*model.ListOptions) error); ok {
+		r1 = rf(_a0)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1235,25 +1235,25 @@ func (_m *Store) OrgSecretFind(_a0 string, _a1 string) (*model.Secret, error) {
 	return r0, r1
 }
 
-// OrgSecretList provides a mock function with given fields: _a0
-func (_m *Store) OrgSecretList(_a0 string) ([]*model.Secret, error) {
-	ret := _m.Called(_a0)
+// OrgSecretList provides a mock function with given fields: _a0, _a1
+func (_m *Store) OrgSecretList(_a0 string, _a1 *model.ListOptions) ([]*model.Secret, error) {
+	ret := _m.Called(_a0, _a1)
 
 	var r0 []*model.Secret
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string) ([]*model.Secret, error)); ok {
-		return rf(_a0)
+	if rf, ok := ret.Get(0).(func(string, *model.ListOptions) ([]*model.Secret, error)); ok {
+		return rf(_a0, _a1)
 	}
-	if rf, ok := ret.Get(0).(func(string) []*model.Secret); ok {
-		r0 = rf(_a0)
+	if rf, ok := ret.Get(0).(func(string, *model.ListOptions) []*model.Secret); ok {
+		r0 = rf(_a0, _a1)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*model.Secret)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(_a0)
+	if rf, ok := ret.Get(1).(func(string, *model.ListOptions) error); ok {
+		r1 = rf(_a0, _a1)
 	} else {
 		r1 = ret.Error(1)
 	}
