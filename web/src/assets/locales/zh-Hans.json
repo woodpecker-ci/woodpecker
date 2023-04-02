@@ -213,7 +213,6 @@
         "general": "基本设置",
         "pipeline_path": {
           "default": "默认: .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml",
-          "desc": "流水线配置文件的路径 (例子: <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">my/path/</span>)。目录必须以 <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">/</span> 结尾.",
           "path": "流水线路径"
         },
         "project": "项目设置",
