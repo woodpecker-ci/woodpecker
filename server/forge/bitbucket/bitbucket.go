@@ -148,11 +148,16 @@ func (c *config) Repo(ctx context.Context, u *model.User, remoteID model.ForgeRe
 	if remoteID.IsValid() {
 		name = string(remoteID)
 	}
-	repo, err := c.newClient(ctx, u).FindRepo(owner, name)
+	client := c.newClient(ctx, u)
+	repo, err := client.FindRepo(owner, name)
 	if err != nil {
 		return nil, err
 	}
-	return convertRepo(repo), nil
+	perm, err := client.GetPermission(repo.FullName)
+	if err != nil {
+		return nil, err
+	}
+	return convertRepo(repo, perm), nil
 }
 
 // Repos returns a list of all repositories for Bitbucket account, including
@@ -176,42 +181,15 @@ func (c *config) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 			return all, err
 		}
 		for _, repo := range repos {
-			all = append(all, convertRepo(repo))
+			perm, err := client.GetPermission(repo.FullName)
+			if err != nil {
+				return nil, err
+			}
+
+			all = append(all, convertRepo(repo, perm))
 		}
 	}
 	return all, nil
-}
-
-// Perm returns the user permissions for the named repository. Because Bitbucket
-// does not have an endpoint to access user permissions, we attempt to fetch
-// the repository hook list, which is restricted to administrators to calculate
-// administrative access to a repository.
-func (c *config) Perm(ctx context.Context, u *model.User, r *model.Repo) (*model.Perm, error) {
-	client := c.newClient(ctx, u)
-
-	perms := new(model.Perm)
-	repo, err := client.FindRepo(r.Owner, r.Name)
-	if err != nil {
-		return perms, err
-	}
-
-	perm, err := client.GetPermission(repo.FullName)
-	if err != nil {
-		return perms, err
-	}
-
-	switch perm.Permission {
-	case "admin":
-		perms.Admin = true
-		fallthrough
-	case "write":
-		perms.Push = true
-		fallthrough
-	default:
-		perms.Pull = true
-	}
-
-	return perms, nil
 }
 
 // File fetches the file from the Bitbucket repository and returns its contents.

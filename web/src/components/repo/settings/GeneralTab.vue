@@ -15,8 +15,12 @@
           :placeholder="$t('repo.settings.general.pipeline_path.default')"
         />
         <template #description>
-          <!-- eslint-disable-next-line vue/no-v-html -->
-          <p class="text-sm text-color-alt" v-html="$t('repo.settings.general.pipeline_path.desc')" />
+          <i18n-t keypath="repo.settings.general.pipeline_path.desc" tag="p" class="text-sm text-color-alt">
+            <span class="bg-gray-300 dark:bg-dark-700 rounded-md px-1">{{
+              $t('repo.settings.general.pipeline_path.desc_path_example')
+            }}</span>
+            <span class="bg-gray-300 dark:bg-dark-700 rounded-md px-1">/</span>
+          </i18n-t>
         </template>
       </InputField>
 

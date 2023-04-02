@@ -10,7 +10,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func Pod(namespace string, step *types.Step, labels, annotations map[string]string) *v1.Pod {
+func Pod(namespace string, step *types.Step, labels, annotations map[string]string) (*v1.Pod, error) {
 	var (
 		vols       []v1.Volume
 		volMounts  []v1.VolumeMount
@@ -20,18 +20,23 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 
 	if step.WorkingDir != "" {
 		for _, vol := range step.Volumes {
+			volumeName, err := dnsName(strings.Split(vol, ":")[0])
+			if err != nil {
+				return nil, err
+			}
+
 			vols = append(vols, v1.Volume{
-				Name: volumeName(vol),
+				Name: volumeName,
 				VolumeSource: v1.VolumeSource{
 					PersistentVolumeClaim: &v1.PersistentVolumeClaimVolumeSource{
-						ClaimName: volumeName(vol),
+						ClaimName: volumeName,
 						ReadOnly:  false,
 					},
 				},
 			})
 
 			volMounts = append(volMounts, v1.VolumeMount{
-				Name:      volumeName(vol),
+				Name:      volumeName,
 				MountPath: volumeMountPath(vol),
 			})
 		}
@@ -88,11 +93,16 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 		},
 	}
 
-	labels["step"] = podName(step)
+	podName, err := dnsName(step.Name)
+	if err != nil {
+		return nil, err
+	}
 
-	return &v1.Pod{
+	labels["step"] = podName
+
+	pod := &v1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        podName(step),
+			Name:        podName,
 			Namespace:   namespace,
 			Labels:      labels,
 			Annotations: annotations,
@@ -101,7 +111,7 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 			RestartPolicy: v1.RestartPolicyNever,
 			HostAliases:   hostAliases,
 			Containers: []v1.Container{{
-				Name:            podName(step),
+				Name:            podName,
 				Image:           step.Image,
 				ImagePullPolicy: pullPolicy,
 				Command:         entrypoint,
@@ -118,10 +128,8 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 			Volumes:          vols,
 		},
 	}
-}
 
-func podName(s *types.Step) string {
-	return dnsName(s.Name)
+	return pod, nil
 }
 
 func mapToEnvVars(m map[string]string) []v1.EnvVar {

@@ -14,9 +14,11 @@
           "desc": "Maksimālais aģenta paralēli izpildāmo konvejerdarbu skaits."
         },
         "created": "Aģents izveidots",
+        "delete_agent": "Dzēst aģentu",
         "delete_confirm": "Vai patiešām dzēst šo aģentu? Tam vairs nebūs iespējas savienoties ar serveri.",
         "deleted": "Aģents izdzēsts",
         "desc": "Šajā serverī reģistrētie aģenti",
+        "edit_agent": "Labot aģentu",
         "last_contact": "Pēdējā sazināšanās",
         "name": {
           "name": "Nosaukums",
@@ -39,6 +41,27 @@
         "version": "Versija"
       },
       "not_allowed": "Nav piekļuves servera iestatījumiem",
+      "queue": {
+        "agent": "aģents",
+        "desc": "Uzdevumi, kuri gaida izpildi",
+        "pause": "Apturēt",
+        "paused": "Rinda ir apturēta",
+        "queue": "Rinda",
+        "resume": "Atsākt",
+        "resumed": "Rindas apstrāde atsākta",
+        "stats": {
+          "completed_count": "Pabeigtie uzdevumi",
+          "pending_count": "Gaida",
+          "running_count": "Izpildās",
+          "waiting_on_deps_count": "Gaida uz atkarībām",
+          "worker_count": "Brīvi"
+        },
+        "task_pending": "Uzdevums gaida izpildi",
+        "task_running": "Uzdevums tiek izpildīts",
+        "task_waiting_on_deps": "Uzdevums gaida uz atkarībām",
+        "tasks": "Uzdevumi",
+        "waiting_for": "gaida uz"
+      },
       "secrets": {
         "add": "Pievienot noslēpumu",
         "created": "Globālais noslēpums izveidots",
@@ -280,6 +303,10 @@
           "disable": "Atspējot repozitoriju",
           "success": "Repozitorijs atspējots"
         },
+        "enable": {
+          "enable": "Iespējot repozitoriju",
+          "success": "Repozitorijs iespējots"
+        },
         "repair": {
           "repair": "Salabot repozitoriju",
           "success": "Repozitorijs salabots"
@@ -333,9 +360,14 @@
           "desc": "Iespējojot šo pazīmi, tiks atcelti visi iepriekšējie konvejerdarbi, kuriem sakrīt notikums un konteksts."
         },
         "general": "Pamata",
+        "netrc_only_trusted": {
+          "desc": "Atļaut izmantot Git autorizāciju tikai uzticamiem konteineriem (ieteicams).",
+          "netrc_only_trusted": "Atļaut izmantot Git autorizāciju tikai uzticamiem konteineriem"
+        },
         "pipeline_path": {
           "default": "Pēc noklusējuma: .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml",
-          "desc": "Ceļš uz konvejerdarba konfigurāciju, piemēram, <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">my/path/</span>. Mapēm jābeidzas ar <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">/</span>.",
+          "desc": "Ceļš uz konvejerdarba konfigurāciju, piemēram, {0}. Mapēm jābeidzas ar {0}.",
+          "desc_path_example": "mans/ceļš/",
           "path": "Konvejerdarba ceļš"
         },
         "project": "Projekta iestatījumi",

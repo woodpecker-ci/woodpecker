@@ -82,7 +82,8 @@
                 "pipeline_path": {
                     "path": "Pipeline path",
                     "default": "By default: .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml",
-                    "desc": "Path to your pipeline config (for example <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">my/path/</span>). Folders should end with a <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">/</span>."
+                    "desc": "Path to your pipeline config (for example {0}). Folders should end with a {1}.",
+                    "desc_path_example": "my/path/"
                 },
                 "allow_pr": {
                     "allow": "Allow Pull Requests",
@@ -212,6 +213,10 @@
                 "disable": {
                     "disable": "Disable repository",
                     "success": "Repository disabled"
+                },
+                "enable": {
+                  "enable": "Enable repository",
+                  "success": "Repository enabled"
                 },
                 "delete": {
                     "delete": "Delete repository",
@@ -368,7 +373,9 @@
                 "version": "Version",
                 "last_contact": "Last contact",
                 "never": "Never",
-                "delete_confirm": "Do you really want to delete this agent? It wont be able to connected to the server anymore."
+                "delete_confirm": "Do you really want to delete this agent? It wont be able to connected to the server anymore.",
+                "edit_agent": "Edit agent",
+                "delete_agent": "Delete agent"
             },
             "queue": {
               "queue": "Queue",
@@ -381,6 +388,8 @@
               "task_running": "Task is running",
               "task_pending": "Task is pending",
               "task_waiting_on_deps": "Task is waiting on dependencies",
+              "agent": "agent",
+              "waiting_for": "waiting for",
               "stats": {
                 "completed_count": "Completed Tasks",
                 "worker_count": "Free",

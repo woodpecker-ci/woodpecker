@@ -21,6 +21,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
 	"github.com/alessio/shellescape"
@@ -28,6 +29,11 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/shared/constant"
+)
+
+const (
+	workingSubDir = "work"
+	homeSubDir    = "home"
 )
 
 // notAllowedEnvVarOverwrites are all env vars that can not be overwritten by step config
@@ -42,9 +48,9 @@ var notAllowedEnvVarOverwrites = []string{
 
 type local struct {
 	// TODO: make cmd a cmd list to iterate over, the hard part is to have a common ReadCloser
-	cmd        *exec.Cmd
-	output     io.ReadCloser
-	workingdir string
+	cmd             *exec.Cmd
+	output          io.ReadCloser
+	workflowBaseDir string
 }
 
 // New returns a new local Engine.
@@ -62,7 +68,7 @@ func (e *local) IsAvailable(context.Context) bool {
 
 func (e *local) Load(context.Context) error {
 	dir, err := os.MkdirTemp("", "woodpecker-local-*")
-	e.workingdir = dir
+	e.workflowBaseDir = dir
 	return err
 }
 
@@ -82,12 +88,15 @@ func (e *local) Exec(ctx context.Context, step *types.Step) error {
 		}
 	}
 
+	// Set HOME
+	env = append(env, "HOME="+filepath.Join(e.workflowBaseDir, homeSubDir))
+
 	var command []string
 	if step.Image == constant.DefaultCloneImage {
 		// Default clone step
-		// TODO: creat tmp HOME and insert netrc
+		// TODO: use tmp HOME and insert netrc and delete it after clone
 		// TODO: download plugin-git binary if not exist
-		env = append(env, "CI_WORKSPACE="+e.workingdir+"/"+step.Environment["CI_REPO"])
+		env = append(env, "CI_WORKSPACE="+filepath.Join(e.workflowBaseDir, workingSubDir, step.Environment["CI_REPO"]))
 		command = append(command, "plugin-git")
 	} else {
 		// Use "image name" as run command
@@ -111,9 +120,9 @@ func (e *local) Exec(ctx context.Context, step *types.Step) error {
 
 	// Prepare working directory
 	if step.Image == constant.DefaultCloneImage {
-		e.cmd.Dir = e.workingdir + "/" + step.Environment["CI_REPO_OWNER"]
+		e.cmd.Dir = filepath.Join(e.workflowBaseDir, workingSubDir, step.Environment["CI_REPO_OWNER"])
 	} else {
-		e.cmd.Dir = e.workingdir + "/" + step.Environment["CI_REPO"]
+		e.cmd.Dir = filepath.Join(e.workflowBaseDir, workingSubDir, step.Environment["CI_REPO"])
 	}
 	err := os.MkdirAll(e.cmd.Dir, 0o700)
 	if err != nil {
@@ -152,5 +161,5 @@ func (e *local) Tail(context.Context, *types.Step) (io.ReadCloser, error) {
 
 // Destroy the pipeline environment.
 func (e *local) Destroy(context.Context, *types.Config) error {
-	return os.RemoveAll(e.cmd.Dir)
+	return os.RemoveAll(e.workflowBaseDir)
 }

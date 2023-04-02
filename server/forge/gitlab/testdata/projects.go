@@ -51,7 +51,17 @@ var allProjectsPayload = []byte(`
 			"path": "diaspora",
 			"updated_at": "2013-09-30T13:46:02Z"
 		},
-		"archived": false
+		"archived": false,
+		"permissions": {
+			"project_access": {
+				"access_level": 10,
+				"notification_level": 3
+			},
+			"group_access": {
+				"access_level": 50,
+				"notification_level": 3
+			}
+		}
 	},
 	{
 		"id": 6,
@@ -87,7 +97,17 @@ var allProjectsPayload = []byte(`
 			"path": "brightbox",
 			"updated_at": "2013-09-30T13:46:02Z"
 		},
-		"archived": true
+		"archived": true,
+		"permissions": {
+			"project_access": {
+				"access_level": 10,
+				"notification_level": 3
+			},
+			"group_access": {
+				"access_level": 50,
+				"notification_level": 3
+			}
+		}
 	}
 ]
 `)
@@ -128,7 +148,17 @@ var notArchivedProjectsPayload = []byte(`
 			"path": "diaspora",
 			"updated_at": "2013-09-30T13:46:02Z"
 		},
-		"archived": false
+		"archived": false,
+		"permissions": {
+			"project_access": {
+				"access_level": 10,
+				"notification_level": 3
+			},
+			"group_access": {
+				"access_level": 50,
+				"notification_level": 3
+			}
+		}
 	}
 ]
 `)

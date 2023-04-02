@@ -47,6 +47,7 @@ func toRepo(from *gitea.Repository) *model.Repo {
 		IsSCMPrivate:  from.Private || from.Owner.Visibility != gitea.VisibleTypePublic,
 		Clone:         from.CloneURL,
 		Branch:        from.DefaultBranch,
+		Perm:          toPerm(from.Permissions),
 	}
 }
 

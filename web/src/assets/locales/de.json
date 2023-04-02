@@ -14,9 +14,11 @@
           "desc": "Die maximale Anzahl von Pipelines, die ein Agent ausführt."
         },
         "created": "Agent erstellt",
+        "delete_agent": "Agent löschen",
         "delete_confirm": "Wollen Sie diesen Agent wirklich löschen? Dieser kann sich dann nicht mehr mit dem Server verbinden.",
         "deleted": "Agent gelöscht",
         "desc": "Für diesen Server registrierte Agents",
+        "edit_agent": "Agent bearbeiten",
         "last_contact": "Letzter Kontakt",
         "name": {
           "name": "Name",
@@ -40,16 +42,25 @@
       },
       "not_allowed": "Du darfst nicht auf die Server-Einstellungen zugreifen",
       "queue": {
+        "agent": "Agent",
         "desc": "Aufgaben, die darauf warten, von Agents ausgeführt zu werden",
         "pause": "Pausieren",
         "paused": "Warteschlange wurde pausiert",
         "queue": "Warteschlange",
         "resume": "Wieder aufnehmen",
         "resumed": "Warteschlange wurde wieder aufgenommen",
+        "stats": {
+          "completed_count": "Beendete Aufgaben",
+          "pending_count": "Ausstehend",
+          "running_count": "Läuft",
+          "waiting_on_deps_count": "Wartet auf Abhängigkeiten",
+          "worker_count": "Frei"
+        },
         "task_pending": "Aufgabe steht aus",
         "task_running": "Aufgabe läuft",
         "task_waiting_on_deps": "Aufgabe wartet auf Abhängigkeiten",
-        "tasks": "Aufgaben"
+        "tasks": "Aufgaben",
+        "waiting_for": "wartet auf"
       },
       "secrets": {
         "add": "Geheimnis hinzufügen",
@@ -293,6 +304,10 @@
           "disable": "Repository deaktivieren",
           "success": "Repository deaktiviert"
         },
+        "enable": {
+          "enable": "Repository aktivieren",
+          "success": "Repository aktiviert"
+        },
         "repair": {
           "repair": "Repository reparieren",
           "success": "Repository repariert"
@@ -346,9 +361,14 @@
           "desc": "Aktiviere diese Option, um laufende Pipelines desselben Ereignisses und Kontexts abzubrechen, bevor die neue Pipeline startet."
         },
         "general": "Allgemein",
+        "netrc_only_trusted": {
+          "desc": "Netrc-Zugangsdaten nur in vertrauenswürdigen Containern bereitstellen (empfohlen).",
+          "netrc_only_trusted": "Netrc-Zugangsdaten nur in vertrauenswürdigen Containern zum Klonen bereitstellen"
+        },
         "pipeline_path": {
           "default": "Standardmäßig: .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml",
-          "desc": "Pfad zu deiner Pipeline-Konfiguration (z. B. <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">mein/pfad/</span>). Verzeichnisse sollten mit einem <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">/</span> enden.",
+          "desc": "Pfad zu deiner Pipeline-Konfiguration (z. B. {0}). Verzeichnisse sollten mit einem {1} enden.",
+          "desc_path_example": "mein/pfad/",
           "path": "Pipeline-Pfad"
         },
         "project": "Projekt-Einstellungen",

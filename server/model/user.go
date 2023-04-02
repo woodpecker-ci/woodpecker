@@ -56,9 +56,6 @@ type User struct {
 	// the avatar url for this user.
 	Avatar string `json:"avatar_url" xorm:" varchar(500) 'user_avatar'"`
 
-	// Synced is the timestamp when the user was synced with the forge.
-	Synced int64 `json:"synced" xorm:"user_synced"`
-
 	// Admin indicates the user is a system administrator.
 	//
 	// NOTE: If the username is part of the WOODPECKER_ADMINS
