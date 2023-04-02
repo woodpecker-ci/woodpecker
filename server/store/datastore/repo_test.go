@@ -179,7 +179,7 @@ func TestRepoList(t *testing.T) {
 		assert.NoError(t, store.PermUpsert(perm))
 	}
 
-	repos, err := store.RepoList(user, false, &model.ListOptions{Page: 1, PerPage: 50})
+	repos, err := store.RepoList(user, false, false)
 	if err != nil {
 		t.Error(err)
 		return
@@ -244,7 +244,7 @@ func TestOwnedRepoList(t *testing.T) {
 		assert.NoError(t, store.PermUpsert(perm))
 	}
 
-	repos, err := store.RepoList(user, true, &model.ListOptions{Page: 1, PerPage: 50})
+	repos, err := store.RepoList(user, true, false)
 	if err != nil {
 		t.Error(err)
 		return
