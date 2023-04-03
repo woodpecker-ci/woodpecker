@@ -27,7 +27,6 @@ if (!repo) {
   throw new Error('Unexpected: "repo" and "scrollComponent" should be provided at this place');
 }
 
-// TODO it seems this also runs if Pr list is open
 async function loadBranches(page: number): Promise<boolean> {
   if (!repo) {
     throw new Error('Unexpected: "repo" should be provided at this place');

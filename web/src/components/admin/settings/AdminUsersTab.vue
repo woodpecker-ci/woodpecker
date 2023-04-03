@@ -161,7 +161,7 @@ function showAddUser() {
   selectedUser.value = cloneDeep({ login: '' });
 }
 
-onMounted(async () => {
+onMounted(() => {
   list.onMounted();
 });
 

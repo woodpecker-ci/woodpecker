@@ -12,26 +12,32 @@ export async function usePaginate<T>(getSingle: (page: number) => Promise<T[]>):
   return result;
 }
 
+const lists = {};
+let currId = 0;
+
+document.querySelector('main > div').addEventListener('scroll', (e: Event) => {
+  if (e.target.scrollTop + e.target.clientHeight === e.target.scrollHeight) {
+    for (const id in lists) {
+      lists[id].page += 1;
+      lists[id].runLoad();
+    }
+  }
+});
+
 export class PaginatedList {
+  private id: number;
   private page = 1;
-
   private hasMore = true;
-
   private readonly load: (page: number) => Promise<boolean>;
 
-  private readonly scrollComponent: Element;
-
-  constructor(load: (page: number) => Promise<boolean>, elem = 'main > div') {
+  constructor(load: (page: number) => Promise<boolean>) {
     this.load = load;
-    this.scrollComponent = document.querySelector(elem);
-    if (!this.scrollComponent) {
-      throw new Error('Unexpected: "scrollComponent" should be provided at this place');
-    }
   }
 
   public onMounted() {
     this.reset(true);
-    this.scrollComponent.addEventListener('scroll', this.handleScroll());
+    this.id = currId++;
+    lists[this.id] = this;
   }
 
   public reset(reload: boolean) {
@@ -44,7 +50,7 @@ export class PaginatedList {
 
   public onUnmounted() {
     this.reset(false);
-    this.scrollComponent.removeEventListener('scroll', this.handleScroll());
+    delete lists[this.id];
   }
 
   private async runLoad() {
@@ -53,16 +59,5 @@ export class PaginatedList {
       this.hasMore = false;
       this.hasMore = await this.load(this.page);
     }
-  }
-
-  private handleScroll() {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const list = this;
-    return (e: Event) => {
-      if (e.target.scrollTop + e.target.clientHeight === e.target.scrollHeight) {
-        list.page += 1;
-        list.runLoad();
-      }
-    };
   }
 }
