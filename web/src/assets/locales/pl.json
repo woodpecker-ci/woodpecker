@@ -254,7 +254,6 @@
         "general": "Ogólne",
         "pipeline_path": {
           "default": "Domyślnie: .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml",
-          "desc": "Ścieżka do pliku konfiguracyjnego twojego potoku (na przykład <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">my/path/</span>). Foldery muszą kończyć się znakiem <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">/</span>.",
           "path": "Ścieżka do pliku potoku"
         },
         "project": "Ustawienia projektu",

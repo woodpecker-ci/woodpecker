@@ -196,7 +196,6 @@
         "general": "Генерал",
         "pipeline_path": {
           "default": "За замовчуванням: .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml",
-          "desc": "Шлях до конфігурації конвеєра (наприклад <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">my/path/</span>). Папки повинні закінчуватися на <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">/</span>.",
           "path": "Траса трубопроводу"
         },
         "project": "Налаштування проекту",
