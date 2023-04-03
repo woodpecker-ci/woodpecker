@@ -15,7 +15,7 @@ pipeline:
       - make docs
     when:
       - path: *when_path
-      - cron: midnight_docs
+      - cron: update_docs
         event: cron
 
   build:
@@ -27,7 +27,7 @@ pipeline:
       - pnpm build
     when:
       - path: *when_path
-      - cron: midnight_docs
+      - cron: update_docs
         event: cron
 
   securitycheck:
@@ -80,5 +80,5 @@ pipeline:
       - event: push
         branch: ${CI_REPO_DEFAULT_BRANCH}
         path: *when_path
-      - cron: midnight_docs
+      - cron: update_docs
         event: cron
