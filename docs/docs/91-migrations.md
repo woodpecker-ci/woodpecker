@@ -15,6 +15,8 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Updated Prometheus gauge `*_job_*` to `*_step_*`
 - Renamed config env `WOODPECKER_MAX_PROCS` to `WOODPECKER_MAX_WORKFLOWS` (still available as fallback)
 - The pipelines are now also read from `.yaml` files, the new default order is `.woodpecker/*.yml` and `.woodpecker/*.yaml` (without any prioritization) -> `.woodpecker.yml` ->  `.woodpecker.yaml` -> `.drone.yml`
+- Dropped support for [Coding](https://coding.net/).
+- `/api/queue/resume` & `/api/queue/pause` endpoint methods were changed from `GET` to `POST`
 
 ## 0.15.0
 

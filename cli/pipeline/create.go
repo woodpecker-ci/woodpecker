@@ -84,9 +84,5 @@ func pipelineCreate(c *cli.Context) error {
 		return err
 	}
 
-	if err := tmpl.Execute(os.Stdout, pipeline); err != nil {
-		return err
-	}
-
-	return nil
+	return tmpl.Execute(os.Stdout, pipeline)
 }

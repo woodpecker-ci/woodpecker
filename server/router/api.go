@@ -61,6 +61,7 @@ func apiRoutes(e *gin.Engine) {
 			}
 		}
 
+		apiBase.POST("/repos/:owner/:name", session.MustUser(), api.PostRepo)
 		repoBase := apiBase.Group("/repos/:owner/:name")
 		{
 			repoBase.Use(session.SetRepo())
@@ -72,10 +73,10 @@ func apiRoutes(e *gin.Engine) {
 			{
 				repo.Use(session.MustPull)
 
-				repo.POST("", session.MustRepoAdmin(), api.PostRepo)
 				repo.GET("", api.GetRepo)
 
 				repo.GET("/branches", api.GetRepoBranches)
+				repo.GET("/pull_requests", api.GetRepoPullRequests)
 
 				repo.GET("/pipelines", api.GetPipelines)
 				repo.POST("/pipelines", session.MustPush, api.CreatePipeline)
@@ -144,8 +145,8 @@ func apiRoutes(e *gin.Engine) {
 		{
 			queue.Use(session.MustAdmin())
 			queue.GET("/info", api.GetQueueInfo)
-			queue.GET("/pause", api.PauseQueue)
-			queue.GET("/resume", api.ResumeQueue)
+			queue.POST("/pause", api.PauseQueue)
+			queue.POST("/resume", api.ResumeQueue)
 			queue.GET("/norunningpipelines", api.BlockTilQueueHasRunningItem)
 		}
 
@@ -172,6 +173,7 @@ func apiRoutes(e *gin.Engine) {
 			agentBase.GET("", api.GetAgents)
 			agentBase.POST("", api.PostAgent)
 			agentBase.GET("/:agent", api.GetAgent)
+			agentBase.GET("/:agent/tasks", api.GetAgentTasks)
 			agentBase.PATCH("/:agent", api.PatchAgent)
 			agentBase.DELETE("/:agent", api.DeleteAgent)
 		}

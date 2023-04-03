@@ -47,7 +47,7 @@ func Test_helper(t *testing.T) {
 
 			from.Links.Self = append(from.Links.Self, selfRef)
 
-			to := convertRepo(from)
+			to := convertRepo(from, &model.Perm{Pull: true})
 			g.Assert(to.FullName).Equal("octocat/hello-world")
 			g.Assert(to.Owner).Equal("octocat")
 			g.Assert(to.Name).Equal("hello-world")
@@ -56,6 +56,7 @@ func Test_helper(t *testing.T) {
 			g.Assert(to.IsSCMPrivate).Equal(true)
 			g.Assert(to.Clone).Equal("https://server.org/foo/bar.git")
 			g.Assert(to.Link).Equal("https://server.org/foo/bar")
+			g.Assert(to.Perm.Pull).IsTrue()
 		})
 
 		g.It("should convert user", func() {

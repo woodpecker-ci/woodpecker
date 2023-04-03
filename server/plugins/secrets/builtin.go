@@ -38,7 +38,7 @@ func (b *builtin) SecretList(repo *model.Repo) ([]*model.Secret, error) {
 	return b.store.SecretList(repo, false)
 }
 
-func (b *builtin) SecretListPipeline(repo *model.Repo, pipeline *model.Pipeline) ([]*model.Secret, error) {
+func (b *builtin) SecretListPipeline(repo *model.Repo, _ *model.Pipeline) ([]*model.Secret, error) {
 	s, err := b.store.SecretList(repo, true)
 	if err != nil {
 		return nil, err
@@ -70,11 +70,11 @@ func (b *builtin) SecretListPipeline(repo *model.Repo, pipeline *model.Pipeline)
 	return secrets, nil
 }
 
-func (b *builtin) SecretCreate(repo *model.Repo, in *model.Secret) error {
+func (b *builtin) SecretCreate(_ *model.Repo, in *model.Secret) error {
 	return b.store.SecretCreate(in)
 }
 
-func (b *builtin) SecretUpdate(repo *model.Repo, in *model.Secret) error {
+func (b *builtin) SecretUpdate(_ *model.Repo, in *model.Secret) error {
 	return b.store.SecretUpdate(in)
 }
 
@@ -94,11 +94,11 @@ func (b *builtin) OrgSecretList(owner string) ([]*model.Secret, error) {
 	return b.store.OrgSecretList(owner)
 }
 
-func (b *builtin) OrgSecretCreate(owner string, in *model.Secret) error {
+func (b *builtin) OrgSecretCreate(_ string, in *model.Secret) error {
 	return b.store.SecretCreate(in)
 }
 
-func (b *builtin) OrgSecretUpdate(owner string, in *model.Secret) error {
+func (b *builtin) OrgSecretUpdate(_ string, in *model.Secret) error {
 	return b.store.SecretUpdate(in)
 }
 

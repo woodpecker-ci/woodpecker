@@ -81,6 +81,8 @@ type Compiler struct {
 	cacher            Cacher
 	reslimit          ResourceLimit
 	defaultCloneImage string
+	trustedPipeline   bool
+	netrcOnlyTrusted  bool
 }
 
 // New creates a new Compiler with options.
@@ -146,12 +148,13 @@ func (c *Compiler) Compile(conf *yaml.Config) (*backend.Config, error) {
 		c.path = conf.Workspace.Path
 	}
 
+	cloneImage := constant.DefaultCloneImage
+	if len(c.defaultCloneImage) > 0 {
+		cloneImage = c.defaultCloneImage
+	}
+
 	// add default clone step
 	if !c.local && len(conf.Clone.Containers) == 0 && !conf.SkipClone {
-		cloneImage := constant.DefaultCloneImage
-		if len(c.defaultCloneImage) > 0 {
-			cloneImage = c.defaultCloneImage
-		}
 		cloneSettings := map[string]interface{}{"depth": "0"}
 		if c.metadata.Curr.Event == frontend.EventTag {
 			cloneSettings["tags"] = "true"
@@ -185,9 +188,14 @@ func (c *Compiler) Compile(conf *yaml.Config) (*backend.Config, error) {
 
 			name := fmt.Sprintf("%s_clone_%d", c.prefix, i)
 			step := c.createProcess(name, container, defaultCloneName)
-			for k, v := range c.cloneEnv {
-				step.Environment[k] = v
+
+			// only inject netrc if it's a trusted repo or a trusted plugin
+			if !c.netrcOnlyTrusted || c.trustedPipeline || (container.IsPlugin() && container.IsTrustedCloneImage()) {
+				for k, v := range c.cloneEnv {
+					step.Environment[k] = v
+				}
 			}
+
 			stage.Steps = append(stage.Steps, step)
 
 			config.Stages = append(config.Stages, stage)

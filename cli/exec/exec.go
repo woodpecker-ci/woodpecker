@@ -203,14 +203,15 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 		return err
 	}
 
-	backend.Init(context.WithValue(c.Context, types.CliContext, c))
+	backendCtx := context.WithValue(c.Context, types.CliContext, c)
+	backend.Init(backendCtx)
 
-	engine, err := backend.FindEngine(c.String("backend-engine"))
+	engine, err := backend.FindEngine(backendCtx, c.String("backend-engine"))
 	if err != nil {
 		return err
 	}
 
-	if err = engine.Load(); err != nil {
+	if err = engine.Load(backendCtx); err != nil {
 		return err
 	}
 

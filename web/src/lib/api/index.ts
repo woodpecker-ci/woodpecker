@@ -8,16 +8,18 @@ import {
   PipelineFeed,
   PipelineLog,
   PipelineStep,
+  PullRequest,
+  QueueInfo,
   Registry,
   Repo,
   RepoPermissions,
   RepoSettings,
   Secret,
+  User,
 } from './types';
 
 type RepoListOptions = {
   all?: boolean;
-  flush?: boolean;
 };
 
 type PipelineOptions = {
@@ -49,6 +51,10 @@ export default class WoodpeckerClient extends ApiClient {
     return this._get(`/api/repos/${owner}/${repo}/branches`) as Promise<string[]>;
   }
 
+  getRepoPullRequests(owner: string, repo: string): Promise<PullRequest[]> {
+    return this._get(`/api/repos/${owner}/${repo}/pull_requests`) as Promise<PullRequest[]>;
+  }
+
   activateRepo(owner: string, repo: string): Promise<unknown> {
     return this._post(`/api/repos/${owner}/${repo}`);
   }
@@ -72,7 +78,7 @@ export default class WoodpeckerClient extends ApiClient {
 
   // Deploy triggers a deployment for an existing pipeline using the
   // specified target environment.
-  deployPipeline(owner: string, repo: string, pipelineNumber: number, options: DeploymentOptions): Promise<Pipeline> {
+  deployPipeline(owner: string, repo: string, pipelineNumber: string, options: DeploymentOptions): Promise<Pipeline> {
     const vars = {
       ...options.variables,
       event: 'deployment',
@@ -248,6 +254,38 @@ export default class WoodpeckerClient extends ApiClient {
 
   deleteAgent(agent: Agent): Promise<unknown> {
     return this._delete(`/api/agents/${agent.id}`);
+  }
+
+  getQueueInfo(): Promise<QueueInfo> {
+    return this._get('/api/queue/info') as Promise<QueueInfo>;
+  }
+
+  pauseQueue(): Promise<unknown> {
+    return this._post('/api/queue/pause');
+  }
+
+  resumeQueue(): Promise<unknown> {
+    return this._post('/api/queue/resume');
+  }
+
+  getUsers(): Promise<User[]> {
+    return this._get('/api/users') as Promise<User[]>;
+  }
+
+  getUser(username: string): Promise<User> {
+    return this._get(`/api/users/${username}`) as Promise<User>;
+  }
+
+  createUser(user: Partial<User>): Promise<User> {
+    return this._post('/api/users', user) as Promise<User>;
+  }
+
+  updateUser(user: Partial<User>): Promise<unknown> {
+    return this._patch(`/api/users/${user.login}`, user);
+  }
+
+  deleteUser(user: User): Promise<unknown> {
+    return this._delete(`/api/users/${user.login}`);
   }
 
   // eslint-disable-next-line promise/prefer-await-to-callbacks

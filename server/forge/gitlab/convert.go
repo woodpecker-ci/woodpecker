@@ -33,7 +33,6 @@ const (
 
 func (g *GitLab) convertGitLabRepo(_repo *gitlab.Project) (*model.Repo, error) {
 	parts := strings.Split(_repo.PathWithNamespace, "/")
-	// TODO(648) save repo id (support nested repos)
 	owner := strings.Join(parts[:len(parts)-1], "/")
 	name := parts[len(parts)-1]
 	repo := &model.Repo{
@@ -47,6 +46,11 @@ func (g *GitLab) convertGitLabRepo(_repo *gitlab.Project) (*model.Repo, error) {
 		Branch:        _repo.DefaultBranch,
 		Visibility:    model.RepoVisibly(_repo.Visibility),
 		IsSCMPrivate:  !_repo.Public,
+		Perm: &model.Perm{
+			Pull:  isRead(_repo),
+			Push:  isWrite(_repo),
+			Admin: isAdmin(_repo),
+		},
 	}
 
 	if len(repo.Branch) == 0 { // TODO: do we need that?
@@ -129,6 +133,7 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 
 	pipeline.Title = obj.Title
 	pipeline.Link = obj.URL
+	pipeline.PullRequestLabels = convertLabels(hook.Labels)
 
 	return obj.IID, repo, pipeline, nil
 }
@@ -249,4 +254,12 @@ func extractFromPath(str string) (string, string, error) {
 		return "", "", fmt.Errorf("Minimum match not found")
 	}
 	return s[0], s[1], nil
+}
+
+func convertLabels(from []*gitlab.EventLabel) []string {
+	labels := make([]string, len(from))
+	for i, label := range from {
+		labels[i] = label.Title
+	}
+	return labels
 }

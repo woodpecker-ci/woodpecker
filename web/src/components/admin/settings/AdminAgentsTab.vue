@@ -12,10 +12,7 @@
         start-icon="back"
         @click="selectedAgent = undefined"
       />
-      <template v-else>
-        <Button class="ml-auto" :text="$t('admin.settings.agents.add')" start-icon="plus" @click="showAddAgent" />
-        <Button class="ml-2" start-icon="refresh" @click="loadAgents" />
-      </template>
+      <Button v-else class="ml-auto" :text="$t('admin.settings.agents.add')" start-icon="plus" @click="showAddAgent" />
     </div>
 
     <div v-if="!selectedAgent" class="space-y-4 text-color">
@@ -23,15 +20,21 @@
         <span>{{ agent.name || `Agent ${agent.id}` }}</span>
         <span class="ml-auto">
           <span class="hidden md:inline-block space-x-2">
-            <Badge :label="$t('admin.settings.agents.platform.badge')" :value="agent.platform" />
-            <Badge :label="$t('admin.settings.agents.backend.badge')" :value="agent.backend" />
-            <Badge :label="$t('admin.settings.agents.capacity.badge')" :value="agent.capacity" />
+            <Badge :label="$t('admin.settings.agents.platform.badge')" :value="agent.platform || '???'" />
+            <Badge :label="$t('admin.settings.agents.backend.badge')" :value="agent.backend || '???'" />
+            <Badge :label="$t('admin.settings.agents.capacity.badge')" :value="agent.capacity || '???'" />
           </span>
           <span class="ml-2">{{ agent.last_contact ? timeAgo.format(agent.last_contact * 1000) : 'never' }}</span>
         </span>
-        <IconButton icon="edit" class="ml-2 w-8 h-8" @click="editAgent(agent)" />
+        <IconButton
+          icon="edit"
+          :title="$t('admin.settings.agents.edit_agent')"
+          class="ml-2 w-8 h-8"
+          @click="editAgent(agent)"
+        />
         <IconButton
           icon="trash"
+          :title="$t('admin.settings.agents.delete_agent')"
           class="ml-2 w-8 h-8 hover:text-red-400 hover:dark:text-red-500"
           :is-loading="isDeleting"
           @click="deleteAgent(agent)"
@@ -78,7 +81,7 @@
             :label="$t('admin.settings.agents.capacity.capacity')"
             docs-url="docs/next/administration/agent-config#woodpecker_max_procs"
           >
-            <span class="text-color-alt">The max amount of parallel pipelines executed by this agent.</span>
+            <span class="text-color-alt">{{ $t('admin.settings.agents.capacity.desc') }}</span>
             <TextField :model-value="selectedAgent.capacity?.toString()" disabled />
           </InputField>
 
@@ -98,11 +101,15 @@
           </InputField>
         </template>
 
-        <Button
-          :is-loading="isSaving"
-          type="submit"
-          :text="isEditingAgent ? $t('admin.settings.agents.save') : $t('admin.settings.agents.add')"
-        />
+        <div class="flex gap-2">
+          <Button type="button" color="gray" :text="$t('cancel')" @click="selectedAgent = undefined" />
+          <Button
+            :is-loading="isSaving"
+            type="submit"
+            color="green"
+            :text="isEditingAgent ? $t('admin.settings.agents.save') : $t('admin.settings.agents.add')"
+          />
+        </div>
       </form>
     </div>
   </Panel>
@@ -110,11 +117,12 @@
 
 <script lang="ts" setup>
 import { cloneDeep } from 'lodash';
-import { computed, onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Badge from '~/components/atomic/Badge.vue';
 import Button from '~/components/atomic/Button.vue';
+import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import Checkbox from '~/components/form/Checkbox.vue';
 import InputField from '~/components/form/InputField.vue';
@@ -128,7 +136,7 @@ import timeAgo from '~/utils/timeAgo';
 
 const apiClient = useApiClient();
 const notifications = useNotifications();
-const i18n = useI18n();
+const { t } = useI18n();
 
 const agents = ref<Agent[]>([]);
 const selectedAgent = ref<Partial<Agent>>();
@@ -150,7 +158,7 @@ const { doSubmit: saveAgent, isLoading: isSaving } = useAsyncAction(async () => 
     selectedAgent.value = await apiClient.createAgent(selectedAgent.value);
   }
   notifications.notify({
-    title: i18n.t(isEditingAgent.value ? 'admin.settings.agents.saved' : 'admin.settings.agents.created'),
+    title: t(isEditingAgent.value ? 'admin.settings.agents.saved' : 'admin.settings.agents.created'),
     type: 'success',
   });
   await loadAgents();
@@ -158,12 +166,12 @@ const { doSubmit: saveAgent, isLoading: isSaving } = useAsyncAction(async () => 
 
 const { doSubmit: deleteAgent, isLoading: isDeleting } = useAsyncAction(async (_agent: Agent) => {
   // eslint-disable-next-line no-restricted-globals, no-alert
-  if (!confirm(i18n.t('admin.settings.agents.delete_confirm'))) {
+  if (!confirm(t('admin.settings.agents.delete_confirm'))) {
     return;
   }
 
   await apiClient.deleteAgent(_agent);
-  notifications.notify({ title: i18n.t('admin.settings.agents.deleted'), type: 'success' });
+  notifications.notify({ title: t('admin.settings.agents.deleted'), type: 'success' });
   await loadAgents();
 });
 
@@ -175,7 +183,17 @@ function showAddAgent() {
   selectedAgent.value = cloneDeep({ name: '' });
 }
 
+const reloadInterval = ref<number>();
 onMounted(async () => {
   await loadAgents();
+  reloadInterval.value = window.setInterval(async () => {
+    await loadAgents();
+  }, 5000);
+});
+
+onBeforeUnmount(() => {
+  if (reloadInterval.value) {
+    window.clearInterval(reloadInterval.value);
+  }
 });
 </script>

@@ -81,6 +81,7 @@ var Config = struct {
 		Volumes                             []string
 		Networks                            []string
 		Privileged                          []string
+		DefaultTimeout                      int64
+		MaxTimeout                          int64
 	}
-	FlatPermissions bool // TODO(485) temporary workaround to not hit api rate limits
 }{}
