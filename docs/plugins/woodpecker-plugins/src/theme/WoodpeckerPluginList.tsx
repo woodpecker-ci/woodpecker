@@ -35,8 +35,8 @@ export function WoodpeckerPluginList({ plugins }: { plugins: WoodpeckerPlugin[] 
   const applyForIndexUrl =
     'https://github.com/woodpecker-ci/woodpecker/edit/master/docs/plugins/woodpecker-plugins/plugins.json';
 
-    const [query, setQuery] = useState('');
-    const [filteredPlugins, setFilteredPlugins] = useState(plugins);
+  const [query, setQuery] = useState('');
+  const [filteredPlugins, setFilteredPlugins] = useState(plugins);
 
   const fuse = new Fuse(plugins, {
     keys: ['name', 'description'],
