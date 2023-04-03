@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Fuse from 'fuse.js';
 import Layout from '@theme/Layout';
 import './style.css';
@@ -38,19 +38,12 @@ export function WoodpeckerPluginList({ plugins }: { plugins: WoodpeckerPlugin[] 
   const [query, setQuery] = useState('');
   const [filteredPlugins, setFilteredPlugins] = useState(plugins);
 
-  const fuse = new Fuse(plugins, {
+  const fuse = useRef(new Fuse(plugins, {
     keys: ['name', 'description'],
     threshold: 0.3,
-  });
+  }));
 
-  const handleSearchChange = (event) => {
-    setQuery(event.currentTarget.value);
-    if (query.length >= 1) {
-      setFilteredPlugins(fuse.search(query).map((p) => ( p.item )));
-    } else {
-      setFilteredPlugins(plugins)
-    }
-  }
+  const searchedPlugins = query.length >= 1 ? fuse.search(query).map((p) => ( p.item )) : plugins;
 
   return (
     <Layout title="Woodpecker CI plugins" description="List of all Woodpecker-CI plugins">
@@ -68,12 +61,12 @@ export function WoodpeckerPluginList({ plugins }: { plugins: WoodpeckerPlugin[] 
               type="search"
               autoComplete="off"
               value={query}
-              onChange={handleSearchChange}
+              onChange={(event) => setQuery(event.currentTarget.value)}
               placeholder="Search for a plugin ..."
               className="wp-plugin-search"
             />
             <div className="wp-plugins-list">
-              {filteredPlugins.map((plugin) => (
+              {searchedPlugins.map((plugin) => (
                 <PluginPanel key={plugin.name} plugin={plugin} />
               ))}
             </div>
