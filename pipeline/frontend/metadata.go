@@ -42,12 +42,13 @@ const (
 type (
 	// Metadata defines runtime m.
 	Metadata struct {
-		ID   string   `json:"id,omitempty"`
-		Repo Repo     `json:"repo,omitempty"`
-		Curr Pipeline `json:"curr,omitempty"`
-		Prev Pipeline `json:"prev,omitempty"`
-		Step Step     `json:"step,omitempty"`
-		Sys  System   `json:"sys,omitempty"`
+		ID       string   `json:"id,omitempty"`
+		Repo     Repo     `json:"repo,omitempty"`
+		Curr     Pipeline `json:"curr,omitempty"`
+		Prev     Pipeline `json:"prev,omitempty"`
+		Step     Step     `json:"step,omitempty"`
+		Workflow Workflow `json:"workflow,omitempty"`
+		Sys      System   `json:"sys,omitempty"`
 	}
 
 	// Repo defines runtime metadata for a repository.
@@ -98,8 +99,13 @@ type (
 
 	// Step defines runtime metadata for a step.
 	Step struct {
+		Name   string            `json:"name,omitempty"`
 		Number int               `json:"number,omitempty"`
 		Matrix map[string]string `json:"matrix,omitempty"`
+	}
+
+	Workflow struct {
+		Name string `json:"name,omitempty"`
 	}
 
 	// Secret defines a runtime secret
@@ -180,6 +186,9 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_PIPELINE_STARTED":       strconv.FormatInt(m.Curr.Started, 10),
 		"CI_PIPELINE_FINISHED":      strconv.FormatInt(m.Curr.Finished, 10),
 
+		"CI_WORKFLOW_NAME": m.Workflow.Name,
+
+		"CI_STEP_NAME":     m.Step.Name,
 		"CI_STEP_NUMBER":   strconv.Itoa(m.Step.Number),
 		"CI_STEP_STATUS":   "", // will be set by agent
 		"CI_STEP_STARTED":  "", // will be set by agent
