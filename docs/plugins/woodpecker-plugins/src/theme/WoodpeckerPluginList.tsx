@@ -42,7 +42,7 @@ export function WoodpeckerPluginList({ plugins }: { plugins: WoodpeckerPlugin[] 
     threshold: 0.3,
   }));
 
-  const searchedPlugins = query.length >= 1 ? fuse.search(query).map((p) => ( p.item )) : plugins;
+  const searchedPlugins = query.length >= 1 ? fuse.current.search(query).map((p) => ( p.item )) : plugins;
 
   return (
     <Layout title="Woodpecker CI plugins" description="List of all Woodpecker-CI plugins">
