@@ -16,7 +16,7 @@
 </template>
 
 <script lang="ts" setup>
-import { inject, onBeforeUnmount, onMounted, onUnmounted, Ref, ref, watch } from 'vue';
+import { inject, onMounted, onUnmounted, Ref, ref, watch } from 'vue';
 
 import ListItem from '~/components/atomic/ListItem.vue';
 import useApiClient from '~/compositions/useApiClient';

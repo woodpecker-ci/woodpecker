@@ -12,23 +12,32 @@ export async function usePaginate<T>(getSingle: (page: number) => Promise<T[]>):
   return result;
 }
 
-const lists = {};
+const lists: Record<number, PaginatedList> = {};
 let currId = 0;
 
-document.querySelector('main > div').addEventListener('scroll', (e: Event) => {
-  if (e.target.scrollTop + e.target.clientHeight === e.target.scrollHeight) {
-    for (const id in lists) {
-      lists[id].page += 1;
-      lists[id].runLoad();
-    }
+const scrollElement = document.querySelector('main > div');
+if (!scrollElement) {
+  throw new Error("Unexpected: Can't get scrollElement");
+}
+scrollElement.addEventListener('scroll', () => {
+  if (scrollElement.scrollTop + scrollElement.clientHeight === scrollElement.scrollHeight) {
+    (Object.keys(lists) as unknown as number[]).forEach((id) => {
+      const list = lists[id];
+      list.nextPage();
+      lists[id] = list;
+    });
   }
 });
 
 export class PaginatedList {
-  private id: number;
+  private id = -1;
+
   private page = 1;
+
   private hasMore = true;
+
   private readonly load: (page: number) => Promise<boolean>;
+
   private readonly isActive: () => boolean;
 
   constructor(load: (page: number) => Promise<boolean>, isActive: () => boolean = () => true) {
@@ -38,7 +47,8 @@ export class PaginatedList {
 
   public onMounted() {
     this.reset(true);
-    this.id = currId++;
+    this.id = currId;
+    currId += 1;
     lists[this.id] = this;
   }
 
@@ -53,6 +63,11 @@ export class PaginatedList {
   public onUnmounted() {
     this.reset(false);
     delete lists[this.id];
+  }
+
+  public nextPage() {
+    this.page += 1;
+    this.runLoad();
   }
 
   private async runLoad() {
