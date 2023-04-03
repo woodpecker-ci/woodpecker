@@ -53,21 +53,6 @@ func loop(c *cli.Context) error {
 
 	platform := runtime.GOOS + "/" + runtime.GOARCH
 
-	labels := map[string]string{
-		"hostname": hostname,
-		"platform": platform,
-		"repo":     "*", // allow all repos by default
-	}
-
-	for _, v := range c.StringSlice("filter") {
-		parts := strings.SplitN(v, "=", 2)
-		labels[parts[0]] = parts[1]
-	}
-
-	filter := rpc.Filter{
-		Labels: labels,
-	}
-
 	if c.Bool("pretty") {
 		log.Logger = log.Output(
 			zerolog.ConsoleWriter{
@@ -188,6 +173,22 @@ func loop(c *cli.Context) error {
 	agentID, err = client.RegisterAgent(ctx, platform, engine.Name(), version.String(), parallel)
 	if err != nil {
 		return err
+	}
+
+	labels := map[string]string{
+		"hostname": hostname,
+		"platform": platform,
+		"backend":  engine.Name(),
+		"repo":     "*", // allow all repos by default
+	}
+
+	for _, v := range c.StringSlice("filter") {
+		parts := strings.SplitN(v, "=", 2)
+		labels[parts[0]] = parts[1]
+	}
+
+	filter := rpc.Filter{
+		Labels: labels,
 	}
 
 	log.Debug().Msgf("Agent registered with ID %d", agentID)
