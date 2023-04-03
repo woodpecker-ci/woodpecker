@@ -27,8 +27,6 @@ if (!repo) {
   throw new Error('Unexpected: "repo" and "scrollComponent" should be provided at this place');
 }
 
-const list = new PaginatedList(loadBranches);
-
 // TODO it seems this also runs if Pr list is open
 async function loadBranches(page: number): Promise<boolean> {
   if (!repo) {
@@ -44,6 +42,8 @@ async function loadBranches(page: number): Promise<boolean> {
   }
   return _branches.length !== 0;
 }
+
+const list = new PaginatedList(loadBranches);
 
 onMounted(() => {
   list.onMounted();

@@ -142,17 +142,18 @@ const { t } = useI18n();
 const agents = ref<Agent[]>([]);
 const selectedAgent = ref<Partial<Agent>>();
 const isEditingAgent = computed(() => !!selectedAgent.value?.id);
-const list = new PaginatedList(loadAgents);
 
 async function loadAgents(page: number): Promise<boolean> {
   const a = await apiClient.getAgents(page);
   if (page === 1 && a !== null) {
     agents.value = a;
-  } else if (a != null) {
+  } else if (a !== null) {
     agents.value?.push(...a);
   }
-  return a != null && a.length != 0;
+  return a !== null && a.length !== 0;
 }
+
+const list = new PaginatedList(loadAgents);
 
 const { doSubmit: saveAgent, isLoading: isSaving } = useAsyncAction(async () => {
   if (!selectedAgent.value) {

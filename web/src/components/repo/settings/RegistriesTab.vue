@@ -119,7 +119,6 @@ export default defineComponent({
     const registries = ref<Registry[]>();
     const selectedRegistry = ref<Partial<Registry>>();
     const isEditingRegistry = computed(() => !!selectedRegistry.value?.id);
-    const list = new PaginatedList(loadRegistries);
 
     async function loadRegistries(page: number): Promise<boolean> {
       if (!repo?.value) {
@@ -129,11 +128,13 @@ export default defineComponent({
       const regs = await apiClient.getRegistryList(repo.value.owner, repo.value.name, page);
       if (page === 1 && regs !== null) {
         registries.value = regs;
-      } else if (regs != null) {
+      } else if (regs !== null) {
         registries.value?.push(...regs);
       }
-      return regs != null && regs.length != 0;
+      return regs !== null && regs.length !== 0;
     }
+
+    const list = new PaginatedList(loadRegistries);
 
     const { doSubmit: createRegistry, isLoading: isSaving } = useAsyncAction(async () => {
       if (!repo?.value) {

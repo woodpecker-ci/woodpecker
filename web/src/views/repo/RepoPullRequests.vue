@@ -16,7 +16,7 @@
 </template>
 
 <script lang="ts" setup>
-import { inject, onMounted, onUnmounted, Ref, ref, watch } from 'vue';
+import {inject, onBeforeUnmount, onMounted, onUnmounted, Ref, ref, watch} from 'vue';
 
 import ListItem from '~/components/atomic/ListItem.vue';
 import useApiClient from '~/compositions/useApiClient';
@@ -30,8 +30,6 @@ const repo = inject<Ref<Repo>>('repo');
 if (!repo) {
   throw new Error('Unexpected: "repo" should be provided at this place');
 }
-
-const list = new PaginatedList(loadPullRequests);
 
 async function loadPullRequests(page: number): Promise<boolean> {
   if (!repo) {
@@ -47,6 +45,8 @@ async function loadPullRequests(page: number): Promise<boolean> {
   }
   return pulls.length !== 0;
 }
+
+const list = new PaginatedList(loadPullRequests);
 
 onMounted(() => {
   list.onMounted();

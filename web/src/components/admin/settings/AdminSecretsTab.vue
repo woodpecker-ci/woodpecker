@@ -89,17 +89,18 @@ export default defineComponent({
     const secrets = ref<Secret[]>([]);
     const selectedSecret = ref<Partial<Secret>>();
     const isEditingSecret = computed(() => !!selectedSecret.value?.id);
-    const list = new PaginatedList(loadSecrets);
 
     async function loadSecrets(page: number): Promise<boolean> {
       const sec = await apiClient.getGlobalSecretList(page);
       if (page === 1 && sec !== null) {
         secrets.value = sec;
-      } else if (sec != null) {
+      } else if (sec !== null) {
         secrets.value?.push(...sec);
       }
-      return sec != null && sec.length != 0;
+      return sec !== null && sec.length !== 0;
     }
+
+    const list = new PaginatedList(loadSecrets);
 
     const { doSubmit: createSecret, isLoading: isSaving } = useAsyncAction(async () => {
       if (!selectedSecret.value) {

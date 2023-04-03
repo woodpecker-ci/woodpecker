@@ -116,7 +116,6 @@ const crons = ref<Cron[]>();
 const selectedCron = ref<Partial<Cron>>();
 const isEditingCron = computed(() => !!selectedCron.value?.id);
 const date = useDate();
-const list = new PaginatedList(loadCrons);
 
 async function loadCrons(page: number): Promise<boolean> {
   if (!repo?.value) {
@@ -126,11 +125,13 @@ async function loadCrons(page: number): Promise<boolean> {
   const c = await apiClient.getCronList(repo.value.owner, repo.value.name, page);
   if (page === 1 && c !== null) {
     crons.value = c;
-  } else if (c != null) {
+  } else if (c !== null) {
     crons.value?.push(...c);
   }
-  return c != null && c.length != 0;
+  return c !== null && c.length !== 0;
 }
+
+const list = new PaginatedList(loadCrons);
 
 const { doSubmit: createCron, isLoading: isSaving } = useAsyncAction(async () => {
   if (!repo?.value) {

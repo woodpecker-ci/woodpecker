@@ -81,7 +81,6 @@ export default defineComponent({
     const secrets = ref<Secret[]>([]);
     const selectedSecret = ref<Partial<Secret>>();
     const isEditingSecret = computed(() => !!selectedSecret.value?.id);
-    const list = new PaginatedList(loadSecrets);
 
     // TODO also triggered if edit / add view is open
     async function loadSecrets(page: number): Promise<boolean> {
@@ -92,11 +91,13 @@ export default defineComponent({
       const sec = await apiClient.getSecretList(repo.value.owner, repo.value.name, page);
       if (page === 1 && sec !== null) {
         secrets.value = sec;
-      } else if (sec != null) {
+      } else if (sec !== null) {
         secrets.value?.push(...sec);
       }
-      return sec != null && sec.length != 0;
+      return sec !== null && sec.length !== 0;
     }
+
+    const list = new PaginatedList(loadSecrets);
 
     const { doSubmit: createSecret, isLoading: isSaving } = useAsyncAction(async () => {
       if (!repo?.value) {

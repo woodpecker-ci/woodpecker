@@ -56,6 +56,7 @@ export class PaginatedList {
   }
 
   private handleScroll() {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const list = this;
     return (e: Event) => {
       if (e.target.scrollTop + e.target.clientHeight === e.target.scrollHeight) {

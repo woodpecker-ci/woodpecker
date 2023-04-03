@@ -107,17 +107,18 @@ const { t } = useI18n();
 const users = ref<User[]>([]);
 const selectedUser = ref<Partial<User>>();
 const isEditingUser = computed(() => !!selectedUser.value?.id);
-const list = new PaginatedList(loadUsers);
 
 async function loadUsers(page: number): Promise<boolean> {
   const u = await apiClient.getUsers(page);
   if (page === 1 && u !== null) {
     users.value = u;
-  } else if (u != null) {
+  } else if (u !== null) {
     users.value?.push(...u);
   }
-  return u != null && u.length != 0;
+  return u !== null && u.length !== 0;
 }
+
+const list = new PaginatedList(loadUsers);
 
 const { doSubmit: saveUser, isLoading: isSaving } = useAsyncAction(async () => {
   if (!selectedUser.value) {
