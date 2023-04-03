@@ -153,7 +153,7 @@ async function loadAgents(page: number): Promise<boolean> {
   return a !== null && a.length !== 0;
 }
 
-const list = new PaginatedList(loadAgents);
+const list = new PaginatedList(loadAgents, () => !selectedAgent.value);
 
 const { doSubmit: saveAgent, isLoading: isSaving } = useAsyncAction(async () => {
   if (!selectedAgent.value) {

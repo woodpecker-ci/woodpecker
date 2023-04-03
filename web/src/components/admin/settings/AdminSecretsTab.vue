@@ -100,7 +100,7 @@ export default defineComponent({
       return sec !== null && sec.length !== 0;
     }
 
-    const list = new PaginatedList(loadSecrets);
+    const list = new PaginatedList(loadSecrets, () => !selectedSecret.value);
 
     const { doSubmit: createSecret, isLoading: isSaving } = useAsyncAction(async () => {
       if (!selectedSecret.value) {

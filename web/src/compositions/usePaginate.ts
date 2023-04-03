@@ -29,9 +29,11 @@ export class PaginatedList {
   private page = 1;
   private hasMore = true;
   private readonly load: (page: number) => Promise<boolean>;
+  private readonly isActive: () => boolean;
 
-  constructor(load: (page: number) => Promise<boolean>) {
+  constructor(load: (page: number) => Promise<boolean>, isActive: () => boolean = () => true) {
     this.load = load;
+    this.isActive = isActive;
   }
 
   public onMounted() {
@@ -54,7 +56,7 @@ export class PaginatedList {
   }
 
   private async runLoad() {
-    if (this.hasMore) {
+    if (this.hasMore && this.isActive()) {
       // to prevent that load() is called multiple times, we set hasMore = false
       this.hasMore = false;
       this.hasMore = await this.load(this.page);

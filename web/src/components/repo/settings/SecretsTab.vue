@@ -82,7 +82,6 @@ export default defineComponent({
     const selectedSecret = ref<Partial<Secret>>();
     const isEditingSecret = computed(() => !!selectedSecret.value?.id);
 
-    // TODO also triggered if edit / add view is open
     async function loadSecrets(page: number): Promise<boolean> {
       if (!repo?.value) {
         throw new Error("Unexpected: Can't load repo");
@@ -97,7 +96,7 @@ export default defineComponent({
       return sec !== null && sec.length !== 0;
     }
 
-    const list = new PaginatedList(loadSecrets);
+    const list = new PaginatedList(loadSecrets, () => !selectedSecret.value);
 
     const { doSubmit: createSecret, isLoading: isSaving } = useAsyncAction(async () => {
       if (!repo?.value) {

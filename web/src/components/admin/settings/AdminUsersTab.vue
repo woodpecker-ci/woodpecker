@@ -118,7 +118,7 @@ async function loadUsers(page: number): Promise<boolean> {
   return u !== null && u.length !== 0;
 }
 
-const list = new PaginatedList(loadUsers);
+const list = new PaginatedList(loadUsers, () => !selectedUser.value);
 
 const { doSubmit: saveUser, isLoading: isSaving } = useAsyncAction(async () => {
   if (!selectedUser.value) {

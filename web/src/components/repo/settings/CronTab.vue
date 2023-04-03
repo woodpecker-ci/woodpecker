@@ -131,7 +131,7 @@ async function loadCrons(page: number): Promise<boolean> {
   return c !== null && c.length !== 0;
 }
 
-const list = new PaginatedList(loadCrons);
+const list = new PaginatedList(loadCrons, () => !selectedCron.value);
 
 const { doSubmit: createCron, isLoading: isSaving } = useAsyncAction(async () => {
   if (!repo?.value) {

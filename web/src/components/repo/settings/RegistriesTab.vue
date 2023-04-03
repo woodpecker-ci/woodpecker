@@ -134,7 +134,7 @@ export default defineComponent({
       return regs !== null && regs.length !== 0;
     }
 
-    const list = new PaginatedList(loadRegistries);
+    const list = new PaginatedList(loadRegistries, () => !selectedRegistry.value);
 
     const { doSubmit: createRegistry, isLoading: isSaving } = useAsyncAction(async () => {
       if (!repo?.value) {
