@@ -17,12 +17,12 @@ package pipeline
 
 import (
 	"fmt"
-	"math/rand"
 	"net/url"
 	"path/filepath"
 	"strings"
 
 	"github.com/drone/envsubst"
+	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog/log"
 
 	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
@@ -279,14 +279,16 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[
 		compiler.WithSecret(secrets...),
 		compiler.WithPrefix(
 			fmt.Sprintf(
-				"wp_%d_%d",
+				"wp_%s_%d",
+				strings.ToLower(ulid.Make().String()),
 				stepID,
-				rand.Int(),
 			),
 		),
 		compiler.WithProxy(),
 		compiler.WithWorkspaceFromURL("/woodpecker", b.Repo.Link),
 		compiler.WithMetadata(metadata),
+		compiler.WithTrusted(b.Repo.IsTrusted),
+		compiler.WithNetrcOnlyTrusted(b.Repo.NetrcOnlyTrusted),
 	).Compile(parsed)
 }
 

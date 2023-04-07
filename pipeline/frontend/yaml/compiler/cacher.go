@@ -72,7 +72,7 @@ type s3Cacher struct {
 	region string
 }
 
-func (c *s3Cacher) Restore(repo, branch string, mounts []string) *yaml.Container {
+func (c *s3Cacher) Restore(_, _ string, mounts []string) *yaml.Container {
 	return &yaml.Container{
 		Name:  "rebuild_cache",
 		Image: "plugins/s3-cache:latest",
@@ -87,7 +87,7 @@ func (c *s3Cacher) Restore(repo, branch string, mounts []string) *yaml.Container
 	}
 }
 
-func (c *s3Cacher) Rebuild(repo, branch string, mounts []string) *yaml.Container {
+func (c *s3Cacher) Rebuild(_, _ string, mounts []string) *yaml.Container {
 	return &yaml.Container{
 		Name:  "rebuild_cache",
 		Image: "plugins/s3-cache:latest",

@@ -33,7 +33,6 @@ const (
 
 func (g *GitLab) convertGitLabRepo(_repo *gitlab.Project) (*model.Repo, error) {
 	parts := strings.Split(_repo.PathWithNamespace, "/")
-	// TODO(648) save repo id (support nested repos)
 	owner := strings.Join(parts[:len(parts)-1], "/")
 	name := parts[len(parts)-1]
 	repo := &model.Repo{
@@ -47,6 +46,11 @@ func (g *GitLab) convertGitLabRepo(_repo *gitlab.Project) (*model.Repo, error) {
 		Branch:        _repo.DefaultBranch,
 		Visibility:    model.RepoVisibly(_repo.Visibility),
 		IsSCMPrivate:  !_repo.Public,
+		Perm: &model.Perm{
+			Pull:  isRead(_repo),
+			Push:  isWrite(_repo),
+			Admin: isAdmin(_repo),
+		},
 	}
 
 	if len(repo.Branch) == 0 { // TODO: do we need that?
@@ -252,10 +256,10 @@ func extractFromPath(str string) (string, string, error) {
 	return s[0], s[1], nil
 }
 
-func convertLabels(from []*gitlab.Label) []string {
+func convertLabels(from []*gitlab.EventLabel) []string {
 	labels := make([]string, len(from))
 	for i, label := range from {
-		labels[i] = label.Name
+		labels[i] = label.Title
 	}
 	return labels
 }

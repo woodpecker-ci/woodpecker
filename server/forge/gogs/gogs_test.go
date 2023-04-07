@@ -101,20 +101,6 @@ func Test_gogs(t *testing.T) {
 			})
 		})
 
-		g.Describe("Requesting repository permissions", func() {
-			g.It("Should return the permission details", func() {
-				perm, err := c.Perm(ctx, fakeUser, fakeRepo)
-				g.Assert(err).IsNil()
-				g.Assert(perm.Admin).IsTrue()
-				g.Assert(perm.Push).IsTrue()
-				g.Assert(perm.Pull).IsTrue()
-			})
-			g.It("Should handle a not found error", func() {
-				_, err := c.Perm(ctx, fakeUser, fakeRepoNotFound)
-				g.Assert(err).IsNotNil()
-			})
-		})
-
 		g.Describe("Requesting a repository list", func() {
 			g.It("Should return the repository list", func() {
 				repos, err := c.Repos(ctx, fakeUser)

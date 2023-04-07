@@ -50,10 +50,6 @@ type Forge interface {
 	// Repos fetches a list of repos from the forge.
 	Repos(ctx context.Context, u *model.User) ([]*model.Repo, error)
 
-	// Perm fetches the named repository permissions from
-	// the forge for the specified user.
-	Perm(ctx context.Context, u *model.User, r *model.Repo) (*model.Perm, error)
-
 	// File fetches a file from the forge repository and returns in string
 	// format.
 	File(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]byte, error)
@@ -82,6 +78,9 @@ type Forge interface {
 
 	// BranchHead returns the sha of the head (latest commit) of the specified branch
 	BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error)
+
+	// PullRequests returns all pull requests for the named repository.
+	PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.PaginationData) ([]*model.PullRequest, error)
 
 	// Hook parses the post-commit hook from the Request body and returns the
 	// required data in a standard format.

@@ -1,5 +1,4 @@
 // Copyright 2022 Woodpecker Authors
-// Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,12 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package coding
+package migration
 
 import (
-	"fmt"
+	"xorm.io/xorm"
 )
 
-func projectFullName(owner, name string) string {
-	return fmt.Sprintf("%s/%s", owner, name)
+var removeActiveFromUsers = task{
+	name:     "remove-active-from-users",
+	required: true,
+	fn: func(sess *xorm.Session) error {
+		return dropTableColumns(sess, "users", "user_active")
+	},
 }

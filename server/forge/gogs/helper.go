@@ -46,6 +46,7 @@ func toRepo(from *gogs.Repository, privateMode bool) *model.Repo {
 		IsSCMPrivate:  from.Private || privateMode,
 		Clone:         from.CloneURL,
 		Branch:        from.DefaultBranch,
+		Perm:          toPerm(from.Permissions),
 	}
 }
 
