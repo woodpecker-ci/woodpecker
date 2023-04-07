@@ -211,5 +211,5 @@ type BranchResp struct {
 }
 
 type Branch struct {
-	Name string `json:"name"`
+	Name string `json:"displayId"`
 }
