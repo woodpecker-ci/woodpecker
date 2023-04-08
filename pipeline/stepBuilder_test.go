@@ -273,7 +273,7 @@ pipeline:
 	if err != nil {
 		t.Fatal(err)
 	}
-	pipelineNames := []string{pipelineItems[0].Step.Name, pipelineItems[1].Step.Name}
+	pipelineNames := []string{pipelineItems[0].Workflow.Name, pipelineItems[1].Workflow.Name}
 	if !containsItemWithName("lint", pipelineItems) || !containsItemWithName("test", pipelineItems) {
 		t.Fatalf("Pipeline name should be 'lint' and 'test' but are '%v'", pipelineNames)
 	}
@@ -312,15 +312,15 @@ pipeline:
 	if len(pipelineItems) != 2 {
 		t.Fatal("Should have generated 2 pipeline")
 	}
-	if pipelineItems[0].Step.State != model.StatusSkipped {
+	if pipelineItems[0].Workflow.State != model.StatusSkipped {
 		t.Fatal("Should not run on dev branch")
 	}
-	for _, child := range pipelineItems[0].Step.Children {
+	for _, child := range pipelineItems[0].Workflow.Children {
 		if child.State != model.StatusSkipped {
 			t.Fatal("Children should skipped status too")
 		}
 	}
-	if pipelineItems[1].Step.State != model.StatusPending {
+	if pipelineItems[1].Workflow.State != model.StatusPending {
 		t.Fatal("Should run on dev branch")
 	}
 }
@@ -448,7 +448,7 @@ depends_on: [ zerostep ]
 	if len(pipelineItems) != 1 {
 		t.Fatal("Zerostep and the step that depends on it should not generate a pipeline item")
 	}
-	if pipelineItems[0].Step.Name != "justastep" {
+	if pipelineItems[0].Workflow.Name != "justastep" {
 		t.Fatal("justastep should have been generated")
 	}
 }
@@ -502,7 +502,7 @@ depends_on: [ shouldbefiltered ]
 	if len(pipelineItems) != 1 {
 		t.Fatal("Zerostep and the step that depends on it, and the one depending on it should not generate a pipeline item")
 	}
-	if pipelineItems[0].Step.Name != "justastep" {
+	if pipelineItems[0].Workflow.Name != "justastep" {
 		t.Fatal("justastep should have been generated")
 	}
 }

@@ -348,6 +348,7 @@ func metadataFromStruct(repo *model.Repo, pipeline, last *model.Pipeline, workfl
 		Workflow: frontend.Workflow{
 			Name:   workflow.Name,
 			Number: workflow.PID,
+			Matrix: workflow.Environ,
 		},
 		Step: frontend.Step{},
 		Sys: frontend.System{

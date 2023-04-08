@@ -112,7 +112,7 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 	metadata := metadataFromContext(c, axis)
 	environ := metadata.Environ()
 	var secrets []compiler.Secret
-	for key, val := range metadata.Step.Matrix {
+	for key, val := range metadata.Workflow.Matrix {
 		environ[key] = val
 		secrets = append(secrets, compiler.Secret{
 			Name:  key,
@@ -218,7 +218,7 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 	ctx, cancel := context.WithTimeout(context.Background(), c.Duration("timeout"))
 	defer cancel()
 	ctx = utils.WithContextSigtermCallback(ctx, func() {
-		println("ctrl+c received, terminating process")
+		fmt.Println("ctrl+c received, terminating process")
 	})
 
 	return pipeline.New(compiled,
@@ -290,9 +290,14 @@ func metadataFromContext(c *cli.Context, axis matrix.Axis) frontend.Metadata {
 				},
 			},
 		},
-		Step: frontend.Step{
-			Number: c.Int("step-number"),
+		Workflow: frontend.Workflow{
+			Name:   c.String("workflow-name"),
+			Number: c.Int("workflow-number"),
 			Matrix: axis,
+		},
+		Step: frontend.Step{
+			Name:   c.String("step-name"),
+			Number: c.Int("step-number"),
 		},
 		Sys: frontend.System{
 			Name:     c.String("system-name"),

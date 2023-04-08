@@ -99,8 +99,9 @@ type (
 
 	// Workflow defines runtime metadata for a workflow.
 	Workflow struct {
-		Name   string `json:"name,omitempty"`
-		Number int    `json:"number,omitempty"`
+		Name   string            `json:"name,omitempty"`
+		Number int               `json:"number,omitempty"`
+		Matrix map[string]string `json:"matrix,omitempty"`
 	}
 
 	// Step defines runtime metadata for a step.
