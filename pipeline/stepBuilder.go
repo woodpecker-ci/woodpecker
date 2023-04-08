@@ -50,7 +50,7 @@ type StepBuilder struct {
 }
 
 type Item struct {
-	Step      *model.Step
+	Workflow  *model.Step
 	Platform  string
 	Labels    map[string]string
 	DependsOn []string
@@ -76,7 +76,7 @@ func (b *StepBuilder) Build() ([]*Item, error) {
 		}
 
 		for _, axis := range axes {
-			step := &model.Step{
+			workflow := &model.Step{
 				PipelineID: b.Curr.ID,
 				PID:        pidSequence,
 				PGID:       pidSequence,
@@ -85,7 +85,7 @@ func (b *StepBuilder) Build() ([]*Item, error) {
 				Name:       SanitizePath(y.Name),
 			}
 
-			metadata := metadataFromStruct(b.Repo, b.Curr, b.Last, step, b.Link)
+			metadata := metadataFromStruct(b.Repo, b.Curr, b.Last, workflow, b.Link)
 			environ := b.environmentVariables(metadata, axis)
 
 			// add global environment variables for substituting
@@ -118,12 +118,12 @@ func (b *StepBuilder) Build() ([]*Item, error) {
 
 			// checking if filtered.
 			if match, err := parsed.When.Match(metadata, true); !match && err == nil {
-				log.Debug().Str("pipeline", step.Name).Msg(
+				log.Debug().Str("pipeline", workflow.Name).Msg(
 					"Marked as skipped, dose not match metadata",
 				)
-				step.State = model.StatusSkipped
+				workflow.State = model.StatusSkipped
 			} else if err != nil {
-				log.Debug().Str("pipeline", step.Name).Msg(
+				log.Debug().Str("pipeline", workflow.Name).Msg(
 					"Pipeline config could not be parsed",
 				)
 				return nil, err
@@ -131,13 +131,13 @@ func (b *StepBuilder) Build() ([]*Item, error) {
 
 			// TODO: deprecated branches filter => remove after some time
 			if !parsed.Branches.Match(b.Curr.Branch) && (b.Curr.Event != model.EventDeploy && b.Curr.Event != model.EventTag) {
-				log.Debug().Str("pipeline", step.Name).Msg(
+				log.Debug().Str("pipeline", workflow.Name).Msg(
 					"Marked as skipped, dose not match branch",
 				)
-				step.State = model.StatusSkipped
+				workflow.State = model.StatusSkipped
 			}
 
-			ir, err := b.toInternalRepresentation(parsed, environ, metadata, step.ID)
+			ir, err := b.toInternalRepresentation(parsed, environ, metadata, workflow.ID)
 			if err != nil {
 				return nil, err
 			}
@@ -147,7 +147,7 @@ func (b *StepBuilder) Build() ([]*Item, error) {
 			}
 
 			item := &Item{
-				Step:      step,
+				Workflow:  workflow,
 				Config:    ir,
 				Labels:    parsed.Labels,
 				DependsOn: parsed.DependsOn,
@@ -175,7 +175,7 @@ func (b *StepBuilder) Build() ([]*Item, error) {
 
 func stepListContainsItemsToRun(items []*Item) bool {
 	for i := range items {
-		if items[i].Step.State == model.StatusPending {
+		if items[i].Workflow.State == model.StatusPending {
 			return true
 		}
 	}
@@ -196,7 +196,7 @@ func filterItemsWithMissingDependencies(items []*Item) []*Item {
 	if len(itemsToRemove) > 0 {
 		filtered := make([]*Item, 0)
 		for _, item := range items {
-			if !containsItemWithName(item.Step.Name, itemsToRemove) {
+			if !containsItemWithName(item.Workflow.Name, itemsToRemove) {
 				filtered = append(filtered, item)
 			}
 		}
@@ -209,7 +209,7 @@ func filterItemsWithMissingDependencies(items []*Item) []*Item {
 
 func containsItemWithName(name string, items []*Item) bool {
 	for _, item := range items {
-		if name == item.Step.Name {
+		if name == item.Workflow.Name {
 			return true
 		}
 	}
@@ -295,9 +295,9 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[
 func SetPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*Item) *model.Pipeline {
 	var pidSequence int
 	for _, item := range pipelineItems {
-		pipeline.Steps = append(pipeline.Steps, item.Step)
-		if pidSequence < item.Step.PID {
-			pidSequence = item.Step.PID
+		pipeline.Steps = append(pipeline.Steps, item.Workflow)
+		if pidSequence < item.Workflow.PID {
+			pidSequence = item.Workflow.PID
 		}
 	}
 
@@ -313,11 +313,11 @@ func SetPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*Item)
 					PipelineID: pipeline.ID,
 					Name:       step.Alias,
 					PID:        pidSequence,
-					PPID:       item.Step.PID,
+					PPID:       item.Workflow.PID,
 					PGID:       gid,
 					State:      model.StatusPending,
 				}
-				if item.Step.State == model.StatusSkipped {
+				if item.Workflow.State == model.StatusSkipped {
 					step.State = model.StatusSkipped
 				}
 				pipeline.Steps = append(pipeline.Steps, step)
@@ -329,7 +329,7 @@ func SetPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*Item)
 }
 
 // return the metadata from the cli context.
-func metadataFromStruct(repo *model.Repo, pipeline, last *model.Pipeline, step *model.Step, link string) frontend.Metadata {
+func metadataFromStruct(repo *model.Repo, pipeline, last *model.Pipeline, workflow *model.Step, link string) frontend.Metadata {
 	host := link
 	uri, err := url.Parse(link)
 	if err == nil {
@@ -345,10 +345,12 @@ func metadataFromStruct(repo *model.Repo, pipeline, last *model.Pipeline, step *
 		},
 		Curr: metadataPipelineFromModelPipeline(pipeline, true),
 		Prev: metadataPipelineFromModelPipeline(last, false),
-		Step: frontend.Step{
-			Number: step.PID,
-			Matrix: step.Environ,
+		Workflow: frontend.Workflow{
+			Name:   workflow.Name,
+			Number: workflow.PID,
+			Matrix: workflow.Environ,
 		},
+		Step: frontend.Step{},
 		Sys: frontend.System{
 			Name:     "woodpecker",
 			Link:     link,
