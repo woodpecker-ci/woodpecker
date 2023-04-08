@@ -85,14 +85,7 @@ func (b *StepBuilder) Build() ([]*Item, error) {
 				Name:       SanitizePath(y.Name),
 			}
 
-			step := &model.Step{
-				PipelineID: b.Curr.ID,
-				PID:        pidSequence,
-				PGID:       pidSequence,
-				State:      model.StatusPending,
-			}
-
-			metadata := metadataFromStruct(b.Repo, b.Curr, b.Last, workflow, step, b.Link)
+			metadata := metadataFromStruct(b.Repo, b.Curr, b.Last, workflow, b.Link)
 			environ := b.environmentVariables(metadata, axis)
 
 			// add global environment variables for substituting
@@ -336,7 +329,7 @@ func SetPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*Item)
 }
 
 // return the metadata from the cli context.
-func metadataFromStruct(repo *model.Repo, pipeline, last *model.Pipeline, workflow, step *model.Step, link string) frontend.Metadata {
+func metadataFromStruct(repo *model.Repo, pipeline, last *model.Pipeline, workflow *model.Step, link string) frontend.Metadata {
 	host := link
 	uri, err := url.Parse(link)
 	if err == nil {
@@ -356,10 +349,7 @@ func metadataFromStruct(repo *model.Repo, pipeline, last *model.Pipeline, workfl
 			Name:   workflow.Name,
 			Number: workflow.PID,
 		},
-		Step: frontend.Step{
-			Name:   step.Name,
-			Number: step.PID,
-		},
+		Step: frontend.Step{},
 		Sys: frontend.System{
 			Name:     "woodpecker",
 			Link:     link,

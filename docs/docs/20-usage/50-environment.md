@@ -88,7 +88,6 @@ This is the reference list of all environment variables available to your pipeli
 | `CI_WORKFLOW_NAME`               | workflow name                                                                                |
 |                                  | **Current step**                                                                             |
 | `CI_STEP_NAME`                   | step name                                                                                    |
-| `CI_STEP_NUMBER`                 | step number                                                                                  |
 | `CI_STEP_STATUS`                 | step status (success, failure)                                                               |
 | `CI_STEP_STARTED`                | step started UNIX timestamp                                                                  |
 | `CI_STEP_FINISHED`               | step finished UNIX timestamp                                                                 |

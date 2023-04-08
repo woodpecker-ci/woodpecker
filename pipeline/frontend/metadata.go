@@ -46,8 +46,8 @@ type (
 		Repo     Repo     `json:"repo,omitempty"`
 		Curr     Pipeline `json:"curr,omitempty"`
 		Prev     Pipeline `json:"prev,omitempty"`
-		Step     Step     `json:"step,omitempty"`
 		Workflow Workflow `json:"workflow,omitempty"`
+		Step     Step     `json:"step,omitempty"`
 		Sys      System   `json:"sys,omitempty"`
 	}
 
