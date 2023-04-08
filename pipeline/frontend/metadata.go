@@ -97,16 +97,16 @@ type (
 		Avatar string `json:"avatar,omitempty"`
 	}
 
-	// Step defines runtime metadata for a step.
-	Step struct {
+	// Workflow defines runtime metadata for a workflow.
+	Workflow struct {
 		Name   string `json:"name,omitempty"`
 		Number int    `json:"number,omitempty"`
 	}
 
-	Workflow struct {
-		Name   string            `json:"name,omitempty"`
-		Number int               `json:"number,omitempty"`
-		Matrix map[string]string `json:"matrix,omitempty"`
+	// Step defines runtime metadata for a step.
+	Step struct {
+		Name   string `json:"name,omitempty"`
+		Number int    `json:"number,omitempty"`
 	}
 
 	// Secret defines a runtime secret
