@@ -62,6 +62,8 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 	}
 
 	environment["CI_WORKSPACE"] = path.Join(c.base, c.path)
+	environment["CI_STEP_NAME"] = name
+	// environment["CI_STEP_NUMBER"] = fmt.Sprintf("%d", c.stepNumber) // TODO: supply actual step name
 
 	if section == "services" || container.Detached {
 		detached = true

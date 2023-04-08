@@ -99,13 +99,14 @@ type (
 
 	// Step defines runtime metadata for a step.
 	Step struct {
-		Name   string            `json:"name,omitempty"`
-		Number int               `json:"number,omitempty"`
-		Matrix map[string]string `json:"matrix,omitempty"`
+		Name   string `json:"name,omitempty"`
+		Number int    `json:"number,omitempty"`
 	}
 
 	Workflow struct {
-		Name string `json:"name,omitempty"`
+		Name   string            `json:"name,omitempty"`
+		Number int               `json:"number,omitempty"`
+		Matrix map[string]string `json:"matrix,omitempty"`
 	}
 
 	// Secret defines a runtime secret
@@ -186,7 +187,8 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_PIPELINE_STARTED":       strconv.FormatInt(m.Curr.Started, 10),
 		"CI_PIPELINE_FINISHED":      strconv.FormatInt(m.Curr.Finished, 10),
 
-		"CI_WORKFLOW_NAME": m.Workflow.Name,
+		"CI_WORKFLOW_NAME":   m.Workflow.Name,
+		"CI_WORKFLOW_NUMBER": strconv.Itoa(m.Workflow.Number),
 
 		"CI_STEP_NAME":     m.Step.Name,
 		"CI_STEP_NUMBER":   strconv.Itoa(m.Step.Number),
