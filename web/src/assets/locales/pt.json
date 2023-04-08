@@ -1,0 +1,59 @@
+{
+  "back": "Voltar",
+  "cancel": "Cancelar",
+  "color_scheme_dark": "Mudar para o modo claro",
+  "color_scheme_light": "Mudar para o modo escuro",
+  "docs": "Documentação",
+  "documentation_for": "Documentação para \"{topic}\"",
+  "errors": {
+    "not_found": "Servidor não pode encontrar o objeto requisitado"
+  },
+  "login": "Entrar",
+  "logout": "Sair",
+  "not_found": {
+    "back_home": "Voltar para o início"
+  },
+  "password": "Senha",
+  "repo": {
+    "activity": "Atividade",
+    "add": "Adicionar repositório",
+    "deploy_pipeline": {
+      "variables": {
+        "add": "Adicionar variável"
+      }
+    },
+    "enable": {
+      "enable": "Habilitar",
+      "enabled": "Já habilitado",
+      "list_reloaded": "Lista de repositório recarregada",
+      "reload": "Recarregar repositórios",
+      "success": "Repositório habilitado"
+    },
+    "not_allowed": "Você não está autorizado a acessar este repositório",
+    "open_in_forge": "Abrir repositório no Sistema de Controle de Versão",
+    "settings": {
+      "general": {
+        "general": "Geral",
+        "project": "Configurações de Projeto",
+        "protected": {
+          "protected": "Protegido"
+        },
+        "save": "Salvar configurações",
+        "success": "Configurações do repositório atualizadas"
+      },
+      "not_allowed": "Você não está autorizado a acessar as configurações deste repositório",
+      "settings": "Configurações"
+    },
+    "user_none": "Esta organização / usuário ainda não tem nenhum projeto."
+  },
+  "repos": "Repos",
+  "repositories": "Repositórios",
+  "search": "Buscar…",
+  "time": {
+    "not_started": "não iniciado ainda"
+  },
+  "unknown_error": "Ocorreu um erro desconhecido",
+  "url": "URL",
+  "username": "Nome de usuário",
+  "welcome": "Bem-vindo ao Woodpecker"
+}
