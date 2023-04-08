@@ -20,6 +20,7 @@ import (
 	"errors"
 
 	"github.com/rs/zerolog/log"
+
 	"github.com/woodpecker-ci/woodpecker/pipeline"
 	"github.com/woodpecker-ci/woodpecker/server"
 	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
