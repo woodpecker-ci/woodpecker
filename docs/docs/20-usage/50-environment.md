@@ -78,7 +78,7 @@ This is the reference list of all environment variables available to your pipeli
 | `CI_PIPELINE_NUMBER`             | pipeline number                                                                              |
 | `CI_PIPELINE_PARENT`             | number of parent pipeline                                                                    |
 | `CI_PIPELINE_EVENT`              | pipeline event (push, pull_request, tag, deployment)                                         |
-| `CI_PIPELINE_LINK`               | pipeline link in CI                                                                          |
+| `CI_PIPELINE_LINK`               | link to the forge's web UI for the commit(s) or tag that triggered the pipeline              |
 | `CI_PIPELINE_DEPLOY_TARGET`      | pipeline deploy target for `deployment` events (ie production)                               |
 | `CI_PIPELINE_STATUS`             | pipeline status (success, failure)                                                           |
 | `CI_PIPELINE_CREATED`            | pipeline created UNIX timestamp                                                              |
