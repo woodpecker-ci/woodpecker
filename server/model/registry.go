@@ -28,38 +28,67 @@ var (
 
 // RegistryService defines a service for managing registries.
 type RegistryService interface {
+	RegistryListPipeline(*Repo, *Pipeline) ([]*Registry, error)
+	// Repository registries
 	RegistryFind(*Repo, string) (*Registry, error)
 	RegistryList(*Repo) ([]*Registry, error)
 	RegistryCreate(*Repo, *Registry) error
 	RegistryUpdate(*Repo, *Registry) error
 	RegistryDelete(*Repo, string) error
+	// Organization registries
+	OrgRegistryFind(string, string) (*Registry, error)
+	OrgRegistryList(string) ([]*Registry, error)
+	OrgRegistryCreate(string, *Registry) error
+	OrgRegistryUpdate(string, *Registry) error
+	OrgRegistryDelete(string, string) error
+	// Global registries
+	GlobalRegistryFind(string) (*Registry, error)
+	GlobalRegistryList() ([]*Registry, error)
+	GlobalRegistryCreate(*Registry) error
+	GlobalRegistryUpdate(*Registry) error
+	GlobalRegistryDelete(string) error
 }
 
 // ReadOnlyRegistryService defines a service for managing registries.
 type ReadOnlyRegistryService interface {
-	RegistryFind(*Repo, string) (*Registry, error)
-	RegistryList(*Repo) ([]*Registry, error)
+	RegistryFind(string) (*Registry, error)
+	RegistryList() ([]*Registry, error)
 }
 
 // RegistryStore persists registry information to storage.
 type RegistryStore interface {
 	RegistryFind(*Repo, string) (*Registry, error)
-	RegistryList(*Repo) ([]*Registry, error)
+	RegistryList(*Repo, bool) ([]*Registry, error)
 	RegistryCreate(*Registry) error
 	RegistryUpdate(*Registry) error
-	RegistryDelete(repo *Repo, addr string) error
+	RegistryDelete(*Registry) error
+	OrgRegistryFind(string, string) (*Registry, error)
+	OrgRegistryList(string) ([]*Registry, error)
+	GlobalRegistryFind(string) (*Registry, error)
+	GlobalRegistryList() ([]*Registry, error)
 }
 
 // Registry represents a docker registry with credentials.
 // swagger:model registry
 type Registry struct {
 	ID       int64  `json:"id"       xorm:"pk autoincr 'registry_id'"`
-	RepoID   int64  `json:"-"        xorm:"UNIQUE(s) INDEX 'registry_repo_id'"`
-	Address  string `json:"address"  xorm:"UNIQUE(s) INDEX 'registry_addr'"`
+	Owner    string `json:"-"        xorm:"NOT NULL DEFAULT '' UNIQUE(s) INDEX 'registry_owner'"`
+	RepoID   int64  `json:"-"        xorm:"NOT NULL DEFAULT 0 UNIQUE(s) INDEX 'registry_repo_id'"`
+	Address  string `json:"address"  xorm:"NOT NULL UNIQUE(s) INDEX 'registry_addr'"`
 	Username string `json:"username" xorm:"varchar(2000) 'registry_username'"`
 	Password string `json:"password" xorm:"TEXT 'registry_password'"`
 	Token    string `json:"token"    xorm:"TEXT 'registry_token'"`
 	Email    string `json:"email"    xorm:"varchar(500) 'registry_email'"`
+}
+
+// Global registry.
+func (r Registry) Global() bool {
+	return r.RepoID == 0 && r.Owner == ""
+}
+
+// Organization registry.
+func (r Registry) Organization() bool {
+	return r.RepoID == 0 && r.Owner != ""
 }
 
 // Validate validates the registry information.
@@ -81,6 +110,7 @@ func (r *Registry) Validate() error {
 func (r *Registry) Copy() *Registry {
 	return &Registry{
 		ID:       r.ID,
+		Owner:    r.Owner,
 		RepoID:   r.RepoID,
 		Address:  r.Address,
 		Username: r.Username,

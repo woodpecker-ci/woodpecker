@@ -48,7 +48,7 @@ func createPipelineItems(_ context.Context, store store.Store,
 		log.Error().Err(err).Msgf("Error getting secrets for %s#%d", repo.FullName, currentPipeline.Number)
 	}
 
-	regs, err := server.Config.Services.Registries.RegistryList(repo)
+	regs, err := server.Config.Services.Registries.RegistryListPipeline(repo, currentPipeline)
 	if err != nil {
 		log.Error().Err(err).Msgf("Error getting registry credentials for %s#%d", repo.FullName, currentPipeline.Number)
 	}

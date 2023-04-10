@@ -82,7 +82,7 @@ func TestRegistryList(t *testing.T) {
 		Password: "bar",
 	}))
 
-	list, err := store.RegistryList(&model.Repo{ID: 1})
+	list, err := store.RegistryList(&model.Repo{ID: 1}, false)
 	if err != nil {
 		t.Error(err)
 		return
@@ -160,6 +160,6 @@ func TestRegistryDelete(t *testing.T) {
 		t.FailNow()
 	}
 
-	assert.NoError(t, store.RegistryDelete(&model.Repo{ID: 1}, "index.docker.io"))
-	assert.ErrorIs(t, store.RegistryDelete(&model.Repo{ID: 1}, "index.docker.io"), types.RecordNotExist)
+	assert.NoError(t, store.RegistryDelete(reg1))
+	assert.ErrorIs(t, store.RegistryDelete(reg1), types.RecordNotExist)
 }

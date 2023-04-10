@@ -11,6 +11,7 @@ import (
 	"github.com/docker/cli/cli/config/types"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	model_types "github.com/woodpecker-ci/woodpecker/server/store/types"
 )
 
 type filesystem struct {
@@ -71,11 +72,20 @@ func parseDockerConfig(path string) ([]*model.Registry, error) {
 	return auths, nil
 }
 
-func (b *filesystem) RegistryFind(*model.Repo, string) (*model.Registry, error) {
-	return nil, nil
+func (b *filesystem) RegistryFind(addr string) (*model.Registry, error) {
+	registries, err := b.RegistryList()
+	if err != nil {
+		return nil, err
+	}
+	for _, registry := range registries {
+		if registry.Address == addr {
+			return registry, nil
+		}
+	}
+	return nil, model_types.RecordNotExist
 }
 
-func (b *filesystem) RegistryList(*model.Repo) ([]*model.Registry, error) {
+func (b *filesystem) RegistryList() ([]*model.Registry, error) {
 	return parseDockerConfig(b.path)
 }
 

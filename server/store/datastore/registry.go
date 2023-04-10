@@ -16,6 +16,9 @@ package datastore
 
 import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/store/types"
+
+	"xorm.io/builder"
 )
 
 func (s storage) RegistryFind(repo *model.Repo, addr string) (*model.Registry, error) {
@@ -26,9 +29,14 @@ func (s storage) RegistryFind(repo *model.Repo, addr string) (*model.Registry, e
 	return reg, wrapGet(s.engine.Get(reg))
 }
 
-func (s storage) RegistryList(repo *model.Repo) ([]*model.Registry, error) {
+func (s storage) RegistryList(repo *model.Repo, includeGlobalAndOrgSecrets bool) ([]*model.Registry, error) {
 	regs := make([]*model.Registry, 0, perPage)
-	return regs, s.engine.Where("registry_repo_id = ?", repo.ID).Find(&regs)
+	var cond builder.Cond = builder.Eq{"registry_repo_id": repo.ID}
+	if includeGlobalAndOrgSecrets {
+		cond = cond.Or(builder.Eq{"registry_owner": repo.Owner}).
+			Or(builder.And(builder.Eq{"registry_owner": ""}, builder.Eq{"registry_repo_id": 0}))
+	}
+	return regs, s.engine.Where(cond).Find(&regs)
 }
 
 func (s storage) RegistryCreate(registry *model.Registry) error {
@@ -42,11 +50,35 @@ func (s storage) RegistryUpdate(registry *model.Registry) error {
 	return err
 }
 
-func (s storage) RegistryDelete(repo *model.Repo, addr string) error {
-	registry, err := s.RegistryFind(repo, addr)
-	if err != nil {
-		return err
+func (s storage) RegistryDelete(registry *model.Registry) error {
+	c, err := s.engine.ID(registry.ID).Delete(new(model.Registry))
+	if err == nil && c == 0 {
+		return types.RecordNotExist
 	}
-	_, err = s.engine.ID(registry.ID).Delete(new(model.Registry))
 	return err
+}
+
+func (s storage) OrgRegistryFind(owner, addr string) (*model.Registry, error) {
+	registry := &model.Registry{
+		Owner:   owner,
+		Address: addr,
+	}
+	return registry, wrapGet(s.engine.Get(registry))
+}
+
+func (s storage) OrgRegistryList(owner string) ([]*model.Registry, error) {
+	registries := make([]*model.Registry, 0, perPage)
+	return registries, s.engine.Where("registry_owner = ?", owner).Find(&registries)
+}
+
+func (s storage) GlobalRegistryFind(addr string) (*model.Registry, error) {
+	registry := &model.Registry{
+		Address: addr,
+	}
+	return registry, wrapGet(s.engine.Where(builder.And(builder.Eq{"registry_owner": ""}, builder.Eq{"registry_repo_id": 0})).Get(registry))
+}
+
+func (s storage) GlobalRegistryList() ([]*model.Registry, error) {
+	registries := make([]*model.Registry, 0, perPage)
+	return registries, s.engine.Where(builder.And(builder.Eq{"registry_owner": ""}, builder.Eq{"registry_repo_id": 0})).Find(&registries)
 }
