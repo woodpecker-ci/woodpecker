@@ -139,6 +139,7 @@ func (s storage) DeleteRepo(repo *model.Repo) error {
 }
 
 // RepoList list all repos where permissions for specific user are stored
+// TODO: paginate
 func (s storage) RepoList(user *model.User, owned, active bool) ([]*model.Repo, error) {
 	repos := make([]*model.Repo, 0)
 	sess := s.engine.Table("repos").
