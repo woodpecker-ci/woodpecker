@@ -208,6 +208,25 @@ func ChownRepo(c *gin.Context) {
 	c.JSON(http.StatusOK, repo)
 }
 
+func LookupRepo(c *gin.Context) {
+	_store := store.FromContext(c)
+	owner := c.Param("owner")
+	name := c.Param("name")
+
+	repo, err := _store.GetRepoName(owner + "/" + name)
+	if err != nil {
+		if errors.Is(err, types.RecordNotExist) {
+			c.AbortWithStatus(http.StatusNotFound)
+			return
+		}
+
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, repo.ID)
+}
+
 func GetRepo(c *gin.Context) {
 	c.JSON(http.StatusOK, session.Repo(c))
 }
