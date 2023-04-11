@@ -162,10 +162,10 @@ function showAddUser() {
 }
 
 onMounted(() => {
-  list.onMounted();
+  list.init();
 });
 
 onUnmounted(() => {
-  list.onUnmounted();
+  list.clear();
 });
 </script>

@@ -182,9 +182,9 @@ const { doSubmit: runCron } = useAsyncAction(async (_cron: Cron) => {
 });
 
 onMounted(() => {
-  list.onMounted();
+  list.init();
 });
 onUnmounted(() => {
-  list.onUnmounted();
+  list.clear();
 });
 </script>

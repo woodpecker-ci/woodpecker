@@ -45,11 +45,11 @@ async function loadBranches(page: number): Promise<boolean> {
 const list = new PaginatedList(loadBranches);
 
 onMounted(() => {
-  list.onMounted();
+  list.init();
 });
 
 onUnmounted(() => {
-  list.onUnmounted();
+  list.clear();
 });
 
 watch(repo, () => {

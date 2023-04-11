@@ -49,11 +49,11 @@ async function loadPullRequests(page: number): Promise<boolean> {
 const list = new PaginatedList(loadPullRequests);
 
 onMounted(() => {
-  list.onMounted();
+  list.init();
 });
 
 onUnmounted(() => {
-  list.onUnmounted();
+  list.clear();
 });
 
 watch(repo, () => {

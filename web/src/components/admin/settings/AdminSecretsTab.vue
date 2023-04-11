@@ -135,11 +135,11 @@ export default defineComponent({
     }
 
     onMounted(() => {
-      list.onMounted();
+      list.init();
     });
 
     onUnmounted(() => {
-      list.onUnmounted();
+      list.clear();
     });
 
     return {

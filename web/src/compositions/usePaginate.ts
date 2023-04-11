@@ -45,7 +45,7 @@ export class PaginatedList {
     this.isActive = isActive;
   }
 
-  public onMounted() {
+  public init() {
     this.reset(true);
     this.id = currId;
     currId += 1;
@@ -60,7 +60,7 @@ export class PaginatedList {
     }
   }
 
-  public onUnmounted() {
+  public clear() {
     this.reset(false);
     delete lists[this.id];
   }
