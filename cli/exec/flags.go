@@ -260,8 +260,16 @@ var flags = []cli.Flag{
 		Name:    "prev-commit-author-email",
 	},
 	&cli.IntFlag{
-		EnvVars: []string{"CI_STEP_NUMBER", "CI_JOB_NUMBER"},
-		Name:    "step-number",
+		EnvVars: []string{"CI_WORKFLOW_NAME"},
+		Name:    "workflow-name",
+	},
+	&cli.IntFlag{
+		EnvVars: []string{"CI_WORKFLOW_NUMBER", "CI_JOB_NUMBER"},
+		Name:    "workflow-number",
+	},
+	&cli.IntFlag{
+		EnvVars: []string{"CI_STEP_NAME", "CI_JOB_NUMBER"},
+		Name:    "step-name",
 	},
 	&cli.StringSliceFlag{
 		EnvVars: []string{"CI_ENV"},

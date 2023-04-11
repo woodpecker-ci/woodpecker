@@ -28,11 +28,11 @@ import (
 func queuePipeline(repo *model.Repo, pipelineItems []*pipeline.Item) error {
 	var tasks []*model.Task
 	for _, item := range pipelineItems {
-		if item.Step.State == model.StatusSkipped {
+		if item.Workflow.State == model.StatusSkipped {
 			continue
 		}
 		task := new(model.Task)
-		task.ID = fmt.Sprint(item.Step.ID)
+		task.ID = fmt.Sprint(item.Workflow.ID)
 		task.Labels = map[string]string{}
 		for k, v := range item.Labels {
 			task.Labels[k] = v
@@ -44,7 +44,7 @@ func queuePipeline(repo *model.Repo, pipelineItems []*pipeline.Item) error {
 		task.DepStatus = make(map[string]model.StatusValue)
 
 		task.Data, _ = json.Marshal(rpc.Pipeline{
-			ID:      fmt.Sprint(item.Step.ID),
+			ID:      fmt.Sprint(item.Workflow.ID),
 			Config:  item.Config,
 			Timeout: repo.Timeout,
 		})
@@ -60,8 +60,8 @@ func queuePipeline(repo *model.Repo, pipelineItems []*pipeline.Item) error {
 func taskIds(dependsOn []string, pipelineItems []*pipeline.Item) (taskIds []string) {
 	for _, dep := range dependsOn {
 		for _, pipelineItem := range pipelineItems {
-			if pipelineItem.Step.Name == dep {
-				taskIds = append(taskIds, fmt.Sprint(pipelineItem.Step.ID))
+			if pipelineItem.Workflow.Name == dep {
+				taskIds = append(taskIds, fmt.Sprint(pipelineItem.Workflow.ID))
 			}
 		}
 	}
