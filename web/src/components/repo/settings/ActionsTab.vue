@@ -75,7 +75,7 @@ export default defineComponent({
         throw new Error('Unexpected: Repo should be set');
       }
 
-      await apiClient.repairRepo(repo.value.owner, repo.value.name);
+      await apiClient.repairRepo(repo.value.id);
       notifications.notify({ title: i18n.t('repo.settings.actions.repair.success'), type: 'success' });
     });
 
@@ -90,7 +90,7 @@ export default defineComponent({
         return;
       }
 
-      await apiClient.deleteRepo(repo.value.owner, repo.value.name);
+      await apiClient.deleteRepo(repo.value.id);
       notifications.notify({ title: i18n.t('repo.settings.actions.delete.success'), type: 'success' });
       await router.replace({ name: 'repos' });
     });
@@ -100,7 +100,7 @@ export default defineComponent({
         throw new Error('Unexpected: Repo should be set');
       }
 
-      await apiClient.activateRepo(repo.value.owner, repo.value.name);
+      await apiClient.activateRepo(repo.value.id);
       notifications.notify({ title: i18n.t('repo.settings.actions.enable.success'), type: 'success' });
     });
 
@@ -109,7 +109,7 @@ export default defineComponent({
         throw new Error('Unexpected: Repo should be set');
       }
 
-      await apiClient.deleteRepo(repo.value.owner, repo.value.name, false);
+      await apiClient.deleteRepo(repo.value.id, false);
       notifications.notify({ title: i18n.t('repo.settings.actions.disable.success'), type: 'success' });
       await router.replace({ name: 'repos' });
     });

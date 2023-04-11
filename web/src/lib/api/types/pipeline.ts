@@ -123,7 +123,5 @@ export type PipelineLog = {
 };
 
 export type PipelineFeed = Pipeline & {
-  owner: string;
-  name: string;
-  full_name: string;
+  repo: number; // repo id
 };

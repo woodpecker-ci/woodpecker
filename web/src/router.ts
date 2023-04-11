@@ -17,26 +17,20 @@ const routes: RouteRecordRaw[] = [
     meta: { authentication: 'required' },
   },
   {
-    path: '/repo/add',
+    path: '/repos/add',
     name: 'repo-add',
     component: (): Component => import('~/views/RepoAdd.vue'),
     meta: { authentication: 'required' },
   },
   {
-    path: '/:repoOwner',
-    name: 'repos-owner',
-    component: (): Component => import('~/views/ReposOwner.vue'),
-    props: true,
-  },
-  {
-    path: '/org/:repoOwner',
+    path: '/org/:ownerOrOrgId',
     component: (): Component => import('~/views/org/OrgWrapper.vue'),
     props: true,
     children: [
       {
         path: '',
         name: 'org',
-        redirect: (route) => ({ name: 'repos-owner', params: route.params }),
+        component: (): Component => import('~/views/org/OrgRepos.vue'),
       },
       {
         path: 'settings',
@@ -48,7 +42,7 @@ const routes: RouteRecordRaw[] = [
     ],
   },
   {
-    path: '/:repoOwner/:repoName',
+    path: '/repos/:repoId',
     name: 'repo-wrapper',
     component: (): Component => import('~/views/repo/RepoWrapper.vue'),
     props: true,
@@ -118,29 +112,6 @@ const routes: RouteRecordRaw[] = [
         meta: { authentication: 'required' },
         props: true,
       },
-      // TODO: redirect to support backwards compatibility => remove after some time
-      {
-        path: ':pipelineId',
-        redirect: (route) => ({ name: 'repo-pipeline', params: route.params }),
-      },
-      {
-        path: 'build/:pipelineId',
-        redirect: (route) => ({ name: 'repo-pipeline', params: route.params }),
-        children: [
-          {
-            path: ':procId?',
-            redirect: (route) => ({ name: 'repo-pipeline', params: route.params }),
-          },
-          {
-            path: 'changed-files',
-            redirect: (route) => ({ name: 'repo-pipeline-changed-files', params: route.params }),
-          },
-          {
-            path: 'config',
-            redirect: (route) => ({ name: 'repo-pipeline-config', params: route.params }),
-          },
-        ],
-      },
     ],
   },
   {
@@ -178,6 +149,49 @@ const routes: RouteRecordRaw[] = [
     meta: { blank: true },
     props: true,
   },
+
+  // TODO: deprecated routes => remove after some time
+  {
+    path: '/:ownerOrOrgId',
+    redirect: (route) => ({ name: 'org', params: route.params }),
+  },
+  {
+    path: '/:repoOwner/:repoName/:pathMatch(.*)*',
+    redirect: (route) => {
+      console.log(route);
+      return { name: 'repo', params: route.params };
+    },
+  },
+  {
+    path: '/:repoOwner/:repoName',
+    component: (): Component => import('~/views/repo/RepoWrapper.vue'),
+    children: [
+      // TODO: redirect to support backwards compatibility => remove after some time
+      {
+        path: ':pipelineId',
+        redirect: (route) => ({ name: 'repo-pipeline', params: route.params }),
+      },
+      {
+        path: 'build/:pipelineId',
+        redirect: (route) => ({ name: 'repo-pipeline', params: route.params }),
+        children: [
+          {
+            path: ':procId?',
+            redirect: (route) => ({ name: 'repo-pipeline', params: route.params }),
+          },
+          {
+            path: 'changed-files',
+            redirect: (route) => ({ name: 'repo-pipeline-changed-files', params: route.params }),
+          },
+          {
+            path: 'config',
+            redirect: (route) => ({ name: 'repo-pipeline-config', params: route.params }),
+          },
+        ],
+      },
+    ],
+  },
+
   {
     path: '/:pathMatch(.*)*',
     name: 'not-found',

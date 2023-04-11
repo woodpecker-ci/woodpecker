@@ -35,7 +35,7 @@ async function loadPullRequests() {
     throw new Error('Unexpected: "repo" should be provided at this place');
   }
 
-  pullRequests.value = await apiClient.getRepoPullRequests(repo.value.owner, repo.value.name);
+  pullRequests.value = await apiClient.getRepoPullRequests(repo.value.id);
 }
 
 onMounted(() => {

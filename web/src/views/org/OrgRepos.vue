@@ -28,8 +28,8 @@
   </Scaffold>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, onMounted, ref } from 'vue';
+<script lang="ts" setup>
+import { computed, onMounted, ref } from 'vue';
 
 import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
@@ -39,38 +39,21 @@ import { useRepoSearch } from '~/compositions/useRepoSearch';
 import { OrgPermissions } from '~/lib/api/types';
 import { useRepoStore } from '~/store/repos';
 
-export default defineComponent({
-  name: 'ReposOwner',
+const props = defineProps<{
+  repoOwner: string;
+}>();
 
-  components: {
-    ListItem,
-    IconButton,
-    Scaffold,
-  },
+const apiClient = useApiClient();
+const repoStore = useRepoStore();
+// TODO: filter server side
+const repos = computed(() => Array.from(repoStore.repos.values()).filter((repo) => repo.owner === props.repoOwner));
+const search = ref('');
+const orgPermissions = ref<OrgPermissions>({ member: false, admin: false });
 
-  props: {
-    repoOwner: {
-      type: String,
-      required: true,
-    },
-  },
+const { searchedRepos } = useRepoSearch(repos, search);
 
-  setup(props) {
-    const apiClient = useApiClient();
-    const repoStore = useRepoStore();
-    // TODO: filter server side
-    const repos = computed(() => Array.from(repoStore.repos.values()).filter((repo) => repo.owner === props.repoOwner));
-    const search = ref('');
-    const orgPermissions = ref<OrgPermissions>({ member: false, admin: false });
-
-    const { searchedRepos } = useRepoSearch(repos, search);
-
-    onMounted(async () => {
-      await repoStore.loadRepos();
-      orgPermissions.value = await apiClient.getOrgPermissions(props.repoOwner);
-    });
-
-    return { searchedRepos, search, orgPermissions };
-  },
+onMounted(async () => {
+  await repoStore.loadRepos();
+  orgPermissions.value = await apiClient.getOrgPermissions(props.repoOwner);
 });
 </script>

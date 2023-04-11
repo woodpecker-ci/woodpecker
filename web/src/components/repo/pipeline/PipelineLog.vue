@@ -206,7 +206,7 @@ export default defineComponent({
       let logs;
       try {
         downloadInProgress.value = true;
-        logs = await apiClient.getLogs(repo.value.owner, repo.value.name, pipeline.value.number, step.value.pid);
+        logs = await apiClient.getLogs(repo.value.id, pipeline.value.number, step.value.pid);
       } catch (e) {
         notifications.notifyError(e, i18n.t('repo.pipeline.log_download_error'));
         return;
@@ -255,7 +255,7 @@ export default defineComponent({
       }
 
       if (isStepFinished(step.value)) {
-        const logs = await apiClient.getLogs(repo.value.owner, repo.value.name, pipeline.value.number, step.value.pid);
+        const logs = await apiClient.getLogs(repo.value.id, pipeline.value.number, step.value.pid);
         logs?.forEach((line) => writeLog({ index: line.pos, text: line.out, time: line.time }));
         flushLogs(false);
       }
@@ -263,19 +263,13 @@ export default defineComponent({
       if (isStepRunning(step.value)) {
         // load stream of parent process (which receives all child processes logs)
         // TODO: change stream to only send data of single child process
-        stream.value = apiClient.streamLogs(
-          repo.value.owner,
-          repo.value.name,
-          pipeline.value.number,
-          step.value.ppid,
-          (line) => {
-            if (line?.step !== step.value?.name) {
-              return;
-            }
-            writeLog({ index: line.pos, text: line.out, time: line.time });
-            flushLogs(true);
-          },
-        );
+        stream.value = apiClient.streamLogs(repo.value.id, pipeline.value.number, step.value.ppid, (line) => {
+          if (line?.step !== step.value?.name) {
+            return;
+          }
+          writeLog({ index: line.pos, text: line.out, time: line.time });
+          flushLogs(true);
+        });
       }
     }
 

@@ -39,7 +39,7 @@ export default defineComponent({
         throw new Error('Unexpected: "repo" should be provided at this place');
       }
 
-      branches.value = await apiClient.getRepoBranches(repo.value.owner, repo.value.name);
+      branches.value = await apiClient.getRepoBranches(repo.value.id);
     }
 
     onMounted(() => {

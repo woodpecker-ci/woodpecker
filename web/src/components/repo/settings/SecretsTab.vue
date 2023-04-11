@@ -86,7 +86,7 @@ export default defineComponent({
         throw new Error("Unexpected: Can't load repo");
       }
 
-      secrets.value = await apiClient.getSecretList(repo.value.owner, repo.value.name);
+      secrets.value = await apiClient.getSecretList(repo.value.id);
     }
 
     const { doSubmit: createSecret, isLoading: isSaving } = useAsyncAction(async () => {
@@ -99,9 +99,9 @@ export default defineComponent({
       }
 
       if (isEditingSecret.value) {
-        await apiClient.updateSecret(repo.value.owner, repo.value.name, selectedSecret.value);
+        await apiClient.updateSecret(repo.value.id, selectedSecret.value);
       } else {
-        await apiClient.createSecret(repo.value.owner, repo.value.name, selectedSecret.value);
+        await apiClient.createSecret(repo.value.id, selectedSecret.value);
       }
       notifications.notify({
         title: i18n.t(isEditingSecret.value ? 'repo.settings.secrets.saved' : 'repo.settings.secrets.created'),
@@ -116,7 +116,7 @@ export default defineComponent({
         throw new Error("Unexpected: Can't load repo");
       }
 
-      await apiClient.deleteSecret(repo.value.owner, repo.value.name, _secret.name);
+      await apiClient.deleteSecret(repo.value.id, _secret.name);
       notifications.notify({ title: i18n.t('repo.settings.secrets.deleted'), type: 'success' });
       await loadSecrets();
     });
