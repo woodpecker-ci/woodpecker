@@ -30,7 +30,7 @@ func (s storage) GetUserLogin(login string) (*model.User, error) {
 
 func (s storage) GetUserList(p *model.ListOptions) ([]*model.User, error) {
 	var users []*model.User
-	return users, s.paginate(p).Find(&users)
+	return users, s.paginate(p).OrderBy("user_id").Find(&users)
 }
 
 func (s storage) GetUserCount() (int64, error) {

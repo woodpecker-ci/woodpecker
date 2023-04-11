@@ -28,7 +28,7 @@ func (s storage) RegistryFind(repo *model.Repo, addr string) (*model.Registry, e
 
 func (s storage) RegistryList(repo *model.Repo, p *model.ListOptions) ([]*model.Registry, error) {
 	var regs []*model.Registry
-	return regs, s.paginate(p).Where("registry_repo_id = ?", repo.ID).Find(&regs)
+	return regs, s.paginate(p).OrderBy("registry_id").Where("registry_repo_id = ?", repo.ID).Find(&regs)
 }
 
 func (s storage) RegistryCreate(registry *model.Registry) error {
