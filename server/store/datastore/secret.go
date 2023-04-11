@@ -71,7 +71,7 @@ func (s storage) OrgSecretFind(owner, name string) (*model.Secret, error) {
 
 func (s storage) OrgSecretList(owner string) ([]*model.Secret, error) {
 	secrets := make([]*model.Secret, 0, perPage)
-	return secrets, s.engine.Where("secret_owner = ?", owner).Find(&secrets)
+	return secrets, s.engine.Where("secret_owner = ?", owner).OrderBy(orderSecretsBy).Find(&secrets)
 }
 
 func (s storage) GlobalSecretFind(name string) (*model.Secret, error) {

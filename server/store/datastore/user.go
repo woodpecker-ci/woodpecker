@@ -30,7 +30,7 @@ func (s storage) GetUserLogin(login string) (*model.User, error) {
 
 func (s storage) GetUserList() ([]*model.User, error) {
 	users := make([]*model.User, 0, 10)
-	return users, s.engine.Find(&users)
+	return users, s.engine.OrderBy("user_id").Find(&users)
 }
 
 func (s storage) GetUserCount() (int64, error) {
