@@ -358,11 +358,6 @@ Supported variables:
 - `owner`: the repo's owner
 - `repo`: the repo's name
 
-### `WOODPECKER_DATABASE_PAGE_SIZE`
-> Default: 50
-
-How many items per page should be requested from the database
-
 ---
 
 ### `WOODPECKER_LIMIT_MEM_SWAP`

@@ -230,12 +230,6 @@ var flags = []cli.Flag{
 		Usage:   "status context format",
 		Value:   "{{ .context }}/{{ .event }}/{{ .pipeline }}",
 	},
-	&cli.IntFlag{
-		EnvVars: []string{"WOODPECKER_DATABASE_PAGE_SIZE"},
-		Name:    "database-page-size",
-		Usage:   "How many items per page should be requested from the database",
-		Value:   50,
-	},
 	//
 	// resource limit parameters
 	//
