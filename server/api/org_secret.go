@@ -131,7 +131,7 @@ func DeleteOrgSecret(c *gin.Context) {
 		name  = c.Param("secret")
 	)
 	if err := server.Config.Services.Secrets.OrgSecretDelete(owner, name); err != nil {
-		c.String(http.StatusInternalServerError, "Error deleting org %q secret %q. %s", owner, name, err)
+		handleDbGetError(c, err)
 		return
 	}
 	c.String(http.StatusNoContent, "")

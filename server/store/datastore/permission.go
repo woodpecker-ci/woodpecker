@@ -76,10 +76,9 @@ func (s storage) permUpsert(sess *xorm.Session, perm *model.Perm) error {
 }
 
 func (s storage) PermDelete(perm *model.Perm) error {
-	_, err := s.engine.
+	return wrapDelete(s.engine.
 		Where("perm_user_id = ? AND perm_repo_id = ?", perm.UserID, perm.RepoID).
-		Delete(new(model.Perm))
-	return err
+		Delete(new(model.Perm)))
 }
 
 func (s storage) PermFlush(user *model.User, before int64) error {
