@@ -57,8 +57,7 @@ func (s storage) SecretUpdate(secret *model.Secret) error {
 }
 
 func (s storage) SecretDelete(secret *model.Secret) error {
-	_, err := s.engine.ID(secret.ID).Delete(new(model.Secret))
-	return err
+	return wrapDelete(s.engine.ID(secret.ID).Delete(new(model.Secret)))
 }
 
 func (s storage) OrgSecretFind(owner, name string) (*model.Secret, error) {

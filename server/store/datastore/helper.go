@@ -28,3 +28,14 @@ func wrapGet(exist bool, err error) error {
 	}
 	return nil
 }
+
+// wrapDelete return error if err not nil or if requested entry do not exist
+func wrapDelete(c int64, err error) error {
+	if err != nil {
+		return err
+	}
+	if c == 0 {
+		return types.RecordNotExist
+	}
+	return nil
+}

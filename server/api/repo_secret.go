@@ -133,7 +133,7 @@ func DeleteSecret(c *gin.Context) {
 		name = c.Param("secret")
 	)
 	if err := server.Config.Services.Secrets.SecretDelete(repo, name); err != nil {
-		c.String(http.StatusInternalServerError, "Error deleting secret %q. %s", name, err)
+		handleDbGetError(c, err)
 		return
 	}
 	c.String(http.StatusNoContent, "")
