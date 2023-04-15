@@ -30,10 +30,14 @@ export function usePagination<T>(
     const newData = await _loadData(page.value);
     hasMore.value = newData != null && newData.length >= pageSize.value;
     if (newData != null) {
-      if (pageSize.value < 1) {
+      if (page.value === 1) {
         pageSize.value = newData.length;
+        data.value = newData;
+      } else {
+        data.value.push(...newData);
       }
-      data.value.push(...newData);
+    } else if (page.value === 1) {
+      data.value = [];
     }
     loading.value = false;
   }
@@ -52,5 +56,15 @@ export function usePagination<T>(
     { distance: 10 },
   );
 
-  return { page, data };
+  const resetPage = () => {
+    if (page.value !== 1) {
+      // just set page = 1, will be handled by watcher
+      page.value = 1;
+    } else {
+      // we need to reload, but page is already 1, so changing won't trigger watcher
+      loadData();
+    }
+  };
+
+  return { resetPage, data };
 }

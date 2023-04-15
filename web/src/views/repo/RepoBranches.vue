@@ -34,10 +34,7 @@ async function loadBranches(page: number): Promise<string[]> {
   return apiClient.getRepoBranches(repo.value.owner, repo.value.name, page);
 }
 
-const { page, data: branches } = usePagination(loadBranches);
+const { resetPage, data: branches } = usePagination(loadBranches);
 
-watch(repo, () => {
-  branches.value = [];
-  page.value = 1;
-});
+watch(repo, resetPage);
 </script>

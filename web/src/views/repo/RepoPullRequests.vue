@@ -38,10 +38,7 @@ async function loadPullRequests(page: number): Promise<PullRequest[]> {
   return apiClient.getRepoPullRequests(repo.value.owner, repo.value.name, page);
 }
 
-const { page, data: pullRequests } = usePagination(loadPullRequests);
+const { resetPage, data: pullRequests } = usePagination(loadPullRequests);
 
-watch(repo, () => {
-  pullRequests.value = [];
-  page.value = 1;
-});
+watch(repo, resetPage);
 </script>

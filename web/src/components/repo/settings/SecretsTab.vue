@@ -89,7 +89,7 @@ export default defineComponent({
       return apiClient.getSecretList(repo.value.owner, repo.value.name, page);
     }
 
-    const { page, data: secrets } = usePagination(loadSecrets, () => !selectedSecret.value);
+    const { resetPage, data: secrets } = usePagination(loadSecrets, () => !selectedSecret.value);
 
     const { doSubmit: createSecret, isLoading: isSaving } = useAsyncAction(async () => {
       if (!repo?.value) {
@@ -110,8 +110,7 @@ export default defineComponent({
         type: 'success',
       });
       selectedSecret.value = undefined;
-      secrets.value = [];
-      page.value = 1;
+      resetPage();
     });
 
     const { doSubmit: deleteSecret, isLoading: isDeleting } = useAsyncAction(async (_secret: Secret) => {
@@ -121,8 +120,7 @@ export default defineComponent({
 
       await apiClient.deleteSecret(repo.value.owner, repo.value.name, _secret.name);
       notifications.notify({ title: i18n.t('repo.settings.secrets.deleted'), type: 'success' });
-      secrets.value = [];
-      page.value = 1;
+      resetPage();
     });
 
     function editSecret(secret: Secret) {

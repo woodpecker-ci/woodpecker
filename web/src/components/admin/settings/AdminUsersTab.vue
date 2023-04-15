@@ -111,7 +111,7 @@ async function loadUsers(page: number): Promise<User[] | null> {
   return apiClient.getUsers(page);
 }
 
-const { page, data: users } = usePagination(loadUsers, () => !selectedUser.value);
+const { resetPage, data: users } = usePagination(loadUsers, () => !selectedUser.value);
 
 const { doSubmit: saveUser, isLoading: isSaving } = useAsyncAction(async () => {
   if (!selectedUser.value) {
@@ -132,8 +132,7 @@ const { doSubmit: saveUser, isLoading: isSaving } = useAsyncAction(async () => {
       type: 'success',
     });
   }
-  users.value = [];
-  page.value = 1;
+  resetPage();
 });
 
 const { doSubmit: deleteUser, isLoading: isDeleting } = useAsyncAction(async (_user: User) => {
@@ -144,8 +143,7 @@ const { doSubmit: deleteUser, isLoading: isDeleting } = useAsyncAction(async (_u
 
   await apiClient.deleteUser(_user);
   notifications.notify({ title: t('admin.settings.users.deleted'), type: 'success' });
-  users.value = [];
-  page.value = 1;
+  resetPage();
 });
 
 function editUser(user: User) {

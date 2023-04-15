@@ -127,7 +127,7 @@ export default defineComponent({
       return apiClient.getRegistryList(repo.value.owner, repo.value.name, page);
     }
 
-    const { page, data: registries } = usePagination(loadRegistries, () => !selectedRegistry.value);
+    const { resetPage, data: registries } = usePagination(loadRegistries, () => !selectedRegistry.value);
 
     const { doSubmit: createRegistry, isLoading: isSaving } = useAsyncAction(async () => {
       if (!repo?.value) {
@@ -150,8 +150,7 @@ export default defineComponent({
         type: 'success',
       });
       selectedRegistry.value = undefined;
-      registries.value = [];
-      page.value = 1;
+      resetPage();
     });
 
     const { doSubmit: deleteRegistry, isLoading: isDeleting } = useAsyncAction(async (_registry: Registry) => {
@@ -162,8 +161,7 @@ export default defineComponent({
       const registryAddress = encodeURIComponent(_registry.address);
       await apiClient.deleteRegistry(repo.value.owner, repo.value.name, registryAddress);
       notifications.notify({ title: i18n.t('repo.settings.registries.deleted'), type: 'success' });
-      registries.value = [];
-      page.value = 1;
+      resetPage();
     });
 
     return { selectedRegistry, registries, isEditingRegistry, isSaving, isDeleting, createRegistry, deleteRegistry };

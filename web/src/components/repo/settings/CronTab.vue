@@ -124,7 +124,7 @@ async function loadCrons(page: number): Promise<Cron[] | null> {
   return apiClient.getCronList(repo.value.owner, repo.value.name, page);
 }
 
-const { page, data: crons } = usePagination(loadCrons, () => !selectedCron.value);
+const { resetPage, data: crons } = usePagination(loadCrons, () => !selectedCron.value);
 
 const { doSubmit: createCron, isLoading: isSaving } = useAsyncAction(async () => {
   if (!repo?.value) {
@@ -145,8 +145,7 @@ const { doSubmit: createCron, isLoading: isSaving } = useAsyncAction(async () =>
     type: 'success',
   });
   selectedCron.value = undefined;
-  crons.value = [];
-  page.value = 1;
+  resetPage();
 });
 
 const { doSubmit: deleteCron, isLoading: isDeleting } = useAsyncAction(async (_cron: Cron) => {
@@ -156,8 +155,7 @@ const { doSubmit: deleteCron, isLoading: isDeleting } = useAsyncAction(async (_c
 
   await apiClient.deleteCron(repo.value.owner, repo.value.name, _cron.id);
   notifications.notify({ title: i18n.t('repo.settings.crons.deleted'), type: 'success' });
-  crons.value = [];
-  page.value = 1;
+  resetPage();
 });
 
 const { doSubmit: runCron } = useAsyncAction(async (_cron: Cron) => {

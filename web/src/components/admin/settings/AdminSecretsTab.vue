@@ -93,7 +93,7 @@ export default defineComponent({
       return apiClient.getGlobalSecretList(page);
     }
 
-    const { page, data: secrets } = usePagination(loadSecrets, () => !selectedSecret.value);
+    const { resetPage, data: secrets } = usePagination(loadSecrets, () => !selectedSecret.value);
 
     const { doSubmit: createSecret, isLoading: isSaving } = useAsyncAction(async () => {
       if (!selectedSecret.value) {
@@ -110,15 +110,13 @@ export default defineComponent({
         type: 'success',
       });
       selectedSecret.value = undefined;
-      secrets.value = [];
-      page.value = 1;
+      resetPage();
     });
 
     const { doSubmit: deleteSecret, isLoading: isDeleting } = useAsyncAction(async (_secret: Secret) => {
       await apiClient.deleteGlobalSecret(_secret.name);
       notifications.notify({ title: i18n.t('admin.settings.secrets.deleted'), type: 'success' });
-      secrets.value = [];
-      page.value = 1;
+      resetPage();
     });
 
     function editSecret(secret: Secret) {

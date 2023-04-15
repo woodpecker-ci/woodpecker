@@ -146,7 +146,7 @@ async function loadAgents(page: number): Promise<Agent[] | null> {
   return apiClient.getAgents(page);
 }
 
-const { page, data: agents } = usePagination(loadAgents, () => !selectedAgent.value);
+const { resetPage, data: agents } = usePagination(loadAgents, () => !selectedAgent.value);
 
 const { doSubmit: saveAgent, isLoading: isSaving } = useAsyncAction(async () => {
   if (!selectedAgent.value) {
@@ -163,8 +163,7 @@ const { doSubmit: saveAgent, isLoading: isSaving } = useAsyncAction(async () => 
     title: t(isEditingAgent.value ? 'admin.settings.agents.saved' : 'admin.settings.agents.created'),
     type: 'success',
   });
-  agents.value = [];
-  page.value = 1;
+  resetPage();
 });
 
 const { doSubmit: deleteAgent, isLoading: isDeleting } = useAsyncAction(async (_agent: Agent) => {
@@ -175,8 +174,7 @@ const { doSubmit: deleteAgent, isLoading: isDeleting } = useAsyncAction(async (_
 
   await apiClient.deleteAgent(_agent);
   notifications.notify({ title: t('admin.settings.agents.deleted'), type: 'success' });
-  agents.value = [];
-  page.value = 1;
+  resetPage();
 });
 
 function editAgent(agent: Agent) {
