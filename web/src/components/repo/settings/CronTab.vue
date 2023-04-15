@@ -89,7 +89,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, onMounted, onUnmounted, Ref, ref } from 'vue';
+import { computed, inject, Ref, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
@@ -103,7 +103,7 @@ import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import { useDate } from '~/compositions/useDate';
 import useNotifications from '~/compositions/useNotifications';
-import { PaginatedList } from '~/compositions/usePaginate';
+import { usePagination } from '~/compositions/usePaginate';
 import { Cron, Repo } from '~/lib/api/types';
 import router from '~/router';
 
@@ -112,26 +112,19 @@ const notifications = useNotifications();
 const i18n = useI18n();
 
 const repo = inject<Ref<Repo>>('repo');
-const crons = ref<Cron[]>();
 const selectedCron = ref<Partial<Cron>>();
 const isEditingCron = computed(() => !!selectedCron.value?.id);
 const date = useDate();
 
-async function loadCrons(page: number): Promise<boolean> {
+async function loadCrons(page: number): Promise<Cron[] | null> {
   if (!repo?.value) {
     throw new Error("Unexpected: Can't load repo");
   }
 
-  const c = await apiClient.getCronList(repo.value.owner, repo.value.name, page);
-  if (page === 1 && c !== null) {
-    crons.value = c;
-  } else if (c !== null) {
-    crons.value?.push(...c);
-  }
-  return c !== null && c.length !== 0;
+  return apiClient.getCronList(repo.value.owner, repo.value.name, page);
 }
 
-const list = new PaginatedList(loadCrons, () => !selectedCron.value);
+const { page, data: crons } = usePagination(loadCrons, () => !selectedCron.value);
 
 const { doSubmit: createCron, isLoading: isSaving } = useAsyncAction(async () => {
   if (!repo?.value) {
@@ -152,7 +145,8 @@ const { doSubmit: createCron, isLoading: isSaving } = useAsyncAction(async () =>
     type: 'success',
   });
   selectedCron.value = undefined;
-  list.reset(true);
+  crons.value = [];
+  page.value = 1;
 });
 
 const { doSubmit: deleteCron, isLoading: isDeleting } = useAsyncAction(async (_cron: Cron) => {
@@ -162,7 +156,8 @@ const { doSubmit: deleteCron, isLoading: isDeleting } = useAsyncAction(async (_c
 
   await apiClient.deleteCron(repo.value.owner, repo.value.name, _cron.id);
   notifications.notify({ title: i18n.t('repo.settings.crons.deleted'), type: 'success' });
-  list.reset(true);
+  crons.value = [];
+  page.value = 1;
 });
 
 const { doSubmit: runCron } = useAsyncAction(async (_cron: Cron) => {
@@ -179,12 +174,5 @@ const { doSubmit: runCron } = useAsyncAction(async (_cron: Cron) => {
       pipelineId: pipeline.number,
     },
   });
-});
-
-onMounted(() => {
-  list.init();
-});
-onUnmounted(() => {
-  list.clear();
 });
 </script>

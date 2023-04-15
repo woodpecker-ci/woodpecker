@@ -80,7 +80,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, onMounted, onUnmounted, Ref, ref } from 'vue';
+import { computed, defineComponent, inject, Ref, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
@@ -93,7 +93,7 @@ import Panel from '~/components/layout/Panel.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
-import { PaginatedList } from '~/compositions/usePaginate';
+import { usePagination } from '~/compositions/usePaginate';
 import { Repo } from '~/lib/api/types';
 import { Registry } from '~/lib/api/types/registry';
 
@@ -116,25 +116,18 @@ export default defineComponent({
     const i18n = useI18n();
 
     const repo = inject<Ref<Repo>>('repo');
-    const registries = ref<Registry[]>();
     const selectedRegistry = ref<Partial<Registry>>();
     const isEditingRegistry = computed(() => !!selectedRegistry.value?.id);
 
-    async function loadRegistries(page: number): Promise<boolean> {
+    async function loadRegistries(page: number): Promise<Registry[] | null> {
       if (!repo?.value) {
         throw new Error("Unexpected: Can't load repo");
       }
 
-      const regs = await apiClient.getRegistryList(repo.value.owner, repo.value.name, page);
-      if (page === 1 && regs !== null) {
-        registries.value = regs;
-      } else if (regs !== null) {
-        registries.value?.push(...regs);
-      }
-      return regs !== null && regs.length !== 0;
+      return apiClient.getRegistryList(repo.value.owner, repo.value.name, page);
     }
 
-    const list = new PaginatedList(loadRegistries, () => !selectedRegistry.value);
+    const { page, data: registries } = usePagination(loadRegistries, () => !selectedRegistry.value);
 
     const { doSubmit: createRegistry, isLoading: isSaving } = useAsyncAction(async () => {
       if (!repo?.value) {
@@ -157,7 +150,8 @@ export default defineComponent({
         type: 'success',
       });
       selectedRegistry.value = undefined;
-      list.reset(true);
+      registries.value = [];
+      page.value = 1;
     });
 
     const { doSubmit: deleteRegistry, isLoading: isDeleting } = useAsyncAction(async (_registry: Registry) => {
@@ -168,15 +162,8 @@ export default defineComponent({
       const registryAddress = encodeURIComponent(_registry.address);
       await apiClient.deleteRegistry(repo.value.owner, repo.value.name, registryAddress);
       notifications.notify({ title: i18n.t('repo.settings.registries.deleted'), type: 'success' });
-      list.reset(true);
-    });
-
-    onMounted(() => {
-      list.init();
-    });
-
-    onUnmounted(() => {
-      list.clear();
+      registries.value = [];
+      page.value = 1;
     });
 
     return { selectedRegistry, registries, isEditingRegistry, isSaving, isDeleting, createRegistry, deleteRegistry };

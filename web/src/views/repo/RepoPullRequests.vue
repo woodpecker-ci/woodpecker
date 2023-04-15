@@ -16,47 +16,32 @@
 </template>
 
 <script lang="ts" setup>
-import { inject, onMounted, onUnmounted, Ref, ref, watch } from 'vue';
+import { inject, Ref, watch } from 'vue';
 
 import ListItem from '~/components/atomic/ListItem.vue';
 import useApiClient from '~/compositions/useApiClient';
-import { PaginatedList } from '~/compositions/usePaginate';
+import { usePagination } from '~/compositions/usePaginate';
 import { PullRequest, Repo } from '~/lib/api/types';
 
 const apiClient = useApiClient();
 
-const pullRequests = ref<PullRequest[]>();
 const repo = inject<Ref<Repo>>('repo');
 if (!repo) {
   throw new Error('Unexpected: "repo" should be provided at this place');
 }
 
-async function loadPullRequests(page: number): Promise<boolean> {
+async function loadPullRequests(page: number): Promise<PullRequest[]> {
   if (!repo) {
     throw new Error('Unexpected: "repo" should be provided at this place');
   }
 
-  const pulls = await apiClient.getRepoPullRequests(repo.value.owner, repo.value.name, page);
-
-  if (page === 1) {
-    pullRequests.value = pulls;
-  } else {
-    pullRequests.value?.push(...pulls);
-  }
-  return pulls.length !== 0;
+  return apiClient.getRepoPullRequests(repo.value.owner, repo.value.name, page);
 }
 
-const list = new PaginatedList(loadPullRequests);
-
-onMounted(() => {
-  list.init();
-});
-
-onUnmounted(() => {
-  list.clear();
-});
+const { page, data: pullRequests } = usePagination(loadPullRequests);
 
 watch(repo, () => {
-  list.reset(true);
+  pullRequests.value = [];
+  page.value = 1;
 });
 </script>

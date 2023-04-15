@@ -1,3 +1,6 @@
+import { useInfiniteScroll } from '@vueuse/core';
+import { onMounted, ref, watch } from 'vue';
+
 export async function usePaginate<T>(getSingle: (page: number) => Promise<T[]>): Promise<T[]> {
   let hasMore = true;
   let page = 1;
@@ -12,69 +15,42 @@ export async function usePaginate<T>(getSingle: (page: number) => Promise<T[]>):
   return result;
 }
 
-const lists: Record<number, PaginatedList> = {};
-let currId = 0;
+export function usePagination<T>(
+  _loadData: (page: number) => Promise<T[] | null>,
+  isActive: () => boolean = () => true,
+) {
+  const page = ref(1);
+  const pageSize = ref(0);
+  const hasMore = ref(true);
+  const data = ref<T[]>([]);
+  const loading = ref(false);
 
-const scrollElement = document.querySelector('main > div');
-if (!scrollElement) {
-  throw new Error("Unexpected: Can't get scrollElement");
-}
-scrollElement.addEventListener('scroll', () => {
-  if (scrollElement.scrollTop + scrollElement.clientHeight === scrollElement.scrollHeight) {
-    (Object.keys(lists) as unknown as number[]).forEach((id) => {
-      const list = lists[id];
-      list.nextPage();
-      lists[id] = list;
-    });
-  }
-});
-
-export class PaginatedList {
-  private id = -1;
-
-  private page = 1;
-
-  private hasMore = true;
-
-  private readonly load: (page: number) => Promise<boolean>;
-
-  private readonly isActive: () => boolean;
-
-  constructor(load: (page: number) => Promise<boolean>, isActive: () => boolean = () => true) {
-    this.load = load;
-    this.isActive = isActive;
-  }
-
-  public init() {
-    this.reset(true);
-    this.id = currId;
-    currId += 1;
-    lists[this.id] = this;
-  }
-
-  public reset(reload: boolean) {
-    this.page = 1;
-    this.hasMore = true;
-    if (reload) {
-      this.runLoad();
+  async function loadData() {
+    loading.value = true;
+    const newData = await _loadData(page.value);
+    hasMore.value = newData != null && newData.length >= pageSize.value;
+    if (newData != null) {
+      if (pageSize.value < 1) {
+        pageSize.value = newData.length;
+      }
+      data.value.push(...newData);
     }
+    loading.value = false;
   }
 
-  public clear() {
-    this.reset(false);
-    delete lists[this.id];
-  }
+  onMounted(loadData);
+  watch(page, loadData);
 
-  public nextPage() {
-    this.page += 1;
-    this.runLoad();
-  }
+  useInfiniteScroll(
+    document.getElementById('scroll-component'),
+    () => {
+      if (isActive() && !loading.value && hasMore.value) {
+        // load more
+        page.value += 1;
+      }
+    },
+    { distance: 10 },
+  );
 
-  private async runLoad() {
-    if (this.hasMore && this.isActive()) {
-      // to prevent that load() is called multiple times, we set hasMore = false
-      this.hasMore = false;
-      this.hasMore = await this.load(this.page);
-    }
-  }
+  return { page, data };
 }

@@ -117,7 +117,7 @@
 
 <script lang="ts" setup>
 import { cloneDeep } from 'lodash';
-import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Badge from '~/components/atomic/Badge.vue';
@@ -131,7 +131,7 @@ import Panel from '~/components/layout/Panel.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
-import { PaginatedList } from '~/compositions/usePaginate';
+import { usePagination } from '~/compositions/usePaginate';
 import { Agent } from '~/lib/api/types';
 import timeAgo from '~/utils/timeAgo';
 
@@ -139,21 +139,14 @@ const apiClient = useApiClient();
 const notifications = useNotifications();
 const { t } = useI18n();
 
-const agents = ref<Agent[]>([]);
 const selectedAgent = ref<Partial<Agent>>();
 const isEditingAgent = computed(() => !!selectedAgent.value?.id);
 
-async function loadAgents(page: number): Promise<boolean> {
-  const a = await apiClient.getAgents(page);
-  if (page === 1 && a !== null) {
-    agents.value = a;
-  } else if (a !== null) {
-    agents.value?.push(...a);
-  }
-  return a !== null && a.length !== 0;
+async function loadAgents(page: number): Promise<Agent[] | null> {
+  return apiClient.getAgents(page);
 }
 
-const list = new PaginatedList(loadAgents, () => !selectedAgent.value);
+const { page, data: agents } = usePagination(loadAgents, () => !selectedAgent.value);
 
 const { doSubmit: saveAgent, isLoading: isSaving } = useAsyncAction(async () => {
   if (!selectedAgent.value) {
@@ -170,7 +163,8 @@ const { doSubmit: saveAgent, isLoading: isSaving } = useAsyncAction(async () => 
     title: t(isEditingAgent.value ? 'admin.settings.agents.saved' : 'admin.settings.agents.created'),
     type: 'success',
   });
-  list.reset(true);
+  agents.value = [];
+  page.value = 1;
 });
 
 const { doSubmit: deleteAgent, isLoading: isDeleting } = useAsyncAction(async (_agent: Agent) => {
@@ -181,7 +175,8 @@ const { doSubmit: deleteAgent, isLoading: isDeleting } = useAsyncAction(async (_
 
   await apiClient.deleteAgent(_agent);
   notifications.notify({ title: t('admin.settings.agents.deleted'), type: 'success' });
-  list.reset(true);
+  agents.value = [];
+  page.value = 1;
 });
 
 function editAgent(agent: Agent) {
@@ -191,12 +186,4 @@ function editAgent(agent: Agent) {
 function showAddAgent() {
   selectedAgent.value = cloneDeep({ name: '' });
 }
-
-onMounted(() => {
-  list.init();
-});
-
-onUnmounted(() => {
-  list.clear();
-});
 </script>

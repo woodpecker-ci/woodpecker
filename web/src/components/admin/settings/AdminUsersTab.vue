@@ -84,7 +84,7 @@
 
 <script lang="ts" setup>
 import { cloneDeep } from 'lodash';
-import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Badge from '~/components/atomic/Badge.vue';
@@ -97,28 +97,21 @@ import Panel from '~/components/layout/Panel.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
-import { PaginatedList } from '~/compositions/usePaginate';
+import { usePagination } from '~/compositions/usePaginate';
 import { User } from '~/lib/api/types';
 
 const apiClient = useApiClient();
 const notifications = useNotifications();
 const { t } = useI18n();
 
-const users = ref<User[]>([]);
 const selectedUser = ref<Partial<User>>();
 const isEditingUser = computed(() => !!selectedUser.value?.id);
 
-async function loadUsers(page: number): Promise<boolean> {
-  const u = await apiClient.getUsers(page);
-  if (page === 1 && u !== null) {
-    users.value = u;
-  } else if (u !== null) {
-    users.value?.push(...u);
-  }
-  return u !== null && u.length !== 0;
+async function loadUsers(page: number): Promise<User[] | null> {
+  return apiClient.getUsers(page);
 }
 
-const list = new PaginatedList(loadUsers, () => !selectedUser.value);
+const { page, data: users } = usePagination(loadUsers, () => !selectedUser.value);
 
 const { doSubmit: saveUser, isLoading: isSaving } = useAsyncAction(async () => {
   if (!selectedUser.value) {
@@ -139,7 +132,8 @@ const { doSubmit: saveUser, isLoading: isSaving } = useAsyncAction(async () => {
       type: 'success',
     });
   }
-  list.reset(true);
+  users.value = [];
+  page.value = 1;
 });
 
 const { doSubmit: deleteUser, isLoading: isDeleting } = useAsyncAction(async (_user: User) => {
@@ -150,7 +144,8 @@ const { doSubmit: deleteUser, isLoading: isDeleting } = useAsyncAction(async (_u
 
   await apiClient.deleteUser(_user);
   notifications.notify({ title: t('admin.settings.users.deleted'), type: 'success' });
-  list.reset(true);
+  users.value = [];
+  page.value = 1;
 });
 
 function editUser(user: User) {
@@ -160,12 +155,4 @@ function editUser(user: User) {
 function showAddUser() {
   selectedUser.value = cloneDeep({ login: '' });
 }
-
-onMounted(() => {
-  list.init();
-});
-
-onUnmounted(() => {
-  list.clear();
-});
 </script>
