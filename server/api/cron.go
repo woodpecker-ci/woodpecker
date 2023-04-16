@@ -204,7 +204,7 @@ func DeleteCron(c *gin.Context) {
 		return
 	}
 	if err := store.FromContext(c).CronDelete(repo, id); err != nil {
-		c.String(http.StatusInternalServerError, "Error deleting cron %d. %s", id, err)
+		handleDbGetError(c, err)
 		return
 	}
 	c.String(http.StatusNoContent, "")

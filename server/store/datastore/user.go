@@ -55,7 +55,7 @@ func (s storage) DeleteUser(user *model.User) error {
 		return err
 	}
 
-	if _, err := sess.ID(user.ID).Delete(new(model.User)); err != nil {
+	if err := wrapDelete(sess.ID(user.ID).Delete(new(model.User))); err != nil {
 		return err
 	}
 

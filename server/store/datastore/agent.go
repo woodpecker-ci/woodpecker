@@ -47,6 +47,5 @@ func (s storage) AgentUpdate(agent *model.Agent) error {
 }
 
 func (s storage) AgentDelete(agent *model.Agent) error {
-	_, err := s.engine.ID(agent.ID).Delete(new(model.Agent))
-	return err
+	return wrapDelete(s.engine.ID(agent.ID).Delete(new(model.Agent)))
 }

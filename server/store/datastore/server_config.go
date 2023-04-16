@@ -41,6 +41,5 @@ func (s storage) ServerConfigDelete(key string) error {
 		Key: key,
 	}
 
-	_, err := s.engine.Delete(config)
-	return err
+	return wrapDelete(s.engine.Delete(config))
 }
