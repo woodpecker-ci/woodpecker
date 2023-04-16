@@ -118,7 +118,7 @@ func PatchGlobalSecret(c *gin.Context) {
 func DeleteGlobalSecret(c *gin.Context) {
 	name := c.Param("secret")
 	if err := server.Config.Services.Secrets.GlobalSecretDelete(name); err != nil {
-		c.String(http.StatusInternalServerError, "Error deleting global secret %q. %s", name, err)
+		handleDbGetError(c, err)
 		return
 	}
 	c.String(http.StatusNoContent, "")
