@@ -1,5 +1,5 @@
 import { useInfiniteScroll } from '@vueuse/core';
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, Ref, ref, watch } from 'vue';
 
 export async function usePaginate<T>(getSingle: (page: number) => Promise<T[]>): Promise<T[]> {
   let hasMore = true;
@@ -18,18 +18,19 @@ export async function usePaginate<T>(getSingle: (page: number) => Promise<T[]>):
 export function usePagination<T>(
   _loadData: (page: number) => Promise<T[] | null>,
   isActive: () => boolean = () => true,
+  scrollElement = ref(document.getElementById('scroll-component')),
 ) {
   const page = ref(1);
   const pageSize = ref(0);
   const hasMore = ref(true);
-  const data = ref<T[]>([]);
+  const data = ref<T[]>([]) as Ref<T[]>;
   const loading = ref(false);
 
   async function loadData() {
     loading.value = true;
     const newData = await _loadData(page.value);
-    hasMore.value = newData != null && newData.length >= pageSize.value;
-    if (newData != null) {
+    hasMore.value = newData !== null && newData.length >= pageSize.value;
+    if (newData !== null) {
       if (page.value === 1) {
         pageSize.value = newData.length;
         data.value = newData;
@@ -46,7 +47,7 @@ export function usePagination<T>(
   watch(page, loadData);
 
   useInfiniteScroll(
-    document.getElementById('scroll-component'),
+    scrollElement,
     () => {
       if (isActive() && !loading.value && hasMore.value) {
         // load more
