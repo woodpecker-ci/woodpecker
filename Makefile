@@ -26,6 +26,7 @@ ifeq ($(HAS_GO),GO)
 	CGO_CFLAGS ?= $(shell go env CGO_CFLAGS)
 endif
 CGO_CFLAGS ?=
+GO_VERSION ?= $(shell go version | cut -d' ' -f3 | tr -d go)
 
 # If the first argument is "in_docker"...
 ifeq (in_docker,$(firstword $(MAKECMDGOALS)))
@@ -35,7 +36,7 @@ ifeq (in_docker,$(firstword $(MAKECMDGOALS)))
   $(eval $(MAKE_ARGS):;@:)
 
   in_docker:
-	@[ "1" -eq "$(shell docker image ls woodpecker/make:local -a | wc -l)" ] && docker build -f ./docker/Dockerfile.make -t woodpecker/make:local . || echo reuse existing docker image
+	@[ "1" -eq "$(shell docker image ls woodpecker/make:local -a | wc -l)" ] && docker build -f ./docker/Dockerfile.make --build-arg GO=$(GO_VERSION) -t woodpecker/make:local . || echo reuse existing docker image
 	@echo run in docker:
 	@docker run -it \
 		--user $(shell id -u):$(shell id -g) \

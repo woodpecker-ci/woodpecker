@@ -11,6 +11,7 @@ variables:
   - &platforms_server 'linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le,linux/riscv64'
   - &platforms_preview 'linux/arm/v6,linux/arm64/v8,linux/amd64,linux/riscv64,windows/amd64'
   - &platforms_alpine 'linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le'
+  - &build_args 'GO=1.20 ALPINE=3.16'
 
 pipeline:
   vendor:
@@ -50,6 +51,7 @@ pipeline:
       repo: woodpeckerci/woodpecker-server
       dockerfile: docker/Dockerfile.server.multiarch
       platforms: *platforms_server
+      build_args: *build_args
       tag: pull_${CI_COMMIT_PULL_REQUEST}
     when:
       event: pull_request
@@ -62,6 +64,7 @@ pipeline:
       repo: woodpeckerci/woodpecker-server
       dockerfile: docker/Dockerfile.server.alpine.multiarch
       platforms: *platforms_alpine
+      build_args: *build_args
       tag: pull_${CI_COMMIT_PULL_REQUEST}-alpine
     when:
       event: pull_request
@@ -74,6 +77,7 @@ pipeline:
       repo: woodpeckerci/woodpecker-server
       dockerfile: docker/Dockerfile.server.multiarch
       platforms: *platforms_server
+      build_args: *build_args
       tag: [next, "next-${CI_COMMIT_SHA:0:10}"]
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
@@ -87,6 +91,7 @@ pipeline:
       repo: woodpeckerci/woodpecker-server
       dockerfile: docker/Dockerfile.server.alpine.multiarch
       platforms: *platforms_alpine
+      build_args: *build_args
       tag: [next-alpine, "next-${CI_COMMIT_SHA:0:10}-alpine"]
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
@@ -100,6 +105,7 @@ pipeline:
       repo: woodpeckerci/woodpecker-server
       dockerfile: docker/Dockerfile.server.multiarch
       platforms: *platforms_server
+      build_args: *build_args
       tag: ${CI_COMMIT_BRANCH##release/}
     when:
       branch: release/*
@@ -113,6 +119,7 @@ pipeline:
       repo: woodpeckerci/woodpecker-server
       dockerfile: docker/Dockerfile.server.alpine.multiarch
       platforms: *platforms_alpine
+      build_args: *build_args
       tag: ${CI_COMMIT_BRANCH##release/}
     when:
       branch: release/*
@@ -126,6 +133,7 @@ pipeline:
       repo: woodpeckerci/woodpecker-server
       dockerfile: docker/Dockerfile.server.multiarch
       platforms: *platforms_server
+      build_args: *build_args
       # remove 'latest' on older version branches to avoid accidental downgrade
       tag: [latest, "${CI_COMMIT_TAG}"]
     when:
@@ -139,6 +147,7 @@ pipeline:
       repo: woodpeckerci/woodpecker-server
       dockerfile: docker/Dockerfile.server.alpine.multiarch
       platforms: *platforms_alpine
+      build_args: *build_args
       # remove 'latest-alpine' on older version branches to avoid accidental downgrade
       tag: [latest-alpine, "${CI_COMMIT_TAG}-alpine"]
     when:
@@ -156,6 +165,7 @@ pipeline:
       repo: woodpeckerci/woodpecker-agent
       dockerfile: docker/Dockerfile.agent.multiarch
       platforms: *platforms_preview
+      build_args: *build_args
       tag: pull_${CI_COMMIT_PULL_REQUEST}
     when:
       event: pull_request
@@ -168,6 +178,7 @@ pipeline:
       repo: woodpeckerci/woodpecker-agent
       dockerfile: docker/Dockerfile.agent.multiarch
       platforms: *platforms_release
+      build_args: *build_args
       tag: [next, "next-${CI_COMMIT_SHA:0:10}"]
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
@@ -181,6 +192,7 @@ pipeline:
       repo: woodpeckerci/woodpecker-agent
       dockerfile: docker/Dockerfile.agent.alpine.multiarch
       platforms: *platforms_alpine
+      build_args: *build_args
       tag: [next-alpine, "next-${CI_COMMIT_SHA:0:10}-alpine"]
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
@@ -194,6 +206,7 @@ pipeline:
       repo: woodpeckerci/woodpecker-agent
       dockerfile: docker/Dockerfile.agent.multiarch
       platforms: *platforms_release
+      build_args: *build_args
       tag: ${CI_COMMIT_BRANCH##release/}
     when:
       branch: release/*
@@ -207,6 +220,7 @@ pipeline:
       repo: woodpeckerci/woodpecker-agent
       dockerfile: docker/Dockerfile.agent.alpine.multiarch
       platforms: *platforms_alpine
+      build_args: *build_args
       tag: ${CI_COMMIT_BRANCH##release/}
     when:
       branch: release/*
@@ -220,6 +234,7 @@ pipeline:
       repo: woodpeckerci/woodpecker-agent
       dockerfile: docker/Dockerfile.agent.multiarch
       platforms: *platforms_release
+      build_args: *build_args
       # remove 'latest' on older version branches to avoid accidental downgrade
       tag: [latest, "${CI_COMMIT_TAG}"]
     when:
@@ -233,6 +248,7 @@ pipeline:
       repo: woodpeckerci/woodpecker-agent
       dockerfile: docker/Dockerfile.agent.alpine.multiarch
       platforms: *platforms_alpine
+      build_args: *build_args
       # remove 'latest-alpine' on older version branches to avoid accidental downgrade
       tag: [latest-alpine, "${CI_COMMIT_TAG}-alpine"]
     when:
@@ -250,6 +266,7 @@ pipeline:
       repo: woodpeckerci/woodpecker-cli
       dockerfile: docker/Dockerfile.cli.multiarch
       platforms: *platforms_preview
+      build_args: *build_args
       tag: pull_${CI_COMMIT_PULL_REQUEST}
     when:
       event: pull_request
@@ -262,6 +279,7 @@ pipeline:
       repo: woodpeckerci/woodpecker-cli
       dockerfile: docker/Dockerfile.cli.multiarch
       platforms: *platforms_release
+      build_args: *build_args
       tag: [next, "next-${CI_COMMIT_SHA:0:10}"]
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
@@ -275,6 +293,7 @@ pipeline:
       repo: woodpeckerci/woodpecker-cli
       dockerfile: docker/Dockerfile.cli.alpine.multiarch
       platforms: *platforms_alpine
+      build_args: *build_args
       tag: [next-alpine, "next-${CI_COMMIT_SHA:0:10}-alpine"]
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
@@ -288,6 +307,7 @@ pipeline:
       repo: woodpeckerci/woodpecker-cli
       dockerfile: docker/Dockerfile.cli.multiarch
       platforms: *platforms_release
+      build_args: *build_args
       tag: ${CI_COMMIT_BRANCH##release/}
     when:
       branch: release/*
@@ -301,6 +321,7 @@ pipeline:
       repo: woodpeckerci/woodpecker-cli
       dockerfile: docker/Dockerfile.cli.alpine.multiarch
       platforms: *platforms_alpine
+      build_args: *build_args
       tag: ${CI_COMMIT_BRANCH##release/}
     when:
       branch: release/*
@@ -314,6 +335,7 @@ pipeline:
       repo: woodpeckerci/woodpecker-cli
       dockerfile: docker/Dockerfile.cli.multiarch
       platforms: *platforms_release
+      build_args: *build_args
       # remove 'latest' on older version branches to avoid accidental downgrade
       tag: [latest, "${CI_COMMIT_TAG}"]
     when:
@@ -327,6 +349,7 @@ pipeline:
       repo: woodpeckerci/woodpecker-cli
       dockerfile: docker/Dockerfile.cli.alpine.multiarch
       platforms: *platforms_alpine
+      build_args: *build_args
       # remove 'latest-alpine' on older version branches to avoid accidental downgrade
       tag: [latest-alpine, "${CI_COMMIT_TAG}-alpine"]
     when:
