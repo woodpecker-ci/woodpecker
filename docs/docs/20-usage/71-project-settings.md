@@ -16,7 +16,7 @@ Your Version-Control-System will notify Woodpecker about events via webhooks. If
 
 ### Allow pull requests
 
-Enables handling WebHook's Pull event. If disabled, then pipeline won't run for Pull requests. 
+Enables handling webhook's pull request event. If disabled, then pipeline won't run for pull requests.
 
 ### Protected
 
@@ -34,7 +34,7 @@ Only server admins can set this option. If you are not a server admin this optio
 
 ### Only inject netrc credentials into trusted containers
 
-Cloning pipeline step may need git credentials. They are injected via netrc. By default it works in trusted containers only: this otion, above `trusted` option and trusted images in clone plugins. If you uncheck the option, git credentials will be injected into any container in clone step.
+Cloning pipeline step may need git credentials. They are injected via netrc. By default, they're only injected if this option is enabled, the repo is trusted ([see above](#trusted)) or the image is a trusted clone image. If you uncheck the option, git credentials will be injected into any container in clone step.
 
 ## Project visibility
 
