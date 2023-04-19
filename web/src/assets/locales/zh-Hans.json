@@ -27,10 +27,15 @@
       "settings": "设置"
     }
   },
+  "back": "返回",
+  "cancel": "取消",
   "color_scheme_dark": "切换到浅色模式",
   "color_scheme_light": "切换到深色模式",
   "docs": "文档",
   "documentation_for": "\"{topic}\"的文档",
+  "errors": {
+    "not_found": "服务器找不到请求的对象"
+  },
   "login": "登录",
   "logout": "退出登录",
   "not_found": {
