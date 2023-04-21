@@ -34,7 +34,7 @@ For reference see [Configuration Cheat Sheet](https://docs.gitea.io/en-us/config
 
 ![gitea oauth setup](gitea_oauth.gif)
 
-If you run the Woodpecker CI and Gitea behind reverse proxy that authenticates users using specifiec HTTP header, you should configure Woodpecker CI to forward authentication header to Gitea using the following configuration options (assumes Woodpecker CI listening on http://192.168.1.100:8000/ behind the proxy and authentication header name `X-Forward-Username`):
+If you run Woodpecker CI and Gitea behind a reverse proxy that authenticates users using specific HTTP header, you should configure Woodpecker CI to forward authentication header to Gitea using the following configuration options (assumes Woodpecker CI listening on http://192.168.1.100:8000/ behind the proxy and authentication header name `X-Forward-Username`):
 ```WOODPECKER_HOST_INTERNAL=http://192.168.1.100:8000/
 WOODPECKER_GITEA_REV_PROXY_AUTH=true
 WOODPECKER_GITEA_REV_PROXY_AUTH_HEADER=X-Forward-Username
