@@ -144,11 +144,11 @@ func (c *Constraint) Match(metadata frontend.Metadata, global bool) (bool, error
 		c.SetDefaultEventFilter()
 
 		// apply step only filters
-		match = c.Matrix.Match(metadata.Workflow.Matrix)
+		match = c.Matrix.Match(metadata.Workflow.Matrix) &&
+			c.Platform.Match(metadata.Sys.Platform)
 	}
 
-	match = match && c.Platform.Match(metadata.Sys.Platform) &&
-		c.Environment.Match(metadata.Curr.Target) &&
+	match = match && c.Environment.Match(metadata.Curr.Target) &&
 		c.Event.Match(metadata.Curr.Event) &&
 		c.Repo.Match(metadata.Repo.Name) &&
 		c.Ref.Match(metadata.Curr.Commit.Ref) &&
