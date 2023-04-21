@@ -83,7 +83,7 @@ Configure if SSL verification should be skipped.
 ### `WOODPECKER_GITEA_REV_PROXY_AUTH`
 > Default: false
 
-Enable gitea authentication using HTTP header specified in `WOODPECKER_GITEA_REV_PROXY_AUTH_HEADER` option.
+Enable Gitea authentication using HTTP header specified in `WOODPECKER_GITEA_REV_PROXY_AUTH_HEADER` option.
 
 ### `WOODPECKER_GITEA_REV_PROXY_AUTH_HEADER`
 > Default: empty
