@@ -401,10 +401,11 @@ func TestConstraintStatusSuccess(t *testing.T) {
 
 func TestConstraints(t *testing.T) {
 	testdata := []struct {
-		desc string
-		conf string
-		with frontend.Metadata
-		want bool
+		desc   string
+		conf   string
+		with   frontend.Metadata
+		global bool
+		want   bool
 	}{
 		{
 			desc: "no constraints, must match on default events",
@@ -515,17 +516,18 @@ func TestConstraints(t *testing.T) {
 			want: true,
 		},
 		{
-			desc: "test case for issue #1677",
-			conf: `{platform: linux/amd64}`,
-			with: frontend.Metadata{Curr: frontend.Pipeline{Event: frontend.EventPush, Commit: frontend.Commit{Branch: "main"}}},
-			want: true,
+			desc:   "test case for issue #1677",
+			conf:   `{platform: linux/amd64}`,
+			with:   frontend.Metadata{Curr: frontend.Pipeline{Event: frontend.EventPush, Commit: frontend.Commit{Branch: "main"}}},
+			global: true,
+			want:   true,
 		},
 	}
 
 	for _, test := range testdata {
 		t.Run(test.desc, func(t *testing.T) {
 			c := parseConstraints(t, test.conf)
-			got, err := c.Match(test.with, false)
+			got, err := c.Match(test.with, test.global)
 			if err != nil {
 				t.Errorf("Match returned error: %v", err)
 			}
