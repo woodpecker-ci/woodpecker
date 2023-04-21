@@ -514,6 +514,12 @@ func TestConstraints(t *testing.T) {
 			with: frontend.Metadata{Curr: frontend.Pipeline{Event: frontend.EventPush}, Repo: frontend.Repo{Name: "owner/repo"}},
 			want: true,
 		},
+		{
+			desc: "test case for issue #1677",
+			conf: `{platform: linux/amd64}`,
+			with: frontend.Metadata{Curr: frontend.Pipeline{Event: frontend.EventPush, Commit: frontend.Commit{Branch: "main"}}},
+			want: true,
+		},
 	}
 
 	for _, test := range testdata {
