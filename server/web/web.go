@@ -18,11 +18,13 @@ import (
 	"crypto/md5"
 	"fmt"
 	"net/http"
+	"regexp"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 
+	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/web"
 )
 
@@ -68,8 +70,10 @@ func handleIndex(c *gin.Context) {
 	if err != nil {
 		log.Fatal().Err(err).Msg("can not find index.html")
 	}
+	data = regexp.MustCompile("/\\S+\\.(js|css|png|svg)").ReplaceAll(data, []byte(server.Config.Server.RootURL + "$0"))
+
 	rw.Header().Set("Content-Type", "text/html; charset=UTF-8")
-	rw.WriteHeader(200)
+	rw.WriteHeader(http.StatusOK)
 	if _, err := rw.Write(data); err != nil {
 		log.Error().Err(err).Msg("can not write index.html")
 	}
