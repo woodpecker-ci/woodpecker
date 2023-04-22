@@ -81,7 +81,7 @@
                 "success": "Repository settings updated",
                 "pipeline_path": {
                     "path": "Pipeline path",
-                    "default": "By default: .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml",
+                    "default": "By default: .woodpecker/*.{yaml,yml} -> .woodpecker.yaml -> .woodpecker.yml -> .drone.yml",
                     "desc": "Path to your pipeline config (for example {0}). Folders should end with a {1}.",
                     "desc_path_example": "my/path/"
                 },
