@@ -30,11 +30,11 @@ func TestStringSliceAddToMap(t *testing.T) {
 	}{
 		{
 			name: "add values to map",
-			sl:   []string{"foo=bar", "baz=qux"},
+			sl:   []string{"foo=bar", "baz=qux=nux"},
 			m:    make(map[string]string),
 			expected: map[string]string{
 				"foo": "bar",
-				"baz": "qux",
+				"baz": "qux=nux",
 			},
 			err: false,
 		},
