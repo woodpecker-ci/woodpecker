@@ -36,23 +36,24 @@ Just add a new section called **variables** like this:
 
 ```yaml
 variables:
-  &base-plugin-settings
+  - &base-plugin-settings
     target: dist
     recursive: false
     try: true
-  &special-setting
+  - &special-setting
     special: true
+  - &some-plugin codeberg.org/6543/docker-images/print_env
 
 pipeline:
   develop:
-    image: some-plugin
+    image: *some-plugin
     settings:
       <<: [*base-plugin-settings, *special-setting] # merge two maps into an empty map
     when:
       branch: develop
 
   main:
-    image: some-plugin
+    image: *some-plugin
     settings:
       <<: *base-plugin-settings # merge one map and ...
       try: false # ... overwrite original value
@@ -65,12 +66,12 @@ pipeline:
 
 ```yaml
 variables:
-  &pre_cmds
+  pre_cmds: &pre_cmds
    - echo start
    - whoami
-  &post_cmds
+  post_cmds: &post_cmds
    - echo stop
-  &hello_cmd
+  hello_cmd: &hello_cmd
    - echo hello
 
 pipeline:
