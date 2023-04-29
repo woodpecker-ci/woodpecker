@@ -46,6 +46,11 @@ var flags = []cli.Flag{
 		Usage:   "server fully qualified url (<scheme>://<host>)",
 	},
 	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_ROOT_URL"},
+		Name:    "root-url",
+		Usage:   "server url root (used for statics loading when having a url path prefix)",
+	},
+	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_SERVER_ADDR"},
 		Name:    "server-addr",
 		Usage:   "server address",
