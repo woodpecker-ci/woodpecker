@@ -366,7 +366,7 @@
           "netrc_only_trusted": "Netrc-Zugangsdaten nur in vertrauenswürdigen Containern zum Klonen bereitstellen"
         },
         "pipeline_path": {
-          "default": "Standardmäßig: .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml",
+          "default": "Standardmäßig: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yml -> .drone.yml",
           "desc": "Pfad zu deiner Pipeline-Konfiguration (z. B. {0}). Verzeichnisse sollten mit einem {1} enden.",
           "desc_path_example": "mein/pfad/",
           "path": "Pipeline-Pfad"
