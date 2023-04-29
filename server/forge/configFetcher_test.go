@@ -527,7 +527,7 @@ func TestFetchFromConfigService(t *testing.T) {
 				&model.User{Token: "xxx"},
 				repo,
 				&model.Pipeline{Commit: "89ab7b2d6bfb347144ac7c557e638ab402848fee"},
-				"",
+				tt.repoConfig,
 			)
 			files, err := configFetcher.Fetch(context.Background())
 			if tt.expectedError && err == nil {
