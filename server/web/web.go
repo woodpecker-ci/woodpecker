@@ -70,7 +70,7 @@ func handleIndex(c *gin.Context) {
 	if err != nil {
 		log.Fatal().Err(err).Msg("can not find index.html")
 	}
-	data = regexp.MustCompile("/\\S+\\.(js|css|png|svg)").ReplaceAll(data, []byte(server.Config.Server.RootURL+"$0"))
+	data = regexp.MustCompile(`/\S+\.(js|css|png|svg)`).ReplaceAll(data, []byte(server.Config.Server.RootURL+"$0"))
 
 	rw.Header().Set("Content-Type", "text/html; charset=UTF-8")
 	rw.WriteHeader(http.StatusOK)
