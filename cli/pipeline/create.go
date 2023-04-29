@@ -39,6 +39,11 @@ var pipelineCreateCmd = &cli.Command{
 			Usage:    "branch to create pipeline from",
 			Required: true,
 		},
+		&cli.StringFlag{
+			Name:  "event",
+			Usage: "specify the event",
+			Value: "manual",
+		},
 		&cli.StringSliceFlag{
 			Name:  "var",
 			Usage: "key=value",
@@ -60,6 +65,7 @@ func pipelineCreate(c *cli.Context) error {
 	}
 
 	branch := c.String("branch")
+	event := c.String("event")
 	variables := make(map[string]string)
 
 	for _, vaz := range c.StringSlice("var") {
@@ -71,6 +77,7 @@ func pipelineCreate(c *cli.Context) error {
 
 	options := &woodpecker.PipelineOptions{
 		Branch:    branch,
+		Event:     event,
 		Variables: variables,
 	}
 

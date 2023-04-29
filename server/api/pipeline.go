@@ -52,11 +52,20 @@ func CreatePipeline(c *gin.Context) {
 		return
 	}
 
+	event := model.WebhookEvent(p.Event)
+	if event == "" {
+		event = model.EventManual
+	}
+	if err := model.ValidateWebhookEvent(event); err != nil {
+		_ = c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
 	user := session.User(c)
 
 	lastCommit, _ := server.Config.Services.Forge.BranchHead(c, user, repo, p.Branch)
 
-	tmpBuild := createTmpPipeline(model.EventManual, lastCommit, repo, user, &p)
+	tmpBuild := createTmpPipeline(event, lastCommit, repo, user, &p)
 
 	pl, err := pipeline.Create(c, _store, repo, tmpBuild)
 	if err != nil {
@@ -374,9 +383,8 @@ func PostPipeline(c *gin.Context) {
 	if event, ok := c.GetQuery("event"); ok {
 		pl.Event = model.WebhookEvent(event)
 
-		if !model.ValidateWebhookEvent(pl.Event) {
-			msg := fmt.Sprintf("pipeline event '%s' is invalid", event)
-			c.String(http.StatusBadRequest, msg)
+		if err := model.ValidateWebhookEvent(pl.Event); err != nil {
+			_ = c.AbortWithError(http.StatusBadRequest, err)
 			return
 		}
 	}

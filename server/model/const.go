@@ -15,6 +15,11 @@
 
 package model
 
+import (
+	"errors"
+	"fmt"
+)
+
 type WebhookEvent string
 
 const (
@@ -32,12 +37,14 @@ func (wel WebhookEventList) Len() int           { return len(wel) }
 func (wel WebhookEventList) Swap(i, j int)      { wel[i], wel[j] = wel[j], wel[i] }
 func (wel WebhookEventList) Less(i, j int) bool { return wel[i] < wel[j] }
 
-func ValidateWebhookEvent(s WebhookEvent) bool {
+var ErrInvalidWebhookEvent = errors.New("invalid webhook event")
+
+func ValidateWebhookEvent(s WebhookEvent) error {
 	switch s {
 	case EventPush, EventPull, EventTag, EventDeploy, EventCron, EventManual:
-		return true
+		return nil
 	default:
-		return false
+		return fmt.Errorf("%w: %s", ErrInvalidWebhookEvent, s)
 	}
 }
 
