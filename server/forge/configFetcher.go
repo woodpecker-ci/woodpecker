@@ -39,16 +39,18 @@ type configFetcher struct {
 	repo            *model.Repo
 	pipeline        *model.Pipeline
 	configExtension config.Extension
+	configPath      string
 	timeout         time.Duration
 }
 
-func NewConfigFetcher(forge Forge, timeout time.Duration, configExtension config.Extension, user *model.User, repo *model.Repo, pipeline *model.Pipeline) ConfigFetcher {
+func NewConfigFetcher(forge Forge, timeout time.Duration, configExtension config.Extension, user *model.User, repo *model.Repo, pipeline *model.Pipeline, configPath string) ConfigFetcher {
 	return &configFetcher{
 		forge:           forge,
 		user:            user,
 		repo:            repo,
 		pipeline:        pipeline,
 		configExtension: configExtension,
+		configPath:      configPath,
 		timeout:         timeout,
 	}
 }
@@ -59,7 +61,7 @@ func (cf *configFetcher) Fetch(ctx context.Context) (files []*types.FileMeta, er
 
 	// try to fetch 3 times
 	for i := 0; i < 3; i++ {
-		files, err = cf.fetch(ctx, time.Second*cf.timeout, strings.TrimSpace(cf.repo.Config))
+		files, err = cf.fetch(ctx, time.Second*cf.timeout, strings.TrimSpace(cf.configPath))
 		if err != nil {
 			log.Trace().Err(err).Msgf("%d. try failed", i+1)
 		}

@@ -60,9 +60,9 @@ func CreatePipeline(c *gin.Context) {
 		return
 	}
 
-	// if set temporary change config path
-	if opts.ConfigPath != "" {
-		repo.Config = opts.ConfigPath
+	// if not temporary set to change config path, use default one
+	if opts.ConfigPath == "" {
+		opts.ConfigPath = repo.Config
 	}
 
 	user := session.User(c)
@@ -71,7 +71,7 @@ func CreatePipeline(c *gin.Context) {
 
 	tmpBuild := createTmpPipeline(lastCommit, repo, user, &opts)
 
-	pl, err := pipeline.Create(c, _store, repo, tmpBuild)
+	pl, err := pipeline.Create(c, _store, repo, tmpBuild, opts.ConfigPath)
 	if err != nil {
 		handlePipelineErr(c, err)
 	} else {

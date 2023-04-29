@@ -29,7 +29,12 @@ import (
 )
 
 // Create a new pipeline and start it
-func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline *model.Pipeline) (*model.Pipeline, error) {
+func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline *model.Pipeline, optConfigPath ...string) (*model.Pipeline, error) {
+	configPath := repo.Config
+	if len(optConfigPath) != 0 {
+		configPath = optConfigPath[0]
+	}
+
 	repoUser, err := _store.GetUser(repo.UserID)
 	if err != nil {
 		msg := fmt.Sprintf("failure to find repo owner via id '%d'", repo.UserID)
@@ -60,7 +65,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	)
 
 	// fetch the pipeline file from the forge
-	configFetcher := forge.NewConfigFetcher(server.Config.Services.Forge, server.Config.Services.Timeout, server.Config.Services.ConfigService, repoUser, repo, pipeline)
+	configFetcher := forge.NewConfigFetcher(server.Config.Services.Forge, server.Config.Services.Timeout, server.Config.Services.ConfigService, repoUser, repo, pipeline, configPath)
 	forgeYamlConfigs, configFetchErr = configFetcher.Fetch(ctx)
 	if configFetchErr == nil {
 		filtered, parseErr = checkIfFiltered(pipeline, forgeYamlConfigs)
