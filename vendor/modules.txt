@@ -1,15 +1,12 @@
 # 4d63.com/gochecknoglobals v0.1.0
 ## explicit; go 1.15
 4d63.com/gochecknoglobals/checknoglobals
-# cloud.google.com/go/compute v1.18.0
-## explicit; go 1.19
-# cloud.google.com/go/compute/metadata v0.2.3
-## explicit; go 1.19
 # code.gitea.io/sdk/gitea v0.15.0
 ## explicit; go 1.13
 code.gitea.io/sdk/gitea
-# dmitri.shuralyov.com/gpu/mtl v0.0.0-20221208032759-85de2813cf6b
-## explicit
+# codeberg.org/6543/go-yaml2json v1.0.0
+## explicit; go 1.16
+codeberg.org/6543/go-yaml2json
 # github.com/Antonboom/errname v0.1.5
 ## explicit; go 1.17
 github.com/Antonboom/errname/pkg/analyzer
@@ -190,8 +187,6 @@ github.com/go-critic/go-critic/checkers/internal/astwalk
 github.com/go-critic/go-critic/checkers/internal/lintutil
 github.com/go-critic/go-critic/checkers/rulesdata
 github.com/go-critic/go-critic/framework/linter
-# github.com/go-gl/glfw/v3.3/glfw v0.0.0-20221017161538-93cebf72946b
-## explicit; go 1.10
 # github.com/go-playground/locales v0.14.0
 ## explicit; go 1.13
 github.com/go-playground/locales
@@ -402,8 +397,6 @@ github.com/hexops/gotextdiff/span
 # github.com/inconshreveable/mousetrap v1.0.0
 ## explicit
 github.com/inconshreveable/mousetrap
-# github.com/jezek/xgb v1.1.0
-## explicit; go 1.11
 # github.com/jgautheron/goconst v1.5.1
 ## explicit; go 1.13
 github.com/jgautheron/goconst
@@ -690,10 +683,10 @@ github.com/spf13/viper/internal/encoding/yaml
 # github.com/ssgreg/nlreturn/v2 v2.2.1
 ## explicit; go 1.13
 github.com/ssgreg/nlreturn/v2/pkg/nlreturn
-# github.com/stretchr/objx v0.3.0
+# github.com/stretchr/objx v0.4.0
 ## explicit; go 1.12
 github.com/stretchr/objx
-# github.com/stretchr/testify v1.7.0
+# github.com/stretchr/testify v1.8.0
 ## explicit; go 1.13
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/mock
@@ -776,8 +769,6 @@ github.com/yagipy/maintidx/pkg/halstvol
 # github.com/yeya24/promlinter v0.1.1-0.20210918184747-d757024714a1
 ## explicit; go 1.14
 github.com/yeya24/promlinter
-# github.com/yuin/goldmark v1.5.4
-## explicit; go 1.18
 # gitlab.com/bosi/decorder v0.2.1
 ## explicit; go 1.17
 gitlab.com/bosi/decorder
@@ -793,16 +784,6 @@ golang.org/x/crypto/openpgp/errors
 golang.org/x/crypto/openpgp/packet
 golang.org/x/crypto/openpgp/s2k
 golang.org/x/crypto/sha3
-# golang.org/x/exp v0.0.0-20230310171629-522b1b587ee0
-## explicit; go 1.18
-# golang.org/x/exp/shiny v0.0.0-20230310171629-522b1b587ee0
-## explicit; go 1.18
-# golang.org/x/image v0.6.0
-## explicit; go 1.12
-# golang.org/x/lint v0.0.0-20210508222113-6edffad5e616
-## explicit; go 1.11
-# golang.org/x/mobile v0.0.0-20230301163155-e0f57694e12c
-## explicit; go 1.17
 # golang.org/x/mod v0.9.0
 ## explicit; go 1.17
 golang.org/x/mod/internal/lazyregexp
@@ -835,8 +816,6 @@ golang.org/x/sys/execabs
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
 golang.org/x/sys/windows
-# golang.org/x/term v0.6.0
-## explicit; go 1.17
 # golang.org/x/text v0.8.0
 ## explicit; go 1.17
 golang.org/x/text/internal/language
@@ -924,8 +903,6 @@ golang.org/x/tools/internal/pkgbits
 golang.org/x/tools/internal/tokeninternal
 golang.org/x/tools/internal/typeparams
 golang.org/x/tools/internal/typesinternal
-# golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2
-## explicit; go 1.17
 # google.golang.org/appengine v1.6.7
 ## explicit; go 1.11
 google.golang.org/appengine/internal
@@ -1028,7 +1005,7 @@ gopkg.in/ini.v1
 # gopkg.in/yaml.v2 v2.4.0
 ## explicit; go 1.15
 gopkg.in/yaml.v2
-# gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
+# gopkg.in/yaml.v3 v3.0.1
 ## explicit
 gopkg.in/yaml.v3
 # honnef.co/go/tools v0.2.2
