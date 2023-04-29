@@ -31,10 +31,12 @@ import (
 // etag is an identifier for a resource version
 // it lets caches determine if resource is still the same and not send it again
 var etag = fmt.Sprintf("%x", md5.Sum([]byte(time.Now().String())))
+var indexHtml []byte
 
 // New returns a gin engine to serve the web frontend.
 func New() (*gin.Engine, error) {
 	e := gin.New()
+	indexHtml = parseIndex()
 
 	e.Use(setupCache)
 
@@ -66,17 +68,19 @@ func redirect(location string, status ...int) func(ctx *gin.Context) {
 
 func handleIndex(c *gin.Context) {
 	rw := c.Writer
+	rw.Header().Set("Content-Type", "text/html; charset=UTF-8")
+	rw.WriteHeader(http.StatusOK)
+	if _, err := rw.Write(indexHtml); err != nil {
+		log.Error().Err(err).Msg("can not write index.html")
+	}
+}
+
+func parseIndex() []byte {
 	data, err := web.Lookup("index.html")
 	if err != nil {
 		log.Fatal().Err(err).Msg("can not find index.html")
 	}
-	data = regexp.MustCompile(`/\S+\.(js|css|png|svg)`).ReplaceAll(data, []byte(server.Config.Server.RootURL+"$0"))
-
-	rw.Header().Set("Content-Type", "text/html; charset=UTF-8")
-	rw.WriteHeader(http.StatusOK)
-	if _, err := rw.Write(data); err != nil {
-		log.Error().Err(err).Msg("can not write index.html")
-	}
+	return regexp.MustCompile(`/\S+\.(js|css|png|svg)`).ReplaceAll(data, []byte(server.Config.Server.RootURL+"$0"))
 }
 
 func setupCache(c *gin.Context) {
