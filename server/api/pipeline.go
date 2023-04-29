@@ -44,28 +44,27 @@ func CreatePipeline(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
 
-	var p model.PipelineOptions
-
-	err := json.NewDecoder(c.Request.Body).Decode(&p)
+	// parse create options
+	var opts model.PipelineOptions
+	err := json.NewDecoder(c.Request.Body).Decode(&opts)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
 
-	event := model.WebhookEvent(p.Event)
-	if event == "" {
-		event = model.EventManual
-	}
-	if err := model.ValidateWebhookEvent(event); err != nil {
+	// set default or validate event
+	if opts.Event == "" {
+		opts.Event = string(model.EventManual)
+	} else if err := model.ValidateWebhookEvent(model.WebhookEvent(opts.Event)); err != nil {
 		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
 
 	user := session.User(c)
 
-	lastCommit, _ := server.Config.Services.Forge.BranchHead(c, user, repo, p.Branch)
+	lastCommit, _ := server.Config.Services.Forge.BranchHead(c, user, repo, opts.Branch)
 
-	tmpBuild := createTmpPipeline(event, lastCommit, repo, user, &p)
+	tmpBuild := createTmpPipeline(lastCommit, repo, user, &opts)
 
 	pl, err := pipeline.Create(c, _store, repo, tmpBuild)
 	if err != nil {
@@ -75,9 +74,9 @@ func CreatePipeline(c *gin.Context) {
 	}
 }
 
-func createTmpPipeline(event model.WebhookEvent, commitSHA string, repo *model.Repo, user *model.User, opts *model.PipelineOptions) *model.Pipeline {
+func createTmpPipeline(commitSHA string, repo *model.Repo, user *model.User, opts *model.PipelineOptions) *model.Pipeline {
 	return &model.Pipeline{
-		Event:     event,
+		Event:     model.WebhookEvent(opts.Event),
 		Commit:    commitSHA,
 		Branch:    opts.Branch,
 		Timestamp: time.Now().UTC().Unix(),
