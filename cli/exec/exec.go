@@ -45,7 +45,7 @@ import (
 var Command = &cli.Command{
 	Name:      "exec",
 	Usage:     "execute a local pipeline",
-	ArgsUsage: "[path/to/.woodpecker.yml]",
+	ArgsUsage: "[path/to/.woodpecker.yaml]",
 	Action:    run,
 	Flags:     append(common.GlobalFlags, flags...),
 }
@@ -66,7 +66,7 @@ func execDir(c *cli.Context, dir string) error {
 		}
 
 		// check if it is a regular file (not dir)
-		if info.Mode().IsRegular() && strings.HasSuffix(info.Name(), ".yml") {
+		if info.Mode().IsRegular() && (strings.HasSuffix(info.Name(), ".yaml") || strings.HasSuffix(info.Name(), ".yml")) {
 			fmt.Println("#", info.Name())
 			_ = runExec(c, path, repoPath) // TODO: should we drop errors or store them and report back?
 			fmt.Println("")
