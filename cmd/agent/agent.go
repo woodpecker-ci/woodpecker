@@ -19,6 +19,7 @@ import (
 	"context"
 	"crypto/tls"
 	"errors"
+	"fmt"
 	"net/http"
 	"os"
 	"runtime"
@@ -182,9 +183,8 @@ func loop(c *cli.Context) error {
 		"repo":     "*", // allow all repos by default
 	}
 
-	for _, v := range c.StringSlice("filter") {
-		parts := strings.SplitN(v, "=", 2)
-		labels[parts[0]] = parts[1]
+	if err := stringSliceAddToMap(c.StringSlice("filter"), labels); err != nil {
+		return err
 	}
 
 	filter := rpc.Filter{
@@ -243,5 +243,23 @@ func loop(c *cli.Context) error {
 		version.String(), engine.Name(), platform, parallel)
 
 	wg.Wait()
+	return nil
+}
+
+func stringSliceAddToMap(sl []string, m map[string]string) error {
+	if m == nil {
+		m = make(map[string]string)
+	}
+	for _, v := range sl {
+		parts := strings.SplitN(v, "=", 2)
+		switch len(parts) {
+		case 2:
+			m[parts[0]] = parts[1]
+		case 1:
+			return fmt.Errorf("key '%s' does not have a value assigned", parts[0])
+		default:
+			return fmt.Errorf("empty string in slice")
+		}
+	}
 	return nil
 }
