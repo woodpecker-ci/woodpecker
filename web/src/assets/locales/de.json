@@ -333,7 +333,7 @@
         "crons": "Crons",
         "delete": "Cron löschen",
         "deleted": "Cron gelöscht",
-        "desc": "Cron-Jobs können dazu verwendet werden in regelmäßigen Abständen Pipeline(s) zu starten",
+        "desc": "Cron-Jobs können dazu verwendet werden in regelmäßigen Abständen Pipeline(s) zu starten.",
         "edit": "Cron bearbeiten",
         "name": {
           "name": "Name",
@@ -366,7 +366,7 @@
           "netrc_only_trusted": "Netrc-Zugangsdaten nur in vertrauenswürdigen Containern zum Klonen bereitstellen"
         },
         "pipeline_path": {
-          "default": "Standardmäßig: .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml",
+          "default": "Standardmäßig: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yml -> .drone.yml",
           "desc": "Pfad zu deiner Pipeline-Konfiguration (z. B. {0}). Verzeichnisse sollten mit einem {1} enden.",
           "desc_path_example": "mein/pfad/",
           "path": "Pipeline-Pfad"
