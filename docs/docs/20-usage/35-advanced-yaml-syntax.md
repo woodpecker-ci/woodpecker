@@ -54,9 +54,9 @@ pipeline:
   main:
     image: some-plugin
     settings:
-      <<: *base-plugin-settings # merge one map and overwrite it
-      try: false # replacing original value from "some-plugin-settings"
-      ongoing: false # adding a new value to "some-plugin-settings"
+      <<: *base-plugin-settings # merge one map and ...
+      try: false # ... overwrite original value
+      ongoing: false # ... adding a new value
     when:
       branch: main
 ```
