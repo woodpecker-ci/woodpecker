@@ -1,0 +1,16 @@
+when:
+  - branch: main
+  - event: pull_request
+
+pipeline:
+  test:
+    image: golang:${GO_VERSION}
+    commands:
+      - go test -race -coverprofile coverage_${GO_VERSION}.out ./...
+
+matrix:
+  GO_VERSION:
+    - 1.13
+    - 1.16
+    - 1.18
+    - 1.20
