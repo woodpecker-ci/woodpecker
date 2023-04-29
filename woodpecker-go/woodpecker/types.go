@@ -193,8 +193,9 @@ type (
 
 	// PipelineOptions is the JSON data for creating a new pipeline
 	PipelineOptions struct {
-		Branch    string            `json:"branch"`
-		Event     string            `json:"event"`
-		Variables map[string]string `json:"variables"`
+		Branch     string            `json:"branch"`
+		Event      string            `json:"event"`
+		Variables  map[string]string `json:"variables"`
+		ConfigPath string            `json:"config_path"`
 	}
 )

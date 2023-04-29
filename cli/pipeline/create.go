@@ -48,6 +48,10 @@ var pipelineCreateCmd = &cli.Command{
 			Name:  "var",
 			Usage: "key=value",
 		},
+		&cli.StringFlag{
+			Name:  "config-path",
+			Usage: "temporary change path to pipeline config",
+		},
 	),
 }
 
@@ -64,10 +68,7 @@ func pipelineCreate(c *cli.Context) error {
 		return err
 	}
 
-	branch := c.String("branch")
-	event := c.String("event")
 	variables := make(map[string]string)
-
 	for _, vaz := range c.StringSlice("var") {
 		sp := strings.SplitN(vaz, "=", 2)
 		if len(sp) == 2 {
@@ -76,9 +77,10 @@ func pipelineCreate(c *cli.Context) error {
 	}
 
 	options := &woodpecker.PipelineOptions{
-		Branch:    branch,
-		Event:     event,
-		Variables: variables,
+		Branch:     c.String("branch"),
+		Event:      c.String("event"),
+		Variables:  variables,
+		ConfigPath: c.String("config-path"),
 	}
 
 	pipeline, err := client.PipelineCreate(owner, name, options)
