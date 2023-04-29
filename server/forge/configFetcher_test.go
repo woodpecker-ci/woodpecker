@@ -114,7 +114,7 @@ func TestFetch(t *testing.T) {
 			expectedError: false,
 		},
 		{
-			name:       "Default config check .woodpecker.yml before .woodpecker.yaml",
+			name:       "Default config check .woodpecker.yaml before .woodpecker.yml",
 			repoConfig: "",
 			files: []file{{
 				name: ".woodpecker.yaml",
@@ -124,7 +124,7 @@ func TestFetch(t *testing.T) {
 				data: dummyData,
 			}},
 			expectedFileNames: []string{
-				".woodpecker.yml",
+				".woodpecker.yaml",
 			},
 			expectedError: false,
 		},

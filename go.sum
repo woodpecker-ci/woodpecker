@@ -32,8 +32,10 @@ cloud.google.com/go/storage v1.8.0/go.mod h1:Wv1Oy7z6Yz3DshWRJFhqM/UCfaWIRTdp0RX
 cloud.google.com/go/storage v1.10.0/go.mod h1:FLPqc6j+Ki4BU591ie1oL6qBQGu2Bl/tZ9ullr3+Kg0=
 code.gitea.io/sdk/gitea v0.15.1-0.20221016183512-2d9ee57af1e0 h1:AKpsCoOtVrWWBtANM9319pwCB5ihx1Sdvr1HSbAwr54=
 code.gitea.io/sdk/gitea v0.15.1-0.20221016183512-2d9ee57af1e0/go.mod h1:ndkDk99BnfiUCCYEUhpNzi0lpmApXlwRFqClBlOlEBg=
-codeberg.org/6543/go-yaml2json v0.3.0 h1:BlvjmY0Gous8P+rr8aBdgPYnIfUAqFepF8q7Tp0R5t8=
-codeberg.org/6543/go-yaml2json v0.3.0/go.mod h1:mz61q14LWF4ZABrgMEDMmk3t9dPi6zgR1uBh2VKV2RQ=
+codeberg.org/6543/go-yaml2json v1.0.0 h1:heGqo9VEi7gY2yNqjj7X4ADs5nzlFIbGsJtgYDLrnig=
+codeberg.org/6543/go-yaml2json v1.0.0/go.mod h1:mz61q14LWF4ZABrgMEDMmk3t9dPi6zgR1uBh2VKV2RQ=
+codeberg.org/6543/xyaml v1.1.0 h1:0PWTy8OUqshshjrrnAXFWXSPUEa8R49DIh2ah07SxFc=
+codeberg.org/6543/xyaml v1.1.0/go.mod h1:jI7afXLZUxeL4rNNsG1SlHh78L+gma9lK1bIebyFZwA=
 dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9/go.mod h1:H6x//7gZCb22OMCxBHrMx7a5I7Hp++hsVxbQ4BYO7hU=
 gitea.com/xorm/sqlfiddle v0.0.0-20180821085327-62ce714f951a h1:lSA0F4e9A2NcQSqGqTOXqu2aRi/XEQxDCBwM8yJtE6s=
 gitea.com/xorm/sqlfiddle v0.0.0-20180821085327-62ce714f951a/go.mod h1:EXuID2Zs0pAQhH8yz+DNjUbjppKQzKFAn28TMYPB6IU=

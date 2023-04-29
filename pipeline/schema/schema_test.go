@@ -79,6 +79,10 @@ func TestSchema(t *testing.T) {
 			testFile: ".woodpecker/test-labels.yml",
 		},
 		{
+			name:     "Map and Sequence Merge", // https://woodpecker-ci.org/docs/next/usage/advanced-yaml-syntax
+			testFile: ".woodpecker/test-merge-map-and-sequence.yml",
+		},
+		{
 			name:     "Broken Config",
 			testFile: ".woodpecker/test-broken.yml",
 			fail:     true,

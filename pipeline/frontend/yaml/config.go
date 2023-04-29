@@ -1,8 +1,7 @@
 package yaml
 
 import (
-	"gopkg.in/yaml.v3"
-
+	"codeberg.org/6543/xyaml"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/constraint"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
 )
@@ -37,7 +36,7 @@ type (
 // ParseBytes parses the configuration from bytes b.
 func ParseBytes(b []byte) (*Config, error) {
 	out := new(Config)
-	err := yaml.Unmarshal(b, out)
+	err := xyaml.Unmarshal(b, out)
 	if err != nil {
 		return nil, err
 	}
