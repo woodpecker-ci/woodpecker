@@ -333,7 +333,7 @@
         "crons": "Crons",
         "delete": "Cron löschen",
         "deleted": "Cron gelöscht",
-        "desc": "Cron-Jobs können dazu verwendet werden in regelmäßigen Abständen Pipeline(s) zu starten",
+        "desc": "Cron-Jobs können dazu verwendet werden in regelmäßigen Abständen Pipeline(s) zu starten.",
         "edit": "Cron bearbeiten",
         "name": {
           "name": "Name",
