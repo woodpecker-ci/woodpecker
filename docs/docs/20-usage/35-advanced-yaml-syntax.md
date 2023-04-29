@@ -34,7 +34,7 @@ Just add a new section called **variables** like this:
 
 ## Map merges and overwrites
 
-```yml
+```yaml
 variables:
   &base-plugin-settings
     target: dist
@@ -63,7 +63,7 @@ pipeline:
 
 ## Sequence merges
 
-```yml
+```yaml
 variables:
   &pre_cmds
    - echo start
