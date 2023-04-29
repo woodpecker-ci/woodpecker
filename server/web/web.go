@@ -30,8 +30,10 @@ import (
 
 // etag is an identifier for a resource version
 // it lets caches determine if resource is still the same and not send it again
-var etag = fmt.Sprintf("%x", md5.Sum([]byte(time.Now().String())))
-var indexHtml []byte
+var (
+	etag      = fmt.Sprintf("%x", md5.Sum([]byte(time.Now().String())))
+	indexHtml []byte
+)
 
 // New returns a gin engine to serve the web frontend.
 func New() (*gin.Engine, error) {
