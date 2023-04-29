@@ -32,34 +32,58 @@ Just add a new section called **variables** like this:
      commands: build
 ```
 
-<!--
-TODO(1192): Support YAML override and extension
-
-## Example of YAML override and extension
+## Map merges and overwrites
 
 ```yml
-variables: 
-  &some-plugin-settings
+variables:
+  &base-plugin-settings
     target: dist
     recursive: false
     try: true
+  &special-setting
+    special: true
 
-pipelines:
+pipeline:
   develop:
-    name: Build and test
     image: some-plugin
-    settings: *some-plugin-settings
+    settings:
+      <<: [*base-plugin-settings, *special-setting] # merge two maps into an empty map
     when:
       branch: develop
 
   main:
-    name: Build and test
     image: some-plugin
     settings:
-      <<: *some-plugin-settings
-      try: false # replacing original value from `some-plugin-settings`
-      ongoing: false # adding a new value to `some-plugin-settings`
+      <<: *base-plugin-settings # merge one map and overwrite it
+      try: false # replacing original value from "some-plugin-settings"
+      ongoing: false # adding a new value to "some-plugin-settings"
     when:
       branch: main
 ```
--->
+
+## Sequence merges
+
+```yml
+variables:
+  &pre_cmds
+   - echo start
+   - whoami
+  &post_cmds
+   - echo stop
+  &hello_cmd
+   - echo hello
+
+pipeline:
+  step1:
+    image: debian
+    commands:
+     - <<: *pre_cmds # prepend a sequence
+     - echo exec step now do dedicated things
+     - <<: *post_cmds # append a sequence
+  step2:
+    image: debian
+    commands:
+     - <<: [*pre_cmds, *hello_cmd] # prepend two sequences
+     - echo echo from second step
+     - <<: *post_cmds
+```
