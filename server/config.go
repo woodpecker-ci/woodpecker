@@ -66,7 +66,6 @@ var Config = struct {
 		StatusContext       string
 		StatusContextFormat string
 		SessionExpires      time.Duration
-		DatabasePageSize    int
 		RootURL             string
 		// Open bool
 		// Orgs map[string]struct{}

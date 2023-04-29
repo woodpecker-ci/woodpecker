@@ -48,7 +48,7 @@ func (s storage) paginate(p *model.ListOptions) *xorm.Session {
 		return s.engine.NewSession()
 	}
 	if p.PerPage < 1 {
-		p.PerPage = server.Config.Server.DatabasePageSize
+		p.PerPage = 1
 	}
 	if p.Page < 1 {
 		p.Page = 1
