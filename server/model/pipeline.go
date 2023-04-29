@@ -65,7 +65,8 @@ type UpdatePipelineStore interface {
 }
 
 type PipelineOptions struct {
-	Branch    string            `json:"branch"`
-	Event     string            `json:"event"`
-	Variables map[string]string `json:"variables"`
+	Branch     string            `json:"branch"`
+	Event      string            `json:"event"`
+	Variables  map[string]string `json:"variables"`
+	ConfigPath string            `json:"config_path"`
 }

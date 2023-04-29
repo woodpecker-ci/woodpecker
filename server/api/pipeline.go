@@ -60,6 +60,11 @@ func CreatePipeline(c *gin.Context) {
 		return
 	}
 
+	// if set temporary change config path
+	if opts.ConfigPath != "" {
+		repo.Config = opts.ConfigPath
+	}
+
 	user := session.User(c)
 
 	lastCommit, _ := server.Config.Services.Forge.BranchHead(c, user, repo, opts.Branch)
