@@ -32,13 +32,13 @@ import (
 // it lets caches determine if resource is still the same and not send it again
 var (
 	etag      = fmt.Sprintf("%x", md5.Sum([]byte(time.Now().String())))
-	indexHtml []byte
+	indexHTML []byte
 )
 
 // New returns a gin engine to serve the web frontend.
 func New() (*gin.Engine, error) {
 	e := gin.New()
-	indexHtml = parseIndex()
+	indexHTML = parseIndex()
 
 	e.Use(setupCache)
 
@@ -72,7 +72,7 @@ func handleIndex(c *gin.Context) {
 	rw := c.Writer
 	rw.Header().Set("Content-Type", "text/html; charset=UTF-8")
 	rw.WriteHeader(http.StatusOK)
-	if _, err := rw.Write(indexHtml); err != nil {
+	if _, err := rw.Write(indexHTML); err != nil {
 		log.Error().Err(err).Msg("can not write index.html")
 	}
 }
@@ -81,6 +81,9 @@ func parseIndex() []byte {
 	data, err := web.Lookup("index.html")
 	if err != nil {
 		log.Fatal().Err(err).Msg("can not find index.html")
+	}
+	if server.Config.Server.RootURL == "" {
+		return data
 	}
 	return regexp.MustCompile(`/\S+\.(js|css|png|svg)`).ReplaceAll(data, []byte(server.Config.Server.RootURL+"$0"))
 }
