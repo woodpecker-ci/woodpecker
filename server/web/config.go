@@ -40,11 +40,11 @@ func Config(c *gin.Context) {
 	}
 
 	configData := map[string]interface{}{
-		"user":    user,
-		"csrf":    csrf,
-		"docs":    server.Config.Server.Docs,
-		"version": version.String(),
-		"forge":   server.Config.Services.Forge.Name(),
+		"user":     user,
+		"csrf":     csrf,
+		"docs":     server.Config.Server.Docs,
+		"version":  version.String(),
+		"forge":    server.Config.Services.Forge.Name(),
 		"root_url": server.Config.Server.RootURL,
 	}
 
@@ -64,7 +64,7 @@ func Config(c *gin.Context) {
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
-	
+
 	c.Status(http.StatusOK)
 }
 
