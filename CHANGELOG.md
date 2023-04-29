@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.15.8](https://github.com/woodpecker-ci/woodpecker/releases/tag/0.15.8) - 2023-04-29
+
+* BUGFIXES
+  * Use codeberg.org/6543/go-yaml2json (#1719)
+  * Fix faulty hardlink in release tarball (#1669) (#1671)
+  * Persist `DepStatus` of tasks (#1610) (#1625)
+
 ## [0.15.7](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.7) - 2023-03-14
 
 * SECURITY
