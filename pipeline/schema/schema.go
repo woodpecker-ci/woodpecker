@@ -26,7 +26,9 @@ func Lint(r io.Reader) ([]gojsonschema.ResultError, error) {
 
 	// resolve sequence merges
 	yamlDoc := new(yaml.Node)
-	xyaml.Unmarshal(rBytes, yamlDoc)
+	if err := xyaml.Unmarshal(rBytes, yamlDoc); err != nil {
+		return nil, fmt.Errorf("Failed to parse yml file %w", err)
+	}
 
 	// convert to json
 	jsonDoc, err := yaml2json.ConvertNode(yamlDoc)
