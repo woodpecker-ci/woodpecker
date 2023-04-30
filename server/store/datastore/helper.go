@@ -15,10 +15,10 @@
 package datastore
 
 import (
-	"github.com/woodpecker-ci/woodpecker/server"
+	"xorm.io/xorm"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store/types"
-	"xorm.io/xorm"
 )
 
 // wrapGet return error if err not nil or if requested entry do not exist
