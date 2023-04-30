@@ -322,7 +322,7 @@
           "netrc_only_trusted": "Вводите учетные данные netrc только внутри контейнеров которым вы доверяете"
         },
         "pipeline_path": {
-          "default": "По умолчанию: .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml",
+          "default": "По умолчанию: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml -> .drone.yml",
           "desc": "Путь к конфигурации вашего конвейера (например: {0}). При указании директории путь должен заканчиваться символом {1}.",
           "desc_path_example": "мой/путь/",
           "path": "Конфигурация конвейера"
