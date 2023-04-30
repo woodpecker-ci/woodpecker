@@ -22,9 +22,12 @@ type RepoListOptions = {
   all?: boolean;
 };
 
+// PipelineOptions is the data for creating a new pipeline
 type PipelineOptions = {
   branch: string;
   variables: Record<string, string>;
+  event?: string;
+  config_path?: string;
 };
 
 type DeploymentOptions = {

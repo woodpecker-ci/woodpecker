@@ -43,7 +43,9 @@
             "desc": "Specify additional variables to use in your pipeline. Variables with the same name will be overwritten.",
             "name": "Variable name",
             "value": "Variable value"
-          }
+          },
+          "select_event": "Select event",
+          "specify_config": "specify pipeline config path"
         },
         "deploy_pipeline": {
           "title": "Trigger deployment event for current pipeline #{pipelineId}",

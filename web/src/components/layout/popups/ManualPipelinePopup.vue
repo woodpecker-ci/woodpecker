@@ -6,6 +6,15 @@
         <InputField :label="$t('repo.manual_pipeline.select_branch')">
           <SelectField v-model="payload.branch" :options="branches" required />
         </InputField>
+        <InputField :label="$t('repo.manual_pipeline.select_event')">
+          <SelectField v-model="payload.event" :options="events" />
+        </InputField>
+        <TextField
+          v-model="payload.config_path"
+          :label="$t('repo.manual_pipeline.specify_config')"
+          :placeholder="$t('change path to pipeline config temporary')"
+          default=""
+        />
         <InputField :label="$t('repo.manual_pipeline.variables.title')">
           <span class="text-sm text-color-alt mb-2">{{ $t('repo.manual_pipeline.variables.desc') }}</span>
           <div class="flex flex-col gap-2">
@@ -57,6 +66,7 @@ import Popup from '~/components/layout/Popup.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { inject } from '~/compositions/useInjectProvide';
 import { usePaginate } from '~/compositions/usePaginate';
+import { WebhookEvents } from '~/lib/api/types';
 
 defineProps<{
   open: boolean;
@@ -72,9 +82,17 @@ const repo = inject('repo');
 
 const router = useRouter();
 const branches = ref<{ text: string; value: string }[]>([]);
-const payload = ref<{ branch: string; variables: Record<string, string> }>({
+const events = ref<{ text: string; value: string }[]>(
+  Object.values(WebhookEvents).map((e) => ({
+    text: e,
+    value: e,
+  })),
+);
+const payload = ref<{ branch: string; variables: Record<string, string>; event: string; config_path?: string }>({
   branch: 'main',
   variables: {},
+  event: WebhookEvents.Manual,
+  config_path: repo.value.config_file,
 });
 const newPipelineVariable = ref<{ name: string; value: string }>({ name: '', value: '' });
 
