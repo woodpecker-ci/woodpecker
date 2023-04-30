@@ -66,11 +66,11 @@ const (
 	RepoPerforce SCMKind = "perforce"
 )
 
-// RepoVisibly represent to wat state a repo in woodpecker is visible to others
-type RepoVisibly string
+// RepoVisibility represent to wat state a repo in woodpecker is visible to others
+type RepoVisibility string
 
 const (
-	VisibilityPublic   RepoVisibly = "public"
-	VisibilityPrivate  RepoVisibly = "private"
-	VisibilityInternal RepoVisibly = "internal"
+	VisibilityPublic   RepoVisibility = "public"
+	VisibilityPrivate  RepoVisibility = "private"
+	VisibilityInternal RepoVisibility = "internal"
 )
