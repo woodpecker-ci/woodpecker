@@ -27,9 +27,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/rs/zerolog/log"
-
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc/metadata"
 	grpcMetadata "google.golang.org/grpc/metadata"
 
@@ -141,7 +140,8 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 		log.Error().Err(err).Msg("rpc.update: cannot update step")
 	}
 
-	if currentPipeline.Steps, err = s.store.StepList(currentPipeline); err != nil {
+	currentPipeline.Steps, err = s.store.StepList(currentPipeline)
+	if err != nil {
 		log.Error().Err(err).Msg("can not get step list from store")
 	}
 	if currentPipeline.Steps, err = model.Tree(currentPipeline.Steps); err != nil {

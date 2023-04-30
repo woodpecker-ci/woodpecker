@@ -29,9 +29,9 @@ import (
 )
 
 func GetAgents(c *gin.Context) {
-	agents, err := store.FromContext(c).AgentList()
+	agents, err := store.FromContext(c).AgentList(session.Pagination(c))
 	if err != nil {
-		c.String(500, "Error getting agent list. %s", err)
+		c.String(http.StatusInternalServerError, "Error getting agent list. %s", err)
 		return
 	}
 	c.JSON(http.StatusOK, agents)
@@ -65,7 +65,7 @@ func GetAgentTasks(c *gin.Context) {
 		return
 	}
 
-	tasks := []*model.Task{}
+	var tasks []*model.Task
 	info := server.Config.Services.Queue.Info(c)
 	for _, task := range info.Running {
 		if task.AgentID == agent.ID {

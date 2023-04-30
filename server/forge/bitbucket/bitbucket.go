@@ -21,6 +21,7 @@ import (
 	"net/http"
 	"net/url"
 
+	shared_utils "github.com/woodpecker-ci/woodpecker/shared/utils"
 	"golang.org/x/oauth2"
 
 	"github.com/woodpecker-ci/woodpecker/server"
@@ -132,15 +133,18 @@ func (c *config) Refresh(ctx context.Context, user *model.User) (bool, error) {
 
 // Teams returns a list of all team membership for the Bitbucket account.
 func (c *config) Teams(ctx context.Context, u *model.User) ([]*model.Team, error) {
-	opts := &internal.ListWorkspacesOpts{
-		PageLen: 100,
-		Role:    "member",
-	}
-	resp, err := c.newClient(ctx, u).ListWorkspaces(opts)
-	if err != nil {
-		return nil, err
-	}
-	return convertWorkspaceList(resp.Values), nil
+	return shared_utils.Paginate(func(page int) ([]*model.Team, error) {
+		opts := &internal.ListWorkspacesOpts{
+			PageLen: 100,
+			Page:    page,
+			Role:    "member",
+		}
+		resp, err := c.newClient(ctx, u).ListWorkspaces(opts)
+		if err != nil {
+			return nil, err
+		}
+		return convertWorkspaceList(resp.Values), nil
+	})
 }
 
 // Repo returns the named Bitbucket repository.
@@ -261,7 +265,7 @@ func (c *config) Netrc(u *model.User, _ *model.Repo) (*model.Netrc, error) {
 }
 
 // Branches returns the names of all branches for the named repository.
-func (c *config) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
+func (c *config) Branches(ctx context.Context, u *model.User, r *model.Repo, _ *model.ListOptions) ([]string, error) {
 	bitbucketBranches, err := c.newClient(ctx, u).ListBranches(r.Owner, r.Name)
 	if err != nil {
 		return nil, err
@@ -280,7 +284,7 @@ func (c *config) BranchHead(_ context.Context, _ *model.User, _ *model.Repo, _ s
 	return "", forge_types.ErrNotImplemented
 }
 
-func (c *config) PullRequests(_ context.Context, _ *model.User, _ *model.Repo, _ *model.PaginationData) ([]*model.PullRequest, error) {
+func (c *config) PullRequests(_ context.Context, _ *model.User, _ *model.Repo, _ *model.ListOptions) ([]*model.PullRequest, error) {
 	return nil, forge_types.ErrNotImplemented
 }
 
