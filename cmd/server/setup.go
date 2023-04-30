@@ -218,11 +218,10 @@ func setupBitbucket(c *cli.Context) (forge.Forge, error) {
 // helper function to setup the Gogs forge from the CLI arguments.
 func setupGogs(c *cli.Context) (forge.Forge, error) {
 	opts := gogs.Opts{
-		URL:         c.String("gogs-server"),
-		Username:    c.String("gogs-git-username"),
-		Password:    c.String("gogs-git-password"),
-		PrivateMode: c.Bool("gogs-private-mode"),
-		SkipVerify:  c.Bool("gogs-skip-verify"),
+		URL:        c.String("gogs-server"),
+		Username:   c.String("gogs-git-username"),
+		Password:   c.String("gogs-git-password"),
+		SkipVerify: c.Bool("gogs-skip-verify"),
 	}
 	log.Trace().Msgf("Forge (gogs) opts: %#v", opts)
 	return gogs.New(opts)
