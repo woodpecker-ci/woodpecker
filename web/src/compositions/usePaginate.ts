@@ -30,7 +30,7 @@ export function usePagination<T>(
     loading.value = true;
     const newData = await _loadData(page.value);
     hasMore.value = newData !== null && newData.length >= pageSize.value;
-    if (newData !== null) {
+    if (newData !== null && newData.length !== 0) {
       if (page.value === 1) {
         pageSize.value = newData.length;
         data.value = newData;
@@ -39,6 +39,8 @@ export function usePagination<T>(
       }
     } else if (page.value === 1) {
       data.value = [];
+    } else {
+      hasMore.value = false;
     }
     loading.value = false;
   }
