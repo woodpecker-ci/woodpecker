@@ -270,7 +270,7 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 	return files, nil
 }
 
-func (c *client) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.PaginationData) ([]*model.PullRequest, error) {
+func (c *client) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error) {
 	token := ""
 	if u != nil {
 		token = u.Token
@@ -278,7 +278,7 @@ func (c *client) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 	client := c.newClientToken(ctx, token)
 
 	pullRequests, _, err := client.PullRequests.List(ctx, r.Owner, r.Name, &github.PullRequestListOptions{
-		ListOptions: github.ListOptions{Page: int(p.Page), PerPage: int(p.PerPage)},
+		ListOptions: github.ListOptions{Page: p.Page, PerPage: p.PerPage},
 		State:       "open",
 	})
 	if err != nil {
@@ -504,14 +504,16 @@ func (c *client) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 }
 
 // Branches returns the names of all branches for the named repository.
-func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
+func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]string, error) {
 	token := ""
 	if u != nil {
 		token = u.Token
 	}
 	client := c.newClientToken(ctx, token)
 
-	githubBranches, _, err := client.Repositories.ListBranches(ctx, r.Owner, r.Name, &github.BranchListOptions{})
+	githubBranches, _, err := client.Repositories.ListBranches(ctx, r.Owner, r.Name, &github.BranchListOptions{
+		ListOptions: github.ListOptions{Page: p.Page, PerPage: p.PerPage},
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -571,21 +573,23 @@ func (c *client) loadChangedFilesFromPullRequest(ctx context.Context, pull *gith
 		return nil, err
 	}
 
-	opts := &github.ListOptions{Page: 1}
-	fileList := make([]string, 0, 16)
-	for opts.Page > 0 {
-		files, resp, err := c.newClientToken(ctx, user.Token).PullRequests.ListFiles(ctx, repo.Owner, repo.Name, pull.GetNumber(), opts)
-		if err != nil {
-			return nil, err
+	pipeline.ChangedFiles, err = utils.Paginate(func(page int) ([]string, error) {
+		opts := &github.ListOptions{Page: page}
+		fileList := make([]string, 0, 16)
+		for opts.Page > 0 {
+			files, resp, err := c.newClientToken(ctx, user.Token).PullRequests.ListFiles(ctx, repo.Owner, repo.Name, pull.GetNumber(), opts)
+			if err != nil {
+				return nil, err
+			}
+
+			for _, file := range files {
+				fileList = append(fileList, file.GetFilename(), file.GetPreviousFilename())
+			}
+
+			opts.Page = resp.NextPage
 		}
+		return utils.DedupStrings(fileList), nil
+	})
 
-		for _, file := range files {
-			fileList = append(fileList, file.GetFilename(), file.GetPreviousFilename())
-		}
-
-		opts.Page = resp.NextPage
-	}
-	pipeline.ChangedFiles = utils.DedupStrings(fileList)
-
-	return pipeline, nil
+	return pipeline, err
 }

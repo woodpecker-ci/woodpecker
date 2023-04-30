@@ -34,12 +34,12 @@ func (b *builtin) SecretFind(repo *model.Repo, name string) (*model.Secret, erro
 	return b.store.SecretFind(repo, name)
 }
 
-func (b *builtin) SecretList(repo *model.Repo) ([]*model.Secret, error) {
-	return b.store.SecretList(repo, false)
+func (b *builtin) SecretList(repo *model.Repo, p *model.ListOptions) ([]*model.Secret, error) {
+	return b.store.SecretList(repo, false, p)
 }
 
-func (b *builtin) SecretListPipeline(repo *model.Repo, _ *model.Pipeline) ([]*model.Secret, error) {
-	s, err := b.store.SecretList(repo, true)
+func (b *builtin) SecretListPipeline(repo *model.Repo, _ *model.Pipeline, p *model.ListOptions) ([]*model.Secret, error) {
+	s, err := b.store.SecretList(repo, true, p)
 	if err != nil {
 		return nil, err
 	}
@@ -90,8 +90,8 @@ func (b *builtin) OrgSecretFind(owner, name string) (*model.Secret, error) {
 	return b.store.OrgSecretFind(owner, name)
 }
 
-func (b *builtin) OrgSecretList(owner string) ([]*model.Secret, error) {
-	return b.store.OrgSecretList(owner)
+func (b *builtin) OrgSecretList(owner string, p *model.ListOptions) ([]*model.Secret, error) {
+	return b.store.OrgSecretList(owner, p)
 }
 
 func (b *builtin) OrgSecretCreate(_ string, in *model.Secret) error {
@@ -114,8 +114,8 @@ func (b *builtin) GlobalSecretFind(owner string) (*model.Secret, error) {
 	return b.store.GlobalSecretFind(owner)
 }
 
-func (b *builtin) GlobalSecretList() ([]*model.Secret, error) {
-	return b.store.GlobalSecretList()
+func (b *builtin) GlobalSecretList(p *model.ListOptions) ([]*model.Secret, error) {
+	return b.store.GlobalSecretList(p)
 }
 
 func (b *builtin) GlobalSecretCreate(in *model.Secret) error {

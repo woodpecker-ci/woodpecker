@@ -222,7 +222,7 @@ func GetRepoBranches(c *gin.Context) {
 	user := session.User(c)
 	f := server.Config.Services.Forge
 
-	branches, err := f.Branches(c, user, repo)
+	branches, err := f.Branches(c, user, repo, session.Pagination(c))
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -234,10 +234,9 @@ func GetRepoBranches(c *gin.Context) {
 func GetRepoPullRequests(c *gin.Context) {
 	repo := session.Repo(c)
 	user := session.User(c)
-	page := session.Pagination(c)
 	f := server.Config.Services.Forge
 
-	prs, err := f.PullRequests(c, user, repo, page)
+	prs, err := f.PullRequests(c, user, repo, session.Pagination(c))
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return

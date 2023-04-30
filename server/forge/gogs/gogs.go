@@ -258,7 +258,7 @@ func (c *client) Deactivate(_ context.Context, _ *model.User, _ *model.Repo, _ s
 }
 
 // Branches returns the names of all branches for the named repository.
-func (c *client) Branches(_ context.Context, u *model.User, r *model.Repo) ([]string, error) {
+func (c *client) Branches(_ context.Context, u *model.User, r *model.Repo, _ *model.ListOptions) ([]string, error) {
 	token := ""
 	if u != nil {
 		token = u.Token
@@ -289,7 +289,7 @@ func (c *client) BranchHead(_ context.Context, u *model.User, r *model.Repo, bra
 	return b.Commit.ID, nil
 }
 
-func (c *client) PullRequests(_ context.Context, _ *model.User, _ *model.Repo, _ *model.PaginationData) ([]*model.PullRequest, error) {
+func (c *client) PullRequests(_ context.Context, _ *model.User, _ *model.Repo, _ *model.ListOptions) ([]*model.PullRequest, error) {
 	return nil, forge_types.ErrNotImplemented
 }
 

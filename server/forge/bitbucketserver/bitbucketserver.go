@@ -229,8 +229,8 @@ func (c *Config) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 }
 
 // Branches returns the names of all branches for the named repository.
-func (c *Config) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
-	bitbucketBranches, err := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token).ListBranches(r.Owner, r.Name)
+func (c *Config) Branches(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]string, error) {
+	bitbucketBranches, err := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token).ListBranches(r.Owner, r.Name, p.Page, p.PerPage)
 	if err != nil {
 		return nil, err
 	}
@@ -248,7 +248,7 @@ func (c *Config) BranchHead(_ context.Context, _ *model.User, _ *model.Repo, _ s
 	return "", forge_types.ErrNotImplemented
 }
 
-func (c *Config) PullRequests(_ context.Context, _ *model.User, _ *model.Repo, _ *model.PaginationData) ([]*model.PullRequest, error) {
+func (c *Config) PullRequests(_ context.Context, _ *model.User, _ *model.Repo, _ *model.ListOptions) ([]*model.PullRequest, error) {
 	return nil, forge_types.ErrNotImplemented
 }
 

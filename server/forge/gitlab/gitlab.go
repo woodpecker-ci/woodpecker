@@ -301,7 +301,7 @@ func (g *GitLab) Repos(ctx context.Context, user *model.User) ([]*model.Repo, er
 	return repos, err
 }
 
-func (g *GitLab) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.PaginationData) ([]*model.PullRequest, error) {
+func (g *GitLab) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error) {
 	token := ""
 	if u != nil {
 		token = u.Token
@@ -318,7 +318,7 @@ func (g *GitLab) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 
 	state := "open"
 	pullRequests, _, err := client.MergeRequests.ListProjectMergeRequests(_repo.ID, &gitlab.ListProjectMergeRequestsOptions{
-		ListOptions: gitlab.ListOptions{Page: int(p.Page), PerPage: int(p.PerPage)},
+		ListOptions: gitlab.ListOptions{Page: p.Page, PerPage: p.PerPage},
 		State:       &state,
 	})
 	if err != nil {
@@ -543,7 +543,7 @@ func (g *GitLab) Deactivate(ctx context.Context, user *model.User, repo *model.R
 }
 
 // Branches returns the names of all branches for the named repository.
-func (g *GitLab) Branches(ctx context.Context, user *model.User, repo *model.Repo) ([]string, error) {
+func (g *GitLab) Branches(ctx context.Context, user *model.User, repo *model.Repo, p *model.ListOptions) ([]string, error) {
 	token := ""
 	if user != nil {
 		token = user.Token
@@ -558,7 +558,9 @@ func (g *GitLab) Branches(ctx context.Context, user *model.User, repo *model.Rep
 		return nil, err
 	}
 
-	gitlabBranches, _, err := client.Branches.ListBranches(_repo.ID, &gitlab.ListBranchesOptions{}, gitlab.WithContext(ctx))
+	gitlabBranches, _, err := client.Branches.ListBranches(_repo.ID,
+		&gitlab.ListBranchesOptions{ListOptions: gitlab.ListOptions{Page: p.Page, PerPage: p.PerPage}},
+		gitlab.WithContext(ctx))
 	if err != nil {
 		return nil, err
 	}

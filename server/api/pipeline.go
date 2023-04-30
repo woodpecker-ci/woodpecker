@@ -28,16 +28,15 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/store/types"
-
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 
+	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/pipeline"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/server/store"
+	"github.com/woodpecker-ci/woodpecker/server/store/types"
 )
 
 func CreatePipeline(c *gin.Context) {
@@ -89,13 +88,8 @@ func createTmpPipeline(event model.WebhookEvent, commitSHA string, repo *model.R
 
 func GetPipelines(c *gin.Context) {
 	repo := session.Repo(c)
-	page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
-	if err != nil {
-		_ = c.AbortWithError(http.StatusBadRequest, err)
-		return
-	}
 
-	pipelines, err := store.FromContext(c).GetPipelineList(repo, page)
+	pipelines, err := store.FromContext(c).GetPipelineList(repo, session.Pagination(c))
 	if err != nil {
 		if errors.Is(err, types.RecordNotExist) {
 			c.AbortWithStatus(http.StatusNotFound)
@@ -130,7 +124,7 @@ func GetPipeline(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	files, _ := _store.FileList(pl)
+	files, _ := _store.FileList(pl, &model.ListOptions{All: true})
 	steps, _ := _store.StepList(pl)
 	if pl.Steps, err = model.Tree(steps); err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
