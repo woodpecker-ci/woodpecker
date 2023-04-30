@@ -39,6 +39,7 @@ type configFetcher struct {
 	repo            *model.Repo
 	pipeline        *model.Pipeline
 	configExtension config.Extension
+	configPath      string
 	timeout         time.Duration
 }
 
@@ -49,6 +50,7 @@ func NewConfigFetcher(forge Forge, timeout time.Duration, configExtension config
 		repo:            repo,
 		pipeline:        pipeline,
 		configExtension: configExtension,
+		configPath:      repo.Config,
 		timeout:         timeout,
 	}
 }
@@ -59,7 +61,7 @@ func (cf *configFetcher) Fetch(ctx context.Context) (files []*types.FileMeta, er
 
 	// try to fetch 3 times
 	for i := 0; i < 3; i++ {
-		files, err = cf.fetch(ctx, time.Second*cf.timeout, strings.TrimSpace(cf.repo.Config))
+		files, err = cf.fetch(ctx, time.Second*cf.timeout, strings.TrimSpace(cf.configPath))
 		if err != nil {
 			log.Trace().Err(err).Msgf("%d. try failed", i+1)
 		}
