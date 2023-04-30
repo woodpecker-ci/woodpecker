@@ -178,7 +178,7 @@ func PatchRepo(c *gin.Context) {
 	if in.Visibility != nil {
 		switch *in.Visibility {
 		case string(model.VisibilityInternal), string(model.VisibilityPrivate), string(model.VisibilityPublic):
-			repo.Visibility = model.RepoVisibly(*in.Visibility)
+			repo.Visibility = model.RepoVisibility(*in.Visibility)
 		default:
 			c.String(http.StatusBadRequest, "Invalid visibility type")
 			return

@@ -37,7 +37,7 @@ type Repo struct {
 	Branch                       string         `json:"default_branch,omitempty"        xorm:"varchar(500) 'repo_branch'"`
 	SCMKind                      SCMKind        `json:"scm,omitempty"                   xorm:"varchar(50) 'repo_scm'"`
 	Timeout                      int64          `json:"timeout,omitempty"               xorm:"repo_timeout"`
-	Visibility                   RepoVisibly    `json:"visibility"                      xorm:"varchar(10) 'repo_visibility'"`
+	Visibility                   RepoVisibility `json:"visibility"                      xorm:"varchar(10) 'repo_visibility'"`
 	IsSCMPrivate                 bool           `json:"private"                         xorm:"repo_private"`
 	IsTrusted                    bool           `json:"trusted"                         xorm:"repo_trusted"`
 	IsGated                      bool           `json:"gated"                           xorm:"repo_gated"`
