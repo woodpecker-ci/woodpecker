@@ -290,7 +290,7 @@ func TestFetch(t *testing.T) {
 
 	for _, tt := range testTable {
 		t.Run(tt.name, func(t *testing.T) {
-			repo := &model.Repo{Owner: "laszlocph", Name: "multipipeline"}
+			repo := &model.Repo{Owner: "laszlocph", Name: "multipipeline", Config: tt.repoConfig}
 
 			f := new(mocks.Forge)
 			dirs := map[string][]*forge_types.FileMeta{}
@@ -320,7 +320,6 @@ func TestFetch(t *testing.T) {
 				&model.User{Token: "xxx"},
 				repo,
 				&model.Pipeline{Commit: "89ab7b2d6bfb347144ac7c557e638ab402848fee"},
-				tt.repoConfig,
 			)
 			files, err := configFetcher.Fetch(context.Background())
 			if tt.expectedError && err == nil {
@@ -497,7 +496,7 @@ func TestFetchFromConfigService(t *testing.T) {
 
 	for _, tt := range testTable {
 		t.Run(tt.name, func(t *testing.T) {
-			repo := &model.Repo{Owner: "laszlocph", Name: tt.name} // Using test name as repo name to provide different responses in mock server
+			repo := &model.Repo{Owner: "laszlocph", Name: tt.name, Config: tt.repoConfig} // Using test name as repo name to provide different responses in mock server
 
 			f := new(mocks.Forge)
 			dirs := map[string][]*forge_types.FileMeta{}
@@ -527,7 +526,6 @@ func TestFetchFromConfigService(t *testing.T) {
 				&model.User{Token: "xxx"},
 				repo,
 				&model.Pipeline{Commit: "89ab7b2d6bfb347144ac7c557e638ab402848fee"},
-				tt.repoConfig,
 			)
 			files, err := configFetcher.Fetch(context.Background())
 			if tt.expectedError && err == nil {
