@@ -34,11 +34,6 @@ The password is used to authenticate and clone all private repositories.
 
 Read the value for `WOODPECKER_GOGS_GIT_PASSWORD` from the specified filepath
 
-### `WOODPECKER_GOGS_PRIVATE_MODE`
-> Default: `false`
-
-TODO
-
 ### `WOODPECKER_GOGS_SKIP_VERIFY`
 > Default: `false`
 

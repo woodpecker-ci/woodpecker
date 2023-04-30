@@ -39,4 +39,4 @@ func (ae *AuthError) Error() string {
 // check interface
 var _ error = new(AuthError)
 
-var ErrNotImplemented = errors.New("Not implemented")
+var ErrNotImplemented = errors.New("not implemented")
