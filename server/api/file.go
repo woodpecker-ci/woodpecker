@@ -28,19 +28,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
-// FileList
-//
-//	@Summary	Gets a list file by pipeline
-//	@Router		/repos/{owner}/{name}/files/{number} [get]
-//	@Produce	json
-//	@Success	200	{array}	File
-//	@Tags		Pipeline files
-//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		owner			path	string	true	"the repository owner's name"
-//	@Param		name			path	string	true	"the repository name"
-//	@Param		number			path	int		true	"the number of the pipeline"
-//	@Param		page			query	int		false	"for response pagination, page offset number"	default(1)
-//	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
+// FileList gets a list file by pipeline.
 func FileList(c *gin.Context) {
 	_store := store.FromContext(c)
 	num, err := strconv.ParseInt(c.Param("number"), 10, 64)
@@ -65,19 +53,7 @@ func FileList(c *gin.Context) {
 	c.JSON(200, files)
 }
 
-// FileGet
-//
-//	@Summary	Gets a file by process and name
-//	@Router		/repos/{owner}/{name}/files/{number}/{step}/{file} [get]
-//	@Produce	plain
-//	@Success	200
-//	@Tags		Pipeline files
-//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		owner			path	string	true	"the repository owner's name"
-//	@Param		name			path	string	true	"the repository name"
-//	@Param		number			path	int		true	"the number of the pipeline"
-//	@Param		step			path	int		true	"the step of the pipeline"
-//	@Param		file			path	string	true	"the filename"
+// FileGet gets a file by process and name
 func FileGet(c *gin.Context) {
 	var (
 		_store = store.FromContext(c)
