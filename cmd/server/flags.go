@@ -338,11 +338,6 @@ var flags = []cli.Flag{
 		FilePath: os.Getenv("WOODPECKER_GOGS_GIT_PASSWORD_FILE"),
 	},
 	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_GOGS_PRIVATE_MODE"},
-		Name:    "gogs-private-mode",
-		Usage:   "gogs private mode enabled",
-	},
-	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_GOGS_SKIP_VERIFY"},
 		Name:    "gogs-skip-verify",
 		Usage:   "gogs skip ssl verification",

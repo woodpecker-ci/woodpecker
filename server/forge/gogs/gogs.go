@@ -18,7 +18,6 @@ package gogs
 import (
 	"context"
 	"crypto/tls"
-	"fmt"
 	"net"
 	"net/http"
 	"net/url"
@@ -34,19 +33,17 @@ import (
 
 // Opts defines configuration options.
 type Opts struct {
-	URL         string // Gogs server url.
-	Username    string // Optional machine account username.
-	Password    string // Optional machine account password.
-	PrivateMode bool   // Gogs is running in private mode.
-	SkipVerify  bool   // Skip ssl verification.
+	URL        string // Gogs server url.
+	Username   string // Optional machine account username.
+	Password   string // Optional machine account password.
+	SkipVerify bool   // Skip ssl verification.
 }
 
 type client struct {
-	URL         string
-	Username    string
-	Password    string
-	PrivateMode bool
-	SkipVerify  bool
+	URL        string
+	Username   string
+	Password   string
+	SkipVerify bool
 }
 
 // New returns a Forge implementation that integrates with Gogs, an open
@@ -61,11 +58,10 @@ func New(opts Opts) (forge.Forge, error) {
 		u.Host = host
 	}
 	return &client{
-		URL:         opts.URL,
-		Username:    opts.Username,
-		Password:    opts.Password,
-		PrivateMode: opts.PrivateMode,
-		SkipVerify:  opts.SkipVerify,
+		URL:        opts.URL,
+		Username:   opts.Username,
+		Password:   opts.Password,
+		SkipVerify: opts.SkipVerify,
 	}, nil
 }
 
@@ -131,7 +127,7 @@ func (c *client) Login(_ context.Context, res http.ResponseWriter, req *http.Req
 
 // Auth is not supported by the Gogs driver.
 func (c *client) Auth(_ context.Context, _, _ string) (string, error) {
-	return "", fmt.Errorf("Not Implemented")
+	return "", forge_types.ErrNotImplemented
 }
 
 // Teams is not supported by the Gogs driver.
@@ -156,7 +152,7 @@ func (c *client) Repo(_ context.Context, u *model.User, _ model.ForgeRemoteID, o
 	if err != nil {
 		return nil, err
 	}
-	return toRepo(repo, c.PrivateMode), nil
+	return toRepo(repo), nil
 }
 
 // Repos returns a list of all repositories for the Gogs account, including
@@ -171,7 +167,7 @@ func (c *client) Repos(_ context.Context, u *model.User) ([]*model.Repo, error) 
 	}
 
 	for _, repo := range all {
-		repos = append(repos, toRepo(repo, c.PrivateMode))
+		repos = append(repos, toRepo(repo))
 	}
 	return repos, err
 }
@@ -296,7 +292,7 @@ func (c *client) PullRequests(_ context.Context, _ *model.User, _ *model.Repo, _
 // Hook parses the incoming Gogs hook and returns the Repository and Pipeline
 // details. If the hook is unsupported nil values are returned.
 func (c *client) Hook(_ context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error) {
-	return parseHook(r, c.PrivateMode)
+	return parseHook(r)
 }
 
 // OrgMembership returns if user is member of organization and if user
