@@ -43,9 +43,9 @@ func CreatePipeline(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
 
-	var p model.PipelineOptions
-
-	err := json.NewDecoder(c.Request.Body).Decode(&p)
+	// parse create options
+	var opts model.PipelineOptions
+	err := json.NewDecoder(c.Request.Body).Decode(&opts)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
@@ -53,9 +53,9 @@ func CreatePipeline(c *gin.Context) {
 
 	user := session.User(c)
 
-	lastCommit, _ := server.Config.Services.Forge.BranchHead(c, user, repo, p.Branch)
+	lastCommit, _ := server.Config.Services.Forge.BranchHead(c, user, repo, opts.Branch)
 
-	tmpBuild := createTmpPipeline(model.EventManual, lastCommit, repo, user, &p)
+	tmpBuild := createTmpPipeline(model.EventManual, lastCommit, repo, user, &opts)
 
 	pl, err := pipeline.Create(c, _store, repo, tmpBuild)
 	if err != nil {
@@ -368,9 +368,8 @@ func PostPipeline(c *gin.Context) {
 	if event, ok := c.GetQuery("event"); ok {
 		pl.Event = model.WebhookEvent(event)
 
-		if !model.ValidateWebhookEvent(pl.Event) {
-			msg := fmt.Sprintf("pipeline event '%s' is invalid", event)
-			c.String(http.StatusBadRequest, msg)
+		if err := model.ValidateWebhookEvent(pl.Event); err != nil {
+			_ = c.AbortWithError(http.StatusBadRequest, err)
 			return
 		}
 	}
