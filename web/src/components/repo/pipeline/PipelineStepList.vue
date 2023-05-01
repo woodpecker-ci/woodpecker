@@ -75,7 +75,12 @@
                 class="mr-1 pr-2px"
               />
               <button
-                v-if="pipeline.steps && pipeline.steps.length > 0 && ['pending'].includes(workflow.state)"
+                v-if="
+                  pipeline.steps &&
+                  pipeline.steps.length > 0 &&
+                  ['pending'].includes(workflow.state) &&
+                  repoPermissions.push
+                "
                 :title="$t('repo.pipeline.actions.skip')"
                 type="button"
                 class="flex justify-center items-center ml-auto gap-2 py-2 px-1 hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-5 rounded-md"
@@ -129,7 +134,7 @@ import PipelineStepDuration from '~/components/repo/pipeline/PipelineStepDuratio
 import useApiClient from '~/compositions/useApiClient';
 import useNotifications from '~/compositions/useNotifications';
 import usePipeline from '~/compositions/usePipeline';
-import { Pipeline, PipelineStep, Repo } from '~/lib/api/types';
+import { Pipeline, PipelineStep, Repo, RepoPermissions } from '~/lib/api/types';
 
 const props = defineProps<{
   pipeline: Pipeline;
@@ -146,8 +151,9 @@ const apiClient = useApiClient();
 const pipeline = toRef(props, 'pipeline');
 const { prettyRef } = usePipeline(pipeline);
 const repo = inject<Ref<Repo>>('repo');
+const repoPermissions = inject<Ref<RepoPermissions>>('repo-permissions');
 
-if (!repo) {
+if (!repo || !repoPermissions || !pipeline) {
   throw new Error('Unexpected: "repo", "repoPermissions" & "pipeline" should be provided at this place');
 }
 
