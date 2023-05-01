@@ -120,17 +120,16 @@
 
 <script lang="ts" setup>
 import { inject, Ref, ref, toRef } from 'vue';
-
 import { useI18n } from 'vue-i18n';
+
 import Badge from '~/components/atomic/Badge.vue';
 import Icon from '~/components/atomic/Icon.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import PipelineStepDuration from '~/components/repo/pipeline/PipelineStepDuration.vue';
-import usePipeline from '~/compositions/usePipeline';
 import useApiClient from '~/compositions/useApiClient';
-import { Pipeline, PipelineStep, Repo } from '~/lib/api/types';
 import useNotifications from '~/compositions/useNotifications';
-import Button from "~/components/atomic/Button.vue";
+import usePipeline from '~/compositions/usePipeline';
+import { Pipeline, PipelineStep, Repo } from '~/lib/api/types';
 
 const props = defineProps<{
   pipeline: Pipeline;
@@ -167,6 +166,5 @@ const workflowsCollapsed = ref<Record<PipelineStep['id'], boolean>>(
 const skipWorkflow = async (workflow: PipelineStep) => {
   await apiClient.skipPipelineWorkflow(repo.value.owner, repo.value.name, `${pipeline.value.number}`, workflow.pid);
   notifications.notify({ title: i18n.t('repo.pipeline.actions.skip_success'), type: 'success' });
-}
-
+};
 </script>

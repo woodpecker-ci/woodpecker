@@ -395,7 +395,7 @@ func (q *fifo) removeFromPending(taskID string) {
 
 // EvictCurrent removes a task either from pending or waitingOnDeps
 // And update dep status
-func (q *fifo) EvictCurrent(c context.Context, id string, exitStatus model.StatusValue) error {
+func (q *fifo) EvictCurrent(_ context.Context, id string, exitStatus model.StatusValue) error {
 	q.Lock()
 	defer q.Unlock()
 

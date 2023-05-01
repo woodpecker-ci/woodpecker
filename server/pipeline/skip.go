@@ -10,9 +10,8 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
-func SkipWorkflow(ctx context.Context, store store.Store, pipeline *model.Pipeline, workflowPid int, user *model.User, repo *model.Repo) (*model.Pipeline, error) {
+func SkipWorkflow(ctx context.Context, store store.Store, pipeline *model.Pipeline, workflowPid int, repo *model.Repo) (*model.Pipeline, error) {
 	workflowToSkip, err := store.StepFind(pipeline, workflowPid)
-
 	if err != nil {
 		log.Error().Err(err).Msg("can not get workflow list from store")
 		return nil, fmt.Errorf("cannot find the workflow %d in pipeline", workflowPid)
