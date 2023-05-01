@@ -465,6 +465,6 @@ func PostSkipWorkflow(c *gin.Context) {
 	if err != nil {
 		handlePipelineErr(c, err)
 	} else {
-		c.JSON(200, pl)
+		c.JSON(http.StatusOK, pl)
 	}
 }
