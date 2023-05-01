@@ -248,7 +248,7 @@ func run(c *cli.Context) error {
 	return nil
 }
 
-func rinWithRetry(context *cli.Context) error {
+func runWithRetry(context *cli.Context) error {
 	var err error
 	for i := 0; i < retryCount; i++ {
 		if err = run(context); err == nil {

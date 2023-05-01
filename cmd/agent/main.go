@@ -35,7 +35,7 @@ func main() {
 	app.Name = "woodpecker-agent"
 	app.Version = version.String()
 	app.Usage = "woodpecker agent"
-	app.Action = rinWithRetry
+	app.Action = runWithRetry
 	app.Commands = []*cli.Command{
 		{
 			Name:   "ping",
