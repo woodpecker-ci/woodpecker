@@ -18,7 +18,6 @@ package gogs
 import (
 	"context"
 	"crypto/tls"
-	"fmt"
 	"net"
 	"net/http"
 	"net/url"
@@ -34,19 +33,17 @@ import (
 
 // Opts defines configuration options.
 type Opts struct {
-	URL         string // Gogs server url.
-	Username    string // Optional machine account username.
-	Password    string // Optional machine account password.
-	PrivateMode bool   // Gogs is running in private mode.
-	SkipVerify  bool   // Skip ssl verification.
+	URL        string // Gogs server url.
+	Username   string // Optional machine account username.
+	Password   string // Optional machine account password.
+	SkipVerify bool   // Skip ssl verification.
 }
 
 type client struct {
-	URL         string
-	Username    string
-	Password    string
-	PrivateMode bool
-	SkipVerify  bool
+	URL        string
+	Username   string
+	Password   string
+	SkipVerify bool
 }
 
 // New returns a Forge implementation that integrates with Gogs, an open
@@ -61,11 +58,10 @@ func New(opts Opts) (forge.Forge, error) {
 		u.Host = host
 	}
 	return &client{
-		URL:         opts.URL,
-		Username:    opts.Username,
-		Password:    opts.Password,
-		PrivateMode: opts.PrivateMode,
-		SkipVerify:  opts.SkipVerify,
+		URL:        opts.URL,
+		Username:   opts.Username,
+		Password:   opts.Password,
+		SkipVerify: opts.SkipVerify,
 	}, nil
 }
 
@@ -76,7 +72,7 @@ func (c *client) Name() string {
 
 // Login authenticates an account with Gogs using basic authentication. The
 // Gogs account details are returned when the user is successfully authenticated.
-func (c *client) Login(ctx context.Context, res http.ResponseWriter, req *http.Request) (*model.User, error) {
+func (c *client) Login(_ context.Context, res http.ResponseWriter, req *http.Request) (*model.User, error) {
 	var (
 		username = req.FormValue("username")
 		password = req.FormValue("password")
@@ -130,12 +126,12 @@ func (c *client) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 }
 
 // Auth is not supported by the Gogs driver.
-func (c *client) Auth(ctx context.Context, token, secret string) (string, error) {
-	return "", fmt.Errorf("Not Implemented")
+func (c *client) Auth(_ context.Context, _, _ string) (string, error) {
+	return "", forge_types.ErrNotImplemented
 }
 
 // Teams is not supported by the Gogs driver.
-func (c *client) Teams(ctx context.Context, u *model.User) ([]*model.Team, error) {
+func (c *client) Teams(_ context.Context, u *model.User) ([]*model.Team, error) {
 	client := c.newClientToken(u.Token)
 	orgs, err := client.ListMyOrgs()
 	if err != nil {
@@ -150,18 +146,18 @@ func (c *client) Teams(ctx context.Context, u *model.User) ([]*model.Team, error
 }
 
 // Repo returns the named Gogs repository.
-func (c *client) Repo(ctx context.Context, u *model.User, _ model.ForgeRemoteID, owner, name string) (*model.Repo, error) {
+func (c *client) Repo(_ context.Context, u *model.User, _ model.ForgeRemoteID, owner, name string) (*model.Repo, error) {
 	client := c.newClientToken(u.Token)
 	repo, err := client.GetRepo(owner, name)
 	if err != nil {
 		return nil, err
 	}
-	return toRepo(repo, c.PrivateMode), nil
+	return toRepo(repo), nil
 }
 
 // Repos returns a list of all repositories for the Gogs account, including
 // organization repositories.
-func (c *client) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {
+func (c *client) Repos(_ context.Context, u *model.User) ([]*model.Repo, error) {
 	var repos []*model.Repo
 
 	client := c.newClientToken(u.Token)
@@ -171,23 +167,13 @@ func (c *client) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 	}
 
 	for _, repo := range all {
-		repos = append(repos, toRepo(repo, c.PrivateMode))
+		repos = append(repos, toRepo(repo))
 	}
 	return repos, err
 }
 
-// Perm returns the user permissions for the named Gogs repository.
-func (c *client) Perm(ctx context.Context, u *model.User, r *model.Repo) (*model.Perm, error) {
-	client := c.newClientToken(u.Token)
-	repo, err := client.GetRepo(r.Owner, r.Name)
-	if err != nil {
-		return nil, err
-	}
-	return toPerm(repo.Permissions), nil
-}
-
 // File fetches the file from the Gogs repository and returns its contents.
-func (c *client) File(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]byte, error) {
+func (c *client) File(_ context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]byte, error) {
 	client := c.newClientToken(u.Token)
 	ref := b.Commit
 
@@ -210,12 +196,12 @@ func (c *client) File(ctx context.Context, u *model.User, r *model.Repo, b *mode
 	return cfg, err
 }
 
-func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*forge_types.FileMeta, error) {
+func (c *client) Dir(_ context.Context, _ *model.User, _ *model.Repo, _ *model.Pipeline, _ string) ([]*forge_types.FileMeta, error) {
 	return nil, forge_types.ErrNotImplemented
 }
 
 // Status is not supported by the Gogs driver.
-func (c *client) Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, step *model.Step) error {
+func (c *client) Status(_ context.Context, _ *model.User, _ *model.Repo, _ *model.Pipeline, _ *model.Step) error {
 	return nil
 }
 
@@ -244,7 +230,7 @@ func (c *client) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 
 // Activate activates the repository by registering post-commit hooks with
 // the Gogs repository.
-func (c *client) Activate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
+func (c *client) Activate(_ context.Context, u *model.User, r *model.Repo, link string) error {
 	config := map[string]string{
 		"url":          link,
 		"secret":       r.Hash,
@@ -263,12 +249,12 @@ func (c *client) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 }
 
 // Deactivate is not supported by the Gogs driver.
-func (c *client) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
+func (c *client) Deactivate(_ context.Context, _ *model.User, _ *model.Repo, _ string) error {
 	return nil
 }
 
 // Branches returns the names of all branches for the named repository.
-func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
+func (c *client) Branches(_ context.Context, u *model.User, r *model.Repo, _ *model.ListOptions) ([]string, error) {
 	token := ""
 	if u != nil {
 		token = u.Token
@@ -287,7 +273,7 @@ func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]
 }
 
 // BranchHead returns sha of commit on top of the specified branch
-func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
+func (c *client) BranchHead(_ context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
 	token := ""
 	if u != nil {
 		token = u.Token
@@ -299,15 +285,19 @@ func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 	return b.Commit.ID, nil
 }
 
+func (c *client) PullRequests(_ context.Context, _ *model.User, _ *model.Repo, _ *model.ListOptions) ([]*model.PullRequest, error) {
+	return nil, forge_types.ErrNotImplemented
+}
+
 // Hook parses the incoming Gogs hook and returns the Repository and Pipeline
 // details. If the hook is unsupported nil values are returned.
-func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error) {
-	return parseHook(r, c.PrivateMode)
+func (c *client) Hook(_ context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error) {
+	return parseHook(r)
 }
 
 // OrgMembership returns if user is member of organization and if user
 // is admin/owner in this organization.
-func (c *client) OrgMembership(ctx context.Context, u *model.User, owner string) (*model.OrgPerm, error) {
+func (c *client) OrgMembership(_ context.Context, u *model.User, owner string) (*model.OrgPerm, error) {
 	client := c.newClientToken(u.Token)
 
 	orgs, err := client.ListMyOrgs()

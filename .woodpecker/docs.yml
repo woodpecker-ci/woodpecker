@@ -1,5 +1,5 @@
 variables:
-  - &golang_image 'golang:1.18.7'
+  - &golang_image 'golang:1.20.2'
   - &node_image 'node:18-alpine'
   - &when_path
     - "docs/**"
@@ -14,7 +14,9 @@ pipeline:
     commands:
       - make docs
     when:
-      path: *when_path
+      - path: *when_path
+      - cron: update_docs
+        event: cron
 
   build:
     image: *node_image
@@ -24,7 +26,9 @@ pipeline:
       - pnpm install --frozen-lockfile
       - pnpm build
     when:
-      path: *when_path
+      - path: *when_path
+      - cron: update_docs
+        event: cron
 
   securitycheck:
     image: aquasec/trivy:latest
@@ -73,6 +77,8 @@ pipeline:
       - git commit -m "Deploy website - based on ${CI_COMMIT_SHA}"
       - git push
     when:
-      event: push
-      branch: ${CI_REPO_DEFAULT_BRANCH}
-      path: *when_path
+      - event: push
+        branch: ${CI_REPO_DEFAULT_BRANCH}
+        path: *when_path
+      - cron: update_docs
+        event: cron

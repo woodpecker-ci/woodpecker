@@ -48,7 +48,12 @@ var HookPush = `
       "email": "gordon@golang.org",
       "username": "gordon"
     },
-    "private": true
+    "private": true,
+    "permissions": {
+      "admin": true,
+      "push": true,
+      "pull": true
+    }
   },
   "pusher": {
     "name": "gordon",
@@ -88,7 +93,12 @@ var HookPushTag = `{
     "clone_url": "http://gogs.golang.org/gordon/hello-world.git",
     "default_branch": "master",
     "created_at": "2015-10-22T19:32:44Z",
-    "updated_at": "2016-11-24T13:37:16Z"
+    "updated_at": "2016-11-24T13:37:16Z",
+    "permissions": {
+      "admin": true,
+      "push": true,
+      "pull": true
+    }
   },
   "sender": {
     "id": 1,
@@ -142,7 +152,12 @@ var HookPullRequest = `{
     "private": true,
     "html_url": "http://gogs.golang.org/gordon/hello-world",
     "clone_url": "https://gogs.golang.org/gordon/hello-world.git",
-    "default_branch": "master"
+    "default_branch": "master",
+    "permissions": {
+      "admin": true,
+      "push": true,
+      "pull": true
+    }
   },
   "sender": {
       "id": 1,

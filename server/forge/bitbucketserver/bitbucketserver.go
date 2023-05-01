@@ -138,46 +138,50 @@ func (c *Config) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 }
 
 // Auth is not supported by the Stash driver.
-func (*Config) Auth(ctx context.Context, token, secret string) (string, error) {
+func (*Config) Auth(_ context.Context, _, _ string) (string, error) {
 	return "", fmt.Errorf("Not Implemented")
 }
 
 // Teams is not supported by the Stash driver.
-func (*Config) Teams(ctx context.Context, u *model.User) ([]*model.Team, error) {
+func (*Config) Teams(_ context.Context, _ *model.User) ([]*model.Team, error) {
 	var teams []*model.Team
 	return teams, nil
 }
 
 // TeamPerm is not supported by the Stash driver.
-func (*Config) TeamPerm(u *model.User, org string) (*model.Perm, error) {
+func (*Config) TeamPerm(_ *model.User, _ string) (*model.Perm, error) {
 	return nil, nil
 }
 
 func (c *Config) Repo(ctx context.Context, u *model.User, _ model.ForgeRemoteID, owner, name string) (*model.Repo, error) {
-	repo, err := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token).FindRepo(owner, name)
+	client := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token)
+	repo, err := client.FindRepo(owner, name)
 	if err != nil {
 		return nil, err
 	}
-	return convertRepo(repo), nil
+	perm, err := client.FindRepoPerms(repo.Project.Key, repo.Name)
+	if err != nil {
+		return nil, err
+	}
+	return convertRepo(repo, perm), nil
 }
 
 func (c *Config) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {
-	repos, err := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token).FindRepos()
+	client := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token)
+	repos, err := client.FindRepos()
 	if err != nil {
 		return nil, err
 	}
 	var all []*model.Repo
 	for _, repo := range repos {
-		all = append(all, convertRepo(repo))
+		perm, err := client.FindRepoPerms(repo.Project.Key, repo.Name)
+		if err != nil {
+			return nil, err
+		}
+		all = append(all, convertRepo(repo, perm))
 	}
 
 	return all, nil
-}
-
-func (c *Config) Perm(ctx context.Context, u *model.User, repo *model.Repo) (*model.Perm, error) {
-	client := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token)
-
-	return client.FindRepoPerms(repo.Owner, repo.Name)
 }
 
 func (c *Config) File(ctx context.Context, u *model.User, r *model.Repo, p *model.Pipeline, f string) ([]byte, error) {
@@ -186,12 +190,12 @@ func (c *Config) File(ctx context.Context, u *model.User, r *model.Repo, p *mode
 	return client.FindFileForRepo(r.Owner, r.Name, f, p.Ref)
 }
 
-func (c *Config) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model.Pipeline, f string) ([]*forge_types.FileMeta, error) {
+func (c *Config) Dir(_ context.Context, _ *model.User, _ *model.Repo, _ *model.Pipeline, _ string) ([]*forge_types.FileMeta, error) {
 	return nil, forge_types.ErrNotImplemented
 }
 
 // Status is not supported by the bitbucketserver driver.
-func (c *Config) Status(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, step *model.Step) error {
+func (c *Config) Status(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, _ *model.Step) error {
 	status := internal.PipelineStatus{
 		State: convertStatus(pipeline.Status),
 		Desc:  common.GetPipelineStatusDescription(pipeline.Status),
@@ -205,7 +209,7 @@ func (c *Config) Status(ctx context.Context, user *model.User, repo *model.Repo,
 	return client.CreateStatus(pipeline.Commit, &status)
 }
 
-func (c *Config) Netrc(user *model.User, r *model.Repo) (*model.Netrc, error) {
+func (c *Config) Netrc(_ *model.User, r *model.Repo) (*model.Netrc, error) {
 	host, err := common.ExtractHostFromCloneURL(r.Clone)
 	if err != nil {
 		return nil, err
@@ -225,8 +229,8 @@ func (c *Config) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 }
 
 // Branches returns the names of all branches for the named repository.
-func (c *Config) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
-	bitbucketBranches, err := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token).ListBranches(r.Owner, r.Name)
+func (c *Config) Branches(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]string, error) {
+	bitbucketBranches, err := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token).ListBranches(r.Owner, r.Name, p.Page, p.PerPage)
 	if err != nil {
 		return nil, err
 	}
@@ -239,9 +243,13 @@ func (c *Config) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]
 }
 
 // BranchHead returns the sha of the head (latest commit) of the specified branch
-func (c *Config) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
+func (c *Config) BranchHead(_ context.Context, _ *model.User, _ *model.Repo, _ string) (string, error) {
 	// TODO(1138): missing implementation
 	return "", forge_types.ErrNotImplemented
+}
+
+func (c *Config) PullRequests(_ context.Context, _ *model.User, _ *model.Repo, _ *model.ListOptions) ([]*model.PullRequest, error) {
+	return nil, forge_types.ErrNotImplemented
 }
 
 func (c *Config) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
@@ -249,13 +257,13 @@ func (c *Config) Deactivate(ctx context.Context, u *model.User, r *model.Repo, l
 	return client.DeleteHook(r.Owner, r.Name, link)
 }
 
-func (c *Config) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error) {
+func (c *Config) Hook(_ context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error) {
 	return parseHook(r, c.URL)
 }
 
 // OrgMembership returns if user is member of organization and if user
 // is admin/owner in this organization.
-func (c *Config) OrgMembership(ctx context.Context, u *model.User, owner string) (*model.OrgPerm, error) {
+func (c *Config) OrgMembership(_ context.Context, _ *model.User, _ string) (*model.OrgPerm, error) {
 	// TODO: Not implemented currently
 	return nil, nil
 }

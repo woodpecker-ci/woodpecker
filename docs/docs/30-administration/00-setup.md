@@ -11,6 +11,12 @@ A Woodpecker deployment consists of two parts:
 >
 > You can add more agents to increase the number of parallel steps or set the agent's `WOODPECKER_MAX_WORKFLOWS=1` environment variable to increase the number of parallel workflows for that agent.
 
+## Which version of Woodpecker should I use?
+
+Woodpecker is having two different kinds of releases: **stable** and **next**.
+
+To find out more about the differences between the two releases, please read the [FAQ](/faq).
+
 ## Installation
 
 You can install Woodpecker on multiple ways:
@@ -168,3 +174,5 @@ A [Prometheus endpoint](./90-prometheus.md) is exposed.
 ## Behind a proxy
 
 See the [proxy guide](./70-proxy.md) if you want to see a setup behind Apache, Nginx, Caddy or ngrok.
+
+In the case you need to use Woodpecker with a URL path prefix (like: https://example.org/woodpecker/), you can use the option [`WOODPECKER_ROOT_URL`](./10-server-config.md#woodpecker_root_url).

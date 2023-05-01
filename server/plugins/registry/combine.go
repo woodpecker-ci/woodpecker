@@ -30,16 +30,16 @@ func (c combined) RegistryFind(repo *model.Repo, name string) (*model.Registry, 
 	return nil, nil
 }
 
-func (c combined) RegistryList(repo *model.Repo) ([]*model.Registry, error) {
+func (c combined) RegistryList(repo *model.Repo, p *model.ListOptions) ([]*model.Registry, error) {
 	var registries []*model.Registry
 	for _, registry := range c.registries {
-		list, err := registry.RegistryList(repo)
+		list, err := registry.RegistryList(repo, &model.ListOptions{All: true})
 		if err != nil {
 			return nil, err
 		}
 		registries = append(registries, list...)
 	}
-	return registries, nil
+	return model.ApplyPagination(p, registries), nil
 }
 
 func (c combined) RegistryCreate(repo *model.Repo, registry *model.Registry) error {

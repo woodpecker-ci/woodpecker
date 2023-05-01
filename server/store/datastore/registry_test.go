@@ -82,7 +82,7 @@ func TestRegistryList(t *testing.T) {
 		Password: "bar",
 	}))
 
-	list, err := store.RegistryList(&model.Repo{ID: 1})
+	list, err := store.RegistryList(&model.Repo{ID: 1}, &model.ListOptions{Page: 1, PerPage: 50})
 	if err != nil {
 		t.Error(err)
 		return

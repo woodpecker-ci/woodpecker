@@ -16,10 +16,12 @@ package local
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
 	"github.com/alessio/shellescape"
@@ -27,6 +29,11 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/shared/constant"
+)
+
+const (
+	workingSubDir = "work"
+	homeSubDir    = "home"
 )
 
 // notAllowedEnvVarOverwrites are all env vars that can not be overwritten by step config
@@ -41,13 +48,10 @@ var notAllowedEnvVarOverwrites = []string{
 
 type local struct {
 	// TODO: make cmd a cmd list to iterate over, the hard part is to have a common ReadCloser
-	cmd        *exec.Cmd
-	output     io.ReadCloser
-	workingdir string
+	cmd             *exec.Cmd
+	output          io.ReadCloser
+	workflowBaseDir string
 }
-
-// make sure local implements Engine
-var _ types.Engine = &local{}
 
 // New returns a new local Engine.
 func New() types.Engine {
@@ -58,18 +62,25 @@ func (e *local) Name() string {
 	return "local"
 }
 
-func (e *local) IsAvailable() bool {
+func (e *local) IsAvailable(context.Context) bool {
 	return true
 }
 
-func (e *local) Load() error {
+func (e *local) Load(context.Context) error {
 	dir, err := os.MkdirTemp("", "woodpecker-local-*")
-	e.workingdir = dir
-	return err
+	if err != nil {
+		return err
+	}
+	e.workflowBaseDir = dir
+
+	if err := os.Mkdir(filepath.Join(e.workflowBaseDir, workingSubDir), 0o700); err != nil {
+		return err
+	}
+	return os.Mkdir(filepath.Join(e.workflowBaseDir, homeSubDir), 0o700)
 }
 
 // Setup the pipeline environment.
-func (e *local) Setup(ctx context.Context, config *types.Config) error {
+func (e *local) Setup(_ context.Context, _ *types.Config) error {
 	return nil
 }
 
@@ -84,12 +95,15 @@ func (e *local) Exec(ctx context.Context, step *types.Step) error {
 		}
 	}
 
+	// Set HOME
+	env = append(env, "HOME="+filepath.Join(e.workflowBaseDir, homeSubDir))
+
 	var command []string
 	if step.Image == constant.DefaultCloneImage {
 		// Default clone step
-		// TODO: creat tmp HOME and insert netrc
+		// TODO: use tmp HOME and insert netrc and delete it after clone
 		// TODO: download plugin-git binary if not exist
-		env = append(env, "CI_WORKSPACE="+e.workingdir+"/"+step.Environment["CI_REPO"])
+		env = append(env, "CI_WORKSPACE="+filepath.Join(e.workflowBaseDir, workingSubDir, step.Environment["CI_REPO"]))
 		command = append(command, "plugin-git")
 	} else {
 		// Use "image name" as run command
@@ -113,9 +127,9 @@ func (e *local) Exec(ctx context.Context, step *types.Step) error {
 
 	// Prepare working directory
 	if step.Image == constant.DefaultCloneImage {
-		e.cmd.Dir = e.workingdir + "/" + step.Environment["CI_REPO_OWNER"]
+		e.cmd.Dir = filepath.Join(e.workflowBaseDir, workingSubDir, step.Environment["CI_REPO_OWNER"])
 	} else {
-		e.cmd.Dir = e.workingdir + "/" + step.Environment["CI_REPO"]
+		e.cmd.Dir = filepath.Join(e.workflowBaseDir, workingSubDir, step.Environment["CI_REPO"])
 	}
 	err := os.MkdirAll(e.cmd.Dir, 0o700)
 	if err != nil {
@@ -133,11 +147,14 @@ func (e *local) Exec(ctx context.Context, step *types.Step) error {
 func (e *local) Wait(context.Context, *types.Step) (*types.State, error) {
 	err := e.cmd.Wait()
 	ExitCode := 0
-	if eerr, ok := err.(*exec.ExitError); ok {
-		ExitCode = eerr.ExitCode()
+
+	var execExitError *exec.ExitError
+	if errors.As(err, &execExitError) {
+		ExitCode = execExitError.ExitCode()
 		// Non-zero exit code is a pipeline failure, but not an agent error.
 		err = nil
 	}
+
 	return &types.State{
 		Exited:   true,
 		ExitCode: ExitCode,
@@ -151,5 +168,5 @@ func (e *local) Tail(context.Context, *types.Step) (io.ReadCloser, error) {
 
 // Destroy the pipeline environment.
 func (e *local) Destroy(context.Context, *types.Config) error {
-	return os.RemoveAll(e.cmd.Dir)
+	return os.RemoveAll(e.workflowBaseDir)
 }

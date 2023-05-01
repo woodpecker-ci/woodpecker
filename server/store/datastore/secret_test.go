@@ -73,9 +73,20 @@ func TestSecretList(t *testing.T) {
 
 	createTestSecrets(t, store)
 
-	list, err := store.SecretList(&model.Repo{ID: 1, Owner: "org"}, false)
+	list, err := store.SecretList(&model.Repo{ID: 1, Owner: "org"}, false, &model.ListOptions{Page: 1, PerPage: 50})
 	assert.NoError(t, err)
 	assert.Len(t, list, 2)
+}
+
+func TestSecretListAll(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Secret))
+	defer closer()
+
+	createTestSecrets(t, store)
+
+	list, err := store.SecretListAll()
+	assert.NoError(t, err)
+	assert.Len(t, list, 4)
 }
 
 func TestSecretPipelineList(t *testing.T) {
@@ -84,7 +95,7 @@ func TestSecretPipelineList(t *testing.T) {
 
 	createTestSecrets(t, store)
 
-	list, err := store.SecretList(&model.Repo{ID: 1, Owner: "org"}, true)
+	list, err := store.SecretList(&model.Repo{ID: 1, Owner: "org"}, true, &model.ListOptions{Page: 1, PerPage: 50})
 	assert.NoError(t, err)
 	assert.Len(t, list, 4)
 }
@@ -238,7 +249,7 @@ func TestOrgSecretList(t *testing.T) {
 
 	createTestSecrets(t, store)
 
-	list, err := store.OrgSecretList("org")
+	list, err := store.OrgSecretList("org", &model.ListOptions{All: true})
 	assert.NoError(t, err)
 	assert.Len(t, list, 1)
 
@@ -291,7 +302,7 @@ func TestGlobalSecretList(t *testing.T) {
 
 	createTestSecrets(t, store)
 
-	list, err := store.GlobalSecretList()
+	list, err := store.GlobalSecretList(&model.ListOptions{All: true})
 	assert.NoError(t, err)
 	assert.Len(t, list, 1)
 

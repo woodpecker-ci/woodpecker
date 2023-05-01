@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/go-ap/httpsig"
+	"github.com/stretchr/testify/assert"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/utils"
 )
 
@@ -16,8 +17,8 @@ func TestSign(t *testing.T) {
 	pubKeyID := "woodpecker-ci-plugins"
 
 	pubEd25519Key, privEd25519Key, err := ed25519.GenerateKey(rand.Reader)
-	if err != nil {
-		panic(err)
+	if !assert.NoError(t, err) {
+		t.FailNow()
 	}
 
 	body := []byte("{\"foo\":\"bar\"}")

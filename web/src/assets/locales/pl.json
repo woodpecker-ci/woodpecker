@@ -1,0 +1,365 @@
+{
+  "admin": {
+    "settings": {
+      "agents": {
+        "add": "Dodaj agenta",
+        "agents": "Agenty",
+        "backend": {
+          "backend": "Backend",
+          "badge": "backend"
+        },
+        "created": "Utworzono agenta",
+        "delete_confirm": "Czy na pewno chcesz usunąć tego agenta? Nie będzie można go więcej połączyć z serwerem.",
+        "deleted": "Usunięto agenta",
+        "desc": "Agenty zarejestrowane na tym serwerze",
+        "last_contact": "Ostatni kontakt",
+        "name": {
+          "name": "Nazwa",
+          "placeholder": "Nazwa agenta"
+        },
+        "never": "Nigdy",
+        "no_schedule": {
+          "name": "Dezaktywuj agenta",
+          "placeholder": "Nie pozwalaj agentowi brać nowych zadań"
+        },
+        "none": "Nie ma jeszcze żadnego agenta.",
+        "platform": {
+          "badge": "platforma",
+          "platform": "Platforma"
+        },
+        "save": "Zapisz agenta",
+        "saved": "Zapisano agenta",
+        "show": "Pokaż agenty",
+        "token": "Token",
+        "version": "Wersja"
+      },
+      "not_allowed": "Nie masz pozwolenia na dostęp do ustawień serwera",
+      "secrets": {
+        "add": "Dodaj sekret",
+        "created": "Dodano sekret globalny",
+        "deleted": "Usunięto sekret globalny",
+        "desc": "Globalne sekrety mogą być przekazane jako zmienne środowiskowe do poszczególnych kroków potoku wszystkich repozytoriów.",
+        "events": {
+          "events": "Dostępny dla wybranych zdarzeń",
+          "pr_warning": "Używaj tej opcji ostrożnie, osoba atakująca może złożyć szkodliwy pull request który ujawni twoje sekrety."
+        },
+        "images": {
+          "desc": "Lista obrazów (rozdzielonych przecinkami) dla których ten sekret jest dostępny, pozostaw puste aby zezwolić dla wszystkich obrazów",
+          "images": "Dostępny dla wybranych obrazów"
+        },
+        "name": "Nazwa",
+        "none": "Nie ma jeszcze żadnych globalnych sekretów.",
+        "plugins_only": "Dostępny tylko dla pluginów",
+        "save": "Zapisz sekret",
+        "saved": "Zapisano sekret globalny",
+        "secrets": "Sekrety",
+        "show": "Pokaż sekrety",
+        "value": "Wartość",
+        "warning": "Te sekrety będą dostępne dla wszystkich użytkowników serwera."
+      },
+      "settings": "Ustawienia"
+    }
+  },
+  "back": "Powrót",
+  "color_scheme_dark": "Przełącz na tryb jasny",
+  "color_scheme_light": "Przełącz na tryb ciemny",
+  "docs": "Dokumentacja",
+  "documentation_for": "Dokumentacja do tematu \"{topic}\"",
+  "login": "Zaloguj",
+  "logout": "Wyloguj",
+  "not_found": {
+    "back_home": "Powrót do strony głównej",
+    "not_found": "Ojoj, 404, albo coś zepsuliśmy, albo pomyliłeś się przy wpisywaniu :-/"
+  },
+  "org": {
+    "settings": {
+      "not_allowed": "Nie masz pozwolenia na dostęp do ustawień tej organizacji",
+      "secrets": {
+        "add": "Dodaj sekret",
+        "created": "Dodano sekret organizacji",
+        "deleted": "Usunięto sekret organizacji",
+        "desc": "Sekrety organizacji mogą być przekazane jako zmienne środowiskowe do poszczególnych kroków potoku wszystkich repozytoriów tej organizacji.",
+        "events": {
+          "events": "Dostępny dla wybranych zdarzeń",
+          "pr_warning": "Używaj tej opcji ostrożnie, osoba atakująca może złożyć szkodliwy pull request który ujawni twoje sekrety."
+        },
+        "images": {
+          "desc": "Lista obrazów (rozdzielonych przecinkami) dla których ten sekret jest dostępny, pozostaw puste aby zezwolić dla wszystkich obrazów",
+          "images": "Dostępny dla wybranych obrazów"
+        },
+        "name": "Nazwa",
+        "none": "Nie ma jeszcze żadnych sekretów organizacji.",
+        "plugins_only": "Dostępny tylko dla pluginów",
+        "save": "Zapisz sekret",
+        "saved": "Zapisano sekret organizacji",
+        "secrets": "Sekrety",
+        "show": "Pokaż sekrety",
+        "value": "Wartość"
+      },
+      "settings": "Ustawienia"
+    }
+  },
+  "password": "Hasło",
+  "pipeline_feed": "Tablica potoków",
+  "repo": {
+    "activity": "Aktywności",
+    "add": "Dodaj repozytorium",
+    "branches": "Gałęzie",
+    "deploy_pipeline": {
+      "variables": {
+        "add": "Dodaj zmienną",
+        "desc": "Zdefiniuj dodatkowe zmienne użyte w twoim potoku. Zmienne o tej samej nazwie zostaną nadpisane.",
+        "name": "Nazwa zmiennej",
+        "title": "Dodatkowe zmienne potoku",
+        "value": "Wartość zmiennej"
+      }
+    },
+    "enable": {
+      "enable": "Aktywuj",
+      "enabled": "Już aktywowano",
+      "list_reloaded": "Wczytano listę repozytoriów ponownie",
+      "reload": "Wczytaj repozytoria ponownie",
+      "success": "Zaktywowano"
+    },
+    "manual_pipeline": {
+      "select_branch": "Wybierz gałąź",
+      "title": "Wyzwól ręcznie uruchomienie potoku",
+      "trigger": "Uruchom potok",
+      "variables": {
+        "add": "Dodaj zmienną",
+        "desc": "Zdefiniuj dodatkowe zmienne użyte w twoim potoku. Zmienne o tej samej nazwie zostaną nadpisane.",
+        "name": "Nazwa zmiennej",
+        "title": "Dodatkowe zmienne potoku",
+        "value": "Wartość zmiennej"
+      }
+    },
+    "not_allowed": "Nie masz pozwolenia na dostęp do tego repozytorium",
+    "open_in_forge": "Otwórz repozytorium w systemie kontroli wersji",
+    "pipeline": {
+      "actions": {
+        "cancel": "Anuluj",
+        "cancel_success": "Anulowano potok",
+        "canceled": "Ten krok został anulowany.",
+        "log_auto_scroll": "Przewijaj automatycznie",
+        "log_auto_scroll_off": "Wyłącz automatyczne przewijanie",
+        "log_download": "Pobierz",
+        "restart": "Uruchom ponownie",
+        "restart_success": "Uruchomiono potok ponownie"
+      },
+      "config": "Konfiguracja",
+      "created": "Utworzono",
+      "event": {
+        "cron": "Cron",
+        "manual": "Ręcznie",
+        "pr": "Pull Request",
+        "push": "Push",
+        "tag": "Tag"
+      },
+      "execution_error": "Błąd wykonania",
+      "exit_code": "kod wyjścia {exitCode}",
+      "files": "Zmodyfikowane pliki ({files})",
+      "loading": "Ładowanie…",
+      "log_download_error": "Wystąpił błąd przy pobieraniu pliku z logiem",
+      "no_files": "Nie zmodyfikowano żadnych plików.",
+      "no_pipeline_steps": "Brak dostępnych kroków potoku!",
+      "no_pipelines": "Nie uruchomiono jeszcze żadnego potoku.",
+      "pipeline": "Potok #{pipelineId}",
+      "pipelines_for": "Potoki dla gałęzi \"{branch}\"",
+      "protected": {
+        "approve": "Zatwierdź",
+        "approve_success": "Zatwierdzono potok",
+        "awaits": "Ten potok oczekuje na zatwierdzenie przez maintainera!",
+        "decline": "Odrzuć",
+        "decline_success": "Odrzucono potok",
+        "declined": "Ten potok został odrzucony!"
+      },
+      "status": {
+        "blocked": "zablokowany",
+        "declined": "odrzucony",
+        "error": "błąd",
+        "failure": "zakończony niepowodzeniem",
+        "killed": "zabity",
+        "pending": "oczekujący na wykonanie",
+        "running": "w trakcie uruchomienia",
+        "skipped": "pominięty",
+        "started": "rozpoczęty",
+        "status": "Status: {status}",
+        "success": "zakończony powodzeniem"
+      },
+      "step_not_started": "Ten krok jeszcze się nie rozpoczął.",
+      "tasks": "Zadania"
+    },
+    "settings": {
+      "actions": {
+        "actions": "Operacje",
+        "delete": {
+          "confirm": "Wszystkie dane zostaną utracone po wykonaniu tej operacji!!!\n\nCzy na pewno chcesz kontynuować?",
+          "delete": "Usuń repozytorium",
+          "success": "Usunięto repozytorium"
+        },
+        "disable": {
+          "disable": "Dezaktywuj repozytorium",
+          "success": "Dezaktywowano repozytorium"
+        },
+        "repair": {
+          "repair": "Napraw repozytorium",
+          "success": "Naprawiono repozytorium"
+        }
+      },
+      "badge": {
+        "badge": "Plakietka",
+        "branch": "Gałąź",
+        "type": "Składnia",
+        "type_html": "HTML",
+        "type_markdown": "Markdown",
+        "type_url": "URL"
+      },
+      "crons": {
+        "add": "Dodaj cron",
+        "branch": {
+          "placeholder": "Gałąź (używa domyślnej gałęzi jeśli puste)",
+          "title": "Gałąź"
+        },
+        "created": "Dodano cron",
+        "crons": "Crony",
+        "delete": "Usuń cron",
+        "deleted": "Usunięto cron",
+        "desc": "Zadania cron mogą być używane do wyzwalania potoków w regularnym odstępie.",
+        "edit": "Edytuj cron",
+        "name": {
+          "name": "Nazwa",
+          "placeholder": "Nazwa zadania cron"
+        },
+        "next_exec": "Następne uruchomienie",
+        "none": "Nie dodano jeszcze żadnego crona.",
+        "not_executed_yet": "Jeszcze nigdy nie uruchomiono",
+        "run": "Uruchom teraz",
+        "save": "Zapisz cron",
+        "saved": "Zapisano cron",
+        "schedule": {
+          "placeholder": "Harmonogram",
+          "title": "Harmonogram (wyrażony w UTC)"
+        },
+        "show": "Pokaż crony"
+      },
+      "general": {
+        "allow_pr": {
+          "allow": "Zezwól na pull requesty",
+          "desc": "Potoki mogą być uruchamiane przy pull requestach."
+        },
+        "cancel_prev": {
+          "cancel": "Anuluj wcześniejsze potoki",
+          "desc": "Zaznacz aby anulować oczekujące i uruchomione potoki dla tego samego zdarzenia i kontekstu przed rozpoczęciem nowego potoku."
+        },
+        "general": "Ogólne",
+        "pipeline_path": {
+          "default": "Domyślnie: .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml",
+          "path": "Ścieżka do pliku potoku"
+        },
+        "project": "Ustawienia projektu",
+        "protected": {
+          "desc": "Każdy potok musi zostać zatwierdzony przed uruchomieniem.",
+          "protected": "Chroniony"
+        },
+        "save": "Zapisz ustawienia",
+        "success": "Zaktualizowano ustawienia projektu",
+        "timeout": {
+          "minutes": "minut",
+          "timeout": "Limit czasu wykonania"
+        },
+        "trusted": {
+          "desc": "Kontenery potoku otrzymają dostęp do podwyższonych operacji, takich jak montowanie woluminów.",
+          "trusted": "Zaufany"
+        },
+        "visibility": {
+          "internal": {
+            "desc": "Tylko zalogowani użytkownicy instancji Woodpecker mogą zobaczyć ten projekt.",
+            "internal": "Wewnętrzny"
+          },
+          "private": {
+            "desc": "Tylko ty i inni właściciele repozytorium mogą zobaczyć ten projekt.",
+            "private": "Prywatny"
+          },
+          "public": {
+            "desc": "Każdy użytkownik może zobaczyć twój projekt bez bycia zalogowanym.",
+            "public": "Publiczny"
+          },
+          "visibility": "Widoczność projektu"
+        }
+      },
+      "not_allowed": "Nie masz pozwolenia na dostęp do ustawień tego repozytorium",
+      "registries": {
+        "add": "Dodaj rejestr",
+        "address": {
+          "address": "Adres",
+          "placeholder": "Adres rejestru (np. docker.io)"
+        },
+        "created": "Utworzono dane rejestru",
+        "creds": "Dane rejestrów",
+        "delete": "Usuń rejestr",
+        "deleted": "Usunięto dane rejestru",
+        "desc": "Możesz dodać dane rejestrów aby używać prywatnych obrazów w twoim potoku.",
+        "edit": "Edytuj rejestr",
+        "none": "Nie dodano jeszcze żadnego rejestru.",
+        "registries": "Rejestry",
+        "save": "Zapisz rejestr",
+        "saved": "Zapisano dane rejestru",
+        "show": "Pokaż rejestry"
+      },
+      "secrets": {
+        "add": "Dodaj sekret",
+        "created": "Dodano sekret",
+        "delete": "Usuń sekret",
+        "deleted": "Usunięto sekret",
+        "desc": "Sekrety są przekazywane do poszczególnych kroków potoku jako zmienne środowiskowe.",
+        "edit": "Edytuj sekret",
+        "events": {
+          "events": "Dostępny dla wybranych zdarzeń",
+          "pr_warning": "Używaj tej opcji ostrożnie, osoba atakująca może złożyć szkodliwy pull request który ujawni twoje sekrety."
+        },
+        "images": {
+          "desc": "Lista obrazów (rozdzielonych przecinkami) dla których ten sekret jest dostępny, pozostaw puste aby zezwolić dla wszystkich obrazów",
+          "images": "Dostępny dla wybranych obrazów"
+        },
+        "name": "Nazwa",
+        "none": "Nie ma jeszcze żadnych sekretów.",
+        "plugins_only": "Dostępny tylko dla pluginów",
+        "save": "Zapisz sekret",
+        "saved": "Zapisano sekret",
+        "secrets": "Sekrety",
+        "show": "Pokaż sekrety",
+        "value": "Wartość"
+      },
+      "settings": "Ustawienia"
+    },
+    "user_none": "Ta organizacja / użytkownik nie ma jeszcze żadnych projektów."
+  },
+  "repos": "Repozytoria",
+  "repositories": "Repozytoria",
+  "search": "Szukaj…",
+  "time": {
+    "days_short": "d",
+    "hours_short": "godz",
+    "min_short": "min",
+    "not_started": "jeszcze nie rozpoczęto",
+    "sec_short": "sek",
+    "tmpl": "DD.MM.YYYY, HH:mm z",
+    "weeks_short": "tyg"
+  },
+  "unknown_error": "Wystąpił nieznany błąd",
+  "url": "URL",
+  "user": {
+    "access_denied": "Nie masz pozwolenia na zalogowanie",
+    "api_usage": "Przykładowe użycie API",
+    "cli_usage": "Przykładowe użycie CLI",
+    "dl_cli": "Pobierz CLI",
+    "internal_error": "Wystąpił błąd wewnętrzny",
+    "oauth_error": "Błąd podczas uwierzytelnienia u dostawcy OAuth",
+    "settings": "Ustawienia użytkownika",
+    "shell_setup": "Konfiguracja powłoki systemowej",
+    "shell_setup_before": "wykonaj wcześniej konfigurację powłoki",
+    "token": "Twój token osobisty"
+  },
+  "username": "Nazwa użytkownika",
+  "welcome": "Witamy w Woodpecker"
+}

@@ -26,7 +26,7 @@ module.exports = {
         items: [
           {
             type: 'doc',
-            docId: 'usage/intro',
+            docId: 'intro',
             activeBaseRegex: 'docs/(?!migrations|awesome)',
             position: 'left',
             label: 'Docs',
@@ -76,6 +76,10 @@ module.exports = {
           {
             title: 'Docs',
             items: [
+              {
+                label: 'Introduction',
+                to: '/docs/intro',
+              },
               {
                 label: 'Usage',
                 to: '/docs/usage/intro',

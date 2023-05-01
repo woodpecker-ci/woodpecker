@@ -20,7 +20,7 @@ Simply start Woodpecker in Gitpod by clicking on the following badge. You can lo
 
 ### Install Go
 
-Install Golang (>=1.16) as described by [this guide](https://go.dev/doc/install).
+Install Golang (>=1.20) as described by [this guide](https://go.dev/doc/install).
 
 ### Install make
 
@@ -133,13 +133,14 @@ Or you can open the test-file inside [VS-Code](#developing-with-vs-code) and run
 
 If you want to run a Woodpecker applications from your terminal you can use one of the following commands from the base of the Woodpecker project. They will execute Woodpecker in a similar way as described in [debugging Woodpecker](#debugging-woodpecker) without the ability to really debug it in your editor.
 
-```bash
-# start server
-$ go run ./cmd/server
+```bash title="start server"
+go run ./cmd/server
+```
 
-# start agent
-$ go run ./cmd/agent
+```bash title="start agent"
+go run ./cmd/agent
+```
 
-# execute cli command
-$ go run ./cmd/cli [command]
+```bash title="execute cli command"
+go run ./cmd/cli [command]
 ```

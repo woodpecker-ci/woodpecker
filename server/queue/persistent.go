@@ -28,18 +28,7 @@ import (
 // ensures the task Queue can be restored when the system starts.
 func WithTaskStore(q Queue, s model.TaskStore) Queue {
 	tasks, _ := s.TaskList()
-	var toEnqueue []*Task
-	for _, task := range tasks {
-		toEnqueue = append(toEnqueue, &Task{
-			ID:           task.ID,
-			Data:         task.Data,
-			Labels:       task.Labels,
-			Dependencies: task.Dependencies,
-			RunOn:        task.RunOn,
-			DepStatus:    make(map[string]string),
-		})
-	}
-	if err := q.PushAtOnce(context.Background(), toEnqueue); err != nil {
+	if err := q.PushAtOnce(context.Background(), tasks); err != nil {
 		log.Error().Err(err).Msg("PushAtOnce failed")
 	}
 	return &persistentQueue{q, s}
@@ -51,14 +40,8 @@ type persistentQueue struct {
 }
 
 // Push pushes a task to the tail of this queue.
-func (q *persistentQueue) Push(c context.Context, task *Task) error {
-	if err := q.store.TaskInsert(&model.Task{
-		ID:           task.ID,
-		Data:         task.Data,
-		Labels:       task.Labels,
-		Dependencies: task.Dependencies,
-		RunOn:        task.RunOn,
-	}); err != nil {
+func (q *persistentQueue) Push(c context.Context, task *model.Task) error {
+	if err := q.store.TaskInsert(task); err != nil {
 		return err
 	}
 	err := q.Queue.Push(c, task)
@@ -71,16 +54,10 @@ func (q *persistentQueue) Push(c context.Context, task *Task) error {
 }
 
 // PushAtOnce pushes multiple tasks to the tail of this queue.
-func (q *persistentQueue) PushAtOnce(c context.Context, tasks []*Task) error {
+func (q *persistentQueue) PushAtOnce(c context.Context, tasks []*model.Task) error {
 	// TODO: invent store.NewSession who return context including a session and make TaskInsert & TaskDelete use it
 	for _, task := range tasks {
-		if err := q.store.TaskInsert(&model.Task{
-			ID:           task.ID,
-			Data:         task.Data,
-			Labels:       task.Labels,
-			Dependencies: task.Dependencies,
-			RunOn:        task.RunOn,
-		}); err != nil {
+		if err := q.store.TaskInsert(task); err != nil {
 			return err
 		}
 	}
@@ -96,8 +73,8 @@ func (q *persistentQueue) PushAtOnce(c context.Context, tasks []*Task) error {
 }
 
 // Poll retrieves and removes a task head of this queue.
-func (q *persistentQueue) Poll(c context.Context, f FilterFn) (*Task, error) {
-	task, err := q.Queue.Poll(c, f)
+func (q *persistentQueue) Poll(c context.Context, agentID int64, f FilterFn) (*model.Task, error) {
+	task, err := q.Queue.Poll(c, agentID, f)
 	if task != nil {
 		log.Debug().Msgf("pull queue item: %s: remove from backup", task.ID)
 		if derr := q.store.TaskDelete(task.ID); derr != nil {

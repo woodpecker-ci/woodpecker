@@ -18,7 +18,6 @@ import (
 	"context"
 	"io"
 	"os"
-	"strconv"
 	"strings"
 
 	"github.com/docker/docker/api/types"
@@ -29,8 +28,10 @@ import (
 	"github.com/moby/moby/pkg/stdcopy"
 	"github.com/moby/term"
 	"github.com/rs/zerolog/log"
+	"github.com/urfave/cli/v2"
 
 	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
+	"github.com/woodpecker-ci/woodpecker/shared/utils"
 )
 
 type docker struct {
@@ -39,9 +40,6 @@ type docker struct {
 	network    string
 	volumes    []string
 }
-
-// make sure docker implements Engine
-var _ backend.Engine = &docker{}
 
 // New returns a new Docker Engine.
 func New() backend.Engine {
@@ -54,7 +52,7 @@ func (e *docker) Name() string {
 	return "docker"
 }
 
-func (e *docker) IsAvailable() bool {
+func (e *docker) IsAvailable(context.Context) bool {
 	if os.Getenv("DOCKER_HOST") != "" {
 		return true
 	}
@@ -63,18 +61,22 @@ func (e *docker) IsAvailable() bool {
 }
 
 // Load new client for Docker Engine using environment variables.
-func (e *docker) Load() error {
-	cli, err := client.NewClientWithOpts(client.FromEnv)
+func (e *docker) Load(ctx context.Context) error {
+	cl, err := client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
 		return err
 	}
-	e.client = cli
+	e.client = cl
 
-	e.enableIPv6, _ = strconv.ParseBool(os.Getenv("WOODPECKER_BACKEND_DOCKER_ENABLE_IPV6"))
+	c, ok := ctx.Value(backend.CliContext).(*cli.Context)
+	if !ok {
+		return backend.ErrNoCliContextFound
+	}
+	e.enableIPv6 = c.Bool("backend-docker-ipv6")
 
-	e.network = os.Getenv("WOODPECKER_BACKEND_DOCKER_NETWORK")
+	e.network = c.String("backend-docker-network")
 
-	volumes := strings.Split(os.Getenv("WOODPECKER_BACKEND_DOCKER_VOLUMES"), ",")
+	volumes := strings.Split(c.String("backend-docker-volumes"), ",")
 	e.volumes = make([]string, 0, len(volumes))
 	// Validate provided volume definitions
 	for _, v := range volumes {
@@ -133,12 +135,11 @@ func (e *docker) Exec(ctx context.Context, step *backend.Step) error {
 	if step.Pull {
 		responseBody, perr := e.client.ImagePull(ctx, config.Image, pullopts)
 		if perr == nil {
-			defer responseBody.Close()
-
 			fd, isTerminal := term.GetFdInfo(os.Stdout)
 			if err := jsonmessage.DisplayJSONMessagesStream(responseBody, os.Stdout, fd, isTerminal, nil); err != nil {
 				log.Error().Err(err).Msg("DisplayJSONMessagesStream")
 			}
+			responseBody.Close()
 		}
 		// Fix "Show warning when fail to auth to docker registry"
 		// (https://web.archive.org/web/20201023145804/https://github.com/drone/drone/issues/1917)
@@ -148,7 +149,7 @@ func (e *docker) Exec(ctx context.Context, step *backend.Step) error {
 	}
 
 	// add default volumes to the host configuration
-	hostConfig.Binds = append(hostConfig.Binds, e.volumes...)
+	hostConfig.Binds = utils.DedupStrings(append(hostConfig.Binds, e.volumes...))
 
 	_, err := e.client.ContainerCreate(ctx, config, hostConfig, nil, nil, step.Name)
 	if client.IsErrNotFound(err) {
@@ -158,11 +159,11 @@ func (e *docker) Exec(ctx context.Context, step *backend.Step) error {
 		if perr != nil {
 			return perr
 		}
-		defer responseBody.Close()
 		fd, isTerminal := term.GetFdInfo(os.Stdout)
 		if err := jsonmessage.DisplayJSONMessagesStream(responseBody, os.Stdout, fd, isTerminal, nil); err != nil {
 			log.Error().Err(err).Msg("DisplayJSONMessagesStream")
 		}
+		responseBody.Close()
 
 		_, err = e.client.ContainerCreate(ctx, config, hostConfig, nil, nil, step.Name)
 	}
@@ -226,7 +227,6 @@ func (e *docker) Tail(ctx context.Context, step *backend.Step) (io.ReadCloser, e
 		_, _ = stdcopy.StdCopy(wc, wc, logs)
 		_ = logs.Close()
 		_ = wc.Close()
-		_ = rc.Close()
 	}()
 	return rc, nil
 }

@@ -43,23 +43,16 @@
     </div>
 
     <div class="flex-grow min-h-0 w-full relative">
-      <div class="absolute top-0 left-0 -right-3 h-full flex flex-col overflow-y-scroll gap-y-2">
+      <div class="absolute top-0 left-0 right-0 h-full flex flex-col overflow-y-scroll gap-y-2">
         <div
           v-for="workflow in pipeline.steps"
           :key="workflow.id"
           class="p-2 md:rounded-md bg-white shadow dark:border-b-dark-gray-600 dark:bg-dark-gray-700"
         >
           <div class="flex flex-col gap-2">
-            <div v-if="workflow.environ" class="flex flex-wrap gap-x-1 gap-y-2 text-xs justify-end pt-1">
+            <div v-if="workflow.environ" class="flex flex-wrap gap-x-1 gap-y-2 text-xs justify-end pt-1 pr-1">
               <div v-for="(value, key) in workflow.environ" :key="key">
-                <span
-                  class="pl-2 pr-1 py-0.5 bg-gray-800 text-gray-200 dark:bg-gray-600 border-2 border-gray-800 dark:border-gray-600 rounded-l-full"
-                >
-                  {{ key }}
-                </span>
-                <span class="pl-1 pr-2 py-0.5 border-2 border-gray-800 dark:border-gray-600 rounded-r-full">
-                  {{ value }}
-                </span>
+                <Badge :label="key" :value="value" />
               </div>
             </div>
             <button
@@ -76,11 +69,15 @@
               />
               <PipelineStatusIcon :status="workflow.state" class="!h-4 !w-4" />
               <span class="truncate">{{ workflow.name }}</span>
+              <PipelineStepDuration
+                v-if="workflow.start_time !== workflow.end_time"
+                :step="workflow"
+                class="mr-1 pr-2px"
+              />
               <button
                 v-if="pipeline.steps && pipeline.steps.length > 0 && ['pending'].includes(workflow.state)"
-                title="skip"
+                :title="$t('repo.pipeline.actions.skip')"
                 type="button"
-                :is-loading="isSkippingWorkflow"
                 class="flex justify-center items-center ml-auto gap-2 py-2 px-1 hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-5 rounded-md"
                 @click="skipWorkflow(workflow)"
               >
@@ -125,14 +122,15 @@
 import { inject, Ref, ref, toRef } from 'vue';
 
 import { useI18n } from 'vue-i18n';
+import Badge from '~/components/atomic/Badge.vue';
 import Icon from '~/components/atomic/Icon.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import PipelineStepDuration from '~/components/repo/pipeline/PipelineStepDuration.vue';
 import usePipeline from '~/compositions/usePipeline';
 import useApiClient from '~/compositions/useApiClient';
-import { useAsyncAction } from '~/compositions/useAsyncAction';
 import { Pipeline, PipelineStep, Repo } from '~/lib/api/types';
 import useNotifications from '~/compositions/useNotifications';
+import Button from "~/components/atomic/Button.vue";
 
 const props = defineProps<{
   pipeline: Pipeline;
@@ -166,8 +164,9 @@ const workflowsCollapsed = ref<Record<PipelineStep['id'], boolean>>(
     : {},
 );
 
-const { doSubmit: skipWorkflow, isLoading: isSkippingWorkflow } = useAsyncAction(async (workflow) => {
-  await apiClient.skipPipelineWorkflow(repo.value.owner, repo.value.name, `${pipeline.value.number}`, `${workflow.pid}`);
+const skipWorkflow = async (workflow: PipelineStep) => {
+  await apiClient.skipPipelineWorkflow(repo.value.owner, repo.value.name, `${pipeline.value.number}`, workflow.pid);
   notifications.notify({ title: i18n.t('repo.pipeline.actions.skip_success'), type: 'success' });
-});
+}
+
 </script>

@@ -20,10 +20,8 @@ package api
 
 import (
 	"fmt"
-	"math/rand"
 	"net/http"
 	"regexp"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
@@ -37,12 +35,8 @@ import (
 
 var skipRe = regexp.MustCompile(`\[(?i:ci *skip|skip *ci)\]`)
 
-func init() {
-	rand.Seed(time.Now().UnixNano())
-}
-
 func GetQueueInfo(c *gin.Context) {
-	c.IndentedJSON(200,
+	c.IndentedJSON(http.StatusOK,
 		server.Config.Services.Queue.Info(c),
 	)
 }
@@ -179,6 +173,6 @@ func PostHook(c *gin.Context) {
 	if err != nil {
 		handlePipelineErr(c, err)
 	} else {
-		c.JSON(200, pl)
+		c.JSON(http.StatusOK, pl)
 	}
 }

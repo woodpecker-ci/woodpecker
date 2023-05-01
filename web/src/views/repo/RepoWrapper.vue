@@ -43,6 +43,11 @@
 
     <Tab id="activity" :title="$t('repo.activity')" />
     <Tab id="branches" :title="$t('repo.branches')" />
+    <Tab
+      v-if="config.forge === 'gitea' || config.forge === 'github' || config.forge === 'gitlab'"
+      id="pull_requests"
+      :title="$t('repo.pull_requests')"
+    />
 
     <router-view />
   </Scaffold>
@@ -64,8 +69,8 @@ import useAuthentication from '~/compositions/useAuthentication';
 import useConfig from '~/compositions/useConfig';
 import useNotifications from '~/compositions/useNotifications';
 import { RepoPermissions } from '~/lib/api/types';
-import PipelineStore from '~/store/pipelines';
-import RepoStore from '~/store/repos';
+import { usePipelineStore } from '~/store/pipelines';
+import { useRepoStore } from '~/store/repos';
 
 const props = defineProps({
   repoOwner: {
@@ -81,19 +86,20 @@ const props = defineProps({
 
 const repoOwner = toRef(props, 'repoOwner');
 const repoName = toRef(props, 'repoName');
-const repoStore = RepoStore();
-const pipelineStore = PipelineStore();
+const repoStore = useRepoStore();
+const pipelineStore = usePipelineStore();
 const apiClient = useApiClient();
 const notifications = useNotifications();
 const { isAuthenticated } = useAuthentication();
 const route = useRoute();
 const router = useRouter();
 const i18n = useI18n();
+const config = useConfig();
 
 const { forge } = useConfig();
 const repo = repoStore.getRepo(repoOwner, repoName);
 const repoPermissions = ref<RepoPermissions>();
-const pipelines = pipelineStore.getSortedPipelines(repoOwner, repoName);
+const pipelines = pipelineStore.getRepoPipelines(repoOwner, repoName);
 provide('repo', repo);
 provide('repo-permissions', repoPermissions);
 provide('pipelines', pipelines);
@@ -121,7 +127,7 @@ async function loadRepo() {
     });
     return;
   }
-  await pipelineStore.loadPipelines(repoOwner.value, repoName.value);
+  await pipelineStore.loadRepoPipelines(repoOwner.value, repoName.value);
 }
 
 onMounted(() => {
@@ -132,18 +138,23 @@ watch([repoOwner, repoName], () => {
   loadRepo();
 });
 
-const badgeUrl = computed(() => `/api/badges/${repo.value.owner}/${repo.value.name}/status.svg`);
+const badgeUrl = computed(() => repo.value && `/api/badges/${repo.value.owner}/${repo.value.name}/status.svg`);
 
 const activeTab = computed({
   get() {
     if (route.name === 'repo-branches' || route.name === 'repo-branch') {
       return 'branches';
     }
+    if (route.name === 'repo-pull-requests' || route.name === 'repo-pull-request') {
+      return 'pull_requests';
+    }
     return 'activity';
   },
   set(tab: string) {
     if (tab === 'branches') {
       router.push({ name: 'repo-branches' });
+    } else if (tab === 'pull_requests') {
+      router.push({ name: 'repo-pull-requests' });
     } else {
       router.push({ name: 'repo' });
     }

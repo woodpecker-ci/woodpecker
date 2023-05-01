@@ -29,7 +29,7 @@ import (
 )
 
 // helper function that converts a Gogs repository to a Woodpecker repository.
-func toRepo(from *gogs.Repository, privateMode bool) *model.Repo {
+func toRepo(from *gogs.Repository) *model.Repo {
 	name := strings.Split(from.FullName, "/")[1]
 	avatar := expandAvatar(
 		from.HTMLURL,
@@ -43,9 +43,10 @@ func toRepo(from *gogs.Repository, privateMode bool) *model.Repo {
 		FullName:      from.FullName,
 		Avatar:        avatar,
 		Link:          from.HTMLURL,
-		IsSCMPrivate:  from.Private || privateMode,
+		IsSCMPrivate:  from.Private,
 		Clone:         from.CloneURL,
 		Branch:        from.DefaultBranch,
+		Perm:          toPerm(from.Permissions),
 	}
 }
 

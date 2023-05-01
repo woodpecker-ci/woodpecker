@@ -72,7 +72,7 @@ func CalcNewNext(schedule string, now time.Time) (time.Time, error) {
 
 	c, err := cron.Parse(schedule)
 	if err != nil {
-		return time.Time{}, fmt.Errorf("cron parse schedule: %v", err)
+		return time.Time{}, fmt.Errorf("cron parse schedule: %w", err)
 	}
 	return c.Next(now), nil
 }

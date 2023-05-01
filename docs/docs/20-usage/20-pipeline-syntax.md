@@ -475,6 +475,13 @@ when:
   - evaluate: 'not (CI_COMMIT_MESSAGE contains "please ignore me")'
 ```
 
+Run on pull requests with the label `deploy`:
+
+```yaml
+when:
+  - evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "deploy"'
+```
+
 ### `group` - Parallel execution
 
 Woodpecker supports parallel step execution for same-machine fan-in and fan-out. Parallel steps are configured using the `group` attribute. This instructs the pipeline runner to execute the named group in parallel.
@@ -619,7 +626,7 @@ pipeline:
 
 You can set labels for your pipeline to select an agent to execute the pipeline on. An agent will pick up and run a pipeline when **every** label assigned to a pipeline matches the agents labels.
 
-To set additional agent labels check the [agent configuration options](../30-administration/15-agent-config.md#woodpecker_filter_labels). Agents will have at least three default labels: `platform=agent-os/agent-arch`, `hostname=my-agent` and `repo=*`. Agents can use a `*` as a wildcard for a label. For example `repo=*` will match every repo.
+To set additional agent labels check the [agent configuration options](../30-administration/15-agent-config.md#woodpecker_filter_labels). Agents will have at least four default labels: `platform=agent-os/agent-arch`, `hostname=my-agent`, `backend=docker` (type of the agent backend) and `repo=*`. Agents can use a `*` as a wildcard for a label. For example `repo=*` will match every repo.
 
 Pipeline labels with an empty value will be ignored.
 By default each pipeline has at least the `repo=your-user/your-repo-name` label. If you have set the [platform attribute](#platform) for your pipeline it will have a label like `platform=your-os/your-arch` as well.
@@ -848,8 +855,7 @@ when:
 
 :::info
 Path conditions are applied only to **push** and **pull_request** events.
-It is currently **only available** for GitHub, GitLab.
-Gitea only supports **push** at the moment ([go-gitea/gitea#18228](https://github.com/go-gitea/gitea/pull/18228)).
+It is currently **only available** for GitHub, GitLab and Gitea (version 1.18.0 and newer)
 :::
 
 Execute a step only on a pipeline with certain files being changed:
@@ -873,7 +879,7 @@ when:
 
 ## `depends_on`
 
-Woodpecker supports to define multiple pipelines for a repository. Those pipelines will run independent from each other. To depend them on each other you can use the [`depends_on`](https://woodpecker-ci.org/docs/usage/multi-pipeline#flow-control) keyword.
+Woodpecker supports to define multiple workflows for a repository. Those workflows will run independent from each other. To depend them on each other you can use the [`depends_on`](https://woodpecker-ci.org/docs/usage/workflows#flow-control) keyword.
 
 ## Privileged mode
 

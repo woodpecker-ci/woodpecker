@@ -33,13 +33,14 @@
       i18n-prefix="org.settings.secrets."
       :is-saving="isSaving"
       @save="createSecret"
+      @cancel="selectedSecret = undefined"
     />
   </Panel>
 </template>
 
 <script lang="ts">
 import { cloneDeep } from 'lodash';
-import { computed, defineComponent, inject, onMounted, Ref, ref } from 'vue';
+import { computed, defineComponent, inject, Ref, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
@@ -50,6 +51,7 @@ import SecretList from '~/components/secrets/SecretList.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
+import { usePagination } from '~/compositions/usePaginate';
 import { Org, Secret, WebhookEvents } from '~/lib/api/types';
 
 const emptySecret = {
@@ -76,17 +78,18 @@ export default defineComponent({
     const i18n = useI18n();
 
     const org = inject<Ref<Org>>('org');
-    const secrets = ref<Secret[]>([]);
     const selectedSecret = ref<Partial<Secret>>();
     const isEditingSecret = computed(() => !!selectedSecret.value?.id);
 
-    async function loadSecrets() {
+    async function loadSecrets(page: number): Promise<Secret[] | null> {
       if (!org?.value) {
         throw new Error("Unexpected: Can't load org");
       }
 
-      secrets.value = await apiClient.getOrgSecretList(org.value.name);
+      return apiClient.getOrgSecretList(org.value.name, page);
     }
+
+    const { resetPage, data: secrets } = usePagination(loadSecrets, () => !selectedSecret.value);
 
     const { doSubmit: createSecret, isLoading: isSaving } = useAsyncAction(async () => {
       if (!org?.value) {
@@ -107,7 +110,7 @@ export default defineComponent({
         type: 'success',
       });
       selectedSecret.value = undefined;
-      await loadSecrets();
+      resetPage();
     });
 
     const { doSubmit: deleteSecret, isLoading: isDeleting } = useAsyncAction(async (_secret: Secret) => {
@@ -117,7 +120,7 @@ export default defineComponent({
 
       await apiClient.deleteOrgSecret(org.value.name, _secret.name);
       notifications.notify({ title: i18n.t('org.settings.secrets.deleted'), type: 'success' });
-      await loadSecrets();
+      resetPage();
     });
 
     function editSecret(secret: Secret) {
@@ -127,10 +130,6 @@ export default defineComponent({
     function showAddSecret() {
       selectedSecret.value = cloneDeep(emptySecret);
     }
-
-    onMounted(async () => {
-      await loadSecrets();
-    });
 
     return {
       selectedSecret,

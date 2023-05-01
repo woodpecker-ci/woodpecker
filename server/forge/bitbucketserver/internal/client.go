@@ -43,7 +43,7 @@ const (
 	pathHookEnabled  = "%s/rest/api/1.0/projects/%s/repos/%s/settings/hooks/%s/enabled"
 	pathHookSettings = "%s/rest/api/1.0/projects/%s/repos/%s/settings/hooks/%s/settings"
 	pathStatus       = "%s/rest/build-status/1.0/commits/%s"
-	pathBranches     = "%s/2.0/repositories/%s/%s/refs/branches"
+	pathBranches     = "%s/rest/api/1.0/projects/%s/repos/%s/branches?limit=%d&start=%d"
 )
 
 type Client struct {
@@ -323,15 +323,13 @@ func (c *Client) paginatedRepos(start int) ([]*Repo, error) {
 	return repoResponse.Values, nil
 }
 
-func (c *Client) ListBranches(owner, name string) ([]*Branch, error) {
-	uri := fmt.Sprintf(pathBranches, c.base, owner, name)
+func (c *Client) ListBranches(owner, name string, page, limit int) ([]*Branch, error) {
+	uri := fmt.Sprintf(pathBranches, c.base, owner, name, limit, limit*(page-1))
 	response, err := c.doGet(uri)
-	if response != nil {
-		defer response.Body.Close()
-	}
 	if err != nil {
 		return nil, err
 	}
+	defer response.Body.Close()
 	out := new(BranchResp)
 	err = json.NewDecoder(response.Body).Decode(&out)
 	return out.Values, err

@@ -4,14 +4,20 @@ linters-settings:
   misspell:
     locale: US
   gofumpt:
-    lang-version: "1.16"
+    lang-version: "1.20"
     extra-rules: true
+  forbidigo:
+    forbid:
+      - context\.WithCancel$
+      - ^print.*$
+      - panic
+  errorlint:
+    errorf-multi: true
 
 linters:
   disable-all: true
   enable:
     - bidichk
-    - deadcode
     - errcheck
     - gofmt
     - goimports
@@ -21,15 +27,16 @@ linters:
     - misspell
     - revive
     - staticcheck
-    - structcheck
     - typecheck
     - unused
-    - varcheck
     - whitespace
     - gofumpt
+    - errorlint
+    - forbidigo
 
 run:
   timeout: 5m
+  go: '1.20'
 
 issues:
   exclude-rules:
@@ -42,3 +49,8 @@ issues:
       linters:
         - staticcheck
         - revive
+
+    # let cli use print and panic
+    - path: "cmd/*|cli/*"
+      linters:
+        - forbidigo

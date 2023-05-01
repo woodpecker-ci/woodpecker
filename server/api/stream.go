@@ -48,7 +48,7 @@ func EventStreamSSE(c *gin.Context) {
 
 	flusher, ok := rw.(http.Flusher)
 	if !ok {
-		c.String(500, "Streaming not supported")
+		c.String(http.StatusInternalServerError, "Streaming not supported")
 		return
 	}
 
@@ -61,19 +61,19 @@ func EventStreamSSE(c *gin.Context) {
 	user := session.User(c)
 	repo := map[string]bool{}
 	if user != nil {
-		repos, _ := store.FromContext(c).RepoList(user, false)
+		repos, _ := store.FromContext(c).RepoList(user, false, true)
 		for _, r := range repos {
 			repo[r.FullName] = true
 		}
 	}
 
 	eventc := make(chan []byte, 10)
-	ctx, cancel := context.WithCancel(
+	ctx, cancel := context.WithCancelCause(
 		context.Background(),
 	)
 
 	defer func() {
-		cancel()
+		cancel(nil)
 		close(eventc)
 		log.Debug().Msg("user feed: connection closed")
 	}()
@@ -98,7 +98,7 @@ func EventStreamSSE(c *gin.Context) {
 		if err != nil {
 			log.Error().Err(err).Msg("Subscribe failed")
 		}
-		cancel()
+		cancel(err)
 	}()
 
 	for {
@@ -131,7 +131,7 @@ func LogStreamSSE(c *gin.Context) {
 
 	flusher, ok := rw.(http.Flusher)
 	if !ok {
-		c.String(500, "Streaming not supported")
+		c.String(http.StatusInternalServerError, "Streaming not supported")
 		return
 	}
 
@@ -165,14 +165,14 @@ func LogStreamSSE(c *gin.Context) {
 	}
 
 	logc := make(chan []byte, 10)
-	ctx, cancel := context.WithCancel(
+	ctx, cancel := context.WithCancelCause(
 		context.Background(),
 	)
 
 	log.Debug().Msgf("log stream: connection opened")
 
 	defer func() {
-		cancel()
+		cancel(nil)
 		close(logc)
 		log.Debug().Msgf("log stream: connection closed")
 	}()
@@ -199,7 +199,7 @@ func LogStreamSSE(c *gin.Context) {
 
 		logWriteStringErr(io.WriteString(rw, "event: error\ndata: eof\n\n"))
 
-		cancel()
+		cancel(err)
 	}()
 
 	id := 1

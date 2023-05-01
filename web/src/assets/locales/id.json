@@ -1,7 +1,67 @@
 {
   "admin": {
     "settings": {
+      "agents": {
+        "add": "Tambahkan agen",
+        "agents": "Agen",
+        "backend": {
+          "backend": "Backend",
+          "badge": "backend"
+        },
+        "capacity": {
+          "badge": "kapasitas",
+          "capacity": "Kapasitas",
+          "desc": "Jumlah maksimal jalur pipa paralel yang dijalankan oleh agen ini."
+        },
+        "created": "Agen dibuat",
+        "delete_agent": "Hapus agen",
+        "delete_confirm": "Apakah Anda ingin menghapus agen ini. Itu tidak akan terhubung lagi ke server.",
+        "deleted": "Agen dihapus",
+        "desc": "Agen terdaftar untuk server",
+        "edit_agent": "Sunting agen",
+        "last_contact": "Hubungan terakhir",
+        "name": {
+          "name": "Nama",
+          "placeholder": "Nama agen"
+        },
+        "never": "Tidak pernah",
+        "no_schedule": {
+          "name": "Nonaktifkan agen",
+          "placeholder": "Hentikan agen untuk mengambil tugas baru"
+        },
+        "none": "Belum ada agen.",
+        "platform": {
+          "badge": "platform",
+          "platform": "Platform"
+        },
+        "save": "Simpan agen",
+        "saved": "Agen disimpan",
+        "show": "Tampilkan agen",
+        "token": "Token",
+        "version": "Versi"
+      },
       "not_allowed": "Anda tidak diperbolehkan untuk mengakses pengaturan peladen",
+      "queue": {
+        "agent": "agen",
+        "desc": "Tugas tertunda yang akan dilakukan oleh agen",
+        "pause": "Jeda",
+        "paused": "Antrean dijeda",
+        "queue": "Antrean",
+        "resume": "Lanjutkan",
+        "resumed": "Antrean dilanjutkan",
+        "stats": {
+          "completed_count": "Tugas yang Selesai",
+          "pending_count": "Menunggu",
+          "running_count": "Berjalan",
+          "waiting_on_deps_count": "Menunggu ketergantungan",
+          "worker_count": "Bebas"
+        },
+        "task_pending": "Tugas tertunda",
+        "task_running": "Tugas sedang berjalan",
+        "task_waiting_on_deps": "Tugas sedang menunggu ketergantungan",
+        "tasks": "Tugas",
+        "waiting_for": "menunggu"
+      },
       "secrets": {
         "add": "Tambahkan rahasia",
         "created": "Rahasia global dibuat",
@@ -25,14 +85,40 @@
         "value": "Nilai",
         "warning": "Rahasia ini akan tersedia untuk pengguna peladen."
       },
-      "settings": "Pengaturan"
+      "settings": "Pengaturan",
+      "users": {
+        "add": "Tambahkan pengguna",
+        "admin": {
+          "admin": "Admin",
+          "placeholder": "Pengguna adalah admin"
+        },
+        "avatar_url": "URL Avatar",
+        "cancel": "Batal",
+        "created": "Pengguna dibuat",
+        "delete_confirm": "Apakah Anda ingin menghapus pengguna ini?",
+        "delete_user": "Hapus pengguna",
+        "deleted": "Pengguna dihapus",
+        "desc": "Pengguna terdaftar untuk server ini",
+        "edit_user": "Sunting pengguna",
+        "email": "Surel",
+        "login": "Masuk",
+        "none": "Belum ada pengguna.",
+        "save": "Simpan pengguna",
+        "saved": "Pengguna disimpan",
+        "show": "Tampilkan pengguna",
+        "users": "Pengguna"
+      }
     }
   },
   "back": "Kembali",
+  "cancel": "Batal",
   "color_scheme_dark": "Ubah ke mode terang",
   "color_scheme_light": "Ubah ke mode gelap",
   "docs": "Dokumentasi",
   "documentation_for": "Dokumentasi untuk \"{topic}\"",
+  "errors": {
+    "not_found": "Server tidak dapat mencari objek yang diminta"
+  },
   "login": "Masuk",
   "logout": "Keluar",
   "not_found": {
@@ -121,7 +207,7 @@
       "config": "Konfigurasi",
       "created": "Dibuat",
       "event": {
-        "cron": "Cron",
+        "cron": "Kron",
         "deploy": "Luncur",
         "manual": "Manual",
         "pr": "Permintaan Penarikan",
@@ -138,6 +224,7 @@
       "no_pipelines": "Belum ada jalur pipa yang dimulai.",
       "pipeline": "Jalur pipa #{pipelineId}",
       "pipelines_for": "Jalur pipa untuk cabang \"{branch}\"",
+      "pipelines_for_pr": "Jalur pipa untuk permintaan penarikan #{index}",
       "protected": {
         "approve": "Setujui",
         "approve_success": "Jalur pipa disetujui",
@@ -162,6 +249,7 @@
       "step_not_started": "Langkah ini belum dijalankan.",
       "tasks": "Tugas"
     },
+    "pull_requests": "Permintaan penarikan",
     "settings": {
       "actions": {
         "actions": "Tindakan",
@@ -173,6 +261,10 @@
         "disable": {
           "disable": "Nonaktifkan repositori",
           "success": "Repositori dinonaktifkan"
+        },
+        "enable": {
+          "enable": "Aktifkan repositori",
+          "success": "Repositori diaktifkan"
         },
         "repair": {
           "repair": "Perbaiki repositori",
@@ -225,9 +317,14 @@
           "desc": "Aktifkan untuk membatalkan jalur pipa yang menunggu dan yang berjalan dari peristiwa dan konteks yang sama sebelum memulai picuan yang baru."
         },
         "general": "Umum",
+        "netrc_only_trusted": {
+          "desc": "Hanya masukkan kredensial netrc ke kontainer yang terpercaya (disarankan).",
+          "netrc_only_trusted": "Hanya masukkan kredensial netrc ke kontainer yang terpercaya"
+        },
         "pipeline_path": {
           "default": "Secara bawaan: .woodpecker/*.yml → .woodpecker.yml → .drone.yml",
-          "desc": "Jalur ke konfigurasi jalur pipa Anda (misalnya <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">jalur/saya/</span>). Folder seharusnya berakhir dengan sebuah <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">/</span>.",
+          "desc": "Jalur ke konfigurasi jalur pipa Anda (misalnya {0}). Folder seharusnya berakhir dengan sebuah {1}.",
+          "desc_path_example": "jalur/saya/",
           "path": "Jalur pipa"
         },
         "project": "Pengaturan proyek",
@@ -284,6 +381,7 @@
         "add": "Tambahkan rahasia",
         "created": "Rahasia dibuat",
         "delete": "Hapus rahasia",
+        "delete_confirm": "Apakah Anda ingin menghapus rahasia ini?",
         "deleted": "Rahasia dihapus",
         "desc": "Rahasia dapat diberikan ke langkah jalur pipa individu saat dijalankan sebagai variabel lingkungan.",
         "edit": "Sunting rahasia",

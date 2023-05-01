@@ -3,10 +3,12 @@ package yaml
 import (
 	"fmt"
 
+	"golang.org/x/exp/slices"
 	"gopkg.in/yaml.v3"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/constraint"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
+	"github.com/woodpecker-ci/woodpecker/shared/constant"
 )
 
 type (
@@ -27,15 +29,15 @@ type (
 		AuthConfig    AuthConfig             `yaml:"auth_config,omitempty"`
 		CapAdd        []string               `yaml:"cap_add,omitempty"`
 		CapDrop       []string               `yaml:"cap_drop,omitempty"`
-		Commands      types.Stringorslice    `yaml:"commands,omitempty"`
+		Commands      types.StringOrSlice    `yaml:"commands,omitempty"`
 		CPUQuota      types.StringorInt      `yaml:"cpu_quota,omitempty"`
 		CPUSet        string                 `yaml:"cpuset,omitempty"`
 		CPUShares     types.StringorInt      `yaml:"cpu_shares,omitempty"`
 		Detached      bool                   `yaml:"detach,omitempty"`
 		Devices       []string               `yaml:"devices,omitempty"`
 		Tmpfs         []string               `yaml:"tmpfs,omitempty"`
-		DNS           types.Stringorslice    `yaml:"dns,omitempty"`
-		DNSSearch     types.Stringorslice    `yaml:"dns_search,omitempty"`
+		DNS           types.StringOrSlice    `yaml:"dns,omitempty"`
+		DNSSearch     types.StringOrSlice    `yaml:"dns_search,omitempty"`
 		Directory     string                 `yaml:"directory,omitempty"`
 		Environment   types.SliceorMap       `yaml:"environment,omitempty"`
 		ExtraHosts    []string               `yaml:"extra_hosts,omitempty"`
@@ -113,4 +115,8 @@ func (c *Containers) UnmarshalYAML(value *yaml.Node) error {
 
 func (c *Container) IsPlugin() bool {
 	return len(c.Commands) == 0
+}
+
+func (c *Container) IsTrustedCloneImage() bool {
+	return c.IsPlugin() && slices.Contains(constant.TrustedCloneImages, c.Image)
 }

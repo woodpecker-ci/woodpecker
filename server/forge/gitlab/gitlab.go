@@ -119,7 +119,7 @@ func (g *GitLab) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 
 	token, err := config.Exchange(oauth2Ctx, code)
 	if err != nil {
-		return nil, fmt.Errorf("Error exchanging token. %s", err)
+		return nil, fmt.Errorf("Error exchanging token. %w", err)
 	}
 
 	client, err := newClient(g.URL, token.AccessToken, g.SkipVerify)
@@ -301,28 +301,38 @@ func (g *GitLab) Repos(ctx context.Context, user *model.User) ([]*model.Repo, er
 	return repos, err
 }
 
-// Perm fetches the named repository from the forge.
-func (g *GitLab) Perm(ctx context.Context, user *model.User, r *model.Repo) (*model.Perm, error) {
-	client, err := newClient(g.URL, user.Token, g.SkipVerify)
-	if err != nil {
-		return nil, err
+func (g *GitLab) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error) {
+	token := ""
+	if u != nil {
+		token = u.Token
 	}
-	repo, err := g.getProject(ctx, client, r.Owner, r.Name)
+	client, err := newClient(g.URL, token, g.SkipVerify)
 	if err != nil {
 		return nil, err
 	}
 
-	// repo owner is granted full access
-	if repo.Owner != nil && repo.Owner.Username == user.Login {
-		return &model.Perm{Push: true, Pull: true, Admin: true}, nil
+	_repo, err := g.getProject(ctx, client, r.Owner, r.Name)
+	if err != nil {
+		return nil, err
 	}
 
-	// return permission for current user
-	return &model.Perm{
-		Pull:  isRead(repo),
-		Push:  isWrite(repo),
-		Admin: isAdmin(repo),
-	}, nil
+	state := "open"
+	pullRequests, _, err := client.MergeRequests.ListProjectMergeRequests(_repo.ID, &gitlab.ListProjectMergeRequestsOptions{
+		ListOptions: gitlab.ListOptions{Page: p.Page, PerPage: p.PerPage},
+		State:       &state,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]*model.PullRequest, len(pullRequests))
+	for i := range pullRequests {
+		result[i] = &model.PullRequest{
+			Index: int64(pullRequests[i].ID),
+			Title: pullRequests[i].Title,
+		}
+	}
+	return result, err
 }
 
 // File fetches a file from the forge repository and returns in string format.
@@ -533,7 +543,7 @@ func (g *GitLab) Deactivate(ctx context.Context, user *model.User, repo *model.R
 }
 
 // Branches returns the names of all branches for the named repository.
-func (g *GitLab) Branches(ctx context.Context, user *model.User, repo *model.Repo) ([]string, error) {
+func (g *GitLab) Branches(ctx context.Context, user *model.User, repo *model.Repo, p *model.ListOptions) ([]string, error) {
 	token := ""
 	if user != nil {
 		token = user.Token
@@ -548,7 +558,9 @@ func (g *GitLab) Branches(ctx context.Context, user *model.User, repo *model.Rep
 		return nil, err
 	}
 
-	gitlabBranches, _, err := client.Branches.ListBranches(_repo.ID, &gitlab.ListBranchesOptions{}, gitlab.WithContext(ctx))
+	gitlabBranches, _, err := client.Branches.ListBranches(_repo.ID,
+		&gitlab.ListBranchesOptions{ListOptions: gitlab.ListOptions{Page: p.Page, PerPage: p.PerPage}},
+		gitlab.WithContext(ctx))
 	if err != nil {
 		return nil, err
 	}

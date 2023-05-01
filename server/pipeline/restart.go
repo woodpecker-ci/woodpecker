@@ -34,7 +34,7 @@ func Restart(ctx context.Context, store store.Store, lastBuild *model.Pipeline, 
 	switch lastBuild.Status {
 	case model.StatusDeclined,
 		model.StatusBlocked:
-		return nil, ErrBadRequest{Msg: fmt.Sprintf("cannot restart a pipeline with status %s", lastBuild.Status)}
+		return nil, &ErrBadRequest{Msg: fmt.Sprintf("cannot restart a pipeline with status %s", lastBuild.Status)}
 	}
 
 	var pipelineFiles []*forge_types.FileMeta
@@ -44,7 +44,7 @@ func Restart(ctx context.Context, store store.Store, lastBuild *model.Pipeline, 
 	if err != nil {
 		msg := fmt.Sprintf("failure to get pipeline config for %s. %s", repo.FullName, err)
 		log.Error().Msgf(msg)
-		return nil, ErrNotFound{Msg: msg}
+		return nil, &ErrNotFound{Msg: msg}
 	}
 
 	for _, y := range configs {
@@ -60,7 +60,7 @@ func Restart(ctx context.Context, store store.Store, lastBuild *model.Pipeline, 
 
 		newConfig, useOld, err := server.Config.Services.ConfigService.FetchConfig(ctx, repo, lastBuild, currentFileMeta)
 		if err != nil {
-			return nil, ErrBadRequest{
+			return nil, &ErrBadRequest{
 				Msg: fmt.Sprintf("On fetching external pipeline config: %s", err),
 			}
 		}
@@ -128,13 +128,13 @@ func persistPipelineConfigs(store store.Store, configs []*model.Config, pipeline
 }
 
 func createNewOutOfOld(old *model.Pipeline) *model.Pipeline {
-	new := *old
-	new.ID = 0
-	new.Number = 0
-	new.Status = model.StatusPending
-	new.Started = 0
-	new.Finished = 0
-	new.Enqueued = time.Now().UTC().Unix()
-	new.Error = ""
-	return &new
+	newPipeline := *old
+	newPipeline.ID = 0
+	newPipeline.Number = 0
+	newPipeline.Status = model.StatusPending
+	newPipeline.Started = 0
+	newPipeline.Finished = 0
+	newPipeline.Enqueued = time.Now().UTC().Unix()
+	newPipeline.Error = ""
+	return &newPipeline
 }
