@@ -20,10 +20,7 @@ import (
 	"time"
 
 	_ "github.com/joho/godotenv/autoload"
-	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 
 	"github.com/woodpecker-ci/woodpecker/version"
 )
@@ -38,18 +35,7 @@ func main() {
 	app.Name = "woodpecker-agent"
 	app.Version = version.String()
 	app.Usage = "woodpecker agent"
-	app.Action = func(context *cli.Context) error {
-		var err error
-		for i := 0; i < retryCount; i++ {
-			if err = loop(context); err == nil {
-				break
-			} else if status.Code(err) == codes.Unavailable {
-				log.Warn().Err(err).Msg(fmt.Sprintf("cannot connect to server, retrying in %v", retryDelay))
-				time.Sleep(retryDelay)
-			}
-		}
-		return err
-	}
+	app.Action = rinWithRetry
 	app.Commands = []*cli.Command{
 		{
 			Name:   "ping",
