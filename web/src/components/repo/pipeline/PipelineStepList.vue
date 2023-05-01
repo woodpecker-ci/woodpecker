@@ -153,7 +153,7 @@ const { prettyRef } = usePipeline(pipeline);
 const repo = inject<Ref<Repo>>('repo');
 const repoPermissions = inject<Ref<RepoPermissions>>('repo-permissions');
 
-if (!repo || !repoPermissions || !pipeline) {
+if (!repo || !repoPermissions || !pipeline.value) {
   throw new Error('Unexpected: "repo", "repoPermissions" & "pipeline" should be provided at this place');
 }
 
