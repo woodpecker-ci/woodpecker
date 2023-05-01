@@ -16,6 +16,7 @@ package datastore
 
 import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	"xorm.io/xorm"
 )
 
 func (s storage) GetUser(id int64) (*model.User, error) {
@@ -23,9 +24,23 @@ func (s storage) GetUser(id int64) (*model.User, error) {
 	return user, wrapGet(s.engine.ID(id).Get(user))
 }
 
-func (s storage) GetUserLogin(login string) (*model.User, error) {
+func (s storage) GetUserRemoteID(remoteID model.ForgeRemoteID, login string) (*model.User, error) {
+	sess := s.engine.NewSession()
 	user := new(model.User)
-	return user, wrapGet(s.engine.Where("user_login=?", login).Get(user))
+	err := wrapGet(sess.Where("forge_remote_id = ?", remoteID).Get(user))
+	if err != nil {
+		user, err = s.getUserLogin(sess, login)
+	}
+	return user, err
+}
+
+func (s storage) GetUserLogin(login string) (*model.User, error) {
+	return s.getUserLogin(s.engine.NewSession(), login)
+}
+
+func (s storage) getUserLogin(sess *xorm.Session, login string) (*model.User, error) {
+	user := new(model.User)
+	return user, wrapGet(sess.Where("user_login=?", login).Get(user))
 }
 
 func (s storage) GetUserList(p *model.ListOptions) ([]*model.User, error) {

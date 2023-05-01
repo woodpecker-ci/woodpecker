@@ -18,6 +18,7 @@ package gogs
 import (
 	"context"
 	"crypto/tls"
+	"fmt"
 	"net"
 	"net/http"
 	"net/url"
@@ -118,10 +119,11 @@ func (c *client) Login(_ context.Context, res http.ResponseWriter, req *http.Req
 	}
 
 	return &model.User{
-		Token:  accessToken,
-		Login:  account.UserName,
-		Email:  account.Email,
-		Avatar: expandAvatar(c.URL, account.AvatarUrl),
+		Token:         accessToken,
+		Login:         account.UserName,
+		Email:         account.Email,
+		Avatar:        expandAvatar(c.URL, account.AvatarUrl),
+		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(account.ID)),
 	}, nil
 }
 
