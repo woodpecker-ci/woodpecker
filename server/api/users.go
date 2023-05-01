@@ -22,11 +22,12 @@ import (
 	"github.com/gorilla/securecookie"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
 func GetUsers(c *gin.Context) {
-	users, err := store.FromContext(c).GetUserList()
+	users, err := store.FromContext(c).GetUserList(session.Pagination(c))
 	if err != nil {
 		c.String(500, "Error getting user list. %s", err)
 		return

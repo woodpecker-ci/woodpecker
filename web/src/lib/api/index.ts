@@ -22,6 +22,7 @@ type RepoListOptions = {
   all?: boolean;
 };
 
+// PipelineOptions is the data for creating a new pipeline
 type PipelineOptions = {
   branch: string;
   variables: Record<string, string>;
@@ -51,12 +52,12 @@ export default class WoodpeckerClient extends ApiClient {
     return this._get(`/api/repos/${repoId}/permissions`) as Promise<RepoPermissions>;
   }
 
-  getRepoBranches(repoId: number): Promise<string[]> {
-    return this._get(`/api/repos/${repoId}/branches`) as Promise<string[]>;
+  getRepoBranches(repoId: number, page: number): Promise<string[]> {
+    return this._get(`/api/repos/${repoId}/branches?page=${page}`) as Promise<string[]>;
   }
 
-  getRepoPullRequests(repoId: number): Promise<PullRequest[]> {
-    return this._get(`/api/repos/${repoId}/pull_requests`) as Promise<PullRequest[]>;
+  getRepoPullRequests(repoId: number, page: number): Promise<PullRequest[]> {
+    return this._get(`/api/repos/${repoId}/pull_requests?page=${page}`) as Promise<PullRequest[]>;
   }
 
   activateRepo(repoId: number): Promise<unknown> {
@@ -143,8 +144,8 @@ export default class WoodpeckerClient extends ApiClient {
     return this._get(`/api/repos/${repoId}/files/${pipeline}`);
   }
 
-  getSecretList(repoId: number): Promise<Secret[]> {
-    return this._get(`/api/repos/${repoId}/secrets`) as Promise<Secret[]>;
+  getSecretList(repoId: number, page: number): Promise<Secret[] | null> {
+    return this._get(`/api/repos/${repoId}/secrets?page=${page}`) as Promise<Secret[] | null>;
   }
 
   createSecret(repoId: number, secret: Partial<Secret>): Promise<unknown> {
@@ -159,8 +160,8 @@ export default class WoodpeckerClient extends ApiClient {
     return this._delete(`/api/repos/${repoId}/secrets/${secretName}`);
   }
 
-  getRegistryList(repoId: number): Promise<Registry[]> {
-    return this._get(`/api/repos/${repoId}/registry`) as Promise<Registry[]>;
+  getRegistryList(repoId: number, page: number): Promise<Registry[] | null> {
+    return this._get(`/api/repos/${repoId}/registry?page=${page}`) as Promise<Registry[] | null>;
   }
 
   createRegistry(repoId: number, registry: Partial<Registry>): Promise<unknown> {
@@ -175,8 +176,8 @@ export default class WoodpeckerClient extends ApiClient {
     return this._delete(`/api/repos/${repoId}/registry/${registryAddress}`);
   }
 
-  getCronList(repoId: number): Promise<Cron[]> {
-    return this._get(`/api/repos/${repoId}/cron`) as Promise<Cron[]>;
+  getCronList(repoId: number, page: number): Promise<Cron[] | null> {
+    return this._get(`/api/repos/${repoId}/cron?page=${page}`) as Promise<Cron[] | null>;
   }
 
   createCron(repoId: number, cron: Partial<Cron>): Promise<unknown> {
@@ -199,8 +200,8 @@ export default class WoodpeckerClient extends ApiClient {
     return this._get(`/api/orgs/${owner}/permissions`) as Promise<OrgPermissions>;
   }
 
-  getOrgSecretList(owner: string): Promise<Secret[]> {
-    return this._get(`/api/orgs/${owner}/secrets`) as Promise<Secret[]>;
+  getOrgSecretList(owner: string, page: number): Promise<Secret[] | null> {
+    return this._get(`/api/orgs/${owner}/secrets?page=${page}`) as Promise<Secret[] | null>;
   }
 
   createOrgSecret(owner: string, secret: Partial<Secret>): Promise<unknown> {
@@ -215,8 +216,8 @@ export default class WoodpeckerClient extends ApiClient {
     return this._delete(`/api/orgs/${owner}/secrets/${secretName}`);
   }
 
-  getGlobalSecretList(): Promise<Secret[]> {
-    return this._get(`/api/secrets`) as Promise<Secret[]>;
+  getGlobalSecretList(page: number): Promise<Secret[] | null> {
+    return this._get(`/api/secrets?page=${page}`) as Promise<Secret[] | null>;
   }
 
   createGlobalSecret(secret: Partial<Secret>): Promise<unknown> {
@@ -239,8 +240,8 @@ export default class WoodpeckerClient extends ApiClient {
     return this._post('/api/user/token') as Promise<string>;
   }
 
-  getAgents(): Promise<Agent[]> {
-    return this._get('/api/agents') as Promise<Agent[]>;
+  getAgents(page: number): Promise<Agent[] | null> {
+    return this._get(`/api/agents?page=${page}`) as Promise<Agent[] | null>;
   }
 
   getAgent(agentId: Agent['id']): Promise<Agent> {
@@ -271,8 +272,8 @@ export default class WoodpeckerClient extends ApiClient {
     return this._post('/api/queue/resume');
   }
 
-  getUsers(): Promise<User[]> {
-    return this._get('/api/users') as Promise<User[]>;
+  getUsers(page: number): Promise<User[] | null> {
+    return this._get(`/api/users?page=${page}`) as Promise<User[] | null>;
   }
 
   getUser(username: string): Promise<User> {

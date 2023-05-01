@@ -18,9 +18,9 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-func (s storage) AgentList() ([]*model.Agent, error) {
-	agents := make([]*model.Agent, 0, 10)
-	return agents, s.engine.Find(&agents)
+func (s storage) AgentList(p *model.ListOptions) ([]*model.Agent, error) {
+	var agents []*model.Agent
+	return agents, s.paginate(p).Find(&agents)
 }
 
 func (s storage) AgentFind(id int64) (*model.Agent, error) {

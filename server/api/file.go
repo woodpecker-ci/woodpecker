@@ -44,7 +44,7 @@ func FileList(c *gin.Context) {
 		return
 	}
 
-	files, err := _store.FileList(pipeline)
+	files, err := _store.FileList(pipeline, session.Pagination(c))
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return

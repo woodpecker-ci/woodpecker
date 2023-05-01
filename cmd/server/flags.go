@@ -46,6 +46,11 @@ var flags = []cli.Flag{
 		Usage:   "server fully qualified url (<scheme>://<host>)",
 	},
 	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_ROOT_URL"},
+		Name:    "root-url",
+		Usage:   "server url root (used for statics loading when having a url path prefix)",
+	},
+	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_SERVER_ADDR"},
 		Name:    "server-addr",
 		Usage:   "server address",
@@ -331,11 +336,6 @@ var flags = []cli.Flag{
 		Name:     "gogs-git-password",
 		Usage:    "gogs service account password",
 		FilePath: os.Getenv("WOODPECKER_GOGS_GIT_PASSWORD_FILE"),
-	},
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_GOGS_PRIVATE_MODE"},
-		Name:    "gogs-private-mode",
-		Usage:   "gogs private mode enabled",
 	},
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_GOGS_SKIP_VERIFY"},

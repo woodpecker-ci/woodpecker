@@ -26,8 +26,8 @@ var PrivilegedPlugins = []string{
 // folders are indicated by supplying a trailing /
 var DefaultConfigOrder = [...]string{
 	".woodpecker/",
-	".woodpecker.yml",
 	".woodpecker.yaml",
+	".woodpecker.yml",
 	".drone.yml",
 }
 

@@ -39,21 +39,21 @@ const (
 
 // parseHook parses a Bitbucket hook from an http.Request request and returns
 // Repo and Pipeline detail. If a hook type is unsupported nil values are returned.
-func parseHook(r *http.Request, privateMode bool) (*model.Repo, *model.Pipeline, error) {
+func parseHook(r *http.Request) (*model.Repo, *model.Pipeline, error) {
 	switch r.Header.Get(hookEvent) {
 	case hookPush:
-		return parsePushHook(r.Body, privateMode)
+		return parsePushHook(r.Body)
 	case hookCreated:
-		return parseCreatedHook(r.Body, privateMode)
+		return parseCreatedHook(r.Body)
 	case hookPullRequest:
-		return parsePullRequestHook(r.Body, privateMode)
+		return parsePullRequestHook(r.Body)
 	}
 	return nil, nil, nil
 }
 
 // parsePushHook parses a push hook and returns the Repo and Pipeline details.
 // If the commit type is unsupported nil values are returned.
-func parsePushHook(payload io.Reader, privateMode bool) (*model.Repo, *model.Pipeline, error) {
+func parsePushHook(payload io.Reader) (*model.Repo, *model.Pipeline, error) {
 	var (
 		repo     *model.Repo
 		pipeline *model.Pipeline
@@ -69,14 +69,14 @@ func parsePushHook(payload io.Reader, privateMode bool) (*model.Repo, *model.Pip
 		return nil, nil, nil
 	}
 
-	repo = toRepo(push.Repo, privateMode)
+	repo = toRepo(push.Repo)
 	pipeline = pipelineFromPush(push)
 	return repo, pipeline, err
 }
 
 // parseCreatedHook parses a push hook and returns the Repo and Pipeline details.
 // If the commit type is unsupported nil values are returned.
-func parseCreatedHook(payload io.Reader, privateMode bool) (*model.Repo, *model.Pipeline, error) {
+func parseCreatedHook(payload io.Reader) (*model.Repo, *model.Pipeline, error) {
 	var (
 		repo     *model.Repo
 		pipeline *model.Pipeline
@@ -91,13 +91,13 @@ func parseCreatedHook(payload io.Reader, privateMode bool) (*model.Repo, *model.
 		return nil, nil, nil
 	}
 
-	repo = toRepo(push.Repo, privateMode)
+	repo = toRepo(push.Repo)
 	pipeline = pipelineFromTag(push)
 	return repo, pipeline, err
 }
 
 // parsePullRequestHook parses a pull_request hook and returns the Repo and Pipeline details.
-func parsePullRequestHook(payload io.Reader, privateMode bool) (*model.Repo, *model.Pipeline, error) {
+func parsePullRequestHook(payload io.Reader) (*model.Repo, *model.Pipeline, error) {
 	var (
 		repo     *model.Repo
 		pipeline *model.Pipeline
@@ -116,7 +116,7 @@ func parsePullRequestHook(payload io.Reader, privateMode bool) (*model.Repo, *mo
 		return nil, nil, nil
 	}
 
-	repo = toRepo(pr.Repo, privateMode)
+	repo = toRepo(pr.Repo)
 	pipeline = pipelineFromPullRequest(pr)
 	return repo, pipeline, err
 }

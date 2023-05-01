@@ -187,7 +187,7 @@ func PatchCron(c *gin.Context) {
 // to the response in json format.
 func GetCronList(c *gin.Context) {
 	repo := session.Repo(c)
-	list, err := store.FromContext(c).CronList(repo)
+	list, err := store.FromContext(c).CronList(repo, session.Pagination(c))
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error getting cron list. %s", err)
 		return

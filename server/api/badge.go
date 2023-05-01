@@ -29,6 +29,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/badges"
 	"github.com/woodpecker-ci/woodpecker/server/ccmenu"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/server/store/types"
 )
@@ -72,7 +73,7 @@ func GetCC(c *gin.Context) {
 		return
 	}
 
-	pipelines, err := _store.GetPipelineList(repo, 1)
+	pipelines, err := _store.GetPipelineList(repo, &model.ListOptions{Page: 1, PerPage: 1})
 	if err != nil || len(pipelines) == 0 {
 		c.AbortWithStatus(http.StatusNotFound)
 		return

@@ -28,9 +28,9 @@ func (s storage) GetUserLogin(login string) (*model.User, error) {
 	return user, wrapGet(s.engine.Where("user_login=?", login).Get(user))
 }
 
-func (s storage) GetUserList() ([]*model.User, error) {
-	users := make([]*model.User, 0, 10)
-	return users, s.engine.OrderBy("user_id").Find(&users)
+func (s storage) GetUserList(p *model.ListOptions) ([]*model.User, error) {
+	var users []*model.User
+	return users, s.paginate(p).OrderBy("user_id").Find(&users)
 }
 
 func (s storage) GetUserCount() (int64, error) {

@@ -1,3 +1,5 @@
+import { WebhookEvents } from './webhook';
+
 // A pipeline for a repository.
 export type Pipeline = {
   id: number;
@@ -8,7 +10,7 @@ export type Pipeline = {
 
   parent: number;
 
-  event: 'push' | 'tag' | 'pull_request' | 'deployment' | 'cron' | 'manual';
+  event: WebhookEvents;
 
   //  The current status of the pipeline.
   status: PipelineStatus;

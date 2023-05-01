@@ -46,17 +46,15 @@ func Test_gogs(t *testing.T) {
 		g.Describe("Creating a forge", func() {
 			g.It("Should return client with specified options", func() {
 				forge, _ := New(Opts{
-					URL:         "http://localhost:8080",
-					Username:    "someuser",
-					Password:    "password",
-					SkipVerify:  true,
-					PrivateMode: true,
+					URL:        "http://localhost:8080",
+					Username:   "someuser",
+					Password:   "password",
+					SkipVerify: true,
 				})
 				g.Assert(forge.(*client).URL).Equal("http://localhost:8080")
 				g.Assert(forge.(*client).Username).Equal("someuser")
 				g.Assert(forge.(*client).Password).Equal("password")
 				g.Assert(forge.(*client).SkipVerify).Equal(true)
-				g.Assert(forge.(*client).PrivateMode).Equal(true)
 			})
 			g.It("Should handle malformed url", func() {
 				_, err := New(Opts{URL: "%gh&%ij"})

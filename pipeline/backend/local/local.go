@@ -68,8 +68,15 @@ func (e *local) IsAvailable(context.Context) bool {
 
 func (e *local) Load(context.Context) error {
 	dir, err := os.MkdirTemp("", "woodpecker-local-*")
+	if err != nil {
+		return err
+	}
 	e.workflowBaseDir = dir
-	return err
+
+	if err := os.Mkdir(filepath.Join(e.workflowBaseDir, workingSubDir), 0o700); err != nil {
+		return err
+	}
+	return os.Mkdir(filepath.Join(e.workflowBaseDir, homeSubDir), 0o700)
 }
 
 // Setup the pipeline environment.

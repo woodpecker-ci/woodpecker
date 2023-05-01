@@ -113,7 +113,7 @@ func PatchSecret(c *gin.Context) {
 // to the response in json format.
 func GetSecretList(c *gin.Context) {
 	repo := session.Repo(c)
-	list, err := server.Config.Services.Secrets.SecretList(repo)
+	list, err := server.Config.Services.Secrets.SecretList(repo, session.Pagination(c))
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error getting secret list. %s", err)
 		return

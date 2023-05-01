@@ -123,7 +123,7 @@ func cancelPreviousPipelines(
 	}
 
 	// get all active activeBuilds
-	activeBuilds, err := _store.GetActivePipelineList(repo, -1)
+	activeBuilds, err := _store.GetActivePipelineList(repo)
 	if err != nil {
 		return err
 	}
