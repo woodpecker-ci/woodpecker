@@ -132,3 +132,15 @@ See [Docker backend configuration](backends/docker/#configuration)
 ### `WOODPECKER_BACKEND_SSH_*`
 
 See [SSH backend configuration](backends/ssh/#configuration)
+
+### `WOODPECKER_CONNECT_RETRY_COUNT`
+
+> Default: `5`
+
+Configures number of times agent retries to connect to the server.
+
+### `WOODPECKER_CONNECT_RETRY_DELAY`
+
+> Default: `2s`
+
+Configures delay between agent connection retries to the server. 

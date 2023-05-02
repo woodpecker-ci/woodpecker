@@ -17,17 +17,11 @@ package main
 import (
 	"fmt"
 	"os"
-	"time"
 
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/urfave/cli/v2"
 
 	"github.com/woodpecker-ci/woodpecker/version"
-)
-
-const (
-	retryCount = 5
-	retryDelay = 2 * time.Second
 )
 
 func main() {

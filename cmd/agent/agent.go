@@ -249,13 +249,15 @@ func run(c *cli.Context) error {
 }
 
 func runWithRetry(context *cli.Context) error {
+	retryCount := context.Int("connect-retry-count")
+	retryDelay := context.Duration("connect-retry-delay")
 	var err error
 	for i := 0; i < retryCount; i++ {
-		if err = run(context); err == nil {
-			break
-		} else if status.Code(err) == codes.Unavailable {
+		if err = run(context); status.Code(err) == codes.Unavailable {
 			log.Warn().Err(err).Msg(fmt.Sprintf("cannot connect to server, retrying in %v", retryDelay))
 			time.Sleep(retryDelay)
+		} else {
+			break
 		}
 	}
 	return err
