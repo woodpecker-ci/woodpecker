@@ -365,7 +365,7 @@
           "netrc_only_trusted": "Injecter les identifiants netrc uniquement dans des conteneurs de confiance"
         },
         "pipeline_path": {
-          "default": "Par défaut : .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml",
+          "default": "Par défaut : .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml -> .drone.yml",
           "desc": "Le chemin vers votre configuration de pipeline (par example {0}). Les dossiers doivent finir par {1}.",
           "desc_path_example": "mon/chemin/",
           "path": "Chemin vers le pipeline"
