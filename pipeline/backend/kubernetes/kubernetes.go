@@ -41,6 +41,7 @@ type Config struct {
 	StorageRwx     bool
 	PodLabels      map[string]string
 	PodAnnotations map[string]string
+	Platform       map[string]string
 }
 
 func configFromCliContext(ctx context.Context) (*Config, error) {
@@ -53,6 +54,7 @@ func configFromCliContext(ctx context.Context) (*Config, error) {
 				StorageRwx:     c.Bool("backend-k8s-storage-rwx"),
 				PodLabels:      make(map[string]string), // just init empty map to prevent nil panic
 				PodAnnotations: make(map[string]string), // just init empty map to prevent nil panic
+				Platform:       make(map[string]string), // just init empty map to prevent nil panic
 			}
 			// Unmarshal label and annotation settings here to ensure they're valid on startup
 			if labels := c.String("backend-k8s-pod-labels"); labels != "" {
@@ -169,7 +171,7 @@ func (e *kube) Setup(ctx context.Context, conf *types.Config) error {
 
 // Start the pipeline step.
 func (e *kube) Exec(ctx context.Context, step *types.Step) error {
-	pod, err := Pod(e.config.Namespace, step, e.config.PodLabels, e.config.PodAnnotations)
+	pod, err := Pod(e.config.Namespace, step, e.config.PodLabels, e.config.Platform, e.config.PodAnnotations)
 	if err != nil {
 		return err
 	}
