@@ -210,7 +210,7 @@ func run(c *cli.Context) error {
 		// start the server with tls enabled
 		g.Go(func() error {
 			serve := &http.Server{
-				Addr:    server.Config.Server.PortTls,
+				Addr:    server.Config.Server.PortTLS,
 				Handler: handler,
 				TLSConfig: &tls.Config{
 					NextProtos: []string{"h2", "http/1.1"},
@@ -350,7 +350,7 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 		server.Config.Server.OAuthHost = c.String("server-host")
 	}
 	server.Config.Server.Port = c.String("server-addr")
-	server.Config.Server.PortTls = c.String("server-addr-tls")
+	server.Config.Server.PortTLS = c.String("server-addr-tls")
 	server.Config.Server.Docs = c.String("docs")
 	server.Config.Server.StatusContext = c.String("status-context")
 	server.Config.Server.StatusContextFormat = c.String("status-context-format")
