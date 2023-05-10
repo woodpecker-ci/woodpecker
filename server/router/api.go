@@ -23,78 +23,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 )
 
-func repoRoutes(repoBase *gin.RouterGroup) {
-	repoBase.Use(session.SetRepo())
-	repoBase.Use(session.SetPerm())
-
-	repoBase.GET("/permissions", api.GetRepoPermissions)
-
-	repo := repoBase.Group("")
-	{
-		repo.Use(session.MustPull)
-
-		repo.GET("", api.GetRepo)
-
-		repo.GET("/branches", api.GetRepoBranches)
-		repo.GET("/pull_requests", api.GetRepoPullRequests)
-
-		repo.GET("/pipelines", api.GetPipelines)
-		repo.POST("/pipelines", session.MustPush, api.CreatePipeline)
-		repo.GET("/pipelines/:number", api.GetPipeline)
-		repo.GET("/pipelines/:number/config", api.GetPipelineConfig)
-
-		// requires push permissions
-		repo.POST("/pipelines/:number", session.MustPush, api.PostPipeline)
-		repo.POST("/pipelines/:number/cancel", session.MustPush, api.CancelPipeline)
-		repo.POST("/pipelines/:number/approve", session.MustPush, api.PostApproval)
-		repo.POST("/pipelines/:number/decline", session.MustPush, api.PostDecline)
-
-		repo.GET("/logs/:number/:pid", api.GetStepLogs)
-		repo.GET("/logs/:number/:pid/:step", api.GetPipelineLogs)
-		repo.GET("/logs/:number/:pid/:step/stream",
-			session.SetRepo(),
-			session.SetPerm(),
-			session.MustPull,
-			api.LogStreamSSE,
-		)
-
-		// requires push permissions
-		repo.DELETE("/logs/:number", session.MustPush, api.DeletePipelineLogs)
-
-		repo.GET("/files/:number", api.FileList)
-		repo.GET("/files/:number/:step/*file", api.FileGet)
-
-		// requires push permissions
-		repo.GET("/secrets", session.MustPush, api.GetSecretList)
-		repo.POST("/secrets", session.MustPush, api.PostSecret)
-		repo.GET("/secrets/:secret", session.MustPush, api.GetSecret)
-		repo.PATCH("/secrets/:secret", session.MustPush, api.PatchSecret)
-		repo.DELETE("/secrets/:secret", session.MustPush, api.DeleteSecret)
-
-		// requires push permissions
-		repo.GET("/registry", session.MustPush, api.GetRegistryList)
-		repo.POST("/registry", session.MustPush, api.PostRegistry)
-		repo.GET("/registry/:registry", session.MustPush, api.GetRegistry)
-		repo.PATCH("/registry/:registry", session.MustPush, api.PatchRegistry)
-		repo.DELETE("/registry/:registry", session.MustPush, api.DeleteRegistry)
-
-		// requires push permissions
-		repo.GET("/cron", session.MustPush, api.GetCronList)
-		repo.POST("/cron", session.MustPush, api.PostCron)
-		repo.GET("/cron/:cron", session.MustPush, api.GetCron)
-		repo.POST("/cron/:cron", session.MustPush, api.RunCron)
-		repo.PATCH("/cron/:cron", session.MustPush, api.PatchCron)
-		repo.DELETE("/cron/:cron", session.MustPush, api.DeleteCron)
-
-		// requires admin permissions
-		repo.PATCH("", session.MustRepoAdmin(), api.PatchRepo)
-		repo.DELETE("", session.MustRepoAdmin(), api.DeleteRepo)
-		repo.POST("/chown", session.MustRepoAdmin(), api.ChownRepo)
-		repo.POST("/repair", session.MustRepoAdmin(), api.RepairRepo)
-		repo.POST("/move", session.MustRepoAdmin(), api.MoveRepo)
-	}
-}
-
 func apiRoutes(e *gin.Engine) {
 	apiBase := e.Group("/api")
 	{
@@ -135,11 +63,78 @@ func apiRoutes(e *gin.Engine) {
 
 		apiBase.GET("/repos/lookup/*repo_full_name", api.LookupRepo) // TODO: check if this public route is a security issue
 		apiBase.POST("/repos", session.MustUser(), api.PostRepo)
-		repoRoutes(apiBase.Group("/repos/:repo_id"))
+		repoBase := apiBase.Group("/repos/:repo_id")
+		{
+			repoBase.Use(session.SetRepo())
+			repoBase.Use(session.SetPerm())
 
-		// DEPRECATED
-		// apiBase.POST("/repos/:owner/:name", session.MustUser(), api.PostRepo)
-		// repoRoutes(apiBase.Group("/repos/:owner/:name"))
+			repoBase.GET("/permissions", api.GetRepoPermissions)
+
+			repo := repoBase.Group("")
+			{
+				repo.Use(session.MustPull)
+
+				repo.GET("", api.GetRepo)
+
+				repo.GET("/branches", api.GetRepoBranches)
+				repo.GET("/pull_requests", api.GetRepoPullRequests)
+
+				repo.GET("/pipelines", api.GetPipelines)
+				repo.POST("/pipelines", session.MustPush, api.CreatePipeline)
+				repo.GET("/pipelines/:number", api.GetPipeline)
+				repo.GET("/pipelines/:number/config", api.GetPipelineConfig)
+
+				// requires push permissions
+				repo.POST("/pipelines/:number", session.MustPush, api.PostPipeline)
+				repo.POST("/pipelines/:number/cancel", session.MustPush, api.CancelPipeline)
+				repo.POST("/pipelines/:number/approve", session.MustPush, api.PostApproval)
+				repo.POST("/pipelines/:number/decline", session.MustPush, api.PostDecline)
+
+				repo.GET("/logs/:number/:pid", api.GetStepLogs)
+				repo.GET("/logs/:number/:pid/:step", api.GetPipelineLogs)
+				repo.GET("/logs/:number/:pid/:step/stream",
+					session.SetRepo(),
+					session.SetPerm(),
+					session.MustPull,
+					api.LogStreamSSE,
+				)
+
+				// requires push permissions
+				repo.DELETE("/logs/:number", session.MustPush, api.DeletePipelineLogs)
+
+				repo.GET("/files/:number", api.FileList)
+				repo.GET("/files/:number/:step/*file", api.FileGet)
+
+				// requires push permissions
+				repo.GET("/secrets", session.MustPush, api.GetSecretList)
+				repo.POST("/secrets", session.MustPush, api.PostSecret)
+				repo.GET("/secrets/:secret", session.MustPush, api.GetSecret)
+				repo.PATCH("/secrets/:secret", session.MustPush, api.PatchSecret)
+				repo.DELETE("/secrets/:secret", session.MustPush, api.DeleteSecret)
+
+				// requires push permissions
+				repo.GET("/registry", session.MustPush, api.GetRegistryList)
+				repo.POST("/registry", session.MustPush, api.PostRegistry)
+				repo.GET("/registry/:registry", session.MustPush, api.GetRegistry)
+				repo.PATCH("/registry/:registry", session.MustPush, api.PatchRegistry)
+				repo.DELETE("/registry/:registry", session.MustPush, api.DeleteRegistry)
+
+				// requires push permissions
+				repo.GET("/cron", session.MustPush, api.GetCronList)
+				repo.POST("/cron", session.MustPush, api.PostCron)
+				repo.GET("/cron/:cron", session.MustPush, api.GetCron)
+				repo.POST("/cron/:cron", session.MustPush, api.RunCron)
+				repo.PATCH("/cron/:cron", session.MustPush, api.PatchCron)
+				repo.DELETE("/cron/:cron", session.MustPush, api.DeleteCron)
+
+				// requires admin permissions
+				repo.PATCH("", session.MustRepoAdmin(), api.PatchRepo)
+				repo.DELETE("", session.MustRepoAdmin(), api.DeleteRepo)
+				repo.POST("/chown", session.MustRepoAdmin(), api.ChownRepo)
+				repo.POST("/repair", session.MustRepoAdmin(), api.RepairRepo)
+				repo.POST("/move", session.MustRepoAdmin(), api.MoveRepo)
+			}
+		}
 
 		badges := apiBase.Group("/badges/:repo_id_or_owner")
 		{
@@ -148,6 +143,7 @@ func apiRoutes(e *gin.Engine) {
 		}
 
 		// DEPRECATED
+		// TODO: remove in future release
 		_badges := apiBase.Group("/badges/:repo_id_or_owner/:repo_name")
 		{
 			_badges.GET("/status.svg", api.GetBadge)
