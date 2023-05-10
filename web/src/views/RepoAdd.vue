@@ -25,8 +25,8 @@
   </Scaffold>
 </template>
 
-<script lang="ts">
-import { defineComponent, onMounted, ref } from 'vue';
+<script lang="ts" setup>
+import { onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
@@ -40,48 +40,27 @@ import { useRepoSearch } from '~/compositions/useRepoSearch';
 import { useRouteBackOrDefault } from '~/compositions/useRouteBackOrDefault';
 import { Repo } from '~/lib/api/types';
 
-export default defineComponent({
-  name: 'RepoAdd',
+const router = useRouter();
+const apiClient = useApiClient();
+const notifications = useNotifications();
+const repos = ref<Repo[]>();
+const repoToActivate = ref<Repo>();
+const search = ref('');
+const i18n = useI18n();
 
-  components: {
-    Button,
-    ListItem,
-    Scaffold,
-  },
+const { searchedRepos } = useRepoSearch(repos, search);
 
-  setup() {
-    const router = useRouter();
-    const apiClient = useApiClient();
-    const notifications = useNotifications();
-    const repos = ref<Repo[]>();
-    const repoToActivate = ref<Repo>();
-    const search = ref('');
-    const i18n = useI18n();
-
-    const { searchedRepos } = useRepoSearch(repos, search);
-
-    onMounted(async () => {
-      repos.value = await apiClient.getRepoList({ all: true });
-    });
-
-    const { doSubmit: activateRepo, isLoading: isActivatingRepo } = useAsyncAction(async (repo: Repo) => {
-      repoToActivate.value = repo;
-      await apiClient.activateRepo(repo.id);
-      notifications.notify({ title: i18n.t('repo.enable.success'), type: 'success' });
-      repoToActivate.value = undefined;
-      await router.push({ name: 'repo', params: { repoId: repo.id } });
-    });
-
-    const goBack = useRouteBackOrDefault({ name: 'repos' });
-
-    return {
-      isActivatingRepo,
-      repoToActivate,
-      goBack,
-      activateRepo,
-      searchedRepos,
-      search,
-    };
-  },
+onMounted(async () => {
+  repos.value = await apiClient.getRepoList({ all: true });
 });
+
+const { doSubmit: activateRepo, isLoading: isActivatingRepo } = useAsyncAction(async (repo: Repo) => {
+  repoToActivate.value = repo;
+  await apiClient.activateRepo(repo.id);
+  notifications.notify({ title: i18n.t('repo.enable.success'), type: 'success' });
+  repoToActivate.value = undefined;
+  await router.push({ name: 'repo', params: { repoId: repo.id } });
+});
+
+const goBack = useRouteBackOrDefault({ name: 'repos' });
 </script>
