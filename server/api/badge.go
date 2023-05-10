@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
@@ -36,7 +37,22 @@ import (
 
 func GetBadge(c *gin.Context) {
 	_store := store.FromContext(c)
-	repo, err := _store.GetRepoName(c.Param("owner") + "/" + c.Param("name"))
+
+	var repo *model.Repo
+	var err error
+
+	if c.Param("repo_name") != "" {
+		repo, err = _store.GetRepoName(c.Param("repo_id_or_owner") + "/" + c.Param("repo_name"))
+	} else {
+		var repoID int64
+		repoID, err = strconv.ParseInt(c.Param("repo_id_or_owner"), 10, 64)
+		if err != nil {
+			c.AbortWithStatus(http.StatusBadRequest)
+			return
+		}
+		repo, err = _store.GetRepo(repoID)
+	}
+
 	if err != nil || !repo.IsActive {
 		if err == nil || errors.Is(err, types.RecordNotExist) {
 			c.AbortWithStatus(http.StatusNotFound)

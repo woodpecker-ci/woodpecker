@@ -54,7 +54,8 @@ func SetRepo() gin.HandlerFunc {
 		var repo *model.Repo
 		var err error
 		if _repoID != "" {
-			repoID, err := strconv.ParseInt(_repoID, 10, 64)
+			var repoID int64
+			repoID, err = strconv.ParseInt(_repoID, 10, 64)
 			if err != nil {
 				c.AbortWithStatus(http.StatusBadRequest)
 				return

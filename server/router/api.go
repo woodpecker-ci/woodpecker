@@ -141,18 +141,18 @@ func apiRoutes(e *gin.Engine) {
 		// apiBase.POST("/repos/:owner/:name", session.MustUser(), api.PostRepo)
 		// repoRoutes(apiBase.Group("/repos/:owner/:name"))
 
-		badges := apiBase.Group("/badges/:repo_id")
+		badges := apiBase.Group("/badges/:repo_id_or_owner")
 		{
 			badges.GET("/status.svg", api.GetBadge)
 			badges.GET("/cc.xml", api.GetCC)
 		}
 
 		// DEPRECATED
-		// _badges := apiBase.Group("/badges/:owner/:name")
-		// {
-		// 	_badges.GET("/status.svg", api.GetBadge)
-		// 	_badges.GET("/cc.xml", api.GetCC)
-		// }
+		_badges := apiBase.Group("/badges/:repo_id_or_owner/:repo_name")
+		{
+			_badges.GET("/status.svg", api.GetBadge)
+			_badges.GET("/cc.xml", api.GetCC)
+		}
 
 		pipelines := apiBase.Group("/pipelines")
 		{
