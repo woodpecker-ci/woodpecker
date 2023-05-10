@@ -70,9 +70,9 @@ func GetRepos(c *gin.Context) {
 	}
 
 	if all {
-		active := map[string]bool{}
+		active := map[model.ForgeRemoteID]*model.Repo{}
 		for _, r := range activeRepos {
-			active[r.FullName] = r.IsActive
+			active[r.ForgeRemoteID] = r
 		}
 
 		_repos, err := _forge.Repos(c, user)
@@ -80,10 +80,13 @@ func GetRepos(c *gin.Context) {
 			c.String(http.StatusInternalServerError, "Error fetching repository list. %s", err)
 			return
 		}
+
 		var repos []*model.Repo
 		for _, r := range _repos {
 			if r.Perm.Push {
-				if active[r.FullName] {
+				if active[r.ForgeRemoteID] != nil && active[r.ForgeRemoteID].IsActive {
+					// TODO: should we merge other fields as well?
+					r.ID = active[r.ForgeRemoteID].ID // keep the internal ID
 					r.IsActive = true
 				}
 				repos = append(repos, r)
