@@ -113,6 +113,7 @@ const routes: RouteRecordRaw[] = [
         path: '',
         name: 'org',
         component: (): Component => import('~/views/org/OrgRepos.vue'),
+        props: true,
       },
       {
         path: 'settings',

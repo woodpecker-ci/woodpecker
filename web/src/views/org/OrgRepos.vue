@@ -14,12 +14,8 @@
     </template>
 
     <div class="space-y-4">
-      <ListItem
-        v-for="repo in searchedRepos"
-        :key="repo.id"
-        :to="{ name: 'repo', params: { repoName: repo.name, repoOwner: repo.owner } }"
-      >
-        <span class="text-color">{{ `${repo.name}` }}</span>
+      <ListItem v-for="repo in searchedRepos" :key="repo.id" :to="{ name: 'repo', params: { repoId: repo.id } }">
+        <span class="text-color">{{ `${repo.owner} / ${repo.name}` }}</span>
       </ListItem>
     </div>
     <div v-if="(searchedRepos || []).length <= 0" class="text-center">

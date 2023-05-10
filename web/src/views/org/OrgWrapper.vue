@@ -19,7 +19,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, provide, ref, toRef, watch } from 'vue';
+import { computed, onMounted, provide, ref, toRef, watch } from 'vue';
 
 import IconButton from '~/components/atomic/IconButton.vue';
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
@@ -33,7 +33,7 @@ const props = defineProps<{
 const orgName = toRef(props, 'orgName');
 const apiClient = useApiClient();
 
-const org = ref<Org>();
+const org = computed<Org>(() => ({ name: orgName.value }));
 const orgPermissions = ref<OrgPermissions>();
 provide('org', org);
 provide('org-permissions', orgPermissions);
