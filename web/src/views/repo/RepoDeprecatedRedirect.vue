@@ -45,7 +45,9 @@ onMounted(async () => {
 
   // TODO: support pipeline and build routes
 
-  const path = route.path.replace(`/${props.repoOwner}/${props.repoName}`, `/repos/${repoId}`);
+  const path = route.path
+    .replace(`/repos/${props.repoOwner}/${props.repoName}`, `/repos/${repoId}`)
+    .replace(`/${props.repoOwner}/${props.repoName}`, `/repos/${repoId}`);
 
   await router.replace({ path });
 });

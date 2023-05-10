@@ -60,8 +60,8 @@ export default class WoodpeckerClient extends ApiClient {
     return this._get(`/api/repos/${repoId}/pull_requests?page=${page}`) as Promise<PullRequest[]>;
   }
 
-  activateRepo(repoId: number): Promise<unknown> {
-    return this._post(`/api/repos/${repoId}`);
+  activateRepo(forgeRemoteId: string): Promise<Repo> {
+    return this._post(`/api/repos?forge_remote_id=${forgeRemoteId}`) as Promise<Repo>;
   }
 
   updateRepo(repoId: number, repoSettings: RepoSettings): Promise<unknown> {

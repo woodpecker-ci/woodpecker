@@ -111,15 +111,7 @@ async function loadRepo() {
     return;
   }
 
-  // TODO: fix this
-  // const apiRepo = await repoStore.loadRepo(repoId.value);
-  // if (apiRepo.full_name !== `${repoOwner.value}/${repoName.value}`) {
-  //   await router.replace({
-  //     name: route.name ? route.name : 'repo',
-  //     params: { repoOwner: apiRepo.owner, repoName: apiRepo.name },
-  //   });
-  //   return;
-  // }
+  await repoStore.loadRepo(repoId.value);
   await pipelineStore.loadRepoPipelines(repoId.value);
 }
 

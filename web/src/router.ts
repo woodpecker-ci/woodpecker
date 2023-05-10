@@ -100,23 +100,28 @@ const routes: RouteRecordRaw[] = [
         ],
       },
       {
-        path: '/org/:ownerOrOrgId',
-        component: (): Component => import('~/views/org/OrgWrapper.vue'),
+        path: ':repoOwner/:repoName/:pathMatch(.*)*',
+        component: () => import('~/views/repo/RepoDeprecatedRedirect.vue'),
         props: true,
-        children: [
-          {
-            path: '',
-            name: 'org',
-            component: (): Component => import('~/views/org/OrgRepos.vue'),
-          },
-          {
-            path: 'settings',
-            name: 'org-settings',
-            component: (): Component => import('~/views/org/OrgSettings.vue'),
-            meta: { authentication: 'required' },
-            props: true,
-          },
-        ],
+      },
+    ],
+  },
+  {
+    path: '/org/:ownerOrOrgId',
+    component: (): Component => import('~/views/org/OrgWrapper.vue'),
+    props: true,
+    children: [
+      {
+        path: '',
+        name: 'org',
+        component: (): Component => import('~/views/org/OrgRepos.vue'),
+      },
+      {
+        path: 'settings',
+        name: 'org-settings',
+        component: (): Component => import('~/views/org/OrgSettings.vue'),
+        meta: { authentication: 'required' },
+        props: true,
       },
     ],
   },
