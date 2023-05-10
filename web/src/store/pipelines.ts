@@ -65,14 +65,14 @@ export const usePipelineStore = defineStore('pipelines', () => {
           ([_pipelineNumber, pipeline]) =>
             <PipelineFeed>{
               ...pipeline,
-              repo: _repoId,
+              repo_id: _repoId,
               number: _pipelineNumber,
             },
         );
         return [...acc, ...repoPipelinesArray];
       }, [])
       .sort(comparePipelines)
-      .filter((pipeline) => repoStore.ownedRepoSlugs.includes(pipeline.repo)),
+      .filter((pipeline) => repoStore.ownedRepoIds.includes(pipeline.repo_id)),
   );
 
   const activePipelines = computed(() => pipelineFeed.value.filter(isPipelineActive));
@@ -82,7 +82,7 @@ export const usePipelineStore = defineStore('pipelines', () => {
 
     const _pipelines = await apiClient.getPipelineFeed();
     _pipelines.forEach((pipeline) => {
-      setPipeline(pipeline.repo, pipeline);
+      setPipeline(pipeline.repo_id, pipeline);
     });
   }
 

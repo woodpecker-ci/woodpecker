@@ -1,7 +1,7 @@
 <template>
   <Scaffold v-model:search="search">
     <template #title>
-      {{ repoOwner }}
+      {{ orgName }}
     </template>
 
     <template #titleActions>
@@ -29,7 +29,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, toRef } from 'vue';
 
 import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
@@ -40,13 +40,15 @@ import { OrgPermissions } from '~/lib/api/types';
 import { useRepoStore } from '~/store/repos';
 
 const props = defineProps<{
-  repoOwner: string;
+  orgName: string;
 }>();
 
 const apiClient = useApiClient();
 const repoStore = useRepoStore();
+
 // TODO: filter server side
-const repos = computed(() => Array.from(repoStore.repos.values()).filter((repo) => repo.owner === props.repoOwner));
+const orgName = toRef(props, 'orgName');
+const repos = computed(() => Array.from(repoStore.repos.values()).filter((repo) => repo.owner === orgName.value));
 const search = ref('');
 const orgPermissions = ref<OrgPermissions>({ member: false, admin: false });
 
@@ -54,6 +56,6 @@ const { searchedRepos } = useRepoSearch(repos, search);
 
 onMounted(async () => {
   await repoStore.loadRepos();
-  orgPermissions.value = await apiClient.getOrgPermissions(props.repoOwner);
+  orgPermissions.value = await apiClient.getOrgPermissions(orgName.value);
 });
 </script>

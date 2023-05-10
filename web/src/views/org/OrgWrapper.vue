@@ -27,10 +27,10 @@ import useApiClient from '~/compositions/useApiClient';
 import { Org, OrgPermissions } from '~/lib/api/types';
 
 const props = defineProps<{
-  ownerOrOrgId: string;
+  orgName: string;
 }>();
 
-const ownerOrOrgId = toRef(props, 'ownerOrOrgId');
+const orgName = toRef(props, 'orgName');
 const apiClient = useApiClient();
 
 const org = ref<Org>();
@@ -39,19 +39,14 @@ provide('org', org);
 provide('org-permissions', orgPermissions);
 
 async function load() {
-  if (ownerOrOrgId.value.match(/^[0-9]+$/)) {
-    org.value = await apiClient.getOrgById(Number(ownerOrOrgId.value));
-  } else {
-    org.value = { name: ownerOrOrgId.value };
-  }
-  orgPermissions.value = await apiClient.getOrgPermissions(ownerOrOrgId.value);
+  orgPermissions.value = await apiClient.getOrgPermissions(orgName.value);
 }
 
 onMounted(() => {
   load();
 });
 
-watch([ownerOrOrgId], () => {
+watch([orgName], () => {
   load();
 });
 </script>

@@ -2,7 +2,7 @@
   <Scaffold enable-tabs :go-back="goBack">
     <template #title>
       <span>
-        <router-link :to="{ name: 'org', params: { ownerOrOrgId: repo.owner } }" class="hover:underline">
+        <router-link :to="{ name: 'org', params: { orgName: repo.owner } }" class="hover:underline">
           {{ repo.owner }}
         </router-link>
         /

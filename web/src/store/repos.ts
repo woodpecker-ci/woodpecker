@@ -8,11 +8,11 @@ export const useRepoStore = defineStore('repos', () => {
   const apiClient = useApiClient();
 
   const repos: Map<number, Repo> = reactive(new Map());
-  const ownedRepoSlugs = ref<number[]>([]);
+  const ownedRepoIds = ref<number[]>([]);
 
   const ownedRepos = computed(() =>
     Array.from(repos.entries())
-      .filter(([repoId]) => ownedRepoSlugs.value.includes(repoId))
+      .filter(([repoId]) => ownedRepoIds.value.includes(repoId))
       .map(([, repo]) => repo),
   );
 
@@ -35,13 +35,13 @@ export const useRepoStore = defineStore('repos', () => {
     _ownedRepos.forEach((repo) => {
       repos.set(repo.id, repo);
     });
-    ownedRepoSlugs.value = _ownedRepos.map((repo) => repo.id);
+    ownedRepoIds.value = _ownedRepos.map((repo) => repo.id);
   }
 
   return {
     repos,
     ownedRepos,
-    ownedRepoSlugs,
+    ownedRepoIds,
     getRepo,
     setRepo,
     loadRepo,

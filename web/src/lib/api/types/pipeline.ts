@@ -125,5 +125,5 @@ export type PipelineLog = {
 };
 
 export type PipelineFeed = Pipeline & {
-  repo: number; // repo id
+  repo_id: number;
 };

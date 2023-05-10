@@ -43,7 +43,6 @@ const routes: RouteRecordRaw[] = [
             name: 'repo-branches',
             component: (): Component => import('~/views/repo/RepoBranches.vue'),
             meta: { repoHeader: true },
-            props: (route) => ({ branch: route.params.branch }),
           },
           {
             path: 'branches/:branch',
@@ -57,7 +56,6 @@ const routes: RouteRecordRaw[] = [
             name: 'repo-pull-requests',
             component: (): Component => import('~/views/repo/RepoPullRequests.vue'),
             meta: { repoHeader: true },
-            props: (route) => ({ pullRequest: route.params.pullRequest }),
           },
           {
             path: 'pull-requests/:pullRequest',
@@ -107,7 +105,7 @@ const routes: RouteRecordRaw[] = [
     ],
   },
   {
-    path: '/org/:ownerOrOrgId',
+    path: '/org/:orgName',
     component: (): Component => import('~/views/org/OrgWrapper.vue'),
     props: true,
     children: [

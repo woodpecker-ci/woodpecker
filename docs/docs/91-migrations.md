@@ -18,9 +18,10 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Dropped support for [Coding](https://coding.net/).
 - `/api/queue/resume` & `/api/queue/pause` endpoint methods were changed from `GET` to `POST`
 - Dropped `WOODPECKER_GOGS_PRIVATE_MODE` (use `WOODPECKER_AUTHENTICATE_PUBLIC_REPOS`)
-- Using `repo-id` in favor of `owner/repo`
-  - :warning: The api endpoints `/api/repos/{owner}/{repo}/...` were replaced by new endpoints using the repos id `/api/repos/{repo-id}`. To get the id of a repo use the `/api/repos/lookup/{repo-full-name-with-slashes}` endpoint.
-  - The badges endpoint `/api/badges/{owner}/{repo}` is now deprecated and will be removed with the next release. Use the new endpoint using the `repo-id`: `/api/badges/{repo-id}`. To get the id of a repo use the `/api/repos/lookup/{repo-full-name-with-slashes}` endpoint.
+- Using `repo-id` in favor of `owner/repo` combination
+  - :warning: The api endpoints `/api/repos/{owner}/{repo}/...` were replaced by new endpoints using the repos id `/api/repos/{repo-id}`
+  - To get the id of a repo use the `/api/repos/lookup/{repo-full-name-with-slashes}` endpoint.
+  - The badges endpoint `/api/badges/{owner}/{repo}` is now deprecated and will be removed in a future release. Use the new endpoint using the `repo-id`: `/api/badges/{repo-id}`.
   - The UI urls for a repository changed from `/repos/{owner}/{repo}/...` to `/repos/{repo-id}/...`. You will be redirected automatically when using the old url. This redirect will be removed in a future release.
   - The woodpecker-go api-client is now using the `repo-id` instead of `owner/repo` for all functions
 
