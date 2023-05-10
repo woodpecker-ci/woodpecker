@@ -5,6 +5,7 @@ import (
 	"crypto/x509"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/rs/zerolog/log"
@@ -76,15 +77,12 @@ func NewClient(c *cli.Context) (woodpecker.Client, error) {
 }
 
 // ParseRepo parses the repository owner and name from a string.
-func ParseRepo(str string) (user, repo string, err error) {
-	parts := strings.Split(str, "/")
-	if len(parts) != 2 {
-		err = fmt.Errorf("Error: Invalid or missing repository. eg octocat/hello-world")
-		return
+func ParseRepo(client woodpecker.Client, str string) (repoID int64, err error) {
+	if strings.Contains(str, "/") {
+		return client.RepoLookup(str)
 	}
-	user = parts[0]
-	repo = parts[1]
-	return
+
+	return strconv.ParseInt(str, 10, 64)
 }
 
 // ParseKeyPair parses a key=value pair.

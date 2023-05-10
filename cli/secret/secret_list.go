@@ -15,7 +15,7 @@ import (
 var secretListCmd = &cli.Command{
 	Name:      "ls",
 	Usage:     "list secrets",
-	ArgsUsage: "[org/name|org]",
+	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    secretList,
 	Flags: append(common.GlobalFlags,
 		&cli.BoolFlag{
@@ -39,7 +39,7 @@ func secretList(c *cli.Context) error {
 		return err
 	}
 
-	global, owner, repo, err := parseTargetArgs(c)
+	global, owner, repoID, err := parseTargetArgs(client, c)
 	if err != nil {
 		return err
 	}
@@ -50,13 +50,13 @@ func secretList(c *cli.Context) error {
 		if err != nil {
 			return err
 		}
-	} else if repo == "" {
+	} else if owner != "" {
 		list, err = client.OrgSecretList(owner)
 		if err != nil {
 			return err
 		}
 	} else {
-		list, err = client.SecretList(owner, repo)
+		list, err = client.SecretList(repoID)
 		if err != nil {
 			return err
 		}

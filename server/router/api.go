@@ -133,7 +133,7 @@ func apiRoutes(e *gin.Engine) {
 			}
 		}
 
-		apiBase.GET("/repos/lookup/:owner/:name", api.LookupRepo) // TODO: check if this public route is a security issue
+		apiBase.GET("/repos/lookup/*repo_full_name", api.LookupRepo) // TODO: check if this public route is a security issue
 		apiBase.POST("/repos", session.MustUser(), api.PostRepo)
 		repoRoutes(apiBase.Group("/repos/:repo_id"))
 

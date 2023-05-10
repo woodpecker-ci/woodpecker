@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -209,10 +210,9 @@ func ChownRepo(c *gin.Context) {
 
 func LookupRepo(c *gin.Context) {
 	_store := store.FromContext(c)
-	owner := c.Param("owner")
-	name := c.Param("name")
+	repoFullName := strings.TrimLeft(c.Param("repo_full_name"), "/")
 
-	repo, err := _store.GetRepoName(owner + "/" + name)
+	repo, err := _store.GetRepoName(repoFullName)
 	if err != nil {
 		if errors.Is(err, types.RecordNotExist) {
 			c.AbortWithStatus(http.StatusNotFound)

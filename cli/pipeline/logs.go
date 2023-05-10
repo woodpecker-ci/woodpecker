@@ -27,14 +27,18 @@ import (
 var pipelineLogsCmd = &cli.Command{
 	Name:      "logs",
 	Usage:     "show pipeline logs",
-	ArgsUsage: "<repo/name> [pipeline] [step]",
+	ArgsUsage: "<repo-id|repo-full-name> [pipeline] [step]",
 	Action:    pipelineLogs,
 	Flags:     common.GlobalFlags,
 }
 
 func pipelineLogs(c *cli.Context) error {
-	repo := c.Args().First()
-	owner, name, err := internal.ParseRepo(repo)
+	repoIDOrFullName := c.Args().First()
+	client, err := internal.NewClient(c)
+	if err != nil {
+		return err
+	}
+	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
 	if err != nil {
 		return err
 	}
@@ -49,12 +53,7 @@ func pipelineLogs(c *cli.Context) error {
 		return err
 	}
 
-	client, err := internal.NewClient(c)
-	if err != nil {
-		return err
-	}
-
-	logs, err := client.PipelineLogs(owner, name, number, step)
+	logs, err := client.PipelineLogs(repoID, number, step)
 	if err != nil {
 		return err
 	}

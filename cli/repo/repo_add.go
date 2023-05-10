@@ -2,6 +2,7 @@ package repo
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/urfave/cli/v2"
 
@@ -12,16 +13,16 @@ import (
 var repoAddCmd = &cli.Command{
 	Name:      "add",
 	Usage:     "add a repository",
-	ArgsUsage: "<repo/name>",
+	ArgsUsage: "<forge-remote-id>",
 	Action:    repoAdd,
 	Flags:     common.GlobalFlags,
 }
 
 func repoAdd(c *cli.Context) error {
-	repo := c.Args().First()
-	owner, name, err := internal.ParseRepo(repo)
+	_forgeRemoteID := c.Args().First()
+	forgeRemoteID, err := strconv.Atoi(_forgeRemoteID)
 	if err != nil {
-		return err
+		return fmt.Errorf("invalid forge remote id: %s", _forgeRemoteID)
 	}
 
 	client, err := internal.NewClient(c)
@@ -29,9 +30,11 @@ func repoAdd(c *cli.Context) error {
 		return err
 	}
 
-	if _, err := client.RepoPost(owner, name); err != nil {
+	repo, err := client.RepoPost(int64(forgeRemoteID))
+	if err != nil {
 		return err
 	}
-	fmt.Printf("Successfully activated repository %s/%s\n", owner, name)
+
+	fmt.Printf("Successfully activated repository with forge remote %d\n", repo.FullName)
 	return nil
 }
