@@ -8,7 +8,7 @@ require (
 	github.com/bmatcuk/doublestar/v4 v4.0.2
 	github.com/docker/cli v20.10.12+incompatible
 	github.com/docker/distribution v2.8.0+incompatible
-	github.com/docker/docker v20.10.12+incompatible
+	github.com/docker/docker v20.10.24+incompatible
 	github.com/docker/go-units v0.4.0
 	github.com/drone/envsubst v1.0.3
 	github.com/flynn/go-shlex v0.0.0-20150515145356-3f9db97f8568

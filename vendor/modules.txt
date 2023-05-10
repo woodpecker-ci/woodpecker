@@ -80,7 +80,6 @@ github.com/charithe/durationcheck
 github.com/chavacava/garif
 # github.com/containerd/containerd v1.6.6
 ## explicit; go 1.17
-github.com/containerd/containerd/errdefs
 # github.com/cpuguy83/go-md2man/v2 v2.0.1
 ## explicit; go 1.11
 github.com/cpuguy83/go-md2man/v2/md2man
@@ -109,8 +108,7 @@ github.com/docker/cli/cli/config/types
 ## explicit
 github.com/docker/distribution/digestset
 github.com/docker/distribution/reference
-github.com/docker/distribution/registry/api/errcode
-# github.com/docker/docker v20.10.12+incompatible
+# github.com/docker/docker v20.10.24+incompatible
 ## explicit
 github.com/docker/docker/api
 github.com/docker/docker/api/types
