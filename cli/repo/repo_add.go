@@ -35,6 +35,6 @@ func repoAdd(c *cli.Context) error {
 		return err
 	}
 
-	fmt.Printf("Successfully activated repository with forge remote %d\n", repo.FullName)
+	fmt.Printf("Successfully activated repository with forge remote %s\n", repo.FullName)
 	return nil
 }
