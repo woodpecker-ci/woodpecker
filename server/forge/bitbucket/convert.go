@@ -118,11 +118,12 @@ func cloneLink(repo *internal.Repo) string {
 // structure to the Woodpecker User structure.
 func convertUser(from *internal.Account, token *oauth2.Token) *model.User {
 	return &model.User{
-		Login:  from.Login,
-		Token:  token.AccessToken,
-		Secret: token.RefreshToken,
-		Expiry: token.Expiry.UTC().Unix(),
-		Avatar: from.Links.Avatar.Href,
+		Login:         from.Login,
+		Token:         token.AccessToken,
+		Secret:        token.RefreshToken,
+		Expiry:        token.Expiry.UTC().Unix(),
+		Avatar:        from.Links.Avatar.Href,
+		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(from.ID)),
 	}
 }
 

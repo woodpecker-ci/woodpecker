@@ -34,6 +34,8 @@ type User struct {
 	// required: true
 	ID int64 `json:"id" xorm:"pk autoincr 'user_id'"`
 
+	ForgeRemoteID ForgeRemoteID `json:"-" xorm:"forge_remote_id"`
+
 	// Login is the username for this user.
 	//
 	// required: true
