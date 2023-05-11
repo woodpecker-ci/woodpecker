@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.15.9](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.9) - 2023-05-11
+
+* SECURITY
+  * Backport securitycheck and bump deps where needed (#1745)
+
 ## [0.15.8](https://github.com/woodpecker-ci/woodpecker/releases/tag/0.15.8) - 2023-04-29
 
 * BUGFIXES
