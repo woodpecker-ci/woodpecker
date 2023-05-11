@@ -103,6 +103,11 @@
       "name": "Woodpecker Feishu Bot",
       "docs": "https://github.com/wenerme/wode/raw/main/apps/woodpecker-feishu-bot/README.md",
       "verified": false
+    },
+    {
+      "name": "ntfy",
+      "docs": "https://codeberg.org/l-x/woodpecker-ntfy/raw/branch/main/docs.md",
+      "verified": false
     }
   ]
 }
