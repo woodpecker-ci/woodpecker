@@ -57,6 +57,12 @@ var flags = []cli.Flag{
 		Value:   ":8000",
 	},
 	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_SERVER_ADDR_TLS"},
+		Name:    "server-addr-tls",
+		Usage:   "port https with tls (:443)",
+		Value:   ":443",
+	},
+	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_SERVER_CERT"},
 		Name:    "server-cert",
 		Usage:   "server ssl cert path",
