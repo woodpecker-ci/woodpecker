@@ -129,10 +129,11 @@ func (c *client) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 	}
 
 	return &model.User{
-		Login:  *user.Login,
-		Email:  *email.Email,
-		Token:  token.AccessToken,
-		Avatar: *user.AvatarURL,
+		Login:         user.GetLogin(),
+		Email:         email.GetEmail(),
+		Token:         token.AccessToken,
+		Avatar:        user.GetAvatarURL(),
+		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(user.GetID())),
 	}, nil
 }
 
