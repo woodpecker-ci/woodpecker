@@ -65,19 +65,22 @@
           <TextField v-model="selectedRegistry.password" :placeholder="$t('password')" required />
         </InputField>
 
-        <Button
-          type="submit"
-          color="green"
-          :is-loading="isSaving"
-          :text="isEditingRegistry ? $t('repo.settings.registries.save') : $t('repo.settings.registries.add')"
-        />
+        <div class="flex gap-2">
+          <Button type="button" color="gray" :text="$t('cancel')" @click="selectedRegistry = undefined" />
+          <Button
+            type="submit"
+            color="green"
+            :is-loading="isSaving"
+            :text="isEditingRegistry ? $t('repo.settings.registries.save') : $t('repo.settings.registries.add')"
+          />
+        </div>
       </form>
     </div>
   </Panel>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, onMounted, Ref, ref } from 'vue';
+import { computed, defineComponent, inject, Ref, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
@@ -90,6 +93,7 @@ import Panel from '~/components/layout/Panel.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
+import { usePagination } from '~/compositions/usePaginate';
 import { Repo } from '~/lib/api/types';
 import { Registry } from '~/lib/api/types/registry';
 
@@ -112,17 +116,18 @@ export default defineComponent({
     const i18n = useI18n();
 
     const repo = inject<Ref<Repo>>('repo');
-    const registries = ref<Registry[]>();
     const selectedRegistry = ref<Partial<Registry>>();
     const isEditingRegistry = computed(() => !!selectedRegistry.value?.id);
 
-    async function loadRegistries() {
+    async function loadRegistries(page: number): Promise<Registry[] | null> {
       if (!repo?.value) {
         throw new Error("Unexpected: Can't load repo");
       }
 
-      registries.value = await apiClient.getRegistryList(repo.value.owner, repo.value.name);
+      return apiClient.getRegistryList(repo.value.owner, repo.value.name, page);
     }
+
+    const { resetPage, data: registries } = usePagination(loadRegistries, () => !selectedRegistry.value);
 
     const { doSubmit: createRegistry, isLoading: isSaving } = useAsyncAction(async () => {
       if (!repo?.value) {
@@ -145,7 +150,7 @@ export default defineComponent({
         type: 'success',
       });
       selectedRegistry.value = undefined;
-      await loadRegistries();
+      resetPage();
     });
 
     const { doSubmit: deleteRegistry, isLoading: isDeleting } = useAsyncAction(async (_registry: Registry) => {
@@ -156,11 +161,7 @@ export default defineComponent({
       const registryAddress = encodeURIComponent(_registry.address);
       await apiClient.deleteRegistry(repo.value.owner, repo.value.name, registryAddress);
       notifications.notify({ title: i18n.t('repo.settings.registries.deleted'), type: 'success' });
-      await loadRegistries();
-    });
-
-    onMounted(async () => {
-      await loadRegistries();
+      resetPage();
     });
 
     return { selectedRegistry, registries, isEditingRegistry, isSaving, isDeleting, createRegistry, deleteRegistry };

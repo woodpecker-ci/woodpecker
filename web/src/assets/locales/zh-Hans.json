@@ -27,10 +27,15 @@
       "settings": "设置"
     }
   },
+  "back": "返回",
+  "cancel": "取消",
   "color_scheme_dark": "切换到浅色模式",
   "color_scheme_light": "切换到深色模式",
   "docs": "文档",
   "documentation_for": "\"{topic}\"的文档",
+  "errors": {
+    "not_found": "服务器找不到请求的对象"
+  },
   "login": "登录",
   "logout": "退出登录",
   "not_found": {
@@ -213,7 +218,6 @@
         "general": "基本设置",
         "pipeline_path": {
           "default": "默认: .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml",
-          "desc": "流水线配置文件的路径 (例子: <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">my/path/</span>)。目录必须以 <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">/</span> 结尾.",
           "path": "流水线路径"
         },
         "project": "项目设置",

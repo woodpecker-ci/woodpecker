@@ -1,10 +1,31 @@
+// Copyright 2021 Woodpecker Authors
+// Copyright 2011 Drone.IO Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 syntax = "proto3";
 
 option go_package = "github.com/woodpecker-ci/woodpecker/pipeline/rpc/proto";
 package proto;
 
+// !IMPORTANT!
+// Increased Version in version.go by 1 if you change something here!
+// !IMPORTANT!
+
+// Woodpecker Server Service
 service Woodpecker {
-  rpc Next          (NextRequest)          returns (NextReply) {}
+  rpc Version       (Empty)                returns (VersionResponse) {}
+  rpc Next          (NextRequest)          returns (NextResponse) {}
   rpc Init          (InitRequest)          returns (Empty) {}
   rpc Wait          (WaitRequest)          returns (Empty) {}
   rpc Done          (DoneRequest)          returns (Empty) {}
@@ -15,6 +36,10 @@ service Woodpecker {
   rpc RegisterAgent (RegisterAgentRequest) returns (RegisterAgentResponse) {}
   rpc ReportHealth  (ReportHealthRequest)  returns (Empty) {}
 }
+
+//
+// Basic Types
+//
 
 message File {
   string name = 1;
@@ -52,12 +77,12 @@ message Pipeline {
   bytes payload = 3;
 }
 
+//
+// Request types
+//
+
 message NextRequest {
   Filter filter = 1;
-}
-
-message NextReply {
-  Pipeline pipeline = 1;
 }
 
 message InitRequest {
@@ -107,6 +132,19 @@ message RegisterAgentRequest {
   string version  = 4;
 }
 
+//
+// Response types
+//
+
+message VersionResponse {
+  int32  grpc_version   = 1;
+  string server_version = 2;
+}
+
+message NextResponse {
+  Pipeline pipeline = 1;
+}
+
 message RegisterAgentResponse {
   int64 agent_id = 1;
 }
@@ -114,7 +152,7 @@ message RegisterAgentResponse {
 // Woodpecker auth service is a simple service to authenticate agents and aquire a token
 
 service WoodpeckerAuth {
-  rpc Auth          (AuthRequest)          returns (AuthReply) {}
+  rpc Auth          (AuthRequest)          returns (AuthResponse) {}
 }
 
 message AuthRequest {
@@ -122,7 +160,7 @@ message AuthRequest {
   int64  agent_id    = 2;
 }
 
-message AuthReply {
+message AuthResponse {
   string status        = 1;
   int64  agent_id      = 2;
   string access_token  = 3;

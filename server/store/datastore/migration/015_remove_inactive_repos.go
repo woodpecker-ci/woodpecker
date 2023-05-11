@@ -1,5 +1,4 @@
 // Copyright 2022 Woodpecker Authors
-// Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,19 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package coding
+package migration
 
 import (
-	"testing"
-
-	"github.com/franela/goblin"
+	"xorm.io/xorm"
 )
 
-func Test_util(t *testing.T) {
-	g := goblin.Goblin(t)
-	g.Describe("Coding util", func() {
-		g.It("Should form project full name", func() {
-			g.Assert(projectFullName("gk", "prj")).Equal("gk/prj")
-		})
-	})
+var removeInactiveRepos = task{
+	name:     "remove-inactive-repos",
+	required: true,
+	fn: func(sess *xorm.Session) error {
+		// If the timeout is 0, the repo was never activated, so we remove it.
+		_, err := sess.Table("repos").Where("repo_active = ?", false).And("repo_timeout = ?", 0).Delete()
+		if err != nil {
+			return err
+		}
+
+		return dropTableColumns(sess, "users", "user_synced")
+	},
 }

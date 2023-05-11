@@ -1,3 +1,4 @@
+// Copyright 2023 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +18,8 @@ package main
 import (
 	"context"
 	"crypto/tls"
+	"errors"
+	"fmt"
 	"net/http"
 	"os"
 	"runtime"
@@ -29,10 +32,12 @@ import (
 	"github.com/tevino/abool"
 	"github.com/urfave/cli/v2"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	grpccredentials "google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 
 	"github.com/woodpecker-ci/woodpecker/agent"
 	agentRpc "github.com/woodpecker-ci/woodpecker/agent/rpc"
@@ -43,28 +48,13 @@ import (
 	"github.com/woodpecker-ci/woodpecker/version"
 )
 
-func loop(c *cli.Context) error {
+func run(c *cli.Context) error {
 	hostname := c.String("hostname")
 	if len(hostname) == 0 {
 		hostname, _ = os.Hostname()
 	}
 
 	platform := runtime.GOOS + "/" + runtime.GOARCH
-
-	labels := map[string]string{
-		"hostname": hostname,
-		"platform": platform,
-		"repo":     "*", // allow all repos by default
-	}
-
-	for _, v := range c.StringSlice("filter") {
-		parts := strings.SplitN(v, "=", 2)
-		labels[parts[0]] = parts[1]
-	}
-
-	filter := rpc.Filter{
-		Labels: labels,
-	}
 
 	if c.Bool("pretty") {
 		log.Logger = log.Output(
@@ -154,14 +144,30 @@ func loop(c *cli.Context) error {
 		sigterm.Set()
 	})
 
-	backend.Init(context.WithValue(ctx, types.CliContext, c))
+	// check if grpc server version is compatible with agent
+	grpcServerVersion, err := client.Version(ctx)
+	if err != nil {
+		log.Error().Err(err).Msg("could not get grpc server version")
+		return err
+	}
+	if grpcServerVersion.GrpcVersion != agentRpc.ClientGrpcVersion {
+		err := errors.New("GRPC version mismatch")
+		log.Error().Err(err).Msgf("Server version %s does report grpc version %d but we only understand %d",
+			grpcServerVersion.ServerVersion,
+			grpcServerVersion.GrpcVersion,
+			agentRpc.ClientGrpcVersion)
+		return err
+	}
+
+	backendCtx := context.WithValue(ctx, types.CliContext, c)
+	backend.Init(backendCtx)
 
 	var wg sync.WaitGroup
 	parallel := c.Int("max-workflows")
 	wg.Add(parallel)
 
 	// new engine
-	engine, err := backend.FindEngine(c.String("backend-engine"))
+	engine, err := backend.FindEngine(backendCtx, c.String("backend-engine"))
 	if err != nil {
 		log.Error().Err(err).Msgf("cannot find backend engine '%s'", c.String("backend-engine"))
 		return err
@@ -170,6 +176,21 @@ func loop(c *cli.Context) error {
 	agentID, err = client.RegisterAgent(ctx, platform, engine.Name(), version.String(), parallel)
 	if err != nil {
 		return err
+	}
+
+	labels := map[string]string{
+		"hostname": hostname,
+		"platform": platform,
+		"backend":  engine.Name(),
+		"repo":     "*", // allow all repos by default
+	}
+
+	if err := stringSliceAddToMap(c.StringSlice("filter"), labels); err != nil {
+		return err
+	}
+
+	filter := rpc.Filter{
+		Labels: labels,
 	}
 
 	log.Debug().Msgf("Agent registered with ID %d", agentID)
@@ -195,7 +216,7 @@ func loop(c *cli.Context) error {
 			defer wg.Done()
 
 			// load engine (e.g. init api client)
-			err = engine.Load()
+			err = engine.Load(backendCtx)
 			if err != nil {
 				log.Error().Err(err).Msg("cannot load backend engine")
 				return
@@ -224,5 +245,38 @@ func loop(c *cli.Context) error {
 		version.String(), engine.Name(), platform, parallel)
 
 	wg.Wait()
+	return nil
+}
+
+func runWithRetry(context *cli.Context) error {
+	retryCount := context.Int("connect-retry-count")
+	retryDelay := context.Duration("connect-retry-delay")
+	var err error
+	for i := 0; i < retryCount; i++ {
+		if err = run(context); status.Code(err) == codes.Unavailable {
+			log.Warn().Err(err).Msg(fmt.Sprintf("cannot connect to server, retrying in %v", retryDelay))
+			time.Sleep(retryDelay)
+		} else {
+			break
+		}
+	}
+	return err
+}
+
+func stringSliceAddToMap(sl []string, m map[string]string) error {
+	if m == nil {
+		m = make(map[string]string)
+	}
+	for _, v := range sl {
+		parts := strings.SplitN(v, "=", 2)
+		switch len(parts) {
+		case 2:
+			m[parts[0]] = parts[1]
+		case 1:
+			return fmt.Errorf("key '%s' does not have a value assigned", parts[0])
+		default:
+			return fmt.Errorf("empty string in slice")
+		}
+	}
 	return nil
 }

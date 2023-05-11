@@ -22,15 +22,16 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/securecookie"
 
+	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
 func GetAgents(c *gin.Context) {
-	agents, err := store.FromContext(c).AgentList()
+	agents, err := store.FromContext(c).AgentList(session.Pagination(c))
 	if err != nil {
-		c.String(500, "Error getting agent list. %s", err)
+		c.String(http.StatusInternalServerError, "Error getting agent list. %s", err)
 		return
 	}
 	c.JSON(http.StatusOK, agents)
@@ -45,10 +46,34 @@ func GetAgent(c *gin.Context) {
 
 	agent, err := store.FromContext(c).AgentFind(agentID)
 	if err != nil {
-		c.String(http.StatusNotFound, "Cannot find agent. %s", err)
+		handleDbGetError(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, agent)
+}
+
+func GetAgentTasks(c *gin.Context) {
+	agentID, err := strconv.ParseInt(c.Param("agent"), 10, 64)
+	if err != nil {
+		_ = c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	agent, err := store.FromContext(c).AgentFind(agentID)
+	if err != nil {
+		c.String(http.StatusNotFound, "Cannot find agent. %s", err)
+		return
+	}
+
+	var tasks []*model.Task
+	info := server.Config.Services.Queue.Info(c)
+	for _, task := range info.Running {
+		if task.AgentID == agent.ID {
+			tasks = append(tasks, task)
+		}
+	}
+
+	c.JSON(http.StatusOK, tasks)
 }
 
 func PatchAgent(c *gin.Context) {
@@ -69,7 +94,7 @@ func PatchAgent(c *gin.Context) {
 
 	agent, err := _store.AgentFind(agentID)
 	if err != nil {
-		c.AbortWithStatus(http.StatusNotFound)
+		handleDbGetError(c, err)
 		return
 	}
 	agent.Name = in.Name
@@ -121,12 +146,12 @@ func DeleteAgent(c *gin.Context) {
 
 	agent, err := _store.AgentFind(agentID)
 	if err != nil {
-		c.String(http.StatusNotFound, "Cannot find user. %s", err)
+		handleDbGetError(c, err)
 		return
 	}
 	if err = _store.AgentDelete(agent); err != nil {
 		c.String(http.StatusInternalServerError, "Error deleting user. %s", err)
 		return
 	}
-	c.String(http.StatusOK, "")
+	c.String(http.StatusNoContent, "")
 }

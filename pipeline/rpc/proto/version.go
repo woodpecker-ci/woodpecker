@@ -1,4 +1,4 @@
-// Copyright 2018 Drone.IO Inc.
+// Copyright 2023 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,18 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package internal
+package proto
 
-import (
-	"fmt"
-)
-
-type APIClientErr struct {
-	Message string
-	URL     string
-	Cause   error
-}
-
-func (e APIClientErr) Error() string {
-	return fmt.Sprintf("%s (Requested %s): %v", e.Message, e.URL, e.Cause)
-}
+// Version is the version of the woodpecker.proto file,
+// !IMPORTANT! increased by 1 each time it get changed !IMPORTANT!
+const Version int32 = 1

@@ -43,7 +43,7 @@ func (s storage) StepChild(pipeline *model.Pipeline, ppid int, child string) (*m
 }
 
 func (s storage) StepList(pipeline *model.Pipeline) ([]*model.Step, error) {
-	stepList := make([]*model.Step, 0, perPage)
+	stepList := make([]*model.Step, 0)
 	return stepList, s.engine.
 		Where("step_pipeline_id = ?", pipeline.ID).
 		OrderBy("step_pid").

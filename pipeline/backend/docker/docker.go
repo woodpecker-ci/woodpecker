@@ -18,7 +18,6 @@ import (
 	"context"
 	"io"
 	"os"
-	"strconv"
 	"strings"
 
 	"github.com/docker/docker/api/types"
@@ -29,6 +28,7 @@ import (
 	"github.com/moby/moby/pkg/stdcopy"
 	"github.com/moby/term"
 	"github.com/rs/zerolog/log"
+	"github.com/urfave/cli/v2"
 
 	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/shared/utils"
@@ -41,9 +41,6 @@ type docker struct {
 	volumes    []string
 }
 
-// make sure docker implements Engine
-var _ backend.Engine = &docker{}
-
 // New returns a new Docker Engine.
 func New() backend.Engine {
 	return &docker{
@@ -55,7 +52,7 @@ func (e *docker) Name() string {
 	return "docker"
 }
 
-func (e *docker) IsAvailable() bool {
+func (e *docker) IsAvailable(context.Context) bool {
 	if os.Getenv("DOCKER_HOST") != "" {
 		return true
 	}
@@ -64,18 +61,22 @@ func (e *docker) IsAvailable() bool {
 }
 
 // Load new client for Docker Engine using environment variables.
-func (e *docker) Load() error {
-	cli, err := client.NewClientWithOpts(client.FromEnv)
+func (e *docker) Load(ctx context.Context) error {
+	cl, err := client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
 		return err
 	}
-	e.client = cli
+	e.client = cl
 
-	e.enableIPv6, _ = strconv.ParseBool(os.Getenv("WOODPECKER_BACKEND_DOCKER_ENABLE_IPV6"))
+	c, ok := ctx.Value(backend.CliContext).(*cli.Context)
+	if !ok {
+		return backend.ErrNoCliContextFound
+	}
+	e.enableIPv6 = c.Bool("backend-docker-ipv6")
 
-	e.network = os.Getenv("WOODPECKER_BACKEND_DOCKER_NETWORK")
+	e.network = c.String("backend-docker-network")
 
-	volumes := strings.Split(os.Getenv("WOODPECKER_BACKEND_DOCKER_VOLUMES"), ",")
+	volumes := strings.Split(c.String("backend-docker-volumes"), ",")
 	e.volumes = make([]string, 0, len(volumes))
 	// Validate provided volume definitions
 	for _, v := range volumes {
@@ -95,7 +96,7 @@ func (e *docker) Load() error {
 
 func (e *docker) Setup(_ context.Context, conf *backend.Config) error {
 	for _, vol := range conf.Volumes {
-		_, err := e.client.VolumeCreate(noContext, volume.VolumeCreateBody{
+		_, err := e.client.VolumeCreate(noContext, volume.CreateOptions{
 			Name:       vol.Name,
 			Driver:     vol.Driver,
 			DriverOpts: vol.DriverOpts,
@@ -226,7 +227,6 @@ func (e *docker) Tail(ctx context.Context, step *backend.Step) (io.ReadCloser, e
 		_, _ = stdcopy.StdCopy(wc, wc, logs)
 		_ = logs.Close()
 		_ = wc.Close()
-		_ = rc.Close()
 	}()
 	return rc, nil
 }

@@ -1,11 +1,72 @@
 {
   "admin": {
     "settings": {
+      "agents": {
+        "add": "Dodaj agenta",
+        "agents": "Agenty",
+        "backend": {
+          "backend": "Backend",
+          "badge": "backend"
+        },
+        "capacity": {
+          "badge": "pojemność",
+          "capacity": "Pojemność",
+          "desc": "Maksymalna ilość równoległych potoków wykonywanych przez tego agenta."
+        },
+        "created": "Utworzono agenta",
+        "delete_agent": "Usuń agenta",
+        "delete_confirm": "Czy na pewno chcesz usunąć tego agenta? Nie będzie można go więcej połączyć z serwerem.",
+        "deleted": "Usunięto agenta",
+        "desc": "Agenty zarejestrowane na tym serwerze",
+        "edit_agent": "Agent prowadzący",
+        "last_contact": "Ostatni kontakt",
+        "name": {
+          "name": "Nazwa",
+          "placeholder": "Nazwa agenta"
+        },
+        "never": "Nigdy",
+        "no_schedule": {
+          "name": "Dezaktywuj agenta",
+          "placeholder": "Nie pozwalaj agentowi brać nowych zadań"
+        },
+        "none": "Nie ma jeszcze żadnego agenta.",
+        "platform": {
+          "badge": "platforma",
+          "platform": "Platforma"
+        },
+        "save": "Zapisz agenta",
+        "saved": "Zapisano agenta",
+        "show": "Pokaż agenty",
+        "token": "Token",
+        "version": "Wersja"
+      },
       "not_allowed": "Nie masz pozwolenia na dostęp do ustawień serwera",
+      "queue": {
+        "agent": "agentka",
+        "desc": "Zadania oczekujące na wykonanie przez agentów",
+        "pause": "Pauza",
+        "paused": "Kolejka jest wstrzymana",
+        "queue": "Kolejka",
+        "resume": "Rezonans",
+        "resumed": "Kolejka jest wznowiona",
+        "stats": {
+          "completed_count": "Zadania zakończone",
+          "pending_count": "W trakcie realizacji",
+          "running_count": "Prowadzenie",
+          "waiting_on_deps_count": "Czekanie na zależności",
+          "worker_count": "Bezpłatnie"
+        },
+        "task_pending": "Zadanie jest w toku",
+        "task_running": "Zadanie jest w toku",
+        "task_waiting_on_deps": "Zadanie oczekuje na zależności",
+        "tasks": "Zadania",
+        "waiting_for": "czekając na"
+      },
       "secrets": {
         "add": "Dodaj sekret",
         "created": "Dodano sekret globalny",
         "deleted": "Usunięto sekret globalny",
+        "desc": "Globalne sekrety mogą być przekazane jako zmienne środowiskowe do poszczególnych kroków potoku wszystkich repozytoriów.",
         "events": {
           "events": "Dostępny dla wybranych zdarzeń",
           "pr_warning": "Używaj tej opcji ostrożnie, osoba atakująca może złożyć szkodliwy pull request który ujawni twoje sekrety."
@@ -24,14 +85,40 @@
         "value": "Wartość",
         "warning": "Te sekrety będą dostępne dla wszystkich użytkowników serwera."
       },
-      "settings": "Ustawienia"
+      "settings": "Ustawienia",
+      "users": {
+        "add": "Dodaj użytkownika",
+        "admin": {
+          "admin": "Administrator",
+          "placeholder": "Użytkownik jest adminem"
+        },
+        "avatar_url": "Adres URL awatara",
+        "cancel": "Anuluj",
+        "created": "Użytkownik utworzony",
+        "delete_confirm": "Czy naprawdę chcesz usunąć tego użytkownika?",
+        "delete_user": "Usuń użytkownika",
+        "deleted": "Użytkownik usunięty",
+        "desc": "Użytkownicy zarejestrowani na tym kanale",
+        "edit_user": "Edytuj użytkownika",
+        "email": "Email",
+        "login": "Logowanie",
+        "none": "Nie ma jeszcze użytkowników.",
+        "save": "Zapisz użytkownika",
+        "saved": "Użytkownik zapisany",
+        "show": "Pokaż użytkowników",
+        "users": "Użytkownicy"
+      }
     }
   },
   "back": "Powrót",
+  "cancel": "Anuluj",
   "color_scheme_dark": "Przełącz na tryb jasny",
   "color_scheme_light": "Przełącz na tryb ciemny",
   "docs": "Dokumentacja",
   "documentation_for": "Dokumentacja do tematu \"{topic}\"",
+  "errors": {
+    "not_found": "Serwer nie mógł znaleźć żądanego obiektu"
+  },
   "login": "Zaloguj",
   "logout": "Wyloguj",
   "not_found": {
@@ -45,6 +132,7 @@
         "add": "Dodaj sekret",
         "created": "Dodano sekret organizacji",
         "deleted": "Usunięto sekret organizacji",
+        "desc": "Sekrety organizacji mogą być przekazane jako zmienne środowiskowe do poszczególnych kroków potoku wszystkich repozytoriów tej organizacji.",
         "events": {
           "events": "Dostępny dla wybranych zdarzeń",
           "pr_warning": "Używaj tej opcji ostrożnie, osoba atakująca może złożyć szkodliwy pull request który ujawni twoje sekrety."
@@ -72,6 +160,9 @@
     "add": "Dodaj repozytorium",
     "branches": "Gałęzie",
     "deploy_pipeline": {
+      "enter_target": "Docelowe środowisko wdrażania",
+      "title": "Wyzwalanie zdarzenia deploymentu dla bieżącego rurociągu #{pipelineId}",
+      "trigger": "Wdrażanie",
       "variables": {
         "add": "Dodaj zmienną",
         "desc": "Zdefiniuj dodatkowe zmienne użyte w twoim potoku. Zmienne o tej samej nazwie zostaną nadpisane.",
@@ -106,6 +197,7 @@
         "cancel": "Anuluj",
         "cancel_success": "Anulowano potok",
         "canceled": "Ten krok został anulowany.",
+        "deploy": "Wdrażanie",
         "log_auto_scroll": "Przewijaj automatycznie",
         "log_auto_scroll_off": "Wyłącz automatyczne przewijanie",
         "log_download": "Pobierz",
@@ -116,6 +208,7 @@
       "created": "Utworzono",
       "event": {
         "cron": "Cron",
+        "deploy": "Wdrażanie",
         "manual": "Ręcznie",
         "pr": "Pull Request",
         "push": "Push",
@@ -131,6 +224,7 @@
       "no_pipelines": "Nie uruchomiono jeszcze żadnego potoku.",
       "pipeline": "Potok #{pipelineId}",
       "pipelines_for": "Potoki dla gałęzi \"{branch}\"",
+      "pipelines_for_pr": "Rurociągi dla pull request #{index}",
       "protected": {
         "approve": "Zatwierdź",
         "approve_success": "Zatwierdzono potok",
@@ -155,6 +249,7 @@
       "step_not_started": "Ten krok jeszcze się nie rozpoczął.",
       "tasks": "Zadania"
     },
+    "pull_requests": "Pull requesty",
     "settings": {
       "actions": {
         "actions": "Operacje",
@@ -166,6 +261,10 @@
         "disable": {
           "disable": "Dezaktywuj repozytorium",
           "success": "Dezaktywowano repozytorium"
+        },
+        "enable": {
+          "enable": "Włącz repozytorium",
+          "success": "Repozytorium włączone"
         },
         "repair": {
           "repair": "Napraw repozytorium",
@@ -218,9 +317,14 @@
           "desc": "Zaznacz aby anulować oczekujące i uruchomione potoki dla tego samego zdarzenia i kontekstu przed rozpoczęciem nowego potoku."
         },
         "general": "Ogólne",
+        "netrc_only_trusted": {
+          "desc": "Wstrzykuj poświadczenia netrc tylko do zaufanych kontenerów (zalecane).",
+          "netrc_only_trusted": "Wstrzykuj poświadczenia netrc tylko do zaufanych kontenerów"
+        },
         "pipeline_path": {
-          "default": "Domyślnie: .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml",
-          "desc": "Ścieżka do pliku konfiguracyjnego twojego potoku (na przykład <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">my/path/</span>). Foldery muszą kończyć się znakiem <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">/</span>.",
+          "default": "Domyślnie: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml -> .drone.yml",
+          "desc": "Ścieżka do konfiguracji Twojego rurociągu (na przykład {0}). Foldery powinny kończyć się znakiem {1}.",
+          "desc_path_example": "moja/ścieżka/",
           "path": "Ścieżka do pliku potoku"
         },
         "project": "Ustawienia projektu",
@@ -277,6 +381,7 @@
         "add": "Dodaj sekret",
         "created": "Dodano sekret",
         "delete": "Usuń sekret",
+        "delete_confirm": "Czy naprawdę chcesz usunąć ten sekret?",
         "deleted": "Usunięto sekret",
         "desc": "Sekrety są przekazywane do poszczególnych kroków potoku jako zmienne środowiskowe.",
         "edit": "Edytuj sekret",
@@ -324,6 +429,7 @@
     "oauth_error": "Błąd podczas uwierzytelnienia u dostawcy OAuth",
     "settings": "Ustawienia użytkownika",
     "shell_setup": "Konfiguracja powłoki systemowej",
+    "shell_setup_before": "wykonaj wcześniej konfigurację powłoki",
     "token": "Twój token osobisty"
   },
   "username": "Nazwa użytkownika",

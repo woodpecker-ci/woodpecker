@@ -19,7 +19,7 @@ import "io"
 
 // FileStore persists pipeline artifacts to storage.
 type FileStore interface {
-	FileList(*Pipeline) ([]*File, error)
+	FileList(*Pipeline, *ListOptions) ([]*File, error)
 	FileFind(*Step, string) (*File, error)
 	FileRead(*Step, string) (io.ReadCloser, error)
 	FileCreate(*File, io.Reader) error

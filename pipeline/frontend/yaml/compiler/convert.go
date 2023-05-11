@@ -60,6 +60,7 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 	}
 
 	environment["CI_WORKSPACE"] = path.Join(c.base, c.path)
+	environment["CI_STEP_NAME"] = name
 
 	if section == "services" || container.Detached {
 		detached = true
@@ -82,7 +83,7 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		}
 	}
 
-	if matchImage(container.Image, c.escalated...) {
+	if matchImage(container.Image, c.escalated...) && container.IsPlugin() {
 		privileged = true
 	}
 

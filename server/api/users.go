@@ -22,11 +22,12 @@ import (
 	"github.com/gorilla/securecookie"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
 func GetUsers(c *gin.Context) {
-	users, err := store.FromContext(c).GetUserList()
+	users, err := store.FromContext(c).GetUserList(session.Pagination(c))
 	if err != nil {
 		c.String(500, "Error getting user list. %s", err)
 		return
@@ -37,7 +38,7 @@ func GetUsers(c *gin.Context) {
 func GetUser(c *gin.Context) {
 	user, err := store.FromContext(c).GetUserLogin(c.Param("login"))
 	if err != nil {
-		c.String(404, "Cannot find user. %s", err)
+		handleDbGetError(c, err)
 		return
 	}
 	c.JSON(200, user)
@@ -55,10 +56,15 @@ func PatchUser(c *gin.Context) {
 
 	user, err := _store.GetUserLogin(c.Param("login"))
 	if err != nil {
-		c.AbortWithStatus(http.StatusNotFound)
+		handleDbGetError(c, err)
 		return
 	}
-	user.Active = in.Active
+
+	// TODO: allow to change login (currently used as primary key)
+	// TODO: disallow to change login, email, avatar if the user is using oauth
+	user.Email = in.Email
+	user.Avatar = in.Avatar
+	user.Admin = in.Admin
 
 	err = _store.UpdateUser(user)
 	if err != nil {
@@ -77,7 +83,6 @@ func PostUser(c *gin.Context) {
 		return
 	}
 	user := &model.User{
-		Active: true,
 		Login:  in.Login,
 		Email:  in.Email,
 		Avatar: in.Avatar,

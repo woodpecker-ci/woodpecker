@@ -42,7 +42,22 @@ pipeline:
     repo: foo/bar
     settings:
       foo: bar
-`}}
+`}, {
+		Title: "merge maps", Data: `
+variables:
+  step_template: &base-step
+    image: golang:1.19
+    commands:
+      - go version
+
+pipeline:
+  test base step:
+    <<: *base-step
+  test base step with latest image:
+    <<: *base-step
+    image: golang:latest
+`,
+	}}
 
 	for _, testd := range testdatas {
 		t.Run(testd.Title, func(t *testing.T) {

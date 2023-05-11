@@ -39,7 +39,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/forge/bitbucket"
 	"github.com/woodpecker-ci/woodpecker/server/forge/bitbucketserver"
-	"github.com/woodpecker-ci/woodpecker/server/forge/coding"
 	"github.com/woodpecker-ci/woodpecker/server/forge/gitea"
 	"github.com/woodpecker-ci/woodpecker/server/forge/github"
 	"github.com/woodpecker-ci/woodpecker/server/forge/gitlab"
@@ -71,10 +70,10 @@ func setupStore(c *cli.Context) (store.Store, error) {
 	}
 
 	if driver == "sqlite3" {
-		if new, err := fallbackSqlite3File(datasource); err != nil {
+		if newDatasource, err := fallbackSqlite3File(datasource); err != nil {
 			log.Fatal().Err(err).Msg("fallback to old sqlite3 file failed")
 		} else {
-			datasource = new
+			datasource = newDatasource
 		}
 	}
 
@@ -178,7 +177,7 @@ func setupRegistryService(c *cli.Context, s store.Store) model.RegistryService {
 	return registry.New(s)
 }
 
-func setupEnvironService(c *cli.Context, s store.Store) model.EnvironService {
+func setupEnvironService(c *cli.Context, _ store.Store) model.EnvironService {
 	return environments.Parse(c.StringSlice("environment"))
 }
 
@@ -201,8 +200,6 @@ func setupForge(c *cli.Context) (forge.Forge, error) {
 		return setupGogs(c)
 	case c.Bool("gitea"):
 		return setupGitea(c)
-	case c.Bool("coding"):
-		return setupCoding(c)
 	default:
 		return nil, fmt.Errorf("version control system not configured")
 	}
@@ -221,11 +218,10 @@ func setupBitbucket(c *cli.Context) (forge.Forge, error) {
 // helper function to setup the Gogs forge from the CLI arguments.
 func setupGogs(c *cli.Context) (forge.Forge, error) {
 	opts := gogs.Opts{
-		URL:         c.String("gogs-server"),
-		Username:    c.String("gogs-git-username"),
-		Password:    c.String("gogs-git-password"),
-		PrivateMode: c.Bool("gogs-private-mode"),
-		SkipVerify:  c.Bool("gogs-skip-verify"),
+		URL:        c.String("gogs-server"),
+		Username:   c.String("gogs-git-username"),
+		Password:   c.String("gogs-git-password"),
+		SkipVerify: c.Bool("gogs-skip-verify"),
 	}
 	log.Trace().Msgf("Forge (gogs) opts: %#v", opts)
 	return gogs.New(opts)
@@ -286,21 +282,6 @@ func setupGitHub(c *cli.Context) (forge.Forge, error) {
 	}
 	log.Trace().Msgf("Forge (github) opts: %#v", opts)
 	return github.New(opts)
-}
-
-// helper function to setup the Coding forge from the CLI arguments.
-func setupCoding(c *cli.Context) (forge.Forge, error) {
-	opts := coding.Opts{
-		URL:        c.String("coding-server"),
-		Client:     c.String("coding-client"),
-		Secret:     c.String("coding-secret"),
-		Scopes:     c.StringSlice("coding-scope"),
-		Username:   c.String("coding-git-username"),
-		Password:   c.String("coding-git-password"),
-		SkipVerify: c.Bool("coding-skip-verify"),
-	}
-	log.Trace().Msgf("Forge (coding) opts: %#v", opts)
-	return coding.New(opts)
 }
 
 func setupMetrics(g *errgroup.Group, _store store.Store) {

@@ -28,7 +28,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
-func createPipelineItems(ctx context.Context, store store.Store,
+func createPipelineItems(_ context.Context, store store.Store,
 	currentPipeline *model.Pipeline, user *model.User, repo *model.Repo,
 	yamls []*forge_types.FileMeta, envs map[string]string,
 ) (*model.Pipeline, []*pipeline.Item, error) {
@@ -43,12 +43,12 @@ func createPipelineItems(ctx context.Context, store store.Store,
 		log.Error().Err(err).Str("repo", repo.FullName).Msgf("Error getting last pipeline before pipeline number '%d'", currentPipeline.Number)
 	}
 
-	secs, err := server.Config.Services.Secrets.SecretListPipeline(repo, currentPipeline)
+	secs, err := server.Config.Services.Secrets.SecretListPipeline(repo, currentPipeline, &model.ListOptions{All: true})
 	if err != nil {
 		log.Error().Err(err).Msgf("Error getting secrets for %s#%d", repo.FullName, currentPipeline.Number)
 	}
 
-	regs, err := server.Config.Services.Registries.RegistryList(repo)
+	regs, err := server.Config.Services.Registries.RegistryList(repo, &model.ListOptions{All: true})
 	if err != nil {
 		log.Error().Err(err).Msgf("Error getting registry credentials for %s#%d", repo.FullName, currentPipeline.Number)
 	}

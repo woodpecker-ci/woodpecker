@@ -41,6 +41,7 @@ import (
 	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store"
+	shared_utils "github.com/woodpecker-ci/woodpecker/shared/utils"
 )
 
 const (
@@ -142,18 +143,19 @@ func (c *Gitea) Login(ctx context.Context, w http.ResponseWriter, req *http.Requ
 	}
 
 	return &model.User{
-		Token:  token.AccessToken,
-		Secret: token.RefreshToken,
-		Expiry: token.Expiry.UTC().Unix(),
-		Login:  account.UserName,
-		Email:  account.Email,
-		Avatar: expandAvatar(c.URL, account.AvatarURL),
+		Token:         token.AccessToken,
+		Secret:        token.RefreshToken,
+		Expiry:        token.Expiry.UTC().Unix(),
+		Login:         account.UserName,
+		Email:         account.Email,
+		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(account.ID)),
+		Avatar:        expandAvatar(c.URL, account.AvatarURL),
 	}, nil
 }
 
 // Auth uses the Gitea oauth2 access token and refresh token to authenticate
 // a session and return the Gitea account login.
-func (c *Gitea) Auth(ctx context.Context, token, secret string) (string, error) {
+func (c *Gitea) Auth(ctx context.Context, token, _ string) (string, error) {
 	client, err := c.newClientToken(ctx, token)
 	if err != nil {
 		return "", err
@@ -195,7 +197,7 @@ func (c *Gitea) Teams(ctx context.Context, u *model.User) ([]*model.Team, error)
 		return nil, err
 	}
 
-	return common.Paginate(func(page int) ([]*model.Team, error) {
+	return shared_utils.Paginate(func(page int) ([]*model.Team, error) {
 		orgs, _, err := client.ListMyOrgs(
 			gitea.ListOrgsOptions{
 				ListOptions: gitea.ListOptions{
@@ -213,7 +215,7 @@ func (c *Gitea) Teams(ctx context.Context, u *model.User) ([]*model.Team, error)
 }
 
 // TeamPerm is not supported by the Gitea driver.
-func (c *Gitea) TeamPerm(u *model.User, org string) (*model.Perm, error) {
+func (c *Gitea) TeamPerm(_ *model.User, _ string) (*model.Perm, error) {
 	return nil, nil
 }
 
@@ -251,7 +253,7 @@ func (c *Gitea) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error)
 		return nil, err
 	}
 
-	return common.Paginate(func(page int) ([]*model.Repo, error) {
+	return shared_utils.Paginate(func(page int) ([]*model.Repo, error) {
 		repos, _, err := client.ListMyRepos(
 			gitea.ListReposOptions{
 				ListOptions: gitea.ListOptions{
@@ -266,20 +268,6 @@ func (c *Gitea) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error)
 		}
 		return result, err
 	})
-}
-
-// Perm returns the user permissions for the named Gitea repository.
-func (c *Gitea) Perm(ctx context.Context, u *model.User, r *model.Repo) (*model.Perm, error) {
-	client, err := c.newClientToken(ctx, u.Token)
-	if err != nil {
-		return nil, err
-	}
-
-	repo, _, err := client.GetRepo(r.Owner, r.Name)
-	if err != nil {
-		return nil, err
-	}
-	return toPerm(repo.Permissions), nil
 }
 
 // File fetches the file from the Gitea repository and returns its contents.
@@ -429,7 +417,7 @@ func (c *Gitea) Deactivate(ctx context.Context, u *model.User, r *model.Repo, li
 }
 
 // Branches returns the names of all branches for the named repository.
-func (c *Gitea) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
+func (c *Gitea) Branches(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]string, error) {
 	token := ""
 	if u != nil {
 		token = u.Token
@@ -439,20 +427,16 @@ func (c *Gitea) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]s
 		return nil, err
 	}
 
-	branches, err := common.Paginate(func(page int) ([]string, error) {
-		branches, _, err := client.ListRepoBranches(r.Owner, r.Name,
-			gitea.ListRepoBranchesOptions{ListOptions: gitea.ListOptions{Page: page}})
-		result := make([]string, len(branches))
-		for i := range branches {
-			result[i] = branches[i].Name
-		}
-		return result, err
-	})
+	branches, _, err := client.ListRepoBranches(r.Owner, r.Name,
+		gitea.ListRepoBranchesOptions{ListOptions: gitea.ListOptions{Page: p.Page, PageSize: p.PerPage}})
 	if err != nil {
 		return nil, err
 	}
-
-	return branches, nil
+	result := make([]string, len(branches))
+	for i := range branches {
+		result[i] = branches[i].Name
+	}
+	return result, err
 }
 
 // BranchHead returns the sha of the head (latest commit) of the specified branch
@@ -472,6 +456,34 @@ func (c *Gitea) BranchHead(ctx context.Context, u *model.User, r *model.Repo, br
 		return "", err
 	}
 	return b.Commit.ID, nil
+}
+
+func (c *Gitea) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error) {
+	token := ""
+	if u != nil {
+		token = u.Token
+	}
+	client, err := c.newClientToken(ctx, token)
+	if err != nil {
+		return nil, err
+	}
+
+	pullRequests, _, err := client.ListRepoPullRequests(r.Owner, r.Name, gitea.ListPullRequestsOptions{
+		ListOptions: gitea.ListOptions{Page: p.Page, PageSize: p.PerPage},
+		State:       gitea.StateOpen,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]*model.PullRequest, len(pullRequests))
+	for i := range pullRequests {
+		result[i] = &model.PullRequest{
+			Index: pullRequests[i].Index,
+			Title: pullRequests[i].Title,
+		}
+	}
+	return result, err
 }
 
 // Hook parses the incoming Gitea hook and returns the Repository and Pipeline
@@ -592,7 +604,7 @@ func (c *Gitea) getChangedFilesForPR(ctx context.Context, repo *model.Repo, inde
 		return []string{}, nil
 	}
 
-	return common.Paginate(func(page int) ([]string, error) {
+	return shared_utils.Paginate(func(page int) ([]string, error) {
 		giteaFiles, _, err := client.ListPullRequestFiles(repo.Owner, repo.Name, index,
 			gitea.ListPullRequestFilesOptions{ListOptions: gitea.ListOptions{Page: page}})
 		if err != nil {

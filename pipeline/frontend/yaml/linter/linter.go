@@ -62,7 +62,7 @@ func (l *Linter) Lint(rawConfig string, c *yaml.Config) error {
 	return linterErr
 }
 
-func (l *Linter) lint(containers []*yaml.Container, block uint8) error {
+func (l *Linter) lint(containers []*yaml.Container, _ uint8) error {
 	var linterErr error
 
 	for _, container := range containers {

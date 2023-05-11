@@ -27,6 +27,7 @@ import (
 
 	"github.com/caddyserver/certmagic"
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
@@ -47,6 +48,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/server/web"
+	"github.com/woodpecker-ci/woodpecker/shared/constant"
 	"github.com/woodpecker-ci/woodpecker/version"
 	// "github.com/woodpecker-ci/woodpecker/server/plugins/encryption"
 	// encryptedStore "github.com/woodpecker-ci/woodpecker/server/plugins/encryption/wrapper/store"
@@ -130,11 +132,11 @@ func run(c *cli.Context) error {
 	g.Go(func() error {
 		lis, err := net.Listen("tcp", c.String("grpc-addr"))
 		if err != nil {
-			log.Err(err).Msg("")
+			log.Error().Err(err).Msg("failed to listen on grpc-addr")
 			return err
 		}
 
-		jwtSecret := "secret" // TODO: make configurable
+		jwtSecret := c.String("grpc-secret")
 		jwtManager := woodpeckerGrpcServer.NewJWTManager(jwtSecret)
 
 		authorizer := woodpeckerGrpcServer.NewAuthorizer(jwtManager)
@@ -165,7 +167,7 @@ func run(c *cli.Context) error {
 
 		err = grpcServer.Serve(lis)
 		if err != nil {
-			log.Err(err).Msg("")
+			log.Error().Err(err).Msg("failed to serve grpc server")
 			return err
 		}
 		return nil
@@ -175,7 +177,12 @@ func run(c *cli.Context) error {
 	var webUIServe func(w http.ResponseWriter, r *http.Request)
 
 	if proxyWebUI == "" {
-		webUIServe = web.New().ServeHTTP
+		webEngine, err := web.New()
+		if err != nil {
+			log.Error().Err(err).Msg("failed to create web engine")
+			return err
+		}
+		webUIServe = webEngine.ServeHTTP
 	} else {
 		origin, _ := url.Parse(proxyWebUI)
 
@@ -203,7 +210,7 @@ func run(c *cli.Context) error {
 		// start the server with tls enabled
 		g.Go(func() error {
 			serve := &http.Server{
-				Addr:    ":https",
+				Addr:    server.Config.Server.PortTLS,
 				Handler: handler,
 				TLSConfig: &tls.Config{
 					NextProtos: []string{"h2", "http/1.1"},
@@ -229,7 +236,7 @@ func run(c *cli.Context) error {
 		}
 
 		g.Go(func() error {
-			return http.ListenAndServe(":http", http.HandlerFunc(redirect))
+			return http.ListenAndServe(server.Config.Server.Port, http.HandlerFunc(redirect))
 		})
 	} else if c.Bool("lets-encrypt") {
 		// start the server with lets-encrypt
@@ -255,6 +262,14 @@ func run(c *cli.Context) error {
 				c.String("server-addr"),
 				handler,
 			)
+		})
+	}
+
+	if metricsServerAddr := c.String("metrics-server-addr"); metricsServerAddr != "" {
+		g.Go(func() error {
+			metricsRouter := gin.New()
+			metricsRouter.GET("/metrics", gin.WrapH(promhttp.Handler()))
+			return http.ListenAndServe(metricsServerAddr, metricsRouter)
 		})
 	}
 
@@ -304,6 +319,7 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 
 	// Cloning
 	server.Config.Pipeline.DefaultCloneImage = c.String("default-clone-image")
+	constant.TrustedCloneImages = append(constant.TrustedCloneImages, server.Config.Pipeline.DefaultCloneImage)
 
 	// Execution
 	_events := c.StringSlice("default-cancel-previous-pipeline-events")
@@ -312,6 +328,8 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 		events = append(events, model.WebhookEvent(v))
 	}
 	server.Config.Pipeline.DefaultCancelPreviousPipelineEvents = events
+	server.Config.Pipeline.DefaultTimeout = c.Int64("default-pipeline-timeout")
+	server.Config.Pipeline.MaxTimeout = c.Int64("max-pipeline-timeout")
 
 	// limits
 	server.Config.Pipeline.Limits.MemSwapLimit = c.Int64("limit-mem-swap")
@@ -332,17 +350,16 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 		server.Config.Server.OAuthHost = c.String("server-host")
 	}
 	server.Config.Server.Port = c.String("server-addr")
+	server.Config.Server.PortTLS = c.String("server-addr-tls")
 	server.Config.Server.Docs = c.String("docs")
 	server.Config.Server.StatusContext = c.String("status-context")
 	server.Config.Server.StatusContextFormat = c.String("status-context-format")
 	server.Config.Server.SessionExpires = c.Duration("session-expires")
+	server.Config.Server.RootURL = strings.TrimSuffix(c.String("root-url"), "/")
 	server.Config.Pipeline.Networks = c.StringSlice("network")
 	server.Config.Pipeline.Volumes = c.StringSlice("volume")
 	server.Config.Pipeline.Privileged = c.StringSlice("escalate")
 
 	// prometheus
 	server.Config.Prometheus.AuthToken = c.String("prometheus-auth-token")
-
-	// TODO(485) temporary workaround to not hit api rate limits
-	server.Config.FlatPermissions = c.Bool("flat-permissions")
 }

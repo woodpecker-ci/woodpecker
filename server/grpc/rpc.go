@@ -27,9 +27,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/rs/zerolog/log"
-
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc/metadata"
 	grpcMetadata "google.golang.org/grpc/metadata"
 
@@ -77,7 +76,7 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Pipeline, er
 			return nil, nil
 		}
 
-		task, err := s.queue.Poll(c, fn)
+		task, err := s.queue.Poll(c, agent.ID, fn)
 		if err != nil {
 			return nil, err
 		} else if task == nil {
@@ -131,14 +130,6 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 		return err
 	}
 
-	metadata, ok := grpcMetadata.FromIncomingContext(c)
-	if ok {
-		hostname, ok := metadata["hostname"]
-		if ok && len(hostname) != 0 {
-			step.Machine = hostname[0]
-		}
-	}
-
 	repo, err := s.store.GetRepo(currentPipeline.RepoID)
 	if err != nil {
 		log.Error().Msgf("error: cannot find repo with id %d: %s", currentPipeline.RepoID, err)
@@ -149,7 +140,8 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 		log.Error().Err(err).Msg("rpc.update: cannot update step")
 	}
 
-	if currentPipeline.Steps, err = s.store.StepList(currentPipeline); err != nil {
+	currentPipeline.Steps, err = s.store.StepList(currentPipeline)
+	if err != nil {
 		log.Error().Err(err).Msg("can not get step list from store")
 	}
 	if currentPipeline.Steps, err = model.Tree(currentPipeline.Steps); err != nil {
@@ -174,7 +166,7 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 }
 
 // Upload implements the rpc.Upload function
-func (s *RPC) Upload(c context.Context, id string, file *rpc.File) error {
+func (s *RPC) Upload(_ context.Context, id string, file *rpc.File) error {
 	stepID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		return err
@@ -258,13 +250,12 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 		log.Error().Msgf("error: cannot find step with id %d: %s", stepID, err)
 		return err
 	}
-	metadata, ok := grpcMetadata.FromIncomingContext(c)
-	if ok {
-		hostname, ok := metadata["hostname"]
-		if ok && len(hostname) != 0 {
-			step.Machine = hostname[0]
-		}
+
+	agent, err := s.getAgentFromContext(c)
+	if err != nil {
+		return err
 	}
+	step.AgentID = agent.ID
 
 	currentPipeline, err := s.store.GetPipeline(step.PipelineID)
 	if err != nil {

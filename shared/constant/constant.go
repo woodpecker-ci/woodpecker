@@ -26,8 +26,8 @@ var PrivilegedPlugins = []string{
 // folders are indicated by supplying a trailing /
 var DefaultConfigOrder = [...]string{
 	".woodpecker/",
-	".woodpecker.yml",
 	".woodpecker.yaml",
+	".woodpecker.yml",
 	".drone.yml",
 }
 
@@ -35,3 +35,7 @@ const (
 	// DefaultCloneImage can be changed by 'WOODPECKER_DEFAULT_CLONE_IMAGE' at runtime
 	DefaultCloneImage = "docker.io/woodpeckerci/plugin-git:2.0.3"
 )
+
+var TrustedCloneImages = []string{
+	DefaultCloneImage,
+}

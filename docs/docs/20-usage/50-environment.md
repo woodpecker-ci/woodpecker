@@ -47,7 +47,7 @@ pipeline:
 This is the reference list of all environment variables available to your pipeline containers. These are injected into your pipeline step and plugins containers, at runtime.
 
 | NAME                             | Description                                                                                  |
-|----------------------------------|----------------------------------------------------------------------------------------------|
+| -------------------------------- | -------------------------------------------------------------------------------------------- |
 | `CI=woodpecker`                  | environment is woodpecker                                                                    |
 |                                  | **Repository**                                                                               |
 | `CI_REPO`                        | repository full name `<owner>/<name>`                                                        |
@@ -68,6 +68,7 @@ This is the reference list of all environment variables available to your pipeli
 | `CI_COMMIT_TARGET_BRANCH`        | commit target branch                                                                         |
 | `CI_COMMIT_TAG`                  | commit tag name (empty if event is not `tag`)                                                |
 | `CI_COMMIT_PULL_REQUEST`         | commit pull request number (empty if event is not `pull_request`)                            |
+| `CI_COMMIT_PULL_REQUEST_LABELS`  | labels assigned to pull request (empty if event is not `pull_request`)                       |
 | `CI_COMMIT_LINK`                 | commit link in forge                                                                         |
 | `CI_COMMIT_MESSAGE`              | commit message                                                                               |
 | `CI_COMMIT_AUTHOR`               | commit author username                                                                       |
@@ -77,14 +78,16 @@ This is the reference list of all environment variables available to your pipeli
 | `CI_PIPELINE_NUMBER`             | pipeline number                                                                              |
 | `CI_PIPELINE_PARENT`             | number of parent pipeline                                                                    |
 | `CI_PIPELINE_EVENT`              | pipeline event (push, pull_request, tag, deployment)                                         |
-| `CI_PIPELINE_LINK`               | pipeline link in CI                                                                          |
+| `CI_PIPELINE_LINK`               | link to the forge's web UI for the commit(s) or tag that triggered the pipeline              |
 | `CI_PIPELINE_DEPLOY_TARGET`      | pipeline deploy target for `deployment` events (ie production)                               |
 | `CI_PIPELINE_STATUS`             | pipeline status (success, failure)                                                           |
 | `CI_PIPELINE_CREATED`            | pipeline created UNIX timestamp                                                              |
 | `CI_PIPELINE_STARTED`            | pipeline started UNIX timestamp                                                              |
 | `CI_PIPELINE_FINISHED`           | pipeline finished UNIX timestamp                                                             |
+|                                  | **Current workflow**                                                                         |
+| `CI_WORKFLOW_NAME`               | workflow name                                                                                |
 |                                  | **Current step**                                                                             |
-| `CI_STEP_NUMBER`                 | step number                                                                                  |
+| `CI_STEP_NAME`                   | step name                                                                                    |
 | `CI_STEP_STATUS`                 | step status (success, failure)                                                               |
 | `CI_STEP_STARTED`                | step started UNIX timestamp                                                                  |
 | `CI_STEP_FINISHED`               | step finished UNIX timestamp                                                                 |

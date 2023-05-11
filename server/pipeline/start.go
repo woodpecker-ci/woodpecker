@@ -41,8 +41,8 @@ func start(ctx context.Context, store store.Store, activePipeline *model.Pipelin
 		log.Error().Err(err).Msg("publishToTopic")
 	}
 
-	if err := queueBuild(activePipeline, repo, pipelineItems); err != nil {
-		log.Error().Err(err).Msg("queueBuild")
+	if err := queuePipeline(repo, pipelineItems); err != nil {
+		log.Error().Err(err).Msg("queuePipeline")
 		return nil, err
 	}
 

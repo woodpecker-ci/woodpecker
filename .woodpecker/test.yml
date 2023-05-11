@@ -1,5 +1,5 @@
 variables:
-  - &golang_image 'golang:1.19.5'
+  - &golang_image 'golang:1.20.2'
   - &when_path # related config files
     - '.woodpecker/test.yml'
     - '.golangci.yml'
@@ -114,6 +114,7 @@ pipeline:
         from_secret: codecov_token
     when:
       path: *when_path
+    failure: ignore
 
 services:
   service-postgres:
