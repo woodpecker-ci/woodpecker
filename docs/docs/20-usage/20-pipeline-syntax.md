@@ -729,8 +729,7 @@ pipeline:
 
 ## `skip_clone`
 
-If you don't specify (a) clone step(s), a default one is added.
-So if you like to not have one at all, just specify:
+By default Woodpecker is automatically adding a clone step. This clone step can be configured by the [clone](#clone) property. If you do not need a `clone` step at all you can skip it using:
 
 ```yaml
 skip_clone: true
