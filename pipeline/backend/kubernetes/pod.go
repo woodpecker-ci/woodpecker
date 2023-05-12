@@ -10,7 +10,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func Pod(namespace string, step *types.Step, labels, platform map[string]string, annotations map[string]string) (*v1.Pod, error) {
+func Pod(namespace string, step *types.Step, labels map[string]string, platform string, annotations map[string]string) (*v1.Pod, error) {
 	var (
 		vols       []v1.Volume
 		volMounts  []v1.VolumeMount
@@ -99,6 +99,7 @@ func Pod(namespace string, step *types.Step, labels, platform map[string]string,
 	}
 
 	labels["step"] = podName
+	NodeSelector := map[string]string{"kubernetes.io/arch": platform}
 
 	pod := &v1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
@@ -110,7 +111,7 @@ func Pod(namespace string, step *types.Step, labels, platform map[string]string,
 		Spec: v1.PodSpec{
 			RestartPolicy: v1.RestartPolicyNever,
 			HostAliases:   hostAliases,
-			NodeSelector:  platform,
+			NodeSelector:  NodeSelector,
 			Containers: []v1.Container{{
 				Name:            podName,
 				Image:           step.Image,
