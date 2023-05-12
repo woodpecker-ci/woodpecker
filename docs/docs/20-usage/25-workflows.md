@@ -124,19 +124,7 @@ depends_on:
 +runs_on: [ success, failure ]
 ```
 
-Some workflows don't need the source code, set the `skip_clone` tag to skip cloning:
-
-```diff
-
-pipeline:
-  notify:
-    image: debian:stable-slim
-    commands:
-      - echo notifying
-
-depends_on:
-  - deploy
-
-runs_on: [ success, failure ]
-+skip_clone: true
-```
+:::info
+Some workflows don't need the source code, like creating a notification on failure.
+Read more about `skip_clone` at [pipeline syntax](./20-pipeline-syntax.md#skip_clone)
+:::
