@@ -65,7 +65,7 @@ func HandleAuth(c *gin.Context) {
 	config := ToConfig(c)
 
 	// get the user from the database
-	u, err := _store.GetUserLogin(tmpuser.Login)
+	u, err := _store.GetUserRemoteID(tmpuser.ForgeRemoteID, tmpuser.Login)
 	if err != nil {
 		if !errors.Is(err, types.RecordNotExist) {
 			_ = c.AbortWithError(http.StatusInternalServerError, err)
@@ -92,11 +92,12 @@ func HandleAuth(c *gin.Context) {
 
 		// create the user account
 		u = &model.User{
-			Login:  tmpuser.Login,
-			Token:  tmpuser.Token,
-			Secret: tmpuser.Secret,
-			Email:  tmpuser.Email,
-			Avatar: tmpuser.Avatar,
+			Login:         tmpuser.Login,
+			ForgeRemoteID: tmpuser.ForgeRemoteID,
+			Token:         tmpuser.Token,
+			Secret:        tmpuser.Secret,
+			Email:         tmpuser.Email,
+			Avatar:        tmpuser.Avatar,
 			Hash: base32.StdEncoding.EncodeToString(
 				securecookie.GenerateRandomKey(32),
 			),
@@ -115,6 +116,8 @@ func HandleAuth(c *gin.Context) {
 	u.Secret = tmpuser.Secret
 	u.Email = tmpuser.Email
 	u.Avatar = tmpuser.Avatar
+	u.ForgeRemoteID = tmpuser.ForgeRemoteID
+	u.Login = tmpuser.Login
 	u.Admin = u.Admin || config.IsAdmin(tmpuser)
 
 	// if self-registration is enabled for whitelisted organizations we need to
