@@ -275,6 +275,8 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 		}
 	}
 
+	s.updateForgeStatus(c, repo, currentPipeline, step)
+
 	defer func() {
 		currentPipeline.Steps, _ = s.store.StepList(currentPipeline)
 		message := pubsub.Message{
