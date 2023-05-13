@@ -7,7 +7,7 @@ require (
 	codeberg.org/6543/go-yaml2json v1.0.0
 	github.com/bmatcuk/doublestar/v4 v4.0.2
 	github.com/docker/cli v20.10.12+incompatible
-	github.com/docker/distribution v2.8.0+incompatible
+	github.com/docker/distribution v2.8.2+incompatible
 	github.com/docker/docker v20.10.24+incompatible
 	github.com/docker/go-units v0.4.0
 	github.com/drone/envsubst v1.0.3
