@@ -422,10 +422,6 @@ Example: `WOODPECKER_ROOT_URL=/woodpecker`
 
 See [GitHub configuration](forges/github/#configuration)
 
-### `WOODPECKER_GOGS_...`
-
-See [Gogs configuration](forges/gogs/#configuration)
-
 ### `WOODPECKER_GITEA_...`
 
 See [Gitea configuration](forges/gitea/#configuration)
