@@ -95,9 +95,9 @@ const selectedLocale = computed<string>({
 });
 
 const resetToken = async () => {
-  token.value = await apiClient.resetToken()
-  location.href = `${address}/logout`
-}
+  token.value = await apiClient.resetToken();
+  location.href = `${address}/logout`;
+};
 </script>
 
 <style scoped>
