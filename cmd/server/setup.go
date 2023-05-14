@@ -42,7 +42,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/forge/gitea"
 	"github.com/woodpecker-ci/woodpecker/server/forge/github"
 	"github.com/woodpecker-ci/woodpecker/server/forge/gitlab"
-	"github.com/woodpecker-ci/woodpecker/server/forge/gogs"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/environments"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/registry"
@@ -196,8 +195,6 @@ func setupForge(c *cli.Context) (forge.Forge, error) {
 		return setupBitbucket(c)
 	case c.Bool("stash"):
 		return setupStash(c)
-	case c.Bool("gogs"):
-		return setupGogs(c)
 	case c.Bool("gitea"):
 		return setupGitea(c)
 	default:
@@ -205,7 +202,7 @@ func setupForge(c *cli.Context) (forge.Forge, error) {
 	}
 }
 
-// helper function to setup the Bitbucket forge from the CLI arguments.
+// setupBitbucket helper function to setup the Bitbucket forge from the CLI arguments.
 func setupBitbucket(c *cli.Context) (forge.Forge, error) {
 	opts := &bitbucket.Opts{
 		Client: c.String("bitbucket-client"),
@@ -215,19 +212,7 @@ func setupBitbucket(c *cli.Context) (forge.Forge, error) {
 	return bitbucket.New(opts)
 }
 
-// helper function to setup the Gogs forge from the CLI arguments.
-func setupGogs(c *cli.Context) (forge.Forge, error) {
-	opts := gogs.Opts{
-		URL:        c.String("gogs-server"),
-		Username:   c.String("gogs-git-username"),
-		Password:   c.String("gogs-git-password"),
-		SkipVerify: c.Bool("gogs-skip-verify"),
-	}
-	log.Trace().Msgf("Forge (gogs) opts: %#v", opts)
-	return gogs.New(opts)
-}
-
-// helper function to setup the Gitea forge from the CLI arguments.
+// setupGitea helper function to setup the Gitea forge from the CLI arguments.
 func setupGitea(c *cli.Context) (forge.Forge, error) {
 	server, err := url.Parse(c.String("gitea-server"))
 	if err != nil {
@@ -246,7 +231,7 @@ func setupGitea(c *cli.Context) (forge.Forge, error) {
 	return gitea.New(opts)
 }
 
-// helper function to setup the Stash forge from the CLI arguments.
+// setupStash helper function to setup the Stash forge from the CLI arguments.
 func setupStash(c *cli.Context) (forge.Forge, error) {
 	opts := bitbucketserver.Opts{
 		URL:               c.String("stash-server"),
@@ -261,7 +246,7 @@ func setupStash(c *cli.Context) (forge.Forge, error) {
 	return bitbucketserver.New(opts)
 }
 
-// helper function to setup the GitLab forge from the CLI arguments.
+// setupGitLab helper function to setup the GitLab forge from the CLI arguments.
 func setupGitLab(c *cli.Context) (forge.Forge, error) {
 	return gitlab.New(gitlab.Opts{
 		URL:          c.String("gitlab-server"),
@@ -271,7 +256,7 @@ func setupGitLab(c *cli.Context) (forge.Forge, error) {
 	})
 }
 
-// helper function to setup the GitHub forge from the CLI arguments.
+// setupGitHub helper function to setup the GitHub forge from the CLI arguments.
 func setupGitHub(c *cli.Context) (forge.Forge, error) {
 	opts := github.Opts{
 		URL:        c.String("github-server"),
@@ -344,7 +329,7 @@ func setupMetrics(g *errgroup.Group, _store store.Store) {
 	})
 }
 
-// generate or load key pair to sign webhooks requests (i.e. used for extensions)
+// setupSignatureKeys generate or load key pair to sign webhooks requests (i.e. used for extensions)
 func setupSignatureKeys(_store store.Store) (crypto.PrivateKey, crypto.PublicKey) {
 	privKeyID := "signature-private-key"
 
