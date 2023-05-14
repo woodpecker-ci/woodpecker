@@ -121,10 +121,11 @@ func convertPushHook(hook *internal.PostHook, baseURL string) *model.Pipeline {
 // structure to the Woodpecker User structure.
 func convertUser(from *internal.User, token *oauth.AccessToken) *model.User {
 	return &model.User{
-		Login:  from.Slug,
-		Token:  token.Token,
-		Email:  from.EmailAddress,
-		Avatar: avatarLink(from.EmailAddress),
+		Login:         from.Slug,
+		Token:         token.Token,
+		Email:         from.EmailAddress,
+		Avatar:        avatarLink(from.EmailAddress),
+		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(from.ID)),
 	}
 }
 
