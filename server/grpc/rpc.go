@@ -136,9 +136,11 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 		return err
 	}
 
-	if _, err = pipeline.UpdateStepStatus(s.store, *step, state, currentPipeline.Started); err != nil {
+	if step, err = pipeline.UpdateStepStatus(s.store, *step, state, currentPipeline.Started); err != nil {
 		log.Error().Err(err).Msg("rpc.update: cannot update step")
 	}
+
+	s.updateForgeStatus(c, repo, currentPipeline, step)
 
 	currentPipeline.Steps, err = s.store.StepList(currentPipeline)
 	if err != nil {
@@ -294,8 +296,12 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 		}
 	}()
 
-	_, err = pipeline.UpdateStepToStatusStarted(s.store, *step, state)
-	return err
+	step, err = pipeline.UpdateStepToStatusStarted(s.store, *step, state)
+	if err != nil {
+		return err
+	}
+	s.updateForgeStatus(c, repo, currentPipeline, step)
+	return nil
 }
 
 // Done implements the rpc.Done function
