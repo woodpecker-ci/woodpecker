@@ -565,12 +565,14 @@ func getStatus(status model.StatusValue) gitea.StatusState {
 		return gitea.StatusPending
 	case model.StatusSuccess:
 		return gitea.StatusSuccess
-	case model.StatusFailure, model.StatusError:
+	case model.StatusFailure:
 		return gitea.StatusFailure
 	case model.StatusKilled:
 		return gitea.StatusFailure
 	case model.StatusDeclined:
 		return gitea.StatusWarning
+	case model.StatusError:
+		return gitea.StatusError
 	default:
 		return gitea.StatusFailure
 	}

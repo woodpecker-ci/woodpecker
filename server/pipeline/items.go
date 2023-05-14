@@ -28,7 +28,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
-func createPipelineItems(_ context.Context, store store.Store,
+func createPipelineItems(c context.Context, store store.Store,
 	currentPipeline *model.Pipeline, user *model.User, repo *model.Repo,
 	yamls []*forge_types.FileMeta, envs map[string]string,
 ) (*model.Pipeline, []*pipeline.Item, error) {
@@ -83,6 +83,8 @@ func createPipelineItems(_ context.Context, store store.Store,
 		currentPipeline, uerr := UpdateToStatusError(store, *currentPipeline, err)
 		if uerr != nil {
 			log.Error().Err(err).Msgf("Error setting error status of pipeline for %s#%d", repo.FullName, currentPipeline.Number)
+		} else {
+			updatePipelineStatus(c, currentPipeline, repo, user)
 		}
 		return currentPipeline, nil, err
 	}

@@ -19,6 +19,7 @@ import (
 	"fmt"
 
 	"github.com/rs/zerolog/log"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
@@ -42,9 +43,7 @@ func Decline(ctx context.Context, store store.Store, pipeline *model.Pipeline, u
 		log.Error().Err(err).Msg("can not build tree from step list")
 	}
 
-	if err := updatePipelineStatus(ctx, pipeline, repo, user); err != nil {
-		log.Error().Err(err).Msg("updateBuildStatus")
-	}
+	updatePipelineStatus(ctx, pipeline, repo, user)
 
 	if err := publishToTopic(ctx, pipeline, repo); err != nil {
 		log.Error().Err(err).Msg("publishToTopic")
