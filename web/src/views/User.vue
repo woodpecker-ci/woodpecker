@@ -6,7 +6,10 @@
       <SelectField v-model="selectedLocale" :options="localeOptions" />
 
       <div>
-        <h2 class="text-lg text-color">{{ $t('user.token') }}</h2>
+        <div class="flex items-center mb-2">
+          <h2 class="text-lg text-color">{{ $t('user.token') }}</h2>
+          <Button class="ml-4" :text="$t('user.reset_token')" @click="resetToken" />
+        </div>
         <pre class="cli-box">{{ token }}</pre>
       </div>
 
@@ -90,6 +93,11 @@ const selectedLocale = computed<string>({
     return storedLocale.value;
   },
 });
+
+const resetToken = async () => {
+  token.value = await apiClient.resetToken();
+  window.location.href = `${address}/logout`;
+};
 </script>
 
 <style scoped>
