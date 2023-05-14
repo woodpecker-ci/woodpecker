@@ -84,7 +84,7 @@ func Cancel(ctx context.Context, store store.Store, repo *model.Repo, user *mode
 		}
 	}
 
-	killedBuild, err := UpdateToStatusKilled(store, *pipeline)
+	killedPipeline, err := UpdateToStatusKilled(store, *pipeline)
 	if err != nil {
 		log.Error().Err(err).Msgf("UpdateToStatusKilled: %v", pipeline)
 		return err
@@ -92,14 +92,14 @@ func Cancel(ctx context.Context, store store.Store, repo *model.Repo, user *mode
 
 	updatePipelineStatus(ctx, pipeline, repo, user)
 
-	steps, err = store.StepList(killedBuild)
+	steps, err = store.StepList(killedPipeline)
 	if err != nil {
 		return &ErrNotFound{Msg: err.Error()}
 	}
-	if killedBuild.Steps, err = model.Tree(steps); err != nil {
+	if killedPipeline.Steps, err = model.Tree(steps); err != nil {
 		return err
 	}
-	if err := publishToTopic(ctx, killedBuild, repo); err != nil {
+	if err := publishToTopic(ctx, killedPipeline, repo); err != nil {
 		log.Error().Err(err).Msg("publishToTopic")
 	}
 
