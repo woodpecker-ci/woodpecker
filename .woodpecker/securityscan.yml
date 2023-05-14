@@ -1,0 +1,19 @@
+pipeline:
+  check backend:
+    image: &trivy_image aquasec/trivy:latest
+    commands:
+      - trivy fs --exit-code 0 --skip-dirs web/ --skip-dirs docs/ --severity UNKNOWN,LOW .
+      - trivy fs --exit-code 1 --skip-dirs web/ --skip-dirs docs/ --severity MEDIUM,HIGH,CRITICAL .
+
+  check docs:
+    image: *trivy_image
+    commands:
+      - trivy fs --exit-code 0 --skip-dirs node_modules/ --skip-dirs plugins/woodpecker-plugins/node_modules --severity UNKNOWN,LOW docs/
+      # TODO currently it is not fixable so just do not block currently
+      - trivy fs --exit-code 0 --skip-dirs node_modules/ --skip-dirs plugins/woodpecker-plugins/node_modules --severity MEDIUM,HIGH,CRITICAL docs/
+
+  check web:
+    image: *trivy_image
+    commands:
+      - trivy fs --exit-code 0 --skip-dirs node_modules/ --severity UNKNOWN,LOW web/
+      - trivy fs --exit-code 1 --skip-dirs node_modules/ --severity MEDIUM,HIGH,CRITICAL web/
