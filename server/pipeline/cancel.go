@@ -90,7 +90,7 @@ func Cancel(ctx context.Context, store store.Store, repo *model.Repo, user *mode
 		return err
 	}
 
-	updatePipelineStatus(ctx, pipeline, repo, user)
+	updatePipelineStatus(ctx, killedPipeline, repo, user)
 
 	steps, err = store.StepList(killedPipeline)
 	if err != nil {
