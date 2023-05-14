@@ -60,6 +60,7 @@ type Item struct {
 
 func (b *StepBuilder) Build() ([]*Item, error) {
 	var items []*Item
+	var linterErr error
 
 	b.Yamls = forge_types.SortByName(b.Yamls)
 
@@ -110,10 +111,11 @@ func (b *StepBuilder) Build() ([]*Item, error) {
 			}
 
 			// lint pipeline
-			if err := linter.New(
+			linterErr = linter.New(
 				linter.WithTrusted(b.Repo.IsTrusted),
-			).Lint(substituted, parsed); err != nil {
-				return nil, &yaml.PipelineParseError{Err: err}
+			).Lint(substituted, parsed)
+			if linterErr != nil && linter.IsBlockingError(linterErr) {
+				return nil, &yaml.PipelineParseError{Err: linterErr}
 			}
 
 			// checking if filtered.
@@ -170,7 +172,7 @@ func (b *StepBuilder) Build() ([]*Item, error) {
 		return nil, fmt.Errorf("pipeline has no startpoint")
 	}
 
-	return items, nil
+	return items, linterErr
 }
 
 func stepListContainsItemsToRun(items []*Item) bool {

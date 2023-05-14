@@ -1,6 +1,7 @@
 package schema
 
 import (
+	"bytes"
 	_ "embed"
 	"fmt"
 	"io"
