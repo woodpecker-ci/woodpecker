@@ -8,7 +8,7 @@
       <div>
         <div class="flex items-center mb-2">
           <h2 class="text-lg text-color">{{ $t('user.token') }}</h2>
-          <Button class="ml-4" @click="resetToken" :text="$t('user.reset_token')" />
+          <Button class="ml-4" :text="$t('user.reset_token')" @click="resetToken" />
         </div>
         <pre class="cli-box">{{ token }}</pre>
       </div>
@@ -96,7 +96,7 @@ const selectedLocale = computed<string>({
 
 const resetToken = async () => {
   token.value = await apiClient.resetToken();
-  location.href = `${address}/logout`;
+  window.location.href = `${address}/logout`;
 };
 </script>
 
