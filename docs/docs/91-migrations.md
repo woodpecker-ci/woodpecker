@@ -15,9 +15,8 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Updated Prometheus gauge `*_job_*` to `*_step_*`
 - Renamed config env `WOODPECKER_MAX_PROCS` to `WOODPECKER_MAX_WORKFLOWS` (still available as fallback)
 - The pipelines are now also read from `.yaml` files, the new default order is `.woodpecker/*.yml` and `.woodpecker/*.yaml` (without any prioritization) -> `.woodpecker.yml` ->  `.woodpecker.yaml` -> `.drone.yml`
-- Dropped support for [Coding](https://coding.net/).
+- Dropped support for [Coding](https://coding.net/) and [Gogs](https://gogs.io).
 - `/api/queue/resume` & `/api/queue/pause` endpoint methods were changed from `GET` to `POST`
-- Dropped `WOODPECKER_GOGS_PRIVATE_MODE` (use `WOODPECKER_AUTHENTICATE_PUBLIC_REPOS`)
 - Using `repo-id` in favor of `owner/repo` combination
   - :warning: The api endpoints `/api/repos/{owner}/{repo}/...` were replaced by new endpoints using the repos id `/api/repos/{repo-id}`
   - To get the id of a repo use the `/api/repos/lookup/{repo-full-name-with-slashes}` endpoint.

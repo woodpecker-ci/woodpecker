@@ -727,6 +727,14 @@ pipeline:
   ...
 ```
 
+## `skip_clone`
+
+By default Woodpecker is automatically adding a clone step. This clone step can be configured by the [clone](#clone) property. If you do not need a `clone` step at all you can skip it using:
+
+```yaml
+skip_clone: true
+```
+
 ## `when` - Global pipeline conditions
 
 Woodpecker gives the ability to skip whole pipelines (not just steps #when---conditional-execution-1) based on certain conditions by a `when` block. If all conditions in the `when` block evaluate to true the pipeline is executed, otherwise it is skipped, but treated as successful and other pipelines depending on it will still continue.

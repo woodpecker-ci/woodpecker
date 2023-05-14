@@ -57,6 +57,12 @@ var flags = []cli.Flag{
 		Value:   ":8000",
 	},
 	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_SERVER_ADDR_TLS"},
+		Name:    "server-addr-tls",
+		Usage:   "port https with tls (:443)",
+		Value:   ":443",
+	},
+	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_SERVER_CERT"},
 		Name:    "server-cert",
 		Usage:   "server ssl cert path",
@@ -310,37 +316,6 @@ var flags = []cli.Flag{
 		EnvVars: []string{"WOODPECKER_GITHUB_SKIP_VERIFY"},
 		Name:    "github-skip-verify",
 		Usage:   "github skip ssl verification",
-	},
-	//
-	// Gogs
-	//
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_GOGS"},
-		Name:    "gogs",
-		Usage:   "gogs driver is enabled",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_GOGS_URL"},
-		Name:    "gogs-server",
-		Usage:   "gogs server address",
-		Value:   "https://try.gogs.io",
-	},
-	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_GOGS_GIT_USERNAME"},
-		Name:     "gogs-git-username",
-		Usage:    "gogs service account username",
-		FilePath: os.Getenv("WOODPECKER_GOGS_GIT_USERNAME_FILE"),
-	},
-	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_GOGS_GIT_PASSWORD"},
-		Name:     "gogs-git-password",
-		Usage:    "gogs service account password",
-		FilePath: os.Getenv("WOODPECKER_GOGS_GIT_PASSWORD_FILE"),
-	},
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_GOGS_SKIP_VERIFY"},
-		Name:    "gogs-skip-verify",
-		Usage:   "gogs skip ssl verification",
 	},
 	//
 	// Gitea

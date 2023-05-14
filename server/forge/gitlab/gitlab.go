@@ -133,11 +133,12 @@ func (g *GitLab) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 	}
 
 	user := &model.User{
-		Login:  login.Username,
-		Email:  login.Email,
-		Avatar: login.AvatarURL,
-		Token:  token.AccessToken,
-		Secret: token.RefreshToken,
+		Login:         login.Username,
+		Email:         login.Email,
+		Avatar:        login.AvatarURL,
+		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(login.ID)),
+		Token:         token.AccessToken,
+		Secret:        token.RefreshToken,
 	}
 	if !strings.HasPrefix(user.Avatar, "http") {
 		user.Avatar = g.URL + "/" + login.AvatarURL
