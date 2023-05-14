@@ -434,6 +434,7 @@
         "api_usage": "Example API Usage",
         "cli_usage": "Example CLI Usage",
         "dl_cli": "Download CLI",
-        "shell_setup_before": "do shell setup steps before"
+        "shell_setup_before": "do shell setup steps before",
+        "reset_token": "Reset token"
     }
 }

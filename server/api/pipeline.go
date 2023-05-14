@@ -257,6 +257,7 @@ func GetPipelineConfig(c *gin.Context) {
 func CancelPipeline(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
+	user := session.User(c)
 	num, _ := strconv.ParseInt(c.Params.ByName("number"), 10, 64)
 
 	pl, err := _store.GetPipelineNumber(repo, num)
@@ -265,7 +266,7 @@ func CancelPipeline(c *gin.Context) {
 		return
 	}
 
-	if err := pipeline.Cancel(c, _store, repo, pl); err != nil {
+	if err := pipeline.Cancel(c, _store, repo, user, pl); err != nil {
 		handlePipelineErr(c, err)
 	} else {
 		c.Status(http.StatusNoContent)

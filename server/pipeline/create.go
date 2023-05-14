@@ -123,9 +123,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 			log.Error().Err(err).Msg("publishToTopic")
 		}
 
-		if err := updatePipelineStatus(ctx, pipeline, repo, repoUser); err != nil {
-			log.Error().Err(err).Msg("updatePipelineStatus")
-		}
+		updatePipelineStatus(ctx, pipeline, repo, repoUser)
 
 		return pipeline, nil
 	}
@@ -142,9 +140,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 			log.Error().Err(err).Msg("publishToTopic")
 		}
 
-		if err := updatePipelineStatus(ctx, pipeline, repo, repoUser); err != nil {
-			log.Error().Err(err).Msg("updatePipelineStatus")
-		}
+		updatePipelineStatus(ctx, pipeline, repo, repoUser)
 
 		return pipeline, nil
 	}

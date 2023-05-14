@@ -293,6 +293,10 @@ export default class WoodpeckerClient extends ApiClient {
     return this._delete(`/api/users/${user.login}`);
   }
 
+  resetToken(): Promise<string> {
+    return this._delete('/api/user/token') as Promise<string>;
+  }
+
   // eslint-disable-next-line promise/prefer-await-to-callbacks
   on(callback: (data: { pipeline?: Pipeline; repo?: Repo; step?: PipelineStep }) => void): EventSource {
     return this._subscribe('/stream/events', callback, {
