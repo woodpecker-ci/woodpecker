@@ -167,7 +167,7 @@ const { doSubmit: restartPipeline, isLoading: isRestartingPipeline } = useAsyncA
   notifications.notify({ title: i18n.t('repo.pipeline.actions.restart_success'), type: 'success' });
   await router.push({
     name: 'repo-pipeline',
-    params: { pipelineId: newPipeline.id },
+    params: { pipelineId: newPipeline.number },
   });
 });
 
