@@ -161,10 +161,14 @@ const { doSubmit: restartPipeline, isLoading: isRestartingPipeline } = useAsyncA
     throw new Error('Unexpected: Repo is undefined');
   }
 
-  await apiClient.restartPipeline(repo.value.owner, repo.value.name, pipelineId.value, { fork: true });
+  const newPipeline = await apiClient.restartPipeline(repo.value.owner, repo.value.name, pipelineId.value, {
+    fork: true,
+  });
   notifications.notify({ title: i18n.t('repo.pipeline.actions.restart_success'), type: 'success' });
-  // TODO: directly send to newest pipeline?
-  await router.push({ name: 'repo', params: { repoName: repo.value.name, repoOwner: repo.value.owner } });
+  await router.push({
+    name: 'repo-pipeline',
+    params: { pipelineId: newPipeline.id },
+  });
 });
 
 onMounted(loadPipeline);
