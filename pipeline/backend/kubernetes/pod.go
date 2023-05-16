@@ -99,7 +99,6 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 	}
 
 	labels["step"] = podName
-	envs := mapToEnvVars(step.Environment)
 
 	var platform string
 	for _, e := range mapToEnvVars(step.Environment) {
@@ -129,7 +128,7 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 				Command:         entrypoint,
 				Args:            args,
 				WorkingDir:      step.WorkingDir,
-				Env:             envs,
+				Env:             mapToEnvVars(step.Environment),
 				VolumeMounts:    volMounts,
 				Resources:       resources,
 				SecurityContext: &v1.SecurityContext{
