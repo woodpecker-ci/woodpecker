@@ -12,6 +12,7 @@ If you have some missing resources, please feel free to [open a pull-request](ht
   - [Docusaurus & publishing to GitHub Pages](https://github.com/woodpecker-ci/woodpecker/blob/master/.woodpecker/docs.yml)
   - [Docker container building](https://github.com/woodpecker-ci/woodpecker/blob/master/.woodpecker/docker.yml)
   - [Helm chart linting & releasing](https://github.com/woodpecker-ci/woodpecker/blob/master/.woodpecker/helm.yml)
+  - [Android Jetpack compose linting and building](https://github.com/dessalines/thumb-key/blob/main/.woodpecker.yml)
 
 ## Projects using Woodpecker
 
