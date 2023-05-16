@@ -427,6 +427,7 @@
     "dl_cli": "Unduh CLI",
     "internal_error": "Terjadi beberapa kesalahan internal",
     "oauth_error": "Terjadi kesalahan saat mengotentikasi dengan penyedia OAuth",
+    "reset_token": "Atur ulang token",
     "settings": "Pengaturan Pengguna",
     "shell_setup": "Pengaturan shell",
     "shell_setup_before": "sebelumnya lakukan penyiapan shell",
