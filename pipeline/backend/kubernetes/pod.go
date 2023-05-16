@@ -10,7 +10,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func Pod(namespace string, step *types.Step, labels map[string]string, platform string, annotations map[string]string) (*v1.Pod, error) {
+func Pod(namespace string, step *types.Step, labels, annotations map[string]string) (*v1.Pod, error) {
 	var (
 		vols       []v1.Volume
 		volMounts  []v1.VolumeMount
@@ -99,6 +99,16 @@ func Pod(namespace string, step *types.Step, labels map[string]string, platform 
 	}
 
 	labels["step"] = podName
+	envs := mapToEnvVars(step.Environment)
+
+	var platform string
+	for _, e := range mapToEnvVars(step.Environment) {
+		if e.Name == "CY_SYSTEM_ARCH" {
+			platform = e.Value
+			break
+		}
+	}
+
 	NodeSelector := map[string]string{"kubernetes.io/arch": platform}
 
 	pod := &v1.Pod{
@@ -119,7 +129,7 @@ func Pod(namespace string, step *types.Step, labels map[string]string, platform 
 				Command:         entrypoint,
 				Args:            args,
 				WorkingDir:      step.WorkingDir,
-				Env:             mapToEnvVars(step.Environment),
+				Env:             envs,
 				VolumeMounts:    volMounts,
 				Resources:       resources,
 				SecurityContext: &v1.SecurityContext{

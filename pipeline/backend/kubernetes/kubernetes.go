@@ -41,7 +41,6 @@ type Config struct {
 	StorageRwx     bool
 	PodLabels      map[string]string
 	PodAnnotations map[string]string
-	Platform       string
 }
 
 func configFromCliContext(ctx context.Context) (*Config, error) {
@@ -170,7 +169,7 @@ func (e *kube) Setup(ctx context.Context, conf *types.Config) error {
 
 // Start the pipeline step.
 func (e *kube) Exec(ctx context.Context, step *types.Step) error {
-	pod, err := Pod(e.config.Namespace, step, e.config.PodLabels, e.config.Platform, e.config.PodAnnotations)
+	pod, err := Pod(e.config.Namespace, step, e.config.PodLabels, e.config.PodAnnotations)
 	if err != nil {
 		return err
 	}
