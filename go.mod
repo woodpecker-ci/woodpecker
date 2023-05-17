@@ -11,7 +11,7 @@ require (
 	github.com/bmatcuk/doublestar/v4 v4.6.0
 	github.com/caddyserver/certmagic v0.17.2
 	github.com/docker/cli v23.0.6+incompatible
-	github.com/docker/distribution v2.8.1+incompatible
+	github.com/docker/distribution v2.8.2+incompatible
 	github.com/docker/docker v23.0.6+incompatible
 	github.com/docker/go-units v0.5.0
 	github.com/drone/envsubst v1.0.3
@@ -20,7 +20,6 @@ require (
 	github.com/gin-gonic/gin v1.9.0
 	github.com/go-ap/httpsig v0.0.0-20221203064646-3647b4d88fdf
 	github.com/go-sql-driver/mysql v1.7.1
-	github.com/gogits/go-gogs-client v0.0.0-20210131175652-1d7215cd8d85
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/google/go-github/v39 v39.2.0
 	github.com/google/tink/go v1.7.0
