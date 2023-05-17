@@ -102,13 +102,13 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 
 	var platform string
 	for _, e := range mapToEnvVars(step.Environment) {
-		if e.Name == "CY_SYSTEM_ARCH" {
+		if e.Name == "CI_SYSTEM_ARCH" {
 			platform = e.Value
 			break
 		}
 	}
 
-	NodeSelector := map[string]string{"kubernetes.io/arch": platform}
+	NodeSelector := map[string]string{"kubernetes.io/arch": strings.Split(platform, "/")[1]}
 
 	pod := &v1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
