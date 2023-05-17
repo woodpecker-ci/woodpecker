@@ -136,6 +136,11 @@ Example: `WOODPECKER_HOST=http://woodpecker.example.org`
 
 Configures the HTTP listener port.
 
+### `WOODPECKER_SERVER_ADDR_TLS`
+> Default: `:443`
+
+Configures the HTTPS listener port when SSL is enabled.
+
 ### `WOODPECKER_SERVER_CERT`
 > Default: empty
 
@@ -416,10 +421,6 @@ Example: `WOODPECKER_ROOT_URL=/woodpecker`
 ### `WOODPECKER_GITHUB_...`
 
 See [GitHub configuration](forges/github/#configuration)
-
-### `WOODPECKER_GOGS_...`
-
-See [Gogs configuration](forges/gogs/#configuration)
 
 ### `WOODPECKER_GITEA_...`
 

@@ -70,29 +70,27 @@ func NewClientWithToken(ctx context.Context, url string, consumer *oauth.Consume
 }
 
 func (c *Client) FindCurrentUser() (*User, error) {
-	CurrentUserIDResponse, err := c.doGet(fmt.Sprintf(currentUserID, c.base))
-	if CurrentUserIDResponse != nil {
-		defer CurrentUserIDResponse.Body.Close()
-	}
+	currentUserIDResponse, err := c.doGet(fmt.Sprintf(currentUserID, c.base))
 	if err != nil {
 		return nil, err
 	}
+	defer currentUserIDResponse.Body.Close()
 
-	bits, err := io.ReadAll(CurrentUserIDResponse.Body)
+	bits, err := io.ReadAll(currentUserIDResponse.Body)
 	if err != nil {
 		return nil, err
 	}
 	login := string(bits)
 
-	CurrentUserResponse, err := c.doGet(fmt.Sprintf(pathUser, c.base, login))
-	if CurrentUserResponse != nil {
-		defer CurrentUserResponse.Body.Close()
+	currentUserResponse, err := c.doGet(fmt.Sprintf(pathUser, c.base, login))
+	if currentUserResponse != nil {
+		defer currentUserResponse.Body.Close()
 	}
 	if err != nil {
 		return nil, err
 	}
 
-	contents, err := io.ReadAll(CurrentUserResponse.Body)
+	contents, err := io.ReadAll(currentUserResponse.Body)
 	if err != nil {
 		return nil, err
 	}

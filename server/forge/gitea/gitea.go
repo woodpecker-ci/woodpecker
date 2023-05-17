@@ -143,12 +143,13 @@ func (c *Gitea) Login(ctx context.Context, w http.ResponseWriter, req *http.Requ
 	}
 
 	return &model.User{
-		Token:  token.AccessToken,
-		Secret: token.RefreshToken,
-		Expiry: token.Expiry.UTC().Unix(),
-		Login:  account.UserName,
-		Email:  account.Email,
-		Avatar: expandAvatar(c.URL, account.AvatarURL),
+		Token:         token.AccessToken,
+		Secret:        token.RefreshToken,
+		Expiry:        token.Expiry.UTC().Unix(),
+		Login:         account.UserName,
+		Email:         account.Email,
+		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(account.ID)),
+		Avatar:        expandAvatar(c.URL, account.AvatarURL),
 	}, nil
 }
 
@@ -564,12 +565,14 @@ func getStatus(status model.StatusValue) gitea.StatusState {
 		return gitea.StatusPending
 	case model.StatusSuccess:
 		return gitea.StatusSuccess
-	case model.StatusFailure, model.StatusError:
+	case model.StatusFailure:
 		return gitea.StatusFailure
 	case model.StatusKilled:
 		return gitea.StatusFailure
 	case model.StatusDeclined:
 		return gitea.StatusWarning
+	case model.StatusError:
+		return gitea.StatusError
 	default:
 		return gitea.StatusFailure
 	}
