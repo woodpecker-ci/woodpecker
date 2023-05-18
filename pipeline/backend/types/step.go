@@ -33,4 +33,5 @@ type Step struct {
 	NetworkMode  string            `json:"network_mode,omitempty"`
 	IpcMode      string            `json:"ipc_mode,omitempty"`
 	Sysctls      map[string]string `json:"sysctls,omitempty"`
+	Resources    Resources         `json:"resources,omitempty"`
 }

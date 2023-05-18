@@ -110,6 +110,11 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		}
 	}
 
+	resources := backend.Resources{
+		Limits:   container.Resources.Limits,
+		Requests: container.Resources.Requests,
+	}
+
 	memSwapLimit := int64(container.MemSwapLimit)
 	if c.reslimit.MemSwapLimit != 0 {
 		memSwapLimit = c.reslimit.MemSwapLimit
@@ -176,6 +181,7 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		Failure:      failure,
 		NetworkMode:  networkMode,
 		IpcMode:      ipcMode,
+		Resources:    resources,
 	}
 }
 

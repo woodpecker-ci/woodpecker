@@ -243,6 +243,9 @@
           "type": "string",
           "enum": ["fail", "ignore"],
           "default": "fail"
+        },
+        "resources": {
+          "$ref": "#/definitions/step_resources"
         }
       }
     },
@@ -479,6 +482,24 @@
     "step_directory": {
       "description": "Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#directory",
       "type": "string"
+    },
+    "step_resources": {
+      "description": "Resources for the kubernetes backend. Read more: https://woodpecker-ci.org/docs/administration/backends/kubernetes",
+      "type": "object",
+      "properties": {
+        "requests": {
+          "$ref": "#/definitions/step_resources_object"
+        },
+        "limits": {
+          "$ref": "#/definitions/step_resources_object"
+        }
+      }
+    },
+    "step_resources_object": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
     },
     "services": {
       "description": "Read more: https://woodpecker-ci.org/docs/usage/services",

@@ -19,6 +19,11 @@ type (
 		Email    string
 	}
 
+	Resources struct {
+		Requests map[string]string `yaml:"requests,omitempty"`
+		Limits   map[string]string `yaml:"limits,omitempty"`
+	}
+
 	// Containers denotes an ordered collection of containers.
 	Containers struct {
 		Containers []*Container
@@ -62,11 +67,13 @@ type (
 		Sysctls       types.SliceorMap       `yaml:"sysctls,omitempty"`
 		When          constraint.When        `yaml:"when,omitempty"`
 		Settings      map[string]interface{} `yaml:"settings"`
+		Resources     Resources              `yaml:"resources,omitempty"`
 	}
 )
 
 // UnmarshalYAML implements the Unmarshaler interface.
 func (c *Containers) UnmarshalYAML(value *yaml.Node) error {
+	fmt.Println("UnmarshalYAML")
 	switch value.Kind {
 	// We support maps ...
 	case yaml.MappingNode:
