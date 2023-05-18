@@ -17,6 +17,7 @@ If you have some missing resources, please feel free to [open a pull-request](ht
 
 - [Woodpecker-CI](https://github.com/woodpecker-ci/woodpecker/tree/master/.woodpecker) itself
 - [All official plugins](https://github.com/woodpecker-ci?q=plugin&type=all)
+- [dessalines/thumb-key](https://github.com/dessalines/thumb-key/blob/main/.woodpecker.yml) - Android Jetpack compose linting and building
 
 ## Tools
 
