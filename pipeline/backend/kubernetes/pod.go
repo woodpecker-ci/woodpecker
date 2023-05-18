@@ -100,6 +100,16 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 
 	labels["step"] = podName
 
+	var platform string
+	for _, e := range mapToEnvVars(step.Environment) {
+		if e.Name == "CI_SYSTEM_ARCH" {
+			platform = e.Value
+			break
+		}
+	}
+
+	NodeSelector := map[string]string{"kubernetes.io/arch": strings.Split(platform, "/")[1]}
+
 	pod := &v1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        podName,
@@ -110,6 +120,7 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 		Spec: v1.PodSpec{
 			RestartPolicy: v1.RestartPolicyNever,
 			HostAliases:   hostAliases,
+			NodeSelector:  NodeSelector,
 			Containers: []v1.Container{{
 				Name:            podName,
 				Image:           step.Image,
