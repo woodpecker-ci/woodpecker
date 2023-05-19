@@ -63,18 +63,18 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 		hostAliases = append(hostAliases, v1.HostAlias{IP: host[1], Hostnames: []string{host[0]}})
 	}
 
-	resources := v1.ResourceRequirements{Requests: v1.ResourceList{}, Limits: v1.ResourceList{}}
+	resourceRequirements := v1.ResourceRequirements{Requests: v1.ResourceList{}, Limits: v1.ResourceList{}}
 	var err error
 	for key, val := range step.Resources.Requests {
 		resourceKey := v1.ResourceName(key)
-		resources.Requests[resourceKey], err = resource.ParseQuantity(val)
+		resourceRequirements.Requests[resourceKey], err = resource.ParseQuantity(val)
 		if err != nil {
 			return nil, fmt.Errorf("resource request '%v' quantity '%v': %w", key, val, err)
 		}
 	}
 	for key, val := range step.Resources.Limits {
 		resourceKey := v1.ResourceName(key)
-		resources.Limits[resourceKey], err = resource.ParseQuantity(val)
+		resourceRequirements.Limits[resourceKey], err = resource.ParseQuantity(val)
 		if err != nil {
 			return nil, fmt.Errorf("resource limit '%v' quantity '%v': %w", key, val, err)
 		}
@@ -117,7 +117,7 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 				WorkingDir:      step.WorkingDir,
 				Env:             mapToEnvVars(step.Environment),
 				VolumeMounts:    volMounts,
-				Resources:       resources,
+				Resources:       resourceRequirements,
 				SecurityContext: &v1.SecurityContext{
 					Privileged: &step.Privileged,
 				},
