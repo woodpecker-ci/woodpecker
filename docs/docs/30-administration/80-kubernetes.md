@@ -1,6 +1,6 @@
 # Kubernetes
 
-Woodpecker does support Kubernetes as a backend.
+Woodpecker does support Kubernetes as a backend. See the [Kubernetes backend configuration](backends/kubernetes/#configuration) for backend-specific options.
 
 :::caution
 Kubernetes support is still experimental and not all pipeline features are fully supported yet.
