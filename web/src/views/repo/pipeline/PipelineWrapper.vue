@@ -160,7 +160,7 @@ const { doSubmit: restartPipeline, isLoading: isRestartingPipeline } = useAsyncA
     throw new Error('Unexpected: Repo is undefined');
   }
 
-  const newPipeline = await apiClient.restartPipeline(repo.value.owner, repo.value.name, pipelineId.value, {
+  const newPipeline = await apiClient.restartPipeline(repo.value.id, pipelineId.value, {
     fork: true,
   });
   notifications.notify({ title: i18n.t('repo.pipeline.actions.restart_success'), type: 'success' });
