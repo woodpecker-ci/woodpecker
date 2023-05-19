@@ -73,7 +73,6 @@ type (
 
 // UnmarshalYAML implements the Unmarshaler interface.
 func (c *Containers) UnmarshalYAML(value *yaml.Node) error {
-	fmt.Println("UnmarshalYAML")
 	switch value.Kind {
 	// We support maps ...
 	case yaml.MappingNode:
