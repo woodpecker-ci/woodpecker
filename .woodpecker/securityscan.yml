@@ -8,14 +8,12 @@ pipeline:
     image: *trivy_plugin
     settings:
       skip-dirs: web/,docs/
-      server: http://trivy-server:4954
 
   check docs:
     group: check
     image: *trivy_plugin
     settings:
       skip-dirs: node_modules/,plugins/woodpecker-plugins/node_modules
-      server: http://trivy-server:4954
       dir:  docs/
       # TODO currently it is not fixable so just do not block currently
       exit-code: 0
@@ -25,13 +23,4 @@ pipeline:
     image: *trivy_plugin
     settings:
       skip-dirs: node_modules/
-      server: http://trivy-server:4954
       dir:  web/
-
-services:
-  trivy-server:
-    image: *trivy_image
-    commands:
-      - trivy server
-    ports:
-      - 4954
