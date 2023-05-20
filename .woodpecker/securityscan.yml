@@ -1,34 +1,28 @@
 variables:
-  - &trivy_image aquasec/trivy:latest
-  - &wait_for_server
-    - apk add --no-cache curl
-    - echo -n "wait for server ..."; while [ $(curl http://trivy-server:4954 -s -o /dev/null || echo true) ]; do sleep 1s; echo -n .; done; echo -n " done"; echo
+  - &trivy_plugin codeberg.org/woodpecker-plugins/trivy:latest
 
 pipeline:
   check backend:
     group: check
-    image: *trivy_image
-    commands:
-      - <<: *wait_for_server
-      - trivy fs --exit-code 0 --server http://trivy-server:4954 --skip-dirs web/ --skip-dirs docs/ --severity UNKNOWN,LOW .
-      - trivy fs --exit-code 1 --server http://trivy-server:4954 --skip-dirs web/ --skip-dirs docs/ --severity MEDIUM,HIGH,CRITICAL .
+    image: *trivy_plugin
+    settings:
+      skip-dirs: web/,docs/
 
   check docs:
     group: check
-    image: *trivy_image
-    commands:
-      - <<: *wait_for_server
-      - trivy fs --exit-code 0 --server http://trivy-server:4954 --skip-dirs node_modules/ --skip-dirs plugins/woodpecker-plugins/node_modules --severity UNKNOWN,LOW docs/
+    image: *trivy_plugin
+    settings:
+      skip-dirs: node_modules/,plugins/woodpecker-plugins/node_modules
+      dir:  docs/
       # TODO currently it is not fixable so just do not block currently
-      - trivy fs --exit-code 0 --server http://trivy-server:4954 --skip-dirs node_modules/ --skip-dirs plugins/woodpecker-plugins/node_modules --severity MEDIUM,HIGH,CRITICAL docs/
+      exit-code: 0
 
   check web:
     group: check
-    image: *trivy_image
-    commands:
-      - <<: *wait_for_server
-      - trivy fs --exit-code 0 --server http://trivy-server:4954 --skip-dirs node_modules/ --severity UNKNOWN,LOW web/
-      - trivy fs --exit-code 1 --server http://trivy-server:4954 --skip-dirs node_modules/ --severity MEDIUM,HIGH,CRITICAL web/
+    image: *trivy_plugin
+    settings:
+      skip-dirs: node_modules/
+      dir:  web/
 
 services:
   trivy-server:
