@@ -1,4 +1,5 @@
 variables:
+  - &trivy_image aquasec/trivy:latest
   - &trivy_plugin codeberg.org/woodpecker-plugins/trivy:latest
 
 pipeline:
