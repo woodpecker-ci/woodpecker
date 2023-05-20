@@ -1,19 +1,39 @@
+variables:
+  - &trivy_image aquasec/trivy:latest
+  - &wait_for_server
+    - apk add --no-cache curl
+    - echo -n "wait for server ..."; while [ $(curl http://trivy-server:4954 -s -o /dev/null || echo true) ]; do sleep 1s; echo -n .; done; echo -n " done"; echo
+
 pipeline:
   check backend:
-    image: &trivy_image aquasec/trivy:latest
+    group: check
+    image: *trivy_image
     commands:
-      - trivy fs --exit-code 0 --skip-dirs web/ --skip-dirs docs/ --severity UNKNOWN,LOW .
-      - trivy fs --exit-code 1 --skip-dirs web/ --skip-dirs docs/ --severity MEDIUM,HIGH,CRITICAL .
+      - <<: *wait_for_server
+      - trivy fs --exit-code 0 --server http://trivy-server:4954 --skip-dirs web/ --skip-dirs docs/ --severity UNKNOWN,LOW .
+      - trivy fs --exit-code 1 --server http://trivy-server:4954 --skip-dirs web/ --skip-dirs docs/ --severity MEDIUM,HIGH,CRITICAL .
 
   check docs:
+    group: check
     image: *trivy_image
     commands:
-      - trivy fs --exit-code 0 --skip-dirs node_modules/ --skip-dirs plugins/woodpecker-plugins/node_modules --severity UNKNOWN,LOW docs/
+      - <<: *wait_for_server
+      - trivy fs --exit-code 0 --server http://trivy-server:4954 --skip-dirs node_modules/ --skip-dirs plugins/woodpecker-plugins/node_modules --severity UNKNOWN,LOW docs/
       # TODO currently it is not fixable so just do not block currently
-      - trivy fs --exit-code 0 --skip-dirs node_modules/ --skip-dirs plugins/woodpecker-plugins/node_modules --severity MEDIUM,HIGH,CRITICAL docs/
+      - trivy fs --exit-code 0 --server http://trivy-server:4954 --skip-dirs node_modules/ --skip-dirs plugins/woodpecker-plugins/node_modules --severity MEDIUM,HIGH,CRITICAL docs/
 
   check web:
+    group: check
     image: *trivy_image
     commands:
-      - trivy fs --exit-code 0 --skip-dirs node_modules/ --severity UNKNOWN,LOW web/
-      - trivy fs --exit-code 1 --skip-dirs node_modules/ --severity MEDIUM,HIGH,CRITICAL web/
+      - <<: *wait_for_server
+      - trivy fs --exit-code 0 --server http://trivy-server:4954 --skip-dirs node_modules/ --severity UNKNOWN,LOW web/
+      - trivy fs --exit-code 1 --server http://trivy-server:4954 --skip-dirs node_modules/ --severity MEDIUM,HIGH,CRITICAL web/
+
+services:
+  trivy-server:
+    image: *trivy_image
+    commands:
+      - trivy server
+    ports:
+      - 4954
