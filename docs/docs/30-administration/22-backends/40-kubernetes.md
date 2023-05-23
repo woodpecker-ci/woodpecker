@@ -53,12 +53,14 @@ pipeline:
       - go get
       - go build
       - go test
-    resources:
-      requests:
-        memory: 128Mi
-        cpu: 1000m
-      limits:
-        memory: 256Mi
+    backend_options:
+      kubernetes:
+        resources:
+          requests:
+            memory: 128Mi
+            cpu: 1000m
+          limits:
+            memory: 256Mi
 ```
 
 See the [kubernetes documentation](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/) for more information on using resources.
