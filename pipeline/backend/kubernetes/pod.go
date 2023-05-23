@@ -65,14 +65,14 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 
 	resourceRequirements := v1.ResourceRequirements{Requests: v1.ResourceList{}, Limits: v1.ResourceList{}}
 	var err error
-	for key, val := range step.Resources.Requests {
+	for key, val := range step.BackendOptions.Kubernetes.Resources.Requests {
 		resourceKey := v1.ResourceName(key)
 		resourceRequirements.Requests[resourceKey], err = resource.ParseQuantity(val)
 		if err != nil {
 			return nil, fmt.Errorf("resource request '%v' quantity '%v': %w", key, val, err)
 		}
 	}
-	for key, val := range step.Resources.Limits {
+	for key, val := range step.BackendOptions.Kubernetes.Resources.Limits {
 		resourceKey := v1.ResourceName(key)
 		resourceRequirements.Limits[resourceKey], err = resource.ParseQuantity(val)
 		if err != nil {
