@@ -128,9 +128,9 @@ export default class WoodpeckerClient extends ApiClient {
     repo: string,
     pipeline: string,
     opts?: Record<string, string | number | boolean>,
-  ): Promise<unknown> {
+  ): Promise<Pipeline> {
     const query = encodeQueryString(opts);
-    return this._post(`/api/repos/${owner}/${repo}/pipelines/${pipeline}?${query}`);
+    return this._post(`/api/repos/${owner}/${repo}/pipelines/${pipeline}?${query}`) as Promise<Pipeline>;
   }
 
   getLogs(owner: string, repo: string, pipeline: number, step: number): Promise<PipelineLog[]> {

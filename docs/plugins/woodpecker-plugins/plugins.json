@@ -108,6 +108,16 @@
       "name": "ntfy",
       "docs": "https://codeberg.org/l-x/woodpecker-ntfy/raw/branch/main/docs.md",
       "verified": false
+    },
+    {
+      "name": "Trivy",
+      "docs": "https://codeberg.org/woodpecker-plugins/trivy/raw/branch/main/docs.md",
+      "verified": true
+    },
+    {
+      "name": "MkDocs",
+      "docs": "https://codeberg.org/woodpecker-plugins/mkdocs/raw/branch/main/docs.md",
+      "verified": true
     }
   ]
 }
