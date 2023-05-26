@@ -451,6 +451,7 @@ func PostSkipWorkflow(c *gin.Context) {
 	var (
 		_store        = store.FromContext(c)
 		repo          = session.Repo(c)
+		user          = session.User(c)
 		num, _        = strconv.ParseInt(c.Params.ByName("number"), 10, 64)
 		workflowID, _ = strconv.Atoi(c.Params.ByName("workflowId"))
 	)
@@ -461,7 +462,7 @@ func PostSkipWorkflow(c *gin.Context) {
 		return
 	}
 
-	pl, err = pipeline.SkipWorkflow(c, _store, pl, workflowID, repo)
+	pl, err = pipeline.SkipWorkflow(c, _store, pl, workflowID, repo, user)
 	if err != nil {
 		handlePipelineErr(c, err)
 	} else {

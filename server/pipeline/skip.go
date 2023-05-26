@@ -5,12 +5,13 @@ import (
 	"fmt"
 
 	"github.com/rs/zerolog/log"
+
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
-func SkipWorkflow(ctx context.Context, store store.Store, pipeline *model.Pipeline, workflowPid int, repo *model.Repo) (*model.Pipeline, error) {
+func SkipWorkflow(ctx context.Context, store store.Store, pipeline *model.Pipeline, workflowPid int, repo *model.Repo, user *model.User) (*model.Pipeline, error) {
 	workflowToSkip, err := store.StepFind(pipeline, workflowPid)
 	if err != nil {
 		log.Error().Err(err).Msg("can not get workflow list from store")
@@ -52,6 +53,8 @@ func SkipWorkflow(ctx context.Context, store store.Store, pipeline *model.Pipeli
 	if err := publishToTopic(ctx, pipeline, repo); err != nil {
 		log.Error().Err(err).Msg("publishToTopic")
 	}
+
+	updatePipelineStatus(ctx, pipeline, repo, user)
 
 	return pipeline, nil
 }
