@@ -7,7 +7,8 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
     --mount=type=cache,target=/go/pkg \
     make build-cli
 
-FROM alpine:3.18
+ARG ALPINE_VERSION
+FROM $ALPINE_VERSION
 RUN apk add -U --no-cache ca-certificates
 ENV GODEBUG=netdns=go
 

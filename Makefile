@@ -2,6 +2,7 @@ GO_PACKAGES ?= $(shell go list ./... | grep -v /vendor/)
 
 TARGETOS ?= linux
 TARGETARCH ?= amd64
+ALPINE_IMAGE ?= alpine:3.18
 
 VERSION ?= next
 VERSION_NUMBER ?= 0.0.0
