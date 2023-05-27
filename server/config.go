@@ -68,6 +68,8 @@ var Config = struct {
 		StatusContextFormat string
 		SessionExpires      time.Duration
 		RootURL             string
+		CustomCssFile       string
+		CustomJsFile        string
 		// Open bool
 		// Orgs map[string]struct{}
 		// Admins map[string]struct{}
