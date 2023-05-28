@@ -28,7 +28,7 @@ The storage class to use for the pipeline volume.
 ### `WOODPECKER_BACKEND_K8S_STORAGE_RWX`
 > Default: `true`
 
-Determines if RWX should be used for the pipeline volume.
+Determines if `RWX` should be used for the pipeline volume's [access mode](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes). If false, `RWO` is used instead.
 
 ### `WOODPECKER_BACKEND_K8S_POD_LABELS`
 > Default: empty
@@ -38,7 +38,7 @@ Additional labels to apply to worker pods. Must be a YAML object, e.g. `{"exampl
 ### `WOODPECKER_BACKEND_K8S_POD_ANNOTATIONS`
 > Default: empty
 
-Additional labels to apply to worker pods. Must be a YAML object, e.g. `{"example.com/test-annotation":"test-value"}`.
+Additional annotations to apply to worker pods. Must be a YAML object, e.g. `{"example.com/test-annotation":"test-value"}`.
 
 ## Resources
 
