@@ -24,7 +24,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// GetOrgPermissions returns the permissions of the current user in the given organization.
+// GetOrgPermissions
+//
+//	@Summary	Get the permissions of the current user in the given organization
+//	@Router		/orgs/{owner}/permissions [get]
+//	@Produce	json
+//	@Success	200	{array}	OrgPerm
+//	@Tags		Organization permissions
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		owner			path	string	true	"the owner's name"
 func GetOrgPermissions(c *gin.Context) {
 	var (
 		err   error

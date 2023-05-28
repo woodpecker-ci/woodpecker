@@ -39,6 +39,17 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store/types"
 )
 
+// CreatePipeline
+//
+//	@Summary	Run/trigger a pipelines
+//	@Router		/repos/{owner}/{name}/pipelines [post]
+//	@Produce	json
+//	@Success	200	{object}	Pipeline
+//	@Tags		Pipelines
+//	@Param		Authorization	header	string					true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		owner			path	string					true	"the repository owner's name"
+//	@Param		name			path	string					true	"the repository name"
+//	@Param		options			body	PipelineOptions	true	"the options for the pipeline to run"
 func CreatePipeline(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
@@ -86,6 +97,18 @@ func createTmpPipeline(event model.WebhookEvent, commitSHA string, repo *model.R
 	}
 }
 
+// GetPipelines
+//
+//	@Summary	Get pipelines, current running and past ones
+//	@Router		/repos/{owner}/{name}/pipelines [get]
+//	@Produce	json
+//	@Success	200	{array}	Pipeline
+//	@Tags		Pipelines
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		owner			path	string	true	"the repository owner's name"
+//	@Param		name			path	string	true	"the repository name"
+//	@Param		page			query	int		false	"for response pagination, page offset number"	default(1)
+//	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
 func GetPipelines(c *gin.Context) {
 	repo := session.Repo(c)
 
@@ -101,6 +124,17 @@ func GetPipelines(c *gin.Context) {
 	c.JSON(http.StatusOK, pipelines)
 }
 
+// GetPipeline
+//
+//	@Summary	Pipeline information by number
+//	@Router		/repos/{owner}/{name}/pipelines/{number} [get]
+//	@Produce	json
+//	@Success	200	{object}	Pipeline
+//	@Tags		Pipelines
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		owner			path	string	true	"the repository owner's name"
+//	@Param		name			path	string	true	"the repository name"
+//	@Param		number			path	int		true	"the number of the pipeline, OR 'latest'"
 func GetPipeline(c *gin.Context) {
 	_store := store.FromContext(c)
 	if c.Param("number") == "latest" {
@@ -158,6 +192,19 @@ func GetPipelineLast(c *gin.Context) {
 	c.JSON(http.StatusOK, pl)
 }
 
+// GetPipelineLogs
+//
+//	@Summary	Log information per step
+//	@Router		/repos/{owner}/{name}/logs/{number}/{pid}/{step} [get]
+//	@Produce	plain
+//	@Success	200
+//	@Tags		Pipeline logs
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		owner			path	string	true	"the repository owner's name"
+//	@Param		name			path	string	true	"the repository name"
+//	@Param		number			path	int		true	"the number of the pipeline"
+//	@Param		pid				path	int		true	"the pipeline id"
+//	@Param		step			path	int		true	"the step name"
 func GetPipelineLogs(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
@@ -194,6 +241,18 @@ func GetPipelineLogs(c *gin.Context) {
 	}
 }
 
+// GetStepLogs
+//
+//	@Summary	Log information
+//	@Router		/repos/{owner}/{name}/logs/{number}/{pid} [get]
+//	@Produce	plain
+//	@Success	200
+//	@Tags		Pipeline logs
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		owner			path	string	true	"the repository owner's name"
+//	@Param		name			path	string	true	"the repository name"
+//	@Param		number			path	int		true	"the number of the pipeline"
+//	@Param		pid				path	int		true	"the pipeline id"
 func GetStepLogs(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
@@ -229,6 +288,17 @@ func GetStepLogs(c *gin.Context) {
 	}
 }
 
+// GetPipelineConfig
+//
+//	@Summary	Pipeline configuration
+//	@Router		/repos/{owner}/{name}/pipelines/{number}/config [get]
+//	@Produce	json
+//	@Success	200	{array}	Config
+//	@Tags		Pipelines
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		owner			path	string	true	"the repository owner's name"
+//	@Param		name			path	string	true	"the repository name"
+//	@Param		number			path	int		true	"the number of the pipeline"
 func GetPipelineConfig(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
@@ -253,7 +323,17 @@ func GetPipelineConfig(c *gin.Context) {
 	c.JSON(http.StatusOK, configs)
 }
 
-// CancelPipeline cancels a pipeline
+// CancelPipeline
+//
+//	@Summary	Cancels a pipeline
+//	@Router		/repos/{owner}/{name}/pipelines/{number}/cancel [post]
+//	@Produce	plain
+//	@Success	200
+//	@Tags		Pipelines
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		owner			path	string	true	"the repository owner's name"
+//	@Param		name			path	string	true	"the repository name"
+//	@Param		number			path	int		true	"the number of the pipeline"
 func CancelPipeline(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
@@ -273,7 +353,17 @@ func CancelPipeline(c *gin.Context) {
 	}
 }
 
-// PostApproval start pipelines in gated repos
+// PostApproval
+//
+//	@Summary	Start pipelines in gated repos
+//	@Router		/repos/{owner}/{name}/pipelines/{number}/approve [post]
+//	@Produce	json
+//	@Success	200	{object}	Pipeline
+//	@Tags		Pipelines
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		owner			path	string	true	"the repository owner's name"
+//	@Param		name			path	string	true	"the repository name"
+//	@Param		number			path	int		true	"the number of the pipeline"
 func PostApproval(c *gin.Context) {
 	var (
 		_store = store.FromContext(c)
@@ -296,7 +386,17 @@ func PostApproval(c *gin.Context) {
 	}
 }
 
-// PostDecline decline pipelines in gated repos
+// PostDecline
+//
+//	@Summary	Decline pipelines in gated repos
+//	@Router		/repos/{owner}/{name}/pipelines/{number}/decline [post]
+//	@Produce	json
+//	@Success	200	{object}	Pipeline
+//	@Tags		Pipelines
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		owner			path	string	true	"the repository owner's name"
+//	@Param		name			path	string	true	"the repository name"
+//	@Param		number			path	int		true	"the number of the pipeline"
 func PostDecline(c *gin.Context) {
 	var (
 		_store = store.FromContext(c)
@@ -319,6 +419,14 @@ func PostDecline(c *gin.Context) {
 	}
 }
 
+// GetPipelineQueue
+//
+//	@Summary	List pipeline queues
+//	@Router		/pipelines [get]
+//	@Produce	json
+//	@Success	200	{array}	Feed
+//	@Tags		Pipeline queues
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 func GetPipelineQueue(c *gin.Context) {
 	out, err := store.FromContext(c).GetPipelineQueue()
 	if err != nil {
@@ -328,7 +436,20 @@ func GetPipelineQueue(c *gin.Context) {
 	c.JSON(http.StatusOK, out)
 }
 
-// PostPipeline restarts a pipeline optional with altered event, deploy or environment
+// PostPipeline
+//
+//	@Summary		Restart a pipeline
+//	@Description	Restarts a pipeline optional with altered event, deploy or environment
+//	@Router			/repos/{owner}/{name}/pipelines/{number} [post]
+//	@Produce		json
+//	@Success		200	{object}	Pipeline
+//	@Tags			Pipelines
+//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param			owner			path	string	true	"the repository owner's name"
+//	@Param			name			path	string	true	"the repository name"
+//	@Param			number			path	int		true	"the number of the pipeline"
+//	@Param			event			query	string	false	"override the event type"
+//	@Param			deploy_to		query	string	false	"override the target deploy value"
 func PostPipeline(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
@@ -398,6 +519,17 @@ func PostPipeline(c *gin.Context) {
 	}
 }
 
+// DeletePipelineLogs
+//
+//	@Summary	Deletes log
+//	@Router		/repos/{owner}/{name}/logs/{number} [post]
+//	@Produce	plain
+//	@Success	200
+//	@Tags		Pipeline logs
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		owner			path	string	true	"the repository owner's name"
+//	@Param		name			path	string	true	"the repository name"
+//	@Param		number			path	int		true	"the number of the pipeline"
 func DeletePipelineLogs(c *gin.Context) {
 	_store := store.FromContext(c)
 

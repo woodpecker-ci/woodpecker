@@ -16,10 +16,10 @@ package main
 
 import (
 	"fmt"
-	"os"
-
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/urfave/cli/v2"
+	_ "github.com/woodpecker-ci/woodpecker/cmd/server/docs"
+	"os"
 
 	"github.com/woodpecker-ci/woodpecker/version"
 )
@@ -31,6 +31,8 @@ func main() {
 	app.Usage = "woodpecker server"
 	app.Action = run
 	app.Flags = flags
+
+	setupSwaggerStaticConfig()
 
 	if err := app.Run(os.Args); err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, err)

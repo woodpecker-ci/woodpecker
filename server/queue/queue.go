@@ -18,9 +18,9 @@ var (
 
 // InfoT provides runtime information.
 type InfoT struct {
-	Pending       []*model.Task `json:"pending"`
-	WaitingOnDeps []*model.Task `json:"waiting_on_deps"`
-	Running       []*model.Task `json:"running"`
+	Pending       []*model.Task/* @name Task */ `json:"pending"`
+	WaitingOnDeps []*model.Task/* @name Task */ `json:"waiting_on_deps"`
+	Running       []*model.Task/* @name Task */ `json:"running"`
 	Stats         struct {
 		Workers       int `json:"worker_count"`
 		Pending       int `json:"pending_count"`
@@ -29,7 +29,7 @@ type InfoT struct {
 		Complete      int `json:"completed_count"`
 	} `json:"stats"`
 	Paused bool `json:"paused"`
-}
+} //	@name InfoT
 
 func (t *InfoT) String() string {
 	var sb strings.Builder

@@ -40,9 +40,6 @@ extras/
 /build/
 /dist/
 
-server/swagger/files/*.json
-server/swagger/swagger_gen.go
-
 docs/venv
 
 # helm charts

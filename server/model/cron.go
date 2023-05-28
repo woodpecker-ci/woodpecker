@@ -20,17 +20,16 @@ import (
 	"github.com/robfig/cron"
 )
 
-// swagger:model cron
 type Cron struct {
 	ID        int64  `json:"id"                  xorm:"pk autoincr"`
 	Name      string `json:"name"                xorm:"UNIQUE(s) INDEX"`
 	RepoID    int64  `json:"repo_id"             xorm:"repo_id UNIQUE(s) INDEX"`
 	CreatorID int64  `json:"creator_id"          xorm:"creator_id INDEX"`
 	NextExec  int64  `json:"next_exec"`
-	Schedule  string `json:"schedule"            xorm:"NOT NULL"` // @weekly, 3min, ...
+	Schedule  string `json:"schedule"            xorm:"NOT NULL"` //	@weekly,	3min, ...
 	Created   int64  `json:"created_at"          xorm:"created NOT NULL DEFAULT 0"`
 	Branch    string `json:"branch"`
-}
+} //	@name Cron
 
 // TableName returns the database table name for xorm
 func (Cron) TableName() string {
