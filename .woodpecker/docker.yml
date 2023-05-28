@@ -64,6 +64,8 @@ pipeline:
       dockerfile: docker/Dockerfile.server.alpine.multiarch
       platforms: *platforms_alpine
       tag: pull_${CI_COMMIT_PULL_REQUEST}-alpine
+      build_args:
+        - ALPINE_VERSION: *alpine_image
     when:
       event: pull_request
 
@@ -163,6 +165,20 @@ pipeline:
       dockerfile: docker/Dockerfile.agent.multiarch
       platforms: *platforms_preview
       tag: pull_${CI_COMMIT_PULL_REQUEST}
+    when:
+      event: pull_request
+
+  publish-agent-preview-alpine:
+    group: docker
+    image: woodpeckerci/plugin-docker-buildx
+    secrets: [docker_username, docker_password]
+    settings:
+      repo: woodpeckerci/woodpecker-agent
+      dockerfile: docker/Dockerfile.agent.alpine.multiarch
+      platforms: *platforms_preview
+      tag: pull_${CI_COMMIT_PULL_REQUEST}
+      build_args:
+        - ALPINE_VERSION: *alpine_image
     when:
       event: pull_request
 
