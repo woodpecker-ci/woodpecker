@@ -78,7 +78,6 @@ func GetBadge(c *gin.Context) {
 //
 //	@Summary		Provide pipeline status information to the CCMenu tool
 //	@Description	CCMenu displays the pipeline status of projects on a CI server as an item in the Mac's menu bar.
-//	@Description	It started as part of the CruiseControl project that built the first continuous integration server.
 //	@Description	More details on how to install, you can find at http://ccmenu.org/
 //	@Description	The response format adheres to CCTray v1 Specification, https://cctray.org/v1/
 //	@Router			/badges/{owner}/{name}/cc.xml [get]
