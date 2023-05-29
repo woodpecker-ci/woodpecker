@@ -41,7 +41,7 @@ Woodpecker offers a comprehensive REST API, so you can integrate easily with fro
 
 ## API specification
 
-Starting with Woodpecker v0.15.10+ a Swagger v2 API specification is served by the Woodpecker Server.
+Starting with Woodpecker v1.0.0 a Swagger v2 API specification is served by the Woodpecker Server.
 The typical URL looks like "http://woodpecker-host/swagger/doc.json", where you can fetch the API specification.
 
 ## Swagger API UI
