@@ -3486,14 +3486,13 @@ const docTemplate = `{
         },
         "/user/token": {
             "post": {
-                "description": "tbd.",
                 "produces": [
-                    "application/json"
+                    "text/plain"
                 ],
                 "tags": [
                     "User"
                 ],
-                "summary": "tbd",
+                "summary": "Return the token of the current user as stringª",
                 "parameters": [
                     {
                         "type": "string",
