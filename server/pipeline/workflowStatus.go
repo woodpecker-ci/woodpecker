@@ -25,7 +25,7 @@ func UpdateWorkflowToStatusStarted(store model.UpdateWorkflowStore, workflow mod
 	return &workflow, store.WorkflowUpdate(&workflow)
 }
 
-func UpdateWorkflowToStatusSkipped(store model.UpdateWorkflowStore, workflow model.Workflow, stopped int64) (*model.Workflow, error) {
+func UpdateWorkflowToStatusSkipped(store model.UpdateWorkflowStore, workflow model.Workflow) (*model.Workflow, error) {
 	workflow.State = model.StatusSkipped
 	return &workflow, store.WorkflowUpdate(&workflow)
 }

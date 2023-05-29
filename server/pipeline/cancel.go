@@ -69,7 +69,7 @@ func Cancel(ctx context.Context, store store.Store, repo *model.Repo, user *mode
 	// Running ones will be set when the agents stop on the cancel signal
 	for _, workflow := range workflows {
 		if workflow.State == model.StatusPending {
-			if _, err = UpdateWorkflowToStatusSkipped(store, *workflow, 0); err != nil {
+			if _, err = UpdateWorkflowToStatusSkipped(store, *workflow); err != nil {
 				log.Error().Msgf("error: done: cannot update step_id %d state: %s", workflow.ID, err)
 			}
 		}
