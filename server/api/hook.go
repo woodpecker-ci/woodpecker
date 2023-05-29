@@ -101,7 +101,7 @@ func BlockTilQueueHasRunningItem(c *gin.Context) {
 //	@Produce	plain
 //	@Success	200
 //	@Tags		System
-//	@Param		hook	body	object	true	"the webhook payload; Github or Gitea is automatically detected"
+//	@Param		hook	body	object	true	"the webhook payload; forge is automatically detected"
 func PostHook(c *gin.Context) {
 	_store := store.FromContext(c)
 	forge := server.Config.Services.Forge
