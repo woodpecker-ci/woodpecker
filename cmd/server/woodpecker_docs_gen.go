@@ -44,7 +44,7 @@ The typical URL looks like "http://woodpecker-host/swagger/doc.json", where you 
 
 ## Swagger API UI
 
-Starting with Woodpecker v0.15.10+ a Swagger web user interface (UI) is served by the Woodpecker Server.
+Starting with Woodpecker v1.0.0 a Swagger web user interface (UI) is served by the Woodpecker Server.
 Typically, you can open "http://woodpecker-host/swagger/index.html" in your browser, to explore the API documentation.
 
 # API endpoint summary
