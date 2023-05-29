@@ -24,12 +24,14 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"github.com/go-swagger/go-swagger/generator"
-	"github.com/woodpecker-ci/woodpecker/cmd/server/docs"
 	"os"
 	"path"
 	"strings"
 	"time"
+	
+	"github.com/go-swagger/go-swagger/generator"
+	
+	"github.com/woodpecker-ci/woodpecker/cmd/server/docs"
 )
 
 const RestApiMarkdownInto = `
