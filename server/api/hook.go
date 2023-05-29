@@ -96,7 +96,7 @@ func BlockTilQueueHasRunningItem(c *gin.Context) {
 
 // PostHook
 //
-//	@Summary	Incoming webhook from Github or Gitea
+//	@Summary	Incoming webhook from forge
 //	@Router		/hook [post]
 //	@Produce	plain
 //	@Success	200
