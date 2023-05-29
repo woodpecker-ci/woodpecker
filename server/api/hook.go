@@ -38,7 +38,7 @@ var skipRe = regexp.MustCompile(`\[(?i:ci *skip|skip *ci)\]`)
 // GetQueueInfo
 //
 //	@Summary	Get pipeline queue information
-//	@Description	TODO: link the InfoT response object - this is blocked, until this swag-issue is solved ...
+//	@Description	TODO: link the InfoT response object - this is blocked, until the `swaggo/swag` tool dependency is v1.18.12 or newer
 //	@Router		/queue/info [get]
 //	@Produce	json
 //	@Success	200	{object} map[string]string
