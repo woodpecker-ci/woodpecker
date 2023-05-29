@@ -20,7 +20,7 @@ import (
 )
 
 // setupSwaggerStaticConfig initializes static content only (contacts, title and description)
-// for dynamic configuration of e.g. hostname, etc. see router.SetupSwaggerConfigAndRoutes
+// for dynamic configuration of e.g. hostname, etc. see router.setupSwaggerConfigAndRoutes
 //
 //	@contact.name	Woodpecker CI Community
 //	@contact.url	https://woodpecker-ci.org/
