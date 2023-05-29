@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"net/http"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -58,7 +59,7 @@ func New() (*gin.Engine, error) {
 }
 
 func handleCustomFilesAndAssets(assetHandler http.Handler) http.HandlerFunc {
-	var serveFileOrEmptyContent = func(w http.ResponseWriter, r *http.Request, localFileName string) {
+	serveFileOrEmptyContent := func(w http.ResponseWriter, r *http.Request, localFileName string) {
 		if len(localFileName) > 0 {
 			http.ServeFile(w, r, localFileName)
 		} else {
@@ -67,9 +68,9 @@ func handleCustomFilesAndAssets(assetHandler http.Handler) http.HandlerFunc {
 		}
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.RequestURI == "/assets/custom.js" {
+		if strings.HasSuffix(r.RequestURI, "/assets/custom.js") {
 			serveFileOrEmptyContent(w, r, server.Config.Server.CustomJsFile)
-		} else if r.RequestURI == "/assets/custom.css" {
+		} else if strings.HasSuffix(r.RequestURI, "/assets/custom.css") {
 			serveFileOrEmptyContent(w, r, server.Config.Server.CustomCssFile)
 		} else {
 			assetHandler.ServeHTTP(w, r)
