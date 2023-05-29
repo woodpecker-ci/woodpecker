@@ -53,15 +53,15 @@ More enhanced information you can find here https://github.com/swaggo/swag/blob/
 
 ##### generate the server's Go code containing the Swagger
 
-```make generate-swagger```
+`make generate-swagger`
 
 ##### update the Markdown in the ./docs folder
 
-```make docs```
+`make docs`
 
 ##### auto-format swagger related godoc
 
-```go run github.com/swaggo/swag/cmd/swag@latest fmt -g server/api/z.go```
+`go run github.com/swaggo/swag/cmd/swag@latest fmt -g server/api/z.go`
 
 **WARNING, known issue**: using swag v2.0.0-rc3 , there's a bug when running the `fmt` command,
 which makes the swagger generator failing, because it can't find the models/structs/types anymore.
