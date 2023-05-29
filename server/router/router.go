@@ -15,14 +15,15 @@
 package router
 
 import (
+	"net/http"
+	"net/url"
+
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/woodpecker-ci/woodpecker/cmd/server/docs"
 	"github.com/woodpecker-ci/woodpecker/server"
-	"net/http"
-	"net/url"
 
 	"github.com/woodpecker-ci/woodpecker/server/api"
 	"github.com/woodpecker-ci/woodpecker/server/api/metrics"

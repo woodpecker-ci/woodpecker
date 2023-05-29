@@ -121,7 +121,7 @@ func generateTempMarkdown(specFile string) string {
 func readGeneratedMarkdownAndSkipIntro(markdown string) string {
 	scanner := bufio.NewScanner(strings.NewReader(markdown))
 	sb := strings.Builder{}
-	var foundActualContentStart = false
+	foundActualContentStart := false
 	for scanner.Scan() {
 		text := scanner.Text()
 		foundActualContentStart = foundActualContentStart || (strings.HasPrefix(text, "##") && strings.Contains(strings.ToLower(text), "all endpoints"))

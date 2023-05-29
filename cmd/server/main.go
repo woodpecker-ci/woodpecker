@@ -16,10 +16,11 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/urfave/cli/v2"
 	_ "github.com/woodpecker-ci/woodpecker/cmd/server/docs"
-	"os"
 
 	"github.com/woodpecker-ci/woodpecker/version"
 )
