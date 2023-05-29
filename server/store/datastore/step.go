@@ -74,7 +74,7 @@ func (s storage) stepCreate(sess *xorm.Session, steps []*model.Step) error {
 		}
 	}
 
-	return nil
+	return sess.Commit()
 }
 
 func (s storage) StepUpdate(step *model.Step) error {

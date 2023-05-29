@@ -147,7 +147,7 @@ func TestFileIndexes(t *testing.T) {
 }
 
 func TestFileCascade(t *testing.T) {
-	store, closer := newTestStore(t, new(model.File), new(model.Step), new(model.Pipeline))
+	store, closer := newTestStore(t, new(model.File), new(model.Step), new(model.Pipeline), new(model.Workflow))
 	defer closer()
 
 	stepOne := &model.Step{

@@ -27,10 +27,7 @@ func TestStepFind(t *testing.T) {
 	store, closer := newTestStore(t, new(model.Step), new(model.Pipeline))
 	sess := store.engine.NewSession()
 
-	defer func() {
-		closer()
-		_ = sess.Commit()
-	}()
+	defer closer()
 
 	steps := []*model.Step{
 		{
@@ -47,6 +44,7 @@ func TestStepFind(t *testing.T) {
 	assert.NoError(t, store.stepCreate(sess, steps))
 	assert.EqualValues(t, 1, steps[0].ID)
 	assert.Error(t, store.stepCreate(sess, steps))
+	assert.NoError(t, sess.Close())
 
 	step, err := store.StepFind(&model.Pipeline{ID: 1000}, 1)
 	if !assert.NoError(t, err) {
@@ -207,6 +205,7 @@ func TestStepIndexes(t *testing.T) {
 	}); err == nil {
 		t.Errorf("Unexpected error: duplicate pid")
 	}
+	_ = sess.Close()
 }
 
 // TODO: func TestStepCascade(t *testing.T) {}
