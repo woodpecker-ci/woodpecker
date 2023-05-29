@@ -32,7 +32,7 @@ func Cancel(ctx context.Context, store store.Store, repo *model.Repo, user *mode
 		return &ErrBadRequest{Msg: "Cannot cancel a non-running or non-pending or non-blocked pipeline"}
 	}
 
-	steps, err := store.StepList(pipeline)
+	workflows, err := store.WorkflowTree(pipeline)
 	if err != nil {
 		return &ErrNotFound{Msg: err.Error()}
 	}
@@ -42,15 +42,12 @@ func Cancel(ctx context.Context, store store.Store, repo *model.Repo, user *mode
 		stepsToCancel []string
 		stepsToEvict  []string
 	)
-	for _, step := range steps {
-		if step.PPID != 0 {
-			continue
+	for _, workflow := range workflows {
+		if workflow.State == model.StatusRunning {
+			stepsToCancel = append(stepsToCancel, fmt.Sprint(workflow.ID))
 		}
-		if step.State == model.StatusRunning {
-			stepsToCancel = append(stepsToCancel, fmt.Sprint(step.ID))
-		}
-		if step.State == model.StatusPending {
-			stepsToEvict = append(stepsToEvict, fmt.Sprint(step.ID))
+		if workflow.State == model.StatusPending {
+			stepsToEvict = append(stepsToEvict, fmt.Sprint(workflow.ID))
 		}
 	}
 
@@ -70,15 +67,16 @@ func Cancel(ctx context.Context, store store.Store, repo *model.Repo, user *mode
 
 	// Then update the DB status for pending pipelines
 	// Running ones will be set when the agents stop on the cancel signal
-	for _, step := range steps {
-		if step.State == model.StatusPending {
-			if step.PPID != 0 {
+	for _, workflow := range workflows {
+		if workflow.State == model.StatusPending {
+			if _, err = UpdateWorkflowToStatusSkipped(store, *workflow, 0); err != nil {
+				log.Error().Msgf("error: done: cannot update step_id %d state: %s", workflow.ID, err)
+			}
+		}
+		for _, step := range workflow.Children {
+			if step.State == model.StatusPending {
 				if _, err = UpdateStepToStatusSkipped(store, *step, 0); err != nil {
-					log.Error().Msgf("error: done: cannot update step_id %d state: %s", step.ID, err)
-				}
-			} else {
-				if _, err = UpdateStepToStatusKilled(store, *step); err != nil {
-					log.Error().Msgf("error: done: cannot update step_id %d state: %s", step.ID, err)
+					log.Error().Msgf("error: done: cannot update step_id %d state: %s", workflow.ID, err)
 				}
 			}
 		}
@@ -92,11 +90,7 @@ func Cancel(ctx context.Context, store store.Store, repo *model.Repo, user *mode
 
 	updatePipelineStatus(ctx, killedPipeline, repo, user)
 
-	steps, err = store.StepList(killedPipeline)
-	if err != nil {
-		return &ErrNotFound{Msg: err.Error()}
-	}
-	if killedPipeline.Steps, err = model.Tree(steps); err != nil {
+	if killedPipeline.Workflows, err = store.WorkflowTree(killedPipeline); err != nil {
 		return err
 	}
 	if err := publishToTopic(ctx, killedPipeline, repo); err != nil {

@@ -50,9 +50,19 @@ func (s storage) StepList(pipeline *model.Pipeline) ([]*model.Step, error) {
 		Find(&stepList)
 }
 
-func (s storage) StepCreate(steps []*model.Step) error {
-	sess := s.engine.NewSession()
-	defer sess.Close()
+func (s storage) StepListWorkflow(workflow *model.Workflow) ([]*model.Step, error) {
+	return s.stepListWorkflow(s.engine.NewSession(), workflow)
+}
+
+func (s storage) stepListWorkflow(sess *xorm.Session, workflow *model.Workflow) ([]*model.Step, error) {
+	stepList := make([]*model.Step, 0)
+	return stepList, sess.
+		Where("step_workflow_id = ?", workflow.ID).
+		OrderBy("step_pid").
+		Find(&stepList)
+}
+
+func (s storage) stepCreate(sess *xorm.Session, steps []*model.Step) error {
 	if err := sess.Begin(); err != nil {
 		return err
 	}
@@ -64,7 +74,7 @@ func (s storage) StepCreate(steps []*model.Step) error {
 		}
 	}
 
-	return sess.Commit()
+	return nil
 }
 
 func (s storage) StepUpdate(step *model.Step) error {
@@ -84,6 +94,10 @@ func (s storage) StepClear(pipeline *model.Pipeline) error {
 	}
 
 	if _, err := sess.Where("step_pipeline_id = ?", pipeline.ID).Delete(new(model.Step)); err != nil {
+		return err
+	}
+
+	if _, err := sess.Where("workflow_pipeline_id = ?", pipeline.ID).Delete(new(model.Workflow)); err != nil {
 		return err
 	}
 

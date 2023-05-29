@@ -50,7 +50,7 @@ type StepBuilder struct {
 }
 
 type Item struct {
-	Workflow  *model.Step
+	Workflow  *model.Workflow
 	Platform  string
 	Labels    map[string]string
 	DependsOn []string
@@ -76,10 +76,9 @@ func (b *StepBuilder) Build() ([]*Item, error) {
 		}
 
 		for _, axis := range axes {
-			workflow := &model.Step{
+			workflow := &model.Workflow{
 				PipelineID: b.Curr.ID,
 				PID:        pidSequence,
-				PGID:       pidSequence,
 				State:      model.StatusPending,
 				Environ:    axis,
 				Name:       SanitizePath(y.Name),
@@ -295,7 +294,6 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[
 func SetPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*Item) *model.Pipeline {
 	var pidSequence int
 	for _, item := range pipelineItems {
-		pipeline.Steps = append(pipeline.Steps, item.Workflow)
 		if pidSequence < item.Workflow.PID {
 			pidSequence = item.Workflow.PID
 		}
@@ -320,16 +318,17 @@ func SetPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*Item)
 				if item.Workflow.State == model.StatusSkipped {
 					step.State = model.StatusSkipped
 				}
-				pipeline.Steps = append(pipeline.Steps, step)
+				item.Workflow.Children = append(item.Workflow.Children, step)
 			}
 		}
+		pipeline.Workflows = append(pipeline.Workflows, item.Workflow)
 	}
 
 	return pipeline
 }
 
 // return the metadata from the cli context.
-func metadataFromStruct(repo *model.Repo, pipeline, last *model.Pipeline, workflow *model.Step, link string) frontend.Metadata {
+func metadataFromStruct(repo *model.Repo, pipeline, last *model.Pipeline, workflow *model.Workflow, link string) frontend.Metadata {
 	host := link
 	uri, err := url.Parse(link)
 	if err == nil {

@@ -32,7 +32,7 @@ func start(ctx context.Context, store store.Store, activePipeline *model.Pipelin
 		log.Error().Err(err).Msg("Failed to cancel previous pipelines")
 	}
 
-	if err := store.StepCreate(activePipeline.Steps); err != nil {
+	if err := store.WorkflowsCreate(activePipeline.Workflows); err != nil {
 		log.Error().Err(err).Str("repo", repo.FullName).Msgf("error persisting steps for %s#%d", repo.FullName, activePipeline.Number)
 		return nil, err
 	}

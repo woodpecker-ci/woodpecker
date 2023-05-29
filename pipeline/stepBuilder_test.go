@@ -536,14 +536,11 @@ pipeline:
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(pipeline.Steps) != 3 {
+	if len(pipeline.Workflows) != 1 {
 		t.Fatal("Should generate three in total")
 	}
-	if pipeline.Steps[1].PPID != 1 {
-		t.Fatal("Clone step should be a children of the stage")
-	}
-	if pipeline.Steps[2].PPID != 1 {
-		t.Fatal("Pipeline step should be a children of the stage")
+	if len(pipeline.Workflows[0].Children) != 2 {
+		t.Fatal("Workflow should have two children")
 	}
 }
 

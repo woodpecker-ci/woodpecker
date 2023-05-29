@@ -195,7 +195,7 @@ func (c *Config) Dir(_ context.Context, _ *model.User, _ *model.Repo, _ *model.P
 }
 
 // Status is not supported by the bitbucketserver driver.
-func (c *Config) Status(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, _ *model.Step) error {
+func (c *Config) Status(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, _ *model.Workflow) error {
 	status := internal.PipelineStatus{
 		State: convertStatus(pipeline.Status),
 		Desc:  common.GetPipelineStatusDescription(pipeline.Status),

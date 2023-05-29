@@ -125,8 +125,7 @@ func GetPipeline(c *gin.Context) {
 		return
 	}
 	files, _ := _store.FileList(pl, &model.ListOptions{All: true})
-	steps, _ := _store.StepList(pl)
-	if pl.Steps, err = model.Tree(steps); err != nil {
+	if pl.Workflows, err = _store.WorkflowTree(pl); err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
@@ -146,12 +145,7 @@ func GetPipelineLast(c *gin.Context) {
 		return
 	}
 
-	steps, err := _store.StepList(pl)
-	if err != nil {
-		_ = c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-	if pl.Steps, err = model.Tree(steps); err != nil {
+	if pl.Workflows, err = _store.WorkflowTree(pl); err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}

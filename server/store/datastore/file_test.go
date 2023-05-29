@@ -157,7 +157,7 @@ func TestFileCascade(t *testing.T) {
 		Name:       "build",
 		State:      "success",
 	}
-	err1 := store.StepCreate([]*model.Step{stepOne})
+	err1 := store.WorkflowsCreate([]*model.Workflow{{Children: []*model.Step{stepOne}}})
 	assert.EqualValues(t, int64(1), stepOne.ID)
 
 	err2 := store.FileCreate(
@@ -181,7 +181,7 @@ func TestFileCascade(t *testing.T) {
 		t.Errorf("Unexpected error: cannot get inserted step: %s", err3)
 	}
 
-	err := store.StepClear(&model.Pipeline{ID: 1, Steps: []*model.Step{stepOne}})
+	err := store.StepClear(&model.Pipeline{ID: 1, Workflows: []*model.Workflow{{Children: []*model.Step{stepOne}}}})
 	assert.NoError(t, err)
 
 	file, err4 := store.FileFind(&model.Step{ID: 1}, "hello.txt")
