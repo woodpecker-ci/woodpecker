@@ -28,13 +28,13 @@ import (
 	"path"
 	"strings"
 	"time"
-	
+
 	"github.com/go-swagger/go-swagger/generator"
-	
+
 	"github.com/woodpecker-ci/woodpecker/cmd/server/docs"
 )
 
-const RestApiMarkdownInto = `
+const restApiMarkdownInto = `
 # REST API
 
 Woodpecker offers a comprehensive REST API, so you can integrate easily with from and with other tools.
@@ -71,7 +71,7 @@ func main() {
 		panic(err)
 	}
 	defer f.Close()
-	_, err = f.WriteString(RestApiMarkdownInto)
+	_, err = f.WriteString(restApiMarkdownInto)
 	if err != nil {
 		panic(err)
 	}
