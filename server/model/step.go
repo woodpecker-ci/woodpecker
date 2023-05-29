@@ -15,8 +15,6 @@
 
 package model
 
-import "fmt"
-
 // StepStore persists process information to storage.
 type StepStore interface {
 	StepLoad(int64) (*Step, error)
@@ -62,27 +60,4 @@ func (p *Step) Running() bool {
 // Failing returns true if the process state is failed, killed or error.
 func (p *Step) Failing() bool {
 	return p.State == StatusError || p.State == StatusKilled || p.State == StatusFailure
-}
-
-// PipelineStatus determine pipeline status based on corresponding step list
-func PipelineStatus(workflows []*Workflow) StatusValue {
-	status := StatusSuccess
-
-	for _, p := range workflows {
-		if p.Failing() {
-			status = p.State
-		}
-	}
-
-	return status
-}
-
-func findNode(nodes []*Step, pid int) (*Step, error) {
-	for _, node := range nodes {
-		if node.PID == pid {
-			return node, nil
-		}
-	}
-
-	return nil, fmt.Errorf("Corrupt step structure")
 }

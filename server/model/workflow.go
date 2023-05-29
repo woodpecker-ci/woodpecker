@@ -55,48 +55,6 @@ func IsMultiPipeline(workflows []*Workflow) bool {
 	return len(workflows) > 1
 }
 
-/*
-
-// Tree creates a process tree from a flat process list.
-func Tree(steps []*Step) ([]*Step, error) {
-	var nodes []*Step
-
-	// init parent nodes
-	for i := range steps {
-		if steps[i].IsParent() {
-			nodes = append(nodes, steps[i])
-		}
-	}
-
-	// assign children to parents
-	for i := range steps {
-		if !steps[i].IsParent() {
-			parent, err := findNode(nodes, steps[i].PPID)
-			if err != nil {
-				return nil, err
-			}
-			parent.Children = append(parent.Children, steps[i])
-		}
-	}
-
-	return nodes, nil
-}
-*/
-// PipelineStatus determine pipeline status based on corresponding step list
-/*
-func PipelineStatus(steps []*Step) StatusValue {
-	status := StatusSuccess
-
-	for _, p := range steps {
-		if p.IsParent() && p.Failing() {
-			status = p.State
-		}
-	}
-
-	return status
-}
-*/
-
 // IsThereRunningStage determine if it contains workflows running or pending to run
 // TODO: return false based on depends_on (https://github.com/woodpecker-ci/woodpecker/pull/730#discussion_r795681697)
 func IsThereRunningStage(workflows []*Workflow) bool {
@@ -108,15 +66,15 @@ func IsThereRunningStage(workflows []*Workflow) bool {
 	return false
 }
 
-/*
+// PipelineStatus determine pipeline status based on corresponding step list
+func PipelineStatus(workflows []*Workflow) StatusValue {
+	status := StatusSuccess
 
-func findNode(nodes []*Step, pid int) (*Step, error) {
-	for _, node := range nodes {
-		if node.PID == pid {
-			return node, nil
+	for _, p := range workflows {
+		if p.Failing() {
+			status = p.State
 		}
 	}
 
-	return nil, fmt.Errorf("Corrupt step structure")
+	return status
 }
-*/
