@@ -68,12 +68,12 @@ func Load(noRouteHandler http.HandlerFunc, middleware ...gin.HandlerFunc) http.H
 	e.GET("/healthz", api.Health)
 
 	apiRoutes(e)
-	SetupSwaggerConfigAndRoutes(e)
+	setupSwaggerConfigAndRoutes(e)
 
 	return e
 }
 
-func SetupSwaggerConfigAndRoutes(e *gin.Engine) {
+func setupSwaggerConfigAndRoutes(e *gin.Engine) {
 	docs.SwaggerInfo.Host = getHost(server.Config.Server.Host)
 	docs.SwaggerInfo.BasePath = server.Config.Server.RootURL + "/api"
 	e.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
