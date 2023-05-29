@@ -105,18 +105,19 @@ or generate a random one like this:
 
 `openssl rand -hex 32 | docker secret create woodpecker-agent-secret -`
 
-## Custom banner message or logo (a.k.a. white-labeling)
+## Custom Javascript and CSS Styling (a.k.a. white-labeling)
 
-Showing custom banner message in the web UI, or a corporate logo can be done by providing
-custom .JS and .CSS files. These files must be present in the server's filesystem.
+Woodpecker supports custom styling of the Web UI by providing custom JS and CSS files.
+These files must be present in the server's filesystem.
 They can be backed in a Docker image or mounted from a ConfigMap inside a Kubernetes environment.
+The configuration variables are independent of each other, which means it can be just one file present, or both.
 
 ```text
 WOODPECKER_CUSTOM_CSS_FILE=/usr/local/www/woodpecker.css
 WOODPECKER_CUSTOM_CSS_FILE=/usr/local/www/woodpecker.js
 ```
 
-These are examples, how to place a corporate logo in the top navigation bar of Woodpecker.
+The examples below show how to place a banner message in the top navigation bar of Woodpecker.
 
 ##### woodpecker.css
 ```css
@@ -136,7 +137,6 @@ These are examples, how to place a corporate logo in the top navigation bar of W
 ##### woodpecker.js
 
 ```javascript
-
 // place/copy a minified version of jQuery or ZeptoJS here ...
 !function(){"use strict";function e(){};/*...*/}();
 
