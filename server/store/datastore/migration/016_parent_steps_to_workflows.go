@@ -25,11 +25,9 @@ type oldStep016 struct {
 	PipelineID int64             `xorm:"UNIQUE(s) INDEX 'step_pipeline_id'"`
 	PID        int               `xorm:"UNIQUE(s) 'step_pid'"`
 	PPID       int               `xorm:"step_ppid"`
-	PGID       int               `xorm:"step_pgid"`
 	Name       string            `xorm:"step_name"`
 	State      model.StatusValue `xorm:"step_state"`
 	Error      string            `xorm:"VARCHAR(500) step_error"`
-	ExitCode   int               `xorm:"step_exit_code"`
 	Started    int64             `xorm:"step_started"`
 	Stopped    int64             `xorm:"step_stopped"`
 	AgentID    int64             `xorm:"step_agent_id"`
@@ -45,10 +43,11 @@ var parentStepsToWorkflows = task{
 	name:     "parent-steps-to-workflows",
 	required: true,
 	fn: func(sess *xorm.Session) error {
-		if err := sess.Sync(new(oldStep016)); err != nil {
+		if err := sess.Sync(new(model.Workflow)); err != nil {
 			return err
 		}
-		if err := sess.Sync(new(model.Workflow)); err != nil {
+		// make sure the columns exist before removing them
+		if err := sess.Sync(new(oldStep016)); err != nil {
 			return err
 		}
 
