@@ -80,7 +80,7 @@ func RunCron(c *gin.Context) {
 func PostCron(c *gin.Context) {
 	repo := session.Repo(c)
 	user := session.User(c)
-	store := store.FromContext(c)
+	_store := store.FromContext(c)
 	forge := session.Forge(c)
 
 	in := new(model.Cron)
@@ -116,7 +116,7 @@ func PostCron(c *gin.Context) {
 		}
 	}
 
-	if err := store.CronCreate(cron); err != nil {
+	if err := _store.CronCreate(cron); err != nil {
 		c.String(http.StatusInternalServerError, "Error inserting cron %q. %s", in.Name, err)
 		return
 	}
@@ -127,7 +127,7 @@ func PostCron(c *gin.Context) {
 func PatchCron(c *gin.Context) {
 	repo := session.Repo(c)
 	user := session.User(c)
-	store := store.FromContext(c)
+	_store := store.FromContext(c)
 	forge := session.Forge(c)
 
 	id, err := strconv.ParseInt(c.Param("cron"), 10, 64)
@@ -143,7 +143,7 @@ func PatchCron(c *gin.Context) {
 		return
 	}
 
-	cron, err := store.CronFind(repo, id)
+	cron, err := _store.CronFind(repo, id)
 	if err != nil {
 		handleDbGetError(c, err)
 		return
@@ -175,7 +175,7 @@ func PatchCron(c *gin.Context) {
 		c.String(http.StatusUnprocessableEntity, "Error inserting cron. validate failed: %s", err)
 		return
 	}
-	if err := store.CronUpdate(repo, cron); err != nil {
+	if err := _store.CronUpdate(repo, cron); err != nil {
 		c.String(http.StatusInternalServerError, "Error updating cron %q. %s", in.Name, err)
 		return
 	}
