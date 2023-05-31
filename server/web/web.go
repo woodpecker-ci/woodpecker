@@ -84,7 +84,7 @@ func handleCustomFilesAndAssets(assetHandler http.Handler) http.HandlerFunc {
 		if strings.HasSuffix(r.RequestURI, "/assets/custom.js") {
 			serveFileOrEmptyContent(w, r, server.Config.Server.CustomJsFile)
 		} else if strings.HasSuffix(r.RequestURI, "/assets/custom.css") {
-			serveFileOrEmptyContent(w, r, server.Config.Server.CustomCssFile)
+			serveFileOrEmptyContent(w, r, server.Config.Server.CustomCSSFile)
 		} else {
 			assetHandler.ServeHTTP(w, r)
 		}
