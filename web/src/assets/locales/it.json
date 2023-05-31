@@ -95,7 +95,7 @@
       "general": {
         "general": "Generale",
         "pipeline_path": {
-          "default": "Predefinito: .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml",
+          "default": "Predefinito: .woodpecker/*.yml -> .woodpecker.yml",
           "path": "Percorso della pipeline"
         },
         "project": "Impostazioni del progetto",
