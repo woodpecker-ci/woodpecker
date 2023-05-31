@@ -158,7 +158,7 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_REPO_NAME":           repoName,
 		"CI_REPO_SCM":            "git",
 		"CI_REPO_LINK":           m.Repo.Link,
-		"CI_REPO_CLONE_URL":      m.Repo.CloneURL,
+		"CI_REPO_CLONE_LINK":     m.Repo.CloneURL,
 		"CI_REPO_DEFAULT_BRANCH": m.Repo.Branch,
 		"CI_REPO_PRIVATE":        strconv.FormatBool(m.Repo.Private),
 		"CI_REPO_TRUSTED":        "false", // TODO should this be added?
@@ -250,8 +250,9 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_JOB_STATUS":   "", // will be set by agent
 		"CI_JOB_STARTED":  "", // will be set by agent
 		"CI_JOB_FINISHED": "", // will be set by agent
-		// CI_REPO_CLONE_URL
-		"CI_REPO_REMOTE": m.Repo.CloneURL,
+		// CI_REPO_CLONE_LINK
+		"CI_REPO_CLONE_URL": m.Repo.CloneURL,
+		"CI_REPO_REMOTE":    m.Repo.CloneURL,
 	}
 	if m.Curr.Event == EventTag {
 		params["CI_COMMIT_TAG"] = strings.TrimPrefix(m.Curr.Commit.Ref, "refs/tags/")
