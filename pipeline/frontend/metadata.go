@@ -131,7 +131,7 @@ type (
 	// Forge defines runtime metadata about the forge that host the repo
 	Forge struct {
 		Type string `json:"type,omitempty"`
-		Link string `json:"link,omitempty"`
+		URL  string `json:"url,omitempty"`
 	}
 )
 
@@ -231,7 +231,7 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_SYSTEM_VERSION":  version.Version,
 
 		"CI_FORGE_TYPE": m.Forge.Type,
-		"CI_FORGE_LINK": m.Forge.Link,
+		"CI_FORGE_URL":  m.Forge.URL,
 
 		// DEPRECATED
 		"CI_SYSTEM_ARCH": m.Sys.Platform, // TODO: remove after v1.0.x version

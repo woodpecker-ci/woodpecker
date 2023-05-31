@@ -359,7 +359,7 @@ func metadataFromStruct(repo *model.Repo, pipeline, last *model.Pipeline, workfl
 		},
 		Forge: frontend.Forge{
 			Type: server.Config.Services.Forge.Name(),
-			Link: server.Config.Services.Forge.URL(),
+			URL:  server.Config.Services.Forge.URL(),
 		},
 	}
 }
