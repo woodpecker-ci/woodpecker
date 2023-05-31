@@ -337,8 +337,8 @@ func (c *config) newConfig(redirect string) *oauth2.Config {
 		ClientID:     c.Client,
 		ClientSecret: c.Secret,
 		Endpoint: oauth2.Endpoint{
-			AuthURL:  fmt.Sprintf("%s/site/oauth2/authorize", c.URL),
-			TokenURL: fmt.Sprintf("%s/site/oauth2/access_token", c.URL),
+			AuthURL:  fmt.Sprintf("%s/site/oauth2/authorize", c.url),
+			TokenURL: fmt.Sprintf("%s/site/oauth2/access_token", c.url),
 		},
 		RedirectURL: fmt.Sprintf("%s/authorize", redirect),
 	}
