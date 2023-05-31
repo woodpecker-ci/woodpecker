@@ -85,11 +85,13 @@ func GetRepos(c *gin.Context) {
 		for _, r := range _repos {
 			if r.Perm.Push {
 				if active[r.ForgeRemoteID] != nil && active[r.ForgeRemoteID].IsActive {
-					// TODO: should we merge other fields as well?
-					r.ID = active[r.ForgeRemoteID].ID // keep the internal ID
-					r.IsActive = true
+					existingRepo := active[r.ForgeRemoteID]
+					existingRepo.Update(r)
+					existingRepo.IsActive = true
+					repos = append(repos, existingRepo)
+				} else {
+					repos = append(repos, r)
 				}
-				repos = append(repos, r)
 			}
 		}
 
