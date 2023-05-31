@@ -40,8 +40,10 @@ func Test_custom_file_return_actual_content(t *testing.T) {
 
 	temp, err := os.CreateTemp(os.TempDir(), "data.txt")
 	assert.NoError(t, err)
-	temp.Write([]byte("EXPECTED-DATA"))
-	temp.Close()
+	_, err = temp.Write([]byte("EXPECTED-DATA"))
+	assert.NoError(t, err)
+	err = temp.Close()
+	assert.NoError(t, err)
 
 	server.Config.Server.CustomJsFile = temp.Name()
 	server.Config.Server.CustomCSSFile = temp.Name()
