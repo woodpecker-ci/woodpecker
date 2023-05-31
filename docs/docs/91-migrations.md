@@ -9,7 +9,8 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Renamed step environment variable `CI_SYSTEM_ARCH` to `CI_SYSTEM_PLATFORM`. Same applies for the cli exec variable.
 - Renamed environment variables `CI_BUILD_*` and `CI_PREV_BUILD_*` to `CI_PIPELINE_*` and `CI_PREV_PIPELINE_*`, old ones are still available but deprecated
 - Renamed environment variables `CI_JOB_*` to `CI_STEP_*`, old ones are still available but deprecated
-- Renamed environment variable `CI_REPO_REMOTE` to `CI_REPO_CLONE_URL`
+- Renamed environment variable `CI_REPO_REMOTE` to `CI_REPO_CLONE_URL`, old is still available but deprecated
+- Renamed environment variable `*_LINK` to `*_URL`, old ones are still available but deprecated
 - Renamed API endpoints for pipelines (`<owner>/<repo>/builds/<buildId>` -> `<owner>/<repo>/pipelines/<pipelineId>`), old ones are still available but deprecated
 - Updated Prometheus gauge `build_*` to `pipeline_*`
 - Updated Prometheus gauge `*_job_*` to `*_step_*`
