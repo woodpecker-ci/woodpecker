@@ -209,7 +209,7 @@
         },
         "general": "Генерал",
         "pipeline_path": {
-          "default": "За замовчуванням: .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml",
+          "default": "За замовчуванням: .woodpecker/*.yml -> .woodpecker.yml",
           "path": "Траса трубопроводу"
         },
         "project": "Налаштування проекту",
