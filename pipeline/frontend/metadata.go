@@ -252,6 +252,13 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_JOB_FINISHED": "", // will be set by agent
 		// CI_REPO_CLONE_URL
 		"CI_REPO_REMOTE": m.Repo.CloneURL,
+		// use *_URL
+		"CI_REPO_LINK":          m.Repo.Link,
+		"CI_COMMIT_LINK":        m.Curr.Link,
+		"CI_PIPELINE_LINK":      m.Curr.Link,
+		"CI_PREV_COMMIT_LINK":   m.Prev.Link,
+		"CI_PREV_PIPELINE_LINK": m.Prev.Link,
+		"CI_SYSTEM_LINK":        m.Sys.Link,
 	}
 	if m.Curr.Event == EventTag {
 		params["CI_COMMIT_TAG"] = strings.TrimPrefix(m.Curr.Commit.Ref, "refs/tags/")
