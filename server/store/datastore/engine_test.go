@@ -46,7 +46,7 @@ func newTestStore(t *testing.T, tables ...interface{}) (*storage, func()) {
 	}
 
 	for _, table := range tables {
-		if err := engine.Sync2(table); err != nil {
+		if err := engine.Sync(table); err != nil {
 			t.Error(err)
 			t.FailNow()
 		}
