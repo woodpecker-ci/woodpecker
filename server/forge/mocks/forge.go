@@ -418,6 +418,20 @@ func (_m *Forge) Teams(ctx context.Context, u *model.User) ([]*model.Team, error
 	return r0, r1
 }
 
+// URL provides a mock function with given fields:
+func (_m *Forge) URL() string {
+	ret := _m.Called()
+
+	var r0 string
+	if rf, ok := ret.Get(0).(func() string); ok {
+		r0 = rf()
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	return r0
+}
+
 type mockConstructorTestingTNewForge interface {
 	mock.TestingT
 	Cleanup(func())
