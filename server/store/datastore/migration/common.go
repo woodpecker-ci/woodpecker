@@ -23,17 +23,6 @@ import (
 	"xorm.io/xorm/schemas"
 )
 
-func dropTable(sess *xorm.Session, table string) error {
-	dialect := sess.Engine().Dialect().URI().DBType
-	switch dialect {
-	case schemas.MYSQL, schemas.POSTGRES, schemas.SQLITE:
-		_, err := sess.Exec(fmt.Sprintf("DROP TABLE `%s`;", table))
-		return err
-	default:
-		return fmt.Errorf("dialect '%s' not supported", dialect)
-	}
-}
-
 func renameTable(sess *xorm.Session, old, new string) error {
 	dialect := sess.Engine().Dialect().URI().DBType
 	switch dialect {
