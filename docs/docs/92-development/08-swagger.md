@@ -34,7 +34,7 @@ Here's a typical example of how annotations for Swagger documentation look like.
 --- server/model/user.go ---
 type User struct {
   ID int64 `json:"id" xorm:"pk autoincr 'user_id'"`
-	 ...
+	 // ...
 } //	@name User
 ```
 
