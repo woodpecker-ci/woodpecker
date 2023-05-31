@@ -31,7 +31,6 @@ service Woodpecker {
   rpc Done          (DoneRequest)          returns (Empty) {}
   rpc Extend        (ExtendRequest)        returns (Empty) {}
   rpc Update        (UpdateRequest)        returns (Empty) {}
-  rpc Upload        (UploadRequest)        returns (Empty) {}
   rpc Log           (LogRequest)           returns (Empty) {}
   rpc RegisterAgent (RegisterAgentRequest) returns (RegisterAgentResponse) {}
   rpc ReportHealth  (ReportHealthRequest)  returns (Empty) {}
@@ -40,16 +39,6 @@ service Woodpecker {
 //
 // Basic Types
 //
-
-message File {
-  string name = 1;
-  string step = 2;
-  string mime = 3;
-  int64  time = 4;
-  int32  size = 5;
-  bytes  data = 6;
-  map<string, string> meta = 7;
-}
 
 message State {
   string name = 1;
@@ -101,11 +90,6 @@ message DoneRequest {
 
 message ExtendRequest {
   string id = 1;
-}
-
-message UploadRequest {
-  string id = 1;
-  File   file = 2;
 }
 
 message UpdateRequest {
