@@ -79,10 +79,6 @@ func (s storage) StepClear(pipeline *model.Pipeline) error {
 		return err
 	}
 
-	if _, err := sess.Where("file_pipeline_id = ?", pipeline.ID).Delete(new(model.File)); err != nil {
-		return err
-	}
-
 	if _, err := sess.Where("step_pipeline_id = ?", pipeline.ID).Delete(new(model.Step)); err != nil {
 		return err
 	}
@@ -92,9 +88,6 @@ func (s storage) StepClear(pipeline *model.Pipeline) error {
 
 func deleteStep(sess *xorm.Session, stepID int64) error {
 	if _, err := sess.Where("log_step_id = ?", stepID).Delete(new(model.Logs)); err != nil {
-		return err
-	}
-	if _, err := sess.Where("file_step_id = ?", stepID).Delete(new(model.File)); err != nil {
 		return err
 	}
 	_, err := sess.ID(stepID).Delete(new(model.Step))
