@@ -54,7 +54,7 @@ type Opts struct {
 
 // Gitlab implements "Forge" interface
 type GitLab struct {
-	URL          string
+	url          string
 	ClientID     string
 	ClientSecret string
 	SkipVerify   bool
@@ -66,7 +66,7 @@ type GitLab struct {
 // source Git service. See https://gitlab.com
 func New(opts Opts) (forge.Forge, error) {
 	return &GitLab{
-		URL:          opts.URL,
+		url:          opts.URL,
 		ClientID:     opts.ClientID,
 		ClientSecret: opts.ClientSecret,
 		SkipVerify:   opts.SkipVerify,
@@ -78,9 +78,9 @@ func (g *GitLab) Name() string {
 	return "gitlab"
 }
 
-// Link returns the root url of a configured forge
-func (g *GitLab) Link() string {
-	return g.URL
+// URL returns the root url of a configured forge
+func (g *GitLab) URL() string {
+	return g.url
 }
 
 func (g *GitLab) oauth2Config(ctx context.Context) (*oauth2.Config, context.Context) {
@@ -88,8 +88,8 @@ func (g *GitLab) oauth2Config(ctx context.Context) (*oauth2.Config, context.Cont
 			ClientID:     g.ClientID,
 			ClientSecret: g.ClientSecret,
 			Endpoint: oauth2.Endpoint{
-				AuthURL:  fmt.Sprintf("%s/oauth/authorize", g.URL),
-				TokenURL: fmt.Sprintf("%s/oauth/token", g.URL),
+				AuthURL:  fmt.Sprintf("%s/oauth/authorize", g.url),
+				TokenURL: fmt.Sprintf("%s/oauth/token", g.url),
 			},
 			Scopes:      []string{defaultScope},
 			RedirectURL: fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost),
@@ -127,7 +127,7 @@ func (g *GitLab) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 		return nil, fmt.Errorf("Error exchanging token. %w", err)
 	}
 
-	client, err := newClient(g.URL, token.AccessToken, g.SkipVerify)
+	client, err := newClient(g.url, token.AccessToken, g.SkipVerify)
 	if err != nil {
 		return nil, err
 	}
@@ -146,7 +146,7 @@ func (g *GitLab) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 		Secret:        token.RefreshToken,
 	}
 	if !strings.HasPrefix(user.Avatar, "http") {
-		user.Avatar = g.URL + "/" + login.AvatarURL
+		user.Avatar = g.url + "/" + login.AvatarURL
 	}
 
 	return user, nil
@@ -177,7 +177,7 @@ func (g *GitLab) Refresh(ctx context.Context, user *model.User) (bool, error) {
 
 // Auth authenticates the session and returns the forge user login for the given token
 func (g *GitLab) Auth(ctx context.Context, token, _ string) (string, error) {
-	client, err := newClient(g.URL, token, g.SkipVerify)
+	client, err := newClient(g.url, token, g.SkipVerify)
 	if err != nil {
 		return "", err
 	}
@@ -191,7 +191,7 @@ func (g *GitLab) Auth(ctx context.Context, token, _ string) (string, error) {
 
 // Teams fetches a list of team memberships from the forge.
 func (g *GitLab) Teams(ctx context.Context, user *model.User) ([]*model.Team, error) {
-	client, err := newClient(g.URL, user.Token, g.SkipVerify)
+	client, err := newClient(g.url, user.Token, g.SkipVerify)
 	if err != nil {
 		return nil, err
 	}
@@ -236,7 +236,7 @@ func (g *GitLab) getProject(ctx context.Context, client *gitlab.Client, owner, n
 
 // Repo fetches the repository from the forge.
 func (g *GitLab) Repo(ctx context.Context, user *model.User, remoteID model.ForgeRemoteID, owner, name string) (*model.Repo, error) {
-	client, err := newClient(g.URL, user.Token, g.SkipVerify)
+	client, err := newClient(g.url, user.Token, g.SkipVerify)
 	if err != nil {
 		return nil, err
 	}
@@ -263,7 +263,7 @@ func (g *GitLab) Repo(ctx context.Context, user *model.User, remoteID model.Forg
 
 // Repos fetches a list of repos from the forge.
 func (g *GitLab) Repos(ctx context.Context, user *model.User) ([]*model.Repo, error) {
-	client, err := newClient(g.URL, user.Token, g.SkipVerify)
+	client, err := newClient(g.url, user.Token, g.SkipVerify)
 	if err != nil {
 		return nil, err
 	}
@@ -312,7 +312,7 @@ func (g *GitLab) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 	if u != nil {
 		token = u.Token
 	}
-	client, err := newClient(g.URL, token, g.SkipVerify)
+	client, err := newClient(g.url, token, g.SkipVerify)
 	if err != nil {
 		return nil, err
 	}
@@ -343,7 +343,7 @@ func (g *GitLab) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 
 // File fetches a file from the forge repository and returns in string format.
 func (g *GitLab) File(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, fileName string) ([]byte, error) {
-	client, err := newClient(g.URL, user.Token, g.SkipVerify)
+	client, err := newClient(g.url, user.Token, g.SkipVerify)
 	if err != nil {
 		return nil, err
 	}
@@ -357,7 +357,7 @@ func (g *GitLab) File(ctx context.Context, user *model.User, repo *model.Repo, p
 
 // Dir fetches a folder from the forge repository
 func (g *GitLab) Dir(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, path string) ([]*forge_types.FileMeta, error) {
-	client, err := newClient(g.URL, user.Token, g.SkipVerify)
+	client, err := newClient(g.url, user.Token, g.SkipVerify)
 	if err != nil {
 		return nil, err
 	}
@@ -405,7 +405,7 @@ func (g *GitLab) Dir(ctx context.Context, user *model.User, repo *model.Repo, pi
 
 // Status sends the commit status back to gitlab.
 func (g *GitLab) Status(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, step *model.Step) error {
-	client, err := newClient(g.URL, user.Token, g.SkipVerify)
+	client, err := newClient(g.url, user.Token, g.SkipVerify)
 	if err != nil {
 		return err
 	}
@@ -462,7 +462,7 @@ func (g *GitLab) getTokenAndWebURL(link string) (token, webURL string, err error
 // Activate activates a repository by adding a Post-commit hook and
 // a Public Deploy key, if applicable.
 func (g *GitLab) Activate(ctx context.Context, user *model.User, repo *model.Repo, link string) error {
-	client, err := newClient(g.URL, user.Token, g.SkipVerify)
+	client, err := newClient(g.url, user.Token, g.SkipVerify)
 	if err != nil {
 		return err
 	}
@@ -497,7 +497,7 @@ func (g *GitLab) Activate(ctx context.Context, user *model.User, repo *model.Rep
 // Deactivate removes a repository by removing all the post-commit hooks
 // which are equal to link and removing the SSH deploy key.
 func (g *GitLab) Deactivate(ctx context.Context, user *model.User, repo *model.Repo, link string) error {
-	client, err := newClient(g.URL, user.Token, g.SkipVerify)
+	client, err := newClient(g.url, user.Token, g.SkipVerify)
 	if err != nil {
 		return err
 	}
@@ -554,7 +554,7 @@ func (g *GitLab) Branches(ctx context.Context, user *model.User, repo *model.Rep
 	if user != nil {
 		token = user.Token
 	}
-	client, err := newClient(g.URL, token, g.SkipVerify)
+	client, err := newClient(g.url, token, g.SkipVerify)
 	if err != nil {
 		return nil, err
 	}
@@ -584,7 +584,7 @@ func (g *GitLab) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 	if u != nil {
 		token = u.Token
 	}
-	client, err := newClient(g.URL, token, g.SkipVerify)
+	client, err := newClient(g.url, token, g.SkipVerify)
 	if err != nil {
 		return "", err
 	}
@@ -640,7 +640,7 @@ func (g *GitLab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 // OrgMembership returns if user is member of organization and if user
 // is admin/owner in this organization.
 func (g *GitLab) OrgMembership(ctx context.Context, u *model.User, owner string) (*model.OrgPerm, error) {
-	client, err := newClient(g.URL, u.Token, g.SkipVerify)
+	client, err := newClient(g.url, u.Token, g.SkipVerify)
 	if err != nil {
 		return nil, err
 	}
@@ -710,7 +710,7 @@ func (g *GitLab) loadChangedFilesFromMergeRequest(ctx context.Context, tmpRepo *
 		return nil, err
 	}
 
-	client, err := newClient(g.URL, user.Token, g.SkipVerify)
+	client, err := newClient(g.url, user.Token, g.SkipVerify)
 	if err != nil {
 		return nil, err
 	}

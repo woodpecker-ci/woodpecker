@@ -57,22 +57,22 @@ type Opts struct {
 func New(opts Opts) (forge.Forge, error) {
 	r := &client{
 		API:        defaultAPI,
-		URL:        defaultURL,
+		url:        defaultURL,
 		Client:     opts.Client,
 		Secret:     opts.Secret,
 		SkipVerify: opts.SkipVerify,
 		MergeRef:   opts.MergeRef,
 	}
 	if opts.URL != defaultURL {
-		r.URL = strings.TrimSuffix(opts.URL, "/")
-		r.API = r.URL + "/api/v3/"
+		r.url = strings.TrimSuffix(opts.URL, "/")
+		r.API = r.url + "/api/v3/"
 	}
 
 	return r, nil
 }
 
 type client struct {
-	URL        string
+	url        string
 	API        string
 	Client     string
 	Secret     string
@@ -85,9 +85,9 @@ func (c *client) Name() string {
 	return "github"
 }
 
-// Link returns the root url of a configured forge
-func (c *client) Link() string {
-	return c.URL
+// URL returns the root url of a configured forge
+func (c *client) URL() string {
+	return c.url
 }
 
 // Login authenticates the session and returns the forge user details.
@@ -385,8 +385,8 @@ func (c *client) newConfig(req *http.Request) *oauth2.Config {
 		ClientSecret: c.Secret,
 		Scopes:       []string{"repo", "repo:status", "user:email", "read:org"},
 		Endpoint: oauth2.Endpoint{
-			AuthURL:  fmt.Sprintf("%s/login/oauth/authorize", c.URL),
-			TokenURL: fmt.Sprintf("%s/login/oauth/access_token", c.URL),
+			AuthURL:  fmt.Sprintf("%s/login/oauth/authorize", c.url),
+			TokenURL: fmt.Sprintf("%s/login/oauth/access_token", c.url),
 		},
 		RedirectURL: redirect,
 	}

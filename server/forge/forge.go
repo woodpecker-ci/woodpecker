@@ -32,8 +32,8 @@ type Forge interface {
 	// Name returns the string name of this driver
 	Name() string
 
-	// Link returns the root url of a configured forge
-	Link() string
+	// URL returns the root url of a configured forge
+	URL() string
 
 	// Login authenticates the session and returns the
 	// forge user details.

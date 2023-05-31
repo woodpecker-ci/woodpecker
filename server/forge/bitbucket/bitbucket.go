@@ -46,7 +46,7 @@ type Opts struct {
 
 type config struct {
 	API    string
-	URL    string
+	url    string
 	Client string
 	Secret string
 }
@@ -56,7 +56,7 @@ type config struct {
 func New(opts *Opts) (forge.Forge, error) {
 	return &config{
 		API:    DefaultAPI,
-		URL:    DefaultURL,
+		url:    DefaultURL,
 		Client: opts.Client,
 		Secret: opts.Secret,
 	}, nil
@@ -68,9 +68,9 @@ func (c *config) Name() string {
 	return "bitbucket"
 }
 
-// Link returns the root url of a configured forge
-func (c *config) Link() string {
-	return c.URL
+// URL returns the root url of a configured forge
+func (c *config) URL() string {
+	return c.url
 }
 
 // Login authenticates an account with Bitbucket using the oauth2 protocol. The
