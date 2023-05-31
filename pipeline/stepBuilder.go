@@ -357,6 +357,10 @@ func metadataFromStruct(repo *model.Repo, pipeline, last *model.Pipeline, workfl
 			Host:     host,
 			Platform: "", // will be set by pipeline platform option or by agent
 		},
+		Forge: frontend.Forge{
+			Type: server.Config.Services.Forge.Name(),
+			Link: server.Config.Services.Forge.Link(),
+		},
 	}
 }
 

@@ -111,6 +111,11 @@ func (c *Config) Name() string {
 	return "stash"
 }
 
+// Link returns the root url of a configured forge
+func (c *Config) Link() string {
+	return c.URL
+}
+
 func (c *Config) Login(ctx context.Context, res http.ResponseWriter, req *http.Request) (*model.User, error) {
 	requestToken, u, err := c.Consumer.GetRequestTokenAndUrl("oob")
 	if err != nil {

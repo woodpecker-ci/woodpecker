@@ -49,6 +49,7 @@ type (
 		Workflow Workflow `json:"workflow,omitempty"`
 		Step     Step     `json:"step,omitempty"`
 		Sys      System   `json:"sys,omitempty"`
+		Forge    Forge    `json:"forge,omitempty"`
 	}
 
 	// Repo defines runtime metadata for a repository.
@@ -125,6 +126,12 @@ type (
 		Link     string `json:"link,omitempty"`
 		Platform string `json:"arch,omitempty"`
 		Version  string `json:"version,omitempty"`
+	}
+
+	// Forge defines runtime metadata about the forge that host the repo
+	Forge struct {
+		Type string `json:"type,omitempty"`
+		Link string `json:"link,omitempty"`
 	}
 )
 
@@ -222,6 +229,9 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_SYSTEM_HOST":     m.Sys.Host,
 		"CI_SYSTEM_PLATFORM": m.Sys.Platform, // will be set by pipeline platform option or by agent
 		"CI_SYSTEM_VERSION":  version.Version,
+
+		"CI_FORGE_TYPE": m.Forge.Type,
+		"CI_FORGE_LINK": m.Forge.Link,
 
 		// DEPRECATED
 		"CI_SYSTEM_ARCH": m.Sys.Platform, // TODO: remove after v1.0.x version

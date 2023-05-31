@@ -68,6 +68,11 @@ func (c *config) Name() string {
 	return "bitbucket"
 }
 
+// Link returns the root url of a configured forge
+func (c *config) Link() string {
+	return c.URL
+}
+
 // Login authenticates an account with Bitbucket using the oauth2 protocol. The
 // Bitbucket account details are returned when the user is successfully authenticated.
 func (c *config) Login(ctx context.Context, w http.ResponseWriter, req *http.Request) (*model.User, error) {

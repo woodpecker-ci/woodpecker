@@ -90,6 +90,11 @@ func (c *Gitea) Name() string {
 	return "gitea"
 }
 
+// Link returns the root url of a configured forge
+func (c *Gitea) Link() string {
+	return c.URL
+}
+
 func (c *Gitea) oauth2Config(ctx context.Context) (*oauth2.Config, context.Context) {
 	return &oauth2.Config{
 			ClientID:     c.ClientID,

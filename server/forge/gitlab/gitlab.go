@@ -78,6 +78,11 @@ func (g *GitLab) Name() string {
 	return "gitlab"
 }
 
+// Link returns the root url of a configured forge
+func (g *GitLab) Link() string {
+	return g.URL
+}
+
 func (g *GitLab) oauth2Config(ctx context.Context) (*oauth2.Config, context.Context) {
 	return &oauth2.Config{
 			ClientID:     g.ClientID,

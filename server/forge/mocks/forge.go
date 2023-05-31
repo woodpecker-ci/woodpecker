@@ -208,6 +208,20 @@ func (_m *Forge) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model
 	return r0, r1, r2
 }
 
+// Link provides a mock function with given fields:
+func (_m *Forge) Link() string {
+	ret := _m.Called()
+
+	var r0 string
+	if rf, ok := ret.Get(0).(func() string); ok {
+		r0 = rf()
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	return r0
+}
+
 // Login provides a mock function with given fields: ctx, w, r
 func (_m *Forge) Login(ctx context.Context, w http.ResponseWriter, r *http.Request) (*model.User, error) {
 	ret := _m.Called(ctx, w, r)

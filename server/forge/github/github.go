@@ -85,6 +85,11 @@ func (c *client) Name() string {
 	return "github"
 }
 
+// Link returns the root url of a configured forge
+func (c *client) Link() string {
+	return c.URL
+}
+
 // Login authenticates the session and returns the forge user details.
 func (c *client) Login(ctx context.Context, res http.ResponseWriter, req *http.Request) (*model.User, error) {
 	config := c.newConfig(req)
