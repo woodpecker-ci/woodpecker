@@ -1,17 +1,57 @@
 {
+  "admin": {
+    "settings": {
+      "users": {
+        "admin": {
+          "admin": "Amministatore",
+          "placeholder": "L'utente è un amministratore"
+        },
+        "created": "Utente creato",
+        "delete_confirm": "Vuoi davvero cancellare questo utente?",
+        "delete_user": "Cancella utente",
+        "deleted": "Utente cancellato",
+        "edit_user": "Modifica utente",
+        "none": "Non ci sono ancora utenti",
+        "saved": "Utente salvato"
+      }
+    }
+  },
+  "back": "Indietro",
+  "cancel": "Annulla",
+  "color_scheme_dark": "Passa al tema chiaro",
+  "color_scheme_light": "Passa al tema scuro",
   "docs": "Documentazione",
+  "documentation_for": "Documentazione per \"{topic}\"",
+  "errors": {
+    "not_found": "Il server non riesce a trovare l'oggetto richiesto"
+  },
   "login": "Accedi",
   "logout": "Esci",
   "not_found": {
-    "back_home": "Torna alla pagina principale"
+    "back_home": "Torna alla pagina principale",
+    "not_found": "Ahia 404, o abbiamo rotto qualcosa o hai scritto male qualcosa :-/"
   },
   "password": "Password",
+  "pipeline_feed": "Alimentazione pipeline",
   "repo": {
     "activity": "Attività",
     "add": "Aggiungi repository",
+    "branches": "Branch",
     "build": {
       "actions": {
         "cancel": "Annulla"
+      }
+    },
+    "deploy_pipeline": {
+      "enter_target": "Ambiente di deploy destinazione",
+      "title": "Azione l'evento di deploy per la pipeline corrente #{pipelineId}",
+      "trigger": "Deploy",
+      "variables": {
+        "add": "Aggiungi variabile",
+        "desc": "Specifica variabili addizionali da usare nella pipeline. Le variabili con lo stesso nome saranno sovrascritte.",
+        "name": "Nome variabile",
+        "title": "Variabili addizionali della pipeline",
+        "value": "Valore variabile"
       }
     },
     "enable": {
@@ -21,12 +61,26 @@
       "reload": "Ricarica i repository",
       "success": "Repository abilitato"
     },
+    "manual_pipeline": {
+      "select_branch": "Seleziona branch",
+      "title": "Avvia un'esecuzione manuale della pipeline",
+      "trigger": "Esegui pipeline",
+      "variables": {
+        "add": "Aggiungi variabile",
+        "desc": "Specifica variabili addizionali da usare nella pipeline. Le variabili con lo stesso nome saranno sovrascritte.",
+        "name": "Nome variabile",
+        "title": "Variabili aggiuntive per la pipeline",
+        "value": "Valore variabile"
+      }
+    },
     "not_allowed": "Non è permesso accedere a questo repository",
+    "open_in_forge": "Apri il repository nel Version Control System",
     "pipeline": {
       "actions": {
         "cancel": "Annulla"
       }
     },
+    "pull_requests": "Pull request",
     "settings": {
       "actions": {
         "actions": "Azioni"
@@ -41,7 +95,8 @@
       "general": {
         "general": "Generale",
         "pipeline_path": {
-          "default": "Predefinito: .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml"
+          "default": "Predefinito: .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml",
+          "path": "Percorso della pipeline"
         },
         "project": "Impostazioni del progetto",
         "protected": {
@@ -84,6 +139,19 @@
   },
   "unknown_error": "Si è verificato un errore sconosciuto",
   "url": "URL",
+  "user": {
+    "access_denied": "Non hai il permesso di entrare",
+    "api_usage": "Esempio di utilizzo API",
+    "cli_usage": "Esempio di utilizzo CLI",
+    "dl_cli": "Scarica CLI",
+    "internal_error": "Errore interno",
+    "oauth_error": "Errore durante l'autenticazione con il provider Oauth",
+    "reset_token": "Reimposta token",
+    "settings": "Configurazione Utente",
+    "shell_setup": "Configurazione shell",
+    "shell_setup_before": "prima confogura la shell",
+    "token": "Il tuo Token Personale"
+  },
   "username": "Nome utente",
   "welcome": "Benvenuti in Woodpecker"
 }

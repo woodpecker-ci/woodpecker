@@ -42,6 +42,8 @@ If you have some missing resources, please feel free to [open a pull-request](ht
 
 ## Videos
 
+- [Replace Ansible Semaphore with Woodpecker CI](https://www.youtube.com/watch?v=d610YPvCB0E)
+
 ## Plugins
 
 We have a separate [index](/plugins) for plugins.

@@ -18,7 +18,9 @@ import (
 	"crypto/md5"
 	"fmt"
 	"net/http"
+	"net/url"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -35,6 +37,15 @@ var (
 	indexHTML []byte
 )
 
+type prefixFS struct {
+	fs     http.FileSystem
+	prefix string
+}
+
+func (f *prefixFS) Open(name string) (http.File, error) {
+	return f.fs.Open(strings.TrimPrefix(name, f.prefix))
+}
+
 // New returns a gin engine to serve the web frontend.
 func New() (*gin.Engine, error) {
 	e := gin.New()
@@ -42,14 +53,17 @@ func New() (*gin.Engine, error) {
 
 	e.Use(setupCache)
 
+	rootURL, _ := url.Parse(server.Config.Server.RootURL)
+	rootPath := rootURL.Path
+
 	httpFS, err := web.HTTPFS()
 	if err != nil {
 		return nil, err
 	}
-	h := http.FileServer(httpFS)
-	e.GET("/favicon.svg", redirect("/favicons/favicon-light-default.svg", http.StatusPermanentRedirect))
-	e.GET("/favicons/*filepath", gin.WrapH(h))
-	e.GET("/assets/*filepath", gin.WrapH(h))
+	h := http.FileServer(&prefixFS{httpFS, rootPath})
+	e.GET(rootPath+"/favicon.svg", redirect(server.Config.Server.RootURL+"/favicons/favicon-light-default.svg", http.StatusPermanentRedirect))
+	e.GET(rootPath+"/favicons/*filepath", gin.WrapH(h))
+	e.GET(rootPath+"/assets/*filepath", gin.WrapH(h))
 
 	e.NoRoute(handleIndex)
 
