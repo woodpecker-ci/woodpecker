@@ -39,7 +39,7 @@ type File struct {
 	Failed     int    `json:"failed"  xorm:"file_meta_failed"`
 	Skipped    int    `json:"skipped" xorm:"file_meta_skipped"`
 	Data       []byte `json:"-"       xorm:"file_data"` // TODO: don't store in db but object storage?
-} //	@name File
+}
 
 // TableName return database table name for xorm
 func (File) TableName() string {
