@@ -26,6 +26,6 @@ var recreateAgentsTable = task{
 		if err := dropTable(sess, "agents"); err != nil {
 			return err
 		}
-		return sess.Sync2(new(model.Agent))
+		return sess.Sync(new(model.Agent))
 	},
 }
