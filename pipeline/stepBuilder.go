@@ -335,6 +335,15 @@ func metadataFromStruct(repo *model.Repo, pipeline, last *model.Pipeline, workfl
 	if err == nil {
 		host = uri.Host
 	}
+
+	forge := frontend.Forge{}
+	if server.Config.Services.Forge != nil {
+		forge = frontend.Forge{
+			Type: server.Config.Services.Forge.Name(),
+			URL:  server.Config.Services.Forge.URL(),
+		}
+	}
+
 	return frontend.Metadata{
 		Repo: frontend.Repo{
 			Name:     repo.FullName,
@@ -357,10 +366,7 @@ func metadataFromStruct(repo *model.Repo, pipeline, last *model.Pipeline, workfl
 			Host:     host,
 			Platform: "", // will be set by pipeline platform option or by agent
 		},
-		Forge: frontend.Forge{
-			Type: server.Config.Services.Forge.Name(),
-			URL:  server.Config.Services.Forge.URL(),
-		},
+		Forge: forge,
 	}
 }
 
