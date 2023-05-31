@@ -301,7 +301,6 @@ func TestRepoCrud(t *testing.T) {
 		new(model.PipelineConfig),
 		new(model.Logs),
 		new(model.Step),
-		new(model.File),
 		new(model.Secret),
 		new(model.Registry),
 		new(model.Config),

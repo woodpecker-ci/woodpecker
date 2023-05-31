@@ -1,4 +1,4 @@
-// Copyright 2023 Woodpecker Authors
+// Copyright 2022 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,8 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package proto
+package migration
 
-// Version is the version of the woodpecker.proto file,
-// !IMPORTANT! increased by 1 each time it get changed !IMPORTANT!
-const Version int32 = 2
+import (
+	"xorm.io/xorm"
+)
+
+var dropFiles = task{
+	name: "drop-files",
+	fn: func(sess *xorm.Session) error {
+		return sess.DropTable("files")
+	},
+}
