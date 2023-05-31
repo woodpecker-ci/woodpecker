@@ -50,7 +50,6 @@ var Config = struct {
 		// Repos  model.RepoStore
 		// Builds model.BuildStore
 		// Logs   model.LogStore
-		Files model.FileStore
 		Steps model.StepStore
 		// Registries model.RegistryStore
 		// Secrets model.SecretStore

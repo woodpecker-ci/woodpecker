@@ -157,7 +157,7 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_REPO_OWNER":          repoOwner,
 		"CI_REPO_NAME":           repoName,
 		"CI_REPO_SCM":            "git",
-		"CI_REPO_LINK":           m.Repo.Link,
+		"CI_REPO_URL":            m.Repo.Link,
 		"CI_REPO_CLONE_URL":      m.Repo.CloneURL,
 		"CI_REPO_DEFAULT_BRANCH": m.Repo.Branch,
 		"CI_REPO_PRIVATE":        strconv.FormatBool(m.Repo.Private),
@@ -169,7 +169,7 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_COMMIT_BRANCH":              m.Curr.Commit.Branch,
 		"CI_COMMIT_SOURCE_BRANCH":       sourceBranch,
 		"CI_COMMIT_TARGET_BRANCH":       targetBranch,
-		"CI_COMMIT_LINK":                m.Curr.Link,
+		"CI_COMMIT_URL":                 m.Curr.Link,
 		"CI_COMMIT_MESSAGE":             m.Curr.Commit.Message,
 		"CI_COMMIT_AUTHOR":              m.Curr.Commit.Author.Name,
 		"CI_COMMIT_AUTHOR_EMAIL":        m.Curr.Commit.Author.Email,
@@ -181,7 +181,7 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_PIPELINE_NUMBER":        strconv.FormatInt(m.Curr.Number, 10),
 		"CI_PIPELINE_PARENT":        strconv.FormatInt(m.Curr.Parent, 10),
 		"CI_PIPELINE_EVENT":         m.Curr.Event,
-		"CI_PIPELINE_LINK":          m.Curr.Link,
+		"CI_PIPELINE_URL":           m.Curr.Link,
 		"CI_PIPELINE_DEPLOY_TARGET": m.Curr.Target,
 		"CI_PIPELINE_STATUS":        m.Curr.Status,
 		"CI_PIPELINE_CREATED":       strconv.FormatInt(m.Curr.Created, 10),
@@ -201,7 +201,7 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_PREV_COMMIT_REF":           m.Prev.Commit.Ref,
 		"CI_PREV_COMMIT_REFSPEC":       m.Prev.Commit.Refspec,
 		"CI_PREV_COMMIT_BRANCH":        m.Prev.Commit.Branch,
-		"CI_PREV_COMMIT_LINK":          m.Prev.Link,
+		"CI_PREV_COMMIT_URL":           m.Prev.Link,
 		"CI_PREV_COMMIT_MESSAGE":       m.Prev.Commit.Message,
 		"CI_PREV_COMMIT_AUTHOR":        m.Prev.Commit.Author.Name,
 		"CI_PREV_COMMIT_AUTHOR_EMAIL":  m.Prev.Commit.Author.Email,
@@ -210,7 +210,7 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_PREV_PIPELINE_NUMBER":        strconv.FormatInt(m.Prev.Number, 10),
 		"CI_PREV_PIPELINE_PARENT":        strconv.FormatInt(m.Prev.Parent, 10),
 		"CI_PREV_PIPELINE_EVENT":         m.Prev.Event,
-		"CI_PREV_PIPELINE_LINK":          m.Prev.Link,
+		"CI_PREV_PIPELINE_URL":           m.Prev.Link,
 		"CI_PREV_PIPELINE_DEPLOY_TARGET": m.Prev.Target,
 		"CI_PREV_PIPELINE_STATUS":        m.Prev.Status,
 		"CI_PREV_PIPELINE_CREATED":       strconv.FormatInt(m.Prev.Created, 10),
@@ -218,7 +218,7 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_PREV_PIPELINE_FINISHED":      strconv.FormatInt(m.Prev.Finished, 10),
 
 		"CI_SYSTEM_NAME":     m.Sys.Name,
-		"CI_SYSTEM_LINK":     m.Sys.Link,
+		"CI_SYSTEM_URL":      m.Sys.Link,
 		"CI_SYSTEM_HOST":     m.Sys.Host,
 		"CI_SYSTEM_PLATFORM": m.Sys.Platform, // will be set by pipeline platform option or by agent
 		"CI_SYSTEM_VERSION":  version.Version,
@@ -252,6 +252,13 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_JOB_FINISHED": "", // will be set by agent
 		// CI_REPO_CLONE_URL
 		"CI_REPO_REMOTE": m.Repo.CloneURL,
+		// use *_URL
+		"CI_REPO_LINK":          m.Repo.Link,
+		"CI_COMMIT_LINK":        m.Curr.Link,
+		"CI_PIPELINE_LINK":      m.Curr.Link,
+		"CI_PREV_COMMIT_LINK":   m.Prev.Link,
+		"CI_PREV_PIPELINE_LINK": m.Prev.Link,
+		"CI_SYSTEM_LINK":        m.Sys.Link,
 	}
 	if m.Curr.Event == EventTag {
 		params["CI_COMMIT_TAG"] = strings.TrimPrefix(m.Curr.Commit.Ref, "refs/tags/")

@@ -116,8 +116,8 @@ func TestWithMetadata(t *testing.T) {
 	if compiler.env["CI_REPO_NAME"] != strings.Split(metadata.Repo.Name, "/")[1] {
 		t.Errorf("WithMetadata must set CI_REPO_NAME")
 	}
-	if compiler.env["CI_REPO_LINK"] != metadata.Repo.Link {
-		t.Errorf("WithMetadata must set CI_REPO_LINK")
+	if compiler.env["CI_REPO_URL"] != metadata.Repo.Link {
+		t.Errorf("WithMetadata must set CI_REPO_URL")
 	}
 	if compiler.env["CI_REPO_CLONE_URL"] != metadata.Repo.CloneURL {
 		t.Errorf("WithMetadata must set CI_REPO_CLONE_URL")
