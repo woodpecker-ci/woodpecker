@@ -1,42 +1,76 @@
 {
+  "admin": {
+    "settings": {
+      "secrets": {
+        "add": "Agregar secreto",
+        "created": "Secreto global creado",
+        "deleted": "Secreto global eliminado",
+        "name": "Nombre",
+        "save": "Guardar secreto",
+        "secrets": "Secretos",
+        "show": "Mostrar secretos",
+        "value": "Valor"
+      }
+    }
+  },
   "back": "Atrás",
+  "cancel": "Cancelar",
   "color_scheme_dark": "Cambiar al modo claro",
   "color_scheme_light": "Cambiar al modo oscuro",
+  "docs": "Documentación",
   "documentation_for": "Documentación de \"{topic}\"",
   "login": "Iniciar sesión",
   "logout": "Cerrar sesión",
   "not_found": {
-    "back_home": "Volver a la página principal"
+    "back_home": "Volver a la página principal",
+    "not_found": "404, ya sea rompimos algo o la dirección es incorrecta :-/"
   },
   "password": "Contraseña",
+  "pipeline_feed": "Reporte de actividad de Pipeline",
   "repo": {
     "activity": "Actividad",
     "add": "Añadir repositorio",
     "branches": "Ramas",
     "enable": {
       "enable": "Activar",
+      "enabled": "Ya está habilitado",
       "list_reloaded": "Lista de repositorios actualizada",
       "reload": "Actualizar repositorios",
       "success": "Repositorio activado"
     },
     "manual_pipeline": {
       "select_branch": "Escoger rama",
+      "trigger": "Corre el pipeline",
       "variables": {
         "add": "Añadir variable",
+        "desc": "Especifique variables adiciónalas para usar en su pipeline. Las variables con el mismo nombre se sobrescribirán.",
         "name": "Nombre de la variable",
         "value": "Valor de la variable"
       }
     },
     "not_allowed": "No tienes acceso a este repositorio",
+    "open_in_forge": "Abrir Repositorio en el Sistema de Control de Versiones",
     "settings": {
       "general": {
+        "allow_pr": {
+          "allow": "Permitir solicitudes de cambios",
+          "desc": "Pipelines pueden correr en solicitudes de cambios."
+        },
         "general": "General",
         "pipeline_path": {
-          "default": "Por defecto: .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml"
+          "default": "Por defecto: .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml",
+          "path": "Pasos del pipeline"
         },
         "project": "Configuración del proyecto",
+        "protected": {
+          "desc": "Todas las pipelines se tienen que estar aprobados antes de que se ejecuten.",
+          "protected": "Protegido"
+        },
         "save": "Guardar configuración",
-        "success": "Configuración del repositorio actualizada"
+        "success": "Configuración del repositorio actualizada",
+        "trusted": {
+          "trusted": "Confiado"
+        }
       },
       "not_allowed": "No tienes acceso a la configuración del repositorio",
       "settings": "Configuración"
@@ -49,9 +83,11 @@
   "time": {
     "days_short": "d",
     "hours_short": "h",
-    "not_started": "no iniciado aún"
+    "not_started": "no iniciado aún",
+    "sec_short": "s"
   },
   "unknown_error": "Se ha producido un error desconocido",
   "url": "URL",
-  "username": "Nombre de usuario"
+  "username": "Nombre de usuario",
+  "welcome": "Bienvenidos a Woodpecker"
 }

@@ -15,12 +15,22 @@
       />
 
       <Button
+        v-if="isActive"
         class="mr-auto mt-4"
         color="blue"
         start-icon="turn-off"
         :is-loading="isDeactivatingRepo"
         :text="$t('repo.settings.actions.disable.disable')"
         @click="deactivateRepo"
+      />
+      <Button
+        v-else
+        class="mr-auto mt-4"
+        color="blue"
+        start-icon="turn-off"
+        :is-loading="isActivatingRepo"
+        :text="$t('repo.settings.actions.enable.enable')"
+        @click="activateRepo"
       />
 
       <Button
@@ -85,6 +95,15 @@ export default defineComponent({
       await router.replace({ name: 'repos' });
     });
 
+    const { doSubmit: activateRepo, isLoading: isActivatingRepo } = useAsyncAction(async () => {
+      if (!repo) {
+        throw new Error('Unexpected: Repo should be set');
+      }
+
+      await apiClient.activateRepo(repo.value.owner, repo.value.name);
+      notifications.notify({ title: i18n.t('repo.settings.actions.enable.success'), type: 'success' });
+    });
+
     const { doSubmit: deactivateRepo, isLoading: isDeactivatingRepo } = useAsyncAction(async () => {
       if (!repo) {
         throw new Error('Unexpected: Repo should be set');
@@ -96,12 +115,15 @@ export default defineComponent({
     });
 
     return {
+      isActive: repo?.value.active,
       isRepairingRepo,
       isDeletingRepo,
       isDeactivatingRepo,
+      isActivatingRepo,
       deleteRepo,
       repairRepo,
       deactivateRepo,
+      activateRepo,
     };
   },
 });

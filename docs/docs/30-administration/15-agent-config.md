@@ -95,6 +95,11 @@ Configures labels to filter pipeline pick up. Use a list of key-value pairs like
 
 Enable healthcheck endpoint.
 
+### `WOODPECKER_HEALTHCHECK_ADDR`
+> Default: `:3000`
+
+Configures healthcheck endpoint address.
+
 ### `WOODPECKER_KEEPALIVE_TIME`
 > Default: empty
 
@@ -127,3 +132,21 @@ See [Docker backend configuration](backends/docker/#configuration)
 ### `WOODPECKER_BACKEND_SSH_*`
 
 See [SSH backend configuration](backends/ssh/#configuration)
+
+## Advanced Settings
+
+:::warning
+Only change these If you know what you do.
+:::
+
+### `WOODPECKER_CONNECT_RETRY_COUNT`
+
+> Default: `5`
+
+Configures number of times agent retries to connect to the server.
+
+### `WOODPECKER_CONNECT_RETRY_DELAY`
+
+> Default: `2s`
+
+Configures delay between agent connection retries to the server.

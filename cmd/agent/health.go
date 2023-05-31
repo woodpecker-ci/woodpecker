@@ -18,6 +18,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
@@ -36,7 +37,7 @@ func init() {
 	http.HandleFunc("/version", handleVersion)
 }
 
-func handleHeartbeat(w http.ResponseWriter, r *http.Request) {
+func handleHeartbeat(w http.ResponseWriter, _ *http.Request) {
 	if counter.Healthy() {
 		w.WriteHeader(200)
 	} else {
@@ -44,7 +45,7 @@ func handleHeartbeat(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func handleVersion(w http.ResponseWriter, r *http.Request) {
+func handleVersion(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(200)
 	w.Header().Add("Content-Type", "text/json")
 	_ = json.NewEncoder(w).Encode(versionResp{
@@ -53,7 +54,7 @@ func handleVersion(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func handleStats(w http.ResponseWriter, r *http.Request) {
+func handleStats(w http.ResponseWriter, _ *http.Request) {
 	if counter.Healthy() {
 		w.WriteHeader(200)
 	} else {
@@ -78,7 +79,12 @@ var counter = &agent.State{
 // handles pinging the endpoint and returns an error if the
 // agent is in an unhealthy state.
 func pinger(c *cli.Context) error {
-	resp, err := http.Get("http://localhost:3000/healthz")
+	healthcheckAddress := c.String("healthcheck-addr")
+	if strings.HasPrefix(healthcheckAddress, ":") {
+		// this seems sufficient according to https://pkg.go.dev/net#Dial
+		healthcheckAddress = "localhost" + healthcheckAddress
+	}
+	resp, err := http.Get("http://" + healthcheckAddress + "/healthz")
 	if err != nil {
 		return err
 	}

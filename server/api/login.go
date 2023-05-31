@@ -16,6 +16,7 @@ package api
 
 import (
 	"encoding/base32"
+	"errors"
 	"net/http"
 	"time"
 
@@ -27,6 +28,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/server/store"
+	"github.com/woodpecker-ci/woodpecker/server/store/types"
 	"github.com/woodpecker-ci/woodpecker/shared/httputil"
 	"github.com/woodpecker-ci/woodpecker/shared/token"
 )
@@ -54,7 +56,7 @@ func HandleAuth(c *gin.Context) {
 	tmpuser, err := forge.Login(c, c.Writer, c.Request)
 	if err != nil {
 		log.Error().Msgf("cannot authenticate user. %s", err)
-		c.Redirect(303, "/login?error=oauth_error")
+		c.Redirect(http.StatusSeeOther, "/login?error=oauth_error")
 		return
 	}
 	// this will happen when the user is redirected by the forge as
@@ -65,12 +67,17 @@ func HandleAuth(c *gin.Context) {
 	config := ToConfig(c)
 
 	// get the user from the database
-	u, err := _store.GetUserLogin(tmpuser.Login)
+	u, err := _store.GetUserRemoteID(tmpuser.ForgeRemoteID, tmpuser.Login)
 	if err != nil {
+		if !errors.Is(err, types.RecordNotExist) {
+			_ = c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
+
 		// if self-registration is disabled we should return a not authorized error
 		if !config.Open && !config.IsAdmin(tmpuser) {
 			log.Error().Msgf("cannot register %s. registration closed", tmpuser.Login)
-			c.Redirect(303, "/login?error=access_denied")
+			c.Redirect(http.StatusSeeOther, "/login?error=access_denied")
 			return
 		}
 
@@ -87,11 +94,12 @@ func HandleAuth(c *gin.Context) {
 
 		// create the user account
 		u = &model.User{
-			Login:  tmpuser.Login,
-			Token:  tmpuser.Token,
-			Secret: tmpuser.Secret,
-			Email:  tmpuser.Email,
-			Avatar: tmpuser.Avatar,
+			Login:         tmpuser.Login,
+			ForgeRemoteID: tmpuser.ForgeRemoteID,
+			Token:         tmpuser.Token,
+			Secret:        tmpuser.Secret,
+			Email:         tmpuser.Email,
+			Avatar:        tmpuser.Avatar,
 			Hash: base32.StdEncoding.EncodeToString(
 				securecookie.GenerateRandomKey(32),
 			),
@@ -100,7 +108,7 @@ func HandleAuth(c *gin.Context) {
 		// insert the user into the database
 		if err := _store.CreateUser(u); err != nil {
 			log.Error().Msgf("cannot insert %s. %s", u.Login, err)
-			c.Redirect(303, "/login?error=internal_error")
+			c.Redirect(http.StatusSeeOther, "/login?error=internal_error")
 			return
 		}
 	}
@@ -110,6 +118,9 @@ func HandleAuth(c *gin.Context) {
 	u.Secret = tmpuser.Secret
 	u.Email = tmpuser.Email
 	u.Avatar = tmpuser.Avatar
+	u.ForgeRemoteID = tmpuser.ForgeRemoteID
+	u.Login = tmpuser.Login
+	u.Admin = u.Admin || config.IsAdmin(tmpuser)
 
 	// if self-registration is enabled for whitelisted organizations we need to
 	// check the user's organization membership.
@@ -117,14 +128,14 @@ func HandleAuth(c *gin.Context) {
 		teams, terr := forge.Teams(c, u)
 		if terr != nil || !config.IsMember(teams) {
 			log.Error().Msgf("cannot verify team membership for %s.", u.Login)
-			c.Redirect(303, "/login?error=access_denied")
+			c.Redirect(http.StatusSeeOther, "/login?error=access_denied")
 			return
 		}
 	}
 
 	if err := _store.UpdateUser(u); err != nil {
 		log.Error().Msgf("cannot update %s. %s", u.Login, err)
-		c.Redirect(303, "/login?error=internal_error")
+		c.Redirect(http.StatusSeeOther, "/login?error=internal_error")
 		return
 	}
 
@@ -132,19 +143,19 @@ func HandleAuth(c *gin.Context) {
 	tokenString, err := token.New(token.SessToken, u.Login).SignExpires(u.Hash, exp)
 	if err != nil {
 		log.Error().Msgf("cannot create token for %s. %s", u.Login, err)
-		c.Redirect(303, "/login?error=internal_error")
+		c.Redirect(http.StatusSeeOther, "/login?error=internal_error")
 		return
 	}
 
 	httputil.SetCookie(c.Writer, c.Request, "user_sess", tokenString)
 
-	c.Redirect(303, "/")
+	c.Redirect(http.StatusSeeOther, "/")
 }
 
 func GetLogout(c *gin.Context) {
 	httputil.DelCookie(c.Writer, c.Request, "user_sess")
 	httputil.DelCookie(c.Writer, c.Request, "user_last")
-	c.Redirect(303, "/")
+	c.Redirect(http.StatusSeeOther, "/")
 }
 
 func GetLoginToken(c *gin.Context) {

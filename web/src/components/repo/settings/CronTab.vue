@@ -74,19 +74,22 @@
           <span v-else class="text-color">{{ $t('repo.settings.crons.not_executed_yet') }}</span>
         </div>
 
-        <Button
-          type="submit"
-          color="green"
-          :is-loading="isSaving"
-          :text="isEditingCron ? $t('repo.settings.crons.save') : $t('repo.settings.crons.add')"
-        />
+        <div class="flex gap-2">
+          <Button type="button" color="gray" :text="$t('cancel')" @click="selectedCron = undefined" />
+          <Button
+            type="submit"
+            color="green"
+            :is-loading="isSaving"
+            :text="isEditingCron ? $t('repo.settings.crons.save') : $t('repo.settings.crons.add')"
+          />
+        </div>
       </form>
     </div>
   </Panel>
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, onMounted, Ref, ref } from 'vue';
+import { computed, inject, Ref, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
@@ -100,6 +103,7 @@ import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import { useDate } from '~/compositions/useDate';
 import useNotifications from '~/compositions/useNotifications';
+import { usePagination } from '~/compositions/usePaginate';
 import { Cron, Repo } from '~/lib/api/types';
 import router from '~/router';
 
@@ -108,18 +112,19 @@ const notifications = useNotifications();
 const i18n = useI18n();
 
 const repo = inject<Ref<Repo>>('repo');
-const crons = ref<Cron[]>();
 const selectedCron = ref<Partial<Cron>>();
 const isEditingCron = computed(() => !!selectedCron.value?.id);
 const date = useDate();
 
-async function loadCrons() {
+async function loadCrons(page: number): Promise<Cron[] | null> {
   if (!repo?.value) {
     throw new Error("Unexpected: Can't load repo");
   }
 
-  crons.value = await apiClient.getCronList(repo.value.owner, repo.value.name);
+  return apiClient.getCronList(repo.value.owner, repo.value.name, page);
 }
+
+const { resetPage, data: crons } = usePagination(loadCrons, () => !selectedCron.value);
 
 const { doSubmit: createCron, isLoading: isSaving } = useAsyncAction(async () => {
   if (!repo?.value) {
@@ -140,7 +145,7 @@ const { doSubmit: createCron, isLoading: isSaving } = useAsyncAction(async () =>
     type: 'success',
   });
   selectedCron.value = undefined;
-  await loadCrons();
+  resetPage();
 });
 
 const { doSubmit: deleteCron, isLoading: isDeleting } = useAsyncAction(async (_cron: Cron) => {
@@ -150,7 +155,7 @@ const { doSubmit: deleteCron, isLoading: isDeleting } = useAsyncAction(async (_c
 
   await apiClient.deleteCron(repo.value.owner, repo.value.name, _cron.id);
   notifications.notify({ title: i18n.t('repo.settings.crons.deleted'), type: 'success' });
-  await loadCrons();
+  resetPage();
 });
 
 const { doSubmit: runCron } = useAsyncAction(async (_cron: Cron) => {
@@ -167,9 +172,5 @@ const { doSubmit: runCron } = useAsyncAction(async (_cron: Cron) => {
       pipelineId: pipeline.number,
     },
   });
-});
-
-onMounted(async () => {
-  await loadCrons();
 });
 </script>

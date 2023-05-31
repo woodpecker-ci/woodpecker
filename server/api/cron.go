@@ -33,16 +33,16 @@ func GetCron(c *gin.Context) {
 	repo := session.Repo(c)
 	id, err := strconv.ParseInt(c.Param("cron"), 10, 64)
 	if err != nil {
-		c.String(400, "Error parsing cron id. %s", err)
+		c.String(http.StatusBadRequest, "Error parsing cron id. %s", err)
 		return
 	}
 
 	cron, err := store.FromContext(c).CronFind(repo, id)
 	if err != nil {
-		c.String(404, "Error getting cron %q. %s", id, err)
+		handleDbGetError(c, err)
 		return
 	}
-	c.JSON(200, cron)
+	c.JSON(http.StatusOK, cron)
 }
 
 // RunCron starts a cron job now.
@@ -51,13 +51,13 @@ func RunCron(c *gin.Context) {
 	_store := store.FromContext(c)
 	id, err := strconv.ParseInt(c.Param("cron"), 10, 64)
 	if err != nil {
-		c.String(400, "Error parsing cron id. %s", err)
+		c.String(http.StatusBadRequest, "Error parsing cron id. %s", err)
 		return
 	}
 
 	cron, err := _store.CronFind(repo, id)
 	if err != nil {
-		c.String(http.StatusNotFound, "Error getting cron %q. %s", id, err)
+		handleDbGetError(c, err)
 		return
 	}
 
@@ -73,7 +73,7 @@ func RunCron(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, pl)
+	c.JSON(http.StatusOK, pl)
 }
 
 // PostCron persists the cron job to the database.
@@ -96,13 +96,13 @@ func PostCron(c *gin.Context) {
 		Branch:    in.Branch,
 	}
 	if err := cron.Validate(); err != nil {
-		c.String(400, "Error inserting cron. validate failed: %s", err)
+		c.String(http.StatusUnprocessableEntity, "Error inserting cron. validate failed: %s", err)
 		return
 	}
 
 	nextExec, err := cronScheduler.CalcNewNext(in.Schedule, time.Now())
 	if err != nil {
-		c.String(400, "Error inserting cron. schedule could not parsed: %s", err)
+		c.String(http.StatusBadRequest, "Error inserting cron. schedule could not parsed: %s", err)
 		return
 	}
 	cron.NextExec = nextExec.Unix()
@@ -111,16 +111,16 @@ func PostCron(c *gin.Context) {
 		// check if branch exists on forge
 		_, err := forge.BranchHead(c, user, repo, in.Branch)
 		if err != nil {
-			c.String(400, "Error inserting cron. branch not resolved: %s", err)
+			c.String(http.StatusBadRequest, "Error inserting cron. branch not resolved: %s", err)
 			return
 		}
 	}
 
 	if err := store.CronCreate(cron); err != nil {
-		c.String(500, "Error inserting cron %q. %s", in.Name, err)
+		c.String(http.StatusInternalServerError, "Error inserting cron %q. %s", in.Name, err)
 		return
 	}
-	c.JSON(200, cron)
+	c.JSON(http.StatusOK, cron)
 }
 
 // PatchCron updates the cron job in the database.
@@ -132,7 +132,7 @@ func PatchCron(c *gin.Context) {
 
 	id, err := strconv.ParseInt(c.Param("cron"), 10, 64)
 	if err != nil {
-		c.String(400, "Error parsing cron id. %s", err)
+		c.String(http.StatusBadRequest, "Error parsing cron id. %s", err)
 		return
 	}
 
@@ -145,14 +145,14 @@ func PatchCron(c *gin.Context) {
 
 	cron, err := store.CronFind(repo, id)
 	if err != nil {
-		c.String(404, "Error getting cron %d. %s", id, err)
+		handleDbGetError(c, err)
 		return
 	}
 	if in.Branch != "" {
 		// check if branch exists on forge
 		_, err := forge.BranchHead(c, user, repo, in.Branch)
 		if err != nil {
-			c.String(400, "Error inserting cron. branch not resolved: %s", err)
+			c.String(http.StatusBadRequest, "Error inserting cron. branch not resolved: %s", err)
 			return
 		}
 		cron.Branch = in.Branch
@@ -161,7 +161,7 @@ func PatchCron(c *gin.Context) {
 		cron.Schedule = in.Schedule
 		nextExec, err := cronScheduler.CalcNewNext(in.Schedule, time.Now())
 		if err != nil {
-			c.String(400, "Error inserting cron. schedule could not parsed: %s", err)
+			c.String(http.StatusBadRequest, "Error inserting cron. schedule could not parsed: %s", err)
 			return
 		}
 		cron.NextExec = nextExec.Unix()
@@ -172,26 +172,26 @@ func PatchCron(c *gin.Context) {
 	cron.CreatorID = user.ID
 
 	if err := cron.Validate(); err != nil {
-		c.String(400, "Error inserting cron. validate failed: %s", err)
+		c.String(http.StatusUnprocessableEntity, "Error inserting cron. validate failed: %s", err)
 		return
 	}
 	if err := store.CronUpdate(repo, cron); err != nil {
-		c.String(500, "Error updating cron %q. %s", in.Name, err)
+		c.String(http.StatusInternalServerError, "Error updating cron %q. %s", in.Name, err)
 		return
 	}
-	c.JSON(200, cron)
+	c.JSON(http.StatusOK, cron)
 }
 
 // GetCronList gets the cron job list from the database and writes
 // to the response in json format.
 func GetCronList(c *gin.Context) {
 	repo := session.Repo(c)
-	list, err := store.FromContext(c).CronList(repo)
+	list, err := store.FromContext(c).CronList(repo, session.Pagination(c))
 	if err != nil {
-		c.String(500, "Error getting cron list. %s", err)
+		c.String(http.StatusInternalServerError, "Error getting cron list. %s", err)
 		return
 	}
-	c.JSON(200, list)
+	c.JSON(http.StatusOK, list)
 }
 
 // DeleteCron deletes the named cron job from the database.
@@ -199,12 +199,12 @@ func DeleteCron(c *gin.Context) {
 	repo := session.Repo(c)
 	id, err := strconv.ParseInt(c.Param("cron"), 10, 64)
 	if err != nil {
-		c.String(400, "Error parsing cron id. %s", err)
+		c.String(http.StatusBadRequest, "Error parsing cron id. %s", err)
 		return
 	}
 	if err := store.FromContext(c).CronDelete(repo, id); err != nil {
-		c.String(500, "Error deleting cron %d. %s", id, err)
+		handleDbGetError(c, err)
 		return
 	}
-	c.String(204, "")
+	c.String(http.StatusNoContent, "")
 }

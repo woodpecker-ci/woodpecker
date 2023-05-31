@@ -45,7 +45,7 @@ import (
 var Command = &cli.Command{
 	Name:      "exec",
 	Usage:     "execute a local pipeline",
-	ArgsUsage: "[path/to/.woodpecker.yml]",
+	ArgsUsage: "[path/to/.woodpecker.yaml]",
 	Action:    run,
 	Flags:     append(common.GlobalFlags, flags...),
 }
@@ -66,7 +66,7 @@ func execDir(c *cli.Context, dir string) error {
 		}
 
 		// check if it is a regular file (not dir)
-		if info.Mode().IsRegular() && strings.HasSuffix(info.Name(), ".yml") {
+		if info.Mode().IsRegular() && (strings.HasSuffix(info.Name(), ".yaml") || strings.HasSuffix(info.Name(), ".yml")) {
 			fmt.Println("#", info.Name())
 			_ = runExec(c, path, repoPath) // TODO: should we drop errors or store them and report back?
 			fmt.Println("")
@@ -112,7 +112,7 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 	metadata := metadataFromContext(c, axis)
 	environ := metadata.Environ()
 	var secrets []compiler.Secret
-	for key, val := range metadata.Step.Matrix {
+	for key, val := range metadata.Workflow.Matrix {
 		environ[key] = val
 		secrets = append(secrets, compiler.Secret{
 			Name:  key,
@@ -203,21 +203,22 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 		return err
 	}
 
-	backend.Init(context.WithValue(c.Context, types.CliContext, c))
+	backendCtx := context.WithValue(c.Context, types.CliContext, c)
+	backend.Init(backendCtx)
 
-	engine, err := backend.FindEngine(c.String("backend-engine"))
+	engine, err := backend.FindEngine(backendCtx, c.String("backend-engine"))
 	if err != nil {
 		return err
 	}
 
-	if err = engine.Load(); err != nil {
+	if err = engine.Load(backendCtx); err != nil {
 		return err
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), c.Duration("timeout"))
 	defer cancel()
 	ctx = utils.WithContextSigtermCallback(ctx, func() {
-		println("ctrl+c received, terminating process")
+		fmt.Println("ctrl+c received, terminating process")
 	})
 
 	return pipeline.New(compiled,
@@ -228,7 +229,7 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 		pipeline.WithDescription(map[string]string{
 			"CLI": "exec",
 		}),
-	).Run()
+	).Run(c.Context)
 }
 
 // return the metadata from the cli context.
@@ -289,9 +290,14 @@ func metadataFromContext(c *cli.Context, axis matrix.Axis) frontend.Metadata {
 				},
 			},
 		},
-		Step: frontend.Step{
-			Number: c.Int("step-number"),
+		Workflow: frontend.Workflow{
+			Name:   c.String("workflow-name"),
+			Number: c.Int("workflow-number"),
 			Matrix: axis,
+		},
+		Step: frontend.Step{
+			Name:   c.String("step-name"),
+			Number: c.Int("step-number"),
 		},
 		Sys: frontend.System{
 			Name:     c.String("system-name"),

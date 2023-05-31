@@ -15,8 +15,12 @@
           :placeholder="$t('repo.settings.general.pipeline_path.default')"
         />
         <template #description>
-          <!-- eslint-disable-next-line vue/no-v-html -->
-          <p class="text-sm text-color-alt" v-html="$t('repo.settings.general.pipeline_path.desc')" />
+          <i18n-t keypath="repo.settings.general.pipeline_path.desc" tag="p" class="text-sm text-color-alt">
+            <span class="bg-gray-300 dark:bg-dark-700 rounded-md px-1">{{
+              $t('repo.settings.general.pipeline_path.desc_path_example')
+            }}</span>
+            <span class="bg-gray-300 dark:bg-dark-700 rounded-md px-1">/</span>
+          </i18n-t>
         </template>
       </InputField>
 
@@ -33,6 +37,11 @@
           v-model="repoSettings.gated"
           :label="$t('repo.settings.general.protected.protected')"
           :description="$t('repo.settings.general.protected.desc')"
+        />
+        <Checkbox
+          v-model="repoSettings.netrc_only_trusted"
+          :label="$t('repo.settings.general.netrc_only_trusted.netrc_only_trusted')"
+          :description="$t('repo.settings.general.netrc_only_trusted.desc')"
         />
         <Checkbox
           v-if="user?.admin"
@@ -100,7 +109,7 @@ import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useAuthentication from '~/compositions/useAuthentication';
 import useNotifications from '~/compositions/useNotifications';
 import { Repo, RepoSettings, RepoVisibility, WebhookEvents } from '~/lib/api/types';
-import RepoStore from '~/store/repos';
+import { useRepoStore } from '~/store/repos';
 
 export default defineComponent({
   name: 'GeneralTab',
@@ -111,7 +120,7 @@ export default defineComponent({
     const apiClient = useApiClient();
     const notifications = useNotifications();
     const { user } = useAuthentication();
-    const repoStore = RepoStore();
+    const repoStore = useRepoStore();
     const i18n = useI18n();
 
     const repo = inject<Ref<Repo>>('repo');
@@ -130,6 +139,7 @@ export default defineComponent({
         trusted: repo.value.trusted,
         allow_pr: repo.value.allow_pr,
         cancel_previous_pipeline_events: repo.value.cancel_previous_pipeline_events || [],
+        netrc_only_trusted: repo.value.netrc_only_trusted,
       };
     }
 

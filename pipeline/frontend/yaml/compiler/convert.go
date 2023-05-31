@@ -62,6 +62,7 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 	}
 
 	environment["CI_WORKSPACE"] = path.Join(c.base, c.path)
+	environment["CI_STEP_NAME"] = name
 
 	if section == "services" || container.Detached {
 		detached = true
@@ -84,7 +85,7 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		}
 	}
 
-	if matchImage(container.Image, c.escalated...) {
+	if matchImage(container.Image, c.escalated...) && container.IsPlugin() {
 		privileged = true
 	}
 
@@ -134,11 +135,10 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		cpuSet = c.reslimit.CPUSet
 	}
 
-	// all constraints must exclude success.
-	onSuccess := container.When.IsEmpty() ||
-		!container.When.ExcludesStatus("success")
+	// at least one constraint contain status success, or all constraints have no status set
+	onSuccess := container.When.IncludesStatusSuccess()
 	// at least one constraint must include the status failure.
-	onFailure := container.When.IncludesStatus("failure")
+	onFailure := container.When.IncludesStatusFailure()
 
 	failure := container.Failure
 	if container.Failure == "" {

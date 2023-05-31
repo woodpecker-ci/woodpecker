@@ -42,12 +42,13 @@ const (
 type (
 	// Metadata defines runtime m.
 	Metadata struct {
-		ID   string   `json:"id,omitempty"`
-		Repo Repo     `json:"repo,omitempty"`
-		Curr Pipeline `json:"curr,omitempty"`
-		Prev Pipeline `json:"prev,omitempty"`
-		Step Step     `json:"step,omitempty"`
-		Sys  System   `json:"sys,omitempty"`
+		ID       string   `json:"id,omitempty"`
+		Repo     Repo     `json:"repo,omitempty"`
+		Curr     Pipeline `json:"curr,omitempty"`
+		Prev     Pipeline `json:"prev,omitempty"`
+		Workflow Workflow `json:"workflow,omitempty"`
+		Step     Step     `json:"step,omitempty"`
+		Sys      System   `json:"sys,omitempty"`
 	}
 
 	// Repo defines runtime metadata for a repository.
@@ -79,13 +80,14 @@ type (
 
 	// Commit defines runtime metadata for a commit.
 	Commit struct {
-		Sha          string   `json:"sha,omitempty"`
-		Ref          string   `json:"ref,omitempty"`
-		Refspec      string   `json:"refspec,omitempty"`
-		Branch       string   `json:"branch,omitempty"`
-		Message      string   `json:"message,omitempty"`
-		Author       Author   `json:"author,omitempty"`
-		ChangedFiles []string `json:"changed_files,omitempty"`
+		Sha               string   `json:"sha,omitempty"`
+		Ref               string   `json:"ref,omitempty"`
+		Refspec           string   `json:"refspec,omitempty"`
+		Branch            string   `json:"branch,omitempty"`
+		Message           string   `json:"message,omitempty"`
+		Author            Author   `json:"author,omitempty"`
+		ChangedFiles      []string `json:"changed_files,omitempty"`
+		PullRequestLabels []string `json:"labels,omitempty"`
 	}
 
 	// Author defines runtime metadata for a commit author.
@@ -95,10 +97,17 @@ type (
 		Avatar string `json:"avatar,omitempty"`
 	}
 
-	// Step defines runtime metadata for a step.
-	Step struct {
+	// Workflow defines runtime metadata for a workflow.
+	Workflow struct {
+		Name   string            `json:"name,omitempty"`
 		Number int               `json:"number,omitempty"`
 		Matrix map[string]string `json:"matrix,omitempty"`
+	}
+
+	// Step defines runtime metadata for a step.
+	Step struct {
+		Name   string `json:"name,omitempty"`
+		Number int    `json:"number,omitempty"`
 	}
 
 	// Secret defines a runtime secret
@@ -154,19 +163,20 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_REPO_PRIVATE":        strconv.FormatBool(m.Repo.Private),
 		"CI_REPO_TRUSTED":        "false", // TODO should this be added?
 
-		"CI_COMMIT_SHA":           m.Curr.Commit.Sha,
-		"CI_COMMIT_REF":           m.Curr.Commit.Ref,
-		"CI_COMMIT_REFSPEC":       m.Curr.Commit.Refspec,
-		"CI_COMMIT_BRANCH":        m.Curr.Commit.Branch,
-		"CI_COMMIT_SOURCE_BRANCH": sourceBranch,
-		"CI_COMMIT_TARGET_BRANCH": targetBranch,
-		"CI_COMMIT_LINK":          m.Curr.Link,
-		"CI_COMMIT_MESSAGE":       m.Curr.Commit.Message,
-		"CI_COMMIT_AUTHOR":        m.Curr.Commit.Author.Name,
-		"CI_COMMIT_AUTHOR_EMAIL":  m.Curr.Commit.Author.Email,
-		"CI_COMMIT_AUTHOR_AVATAR": m.Curr.Commit.Author.Avatar,
-		"CI_COMMIT_TAG":           "", // will be set if event is tag
-		"CI_COMMIT_PULL_REQUEST":  "", // will be set if event is pr
+		"CI_COMMIT_SHA":                 m.Curr.Commit.Sha,
+		"CI_COMMIT_REF":                 m.Curr.Commit.Ref,
+		"CI_COMMIT_REFSPEC":             m.Curr.Commit.Refspec,
+		"CI_COMMIT_BRANCH":              m.Curr.Commit.Branch,
+		"CI_COMMIT_SOURCE_BRANCH":       sourceBranch,
+		"CI_COMMIT_TARGET_BRANCH":       targetBranch,
+		"CI_COMMIT_LINK":                m.Curr.Link,
+		"CI_COMMIT_MESSAGE":             m.Curr.Commit.Message,
+		"CI_COMMIT_AUTHOR":              m.Curr.Commit.Author.Name,
+		"CI_COMMIT_AUTHOR_EMAIL":        m.Curr.Commit.Author.Email,
+		"CI_COMMIT_AUTHOR_AVATAR":       m.Curr.Commit.Author.Avatar,
+		"CI_COMMIT_TAG":                 "", // will be set if event is tag
+		"CI_COMMIT_PULL_REQUEST":        "", // will be set if event is pr
+		"CI_COMMIT_PULL_REQUEST_LABELS": "", // will be set if event is pr
 
 		"CI_PIPELINE_NUMBER":        strconv.FormatInt(m.Curr.Number, 10),
 		"CI_PIPELINE_PARENT":        strconv.FormatInt(m.Curr.Parent, 10),
@@ -178,6 +188,10 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_PIPELINE_STARTED":       strconv.FormatInt(m.Curr.Started, 10),
 		"CI_PIPELINE_FINISHED":      strconv.FormatInt(m.Curr.Finished, 10),
 
+		"CI_WORKFLOW_NAME":   m.Workflow.Name,
+		"CI_WORKFLOW_NUMBER": strconv.Itoa(m.Workflow.Number),
+
+		"CI_STEP_NAME":     m.Step.Name,
 		"CI_STEP_NUMBER":   strconv.Itoa(m.Step.Number),
 		"CI_STEP_STATUS":   "", // will be set by agent
 		"CI_STEP_STARTED":  "", // will be set by agent
@@ -244,9 +258,8 @@ func (m *Metadata) Environ() map[string]string {
 	}
 	if m.Curr.Event == EventPull {
 		params["CI_COMMIT_PULL_REQUEST"] = pullRegexp.FindString(m.Curr.Commit.Ref)
+		params["CI_COMMIT_PULL_REQUEST_LABELS"] = strings.Join(m.Curr.Commit.PullRequestLabels, ",")
 	}
-
-	m.setDroneEnviron(params)
 
 	return params
 }

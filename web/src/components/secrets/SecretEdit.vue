@@ -11,7 +11,7 @@
       </InputField>
 
       <InputField :label="$t(i18nPrefix + 'value')">
-        <TextField v-model="innerValue.value" :placeholder="$t(i18nPrefix + 'value')" :lines="5" required />
+        <TextField v-model="innerValue.value" :placeholder="$t(i18nPrefix + 'value')" :lines="5" />
       </InputField>
 
       <InputField :label="$t(i18nPrefix + 'images.images')">
@@ -24,12 +24,15 @@
         <CheckboxesField v-model="innerValue.event" :options="secretEventsOptions" />
       </InputField>
 
-      <Button
-        type="submit"
-        color="green"
-        :is-loading="isSaving"
-        :text="isEditingSecret ? $t(i18nPrefix + 'save') : $t(i18nPrefix + 'add')"
-      />
+      <div class="flex gap-2">
+        <Button type="button" color="gray" :text="$t('cancel')" @click="$emit('cancel')" />
+        <Button
+          type="submit"
+          color="green"
+          :is-loading="isSaving"
+          :text="isEditingSecret ? $t(i18nPrefix + 'save') : $t(i18nPrefix + 'add')"
+        />
+      </div>
     </form>
   </div>
 </template>
@@ -54,6 +57,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (event: 'update:modelValue', value: Partial<Secret> | undefined): void;
   (event: 'save', value: Partial<Secret>): void;
+  (event: 'cancel'): void;
 }>();
 
 const i18n = useI18n();

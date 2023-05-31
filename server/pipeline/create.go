@@ -68,7 +68,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	)
 
 	// fetch the pipeline file from the forge
-	configFetcher := forge.NewConfigFetcher(_forge, server.Config.Services.ConfigService, repoUser, repo, pipeline)
+	configFetcher := forge.NewConfigFetcher(_forge, server.Config.Services.Timeout, server.Config.Services.ConfigService, repoUser, repo, pipeline)
 	forgeYamlConfigs, configFetchErr = configFetcher.Fetch(ctx)
 	if configFetchErr == nil {
 		filtered, parseErr = checkIfFiltered(pipeline, forgeYamlConfigs)
@@ -131,9 +131,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 			log.Error().Err(err).Msg("publishToTopic")
 		}
 
-		if err := updatePipelineStatus(ctx, _forge, pipeline, repo, repoUser); err != nil {
-			log.Error().Err(err).Msg("updatePipelineStatus")
-		}
+		updatePipelineStatus(ctx, _forge, pipeline, repo, repoUser)
 
 		return pipeline, nil
 	}
@@ -150,9 +148,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 			log.Error().Err(err).Msg("publishToTopic")
 		}
 
-		if err := updatePipelineStatus(ctx, _forge, pipeline, repo, repoUser); err != nil {
-			log.Error().Err(err).Msg("updatePipelineStatus")
-		}
+		updatePipelineStatus(ctx, _forge, pipeline, repo, repoUser)
 
 		return pipeline, nil
 	}

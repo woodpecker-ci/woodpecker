@@ -54,6 +54,9 @@ const (
 	pathPipelineQueue  = "%s/api/pipelines"
 	pathQueue          = "%s/api/queue"
 	pathLogLevel       = "%s/api/log-level"
+	pathAgents         = "%s/api/agents"
+	pathAgent          = "%s/api/agents/%d"
+	pathAgentTasks     = "%s/api/agents/%d/tasks"
 	// TODO: implement endpoints
 	// pathFeed           = "%s/api/user/feed"
 	// pathVersion        = "%s/version"
@@ -295,7 +298,7 @@ func (c *client) PipelineLogs(owner, name string, num, step int) ([]*Logs, error
 func (c *client) Deploy(owner, name string, num int, env string, params map[string]string) (*Pipeline, error) {
 	out := new(Pipeline)
 	val := mapValues(params)
-	val.Set("event", "deployment")
+	val.Set("event", EventDeploy)
 	val.Set("deploy_to", env)
 	uri := fmt.Sprintf(pathPipeline, c.addr, owner, name, num)
 	err := c.post(uri+"?"+val.Encode(), nil, out)
@@ -515,38 +518,68 @@ func (c *client) CronGet(owner, repo string, cronID int64) (*Cron, error) {
 	return out, c.get(uri, out)
 }
 
+func (c *client) AgentList() ([]*Agent, error) {
+	out := make([]*Agent, 0, 5)
+	uri := fmt.Sprintf(pathAgents, c.addr)
+	return out, c.get(uri, &out)
+}
+
+func (c *client) Agent(agentID int64) (*Agent, error) {
+	out := new(Agent)
+	uri := fmt.Sprintf(pathAgent, c.addr, agentID)
+	return out, c.get(uri, out)
+}
+
+func (c *client) AgentCreate(in *Agent) (*Agent, error) {
+	out := new(Agent)
+	uri := fmt.Sprintf(pathAgents, c.addr)
+	return out, c.post(uri, in, out)
+}
+
+func (c *client) AgentUpdate(in *Agent) (*Agent, error) {
+	out := new(Agent)
+	uri := fmt.Sprintf(pathAgent, c.addr, in.ID)
+	return out, c.patch(uri, in, out)
+}
+
+func (c *client) AgentDelete(agentID int64) error {
+	uri := fmt.Sprintf(pathAgent, c.addr, agentID)
+	return c.delete(uri)
+}
+
+func (c *client) AgentTasksList(agentID int64) ([]*Task, error) {
+	out := make([]*Task, 0, 5)
+	uri := fmt.Sprintf(pathAgentTasks, c.addr, agentID)
+	return out, c.get(uri, &out)
+}
+
 //
 // http request helper functions
 //
 
 // helper function for making an http GET request.
 func (c *client) get(rawurl string, out interface{}) error {
-	return c.do(rawurl, "GET", nil, out)
+	return c.do(rawurl, http.MethodGet, nil, out)
 }
 
 // helper function for making an http POST request.
 func (c *client) post(rawurl string, in, out interface{}) error {
-	return c.do(rawurl, "POST", in, out)
-}
-
-// helper function for making an http PUT request.
-func (c *client) put(rawurl string, in, out interface{}) error {
-	return c.do(rawurl, "PUT", in, out)
+	return c.do(rawurl, http.MethodPost, in, out)
 }
 
 // helper function for making an http PATCH request.
 func (c *client) patch(rawurl string, in, out interface{}) error {
-	return c.do(rawurl, "PATCH", in, out)
+	return c.do(rawurl, http.MethodPatch, in, out)
 }
 
 // helper function for making an http DELETE request.
 func (c *client) delete(rawurl string) error {
-	return c.do(rawurl, "DELETE", nil, nil)
+	return c.do(rawurl, http.MethodDelete, nil, nil)
 }
 
 // helper function to make an http request
 func (c *client) do(rawurl, method string, in, out interface{}) error {
-	body, err := c.open(rawurl, method, in, out)
+	body, err := c.open(rawurl, method, in)
 	if err != nil {
 		return err
 	}
@@ -558,7 +591,7 @@ func (c *client) do(rawurl, method string, in, out interface{}) error {
 }
 
 // helper function to open an http request
-func (c *client) open(rawurl, method string, in, out interface{}) (io.ReadCloser, error) {
+func (c *client) open(rawurl, method string, in interface{}) (io.ReadCloser, error) {
 	uri, err := url.Parse(rawurl)
 	if err != nil {
 		return nil, err

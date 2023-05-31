@@ -22,12 +22,14 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strconv"
-
-	"github.com/rs/zerolog/log"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/rs/zerolog/log"
+	"google.golang.org/grpc/metadata"
 	grpcMetadata "google.golang.org/grpc/metadata"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
@@ -67,7 +69,14 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Pipeline, er
 		return nil, err
 	}
 	for {
-		task, err := s.queue.Poll(c, fn)
+		agent, err := s.getAgentFromContext(c)
+		if err != nil {
+			return nil, err
+		} else if agent.NoSchedule {
+			return nil, nil
+		}
+
+		task, err := s.queue.Poll(c, agent.ID, fn)
 		if err != nil {
 			return nil, err
 		} else if task == nil {
@@ -79,6 +88,7 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Pipeline, er
 			err = json.Unmarshal(task.Data, pipeline)
 			return pipeline, err
 		}
+
 		if err := s.Done(c, task.ID, rpc.State{}); err != nil {
 			log.Error().Err(err).Msgf("mark task '%s' done failed", task.ID)
 		}
@@ -120,25 +130,20 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 		return err
 	}
 
-	metadata, ok := grpcMetadata.FromIncomingContext(c)
-	if ok {
-		hostname, ok := metadata["hostname"]
-		if ok && len(hostname) != 0 {
-			step.Machine = hostname[0]
-		}
-	}
-
 	repo, err := s.store.GetRepo(currentPipeline.RepoID)
 	if err != nil {
 		log.Error().Msgf("error: cannot find repo with id %d: %s", currentPipeline.RepoID, err)
 		return err
 	}
 
-	if _, err = pipeline.UpdateStepStatus(s.store, *step, state, currentPipeline.Started); err != nil {
+	if step, err = pipeline.UpdateStepStatus(s.store, *step, state, currentPipeline.Started); err != nil {
 		log.Error().Err(err).Msg("rpc.update: cannot update step")
 	}
 
-	if currentPipeline.Steps, err = s.store.StepList(currentPipeline); err != nil {
+	s.updateForgeStatus(c, repo, currentPipeline, step)
+
+	currentPipeline.Steps, err = s.store.StepList(currentPipeline)
+	if err != nil {
 		log.Error().Err(err).Msg("can not get step list from store")
 	}
 	if currentPipeline.Steps, err = model.Tree(currentPipeline.Steps); err != nil {
@@ -163,7 +168,7 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 }
 
 // Upload implements the rpc.Upload function
-func (s *RPC) Upload(c context.Context, id string, file *rpc.File) error {
+func (s *RPC) Upload(_ context.Context, id string, file *rpc.File) error {
 	stepID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		return err
@@ -247,13 +252,12 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 		log.Error().Msgf("error: cannot find step with id %d: %s", stepID, err)
 		return err
 	}
-	metadata, ok := grpcMetadata.FromIncomingContext(c)
-	if ok {
-		hostname, ok := metadata["hostname"]
-		if ok && len(hostname) != 0 {
-			step.Machine = hostname[0]
-		}
+
+	agent, err := s.getAgentFromContext(c)
+	if err != nil {
+		return err
 	}
+	step.AgentID = agent.ID
 
 	currentPipeline, err := s.store.GetPipeline(step.PipelineID)
 	if err != nil {
@@ -273,6 +277,8 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 		}
 	}
 
+	s.updateForgeStatus(c, repo, currentPipeline, step)
+
 	defer func() {
 		currentPipeline.Steps, _ = s.store.StepList(currentPipeline)
 		message := pubsub.Message{
@@ -290,26 +296,30 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 		}
 	}()
 
-	_, err = pipeline.UpdateStepToStatusStarted(s.store, *step, state)
-	return err
+	step, err = pipeline.UpdateStepToStatusStarted(s.store, *step, state)
+	if err != nil {
+		return err
+	}
+	s.updateForgeStatus(c, repo, currentPipeline, step)
+	return nil
 }
 
 // Done implements the rpc.Done function
 func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
-	stepID, err := strconv.ParseInt(id, 10, 64)
+	workflowID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		return err
 	}
 
-	step, err := s.store.StepLoad(stepID)
+	workflow, err := s.store.StepLoad(workflowID)
 	if err != nil {
-		log.Error().Msgf("error: cannot find step with id %d: %s", stepID, err)
+		log.Error().Msgf("error: cannot find step with id %d: %s", workflowID, err)
 		return err
 	}
 
-	currentPipeline, err := s.store.GetPipeline(step.PipelineID)
+	currentPipeline, err := s.store.GetPipeline(workflow.PipelineID)
 	if err != nil {
-		log.Error().Msgf("error: cannot find pipeline with id %d: %s", step.PipelineID, err)
+		log.Error().Msgf("error: cannot find pipeline with id %d: %s", workflow.PipelineID, err)
 		return err
 	}
 
@@ -325,36 +335,36 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 		Str("step_id", id).
 		Msgf("gRPC Done with state: %#v", state)
 
-	if step, err = pipeline.UpdateStepStatusToDone(s.store, *step, state); err != nil {
-		log.Error().Msgf("error: done: cannot update step_id %d state: %s", step.ID, err)
+	if workflow, err = pipeline.UpdateStepStatusToDone(s.store, *workflow, state); err != nil {
+		log.Error().Msgf("error: done: cannot update step_id %d state: %s", workflow.ID, err)
 	}
 
 	var queueErr error
-	if step.Failing() {
+	if workflow.Failing() {
 		queueErr = s.queue.Error(c, id, fmt.Errorf("Step finished with exitcode %d, %s", state.ExitCode, state.Error))
 	} else {
-		queueErr = s.queue.Done(c, id, step.State)
+		queueErr = s.queue.Done(c, id, workflow.State)
 	}
 	if queueErr != nil {
-		log.Error().Msgf("error: done: cannot ack step_id %d: %s", stepID, err)
+		log.Error().Msgf("error: done: cannot ack step_id %d: %s", workflowID, err)
 	}
 
 	steps, err := s.store.StepList(currentPipeline)
 	if err != nil {
 		return err
 	}
-	s.completeChildrenIfParentCompleted(steps, step)
+	s.completeChildrenIfParentCompleted(steps, workflow)
 
 	if !model.IsThereRunningStage(steps) {
-		if currentPipeline, err = pipeline.UpdateStatusToDone(s.store, *currentPipeline, model.PipelineStatus(steps), step.Stopped); err != nil {
+		if currentPipeline, err = pipeline.UpdateStatusToDone(s.store, *currentPipeline, model.PipelineStatus(steps), workflow.Stopped); err != nil {
 			log.Error().Err(err).Msgf("error: done: cannot update build_id %d final state", currentPipeline.ID)
 		}
 	}
 
-	s.updateForgeStatus(c, repo, currentPipeline, step)
+	s.updateForgeStatus(c, repo, currentPipeline, workflow)
 
 	if err := s.logger.Close(c, id); err != nil {
-		log.Error().Err(err).Msgf("done: cannot close build_id %d logger", step.ID)
+		log.Error().Err(err).Msgf("done: cannot close build_id %d logger", workflow.ID)
 	}
 
 	if err := s.notify(c, repo, currentPipeline, steps); err != nil {
@@ -366,7 +376,7 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 		s.pipelineTime.WithLabelValues(repo.FullName, currentPipeline.Branch, string(currentPipeline.Status), "total").Set(float64(currentPipeline.Finished - currentPipeline.Started))
 	}
 	if model.IsMultiPipeline(steps) {
-		s.pipelineTime.WithLabelValues(repo.FullName, currentPipeline.Branch, string(step.State), step.Name).Set(float64(step.Stopped - step.Started))
+		s.pipelineTime.WithLabelValues(repo.FullName, currentPipeline.Branch, string(workflow.State), workflow.Name).Set(float64(workflow.Stopped - workflow.Started))
 	}
 
 	return nil
@@ -382,10 +392,44 @@ func (s *RPC) Log(c context.Context, id string, line *rpc.Line) error {
 	return nil
 }
 
-func (s *RPC) completeChildrenIfParentCompleted(steps []*model.Step, completedStep *model.Step) {
+func (s *RPC) RegisterAgent(ctx context.Context, platform, backend, version string, capacity int32) (int64, error) {
+	agent, err := s.getAgentFromContext(ctx)
+	if err != nil {
+		return -1, err
+	}
+
+	agent.Backend = backend
+	agent.Platform = platform
+	agent.Capacity = capacity
+	agent.Version = version
+
+	err = s.store.AgentUpdate(agent)
+	if err != nil {
+		return -1, err
+	}
+
+	return agent.ID, nil
+}
+
+func (s *RPC) ReportHealth(ctx context.Context, status string) error {
+	agent, err := s.getAgentFromContext(ctx)
+	if err != nil {
+		return err
+	}
+
+	if status != "I am alive!" {
+		return errors.New("Are you alive?")
+	}
+
+	agent.LastContact = time.Now().Unix()
+
+	return s.store.AgentUpdate(agent)
+}
+
+func (s *RPC) completeChildrenIfParentCompleted(steps []*model.Step, completedWorkflow *model.Step) {
 	for _, p := range steps {
-		if p.Running() && p.PPID == completedStep.PID {
-			if _, err := pipeline.UpdateStepToStatusSkipped(s.store, *p, completedStep.Stopped); err != nil {
+		if p.Running() && p.PPID == completedWorkflow.PID {
+			if _, err := pipeline.UpdateStepToStatusSkipped(s.store, *p, completedWorkflow.Stopped); err != nil {
 				log.Error().Msgf("error: done: cannot update step_id %d child state: %s", p.ID, err)
 			}
 		}
@@ -443,4 +487,24 @@ func (s *RPC) notify(c context.Context, repo *model.Repo, pipeline *model.Pipeli
 		log.Error().Err(err).Msgf("grpc could not notify event: '%v'", message)
 	}
 	return nil
+}
+
+func (s *RPC) getAgentFromContext(ctx context.Context) (*model.Agent, error) {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return nil, errors.New("metadata is not provided")
+	}
+
+	values := md["agent_id"]
+	if len(values) == 0 {
+		return nil, errors.New("agent_id is not provided")
+	}
+
+	_agentID := values[0]
+	agentID, err := strconv.ParseInt(_agentID, 10, 64)
+	if err != nil {
+		return nil, errors.New("agent_id is not a valid integer")
+	}
+
+	return s.store.AgentFind(agentID)
 }

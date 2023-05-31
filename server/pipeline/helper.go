@@ -23,7 +23,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-func updatePipelineStatus(ctx context.Context, forge forge.Forge, pipeline *model.Pipeline, repo *model.Repo, user *model.User) error {
+func updatePipelineStatus(ctx context.Context, forge forge.Forge, pipeline *model.Pipeline, repo *model.Repo, user *model.User) {
 	for _, step := range pipeline.Steps {
 		// skip child steps
 		if !step.IsParent() {
@@ -33,9 +33,7 @@ func updatePipelineStatus(ctx context.Context, forge forge.Forge, pipeline *mode
 		err := forge.Status(ctx, user, repo, pipeline, step)
 		if err != nil {
 			log.Error().Err(err).Msgf("error setting commit status for %s/%d", repo.FullName, pipeline.Number)
-			return err
+			return
 		}
 	}
-
-	return nil
 }

@@ -1,7 +1,67 @@
 {
   "admin": {
     "settings": {
+      "agents": {
+        "add": "Ajouter un agent",
+        "agents": "Agents",
+        "backend": {
+          "backend": "Backend",
+          "badge": "backend"
+        },
+        "capacity": {
+          "badge": "capacité",
+          "capacity": "Capacité",
+          "desc": "Le nombre maximum de pipelines exécutées en parallèle par cet agent."
+        },
+        "created": "Agent crée",
+        "delete_agent": "Effacer l'agent",
+        "delete_confirm": "Voulez vous vraiment effacer cet agent ? Il ne pourra plus se connecter sur le serveur.",
+        "deleted": "Agent effacé",
+        "desc": "Agents enregistrés sur ce serveur",
+        "edit_agent": "Éditer l'agent",
+        "last_contact": "Dernier contact",
+        "name": {
+          "name": "Nom",
+          "placeholder": "Nom de l'agent"
+        },
+        "never": "Jamais",
+        "no_schedule": {
+          "name": "Désactiver l'agent",
+          "placeholder": "Bloquer l'assignation de nouvelles taches sur l'agent"
+        },
+        "none": "Il n'y a pas d'agent pour le moment.",
+        "platform": {
+          "badge": "platforme",
+          "platform": "Platforme"
+        },
+        "save": "Enregistrer l'agent",
+        "saved": "Agent enregistré",
+        "show": "Afficher les agents",
+        "token": "Jeton",
+        "version": "Version"
+      },
       "not_allowed": "Vous n'êtes pas autorisé à accéder aux réglages du serveur",
+      "queue": {
+        "agent": "agent",
+        "desc": "Taches en attente d’exécution par des agents",
+        "pause": "Mettre en pause",
+        "paused": "La queue est en pause",
+        "queue": "Queue",
+        "resume": "Relancer",
+        "resumed": "La queue est repartie",
+        "stats": {
+          "completed_count": "Tâches complétées",
+          "pending_count": "En attente",
+          "running_count": "En cours d’exécution",
+          "waiting_on_deps_count": "En attente de dépendances",
+          "worker_count": "Libre"
+        },
+        "task_pending": "La tâche est en attente",
+        "task_running": "La tâche est en cours d’exécution",
+        "task_waiting_on_deps": "La tâche est en attente de ses dépendances",
+        "tasks": "Tâches",
+        "waiting_for": "en attente de"
+      },
       "secrets": {
         "add": "Ajouter un secret",
         "created": "Secret global crée",
@@ -25,14 +85,40 @@
         "value": "Valeur",
         "warning": "Ces secrets seront disponibles pour tout les comptes du serveur."
       },
-      "settings": "Réglages"
+      "settings": "Réglages",
+      "users": {
+        "add": "Ajouter un compte utilisateur",
+        "admin": {
+          "admin": "Administrateur",
+          "placeholder": "Le compte utilisateur est un administrateur"
+        },
+        "avatar_url": "URL de l'avatar",
+        "cancel": "Annuler",
+        "created": "Compte utilisateur effacé",
+        "delete_confirm": "Voulez vous vraiment supprimer ce compte utilisateur ?",
+        "delete_user": "Effacer le compte utilisateur",
+        "deleted": "Compte utilisateur effacé",
+        "desc": "Utilisateurs enregistrés sur le serveur",
+        "edit_user": "Éditer le compte utilisateur",
+        "email": "Courriel",
+        "login": "Login",
+        "none": "Il n'y a pas de compte utilisateur pour le moment.",
+        "save": "Enregistrer le compte utilisateur",
+        "saved": "Compte utilisateur enregistré",
+        "show": "Afficher les comptes utilisateurs",
+        "users": "Utilisateurs"
+      }
     }
   },
   "back": "Revenir en arrière",
+  "cancel": "Annuler",
   "color_scheme_dark": "Basculer en couleurs claires",
   "color_scheme_light": "Basculer en couleurs sombres",
   "docs": "Docs",
   "documentation_for": "Documentation sur \"{topic}\"",
+  "errors": {
+    "not_found": "Le serveur n'a pas pu trouver l'objet demandé"
+  },
   "login": "Connexion",
   "logout": "Déconnexion",
   "not_found": {
@@ -114,6 +200,18 @@
       "step_not_started": "L'étape n'a pas démarré encore.",
       "tasks": "Tâches"
     },
+    "deploy_pipeline": {
+      "enter_target": "Environnement de déploiement ciblé",
+      "title": "Déclenchement d'un événement de déploiement pour le pipeline courant #{pipelineId}",
+      "trigger": "Déployer",
+      "variables": {
+        "add": "Ajouter une variable",
+        "desc": "Spécifiez les variables additionnelles que votre pipeline va utiliser. Les variables portant le même nom seront écrasées.",
+        "name": "Nom de la variable",
+        "title": "Variables additionnelles du pipeline",
+        "value": "Valeur de la variable"
+      }
+    },
     "enable": {
       "enable": "Activer",
       "enabled": "Déjà activé",
@@ -134,11 +232,13 @@
       }
     },
     "not_allowed": "Vous n'êtes pas autorisé à accéder à ce dépôt",
+    "open_in_forge": "Ouvrir le dépôt dans un système de contrôle de version",
     "pipeline": {
       "actions": {
         "cancel": "Annuler",
         "cancel_success": "Pipeline annulé",
         "canceled": "Cette étape a été annulée.",
+        "deploy": "Déployer",
         "log_auto_scroll": "Automatiquement défiler vers le bas",
         "log_auto_scroll_off": "Désactiver le défilement automatique",
         "log_download": "Télécharger",
@@ -165,6 +265,7 @@
       "no_pipelines": "Aucun pipeline n'a démarré pour le moment.",
       "pipeline": "Pipeline #{pipelineId}",
       "pipelines_for": "Pipelines pour la branche \"{branch}\"",
+      "pipelines_for_pr": "Pipeline pour la pull request #{index}",
       "protected": {
         "approve": "Approuver",
         "approve_success": "Pipeline approuvé",
@@ -173,9 +274,23 @@
         "decline_success": "Pipeline refusé",
         "declined": "Le pipeline a été refusé !"
       },
+      "status": {
+        "blocked": "bloqué",
+        "declined": "refusé",
+        "error": "en erreur",
+        "failure": "échoué",
+        "killed": "tué",
+        "pending": "en attente",
+        "running": "en cours",
+        "skipped": "sauté",
+        "started": "démarré",
+        "status": "Status : {status}",
+        "success": "réussi"
+      },
       "step_not_started": "L'étape n'a pas démarré encore.",
       "tasks": "Tâches"
     },
+    "pull_requests": "Pull requests",
     "settings": {
       "actions": {
         "actions": "Actions",
@@ -187,6 +302,10 @@
         "disable": {
           "disable": "Désactiver le dépôt",
           "success": "Dépôt désactivé"
+        },
+        "enable": {
+          "enable": "Activer le dépôt",
+          "success": "Dépôt activé"
         },
         "repair": {
           "repair": "Réparer un dépôt",
@@ -241,9 +360,14 @@
           "desc": "Activer pour forcer l'annulation des pipelines en cours et en attente pour le même contexte et le même événement avant de démarrer un nouveau pipeline déclenché par un événement."
         },
         "general": "Général",
+        "netrc_only_trusted": {
+          "desc": "Injecter les identifiants netrc uniquement dans des conteneurs de confiance (recommandé).",
+          "netrc_only_trusted": "Injecter les identifiants netrc uniquement dans des conteneurs de confiance"
+        },
         "pipeline_path": {
-          "default": "Par défaut : .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml",
-          "desc": "Le chemin vers votre configuration de pipeline (for example <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">mon/chemin/</span>). Le dossier doit se terminer par <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">/</span>.",
+          "default": "Par défaut : .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml -> .drone.yml",
+          "desc": "Le chemin vers votre configuration de pipeline (par example {0}). Les dossiers doivent finir par {1}.",
+          "desc_path_example": "mon/chemin/",
           "path": "Chemin vers le pipeline"
         },
         "project": "Paramètres du projet",
@@ -300,6 +424,7 @@
         "add": "Ajouter un secret",
         "created": "Secret crée",
         "delete": "Effacer le secret",
+        "delete_confirm": "Voulez vous vraiment effacer ce secret ?",
         "deleted": "Secret effacé",
         "desc": "Les secrets sont transmis sous forme de variable d’environnement lors de l’exécution d'une étape d'un pipeline.",
         "edit": "Modifier le secret",
@@ -345,6 +470,7 @@
     "dl_cli": "Télécharger l'interface en ligne de commande",
     "internal_error": "Une erreur interne est arrivé",
     "oauth_error": "Erreur lors de l’authentification auprès du fournisseur OAuth",
+    "reset_token": "Effacer le jeton",
     "settings": "Profil personnel",
     "shell_setup": "Utilisation avec un shell",
     "shell_setup_before": "faites la mise en place dans le shell avant",

@@ -17,7 +17,6 @@ package main
 import (
 	"context"
 	"crypto/tls"
-	"errors"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -28,13 +27,13 @@ import (
 
 	"github.com/caddyserver/certmagic"
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
-	"google.golang.org/grpc/metadata"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc/proto"
 	"github.com/woodpecker-ci/woodpecker/server"
@@ -48,7 +47,10 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/server/web"
+	"github.com/woodpecker-ci/woodpecker/shared/constant"
 	"github.com/woodpecker-ci/woodpecker/version"
+	// "github.com/woodpecker-ci/woodpecker/server/plugins/encryption"
+	// encryptedStore "github.com/woodpecker-ci/woodpecker/server/plugins/encryption/wrapper/store"
 )
 
 func run(c *cli.Context) error {
@@ -130,19 +132,22 @@ func run(c *cli.Context) error {
 	g.Go(func() error {
 		lis, err := net.Listen("tcp", c.String("grpc-addr"))
 		if err != nil {
-			log.Err(err).Msg("")
+			log.Error().Err(err).Msg("failed to listen on grpc-addr")
 			return err
 		}
-		authorizer := &authorizer{
-			password: c.String("agent-secret"),
-		}
+
+		jwtSecret := c.String("grpc-secret")
+		jwtManager := woodpeckerGrpcServer.NewJWTManager(jwtSecret)
+
+		authorizer := woodpeckerGrpcServer.NewAuthorizer(jwtManager)
 		grpcServer := grpc.NewServer(
-			grpc.StreamInterceptor(authorizer.streamInterceptor),
-			grpc.UnaryInterceptor(authorizer.unaryInterceptor),
+			grpc.StreamInterceptor(authorizer.StreamInterceptor),
+			grpc.UnaryInterceptor(authorizer.UnaryInterceptor),
 			grpc.KeepaliveEnforcementPolicy(keepalive.EnforcementPolicy{
 				MinTime: c.Duration("keepalive-min-time"),
 			}),
 		)
+
 		woodpeckerServer := woodpeckerGrpcServer.NewWoodpeckerServer(
 			server.Config.Services.Queue,
 			server.Config.Services.Logs,
@@ -152,9 +157,16 @@ func run(c *cli.Context) error {
 		)
 		proto.RegisterWoodpeckerServer(grpcServer, woodpeckerServer)
 
+		woodpeckerAuthServer := woodpeckerGrpcServer.NewWoodpeckerAuthServer(
+			jwtManager,
+			server.Config.Server.AgentToken,
+			_store,
+		)
+		proto.RegisterWoodpeckerAuthServer(grpcServer, woodpeckerAuthServer)
+
 		err = grpcServer.Serve(lis)
 		if err != nil {
-			log.Err(err).Msg("")
+			log.Error().Err(err).Msg("failed to serve grpc server")
 			return err
 		}
 		return nil
@@ -164,7 +176,12 @@ func run(c *cli.Context) error {
 	var webUIServe func(w http.ResponseWriter, r *http.Request)
 
 	if proxyWebUI == "" {
-		webUIServe = web.New().ServeHTTP
+		webEngine, err := web.New()
+		if err != nil {
+			log.Error().Err(err).Msg("failed to create web engine")
+			return err
+		}
+		webUIServe = webEngine.ServeHTTP
 	} else {
 		origin, _ := url.Parse(proxyWebUI)
 
@@ -192,7 +209,7 @@ func run(c *cli.Context) error {
 		// start the server with tls enabled
 		g.Go(func() error {
 			serve := &http.Server{
-				Addr:    ":https",
+				Addr:    server.Config.Server.PortTLS,
 				Handler: handler,
 				TLSConfig: &tls.Config{
 					NextProtos: []string{"h2", "http/1.1"},
@@ -218,7 +235,7 @@ func run(c *cli.Context) error {
 		}
 
 		g.Go(func() error {
-			return http.ListenAndServe(":http", http.HandlerFunc(redirect))
+			return http.ListenAndServe(server.Config.Server.Port, http.HandlerFunc(redirect))
 		})
 	} else if c.Bool("lets-encrypt") {
 		// start the server with lets-encrypt
@@ -247,6 +264,14 @@ func run(c *cli.Context) error {
 		})
 	}
 
+	if metricsServerAddr := c.String("metrics-server-addr"); metricsServerAddr != "" {
+		g.Go(func() error {
+			metricsRouter := gin.New()
+			metricsRouter.GET("/metrics", gin.WrapH(promhttp.Handler()))
+			return http.ListenAndServe(metricsServerAddr, metricsRouter)
+		})
+	}
+
 	log.Info().Msgf("Starting Woodpecker server with version '%s'", version.String())
 
 	return g.Wait()
@@ -256,6 +281,9 @@ func setupEvilGlobals(c *cli.Context, v store.Store) {
 	// storage
 	server.Config.Storage.Files = v
 
+	// forge
+	server.Config.Services.Timeout = c.Duration("forge-timeout")
+
 	// services
 	server.Config.Services.Queue = setupQueue(c, v)
 	server.Config.Services.Logs = logging.New()
@@ -264,7 +292,17 @@ func setupEvilGlobals(c *cli.Context, v store.Store) {
 		log.Error().Err(err).Msg("could not create pubsub service")
 	}
 	server.Config.Services.Registries = setupRegistryService(c, v)
+
+	// TODO(1544): fix encrypted store
+	// // encryption
+	// encryptedSecretStore := encryptedStore.NewSecretStore(v)
+	// err := encryption.Encryption(c, v).WithClient(encryptedSecretStore).Build()
+	// if err != nil {
+	// 	log.Fatal().Err(err).Msg("could not create encryption service")
+	// }
+	// server.Config.Services.Secrets = setupSecretService(c, encryptedSecretStore)
 	server.Config.Services.Secrets = setupSecretService(c, v)
+
 	server.Config.Services.Environ = setupEnvironService(c, v)
 	server.Config.Services.Membership = setupMembershipService(c)
 
@@ -279,6 +317,7 @@ func setupEvilGlobals(c *cli.Context, v store.Store) {
 
 	// Cloning
 	server.Config.Pipeline.DefaultCloneImage = c.String("default-clone-image")
+	constant.TrustedCloneImages = append(constant.TrustedCloneImages, server.Config.Pipeline.DefaultCloneImage)
 
 	// Execution
 	_events := c.StringSlice("default-cancel-previous-pipeline-events")
@@ -287,6 +326,8 @@ func setupEvilGlobals(c *cli.Context, v store.Store) {
 		events = append(events, model.WebhookEvent(v))
 	}
 	server.Config.Pipeline.DefaultCancelPreviousPipelineEvents = events
+	server.Config.Pipeline.DefaultTimeout = c.Int64("default-pipeline-timeout")
+	server.Config.Pipeline.MaxTimeout = c.Int64("max-pipeline-timeout")
 
 	// limits
 	server.Config.Pipeline.Limits.MemSwapLimit = c.Int64("limit-mem-swap")
@@ -299,7 +340,7 @@ func setupEvilGlobals(c *cli.Context, v store.Store) {
 	// server configuration
 	server.Config.Server.Cert = c.String("server-cert")
 	server.Config.Server.Key = c.String("server-key")
-	server.Config.Server.Pass = c.String("agent-secret")
+	server.Config.Server.AgentToken = c.String("agent-secret")
 	server.Config.Server.Host = c.String("server-host")
 	if c.IsSet("server-dev-oauth-host") {
 		server.Config.Server.OAuthHost = c.String("server-dev-oauth-host")
@@ -307,45 +348,16 @@ func setupEvilGlobals(c *cli.Context, v store.Store) {
 		server.Config.Server.OAuthHost = c.String("server-host")
 	}
 	server.Config.Server.Port = c.String("server-addr")
+	server.Config.Server.PortTLS = c.String("server-addr-tls")
 	server.Config.Server.Docs = c.String("docs")
 	server.Config.Server.StatusContext = c.String("status-context")
 	server.Config.Server.StatusContextFormat = c.String("status-context-format")
 	server.Config.Server.SessionExpires = c.Duration("session-expires")
+	server.Config.Server.RootURL = strings.TrimSuffix(c.String("root-url"), "/")
 	server.Config.Pipeline.Networks = c.StringSlice("network")
 	server.Config.Pipeline.Volumes = c.StringSlice("volume")
 	server.Config.Pipeline.Privileged = c.StringSlice("escalate")
 
 	// prometheus
 	server.Config.Prometheus.AuthToken = c.String("prometheus-auth-token")
-
-	// TODO(485) temporary workaround to not hit api rate limits
-	server.Config.FlatPermissions = c.Bool("flat-permissions")
-}
-
-type authorizer struct {
-	password string
-}
-
-func (a *authorizer) streamInterceptor(srv interface{}, stream grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
-	if err := a.authorize(stream.Context()); err != nil {
-		return err
-	}
-	return handler(srv, stream)
-}
-
-func (a *authorizer) unaryInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
-	if err := a.authorize(ctx); err != nil {
-		return nil, err
-	}
-	return handler(ctx, req)
-}
-
-func (a *authorizer) authorize(ctx context.Context) error {
-	if md, ok := metadata.FromIncomingContext(ctx); ok {
-		if len(md["password"]) > 0 && md["password"][0] == a.password {
-			return nil
-		}
-		return errors.New("invalid agent token")
-	}
-	return errors.New("missing agent token")
 }

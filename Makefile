@@ -1,4 +1,3 @@
-GOFILES_NOVENDOR = $(shell find . -type f -name '*.go' -not -path "./vendor/*" -not -path "./.git/*")
 GO_PACKAGES ?= $(shell go list ./... | grep -v /vendor/)
 
 TARGETOS ?= linux
@@ -19,13 +18,14 @@ ifeq ($(BUILD_VERSION),next)
 endif
 
 LDFLAGS := -s -w -extldflags "-static" -X github.com/woodpecker-ci/woodpecker/version.Version=${BUILD_VERSION}
-CGO_CFLAGS ?=
+CGO_ENABLED ?= 1 # only used to compile server
 
 HAS_GO = $(shell hash go > /dev/null 2>&1 && echo "GO" || echo "NOGO" )
-ifeq ($(HAS_GO), GO)
-	XGO_VERSION ?= go-1.18.x
-	CGO_CFLAGS ?= $(shell $(GO) env CGO_CFLAGS)
+ifeq ($(HAS_GO),GO)
+	XGO_VERSION ?= go-1.19.x
+	CGO_CFLAGS ?= $(shell go env CGO_CFLAGS)
 endif
+CGO_CFLAGS ?=
 
 # If the first argument is "in_docker"...
 ifeq (in_docker,$(firstword $(MAKECMDGOALS)))
@@ -45,6 +45,9 @@ ifeq (in_docker,$(firstword $(MAKECMDGOALS)))
 		-e GO_PACKAGES="$(GO_PACKAGES)" \
 		-e TARGETOS="$(TARGETOS)" \
 		-e TARGETARCH="$(TARGETARCH)" \
+		-e CGO_ENABLED="$(CGO_ENABLED)"
+		-e GOPATH=/tmp/go \
+		-e HOME=/tmp/home \
 		-v $(PWD):/build --rm woodpecker/make:local make $(MAKE_ARGS)
 else
 
@@ -79,13 +82,17 @@ vendor: ## Update the vendor directory
 	go mod vendor
 
 format: install-tools ## Format source code
-	@gofumpt -extra -w ${GOFILES_NOVENDOR}
+	@gofumpt -extra -w .
 
 .PHONY: clean
 clean: ## Clean build artifacts
 	go clean -i ./...
 	rm -rf build
 	@[ "1" != "$(shell docker image ls woodpecker/make:local -a | wc -l)" ] && docker image rm woodpecker/make:local || echo no docker image to clean
+
+.PHONY: generate
+generate: ## Run all code generations
+	go generate ./...
 
 check-xgo: ## Check if xgo is installed
 	@hash xgo > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
@@ -132,7 +139,8 @@ test-cli: ## Test cli code
 	go test -race -cover -coverprofile cli-coverage.out -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/cli github.com/woodpecker-ci/woodpecker/cli/...
 
 test-server-datastore: ## Test server datastore
-	go test -race -timeout 30s github.com/woodpecker-ci/woodpecker/server/store/...
+	go test -timeout 30s -run TestMigrate github.com/woodpecker-ci/woodpecker/server/store/...
+	go test -race -timeout 30s -skip TestMigrate github.com/woodpecker-ci/woodpecker/server/store/...
 
 test-server-datastore-coverage: ## Test server datastore with coverage report
 	go test -race -cover -coverprofile datastore-coverage.out -timeout 30s github.com/woodpecker-ci/woodpecker/server/store/...
@@ -154,7 +162,7 @@ build-ui: ## Build UI
 	(cd web/; pnpm install --frozen-lockfile; pnpm build)
 
 build-server: build-ui ## Build server
-	CGO_ENABLED=1 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -ldflags '${LDFLAGS}' -o dist/woodpecker-server github.com/woodpecker-ci/woodpecker/cmd/server
+	CGO_ENABLED=${CGO_ENABLED} GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -ldflags '${LDFLAGS}' -o dist/woodpecker-server github.com/woodpecker-ci/woodpecker/cmd/server
 
 build-agent: ## Build agent
 	CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -ldflags '${LDFLAGS}' -o dist/woodpecker-agent github.com/woodpecker-ci/woodpecker/cmd/agent
@@ -188,7 +196,7 @@ release-server-xgo: check-xgo ## Create server binaries for release using xgo
 
 release-server: ## Create server binaries for release
 	# compile
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go build -ldflags '${LDFLAGS}' -o dist/server/linux_amd64/woodpecker-server github.com/woodpecker-ci/woodpecker/cmd/server
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=${CGO_ENABLED} go build -ldflags '${LDFLAGS}' -o dist/server/linux_amd64/woodpecker-server github.com/woodpecker-ci/woodpecker/cmd/server
 	# tar binary files
 	tar -cvzf dist/woodpecker-server_linux_amd64.tar.gz   -C dist/server/linux_amd64 woodpecker-server
 
@@ -244,7 +252,6 @@ release-tarball: ## Create tarball for release
 		web/package.json \
 		web/public \
 		web/src \
-		web/package.json \
 		web/tsconfig.* \
 		web/*.ts \
 		web/pnpm-lock.yaml \

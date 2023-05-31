@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM golang:1.18 AS build
+FROM --platform=$BUILDPLATFORM golang:1.20 AS build
 
 WORKDIR /src
 COPY . .
@@ -11,7 +11,7 @@ FROM scratch
 ENV GODEBUG=netdns=go
 EXPOSE 3000
 
-# copy certs from golang:1.18 image
+# copy certs from build image
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 # copy agent binary
 COPY --from=build /src/dist/woodpecker-agent /bin/

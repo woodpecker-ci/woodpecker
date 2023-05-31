@@ -25,6 +25,7 @@ import (
 	"net/http/httptest"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/go-ap/httpsig"
 	"github.com/stretchr/testify/assert"
@@ -113,7 +114,7 @@ func TestFetch(t *testing.T) {
 			expectedError: false,
 		},
 		{
-			name:       "Default config check .woodpecker.yml before .woodpecker.yaml",
+			name:       "Default config check .woodpecker.yaml before .woodpecker.yml",
 			repoConfig: "",
 			files: []file{{
 				name: ".woodpecker.yaml",
@@ -123,7 +124,7 @@ func TestFetch(t *testing.T) {
 				data: dummyData,
 			}},
 			expectedFileNames: []string{
-				".woodpecker.yml",
+				".woodpecker.yaml",
 			},
 			expectedError: false,
 		},
@@ -314,6 +315,7 @@ func TestFetch(t *testing.T) {
 
 			configFetcher := forge.NewConfigFetcher(
 				f,
+				time.Second*3,
 				config.NewHTTP("", ""),
 				&model.User{Token: "xxx"},
 				repo,
@@ -519,6 +521,7 @@ func TestFetchFromConfigService(t *testing.T) {
 
 			configFetcher := forge.NewConfigFetcher(
 				f,
+				time.Second*3,
 				configAPI,
 				&model.User{Token: "xxx"},
 				repo,

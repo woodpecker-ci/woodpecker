@@ -16,10 +16,12 @@ package local
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
 	"github.com/alessio/shellescape"
@@ -39,42 +41,80 @@ var notAllowedEnvVarOverwrites = []string{
 	"SHELL",
 }
 
-type local struct {
-	// TODO: make cmd a cmd list to iterate over, the hard part is to have a common ReadCloser
-	cmd        *exec.Cmd
-	output     io.ReadCloser
-	workingdir string
+type workflowState struct {
+	stepCMDs     map[string]*exec.Cmd
+	baseDir      string
+	homeDir      string
+	workspaceDir string
 }
 
-// make sure local implements Engine
-var _ types.Engine = &local{}
+type local struct {
+	workflows map[string]*workflowState
+	output    io.ReadCloser
+}
 
 // New returns a new local Engine.
 func New() types.Engine {
-	return &local{}
+	return &local{
+		workflows: make(map[string]*workflowState),
+	}
 }
 
 func (e *local) Name() string {
 	return "local"
 }
 
-func (e *local) IsAvailable() bool {
+func (e *local) IsAvailable(context.Context) bool {
 	return true
 }
 
-func (e *local) Load() error {
-	dir, err := os.MkdirTemp("", "woodpecker-local-*")
-	e.workingdir = dir
-	return err
+func (e *local) Load(context.Context) error {
+	// TODO: download plugin-git binary if not exist
+
+	return nil
 }
 
 // Setup the pipeline environment.
-func (e *local) Setup(ctx context.Context, config *types.Config) error {
+func (e *local) Setup(_ context.Context, c *types.Config) error {
+	baseDir, err := os.MkdirTemp("", "woodpecker-local-*")
+	if err != nil {
+		return err
+	}
+
+	state := &workflowState{
+		stepCMDs:     make(map[string]*exec.Cmd),
+		baseDir:      baseDir,
+		workspaceDir: filepath.Join(baseDir, "workspace"),
+		homeDir:      filepath.Join(baseDir, "home"),
+	}
+
+	if err := os.Mkdir(state.homeDir, 0o700); err != nil {
+		return err
+	}
+
+	if err := os.Mkdir(state.workspaceDir, 0o700); err != nil {
+		return err
+	}
+
+	// TODO: copy plugin-git binary to homeDir and set PATH
+
+	workflowID, err := e.getWorkflowIDFromConfig(c)
+	if err != nil {
+		return err
+	}
+
+	e.workflows[workflowID] = state
+
 	return nil
 }
 
 // Exec the pipeline step.
 func (e *local) Exec(ctx context.Context, step *types.Step) error {
+	state, err := e.getWorkflowStateFromStep(step)
+	if err != nil {
+		return err
+	}
+
 	// Get environment variables
 	env := os.Environ()
 	for a, b := range step.Environment {
@@ -84,12 +124,14 @@ func (e *local) Exec(ctx context.Context, step *types.Step) error {
 		}
 	}
 
+	// Set HOME
+	env = append(env, "HOME="+state.homeDir)
+
 	var command []string
 	if step.Image == constant.DefaultCloneImage {
 		// Default clone step
-		// TODO: creat tmp HOME and insert netrc
-		// TODO: download plugin-git binary if not exist
-		env = append(env, "CI_WORKSPACE="+e.workingdir+"/"+step.Environment["CI_REPO"])
+		// TODO: use tmp HOME and insert netrc and delete it after clone
+		env = append(env, "CI_WORKSPACE="+state.workspaceDir)
 		command = append(command, "plugin-git")
 	} else {
 		// Use "image name" as run command
@@ -108,36 +150,42 @@ func (e *local) Exec(ctx context.Context, step *types.Step) error {
 	}
 
 	// Prepare command
-	e.cmd = exec.CommandContext(ctx, command[0], command[1:]...)
-	e.cmd.Env = env
+	cmd := exec.CommandContext(ctx, command[0], command[1:]...)
+	cmd.Env = env
+	cmd.Dir = state.workspaceDir
 
-	// Prepare working directory
-	if step.Image == constant.DefaultCloneImage {
-		e.cmd.Dir = e.workingdir + "/" + step.Environment["CI_REPO_OWNER"]
-	} else {
-		e.cmd.Dir = e.workingdir + "/" + step.Environment["CI_REPO"]
-	}
-	err := os.MkdirAll(e.cmd.Dir, 0o700)
-	if err != nil {
-		return err
-	}
 	// Get output and redirect Stderr to Stdout
-	e.output, _ = e.cmd.StdoutPipe()
-	e.cmd.Stderr = e.cmd.Stdout
+	e.output, _ = cmd.StdoutPipe()
+	cmd.Stderr = cmd.Stdout
 
-	return e.cmd.Start()
+	state.stepCMDs[step.Name] = cmd
+
+	return cmd.Start()
 }
 
 // Wait for the pipeline step to complete and returns
 // the completion results.
-func (e *local) Wait(context.Context, *types.Step) (*types.State, error) {
-	err := e.cmd.Wait()
+func (e *local) Wait(_ context.Context, step *types.Step) (*types.State, error) {
+	state, err := e.getWorkflowStateFromStep(step)
+	if err != nil {
+		return nil, err
+	}
+
+	cmd, ok := state.stepCMDs[step.Name]
+	if !ok {
+		return nil, fmt.Errorf("step cmd %s not found", step.Name)
+	}
+
+	err = cmd.Wait()
 	ExitCode := 0
-	if eerr, ok := err.(*exec.ExitError); ok {
-		ExitCode = eerr.ExitCode()
+
+	var execExitError *exec.ExitError
+	if errors.As(err, &execExitError) {
+		ExitCode = execExitError.ExitCode()
 		// Non-zero exit code is a pipeline failure, but not an agent error.
 		err = nil
 	}
+
 	return &types.State{
 		Exited:   true,
 		ExitCode: ExitCode,
@@ -150,6 +198,69 @@ func (e *local) Tail(context.Context, *types.Step) (io.ReadCloser, error) {
 }
 
 // Destroy the pipeline environment.
-func (e *local) Destroy(context.Context, *types.Config) error {
-	return os.RemoveAll(e.cmd.Dir)
+func (e *local) Destroy(_ context.Context, c *types.Config) error {
+	state, err := e.getWorkflowStateFromConfig(c)
+	if err != nil {
+		return err
+	}
+
+	err = os.RemoveAll(state.baseDir)
+	if err != nil {
+		return err
+	}
+
+	workflowID, err := e.getWorkflowIDFromConfig(c)
+	if err != nil {
+		return err
+	}
+
+	delete(e.workflows, workflowID)
+
+	return err
+}
+
+func (e *local) getWorkflowIDFromStep(step *types.Step) (string, error) {
+	prefix := strings.Split(step.Name, "_stage_")
+	if len(prefix) < 2 {
+		return "", fmt.Errorf("invalid step name %s", step.Name)
+	}
+
+	return prefix[0], nil
+}
+
+func (e *local) getWorkflowIDFromConfig(c *types.Config) (string, error) {
+	if len(c.Volumes) < 1 {
+		return "", fmt.Errorf("no volumes found in config")
+	}
+
+	prefix := strings.Replace(c.Volumes[0].Name, "_default", "", 1)
+	return prefix, nil
+}
+
+func (e *local) getWorkflowStateFromConfig(c *types.Config) (*workflowState, error) {
+	workflowID, err := e.getWorkflowIDFromConfig(c)
+	if err != nil {
+		return nil, err
+	}
+
+	state, ok := e.workflows[workflowID]
+	if !ok {
+		return nil, fmt.Errorf("workflow %s not found", workflowID)
+	}
+
+	return state, nil
+}
+
+func (e *local) getWorkflowStateFromStep(step *types.Step) (*workflowState, error) {
+	workflowID, err := e.getWorkflowIDFromStep(step)
+	if err != nil {
+		return nil, err
+	}
+
+	state, ok := e.workflows[workflowID]
+	if !ok {
+		return nil, fmt.Errorf("workflow %s not found", workflowID)
+	}
+
+	return state, nil
 }

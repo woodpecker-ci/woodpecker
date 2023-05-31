@@ -25,7 +25,7 @@ import (
 
 type mockUpdatePipelineStore struct{}
 
-func (m *mockUpdatePipelineStore) UpdatePipeline(pipeline *model.Pipeline) error {
+func (m *mockUpdatePipelineStore) UpdatePipeline(_ *model.Pipeline) error {
 	return nil
 }
 

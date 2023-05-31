@@ -56,6 +56,7 @@ import Panel from '~/components/layout/Panel.vue';
 import Popup from '~/components/layout/Popup.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { inject } from '~/compositions/useInjectProvide';
+import { usePaginate } from '~/compositions/usePaginate';
 
 defineProps<{
   open: boolean;
@@ -79,7 +80,7 @@ const newPipelineVariable = ref<{ name: string; value: string }>({ name: '', val
 
 const loading = ref(true);
 onMounted(async () => {
-  const data = await apiClient.getRepoBranches(repo.value.owner, repo.value.name);
+  const data = await usePaginate((page) => apiClient.getRepoBranches(repo.value.owner, repo.value.name, page));
   branches.value = data.map((e) => ({
     text: e,
     value: e,

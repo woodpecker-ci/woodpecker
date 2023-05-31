@@ -23,17 +23,16 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/queue"
 )
 
-func queueBuild(pipeline *model.Pipeline, repo *model.Repo, pipelineItems []*pipeline.Item) error {
-	var tasks []*queue.Task
+func queuePipeline(repo *model.Repo, pipelineItems []*pipeline.Item) error {
+	var tasks []*model.Task
 	for _, item := range pipelineItems {
-		if item.Step.State == model.StatusSkipped {
+		if item.Workflow.State == model.StatusSkipped {
 			continue
 		}
-		task := new(queue.Task)
-		task.ID = fmt.Sprint(item.Step.ID)
+		task := new(model.Task)
+		task.ID = fmt.Sprint(item.Workflow.ID)
 		task.Labels = map[string]string{}
 		for k, v := range item.Labels {
 			task.Labels[k] = v
@@ -42,10 +41,10 @@ func queueBuild(pipeline *model.Pipeline, repo *model.Repo, pipelineItems []*pip
 		task.Labels["repo"] = repo.FullName
 		task.Dependencies = taskIds(item.DependsOn, pipelineItems)
 		task.RunOn = item.RunsOn
-		task.DepStatus = make(map[string]string)
+		task.DepStatus = make(map[string]model.StatusValue)
 
 		task.Data, _ = json.Marshal(rpc.Pipeline{
-			ID:      fmt.Sprint(item.Step.ID),
+			ID:      fmt.Sprint(item.Workflow.ID),
 			Config:  item.Config,
 			Timeout: repo.Timeout,
 		})
@@ -61,8 +60,8 @@ func queueBuild(pipeline *model.Pipeline, repo *model.Repo, pipelineItems []*pip
 func taskIds(dependsOn []string, pipelineItems []*pipeline.Item) (taskIds []string) {
 	for _, dep := range dependsOn {
 		for _, pipelineItem := range pipelineItems {
-			if pipelineItem.Step.Name == dep {
-				taskIds = append(taskIds, fmt.Sprint(pipelineItem.Step.ID))
+			if pipelineItem.Workflow.Name == dep {
+				taskIds = append(taskIds, fmt.Sprint(pipelineItem.Workflow.ID))
 			}
 		}
 	}

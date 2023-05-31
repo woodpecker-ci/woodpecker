@@ -30,6 +30,5 @@ func (s storage) TaskInsert(task *model.Task) error {
 }
 
 func (s storage) TaskDelete(id string) error {
-	_, err := s.engine.Where("task_id = ?", id).Delete(new(model.Task))
-	return err
+	return wrapDelete(s.engine.Where("task_id = ?", id).Delete(new(model.Task)))
 }

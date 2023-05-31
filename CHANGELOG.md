@@ -1,5 +1,43 @@
 # Changelog
 
+## [0.15.9](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.9) - 2023-05-11
+
+* SECURITY
+  * Backport securitycheck and bump deps where needed (#1745)
+
+## [0.15.8](https://github.com/woodpecker-ci/woodpecker/releases/tag/0.15.8) - 2023-04-29
+
+* BUGFIXES
+  * Use codeberg.org/6543/go-yaml2json (#1719)
+  * Fix faulty hardlink in release tarball (#1669) (#1671)
+  * Persist `DepStatus` of tasks (#1610) (#1625)
+
+## [0.15.7](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.7) - 2023-03-14
+
+* SECURITY
+  * Update dependencies golang/x libs (#1612) (#1621)
+* BUGFIXES
+  * Docker backend should not close 'engine.Tail' result (#1616) (#1620)
+  * Force pure Go resolver onto server (#1502) (#1503)
+* ENHANCEMENTS
+  * SanitizeParamKey "-" to "_" for plugin settings (#1511)
+* MISC
+  * Bump xgo and go to v1.19.5 (#1538) (#1547)
+  * Pin official default clone image (#1526) (#1534)
+
+## [0.15.6](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.6) - 2022-12-23
+
+* SECURITY
+  * Update golang.org/x/net (#1494)
+  * [**BREAKING**] Disable metrics access if no token is set (#1469) (#1470)
+  * Update dep moby (#1263) (#1264)
+* BUGFIXES
+  * Update json schema for cli lint to cover valid cases (#1384)
+  * Add pipeline.step.when.branch string-array type to schema.json (#1380)
+  * Display system CA error only if there is an error (#870) (#1286)
+* ENHANCEMENTS
+  * Bump Frontend Deps and remove unused (#1404)
+
 ## [0.15.5](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.5) - 2022-10-13
 
 * BUGFIXES

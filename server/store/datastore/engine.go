@@ -25,9 +25,6 @@ type storage struct {
 	engine *xorm.Engine
 }
 
-// make sure storage implement Store
-var _ store.Store = &storage{}
-
 const perPage = 50
 
 func NewEngine(opts *store.Opts) (store.Store, error) {

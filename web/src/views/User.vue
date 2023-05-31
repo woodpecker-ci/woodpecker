@@ -6,7 +6,10 @@
       <SelectField v-model="selectedLocale" :options="localeOptions" />
 
       <div>
-        <h2 class="text-lg text-color">{{ $t('user.token') }}</h2>
+        <div class="flex items-center mb-2">
+          <h2 class="text-lg text-color">{{ $t('user.token') }}</h2>
+          <Button class="ml-4" :text="$t('user.reset_token')" @click="resetToken" />
+        </div>
         <pre class="cli-box">{{ token }}</pre>
       </div>
 
@@ -35,6 +38,7 @@
 import { useLocalStorage } from '@vueuse/core';
 import dayjs from 'dayjs';
 import TimeAgo from 'javascript-time-ago';
+import { SUPPORTED_LOCALES } from 'virtual:vue-i18n-supported-locales';
 import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -42,8 +46,9 @@ import Button from '~/components/atomic/Button.vue';
 import SelectField from '~/components/form/SelectField.vue';
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import useApiClient from '~/compositions/useApiClient';
+import { setI18nLanguage } from '~/compositions/useI18n';
 
-const { t, availableLocales, locale } = useI18n();
+const { t, locale } = useI18n();
 
 const apiClient = useApiClient();
 const token = ref<string | undefined>();
@@ -70,17 +75,17 @@ const usageWithCli = `# ${t('user.shell_setup_before')}\nwoodpecker info`;
 const cliDownload = 'https://github.com/woodpecker-ci/woodpecker/releases';
 
 const localeOptions = computed(() =>
-  availableLocales.map((availableLocale) => ({
-    value: availableLocale,
-    text: new Intl.DisplayNames(availableLocale, { type: 'language' }).of(availableLocale) || availableLocale,
+  SUPPORTED_LOCALES.map((supportedLocale) => ({
+    value: supportedLocale,
+    text: new Intl.DisplayNames(supportedLocale, { type: 'language' }).of(supportedLocale) || supportedLocale,
   })),
 );
 
 const storedLocale = useLocalStorage('woodpecker:locale', locale.value);
 const selectedLocale = computed<string>({
-  set(_selectedLocale) {
+  async set(_selectedLocale) {
+    await setI18nLanguage(_selectedLocale);
     storedLocale.value = _selectedLocale;
-    locale.value = _selectedLocale;
     dayjs.locale(_selectedLocale);
     TimeAgo.setDefaultLocale(_selectedLocale);
   },
@@ -88,6 +93,11 @@ const selectedLocale = computed<string>({
     return storedLocale.value;
   },
 });
+
+const resetToken = async () => {
+  token.value = await apiClient.resetToken();
+  window.location.href = `${address}/logout`;
+};
 </script>
 
 <style scoped>

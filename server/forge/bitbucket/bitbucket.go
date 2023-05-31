@@ -21,6 +21,7 @@ import (
 	"net/http"
 	"net/url"
 
+	shared_utils "github.com/woodpecker-ci/woodpecker/shared/utils"
 	"golang.org/x/oauth2"
 
 	"github.com/woodpecker-ci/woodpecker/server"
@@ -132,15 +133,18 @@ func (c *config) Refresh(ctx context.Context, user *model.User) (bool, error) {
 
 // Teams returns a list of all team membership for the Bitbucket account.
 func (c *config) Teams(ctx context.Context, u *model.User) ([]*model.Team, error) {
-	opts := &internal.ListWorkspacesOpts{
-		PageLen: 100,
-		Role:    "member",
-	}
-	resp, err := c.newClient(ctx, u).ListWorkspaces(opts)
-	if err != nil {
-		return nil, err
-	}
-	return convertWorkspaceList(resp.Values), nil
+	return shared_utils.Paginate(func(page int) ([]*model.Team, error) {
+		opts := &internal.ListWorkspacesOpts{
+			PageLen: 100,
+			Page:    page,
+			Role:    "member",
+		}
+		resp, err := c.newClient(ctx, u).ListWorkspaces(opts)
+		if err != nil {
+			return nil, err
+		}
+		return convertWorkspaceList(resp.Values), nil
+	})
 }
 
 // Repo returns the named Bitbucket repository.
@@ -148,11 +152,16 @@ func (c *config) Repo(ctx context.Context, u *model.User, remoteID model.ForgeRe
 	if remoteID.IsValid() {
 		name = string(remoteID)
 	}
-	repo, err := c.newClient(ctx, u).FindRepo(owner, name)
+	client := c.newClient(ctx, u)
+	repo, err := client.FindRepo(owner, name)
 	if err != nil {
 		return nil, err
 	}
-	return convertRepo(repo), nil
+	perm, err := client.GetPermission(repo.FullName)
+	if err != nil {
+		return nil, err
+	}
+	return convertRepo(repo, perm), nil
 }
 
 // Repos returns a list of all repositories for Bitbucket account, including
@@ -176,42 +185,15 @@ func (c *config) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 			return all, err
 		}
 		for _, repo := range repos {
-			all = append(all, convertRepo(repo))
+			perm, err := client.GetPermission(repo.FullName)
+			if err != nil {
+				return nil, err
+			}
+
+			all = append(all, convertRepo(repo, perm))
 		}
 	}
 	return all, nil
-}
-
-// Perm returns the user permissions for the named repository. Because Bitbucket
-// does not have an endpoint to access user permissions, we attempt to fetch
-// the repository hook list, which is restricted to administrators to calculate
-// administrative access to a repository.
-func (c *config) Perm(ctx context.Context, u *model.User, r *model.Repo) (*model.Perm, error) {
-	client := c.newClient(ctx, u)
-
-	perms := new(model.Perm)
-	repo, err := client.FindRepo(r.Owner, r.Name)
-	if err != nil {
-		return perms, err
-	}
-
-	perm, err := client.GetPermission(repo.FullName)
-	if err != nil {
-		return perms, err
-	}
-
-	switch perm.Permission {
-	case "admin":
-		perms.Admin = true
-		fallthrough
-	case "write":
-		perms.Push = true
-		fallthrough
-	default:
-		perms.Pull = true
-	}
-
-	return perms, nil
 }
 
 // File fetches the file from the Bitbucket repository and returns its contents.
@@ -223,12 +205,12 @@ func (c *config) File(ctx context.Context, u *model.User, r *model.Repo, p *mode
 	return []byte(*config), err
 }
 
-func (c *config) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model.Pipeline, f string) ([]*forge_types.FileMeta, error) {
+func (c *config) Dir(_ context.Context, _ *model.User, _ *model.Repo, _ *model.Pipeline, _ string) ([]*forge_types.FileMeta, error) {
 	return nil, forge_types.ErrNotImplemented
 }
 
 // Status creates a pipeline status for the Bitbucket commit.
-func (c *config) Status(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, step *model.Step) error {
+func (c *config) Status(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, _ *model.Step) error {
 	status := internal.PipelineStatus{
 		State: convertStatus(pipeline.Status),
 		Desc:  common.GetPipelineStatusDescription(pipeline.Status),
@@ -274,7 +256,7 @@ func (c *config) Deactivate(ctx context.Context, u *model.User, r *model.Repo, l
 
 // Netrc returns a netrc file capable of authenticating Bitbucket requests and
 // cloning Bitbucket repositories.
-func (c *config) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
+func (c *config) Netrc(u *model.User, _ *model.Repo) (*model.Netrc, error) {
 	return &model.Netrc{
 		Machine:  "bitbucket.org",
 		Login:    "x-token-auth",
@@ -283,7 +265,7 @@ func (c *config) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 }
 
 // Branches returns the names of all branches for the named repository.
-func (c *config) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
+func (c *config) Branches(ctx context.Context, u *model.User, r *model.Repo, _ *model.ListOptions) ([]string, error) {
 	bitbucketBranches, err := c.newClient(ctx, u).ListBranches(r.Owner, r.Name)
 	if err != nil {
 		return nil, err
@@ -297,14 +279,18 @@ func (c *config) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]
 }
 
 // BranchHead returns the sha of the head (latest commit) of the specified branch
-func (c *config) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
+func (c *config) BranchHead(_ context.Context, _ *model.User, _ *model.Repo, _ string) (string, error) {
 	// TODO(1138): missing implementation
 	return "", forge_types.ErrNotImplemented
 }
 
+func (c *config) PullRequests(_ context.Context, _ *model.User, _ *model.Repo, _ *model.ListOptions) ([]*model.PullRequest, error) {
+	return nil, forge_types.ErrNotImplemented
+}
+
 // Hook parses the incoming Bitbucket hook and returns the Repository and
 // Pipeline details. If the hook is unsupported nil values are returned.
-func (c *config) Hook(ctx context.Context, req *http.Request) (*model.Repo, *model.Pipeline, error) {
+func (c *config) Hook(_ context.Context, req *http.Request) (*model.Repo, *model.Pipeline, error) {
 	return parseHook(req)
 }
 

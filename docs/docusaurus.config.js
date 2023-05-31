@@ -25,7 +25,8 @@ module.exports = {
         },
         items: [
           {
-            to: 'docs/intro',
+            type: 'doc',
+            docId: 'intro',
             activeBaseRegex: 'docs/(?!migrations|awesome)',
             position: 'left',
             label: 'Docs',
@@ -36,8 +37,8 @@ module.exports = {
             label: 'Plugins',
           },
           {
-            to: '/docs/migrations',
-            activeBaseRegex: 'docs/migrations',
+            to: '/docs/next/migrations', // Always point to newest migration guide
+            activeBaseRegex: 'docs/(next/)?migrations',
             position: 'left',
             label: 'Migrations',
           },
@@ -47,7 +48,8 @@ module.exports = {
             label: 'FAQ',
           },
           {
-            to: '/docs/awesome',
+            to: '/docs/next/awesome', // Always point to newest awesome list
+            activeBaseRegex: 'docs/(next/)?awesome',
             position: 'left',
             label: 'Awesome',
           },
@@ -74,6 +76,10 @@ module.exports = {
           {
             title: 'Docs',
             items: [
+              {
+                label: 'Introduction',
+                to: '/docs/intro',
+              },
               {
                 label: 'Usage',
                 to: '/docs/usage/intro',

@@ -19,7 +19,7 @@ func TestLogging(t *testing.T) {
 		}
 	)
 
-	ctx, cancel := context.WithCancel(
+	ctx, cancel := context.WithCancelCause(
 		context.Background(),
 	)
 
@@ -50,5 +50,5 @@ func TestLogging(t *testing.T) {
 	<-time.After(500 * time.Millisecond)
 
 	wg.Wait()
-	cancel()
+	cancel(nil)
 }

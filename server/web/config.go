@@ -18,7 +18,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"text/template"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
@@ -40,18 +39,13 @@ func Config(c *gin.Context) {
 		).Sign(user.Hash)
 	}
 
-	var syncing bool
-	if user != nil {
-		syncing = time.Unix(user.Synced, 0).Add(time.Hour * 72).Before(time.Now())
-	}
-
 	configData := map[string]interface{}{
-		"user":    user,
-		"csrf":    csrf,
-		"syncing": syncing,
-		"docs":    server.Config.Server.Docs,
-		"version": version.String(),
-		"forge":   "deprecated", // TODO: remove this and use the forge type from the corresponding repo
+		"user":     user,
+		"csrf":     csrf,
+		"docs":     server.Config.Server.Docs,
+		"version":  version.String(),
+		"forge":    "deprecated", // TODO: remove this and use the forge type from the corresponding repo
+		"root_url": server.Config.Server.RootURL,
 	}
 
 	// default func map with json parser.
@@ -68,14 +62,17 @@ func Config(c *gin.Context) {
 	if err := tmpl.Execute(c.Writer, configData); err != nil {
 		log.Error().Err(err).Msgf("could not execute template")
 		c.AbortWithStatus(http.StatusInternalServerError)
+		return
 	}
+
+	c.Status(http.StatusOK)
 }
 
 const configTemplate = `
 window.WOODPECKER_USER = {{ json .user }};
-window.WOODPECKER_SYNC = {{ .syncing }};
 window.WOODPECKER_CSRF = "{{ .csrf }}";
 window.WOODPECKER_VERSION = "{{ .version }}";
 window.WOODPECKER_DOCS = "{{ .docs }}";
 window.WOODPECKER_FORGE = "{{ .forge }}";
+window.WOODPECKER_ROOT_URL = "{{ .root_url }}";
 `

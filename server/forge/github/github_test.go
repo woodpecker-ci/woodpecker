@@ -94,20 +94,6 @@ func Test_github(t *testing.T) {
 			})
 		})
 
-		g.Describe("Requesting repository permissions", func() {
-			g.It("Should return the permission details", func() {
-				perm, err := c.Perm(ctx, fakeUser, fakeRepo)
-				g.Assert(err).IsNil()
-				g.Assert(perm.Admin).IsTrue()
-				g.Assert(perm.Push).IsTrue()
-				g.Assert(perm.Pull).IsTrue()
-			})
-			g.It("Should handle a not found error", func() {
-				_, err := c.Perm(ctx, fakeUser, fakeRepoNotFound)
-				g.Assert(err).IsNotNil()
-			})
-		})
-
 		g.It("Should return a user repository list")
 
 		g.It("Should return a user team list")

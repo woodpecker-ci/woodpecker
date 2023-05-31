@@ -260,15 +260,66 @@ var flags = []cli.Flag{
 		Name:    "prev-commit-author-email",
 	},
 	&cli.IntFlag{
-		EnvVars: []string{"CI_STEP_NUMBER", "CI_JOB_NUMBER"},
-		Name:    "step-number",
+		EnvVars: []string{"CI_WORKFLOW_NAME"},
+		Name:    "workflow-name",
+	},
+	&cli.IntFlag{
+		EnvVars: []string{"CI_WORKFLOW_NUMBER", "CI_JOB_NUMBER"},
+		Name:    "workflow-number",
+	},
+	&cli.IntFlag{
+		EnvVars: []string{"CI_STEP_NAME", "CI_JOB_NUMBER"},
+		Name:    "step-name",
 	},
 	&cli.StringSliceFlag{
 		EnvVars: []string{"CI_ENV"},
 		Name:    "env",
 	},
 
-	// TODO: add flags of backends
+	// backend docker
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_DOCKER_ENABLE_IPV6"},
+		Name:    "backend-docker-ipv6",
+		Usage:   "backend docker enable IPV6",
+		Value:   false,
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_DOCKER_NETWORK"},
+		Name:    "backend-docker-network",
+		Usage:   "backend docker network",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_DOCKER_VOLUMES"},
+		Name:    "backend-docker-volumes",
+		Usage:   "backend docker volumes (comma separated)",
+	},
+
+	// backend ssh
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_SSH_ADDRESS"},
+		Name:    "backend-ssh-address",
+		Usage:   "backend ssh address",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_SSH_USER"},
+		Name:    "backend-ssh-user",
+		Usage:   "backend ssh user",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_SSH_KEY"},
+		Name:    "backend-ssh-key",
+		Usage:   "backend ssh key file",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_SSH_KEY_PASSWORD"},
+		Name:    "backend-ssh-key-password",
+		Usage:   "backend ssh key password",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_SSH_PASSWORD"},
+		Name:    "backend-ssh-password",
+		Usage:   "backend ssh password",
+	},
 
 	// backend k8s
 	&cli.StringFlag{
@@ -294,5 +345,17 @@ var flags = []cli.Flag{
 		Name:    "backend-k8s-storage-rwx",
 		Usage:   "backend k8s storage access mode, should ReadWriteMany (RWX) instead of ReadWriteOnce (RWO) be used? (default: true)",
 		Value:   true,
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_K8S_POD_LABELS"},
+		Name:    "backend-k8s-pod-labels",
+		Usage:   "backend k8s additional worker pod labels",
+		Value:   "",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_K8S_POD_ANNOTATIONS"},
+		Name:    "backend-k8s-pod-annotations",
+		Usage:   "backend k8s additional worker pod annotations",
+		Value:   "",
 	},
 }
