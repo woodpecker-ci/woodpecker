@@ -137,14 +137,6 @@ export default class WoodpeckerClient extends ApiClient {
     return this._get(`/api/repos/${owner}/${repo}/logs/${pipeline}/${step}`) as Promise<PipelineLog[]>;
   }
 
-  getArtifact(owner: string, repo: string, pipeline: string, step: string, file: string): Promise<unknown> {
-    return this._get(`/api/repos/${owner}/${repo}/files/${pipeline}/${step}/${file}?raw=true`);
-  }
-
-  getArtifactList(owner: string, repo: string, pipeline: string): Promise<unknown> {
-    return this._get(`/api/repos/${owner}/${repo}/files/${pipeline}`);
-  }
-
   getSecretList(owner: string, repo: string, page: number): Promise<Secret[] | null> {
     return this._get(`/api/repos/${owner}/${repo}/secrets?page=${page}`) as Promise<Secret[] | null>;
   }

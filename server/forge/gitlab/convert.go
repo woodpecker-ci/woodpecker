@@ -58,7 +58,7 @@ func (g *GitLab) convertGitLabRepo(_repo *gitlab.Project) (*model.Repo, error) {
 	}
 
 	if len(repo.Avatar) != 0 && !strings.HasPrefix(repo.Avatar, "http") {
-		repo.Avatar = fmt.Sprintf("%s/%s", g.URL, repo.Avatar)
+		repo.Avatar = fmt.Sprintf("%s/%s", g.url, repo.Avatar)
 	}
 
 	return repo, nil

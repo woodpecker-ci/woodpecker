@@ -322,7 +322,7 @@
           "netrc_only_trusted": "Hanya masukkan kredensial netrc ke kontainer yang terpercaya"
         },
         "pipeline_path": {
-          "default": "Secara bawaan: .woodpecker/*.{'{yaml,yml}'} → .woodpecker.yaml → .woodpecker.yml → .drone.yml",
+          "default": "Secara bawaan: .woodpecker/*.{'{yaml,yml}'} → .woodpecker.yaml → .woodpecker.yml",
           "desc": "Jalur ke konfigurasi jalur pipa Anda (misalnya {0}). Folder seharusnya berakhir dengan sebuah {1}.",
           "desc_path_example": "jalur/saya/",
           "path": "Jalur pipa"
