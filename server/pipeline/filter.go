@@ -51,10 +51,15 @@ func zeroSteps(currentPipeline *model.Pipeline, forgeYamlConfigs []*forge_types.
 
 // TODO: parse yaml once and not for each filter function
 // Check if at least one pipeline step will be execute otherwise we will just ignore this webhook
-func checkIfFiltered(pipeline *model.Pipeline, forgeYamlConfigs []*forge_types.FileMeta) (bool, error) {
+func checkIfFiltered(repo *model.Repo, pipeline *model.Pipeline, forgeYamlConfigs []*forge_types.FileMeta) (bool, error) {
 	log.Trace().Msgf("hook.branchFiltered(): pipeline branch: '%s' pipeline event: '%s' config count: %d", pipeline.Branch, pipeline.Event, len(forgeYamlConfigs))
 
+	// TODO: make same as https://github.com/woodpecker-ci/woodpecker/blob/36b5ae345959559fba5f5cc1682d209038d09db0/pipeline/stepBuilder.go#L332
+	// by either finally resolve TODO in L52 or move the metadata creation into a dedicated shared func
 	matchMetadata := frontend.Metadata{
+		Repo: frontend.Repo{
+			Branch: repo.Branch, // we need whole metadata to make variable expansion work for global filters too
+		},
 		Curr: frontend.Pipeline{
 			Event: string(pipeline.Event),
 			Commit: frontend.Commit{
