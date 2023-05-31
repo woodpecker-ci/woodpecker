@@ -11,7 +11,7 @@ import (
 )
 
 func Forge(c *gin.Context) forge.Forge {
-	v, ok := c.Get("repo")
+	v, ok := c.Get("forge")
 	if !ok {
 		return nil
 	}
