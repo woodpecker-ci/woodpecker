@@ -142,8 +142,6 @@ func apiRoutes(e *gin.Engine) {
 			badges.GET("/cc.xml", api.GetCC)
 		}
 
-		// DEPRECATED
-		// TODO: remove in future release
 		_badges := apiBase.Group("/badges/:repo_id_or_owner/:repo_name")
 		{
 			_badges.GET("/status.svg", api.GetBadge)

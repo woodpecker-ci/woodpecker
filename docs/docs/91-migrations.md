@@ -14,14 +14,14 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Updated Prometheus gauge `build_*` to `pipeline_*`
 - Updated Prometheus gauge `*_job_*` to `*_step_*`
 - Renamed config env `WOODPECKER_MAX_PROCS` to `WOODPECKER_MAX_WORKFLOWS` (still available as fallback)
-- The pipelines are now also read from `.yaml` files, the new default order is `.woodpecker/*.yml` and `.woodpecker/*.yaml` (without any prioritization) -> `.woodpecker.yml` ->  `.woodpecker.yaml` -> `.drone.yml`
+- The pipelines are now also read from `.yaml` files, the new default order is `.woodpecker/*.yml` and `.woodpecker/*.yaml` (without any prioritization) -> `.woodpecker.yml` -> `.woodpecker.yaml` -> `.drone.yml`
 - Dropped support for [Coding](https://coding.net/) and [Gogs](https://gogs.io).
 - `/api/queue/resume` & `/api/queue/pause` endpoint methods were changed from `GET` to `POST`
 - Using `repo-id` in favor of `owner/repo` combination
   - :warning: The api endpoints `/api/repos/{owner}/{repo}/...` were replaced by new endpoints using the repos id `/api/repos/{repo-id}`
-  - To get the id of a repo use the `/api/repos/lookup/{repo-full-name-with-slashes}` endpoint.
-  - The badges endpoint `/api/badges/{owner}/{repo}` is now deprecated and will be removed in a future release. Use the new endpoint using the `repo-id`: `/api/badges/{repo-id}`.
-  - The UI urls for a repository changed from `/repos/{owner}/{repo}/...` to `/repos/{repo-id}/...`. You will be redirected automatically when using the old url. This redirect will be removed in a future release.
+  - To find the id of a repo use the `/api/repos/lookup/{repo-full-name-with-slashes}` endpoint.
+  - The existing badge endpoint `/api/badges/{owner}/{repo}` will still work, but whenever possible try to use the new endpoint using the `repo-id`: `/api/badges/{repo-id}`.
+  - The UI urls for a repository changed from `/repos/{owner}/{repo}/...` to `/repos/{repo-id}/...`. You will be redirected automatically when using the old url.
   - The woodpecker-go api-client is now using the `repo-id` instead of `owner/repo` for all functions
 
 ## 0.15.0
