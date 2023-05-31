@@ -8,6 +8,7 @@
     "node_modules",
     "server/store/datastore/migration/testfiles/sqlite.db",
     "server/store/datastore/feed.go",
+    "cmd/server/docs/docs.go",
     "_test.go",
     "Makefile"
   ]
