@@ -11,14 +11,14 @@
         "capacity": {
           "badge": "pojemność",
           "capacity": "Pojemność",
-          "desc": "Maksymalna ilość równoległych potoków wykonywanych przez tego agenta."
+          "desc": "Maksymalna liczba równoległych potoków wykonywanych przez tego agenta."
         },
         "created": "Utworzono agenta",
         "delete_agent": "Usuń agenta",
         "delete_confirm": "Czy na pewno chcesz usunąć tego agenta? Nie będzie można go więcej połączyć z serwerem.",
         "deleted": "Usunięto agenta",
         "desc": "Agenty zarejestrowane na tym serwerze",
-        "edit_agent": "Agent prowadzący",
+        "edit_agent": "Edytuj agenta",
         "last_contact": "Ostatni kontakt",
         "name": {
           "name": "Nazwa",
@@ -27,7 +27,7 @@
         "never": "Nigdy",
         "no_schedule": {
           "name": "Dezaktywuj agenta",
-          "placeholder": "Nie pozwalaj agentowi brać nowych zadań"
+          "placeholder": "Nie pozwalaj agentowi pobierać nowych zadań"
         },
         "none": "Nie ma jeszcze żadnego agenta.",
         "platform": {
@@ -42,25 +42,25 @@
       },
       "not_allowed": "Nie masz pozwolenia na dostęp do ustawień serwera",
       "queue": {
-        "agent": "agentka",
+        "agent": "agent",
         "desc": "Zadania oczekujące na wykonanie przez agentów",
-        "pause": "Pauza",
+        "pause": "Wstrzymaj",
         "paused": "Kolejka jest wstrzymana",
         "queue": "Kolejka",
-        "resume": "Rezonans",
+        "resume": "Wznów",
         "resumed": "Kolejka jest wznowiona",
         "stats": {
           "completed_count": "Zadania zakończone",
-          "pending_count": "W trakcie realizacji",
-          "running_count": "Prowadzenie",
+          "pending_count": "Oczekujące",
+          "running_count": "Uruchomione",
           "waiting_on_deps_count": "Czekanie na zależności",
-          "worker_count": "Bezpłatnie"
+          "worker_count": "Wolne"
         },
-        "task_pending": "Zadanie jest w toku",
+        "task_pending": "Zadanie jest oczekujące",
         "task_running": "Zadanie jest w toku",
         "task_waiting_on_deps": "Zadanie oczekuje na zależności",
         "tasks": "Zadania",
-        "waiting_for": "czekając na"
+        "waiting_for": "oczekuje na"
       },
       "secrets": {
         "add": "Dodaj sekret",
@@ -98,7 +98,7 @@
         "delete_confirm": "Czy naprawdę chcesz usunąć tego użytkownika?",
         "delete_user": "Usuń użytkownika",
         "deleted": "Użytkownik usunięty",
-        "desc": "Użytkownicy zarejestrowani na tym kanale",
+        "desc": "Użytkownicy zarejestrowani na tym serwerze",
         "edit_user": "Edytuj użytkownika",
         "email": "Email",
         "login": "Logowanie",
@@ -161,7 +161,7 @@
     "branches": "Gałęzie",
     "deploy_pipeline": {
       "enter_target": "Docelowe środowisko wdrażania",
-      "title": "Wyzwalanie zdarzenia deploymentu dla bieżącego rurociągu #{pipelineId}",
+      "title": "Wyzwalanie zdarzenia deploymentu dla bieżącego potoku #{pipelineId}",
       "trigger": "Wdrażanie",
       "variables": {
         "add": "Dodaj zmienną",
@@ -224,7 +224,7 @@
       "no_pipelines": "Nie uruchomiono jeszcze żadnego potoku.",
       "pipeline": "Potok #{pipelineId}",
       "pipelines_for": "Potoki dla gałęzi \"{branch}\"",
-      "pipelines_for_pr": "Rurociągi dla pull request #{index}",
+      "pipelines_for_pr": "Potoki dla pull requesta #{index}",
       "protected": {
         "approve": "Zatwierdź",
         "approve_success": "Zatwierdzono potok",
@@ -264,7 +264,7 @@
         },
         "enable": {
           "enable": "Włącz repozytorium",
-          "success": "Repozytorium włączone"
+          "success": "Włączono repozytorium"
         },
         "repair": {
           "repair": "Napraw repozytorium",
@@ -322,8 +322,8 @@
           "netrc_only_trusted": "Wstrzykuj poświadczenia netrc tylko do zaufanych kontenerów"
         },
         "pipeline_path": {
-          "default": "Domyślnie: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml -> .drone.yml",
-          "desc": "Ścieżka do konfiguracji Twojego rurociągu (na przykład {0}). Foldery powinny kończyć się znakiem {1}.",
+          "default": "Domyślnie: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml",
+          "desc": "Ścieżka do konfiguracji Twojego potoku (na przykład {0}). Foldery powinny kończyć się znakiem {1}.",
           "desc_path_example": "moja/ścieżka/",
           "path": "Ścieżka do pliku potoku"
         },
@@ -427,6 +427,7 @@
     "dl_cli": "Pobierz CLI",
     "internal_error": "Wystąpił błąd wewnętrzny",
     "oauth_error": "Błąd podczas uwierzytelnienia u dostawcy OAuth",
+    "reset_token": "Resetuj token",
     "settings": "Ustawienia użytkownika",
     "shell_setup": "Konfiguracja powłoki systemowej",
     "shell_setup_before": "wykonaj wcześniej konfigurację powłoki",
