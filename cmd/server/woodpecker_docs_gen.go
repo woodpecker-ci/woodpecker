@@ -63,7 +63,6 @@ func main() {
 	setupSwaggerStaticConfig()
 
 	specFile := createTempFileWithSwaggerSpec()
-	defer os.Remove(specFile)
 	markdown := generateTempMarkdown(specFile)
 
 	f, err := os.Create(path.Join("..", "..", "docs", "docs", "20-usage", "90-rest-api.md"))
@@ -82,7 +81,7 @@ func main() {
 }
 
 func createTempFileWithSwaggerSpec() string {
-	f, err := os.CreateTemp(os.TempDir(), "swagger.json")
+	f, err := os.Create(path.Join("..", "..", "docs", "swagger.json"))
 	if err != nil {
 		panic(err)
 	}
