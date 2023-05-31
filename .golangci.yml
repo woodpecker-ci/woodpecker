@@ -40,6 +40,7 @@ run:
 
 issues:
   exclude-rules:
+    # gin force us to use string as context key
     - path: server/store/context.go
       linters:
         - staticcheck
