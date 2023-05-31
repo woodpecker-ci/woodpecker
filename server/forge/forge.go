@@ -32,6 +32,9 @@ type Forge interface {
 	// Name returns the string name of this driver
 	Name() string
 
+	// URL returns the root url of a configured forge
+	URL() string
+
 	// Login authenticates the session and returns the
 	// forge user details.
 	Login(ctx context.Context, w http.ResponseWriter, r *http.Request) (*model.User, error)

@@ -150,12 +150,6 @@ type Store interface {
 	// so either find a way to write log in chunks by xorm ...
 	LogSave(*model.Step, io.Reader) error
 
-	// Files
-	FileList(*model.Pipeline, *model.ListOptions) ([]*model.File, error)
-	FileFind(*model.Step, string) (*model.File, error)
-	FileRead(*model.Step, string) (io.ReadCloser, error)
-	FileCreate(*model.File, io.Reader) error
-
 	// Tasks
 	// TaskList TODO: paginate & opt filter
 	TaskList() ([]*model.Task, error)

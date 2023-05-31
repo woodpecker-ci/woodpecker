@@ -19,7 +19,6 @@
 package grpc
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -33,7 +32,6 @@ import (
 	grpcMetadata "google.golang.org/grpc/metadata"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
-	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/logging"
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -159,79 +157,6 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 	}
 
 	return nil
-}
-
-// Upload implements the rpc.Upload function
-func (s *RPC) Upload(_ context.Context, id string, file *rpc.File) error {
-	stepID, err := strconv.ParseInt(id, 10, 64)
-	if err != nil {
-		return err
-	}
-
-	workflow, err := s.store.WorkflowLoad(stepID)
-	if err != nil {
-		log.Error().Msgf("error: cannot find parent step with id %d: %s", stepID, err)
-		return err
-	}
-
-	pipeline, err := s.store.GetPipeline(workflow.PipelineID)
-	if err != nil {
-		log.Error().Msgf("error: cannot find pipeline with id %d: %s", workflow.PipelineID, err)
-		return err
-	}
-
-	step, err := s.store.StepChild(pipeline, workflow.PID, file.Step)
-	if err != nil {
-		log.Error().Msgf("error: cannot find child step with name %s: %s", file.Step, err)
-		return err
-	}
-
-	if file.Mime == "application/json+logs" {
-		return s.store.LogSave(
-			step,
-			bytes.NewBuffer(file.Data),
-		)
-	}
-
-	report := &model.File{
-		PipelineID: step.PipelineID,
-		StepID:     step.ID,
-		PID:        step.PID,
-		Mime:       file.Mime,
-		Name:       file.Name,
-		Size:       file.Size,
-		Time:       file.Time,
-	}
-	if d, ok := file.Meta["X-Tests-Passed"]; ok {
-		report.Passed, _ = strconv.Atoi(d)
-	}
-	if d, ok := file.Meta["X-Tests-Failed"]; ok {
-		report.Failed, _ = strconv.Atoi(d)
-	}
-	if d, ok := file.Meta["X-Tests-Skipped"]; ok {
-		report.Skipped, _ = strconv.Atoi(d)
-	}
-
-	if d, ok := file.Meta["X-Checks-Passed"]; ok {
-		report.Passed, _ = strconv.Atoi(d)
-	}
-	if d, ok := file.Meta["X-Checks-Failed"]; ok {
-		report.Failed, _ = strconv.Atoi(d)
-	}
-
-	if d, ok := file.Meta["X-Coverage-Lines"]; ok {
-		report.Passed, _ = strconv.Atoi(d)
-	}
-	if d, ok := file.Meta["X-Coverage-Total"]; ok {
-		if total, _ := strconv.Atoi(d); total != 0 {
-			report.Failed = total - report.Passed
-		}
-	}
-
-	return server.Config.Storage.Files.FileCreate(
-		report,
-		bytes.NewBuffer(file.Data),
-	)
 }
 
 // Init implements the rpc.Init function

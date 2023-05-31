@@ -279,9 +279,6 @@ func run(c *cli.Context) error {
 }
 
 func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
-	// storage
-	server.Config.Storage.Files = v
-
 	// forge
 	server.Config.Services.Forge = f
 	server.Config.Services.Timeout = c.Duration("forge-timeout")

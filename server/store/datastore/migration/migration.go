@@ -44,6 +44,7 @@ var migrationTasks = []*task{
 	&renameForgeIDToForgeRemoteID,
 	&removeActiveFromUsers,
 	&removeInactiveRepos,
+	&dropFiles,
 	&parentStepsToWorkflows,
 }
 
@@ -52,7 +53,6 @@ var allBeans = []interface{}{
 	new(model.Pipeline),
 	new(model.PipelineConfig),
 	new(model.Config),
-	new(model.File),
 	new(model.Logs),
 	new(model.Perm),
 	new(model.Step),

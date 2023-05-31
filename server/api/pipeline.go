@@ -124,12 +124,10 @@ func GetPipeline(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	files, _ := _store.FileList(pl, &model.ListOptions{All: true})
 	if pl.Workflows, err = _store.WorkflowTree(pl); err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	pl.Files = files
 
 	c.JSON(http.StatusOK, pl)
 }

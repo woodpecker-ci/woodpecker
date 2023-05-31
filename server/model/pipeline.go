@@ -49,7 +49,6 @@ type Pipeline struct {
 	Reviewer            string            `json:"reviewed_by"             xorm:"pipeline_reviewer"`
 	Reviewed            int64             `json:"reviewed_at"             xorm:"pipeline_reviewed"`
 	Workflows           []*Workflow       `json:"workflows,omitempty"         xorm:"-"`
-	Files               []*File           `json:"files,omitempty"         xorm:"-"`
 	ChangedFiles        []string          `json:"changed_files,omitempty" xorm:"json 'changed_files'"`
 	AdditionalVariables map[string]string `json:"variables,omitempty"     xorm:"json 'additional_variables'"`
 	PullRequestLabels   []string          `json:"pr_labels,omitempty"     xorm:"json 'pr_labels'"`
