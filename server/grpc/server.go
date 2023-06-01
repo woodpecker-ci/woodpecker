@@ -118,22 +118,6 @@ func (s *WoodpeckerServer) Update(c context.Context, req *proto.UpdateRequest) (
 	return res, err
 }
 
-func (s *WoodpeckerServer) Upload(c context.Context, req *proto.UploadRequest) (*proto.Empty, error) {
-	file := &rpc.File{
-		Data: req.GetFile().GetData(),
-		Mime: req.GetFile().GetMime(),
-		Name: req.GetFile().GetName(),
-		Step: req.GetFile().GetStep(),
-		Size: int(req.GetFile().GetSize()),
-		Time: req.GetFile().GetTime(),
-		Meta: req.GetFile().GetMeta(),
-	}
-
-	res := new(proto.Empty)
-	err := s.peer.Upload(c, req.GetId(), file)
-	return res, err
-}
-
 func (s *WoodpeckerServer) Done(c context.Context, req *proto.DoneRequest) (*proto.Empty, error) {
 	state := rpc.State{
 		Error:    req.GetState().GetError(),

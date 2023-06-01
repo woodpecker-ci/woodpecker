@@ -23,17 +23,6 @@ import (
 	"xorm.io/xorm/schemas"
 )
 
-func dropTable(sess *xorm.Session, table string) error {
-	dialect := sess.Engine().Dialect().URI().DBType
-	switch dialect {
-	case schemas.MYSQL, schemas.POSTGRES, schemas.SQLITE:
-		_, err := sess.Exec(fmt.Sprintf("DROP TABLE `%s`;", table))
-		return err
-	default:
-		return fmt.Errorf("dialect '%s' not supported", dialect)
-	}
-}
-
 func renameTable(sess *xorm.Session, old, new string) error {
 	dialect := sess.Engine().Dialect().URI().DBType
 	switch dialect {
@@ -180,40 +169,6 @@ func dropTableColumns(sess *xorm.Session, tableName string, columnNames ...strin
 			cols += "DROP COLUMN `" + col + "`"
 		}
 		if _, err := sess.Exec(fmt.Sprintf("ALTER TABLE `%s` %s", tableName, cols)); err != nil {
-			return fmt.Errorf("drop table `%s` columns %v: %w", tableName, columnNames, err)
-		}
-	case schemas.MSSQL:
-		cols := ""
-		for _, col := range columnNames {
-			if cols != "" {
-				cols += ", "
-			}
-			cols += "`" + strings.ToLower(col) + "`"
-		}
-		sql := fmt.Sprintf("SELECT Name FROM sys.default_constraints WHERE parent_object_id = OBJECT_ID('%[1]s') AND parent_column_id IN (SELECT column_id FROM sys.columns WHERE LOWER(name) IN (%[2]s) AND object_id = OBJECT_ID('%[1]s'))",
-			tableName, strings.ReplaceAll(cols, "`", "'"))
-		constraints := make([]string, 0)
-		if err := sess.SQL(sql).Find(&constraints); err != nil {
-			return fmt.Errorf("find constraints: %w", err)
-		}
-		for _, constraint := range constraints {
-			if _, err := sess.Exec(fmt.Sprintf("ALTER TABLE `%s` DROP CONSTRAINT `%s`", tableName, constraint)); err != nil {
-				return fmt.Errorf("drop table `%s` default constraint `%s`: %w", tableName, constraint, err)
-			}
-		}
-		sql = fmt.Sprintf("SELECT DISTINCT Name FROM sys.indexes INNER JOIN sys.index_columns ON indexes.index_id = index_columns.index_id AND indexes.object_id = index_columns.object_id WHERE indexes.object_id = OBJECT_ID('%[1]s') AND index_columns.column_id IN (SELECT column_id FROM sys.columns WHERE LOWER(name) IN (%[2]s) AND object_id = OBJECT_ID('%[1]s'))",
-			tableName, strings.ReplaceAll(cols, "`", "'"))
-		constraints = make([]string, 0)
-		if err := sess.SQL(sql).Find(&constraints); err != nil {
-			return fmt.Errorf("find constraints: %w", err)
-		}
-		for _, constraint := range constraints {
-			if _, err := sess.Exec(fmt.Sprintf("DROP INDEX `%s` ON `%s`", constraint, tableName)); err != nil {
-				return fmt.Errorf("drop index `%s` on `%s`: %w", constraint, tableName, err)
-			}
-		}
-
-		if _, err := sess.Exec(fmt.Sprintf("ALTER TABLE `%s` DROP COLUMN %s", tableName, cols)); err != nil {
 			return fmt.Errorf("drop table `%s` columns %v: %w", tableName, columnNames, err)
 		}
 	default:
