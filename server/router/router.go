@@ -16,10 +16,12 @@ package router
 
 import (
 	"net/http"
+	"net/url"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 
+	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/api"
 	"github.com/woodpecker-ci/woodpecker/server/api/metrics"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/header"
@@ -47,23 +49,28 @@ func Load(noRouteHandler http.HandlerFunc, middleware ...gin.HandlerFunc) http.H
 	e.Use(token.Refresh)
 
 	e.NoRoute(gin.WrapF(noRouteHandler))
+	rootURL, _ := url.Parse(server.Config.Server.RootURL)
+	rootPath := rootURL.Path
 
-	e.GET("/web-config.js", web.Config)
-
-	e.GET("/logout", api.GetLogout)
-	e.GET("/login", api.HandleLogin)
-	auth := e.Group("/authorize")
+	base := e.Group(rootPath)
 	{
-		auth.GET("", api.HandleAuth)
-		auth.POST("", api.HandleAuth)
-		auth.POST("/token", api.GetLoginToken)
+		base.GET("/web-config.js", web.Config)
+
+		base.GET("/logout", api.GetLogout)
+		base.GET("/login", api.HandleLogin)
+		auth := base.Group("/authorize")
+		{
+			auth.GET("", api.HandleAuth)
+			auth.POST("", api.HandleAuth)
+			auth.POST("/token", api.GetLoginToken)
+		}
+
+		base.GET("/metrics", metrics.PromHandler())
+		base.GET("/version", api.Version)
+		base.GET("/healthz", api.Health)
 	}
 
-	e.GET("/metrics", metrics.PromHandler())
-	e.GET("/version", api.Version)
-	e.GET("/healthz", api.Health)
-
-	apiRoutes(e)
+	apiRoutes(base)
 
 	return e
 }
