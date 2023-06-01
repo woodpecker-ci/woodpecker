@@ -86,7 +86,7 @@ var legacy2Xorm = task{
 
 		{ // recreate build_config
 			type BuildConfig struct {
-				ConfigID int64 `xorm:"NOT NULL 'config_id'"` // xorm.Sync() do not use index info of sess -> so it try to create it twice
+				ConfigID int64 `xorm:"NOT NULL 'config_id'"` // xorm.Sync() do not use index info of sess -> so it tries to create it twice
 				BuildID  int64 `xorm:"NOT NULL 'build_id'"`
 			}
 			if err := renameTable(sess, "build_config", "old_build_config"); err != nil {
