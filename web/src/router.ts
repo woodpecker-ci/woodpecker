@@ -2,36 +2,39 @@ import { Component } from 'vue';
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
 
 import useAuthentication from '~/compositions/useAuthentication';
-import useUserConfig from '~/compositions/useUserConfig';
 import useConfig from '~/compositions/useConfig';
+import useUserConfig from '~/compositions/useUserConfig';
 
-const rootURL = useConfig().rootURL ? new URL(useConfig().rootURL!!).pathname : '';
+let { rootURL } = useConfig();
+if (rootURL !== '' && rootURL !== null) {
+  rootURL = new URL(useConfig().rootURL).pathname;
+}
 const routes: RouteRecordRaw[] = [
   {
-    path: rootURL + '/',
+    path: `${rootURL}/`,
     name: 'home',
-    redirect: rootURL + '/repos',
+    redirect: `${rootURL}/repos`,
   },
   {
-    path: rootURL + '/repos',
+    path: `${rootURL}/repos`,
     name: 'repos',
     component: (): Component => import('~/views/Repos.vue'),
     meta: { authentication: 'required' },
   },
   {
-    path: rootURL + '/repo/add',
+    path: `${rootURL}/repo/add`,
     name: 'repo-add',
     component: (): Component => import('~/views/RepoAdd.vue'),
     meta: { authentication: 'required' },
   },
   {
-    path: rootURL + '/:repoOwner',
+    path: `${rootURL}/:repoOwner`,
     name: 'repos-owner',
     component: (): Component => import('~/views/ReposOwner.vue'),
     props: true,
   },
   {
-    path: rootURL + '/org/:repoOwner',
+    path: `${rootURL}/org/:repoOwner`,
     component: (): Component => import('~/views/org/OrgWrapper.vue'),
     props: true,
     children: [
@@ -50,7 +53,7 @@ const routes: RouteRecordRaw[] = [
     ],
   },
   {
-    path: rootURL + '/:repoOwner/:repoName',
+    path: `${rootURL}/:repoOwner/:repoName`,
     name: 'repo-wrapper',
     component: (): Component => import('~/views/repo/RepoWrapper.vue'),
     props: true,
@@ -145,42 +148,42 @@ const routes: RouteRecordRaw[] = [
     ],
   },
   {
-    path: rootURL + '/admin',
+    path: `${rootURL}/admin`,
     name: 'admin',
     component: (): Component => import('~/views/admin/Admin.vue'),
     meta: { authentication: 'required' },
     props: true,
   },
   {
-    path: rootURL + '/admin/settings',
+    path: `${rootURL}/admin/settings`,
     name: 'admin-settings',
     component: (): Component => import('~/views/admin/AdminSettings.vue'),
     meta: { authentication: 'required' },
     props: true,
   },
   {
-    path: rootURL + '/user',
+    path: `${rootURL}/user`,
     name: 'user',
     component: (): Component => import('~/views/User.vue'),
     meta: { authentication: 'required' },
     props: true,
   },
   {
-    path: rootURL + '/login/error',
+    path: `${rootURL}/login/error`,
     name: 'login-error',
     component: (): Component => import('~/views/Login.vue'),
     meta: { blank: true },
     props: true,
   },
   {
-    path: rootURL + '/do-login',
+    path: `${rootURL}/do-login`,
     name: 'login',
     component: (): Component => import('~/views/Login.vue'),
     meta: { blank: true },
     props: true,
   },
   {
-    path: rootURL + '/:pathMatch(.*)*',
+    path: `${rootURL}/:pathMatch(.*)*`,
     name: 'not-found',
     component: (): Component => import('~/views/NotFound.vue'),
   },
