@@ -322,7 +322,7 @@
           "netrc_only_trusted": "Wstrzykuj poświadczenia netrc tylko do zaufanych kontenerów"
         },
         "pipeline_path": {
-          "default": "Domyślnie: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml -> .drone.yml",
+          "default": "Domyślnie: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml",
           "desc": "Ścieżka do konfiguracji Twojego potoku (na przykład {0}). Foldery powinny kończyć się znakiem {1}.",
           "desc_path_example": "moja/ścieżka/",
           "path": "Ścieżka do pliku potoku"

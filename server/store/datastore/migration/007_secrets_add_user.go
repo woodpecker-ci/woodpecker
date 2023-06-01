@@ -32,7 +32,7 @@ func (SecretV007) TableName() string {
 var alterTableSecretsAddUserCol = task{
 	name: "alter-table-add-secrets-user-id",
 	fn: func(sess *xorm.Session) error {
-		if err := sess.Sync2(new(SecretV007)); err != nil {
+		if err := sess.Sync(new(SecretV007)); err != nil {
 			return err
 		}
 		if err := alterColumnDefault(sess, "secrets", "secret_repo_id", "0"); err != nil {
