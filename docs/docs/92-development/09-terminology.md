@@ -2,6 +2,7 @@
 
 ## Glossary
 
+- **Woodpecker CI**: The project name around Woodpecker.
 - **Woodpecker**: An open-source tool that executes pipelines on your code.
 - **Pipeline**: A sequence of workflows that are executed on the code. Pipelines are triggered by events.
 - **Workflow**: A sequence of steps and services that are executed as part of a pipeline. Workflows are represented by YAML files. Each workflow has its own isolated workspace, and often additional resources like a shared network (docker).
