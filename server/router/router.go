@@ -49,7 +49,7 @@ func Load(noRouteHandler http.HandlerFunc, middleware ...gin.HandlerFunc) http.H
 	e.Use(token.Refresh)
 
 	e.NoRoute(gin.WrapF(noRouteHandler))
-	rootURL, _ := url.Parse(server.Config.Server.RootURL)
+	rootURL, _ := url.Parse(server.Config.Server.RootPath)
 	rootPath := rootURL.Path
 
 	base := e.Group(rootPath)

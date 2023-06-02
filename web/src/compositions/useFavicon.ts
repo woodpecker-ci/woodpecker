@@ -8,7 +8,7 @@ const darkMode = computed(() => (useDarkMode().darkMode.value ? 'dark' : 'light'
 
 type Status = 'default' | 'success' | 'pending' | 'error';
 const faviconStatus = ref<Status>('default');
-const rootURL = useConfig().rootURL ?? '';
+const rootURL = useConfig().rootPath;
 
 watch(
   [darkMode, faviconStatus],

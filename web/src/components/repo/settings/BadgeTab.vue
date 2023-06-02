@@ -88,7 +88,7 @@ export default defineComponent({
       });
     }
 
-    const rootPath = useConfig().rootURL ?? '';
+    const rootPath = useConfig().rootPath;
     const baseUrl = `${window.location.protocol}//${window.location.hostname}${
       window.location.port ? `:${window.location.port}` : ''
     }${rootPath}`;

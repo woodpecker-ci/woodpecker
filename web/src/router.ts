@@ -5,7 +5,7 @@ import useAuthentication from '~/compositions/useAuthentication';
 import useConfig from '~/compositions/useConfig';
 import useUserConfig from '~/compositions/useUserConfig';
 
-const rootURL = useConfig().rootURL ?? '';
+const rootURL = useConfig().rootPath;
 const routes: RouteRecordRaw[] = [
   {
     path: `${rootURL}/`,

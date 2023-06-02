@@ -58,7 +58,7 @@ onMounted(async () => {
   token.value = await apiClient.getToken();
 });
 
-const rootPath = useConfig().rootURL ?? '';
+const rootPath = useConfig().rootPath;
 const address = `${window.location.protocol}//${window.location.host}${rootPath}`; // port is included in location.host
 
 const usageWithShell = computed(() => {

@@ -53,7 +53,7 @@ func New() (*gin.Engine, error) {
 
 	e.Use(setupCache)
 
-	rootURL, _ := url.Parse(server.Config.Server.RootURL)
+	rootURL, _ := url.Parse(server.Config.Server.RootPath)
 	rootPath := rootURL.Path
 
 	httpFS, err := web.HTTPFS()
@@ -61,7 +61,7 @@ func New() (*gin.Engine, error) {
 		return nil, err
 	}
 	h := http.FileServer(&prefixFS{httpFS, rootPath})
-	e.GET(rootPath+"/favicon.svg", redirect(server.Config.Server.RootURL+"/favicons/favicon-light-default.svg", http.StatusPermanentRedirect))
+	e.GET(rootPath+"/favicon.svg", redirect(server.Config.Server.RootPath+"/favicons/favicon-light-default.svg", http.StatusPermanentRedirect))
 	e.GET(rootPath+"/favicons/*filepath", gin.WrapH(h))
 	e.GET(rootPath+"/assets/*filepath", gin.WrapH(h))
 
@@ -96,10 +96,10 @@ func parseIndex() []byte {
 	if err != nil {
 		log.Fatal().Err(err).Msg("can not find index.html")
 	}
-	if server.Config.Server.RootURL == "" {
+	if server.Config.Server.RootPath == "" {
 		return data
 	}
-	return regexp.MustCompile(`/\S+\.(js|css|png|svg)`).ReplaceAll(data, []byte(server.Config.Server.RootURL+"$0"))
+	return regexp.MustCompile(`/\S+\.(js|css|png|svg)`).ReplaceAll(data, []byte(server.Config.Server.RootPath+"$0"))
 }
 
 func setupCache(c *gin.Context) {
