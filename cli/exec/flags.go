@@ -275,6 +275,14 @@ var flags = []cli.Flag{
 		EnvVars: []string{"CI_ENV"},
 		Name:    "env",
 	},
+	&cli.StringFlag{
+		EnvVars: []string{"CI_FORGE_TYPE"},
+		Name:    "forge-type",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"CI_FORGE_URL"},
+		Name:    "forge-url",
+	},
 
 	// backend docker
 	&cli.BoolFlag{
