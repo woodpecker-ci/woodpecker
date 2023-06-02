@@ -53,6 +53,7 @@ func ParseBytes(b []byte) (*Config, error) {
 		} else {
 			return nil, fmt.Errorf("could not apply deprecated branches filter into global when filter")
 		}
+		out.BranchesDontUseIt = nil
 	}
 
 	return out, nil
