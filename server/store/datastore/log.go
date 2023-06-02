@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"io"
 
+	"github.com/woodpecker-ci/woodpecker/server/logging"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
@@ -55,6 +56,36 @@ func (s storage) LogSave(step *model.Step, reader io.Reader) error {
 		if _, err := sess.Insert(&model.Logs{
 			StepID: step.ID,
 			Data:   data,
+		}); err != nil {
+			return err
+		}
+	}
+
+	return sess.Commit()
+}
+
+func (s storage) LogAppend(stepID int64, entry *logging.Entry) error {
+	sess := s.engine.NewSession()
+	defer sess.Close()
+	if err := sess.Begin(); err != nil {
+		return err
+	}
+
+	logs := new(model.Logs)
+	exist, err := sess.Where("log_step_id = ?", stepID).Get(logs)
+	if err != nil {
+		return err
+	}
+
+	if exist {
+		data := append(logs.Data, entry.Data...)
+		if _, err := sess.ID(logs.ID).Cols("log_data").Update(&model.Logs{Data: data}); err != nil {
+			return err
+		}
+	} else {
+		if _, err := sess.Insert(&model.Logs{
+			StepID: stepID,
+			Data:   entry.Data,
 		}); err != nil {
 			return err
 		}

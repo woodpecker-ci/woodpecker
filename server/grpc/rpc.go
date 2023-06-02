@@ -308,13 +308,19 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 }
 
 // Log implements the rpc.Log function
-func (s *RPC) Log(c context.Context, id string, line *rpc.Line) error {
+func (s *RPC) Log(c context.Context, _id string, line *rpc.Line) error {
 	entry := new(logging.Entry)
 	entry.Data, _ = json.Marshal(line)
-	if err := s.logger.Write(c, id, entry); err != nil {
+	if err := s.logger.Write(c, _id, entry); err != nil {
 		log.Error().Err(err).Msgf("rpc server could not write to logger")
 	}
-	return nil
+
+	id, err := strconv.ParseInt(_id, 10, 64)
+	if err != nil {
+		return err
+	}
+
+	return s.store.LogAppend(id, entry)
 }
 
 func (s *RPC) RegisterAgent(ctx context.Context, platform, backend, version string, capacity int32) (int64, error) {

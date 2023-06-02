@@ -6,6 +6,8 @@ import (
 	io "io"
 
 	mock "github.com/stretchr/testify/mock"
+	logging "github.com/woodpecker-ci/woodpecker/server/logging"
+
 	model "github.com/woodpecker-ci/woodpecker/server/model"
 )
 
@@ -1087,6 +1089,20 @@ func (_m *Store) HasRedirectionForRepo(_a0 int64, _a1 string) (bool, error) {
 	}
 
 	return r0, r1
+}
+
+// LogAppend provides a mock function with given fields: stepID, entry
+func (_m *Store) LogAppend(stepID int64, entry *logging.Entry) error {
+	ret := _m.Called(stepID, entry)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(int64, *logging.Entry) error); ok {
+		r0 = rf(stepID, entry)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
 }
 
 // LogFind provides a mock function with given fields: _a0

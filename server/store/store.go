@@ -20,6 +20,7 @@ package store
 import (
 	"io"
 
+	"github.com/woodpecker-ci/woodpecker/server/logging"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
@@ -149,6 +150,7 @@ type Store interface {
 	// TODO: since we do ReadAll in any case a ioReader is not the best idea
 	// so either find a way to write log in chunks by xorm ...
 	LogSave(*model.Step, io.Reader) error
+	LogAppend(stepID int64, entry *logging.Entry) error
 
 	// Tasks
 	// TaskList TODO: paginate & opt filter
