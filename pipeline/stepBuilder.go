@@ -86,7 +86,6 @@ func (b *StepBuilder) Build() ([]*Item, error) {
 				Name:       SanitizePath(y.Name),
 			}
 
-			// TODO: move metadata into own package and inject as argument into Build()
 			workflowMetadata := frontend.MetadataFromStruct(b.Forge, b.Repo, b.Curr, b.Last, workflow, b.Link)
 			environ := b.environmentVariables(workflowMetadata, axis)
 

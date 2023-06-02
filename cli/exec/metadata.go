@@ -15,13 +15,13 @@
 package exec
 
 import (
-	"github.com/woodpecker-ci/woodpecker/version"
 	"runtime"
 
 	"github.com/urfave/cli/v2"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/matrix"
+	"github.com/woodpecker-ci/woodpecker/version"
 )
 
 // return the metadata from the cli context.
