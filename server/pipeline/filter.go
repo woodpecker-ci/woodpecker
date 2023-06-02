@@ -20,6 +20,7 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
 	"github.com/woodpecker-ci/woodpecker/server"
 	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
@@ -36,6 +37,7 @@ func zeroSteps(currentPipeline *model.Pipeline, forgeYamlConfigs []*forge_types.
 		Regs:  []*model.Registry{},
 		Link:  "",
 		Yamls: forgeYamlConfigs,
+		Forge: server.Config.Services.Forge,
 	}
 
 	pipelineItems, err := b.Build()
@@ -54,7 +56,7 @@ func zeroSteps(currentPipeline *model.Pipeline, forgeYamlConfigs []*forge_types.
 func checkIfFiltered(repo *model.Repo, p *model.Pipeline, forgeYamlConfigs []*forge_types.FileMeta) (bool, error) {
 	log.Trace().Msgf("hook.branchFiltered(): pipeline branch: '%s' pipeline event: '%s' config count: %d", p.Branch, p.Event, len(forgeYamlConfigs))
 
-	matchMetadata := pipeline.MetadataFromStruct(server.Config.Services.Forge, repo, p, nil, nil, "")
+	matchMetadata := frontend.MetadataFromStruct(server.Config.Services.Forge, repo, p, nil, nil, "")
 
 	for _, forgeYamlConfig := range forgeYamlConfigs {
 		parsedPipelineConfig, err := yaml.ParseBytes(forgeYamlConfig.Data)
