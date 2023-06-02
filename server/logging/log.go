@@ -72,6 +72,7 @@ func (l *log) Write(_ context.Context, path string, entry *Entry) error {
 	for sub := range s.subs {
 		go sub.handler(entry)
 	}
+	// TODO: store entry to database as well
 	s.Unlock()
 	return nil
 }
