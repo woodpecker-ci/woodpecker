@@ -17,12 +17,11 @@ package pipeline
 
 import (
 	"fmt"
-	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/forge/mocks"
 	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -30,9 +29,9 @@ import (
 
 func TestGlobalEnvsubst(t *testing.T) {
 	t.Parallel()
-	setupMockForge(t)
 
 	b := StepBuilder{
+		Forge: getMockForge(t),
 		Envs: map[string]string{
 			"KEY_K": "VALUE_V",
 			"IMAGE": "scratch",
@@ -65,9 +64,9 @@ pipeline:
 
 func TestMissingGlobalEnvsubst(t *testing.T) {
 	t.Parallel()
-	setupMockForge(t)
 
 	b := StepBuilder{
+		Forge: getMockForge(t),
 		Envs: map[string]string{
 			"KEY_K":    "VALUE_V",
 			"NO_IMAGE": "scratch",
@@ -100,10 +99,10 @@ pipeline:
 
 func TestMultilineEnvsubst(t *testing.T) {
 	t.Parallel()
-	setupMockForge(t)
 
 	b := StepBuilder{
-		Repo: &model.Repo{},
+		Forge: getMockForge(t),
+		Repo:  &model.Repo{},
 		Curr: &model.Pipeline{
 			Message: `aaa
 bbb`,
@@ -138,9 +137,9 @@ pipeline:
 
 func TestMultiPipeline(t *testing.T) {
 	t.Parallel()
-	setupMockForge(t)
 
 	b := StepBuilder{
+		Forge: getMockForge(t),
 		Repo:  &model.Repo{},
 		Curr:  &model.Pipeline{},
 		Last:  &model.Pipeline{},
@@ -173,9 +172,9 @@ pipeline:
 
 func TestDependsOn(t *testing.T) {
 	t.Parallel()
-	setupMockForge(t)
 
 	b := StepBuilder{
+		Forge: getMockForge(t),
 		Repo:  &model.Repo{},
 		Curr:  &model.Pipeline{},
 		Last:  &model.Pipeline{},
@@ -220,9 +219,9 @@ depends_on:
 
 func TestRunsOn(t *testing.T) {
 	t.Parallel()
-	setupMockForge(t)
 
 	b := StepBuilder{
+		Forge: getMockForge(t),
 		Repo:  &model.Repo{},
 		Curr:  &model.Pipeline{},
 		Last:  &model.Pipeline{},
@@ -257,9 +256,9 @@ runs_on:
 
 func TestPipelineName(t *testing.T) {
 	t.Parallel()
-	setupMockForge(t)
 
 	b := StepBuilder{
+		Forge: getMockForge(t),
 		Repo:  &model.Repo{Config: ".woodpecker"},
 		Curr:  &model.Pipeline{},
 		Last:  &model.Pipeline{},
@@ -293,9 +292,9 @@ pipeline:
 
 func TestBranchFilter(t *testing.T) {
 	t.Parallel()
-	setupMockForge(t)
 
 	b := StepBuilder{
+		Forge: getMockForge(t),
 		Repo:  &model.Repo{},
 		Curr:  &model.Pipeline{Branch: "dev"},
 		Last:  &model.Pipeline{},
@@ -332,9 +331,9 @@ pipeline:
 
 func TestRootWhenFilter(t *testing.T) {
 	t.Parallel()
-	setupMockForge(t)
 
 	b := StepBuilder{
+		Forge: getMockForge(t),
 		Repo:  &model.Repo{},
 		Curr:  &model.Pipeline{Event: "tester"},
 		Last:  &model.Pipeline{},
@@ -379,11 +378,11 @@ pipeline:
 
 func TestZeroSteps(t *testing.T) {
 	t.Parallel()
-	setupMockForge(t)
 
 	pipeline := &model.Pipeline{Branch: "dev"}
 
 	b := StepBuilder{
+		Forge: getMockForge(t),
 		Repo:  &model.Repo{},
 		Curr:  pipeline,
 		Last:  &model.Pipeline{},
@@ -414,11 +413,11 @@ pipeline:
 
 func TestZeroStepsAsMultiPipelineDeps(t *testing.T) {
 	t.Parallel()
-	setupMockForge(t)
 
 	pipeline := &model.Pipeline{Branch: "dev"}
 
 	b := StepBuilder{
+		Forge: getMockForge(t),
 		Repo:  &model.Repo{},
 		Curr:  pipeline,
 		Last:  &model.Pipeline{},
@@ -463,11 +462,11 @@ depends_on: [ zerostep ]
 
 func TestZeroStepsAsMultiPipelineTransitiveDeps(t *testing.T) {
 	t.Parallel()
-	setupMockForge(t)
 
 	pipeline := &model.Pipeline{Branch: "dev"}
 
 	b := StepBuilder{
+		Forge: getMockForge(t),
 		Repo:  &model.Repo{},
 		Curr:  pipeline,
 		Last:  &model.Pipeline{},
@@ -518,13 +517,13 @@ depends_on: [ shouldbefiltered ]
 
 func TestTree(t *testing.T) {
 	t.Parallel()
-	setupMockForge(t)
 
 	pipeline := &model.Pipeline{
 		Event: model.EventPush,
 	}
 
 	b := StepBuilder{
+		Forge: getMockForge(t),
 		Repo:  &model.Repo{},
 		Curr:  pipeline,
 		Last:  &model.Pipeline{},
@@ -559,7 +558,6 @@ pipeline:
 
 func TestSanitizePath(t *testing.T) {
 	t.Parallel()
-	setupMockForge(t)
 
 	testTable := []struct {
 		path          string
@@ -598,14 +596,9 @@ func TestSanitizePath(t *testing.T) {
 	}
 }
 
-var setupMockForgeLock = sync.Once{}
-
-func setupMockForge(t *testing.T) {
-	setupMockForgeLock.Do(func() {
-		forge := mocks.NewForge(t)
-		forge.On("Name").Return("mock")
-		forge.On("URL").Return("https://codeberg.org")
-
-		server.Config.Services.Forge = forge
-	})
+func getMockForge(t *testing.T) forge.Forge {
+	forge := mocks.NewForge(t)
+	forge.On("Name").Return("mock")
+	forge.On("URL").Return("https://codeberg.org")
+	return forge
 }

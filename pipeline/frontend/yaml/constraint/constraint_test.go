@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
 )
 
@@ -504,11 +505,12 @@ func TestConstraints(t *testing.T) {
 		},
 		{
 			desc: "filter with build-in env passes",
-			conf: "{ branch: develop }",
+			conf: "{ branch: ${CI_REPO_DEFAULT_BRANCH} }",
 			with: metadata.Metadata{
-				Curr: metadata.Pipeline{Event: "non-default"},
+				Curr: metadata.Pipeline{Event: metadata.EventPush, Commit: metadata.Commit{Branch: "stable"}},
+				Repo: metadata.Repo{Branch: "stable"},
 			},
-			want: false,
+			want: true,
 		},
 		{
 			desc: "filter by eval based on event",
@@ -526,7 +528,9 @@ func TestConstraints(t *testing.T) {
 
 	for _, test := range testdata {
 		t.Run(test.desc, func(t *testing.T) {
-			c := parseConstraints(t, test.conf)
+			conf, err := frontend.EnvVarSubst(test.conf, test.with.Environ())
+			assert.NoError(t, err)
+			c := parseConstraints(t, conf)
 			got, err := c.Match(test.with, false)
 			if err != nil {
 				t.Errorf("Match returned error: %v", err)
