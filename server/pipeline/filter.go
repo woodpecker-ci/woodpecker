@@ -59,9 +59,14 @@ func checkIfFiltered(repo *model.Repo, p *model.Pipeline, forgeYamlConfigs []*fo
 	matchMetadata := frontend.MetadataFromStruct(server.Config.Services.Forge, repo, p, nil, nil, "")
 
 	for _, forgeYamlConfig := range forgeYamlConfigs {
-		parsedPipelineConfig, err := yaml.ParseBytes(forgeYamlConfig.Data)
+		substitutedConfigData, err := frontend.EnvVarSubst(string(forgeYamlConfig.Data), matchMetadata.Environ())
 		if err != nil {
-			log.Trace().Msgf("parse config '%s': %s", forgeYamlConfig.Name, err)
+			log.Trace().Err(err).Msgf("fail to substitute config '%s'", forgeYamlConfig.Name)
+			return false, err
+		}
+		parsedPipelineConfig, err := yaml.ParseString(substitutedConfigData)
+		if err != nil {
+			log.Trace().Err(err).Msgf("fail to parse config '%s'", forgeYamlConfig.Name)
 			return false, err
 		}
 		log.Trace().Msgf("config '%s': %#v", forgeYamlConfig.Name, parsedPipelineConfig)

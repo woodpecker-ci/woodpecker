@@ -20,7 +20,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/drone/envsubst"
 	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog/log"
 
@@ -99,7 +98,7 @@ func (b *StepBuilder) Build() ([]*Item, error) {
 			}
 
 			// substitute vars
-			substituted, err := b.envsubst(string(y.Data), environ)
+			substituted, err := frontend.EnvVarSubst(string(y.Data), environ)
 			if err != nil {
 				return nil, err
 			}
@@ -207,16 +206,6 @@ func containsItemWithName(name string, items []*Item) bool {
 		}
 	}
 	return false
-}
-
-func (b *StepBuilder) envsubst(y string, environ map[string]string) (string, error) {
-	return envsubst.Eval(y, func(name string) string {
-		env := environ[name]
-		if strings.Contains(env, "\n") {
-			env = fmt.Sprintf("%q", env)
-		}
-		return env
-	})
 }
 
 func (b *StepBuilder) environmentVariables(metadata metadata.Metadata, axis matrix.Axis) map[string]string {

@@ -503,6 +503,14 @@ func TestConstraints(t *testing.T) {
 			want: false,
 		},
 		{
+			desc: "filter with build-in env passes",
+			conf: "{ branch: develop }",
+			with: metadata.Metadata{
+				Curr: metadata.Pipeline{Event: "non-default"},
+			},
+			want: false,
+		},
+		{
 			desc: "filter by eval based on event",
 			conf: `{ evaluate: 'CI_PIPELINE_EVENT == "push"' }`,
 			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush}},

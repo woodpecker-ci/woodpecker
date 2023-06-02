@@ -15,12 +15,26 @@
 package frontend
 
 import (
+	"fmt"
 	"net/url"
+	"strings"
+
+	"github.com/drone/envsubst"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/version"
 )
+
+func EnvVarSubst(yaml string, environ map[string]string) (string, error) {
+	return envsubst.Eval(yaml, func(name string) string {
+		env := environ[name]
+		if strings.Contains(env, "\n") {
+			env = fmt.Sprintf("%q", env)
+		}
+		return env
+	})
+}
 
 // MetadataFromStruct return the metadata from a pipeline will run with.
 func MetadataFromStruct(forge metadata.ServerForge, repo *model.Repo, pipeline, last *model.Pipeline, workflow *model.Step, link string) metadata.Metadata {
