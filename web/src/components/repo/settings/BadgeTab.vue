@@ -50,6 +50,7 @@ import Panel from '~/components/layout/Panel.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { usePaginate } from '~/compositions/usePaginate';
 import { Repo } from '~/lib/api/types';
+import useConfig from "~/compositions/useConfig";
 
 export default defineComponent({
   name: 'BadgeTab',
@@ -87,9 +88,13 @@ export default defineComponent({
       });
     }
 
+    let rootPath = useConfig().rootURL ?? '';
+    if (rootPath !== '') {
+      rootPath = new URL(rootPath).pathname;
+    }
     const baseUrl = `${window.location.protocol}//${window.location.hostname}${
       window.location.port ? `:${window.location.port}` : ''
-    }`;
+    }${rootPath}`;
     const badgeUrl = computed(
       () =>
         `/api/badges/${repo.value.owner}/${repo.value.name}/status.svg${

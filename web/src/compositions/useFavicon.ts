@@ -2,23 +2,28 @@ import { computed, ref, watch } from 'vue';
 
 import { useDarkMode } from '~/compositions/useDarkMode';
 import { PipelineStatus } from '~/lib/api/types';
+import useConfig from "~/compositions/useConfig";
 
 const darkMode = computed(() => (useDarkMode().darkMode.value ? 'dark' : 'light'));
 
 type Status = 'default' | 'success' | 'pending' | 'error';
 const faviconStatus = ref<Status>('default');
+let rootURL = useConfig().rootURL ?? '';
+if (rootURL !== '') {
+  rootURL = new URL(rootURL).pathname;
+}
 
 watch(
   [darkMode, faviconStatus],
   () => {
     const faviconPNG = document.getElementById('favicon-png');
     if (faviconPNG) {
-      (faviconPNG as HTMLLinkElement).href = `/favicons/favicon-${darkMode.value}-${faviconStatus.value}.png`;
+      (faviconPNG as HTMLLinkElement).href = `${rootURL}/favicons/favicon-${darkMode.value}-${faviconStatus.value}.png`;
     }
 
     const faviconSVG = document.getElementById('favicon-svg');
     if (faviconSVG) {
-      (faviconSVG as HTMLLinkElement).href = `/favicons/favicon-${darkMode.value}-${faviconStatus.value}.svg`;
+      (faviconSVG as HTMLLinkElement).href = `${rootURL}/favicons/favicon-${darkMode.value}-${faviconStatus.value}.svg`;
     }
   },
   { immediate: true },

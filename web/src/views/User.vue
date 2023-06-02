@@ -47,6 +47,7 @@ import SelectField from '~/components/form/SelectField.vue';
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { setI18nLanguage } from '~/compositions/useI18n';
+import useConfig from "~/compositions/useConfig";
 
 const { t, locale } = useI18n();
 
@@ -57,8 +58,11 @@ onMounted(async () => {
   token.value = await apiClient.getToken();
 });
 
-// eslint-disable-next-line no-restricted-globals
-const address = `${location.protocol}//${location.host}`; // port is included in location.host
+let rootPath = useConfig().rootURL ?? '';
+if (rootPath !== '') {
+  rootPath = new URL(rootPath).pathname;
+}
+const address = `${window.location.protocol}//${window.location.host}${rootPath}`; // port is included in location.host
 
 const usageWithShell = computed(() => {
   let usage = `export WOODPECKER_SERVER="${address}"\n`;
