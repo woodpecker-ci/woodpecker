@@ -18,8 +18,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-
-	"github.com/woodpecker-ci/woodpecker/version"
 )
 
 // Event types corresponding to scm hooks.
@@ -228,7 +226,7 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_SYSTEM_URL":      m.Sys.Link,
 		"CI_SYSTEM_HOST":     m.Sys.Host,
 		"CI_SYSTEM_PLATFORM": m.Sys.Platform, // will be set by pipeline platform option or by agent
-		"CI_SYSTEM_VERSION":  version.Version,
+		"CI_SYSTEM_VERSION":  m.Sys.Version,
 
 		"CI_FORGE_TYPE": m.Forge.Type,
 		"CI_FORGE_URL":  m.Forge.URL,

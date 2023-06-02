@@ -32,8 +32,10 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/linter"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/matrix"
 	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/forge"
 	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/version"
 )
 
 // StepBuilder Takes the hook data and the yaml and returns in internal data model
@@ -85,7 +87,8 @@ func (b *StepBuilder) Build() ([]*Item, error) {
 				Name:       SanitizePath(y.Name),
 			}
 
-			metadata := metadataFromStruct(b.Repo, b.Curr, b.Last, workflow, b.Link)
+			// TODO: move metadata into own package and inject as argument into Build()
+			metadata := MetadataFromStruct(server.Config.Services.Forge, b.Repo, b.Curr, b.Last, workflow, b.Link)
 			environ := b.environmentVariables(metadata, axis)
 
 			// add global environment variables for substituting
@@ -261,6 +264,7 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[
 	return compiler.New(
 		compiler.WithEnviron(environ),
 		compiler.WithEnviron(b.Envs),
+		// TODO: server deps should be moved into StepBuilder fields and set on StepBuilder creation
 		compiler.WithEscalated(server.Config.Pipeline.Privileged...),
 		compiler.WithResourceLimit(server.Config.Pipeline.Limits.MemSwapLimit, server.Config.Pipeline.Limits.MemLimit, server.Config.Pipeline.Limits.ShmSize, server.Config.Pipeline.Limits.CPUQuota, server.Config.Pipeline.Limits.CPUShares, server.Config.Pipeline.Limits.CPUSet),
 		compiler.WithVolumes(server.Config.Pipeline.Volumes...),
@@ -328,49 +332,64 @@ func SetPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*Item)
 	return pipeline
 }
 
-// return the metadata from the cli context.
-func metadataFromStruct(repo *model.Repo, pipeline, last *model.Pipeline, workflow *model.Step, link string) frontend.Metadata {
+// MetadataFromStruct return the metadata from a pipeline will run with.
+func MetadataFromStruct(forge forge.Forge, repo *model.Repo, pipeline, last *model.Pipeline, workflow *model.Step, link string) frontend.Metadata {
 	host := link
 	uri, err := url.Parse(link)
 	if err == nil {
 		host = uri.Host
 	}
 
-	forge := frontend.Forge{}
-	if server.Config.Services.Forge != nil {
-		forge = frontend.Forge{
-			Type: server.Config.Services.Forge.Name(),
-			URL:  server.Config.Services.Forge.URL(),
+	fForge := frontend.Forge{}
+	if forge != nil {
+		fForge = frontend.Forge{
+			Type: forge.Name(),
+			URL:  forge.URL(),
 		}
 	}
 
-	return frontend.Metadata{
-		Repo: frontend.Repo{
+	fRepo := frontend.Repo{}
+	if repo != nil {
+		fRepo = frontend.Repo{
 			Name:     repo.FullName,
 			Link:     repo.Link,
 			CloneURL: repo.Clone,
 			Private:  repo.IsSCMPrivate,
 			Branch:   repo.Branch,
-		},
-		Curr: metadataPipelineFromModelPipeline(pipeline, true),
-		Prev: metadataPipelineFromModelPipeline(last, false),
-		Workflow: frontend.Workflow{
+		}
+	}
+
+	fWorkflow := frontend.Workflow{}
+	if workflow != nil {
+		fWorkflow = frontend.Workflow{
 			Name:   workflow.Name,
 			Number: workflow.PID,
 			Matrix: workflow.Environ,
-		},
-		Step: frontend.Step{},
+		}
+	}
+
+	return frontend.Metadata{
+		Repo:     fRepo,
+		Curr:     metadataPipelineFromModelPipeline(pipeline, true),
+		Prev:     metadataPipelineFromModelPipeline(last, false),
+		Workflow: fWorkflow,
+		Step:     frontend.Step{},
 		Sys: frontend.System{
 			Name:     "woodpecker",
 			Link:     link,
 			Host:     host,
 			Platform: "", // will be set by pipeline platform option or by agent
+			Version:  version.Version,
 		},
-		Forge: forge,
+		Forge: fForge,
 	}
 }
 
 func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent bool) frontend.Pipeline {
+	if pipeline == nil {
+		return frontend.Pipeline{}
+	}
+
 	cron := ""
 	if pipeline.Event == model.EventCron {
 		cron = pipeline.Sender
