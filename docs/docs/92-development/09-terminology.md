@@ -9,8 +9,8 @@
 - **Code**: Refers to the files tracked by the version control system used by the forge.
 - **Repos**: Short for repositories, these are storage locations where code is stored.
 - **Forge**: The hosting platform or service where the repositories are hosted.
-- **Workspace**: A separate environment or area where a workflow is executed in isolation.
-- **Event**: Triggers the execution of a pipeline, such as a forge event, manual interaction in the user interface, cron job, or command-line interface.
+- **Workspace**: A folder shared between all steps of a workflow containing the repository and all the generated data from previous steps.
+- **Event**: Triggers the execution of a pipeline, such as a forge event like `push`, or `manual` triggered manually from the UI.
 - **Commit**: A defined state of the code, usually associated with a version control system like Git.
 - **Matrix**: A configuration option that allows the execution of workflows for each value in the matrix.
 - **Service**: A service is a step that is executed from the start of a workflow until its end. It can be accessed by name via the network from other steps within the same workflow.
@@ -18,7 +18,7 @@
 - **Container**: A lightweight and isolated environment where commands are executed in.
 - **YAML File**: A file format used to define and configure workflows.
 - **Dependency**: Workflows can depend on each other, and if possible, they are executed in parallel.
-- **Status**: Status refers to the outcome of a step or workflow after it has been executed, determined by the internal command exit code.
+- **Status**: Status refers to the outcome of a step or workflow after it has been executed, determined by the internal command exit code. At the end of a workflow its status it is send to the forge.
 
 ## Terms
 
