@@ -54,6 +54,10 @@ func UserToken(ctx context.Context, r *model.Repo, u *model.User) string {
 		log.Error().Msg("could not get store from context")
 		return ""
 	}
+	if r == nil {
+		log.Error().Msg("can not get user token by empty repo")
+		return ""
+	}
 	user, err := _store.GetUser(r.UserID)
 	if err != nil {
 		return ""
