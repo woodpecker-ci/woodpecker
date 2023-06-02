@@ -4,7 +4,7 @@
 
 - **Woodpecker**: An open-source tool that executes pipelines on your code.
 - **Pipeline**: A sequence of workflows that are executed on the code. Pipelines are triggered by events.
-- **Workflow**: A sequence of steps and services that are executed as part of a pipeline. Workflows are represented by YAML files. Each workflow has its own isolated network.
+- **Workflow**: A sequence of steps and services that are executed as part of a pipeline. Workflows are represented by YAML files. Each workflow has its own isolated workspace, and often additional resources like a shared network (docker).
 - **Steps**: Individual commands, actions or tasks within a workflow.
 - **Code**: Refers to the files tracked by the version control system used by the forge.
 - **Repos**: Short for repositories, these are storage locations where code is stored.
