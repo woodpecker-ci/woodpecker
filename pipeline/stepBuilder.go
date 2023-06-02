@@ -132,14 +132,6 @@ func (b *StepBuilder) Build() ([]*Item, error) {
 				return nil, err
 			}
 
-			// TODO: deprecated branches filter => remove after some time
-			if !parsed.Branches.Match(b.Curr.Branch) && (b.Curr.Event != model.EventDeploy && b.Curr.Event != model.EventTag) {
-				log.Debug().Str("pipeline", workflow.Name).Msg(
-					"Marked as skipped, dose not match branch",
-				)
-				workflow.State = model.StatusSkipped
-			}
-
 			ir, err := b.toInternalRepresentation(parsed, environ, metadata, workflow.ID)
 			if err != nil {
 				return nil, err

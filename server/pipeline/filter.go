@@ -71,11 +71,6 @@ func checkIfFiltered(repo *model.Repo, p *model.Pipeline, forgeYamlConfigs []*fo
 			return false, err
 		}
 
-		// ignore if the pipeline was filtered by the branch (legacy)
-		if !parsedPipelineConfig.Branches.Match(pipeline.Branch) {
-			continue
-		}
-
 		// at least one config yielded in a valid run.
 		return false, nil
 	}

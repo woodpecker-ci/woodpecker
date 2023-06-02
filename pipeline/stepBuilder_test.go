@@ -20,6 +20,8 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/forge/mocks"
 	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
@@ -320,18 +322,10 @@ pipeline:
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(pipelineItems) != 2 {
-		t.Fatal("Should have generated 2 pipeline")
+	if !assert.Len(t, pipelineItems, 1) {
+		t.Fatal("Should have generated 1 pipeline")
 	}
-	if pipelineItems[0].Workflow.State != model.StatusSkipped {
-		t.Fatal("Should not run on dev branch")
-	}
-	for _, child := range pipelineItems[0].Workflow.Children {
-		if child.State != model.StatusSkipped {
-			t.Fatal("Children should skipped status too")
-		}
-	}
-	if pipelineItems[1].Workflow.State != model.StatusPending {
+	if pipelineItems[0].Workflow.State != model.StatusPending {
 		t.Fatal("Should run on dev branch")
 	}
 }
