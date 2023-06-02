@@ -8,19 +8,18 @@ const darkMode = computed(() => (useDarkMode().darkMode.value ? 'dark' : 'light'
 
 type Status = 'default' | 'success' | 'pending' | 'error';
 const faviconStatus = ref<Status>('default');
-const rootURL = useConfig().rootPath;
 
 watch(
   [darkMode, faviconStatus],
   () => {
     const faviconPNG = document.getElementById('favicon-png');
     if (faviconPNG) {
-      (faviconPNG as HTMLLinkElement).href = `${rootURL}/favicons/favicon-${darkMode.value}-${faviconStatus.value}.png`;
+      (faviconPNG as HTMLLinkElement).href = `${useConfig().rootPath}/favicons/favicon-${darkMode.value}-${faviconStatus.value}.png`;
     }
 
     const faviconSVG = document.getElementById('favicon-svg');
     if (faviconSVG) {
-      (faviconSVG as HTMLLinkElement).href = `${rootURL}/favicons/favicon-${darkMode.value}-${faviconStatus.value}.svg`;
+      (faviconSVG as HTMLLinkElement).href = `${useConfig().rootPath}/favicons/favicon-${darkMode.value}-${faviconStatus.value}.svg`;
     }
   },
   { immediate: true },

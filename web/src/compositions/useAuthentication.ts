@@ -1,7 +1,6 @@
 import useConfig from '~/compositions/useConfig';
 import useUserConfig from '~/compositions/useUserConfig';
 
-const rootURL = useConfig().rootPath;
 export default () =>
   ({
     isAuthenticated: !!useConfig().user,
@@ -13,6 +12,6 @@ export default () =>
         const config = useUserConfig();
         config.setUserConfig('redirectUrl', url);
       }
-      window.location.href = `${rootURL}/login`;
+      window.location.href = `${useConfig().rootPath}/login`;
     },
   } as const);

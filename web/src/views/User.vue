@@ -58,8 +58,7 @@ onMounted(async () => {
   token.value = await apiClient.getToken();
 });
 
-const rootPath = useConfig().rootPath;
-const address = `${window.location.protocol}//${window.location.host}${rootPath}`; // port is included in location.host
+const address = `${window.location.protocol}//${window.location.host}${useConfig().rootPath}`; // port is included in location.host
 
 const usageWithShell = computed(() => {
   let usage = `export WOODPECKER_SERVER="${address}"\n`;

@@ -88,10 +88,9 @@ export default defineComponent({
       });
     }
 
-    const rootPath = useConfig().rootPath;
     const baseUrl = `${window.location.protocol}//${window.location.hostname}${
       window.location.port ? `:${window.location.port}` : ''
-    }${rootPath}`;
+    }${useConfig().rootPath}`;
     const badgeUrl = computed(
       () =>
         `/api/badges/${repo.value.owner}/${repo.value.name}/status.svg${
