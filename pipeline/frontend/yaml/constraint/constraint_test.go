@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
 )
 
 func TestConstraint(t *testing.T) {
@@ -403,15 +403,15 @@ func TestConstraints(t *testing.T) {
 	testdata := []struct {
 		desc string
 		conf string
-		with frontend.Metadata
+		with metadata.Metadata
 		want bool
 	}{
 		{
 			desc: "no constraints, must match on default events",
 			conf: "",
-			with: frontend.Metadata{
-				Curr: frontend.Pipeline{
-					Event: frontend.EventPush,
+			with: metadata.Metadata{
+				Curr: metadata.Pipeline{
+					Event: metadata.EventPush,
 				},
 			},
 			want: true,
@@ -419,99 +419,99 @@ func TestConstraints(t *testing.T) {
 		{
 			desc: "global branch filter",
 			conf: "{ branch: develop }",
-			with: frontend.Metadata{Curr: frontend.Pipeline{Event: frontend.EventPush, Commit: frontend.Commit{Branch: "master"}}},
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush, Commit: metadata.Commit{Branch: "master"}}},
 			want: false,
 		},
 		{
 			desc: "global branch filter",
 			conf: "{ branch: master }",
-			with: frontend.Metadata{Curr: frontend.Pipeline{Event: frontend.EventPush, Commit: frontend.Commit{Branch: "master"}}},
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush, Commit: metadata.Commit{Branch: "master"}}},
 			want: true,
 		},
 		{
 			desc: "repo constraint",
 			conf: "{ repo: owner/* }",
-			with: frontend.Metadata{Curr: frontend.Pipeline{Event: frontend.EventPush}, Repo: frontend.Repo{Name: "owner/repo"}},
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush}, Repo: metadata.Repo{Name: "owner/repo"}},
 			want: true,
 		},
 		{
 			desc: "repo constraint",
 			conf: "{ repo: octocat/* }",
-			with: frontend.Metadata{Curr: frontend.Pipeline{Event: frontend.EventPush}, Repo: frontend.Repo{Name: "owner/repo"}},
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush}, Repo: metadata.Repo{Name: "owner/repo"}},
 			want: false,
 		},
 		{
 			desc: "ref constraint",
 			conf: "{ ref: refs/tags/* }",
-			with: frontend.Metadata{Curr: frontend.Pipeline{Commit: frontend.Commit{Ref: "refs/tags/v1.0.0"}, Event: frontend.EventPush}},
+			with: metadata.Metadata{Curr: metadata.Pipeline{Commit: metadata.Commit{Ref: "refs/tags/v1.0.0"}, Event: metadata.EventPush}},
 			want: true,
 		},
 		{
 			desc: "ref constraint",
 			conf: "{ ref: refs/tags/* }",
-			with: frontend.Metadata{Curr: frontend.Pipeline{Commit: frontend.Commit{Ref: "refs/heads/master"}, Event: frontend.EventPush}},
+			with: metadata.Metadata{Curr: metadata.Pipeline{Commit: metadata.Commit{Ref: "refs/heads/master"}, Event: metadata.EventPush}},
 			want: false,
 		},
 		{
 			desc: "platform constraint",
 			conf: "{ platform: linux/amd64 }",
-			with: frontend.Metadata{Curr: frontend.Pipeline{Event: frontend.EventPush}, Sys: frontend.System{Platform: "linux/amd64"}},
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush}, Sys: metadata.System{Platform: "linux/amd64"}},
 			want: true,
 		},
 		{
 			desc: "platform constraint",
 			conf: "{ repo: linux/amd64 }",
-			with: frontend.Metadata{Curr: frontend.Pipeline{Event: frontend.EventPush}, Sys: frontend.System{Platform: "windows/amd64"}},
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush}, Sys: metadata.System{Platform: "windows/amd64"}},
 			want: false,
 		},
 		{
 			desc: "instance constraint",
 			conf: "{ instance: agent.tld }",
-			with: frontend.Metadata{Curr: frontend.Pipeline{Event: frontend.EventPush}, Sys: frontend.System{Host: "agent.tld"}},
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush}, Sys: metadata.System{Host: "agent.tld"}},
 			want: true,
 		},
 		{
 			desc: "instance constraint",
 			conf: "{ instance: agent.tld }",
-			with: frontend.Metadata{Curr: frontend.Pipeline{Event: frontend.EventPush}, Sys: frontend.System{Host: "beta.agent.tld"}},
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush}, Sys: metadata.System{Host: "beta.agent.tld"}},
 			want: false,
 		},
 		{
 			desc: "filter cron by default constraint",
 			conf: "{}",
-			with: frontend.Metadata{Curr: frontend.Pipeline{Event: frontend.EventCron}},
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventCron}},
 			want: false,
 		},
 		{
 			desc: "filter cron by matching name",
 			conf: "{ event: cron, cron: job1 }",
-			with: frontend.Metadata{Curr: frontend.Pipeline{Event: frontend.EventCron, Cron: "job1"}},
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventCron, Cron: "job1"}},
 			want: true,
 		},
 		{
 			desc: "filter cron by name",
 			conf: "{ event: cron, cron: job2 }",
-			with: frontend.Metadata{Curr: frontend.Pipeline{Event: frontend.EventCron, Cron: "job1"}},
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventCron, Cron: "job1"}},
 			want: false,
 		},
 		{
 			desc: "no constraints, event gets filtered by default event filter",
 			conf: "",
-			with: frontend.Metadata{
-				Curr: frontend.Pipeline{Event: "non-default"},
+			with: metadata.Metadata{
+				Curr: metadata.Pipeline{Event: "non-default"},
 			},
 			want: false,
 		},
 		{
 			desc: "filter by eval based on event",
 			conf: `{ evaluate: 'CI_PIPELINE_EVENT == "push"' }`,
-			with: frontend.Metadata{Curr: frontend.Pipeline{Event: frontend.EventPush}},
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush}},
 			want: true,
 		},
 		{
 			desc: "filter by eval based on event and repo",
 			conf: `{ evaluate: 'CI_PIPELINE_EVENT == "push" && CI_REPO == "owner/repo"' }`,
-			with: frontend.Metadata{Curr: frontend.Pipeline{Event: frontend.EventPush}, Repo: frontend.Repo{Name: "owner/repo"}},
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush}, Repo: metadata.Repo{Name: "owner/repo"}},
 			want: true,
 		},
 	}

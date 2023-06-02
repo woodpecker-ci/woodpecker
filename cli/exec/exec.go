@@ -32,7 +32,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	backendTypes "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/compiler"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/linter"
@@ -233,20 +233,20 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 }
 
 // return the metadata from the cli context.
-func metadataFromContext(c *cli.Context, axis matrix.Axis) frontend.Metadata {
+func metadataFromContext(c *cli.Context, axis matrix.Axis) metadata.Metadata {
 	platform := c.String("system-platform")
 	if platform == "" {
 		platform = runtime.GOOS + "/" + runtime.GOARCH
 	}
 
-	return frontend.Metadata{
-		Repo: frontend.Repo{
+	return metadata.Metadata{
+		Repo: metadata.Repo{
 			Name:     c.String("repo-name"),
 			Link:     c.String("repo-link"),
 			CloneURL: c.String("repo-clone-url"),
 			Private:  c.Bool("repo-private"),
 		},
-		Curr: frontend.Pipeline{
+		Curr: metadata.Pipeline{
 			Number:   c.Int64("pipeline-number"),
 			Parent:   c.Int64("pipeline-parent"),
 			Created:  c.Int64("pipeline-created"),
@@ -256,20 +256,20 @@ func metadataFromContext(c *cli.Context, axis matrix.Axis) frontend.Metadata {
 			Event:    c.String("pipeline-event"),
 			Link:     c.String("pipeline-link"),
 			Target:   c.String("pipeline-target"),
-			Commit: frontend.Commit{
+			Commit: metadata.Commit{
 				Sha:     c.String("commit-sha"),
 				Ref:     c.String("commit-ref"),
 				Refspec: c.String("commit-refspec"),
 				Branch:  c.String("commit-branch"),
 				Message: c.String("commit-message"),
-				Author: frontend.Author{
+				Author: metadata.Author{
 					Name:   c.String("commit-author-name"),
 					Email:  c.String("commit-author-email"),
 					Avatar: c.String("commit-author-avatar"),
 				},
 			},
 		},
-		Prev: frontend.Pipeline{
+		Prev: metadata.Pipeline{
 			Number:   c.Int64("prev-pipeline-number"),
 			Created:  c.Int64("prev-pipeline-created"),
 			Started:  c.Int64("prev-pipeline-started"),
@@ -277,29 +277,29 @@ func metadataFromContext(c *cli.Context, axis matrix.Axis) frontend.Metadata {
 			Status:   c.String("prev-pipeline-status"),
 			Event:    c.String("prev-pipeline-event"),
 			Link:     c.String("prev-pipeline-link"),
-			Commit: frontend.Commit{
+			Commit: metadata.Commit{
 				Sha:     c.String("prev-commit-sha"),
 				Ref:     c.String("prev-commit-ref"),
 				Refspec: c.String("prev-commit-refspec"),
 				Branch:  c.String("prev-commit-branch"),
 				Message: c.String("prev-commit-message"),
-				Author: frontend.Author{
+				Author: metadata.Author{
 					Name:   c.String("prev-commit-author-name"),
 					Email:  c.String("prev-commit-author-email"),
 					Avatar: c.String("prev-commit-author-avatar"),
 				},
 			},
 		},
-		Workflow: frontend.Workflow{
+		Workflow: metadata.Workflow{
 			Name:   c.String("workflow-name"),
 			Number: c.Int("workflow-number"),
 			Matrix: axis,
 		},
-		Step: frontend.Step{
+		Step: metadata.Step{
 			Name:   c.String("step-name"),
 			Number: c.Int("step-number"),
 		},
-		Sys: frontend.System{
+		Sys: metadata.System{
 			Name:     c.String("system-name"),
 			Link:     c.String("system-link"),
 			Platform: platform,

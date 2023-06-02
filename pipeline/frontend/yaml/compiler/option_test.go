@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
 )
 
 func TestWithWorkspace(t *testing.T) {
@@ -98,8 +98,8 @@ func TestWithPrefix(t *testing.T) {
 }
 
 func TestWithMetadata(t *testing.T) {
-	metadata := frontend.Metadata{
-		Repo: frontend.Repo{
+	metadata := metadata.Metadata{
+		Repo: metadata.Repo{
 			Name:     "octocat/hello-world",
 			Private:  true,
 			Link:     "https://github.com/octocat/hello-world",

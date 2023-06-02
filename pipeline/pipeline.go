@@ -12,7 +12,7 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
 	"github.com/woodpecker-ci/woodpecker/pipeline/multipart"
 )
 
@@ -199,7 +199,7 @@ func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 
 			// Return the error after tracing it.
 			err = r.traceStep(processState, err, step)
-			if err != nil && step.Failure == frontend.FailureIgnore {
+			if err != nil && step.Failure == metadata.FailureIgnore {
 				return nil
 			}
 			return err

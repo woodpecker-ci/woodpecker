@@ -18,10 +18,10 @@ package pipeline
 
 import (
 	"github.com/rs/zerolog/log"
-	"github.com/woodpecker-ci/woodpecker/server"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
+	"github.com/woodpecker-ci/woodpecker/server"
 	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )

@@ -26,7 +26,7 @@ import (
 	"github.com/rs/zerolog/log"
 
 	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/compiler"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/linter"
@@ -221,7 +221,7 @@ func (b *StepBuilder) envsubst(y string, environ map[string]string) (string, err
 	})
 }
 
-func (b *StepBuilder) environmentVariables(metadata frontend.Metadata, axis matrix.Axis) map[string]string {
+func (b *StepBuilder) environmentVariables(metadata metadata.Metadata, axis matrix.Axis) map[string]string {
 	environ := metadata.Environ()
 	for k, v := range axis {
 		environ[k] = v
@@ -229,7 +229,7 @@ func (b *StepBuilder) environmentVariables(metadata frontend.Metadata, axis matr
 	return environ
 }
 
-func (b *StepBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[string]string, metadata frontend.Metadata, stepID int64) (*backend.Config, error) {
+func (b *StepBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[string]string, metadata metadata.Metadata, stepID int64) (*backend.Config, error) {
 	var secrets []compiler.Secret
 	for _, sec := range b.Secs {
 		if !sec.Match(b.Curr.Event) {
@@ -325,24 +325,24 @@ func SetPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*Item)
 }
 
 // MetadataFromStruct return the metadata from a pipeline will run with.
-func MetadataFromStruct(forge forge.Forge, repo *model.Repo, pipeline, last *model.Pipeline, workflow *model.Step, link string) frontend.Metadata {
+func MetadataFromStruct(forge forge.Forge, repo *model.Repo, pipeline, last *model.Pipeline, workflow *model.Step, link string) metadata.Metadata {
 	host := link
 	uri, err := url.Parse(link)
 	if err == nil {
 		host = uri.Host
 	}
 
-	fForge := frontend.Forge{}
+	fForge := metadata.Forge{}
 	if forge != nil {
-		fForge = frontend.Forge{
+		fForge = metadata.Forge{
 			Type: forge.Name(),
 			URL:  forge.URL(),
 		}
 	}
 
-	fRepo := frontend.Repo{}
+	fRepo := metadata.Repo{}
 	if repo != nil {
-		fRepo = frontend.Repo{
+		fRepo = metadata.Repo{
 			Name:     repo.FullName,
 			Link:     repo.Link,
 			CloneURL: repo.Clone,
@@ -351,22 +351,22 @@ func MetadataFromStruct(forge forge.Forge, repo *model.Repo, pipeline, last *mod
 		}
 	}
 
-	fWorkflow := frontend.Workflow{}
+	fWorkflow := metadata.Workflow{}
 	if workflow != nil {
-		fWorkflow = frontend.Workflow{
+		fWorkflow = metadata.Workflow{
 			Name:   workflow.Name,
 			Number: workflow.PID,
 			Matrix: workflow.Environ,
 		}
 	}
 
-	return frontend.Metadata{
+	return metadata.Metadata{
 		Repo:     fRepo,
 		Curr:     metadataPipelineFromModelPipeline(pipeline, true),
 		Prev:     metadataPipelineFromModelPipeline(last, false),
 		Workflow: fWorkflow,
-		Step:     frontend.Step{},
-		Sys: frontend.System{
+		Step:     metadata.Step{},
+		Sys: metadata.System{
 			Name:     "woodpecker",
 			Link:     link,
 			Host:     host,
@@ -377,9 +377,9 @@ func MetadataFromStruct(forge forge.Forge, repo *model.Repo, pipeline, last *mod
 	}
 }
 
-func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent bool) frontend.Pipeline {
+func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent bool) metadata.Pipeline {
 	if pipeline == nil {
-		return frontend.Pipeline{}
+		return metadata.Pipeline{}
 	}
 
 	cron := ""
@@ -392,7 +392,7 @@ func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent b
 		parent = pipeline.Parent
 	}
 
-	return frontend.Pipeline{
+	return metadata.Pipeline{
 		Number:   pipeline.Number,
 		Parent:   parent,
 		Created:  pipeline.Created,
@@ -402,13 +402,13 @@ func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent b
 		Event:    string(pipeline.Event),
 		Link:     pipeline.Link,
 		Target:   pipeline.Deploy,
-		Commit: frontend.Commit{
+		Commit: metadata.Commit{
 			Sha:     pipeline.Commit,
 			Ref:     pipeline.Ref,
 			Refspec: pipeline.Refspec,
 			Branch:  pipeline.Branch,
 			Message: pipeline.Message,
-			Author: frontend.Author{
+			Author: metadata.Author{
 				Name:   pipeline.Author,
 				Email:  pipeline.Email,
 				Avatar: pipeline.Avatar,
