@@ -26,7 +26,7 @@ type oldStep017 struct {
 var removeMachineCol = task{
 	name: "remove-machine-col",
 	fn: func(sess *xorm.Session) error {
-		// make sure step_machine table exists
+		// make sure step_machine column exists
 		if err := sess.Sync(new(oldStep017)); err != nil {
 			return err
 		}
