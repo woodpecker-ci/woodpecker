@@ -37,6 +37,7 @@ func Repo(c *gin.Context) *model.Repo {
 	if !ok {
 		return nil
 	}
+	r.Perm = Perm(c)
 	return r
 }
 
