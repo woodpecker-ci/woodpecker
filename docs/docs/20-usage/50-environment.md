@@ -120,6 +120,9 @@ This is the reference list of all environment variables available to your pipeli
 | `CI_SYSTEM_URL`                  | link to CI system                                                                            |
 | `CI_SYSTEM_HOST`                 | hostname of CI server                                                                        |
 | `CI_SYSTEM_VERSION`              | version of the server                                                                        |
+|                                  | **Forge**                                                                                    |
+| `CI_FORGE_TYPE`                  | name of forge (gitea, github, ...)                                                           |
+| `CI_FORGE_URL`                   | root URL of configured forge                                                                 |
 |                                  | **Internal** - Please don't use!                                                             |
 | `CI_SCRIPT`                      | Internal script path. Used to call pipeline step commands.                                   |
 | `CI_NETRC_USERNAME`              | Credentials for private repos to be able to clone data. (Only available for specific images) |
