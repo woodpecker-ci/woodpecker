@@ -17,6 +17,17 @@ Woodpecker is having two different kinds of releases: **stable** and **next**.
 
 To find out more about the differences between the two releases, please read the [FAQ](/faq).
 
+## Hardware Requirements
+
+Below are resources requirements for Woodpecker components itself:
+
+| Component | Memory | CPU |
+| --------- | ------ | --- |
+| Server    | 32 MB  | 1   |
+| Agent     | 32 MB  | 1   |
+
+Note, that it doesn't include OS, DBMS or workload (pipelines execution) resources consumption.
+
 ## Installation
 
 You can install Woodpecker on multiple ways:
