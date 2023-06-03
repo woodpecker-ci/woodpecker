@@ -23,6 +23,10 @@ type oldStep017 struct {
 	Machine string `xorm:"step_machine"`
 }
 
+func (oldStep017) TableName() string {
+	return "steps"
+}
+
 var removeMachineCol = task{
 	name: "remove-machine-col",
 	fn: func(sess *xorm.Session) error {
