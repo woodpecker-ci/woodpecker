@@ -26,7 +26,9 @@ Below are resources requirements for Woodpecker components itself:
 | Server    | 32 MB  | 1   |
 | Agent     | 32 MB  | 1   |
 
-Note, that it doesn't include OS, DBMS or workload (pipelines execution) resources consumption.
+Note, that those values do not include the operating system or workload (pipelines execution) resources consumption.
+
+In addition you need at least some kind of database which requires additional resources depending on the selected database system.
 
 ## Installation
 
