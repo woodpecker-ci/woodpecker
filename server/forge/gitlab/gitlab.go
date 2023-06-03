@@ -302,10 +302,7 @@ func (g *GitLab) Repos(ctx context.Context, user *model.User) ([]*model.Repo, er
 }
 
 func (g *GitLab) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error) {
-	token := ""
-	if u != nil {
-		token = u.Token
-	}
+	token := common.UserToken(ctx, r, u)
 	client, err := newClient(g.url, token, g.SkipVerify)
 	if err != nil {
 		return nil, err
@@ -544,10 +541,7 @@ func (g *GitLab) Deactivate(ctx context.Context, user *model.User, repo *model.R
 
 // Branches returns the names of all branches for the named repository.
 func (g *GitLab) Branches(ctx context.Context, user *model.User, repo *model.Repo, p *model.ListOptions) ([]string, error) {
-	token := ""
-	if user != nil {
-		token = user.Token
-	}
+	token := common.UserToken(ctx, repo, user)
 	client, err := newClient(g.url, token, g.SkipVerify)
 	if err != nil {
 		return nil, err
@@ -574,10 +568,7 @@ func (g *GitLab) Branches(ctx context.Context, user *model.User, repo *model.Rep
 
 // BranchHead returns the sha of the head (latest commit) of the specified branch
 func (g *GitLab) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
-	token := ""
-	if u != nil {
-		token = u.Token
-	}
+	token := common.UserToken(ctx, r, u)
 	client, err := newClient(g.url, token, g.SkipVerify)
 	if err != nil {
 		return "", err
