@@ -48,9 +48,9 @@ import InputField from '~/components/form/InputField.vue';
 import SelectField from '~/components/form/SelectField.vue';
 import Panel from '~/components/layout/Panel.vue';
 import useApiClient from '~/compositions/useApiClient';
+import useConfig from '~/compositions/useConfig';
 import { usePaginate } from '~/compositions/usePaginate';
 import { Repo } from '~/lib/api/types';
-import useConfig from '~/compositions/useConfig';
 
 export default defineComponent({
   name: 'BadgeTab',

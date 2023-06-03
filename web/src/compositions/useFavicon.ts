@@ -1,8 +1,8 @@
 import { computed, ref, watch } from 'vue';
 
+import useConfig from '~/compositions/useConfig';
 import { useDarkMode } from '~/compositions/useDarkMode';
 import { PipelineStatus } from '~/lib/api/types';
-import useConfig from '~/compositions/useConfig';
 
 const darkMode = computed(() => (useDarkMode().darkMode.value ? 'dark' : 'light'));
 
