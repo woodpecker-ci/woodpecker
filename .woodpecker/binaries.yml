@@ -67,14 +67,6 @@ pipeline:
     when:
       path: *when_path
 
-  build-tarball:
-    group: bundle
-    image: *golang_image
-    commands:
-      - make release-tarball
-    when:
-      path: *when_path
-
   checksums:
     image: *golang_image
     commands:
