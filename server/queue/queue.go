@@ -83,6 +83,7 @@ type Queue interface {
 	// EvictAtOnce removes a pending task from the queue.
 	EvictAtOnce(c context.Context, id []string) error
 
+	// EvictCurrent removes a task either from pending or waitingOnDeps
 	EvictCurrent(c context.Context, id string, exitStatus model.StatusValue) error
 
 	// Wait waits until the task is complete.

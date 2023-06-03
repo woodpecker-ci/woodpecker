@@ -60,10 +60,3 @@ func UpdateToStatusKilled(store model.UpdatePipelineStore, pipeline model.Pipeli
 	pipeline.Finished = time.Now().Unix()
 	return &pipeline, store.UpdatePipeline(&pipeline)
 }
-
-func UpdateToStatusSkipped(store model.UpdatePipelineStore, pipeline model.Pipeline, reviewer string) (*model.Pipeline, error) {
-	pipeline.Reviewer = reviewer
-	pipeline.Status = model.StatusSkipped
-	pipeline.Reviewed = time.Now().Unix()
-	return &pipeline, store.UpdatePipeline(&pipeline)
-}
