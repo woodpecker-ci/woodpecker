@@ -135,7 +135,7 @@ lint-ui: ## Lint UI code
 test-agent: ## Test agent code
 	go test -race -cover -coverprofile agent-coverage.out -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/agent github.com/woodpecker-ci/woodpecker/agent/...
 
-test-server: generate-swagger ## Test server code
+test-server: ## Test server code
 	go test -race -cover -coverprofile server-coverage.out -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/server $(shell go list github.com/woodpecker-ci/woodpecker/server/... | grep -v '/store')
 
 test-cli: ## Test cli code
