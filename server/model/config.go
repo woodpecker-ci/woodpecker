@@ -31,7 +31,7 @@ type Config struct {
 	Hash   string `json:"hash" xorm:"UNIQUE(s) 'config_hash'"`
 	Name   string `json:"name" xorm:"config_name"`
 	Data   []byte `json:"data" xorm:"config_data"`
-} //	@name Config
+} //	@name	Config
 
 // PipelineConfig is the n:n relation between Pipeline and Config
 type PipelineConfig struct {

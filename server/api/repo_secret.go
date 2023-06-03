@@ -56,9 +56,9 @@ func GetSecret(c *gin.Context) {
 //	@Produce	json
 //	@Success	200	{object}	Secret
 //	@Tags		Repository secrets
-//	@Param		Authorization	header	string			true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		owner			path	string			true	"the repository owner's name"
-//	@Param		name			path	string			true	"the repository name"
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		owner			path	string	true	"the repository owner's name"
+//	@Param		name			path	string	true	"the repository name"
 //	@Param		secret			body	Secret	true	"the new secret"
 func PostSecret(c *gin.Context) {
 	repo := session.Repo(c)
@@ -94,10 +94,10 @@ func PostSecret(c *gin.Context) {
 //	@Produce	json
 //	@Success	200	{object}	Secret
 //	@Tags		Repository secrets
-//	@Param		Authorization	header	string			true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		owner			path	string			true	"the repository owner's name"
-//	@Param		name			path	string			true	"the repository name"
-//	@Param		secretName		path	string			true	"the secret name"
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		owner			path	string	true	"the repository owner's name"
+//	@Param		name			path	string	true	"the repository name"
+//	@Param		secretName		path	string	true	"the secret name"
 //	@Param		secret			body	Secret	true	"the secret itself"
 func PatchSecret(c *gin.Context) {
 	var (

@@ -80,8 +80,8 @@ func GetOrgSecretList(c *gin.Context) {
 //	@Produce	json
 //	@Success	200	{object}	Secret
 //	@Tags		Organization secrets
-//	@Param		Authorization	header	string			true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		owner			path	string			true	"the owner's name"
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		owner			path	string	true	"the owner's name"
 //	@Param		secretData		body	Secret	true	"the new secret"
 func PostOrgSecret(c *gin.Context) {
 	owner := c.Param("owner")
@@ -117,9 +117,9 @@ func PostOrgSecret(c *gin.Context) {
 //	@Produce	json
 //	@Success	200	{object}	Secret
 //	@Tags		Organization secrets
-//	@Param		Authorization	header	string			true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		owner			path	string			true	"the owner's name"
-//	@Param		secret			path	string			true	"the secret's name"
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		owner			path	string	true	"the owner's name"
+//	@Param		secret			path	string	true	"the secret's name"
 //	@Param		secretData		body	Secret	true	"the update secret data"
 func PatchOrgSecret(c *gin.Context) {
 	var (

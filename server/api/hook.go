@@ -37,13 +37,13 @@ var skipRe = regexp.MustCompile(`\[(?i:ci *skip|skip *ci)\]`)
 
 // GetQueueInfo
 //
-//	@Summary	Get pipeline queue information
+//	@Summary		Get pipeline queue information
 //	@Description	TODO: link the InfoT response object - this is blocked, until the `swaggo/swag` tool dependency is v1.18.12 or newer
-//	@Router		/queue/info [get]
-//	@Produce	json
-//	@Success	200	{object} map[string]string
-//	@Tags		Pipeline queues
-//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Router			/queue/info [get]
+//	@Produce		json
+//	@Success		200	{object}	map[string]string
+//	@Tags			Pipeline queues
+//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 func GetQueueInfo(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK,
 		server.Config.Services.Queue.Info(c),

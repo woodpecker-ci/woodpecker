@@ -125,12 +125,12 @@ func GetRepos(c *gin.Context) {
 
 // PostToken
 //
-//	@Summary		Return the token of the current user as stringª
-//	@Router			/user/token [post]
-//	@Produce		plain
-//	@Success		200
-//	@Tags			User
-//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Summary	Return the token of the current user as stringª
+//	@Router		/user/token [post]
+//	@Produce	plain
+//	@Success	200
+//	@Tags		User
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 func PostToken(c *gin.Context) {
 	user := session.User(c)
 	tokenString, err := token.New(token.UserToken, user.Login).Sign(user.Hash)

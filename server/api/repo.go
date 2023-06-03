@@ -151,9 +151,9 @@ func PostRepo(c *gin.Context) {
 //	@Produce	json
 //	@Success	200	{object}	Repo
 //	@Tags		Repositories
-//	@Param		Authorization	header	string			true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		owner			path	string			true	"the repository owner's name"
-//	@Param		name			path	string			true	"the repository name"
+//	@Param		Authorization	header	string		true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		owner			path	string		true	"the repository owner's name"
+//	@Param		name			path	string		true	"the repository name"
 //	@Param		repo			body	RepoPatch	true	"the repository's information"
 func PatchRepo(c *gin.Context) {
 	_store := store.FromContext(c)

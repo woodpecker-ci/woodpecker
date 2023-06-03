@@ -29,7 +29,7 @@ type Cron struct {
 	Schedule  string `json:"schedule"            xorm:"NOT NULL"` //	@weekly,	3min, ...
 	Created   int64  `json:"created_at"          xorm:"created NOT NULL DEFAULT 0"`
 	Branch    string `json:"branch"`
-} //	@name Cron
+} //	@name	Cron
 
 // TableName returns the database table name for xorm
 func (Cron) TableName() string {
