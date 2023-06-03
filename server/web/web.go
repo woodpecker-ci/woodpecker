@@ -53,8 +53,7 @@ func New() (*gin.Engine, error) {
 
 	e.Use(setupCache)
 
-	rootURL, _ := url.Parse(server.Config.Server.RootPath)
-	rootPath := rootURL.Path
+	rootPath := server.Config.Server.RootPath
 
 	httpFS, err := web.HTTPFS()
 	if err != nil {
