@@ -18,22 +18,9 @@ import (
 	"xorm.io/xorm"
 )
 
-type oldStep017 struct {
-	ID      int64  `xorm:"pk autoincr 'step_id'"`
-	Machine string `xorm:"step_machine"`
-}
-
-func (oldStep017) TableName() string {
-	return "steps"
-}
-
 var removeMachineCol = task{
 	name: "remove-machine-col",
 	fn: func(sess *xorm.Session) error {
-		// make sure step_machine column exists
-		if err := sess.Sync(new(oldStep017)); err != nil {
-			return err
-		}
 		return dropTableColumns(sess, "steps", "step_machine")
 	},
 }
