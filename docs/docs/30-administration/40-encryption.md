@@ -32,6 +32,33 @@ You can manage encryption on server using these environment variables:
 - `WOODPECKER_ENCRYPTION_KEY_FILE` - file to read encryption key from
 - `WOODPECKER_ENCRYPTION_DISABLE` - disable encryption flag used to decrypt all data on server
 
+One option to generate encryption key is to use OpenSSL, but any password generator can be used also. Recommended length is at least 32 bytes:
+```shell
+$ openssl rand -base64 32
+GjVHT007c4x3N+YPbsZld+hifba1enXkOzIb/0h6oW8=
+```
+
+Suppose, we have secrets as plain text:
+```psql
+woodpecker=# SELECT secret_name, secret_value FROM secrets;
+   secret_name   |               secret_value
+-----------------+------------------------------------------
+ docker_username | adm
+ docker_password | 6bf712dc0ca26c79f4f003d9a77bf4cb9293add3
+```
+
+If we run server with `WOODPECKER_ENCRYPTION_KEY='GjVHT007c4x3N+YPbsZld+hifba1enXkOzIb/0h6oW8='`, then we'll get below messages in logs:
+```log
+// TODO: Add log messages example
+```
+and encrypted DB rows will be as follow:
+```psql
+woodpecker=# SELECT secret_name, secret_value FROM secrets;
+   secret_name   |               secret_value
+-----------------+------------------------------------------
+// TODO: Add example of encrypted data
+```
+
 ## TINK
 TINK uses AEAD encryption instead of simple AES and supports key rotation.
 
