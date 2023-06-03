@@ -82,7 +82,6 @@ vendor: ## Update the vendor directory
 	go mod vendor
 
 format: install-tools ## Format source code
-	@swag fmt -g server/api/*.go -g cmd/server/swagger.go
 	@gofumpt -extra -w .
 
 .PHONY: clean
@@ -112,9 +111,6 @@ install-tools: ## Install development tools
 	fi ; \
 	hash gofumpt > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		go install mvdan.cc/gofumpt@latest; \
-	fi ; \
-	hash swag > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
-		go install github.com/swaggo/swag/cmd/swag@latest; \
 	fi
 
 ui-dependencies: ## Install UI dependencies

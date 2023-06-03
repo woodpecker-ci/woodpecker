@@ -29,7 +29,7 @@ type InfoT struct {
 		Complete      int `json:"completed_count"`
 	} `json:"stats"`
 	Paused bool `json:"paused"`
-} //	@name	InfoT
+} //	@name InfoT
 
 func (t *InfoT) String() string {
 	var sb strings.Builder

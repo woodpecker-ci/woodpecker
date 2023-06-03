@@ -45,7 +45,7 @@ type Step struct {
 	Platform   string            `json:"platform,omitempty"   xorm:"step_platform"`
 	Environ    map[string]string `json:"environ,omitempty"    xorm:"json 'step_environ'"`
 	Children   []*Step           `json:"children,omitempty"   xorm:"-"`
-} //	@name	Step
+} //	@name Step
 
 type UpdateStepStore interface {
 	StepUpdate(*Step) error

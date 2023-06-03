@@ -59,7 +59,7 @@ type Registry struct {
 	Password string `json:"password" xorm:"TEXT 'registry_password'"`
 	Token    string `json:"token"    xorm:"TEXT 'registry_token'"`
 	Email    string `json:"email"    xorm:"varchar(500) 'registry_email'"`
-} //	@name	Registry
+} //	@name Registry
 
 // Validate validates the registry information.
 func (r *Registry) Validate() error {

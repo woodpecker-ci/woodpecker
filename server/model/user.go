@@ -64,7 +64,7 @@ type User struct {
 
 	// Hash is a unique token used to sign tokens.
 	Hash string `json:"-" xorm:"UNIQUE varchar(500) 'user_hash'"`
-} //	@name	User
+} //	@name User
 
 // TableName return database table name for xorm
 func (User) TableName() string {

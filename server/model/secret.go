@@ -79,7 +79,7 @@ type Secret struct {
 	Events      []WebhookEvent `json:"event"           xorm:"json 'secret_events'"`
 	SkipVerify  bool           `json:"-"               xorm:"secret_skip_verify"`
 	Conceal     bool           `json:"-"               xorm:"secret_conceal"`
-} //	@name	Secret
+} //	@name Secret
 
 // TableName return database table name for xorm
 func (Secret) TableName() string {
