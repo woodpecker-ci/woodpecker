@@ -95,7 +95,7 @@ generate: generate-swagger ## Run all code generations
 	go generate ./...
 
 generate-swagger: install-tools ## Run swagger code generation
-	swag init -g server/api/*.go -g cmd/server/swagger.go --outputTypes go -output cmd/server/docs
+	swag init -g server/api/ -g cmd/server/swagger.go --outputTypes go -output cmd/server/docs
 
 check-xgo: ## Check if xgo is installed
 	@hash xgo > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
@@ -111,6 +111,9 @@ install-tools: ## Install development tools
 	fi ; \
 	hash gofumpt > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		go install mvdan.cc/gofumpt@latest; \
+	fi ; \
+	hash swag > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
+		go install github.com/swaggo/swag/cmd/swag@latest; \
 	fi
 
 ui-dependencies: ## Install UI dependencies
