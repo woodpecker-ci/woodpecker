@@ -95,8 +95,8 @@ clean: ## Clean build artifacts
 generate: generate-swagger ## Run all code generations
 	go generate ./...
 
-generate-swagger: ## Run swagger code generation
-	go run github.com/swaggo/swag/cmd/swag@latest init -g server/api/*.go -g cmd/server/swagger.go --outputTypes go -output cmd/server/docs
+generate-swagger: install-tools ## Run swagger code generation
+	swag init -g server/api/*.go -g cmd/server/swagger.go --outputTypes go -output cmd/server/docs
 
 check-xgo: ## Check if xgo is installed
 	@hash xgo > /dev/null 2>&1; if [ $$? -ne 0 ]; then \

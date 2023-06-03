@@ -104,6 +104,7 @@ func generateTempMarkdown(specFile string) string {
 			Spec: specFile,
 		},
 	}
+	// TODO: contrib upstream a GenerateMarkdown that use io.Reader and io.Writer
 	err := generator.GenerateMarkdown(markdownFile, []string{}, []string{}, &opts)
 	if err != nil {
 		panic(err)

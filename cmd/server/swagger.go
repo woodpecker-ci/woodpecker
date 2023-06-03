@@ -19,13 +19,14 @@ import (
 	"github.com/woodpecker-ci/woodpecker/version"
 )
 
+// generate docs/docs/20-usage/90-rest-api.md via:
+//go:generate go run woodpecker_docs_gen.go swagger.go
+
 // setupSwaggerStaticConfig initializes static content only (contacts, title and description)
 // for dynamic configuration of e.g. hostname, etc. see router.setupSwaggerConfigAndRoutes
 //
 //	@contact.name	Woodpecker CI Community
 //	@contact.url	https://woodpecker-ci.org/
-//
-//go:generate go run woodpecker_docs_gen.go swagger.go
 func setupSwaggerStaticConfig() {
 	docs.SwaggerInfo.BasePath = "/api"
 	docs.SwaggerInfo.InfoInstanceName = "api"
