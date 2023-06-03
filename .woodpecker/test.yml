@@ -45,6 +45,16 @@ pipeline:
     when:
       path: *when_path
 
+  check_swagger:
+    image: *golang_image
+    group: test
+    commands:
+      - "make generate-swagger"
+      - "DIFF=$(git diff | head)"
+      - "[ -n \"$DIFF\" ] && { echo \"swagger not up to date, exec 'make generate-swagger' and commit\"; exit 1; } || true"
+    when:
+      path: *when_path
+
   lint-editorconfig:
     image: mstruebing/editorconfig-checker
     group: test
