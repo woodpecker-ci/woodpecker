@@ -5,7 +5,7 @@
     <div class="flex text-white dark:text-gray-400 items-center space-x-2">
       <!-- Logo -->
       <router-link :to="{ name: 'home' }" class="flex flex-col -my-2 px-2">
-        <img class="w-8 h-8" src="../../../assets/logo.svg?url" />
+        <img class="w-8 h-8" :src="`../../..${rootPath}/assets/logo.svg?url`" />
         <span class="text-xs">{{ version }}</span>
       </router-link>
       <!-- Repo Link -->
@@ -77,7 +77,7 @@ export default defineComponent({
 
     const version = config.version?.startsWith('next') ? 'next' : config.version;
 
-    return { darkMode, user: authentication.user, doLogin, docsUrl, version };
+    return { darkMode, user: authentication.user, doLogin, docsUrl, version, rootPath: config.rootPath };
   },
 });
 </script>

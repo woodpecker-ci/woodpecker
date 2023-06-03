@@ -50,7 +50,7 @@ import Panel from '~/components/layout/Panel.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { usePaginate } from '~/compositions/usePaginate';
 import { Repo } from '~/lib/api/types';
-import useConfig from "~/compositions/useConfig";
+import useConfig from '~/compositions/useConfig';
 
 export default defineComponent({
   name: 'BadgeTab',

@@ -47,7 +47,7 @@ import SelectField from '~/components/form/SelectField.vue';
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { setI18nLanguage } from '~/compositions/useI18n';
-import useConfig from "~/compositions/useConfig";
+import useConfig from '~/compositions/useConfig';
 
 const { t, locale } = useI18n();
 
