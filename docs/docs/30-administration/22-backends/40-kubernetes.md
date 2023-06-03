@@ -3,7 +3,7 @@
 :::caution
 Kubernetes support is still experimental and not all pipeline features are fully supported yet.
 
-Check the [current state](https://github.com/woodpecker-ci/woodpecker/issues/9#issuecomment-483979755)
+Check the [current state](https://github.com/woodpecker-ci/woodpecker/issues/1513)
 :::
 
 The kubernetes backend executes each step inside a newly created pod. A PVC is also created for the lifetime of the pipeline, for transferring files between steps.
