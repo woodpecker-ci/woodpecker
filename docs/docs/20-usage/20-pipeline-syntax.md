@@ -829,6 +829,17 @@ when:
   event: [push, pull_request, tag, deployment]
 ```
 
+### `ref`
+
+The `ref` filter compares the git reference against which the pipeline is executed.
+This allows you to filter, for example, tags that must start with **v**:
+
+```diff
+when:
+  event: tag
+  ref: refs/tags/v*
+```
+
 ### `environment`
 
 Execute a step for deployment events matching the target deployment environment:
