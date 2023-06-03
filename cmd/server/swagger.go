@@ -19,7 +19,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/version"
 )
 
-// generate docs/docs/20-usage/90-rest-api.md via:
+// generate docs/swagger.json via:
 //go:generate go run woodpecker_docs_gen.go swagger.go
 
 // setupSwaggerStaticConfig initializes static content only (contacts, title and description)
