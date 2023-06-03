@@ -252,7 +252,7 @@ const docTemplate = `{
         },
         "/badges/{owner}/{name}/cc.xml": {
             "get": {
-                "description": "CCMenu displays the pipeline status of projects on a CI server as an item in the Mac's menu bar.\nIt started as part of the CruiseControl project that built the first continuous integration server.\nMore details on how to install, you can find at http://ccmenu.org/\nThe response format adheres to CCTray v1 Specification, https://cctray.org/v1/",
+                "description": "CCMenu displays the pipeline status of projects on a CI server as an item in the Mac's menu bar.\nMore details on how to install, you can find at http://ccmenu.org/\nThe response format adheres to CCTray v1 Specification, https://cctray.org/v1/",
                 "produces": [
                     "text/xml"
                 ],
@@ -639,10 +639,10 @@ const docTemplate = `{
                 "tags": [
                     "System"
                 ],
-                "summary": "Incoming webhook from Github or Gitea",
+                "summary": "Incoming webhook from forge",
                 "parameters": [
                     {
-                        "description": "the webhook payload; Github or Gitea is automatically detected",
+                        "description": "the webhook payload; forge is automatically detected",
                         "name": "hook",
                         "in": "body",
                         "required": true,
@@ -1051,7 +1051,7 @@ const docTemplate = `{
         },
         "/queue/info": {
             "get": {
-                "description": "TODO: link the InfoT response object - this is blocked, until this swag-issue is solved ...",
+                "description": "TODO: link the InfoT response object - this is blocked, until the ` + "`" + `swaggo/swag` + "`" + ` tool dependency is v1.18.12 or newer",
                 "produces": [
                     "application/json"
                 ],
@@ -1744,134 +1744,6 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/Cron"
                         }
-                    }
-                }
-            }
-        },
-        "/repos/{owner}/{name}/files/{number}": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Pipeline files"
-                ],
-                "summary": "Gets a list file by pipeline",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "default": "Bearer \u003cpersonal access token\u003e",
-                        "description": "Insert your personal access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository owner's name",
-                        "name": "owner",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository name",
-                        "name": "name",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "the number of the pipeline",
-                        "name": "number",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "default": 1,
-                        "description": "for response pagination, page offset number",
-                        "name": "page",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 50,
-                        "description": "for response pagination, max items per page",
-                        "name": "perPage",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/File"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/repos/{owner}/{name}/files/{number}/{step}/{file}": {
-            "get": {
-                "produces": [
-                    "text/plain"
-                ],
-                "tags": [
-                    "Pipeline files"
-                ],
-                "summary": "Gets a file by process and name",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "default": "Bearer \u003cpersonal access token\u003e",
-                        "description": "Insert your personal access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository owner's name",
-                        "name": "owner",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository name",
-                        "name": "name",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "the number of the pipeline",
-                        "name": "number",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "the step of the pipeline",
-                        "name": "step",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the filename",
-                        "name": "file",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
                     }
                 }
             }
@@ -3928,41 +3800,6 @@ const docTemplate = `{
                 }
             }
         },
-        "File": {
-            "type": "object",
-            "properties": {
-                "failed": {
-                    "type": "integer"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "mime": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "passed": {
-                    "type": "integer"
-                },
-                "pid": {
-                    "type": "integer"
-                },
-                "size": {
-                    "type": "integer"
-                },
-                "skipped": {
-                    "type": "integer"
-                },
-                "step_id": {
-                    "type": "integer"
-                },
-                "time": {
-                    "type": "integer"
-                }
-            }
-        },
         "OrgPerm": {
             "type": "object",
             "properties": {
@@ -4038,12 +3875,6 @@ const docTemplate = `{
                 },
                 "event": {
                     "$ref": "#/definitions/WebhookEvent"
-                },
-                "files": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/File"
-                    }
                 },
                 "finished_at": {
                     "type": "integer"
