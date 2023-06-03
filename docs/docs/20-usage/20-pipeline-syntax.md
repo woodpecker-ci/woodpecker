@@ -829,17 +829,6 @@ when:
   event: [push, pull_request, tag, deployment]
 ```
 
-### `tag`
-
-This filter only applies to tag events.
-Use glob expression to execute a step if the tag name starts with `v`:
-
-```diff
-when:
-  event: tag
-  tag: v*
-```
-
 ### `environment`
 
 Execute a step for deployment events matching the target deployment environment:
