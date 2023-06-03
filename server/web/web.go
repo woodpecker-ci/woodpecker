@@ -18,7 +18,6 @@ import (
 	"crypto/md5"
 	"fmt"
 	"net/http"
-	"net/url"
 	"regexp"
 	"strings"
 	"time"

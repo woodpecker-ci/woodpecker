@@ -16,7 +16,6 @@ package router
 
 import (
 	"net/http"
-	"net/url"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
