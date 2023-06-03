@@ -20,7 +20,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-type oldStep017 struct {
+type oldStep018 struct {
 	ID         int64             `xorm:"pk autoincr 'step_id'"`
 	PipelineID int64             `xorm:"UNIQUE(s) INDEX 'step_pipeline_id'"`
 	PID        int               `xorm:"UNIQUE(s) 'step_pid'"`
@@ -35,7 +35,7 @@ type oldStep017 struct {
 	Environ    map[string]string `xorm:"json 'step_environ'"`
 }
 
-func (oldStep017) TableName() string {
+func (oldStep018) TableName() string {
 	return "steps"
 }
 
@@ -47,11 +47,11 @@ var parentStepsToWorkflows = task{
 			return err
 		}
 		// make sure the columns exist before removing them
-		if err := sess.Sync(new(oldStep017)); err != nil {
+		if err := sess.Sync(new(oldStep018)); err != nil {
 			return err
 		}
 
-		var parentSteps []*oldStep017
+		var parentSteps []*oldStep018
 		err := sess.Where("step_ppid = ?", 0).Find(&parentSteps)
 		if err != nil {
 			return err

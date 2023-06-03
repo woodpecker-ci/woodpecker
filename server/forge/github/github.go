@@ -277,10 +277,7 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 }
 
 func (c *client) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error) {
-	token := ""
-	if u != nil {
-		token = u.Token
-	}
+	token := common.UserToken(ctx, r, u)
 	client := c.newClientToken(ctx, token)
 
 	pullRequests, _, err := client.PullRequests.List(ctx, r.Owner, r.Name, &github.PullRequestListOptions{
@@ -511,10 +508,7 @@ func (c *client) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 
 // Branches returns the names of all branches for the named repository.
 func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]string, error) {
-	token := ""
-	if u != nil {
-		token = u.Token
-	}
+	token := common.UserToken(ctx, r, u)
 	client := c.newClientToken(ctx, token)
 
 	githubBranches, _, err := client.Repositories.ListBranches(ctx, r.Owner, r.Name, &github.BranchListOptions{
@@ -533,10 +527,7 @@ func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo, p *
 
 // BranchHead returns the sha of the head (latest commit) of the specified branch
 func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
-	token := ""
-	if u != nil {
-		token = u.Token
-	}
+	token := common.UserToken(ctx, r, u)
 	b, _, err := c.newClientToken(ctx, token).Repositories.GetBranch(ctx, r.Owner, r.Name, branch, true)
 	if err != nil {
 		return "", err

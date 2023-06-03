@@ -235,7 +235,7 @@ func (c *Config) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 
 // Branches returns the names of all branches for the named repository.
 func (c *Config) Branches(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]string, error) {
-	bitbucketBranches, err := internal.NewClientWithToken(ctx, c.url, c.Consumer, u.Token).ListBranches(r.Owner, r.Name, p.Page, p.PerPage)
+	bitbucketBranches, err := internal.NewClientWithToken(ctx, c.url, c.Consumer, common.UserToken(ctx, r, u)).ListBranches(r.Owner, r.Name, p.Page, p.PerPage)
 	if err != nil {
 		return nil, err
 	}

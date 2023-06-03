@@ -45,6 +45,7 @@ var migrationTasks = []*task{
 	&removeActiveFromUsers,
 	&removeInactiveRepos,
 	&dropFiles,
+	&removeMachineCol,
 	&parentStepsToWorkflows,
 }
 
