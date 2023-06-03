@@ -96,7 +96,7 @@ func (e *docker) Load(ctx context.Context) error {
 
 func (e *docker) Setup(_ context.Context, conf *backend.Config) error {
 	for _, vol := range conf.Volumes {
-		_, err := e.client.VolumeCreate(noContext, volume.CreateOptions{
+		_, err := e.client.VolumeCreate(noContext, volume.VolumeCreateBody{
 			Name:       vol.Name,
 			Driver:     vol.Driver,
 			DriverOpts: vol.DriverOpts,
