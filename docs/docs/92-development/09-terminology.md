@@ -4,9 +4,9 @@
 
 - **Woodpecker CI**: The project name around Woodpecker.
 - **Woodpecker**: An open-source tool that executes [pipelines][Pipeline] on your code.
-- **Server**: The component of Woodpecker that handles webhooks from forges, orchestrates agents, and sends status back. It also serves a web UI for administration and configuration.
+- **Server**: The component of Woodpecker that handles webhooks from forges, orchestrates agents, and sends status back. It also serves the API and web UI for administration and configuration.
 - **Agent**: A component of Woodpecker that executes [pipelines][Pipeline] (specifically one or more [workflows][Workflow]) with a specific backend (e.g. [Docker][], Kubernetes, [local][Local]). It connects to the server via GRPC.
-- **CLI**: The Woodpecker command-line interface (CLI) is a terminal tool used by users to administer the server, execute pipelines locally for debugging/testing purposes, and perform tasks like linting pipelines.
+- **CLI**: The Woodpecker command-line interface (CLI) is a terminal tool used to administer the server, to execute pipelines locally for debugging / testing purposes, and to perform tasks like linting pipelines.
 - **Pipeline**: A sequence of [workflows][Workflow] that are executed on the code. [Pipelines][Pipeline] are triggered by events.
 - **Workflow**: A sequence of steps and services that are executed as part of a [pipeline][Pipeline]. Workflows are represented by YAML files. Each [workflow][Workflow] has its own isolated [workspace][Workspace], and often additional resources like a shared network (docker).
 - **Steps**: Individual commands, actions or tasks within a [workflow][Workflow].
