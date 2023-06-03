@@ -10,9 +10,9 @@ require (
 	github.com/antonmedv/expr v1.12.5
 	github.com/bmatcuk/doublestar/v4 v4.6.0
 	github.com/caddyserver/certmagic v0.17.2
-	github.com/docker/cli v23.0.6+incompatible
+	github.com/docker/cli v20.10.24+incompatible
 	github.com/docker/distribution v2.8.2+incompatible
-	github.com/docker/docker v23.0.6+incompatible
+	github.com/docker/docker v20.10.24+incompatible
 	github.com/docker/go-units v0.5.0
 	github.com/drone/envsubst v1.0.3
 	github.com/franela/goblin v0.0.0-20211003143422-0a4f594942bf
@@ -29,7 +29,7 @@ require (
 	github.com/lib/pq v1.10.9
 	github.com/mattn/go-sqlite3 v1.14.16
 	github.com/melbahja/goph v1.3.1
-	github.com/moby/moby v23.0.6+incompatible
+	github.com/moby/moby v20.10.24+incompatible
 	github.com/moby/term v0.5.0
 	github.com/mrjones/oauth v0.0.0-20190623134757-126b35219450
 	github.com/oklog/ulid/v2 v2.1.0

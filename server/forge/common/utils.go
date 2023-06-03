@@ -15,9 +15,15 @@
 package common
 
 import (
+	"context"
 	"net"
 	"net/url"
 	"strings"
+
+	"github.com/rs/zerolog/log"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
 func ExtractHostFromCloneURL(cloneURL string) (string, error) {
@@ -36,4 +42,25 @@ func ExtractHostFromCloneURL(cloneURL string) (string, error) {
 	}
 
 	return host, nil
+}
+
+func UserToken(ctx context.Context, r *model.Repo, u *model.User) string {
+	if u != nil {
+		return u.Token
+	}
+
+	_store, ok := store.TryFromContext(ctx)
+	if !ok {
+		log.Error().Msg("could not get store from context")
+		return ""
+	}
+	if r == nil {
+		log.Error().Msg("can not get user token by empty repo")
+		return ""
+	}
+	user, err := _store.GetUser(r.UserID)
+	if err != nil {
+		return ""
+	}
+	return user.Token
 }
