@@ -1,4 +1,4 @@
-// Copyright 2022 Woodpecker Authors
+// Copyright 2023 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,16 +16,20 @@ package migration
 
 import (
 	"xorm.io/xorm"
-
-	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-var recreateAgentsTable = task{
-	name: "recreate-agents-table",
+type oldStep017 struct {
+	ID      int64  `xorm:"pk autoincr 'step_id'"`
+	Machine string `xorm:"step_machine"`
+}
+
+var removeMachineCol = task{
+	name: "remove-machine-col",
 	fn: func(sess *xorm.Session) error {
-		if err := sess.DropTable("agents"); err != nil {
+		// make sure step_machine column exists
+		if err := sess.Sync(new(oldStep017)); err != nil {
 			return err
 		}
-		return sess.Sync(new(model.Agent))
+		return dropTableColumns(sess, "steps", "step_machine")
 	},
 }
