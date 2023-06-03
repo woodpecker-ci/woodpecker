@@ -57,22 +57,22 @@ type Opts struct {
 func New(opts Opts) (forge.Forge, error) {
 	r := &client{
 		API:        defaultAPI,
-		URL:        defaultURL,
+		url:        defaultURL,
 		Client:     opts.Client,
 		Secret:     opts.Secret,
 		SkipVerify: opts.SkipVerify,
 		MergeRef:   opts.MergeRef,
 	}
 	if opts.URL != defaultURL {
-		r.URL = strings.TrimSuffix(opts.URL, "/")
-		r.API = r.URL + "/api/v3/"
+		r.url = strings.TrimSuffix(opts.URL, "/")
+		r.API = r.url + "/api/v3/"
 	}
 
 	return r, nil
 }
 
 type client struct {
-	URL        string
+	url        string
 	API        string
 	Client     string
 	Secret     string
@@ -83,6 +83,11 @@ type client struct {
 // Name returns the string name of this driver
 func (c *client) Name() string {
 	return "github"
+}
+
+// URL returns the root url of a configured forge
+func (c *client) URL() string {
+	return c.url
 }
 
 // Login authenticates the session and returns the forge user details.
@@ -272,10 +277,7 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 }
 
 func (c *client) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error) {
-	token := ""
-	if u != nil {
-		token = u.Token
-	}
+	token := common.UserToken(ctx, r, u)
 	client := c.newClientToken(ctx, token)
 
 	pullRequests, _, err := client.PullRequests.List(ctx, r.Owner, r.Name, &github.PullRequestListOptions{
@@ -380,8 +382,8 @@ func (c *client) newConfig(req *http.Request) *oauth2.Config {
 		ClientSecret: c.Secret,
 		Scopes:       []string{"repo", "repo:status", "user:email", "read:org"},
 		Endpoint: oauth2.Endpoint{
-			AuthURL:  fmt.Sprintf("%s/login/oauth/authorize", c.URL),
-			TokenURL: fmt.Sprintf("%s/login/oauth/access_token", c.URL),
+			AuthURL:  fmt.Sprintf("%s/login/oauth/authorize", c.url),
+			TokenURL: fmt.Sprintf("%s/login/oauth/access_token", c.url),
 		},
 		RedirectURL: redirect,
 	}
@@ -506,10 +508,7 @@ func (c *client) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 
 // Branches returns the names of all branches for the named repository.
 func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]string, error) {
-	token := ""
-	if u != nil {
-		token = u.Token
-	}
+	token := common.UserToken(ctx, r, u)
 	client := c.newClientToken(ctx, token)
 
 	githubBranches, _, err := client.Repositories.ListBranches(ctx, r.Owner, r.Name, &github.BranchListOptions{
@@ -528,10 +527,7 @@ func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo, p *
 
 // BranchHead returns the sha of the head (latest commit) of the specified branch
 func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
-	token := ""
-	if u != nil {
-		token = u.Token
-	}
+	token := common.UserToken(ctx, r, u)
 	b, _, err := c.newClientToken(ctx, token).Repositories.GetBranch(ctx, r.Owner, r.Name, branch, true)
 	if err != nil {
 		return "", err

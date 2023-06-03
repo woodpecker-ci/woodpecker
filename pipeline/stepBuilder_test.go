@@ -17,14 +17,18 @@ package pipeline
 
 import (
 	"fmt"
+	"sync"
 	"testing"
 
+	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/forge/mocks"
 	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 func TestGlobalEnvsubst(t *testing.T) {
 	t.Parallel()
+	setupMockForge(t)
 
 	b := StepBuilder{
 		Envs: map[string]string{
@@ -59,6 +63,7 @@ pipeline:
 
 func TestMissingGlobalEnvsubst(t *testing.T) {
 	t.Parallel()
+	setupMockForge(t)
 
 	b := StepBuilder{
 		Envs: map[string]string{
@@ -93,6 +98,7 @@ pipeline:
 
 func TestMultilineEnvsubst(t *testing.T) {
 	t.Parallel()
+	setupMockForge(t)
 
 	b := StepBuilder{
 		Repo: &model.Repo{},
@@ -130,6 +136,7 @@ pipeline:
 
 func TestMultiPipeline(t *testing.T) {
 	t.Parallel()
+	setupMockForge(t)
 
 	b := StepBuilder{
 		Repo:  &model.Repo{},
@@ -164,6 +171,7 @@ pipeline:
 
 func TestDependsOn(t *testing.T) {
 	t.Parallel()
+	setupMockForge(t)
 
 	b := StepBuilder{
 		Repo:  &model.Repo{},
@@ -210,6 +218,7 @@ depends_on:
 
 func TestRunsOn(t *testing.T) {
 	t.Parallel()
+	setupMockForge(t)
 
 	b := StepBuilder{
 		Repo:  &model.Repo{},
@@ -246,6 +255,7 @@ runs_on:
 
 func TestPipelineName(t *testing.T) {
 	t.Parallel()
+	setupMockForge(t)
 
 	b := StepBuilder{
 		Repo:  &model.Repo{Config: ".woodpecker"},
@@ -281,6 +291,7 @@ pipeline:
 
 func TestBranchFilter(t *testing.T) {
 	t.Parallel()
+	setupMockForge(t)
 
 	b := StepBuilder{
 		Repo:  &model.Repo{},
@@ -327,6 +338,7 @@ pipeline:
 
 func TestRootWhenFilter(t *testing.T) {
 	t.Parallel()
+	setupMockForge(t)
 
 	b := StepBuilder{
 		Repo:  &model.Repo{},
@@ -373,6 +385,7 @@ pipeline:
 
 func TestZeroSteps(t *testing.T) {
 	t.Parallel()
+	setupMockForge(t)
 
 	pipeline := &model.Pipeline{Branch: "dev"}
 
@@ -407,6 +420,7 @@ pipeline:
 
 func TestZeroStepsAsMultiPipelineDeps(t *testing.T) {
 	t.Parallel()
+	setupMockForge(t)
 
 	pipeline := &model.Pipeline{Branch: "dev"}
 
@@ -455,6 +469,7 @@ depends_on: [ zerostep ]
 
 func TestZeroStepsAsMultiPipelineTransitiveDeps(t *testing.T) {
 	t.Parallel()
+	setupMockForge(t)
 
 	pipeline := &model.Pipeline{Branch: "dev"}
 
@@ -509,6 +524,7 @@ depends_on: [ shouldbefiltered ]
 
 func TestTree(t *testing.T) {
 	t.Parallel()
+	setupMockForge(t)
 
 	pipeline := &model.Pipeline{
 		Event: model.EventPush,
@@ -549,6 +565,7 @@ pipeline:
 
 func TestSanitizePath(t *testing.T) {
 	t.Parallel()
+	setupMockForge(t)
 
 	testTable := []struct {
 		path          string
@@ -585,4 +602,16 @@ func TestSanitizePath(t *testing.T) {
 			t.Fatal("Path hasn't been sanitized correctly")
 		}
 	}
+}
+
+var setupMockForgeLock = sync.Once{}
+
+func setupMockForge(t *testing.T) {
+	setupMockForgeLock.Do(func() {
+		forge := mocks.NewForge(t)
+		forge.On("Name").Return("mock")
+		forge.On("URL").Return("https://codeberg.org")
+
+		server.Config.Services.Forge = forge
+	})
 }

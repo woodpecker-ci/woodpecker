@@ -366,7 +366,7 @@
           "netrc_only_trusted": "Netrc-Zugangsdaten nur in vertrauenswürdigen Containern zum Klonen bereitstellen"
         },
         "pipeline_path": {
-          "default": "Standardmäßig: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yml -> .drone.yml",
+          "default": "Standardmäßig: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml",
           "desc": "Pfad zu deiner Pipeline-Konfiguration (z. B. {0}). Verzeichnisse sollten mit einem {1} enden.",
           "desc_path_example": "mein/pfad/",
           "path": "Pipeline-Pfad"
@@ -471,6 +471,7 @@
     "dl_cli": "Download Kommando-Zeilen-Tool",
     "internal_error": "Ein interner Fehler ist aufgetreten",
     "oauth_error": "Fehler bei der Authentifizierung gegen OAuth-Anbieter",
+    "reset_token": "Token Zurücksetzen",
     "settings": "Benutzer-Einstellungen",
     "shell_setup": "Kommandozeilen-Einrichtung",
     "shell_setup_before": "Führe bitte die Schritte zur Einrichtung der Kommandozeile vorher aus",

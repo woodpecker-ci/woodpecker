@@ -44,6 +44,8 @@ var migrationTasks = []*task{
 	&renameForgeIDToForgeRemoteID,
 	&removeActiveFromUsers,
 	&removeInactiveRepos,
+	&dropFiles,
+	&removeMachineCol,
 }
 
 var allBeans = []interface{}{
@@ -51,7 +53,6 @@ var allBeans = []interface{}{
 	new(model.Pipeline),
 	new(model.PipelineConfig),
 	new(model.Config),
-	new(model.File),
 	new(model.Logs),
 	new(model.Perm),
 	new(model.Step),
@@ -92,7 +93,7 @@ func initNew(sess *xorm.Session) error {
 }
 
 func Migrate(e *xorm.Engine) error {
-	if err := e.Sync2(new(migrations)); err != nil {
+	if err := e.Sync(new(migrations)); err != nil {
 		return err
 	}
 
@@ -171,13 +172,13 @@ func runTasks(sess *xorm.Session, tasks []*task) error {
 }
 
 type syncEngine interface {
-	Sync2(beans ...interface{}) error
+	Sync(beans ...interface{}) error
 }
 
 func syncAll(sess syncEngine) error {
 	for _, bean := range allBeans {
-		if err := sess.Sync2(bean); err != nil {
-			return fmt.Errorf("sync2 error '%s': %w", reflect.TypeOf(bean), err)
+		if err := sess.Sync(bean); err != nil {
+			return fmt.Errorf("Sync error '%s': %w", reflect.TypeOf(bean), err)
 		}
 	}
 	return nil

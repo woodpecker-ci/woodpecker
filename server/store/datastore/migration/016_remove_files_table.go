@@ -16,16 +16,11 @@ package migration
 
 import (
 	"xorm.io/xorm"
-
-	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-var recreateAgentsTable = task{
-	name: "recreate-agents-table",
+var dropFiles = task{
+	name: "drop-files",
 	fn: func(sess *xorm.Session) error {
-		if err := sess.DropTable("agents"); err != nil {
-			return err
-		}
-		return sess.Sync(new(model.Agent))
+		return sess.DropTable("files")
 	},
 }
