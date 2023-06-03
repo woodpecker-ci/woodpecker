@@ -82,7 +82,7 @@ vendor: ## Update the vendor directory
 	go mod vendor
 
 format: install-tools ## Format source code
-	@swag fmt -g server/api/z.go -g cmd/server/swagger.go
+	@swag fmt -g server/api/*.go -g cmd/server/swagger.go
 	@gofumpt -extra -w .
 
 .PHONY: clean
@@ -96,7 +96,7 @@ generate: generate-swagger ## Run all code generations
 	go generate ./...
 
 generate-swagger: ## Run swagger code generation
-	go run github.com/swaggo/swag/cmd/swag@latest init -g server/api/z.go -g cmd/server/swagger.go --outputTypes go -output cmd/server/docs
+	go run github.com/swaggo/swag/cmd/swag@latest init -g server/api/*.go -g cmd/server/swagger.go --outputTypes go -output cmd/server/docs
 
 check-xgo: ## Check if xgo is installed
 	@hash xgo > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
