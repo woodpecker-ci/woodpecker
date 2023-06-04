@@ -150,6 +150,7 @@ func (s *WoodpeckerServer) Log(c context.Context, req *proto.LogRequest) (*proto
 		Line:   int(req.GetLogEntry().GetLine()),
 		Time:   req.GetLogEntry().GetTime(),
 		StepID: req.GetLogEntry().GetStepId(),
+		Type:   int(req.GetLogEntry().GetType()),
 	}
 	res := new(proto.Empty)
 	err := s.peer.Log(c, logEntry)

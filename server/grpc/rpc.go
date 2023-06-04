@@ -314,7 +314,13 @@ func (s *RPC) Log(c context.Context, _logEntry *rpc.LogEntry) error {
 		Time:   _logEntry.Time,
 		Line:   _logEntry.Line,
 		Data:   []byte(_logEntry.Data),
+		Type:   model.LogEntryType(_logEntry.Type),
 	}
+	// write line to listening web clients
+	if err := s.logger.Write(c, fmt.Sprint(logEntry.StepID), logEntry); err != nil {
+		log.Error().Err(err).Msgf("rpc server could not write to logger")
+	}
+	// make line persistent in database
 	return s.store.LogAppend(logEntry)
 }
 

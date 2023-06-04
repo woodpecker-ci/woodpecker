@@ -14,12 +14,27 @@
 
 package model
 
+// LogEntryType identifies the type of line in the logs.
+type LogEntryType int
+
+const (
+	LogEntryStdout LogEntryType = iota
+	LogEntryStderr
+	LogEntryExitCode
+	LogEntryMetadata
+	LogEntryProgress
+)
+
 type LogEntry struct {
-	ID      int64  `json:"id"       xorm:"pk autoincr 'log_id'"`
-	StepID  int64  `json:"step_id"  xorm:"UNIQUE(log) 'log_step_id'"`
-	Time    int64  `json:"time"     xorm:"'log_time'"`
-	Line    int    `json:"line"     xorm:"UNIQUE(log) 'log_line'"`
-	Data    []byte `json:"data"     xorm:"LONGBLOB 'log_data'"`
-	Created int64  `json:"-"        xorm:"created"`
-	// TODO: should we add type from pipeline/rpc/line.go ?
+	ID      int64        `json:"id"       xorm:"pk autoincr"`
+	StepID  int64        `json:"step_id"  xorm:"UNIQUE(log)"`
+	Time    int64        `json:"time"`
+	Line    int          `json:"line"     xorm:"UNIQUE(log)"`
+	Data    []byte       `json:"data"     xorm:"LONGBLOB"`
+	Created int64        `json:"-"        xorm:"created"`
+	Type    LogEntryType `json:"type"`
+}
+
+func (LogEntry) TableName() string {
+	return "log_entries"
 }

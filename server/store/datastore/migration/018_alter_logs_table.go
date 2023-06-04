@@ -61,19 +61,14 @@ var alterLogsTable = task{
 			return err
 		}
 
-		if err := renameTable(sess, "logs", "old_logs"); err != nil {
-			return err
-		}
-
 		if err := sess.Sync(new(model.LogEntry)); err != nil {
 			return err
 		}
 
-		// TODO: copy data over from old_logs to logs
 		page := 0
 		for {
 			var logs []*oldLogs018
-			err := sess.Limit(10, page*10).Find(&logs)
+			err := sess.Limit(10, page*10).Table("logs").Find(&logs)
 			if err != nil {
 				return err
 			}
@@ -113,6 +108,6 @@ var alterLogsTable = task{
 			page++
 		}
 
-		return sess.DropTable("old_logs")
+		return sess.DropTable("logs")
 	},
 }
