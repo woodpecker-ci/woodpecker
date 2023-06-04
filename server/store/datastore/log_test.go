@@ -21,7 +21,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-func TestLogCreateFind(t *testing.T) {
+func TestLogCreateFindDelete(t *testing.T) {
 	store, closer := newTestStore(t, new(model.Step), new(model.LogEntry))
 	defer closer()
 
@@ -51,6 +51,12 @@ func TestLogCreateFind(t *testing.T) {
 	_logEntries, err := store.LogFind(&step)
 	assert.NoError(t, err)
 	assert.Len(t, _logEntries, len(logEntries))
+
+	// delete and check
+	assert.NoError(t, store.LogDelete(&step))
+	_logEntries, err = store.LogFind(&step)
+	assert.NoError(t, err)
+	assert.Len(t, _logEntries, 0)
 }
 
 func TestLogAppend(t *testing.T) {

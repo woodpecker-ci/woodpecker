@@ -22,7 +22,7 @@ import (
 
 func (s storage) LogFind(step *model.Step) ([]*model.LogEntry, error) {
 	var logEntries []*model.LogEntry
-	return logEntries, s.engine.Where("log_step_id = ?", step.ID).Find(&logEntries)
+	return logEntries, s.engine.Where("step_id = ?", step.ID).Find(&logEntries)
 }
 
 func (s storage) LogSave(step *model.Step, logEntries []*model.LogEntry) error {
@@ -50,6 +50,6 @@ func (s storage) LogAppend(logEntry *model.LogEntry) error {
 }
 
 func (s storage) LogDelete(step *model.Step) error {
-	_, err := s.engine.Where("log_step_id = ?", step.ID).Delete(new(model.LogEntry))
+	_, err := s.engine.Where("step_id = ?", step.ID).Delete(new(model.LogEntry))
 	return err
 }
