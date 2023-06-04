@@ -29,40 +29,40 @@ type subscriber struct {
 type stream struct {
 	sync.Mutex
 
-	path string
-	list []*model.LogEntry
-	subs map[*subscriber]struct{}
-	done chan struct{}
+	stepID int64
+	list   []*model.LogEntry
+	subs   map[*subscriber]struct{}
+	done   chan struct{}
 }
 
 type log struct {
 	sync.Mutex
 
-	streams map[string]*stream
+	streams map[int64]*stream
 }
 
 // New returns a new logger.
 func New() Log {
 	return &log{
-		streams: map[string]*stream{},
+		streams: map[int64]*stream{},
 	}
 }
 
-func (l *log) Open(_ context.Context, path string) error {
+func (l *log) Open(_ context.Context, stepID int64) error {
 	l.Lock()
-	_, ok := l.streams[path]
+	_, ok := l.streams[stepID]
 	if !ok {
-		l.streams[path] = &stream{
-			path: path,
-			subs: make(map[*subscriber]struct{}),
-			done: make(chan struct{}),
+		l.streams[stepID] = &stream{
+			stepID: stepID,
+			subs:   make(map[*subscriber]struct{}),
+			done:   make(chan struct{}),
 		}
 	}
 	l.Unlock()
 	return nil
 }
 
-func (l *log) Write(_ context.Context, stepID string, logEntry *model.LogEntry) error {
+func (l *log) Write(_ context.Context, stepID int64, logEntry *model.LogEntry) error {
 	l.Lock()
 	s, ok := l.streams[stepID]
 	l.Unlock()
@@ -78,9 +78,9 @@ func (l *log) Write(_ context.Context, stepID string, logEntry *model.LogEntry) 
 	return nil
 }
 
-func (l *log) Tail(c context.Context, path string, handler Handler) error {
+func (l *log) Tail(c context.Context, stepID int64, handler Handler) error {
 	l.Lock()
-	s, ok := l.streams[path]
+	s, ok := l.streams[stepID]
 	l.Unlock()
 	if !ok {
 		return ErrNotFound
@@ -107,9 +107,9 @@ func (l *log) Tail(c context.Context, path string, handler Handler) error {
 	return nil
 }
 
-func (l *log) Close(_ context.Context, path string) error {
+func (l *log) Close(_ context.Context, stepID int64) error {
 	l.Lock()
-	s, ok := l.streams[path]
+	s, ok := l.streams[stepID]
 	l.Unlock()
 	if !ok {
 		return ErrNotFound
@@ -120,14 +120,14 @@ func (l *log) Close(_ context.Context, path string) error {
 	s.Unlock()
 
 	l.Lock()
-	delete(l.streams, path)
+	delete(l.streams, stepID)
 	l.Unlock()
 	return nil
 }
 
-func (l *log) Snapshot(_ context.Context, path string, w io.Writer) error {
+func (l *log) Snapshot(_ context.Context, stepID int64, w io.Writer) error {
 	l.Lock()
-	s, ok := l.streams[path]
+	s, ok := l.streams[stepID]
 	l.Unlock()
 	if !ok {
 		return ErrNotFound
@@ -138,11 +138,9 @@ func (l *log) Snapshot(_ context.Context, path string, w io.Writer) error {
 		if _, err := w.Write(entry.Data); err != nil {
 			return err
 		}
-		if _, err := w.Write(cr); err != nil {
+		if _, err := w.Write([]byte{'\n'}); err != nil {
 			return err
 		}
 	}
 	return nil
 }
-
-var cr = []byte{'\n'}

@@ -238,40 +238,41 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 
 	workflow, err := s.store.StepLoad(workflowID)
 	if err != nil {
-		log.Error().Msgf("error: cannot find step with id %d: %s", workflowID, err)
+		log.Error().Err(err).Msgf("cannot find step with id %d", workflowID)
 		return err
 	}
 
 	currentPipeline, err := s.store.GetPipeline(workflow.PipelineID)
 	if err != nil {
-		log.Error().Msgf("error: cannot find pipeline with id %d: %s", workflow.PipelineID, err)
+		log.Error().Err(err).Msgf("cannot find pipeline with id %d", workflow.PipelineID)
 		return err
 	}
 
 	repo, err := s.store.GetRepo(currentPipeline.RepoID)
 	if err != nil {
-		log.Error().Msgf("error: cannot find repo with id %d: %s", currentPipeline.RepoID, err)
+		log.Error().Err(err).Msgf("cannot find repo with id %d", currentPipeline.RepoID)
 		return err
 	}
 
-	log.Trace().
+	logger := log.With().
 		Str("repo_id", fmt.Sprint(repo.ID)).
-		Str("build_id", fmt.Sprint(currentPipeline.ID)).
-		Str("step_id", id).
-		Msgf("gRPC Done with state: %#v", state)
+		Str("pipeline_id", fmt.Sprint(currentPipeline.ID)).
+		Str("workflow_id", id).Logger()
+
+	logger.Trace().Msgf("gRPC Done with state: %#v", state)
 
 	if workflow, err = pipeline.UpdateStepStatusToDone(s.store, *workflow, state); err != nil {
-		log.Error().Msgf("error: done: cannot update step_id %d state: %s", workflow.ID, err)
+		logger.Error().Err(err).Msgf("pipeline.UpdateStepStatusToDone: cannot update workflow state: %s", err)
 	}
 
 	var queueErr error
 	if workflow.Failing() {
-		queueErr = s.queue.Error(c, id, fmt.Errorf("Step finished with exitcode %d, %s", state.ExitCode, state.Error))
+		queueErr = s.queue.Error(c, id, fmt.Errorf("Step finished with exit code %d, %s", state.ExitCode, state.Error))
 	} else {
 		queueErr = s.queue.Done(c, id, workflow.State)
 	}
 	if queueErr != nil {
-		log.Error().Msgf("error: done: cannot ack step_id %d: %s", workflowID, err)
+		logger.Error().Err(queueErr).Msg("queue.Done: cannot ack workflow")
 	}
 
 	steps, err := s.store.StepList(currentPipeline)
@@ -282,15 +283,20 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 
 	if !model.IsThereRunningStage(steps) {
 		if currentPipeline, err = pipeline.UpdateStatusToDone(s.store, *currentPipeline, model.PipelineStatus(steps), workflow.Stopped); err != nil {
-			log.Error().Err(err).Msgf("error: done: cannot update build_id %d final state", currentPipeline.ID)
+			logger.Error().Err(err).Msgf("pipeline.UpdateStatusToDone: cannot update workflow final state")
 		}
 	}
 
 	s.updateForgeStatus(c, repo, currentPipeline, workflow)
 
-	if err := s.logger.Close(c, id); err != nil {
-		log.Error().Err(err).Msgf("done: cannot close build_id %d logger", workflow.ID)
-	}
+	// make sure writes to pubsub are non blocking (https://github.com/woodpecker-ci/woodpecker/blob/c919f32e0b6432a95e1a6d3d0ad662f591adf73f/server/logging/log.go#L9)
+	go func() {
+		for _, step := range steps {
+			if err := s.logger.Close(c, step.ID); err != nil {
+				logger.Error().Err(err).Msgf("done: cannot close log stream for step %d", step.ID)
+			}
+		}
+	}()
 
 	if err := s.notify(c, repo, currentPipeline, steps); err != nil {
 		return err
@@ -324,7 +330,7 @@ func (s *RPC) Log(c context.Context, _logEntry *rpc.LogEntry) error {
 	// make sure writes to pubsub are non blocking (https://github.com/woodpecker-ci/woodpecker/blob/c919f32e0b6432a95e1a6d3d0ad662f591adf73f/server/logging/log.go#L9)
 	go func() {
 		// write line to listening web clients
-		if err := s.logger.Write(c, fmt.Sprint(logEntry.StepID), logEntry); err != nil {
+		if err := s.logger.Write(c, logEntry.StepID, logEntry); err != nil {
 			log.Error().Err(err).Msgf("rpc server could not write to logger")
 		}
 	}()

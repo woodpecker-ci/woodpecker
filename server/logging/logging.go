@@ -19,17 +19,17 @@ type Handler func(...*model.LogEntry)
 // Log defines a log multiplexer.
 type Log interface {
 	// Open opens the log.
-	Open(c context.Context, stepID string) error
+	Open(c context.Context, stepID int64) error
 
 	// Write writes the entry to the log.
-	Write(c context.Context, stepID string, entry *model.LogEntry) error
+	Write(c context.Context, stepID int64, entry *model.LogEntry) error
 
 	// Tail tails the log.
-	Tail(c context.Context, stepID string, handler Handler) error
+	Tail(c context.Context, stepID int64, handler Handler) error
 
 	// Close closes the log.
-	Close(c context.Context, stepID string) error
+	Close(c context.Context, stepID int64) error
 
 	// Snapshot snapshots the stream to Writer w.
-	Snapshot(c context.Context, stepID string, w io.Writer) error
+	Snapshot(c context.Context, stepID int64, w io.Writer) error
 }

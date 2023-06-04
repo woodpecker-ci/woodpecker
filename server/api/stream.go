@@ -17,7 +17,6 @@ package api
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -167,11 +166,10 @@ func LogStreamSSE(c *gin.Context) {
 	}()
 
 	go func() {
-		// TODO remove global variable
-		err := server.Config.Services.Logs.Tail(ctx, fmt.Sprint(step.ID), func(entries ...*model.LogEntry) {
+		err := server.Config.Services.Logs.Tail(ctx, step.ID, func(entries ...*model.LogEntry) {
 			defer func() {
-				obj := recover() // fix #2480 // TODO: check if it's still needed
-				log.Trace().Msgf("pubsub subscribe recover return: %v", obj)
+				obj := recover() // TODO: check if it's still needed
+				log.Error().Msgf("## IF YOU SEE THIS OPEN AN ISSUE UPSTREAM ## - pubsub subscribe recover return: %v", obj)
 			}()
 			for _, entry := range entries {
 				select {
