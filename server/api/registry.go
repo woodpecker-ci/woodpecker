@@ -24,8 +24,17 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 )
 
-// GetRegistry gets the name registry from the database and writes
-// to the response in json format.
+// GetRegistry
+//
+//	@Summary	Get a named registry
+//	@Router		/repos/{owner}/{name}/registry/{registry} [get]
+//	@Produce	json
+//	@Success	200	{object}	Registry
+//	@Tags		Repository registries
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		owner			path	string	true	"the repository owner's name"
+//	@Param		name			path	string	true	"the repository name"
+//	@Param		registry		path	string	true	"the registry name"
 func GetRegistry(c *gin.Context) {
 	var (
 		repo = session.Repo(c)
@@ -39,7 +48,17 @@ func GetRegistry(c *gin.Context) {
 	c.JSON(200, registry.Copy())
 }
 
-// PostRegistry persists the registry to the database.
+// PostRegistry
+//
+//	@Summary	Persist/create a registry
+//	@Router		/repos/{owner}/{name}/registry [post]
+//	@Produce	json
+//	@Success	200	{object}	Registry
+//	@Tags		Repository registries
+//	@Param		Authorization	header	string			true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		owner			path	string			true	"the repository owner's name"
+//	@Param		name			path	string			true	"the repository name"
+//	@Param		registry		body	Registry	true	"the new registry data"
 func PostRegistry(c *gin.Context) {
 	repo := session.Repo(c)
 
@@ -67,7 +86,18 @@ func PostRegistry(c *gin.Context) {
 	c.JSON(http.StatusOK, in.Copy())
 }
 
-// PatchRegistry updates the registry in the database.
+// PatchRegistry
+//
+//	@Summary	Update a named registry
+//	@Router		/repos/{owner}/{name}/registry/{registry} [patch]
+//	@Produce	json
+//	@Success	200	{object}	Registry
+//	@Tags		Repository registries
+//	@Param		Authorization	header	string			true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		owner			path	string			true	"the repository owner's name"
+//	@Param		name			path	string			true	"the repository name"
+//	@Param		registry		path	string			true	"the registry name"
+//	@Param		registryData	body	Registry	true	"the attributes for the registry"
 func PatchRegistry(c *gin.Context) {
 	var (
 		repo = session.Repo(c)
@@ -110,8 +140,18 @@ func PatchRegistry(c *gin.Context) {
 	c.JSON(http.StatusOK, in.Copy())
 }
 
-// GetRegistryList gets the registry list from the database and writes
-// to the response in json format.
+// GetRegistryList
+//
+//	@Summary	Get the registry list
+//	@Router		/repos/{owner}/{name}/registry [get]
+//	@Produce	json
+//	@Success	200	{array}	Registry
+//	@Tags		Repository registries
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		owner			path	string	true	"the repository owner's name"
+//	@Param		name			path	string	true	"the repository name"
+//	@Param		page			query	int		false	"for response pagination, page offset number"	default(1)
+//	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
 func GetRegistryList(c *gin.Context) {
 	repo := session.Repo(c)
 	list, err := server.Config.Services.Registries.RegistryList(repo, session.Pagination(c))
@@ -127,7 +167,17 @@ func GetRegistryList(c *gin.Context) {
 	c.JSON(http.StatusOK, list)
 }
 
-// DeleteRegistry deletes the named registry from the database.
+// DeleteRegistry
+//
+//	@Summary	Delete a named registry
+//	@Router		/repos/{owner}/{name}/registry/{registry} [delete]
+//	@Produce	plain
+//	@Success	200
+//	@Tags		Repository registries
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		owner			path	string	true	"the repository owner's name"
+//	@Param		name			path	string	true	"the repository name"
+//	@Param		registry		path	string	true	"the registry name"
 func DeleteRegistry(c *gin.Context) {
 	var (
 		repo = session.Repo(c)

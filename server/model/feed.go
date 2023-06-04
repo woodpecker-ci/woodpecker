@@ -16,8 +16,6 @@
 package model
 
 // Feed represents an item in the user's feed or timeline.
-//
-// swagger:model feed
 type Feed struct {
 	Owner    string `json:"owner"                   xorm:"feed_repo_owner"`
 	Name     string `json:"name"                    xorm:"feed_repo_name"`
@@ -40,4 +38,4 @@ type Feed struct {
 	Author   string `json:"author,omitempty"        xorm:"feed_pipeline_author"`
 	Avatar   string `json:"author_avatar,omitempty" xorm:"feed_pipeline_avatar"`
 	Email    string `json:"author_email,omitempty"  xorm:"feed_pipeline_email"`
-}
+} //	@name Feed

@@ -110,6 +110,16 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		}
 	}
 
+	// Kubernetes advanced settings
+	backendOptions := backend.BackendOptions{
+		Kubernetes: backend.KubernetesBackendOptions{
+			Resources: backend.Resources{
+				Limits:   container.BackendOptions.Kubernetes.Resources.Limits,
+				Requests: container.BackendOptions.Kubernetes.Resources.Requests,
+			},
+		},
+	}
+
 	memSwapLimit := int64(container.MemSwapLimit)
 	if c.reslimit.MemSwapLimit != 0 {
 		memSwapLimit = c.reslimit.MemSwapLimit
@@ -146,36 +156,37 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 	}
 
 	return &backend.Step{
-		Name:         name,
-		Alias:        container.Name,
-		Image:        container.Image,
-		Pull:         container.Pull,
-		Detached:     detached,
-		Privileged:   privileged,
-		WorkingDir:   workingdir,
-		Environment:  environment,
-		Labels:       container.Labels,
-		Commands:     container.Commands,
-		ExtraHosts:   container.ExtraHosts,
-		Volumes:      volumes,
-		Tmpfs:        container.Tmpfs,
-		Devices:      container.Devices,
-		Networks:     networks,
-		DNS:          container.DNS,
-		DNSSearch:    container.DNSSearch,
-		MemSwapLimit: memSwapLimit,
-		MemLimit:     memLimit,
-		ShmSize:      shmSize,
-		Sysctls:      container.Sysctls,
-		CPUQuota:     cpuQuota,
-		CPUShares:    cpuShares,
-		CPUSet:       cpuSet,
-		AuthConfig:   authConfig,
-		OnSuccess:    onSuccess,
-		OnFailure:    onFailure,
-		Failure:      failure,
-		NetworkMode:  networkMode,
-		IpcMode:      ipcMode,
+		Name:           name,
+		Alias:          container.Name,
+		Image:          container.Image,
+		Pull:           container.Pull,
+		Detached:       detached,
+		Privileged:     privileged,
+		WorkingDir:     workingdir,
+		Environment:    environment,
+		Labels:         container.Labels,
+		Commands:       container.Commands,
+		ExtraHosts:     container.ExtraHosts,
+		Volumes:        volumes,
+		Tmpfs:          container.Tmpfs,
+		Devices:        container.Devices,
+		Networks:       networks,
+		DNS:            container.DNS,
+		DNSSearch:      container.DNSSearch,
+		MemSwapLimit:   memSwapLimit,
+		MemLimit:       memLimit,
+		ShmSize:        shmSize,
+		Sysctls:        container.Sysctls,
+		CPUQuota:       cpuQuota,
+		CPUShares:      cpuShares,
+		CPUSet:         cpuSet,
+		AuthConfig:     authConfig,
+		OnSuccess:      onSuccess,
+		OnFailure:      onFailure,
+		Failure:        failure,
+		NetworkMode:    networkMode,
+		IpcMode:        ipcMode,
+		BackendOptions: backendOptions,
 	}
 }
 
