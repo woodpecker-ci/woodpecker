@@ -17,6 +17,7 @@ package datastore
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
@@ -43,19 +44,19 @@ func TestLogCreateFind(t *testing.T) {
 		},
 	}
 
-	err := store.LogSave(&step, logEntries)
-	if err != nil {
-		t.Errorf("Unexpected error: log create: %s", err)
-	}
+	// first insert should just work
+	assert.NoError(t, store.LogSave(&step, logEntries))
 
+	// reset id and check against unique constrains (stepID+lineNr)
+	for i := range logEntries {
+		logEntries[i].ID = 0
+	}
+	assert.Error(t, store.LogSave(&step, logEntries))
+
+	// we want to find our inserted logs
 	_logEntries, err := store.LogFind(&step)
-	if err != nil {
-		t.Errorf("Unexpected error: log create: %s", err)
-	}
-
-	if got, want := len(_logEntries), len(logEntries); got != want {
-		t.Errorf("Want %d log entries, got %d", want, got)
-	}
+	assert.NoError(t, err)
+	assert.Len(t, _logEntries, len(logEntries))
 }
 
 func TestLogAppend(t *testing.T) {
@@ -80,9 +81,7 @@ func TestLogAppend(t *testing.T) {
 		},
 	}
 
-	if err := store.LogSave(&step, logEntries); err != nil {
-		t.Errorf("Unexpected error: log create: %s", err)
-	}
+	assert.NoError(t, store.LogSave(&step, logEntries))
 
 	logEntry := &model.LogEntry{
 		StepID: step.ID,
@@ -91,16 +90,9 @@ func TestLogAppend(t *testing.T) {
 		Time:   20,
 	}
 
-	if err := store.LogAppend(logEntry); err != nil {
-		t.Errorf("Unexpected error: log append: %s", err)
-	}
+	assert.NoError(t, store.LogAppend(logEntry))
 
 	_logEntries, err := store.LogFind(&step)
-	if err != nil {
-		t.Errorf("Unexpected error: log find: %s", err)
-	}
-
-	if got, want := len(_logEntries), len(logEntries)+1; got != want {
-		t.Errorf("Want %d log entries, got %d", want, got)
-	}
+	assert.NoError(t, err)
+	assert.Len(t, _logEntries, len(logEntries)+1)
 }

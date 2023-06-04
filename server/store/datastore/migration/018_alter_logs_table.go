@@ -41,6 +41,10 @@ type oldLogs018 struct {
 	Data   []byte `xorm:"LONGBLOB 'log_data'"`
 }
 
+func (oldLogs018) TableName() string {
+	return "logs"
+}
+
 type oldLogEntry018 struct {
 	Step string `json:"step,omitempty"`
 	Time int64  `json:"time,omitempty"`

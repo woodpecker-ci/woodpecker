@@ -536,10 +536,8 @@ func DeletePipelineLogs(c *gin.Context) {
 	}
 
 	for _, step := range steps {
-		logs := make([]*model.LogEntry, 0)
-		lerr := _store.LogSave(step, logs)
-		if lerr != nil {
-			err = lerr
+		if lErr := _store.LogDelete(step); err != nil {
+			err = errors.Join(err, lErr)
 		}
 	}
 	if err != nil {

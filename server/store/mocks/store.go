@@ -1101,6 +1101,20 @@ func (_m *Store) LogAppend(logEntry *model.LogEntry) error {
 	return r0
 }
 
+// LogDelete provides a mock function with given fields: _a0
+func (_m *Store) LogDelete(_a0 *model.Step) error {
+	ret := _m.Called(_a0)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*model.Step) error); ok {
+		r0 = rf(_a0)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // LogFind provides a mock function with given fields: _a0
 func (_m *Store) LogFind(_a0 *model.Step) ([]*model.LogEntry, error) {
 	ret := _m.Called(_a0)

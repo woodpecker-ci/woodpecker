@@ -15,12 +15,14 @@
 package datastore
 
 import (
+	"fmt"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 func (s storage) LogFind(step *model.Step) ([]*model.LogEntry, error) {
 	var logEntries []*model.LogEntry
-	return logEntries, s.engine.Find(&logEntries)
+	return logEntries, s.engine.Asc("log_line").Where("log_step_id = ?", step.ID).Find(&logEntries)
 }
 
 func (s storage) LogSave(step *model.Step, logEntries []*model.LogEntry) error {
@@ -31,6 +33,9 @@ func (s storage) LogSave(step *model.Step, logEntries []*model.LogEntry) error {
 	}
 
 	for _, logEntry := range logEntries {
+		if logEntry.StepID != step.ID {
+			return fmt.Errorf("got a log-entry with step id '%d' but require '%d'", logEntry.StepID, step.ID)
+		}
 		if _, err := sess.Insert(logEntry); err != nil {
 			return err
 		}
@@ -41,5 +46,10 @@ func (s storage) LogSave(step *model.Step, logEntries []*model.LogEntry) error {
 
 func (s storage) LogAppend(logEntry *model.LogEntry) error {
 	_, err := s.engine.Insert(logEntry)
+	return err
+}
+
+func (s storage) LogDelete(step *model.Step) error {
+	_, err := s.engine.Where("log_step_id = ?", step.ID).Delete(new(model.LogEntry))
 	return err
 }

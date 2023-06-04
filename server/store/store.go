@@ -146,6 +146,7 @@ type Store interface {
 	LogFind(*model.Step) ([]*model.LogEntry, error)
 	LogSave(*model.Step, []*model.LogEntry) error
 	LogAppend(logEntry *model.LogEntry) error
+	LogDelete(*model.Step) error
 
 	// Tasks
 	// TaskList TODO: paginate & opt filter
