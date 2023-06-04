@@ -287,6 +287,7 @@ func (c *client) Log(ctx context.Context, logEntry *rpc.LogEntry) (err error) {
 	req.LogEntry.Data = logEntry.Data
 	req.LogEntry.Line = int32(logEntry.Line)
 	req.LogEntry.Time = logEntry.Time
+	req.LogEntry.Type = int32(logEntry.Type)
 	for {
 		_, err = c.client.Log(ctx, req)
 		if err == nil {

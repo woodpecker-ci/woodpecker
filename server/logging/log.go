@@ -62,9 +62,9 @@ func (l *log) Open(_ context.Context, path string) error {
 	return nil
 }
 
-func (l *log) Write(_ context.Context, path string, logEntry *model.LogEntry) error {
+func (l *log) Write(_ context.Context, stepID string, logEntry *model.LogEntry) error {
 	l.Lock()
-	s, ok := l.streams[path]
+	s, ok := l.streams[stepID]
 	l.Unlock()
 	if !ok {
 		return ErrNotFound

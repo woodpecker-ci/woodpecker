@@ -27,13 +27,15 @@ const (
 
 type LogEntry struct {
 	ID      int64        `json:"id"       xorm:"pk autoincr"`
-	StepID  int64        `json:"step_id"  xorm:"UNIQUE(log)"`
+	StepID  int64        `json:"step_id"`
 	Time    int64        `json:"time"`
-	Line    int          `json:"line"     xorm:"UNIQUE(log)"`
+	Line    int          `json:"line"`
 	Data    []byte       `json:"data"     xorm:"LONGBLOB"`
 	Created int64        `json:"-"        xorm:"created"`
 	Type    LogEntryType `json:"type"`
 }
+
+// TODO: store info what specific command the line belongs to (must be optional and impl. by backend)
 
 func (LogEntry) TableName() string {
 	return "log_entries"

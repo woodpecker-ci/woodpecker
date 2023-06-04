@@ -86,6 +86,8 @@ func (w *LineWriter) Write(p []byte) (n int, err error) {
 		StepID: w.stepID,
 		Time:   int64(time.Since(w.now).Seconds()),
 		Type:   LogEntryStdout,
+		// TODO: figure out a way to calc and set correct line number
+		Line: w.num,
 	}
 	if err := w.peer.Log(context.Background(), line); err != nil {
 		log.Error().Err(err).Msgf("fail to write pipeline log to peer '%d'", w.stepID)

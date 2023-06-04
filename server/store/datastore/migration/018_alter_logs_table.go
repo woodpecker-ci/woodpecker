@@ -22,19 +22,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-// old:
-// - log_id
-// - log_step_id
-// - log_data
-
-// new:
-// - log_id
-// - log_step_id
-// - log_time
-// - log_pos
-// - log_data (raw text)
-// - log_command (can be added later when we support executing command by command)
-
 type oldLogs018 struct {
 	ID     int64  `xorm:"pk autoincr 'log_id'"`
 	StepID int64  `xorm:"UNIQUE 'log_step_id'"`

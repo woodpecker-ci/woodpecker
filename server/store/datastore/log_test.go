@@ -47,12 +47,6 @@ func TestLogCreateFind(t *testing.T) {
 	// first insert should just work
 	assert.NoError(t, store.LogSave(&step, logEntries))
 
-	// reset id and check against unique constrains (stepID+lineNr)
-	for i := range logEntries {
-		logEntries[i].ID = 0
-	}
-	assert.Error(t, store.LogSave(&step, logEntries))
-
 	// we want to find our inserted logs
 	_logEntries, err := store.LogFind(&step)
 	assert.NoError(t, err)
