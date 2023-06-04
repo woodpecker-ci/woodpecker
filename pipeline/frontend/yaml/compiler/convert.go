@@ -10,7 +10,7 @@ import (
 	"github.com/rs/zerolog/log"
 
 	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/compiler/settings"
 )
@@ -155,7 +155,7 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 
 	failure := container.Failure
 	if container.Failure == "" {
-		failure = frontend.FailureFail
+		failure = metadata.FailureFail
 	}
 
 	return &backend.Step{

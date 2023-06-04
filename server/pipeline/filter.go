@@ -22,6 +22,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
+	"github.com/woodpecker-ci/woodpecker/server"
 	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
@@ -36,6 +37,7 @@ func zeroSteps(currentPipeline *model.Pipeline, forgeYamlConfigs []*forge_types.
 		Regs:  []*model.Registry{},
 		Link:  "",
 		Yamls: forgeYamlConfigs,
+		Forge: server.Config.Services.Forge,
 	}
 
 	pipelineItems, err := b.Build()
@@ -51,22 +53,20 @@ func zeroSteps(currentPipeline *model.Pipeline, forgeYamlConfigs []*forge_types.
 
 // TODO: parse yaml once and not for each filter function (-> move server/pipeline/filter* into pipeline/step_builder)
 // Check if at least one pipeline step will be execute otherwise we will just ignore this webhook
-func checkIfFiltered(pipeline *model.Pipeline, forgeYamlConfigs []*forge_types.FileMeta) (bool, error) {
-	log.Trace().Msgf("hook.branchFiltered(): pipeline branch: '%s' pipeline event: '%s' config count: %d", pipeline.Branch, pipeline.Event, len(forgeYamlConfigs))
+func checkIfFiltered(repo *model.Repo, p *model.Pipeline, forgeYamlConfigs []*forge_types.FileMeta) (bool, error) {
+	log.Trace().Msgf("hook.branchFiltered(): pipeline branch: '%s' pipeline event: '%s' config count: %d", p.Branch, p.Event, len(forgeYamlConfigs))
 
-	matchMetadata := frontend.Metadata{
-		Curr: frontend.Pipeline{
-			Event: string(pipeline.Event),
-			Commit: frontend.Commit{
-				Branch: pipeline.Branch,
-			},
-		},
-	}
+	matchMetadata := frontend.MetadataFromStruct(server.Config.Services.Forge, repo, p, nil, nil, "")
 
 	for _, forgeYamlConfig := range forgeYamlConfigs {
-		parsedPipelineConfig, err := yaml.ParseBytes(forgeYamlConfig.Data)
+		substitutedConfigData, err := frontend.EnvVarSubst(string(forgeYamlConfig.Data), matchMetadata.Environ())
 		if err != nil {
-			log.Trace().Msgf("parse config '%s': %s", forgeYamlConfig.Name, err)
+			log.Trace().Err(err).Msgf("failed to substitute config '%s'", forgeYamlConfig.Name)
+			return false, err
+		}
+		parsedPipelineConfig, err := yaml.ParseString(substitutedConfigData)
+		if err != nil {
+			log.Trace().Err(err).Msgf("failed to parse config '%s'", forgeYamlConfig.Name)
 			return false, err
 		}
 		log.Trace().Msgf("config '%s': %#v", forgeYamlConfig.Name, parsedPipelineConfig)
@@ -76,11 +76,6 @@ func checkIfFiltered(pipeline *model.Pipeline, forgeYamlConfigs []*forge_types.F
 			continue
 		} else if err != nil {
 			return false, err
-		}
-
-		// ignore if the pipeline was filtered by the branch (legacy)
-		if !parsedPipelineConfig.Branches.Match(pipeline.Branch) {
-			continue
 		}
 
 		// at least one config yielded in a valid run.

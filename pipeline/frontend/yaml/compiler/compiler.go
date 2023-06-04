@@ -2,10 +2,11 @@ package compiler
 
 import (
 	"fmt"
+	"path"
 	"strings"
 
 	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
 	"github.com/woodpecker-ci/woodpecker/shared/constant"
 )
@@ -75,7 +76,7 @@ type Compiler struct {
 	cloneEnv          map[string]string
 	base              string
 	path              string
-	metadata          frontend.Metadata
+	metadata          metadata.Metadata
 	registries        []Registry
 	secrets           secretMap
 	cacher            Cacher
@@ -156,7 +157,7 @@ func (c *Compiler) Compile(conf *yaml.Config) (*backend.Config, error) {
 	// add default clone step
 	if !c.local && len(conf.Clone.Containers) == 0 && !conf.SkipClone {
 		cloneSettings := map[string]interface{}{"depth": "0"}
-		if c.metadata.Curr.Event == frontend.EventTag {
+		if c.metadata.Curr.Event == metadata.EventTag {
 			cloneSettings["tags"] = "true"
 		}
 		container := &yaml.Container{
@@ -263,7 +264,7 @@ func (c *Compiler) setupCache(conf *yaml.Config, ir *backend.Config) {
 		return
 	}
 
-	container := c.cacher.Restore(c.metadata.Repo.Name, c.metadata.Curr.Commit.Branch, conf.Cache)
+	container := c.cacher.Restore(path.Join(c.metadata.Repo.Owner, c.metadata.Repo.Name), c.metadata.Curr.Commit.Branch, conf.Cache)
 	name := fmt.Sprintf("%s_restore_cache", c.prefix)
 	step := c.createProcess(name, container, "cache")
 
@@ -276,10 +277,10 @@ func (c *Compiler) setupCache(conf *yaml.Config, ir *backend.Config) {
 }
 
 func (c *Compiler) setupCacheRebuild(conf *yaml.Config, ir *backend.Config) {
-	if c.local || len(conf.Cache) == 0 || c.metadata.Curr.Event != frontend.EventPush || c.cacher == nil {
+	if c.local || len(conf.Cache) == 0 || c.metadata.Curr.Event != metadata.EventPush || c.cacher == nil {
 		return
 	}
-	container := c.cacher.Rebuild(c.metadata.Repo.Name, c.metadata.Curr.Commit.Branch, conf.Cache)
+	container := c.cacher.Rebuild(path.Join(c.metadata.Repo.Owner, c.metadata.Repo.Name), c.metadata.Curr.Commit.Branch, conf.Cache)
 
 	name := fmt.Sprintf("%s_rebuild_cache", c.prefix)
 	step := c.createProcess(name, container, "cache")
