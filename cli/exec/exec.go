@@ -324,7 +324,7 @@ var defaultLogger = pipeline.LogFunc(func(step *backendTypes.Step, rc multipart.
 		return err
 	}
 
-	logStream := NewLineWriter(step.Alias)
+	logStream := NewLineWriter(step.Alias, step.UUID)
 	_, err = io.Copy(logStream, part)
 	return err
 })
