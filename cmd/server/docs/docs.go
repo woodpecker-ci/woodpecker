@@ -4233,6 +4233,9 @@ const docTemplate = `{
                 },
                 "state": {
                     "$ref": "#/definitions/StatusValue"
+                },
+                "uuid": {
+                    "type": "string"
                 }
             }
         },
