@@ -26,8 +26,6 @@ var reUsername = regexp.MustCompile("^[a-zA-Z0-9-_.]+$")
 var errUserLoginInvalid = errors.New("Invalid User Login")
 
 // User represents a registered user.
-//
-// swagger:model user
 type User struct {
 	// the id for this user.
 	//
@@ -66,7 +64,7 @@ type User struct {
 
 	// Hash is a unique token used to sign tokens.
 	Hash string `json:"-" xorm:"UNIQUE varchar(500) 'user_hash'"`
-}
+} //	@name User
 
 // TableName return database table name for xorm
 func (User) TableName() string {

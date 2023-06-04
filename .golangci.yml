@@ -40,10 +40,6 @@ run:
 
 issues:
   exclude-rules:
-    - path: woodpecker-go/woodpecker/client.go|server/swagger/swagger.go
-      linters:
-        - deadcode
-        - unused
     # gin force us to use string as context key
     - path: server/store/context.go
       linters:

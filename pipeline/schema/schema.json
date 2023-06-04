@@ -243,6 +243,9 @@
           "type": "string",
           "enum": ["fail", "ignore"],
           "default": "fail"
+        },
+        "backend_options": {
+          "$ref": "#/definitions/step_backend_options"
         }
       }
     },
@@ -479,6 +482,43 @@
     "step_directory": {
       "description": "Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#directory",
       "type": "string"
+    },
+    "step_backend_options": {
+      "description": "Advanced options for the different agent backends",
+      "type": "object",
+      "properties": {
+        "kubernetes" :{
+          "$ref": "#/definitions/step_backend_kubernetes_resources"
+        }
+      }
+    },
+    "step_backend_kubernetes": {
+      "description": "Advanced options for the kubernetes agent backends",
+      "type": "object",
+      "properties": {
+        "resources" :{
+          "$ref": "#/definitions/step_backend_kubernetes_resources"
+        }
+      }
+    },
+    "step_backend_kubernetes_resources": {
+      "description": "Resources for the kubernetes backend. Read more: https://woodpecker-ci.org/docs/administration/backends/kubernetes",
+      "type": "object",
+      "properties": {
+        "requests": {
+          "$ref": "#/definitions/step_kubernetes_resources_object"
+        },
+        "limits": {
+          "$ref": "#/definitions/step_kubernetes_resources_object"
+        }
+      }
+    },
+    "step_kubernetes_resources_object": {
+      "description": "A list of kubernetes resource mappings",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
     },
     "services": {
       "description": "Read more: https://woodpecker-ci.org/docs/usage/services",

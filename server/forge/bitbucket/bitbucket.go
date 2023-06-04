@@ -46,7 +46,7 @@ type Opts struct {
 
 type config struct {
 	API    string
-	URL    string
+	url    string
 	Client string
 	Secret string
 }
@@ -56,7 +56,7 @@ type config struct {
 func New(opts *Opts) (forge.Forge, error) {
 	return &config{
 		API:    DefaultAPI,
-		URL:    DefaultURL,
+		url:    DefaultURL,
 		Client: opts.Client,
 		Secret: opts.Secret,
 	}, nil
@@ -66,6 +66,11 @@ func New(opts *Opts) (forge.Forge, error) {
 // Name returns the string name of this driver
 func (c *config) Name() string {
 	return "bitbucket"
+}
+
+// URL returns the root url of a configured forge
+func (c *config) URL() string {
+	return c.url
 }
 
 // Login authenticates an account with Bitbucket using the oauth2 protocol. The
@@ -332,8 +337,8 @@ func (c *config) newConfig(redirect string) *oauth2.Config {
 		ClientID:     c.Client,
 		ClientSecret: c.Secret,
 		Endpoint: oauth2.Endpoint{
-			AuthURL:  fmt.Sprintf("%s/site/oauth2/authorize", c.URL),
-			TokenURL: fmt.Sprintf("%s/site/oauth2/access_token", c.URL),
+			AuthURL:  fmt.Sprintf("%s/site/oauth2/authorize", c.url),
+			TokenURL: fmt.Sprintf("%s/site/oauth2/access_token", c.url),
 		},
 		RedirectURL: fmt.Sprintf("%s/authorize", redirect),
 	}

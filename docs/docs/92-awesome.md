@@ -39,6 +39,7 @@ If you have some missing resources, please feel free to [open a pull-request](ht
 - [Using Woodpecker CI for my static sites](https://jan.wildeboer.net/2022/07/Woodpecker-CI-Jekyll/)
 - [Woodpecker CI @ Codeberg](https://www.sarkasti.eu/articles/post/woodpecker/)
 - [Deploy Docker/Compose using Woodpecker CI](https://hinty.io/vverenko/deploy-docker-compose-using-woodpecker-ci/)
+- [Installing Woodpecker CI in your personal homelab](https://pwa.io/articles/installing-woodpecker-in-your-homelab/)
 
 ## Videos
 

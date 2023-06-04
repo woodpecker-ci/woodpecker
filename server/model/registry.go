@@ -51,7 +51,6 @@ type RegistryStore interface {
 }
 
 // Registry represents a docker registry with credentials.
-// swagger:model registry
 type Registry struct {
 	ID       int64  `json:"id"       xorm:"pk autoincr 'registry_id'"`
 	RepoID   int64  `json:"-"        xorm:"UNIQUE(s) INDEX 'registry_repo_id'"`
@@ -60,7 +59,7 @@ type Registry struct {
 	Password string `json:"password" xorm:"TEXT 'registry_password'"`
 	Token    string `json:"token"    xorm:"TEXT 'registry_token'"`
 	Email    string `json:"email"    xorm:"varchar(500) 'registry_email'"`
-}
+} //	@name Registry
 
 // Validate validates the registry information.
 func (r *Registry) Validate() error {

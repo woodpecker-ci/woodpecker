@@ -1,4 +1,4 @@
-// Copyright 2018 Drone.IO Inc.
+// Copyright 2023 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,20 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package classification Drone API.
-//
-//	Schemes: http, https
-//	BasePath: /api
-//	Version: 1.0.0
-//
-//	Consumes:
-//	- application/json
-//
-//	Produces:
-//	- application/json
-//
-// swagger:meta
-package swagger
+package migration
 
-//go:generate swagger generate spec -o files/swagger.json
-//go:generate go-bindata -pkg swagger -o swagger_gen.go files/
+import (
+	"xorm.io/xorm"
+)
+
+var removeMachineCol = task{
+	name: "remove-machine-col",
+	fn: func(sess *xorm.Session) error {
+		return dropTableColumns(sess, "steps", "step_machine")
+	},
+}

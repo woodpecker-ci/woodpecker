@@ -54,6 +54,11 @@ module.exports = {
             label: 'Awesome',
           },
           {
+            to: '/api',
+            position: 'left',
+            label: 'API',
+          },
+          {
             type: 'docsVersionDropdown',
             position: 'right',
           },
@@ -222,6 +227,23 @@ module.exports = {
           customCss: require.resolve('./src/css/custom.css'),
         },
       }),
+    ],
+    [
+      'redocusaurus',
+      {
+        // Plugin Options for loading OpenAPI files
+        specs: [
+          {
+            spec: 'swagger.json',
+            route: '/api/',
+          },
+        ],
+        // Theme Options for modifying how redoc renders them
+        theme: {
+          // Change with your site colors
+          primaryColor: '#1890ff',
+        },
+      },
     ],
   ],
   webpack: {
