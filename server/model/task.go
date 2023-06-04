@@ -35,7 +35,7 @@ type Task struct {
 	RunOn        []string               `json:"run_on"       xorm:"json 'task_run_on'"`
 	DepStatus    map[string]StatusValue `json:"dep_status"   xorm:"json 'task_dep_status'"`
 	AgentID      int64                  `json:"agent_id"     xorm:"'agent_id'"`
-}
+} //	@name Task
 
 // TableName return database table name for xorm
 func (Task) TableName() string {

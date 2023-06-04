@@ -68,7 +68,6 @@ type SecretStore interface {
 }
 
 // Secret represents a secret variable, such as a password or token.
-// swagger:model registry
 type Secret struct {
 	ID          int64          `json:"id"              xorm:"pk autoincr 'secret_id'"`
 	Owner       string         `json:"-"               xorm:"NOT NULL DEFAULT '' UNIQUE(s) INDEX 'secret_owner'"`
@@ -80,7 +79,7 @@ type Secret struct {
 	Events      []WebhookEvent `json:"event"           xorm:"json 'secret_events'"`
 	SkipVerify  bool           `json:"-"               xorm:"secret_skip_verify"`
 	Conceal     bool           `json:"-"               xorm:"secret_conceal"`
-}
+} //	@name Secret
 
 // TableName return database table name for xorm
 func (Secret) TableName() string {
