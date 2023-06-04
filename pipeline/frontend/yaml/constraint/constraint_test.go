@@ -432,13 +432,13 @@ func TestConstraints(t *testing.T) {
 		{
 			desc: "repo constraint",
 			conf: "{ repo: owner/* }",
-			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush}, Repo: metadata.Repo{Name: "owner/repo"}},
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush}, Repo: metadata.Repo{Owner: "owner", Name: "repo"}},
 			want: true,
 		},
 		{
 			desc: "repo constraint",
 			conf: "{ repo: octocat/* }",
-			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush}, Repo: metadata.Repo{Name: "owner/repo"}},
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush}, Repo: metadata.Repo{Owner: "owner", Name: "repo"}},
 			want: false,
 		},
 		{
@@ -521,7 +521,7 @@ func TestConstraints(t *testing.T) {
 		{
 			desc: "filter by eval based on event and repo",
 			conf: `{ evaluate: 'CI_PIPELINE_EVENT == "push" && CI_REPO == "owner/repo"' }`,
-			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush}, Repo: metadata.Repo{Name: "owner/repo"}},
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush}, Repo: metadata.Repo{Owner: "owner", Name: "repo"}},
 			want: true,
 		},
 	}

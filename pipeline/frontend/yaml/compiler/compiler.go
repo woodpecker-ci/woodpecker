@@ -2,6 +2,7 @@ package compiler
 
 import (
 	"fmt"
+	"path"
 	"strings"
 
 	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
@@ -263,7 +264,7 @@ func (c *Compiler) setupCache(conf *yaml.Config, ir *backend.Config) {
 		return
 	}
 
-	container := c.cacher.Restore(c.metadata.Repo.Name, c.metadata.Curr.Commit.Branch, conf.Cache)
+	container := c.cacher.Restore(path.Join(c.metadata.Repo.Owner, c.metadata.Repo.Name), c.metadata.Curr.Commit.Branch, conf.Cache)
 	name := fmt.Sprintf("%s_restore_cache", c.prefix)
 	step := c.createProcess(name, container, "cache")
 
@@ -279,7 +280,7 @@ func (c *Compiler) setupCacheRebuild(conf *yaml.Config, ir *backend.Config) {
 	if c.local || len(conf.Cache) == 0 || c.metadata.Curr.Event != metadata.EventPush || c.cacher == nil {
 		return
 	}
-	container := c.cacher.Rebuild(c.metadata.Repo.Name, c.metadata.Curr.Commit.Branch, conf.Cache)
+	container := c.cacher.Rebuild(path.Join(c.metadata.Repo.Owner, c.metadata.Repo.Name), c.metadata.Curr.Commit.Branch, conf.Cache)
 
 	name := fmt.Sprintf("%s_rebuild_cache", c.prefix)
 	step := c.createProcess(name, container, "cache")

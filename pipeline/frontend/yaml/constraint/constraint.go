@@ -3,6 +3,7 @@ package constraint
 import (
 	"errors"
 	"fmt"
+	"path"
 	"strings"
 
 	"github.com/antonmedv/expr"
@@ -150,7 +151,7 @@ func (c *Constraint) Match(m metadata.Metadata, global bool) (bool, error) {
 	match = match && c.Platform.Match(m.Sys.Platform) &&
 		c.Environment.Match(m.Curr.Target) &&
 		c.Event.Match(m.Curr.Event) &&
-		c.Repo.Match(m.Repo.Name) &&
+		c.Repo.Match(path.Join(m.Repo.Owner, m.Repo.Name)) &&
 		c.Ref.Match(m.Curr.Commit.Ref) &&
 		c.Instance.Match(m.Sys.Host)
 

@@ -65,10 +65,13 @@ func MetadataFromStruct(forge metadata.ServerForge, repo *model.Repo, pipeline, 
 			Trusted:  repo.IsTrusted,
 		}
 
-		if idx := strings.LastIndex(repo.FullName, "/"); idx != -1 && repo.Name == "" && repo.FullName != "" {
-			fRepo.Name = repo.FullName[idx+1:]
-		} else if idx != -1 && repo.Owner == "" && repo.FullName != "" {
-			fRepo.Owner = repo.FullName[:idx]
+		if idx := strings.LastIndex(repo.FullName, "/"); idx != -1 {
+			if fRepo.Name == "" && repo.FullName != "" {
+				fRepo.Name = repo.FullName[idx+1:]
+			}
+			if fRepo.Owner == "" && repo.FullName != "" {
+				fRepo.Owner = repo.FullName[:idx]
+			}
 		}
 	}
 
