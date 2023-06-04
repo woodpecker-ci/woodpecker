@@ -30,6 +30,8 @@ type (
 	// Repo defines runtime metadata for a repository.
 	Repo struct {
 		Name     string   `json:"name,omitempty"`
+		Owner    string   `json:"owner,omitempty"`
+		RemoteID string   `json:"remote_id,omitempty"`
 		Link     string   `json:"link,omitempty"`
 		CloneURL string   `json:"clone_url,omitempty"`
 		Private  bool     `json:"private,omitempty"`

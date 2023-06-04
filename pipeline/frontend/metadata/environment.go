@@ -15,6 +15,7 @@
 package metadata
 
 import (
+	"path"
 	"regexp"
 	"strconv"
 	"strings"
@@ -25,19 +26,9 @@ var pullRegexp = regexp.MustCompile(`\d+`)
 // Environ returns the metadata as a map of environment variables.
 func (m *Metadata) Environ() map[string]string {
 	var (
-		repoOwner    string
-		repoName     string
 		sourceBranch string
 		targetBranch string
 	)
-
-	repoParts := strings.Split(m.Repo.Name, "/")
-	if len(repoParts) == 2 {
-		repoOwner = repoParts[0]
-		repoName = repoParts[1]
-	} else {
-		repoName = m.Repo.Name
-	}
 
 	branchParts := strings.Split(m.Curr.Commit.Refspec, ":")
 	if len(branchParts) == 2 {
@@ -47,9 +38,10 @@ func (m *Metadata) Environ() map[string]string {
 
 	params := map[string]string{
 		"CI":                     m.Sys.Name,
-		"CI_REPO":                m.Repo.Name,
-		"CI_REPO_OWNER":          repoOwner,
-		"CI_REPO_NAME":           repoName,
+		"CI_REPO":                path.Join(m.Repo.Owner, m.Repo.Name),
+		"CI_REPO_NAME":           m.Repo.Name,
+		"CI_REPO_OWNER":          m.Repo.Owner,
+		"CI_REPO_REMOTE_ID":      m.Repo.RemoteID,
 		"CI_REPO_SCM":            "git",
 		"CI_REPO_URL":            m.Repo.Link,
 		"CI_REPO_CLONE_URL":      m.Repo.CloneURL,

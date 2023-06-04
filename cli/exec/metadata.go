@@ -16,6 +16,7 @@ package exec
 
 import (
 	"runtime"
+	"strings"
 
 	"github.com/urfave/cli/v2"
 
@@ -31,12 +32,22 @@ func metadataFromContext(c *cli.Context, axis matrix.Axis) metadata.Metadata {
 		platform = runtime.GOOS + "/" + runtime.GOARCH
 	}
 
+	fullRepoName := c.String("repo-name")
+	repoOwner := ""
+	repoName := ""
+	if idx := strings.LastIndex(fullRepoName, "/"); idx != -1 {
+		repoOwner = fullRepoName[:idx]
+		repoName = fullRepoName[idx+1:]
+	}
+
 	return metadata.Metadata{
 		Repo: metadata.Repo{
-			Name:     c.String("repo-name"),
+			Name:     repoName,
+			Owner:    repoOwner,
 			Link:     c.String("repo-link"),
 			CloneURL: c.String("repo-clone-url"),
 			Private:  c.Bool("repo-private"),
+			Trusted:  c.Bool("repo-trusted"),
 		},
 		Curr: metadata.Pipeline{
 			Number:   c.Int64("pipeline-number"),

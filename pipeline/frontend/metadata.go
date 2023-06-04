@@ -55,7 +55,9 @@ func MetadataFromStruct(forge metadata.ServerForge, repo *model.Repo, pipeline, 
 	fRepo := metadata.Repo{}
 	if repo != nil {
 		fRepo = metadata.Repo{
-			Name:     repo.FullName,
+			Name:     repo.Name,
+			Owner:    repo.Owner,
+			RemoteID: fmt.Sprint(repo.ForgeRemoteID),
 			Link:     repo.Link,
 			CloneURL: repo.Clone,
 			Private:  repo.IsSCMPrivate,
