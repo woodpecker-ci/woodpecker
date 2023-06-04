@@ -8,7 +8,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-// TODO: write adapter for external pubsub provider
+// TODO(#742): write adapter for external pubsub provider
 
 // ErrNotFound is returned when the log does not exist.
 var ErrNotFound = errors.New("stream: not found")
