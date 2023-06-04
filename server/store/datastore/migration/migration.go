@@ -46,6 +46,7 @@ var migrationTasks = []*task{
 	&removeInactiveRepos,
 	&dropFiles,
 	&removeMachineCol,
+	&alterLogsTable,
 }
 
 var allBeans = []interface{}{
