@@ -120,7 +120,7 @@ var flags = []cli.Flag{
 		Usage:   "full repo name",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_REPO_NAME"},
+		EnvVars: []string{"CI_REPO_REMOTE_ID"},
 		Name:    "repo-remote-id",
 	},
 	&cli.StringFlag{
