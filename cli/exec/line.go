@@ -19,39 +19,23 @@ import (
 	"os"
 	"strings"
 	"time"
-)
 
-// Identifies the type of line in the logs.
-const (
-	LineStdout int = iota
-	LineStderr
-	LineExitCode
-	LineMetadata
-	LineProgress
+	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
 )
-
-// Line is a line of console output.
-type Line struct {
-	Step string `json:"step,omitempty"`
-	Time int64  `json:"time,omitempty"`
-	Type int    `json:"type,omitempty"`
-	Pos  int    `json:"pos,omitempty"`
-	Out  string `json:"out,omitempty"`
-}
 
 // LineWriter sends logs to the client.
 type LineWriter struct {
-	name  string
-	num   int
-	now   time.Time
-	rep   *strings.Replacer
-	lines []*Line
+	stepID int64
+	num    int
+	now    time.Time
+	rep    *strings.Replacer
+	lines  []*rpc.LogEntry
 }
 
 // NewLineWriter returns a new line reader.
-func NewLineWriter(name string) *LineWriter {
+func NewLineWriter(stepID int64) *LineWriter {
 	w := new(LineWriter)
-	w.name = name
+	w.stepID = stepID
 	w.num = 0
 	w.now = time.Now().UTC()
 
@@ -59,20 +43,20 @@ func NewLineWriter(name string) *LineWriter {
 }
 
 func (w *LineWriter) Write(p []byte) (n int, err error) {
-	out := string(p)
+	data := string(p)
 	if w.rep != nil {
-		out = w.rep.Replace(out)
+		data = w.rep.Replace(data)
 	}
 
-	line := &Line{
-		Out:  out,
-		Step: w.name,
-		Pos:  w.num,
-		Time: int64(time.Since(w.now).Seconds()),
-		Type: LineStdout,
+	line := &rpc.LogEntry{
+		Data:   data,
+		StepID: w.stepID,
+		Line:   w.num,
+		Time:   int64(time.Since(w.now).Seconds()),
+		Type:   rpc.LogEntryStdout,
 	}
 
-	fmt.Fprintf(os.Stderr, "[%s:L%d:%ds] %s", w.name, w.num, int64(time.Since(w.now).Seconds()), out)
+	fmt.Fprintf(os.Stderr, "[%d:L%d:%ds] %s", w.stepID, w.num, int64(time.Since(w.now).Seconds()), data)
 
 	w.num++
 

@@ -53,7 +53,8 @@ message LogEntry {
   int64  step_id = 1;
   int64  time = 2;
   int32  line = 3;
-  string data = 4;
+  int32  type = 4; // 0 = stdout, 1 = stderr, 2 = exit-code, 3 = metadata, 4 = progress
+  string data = 5;
 }
 
 message Filter {

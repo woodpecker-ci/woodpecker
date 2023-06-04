@@ -28,11 +28,11 @@ import (
 
 // Identifies the type of line in the logs.
 const (
-	LineStdout int = iota
-	LineStderr
-	LineExitCode
-	LineMetadata
-	LineProgress
+	LogEntryStdout int = iota
+	LogEntryStderr
+	LogEntryExitCode
+	LogEntryMetadata
+	LogEntryProgress
 )
 
 // Line is a line of console output.
@@ -46,7 +46,7 @@ type LogEntry struct {
 
 func (l *LogEntry) String() string {
 	switch l.Type {
-	case LineExitCode:
+	case LogEntryExitCode:
 		return fmt.Sprintf("[%d] exit code %s", l.StepID, l.Data)
 	default:
 		return fmt.Sprintf("[%d:L%v:%vs] %s", l.StepID, l.Line, l.Time, l.Data)
@@ -85,7 +85,7 @@ func (w *LineWriter) Write(p []byte) (n int, err error) {
 		Data:   data,
 		StepID: w.stepID,
 		Time:   int64(time.Since(w.now).Seconds()),
-		Type:   LineStdout,
+		Type:   LogEntryStdout,
 	}
 	if err := w.peer.Log(context.Background(), line); err != nil {
 		log.Error().Err(err).Msgf("fail to write pipeline log to peer '%d'", w.stepID)
