@@ -20,7 +20,7 @@ import (
 	"fmt"
 )
 
-type WebhookEvent string
+type WebhookEvent string //	@name WebhookEvent
 
 const (
 	EventPush   WebhookEvent = "push"
@@ -49,7 +49,7 @@ func ValidateWebhookEvent(s WebhookEvent) error {
 }
 
 // StatusValue represent pipeline states woodpecker know
-type StatusValue string
+type StatusValue string //	@name StatusValue
 
 const (
 	StatusSkipped  StatusValue = "skipped"
@@ -64,7 +64,7 @@ const (
 )
 
 // SCMKind represent different version control systems
-type SCMKind string
+type SCMKind string //	@name SCMKind
 
 const (
 	RepoGit      SCMKind = "git"
@@ -74,7 +74,7 @@ const (
 )
 
 // RepoVisibility represent to wat state a repo in woodpecker is visible to others
-type RepoVisibility string
+type RepoVisibility string //	@name RepoVisibility
 
 const (
 	VisibilityPublic   RepoVisibility = "public"
