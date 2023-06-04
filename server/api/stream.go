@@ -137,21 +137,11 @@ func LogStreamSSE(c *gin.Context) {
 	logWriteStringErr(io.WriteString(rw, ": ping\n\n"))
 	flusher.Flush()
 
-	repo := session.Repo(c)
 	_store := store.FromContext(c)
 
-	// parse the pipeline number and step sequence number from
-	// the request parameter.
-	pipelinen, _ := strconv.ParseInt(c.Param("pipeline"), 10, 64)
-	stepn, _ := strconv.Atoi(c.Param("number"))
+	stepID, _ := strconv.ParseInt(c.Param("stepId"), 10, 64)
 
-	pipeline, err := _store.GetPipelineNumber(repo, pipelinen)
-	if err != nil {
-		log.Debug().Msgf("stream cannot get pipeline number: %v", err)
-		logWriteStringErr(io.WriteString(rw, "event: error\ndata: pipeline not found\n\n"))
-		return
-	}
-	step, err := _store.StepFind(pipeline, stepn)
+	step, err := _store.StepLoad(stepID)
 	if err != nil {
 		log.Debug().Msgf("stream cannot get step number: %v", err)
 		logWriteStringErr(io.WriteString(rw, "event: error\ndata: process not found\n\n"))

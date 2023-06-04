@@ -190,7 +190,7 @@ async function download() {
   let logs;
   try {
     downloadInProgress.value = true;
-    logs = await apiClient.getLogs(repo.value.owner, repo.value.name, pipeline.value.number, step.value.pid);
+    logs = await apiClient.getLogs(repo.value.owner, repo.value.name, pipeline.value.number, step.value.id);
   } catch (e) {
     notifications.notifyError(e, i18n.t('repo.pipeline.log_download_error'));
     return;
@@ -239,7 +239,7 @@ async function loadLogs() {
   }
 
   if (isStepFinished(step.value)) {
-    const logs = await apiClient.getLogs(repo.value.owner, repo.value.name, pipeline.value.number, step.value.pid);
+    const logs = await apiClient.getLogs(repo.value.owner, repo.value.name, pipeline.value.number, step.value.id);
     logs?.forEach((line) => writeLog({ index: line.line, text: line.data, time: line.time }));
     flushLogs(false);
   }

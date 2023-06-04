@@ -245,20 +245,16 @@ func GetPipelineLogs(c *gin.Context) {
 //	@Param		pid				path	int		true	"the pipeline id"
 func GetStepLogs(c *gin.Context) {
 	_store := store.FromContext(c)
-	repo := session.Repo(c)
 
 	// parse the pipeline number and step sequence number from
 	// the request parameter.
-	num, _ := strconv.ParseInt(c.Params.ByName("number"), 10, 64)
-	pid, _ := strconv.Atoi(c.Params.ByName("pid"))
-
-	pl, err := _store.GetPipelineNumber(repo, num)
+	stepID, err := strconv.ParseInt(c.Params.ByName("stepId"), 10, 64)
 	if err != nil {
-		handleDbGetError(c, err)
+		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
 
-	step, err := _store.StepFind(pl, pid)
+	step, err := _store.StepLoad(stepID)
 	if err != nil {
 		handleDbGetError(c, err)
 		return
