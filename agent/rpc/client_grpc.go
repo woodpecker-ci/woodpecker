@@ -280,7 +280,6 @@ func (c *client) Update(ctx context.Context, id string, state rpc.State) (err er
 // Log writes the pipeline log entry.
 func (c *client) Log(ctx context.Context, logEntry *rpc.LogEntry) (err error) {
 	req := new(proto.LogRequest)
-	req.Id = logEntry.StepUUID
 	req.LogEntry = new(proto.LogEntry)
 	req.LogEntry.StepUuid = logEntry.StepUUID
 	req.LogEntry.Data = logEntry.Data

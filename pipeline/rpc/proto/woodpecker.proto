@@ -99,8 +99,7 @@ message UpdateRequest {
 }
 
 message LogRequest {
-  string   id = 1;
-  LogEntry logEntry = 2;
+  LogEntry logEntry = 1;
 }
 
 message Empty {
