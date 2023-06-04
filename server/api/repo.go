@@ -35,6 +35,16 @@ import (
 	"github.com/woodpecker-ci/woodpecker/shared/token"
 )
 
+// PostRepo
+//
+//	@Summary	Activate a repository
+//	@Router		/repos/{owner}/{name} [post]
+//	@Produce	json
+//	@Success	200	{object}	Repo
+//	@Tags		Repositories
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		owner			path	string	true	"the repository owner's name"
+//	@Param		name			path	string	true	"the repository name"
 func PostRepo(c *gin.Context) {
 	forge := server.Config.Services.Forge
 	_store := store.FromContext(c)
@@ -134,6 +144,17 @@ func PostRepo(c *gin.Context) {
 	c.JSON(http.StatusOK, repo)
 }
 
+// PatchRepo
+//
+//	@Summary	Change a repository
+//	@Router		/repos/{owner}/{name} [patch]
+//	@Produce	json
+//	@Success	200	{object}	Repo
+//	@Tags		Repositories
+//	@Param		Authorization	header	string			true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		owner			path	string			true	"the repository owner's name"
+//	@Param		name			path	string			true	"the repository name"
+//	@Param		repo			body	RepoPatch	true	"the repository's information"
 func PatchRepo(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
@@ -194,6 +215,16 @@ func PatchRepo(c *gin.Context) {
 	c.JSON(http.StatusOK, repo)
 }
 
+// ChownRepo
+//
+//	@Summary	Change a repository's owner, to the one holding the access token
+//	@Router		/repos/{owner}/{name}/chown [post]
+//	@Produce	json
+//	@Success	200	{object}	Repo
+//	@Tags		Repositories
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		owner			path	string	true	"the repository owner's name"
+//	@Param		name			path	string	true	"the repository name"
 func ChownRepo(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
@@ -208,15 +239,48 @@ func ChownRepo(c *gin.Context) {
 	c.JSON(http.StatusOK, repo)
 }
 
+// GetRepo
+//
+//	@Summary	Get repository information
+//	@Router		/repos/{owner}/{name} [get]
+//	@Produce	json
+//	@Success	200	{object}	Repo
+//	@Tags		Repositories
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		owner			path	string	true	"the repository owner's name"
+//	@Param		name			path	string	true	"the repository name"
 func GetRepo(c *gin.Context) {
 	c.JSON(http.StatusOK, session.Repo(c))
 }
 
+// GetRepoPermissions
+//
+//	@Summary		Repository permission information
+//	@Description	The repository permission, according to the used access token.
+//	@Router			/repos/{owner}/{name}/permissions [get]
+//	@Produce		json
+//	@Success		200	{object}	Perm
+//	@Tags			Repositories
+//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param			owner			path	string	true	"the repository owner's name"
+//	@Param			name			path	string	true	"the repository name"
 func GetRepoPermissions(c *gin.Context) {
 	perm := session.Perm(c)
 	c.JSON(http.StatusOK, perm)
 }
 
+// GetRepoBranches
+//
+//	@Summary	Get repository branches
+//	@Router		/repos/{owner}/{name}/branches [get]
+//	@Produce	json
+//	@Success	200	{array}	string
+//	@Tags		Repositories
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		owner			path	string	true	"the repository owner's name"
+//	@Param		name			path	string	true	"the repository name"
+//	@Param		page			query	int		false	"for response pagination, page offset number"	default(1)
+//	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
 func GetRepoBranches(c *gin.Context) {
 	repo := session.Repo(c)
 	user := session.User(c)
@@ -231,6 +295,18 @@ func GetRepoBranches(c *gin.Context) {
 	c.JSON(http.StatusOK, branches)
 }
 
+// GetRepoPullRequests
+//
+//	@Summary	List active pull requests
+//	@Router		/repos/{owner}/{name}/pull_requests [get]
+//	@Produce	json
+//	@Success	200	{array}	PullRequest
+//	@Tags		Repositories
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		owner			path	string	true	"the repository owner's name"
+//	@Param		name			path	string	true	"the repository name"
+//	@Param		page			query	int		false	"for response pagination, page offset number"	default(1)
+//	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
 func GetRepoPullRequests(c *gin.Context) {
 	repo := session.Repo(c)
 	user := session.User(c)
@@ -245,6 +321,16 @@ func GetRepoPullRequests(c *gin.Context) {
 	c.JSON(http.StatusOK, prs)
 }
 
+// DeleteRepo
+//
+//	@Summary	Delete a repository
+//	@Router		/repos/{owner}/{name} [delete]
+//	@Produce	json
+//	@Success	200	{object}	Repo
+//	@Tags		Repositories
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		owner			path	string	true	"the repository owner's name"
+//	@Param		name			path	string	true	"the repository name"
 func DeleteRepo(c *gin.Context) {
 	remove, _ := strconv.ParseBool(c.Query("remove"))
 	_store := store.FromContext(c)
@@ -274,6 +360,16 @@ func DeleteRepo(c *gin.Context) {
 	c.JSON(http.StatusOK, repo)
 }
 
+// RepairRepo
+//
+//	@Summary	Repair a repository
+//	@Router		/repos/{owner}/{name}/repair [post]
+//	@Produce	plain
+//	@Success	200
+//	@Tags		Repositories
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		owner			path	string	true	"the repository owner's name"
+//	@Param		name			path	string	true	"the repository name"
 func RepairRepo(c *gin.Context) {
 	forge := server.Config.Services.Forge
 	_store := store.FromContext(c)
@@ -336,6 +432,17 @@ func RepairRepo(c *gin.Context) {
 	c.Writer.WriteHeader(http.StatusOK)
 }
 
+// MoveRepo
+//
+//	@Summary	Move a repository to a new owner
+//	@Router		/repos/{owner}/{name}/move [post]
+//	@Produce	plain
+//	@Success	200
+//	@Tags		Repositories
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		owner			path	string	true	"the repository owner's name"
+//	@Param		name			path	string	true	"the repository name"
+//	@Param		to				query	string	true	"the username to move the repository to"
 func MoveRepo(c *gin.Context) {
 	forge := server.Config.Services.Forge
 	_store := store.FromContext(c)

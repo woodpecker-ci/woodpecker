@@ -15,8 +15,6 @@
 package model
 
 // Team represents a team or organization in the forge.
-//
-// swagger:model user
 type Team struct {
 	// Login is the username for this team.
 	Login string `json:"login"`
