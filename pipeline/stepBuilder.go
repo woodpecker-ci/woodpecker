@@ -22,6 +22,7 @@ import (
 	"strings"
 
 	"github.com/drone/envsubst"
+	"github.com/google/uuid"
 	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog/log"
 
@@ -77,6 +78,7 @@ func (b *StepBuilder) Build() ([]*Item, error) {
 
 		for _, axis := range axes {
 			workflow := &model.Step{
+				UUID:       uuid.New().String(), // TODO(#1784): Remove once workflows are a separate entity in database
 				PipelineID: b.Curr.ID,
 				PID:        pidSequence,
 				PGID:       pidSequence,
