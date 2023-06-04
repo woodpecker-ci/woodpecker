@@ -309,17 +309,25 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 
 // Log implements the rpc.Log function
 func (s *RPC) Log(c context.Context, _logEntry *rpc.LogEntry) error {
+	// convert rpc log_entry to model.log_entry
+	step, err := s.store.StepByUUID(_logEntry.StepUUID)
+	if err != nil {
+		return fmt.Errorf("could not find step with uuid %s in store: %w", _logEntry.StepUUID, err)
+	}
 	logEntry := &model.LogEntry{
-		StepID: _logEntry.StepID,
+		StepID: step.ID,
 		Time:   _logEntry.Time,
 		Line:   _logEntry.Line,
 		Data:   []byte(_logEntry.Data),
 		Type:   model.LogEntryType(_logEntry.Type),
 	}
-	// write line to listening web clients
-	if err := s.logger.Write(c, fmt.Sprint(logEntry.StepID), logEntry); err != nil {
-		log.Error().Err(err).Msgf("rpc server could not write to logger")
-	}
+	// make sure writes to pubsub are non blocking (https://github.com/woodpecker-ci/woodpecker/blob/c919f32e0b6432a95e1a6d3d0ad662f591adf73f/server/logging/log.go#L9)
+	go func() {
+		// write line to listening web clients
+		if err := s.logger.Write(c, fmt.Sprint(logEntry.StepID), logEntry); err != nil {
+			log.Error().Err(err).Msgf("rpc server could not write to logger")
+		}
+	}()
 	// make line persistent in database
 	return s.store.LogAppend(logEntry)
 }

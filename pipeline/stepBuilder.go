@@ -140,7 +140,6 @@ func (b *StepBuilder) Build() ([]*Item, error) {
 			}
 
 			ir, err := b.toInternalRepresentation(parsed, environ, metadata, workflow.ID)
-			// TODO: mark compiler return server only!!!
 			if err != nil {
 				return nil, err
 			}

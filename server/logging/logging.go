@@ -32,7 +32,4 @@ type Log interface {
 
 	// Snapshot snapshots the stream to Writer w.
 	Snapshot(c context.Context, stepID string, w io.Writer) error
-
-	// Info returns runtime information about the multiplexer.
-	// Info(c context.Context) (interface{}, error)
 }

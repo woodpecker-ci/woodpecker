@@ -20,10 +20,10 @@ import (
 
 func TestLogEntry(t *testing.T) {
 	line := LogEntry{
-		StepID: int64(123),
-		Time:   60,
-		Line:   1,
-		Data:   "starting redis server",
+		StepUUID: "e9ea76a5-44a1-4059-9c4a-6956c478b26d",
+		Time:     60,
+		Line:     1,
+		Data:     "starting redis server",
 	}
 	got, want := line.String(), "[redis:L1:60s] starting redis server"
 	if got != want {

@@ -146,11 +146,11 @@ func (s *WoodpeckerServer) Extend(c context.Context, req *proto.ExtendRequest) (
 
 func (s *WoodpeckerServer) Log(c context.Context, req *proto.LogRequest) (*proto.Empty, error) {
 	logEntry := &rpc.LogEntry{
-		Data:   req.GetLogEntry().GetData(),
-		Line:   int(req.GetLogEntry().GetLine()),
-		Time:   req.GetLogEntry().GetTime(),
-		StepID: req.GetLogEntry().GetStepId(),
-		Type:   int(req.GetLogEntry().GetType()),
+		Data:     req.GetLogEntry().GetData(),
+		Line:     int(req.GetLogEntry().GetLine()),
+		Time:     req.GetLogEntry().GetTime(),
+		StepUUID: req.GetLogEntry().GetStepUuid(),
+		Type:     int(req.GetLogEntry().GetType()),
 	}
 	res := new(proto.Empty)
 	err := s.peer.Log(c, logEntry)
