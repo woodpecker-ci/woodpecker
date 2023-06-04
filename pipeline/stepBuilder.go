@@ -138,6 +138,7 @@ func (b *StepBuilder) Build() ([]*Item, error) {
 			}
 
 			ir, err := b.toInternalRepresentation(parsed, environ, metadata, workflow.ID)
+			// TODO: mark compiler return server only!!!
 			if err != nil {
 				return nil, err
 			}
@@ -292,6 +293,9 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[
 	).Compile(parsed)
 }
 
+// SetPipelineStepsOnPipeline is the link between pipeline representation in "pipeline package" and server
+// to be specific this func currently is used to convert the pipeline.Item list (crafted by StepBuilder.Build()) into
+// a pipeline that can be stored in the database by the server
 func SetPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*Item) *model.Pipeline {
 	var pidSequence int
 	for _, item := range pipelineItems {
@@ -310,8 +314,9 @@ func SetPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*Item)
 					gid = pidSequence
 				}
 				step := &model.Step{
-					PipelineID: pipeline.ID,
 					Name:       step.Alias,
+					UUID:       step.UUID,
+					PipelineID: pipeline.ID,
 					PID:        pidSequence,
 					PPID:       item.Workflow.PID,
 					PGID:       gid,

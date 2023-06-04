@@ -136,6 +136,7 @@ type Store interface {
 	// Steps
 	StepLoad(int64) (*model.Step, error)
 	StepFind(*model.Pipeline, int) (*model.Step, error)
+	StepByUUID(string) (*model.Step, error)
 	StepChild(*model.Pipeline, int, string) (*model.Step, error)
 	StepList(*model.Pipeline) ([]*model.Step, error)
 	StepCreate([]*model.Step) error

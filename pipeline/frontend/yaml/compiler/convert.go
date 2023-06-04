@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 
 	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
@@ -16,6 +17,8 @@ import (
 
 func (c *Compiler) createProcess(name string, container *yaml.Container, section string) *backend.Step {
 	var (
+		uuid = uuid.New()
+
 		detached   bool
 		workingdir string
 
@@ -157,6 +160,7 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 
 	return &backend.Step{
 		Name:           name,
+		UUID:           uuid.String(),
 		Alias:          container.Name,
 		Image:          container.Image,
 		Pull:           container.Pull,
@@ -164,7 +168,6 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		Privileged:     privileged,
 		WorkingDir:     workingdir,
 		Environment:    environment,
-		Labels:         container.Labels,
 		Commands:       container.Commands,
 		ExtraHosts:     container.ExtraHosts,
 		Volumes:        volumes,

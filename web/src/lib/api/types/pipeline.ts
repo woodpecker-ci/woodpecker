@@ -123,6 +123,7 @@ export type PipelineLog = {
   time: number;
   line: number;
   data: string;
+  type: number;
 };
 
 export type PipelineFeed = Pipeline & {

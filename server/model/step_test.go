@@ -23,6 +23,7 @@ import (
 func TestTree(t *testing.T) {
 	steps := []*Step{{
 		ID:         25,
+		UUID:       "f80df0bb-77a7-4964-9412-2e1049872d57",
 		PID:        2,
 		PipelineID: 6,
 		PPID:       1,
@@ -32,6 +33,7 @@ func TestTree(t *testing.T) {
 		Error:      "0",
 	}, {
 		ID:         24,
+		UUID:       "c19b49c5-990d-4722-ba9c-1c4fe9db1f91",
 		PipelineID: 6,
 		PID:        1,
 		PPID:       0,
@@ -41,6 +43,7 @@ func TestTree(t *testing.T) {
 		Error:      "1",
 	}, {
 		ID:         26,
+		UUID:       "4380146f-c0ff-4482-8107-c90937d1faba",
 		PipelineID: 6,
 		PID:        3,
 		PPID:       1,
@@ -56,6 +59,7 @@ func TestTree(t *testing.T) {
 
 	steps = []*Step{{
 		ID:         25,
+		UUID:       "f80df0bb-77a7-4964-9412-2e1049872d57",
 		PID:        2,
 		PipelineID: 6,
 		PPID:       1,
