@@ -14,11 +14,12 @@
 
 package model
 
-type Logs struct {
-	ID     int64  `xorm:"pk autoincr 'log_id'"`
-	StepID int64  `xorm:"UNIQUE 'log_step_id'"`
-	Time   int64  `xorm:"'log_time'"`
-	Line   int    `xorm:"'log_line'"`
-	Data   []byte `xorm:"LONGBLOB 'log_data'"`
-	// TODO: add create timestamp
+type LogEntry struct {
+	ID      int64  `json:"id"       xorm:"pk autoincr 'log_id'"`
+	StepID  int64  `json:"step_id"  xorm:"UNIQUE 'log_step_id'"`
+	Time    int64  `json:"time"     xorm:"'log_time'"`
+	Line    int    `json:"line"     xorm:"'log_line'"`
+	Data    []byte `json:"data"     xorm:"LONGBLOB 'log_data'"`
+	Created int64  `json:"-"        xorm:"created"`
+	// TODO: should we add type from pipeline/rpc/line.go?
 }

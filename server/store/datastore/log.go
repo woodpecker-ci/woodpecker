@@ -15,48 +15,23 @@
 package datastore
 
 import (
-	"bytes"
-	"io"
-
-	"github.com/woodpecker-ci/woodpecker/server/logging"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-func (s storage) LogFind(step *model.Step) (io.ReadCloser, error) {
-	logs := &model.Logs{
-		StepID: step.ID,
-	}
-	if err := wrapGet(s.engine.Get(logs)); err != nil {
-		return nil, err
-	}
-	buf := bytes.NewBuffer(logs.Data)
-	return io.NopCloser(buf), nil
+func (s storage) LogFind(step *model.Step) ([]*model.LogEntry, error) {
+	var logEntries []*model.LogEntry
+	return logEntries, s.engine.Find(&logEntries)
 }
 
-func (s storage) LogSave(step *model.Step, reader io.Reader) error {
-	data, _ := io.ReadAll(reader)
-
+func (s storage) LogSave(step *model.Step, logEntries []*model.LogEntry) error {
 	sess := s.engine.NewSession()
 	defer sess.Close()
 	if err := sess.Begin(); err != nil {
 		return err
 	}
 
-	logs := new(model.Logs)
-	exist, err := sess.Where("log_step_id = ?", step.ID).Get(logs)
-	if err != nil {
-		return err
-	}
-
-	if exist {
-		if _, err := sess.ID(logs.ID).Cols("log_data").Update(&model.Logs{Data: data}); err != nil {
-			return err
-		}
-	} else {
-		if _, err := sess.Insert(&model.Logs{
-			StepID: step.ID,
-			Data:   data,
-		}); err != nil {
+	for _, logEntry := range logEntries {
+		if _, err := sess.Insert(logEntry); err != nil {
 			return err
 		}
 	}
@@ -64,32 +39,7 @@ func (s storage) LogSave(step *model.Step, reader io.Reader) error {
 	return sess.Commit()
 }
 
-func (s storage) LogAppend(stepID int64, entry *logging.Entry) error {
-	sess := s.engine.NewSession()
-	defer sess.Close()
-	if err := sess.Begin(); err != nil {
-		return err
-	}
-
-	logs := new(model.Logs)
-	exist, err := sess.Where("log_step_id = ?", stepID).Get(logs)
-	if err != nil {
-		return err
-	}
-
-	if exist {
-		data := append(logs.Data, entry.Data...)
-		if _, err := sess.ID(logs.ID).Cols("log_data").Update(&model.Logs{Data: data}); err != nil {
-			return err
-		}
-	} else {
-		if _, err := sess.Insert(&model.Logs{
-			StepID: stepID,
-			Data:   entry.Data,
-		}); err != nil {
-			return err
-		}
-	}
-
-	return sess.Commit()
+func (s storage) LogAppend(logEntry *model.LogEntry) error {
+	_, err := s.engine.Insert(logEntry)
+	return err
 }

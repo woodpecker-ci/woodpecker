@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 func TestLogging(t *testing.T) {
@@ -14,7 +15,7 @@ func TestLogging(t *testing.T) {
 		wg sync.WaitGroup
 
 		testPath  = "test"
-		testEntry = &Entry{
+		testEntry = &model.LogEntry{
 			Data: []byte("test"),
 		}
 	)
@@ -26,10 +27,10 @@ func TestLogging(t *testing.T) {
 	logger := New()
 	assert.NoError(t, logger.Open(ctx, testPath))
 	go func() {
-		assert.NoError(t, logger.Tail(ctx, testPath, func(entry ...*Entry) { wg.Done() }))
+		assert.NoError(t, logger.Tail(ctx, testPath, func(entry ...*model.LogEntry) { wg.Done() }))
 	}()
 	go func() {
-		assert.NoError(t, logger.Tail(ctx, testPath, func(entry ...*Entry) { wg.Done() }))
+		assert.NoError(t, logger.Tail(ctx, testPath, func(entry ...*model.LogEntry) { wg.Done() }))
 	}()
 
 	<-time.After(500 * time.Millisecond)
@@ -44,7 +45,7 @@ func TestLogging(t *testing.T) {
 
 	wg.Add(1)
 	go func() {
-		assert.NoError(t, logger.Tail(ctx, testPath, func(entry ...*Entry) { wg.Done() }))
+		assert.NoError(t, logger.Tail(ctx, testPath, func(entry ...*model.LogEntry) { wg.Done() }))
 	}()
 
 	<-time.After(500 * time.Millisecond)

@@ -18,12 +18,12 @@ import (
 	"testing"
 )
 
-func TestLine(t *testing.T) {
-	line := Line{
-		Step: "redis",
-		Time: 60,
-		Pos:  1,
-		Out:  "starting redis server",
+func TestLogEntry(t *testing.T) {
+	line := LogEntry{
+		StepID: int64(123),
+		Time:   60,
+		Line:   1,
+		Data:   "starting redis server",
 	}
 	got, want := line.String(), "[redis:L1:60s] starting redis server"
 	if got != want {

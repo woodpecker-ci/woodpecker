@@ -19,17 +19,13 @@
 package api
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
-	"io"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/rs/zerolog/log"
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -172,24 +168,20 @@ func GetPipelineLogs(c *gin.Context) {
 		return
 	}
 
+	// TODO: get & use step id directly
 	step, err := _store.StepChild(pl, ppid, name)
 	if err != nil {
 		handleDbGetError(c, err)
 		return
 	}
 
-	rc, err := _store.LogFind(step)
+	logs, err := _store.LogFind(step)
 	if err != nil {
 		handleDbGetError(c, err)
 		return
 	}
 
-	defer rc.Close()
-
-	c.Header("Content-Type", "application/json")
-	if _, err := io.Copy(c.Writer, rc); err != nil {
-		log.Error().Err(err).Msg("could not copy log to http response")
-	}
+	c.JSON(http.StatusOK, logs)
 }
 
 func GetStepLogs(c *gin.Context) {
@@ -213,18 +205,13 @@ func GetStepLogs(c *gin.Context) {
 		return
 	}
 
-	rc, err := _store.LogFind(step)
+	logs, err := _store.LogFind(step)
 	if err != nil {
 		handleDbGetError(c, err)
 		return
 	}
 
-	defer rc.Close()
-
-	c.Header("Content-Type", "application/json")
-	if _, err := io.Copy(c.Writer, rc); err != nil {
-		log.Error().Err(err).Msg("could not copy log to http response")
-	}
+	c.JSON(http.StatusOK, logs)
 }
 
 func GetPipelineConfig(c *gin.Context) {
@@ -400,7 +387,6 @@ func DeletePipelineLogs(c *gin.Context) {
 	_store := store.FromContext(c)
 
 	repo := session.Repo(c)
-	user := session.User(c)
 	num, _ := strconv.ParseInt(c.Params.ByName("number"), 10, 64)
 
 	pl, err := _store.GetPipelineNumber(repo, num)
@@ -422,9 +408,8 @@ func DeletePipelineLogs(c *gin.Context) {
 	}
 
 	for _, step := range steps {
-		t := time.Now().UTC()
-		buf := bytes.NewBufferString(fmt.Sprintf(deleteStr, step.Name, user.Login, t.Format(time.UnixDate)))
-		lerr := _store.LogSave(step, buf)
+		logs := make([]*model.LogEntry, 0)
+		lerr := _store.LogSave(step, logs)
 		if lerr != nil {
 			err = lerr
 		}
@@ -436,11 +421,3 @@ func DeletePipelineLogs(c *gin.Context) {
 
 	c.String(http.StatusNoContent, "")
 }
-
-var deleteStr = `[
-	{
-		"step": %q,
-		"pos": 0,
-		"out": "logs purged by %s on %s\n"
-	}
-]`

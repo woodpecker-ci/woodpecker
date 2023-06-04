@@ -15,64 +15,92 @@
 package datastore
 
 import (
-	"bytes"
-	"io"
 	"testing"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 func TestLogCreateFind(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Step), new(model.Logs))
+	store, closer := newTestStore(t, new(model.Step), new(model.LogEntry))
 	defer closer()
 
 	step := model.Step{
 		ID: 1,
 	}
-	buf := bytes.NewBufferString("echo hi")
-	err := store.LogSave(&step, buf)
+
+	logEntries := []*model.LogEntry{
+		{
+			StepID: step.ID,
+			Data:   []byte("hello"),
+			Line:   1,
+			Time:   0,
+		},
+		{
+			StepID: step.ID,
+			Data:   []byte("world"),
+			Line:   2,
+			Time:   10,
+		},
+	}
+
+	err := store.LogSave(&step, logEntries)
 	if err != nil {
 		t.Errorf("Unexpected error: log create: %s", err)
 	}
 
-	rc, err := store.LogFind(&step)
+	_logEntries, err := store.LogFind(&step)
 	if err != nil {
 		t.Errorf("Unexpected error: log create: %s", err)
 	}
 
-	defer rc.Close()
-	out, _ := io.ReadAll(rc)
-	if got, want := string(out), "echo hi"; got != want {
-		t.Errorf("Want log data %s, got %s", want, got)
+	if got, want := len(_logEntries), len(logEntries); got != want {
+		t.Errorf("Want %d log entries, got %d", want, got)
 	}
 }
 
-func TestLogUpdate(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Step), new(model.Logs))
+func TestLogAppend(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Step), new(model.LogEntry))
 	defer closer()
 
 	step := model.Step{
 		ID: 1,
 	}
-	buf1 := bytes.NewBufferString("echo hi")
-	buf2 := bytes.NewBufferString("echo allo?")
-	err1 := store.LogSave(&step, buf1)
-	err2 := store.LogSave(&step, buf2)
-	if err1 != nil {
-		t.Errorf("Unexpected error: log create: %s", err1)
-	}
-	if err2 != nil {
-		t.Errorf("Unexpected error: log update: %s", err2)
+	logEntries := []*model.LogEntry{
+		{
+			StepID: step.ID,
+			Data:   []byte("hello"),
+			Line:   1,
+			Time:   0,
+		},
+		{
+			StepID: step.ID,
+			Data:   []byte("world"),
+			Line:   2,
+			Time:   10,
+		},
 	}
 
-	rc, err := store.LogFind(&step)
-	if err != nil {
+	if err := store.LogSave(&step, logEntries); err != nil {
 		t.Errorf("Unexpected error: log create: %s", err)
 	}
 
-	defer rc.Close()
-	out, _ := io.ReadAll(rc)
-	if got, want := string(out), "echo allo?"; got != want {
-		t.Errorf("Want log data %s, got %s", want, got)
+	logEntry := &model.LogEntry{
+		StepID: step.ID,
+		Data:   []byte("allo?"),
+		Line:   3,
+		Time:   20,
+	}
+
+	if err := store.LogAppend(logEntry); err != nil {
+		t.Errorf("Unexpected error: log append: %s", err)
+	}
+
+	_logEntries, err := store.LogFind(&step)
+	if err != nil {
+		t.Errorf("Unexpected error: log find: %s", err)
+	}
+
+	if got, want := len(_logEntries), len(logEntries)+1; got != want {
+		t.Errorf("Want %d log entries, got %d", want, got)
 	}
 }

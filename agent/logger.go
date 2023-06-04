@@ -50,7 +50,8 @@ func (r *Runner) createLogger(_ context.Context, logger zerolog.Logger, uploads 
 
 		loglogger.Debug().Msg("log stream opened")
 
-		logStream := rpc.NewLineWriter(r.client, work.ID, step.Alias, secrets...)
+		// TODO: use step-id instead of work-id
+		logStream := rpc.NewLineWriter(r.client, work.ID, secrets...)
 		if _, err := io.Copy(logStream, part); err != nil {
 			log.Error().Err(err).Msg("copy limited logStream part")
 		}

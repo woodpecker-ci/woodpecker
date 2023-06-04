@@ -36,62 +36,59 @@ const (
 )
 
 // Line is a line of console output.
-type Line struct {
-	Step string `json:"step,omitempty"`
-	Time int64  `json:"time,omitempty"`
-	Type int    `json:"type,omitempty"`
-	Pos  int    `json:"pos,omitempty"`
-	Out  string `json:"out,omitempty"`
+type LogEntry struct {
+	StepID int64  `json:"step_id,omitempty"`
+	Time   int64  `json:"time,omitempty"`
+	Type   int    `json:"type,omitempty"`
+	Line   int    `json:"line,omitempty"`
+	Data   string `json:"data,omitempty"`
 }
 
-func (l *Line) String() string {
+func (l *LogEntry) String() string {
 	switch l.Type {
 	case LineExitCode:
-		return fmt.Sprintf("[%s] exit code %s", l.Step, l.Out)
+		return fmt.Sprintf("[%d] exit code %s", l.StepID, l.Data)
 	default:
-		return fmt.Sprintf("[%s:L%v:%vs] %s", l.Step, l.Pos, l.Time, l.Out)
+		return fmt.Sprintf("[%d:L%v:%vs] %s", l.StepID, l.Line, l.Time, l.Data)
 	}
 }
 
 // LineWriter sends logs to the client.
 type LineWriter struct {
-	peer  Peer
-	id    string
-	name  string
-	num   int
-	now   time.Time
-	rep   *strings.Replacer
-	lines []*Line
+	peer   Peer
+	stepID int64
+	num    int
+	now    time.Time
+	rep    *strings.Replacer
+	lines  []*LogEntry
 }
 
 // NewLineWriter returns a new line reader.
-func NewLineWriter(peer Peer, id, name string, secret ...string) *LineWriter {
+func NewLineWriter(peer Peer, stepID int64, secret ...string) *LineWriter {
 	return &LineWriter{
-		peer:  peer,
-		id:    id,
-		name:  name,
-		now:   time.Now().UTC(),
-		rep:   shared.NewSecretsReplacer(secret),
-		lines: nil,
+		peer:   peer,
+		stepID: stepID,
+		now:    time.Now().UTC(),
+		rep:    shared.NewSecretsReplacer(secret),
+		lines:  nil,
 	}
 }
 
 func (w *LineWriter) Write(p []byte) (n int, err error) {
-	out := string(p)
+	data := string(p)
 	if w.rep != nil {
-		out = w.rep.Replace(out)
+		data = w.rep.Replace(data)
 	}
-	log.Trace().Str("name", w.name).Str("ID", w.id).Msgf("grpc write line: %s", out)
+	log.Trace().Int64("step-id", w.stepID).Msgf("grpc write line: %s", data)
 
-	line := &Line{
-		Out:  out,
-		Step: w.name,
-		Pos:  w.num,
-		Time: int64(time.Since(w.now).Seconds()),
-		Type: LineStdout,
+	line := &LogEntry{
+		Data:   data,
+		StepID: w.stepID,
+		Time:   int64(time.Since(w.now).Seconds()),
+		Type:   LineStdout,
 	}
-	if err := w.peer.Log(context.Background(), w.id, line); err != nil {
-		log.Error().Err(err).Msgf("fail to write pipeline log to peer '%s'", w.id)
+	if err := w.peer.Log(context.Background(), line); err != nil {
+		log.Error().Err(err).Msgf("fail to write pipeline log to peer '%d'", w.stepID)
 	}
 	w.num++
 
@@ -111,7 +108,7 @@ func (w *LineWriter) Write(p []byte) (n int, err error) {
 }
 
 // Lines returns the line history
-func (w *LineWriter) Lines() []*Line {
+func (w *LineWriter) Lines() []*LogEntry {
 	return w.lines
 }
 

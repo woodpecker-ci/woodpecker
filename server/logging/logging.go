@@ -4,26 +4,15 @@ import (
 	"context"
 	"errors"
 	"io"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 // ErrNotFound is returned when the log does not exist.
 var ErrNotFound = errors.New("stream: not found")
 
-// Entry defines a log entry.
-type Entry struct {
-	// ID identifies this message.
-	ID string `json:"id,omitempty"`
-
-	// Data is the actual data in the entry.
-	Data []byte `json:"data"`
-
-	// Tags represents the key-value pairs the
-	// entry is tagged with.
-	Tags map[string]string `json:"tags,omitempty"`
-}
-
 // Handler defines a callback function for handling log entries.
-type Handler func(...*Entry)
+type Handler func(...*model.LogEntry)
 
 // Log defines a log multiplexer.
 type Log interface {
@@ -31,7 +20,7 @@ type Log interface {
 	Open(c context.Context, path string) error
 
 	// Write writes the entry to the log.
-	Write(c context.Context, path string, entry *Entry) error
+	Write(c context.Context, path string, entry *model.LogEntry) error
 
 	// Tail tails the log.
 	Tail(c context.Context, path string, handler Handler) error

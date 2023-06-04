@@ -118,10 +118,11 @@ export type PipelineStep = {
 };
 
 export type PipelineLog = {
-  step: string;
-  pos: number;
-  out: string;
-  time?: number;
+  id: number;
+  step_id: number;
+  time: number;
+  line: number;
+  data: string;
 };
 
 export type PipelineFeed = Pipeline & {

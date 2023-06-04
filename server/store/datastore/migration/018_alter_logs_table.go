@@ -61,7 +61,7 @@ var alterLogsTable = task{
 			return err
 		}
 
-		if err := sess.Sync(new(model.Logs)); err != nil {
+		if err := sess.Sync(new(model.LogEntry)); err != nil {
 			return err
 		}
 
@@ -88,7 +88,7 @@ var alterLogsTable = task{
 						time = logEntry.Time
 					}
 
-					log := &model.Logs{
+					log := &model.LogEntry{
 						ID:     l.ID,
 						StepID: l.StepID,
 						Data:   []byte(logEntry.Out),

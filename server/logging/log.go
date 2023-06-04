@@ -4,6 +4,8 @@ import (
 	"context"
 	"io"
 	"sync"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 // TODO (bradrydzewski) writing to subscribers is currently a blocking
@@ -28,7 +30,7 @@ type stream struct {
 	sync.Mutex
 
 	path string
-	list []*Entry
+	list []*model.LogEntry
 	subs map[*subscriber]struct{}
 	done chan struct{}
 }
@@ -60,7 +62,7 @@ func (l *log) Open(_ context.Context, path string) error {
 	return nil
 }
 
-func (l *log) Write(_ context.Context, path string, entry *Entry) error {
+func (l *log) Write(_ context.Context, path string, logEntry *model.LogEntry) error {
 	l.Lock()
 	s, ok := l.streams[path]
 	l.Unlock()
@@ -68,9 +70,9 @@ func (l *log) Write(_ context.Context, path string, entry *Entry) error {
 		return ErrNotFound
 	}
 	s.Lock()
-	s.list = append(s.list, entry)
+	s.list = append(s.list, logEntry)
 	for sub := range s.subs {
-		go sub.handler(entry)
+		go sub.handler(logEntry)
 	}
 	s.Unlock()
 	return nil

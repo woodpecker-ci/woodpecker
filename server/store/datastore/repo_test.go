@@ -299,7 +299,7 @@ func TestRepoCrud(t *testing.T) {
 		new(model.Perm),
 		new(model.Pipeline),
 		new(model.PipelineConfig),
-		new(model.Logs),
+		new(model.LogEntry),
 		new(model.Step),
 		new(model.Secret),
 		new(model.Registry),

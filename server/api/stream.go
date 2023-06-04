@@ -27,7 +27,6 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/logging"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/pubsub"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
@@ -141,8 +140,8 @@ func LogStreamSSE(c *gin.Context) {
 	repo := session.Repo(c)
 	_store := store.FromContext(c)
 
-	// // parse the pipeline number and step sequence number from
-	// // the request parameter.
+	// parse the pipeline number and step sequence number from
+	// the request parameter.
 	pipelinen, _ := strconv.ParseInt(c.Param("pipeline"), 10, 64)
 	stepn, _ := strconv.Atoi(c.Param("number"))
 
@@ -179,7 +178,7 @@ func LogStreamSSE(c *gin.Context) {
 
 	go func() {
 		// TODO remove global variable
-		err := server.Config.Services.Logs.Tail(ctx, fmt.Sprint(step.ID), func(entries ...*logging.Entry) {
+		err := server.Config.Services.Logs.Tail(ctx, fmt.Sprint(step.ID), func(entries ...*model.LogEntry) {
 			defer func() {
 				obj := recover() // fix #2480 // TODO: check if it's still needed
 				log.Trace().Msgf("pubsub subscribe recover return: %v", obj)
