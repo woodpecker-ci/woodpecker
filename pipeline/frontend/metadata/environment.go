@@ -55,7 +55,7 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_REPO_CLONE_URL":      m.Repo.CloneURL,
 		"CI_REPO_DEFAULT_BRANCH": m.Repo.Branch,
 		"CI_REPO_PRIVATE":        strconv.FormatBool(m.Repo.Private),
-		"CI_REPO_TRUSTED":        "false", // TODO should this be added?
+		"CI_REPO_TRUSTED":        strconv.FormatBool(m.Repo.Trusted),
 
 		"CI_COMMIT_SHA":                 m.Curr.Commit.Sha,
 		"CI_COMMIT_REF":                 m.Curr.Commit.Ref,

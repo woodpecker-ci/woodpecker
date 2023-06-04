@@ -35,6 +35,7 @@ type (
 		Private  bool     `json:"private,omitempty"`
 		Secrets  []Secret `json:"secrets,omitempty"`
 		Branch   string   `json:"default_branch,omitempty"`
+		Trusted  bool     `json:"trusted,omitempty"`
 	}
 
 	// Pipeline defines runtime metadata for a pipeline.

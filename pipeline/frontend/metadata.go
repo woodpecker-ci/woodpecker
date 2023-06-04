@@ -60,6 +60,7 @@ func MetadataFromStruct(forge metadata.ServerForge, repo *model.Repo, pipeline, 
 			CloneURL: repo.Clone,
 			Private:  repo.IsSCMPrivate,
 			Branch:   repo.Branch,
+			Trusted:  repo.IsTrusted,
 		}
 	}
 
