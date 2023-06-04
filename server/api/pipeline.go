@@ -577,6 +577,18 @@ var deleteStr = `[
 	}
 ]`
 
+// PostSkipWorkflow
+//
+//	@Summary	Skip a workflow
+//	@Router		/repos/{owner}/{name}/pipelines/{number}/skip/{workflowId} [post]
+//	@Produce	json
+//	@Success	200	{object}	Pipeline
+//	@Tags		Pipelines
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		owner			path	string	true	"the repository owner's name"
+//	@Param		name			path	string	true	"the repository name"
+//	@Param		number			path	int		true	"the number of the pipeline"
+//	@Param		workflowId			path	int		true	"the ID of the workflow"
 func PostSkipWorkflow(c *gin.Context) {
 	var (
 		_store        = store.FromContext(c)
