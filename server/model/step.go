@@ -27,7 +27,6 @@ type StepStore interface {
 }
 
 // Step represents a process in the pipeline.
-// swagger:model step
 type Step struct {
 	ID         int64       `json:"id"                   xorm:"pk autoincr 'step_id'"`
 	PipelineID int64       `json:"pipeline_id"          xorm:"UNIQUE(s) INDEX 'step_pipeline_id'"`
@@ -41,7 +40,7 @@ type Step struct {
 	Started    int64       `json:"start_time,omitempty" xorm:"step_started"`
 	Stopped    int64       `json:"end_time,omitempty"   xorm:"step_stopped"`
 	Children   []*Step     `json:"children,omitempty"   xorm:"-"`
-}
+} //	@name Step
 
 type UpdateStepStore interface {
 	StepUpdate(*Step) error
