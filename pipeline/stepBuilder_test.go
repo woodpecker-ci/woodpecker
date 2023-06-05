@@ -17,10 +17,11 @@ package pipeline
 
 import (
 	"fmt"
-	"sync"
 	"testing"
 
-	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/stretchr/testify/assert"
+
+	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/forge/mocks"
 	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -28,9 +29,9 @@ import (
 
 func TestGlobalEnvsubst(t *testing.T) {
 	t.Parallel()
-	setupMockForge(t)
 
 	b := StepBuilder{
+		Forge: getMockForge(t),
 		Envs: map[string]string{
 			"KEY_K": "VALUE_V",
 			"IMAGE": "scratch",
@@ -63,9 +64,9 @@ pipeline:
 
 func TestMissingGlobalEnvsubst(t *testing.T) {
 	t.Parallel()
-	setupMockForge(t)
 
 	b := StepBuilder{
+		Forge: getMockForge(t),
 		Envs: map[string]string{
 			"KEY_K":    "VALUE_V",
 			"NO_IMAGE": "scratch",
@@ -98,10 +99,10 @@ pipeline:
 
 func TestMultilineEnvsubst(t *testing.T) {
 	t.Parallel()
-	setupMockForge(t)
 
 	b := StepBuilder{
-		Repo: &model.Repo{},
+		Forge: getMockForge(t),
+		Repo:  &model.Repo{},
 		Curr: &model.Pipeline{
 			Message: `aaa
 bbb`,
@@ -136,9 +137,9 @@ pipeline:
 
 func TestMultiPipeline(t *testing.T) {
 	t.Parallel()
-	setupMockForge(t)
 
 	b := StepBuilder{
+		Forge: getMockForge(t),
 		Repo:  &model.Repo{},
 		Curr:  &model.Pipeline{},
 		Last:  &model.Pipeline{},
@@ -171,9 +172,9 @@ pipeline:
 
 func TestDependsOn(t *testing.T) {
 	t.Parallel()
-	setupMockForge(t)
 
 	b := StepBuilder{
+		Forge: getMockForge(t),
 		Repo:  &model.Repo{},
 		Curr:  &model.Pipeline{},
 		Last:  &model.Pipeline{},
@@ -218,9 +219,9 @@ depends_on:
 
 func TestRunsOn(t *testing.T) {
 	t.Parallel()
-	setupMockForge(t)
 
 	b := StepBuilder{
+		Forge: getMockForge(t),
 		Repo:  &model.Repo{},
 		Curr:  &model.Pipeline{},
 		Last:  &model.Pipeline{},
@@ -255,9 +256,9 @@ runs_on:
 
 func TestPipelineName(t *testing.T) {
 	t.Parallel()
-	setupMockForge(t)
 
 	b := StepBuilder{
+		Forge: getMockForge(t),
 		Repo:  &model.Repo{Config: ".woodpecker"},
 		Curr:  &model.Pipeline{},
 		Last:  &model.Pipeline{},
@@ -291,9 +292,9 @@ pipeline:
 
 func TestBranchFilter(t *testing.T) {
 	t.Parallel()
-	setupMockForge(t)
 
 	b := StepBuilder{
+		Forge: getMockForge(t),
 		Repo:  &model.Repo{},
 		Curr:  &model.Pipeline{Branch: "dev"},
 		Last:  &model.Pipeline{},
@@ -320,27 +321,19 @@ pipeline:
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(pipelineItems) != 2 {
-		t.Fatal("Should have generated 2 pipeline")
+	if !assert.Len(t, pipelineItems, 1) {
+		t.Fatal("Should have generated 1 pipeline")
 	}
-	if pipelineItems[0].Workflow.State != model.StatusSkipped {
-		t.Fatal("Should not run on dev branch")
-	}
-	for _, child := range pipelineItems[0].Workflow.Children {
-		if child.State != model.StatusSkipped {
-			t.Fatal("Children should skipped status too")
-		}
-	}
-	if pipelineItems[1].Workflow.State != model.StatusPending {
+	if pipelineItems[0].Workflow.State != model.StatusPending {
 		t.Fatal("Should run on dev branch")
 	}
 }
 
 func TestRootWhenFilter(t *testing.T) {
 	t.Parallel()
-	setupMockForge(t)
 
 	b := StepBuilder{
+		Forge: getMockForge(t),
 		Repo:  &model.Repo{},
 		Curr:  &model.Pipeline{Event: "tester"},
 		Last:  &model.Pipeline{},
@@ -385,11 +378,11 @@ pipeline:
 
 func TestZeroSteps(t *testing.T) {
 	t.Parallel()
-	setupMockForge(t)
 
 	pipeline := &model.Pipeline{Branch: "dev"}
 
 	b := StepBuilder{
+		Forge: getMockForge(t),
 		Repo:  &model.Repo{},
 		Curr:  pipeline,
 		Last:  &model.Pipeline{},
@@ -420,11 +413,11 @@ pipeline:
 
 func TestZeroStepsAsMultiPipelineDeps(t *testing.T) {
 	t.Parallel()
-	setupMockForge(t)
 
 	pipeline := &model.Pipeline{Branch: "dev"}
 
 	b := StepBuilder{
+		Forge: getMockForge(t),
 		Repo:  &model.Repo{},
 		Curr:  pipeline,
 		Last:  &model.Pipeline{},
@@ -469,11 +462,11 @@ depends_on: [ zerostep ]
 
 func TestZeroStepsAsMultiPipelineTransitiveDeps(t *testing.T) {
 	t.Parallel()
-	setupMockForge(t)
 
 	pipeline := &model.Pipeline{Branch: "dev"}
 
 	b := StepBuilder{
+		Forge: getMockForge(t),
 		Repo:  &model.Repo{},
 		Curr:  pipeline,
 		Last:  &model.Pipeline{},
@@ -524,13 +517,13 @@ depends_on: [ shouldbefiltered ]
 
 func TestTree(t *testing.T) {
 	t.Parallel()
-	setupMockForge(t)
 
 	pipeline := &model.Pipeline{
 		Event: model.EventPush,
 	}
 
 	b := StepBuilder{
+		Forge: getMockForge(t),
 		Repo:  &model.Repo{},
 		Curr:  pipeline,
 		Last:  &model.Pipeline{},
@@ -562,7 +555,6 @@ pipeline:
 
 func TestSanitizePath(t *testing.T) {
 	t.Parallel()
-	setupMockForge(t)
 
 	testTable := []struct {
 		path          string
@@ -601,14 +593,9 @@ func TestSanitizePath(t *testing.T) {
 	}
 }
 
-var setupMockForgeLock = sync.Once{}
-
-func setupMockForge(t *testing.T) {
-	setupMockForgeLock.Do(func() {
-		forge := mocks.NewForge(t)
-		forge.On("Name").Return("mock")
-		forge.On("URL").Return("https://codeberg.org")
-
-		server.Config.Services.Forge = forge
-	})
+func getMockForge(t *testing.T) forge.Forge {
+	forge := mocks.NewForge(t)
+	forge.On("Name").Return("mock")
+	forge.On("URL").Return("https://codeberg.org")
+	return forge
 }

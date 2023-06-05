@@ -53,8 +53,9 @@ This is the reference list of all environment variables available to your pipeli
 | `CI_REPO`                        | repository full name `<owner>/<name>`                                                        |
 | `CI_REPO_OWNER`                  | repository owner                                                                             |
 | `CI_REPO_NAME`                   | repository name                                                                              |
+| `CI_REPO_REMOTE_ID`              | repository remote ID, is the UID it has in the forge                                         |
 | `CI_REPO_SCM`                    | repository SCM (git)                                                                         |
-| `CI_REPO_URL`                    | repository web URL                                                                              |
+| `CI_REPO_URL`                    | repository web URL                                                                           |
 | `CI_REPO_CLONE_URL`              | repository clone URL                                                                         |
 | `CI_REPO_DEFAULT_BRANCH`         | repository default branch (master)                                                           |
 | `CI_REPO_PRIVATE`                | repository is private                                                                        |

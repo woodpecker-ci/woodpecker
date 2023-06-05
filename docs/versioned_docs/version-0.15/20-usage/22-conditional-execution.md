@@ -86,15 +86,6 @@ when:
   event: [push, pull_request, tag, deployment]
 ```
 
-## `tag`
-
-Execute a step if the tag name starts with `release`:
-
-```diff
-when:
-  tag: release*
-```
-
 ## `status`
 
 There are use cases for executing pipeline steps on failure, such as sending notifications for failed pipelines. Use the status constraint to execute steps even when the pipeline fails:
