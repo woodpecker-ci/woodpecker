@@ -26,7 +26,7 @@ const (
 )
 
 type LogEntry struct {
-	ID      int64        `json:"id"       xorm:"pk autoincr"`
+	ID      int64        `json:"id"       xorm:"pk autoincr 'id'"`
 	StepID  int64        `json:"step_id"  xorm:"'step_id'"`
 	Time    int64        `json:"time"`
 	Line    int          `json:"line"`

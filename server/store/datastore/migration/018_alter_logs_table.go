@@ -40,11 +40,12 @@ type oldLogEntry018 struct {
 	Out  string `json:"out,omitempty"`
 }
 
-var alterLogsTable = task{
-	name: "alter-logs-table",
+var migrateLogs2LogEntries = task{
+	name:     "migrate-logs-to-log_entries",
+	required: true,
 	fn: func(sess *xorm.Session) error {
 		// make sure old logs table exists
-		if err := sess.Sync(new(oldLogs018)); err != nil {
+		if exist, err := sess.IsTableExist("logs"); !exist || err != nil {
 			return err
 		}
 
@@ -55,7 +56,7 @@ var alterLogsTable = task{
 		page := 0
 		for {
 			var logs []*oldLogs018
-			err := sess.Limit(10, page*10).Table("logs").Find(&logs)
+			err := sess.Limit(10, page*10).Find(&logs)
 			if err != nil {
 				return err
 			}
@@ -75,11 +76,11 @@ var alterLogsTable = task{
 					}
 
 					log := &model.LogEntry{
-						ID:     l.ID,
 						StepID: l.StepID,
 						Data:   []byte(logEntry.Out),
 						Line:   logEntry.Pos,
 						Time:   time,
+						Type:   model.LogEntryType(logEntry.Type),
 					}
 
 					if _, err := sess.Insert(log); err != nil {
