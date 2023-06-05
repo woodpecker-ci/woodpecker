@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
 )
 
 const (
@@ -40,7 +41,7 @@ func (l *Linter) Lint(c *yaml.Workflow) error {
 	return l.lint(c.Services.ContainerList, blockServices)
 }
 
-func (l *Linter) lint(containers []*yaml.Container, _ uint8) error {
+func (l *Linter) lint(containers []*types.Container, _ uint8) error {
 	for _, container := range containers {
 		if err := l.lintImage(container); err != nil {
 			return err
@@ -57,14 +58,14 @@ func (l *Linter) lint(containers []*yaml.Container, _ uint8) error {
 	return nil
 }
 
-func (l *Linter) lintImage(c *yaml.Container) error {
+func (l *Linter) lintImage(c *types.Container) error {
 	if len(c.Image) == 0 {
 		return fmt.Errorf("Invalid or missing image")
 	}
 	return nil
 }
 
-func (l *Linter) lintCommands(c *yaml.Container) error {
+func (l *Linter) lintCommands(c *types.Container) error {
 	if len(c.Commands) == 0 {
 		return nil
 	}
@@ -78,7 +79,7 @@ func (l *Linter) lintCommands(c *yaml.Container) error {
 	return nil
 }
 
-func (l *Linter) lintTrusted(c *yaml.Container) error {
+func (l *Linter) lintTrusted(c *types.Container) error {
 	if c.Privileged {
 		return fmt.Errorf("Insufficient privileges to use privileged mode")
 	}

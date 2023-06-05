@@ -1,4 +1,4 @@
-package yaml
+package types
 
 import (
 	"testing"
@@ -8,7 +8,6 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/constraint"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
 )
 
 var containerYaml = []byte(`
@@ -64,25 +63,25 @@ func TestUnmarshalContainer(t *testing.T) {
 	want := Container{
 		CapAdd:        []string{"ALL"},
 		CapDrop:       []string{"NET_ADMIN", "SYS_ADMIN"},
-		Commands:      types.StringOrSlice{"go build", "go test"},
-		CPUQuota:      types.StringorInt(11),
+		Commands:      StringOrSlice{"go build", "go test"},
+		CPUQuota:      StringorInt(11),
 		CPUSet:        "1,2",
-		CPUShares:     types.StringorInt(99),
+		CPUShares:     StringorInt(99),
 		Detached:      true,
 		Devices:       []string{"/dev/ttyUSB0:/dev/ttyUSB0"},
 		Directory:     "example/",
-		DNS:           types.StringOrSlice{"8.8.8.8"},
-		DNSSearch:     types.StringOrSlice{"example.com"},
-		Environment:   types.SliceorMap{"RACK_ENV": "development", "SHOW": "true"},
+		DNS:           StringOrSlice{"8.8.8.8"},
+		DNSSearch:     StringOrSlice{"example.com"},
+		Environment:   SliceorMap{"RACK_ENV": "development", "SHOW": "true"},
 		ExtraHosts:    []string{"somehost:162.242.195.82", "otherhost:50.31.209.229"},
 		Image:         "golang:latest",
 		Isolation:     "hyperv",
-		MemLimit:      types.MemStringorInt(1024),
-		MemSwapLimit:  types.MemStringorInt(1024),
-		MemSwappiness: types.MemStringorInt(1024),
+		MemLimit:      MemStringorInt(1024),
+		MemSwapLimit:  MemStringorInt(1024),
+		MemSwappiness: MemStringorInt(1024),
 		Name:          "my-build-container",
-		Networks: types.Networks{
-			Networks: []*types.Network{
+		Networks: Networks{
+			Networks: []*Network{
 				{Name: "some-network"},
 				{Name: "other-network"},
 			},
@@ -90,10 +89,10 @@ func TestUnmarshalContainer(t *testing.T) {
 		NetworkMode: "bridge",
 		Pull:        true,
 		Privileged:  true,
-		ShmSize:     types.MemStringorInt(1024),
-		Tmpfs:       types.StringOrSlice{"/var/lib/test"},
-		Volumes: types.Volumes{
-			Volumes: []*types.Volume{
+		ShmSize:     MemStringorInt(1024),
+		Tmpfs:       StringOrSlice{"/var/lib/test"},
+		Volumes: Volumes{
+			Volumes: []*Volume{
 				{Source: "", Destination: "/var/lib/mysql"},
 				{Source: "/opt/data", Destination: "/var/lib/mysql"},
 				{Source: "/etc/configs", Destination: "/etc/configs/", AccessMode: "ro"},
@@ -174,7 +173,7 @@ func TestUnmarshalContainers(t *testing.T) {
 					Name:  "publish-agent",
 					Image: "print/env",
 					Group: "bundle",
-					Secrets: types.Secrets{Secrets: []*types.Secret{{
+					Secrets: Secrets{Secrets: []*Secret{{
 						Source: "docker_username",
 						Target: "docker_username",
 					}, {
@@ -291,9 +290,9 @@ func stringsToInterface(val ...string) []interface{} {
 func TestIsPlugin(t *testing.T) {
 	assert.True(t, (&Container{}).IsPlugin())
 	assert.True(t, (&Container{
-		Commands: types.StringOrSlice(strslice.StrSlice{}),
+		Commands: StringOrSlice(strslice.StrSlice{}),
 	}).IsPlugin())
 	assert.False(t, (&Container{
-		Commands: types.StringOrSlice(strslice.StrSlice{"echo 'this is not a plugin'"}),
+		Commands: StringOrSlice(strslice.StrSlice{"echo 'this is not a plugin'"}),
 	}).IsPlugin())
 }

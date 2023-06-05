@@ -15,9 +15,9 @@ type (
 		When      constraint.When `yaml:"when,omitempty"`
 		Platform  string
 		Workspace Workspace
-		Clone     ContainerList
-		Steps     ContainerList `yaml:"pipeline"` // TODO: discussed if we should rename it to "steps"
-		Services  ContainerList
+		Clone     types.ContainerList
+		Steps     types.ContainerList `yaml:"pipeline"` // TODO: discussed if we should rename it to "steps"
+		Services  types.ContainerList
 		Networks  Networks
 		Volumes   Volumes
 		Labels    types.SliceorMap

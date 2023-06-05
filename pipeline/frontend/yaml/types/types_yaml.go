@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/docker/docker/api/types/strslice"
 	"github.com/docker/go-units"
 )
 
@@ -59,9 +58,9 @@ func (s *MemStringorInt) UnmarshalYAML(unmarshal func(interface{}) error) error 
 	return errors.New("Failed to unmarshal MemStringorInt")
 }
 
-// StringOrSlice represents
-// Using engine-api Strslice and augment it with YAML marshaling stuff. a string or an array of strings.
-type StringOrSlice strslice.StrSlice
+// StringOrSlice represents a string or an array of strings.
+// We need to override the yaml decoder to accept both options.
+type StringOrSlice []string
 
 // UnmarshalYAML implements the Unmarshaler interface.
 func (s *StringOrSlice) UnmarshalYAML(unmarshal func(interface{}) error) error {
