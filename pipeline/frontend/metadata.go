@@ -1,4 +1,4 @@
-// Copyright 2022 Woodpecker Authors
+// Copyright 2023 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,274 +15,131 @@
 package frontend
 
 import (
-	"regexp"
-	"strconv"
+	"fmt"
+	"net/url"
 	"strings"
 
+	"github.com/drone/envsubst"
+
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/version"
 )
 
-// Event types corresponding to scm hooks.
-const (
-	EventPush   = "push"
-	EventPull   = "pull_request"
-	EventTag    = "tag"
-	EventDeploy = "deployment"
-	EventCron   = "cron"
-	EventManual = "manual"
-)
-
-// Different ways to handle failure states
-const (
-	FailureIgnore = "ignore"
-	FailureFail   = "fail"
-	// FailureCancel = "cancel" // Not implemented yet
-)
-
-type (
-	// Metadata defines runtime m.
-	Metadata struct {
-		ID       string   `json:"id,omitempty"`
-		Repo     Repo     `json:"repo,omitempty"`
-		Curr     Pipeline `json:"curr,omitempty"`
-		Prev     Pipeline `json:"prev,omitempty"`
-		Workflow Workflow `json:"workflow,omitempty"`
-		Step     Step     `json:"step,omitempty"`
-		Sys      System   `json:"sys,omitempty"`
-		Forge    Forge    `json:"forge,omitempty"`
-	}
-
-	// Repo defines runtime metadata for a repository.
-	Repo struct {
-		Name     string   `json:"name,omitempty"`
-		Link     string   `json:"link,omitempty"`
-		CloneURL string   `json:"clone_url,omitempty"`
-		Private  bool     `json:"private,omitempty"`
-		Secrets  []Secret `json:"secrets,omitempty"`
-		Branch   string   `json:"default_branch,omitempty"`
-	}
-
-	// Pipeline defines runtime metadata for a pipeline.
-	Pipeline struct {
-		Number   int64  `json:"number,omitempty"`
-		Created  int64  `json:"created,omitempty"`
-		Started  int64  `json:"started,omitempty"`
-		Finished int64  `json:"finished,omitempty"`
-		Timeout  int64  `json:"timeout,omitempty"`
-		Status   string `json:"status,omitempty"`
-		Event    string `json:"event,omitempty"`
-		Link     string `json:"link,omitempty"`
-		Target   string `json:"target,omitempty"`
-		Trusted  bool   `json:"trusted,omitempty"`
-		Commit   Commit `json:"commit,omitempty"`
-		Parent   int64  `json:"parent,omitempty"`
-		Cron     string `json:"cron,omitempty"`
-	}
-
-	// Commit defines runtime metadata for a commit.
-	Commit struct {
-		Sha               string   `json:"sha,omitempty"`
-		Ref               string   `json:"ref,omitempty"`
-		Refspec           string   `json:"refspec,omitempty"`
-		Branch            string   `json:"branch,omitempty"`
-		Message           string   `json:"message,omitempty"`
-		Author            Author   `json:"author,omitempty"`
-		ChangedFiles      []string `json:"changed_files,omitempty"`
-		PullRequestLabels []string `json:"labels,omitempty"`
-	}
-
-	// Author defines runtime metadata for a commit author.
-	Author struct {
-		Name   string `json:"name,omitempty"`
-		Email  string `json:"email,omitempty"`
-		Avatar string `json:"avatar,omitempty"`
-	}
-
-	// Workflow defines runtime metadata for a workflow.
-	Workflow struct {
-		Name   string            `json:"name,omitempty"`
-		Number int               `json:"number,omitempty"`
-		Matrix map[string]string `json:"matrix,omitempty"`
-	}
-
-	// Step defines runtime metadata for a step.
-	Step struct {
-		Name   string `json:"name,omitempty"`
-		Number int    `json:"number,omitempty"`
-	}
-
-	// Secret defines a runtime secret
-	Secret struct {
-		Name  string `json:"name,omitempty"`
-		Value string `json:"value,omitempty"`
-		Mount string `json:"mount,omitempty"`
-		Mask  bool   `json:"mask,omitempty"`
-	}
-
-	// System defines runtime metadata for a ci/cd system.
-	System struct {
-		Name     string `json:"name,omitempty"`
-		Host     string `json:"host,omitempty"`
-		Link     string `json:"link,omitempty"`
-		Platform string `json:"arch,omitempty"`
-		Version  string `json:"version,omitempty"`
-	}
-
-	// Forge defines runtime metadata about the forge that host the repo
-	Forge struct {
-		Type string `json:"type,omitempty"`
-		URL  string `json:"url,omitempty"`
-	}
-)
-
-// Environ returns the metadata as a map of environment variables.
-func (m *Metadata) Environ() map[string]string {
-	var (
-		repoOwner    string
-		repoName     string
-		sourceBranch string
-		targetBranch string
-	)
-
-	repoParts := strings.Split(m.Repo.Name, "/")
-	if len(repoParts) == 2 {
-		repoOwner = repoParts[0]
-		repoName = repoParts[1]
-	} else {
-		repoName = m.Repo.Name
-	}
-
-	branchParts := strings.Split(m.Curr.Commit.Refspec, ":")
-	if len(branchParts) == 2 {
-		sourceBranch = branchParts[0]
-		targetBranch = branchParts[1]
-	}
-
-	params := map[string]string{
-		"CI":                     m.Sys.Name,
-		"CI_REPO":                m.Repo.Name,
-		"CI_REPO_OWNER":          repoOwner,
-		"CI_REPO_NAME":           repoName,
-		"CI_REPO_SCM":            "git",
-		"CI_REPO_URL":            m.Repo.Link,
-		"CI_REPO_CLONE_URL":      m.Repo.CloneURL,
-		"CI_REPO_DEFAULT_BRANCH": m.Repo.Branch,
-		"CI_REPO_PRIVATE":        strconv.FormatBool(m.Repo.Private),
-		"CI_REPO_TRUSTED":        "false", // TODO should this be added?
-
-		"CI_COMMIT_SHA":                 m.Curr.Commit.Sha,
-		"CI_COMMIT_REF":                 m.Curr.Commit.Ref,
-		"CI_COMMIT_REFSPEC":             m.Curr.Commit.Refspec,
-		"CI_COMMIT_BRANCH":              m.Curr.Commit.Branch,
-		"CI_COMMIT_SOURCE_BRANCH":       sourceBranch,
-		"CI_COMMIT_TARGET_BRANCH":       targetBranch,
-		"CI_COMMIT_URL":                 m.Curr.Link,
-		"CI_COMMIT_MESSAGE":             m.Curr.Commit.Message,
-		"CI_COMMIT_AUTHOR":              m.Curr.Commit.Author.Name,
-		"CI_COMMIT_AUTHOR_EMAIL":        m.Curr.Commit.Author.Email,
-		"CI_COMMIT_AUTHOR_AVATAR":       m.Curr.Commit.Author.Avatar,
-		"CI_COMMIT_TAG":                 "", // will be set if event is tag
-		"CI_COMMIT_PULL_REQUEST":        "", // will be set if event is pr
-		"CI_COMMIT_PULL_REQUEST_LABELS": "", // will be set if event is pr
-
-		"CI_PIPELINE_NUMBER":        strconv.FormatInt(m.Curr.Number, 10),
-		"CI_PIPELINE_PARENT":        strconv.FormatInt(m.Curr.Parent, 10),
-		"CI_PIPELINE_EVENT":         m.Curr.Event,
-		"CI_PIPELINE_URL":           m.Curr.Link,
-		"CI_PIPELINE_DEPLOY_TARGET": m.Curr.Target,
-		"CI_PIPELINE_STATUS":        m.Curr.Status,
-		"CI_PIPELINE_CREATED":       strconv.FormatInt(m.Curr.Created, 10),
-		"CI_PIPELINE_STARTED":       strconv.FormatInt(m.Curr.Started, 10),
-		"CI_PIPELINE_FINISHED":      strconv.FormatInt(m.Curr.Finished, 10),
-
-		"CI_WORKFLOW_NAME":   m.Workflow.Name,
-		"CI_WORKFLOW_NUMBER": strconv.Itoa(m.Workflow.Number),
-
-		"CI_STEP_NAME":     m.Step.Name,
-		"CI_STEP_NUMBER":   strconv.Itoa(m.Step.Number),
-		"CI_STEP_STATUS":   "", // will be set by agent
-		"CI_STEP_STARTED":  "", // will be set by agent
-		"CI_STEP_FINISHED": "", // will be set by agent
-
-		"CI_PREV_COMMIT_SHA":           m.Prev.Commit.Sha,
-		"CI_PREV_COMMIT_REF":           m.Prev.Commit.Ref,
-		"CI_PREV_COMMIT_REFSPEC":       m.Prev.Commit.Refspec,
-		"CI_PREV_COMMIT_BRANCH":        m.Prev.Commit.Branch,
-		"CI_PREV_COMMIT_URL":           m.Prev.Link,
-		"CI_PREV_COMMIT_MESSAGE":       m.Prev.Commit.Message,
-		"CI_PREV_COMMIT_AUTHOR":        m.Prev.Commit.Author.Name,
-		"CI_PREV_COMMIT_AUTHOR_EMAIL":  m.Prev.Commit.Author.Email,
-		"CI_PREV_COMMIT_AUTHOR_AVATAR": m.Prev.Commit.Author.Avatar,
-
-		"CI_PREV_PIPELINE_NUMBER":        strconv.FormatInt(m.Prev.Number, 10),
-		"CI_PREV_PIPELINE_PARENT":        strconv.FormatInt(m.Prev.Parent, 10),
-		"CI_PREV_PIPELINE_EVENT":         m.Prev.Event,
-		"CI_PREV_PIPELINE_URL":           m.Prev.Link,
-		"CI_PREV_PIPELINE_DEPLOY_TARGET": m.Prev.Target,
-		"CI_PREV_PIPELINE_STATUS":        m.Prev.Status,
-		"CI_PREV_PIPELINE_CREATED":       strconv.FormatInt(m.Prev.Created, 10),
-		"CI_PREV_PIPELINE_STARTED":       strconv.FormatInt(m.Prev.Started, 10),
-		"CI_PREV_PIPELINE_FINISHED":      strconv.FormatInt(m.Prev.Finished, 10),
-
-		"CI_SYSTEM_NAME":     m.Sys.Name,
-		"CI_SYSTEM_URL":      m.Sys.Link,
-		"CI_SYSTEM_HOST":     m.Sys.Host,
-		"CI_SYSTEM_PLATFORM": m.Sys.Platform, // will be set by pipeline platform option or by agent
-		"CI_SYSTEM_VERSION":  version.Version,
-
-		"CI_FORGE_TYPE": m.Forge.Type,
-		"CI_FORGE_URL":  m.Forge.URL,
-
-		// DEPRECATED
-		"CI_SYSTEM_ARCH": m.Sys.Platform, // TODO: remove after v1.0.x version
-		// use CI_PIPELINE_*
-		"CI_BUILD_NUMBER":        strconv.FormatInt(m.Curr.Number, 10),
-		"CI_BUILD_PARENT":        strconv.FormatInt(m.Curr.Parent, 10),
-		"CI_BUILD_EVENT":         m.Curr.Event,
-		"CI_BUILD_LINK":          m.Curr.Link,
-		"CI_BUILD_DEPLOY_TARGET": m.Curr.Target,
-		"CI_BUILD_STATUS":        m.Curr.Status,
-		"CI_BUILD_CREATED":       strconv.FormatInt(m.Curr.Created, 10),
-		"CI_BUILD_STARTED":       strconv.FormatInt(m.Curr.Started, 10),
-		"CI_BUILD_FINISHED":      strconv.FormatInt(m.Curr.Finished, 10),
-		// use CI_PREV_PIPELINE_*
-		"CI_PREV_BUILD_NUMBER":        strconv.FormatInt(m.Prev.Number, 10),
-		"CI_PREV_BUILD_PARENT":        strconv.FormatInt(m.Prev.Parent, 10),
-		"CI_PREV_BUILD_EVENT":         m.Prev.Event,
-		"CI_PREV_BUILD_LINK":          m.Prev.Link,
-		"CI_PREV_BUILD_DEPLOY_TARGET": m.Prev.Target,
-		"CI_PREV_BUILD_STATUS":        m.Prev.Status,
-		"CI_PREV_BUILD_CREATED":       strconv.FormatInt(m.Prev.Created, 10),
-		"CI_PREV_BUILD_STARTED":       strconv.FormatInt(m.Prev.Started, 10),
-		"CI_PREV_BUILD_FINISHED":      strconv.FormatInt(m.Prev.Finished, 10),
-		// use CI_STEP_*
-		"CI_JOB_NUMBER":   strconv.Itoa(m.Step.Number),
-		"CI_JOB_STATUS":   "", // will be set by agent
-		"CI_JOB_STARTED":  "", // will be set by agent
-		"CI_JOB_FINISHED": "", // will be set by agent
-		// CI_REPO_CLONE_URL
-		"CI_REPO_REMOTE": m.Repo.CloneURL,
-		// use *_URL
-		"CI_REPO_LINK":          m.Repo.Link,
-		"CI_COMMIT_LINK":        m.Curr.Link,
-		"CI_PIPELINE_LINK":      m.Curr.Link,
-		"CI_PREV_COMMIT_LINK":   m.Prev.Link,
-		"CI_PREV_PIPELINE_LINK": m.Prev.Link,
-		"CI_SYSTEM_LINK":        m.Sys.Link,
-	}
-	if m.Curr.Event == EventTag {
-		params["CI_COMMIT_TAG"] = strings.TrimPrefix(m.Curr.Commit.Ref, "refs/tags/")
-	}
-	if m.Curr.Event == EventPull {
-		params["CI_COMMIT_PULL_REQUEST"] = pullRegexp.FindString(m.Curr.Commit.Ref)
-		params["CI_COMMIT_PULL_REQUEST_LABELS"] = strings.Join(m.Curr.Commit.PullRequestLabels, ",")
-	}
-
-	return params
+func EnvVarSubst(yaml string, environ map[string]string) (string, error) {
+	return envsubst.Eval(yaml, func(name string) string {
+		env := environ[name]
+		if strings.Contains(env, "\n") {
+			env = fmt.Sprintf("%q", env)
+		}
+		return env
+	})
 }
 
-var pullRegexp = regexp.MustCompile(`\d+`)
+// MetadataFromStruct return the metadata from a pipeline will run with.
+func MetadataFromStruct(forge metadata.ServerForge, repo *model.Repo, pipeline, last *model.Pipeline, workflow *model.Step, link string) metadata.Metadata {
+	host := link
+	uri, err := url.Parse(link)
+	if err == nil {
+		host = uri.Host
+	}
 
-func (m *Metadata) SetPlatform(platform string) {
-	m.Sys.Platform = platform
+	fForge := metadata.Forge{}
+	if forge != nil {
+		fForge = metadata.Forge{
+			Type: forge.Name(),
+			URL:  forge.URL(),
+		}
+	}
+
+	fRepo := metadata.Repo{}
+	if repo != nil {
+		fRepo = metadata.Repo{
+			Name:     repo.Name,
+			Owner:    repo.Owner,
+			RemoteID: fmt.Sprint(repo.ForgeRemoteID),
+			Link:     repo.Link,
+			CloneURL: repo.Clone,
+			Private:  repo.IsSCMPrivate,
+			Branch:   repo.Branch,
+			Trusted:  repo.IsTrusted,
+		}
+
+		if idx := strings.LastIndex(repo.FullName, "/"); idx != -1 {
+			if fRepo.Name == "" && repo.FullName != "" {
+				fRepo.Name = repo.FullName[idx+1:]
+			}
+			if fRepo.Owner == "" && repo.FullName != "" {
+				fRepo.Owner = repo.FullName[:idx]
+			}
+		}
+	}
+
+	fWorkflow := metadata.Workflow{}
+	if workflow != nil {
+		fWorkflow = metadata.Workflow{
+			Name:   workflow.Name,
+			Number: workflow.PID,
+			Matrix: workflow.Environ,
+		}
+	}
+
+	return metadata.Metadata{
+		Repo:     fRepo,
+		Curr:     metadataPipelineFromModelPipeline(pipeline, true),
+		Prev:     metadataPipelineFromModelPipeline(last, false),
+		Workflow: fWorkflow,
+		Step:     metadata.Step{},
+		Sys: metadata.System{
+			Name:     "woodpecker",
+			Link:     link,
+			Host:     host,
+			Platform: "", // will be set by pipeline platform option or by agent
+			Version:  version.Version,
+		},
+		Forge: fForge,
+	}
+}
+
+func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent bool) metadata.Pipeline {
+	if pipeline == nil {
+		return metadata.Pipeline{}
+	}
+
+	cron := ""
+	if pipeline.Event == model.EventCron {
+		cron = pipeline.Sender
+	}
+
+	parent := int64(0)
+	if includeParent {
+		parent = pipeline.Parent
+	}
+
+	return metadata.Pipeline{
+		Number:   pipeline.Number,
+		Parent:   parent,
+		Created:  pipeline.Created,
+		Started:  pipeline.Started,
+		Finished: pipeline.Finished,
+		Status:   string(pipeline.Status),
+		Event:    string(pipeline.Event),
+		Link:     pipeline.Link,
+		Target:   pipeline.Deploy,
+		Commit: metadata.Commit{
+			Sha:     pipeline.Commit,
+			Ref:     pipeline.Ref,
+			Refspec: pipeline.Refspec,
+			Branch:  pipeline.Branch,
+			Message: pipeline.Message,
+			Author: metadata.Author{
+				Name:   pipeline.Author,
+				Email:  pipeline.Email,
+				Avatar: pipeline.Avatar,
+			},
+			ChangedFiles:      pipeline.ChangedFiles,
+			PullRequestLabels: pipeline.PullRequestLabels,
+		},
+		Cron: cron,
+	}
 }
