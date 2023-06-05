@@ -87,7 +87,6 @@ func TestUnmarshalContainer(t *testing.T) {
 		ExtraHosts:    []string{"somehost:162.242.195.82", "otherhost:50.31.209.229"},
 		Image:         "golang:latest",
 		Isolation:     "hyperv",
-		Labels:        types.SliceorMap{"com.example.type": "build", "com.example.team": "frontend"},
 		MemLimit:      types.MemStringorInt(1024),
 		MemSwapLimit:  types.MemStringorInt(1024),
 		MemSwappiness: types.MemStringorInt(1024),

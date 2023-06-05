@@ -25,7 +25,7 @@ func TestLogEntry(t *testing.T) {
 		Line:     1,
 		Data:     "starting redis server",
 	}
-	got, want := line.String(), "[redis:L1:60s] starting redis server"
+	got, want := line.String(), "[e9ea76a5-44a1-4059-9c4a-6956c478b26d:L1:60s] starting redis server"
 	if got != want {
 		t.Errorf("Wanted line string %q, got %q", want, got)
 	}
