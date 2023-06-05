@@ -34,7 +34,7 @@ func (s storage) LogSave(step *model.Step, logEntries []*model.LogEntry) error {
 
 	for _, logEntry := range logEntries {
 		if logEntry.StepID != step.ID {
-			return fmt.Errorf("got a log-entry with step id '%d' but require '%d'", logEntry.StepID, step.ID)
+			return fmt.Errorf("got a log-entry with step id '%d' but expected '%d'", logEntry.StepID, step.ID)
 		}
 		if _, err := sess.Insert(logEntry); err != nil {
 			return err
