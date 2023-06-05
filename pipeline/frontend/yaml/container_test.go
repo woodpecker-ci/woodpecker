@@ -181,7 +181,7 @@ func TestUnmarshalContainers(t *testing.T) {
 					Name:  "publish-agent",
 					Image: "print/env",
 					Group: "bundle",
-					Secrets: Secrets{Secrets: []*Secret{{
+					Secrets: types.Secrets{Secrets: []*types.Secret{{
 						Source: "docker_username",
 						Target: "docker_username",
 					}, {
@@ -265,10 +265,10 @@ func TestUnmarshalContainers(t *testing.T) {
 	}
 	for _, test := range testdata {
 		in := []byte(test.from)
-		got := Containers{}
+		got := ContainerList{}
 		err := yaml.Unmarshal(in, &got)
 		assert.NoError(t, err)
-		assert.EqualValues(t, test.want, got.Containers, "problem parsing containers %q", test.from)
+		assert.EqualValues(t, test.want, got.ContainerList, "problem parsing containers %q", test.from)
 	}
 }
 
@@ -281,7 +281,7 @@ func TestUnmarshalContainersErr(t *testing.T) {
 	}
 	for _, test := range testdata {
 		in := []byte(test)
-		containers := new(Containers)
+		containers := new(ContainerList)
 		err := yaml.Unmarshal(in, &containers)
 		assert.Error(t, err, "wanted error for containers %q", test)
 	}

@@ -216,7 +216,7 @@ func (b *StepBuilder) environmentVariables(metadata metadata.Metadata, axis matr
 	return environ
 }
 
-func (b *StepBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[string]string, metadata metadata.Metadata, stepID int64) (*backend.Config, error) {
+func (b *StepBuilder) toInternalRepresentation(parsed *yaml.Workflow, environ map[string]string, metadata metadata.Metadata, stepID int64) (*backend.Config, error) {
 	var secrets []compiler.Secret
 	for _, sec := range b.Secs {
 		if !sec.Match(b.Curr.Event) {

@@ -33,61 +33,65 @@ type (
 		Limits   map[string]string `yaml:"limits,omitempty"`
 	}
 
-	// Containers denotes an ordered collection of containers.
-	Containers struct {
-		Containers []*Container
+	// ContainerList denotes an ordered collection of containers.
+	ContainerList struct {
+		ContainerList []*Container
 	}
 
 	// Container defines a container.
 	Container struct {
-		AuthConfig     AuthConfig             `yaml:"auth_config,omitempty"`
-		CapAdd         []string               `yaml:"cap_add,omitempty"`
-		CapDrop        []string               `yaml:"cap_drop,omitempty"`
+		BackendOptions BackendOptions         `yaml:"backend_options,omitempty"`
 		Commands       types.StringOrSlice    `yaml:"commands,omitempty"`
-		CPUQuota       types.StringorInt      `yaml:"cpu_quota,omitempty"`
-		CPUSet         string                 `yaml:"cpuset,omitempty"`
-		CPUShares      types.StringorInt      `yaml:"cpu_shares,omitempty"`
 		Detached       bool                   `yaml:"detach,omitempty"`
-		Devices        []string               `yaml:"devices,omitempty"`
-		Tmpfs          []string               `yaml:"tmpfs,omitempty"`
-		DNS            types.StringOrSlice    `yaml:"dns,omitempty"`
-		DNSSearch      types.StringOrSlice    `yaml:"dns_search,omitempty"`
 		Directory      string                 `yaml:"directory,omitempty"`
 		Environment    types.SliceorMap       `yaml:"environment,omitempty"`
-		ExtraHosts     []string               `yaml:"extra_hosts,omitempty"`
+		Failure        string                 `yaml:"failure,omitempty"`
 		Group          string                 `yaml:"group,omitempty"`
 		Image          string                 `yaml:"image,omitempty"`
-		Failure        string                 `yaml:"failure,omitempty"`
-		Isolation      string                 `yaml:"isolation,omitempty"`
-		MemLimit       types.MemStringorInt   `yaml:"mem_limit,omitempty"`
-		MemSwapLimit   types.MemStringorInt   `yaml:"memswap_limit,omitempty"`
-		MemSwappiness  types.MemStringorInt   `yaml:"mem_swappiness,omitempty"`
 		Name           string                 `yaml:"name,omitempty"`
-		NetworkMode    string                 `yaml:"network_mode,omitempty"`
-		IpcMode        string                 `yaml:"ipc_mode,omitempty"`
-		Networks       types.Networks         `yaml:"networks,omitempty"`
-		Privileged     bool                   `yaml:"privileged,omitempty"`
 		Pull           bool                   `yaml:"pull,omitempty"`
-		ShmSize        types.MemStringorInt   `yaml:"shm_size,omitempty"`
-		Ulimits        types.Ulimits          `yaml:"ulimits,omitempty"`
-		Volumes        types.Volumes          `yaml:"volumes,omitempty"`
-		Secrets        Secrets                `yaml:"secrets,omitempty"`
-		Sysctls        types.SliceorMap       `yaml:"sysctls,omitempty"`
-		When           constraint.When        `yaml:"when,omitempty"`
+		Secrets        types.Secrets          `yaml:"secrets,omitempty"`
 		Settings       map[string]interface{} `yaml:"settings"`
-		BackendOptions BackendOptions         `yaml:"backend_options,omitempty"`
+		Volumes        types.Volumes          `yaml:"volumes,omitempty"`
+		When           constraint.When        `yaml:"when,omitempty"`
+
+		// Docker Specific
+		Privileged bool `yaml:"privileged,omitempty"`
+
+		// Undocumented
+		AuthConfig    AuthConfig           `yaml:"auth_config,omitempty"`
+		CapAdd        []string             `yaml:"cap_add,omitempty"`
+		CapDrop       []string             `yaml:"cap_drop,omitempty"`
+		CPUQuota      types.StringorInt    `yaml:"cpu_quota,omitempty"`
+		CPUSet        string               `yaml:"cpuset,omitempty"`
+		CPUShares     types.StringorInt    `yaml:"cpu_shares,omitempty"`
+		Devices       []string             `yaml:"devices,omitempty"`
+		DNSSearch     types.StringOrSlice  `yaml:"dns_search,omitempty"`
+		DNS           types.StringOrSlice  `yaml:"dns,omitempty"`
+		ExtraHosts    []string             `yaml:"extra_hosts,omitempty"`
+		IpcMode       string               `yaml:"ipc_mode,omitempty"`
+		Isolation     string               `yaml:"isolation,omitempty"`
+		MemLimit      types.MemStringorInt `yaml:"mem_limit,omitempty"`
+		MemSwapLimit  types.MemStringorInt `yaml:"memswap_limit,omitempty"`
+		MemSwappiness types.MemStringorInt `yaml:"mem_swappiness,omitempty"`
+		NetworkMode   string               `yaml:"network_mode,omitempty"`
+		Networks      types.Networks       `yaml:"networks,omitempty"`
+		ShmSize       types.MemStringorInt `yaml:"shm_size,omitempty"`
+		Sysctls       types.SliceorMap     `yaml:"sysctls,omitempty"`
+		Tmpfs         []string             `yaml:"tmpfs,omitempty"`
+		Ulimits       types.Ulimits        `yaml:"ulimits,omitempty"`
 	}
 )
 
 // UnmarshalYAML implements the Unmarshaler interface.
-func (c *Containers) UnmarshalYAML(value *yaml.Node) error {
+func (c *ContainerList) UnmarshalYAML(value *yaml.Node) error {
 	switch value.Kind {
 	// We support maps ...
 	case yaml.MappingNode:
-		c.Containers = make([]*Container, 0, len(value.Content)/2+1)
+		c.ContainerList = make([]*Container, 0, len(value.Content)/2+1)
 		// We cannot use decode on specific values
 		// since if we try to load from a map, the order
-		// will not be kept. Therefore use value.Content
+		// will not be kept. Therefor use value.Content
 		// and take the map values i%2=1
 		for i, n := range value.Content {
 			if i%2 == 1 {
@@ -100,13 +104,13 @@ func (c *Containers) UnmarshalYAML(value *yaml.Node) error {
 					container.Name = fmt.Sprintf("%v", value.Content[i-1].Value)
 				}
 
-				c.Containers = append(c.Containers, container)
+				c.ContainerList = append(c.ContainerList, container)
 			}
 		}
 
 	// ... and lists
 	case yaml.SequenceNode:
-		c.Containers = make([]*Container, 0, len(value.Content))
+		c.ContainerList = make([]*Container, 0, len(value.Content))
 		for i, n := range value.Content {
 			container := &Container{}
 			if err := n.Decode(container); err != nil {
@@ -117,7 +121,7 @@ func (c *Containers) UnmarshalYAML(value *yaml.Node) error {
 				container.Name = fmt.Sprintf("step-%d", i)
 			}
 
-			c.Containers = append(c.Containers, container)
+			c.ContainerList = append(c.ContainerList, container)
 		}
 
 	default:
