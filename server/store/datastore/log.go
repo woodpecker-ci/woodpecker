@@ -22,7 +22,7 @@ import (
 
 func (s storage) LogFind(step *model.Step) ([]*model.LogEntry, error) {
 	var logEntries []*model.LogEntry
-	return logEntries, s.engine.Where("step_id = ?", step.ID).Find(&logEntries)
+	return logEntries, s.engine.Asc("id").Where("step_id = ?", step.ID).Find(&logEntries)
 }
 
 func (s storage) LogSave(step *model.Step, logEntries []*model.LogEntry) error {
