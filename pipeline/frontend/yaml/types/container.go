@@ -7,6 +7,7 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/constraint"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types/base"
 	"github.com/woodpecker-ci/woodpecker/shared/constant"
 )
 
@@ -19,10 +20,10 @@ type (
 	// Container defines a container.
 	Container struct {
 		BackendOptions BackendOptions         `yaml:"backend_options,omitempty"`
-		Commands       StringOrSlice          `yaml:"commands,omitempty"`
+		Commands       base.StringOrSlice     `yaml:"commands,omitempty"`
 		Detached       bool                   `yaml:"detach,omitempty"`
 		Directory      string                 `yaml:"directory,omitempty"`
-		Environment    SliceorMap             `yaml:"environment,omitempty"`
+		Environment    base.SliceOrMap        `yaml:"environment,omitempty"`
 		Failure        string                 `yaml:"failure,omitempty"`
 		Group          string                 `yaml:"group,omitempty"`
 		Image          string                 `yaml:"image,omitempty"`
@@ -37,26 +38,26 @@ type (
 		Privileged bool `yaml:"privileged,omitempty"`
 
 		// Undocumented
-		CapAdd        []string       `yaml:"cap_add,omitempty"`
-		CapDrop       []string       `yaml:"cap_drop,omitempty"`
-		CPUQuota      StringorInt    `yaml:"cpu_quota,omitempty"`
-		CPUSet        string         `yaml:"cpuset,omitempty"`
-		CPUShares     StringorInt    `yaml:"cpu_shares,omitempty"`
-		Devices       []string       `yaml:"devices,omitempty"`
-		DNSSearch     StringOrSlice  `yaml:"dns_search,omitempty"`
-		DNS           StringOrSlice  `yaml:"dns,omitempty"`
-		ExtraHosts    []string       `yaml:"extra_hosts,omitempty"`
-		IpcMode       string         `yaml:"ipc_mode,omitempty"`
-		Isolation     string         `yaml:"isolation,omitempty"`
-		MemLimit      MemStringorInt `yaml:"mem_limit,omitempty"`
-		MemSwapLimit  MemStringorInt `yaml:"memswap_limit,omitempty"`
-		MemSwappiness MemStringorInt `yaml:"mem_swappiness,omitempty"`
-		NetworkMode   string         `yaml:"network_mode,omitempty"`
-		Networks      Networks       `yaml:"networks,omitempty"`
-		ShmSize       MemStringorInt `yaml:"shm_size,omitempty"`
-		Sysctls       SliceorMap     `yaml:"sysctls,omitempty"`
-		Tmpfs         []string       `yaml:"tmpfs,omitempty"`
-		Ulimits       Ulimits        `yaml:"ulimits,omitempty"`
+		CapAdd        []string            `yaml:"cap_add,omitempty"`
+		CapDrop       []string            `yaml:"cap_drop,omitempty"`
+		CPUQuota      base.StringOrInt    `yaml:"cpu_quota,omitempty"`
+		CPUSet        string              `yaml:"cpuset,omitempty"`
+		CPUShares     base.StringOrInt    `yaml:"cpu_shares,omitempty"`
+		Devices       []string            `yaml:"devices,omitempty"`
+		DNSSearch     base.StringOrSlice  `yaml:"dns_search,omitempty"`
+		DNS           base.StringOrSlice  `yaml:"dns,omitempty"`
+		ExtraHosts    []string            `yaml:"extra_hosts,omitempty"`
+		IpcMode       string              `yaml:"ipc_mode,omitempty"`
+		Isolation     string              `yaml:"isolation,omitempty"`
+		MemLimit      base.MemStringOrInt `yaml:"mem_limit,omitempty"`
+		MemSwapLimit  base.MemStringOrInt `yaml:"memswap_limit,omitempty"`
+		MemSwappiness base.MemStringOrInt `yaml:"mem_swappiness,omitempty"`
+		NetworkMode   string              `yaml:"network_mode,omitempty"`
+		Networks      Networks            `yaml:"networks,omitempty"`
+		ShmSize       base.MemStringOrInt `yaml:"shm_size,omitempty"`
+		Sysctls       base.SliceOrMap     `yaml:"sysctls,omitempty"`
+		Tmpfs         []string            `yaml:"tmpfs,omitempty"`
+		Ulimits       Ulimits             `yaml:"ulimits,omitempty"`
 	}
 )
 

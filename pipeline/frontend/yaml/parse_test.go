@@ -6,7 +6,7 @@ import (
 	"github.com/franela/goblin"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
+	yaml_base_types "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types/base"
 )
 
 func TestParse(t *testing.T) {
@@ -26,16 +26,16 @@ func TestParse(t *testing.T) {
 				g.Assert(out.Workspace.Path).Equal("src/github.com/octocat/hello-world")
 				g.Assert(out.Volumes.WorkflowVolumes[0].Name).Equal("custom")
 				g.Assert(out.Volumes.WorkflowVolumes[0].Driver).Equal("blockbridge")
-				g.Assert(out.Networks.Networks[0].Name).Equal("custom")
-				g.Assert(out.Networks.Networks[0].Driver).Equal("overlay")
+				g.Assert(out.Networks.WorkflowNetworks[0].Name).Equal("custom")
+				g.Assert(out.Networks.WorkflowNetworks[0].Driver).Equal("overlay")
 				g.Assert(out.Services.ContainerList[0].Name).Equal("database")
 				g.Assert(out.Services.ContainerList[0].Image).Equal("mysql")
 				g.Assert(out.Steps.ContainerList[0].Name).Equal("test")
 				g.Assert(out.Steps.ContainerList[0].Image).Equal("golang")
-				g.Assert(out.Steps.ContainerList[0].Commands).Equal(types.StringOrSlice{"go install", "go test"})
+				g.Assert(out.Steps.ContainerList[0].Commands).Equal(yaml_base_types.StringOrSlice{"go install", "go test"})
 				g.Assert(out.Steps.ContainerList[1].Name).Equal("build")
 				g.Assert(out.Steps.ContainerList[1].Image).Equal("golang")
-				g.Assert(out.Steps.ContainerList[1].Commands).Equal(types.StringOrSlice{"go build"})
+				g.Assert(out.Steps.ContainerList[1].Commands).Equal(yaml_base_types.StringOrSlice{"go build"})
 				g.Assert(out.Steps.ContainerList[2].Name).Equal("notify")
 				g.Assert(out.Steps.ContainerList[2].Image).Equal("slack")
 				// g.Assert(out.Steps.ContainerList[2].NetworkMode).Equal("container:name")

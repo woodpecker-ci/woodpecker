@@ -1,6 +1,9 @@
 package types
 
-import "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/constraint"
+import (
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/constraint"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types/base"
+)
 
 type (
 	// Workflow defines a workflow configuration.
@@ -11,14 +14,14 @@ type (
 		Clone     ContainerList   `yaml:"clone,omitempty"`
 		Steps     ContainerList   `yaml:"pipeline"` // TODO: discussed if we should rename it to "steps"
 		Services  ContainerList   `yaml:"services,omitempty"`
-		Labels    SliceorMap      `yaml:"labels,omitempty"`
+		Labels    base.SliceOrMap `yaml:"labels,omitempty"`
 		DependsOn []string        `yaml:"depends_on,omitempty"`
 		RunsOn    []string        `yaml:"runs_on,omitempty"`
 		SkipClone bool            `yaml:"skip_clone"`
 		// Undocumented
-		Cache    StringOrSlice    `yaml:"cache,omitempty"`
-		Networks WorkflowNetworks `yaml:"networks,omitempty"`
-		Volumes  WorkflowVolumes  `yaml:"volumes,omitempty"`
+		Cache    base.StringOrSlice `yaml:"cache,omitempty"`
+		Networks WorkflowNetworks   `yaml:"networks,omitempty"`
+		Volumes  WorkflowVolumes    `yaml:"volumes,omitempty"`
 		// Deprecated
 		BranchesDontUseIt *constraint.List `yaml:"branches,omitempty"`
 	}

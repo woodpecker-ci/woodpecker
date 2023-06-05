@@ -8,6 +8,7 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/constraint"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types/base"
 )
 
 var containerYaml = []byte(`
@@ -63,22 +64,22 @@ func TestUnmarshalContainer(t *testing.T) {
 	want := Container{
 		CapAdd:        []string{"ALL"},
 		CapDrop:       []string{"NET_ADMIN", "SYS_ADMIN"},
-		Commands:      StringOrSlice{"go build", "go test"},
-		CPUQuota:      StringorInt(11),
+		Commands:      base.StringOrSlice{"go build", "go test"},
+		CPUQuota:      base.StringOrInt(11),
 		CPUSet:        "1,2",
-		CPUShares:     StringorInt(99),
+		CPUShares:     base.StringOrInt(99),
 		Detached:      true,
 		Devices:       []string{"/dev/ttyUSB0:/dev/ttyUSB0"},
 		Directory:     "example/",
-		DNS:           StringOrSlice{"8.8.8.8"},
-		DNSSearch:     StringOrSlice{"example.com"},
-		Environment:   SliceorMap{"RACK_ENV": "development", "SHOW": "true"},
+		DNS:           base.StringOrSlice{"8.8.8.8"},
+		DNSSearch:     base.StringOrSlice{"example.com"},
+		Environment:   base.SliceOrMap{"RACK_ENV": "development", "SHOW": "true"},
 		ExtraHosts:    []string{"somehost:162.242.195.82", "otherhost:50.31.209.229"},
 		Image:         "golang:latest",
 		Isolation:     "hyperv",
-		MemLimit:      MemStringorInt(1024),
-		MemSwapLimit:  MemStringorInt(1024),
-		MemSwappiness: MemStringorInt(1024),
+		MemLimit:      base.MemStringOrInt(1024),
+		MemSwapLimit:  base.MemStringOrInt(1024),
+		MemSwappiness: base.MemStringOrInt(1024),
 		Name:          "my-build-container",
 		Networks: Networks{
 			Networks: []*Network{
@@ -89,8 +90,8 @@ func TestUnmarshalContainer(t *testing.T) {
 		NetworkMode: "bridge",
 		Pull:        true,
 		Privileged:  true,
-		ShmSize:     MemStringorInt(1024),
-		Tmpfs:       StringOrSlice{"/var/lib/test"},
+		ShmSize:     base.MemStringOrInt(1024),
+		Tmpfs:       base.StringOrSlice{"/var/lib/test"},
 		Volumes: Volumes{
 			Volumes: []*Volume{
 				{Source: "", Destination: "/var/lib/mysql"},
@@ -290,9 +291,9 @@ func stringsToInterface(val ...string) []interface{} {
 func TestIsPlugin(t *testing.T) {
 	assert.True(t, (&Container{}).IsPlugin())
 	assert.True(t, (&Container{
-		Commands: StringOrSlice(strslice.StrSlice{}),
+		Commands: base.StringOrSlice(strslice.StrSlice{}),
 	}).IsPlugin())
 	assert.False(t, (&Container{
-		Commands: StringOrSlice(strslice.StrSlice{"echo 'this is not a plugin'"}),
+		Commands: base.StringOrSlice(strslice.StrSlice{"echo 'this is not a plugin'"}),
 	}).IsPlugin())
 }
