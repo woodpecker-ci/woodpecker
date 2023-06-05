@@ -81,14 +81,12 @@ func (w *LineWriter) Write(p []byte) (n int, err error) {
 	}
 	log.Trace().Str("step-uuid", w.stepUUID).Msgf("grpc write line: %s", data)
 
-	// TODO: split p by "\n" to create a new entry for each line?
 	line := &LogEntry{
 		Data:     data,
 		StepUUID: w.stepUUID,
 		Time:     int64(time.Since(w.now).Seconds()),
 		Type:     LogEntryStdout,
-		// TODO: figure out a way to calc and set correct line number
-		Line: w.num,
+		Line:     w.num,
 	}
 	if err := w.peer.Log(context.Background(), line); err != nil {
 		log.Error().Err(err).Str("step-uuid", w.stepUUID).Msg("fail to write pipeline log to peer")
