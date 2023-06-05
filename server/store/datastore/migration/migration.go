@@ -17,6 +17,7 @@ package migration
 import (
 	"fmt"
 	"reflect"
+	"time"
 
 	"github.com/rs/zerolog/log"
 	"xorm.io/xorm"
@@ -97,6 +98,9 @@ func Migrate(e *xorm.Engine) error {
 	if err := e.Sync(new(migrations)); err != nil {
 		return err
 	}
+
+	// account for long migrations
+	e.SetConnMaxLifetime(time.Minute * 30)
 
 	sess := e.NewSession()
 	defer sess.Close()
