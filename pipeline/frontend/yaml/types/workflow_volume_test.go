@@ -40,7 +40,7 @@ func TestUnmarshalVolume(t *testing.T) {
 	}
 }
 
-func TestUnmarshalVolumes(t *testing.T) {
+func TestUnmarshalWorkflowVolumes(t *testing.T) {
 	testdata := []struct {
 		from string
 		want []*WorkflowVolume
