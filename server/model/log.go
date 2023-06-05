@@ -15,7 +15,7 @@
 package model
 
 // LogEntryType identifies the type of line in the logs.
-type LogEntryType int
+type LogEntryType int // @name	LogEntryType
 
 const (
 	LogEntryStdout LogEntryType = iota
@@ -33,7 +33,7 @@ type LogEntry struct {
 	Data    []byte       `json:"data"     xorm:"LONGBLOB"`
 	Created int64        `json:"-"        xorm:"created"`
 	Type    LogEntryType `json:"type"`
-}
+} //	@name LogEntry
 
 // TODO: store info what specific command the line belongs to (must be optional and impl. by backend)
 

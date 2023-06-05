@@ -751,6 +751,52 @@ const docTemplate = `{
                 }
             }
         },
+        "/logs/{owner}/{name}/{pipeline}/{stepID}": {
+            "get": {
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Pipeline logs"
+                ],
+                "summary": "Log stream",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "the repository owner's name",
+                        "name": "owner",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "the repository name",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the number of the pipeline",
+                        "name": "pipeline",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the step id",
+                        "name": "stepID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/orgs/{owner}/permissions": {
             "get": {
                 "produces": [
@@ -1795,10 +1841,10 @@ const docTemplate = `{
                 }
             }
         },
-        "/repos/{owner}/{name}/logs/{number}/{pid}": {
+        "/repos/{owner}/{name}/logs/{number}/{stepID}": {
             "get": {
                 "produces": [
-                    "text/plain"
+                    "application/json"
                 ],
                 "tags": [
                     "Pipeline logs"
@@ -1836,76 +1882,21 @@ const docTemplate = `{
                     },
                     {
                         "type": "integer",
-                        "description": "the pipeline id",
-                        "name": "pid",
+                        "description": "the step id",
+                        "name": "stepID",
                         "in": "path",
                         "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK"
-                    }
-                }
-            }
-        },
-        "/repos/{owner}/{name}/logs/{number}/{pid}/{step}": {
-            "get": {
-                "produces": [
-                    "text/plain"
-                ],
-                "tags": [
-                    "Pipeline logs"
-                ],
-                "summary": "Log information per step",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "default": "Bearer \u003cpersonal access token\u003e",
-                        "description": "Insert your personal access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository owner's name",
-                        "name": "owner",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository name",
-                        "name": "name",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "the number of the pipeline",
-                        "name": "number",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "the pipeline id",
-                        "name": "pid",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "the step name",
-                        "name": "step",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/LogEntry"
+                            }
+                        }
                     }
                 }
             }
@@ -3800,6 +3791,32 @@ const docTemplate = `{
                 }
             }
         },
+        "LogEntry": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "line": {
+                    "type": "integer"
+                },
+                "step_id": {
+                    "type": "integer"
+                },
+                "time": {
+                    "type": "integer"
+                },
+                "type": {
+                    "$ref": "#/definitions/model.LogEntryType"
+                }
+            }
+        },
         "OrgPerm": {
             "type": "object",
             "properties": {
@@ -4322,6 +4339,23 @@ const docTemplate = `{
                 "EventDeploy",
                 "EventCron",
                 "EventManual"
+            ]
+        },
+        "model.LogEntryType": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3,
+                4
+            ],
+            "x-enum-varnames": [
+                "LogEntryStdout",
+                "LogEntryStderr",
+                "LogEntryExitCode",
+                "LogEntryMetadata",
+                "LogEntryProgress"
             ]
         }
     }

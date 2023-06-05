@@ -119,6 +119,17 @@ func EventStreamSSE(c *gin.Context) {
 	}
 }
 
+// LogStream
+//
+//	@Summary	Log stream
+//	@Router		/logs/{owner}/{name}/{pipeline}/{stepID} [get]
+//	@Produce	plain
+//	@Success	200
+//	@Tags			Pipeline logs
+//	@Param		owner			path	string	true	"the repository owner's name"
+//	@Param		name			path	string	true	"the repository name"
+//	@Param		pipeline	path	int		true		"the number of the pipeline"
+//	@Param		stepID		path	int		true		"the step id"
 func LogStreamSSE(c *gin.Context) {
 	c.Header("Content-Type", "text/event-stream")
 	c.Header("Cache-Control", "no-cache")

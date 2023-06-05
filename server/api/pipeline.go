@@ -21,6 +21,7 @@ package api
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -186,28 +187,29 @@ func GetPipelineLast(c *gin.Context) {
 	c.JSON(http.StatusOK, pl)
 }
 
-// GetPipelineLogs
+// GetStepLogs
 //
-//	@Summary	Log information per step
-//	@Router		/repos/{owner}/{name}/logs/{number}/{pid}/{step} [get]
-//	@Produce	plain
-//	@Success	200
-//	@Tags		Pipeline logs
+//	@Summary	Log information
+//	@Router		/repos/{owner}/{name}/logs/{number}/{stepID} [get]
+//	@Produce	json
+//	@Success	200 {array} LogEntry
+//	@Tags			Pipeline logs
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		owner			path	string	true	"the repository owner's name"
 //	@Param		name			path	string	true	"the repository name"
-//	@Param		number			path	int		true	"the number of the pipeline"
-//	@Param		pid				path	int		true	"the pipeline id"
-//	@Param		step			path	int		true	"the step name"
-func GetPipelineLogs(c *gin.Context) {
+//	@Param		number		path	int		true		"the number of the pipeline"
+//	@Param		stepID		path	int		true		"the step id"
+func GetStepLogs(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
 
 	// parse the pipeline number and step sequence number from
 	// the request parameter.
-	num, _ := strconv.ParseInt(c.Params.ByName("number"), 10, 64)
-	ppid, _ := strconv.Atoi(c.Params.ByName("pid"))
-	name := c.Params.ByName("step")
+	num, err := strconv.ParseInt(c.Params.ByName("number"), 10, 64)
+	if err != nil {
+		_ = c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
 
 	pl, err := _store.GetPipelineNumber(repo, num)
 	if err != nil {
@@ -215,39 +217,6 @@ func GetPipelineLogs(c *gin.Context) {
 		return
 	}
 
-	// TODO: get & use step id directly
-	step, err := _store.StepChild(pl, ppid, name)
-	if err != nil {
-		handleDbGetError(c, err)
-		return
-	}
-
-	logs, err := _store.LogFind(step)
-	if err != nil {
-		handleDbGetError(c, err)
-		return
-	}
-
-	c.JSON(http.StatusOK, logs)
-}
-
-// GetStepLogs
-//
-//	@Summary	Log information
-//	@Router		/repos/{owner}/{name}/logs/{number}/{pid} [get]
-//	@Produce	plain
-//	@Success	200
-//	@Tags		Pipeline logs
-//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		owner			path	string	true	"the repository owner's name"
-//	@Param		name			path	string	true	"the repository name"
-//	@Param		number			path	int		true	"the number of the pipeline"
-//	@Param		pid				path	int		true	"the pipeline id"
-func GetStepLogs(c *gin.Context) {
-	_store := store.FromContext(c)
-
-	// parse the pipeline number and step sequence number from
-	// the request parameter.
 	stepID, err := strconv.ParseInt(c.Params.ByName("stepId"), 10, 64)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusBadRequest, err)
@@ -257,6 +226,12 @@ func GetStepLogs(c *gin.Context) {
 	step, err := _store.StepLoad(stepID)
 	if err != nil {
 		handleDbGetError(c, err)
+		return
+	}
+
+	if step.PipelineID != pl.ID {
+		// make sure we can not read arbitrary logs by id
+		_ = c.AbortWithError(http.StatusBadRequest, fmt.Errorf("step with id %d is not part of repo %s", stepID, repo.FullName))
 		return
 	}
 

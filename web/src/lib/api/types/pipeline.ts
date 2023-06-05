@@ -102,6 +102,7 @@ export type PipelineStatus =
 
 export type PipelineStep = {
   id: number;
+  uuid: string;
   pipeline_id: number;
   pid: number;
   ppid: number;

@@ -178,6 +178,15 @@ func apiRoutes(e *gin.Engine) {
 
 		apiBase.POST("/hook", api.PostHook)
 
+		stream := e.Group("/stream")
+		{
+			stream.GET("/logs/:owner/:name/:pipeline/:stepId",
+				session.SetRepo(),
+				session.SetPerm(),
+				session.MustPull,
+				api.LogStreamSSE)
+		}
+
 		if zerolog.GlobalLevel() <= zerolog.DebugLevel {
 			debugger := apiBase.Group("/debug")
 			{
@@ -203,11 +212,5 @@ func apiRoutes(e *gin.Engine) {
 	sse := e.Group("/stream")
 	{
 		sse.GET("/events", api.EventStreamSSE)
-		sse.GET("/logs/:owner/:name/:pipeline/:stepId",
-			session.SetRepo(),
-			session.SetPerm(),
-			session.MustPull,
-			api.LogStreamSSE,
-		)
 	}
 }
