@@ -198,7 +198,7 @@ async function download() {
     downloadInProgress.value = false;
   }
   const fileURL = window.URL.createObjectURL(
-    new Blob([logs.map((line) => line.data).join('')], {
+    new Blob([logs.map((line) => atob(line.data)).join('')], {
       type: 'text/plain',
     }),
   );
@@ -240,7 +240,7 @@ async function loadLogs() {
 
   if (isStepFinished(step.value)) {
     const logs = await apiClient.getLogs(repo.value.owner, repo.value.name, pipeline.value.number, step.value.id);
-    logs?.forEach((line) => writeLog({ index: line.line, text: line.data, time: line.time }));
+    logs?.forEach((line) => writeLog({ index: line.line, text: atob(line.data), time: line.time }));
     flushLogs(false);
   }
 
