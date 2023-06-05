@@ -245,17 +245,12 @@ async function loadLogs() {
   }
 
   if (isStepRunning(step.value)) {
-    // load stream of parent process (which receives all child processes logs)
-    // TODO: change stream to only send data of single child process
     stream.value = apiClient.streamLogs(
       repo.value.owner,
       repo.value.name,
       pipeline.value.number,
-      step.value.ppid,
+      step.value.id,
       (line) => {
-        if (line?.step_id !== step.value?.id) {
-          return;
-        }
         writeLog({ index: line.line, text: line.data, time: line.time });
         flushLogs(true);
       },
