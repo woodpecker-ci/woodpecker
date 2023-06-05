@@ -14,6 +14,7 @@
 
 package types
 
+// BackendOptions are advanced options for specific backends
 type BackendOptions struct {
 	Kubernetes KubernetesBackendOptions `yaml:"kubernetes,omitempty"`
 }

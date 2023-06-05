@@ -12,15 +12,6 @@ import (
 )
 
 type (
-	// AuthConfig defines registry authentication credentials.
-	AuthConfig struct {
-		Username string
-		Password string
-		Email    string
-	}
-
-	// Advanced backend options
-
 	// ContainerList denotes an ordered collection of containers.
 	ContainerList struct {
 		ContainerList []*Container
@@ -47,7 +38,6 @@ type (
 		Privileged bool `yaml:"privileged,omitempty"`
 
 		// Undocumented
-		AuthConfig    AuthConfig           `yaml:"auth_config,omitempty"`
 		CapAdd        []string             `yaml:"cap_add,omitempty"`
 		CapDrop       []string             `yaml:"cap_drop,omitempty"`
 		CPUQuota      types.StringorInt    `yaml:"cpu_quota,omitempty"`

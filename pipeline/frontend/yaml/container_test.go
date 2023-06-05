@@ -13,9 +13,6 @@ import (
 
 var containerYaml = []byte(`
 image: golang:latest
-auth_config:
-  username: janedoe
-  password: password
 cap_add: [ ALL ]
 cap_drop: [ NET_ADMIN, SYS_ADMIN ]
 commands:
@@ -65,10 +62,6 @@ settings:
 
 func TestUnmarshalContainer(t *testing.T) {
 	want := Container{
-		AuthConfig: AuthConfig{
-			Username: "janedoe",
-			Password: "password",
-		},
 		CapAdd:        []string{"ALL"},
 		CapDrop:       []string{"NET_ADMIN", "SYS_ADMIN"},
 		Commands:      types.StringOrSlice{"go build", "go test"},
