@@ -44,9 +44,6 @@ networks:
   - other-network
 pull: true
 privileged: true
-labels:
-  com.example.type: build
-  com.example.team: frontend
 shm_size: 1kb
 mem_limit: 1kb
 memswap_limit: 1kb
