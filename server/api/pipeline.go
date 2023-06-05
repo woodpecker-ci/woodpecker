@@ -579,7 +579,7 @@ var deleteStr = `[
 
 // PostSkipWorkflow
 //
-//	@Summary	Skip a workflow
+//	@Summary	Skip a workflow and it's depending ones
 //	@Router		/repos/{owner}/{name}/pipelines/{number}/skip/{workflowId} [post]
 //	@Produce	json
 //	@Success	200	{object}	Pipeline
