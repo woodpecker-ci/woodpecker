@@ -178,7 +178,7 @@ func apiRoutes(e *gin.Engine) {
 
 		apiBase.POST("/hook", api.PostHook)
 
-		stream := e.Group("/stream")
+		stream := apiBase.Group("/stream")
 		{
 			stream.GET("/logs/:owner/:name/:pipeline/:stepId",
 				session.SetRepo(),
