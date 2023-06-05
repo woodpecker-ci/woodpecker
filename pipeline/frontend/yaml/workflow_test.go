@@ -24,8 +24,8 @@ func TestParse(t *testing.T) {
 
 				g.Assert(out.Workspace.Base).Equal("/go")
 				g.Assert(out.Workspace.Path).Equal("src/github.com/octocat/hello-world")
-				g.Assert(out.Volumes.Volumes[0].Name).Equal("custom")
-				g.Assert(out.Volumes.Volumes[0].Driver).Equal("blockbridge")
+				g.Assert(out.Volumes.WorkflowVolumes[0].Name).Equal("custom")
+				g.Assert(out.Volumes.WorkflowVolumes[0].Driver).Equal("blockbridge")
 				g.Assert(out.Networks.Networks[0].Name).Equal("custom")
 				g.Assert(out.Networks.Networks[0].Driver).Equal("overlay")
 				g.Assert(out.Services.ContainerList[0].Name).Equal("database")

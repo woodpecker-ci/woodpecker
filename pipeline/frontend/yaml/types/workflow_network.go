@@ -1,4 +1,4 @@
-package yaml
+package types
 
 import (
 	"fmt"
@@ -7,8 +7,8 @@ import (
 )
 
 type (
-	// Networks defines a collection of networks.
-	Networks struct {
+	// WorkflowNetworks defines a collection of networks.
+	WorkflowNetworks struct {
 		Networks []*Network
 	}
 
@@ -21,7 +21,7 @@ type (
 )
 
 // UnmarshalYAML implements the Unmarshaler interface.
-func (n *Networks) UnmarshalYAML(value *yaml.Node) error {
+func (n *WorkflowNetworks) UnmarshalYAML(value *yaml.Node) error {
 	networks := map[string]Network{}
 	err := value.Decode(&networks)
 

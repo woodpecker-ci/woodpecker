@@ -1,4 +1,4 @@
-package yaml
+package types
 
 import (
 	"testing"
@@ -7,21 +7,21 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func TestUnmarshalNetwork(t *testing.T) {
+func TestUnmarshalVolume(t *testing.T) {
 	testdata := []struct {
 		from string
-		want Network
+		want WorkflowVolume
 	}{
 		{
 			from: "{ name: foo, driver: bar }",
-			want: Network{
+			want: WorkflowVolume{
 				Name:   "foo",
 				Driver: "bar",
 			},
 		},
 		{
 			from: "{ name: foo, driver: bar, driver_opts: { baz: qux } }",
-			want: Network{
+			want: WorkflowVolume{
 				Name:   "foo",
 				Driver: "bar",
 				DriverOpts: map[string]string{
@@ -33,21 +33,21 @@ func TestUnmarshalNetwork(t *testing.T) {
 
 	for _, test := range testdata {
 		in := []byte(test.from)
-		got := Network{}
+		got := WorkflowVolume{}
 		err := yaml.Unmarshal(in, &got)
 		assert.NoError(t, err)
-		assert.EqualValues(t, test.want, got, "problem parsing network %q", test.from)
+		assert.EqualValues(t, test.want, got, "problem parsing volume %q", test.from)
 	}
 }
 
-func TestUnmarshalNetworks(t *testing.T) {
+func TestUnmarshalVolumes(t *testing.T) {
 	testdata := []struct {
 		from string
-		want []*Network
+		want []*WorkflowVolume
 	}{
 		{
 			from: "foo: { driver: bar }",
-			want: []*Network{
+			want: []*WorkflowVolume{
 				{
 					Name:   "foo",
 					Driver: "bar",
@@ -56,16 +56,16 @@ func TestUnmarshalNetworks(t *testing.T) {
 		},
 		{
 			from: "foo: { name: baz }",
-			want: []*Network{
+			want: []*WorkflowVolume{
 				{
 					Name:   "baz",
-					Driver: "bridge",
+					Driver: "local",
 				},
 			},
 		},
 		{
 			from: "foo: { name: baz, driver: bar }",
-			want: []*Network{
+			want: []*WorkflowVolume{
 				{
 					Name:   "baz",
 					Driver: "bar",
@@ -76,14 +76,14 @@ func TestUnmarshalNetworks(t *testing.T) {
 
 	for _, test := range testdata {
 		in := []byte(test.from)
-		got := Networks{}
+		got := WorkflowVolumes{}
 		err := yaml.Unmarshal(in, &got)
 		assert.NoError(t, err)
-		assert.EqualValues(t, test.want, got.Networks, "problem parsing network %q", test.from)
+		assert.EqualValues(t, test.want, got.WorkflowVolumes, "problem parsing volumes %q", test.from)
 	}
 }
 
-func TestUnmarshalNetworkErr(t *testing.T) {
+func TestUnmarshalVolumesErr(t *testing.T) {
 	testdata := []string{
 		"foo: { name: [ foo, bar] }",
 		"- foo",
@@ -91,7 +91,7 @@ func TestUnmarshalNetworkErr(t *testing.T) {
 
 	for _, test := range testdata {
 		in := []byte(test)
-		err := yaml.Unmarshal(in, new(Networks))
-		assert.Error(t, err, "wanted error for networks %q", test)
+		err := yaml.Unmarshal(in, new(WorkflowVolumes))
+		assert.Error(t, err, "wanted error for volumes %q", test)
 	}
 }

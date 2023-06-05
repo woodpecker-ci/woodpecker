@@ -12,20 +12,20 @@ import (
 type (
 	// Workflow defines a workflow configuration.
 	Workflow struct {
-		When      constraint.When `yaml:"when,omitempty"`
-		Platform  string
-		Workspace Workspace
-		Clone     types.ContainerList
+		When      constraint.When     `yaml:"when,omitempty"`
+		Platform  string              `yaml:"platform,omitempty"`
+		Workspace Workspace           `yaml:"workspace,omitempty"`
+		Clone     types.ContainerList `yaml:"clone,omitempty"`
 		Steps     types.ContainerList `yaml:"pipeline"` // TODO: discussed if we should rename it to "steps"
-		Services  types.ContainerList
-		Networks  Networks
-		Volumes   Volumes
-		Labels    types.SliceorMap
-		DependsOn []string `yaml:"depends_on,omitempty"`
-		RunsOn    []string `yaml:"runs_on,omitempty"`
-		SkipClone bool     `yaml:"skip_clone"`
+		Services  types.ContainerList `yaml:"services,omitempty"`
+		Labels    types.SliceorMap    `yaml:"labels,omitempty"`
+		DependsOn []string            `yaml:"depends_on,omitempty"`
+		RunsOn    []string            `yaml:"runs_on,omitempty"`
+		SkipClone bool                `yaml:"skip_clone"`
 		// Undocumented
-		Cache types.StringOrSlice
+		Cache    types.StringOrSlice    `yaml:"cache,omitempty"`
+		Networks types.WorkflowNetworks `yaml:"networks,omitempty"`
+		Volumes  types.WorkflowVolumes  `yaml:"volumes,omitempty"`
 		// Deprecated
 		BranchesDontUseIt *constraint.List `yaml:"branches,omitempty"`
 	}
