@@ -17,7 +17,6 @@ package migration
 import (
 	"fmt"
 	"reflect"
-	"time"
 
 	"github.com/rs/zerolog/log"
 	"xorm.io/xorm"
@@ -47,7 +46,6 @@ var migrationTasks = []*task{
 	&removeInactiveRepos,
 	&dropFiles,
 	&removeMachineCol,
-	&migrateLogs2LogEntries,
 }
 
 var allBeans = []interface{}{
@@ -98,9 +96,6 @@ func Migrate(e *xorm.Engine) error {
 	if err := e.Sync(new(migrations)); err != nil {
 		return err
 	}
-
-	// account for long migrations of "migrate-logs-to-log_entries"
-	e.SetConnMaxLifetime(time.Hour * 1)
 
 	sess := e.NewSession()
 	defer sess.Close()
