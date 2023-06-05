@@ -3,7 +3,6 @@ package linter
 import (
 	"fmt"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
 )
 
@@ -28,7 +27,7 @@ func New(opts ...Option) *Linter {
 }
 
 // Lint lints the configuration.
-func (l *Linter) Lint(c *yaml.Workflow) error {
+func (l *Linter) Lint(c *types.Workflow) error {
 	if len(c.Steps.ContainerList) == 0 {
 		return fmt.Errorf("Invalid or missing pipeline section")
 	}

@@ -9,11 +9,11 @@ import (
 type (
 	// WorkflowNetworks defines a collection of networks.
 	WorkflowNetworks struct {
-		Networks []*Network
+		WorkflowNetworks []*WorkflowNetwork
 	}
 
-	// Network defines a container network.
-	Network struct {
+	// WorkflowNetwork defines a container network.
+	WorkflowNetwork struct {
 		Name       string            `yaml:"name,omitempty"`
 		Driver     string            `yaml:"driver,omitempty"`
 		DriverOpts map[string]string `yaml:"driver_opts,omitempty"`
@@ -22,7 +22,7 @@ type (
 
 // UnmarshalYAML implements the Unmarshaler interface.
 func (n *WorkflowNetworks) UnmarshalYAML(value *yaml.Node) error {
-	networks := map[string]Network{}
+	networks := map[string]WorkflowNetwork{}
 	err := value.Decode(&networks)
 
 	for key, nn := range networks {
@@ -32,7 +32,7 @@ func (n *WorkflowNetworks) UnmarshalYAML(value *yaml.Node) error {
 		if nn.Driver == "" {
 			nn.Driver = "bridge"
 		}
-		n.Networks = append(n.Networks, &nn)
+		n.WorkflowNetworks = append(n.WorkflowNetworks, &nn)
 	}
 	return err
 }

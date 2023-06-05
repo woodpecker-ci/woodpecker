@@ -7,7 +7,6 @@ import (
 
 	backend_types "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
 	yaml_types "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
 	"github.com/woodpecker-ci/woodpecker/shared/constant"
 )
@@ -102,7 +101,7 @@ func New(opts ...Option) *Compiler {
 
 // Compile compiles the YAML configuration to the pipeline intermediate
 // representation configuration format.
-func (c *Compiler) Compile(conf *yaml.Workflow) (*backend_types.Config, error) {
+func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, error) {
 	config := new(backend_types.Config)
 
 	if match, err := conf.When.Match(c.metadata, true); !match && err == nil {
@@ -260,7 +259,7 @@ func (c *Compiler) Compile(conf *yaml.Workflow) (*backend_types.Config, error) {
 	return config, nil
 }
 
-func (c *Compiler) setupCache(conf *yaml.Workflow, ir *backend_types.Config) {
+func (c *Compiler) setupCache(conf *yaml_types.Workflow, ir *backend_types.Config) {
 	if c.local || len(conf.Cache) == 0 || c.cacher == nil {
 		return
 	}
@@ -277,7 +276,7 @@ func (c *Compiler) setupCache(conf *yaml.Workflow, ir *backend_types.Config) {
 	ir.Stages = append(ir.Stages, stage)
 }
 
-func (c *Compiler) setupCacheRebuild(conf *yaml.Workflow, ir *backend_types.Config) {
+func (c *Compiler) setupCacheRebuild(conf *yaml_types.Workflow, ir *backend_types.Config) {
 	if c.local || len(conf.Cache) == 0 || c.metadata.Curr.Event != metadata.EventPush || c.cacher == nil {
 		return
 	}
