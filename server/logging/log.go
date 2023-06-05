@@ -2,7 +2,6 @@ package logging
 
 import (
 	"context"
-	"io"
 	"sync"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -122,25 +121,5 @@ func (l *log) Close(_ context.Context, stepID int64) error {
 	l.Lock()
 	delete(l.streams, stepID)
 	l.Unlock()
-	return nil
-}
-
-func (l *log) Snapshot(_ context.Context, stepID int64, w io.Writer) error {
-	l.Lock()
-	s, ok := l.streams[stepID]
-	l.Unlock()
-	if !ok {
-		return ErrNotFound
-	}
-	s.Lock()
-	defer s.Unlock()
-	for _, entry := range s.list {
-		if _, err := w.Write(entry.Data); err != nil {
-			return err
-		}
-		if _, err := w.Write([]byte{'\n'}); err != nil {
-			return err
-		}
-	}
 	return nil
 }

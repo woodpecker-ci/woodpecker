@@ -3,7 +3,6 @@ package logging
 import (
 	"context"
 	"errors"
-	"io"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
@@ -29,7 +28,4 @@ type Log interface {
 
 	// Close closes the log.
 	Close(c context.Context, stepID int64) error
-
-	// Snapshot snapshots the stream to Writer w.
-	Snapshot(c context.Context, stepID int64, w io.Writer) error
 }

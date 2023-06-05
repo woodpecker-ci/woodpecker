@@ -206,10 +206,6 @@ func LogStreamSSE(c *gin.Context) {
 
 	go func() {
 		err := server.Config.Services.Logs.Tail(ctx, step.ID, func(entries ...*model.LogEntry) {
-			defer func() {
-				obj := recover() // TODO: check if it's still needed
-				log.Error().Msgf("## IF YOU SEE THIS OPEN AN ISSUE UPSTREAM ## - pubsub subscribe recover return: %v", obj)
-			}()
 			for _, entry := range entries {
 				select {
 				case <-ctx.Done():
