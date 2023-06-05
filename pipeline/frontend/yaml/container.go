@@ -20,18 +20,6 @@ type (
 	}
 
 	// Advanced backend options
-	BackendOptions struct {
-		Kubernetes KubernetesBackendOptions `yaml:"kubernetes,omitempty"`
-	}
-
-	KubernetesBackendOptions struct {
-		Resources Resources `yaml:"resources,omitempty"`
-	}
-
-	Resources struct {
-		Requests map[string]string `yaml:"requests,omitempty"`
-		Limits   map[string]string `yaml:"limits,omitempty"`
-	}
 
 	// ContainerList denotes an ordered collection of containers.
 	ContainerList struct {
@@ -40,7 +28,7 @@ type (
 
 	// Container defines a container.
 	Container struct {
-		BackendOptions BackendOptions         `yaml:"backend_options,omitempty"`
+		BackendOptions types.BackendOptions   `yaml:"backend_options,omitempty"`
 		Commands       types.StringOrSlice    `yaml:"commands,omitempty"`
 		Detached       bool                   `yaml:"detach,omitempty"`
 		Directory      string                 `yaml:"directory,omitempty"`
