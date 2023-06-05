@@ -115,8 +115,13 @@ var flags = []cli.Flag{
 		Value:   "https://github.com/woodpecker-ci/woodpecker",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_REPO_NAME"},
-		Name:    "repo-name",
+		EnvVars: []string{"CI_REPO"},
+		Name:    "repo",
+		Usage:   "full repo name",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"CI_REPO_REMOTE_ID"},
+		Name:    "repo-remote-id",
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"CI_REPO_URL", "CI_REPO_LINK"},
@@ -129,6 +134,10 @@ var flags = []cli.Flag{
 	&cli.StringFlag{
 		EnvVars: []string{"CI_REPO_PRIVATE"},
 		Name:    "repo-private",
+	},
+	&cli.BoolFlag{
+		EnvVars: []string{"CI_REPO_TRUSTED"},
+		Name:    "repo-trusted",
 	},
 	&cli.IntFlag{
 		EnvVars: []string{"CI_PIPELINE_NUMBER"},
@@ -274,6 +283,14 @@ var flags = []cli.Flag{
 	&cli.StringSliceFlag{
 		EnvVars: []string{"CI_ENV"},
 		Name:    "env",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"CI_FORGE_TYPE"},
+		Name:    "forge-type",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"CI_FORGE_URL"},
+		Name:    "forge-url",
 	},
 
 	// backend docker

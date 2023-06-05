@@ -5,7 +5,7 @@ import (
 
 	"github.com/franela/goblin"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
 )
 
@@ -79,8 +79,8 @@ func TestParse(t *testing.T) {
 			}
 
 			g.It("Should match event tester", func() {
-				match, err := matchConfig.When.Match(frontend.Metadata{
-					Curr: frontend.Pipeline{
+				match, err := matchConfig.When.Match(metadata.Metadata{
+					Curr: metadata.Pipeline{
 						Event: "tester",
 					},
 				}, false)
@@ -89,8 +89,8 @@ func TestParse(t *testing.T) {
 			})
 
 			g.It("Should match event tester2", func() {
-				match, err := matchConfig.When.Match(frontend.Metadata{
-					Curr: frontend.Pipeline{
+				match, err := matchConfig.When.Match(metadata.Metadata{
+					Curr: metadata.Pipeline{
 						Event: "tester2",
 					},
 				}, false)
@@ -99,9 +99,9 @@ func TestParse(t *testing.T) {
 			})
 
 			g.It("Should match branch tester", func() {
-				match, err := matchConfig.When.Match(frontend.Metadata{
-					Curr: frontend.Pipeline{
-						Commit: frontend.Commit{
+				match, err := matchConfig.When.Match(metadata.Metadata{
+					Curr: metadata.Pipeline{
+						Commit: metadata.Commit{
 							Branch: "tester",
 						},
 					},
@@ -111,8 +111,8 @@ func TestParse(t *testing.T) {
 			})
 
 			g.It("Should not match event push", func() {
-				match, err := matchConfig.When.Match(frontend.Metadata{
-					Curr: frontend.Pipeline{
+				match, err := matchConfig.When.Match(metadata.Metadata{
+					Curr: metadata.Pipeline{
 						Event: "push",
 					},
 				}, false)
