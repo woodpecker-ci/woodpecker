@@ -123,7 +123,7 @@ export type PipelineLog = {
   step_id: number;
   time: number;
   line: number;
-  data: string;
+  data: string; // base64 encoded
   type: number;
 };
 

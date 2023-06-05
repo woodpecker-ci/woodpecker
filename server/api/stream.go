@@ -17,6 +17,7 @@ package api
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -211,7 +212,8 @@ func LogStreamSSE(c *gin.Context) {
 				case <-ctx.Done():
 					return
 				default:
-					logc <- entry.Data
+					ee, _ := json.Marshal(entry)
+					logc <- ee
 				}
 			}
 		})

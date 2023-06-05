@@ -251,7 +251,7 @@ async function loadLogs() {
       pipeline.value.number,
       step.value.id,
       (line) => {
-        writeLog({ index: line.line, text: line.data, time: line.time });
+        writeLog({ index: line.line, text: atob(line.data), time: line.time });
         flushLogs(true);
       },
     );
