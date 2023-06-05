@@ -17,6 +17,7 @@ package migration
 import (
 	"encoding/json"
 
+	"github.com/rs/zerolog/log"
 	"xorm.io/xorm"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -53,6 +54,8 @@ var migrateLogs2LogEntries = task{
 			return err
 		}
 
+		log.Info().Msg("migrate-logs-to-log_entries: start migration of logs")
+
 		page := 0
 		for {
 			var logs []*oldLogs018
@@ -60,6 +63,8 @@ var migrateLogs2LogEntries = task{
 			if err != nil {
 				return err
 			}
+
+			log.Info().Msgf("migrate-logs-to-log_entries: start page %d", page)
 
 			for _, l := range logs {
 

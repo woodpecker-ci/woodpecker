@@ -99,8 +99,8 @@ func Migrate(e *xorm.Engine) error {
 		return err
 	}
 
-	// account for long migrations
-	e.SetConnMaxLifetime(time.Minute * 30)
+	// account for long migrations of "migrate-logs-to-log_entries"
+	e.SetConnMaxLifetime(time.Hour * 1)
 
 	sess := e.NewSession()
 	defer sess.Close()
