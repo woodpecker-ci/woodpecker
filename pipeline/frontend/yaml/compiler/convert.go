@@ -164,7 +164,6 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		Privileged:     privileged,
 		WorkingDir:     workingdir,
 		Environment:    environment,
-		Labels:         container.Labels,
 		Commands:       container.Commands,
 		ExtraHosts:     container.ExtraHosts,
 		Volumes:        volumes,

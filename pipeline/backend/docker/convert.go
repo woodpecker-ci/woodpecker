@@ -30,7 +30,6 @@ import (
 func toConfig(step *types.Step) *container.Config {
 	config := &container.Config{
 		Image:        step.Image,
-		Labels:       step.Labels,
 		WorkingDir:   step.WorkingDir,
 		AttachStdout: true,
 		AttachStderr: true,
