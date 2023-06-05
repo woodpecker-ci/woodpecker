@@ -33,14 +33,10 @@ import (
 )
 
 func HandleLogin(c *gin.Context) {
-	var (
-		w = c.Writer
-		r = c.Request
-	)
-	if err := r.FormValue("error"); err != "" {
-		http.Redirect(w, r, "/login/error?code="+err, 303)
+	if err := c.Request.FormValue("error"); err != "" {
+		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login/error?code="+err)
 	} else {
-		http.Redirect(w, r, "/authorize", 303)
+		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/authorize")
 	}
 }
 
