@@ -17,6 +17,7 @@ package api
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -148,15 +149,42 @@ func LogStreamSSE(c *gin.Context) {
 	flusher.Flush()
 
 	_store := store.FromContext(c)
+	repo := session.Repo(c)
 
-	stepID, _ := strconv.ParseInt(c.Param("stepId"), 10, 64)
+	pipeline, err := strconv.ParseInt(c.Param("pipeline"), 10, 64)
+	if err != nil {
+		log.Debug().Err(err).Msg("pipeline number invalid")
+		logWriteStringErr(io.WriteString(rw, "event: error\ndata: pipeline number invalid\n\n"))
+		return
+	}
+	pl, err := _store.GetPipelineNumber(repo, pipeline)
+	if err != nil {
+		log.Debug().Msgf("stream cannot get pipeline number: %v", err)
+		logWriteStringErr(io.WriteString(rw, "event: error\ndata: pipeline not found\n\n"))
+		return
+	}
 
+	stepID, err := strconv.ParseInt(c.Param("stepId"), 10, 64)
+	if err != nil {
+		log.Debug().Err(err).Msg("step id invalid")
+		logWriteStringErr(io.WriteString(rw, "event: error\ndata: step id invalid\n\n"))
+		return
+	}
 	step, err := _store.StepLoad(stepID)
 	if err != nil {
 		log.Debug().Msgf("stream cannot get step number: %v", err)
 		logWriteStringErr(io.WriteString(rw, "event: error\ndata: process not found\n\n"))
 		return
 	}
+
+	if step.PipelineID != pl.ID {
+		// make sure we can not read arbitrary logs by id
+		err = fmt.Errorf("step with id %d is not part of repo %s", stepID, repo.FullName)
+		log.Debug().Err(err)
+		logWriteStringErr(io.WriteString(rw, "event: error\ndata: "+err.Error()+"\n\n"))
+		return
+	}
+
 	if step.State != model.StatusRunning {
 		log.Debug().Msg("stream not found.")
 		logWriteStringErr(io.WriteString(rw, "event: error\ndata: stream not found\n\n"))
