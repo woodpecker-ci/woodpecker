@@ -2430,7 +2430,7 @@ const docTemplate = `{
                 "tags": [
                     "Pipelines"
                 ],
-                "summary": "Skip a workflow",
+                "summary": "Skip a workflow and it's depending ones",
                 "parameters": [
                     {
                         "type": "string",
