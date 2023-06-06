@@ -245,16 +245,10 @@ async function loadLogs() {
   }
 
   if (isStepRunning(step.value)) {
-    stream.value = apiClient.streamLogs(
-      repo.value.owner,
-      repo.value.name,
-      pipeline.value.number,
-      step.value.id,
-      (line) => {
-        writeLog({ index: line.line, text: atob(line.data), time: line.time });
-        flushLogs(true);
-      },
-    );
+    stream.value = apiClient.streamLogs(repo.value.id, pipeline.value.number, step.value.id, (line) => {
+      writeLog({ index: line.line, text: atob(line.data), time: line.time });
+      flushLogs(true);
+    });
   }
 }
 

@@ -53,7 +53,7 @@ func pipelineLogs(c *cli.Context) error {
 		return err
 	}
 
-	logs, err := client.PipelineLogs(repoID, number, step)
+	logs, err := client.StepLogEntries(repoID, number, step)
 	if err != nil {
 		return err
 	}
