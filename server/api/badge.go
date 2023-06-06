@@ -38,12 +38,11 @@ import (
 // GetBadge
 //
 //	@Summary	Get status badge, SVG format
-//	@Router		/badges/{owner}/{name}/status.svg [get]
+//	@Router		/badges/{repo_id}/status.svg [get]
 //	@Produce	image/svg+xml
 //	@Success	200
 //	@Tags		Badges
-//	@Param		owner	path	string	true	"the repository owner's name"
-//	@Param		name	path	string	true	"the repository name"
+//	@Param		repo_id			path	int		true	"the repository id"
 func GetBadge(c *gin.Context) {
 	_store := store.FromContext(c)
 
@@ -96,7 +95,7 @@ func GetBadge(c *gin.Context) {
 //	@Description	CCMenu displays the pipeline status of projects on a CI server as an item in the Mac's menu bar.
 //	@Description	More details on how to install, you can find at http://ccmenu.org/
 //	@Description	The response format adheres to CCTray v1 Specification, https://cctray.org/v1/
-//	@Router			/badges/{owner}/{name}/cc.xml [get]
+//	@Router			/badges/{repo_id}/cc.xml [get]
 //	@Produce		xml
 //	@Success		200
 //	@Tags			Badges
