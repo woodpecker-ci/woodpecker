@@ -15,6 +15,7 @@
 package migration
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 
@@ -25,7 +26,7 @@ import (
 )
 
 // APPEND NEW MIGRATIONS
-// they are executed in order and if one fails woodpecker will try to rollback and quits
+// they are executed in order and if one fails woodpecker will try to rollback that specific one and quits
 var migrationTasks = []*task{
 	&legacy2Xorm,
 	&alterTableReposDropFallback,
@@ -116,11 +117,11 @@ func Migrate(e *xorm.Engine) error {
 		return sess.Commit()
 	}
 
-	if err := runTasks(sess, migrationTasks); err != nil {
+	if err := sess.Commit(); err != nil {
 		return err
 	}
 
-	if err := sess.Commit(); err != nil {
+	if err := runTasks(e, migrationTasks); err != nil {
 		return err
 	}
 
@@ -131,11 +132,11 @@ func Migrate(e *xorm.Engine) error {
 	return syncAll(e)
 }
 
-func runTasks(sess *xorm.Session, tasks []*task) error {
+func runTasks(e *xorm.Engine, tasks []*task) error {
 	// cache migrations in db
 	migCache := make(map[string]bool)
 	var migList []*migrations
-	if err := sess.Find(&migList); err != nil {
+	if err := e.Find(&migList); err != nil {
 		return err
 	}
 	for i := range migList {
@@ -149,9 +150,18 @@ func runTasks(sess *xorm.Session, tasks []*task) error {
 		}
 
 		log.Trace().Msgf("start migration task '%s'", task.name)
+		sess := e.NewSession()
+		defer sess.Close()
+		if err := sess.Begin(); err != nil {
+			return err
+		}
 
 		if task.fn != nil {
 			if err := task.fn(sess); err != nil {
+				if err2 := sess.Rollback(); err2 != nil {
+					err = errors.Join(err, err2)
+				}
+
 				if task.required {
 					return err
 				}
@@ -166,6 +176,10 @@ func runTasks(sess *xorm.Session, tasks []*task) error {
 		if _, err := sess.Insert(&migrations{task.name}); err != nil {
 			return err
 		}
+		if err := sess.Commit(); err != nil {
+			return err
+		}
+
 		migCache[task.name] = true
 	}
 	return nil
