@@ -57,7 +57,8 @@ func (s storage) StepListWorkflow(workflow *model.Workflow) ([]*model.Step, erro
 func (s storage) stepListWorkflow(sess *xorm.Session, workflow *model.Workflow) ([]*model.Step, error) {
 	stepList := make([]*model.Step, 0)
 	return stepList, sess.
-		Where("step_workflow_id = ?", workflow.ID).
+		Where("step_pipeline_id = ?", workflow.PipelineID).
+		Where("step_ppid = ?", workflow.PID).
 		OrderBy("step_pid").
 		Find(&stepList)
 }

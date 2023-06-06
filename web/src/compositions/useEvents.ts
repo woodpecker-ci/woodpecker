@@ -35,6 +35,6 @@ export default () => {
       return;
     }
     const { step } = data;
-    pipelineStore.setStep(repo.owner, repo.name, pipeline.number, step);
+    pipelineStore.setWorkflow(repo.owner, repo.name, pipeline.number, step);
   });
 };

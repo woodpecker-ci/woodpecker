@@ -39,7 +39,6 @@ type Step struct {
 	ExitCode   int         `json:"exit_code"            xorm:"step_exit_code"`
 	Started    int64       `json:"start_time,omitempty" xorm:"step_started"`
 	Stopped    int64       `json:"end_time,omitempty"   xorm:"step_stopped"`
-	Children   []*Step     `json:"children,omitempty"   xorm:"-"`
 } //	@name Step
 
 type UpdateStepStore interface {

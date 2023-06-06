@@ -76,7 +76,7 @@ func pipelinePs(c *cli.Context) error {
 		return err
 	}
 
-	for _, step := range pipeline.Steps {
+	for _, step := range pipeline.Workflows {
 		for _, child := range step.Children {
 			if err := tmpl.Execute(os.Stdout, child); err != nil {
 				return err

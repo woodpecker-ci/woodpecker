@@ -7,7 +7,7 @@ import {
   PipelineConfig,
   PipelineFeed,
   PipelineLog,
-  PipelineStep,
+  PipelineWorkflow,
   PullRequest,
   QueueInfo,
   Registry,
@@ -286,7 +286,7 @@ export default class WoodpeckerClient extends ApiClient {
   }
 
   // eslint-disable-next-line promise/prefer-await-to-callbacks
-  on(callback: (data: { pipeline?: Pipeline; repo?: Repo; step?: PipelineStep }) => void): EventSource {
+  on(callback: (data: { pipeline?: Pipeline; repo?: Repo; step?: PipelineWorkflow }) => void): EventSource {
     return this._subscribe('/stream/events', callback, {
       reconnect: true,
     });

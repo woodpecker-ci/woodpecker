@@ -50,8 +50,8 @@ func (s storage) WorkflowList(pipeline *model.Pipeline) ([]*model.Workflow, erro
 // workflowList lists workflows without child steps
 func (s storage) workflowList(sess *xorm.Session, pipeline *model.Pipeline) ([]*model.Workflow, error) {
 	var wfList []*model.Workflow
-	err := sess.Where("step_pipeline_id = ?", pipeline.ID).
-		OrderBy("step_pid").
+	err := sess.Where("workflow_pipeline_id = ?", pipeline.ID).
+		OrderBy("workflow_pid").
 		Find(&wfList)
 	if err != nil {
 		return nil, err

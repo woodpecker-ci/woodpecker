@@ -59,51 +59,62 @@ type (
 
 	// Pipeline defines a pipeline object.
 	Pipeline struct {
-		ID        int64   `json:"id"`
-		Number    int     `json:"number"`
-		Parent    int     `json:"parent"`
-		Event     string  `json:"event"`
-		Status    string  `json:"status"`
-		Error     string  `json:"error"`
-		Enqueued  int64   `json:"enqueued_at"`
-		Created   int64   `json:"created_at"`
-		Started   int64   `json:"started_at"`
-		Finished  int64   `json:"finished_at"`
-		Deploy    string  `json:"deploy_to"`
-		Commit    string  `json:"commit"`
-		Branch    string  `json:"branch"`
-		Ref       string  `json:"ref"`
-		Refspec   string  `json:"refspec"`
-		CloneURL  string  `json:"clone_url"`
-		Title     string  `json:"title"`
-		Message   string  `json:"message"`
-		Timestamp int64   `json:"timestamp"`
-		Sender    string  `json:"sender"`
-		Author    string  `json:"author"`
-		Avatar    string  `json:"author_avatar"`
-		Email     string  `json:"author_email"`
-		Link      string  `json:"link_url"`
-		Reviewer  string  `json:"reviewed_by"`
-		Reviewed  int64   `json:"reviewed_at"`
-		Steps     []*Step `json:"steps,omitempty"`
+		ID        int64       `json:"id"`
+		Number    int         `json:"number"`
+		Parent    int         `json:"parent"`
+		Event     string      `json:"event"`
+		Status    string      `json:"status"`
+		Error     string      `json:"error"`
+		Enqueued  int64       `json:"enqueued_at"`
+		Created   int64       `json:"created_at"`
+		Started   int64       `json:"started_at"`
+		Finished  int64       `json:"finished_at"`
+		Deploy    string      `json:"deploy_to"`
+		Commit    string      `json:"commit"`
+		Branch    string      `json:"branch"`
+		Ref       string      `json:"ref"`
+		Refspec   string      `json:"refspec"`
+		CloneURL  string      `json:"clone_url"`
+		Title     string      `json:"title"`
+		Message   string      `json:"message"`
+		Timestamp int64       `json:"timestamp"`
+		Sender    string      `json:"sender"`
+		Author    string      `json:"author"`
+		Avatar    string      `json:"author_avatar"`
+		Email     string      `json:"author_email"`
+		Link      string      `json:"link_url"`
+		Reviewer  string      `json:"reviewed_by"`
+		Reviewed  int64       `json:"reviewed_at"`
+		Workflows []*Workflow `json:"workflows,omitempty"`
+	}
+
+	// Workflow represents a workflow in the pipeline.
+	Workflow struct {
+		ID       int64             `json:"id"`
+		PID      int               `json:"pid"`
+		Name     string            `json:"name"`
+		State    string            `json:"state"`
+		Error    string            `json:"error,omitempty"`
+		Started  int64             `json:"start_time,omitempty"`
+		Stopped  int64             `json:"end_time,omitempty"`
+		AgentID  int64             `json:"agent_id,omitempty"`
+		Platform string            `json:"platform,omitempty"`
+		Environ  map[string]string `json:"environ,omitempty"`
+		Children []*Step           `json:"children,omitempty"`
 	}
 
 	// Step represents a process in the pipeline.
 	Step struct {
-		ID       int64             `json:"id"`
-		PID      int               `json:"pid"`
-		PPID     int               `json:"ppid"`
-		PGID     int               `json:"pgid"`
-		Name     string            `json:"name"`
-		State    string            `json:"state"`
-		Error    string            `json:"error,omitempty"`
-		ExitCode int               `json:"exit_code"`
-		Started  int64             `json:"start_time,omitempty"`
-		Stopped  int64             `json:"end_time,omitempty"`
-		Machine  string            `json:"machine,omitempty"`
-		Platform string            `json:"platform,omitempty"`
-		Environ  map[string]string `json:"environ,omitempty"`
-		Children []*Step           `json:"children,omitempty"`
+		ID       int64  `json:"id"`
+		PID      int    `json:"pid"`
+		PPID     int    `json:"ppid"`
+		PGID     int    `json:"pgid"`
+		Name     string `json:"name"`
+		State    string `json:"state"`
+		Error    string `json:"error,omitempty"`
+		ExitCode int    `json:"exit_code"`
+		Started  int64  `json:"start_time,omitempty"`
+		Stopped  int64  `json:"end_time,omitempty"`
 	}
 
 	// Registry represents a docker registry with credentials.
