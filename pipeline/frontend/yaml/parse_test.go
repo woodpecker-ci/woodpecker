@@ -137,7 +137,7 @@ build:
 workspace:
   path: src/github.com/octocat/hello-world
   base: /go
-pipeline:
+steps:
   test:
     image: golang
     commands:
@@ -178,7 +178,7 @@ runs_on:
 var simpleYamlAnchors = `
 vars:
   image: &image plugins/slack
-pipeline:
+steps:
   notify_success:
     image: *image
 `
@@ -186,7 +186,7 @@ pipeline:
 var sampleVarYaml = `
 _slack: &SLACK
   image: plugins/slack
-pipeline:
+steps:
   notify_fail: *SLACK
   notify_success:
     << : *SLACK

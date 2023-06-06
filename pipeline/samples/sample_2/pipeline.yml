@@ -2,7 +2,7 @@ workspace:
   base: /go
   path: src/github.com/go-sql-driver/mysql
 
-pipeline:
+steps:
   build:
     image: golang:1.7
     environment:

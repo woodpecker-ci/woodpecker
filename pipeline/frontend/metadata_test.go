@@ -33,11 +33,11 @@ func TestEnvVarSubst(t *testing.T) {
 		want    string
 	}{{
 		name: "simple substitution",
-		yaml: `pipeline:
+		yaml: `steps:
 		step1:
 			image: ${HELLO_IMAGE}`,
 		environ: map[string]string{"HELLO_IMAGE": "hello-world"},
-		want: `pipeline:
+		want: `steps:
 		step1:
 			image: hello-world`,
 	}}
@@ -90,7 +90,7 @@ func TestMetadataFromStruct(t *testing.T) {
 			name:     "Test with forge",
 			forge:    forge,
 			repo:     &model.Repo{FullName: "testUser/testRepo", Link: "https://gitea.com/testUser/testRepo", Clone: "https://gitea.com/testUser/testRepo.git", Branch: "main", IsSCMPrivate: true},
-			pipeline: &model.Pipeline{Number: 3},
+			steps:    &model.Pipeline{Number: 3},
 			last:     &model.Pipeline{Number: 2},
 			workflow: &model.Step{Name: "hello"},
 			link:     "https://example.com",

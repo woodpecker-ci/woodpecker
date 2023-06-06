@@ -18,7 +18,8 @@
     "skip_clone": { "type": "boolean" },
     "branches": { "$ref": "#/definitions/branches" },
     "when": { "$ref": "#/definitions/pipeline_when" },
-    "pipeline": { "$ref": "#/definitions/pipeline" },
+    "steps": { "$ref": "#/definitions/step_list" },
+    "pipeline": { "$ref": "#/definitions/step_list", "description": "depricated, use steps" },
     "services": { "$ref": "#/definitions/services" },
     "workspace": { "$ref": "#/definitions/workspace" },
     "matrix": { "$ref": "#/definitions/matrix" },
@@ -92,7 +93,7 @@
         }
       ]
     },
-    "pipeline": {
+    "step_list": {
       "description": "The pipeline section defines a list of steps which will be executed serially, in the order in which they are defined. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax",
       "oneOf": [
         { "type": "object", "additionalProperties": { "$ref": "#/definitions/step" }, "minProperties": 1 },
