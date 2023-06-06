@@ -29,7 +29,7 @@ type StepStore interface {
 // Step represents a process in the pipeline.
 type Step struct {
 	ID         int64       `json:"id"                   xorm:"pk autoincr 'step_id'"`
-	UUID       string            `json:"uuid"                 xorm:"UNIQUE INDEX 'step_uuid'"`
+	UUID       string      `json:"uuid"                 xorm:"UNIQUE INDEX 'step_uuid'"`
 	PipelineID int64       `json:"pipeline_id"          xorm:"UNIQUE(s) INDEX 'step_pipeline_id'"`
 	PID        int         `json:"pid"                  xorm:"UNIQUE(s) 'step_pid'"`
 	PPID       int         `json:"ppid"                 xorm:"step_ppid"`
