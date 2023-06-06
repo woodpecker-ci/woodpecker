@@ -94,6 +94,8 @@ func initNew(sess *xorm.Session) error {
 }
 
 func Migrate(e *xorm.Engine) error {
+	e.SetDisableGlobalCache(true)
+
 	if err := e.Sync(new(migrations)); err != nil {
 		return err
 	}
@@ -125,9 +127,7 @@ func Migrate(e *xorm.Engine) error {
 		return err
 	}
 
-	if err := e.ClearCache(allBeans...); err != nil {
-		return err
-	}
+	e.SetDisableGlobalCache(false)
 
 	return syncAll(e)
 }
