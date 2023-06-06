@@ -90,7 +90,7 @@ func TestMetadataFromStruct(t *testing.T) {
 			name:     "Test with forge",
 			forge:    forge,
 			repo:     &model.Repo{FullName: "testUser/testRepo", Link: "https://gitea.com/testUser/testRepo", Clone: "https://gitea.com/testUser/testRepo.git", Branch: "main", IsSCMPrivate: true},
-			steps:    &model.Pipeline{Number: 3},
+			pipeline: &model.Pipeline{Number: 3},
 			last:     &model.Pipeline{Number: 2},
 			workflow: &model.Step{Name: "hello"},
 			link:     "https://example.com",
