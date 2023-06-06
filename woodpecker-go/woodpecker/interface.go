@@ -108,8 +108,8 @@ type Client interface {
 	// PipelineKill force kills the running pipeline.
 	PipelineKill(repoID int64, pipeline int) error
 
-	// PipelineLogs returns the logs for the given pipeline
-	PipelineLogs(repoID int64, pipeline, step int) ([]*Logs, error)
+	// StepLogEntries returns the LogEntries for the given pipeline step
+	StepLogEntries(repoID int64, pipeline, stepID int) ([]*LogEntry, error)
 
 	// Deploy triggers a deployment for an existing pipeline using the specified
 	// target environment.

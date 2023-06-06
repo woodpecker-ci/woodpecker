@@ -19,7 +19,6 @@
 package grpc
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -33,7 +32,6 @@ import (
 	grpcMetadata "google.golang.org/grpc/metadata"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
-	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/logging"
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -167,79 +165,6 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 	return nil
 }
 
-// Upload implements the rpc.Upload function
-func (s *RPC) Upload(_ context.Context, id string, file *rpc.File) error {
-	stepID, err := strconv.ParseInt(id, 10, 64)
-	if err != nil {
-		return err
-	}
-
-	pstep, err := s.store.StepLoad(stepID)
-	if err != nil {
-		log.Error().Msgf("error: cannot find parent step with id %d: %s", stepID, err)
-		return err
-	}
-
-	pipeline, err := s.store.GetPipeline(pstep.PipelineID)
-	if err != nil {
-		log.Error().Msgf("error: cannot find pipeline with id %d: %s", pstep.PipelineID, err)
-		return err
-	}
-
-	step, err := s.store.StepChild(pipeline, pstep.PID, file.Step)
-	if err != nil {
-		log.Error().Msgf("error: cannot find child step with name %s: %s", file.Step, err)
-		return err
-	}
-
-	if file.Mime == "application/json+logs" {
-		return s.store.LogSave(
-			step,
-			bytes.NewBuffer(file.Data),
-		)
-	}
-
-	report := &model.File{
-		PipelineID: step.PipelineID,
-		StepID:     step.ID,
-		PID:        step.PID,
-		Mime:       file.Mime,
-		Name:       file.Name,
-		Size:       file.Size,
-		Time:       file.Time,
-	}
-	if d, ok := file.Meta["X-Tests-Passed"]; ok {
-		report.Passed, _ = strconv.Atoi(d)
-	}
-	if d, ok := file.Meta["X-Tests-Failed"]; ok {
-		report.Failed, _ = strconv.Atoi(d)
-	}
-	if d, ok := file.Meta["X-Tests-Skipped"]; ok {
-		report.Skipped, _ = strconv.Atoi(d)
-	}
-
-	if d, ok := file.Meta["X-Checks-Passed"]; ok {
-		report.Passed, _ = strconv.Atoi(d)
-	}
-	if d, ok := file.Meta["X-Checks-Failed"]; ok {
-		report.Failed, _ = strconv.Atoi(d)
-	}
-
-	if d, ok := file.Meta["X-Coverage-Lines"]; ok {
-		report.Passed, _ = strconv.Atoi(d)
-	}
-	if d, ok := file.Meta["X-Coverage-Total"]; ok {
-		if total, _ := strconv.Atoi(d); total != 0 {
-			report.Failed = total - report.Passed
-		}
-	}
-
-	return server.Config.Storage.Files.FileCreate(
-		report,
-		bytes.NewBuffer(file.Data),
-	)
-}
-
 // Init implements the rpc.Init function
 func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 	stepID, err := strconv.ParseInt(id, 10, 64)
@@ -313,40 +238,41 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 
 	workflow, err := s.store.StepLoad(workflowID)
 	if err != nil {
-		log.Error().Msgf("error: cannot find step with id %d: %s", workflowID, err)
+		log.Error().Err(err).Msgf("cannot find step with id %d", workflowID)
 		return err
 	}
 
 	currentPipeline, err := s.store.GetPipeline(workflow.PipelineID)
 	if err != nil {
-		log.Error().Msgf("error: cannot find pipeline with id %d: %s", workflow.PipelineID, err)
+		log.Error().Err(err).Msgf("cannot find pipeline with id %d", workflow.PipelineID)
 		return err
 	}
 
 	repo, err := s.store.GetRepo(currentPipeline.RepoID)
 	if err != nil {
-		log.Error().Msgf("error: cannot find repo with id %d: %s", currentPipeline.RepoID, err)
+		log.Error().Err(err).Msgf("cannot find repo with id %d", currentPipeline.RepoID)
 		return err
 	}
 
-	log.Trace().
+	logger := log.With().
 		Str("repo_id", fmt.Sprint(repo.ID)).
-		Str("build_id", fmt.Sprint(currentPipeline.ID)).
-		Str("step_id", id).
-		Msgf("gRPC Done with state: %#v", state)
+		Str("pipeline_id", fmt.Sprint(currentPipeline.ID)).
+		Str("workflow_id", id).Logger()
+
+	logger.Trace().Msgf("gRPC Done with state: %#v", state)
 
 	if workflow, err = pipeline.UpdateStepStatusToDone(s.store, *workflow, state); err != nil {
-		log.Error().Msgf("error: done: cannot update step_id %d state: %s", workflow.ID, err)
+		logger.Error().Err(err).Msgf("pipeline.UpdateStepStatusToDone: cannot update workflow state: %s", err)
 	}
 
 	var queueErr error
 	if workflow.Failing() {
-		queueErr = s.queue.Error(c, id, fmt.Errorf("Step finished with exitcode %d, %s", state.ExitCode, state.Error))
+		queueErr = s.queue.Error(c, id, fmt.Errorf("Step finished with exit code %d, %s", state.ExitCode, state.Error))
 	} else {
 		queueErr = s.queue.Done(c, id, workflow.State)
 	}
 	if queueErr != nil {
-		log.Error().Msgf("error: done: cannot ack step_id %d: %s", workflowID, err)
+		logger.Error().Err(queueErr).Msg("queue.Done: cannot ack workflow")
 	}
 
 	steps, err := s.store.StepList(currentPipeline)
@@ -357,15 +283,20 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 
 	if !model.IsThereRunningStage(steps) {
 		if currentPipeline, err = pipeline.UpdateStatusToDone(s.store, *currentPipeline, model.PipelineStatus(steps), workflow.Stopped); err != nil {
-			log.Error().Err(err).Msgf("error: done: cannot update build_id %d final state", currentPipeline.ID)
+			logger.Error().Err(err).Msgf("pipeline.UpdateStatusToDone: cannot update workflow final state")
 		}
 	}
 
 	s.updateForgeStatus(c, repo, currentPipeline, workflow)
 
-	if err := s.logger.Close(c, id); err != nil {
-		log.Error().Err(err).Msgf("done: cannot close build_id %d logger", workflow.ID)
-	}
+	// make sure writes to pubsub are non blocking (https://github.com/woodpecker-ci/woodpecker/blob/c919f32e0b6432a95e1a6d3d0ad662f591adf73f/server/logging/log.go#L9)
+	go func() {
+		for _, step := range steps {
+			if err := s.logger.Close(c, step.ID); err != nil {
+				logger.Error().Err(err).Msgf("done: cannot close log stream for step %d", step.ID)
+			}
+		}
+	}()
 
 	if err := s.notify(c, repo, currentPipeline, steps); err != nil {
 		return err
@@ -383,13 +314,28 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 }
 
 // Log implements the rpc.Log function
-func (s *RPC) Log(c context.Context, id string, line *rpc.Line) error {
-	entry := new(logging.Entry)
-	entry.Data, _ = json.Marshal(line)
-	if err := s.logger.Write(c, id, entry); err != nil {
-		log.Error().Err(err).Msgf("rpc server could not write to logger")
+func (s *RPC) Log(c context.Context, _logEntry *rpc.LogEntry) error {
+	// convert rpc log_entry to model.log_entry
+	step, err := s.store.StepByUUID(_logEntry.StepUUID)
+	if err != nil {
+		return fmt.Errorf("could not find step with uuid %s in store: %w", _logEntry.StepUUID, err)
 	}
-	return nil
+	logEntry := &model.LogEntry{
+		StepID: step.ID,
+		Time:   _logEntry.Time,
+		Line:   _logEntry.Line,
+		Data:   []byte(_logEntry.Data),
+		Type:   model.LogEntryType(_logEntry.Type),
+	}
+	// make sure writes to pubsub are non blocking (https://github.com/woodpecker-ci/woodpecker/blob/c919f32e0b6432a95e1a6d3d0ad662f591adf73f/server/logging/log.go#L9)
+	go func() {
+		// write line to listening web clients
+		if err := s.logger.Write(c, logEntry.StepID, logEntry); err != nil {
+			log.Error().Err(err).Msgf("rpc server could not write to logger")
+		}
+	}()
+	// make line persistent in database
+	return s.store.LogAppend(logEntry)
 }
 
 func (s *RPC) RegisterAgent(ctx context.Context, platform, backend, version string, capacity int32) (int64, error) {

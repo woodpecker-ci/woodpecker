@@ -1,4 +1,4 @@
-package yaml
+package types
 
 import (
 	"testing"
@@ -8,14 +8,11 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/constraint"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types/base"
 )
 
 var containerYaml = []byte(`
 image: golang:latest
-auth_config:
-  username: janedoe
-  password: password
 cap_add: [ ALL ]
 cap_drop: [ NET_ADMIN, SYS_ADMIN ]
 commands:
@@ -44,9 +41,6 @@ networks:
   - other-network
 pull: true
 privileged: true
-labels:
-  com.example.type: build
-  com.example.team: frontend
 shm_size: 1kb
 mem_limit: 1kb
 memswap_limit: 1kb
@@ -68,32 +62,27 @@ settings:
 
 func TestUnmarshalContainer(t *testing.T) {
 	want := Container{
-		AuthConfig: AuthConfig{
-			Username: "janedoe",
-			Password: "password",
-		},
 		CapAdd:        []string{"ALL"},
 		CapDrop:       []string{"NET_ADMIN", "SYS_ADMIN"},
-		Commands:      types.StringOrSlice{"go build", "go test"},
-		CPUQuota:      types.StringorInt(11),
+		Commands:      base.StringOrSlice{"go build", "go test"},
+		CPUQuota:      base.StringOrInt(11),
 		CPUSet:        "1,2",
-		CPUShares:     types.StringorInt(99),
+		CPUShares:     base.StringOrInt(99),
 		Detached:      true,
 		Devices:       []string{"/dev/ttyUSB0:/dev/ttyUSB0"},
 		Directory:     "example/",
-		DNS:           types.StringOrSlice{"8.8.8.8"},
-		DNSSearch:     types.StringOrSlice{"example.com"},
-		Environment:   types.SliceorMap{"RACK_ENV": "development", "SHOW": "true"},
+		DNS:           base.StringOrSlice{"8.8.8.8"},
+		DNSSearch:     base.StringOrSlice{"example.com"},
+		Environment:   base.SliceOrMap{"RACK_ENV": "development", "SHOW": "true"},
 		ExtraHosts:    []string{"somehost:162.242.195.82", "otherhost:50.31.209.229"},
 		Image:         "golang:latest",
 		Isolation:     "hyperv",
-		Labels:        types.SliceorMap{"com.example.type": "build", "com.example.team": "frontend"},
-		MemLimit:      types.MemStringorInt(1024),
-		MemSwapLimit:  types.MemStringorInt(1024),
-		MemSwappiness: types.MemStringorInt(1024),
+		MemLimit:      base.MemStringOrInt(1024),
+		MemSwapLimit:  base.MemStringOrInt(1024),
+		MemSwappiness: base.MemStringOrInt(1024),
 		Name:          "my-build-container",
-		Networks: types.Networks{
-			Networks: []*types.Network{
+		Networks: Networks{
+			Networks: []*Network{
 				{Name: "some-network"},
 				{Name: "other-network"},
 			},
@@ -101,10 +90,10 @@ func TestUnmarshalContainer(t *testing.T) {
 		NetworkMode: "bridge",
 		Pull:        true,
 		Privileged:  true,
-		ShmSize:     types.MemStringorInt(1024),
-		Tmpfs:       types.StringOrSlice{"/var/lib/test"},
-		Volumes: types.Volumes{
-			Volumes: []*types.Volume{
+		ShmSize:     base.MemStringOrInt(1024),
+		Tmpfs:       base.StringOrSlice{"/var/lib/test"},
+		Volumes: Volumes{
+			Volumes: []*Volume{
 				{Source: "", Destination: "/var/lib/mysql"},
 				{Source: "/opt/data", Destination: "/var/lib/mysql"},
 				{Source: "/etc/configs", Destination: "/etc/configs/", AccessMode: "ro"},
@@ -269,10 +258,10 @@ func TestUnmarshalContainers(t *testing.T) {
 	}
 	for _, test := range testdata {
 		in := []byte(test.from)
-		got := Containers{}
+		got := ContainerList{}
 		err := yaml.Unmarshal(in, &got)
 		assert.NoError(t, err)
-		assert.EqualValues(t, test.want, got.Containers, "problem parsing containers %q", test.from)
+		assert.EqualValues(t, test.want, got.ContainerList, "problem parsing containers %q", test.from)
 	}
 }
 
@@ -285,7 +274,7 @@ func TestUnmarshalContainersErr(t *testing.T) {
 	}
 	for _, test := range testdata {
 		in := []byte(test)
-		containers := new(Containers)
+		containers := new(ContainerList)
 		err := yaml.Unmarshal(in, &containers)
 		assert.Error(t, err, "wanted error for containers %q", test)
 	}
@@ -302,9 +291,9 @@ func stringsToInterface(val ...string) []interface{} {
 func TestIsPlugin(t *testing.T) {
 	assert.True(t, (&Container{}).IsPlugin())
 	assert.True(t, (&Container{
-		Commands: types.StringOrSlice(strslice.StrSlice{}),
+		Commands: base.StringOrSlice(strslice.StrSlice{}),
 	}).IsPlugin())
 	assert.False(t, (&Container{
-		Commands: types.StringOrSlice(strslice.StrSlice{"echo 'this is not a plugin'"}),
+		Commands: base.StringOrSlice(strslice.StrSlice{"echo 'this is not a plugin'"}),
 	}).IsPlugin())
 }

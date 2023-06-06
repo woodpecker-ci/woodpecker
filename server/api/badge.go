@@ -35,6 +35,15 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store/types"
 )
 
+// GetBadge
+//
+//	@Summary	Get status badge, SVG format
+//	@Router		/badges/{owner}/{name}/status.svg [get]
+//	@Produce	image/svg+xml
+//	@Success	200
+//	@Tags		Badges
+//	@Param		owner	path	string	true	"the repository owner's name"
+//	@Param		name	path	string	true	"the repository name"
 func GetBadge(c *gin.Context) {
 	_store := store.FromContext(c)
 
@@ -81,6 +90,18 @@ func GetBadge(c *gin.Context) {
 	c.String(http.StatusOK, badges.Generate(pipeline))
 }
 
+// GetCC
+//
+//	@Summary		Provide pipeline status information to the CCMenu tool
+//	@Description	CCMenu displays the pipeline status of projects on a CI server as an item in the Mac's menu bar.
+//	@Description	More details on how to install, you can find at http://ccmenu.org/
+//	@Description	The response format adheres to CCTray v1 Specification, https://cctray.org/v1/
+//	@Router			/badges/{owner}/{name}/cc.xml [get]
+//	@Produce		xml
+//	@Success		200
+//	@Tags			Badges
+//	@Param			owner	path	string	true	"the repository owner's name"
+//	@Param			name	path	string	true	"the repository name"
 func GetCC(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo, err := _store.GetRepoName(c.Param("owner") + "/" + c.Param("name"))

@@ -1,4 +1,4 @@
-package yaml
+package types
 
 import (
 	"fmt"
@@ -7,13 +7,13 @@ import (
 )
 
 type (
-	// Volumes defines a collection of volumes.
-	Volumes struct {
-		Volumes []*Volume
+	// WorkflowVolumes defines a collection of volumes.
+	WorkflowVolumes struct {
+		WorkflowVolumes []*WorkflowVolume
 	}
 
-	// Volume defines a container volume.
-	Volume struct {
+	// WorkflowVolume defines a container volume.
+	WorkflowVolume struct {
 		Name       string            `yaml:"name,omitempty"`
 		Driver     string            `yaml:"driver,omitempty"`
 		DriverOpts map[string]string `yaml:"driver_opts,omitempty"`
@@ -21,10 +21,10 @@ type (
 )
 
 // UnmarshalYAML implements the Unmarshaler interface.
-func (v *Volumes) UnmarshalYAML(value *yaml.Node) error {
+func (v *WorkflowVolumes) UnmarshalYAML(value *yaml.Node) error {
 	y, _ := yaml.Marshal(value)
 
-	volumes := map[string]Volume{}
+	volumes := map[string]WorkflowVolume{}
 	err := yaml.Unmarshal(y, &volumes)
 	if err != nil {
 		return err
@@ -37,7 +37,7 @@ func (v *Volumes) UnmarshalYAML(value *yaml.Node) error {
 		if vv.Driver == "" {
 			vv.Driver = "local"
 		}
-		v.Volumes = append(v.Volumes, &vv)
+		v.WorkflowVolumes = append(v.WorkflowVolumes, &vv)
 	}
 	return err
 }

@@ -295,9 +295,9 @@ func (c *client) PipelineKill(repoID int64, pipeline int) error {
 }
 
 // PipelineLogs returns the pipeline logs for the specified step.
-func (c *client) PipelineLogs(repoID int64, pipeline, step int) ([]*Logs, error) {
-	uri := fmt.Sprintf(pathLogs, c.addr, repoID, pipeline, step)
-	var out []*Logs
+func (c *client) StepLogEntries(repoID int64, num, step int) ([]*LogEntry, error) {
+	uri := fmt.Sprintf(pathLogs, c.addr, repoID, num, step)
+	var out []*LogEntry
 	err := c.get(uri, &out)
 	return out, err
 }

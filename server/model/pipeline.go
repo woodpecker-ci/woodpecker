@@ -15,7 +15,6 @@
 
 package model
 
-// swagger:model pipeline
 type Pipeline struct {
 	ID                  int64             `json:"id"                      xorm:"pk autoincr 'pipeline_id'"`
 	RepoID              int64             `json:"-"                       xorm:"UNIQUE(s) INDEX 'pipeline_repo_id'"`
@@ -49,11 +48,10 @@ type Pipeline struct {
 	Reviewer            string            `json:"reviewed_by"             xorm:"pipeline_reviewer"`
 	Reviewed            int64             `json:"reviewed_at"             xorm:"pipeline_reviewed"`
 	Steps               []*Step           `json:"steps,omitempty"         xorm:"-"`
-	Files               []*File           `json:"files,omitempty"         xorm:"-"`
 	ChangedFiles        []string          `json:"changed_files,omitempty" xorm:"json 'changed_files'"`
 	AdditionalVariables map[string]string `json:"variables,omitempty"     xorm:"json 'additional_variables'"`
 	PullRequestLabels   []string          `json:"pr_labels,omitempty"     xorm:"json 'pr_labels'"`
-}
+} //	@name Pipeline
 
 // TableName return database table name for xorm
 func (Pipeline) TableName() string {
@@ -67,4 +65,4 @@ type UpdatePipelineStore interface {
 type PipelineOptions struct {
 	Branch    string            `json:"branch"`
 	Variables map[string]string `json:"variables"`
-}
+} //	@name PipelineOptions

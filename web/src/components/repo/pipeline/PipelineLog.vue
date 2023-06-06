@@ -64,13 +64,13 @@
   </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import '~/style/console.css';
 
 import { useStorage } from '@vueuse/core';
 import AnsiUp from 'ansi_up';
 import { debounce } from 'lodash';
-import { computed, defineComponent, inject, nextTick, onMounted, PropType, Ref, ref, toRef, watch } from 'vue';
+import { computed, inject, nextTick, onMounted, Ref, ref, toRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
@@ -86,221 +86,191 @@ type LogLine = {
   time?: number;
 };
 
-export default defineComponent({
-  name: 'PipelineLog',
+const props = defineProps<{
+  pipeline: Pipeline;
+  stepId: number;
+}>();
 
-  components: { Icon, Button },
+defineEmits<{
+  (event: 'update:step-id', stepId: number | null): true;
+}>();
 
-  props: {
-    pipeline: {
-      type: Object as PropType<Pipeline>,
-      required: true,
-    },
+const notifications = useNotifications();
+const i18n = useI18n();
+const pipeline = toRef(props, 'pipeline');
+const stepId = toRef(props, 'stepId');
+const repo = inject<Ref<Repo>>('repo');
+const apiClient = useApiClient();
 
-    stepId: {
-      type: Number,
-      required: true,
-    },
-  },
+const loadedStepSlug = ref<string>();
+const stepSlug = computed(() => `${repo?.value.owner} - ${repo?.value.name} - ${pipeline.value.id} - ${stepId.value}`);
+const step = computed(() => pipeline.value && findStep(pipeline.value.steps || [], stepId.value));
+const stream = ref<EventSource>();
+const log = ref<LogLine[]>();
+const consoleElement = ref<Element>();
 
-  emits: {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    'update:step-id': (stepId: number | null) => true,
-  },
+const loadedLogs = computed(() => !!log.value);
+const hasLogs = computed(
+  () =>
+    // we do not have logs for skipped steps
+    repo?.value && pipeline.value && step.value && step.value.state !== 'skipped' && step.value.state !== 'killed',
+);
+const autoScroll = useStorage('log-auto-scroll', false);
+const showActions = ref(false);
+const downloadInProgress = ref(false);
+const ansiUp = ref(new AnsiUp());
+ansiUp.value.use_classes = true;
+const logBuffer = ref<LogLine[]>([]);
 
-  setup(props) {
-    const notifications = useNotifications();
-    const i18n = useI18n();
-    const pipeline = toRef(props, 'pipeline');
-    const stepId = toRef(props, 'stepId');
-    const repo = inject<Ref<Repo>>('repo');
-    const apiClient = useApiClient();
+const maxLineCount = 500; // TODO: think about way to support lazy-loading more than last 300 logs (#776)
 
-    const loadedStepSlug = ref<string>();
-    const stepSlug = computed(
-      () => `${repo?.value.owner} - ${repo?.value.name} - ${pipeline.value.id} - ${stepId.value}`,
+function formatTime(time?: number): string {
+  return time === undefined ? '' : `${time}s`;
+}
+
+function writeLog(line: LogLine) {
+  logBuffer.value.push({
+    index: line.index ?? 0,
+    text: ansiUp.value.ansi_to_html(line.text),
+    time: line.time ?? 0,
+  });
+}
+
+function scrollDown() {
+  nextTick(() => {
+    if (!consoleElement.value) {
+      return;
+    }
+    consoleElement.value.scrollTop = consoleElement.value.scrollHeight;
+  });
+}
+
+const flushLogs = debounce((scroll: boolean) => {
+  let buffer = logBuffer.value.slice(-maxLineCount);
+  logBuffer.value = [];
+
+  if (buffer.length === 0) {
+    if (!log.value) {
+      log.value = [];
+    }
+    return;
+  }
+
+  // append old logs lines
+  if (buffer.length < maxLineCount && log.value) {
+    buffer = [...log.value.slice(-(maxLineCount - buffer.length)), ...buffer];
+  }
+
+  // deduplicate repeating times
+  buffer = buffer.reduce(
+    (acc, line) => ({
+      lastTime: line.time ?? 0,
+      lines: [
+        ...acc.lines,
+        {
+          ...line,
+          time: acc.lastTime === line.time ? undefined : line.time,
+        },
+      ],
+    }),
+    { lastTime: -1, lines: [] as LogLine[] },
+  ).lines;
+
+  log.value = buffer;
+
+  if (scroll && autoScroll.value) {
+    scrollDown();
+  }
+}, 500);
+
+async function download() {
+  if (!repo?.value || !pipeline.value || !step.value) {
+    throw new Error('The repository, pipeline or step was undefined');
+  }
+  let logs;
+  try {
+    downloadInProgress.value = true;
+    logs = await apiClient.getLogs(repo.value.id, pipeline.value.number, step.value.id);
+  } catch (e) {
+    notifications.notifyError(e, i18n.t('repo.pipeline.log_download_error'));
+    return;
+  } finally {
+    downloadInProgress.value = false;
+  }
+  const fileURL = window.URL.createObjectURL(
+    new Blob([logs.map((line) => atob(line.data)).join('')], {
+      type: 'text/plain',
+    }),
+  );
+  const fileLink = document.createElement('a');
+
+  fileLink.href = fileURL;
+  fileLink.setAttribute(
+    'download',
+    `${repo.value.owner}-${repo.value.name}-${pipeline.value.number}-${step.value.name}.log`,
+  );
+  document.body.appendChild(fileLink);
+
+  fileLink.click();
+  document.body.removeChild(fileLink);
+  window.URL.revokeObjectURL(fileURL);
+}
+
+async function loadLogs() {
+  if (loadedStepSlug.value === stepSlug.value) {
+    return;
+  }
+  loadedStepSlug.value = stepSlug.value;
+  log.value = undefined;
+  logBuffer.value = [];
+  ansiUp.value = new AnsiUp();
+  ansiUp.value.use_classes = true;
+
+  if (!repo) {
+    throw new Error('Unexpected: "repo" should be provided at this place');
+  }
+
+  if (stream.value) {
+    stream.value.close();
+  }
+
+  if (!hasLogs.value || !step.value) {
+    return;
+  }
+
+  if (isStepFinished(step.value)) {
+    const logs = await apiClient.getLogs(repo.value.id, pipeline.value.number, step.value.id);
+    logs?.forEach((line) => writeLog({ index: line.line, text: atob(line.data), time: line.time }));
+    flushLogs(false);
+  }
+
+  if (isStepRunning(step.value)) {
+    stream.value = apiClient.streamLogs(
+      repo.value.owner,
+      repo.value.name,
+      pipeline.value.number,
+      step.value.id,
+      (line) => {
+        writeLog({ index: line.line, text: atob(line.data), time: line.time });
+        flushLogs(true);
+      },
     );
-    const step = computed(() => pipeline.value && findStep(pipeline.value.steps || [], stepId.value));
-    const stream = ref<EventSource>();
-    const log = ref<LogLine[]>();
-    const consoleElement = ref<Element>();
+  }
+}
 
-    const loadedLogs = computed(() => !!log.value);
-    const hasLogs = computed(
-      () =>
-        // we do not have logs for skipped steps
-        repo?.value && pipeline.value && step.value && step.value.state !== 'skipped' && step.value.state !== 'killed',
-    );
-    const autoScroll = useStorage('log-auto-scroll', false);
-    const showActions = ref(false);
-    const downloadInProgress = ref(false);
-    const ansiUp = ref(new AnsiUp());
-    ansiUp.value.use_classes = true;
-    const logBuffer = ref<LogLine[]>([]);
+onMounted(async () => {
+  loadLogs();
+});
 
-    const maxLineCount = 500; // TODO: think about way to support lazy-loading more than last 300 logs (#776)
+watch(stepSlug, () => {
+  loadLogs();
+});
 
-    function formatTime(time?: number): string {
-      return time === undefined ? '' : `${time}s`;
+watch(step, (oldStep, newStep) => {
+  if (oldStep && oldStep.name === newStep?.name && oldStep?.end_time !== newStep?.end_time) {
+    if (autoScroll.value) {
+      scrollDown();
     }
-
-    function writeLog(line: LogLine) {
-      logBuffer.value.push({
-        index: line.index ?? 0,
-        text: ansiUp.value.ansi_to_html(line.text),
-        time: line.time ?? 0,
-      });
-    }
-
-    function scrollDown() {
-      nextTick(() => {
-        if (!consoleElement.value) {
-          return;
-        }
-        consoleElement.value.scrollTop = consoleElement.value.scrollHeight;
-      });
-    }
-
-    const flushLogs = debounce((scroll: boolean) => {
-      let buffer = logBuffer.value.slice(-maxLineCount);
-      logBuffer.value = [];
-
-      if (buffer.length === 0) {
-        if (!log.value) {
-          log.value = [];
-        }
-        return;
-      }
-
-      // append old logs lines
-      if (buffer.length < maxLineCount && log.value) {
-        buffer = [...log.value.slice(-(maxLineCount - buffer.length)), ...buffer];
-      }
-
-      // deduplicate repeating times
-      buffer = buffer.reduce(
-        (acc, line) => ({
-          lastTime: line.time ?? 0,
-          lines: [
-            ...acc.lines,
-            {
-              ...line,
-              time: acc.lastTime === line.time ? undefined : line.time,
-            },
-          ],
-        }),
-        { lastTime: -1, lines: [] as LogLine[] },
-      ).lines;
-
-      log.value = buffer;
-
-      if (scroll && autoScroll.value) {
-        scrollDown();
-      }
-    }, 500);
-
-    async function download() {
-      if (!repo?.value || !pipeline.value || !step.value) {
-        throw new Error('The repository, pipeline or step was undefined');
-      }
-      let logs;
-      try {
-        downloadInProgress.value = true;
-        logs = await apiClient.getLogs(repo.value.id, pipeline.value.number, step.value.pid);
-      } catch (e) {
-        notifications.notifyError(e, i18n.t('repo.pipeline.log_download_error'));
-        return;
-      } finally {
-        downloadInProgress.value = false;
-      }
-      const fileURL = window.URL.createObjectURL(
-        new Blob([logs.map((line) => line.out).join('')], {
-          type: 'text/plain',
-        }),
-      );
-      const fileLink = document.createElement('a');
-
-      fileLink.href = fileURL;
-      fileLink.setAttribute(
-        'download',
-        `${repo.value.owner}-${repo.value.name}-${pipeline.value.number}-${step.value.name}.log`,
-      );
-      document.body.appendChild(fileLink);
-
-      fileLink.click();
-      document.body.removeChild(fileLink);
-      window.URL.revokeObjectURL(fileURL);
-    }
-
-    async function loadLogs() {
-      if (loadedStepSlug.value === stepSlug.value) {
-        return;
-      }
-      loadedStepSlug.value = stepSlug.value;
-      log.value = undefined;
-      logBuffer.value = [];
-      ansiUp.value = new AnsiUp();
-      ansiUp.value.use_classes = true;
-
-      if (!repo) {
-        throw new Error('Unexpected: "repo" should be provided at this place');
-      }
-
-      if (stream.value) {
-        stream.value.close();
-      }
-
-      if (!hasLogs.value || !step.value) {
-        return;
-      }
-
-      if (isStepFinished(step.value)) {
-        const logs = await apiClient.getLogs(repo.value.id, pipeline.value.number, step.value.pid);
-        logs?.forEach((line) => writeLog({ index: line.pos, text: line.out, time: line.time }));
-        flushLogs(false);
-      }
-
-      if (isStepRunning(step.value)) {
-        // load stream of parent process (which receives all child processes logs)
-        // TODO: change stream to only send data of single child process
-        stream.value = apiClient.streamLogs(repo.value.id, pipeline.value.number, step.value.ppid, (line) => {
-          if (line?.step !== step.value?.name) {
-            return;
-          }
-          writeLog({ index: line.pos, text: line.out, time: line.time });
-          flushLogs(true);
-        });
-      }
-    }
-
-    onMounted(async () => {
-      loadLogs();
-    });
-
-    watch(stepSlug, () => {
-      loadLogs();
-    });
-
-    watch(step, (oldStep, newStep) => {
-      if (oldStep && oldStep.name === newStep?.name && oldStep?.end_time !== newStep?.end_time) {
-        if (autoScroll.value) {
-          scrollDown();
-        }
-      }
-    });
-
-    return {
-      consoleElement,
-      step,
-      log,
-      loadedLogs,
-      hasLogs,
-      formatTime,
-      showActions,
-      download,
-      downloadInProgress,
-      autoScroll,
-    };
-  },
+  }
 });
 </script>

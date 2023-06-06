@@ -39,7 +39,7 @@ func load(t *testing.T, config string) *GitLab {
 	_url.RawQuery = ""
 
 	gitlab := GitLab{}
-	gitlab.URL = _url.String()
+	gitlab.url = _url.String()
 	gitlab.ClientID = params.Get("client_id")
 	gitlab.ClientSecret = params.Get("client_secret")
 	gitlab.SkipVerify, _ = strconv.ParseBool(params.Get("skip_verify"))

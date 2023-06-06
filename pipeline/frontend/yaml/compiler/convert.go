@@ -6,16 +6,19 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 
-	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
+	backend_types "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/compiler/settings"
+	yaml_types "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
 )
 
-func (c *Compiler) createProcess(name string, container *yaml.Container, section string) *backend.Step {
+func (c *Compiler) createProcess(name string, container *yaml_types.Container, section string) *backend_types.Step {
 	var (
+		uuid = uuid.New()
+
 		detached   bool
 		workingdir string
 
@@ -26,14 +29,14 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		// network    = container.Network
 	)
 
-	networks := []backend.Conn{
+	networks := []backend_types.Conn{
 		{
 			Name:    fmt.Sprintf("%s_default", c.prefix),
 			Aliases: []string{container.Name},
 		},
 	}
 	for _, network := range c.networks {
-		networks = append(networks, backend.Conn{
+		networks = append(networks, backend_types.Conn{
 			Name: network,
 		})
 	}
@@ -89,11 +92,7 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		privileged = true
 	}
 
-	authConfig := backend.Auth{
-		Username: container.AuthConfig.Username,
-		Password: container.AuthConfig.Password,
-		Email:    container.AuthConfig.Email,
-	}
+	authConfig := backend_types.Auth{}
 	for _, registry := range c.registries {
 		if matchHostname(container.Image, registry.Hostname) {
 			authConfig.Username = registry.Username
@@ -108,6 +107,16 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		if ok && secret.Available(container) {
 			environment[strings.ToUpper(requested.Target)] = secret.Value
 		}
+	}
+
+	// Kubernetes advanced settings
+	backendOptions := backend_types.BackendOptions{
+		Kubernetes: backend_types.KubernetesBackendOptions{
+			Resources: backend_types.Resources{
+				Limits:   container.BackendOptions.Kubernetes.Resources.Limits,
+				Requests: container.BackendOptions.Kubernetes.Resources.Requests,
+			},
+		},
 	}
 
 	memSwapLimit := int64(container.MemSwapLimit)
@@ -142,44 +151,45 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 
 	failure := container.Failure
 	if container.Failure == "" {
-		failure = frontend.FailureFail
+		failure = metadata.FailureFail
 	}
 
-	return &backend.Step{
-		Name:         name,
-		Alias:        container.Name,
-		Image:        container.Image,
-		Pull:         container.Pull,
-		Detached:     detached,
-		Privileged:   privileged,
-		WorkingDir:   workingdir,
-		Environment:  environment,
-		Labels:       container.Labels,
-		Commands:     container.Commands,
-		ExtraHosts:   container.ExtraHosts,
-		Volumes:      volumes,
-		Tmpfs:        container.Tmpfs,
-		Devices:      container.Devices,
-		Networks:     networks,
-		DNS:          container.DNS,
-		DNSSearch:    container.DNSSearch,
-		MemSwapLimit: memSwapLimit,
-		MemLimit:     memLimit,
-		ShmSize:      shmSize,
-		Sysctls:      container.Sysctls,
-		CPUQuota:     cpuQuota,
-		CPUShares:    cpuShares,
-		CPUSet:       cpuSet,
-		AuthConfig:   authConfig,
-		OnSuccess:    onSuccess,
-		OnFailure:    onFailure,
-		Failure:      failure,
-		NetworkMode:  networkMode,
-		IpcMode:      ipcMode,
+	return &backend_types.Step{
+		Name:           name,
+		UUID:           uuid.String(),
+		Alias:          container.Name,
+		Image:          container.Image,
+		Pull:           container.Pull,
+		Detached:       detached,
+		Privileged:     privileged,
+		WorkingDir:     workingdir,
+		Environment:    environment,
+		Commands:       container.Commands,
+		ExtraHosts:     container.ExtraHosts,
+		Volumes:        volumes,
+		Tmpfs:          container.Tmpfs,
+		Devices:        container.Devices,
+		Networks:       networks,
+		DNS:            container.DNS,
+		DNSSearch:      container.DNSSearch,
+		MemSwapLimit:   memSwapLimit,
+		MemLimit:       memLimit,
+		ShmSize:        shmSize,
+		Sysctls:        container.Sysctls,
+		CPUQuota:       cpuQuota,
+		CPUShares:      cpuShares,
+		CPUSet:         cpuSet,
+		AuthConfig:     authConfig,
+		OnSuccess:      onSuccess,
+		OnFailure:      onFailure,
+		Failure:        failure,
+		NetworkMode:    networkMode,
+		IpcMode:        ipcMode,
+		BackendOptions: backendOptions,
 	}
 }
 
-func (c *Compiler) stepWorkdir(container *yaml.Container) string {
+func (c *Compiler) stepWorkdir(container *yaml_types.Container) string {
 	if filepath.IsAbs(container.Directory) {
 		return container.Directory
 	}

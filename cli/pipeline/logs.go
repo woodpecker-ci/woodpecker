@@ -27,7 +27,7 @@ import (
 var pipelineLogsCmd = &cli.Command{
 	Name:      "logs",
 	Usage:     "show pipeline logs",
-	ArgsUsage: "<repo-id|repo-full-name> [pipeline] [step]",
+	ArgsUsage: "<repo-id|repo-full-name> [pipeline] [stepID]",
 	Action:    pipelineLogs,
 	Flags:     common.GlobalFlags,
 }
@@ -59,7 +59,7 @@ func pipelineLogs(c *cli.Context) error {
 	}
 
 	for _, log := range logs {
-		fmt.Print(log.Output)
+		fmt.Print(string(log.Data))
 	}
 
 	return nil

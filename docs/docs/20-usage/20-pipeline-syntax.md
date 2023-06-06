@@ -829,15 +829,15 @@ when:
   event: [push, pull_request, tag, deployment]
 ```
 
-### `tag`
+### `ref`
 
-This filter only applies to tag events.
-Use glob expression to execute a step if the tag name starts with `v`:
+The `ref` filter compares the git reference against which the pipeline is executed.
+This allows you to filter, for example, tags that must start with **v**:
 
 ```diff
 when:
   event: tag
-  tag: v*
+  ref: refs/tags/v*
 ```
 
 ### `environment`

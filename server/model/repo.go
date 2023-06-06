@@ -21,8 +21,6 @@ import (
 )
 
 // Repo represents a repository.
-//
-// swagger:model repo
 type Repo struct {
 	ID     int64 `json:"id,omitempty"                    xorm:"pk autoincr 'repo_id'"`
 	UserID int64 `json:"-"                               xorm:"repo_user_id"`
@@ -48,7 +46,7 @@ type Repo struct {
 	Perm                         *Perm          `json:"-"                               xorm:"-"`
 	CancelPreviousPipelineEvents []WebhookEvent `json:"cancel_previous_pipeline_events" xorm:"json 'cancel_previous_pipeline_events'"`
 	NetrcOnlyTrusted             bool           `json:"netrc_only_trusted"              xorm:"NOT NULL DEFAULT true 'netrc_only_trusted'"`
-}
+} //	@name Repo
 
 // TableName return database table name for xorm
 func (Repo) TableName() string {
@@ -109,7 +107,7 @@ type RepoPatch struct {
 	AllowPull                    *bool           `json:"allow_pr,omitempty"`
 	CancelPreviousPipelineEvents *[]WebhookEvent `json:"cancel_previous_pipeline_events"`
 	NetrcOnlyTrusted             *bool           `json:"netrc_only_trusted"`
-}
+} //	@name RepoPatch
 
 type ForgeRemoteID string
 
