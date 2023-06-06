@@ -155,7 +155,7 @@ func GetPipeline(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	if pl.Workflows, err = _store.WorkflowTree(pl); err != nil {
+	if pl.Workflows, err = _store.WorkflowGetTree(pl); err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
@@ -174,7 +174,7 @@ func GetPipelineLast(c *gin.Context) {
 		return
 	}
 
-	if pl.Workflows, err = _store.WorkflowTree(pl); err != nil {
+	if pl.Workflows, err = _store.WorkflowGetTree(pl); err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}

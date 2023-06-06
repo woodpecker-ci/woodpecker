@@ -141,7 +141,7 @@ type Store interface {
 	StepList(*model.Pipeline) ([]*model.Step, error)
 	StepUpdate(*model.Step) error
 	StepClear(*model.Pipeline) error
-	StepListFromWorkflow(*model.Workflow) ([]*model.Step, error)
+	StepListFromWorkflowFind(*model.Workflow) ([]*model.Step, error)
 
 	// Logs
 	LogFind(*model.Step) ([]*model.LogEntry, error)
@@ -178,7 +178,7 @@ type Store interface {
 	AgentDelete(*model.Agent) error
 
 	// Workflow
-	WorkflowTree(*model.Pipeline) ([]*model.Workflow, error)
+	WorkflowGetTree(*model.Pipeline) ([]*model.Workflow, error)
 	WorkflowsCreate([]*model.Workflow) error
 	WorkflowLoad(int64) (*model.Workflow, error)
 	WorkflowUpdate(*model.Workflow) error

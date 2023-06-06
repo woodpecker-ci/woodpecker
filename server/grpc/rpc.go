@@ -138,7 +138,7 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 		log.Error().Err(err).Msg("rpc.update: cannot update step")
 	}
 
-	if currentPipeline.Workflows, err = s.store.WorkflowTree(currentPipeline); err != nil {
+	if currentPipeline.Workflows, err = s.store.WorkflowGetTree(currentPipeline); err != nil {
 		log.Error().Err(err).Msg("can not build tree from step list")
 		return err
 	}
@@ -199,7 +199,7 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 	s.updateForgeStatus(c, repo, currentPipeline, workflow)
 
 	defer func() {
-		currentPipeline.Workflows, _ = s.store.WorkflowTree(currentPipeline)
+		currentPipeline.Workflows, _ = s.store.WorkflowGetTree(currentPipeline)
 		message := pubsub.Message{
 			Labels: map[string]string{
 				"repo":    repo.FullName,
@@ -236,7 +236,7 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 		return err
 	}
 
-	workflow.Children, err = s.store.StepListFromWorkflow(workflow)
+	workflow.Children, err = s.store.StepListFromWorkflowFind(workflow)
 	if err != nil {
 		return err
 	}
@@ -274,7 +274,7 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 		logger.Error().Err(queueErr).Msg("queue.Done: cannot ack workflow")
 	}
 
-	currentPipeline.Workflows, err = s.store.WorkflowTree(currentPipeline)
+	currentPipeline.Workflows, err = s.store.WorkflowGetTree(currentPipeline)
 	if err != nil {
 		return err
 	}

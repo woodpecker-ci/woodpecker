@@ -6,7 +6,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-func (s storage) WorkflowTree(pipeline *model.Pipeline) ([]*model.Workflow, error) {
+func (s storage) WorkflowGetTree(pipeline *model.Pipeline) ([]*model.Workflow, error) {
 	sess := s.engine.NewSession()
 	wfList, err := s.workflowList(sess, pipeline)
 	if err != nil {

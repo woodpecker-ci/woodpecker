@@ -1754,7 +1754,7 @@ func (_m *Store) StepList(_a0 *model.Pipeline) ([]*model.Step, error) {
 }
 
 // StepListFromWorkflow provides a mock function with given fields: _a0
-func (_m *Store) StepListFromWorkflow(_a0 *model.Workflow) ([]*model.Step, error) {
+func (_m *Store) StepListFromWorkflowFind(_a0 *model.Workflow) ([]*model.Step, error) {
 	ret := _m.Called(_a0)
 
 	var r0 []*model.Step
@@ -1968,7 +1968,7 @@ func (_m *Store) WorkflowLoad(_a0 int64) (*model.Workflow, error) {
 }
 
 // WorkflowTree provides a mock function with given fields: _a0
-func (_m *Store) WorkflowTree(_a0 *model.Pipeline) ([]*model.Workflow, error) {
+func (_m *Store) WorkflowGetTree(_a0 *model.Pipeline) ([]*model.Workflow, error) {
 	ret := _m.Called(_a0)
 
 	var r0 []*model.Workflow

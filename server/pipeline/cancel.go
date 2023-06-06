@@ -32,7 +32,7 @@ func Cancel(ctx context.Context, store store.Store, repo *model.Repo, user *mode
 		return &ErrBadRequest{Msg: "Cannot cancel a non-running or non-pending or non-blocked pipeline"}
 	}
 
-	workflows, err := store.WorkflowTree(pipeline)
+	workflows, err := store.WorkflowGetTree(pipeline)
 	if err != nil {
 		return &ErrNotFound{Msg: err.Error()}
 	}
@@ -90,7 +90,7 @@ func Cancel(ctx context.Context, store store.Store, repo *model.Repo, user *mode
 
 	updatePipelineStatus(ctx, killedPipeline, repo, user)
 
-	if killedPipeline.Workflows, err = store.WorkflowTree(killedPipeline); err != nil {
+	if killedPipeline.Workflows, err = store.WorkflowGetTree(killedPipeline); err != nil {
 		return err
 	}
 	if err := publishToTopic(ctx, killedPipeline, repo); err != nil {

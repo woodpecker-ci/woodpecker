@@ -35,7 +35,7 @@ func Decline(ctx context.Context, store store.Store, pipeline *model.Pipeline, u
 		return nil, fmt.Errorf("error updating pipeline. %w", err)
 	}
 
-	if pipeline.Workflows, err = store.WorkflowTree(pipeline); err != nil {
+	if pipeline.Workflows, err = store.WorkflowGetTree(pipeline); err != nil {
 		log.Error().Err(err).Msg("can not build tree from step list")
 	}
 
