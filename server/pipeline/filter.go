@@ -51,7 +51,7 @@ func zeroSteps(currentPipeline *model.Pipeline, forgeYamlConfigs []*forge_types.
 	return false
 }
 
-// TODO: parse yaml once and not for each filter function
+// TODO: parse yaml once and not for each filter function (-> move server/pipeline/filter* into pipeline/step_builder)
 // Check if at least one pipeline step will be execute otherwise we will just ignore this webhook
 func checkIfFiltered(repo *model.Repo, p *model.Pipeline, forgeYamlConfigs []*forge_types.FileMeta) (bool, error) {
 	log.Trace().Msgf("hook.branchFiltered(): pipeline branch: '%s' pipeline event: '%s' config count: %d", p.Branch, p.Event, len(forgeYamlConfigs))

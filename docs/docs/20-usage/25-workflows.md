@@ -1,7 +1,7 @@
 # Workflows
 
 :::info
-This Feature is only available for GitHub, Gitea & GitLab repositories. Follow [this](https://github.com/woodpecker-ci/woodpecker/issues/131) issue to support further development.
+This Feature is only available for GitHub, Gitea & GitLab repositories. Follow [this](https://github.com/woodpecker-ci/woodpecker/issues/1138) issue to support further development.
 :::
 
 A pipeline has at least one workflow. A workflow is a set of steps that are executed in sequence using the same workspace which is a shared folder containing the repository and all the generated data from previous steps.

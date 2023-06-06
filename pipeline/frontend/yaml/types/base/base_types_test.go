@@ -1,4 +1,4 @@
-package types
+package base
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 )
 
 type StructStringorInt struct {
-	Foo StringorInt
+	Foo StringOrInt
 }
 
 func TestStringorIntYaml(t *testing.T) {
@@ -18,7 +18,7 @@ func TestStringorIntYaml(t *testing.T) {
 		s := StructStringorInt{}
 		assert.NoError(t, yaml.Unmarshal([]byte(str), &s))
 
-		assert.Equal(t, StringorInt(10), s.Foo)
+		assert.Equal(t, StringOrInt(10), s.Foo)
 
 		d, err := yaml.Marshal(&s)
 		assert.Nil(t, err)
@@ -26,7 +26,7 @@ func TestStringorIntYaml(t *testing.T) {
 		s2 := StructStringorInt{}
 		assert.NoError(t, yaml.Unmarshal(d, &s2))
 
-		assert.Equal(t, StringorInt(10), s2.Foo)
+		assert.Equal(t, StringOrInt(10), s2.Foo)
 	}
 }
 
@@ -52,7 +52,7 @@ func TestStringOrSliceYaml(t *testing.T) {
 }
 
 type StructSliceorMap struct {
-	Foos SliceorMap `yaml:"foos,omitempty"`
+	Foos SliceOrMap `yaml:"foos,omitempty"`
 	Bars []string   `yaml:"bars"`
 }
 
@@ -62,7 +62,7 @@ func TestSliceOrMapYaml(t *testing.T) {
 	s := StructSliceorMap{}
 	assert.NoError(t, yaml.Unmarshal([]byte(str), &s))
 
-	assert.Equal(t, SliceorMap{"bar": "baz", "far": "faz"}, s.Foos)
+	assert.Equal(t, SliceOrMap{"bar": "baz", "far": "faz"}, s.Foos)
 
 	d, err := yaml.Marshal(&s)
 	assert.Nil(t, err)
@@ -70,7 +70,7 @@ func TestSliceOrMapYaml(t *testing.T) {
 	s2 := StructSliceorMap{}
 	assert.NoError(t, yaml.Unmarshal(d, &s2))
 
-	assert.Equal(t, SliceorMap{"bar": "baz", "far": "faz"}, s2.Foos)
+	assert.Equal(t, SliceOrMap{"bar": "baz", "far": "faz"}, s2.Foos)
 }
 
 var sampleStructSliceorMap = `
@@ -88,7 +88,7 @@ func TestUnmarshalSliceOrMap(t *testing.T) {
 
 func TestStr2SliceOrMapPtrMap(t *testing.T) {
 	s := map[string]*StructSliceorMap{"udav": {
-		Foos: SliceorMap{"io.rancher.os.bar": "baz", "io.rancher.os.far": "true"},
+		Foos: SliceOrMap{"io.rancher.os.bar": "baz", "io.rancher.os.far": "true"},
 		Bars: []string{},
 	}}
 	d, err := yaml.Marshal(&s)

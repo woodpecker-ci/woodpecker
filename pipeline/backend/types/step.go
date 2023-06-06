@@ -3,6 +3,7 @@ package types
 // Step defines a container process.
 type Step struct {
 	Name           string            `json:"name"`
+	UUID           string            `json:"uuid"`
 	Alias          string            `json:"alias,omitempty"`
 	Image          string            `json:"image,omitempty"`
 	Pull           bool              `json:"pull,omitempty"`

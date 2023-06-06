@@ -18,8 +18,6 @@ package store
 //go:generate mockery --name Store --output mocks --case underscore
 
 import (
-	"io"
-
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
@@ -138,6 +136,7 @@ type Store interface {
 	// Steps
 	StepLoad(int64) (*model.Step, error)
 	StepFind(*model.Pipeline, int) (*model.Step, error)
+	StepByUUID(string) (*model.Step, error)
 	StepChild(*model.Pipeline, int, string) (*model.Step, error)
 	StepList(*model.Pipeline) ([]*model.Step, error)
 	StepCreate([]*model.Step) error
@@ -145,10 +144,10 @@ type Store interface {
 	StepClear(*model.Pipeline) error
 
 	// Logs
-	LogFind(*model.Step) (io.ReadCloser, error)
-	// TODO: since we do ReadAll in any case a ioReader is not the best idea
-	// so either find a way to write log in chunks by xorm ...
-	LogSave(*model.Step, io.Reader) error
+	LogFind(*model.Step) ([]*model.LogEntry, error)
+	LogSave(*model.Step, []*model.LogEntry) error
+	LogAppend(logEntry *model.LogEntry) error
+	LogDelete(*model.Step) error
 
 	// Tasks
 	// TaskList TODO: paginate & opt filter

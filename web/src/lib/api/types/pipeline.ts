@@ -102,6 +102,7 @@ export type PipelineStatus =
 
 export type PipelineStep = {
   id: number;
+  uuid: string;
   pipeline_id: number;
   pid: number;
   ppid: number;
@@ -118,10 +119,12 @@ export type PipelineStep = {
 };
 
 export type PipelineLog = {
-  step: string;
-  pos: number;
-  out: string;
-  time?: number;
+  id: number;
+  step_id: number;
+  time: number;
+  line: number;
+  data: string; // base64 encoded
+  type: number;
 };
 
 export type PipelineFeed = Pipeline & {
