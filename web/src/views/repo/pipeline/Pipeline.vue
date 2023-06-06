@@ -17,7 +17,7 @@
         <div v-else-if="pipeline.status === 'blocked'" class="flex flex-col flex-grow justify-center items-center p-2">
           <Icon name="status-blocked" class="w-16 h-16 text-color mb-4" />
           <p class="text-xl text-color mb-4">{{ $t('repo.pipeline.protected.awaits') }}</p>
-          <div v-if="repoPermissions.push" class="flex mt-2 space-x-4">
+          <div v-if="repoPermissions.push" class="flex space-x-4">
             <Button
               color="green"
               :text="$t('repo.pipeline.protected.approve')"
@@ -34,7 +34,7 @@
         </div>
 
         <div v-else-if="pipeline.status === 'declined'" class="flex flex-col flex-grow justify-center items-center">
-          <Icon name="status-blocked" class="w-32 h-32 text-color" />
+          <Icon name="status-blocked" class="w-16 h-16 text-color mb-4" />
           <p class="text-xl text-color">{{ $t('repo.pipeline.protected.declined') }}</p>
         </div>
 

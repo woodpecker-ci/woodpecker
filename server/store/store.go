@@ -18,8 +18,6 @@ package store
 //go:generate mockery --name Store --output mocks --case underscore
 
 import (
-	"io"
-
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
@@ -29,11 +27,12 @@ type Store interface {
 	// Users
 	// GetUser gets a user by unique ID.
 	GetUser(int64) (*model.User, error)
+	// GetUserRemoteID gets a user by remote ID with fallback to login name.
+	GetUserRemoteID(model.ForgeRemoteID, string) (*model.User, error)
 	// GetUserLogin gets a user by unique Login name.
 	GetUserLogin(string) (*model.User, error)
 	// GetUserList gets a list of all users in the system.
-	// TODO: paginate
-	GetUserList() ([]*model.User, error)
+	GetUserList(p *model.ListOptions) ([]*model.User, error)
 	// GetUserCount gets a count of all users in the system.
 	GetUserCount() (int64, error)
 	// CreateUser creates a new user account.
@@ -83,10 +82,9 @@ type Store interface {
 	// GetPipelineLastBefore gets the last pipeline before pipeline number N.
 	GetPipelineLastBefore(*model.Repo, string, int64) (*model.Pipeline, error)
 	// GetPipelineList gets a list of pipelines for the repository
-	// TODO: paginate
-	GetPipelineList(*model.Repo, int) ([]*model.Pipeline, error)
-	// GetPipelineList gets a list of the active pipelines for the repository
-	GetActivePipelineList(repo *model.Repo, page int) ([]*model.Pipeline, error)
+	GetPipelineList(*model.Repo, *model.ListOptions) ([]*model.Pipeline, error)
+	// GetActivePipelineList gets a list of the active pipelines for the repository
+	GetActivePipelineList(repo *model.Repo) ([]*model.Pipeline, error)
 	// GetPipelineQueue gets a list of pipelines in queue.
 	GetPipelineQueue() ([]*model.Feed, error)
 	// GetPipelineCount gets a count of all pipelines in the system.
@@ -100,11 +98,8 @@ type Store interface {
 	UserFeed(*model.User) ([]*model.Feed, error)
 
 	// Repositories
-	// RepoList TODO: paginate
-	RepoList(user *model.User, owned bool) ([]*model.Repo, error)
+	RepoList(user *model.User, owned, active bool) ([]*model.Repo, error)
 	RepoListLatest(*model.User) ([]*model.Feed, error)
-	// RepoBatch Sync batch of repos from SCM (with permissions) to store (create if not exist else update)
-	RepoBatch([]*model.Repo) error
 
 	// Permissions
 	PermFind(user *model.User, repo *model.Repo) (*model.Perm, error)
@@ -121,19 +116,19 @@ type Store interface {
 
 	// Secrets
 	SecretFind(*model.Repo, string) (*model.Secret, error)
-	SecretList(*model.Repo, bool) ([]*model.Secret, error)
+	SecretList(*model.Repo, bool, *model.ListOptions) ([]*model.Secret, error)
 	SecretListAll() ([]*model.Secret, error)
 	SecretCreate(*model.Secret) error
 	SecretUpdate(*model.Secret) error
 	SecretDelete(*model.Secret) error
 	OrgSecretFind(string, string) (*model.Secret, error)
-	OrgSecretList(string) ([]*model.Secret, error)
+	OrgSecretList(string, *model.ListOptions) ([]*model.Secret, error)
 	GlobalSecretFind(string) (*model.Secret, error)
-	GlobalSecretList() ([]*model.Secret, error)
+	GlobalSecretList(*model.ListOptions) ([]*model.Secret, error)
 
 	// Registries
 	RegistryFind(*model.Repo, string) (*model.Registry, error)
-	RegistryList(*model.Repo) ([]*model.Registry, error)
+	RegistryList(*model.Repo, *model.ListOptions) ([]*model.Registry, error)
 	RegistryCreate(*model.Registry) error
 	RegistryUpdate(*model.Registry) error
 	RegistryDelete(repo *model.Repo, addr string) error
@@ -141,6 +136,7 @@ type Store interface {
 	// Steps
 	StepLoad(int64) (*model.Step, error)
 	StepFind(*model.Pipeline, int) (*model.Step, error)
+	StepByUUID(string) (*model.Step, error)
 	StepChild(*model.Pipeline, int, string) (*model.Step, error)
 	StepList(*model.Pipeline) ([]*model.Step, error)
 	StepCreate([]*model.Step) error
@@ -148,16 +144,10 @@ type Store interface {
 	StepClear(*model.Pipeline) error
 
 	// Logs
-	LogFind(*model.Step) (io.ReadCloser, error)
-	// TODO: since we do ReadAll in any case a ioReader is not the best idea
-	// so either find a way to write log in chunks by xorm ...
-	LogSave(*model.Step, io.Reader) error
-
-	// Files
-	FileList(*model.Pipeline) ([]*model.File, error)
-	FileFind(*model.Step, string) (*model.File, error)
-	FileRead(*model.Step, string) (io.ReadCloser, error)
-	FileCreate(*model.File, io.Reader) error
+	LogFind(*model.Step) ([]*model.LogEntry, error)
+	LogSave(*model.Step, []*model.LogEntry) error
+	LogAppend(logEntry *model.LogEntry) error
+	LogDelete(*model.Step) error
 
 	// Tasks
 	// TaskList TODO: paginate & opt filter
@@ -173,7 +163,7 @@ type Store interface {
 	// Cron
 	CronCreate(*model.Cron) error
 	CronFind(*model.Repo, int64) (*model.Cron, error)
-	CronList(*model.Repo) ([]*model.Cron, error)
+	CronList(*model.Repo, *model.ListOptions) ([]*model.Cron, error)
 	CronUpdate(*model.Repo, *model.Cron) error
 	CronDelete(*model.Repo, int64) error
 	CronListNextExecute(int64, int64) ([]*model.Cron, error)
@@ -183,7 +173,7 @@ type Store interface {
 	AgentCreate(*model.Agent) error
 	AgentFind(int64) (*model.Agent, error)
 	AgentFindByToken(string) (*model.Agent, error)
-	AgentList() ([]*model.Agent, error)
+	AgentList(p *model.ListOptions) ([]*model.Agent, error)
 	AgentUpdate(*model.Agent) error
 	AgentDelete(*model.Agent) error
 

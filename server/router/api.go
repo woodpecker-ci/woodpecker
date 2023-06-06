@@ -61,6 +61,7 @@ func apiRoutes(e *gin.Engine) {
 			}
 		}
 
+		apiBase.POST("/repos/:owner/:name", session.MustUser(), api.PostRepo)
 		repoBase := apiBase.Group("/repos/:owner/:name")
 		{
 			repoBase.Use(session.SetRepo())
@@ -72,7 +73,6 @@ func apiRoutes(e *gin.Engine) {
 			{
 				repo.Use(session.MustPull)
 
-				repo.POST("", session.MustRepoAdmin(), api.PostRepo)
 				repo.GET("", api.GetRepo)
 
 				repo.GET("/branches", api.GetRepoBranches)
@@ -89,14 +89,10 @@ func apiRoutes(e *gin.Engine) {
 				repo.POST("/pipelines/:number/approve", session.MustPush, api.PostApproval)
 				repo.POST("/pipelines/:number/decline", session.MustPush, api.PostDecline)
 
-				repo.GET("/logs/:number/:pid", api.GetStepLogs)
-				repo.GET("/logs/:number/:pid/:step", api.GetPipelineLogs)
+				repo.GET("/logs/:number/:stepId", api.GetStepLogs)
 
 				// requires push permissions
 				repo.DELETE("/logs/:number", session.MustPush, api.DeletePipelineLogs)
-
-				repo.GET("/files/:number", api.FileList)
-				repo.GET("/files/:number/:step/*file", api.FileGet)
 
 				// requires push permissions
 				repo.GET("/secrets", session.MustPush, api.GetSecretList)
@@ -173,6 +169,7 @@ func apiRoutes(e *gin.Engine) {
 			agentBase.GET("", api.GetAgents)
 			agentBase.POST("", api.PostAgent)
 			agentBase.GET("/:agent", api.GetAgent)
+			agentBase.GET("/:agent/tasks", api.GetAgentTasks)
 			agentBase.PATCH("/:agent", api.PatchAgent)
 			agentBase.DELETE("/:agent", api.DeleteAgent)
 		}
@@ -180,6 +177,15 @@ func apiRoutes(e *gin.Engine) {
 		apiBase.GET("/signature/public-key", session.MustUser(), api.GetSignaturePublicKey)
 
 		apiBase.POST("/hook", api.PostHook)
+
+		stream := apiBase.Group("/stream")
+		{
+			stream.GET("/logs/:owner/:name/:pipeline/:stepId",
+				session.SetRepo(),
+				session.SetPerm(),
+				session.MustPull,
+				api.LogStreamSSE)
+		}
 
 		if zerolog.GlobalLevel() <= zerolog.DebugLevel {
 			debugger := apiBase.Group("/debug")
@@ -206,11 +212,5 @@ func apiRoutes(e *gin.Engine) {
 	sse := e.Group("/stream")
 	{
 		sse.GET("/events", api.EventStreamSSE)
-		sse.GET("/logs/:owner/:name/:pipeline/:number",
-			session.SetRepo(),
-			session.SetPerm(),
-			session.MustPull,
-			api.LogStreamSSE,
-		)
 	}
 }

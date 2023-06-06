@@ -19,6 +19,7 @@ import (
 	"context"
 	"crypto/tls"
 	"errors"
+	"fmt"
 	"net/http"
 	"os"
 	"runtime"
@@ -31,10 +32,12 @@ import (
 	"github.com/tevino/abool"
 	"github.com/urfave/cli/v2"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	grpccredentials "google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 
 	"github.com/woodpecker-ci/woodpecker/agent"
 	agentRpc "github.com/woodpecker-ci/woodpecker/agent/rpc"
@@ -45,28 +48,13 @@ import (
 	"github.com/woodpecker-ci/woodpecker/version"
 )
 
-func loop(c *cli.Context) error {
+func run(c *cli.Context) error {
 	hostname := c.String("hostname")
 	if len(hostname) == 0 {
 		hostname, _ = os.Hostname()
 	}
 
 	platform := runtime.GOOS + "/" + runtime.GOARCH
-
-	labels := map[string]string{
-		"hostname": hostname,
-		"platform": platform,
-		"repo":     "*", // allow all repos by default
-	}
-
-	for _, v := range c.StringSlice("filter") {
-		parts := strings.SplitN(v, "=", 2)
-		labels[parts[0]] = parts[1]
-	}
-
-	filter := rpc.Filter{
-		Labels: labels,
-	}
 
 	if c.Bool("pretty") {
 		log.Logger = log.Output(
@@ -190,6 +178,21 @@ func loop(c *cli.Context) error {
 		return err
 	}
 
+	labels := map[string]string{
+		"hostname": hostname,
+		"platform": platform,
+		"backend":  engine.Name(),
+		"repo":     "*", // allow all repos by default
+	}
+
+	if err := stringSliceAddToMap(c.StringSlice("filter"), labels); err != nil {
+		return err
+	}
+
+	filter := rpc.Filter{
+		Labels: labels,
+	}
+
 	log.Debug().Msgf("Agent registered with ID %d", agentID)
 
 	go func() {
@@ -242,5 +245,38 @@ func loop(c *cli.Context) error {
 		version.String(), engine.Name(), platform, parallel)
 
 	wg.Wait()
+	return nil
+}
+
+func runWithRetry(context *cli.Context) error {
+	retryCount := context.Int("connect-retry-count")
+	retryDelay := context.Duration("connect-retry-delay")
+	var err error
+	for i := 0; i < retryCount; i++ {
+		if err = run(context); status.Code(err) == codes.Unavailable {
+			log.Warn().Err(err).Msg(fmt.Sprintf("cannot connect to server, retrying in %v", retryDelay))
+			time.Sleep(retryDelay)
+		} else {
+			break
+		}
+	}
+	return err
+}
+
+func stringSliceAddToMap(sl []string, m map[string]string) error {
+	if m == nil {
+		m = make(map[string]string)
+	}
+	for _, v := range sl {
+		parts := strings.SplitN(v, "=", 2)
+		switch len(parts) {
+		case 2:
+			m[parts[0]] = parts[1]
+		case 1:
+			return fmt.Errorf("key '%s' does not have a value assigned", parts[0])
+		default:
+			return fmt.Errorf("empty string in slice")
+		}
+	}
 	return nil
 }

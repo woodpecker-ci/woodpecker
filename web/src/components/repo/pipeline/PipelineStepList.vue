@@ -43,7 +43,7 @@
     </div>
 
     <div class="flex-grow min-h-0 w-full relative">
-      <div class="absolute top-0 left-0 -right-3 h-full flex flex-col overflow-y-scroll gap-y-2">
+      <div class="absolute top-0 left-0 right-0 h-full flex flex-col overflow-y-scroll gap-y-2">
         <div
           v-for="workflow in pipeline.steps"
           :key="workflow.id"

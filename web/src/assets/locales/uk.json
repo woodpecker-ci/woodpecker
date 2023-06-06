@@ -28,10 +28,14 @@
     }
   },
   "back": "Назад",
+  "cancel": "Скасувати",
   "color_scheme_dark": "Перехід у світловий режим",
   "color_scheme_light": "Перехід у темний режим",
   "docs": "Документи",
   "documentation_for": "Документація для \"{topic}\"",
+  "errors": {
+    "not_found": "Серверу не вдалося знайти запитуваний об'єкт"
+  },
   "login": "Логін",
   "logout": "Вихід",
   "not_found": {
@@ -66,10 +70,19 @@
     }
   },
   "password": "Пароль",
+  "pipeline_feed": "Трубопровідна подача",
   "repo": {
     "activity": "Активність",
     "add": "Додати репозиторій",
     "branches": "Відділення",
+    "deploy_pipeline": {
+      "enter_target": "Цільове середовище розгортання",
+      "variables": {
+        "add": "Додати змінну",
+        "desc": "Вкажіть додаткові змінні для використання у конвеєрі. Змінні з однаковими іменами буде перезаписано.",
+        "title": "Додаткові змінні конвеєра"
+      }
+    },
     "enable": {
       "enable": "Увімкнути",
       "enabled": "Вже увімкнено",
@@ -90,6 +103,7 @@
       }
     },
     "not_allowed": "Ви не маєте права доступу до цього сховища",
+    "open_in_forge": "Відкрити репозиторій у системі керування версіями",
     "pipeline": {
       "actions": {
         "cancel": "Скасувати",
@@ -195,8 +209,7 @@
         },
         "general": "Генерал",
         "pipeline_path": {
-          "default": "За замовчуванням: .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml",
-          "desc": "Шлях до конфігурації конвеєра (наприклад <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">my/path/</span>). Папки повинні закінчуватися на <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">/</span>.",
+          "default": "За замовчуванням: .woodpecker/*.yml -> .woodpecker.yml",
           "path": "Траса трубопроводу"
         },
         "project": "Налаштування проекту",

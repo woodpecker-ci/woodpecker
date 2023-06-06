@@ -21,6 +21,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/store/types"
 )
 
 func TestStepFind(t *testing.T) {
@@ -29,6 +30,7 @@ func TestStepFind(t *testing.T) {
 
 	steps := []*model.Step{
 		{
+			UUID:       "8d89104f-d44e-4b45-b86e-17f8b5e74a0e",
 			PipelineID: 1000,
 			PID:        1,
 			PPID:       2,
@@ -37,7 +39,7 @@ func TestStepFind(t *testing.T) {
 			State:      model.StatusSuccess,
 			Error:      "pc load letter",
 			ExitCode:   255,
-			Machine:    "localhost",
+			AgentID:    1,
 			Platform:   "linux/amd64",
 			Environ:    map[string]string{"GOLANG": "tip"},
 		},
@@ -59,6 +61,7 @@ func TestStepChild(t *testing.T) {
 
 	err := store.StepCreate([]*model.Step{
 		{
+			UUID:       "ea6d4008-8ace-4f8a-ad03-53f1756465d9",
 			PipelineID: 1,
 			PID:        1,
 			PPID:       1,
@@ -66,6 +69,7 @@ func TestStepChild(t *testing.T) {
 			State:      "success",
 		},
 		{
+			UUID:       "2bf387f7-2913-4907-814c-c9ada88707c0",
 			PipelineID: 1,
 			PID:        2,
 			PGID:       2,
@@ -98,6 +102,7 @@ func TestStepList(t *testing.T) {
 
 	err := store.StepCreate([]*model.Step{
 		{
+			UUID:       "2bf387f7-2913-4907-814c-c9ada88707c0",
 			PipelineID: 2,
 			PID:        1,
 			PPID:       1,
@@ -105,6 +110,7 @@ func TestStepList(t *testing.T) {
 			State:      "success",
 		},
 		{
+			UUID:       "4b04073c-1827-4aa4-a5f5-c7b21c5e44a6",
 			PipelineID: 1,
 			PID:        1,
 			PPID:       1,
@@ -112,6 +118,7 @@ func TestStepList(t *testing.T) {
 			State:      "success",
 		},
 		{
+			UUID:       "40aab045-970b-4892-b6df-6f825a7ec97a",
 			PipelineID: 1,
 			PID:        2,
 			PGID:       2,
@@ -139,6 +146,7 @@ func TestStepUpdate(t *testing.T) {
 	defer closer()
 
 	step := &model.Step{
+		UUID:       "fc7c7fd6-553e-480b-8ed7-30d8563d0b79",
 		PipelineID: 1,
 		PID:        1,
 		PPID:       2,
@@ -147,7 +155,7 @@ func TestStepUpdate(t *testing.T) {
 		State:      "pending",
 		Error:      "pc load letter",
 		ExitCode:   255,
-		Machine:    "localhost",
+		AgentID:    1,
 		Platform:   "linux/amd64",
 		Environ:    map[string]string{"GOLANG": "tip"},
 	}
@@ -176,6 +184,7 @@ func TestStepIndexes(t *testing.T) {
 
 	if err := store.StepCreate([]*model.Step{
 		{
+			UUID:       "4db7e5fc-5312-4d02-9e14-b51b9e3242cc",
 			PipelineID: 1,
 			PID:        1,
 			PPID:       1,
@@ -191,6 +200,7 @@ func TestStepIndexes(t *testing.T) {
 	// fail due to duplicate pid
 	if err := store.StepCreate([]*model.Step{
 		{
+			UUID:       "c1f33a9e-2a02-4579-95ec-90255d785a12",
 			PipelineID: 1,
 			PID:        1,
 			PPID:       1,
@@ -201,6 +211,60 @@ func TestStepIndexes(t *testing.T) {
 	}); err == nil {
 		t.Errorf("Unexpected error: duplicate pid")
 	}
+
+	// fail due to duplicate uuid
+	if err := store.StepCreate([]*model.Step{
+		{
+			UUID:       "4db7e5fc-5312-4d02-9e14-b51b9e3242cc",
+			PipelineID: 5,
+			PID:        4,
+			PPID:       3,
+			PGID:       2,
+			State:      "success",
+			Name:       "clone",
+		},
+	}); err == nil {
+		t.Errorf("Unexpected error: duplicate pid")
+	}
+}
+
+func TestStepByUUID(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Step), new(model.Pipeline))
+	defer closer()
+
+	assert.NoError(t, store.StepCreate([]*model.Step{
+		{
+			UUID:       "4db7e5fc-5312-4d02-9e14-b51b9e3242cc",
+			PipelineID: 1,
+			PID:        1,
+			PPID:       1,
+			PGID:       1,
+			State:      "running",
+			Name:       "build",
+		},
+		{
+			UUID:       "fc7c7fd6-553e-480b-8ed7-30d8563d0b79",
+			PipelineID: 4,
+			PID:        6,
+			PPID:       7,
+			PGID:       8,
+			Name:       "build",
+			State:      "pending",
+			Error:      "pc load letter",
+			ExitCode:   255,
+			AgentID:    1,
+			Platform:   "linux/amd64",
+			Environ:    map[string]string{"GOLANG": "tip"},
+		},
+	}))
+
+	step, err := store.StepByUUID("4db7e5fc-5312-4d02-9e14-b51b9e3242cc")
+	assert.NoError(t, err)
+	assert.NotEmpty(t, step)
+
+	step, err = store.StepByUUID("52feb6f5-8ce2-40c0-9937-9d0e3349c98c")
+	assert.ErrorIs(t, err, types.RecordNotExist)
+	assert.Empty(t, step)
 }
 
 // TODO: func TestStepCascade(t *testing.T) {}

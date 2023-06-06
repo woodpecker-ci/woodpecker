@@ -4,7 +4,7 @@
     <template v-else>
       <Navbar />
       <main class="relative flex min-h-0 h-full">
-        <div class="flex flex-col overflow-y-auto flex-grow">
+        <div id="scroll-component" class="flex flex-col overflow-y-auto flex-grow">
           <router-view />
         </div>
         <transition name="slide-right">

@@ -173,10 +173,14 @@ type (
 		Level string `json:"log-level"`
 	}
 
-	// Logs is the JSON data for a logs response
-	Logs struct {
-		Step   string `json:"step"`
-		Output string `json:"out"`
+	// LogEntry is a single log entry
+	LogEntry struct {
+		ID     int64        `json:"id"`
+		StepID int64        `json:"step_id"`
+		Time   int64        `json:"time"`
+		Line   int          `json:"line"`
+		Data   []byte       `json:"data"`
+		Type   LogEntryType `json:"type"`
 	}
 
 	// Cron is the JSON data of a cron job
@@ -195,5 +199,32 @@ type (
 	PipelineOptions struct {
 		Branch    string            `json:"branch"`
 		Variables map[string]string `json:"variables"`
+	}
+
+	// Agent is the JSON data for an agent
+	Agent struct {
+		ID          int64  `json:"id"`
+		Created     int64  `json:"created"`
+		Updated     int64  `json:"updated"`
+		Name        string `json:"name"`
+		OwnerID     int64  `json:"owner_id"`
+		Token       string `json:"token"`
+		LastContact int64  `json:"last_contact"`
+		Platform    string `json:"platform"`
+		Backend     string `json:"backend"`
+		Capacity    int32  `json:"capacity"`
+		Version     string `json:"version"`
+		NoSchedule  bool   `json:"no_schedule"`
+	}
+
+	// Task is the JSON data for a task
+	Task struct {
+		ID           string            `json:"id"`
+		Data         []byte            `json:"data"`
+		Labels       map[string]string `json:"labels"`
+		Dependencies []string          `json:"dependencies"`
+		RunOn        []string          `json:"run_on"`
+		DepStatus    map[string]string `json:"dep_status"`
+		AgentID      int64             `json:"agent_id"`
 	}
 )

@@ -136,6 +136,11 @@ Example: `WOODPECKER_HOST=http://woodpecker.example.org`
 
 Configures the HTTP listener port.
 
+### `WOODPECKER_SERVER_ADDR_TLS`
+> Default: `:443`
+
+Configures the HTTPS listener port when SSL is enabled.
+
 ### `WOODPECKER_SERVER_CERT`
 > Default: empty
 
@@ -404,16 +409,18 @@ Specify a configuration service endpoint, see [Configuration Extension](./100-ex
 
 Specify how many seconds before timeout when fetching the Woodpecker configuration from a Forge
 
+### `WOODPECKER_ROOT_URL`
+> Default: ``
+
+Server URL path prefix (used for statics loading when having a url path prefix), should start with `/`
+
+Example: `WOODPECKER_ROOT_URL=/woodpecker`
 
 ---
 
 ### `WOODPECKER_GITHUB_...`
 
 See [GitHub configuration](forges/github/#configuration)
-
-### `WOODPECKER_GOGS_...`
-
-See [Gogs configuration](forges/gogs/#configuration)
 
 ### `WOODPECKER_GITEA_...`
 

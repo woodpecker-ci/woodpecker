@@ -29,7 +29,7 @@ type InfoT struct {
 		Complete      int `json:"completed_count"`
 	} `json:"stats"`
 	Paused bool `json:"paused"`
-}
+} //	@name InfoT
 
 func (t *InfoT) String() string {
 	var sb strings.Builder
@@ -63,7 +63,7 @@ type Queue interface {
 	PushAtOnce(c context.Context, tasks []*model.Task) error
 
 	// Poll retrieves and removes a task head of this queue.
-	Poll(c context.Context, f FilterFn) (*model.Task, error)
+	Poll(c context.Context, agentID int64, f FilterFn) (*model.Task, error)
 
 	// Extend extends the deadline for a task.
 	Extend(c context.Context, id string) error

@@ -36,9 +36,9 @@ func (s storage) CronFind(repo *model.Repo, id int64) (*model.Cron, error) {
 	return cron, wrapGet(s.engine.Get(cron))
 }
 
-func (s storage) CronList(repo *model.Repo) ([]*model.Cron, error) {
-	crons := make([]*model.Cron, 0, perPage)
-	return crons, s.engine.Where("repo_id = ?", repo.ID).Find(&crons)
+func (s storage) CronList(repo *model.Repo, p *model.ListOptions) ([]*model.Cron, error) {
+	var crons []*model.Cron
+	return crons, s.paginate(p).Where("repo_id = ?", repo.ID).Find(&crons)
 }
 
 func (s storage) CronUpdate(_ *model.Repo, cron *model.Cron) error {
@@ -47,8 +47,7 @@ func (s storage) CronUpdate(_ *model.Repo, cron *model.Cron) error {
 }
 
 func (s storage) CronDelete(repo *model.Repo, id int64) error {
-	_, err := s.engine.ID(id).Where("repo_id = ?", repo.ID).Delete(new(model.Cron))
-	return err
+	return wrapDelete(s.engine.ID(id).Where("repo_id = ?", repo.ID).Delete(new(model.Cron)))
 }
 
 // CronListNextExecute returns limited number of jobs with NextExec being less or equal to the provided unix timestamp

@@ -51,7 +51,7 @@ func Test_github(t *testing.T) {
 					Secret:     "I1NiIsInR5",
 					SkipVerify: true,
 				})
-				g.Assert(forge.(*client).URL).Equal("http://localhost:8080")
+				g.Assert(forge.(*client).url).Equal("http://localhost:8080")
 				g.Assert(forge.(*client).API).Equal("http://localhost:8080/api/v3/")
 				g.Assert(forge.(*client).Client).Equal("0ZXh0IjoiI")
 				g.Assert(forge.(*client).Secret).Equal("I1NiIsInR5")
@@ -90,20 +90,6 @@ func Test_github(t *testing.T) {
 			})
 			g.It("Should handle a not found error", func() {
 				_, err := c.Repo(ctx, fakeUser, "0", fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
-				g.Assert(err).IsNotNil()
-			})
-		})
-
-		g.Describe("Requesting repository permissions", func() {
-			g.It("Should return the permission details", func() {
-				perm, err := c.Perm(ctx, fakeUser, fakeRepo)
-				g.Assert(err).IsNil()
-				g.Assert(perm.Admin).IsTrue()
-				g.Assert(perm.Push).IsTrue()
-				g.Assert(perm.Pull).IsTrue()
-			})
-			g.It("Should handle a not found error", func() {
-				_, err := c.Perm(ctx, fakeUser, fakeRepoNotFound)
 				g.Assert(err).IsNotNil()
 			})
 		})

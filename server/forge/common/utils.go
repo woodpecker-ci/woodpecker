@@ -15,9 +15,15 @@
 package common
 
 import (
+	"context"
 	"net"
 	"net/url"
 	"strings"
+
+	"github.com/rs/zerolog/log"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
 func ExtractHostFromCloneURL(cloneURL string) (string, error) {
@@ -38,27 +44,23 @@ func ExtractHostFromCloneURL(cloneURL string) (string, error) {
 	return host, nil
 }
 
-// Paginate iterates over a func call until it does not return new items and return it as list
-func Paginate[T any](get func(page int) ([]T, error)) ([]T, error) {
-	items := make([]T, 0, 10)
-	page := 1
-	lenFirstBatch := -1
-
-	for {
-		batch, err := get(page)
-		if err != nil {
-			return nil, err
-		}
-		items = append(items, batch...)
-
-		if page == 1 {
-			lenFirstBatch = len(batch)
-		} else if len(batch) < lenFirstBatch || len(batch) == 0 {
-			break
-		}
-
-		page++
+func UserToken(ctx context.Context, r *model.Repo, u *model.User) string {
+	if u != nil {
+		return u.Token
 	}
 
-	return items, nil
+	_store, ok := store.TryFromContext(ctx)
+	if !ok {
+		log.Error().Msg("could not get store from context")
+		return ""
+	}
+	if r == nil {
+		log.Error().Msg("can not get user token by empty repo")
+		return ""
+	}
+	user, err := _store.GetUser(r.UserID)
+	if err != nil {
+		return ""
+	}
+	return user.Token
 }

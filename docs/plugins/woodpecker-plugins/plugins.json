@@ -98,6 +98,26 @@
       "name": "Woodpecker Email",
       "docs": "https://gitnet.fr/deblan/woodpecker-email/raw/branch/develop/DOCS.md",
       "verified": false
+    },
+    {
+      "name": "Woodpecker Feishu Bot",
+      "docs": "https://github.com/wenerme/wode/raw/main/apps/woodpecker-feishu-bot/README.md",
+      "verified": false
+    },
+    {
+      "name": "ntfy",
+      "docs": "https://codeberg.org/l-x/woodpecker-ntfy/raw/branch/main/docs.md",
+      "verified": false
+    },
+    {
+      "name": "Trivy",
+      "docs": "https://codeberg.org/woodpecker-plugins/trivy/raw/branch/main/docs.md",
+      "verified": true
+    },
+    {
+      "name": "MkDocs",
+      "docs": "https://codeberg.org/woodpecker-plugins/mkdocs/raw/branch/main/docs.md",
+      "verified": true
     }
   ]
 }

@@ -1,6 +1,7 @@
 package kubernetes
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/common"
@@ -10,7 +11,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func Pod(namespace string, step *types.Step, labels, annotations map[string]string) *v1.Pod {
+func Pod(namespace string, step *types.Step, labels, annotations map[string]string) (*v1.Pod, error) {
 	var (
 		vols       []v1.Volume
 		volMounts  []v1.VolumeMount
@@ -20,18 +21,23 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 
 	if step.WorkingDir != "" {
 		for _, vol := range step.Volumes {
+			volumeName, err := dnsName(strings.Split(vol, ":")[0])
+			if err != nil {
+				return nil, err
+			}
+
 			vols = append(vols, v1.Volume{
-				Name: volumeName(vol),
+				Name: volumeName,
 				VolumeSource: v1.VolumeSource{
 					PersistentVolumeClaim: &v1.PersistentVolumeClaimVolumeSource{
-						ClaimName: volumeName(vol),
+						ClaimName: volumeName,
 						ReadOnly:  false,
 					},
 				},
 			})
 
 			volMounts = append(volMounts, v1.VolumeMount{
-				Name:      volumeName(vol),
+				Name:      volumeName,
 				MountPath: volumeMountPath(vol),
 			})
 		}
@@ -57,42 +63,43 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 		hostAliases = append(hostAliases, v1.HostAlias{IP: host[1], Hostnames: []string{host[0]}})
 	}
 
-	// TODO: add support for resource limits
-	// if step.Resources.CPULimit == "" {
-	// 	step.Resources.CPULimit = "2"
-	// }
-	// if step.Resources.MemoryLimit == "" {
-	// 	step.Resources.MemoryLimit = "2G"
-	// }
-	// memoryLimit := resource.MustParse(step.Resources.MemoryLimit)
-	// CPULimit := resource.MustParse(step.Resources.CPULimit)
-
-	memoryLimit := resource.MustParse("2G")
-	CPULimit := resource.MustParse("2")
-
-	memoryLimitValue, _ := memoryLimit.AsInt64()
-	CPULimitValue, _ := CPULimit.AsInt64()
-	loadfactor := 0.5
-
-	memoryRequest := resource.NewQuantity(int64(float64(memoryLimitValue)*loadfactor), resource.DecimalSI)
-	CPURequest := resource.NewQuantity(int64(float64(CPULimitValue)*loadfactor), resource.DecimalSI)
-
-	resources := v1.ResourceRequirements{
-		Requests: v1.ResourceList{
-			v1.ResourceMemory: *memoryRequest,
-			v1.ResourceCPU:    *CPURequest,
-		},
-		Limits: v1.ResourceList{
-			v1.ResourceMemory: memoryLimit,
-			v1.ResourceCPU:    CPULimit,
-		},
+	resourceRequirements := v1.ResourceRequirements{Requests: v1.ResourceList{}, Limits: v1.ResourceList{}}
+	var err error
+	for key, val := range step.BackendOptions.Kubernetes.Resources.Requests {
+		resourceKey := v1.ResourceName(key)
+		resourceRequirements.Requests[resourceKey], err = resource.ParseQuantity(val)
+		if err != nil {
+			return nil, fmt.Errorf("resource request '%v' quantity '%v': %w", key, val, err)
+		}
+	}
+	for key, val := range step.BackendOptions.Kubernetes.Resources.Limits {
+		resourceKey := v1.ResourceName(key)
+		resourceRequirements.Limits[resourceKey], err = resource.ParseQuantity(val)
+		if err != nil {
+			return nil, fmt.Errorf("resource limit '%v' quantity '%v': %w", key, val, err)
+		}
 	}
 
-	labels["step"] = podName(step)
+	podName, err := dnsName(step.Name)
+	if err != nil {
+		return nil, err
+	}
 
-	return &v1.Pod{
+	labels["step"] = podName
+
+	var platform string
+	for _, e := range mapToEnvVars(step.Environment) {
+		if e.Name == "CI_SYSTEM_ARCH" {
+			platform = e.Value
+			break
+		}
+	}
+
+	NodeSelector := map[string]string{"kubernetes.io/arch": strings.Split(platform, "/")[1]}
+
+	pod := &v1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        podName(step),
+			Name:        podName,
 			Namespace:   namespace,
 			Labels:      labels,
 			Annotations: annotations,
@@ -100,8 +107,9 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 		Spec: v1.PodSpec{
 			RestartPolicy: v1.RestartPolicyNever,
 			HostAliases:   hostAliases,
+			NodeSelector:  NodeSelector,
 			Containers: []v1.Container{{
-				Name:            podName(step),
+				Name:            podName,
 				Image:           step.Image,
 				ImagePullPolicy: pullPolicy,
 				Command:         entrypoint,
@@ -109,7 +117,7 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 				WorkingDir:      step.WorkingDir,
 				Env:             mapToEnvVars(step.Environment),
 				VolumeMounts:    volMounts,
-				Resources:       resources,
+				Resources:       resourceRequirements,
 				SecurityContext: &v1.SecurityContext{
 					Privileged: &step.Privileged,
 				},
@@ -118,10 +126,8 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 			Volumes:          vols,
 		},
 	}
-}
 
-func podName(s *types.Step) string {
-	return dnsName(s.Name)
+	return pod, nil
 }
 
 func mapToEnvVars(m map[string]string) []v1.EnvVar {

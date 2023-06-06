@@ -7,7 +7,7 @@ let apiClient: WoodpeckerClient | undefined;
 export default (): WoodpeckerClient => {
   if (!apiClient) {
     const config = useConfig();
-    const server = '';
+    const server = config.rootURL ?? '';
     const token = null;
     const csrf = config.csrf || null;
 

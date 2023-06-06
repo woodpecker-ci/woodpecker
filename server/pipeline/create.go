@@ -63,7 +63,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	configFetcher := forge.NewConfigFetcher(server.Config.Services.Forge, server.Config.Services.Timeout, server.Config.Services.ConfigService, repoUser, repo, pipeline)
 	forgeYamlConfigs, configFetchErr = configFetcher.Fetch(ctx)
 	if configFetchErr == nil {
-		filtered, parseErr = checkIfFiltered(pipeline, forgeYamlConfigs)
+		filtered, parseErr = checkIfFiltered(repo, pipeline, forgeYamlConfigs)
 		if parseErr == nil {
 			if filtered {
 				err := ErrFiltered{Msg: "branch does not match restrictions defined in yaml"}
@@ -123,9 +123,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 			log.Error().Err(err).Msg("publishToTopic")
 		}
 
-		if err := updatePipelineStatus(ctx, pipeline, repo, repoUser); err != nil {
-			log.Error().Err(err).Msg("updatePipelineStatus")
-		}
+		updatePipelineStatus(ctx, pipeline, repo, repoUser)
 
 		return pipeline, nil
 	}
@@ -142,9 +140,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 			log.Error().Err(err).Msg("publishToTopic")
 		}
 
-		if err := updatePipelineStatus(ctx, pipeline, repo, repoUser); err != nil {
-			log.Error().Err(err).Msg("updatePipelineStatus")
-		}
+		updatePipelineStatus(ctx, pipeline, repo, repoUser)
 
 		return pipeline, nil
 	}

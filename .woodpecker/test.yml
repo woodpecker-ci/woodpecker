@@ -45,18 +45,29 @@ pipeline:
     when:
       path: *when_path
 
+  check_swagger:
+    image: *golang_image
+    group: test
+    commands:
+      - "make generate-swagger"
+      - "DIFF=$(git diff | head)"
+      - "[ -n \"$DIFF\" ] && { echo \"swagger not up to date, exec 'make generate-swagger' and commit\"; exit 1; } || true"
+    when:
+      path: *when_path
+
   lint-editorconfig:
     image: mstruebing/editorconfig-checker
     group: test
 
-  securitycheck:
-    group: test
-    image: aquasec/trivy:latest
-    commands:
-      - trivy fs --exit-code 0 --skip-dirs web/ --skip-dirs docs/ --severity UNKNOWN,LOW .
-      - trivy fs --exit-code 1 --skip-dirs web/ --skip-dirs docs/ --severity MEDIUM,HIGH,CRITICAL .
-    when:
-      path: *when_path
+  # Fixed with https://github.com/woodpecker-ci/woodpecker/pull/1753
+  # securitycheck:
+  #   group: test
+  #   image: aquasec/trivy:latest
+  #   commands:
+  #     - trivy fs --exit-code 0 --skip-dirs web/ --skip-dirs docs/ --severity UNKNOWN,LOW .
+  #     - trivy fs --exit-code 1 --skip-dirs web/ --skip-dirs docs/ --severity MEDIUM,HIGH,CRITICAL .
+  #   when:
+  #     path: *when_path
 
   test:
     image: *golang_image
@@ -115,6 +126,7 @@ pipeline:
         from_secret: codecov_token
     when:
       path: *when_path
+    failure: ignore
 
 services:
   service-postgres:

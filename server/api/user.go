@@ -18,54 +18,42 @@ import (
 	"encoding/base32"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/securecookie"
-	"github.com/rs/zerolog/log"
-
 	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/shared/token"
 )
 
+// GetSelf
+//
+//	@Summary	Returns the currently authenticated user.
+//	@Router		/user [get]
+//	@Produce	json
+//	@Success	200	{object}	User
+//	@Tags		User
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 func GetSelf(c *gin.Context) {
 	c.JSON(http.StatusOK, session.User(c))
 }
 
+// GetFeed
+//
+//	@Summary		A feed entry for a build.
+//	@Description	Feed entries can be used to display information on the latest builds.
+//	@Router			/user/feed [get]
+//	@Produce		json
+//	@Success		200	{object}	Feed
+//	@Tags			User
+//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 func GetFeed(c *gin.Context) {
 	_store := store.FromContext(c)
-	_forge := server.Config.Services.Forge
 
 	user := session.User(c)
 	latest, _ := strconv.ParseBool(c.Query("latest"))
-
-	if time.Unix(user.Synced, 0).Add(time.Hour * 72).Before(time.Now()) {
-		log.Debug().Msgf("sync begin: %s", user.Login)
-
-		user.Synced = time.Now().Unix()
-		if err := _store.UpdateUser(user); err != nil {
-			log.Error().Err(err).Msg("UpdateUser")
-			return
-		}
-
-		config := ToConfig(c)
-
-		sync := forge.Syncer{
-			Forge: _forge,
-			Store: _store,
-			Perms: _store,
-			Match: forge.NamespaceFilter(config.OwnersWhitelist),
-		}
-		if err := sync.Sync(c, user, server.Config.FlatPermissions); err != nil {
-			log.Debug().Msgf("sync error: %s: %s", user.Login, err)
-		} else {
-			log.Debug().Msgf("sync complete: %s", user.Login)
-		}
-	}
 
 	if latest {
 		feed, err := _store.RepoListLatest(user)
@@ -85,58 +73,64 @@ func GetFeed(c *gin.Context) {
 	c.JSON(http.StatusOK, feed)
 }
 
+// GetRepos
+//
+//	@Summary		Get user's repos
+//	@Description	Retrieve the currently authenticated User's Repository list
+//	@Router			/user/repos [get]
+//	@Produce		json
+//	@Success		200	{array}	Repo
+//	@Tags			User
+//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 func GetRepos(c *gin.Context) {
 	_store := store.FromContext(c)
 	_forge := server.Config.Services.Forge
 
 	user := session.User(c)
 	all, _ := strconv.ParseBool(c.Query("all"))
-	flush, _ := strconv.ParseBool(c.Query("flush"))
 
-	if flush || time.Unix(user.Synced, 0).Add(time.Hour*72).Before(time.Now()) {
-		log.Debug().Msgf("sync begin: %s", user.Login)
-		user.Synced = time.Now().Unix()
-		if err := _store.UpdateUser(user); err != nil {
-			log.Err(err).Msgf("update user '%s'", user.Login)
-			return
-		}
-
-		config := ToConfig(c)
-
-		sync := forge.Syncer{
-			Forge: _forge,
-			Store: _store,
-			Perms: _store,
-			Match: forge.NamespaceFilter(config.OwnersWhitelist),
-		}
-
-		if err := sync.Sync(c, user, server.Config.FlatPermissions); err != nil {
-			log.Debug().Msgf("sync error: %s: %s", user.Login, err)
-		} else {
-			log.Debug().Msgf("sync complete: %s", user.Login)
-		}
-	}
-
-	repos, err := _store.RepoList(user, true)
+	activeRepos, err := _store.RepoList(user, true, true)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error fetching repository list. %s", err)
 		return
 	}
 
 	if all {
+		active := map[string]bool{}
+		for _, r := range activeRepos {
+			active[r.FullName] = r.IsActive
+		}
+
+		_repos, err := _forge.Repos(c, user)
+		if err != nil {
+			c.String(http.StatusInternalServerError, "Error fetching repository list. %s", err)
+			return
+		}
+		var repos []*model.Repo
+		for _, r := range _repos {
+			if r.Perm.Push {
+				if active[r.FullName] {
+					r.IsActive = true
+				}
+				repos = append(repos, r)
+			}
+		}
+
 		c.JSON(http.StatusOK, repos)
 		return
 	}
 
-	active := make([]*model.Repo, 0)
-	for _, repo := range repos {
-		if repo.IsActive {
-			active = append(active, repo)
-		}
-	}
-	c.JSON(http.StatusOK, active)
+	c.JSON(http.StatusOK, activeRepos)
 }
 
+// PostToken
+//
+//	@Summary		Return the token of the current user as stringª
+//	@Router			/user/token [post]
+//	@Produce		plain
+//	@Success		200
+//	@Tags			User
+//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 func PostToken(c *gin.Context) {
 	user := session.User(c)
 	tokenString, err := token.New(token.UserToken, user.Login).Sign(user.Hash)
@@ -147,6 +141,15 @@ func PostToken(c *gin.Context) {
 	c.String(http.StatusOK, tokenString)
 }
 
+// DeleteToken
+//
+//	@Summary		Reset a token
+//	@Description	Reset's the current personal access token of the user and returns a new one.
+//	@Router			/user/token [delete]
+//	@Produce		plain
+//	@Success		200
+//	@Tags			User
+//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 func DeleteToken(c *gin.Context) {
 	_store := store.FromContext(c)
 

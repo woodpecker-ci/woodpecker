@@ -20,9 +20,9 @@ import {
 
 type RepoListOptions = {
   all?: boolean;
-  flush?: boolean;
 };
 
+// PipelineOptions is the data for creating a new pipeline
 type PipelineOptions = {
   branch: string;
   variables: Record<string, string>;
@@ -48,12 +48,12 @@ export default class WoodpeckerClient extends ApiClient {
     return this._get(`/api/repos/${owner}/${repo}/permissions`) as Promise<RepoPermissions>;
   }
 
-  getRepoBranches(owner: string, repo: string): Promise<string[]> {
-    return this._get(`/api/repos/${owner}/${repo}/branches`) as Promise<string[]>;
+  getRepoBranches(owner: string, repo: string, page: number): Promise<string[]> {
+    return this._get(`/api/repos/${owner}/${repo}/branches?page=${page}`) as Promise<string[]>;
   }
 
-  getRepoPullRequests(owner: string, repo: string): Promise<PullRequest[]> {
-    return this._get(`/api/repos/${owner}/${repo}/pull_requests`) as Promise<PullRequest[]>;
+  getRepoPullRequests(owner: string, repo: string, page: number): Promise<PullRequest[]> {
+    return this._get(`/api/repos/${owner}/${repo}/pull_requests?page=${page}`) as Promise<PullRequest[]>;
   }
 
   activateRepo(owner: string, repo: string): Promise<unknown> {
@@ -124,25 +124,17 @@ export default class WoodpeckerClient extends ApiClient {
     repo: string,
     pipeline: string,
     opts?: Record<string, string | number | boolean>,
-  ): Promise<unknown> {
+  ): Promise<Pipeline> {
     const query = encodeQueryString(opts);
-    return this._post(`/api/repos/${owner}/${repo}/pipelines/${pipeline}?${query}`);
+    return this._post(`/api/repos/${owner}/${repo}/pipelines/${pipeline}?${query}`) as Promise<Pipeline>;
   }
 
-  getLogs(owner: string, repo: string, pipeline: number, step: number): Promise<PipelineLog[]> {
-    return this._get(`/api/repos/${owner}/${repo}/logs/${pipeline}/${step}`) as Promise<PipelineLog[]>;
+  getLogs(owner: string, repo: string, pipeline: number, stepId: number): Promise<PipelineLog[]> {
+    return this._get(`/api/repos/${owner}/${repo}/logs/${pipeline}/${stepId}`) as Promise<PipelineLog[]>;
   }
 
-  getArtifact(owner: string, repo: string, pipeline: string, step: string, file: string): Promise<unknown> {
-    return this._get(`/api/repos/${owner}/${repo}/files/${pipeline}/${step}/${file}?raw=true`);
-  }
-
-  getArtifactList(owner: string, repo: string, pipeline: string): Promise<unknown> {
-    return this._get(`/api/repos/${owner}/${repo}/files/${pipeline}`);
-  }
-
-  getSecretList(owner: string, repo: string): Promise<Secret[]> {
-    return this._get(`/api/repos/${owner}/${repo}/secrets`) as Promise<Secret[]>;
+  getSecretList(owner: string, repo: string, page: number): Promise<Secret[] | null> {
+    return this._get(`/api/repos/${owner}/${repo}/secrets?page=${page}`) as Promise<Secret[] | null>;
   }
 
   createSecret(owner: string, repo: string, secret: Partial<Secret>): Promise<unknown> {
@@ -157,8 +149,8 @@ export default class WoodpeckerClient extends ApiClient {
     return this._delete(`/api/repos/${owner}/${repo}/secrets/${secretName}`);
   }
 
-  getRegistryList(owner: string, repo: string): Promise<Registry[]> {
-    return this._get(`/api/repos/${owner}/${repo}/registry`) as Promise<Registry[]>;
+  getRegistryList(owner: string, repo: string, page: number): Promise<Registry[] | null> {
+    return this._get(`/api/repos/${owner}/${repo}/registry?page=${page}`) as Promise<Registry[] | null>;
   }
 
   createRegistry(owner: string, repo: string, registry: Partial<Registry>): Promise<unknown> {
@@ -173,8 +165,8 @@ export default class WoodpeckerClient extends ApiClient {
     return this._delete(`/api/repos/${owner}/${repo}/registry/${registryAddress}`);
   }
 
-  getCronList(owner: string, repo: string): Promise<Cron[]> {
-    return this._get(`/api/repos/${owner}/${repo}/cron`) as Promise<Cron[]>;
+  getCronList(owner: string, repo: string, page: number): Promise<Cron[] | null> {
+    return this._get(`/api/repos/${owner}/${repo}/cron?page=${page}`) as Promise<Cron[] | null>;
   }
 
   createCron(owner: string, repo: string, cron: Partial<Cron>): Promise<unknown> {
@@ -197,8 +189,8 @@ export default class WoodpeckerClient extends ApiClient {
     return this._get(`/api/orgs/${owner}/permissions`) as Promise<OrgPermissions>;
   }
 
-  getOrgSecretList(owner: string): Promise<Secret[]> {
-    return this._get(`/api/orgs/${owner}/secrets`) as Promise<Secret[]>;
+  getOrgSecretList(owner: string, page: number): Promise<Secret[] | null> {
+    return this._get(`/api/orgs/${owner}/secrets?page=${page}`) as Promise<Secret[] | null>;
   }
 
   createOrgSecret(owner: string, secret: Partial<Secret>): Promise<unknown> {
@@ -213,8 +205,8 @@ export default class WoodpeckerClient extends ApiClient {
     return this._delete(`/api/orgs/${owner}/secrets/${secretName}`);
   }
 
-  getGlobalSecretList(): Promise<Secret[]> {
-    return this._get(`/api/secrets`) as Promise<Secret[]>;
+  getGlobalSecretList(page: number): Promise<Secret[] | null> {
+    return this._get(`/api/secrets?page=${page}`) as Promise<Secret[] | null>;
   }
 
   createGlobalSecret(secret: Partial<Secret>): Promise<unknown> {
@@ -237,8 +229,8 @@ export default class WoodpeckerClient extends ApiClient {
     return this._post('/api/user/token') as Promise<string>;
   }
 
-  getAgents(): Promise<Agent[]> {
-    return this._get('/api/agents') as Promise<Agent[]>;
+  getAgents(page: number): Promise<Agent[] | null> {
+    return this._get(`/api/agents?page=${page}`) as Promise<Agent[] | null>;
   }
 
   getAgent(agentId: Agent['id']): Promise<Agent> {
@@ -269,8 +261,8 @@ export default class WoodpeckerClient extends ApiClient {
     return this._post('/api/queue/resume');
   }
 
-  getUsers(): Promise<User[]> {
-    return this._get('/api/users') as Promise<User[]>;
+  getUsers(page: number): Promise<User[] | null> {
+    return this._get(`/api/users?page=${page}`) as Promise<User[] | null>;
   }
 
   getUser(username: string): Promise<User> {
@@ -289,6 +281,10 @@ export default class WoodpeckerClient extends ApiClient {
     return this._delete(`/api/users/${user.login}`);
   }
 
+  resetToken(): Promise<string> {
+    return this._delete('/api/user/token') as Promise<string>;
+  }
+
   // eslint-disable-next-line promise/prefer-await-to-callbacks
   on(callback: (data: { pipeline?: Pipeline; repo?: Repo; step?: PipelineStep }) => void): EventSource {
     return this._subscribe('/stream/events', callback, {
@@ -304,7 +300,7 @@ export default class WoodpeckerClient extends ApiClient {
     // eslint-disable-next-line promise/prefer-await-to-callbacks
     callback: (data: PipelineLog) => void,
   ): EventSource {
-    return this._subscribe(`/stream/logs/${owner}/${repo}/${pipeline}/${step}`, callback, {
+    return this._subscribe(`/api/stream/logs/${owner}/${repo}/${pipeline}/${step}`, callback, {
       reconnect: true,
     });
   }

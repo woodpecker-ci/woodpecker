@@ -14,9 +14,11 @@
           "desc": "Jumlah maksimal jalur pipa paralel yang dijalankan oleh agen ini."
         },
         "created": "Agen dibuat",
+        "delete_agent": "Hapus agen",
         "delete_confirm": "Apakah Anda ingin menghapus agen ini. Itu tidak akan terhubung lagi ke server.",
         "deleted": "Agen dihapus",
         "desc": "Agen terdaftar untuk server",
+        "edit_agent": "Sunting agen",
         "last_contact": "Hubungan terakhir",
         "name": {
           "name": "Nama",
@@ -39,6 +41,27 @@
         "version": "Versi"
       },
       "not_allowed": "Anda tidak diperbolehkan untuk mengakses pengaturan peladen",
+      "queue": {
+        "agent": "agen",
+        "desc": "Tugas tertunda yang akan dilakukan oleh agen",
+        "pause": "Jeda",
+        "paused": "Antrean dijeda",
+        "queue": "Antrean",
+        "resume": "Lanjutkan",
+        "resumed": "Antrean dilanjutkan",
+        "stats": {
+          "completed_count": "Tugas yang Selesai",
+          "pending_count": "Menunggu",
+          "running_count": "Berjalan",
+          "waiting_on_deps_count": "Menunggu ketergantungan",
+          "worker_count": "Bebas"
+        },
+        "task_pending": "Tugas tertunda",
+        "task_running": "Tugas sedang berjalan",
+        "task_waiting_on_deps": "Tugas sedang menunggu ketergantungan",
+        "tasks": "Tugas",
+        "waiting_for": "menunggu"
+      },
       "secrets": {
         "add": "Tambahkan rahasia",
         "created": "Rahasia global dibuat",
@@ -239,6 +262,10 @@
           "disable": "Nonaktifkan repositori",
           "success": "Repositori dinonaktifkan"
         },
+        "enable": {
+          "enable": "Aktifkan repositori",
+          "success": "Repositori diaktifkan"
+        },
         "repair": {
           "repair": "Perbaiki repositori",
           "success": "Repositori diperbaiki"
@@ -290,9 +317,14 @@
           "desc": "Aktifkan untuk membatalkan jalur pipa yang menunggu dan yang berjalan dari peristiwa dan konteks yang sama sebelum memulai picuan yang baru."
         },
         "general": "Umum",
+        "netrc_only_trusted": {
+          "desc": "Hanya masukkan kredensial netrc ke kontainer yang terpercaya (disarankan).",
+          "netrc_only_trusted": "Hanya masukkan kredensial netrc ke kontainer yang terpercaya"
+        },
         "pipeline_path": {
-          "default": "Secara bawaan: .woodpecker/*.yml → .woodpecker.yml → .drone.yml",
-          "desc": "Jalur ke konfigurasi jalur pipa Anda (misalnya <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">jalur/saya/</span>). Folder seharusnya berakhir dengan sebuah <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">/</span>.",
+          "default": "Secara bawaan: .woodpecker/*.{'{yaml,yml}'} → .woodpecker.yaml → .woodpecker.yml",
+          "desc": "Jalur ke konfigurasi jalur pipa Anda (misalnya {0}). Folder seharusnya berakhir dengan sebuah {1}.",
+          "desc_path_example": "jalur/saya/",
           "path": "Jalur pipa"
         },
         "project": "Pengaturan proyek",
@@ -395,6 +427,7 @@
     "dl_cli": "Unduh CLI",
     "internal_error": "Terjadi beberapa kesalahan internal",
     "oauth_error": "Terjadi kesalahan saat mengotentikasi dengan penyedia OAuth",
+    "reset_token": "Atur ulang token",
     "settings": "Pengaturan Pengguna",
     "shell_setup": "Pengaturan shell",
     "shell_setup_before": "sebelumnya lakukan penyiapan shell",

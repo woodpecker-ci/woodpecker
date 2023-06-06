@@ -17,6 +17,7 @@ If you have some missing resources, please feel free to [open a pull-request](ht
 
 - [Woodpecker-CI](https://github.com/woodpecker-ci/woodpecker/tree/master/.woodpecker) itself
 - [All official plugins](https://github.com/woodpecker-ci?q=plugin&type=all)
+- [dessalines/thumb-key](https://github.com/dessalines/thumb-key/blob/main/.woodpecker.yml) - Android Jetpack compose linting and building
 
 ## Tools
 
@@ -38,8 +39,11 @@ If you have some missing resources, please feel free to [open a pull-request](ht
 - [Using Woodpecker CI for my static sites](https://jan.wildeboer.net/2022/07/Woodpecker-CI-Jekyll/)
 - [Woodpecker CI @ Codeberg](https://www.sarkasti.eu/articles/post/woodpecker/)
 - [Deploy Docker/Compose using Woodpecker CI](https://hinty.io/vverenko/deploy-docker-compose-using-woodpecker-ci/)
+- [Installing Woodpecker CI in your personal homelab](https://pwa.io/articles/installing-woodpecker-in-your-homelab/)
 
 ## Videos
+
+- [Replace Ansible Semaphore with Woodpecker CI](https://www.youtube.com/watch?v=d610YPvCB0E)
 
 ## Plugins
 

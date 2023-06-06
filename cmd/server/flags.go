@@ -46,10 +46,21 @@ var flags = []cli.Flag{
 		Usage:   "server fully qualified url (<scheme>://<host>)",
 	},
 	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_ROOT_URL"},
+		Name:    "root-url",
+		Usage:   "server url root (used for statics loading when having a url path prefix)",
+	},
+	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_SERVER_ADDR"},
 		Name:    "server-addr",
 		Usage:   "server address",
 		Value:   ":8000",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_SERVER_ADDR_TLS"},
+		Name:    "server-addr-tls",
+		Usage:   "port https with tls (:443)",
+		Value:   ":443",
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_SERVER_CERT"},
@@ -307,42 +318,6 @@ var flags = []cli.Flag{
 		Usage:   "github skip ssl verification",
 	},
 	//
-	// Gogs
-	//
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_GOGS"},
-		Name:    "gogs",
-		Usage:   "gogs driver is enabled",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_GOGS_URL"},
-		Name:    "gogs-server",
-		Usage:   "gogs server address",
-		Value:   "https://try.gogs.io",
-	},
-	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_GOGS_GIT_USERNAME"},
-		Name:     "gogs-git-username",
-		Usage:    "gogs service account username",
-		FilePath: os.Getenv("WOODPECKER_GOGS_GIT_USERNAME_FILE"),
-	},
-	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_GOGS_GIT_PASSWORD"},
-		Name:     "gogs-git-password",
-		Usage:    "gogs service account password",
-		FilePath: os.Getenv("WOODPECKER_GOGS_GIT_PASSWORD_FILE"),
-	},
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_GOGS_PRIVATE_MODE"},
-		Name:    "gogs-private-mode",
-		Usage:   "gogs private mode enabled",
-	},
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_GOGS_SKIP_VERIFY"},
-		Name:    "gogs-skip-verify",
-		Usage:   "gogs skip ssl verification",
-	},
-	//
 	// Gitea
 	//
 	&cli.BoolFlag{
@@ -485,16 +460,6 @@ var flags = []cli.Flag{
 		Usage:   "server fully qualified url (<scheme>://<host>) used for oauth redirect (used for development)",
 		Value:   "",
 		Hidden:  true,
-	},
-	//
-	// misc
-	//
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_FLAT_PERMISSIONS"},
-		Name:    "flat-permissions",
-		Usage:   "no forge call for permissions should be made",
-		Hidden:  true,
-		// TODO(485) temporary workaround to not hit api rate limits
 	},
 	//
 	// secrets encryption in DB

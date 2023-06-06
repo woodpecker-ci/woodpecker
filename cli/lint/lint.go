@@ -16,7 +16,7 @@ import (
 var Command = &cli.Command{
 	Name:      "lint",
 	Usage:     "lint a pipeline configuration file",
-	ArgsUsage: "[path/to/.woodpecker.yml]",
+	ArgsUsage: "[path/to/.woodpecker.yaml]",
 	Action:    lint,
 	Flags:     common.GlobalFlags,
 }
@@ -33,7 +33,7 @@ func lintDir(c *cli.Context, dir string) error {
 		}
 
 		// check if it is a regular file (not dir)
-		if info.Mode().IsRegular() && strings.HasSuffix(info.Name(), ".yml") {
+		if info.Mode().IsRegular() && (strings.HasSuffix(info.Name(), ".yaml") || strings.HasSuffix(info.Name(), ".yml")) {
 			fmt.Println("#", info.Name())
 			if err := lintFile(c, path); err != nil {
 				errorStrings = append(errorStrings, err.Error())

@@ -34,15 +34,15 @@ type Perm struct {
 	Synced  int64 `json:"synced"  xorm:"perm_synced"`
 	Created int64 `json:"created" xorm:"created"`
 	Updated int64 `json:"updated" xorm:"updated"`
-}
+} //	@name Perm
 
 // TableName return database table name for xorm
 func (Perm) TableName() string {
 	return "perms"
 }
 
-// OrgPerm defines a organization permission for an individual user.
+// OrgPerm defines an organization permission for an individual user.
 type OrgPerm struct {
 	Member bool `json:"member"`
 	Admin  bool `json:"admin"`
-}
+} //	@name OrgPerm

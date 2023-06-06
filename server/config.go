@@ -50,7 +50,6 @@ var Config = struct {
 		// Repos  model.RepoStore
 		// Builds model.BuildStore
 		// Logs   model.LogStore
-		Files model.FileStore
 		Steps model.StepStore
 		// Registries model.RegistryStore
 		// Secrets model.SecretStore
@@ -61,11 +60,13 @@ var Config = struct {
 		OAuthHost           string
 		Host                string
 		Port                string
+		PortTLS             string
 		AgentToken          string
 		Docs                string
 		StatusContext       string
 		StatusContextFormat string
 		SessionExpires      time.Duration
+		RootURL             string
 		// Open bool
 		// Orgs map[string]struct{}
 		// Admins map[string]struct{}
@@ -84,5 +85,4 @@ var Config = struct {
 		DefaultTimeout                      int64
 		MaxTimeout                          int64
 	}
-	FlatPermissions bool // TODO(485) temporary workaround to not hit api rate limits
 }{}

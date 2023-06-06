@@ -105,8 +105,8 @@ type Client interface {
 	// PipelineKill force kills the running pipeline.
 	PipelineKill(string, string, int) error
 
-	// PipelineLogs returns the logs for the given pipeline
-	PipelineLogs(string, string, int, int) ([]*Logs, error)
+	// StepLogEntries returns the LogEntries for the given pipeline step
+	StepLogEntries(string, string, int, int) ([]*LogEntry, error)
 
 	// Deploy triggers a deployment for an existing pipeline using the specified
 	// target environment.
@@ -198,4 +198,22 @@ type Client interface {
 
 	// CronUpdate update an existing cron job of a repo
 	CronUpdate(owner, repo string, cron *Cron) (*Cron, error)
+
+	// AgentList returns a list of all registered agents
+	AgentList() ([]*Agent, error)
+
+	// Agent returns an agent by id
+	Agent(int64) (*Agent, error)
+
+	// AgentCreate creates a new agent
+	AgentCreate(*Agent) (*Agent, error)
+
+	// AgentUpdate updates an existing agent
+	AgentUpdate(*Agent) (*Agent, error)
+
+	// AgentDelete deletes an agent
+	AgentDelete(int64) error
+
+	// AgentTasksList returns a list of all tasks executed by an agent
+	AgentTasksList(int64) ([]*Task, error)
 }

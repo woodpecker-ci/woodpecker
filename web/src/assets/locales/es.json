@@ -58,8 +58,7 @@
         },
         "general": "General",
         "pipeline_path": {
-          "default": "Por defecto: .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml",
-          "desc": "Recorrido ha la configuración de tu pipeline (por ejemplo <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">mi/recorrido/local/</span>). Carpetas deben terminar con <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">/</span>.",
+          "default": "Por defecto: .woodpecker/*.yml -> .woodpecker.yml",
           "path": "Pasos del pipeline"
         },
         "project": "Configuración del proyecto",

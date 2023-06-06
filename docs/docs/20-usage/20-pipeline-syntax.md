@@ -626,7 +626,7 @@ pipeline:
 
 You can set labels for your pipeline to select an agent to execute the pipeline on. An agent will pick up and run a pipeline when **every** label assigned to a pipeline matches the agents labels.
 
-To set additional agent labels check the [agent configuration options](../30-administration/15-agent-config.md#woodpecker_filter_labels). Agents will have at least three default labels: `platform=agent-os/agent-arch`, `hostname=my-agent` and `repo=*`. Agents can use a `*` as a wildcard for a label. For example `repo=*` will match every repo.
+To set additional agent labels check the [agent configuration options](../30-administration/15-agent-config.md#woodpecker_filter_labels). Agents will have at least four default labels: `platform=agent-os/agent-arch`, `hostname=my-agent`, `backend=docker` (type of the agent backend) and `repo=*`. Agents can use a `*` as a wildcard for a label. For example `repo=*` will match every repo.
 
 Pipeline labels with an empty value will be ignored.
 By default each pipeline has at least the `repo=your-user/your-repo-name` label. If you have set the [platform attribute](#platform) for your pipeline it will have a label like `platform=your-os/your-arch` as well.
@@ -727,6 +727,14 @@ pipeline:
   ...
 ```
 
+## `skip_clone`
+
+By default Woodpecker is automatically adding a clone step. This clone step can be configured by the [clone](#clone) property. If you do not need a `clone` step at all you can skip it using:
+
+```yaml
+skip_clone: true
+```
+
 ## `when` - Global pipeline conditions
 
 Woodpecker gives the ability to skip whole pipelines (not just steps #when---conditional-execution-1) based on certain conditions by a `when` block. If all conditions in the `when` block evaluate to true the pipeline is executed, otherwise it is skipped, but treated as successful and other pipelines depending on it will still continue.
@@ -821,15 +829,15 @@ when:
   event: [push, pull_request, tag, deployment]
 ```
 
-### `tag`
+### `ref`
 
-This filter only applies to tag events.
-Use glob expression to execute a step if the tag name starts with `v`:
+The `ref` filter compares the git reference against which the pipeline is executed.
+This allows you to filter, for example, tags that must start with **v**:
 
 ```diff
 when:
   event: tag
-  tag: v*
+  ref: refs/tags/v*
 ```
 
 ### `environment`

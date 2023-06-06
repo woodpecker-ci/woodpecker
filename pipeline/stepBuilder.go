@@ -17,22 +17,24 @@ package pipeline
 
 import (
 	"fmt"
-	"net/url"
 	"path/filepath"
 	"strings"
 
-	"github.com/drone/envsubst"
+	"github.com/google/uuid"
 	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog/log"
 
-	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
+	backend_types "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
+	yaml_types "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
+	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
+
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/compiler"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/linter"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/matrix"
 	"github.com/woodpecker-ci/woodpecker/server"
-	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
@@ -47,15 +49,16 @@ type StepBuilder struct {
 	Link  string
 	Yamls []*forge_types.FileMeta
 	Envs  map[string]string
+	Forge metadata.ServerForge
 }
 
 type Item struct {
-	Step      *model.Step
+	Workflow  *model.Step
 	Platform  string
 	Labels    map[string]string
 	DependsOn []string
 	RunsOn    []string
-	Config    *backend.Config
+	Config    *backend_types.Config
 }
 
 func (b *StepBuilder) Build() ([]*Item, error) {
@@ -76,7 +79,8 @@ func (b *StepBuilder) Build() ([]*Item, error) {
 		}
 
 		for _, axis := range axes {
-			step := &model.Step{
+			workflow := &model.Step{
+				UUID:       uuid.New().String(), // TODO(#1784): Remove once workflows are a separate entity in database
 				PipelineID: b.Curr.ID,
 				PID:        pidSequence,
 				PGID:       pidSequence,
@@ -85,8 +89,8 @@ func (b *StepBuilder) Build() ([]*Item, error) {
 				Name:       SanitizePath(y.Name),
 			}
 
-			metadata := metadataFromStruct(b.Repo, b.Curr, b.Last, step, b.Link)
-			environ := b.environmentVariables(metadata, axis)
+			workflowMetadata := frontend.MetadataFromStruct(b.Forge, b.Repo, b.Curr, b.Last, workflow, b.Link)
+			environ := b.environmentVariables(workflowMetadata, axis)
 
 			// add global environment variables for substituting
 			for k, v := range b.Envs {
@@ -98,7 +102,7 @@ func (b *StepBuilder) Build() ([]*Item, error) {
 			}
 
 			// substitute vars
-			substituted, err := b.envsubst(string(y.Data), environ)
+			substituted, err := frontend.EnvVarSubst(string(y.Data), environ)
 			if err != nil {
 				return nil, err
 			}
@@ -117,27 +121,19 @@ func (b *StepBuilder) Build() ([]*Item, error) {
 			}
 
 			// checking if filtered.
-			if match, err := parsed.When.Match(metadata, true); !match && err == nil {
-				log.Debug().Str("pipeline", step.Name).Msg(
+			if match, err := parsed.When.Match(workflowMetadata, true); !match && err == nil {
+				log.Debug().Str("pipeline", workflow.Name).Msg(
 					"Marked as skipped, dose not match metadata",
 				)
-				step.State = model.StatusSkipped
+				workflow.State = model.StatusSkipped
 			} else if err != nil {
-				log.Debug().Str("pipeline", step.Name).Msg(
+				log.Debug().Str("pipeline", workflow.Name).Msg(
 					"Pipeline config could not be parsed",
 				)
 				return nil, err
 			}
 
-			// TODO: deprecated branches filter => remove after some time
-			if !parsed.Branches.Match(b.Curr.Branch) && (b.Curr.Event != model.EventDeploy && b.Curr.Event != model.EventTag) {
-				log.Debug().Str("pipeline", step.Name).Msg(
-					"Marked as skipped, dose not match branch",
-				)
-				step.State = model.StatusSkipped
-			}
-
-			ir, err := b.toInternalRepresentation(parsed, environ, metadata, step.ID)
+			ir, err := b.toInternalRepresentation(parsed, environ, workflowMetadata, workflow.ID)
 			if err != nil {
 				return nil, err
 			}
@@ -147,7 +143,7 @@ func (b *StepBuilder) Build() ([]*Item, error) {
 			}
 
 			item := &Item{
-				Step:      step,
+				Workflow:  workflow,
 				Config:    ir,
 				Labels:    parsed.Labels,
 				DependsOn: parsed.DependsOn,
@@ -175,7 +171,7 @@ func (b *StepBuilder) Build() ([]*Item, error) {
 
 func stepListContainsItemsToRun(items []*Item) bool {
 	for i := range items {
-		if items[i].Step.State == model.StatusPending {
+		if items[i].Workflow.State == model.StatusPending {
 			return true
 		}
 	}
@@ -196,7 +192,7 @@ func filterItemsWithMissingDependencies(items []*Item) []*Item {
 	if len(itemsToRemove) > 0 {
 		filtered := make([]*Item, 0)
 		for _, item := range items {
-			if !containsItemWithName(item.Step.Name, itemsToRemove) {
+			if !containsItemWithName(item.Workflow.Name, itemsToRemove) {
 				filtered = append(filtered, item)
 			}
 		}
@@ -209,24 +205,14 @@ func filterItemsWithMissingDependencies(items []*Item) []*Item {
 
 func containsItemWithName(name string, items []*Item) bool {
 	for _, item := range items {
-		if name == item.Step.Name {
+		if name == item.Workflow.Name {
 			return true
 		}
 	}
 	return false
 }
 
-func (b *StepBuilder) envsubst(y string, environ map[string]string) (string, error) {
-	return envsubst.Eval(y, func(name string) string {
-		env := environ[name]
-		if strings.Contains(env, "\n") {
-			env = fmt.Sprintf("%q", env)
-		}
-		return env
-	})
-}
-
-func (b *StepBuilder) environmentVariables(metadata frontend.Metadata, axis matrix.Axis) map[string]string {
+func (b *StepBuilder) environmentVariables(metadata metadata.Metadata, axis matrix.Axis) map[string]string {
 	environ := metadata.Environ()
 	for k, v := range axis {
 		environ[k] = v
@@ -234,7 +220,7 @@ func (b *StepBuilder) environmentVariables(metadata frontend.Metadata, axis matr
 	return environ
 }
 
-func (b *StepBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[string]string, metadata frontend.Metadata, stepID int64) (*backend.Config, error) {
+func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, environ map[string]string, metadata metadata.Metadata, stepID int64) (*backend_types.Config, error) {
 	var secrets []compiler.Secret
 	for _, sec := range b.Secs {
 		if !sec.Match(b.Curr.Event) {
@@ -261,6 +247,7 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[
 	return compiler.New(
 		compiler.WithEnviron(environ),
 		compiler.WithEnviron(b.Envs),
+		// TODO: server deps should be moved into StepBuilder fields and set on StepBuilder creation
 		compiler.WithEscalated(server.Config.Pipeline.Privileged...),
 		compiler.WithResourceLimit(server.Config.Pipeline.Limits.MemSwapLimit, server.Config.Pipeline.Limits.MemLimit, server.Config.Pipeline.Limits.ShmSize, server.Config.Pipeline.Limits.CPUQuota, server.Config.Pipeline.Limits.CPUShares, server.Config.Pipeline.Limits.CPUSet),
 		compiler.WithVolumes(server.Config.Pipeline.Volumes...),
@@ -280,7 +267,7 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[
 		compiler.WithPrefix(
 			fmt.Sprintf(
 				"wp_%s_%d",
-				ulid.Make().String(),
+				strings.ToLower(ulid.Make().String()),
 				stepID,
 			),
 		),
@@ -292,12 +279,15 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[
 	).Compile(parsed)
 }
 
+// SetPipelineStepsOnPipeline is the link between pipeline representation in "pipeline package" and server
+// to be specific this func currently is used to convert the pipeline.Item list (crafted by StepBuilder.Build()) into
+// a pipeline that can be stored in the database by the server
 func SetPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*Item) *model.Pipeline {
 	var pidSequence int
 	for _, item := range pipelineItems {
-		pipeline.Steps = append(pipeline.Steps, item.Step)
-		if pidSequence < item.Step.PID {
-			pidSequence = item.Step.PID
+		pipeline.Steps = append(pipeline.Steps, item.Workflow)
+		if pidSequence < item.Workflow.PID {
+			pidSequence = item.Workflow.PID
 		}
 	}
 
@@ -310,14 +300,15 @@ func SetPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*Item)
 					gid = pidSequence
 				}
 				step := &model.Step{
-					PipelineID: pipeline.ID,
 					Name:       step.Alias,
+					UUID:       step.UUID,
+					PipelineID: pipeline.ID,
 					PID:        pidSequence,
-					PPID:       item.Step.PID,
+					PPID:       item.Workflow.PID,
 					PGID:       gid,
 					State:      model.StatusPending,
 				}
-				if item.Step.State == model.StatusSkipped {
+				if item.Workflow.State == model.StatusSkipped {
 					step.State = model.StatusSkipped
 				}
 				pipeline.Steps = append(pipeline.Steps, step)
@@ -326,75 +317,6 @@ func SetPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*Item)
 	}
 
 	return pipeline
-}
-
-// return the metadata from the cli context.
-func metadataFromStruct(repo *model.Repo, pipeline, last *model.Pipeline, step *model.Step, link string) frontend.Metadata {
-	host := link
-	uri, err := url.Parse(link)
-	if err == nil {
-		host = uri.Host
-	}
-	return frontend.Metadata{
-		Repo: frontend.Repo{
-			Name:     repo.FullName,
-			Link:     repo.Link,
-			CloneURL: repo.Clone,
-			Private:  repo.IsSCMPrivate,
-			Branch:   repo.Branch,
-		},
-		Curr: metadataPipelineFromModelPipeline(pipeline, true),
-		Prev: metadataPipelineFromModelPipeline(last, false),
-		Step: frontend.Step{
-			Number: step.PID,
-			Matrix: step.Environ,
-		},
-		Sys: frontend.System{
-			Name:     "woodpecker",
-			Link:     link,
-			Host:     host,
-			Platform: "", // will be set by pipeline platform option or by agent
-		},
-	}
-}
-
-func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent bool) frontend.Pipeline {
-	cron := ""
-	if pipeline.Event == model.EventCron {
-		cron = pipeline.Sender
-	}
-
-	parent := int64(0)
-	if includeParent {
-		parent = pipeline.Parent
-	}
-
-	return frontend.Pipeline{
-		Number:   pipeline.Number,
-		Parent:   parent,
-		Created:  pipeline.Created,
-		Started:  pipeline.Started,
-		Finished: pipeline.Finished,
-		Status:   string(pipeline.Status),
-		Event:    string(pipeline.Event),
-		Link:     pipeline.Link,
-		Target:   pipeline.Deploy,
-		Commit: frontend.Commit{
-			Sha:     pipeline.Commit,
-			Ref:     pipeline.Ref,
-			Refspec: pipeline.Refspec,
-			Branch:  pipeline.Branch,
-			Message: pipeline.Message,
-			Author: frontend.Author{
-				Name:   pipeline.Author,
-				Email:  pipeline.Email,
-				Avatar: pipeline.Avatar,
-			},
-			ChangedFiles:      pipeline.ChangedFiles,
-			PullRequestLabels: pipeline.PullRequestLabels,
-		},
-		Cron: cron,
-	}
 }
 
 func SanitizePath(path string) string {

@@ -91,8 +91,11 @@ clean: ## Clean build artifacts
 	@[ "1" != "$(shell docker image ls woodpecker/make:local -a | wc -l)" ] && docker image rm woodpecker/make:local || echo no docker image to clean
 
 .PHONY: generate
-generate: ## Run all code generations
+generate: generate-swagger ## Run all code generations
 	go generate ./...
+
+generate-swagger: install-tools ## Run swagger code generation
+	swag init -g server/api/ -g cmd/server/swagger.go --outputTypes go -output cmd/server/docs
 
 check-xgo: ## Check if xgo is installed
 	@hash xgo > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
@@ -108,6 +111,9 @@ install-tools: ## Install development tools
 	fi ; \
 	hash gofumpt > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		go install mvdan.cc/gofumpt@latest; \
+	fi ; \
+	hash swag > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
+		go install github.com/swaggo/swag/cmd/swag@latest; \
 	fi
 
 ui-dependencies: ## Install UI dependencies
@@ -161,7 +167,7 @@ test: test-agent test-server test-server-datastore test-cli test-lib test-ui ## 
 build-ui: ## Build UI
 	(cd web/; pnpm install --frozen-lockfile; pnpm build)
 
-build-server: build-ui ## Build server
+build-server: build-ui generate-swagger ## Build server
 	CGO_ENABLED=${CGO_ENABLED} GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -ldflags '${LDFLAGS}' -o dist/woodpecker-server github.com/woodpecker-ci/woodpecker/cmd/server
 
 build-agent: ## Build agent
@@ -232,32 +238,6 @@ release-cli: ## Create cli binaries for release
 	tar -cvzf dist/woodpecker-cli_darwin_amd64.tar.gz  -C dist/cli/darwin_amd64  woodpecker-cli
 	tar -cvzf dist/woodpecker-cli_darwin_arm64.tar.gz  -C dist/cli/darwin_arm64  woodpecker-cli
 
-release-tarball: ## Create tarball for release
-	mkdir -p dist/
-	tar -cvzf dist/woodpecker-src-$(BUILD_VERSION).tar.gz \
-		agent \
-		cli \
-		cmd \
-		go.??? \
-		LICENSE \
-		Makefile \
-		pipeline \
-		server \
-		shared \
-		vendor \
-		version \
-		woodpecker-go \
-		web/index.html \
-		web/node_modules \
-		web/package.json \
-		web/public \
-		web/src \
-		web/package.json \
-		web/tsconfig.* \
-		web/*.ts \
-		web/pnpm-lock.yaml \
-		web/web.go
-
 release-checksums: ## Create checksums for all release files
 	# generate shas for tar files
 	(cd dist/; sha256sum *.* > checksums.txt)
@@ -285,5 +265,6 @@ bundle: bundle-agent bundle-server bundle-cli ## Create all bundles
 .PHONY: docs
 docs: ## Generate docs (currently only for the cli)
 	go generate cmd/cli/app.go
+	go generate cmd/server/swagger.go
 
 endif

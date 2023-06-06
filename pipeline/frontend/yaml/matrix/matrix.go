@@ -19,7 +19,7 @@ import (
 
 	pipeline "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
 
-	"gopkg.in/yaml.v3"
+	"codeberg.org/6543/xyaml"
 )
 
 const (
@@ -115,7 +115,7 @@ func parse(raw []byte) (Matrix, error) {
 	data := struct {
 		Matrix map[string][]string
 	}{}
-	if err := yaml.Unmarshal(raw, &data); err != nil {
+	if err := xyaml.Unmarshal(raw, &data); err != nil {
 		return nil, &pipeline.PipelineParseError{Err: err}
 	}
 	return data.Matrix, nil
@@ -128,7 +128,7 @@ func parseList(raw []byte) ([]Axis, error) {
 		}
 	}{}
 
-	if err := yaml.Unmarshal(raw, &data); err != nil {
+	if err := xyaml.Unmarshal(raw, &data); err != nil {
 		return nil, &pipeline.PipelineParseError{Err: err}
 	}
 	return data.Matrix.Include, nil

@@ -22,11 +22,23 @@ import (
 	"github.com/gorilla/securecookie"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
+// GetUsers
+//
+//	@Summary		Get all users
+//	@Description	Returns all registered, active users in the system. Requires admin rights.
+//	@Router			/users [get]
+//	@Produce		json
+//	@Success		200	{array}	User
+//	@Tags			Users
+//	@Param			Authorization	header	string	true	"Insert your personal access token"				default(Bearer <personal access token>)
+//	@Param			page			query	int		false	"for response pagination, page offset number"	default(1)
+//	@Param			perPage			query	int		false	"for response pagination, max items per page"	default(50)
 func GetUsers(c *gin.Context) {
-	users, err := store.FromContext(c).GetUserList()
+	users, err := store.FromContext(c).GetUserList(session.Pagination(c))
 	if err != nil {
 		c.String(500, "Error getting user list. %s", err)
 		return
@@ -34,6 +46,16 @@ func GetUsers(c *gin.Context) {
 	c.JSON(200, users)
 }
 
+// GetUser
+//
+//	@Summary		Get a user
+//	@Description	Returns a user with the specified login name. Requires admin rights.
+//	@Router			/users/{login} [get]
+//	@Produce		json
+//	@Success		200	{object}	User
+//	@Tags			Users
+//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param			login			path	string	true	"the user's login name"
 func GetUser(c *gin.Context) {
 	user, err := store.FromContext(c).GetUserLogin(c.Param("login"))
 	if err != nil {
@@ -43,6 +65,18 @@ func GetUser(c *gin.Context) {
 	c.JSON(200, user)
 }
 
+// PatchUser
+//
+//	@Summary		Change a user
+//	@Description	Changes the data of an existing user. Requires admin rights.
+//	@Router			/users/{login} [patch]
+//	@Produce		json
+//	@Accept			json
+//	@Success		200	{object}	User
+//	@Tags			Users
+//	@Param			Authorization	header	string		true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param			login			path	string		true	"the user's login name"
+//	@Param			user			body	User	true	"the user's data"
 func PatchUser(c *gin.Context) {
 	_store := store.FromContext(c)
 
@@ -74,6 +108,16 @@ func PatchUser(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
+// PostUser
+//
+//	@Summary		Create a user
+//	@Description	Creates a new user account with the specified external login. Requires admin rights.
+//	@Router			/users [post]
+//	@Produce		json
+//	@Success		200	{object}	User
+//	@Tags			Users
+//	@Param			Authorization	header	string		true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param			user			body	User	true	"the user's data"
 func PostUser(c *gin.Context) {
 	in := &model.User{}
 	err := c.Bind(in)
@@ -100,6 +144,16 @@ func PostUser(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
+// DeleteUser
+//
+//	@Summary		Delete a user
+//	@Description	Deletes the given user. Requires admin rights.
+//	@Router			/users/{login} [delete]
+//	@Produce		json
+//	@Success		200	{object}	User
+//	@Tags			Users
+//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param			login			path	string	true	"the user's login name"
 func DeleteUser(c *gin.Context) {
 	_store := store.FromContext(c)
 

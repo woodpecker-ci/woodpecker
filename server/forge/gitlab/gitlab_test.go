@@ -39,7 +39,7 @@ func load(t *testing.T, config string) *GitLab {
 	_url.RawQuery = ""
 
 	gitlab := GitLab{}
-	gitlab.URL = _url.String()
+	gitlab.url = _url.String()
 	gitlab.ClientID = params.Get("client_id")
 	gitlab.ClientSecret = params.Get("client_secret")
 	gitlab.SkipVerify, _ = strconv.ParseBool(params.Get("skip_verify"))
@@ -104,35 +104,6 @@ func Test_GitLab(t *testing.T) {
 			g.It("Should return error, when repo not exist", func() {
 				_, err := client.Repo(ctx, &user, "0", "not-existed", "not-existed")
 				assert.Error(t, err)
-			})
-		})
-
-		// Test permissions method
-		g.Describe("Perm", func() {
-			g.It("Should return repo permissions", func() {
-				perm, err := client.Perm(ctx, &user, &repo)
-				assert.NoError(t, err)
-				assert.True(t, perm.Admin)
-				assert.True(t, perm.Pull)
-				assert.True(t, perm.Push)
-			})
-			g.It("Should return repo permissions when user is admin", func() {
-				perm, err := client.Perm(ctx, &user, &model.Repo{
-					Owner: "brightbox",
-					Name:  "puppet",
-				})
-				assert.NoError(t, err)
-				g.Assert(perm.Admin).Equal(true)
-				g.Assert(perm.Pull).Equal(true)
-				g.Assert(perm.Push).Equal(true)
-			})
-			g.It("Should return error, when repo is not exist", func() {
-				_, err := client.Perm(ctx, &user, &model.Repo{
-					Owner: "not-existed",
-					Name:  "not-existed",
-				})
-
-				g.Assert(err).IsNotNil()
 			})
 		})
 

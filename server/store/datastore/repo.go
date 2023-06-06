@@ -18,7 +18,6 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/rs/zerolog/log"
 	"xorm.io/builder"
 	"xorm.io/xorm"
 
@@ -141,90 +140,18 @@ func (s storage) DeleteRepo(repo *model.Repo) error {
 
 // RepoList list all repos where permissions for specific user are stored
 // TODO: paginate
-func (s storage) RepoList(user *model.User, owned bool) ([]*model.Repo, error) {
-	repos := make([]*model.Repo, 0, perPage)
+func (s storage) RepoList(user *model.User, owned, active bool) ([]*model.Repo, error) {
+	repos := make([]*model.Repo, 0)
 	sess := s.engine.Table("repos").
 		Join("INNER", "perms", "perms.perm_repo_id = repos.repo_id").
 		Where("perms.perm_user_id = ?", user.ID)
 	if owned {
 		sess = sess.And(builder.Eq{"perms.perm_push": true}.Or(builder.Eq{"perms.perm_admin": true}))
 	}
+	if active {
+		sess = sess.And(builder.Eq{"repos.repo_active": true})
+	}
 	return repos, sess.
 		Asc("repo_full_name").
 		Find(&repos)
-}
-
-// RepoBatch Sync batch of repos from SCM (with permissions) to store (create if not exist else update)
-// TODO: only store activated repos ...
-func (s storage) RepoBatch(repos []*model.Repo) error {
-	sess := s.engine.NewSession()
-	defer sess.Close()
-	if err := sess.Begin(); err != nil {
-		return err
-	}
-
-	for i := range repos {
-		if len(repos[i].Owner) == 0 || len(repos[i].Name) == 0 || len(repos[i].FullName) == 0 {
-			log.Debug().Msgf("skip insert/update repo: %#v", repos[i])
-			continue
-		}
-
-		exist := true
-		repo, err := s.getRepoNameFallback(sess, repos[i].ForgeRemoteID, repos[i].FullName)
-		if err != nil {
-			if errors.Is(err, types.RecordNotExist) {
-				exist = false
-			} else {
-				return err
-			}
-		}
-
-		if exist {
-			if repos[i].FullName != repo.FullName {
-				// create redirection
-				err := s.createRedirection(sess, &model.Redirection{RepoID: repo.ID, FullName: repo.FullName})
-				if err != nil {
-					return err
-				}
-			}
-			if repos[i].ForgeRemoteID.IsValid() {
-				if _, err := sess.
-					Where("forge_remote_id = ?", repos[i].ForgeRemoteID).
-					Cols("repo_owner", "repo_name", "repo_full_name", "repo_scm", "repo_avatar", "repo_link", "repo_private", "repo_clone", "repo_branch", "forge_id").
-					Update(repos[i]); err != nil {
-					return err
-				}
-			} else {
-				if _, err := sess.
-					Where("repo_owner = ?", repos[i].Owner).
-					And(" repo_name = ?", repos[i].Name).
-					Cols("repo_owner", "repo_name", "repo_full_name", "repo_scm", "repo_avatar", "repo_link", "repo_private", "repo_clone", "repo_branch", "forge_id").
-					Update(repos[i]); err != nil {
-					return err
-				}
-			}
-
-			_, err := sess.
-				Where("forge_remote_id = ?", repos[i].ForgeRemoteID).
-				Get(repos[i])
-			if err != nil {
-				return err
-			}
-		} else {
-			// only Insert on single object ref set auto created ID back to object
-			if _, err := sess.Insert(repos[i]); err != nil {
-				return err
-			}
-		}
-
-		if repos[i].Perm != nil {
-			repos[i].Perm.RepoID = repos[i].ID
-			repos[i].Perm.Repo = repos[i]
-			if err := s.permUpsert(sess, repos[i].Perm); err != nil {
-				return err
-			}
-		}
-	}
-
-	return sess.Commit()
 }

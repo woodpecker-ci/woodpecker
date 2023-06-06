@@ -57,7 +57,7 @@ func Test_gitea(t *testing.T) {
 					URL:        "http://localhost:8080",
 					SkipVerify: true,
 				})
-				g.Assert(forge.(*Gitea).URL).Equal("http://localhost:8080")
+				g.Assert(forge.(*Gitea).url).Equal("http://localhost:8080")
 				g.Assert(forge.(*Gitea).SkipVerify).Equal(true)
 			})
 			g.It("Should handle malformed url", func() {
@@ -96,20 +96,6 @@ func Test_gitea(t *testing.T) {
 			})
 			g.It("Should handle a not found error", func() {
 				_, err := c.Repo(ctx, fakeUser, "0", fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
-				g.Assert(err).IsNotNil()
-			})
-		})
-
-		g.Describe("Requesting repository permissions", func() {
-			g.It("Should return the permission details", func() {
-				perm, err := c.Perm(ctx, fakeUser, fakeRepo)
-				g.Assert(err).IsNil()
-				g.Assert(perm.Admin).IsTrue()
-				g.Assert(perm.Push).IsTrue()
-				g.Assert(perm.Pull).IsTrue()
-			})
-			g.It("Should handle a not found error", func() {
-				_, err := c.Perm(ctx, fakeUser, fakeRepoNotFound)
 				g.Assert(err).IsNotNil()
 			})
 		})

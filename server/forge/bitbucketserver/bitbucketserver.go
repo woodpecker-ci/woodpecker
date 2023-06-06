@@ -55,7 +55,7 @@ type Opts struct {
 }
 
 type Config struct {
-	URL        string
+	url        string
 	Username   string
 	Password   string
 	SkipVerify bool
@@ -66,7 +66,7 @@ type Config struct {
 // the on-premise edition of Bitbucket Cloud, formerly known as Stash.
 func New(opts Opts) (forge.Forge, error) {
 	config := &Config{
-		URL:        opts.URL,
+		url:        opts.URL,
 		Username:   opts.Username,
 		Password:   opts.Password,
 		SkipVerify: opts.SkipVerify,
@@ -111,6 +111,11 @@ func (c *Config) Name() string {
 	return "stash"
 }
 
+// URL returns the root url of a configured forge
+func (c *Config) URL() string {
+	return c.url
+}
+
 func (c *Config) Login(ctx context.Context, res http.ResponseWriter, req *http.Request) (*model.User, error) {
 	requestToken, u, err := c.Consumer.GetRequestTokenAndUrl("oob")
 	if err != nil {
@@ -127,7 +132,7 @@ func (c *Config) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 		return nil, err
 	}
 
-	client := internal.NewClientWithToken(ctx, c.URL, c.Consumer, accessToken.Token)
+	client := internal.NewClientWithToken(ctx, c.url, c.Consumer, accessToken.Token)
 
 	user, err := client.FindCurrentUser()
 	if err != nil {
@@ -154,34 +159,38 @@ func (*Config) TeamPerm(_ *model.User, _ string) (*model.Perm, error) {
 }
 
 func (c *Config) Repo(ctx context.Context, u *model.User, _ model.ForgeRemoteID, owner, name string) (*model.Repo, error) {
-	repo, err := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token).FindRepo(owner, name)
+	client := internal.NewClientWithToken(ctx, c.url, c.Consumer, u.Token)
+	repo, err := client.FindRepo(owner, name)
 	if err != nil {
 		return nil, err
 	}
-	return convertRepo(repo), nil
+	perm, err := client.FindRepoPerms(repo.Project.Key, repo.Name)
+	if err != nil {
+		return nil, err
+	}
+	return convertRepo(repo, perm), nil
 }
 
 func (c *Config) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {
-	repos, err := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token).FindRepos()
+	client := internal.NewClientWithToken(ctx, c.url, c.Consumer, u.Token)
+	repos, err := client.FindRepos()
 	if err != nil {
 		return nil, err
 	}
 	var all []*model.Repo
 	for _, repo := range repos {
-		all = append(all, convertRepo(repo))
+		perm, err := client.FindRepoPerms(repo.Project.Key, repo.Name)
+		if err != nil {
+			return nil, err
+		}
+		all = append(all, convertRepo(repo, perm))
 	}
 
 	return all, nil
 }
 
-func (c *Config) Perm(ctx context.Context, u *model.User, repo *model.Repo) (*model.Perm, error) {
-	client := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token)
-
-	return client.FindRepoPerms(repo.Owner, repo.Name)
-}
-
 func (c *Config) File(ctx context.Context, u *model.User, r *model.Repo, p *model.Pipeline, f string) ([]byte, error) {
-	client := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token)
+	client := internal.NewClientWithToken(ctx, c.url, c.Consumer, u.Token)
 
 	return client.FindFileForRepo(r.Owner, r.Name, f, p.Ref)
 }
@@ -200,7 +209,7 @@ func (c *Config) Status(ctx context.Context, user *model.User, repo *model.Repo,
 		URL:   common.GetPipelineStatusLink(repo, pipeline, nil),
 	}
 
-	client := internal.NewClientWithToken(ctx, c.URL, c.Consumer, user.Token)
+	client := internal.NewClientWithToken(ctx, c.url, c.Consumer, user.Token)
 
 	return client.CreateStatus(pipeline.Commit, &status)
 }
@@ -219,14 +228,14 @@ func (c *Config) Netrc(_ *model.User, r *model.Repo) (*model.Netrc, error) {
 }
 
 func (c *Config) Activate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
-	client := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token)
+	client := internal.NewClientWithToken(ctx, c.url, c.Consumer, u.Token)
 
 	return client.CreateHook(r.Owner, r.Name, link)
 }
 
 // Branches returns the names of all branches for the named repository.
-func (c *Config) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
-	bitbucketBranches, err := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token).ListBranches(r.Owner, r.Name)
+func (c *Config) Branches(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]string, error) {
+	bitbucketBranches, err := internal.NewClientWithToken(ctx, c.url, c.Consumer, common.UserToken(ctx, r, u)).ListBranches(r.Owner, r.Name, p.Page, p.PerPage)
 	if err != nil {
 		return nil, err
 	}
@@ -244,17 +253,17 @@ func (c *Config) BranchHead(_ context.Context, _ *model.User, _ *model.Repo, _ s
 	return "", forge_types.ErrNotImplemented
 }
 
-func (c *Config) PullRequests(_ context.Context, _ *model.User, _ *model.Repo, _ *model.PaginationData) ([]*model.PullRequest, error) {
+func (c *Config) PullRequests(_ context.Context, _ *model.User, _ *model.Repo, _ *model.ListOptions) ([]*model.PullRequest, error) {
 	return nil, forge_types.ErrNotImplemented
 }
 
 func (c *Config) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
-	client := internal.NewClientWithToken(ctx, c.URL, c.Consumer, u.Token)
+	client := internal.NewClientWithToken(ctx, c.url, c.Consumer, u.Token)
 	return client.DeleteHook(r.Owner, r.Name, link)
 }
 
 func (c *Config) Hook(_ context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error) {
-	return parseHook(r, c.URL)
+	return parseHook(r, c.url)
 }
 
 // OrgMembership returns if user is member of organization and if user
