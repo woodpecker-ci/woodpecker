@@ -1753,8 +1753,8 @@ func (_m *Store) StepList(_a0 *model.Pipeline) ([]*model.Step, error) {
 	return r0, r1
 }
 
-// StepListWorkflow provides a mock function with given fields: _a0
-func (_m *Store) StepListWorkflow(_a0 *model.Workflow) ([]*model.Step, error) {
+// StepListFromWorkflow provides a mock function with given fields: _a0
+func (_m *Store) StepListFromWorkflow(_a0 *model.Workflow) ([]*model.Step, error) {
 	ret := _m.Called(_a0)
 
 	var r0 []*model.Step

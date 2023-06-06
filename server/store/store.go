@@ -141,7 +141,7 @@ type Store interface {
 	StepList(*model.Pipeline) ([]*model.Step, error)
 	StepUpdate(*model.Step) error
 	StepClear(*model.Pipeline) error
-	StepListWorkflow(*model.Workflow) ([]*model.Step, error)
+	StepListFromWorkflow(*model.Workflow) ([]*model.Step, error)
 
 	// Logs
 	LogFind(*model.Step) ([]*model.LogEntry, error)

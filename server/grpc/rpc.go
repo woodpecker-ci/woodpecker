@@ -236,7 +236,7 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 		return err
 	}
 
-	workflow.Children, err = s.store.StepListWorkflow(workflow)
+	workflow.Children, err = s.store.StepListFromWorkflow(workflow)
 	if err != nil {
 		return err
 	}
@@ -307,7 +307,7 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 		s.pipelineCount.WithLabelValues(repo.FullName, currentPipeline.Branch, string(currentPipeline.Status), "total").Inc()
 		s.pipelineTime.WithLabelValues(repo.FullName, currentPipeline.Branch, string(currentPipeline.Status), "total").Set(float64(currentPipeline.Finished - currentPipeline.Started))
 	}
-	if model.IsMultiPipeline(currentPipeline.Workflows) {
+	if currentPipeline.IsMultiPipeline() {
 		s.pipelineTime.WithLabelValues(repo.FullName, currentPipeline.Branch, string(workflow.State), workflow.Name).Set(float64(workflow.Stopped - workflow.Started))
 	}
 

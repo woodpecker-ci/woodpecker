@@ -55,7 +55,7 @@ func (s storage) StepList(pipeline *model.Pipeline) ([]*model.Step, error) {
 		Find(&stepList)
 }
 
-func (s storage) StepListWorkflow(workflow *model.Workflow) ([]*model.Step, error) {
+func (s storage) StepListFromWorkflow(workflow *model.Workflow) ([]*model.Step, error) {
 	return s.stepListWorkflow(s.engine.NewSession(), workflow)
 }
 

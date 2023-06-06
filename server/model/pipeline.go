@@ -47,7 +47,7 @@ type Pipeline struct {
 	Verified            bool              `json:"verified"                xorm:"pipeline_verified"` // deprecate
 	Reviewer            string            `json:"reviewed_by"             xorm:"pipeline_reviewer"`
 	Reviewed            int64             `json:"reviewed_at"             xorm:"pipeline_reviewed"`
-	Workflows           []*Workflow       `json:"workflows,omitempty"         xorm:"-"`
+	Workflows           []*Workflow       `json:"workflows,omitempty"     xorm:"-"`
 	ChangedFiles        []string          `json:"changed_files,omitempty" xorm:"json 'changed_files'"`
 	AdditionalVariables map[string]string `json:"variables,omitempty"     xorm:"json 'additional_variables'"`
 	PullRequestLabels   []string          `json:"pr_labels,omitempty"     xorm:"json 'pr_labels'"`
@@ -56,6 +56,11 @@ type Pipeline struct {
 // TableName return database table name for xorm
 func (Pipeline) TableName() string {
 	return "pipelines"
+}
+
+// IsMultiPipeline checks if step list contain more than one parent step
+func (p Pipeline) IsMultiPipeline() bool {
+	return len(p.Workflows) > 1
 }
 
 type UpdatePipelineStore interface {

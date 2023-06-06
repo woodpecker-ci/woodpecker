@@ -50,11 +50,6 @@ func (p *Workflow) Failing() bool {
 	return p.State == StatusError || p.State == StatusKilled || p.State == StatusFailure
 }
 
-// IsMultiPipeline checks if step list contain more than one parent step
-func IsMultiPipeline(workflows []*Workflow) bool {
-	return len(workflows) > 1
-}
-
 // IsThereRunningStage determine if it contains workflows running or pending to run
 // TODO: return false based on depends_on (https://github.com/woodpecker-ci/woodpecker/pull/730#discussion_r795681697)
 func IsThereRunningStage(workflows []*Workflow) bool {
