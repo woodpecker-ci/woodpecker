@@ -150,7 +150,7 @@ func runTasks(e *xorm.Engine, tasks []*task) error {
 		}
 
 		log.Trace().Msgf("start migration task '%s'", task.name)
-		sess := e.NewSession()
+		sess := e.NewSession().NoCache()
 		defer sess.Close()
 		if err := sess.Begin(); err != nil {
 			return err
