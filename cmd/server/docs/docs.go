@@ -3926,12 +3926,6 @@ const docTemplate = `{
                 "status": {
                     "$ref": "#/definitions/StatusValue"
                 },
-                "steps": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Step"
-                    }
-                },
                 "timestamp": {
                     "type": "integer"
                 },
@@ -3950,6 +3944,12 @@ const docTemplate = `{
                 "verified": {
                     "description": "deprecate",
                     "type": "boolean"
+                },
+                "workflows": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Workflow"
+                    }
                 }
             }
         },
@@ -4183,9 +4183,6 @@ const docTemplate = `{
         "Step": {
             "type": "object",
             "properties": {
-                "agent_id": {
-                    "type": "integer"
-                },
                 "children": {
                     "type": "array",
                     "items": {
@@ -4194,12 +4191,6 @@ const docTemplate = `{
                 },
                 "end_time": {
                     "type": "integer"
-                },
-                "environ": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
                 },
                 "error": {
                     "type": "string"
@@ -4221,9 +4212,6 @@ const docTemplate = `{
                 },
                 "pipeline_id": {
                     "type": "integer"
-                },
-                "platform": {
-                    "type": "string"
                 },
                 "ppid": {
                     "type": "integer"
@@ -4320,6 +4308,53 @@ const docTemplate = `{
                 "EventCron",
                 "EventManual"
             ]
+        },
+        "model.Workflow": {
+            "type": "object",
+            "properties": {
+                "agent_id": {
+                    "type": "integer"
+                },
+                "children": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Step"
+                    }
+                },
+                "end_time": {
+                    "type": "integer"
+                },
+                "environ": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pid": {
+                    "type": "integer"
+                },
+                "pipeline_id": {
+                    "type": "integer"
+                },
+                "platform": {
+                    "type": "string"
+                },
+                "start_time": {
+                    "type": "integer"
+                },
+                "state": {
+                    "$ref": "#/definitions/StatusValue"
+                }
+            }
         }
     }
 }`

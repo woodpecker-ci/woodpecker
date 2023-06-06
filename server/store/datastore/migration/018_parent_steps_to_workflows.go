@@ -76,7 +76,7 @@ var parentStepsToWorkflows = task{
 				return err
 			}
 
-			_, err = sess.ID(p.ID).Delete()
+			_, err = sess.Where("step_id = ?", p.ID).Delete()
 			if err != nil {
 				return err
 			}
