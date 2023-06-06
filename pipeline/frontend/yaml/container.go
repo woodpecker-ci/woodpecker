@@ -59,7 +59,6 @@ type (
 		Image          string                 `yaml:"image,omitempty"`
 		Failure        string                 `yaml:"failure,omitempty"`
 		Isolation      string                 `yaml:"isolation,omitempty"`
-		Labels         types.SliceorMap       `yaml:"labels,omitempty"`
 		MemLimit       types.MemStringorInt   `yaml:"mem_limit,omitempty"`
 		MemSwapLimit   types.MemStringorInt   `yaml:"memswap_limit,omitempty"`
 		MemSwappiness  types.MemStringorInt   `yaml:"mem_swappiness,omitempty"`
