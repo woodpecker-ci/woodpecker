@@ -132,8 +132,8 @@ export default class WoodpeckerClient extends ApiClient {
     return this._post(`/api/repos/${repoId}/pipelines/${pipeline}?${query}`) as Promise<Pipeline>;
   }
 
-  getLogs(repoId: number, pipeline: number, stepId: number): Promise<PipelineLog[]> {
-    return this._get(`/api/repos/${repoId}/logs/${pipeline}/${stepId}`) as Promise<PipelineLog[]>;
+  getLogs(repoId: number, pipeline: number, step: number): Promise<PipelineLog[]> {
+    return this._get(`/api/repos/${repoId}/logs/${pipeline}/${step}`) as Promise<PipelineLog[]>;
   }
 
   getSecretList(repoId: number, page: number): Promise<Secret[] | null> {
