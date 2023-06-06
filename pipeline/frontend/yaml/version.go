@@ -14,23 +14,5 @@
 
 package yaml
 
-import "errors"
-
-var (
-	ErrUnsuportedVersion = errors.New("unsuported yaml version detected")
-)
-
-// PipelineParseError is an error that occurs when the pipeline parsing fails.
-type PipelineParseError struct {
-	Err error
-}
-
-func (e PipelineParseError) Error() string {
-	return e.Err.Error()
-}
-
-func (e PipelineParseError) Is(err error) bool {
-	target1 := PipelineParseError{}
-	target2 := &target1
-	return errors.As(err, &target1) || errors.As(err, &target2)
-}
+// Version of this package and it's subpackages
+const Version = "1"
