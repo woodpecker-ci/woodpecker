@@ -11,7 +11,7 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
+	yaml_base_types "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types/base"
 )
 
 type (
@@ -32,7 +32,7 @@ type (
 		Cron        List
 		Status      List
 		Matrix      Map
-		Local       types.BoolTrue
+		Local       yaml_base_types.BoolTrue
 		Path        Path
 		Evaluate    string `yaml:"evaluate,omitempty"`
 	}
@@ -240,11 +240,11 @@ func (c *List) Excludes(v string) bool {
 // UnmarshalYAML unmarshals the constraint.
 func (c *List) UnmarshalYAML(value *yaml.Node) error {
 	out1 := struct {
-		Include types.StringOrSlice
-		Exclude types.StringOrSlice
+		Include yaml_base_types.StringOrSlice
+		Exclude yaml_base_types.StringOrSlice
 	}{}
 
-	var out2 types.StringOrSlice
+	var out2 yaml_base_types.StringOrSlice
 
 	err1 := value.Decode(&out1)
 	err2 := value.Decode(&out2)
@@ -319,12 +319,12 @@ func (c *Map) UnmarshalYAML(unmarshal func(interface{}) error) error {
 // UnmarshalYAML unmarshal the constraint.
 func (c *Path) UnmarshalYAML(value *yaml.Node) error {
 	out1 := struct {
-		Include       types.StringOrSlice `yaml:"include,omitempty"`
-		Exclude       types.StringOrSlice `yaml:"exclude,omitempty"`
-		IgnoreMessage string              `yaml:"ignore_message,omitempty"`
+		Include       yaml_base_types.StringOrSlice `yaml:"include,omitempty"`
+		Exclude       yaml_base_types.StringOrSlice `yaml:"exclude,omitempty"`
+		IgnoreMessage string                        `yaml:"ignore_message,omitempty"`
 	}{}
 
-	var out2 types.StringOrSlice
+	var out2 yaml_base_types.StringOrSlice
 
 	err1 := value.Decode(&out1)
 	err2 := value.Decode(&out2)

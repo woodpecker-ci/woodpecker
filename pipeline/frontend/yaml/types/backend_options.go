@@ -1,4 +1,4 @@
-// Copyright 2019 Woodpecker Authors
+// Copyright 2023 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,21 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package rpc
+package types
 
-import (
-	"testing"
-)
+// BackendOptions are advanced options for specific backends
+type BackendOptions struct {
+	Kubernetes KubernetesBackendOptions `yaml:"kubernetes,omitempty"`
+}
 
-func TestLine(t *testing.T) {
-	line := Line{
-		Step: "redis",
-		Time: 60,
-		Pos:  1,
-		Out:  "starting redis server",
-	}
-	got, want := line.String(), "[redis:L1:60s] starting redis server"
-	if got != want {
-		t.Errorf("Wanted line string %q, got %q", want, got)
-	}
+type KubernetesBackendOptions struct {
+	Resources Resources `yaml:"resources,omitempty"`
+}
+
+type Resources struct {
+	Requests map[string]string `yaml:"requests,omitempty"`
+	Limits   map[string]string `yaml:"limits,omitempty"`
 }

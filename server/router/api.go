@@ -89,8 +89,7 @@ func apiRoutes(e *gin.Engine) {
 				repo.POST("/pipelines/:number/approve", session.MustPush, api.PostApproval)
 				repo.POST("/pipelines/:number/decline", session.MustPush, api.PostDecline)
 
-				repo.GET("/logs/:number/:pid", api.GetStepLogs)
-				repo.GET("/logs/:number/:pid/:step", api.GetPipelineLogs)
+				repo.GET("/logs/:number/:stepId", api.GetStepLogs)
 
 				// requires push permissions
 				repo.DELETE("/logs/:number", session.MustPush, api.DeletePipelineLogs)
@@ -179,6 +178,15 @@ func apiRoutes(e *gin.Engine) {
 
 		apiBase.POST("/hook", api.PostHook)
 
+		stream := apiBase.Group("/stream")
+		{
+			stream.GET("/logs/:owner/:name/:pipeline/:stepId",
+				session.SetRepo(),
+				session.SetPerm(),
+				session.MustPull,
+				api.LogStreamSSE)
+		}
+
 		if zerolog.GlobalLevel() <= zerolog.DebugLevel {
 			debugger := apiBase.Group("/debug")
 			{
@@ -204,11 +212,5 @@ func apiRoutes(e *gin.Engine) {
 	sse := e.Group("/stream")
 	{
 		sse.GET("/events", api.EventStreamSSE)
-		sse.GET("/logs/:owner/:name/:pipeline/:number",
-			session.SetRepo(),
-			session.SetPerm(),
-			session.MustPull,
-			api.LogStreamSSE,
-		)
 	}
 }
