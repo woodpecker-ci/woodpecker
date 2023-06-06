@@ -1,4 +1,4 @@
-# docker build --rm  -f docker/Dockerfile.server -t woodpeckerci/woodpecker-server .
+# docker build --rm  -f docker/Dockerfile.make -t woodpecker/make:local .
 FROM golang:1.20-alpine as golang_image
 FROM node:18-alpine
 
@@ -10,10 +10,11 @@ COPY --from=golang_image /usr/local/go /usr/local/go
 ENV PATH=$PATH:/usr/local/go/bin
 
 # Cache tools
-RUN go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest && \
-  go install github.com/rs/zerolog/cmd/lint@latest && \
-  go install mvdan.cc/gofumpt@latest
+RUN make install-tools && \
+  mv /root/go/bin/* /usr/local/go/bin/ && \
+  chmod 755 /usr/local/go/bin/*
 
 WORKDIR /build
+RUN chmod -R 777 /root
 
-CMD [ "sh" ]
+CMD [ "/bin/sh" ]
