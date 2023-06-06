@@ -20,6 +20,7 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline"
+	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
@@ -45,6 +46,16 @@ func start(ctx context.Context, store store.Store, activePipeline *model.Pipelin
 		log.Error().Err(err).Msg("queuePipeline")
 		return nil, err
 	}
+
+	// open logs streamer for each step
+	go func() {
+		steps := activePipeline.Steps
+		for _, step := range steps {
+			if err := server.Config.Services.Logs.Open(context.Background(), step.ID); err != nil {
+				log.Error().Err(err).Msgf("could not open log stream for step %d", step.ID)
+			}
+		}
+	}()
 
 	updatePipelineStatus(ctx, activePipeline, repo, user)
 

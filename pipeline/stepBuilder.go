@@ -20,6 +20,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog/log"
 
@@ -79,6 +80,7 @@ func (b *StepBuilder) Build() ([]*Item, error) {
 
 		for _, axis := range axes {
 			workflow := &model.Step{
+				UUID:       uuid.New().String(), // TODO(#1784): Remove once workflows are a separate entity in database
 				PipelineID: b.Curr.ID,
 				PID:        pidSequence,
 				PGID:       pidSequence,
@@ -277,6 +279,9 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, envi
 	).Compile(parsed)
 }
 
+// SetPipelineStepsOnPipeline is the link between pipeline representation in "pipeline package" and server
+// to be specific this func currently is used to convert the pipeline.Item list (crafted by StepBuilder.Build()) into
+// a pipeline that can be stored in the database by the server
 func SetPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*Item) *model.Pipeline {
 	var pidSequence int
 	for _, item := range pipelineItems {
@@ -295,8 +300,9 @@ func SetPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*Item)
 					gid = pidSequence
 				}
 				step := &model.Step{
-					PipelineID: pipeline.ID,
 					Name:       step.Alias,
+					UUID:       step.UUID,
+					PipelineID: pipeline.ID,
 					PID:        pidSequence,
 					PPID:       item.Workflow.PID,
 					PGID:       gid,

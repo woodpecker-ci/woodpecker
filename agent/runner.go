@@ -31,14 +31,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/shared/utils"
 )
 
-// TODO: Implement log streaming.
-// Until now we need to limit the size of the logs and files that we upload.
-// The maximum grpc payload size is 4194304. So we need to set these limits below the maximum.
-const (
-	maxLogsUpload = 2000000 // this is per step
-	maxFileUpload = 1000000
-)
-
 type Runner struct {
 	client   rpc.Peer
 	filter   rpc.Filter

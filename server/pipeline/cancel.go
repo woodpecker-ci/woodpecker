@@ -131,18 +131,18 @@ func cancelPreviousPipelines(
 		return err
 	}
 
-	pipelineNeedsCancel := func(active *model.Pipeline) (bool, error) {
+	pipelineNeedsCancel := func(active *model.Pipeline) bool {
 		// always filter on same event
 		if active.Event != pipeline.Event {
-			return false, nil
+			return false
 		}
 
 		// find events for the same context
 		switch pipeline.Event {
 		case model.EventPush:
-			return pipeline.Branch == active.Branch, nil
+			return pipeline.Branch == active.Branch
 		default:
-			return pipeline.Refspec == active.Refspec, nil
+			return pipeline.Refspec == active.Refspec
 		}
 	}
 
@@ -152,14 +152,7 @@ func cancelPreviousPipelines(
 			continue
 		}
 
-		cancel, err := pipelineNeedsCancel(active)
-		if err != nil {
-			log.Error().
-				Err(err).
-				Str("Ref", active.Ref).
-				Msg("Error while trying to cancel pipeline, skipping")
-			continue
-		}
+		cancel := pipelineNeedsCancel(active)
 
 		if !cancel {
 			continue

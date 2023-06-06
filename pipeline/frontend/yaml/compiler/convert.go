@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 
 	backend_types "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
@@ -16,6 +17,8 @@ import (
 
 func (c *Compiler) createProcess(name string, container *yaml_types.Container, section string) *backend_types.Step {
 	var (
+		uuid = uuid.New()
+
 		detached   bool
 		workingdir string
 
@@ -153,6 +156,7 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 
 	return &backend_types.Step{
 		Name:           name,
+		UUID:           uuid.String(),
 		Alias:          container.Name,
 		Image:          container.Image,
 		Pull:           container.Pull,

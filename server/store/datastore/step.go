@@ -33,6 +33,11 @@ func (s storage) StepFind(pipeline *model.Pipeline, pid int) (*model.Step, error
 	return step, wrapGet(s.engine.Get(step))
 }
 
+func (s storage) StepByUUID(uuid string) (*model.Step, error) {
+	step := new(model.Step)
+	return step, wrapGet(s.engine.Where("step_uuid = ?", uuid).Get(step))
+}
+
 func (s storage) StepChild(pipeline *model.Pipeline, ppid int, child string) (*model.Step, error) {
 	step := &model.Step{
 		PipelineID: pipeline.ID,
@@ -87,7 +92,7 @@ func (s storage) StepClear(pipeline *model.Pipeline) error {
 }
 
 func deleteStep(sess *xorm.Session, stepID int64) error {
-	if _, err := sess.Where("log_step_id = ?", stepID).Delete(new(model.Logs)); err != nil {
+	if _, err := sess.Where("step_id = ?", stepID).Delete(new(model.LogEntry)); err != nil {
 		return err
 	}
 	_, err := sess.ID(stepID).Delete(new(model.Step))
