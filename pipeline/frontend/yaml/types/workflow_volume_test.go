@@ -1,4 +1,4 @@
-package yaml
+package types
 
 import (
 	"testing"
@@ -10,18 +10,18 @@ import (
 func TestUnmarshalVolume(t *testing.T) {
 	testdata := []struct {
 		from string
-		want Volume
+		want WorkflowVolume
 	}{
 		{
 			from: "{ name: foo, driver: bar }",
-			want: Volume{
+			want: WorkflowVolume{
 				Name:   "foo",
 				Driver: "bar",
 			},
 		},
 		{
 			from: "{ name: foo, driver: bar, driver_opts: { baz: qux } }",
-			want: Volume{
+			want: WorkflowVolume{
 				Name:   "foo",
 				Driver: "bar",
 				DriverOpts: map[string]string{
@@ -33,21 +33,21 @@ func TestUnmarshalVolume(t *testing.T) {
 
 	for _, test := range testdata {
 		in := []byte(test.from)
-		got := Volume{}
+		got := WorkflowVolume{}
 		err := yaml.Unmarshal(in, &got)
 		assert.NoError(t, err)
 		assert.EqualValues(t, test.want, got, "problem parsing volume %q", test.from)
 	}
 }
 
-func TestUnmarshalVolumes(t *testing.T) {
+func TestUnmarshalWorkflowVolumes(t *testing.T) {
 	testdata := []struct {
 		from string
-		want []*Volume
+		want []*WorkflowVolume
 	}{
 		{
 			from: "foo: { driver: bar }",
-			want: []*Volume{
+			want: []*WorkflowVolume{
 				{
 					Name:   "foo",
 					Driver: "bar",
@@ -56,7 +56,7 @@ func TestUnmarshalVolumes(t *testing.T) {
 		},
 		{
 			from: "foo: { name: baz }",
-			want: []*Volume{
+			want: []*WorkflowVolume{
 				{
 					Name:   "baz",
 					Driver: "local",
@@ -65,7 +65,7 @@ func TestUnmarshalVolumes(t *testing.T) {
 		},
 		{
 			from: "foo: { name: baz, driver: bar }",
-			want: []*Volume{
+			want: []*WorkflowVolume{
 				{
 					Name:   "baz",
 					Driver: "bar",
@@ -76,10 +76,10 @@ func TestUnmarshalVolumes(t *testing.T) {
 
 	for _, test := range testdata {
 		in := []byte(test.from)
-		got := Volumes{}
+		got := WorkflowVolumes{}
 		err := yaml.Unmarshal(in, &got)
 		assert.NoError(t, err)
-		assert.EqualValues(t, test.want, got.Volumes, "problem parsing volumes %q", test.from)
+		assert.EqualValues(t, test.want, got.WorkflowVolumes, "problem parsing volumes %q", test.from)
 	}
 }
 
@@ -91,7 +91,7 @@ func TestUnmarshalVolumesErr(t *testing.T) {
 
 	for _, test := range testdata {
 		in := []byte(test)
-		err := yaml.Unmarshal(in, new(Volumes))
+		err := yaml.Unmarshal(in, new(WorkflowVolumes))
 		assert.Error(t, err, "wanted error for volumes %q", test)
 	}
 }

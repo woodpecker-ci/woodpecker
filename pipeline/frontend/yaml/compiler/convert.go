@@ -8,13 +8,13 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
+	backend_types "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/compiler/settings"
+	yaml_types "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
 )
 
-func (c *Compiler) createProcess(name string, container *yaml.Container, section string) *backend.Step {
+func (c *Compiler) createProcess(name string, container *yaml_types.Container, section string) *backend_types.Step {
 	var (
 		detached   bool
 		workingdir string
@@ -26,14 +26,14 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		// network    = container.Network
 	)
 
-	networks := []backend.Conn{
+	networks := []backend_types.Conn{
 		{
 			Name:    fmt.Sprintf("%s_default", c.prefix),
 			Aliases: []string{container.Name},
 		},
 	}
 	for _, network := range c.networks {
-		networks = append(networks, backend.Conn{
+		networks = append(networks, backend_types.Conn{
 			Name: network,
 		})
 	}
@@ -89,11 +89,7 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		privileged = true
 	}
 
-	authConfig := backend.Auth{
-		Username: container.AuthConfig.Username,
-		Password: container.AuthConfig.Password,
-		Email:    container.AuthConfig.Email,
-	}
+	authConfig := backend_types.Auth{}
 	for _, registry := range c.registries {
 		if matchHostname(container.Image, registry.Hostname) {
 			authConfig.Username = registry.Username
@@ -111,9 +107,9 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 	}
 
 	// Kubernetes advanced settings
-	backendOptions := backend.BackendOptions{
-		Kubernetes: backend.KubernetesBackendOptions{
-			Resources: backend.Resources{
+	backendOptions := backend_types.BackendOptions{
+		Kubernetes: backend_types.KubernetesBackendOptions{
+			Resources: backend_types.Resources{
 				Limits:   container.BackendOptions.Kubernetes.Resources.Limits,
 				Requests: container.BackendOptions.Kubernetes.Resources.Requests,
 			},
@@ -155,7 +151,7 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		failure = metadata.FailureFail
 	}
 
-	return &backend.Step{
+	return &backend_types.Step{
 		Name:           name,
 		Alias:          container.Name,
 		Image:          container.Image,
@@ -189,7 +185,7 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 	}
 }
 
-func (c *Compiler) stepWorkdir(container *yaml.Container) string {
+func (c *Compiler) stepWorkdir(container *yaml_types.Container) string {
 	if filepath.IsAbs(container.Directory) {
 		return container.Directory
 	}

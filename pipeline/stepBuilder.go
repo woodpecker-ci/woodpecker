@@ -23,7 +23,10 @@ import (
 	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog/log"
 
-	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
+	backend_types "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
+	yaml_types "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
+	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
+
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
@@ -31,7 +34,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/linter"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/matrix"
 	"github.com/woodpecker-ci/woodpecker/server"
-	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
@@ -55,7 +57,7 @@ type Item struct {
 	Labels    map[string]string
 	DependsOn []string
 	RunsOn    []string
-	Config    *backend.Config
+	Config    *backend_types.Config
 }
 
 func (b *StepBuilder) Build() ([]*Item, error) {
@@ -216,7 +218,7 @@ func (b *StepBuilder) environmentVariables(metadata metadata.Metadata, axis matr
 	return environ
 }
 
-func (b *StepBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[string]string, metadata metadata.Metadata, stepID int64) (*backend.Config, error) {
+func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, environ map[string]string, metadata metadata.Metadata, stepID int64) (*backend_types.Config, error) {
 	var secrets []compiler.Secret
 	for _, sec := range b.Secs {
 		if !sec.Match(b.Curr.Event) {
