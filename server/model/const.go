@@ -63,6 +63,10 @@ const (
 	StatusDeclined StatusValue = "declined"
 )
 
+func (s StatusValue) Failing() bool {
+	return s == StatusError || s == StatusKilled || s == StatusFailure
+}
+
 // SCMKind represent different version control systems
 type SCMKind string //	@name SCMKind
 

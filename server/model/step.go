@@ -63,7 +63,7 @@ func (p *Step) Running() bool {
 
 // Failing returns true if the process state is failed, killed or error.
 func (p *Step) Failing() bool {
-	return p.State == StatusError || p.State == StatusKilled || p.State == StatusFailure || p.State == StatusSkipped
+	return p.State == StatusError || p.State == StatusKilled || p.State == StatusFailure
 }
 
 // IsParent returns true if the process is a parent process.
@@ -117,6 +117,8 @@ func PipelineStatus(steps []*Step) StatusValue {
 	for _, p := range steps {
 		if p.IsParent() && p.Failing() {
 			status = p.State
+		} else if p.State == StatusSkipped && !status.Failing() {
+			status = StatusKilled
 		}
 	}
 
