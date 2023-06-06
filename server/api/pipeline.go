@@ -19,17 +19,14 @@
 package api
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/rs/zerolog/log"
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -190,75 +187,29 @@ func GetPipelineLast(c *gin.Context) {
 	c.JSON(http.StatusOK, pl)
 }
 
-// GetPipelineLogs
-//
-//	@Summary	Log information per step
-//	@Router		/repos/{owner}/{name}/logs/{number}/{pid}/{step} [get]
-//	@Produce	plain
-//	@Success	200
-//	@Tags		Pipeline logs
-//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		owner			path	string	true	"the repository owner's name"
-//	@Param		name			path	string	true	"the repository name"
-//	@Param		number			path	int		true	"the number of the pipeline"
-//	@Param		pid				path	int		true	"the pipeline id"
-//	@Param		step			path	int		true	"the step name"
-func GetPipelineLogs(c *gin.Context) {
-	_store := store.FromContext(c)
-	repo := session.Repo(c)
-
-	// parse the pipeline number and step sequence number from
-	// the request parameter.
-	num, _ := strconv.ParseInt(c.Params.ByName("number"), 10, 64)
-	ppid, _ := strconv.Atoi(c.Params.ByName("pid"))
-	name := c.Params.ByName("step")
-
-	pl, err := _store.GetPipelineNumber(repo, num)
-	if err != nil {
-		handleDbGetError(c, err)
-		return
-	}
-
-	step, err := _store.StepChild(pl, ppid, name)
-	if err != nil {
-		handleDbGetError(c, err)
-		return
-	}
-
-	rc, err := _store.LogFind(step)
-	if err != nil {
-		handleDbGetError(c, err)
-		return
-	}
-
-	defer rc.Close()
-
-	c.Header("Content-Type", "application/json")
-	if _, err := io.Copy(c.Writer, rc); err != nil {
-		log.Error().Err(err).Msg("could not copy log to http response")
-	}
-}
-
 // GetStepLogs
 //
 //	@Summary	Log information
-//	@Router		/repos/{owner}/{name}/logs/{number}/{pid} [get]
-//	@Produce	plain
-//	@Success	200
-//	@Tags		Pipeline logs
+//	@Router		/repos/{owner}/{name}/logs/{number}/{stepID} [get]
+//	@Produce	json
+//	@Success	200 {array} LogEntry
+//	@Tags			Pipeline logs
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		owner			path	string	true	"the repository owner's name"
 //	@Param		name			path	string	true	"the repository name"
-//	@Param		number			path	int		true	"the number of the pipeline"
-//	@Param		pid				path	int		true	"the pipeline id"
+//	@Param		number		path	int		true		"the number of the pipeline"
+//	@Param		stepID		path	int		true		"the step id"
 func GetStepLogs(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
 
 	// parse the pipeline number and step sequence number from
 	// the request parameter.
-	num, _ := strconv.ParseInt(c.Params.ByName("number"), 10, 64)
-	pid, _ := strconv.Atoi(c.Params.ByName("pid"))
+	num, err := strconv.ParseInt(c.Params.ByName("number"), 10, 64)
+	if err != nil {
+		_ = c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
 
 	pl, err := _store.GetPipelineNumber(repo, num)
 	if err != nil {
@@ -266,24 +217,31 @@ func GetStepLogs(c *gin.Context) {
 		return
 	}
 
-	step, err := _store.StepFind(pl, pid)
+	stepID, err := strconv.ParseInt(c.Params.ByName("stepId"), 10, 64)
+	if err != nil {
+		_ = c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	step, err := _store.StepLoad(stepID)
 	if err != nil {
 		handleDbGetError(c, err)
 		return
 	}
 
-	rc, err := _store.LogFind(step)
+	if step.PipelineID != pl.ID {
+		// make sure we can not read arbitrary logs by id
+		_ = c.AbortWithError(http.StatusBadRequest, fmt.Errorf("step with id %d is not part of repo %s", stepID, repo.FullName))
+		return
+	}
+
+	logs, err := _store.LogFind(step)
 	if err != nil {
 		handleDbGetError(c, err)
 		return
 	}
 
-	defer rc.Close()
-
-	c.Header("Content-Type", "application/json")
-	if _, err := io.Copy(c.Writer, rc); err != nil {
-		log.Error().Err(err).Msg("could not copy log to http response")
-	}
+	c.JSON(http.StatusOK, logs)
 }
 
 // GetPipelineConfig
@@ -532,7 +490,6 @@ func DeletePipelineLogs(c *gin.Context) {
 	_store := store.FromContext(c)
 
 	repo := session.Repo(c)
-	user := session.User(c)
 	num, _ := strconv.ParseInt(c.Params.ByName("number"), 10, 64)
 
 	pl, err := _store.GetPipelineNumber(repo, num)
@@ -554,11 +511,8 @@ func DeletePipelineLogs(c *gin.Context) {
 	}
 
 	for _, step := range steps {
-		t := time.Now().UTC()
-		buf := bytes.NewBufferString(fmt.Sprintf(deleteStr, step.Name, user.Login, t.Format(time.UnixDate)))
-		lerr := _store.LogSave(step, buf)
-		if lerr != nil {
-			err = lerr
+		if lErr := _store.LogDelete(step); err != nil {
+			err = errors.Join(err, lErr)
 		}
 	}
 	if err != nil {
@@ -568,11 +522,3 @@ func DeletePipelineLogs(c *gin.Context) {
 
 	c.String(http.StatusNoContent, "")
 }
-
-var deleteStr = `[
-	{
-		"step": %q,
-		"pos": 0,
-		"out": "logs purged by %s on %s\n"
-	}
-]`

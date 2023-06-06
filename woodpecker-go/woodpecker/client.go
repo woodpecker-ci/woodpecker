@@ -286,9 +286,9 @@ func (c *client) PipelineKill(owner, name string, num int) error {
 }
 
 // PipelineLogs returns the pipeline logs for the specified step.
-func (c *client) PipelineLogs(owner, name string, num, step int) ([]*Logs, error) {
+func (c *client) StepLogEntries(owner, name string, num, step int) ([]*LogEntry, error) {
 	uri := fmt.Sprintf(pathLogs, c.addr, owner, name, num, step)
-	var out []*Logs
+	var out []*LogEntry
 	err := c.get(uri, &out)
 	return out, err
 }
