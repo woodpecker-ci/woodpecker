@@ -4,7 +4,7 @@
   "$id": "https://woodpecker-ci.org/schema/woodpecker.json",
   "description": "Schema of a Woodpecker pipeline file. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax",
   "type": "object",
-  "required": ["pipeline"],
+  "required": ["steps"],
   "additionalProperties": false,
   "properties": {
     "$schema": {
