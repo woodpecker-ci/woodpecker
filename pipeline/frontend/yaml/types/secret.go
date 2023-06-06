@@ -1,4 +1,4 @@
-package yaml
+package types
 
 import "gopkg.in/yaml.v3"
 
