@@ -3,7 +3,7 @@ package linter
 import (
 	"fmt"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
 )
 
 const (
@@ -27,20 +27,20 @@ func New(opts ...Option) *Linter {
 }
 
 // Lint lints the configuration.
-func (l *Linter) Lint(c *yaml.Config) error {
-	if len(c.Pipeline.Containers) == 0 {
+func (l *Linter) Lint(c *types.Workflow) error {
+	if len(c.Steps.ContainerList) == 0 {
 		return fmt.Errorf("Invalid or missing pipeline section")
 	}
-	if err := l.lint(c.Clone.Containers, blockClone); err != nil {
+	if err := l.lint(c.Clone.ContainerList, blockClone); err != nil {
 		return err
 	}
-	if err := l.lint(c.Pipeline.Containers, blockPipeline); err != nil {
+	if err := l.lint(c.Steps.ContainerList, blockPipeline); err != nil {
 		return err
 	}
-	return l.lint(c.Services.Containers, blockServices)
+	return l.lint(c.Services.ContainerList, blockServices)
 }
 
-func (l *Linter) lint(containers []*yaml.Container, _ uint8) error {
+func (l *Linter) lint(containers []*types.Container, _ uint8) error {
 	for _, container := range containers {
 		if err := l.lintImage(container); err != nil {
 			return err
@@ -57,14 +57,14 @@ func (l *Linter) lint(containers []*yaml.Container, _ uint8) error {
 	return nil
 }
 
-func (l *Linter) lintImage(c *yaml.Container) error {
+func (l *Linter) lintImage(c *types.Container) error {
 	if len(c.Image) == 0 {
 		return fmt.Errorf("Invalid or missing image")
 	}
 	return nil
 }
 
-func (l *Linter) lintCommands(c *yaml.Container) error {
+func (l *Linter) lintCommands(c *types.Container) error {
 	if len(c.Commands) == 0 {
 		return nil
 	}
@@ -78,7 +78,7 @@ func (l *Linter) lintCommands(c *yaml.Container) error {
 	return nil
 }
 
-func (l *Linter) lintTrusted(c *yaml.Container) error {
+func (l *Linter) lintTrusted(c *types.Container) error {
 	if c.Privileged {
 		return fmt.Errorf("Insufficient privileges to use privileged mode")
 	}

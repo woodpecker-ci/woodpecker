@@ -55,7 +55,7 @@ var allBeans = []interface{}{
 	new(model.Pipeline),
 	new(model.PipelineConfig),
 	new(model.Config),
-	new(model.Logs),
+	new(model.LogEntry),
 	new(model.Perm),
 	new(model.Step),
 	new(model.Registry),

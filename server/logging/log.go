@@ -2,8 +2,9 @@ package logging
 
 import (
 	"context"
-	"io"
 	"sync"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 // TODO (bradrydzewski) writing to subscribers is currently a blocking
@@ -27,58 +28,58 @@ type subscriber struct {
 type stream struct {
 	sync.Mutex
 
-	path string
-	list []*Entry
-	subs map[*subscriber]struct{}
-	done chan struct{}
+	stepID int64
+	list   []*model.LogEntry
+	subs   map[*subscriber]struct{}
+	done   chan struct{}
 }
 
 type log struct {
 	sync.Mutex
 
-	streams map[string]*stream
+	streams map[int64]*stream
 }
 
 // New returns a new logger.
 func New() Log {
 	return &log{
-		streams: map[string]*stream{},
+		streams: map[int64]*stream{},
 	}
 }
 
-func (l *log) Open(_ context.Context, path string) error {
+func (l *log) Open(_ context.Context, stepID int64) error {
 	l.Lock()
-	_, ok := l.streams[path]
+	_, ok := l.streams[stepID]
 	if !ok {
-		l.streams[path] = &stream{
-			path: path,
-			subs: make(map[*subscriber]struct{}),
-			done: make(chan struct{}),
+		l.streams[stepID] = &stream{
+			stepID: stepID,
+			subs:   make(map[*subscriber]struct{}),
+			done:   make(chan struct{}),
 		}
 	}
 	l.Unlock()
 	return nil
 }
 
-func (l *log) Write(_ context.Context, path string, entry *Entry) error {
+func (l *log) Write(_ context.Context, stepID int64, logEntry *model.LogEntry) error {
 	l.Lock()
-	s, ok := l.streams[path]
+	s, ok := l.streams[stepID]
 	l.Unlock()
 	if !ok {
 		return ErrNotFound
 	}
 	s.Lock()
-	s.list = append(s.list, entry)
+	s.list = append(s.list, logEntry)
 	for sub := range s.subs {
-		go sub.handler(entry)
+		go sub.handler(logEntry)
 	}
 	s.Unlock()
 	return nil
 }
 
-func (l *log) Tail(c context.Context, path string, handler Handler) error {
+func (l *log) Tail(c context.Context, stepID int64, handler Handler) error {
 	l.Lock()
-	s, ok := l.streams[path]
+	s, ok := l.streams[stepID]
 	l.Unlock()
 	if !ok {
 		return ErrNotFound
@@ -105,9 +106,9 @@ func (l *log) Tail(c context.Context, path string, handler Handler) error {
 	return nil
 }
 
-func (l *log) Close(_ context.Context, path string) error {
+func (l *log) Close(_ context.Context, stepID int64) error {
 	l.Lock()
-	s, ok := l.streams[path]
+	s, ok := l.streams[stepID]
 	l.Unlock()
 	if !ok {
 		return ErrNotFound
@@ -118,29 +119,7 @@ func (l *log) Close(_ context.Context, path string) error {
 	s.Unlock()
 
 	l.Lock()
-	delete(l.streams, path)
+	delete(l.streams, stepID)
 	l.Unlock()
 	return nil
 }
-
-func (l *log) Snapshot(_ context.Context, path string, w io.Writer) error {
-	l.Lock()
-	s, ok := l.streams[path]
-	l.Unlock()
-	if !ok {
-		return ErrNotFound
-	}
-	s.Lock()
-	defer s.Unlock()
-	for _, entry := range s.list {
-		if _, err := w.Write(entry.Data); err != nil {
-			return err
-		}
-		if _, err := w.Write(cr); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-var cr = []byte{'\n'}

@@ -3,8 +3,6 @@
 package mocks
 
 import (
-	io "io"
-
 	mock "github.com/stretchr/testify/mock"
 	model "github.com/woodpecker-ci/woodpecker/server/model"
 )
@@ -1089,20 +1087,48 @@ func (_m *Store) HasRedirectionForRepo(_a0 int64, _a1 string) (bool, error) {
 	return r0, r1
 }
 
-// LogFind provides a mock function with given fields: _a0
-func (_m *Store) LogFind(_a0 *model.Step) (io.ReadCloser, error) {
+// LogAppend provides a mock function with given fields: logEntry
+func (_m *Store) LogAppend(logEntry *model.LogEntry) error {
+	ret := _m.Called(logEntry)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*model.LogEntry) error); ok {
+		r0 = rf(logEntry)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// LogDelete provides a mock function with given fields: _a0
+func (_m *Store) LogDelete(_a0 *model.Step) error {
 	ret := _m.Called(_a0)
 
-	var r0 io.ReadCloser
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*model.Step) error); ok {
+		r0 = rf(_a0)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// LogFind provides a mock function with given fields: _a0
+func (_m *Store) LogFind(_a0 *model.Step) ([]*model.LogEntry, error) {
+	ret := _m.Called(_a0)
+
+	var r0 []*model.LogEntry
 	var r1 error
-	if rf, ok := ret.Get(0).(func(*model.Step) (io.ReadCloser, error)); ok {
+	if rf, ok := ret.Get(0).(func(*model.Step) ([]*model.LogEntry, error)); ok {
 		return rf(_a0)
 	}
-	if rf, ok := ret.Get(0).(func(*model.Step) io.ReadCloser); ok {
+	if rf, ok := ret.Get(0).(func(*model.Step) []*model.LogEntry); ok {
 		r0 = rf(_a0)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(io.ReadCloser)
+			r0 = ret.Get(0).([]*model.LogEntry)
 		}
 	}
 
@@ -1116,11 +1142,11 @@ func (_m *Store) LogFind(_a0 *model.Step) (io.ReadCloser, error) {
 }
 
 // LogSave provides a mock function with given fields: _a0, _a1
-func (_m *Store) LogSave(_a0 *model.Step, _a1 io.Reader) error {
+func (_m *Store) LogSave(_a0 *model.Step, _a1 []*model.LogEntry) error {
 	ret := _m.Called(_a0, _a1)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(*model.Step, io.Reader) error); ok {
+	if rf, ok := ret.Get(0).(func(*model.Step, []*model.LogEntry) error); ok {
 		r0 = rf(_a0, _a1)
 	} else {
 		r0 = ret.Error(0)
@@ -1607,6 +1633,32 @@ func (_m *Store) ServerConfigSet(_a0 string, _a1 string) error {
 	}
 
 	return r0
+}
+
+// StepByUUID provides a mock function with given fields: _a0
+func (_m *Store) StepByUUID(_a0 string) (*model.Step, error) {
+	ret := _m.Called(_a0)
+
+	var r0 *model.Step
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) (*model.Step, error)); ok {
+		return rf(_a0)
+	}
+	if rf, ok := ret.Get(0).(func(string) *model.Step); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Step)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(_a0)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // StepChild provides a mock function with given fields: _a0, _a1, _a2

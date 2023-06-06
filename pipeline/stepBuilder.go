@@ -23,7 +23,10 @@ import (
 	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog/log"
 
-	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
+	backend_types "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
+	yaml_types "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
+	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
+
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
@@ -31,7 +34,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/linter"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/matrix"
 	"github.com/woodpecker-ci/woodpecker/server"
-	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
@@ -55,7 +57,7 @@ type Item struct {
 	Labels    map[string]string
 	DependsOn []string
 	RunsOn    []string
-	Config    *backend.Config
+	Config    *backend_types.Config
 }
 
 func (b *StepBuilder) Build() ([]*Item, error) {
@@ -215,7 +217,7 @@ func (b *StepBuilder) environmentVariables(metadata metadata.Metadata, axis matr
 	return environ
 }
 
-func (b *StepBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[string]string, metadata metadata.Metadata, stepID int64) (*backend.Config, error) {
+func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, environ map[string]string, metadata metadata.Metadata, stepID int64) (*backend_types.Config, error) {
 	var secrets []compiler.Secret
 	for _, sec := range b.Secs {
 		if !sec.Match(b.Curr.Event) {
@@ -274,6 +276,9 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml.Config, environ map[
 	).Compile(parsed)
 }
 
+// SetPipelineStepsOnPipeline is the link between pipeline representation in "pipeline package" and server
+// to be specific this func currently is used to convert the pipeline.Item list (crafted by StepBuilder.Build()) into
+// a pipeline that can be stored in the database by the server
 func SetPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*Item) *model.Pipeline {
 	var pidSequence int
 	for _, item := range pipelineItems {
@@ -291,8 +296,9 @@ func SetPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*Item)
 					gid = pidSequence
 				}
 				step := &model.Step{
-					PipelineID: pipeline.ID,
 					Name:       step.Alias,
+					UUID:       step.UUID,
+					PipelineID: pipeline.ID,
 					PID:        pidSequence,
 					PPID:       item.Workflow.PID,
 					PGID:       gid,

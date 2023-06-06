@@ -1,4 +1,4 @@
-// Copyright 2023 Woodpecker Authors
+// Copyright 2019 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,8 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package proto
+package rpc
 
-// Version is the version of the woodpecker.proto file,
-// !IMPORTANT! increased by 1 each time it get changed !IMPORTANT!
-const Version int32 = 3
+import (
+	"testing"
+)
+
+func TestLogEntry(t *testing.T) {
+	line := LogEntry{
+		StepUUID: "e9ea76a5-44a1-4059-9c4a-6956c478b26d",
+		Time:     60,
+		Line:     1,
+		Data:     "starting redis server",
+	}
+	got, want := line.String(), "[e9ea76a5-44a1-4059-9c4a-6956c478b26d:L1:60s] starting redis server"
+	if got != want {
+		t.Errorf("Wanted line string %q, got %q", want, got)
+	}
+}

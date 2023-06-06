@@ -33,3 +33,14 @@ const (
 	StatusKilled  = "killed"
 	StatusError   = "error"
 )
+
+// LogEntryType identifies the type of line in the logs.
+type LogEntryType int
+
+const (
+	LogEntryStdout LogEntryType = iota
+	LogEntryStderr
+	LogEntryExitCode
+	LogEntryMetadata
+	LogEntryProgress
+)
