@@ -7,7 +7,7 @@ This provides a brief tutorial for creating a Woodpecker webhook plugin, using s
 The below example demonstrates how we might configure a webhook plugin in the YAML file:
 
 ```yaml
-pipeline:
+steps:
   webhook:
     image: foo/webhook
     settings:
