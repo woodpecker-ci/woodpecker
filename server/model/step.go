@@ -35,7 +35,6 @@ type Step struct {
 	PipelineID int64             `json:"pipeline_id"          xorm:"UNIQUE(s) INDEX 'step_pipeline_id'"`
 	PID        int               `json:"pid"                  xorm:"UNIQUE(s) 'step_pid'"`
 	PPID       int               `json:"ppid"                 xorm:"step_ppid"`
-	PGID       int               `json:"pgid"                 xorm:"step_pgid"`
 	Name       string            `json:"name"                 xorm:"step_name"`
 	State      StatusValue       `json:"state"                xorm:"step_state"`
 	Error      string            `json:"error,omitempty"      xorm:"VARCHAR(500) step_error"`
