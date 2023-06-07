@@ -141,7 +141,7 @@ steps:
 pipeline:
   old crap:
     image: bash
-    commans: meh!
+    commands: meh!
 `
 
 	workflow1, err := ParseString(sampleYamlPipelineLegacy)
