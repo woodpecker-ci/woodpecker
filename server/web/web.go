@@ -15,10 +15,10 @@
 package web
 
 import (
+	"bytes"
 	"crypto/md5"
 	"fmt"
 	"net/http"
-	"regexp"
 	"strings"
 	"time"
 
@@ -89,15 +89,23 @@ func handleIndex(c *gin.Context) {
 	}
 }
 
+func loadFile(path string) ([]byte, error) {
+	data, err := web.Lookup(path)
+	if err != nil {
+		return nil, err
+	}
+	if server.Config.Server.RootPath == "" {
+		return data, nil
+	}
+	return bytes.ReplaceAll(data, []byte("/BASE_PATH"), []byte(server.Config.Server.RootPath)), nil
+}
+
 func parseIndex() []byte {
-	data, err := web.Lookup("index.html")
+	data, err := loadFile("index.html")
 	if err != nil {
 		log.Fatal().Err(err).Msg("can not find index.html")
 	}
-	if server.Config.Server.RootPath == "" {
-		return data
-	}
-	return regexp.MustCompile(`/\S+\.(js|css|png|svg)`).ReplaceAll(data, []byte(server.Config.Server.RootPath+"$0"))
+	return data
 }
 
 func setupCache(c *gin.Context) {
