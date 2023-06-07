@@ -301,7 +301,6 @@ func SetPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*Item)
 					PipelineID: pipeline.ID,
 					PID:        pidSequence,
 					PPID:       item.Workflow.PID,
-					PGID:       gid,
 					State:      model.StatusPending,
 				}
 				if item.Workflow.State == model.StatusSkipped {

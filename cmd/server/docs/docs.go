@@ -3933,10 +3933,6 @@ const docTemplate = `{
                     "description": "uses reported user for webhooks and name of cron for cron pipelines",
                     "type": "string"
                 },
-                "signed": {
-                    "description": "deprecate",
-                    "type": "boolean"
-                },
                 "started_at": {
                     "type": "integer"
                 },
@@ -3961,12 +3957,6 @@ const docTemplate = `{
                 "verified": {
                     "description": "deprecate",
                     "type": "boolean"
-                },
-                "workflows": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/model.Workflow"
-                    }
                 }
             }
         },
@@ -4214,9 +4204,6 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
-                },
-                "pgid": {
-                    "type": "integer"
                 },
                 "pid": {
                     "type": "integer"

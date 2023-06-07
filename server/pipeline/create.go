@@ -81,7 +81,6 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 
 	// update some pipeline fields
 	pipeline.RepoID = repo.ID
-	pipeline.Verified = true
 	pipeline.Status = model.StatusPending
 
 	if configFetchErr != nil {

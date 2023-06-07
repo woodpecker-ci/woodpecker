@@ -108,7 +108,6 @@ type (
 		ID       int64  `json:"id"`
 		PID      int    `json:"pid"`
 		PPID     int    `json:"ppid"`
-		PGID     int    `json:"pgid"`
 		Name     string `json:"name"`
 		State    string `json:"state"`
 		Error    string `json:"error,omitempty"`
