@@ -32,8 +32,8 @@ func ParseBytes(b []byte) (*types.Workflow, error) {
 	// support deprecated pipeline keyword
 	if len(out.PipelineDontUseIt.ContainerList) != 0 && len(out.Steps.ContainerList) == 0 {
 		out.Steps.ContainerList = out.PipelineDontUseIt.ContainerList
-		out.PipelineDontUseIt.ContainerList = nil
 	}
+	out.PipelineDontUseIt.ContainerList = nil
 
 	return out, nil
 }

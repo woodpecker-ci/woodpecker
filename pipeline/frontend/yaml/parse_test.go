@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/franela/goblin"
+	"github.com/stretchr/testify/assert"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
 	yaml_base_types "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types/base"
@@ -121,6 +122,41 @@ func TestParse(t *testing.T) {
 			})
 		})
 	})
+}
+
+func TestParseLegacy(t *testing.T) {
+	var sampleYamlPipelineLegacy = `
+pipeline:
+  say hello:
+    image: bash
+    commands: echo hello
+`
+
+	var sampleYamlPipelineLegacyIgnore = `
+steps:
+  say hello:
+    image: bash
+    commands: echo hello
+
+pipeline:
+  old crap:
+    image: bash
+    commans: meh!
+`
+
+	workflow1, err := ParseString(sampleYamlPipelineLegacy)
+	if !assert.NoError(t, err) {
+		t.Fail()
+	}
+
+	workflow2, err := ParseString(sampleYamlPipelineLegacyIgnore)
+	if !assert.NoError(t, err) {
+		t.Fail()
+	}
+
+	assert.EqualValues(t, workflow1, workflow2)
+	assert.Len(t, workflow1.Steps.ContainerList, 1)
+	assert.EqualValues(t, "say hello", workflow1.Steps.ContainerList[0].Name)
 }
 
 var sampleYaml = `
