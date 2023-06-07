@@ -3,7 +3,7 @@ labels:
   weather: sun
   hostname: ""
 
-pipeline:
+steps:
   build:
     image: golang:latest
     commands:

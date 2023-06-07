@@ -12,7 +12,7 @@ type (
 		Platform  string          `yaml:"platform,omitempty"`
 		Workspace Workspace       `yaml:"workspace,omitempty"`
 		Clone     ContainerList   `yaml:"clone,omitempty"`
-		Steps     ContainerList   `yaml:"pipeline"` // TODO: discussed if we should rename it to "steps"
+		Steps     ContainerList   `yaml:"steps,omitempty"`
 		Services  ContainerList   `yaml:"services,omitempty"`
 		Labels    base.SliceOrMap `yaml:"labels,omitempty"`
 		DependsOn []string        `yaml:"depends_on,omitempty"`
@@ -24,6 +24,8 @@ type (
 		Volumes  WorkflowVolumes    `yaml:"volumes,omitempty"`
 		// Deprecated
 		BranchesDontUseIt *constraint.List `yaml:"branches,omitempty"`
+		// Deprecated
+		PipelineDontUseIt ContainerList `yaml:"pipeline,omitempty"`
 	}
 
 	// Workspace defines a pipeline workspace.

@@ -7,7 +7,7 @@ They are automatically pulled from the default container registry the agent's ha
 Example pipeline using the Docker and Slack plugins:
 
 ```yaml
-pipeline:
+steps:
   build:
     image: golang
     commands:
