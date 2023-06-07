@@ -1,4 +1,4 @@
-pipeline:
+steps:
   test:
     image: golang:${GO_VERSION}
     commands:

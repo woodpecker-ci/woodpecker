@@ -12,7 +12,7 @@ Read more at: [pipeline-syntax#event](./20-pipeline-syntax.md#event)
 1. To create a new cron job adjust your pipeline config(s) and add the event filter to all steps you would like to run by the cron job:
 
     ```diff
-     pipeline:
+     steps:
        sync_locales:
          image: weblate_sync
          settings:

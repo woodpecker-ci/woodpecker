@@ -5,7 +5,7 @@ Woodpecker provides the ability to store named parameters external to the YAML c
 Secrets are exposed to your pipeline steps and plugins as uppercase environment variables and can therefore be referenced in the commands section of your pipeline.
 
 ```diff
-pipeline:
+steps:
   docker:
     image: docker
     commands:
@@ -20,7 +20,7 @@ In this example, the secret named `secret_token` would be passed to the pipeline
 **NOTE:** the `from_secret` syntax only works with the newer `settings` block.
 
 ```diff
-pipeline:
+steps:
   docker:
     image: my-plugin
     settings:
@@ -32,7 +32,7 @@ pipeline:
 Please note parameter expressions are subject to pre-processing. When using secrets in parameter expressions they should be escaped.
 
 ```diff
-pipeline:
+steps:
   docker:
     image: docker
     commands:
@@ -52,7 +52,7 @@ Secrets are added to the Woodpecker secret store on the UI or with the CLI.
 There may be scenarios where you are required to store secrets using alternate names. You can map the alternate secret name to the expected name using the below syntax:
 
 ```diff
-pipeline:
+steps:
   docker:
     image: plugins/docker
     repo: octocat/hello-world

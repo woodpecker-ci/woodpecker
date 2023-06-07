@@ -7,7 +7,7 @@ Volumes are only available to trusted repositories and for security reasons shou
 :::
 
 ```diff
-pipeline:
+steps:
   build:
     image: docker
     commands:
