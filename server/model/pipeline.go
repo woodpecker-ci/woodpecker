@@ -43,8 +43,6 @@ type Pipeline struct {
 	Avatar              string            `json:"author_avatar"           xorm:"pipeline_avatar"`
 	Email               string            `json:"author_email"            xorm:"pipeline_email"`
 	Link                string            `json:"link_url"                xorm:"pipeline_link"`
-	Signed              bool              `json:"signed"                  xorm:"pipeline_signed"`   // deprecate
-	Verified            bool              `json:"verified"                xorm:"pipeline_verified"` // deprecate
 	Reviewer            string            `json:"reviewed_by"             xorm:"pipeline_reviewer"`
 	Reviewed            int64             `json:"reviewed_at"             xorm:"pipeline_reviewed"`
 	Steps               []*Step           `json:"steps,omitempty"         xorm:"-"`

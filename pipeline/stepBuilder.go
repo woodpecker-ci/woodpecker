@@ -83,7 +83,6 @@ func (b *StepBuilder) Build() ([]*Item, error) {
 				UUID:       uuid.New().String(), // TODO(#1784): Remove once workflows are a separate entity in database
 				PipelineID: b.Curr.ID,
 				PID:        pidSequence,
-				PGID:       pidSequence,
 				State:      model.StatusPending,
 				Environ:    axis,
 				Name:       SanitizePath(y.Name),
@@ -305,7 +304,6 @@ func SetPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*Item)
 					PipelineID: pipeline.ID,
 					PID:        pidSequence,
 					PPID:       item.Workflow.PID,
-					PGID:       gid,
 					State:      model.StatusPending,
 				}
 				if item.Workflow.State == model.StatusSkipped {
