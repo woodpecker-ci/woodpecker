@@ -1,6 +1,6 @@
 branches: master
 
-pipeline:
+steps:
   build:
     image: golang
     commands:

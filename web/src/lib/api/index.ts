@@ -129,8 +129,8 @@ export default class WoodpeckerClient extends ApiClient {
     return this._post(`/api/repos/${owner}/${repo}/pipelines/${pipeline}?${query}`) as Promise<Pipeline>;
   }
 
-  getLogs(owner: string, repo: string, pipeline: number, step: number): Promise<PipelineLog[]> {
-    return this._get(`/api/repos/${owner}/${repo}/logs/${pipeline}/${step}`) as Promise<PipelineLog[]>;
+  getLogs(owner: string, repo: string, pipeline: number, stepId: number): Promise<PipelineLog[]> {
+    return this._get(`/api/repos/${owner}/${repo}/logs/${pipeline}/${stepId}`) as Promise<PipelineLog[]>;
   }
 
   getSecretList(owner: string, repo: string, page: number): Promise<Secret[] | null> {
@@ -300,7 +300,7 @@ export default class WoodpeckerClient extends ApiClient {
     // eslint-disable-next-line promise/prefer-await-to-callbacks
     callback: (data: PipelineLog) => void,
   ): EventSource {
-    return this._subscribe(`/stream/logs/${owner}/${repo}/${pipeline}/${step}`, callback, {
+    return this._subscribe(`/api/stream/logs/${owner}/${repo}/${pipeline}/${step}`, callback, {
       reconnect: true,
     });
   }

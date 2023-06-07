@@ -9,36 +9,9 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
 )
 
-type (
-	// Config defines a pipeline configuration.
-	Config struct {
-		When      constraint.When `yaml:"when,omitempty"`
-		Cache     types.StringOrSlice
-		Platform  string
-		Workspace Workspace
-		Clone     Containers
-		Pipeline  Containers
-		Services  Containers
-		Networks  Networks
-		Volumes   Volumes
-		Labels    types.SliceorMap
-		DependsOn []string `yaml:"depends_on,omitempty"`
-		RunsOn    []string `yaml:"runs_on,omitempty"`
-		SkipClone bool     `yaml:"skip_clone"`
-		// Deprecated use When.Branch
-		BranchesDontUseIt *constraint.List `yaml:"branches,omitempty"`
-	}
-
-	// Workspace defines a pipeline workspace.
-	Workspace struct {
-		Base string
-		Path string
-	}
-)
-
 // ParseBytes parses the configuration from bytes b.
-func ParseBytes(b []byte) (*Config, error) {
-	out := new(Config)
+func ParseBytes(b []byte) (*types.Workflow, error) {
+	out := new(types.Workflow)
 	err := xyaml.Unmarshal(b, out)
 	if err != nil {
 		return nil, err
@@ -56,11 +29,17 @@ func ParseBytes(b []byte) (*Config, error) {
 		out.BranchesDontUseIt = nil
 	}
 
+	// support deprecated pipeline keyword
+	if len(out.PipelineDontUseIt.ContainerList) != 0 && len(out.Steps.ContainerList) == 0 {
+		out.Steps.ContainerList = out.PipelineDontUseIt.ContainerList
+	}
+	out.PipelineDontUseIt.ContainerList = nil
+
 	return out, nil
 }
 
 // ParseString parses the configuration from string s.
-func ParseString(s string) (*Config, error) {
+func ParseString(s string) (*types.Workflow, error) {
 	return ParseBytes(
 		[]byte(s),
 	)

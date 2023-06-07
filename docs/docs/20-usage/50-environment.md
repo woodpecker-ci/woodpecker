@@ -3,7 +3,7 @@
 Woodpecker provides the ability to pass environment variables to individual pipeline steps. Example pipeline step with custom environment variables:
 
 ```diff
-pipeline:
+steps:
   build:
     image: golang
 +   environment:
@@ -18,7 +18,7 @@ pipeline:
 Please note that the environment section is not able to expand environment variables. If you need to expand variables they should be exported in the commands section.
 
 ```diff
-pipeline:
+steps:
   build:
     image: golang
 -   environment:
@@ -32,7 +32,7 @@ pipeline:
 > Please be warned that `${variable}` expressions are subject to pre-processing. If you do not want the pre-processor to evaluate your expression it must be escaped:
 
 ```diff
-pipeline:
+steps:
   build:
     image: golang
     commands:
@@ -146,7 +146,7 @@ services:
 These can be used, for example, to manage the image tag used by multiple projects.
 
 ```diff
-pipeline:
+steps:
   build:
 -   image: golang:1.18
 +   image: golang:${GOLANG_VERSION}
@@ -164,7 +164,7 @@ Woodpecker provides the ability to substitute environment variables at runtime. 
 Example commit substitution:
 
 ```diff
-pipeline:
+steps:
   docker:
     image: plugins/docker
     settings:
@@ -174,7 +174,7 @@ pipeline:
 Example tag substitution:
 
 ```diff
-pipeline:
+steps:
   docker:
     image: plugins/docker
     settings:
@@ -202,7 +202,7 @@ Woodpecker also emulates bash string operations. This gives us the ability to ma
 Example variable substitution with substring:
 
 ```diff
-pipeline:
+steps:
   docker:
     image: plugins/docker
     settings:
@@ -212,7 +212,7 @@ pipeline:
 Example variable substitution strips `v` prefix from `v.1.0.0`:
 
 ```diff
-pipeline:
+steps:
   docker:
     image: plugins/docker
     settings:

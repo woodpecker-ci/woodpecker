@@ -46,7 +46,7 @@ The kubernetes backend also allows for specifying requests and limits on a per-s
 
 Example pipeline configuration:
 ```yaml
-pipeline:
+steps:
   build:
     image: golang
     commands:

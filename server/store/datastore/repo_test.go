@@ -299,7 +299,7 @@ func TestRepoCrud(t *testing.T) {
 		new(model.Perm),
 		new(model.Pipeline),
 		new(model.PipelineConfig),
-		new(model.Logs),
+		new(model.LogEntry),
 		new(model.Step),
 		new(model.Secret),
 		new(model.Registry),
@@ -334,6 +334,7 @@ func TestRepoCrud(t *testing.T) {
 		RepoID: repoUnrelated.ID,
 	}
 	stepUnrelated := model.Step{
+		UUID: "44c0de71-a6be-41c9-b860-e3716d1dfcef",
 		Name: "a unrelated step",
 	}
 	assert.NoError(t, store.CreatePipeline(&pipelineUnrelated, &stepUnrelated))
