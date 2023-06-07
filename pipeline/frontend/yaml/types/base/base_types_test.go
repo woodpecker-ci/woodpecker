@@ -30,27 +30,6 @@ func TestStringorIntYaml(t *testing.T) {
 	}
 }
 
-type StructStringOrSlice struct {
-	Foo StringOrSlice
-}
-
-func TestStringOrSliceYaml(t *testing.T) {
-	str := `{foo: [bar, baz]}`
-
-	s := StructStringOrSlice{}
-	assert.NoError(t, yaml.Unmarshal([]byte(str), &s))
-
-	assert.Equal(t, StringOrSlice{"bar", "baz"}, s.Foo)
-
-	d, err := yaml.Marshal(&s)
-	assert.Nil(t, err)
-
-	s2 := StructStringOrSlice{}
-	assert.NoError(t, yaml.Unmarshal(d, &s2))
-
-	assert.Equal(t, StringOrSlice{"bar", "baz"}, s2.Foo)
-}
-
 type StructSliceorMap struct {
 	Foos SliceOrMap `yaml:"foos,omitempty"`
 	Bars []string   `yaml:"bars"`

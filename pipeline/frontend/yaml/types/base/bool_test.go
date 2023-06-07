@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/franela/goblin"
+	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 )
 
@@ -48,6 +49,29 @@ func TestBoolTrue(t *testing.T) {
 				err := yaml.Unmarshal(in, &out)
 				g.Assert(err).IsNotNil("expects error")
 			})
+		})
+	})
+
+	g.Describe("marshal", func() {
+		g.It("marshal empty", func() {
+			in := &BoolTrue{}
+			out, err := yaml.Marshal(&in)
+			g.Assert(err).IsNil("expect no error")
+			assert.EqualValues(t, "true\n", string(out))
+		})
+
+		g.It("marshal true", func() {
+			in := BoolTrue{value: true}
+			out, err := yaml.Marshal(&in)
+			g.Assert(err).IsNil("expect no error")
+			assert.EqualValues(t, "true\n", string(out))
+		})
+
+		g.It("marshal false", func() {
+			in := BoolTrue{value: false}
+			out, err := yaml.Marshal(&in)
+			g.Assert(err).IsNil("expect no error")
+			assert.EqualValues(t, "false\n", string(out))
 		})
 	})
 }

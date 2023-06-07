@@ -30,6 +30,16 @@ func (s *StringOrSlice) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return errors.New("Failed to unmarshal StringOrSlice")
 }
 
+// MarshalYAML implements custom Yaml marshaling.
+func (s StringOrSlice) MarshalYAML() (interface{}, error) {
+	if len(s) == 0 {
+		return "", nil
+	} else if len(s) == 1 {
+		return s[0], nil
+	}
+	return []string(s), nil
+}
+
 func toStrings(s []interface{}) ([]string, error) {
 	if len(s) == 0 {
 		return nil, nil

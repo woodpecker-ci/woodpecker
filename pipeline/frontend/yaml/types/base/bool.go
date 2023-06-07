@@ -1,6 +1,7 @@
 package base
 
 import (
+	"fmt"
 	"strconv"
 
 	"gopkg.in/yaml.v3"
@@ -26,6 +27,11 @@ func (b *BoolTrue) UnmarshalYAML(value *yaml.Node) error {
 		return err
 	}
 	return nil
+}
+
+// MarshalText implements custom Yaml marshaling.
+func (b BoolTrue) MarshalText() (text []byte, err error) {
+	return []byte(fmt.Sprint(b.Bool())), nil
 }
 
 // Bool returns the bool value.

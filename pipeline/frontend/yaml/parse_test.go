@@ -4,6 +4,8 @@ import (
 	"testing"
 
 	"github.com/franela/goblin"
+	"github.com/stretchr/testify/assert"
+	"gopkg.in/yaml.v3"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
 	yaml_base_types "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types/base"
@@ -123,6 +125,41 @@ func TestParse(t *testing.T) {
 	})
 }
 
+func TestParseLegacy(t *testing.T) {
+	var sampleYamlPipelineLegacy = `
+pipeline:
+  say hello:
+    image: bash
+    commands: echo hello
+`
+
+	var sampleYamlPipelineLegacyIgnore = `
+steps:
+  say hello:
+    image: bash
+    commands: echo hello
+
+pipeline:
+  old crap:
+    image: bash
+    commands: meh!
+`
+
+	workflow1, err := ParseString(sampleYamlPipelineLegacy)
+	if !assert.NoError(t, err) {
+		t.Fail()
+	}
+
+	workflow2, err := ParseString(sampleYamlPipelineLegacyIgnore)
+	if !assert.NoError(t, err) {
+		t.Fail()
+	}
+
+	assert.EqualValues(t, workflow1, workflow2)
+	assert.Len(t, workflow1.Steps.ContainerList, 1)
+	assert.EqualValues(t, "say hello", workflow1.Steps.ContainerList[0].Name)
+}
+
 var sampleYaml = `
 image: hello-world
 when:
@@ -137,7 +174,7 @@ build:
 workspace:
   path: src/github.com/octocat/hello-world
   base: /go
-pipeline:
+steps:
   test:
     image: golang
     commands:
@@ -178,7 +215,7 @@ runs_on:
 var simpleYamlAnchors = `
 vars:
   image: &image plugins/slack
-pipeline:
+steps:
   notify_success:
     image: *image
 `
@@ -186,10 +223,36 @@ pipeline:
 var sampleVarYaml = `
 _slack: &SLACK
   image: plugins/slack
-pipeline:
+steps:
   notify_fail: *SLACK
   notify_success:
     << : *SLACK
     when:
       event: success
 `
+
+func TestReSerialize(t *testing.T) {
+	work1, err := ParseString(sampleVarYaml)
+	if !assert.NoError(t, err) {
+		t.Fail()
+	}
+
+	workBin, err := yaml.Marshal(work1)
+	if !assert.NoError(t, err) {
+		t.Fail()
+	}
+
+	assert.EqualValues(t, `steps:
+    containerlist:
+        - image: plugins/slack
+          name: notify_fail
+          settings: {}
+        - image: plugins/slack
+          name: notify_success
+          settings: {}
+          when:
+        				path:
+        					include: []
+        					exclude: []
+skip_clone: false`, string(workBin))
+}
