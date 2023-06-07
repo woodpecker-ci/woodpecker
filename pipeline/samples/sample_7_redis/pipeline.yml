@@ -2,7 +2,7 @@ workspace:
   base: /go
   path: src/github.com/drone/envsubst
 
-pipeline:
+steps:
   build:
     image: redis:3.0
     commands:

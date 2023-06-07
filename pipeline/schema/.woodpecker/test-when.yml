@@ -1,4 +1,4 @@
-pipeline:
+steps:
   when-branch:
     image: alpine
     commands:

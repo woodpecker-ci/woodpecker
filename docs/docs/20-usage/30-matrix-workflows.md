@@ -1,4 +1,4 @@
-# Matrix pipelines
+# Matrix workflows
 
 Woodpecker has integrated support for matrix workflows. Woodpecker executes a separate workflow for each combination in the matrix, allowing you to build and test a single commit against multiple configurations.
 
@@ -42,7 +42,7 @@ matrix:
     - mysql:6.5
     - mariadb:10.1
 
-pipeline:
+steps:
   build:
     image: golang:${GO_VERSION}
     commands:
@@ -58,7 +58,7 @@ services:
 Example YAML file after injecting the matrix parameters:
 
 ```diff
-pipeline:
+steps:
   build:
 -   image: golang:${GO_VERSION}
 +   image: golang:1.4
@@ -87,7 +87,7 @@ matrix:
     - 1.8
     - latest
 
-pipeline:
+steps:
   build:
     image: golang:${TAG}
     commands:
@@ -104,7 +104,7 @@ matrix:
     - golang:1.8
     - golang:latest
 
-pipeline:
+steps:
   build:
     image: ${IMAGE}
     commands:
@@ -122,7 +122,7 @@ matrix:
 
 platform: ${platform}
 
-pipeline:
+steps:
   test:
     image: alpine
     commands:
