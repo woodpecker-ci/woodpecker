@@ -125,14 +125,14 @@ func TestParse(t *testing.T) {
 }
 
 func TestParseLegacy(t *testing.T) {
-	var sampleYamlPipelineLegacy = `
+	sampleYamlPipelineLegacy := `
 pipeline:
   say hello:
     image: bash
     commands: echo hello
 `
 
-	var sampleYamlPipelineLegacyIgnore = `
+	sampleYamlPipelineLegacyIgnore := `
 steps:
   say hello:
     image: bash
