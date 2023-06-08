@@ -49,6 +49,7 @@ var migrationTasks = []*task{
 	&dropFiles,
 	&removeMachineCol,
 	&dropOldCols,
+	&initLogsEntriesTable,
 	&migrateLogs2LogEntries,
 }
 
