@@ -6,7 +6,7 @@ You can use [YAML anchors & aliases](https://yaml.org/spec/1.2.2/#3222-anchors-a
 
 To convert this:
 ```yml
-pipeline:
+steps:
   test:
     image: golang:1.18
     commands: go test ./...
@@ -21,7 +21,7 @@ Just add a new section called **variables** like this:
 +variables:
 +  - &golang_image 'golang:1.18'
 
- pipeline:
+ steps:
    test:
 -    image: golang:1.18
 +    image: *golang_image
@@ -44,7 +44,7 @@ variables:
     special: true
   - &some-plugin codeberg.org/6543/docker-images/print_env
 
-pipeline:
+steps:
   develop:
     image: *some-plugin
     settings:
@@ -74,7 +74,7 @@ variables:
   hello_cmd: &hello_cmd
    - echo hello
 
-pipeline:
+steps:
   step1:
     image: debian
     commands:

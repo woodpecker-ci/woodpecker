@@ -12,7 +12,7 @@ Woodpecker is a simple CI engine with great extensibility. It runs your pipeline
 
 ```yaml
 # .woodpecker.yml
-pipeline:
+steps:
   build:
     image: debian
     commands:
@@ -23,7 +23,7 @@ pipeline:
       - echo "Testing.."
 ```
 
-### Pipeline steps are containers
+### Steps are containers
 
 - Define any container image as context
   - either use your own and install the needed tools in custom image or
@@ -31,7 +31,7 @@ pipeline:
 - List the commands that should be executed in your container, in order to build or test your application
 
 ```diff
-pipeline:
+steps:
   build:
 -   image: debian
 +   image: mycompany/image-with-awscli
@@ -41,12 +41,12 @@ pipeline:
 
 ### File changes are incremental
 
-- Woodpecker clones the source code in the beginning pipeline
+- Woodpecker clones the source code in the beginning
 - Changes to files are persisted through steps as the same volume is mounted to all steps
 
 ```yaml
 # .woodpecker.yml
-pipeline:
+steps:
   build:
     image: debian
     commands:
@@ -78,7 +78,7 @@ kubectl apply -f $PLUGIN_TEMPLATE
 
 ```yaml
 # .woodpecker.yml
-pipeline:
+steps:
   deploy-to-k8s:
     image: laszlocloud/my-k8s-plugin
     settings:

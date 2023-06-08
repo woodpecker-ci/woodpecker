@@ -33,11 +33,11 @@ func TestEnvVarSubst(t *testing.T) {
 		want    string
 	}{{
 		name: "simple substitution",
-		yaml: `pipeline:
+		yaml: `steps:
 		step1:
 			image: ${HELLO_IMAGE}`,
 		environ: map[string]string{"HELLO_IMAGE": "hello-world"},
-		want: `pipeline:
+		want: `steps:
 		step1:
 			image: hello-world`,
 	}}

@@ -48,6 +48,7 @@ var migrationTasks = []*task{
 	&removeInactiveRepos,
 	&dropFiles,
 	&removeMachineCol,
+	&dropOldCols,
 	&migrateLogs2LogEntries,
 }
 

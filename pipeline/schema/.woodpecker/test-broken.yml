@@ -5,7 +5,7 @@ matri:
     - 1.14
     - 1.13
 
-pipeline:
+steps:
   test:
     image: golang:${GO_VERSION}
     commands:

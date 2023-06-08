@@ -9,7 +9,7 @@ clone:
     image: woodpeckerci/plugin-git:windows
     depth: 50
 
-pipeline:
+steps:
   build:
     image: golang:1.10.1-nanoserver-sac2016
     commands:
