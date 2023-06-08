@@ -76,8 +76,6 @@ var migrateLogs2LogEntries = task{
 			return err
 		}
 
-		log.Info().Msg("migrate-logs-to-log_entries: start migration of logs")
-
 		page := 0
 		for {
 			var logs []*oldLogs019
@@ -86,7 +84,7 @@ var migrateLogs2LogEntries = task{
 				return err
 			}
 
-			log.Info().Msgf("migrate-logs-to-log_entries: start page %d", page)
+			log.Trace().Msgf("migrate-logs-to-log_entries: process page %d", page)
 
 			for _, l := range logs {
 
