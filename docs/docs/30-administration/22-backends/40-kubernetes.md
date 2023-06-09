@@ -47,14 +47,15 @@ Additional annotations to apply to worker pods. Must be a YAML object, e.g. `{"e
 The kubernetes backend also allows for specifying requests and limits on a per-step basic, most commonly for CPU and memory.
 See the [kubernetes documentation](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/) for more information on using resources.
 
-### ServiceAccountName
+### serviceAccountName
 
 Specify the name of the ServiceAccount which the build pod will mount. This serviceAccount must be created externally.
 See the [kubernetes documentation](https://kubernetes.io/docs/concepts/security/service-accounts/) for more information on using serviceAccounts.
 
 ### nodeSelector
 
-Specify the label which is used to select the node where the job should be executed.
+Specify the label which is used to select the node where the job should be executed. Labels defined here will be appended to a list already containing "kubernetes.io/arch".
+By default the pod will use "kubernetes.io/arch" inferred from top-level "platform" setting which is deducted from the agents' environment variable CI_SYSTEM_ARCH. To overwrite this, you need to specify this label in the nodeSelector section.
 See the [kubernetes documentation](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector) for more information on using nodeSelector.
 
 Example pipeline configuration:
