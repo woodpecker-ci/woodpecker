@@ -16,6 +16,7 @@ package migration
 
 import (
 	"encoding/json"
+	"runtime"
 
 	"github.com/rs/zerolog/log"
 	"xorm.io/xorm"
@@ -117,6 +118,7 @@ var migrateLogs2LogEntries = task{
 				break
 			}
 
+			runtime.GC()
 			page++
 		}
 
