@@ -3954,9 +3954,11 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
-                "verified": {
-                    "description": "deprecate",
-                    "type": "boolean"
+                "workflows": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Workflow"
+                    }
                 }
             }
         },
