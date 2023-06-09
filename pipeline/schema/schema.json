@@ -139,8 +139,8 @@
             }
           ]
         },
-        "tag": {
-          "description": "Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#tag",
+        "ref": {
+          "description": "Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#ref",
           "type": "string"
         },
         "cron": {
@@ -289,8 +289,8 @@
             }
           ]
         },
-        "tag": {
-          "description": "Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#tag",
+        "ref": {
+          "description": "Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#ref",
           "type": "string"
         },
         "cron": {
