@@ -4,7 +4,7 @@ package types
 type KubernetesBackendOptions struct {
 	Resources Resources `json:"resouces,omitempty"`
 	ServiceAccountName string `json:"serviceAccountName,omitempty"`
-	NodeSelector map[string]string `json:"nodeSelector,omitEmpty"`
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 }
 
 // Resources defines two maps for kubernetes resource definitions
