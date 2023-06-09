@@ -93,24 +93,23 @@ var migrateLogs2LogEntries = task{
 				}
 
 				time := int64(0)
-				logs := []*newLogEntry019{}
 				for _, logEntry := range logEntries {
 
 					if logEntry.Time > time {
 						time = logEntry.Time
 					}
 
-					logs = append(logs, &newLogEntry019{
+					log := &newLogEntry019{
 						StepID: l.StepID,
 						Data:   []byte(logEntry.Out),
 						Line:   logEntry.Pos,
 						Time:   time,
 						Type:   logEntry.Type,
-					})
-				}
+					}
 
-				if _, err := sess.InsertMulti(logs); err != nil {
-					return err
+					if _, err := sess.Insert(log); err != nil {
+						return err
+					}
 				}
 			}
 
