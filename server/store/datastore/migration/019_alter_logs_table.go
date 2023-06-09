@@ -19,8 +19,6 @@ import (
 
 	"github.com/rs/zerolog/log"
 	"xorm.io/xorm"
-
-	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 type oldLogs019 struct {
@@ -77,9 +75,10 @@ var migrateLogs2LogEntries = task{
 		}
 
 		page := 0
+		perPage := 500
 		for {
 			var logs []*oldLogs019
-			err := sess.Limit(10, page*10).Find(&logs)
+			err := sess.Limit(perPage, page*perPage).Find(&logs)
 			if err != nil {
 				return err
 			}
@@ -94,23 +93,24 @@ var migrateLogs2LogEntries = task{
 				}
 
 				time := int64(0)
+				logs := []*newLogEntry019{}
 				for _, logEntry := range logEntries {
 
 					if logEntry.Time > time {
 						time = logEntry.Time
 					}
 
-					log := &model.LogEntry{
+					logs = append(logs, &newLogEntry019{
 						StepID: l.StepID,
 						Data:   []byte(logEntry.Out),
 						Line:   logEntry.Pos,
 						Time:   time,
-						Type:   model.LogEntryType(logEntry.Type),
-					}
+						Type:   logEntry.Type,
+					})
+				}
 
-					if _, err := sess.Insert(log); err != nil {
-						return err
-					}
+				if _, err := sess.InsertMulti(logs); err != nil {
+					return err
 				}
 			}
 
