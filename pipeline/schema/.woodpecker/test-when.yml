@@ -27,12 +27,12 @@ steps:
     when:
       event: [push, pull_request, tag, deployment]
 
-  when-tag:
+  when-ref:
     image: alpine
     commands:
       - echo "test"
     when:
-      tag: "v**"
+      ref: "refs/tags/v**"
 
   when-status:
     image: alpine
