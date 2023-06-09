@@ -18,14 +18,35 @@ import (
 	"fmt"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/shared/utils"
 )
 
 func (s storage) LogFind(step *model.Step) ([]*model.LogEntry, error) {
 	var logEntries []*model.LogEntry
-	return logEntries, s.engine.Asc("id").Where("step_id = ?", step.ID).Find(&logEntries)
+	if err := s.engine.Asc("id").Where("step_id = ?", step.ID).Find(&logEntries); err != nil {
+		return nil, err
+	}
+	deCompressLogs(logEntries...)
+	return logEntries, nil
+}
+
+func compressLogs(logEntries ...*model.LogEntry) {
+	for i := range logEntries {
+		logEntries[i].Data = utils.ZStdCompress(logEntries[i].Data)
+		logEntries[i].Compr = "zstd"
+	}
+}
+
+func deCompressLogs(logEntries ...*model.LogEntry) {
+	for i := range logEntries {
+		if logEntries[i].Compr == "zstd" {
+			logEntries[i].Data, _ = utils.ZStdDecompress(logEntries[i].Data)
+		}
+	}
 }
 
 func (s storage) LogSave(step *model.Step, logEntries []*model.LogEntry) error {
+	compressLogs(logEntries...)
 	sess := s.engine.NewSession()
 	defer sess.Close()
 	if err := sess.Begin(); err != nil {
@@ -45,6 +66,7 @@ func (s storage) LogSave(step *model.Step, logEntries []*model.LogEntry) error {
 }
 
 func (s storage) LogAppend(logEntry *model.LogEntry) error {
+	compressLogs(logEntry)
 	_, err := s.engine.Insert(logEntry)
 	return err
 }

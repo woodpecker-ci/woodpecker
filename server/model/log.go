@@ -33,6 +33,7 @@ type LogEntry struct {
 	Data    []byte       `json:"data"     xorm:"LONGBLOB"`
 	Created int64        `json:"-"        xorm:"created"`
 	Type    LogEntryType `json:"type"`
+	Compr   string       `json:"-"        xorm:"'compress' DEFAULT NULL"`
 } //	@name LogEntry
 
 // TODO: store info what specific command the line belongs to (must be optional and impl. by backend)
