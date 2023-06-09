@@ -521,6 +521,25 @@
         "type": "string"
       }
     },
+    "step_backend_kubernetes_service_account": {
+      "description": "serviceAccountName to be use by job. Read more: https://woodpecker-ci.org/docs/administration/backends/kubernetes",
+      "type": "object",
+      "properties": {
+        "requests": {
+          "$ref": "#/definitions/step_kubernetes_service_account_object"
+        },
+        "limits": {
+          "$ref": "#/definitions/step_kubernetes_service_account_object"
+        }
+      }
+    },
+    "step_kubernetes_service_account_object": {
+      "description": "A list of kubernetes resource mappings",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
     "services": {
       "description": "Read more: https://woodpecker-ci.org/docs/usage/services",
       "type": "object",

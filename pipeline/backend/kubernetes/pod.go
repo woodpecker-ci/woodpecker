@@ -80,6 +80,11 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 		}
 	}
 
+	var ServiceAccountName string
+	if step.BackendOptions.Kubernetes.ServiceAccountName != "" {
+		ServiceAccountName = step.BackendOptions.Kubernetes.ServiceAccountName
+	}
+
 	podName, err := dnsName(step.Name)
 	if err != nil {
 		return nil, err
@@ -97,6 +102,10 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 
 	NodeSelector := map[string]string{"kubernetes.io/arch": strings.Split(platform, "/")[1]}
 
+	for key, val := range step.BackendOptions.Kubernetes.NodeSelector {
+		NodeSelector[key] = val
+	}
+
 	pod := &v1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        podName,
@@ -105,9 +114,10 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 			Annotations: annotations,
 		},
 		Spec: v1.PodSpec{
-			RestartPolicy: v1.RestartPolicyNever,
-			HostAliases:   hostAliases,
-			NodeSelector:  NodeSelector,
+			RestartPolicy:      v1.RestartPolicyNever,
+			HostAliases:        hostAliases,
+			NodeSelector:       NodeSelector,
+			ServiceAccountName: ServiceAccountName,
 			Containers: []v1.Container{{
 				Name:            podName,
 				Image:           step.Image,
