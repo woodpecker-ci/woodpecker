@@ -69,18 +69,13 @@ func (s storage) stepListWorkflow(sess *xorm.Session, workflow *model.Workflow) 
 }
 
 func (s storage) stepCreate(sess *xorm.Session, steps []*model.Step) error {
-	if err := sess.Begin(); err != nil {
-		return err
-	}
-
 	for i := range steps {
 		// only Insert on single object ref set auto created ID back to object
 		if _, err := sess.Insert(steps[i]); err != nil {
 			return err
 		}
 	}
-
-	return sess.Commit()
+	return nil
 }
 
 func (s storage) StepUpdate(step *model.Step) error {
