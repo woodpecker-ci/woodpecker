@@ -42,6 +42,9 @@ func Copy(src, dest *xorm.Engine) error {
 	}
 
 	// init schema in destination
+	if err := dest.Sync(new(migrations)); err != nil {
+		return err
+	}
 	if err := initNew(dest); err != nil {
 		return fmt.Errorf("init schema at destination failed: %w", err)
 	}
