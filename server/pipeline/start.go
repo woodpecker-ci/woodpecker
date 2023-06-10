@@ -50,8 +50,7 @@ func start(ctx context.Context, store store.Store, activePipeline *model.Pipelin
 	// open logs streamer for each step
 	go func() {
 		for _, wf := range activePipeline.Workflows {
-			steps := wf.Children
-			for _, step := range steps {
+			for _, step := range wf.Children {
 				if err := server.Config.Services.Logs.Open(context.Background(), step.ID); err != nil {
 					log.Error().Err(err).Msgf("could not open log stream for step %d", step.ID)
 				}

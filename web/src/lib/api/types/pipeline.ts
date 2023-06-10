@@ -106,7 +106,6 @@ export type PipelineWorkflow = {
   pid: number;
   name: string;
   state: PipelineStatus;
-  exit_code: number;
   environ?: Record<string, string>;
   start_time?: number;
   end_time?: number;

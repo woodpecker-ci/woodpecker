@@ -70,13 +70,13 @@ func Cancel(ctx context.Context, store store.Store, repo *model.Repo, user *mode
 	for _, workflow := range workflows {
 		if workflow.State == model.StatusPending {
 			if _, err = UpdateWorkflowToStatusSkipped(store, *workflow); err != nil {
-				log.Error().Msgf("error: done: cannot update step_id %d state: %s", workflow.ID, err)
+				log.Error().Err(err).Msgf("cannot update workflow with id %d state", workflow.ID)
 			}
 		}
 		for _, step := range workflow.Children {
 			if step.State == model.StatusPending {
 				if _, err = UpdateStepToStatusSkipped(store, *step, 0); err != nil {
-					log.Error().Msgf("error: done: cannot update step_id %d state: %s", workflow.ID, err)
+					log.Error().Err(err).Msgf("cannot update workflow with id %d state", workflow.ID)
 				}
 			}
 		}
