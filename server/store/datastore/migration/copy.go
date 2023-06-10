@@ -30,7 +30,7 @@ func Copy(src, dest *xorm.Engine) error {
 		if err != nil {
 			return err
 		} else if exist {
-			return fmt.Errorf("existing table %s in import destination detected", dest.TableName(bean))
+			return fmt.Errorf("existing table '%s' in import destination detected", dest.TableName(bean))
 		}
 	}
 
@@ -107,7 +107,7 @@ func copyBean[T any](src, dest *xorm.Engine) error {
 	defer aliveMsgCancel(nil)
 
 	page := 0
-	perPage := 10
+	perPage := 100
 	items := make([]*T, 0, perPage)
 
 	for {
