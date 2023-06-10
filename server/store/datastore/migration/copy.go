@@ -61,7 +61,11 @@ func Copy(src, dest *xorm.Engine) error {
 			// TODO: use waitGroup and chanel to stream items through
 
 			// create list out of type from bean
-			items := reflect.MakeSlice(reflect.SliceOf(reflect.TypeOf(bean)), 0, perPage).Interface()
+			beanType := reflect.TypeOf(bean)
+			beanSliceType := reflect.New(reflect.SliceOf(beanType))
+			items := beanSliceType.Interface()
+
+			// FIXIT: ""needs a pointer to a slice or a map""
 
 			// read
 			if err := src.Limit(perPage, page*perPage).Find(&items); err != nil {
