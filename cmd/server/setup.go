@@ -55,8 +55,10 @@ import (
 func setupStore(c *cli.Context) (store.Store, error) {
 	datasource := c.String("datasource")
 	driver := c.String("driver")
+	oldDatasource := c.String("old-datasource")
+	oldDriver := c.String("old-driver")
 
-	if driver == "sqlite3" {
+	if driver == "sqlite3" || oldDriver == "sqlite3" {
 		if datastore.SupportedDriver("sqlite3") {
 			log.Debug().Msgf("server has sqlite3 support")
 		} else {
@@ -68,7 +70,7 @@ func setupStore(c *cli.Context) (store.Store, error) {
 		log.Fatal().Msgf("database driver '%s' not supported", driver)
 	}
 
-	if driver == "sqlite3" {
+	if driver == "sqlite3" && oldDatasource == "" {
 		if newDatasource, err := fallbackSqlite3File(datasource); err != nil {
 			log.Fatal().Err(err).Msg("fallback to old sqlite3 file failed")
 		} else {
@@ -81,16 +83,28 @@ func setupStore(c *cli.Context) (store.Store, error) {
 		Config: datasource,
 	}
 	log.Trace().Msgf("setup datastore: %#v", *opts)
-	store, err := datastore.NewEngine(opts)
+	_store, err := datastore.NewEngine(opts)
 	if err != nil {
 		log.Fatal().Err(err).Msg("could not open datastore")
 	}
 
-	if err := store.Migrate(); err != nil {
-		log.Fatal().Err(err).Msg("could not migrate datastore")
+	if oldDatasource == "" {
+		if err := _store.Migrate(); err != nil {
+			log.Fatal().Err(err).Msg("could not migrate datastore")
+		}
+	} else {
+		oldOpts := &store.Opts{
+			Driver: oldDriver,
+			Config: oldDatasource,
+		}
+		log.Trace().Msgf("migrate and import from datastore: %#v", *oldOpts)
+		log.Info().Msg("database to convert detected")
+		if err := datastore.ImportOldDB(oldOpts, opts); err != nil {
+			return nil, err
+		}
 	}
 
-	return store, nil
+	return _store, nil
 }
 
 // TODO: remove it in v1.1.0

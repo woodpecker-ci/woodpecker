@@ -223,6 +223,18 @@ var flags = []cli.Flag{
 		FilePath: os.Getenv("WOODPECKER_DATABASE_DATASOURCE_FILE"),
 	},
 	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_OLD_DATABASE_DRIVER"},
+		Name:    "old-driver",
+		Usage:   "driver of database to be migrated & imported",
+		Value:   "",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_OLD_DATABASE_DATASOURCE"},
+		Name:    "old-datasource",
+		Usage:   "driver configuration of database to be migrated & imported",
+		Value:   "",
+	},
+	&cli.StringFlag{
 		EnvVars:  []string{"WOODPECKER_PROMETHEUS_AUTH_TOKEN"},
 		Name:     "prometheus-auth-token",
 		Usage:    "token to secure prometheus metrics endpoint",

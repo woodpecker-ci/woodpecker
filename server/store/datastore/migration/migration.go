@@ -79,7 +79,7 @@ type task struct {
 }
 
 // initNew create tables for new instance
-func initNew(sess *xorm.Session) error {
+func initNew(sess syncEngine) error {
 	if err := syncAll(sess); err != nil {
 		return err
 	}
@@ -188,6 +188,7 @@ func runTasks(e *xorm.Engine, tasks []*task) error {
 
 type syncEngine interface {
 	Sync(beans ...interface{}) error
+	Insert(beans ...interface{}) (int64, error)
 }
 
 func syncAll(sess syncEngine) error {
