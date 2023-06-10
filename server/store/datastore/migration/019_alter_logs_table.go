@@ -114,7 +114,7 @@ var migrateLogs2LogEntries = task{
 				}
 			}
 
-			if len(logs) < 10 {
+			if len(logs) < perPage {
 				break
 			}
 
