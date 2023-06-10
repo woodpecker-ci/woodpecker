@@ -52,6 +52,7 @@ var migrationTasks = []*task{
 	&dropOldCols,
 }
 
+// IMPORTANT: if you add something here, also add it to copy.go Copy() func
 var allBeans = []interface{}{
 	new(model.Agent),
 	new(model.Pipeline),
@@ -163,6 +164,7 @@ func runTasks(e *xorm.Engine, tasks []*task) error {
 			aliveMsgCancel := showBeAliveSign(task.name)
 			if err := task.fn(sess); err != nil {
 				aliveMsgCancel(nil)
+				err = fmt.Errorf("migration '%s' error: %w", task.name, err)
 				if err2 := sess.Rollback(); err2 != nil {
 					err = errors.Join(err, err2)
 				}

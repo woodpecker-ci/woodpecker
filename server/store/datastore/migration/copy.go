@@ -16,10 +16,11 @@ package migration
 
 import (
 	"fmt"
-	"reflect"
 
 	"github.com/rs/zerolog/log"
 	"xorm.io/xorm"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 func Copy(src, dest *xorm.Engine) error {
@@ -47,41 +48,96 @@ func Copy(src, dest *xorm.Engine) error {
 	}
 
 	// copy data
-	for _, bean := range allBeans {
-		log.Info().Msgf("Start copy %s table", dest.TableName(bean))
-		aliveMsgCancel := showBeAliveSign(dest.TableName(bean))
-		defer aliveMsgCancel(nil)
-
-		page := 0
-		perPage := 10
-
-		for {
-			// TODO: use waitGroup and chanel to stream items through
-
-			// create list out of type from bean
-			beanType := reflect.TypeOf(bean)
-			beanSliceType := reflect.New(reflect.SliceOf(beanType))
-			items := beanSliceType.Interface()
-
-			// FIXIT: ""needs a pointer to a slice or a map""
-
-			// read
-			if err := src.Limit(perPage, page*perPage).Find(&items); err != nil {
-				return err
-			}
-			// write
-			if _, err := dest.NoAutoTime().AllCols().InsertMulti(items); err != nil {
-				return err
-			}
-
-			if reflect.ValueOf(items).Len() < perPage {
-				break
-			}
-			page++
+	// IMPORTANT: if you add something here, also add it to migration.go allBeans slice
+	{ // TODO: find a way to use reflection to be able to use allBeans
+		if err := copyBean[model.Agent](src, dest); err != nil {
+			return err
 		}
-
-		aliveMsgCancel(nil)
+		if err := copyBean[model.Pipeline](src, dest); err != nil {
+			return err
+		}
+		if err := copyBean[model.PipelineConfig](src, dest); err != nil {
+			return err
+		}
+		if err := copyBean[model.Config](src, dest); err != nil {
+			return err
+		}
+		if err := copyBean[model.LogEntry](src, dest); err != nil {
+			return err
+		}
+		if err := copyBean[model.Perm](src, dest); err != nil {
+			return err
+		}
+		if err := copyBean[model.Step](src, dest); err != nil {
+			return err
+		}
+		if err := copyBean[model.Registry](src, dest); err != nil {
+			return err
+		}
+		if err := copyBean[model.Repo](src, dest); err != nil {
+			return err
+		}
+		if err := copyBean[model.Secret](src, dest); err != nil {
+			return err
+		}
+		if err := copyBean[model.Task](src, dest); err != nil {
+			return err
+		}
+		if err := copyBean[model.User](src, dest); err != nil {
+			return err
+		}
+		if err := copyBean[model.ServerConfig](src, dest); err != nil {
+			return err
+		}
+		if err := copyBean[model.Cron](src, dest); err != nil {
+			return err
+		}
+		if err := copyBean[model.Redirection](src, dest); err != nil {
+			return err
+		}
 	}
 
+	return nil
+}
+
+func copyBean[T any](src, dest *xorm.Engine) error {
+	tableName := dest.TableName(new(T))
+	log.Info().Msgf("Start copy %s table", tableName)
+	aliveMsgCancel := showBeAliveSign(tableName)
+	defer aliveMsgCancel(nil)
+
+	page := 0
+	perPage := 10
+	items := make([]*T, 0, perPage)
+
+	for {
+		// TODO: use waitGroup and chanel to stream items through
+		// clean item list
+		items = items[:0]
+
+		// read
+		if err := src.Limit(perPage, page*perPage).Find(&items); err != nil {
+			return fmt.Errorf("read data of table '%s' page %d failed: %w", tableName, page, err)
+		}
+
+		if len(items) == 0 {
+			break
+		}
+
+		// write
+		if _, err := dest.NoAutoTime().AllCols().InsertMulti(items); err != nil {
+			for i := range items {
+				log.Debug().Err(err).Msgf("items: %#v", *items[i])
+			}
+			return fmt.Errorf("write data of table '%s' page %d failed: %w", tableName, page, err)
+		}
+
+		if len(items) < perPage {
+			break
+		}
+		page++
+	}
+
+	aliveMsgCancel(nil)
 	return nil
 }
