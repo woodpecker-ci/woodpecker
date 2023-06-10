@@ -126,9 +126,6 @@ func copyBean[T any](src, dest *xorm.Engine) error {
 
 		// write
 		if _, err := dest.NoAutoTime().AllCols().InsertMulti(items); err != nil {
-			for i := range items {
-				log.Debug().Err(err).Msgf("items: %#v", *items[i])
-			}
 			return fmt.Errorf("write data of table '%s' page %d failed: %w", tableName, page, err)
 		}
 
