@@ -96,6 +96,11 @@ func TestMigrate(t *testing.T) {
 		time.Sleep(100 * time.Millisecond)
 	}
 
+	if dbType == schemas.SQLITE {
+		// skip migration of old db as this is covered by TestCopy for sqlite
+		return
+	}
+
 	// migrate old db
 	engine, closeDB = testDB(t, false)
 	assert.NoError(t, Migrate(engine))
