@@ -38,7 +38,7 @@ func GetPipelineStatusContext(repo *model.Repo, pipeline *model.Pipeline, workfl
 	err = tmpl.Execute(&ctx, map[string]interface{}{
 		"context":  server.Config.Server.StatusContext,
 		"event":    event,
-		"pipeline": workflow.Name,
+		"workflow": workflow.Name,
 		"owner":    repo.Owner,
 		"repo":     repo.Name,
 	})
