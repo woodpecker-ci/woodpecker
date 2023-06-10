@@ -38,12 +38,12 @@ func TestGetPipelineStatusContext(t *testing.T) {
 	assert.EqualValues(t, "", GetPipelineStatusContext(repo, pipeline, workflow))
 
 	server.Config.Server.StatusContext = "ci/woodpecker"
-	server.Config.Server.StatusContextFormat = "{{ .context }}/{{ .event }}/{{ .pipeline }}"
+	server.Config.Server.StatusContextFormat = "{{ .context }}/{{ .event }}/{{ .workflow }}"
 	assert.EqualValues(t, "ci/woodpecker/pr/lint", GetPipelineStatusContext(repo, pipeline, workflow))
 	pipeline.Event = model.EventPush
 	assert.EqualValues(t, "ci/woodpecker/push/lint", GetPipelineStatusContext(repo, pipeline, workflow))
 
 	server.Config.Server.StatusContext = "ci"
-	server.Config.Server.StatusContextFormat = "{{ .context }}:{{ .owner }}/{{ .repo }}:{{ .event }}:{{ .pipeline }}"
+	server.Config.Server.StatusContextFormat = "{{ .context }}:{{ .owner }}/{{ .repo }}:{{ .event }}:{{ .workflow }}"
 	assert.EqualValues(t, "ci:user1/repo1:push:lint", GetPipelineStatusContext(repo, pipeline, workflow))
 }

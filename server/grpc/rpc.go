@@ -105,14 +105,14 @@ func (s *RPC) Extend(c context.Context, id string) error {
 
 // Update implements the rpc.Update function
 func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
-	stepID, err := strconv.ParseInt(id, 10, 64)
+	workflowID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		return err
 	}
 
-	workflow, err := s.store.WorkflowLoad(stepID)
+	workflow, err := s.store.WorkflowLoad(workflowID)
 	if err != nil {
-		log.Error().Msgf("error: rpc.update: cannot find workflow with id %d: %s", stepID, err)
+		log.Error().Msgf("error: rpc.update: cannot find workflow with id %d: %s", workflowID, err)
 		return err
 	}
 
@@ -134,7 +134,7 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 		return err
 	}
 
-	if _, err = pipeline.UpdateStepStatus(s.store, *step, state, currentPipeline.Started); err != nil {
+	if err := pipeline.UpdateStepStatus(s.store, step, state, currentPipeline.Started); err != nil {
 		log.Error().Err(err).Msg("rpc.update: cannot update step")
 	}
 
