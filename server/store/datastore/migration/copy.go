@@ -15,15 +15,12 @@
 package migration
 
 import (
-	"errors"
 	"fmt"
 	"reflect"
 
 	"github.com/rs/zerolog/log"
 	"xorm.io/xorm"
 )
-
-var ErrDestHasExistingData = errors.New("while try to convert the database, we detect existing data at the destination")
 
 func Copy(src, dest *xorm.Engine) error {
 	// first check if the new database already has existing data
@@ -32,7 +29,7 @@ func Copy(src, dest *xorm.Engine) error {
 		if err != nil {
 			return err
 		} else if exist {
-			return fmt.Errorf("%w: table %s", ErrDestHasExistingData, dest.TableName(bean))
+			return fmt.Errorf("existing table %s in import destination detected", dest.TableName(bean))
 		}
 	}
 
@@ -52,7 +49,8 @@ func Copy(src, dest *xorm.Engine) error {
 	// copy data
 	for _, bean := range allBeans {
 		log.Info().Msgf("Start copy %s table", dest.TableName(bean))
-		// TODO: add showBeAliveSign from #1846
+		aliveMsgCancel := showBeAliveSign(dest.TableName(bean))
+		defer aliveMsgCancel(nil)
 
 		page := 0
 		perPage := 10
@@ -81,6 +79,8 @@ func Copy(src, dest *xorm.Engine) error {
 			}
 			page++
 		}
+
+		aliveMsgCancel(nil)
 	}
 
 	return nil
