@@ -23,7 +23,6 @@ import (
 
 	"github.com/rs/zerolog/log"
 	"xorm.io/xorm"
-	"xorm.io/xorm/schemas"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
@@ -134,13 +133,6 @@ func Migrate(e *xorm.Engine) error {
 	}
 
 	e.SetDisableGlobalCache(false)
-
-	if e.Dialect().URI().DBType == schemas.SQLITE {
-		log.Info().Msg("VACUUM sqlite database")
-		if _, err := e.SQL(`VACUUM;`).Exec(); err != nil {
-			log.Warn().Err(err).Msgf("VACUUM sqlite file failed")
-		}
-	}
 
 	return syncAll(e)
 }

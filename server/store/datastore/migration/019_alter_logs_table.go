@@ -16,11 +16,18 @@ package migration
 
 import (
 	"encoding/json"
+	"fmt"
+	"os"
 	"runtime"
+	"strconv"
 
 	"github.com/rs/zerolog/log"
 	"xorm.io/xorm"
+	"xorm.io/xorm/schemas"
 )
+
+// maxDefaultSqliteItems set the threshold at witch point the migration will fail by default
+var maxDefaultSqliteItems = 1000
 
 type oldLogs019 struct {
 	ID     int64  `xorm:"pk autoincr 'log_id'"`
@@ -64,11 +71,24 @@ var initLogsEntriesTable = task{
 
 var migrateLogs2LogEntries = task{
 	name:     "migrate-logs-to-log_entries",
-	required: true,
+	required: false,
 	fn: func(sess *xorm.Session) error {
 		// make sure old logs table exists
 		if exist, err := sess.IsTableExist(new(oldLogs019)); !exist || err != nil {
 			return err
+		}
+
+		// check and skip if it's sqlite and not explicite set
+		if sess.Engine().Dialect().URI().DBType == schemas.SQLITE {
+			// first we check if we have just 1000 entries to migrate
+			toMigrate, err := sess.Count(new(oldLogs019))
+			if err != nil {
+				return err
+			}
+			allowLongMigration, _ := strconv.ParseBool(os.Getenv("WOODPECKER_ALLOW_LONG_MIGRATION"))
+			if toMigrate > int64(maxDefaultSqliteItems) && !allowLongMigration {
+				return fmt.Errorf("migrating logs to log_entries is skipped, as we have %d entries to convert. set 'WOODPECKER_ALLOW_LONG_MIGRATION' to 'true' to migrate anyway", toMigrate)
+			}
 		}
 
 		if err := sess.Sync(new(oldLogs019)); err != nil {
