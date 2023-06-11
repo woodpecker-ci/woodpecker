@@ -57,6 +57,7 @@ func setupStore(c *cli.Context) (store.Store, error) {
 	driver := c.String("driver")
 	oldDatasource := c.String("old-datasource")
 	oldDriver := c.String("old-driver")
+	importOnly := c.Bool("import-old-datastore-only")
 
 	if driver == "sqlite3" || oldDriver == "sqlite3" {
 		if datastore.SupportedDriver("sqlite3") {
@@ -101,6 +102,9 @@ func setupStore(c *cli.Context) (store.Store, error) {
 		log.Info().Msg("database to convert detected")
 		if err := datastore.ImportOldDB(oldOpts, opts); err != nil {
 			return nil, err
+		}
+		if importOnly {
+			os.Exit(0)
 		}
 	}
 

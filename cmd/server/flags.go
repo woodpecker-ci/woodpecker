@@ -234,6 +234,11 @@ var flags = []cli.Flag{
 		Usage:   "driver configuration of database to be migrated & imported",
 		Value:   "",
 	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_OLD_DATABASE_IMPORT_ONLY"},
+		Name:    "import-old-datastore-only",
+		Usage:   "if '--old-driver' and --old-datasource' are set, exit successfully after import.",
+	},
 	&cli.StringFlag{
 		EnvVars:  []string{"WOODPECKER_PROMETHEUS_AUTH_TOKEN"},
 		Name:     "prometheus-auth-token",
