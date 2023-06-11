@@ -97,8 +97,10 @@ var migrateLogs2LogEntries = task{
 
 		page := 0
 		perPage := 500
+		logs := make([]*oldLogs019, 0, perPage)
+		logEntries := make([]*oldLogEntry019, 0, 50)
 		for {
-			var logs []*oldLogs019
+			logs = logs[:0]
 			err := sess.Limit(perPage, page*perPage).Find(&logs)
 			if err != nil {
 				return err
@@ -108,7 +110,7 @@ var migrateLogs2LogEntries = task{
 
 			for _, l := range logs {
 
-				logEntries := []*oldLogEntry019{}
+				logEntries = logEntries[:0]
 				if err := json.Unmarshal(l.Data, &logEntries); err != nil {
 					return err
 				}
