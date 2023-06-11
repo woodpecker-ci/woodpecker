@@ -23,14 +23,13 @@ import (
 
 	"github.com/rs/zerolog/log"
 	"xorm.io/xorm"
-	"xorm.io/xorm/schemas"
 )
 
 // maxDefaultSqliteItems set the threshold at witch point the migration will fail by default
 var maxDefaultSqliteItems019 = 5000
 
 // perPage019 set the size of the slice to read per page
-var perPage019 = 500
+var perPage019 = 100
 
 type oldLogs019 struct {
 	ID     int64  `xorm:"pk autoincr 'log_id'"`
@@ -75,26 +74,23 @@ var initLogsEntriesTable = task{
 var migrateLogs2LogEntries = task{
 	name:     "migrate-logs-to-log_entries",
 	required: false,
-	fn: func(sess *xorm.Session) error {
+	engineFn: func(e *xorm.Engine) error {
 		// make sure old logs table exists
-		if exist, err := sess.IsTableExist(new(oldLogs019)); !exist || err != nil {
+		if exist, err := e.IsTableExist(new(oldLogs019)); !exist || err != nil {
 			return err
 		}
 
-		// check and skip if it's sqlite and not explicite set
-		if sess.Engine().Dialect().URI().DBType == schemas.SQLITE {
-			// first we check if we have just 1000 entries to migrate
-			toMigrate, err := sess.Count(new(oldLogs019))
-			if err != nil {
-				return err
-			}
-			allowLongMigration, _ := strconv.ParseBool(os.Getenv("WOODPECKER_ALLOW_LONG_MIGRATION"))
-			if toMigrate > int64(maxDefaultSqliteItems019) && !allowLongMigration {
-				return fmt.Errorf("migrating logs to log_entries is skipped, as we have %d entries to convert. set 'WOODPECKER_ALLOW_LONG_MIGRATION' to 'true' to migrate anyway", toMigrate)
-			}
+		// first we check if we have just 1000 entries to migrate
+		toMigrate, err := e.Count(new(oldLogs019))
+		if err != nil {
+			return err
+		}
+		allowLongMigration, _ := strconv.ParseBool(os.Getenv("WOODPECKER_ALLOW_LONG_MIGRATION"))
+		if toMigrate > int64(maxDefaultSqliteItems019) && !allowLongMigration {
+			return fmt.Errorf("migrating logs to log_entries is skipped, as we have %d entries to convert. set 'WOODPECKER_ALLOW_LONG_MIGRATION' to 'true' to migrate anyway", toMigrate)
 		}
 
-		if err := sess.Sync(new(oldLogs019)); err != nil {
+		if err := e.Sync(new(oldLogs019)); err != nil {
 			return err
 		}
 
@@ -102,8 +98,16 @@ var migrateLogs2LogEntries = task{
 		logs := make([]*oldLogs019, 0, perPage019)
 		logEntries := make([]*oldLogEntry019, 0, 50)
 		for {
+			// TODO: listen for cancel signal and stop migration gracefully
+
+			sess := e.NewSession().NoCache()
+			defer sess.Close()
+			if err := sess.Begin(); err != nil {
+				return err
+			}
 			logs = logs[:0]
-			err := sess.Limit(perPage019, page*perPage019).Find(&logs)
+
+			err := sess.Limit(perPage019).Find(&logs)
 			if err != nil {
 				return err
 			}
@@ -111,7 +115,6 @@ var migrateLogs2LogEntries = task{
 			log.Trace().Msgf("migrate-logs-to-log_entries: process page %d", page)
 
 			for _, l := range logs {
-
 				logEntries = logEntries[:0]
 				if err := json.Unmarshal(l.Data, &logEntries); err != nil {
 					return err
@@ -136,6 +139,14 @@ var migrateLogs2LogEntries = task{
 						return err
 					}
 				}
+
+				if _, err := sess.Delete(l); err != nil {
+					return err
+				}
+			}
+
+			if err := sess.Commit(); err != nil {
+				return err
 			}
 
 			if len(logs) < perPage019 {
@@ -146,6 +157,6 @@ var migrateLogs2LogEntries = task{
 			page++
 		}
 
-		return sess.DropTable("logs")
+		return e.DropTables("logs")
 	},
 }
