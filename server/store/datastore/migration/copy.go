@@ -95,6 +95,9 @@ func Copy(src, dest *xorm.Engine) error {
 		if err := copyBean[model.Redirection](src, dest); err != nil {
 			return err
 		}
+		if err := copyNonMigratedLogs(src, dest); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -114,6 +117,7 @@ func copyBean[T any](src, dest *xorm.Engine) error {
 		// TODO: use waitGroup and chanel to stream items through
 		// clean item list
 		items = items[:0]
+		log.Trace().Msgf("copy table '%s' page %d", tableName, page)
 
 		// read
 		if err := src.Limit(perPage, page*perPage).Find(&items); err != nil {
@@ -137,4 +141,31 @@ func copyBean[T any](src, dest *xorm.Engine) error {
 
 	aliveMsgCancel(nil)
 	return nil
+}
+
+// TODO: drop at v1.1.0
+func copyNonMigratedLogs(src, dest *xorm.Engine) error {
+	type logs struct {
+		ID     int64  `xorm:"pk autoincr 'log_id'"`
+		StepID int64  `xorm:"UNIQUE 'log_step_id'"`
+		Data   []byte `xorm:"LONGBLOB 'log_data'"`
+	}
+
+	// check if we need to run custom migration at all
+	exist, err := src.IsTableExist(new(logs))
+	if err != nil {
+		log.Error().Err(err).Msg("could not detect old 'logs' table")
+		return nil
+	} else if !exist {
+		return nil
+	}
+	if empty, err := src.IsTableEmpty(new(logs)); err != nil || empty {
+		return err
+	}
+
+	if err := dest.Sync(new(logs)); err != nil {
+		return err
+	}
+
+	return copyBean[logs](src, dest)
 }
