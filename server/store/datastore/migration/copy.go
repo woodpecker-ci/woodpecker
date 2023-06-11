@@ -167,5 +167,10 @@ func copyNonMigratedLogs(src, dest *xorm.Engine) error {
 		return err
 	}
 
+	// https://github.com/woodpecker-ci/woodpecker/pull/1828
+	if _, err := dest.Exec("DELETE FROM migrations WHERE name like 'migrate-logs-to-log_entries';"); err != nil {
+		return err
+	}
+
 	return copyBean[logs](src, dest)
 }
