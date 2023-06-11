@@ -103,13 +103,13 @@ var migrateLogs2LogEntries = task{
 		logEntries := make([]*oldLogEntry019, 0, 50)
 		sigterm := abool.New()
 		_ = utils.WithContextSigtermCallback(context.Background(), func() {
-			log.Info().Msg("ctrl+c received, terminating process")
+			log.Info().Msg("ctrl+c received, stopping current migration")
 			sigterm.Set()
 		})
 
 		for {
 			if sigterm.IsSet() {
-				return fmt.Errorf("migration 'migrate-logs-to-log_entries' successfully aborted")
+				return fmt.Errorf("migration 'migrate-logs-to-log_entries' gracefully aborted")
 			}
 
 			sess := e.NewSession().NoCache()
