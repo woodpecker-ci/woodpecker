@@ -61,10 +61,18 @@ Woodpecker automatically handles database migration between versions, including 
 
 ## Database DBMS Migration
 
-If you have an existing database and want to change the DBMS, e.g. from SQLite to Mariadb, rename `WOODPECKER_DATABASE_DRIVER` to `WOODPECKER_OLD_DATABASE_DRIVER` and `WOODPECKER_DATABASE_DATASOURCE` to `WOODPECKER_OLD_DATABASE_DATASOURCE` and add the database configuration as you would with a new installation.  
-On next start, the old database will first migrate to the newest schema and then the new database is initialized and all data copied.  
-If you don't want to start the server afterwards set `WOODPECKER_OLD_DATABASE_IMPORT_ONLY` to **true**.
+If you have an existing database and want to change the DBMS (e.g. from SQLite to Mariadb):
 
+1. Rename `WOODPECKER_DATABASE_DRIVER` to `WOODPECKER_OLD_DATABASE_DRIVER` and `WOODPECKER_DATABASE_DATASOURCE` to `WOODPECKER_OLD_DATABASE_DATASOURCE`
+2. Add the database configuration as you would with a new installation.  
+
+On next start, a schema migration will run on the **old** database.
+Then the new database is initialized and all data copied.
+
+:::info
+If you don't want to start the server afterwards set `WOODPECKER_OLD_DATABASE_IMPORT_ONLY` to **true**.  
+If the new database already contains data the server will just error and exit.
+:::
 ## Database Backups
 
 Woodpecker does not perform database backups. This should be handled by separate third party tools provided by your database vendor of choice.
