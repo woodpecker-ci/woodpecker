@@ -103,7 +103,7 @@ var migrateLogs2LogEntries = task{
 		logEntries := make([]*oldLogEntry019, 0, 50)
 		sigterm := abool.New()
 		_ = utils.WithContextSigtermCallback(context.Background(), func() {
-			println("ctrl+c received, terminating process")
+			log.Info().Msg("ctrl+c received, terminating process")
 			sigterm.Set()
 		})
 
