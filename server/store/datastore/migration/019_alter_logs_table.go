@@ -15,6 +15,7 @@
 package migration
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -22,7 +23,10 @@ import (
 	"strconv"
 
 	"github.com/rs/zerolog/log"
+	"github.com/tevino/abool"
 	"xorm.io/xorm"
+
+	"github.com/woodpecker-ci/woodpecker/shared/utils"
 )
 
 // maxDefaultSqliteItems set the threshold at witch point the migration will fail by default
@@ -97,8 +101,16 @@ var migrateLogs2LogEntries = task{
 		page := 0
 		logs := make([]*oldLogs019, 0, perPage019)
 		logEntries := make([]*oldLogEntry019, 0, 50)
+		sigterm := abool.New()
+		_ = utils.WithContextSigtermCallback(context.Background(), func() {
+			println("ctrl+c received, terminating process")
+			sigterm.Set()
+		})
+
 		for {
-			// TODO: listen for cancel signal and stop migration gracefully
+			if sigterm.IsSet() {
+				return fmt.Errorf("migration 'migrate-logs-to-log_entries' successfully aborted")
+			}
 
 			sess := e.NewSession().NoCache()
 			defer sess.Close()

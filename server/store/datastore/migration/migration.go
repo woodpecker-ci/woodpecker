@@ -191,9 +191,8 @@ func runTasks(e *xorm.Engine, tasks []*task) error {
 			}
 			log.Error().Err(taskErr).Msgf("migration task '%s' failed but is not required", task.name)
 			continue
-		} else {
-			log.Debug().Msgf("migration task '%s' done", task.name)
 		}
+		log.Debug().Msgf("migration task '%s' done", task.name)
 
 		if _, err := e.Insert(&migrations{task.name}); err != nil {
 			return err
