@@ -27,7 +27,10 @@ import (
 )
 
 // maxDefaultSqliteItems set the threshold at witch point the migration will fail by default
-var maxDefaultSqliteItems = 1000
+var maxDefaultSqliteItems019 = 5000
+
+// perPage019 set the size of the slice to read per page
+var perPage019 = 500
 
 type oldLogs019 struct {
 	ID     int64  `xorm:"pk autoincr 'log_id'"`
@@ -86,7 +89,7 @@ var migrateLogs2LogEntries = task{
 				return err
 			}
 			allowLongMigration, _ := strconv.ParseBool(os.Getenv("WOODPECKER_ALLOW_LONG_MIGRATION"))
-			if toMigrate > int64(maxDefaultSqliteItems) && !allowLongMigration {
+			if toMigrate > int64(maxDefaultSqliteItems019) && !allowLongMigration {
 				return fmt.Errorf("migrating logs to log_entries is skipped, as we have %d entries to convert. set 'WOODPECKER_ALLOW_LONG_MIGRATION' to 'true' to migrate anyway", toMigrate)
 			}
 		}
@@ -96,12 +99,11 @@ var migrateLogs2LogEntries = task{
 		}
 
 		page := 0
-		perPage := 500
-		logs := make([]*oldLogs019, 0, perPage)
+		logs := make([]*oldLogs019, 0, perPage019)
 		logEntries := make([]*oldLogEntry019, 0, 50)
 		for {
 			logs = logs[:0]
-			err := sess.Limit(perPage, page*perPage).Find(&logs)
+			err := sess.Limit(perPage019, page*perPage019).Find(&logs)
 			if err != nil {
 				return err
 			}
@@ -136,7 +138,7 @@ var migrateLogs2LogEntries = task{
 				}
 			}
 
-			if len(logs) < perPage {
+			if len(logs) < perPage019 {
 				break
 			}
 
