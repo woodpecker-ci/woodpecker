@@ -18,14 +18,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"os"
 	"runtime"
-	"strconv"
 
 	"github.com/rs/zerolog/log"
 	"github.com/tevino/abool"
 	"xorm.io/xorm"
 
+	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/shared/utils"
 )
 
@@ -89,9 +88,9 @@ var migrateLogs2LogEntries = task{
 		if err != nil {
 			return err
 		}
-		allowLongMigration, _ := strconv.ParseBool(os.Getenv("WOODPECKER_ALLOW_LONG_MIGRATION"))
-		if toMigrate > int64(maxDefaultSqliteItems019) && !allowLongMigration {
-			return fmt.Errorf("Migrating logs to log_entries is skipped, as we have %d entries to convert. Set 'WOODPECKER_ALLOW_LONG_MIGRATION' to 'true' to migrate anyway", toMigrate)
+
+		if toMigrate > int64(maxDefaultSqliteItems019) && !server.Config.Server.Migrations.AllowLong {
+			return fmt.Errorf("Migrating logs to log_entries is skipped, as we have %d entries to convert. Set 'WOODPECKER_MIGRATIONS_ALLOW_LONG' to 'true' to migrate anyway", toMigrate)
 		}
 
 		if err := e.Sync(new(oldLogs019)); err != nil {
