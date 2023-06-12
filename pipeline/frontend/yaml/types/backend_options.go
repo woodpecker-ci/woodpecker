@@ -20,7 +20,9 @@ type BackendOptions struct {
 }
 
 type KubernetesBackendOptions struct {
-	Resources Resources `yaml:"resources,omitempty"`
+	Resources          Resources         `yaml:"resources,omitempty"`
+	ServiceAccountName string            `yaml:"serviceAccountName,omitempty"`
+	NodeSelector       map[string]string `yaml:"nodeSelector,omitempty"`
 }
 
 type Resources struct {

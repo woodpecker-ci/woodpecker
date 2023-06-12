@@ -258,6 +258,11 @@ var flags = []cli.Flag{
 		Usage:   "status context format",
 		Value:   "{{ .context }}/{{ .event }}/{{ .pipeline }}",
 	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_MIGRATIONS_ALLOW_LONG"},
+		Name:    "migrations-allow-long",
+		Value:   false,
+	},
 	//
 	// resource limit parameters
 	//
