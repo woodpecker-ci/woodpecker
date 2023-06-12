@@ -22,6 +22,8 @@ Simply start Woodpecker in Gitpod by clicking on the following badge. You can lo
 
 Install Golang (>=1.20) as described by [this guide](https://go.dev/doc/install).
 
+GCC go [will not work](https://github.com/go-delve/delve/issues/2672).
+
 ### Install make
 
 > GNU Make is a tool which controls the generation of executables and other non-source files of a program from the program's source files. (https://www.gnu.org/software/make/)
