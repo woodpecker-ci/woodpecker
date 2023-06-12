@@ -23,7 +23,13 @@ No breaking changes
 - Dropped support for [Coding](https://coding.net/) and [Gogs](https://gogs.io).
 - `/api/queue/resume` & `/api/queue/pause` endpoint methods were changed from `GET` to `POST`
 - rename `pipeline:` key in your workflow config to `steps:`
-- If you want to migrate old logs to the new format, watch the error messages on start. If there are none we are good to go, else you have to plan a migration that can take hours. Set `WOODPECKER_ALLOW_LONG_MIGRATION` to true and let it run.
+- If you want to migrate old logs to the new format, watch the error messages on start. If there are none we are good to go, else you have to plan a migration that can take hours. Set `WOODPECKER_MIGRATIONS_ALLOW_LONG` to true and let it run.
+- Using `repo-id` in favor of `owner/repo` combination
+  - :warning: The api endpoints `/api/repos/{owner}/{repo}/...` were replaced by new endpoints using the repos id `/api/repos/{repo-id}`
+  - To find the id of a repo use the `/api/repos/lookup/{repo-full-name-with-slashes}` endpoint.
+  - The existing badge endpoint `/api/badges/{owner}/{repo}` will still work, but whenever possible try to use the new endpoint using the `repo-id`: `/api/badges/{repo-id}`.
+  - The UI urls for a repository changed from `/repos/{owner}/{repo}/...` to `/repos/{repo-id}/...`. You will be redirected automatically when using the old url.
+  - The woodpecker-go api-client is now using the `repo-id` instead of `owner/repo` for all functions
 
 ## 0.15.0
 

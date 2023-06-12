@@ -9,11 +9,7 @@
     </template>
 
     <div class="space-y-4">
-      <ListItem
-        v-for="repo in searchedRepos"
-        :key="repo.id"
-        :to="{ name: 'repo', params: { repoName: repo.name, repoOwner: repo.owner } }"
-      >
+      <ListItem v-for="repo in searchedRepos" :key="repo.id" :to="{ name: 'repo', params: { repoId: repo.id } }">
         <span class="text-color">{{ `${repo.owner} / ${repo.name}` }}</span>
       </ListItem>
     </div>

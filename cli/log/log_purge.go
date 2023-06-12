@@ -27,14 +27,18 @@ import (
 var logPurgeCmd = &cli.Command{
 	Name:      "purge",
 	Usage:     "purge a log",
-	ArgsUsage: "<repo/name> <pipeline>",
+	ArgsUsage: "<repo-id|repo-full-name> <pipeline>",
 	Action:    logPurge,
 	Flags:     common.GlobalFlags,
 }
 
 func logPurge(c *cli.Context) (err error) {
-	repo := c.Args().First()
-	owner, name, err := internal.ParseRepo(repo)
+	client, err := internal.NewClient(c)
+	if err != nil {
+		return err
+	}
+	repoIDOrFullName := c.Args().First()
+	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
 	if err != nil {
 		return err
 	}
@@ -43,16 +47,11 @@ func logPurge(c *cli.Context) (err error) {
 		return err
 	}
 
-	client, err := internal.NewClient(c)
+	err = client.LogsPurge(repoID, number)
 	if err != nil {
 		return err
 	}
 
-	err = client.LogsPurge(owner, name, number)
-	if err != nil {
-		return err
-	}
-
-	fmt.Printf("Purging logs for pipeline %s/%s#%d\n", owner, name, number)
+	fmt.Printf("Purging logs for pipeline %s#%d\n", repoIDOrFullName, number)
 	return nil
 }

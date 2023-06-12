@@ -99,12 +99,7 @@ function deleteVar(key: string) {
 const pipelineNumber = toRef(props, 'pipelineNumber');
 async function triggerDeployPipeline() {
   loading.value = true;
-  const newPipeline = await apiClient.deployPipeline(
-    repo.value.owner,
-    repo.value.name,
-    pipelineNumber.value,
-    payload.value,
-  );
+  const newPipeline = await apiClient.deployPipeline(repo.value.id, pipelineNumber.value, payload.value);
 
   emit('close');
 
