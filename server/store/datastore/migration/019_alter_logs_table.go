@@ -91,7 +91,7 @@ var migrateLogs2LogEntries = task{
 		}
 		allowLongMigration, _ := strconv.ParseBool(os.Getenv("WOODPECKER_ALLOW_LONG_MIGRATION"))
 		if toMigrate > int64(maxDefaultSqliteItems019) && !allowLongMigration {
-			return fmt.Errorf("migrating logs to log_entries is skipped, as we have %d entries to convert. set 'WOODPECKER_ALLOW_LONG_MIGRATION' to 'true' to migrate anyway", toMigrate)
+			return fmt.Errorf("Migrating logs to log_entries is skipped, as we have %d entries to convert. Set 'WOODPECKER_ALLOW_LONG_MIGRATION' to 'true' to migrate anyway", toMigrate)
 		}
 
 		if err := e.Sync(new(oldLogs019)); err != nil {
