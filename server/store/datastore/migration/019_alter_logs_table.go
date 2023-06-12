@@ -53,13 +53,13 @@ type oldLogEntry019 struct {
 }
 
 type newLogEntry019 struct {
-	ID      int64  `json:"id"       xorm:"pk autoincr 'id'"`
-	StepID  int64  `json:"step_id"  xorm:"'step_id'"`
-	Time    int64  `json:"time"`
-	Line    int    `json:"line"`
-	Data    []byte `json:"data"     xorm:"LONGBLOB"`
-	Created int64  `json:"-"        xorm:"created"`
-	Type    int    `json:"type"`
+	ID      int64 `xorm:"pk autoincr 'id'"`
+	StepID  int64 `xorm:"'step_id'"`
+	Time    int64
+	Line    int
+	Data    []byte `xorm:"LONGBLOB"`
+	Created int64  `xorm:"created"`
+	Type    int
 }
 
 func (newLogEntry019) TableName() string {
