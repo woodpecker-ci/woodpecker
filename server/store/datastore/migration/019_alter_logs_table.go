@@ -100,7 +100,7 @@ var migrateLogs2LogEntries = task{
 		hasJsonErrors := false
 
 		page := 0
-		offSet := 0
+		offset := 0
 		logs := make([]*oldLogs019, 0, perPage019)
 		logEntries := make([]*oldLogEntry019, 0, 50)
 
@@ -124,7 +124,7 @@ var migrateLogs2LogEntries = task{
 			}
 			logs = logs[:0]
 
-			err := sess.Limit(perPage019, offSet).Find(&logs)
+			err := sess.Limit(perPage019, offset).Find(&logs)
 			if err != nil {
 				return err
 			}
@@ -135,7 +135,7 @@ var migrateLogs2LogEntries = task{
 				logEntries = logEntries[:0]
 				if err := json.Unmarshal(l.Data, &logEntries); err != nil {
 					hasJsonErrors = true
-					offSet++
+					offset++
 					continue
 				}
 
