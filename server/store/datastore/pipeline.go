@@ -73,7 +73,7 @@ func (s storage) GetPipelineLastBefore(repo *model.Repo, branch string, num int6
 }
 
 func (s storage) GetPipelineList(repo *model.Repo, p *model.ListOptions) ([]*model.Pipeline, error) {
-	pipelines := make([]*model.Pipeline, 0)
+	pipelines := make([]*model.Pipeline, 0, 16)
 	return pipelines, s.paginate(p).Where("pipeline_repo_id = ?", repo.ID).
 		Desc("pipeline_number").
 		Find(&pipelines)
