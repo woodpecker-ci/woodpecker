@@ -36,8 +36,8 @@
         ref="consoleElement"
         class="w-full max-w-full grid grid-cols-[min-content,1fr,min-content] auto-rows-min flex-grow p-2 gap-x-2 overflow-x-hidden overflow-y-auto"
       >
-        <div v-for="line in log" :id="`L${line.index}`" :key="line.index" class="contents font-mono">
-          <span class="text-gray-500 whitespace-nowrap select-none text-right">{{ line.index + 1 }}</span>
+        <div v-for="line in log" :id="`L${line.index + 1}`" :key="line.index" class="contents font-mono">
+          <a :href="`#L${line.index + 1}`" class="text-gray-500 whitespace-nowrap select-none text-right">{{ line.index + 1 }}</a>
           <!-- eslint-disable-next-line vue/no-v-html -->
           <span class="align-top text-color whitespace-pre-wrap break-words" v-html="line.text" />
           <span class="text-gray-500 whitespace-nowrap select-none text-right">{{ formatTime(line.time) }}</span>
