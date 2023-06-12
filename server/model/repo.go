@@ -25,7 +25,7 @@ type Repo struct {
 	ID     int64 `json:"id,omitempty"                    xorm:"pk autoincr 'repo_id'"`
 	UserID int64 `json:"-"                               xorm:"repo_user_id"`
 	// ForgeRemoteID is the unique identifier for the repository on the forge.
-	ForgeRemoteID                ForgeRemoteID  `json:"-"                               xorm:"forge_remote_id"`
+	ForgeRemoteID                ForgeRemoteID  `json:"forge_remote_id"                 xorm:"forge_remote_id"`
 	Owner                        string         `json:"owner"                           xorm:"UNIQUE(name) 'repo_owner'"`
 	Name                         string         `json:"name"                            xorm:"UNIQUE(name) 'repo_name'"`
 	FullName                     string         `json:"full_name"                       xorm:"UNIQUE 'repo_full_name'"`

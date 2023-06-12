@@ -13,7 +13,7 @@ import (
 var repoInfoCmd = &cli.Command{
 	Name:      "info",
 	Usage:     "show repository details",
-	ArgsUsage: "<repo/name>",
+	ArgsUsage: "<repo-id|repo-full-name>",
 	Action:    repoInfo,
 	Flags: append(common.GlobalFlags,
 		common.FormatFlag(tmplRepoInfo),
@@ -21,18 +21,17 @@ var repoInfoCmd = &cli.Command{
 }
 
 func repoInfo(c *cli.Context) error {
-	arg := c.Args().First()
-	owner, name, err := internal.ParseRepo(arg)
-	if err != nil {
-		return err
-	}
-
+	repoIDOrFullName := c.Args().First()
 	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
 	}
+	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
+	if err != nil {
+		return err
+	}
 
-	repo, err := client.Repo(owner, name)
+	repo, err := client.Repo(repoID)
 	if err != nil {
 		return err
 	}
@@ -47,11 +46,12 @@ func repoInfo(c *cli.Context) error {
 // template for repo information
 var tmplRepoInfo = `Owner: {{ .Owner }}
 Repo: {{ .Name }}
-Type: {{ .Kind }}
-Config: {{ .Config }}
+Link: {{ .Link }}
+Config path: {{ .Config }}
 Visibility: {{ .Visibility }}
 Private: {{ .IsSCMPrivate }}
 Trusted: {{ .IsTrusted }}
 Gated: {{ .IsGated }}
-Forge: {{ .Clone }}
+Clone url: {{ .Clone }}
+Allow pull-requests: {{ .AllowPullRequests }}
 `

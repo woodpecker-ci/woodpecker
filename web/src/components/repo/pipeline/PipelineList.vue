@@ -5,7 +5,7 @@
       :key="pipeline.id"
       :to="{
         name: 'repo-pipeline',
-        params: { repoOwner: repo.owner, repoName: repo.name, pipelineId: pipeline.number },
+        params: { pipelineId: pipeline.number },
       }"
       :pipeline="pipeline"
     />
@@ -15,28 +15,12 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, PropType } from 'vue';
-
+<script lang="ts" setup>
 import Panel from '~/components/layout/Panel.vue';
 import PipelineItem from '~/components/repo/pipeline/PipelineItem.vue';
-import { Pipeline, Repo } from '~/lib/api/types';
+import { Pipeline } from '~/lib/api/types';
 
-export default defineComponent({
-  name: 'PipelineList',
-
-  components: { Panel, PipelineItem },
-
-  props: {
-    repo: {
-      type: Object as PropType<Repo>,
-      required: true,
-    },
-
-    pipelines: {
-      type: Object as PropType<Pipeline[] | undefined>,
-      required: true,
-    },
-  },
-});
+defineProps<{
+  pipelines: Pipeline[] | undefined;
+}>();
 </script>
