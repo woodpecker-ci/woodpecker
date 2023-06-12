@@ -50,6 +50,8 @@ var migrationTasks = []*task{
 	&dropFiles,
 	&removeMachineCol,
 	&dropOldCols,
+	&initLogsEntriesTable,
+	&migrateLogs2LogEntries,
 }
 
 var allBeans = []interface{}{
@@ -78,6 +80,8 @@ type task struct {
 	name     string
 	required bool
 	fn       func(sess *xorm.Session) error
+	// engineFn does manage session on it's own. only use it if you really need to
+	engineFn func(e *xorm.Engine) error
 }
 
 // initNew create tables for new instance
@@ -153,36 +157,44 @@ func runTasks(e *xorm.Engine, tasks []*task) error {
 		}
 
 		log.Trace().Msgf("start migration task '%s'", task.name)
-		sess := e.NewSession().NoCache()
-		defer sess.Close()
-		if err := sess.Begin(); err != nil {
-			return err
-		}
-
+		aliveMsgCancel := showBeAliveSign(task.name)
+		defer aliveMsgCancel(nil)
+		var taskErr error
 		if task.fn != nil {
-			aliveMsgCancel := showBeAliveSign(task.name)
-			if err := task.fn(sess); err != nil {
+			sess := e.NewSession().NoCache()
+			defer sess.Close()
+			if err := sess.Begin(); err != nil {
+				return err
+			}
+
+			if taskErr = task.fn(sess); taskErr != nil {
 				aliveMsgCancel(nil)
 				if err2 := sess.Rollback(); err2 != nil {
-					err = errors.Join(err, err2)
+					taskErr = errors.Join(taskErr, err2)
 				}
-
-				if task.required {
-					return err
-				}
-				log.Error().Err(err).Msgf("migration task '%s' failed but is not required", task.name)
-				continue
 			}
-			aliveMsgCancel(nil)
-			log.Debug().Msgf("migration task '%s' done", task.name)
+			if err := sess.Commit(); err != nil {
+				return err
+			}
+		} else if task.engineFn != nil {
+			taskErr = task.engineFn(e)
 		} else {
 			log.Trace().Msgf("skip migration task '%s'", task.name)
+			aliveMsgCancel(nil)
+			continue
 		}
 
-		if _, err := sess.Insert(&migrations{task.name}); err != nil {
-			return err
+		aliveMsgCancel(nil)
+		if taskErr != nil {
+			if task.required {
+				return taskErr
+			}
+			log.Error().Err(taskErr).Msgf("migration task '%s' failed but is not required", task.name)
+			continue
 		}
-		if err := sess.Commit(); err != nil {
+		log.Debug().Msgf("migration task '%s' done", task.name)
+
+		if _, err := e.Insert(&migrations{task.name}); err != nil {
 			return err
 		}
 
