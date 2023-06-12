@@ -48,7 +48,7 @@ type Client interface {
 	Repo(repoID int64) (*Repo, error)
 
 	// RepoLookup returns a repository id by the owner and name.
-	RepoLookup(repoFullName string) (int64, error)
+	RepoLookup(repoFullName string) (*Repo, error)
 
 	// RepoList returns a list of all repositories to which the user has explicit
 	// access in the host system.

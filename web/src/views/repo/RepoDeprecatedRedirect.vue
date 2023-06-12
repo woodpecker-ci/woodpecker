@@ -18,7 +18,7 @@ const props = defineProps<{
 }>();
 
 onMounted(async () => {
-  const repoId = await apiClient.lookupRepo(props.repoOwner, props.repoName);
+  const repo = await apiClient.lookupRepo(props.repoOwner, props.repoName);
 
   // {
   //   path: ':pipelineId',
@@ -46,8 +46,8 @@ onMounted(async () => {
   // TODO: support pipeline and build routes
 
   const path = route.path
-    .replace(`/repos/${props.repoOwner}/${props.repoName}`, `/repos/${repoId}`)
-    .replace(`/${props.repoOwner}/${props.repoName}`, `/repos/${repoId}`);
+    .replace(`/repos/${props.repoOwner}/${props.repoName}`, `/repos/${repo?.id}`)
+    .replace(`/${props.repoOwner}/${props.repoName}`, `/repos/${repo?.id}`);
 
   await router.replace({ path });
 });

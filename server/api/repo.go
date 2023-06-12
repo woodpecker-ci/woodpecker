@@ -238,13 +238,13 @@ func ChownRepo(c *gin.Context) {
 
 // LookupRepo
 //
-//	@Summary	Get repository id for owner/name combination
+//	@Summary	Get repository by full-name
 //	@Router		/repos/lookup/{repo_full_name} [get]
 //	@Produce	json
 //	@Success	200	{object}	Repo
 //	@Tags		Repositories
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		repo_full_name	path	string	true	"the repository full-name / slug"
 func LookupRepo(c *gin.Context) {
 	_store := store.FromContext(c)
 	repoFullName := strings.TrimLeft(c.Param("repo_full_name"), "/")
@@ -260,7 +260,7 @@ func LookupRepo(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, repo.ID)
+	c.JSON(http.StatusOK, repo)
 }
 
 // GetRepo

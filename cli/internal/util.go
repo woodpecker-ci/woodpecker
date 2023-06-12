@@ -79,7 +79,11 @@ func NewClient(c *cli.Context) (woodpecker.Client, error) {
 // ParseRepo parses the repository owner and name from a string.
 func ParseRepo(client woodpecker.Client, str string) (repoID int64, err error) {
 	if strings.Contains(str, "/") {
-		return client.RepoLookup(str)
+		repo, err := client.RepoLookup(str)
+		if err != nil {
+			return 0, err
+		}
+		return repo.ID, nil
 	}
 
 	return strconv.ParseInt(str, 10, 64)

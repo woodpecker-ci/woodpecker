@@ -40,8 +40,8 @@ export default class WoodpeckerClient extends ApiClient {
     return this._get(`/api/user/repos?${query}`) as Promise<Repo[]>;
   }
 
-  lookupRepo(owner: string, name: string): Promise<number | undefined> {
-    return this._get(`/api/repos/lookup/${owner}/${name}`) as Promise<number | undefined>;
+  lookupRepo(owner: string, name: string): Promise<Repo | undefined> {
+    return this._get(`/api/repos/lookup/${owner}/${name}`) as Promise<Repo | undefined>;
   }
 
   getRepo(repoId: number): Promise<Repo> {

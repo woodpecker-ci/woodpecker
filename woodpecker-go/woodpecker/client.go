@@ -144,11 +144,11 @@ func (c *client) Repo(repoID int64) (*Repo, error) {
 }
 
 // RepoLookup returns a repository by name.
-func (c *client) RepoLookup(fullName string) (int64, error) {
-	var repoID int64
+func (c *client) RepoLookup(fullName string) (*Repo, error) {
+	out := new(Repo)
 	uri := fmt.Sprintf(pathRepoLookup, c.addr, fullName)
-	err := c.get(uri, &repoID)
-	return repoID, err
+	err := c.get(uri, out)
+	return out, err
 }
 
 // RepoList returns a list of all repositories to which
