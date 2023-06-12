@@ -14,7 +14,7 @@ import (
 var secretInfoCmd = &cli.Command{
 	Name:      "info",
 	Usage:     "display secret info",
-	ArgsUsage: "[org/repo|org]",
+	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    secretInfo,
 	Flags: append(common.GlobalFlags,
 		&cli.BoolFlag{
@@ -44,7 +44,7 @@ func secretInfo(c *cli.Context) error {
 		return err
 	}
 
-	global, owner, repo, err := parseTargetArgs(c)
+	global, owner, repoID, err := parseTargetArgs(client, c)
 	if err != nil {
 		return err
 	}
@@ -55,13 +55,13 @@ func secretInfo(c *cli.Context) error {
 		if err != nil {
 			return err
 		}
-	} else if repo == "" {
+	} else if owner != "" {
 		secret, err = client.OrgSecret(owner, secretName)
 		if err != nil {
 			return err
 		}
 	} else {
-		secret, err = client.Secret(owner, repo, secretName)
+		secret, err = client.Secret(repoID, secretName)
 		if err != nil {
 			return err
 		}

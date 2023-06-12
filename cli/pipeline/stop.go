@@ -27,14 +27,18 @@ import (
 var pipelineStopCmd = &cli.Command{
 	Name:      "stop",
 	Usage:     "stop a pipeline",
-	ArgsUsage: "<repo/name> [pipeline]",
+	ArgsUsage: "<repo-id|repo-full-name> [pipeline]",
 	Flags:     common.GlobalFlags,
 	Action:    pipelineStop,
 }
 
 func pipelineStop(c *cli.Context) (err error) {
-	repo := c.Args().First()
-	owner, name, err := internal.ParseRepo(repo)
+	repoIDOrFullName := c.Args().First()
+	client, err := internal.NewClient(c)
+	if err != nil {
+		return err
+	}
+	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
 	if err != nil {
 		return err
 	}
@@ -43,16 +47,11 @@ func pipelineStop(c *cli.Context) (err error) {
 		return err
 	}
 
-	client, err := internal.NewClient(c)
+	err = client.PipelineStop(repoID, number)
 	if err != nil {
 		return err
 	}
 
-	err = client.PipelineStop(owner, name, number)
-	if err != nil {
-		return err
-	}
-
-	fmt.Printf("Stopping pipeline %s/%s#%d\n", owner, name, number)
+	fmt.Printf("Stopping pipeline %s#%d\n", repoIDOrFullName, number)
 	return nil
 }

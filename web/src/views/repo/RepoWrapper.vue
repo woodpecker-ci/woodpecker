@@ -7,8 +7,8 @@
   >
     <template #title>
       <span class="flex">
-        <router-link :to="{ name: 'repos-owner', params: { repoOwner } }" class="hover:underline">{{
-          repoOwner
+        <router-link :to="{ name: 'org', params: { orgName: repo?.owner } }" class="hover:underline">{{
+          repo.owner
         }}</router-link>
         {{ `&nbsp;/&nbsp;${repo.name}` }}
       </span>
@@ -72,20 +72,12 @@ import { RepoPermissions } from '~/lib/api/types';
 import { usePipelineStore } from '~/store/pipelines';
 import { useRepoStore } from '~/store/repos';
 
-const props = defineProps({
-  repoOwner: {
-    type: String,
-    required: true,
-  },
+const props = defineProps<{
+  repoId: string;
+}>();
 
-  repoName: {
-    type: String,
-    required: true,
-  },
-});
-
-const repoOwner = toRef(props, 'repoOwner');
-const repoName = toRef(props, 'repoName');
+const _repoId = toRef(props, 'repoId');
+const repoId = computed(() => parseInt(_repoId.value, 10));
 const repoStore = useRepoStore();
 const pipelineStore = usePipelineStore();
 const apiClient = useApiClient();
@@ -97,9 +89,9 @@ const i18n = useI18n();
 const config = useConfig();
 
 const { forge } = useConfig();
-const repo = repoStore.getRepo(repoOwner, repoName);
+const repo = repoStore.getRepo(repoId);
 const repoPermissions = ref<RepoPermissions>();
-const pipelines = pipelineStore.getRepoPipelines(repoOwner, repoName);
+const pipelines = pipelineStore.getRepoPipelines(repoId);
 provide('repo', repo);
 provide('repo-permissions', repoPermissions);
 provide('pipelines', pipelines);
@@ -107,7 +99,7 @@ provide('pipelines', pipelines);
 const showManualPipelinePopup = ref(false);
 
 async function loadRepo() {
-  repoPermissions.value = await apiClient.getRepoPermissions(repoOwner.value, repoName.value);
+  repoPermissions.value = await apiClient.getRepoPermissions(repoId.value);
   if (!repoPermissions.value.pull) {
     notifications.notify({ type: 'error', title: i18n.t('repo.not_allowed') });
     // no access and not authenticated, redirect to login
@@ -119,26 +111,19 @@ async function loadRepo() {
     return;
   }
 
-  const apiRepo = await repoStore.loadRepo(repoOwner.value, repoName.value);
-  if (apiRepo.full_name !== `${repoOwner.value}/${repoName.value}`) {
-    await router.replace({
-      name: route.name ? route.name : 'repo',
-      params: { repoOwner: apiRepo.owner, repoName: apiRepo.name },
-    });
-    return;
-  }
-  await pipelineStore.loadRepoPipelines(repoOwner.value, repoName.value);
+  await repoStore.loadRepo(repoId.value);
+  await pipelineStore.loadRepoPipelines(repoId.value);
 }
 
 onMounted(() => {
   loadRepo();
 });
 
-watch([repoOwner, repoName], () => {
+watch([repoId], () => {
   loadRepo();
 });
 
-const badgeUrl = computed(() => repo.value && `/api/badges/${repo.value.owner}/${repo.value.name}/status.svg`);
+const badgeUrl = computed(() => repo.value && `/api/badges/${repo.value.id}/status.svg`);
 
 const activeTab = computed({
   get() {

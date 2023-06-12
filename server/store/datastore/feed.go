@@ -20,9 +20,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-var feedItemSelect = `repos.repo_owner as feed_repo_owner,
-repos.repo_name as feed_repo_name,
-repos.repo_full_name as feed_repo_full_name,
+var feedItemSelect = `repos.repo_id as feed_repo_id,
 pipelines.pipeline_id as feed_pipeline_id,
 pipelines.pipeline_number as feed_pipeline_number,
 pipelines.pipeline_event as feed_pipeline_event,

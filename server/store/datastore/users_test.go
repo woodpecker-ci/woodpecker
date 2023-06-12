@@ -245,9 +245,9 @@ func TestUsers(t *testing.T) {
 			pipelines, err := store.UserFeed(user)
 			g.Assert(err).IsNil()
 			g.Assert(len(pipelines)).Equal(3)
-			g.Assert(pipelines[0].FullName).Equal(repo2.FullName)
-			g.Assert(pipelines[1].FullName).Equal(repo1.FullName)
-			g.Assert(pipelines[2].FullName).Equal(repo1.FullName)
+			g.Assert(pipelines[0].RepoID).Equal(repo2.ID)
+			g.Assert(pipelines[1].RepoID).Equal(repo1.ID)
+			g.Assert(pipelines[2].RepoID).Equal(repo1.ID)
 		})
 	})
 }

@@ -12,26 +12,27 @@ import (
 var repoChownCmd = &cli.Command{
 	Name:      "chown",
 	Usage:     "assume ownership of a repository",
-	ArgsUsage: "<repo/name>",
+	ArgsUsage: "<repo-id|repo-full-name>",
 	Action:    repoChown,
 	Flags:     common.GlobalFlags,
 }
 
 func repoChown(c *cli.Context) error {
-	repo := c.Args().First()
-	owner, name, err := internal.ParseRepo(repo)
-	if err != nil {
-		return err
-	}
-
+	repoIDOrFullName := c.Args().First()
 	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
 	}
-
-	if _, err := client.RepoChown(owner, name); err != nil {
+	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
+	if err != nil {
 		return err
 	}
-	fmt.Printf("Successfully assumed ownership of repository %s/%s\n", owner, name)
+
+	repo, err := client.RepoChown(repoID)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Successfully assumed ownership of repository %s\n", repo.FullName)
 	return nil
 }

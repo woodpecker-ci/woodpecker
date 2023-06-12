@@ -14,7 +14,7 @@ import (
 var cronCreateCmd = &cli.Command{
 	Name:      "add",
 	Usage:     "add a cron job",
-	ArgsUsage: "[repo/name]",
+	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    cronCreate,
 	Flags: append(common.GlobalFlags,
 		common.RepoFlag,
@@ -38,29 +38,32 @@ var cronCreateCmd = &cli.Command{
 
 func cronCreate(c *cli.Context) error {
 	var (
-		jobName  = c.String("name")
-		branch   = c.String("branch")
-		schedule = c.String("schedule")
-		reponame = c.String("repository")
-		format   = c.String("format") + "\n"
+		jobName          = c.String("name")
+		branch           = c.String("branch")
+		schedule         = c.String("schedule")
+		repoIDOrFullName = c.String("repository")
+		format           = c.String("format") + "\n"
 	)
-	if reponame == "" {
-		reponame = c.Args().First()
+	if repoIDOrFullName == "" {
+		repoIDOrFullName = c.Args().First()
 	}
-	owner, name, err := internal.ParseRepo(reponame)
-	if err != nil {
-		return err
-	}
+
 	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
 	}
+
+	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
+	if err != nil {
+		return err
+	}
+
 	cron := &woodpecker.Cron{
 		Name:     jobName,
 		Branch:   branch,
 		Schedule: schedule,
 	}
-	cron, err = client.CronCreate(owner, name, cron)
+	cron, err = client.CronCreate(repoID, cron)
 	if err != nil {
 		return err
 	}
