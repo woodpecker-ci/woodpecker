@@ -11,7 +11,7 @@ when:
       include:
         - hello
 
-pipeline:
+steps:
   echo:
     image: alpine
     commands:

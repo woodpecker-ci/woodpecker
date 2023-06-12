@@ -15,9 +15,11 @@
 package migration
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"reflect"
+	"time"
 
 	"github.com/rs/zerolog/log"
 	"xorm.io/xorm"
@@ -47,6 +49,7 @@ var migrationTasks = []*task{
 	&removeInactiveRepos,
 	&dropFiles,
 	&removeMachineCol,
+	&dropOldCols,
 }
 
 var allBeans = []interface{}{
@@ -157,7 +160,9 @@ func runTasks(e *xorm.Engine, tasks []*task) error {
 		}
 
 		if task.fn != nil {
+			aliveMsgCancel := showBeAliveSign(task.name)
 			if err := task.fn(sess); err != nil {
+				aliveMsgCancel(nil)
 				if err2 := sess.Rollback(); err2 != nil {
 					err = errors.Join(err, err2)
 				}
@@ -168,6 +173,7 @@ func runTasks(e *xorm.Engine, tasks []*task) error {
 				log.Error().Err(err).Msgf("migration task '%s' failed but is not required", task.name)
 				continue
 			}
+			aliveMsgCancel(nil)
 			log.Debug().Msgf("migration task '%s' done", task.name)
 		} else {
 			log.Trace().Msgf("skip migration task '%s'", task.name)
@@ -196,4 +202,21 @@ func syncAll(sess syncEngine) error {
 		}
 	}
 	return nil
+}
+
+var showBeAliveSignDelay = time.Second * 20
+
+func showBeAliveSign(taskName string) context.CancelCauseFunc {
+	ctx, cancel := context.WithCancelCause(context.Background())
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-time.After(showBeAliveSignDelay):
+				log.Info().Msgf("Migration '%s' is still running, please be patient", taskName)
+			}
+		}
+	}()
+	return cancel
 }

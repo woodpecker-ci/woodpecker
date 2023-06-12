@@ -106,7 +106,6 @@ export type PipelineStep = {
   pipeline_id: number;
   pid: number;
   ppid: number;
-  pgid: number;
   name: string;
   state: PipelineStatus;
   exit_code: number;

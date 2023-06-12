@@ -85,7 +85,7 @@ used to run the commands.
 ```yaml
 # .woodpecker.yml
 
-pipeline:
+steps:
   build:
     image: bash
     commands:
@@ -116,7 +116,7 @@ only run on this agent:
 labels:
   type: exec
 
-pipeline:
+steps:
   [...]
 ```
 
