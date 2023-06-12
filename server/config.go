@@ -67,6 +67,9 @@ var Config = struct {
 		StatusContextFormat string
 		SessionExpires      time.Duration
 		RootURL             string
+		Migrations          struct {
+			AllowLong bool
+		}
 		// Open bool
 		// Orgs map[string]struct{}
 		// Admins map[string]struct{}
