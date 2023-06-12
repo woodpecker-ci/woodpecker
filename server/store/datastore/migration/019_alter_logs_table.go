@@ -97,7 +97,7 @@ var migrateLogs2LogEntries = task{
 			return err
 		}
 
-		hasJsonErrors := false
+		hasJSONErrors := false
 
 		page := 0
 		offset := 0
@@ -134,7 +134,7 @@ var migrateLogs2LogEntries = task{
 			for _, l := range logs {
 				logEntries = logEntries[:0]
 				if err := json.Unmarshal(l.Data, &logEntries); err != nil {
-					hasJsonErrors = true
+					hasJSONErrors = true
 					offset++
 					continue
 				}
@@ -176,7 +176,7 @@ var migrateLogs2LogEntries = task{
 			page++
 		}
 
-		if hasJsonErrors {
+		if hasJSONErrors {
 			return fmt.Errorf("skipped some logs as json could not be deserialized for them")
 		}
 
