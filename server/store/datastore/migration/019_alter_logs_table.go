@@ -102,7 +102,9 @@ var migrateLogs2LogEntries = task{
 		logs := make([]*oldLogs019, 0, perPage019)
 		logEntries := make([]*oldLogEntry019, 0, 50)
 		sigterm := abool.New()
-		_ = utils.WithContextSigtermCallback(context.Background(), func() {
+		ctx, cancelCtx := context.WithCancelCause(context.Background())
+		defer cancelCtx(nil)
+		_ = utils.WithContextSigtermCallback(ctx, func() {
 			log.Info().Msg("ctrl+c received, stopping current migration")
 			sigterm.Set()
 		})
