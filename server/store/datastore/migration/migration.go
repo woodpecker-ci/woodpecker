@@ -170,7 +170,7 @@ func runTasks(e *xorm.Engine, tasks []*task) error {
 
 			if taskErr = task.fn(sess); taskErr != nil {
 				aliveMsgCancel(nil)
-				err = fmt.Errorf("migration '%s' error: %w", task.name, err)
+				taskErr = fmt.Errorf("migration '%s' error: %w", task.name, taskErr)
 				if err2 := sess.Rollback(); err2 != nil {
 					taskErr = errors.Join(taskErr, err2)
 				}
