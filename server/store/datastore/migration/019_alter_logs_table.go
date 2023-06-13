@@ -97,9 +97,13 @@ var migrateLogs2LogEntries = task{
 			return err
 		}
 
+		hasJSONErrors := false
+
 		page := 0
+		offset := 0
 		logs := make([]*oldLogs019, 0, perPage019)
 		logEntries := make([]*oldLogEntry019, 0, 50)
+
 		sigterm := abool.New()
 		ctx, cancelCtx := context.WithCancelCause(context.Background())
 		defer cancelCtx(nil)
@@ -120,7 +124,7 @@ var migrateLogs2LogEntries = task{
 			}
 			logs = logs[:0]
 
-			err := sess.Limit(perPage019).Find(&logs)
+			err := sess.Limit(perPage019, offset).Find(&logs)
 			if err != nil {
 				return err
 			}
@@ -130,7 +134,9 @@ var migrateLogs2LogEntries = task{
 			for _, l := range logs {
 				logEntries = logEntries[:0]
 				if err := json.Unmarshal(l.Data, &logEntries); err != nil {
-					return err
+					hasJSONErrors = true
+					offset++
+					continue
 				}
 
 				time := int64(0)
@@ -168,6 +174,10 @@ var migrateLogs2LogEntries = task{
 
 			runtime.GC()
 			page++
+		}
+
+		if hasJSONErrors {
+			return fmt.Errorf("skipped some logs as json could not be deserialized for them")
 		}
 
 		return e.DropTables("logs")
