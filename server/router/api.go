@@ -187,7 +187,7 @@ func apiRoutes(e *gin.Engine) {
 
 		stream := apiBase.Group("/stream")
 		{
-			stream.GET("/logs/:owner/:name/:pipeline/:stepId",
+			stream.GET("/logs/:repo_id/:pipeline/:stepId",
 				session.SetRepo(),
 				session.SetPerm(),
 				session.MustPull,
