@@ -51,7 +51,6 @@ var migrationTasks = []*task{
 	&removeMachineCol,
 	&dropOldCols,
 	&initLogsEntriesTable,
-	&migrateLogs2LogEntries,
 }
 
 // IMPORTANT: if you add something here, also add it to copy.go Copy() func
