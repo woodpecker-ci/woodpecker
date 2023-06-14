@@ -30,27 +30,6 @@ import (
 // APPEND NEW MIGRATIONS
 // they are executed in order and if one fails woodpecker will try to rollback that specific one and quits
 var migrationTasks = []*task{
-	&legacy2Xorm,
-	&alterTableReposDropFallback,
-	&alterTableReposDropAllowDeploysAllowTags,
-	&fixPRSecretEventName,
-	&alterTableReposDropCounter,
-	&dropSenders,
-	&alterTableLogUpdateColumnLogDataType,
-	&alterTableSecretsAddUserCol,
-	&recreateAgentsTable,
-	&lowercaseSecretNames,
-	&renameBuildsToPipeline,
-	&renameColumnsBuildsToPipeline,
-	&renameTableProcsToSteps,
-	&renameRemoteToForge,
-	&renameForgeIDToForgeRemoteID,
-	&removeActiveFromUsers,
-	&removeInactiveRepos,
-	&dropFiles,
-	&removeMachineCol,
-	&dropOldCols,
-	&initLogsEntriesTable,
 	&migrateLogs2LogEntries,
 }
 

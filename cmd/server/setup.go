@@ -90,6 +90,9 @@ func setupStore(c *cli.Context) (store.Store, error) {
 		log.Fatal().Err(err).Msg("could not migrate datastore")
 	}
 
+	time.Sleep(time.Second)
+	os.Exit(0)
+
 	return store, nil
 }
 
