@@ -10,7 +10,7 @@ import (
 var secretDeleteCmd = &cli.Command{
 	Name:      "rm",
 	Usage:     "remove a secret",
-	ArgsUsage: "[org/repo|org]",
+	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    secretDelete,
 	Flags: append(common.GlobalFlags,
 		&cli.BoolFlag{
@@ -37,7 +37,7 @@ func secretDelete(c *cli.Context) error {
 		return err
 	}
 
-	global, owner, repo, err := parseTargetArgs(c)
+	global, owner, repoID, err := parseTargetArgs(client, c)
 	if err != nil {
 		return err
 	}
@@ -45,8 +45,8 @@ func secretDelete(c *cli.Context) error {
 	if global {
 		return client.GlobalSecretDelete(secretName)
 	}
-	if repo == "" {
+	if owner != "" {
 		return client.OrgSecretDelete(owner, secretName)
 	}
-	return client.SecretDelete(owner, repo, secretName)
+	return client.SecretDelete(repoID, secretName)
 }

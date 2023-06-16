@@ -190,7 +190,7 @@ async function download() {
   let logs;
   try {
     downloadInProgress.value = true;
-    logs = await apiClient.getLogs(repo.value.owner, repo.value.name, pipeline.value.number, step.value.id);
+    logs = await apiClient.getLogs(repo.value.id, pipeline.value.number, step.value.id);
   } catch (e) {
     notifications.notifyError(e, i18n.t('repo.pipeline.log_download_error'));
     return;
@@ -239,22 +239,16 @@ async function loadLogs() {
   }
 
   if (isStepFinished(step.value)) {
-    const logs = await apiClient.getLogs(repo.value.owner, repo.value.name, pipeline.value.number, step.value.id);
+    const logs = await apiClient.getLogs(repo.value.id, pipeline.value.number, step.value.id);
     logs?.forEach((line) => writeLog({ index: line.line, text: atob(line.data), time: line.time }));
     flushLogs(false);
   }
 
   if (isStepRunning(step.value)) {
-    stream.value = apiClient.streamLogs(
-      repo.value.owner,
-      repo.value.name,
-      pipeline.value.number,
-      step.value.id,
-      (line) => {
-        writeLog({ index: line.line, text: atob(line.data), time: line.time });
-        flushLogs(true);
-      },
-    );
+    stream.value = apiClient.streamLogs(repo.value.id, pipeline.value.number, step.value.id, (line) => {
+      writeLog({ index: line.line, text: atob(line.data), time: line.time });
+      flushLogs(true);
+    });
   }
 }
 

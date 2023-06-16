@@ -45,7 +45,10 @@ type Client interface {
 	UserDel(string) error
 
 	// Repo returns a repository by name.
-	Repo(string, string) (*Repo, error)
+	Repo(repoID int64) (*Repo, error)
+
+	// RepoLookup returns a repository id by the owner and name.
+	RepoLookup(repoFullName string) (*Repo, error)
 
 	// RepoList returns a list of all repositories to which the user has explicit
 	// access in the host system.
@@ -56,94 +59,94 @@ type Client interface {
 	RepoListOpts(bool, bool) ([]*Repo, error)
 
 	// RepoPost activates a repository.
-	RepoPost(string, string) (*Repo, error)
+	RepoPost(forgeRemoteID int64) (*Repo, error)
 
 	// RepoPatch updates a repository.
-	RepoPatch(string, string, *RepoPatch) (*Repo, error)
+	RepoPatch(repoID int64, repo *RepoPatch) (*Repo, error)
 
 	// RepoMove moves the repository
-	RepoMove(string, string, string) error
+	RepoMove(repoID int64, dst string) error
 
 	// RepoChown updates a repository owner.
-	RepoChown(string, string) (*Repo, error)
+	RepoChown(repoID int64) (*Repo, error)
 
 	// RepoRepair repairs the repository hooks.
-	RepoRepair(string, string) error
+	RepoRepair(repoID int64) error
 
 	// RepoDel deletes a repository.
-	RepoDel(string, string) error
+	RepoDel(repoID int64) error
 
 	// Pipeline returns a repository pipeline by number.
-	Pipeline(string, string, int) (*Pipeline, error)
+	Pipeline(repoID int64, pipeline int) (*Pipeline, error)
 
 	// PipelineLast returns the latest repository pipeline by branch. An empty branch
 	// will result in the default branch.
-	PipelineLast(string, string, string) (*Pipeline, error)
+	PipelineLast(repoID int64, branch string) (*Pipeline, error)
 
 	// PipelineList returns a list of recent pipelines for the
 	// the specified repository.
-	PipelineList(string, string) ([]*Pipeline, error)
+	PipelineList(repoID int64) ([]*Pipeline, error)
 
 	// PipelineQueue returns a list of enqueued pipelines.
 	PipelineQueue() ([]*Activity, error)
 
 	// PipelineCreate returns creates a pipeline on specified branch.
-	PipelineCreate(string, string, *PipelineOptions) (*Pipeline, error)
+	PipelineCreate(repoID int64, opts *PipelineOptions) (*Pipeline, error)
 
 	// PipelineStart re-starts a stopped pipeline.
-	PipelineStart(string, string, int, map[string]string) (*Pipeline, error)
+	PipelineStart(repoID int64, num int, params map[string]string) (*Pipeline, error)
 
 	// PipelineStop stops the given pipeline.
-	PipelineStop(string, string, int) error
+	PipelineStop(repoID int64, pipeline int) error
 
 	// PipelineApprove approves a blocked pipeline.
-	PipelineApprove(string, string, int) (*Pipeline, error)
+	PipelineApprove(repoID int64, pipeline int) (*Pipeline, error)
 
 	// PipelineDecline declines a blocked pipeline.
-	PipelineDecline(string, string, int) (*Pipeline, error)
+	PipelineDecline(repoID int64, pipeline int) (*Pipeline, error)
 
 	// PipelineKill force kills the running pipeline.
-	PipelineKill(string, string, int) error
+	PipelineKill(repoID int64, pipeline int) error
 
 	// StepLogEntries returns the LogEntries for the given pipeline step
-	StepLogEntries(string, string, int, int) ([]*LogEntry, error)
+	StepLogEntries(repoID int64, pipeline, stepID int) ([]*LogEntry, error)
 
 	// Deploy triggers a deployment for an existing pipeline using the specified
 	// target environment.
-	Deploy(string, string, int, string, map[string]string) (*Pipeline, error)
+	Deploy(repoID int64, pipeline int, env string, params map[string]string) (*Pipeline, error)
 
 	// LogsPurge purges the pipeline logs for the specified pipeline.
-	LogsPurge(string, string, int) error
+	LogsPurge(repoID int64, pipeline int) error
 
 	// Registry returns a registry by hostname.
-	Registry(owner, name, hostname string) (*Registry, error)
+	Registry(repoID int64, hostname string) (*Registry, error)
 
 	// RegistryList returns a list of all repository registries.
-	RegistryList(owner, name string) ([]*Registry, error)
+	RegistryList(repoID int64) ([]*Registry, error)
 
 	// RegistryCreate creates a registry.
-	RegistryCreate(owner, name string, registry *Registry) (*Registry, error)
+	RegistryCreate(repoID int64, registry *Registry) (*Registry, error)
 
 	// RegistryUpdate updates a registry.
-	RegistryUpdate(owner, name string, registry *Registry) (*Registry, error)
+	RegistryUpdate(repoID int64, registry *Registry) (*Registry, error)
 
 	// RegistryDelete deletes a registry.
-	RegistryDelete(owner, name, hostname string) error
+	RegistryDelete(repoID int64, hostname string) error
 
 	// Secret returns a secret by name.
-	Secret(owner, name, secret string) (*Secret, error)
+	Secret(repoID int64, secret string) (*Secret, error)
 
 	// SecretList returns a list of all repository secrets.
-	SecretList(owner, name string) ([]*Secret, error)
+	SecretList(repoID int64) ([]*Secret, error)
 
 	// SecretCreate creates a secret.
-	SecretCreate(owner, name string, secret *Secret) (*Secret, error)
+	SecretCreate(repoID int64, secret *Secret) (*Secret, error)
 
 	// SecretUpdate updates a secret.
-	SecretUpdate(owner, name string, secret *Secret) (*Secret, error)
+	SecretUpdate(repoID int64, secret *Secret) (*Secret, error)
 
 	// SecretDelete deletes a secret.
-	SecretDelete(owner, name, secret string) error
+	SecretDelete(repoID int64, secret string) error
 
 	// OrgSecret returns an organization secret by name.
 	OrgSecret(owner, secret string) (*Secret, error)
@@ -185,19 +188,19 @@ type Client interface {
 	SetLogLevel(logLevel *LogLevel) (*LogLevel, error)
 
 	// CronList list all cron jobs of a repo
-	CronList(owner, repo string) ([]*Cron, error)
+	CronList(repoID int64) ([]*Cron, error)
 
 	// CronGet get a specific cron job of a repo by id
-	CronGet(owner, repo string, cronID int64) (*Cron, error)
+	CronGet(repoID, cronID int64) (*Cron, error)
 
 	// CronDelete delete a specific cron job of a repo by id
-	CronDelete(owner, repo string, cronID int64) error
+	CronDelete(repoID, cronID int64) error
 
 	// CronCreate create a new cron job in a repo
-	CronCreate(owner, repo string, cron *Cron) (*Cron, error)
+	CronCreate(repoID int64, cron *Cron) (*Cron, error)
 
 	// CronUpdate update an existing cron job of a repo
-	CronUpdate(owner, repo string, cron *Cron) (*Cron, error)
+	CronUpdate(repoID int64, cron *Cron) (*Cron, error)
 
 	// AgentList returns a list of all registered agents
 	AgentList() ([]*Agent, error)

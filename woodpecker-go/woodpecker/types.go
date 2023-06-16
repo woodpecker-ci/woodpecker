@@ -27,23 +27,26 @@ type (
 
 	// Repo represents a repository.
 	Repo struct {
-		ID         int64  `json:"id,omitempty"`
-		Owner      string `json:"owner"`
-		Name       string `json:"name"`
-		FullName   string `json:"full_name"`
-		Avatar     string `json:"avatar_url,omitempty"`
-		Link       string `json:"link_url,omitempty"`
-		Kind       string `json:"scm,omitempty"`
-		Clone      string `json:"clone_url,omitempty"`
-		Branch     string `json:"default_branch,omitempty"`
-		Timeout    int64  `json:"timeout,omitempty"`
-		Visibility string `json:"visibility"`
-		IsPrivate  bool   `json:"private,omitempty"`
-		IsTrusted  bool   `json:"trusted"`
-		IsStarred  bool   `json:"starred,omitempty"`
-		IsGated    bool   `json:"gated"`
-		AllowPull  bool   `json:"allow_pr"`
-		Config     string `json:"config_file"`
+		ID                           int64    `json:"id,omitempty"`
+		ForgeRemoteID                string   `json:"forge_remote_id"`
+		Owner                        string   `json:"owner"`
+		Name                         string   `json:"name"`
+		FullName                     string   `json:"full_name"`
+		Avatar                       string   `json:"avatar_url,omitempty"`
+		Link                         string   `json:"link_url,omitempty"`
+		Clone                        string   `json:"clone_url,omitempty"`
+		DefaultBranch                string   `json:"default_branch,omitempty"`
+		SCMKind                      string   `json:"scm,omitempty"`
+		Timeout                      int64    `json:"timeout,omitempty"`
+		Visibility                   string   `json:"visibility"`
+		IsSCMPrivate                 bool     `json:"private"`
+		IsTrusted                    bool     `json:"trusted"`
+		IsGated                      bool     `json:"gated"`
+		IsActive                     bool     `json:"active"`
+		AllowPullRequests            bool     `json:"allow_pr"`
+		Config                       string   `json:"config_file"`
+		CancelPreviousPipelineEvents []string `json:"cancel_previous_pipeline_events"`
+		NetrcOnlyTrusted             bool     `json:"netrc_only_trusted"`
 	}
 
 	// RepoPatch defines a repository patch request.

@@ -133,7 +133,7 @@ const { doSubmit: approvePipeline, isLoading: isApprovingPipeline } = useAsyncAc
     throw new Error('Unexpected: Repo is undefined');
   }
 
-  await apiClient.approvePipeline(repo.value.owner, repo.value.name, `${pipeline.value.number}`);
+  await apiClient.approvePipeline(repo.value.id, `${pipeline.value.number}`);
   notifications.notify({ title: i18n.t('repo.pipeline.protected.approve_success'), type: 'success' });
 });
 
@@ -142,7 +142,7 @@ const { doSubmit: declinePipeline, isLoading: isDecliningPipeline } = useAsyncAc
     throw new Error('Unexpected: Repo is undefined');
   }
 
-  await apiClient.declinePipeline(repo.value.owner, repo.value.name, `${pipeline.value.number}`);
+  await apiClient.declinePipeline(repo.value.id, `${pipeline.value.number}`);
   notifications.notify({ title: i18n.t('repo.pipeline.protected.decline_success'), type: 'success' });
 });
 </script>

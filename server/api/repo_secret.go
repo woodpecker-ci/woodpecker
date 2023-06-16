@@ -28,13 +28,12 @@ import (
 // GetSecret
 //
 //	@Summary	Get a named secret
-//	@Router		/repos/{owner}/{name}/secrets/{secretName} [get]
+//	@Router		/repos/{repo_id}/secrets/{secretName} [get]
 //	@Produce	json
 //	@Success	200	{object}	Secret
 //	@Tags		Repository secrets
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		owner			path	string	true	"the repository owner's name"
-//	@Param		name			path	string	true	"the repository name"
+//	@Param		repo_id			path	int		true	"the repository id"
 //	@Param		secretName		path	string	true	"the secret name"
 func GetSecret(c *gin.Context) {
 	var (
@@ -52,13 +51,12 @@ func GetSecret(c *gin.Context) {
 // PostSecret
 //
 //	@Summary	Persist/create a secret
-//	@Router		/repos/{owner}/{name}/secrets [post]
+//	@Router		/repos/{repo_id}/secrets [post]
 //	@Produce	json
 //	@Success	200	{object}	Secret
 //	@Tags		Repository secrets
 //	@Param		Authorization	header	string			true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		owner			path	string			true	"the repository owner's name"
-//	@Param		name			path	string			true	"the repository name"
+//	@Param		repo_id			path	int		true	"the repository id"
 //	@Param		secret			body	Secret	true	"the new secret"
 func PostSecret(c *gin.Context) {
 	repo := session.Repo(c)
@@ -90,13 +88,12 @@ func PostSecret(c *gin.Context) {
 // PatchSecret
 //
 //	@Summary	Update a named secret
-//	@Router		/repos/{owner}/{name}/secrets/{secretName} [patch]
+//	@Router		/repos/{repo_id}/secrets/{secretName} [patch]
 //	@Produce	json
 //	@Success	200	{object}	Secret
 //	@Tags		Repository secrets
 //	@Param		Authorization	header	string			true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		owner			path	string			true	"the repository owner's name"
-//	@Param		name			path	string			true	"the repository name"
+//	@Param		repo_id			path	int		true	"the repository id"
 //	@Param		secretName		path	string			true	"the secret name"
 //	@Param		secret			body	Secret	true	"the secret itself"
 func PatchSecret(c *gin.Context) {
@@ -142,13 +139,12 @@ func PatchSecret(c *gin.Context) {
 // GetSecretList
 //
 //	@Summary	Get the secret list
-//	@Router		/repos/{owner}/{name}/secrets [get]
+//	@Router		/repos/{repo_id}/secrets [get]
 //	@Produce	json
 //	@Success	200	{array}	Secret
 //	@Tags		Repository secrets
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		owner			path	string	true	"the repository owner's name"
-//	@Param		name			path	string	true	"the repository name"
+//	@Param		repo_id			path	int		true	"the repository id"
 //	@Param		page			query	int		false	"for response pagination, page offset number"	default(1)
 //	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
 func GetSecretList(c *gin.Context) {
@@ -169,13 +165,12 @@ func GetSecretList(c *gin.Context) {
 // DeleteSecret
 //
 //	@Summary	Delete a named secret
-//	@Router		/repos/{owner}/{name}/secrets/{secretName} [delete]
+//	@Router		/repos/{repo_id}/secrets/{secretName} [delete]
 //	@Produce	plain
 //	@Success	200
 //	@Tags		Repository secrets
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		owner			path	string	true	"the repository owner's name"
-//	@Param		name			path	string	true	"the repository name"
+//	@Param		repo_id			path	int		true	"the repository id"
 //	@Param		secretName		path	string	true	"the secret name"
 func DeleteSecret(c *gin.Context) {
 	var (
