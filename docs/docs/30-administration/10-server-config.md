@@ -131,6 +131,13 @@ Server fully qualified URL of the user-facing hostname.
 
 Example: `WOODPECKER_HOST=http://woodpecker.example.org`
 
+### `WOODPECKER_WEBHOOK_HOST`
+> Default: empty
+
+Server fully qualified URL of the Webhook-facing hostname.
+
+Example: `WOODPECKER_HOST=http://woodpecker-server.cicd.svc.cluster.local:8000`
+
 ### `WOODPECKER_SERVER_ADDR`
 > Default: `:8000`
 
