@@ -96,9 +96,9 @@ func GetRepos(c *gin.Context) {
 	}
 
 	if all {
-		active := map[string]bool{}
+		active := map[model.ForgeRemoteID]*model.Repo{}
 		for _, r := range activeRepos {
-			active[r.FullName] = r.IsActive
+			active[r.ForgeRemoteID] = r
 		}
 
 		_repos, err := _forge.Repos(c, user)
@@ -106,13 +106,18 @@ func GetRepos(c *gin.Context) {
 			c.String(http.StatusInternalServerError, "Error fetching repository list. %s", err)
 			return
 		}
+
 		var repos []*model.Repo
 		for _, r := range _repos {
 			if r.Perm.Push {
-				if active[r.FullName] {
-					r.IsActive = true
+				if active[r.ForgeRemoteID] != nil && active[r.ForgeRemoteID].IsActive {
+					existingRepo := active[r.ForgeRemoteID]
+					existingRepo.Update(r)
+					existingRepo.IsActive = true
+					repos = append(repos, existingRepo)
+				} else {
+					repos = append(repos, r)
 				}
-				repos = append(repos, r)
 			}
 		}
 
