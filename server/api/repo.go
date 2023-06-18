@@ -108,13 +108,9 @@ func PostRepo(c *gin.Context) {
 		return
 	}
 
-	wpHost := server.Config.Server.WebhookHost
-	if wpHost == "" {
-		wpHost = server.Config.Server.Host
-	}
 	link := fmt.Sprintf(
 		"%s/hook?access_token=%s",
-		wpHost,
+		server.Config.Server.WebhookHost,
 		sig,
 	)
 

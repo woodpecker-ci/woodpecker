@@ -132,7 +132,7 @@ Server fully qualified URL of the user-facing hostname.
 Example: `WOODPECKER_HOST=http://woodpecker.example.org`
 
 ### `WOODPECKER_WEBHOOK_HOST`
-> Default: empty
+> Default: value from `WOODPECKER_HOST` config env
 
 Server fully qualified URL of the Webhook-facing hostname.
 
