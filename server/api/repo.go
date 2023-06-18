@@ -110,7 +110,7 @@ func PostRepo(c *gin.Context) {
 
 	link := fmt.Sprintf(
 		"%s/hook?access_token=%s",
-		server.Config.Server.Host,
+		server.Config.Server.WebhookHost,
 		sig,
 	)
 
