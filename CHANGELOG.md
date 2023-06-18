@@ -24,7 +24,6 @@
   * Implement YAML Map Merge, Overrides, and Sequence Merge Support (#1720)
   * Add users UI for admins (#1634)
   * Add agent no-schedule flag (#1567)
-  * Secrets encryption in database (#1475)
   * Change locale in user settings (#1305)
   * Add when evaluate filter (#1213)
   * Store an agents list and add agent heartbeats (#1189)
@@ -87,6 +86,7 @@
   * Support conditional branch as an array to align with documentation (#836)
   * Fix redirect after login (#824)
 * ENHANCEMENTS
+  * Added Woodpecker Host Config used for Webhooks (#1869)
   * Drop old columns (#1838)
   * Remove MSSQL specific code and cleanups (#1796)
   * Remove unused file system API (#1791)
