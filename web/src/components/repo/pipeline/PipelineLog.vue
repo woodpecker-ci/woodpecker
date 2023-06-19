@@ -42,9 +42,10 @@
             :href="`#L${line.index}`"
             class="text-gray-500 whitespace-nowrap select-none text-right pl-1 pr-2"
             :class="{
-              'bg-opacity-50 bg-red-800': line.type === 'error',
-              'bg-opacity-50 bg-yellow-800': line.type === 'warning',
-              'bg-opacity-20 bg-blue-800 underline': $route.hash === `#L${line.index}`,
+              'bg-opacity-40 dark:bg-opacity-50 bg-red-600 dark:bg-red-800': line.type === 'error',
+              'bg-opacity-40 dark:bg-opacity-50 bg-yellow-600 dark:bg-yellow-800': line.type === 'warning',
+              'bg-opacity-20 bg-blue-600': $route.hash === `#L${line.index}`,
+              underline: $route.hash === `#L${line.index}`,
             }"
             >{{ line.index + 1 }}</a
           >
@@ -52,9 +53,9 @@
           <span
             class="align-top text-color whitespace-pre-wrap break-words"
             :class="{
-              'bg-opacity-50 bg-red-800': line.type === 'error',
-              'bg-opacity-50 bg-yellow-800': line.type === 'warning',
-              'bg-opacity-20 bg-blue-800': $route.hash === `#L${line.index}`,
+              'bg-opacity-40 dark:bg-opacity-50 bg-red-600 dark:bg-red-800': line.type === 'error',
+              'bg-opacity-40 dark:bg-opacity-50 bg-yellow-600 dark:bg-yellow-800': line.type === 'warning',
+              'bg-opacity-20 bg-blue-600': $route.hash === `#L${line.index}`,
             }"
             v-html="line.text"
           />
@@ -62,9 +63,9 @@
           <span
             class="text-gray-500 whitespace-nowrap select-none text-right pr-1"
             :class="{
-              'bg-opacity-50 bg-red-800': line.type === 'error',
-              'bg-opacity-50 bg-yellow-800': line.type === 'warning',
-              'bg-opacity-20 bg-blue-800': $route.hash === `#L${line.index}`,
+              'bg-opacity-40 dark:bg-opacity-50 bg-red-600 dark:bg-red-800': line.type === 'error',
+              'bg-opacity-40 dark:bg-opacity-50 bg-yellow-600 dark:bg-yellow-800': line.type === 'warning',
+              'bg-opacity-20 bg-blue-600': $route.hash === `#L${line.index}`,
             }"
             >{{ formatTime(line.time) }}</span
           >
@@ -157,14 +158,43 @@ function formatTime(time?: number): string {
 }
 
 function getLogType(text: string): LogLine['type'] {
-  if (
-    text.match(
-      'error|fail|fatal|exception|panic|abort|crash|broken|invalid|unavailable|unreachable|unrecoverable|unresolvable|unresolved|unhandled|uncaught|unknown|unexpected',
-    )
-  ) {
+  const check = (keywords: string[]) => text.match(new RegExp(`\\s(${keywords.join('|')})[\\s:]`, 'i'));
+  const errorKeywords = [
+    'error',
+    'fail',
+    'fatal',
+    'exception',
+    'panic',
+    'abort',
+    'crash',
+    'broken',
+    'invalid',
+    'unavailable',
+    'unreachable',
+    'unrecoverable',
+    'unresolvable',
+    'unresolved',
+    'unhandled',
+    'uncaught',
+    'unknown',
+    'unexpected',
+  ];
+  const warningKeywords = [
+    'warning',
+    'warn',
+    'deprecated',
+    'deprecation',
+    'obsolete',
+    'outdated',
+    'obsolete',
+    'deprecated',
+  ];
+
+  if (check(errorKeywords)) {
     return 'error';
   }
-  if (text.match('warning|warn|deprecated|deprecation|obsolete|outdated|obsolete|deprecated')) {
+
+  if (check(warningKeywords)) {
     return 'warning';
   }
 
