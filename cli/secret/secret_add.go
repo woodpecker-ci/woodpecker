@@ -14,7 +14,7 @@ import (
 var secretCreateCmd = &cli.Command{
 	Name:      "add",
 	Usage:     "adds a secret",
-	ArgsUsage: "[org/repo|org]",
+	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    secretCreate,
 	Flags: append(common.GlobalFlags,
 		&cli.BoolFlag{
@@ -74,7 +74,7 @@ func secretCreate(c *cli.Context) error {
 		secret.Value = string(out)
 	}
 
-	global, owner, repo, err := parseTargetArgs(c)
+	global, owner, repoID, err := parseTargetArgs(client, c)
 	if err != nil {
 		return err
 	}
@@ -83,11 +83,11 @@ func secretCreate(c *cli.Context) error {
 		_, err = client.GlobalSecretCreate(secret)
 		return err
 	}
-	if repo == "" {
+	if owner != "" {
 		_, err = client.OrgSecretCreate(owner, secret)
 		return err
 	}
-	_, err = client.SecretCreate(owner, repo, secret)
+	_, err = client.SecretCreate(repoID, secret)
 	return err
 }
 

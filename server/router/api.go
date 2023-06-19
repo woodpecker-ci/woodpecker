@@ -61,8 +61,9 @@ func apiRoutes(e *gin.RouterGroup) {
 			}
 		}
 
-		apiBase.POST("/repos/:owner/:name", session.MustUser(), api.PostRepo)
-		repoBase := apiBase.Group("/repos/:owner/:name")
+		apiBase.GET("/repos/lookup/*repo_full_name", api.LookupRepo) // TODO: check if this public route is a security issue
+		apiBase.POST("/repos", session.MustUser(), api.PostRepo)
+		repoBase := apiBase.Group("/repos/:repo_id")
 		{
 			repoBase.Use(session.SetRepo())
 			repoBase.Use(session.SetPerm())
@@ -125,10 +126,16 @@ func apiRoutes(e *gin.RouterGroup) {
 			}
 		}
 
-		badges := apiBase.Group("/badges/:owner/:name")
+		badges := apiBase.Group("/badges/:repo_id_or_owner")
 		{
 			badges.GET("/status.svg", api.GetBadge)
 			badges.GET("/cc.xml", api.GetCC)
+		}
+
+		_badges := apiBase.Group("/badges/:repo_id_or_owner/:repo_name")
+		{
+			_badges.GET("/status.svg", api.GetBadge)
+			_badges.GET("/cc.xml", api.GetCC)
 		}
 
 		pipelines := apiBase.Group("/pipelines")
@@ -180,7 +187,7 @@ func apiRoutes(e *gin.RouterGroup) {
 
 		stream := apiBase.Group("/stream")
 		{
-			stream.GET("/logs/:owner/:name/:pipeline/:stepId",
+			stream.GET("/logs/:repo_id/:pipeline/:stepId",
 				session.SetRepo(),
 				session.SetPerm(),
 				session.MustPull,

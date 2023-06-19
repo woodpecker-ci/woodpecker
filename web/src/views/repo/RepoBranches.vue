@@ -31,7 +31,7 @@ async function loadBranches(page: number): Promise<string[]> {
     throw new Error('Unexpected: "repo" should be provided at this place');
   }
 
-  return apiClient.getRepoBranches(repo.value.owner, repo.value.name, page);
+  return apiClient.getRepoBranches(repo.value.id, page);
 }
 
 const { resetPage, data: branches } = usePagination(loadBranches);

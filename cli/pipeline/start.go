@@ -28,7 +28,7 @@ import (
 var pipelineStartCmd = &cli.Command{
 	Name:      "start",
 	Usage:     "start a pipeline",
-	ArgsUsage: "<repo/name> [pipeline]",
+	ArgsUsage: "<repo-id|repo-full-name> [pipeline]",
 	Action:    pipelineStart,
 	Flags: append(common.GlobalFlags,
 		&cli.StringSliceFlag{
@@ -40,13 +40,12 @@ var pipelineStartCmd = &cli.Command{
 }
 
 func pipelineStart(c *cli.Context) (err error) {
-	repo := c.Args().First()
-	owner, name, err := internal.ParseRepo(repo)
+	repoIDOrFullName := c.Args().First()
+	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
 	}
-
-	client, err := internal.NewClient(c)
+	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
 	if err != nil {
 		return err
 	}
@@ -55,7 +54,7 @@ func pipelineStart(c *cli.Context) (err error) {
 	var number int
 	if pipelineArg == "last" {
 		// Fetch the pipeline number from the last pipeline
-		pipeline, err := client.PipelineLast(owner, name, "")
+		pipeline, err := client.PipelineLast(repoID, "")
 		if err != nil {
 			return err
 		}
@@ -72,11 +71,11 @@ func pipelineStart(c *cli.Context) (err error) {
 
 	params := internal.ParseKeyPair(c.StringSlice("param"))
 
-	pipeline, err := client.PipelineStart(owner, name, number, params)
+	pipeline, err := client.PipelineStart(repoID, number, params)
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("Starting pipeline %s/%s#%d\n", owner, name, pipeline.Number)
+	fmt.Printf("Starting pipeline %s#%d\n", repoIDOrFullName, pipeline.Number)
 	return nil
 }

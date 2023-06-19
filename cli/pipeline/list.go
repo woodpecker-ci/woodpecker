@@ -27,7 +27,7 @@ import (
 var pipelineListCmd = &cli.Command{
 	Name:      "ls",
 	Usage:     "show pipeline history",
-	ArgsUsage: "<repo/name>",
+	ArgsUsage: "<repo-id|repo-full-name>",
 	Action:    pipelineList,
 	Flags: append(common.GlobalFlags,
 		common.FormatFlag(tmplPipelineList),
@@ -52,18 +52,17 @@ var pipelineListCmd = &cli.Command{
 }
 
 func pipelineList(c *cli.Context) error {
-	repo := c.Args().First()
-	owner, name, err := internal.ParseRepo(repo)
-	if err != nil {
-		return err
-	}
-
+	repoIDOrFullName := c.Args().First()
 	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
 	}
+	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
+	if err != nil {
+		return err
+	}
 
-	pipelines, err := client.PipelineList(owner, name)
+	pipelines, err := client.PipelineList(repoID)
 	if err != nil {
 		return err
 	}
@@ -101,7 +100,7 @@ func pipelineList(c *cli.Context) error {
 }
 
 // template for pipeline list information
-var tmplPipelineList = "\x1b[33mBuild #{{ .Number }} \x1b[0m" + `
+var tmplPipelineList = "\x1b[33mPipeline #{{ .Number }} \x1b[0m" + `
 Status: {{ .Status }}
 Event: {{ .Event }}
 Commit: {{ .Commit }}

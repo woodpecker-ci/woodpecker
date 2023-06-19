@@ -80,7 +80,7 @@ const newPipelineVariable = ref<{ name: string; value: string }>({ name: '', val
 
 const loading = ref(true);
 onMounted(async () => {
-  const data = await usePaginate((page) => apiClient.getRepoBranches(repo.value.owner, repo.value.name, page));
+  const data = await usePaginate((page) => apiClient.getRepoBranches(repo.value.id, page));
   branches.value = data.map((e) => ({
     text: e,
     value: e,
@@ -103,7 +103,7 @@ function deleteVar(key: string) {
 
 async function triggerManualPipeline() {
   loading.value = true;
-  const pipeline = await apiClient.createPipeline(repo.value.owner, repo.value.name, payload.value);
+  const pipeline = await apiClient.createPipeline(repo.value.id, payload.value);
 
   emit('close');
 

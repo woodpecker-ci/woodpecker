@@ -76,7 +76,7 @@ export default defineComponent({
         throw new Error('Unexpected: "repo" should be provided at this place');
       }
 
-      branches.value = (await usePaginate((page) => apiClient.getRepoBranches(repo.value.owner, repo.value.name, page)))
+      branches.value = (await usePaginate((page) => apiClient.getRepoBranches(repo.value.id, page)))
         .map((b) => ({
           value: b,
           text: b,
@@ -92,14 +92,9 @@ export default defineComponent({
       window.location.port ? `:${window.location.port}` : ''
     }${useConfig().rootPath}`;
     const badgeUrl = computed(
-      () =>
-        `/api/badges/${repo.value.owner}/${repo.value.name}/status.svg${
-          branch.value !== '' ? `?branch=${branch.value}` : ''
-        }`,
+      () => `/api/badges/${repo.value.id}/status.svg${branch.value !== '' ? `?branch=${branch.value}` : ''}`,
     );
-    const repoUrl = computed(
-      () => `/${repo.value.owner}/${repo.value.name}${branch.value !== '' ? `/branches/${branch.value}` : ''}`,
-    );
+    const repoUrl = computed(() => `/${repo.value.id}${branch.value !== '' ? `/branches/${branch.value}` : ''}`);
 
     const badgeContent = computed(() => {
       if (!repo) {

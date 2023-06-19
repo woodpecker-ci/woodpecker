@@ -12,26 +12,25 @@ import (
 var repoRemoveCmd = &cli.Command{
 	Name:      "rm",
 	Usage:     "remove a repository",
-	ArgsUsage: "<repo/name>",
+	ArgsUsage: "<repo-id|repo-full-name>",
 	Action:    repoRemove,
 	Flags:     common.GlobalFlags,
 }
 
 func repoRemove(c *cli.Context) error {
-	repo := c.Args().First()
-	owner, name, err := internal.ParseRepo(repo)
-	if err != nil {
-		return err
-	}
-
+	repoIDOrFullName := c.Args().First()
 	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
 	}
-
-	if err := client.RepoDel(owner, name); err != nil {
+	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
+	if err != nil {
 		return err
 	}
-	fmt.Printf("Successfully removed repository %s/%s\n", owner, name)
+
+	if err := client.RepoDel(repoID); err != nil {
+		return err
+	}
+	fmt.Printf("Successfully removed repository %s\n", repoIDOrFullName)
 	return nil
 }

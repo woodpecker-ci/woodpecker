@@ -27,13 +27,12 @@ import (
 // GetRegistry
 //
 //	@Summary	Get a named registry
-//	@Router		/repos/{owner}/{name}/registry/{registry} [get]
+//	@Router		/repos/{repo_id}/registry/{registry} [get]
 //	@Produce	json
 //	@Success	200	{object}	Registry
 //	@Tags		Repository registries
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		owner			path	string	true	"the repository owner's name"
-//	@Param		name			path	string	true	"the repository name"
+//	@Param		repo_id			path	int		true	"the repository id"
 //	@Param		registry		path	string	true	"the registry name"
 func GetRegistry(c *gin.Context) {
 	var (
@@ -51,13 +50,12 @@ func GetRegistry(c *gin.Context) {
 // PostRegistry
 //
 //	@Summary	Persist/create a registry
-//	@Router		/repos/{owner}/{name}/registry [post]
+//	@Router		/repos/{repo_id}/registry [post]
 //	@Produce	json
 //	@Success	200	{object}	Registry
 //	@Tags		Repository registries
 //	@Param		Authorization	header	string			true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		owner			path	string			true	"the repository owner's name"
-//	@Param		name			path	string			true	"the repository name"
+//	@Param		repo_id			path	int		true	"the repository id"
 //	@Param		registry		body	Registry	true	"the new registry data"
 func PostRegistry(c *gin.Context) {
 	repo := session.Repo(c)
@@ -89,13 +87,12 @@ func PostRegistry(c *gin.Context) {
 // PatchRegistry
 //
 //	@Summary	Update a named registry
-//	@Router		/repos/{owner}/{name}/registry/{registry} [patch]
+//	@Router		/repos/{repo_id}/registry/{registry} [patch]
 //	@Produce	json
 //	@Success	200	{object}	Registry
 //	@Tags		Repository registries
 //	@Param		Authorization	header	string			true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		owner			path	string			true	"the repository owner's name"
-//	@Param		name			path	string			true	"the repository name"
+//	@Param		repo_id			path	int		true	"the repository id"
 //	@Param		registry		path	string			true	"the registry name"
 //	@Param		registryData	body	Registry	true	"the attributes for the registry"
 func PatchRegistry(c *gin.Context) {
@@ -143,13 +140,12 @@ func PatchRegistry(c *gin.Context) {
 // GetRegistryList
 //
 //	@Summary	Get the registry list
-//	@Router		/repos/{owner}/{name}/registry [get]
+//	@Router		/repos/{repo_id}/registry [get]
 //	@Produce	json
 //	@Success	200	{array}	Registry
 //	@Tags		Repository registries
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		owner			path	string	true	"the repository owner's name"
-//	@Param		name			path	string	true	"the repository name"
+//	@Param		repo_id			path	int		true	"the repository id"
 //	@Param		page			query	int		false	"for response pagination, page offset number"	default(1)
 //	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
 func GetRegistryList(c *gin.Context) {
@@ -170,13 +166,12 @@ func GetRegistryList(c *gin.Context) {
 // DeleteRegistry
 //
 //	@Summary	Delete a named registry
-//	@Router		/repos/{owner}/{name}/registry/{registry} [delete]
+//	@Router		/repos/{repo_id}/registry/{registry} [delete]
 //	@Produce	plain
 //	@Success	200
 //	@Tags		Repository registries
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		owner			path	string	true	"the repository owner's name"
-//	@Param		name			path	string	true	"the repository name"
+//	@Param		repo_id			path	int		true	"the repository id"
 //	@Param		registry		path	string	true	"the registry name"
 func DeleteRegistry(c *gin.Context) {
 	var (

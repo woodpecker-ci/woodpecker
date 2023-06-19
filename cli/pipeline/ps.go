@@ -28,7 +28,7 @@ import (
 var pipelinePsCmd = &cli.Command{
 	Name:      "ps",
 	Usage:     "show pipeline steps",
-	ArgsUsage: "<repo/name> [pipeline]",
+	ArgsUsage: "<repo-id|repo-full-name> [pipeline]",
 	Action:    pipelinePs,
 	Flags: append(common.GlobalFlags,
 		common.FormatFlag(tmplPipelinePs),
@@ -36,14 +36,12 @@ var pipelinePsCmd = &cli.Command{
 }
 
 func pipelinePs(c *cli.Context) error {
-	repo := c.Args().First()
-
-	owner, name, err := internal.ParseRepo(repo)
+	repoIDOrFullName := c.Args().First()
+	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
 	}
-
-	client, err := internal.NewClient(c)
+	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
 	if err != nil {
 		return err
 	}
@@ -53,7 +51,7 @@ func pipelinePs(c *cli.Context) error {
 
 	if pipelineArg == "last" || len(pipelineArg) == 0 {
 		// Fetch the pipeline number from the last pipeline
-		pipeline, err := client.PipelineLast(owner, name, "")
+		pipeline, err := client.PipelineLast(repoID, "")
 		if err != nil {
 			return err
 		}
@@ -66,7 +64,7 @@ func pipelinePs(c *cli.Context) error {
 		}
 	}
 
-	pipeline, err := client.Pipeline(owner, name, number)
+	pipeline, err := client.Pipeline(repoID, number)
 	if err != nil {
 		return err
 	}
