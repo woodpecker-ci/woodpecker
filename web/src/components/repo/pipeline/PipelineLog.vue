@@ -34,13 +34,40 @@
       <div
         v-show="hasLogs && loadedLogs"
         ref="consoleElement"
-        class="w-full max-w-full grid grid-cols-[min-content,1fr,min-content] auto-rows-min flex-grow p-2 gap-x-2 overflow-x-hidden overflow-y-auto"
+        class="w-full max-w-full grid grid-cols-[min-content,1fr,min-content] auto-rows-min flex-grow p-2 overflow-x-hidden overflow-y-auto"
       >
-        <div v-for="line in log" :id="`L${line.index}`" :key="line.index" class="contents font-mono">
-          <span class="text-gray-500 whitespace-nowrap select-none text-right">{{ line.index + 1 }}</span>
-          <!-- eslint-disable-next-line vue/no-v-html -->
-          <span class="align-top text-color whitespace-pre-wrap break-words" v-html="line.text" />
-          <span class="text-gray-500 whitespace-nowrap select-none text-right">{{ formatTime(line.time) }}</span>
+        <div v-for="line in log" :key="line.index" class="contents font-mono">
+          <a
+            :id="`L${line.index}`"
+            :href="`#L${line.index}`"
+            class="text-gray-500 whitespace-nowrap select-none text-right pl-1 pr-2"
+            :class="{
+              'bg-opacity-50 bg-red-800': line.type === 'error',
+              'bg-opacity-50 bg-yellow-800': line.type === 'warning',
+              'bg-opacity-20 bg-blue-800 underline': $route.hash === `#L${line.index}`,
+            }"
+            >{{ line.index + 1 }}</a
+          >
+          <!-- eslint-disable vue/no-v-html -->
+          <span
+            class="align-top text-color whitespace-pre-wrap break-words"
+            :class="{
+              'bg-opacity-50 bg-red-800': line.type === 'error',
+              'bg-opacity-50 bg-yellow-800': line.type === 'warning',
+              'bg-opacity-20 bg-blue-800': $route.hash === `#L${line.index}`,
+            }"
+            v-html="line.text"
+          />
+          <!-- eslint-enable vue/no-v-html -->
+          <span
+            class="text-gray-500 whitespace-nowrap select-none text-right pr-1"
+            :class="{
+              'bg-opacity-50 bg-red-800': line.type === 'error',
+              'bg-opacity-50 bg-yellow-800': line.type === 'warning',
+              'bg-opacity-20 bg-blue-800': $route.hash === `#L${line.index}`,
+            }"
+            >{{ formatTime(line.time) }}</span
+          >
         </div>
       </div>
 
@@ -84,6 +111,7 @@ type LogLine = {
   index: number;
   text: string;
   time?: number;
+  type: 'error' | 'warning' | null;
 };
 
 const props = defineProps<{
@@ -128,12 +156,39 @@ function formatTime(time?: number): string {
   return time === undefined ? '' : `${time}s`;
 }
 
-function writeLog(line: LogLine) {
+function getLogType(text: string): LogLine['type'] {
+  if (
+    text.match(
+      'error|fail|fatal|exception|panic|abort|crash|broken|invalid|unavailable|unreachable|unrecoverable|unresolvable|unresolved|unhandled|uncaught|unknown|unexpected',
+    )
+  ) {
+    return 'error';
+  }
+  if (text.match('warning|warn|deprecated|deprecation|obsolete|outdated|obsolete|deprecated')) {
+    return 'warning';
+  }
+
+  return null;
+}
+
+function writeLog(line: Partial<LogLine>) {
   logBuffer.value.push({
     index: line.index ?? 0,
-    text: ansiUp.value.ansi_to_html(line.text),
+    text: ansiUp.value.ansi_to_html(line.text ?? ''),
     time: line.time ?? 0,
+    type: getLogType(line.text ?? ''),
   });
+}
+
+// SOURCE: https://stackoverflow.com/questions/30106476/using-javascripts-atob-to-decode-base64-doesnt-properly-decode-utf-8-strings
+function b64DecodeUnicode(str: string) {
+  return decodeURIComponent(
+    window
+      .atob(str)
+      .split('')
+      .map((c) => `%${`00${c.charCodeAt(0).toString(16)}`.slice(-2)}`)
+      .join(''),
+  );
 }
 
 function scrollDown() {
@@ -198,7 +253,7 @@ async function download() {
     downloadInProgress.value = false;
   }
   const fileURL = window.URL.createObjectURL(
-    new Blob([logs.map((line) => atob(line.data)).join('')], {
+    new Blob([logs.map((line) => b64DecodeUnicode(line.data)).join('')], {
       type: 'text/plain',
     }),
   );
@@ -240,13 +295,13 @@ async function loadLogs() {
 
   if (isStepFinished(step.value)) {
     const logs = await apiClient.getLogs(repo.value.id, pipeline.value.number, step.value.id);
-    logs?.forEach((line) => writeLog({ index: line.line, text: atob(line.data), time: line.time }));
+    logs?.forEach((line) => writeLog({ index: line.line, text: b64DecodeUnicode(line.data), time: line.time }));
     flushLogs(false);
   }
 
   if (isStepRunning(step.value)) {
     stream.value = apiClient.streamLogs(repo.value.id, pipeline.value.number, step.value.id, (line) => {
-      writeLog({ index: line.line, text: atob(line.data), time: line.time });
+      writeLog({ index: line.line, text: b64DecodeUnicode(line.data), time: line.time });
       flushLogs(true);
     });
   }
