@@ -16,6 +16,7 @@ package api
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -34,20 +35,21 @@ import (
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		owner			path	string	true	"the owner's name"
 func GetOrgPermissions(c *gin.Context) {
-	var (
-		err   error
-		user  = session.User(c)
-		owner = c.Param("owner")
-	)
+	user := session.User(c)
+	orgID, err := strconv.ParseInt(c.Param("org_id"), 10, 64)
+	if err != nil {
+		c.String(http.StatusBadRequest, "Error parsing org id. %s", err)
+		return
+	}
 
 	if user == nil {
 		c.JSON(http.StatusOK, &model.OrgPerm{})
 		return
 	}
 
-	perm, err := server.Config.Services.Membership.Get(c, user, owner)
+	perm, err := server.Config.Services.Membership.Get(c, user, orgID)
 	if err != nil {
-		c.String(http.StatusInternalServerError, "Error getting membership for %q. %s", owner, err)
+		c.String(http.StatusInternalServerError, "Error getting membership for %d. %s", orgID, err)
 		return
 	}
 

@@ -46,7 +46,7 @@ func apiRoutes(e *gin.Engine) {
 			users.DELETE("/:login", api.DeleteUser)
 		}
 
-		orgBase := apiBase.Group("/orgs/:owner")
+		orgBase := apiBase.Group("/orgs/:org_id")
 		{
 			orgBase.GET("/permissions", api.GetOrgPermissions)
 

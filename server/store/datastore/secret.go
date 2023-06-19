@@ -60,17 +60,17 @@ func (s storage) SecretDelete(secret *model.Secret) error {
 	return wrapDelete(s.engine.ID(secret.ID).Delete(new(model.Secret)))
 }
 
-func (s storage) OrgSecretFind(owner, name string) (*model.Secret, error) {
+func (s storage) OrgSecretFind(orgID int64, name string) (*model.Secret, error) {
 	secret := &model.Secret{
-		Owner: owner,
+		OrgID: orgID,
 		Name:  name,
 	}
 	return secret, wrapGet(s.engine.Get(secret))
 }
 
-func (s storage) OrgSecretList(owner string, p *model.ListOptions) ([]*model.Secret, error) {
+func (s storage) OrgSecretList(orgID int64, p *model.ListOptions) ([]*model.Secret, error) {
 	secrets := make([]*model.Secret, 0)
-	return secrets, s.paginate(p).Where("secret_owner = ?", owner).OrderBy(orderSecretsBy).Find(&secrets)
+	return secrets, s.paginate(p).Where("secret_owner = ?", orgID).OrderBy(orderSecretsBy).Find(&secrets)
 }
 
 func (s storage) GlobalSecretFind(name string) (*model.Secret, error) {
