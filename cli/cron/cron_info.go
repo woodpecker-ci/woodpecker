@@ -13,7 +13,7 @@ import (
 var cronInfoCmd = &cli.Command{
 	Name:      "info",
 	Usage:     "display info about a cron job",
-	ArgsUsage: "[repo/name]",
+	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    cronInfo,
 	Flags: append(common.GlobalFlags,
 		common.RepoFlag,
@@ -28,22 +28,23 @@ var cronInfoCmd = &cli.Command{
 
 func cronInfo(c *cli.Context) error {
 	var (
-		jobID    = c.Int64("id")
-		reponame = c.String("repository")
-		format   = c.String("format") + "\n"
+		jobID            = c.Int64("id")
+		repoIDOrFullName = c.String("repository")
+		format           = c.String("format") + "\n"
 	)
-	if reponame == "" {
-		reponame = c.Args().First()
-	}
-	owner, name, err := internal.ParseRepo(reponame)
-	if err != nil {
-		return err
+	if repoIDOrFullName == "" {
+		repoIDOrFullName = c.Args().First()
 	}
 	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
 	}
-	cron, err := client.CronGet(owner, name, jobID)
+	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
+	if err != nil {
+		return err
+	}
+
+	cron, err := client.CronGet(repoID, jobID)
 	if err != nil {
 		return err
 	}

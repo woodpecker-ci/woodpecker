@@ -59,6 +59,7 @@ var Config = struct {
 		Cert                string
 		OAuthHost           string
 		Host                string
+		WebhookHost         string
 		Port                string
 		PortTLS             string
 		AgentToken          string
@@ -67,6 +68,9 @@ var Config = struct {
 		StatusContextFormat string
 		SessionExpires      time.Duration
 		RootURL             string
+		Migrations          struct {
+			AllowLong bool
+		}
 		// Open bool
 		// Orgs map[string]struct{}
 		// Admins map[string]struct{}

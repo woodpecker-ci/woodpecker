@@ -347,15 +347,15 @@ when:
 
 [Read more about cron](./45-cron.md)
 
-#### `tag`
+#### `ref`
 
-This filter only applies to tag events.
-Use glob expression to execute a step if the tag name starts with `v`:
+The `ref` filter compares the git reference against which the pipeline is executed.
+This allows you to filter, for example, tags that must start with **v**:
 
 ```yaml
 when:
-  - event: tag
-    tag: v*
+  event: tag
+  ref: refs/tags/v*
 ```
 
 #### `status`
@@ -834,7 +834,7 @@ when:
 The `ref` filter compares the git reference against which the pipeline is executed.
 This allows you to filter, for example, tags that must start with **v**:
 
-```diff
+```yaml
 when:
   event: tag
   ref: refs/tags/v*
@@ -887,7 +887,7 @@ when:
 
 ## `depends_on`
 
-Woodpecker supports to define multiple workflows for a repository. Those workflows will run independent from each other. To depend them on each other you can use the [`depends_on`](https://woodpecker-ci.org/docs/usage/workflows#flow-control) keyword.
+Woodpecker supports to define multiple workflows for a repository. Those workflows will run independent from each other. To depend them on each other you can use the [`depends_on`](./25-workflows.md#flow-control) keyword.
 
 ## Privileged mode
 

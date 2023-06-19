@@ -14,7 +14,7 @@ import (
 var registryCreateCmd = &cli.Command{
 	Name:      "add",
 	Usage:     "adds a registry",
-	ArgsUsage: "[repo/name]",
+	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    registryCreate,
 	Flags: append(common.GlobalFlags,
 		common.RepoFlag,
@@ -36,19 +36,19 @@ var registryCreateCmd = &cli.Command{
 
 func registryCreate(c *cli.Context) error {
 	var (
-		hostname = c.String("hostname")
-		username = c.String("username")
-		password = c.String("password")
-		reponame = c.String("repository")
+		hostname         = c.String("hostname")
+		username         = c.String("username")
+		password         = c.String("password")
+		repoIDOrFullName = c.String("repository")
 	)
-	if reponame == "" {
-		reponame = c.Args().First()
+	if repoIDOrFullName == "" {
+		repoIDOrFullName = c.Args().First()
 	}
-	owner, name, err := internal.ParseRepo(reponame)
+	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
 	}
-	client, err := internal.NewClient(c)
+	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
 	if err != nil {
 		return err
 	}
@@ -65,7 +65,7 @@ func registryCreate(c *cli.Context) error {
 		}
 		registry.Password = string(out)
 	}
-	_, err = client.RegistryCreate(owner, name, registry)
+	_, err = client.RegistryCreate(repoID, registry)
 	if err != nil {
 		return err
 	}

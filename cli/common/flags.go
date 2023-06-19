@@ -70,5 +70,5 @@ func FormatFlag(tmpl string, hidden ...bool) *cli.StringFlag {
 var RepoFlag = &cli.StringFlag{
 	Name:    "repository",
 	Aliases: []string{"repo"},
-	Usage:   "repository name (e.g. octocat/hello-world)",
+	Usage:   "repository id or full-name (e.g. 134 or octocat/hello-world)",
 }
