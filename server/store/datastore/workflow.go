@@ -25,7 +25,6 @@ func (s storage) WorkflowGetTree(pipeline *model.Pipeline) ([]*model.Workflow, e
 
 func (s storage) WorkflowsCreate(workflows []*model.Workflow) error {
 	sess := s.engine.NewSession()
-	defer sess.Close()
 	if err := sess.Begin(); err != nil {
 		return err
 	}
@@ -40,7 +39,7 @@ func (s storage) WorkflowsCreate(workflows []*model.Workflow) error {
 		}
 	}
 
-	return nil
+	return sess.Commit()
 }
 
 func (s storage) WorkflowList(pipeline *model.Pipeline) ([]*model.Workflow, error) {
