@@ -27,7 +27,6 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/woodpecker-ci/woodpecker/shared/utils"
-
 	"github.com/woodpecker-ci/woodpecker/server/forge/gitea/fixtures"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store"
