@@ -490,14 +490,6 @@ func TestConstraints(t *testing.T) {
 			want: false,
 		},
 		{
-			desc: "no constraints, event gets filtered by default event filter",
-			conf: "",
-			with: metadata.Metadata{
-				Curr: metadata.Pipeline{Event: "non-default"},
-			},
-			want: false,
-		},
-		{
 			desc: "filter with build-in env passes",
 			conf: "{ branch: ${CI_REPO_DEFAULT_BRANCH} }",
 			with: metadata.Metadata{
