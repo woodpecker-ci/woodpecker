@@ -26,11 +26,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/mock"
 
-	"github.com/woodpecker-ci/woodpecker/shared/utils"
 	"github.com/woodpecker-ci/woodpecker/server/forge/gitea/fixtures"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	mocks_store "github.com/woodpecker-ci/woodpecker/server/store/mocks"
+	"github.com/woodpecker-ci/woodpecker/shared/utils"
 )
 
 func Test_gitea(t *testing.T) {
