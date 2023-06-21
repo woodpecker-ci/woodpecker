@@ -302,8 +302,21 @@ func (c *config) BranchHead(_ context.Context, _ *model.User, _ *model.Repo, _ s
 	return "", forge_types.ErrNotImplemented
 }
 
-func (c *config) PullRequests(_ context.Context, _ *model.User, _ *model.Repo, _ *model.ListOptions) ([]*model.PullRequest, error) {
-	return nil, forge_types.ErrNotImplemented
+// PullRequests returns the pull requests of the named repository.
+func (c *config) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error) {
+	opts := internal.ListOpts{Page: p.Page, PageLen: p.Page}
+	pullRequests, err := c.newClient(ctx, u).ListPullRequests(r.Owner, r.Name, &opts)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]*model.PullRequest, len(pullRequests))
+	for i := range pullRequests {
+		result[i] = &model.PullRequest{
+			Index: int64(pullRequests[i].ID),
+			Title: pullRequests[i].Title,
+		}
+	}
+	return result, nil
 }
 
 // Hook parses the incoming Bitbucket hook and returns the Repository and
