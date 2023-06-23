@@ -303,12 +303,6 @@ when:
 
 #### `event`
 
-:::info
-**By default steps are filtered by following event types:**
-
-`push`, `pull_request`, `tag`, `deployment`, `manual`.
-:::
-
 Available events: `push`, `pull_request`, `tag`, `deployment`, `cron`, `manual`
 
 Execute a step if the build event is a `tag`:
