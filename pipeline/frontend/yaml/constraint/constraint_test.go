@@ -478,12 +478,6 @@ func TestConstraints(t *testing.T) {
 			want: false,
 		},
 		{
-			desc: "filter cron by default constraint",
-			conf: "{}",
-			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventCron}},
-			want: false,
-		},
-		{
 			desc: "filter cron by matching name",
 			conf: "{ event: cron, cron: job1 }",
 			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventCron, Cron: "job1"}},
@@ -493,14 +487,6 @@ func TestConstraints(t *testing.T) {
 			desc: "filter cron by name",
 			conf: "{ event: cron, cron: job2 }",
 			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventCron, Cron: "job1"}},
-			want: false,
-		},
-		{
-			desc: "no constraints, event gets filtered by default event filter",
-			conf: "",
-			with: metadata.Metadata{
-				Curr: metadata.Pipeline{Event: "non-default"},
-			},
 			want: false,
 		},
 		{
