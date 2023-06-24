@@ -148,7 +148,7 @@ export default defineComponent({
         throw new Error('Unexpected: Repo should be set');
       }
 
-      await repoStore.loadRepo(repo.value.owner, repo.value.name);
+      await repoStore.loadRepo(repo.value.id);
       loadRepoSettings();
     }
 
@@ -161,7 +161,7 @@ export default defineComponent({
         throw new Error('Unexpected: Repo-Settings should be set');
       }
 
-      await apiClient.updateRepo(repo.value.owner, repo.value.name, repoSettings.value);
+      await apiClient.updateRepo(repo.value.id, repoSettings.value);
       await loadRepo();
       notifications.notify({ title: i18n.t('repo.settings.general.success'), type: 'success' });
     });

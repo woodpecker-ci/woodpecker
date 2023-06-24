@@ -31,7 +31,7 @@ import (
 var Command = &cli.Command{
 	Name:      "deploy",
 	Usage:     "deploy code",
-	ArgsUsage: "<repo/name> <pipeline> <environment>",
+	ArgsUsage: "<repo-id|repo-full-name> <pipeline> <environment>",
 	Action:    deploy,
 	Flags: append(common.GlobalFlags,
 		common.FormatFlag(tmplDeployInfo),
@@ -59,13 +59,13 @@ var Command = &cli.Command{
 }
 
 func deploy(c *cli.Context) error {
-	repo := c.Args().First()
-	owner, name, err := internal.ParseRepo(repo)
+	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
 	}
 
-	client, err := internal.NewClient(c)
+	repo := c.Args().First()
+	repoID, err := internal.ParseRepo(client, repo)
 	if err != nil {
 		return err
 	}
@@ -78,7 +78,7 @@ func deploy(c *cli.Context) error {
 	var number int
 	if pipelineArg == "last" {
 		// Fetch the pipeline number from the last pipeline
-		pipelines, berr := client.PipelineList(owner, name)
+		pipelines, berr := client.PipelineList(repoID)
 		if berr != nil {
 			return berr
 		}
@@ -113,7 +113,7 @@ func deploy(c *cli.Context) error {
 
 	params := internal.ParseKeyPair(c.StringSlice("param"))
 
-	deploy, err := client.Deploy(owner, name, number, env, params)
+	deploy, err := client.Deploy(repoID, number, env, params)
 	if err != nil {
 		return err
 	}

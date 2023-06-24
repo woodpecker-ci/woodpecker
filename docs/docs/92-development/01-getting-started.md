@@ -48,7 +48,7 @@ WOODPECKER_OPEN=true
 WOODPECKER_ADMIN=your-username
 
 # if you want to test webhooks with an online forge like GitHub this address needs to be accessible from public server
-WOODPECKER_HOST=http://your-dev-address.com/
+WOODPECKER_HOST=http://your-dev-address.com
 
 # github (sample for a forge config - see /docs/administration/forge/overview for other forges)
 WOODPECKER_GITHUB=true

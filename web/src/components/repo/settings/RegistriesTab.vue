@@ -124,7 +124,7 @@ export default defineComponent({
         throw new Error("Unexpected: Can't load repo");
       }
 
-      return apiClient.getRegistryList(repo.value.owner, repo.value.name, page);
+      return apiClient.getRegistryList(repo.value.id, page);
     }
 
     const { resetPage, data: registries } = usePagination(loadRegistries, () => !selectedRegistry.value);
@@ -139,9 +139,9 @@ export default defineComponent({
       }
 
       if (isEditingRegistry.value) {
-        await apiClient.updateRegistry(repo.value.owner, repo.value.name, selectedRegistry.value);
+        await apiClient.updateRegistry(repo.value.id, selectedRegistry.value);
       } else {
-        await apiClient.createRegistry(repo.value.owner, repo.value.name, selectedRegistry.value);
+        await apiClient.createRegistry(repo.value.id, selectedRegistry.value);
       }
       notifications.notify({
         title: i18n.t(
@@ -159,7 +159,7 @@ export default defineComponent({
       }
 
       const registryAddress = encodeURIComponent(_registry.address);
-      await apiClient.deleteRegistry(repo.value.owner, repo.value.name, registryAddress);
+      await apiClient.deleteRegistry(repo.value.id, registryAddress);
       notifications.notify({ title: i18n.t('repo.settings.registries.deleted'), type: 'success' });
       resetPage();
     });

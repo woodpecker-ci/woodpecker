@@ -28,7 +28,7 @@ import (
 var pipelineInfoCmd = &cli.Command{
 	Name:      "info",
 	Usage:     "show pipeline details",
-	ArgsUsage: "<repo/name> [pipeline]",
+	ArgsUsage: "<repo-id|repo-full-name> [pipeline]",
 	Action:    pipelineInfo,
 	Flags: append(common.GlobalFlags,
 		common.FormatFlag(tmplPipelineInfo),
@@ -36,22 +36,21 @@ var pipelineInfoCmd = &cli.Command{
 }
 
 func pipelineInfo(c *cli.Context) error {
-	repo := c.Args().First()
-	owner, name, err := internal.ParseRepo(repo)
+	repoIDOrFullName := c.Args().First()
+	client, err := internal.NewClient(c)
+	if err != nil {
+		return err
+	}
+	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
 	if err != nil {
 		return err
 	}
 	pipelineArg := c.Args().Get(1)
 
-	client, err := internal.NewClient(c)
-	if err != nil {
-		return err
-	}
-
 	var number int
 	if pipelineArg == "last" || len(pipelineArg) == 0 {
 		// Fetch the pipeline number from the last pipeline
-		pipeline, err := client.PipelineLast(owner, name, "")
+		pipeline, err := client.PipelineLast(repoID, "")
 		if err != nil {
 			return err
 		}
@@ -63,7 +62,7 @@ func pipelineInfo(c *cli.Context) error {
 		}
 	}
 
-	pipeline, err := client.Pipeline(owner, name, number)
+	pipeline, err := client.Pipeline(repoID, number)
 	if err != nil {
 		return err
 	}

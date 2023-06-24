@@ -121,7 +121,7 @@ async function loadCrons(page: number): Promise<Cron[] | null> {
     throw new Error("Unexpected: Can't load repo");
   }
 
-  return apiClient.getCronList(repo.value.owner, repo.value.name, page);
+  return apiClient.getCronList(repo.value.id, page);
 }
 
 const { resetPage, data: crons } = usePagination(loadCrons, () => !selectedCron.value);
@@ -136,9 +136,9 @@ const { doSubmit: createCron, isLoading: isSaving } = useAsyncAction(async () =>
   }
 
   if (isEditingCron.value) {
-    await apiClient.updateCron(repo.value.owner, repo.value.name, selectedCron.value);
+    await apiClient.updateCron(repo.value.id, selectedCron.value);
   } else {
-    await apiClient.createCron(repo.value.owner, repo.value.name, selectedCron.value);
+    await apiClient.createCron(repo.value.id, selectedCron.value);
   }
   notifications.notify({
     title: i18n.t(isEditingCron.value ? 'repo.settings.crons.saved' : i18n.t('repo.settings.crons.created')),
@@ -153,7 +153,7 @@ const { doSubmit: deleteCron, isLoading: isDeleting } = useAsyncAction(async (_c
     throw new Error("Unexpected: Can't load repo");
   }
 
-  await apiClient.deleteCron(repo.value.owner, repo.value.name, _cron.id);
+  await apiClient.deleteCron(repo.value.id, _cron.id);
   notifications.notify({ title: i18n.t('repo.settings.crons.deleted'), type: 'success' });
   resetPage();
 });
@@ -163,12 +163,10 @@ const { doSubmit: runCron } = useAsyncAction(async (_cron: Cron) => {
     throw new Error("Unexpected: Can't load repo");
   }
 
-  const pipeline = await apiClient.runCron(repo.value.owner, repo.value.name, _cron.id);
+  const pipeline = await apiClient.runCron(repo.value.id, _cron.id);
   await router.push({
     name: 'repo-pipeline',
     params: {
-      repoOwner: repo.value.owner,
-      repoName: repo.value.name,
       pipelineId: pipeline.number,
     },
   });
