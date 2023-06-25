@@ -9,7 +9,7 @@ USAGE:
    woodpecker-cli [global options] command [command options] [arguments...]
 
 VERSION:
-   next-fc7aacb6
+   v0.15.x
 
 COMMANDS:
    build      manage builds
