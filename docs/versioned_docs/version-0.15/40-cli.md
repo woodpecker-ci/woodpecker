@@ -12,10 +12,10 @@ VERSION:
    v0.15.x
 
 COMMANDS:
-   build      manage builds
+   build      manage pipelines
    log        manage logs
    deploy     deploy code
-   exec       execute a local build
+   exec       execute a pipeline locally
    info       show information about the current user
    registry   manage registries
    secret     manage secrets
