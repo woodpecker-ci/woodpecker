@@ -165,6 +165,7 @@ func (c *config) Repo(ctx context.Context, u *model.User, remoteID model.ForgeRe
 		for _, repo := range repos {
 			if string(repo.ForgeRemoteID) == name {
 				owner = repo.Owner
+				break
 			}
 		}
 	}
