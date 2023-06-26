@@ -157,6 +157,18 @@ func (c *config) Repo(ctx context.Context, u *model.User, remoteID model.ForgeRe
 	if remoteID.IsValid() {
 		name = string(remoteID)
 	}
+	repos, err := c.Repos(ctx, u)
+	if err != nil {
+		return nil, err
+	}
+	if len(owner) == 0 {
+		for _, repo := range repos {
+			if string(repo.ForgeRemoteID) == name {
+				owner = repo.Owner
+				break
+			}
+		}
+	}
 	client := c.newClient(ctx, u)
 	repo, err := client.FindRepo(owner, name)
 	if err != nil {
