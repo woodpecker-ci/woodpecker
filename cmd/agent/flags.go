@@ -67,6 +67,12 @@ var flags = []cli.Flag{
 		Name:    "hostname",
 		Usage:   "agent hostname",
 	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_AGENT_ID_CONFIG_PATH"},
+		Name:    "agent-id-config-path",
+		Usage:   "agent-id config file path",
+		Value:   "/etc/agent-id.conf",
+	},
 	&cli.StringSliceFlag{
 		EnvVars: []string{"WOODPECKER_FILTER_LABELS"},
 		Name:    "filter",
