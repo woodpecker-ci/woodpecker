@@ -25,6 +25,7 @@ __debug_bin
 web/dist/**
 !web/dist/.gitkeep
 web/node_modules/
+web/package-lock.json
 web/*.log
 web/.env
 
