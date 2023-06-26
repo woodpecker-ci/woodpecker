@@ -23,6 +23,7 @@ import (
 	"net/http"
 	"os"
 	"runtime"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -47,6 +48,8 @@ import (
 	"github.com/woodpecker-ci/woodpecker/shared/utils"
 	"github.com/woodpecker-ci/woodpecker/version"
 )
+
+const configPath = "/agent-id.conf"
 
 func run(c *cli.Context) error {
 	hostname := c.String("hostname")
@@ -109,7 +112,7 @@ func run(c *cli.Context) error {
 	}
 	defer authConn.Close()
 
-	agentID := int64(-1) // TODO: store agent id in a file
+	agentID := readAgentId()
 	agentToken := c.String("grpc-token")
 	authClient := agentRpc.NewAuthGrpcClient(authConn, agentToken, agentID)
 	authInterceptor, err := agentRpc.NewAuthInterceptor(authClient, 30*time.Minute)
@@ -177,6 +180,8 @@ func run(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
+
+	writeAgentId(agentID)
 
 	labels := map[string]string{
 		"hostname": hostname,
@@ -279,4 +284,31 @@ func stringSliceAddToMap(sl []string, m map[string]string) error {
 		}
 	}
 	return nil
+}
+
+func readAgentId() int64 {
+	const defaultAgentIdValue = int64(-1)
+
+	out, fileErr := os.ReadFile(configPath)
+	if fileErr != nil {
+		return defaultAgentIdValue
+	}
+
+	value, err := strconv.ParseInt(string(out), 10, 64)
+	if err != nil {
+		return defaultAgentIdValue
+	}
+
+	return value
+}
+
+func writeAgentId(agentID int64) {
+	currentAgentId := readAgentId()
+
+	if currentAgentId != agentID {
+		err := os.WriteFile(configPath, []byte(strconv.FormatInt(agentID, 10)), 0644)
+		if err != nil {
+			return
+		}
+	}
 }
