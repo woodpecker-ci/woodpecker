@@ -141,6 +141,35 @@ func HandleAuth(c *gin.Context) {
 		return
 	}
 
+	repos, _ := server.Config.Services.Forge.Repos(c, u)
+	for _, forgeRepo := range repos {
+		dbRepo, err := _store.GetRepoForgeID(forgeRepo.ForgeRemoteID)
+		if err != nil && errors.Is(err, types.RecordNotExist) {
+			continue
+		}
+		if err != nil {
+			log.Error().Msgf("cannot list repos for %s. %s", u.Login, err)
+			c.Redirect(http.StatusSeeOther, "/login?error=internal_error")
+			return
+		}
+
+		if !dbRepo.IsActive {
+			continue
+		}
+
+		log.Debug().Msgf("Synced user permission for %s %s", u.Login, dbRepo.FullName)
+		perm := forgeRepo.Perm
+		perm.Repo = dbRepo
+		perm.RepoID = dbRepo.ID
+		perm.UserID = u.ID
+		perm.Synced = time.Now().Unix()
+		if err := _store.PermUpsert(perm); err != nil {
+			log.Error().Msgf("cannot update permissions for %s. %s", u.Login, err)
+			c.Redirect(http.StatusSeeOther, "/login?error=internal_error")
+			return
+		}
+	}
+
 	httputil.SetCookie(c.Writer, c.Request, "user_sess", tokenString)
 
 	c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/")

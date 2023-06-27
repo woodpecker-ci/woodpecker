@@ -33,9 +33,6 @@ func publishToTopic(c context.Context, pipeline *model.Pipeline, repo *model.Rep
 		},
 	}
 	pipelineCopy := *pipeline
-	if pipelineCopy.Steps, err = model.Tree(pipelineCopy.Steps); err != nil {
-		return err
-	}
 
 	message.Data, _ = json.Marshal(model.Event{
 		Repo:     *repo,

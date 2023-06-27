@@ -38,14 +38,14 @@
       </div>
     </div>
 
-    <div v-if="pipeline.steps === undefined || pipeline.steps.length === 0" class="m-auto mt-4">
+    <div v-if="pipeline.workflows === undefined || pipeline.workflows.length === 0" class="m-auto mt-4">
       <span>{{ $t('repo.pipeline.no_pipeline_steps') }}</span>
     </div>
 
     <div class="flex-grow min-h-0 w-full relative">
       <div class="absolute top-0 left-0 right-0 h-full flex flex-col overflow-y-scroll gap-y-2">
         <div
-          v-for="workflow in pipeline.steps"
+          v-for="workflow in pipeline.workflows"
           :key="workflow.id"
           class="p-2 md:rounded-md bg-white shadow dark:border-b-dark-gray-600 dark:bg-dark-gray-700"
         >
@@ -56,7 +56,7 @@
               </div>
             </div>
             <button
-              v-if="pipeline.steps && pipeline.steps.length > 1"
+              v-if="pipeline.workflows && pipeline.workflows.length > 1"
               type="button"
               :title="workflow.name"
               class="flex items-center gap-2 py-2 px-1 hover-effect rounded-md"
@@ -71,7 +71,7 @@
               <span class="truncate">{{ workflow.name }}</span>
               <PipelineStepDuration
                 v-if="workflow.start_time !== workflow.end_time"
-                :step="workflow"
+                :workflow="workflow"
                 class="mr-1 pr-2px"
               />
             </button>
@@ -81,7 +81,7 @@
             :class="{
               'max-h-screen': !workflowsCollapsed[workflow.id],
               'max-h-0': workflowsCollapsed[workflow.id],
-              'ml-6': pipeline.steps && pipeline.steps.length > 1,
+              'ml-6': pipeline.workflows && pipeline.workflows.length > 1,
             }"
           >
             <button
@@ -93,7 +93,7 @@
               :class="{
                 'bg-black bg-opacity-10 dark:bg-white dark:bg-opacity-5': selectedStepId && selectedStepId === step.pid,
                 'mt-1':
-                  (pipeline.steps && pipeline.steps.length > 1) ||
+                  (pipeline.workflows && pipeline.workflows.length > 1) ||
                   (workflow.children && step.pid !== workflow.children[0].pid),
               }"
               @click="$emit('update:selected-step-id', step.pid)"
@@ -132,8 +132,8 @@ const pipeline = toRef(props, 'pipeline');
 const { prettyRef } = usePipeline(pipeline);
 
 const workflowsCollapsed = ref<Record<PipelineStep['id'], boolean>>(
-  props.pipeline.steps && props.pipeline.steps.length > 1
-    ? (props.pipeline.steps || []).reduce(
+  props.pipeline.workflows && props.pipeline.workflows.length > 1
+    ? (props.pipeline.workflows || []).reduce(
         (collapsed, workflow) => ({
           ...collapsed,
           [workflow.id]: ['success', 'skipped', 'blocked'].includes(workflow.state),

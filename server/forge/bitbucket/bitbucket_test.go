@@ -227,7 +227,7 @@ func Test_bitbucket(t *testing.T) {
 		})
 
 		g.It("Should update the status", func() {
-			err := c.Status(ctx, fakeUser, fakeRepo, fakePipeline, fakeStep)
+			err := c.Status(ctx, fakeUser, fakeRepo, fakePipeline, fakeWorkflow)
 			g.Assert(err).IsNil()
 		})
 
@@ -309,7 +309,7 @@ var (
 		Commit: "9ecad50",
 	}
 
-	fakeStep = &model.Step{
+	fakeWorkflow = &model.Workflow{
 		Name:  "test",
 		State: model.StatusSuccess,
 	}

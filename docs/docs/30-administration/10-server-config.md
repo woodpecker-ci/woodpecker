@@ -364,9 +364,10 @@ Context prefix Woodpecker will use to publish status messages to SCM. You probab
 
 Template for the status messages published to forges, uses [Go templates](https://pkg.go.dev/text/template) as template language.
 Supported variables:
+
 - `context`: Woodpecker's context (see `WOODPECKER_STATUS_CONTEXT`)
 - `event`: the event which started the pipeline
-- `pipeline`: the pipeline's name
+- `workflow`: the workflow's name
 - `owner`: the repo's owner
 - `repo`: the repo's name
 

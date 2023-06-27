@@ -456,7 +456,7 @@ var reDeploy = regexp.MustCompile(`.+/deployments/(\d+)`)
 
 // Status sends the commit status to the forge.
 // An example would be the GitHub pull request status.
-func (c *client) Status(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, step *model.Step) error {
+func (c *client) Status(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, workflow *model.Workflow) error {
 	client := c.newClientToken(ctx, user.Token)
 
 	if pipeline.Event == model.EventDeploy {
@@ -475,10 +475,10 @@ func (c *client) Status(ctx context.Context, user *model.User, repo *model.Repo,
 	}
 
 	_, _, err := client.Repositories.CreateStatus(ctx, repo.Owner, repo.Name, pipeline.Commit, &github.RepoStatus{
-		Context:     github.String(common.GetPipelineStatusContext(repo, pipeline, step)),
-		State:       github.String(convertStatus(step.State)),
-		Description: github.String(common.GetPipelineStatusDescription(step.State)),
-		TargetURL:   github.String(common.GetPipelineStatusLink(repo, pipeline, step)),
+		Context:     github.String(common.GetPipelineStatusContext(repo, pipeline, workflow)),
+		State:       github.String(convertStatus(workflow.State)),
+		Description: github.String(common.GetPipelineStatusDescription(workflow.State)),
+		TargetURL:   github.String(common.GetPipelineStatusLink(repo, pipeline, workflow)),
 	})
 	return err
 }
