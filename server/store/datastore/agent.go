@@ -15,6 +15,8 @@
 package datastore
 
 import (
+	"errors"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
@@ -29,6 +31,10 @@ func (s storage) AgentFind(id int64) (*model.Agent, error) {
 }
 
 func (s storage) AgentFindByToken(token string) (*model.Agent, error) {
+	// Searching with an empty token would result in an empty where clause and therefore returning first item
+	if token == "" {
+		return nil, errors.New("Please provide a token")
+	}
 	agent := &model.Agent{
 		Token: token,
 	}
