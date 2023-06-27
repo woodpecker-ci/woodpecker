@@ -20,7 +20,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/google/uuid"
 	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog/log"
 
@@ -53,7 +52,7 @@ type StepBuilder struct {
 }
 
 type Item struct {
-	Workflow  *model.Step
+	Workflow  *model.Workflow
 	Platform  string
 	Labels    map[string]string
 	DependsOn []string
@@ -79,8 +78,7 @@ func (b *StepBuilder) Build() ([]*Item, error) {
 		}
 
 		for _, axis := range axes {
-			workflow := &model.Step{
-				UUID:       uuid.New().String(), // TODO(#1784): Remove once workflows are a separate entity in database
+			workflow := &model.Workflow{
 				PipelineID: b.Curr.ID,
 				PID:        pidSequence,
 				State:      model.StatusPending,
@@ -284,7 +282,6 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, envi
 func SetPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*Item) *model.Pipeline {
 	var pidSequence int
 	for _, item := range pipelineItems {
-		pipeline.Steps = append(pipeline.Steps, item.Workflow)
 		if pidSequence < item.Workflow.PID {
 			pidSequence = item.Workflow.PID
 		}
@@ -309,9 +306,10 @@ func SetPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*Item)
 				if item.Workflow.State == model.StatusSkipped {
 					step.State = model.StatusSkipped
 				}
-				pipeline.Steps = append(pipeline.Steps, step)
+				item.Workflow.Children = append(item.Workflow.Children, step)
 			}
 		}
+		pipeline.Workflows = append(pipeline.Workflows, item.Workflow)
 	}
 
 	return pipeline

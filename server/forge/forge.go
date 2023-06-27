@@ -61,7 +61,7 @@ type Forge interface {
 
 	// Status sends the commit status to the forge.
 	// An example would be the GitHub pull request status.
-	Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, p *model.Step) error
+	Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, p *model.Workflow) error
 
 	// Netrc returns a .netrc file that can be used to clone
 	// private repositories from a forge.

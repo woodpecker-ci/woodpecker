@@ -142,8 +142,6 @@ func (when *When) UnmarshalYAML(value *yaml.Node) error {
 func (c *Constraint) Match(m metadata.Metadata, global bool) (bool, error) {
 	match := true
 	if !global {
-		c.SetDefaultEventFilter()
-
 		// apply step only filters
 		match = c.Matrix.Match(m.Workflow.Matrix)
 	}
@@ -182,19 +180,6 @@ func (c *Constraint) Match(m metadata.Metadata, global bool) (bool, error) {
 	}
 
 	return match, nil
-}
-
-// SetDefaultEventFilter set default e event filter if not event filter is already set
-func (c *Constraint) SetDefaultEventFilter() {
-	if c.Event.IsEmpty() {
-		c.Event.Include = []string{
-			metadata.EventPush,
-			metadata.EventPull,
-			metadata.EventTag,
-			metadata.EventDeploy,
-			metadata.EventManual,
-		}
-	}
 }
 
 // IsEmpty return true if a constraint has no conditions

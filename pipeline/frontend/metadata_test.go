@@ -61,7 +61,7 @@ func TestMetadataFromStruct(t *testing.T) {
 		forge            metadata.ServerForge
 		repo             *model.Repo
 		pipeline, last   *model.Pipeline
-		workflow         *model.Step
+		workflow         *model.Workflow
 		link             string
 		expectedMetadata metadata.Metadata
 		expectedEnviron  map[string]string
@@ -92,7 +92,7 @@ func TestMetadataFromStruct(t *testing.T) {
 			repo:     &model.Repo{FullName: "testUser/testRepo", Link: "https://gitea.com/testUser/testRepo", Clone: "https://gitea.com/testUser/testRepo.git", Branch: "main", IsSCMPrivate: true},
 			pipeline: &model.Pipeline{Number: 3},
 			last:     &model.Pipeline{Number: 2},
-			workflow: &model.Step{Name: "hello"},
+			workflow: &model.Workflow{Name: "hello"},
 			link:     "https://example.com",
 			expectedMetadata: metadata.Metadata{
 				Forge:    metadata.Forge{Type: "gitea", URL: "https://gitea.com"},

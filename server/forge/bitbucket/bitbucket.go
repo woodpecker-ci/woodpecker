@@ -21,8 +21,9 @@ import (
 	"net/http"
 	"net/url"
 
-	shared_utils "github.com/woodpecker-ci/woodpecker/shared/utils"
 	"golang.org/x/oauth2"
+
+	shared_utils "github.com/woodpecker-ci/woodpecker/shared/utils"
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/forge"
@@ -157,6 +158,18 @@ func (c *config) Repo(ctx context.Context, u *model.User, remoteID model.ForgeRe
 	if remoteID.IsValid() {
 		name = string(remoteID)
 	}
+	repos, err := c.Repos(ctx, u)
+	if err != nil {
+		return nil, err
+	}
+	if len(owner) == 0 {
+		for _, repo := range repos {
+			if string(repo.ForgeRemoteID) == name {
+				owner = repo.Owner
+				break
+			}
+		}
+	}
 	client := c.newClient(ctx, u)
 	repo, err := client.FindRepo(owner, name)
 	if err != nil {
@@ -215,7 +228,7 @@ func (c *config) Dir(_ context.Context, _ *model.User, _ *model.Repo, _ *model.P
 }
 
 // Status creates a pipeline status for the Bitbucket commit.
-func (c *config) Status(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, _ *model.Step) error {
+func (c *config) Status(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, _ *model.Workflow) error {
 	status := internal.PipelineStatus{
 		State: convertStatus(pipeline.Status),
 		Desc:  common.GetPipelineStatusDescription(pipeline.Status),
