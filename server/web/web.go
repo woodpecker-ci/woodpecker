@@ -17,7 +17,10 @@ package web
 import (
 	"bytes"
 	"crypto/md5"
+	"errors"
 	"fmt"
+	"io"
+	"io/fs"
 	"net/http"
 	"strings"
 	"time"
@@ -45,6 +48,21 @@ func (f *prefixFS) Open(name string) (http.File, error) {
 	return f.fs.Open(strings.TrimPrefix(name, f.prefix))
 }
 
+func (f *prefixFS) lookup(path string) (buf []byte, err error) {
+	file, err := f.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	buf, err = io.ReadAll(file)
+	if err != nil {
+		return nil, err
+	}
+
+	return buf, nil
+}
+
 // New returns a gin engine to serve the web frontend.
 func New() (*gin.Engine, error) {
 	e := gin.New()
@@ -58,14 +76,51 @@ func New() (*gin.Engine, error) {
 	if err != nil {
 		return nil, err
 	}
-	h := http.FileServer(&prefixFS{httpFS, rootPath})
+	f := &prefixFS{httpFS, rootPath}
 	e.GET(rootPath+"/favicon.svg", redirect(server.Config.Server.RootPath+"/favicons/favicon-light-default.svg", http.StatusPermanentRedirect))
-	e.GET(rootPath+"/favicons/*filepath", gin.WrapH(h))
-	e.GET(rootPath+"/assets/*filepath", gin.WrapH(h))
+	e.GET(rootPath+"/favicons/*filepath", serveFile(f))
+	e.GET(rootPath+"/assets/*filepath", serveFile(f))
 
 	e.NoRoute(handleIndex)
 
 	return e, nil
+}
+
+func serveFile(f *prefixFS) func(ctx *gin.Context) {
+	return func(ctx *gin.Context) {
+		file, err := f.Open(ctx.Request.URL.Path)
+		if err != nil {
+			code := http.StatusInternalServerError
+			if errors.Is(err, fs.ErrNotExist) {
+				code = http.StatusNotFound
+			} else if errors.Is(err, fs.ErrPermission) {
+				code = http.StatusForbidden
+			}
+			ctx.Status(code)
+			return
+		}
+		data, err := io.ReadAll(file)
+		if err != nil {
+			ctx.Status(http.StatusInternalServerError)
+			return
+		}
+		var mime string
+		switch {
+		case strings.HasSuffix(ctx.Request.URL.Path, ".js"):
+			mime = "text/javascript"
+		case strings.HasSuffix(ctx.Request.URL.Path, ".css"):
+			mime = "text/css"
+		case strings.HasSuffix(ctx.Request.URL.Path, ".png"):
+			mime = "image/png"
+		case strings.HasSuffix(ctx.Request.URL.Path, ".svg"):
+			mime = "image/svg"
+		}
+		ctx.Status(http.StatusOK)
+		ctx.Writer.Header().Set("Content-Type", mime)
+		if _, err := ctx.Writer.Write(replaceBytes(data)); err != nil {
+			log.Error().Err(err).Msgf("can not write %s", ctx.Request.URL.Path)
+		}
+	}
 }
 
 // redirect return gin helper to redirect a request
@@ -94,7 +149,11 @@ func loadFile(path string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return bytes.ReplaceAll(data, []byte("/BASE_PATH"), []byte(server.Config.Server.RootPath)), nil
+	return replaceBytes(data), nil
+}
+
+func replaceBytes(data []byte) []byte {
+	return bytes.ReplaceAll(data, []byte("/BASE_PATH"), []byte(server.Config.Server.RootPath))
 }
 
 func parseIndex() []byte {
