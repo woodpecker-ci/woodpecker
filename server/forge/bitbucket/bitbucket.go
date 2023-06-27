@@ -309,12 +309,12 @@ func (c *config) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 	if err != nil {
 		return nil, err
 	}
-	result := make([]*model.PullRequest, len(pullRequests))
-	for i := range pullRequests {
-		result[i] = &model.PullRequest{
-			Index: int64(pullRequests[i].ID),
-			Title: pullRequests[i].Title,
-		}
+	result := []*model.PullRequest{}
+	for _, pullRequest := range pullRequests {
+		result = append(result, &model.PullRequest{
+			Index: int64(pullRequest.ID),
+			Title: pullRequest.Title,
+		})
 	}
 	return result, nil
 }
