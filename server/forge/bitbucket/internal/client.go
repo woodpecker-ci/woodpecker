@@ -34,18 +34,19 @@ const (
 )
 
 const (
-	pathUser        = "%s/2.0/user/"
-	pathEmails      = "%s/2.0/user/emails"
-	pathPermissions = "%s/2.0/user/permissions/repositories?q=repository.full_name=%q"
-	pathWorkspace   = "%s/2.0/workspaces/?%s"
-	pathRepo        = "%s/2.0/repositories/%s/%s"
-	pathRepos       = "%s/2.0/repositories/%s?%s"
-	pathHook        = "%s/2.0/repositories/%s/%s/hooks/%s"
-	pathHooks       = "%s/2.0/repositories/%s/%s/hooks?%s"
-	pathSource      = "%s/2.0/repositories/%s/%s/src/%s/%s"
-	pathStatus      = "%s/2.0/repositories/%s/%s/commit/%s/statuses/build"
-	pathBranches    = "%s/2.0/repositories/%s/%s/refs/branches"
-	pathOrgPerms    = "%s/2.0/workspaces/%s/permissions?%s"
+	pathUser         = "%s/2.0/user/"
+	pathEmails       = "%s/2.0/user/emails"
+	pathPermissions  = "%s/2.0/user/permissions/repositories?q=repository.full_name=%q"
+	pathWorkspace    = "%s/2.0/workspaces/?%s"
+	pathRepo         = "%s/2.0/repositories/%s/%s"
+	pathRepos        = "%s/2.0/repositories/%s?%s"
+	pathHook         = "%s/2.0/repositories/%s/%s/hooks/%s"
+	pathHooks        = "%s/2.0/repositories/%s/%s/hooks?%s"
+	pathSource       = "%s/2.0/repositories/%s/%s/src/%s/%s"
+	pathStatus       = "%s/2.0/repositories/%s/%s/commit/%s/statuses/build"
+	pathBranches     = "%s/2.0/repositories/%s/%s/refs/branches"
+	pathOrgPerms     = "%s/2.0/workspaces/%s/permissions?%s"
+	pathPullRequests = "%s/2.0/repositories/%s/%s/pullrequests"
 )
 
 type Client struct {
@@ -202,6 +203,13 @@ func (c *Client) GetUserWorkspaceMembership(workspace, user string) (string, err
 		opts.Page++
 	}
 	return "", nil
+}
+
+func (c *Client) ListPullRequests(owner, name string, opts *ListOpts) ([]*PullRequest, error) {
+	out := new(PullRequestResp)
+	uri := fmt.Sprintf(pathPullRequests, c.base, owner, name)
+	_, err := c.do(uri, get, opts.Encode(), out)
+	return out.Values, err
 }
 
 func (c *Client) do(rawurl, method string, in, out interface{}) (*string, error) {
