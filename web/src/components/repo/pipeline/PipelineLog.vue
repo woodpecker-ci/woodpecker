@@ -36,8 +36,17 @@
         ref="consoleElement"
         class="w-full max-w-full grid grid-cols-[min-content,1fr,min-content] auto-rows-min flex-grow p-2 gap-x-2 overflow-x-hidden overflow-y-auto"
       >
-        <div v-for="line in log" :id="`L${line.index + 1}`" :key="line.index" class="contents font-mono">
-          <a :href="`#L${line.index + 1}`" class="text-gray-500 whitespace-nowrap select-none text-right">{{ line.index + 1 }}</a>
+        <div v-for="line in log" :key="line.index" class="contents font-mono">
+          <a
+            :href="`#L${line.index + 1}`"
+            :id="`L${line.index + 1}`"
+            class="text-gray-500 whitespace-nowrap select-none text-right"
+            :class="{
+              'bg-black bg-opacity-10 dark:bg-white dark:bg-opacity-5': $route.hash == `#L${line.index + 1}`,
+            }"
+          >
+            {{ line.index + 1 }}
+          </a>
           <!-- eslint-disable-next-line vue/no-v-html -->
           <span class="align-top text-color whitespace-pre-wrap break-words" v-html="line.text" />
           <span class="text-gray-500 whitespace-nowrap select-none text-right">{{ formatTime(line.time) }}</span>
@@ -68,6 +77,7 @@
 import '~/style/console.css';
 
 import { useStorage } from '@vueuse/core';
+import { useRoute } from 'vue-router';
 import AnsiUp from 'ansi_up';
 import { debounce } from 'lodash';
 import { computed, inject, nextTick, onMounted, Ref, ref, toRef, watch } from 'vue';
@@ -101,6 +111,7 @@ const pipeline = toRef(props, 'pipeline');
 const stepId = toRef(props, 'stepId');
 const repo = inject<Ref<Repo>>('repo');
 const apiClient = useApiClient();
+const route = useRoute();
 
 const loadedStepSlug = ref<string>();
 const stepSlug = computed(() => `${repo?.value.owner} - ${repo?.value.name} - ${pipeline.value.id} - ${stepId.value}`);
@@ -178,7 +189,9 @@ const flushLogs = debounce((scroll: boolean) => {
 
   log.value = buffer;
 
-  if (scroll && autoScroll.value) {
+  if (route.hash.length > 0) {
+    nextTick(() => document.getElementById(route.hash.substring(1)).scrollIntoView());
+  } else if (scroll && autoScroll.value) {
     scrollDown();
   }
 }, 500);
