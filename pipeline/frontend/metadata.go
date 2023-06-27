@@ -37,7 +37,7 @@ func EnvVarSubst(yaml string, environ map[string]string) (string, error) {
 }
 
 // MetadataFromStruct return the metadata from a pipeline will run with.
-func MetadataFromStruct(forge metadata.ServerForge, repo *model.Repo, pipeline, last *model.Pipeline, workflow *model.Step, link string) metadata.Metadata {
+func MetadataFromStruct(forge metadata.ServerForge, repo *model.Repo, pipeline, last *model.Pipeline, workflow *model.Workflow, link string) metadata.Metadata {
 	host := link
 	uri, err := url.Parse(link)
 	if err == nil {

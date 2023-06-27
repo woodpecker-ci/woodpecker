@@ -35,6 +35,6 @@ export default () => {
       return;
     }
     const { step } = data;
-    pipelineStore.setStep(repo.id, pipeline.number, step);
+    pipelineStore.setWorkflow(repo.id, pipeline.number, step);
   });
 };
