@@ -50,7 +50,7 @@ import (
 )
 
 func run(c *cli.Context) error {
-	agentIdConfigPath := c.String("agent-id-config-path")
+	agentIDConfigPath := c.String("agent-id-config-path")
 	hostname := c.String("hostname")
 	if len(hostname) == 0 {
 		hostname, _ = os.Hostname()
@@ -111,7 +111,7 @@ func run(c *cli.Context) error {
 	}
 	defer authConn.Close()
 
-	agentID := readAgentId(agentIdConfigPath)
+	agentID := readAgentID(agentIDConfigPath)
 	agentToken := c.String("grpc-token")
 	authClient := agentRpc.NewAuthGrpcClient(authConn, agentToken, agentID)
 	authInterceptor, err := agentRpc.NewAuthInterceptor(authClient, 30*time.Minute)
@@ -180,7 +180,7 @@ func run(c *cli.Context) error {
 		return err
 	}
 
-	writeAgentId(agentID, agentIdConfigPath)
+	writeAgentID(agentID, agentIDConfigPath)
 
 	labels := map[string]string{
 		"hostname": hostname,
@@ -285,30 +285,32 @@ func stringSliceAddToMap(sl []string, m map[string]string) error {
 	return nil
 }
 
-func readAgentId(agentIdConfigPath string) int64 {
-	const defaultAgentIdValue = int64(-1)
+func readAgentID(agentIDConfigPath string) int64 {
+	const defaultAgentIDValue = int64(-1)
 
-	rawAgentId, fileErr := os.ReadFile(agentIdConfigPath)
+	rawAgentID, fileErr := os.ReadFile(agentIDConfigPath)
 	if fileErr != nil {
-		return defaultAgentIdValue
+		log.Debug().Err(fileErr).Msgf("could not open agent-id config file from %s", agentIDConfigPath)
+		return defaultAgentIDValue
 	}
 
-	strAgentId := strings.TrimSpace(string(rawAgentId))
-	agentId, err := strconv.ParseInt(strAgentId, 10, 64)
-	if err != nil {
-		return defaultAgentIdValue
+	strAgentID := strings.TrimSpace(string(rawAgentID))
+	agentID, parseErr := strconv.ParseInt(strAgentID, 10, 64)
+	if parseErr != nil {
+		log.Warn().Err(parseErr).Msg("could not parse agent-id config file content to int64")
+		return defaultAgentIDValue
 	}
 
-	return agentId
+	return agentID
 }
 
-func writeAgentId(agentID int64, agentIdConfigPath string) {
-	currentAgentId := readAgentId(agentIdConfigPath)
+func writeAgentID(agentID int64, agentIDConfigPath string) {
+	currentAgentID := readAgentID(agentIDConfigPath)
 
-	if currentAgentId != agentID {
-		err := os.WriteFile(agentIdConfigPath, []byte(strconv.FormatInt(agentID, 10)+"\n"), 0644)
+	if currentAgentID != agentID {
+		err := os.WriteFile(agentIDConfigPath, []byte(strconv.FormatInt(agentID, 10)+"\n"), 0o644)
 		if err != nil {
-			log.Warn().Err(err).Msgf("could not write agent-id config file to %s", agentIdConfigPath)
+			log.Warn().Err(err).Msgf("could not write agent-id config file to %s", agentIDConfigPath)
 		}
 	}
 }

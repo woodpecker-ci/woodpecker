@@ -80,6 +80,11 @@ Disable colored debug output.
 
 Configures the agent hostname.
 
+### `WOODPECKER_AGENT_ID_CONFIG_PATH`
+> Default: `/etc/woodpecker/agent-id.conf`
+
+Configures the path of the agent-id.conf file.
+
 ### `WOODPECKER_MAX_WORKFLOWS`
 > Default: `1`
 

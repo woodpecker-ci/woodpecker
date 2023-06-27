@@ -67,7 +67,7 @@
           </InputField>
 
           <InputField :label="$t('admin.settings.agents.id')">
-            <TextField v-model="selectedAgent.id" disabled />
+            <TextField :model-value="selectedAgent.id?.toString()" disabled />
           </InputField>
 
           <InputField
