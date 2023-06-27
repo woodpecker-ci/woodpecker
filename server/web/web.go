@@ -94,9 +94,6 @@ func loadFile(path string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	if server.Config.Server.RootPath == "" {
-		return data, nil
-	}
 	return bytes.ReplaceAll(data, []byte("/BASE_PATH"), []byte(server.Config.Server.RootPath)), nil
 }
 

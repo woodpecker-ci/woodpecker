@@ -80,7 +80,7 @@ func Load(noRouteHandler http.HandlerFunc, middleware ...gin.HandlerFunc) http.H
 func setupSwaggerConfigAndRoutes(e *gin.Engine) {
 	docs.SwaggerInfo.Host = getHost(server.Config.Server.Host)
 	docs.SwaggerInfo.BasePath = server.Config.Server.RootPath + "/api"
-	e.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+	e.GET(server.Config.Server.RootPath+"/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 }
 
 func getHost(s string) string {

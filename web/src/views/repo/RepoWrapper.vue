@@ -123,7 +123,7 @@ watch([repoId], () => {
   loadRepo();
 });
 
-const badgeUrl = computed(() => repo.value && `/api/badges/${repo.value.id}/status.svg`);
+const badgeUrl = computed(() => repo.value && `${config.rootPath}/api/badges/${repo.value.id}/status.svg`);
 
 const activeTab = computed({
   get() {
