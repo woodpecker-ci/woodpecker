@@ -140,7 +140,7 @@ const { doSubmit: cancelPipeline, isLoading: isCancelingPipeline } = useAsyncAct
     throw new Error('Unexpected: Repo is undefined');
   }
 
-  if (!pipeline.value?.steps) {
+  if (!pipeline.value?.workflows) {
     throw new Error('Unexpected: Pipeline steps not loaded');
   }
 
