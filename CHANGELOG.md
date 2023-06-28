@@ -51,11 +51,13 @@
   * Add support to run pipelines using a local backend (#709)
   * Add initial version of Kubernetes backend (#552)
 * SECURITY
+  * Fix ignoring server set pipeline max-timeout (#1875)
   * Only grant privileged to plugins (#1646)
   * Only inject netrc to trusted clone plugins (#1352)
   * Support plugin-only secrets (#1344)
   * Fix insecure /tmp usage in local backend (#872)
 * BUGFIXES
+  * Fix Bitbucket implement missing features (#1887) (#1889)
   * Fix nil pointer in repo repair (#1804)
   * Do not use OAuth client without token (#1803)
   * Correct label argument parsing in agent code (#1717)
