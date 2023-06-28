@@ -49,7 +49,7 @@ show pipeline history
 
 **--event**="": event filter
 
-**--format**="": format output (default: [33mBuild #{{ .Number }} [0m
+**--format**="": format output (default: [33mPipeline #{{ .Number }} [0m
 Status: {{ .Status }}
 Event: {{ .Event }}
 Commit: {{ .Commit }}
@@ -204,7 +204,7 @@ create new pipeline
 
 **--branch**="": branch to create pipeline from
 
-**--format**="": format output (default: [33mBuild #{{ .Number }} [0m
+**--format**="": format output (default: [33mPipeline #{{ .Number }} [0m
 Status: {{ .Status }}
 Event: {{ .Event }}
 Commit: {{ .Commit }}
@@ -454,7 +454,7 @@ adds a registry
 
 **--password**="": registry password
 
-**--repository, --repo**="": repository name (e.g. octocat/hello-world)
+**--repository, --repo**="": repository id or full-name (e.g. 134 or octocat/hello-world)
 
 **--server, -s**="": server address
 
@@ -470,7 +470,7 @@ remove a registry
 
 **--log-level**="": set logging level (default: info)
 
-**--repository, --repo**="": repository name (e.g. octocat/hello-world)
+**--repository, --repo**="": repository id or full-name (e.g. 134 or octocat/hello-world)
 
 **--server, -s**="": server address
 
@@ -486,7 +486,7 @@ update a registry
 
 **--password**="": registry password
 
-**--repository, --repo**="": repository name (e.g. octocat/hello-world)
+**--repository, --repo**="": repository id or full-name (e.g. 134 or octocat/hello-world)
 
 **--server, -s**="": server address
 
@@ -502,7 +502,7 @@ display registry info
 
 **--log-level**="": set logging level (default: info)
 
-**--repository, --repo**="": repository name (e.g. octocat/hello-world)
+**--repository, --repo**="": repository id or full-name (e.g. 134 or octocat/hello-world)
 
 **--server, -s**="": server address
 
@@ -514,7 +514,7 @@ list registries
 
 **--log-level**="": set logging level (default: info)
 
-**--repository, --repo**="": repository name (e.g. octocat/hello-world)
+**--repository, --repo**="": repository id or full-name (e.g. 134 or octocat/hello-world)
 
 **--server, -s**="": server address
 
@@ -548,7 +548,7 @@ adds a secret
 
 **--plugins-only**: secret limited to plugins
 
-**--repository, --repo**="": repository name (e.g. octocat/hello-world)
+**--repository, --repo**="": repository id or full-name (e.g. 134 or octocat/hello-world)
 
 **--server, -s**="": server address
 
@@ -568,7 +568,7 @@ remove a secret
 
 **--organization**="": organization name (e.g. octocat)
 
-**--repository, --repo**="": repository name (e.g. octocat/hello-world)
+**--repository, --repo**="": repository id or full-name (e.g. 134 or octocat/hello-world)
 
 **--server, -s**="": server address
 
@@ -592,7 +592,7 @@ update a secret
 
 **--plugins-only**: secret limited to plugins
 
-**--repository, --repo**="": repository name (e.g. octocat/hello-world)
+**--repository, --repo**="": repository id or full-name (e.g. 134 or octocat/hello-world)
 
 **--server, -s**="": server address
 
@@ -612,7 +612,7 @@ display secret info
 
 **--organization**="": organization name (e.g. octocat)
 
-**--repository, --repo**="": repository name (e.g. octocat/hello-world)
+**--repository, --repo**="": repository id or full-name (e.g. 134 or octocat/hello-world)
 
 **--server, -s**="": server address
 
@@ -628,7 +628,7 @@ list secrets
 
 **--organization**="": organization name (e.g. octocat)
 
-**--repository, --repo**="": repository name (e.g. octocat/hello-world)
+**--repository, --repo**="": repository id or full-name (e.g. 134 or octocat/hello-world)
 
 **--server, -s**="": server address
 
@@ -648,7 +648,7 @@ manage repositories
 
 list all repos
 
-**--format**="": format output (default: {{ .FullName }})
+**--format**="": format output (default: [33m{{ .FullName }}[0m (id: {{ .ID }}))
 
 **--log-level**="": set logging level (default: info)
 
@@ -664,13 +664,14 @@ show repository details
 
 **--format**="": format output (default: Owner: {{ .Owner }}
 Repo: {{ .Name }}
-Type: {{ .Kind }}
-Config: {{ .Config }}
+Link: {{ .Link }}
+Config path: {{ .Config }}
 Visibility: {{ .Visibility }}
 Private: {{ .IsSCMPrivate }}
 Trusted: {{ .IsTrusted }}
 Gated: {{ .IsGated }}
-Forge: {{ .Clone }}
+Clone url: {{ .Clone }}
+Allow pull-requests: {{ .AllowPullRequests }}
 )
 
 **--log-level**="": set logging level (default: info)
@@ -747,7 +748,7 @@ assume ownership of a repository
 
 synchronize the repository list
 
-**--format**="": format output (default: {{ .FullName }})
+**--format**="": format output (default: [33m{{ .FullName }}[0m (id: {{ .ID }}))
 
 **--log-level**="": set logging level (default: info)
 
@@ -850,7 +851,7 @@ add a cron job
 
 **--name**="": cron name
 
-**--repository, --repo**="": repository name (e.g. octocat/hello-world)
+**--repository, --repo**="": repository id or full-name (e.g. 134 or octocat/hello-world)
 
 **--schedule**="": cron schedule
 
@@ -866,7 +867,7 @@ remove a cron job
 
 **--log-level**="": set logging level (default: info)
 
-**--repository, --repo**="": repository name (e.g. octocat/hello-world)
+**--repository, --repo**="": repository id or full-name (e.g. 134 or octocat/hello-world)
 
 **--server, -s**="": server address
 
@@ -884,7 +885,7 @@ update a cron job
 
 **--name**="": cron name
 
-**--repository, --repo**="": repository name (e.g. octocat/hello-world)
+**--repository, --repo**="": repository id or full-name (e.g. 134 or octocat/hello-world)
 
 **--schedule**="": cron schedule
 
@@ -900,7 +901,7 @@ display info about a cron job
 
 **--log-level**="": set logging level (default: info)
 
-**--repository, --repo**="": repository name (e.g. octocat/hello-world)
+**--repository, --repo**="": repository id or full-name (e.g. 134 or octocat/hello-world)
 
 **--server, -s**="": server address
 
@@ -912,7 +913,7 @@ list cron jobs
 
 **--log-level**="": set logging level (default: info)
 
-**--repository, --repo**="": repository name (e.g. octocat/hello-world)
+**--repository, --repo**="": repository id or full-name (e.g. 134 or octocat/hello-world)
 
 **--server, -s**="": server address
 
