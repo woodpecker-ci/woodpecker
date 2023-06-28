@@ -190,7 +190,7 @@ const flushLogs = debounce((scroll: boolean) => {
   log.value = buffer;
 
   if (route.hash.length > 0) {
-    nextTick(() => document.getElementById(route.hash.substring(1)).scrollIntoView());
+    nextTick(() => document.getElementById(route.hash.substring(1))?.scrollIntoView());
   } else if (scroll && autoScroll.value) {
     scrollDown();
   }
