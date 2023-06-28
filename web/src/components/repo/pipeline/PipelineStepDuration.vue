@@ -1,12 +1,12 @@
 <template>
-  <span v-if="step.start_time !== undefined" class="ml-auto text-sm">{{ duration }}</span>
+  <span v-if="started" class="ml-auto text-sm">{{ duration }}</span>
 </template>
 
 <script lang="ts">
 import { computed, defineComponent, PropType, toRef } from 'vue';
 
 import { useElapsedTime } from '~/compositions/useElapsedTime';
-import { PipelineStep } from '~/lib/api/types';
+import { PipelineStep, PipelineWorkflow } from '~/lib/api/types';
 import { durationAsNumber } from '~/utils/duration';
 
 export default defineComponent({
@@ -15,16 +15,22 @@ export default defineComponent({
   props: {
     step: {
       type: Object as PropType<PipelineStep>,
-      required: true,
+      default: undefined,
+    },
+
+    workflow: {
+      type: Object as PropType<PipelineWorkflow>,
+      default: undefined,
     },
   },
 
   setup(props) {
     const step = toRef(props, 'step');
+    const workflow = toRef(props, 'workflow');
 
     const durationRaw = computed(() => {
-      const start = step.value.start_time || 0;
-      const end = step.value.end_time || 0;
+      const start = (step.value ? step.value?.start_time : workflow.value?.start_time) || 0;
+      const end = (step.value ? step.value?.end_time : workflow.value?.end_time) || 0;
 
       if (end === 0 && start === 0) {
         return undefined;
@@ -37,7 +43,7 @@ export default defineComponent({
       return (end - start) * 1000;
     });
 
-    const running = computed(() => step.value.state === 'running');
+    const running = computed(() => (step.value ? step.value?.state : workflow.value?.state) === 'running');
     const { time: durationElapsed } = useElapsedTime(running, durationRaw);
 
     const duration = computed(() => {
@@ -45,10 +51,11 @@ export default defineComponent({
         return '-';
       }
 
-      return durationAsNumber(durationElapsed.value);
+      return durationAsNumber(durationElapsed.value || 0);
     });
+    const started = computed(() => (step.value ? step.value?.start_time : workflow.value?.start_time) !== undefined);
 
-    return { duration };
+    return { started, duration };
   },
 });
 </script>
