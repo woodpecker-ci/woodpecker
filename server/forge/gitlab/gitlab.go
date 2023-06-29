@@ -395,7 +395,7 @@ func (g *GitLab) Dir(ctx context.Context, user *model.User, repo *model.Repo, pi
 }
 
 // Status sends the commit status back to gitlab.
-func (g *GitLab) Status(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, step *model.Step) error {
+func (g *GitLab) Status(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, workflow *model.Workflow) error {
 	client, err := newClient(g.url, user.Token, g.SkipVerify)
 	if err != nil {
 		return err
@@ -407,10 +407,10 @@ func (g *GitLab) Status(ctx context.Context, user *model.User, repo *model.Repo,
 	}
 
 	_, _, err = client.Commits.SetCommitStatus(_repo.ID, pipeline.Commit, &gitlab.SetCommitStatusOptions{
-		State:       getStatus(step.State),
-		Description: gitlab.String(common.GetPipelineStatusDescription(step.State)),
-		TargetURL:   gitlab.String(common.GetPipelineStatusLink(repo, pipeline, step)),
-		Context:     gitlab.String(common.GetPipelineStatusContext(repo, pipeline, step)),
+		State:       getStatus(workflow.State),
+		Description: gitlab.String(common.GetPipelineStatusDescription(workflow.State)),
+		TargetURL:   gitlab.String(common.GetPipelineStatusLink(repo, pipeline, workflow)),
+		Context:     gitlab.String(common.GetPipelineStatusContext(repo, pipeline, workflow)),
 	}, gitlab.WithContext(ctx))
 
 	return err

@@ -115,7 +115,7 @@ const route = useRoute();
 
 const loadedStepSlug = ref<string>();
 const stepSlug = computed(() => `${repo?.value.owner} - ${repo?.value.name} - ${pipeline.value.id} - ${stepId.value}`);
-const step = computed(() => pipeline.value && findStep(pipeline.value.steps || [], stepId.value));
+const step = computed(() => pipeline.value && findStep(pipeline.value.workflows || [], stepId.value));
 const stream = ref<EventSource>();
 const log = ref<LogLine[]>();
 const consoleElement = ref<Element>();

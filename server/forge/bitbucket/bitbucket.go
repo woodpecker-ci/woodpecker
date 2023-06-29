@@ -21,8 +21,9 @@ import (
 	"net/http"
 	"net/url"
 
-	shared_utils "github.com/woodpecker-ci/woodpecker/shared/utils"
 	"golang.org/x/oauth2"
+
+	shared_utils "github.com/woodpecker-ci/woodpecker/shared/utils"
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/forge"
@@ -227,7 +228,7 @@ func (c *config) Dir(_ context.Context, _ *model.User, _ *model.Repo, _ *model.P
 }
 
 // Status creates a pipeline status for the Bitbucket commit.
-func (c *config) Status(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, _ *model.Step) error {
+func (c *config) Status(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, _ *model.Workflow) error {
 	status := internal.PipelineStatus{
 		State: convertStatus(pipeline.Status),
 		Desc:  common.GetPipelineStatusDescription(pipeline.Status),
@@ -301,8 +302,21 @@ func (c *config) BranchHead(_ context.Context, _ *model.User, _ *model.Repo, _ s
 	return "", forge_types.ErrNotImplemented
 }
 
-func (c *config) PullRequests(_ context.Context, _ *model.User, _ *model.Repo, _ *model.ListOptions) ([]*model.PullRequest, error) {
-	return nil, forge_types.ErrNotImplemented
+// PullRequests returns the pull requests of the named repository.
+func (c *config) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error) {
+	opts := internal.ListOpts{Page: p.Page, PageLen: p.Page}
+	pullRequests, err := c.newClient(ctx, u).ListPullRequests(r.Owner, r.Name, &opts)
+	if err != nil {
+		return nil, err
+	}
+	result := []*model.PullRequest{}
+	for _, pullRequest := range pullRequests {
+		result = append(result, &model.PullRequest{
+			Index: int64(pullRequest.ID),
+			Title: pullRequest.Title,
+		})
+	}
+	return result, nil
 }
 
 // Hook parses the incoming Bitbucket hook and returns the Repository and

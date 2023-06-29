@@ -52,6 +52,7 @@ var migrationTasks = []*task{
 	&dropOldCols,
 	&initLogsEntriesTable,
 	&migrateLogs2LogEntries,
+	&parentStepsToWorkflows,
 }
 
 var allBeans = []interface{}{
@@ -70,6 +71,7 @@ var allBeans = []interface{}{
 	new(model.ServerConfig),
 	new(model.Cron),
 	new(model.Redirection),
+	new(model.Workflow),
 }
 
 type migrations struct {
