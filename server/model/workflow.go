@@ -81,6 +81,7 @@ func WorkflowStatus(steps []*Step) StatusValue {
 	for _, p := range steps {
 		if p.Failing() {
 			status = p.State
+			break
 		}
 	}
 
