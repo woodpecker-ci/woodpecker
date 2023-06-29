@@ -11,7 +11,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func Pod(namespace string, step *types.Step, labels, annotations map[string]string) (*v1.Pod, error) {
+func Pod(namespace string, step *types.Step, labels, annotations map[string]string, ImagePullSecrets) (*v1.Pod, error) {
 	var (
 		vols       []v1.Volume
 		volMounts  []v1.VolumeMount
@@ -132,7 +132,7 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 					Privileged: &step.Privileged,
 				},
 			}},
-			ImagePullSecrets: []v1.LocalObjectReference{{Name: "regcred"}},
+			ImagePullSecrets: ImagePullSecrets,
 			Volumes:          vols,
 		},
 	}

@@ -53,3 +53,9 @@ helm upgrade --install woodpecker-agent --namespace <namespace> woodpecker/woodp
 # Uninstall
 helm delete woodpecker-agent
 ```
+
+## ImagePullSecrets
+
+By default pods look for a secret named "regcred" in the respective namespace.
+Existing secrets can be used by overwriting the default secret name Woodpecker is looking for via the k8s backend option `backend-k8s-pod-image-pull-secret`.
+Multiple secrets can be referenced!

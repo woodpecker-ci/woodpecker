@@ -190,6 +190,12 @@ var flags = []cli.Flag{
 		Usage:   "backend k8s additional worker pod annotations",
 		Value:   "",
 	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_K8S_IMAGE_PULL_SECRETS"},
+		Name:    "backend-k8s-pod-image-pull-secrets",
+		Usage:   "backend k8s pull secrets for private registries",
+		Value:   "regcred",
+	},
 	&cli.IntFlag{
 		EnvVars: []string{"WOODPECKER_CONNECT_RETRY_COUNT"},
 		Name:    "connect-retry-count",

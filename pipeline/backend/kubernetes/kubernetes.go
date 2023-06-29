@@ -35,24 +35,27 @@ type kube struct {
 }
 
 type Config struct {
-	Namespace      string
-	StorageClass   string
-	VolumeSize     string
-	StorageRwx     bool
-	PodLabels      map[string]string
-	PodAnnotations map[string]string
+	Namespace        string
+	StorageClass     string
+	VolumeSize       string
+	StorageRwx       bool
+	PodLabels        map[string]string
+	PodAnnotations   map[string]string
+	ImagePullSecrets []v1.LocalObjectReference
 }
 
 func configFromCliContext(ctx context.Context) (*Config, error) {
 	if ctx != nil {
 		if c, ok := ctx.Value(types.CliContext).(*cli.Context); ok {
 			config := Config{
-				Namespace:      c.String("backend-k8s-namespace"),
-				StorageClass:   c.String("backend-k8s-storage-class"),
-				VolumeSize:     c.String("backend-k8s-volume-size"),
-				StorageRwx:     c.Bool("backend-k8s-storage-rwx"),
-				PodLabels:      make(map[string]string), // just init empty map to prevent nil panic
-				PodAnnotations: make(map[string]string), // just init empty map to prevent nil panic
+				Namespace:        c.String("backend-k8s-namespace"),
+				StorageClass:     c.String("backend-k8s-storage-class"),
+				VolumeSize:       c.String("backend-k8s-volume-size"),
+				StorageRwx:       c.Bool("backend-k8s-storage-rwx"),
+				PodLabels:        make(map[string]string), // just init empty map to prevent nil panic
+				PodAnnotations:   make(map[string]string), // just init empty map to prevent nil panic
+				// # FIXME: how to reference a list here?
+				ImagePullSecrets: []v1.LocalObjectReference{{Name: "regcred"}},
 			}
 			// Unmarshal label and annotation settings here to ensure they're valid on startup
 			if labels := c.String("backend-k8s-pod-labels"); labels != "" {
@@ -64,6 +67,13 @@ func configFromCliContext(ctx context.Context) (*Config, error) {
 			if annotations := c.String("backend-k8s-pod-annotations"); annotations != "" {
 				if err := yaml.Unmarshal([]byte(c.String("backend-k8s-pod-annotations")), &config.PodAnnotations); err != nil {
 					log.Error().Msgf("could not unmarshal pod annotations '%s': %s", c.String("backend-k8s-pod-annotations"), err)
+					return nil, err
+				}
+			}
+			// FIXME: this is wrong and needs to be adapted to a list - help!
+			if ImagePullSecrets := c.String("backend-k8s-pod-image-pull-secrets"); ImagePullSecrets != "" {
+				if err := yaml.Unmarshal([]byte(ImagePullSecrets), &config.ImagePullSecrets); err != nil {
+					log.Error().Msgf("could not unmarshal pod ImagePullSecrets '%s': %s", c.String("backend-k8s-pod-image-pull-secrets"), err)
 					return nil, err
 				}
 			}
@@ -169,7 +179,7 @@ func (e *kube) Setup(ctx context.Context, conf *types.Config) error {
 
 // Start the pipeline step.
 func (e *kube) Exec(ctx context.Context, step *types.Step) error {
-	pod, err := Pod(e.config.Namespace, step, e.config.PodLabels, e.config.PodAnnotations)
+	pod, err := Pod(e.config.Namespace, step, e.config.PodLabels, e.config.PodAnnotations, e.config.ImagePullSecrets)
 	if err != nil {
 		return err
 	}
