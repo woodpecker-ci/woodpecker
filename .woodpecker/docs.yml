@@ -8,7 +8,7 @@ variables:
     - "cli/**"
     - "cmd/cli/**"
 
-pipeline: &legacy
+steps:
   build-cli:
     image: *golang_image
     commands:
@@ -82,5 +82,3 @@ pipeline: &legacy
         path: *when_path
       - cron: update_docs
         event: cron
-
-steps: *legacy

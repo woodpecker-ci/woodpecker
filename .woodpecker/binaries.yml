@@ -18,7 +18,7 @@ variables:
       # web source code
       - "web/**"
 
-pipeline: &legacy
+steps:
   build-web:
     group: prepare
     image: *node_image
@@ -101,5 +101,3 @@ pipeline: &legacy
       title: ${CI_COMMIT_TAG##v}
     when:
       event: tag
-
-steps: *legacy
