@@ -36,7 +36,7 @@ func UpdateWorkflowStatusToDone(store model.UpdateWorkflowStore, workflow model.
 	if state.Started == 0 {
 		workflow.State = model.StatusSkipped
 	} else {
-		workflow.State = model.StatusSuccess
+		workflow.State = model.WorkflowStatus(workflow.Children)
 	}
 	if workflow.Error != "" {
 		workflow.State = model.StatusFailure
