@@ -57,7 +57,7 @@ helm delete woodpecker-agent
 ## Volumes
 
 To mount volumes a persistent volume (PV) and persistent volume claim (PVC) are needed on the cluster which can be referenced in steps via the `volume:` option.
-Assuming a PVC named "woodpecker-cache" exists:
+Assuming a PVC named "woodpecker-cache" exists, it can be referenced as follows in a step:
 
 ```yaml
 steps:
