@@ -26,6 +26,13 @@ type StepStore interface {
 	StepClear(*Pipeline) error
 }
 
+// Different ways to handle failure states
+const (
+	FailureIgnore = "ignore"
+	FailureFail   = "fail"
+	// FailureCancel = "cancel" // Not implemented yet
+)
+
 // Step represents a process in the pipeline.
 type Step struct {
 	ID         int64       `json:"id"                   xorm:"pk autoincr 'step_id'"`
@@ -36,6 +43,7 @@ type Step struct {
 	Name       string      `json:"name"                 xorm:"step_name"`
 	State      StatusValue `json:"state"                xorm:"step_state"`
 	Error      string      `json:"error,omitempty"      xorm:"VARCHAR(500) step_error"`
+	Failure    string      `json:"-"                    xorm:"step_failure"`
 	ExitCode   int         `json:"exit_code"            xorm:"step_exit_code"`
 	Started    int64       `json:"start_time,omitempty" xorm:"step_started"`
 	Stopped    int64       `json:"end_time,omitempty"   xorm:"step_stopped"`
@@ -57,5 +65,5 @@ func (p *Step) Running() bool {
 
 // Failing returns true if the process state is failed, killed or error.
 func (p *Step) Failing() bool {
-	return p.State == StatusError || p.State == StatusKilled || p.State == StatusFailure
+	return p.Failure == FailureFail && (p.State == StatusError || p.State == StatusKilled || p.State == StatusFailure)
 }
