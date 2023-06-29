@@ -53,3 +53,20 @@ helm upgrade --install woodpecker-agent --namespace <namespace> woodpecker/woodp
 # Uninstall
 helm delete woodpecker-agent
 ```
+
+## Volumes
+
+To mount volumes a persistent volume (PV) and persistent volume claim (PVC) are needed on the cluster which can be referenced in steps via the `volume:` option.
+Assuming a PVC named "woodpecker-cache" exists, it can be referenced as follows in a step:
+
+```yaml
+steps:
+  "Restore Cache":
+    image: meltwater/drone-cache
+    volumes:
+      - woodpecker-cache:/woodpecker/src/cache
+    settings:
+      mount:
+        - "woodpecker-cache"
+    [...]
+```
