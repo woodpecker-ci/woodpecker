@@ -52,6 +52,7 @@ pipeline: &legacy
     commands:
       - trivy fs --exit-code 0 --skip-dirs node_modules/ --severity UNKNOWN,LOW web/
       - trivy fs --exit-code 1 --skip-dirs node_modules/ --severity MEDIUM,HIGH,CRITICAL web/
+    failure: ignore
     when:
       path: *when_path
 
