@@ -2,6 +2,9 @@ depends_on:
   - test
   - web
 
+when:
+  event: tag
+
 variables:
   - &golang_image 'golang:1.20.2'
   - &node_image 'node:18-alpine'
