@@ -16,9 +16,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestStringSliceAddToMap(t *testing.T) {
@@ -126,6 +127,7 @@ func TestWriteAgentIDFileNotExists(t *testing.T) {
 	}
 	assert.EqualValues(t, "42\n", actual)
 }
+
 func TestWriteAgentIDFileExists(t *testing.T) {
 	parameters := []struct {
 		fileInput  string

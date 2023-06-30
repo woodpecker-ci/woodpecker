@@ -58,7 +58,7 @@ A shared secret used by server and agents to authenticate communication. A secre
 ### `WOODPECKER_AGENT_SECRET_FILE`
 > Default: empty
 
-Read the value for `WOODPECKER_AGENT_SECRET` from the specified filepath
+Read the value for `WOODPECKER_AGENT_SECRET` from the specified filepath, e.g. `/etc/woodpecker/agent-secret.conf`
 
 ### `WOODPECKER_LOG_LEVEL`
 > Default: empty
