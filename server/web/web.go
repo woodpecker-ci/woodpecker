@@ -48,21 +48,6 @@ func (f *prefixFS) Open(name string) (http.File, error) {
 	return f.fs.Open(strings.TrimPrefix(name, f.prefix))
 }
 
-func (f *prefixFS) lookup(path string) (buf []byte, err error) {
-	file, err := f.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	buf, err = io.ReadAll(file)
-	if err != nil {
-		return nil, err
-	}
-
-	return buf, nil
-}
-
 // New returns a gin engine to serve the web frontend.
 func New() (*gin.Engine, error) {
 	e := gin.New()
