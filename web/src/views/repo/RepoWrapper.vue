@@ -77,7 +77,7 @@ const props = defineProps<{
 }>();
 
 const _repoId = toRef(props, 'repoId');
-const repoId = computed(() => parseInt(_repoId.value, 10));
+const repositoryId = computed(() => parseInt(_repoId.value, 10));
 const repoStore = useRepoStore();
 const pipelineStore = usePipelineStore();
 const apiClient = useApiClient();
@@ -89,9 +89,9 @@ const i18n = useI18n();
 const config = useConfig();
 
 const { forge } = useConfig();
-const repo = repoStore.getRepo(repoId);
+const repo = repoStore.getRepo(repositoryId);
 const repoPermissions = ref<RepoPermissions>();
-const pipelines = pipelineStore.getRepoPipelines(repoId);
+const pipelines = pipelineStore.getRepoPipelines(repositoryId);
 provide('repo', repo);
 provide('repo-permissions', repoPermissions);
 provide('pipelines', pipelines);
@@ -99,7 +99,7 @@ provide('pipelines', pipelines);
 const showManualPipelinePopup = ref(false);
 
 async function loadRepo() {
-  repoPermissions.value = await apiClient.getRepoPermissions(repoId.value);
+  repoPermissions.value = await apiClient.getRepoPermissions(repositoryId.value);
   if (!repoPermissions.value.pull) {
     notifications.notify({ type: 'error', title: i18n.t('repo.not_allowed') });
     // no access and not authenticated, redirect to login
@@ -111,15 +111,15 @@ async function loadRepo() {
     return;
   }
 
-  await repoStore.loadRepo(repoId.value);
-  await pipelineStore.loadRepoPipelines(repoId.value);
+  await repoStore.loadRepo(repositoryId.value);
+  await pipelineStore.loadRepoPipelines(repositoryId.value);
 }
 
 onMounted(() => {
   loadRepo();
 });
 
-watch([repoId], () => {
+watch([repositoryId], () => {
   loadRepo();
 });
 
