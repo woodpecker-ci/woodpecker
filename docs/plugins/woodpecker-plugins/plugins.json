@@ -120,7 +120,7 @@
       "verified": true
     },
     {
-      "TODO-Checker",
+      "name": "TODO-Checker",
       "docs": "https://codeberg.org/Epsilon_02/todo-checker/raw/branch/main/README.md",
       "verfied": false
     }
