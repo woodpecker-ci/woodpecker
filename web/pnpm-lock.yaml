@@ -17,7 +17,7 @@ dependencies:
     specifier: ^1.11.8
     version: 1.11.8
   floating-vue:
-    specifier: 2.0.0-beta.24
+    specifier: ^2.0.0-beta.24
     version: 2.0.0-beta.24(vue@3.3.4)
   fuse.js:
     specifier: ^6.6.2

@@ -22,7 +22,7 @@
     "@vueuse/core": "^9.13.0",
     "ansi_up": "^5.2.1",
     "dayjs": "^1.11.8",
-    "floating-vue": "2.0.0-beta.24",
+    "floating-vue": "^2.0.0-beta.24",
     "fuse.js": "^6.6.2",
     "humanize-duration": "^3.28.0",
     "javascript-time-ago": "^2.5.9",
