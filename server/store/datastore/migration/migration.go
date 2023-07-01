@@ -72,6 +72,7 @@ var allBeans = []interface{}{
 	new(model.Cron),
 	new(model.Redirection),
 	new(model.Workflow),
+	new(model.Org),
 }
 
 type migrations struct {

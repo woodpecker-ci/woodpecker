@@ -70,6 +70,11 @@ func PostRepo(c *gin.Context) {
 		c.String(http.StatusForbidden, "User has to be a admin of this repository")
 	}
 
+	// check if the repo is owned by an organization
+	if from.Owner != user.Login {
+		// create an org if it doesn't exist
+	}
+
 	if enabledOnce {
 		repo.Update(from)
 	} else {
