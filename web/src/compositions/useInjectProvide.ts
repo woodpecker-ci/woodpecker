@@ -1,4 +1,4 @@
-import { inject as vueInject, provide as vueProvide, Ref, InjectionKey } from 'vue';
+import { inject as vueInject, InjectionKey, provide as vueProvide, Ref } from 'vue';
 
 import { Repo } from '~/lib/api/types';
 
