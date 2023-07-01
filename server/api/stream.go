@@ -186,8 +186,8 @@ func LogStreamSSE(c *gin.Context) {
 	}
 
 	if step.State != model.StatusRunning {
-		log.Debug().Msg("stream not found.")
-		logWriteStringErr(io.WriteString(rw, "event: error\ndata: stream not found\n\n"))
+		log.Debug().Msg("step not running (anymore).")
+		logWriteStringErr(io.WriteString(rw, "event: error\ndata: step not running (anymore)\n\n"))
 		return
 	}
 
