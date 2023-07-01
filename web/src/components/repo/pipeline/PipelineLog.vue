@@ -157,12 +157,56 @@ function formatTime(time?: number): string {
   return time === undefined ? '' : `${time}s`;
 }
 
+function getLogType(text: string): LogLine['type'] {
+  const check = (keywords: string[]) => text.match(new RegExp(`\\s(${keywords.join('|')})[\\s:]`, 'i'));
+  const errorKeywords = [
+    'error',
+    'fail',
+    'fatal',
+    'exception',
+    'panic',
+    'abort',
+    'crash',
+    'broken',
+    'invalid',
+    'unavailable',
+    'unreachable',
+    'unrecoverable',
+    'unresolvable',
+    'unresolved',
+    'unhandled',
+    'uncaught',
+    'unknown',
+    'unexpected',
+  ];
+  const warningKeywords = [
+    'warning',
+    'warn',
+    'deprecated',
+    'deprecation',
+    'obsolete',
+    'outdated',
+    'obsolete',
+    'deprecated',
+  ];
+
+  if (check(errorKeywords)) {
+    return 'error';
+  }
+
+  if (check(warningKeywords)) {
+    return 'warning';
+  }
+
+  return null;
+}
+
 function writeLog(line: Partial<LogLine>) {
   logBuffer.value.push({
     index: line.index ?? 0,
     text: ansiUp.value.ansi_to_html(line.text ?? ''),
     time: line.time ?? 0,
-    type: null, // TODO: implement way to detect errors and warnings
+    type: getLogType(line.text ?? ''),
   });
 }
 
