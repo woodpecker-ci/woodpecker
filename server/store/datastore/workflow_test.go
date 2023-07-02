@@ -70,6 +70,58 @@ func TestWorkflowLoad(t *testing.T) {
 	}
 }
 
+func TestWorkflowFind(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Step), new(model.Pipeline), new(model.Workflow))
+	defer closer()
+
+	wf := &model.Workflow{
+		PipelineID: 1,
+		PID:        1,
+		Name:       "woodpecker",
+		Children: []*model.Step{
+			{
+				UUID:       "ea6d4008-8ace-4f8a-ad03-53f1756465d9",
+				PipelineID: 1,
+				PID:        2,
+				PPID:       1,
+				State:      "success",
+			},
+			{
+				UUID:       "2bf387f7-2913-4907-814c-c9ada88707c0",
+				PipelineID: 1,
+				PID:        3,
+				PPID:       1,
+				Name:       "build",
+				State:      "success",
+			},
+		},
+	}
+	err := store.WorkflowsCreate([]*model.Workflow{wf})
+	if err != nil {
+		t.Errorf("Unexpected error: insert steps: %s", err)
+		return
+	}
+	workflowGet, err := store.WorkflowFind(&model.Pipeline{ID: 1}, 1)
+	if err != nil {
+		t.Errorf("Unexpected error: insert steps: %s", err)
+		return
+	}
+
+	if got, want := workflowGet.PipelineID, int64(1); got != want {
+		t.Errorf("Want pipeline id %d, got %d", want, got)
+	}
+	if got, want := workflowGet.PID, 1; got != want {
+		t.Errorf("Want workflow pid %d, got %d", want, got)
+	}
+	if got, want := workflowGet.Name, "woodpecker"; got != want {
+		t.Errorf("Want workflow name %s, got %s", want, got)
+	}
+	// children are not loaded
+	if got, want := len(workflowGet.Children), 0; got != want {
+		t.Errorf("Want children len %d, got %d", want, got)
+	}
+}
+
 func TestWorkflowGetTree(t *testing.T) {
 	store, closer := newTestStore(t, new(model.Step), new(model.Pipeline), new(model.Workflow))
 	defer closer()

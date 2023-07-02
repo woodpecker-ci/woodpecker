@@ -71,9 +71,6 @@ func (s storage) WorkflowUpdate(workflow *model.Workflow) error {
 }
 
 func (s storage) WorkflowFind(pipeline *model.Pipeline, pid int) (*model.Workflow, error) {
-	wf := &model.Workflow{
-		PipelineID: pipeline.ID,
-		PID:        pid,
-	}
-	return wf, wrapGet(s.engine.Get(wf))
+	wf := new(model.Workflow)
+	return wf, wrapGet(s.engine.Where("workflow_pipeline_id = ?", pipeline.ID).And("workflow_pid = ?", pid).Get(wf))
 }
