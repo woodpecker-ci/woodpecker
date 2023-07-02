@@ -476,11 +476,11 @@ when:
   - evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "deploy"'
 ```
 
-Skip step:
+Skip step only if `SKIP=true`, run if undefined or set other value:
 
 ```yaml
 when:
-  - evaluate: 'SKIP == "true"'
+  - evaluate: 'SKIP != "true"'
 ```
 
 ### `group` - Parallel execution
