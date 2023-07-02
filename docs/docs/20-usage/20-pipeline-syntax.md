@@ -476,7 +476,7 @@ when:
   - evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "deploy"'
 ```
 
-Skip step only if `SKIP=true`, run if undefined or set other value:
+Skip step only if `SKIP=true`, run otherwise or if undefined:
 
 ```yaml
 when:
