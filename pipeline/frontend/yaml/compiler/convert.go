@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
+	"golang.org/x/exp/maps"
 
 	backend_types "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
@@ -52,17 +53,8 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 
 	// append default environment variables
 	environment := map[string]string{}
-	for k, v := range container.Environment {
-		environment[k] = v
-	}
-	for k, v := range c.env {
-		switch v {
-		case "", "0", "false":
-			continue
-		default:
-			environment[k] = v
-		}
-	}
+	maps.Copy(environment, container.Environment)
+	maps.Copy(environment, c.env)
 
 	environment["CI_WORKSPACE"] = path.Join(c.base, c.path)
 	environment["CI_STEP_NAME"] = name
