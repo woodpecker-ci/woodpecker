@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { computed, reactive, Ref, ref } from 'vue';
 
 import useApiClient from '~/compositions/useApiClient';
-import { Pipeline, PipelineFeed, PipelineStep } from '~/lib/api/types';
+import { Pipeline, PipelineFeed, PipelineWorkflow } from '~/lib/api/types';
 import { useRepoStore } from '~/store/repos';
 import { comparePipelines, isPipelineActive } from '~/utils/helpers';
 
@@ -32,17 +32,17 @@ export const usePipelineStore = defineStore('pipelines', () => {
     });
   }
 
-  function setStep(repoId: number, pipelineNumber: number, step: PipelineStep) {
+  function setWorkflow(repoId: number, pipelineNumber: number, workflow: PipelineWorkflow) {
     const pipeline = getPipeline(ref(repoId), ref(pipelineNumber.toString())).value;
     if (!pipeline) {
       throw new Error("Can't find pipeline");
     }
 
-    if (!pipeline.steps) {
-      pipeline.steps = [];
+    if (!pipeline.workflows) {
+      pipeline.workflows = [];
     }
 
-    pipeline.steps = [...pipeline.steps.filter((p) => p.pid !== step.pid), step];
+    pipeline.workflows = [...pipeline.workflows.filter((p) => p.pid !== workflow.pid), workflow];
     setPipeline(repoId, pipeline);
   }
 
@@ -89,7 +89,7 @@ export const usePipelineStore = defineStore('pipelines', () => {
   return {
     pipelines,
     setPipeline,
-    setStep,
+    setWorkflow,
     getRepoPipelines,
     getPipeline,
     loadRepoPipelines,

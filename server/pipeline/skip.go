@@ -12,7 +12,7 @@ import (
 )
 
 func SkipWorkflow(ctx context.Context, store store.Store, pipeline *model.Pipeline, workflowPid int, repo *model.Repo, user *model.User) (*model.Pipeline, error) {
-	workflowToSkip, err := store.StepFind(pipeline, workflowPid)
+	workflowToSkip, err := store.WorkflowFind(pipeline, workflowPid)
 	if err != nil {
 		log.Error().Err(err).Msg("can not get workflow list from store")
 		return nil, fmt.Errorf("cannot find the workflow %d in pipeline", workflowPid)
@@ -23,31 +23,26 @@ func SkipWorkflow(ctx context.Context, store store.Store, pipeline *model.Pipeli
 		return nil, fmt.Errorf("cannot evict %d in pipeline", workflowPid)
 	}
 
-	if _, err = UpdateStepToStatusSkipped(store, *workflowToSkip, 0); err != nil {
+	if _, err = UpdateWorkflowToStatusSkipped(store, *workflowToSkip); err != nil {
 		log.Error().Msgf("error: done: cannot update step_id %d state: %s", workflowToSkip.ID, err)
 		return nil, fmt.Errorf("cannot skip %d in pipeline", workflowPid)
 	}
 
-	if pipeline.Steps, err = store.StepList(pipeline); err != nil {
+	steps, err := store.StepListFromWorkflowFind(workflowToSkip)
+	if err != nil {
 		log.Error().Err(err).Msg("can not get step list from store")
 	}
 
 	// Skip the children of the skipped step
-	for _, child := range pipeline.Steps {
-		if child.PPID == workflowPid {
-			if _, err = UpdateStepToStatusSkipped(store, *child, 0); err != nil {
-				log.Error().Msgf("error: done: cannot update step_id %d state: %s", child.ID, err)
-				return nil, fmt.Errorf("cannot skip %d in pipeline", child.PID)
-			}
+	for _, step := range steps {
+		if _, err = UpdateStepToStatusSkipped(store, *step, 0); err != nil {
+			log.Error().Msgf("error: done: cannot update step_id %d state: %s", step.ID, err)
+			return nil, fmt.Errorf("cannot skip %d in pipeline", step.PID)
 		}
 	}
 
-	if pipeline.Steps, err = store.StepList(pipeline); err != nil {
+	if pipeline.Workflows, err = store.WorkflowGetTree(pipeline); err != nil {
 		log.Error().Err(err).Msg("can not get workflow list from store")
-	}
-
-	if pipeline.Steps, err = model.Tree(pipeline.Steps); err != nil {
-		log.Error().Err(err).Msg("can not build tree from step list")
 	}
 
 	if err := publishToTopic(ctx, pipeline, repo); err != nil {

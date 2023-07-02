@@ -117,7 +117,7 @@ func (q *fifo) Error(_ context.Context, id string, err error) error {
 	return q.finished([]string{id}, model.StatusFailure, err)
 }
 
-// Error signals that the item is done executing with error.
+// ErrorAtOnce signals that the item is done executing with error.
 func (q *fifo) ErrorAtOnce(_ context.Context, id []string, err error) error {
 	return q.finished(id, model.StatusFailure, err)
 }

@@ -139,9 +139,9 @@ type Store interface {
 	StepByUUID(string) (*model.Step, error)
 	StepChild(*model.Pipeline, int, string) (*model.Step, error)
 	StepList(*model.Pipeline) ([]*model.Step, error)
-	StepCreate([]*model.Step) error
 	StepUpdate(*model.Step) error
 	StepClear(*model.Pipeline) error
+	StepListFromWorkflowFind(*model.Workflow) ([]*model.Step, error)
 
 	// Logs
 	LogFind(*model.Step) ([]*model.LogEntry, error)
@@ -176,6 +176,13 @@ type Store interface {
 	AgentList(p *model.ListOptions) ([]*model.Agent, error)
 	AgentUpdate(*model.Agent) error
 	AgentDelete(*model.Agent) error
+
+	// Workflow
+	WorkflowGetTree(*model.Pipeline) ([]*model.Workflow, error)
+	WorkflowsCreate([]*model.Workflow) error
+	WorkflowLoad(int64) (*model.Workflow, error)
+	WorkflowUpdate(*model.Workflow) error
+	WorkflowFind(*model.Pipeline, int) (*model.Workflow, error)
 
 	// Store operations
 	Ping() error
