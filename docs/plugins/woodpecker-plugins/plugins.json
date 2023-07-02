@@ -118,6 +118,11 @@
       "name": "MkDocs",
       "docs": "https://codeberg.org/woodpecker-plugins/mkdocs/raw/branch/main/docs.md",
       "verified": true
+    },
+    {
+      "name": "TODO-Checker",
+      "docs": "https://codeberg.org/Epsilon_02/todo-checker/raw/branch/main/README.md",
+      "verfied": false
     }
   ]
 }
