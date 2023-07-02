@@ -444,7 +444,7 @@ when:
 
 #### `evaluate`
 
-Execute a step only if the provided evaluate expression is equal to true. Not only built-in [`CI_` variables](./50-environment.md#built-in-environment-variables) can be used inside the expression, but custom also.
+Execute a step only if the provided evaluate expression is equal to true. Both built-in [`CI_`](./50-environment.md#built-in-environment-variables) and custom variables can be used inside the expression.
 
 The expression syntax can be found in [the docs](https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md) of the underlying library.
 
