@@ -171,9 +171,9 @@ func (c *Constraint) Match(m metadata.Metadata, global bool, env map[string]stri
 		if env == nil {
 			env = m.Environ()
 		} else {
-			maps.Copy(env, m.Environ()) // 50-environment.md: Note that these can't overwrite any existing, built-in variables.
+			maps.Copy(env, m.Environ())
 		}
-		out, err := expr.Compile(c.Evaluate, expr.Env(env), expr.AsBool())
+		out, err := expr.Compile(c.Evaluate, expr.Env(env), expr.AllowUndefinedVariables(), expr.AsBool())
 		if err != nil {
 			return false, err
 		}
