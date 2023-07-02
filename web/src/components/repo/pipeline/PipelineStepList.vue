@@ -76,8 +76,8 @@
               />
               <button
                 v-if="
-                  pipeline.steps &&
-                  pipeline.steps.length > 0 &&
+                  pipeline.workflows &&
+                  pipeline.workflows.length > 0 &&
                   ['pending'].includes(workflow.state) &&
                   repoPermissions.push
                 "
@@ -134,7 +134,7 @@ import PipelineStepDuration from '~/components/repo/pipeline/PipelineStepDuratio
 import useApiClient from '~/compositions/useApiClient';
 import useNotifications from '~/compositions/useNotifications';
 import usePipeline from '~/compositions/usePipeline';
-import { Pipeline, PipelineStep, Repo, RepoPermissions } from '~/lib/api/types';
+import {Pipeline, PipelineStep, PipelineWorkflow, Repo, RepoPermissions} from '~/lib/api/types';
 
 const props = defineProps<{
   pipeline: Pipeline;
@@ -157,7 +157,7 @@ if (!repo || !repoPermissions || !pipeline.value) {
   throw new Error('Unexpected: "repo", "repoPermissions" & "pipeline" should be provided at this place');
 }
 
-const workflowsCollapsed = ref<Record<PipelineStep['id'], boolean>>(
+const workflowsCollapsed = ref<Record<PipelineWorkflow['id'], boolean>>(
   props.pipeline.workflows && props.pipeline.workflows.length > 1
     ? (props.pipeline.workflows || []).reduce(
         (collapsed, workflow) => ({
@@ -169,7 +169,7 @@ const workflowsCollapsed = ref<Record<PipelineStep['id'], boolean>>(
     : {},
 );
 
-const skipWorkflow = async (workflow: PipelineStep) => {
+const skipWorkflow = async (workflow: PipelineWorkflow) => {
   await apiClient.skipPipelineWorkflow(repo.value.owner, repo.value.name, `${pipeline.value.number}`, workflow.pid);
   notifications.notify({ title: i18n.t('repo.pipeline.actions.skip_success'), type: 'success' });
 };
