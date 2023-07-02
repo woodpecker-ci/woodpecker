@@ -134,7 +134,7 @@ import PipelineStepDuration from '~/components/repo/pipeline/PipelineStepDuratio
 import useApiClient from '~/compositions/useApiClient';
 import useNotifications from '~/compositions/useNotifications';
 import usePipeline from '~/compositions/usePipeline';
-import { Pipeline, PipelineStep, PipelineWorkflow, Repo, RepoPermissions } from '~/lib/api/types';
+import { Pipeline, PipelineWorkflow, Repo, RepoPermissions } from '~/lib/api/types';
 
 const props = defineProps<{
   pipeline: Pipeline;
