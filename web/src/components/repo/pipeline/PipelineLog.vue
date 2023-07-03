@@ -111,6 +111,7 @@ import { findStep, isStepFinished, isStepRunning } from '~/utils/helpers';
 
 type LogLine = {
   index: number;
+  number: number;
   text: string;
   time?: number;
   type: 'error' | 'warning' | null;
@@ -155,7 +156,7 @@ const logBuffer = ref<LogLine[]>([]);
 
 const maxLineCount = 500; // TODO: think about way to support lazy-loading more than last 300 logs (#776)
 
-function isSelected(line: LogLine) {
+function isSelected(line: LogLine): boolean {
   return route.hash === `#L${line.number}`;
 }
 
@@ -166,7 +167,7 @@ function formatTime(time?: number): string {
 function writeLog(line: Partial<LogLine>) {
   logBuffer.value.push({
     index: line.index ?? 0,
-    number: line.index + 1,
+    number: (line.index ?? 0) + 1,
     text: ansiUp.value.ansi_to_html(line.text ?? ''),
     time: line.time ?? 0,
     type: null, // TODO: implement way to detect errors and warnings
