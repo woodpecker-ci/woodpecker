@@ -38,13 +38,13 @@
       >
         <div v-for="line in log" :key="line.index" class="contents font-mono">
           <a
-            :id="`L${line.index}`"
-            :href="`#L${line.index}`"
+            :id="`L${line.index + 1}`"
+            :href="`#L${line.index + 1}`"
             class="text-gray-500 whitespace-nowrap select-none text-right pl-1 pr-2"
             :class="{
               'bg-opacity-40 dark:bg-opacity-50 bg-red-600 dark:bg-red-800': line.type === 'error',
               'bg-opacity-40 dark:bg-opacity-50 bg-yellow-600 dark:bg-yellow-800': line.type === 'warning',
-              'bg-opacity-20 bg-blue-600': $route.hash === `#L${line.index}`,
+              'bg-opacity-20 bg-blue-600': $route.hash === `#L${line.index + 1}`,
               underline: $route.hash === `#L${line.index}`,
             }"
             >{{ line.index + 1 }}</a
@@ -100,6 +100,7 @@ import AnsiUp from 'ansi_up';
 import { debounce } from 'lodash';
 import { computed, inject, nextTick, onMounted, Ref, ref, toRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useRoute } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
 import Icon from '~/components/atomic/Icon.vue';
@@ -130,6 +131,7 @@ const pipeline = toRef(props, 'pipeline');
 const stepId = toRef(props, 'stepId');
 const repo = inject<Ref<Repo>>('repo');
 const apiClient = useApiClient();
+const route = useRoute();
 
 const loadedStepSlug = ref<string>();
 const stepSlug = computed(() => `${repo?.value.owner} - ${repo?.value.name} - ${pipeline.value.id} - ${stepId.value}`);
@@ -219,7 +221,9 @@ const flushLogs = debounce((scroll: boolean) => {
 
   log.value = buffer;
 
-  if (scroll && autoScroll.value) {
+  if (route.hash.length > 0) {
+    nextTick(() => document.getElementById(route.hash.substring(1))?.scrollIntoView());
+  } else if (scroll && autoScroll.value) {
     scrollDown();
   }
 }, 500);
