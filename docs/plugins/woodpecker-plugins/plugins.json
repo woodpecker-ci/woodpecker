@@ -123,6 +123,11 @@
       "name": "TODO-Checker",
       "docs": "https://codeberg.org/Epsilon_02/todo-checker/raw/branch/main/README.md",
       "verfied": false
+    },
+    {
+      "name": "Nextcloud Upload",
+      "docs": "https://raw.githubusercontent.com/Ellpeck/WoodpeckerPlugins/main/nextcloud-upload/README.md",
+      "verfied": false
     }
   ]
 }
