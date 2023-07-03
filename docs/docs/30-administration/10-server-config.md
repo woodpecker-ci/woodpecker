@@ -19,7 +19,10 @@ services:
 +     - WOODPECKER_OPEN=true
 ```
 
-When registration is closed, an administrator must add new users manually (with the CLI: `woodpecker-cli user add`) or by allowing specific users via `WOODPECKER_ADMIN` or `WOODPECKER_ORGS`.
+When registration is closed users can be added:
+- By adding new users manually via the CLI: `woodpecker-cli user add`, or
+- By allowing specific admin users via the `WOODPECKER_ADMIN` setting, or
+- By allowing specific orgaizations via the `WOODPECKER_ORGS` setting.
 
 To close registration, but allow specific admin users:
 ```diff
