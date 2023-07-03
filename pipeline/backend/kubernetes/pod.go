@@ -81,9 +81,9 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 		}
 	}
 
-	var ServiceAccountName string
+	var serviceAccountName string
 	if step.BackendOptions.Kubernetes.ServiceAccountName != "" {
-		ServiceAccountName = step.BackendOptions.Kubernetes.ServiceAccountName
+		serviceAccountName = step.BackendOptions.Kubernetes.ServiceAccountName
 	}
 
 	podName, err := dnsName(step.Name)
@@ -119,7 +119,7 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 			RestartPolicy:      v1.RestartPolicyNever,
 			HostAliases:        hostAliases,
 			NodeSelector:       nodeSelector,
-			ServiceAccountName: ServiceAccountName,
+			ServiceAccountName: serviceAccountName,
 			Containers: []v1.Container{{
 				Name:            podName,
 				Image:           step.Image,
