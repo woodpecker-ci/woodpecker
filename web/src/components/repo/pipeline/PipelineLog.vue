@@ -38,8 +38,8 @@
       >
         <div v-for="line in log" :key="line.index" class="contents font-mono">
           <a
-            :href="`#L${line.index + 1}`"
             :id="`L${line.index + 1}`"
+            :href="`#L${line.index + 1}`"
             class="text-gray-500 whitespace-nowrap select-none text-right"
             :class="{
               'bg-black bg-opacity-10 dark:bg-white dark:bg-opacity-5': $route.hash == `#L${line.index + 1}`,
@@ -77,11 +77,11 @@
 import '~/style/console.css';
 
 import { useStorage } from '@vueuse/core';
-import { useRoute } from 'vue-router';
 import AnsiUp from 'ansi_up';
 import { debounce } from 'lodash';
 import { computed, inject, nextTick, onMounted, Ref, ref, toRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useRoute } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
 import Icon from '~/components/atomic/Icon.vue';
