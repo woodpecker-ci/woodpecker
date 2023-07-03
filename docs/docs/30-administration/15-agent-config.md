@@ -35,6 +35,38 @@ services:
     - WOODPECKER_AGENT_SECRET="your-shared-secret-goes-here"
 +    - WOODPECKER_MAX_WORKFLOWS=4
 ```
+## Agent registration on server
+
+When the agent starts, it connects to the server using token from `WOODPECKER_AGENT_SECRET`. The server identifies agent and, if such agent doesn't exist, register him.
+There are two types of token, so would be two ways of agent registration.
+
+### Using system token
+
+_System token_ is a token that is used system-wide, e. g. when you set the same token in `WOODPECKER_AGENT_SECRET` on both the server and the agents.
+
+In that case registration process would be as follows:
+
+1. First time Agent communicates with Server using system token;
+2. Server registers Agent in DB, generates ID and sends this ID back to Agent;
+3. Agent stores ID in a file configured by `WOODPECKER_AGENT_ID_FILE`.
+
+At the following startups Agent uses system token **and** ID.
+
+### Using agent token
+
+_Agent token_ is a token that is used by only particular agent. This unique token also configured by `WOODPECKER_AGENT_SECRET`, but only on the agent side.
+
+In that case you probably doesn't configure `WOODPECKER_AGENT_SECRET` on the server side. The registration process would be as follows:
+
+1. Administrator registers Agent manually in _Server settings - Agents - Add agent_;
+![Agent creation](./new-agent-registration.png)
+![Agent created](./new-agent-created.png)
+2. The token generated in previous step have to be provided to Agent in `WOODPECKER_AGENT_SECRET`;
+3. First time Agent communicates with Server using agent token;
+4. Server identifies Agent by the token and fills additional information provided by Agent;
+![Agent connected](./new-agent-connected.png)
+
+At following startups Agent uses own token only.
 
 ## All agent configuration options
 
