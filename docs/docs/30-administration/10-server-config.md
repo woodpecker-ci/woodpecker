@@ -2,11 +2,11 @@
 
 ## User registration
 
-Registration is closed by default. While disabled an administrator needs to add new users manually (exp. `woodpecker-cli user add`).
+Woodpecker does not have its own user registry; users are provided from your [forge](./11-forges/10-overview.md) (using OAuth2).
 
-If registration is open every user with an account at the configured [forges](./11-forges/10-overview.md) can login to Woodpecker.
-This example enables open registration for users that are members of approved organizations:
+Registration is closed by default (`WOODPECKER_OPEN=false`). If registration is open (`WOODPECKER_OPEN=true`) then every user with an account at the configured forge can login to Woodpecker.
 
+To open registration:
 ```diff
 # docker-compose.yml
 version: '3'
@@ -17,8 +17,36 @@ services:
     environment:
       - [...]
 +     - WOODPECKER_OPEN=true
-+     - WOODPECKER_ORGS=dolores,dogpatch
+```
 
+When registration is closed, an administrator must add new users manually (with the CLI: `woodpecker-cli user add`) or by allowing specific users via `WOODPECKER_ADMIN` or `WOODPECKER_ORGS`.
+
+To close registration, but allow specific users:
+```diff
+# docker-compose.yml
+version: '3'
+
+services:
+  woodpecker-server:
+    [...]
+    environment:
+      - [...]
++     - WOODPECKER_OPEN=false
++     - WOODPECKER_ADMIN=johnsmith,janedoe
+```
+
+To close registration, but allow users who are members of approved organizations:
+```diff
+# docker-compose.yml
+version: '3'
+
+services:
+  woodpecker-server:
+    [...]
+    environment:
+      - [...]
++     - WOODPECKER_OPEN=false
++     - WOODPECKER_ORGS=dolores,dogpatch
 ```
 
 ## Administrators
