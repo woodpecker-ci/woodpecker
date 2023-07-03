@@ -104,7 +104,7 @@ func New(opts ...Option) *Compiler {
 func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, error) {
 	config := new(backend_types.Config)
 
-	if match, err := conf.When.Match(c.metadata, true); !match && err == nil {
+	if match, err := conf.When.Match(c.metadata, true, c.env); !match && err == nil {
 		// This pipeline does not match the configured filter so return an empty config and stop further compilation.
 		// An empty pipeline will just be skipped completely.
 		return config, nil
@@ -177,7 +177,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 		config.Stages = append(config.Stages, stage)
 	} else if !c.local && !conf.SkipClone {
 		for i, container := range conf.Clone.ContainerList {
-			if match, err := container.When.Match(c.metadata, false); !match && err == nil {
+			if match, err := container.When.Match(c.metadata, false, c.env); !match && err == nil {
 				continue
 			} else if err != nil {
 				return nil, err
@@ -212,7 +212,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 		stage.Alias = nameServices
 
 		for i, container := range conf.Services.ContainerList {
-			if match, err := container.When.Match(c.metadata, false); !match && err == nil {
+			if match, err := container.When.Match(c.metadata, false, c.env); !match && err == nil {
 				continue
 			} else if err != nil {
 				return nil, err
@@ -234,7 +234,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			continue
 		}
 
-		if match, err := container.When.Match(c.metadata, false); !match && err == nil {
+		if match, err := container.When.Match(c.metadata, false, c.env); !match && err == nil {
 			continue
 		} else if err != nil {
 			return nil, err

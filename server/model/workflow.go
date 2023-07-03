@@ -61,13 +61,27 @@ func IsThereRunningStage(workflows []*Workflow) bool {
 	return false
 }
 
-// PipelineStatus determine pipeline status based on corresponding step list
+// PipelineStatus determine pipeline status based on corresponding workflow list
 func PipelineStatus(workflows []*Workflow) StatusValue {
 	status := StatusSuccess
 
 	for _, p := range workflows {
 		if p.Failing() {
 			status = p.State
+		}
+	}
+
+	return status
+}
+
+// WorkflowStatus determine workflow status based on corresponding step list
+func WorkflowStatus(steps []*Step) StatusValue {
+	status := StatusSuccess
+
+	for _, p := range steps {
+		if p.Failing() {
+			status = p.State
+			break
 		}
 	}
 
