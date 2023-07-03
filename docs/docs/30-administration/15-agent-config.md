@@ -2,7 +2,7 @@
 
 Agents are configured by the command line or environment variables. At the minimum you need the following information:
 
-```yaml
+```diff
 # docker-compose.yml
 version: '3'
 
@@ -23,7 +23,7 @@ The following are automatically set and can be overridden:
 
 By default the maximum processes that are run per agent is 1. If required you can add `WOODPECKER_MAX_WORKFLOWS` to increase your parallel processing on a per-agent basis.
 
-```yaml
+```diff
 # docker-compose.yml
 version: '3'
 
@@ -33,8 +33,9 @@ services:
   environment:
     - WOODPECKER_SERVER=localhost:9000
     - WOODPECKER_AGENT_SECRET="your-shared-secret-goes-here"
-+    - WOODPECKER_MAX_WORKFLOWS=4
++   - WOODPECKER_MAX_WORKFLOWS=4
 ```
+
 ## Agent registration on server
 
 When the agent starts, it connects to the server using token from `WOODPECKER_AGENT_SECRET`. The server identifies agent and, if such agent doesn't exist, register him.
