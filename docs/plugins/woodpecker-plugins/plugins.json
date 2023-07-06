@@ -122,7 +122,22 @@
     {
       "name": "TODO-Checker",
       "docs": "https://codeberg.org/Epsilon_02/todo-checker/raw/branch/main/README.md",
-      "verfied": false
+      "verified": false
+    },
+    {
+      "name": "Nextcloud Upload",
+      "docs": "https://raw.githubusercontent.com/Ellpeck/WoodpeckerPlugins/main/nextcloud-upload/README.md",
+      "verified": false
+    },
+    {
+      "name": "Kubernetes Deployment or StatefulSet Update",
+      "docs": "https://raw.githubusercontent.com/euryecetelecom/woodpeckerci-kubernetes/master/README.md",
+      "verified": false
+    },
+    {
+      "name": "Dockle",
+      "docs": "https://raw.githubusercontent.com/euryecetelecom/woodpeckerci-dockle/master/README.md",
+      "verified": false
     }
   ]
 }
