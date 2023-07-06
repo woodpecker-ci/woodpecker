@@ -66,6 +66,10 @@
             <TextField v-model="selectedAgent.token" :placeholder="$t('admin.settings.agents.token')" disabled />
           </InputField>
 
+          <InputField :label="$t('admin.settings.agents.id')">
+            <TextField :model-value="selectedAgent.id?.toString()" disabled />
+          </InputField>
+
           <InputField
             :label="$t('admin.settings.agents.backend.backend')"
             docs-url="docs/next/administration/backends/docker"

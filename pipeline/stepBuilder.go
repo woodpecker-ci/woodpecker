@@ -118,7 +118,7 @@ func (b *StepBuilder) Build() ([]*Item, error) {
 			}
 
 			// checking if filtered.
-			if match, err := parsed.When.Match(workflowMetadata, true); !match && err == nil {
+			if match, err := parsed.When.Match(workflowMetadata, true, environ); !match && err == nil {
 				log.Debug().Str("pipeline", workflow.Name).Msg(
 					"Marked as skipped, dose not match metadata",
 				)
@@ -302,6 +302,7 @@ func SetPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*Item)
 					PID:        pidSequence,
 					PPID:       item.Workflow.PID,
 					State:      model.StatusPending,
+					Failure:    step.Failure,
 				}
 				if item.Workflow.State == model.StatusSkipped {
 					step.State = model.StatusSkipped

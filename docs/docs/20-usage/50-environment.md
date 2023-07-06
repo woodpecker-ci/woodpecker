@@ -1,6 +1,6 @@
 # Environment variables
 
-Woodpecker provides the ability to pass environment variables to individual pipeline steps. Example pipeline step with custom environment variables:
+Woodpecker provides the ability to pass environment variables to individual pipeline steps. Note that these can't overwrite any existing, built-in variables. Example pipeline step with custom environment variables:
 
 ```diff
 steps:
