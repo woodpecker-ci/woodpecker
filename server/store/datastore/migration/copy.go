@@ -146,7 +146,7 @@ func copyBean[T any](src, dest *xorm.Engine) error {
 	return nil
 }
 
-// TODO: drop at v1.1.0
+// TODO: drop at v1.2.0
 func copyNonMigratedLogs(src, dest *xorm.Engine) error {
 	type logs struct {
 		ID     int64  `xorm:"pk autoincr 'log_id'"`
