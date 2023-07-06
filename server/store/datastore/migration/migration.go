@@ -52,6 +52,7 @@ var migrationTasks = []*task{
 	&dropOldCols,
 	&initLogsEntriesTable,
 	&migrateLogs2LogEntries,
+	&parentStepsToWorkflows,
 }
 
 // IMPORTANT: if you add something here, also add it to copy.go Copy() func
@@ -71,6 +72,7 @@ var allBeans = []interface{}{
 	new(model.ServerConfig),
 	new(model.Cron),
 	new(model.Redirection),
+	new(model.Workflow),
 }
 
 type migrations struct {

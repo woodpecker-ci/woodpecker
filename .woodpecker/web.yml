@@ -6,7 +6,7 @@ variables:
       # web source code
       - "web/**"
 
-pipeline: &legacy
+steps:
   deps:
     image: *node_image
     directory: web/
@@ -64,5 +64,3 @@ pipeline: &legacy
       - pnpm test
     when:
       path: *when_path
-
-steps: *legacy

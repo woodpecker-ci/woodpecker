@@ -405,6 +405,7 @@ func TestConstraints(t *testing.T) {
 		desc string
 		conf string
 		with metadata.Metadata
+		env  map[string]string
 		want bool
 	}{
 		{
@@ -478,12 +479,6 @@ func TestConstraints(t *testing.T) {
 			want: false,
 		},
 		{
-			desc: "filter cron by default constraint",
-			conf: "{}",
-			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventCron}},
-			want: false,
-		},
-		{
 			desc: "filter cron by matching name",
 			conf: "{ event: cron, cron: job1 }",
 			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventCron, Cron: "job1"}},
@@ -493,14 +488,6 @@ func TestConstraints(t *testing.T) {
 			desc: "filter cron by name",
 			conf: "{ event: cron, cron: job2 }",
 			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventCron, Cron: "job1"}},
-			want: false,
-		},
-		{
-			desc: "no constraints, event gets filtered by default event filter",
-			conf: "",
-			with: metadata.Metadata{
-				Curr: metadata.Pipeline{Event: "non-default"},
-			},
 			want: false,
 		},
 		{
@@ -524,6 +511,20 @@ func TestConstraints(t *testing.T) {
 			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush}, Repo: metadata.Repo{Owner: "owner", Name: "repo"}},
 			want: true,
 		},
+		{
+			desc: "filter by eval based on custom variable",
+			conf: `{ evaluate: 'TESTVAR == "testval"' }`,
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventManual}},
+			env:  map[string]string{"TESTVAR": "testval"},
+			want: true,
+		},
+		{
+			desc: "filter by eval based on custom variable",
+			conf: `{ evaluate: 'TESTVAR == "testval"' }`,
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventManual}},
+			env:  map[string]string{"TESTVAR": "qwe"},
+			want: false,
+		},
 	}
 
 	for _, test := range testdata {
@@ -531,7 +532,7 @@ func TestConstraints(t *testing.T) {
 			conf, err := frontend.EnvVarSubst(test.conf, test.with.Environ())
 			assert.NoError(t, err)
 			c := parseConstraints(t, conf)
-			got, err := c.Match(test.with, false)
+			got, err := c.Match(test.with, false, test.env)
 			if err != nil {
 				t.Errorf("Match returned error: %v", err)
 			}

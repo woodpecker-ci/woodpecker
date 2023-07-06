@@ -72,7 +72,7 @@ func checkIfFiltered(repo *model.Repo, p *model.Pipeline, forgeYamlConfigs []*fo
 		log.Trace().Msgf("config '%s': %#v", forgeYamlConfig.Name, parsedPipelineConfig)
 
 		// ignore if the pipeline was filtered by matched constraints
-		if match, err := parsedPipelineConfig.When.Match(matchMetadata, true); !match && err == nil {
+		if match, err := parsedPipelineConfig.When.Match(matchMetadata, true, p.AdditionalVariables); !match && err == nil {
 			continue
 		} else if err != nil {
 			return false, err

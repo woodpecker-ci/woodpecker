@@ -303,12 +303,6 @@ when:
 
 #### `event`
 
-:::info
-**By default steps are filtered by following event types:**
-
-`push`, `pull_request`, `tag`, `deployment`, `manual`.
-:::
-
 Available events: `push`, `pull_request`, `tag`, `deployment`, `cron`, `manual`
 
 Execute a step if the build event is a `tag`:
@@ -450,7 +444,7 @@ when:
 
 #### `evaluate`
 
-Execute a step only if the provided evaluate expression is equal to true. Each [`CI_` variable](./50-environment.md#built-in-environment-variables) can be used inside the expression.
+Execute a step only if the provided evaluate expression is equal to true. Both built-in [`CI_`](./50-environment.md#built-in-environment-variables) and custom variables can be used inside the expression.
 
 The expression syntax can be found in [the docs](https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md) of the underlying library.
 
@@ -480,6 +474,13 @@ Run on pull requests with the label `deploy`:
 ```yaml
 when:
   - evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "deploy"'
+```
+
+Skip step only if `SKIP=true`, run otherwise or if undefined:
+
+```yaml
+when:
+  - evaluate: 'SKIP != "true"'
 ```
 
 ### `group` - Parallel execution

@@ -10,7 +10,7 @@ variables:
       # schema changes
       - "pipeline/schema/**"
 
-pipeline: &legacy
+steps:
   vendor:
     image: *golang_image
     group: prepare
@@ -146,5 +146,3 @@ services:
       - MYSQL_ALLOW_EMPTY_PASSWORD=yes
     when:
       path: *when_path
-
-steps: *legacy

@@ -95,6 +95,9 @@ func Copy(src, dest *xorm.Engine) error {
 		if err := copyBean[model.Redirection](src, dest); err != nil {
 			return err
 		}
+		if err := copyBean[model.Workflow](src, dest); err != nil {
+			return err
+		}
 		if err := copyNonMigratedLogs(src, dest); err != nil {
 			return err
 		}

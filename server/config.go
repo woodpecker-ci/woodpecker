@@ -59,6 +59,7 @@ var Config = struct {
 		Cert                string
 		OAuthHost           string
 		Host                string
+		WebhookHost         string
 		Port                string
 		PortTLS             string
 		AgentToken          string
