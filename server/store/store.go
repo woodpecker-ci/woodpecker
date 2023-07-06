@@ -183,6 +183,13 @@ type Store interface {
 	WorkflowLoad(int64) (*model.Workflow, error)
 	WorkflowUpdate(*model.Workflow) error
 
+	// Org
+	OrgCreate(*model.Org) error
+	OrgFind(int64) (*model.Org, error)
+	// OrgList(*model.ListOptions) ([]*model.Org, error)
+	OrgUpdate(*model.Org) error
+	OrgDelete(int64) error
+
 	// Store operations
 	Ping() error
 	Close() error

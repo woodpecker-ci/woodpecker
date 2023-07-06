@@ -73,6 +73,17 @@ func PostRepo(c *gin.Context) {
 	// check if the repo is owned by an organization
 	if from.Owner != user.Login {
 		// create an org if it doesn't exist
+		org := &model.Org{
+			ForgeRemoteID: "", // TODO
+			Name:          from.Owner,
+		}
+
+		err = _store.OrgCreate(org)
+		if err != nil {
+			c.String(http.StatusInternalServerError, err.Error())
+			return
+		}
+
 	}
 
 	if enabledOnce {
