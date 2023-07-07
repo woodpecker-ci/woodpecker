@@ -30,11 +30,10 @@ func (s storage) ConfigsForPipeline(pipelineID int64) ([]*model.Config, error) {
 }
 
 func (s storage) ConfigFindIdentical(repoID int64, hash string) (*model.Config, error) {
-	conf := &model.Config{
-		RepoID: repoID,
-		Hash:   hash,
-	}
-	if err := wrapGet(s.engine.Get(conf)); err != nil {
+	conf := new(model.Config)
+	if err := wrapGet(s.engine.
+		Where("config_repo_id = ? AND config_hash = ?", repoID, hash).
+		Get(conf)); err != nil {
 		return nil, err
 	}
 	return conf, nil

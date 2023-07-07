@@ -77,10 +77,10 @@ func (s storage) GlobalSecretFind(name string) (*model.Secret, error) {
 	secret := &model.Secret{
 		Name: name,
 	}
-	return secret, wrapGet(s.engine.Where(builder.And(builder.Eq{"secret_owner": ""}, builder.Eq{"secret_repo_id": 0})).Get(secret))
+	return secret, wrapGet(s.engine.Where(builder.Eq{"secret_owner": "", "secret_repo_id": 0}).Get(secret))
 }
 
 func (s storage) GlobalSecretList(p *model.ListOptions) ([]*model.Secret, error) {
 	secrets := make([]*model.Secret, 0)
-	return secrets, s.paginate(p).Where(builder.And(builder.Eq{"secret_owner": ""}, builder.Eq{"secret_repo_id": 0})).OrderBy(orderSecretsBy).Find(&secrets)
+	return secrets, s.paginate(p).Where(builder.Eq{"secret_owner": "", "secret_repo_id": 0}).OrderBy(orderSecretsBy).Find(&secrets)
 }

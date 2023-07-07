@@ -28,47 +28,40 @@ func (s storage) GetPipeline(id int64) (*model.Pipeline, error) {
 }
 
 func (s storage) GetPipelineNumber(repo *model.Repo, num int64) (*model.Pipeline, error) {
-	pipeline := &model.Pipeline{
-		RepoID: repo.ID,
-		Number: num,
-	}
-	return pipeline, wrapGet(s.engine.Get(pipeline))
+	pipeline := new(model.Pipeline)
+	return pipeline, wrapGet(s.engine.
+		Where("pipeline_repo_id = ? AND pipeline_number = ?", repo.ID, num).
+		Get(pipeline))
 }
 
 func (s storage) GetPipelineRef(repo *model.Repo, ref string) (*model.Pipeline, error) {
-	pipeline := &model.Pipeline{
-		RepoID: repo.ID,
-		Ref:    ref,
-	}
-	return pipeline, wrapGet(s.engine.Get(pipeline))
+	pipeline := new(model.Pipeline)
+	return pipeline, wrapGet(s.engine.
+		Where("pipeline_repo_id = ? AND pipeline_ref = ?", repo.ID, ref).
+		Get(pipeline))
 }
 
 func (s storage) GetPipelineCommit(repo *model.Repo, sha, branch string) (*model.Pipeline, error) {
-	pipeline := &model.Pipeline{
-		RepoID: repo.ID,
-		Branch: branch,
-		Commit: sha,
-	}
-	return pipeline, wrapGet(s.engine.Get(pipeline))
+	pipeline := new(model.Pipeline)
+	return pipeline, wrapGet(s.engine.
+		Where("pipeline_repo_id = ? AND pipeline_branch = ? AND pipeline_commit = ?", repo.ID, branch, sha).
+		Get(pipeline))
 }
 
 func (s storage) GetPipelineLast(repo *model.Repo, branch string) (*model.Pipeline, error) {
-	pipeline := &model.Pipeline{
-		RepoID: repo.ID,
-		Branch: branch,
-		Event:  model.EventPush,
-	}
-	return pipeline, wrapGet(s.engine.Desc("pipeline_number").Get(pipeline))
+	pipeline := new(model.Pipeline)
+	return pipeline, wrapGet(s.engine.
+		Desc("pipeline_number").
+		Where("pipeline_repo_id = ? AND pipeline_branch = ? AND pipeline_event = ?", repo.ID, branch, model.EventPush).
+		Get(pipeline))
 }
 
 func (s storage) GetPipelineLastBefore(repo *model.Repo, branch string, num int64) (*model.Pipeline, error) {
-	pipeline := &model.Pipeline{
-		RepoID: repo.ID,
-		Branch: branch,
-	}
+	pipeline := new(model.Pipeline)
 	return pipeline, wrapGet(s.engine.
 		Desc("pipeline_number").
 		Where("pipeline_id < ?", num).
+		And("pipeline_repo_id = ? AND pipeline_branch = ?", repo.ID, branch).
 		Get(pipeline))
 }
 

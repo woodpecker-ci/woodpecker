@@ -19,11 +19,11 @@ import (
 )
 
 func (s storage) RegistryFind(repo *model.Repo, addr string) (*model.Registry, error) {
-	reg := &model.Registry{
-		RepoID:  repo.ID,
-		Address: addr,
-	}
-	return reg, wrapGet(s.engine.Get(reg))
+	reg := new(model.Registry)
+	return reg, wrapGet(s.engine.
+		Where("registry_repo_id = ?", repo.ID).
+		And("registry_addr = ?", addr).
+		Get(reg))
 }
 
 func (s storage) RegistryList(repo *model.Repo, p *model.ListOptions) ([]*model.Registry, error) {

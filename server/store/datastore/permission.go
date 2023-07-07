@@ -24,11 +24,10 @@ import (
 )
 
 func (s storage) PermFind(user *model.User, repo *model.Repo) (*model.Perm, error) {
-	perm := &model.Perm{
-		UserID: user.ID,
-		RepoID: repo.ID,
-	}
-	return perm, wrapGet(s.engine.Get(perm))
+	perm := new(model.Perm)
+	return perm, wrapGet(s.engine.
+		Where("perm_user_id = ? AND perm_repo_id = ?", user.ID, repo.ID).
+		Get(perm))
 }
 
 func (s storage) PermUpsert(perm *model.Perm) error {
