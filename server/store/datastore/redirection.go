@@ -15,8 +15,10 @@
 package datastore
 
 import (
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"xorm.io/builder"
 	"xorm.io/xorm"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 func (s storage) GetRedirection(fullName string) (*model.Redirection, error) {
@@ -43,5 +45,7 @@ func (s storage) createRedirection(e *xorm.Session, redirect *model.Redirection)
 }
 
 func (s storage) HasRedirectionForRepo(repoID int64, fullName string) (bool, error) {
-	return s.engine.Where("repo_id = ? ", repoID).And("repo_full_name = ?", fullName).Exist(new(model.Redirection))
+	return s.engine.Where(
+		builder.Eq{"repo_id": repoID, "repo_full_name": fullName},
+	).Exist(new(model.Redirection))
 }

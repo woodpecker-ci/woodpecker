@@ -23,11 +23,10 @@ import (
 const orderSecretsBy = "secret_name"
 
 func (s storage) SecretFind(repo *model.Repo, name string) (*model.Secret, error) {
-	secret := &model.Secret{
-		RepoID: repo.ID,
-		Name:   name,
-	}
-	return secret, wrapGet(s.engine.Get(secret))
+	secret := new(model.Secret)
+	return secret, wrapGet(s.engine.Where(
+		builder.Eq{"secret_repo_id": repo.ID, "secret_name": name},
+	).Get(secret))
 }
 
 func (s storage) SecretList(repo *model.Repo, includeGlobalAndOrgSecrets bool, p *model.ListOptions) ([]*model.Secret, error) {
@@ -61,11 +60,10 @@ func (s storage) SecretDelete(secret *model.Secret) error {
 }
 
 func (s storage) OrgSecretFind(owner, name string) (*model.Secret, error) {
-	secret := &model.Secret{
-		Owner: owner,
-		Name:  name,
-	}
-	return secret, wrapGet(s.engine.Get(secret))
+	secret := new(model.Secret)
+	return secret, wrapGet(s.engine.Where(
+		builder.Eq{"secret_owner": owner, "secret_name": name},
+	).Get(secret))
 }
 
 func (s storage) OrgSecretList(owner string, p *model.ListOptions) ([]*model.Secret, error) {
@@ -74,10 +72,10 @@ func (s storage) OrgSecretList(owner string, p *model.ListOptions) ([]*model.Sec
 }
 
 func (s storage) GlobalSecretFind(name string) (*model.Secret, error) {
-	secret := &model.Secret{
-		Name: name,
-	}
-	return secret, wrapGet(s.engine.Where(builder.Eq{"secret_owner": "", "secret_repo_id": 0}).Get(secret))
+	secret := new(model.Secret)
+	return secret, wrapGet(s.engine.Where(
+		builder.Eq{"secret_owner": "", "secret_repo_id": 0, "secret_name": name},
+	).Get(secret))
 }
 
 func (s storage) GlobalSecretList(p *model.ListOptions) ([]*model.Secret, error) {

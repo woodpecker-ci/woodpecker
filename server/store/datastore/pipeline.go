@@ -17,6 +17,7 @@ package datastore
 import (
 	"time"
 
+	"xorm.io/builder"
 	"xorm.io/xorm"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -60,7 +61,7 @@ func (s storage) GetPipelineLastBefore(repo *model.Repo, branch string, num int6
 	pipeline := new(model.Pipeline)
 	return pipeline, wrapGet(s.engine.
 		Desc("pipeline_number").
-		Where("pipeline_id < ?", num).
+		Where(builder.Lt{"pipeline_id": num}).
 		And("pipeline_repo_id = ? AND pipeline_branch = ?", repo.ID, branch).
 		Get(pipeline))
 }
