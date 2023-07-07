@@ -34,7 +34,7 @@ func Test_parser(t *testing.T) {
 			req.Header = http.Header{}
 			req.Header.Set(hookEvent, "issue:created")
 
-			r, b, err := parseHook(req)
+			r, b, _, err := parseHook(req)
 			g.Assert(r).IsNil()
 			g.Assert(b).IsNil()
 			g.Assert(err).IsNil()
@@ -47,7 +47,7 @@ func Test_parser(t *testing.T) {
 				req.Header = http.Header{}
 				req.Header.Set(hookEvent, hookPullCreated)
 
-				_, _, err := parseHook(req)
+				_, _, _, err := parseHook(req)
 				g.Assert(err).IsNotNil()
 			})
 
@@ -57,7 +57,7 @@ func Test_parser(t *testing.T) {
 				req.Header = http.Header{}
 				req.Header.Set(hookEvent, hookPullCreated)
 
-				r, b, err := parseHook(req)
+				r, b, _, err := parseHook(req)
 				g.Assert(r).IsNil()
 				g.Assert(b).IsNil()
 				g.Assert(err).IsNil()
@@ -69,7 +69,7 @@ func Test_parser(t *testing.T) {
 				req.Header = http.Header{}
 				req.Header.Set(hookEvent, hookPullCreated)
 
-				r, b, err := parseHook(req)
+				r, b, _, err := parseHook(req)
 				g.Assert(err).IsNil()
 				g.Assert(r.FullName).Equal("user_name/repo_name")
 				g.Assert(b.Commit).Equal("ce5965ddd289")
@@ -83,7 +83,7 @@ func Test_parser(t *testing.T) {
 				req.Header = http.Header{}
 				req.Header.Set(hookEvent, hookPush)
 
-				_, _, err := parseHook(req)
+				_, _, _, err := parseHook(req)
 				g.Assert(err).IsNotNil()
 			})
 
@@ -93,7 +93,7 @@ func Test_parser(t *testing.T) {
 				req.Header = http.Header{}
 				req.Header.Set(hookEvent, hookPush)
 
-				r, b, err := parseHook(req)
+				r, b, _, err := parseHook(req)
 				g.Assert(r).IsNil()
 				g.Assert(b).IsNil()
 				g.Assert(err).IsNil()
@@ -105,7 +105,7 @@ func Test_parser(t *testing.T) {
 				req.Header = http.Header{}
 				req.Header.Set(hookEvent, hookPush)
 
-				r, b, err := parseHook(req)
+				r, b, _, err := parseHook(req)
 				g.Assert(err).IsNil()
 				g.Assert(r.FullName).Equal("martinherren1984/publictestrepo")
 				g.Assert(r.SCMKind).Equal(model.RepoGit)
