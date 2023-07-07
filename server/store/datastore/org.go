@@ -23,19 +23,30 @@ func (s storage) OrgCreate(org *model.Org) error {
 	return err
 }
 
-func (s storage) OrgFind(repo *model.Repo, id int64) (*model.Cron, error) {
-	cron := &model.Cron{
-		RepoID: repo.ID,
-		ID:     id,
+func (s storage) OrgFind(id int64) (*model.Org, error) {
+	org := &model.Org{
+		ID: id,
 	}
-	return cron, wrapGet(s.engine.Get(cron))
+	return org, wrapGet(s.engine.Get(org))
 }
 
-func (s storage) OrgUpdate(org *model.Cron) error {
+func (s storage) OrgUpdate(org *model.Org) error {
 	_, err := s.engine.ID(org.ID).AllCols().Update(org)
 	return err
 }
 
 func (s storage) OrgDelete(id int64) error {
 	return wrapDelete(s.engine.ID(id).Delete(new(model.Org)))
+}
+
+func (s storage) OrgFindByName(name string, p *model.ListOptions) (*model.Org, error) {
+	org := &model.Org{
+		Name: name,
+	}
+	return org, wrapGet(s.engine.Get(org))
+}
+
+func (s storage) OrgRepoList(org *model.Org, p *model.ListOptions) ([]*model.Repo, error) {
+	var repos []*model.Repo
+	return repos, s.paginate(p).OrderBy("repo_id").Where("org_id = ?", org.ID).Find(&repos)
 }

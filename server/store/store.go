@@ -186,9 +186,12 @@ type Store interface {
 	// Org
 	OrgCreate(*model.Org) error
 	OrgFind(int64) (*model.Org, error)
-	// OrgList(*model.ListOptions) ([]*model.Org, error)
+	OrgFindByName(string) (*model.Org, error)
 	OrgUpdate(*model.Org) error
 	OrgDelete(int64) error
+
+	// Org repos
+	OrgRepoList(*model.Org, *model.ListOptions) ([]*model.Repo, error)
 
 	// Store operations
 	Ping() error

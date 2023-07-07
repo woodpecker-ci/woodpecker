@@ -70,12 +70,22 @@ func PostRepo(c *gin.Context) {
 		c.String(http.StatusForbidden, "User has to be a admin of this repository")
 	}
 
-	// check if the repo is owned by an organization
-	if from.Owner != user.Login {
-		// create an org if it doesn't exist
-		org := &model.Org{
-			ForgeRemoteID: "", // TODO
-			Name:          from.Owner,
+	// find org of repo
+	org, err := _store.OrgFindByName(repo.Owner)
+	if err != nil && !errors.Is(err, types.RecordNotExist) {
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	// create an org if it doesn't exist yet
+	if errors.Is(err, types.RecordNotExist) {
+		// TODO: handle org=user case
+		// TODO: implement forge.Org
+		forgeOrg, err := forge.Org(c, user, repo.Owner)
+
+		org = &model.Org{
+			Name:          repo.Owner,
+			ForgeRemoteID: forgeOrg.RemoteID,
 		}
 
 		err = _store.OrgCreate(org)
@@ -83,8 +93,9 @@ func PostRepo(c *gin.Context) {
 			c.String(http.StatusInternalServerError, err.Error())
 			return
 		}
-
 	}
+
+	repo.OrgID = org.ID
 
 	if enabledOnce {
 		repo.Update(from)
