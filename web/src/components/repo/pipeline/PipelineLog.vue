@@ -38,16 +38,16 @@
       >
         <div v-for="line in log" :key="line.index" class="contents font-mono">
           <a
-            :id="`L${line.index + 1}`"
-            :href="`#L${line.index + 1}`"
+            :id="`L${line.number}`"
+            :href="`#L${line.number}`"
             class="text-gray-500 whitespace-nowrap select-none text-right pl-1 pr-2"
             :class="{
               'bg-opacity-40 dark:bg-opacity-50 bg-red-600 dark:bg-red-800': line.type === 'error',
               'bg-opacity-40 dark:bg-opacity-50 bg-yellow-600 dark:bg-yellow-800': line.type === 'warning',
-              'bg-opacity-20 bg-blue-600': $route.hash === `#L${line.index + 1}`,
-              underline: $route.hash === `#L${line.index}`,
+              'bg-opacity-20 bg-blue-600': isSelected(line),
+              underline: isSelected(line),
             }"
-            >{{ line.index + 1 }}</a
+            >{{ line.number }}</a
           >
           <!-- eslint-disable vue/no-v-html -->
           <span
@@ -55,7 +55,7 @@
             :class="{
               'bg-opacity-40 dark:bg-opacity-50 bg-red-600 dark:bg-red-800': line.type === 'error',
               'bg-opacity-40 dark:bg-opacity-50 bg-yellow-600 dark:bg-yellow-800': line.type === 'warning',
-              'bg-opacity-20 bg-blue-600': $route.hash === `#L${line.index}`,
+              'bg-opacity-20 bg-blue-600': isSelected(line),
             }"
             v-html="line.text"
           />
@@ -65,7 +65,7 @@
             :class="{
               'bg-opacity-40 dark:bg-opacity-50 bg-red-600 dark:bg-red-800': line.type === 'error',
               'bg-opacity-40 dark:bg-opacity-50 bg-yellow-600 dark:bg-yellow-800': line.type === 'warning',
-              'bg-opacity-20 bg-blue-600': $route.hash === `#L${line.index}`,
+              'bg-opacity-20 bg-blue-600': isSelected(line),
             }"
             >{{ formatTime(line.time) }}</span
           >
@@ -111,6 +111,7 @@ import { findStep, isStepFinished, isStepRunning } from '~/utils/helpers';
 
 type LogLine = {
   index: number;
+  number: number;
   text: string;
   time?: number;
   type: 'error' | 'warning' | null;
@@ -155,6 +156,10 @@ const logBuffer = ref<LogLine[]>([]);
 
 const maxLineCount = 500; // TODO: think about way to support lazy-loading more than last 300 logs (#776)
 
+function isSelected(line: LogLine): boolean {
+  return route.hash === `#L${line.number}`;
+}
+
 function formatTime(time?: number): string {
   return time === undefined ? '' : `${time}s`;
 }
@@ -162,6 +167,7 @@ function formatTime(time?: number): string {
 function writeLog(line: Partial<LogLine>) {
   logBuffer.value.push({
     index: line.index ?? 0,
+    number: (line.index ?? 0) + 1,
     text: ansiUp.value.ansi_to_html(line.text ?? ''),
     time: line.time ?? 0,
     type: null, // TODO: implement way to detect errors and warnings
