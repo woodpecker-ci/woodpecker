@@ -61,8 +61,8 @@ func (s storage) GetPipelineLastBefore(repo *model.Repo, branch string, num int6
 	pipeline := new(model.Pipeline)
 	return pipeline, wrapGet(s.engine.
 		Desc("pipeline_number").
-		Where(builder.Lt{"pipeline_id": num}).
-		And(builder.Eq{"pipeline_repo_id": repo.ID, "pipeline_branch": branch}).
+		Where(builder.Lt{"pipeline_id": num}.
+			And(builder.Eq{"pipeline_repo_id": repo.ID, "pipeline_branch": branch})).
 		Get(pipeline))
 }
 
