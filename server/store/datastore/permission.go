@@ -26,7 +26,7 @@ import (
 func (s storage) PermFind(user *model.User, repo *model.Repo) (*model.Perm, error) {
 	perm := new(model.Perm)
 	return perm, wrapGet(s.engine.
-		Where("perm_user_id = ? AND perm_repo_id = ?", user.ID, repo.ID).
+		Where(builder.Eq{"perm_user_id": user.ID, "perm_repo_id": repo.ID}).
 		Get(perm))
 }
 
