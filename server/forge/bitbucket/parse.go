@@ -33,16 +33,21 @@ const (
 
 // parseHook parses a Bitbucket hook from an http.Request request and returns
 // Repo and Pipeline detail. If a hook type is unsupported nil values are returned.
-func parseHook(r *http.Request) (*model.Repo, *model.Pipeline, error) {
-	payload, _ := io.ReadAll(r.Body)
+func parseHook(r *http.Request) (*model.Repo, *model.Pipeline, bool, error) {
+	payload, err := io.ReadAll(r.Body)
+	if err != nil {
+		return nil, nil, false, err
+	}
 
 	switch r.Header.Get(hookEvent) {
 	case hookPush:
-		return parsePushHook(payload)
+		r, p, err := parsePushHook(payload)
+		return r, p, false, err
 	case hookPullCreated, hookPullUpdated:
-		return parsePullHook(payload)
+		r, p, err := parsePullHook(payload)
+		return r, p, false, err
 	}
-	return nil, nil, nil
+	return nil, nil, true, nil
 }
 
 // parsePushHook parses a push hook and returns the Repo and Pipeline details.

@@ -106,11 +106,17 @@ func PostHook(c *gin.Context) {
 	_store := store.FromContext(c)
 	forge := server.Config.Services.Forge
 
-	tmpRepo, tmpBuild, err := forge.Hook(c, c.Request)
+	tmpRepo, tmpBuild, ignored, err := forge.Hook(c, c.Request)
 	if err != nil {
 		msg := "failure to parse hook"
 		log.Debug().Err(err).Msg(msg)
 		c.String(http.StatusBadRequest, msg)
+		return
+	}
+	if ignored {
+		msg := "ignoring hook: by forge driver"
+		log.Debug().Msg(msg)
+		c.String(http.StatusOK, msg)
 		return
 	}
 	if tmpBuild == nil {

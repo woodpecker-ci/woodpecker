@@ -321,7 +321,7 @@ func (c *config) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 
 // Hook parses the incoming Bitbucket hook and returns the Repository and
 // Pipeline details. If the hook is unsupported nil values are returned.
-func (c *config) Hook(_ context.Context, req *http.Request) (*model.Repo, *model.Pipeline, error) {
+func (c *config) Hook(_ context.Context, req *http.Request) (*model.Repo, *model.Pipeline, bool, error) {
 	return parseHook(req)
 }
 
