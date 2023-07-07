@@ -80,5 +80,7 @@ func (s storage) GlobalSecretFind(name string) (*model.Secret, error) {
 
 func (s storage) GlobalSecretList(p *model.ListOptions) ([]*model.Secret, error) {
 	secrets := make([]*model.Secret, 0)
-	return secrets, s.paginate(p).Where(builder.Eq{"secret_owner": "", "secret_repo_id": 0}).OrderBy(orderSecretsBy).Find(&secrets)
+	return secrets, s.paginate(p).Where(
+		builder.Eq{"secret_owner": "", "secret_repo_id": 0},
+	).OrderBy(orderSecretsBy).Find(&secrets)
 }

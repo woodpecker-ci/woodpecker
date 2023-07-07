@@ -35,7 +35,9 @@ func (s storage) StepFind(pipeline *model.Pipeline, pid int) (*model.Step, error
 
 func (s storage) StepByUUID(uuid string) (*model.Step, error) {
 	step := new(model.Step)
-	return step, wrapGet(s.engine.Where(builder.Eq{"step_uuid": uuid}).Get(step))
+	return step, wrapGet(s.engine.Where(
+		builder.Eq{"step_uuid": uuid},
+	).Get(step))
 }
 
 func (s storage) StepChild(pipeline *model.Pipeline, ppid int, child string) (*model.Step, error) {
