@@ -30,30 +30,30 @@ func (s storage) GetPipeline(id int64) (*model.Pipeline, error) {
 
 func (s storage) GetPipelineNumber(repo *model.Repo, num int64) (*model.Pipeline, error) {
 	pipeline := new(model.Pipeline)
-	return pipeline, wrapGet(s.engine.
-		Where("pipeline_repo_id = ? AND pipeline_number = ?", repo.ID, num).
-		Get(pipeline))
+	return pipeline, wrapGet(s.engine.Where(
+		builder.Eq{"pipeline_repo_id": repo.ID, "pipeline_number": num},
+	).Get(pipeline))
 }
 
 func (s storage) GetPipelineRef(repo *model.Repo, ref string) (*model.Pipeline, error) {
 	pipeline := new(model.Pipeline)
-	return pipeline, wrapGet(s.engine.
-		Where("pipeline_repo_id = ? AND pipeline_ref = ?", repo.ID, ref).
-		Get(pipeline))
+	return pipeline, wrapGet(s.engine.Where(
+		builder.Eq{"pipeline_repo_id": repo.ID, "pipeline_ref": ref},
+	).Get(pipeline))
 }
 
 func (s storage) GetPipelineCommit(repo *model.Repo, sha, branch string) (*model.Pipeline, error) {
 	pipeline := new(model.Pipeline)
-	return pipeline, wrapGet(s.engine.
-		Where("pipeline_repo_id = ? AND pipeline_branch = ? AND pipeline_commit = ?", repo.ID, branch, sha).
-		Get(pipeline))
+	return pipeline, wrapGet(s.engine.Where(
+		builder.Eq{"pipeline_repo_id": repo.ID, "pipeline_branch": branch, "pipeline_commit": sha},
+	).Get(pipeline))
 }
 
 func (s storage) GetPipelineLast(repo *model.Repo, branch string) (*model.Pipeline, error) {
 	pipeline := new(model.Pipeline)
 	return pipeline, wrapGet(s.engine.
 		Desc("pipeline_number").
-		Where("pipeline_repo_id = ? AND pipeline_branch = ? AND pipeline_event = ?", repo.ID, branch, model.EventPush).
+		Where(builder.Eq{"pipeline_repo_id": repo.ID, "pipeline_branch": branch, "pipeline_event": model.EventPush}).
 		Get(pipeline))
 }
 
@@ -62,7 +62,7 @@ func (s storage) GetPipelineLastBefore(repo *model.Repo, branch string, num int6
 	return pipeline, wrapGet(s.engine.
 		Desc("pipeline_number").
 		Where(builder.Lt{"pipeline_id": num}).
-		And("pipeline_repo_id = ? AND pipeline_branch = ?", repo.ID, branch).
+		And(builder.Eq{"pipeline_repo_id": repo.ID, "pipeline_branch": branch}).
 		Get(pipeline))
 }
 
@@ -105,7 +105,10 @@ func (s storage) CreatePipeline(pipeline *model.Pipeline, stepList ...*model.Ste
 
 	// calc pipeline number
 	var number int64
-	if _, err := sess.SQL("SELECT MAX(pipeline_number) FROM `pipelines` WHERE pipeline_repo_id = ?", pipeline.RepoID).Get(&number); err != nil {
+	if _, err := sess.Select("MAX(pipeline_number)").
+		Table(new(model.Pipeline)).
+		Where("pipeline_repo_id = ?", pipeline.RepoID).
+		Get(&number); err != nil {
 		return err
 	}
 	pipeline.Number = number + 1
