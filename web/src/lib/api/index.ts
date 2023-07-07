@@ -146,7 +146,7 @@ export default class WoodpeckerClient extends ApiClient {
 
   updateSecret(repoId: number, secret: Partial<Secret>): Promise<unknown> {
     const secretName = encodeURIComponent(secret.name ?? '');
-    return this._patch(`/api/repos/${repoId}/secrets/encodeURIComponent(${secretName}`, secret);
+    return this._patch(`/api/repos/${repoId}/secrets/${secretName}`, secret);
   }
 
   deleteSecret(repoId: number, secretName: string): Promise<unknown> {
