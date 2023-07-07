@@ -20,9 +20,9 @@ services:
 ```
 
 When registration is closed users can be added:
-- By adding new users manually via the CLI: `woodpecker-cli user add`, or
-- By allowing specific admin users via the `WOODPECKER_ADMIN` setting, or
-- By allowing specific orgaizations via the `WOODPECKER_ORGS` setting.
+- by adding new users manually via the CLI: `woodpecker-cli user add`
+- by allowing specific admin users via the `WOODPECKER_ADMIN` setting
+- by allowing specific users via organization membership through the `WOODPECKER_ORGS` setting
 
 To close registration, but allow specific admin users:
 ```diff
@@ -38,7 +38,7 @@ services:
 +     - WOODPECKER_ADMIN=johnsmith,janedoe
 ```
 
-To close registration, but allow users who are members of approved organizations:
+To only allow registration of users, who are members of approved organizations:
 ```diff
 # docker-compose.yml
 version: '3'
@@ -48,7 +48,7 @@ services:
     [...]
     environment:
       - [...]
-+     - WOODPECKER_OPEN=false
++     - WOODPECKER_OPEN=true
 +     - WOODPECKER_ORGS=dolores,dogpatch
 ```
 
