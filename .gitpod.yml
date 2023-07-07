@@ -4,11 +4,13 @@ tasks:
       WOODPECKER_OPEN: true
       WOODPECKER_ADMIN: woodpecker
       WOODPECKER_HOST: http://host.docker.internal:8000
-      WOODPECKER_SECRET: "1234"
+      WOODPECKER_SECRET: '1234'
       WOODPECKER_GITEA: true
       WOODPECKER_DEV_WWW_PROXY: http://localhost:8010
       WOODPECKER_BACKEND_DOCKER_NETWORK: ci_default
     init: |
+      GO_VERSION=1.20
+      curl -fsSL https://dl.google.com/go/go$GO_VERSION.linux-amd64.tar.gz | tar xzs -C ~/
       go mod tidy
       mkdir -p web/dist
       touch web/dist/index.html
@@ -26,7 +28,7 @@ tasks:
   - name: Agent
     env:
       WOODPECKER_SERVER: localhost:9000
-      WOODPECKER_SECRET: "1234"
+      WOODPECKER_SECRET: '1234'
       WOODPECKER_MAX_WORKFLOWS: 1
       WOODPECKER_HEALTHCHECK: false
     command: |
@@ -102,12 +104,12 @@ ports:
 
 vscode:
   extensions:
-    - "golang.go"
-    - "EditorConfig.EditorConfig"
-    - "dbaeumer.vscode-eslint"
-    - "esbenp.prettier-vscode"
-    - "voorjaar.windicss-intellisense"
-    - "Vue.volar"
-    - "redhat.vscode-yaml"
-    - "davidanson.vscode-markdownlint"
-    - "streetsidesoftware.code-spell-checker"
+    - 'golang.go'
+    - 'EditorConfig.EditorConfig'
+    - 'dbaeumer.vscode-eslint'
+    - 'esbenp.prettier-vscode'
+    - 'voorjaar.windicss-intellisense'
+    - 'Vue.volar'
+    - 'redhat.vscode-yaml'
+    - 'davidanson.vscode-markdownlint'
+    - 'streetsidesoftware.code-spell-checker'
