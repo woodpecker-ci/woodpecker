@@ -7,6 +7,7 @@ Woodpecker does not have its own user registry; users are provided from your [fo
 Registration is closed by default (`WOODPECKER_OPEN=false`). If registration is open (`WOODPECKER_OPEN=true`) then every user with an account at the configured forge can login to Woodpecker.
 
 To open registration:
+
 ```diff
 # docker-compose.yml
 version: '3'
@@ -19,12 +20,13 @@ services:
 +     - WOODPECKER_OPEN=true
 ```
 
-When registration is closed users can be added:
-- by adding new users manually via the CLI: `woodpecker-cli user add`
-- by allowing specific admin users via the `WOODPECKER_ADMIN` setting
-- by allowing specific users via organization membership through the `WOODPECKER_ORGS` setting
+You can **also restrict** registration, by keep registration closed and ...  
+... **adding** new **users manually** via the CLI: `woodpecker-cli user add`, or  
+... allowing specific **admin users** via the `WOODPECKER_ADMIN` setting, or  
+by open registration and **filter by organization** membership through the `WOODPECKER_ORGS` setting.
 
-To close registration, but allow specific admin users:
+### To close registration, but allow specific admin users
+
 ```diff
 # docker-compose.yml
 version: '3'
@@ -38,7 +40,8 @@ services:
 +     - WOODPECKER_ADMIN=johnsmith,janedoe
 ```
 
-To only allow registration of users, who are members of approved organizations:
+### To only allow registration of users, who are members of approved organizations
+
 ```diff
 # docker-compose.yml
 version: '3'
