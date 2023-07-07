@@ -84,7 +84,7 @@ func TestParse(t *testing.T) {
 					Curr: metadata.Pipeline{
 						Event: "tester",
 					},
-				}, false)
+				}, false, nil)
 				g.Assert(match).Equal(true)
 				g.Assert(err).IsNil()
 			})
@@ -94,7 +94,7 @@ func TestParse(t *testing.T) {
 					Curr: metadata.Pipeline{
 						Event: "tester2",
 					},
-				}, false)
+				}, false, nil)
 				g.Assert(match).Equal(true)
 				g.Assert(err).IsNil()
 			})
@@ -106,7 +106,7 @@ func TestParse(t *testing.T) {
 							Branch: "tester",
 						},
 					},
-				}, true)
+				}, true, nil)
 				g.Assert(match).Equal(true)
 				g.Assert(err).IsNil()
 			})
@@ -116,7 +116,7 @@ func TestParse(t *testing.T) {
 					Curr: metadata.Pipeline{
 						Event: "push",
 					},
-				}, false)
+				}, false, nil)
 				g.Assert(match).Equal(false)
 				g.Assert(err).IsNil()
 			})

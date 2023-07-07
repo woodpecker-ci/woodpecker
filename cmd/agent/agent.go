@@ -23,6 +23,7 @@ import (
 	"net/http"
 	"os"
 	"runtime"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -49,6 +50,7 @@ import (
 )
 
 func run(c *cli.Context) error {
+	agentIDConfigPath := c.String("agent-id-config-path")
 	hostname := c.String("hostname")
 	if len(hostname) == 0 {
 		hostname, _ = os.Hostname()
@@ -109,7 +111,7 @@ func run(c *cli.Context) error {
 	}
 	defer authConn.Close()
 
-	agentID := int64(-1) // TODO: store agent id in a file
+	agentID := readAgentID(agentIDConfigPath)
 	agentToken := c.String("grpc-token")
 	authClient := agentRpc.NewAuthGrpcClient(authConn, agentToken, agentID)
 	authInterceptor, err := agentRpc.NewAuthInterceptor(authClient, 30*time.Minute)
@@ -177,6 +179,8 @@ func run(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
+
+	writeAgentID(agentID, agentIDConfigPath)
 
 	labels := map[string]string{
 		"hostname": hostname,
@@ -279,4 +283,34 @@ func stringSliceAddToMap(sl []string, m map[string]string) error {
 		}
 	}
 	return nil
+}
+
+func readAgentID(agentIDConfigPath string) int64 {
+	const defaultAgentIDValue = int64(-1)
+
+	rawAgentID, fileErr := os.ReadFile(agentIDConfigPath)
+	if fileErr != nil {
+		log.Debug().Err(fileErr).Msgf("could not open agent-id config file from %s", agentIDConfigPath)
+		return defaultAgentIDValue
+	}
+
+	strAgentID := strings.TrimSpace(string(rawAgentID))
+	agentID, parseErr := strconv.ParseInt(strAgentID, 10, 64)
+	if parseErr != nil {
+		log.Warn().Err(parseErr).Msg("could not parse agent-id config file content to int64")
+		return defaultAgentIDValue
+	}
+
+	return agentID
+}
+
+func writeAgentID(agentID int64, agentIDConfigPath string) {
+	currentAgentID := readAgentID(agentIDConfigPath)
+
+	if currentAgentID != agentID {
+		err := os.WriteFile(agentIDConfigPath, []byte(strconv.FormatInt(agentID, 10)+"\n"), 0o644)
+		if err != nil {
+			log.Warn().Err(err).Msgf("could not write agent-id config file to %s", agentIDConfigPath)
+		}
+	}
 }
