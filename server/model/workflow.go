@@ -22,7 +22,7 @@ type Workflow struct {
 	PID        int               `json:"pid"                  xorm:"UNIQUE(s) 'workflow_pid'"`
 	Name       string            `json:"name"                 xorm:"workflow_name"`
 	State      StatusValue       `json:"state"                xorm:"workflow_state"`
-	Error      string            `json:"error,omitempty"      xorm:"VARCHAR(500) workflow_error"`
+	Error      string            `json:"error,omitempty"      xorm:"TEXT 'workflow_error'"`
 	Started    int64             `json:"start_time,omitempty" xorm:"workflow_started"`
 	Stopped    int64             `json:"end_time,omitempty"   xorm:"workflow_stopped"`
 	AgentID    int64             `json:"agent_id,omitempty"   xorm:"workflow_agent_id"`
