@@ -44,7 +44,7 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 		}
 	}
 
-	pullPolicy := v1.PullIfNotPresent
+	var pullPolicy v1.PullPolicy
 	if step.Pull {
 		pullPolicy = v1.PullAlways
 	}
