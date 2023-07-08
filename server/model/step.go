@@ -42,7 +42,7 @@ type Step struct {
 	PPID       int         `json:"ppid"                 xorm:"step_ppid"`
 	Name       string      `json:"name"                 xorm:"step_name"`
 	State      StatusValue `json:"state"                xorm:"step_state"`
-	Error      string      `json:"error,omitempty"      xorm:"TEXT step_error"`
+	Error      string      `json:"error,omitempty"      xorm:"TEXT 'step_error'"`
 	Failure    string      `json:"-"                    xorm:"step_failure"`
 	ExitCode   int         `json:"exit_code"            xorm:"step_exit_code"`
 	Started    int64       `json:"start_time,omitempty" xorm:"step_started"`
