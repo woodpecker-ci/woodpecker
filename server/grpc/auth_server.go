@@ -57,6 +57,7 @@ func (s *WoodpeckerAuthServer) Auth(_ context.Context, req *proto.AuthRequest) (
 }
 
 func (s *WoodpeckerAuthServer) getAgent(agentID int64, agentToken string) (*model.Agent, error) {
+	// global agent secret auth
 	if s.agentMasterToken != "" {
 		if agentToken == s.agentMasterToken && agentID == -1 {
 			agent := new(model.Agent)
@@ -83,6 +84,7 @@ func (s *WoodpeckerAuthServer) getAgent(agentID int64, agentToken string) (*mode
 		}
 	}
 
+	// individual agent token auth
 	agent, err := s.store.AgentFindByToken(agentToken)
 	if err != nil && errors.Is(err, types.RecordNotExist) {
 		return nil, fmt.Errorf("individual agent not found by token: %w", err)
