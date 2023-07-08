@@ -16,12 +16,15 @@ package grpc
 
 import (
 	"context"
+	"errors"
+	"fmt"
 
 	"github.com/rs/zerolog/log"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc/proto"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store"
+	"github.com/woodpecker-ci/woodpecker/server/store/types"
 )
 
 type WoodpeckerAuthServer struct {
@@ -38,7 +41,7 @@ func NewWoodpeckerAuthServer(jwtManager *JWTManager, agentMasterToken string, st
 func (s *WoodpeckerAuthServer) Auth(_ context.Context, req *proto.AuthRequest) (*proto.AuthResponse, error) {
 	agent, err := s.getAgent(req.AgentId, req.AgentToken)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Agent could not auth: %w", err)
 	}
 
 	accessToken, err := s.jwtManager.Generate(agent.ID)
@@ -54,25 +57,35 @@ func (s *WoodpeckerAuthServer) Auth(_ context.Context, req *proto.AuthRequest) (
 }
 
 func (s *WoodpeckerAuthServer) getAgent(agentID int64, agentToken string) (*model.Agent, error) {
-	if s.agentMasterToken != "" && agentToken == s.agentMasterToken && agentID == -1 {
-		agent := new(model.Agent)
-		agent.Name = ""
-		agent.OwnerID = -1 // system agent
-		agent.Token = s.agentMasterToken
-		agent.Backend = ""
-		agent.Platform = ""
-		agent.Capacity = -1
-		err := s.store.AgentCreate(agent)
-		if err != nil {
-			log.Err(err).Msgf("Error creating system agent: %s", err)
-			return nil, err
+	if s.agentMasterToken != "" {
+		if agentToken == s.agentMasterToken && agentID == -1 {
+			agent := new(model.Agent)
+			agent.Name = ""
+			agent.OwnerID = -1 // system agent
+			agent.Token = s.agentMasterToken
+			agent.Backend = ""
+			agent.Platform = ""
+			agent.Capacity = -1
+			err := s.store.AgentCreate(agent)
+			if err != nil {
+				log.Err(err).Msgf("Error creating system agent: %s", err)
+				return nil, err
+			}
+			return agent, nil
 		}
-		return agent, nil
+
+		if agentToken == s.agentMasterToken {
+			agent, err := s.store.AgentFind(agentID)
+			if err != nil && errors.Is(err, types.RecordNotExist) {
+				return nil, fmt.Errorf("AgentID not found in database")
+			}
+			return agent, err
+		}
 	}
 
-	if agentToken == s.agentMasterToken {
-		return s.store.AgentFind(agentID)
+	agent, err := s.store.AgentFindByToken(agentToken)
+	if err != nil && errors.Is(err, types.RecordNotExist) {
+		return nil, fmt.Errorf("individual agent not found by token: %w", err)
 	}
-
-	return s.store.AgentFindByToken(agentToken)
+	return agent, err
 }
