@@ -99,8 +99,6 @@ func (e *docker) Setup(_ context.Context, conf *backend.Config) error {
 		_, err := e.client.VolumeCreate(noContext, volume.VolumeCreateBody{
 			Name:   vol.Name,
 			Driver: "local",
-			// DriverOpts:
-			// Labels:     defaultLabels,
 		})
 		if err != nil {
 			return err
@@ -111,7 +109,6 @@ func (e *docker) Setup(_ context.Context, conf *backend.Config) error {
 			Driver:     n.Driver,
 			Options:    n.DriverOpts,
 			EnableIPv6: e.enableIPv6,
-			// Labels:  defaultLabels,
 		})
 		if err != nil {
 			return err
