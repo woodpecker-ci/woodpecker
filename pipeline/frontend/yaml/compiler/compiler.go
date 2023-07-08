@@ -114,8 +114,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 
 	// create a default volume
 	config.Volumes = append(config.Volumes, &backend_types.Volume{
-		Name:   fmt.Sprintf("%s_default", c.prefix),
-		Driver: "local",
+		Name: fmt.Sprintf("%s_default", c.prefix),
 	})
 
 	// create a default network
