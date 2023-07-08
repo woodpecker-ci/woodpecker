@@ -27,7 +27,7 @@ type oldStep020 struct {
 	PPID       int               `xorm:"step_ppid"`
 	Name       string            `xorm:"step_name"`
 	State      model.StatusValue `xorm:"step_state"`
-	Error      string            `xorm:"VARCHAR(500) step_error"`
+	Error      string            `xorm:"TEXT 'step_error'"`
 	Started    int64             `xorm:"step_started"`
 	Stopped    int64             `xorm:"step_stopped"`
 	AgentID    int64             `xorm:"step_agent_id"`
