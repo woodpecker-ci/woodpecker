@@ -54,3 +54,9 @@ func sliceToMap2(s []string) map[string]bool {
 	}
 	return v
 }
+
+// GetConfig returns the config from the Context
+func GetConfig(c *gin.Context) *model.Settings {
+	v := c.MustGet(configKey)
+	return v.(*model.Settings)
+}
