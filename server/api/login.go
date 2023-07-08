@@ -46,12 +46,13 @@ func HandleLogin(c *gin.Context) {
 
 func HandleAuth(c *gin.Context) {
 	_store := store.FromContext(c)
+	_forge := server.Config.Services.Forge
 
 	// when dealing with redirects we may need to adjust the content type. I
 	// cannot, however, remember why, so need to revisit this line.
 	c.Writer.Header().Del("Content-Type")
 
-	tmpuser, err := server.Config.Services.Forge.Login(c, c.Writer, c.Request)
+	tmpuser, err := _forge.Login(c, c.Writer, c.Request)
 	if err != nil {
 		log.Error().Msgf("cannot authenticate user. %s", err)
 		c.Redirect(http.StatusSeeOther, "/login?error=oauth_error")
@@ -82,7 +83,7 @@ func HandleAuth(c *gin.Context) {
 		// if self-registration is enabled for whitelisted organizations we need to
 		// check the user's organization membership.
 		if len(config.Orgs) != 0 {
-			teams, terr := server.Config.Services.Forge.Teams(c, tmpuser)
+			teams, terr := _forge.Teams(c, tmpuser)
 			if terr != nil || !config.IsMember(teams) {
 				log.Error().Msgf("cannot verify team membership for %s.", u.Login)
 				c.Redirect(303, "/login?error=access_denied")
@@ -123,7 +124,7 @@ func HandleAuth(c *gin.Context) {
 	// if self-registration is enabled for whitelisted organizations we need to
 	// check the user's organization membership.
 	if len(config.Orgs) != 0 {
-		teams, terr := server.Config.Services.Forge.Teams(c, u)
+		teams, terr := _forge.Teams(c, u)
 		if terr != nil || !config.IsMember(teams) {
 			log.Error().Msgf("cannot verify team membership for %s.", u.Login)
 			c.Redirect(http.StatusSeeOther, "/login?error=access_denied")
@@ -143,6 +144,35 @@ func HandleAuth(c *gin.Context) {
 		log.Error().Msgf("cannot create token for %s. %s", u.Login, err)
 		c.Redirect(http.StatusSeeOther, "/login?error=internal_error")
 		return
+	}
+
+	repos, _ := _forge.Repos(c, u)
+	for _, forgeRepo := range repos {
+		dbRepo, err := _store.GetRepoForgeID(forgeRepo.ForgeRemoteID)
+		if err != nil && errors.Is(err, types.RecordNotExist) {
+			continue
+		}
+		if err != nil {
+			log.Error().Msgf("cannot list repos for %s. %s", u.Login, err)
+			c.Redirect(http.StatusSeeOther, "/login?error=internal_error")
+			return
+		}
+
+		if !dbRepo.IsActive {
+			continue
+		}
+
+		log.Debug().Msgf("Synced user permission for %s %s", u.Login, dbRepo.FullName)
+		perm := forgeRepo.Perm
+		perm.Repo = dbRepo
+		perm.RepoID = dbRepo.ID
+		perm.UserID = u.ID
+		perm.Synced = time.Now().Unix()
+		if err := _store.PermUpsert(perm); err != nil {
+			log.Error().Msgf("cannot update permissions for %s. %s", u.Login, err)
+			c.Redirect(http.StatusSeeOther, "/login?error=internal_error")
+			return
+		}
 	}
 
 	httputil.SetCookie(c.Writer, c.Request, "user_sess", tokenString)

@@ -100,7 +100,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		pipeline.Status = model.StatusBlocked
 	}
 
-	err = _store.CreatePipeline(pipeline, pipeline.Steps...)
+	err = _store.CreatePipeline(pipeline)
 	if err != nil {
 		msg := fmt.Sprintf("failure to save pipeline for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)

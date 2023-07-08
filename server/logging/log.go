@@ -61,12 +61,12 @@ func (l *log) Open(_ context.Context, stepID int64) error {
 	return nil
 }
 
-func (l *log) Write(_ context.Context, stepID int64, logEntry *model.LogEntry) error {
+func (l *log) Write(ctx context.Context, stepID int64, logEntry *model.LogEntry) error {
 	l.Lock()
 	s, ok := l.streams[stepID]
 	l.Unlock()
 	if !ok {
-		return ErrNotFound
+		return l.Open(ctx, stepID)
 	}
 	s.Lock()
 	s.list = append(s.list, logEntry)

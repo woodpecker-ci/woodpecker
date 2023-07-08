@@ -23,7 +23,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-func GetPipelineStatusContext(repo *model.Repo, pipeline *model.Pipeline, step *model.Step) string {
+func GetPipelineStatusContext(repo *model.Repo, pipeline *model.Pipeline, workflow *model.Workflow) string {
 	event := string(pipeline.Event)
 	switch pipeline.Event {
 	case model.EventPull:
@@ -38,7 +38,7 @@ func GetPipelineStatusContext(repo *model.Repo, pipeline *model.Pipeline, step *
 	err = tmpl.Execute(&ctx, map[string]interface{}{
 		"context":  server.Config.Server.StatusContext,
 		"event":    event,
-		"pipeline": step.Name,
+		"workflow": workflow.Name,
 		"owner":    repo.Owner,
 		"repo":     repo.Name,
 	})
@@ -72,10 +72,10 @@ func GetPipelineStatusDescription(status model.StatusValue) string {
 	}
 }
 
-func GetPipelineStatusLink(repo *model.Repo, pipeline *model.Pipeline, step *model.Step) string {
-	if step == nil {
+func GetPipelineStatusLink(repo *model.Repo, pipeline *model.Pipeline, workflow *model.Workflow) string {
+	if workflow == nil {
 		return fmt.Sprintf("%s/repos/%d/pipeline/%d", server.Config.Server.Host, repo.ID, pipeline.Number)
 	}
 
-	return fmt.Sprintf("%s/repos/%d/pipeline/%d/%d", server.Config.Server.Host, repo.ID, pipeline.Number, step.PID)
+	return fmt.Sprintf("%s/repos/%d/pipeline/%d/%d", server.Config.Server.Host, repo.ID, pipeline.Number, workflow.PID)
 }

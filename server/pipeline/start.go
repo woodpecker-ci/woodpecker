@@ -33,7 +33,7 @@ func start(ctx context.Context, store store.Store, activePipeline *model.Pipelin
 		log.Error().Err(err).Msg("Failed to cancel previous pipelines")
 	}
 
-	if err := store.StepCreate(activePipeline.Steps); err != nil {
+	if err := store.WorkflowsCreate(activePipeline.Workflows); err != nil {
 		log.Error().Err(err).Str("repo", repo.FullName).Msgf("error persisting steps for %s#%d", repo.FullName, activePipeline.Number)
 		return nil, err
 	}
@@ -48,14 +48,16 @@ func start(ctx context.Context, store store.Store, activePipeline *model.Pipelin
 	}
 
 	// open logs streamer for each step
-	go func() {
-		steps := activePipeline.Steps
-		for _, step := range steps {
-			if err := server.Config.Services.Logs.Open(context.Background(), step.ID); err != nil {
-				log.Error().Err(err).Msgf("could not open log stream for step %d", step.ID)
-			}
+	for _, wf := range activePipeline.Workflows {
+		for _, step := range wf.Children {
+			stepID := step.ID
+			go func() {
+				if err := server.Config.Services.Logs.Open(context.Background(), stepID); err != nil {
+					log.Error().Err(err).Msgf("could not open log stream for step %d", stepID)
+				}
+			}()
 		}
-	}()
+	}
 
 	updatePipelineStatus(ctx, activePipeline, repo, user)
 

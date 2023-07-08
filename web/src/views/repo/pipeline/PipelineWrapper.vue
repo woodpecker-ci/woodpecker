@@ -110,14 +110,14 @@ const i18n = useI18n();
 const pipelineStore = usePipelineStore();
 const pipelineId = toRef(props, 'pipelineId');
 const _repoId = toRef(props, 'repoId');
-const repoId = computed(() => parseInt(_repoId.value, 10));
+const repositoryId = computed(() => parseInt(_repoId.value, 10));
 const repo = inject<Ref<Repo>>('repo');
 const repoPermissions = inject<Ref<RepoPermissions>>('repo-permissions');
 if (!repo || !repoPermissions) {
   throw new Error('Unexpected: "repo" & "repoPermissions" should be provided at this place');
 }
 
-const pipeline = pipelineStore.getPipeline(repoId, pipelineId);
+const pipeline = pipelineStore.getPipeline(repositoryId, pipelineId);
 const { since, duration, created } = usePipeline(pipeline);
 provide('pipeline', pipeline);
 
@@ -140,7 +140,7 @@ const { doSubmit: cancelPipeline, isLoading: isCancelingPipeline } = useAsyncAct
     throw new Error('Unexpected: Repo is undefined');
   }
 
-  if (!pipeline.value?.steps) {
+  if (!pipeline.value?.workflows) {
     throw new Error('Unexpected: Pipeline steps not loaded');
   }
 
@@ -171,7 +171,7 @@ const { doSubmit: restartPipeline, isLoading: isRestartingPipeline } = useAsyncA
 });
 
 onMounted(loadPipeline);
-watch([repoId, pipelineId], loadPipeline);
+watch([repositoryId, pipelineId], loadPipeline);
 onBeforeUnmount(() => {
   favicon.updateStatus('default');
 });
