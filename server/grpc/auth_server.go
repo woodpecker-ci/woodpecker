@@ -54,7 +54,7 @@ func (s *WoodpeckerAuthServer) Auth(_ context.Context, req *proto.AuthRequest) (
 }
 
 func (s *WoodpeckerAuthServer) getAgent(agentID int64, agentToken string) (*model.Agent, error) {
-	if agentToken == s.agentMasterToken && agentID == -1 {
+	if s.agentMasterToken != "" && agentToken == s.agentMasterToken && agentID == -1 {
 		agent := new(model.Agent)
 		agent.Name = ""
 		agent.OwnerID = -1 // system agent
