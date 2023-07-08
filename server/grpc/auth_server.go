@@ -20,7 +20,6 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc/proto"
-	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
@@ -59,7 +58,7 @@ func (s *WoodpeckerAuthServer) getAgent(agentID int64, agentToken string) (*mode
 		agent := new(model.Agent)
 		agent.Name = ""
 		agent.OwnerID = -1 // system agent
-		agent.Token = server.Config.Server.AgentToken
+		agent.Token = s.agentMasterToken
 		agent.Backend = ""
 		agent.Platform = ""
 		agent.Capacity = -1
