@@ -24,7 +24,7 @@ type Pipeline struct {
 	Parent              int64             `json:"parent"                  xorm:"pipeline_parent"`
 	Event               WebhookEvent      `json:"event"                   xorm:"pipeline_event"`
 	Status              StatusValue       `json:"status"                  xorm:"INDEX 'pipeline_status'"`
-	Error               string            `json:"error"                   xorm:"pipeline_error"`
+	Error               string            `json:"error"                   xorm:"LONGTEXT 'pipeline_error'"`
 	Enqueued            int64             `json:"enqueued_at"             xorm:"pipeline_enqueued"`
 	Created             int64             `json:"created_at"              xorm:"pipeline_created"`
 	Updated             int64             `json:"updated_at"              xorm:"updated NOT NULL DEFAULT 0 'updated'"`
@@ -46,7 +46,7 @@ type Pipeline struct {
 	Reviewer            string            `json:"reviewed_by"             xorm:"pipeline_reviewer"`
 	Reviewed            int64             `json:"reviewed_at"             xorm:"pipeline_reviewed"`
 	Workflows           []*Workflow       `json:"workflows,omitempty"     xorm:"-"`
-	ChangedFiles        []string          `json:"changed_files,omitempty" xorm:"json 'changed_files'"`
+	ChangedFiles        []string          `json:"changed_files,omitempty" xorm:"LONGTEXT 'changed_files'"`
 	AdditionalVariables map[string]string `json:"variables,omitempty"     xorm:"json 'additional_variables'"`
 	PullRequestLabels   []string          `json:"pr_labels,omitempty"     xorm:"json 'pr_labels'"`
 } //	@name Pipeline
