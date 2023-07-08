@@ -329,6 +329,9 @@ func (a *authorizer) unaryIntercaptor(ctx context.Context, req interface{}, info
 }
 
 func (a *authorizer) authorize(ctx context.Context) error {
+	if a.password == "" {
+		return errors.New("agent token not set at server")
+	}
 	if md, ok := metadata.FromIncomingContext(ctx); ok {
 		if len(md["password"]) > 0 && md["password"][0] == a.password {
 			return nil
