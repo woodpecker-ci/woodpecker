@@ -145,11 +145,13 @@ export default class WoodpeckerClient extends ApiClient {
   }
 
   updateSecret(repoId: number, secret: Partial<Secret>): Promise<unknown> {
-    return this._patch(`/api/repos/${repoId}/secrets/${secret.name}`, secret);
+    const secretName = encodeURIComponent(secret.name ?? '');
+    return this._patch(`/api/repos/${repoId}/secrets/${secretName}`, secret);
   }
 
   deleteSecret(repoId: number, secretName: string): Promise<unknown> {
-    return this._delete(`/api/repos/${repoId}/secrets/${secretName}`);
+    const name = encodeURIComponent(secretName);
+    return this._delete(`/api/repos/${repoId}/secrets/${name}`);
   }
 
   getRegistryList(repoId: number, page: number): Promise<Registry[] | null> {
@@ -201,11 +203,13 @@ export default class WoodpeckerClient extends ApiClient {
   }
 
   updateOrgSecret(owner: string, secret: Partial<Secret>): Promise<unknown> {
-    return this._patch(`/api/orgs/${owner}/secrets/${secret.name}`, secret);
+    const secretName = encodeURIComponent(secret.name ?? '');
+    return this._patch(`/api/orgs/${owner}/secrets/${secretName}`, secret);
   }
 
   deleteOrgSecret(owner: string, secretName: string): Promise<unknown> {
-    return this._delete(`/api/orgs/${owner}/secrets/${secretName}`);
+    const name = encodeURIComponent(secretName);
+    return this._delete(`/api/orgs/${owner}/secrets/${name}`);
   }
 
   getGlobalSecretList(page: number): Promise<Secret[] | null> {
@@ -217,11 +221,13 @@ export default class WoodpeckerClient extends ApiClient {
   }
 
   updateGlobalSecret(secret: Partial<Secret>): Promise<unknown> {
-    return this._patch(`/api/secrets/${secret.name}`, secret);
+    const secretName = encodeURIComponent(secret.name ?? '');
+    return this._patch(`/api/secrets/${secretName}`, secret);
   }
 
   deleteGlobalSecret(secretName: string): Promise<unknown> {
-    return this._delete(`/api/secrets/${secretName}`);
+    const name = encodeURIComponent(secretName);
+    return this._delete(`/api/secrets/${name}`);
   }
 
   getSelf(): Promise<unknown> {
