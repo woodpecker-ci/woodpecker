@@ -26,6 +26,7 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/router/middleware"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/server/store/types"
 	"github.com/woodpecker-ci/woodpecker/shared/httputil"
@@ -63,7 +64,7 @@ func HandleAuth(c *gin.Context) {
 	if tmpuser == nil {
 		return
 	}
-	config := ToConfig(c)
+	config := middleware.GetConfig(c)
 
 	// get the user from the database
 	u, err := _store.GetUserRemoteID(tmpuser.ForgeRemoteID, tmpuser.Login)
@@ -226,10 +227,4 @@ type tokenPayload struct {
 	Access  string `json:"access_token,omitempty"`
 	Refresh string `json:"refresh_token,omitempty"`
 	Expires int64  `json:"expires_in,omitempty"`
-}
-
-// ToConfig returns the config from the Context
-func ToConfig(c *gin.Context) *model.Settings {
-	v := c.MustGet("config")
-	return v.(*model.Settings)
 }
