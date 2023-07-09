@@ -28,7 +28,7 @@ import (
 // MembershipService is a service to check for user membership.
 type MembershipService interface {
 	// Get returns if the user is a member of the organization.
-	Get(ctx context.Context, u *model.User, orgID int64) (*model.OrgPerm, error)
+	Get(ctx context.Context, u *model.User, org string) (*model.OrgPerm, error)
 }
 
 type membershipCache struct {
@@ -47,15 +47,15 @@ func NewMembershipService(f forge.Forge) MembershipService {
 }
 
 // Get returns if the user is a member of the organization.
-func (c *membershipCache) Get(ctx context.Context, u *model.User, orgID int64) (*model.OrgPerm, error) {
-	key := fmt.Sprintf("%s-%d", u.ForgeRemoteID, orgID)
+func (c *membershipCache) Get(ctx context.Context, u *model.User, org string) (*model.OrgPerm, error) {
+	key := fmt.Sprintf("%s-%s", u.ForgeRemoteID, org)
 	// Error can be safely ignored, as cache can only return error from loaders.
 	item, _ := c.Cache.Get(key)
 	if item != nil && !item.IsExpired() {
 		return item.Value(), nil
 	}
 
-	perm, err := c.Forge.OrgMembership(ctx, u, orgID)
+	perm, err := c.Forge.OrgMembership(ctx, u, org)
 	if err != nil {
 		return nil, err
 	}

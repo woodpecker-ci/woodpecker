@@ -39,7 +39,7 @@ func (s storage) OrgDelete(id int64) error {
 	return wrapDelete(s.engine.ID(id).Delete(new(model.Org)))
 }
 
-func (s storage) OrgFindByName(name string, p *model.ListOptions) (*model.Org, error) {
+func (s storage) OrgFindByName(name string) (*model.Org, error) {
 	org := &model.Org{
 		Name: name,
 	}

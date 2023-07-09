@@ -71,7 +71,8 @@ func PostRepo(c *gin.Context) {
 	}
 
 	// find org of repo
-	org, err := _store.OrgFindByName(repo.Owner)
+	var org *model.Org
+	org, err = _store.OrgFindByName(repo.Owner)
 	if err != nil && !errors.Is(err, types.RecordNotExist) {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
@@ -79,13 +80,9 @@ func PostRepo(c *gin.Context) {
 
 	// create an org if it doesn't exist yet
 	if errors.Is(err, types.RecordNotExist) {
-		// TODO: handle org=user case
-		// TODO: implement forge.Org
-		forgeOrg, err := forge.Org(c, user, repo.Owner)
-
+		// TODO: handle owner is an user case
 		org = &model.Org{
-			Name:          repo.Owner,
-			ForgeRemoteID: forgeOrg.RemoteID,
+			Name: repo.Owner,
 		}
 
 		err = _store.OrgCreate(org)

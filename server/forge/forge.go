@@ -89,7 +89,7 @@ type Forge interface {
 
 	// OrgMembership returns if user is member of organization and if user
 	// is admin/owner in that organization.
-	OrgMembership(ctx context.Context, u *model.User, orgID int64) (*model.OrgPerm, error)
+	OrgMembership(ctx context.Context, u *model.User, org string) (*model.OrgPerm, error)
 }
 
 // Refresher refreshes an oauth token and expiration for the given user. It
