@@ -30,7 +30,7 @@ func expandImage(name string) string {
 	return named.String()
 }
 
-// matchImage returns true if the image name matches
+// MatchImage returns true if the image name matches
 // an image in the list. Note the image tag is not used
 // in the matching logic.
 func MatchImage(from string, to ...string) bool {
@@ -43,7 +43,7 @@ func MatchImage(from string, to ...string) bool {
 	return false
 }
 
-// matchHostname returns true if the image hostname
+// MatchHostname returns true if the image hostname
 // matches the specified hostname.
 func MatchHostname(image, hostname string) bool {
 	ref, err := reference.ParseAnyReference(image)
