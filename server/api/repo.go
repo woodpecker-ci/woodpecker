@@ -80,9 +80,10 @@ func PostRepo(c *gin.Context) {
 
 	// create an org if it doesn't exist yet
 	if errors.Is(err, types.RecordNotExist) {
-		// TODO: handle owner is an user case
-		org = &model.Org{
-			Name: repo.Owner,
+		org, err = forge.Org(c, user, repo.Owner)
+		if err != nil {
+			c.String(http.StatusInternalServerError, "Could not fetch organization from forge.")
+			return
 		}
 
 		err = _store.OrgCreate(org)
