@@ -32,17 +32,17 @@ type MembershipService interface {
 }
 
 type membershipCache struct {
-	Forge forge.Forge
-	Cache *ttlcache.Cache[string, *model.OrgPerm]
-	TTL   time.Duration
+	forge forge.Forge
+	cache *ttlcache.Cache[string, *model.OrgPerm]
+	ttl   time.Duration
 }
 
 // NewMembershipService creates a new membership service.
 func NewMembershipService(f forge.Forge) MembershipService {
 	return &membershipCache{
-		TTL:   10 * time.Minute,
-		Forge: f,
-		Cache: ttlcache.New(ttlcache.WithDisableTouchOnHit[string, *model.OrgPerm]()),
+		ttl:   10 * time.Minute,
+		forge: f,
+		cache: ttlcache.New(ttlcache.WithDisableTouchOnHit[string, *model.OrgPerm]()),
 	}
 }
 
@@ -50,15 +50,15 @@ func NewMembershipService(f forge.Forge) MembershipService {
 func (c *membershipCache) Get(ctx context.Context, u *model.User, org string) (*model.OrgPerm, error) {
 	key := fmt.Sprintf("%s-%s", u.ForgeRemoteID, org)
 	// Error can be safely ignored, as cache can only return error from loaders.
-	item, _ := c.Cache.Get(key)
+	item, _ := c.cache.Get(key)
 	if item != nil && !item.IsExpired() {
 		return item.Value(), nil
 	}
 
-	perm, err := c.Forge.OrgMembership(ctx, u, org)
+	perm, err := c.forge.OrgMembership(ctx, u, org)
 	if err != nil {
 		return nil, err
 	}
-	c.Cache.Set(key, perm, c.TTL)
+	c.cache.Set(key, perm, c.ttl)
 	return perm, nil
 }

@@ -40,7 +40,7 @@ const org = inject('org');
 const orgPermissions = inject('org-permissions');
 
 const search = ref('');
-const repos = computed(() => Array.from(repoStore.repos.values()).filter((repo) => repo.owner === org.value?.name));
+const repos = computed(() => Array.from(repoStore.repos.values()).filter((repo) => repo.org_id === org.value?.id));
 const { searchedRepos } = useRepoSearch(repos, search);
 
 onMounted(async () => {
