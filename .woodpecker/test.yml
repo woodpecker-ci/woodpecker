@@ -95,7 +95,7 @@ steps:
     group: test
     environment:
       - WOODPECKER_DATABASE_DRIVER=postgres
-      - WOODPECKER_DATABASE_DATASOURCE=host=service-postgres user=postgres dbname=postgres sslmode=disable
+      - WOODPECKER_DATABASE_DATASOURCE=host=postgres user=postgres dbname=postgres sslmode=disable
     commands:
       - make test-server-datastore
     when:
@@ -106,7 +106,7 @@ steps:
     group: test
     environment:
       - WOODPECKER_DATABASE_DRIVER=mysql
-      - WOODPECKER_DATABASE_DATASOURCE=root@tcp(service-mysql:3306)/test?parseTime=true
+      - WOODPECKER_DATABASE_DATASOURCE=root@tcp(mysql:3306)/test?parseTime=true
     commands:
       - make test-server-datastore
     when:
@@ -129,7 +129,7 @@ steps:
     failure: ignore
 
 services:
-  service-postgres:
+  postgres:
     image: postgres:11
     ports: ["5432"]
     environment:
@@ -138,7 +138,7 @@ services:
     when:
       path: *when_path
 
-  service-mysql:
+  mysql:
     image: mysql:5.6.27
     ports: ["3306"]
     environment:
