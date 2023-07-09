@@ -59,7 +59,7 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 	environment["CI_WORKSPACE"] = path.Join(c.base, c.path)
 	environment["CI_STEP_NAME"] = name
 
-	if section == "services" || container.Detached {
+	if section == typeServices || container.Detached {
 		detached = true
 	}
 
