@@ -1,13 +1,16 @@
 variables:
   - &node_image 'node:18-alpine'
   - &when
-    path:
-      # related config files
-      - ".woodpecker/web.yml"
-      # web source code
-      - "web/**"
-    branch:
-      exclude: ${CI_REPO_DEFAULT_BRANCH}
+    - path: &when_path
+        # related config files
+        - ".woodpecker/web.yml"
+        # web source code
+        - "web/**"
+      branch:
+        exclude: ${CI_REPO_DEFAULT_BRANCH}
+      event: push
+    - path: *when_path
+      event: [pull_request, tag, deployment]
 
 steps:
   deps:

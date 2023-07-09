@@ -1,17 +1,20 @@
 variables:
   - &golang_image 'golang:1.20.2'
   - &when
-    path:
-      # related config files
-      - ".woodpecker/test.yml"
-      - ".golangci.yml"
-      # go source code
-      - "**/*.go"
-      - "go.*"
-      # schema changes
-      - "pipeline/schema/**"
-    branch:
-      exclude: ${CI_REPO_DEFAULT_BRANCH}
+    - path: &when_path
+        # related config files
+        - ".woodpecker/test.yml"
+        - ".golangci.yml"
+        # go source code
+        - "**/*.go"
+        - "go.*"
+        # schema changes
+        - "pipeline/schema/**"
+      branch:
+        exclude: ${CI_REPO_DEFAULT_BRANCH}
+      event: push
+    - path: *when_path
+      event: [pull_request, tag, deployment]
 
 steps:
   vendor:
@@ -26,8 +29,8 @@ steps:
     commands:
       - go run github.com/woodpecker-ci/woodpecker/cmd/cli lint
     when:
-      <<: *when
-      path:
+      - <<: *when
+      - path:
         - ".woodpecker/**"
         - "pipeline/schema/**"
 
