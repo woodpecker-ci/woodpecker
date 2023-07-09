@@ -53,6 +53,7 @@ var migrationTasks = []*task{
 	&initLogsEntriesTable,
 	&migrateLogs2LogEntries,
 	&parentStepsToWorkflows,
+	&addOrgs,
 }
 
 var allBeans = []interface{}{
