@@ -38,7 +38,6 @@ type (
 		Privileged bool `yaml:"privileged,omitempty"`
 
 		// Undocumented
-		CapAdd       []string            `yaml:"cap_add,omitempty"`
 		CPUQuota     base.StringOrInt    `yaml:"cpu_quota,omitempty"`
 		CPUSet       string              `yaml:"cpuset,omitempty"`
 		CPUShares    base.StringOrInt    `yaml:"cpu_shares,omitempty"`
