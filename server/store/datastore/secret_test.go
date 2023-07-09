@@ -73,7 +73,7 @@ func TestSecretList(t *testing.T) {
 
 	createTestSecrets(t, store)
 
-	list, err := store.SecretList(&model.Repo{ID: 1, Owner: "org"}, false, &model.ListOptions{Page: 1, PerPage: 50})
+	list, err := store.SecretList(&model.Repo{ID: 1, OrgID: 12}, false, &model.ListOptions{Page: 1, PerPage: 50})
 	assert.NoError(t, err)
 	assert.Len(t, list, 2)
 }
@@ -95,7 +95,7 @@ func TestSecretPipelineList(t *testing.T) {
 
 	createTestSecrets(t, store)
 
-	list, err := store.SecretList(&model.Repo{ID: 1, Owner: "org"}, true, &model.ListOptions{Page: 1, PerPage: 50})
+	list, err := store.SecretList(&model.Repo{ID: 1, OrgID: 12}, true, &model.ListOptions{Page: 1, PerPage: 50})
 	assert.NoError(t, err)
 	assert.Len(t, list, 4)
 }
@@ -221,7 +221,7 @@ func TestOrgSecretFind(t *testing.T) {
 		return
 	}
 	if got, want := secret.OrgID, int64(12); got != want {
-		t.Errorf("Want owner %d, got %d", want, got)
+		t.Errorf("Want org_id %d, got %d", want, got)
 	}
 	if got, want := secret.Name, "password"; got != want {
 		t.Errorf("Want secret name %s, got %s", want, got)
