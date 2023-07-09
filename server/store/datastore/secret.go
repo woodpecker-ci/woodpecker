@@ -59,10 +59,10 @@ func (s storage) SecretDelete(secret *model.Secret) error {
 	return wrapDelete(s.engine.ID(secret.ID).Delete(new(model.Secret)))
 }
 
-func (s storage) OrgSecretFind(owner, name string) (*model.Secret, error) {
+func (s storage) OrgSecretFind(orgID int64, name string) (*model.Secret, error) {
 	secret := new(model.Secret)
 	return secret, wrapGet(s.engine.Where(
-		builder.Eq{"secret_org_id": owner, "secret_name": name},
+		builder.Eq{"secret_org_id": orgID, "secret_name": name},
 	).Get(secret))
 }
 

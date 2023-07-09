@@ -70,31 +70,6 @@ func PostRepo(c *gin.Context) {
 		c.String(http.StatusForbidden, "User has to be a admin of this repository")
 	}
 
-	// find org of repo
-	var org *model.Org
-	org, err = _store.OrgFindByName(repo.Owner)
-	if err != nil && !errors.Is(err, types.RecordNotExist) {
-		c.String(http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	// create an org if it doesn't exist yet
-	if errors.Is(err, types.RecordNotExist) {
-		org, err = forge.Org(c, user, repo.Owner)
-		if err != nil {
-			c.String(http.StatusInternalServerError, "Could not fetch organization from forge.")
-			return
-		}
-
-		err = _store.OrgCreate(org)
-		if err != nil {
-			c.String(http.StatusInternalServerError, err.Error())
-			return
-		}
-	}
-
-	repo.OrgID = org.ID
-
 	if enabledOnce {
 		repo.Update(from)
 	} else {
@@ -138,6 +113,31 @@ func PostRepo(c *gin.Context) {
 		server.Config.Server.WebhookHost,
 		sig,
 	)
+
+	// find org of repo
+	var org *model.Org
+	org, err = _store.OrgFindByName(repo.Owner)
+	if err != nil && !errors.Is(err, types.RecordNotExist) {
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	// create an org if it doesn't exist yet
+	if errors.Is(err, types.RecordNotExist) {
+		org, err = forge.Org(c, user, repo.Owner)
+		if err != nil {
+			c.String(http.StatusInternalServerError, "Could not fetch organization from forge.")
+			return
+		}
+
+		err = _store.OrgCreate(org)
+		if err != nil {
+			c.String(http.StatusInternalServerError, err.Error())
+			return
+		}
+	}
+
+	repo.OrgID = org.ID
 
 	err = forge.Activate(c, user, repo, link)
 	if err != nil {

@@ -15,16 +15,50 @@
 package api
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/server/store"
+	"github.com/woodpecker-ci/woodpecker/server/store/types"
 
 	"github.com/gin-gonic/gin"
 )
+
+// GetOrg
+//
+//	@Summary	Get organization by id
+//	@Router		/orgs/{org_id} [get]
+//	@Produce	json
+//	@Success	200	{array}	Org
+//	@Tags		Organization
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		org_id			path	string	true	"the organziation's id"
+func GetOrg(c *gin.Context) {
+	_store := store.FromContext(c)
+
+	orgID, err := strconv.ParseInt(c.Param("org_id"), 10, 64)
+	if err != nil {
+		c.String(http.StatusBadRequest, "Error parsing org id. %s", err)
+		return
+	}
+
+	org, err := _store.OrgFind(orgID)
+	if err != nil {
+		if errors.Is(err, types.RecordNotExist) {
+			c.AbortWithStatus(http.StatusNotFound)
+			return
+		}
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, org)
+}
 
 // GetOrgPermissions
 //
@@ -63,4 +97,31 @@ func GetOrgPermissions(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, perm)
+}
+
+// LookupOrg
+//
+//	@Summary	Lookup organization by full-name
+//	@Router		/org/lookup/{org_full_name} [get]
+//	@Produce	json
+//	@Success	200	{object}	Org
+//	@Tags		Organizations
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		org_full_name	path	string	true	"the organizations full-name / slug"
+func LookupOrg(c *gin.Context) {
+	_store := store.FromContext(c)
+	orgFullName := strings.TrimLeft(c.Param("org_full_name"), "/")
+
+	org, err := _store.OrgFindByName(orgFullName)
+	if err != nil {
+		if errors.Is(err, types.RecordNotExist) {
+			c.AbortWithStatus(http.StatusNotFound)
+			return
+		}
+
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, org)
 }

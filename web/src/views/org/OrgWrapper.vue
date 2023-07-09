@@ -19,34 +19,31 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, provide, ref, toRef, watch } from 'vue';
+import { computed, onMounted, ref, toRef, watch } from 'vue';
 
 import IconButton from '~/components/atomic/IconButton.vue';
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import useApiClient from '~/compositions/useApiClient';
+import { provide } from '~/compositions/useInjectProvide';
 import { Org, OrgPermissions } from '~/lib/api/types';
 
 const props = defineProps<{
-  orgName: string;
+  orgId: string;
 }>();
 
-const orgName = toRef(props, 'orgName');
+const orgId = computed(() => parseInt(props.orgId, 10));
 const apiClient = useApiClient();
 
-const org = computed<Org>(() => ({ name: orgName.value }));
+const org = ref<Org>();
 const orgPermissions = ref<OrgPermissions>();
 provide('org', org);
 provide('org-permissions', orgPermissions);
 
 async function load() {
-  orgPermissions.value = await apiClient.getOrgPermissions(orgName.value);
+  org.value = await apiClient.getOrg(orgId.value);
+  orgPermissions.value = await apiClient.getOrgPermissions(org.value.id);
 }
 
-onMounted(() => {
-  load();
-});
-
-watch([orgName], () => {
-  load();
-});
+onMounted(load);
+watch(orgId, load);
 </script>
