@@ -4,6 +4,7 @@ package types
 type Step struct {
 	Name           string            `json:"name"`
 	UUID           string            `json:"uuid"`
+	Type           StepType          `json:"type,omitempty"`
 	Alias          string            `json:"alias,omitempty"`
 	Image          string            `json:"image,omitempty"`
 	Pull           bool              `json:"pull,omitempty"`
