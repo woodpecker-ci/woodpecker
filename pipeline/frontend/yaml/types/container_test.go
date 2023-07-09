@@ -14,7 +14,6 @@ import (
 var containerYaml = []byte(`
 image: golang:latest
 cap_add: [ ALL ]
-cap_drop: [ NET_ADMIN, SYS_ADMIN ]
 commands:
   - go build
   - go test
@@ -61,7 +60,6 @@ settings:
 func TestUnmarshalContainer(t *testing.T) {
 	want := Container{
 		CapAdd:       []string{"ALL"},
-		CapDrop:      []string{"NET_ADMIN", "SYS_ADMIN"},
 		Commands:     base.StringOrSlice{"go build", "go test"},
 		CPUQuota:     base.StringOrInt(11),
 		CPUSet:       "1,2",

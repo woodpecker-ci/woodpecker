@@ -39,7 +39,6 @@ type (
 
 		// Undocumented
 		CapAdd       []string            `yaml:"cap_add,omitempty"`
-		CapDrop      []string            `yaml:"cap_drop,omitempty"`
 		CPUQuota     base.StringOrInt    `yaml:"cpu_quota,omitempty"`
 		CPUSet       string              `yaml:"cpuset,omitempty"`
 		CPUShares    base.StringOrInt    `yaml:"cpu_shares,omitempty"`
