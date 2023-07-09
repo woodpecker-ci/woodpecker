@@ -18,6 +18,7 @@ import (
 	"context"
 	"io"
 	"os"
+	"runtime"
 	"strings"
 
 	"github.com/docker/docker/api/types"
@@ -40,6 +41,12 @@ type docker struct {
 	network    string
 	volumes    []string
 }
+
+const (
+	networkDriverNAT    = "nat"
+	networkDriverBridge = "bridge"
+	volumeDriver        = "local"
+)
 
 // New returns a new Docker Engine.
 func New() backend.Engine {
@@ -98,16 +105,20 @@ func (e *docker) Setup(_ context.Context, conf *backend.Config) error {
 	for _, vol := range conf.Volumes {
 		_, err := e.client.VolumeCreate(noContext, volume.VolumeCreateBody{
 			Name:   vol.Name,
-			Driver: "local",
+			Driver: volumeDriver,
 		})
 		if err != nil {
 			return err
 		}
 	}
+
+	networkDriver := networkDriverBridge
+	if runtime.GOOS == "windows" {
+		networkDriver = networkDriverNAT
+	}
 	for _, n := range conf.Networks {
 		_, err := e.client.NetworkCreate(noContext, n.Name, types.NetworkCreate{
-			Driver:     n.Driver,
-			Options:    n.DriverOpts,
+			Driver:     networkDriver,
 			EnableIPv6: e.enableIPv6,
 		})
 		if err != nil {
