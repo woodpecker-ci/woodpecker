@@ -4004,10 +4004,30 @@ const docTemplate = `{
                 "state": {
                     "$ref": "#/definitions/StatusValue"
                 },
+                "type": {
+                    "$ref": "#/definitions/StepType"
+                },
                 "uuid": {
                     "type": "string"
                 }
             }
+        },
+        "StepType": {
+            "type": "integer",
+            "enum": [
+                1,
+                2,
+                3,
+                4,
+                5
+            ],
+            "x-enum-varnames": [
+                "StepTypeClone",
+                "StepTypeService",
+                "StepTypePlugin",
+                "StepTypeCommands",
+                "StepTypeCache"
+            ]
         },
         "Task": {
             "type": "object",
