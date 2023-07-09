@@ -69,7 +69,7 @@ func (p *Step) Failing() bool {
 	return p.Failure == FailureFail && (p.State == StatusError || p.State == StatusKilled || p.State == StatusFailure)
 }
 
-type StepType uint8
+type StepType uint8 //	@name StepType
 
 const (
 	StepTypeClone StepType = iota + 1

@@ -44,3 +44,14 @@ const (
 	LogEntryMetadata
 	LogEntryProgress
 )
+
+// LogEntryType identifies the type of step
+type StepType uint8
+
+const (
+	StepTypeClone StepType = iota + 1
+	StepTypeService
+	StepTypePlugin
+	StepTypeCommands
+	StepTypeCache
+)
