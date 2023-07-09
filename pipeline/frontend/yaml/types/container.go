@@ -3,11 +3,11 @@ package types
 import (
 	"fmt"
 
-	"golang.org/x/exp/slices"
 	"gopkg.in/yaml.v3"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/constraint"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types/base"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/utils"
 	"github.com/woodpecker-ci/woodpecker/shared/constant"
 )
 
@@ -109,5 +109,5 @@ func (c *Container) IsPlugin() bool {
 }
 
 func (c *Container) IsTrustedCloneImage() bool {
-	return c.IsPlugin() && slices.Contains(constant.TrustedCloneImages, c.Image)
+	return c.IsPlugin() && utils.MatchImage(c.Image, constant.TrustedCloneImages...)
 }

@@ -1,4 +1,4 @@
-package compiler
+package utils
 
 import "github.com/docker/distribution/reference"
 
@@ -33,7 +33,7 @@ func expandImage(name string) string {
 // matchImage returns true if the image name matches
 // an image in the list. Note the image tag is not used
 // in the matching logic.
-func matchImage(from string, to ...string) bool {
+func MatchImage(from string, to ...string) bool {
 	from = trimImage(from)
 	for _, match := range to {
 		if from == trimImage(match) {
@@ -45,7 +45,7 @@ func matchImage(from string, to ...string) bool {
 
 // matchHostname returns true if the image hostname
 // matches the specified hostname.
-func matchHostname(image, hostname string) bool {
+func MatchHostname(image, hostname string) bool {
 	ref, err := reference.ParseAnyReference(image)
 	if err != nil {
 		return false

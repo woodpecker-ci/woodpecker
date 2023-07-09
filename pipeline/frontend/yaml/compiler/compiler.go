@@ -8,6 +8,7 @@ import (
 	backend_types "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
 	yaml_types "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/utils"
 	"github.com/woodpecker-ci/woodpecker/shared/constant"
 )
 
@@ -43,7 +44,7 @@ type Secret struct {
 }
 
 func (s *Secret) Available(container *yaml_types.Container) bool {
-	return (len(s.Match) == 0 || matchImage(container.Image, s.Match...)) && (!s.PluginOnly || container.IsPlugin())
+	return (len(s.Match) == 0 || utils.MatchImage(container.Image, s.Match...)) && (!s.PluginOnly || container.IsPlugin())
 }
 
 type secretMap map[string]Secret
