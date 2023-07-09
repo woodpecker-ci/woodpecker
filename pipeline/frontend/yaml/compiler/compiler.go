@@ -25,13 +25,6 @@ const (
 	nameServices = "services"
 )
 
-const (
-	typeClones   = "clone"
-	typeServices = "services"
-	typeSteps    = "pipeline"
-	typeCache    = "cache"
-)
-
 // Registry represents registry credentials
 type Registry struct {
 	Hostname string
@@ -173,7 +166,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			Environment: c.cloneEnv,
 		}
 		name := fmt.Sprintf("%s_clone", c.prefix)
-		step := c.createProcess(name, container, typeClones)
+		step := c.createProcess(name, container, backend_types.StepTypeClone)
 
 		stage := new(backend_types.Stage)
 		stage.Name = name
@@ -194,7 +187,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			stage.Alias = container.Name
 
 			name := fmt.Sprintf("%s_clone_%d", c.prefix, i)
-			step := c.createProcess(name, container, typeClones)
+			step := c.createProcess(name, container, backend_types.StepTypeClone)
 
 			// only inject netrc if it's a trusted repo or a trusted plugin
 			if !c.netrcOnlyTrusted || c.trustedPipeline || (container.IsPlugin() && container.IsTrustedCloneImage()) {
@@ -225,7 +218,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			}
 
 			name := fmt.Sprintf("%s_%s_%d", c.prefix, nameServices, i)
-			step := c.createProcess(name, container, typeServices)
+			step := c.createProcess(name, container, backend_types.StepTypeService)
 			stage.Steps = append(stage.Steps, step)
 		}
 		config.Stages = append(config.Stages, stage)
@@ -256,7 +249,11 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 		}
 
 		name := fmt.Sprintf("%s_step_%d", c.prefix, i)
-		step := c.createProcess(name, container, typeSteps)
+		stepType := backend_types.StepTypeCommands
+		if container.IsPlugin() {
+			stepType = backend_types.StepTypePlugin
+		}
+		step := c.createProcess(name, container, stepType)
 		stage.Steps = append(stage.Steps, step)
 	}
 
@@ -272,7 +269,7 @@ func (c *Compiler) setupCache(conf *yaml_types.Workflow, ir *backend_types.Confi
 
 	container := c.cacher.Restore(path.Join(c.metadata.Repo.Owner, c.metadata.Repo.Name), c.metadata.Curr.Commit.Branch, conf.Cache)
 	name := fmt.Sprintf("%s_restore_cache", c.prefix)
-	step := c.createProcess(name, container, typeCache)
+	step := c.createProcess(name, container, backend_types.StepTypeCache)
 
 	stage := new(backend_types.Stage)
 	stage.Name = name
@@ -289,7 +286,7 @@ func (c *Compiler) setupCacheRebuild(conf *yaml_types.Workflow, ir *backend_type
 	container := c.cacher.Rebuild(path.Join(c.metadata.Repo.Owner, c.metadata.Repo.Name), c.metadata.Curr.Commit.Branch, conf.Cache)
 
 	name := fmt.Sprintf("%s_rebuild_cache", c.prefix)
-	step := c.createProcess(name, container, typeCache)
+	step := c.createProcess(name, container, backend_types.StepTypeCache)
 
 	stage := new(backend_types.Stage)
 	stage.Name = name

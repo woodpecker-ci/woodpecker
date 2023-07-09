@@ -35,3 +35,13 @@ type Step struct {
 	Sysctls        map[string]string `json:"sysctls,omitempty"`
 	BackendOptions BackendOptions    `json:"backend_options,omitempty"`
 }
+
+type StepType uint8
+
+const (
+	StepTypeClone StepType = iota + 1
+	StepTypeService
+	StepTypePlugin
+	StepTypeCommands
+	StepTypeCache
+)
