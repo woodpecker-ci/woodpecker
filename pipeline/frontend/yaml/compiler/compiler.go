@@ -10,12 +10,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/shared/constant"
 )
 
-// TODO(bradrydzewski) compiler should handle user-defined volumes from YAML
-// TODO(bradrydzewski) compiler should handle user-defined networks from YAML
-
 const (
-	windowsPrefix = "windows/"
-
 	defaultCloneName = "clone"
 
 	nameServices = "services"
