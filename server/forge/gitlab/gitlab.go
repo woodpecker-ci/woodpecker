@@ -693,8 +693,8 @@ func (g *GitLab) Org(ctx context.Context, u *model.User, owner string) (*model.O
 	})
 	if len(users) == 1 && err == nil {
 		return &model.Org{
-			Name: users[0].Username,
-			Type: model.OrgTypeUser,
+			Name:   users[0].Username,
+			IsUser: true,
 		}, nil
 	}
 
@@ -715,7 +715,6 @@ func (g *GitLab) Org(ctx context.Context, u *model.User, owner string) (*model.O
 
 	return &model.Org{
 		Name: groups[0].Name,
-		Type: model.OrgTypeTeam,
 	}, nil
 }
 

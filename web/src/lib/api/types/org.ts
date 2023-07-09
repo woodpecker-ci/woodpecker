@@ -3,7 +3,7 @@ export type Org = {
   // The name of the organization.
   id: number;
   name: string;
-  type: 'user' | 'team';
+  is_user: boolean;
 };
 
 export type OrgPermissions = {

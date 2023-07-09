@@ -49,12 +49,12 @@ func apiRoutes(e *gin.Engine) {
 		apiBase.GET("/orgs/lookup/*org_full_name", api.LookupOrg) // TODO: check if this public route is a security issue
 		orgBase := apiBase.Group("/orgs/:org_id")
 		{
-			orgBase.GET("", api.GetOrg)
 			orgBase.GET("/permissions", api.GetOrgPermissions)
 
 			org := orgBase.Group("")
 			{
 				org.Use(session.MustOrgMember(true))
+				org.GET("", api.GetOrg)
 				org.GET("/secrets", api.GetOrgSecretList)
 				org.POST("/secrets", api.PostOrgSecret)
 				org.GET("/secrets/:secret", api.GetOrgSecret)

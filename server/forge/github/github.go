@@ -356,8 +356,8 @@ func (c *client) Org(ctx context.Context, u *model.User, owner string) (*model.O
 	user, _, err := client.Users.Get(ctx, owner)
 	if user != nil && err == nil {
 		return &model.Org{
-			Name: owner,
-			Type: model.OrgTypeUser,
+			Name:   user.GetName(),
+			IsUser: true,
 		}, nil
 	}
 
@@ -367,8 +367,7 @@ func (c *client) Org(ctx context.Context, u *model.User, owner string) (*model.O
 	}
 
 	return &model.Org{
-		Name: *org.Name,
-		Type: model.OrgTypeTeam,
+		Name: org.GetName(),
 	}, nil
 }
 

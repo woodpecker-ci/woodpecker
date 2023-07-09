@@ -90,6 +90,14 @@ func GetOrgPermissions(c *gin.Context) {
 		return
 	}
 
+	if (org.IsUser && org.Name == user.Login) || user.Admin {
+		c.JSON(http.StatusOK, &model.OrgPerm{
+			Member: true,
+			Admin:  true,
+		})
+		return
+	}
+
 	perm, err := server.Config.Services.Membership.Get(c, user, org.Name)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error getting membership for %d. %s", orgID, err)

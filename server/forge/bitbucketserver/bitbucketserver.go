@@ -277,7 +277,6 @@ func (c *Config) Org(_ context.Context, _ *model.User, owner string) (*model.Org
 	// TODO: Not implemented currently
 	return &model.Org{
 		Name: owner,
-		Type: model.OrgTypeTeam,
 	}, nil
 }
 

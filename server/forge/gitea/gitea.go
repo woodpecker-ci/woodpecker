@@ -540,10 +540,10 @@ func (c *Gitea) Org(ctx context.Context, u *model.User, owner string) (*model.Or
 	}
 
 	user, _, err := client.GetUserInfo(owner)
-	if user != nil {
+	if user != nil && err == nil {
 		return &model.Org{
-			Name: user.UserName,
-			Type: model.OrgTypeUser,
+			Name:   user.UserName,
+			IsUser: true,
 		}, nil
 	}
 
@@ -554,7 +554,6 @@ func (c *Gitea) Org(ctx context.Context, u *model.User, owner string) (*model.Or
 
 	return &model.Org{
 		Name: org.UserName,
-		Type: model.OrgTypeTeam,
 	}, nil
 }
 

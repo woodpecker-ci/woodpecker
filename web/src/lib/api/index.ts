@@ -207,16 +207,16 @@ export default class WoodpeckerClient extends ApiClient {
     return this._get(`/api/orgs/${orgId}/secrets?page=${page}`) as Promise<Secret[] | null>;
   }
 
-  createOrgSecret(orgId: string, secret: Partial<Secret>): Promise<unknown> {
+  createOrgSecret(orgId: number, secret: Partial<Secret>): Promise<unknown> {
     return this._post(`/api/orgs/${orgId}/secrets`, secret);
   }
 
-  updateOrgSecret(orgId: string, secret: Partial<Secret>): Promise<unknown> {
+  updateOrgSecret(orgId: number, secret: Partial<Secret>): Promise<unknown> {
     const secretName = encodeURIComponent(secret.name ?? '');
     return this._patch(`/api/orgs/${orgId}/secrets/${secretName}`, secret);
   }
 
-  deleteOrgSecret(orgId: string, secretName: string): Promise<unknown> {
+  deleteOrgSecret(orgId: number, secretName: string): Promise<unknown> {
     const name = encodeURIComponent(secretName);
     return this._delete(`/api/orgs/${orgId}/secrets/${name}`);
   }
