@@ -45,7 +45,7 @@ const (
 	LogEntryProgress
 )
 
-// LogEntryType identifies the type of step
+// StepType identifies the type of step
 type StepType uint8
 
 const (
