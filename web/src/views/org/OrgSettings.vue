@@ -1,5 +1,5 @@
 <template>
-  <Scaffold enable-tabs v-if="org" :go-back="goBack">
+  <Scaffold v-if="org" enable-tabs :go-back="goBack">
     <template #title>
       <span>
         <router-link :to="{ name: 'org' }" class="hover:underline">

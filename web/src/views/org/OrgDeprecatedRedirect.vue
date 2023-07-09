@@ -19,10 +19,7 @@ const props = defineProps<{
 onMounted(async () => {
   const org = await apiClient.lookupOrg(props.orgName);
 
-  const path = route.path
-    .replace(`/org/${props.orgName}`, `/orgs/${org?.id}`);
-
-console.log(route.path, path);
+  const path = route.path.replace(`/org/${props.orgName}`, `/orgs/${org?.id}`);
 
   await router.replace({ path });
 });
