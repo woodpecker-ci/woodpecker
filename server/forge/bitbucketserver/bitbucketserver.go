@@ -273,6 +273,14 @@ func (c *Config) OrgMembership(_ context.Context, _ *model.User, _ string) (*mod
 	return nil, nil
 }
 
+func (c *Config) Org(_ context.Context, _ *model.User, owner string) (*model.Org, error) {
+	// TODO: Not implemented currently
+	return &model.Org{
+		Name: owner,
+		Type: model.OrgTypeTeam,
+	}, nil
+}
+
 func CreateConsumer(URL, ConsumerKey string, PrivateKey *rsa.PrivateKey) *oauth.Consumer {
 	consumer := oauth.NewRSAConsumer(
 		ConsumerKey,

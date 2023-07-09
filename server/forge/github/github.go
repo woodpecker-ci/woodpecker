@@ -350,6 +350,28 @@ func (c *client) OrgMembership(ctx context.Context, u *model.User, owner string)
 	return &model.OrgPerm{Member: org.GetState() == "active", Admin: org.GetRole() == "admin"}, nil
 }
 
+func (c *client) Org(ctx context.Context, u *model.User, owner string) (*model.Org, error) {
+	client := c.newClientToken(ctx, u.Token)
+
+	user, _, err := client.Users.Get(ctx, owner)
+	if user != nil && err == nil {
+		return &model.Org{
+			Name: owner,
+			Type: model.OrgTypeUser,
+		}, nil
+	}
+
+	org, _, err := client.Organizations.Get(ctx, owner)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.Org{
+		Name: *org.Name,
+		Type: model.OrgTypeTeam,
+	}, nil
+}
+
 // helper function to return the GitHub oauth2 context using an HTTPClient that
 // disables TLS verification if disabled in the forge settings.
 func (c *client) newContext(ctx context.Context) context.Context {

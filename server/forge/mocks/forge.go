@@ -274,6 +274,32 @@ func (_m *Forge) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 	return r0, r1
 }
 
+// Org provides a mock function with given fields: ctx, u, org
+func (_m *Forge) Org(ctx context.Context, u *model.User, org string) (*model.Org, error) {
+	ret := _m.Called(ctx, u, org)
+
+	var r0 *model.Org
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *model.User, string) (*model.Org, error)); ok {
+		return rf(ctx, u, org)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *model.User, string) *model.Org); ok {
+		r0 = rf(ctx, u, org)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Org)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *model.User, string) error); ok {
+		r1 = rf(ctx, u, org)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // OrgMembership provides a mock function with given fields: ctx, u, org
 func (_m *Forge) OrgMembership(ctx context.Context, u *model.User, org string) (*model.OrgPerm, error) {
 	ret := _m.Called(ctx, u, org)
