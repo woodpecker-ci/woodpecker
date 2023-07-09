@@ -21,6 +21,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
+	"github.com/woodpecker-ci/woodpecker/server/store"
 
 	"github.com/gin-gonic/gin"
 )
@@ -28,14 +29,16 @@ import (
 // GetOrgPermissions
 //
 //	@Summary	Get the permissions of the current user in the given organization
-//	@Router		/orgs/{owner}/permissions [get]
+//	@Router		/orgs/{org_id}/permissions [get]
 //	@Produce	json
 //	@Success	200	{array}	OrgPerm
 //	@Tags		Organization permissions
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		owner			path	string	true	"the owner's name"
+//	@Param		org_id			path	string	true	"the organziation's id"
 func GetOrgPermissions(c *gin.Context) {
 	user := session.User(c)
+	_store := store.FromContext(c)
+
 	orgID, err := strconv.ParseInt(c.Param("org_id"), 10, 64)
 	if err != nil {
 		c.String(http.StatusBadRequest, "Error parsing org id. %s", err)
@@ -47,7 +50,13 @@ func GetOrgPermissions(c *gin.Context) {
 		return
 	}
 
-	perm, err := server.Config.Services.Membership.Get(c, user, orgID)
+	org, err := _store.OrgFind(orgID)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Error getting org %d. %s", orgID, err)
+		return
+	}
+
+	perm, err := server.Config.Services.Membership.Get(c, user, org.Name)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error getting membership for %d. %s", orgID, err)
 		return
