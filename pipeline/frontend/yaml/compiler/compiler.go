@@ -3,7 +3,6 @@ package compiler
 import (
 	"fmt"
 	"path"
-	"strings"
 
 	backend_types "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
@@ -11,16 +10,8 @@ import (
 	"github.com/woodpecker-ci/woodpecker/shared/constant"
 )
 
-// TODO(bradrydzewski) compiler should handle user-defined volumes from YAML
-// TODO(bradrydzewski) compiler should handle user-defined networks from YAML
-
 const (
-	windowsPrefix = "windows/"
-
 	defaultCloneName = "clone"
-
-	networkDriverNAT    = "nat"
-	networkDriverBridge = "bridge"
 
 	nameServices = "services"
 	namePipeline = "pipeline"
@@ -114,22 +105,13 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 
 	// create a default volume
 	config.Volumes = append(config.Volumes, &backend_types.Volume{
-		Name:   fmt.Sprintf("%s_default", c.prefix),
-		Driver: "local",
+		Name: fmt.Sprintf("%s_default", c.prefix),
 	})
 
 	// create a default network
-	if strings.HasPrefix(c.metadata.Sys.Platform, windowsPrefix) {
-		config.Networks = append(config.Networks, &backend_types.Network{
-			Name:   fmt.Sprintf("%s_default", c.prefix),
-			Driver: networkDriverNAT,
-		})
-	} else {
-		config.Networks = append(config.Networks, &backend_types.Network{
-			Name:   fmt.Sprintf("%s_default", c.prefix),
-			Driver: networkDriverBridge,
-		})
-	}
+	config.Networks = append(config.Networks, &backend_types.Network{
+		Name: fmt.Sprintf("%s_default", c.prefix),
+	})
 
 	// create secrets for mask
 	for _, sec := range c.secrets {
