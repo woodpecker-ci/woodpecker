@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.15.10](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.10) - 2023-07-08
+## [0.15.10](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.10) - 2023-07-09
 
 * SECURITY
   * Fix agent auth (#1952) (#1953)
