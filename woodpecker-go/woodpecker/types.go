@@ -240,4 +240,11 @@ type (
 		DepStatus    map[string]string `json:"dep_status"`
 		AgentID      int64             `json:"agent_id"`
 	}
+
+	// Org is the JSON data for an organization
+	Org struct {
+		ID     int64  `json:"id"`
+		Name   string `json:"name"`
+		IsUser bool   `json:"is_user"`
+	}
 )
