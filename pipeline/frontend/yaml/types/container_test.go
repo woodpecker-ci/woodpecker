@@ -33,7 +33,6 @@ environment:
 extra_hosts:
  - somehost:162.242.195.82
  - otherhost:50.31.209.229
-isolation: hyperv
 name: my-build-container
 network_mode: bridge
 networks:
@@ -75,7 +74,6 @@ func TestUnmarshalContainer(t *testing.T) {
 		Environment:  base.SliceOrMap{"RACK_ENV": "development", "SHOW": "true"},
 		ExtraHosts:   []string{"somehost:162.242.195.82", "otherhost:50.31.209.229"},
 		Image:        "golang:latest",
-		Isolation:    "hyperv",
 		MemLimit:     base.MemStringOrInt(1024),
 		MemSwapLimit: base.MemStringOrInt(1024),
 		Name:         "my-build-container",

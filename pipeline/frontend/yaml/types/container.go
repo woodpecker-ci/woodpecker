@@ -48,7 +48,6 @@ type (
 		DNS          base.StringOrSlice  `yaml:"dns,omitempty"`
 		ExtraHosts   []string            `yaml:"extra_hosts,omitempty"`
 		IpcMode      string              `yaml:"ipc_mode,omitempty"`
-		Isolation    string              `yaml:"isolation,omitempty"`
 		MemLimit     base.MemStringOrInt `yaml:"mem_limit,omitempty"`
 		MemSwapLimit base.MemStringOrInt `yaml:"memswap_limit,omitempty"`
 		NetworkMode  string              `yaml:"network_mode,omitempty"`
