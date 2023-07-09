@@ -10,6 +10,8 @@ variables:
       - "go.*"
       # schema changes
       - "pipeline/schema/**"
+    branch:
+      exclude: ${CI_REPO_DEFAULT_BRANCH}
 
 steps:
   vendor:
