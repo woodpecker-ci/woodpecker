@@ -84,7 +84,7 @@ func HandleAuth(c *gin.Context) {
 		if len(config.Orgs) != 0 {
 			teams, terr := server.Config.Services.Forge.Teams(c, tmpuser)
 			if terr != nil || !config.IsMember(teams) {
-				log.Error().Msgf("cannot verify team membership for %s.", u.Login)
+				log.Error().Err(terr).Msgf("cannot verify team membership for %s.", u.Login)
 				c.Redirect(303, "/login?error=access_denied")
 				return
 			}
@@ -125,7 +125,7 @@ func HandleAuth(c *gin.Context) {
 	if len(config.Orgs) != 0 {
 		teams, terr := server.Config.Services.Forge.Teams(c, u)
 		if terr != nil || !config.IsMember(teams) {
-			log.Error().Msgf("cannot verify team membership for %s.", u.Login)
+			log.Error().Err(terr).Msgf("cannot verify team membership for %s.", u.Login)
 			c.Redirect(http.StatusSeeOther, "/login?error=access_denied")
 			return
 		}
