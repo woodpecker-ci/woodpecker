@@ -43,7 +43,7 @@ var addOrgs = task{
 	name:     "add-orgs",
 	required: true,
 	fn: func(sess *xorm.Session) error {
-		if err := sess.Sync(new(model.Org)); err != nil {
+		if err := sess.Sync(new(model.Org), new(model.Repo)); err != nil {
 			return err
 		}
 
