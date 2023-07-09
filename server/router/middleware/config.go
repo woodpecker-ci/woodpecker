@@ -36,7 +36,6 @@ func Config(cli *cli.Context) gin.HandlerFunc {
 func setupConfig(c *cli.Context) *model.Settings {
 	return &model.Settings{
 		Open:            c.Bool("open"),
-		Secret:          c.String("agent-secret"),
 		Admins:          sliceToMap2(c.StringSlice("admin")),
 		Orgs:            sliceToMap2(c.StringSlice("orgs")),
 		OwnersWhitelist: sliceToMap2(c.StringSlice("repo-owners")),
@@ -53,4 +52,10 @@ func sliceToMap2(s []string) map[string]bool {
 		v[ss] = true
 	}
 	return v
+}
+
+// GetConfig returns the config from the Context
+func GetConfig(c *gin.Context) *model.Settings {
+	v := c.MustGet(configKey)
+	return v.(*model.Settings)
 }

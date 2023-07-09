@@ -6,6 +6,7 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/common"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
+	"golang.org/x/exp/maps"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -43,7 +44,7 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 		}
 	}
 
-	pullPolicy := v1.PullIfNotPresent
+	var pullPolicy v1.PullPolicy
 	if step.Pull {
 		pullPolicy = v1.PullAlways
 	}
@@ -80,9 +81,9 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 		}
 	}
 
-	var ServiceAccountName string
+	var serviceAccountName string
 	if step.BackendOptions.Kubernetes.ServiceAccountName != "" {
-		ServiceAccountName = step.BackendOptions.Kubernetes.ServiceAccountName
+		serviceAccountName = step.BackendOptions.Kubernetes.ServiceAccountName
 	}
 
 	podName, err := dnsName(step.Name)
@@ -92,18 +93,19 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 
 	labels["step"] = podName
 
-	var platform string
-	for _, e := range mapToEnvVars(step.Environment) {
-		if e.Name == "CI_SYSTEM_ARCH" {
-			platform = e.Value
-			break
-		}
+	var nodeSelector map[string]string
+	if platform, exist := step.Environment["CI_SYSTEM_PLATFORM"]; exist {
+		arch := strings.Split(platform, "/")[1]
+		nodeSelector = map[string]string{v1.LabelArchStable: arch}
 	}
 
-	NodeSelector := map[string]string{"kubernetes.io/arch": strings.Split(platform, "/")[1]}
-
-	for key, val := range step.BackendOptions.Kubernetes.NodeSelector {
-		NodeSelector[key] = val
+	beOptNodeSelector := step.BackendOptions.Kubernetes.NodeSelector
+	if len(beOptNodeSelector) > 0 {
+		if len(nodeSelector) == 0 {
+			nodeSelector = beOptNodeSelector
+		} else {
+			maps.Copy(nodeSelector, beOptNodeSelector)
+		}
 	}
 
 	pod := &v1.Pod{
@@ -116,8 +118,8 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 		Spec: v1.PodSpec{
 			RestartPolicy:      v1.RestartPolicyNever,
 			HostAliases:        hostAliases,
-			NodeSelector:       NodeSelector,
-			ServiceAccountName: ServiceAccountName,
+			NodeSelector:       nodeSelector,
+			ServiceAccountName: serviceAccountName,
 			Containers: []v1.Container{{
 				Name:            podName,
 				Image:           step.Image,

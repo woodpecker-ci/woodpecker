@@ -23,11 +23,10 @@ import (
 const orderSecretsBy = "secret_name"
 
 func (s storage) SecretFind(repo *model.Repo, name string) (*model.Secret, error) {
-	secret := &model.Secret{
-		RepoID: repo.ID,
-		Name:   name,
-	}
-	return secret, wrapGet(s.engine.Get(secret))
+	secret := new(model.Secret)
+	return secret, wrapGet(s.engine.Where(
+		builder.Eq{"secret_repo_id": repo.ID, "secret_name": name},
+	).Get(secret))
 }
 
 func (s storage) SecretList(repo *model.Repo, includeGlobalAndOrgSecrets bool, p *model.ListOptions) ([]*model.Secret, error) {
@@ -60,12 +59,11 @@ func (s storage) SecretDelete(secret *model.Secret) error {
 	return wrapDelete(s.engine.ID(secret.ID).Delete(new(model.Secret)))
 }
 
-func (s storage) OrgSecretFind(orgID int64, name string) (*model.Secret, error) {
-	secret := &model.Secret{
-		OrgID: orgID,
-		Name:  name,
-	}
-	return secret, wrapGet(s.engine.Get(secret))
+func (s storage) OrgSecretFind(owner, name string) (*model.Secret, error) {
+	secret := new(model.Secret)
+	return secret, wrapGet(s.engine.Where(
+		builder.Eq{"secret_org_id": owner, "secret_name": name},
+	).Get(secret))
 }
 
 func (s storage) OrgSecretList(orgID int64, p *model.ListOptions) ([]*model.Secret, error) {
@@ -74,13 +72,15 @@ func (s storage) OrgSecretList(orgID int64, p *model.ListOptions) ([]*model.Secr
 }
 
 func (s storage) GlobalSecretFind(name string) (*model.Secret, error) {
-	secret := &model.Secret{
-		Name: name,
-	}
-	return secret, wrapGet(s.engine.Where(builder.And(builder.Eq{"secret_org_id": 0}, builder.Eq{"secret_repo_id": 0})).Get(secret))
+	secret := new(model.Secret)
+	return secret, wrapGet(s.engine.Where(
+		builder.Eq{"secret_org_id": 0, "secret_repo_id": 0, "secret_name": name},
+	).Get(secret))
 }
 
 func (s storage) GlobalSecretList(p *model.ListOptions) ([]*model.Secret, error) {
 	secrets := make([]*model.Secret, 0)
-	return secrets, s.paginate(p).Where(builder.And(builder.Eq{"secret_owner": 0}, builder.Eq{"secret_repo_id": 0})).OrderBy(orderSecretsBy).Find(&secrets)
+	return secrets, s.paginate(p).Where(
+		builder.Eq{"secret_org_id": 0, "secret_repo_id": 0},
+	).OrderBy(orderSecretsBy).Find(&secrets)
 }
