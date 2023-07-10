@@ -51,7 +51,7 @@ func PostRepo(c *gin.Context) {
 	user := session.User(c)
 
 	remoteID := model.ForgeRemoteID(c.Query("forge_remote_id"))
-	if remoteID == "" {
+	if !remoteID.IsValid() {
 		c.String(http.StatusBadRequest, "No forge_remote_id provided")
 		return
 	}
