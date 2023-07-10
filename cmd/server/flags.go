@@ -104,10 +104,10 @@ var flags = []cli.Flag{
 		Value:   ":9000",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_GRPC_SECRET"},
-		Name:    "grpc-secret",
-		Usage:   "grpc jwt secret",
-		Value:   "secret",
+		EnvVars:  []string{"WOODPECKER_GRPC_SECRET"},
+		Name:     "grpc-secret",
+		Usage:    "grpc jwt secret",
+		Value:    "secret",
 		FilePath: os.Getenv("WOODPECKER_GRPC_SECRET_FILE"),
 	},
 	&cli.StringFlag{
