@@ -20,7 +20,8 @@ Enables handling webhook's pull request event. If disabled, then pipeline won't 
 
 ### Protected
 
-Every build initiated by a user (not including the project owner) needs to be approved by the owner before being executed. This can be used if your repository is public to protect the pipeline configuration from running unauthorized changes on third-party pull requests.
+Every pipeline initiated by a user needs to be approved by the owner before being executed.
+This can be used if your repository is public to protect the pipeline configuration from running unauthorized changes on third-party pull requests.
 
 ### Trusted
 
