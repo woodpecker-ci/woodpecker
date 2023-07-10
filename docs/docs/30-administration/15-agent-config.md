@@ -8,10 +8,12 @@ version: '3'
 
 services:
   woodpecker-agent:
-  [...]
-  environment:
-+   - WOODPECKER_SERVER=localhost:9000
-+   - WOODPECKER_AGENT_SECRET="your-shared-secret-goes-here"
+    [...]
+    volumes:
+      - woodpecker-agent-config:/etc/woodpecker
+    environment:
++     - WOODPECKER_SERVER=localhost:9000
++     - WOODPECKER_AGENT_SECRET="your-shared-secret-goes-here"
 ```
 
 The following are automatically set and can be overridden:
