@@ -78,6 +78,16 @@ var flags = []cli.Flag{
 		Usage:   "server ssl key path",
 	},
 	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_CUSTOM_CSS_FILE"},
+		Name:    "custom-css-file",
+		Usage:   "file path for the server to serve a custom .CSS file, used for customizing the UI",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_CUSTOM_JS_FILE"},
+		Name:    "custom-js-file",
+		Usage:   "file path for the server to serve a custom .JS file, used for customizing the UI",
+	},
+	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_LETS_ENCRYPT_EMAIL"},
 		Name:    "lets-encrypt-email",
 		Usage:   "let's encrypt email",
