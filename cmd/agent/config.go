@@ -66,7 +66,7 @@ func writeAgentConfig(conf AgentConfig, agentConfigPath string) {
 	oldRawAgentConf, _ := os.ReadFile(agentConfigPath)
 
 	// if config differ write to disk
-	if bytes.Compare(rawAgentConf, oldRawAgentConf) == 0 {
+	if bytes.Equal(rawAgentConf, oldRawAgentConf) {
 		if err := os.WriteFile(agentConfigPath, rawAgentConf, 0o644); err != nil {
 			log.Error().Err(err).Msgf("could not persist agent config at '%s'", agentConfigPath)
 		}
