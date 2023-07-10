@@ -202,7 +202,7 @@ func run(c *cli.Context) error {
 		Labels: labels,
 	}
 
-	log.Debug().Msgf("Agent registered with ID %d", agentID)
+	log.Debug().Msgf("Agent registered with ID %d", agentConfig.AgentID)
 
 	go func() {
 		for {
