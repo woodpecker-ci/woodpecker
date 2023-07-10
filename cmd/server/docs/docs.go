@@ -250,7 +250,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/badges/{owner}/{name}/cc.xml": {
+        "/badges/{repo_id}/cc.xml": {
             "get": {
                 "description": "CCMenu displays the pipeline status of projects on a CI server as an item in the Mac's menu bar.\nMore details on how to install, you can find at http://ccmenu.org/\nThe response format adheres to CCTray v1 Specification, https://cctray.org/v1/",
                 "produces": [
@@ -283,7 +283,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/badges/{owner}/{name}/status.svg": {
+        "/badges/{repo_id}/status.svg": {
             "get": {
                 "produces": [
                     "image/svg+xml"
@@ -294,16 +294,9 @@ const docTemplate = `{
                 "summary": "Get status badge, SVG format",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "the repository owner's name",
-                        "name": "owner",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository name",
-                        "name": "name",
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
                         "in": "path",
                         "required": true
                     }
@@ -751,6 +744,45 @@ const docTemplate = `{
                 }
             }
         },
+        "/logs/{repo_id}/{pipeline}/{stepID}": {
+            "get": {
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Pipeline logs"
+                ],
+                "summary": "Log stream",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the number of the pipeline",
+                        "name": "pipeline",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the step id",
+                        "name": "stepID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/orgs/{owner}/permissions": {
             "get": {
                 "produces": [
@@ -1160,7 +1192,43 @@ const docTemplate = `{
                 }
             }
         },
-        "/repos/{owner}/{name}": {
+        "/repos/lookup/{repo_full_name}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Repositories"
+                ],
+                "summary": "Get repository by full-name",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "the repository full-name / slug",
+                        "name": "repo_full_name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Repo"
+                        }
+                    }
+                }
+            }
+        },
+        "/repos/{repo_id}": {
             "get": {
                 "produces": [
                     "application/json"
@@ -1179,16 +1247,9 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "the repository owner's name",
-                        "name": "owner",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository name",
-                        "name": "name",
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
                         "in": "path",
                         "required": true
                     }
@@ -1220,16 +1281,9 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "the repository owner's name",
-                        "name": "owner",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository name",
-                        "name": "name",
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
                         "in": "path",
                         "required": true
                     }
@@ -1261,16 +1315,9 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "the repository owner's name",
-                        "name": "owner",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository name",
-                        "name": "name",
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
                         "in": "path",
                         "required": true
                     }
@@ -1302,16 +1349,9 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "the repository owner's name",
-                        "name": "owner",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository name",
-                        "name": "name",
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
                         "in": "path",
                         "required": true
                     },
@@ -1335,7 +1375,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/repos/{owner}/{name}/branches": {
+        "/repos/{repo_id}/branches": {
             "get": {
                 "produces": [
                     "application/json"
@@ -1354,16 +1394,9 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "the repository owner's name",
-                        "name": "owner",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository name",
-                        "name": "name",
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
                         "in": "path",
                         "required": true
                     },
@@ -1395,7 +1428,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/repos/{owner}/{name}/chown": {
+        "/repos/{repo_id}/chown": {
             "post": {
                 "produces": [
                     "application/json"
@@ -1414,16 +1447,9 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "the repository owner's name",
-                        "name": "owner",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository name",
-                        "name": "name",
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
                         "in": "path",
                         "required": true
                     }
@@ -1438,7 +1464,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/repos/{owner}/{name}/cron": {
+        "/repos/{repo_id}/cron": {
             "get": {
                 "produces": [
                     "application/json"
@@ -1457,16 +1483,9 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "the repository owner's name",
-                        "name": "owner",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository name",
-                        "name": "name",
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
                         "in": "path",
                         "required": true
                     },
@@ -1515,16 +1534,9 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "the repository owner's name",
-                        "name": "owner",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository name",
-                        "name": "name",
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
                         "in": "path",
                         "required": true
                     },
@@ -1548,7 +1560,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/repos/{owner}/{name}/cron/{cron}": {
+        "/repos/{repo_id}/cron/{cron}": {
             "get": {
                 "produces": [
                     "application/json"
@@ -1567,16 +1579,9 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "the repository owner's name",
-                        "name": "owner",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository name",
-                        "name": "name",
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
                         "in": "path",
                         "required": true
                     },
@@ -1615,16 +1620,9 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "the repository owner's name",
-                        "name": "owner",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository name",
-                        "name": "name",
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
                         "in": "path",
                         "required": true
                     },
@@ -1663,16 +1661,9 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "the repository owner's name",
-                        "name": "owner",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository name",
-                        "name": "name",
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
                         "in": "path",
                         "required": true
                     },
@@ -1708,16 +1699,9 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "the repository owner's name",
-                        "name": "owner",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository name",
-                        "name": "name",
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
                         "in": "path",
                         "required": true
                     },
@@ -1748,7 +1732,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/repos/{owner}/{name}/logs/{number}": {
+        "/repos/{repo_id}/logs/{number}": {
             "post": {
                 "produces": [
                     "text/plain"
@@ -1767,16 +1751,9 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "the repository owner's name",
-                        "name": "owner",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository name",
-                        "name": "name",
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
                         "in": "path",
                         "required": true
                     },
@@ -1795,10 +1772,10 @@ const docTemplate = `{
                 }
             }
         },
-        "/repos/{owner}/{name}/logs/{number}/{pid}": {
+        "/repos/{repo_id}/logs/{number}/{stepID}": {
             "get": {
                 "produces": [
-                    "text/plain"
+                    "application/json"
                 ],
                 "tags": [
                     "Pipeline logs"
@@ -1814,16 +1791,9 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "the repository owner's name",
-                        "name": "owner",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository name",
-                        "name": "name",
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
                         "in": "path",
                         "required": true
                     },
@@ -1836,81 +1806,26 @@ const docTemplate = `{
                     },
                     {
                         "type": "integer",
-                        "description": "the pipeline id",
-                        "name": "pid",
+                        "description": "the step id",
+                        "name": "stepID",
                         "in": "path",
                         "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/LogEntry"
+                            }
+                        }
                     }
                 }
             }
         },
-        "/repos/{owner}/{name}/logs/{number}/{pid}/{step}": {
-            "get": {
-                "produces": [
-                    "text/plain"
-                ],
-                "tags": [
-                    "Pipeline logs"
-                ],
-                "summary": "Log information per step",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "default": "Bearer \u003cpersonal access token\u003e",
-                        "description": "Insert your personal access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository owner's name",
-                        "name": "owner",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository name",
-                        "name": "name",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "the number of the pipeline",
-                        "name": "number",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "the pipeline id",
-                        "name": "pid",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "the step name",
-                        "name": "step",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                }
-            }
-        },
-        "/repos/{owner}/{name}/move": {
+        "/repos/{repo_id}/move": {
             "post": {
                 "produces": [
                     "text/plain"
@@ -1929,16 +1844,9 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "the repository owner's name",
-                        "name": "owner",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository name",
-                        "name": "name",
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
                         "in": "path",
                         "required": true
                     },
@@ -1957,7 +1865,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/repos/{owner}/{name}/permissions": {
+        "/repos/{repo_id}/permissions": {
             "get": {
                 "description": "The repository permission, according to the used access token.",
                 "produces": [
@@ -2001,7 +1909,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/repos/{owner}/{name}/pipelines": {
+        "/repos/{repo_id}/pipelines": {
             "get": {
                 "produces": [
                     "application/json"
@@ -2020,16 +1928,9 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "the repository owner's name",
-                        "name": "owner",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository name",
-                        "name": "name",
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
                         "in": "path",
                         "required": true
                     },
@@ -2078,16 +1979,9 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "the repository owner's name",
-                        "name": "owner",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository name",
-                        "name": "name",
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
                         "in": "path",
                         "required": true
                     },
@@ -2111,7 +2005,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/repos/{owner}/{name}/pipelines/{number}": {
+        "/repos/{repo_id}/pipelines/{number}": {
             "get": {
                 "produces": [
                     "application/json"
@@ -2130,16 +2024,9 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "the repository owner's name",
-                        "name": "owner",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository name",
-                        "name": "name",
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
                         "in": "path",
                         "required": true
                     },
@@ -2222,7 +2109,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/repos/{owner}/{name}/pipelines/{number}/approve": {
+        "/repos/{repo_id}/pipelines/{number}/approve": {
             "post": {
                 "produces": [
                     "application/json"
@@ -2241,16 +2128,9 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "the repository owner's name",
-                        "name": "owner",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository name",
-                        "name": "name",
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
                         "in": "path",
                         "required": true
                     },
@@ -2272,7 +2152,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/repos/{owner}/{name}/pipelines/{number}/cancel": {
+        "/repos/{repo_id}/pipelines/{number}/cancel": {
             "post": {
                 "produces": [
                     "text/plain"
@@ -2291,16 +2171,9 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "the repository owner's name",
-                        "name": "owner",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository name",
-                        "name": "name",
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
                         "in": "path",
                         "required": true
                     },
@@ -2319,7 +2192,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/repos/{owner}/{name}/pipelines/{number}/config": {
+        "/repos/{repo_id}/pipelines/{number}/config": {
             "get": {
                 "produces": [
                     "application/json"
@@ -2338,16 +2211,9 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "the repository owner's name",
-                        "name": "owner",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository name",
-                        "name": "name",
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
                         "in": "path",
                         "required": true
                     },
@@ -2372,7 +2238,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/repos/{owner}/{name}/pipelines/{number}/decline": {
+        "/repos/{repo_id}/pipelines/{number}/decline": {
             "post": {
                 "produces": [
                     "application/json"
@@ -2391,16 +2257,9 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "the repository owner's name",
-                        "name": "owner",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository name",
-                        "name": "name",
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
                         "in": "path",
                         "required": true
                     },
@@ -2422,7 +2281,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/repos/{owner}/{name}/pull_requests": {
+        "/repos/{repo_id}/pull_requests": {
             "get": {
                 "produces": [
                     "application/json"
@@ -2441,16 +2300,9 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "the repository owner's name",
-                        "name": "owner",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository name",
-                        "name": "name",
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
                         "in": "path",
                         "required": true
                     },
@@ -2482,7 +2334,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/repos/{owner}/{name}/registry": {
+        "/repos/{repo_id}/registry": {
             "get": {
                 "produces": [
                     "application/json"
@@ -2501,16 +2353,9 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "the repository owner's name",
-                        "name": "owner",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository name",
-                        "name": "name",
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
                         "in": "path",
                         "required": true
                     },
@@ -2559,16 +2404,9 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "the repository owner's name",
-                        "name": "owner",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository name",
-                        "name": "name",
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
                         "in": "path",
                         "required": true
                     },
@@ -2592,7 +2430,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/repos/{owner}/{name}/registry/{registry}": {
+        "/repos/{repo_id}/registry/{registry}": {
             "get": {
                 "produces": [
                     "application/json"
@@ -2611,16 +2449,9 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "the repository owner's name",
-                        "name": "owner",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository name",
-                        "name": "name",
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
                         "in": "path",
                         "required": true
                     },
@@ -2659,16 +2490,9 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "the repository owner's name",
-                        "name": "owner",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository name",
-                        "name": "name",
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
                         "in": "path",
                         "required": true
                     },
@@ -2704,16 +2528,9 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "the repository owner's name",
-                        "name": "owner",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository name",
-                        "name": "name",
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
                         "in": "path",
                         "required": true
                     },
@@ -2744,7 +2561,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/repos/{owner}/{name}/repair": {
+        "/repos/{repo_id}/repair": {
             "post": {
                 "produces": [
                     "text/plain"
@@ -2763,16 +2580,9 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "the repository owner's name",
-                        "name": "owner",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository name",
-                        "name": "name",
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
                         "in": "path",
                         "required": true
                     }
@@ -2784,7 +2594,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/repos/{owner}/{name}/secrets": {
+        "/repos/{repo_id}/secrets": {
             "get": {
                 "produces": [
                     "application/json"
@@ -2803,16 +2613,9 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "the repository owner's name",
-                        "name": "owner",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository name",
-                        "name": "name",
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
                         "in": "path",
                         "required": true
                     },
@@ -2861,16 +2664,9 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "the repository owner's name",
-                        "name": "owner",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository name",
-                        "name": "name",
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
                         "in": "path",
                         "required": true
                     },
@@ -2894,7 +2690,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/repos/{owner}/{name}/secrets/{secretName}": {
+        "/repos/{repo_id}/secrets/{secretName}": {
             "get": {
                 "produces": [
                     "application/json"
@@ -2913,16 +2709,9 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "the repository owner's name",
-                        "name": "owner",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository name",
-                        "name": "name",
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
                         "in": "path",
                         "required": true
                     },
@@ -2961,16 +2750,9 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "the repository owner's name",
-                        "name": "owner",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository name",
-                        "name": "name",
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
                         "in": "path",
                         "required": true
                     },
@@ -3006,16 +2788,9 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "the repository owner's name",
-                        "name": "owner",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository name",
-                        "name": "name",
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
                         "in": "path",
                         "required": true
                     },
@@ -3762,23 +3537,14 @@ const docTemplate = `{
                 "finished_at": {
                     "type": "integer"
                 },
-                "full_name": {
-                    "type": "string"
-                },
                 "id": {
                     "type": "integer"
                 },
                 "message": {
                     "type": "string"
                 },
-                "name": {
-                    "type": "string"
-                },
                 "number": {
                     "type": "integer"
-                },
-                "owner": {
-                    "type": "string"
                 },
                 "ref": {
                     "type": "string"
@@ -3789,6 +3555,9 @@ const docTemplate = `{
                 "remote": {
                     "type": "string"
                 },
+                "repo_id": {
+                    "type": "integer"
+                },
                 "started_at": {
                     "type": "integer"
                 },
@@ -3797,6 +3566,32 @@ const docTemplate = `{
                 },
                 "title": {
                     "type": "string"
+                }
+            }
+        },
+        "LogEntry": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "line": {
+                    "type": "integer"
+                },
+                "step_id": {
+                    "type": "integer"
+                },
+                "time": {
+                    "type": "integer"
+                },
+                "type": {
+                    "$ref": "#/definitions/model.LogEntryType"
                 }
             }
         },
@@ -3916,21 +3711,11 @@ const docTemplate = `{
                     "description": "uses reported user for webhooks and name of cron for cron pipelines",
                     "type": "string"
                 },
-                "signed": {
-                    "description": "deprecate",
-                    "type": "boolean"
-                },
                 "started_at": {
                     "type": "integer"
                 },
                 "status": {
                     "$ref": "#/definitions/StatusValue"
-                },
-                "steps": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Step"
-                    }
                 },
                 "timestamp": {
                     "type": "integer"
@@ -3947,9 +3732,11 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
-                "verified": {
-                    "description": "deprecate",
-                    "type": "boolean"
+                "workflows": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Workflow"
+                    }
                 }
             }
         },
@@ -4026,6 +3813,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "default_branch": {
+                    "type": "string"
+                },
+                "forge_remote_id": {
+                    "description": "ForgeRemoteID is the unique identifier for the repository on the forge.",
                     "type": "string"
                 },
                 "full_name": {
@@ -4183,23 +3974,8 @@ const docTemplate = `{
         "Step": {
             "type": "object",
             "properties": {
-                "agent_id": {
-                    "type": "integer"
-                },
-                "children": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Step"
-                    }
-                },
                 "end_time": {
                     "type": "integer"
-                },
-                "environ": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
                 },
                 "error": {
                     "type": "string"
@@ -4213,17 +3989,11 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "pgid": {
-                    "type": "integer"
-                },
                 "pid": {
                     "type": "integer"
                 },
                 "pipeline_id": {
                     "type": "integer"
-                },
-                "platform": {
-                    "type": "string"
                 },
                 "ppid": {
                     "type": "integer"
@@ -4233,6 +4003,9 @@ const docTemplate = `{
                 },
                 "state": {
                     "$ref": "#/definitions/StatusValue"
+                },
+                "uuid": {
+                    "type": "string"
                 }
             }
         },
@@ -4320,6 +4093,70 @@ const docTemplate = `{
                 "EventCron",
                 "EventManual"
             ]
+        },
+        "model.LogEntryType": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3,
+                4
+            ],
+            "x-enum-varnames": [
+                "LogEntryStdout",
+                "LogEntryStderr",
+                "LogEntryExitCode",
+                "LogEntryMetadata",
+                "LogEntryProgress"
+            ]
+        },
+        "model.Workflow": {
+            "type": "object",
+            "properties": {
+                "agent_id": {
+                    "type": "integer"
+                },
+                "children": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Step"
+                    }
+                },
+                "end_time": {
+                    "type": "integer"
+                },
+                "environ": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pid": {
+                    "type": "integer"
+                },
+                "pipeline_id": {
+                    "type": "integer"
+                },
+                "platform": {
+                    "type": "string"
+                },
+                "start_time": {
+                    "type": "integer"
+                },
+                "state": {
+                    "$ref": "#/definitions/StatusValue"
+                }
+            }
         }
     }
 }`

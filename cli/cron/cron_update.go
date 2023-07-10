@@ -14,7 +14,7 @@ import (
 var cronUpdateCmd = &cli.Command{
 	Name:      "update",
 	Usage:     "update a cron job",
-	ArgsUsage: "[repo/name]",
+	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    cronUpdate,
 	Flags: append(common.GlobalFlags,
 		common.RepoFlag,
@@ -41,21 +41,21 @@ var cronUpdateCmd = &cli.Command{
 
 func cronUpdate(c *cli.Context) error {
 	var (
-		reponame = c.String("repository")
-		jobID    = c.Int64("id")
-		jobName  = c.String("name")
-		branch   = c.String("branch")
-		schedule = c.String("schedule")
-		format   = c.String("format") + "\n"
+		repoIDOrFullName = c.String("repository")
+		jobID            = c.Int64("id")
+		jobName          = c.String("name")
+		branch           = c.String("branch")
+		schedule         = c.String("schedule")
+		format           = c.String("format") + "\n"
 	)
-	if reponame == "" {
-		reponame = c.Args().First()
+	if repoIDOrFullName == "" {
+		repoIDOrFullName = c.Args().First()
 	}
-	owner, name, err := internal.ParseRepo(reponame)
+	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
 	}
-	client, err := internal.NewClient(c)
+	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
 	if err != nil {
 		return err
 	}
@@ -65,7 +65,7 @@ func cronUpdate(c *cli.Context) error {
 		Branch:   branch,
 		Schedule: schedule,
 	}
-	cron, err = client.CronUpdate(owner, name, cron)
+	cron, err = client.CronUpdate(repoID, cron)
 	if err != nil {
 		return err
 	}

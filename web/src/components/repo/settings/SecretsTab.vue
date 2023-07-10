@@ -86,7 +86,7 @@ export default defineComponent({
         throw new Error("Unexpected: Can't load repo");
       }
 
-      return apiClient.getSecretList(repo.value.owner, repo.value.name, page);
+      return apiClient.getSecretList(repo.value.id, page);
     }
 
     const { resetPage, data: secrets } = usePagination(loadSecrets, () => !selectedSecret.value);
@@ -101,9 +101,9 @@ export default defineComponent({
       }
 
       if (isEditingSecret.value) {
-        await apiClient.updateSecret(repo.value.owner, repo.value.name, selectedSecret.value);
+        await apiClient.updateSecret(repo.value.id, selectedSecret.value);
       } else {
-        await apiClient.createSecret(repo.value.owner, repo.value.name, selectedSecret.value);
+        await apiClient.createSecret(repo.value.id, selectedSecret.value);
       }
       notifications.notify({
         title: i18n.t(isEditingSecret.value ? 'repo.settings.secrets.saved' : 'repo.settings.secrets.created'),
@@ -118,7 +118,7 @@ export default defineComponent({
         throw new Error("Unexpected: Can't load repo");
       }
 
-      await apiClient.deleteSecret(repo.value.owner, repo.value.name, _secret.name);
+      await apiClient.deleteSecret(repo.value.id, _secret.name);
       notifications.notify({ title: i18n.t('repo.settings.secrets.deleted'), type: 'success' });
       resetPage();
     });

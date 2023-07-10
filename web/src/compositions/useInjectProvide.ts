@@ -1,4 +1,4 @@
-import { inject as vueInject, provide as vueProvide, Ref } from 'vue';
+import { inject as vueInject, InjectionKey, provide as vueProvide, Ref } from 'vue';
 
 import { Repo } from '~/lib/api/types';
 
@@ -15,5 +15,5 @@ export function inject<T extends keyof InjectKeys>(key: T): InjectKeys[T] {
 }
 
 export function provide<T extends keyof InjectKeys>(key: T, value: InjectKeys[T]): void {
-  return vueProvide(key, value);
+  return vueProvide(key, value as T extends InjectionKey<infer V> ? V : InjectKeys[T]);
 }

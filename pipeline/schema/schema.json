@@ -4,7 +4,7 @@
   "$id": "https://woodpecker-ci.org/schema/woodpecker.json",
   "description": "Schema of a Woodpecker pipeline file. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax",
   "type": "object",
-  "required": ["pipeline"],
+  "required": ["steps"],
   "additionalProperties": false,
   "properties": {
     "$schema": {
@@ -18,7 +18,8 @@
     "skip_clone": { "type": "boolean" },
     "branches": { "$ref": "#/definitions/branches" },
     "when": { "$ref": "#/definitions/pipeline_when" },
-    "pipeline": { "$ref": "#/definitions/pipeline" },
+    "steps": { "$ref": "#/definitions/step_list" },
+    "pipeline": { "$ref": "#/definitions/step_list", "description": "depricated, use steps" },
     "services": { "$ref": "#/definitions/services" },
     "workspace": { "$ref": "#/definitions/workspace" },
     "matrix": { "$ref": "#/definitions/matrix" },
@@ -92,8 +93,8 @@
         }
       ]
     },
-    "pipeline": {
-      "description": "The pipeline section defines a list of steps which will be executed serially, in the order in which they are defined. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax",
+    "step_list": {
+      "description": "The steps section defines a list of steps which will be executed serially, in the order in which they are defined. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax",
       "oneOf": [
         { "type": "object", "additionalProperties": { "$ref": "#/definitions/step" }, "minProperties": 1 },
         { "type": "array", "items": { "$ref": "#/definitions/step" }, "minLength": 1 }
@@ -138,8 +139,8 @@
             }
           ]
         },
-        "tag": {
-          "description": "Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#tag",
+        "ref": {
+          "description": "Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#ref",
           "type": "string"
         },
         "cron": {
@@ -288,8 +289,8 @@
             }
           ]
         },
-        "tag": {
-          "description": "Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#tag",
+        "ref": {
+          "description": "Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#ref",
           "type": "string"
         },
         "cron": {
@@ -514,6 +515,25 @@
       }
     },
     "step_kubernetes_resources_object": {
+      "description": "A list of kubernetes resource mappings",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "step_backend_kubernetes_service_account": {
+      "description": "serviceAccountName to be use by job. Read more: https://woodpecker-ci.org/docs/administration/backends/kubernetes",
+      "type": "object",
+      "properties": {
+        "requests": {
+          "$ref": "#/definitions/step_kubernetes_service_account_object"
+        },
+        "limits": {
+          "$ref": "#/definitions/step_kubernetes_service_account_object"
+        }
+      }
+    },
+    "step_kubernetes_service_account_object": {
       "description": "A list of kubernetes resource mappings",
       "type": "object",
       "additionalProperties": {

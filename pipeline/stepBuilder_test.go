@@ -17,10 +17,11 @@ package pipeline
 
 import (
 	"fmt"
-	"sync"
 	"testing"
 
-	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/stretchr/testify/assert"
+
+	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/forge/mocks"
 	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -28,9 +29,9 @@ import (
 
 func TestGlobalEnvsubst(t *testing.T) {
 	t.Parallel()
-	setupMockForge(t)
 
 	b := StepBuilder{
+		Forge: getMockForge(t),
 		Envs: map[string]string{
 			"KEY_K": "VALUE_V",
 			"IMAGE": "scratch",
@@ -46,7 +47,7 @@ func TestGlobalEnvsubst(t *testing.T) {
 		Link:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
-pipeline:
+steps:
   build:
     image: ${IMAGE}
     yyy: ${CI_COMMIT_MESSAGE}
@@ -63,9 +64,9 @@ pipeline:
 
 func TestMissingGlobalEnvsubst(t *testing.T) {
 	t.Parallel()
-	setupMockForge(t)
 
 	b := StepBuilder{
+		Forge: getMockForge(t),
 		Envs: map[string]string{
 			"KEY_K":    "VALUE_V",
 			"NO_IMAGE": "scratch",
@@ -81,7 +82,7 @@ func TestMissingGlobalEnvsubst(t *testing.T) {
 		Link:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
-pipeline:
+steps:
   build:
     image: ${IMAGE}
     yyy: ${CI_COMMIT_MESSAGE}
@@ -98,10 +99,10 @@ pipeline:
 
 func TestMultilineEnvsubst(t *testing.T) {
 	t.Parallel()
-	setupMockForge(t)
 
 	b := StepBuilder{
-		Repo: &model.Repo{},
+		Forge: getMockForge(t),
+		Repo:  &model.Repo{},
 		Curr: &model.Pipeline{
 			Message: `aaa
 bbb`,
@@ -113,13 +114,13 @@ bbb`,
 		Link:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
-pipeline:
+steps:
   xxx:
     image: scratch
     yyy: ${CI_COMMIT_MESSAGE}
 `)},
 			{Data: []byte(`
-pipeline:
+steps:
   build:
     image: scratch
     yyy: ${CI_COMMIT_MESSAGE}
@@ -136,9 +137,9 @@ pipeline:
 
 func TestMultiPipeline(t *testing.T) {
 	t.Parallel()
-	setupMockForge(t)
 
 	b := StepBuilder{
+		Forge: getMockForge(t),
 		Repo:  &model.Repo{},
 		Curr:  &model.Pipeline{},
 		Last:  &model.Pipeline{},
@@ -148,12 +149,12 @@ func TestMultiPipeline(t *testing.T) {
 		Link:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
-pipeline:
+steps:
   xxx:
     image: scratch
 `)},
 			{Data: []byte(`
-pipeline:
+steps:
   build:
     image: scratch
 `)},
@@ -171,9 +172,9 @@ pipeline:
 
 func TestDependsOn(t *testing.T) {
 	t.Parallel()
-	setupMockForge(t)
 
 	b := StepBuilder{
+		Forge: getMockForge(t),
 		Repo:  &model.Repo{},
 		Curr:  &model.Pipeline{},
 		Last:  &model.Pipeline{},
@@ -183,17 +184,17 @@ func TestDependsOn(t *testing.T) {
 		Link:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Name: "lint", Data: []byte(`
-pipeline:
+steps:
   build:
     image: scratch
 `)},
 			{Name: "test", Data: []byte(`
-pipeline:
+steps:
   build:
     image: scratch
 `)},
 			{Data: []byte(`
-pipeline:
+steps:
   deploy:
     image: scratch
 
@@ -218,9 +219,9 @@ depends_on:
 
 func TestRunsOn(t *testing.T) {
 	t.Parallel()
-	setupMockForge(t)
 
 	b := StepBuilder{
+		Forge: getMockForge(t),
 		Repo:  &model.Repo{},
 		Curr:  &model.Pipeline{},
 		Last:  &model.Pipeline{},
@@ -230,7 +231,7 @@ func TestRunsOn(t *testing.T) {
 		Link:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
-pipeline:
+steps:
   deploy:
     image: scratch
 
@@ -255,9 +256,9 @@ runs_on:
 
 func TestPipelineName(t *testing.T) {
 	t.Parallel()
-	setupMockForge(t)
 
 	b := StepBuilder{
+		Forge: getMockForge(t),
 		Repo:  &model.Repo{Config: ".woodpecker"},
 		Curr:  &model.Pipeline{},
 		Last:  &model.Pipeline{},
@@ -267,12 +268,12 @@ func TestPipelineName(t *testing.T) {
 		Link:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Name: ".woodpecker/lint.yml", Data: []byte(`
-pipeline:
+steps:
   build:
     image: scratch
 `)},
 			{Name: ".woodpecker/.test.yml", Data: []byte(`
-pipeline:
+steps:
   build:
     image: scratch
 `)},
@@ -291,9 +292,9 @@ pipeline:
 
 func TestBranchFilter(t *testing.T) {
 	t.Parallel()
-	setupMockForge(t)
 
 	b := StepBuilder{
+		Forge: getMockForge(t),
 		Repo:  &model.Repo{},
 		Curr:  &model.Pipeline{Branch: "dev"},
 		Last:  &model.Pipeline{},
@@ -303,13 +304,13 @@ func TestBranchFilter(t *testing.T) {
 		Link:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
-pipeline:
+steps:
   xxx:
     image: scratch
 branches: master
 `)},
 			{Data: []byte(`
-pipeline:
+steps:
   build:
     image: scratch
 `)},
@@ -320,27 +321,19 @@ pipeline:
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(pipelineItems) != 2 {
-		t.Fatal("Should have generated 2 pipeline")
+	if !assert.Len(t, pipelineItems, 1) {
+		t.Fatal("Should have generated 1 pipeline")
 	}
-	if pipelineItems[0].Workflow.State != model.StatusSkipped {
-		t.Fatal("Should not run on dev branch")
-	}
-	for _, child := range pipelineItems[0].Workflow.Children {
-		if child.State != model.StatusSkipped {
-			t.Fatal("Children should skipped status too")
-		}
-	}
-	if pipelineItems[1].Workflow.State != model.StatusPending {
+	if pipelineItems[0].Workflow.State != model.StatusPending {
 		t.Fatal("Should run on dev branch")
 	}
 }
 
 func TestRootWhenFilter(t *testing.T) {
 	t.Parallel()
-	setupMockForge(t)
 
 	b := StepBuilder{
+		Forge: getMockForge(t),
 		Repo:  &model.Repo{},
 		Curr:  &model.Pipeline{Event: "tester"},
 		Last:  &model.Pipeline{},
@@ -353,7 +346,7 @@ func TestRootWhenFilter(t *testing.T) {
 when:
   event:
     - tester
-pipeline:
+steps:
   xxx:
     image: scratch
 `)},
@@ -361,12 +354,12 @@ pipeline:
 when:
   event:
     - push
-pipeline:
+steps:
   xxx:
     image: scratch
 `)},
 			{Data: []byte(`
-pipeline:
+steps:
   build:
     image: scratch
 `)},
@@ -385,11 +378,11 @@ pipeline:
 
 func TestZeroSteps(t *testing.T) {
 	t.Parallel()
-	setupMockForge(t)
 
 	pipeline := &model.Pipeline{Branch: "dev"}
 
 	b := StepBuilder{
+		Forge: getMockForge(t),
 		Repo:  &model.Repo{},
 		Curr:  pipeline,
 		Last:  &model.Pipeline{},
@@ -400,7 +393,7 @@ func TestZeroSteps(t *testing.T) {
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 skip_clone: true
-pipeline:
+steps:
   build:
     when:
       branch: notdev
@@ -420,11 +413,11 @@ pipeline:
 
 func TestZeroStepsAsMultiPipelineDeps(t *testing.T) {
 	t.Parallel()
-	setupMockForge(t)
 
 	pipeline := &model.Pipeline{Branch: "dev"}
 
 	b := StepBuilder{
+		Forge: getMockForge(t),
 		Repo:  &model.Repo{},
 		Curr:  pipeline,
 		Last:  &model.Pipeline{},
@@ -435,19 +428,19 @@ func TestZeroStepsAsMultiPipelineDeps(t *testing.T) {
 		Yamls: []*forge_types.FileMeta{
 			{Name: "zerostep", Data: []byte(`
 skip_clone: true
-pipeline:
+steps:
   build:
     when:
       branch: notdev
     image: scratch
 `)},
 			{Name: "justastep", Data: []byte(`
-pipeline:
+steps:
   build:
     image: scratch
 `)},
 			{Name: "shouldbefiltered", Data: []byte(`
-pipeline:
+steps:
   build:
     image: scratch
 depends_on: [ zerostep ]
@@ -469,11 +462,11 @@ depends_on: [ zerostep ]
 
 func TestZeroStepsAsMultiPipelineTransitiveDeps(t *testing.T) {
 	t.Parallel()
-	setupMockForge(t)
 
 	pipeline := &model.Pipeline{Branch: "dev"}
 
 	b := StepBuilder{
+		Forge: getMockForge(t),
 		Repo:  &model.Repo{},
 		Curr:  pipeline,
 		Last:  &model.Pipeline{},
@@ -484,25 +477,25 @@ func TestZeroStepsAsMultiPipelineTransitiveDeps(t *testing.T) {
 		Yamls: []*forge_types.FileMeta{
 			{Name: "zerostep", Data: []byte(`
 skip_clone: true
-pipeline:
+steps:
   build:
     when:
       branch: notdev
     image: scratch
 `)},
 			{Name: "justastep", Data: []byte(`
-pipeline:
+steps:
   build:
     image: scratch
 `)},
 			{Name: "shouldbefiltered", Data: []byte(`
-pipeline:
+steps:
   build:
     image: scratch
 depends_on: [ zerostep ]
 `)},
 			{Name: "shouldbefilteredtoo", Data: []byte(`
-pipeline:
+steps:
   build:
     image: scratch
 depends_on: [ shouldbefiltered ]
@@ -524,13 +517,13 @@ depends_on: [ shouldbefiltered ]
 
 func TestTree(t *testing.T) {
 	t.Parallel()
-	setupMockForge(t)
 
 	pipeline := &model.Pipeline{
 		Event: model.EventPush,
 	}
 
 	b := StepBuilder{
+		Forge: getMockForge(t),
 		Repo:  &model.Repo{},
 		Curr:  pipeline,
 		Last:  &model.Pipeline{},
@@ -540,7 +533,7 @@ func TestTree(t *testing.T) {
 		Link:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
-pipeline:
+steps:
   build:
     image: scratch
 `)},
@@ -552,20 +545,16 @@ pipeline:
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(pipeline.Steps) != 3 {
+	if len(pipeline.Workflows) != 1 {
 		t.Fatal("Should generate three in total")
 	}
-	if pipeline.Steps[1].PPID != 1 {
-		t.Fatal("Clone step should be a children of the stage")
-	}
-	if pipeline.Steps[2].PPID != 1 {
-		t.Fatal("Pipeline step should be a children of the stage")
+	if len(pipeline.Workflows[0].Children) != 2 {
+		t.Fatal("Workflow should have two children")
 	}
 }
 
 func TestSanitizePath(t *testing.T) {
 	t.Parallel()
-	setupMockForge(t)
 
 	testTable := []struct {
 		path          string
@@ -604,14 +593,9 @@ func TestSanitizePath(t *testing.T) {
 	}
 }
 
-var setupMockForgeLock = sync.Once{}
-
-func setupMockForge(t *testing.T) {
-	setupMockForgeLock.Do(func() {
-		forge := mocks.NewForge(t)
-		forge.On("Name").Return("mock")
-		forge.On("URL").Return("https://codeberg.org")
-
-		server.Config.Services.Forge = forge
-	})
+func getMockForge(t *testing.T) forge.Forge {
+	forge := mocks.NewForge(t)
+	forge.On("Name").Return("mock")
+	forge.On("URL").Return("https://codeberg.org")
+	return forge
 }

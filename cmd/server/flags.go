@@ -46,6 +46,11 @@ var flags = []cli.Flag{
 		Usage:   "server fully qualified url (<scheme>://<host>)",
 	},
 	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_WEBHOOK_HOST"},
+		Name:    "server-webhook-host",
+		Usage:   "server fully qualified url for forge's Webhooks (<scheme>://<host>)",
+	},
+	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_ROOT_URL"},
 		Name:    "root-url",
 		Usage:   "server url root (used for statics loading when having a url path prefix)",
@@ -249,7 +254,12 @@ var flags = []cli.Flag{
 		EnvVars: []string{"WOODPECKER_STATUS_CONTEXT_FORMAT"},
 		Name:    "status-context-format",
 		Usage:   "status context format",
-		Value:   "{{ .context }}/{{ .event }}/{{ .pipeline }}",
+		Value:   "{{ .context }}/{{ .event }}/{{ .workflow }}",
+	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_MIGRATIONS_ALLOW_LONG"},
+		Name:    "migrations-allow-long",
+		Value:   false,
 	},
 	//
 	// resource limit parameters

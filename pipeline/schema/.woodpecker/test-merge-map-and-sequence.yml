@@ -5,7 +5,7 @@ variables:
       - go version
       - whoami
 
-pipeline:
+steps:
   test-base-step:
     <<: *base-step
   test base step with latest image:

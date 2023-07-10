@@ -49,9 +49,6 @@ func queuePipeline(repo *model.Repo, pipelineItems []*pipeline.Item) error {
 			Timeout: repo.Timeout,
 		})
 
-		if err := server.Config.Services.Logs.Open(context.Background(), task.ID); err != nil {
-			return err
-		}
 		tasks = append(tasks, task)
 	}
 	return server.Config.Services.Queue.PushAtOnce(context.Background(), tasks)

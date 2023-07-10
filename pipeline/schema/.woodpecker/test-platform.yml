@@ -1,6 +1,6 @@
 platform: linux/amd64
 
-pipeline:
+steps:
   build:
     image: golang:latest
     commands:

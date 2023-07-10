@@ -17,10 +17,7 @@ package model
 
 // Feed represents an item in the user's feed or timeline.
 type Feed struct {
-	Owner    string `json:"owner"                   xorm:"feed_repo_owner"`
-	Name     string `json:"name"                    xorm:"feed_repo_name"`
-	FullName string `json:"full_name"               xorm:"feed_repo_full_name"`
-
+	RepoID   int64  `json:"repo_id"                 xorm:"feed_repo_id"`
 	ID       int64  `json:"id,omitempty"            xorm:"feed_pipeline_id"`
 	Number   int64  `json:"number,omitempty"        xorm:"feed_pipeline_number"`
 	Event    string `json:"event,omitempty"         xorm:"feed_pipeline_event"`

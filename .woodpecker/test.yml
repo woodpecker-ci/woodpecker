@@ -10,7 +10,7 @@ variables:
       # schema changes
       - "pipeline/schema/**"
 
-pipeline:
+steps:
   vendor:
     image: *golang_image
     group: prepare

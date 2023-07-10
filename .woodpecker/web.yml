@@ -6,7 +6,7 @@ variables:
       # web source code
       - "web/**"
 
-pipeline:
+steps:
   deps:
     image: *node_image
     directory: web/

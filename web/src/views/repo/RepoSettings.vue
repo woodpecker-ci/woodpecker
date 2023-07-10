@@ -2,14 +2,11 @@
   <Scaffold enable-tabs :go-back="goBack">
     <template #title>
       <span>
-        <router-link :to="{ name: 'repos-owner', params: { repoOwner: repo.owner } }" class="hover:underline">
+        <router-link :to="{ name: 'org', params: { orgName: repo.owner } }" class="hover:underline">
           {{ repo.owner }}
         </router-link>
         /
-        <router-link
-          :to="{ name: 'repo', params: { repoOwner: repo.owner, repoName: repo.name } }"
-          class="hover:underline"
-        >
+        <router-link :to="{ name: 'repo' }" class="hover:underline">
           {{ repo.name }}
         </router-link>
         /

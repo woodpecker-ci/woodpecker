@@ -2,10 +2,45 @@
 
 ## User registration
 
-Registration is closed by default. While disabled an administrator needs to add new users manually (exp. `woodpecker-cli user add`).
+Woodpecker does not have its own user registry; users are provided from your [forge](./11-forges/10-overview.md) (using OAuth2).
 
-If registration is open every user with an account at the configured [forges](./11-forges/10-overview.md) can login to Woodpecker.
-This example enables open registration for users that are members of approved organizations:
+Registration is closed by default (`WOODPECKER_OPEN=false`). If registration is open (`WOODPECKER_OPEN=true`) then every user with an account at the configured forge can login to Woodpecker.
+
+To open registration:
+
+```diff
+# docker-compose.yml
+version: '3'
+
+services:
+  woodpecker-server:
+    [...]
+    environment:
+      - [...]
++     - WOODPECKER_OPEN=true
+```
+
+You can **also restrict** registration, by keep registration closed and ...  
+... **adding** new **users manually** via the CLI: `woodpecker-cli user add`, or  
+... allowing specific **admin users** via the `WOODPECKER_ADMIN` setting, or  
+by open registration and **filter by organization** membership through the `WOODPECKER_ORGS` setting.
+
+### To close registration, but allow specific admin users
+
+```diff
+# docker-compose.yml
+version: '3'
+
+services:
+  woodpecker-server:
+    [...]
+    environment:
+      - [...]
++     - WOODPECKER_OPEN=false
++     - WOODPECKER_ADMIN=johnsmith,janedoe
+```
+
+### To only allow registration of users, who are members of approved organizations
 
 ```diff
 # docker-compose.yml
@@ -18,7 +53,6 @@ services:
       - [...]
 +     - WOODPECKER_OPEN=true
 +     - WOODPECKER_ORGS=dolores,dogpatch
-
 ```
 
 ## Administrators
@@ -171,6 +205,13 @@ Disable colored debug output.
 Server fully qualified URL of the user-facing hostname.
 
 Example: `WOODPECKER_HOST=http://woodpecker.example.org`
+
+### `WOODPECKER_WEBHOOK_HOST`
+> Default: value from `WOODPECKER_HOST` config env
+
+Server fully qualified URL of the Webhook-facing hostname.
+
+Example: `WOODPECKER_WEBHOOK_HOST=http://woodpecker-server.cicd.svc.cluster.local:8000`
 
 ### `WOODPECKER_SERVER_ADDR`
 > Default: `:8000`
@@ -412,13 +453,14 @@ Read the value for `WOODPECKER_PROMETHEUS_AUTH_TOKEN` from the specified filepat
 Context prefix Woodpecker will use to publish status messages to SCM. You probably will only need to change it if you run multiple Woodpecker instances for a single repository.
 
 ### `WOODPECKER_STATUS_CONTEXT_FORMAT`
-> Default: `{{ .context }}/{{ .event }}/{{ .pipeline }}`
+> Default: `{{ .context }}/{{ .event }}/{{ .workflow }}`
 
 Template for the status messages published to forges, uses [Go templates](https://pkg.go.dev/text/template) as template language.
 Supported variables:
+
 - `context`: Woodpecker's context (see `WOODPECKER_STATUS_CONTEXT`)
 - `event`: the event which started the pipeline
-- `pipeline`: the pipeline's name
+- `workflow`: the workflow's name
 - `owner`: the repo's owner
 - `repo`: the repo's name
 

@@ -27,7 +27,7 @@ import (
 var registryListCmd = &cli.Command{
 	Name:      "ls",
 	Usage:     "list registries",
-	ArgsUsage: "[repo/name]",
+	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    registryList,
 	Flags: append(common.GlobalFlags,
 		common.RepoFlag,
@@ -37,21 +37,21 @@ var registryListCmd = &cli.Command{
 
 func registryList(c *cli.Context) error {
 	var (
-		format   = c.String("format") + "\n"
-		reponame = c.String("repository")
+		format           = c.String("format") + "\n"
+		repoIDOrFullName = c.String("repository")
 	)
-	if reponame == "" {
-		reponame = c.Args().First()
-	}
-	owner, name, err := internal.ParseRepo(reponame)
-	if err != nil {
-		return err
+	if repoIDOrFullName == "" {
+		repoIDOrFullName = c.Args().First()
 	}
 	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
 	}
-	list, err := client.RegistryList(owner, name)
+	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
+	if err != nil {
+		return err
+	}
+	list, err := client.RegistryList(repoID)
 	if err != nil {
 		return err
 	}

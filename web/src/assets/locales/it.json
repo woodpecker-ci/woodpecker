@@ -1,7 +1,16 @@
 {
   "admin": {
     "settings": {
+      "queue": {
+        "agent": "agente",
+        "stats": {
+          "completed_count": "Task completo",
+          "worker_count": "Liberi"
+        },
+        "waiting_for": "in attesa"
+      },
       "users": {
+        "add": "Aggiungi utente",
         "admin": {
           "admin": "Amministatore",
           "placeholder": "L'utente è un amministratore"
@@ -11,8 +20,9 @@
         "delete_user": "Cancella utente",
         "deleted": "Utente cancellato",
         "edit_user": "Modifica utente",
-        "none": "Non ci sono ancora utenti",
-        "saved": "Utente salvato"
+        "none": "Non ci sono ancora utenti.",
+        "saved": "Utente salvato",
+        "show": "Mostra utenti"
       }
     }
   },

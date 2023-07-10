@@ -2,7 +2,7 @@
 
 Agents are configured by the command line or environment variables. At the minimum you need the following information:
 
-```yaml
+```diff
 # docker-compose.yml
 version: '3'
 
@@ -23,7 +23,7 @@ The following are automatically set and can be overridden:
 
 By default the maximum processes that are run per agent is 1. If required you can add `WOODPECKER_MAX_WORKFLOWS` to increase your parallel processing on a per-agent basis.
 
-```yaml
+```diff
 # docker-compose.yml
 version: '3'
 
@@ -33,8 +33,41 @@ services:
   environment:
     - WOODPECKER_SERVER=localhost:9000
     - WOODPECKER_AGENT_SECRET="your-shared-secret-goes-here"
-+    - WOODPECKER_MAX_WORKFLOWS=4
++   - WOODPECKER_MAX_WORKFLOWS=4
 ```
+
+## Agent registration on server
+
+When the agent starts, it connects to the server using token from `WOODPECKER_AGENT_SECRET`. The server identifies agent and, if such agent doesn't exist, register him.
+There are two types of token, so would be two ways of agent registration.
+
+### Using system token
+
+_System token_ is a token that is used system-wide, e. g. when you set the same token in `WOODPECKER_AGENT_SECRET` on both the server and the agents.
+
+In that case registration process would be as follows:
+
+1. First time Agent communicates with Server using system token;
+2. Server registers Agent in DB, generates ID and sends this ID back to Agent;
+3. Agent stores ID in a file configured by `WOODPECKER_AGENT_ID_FILE`.
+
+At the following startups Agent uses system token **and** ID.
+
+### Using agent token
+
+_Agent token_ is a token that is used by only particular agent. This unique token also configured by `WOODPECKER_AGENT_SECRET`, but only on the agent side.
+
+In that case you probably doesn't configure `WOODPECKER_AGENT_SECRET` on the server side. The registration process would be as follows:
+
+1. Administrator registers Agent manually in _Server settings - Agents - Add agent_;
+![Agent creation](./new-agent-registration.png)
+![Agent created](./new-agent-created.png)
+2. The token generated in previous step have to be provided to Agent in `WOODPECKER_AGENT_SECRET`;
+3. First time Agent communicates with Server using agent token;
+4. Server identifies Agent by the token and fills additional information provided by Agent;
+![Agent connected](./new-agent-connected.png)
+
+At following startups Agent uses own token only.
 
 ## All agent configuration options
 
@@ -58,7 +91,7 @@ A shared secret used by server and agents to authenticate communication. A secre
 ### `WOODPECKER_AGENT_SECRET_FILE`
 > Default: empty
 
-Read the value for `WOODPECKER_AGENT_SECRET` from the specified filepath
+Read the value for `WOODPECKER_AGENT_SECRET` from the specified filepath, e.g. `/etc/woodpecker/agent-secret.conf`
 
 ### `WOODPECKER_LOG_LEVEL`
 > Default: empty
@@ -79,6 +112,11 @@ Disable colored debug output.
 > Default: empty
 
 Configures the agent hostname.
+
+### `WOODPECKER_AGENT_ID_FILE`
+> Default: `/etc/woodpecker/agent-id.conf`
+
+Configures the path of the agent-id.conf file.
 
 ### `WOODPECKER_MAX_WORKFLOWS`
 > Default: `1`
