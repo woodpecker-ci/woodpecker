@@ -143,6 +143,7 @@ func (e *docker) Exec(ctx context.Context, step *backend.Step) error {
 	if step.Pull {
 		responseBody, perr := e.client.ImagePull(ctx, config.Image, pullopts)
 		if perr == nil {
+			// TODO(1936): show image pull progress in web-ui
 			fd, isTerminal := term.GetFdInfo(os.Stdout)
 			if err := jsonmessage.DisplayJSONMessagesStream(responseBody, os.Stdout, fd, isTerminal, nil); err != nil {
 				log.Error().Err(err).Msg("DisplayJSONMessagesStream")
@@ -167,6 +168,7 @@ func (e *docker) Exec(ctx context.Context, step *backend.Step) error {
 		if perr != nil {
 			return perr
 		}
+		// TODO(1936): show image pull progress in web-ui
 		fd, isTerminal := term.GetFdInfo(os.Stdout)
 		if err := jsonmessage.DisplayJSONMessagesStream(responseBody, os.Stdout, fd, isTerminal, nil); err != nil {
 			log.Error().Err(err).Msg("DisplayJSONMessagesStream")
