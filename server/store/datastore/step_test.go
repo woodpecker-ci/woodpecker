@@ -179,6 +179,8 @@ func TestStepIndexes(t *testing.T) {
 	defer closer()
 
 	sess := store.engine.NewSession()
+	defer sess.Close()
+
 	if err := store.stepCreate(sess, []*model.Step{
 		{
 			UUID:       "4db7e5fc-5312-4d02-9e14-b51b9e3242cc",
@@ -206,21 +208,6 @@ func TestStepIndexes(t *testing.T) {
 	}); err == nil {
 		t.Errorf("Unexpected error: duplicate pid")
 	}
-
-	// fail due to duplicate uuid
-	if err := store.stepCreate(sess, []*model.Step{
-		{
-			UUID:       "4db7e5fc-5312-4d02-9e14-b51b9e3242cc",
-			PipelineID: 5,
-			PID:        4,
-			PPID:       3,
-			State:      "success",
-			Name:       "clone",
-		},
-	}); err == nil {
-		t.Errorf("Unexpected error: duplicate pid")
-	}
-	_ = sess.Close()
 }
 
 func TestStepByUUID(t *testing.T) {

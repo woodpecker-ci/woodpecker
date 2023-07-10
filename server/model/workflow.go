@@ -22,7 +22,7 @@ type Workflow struct {
 	PID        int               `json:"pid"                  xorm:"UNIQUE(s) 'workflow_pid'"`
 	Name       string            `json:"name"                 xorm:"workflow_name"`
 	State      StatusValue       `json:"state"                xorm:"workflow_state"`
-	Error      string            `json:"error,omitempty"      xorm:"VARCHAR(500) workflow_error"`
+	Error      string            `json:"error,omitempty"      xorm:"TEXT 'workflow_error'"`
 	Started    int64             `json:"start_time,omitempty" xorm:"workflow_started"`
 	Stopped    int64             `json:"end_time,omitempty"   xorm:"workflow_stopped"`
 	AgentID    int64             `json:"agent_id,omitempty"   xorm:"workflow_agent_id"`
@@ -61,13 +61,27 @@ func IsThereRunningStage(workflows []*Workflow) bool {
 	return false
 }
 
-// PipelineStatus determine pipeline status based on corresponding step list
+// PipelineStatus determine pipeline status based on corresponding workflow list
 func PipelineStatus(workflows []*Workflow) StatusValue {
 	status := StatusSuccess
 
 	for _, p := range workflows {
 		if p.Failing() {
 			status = p.State
+		}
+	}
+
+	return status
+}
+
+// WorkflowStatus determine workflow status based on corresponding step list
+func WorkflowStatus(steps []*Step) StatusValue {
+	status := StatusSuccess
+
+	for _, p := range steps {
+		if p.Failing() {
+			status = p.State
+			break
 		}
 	}
 

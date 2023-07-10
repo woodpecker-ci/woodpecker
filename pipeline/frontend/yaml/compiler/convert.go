@@ -8,11 +8,13 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
+	"golang.org/x/exp/maps"
 
 	backend_types "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/compiler/settings"
 	yaml_types "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/utils"
 )
 
 func (c *Compiler) createProcess(name string, container *yaml_types.Container, section string) *backend_types.Step {
@@ -52,17 +54,8 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 
 	// append default environment variables
 	environment := map[string]string{}
-	for k, v := range container.Environment {
-		environment[k] = v
-	}
-	for k, v := range c.env {
-		switch v {
-		case "", "0", "false":
-			continue
-		default:
-			environment[k] = v
-		}
-	}
+	maps.Copy(environment, container.Environment)
+	maps.Copy(environment, c.env)
 
 	environment["CI_WORKSPACE"] = path.Join(c.base, c.path)
 	environment["CI_STEP_NAME"] = name
@@ -88,13 +81,13 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		}
 	}
 
-	if matchImage(container.Image, c.escalated...) && container.IsPlugin() {
+	if utils.MatchImage(container.Image, c.escalated...) && container.IsPlugin() {
 		privileged = true
 	}
 
 	authConfig := backend_types.Auth{}
 	for _, registry := range c.registries {
-		if matchHostname(container.Image, registry.Hostname) {
+		if utils.MatchHostname(container.Image, registry.Hostname) {
 			authConfig.Username = registry.Username
 			authConfig.Password = registry.Password
 			authConfig.Email = registry.Email

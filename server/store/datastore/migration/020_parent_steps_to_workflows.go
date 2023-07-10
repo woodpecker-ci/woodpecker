@@ -20,14 +20,14 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-type oldStep018 struct {
+type oldStep020 struct {
 	ID         int64             `xorm:"pk autoincr 'step_id'"`
 	PipelineID int64             `xorm:"UNIQUE(s) INDEX 'step_pipeline_id'"`
 	PID        int               `xorm:"UNIQUE(s) 'step_pid'"`
 	PPID       int               `xorm:"step_ppid"`
 	Name       string            `xorm:"step_name"`
 	State      model.StatusValue `xorm:"step_state"`
-	Error      string            `xorm:"VARCHAR(500) step_error"`
+	Error      string            `xorm:"TEXT 'step_error'"`
 	Started    int64             `xorm:"step_started"`
 	Stopped    int64             `xorm:"step_stopped"`
 	AgentID    int64             `xorm:"step_agent_id"`
@@ -35,7 +35,7 @@ type oldStep018 struct {
 	Environ    map[string]string `xorm:"json 'step_environ'"`
 }
 
-func (oldStep018) TableName() string {
+func (oldStep020) TableName() string {
 	return "steps"
 }
 
@@ -47,11 +47,11 @@ var parentStepsToWorkflows = task{
 			return err
 		}
 		// make sure the columns exist before removing them
-		if err := sess.Sync(new(oldStep018)); err != nil {
+		if err := sess.Sync(new(oldStep020)); err != nil {
 			return err
 		}
 
-		var parentSteps []*oldStep018
+		var parentSteps []*oldStep020
 		err := sess.Where("step_ppid = ?", 0).Find(&parentSteps)
 		if err != nil {
 			return err
@@ -76,7 +76,7 @@ var parentStepsToWorkflows = task{
 				return err
 			}
 
-			_, err = sess.Delete(&oldStep018{ID: p.ID})
+			_, err = sess.Delete(&oldStep020{ID: p.ID})
 			if err != nil {
 				return err
 			}

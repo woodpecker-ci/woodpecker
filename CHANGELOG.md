@@ -178,6 +178,13 @@
   * Replace yarn with pnpm (#1240)
   * Publish preview docker images of pulls (#1072)
 
+## [0.15.10](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.10) - 2023-07-09
+
+* SECURITY
+  * Fix agent auth (#1952) (#1953)
+  * Return after error (#1875) (#1876)
+  * Update github.com/docker/distribution (#1750)
+
 ## [0.15.9](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.9) - 2023-05-11
 
 * SECURITY

@@ -15,6 +15,7 @@
 package datastore
 
 import (
+	"xorm.io/builder"
 	"xorm.io/xorm"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -26,25 +27,24 @@ func (s storage) StepLoad(id int64) (*model.Step, error) {
 }
 
 func (s storage) StepFind(pipeline *model.Pipeline, pid int) (*model.Step, error) {
-	step := &model.Step{
-		PipelineID: pipeline.ID,
-		PID:        pid,
-	}
-	return step, wrapGet(s.engine.Get(step))
+	step := new(model.Step)
+	return step, wrapGet(s.engine.Where(
+		builder.Eq{"step_pipeline_id": pipeline.ID, "step_pid": pid},
+	).Get(step))
 }
 
 func (s storage) StepByUUID(uuid string) (*model.Step, error) {
 	step := new(model.Step)
-	return step, wrapGet(s.engine.Where("step_uuid = ?", uuid).Get(step))
+	return step, wrapGet(s.engine.Where(
+		builder.Eq{"step_uuid": uuid},
+	).Get(step))
 }
 
 func (s storage) StepChild(pipeline *model.Pipeline, ppid int, child string) (*model.Step, error) {
-	step := &model.Step{
-		PipelineID: pipeline.ID,
-		PPID:       ppid,
-		Name:       child,
-	}
-	return step, wrapGet(s.engine.Get(step))
+	step := new(model.Step)
+	return step, wrapGet(s.engine.Where(
+		builder.Eq{"step_pipeline_id": pipeline.ID, "step_ppid": ppid, "step_name": child},
+	).Get(step))
 }
 
 func (s storage) StepList(pipeline *model.Pipeline) ([]*model.Step, error) {
