@@ -69,6 +69,7 @@ var addOrgs = task{
 				if _, err := sess.Insert(org); err != nil {
 					return err
 				}
+				orgs[org.Name] = org
 			}
 
 			// update the repos
