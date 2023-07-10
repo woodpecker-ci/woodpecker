@@ -3,24 +3,16 @@ package compiler
 import (
 	"fmt"
 	"path"
-	"strings"
 
 	backend_types "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
 	yaml_types "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/utils"
 	"github.com/woodpecker-ci/woodpecker/shared/constant"
 )
 
-// TODO(bradrydzewski) compiler should handle user-defined volumes from YAML
-// TODO(bradrydzewski) compiler should handle user-defined networks from YAML
-
 const (
-	windowsPrefix = "windows/"
-
 	defaultCloneName = "clone"
-
-	networkDriverNAT    = "nat"
-	networkDriverBridge = "bridge"
 
 	nameServices = "services"
 	namePipeline = "pipeline"
@@ -43,7 +35,7 @@ type Secret struct {
 }
 
 func (s *Secret) Available(container *yaml_types.Container) bool {
-	return (len(s.Match) == 0 || matchImage(container.Image, s.Match...)) && (!s.PluginOnly || container.IsPlugin())
+	return (len(s.Match) == 0 || utils.MatchImage(container.Image, s.Match...)) && (!s.PluginOnly || container.IsPlugin())
 }
 
 type secretMap map[string]Secret
@@ -104,7 +96,7 @@ func New(opts ...Option) *Compiler {
 func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, error) {
 	config := new(backend_types.Config)
 
-	if match, err := conf.When.Match(c.metadata, true); !match && err == nil {
+	if match, err := conf.When.Match(c.metadata, true, c.env); !match && err == nil {
 		// This pipeline does not match the configured filter so return an empty config and stop further compilation.
 		// An empty pipeline will just be skipped completely.
 		return config, nil
@@ -114,22 +106,13 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 
 	// create a default volume
 	config.Volumes = append(config.Volumes, &backend_types.Volume{
-		Name:   fmt.Sprintf("%s_default", c.prefix),
-		Driver: "local",
+		Name: fmt.Sprintf("%s_default", c.prefix),
 	})
 
 	// create a default network
-	if strings.HasPrefix(c.metadata.Sys.Platform, windowsPrefix) {
-		config.Networks = append(config.Networks, &backend_types.Network{
-			Name:   fmt.Sprintf("%s_default", c.prefix),
-			Driver: networkDriverNAT,
-		})
-	} else {
-		config.Networks = append(config.Networks, &backend_types.Network{
-			Name:   fmt.Sprintf("%s_default", c.prefix),
-			Driver: networkDriverBridge,
-		})
-	}
+	config.Networks = append(config.Networks, &backend_types.Network{
+		Name: fmt.Sprintf("%s_default", c.prefix),
+	})
 
 	// create secrets for mask
 	for _, sec := range c.secrets {
@@ -177,7 +160,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 		config.Stages = append(config.Stages, stage)
 	} else if !c.local && !conf.SkipClone {
 		for i, container := range conf.Clone.ContainerList {
-			if match, err := container.When.Match(c.metadata, false); !match && err == nil {
+			if match, err := container.When.Match(c.metadata, false, c.env); !match && err == nil {
 				continue
 			} else if err != nil {
 				return nil, err
@@ -212,7 +195,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 		stage.Alias = nameServices
 
 		for i, container := range conf.Services.ContainerList {
-			if match, err := container.When.Match(c.metadata, false); !match && err == nil {
+			if match, err := container.When.Match(c.metadata, false, c.env); !match && err == nil {
 				continue
 			} else if err != nil {
 				return nil, err
@@ -234,7 +217,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			continue
 		}
 
-		if match, err := container.When.Match(c.metadata, false); !match && err == nil {
+		if match, err := container.When.Match(c.metadata, false, c.env); !match && err == nil {
 			continue
 		} else if err != nil {
 			return nil, err
