@@ -14,6 +14,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/compiler/settings"
 	yaml_types "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/utils"
 )
 
 func (c *Compiler) createProcess(name string, container *yaml_types.Container, typ backend_types.StepType) *backend_types.Step {
@@ -80,13 +81,13 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, t
 		}
 	}
 
-	if matchImage(container.Image, c.escalated...) && container.IsPlugin() {
+	if utils.MatchImage(container.Image, c.escalated...) && container.IsPlugin() {
 		privileged = true
 	}
 
 	authConfig := backend_types.Auth{}
 	for _, registry := range c.registries {
-		if matchHostname(container.Image, registry.Hostname) {
+		if utils.MatchHostname(container.Image, registry.Hostname) {
 			authConfig.Username = registry.Username
 			authConfig.Password = registry.Password
 			authConfig.Email = registry.Email
