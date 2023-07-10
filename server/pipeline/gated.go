@@ -18,7 +18,7 @@ import "github.com/woodpecker-ci/woodpecker/server/model"
 
 func setGatedState(repo *model.Repo, pipe *model.Pipeline) {
 	// TODO(336): extend gated feature with an allow/block List
-	if repo.IsGated {
+	if repo.IsGated && pipe.Event != model.EventCron {
 		pipe.Status = model.StatusBlocked
 	}
 }
