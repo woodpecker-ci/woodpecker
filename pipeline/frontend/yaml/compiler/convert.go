@@ -17,7 +17,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/utils"
 )
 
-func (c *Compiler) createProcess(name string, container *yaml_types.Container, typ backend_types.StepType) *backend_types.Step {
+func (c *Compiler) createProcess(name string, container *yaml_types.Container, stepType backend_types.StepType) *backend_types.Step {
 	var (
 		uuid = uuid.New()
 
@@ -60,7 +60,7 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, t
 	environment["CI_WORKSPACE"] = path.Join(c.base, c.path)
 	environment["CI_STEP_NAME"] = name
 
-	if typ == backend_types.StepTypeService || container.Detached {
+	if stepType == backend_types.StepTypeService || container.Detached {
 		detached = true
 	}
 
@@ -152,7 +152,7 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, t
 	return &backend_types.Step{
 		Name:           name,
 		UUID:           uuid.String(),
-		Type:           typ,
+		Type:           stepType,
 		Alias:          container.Name,
 		Image:          container.Image,
 		Pull:           container.Pull,
