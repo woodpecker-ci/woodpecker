@@ -55,10 +55,7 @@ func toConfig(step *types.Step) *container.Config {
 }
 
 func toContainerName(step *types.Step) string {
-	if step.UUID != "" {
-		return "wp_" + step.UUID
-	}
-	return step.Name
+	return "wp_" + step.UUID
 }
 
 // returns a container host configuration.
