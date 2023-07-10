@@ -49,7 +49,7 @@ In that case registration process would be as follows:
 
 1. First time Agent communicates with Server using system token;
 2. Server registers Agent in DB, generates ID and sends this ID back to Agent;
-3. Agent stores ID in a file configured by `WOODPECKER_AGENT_ID_FILE`.
+3. Agent stores ID in a file configured by `WOODPECKER_AGENT_CONFIG_FILE`.
 
 At the following startups Agent uses system token **and** ID.
 
@@ -113,10 +113,10 @@ Disable colored debug output.
 
 Configures the agent hostname.
 
-### `WOODPECKER_AGENT_ID_FILE`
-> Default: `/etc/woodpecker/agent-id.conf`
+### `WOODPECKER_AGENT_CONFIG_FILE`
+> Default: `/etc/woodpecker/agent.conf`
 
-Configures the path of the agent-id.conf file.
+Configures the path of the agent config file.
 
 ### `WOODPECKER_MAX_WORKFLOWS`
 > Default: `1`
