@@ -112,7 +112,7 @@ func run(c *cli.Context) error {
 
 	agentConfig := readAgentConfig(agentConfigPath)
 
-	//deprecated
+	// deprecated
 	if agentConfig.AgentID == defaultAgentIDValue {
 		agentConfig.AgentID = readAgentID(c.String("agent-id-config-path"))
 	}
