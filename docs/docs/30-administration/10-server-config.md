@@ -270,6 +270,11 @@ Configures the gRPC listener port.
 
 Configures the gRPC JWT secret.
 
+### `WOODPECKER_GRPC_SECRET_FILE`
+> Default: empty
+
+Read the value for `WOODPECKER_GRPC_SECRET` from the specified filepath.
+
 ### `WOODPECKER_METRICS_SERVER_ADDR`
 > Default: empty
 

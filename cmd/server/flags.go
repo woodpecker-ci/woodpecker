@@ -108,6 +108,7 @@ var flags = []cli.Flag{
 		Name:    "grpc-secret",
 		Usage:   "grpc jwt secret",
 		Value:   "secret",
+		FilePath: os.Getenv("WOODPECKER_GRPC_SECRET_FILE"),
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_METRICS_SERVER_ADDR"},
