@@ -67,5 +67,10 @@
     "vue-eslint-parser": "^9.3.1",
     "vue-tsc": "^1.8.3",
     "windicss": "^3.5.6"
+  },
+  "pnpm": {
+    "overrides": {
+      "semver@<7.5.2": ">=7.5.2"
+    }
   }
 }

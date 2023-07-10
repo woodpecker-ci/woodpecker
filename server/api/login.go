@@ -26,6 +26,7 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/router/middleware"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/server/store/types"
 	"github.com/woodpecker-ci/woodpecker/shared/httputil"
@@ -42,12 +43,13 @@ func HandleLogin(c *gin.Context) {
 
 func HandleAuth(c *gin.Context) {
 	_store := store.FromContext(c)
+	_forge := server.Config.Services.Forge
 
 	// when dealing with redirects we may need to adjust the content type. I
 	// cannot, however, remember why, so need to revisit this line.
 	c.Writer.Header().Del("Content-Type")
 
-	tmpuser, err := server.Config.Services.Forge.Login(c, c.Writer, c.Request)
+	tmpuser, err := _forge.Login(c, c.Writer, c.Request)
 	if err != nil {
 		log.Error().Msgf("cannot authenticate user. %s", err)
 		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=oauth_error")
@@ -58,7 +60,7 @@ func HandleAuth(c *gin.Context) {
 	if tmpuser == nil {
 		return
 	}
-	config := ToConfig(c)
+	config := middleware.GetConfig(c)
 
 	// get the user from the database
 	u, err := _store.GetUserRemoteID(tmpuser.ForgeRemoteID, tmpuser.Login)
@@ -78,7 +80,7 @@ func HandleAuth(c *gin.Context) {
 		// if self-registration is enabled for whitelisted organizations we need to
 		// check the user's organization membership.
 		if len(config.Orgs) != 0 {
-			teams, terr := server.Config.Services.Forge.Teams(c, tmpuser)
+			teams, terr := _forge.Teams(c, tmpuser)
 			if terr != nil || !config.IsMember(teams) {
 				log.Error().Msgf("cannot verify team membership for %s.", u.Login)
 				c.Redirect(303, server.Config.Server.RootPath+"/login?error=access_denied")
@@ -119,7 +121,7 @@ func HandleAuth(c *gin.Context) {
 	// if self-registration is enabled for whitelisted organizations we need to
 	// check the user's organization membership.
 	if len(config.Orgs) != 0 {
-		teams, terr := server.Config.Services.Forge.Teams(c, u)
+		teams, terr := _forge.Teams(c, u)
 		if terr != nil || !config.IsMember(teams) {
 			log.Error().Msgf("cannot verify team membership for %s.", u.Login)
 			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=access_denied")
@@ -141,7 +143,7 @@ func HandleAuth(c *gin.Context) {
 		return
 	}
 
-	repos, _ := server.Config.Services.Forge.Repos(c, u)
+	repos, _ := _forge.Repos(c, u)
 	for _, forgeRepo := range repos {
 		dbRepo, err := _store.GetRepoForgeID(forgeRepo.ForgeRemoteID)
 		if err != nil && errors.Is(err, types.RecordNotExist) {
@@ -221,10 +223,4 @@ type tokenPayload struct {
 	Access  string `json:"access_token,omitempty"`
 	Refresh string `json:"refresh_token,omitempty"`
 	Expires int64  `json:"expires_in,omitempty"`
-}
-
-// ToConfig returns the config from the Context
-func ToConfig(c *gin.Context) *model.Settings {
-	v := c.MustGet("config")
-	return v.(*model.Settings)
 }

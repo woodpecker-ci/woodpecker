@@ -24,11 +24,10 @@ import (
 )
 
 func (s storage) PermFind(user *model.User, repo *model.Repo) (*model.Perm, error) {
-	perm := &model.Perm{
-		UserID: user.ID,
-		RepoID: repo.ID,
-	}
-	return perm, wrapGet(s.engine.Get(perm))
+	perm := new(model.Perm)
+	return perm, wrapGet(s.engine.
+		Where(builder.Eq{"perm_user_id": user.ID, "perm_repo_id": repo.ID}).
+		Get(perm))
 }
 
 func (s storage) PermUpsert(perm *model.Perm) error {
@@ -59,15 +58,13 @@ func (s storage) permUpsert(sess *xorm.Session, perm *model.Perm) error {
 		perm.RepoID = r.ID
 	}
 
-	exist, err := sess.Where("perm_user_id = ? AND perm_repo_id = ?", perm.UserID, perm.RepoID).
-		Exist(new(model.Perm))
+	exist, err := sess.Where(userIDAndRepoIDCond(perm)).Exist(new(model.Perm))
 	if err != nil {
 		return err
 	}
 
 	if exist {
-		_, err = sess.Where("perm_user_id = ? AND perm_repo_id = ?", perm.UserID, perm.RepoID).
-			AllCols().Update(perm)
+		_, err = sess.Where(userIDAndRepoIDCond(perm)).AllCols().Update(perm)
 	} else {
 		// only Insert set auto created ID back to object
 		_, err = sess.Insert(perm)
@@ -76,9 +73,7 @@ func (s storage) permUpsert(sess *xorm.Session, perm *model.Perm) error {
 }
 
 func (s storage) PermDelete(perm *model.Perm) error {
-	return wrapDelete(s.engine.
-		Where("perm_user_id = ? AND perm_repo_id = ?", perm.UserID, perm.RepoID).
-		Delete(new(model.Perm)))
+	return wrapDelete(s.engine.Where(userIDAndRepoIDCond(perm)).Delete(new(model.Perm)))
 }
 
 func (s storage) PermFlush(user *model.User, before int64) error {
@@ -94,4 +89,8 @@ func userPushOrAdminCondition(userID int64) builder.Cond {
 	return builder.Eq{"perms.perm_user_id": userID}.
 		And(builder.Eq{"perms.perm_push": true}.
 			Or(builder.Eq{"perms.perm_admin": true}))
+}
+
+func userIDAndRepoIDCond(perm *model.Perm) builder.Cond {
+	return builder.Eq{"perm_user_id": perm.UserID, "perm_repo_id": perm.RepoID}
 }
