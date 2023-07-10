@@ -160,7 +160,7 @@ func (e *docker) Exec(ctx context.Context, step *backend.Step) error {
 	// add default volumes to the host configuration
 	hostConfig.Binds = utils.DedupStrings(append(hostConfig.Binds, e.volumes...))
 
-	_, err := e.client.ContainerCreate(ctx, config, hostConfig, nil, nil, step.Name)
+	_, err := e.client.ContainerCreate(ctx, config, hostConfig, nil, nil, toContainerName(step))
 	if client.IsErrNotFound(err) {
 		// automatically pull and try to re-create the image if the
 		// failure is caused because the image does not exist.
@@ -175,7 +175,7 @@ func (e *docker) Exec(ctx context.Context, step *backend.Step) error {
 		}
 		responseBody.Close()
 
-		_, err = e.client.ContainerCreate(ctx, config, hostConfig, nil, nil, step.Name)
+		_, err = e.client.ContainerCreate(ctx, config, hostConfig, nil, nil, toContainerName(step))
 	}
 	if err != nil {
 		return err
@@ -183,7 +183,7 @@ func (e *docker) Exec(ctx context.Context, step *backend.Step) error {
 
 	if len(step.NetworkMode) == 0 {
 		for _, net := range step.Networks {
-			err = e.client.NetworkConnect(ctx, net.Name, step.Name, &network.EndpointSettings{
+			err = e.client.NetworkConnect(ctx, net.Name, toContainerName(step), &network.EndpointSettings{
 				Aliases: net.Aliases,
 			})
 			if err != nil {
@@ -193,24 +193,24 @@ func (e *docker) Exec(ctx context.Context, step *backend.Step) error {
 
 		// join the container to an existing network
 		if e.network != "" {
-			err = e.client.NetworkConnect(ctx, e.network, step.Name, &network.EndpointSettings{})
+			err = e.client.NetworkConnect(ctx, e.network, toContainerName(step), &network.EndpointSettings{})
 			if err != nil {
 				return err
 			}
 		}
 	}
 
-	return e.client.ContainerStart(ctx, step.Name, startOpts)
+	return e.client.ContainerStart(ctx, toContainerName(step), startOpts)
 }
 
 func (e *docker) Wait(ctx context.Context, step *backend.Step) (*backend.State, error) {
-	wait, errc := e.client.ContainerWait(ctx, step.Name, "")
+	wait, errc := e.client.ContainerWait(ctx, toContainerName(step), "")
 	select {
 	case <-wait:
 	case <-errc:
 	}
 
-	info, err := e.client.ContainerInspect(ctx, step.Name)
+	info, err := e.client.ContainerInspect(ctx, toContainerName(step))
 	if err != nil {
 		return nil, err
 	}
@@ -226,7 +226,7 @@ func (e *docker) Wait(ctx context.Context, step *backend.Step) (*backend.State, 
 }
 
 func (e *docker) Tail(ctx context.Context, step *backend.Step) (io.ReadCloser, error) {
-	logs, err := e.client.ContainerLogs(ctx, step.Name, logsOpts)
+	logs, err := e.client.ContainerLogs(ctx, toContainerName(step), logsOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -244,10 +244,10 @@ func (e *docker) Tail(ctx context.Context, step *backend.Step) (io.ReadCloser, e
 func (e *docker) Destroy(_ context.Context, conf *backend.Config) error {
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
-			if err := e.client.ContainerKill(noContext, step.Name, "9"); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
+			if err := e.client.ContainerKill(noContext, toContainerName(step), "9"); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
 				log.Error().Err(err).Msgf("could not kill container '%s'", stage.Name)
 			}
-			if err := e.client.ContainerRemove(noContext, step.Name, removeOpts); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
+			if err := e.client.ContainerRemove(noContext, toContainerName(step), removeOpts); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
 				log.Error().Err(err).Msgf("could not remove container '%s'", stage.Name)
 			}
 		}
