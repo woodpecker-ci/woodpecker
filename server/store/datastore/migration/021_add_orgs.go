@@ -65,12 +65,13 @@ var addOrgs = task{
 			// create org if not already created
 			if _, ok := orgs[orgName]; !ok {
 				org := &model.Org{
-					Name:   repo.Owner,
+					Name:   orgName,
 					IsUser: false, // TODO: should we get this info from the forges?
 				}
 				if _, err := sess.Insert(org); err != nil {
 					return err
 				}
+				orgs[orgName] = org
 
 				// update org secrets
 				var secrets []*oldSecret021
