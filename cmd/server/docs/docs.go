@@ -1192,6 +1192,42 @@ const docTemplate = `{
                 }
             }
         },
+        "/repos": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Repositories"
+                ],
+                "summary": "Activate a repository",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "the id of a repository at the forge",
+                        "name": "forge_remote_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Repo"
+                        }
+                    }
+                }
+            }
+        },
         "/repos/lookup/{repo_full_name}": {
             "get": {
                 "produces": [
@@ -1237,40 +1273,6 @@ const docTemplate = `{
                     "Repositories"
                 ],
                 "summary": "Get repository information",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "default": "Bearer \u003cpersonal access token\u003e",
-                        "description": "Insert your personal access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "the repository id",
-                        "name": "repo_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/Repo"
-                        }
-                    }
-                }
-            },
-            "post": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Repositories"
-                ],
-                "summary": "Activate a repository",
                 "parameters": [
                     {
                         "type": "string",
@@ -3116,6 +3118,12 @@ const docTemplate = `{
                         "name": "Authorization",
                         "in": "header",
                         "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "query not activated repos from forge too",
+                        "name": "all",
+                        "in": "query"
                     }
                 ],
                 "responses": {
