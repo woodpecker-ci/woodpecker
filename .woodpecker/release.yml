@@ -1,4 +1,4 @@
-pipeline:
+steps:
   release:
     image: woodpeckerci/plugin-ready-release-go
     pull: true
