@@ -7,7 +7,7 @@ authors:
     title: Maintainer of Woodpecker
     url: https://github.com/anbraten
     image_url: https://github.com/anbraten.png
-tags: [hello, woodpeker]
+tags: [hello, woodpecker]
 image: https://i.imgur.com/mErPwqL.png
 hide_table_of_contents: false
 ---
