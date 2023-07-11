@@ -44,7 +44,7 @@ import (
 //	@Success	200	{object}	Repo
 //	@Tags		Repositories
 //	@Param		Authorization			header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		forge_remote_id		query		string	true	"the repository id it has at the forge"
+//	@Param		forge_remote_id		query		string	true	"the id of a repository at the forge"
 func PostRepo(c *gin.Context) {
 	forge := server.Config.Services.Forge
 	_store := store.FromContext(c)
