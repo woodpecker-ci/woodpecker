@@ -23,11 +23,9 @@ func (s storage) OrgCreate(org *model.Org) error {
 	return err
 }
 
-func (s storage) OrgFind(id int64) (*model.Org, error) {
-	org := &model.Org{
-		ID: id,
-	}
-	return org, wrapGet(s.engine.Get(org))
+func (s storage) OrgGet(id int64) (*model.Org, error) {
+	org := new(model.Org)
+	return org, wrapGet(s.engine.ID(id).Get(org))
 }
 
 func (s storage) OrgUpdate(org *model.Org) error {
