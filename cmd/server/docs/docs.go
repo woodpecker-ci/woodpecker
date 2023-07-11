@@ -1212,7 +1212,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "the repository id it has at the forge",
+                        "description": "the id of a repository at the forge",
                         "name": "forge_remote_id",
                         "in": "query",
                         "required": true
@@ -3118,6 +3118,12 @@ const docTemplate = `{
                         "name": "Authorization",
                         "in": "header",
                         "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "query not activated repos from forge too",
+                        "name": "all",
+                        "in": "query"
                     }
                 ],
                 "responses": {
