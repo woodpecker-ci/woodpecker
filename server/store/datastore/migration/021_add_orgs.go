@@ -69,22 +69,25 @@ var addOrgs = task{
 				if _, err := sess.Insert(org); err != nil {
 					return err
 				}
-			}
 
-			// update the repos
-			repo.OrgID = org.ID
-
-			// update org secrets
-			var secrets []*oldSecret021
-			if err := sess.Where(builder.Eq{"secret_owner": repo.Owner, "secret_repo_id": 0}).Find(&secrets); err != nil {
-				return err
-			}
-
-			for _, secret := range secrets {
-				secret.OrgID = org.ID
-				if _, err := sess.ID(secret.ID).Cols("secret_org_id").Update(secret); err != nil {
+				// update org secrets
+				var secrets []*oldSecret021
+				if err := sess.Where(builder.Eq{"secret_owner": repo.Owner, "secret_repo_id": 0}).Find(&secrets); err != nil {
 					return err
 				}
+
+				for _, secret := range secrets {
+					secret.OrgID = org.ID
+					if _, err := sess.ID(secret.ID).Cols("secret_org_id").Update(secret); err != nil {
+						return err
+					}
+				}
+			}
+
+			// update the repo
+			repo.OrgID = org.ID
+			if _, err := sess.ID(repo.ID).Cols("repo_org_id").Update(repo); err != nil {
+				return err
 			}
 		}
 
