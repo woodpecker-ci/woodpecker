@@ -37,12 +37,13 @@ type Step struct {
 	BackendOptions BackendOptions    `json:"backend_options,omitempty"`
 }
 
-type StepType uint8
+// StepType identifies the type of step
+type StepType string
 
 const (
-	StepTypeClone StepType = iota + 1
-	StepTypeService
-	StepTypePlugin
-	StepTypeCommands
-	StepTypeCache
+	StepTypeClone    StepType = "clone"
+	StepTypeService  StepType = "service"
+	StepTypePlugin   StepType = "plugin"
+	StepTypeCommands StepType = "commands"
+	StepTypeCache    StepType = "cache"
 )

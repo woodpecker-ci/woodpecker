@@ -69,12 +69,13 @@ func (p *Step) Failing() bool {
 	return p.Failure == FailureFail && (p.State == StatusError || p.State == StatusKilled || p.State == StatusFailure)
 }
 
-type StepType uint8 //	@name StepType
+// StepType identifies the type of step
+type StepType string //	@name StepType
 
 const (
-	StepTypeClone StepType = iota + 1
-	StepTypeService
-	StepTypePlugin
-	StepTypeCommands
-	StepTypeCache
+	StepTypeClone    StepType = "clone"
+	StepTypeService  StepType = "service"
+	StepTypePlugin   StepType = "plugin"
+	StepTypeCommands StepType = "commands"
+	StepTypeCache    StepType = "cache"
 )

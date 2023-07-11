@@ -46,12 +46,12 @@ const (
 )
 
 // StepType identifies the type of step
-type StepType uint8
+type StepType string
 
 const (
-	StepTypeClone StepType = iota + 1
-	StepTypeService
-	StepTypePlugin
-	StepTypeCommands
-	StepTypeCache
+	StepTypeClone    StepType = "clone"
+	StepTypeService  StepType = "service"
+	StepTypePlugin   StepType = "plugin"
+	StepTypeCommands StepType = "commands"
+	StepTypeCache    StepType = "cache"
 )
