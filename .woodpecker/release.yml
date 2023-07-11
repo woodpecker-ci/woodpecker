@@ -1,0 +1,14 @@
+pipeline:
+  release:
+    image: woodpeckerci/plugin-ready-release-go
+    pull: true
+    settings:
+      release_branch: main
+      forge_type: github
+      git_email: woodpecker-bot@obermui.de
+      github_token:
+        from_secret: GITHUB_TOKEN
+
+when:
+  event: push
+  branch: main
