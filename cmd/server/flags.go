@@ -78,6 +78,16 @@ var flags = []cli.Flag{
 		Usage:   "server ssl key path",
 	},
 	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_CUSTOM_CSS_FILE"},
+		Name:    "custom-css-file",
+		Usage:   "file path for the server to serve a custom .CSS file, used for customizing the UI",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_CUSTOM_JS_FILE"},
+		Name:    "custom-js-file",
+		Usage:   "file path for the server to serve a custom .JS file, used for customizing the UI",
+	},
+	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_LETS_ENCRYPT_EMAIL"},
 		Name:    "lets-encrypt-email",
 		Usage:   "let's encrypt email",
@@ -94,10 +104,11 @@ var flags = []cli.Flag{
 		Value:   ":9000",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_GRPC_SECRET"},
-		Name:    "grpc-secret",
-		Usage:   "grpc jwt secret",
-		Value:   "secret",
+		EnvVars:  []string{"WOODPECKER_GRPC_SECRET"},
+		Name:     "grpc-secret",
+		Usage:    "grpc jwt secret",
+		Value:    "secret",
+		FilePath: os.Getenv("WOODPECKER_GRPC_SECRET_FILE"),
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_METRICS_SERVER_ADDR"},
