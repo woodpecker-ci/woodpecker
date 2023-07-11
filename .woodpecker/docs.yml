@@ -1,3 +1,7 @@
+when:
+  event: [push, pull_request]
+  branch: [master, release/*]
+
 variables:
   - &golang_image 'golang:1.20.2'
   - &node_image 'node:18-alpine'

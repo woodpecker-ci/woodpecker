@@ -1,3 +1,7 @@
+when:
+  event: [push, pull_request]
+  branch: [master, release/*]
+
 depends_on:
   - test
   - web
