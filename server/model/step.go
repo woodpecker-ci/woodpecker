@@ -47,6 +47,7 @@ type Step struct {
 	ExitCode   int         `json:"exit_code"            xorm:"step_exit_code"`
 	Started    int64       `json:"start_time,omitempty" xorm:"step_started"`
 	Stopped    int64       `json:"end_time,omitempty"   xorm:"step_stopped"`
+	Type       StepType    `json:"type,omitempty"       xorm:"step_type"`
 } //	@name Step
 
 type UpdateStepStore interface {
@@ -67,3 +68,14 @@ func (p *Step) Running() bool {
 func (p *Step) Failing() bool {
 	return p.Failure == FailureFail && (p.State == StatusError || p.State == StatusKilled || p.State == StatusFailure)
 }
+
+// StepType identifies the type of step
+type StepType string //	@name StepType
+
+const (
+	StepTypeClone    StepType = "clone"
+	StepTypeService  StepType = "service"
+	StepTypePlugin   StepType = "plugin"
+	StepTypeCommands StepType = "commands"
+	StepTypeCache    StepType = "cache"
+)
