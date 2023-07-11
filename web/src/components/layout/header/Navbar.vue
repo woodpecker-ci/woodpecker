@@ -16,12 +16,7 @@
       <!-- Docs Link -->
       <a :href="docsUrl" target="_blank" class="navbar-link navbar-clickable hidden md:flex">{{ $t('docs') }}</a>
       <!-- API Link -->
-      <a
-        :href="{ name: 'home' } / swagger / index.html"
-        target="_blank"
-        class="navbar-link navbar-clickable hidden md:flex"
-        >{ name: 'home' }/swagger/index.html</a
-      >
+      <a :href="apiUrl" target="_blank" class="navbar-link navbar-clickable hidden md:flex">{{ $t('api') }}</a>
     </div>
     <!-- Right Icons Box -->
     <div class="flex ml-auto -m-1.5 items-center space-x-2 text-white dark:text-gray-400">
