@@ -50,13 +50,13 @@ func PostRepo(c *gin.Context) {
 	_store := store.FromContext(c)
 	user := session.User(c)
 
-	remoteID := model.ForgeRemoteID(c.Query("forge_remote_id"))
-	if !remoteID.IsValid() {
+	forgeRemoteID := model.ForgeRemoteID(c.Query("forge_remote_id"))
+	if !forgeRemoteID.IsValid() {
 		c.String(http.StatusBadRequest, "No forge_remote_id provided")
 		return
 	}
 
-	repo, err := _store.GetRepoForgeID(remoteID)
+	repo, err := _store.GetRepoForgeID(forgeRemoteID)
 	enabledOnce := err == nil // if there's no error, the repo was found and enabled once already
 	if enabledOnce && repo.IsActive {
 		c.String(http.StatusConflict, "Repository is already active.")
@@ -66,7 +66,7 @@ func PostRepo(c *gin.Context) {
 		return
 	}
 
-	from, err := forge.Repo(c, user, remoteID, "", "")
+	from, err := forge.Repo(c, user, forgeRemoteID, "", "")
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Could not fetch repository from forge.")
 		return
