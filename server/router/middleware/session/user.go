@@ -133,7 +133,7 @@ func MustOrgMember(admin bool) gin.HandlerFunc {
 			return
 		}
 
-		org, err := _store.OrgFind(orgID)
+		org, err := _store.OrgGet(orgID)
 		if err != nil {
 			c.String(http.StatusNotFound, "Organization not found")
 			return

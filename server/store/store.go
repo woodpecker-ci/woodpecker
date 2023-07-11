@@ -185,7 +185,7 @@ type Store interface {
 
 	// Org
 	OrgCreate(*model.Org) error
-	OrgFind(int64) (*model.Org, error)
+	OrgGet(int64) (*model.Org, error)
 	OrgFindByName(string) (*model.Org, error)
 	OrgUpdate(*model.Org) error
 	OrgDelete(int64) error

@@ -47,7 +47,7 @@ func GetOrg(c *gin.Context) {
 		return
 	}
 
-	org, err := _store.OrgFind(orgID)
+	org, err := _store.OrgGet(orgID)
 	if err != nil {
 		if errors.Is(err, types.RecordNotExist) {
 			c.AbortWithStatus(http.StatusNotFound)
@@ -84,7 +84,7 @@ func GetOrgPermissions(c *gin.Context) {
 		return
 	}
 
-	org, err := _store.OrgFind(orgID)
+	org, err := _store.OrgGet(orgID)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error getting org %d. %s", orgID, err)
 		return
