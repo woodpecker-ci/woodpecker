@@ -20,8 +20,8 @@ Enables handling webhook's pull request event. If disabled, then pipeline won't 
 
 ### Protected
 
-Every pipeline initiated by an webhook event needs to be approved, by the project members who have push rights, before being executed.
-This can be used if your repository is public to protect the pipeline configuration from running unauthorized changes on third-party pull requests.
+Every pipeline initiated by an webhook event needs to be approved by a project members with push permissions before being executed.
+The protected option can be used as an additional review process before running potentially harmful pipelines. Especially if pipelines can be executed by third-parties through pull-requests. 
 
 ### Trusted
 
