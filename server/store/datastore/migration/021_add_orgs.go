@@ -60,19 +60,21 @@ var addOrgs = task{
 
 		orgs := make(map[string]*model.Org)
 		for _, repo := range repos {
-			org := &model.Org{
-				Name:   repo.Owner,
-				IsUser: false, // TODO: should we get this info from the forges?
-			}
+			orgName := repo.Owner
 
-			if _, ok := orgs[org.Name]; !ok {
+			// create org if not already created
+			if _, ok := orgs[orgName]; !ok {
+				org := &model.Org{
+					Name:   repo.Owner,
+					IsUser: false, // TODO: should we get this info from the forges?
+				}
 				if _, err := sess.Insert(org); err != nil {
 					return err
 				}
 
 				// update org secrets
 				var secrets []*oldSecret021
-				if err := sess.Where(builder.Eq{"secret_owner": repo.Owner, "secret_repo_id": 0}).Find(&secrets); err != nil {
+				if err := sess.Where(builder.Eq{"secret_owner": orgName, "secret_repo_id": 0}).Find(&secrets); err != nil {
 					return err
 				}
 
@@ -85,7 +87,7 @@ var addOrgs = task{
 			}
 
 			// update the repo
-			repo.OrgID = org.ID
+			repo.OrgID = orgs[orgName].ID
 			if _, err := sess.ID(repo.ID).Cols("repo_org_id").Update(repo); err != nil {
 				return err
 			}
