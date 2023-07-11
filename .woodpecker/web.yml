@@ -6,6 +6,8 @@ variables:
         - ".woodpecker/web.yml"
         # web source code
         - "web/**"
+        # api source code
+        - "server/api/**"
       branch:
         exclude: ${CI_REPO_DEFAULT_BRANCH}
       event: push

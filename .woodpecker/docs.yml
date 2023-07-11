@@ -7,6 +7,8 @@ variables:
     # since we generate docs for cli tool we have to watch this too
     - "cli/**"
     - "cmd/cli/**"
+    # api docs
+    - "server/api/**"
 
 steps:
   build-cli:
