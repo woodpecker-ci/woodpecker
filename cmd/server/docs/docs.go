@@ -4013,13 +4013,13 @@ const docTemplate = `{
             }
         },
         "StepType": {
-            "type": "integer",
+            "type": "string",
             "enum": [
-                1,
-                2,
-                3,
-                4,
-                5
+                "clone",
+                "service",
+                "plugin",
+                "commands",
+                "cache"
             ],
             "x-enum-varnames": [
                 "StepTypeClone",
