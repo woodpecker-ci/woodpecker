@@ -38,10 +38,8 @@ func (s storage) OrgDelete(id int64) error {
 }
 
 func (s storage) OrgFindByName(name string) (*model.Org, error) {
-	org := &model.Org{
-		Name: name,
-	}
-	return org, wrapGet(s.engine.Get(org))
+	org := new(model.Org)
+	return org, wrapGet(s.engine.Where("name = ?", name).Get(org))
 }
 
 func (s storage) OrgRepoList(org *model.Org, p *model.ListOptions) ([]*model.Repo, error) {
