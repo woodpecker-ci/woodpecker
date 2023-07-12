@@ -3,7 +3,7 @@ module github.com/woodpecker-ci/woodpecker
 go 1.18
 
 require (
-	code.gitea.io/sdk/gitea v0.15.0
+	code.gitea.io/sdk/gitea v0.15.1-0.20220501190934-319a978c6c71
 	codeberg.org/6543/go-yaml2json v1.0.0
 	github.com/bmatcuk/doublestar/v4 v4.0.2
 	github.com/docker/cli v20.10.12+incompatible
@@ -123,7 +123,7 @@ require (
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/go-retryablehttp v0.7.0 // indirect
-	github.com/hashicorp/go-version v1.2.1 // indirect
+	github.com/hashicorp/go-version v1.6.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/hexops/gotextdiff v1.0.3 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect

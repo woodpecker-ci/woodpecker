@@ -1,7 +1,7 @@
 # 4d63.com/gochecknoglobals v0.1.0
 ## explicit; go 1.15
 4d63.com/gochecknoglobals/checknoglobals
-# code.gitea.io/sdk/gitea v0.15.0
+# code.gitea.io/sdk/gitea v0.15.1-0.20220501190934-319a978c6c71
 ## explicit; go 1.13
 code.gitea.io/sdk/gitea
 # codeberg.org/6543/go-yaml2json v1.0.0
@@ -405,7 +405,7 @@ github.com/hashicorp/go-multierror
 # github.com/hashicorp/go-retryablehttp v0.7.0
 ## explicit; go 1.13
 github.com/hashicorp/go-retryablehttp
-# github.com/hashicorp/go-version v1.2.1
+# github.com/hashicorp/go-version v1.6.0
 ## explicit
 github.com/hashicorp/go-version
 # github.com/hashicorp/hcl v1.0.0
