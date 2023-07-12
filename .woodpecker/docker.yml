@@ -1,7 +1,7 @@
 when:
   - event: pull_request
   - event: push
-    branch: [${CI_REPO_DEFAULT_BRANCH}, release/*]
+    branch: [ '${CI_REPO_DEFAULT_BRANCH}', 'release/*' ]
 
 depends_on:
   - test
