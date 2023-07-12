@@ -1,7 +1,7 @@
 when:
   - event: pull_request
   - event: push
-    branch: [master, release/*]
+    branch: [${CI_REPO_DEFAULT_BRANCH}, release/*]
 
 variables:
   - &node_image 'node:18-alpine'
