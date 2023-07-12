@@ -4,6 +4,7 @@ package types
 type Step struct {
 	Name           string            `json:"name"`
 	UUID           string            `json:"uuid"`
+	Type           StepType          `json:"type,omitempty"`
 	Alias          string            `json:"alias,omitempty"`
 	Image          string            `json:"image,omitempty"`
 	Pull           bool              `json:"pull,omitempty"`
@@ -35,3 +36,14 @@ type Step struct {
 	Sysctls        map[string]string `json:"sysctls,omitempty"`
 	BackendOptions BackendOptions    `json:"backend_options,omitempty"`
 }
+
+// StepType identifies the type of step
+type StepType string
+
+const (
+	StepTypeClone    StepType = "clone"
+	StepTypeService  StepType = "service"
+	StepTypePlugin   StepType = "plugin"
+	StepTypeCommands StepType = "commands"
+	StepTypeCache    StepType = "cache"
+)
