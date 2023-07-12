@@ -57,6 +57,7 @@
   * Support plugin-only secrets (#1344)
   * Fix insecure /tmp usage in local backend (#872)
 * BUGFIXES
+  * Fix repo gate protection (#1969)
   * Make secrets with "/" in name editable / deletable (#1938)
   * Fix Bitbucket implement missing features (#1887) (#1889)
   * Fix nil pointer in repo repair (#1804)
@@ -89,6 +90,8 @@
   * Support conditional branch as an array to align with documentation (#836)
   * Fix redirect after login (#824)
 * ENHANCEMENTS
+  * Add option to read grpc-secret from file (#1972)
+  * Let pipeline-compiler export step types (#1958)
   * docker backend use uuid instead of name as identifier (#1967)
   * Kubernetes do not set Pod's Image pull policy if not explicitly set (#1914)
   * Fixed when:evaluate on non-standard (non-CI*) env vars (#1907)
