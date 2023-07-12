@@ -9,10 +9,10 @@ variables:
   - &xgo_version 'go-1.20.2'
   - &platforms_release 'linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/386,linux/amd64,linux/ppc64le,linux/riscv64,linux/s390x,windows/amd64,freebsd/arm64,freebsd/amd64,openbsd/arm64,openbsd/amd64'
   - &platforms_server 'linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le,linux/riscv64'
-  - &platforms_preview 'linux/arm/v6,linux/arm64/v8,linux/amd64,linux/riscv64,windows/amd64'
+  - &platforms_preview 'linux/amd64'
   - &platforms_alpine 'linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le'
 
-pipeline:
+steps:
   vendor:
     image: *golang_image
     pull: true
@@ -30,7 +30,7 @@ pipeline:
       - pnpm install --frozen-lockfile
       - pnpm build
 
-  cross-compile-server:
+  cross-compile-server-preview:
     image: *xgo_image
     pull: true
     commands:
@@ -38,9 +38,11 @@ pipeline:
       - apt install -y tree
       - make cross-compile-server
     environment:
-      PLATFORMS: linux|arm/v7;linux|arm64/v8;linux|amd64;linux|ppc64le;linux|riscv64
+      PLATFORMS: linux|amd64
       TAGS: bindata sqlite sqlite_unlock_notify netgo
       XGO_VERSION: *xgo_version
+    when:
+      event: pull_request
 
   publish-server-preview:
     image: woodpeckerci/plugin-docker-buildx
@@ -49,7 +51,7 @@ pipeline:
     settings:
       repo: woodpeckerci/woodpecker-server
       dockerfile: docker/Dockerfile.server.multiarch
-      platforms: *platforms_server
+      platforms: *platforms_preview
       tag: pull_${CI_COMMIT_PULL_REQUEST}
     when:
       event: pull_request
@@ -61,10 +63,25 @@ pipeline:
     settings:
       repo: woodpeckerci/woodpecker-server
       dockerfile: docker/Dockerfile.server.alpine.multiarch
-      platforms: *platforms_alpine
+      platforms: *platforms_preview
       tag: pull_${CI_COMMIT_PULL_REQUEST}-alpine
     when:
       event: pull_request
+
+  cross-compile-server:
+    image: *xgo_image
+    pull: true
+    commands:
+      - apt update
+      - apt install -y tree
+      - make cross-compile-server
+    environment:
+      PLATFORMS: linux|arm/v7;linux|arm64/v8;linux|amd64;linux|ppc64le;linux|riscv64
+      TAGS: bindata sqlite sqlite_unlock_notify netgo
+      XGO_VERSION: *xgo_version
+    when:
+      branch: ${CI_REPO_DEFAULT_BRANCH}
+      event: push
 
   publish-next-server:
     image: woodpeckerci/plugin-docker-buildx

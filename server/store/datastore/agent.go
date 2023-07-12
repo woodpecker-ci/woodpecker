@@ -15,12 +15,16 @@
 package datastore
 
 import (
+	"errors"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-func (s storage) AgentList() ([]*model.Agent, error) {
-	agents := make([]*model.Agent, 0, 10)
-	return agents, s.engine.Find(&agents)
+var ErrNoTokenProvided = errors.New("Please provide a token")
+
+func (s storage) AgentList(p *model.ListOptions) ([]*model.Agent, error) {
+	var agents []*model.Agent
+	return agents, s.paginate(p).Find(&agents)
 }
 
 func (s storage) AgentFind(id int64) (*model.Agent, error) {
@@ -29,10 +33,12 @@ func (s storage) AgentFind(id int64) (*model.Agent, error) {
 }
 
 func (s storage) AgentFindByToken(token string) (*model.Agent, error) {
-	agent := &model.Agent{
-		Token: token,
+	// Searching with an empty token would result in an empty where clause and therefore returning first item
+	if token == "" {
+		return nil, ErrNoTokenProvided
 	}
-	return agent, wrapGet(s.engine.Get(agent))
+	agent := new(model.Agent)
+	return agent, wrapGet(s.engine.Where("token = ?", token).Get(agent))
 }
 
 func (s storage) AgentCreate(agent *model.Agent) error {
@@ -47,6 +53,5 @@ func (s storage) AgentUpdate(agent *model.Agent) error {
 }
 
 func (s storage) AgentDelete(agent *model.Agent) error {
-	_, err := s.engine.ID(agent.ID).Delete(new(model.Agent))
-	return err
+	return wrapDelete(s.engine.ID(agent.ID).Delete(new(model.Agent)))
 }

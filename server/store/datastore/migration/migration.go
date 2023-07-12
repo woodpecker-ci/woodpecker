@@ -15,8 +15,11 @@
 package migration
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"reflect"
+	"time"
 
 	"github.com/rs/zerolog/log"
 	"xorm.io/xorm"
@@ -25,7 +28,7 @@ import (
 )
 
 // APPEND NEW MIGRATIONS
-// they are executed in order and if one fails woodpecker will try to rollback and quits
+// they are executed in order and if one fails woodpecker will try to rollback that specific one and quits
 var migrationTasks = []*task{
 	&legacy2Xorm,
 	&alterTableReposDropFallback,
@@ -44,6 +47,12 @@ var migrationTasks = []*task{
 	&renameForgeIDToForgeRemoteID,
 	&removeActiveFromUsers,
 	&removeInactiveRepos,
+	&dropFiles,
+	&removeMachineCol,
+	&dropOldCols,
+	&initLogsEntriesTable,
+	&migrateLogs2LogEntries,
+	&parentStepsToWorkflows,
 }
 
 var allBeans = []interface{}{
@@ -51,8 +60,7 @@ var allBeans = []interface{}{
 	new(model.Pipeline),
 	new(model.PipelineConfig),
 	new(model.Config),
-	new(model.File),
-	new(model.Logs),
+	new(model.LogEntry),
 	new(model.Perm),
 	new(model.Step),
 	new(model.Registry),
@@ -63,6 +71,7 @@ var allBeans = []interface{}{
 	new(model.ServerConfig),
 	new(model.Cron),
 	new(model.Redirection),
+	new(model.Workflow),
 }
 
 type migrations struct {
@@ -73,6 +82,8 @@ type task struct {
 	name     string
 	required bool
 	fn       func(sess *xorm.Session) error
+	// engineFn does manage session on it's own. only use it if you really need to
+	engineFn func(e *xorm.Engine) error
 }
 
 // initNew create tables for new instance
@@ -92,7 +103,9 @@ func initNew(sess *xorm.Session) error {
 }
 
 func Migrate(e *xorm.Engine) error {
-	if err := e.Sync2(new(migrations)); err != nil {
+	e.SetDisableGlobalCache(true)
+
+	if err := e.Sync(new(migrations)); err != nil {
 		return err
 	}
 
@@ -115,26 +128,24 @@ func Migrate(e *xorm.Engine) error {
 		return sess.Commit()
 	}
 
-	if err := runTasks(sess, migrationTasks); err != nil {
-		return err
-	}
-
 	if err := sess.Commit(); err != nil {
 		return err
 	}
 
-	if err := e.ClearCache(allBeans...); err != nil {
+	if err := runTasks(e, migrationTasks); err != nil {
 		return err
 	}
+
+	e.SetDisableGlobalCache(false)
 
 	return syncAll(e)
 }
 
-func runTasks(sess *xorm.Session, tasks []*task) error {
+func runTasks(e *xorm.Engine, tasks []*task) error {
 	// cache migrations in db
 	migCache := make(map[string]bool)
 	var migList []*migrations
-	if err := sess.Find(&migList); err != nil {
+	if err := e.Find(&migList); err != nil {
 		return err
 	}
 	for i := range migList {
@@ -148,37 +159,78 @@ func runTasks(sess *xorm.Session, tasks []*task) error {
 		}
 
 		log.Trace().Msgf("start migration task '%s'", task.name)
-
+		aliveMsgCancel := showBeAliveSign(task.name)
+		defer aliveMsgCancel(nil)
+		var taskErr error
 		if task.fn != nil {
-			if err := task.fn(sess); err != nil {
-				if task.required {
-					return err
-				}
-				log.Error().Err(err).Msgf("migration task '%s' failed but is not required", task.name)
-				continue
+			sess := e.NewSession().NoCache()
+			defer sess.Close()
+			if err := sess.Begin(); err != nil {
+				return err
 			}
-			log.Debug().Msgf("migration task '%s' done", task.name)
+
+			if taskErr = task.fn(sess); taskErr != nil {
+				aliveMsgCancel(nil)
+				if err2 := sess.Rollback(); err2 != nil {
+					taskErr = errors.Join(taskErr, err2)
+				}
+			}
+			if err := sess.Commit(); err != nil {
+				return err
+			}
+		} else if task.engineFn != nil {
+			taskErr = task.engineFn(e)
 		} else {
 			log.Trace().Msgf("skip migration task '%s'", task.name)
+			aliveMsgCancel(nil)
+			continue
 		}
 
-		if _, err := sess.Insert(&migrations{task.name}); err != nil {
+		aliveMsgCancel(nil)
+		if taskErr != nil {
+			if task.required {
+				return taskErr
+			}
+			log.Error().Err(taskErr).Msgf("migration task '%s' failed but is not required", task.name)
+			continue
+		}
+		log.Debug().Msgf("migration task '%s' done", task.name)
+
+		if _, err := e.Insert(&migrations{task.name}); err != nil {
 			return err
 		}
+
 		migCache[task.name] = true
 	}
 	return nil
 }
 
 type syncEngine interface {
-	Sync2(beans ...interface{}) error
+	Sync(beans ...interface{}) error
 }
 
 func syncAll(sess syncEngine) error {
 	for _, bean := range allBeans {
-		if err := sess.Sync2(bean); err != nil {
-			return fmt.Errorf("sync2 error '%s': %w", reflect.TypeOf(bean), err)
+		if err := sess.Sync(bean); err != nil {
+			return fmt.Errorf("Sync error '%s': %w", reflect.TypeOf(bean), err)
 		}
 	}
 	return nil
+}
+
+var showBeAliveSignDelay = time.Second * 20
+
+func showBeAliveSign(taskName string) context.CancelCauseFunc {
+	ctx, cancel := context.WithCancelCause(context.Background())
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-time.After(showBeAliveSignDelay):
+				log.Info().Msgf("Migration '%s' is still running, please be patient", taskName)
+			}
+		}
+	}()
+	return cancel
 }

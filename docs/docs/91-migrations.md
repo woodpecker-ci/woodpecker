@@ -9,14 +9,23 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Renamed step environment variable `CI_SYSTEM_ARCH` to `CI_SYSTEM_PLATFORM`. Same applies for the cli exec variable.
 - Renamed environment variables `CI_BUILD_*` and `CI_PREV_BUILD_*` to `CI_PIPELINE_*` and `CI_PREV_PIPELINE_*`, old ones are still available but deprecated
 - Renamed environment variables `CI_JOB_*` to `CI_STEP_*`, old ones are still available but deprecated
-- Renamed environment variable `CI_REPO_REMOTE` to `CI_REPO_CLONE_URL`
+- Renamed environment variable `CI_REPO_REMOTE` to `CI_REPO_CLONE_URL`, old is still available but deprecated
+- Renamed environment variable `*_LINK` to `*_URL`, old ones are still available but deprecated
 - Renamed API endpoints for pipelines (`<owner>/<repo>/builds/<buildId>` -> `<owner>/<repo>/pipelines/<pipelineId>`), old ones are still available but deprecated
 - Updated Prometheus gauge `build_*` to `pipeline_*`
 - Updated Prometheus gauge `*_job_*` to `*_step_*`
 - Renamed config env `WOODPECKER_MAX_PROCS` to `WOODPECKER_MAX_WORKFLOWS` (still available as fallback)
-- The pipelines are now also read from `.yaml` files, the new default order is `.woodpecker/*.yml` and `.woodpecker/*.yaml` (without any prioritization) -> `.woodpecker.yml` ->  `.woodpecker.yaml` -> `.drone.yml`
-- Dropped support for [Coding](https://coding.net/).
+- The pipelines are now also read from `.yaml` files, the new default order is `.woodpecker/*.yml` and `.woodpecker/*.yaml` (without any prioritization) -> `.woodpecker.yml` ->  `.woodpecker.yaml`
+- Dropped support for [Coding](https://coding.net/) and [Gogs](https://gogs.io).
 - `/api/queue/resume` & `/api/queue/pause` endpoint methods were changed from `GET` to `POST`
+- rename `pipeline:` key in your workflow config to `steps:`
+- If you want to migrate old logs to the new format, watch the error messages on start. If there are none we are good to go, else you have to plan a migration that can take hours. Set `WOODPECKER_MIGRATIONS_ALLOW_LONG` to true and let it run.
+- Using `repo-id` in favor of `owner/repo` combination
+  - :warning: The api endpoints `/api/repos/{owner}/{repo}/...` were replaced by new endpoints using the repos id `/api/repos/{repo-id}`
+  - To find the id of a repo use the `/api/repos/lookup/{repo-full-name-with-slashes}` endpoint.
+  - The existing badge endpoint `/api/badges/{owner}/{repo}` will still work, but whenever possible try to use the new endpoint using the `repo-id`: `/api/badges/{repo-id}`.
+  - The UI urls for a repository changed from `/repos/{owner}/{repo}/...` to `/repos/{repo-id}/...`. You will be redirected automatically when using the old url.
+  - The woodpecker-go api-client is now using the `repo-id` instead of `owner/repo` for all functions
 
 ## 0.15.0
 
@@ -74,7 +83,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Plugin Settings moved into `settings` section:
 
   ```diff
-   pipeline:
+   steps:
    something:
      image: my/plugin
   -  setting1: foo

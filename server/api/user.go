@@ -28,10 +28,27 @@ import (
 	"github.com/woodpecker-ci/woodpecker/shared/token"
 )
 
+// GetSelf
+//
+//	@Summary	Returns the currently authenticated user.
+//	@Router		/user [get]
+//	@Produce	json
+//	@Success	200	{object}	User
+//	@Tags		User
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 func GetSelf(c *gin.Context) {
 	c.JSON(http.StatusOK, session.User(c))
 }
 
+// GetFeed
+//
+//	@Summary		A feed entry for a build.
+//	@Description	Feed entries can be used to display information on the latest builds.
+//	@Router			/user/feed [get]
+//	@Produce		json
+//	@Success		200	{object}	Feed
+//	@Tags			User
+//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 func GetFeed(c *gin.Context) {
 	_store := store.FromContext(c)
 
@@ -56,6 +73,16 @@ func GetFeed(c *gin.Context) {
 	c.JSON(http.StatusOK, feed)
 }
 
+// GetRepos
+//
+//	@Summary		Get user's repos
+//	@Description	Retrieve the currently authenticated User's Repository list
+//	@Router			/user/repos [get]
+//	@Produce		json
+//	@Success		200	{array}	Repo
+//	@Tags			User
+//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param			all		query	bool	false	"query all repos, including inactive ones"
 func GetRepos(c *gin.Context) {
 	_store := store.FromContext(c)
 	_forge := server.Config.Services.Forge
@@ -63,16 +90,16 @@ func GetRepos(c *gin.Context) {
 	user := session.User(c)
 	all, _ := strconv.ParseBool(c.Query("all"))
 
-	dbRepos, err := _store.RepoList(user, true)
+	activeRepos, err := _store.RepoList(user, true, true)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error fetching repository list. %s", err)
 		return
 	}
 
 	if all {
-		active := map[string]bool{}
-		for _, r := range dbRepos {
-			active[r.FullName] = r.IsActive
+		active := map[model.ForgeRemoteID]*model.Repo{}
+		for _, r := range activeRepos {
+			active[r.ForgeRemoteID] = r
 		}
 
 		_repos, err := _forge.Repos(c, user)
@@ -80,13 +107,18 @@ func GetRepos(c *gin.Context) {
 			c.String(http.StatusInternalServerError, "Error fetching repository list. %s", err)
 			return
 		}
+
 		var repos []*model.Repo
 		for _, r := range _repos {
 			if r.Perm.Push {
-				if active[r.FullName] {
-					r.IsActive = true
+				if active[r.ForgeRemoteID] != nil && active[r.ForgeRemoteID].IsActive {
+					existingRepo := active[r.ForgeRemoteID]
+					existingRepo.Update(r)
+					existingRepo.IsActive = true
+					repos = append(repos, existingRepo)
+				} else {
+					repos = append(repos, r)
 				}
-				repos = append(repos, r)
 			}
 		}
 
@@ -94,15 +126,17 @@ func GetRepos(c *gin.Context) {
 		return
 	}
 
-	active := make([]*model.Repo, 0)
-	for _, repo := range dbRepos {
-		if repo.IsActive {
-			active = append(active, repo)
-		}
-	}
-	c.JSON(http.StatusOK, active)
+	c.JSON(http.StatusOK, activeRepos)
 }
 
+// PostToken
+//
+//	@Summary		Return the token of the current user as stringª
+//	@Router			/user/token [post]
+//	@Produce		plain
+//	@Success		200
+//	@Tags			User
+//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 func PostToken(c *gin.Context) {
 	user := session.User(c)
 	tokenString, err := token.New(token.UserToken, user.Login).Sign(user.Hash)
@@ -113,6 +147,15 @@ func PostToken(c *gin.Context) {
 	c.String(http.StatusOK, tokenString)
 }
 
+// DeleteToken
+//
+//	@Summary		Reset a token
+//	@Description	Reset's the current personal access token of the user and returns a new one.
+//	@Router			/user/token [delete]
+//	@Produce		plain
+//	@Success		200
+//	@Tags			User
+//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 func DeleteToken(c *gin.Context) {
 	_store := store.FromContext(c)
 

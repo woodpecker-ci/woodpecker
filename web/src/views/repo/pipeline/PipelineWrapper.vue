@@ -96,8 +96,7 @@ import { Repo, RepoPermissions } from '~/lib/api/types';
 import { usePipelineStore } from '~/store/pipelines';
 
 const props = defineProps<{
-  repoOwner: string;
-  repoName: string;
+  repoId: string;
   pipelineId: string;
 }>();
 
@@ -110,15 +109,15 @@ const i18n = useI18n();
 
 const pipelineStore = usePipelineStore();
 const pipelineId = toRef(props, 'pipelineId');
-const repoOwner = toRef(props, 'repoOwner');
-const repoName = toRef(props, 'repoName');
+const _repoId = toRef(props, 'repoId');
+const repositoryId = computed(() => parseInt(_repoId.value, 10));
 const repo = inject<Ref<Repo>>('repo');
 const repoPermissions = inject<Ref<RepoPermissions>>('repo-permissions');
 if (!repo || !repoPermissions) {
   throw new Error('Unexpected: "repo" & "repoPermissions" should be provided at this place');
 }
 
-const pipeline = pipelineStore.getPipeline(repoOwner, repoName, pipelineId);
+const pipeline = pipelineStore.getPipeline(repositoryId, pipelineId);
 const { since, duration, created } = usePipeline(pipeline);
 provide('pipeline', pipeline);
 
@@ -131,7 +130,7 @@ async function loadPipeline(): Promise<void> {
     throw new Error('Unexpected: Repo is undefined');
   }
 
-  await pipelineStore.loadPipeline(repo.value.owner, repo.value.name, parseInt(pipelineId.value, 10));
+  await pipelineStore.loadPipeline(repo.value.id, parseInt(pipelineId.value, 10));
 
   favicon.updateStatus(pipeline.value?.status);
 }
@@ -141,7 +140,7 @@ const { doSubmit: cancelPipeline, isLoading: isCancelingPipeline } = useAsyncAct
     throw new Error('Unexpected: Repo is undefined');
   }
 
-  if (!pipeline.value?.steps) {
+  if (!pipeline.value?.workflows) {
     throw new Error('Unexpected: Pipeline steps not loaded');
   }
 
@@ -152,7 +151,7 @@ const { doSubmit: cancelPipeline, isLoading: isCancelingPipeline } = useAsyncAct
   //   throw new Error('Unexpected: Step not found');
   // }
 
-  await apiClient.cancelPipeline(repo.value.owner, repo.value.name, parseInt(pipelineId.value, 10));
+  await apiClient.cancelPipeline(repo.value.id, parseInt(pipelineId.value, 10));
   notifications.notify({ title: i18n.t('repo.pipeline.actions.cancel_success'), type: 'success' });
 });
 
@@ -161,14 +160,18 @@ const { doSubmit: restartPipeline, isLoading: isRestartingPipeline } = useAsyncA
     throw new Error('Unexpected: Repo is undefined');
   }
 
-  await apiClient.restartPipeline(repo.value.owner, repo.value.name, pipelineId.value, { fork: true });
+  const newPipeline = await apiClient.restartPipeline(repo.value.id, pipelineId.value, {
+    fork: true,
+  });
   notifications.notify({ title: i18n.t('repo.pipeline.actions.restart_success'), type: 'success' });
-  // TODO: directly send to newest pipeline?
-  await router.push({ name: 'repo', params: { repoName: repo.value.name, repoOwner: repo.value.owner } });
+  await router.push({
+    name: 'repo-pipeline',
+    params: { pipelineId: newPipeline.number },
+  });
 });
 
 onMounted(loadPipeline);
-watch([repoName, repoOwner, pipelineId], loadPipeline);
+watch([repositoryId, pipelineId], loadPipeline);
 onBeforeUnmount(() => {
   favicon.updateStatus('default');
 });

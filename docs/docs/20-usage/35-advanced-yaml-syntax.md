@@ -6,7 +6,7 @@ You can use [YAML anchors & aliases](https://yaml.org/spec/1.2.2/#3222-anchors-a
 
 To convert this:
 ```yml
-pipeline:
+steps:
   test:
     image: golang:1.18
     commands: go test ./...
@@ -21,7 +21,7 @@ Just add a new section called **variables** like this:
 +variables:
 +  - &golang_image 'golang:1.18'
 
- pipeline:
+ steps:
    test:
 -    image: golang:1.18
 +    image: *golang_image
@@ -32,34 +32,59 @@ Just add a new section called **variables** like this:
      commands: build
 ```
 
-<!--
-TODO(1192): Support YAML override and extension
+## Map merges and overwrites
 
-## Example of YAML override and extension
-
-```yml
-variables: 
-  &some-plugin-settings
+```yaml
+variables:
+  - &base-plugin-settings
     target: dist
     recursive: false
     try: true
+  - &special-setting
+    special: true
+  - &some-plugin codeberg.org/6543/docker-images/print_env
 
-pipelines:
+steps:
   develop:
-    name: Build and test
-    image: some-plugin
-    settings: *some-plugin-settings
+    image: *some-plugin
+    settings:
+      <<: [*base-plugin-settings, *special-setting] # merge two maps into an empty map
     when:
       branch: develop
 
   main:
-    name: Build and test
-    image: some-plugin
+    image: *some-plugin
     settings:
-      <<: *some-plugin-settings
-      try: false # replacing original value from `some-plugin-settings`
-      ongoing: false # adding a new value to `some-plugin-settings`
+      <<: *base-plugin-settings # merge one map and ...
+      try: false # ... overwrite original value
+      ongoing: false # ... adding a new value
     when:
       branch: main
 ```
--->
+
+## Sequence merges
+
+```yaml
+variables:
+  pre_cmds: &pre_cmds
+   - echo start
+   - whoami
+  post_cmds: &post_cmds
+   - echo stop
+  hello_cmd: &hello_cmd
+   - echo hello
+
+steps:
+  step1:
+    image: debian
+    commands:
+     - <<: *pre_cmds # prepend a sequence
+     - echo exec step now do dedicated things
+     - <<: *post_cmds # append a sequence
+  step2:
+    image: debian
+    commands:
+     - <<: [*pre_cmds, *hello_cmd] # prepend two sequences
+     - echo echo from second step
+     - <<: *post_cmds
+```

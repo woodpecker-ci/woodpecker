@@ -13,7 +13,7 @@ import (
 var registryInfoCmd = &cli.Command{
 	Name:      "info",
 	Usage:     "display registry info",
-	ArgsUsage: "[repo/name]",
+	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    registryInfo,
 	Flags: append(common.GlobalFlags,
 		common.RepoFlag,
@@ -28,22 +28,22 @@ var registryInfoCmd = &cli.Command{
 
 func registryInfo(c *cli.Context) error {
 	var (
-		hostname = c.String("hostname")
-		reponame = c.String("repository")
-		format   = c.String("format") + "\n"
+		hostname         = c.String("hostname")
+		repoIDOrFullName = c.String("repository")
+		format           = c.String("format") + "\n"
 	)
-	if reponame == "" {
-		reponame = c.Args().First()
-	}
-	owner, name, err := internal.ParseRepo(reponame)
-	if err != nil {
-		return err
+	if repoIDOrFullName == "" {
+		repoIDOrFullName = c.Args().First()
 	}
 	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
 	}
-	registry, err := client.Registry(owner, name, hostname)
+	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
+	if err != nil {
+		return err
+	}
+	registry, err := client.Registry(repoID, hostname)
 	if err != nil {
 		return err
 	}

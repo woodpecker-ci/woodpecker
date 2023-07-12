@@ -365,7 +365,7 @@
           "netrc_only_trusted": "Injecter les identifiants netrc uniquement dans des conteneurs de confiance"
         },
         "pipeline_path": {
-          "default": "Par défaut : .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml",
+          "default": "Par défaut : .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml",
           "desc": "Le chemin vers votre configuration de pipeline (par example {0}). Les dossiers doivent finir par {1}.",
           "desc_path_example": "mon/chemin/",
           "path": "Chemin vers le pipeline"
@@ -470,6 +470,7 @@
     "dl_cli": "Télécharger l'interface en ligne de commande",
     "internal_error": "Une erreur interne est arrivé",
     "oauth_error": "Erreur lors de l’authentification auprès du fournisseur OAuth",
+    "reset_token": "Effacer le jeton",
     "settings": "Profil personnel",
     "shell_setup": "Utilisation avec un shell",
     "shell_setup_before": "faites la mise en place dans le shell avant",

@@ -27,11 +27,13 @@ import (
 )
 
 // TODO: use pagination
-// TODO: add Driver() who return source forge back
 
 type Forge interface {
 	// Name returns the string name of this driver
 	Name() string
+
+	// URL returns the root url of a configured forge
+	URL() string
 
 	// Login authenticates the session and returns the
 	// forge user details.
@@ -59,7 +61,7 @@ type Forge interface {
 
 	// Status sends the commit status to the forge.
 	// An example would be the GitHub pull request status.
-	Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, p *model.Step) error
+	Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, p *model.Workflow) error
 
 	// Netrc returns a .netrc file that can be used to clone
 	// private repositories from a forge.
@@ -73,14 +75,13 @@ type Forge interface {
 	Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error
 
 	// Branches returns the names of all branches for the named repository.
-	// TODO: Add proper pagination handling and remove workaround in gitea forge
-	Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error)
+	Branches(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]string, error)
 
 	// BranchHead returns the sha of the head (latest commit) of the specified branch
 	BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error)
 
 	// PullRequests returns all pull requests for the named repository.
-	PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.PaginationData) ([]*model.PullRequest, error)
+	PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error)
 
 	// Hook parses the post-commit hook from the Request body and returns the
 	// required data in a standard format.

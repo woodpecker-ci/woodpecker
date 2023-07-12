@@ -15,8 +15,6 @@ var alterTableLogUpdateColumnLogDataType = task{
 			_, err = sess.Exec("ALTER TABLE logs ALTER COLUMN log_data TYPE BYTEA")
 		case schemas.MYSQL:
 			_, err = sess.Exec("ALTER TABLE logs MODIFY COLUMN log_data LONGBLOB")
-		case schemas.MSSQL:
-			_, err = sess.Exec("ALTER TABLE logs MODIFY COLUMN log_data VARBINARY")
 		default:
 			// sqlite does only know BLOB in all cases
 			return nil

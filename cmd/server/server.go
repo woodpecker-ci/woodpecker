@@ -210,7 +210,7 @@ func run(c *cli.Context) error {
 		// start the server with tls enabled
 		g.Go(func() error {
 			serve := &http.Server{
-				Addr:    ":https",
+				Addr:    server.Config.Server.PortTLS,
 				Handler: handler,
 				TLSConfig: &tls.Config{
 					NextProtos: []string{"h2", "http/1.1"},
@@ -236,7 +236,7 @@ func run(c *cli.Context) error {
 		}
 
 		g.Go(func() error {
-			return http.ListenAndServe(":http", http.HandlerFunc(redirect))
+			return http.ListenAndServe(server.Config.Server.Port, http.HandlerFunc(redirect))
 		})
 	} else if c.Bool("lets-encrypt") {
 		// start the server with lets-encrypt
@@ -279,9 +279,6 @@ func run(c *cli.Context) error {
 }
 
 func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
-	// storage
-	server.Config.Storage.Files = v
-
 	// forge
 	server.Config.Services.Forge = f
 	server.Config.Services.Timeout = c.Duration("forge-timeout")
@@ -344,19 +341,29 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 	server.Config.Server.Key = c.String("server-key")
 	server.Config.Server.AgentToken = c.String("agent-secret")
 	server.Config.Server.Host = c.String("server-host")
+	if c.IsSet("server-webhook-host") {
+		server.Config.Server.WebhookHost = c.String("server-webhook-host")
+	} else {
+		server.Config.Server.WebhookHost = c.String("server-host")
+	}
 	if c.IsSet("server-dev-oauth-host") {
 		server.Config.Server.OAuthHost = c.String("server-dev-oauth-host")
 	} else {
 		server.Config.Server.OAuthHost = c.String("server-host")
 	}
 	server.Config.Server.Port = c.String("server-addr")
+	server.Config.Server.PortTLS = c.String("server-addr-tls")
 	server.Config.Server.Docs = c.String("docs")
 	server.Config.Server.StatusContext = c.String("status-context")
 	server.Config.Server.StatusContextFormat = c.String("status-context-format")
 	server.Config.Server.SessionExpires = c.Duration("session-expires")
+	server.Config.Server.RootURL = strings.TrimSuffix(c.String("root-url"), "/")
+	server.Config.Server.CustomCSSFile = strings.TrimSpace(c.String("custom-css-file"))
+	server.Config.Server.CustomJsFile = strings.TrimSpace(c.String("custom-js-file"))
 	server.Config.Pipeline.Networks = c.StringSlice("network")
 	server.Config.Pipeline.Volumes = c.StringSlice("volume")
 	server.Config.Pipeline.Privileged = c.StringSlice("escalate")
+	server.Config.Server.Migrations.AllowLong = c.Bool("migrations-allow-long")
 
 	// prometheus
 	server.Config.Prometheus.AuthToken = c.String("prometheus-auth-token")

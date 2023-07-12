@@ -3,11 +3,8 @@ package datastore
 import "github.com/woodpecker-ci/woodpecker/server/model"
 
 func (s storage) ServerConfigGet(key string) (string, error) {
-	config := &model.ServerConfig{
-		Key: key,
-	}
-
-	err := wrapGet(s.engine.Get(config))
+	config := new(model.ServerConfig)
+	err := wrapGet(s.engine.ID(key).Get(config))
 	if err != nil {
 		return "", err
 	}
@@ -41,6 +38,5 @@ func (s storage) ServerConfigDelete(key string) error {
 		Key: key,
 	}
 
-	_, err := s.engine.Delete(config)
-	return err
+	return wrapDelete(s.engine.Delete(config))
 }

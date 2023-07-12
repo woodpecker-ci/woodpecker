@@ -7,6 +7,7 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
+	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
 )
 
 // Command exports the secret command.
@@ -23,24 +24,29 @@ var Command = &cli.Command{
 	},
 }
 
-func parseTargetArgs(c *cli.Context) (global bool, owner, name string, err error) {
+func parseTargetArgs(client woodpecker.Client, c *cli.Context) (global bool, owner string, repoID int64, err error) {
 	if c.Bool("global") {
-		return true, "", "", nil
+		return true, "", -1, nil
 	}
+
+	repoIDOrFullName := c.String("repository")
+	if repoIDOrFullName == "" {
+		repoIDOrFullName = c.Args().First()
+	}
+
 	orgName := c.String("organization")
-	repoName := c.String("repository")
-	if orgName == "" && repoName == "" {
-		repoName = c.Args().First()
+	if orgName != "" && repoIDOrFullName == "" {
+		return false, orgName, -1, err
 	}
-	if orgName == "" && !strings.Contains(repoName, "/") {
-		orgName = repoName
+
+	if orgName != "" && !strings.Contains(repoIDOrFullName, "/") {
+		repoIDOrFullName = orgName + "/" + repoIDOrFullName
 	}
-	if orgName != "" {
-		return false, orgName, "", err
-	}
-	owner, name, err = internal.ParseRepo(repoName)
+
+	repoID, err = internal.ParseRepo(client, repoIDOrFullName)
 	if err != nil {
-		return false, "", "", err
+		return false, "", -1, err
 	}
-	return false, owner, name, nil
+
+	return false, "", repoID, nil
 }

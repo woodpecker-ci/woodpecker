@@ -25,7 +25,15 @@ import (
 	"github.com/woodpecker-ci/woodpecker/version"
 )
 
-// Health endpoint returns a 500 if the server state is unhealthy.
+// Health
+//
+//	@Summary		Health information
+//	@Description	If everything is fine, just a 200 will be returned, a 500 signals server state is unhealthy.
+//	@Router			/healthz [get]
+//	@Produce		plain
+//	@Success		200
+//	@Failure		500
+//	@Tags			System
 func Health(c *gin.Context) {
 	if err := store.FromContext(c).Ping(); err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
@@ -34,7 +42,14 @@ func Health(c *gin.Context) {
 	c.String(http.StatusOK, "")
 }
 
-// Version endpoint returns the server version and build information.
+// Version
+//
+//	@Summary		Get version
+//	@Description	Endpoint returns the server version and build information.
+//	@Router			/version [get]
+//	@Produce		json
+//	@Success		200	{object}	string{source=string,version=string}
+//	@Tags			System
 func Version(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"source":  "https://github.com/woodpecker-ci/woodpecker",
@@ -42,14 +57,30 @@ func Version(c *gin.Context) {
 	})
 }
 
-// LogLevel endpoint returns the current logging level
+// LogLevel
+//
+//	@Summary		Current log level
+//	@Description	Endpoint returns the current logging level. Requires admin rights.
+//	@Router			/log-level [get]
+//	@Produce		json
+//	@Success		200	{object}	string{log-level=string}
+//	@Tags			System
 func LogLevel(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"log-level": zerolog.GlobalLevel().String(),
 	})
 }
 
-// SetLogLevel endpoint allows setting the logging level via API
+// SetLogLevel
+//
+//	@Summary		Set log level
+//	@Description	Endpoint sets the current logging level. Requires admin rights.
+//	@Router			/log-level [post]
+//	@Produce		json
+//	@Success		200	{object}	string{log-level=string}
+//	@Tags			System
+//	@Param			Authorization	header	string						true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param			log-level		body	string{log-level=string}	true	"the new log level, one of <debug,trace,info,warn,error,fatal,panic,disabled>"
 func SetLogLevel(c *gin.Context) {
 	logLevel := struct {
 		LogLevel string `json:"log-level"`

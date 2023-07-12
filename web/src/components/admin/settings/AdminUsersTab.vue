@@ -84,7 +84,7 @@
 
 <script lang="ts" setup>
 import { cloneDeep } from 'lodash';
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Badge from '~/components/atomic/Badge.vue';
@@ -97,19 +97,21 @@ import Panel from '~/components/layout/Panel.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
+import { usePagination } from '~/compositions/usePaginate';
 import { User } from '~/lib/api/types';
 
 const apiClient = useApiClient();
 const notifications = useNotifications();
 const { t } = useI18n();
 
-const users = ref<User[]>([]);
 const selectedUser = ref<Partial<User>>();
 const isEditingUser = computed(() => !!selectedUser.value?.id);
 
-async function loadUsers() {
-  users.value = await apiClient.getUsers();
+async function loadUsers(page: number): Promise<User[] | null> {
+  return apiClient.getUsers(page);
 }
+
+const { resetPage, data: users } = usePagination(loadUsers, () => !selectedUser.value);
 
 const { doSubmit: saveUser, isLoading: isSaving } = useAsyncAction(async () => {
   if (!selectedUser.value) {
@@ -130,7 +132,7 @@ const { doSubmit: saveUser, isLoading: isSaving } = useAsyncAction(async () => {
       type: 'success',
     });
   }
-  await loadUsers();
+  resetPage();
 });
 
 const { doSubmit: deleteUser, isLoading: isDeleting } = useAsyncAction(async (_user: User) => {
@@ -141,7 +143,7 @@ const { doSubmit: deleteUser, isLoading: isDeleting } = useAsyncAction(async (_u
 
   await apiClient.deleteUser(_user);
   notifications.notify({ title: t('admin.settings.users.deleted'), type: 'success' });
-  await loadUsers();
+  resetPage();
 });
 
 function editUser(user: User) {
@@ -151,16 +153,4 @@ function editUser(user: User) {
 function showAddUser() {
   selectedUser.value = cloneDeep({ login: '' });
 }
-
-const reloadInterval = ref<number>();
-onMounted(async () => {
-  await loadUsers();
-  reloadInterval.value = window.setInterval(loadUsers, 5000);
-});
-
-onBeforeUnmount(() => {
-  if (reloadInterval.value) {
-    window.clearInterval(reloadInterval.value);
-  }
-});
 </script>

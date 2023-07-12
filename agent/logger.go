@@ -16,10 +16,8 @@ package agent
 
 import (
 	"context"
-	"encoding/json"
 	"io"
 	"sync"
-	"time"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -30,7 +28,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
 )
 
-func (r *Runner) createLogger(ctxmeta context.Context, logger zerolog.Logger, uploads *sync.WaitGroup, work *rpc.Pipeline) pipeline.LogFunc {
+func (r *Runner) createLogger(_ context.Context, logger zerolog.Logger, uploads *sync.WaitGroup, work *rpc.Pipeline) pipeline.LogFunc {
 	return func(step *backend.Step, rc multipart.Reader) error {
 		loglogger := logger.With().
 			Str("image", step.Image).
@@ -52,81 +50,18 @@ func (r *Runner) createLogger(ctxmeta context.Context, logger zerolog.Logger, up
 
 		loglogger.Debug().Msg("log stream opened")
 
-		limitedPart := io.LimitReader(part, maxLogsUpload)
-		logStream := rpc.NewLineWriter(r.client, work.ID, step.Alias, secrets...)
-		if _, err := io.Copy(logStream, limitedPart); err != nil {
+		logStream := rpc.NewLineWriter(r.client, step.UUID, secrets...)
+		if _, err := io.Copy(logStream, part); err != nil {
 			log.Error().Err(err).Msg("copy limited logStream part")
 		}
 
 		loglogger.Debug().Msg("log stream copied")
-
-		data, err := json.Marshal(logStream.Lines())
-		if err != nil {
-			loglogger.Err(err).Msg("could not marshal logstream")
-		}
-
-		file := &rpc.File{
-			Mime: "application/json+logs",
-			Step: step.Alias,
-			Name: "logs.json",
-			Data: data,
-			Size: len(data),
-			Time: time.Now().Unix(),
-		}
-
-		loglogger.Debug().Msg("log stream uploading")
-		if serr := r.client.Upload(ctxmeta, work.ID, file); serr != nil {
-			loglogger.Error().Err(serr).Msg("log stream upload error")
-		} else {
-			loglogger.Debug().Msg("log stream upload complete")
-		}
 
 		defer func() {
 			loglogger.Debug().Msg("log stream closed")
 			uploads.Done()
 		}()
 
-		part, rerr = rc.NextPart()
-		if rerr != nil {
-			return nil
-		}
-		// TODO should be configurable
-		limitedPart = io.LimitReader(part, maxFileUpload)
-		data, err = io.ReadAll(limitedPart)
-		if err != nil {
-			loglogger.Err(err).Msg("could not read limited part")
-		}
-
-		file = &rpc.File{
-			Mime: part.Header().Get("Content-Type"),
-			Step: step.Alias,
-			Name: part.FileName(),
-			Data: data,
-			Size: len(data),
-			Time: time.Now().Unix(),
-			Meta: make(map[string]string),
-		}
-		for key, value := range part.Header() {
-			file.Meta[key] = value[0]
-		}
-
-		loglogger.Debug().
-			Str("file", file.Name).
-			Str("mime", file.Mime).
-			Msg("file stream uploading")
-
-		if serr := r.client.Upload(ctxmeta, work.ID, file); serr != nil {
-			loglogger.Error().
-				Err(serr).
-				Str("file", file.Name).
-				Str("mime", file.Mime).
-				Msg("file stream upload error")
-		}
-
-		loglogger.Debug().
-			Str("file", file.Name).
-			Str("mime", file.Mime).
-			Msg("file stream upload complete")
 		return nil
 	}
 }

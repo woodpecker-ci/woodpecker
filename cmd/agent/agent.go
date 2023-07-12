@@ -19,9 +19,11 @@ import (
 	"context"
 	"crypto/tls"
 	"errors"
+	"fmt"
 	"net/http"
 	"os"
 	"runtime"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -31,10 +33,12 @@ import (
 	"github.com/tevino/abool"
 	"github.com/urfave/cli/v2"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	grpccredentials "google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 
 	"github.com/woodpecker-ci/woodpecker/agent"
 	agentRpc "github.com/woodpecker-ci/woodpecker/agent/rpc"
@@ -45,7 +49,8 @@ import (
 	"github.com/woodpecker-ci/woodpecker/version"
 )
 
-func loop(c *cli.Context) error {
+func run(c *cli.Context) error {
+	agentIDConfigPath := c.String("agent-id-config-path")
 	hostname := c.String("hostname")
 	if len(hostname) == 0 {
 		hostname, _ = os.Hostname()
@@ -106,7 +111,7 @@ func loop(c *cli.Context) error {
 	}
 	defer authConn.Close()
 
-	agentID := int64(-1) // TODO: store agent id in a file
+	agentID := readAgentID(agentIDConfigPath)
 	agentToken := c.String("grpc-token")
 	authClient := agentRpc.NewAuthGrpcClient(authConn, agentToken, agentID)
 	authInterceptor, err := agentRpc.NewAuthInterceptor(authClient, 30*time.Minute)
@@ -175,6 +180,8 @@ func loop(c *cli.Context) error {
 		return err
 	}
 
+	writeAgentID(agentID, agentIDConfigPath)
+
 	labels := map[string]string{
 		"hostname": hostname,
 		"platform": platform,
@@ -182,9 +189,8 @@ func loop(c *cli.Context) error {
 		"repo":     "*", // allow all repos by default
 	}
 
-	for _, v := range c.StringSlice("filter") {
-		parts := strings.SplitN(v, "=", 2)
-		labels[parts[0]] = parts[1]
+	if err := stringSliceAddToMap(c.StringSlice("filter"), labels); err != nil {
+		return err
 	}
 
 	filter := rpc.Filter{
@@ -244,4 +250,67 @@ func loop(c *cli.Context) error {
 
 	wg.Wait()
 	return nil
+}
+
+func runWithRetry(context *cli.Context) error {
+	retryCount := context.Int("connect-retry-count")
+	retryDelay := context.Duration("connect-retry-delay")
+	var err error
+	for i := 0; i < retryCount; i++ {
+		if err = run(context); status.Code(err) == codes.Unavailable {
+			log.Warn().Err(err).Msg(fmt.Sprintf("cannot connect to server, retrying in %v", retryDelay))
+			time.Sleep(retryDelay)
+		} else {
+			break
+		}
+	}
+	return err
+}
+
+func stringSliceAddToMap(sl []string, m map[string]string) error {
+	if m == nil {
+		m = make(map[string]string)
+	}
+	for _, v := range sl {
+		parts := strings.SplitN(v, "=", 2)
+		switch len(parts) {
+		case 2:
+			m[parts[0]] = parts[1]
+		case 1:
+			return fmt.Errorf("key '%s' does not have a value assigned", parts[0])
+		default:
+			return fmt.Errorf("empty string in slice")
+		}
+	}
+	return nil
+}
+
+func readAgentID(agentIDConfigPath string) int64 {
+	const defaultAgentIDValue = int64(-1)
+
+	rawAgentID, fileErr := os.ReadFile(agentIDConfigPath)
+	if fileErr != nil {
+		log.Debug().Err(fileErr).Msgf("could not open agent-id config file from %s", agentIDConfigPath)
+		return defaultAgentIDValue
+	}
+
+	strAgentID := strings.TrimSpace(string(rawAgentID))
+	agentID, parseErr := strconv.ParseInt(strAgentID, 10, 64)
+	if parseErr != nil {
+		log.Warn().Err(parseErr).Msg("could not parse agent-id config file content to int64")
+		return defaultAgentIDValue
+	}
+
+	return agentID
+}
+
+func writeAgentID(agentID int64, agentIDConfigPath string) {
+	currentAgentID := readAgentID(agentIDConfigPath)
+
+	if currentAgentID != agentID {
+		err := os.WriteFile(agentIDConfigPath, []byte(strconv.FormatInt(agentID, 10)+"\n"), 0o644)
+		if err != nil {
+			log.Warn().Err(err).Msgf("could not write agent-id config file to %s", agentIDConfigPath)
+		}
+	}
 }

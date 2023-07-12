@@ -15,6 +15,9 @@
 package datastore
 
 import (
+	"xorm.io/xorm"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store/types"
 )
 
@@ -27,4 +30,28 @@ func wrapGet(exist bool, err error) error {
 		return types.RecordNotExist
 	}
 	return nil
+}
+
+// wrapDelete return error if err not nil or if requested entry do not exist
+func wrapDelete(c int64, err error) error {
+	if err != nil {
+		return err
+	}
+	if c == 0 {
+		return types.RecordNotExist
+	}
+	return nil
+}
+
+func (s storage) paginate(p *model.ListOptions) *xorm.Session {
+	if p.All {
+		return s.engine.NewSession()
+	}
+	if p.PerPage < 1 {
+		p.PerPage = 1
+	}
+	if p.Page < 1 {
+		p.Page = 1
+	}
+	return s.engine.Limit(p.PerPage, p.PerPage*(p.Page-1))
 }
