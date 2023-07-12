@@ -9,8 +9,6 @@ variables:
     - "cmd/cli/**"
     # api docs
     - "server/api/**"
-    # web UI
-    - "web/**"
 
 steps:
   build-cli:
