@@ -49,6 +49,7 @@ import (
 )
 
 func run(c *cli.Context) error {
+	agentConfigPath := c.String("agent-config")
 	hostname := c.String("hostname")
 	if len(hostname) == 0 {
 		hostname, _ = os.Hostname()
@@ -109,9 +110,15 @@ func run(c *cli.Context) error {
 	}
 	defer authConn.Close()
 
-	agentID := int64(-1) // TODO: store agent id in a file
+	agentConfig := readAgentConfig(agentConfigPath)
+
+	// deprecated
+	if agentConfig.AgentID == defaultAgentIDValue {
+		agentConfig.AgentID = readAgentID(c.String("agent-id-config-path"))
+	}
+
 	agentToken := c.String("grpc-token")
-	authClient := agentRpc.NewAuthGrpcClient(authConn, agentToken, agentID)
+	authClient := agentRpc.NewAuthGrpcClient(authConn, agentToken, agentConfig.AgentID)
 	authInterceptor, err := agentRpc.NewAuthInterceptor(authClient, 30*time.Minute)
 	if err != nil {
 		return err
@@ -173,10 +180,12 @@ func run(c *cli.Context) error {
 		return err
 	}
 
-	agentID, err = client.RegisterAgent(ctx, platform, engine.Name(), version.String(), parallel)
+	agentConfig.AgentID, err = client.RegisterAgent(ctx, platform, engine.Name(), version.String(), parallel)
 	if err != nil {
 		return err
 	}
+
+	writeAgentConfig(agentConfig, agentConfigPath)
 
 	labels := map[string]string{
 		"hostname": hostname,
@@ -193,7 +202,7 @@ func run(c *cli.Context) error {
 		Labels: labels,
 	}
 
-	log.Debug().Msgf("Agent registered with ID %d", agentID)
+	log.Debug().Msgf("Agent registered with ID %d", agentConfig.AgentID)
 
 	go func() {
 		for {

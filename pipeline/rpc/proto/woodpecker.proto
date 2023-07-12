@@ -49,11 +49,12 @@ message State {
   string error = 6;
 }
 
-message Line {
-  string step = 1;
+message LogEntry {
+  string step_uuid = 1;
   int64  time = 2;
-  int32  pos = 3;
-  string out = 4;
+  int32  line = 3;
+  int32  type = 4; // 0 = stdout, 1 = stderr, 2 = exit-code, 3 = metadata, 4 = progress
+  string data = 5;
 }
 
 message Filter {
@@ -98,8 +99,7 @@ message UpdateRequest {
 }
 
 message LogRequest {
-  string id = 1;
-  Line   line = 2;
+  LogEntry logEntry = 1;
 }
 
 message Empty {

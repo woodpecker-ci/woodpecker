@@ -1,8 +1,13 @@
+when:
+  - event: [ pull_request, cron ]
+  - event: push
+    branch: [ main, release/* ]
+
 variables:
   - &trivy_image aquasec/trivy:latest
   - &trivy_plugin codeberg.org/woodpecker-plugins/trivy:latest
 
-pipeline:
+steps:
   check backend:
     group: check
     image: *trivy_plugin

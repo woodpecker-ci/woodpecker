@@ -54,6 +54,12 @@ module.exports = {
             label: 'Awesome',
           },
           {
+            to: '/api',
+            position: 'left',
+            label: 'API',
+          },
+          { to: 'blog', label: 'Blog', position: 'left' },
+          {
             type: 'docsVersionDropdown',
             position: 'right',
           },
@@ -218,10 +224,33 @@ module.exports = {
             },
           },
         },
+        blog: {
+          blogTitle: 'Docusaurus blog!',
+          blogDescription: 'A Docusaurus powered blog!',
+          // postsPerPage: 'ALL',
+          // blogSidebarCount: 0,
+        },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
         },
       }),
+    ],
+    [
+      'redocusaurus',
+      {
+        // Plugin Options for loading OpenAPI files
+        specs: [
+          {
+            spec: 'swagger.json',
+            route: '/api/',
+          },
+        ],
+        // Theme Options for modifying how redoc renders them
+        theme: {
+          // Change with your site colors
+          primaryColor: '#1890ff',
+        },
+      },
     ],
   ],
   webpack: {

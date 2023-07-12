@@ -2,10 +2,45 @@
 
 ## User registration
 
-Registration is closed by default. While disabled an administrator needs to add new users manually (exp. `woodpecker-cli user add`).
+Woodpecker does not have its own user registry; users are provided from your [forge](./11-forges/10-overview.md) (using OAuth2).
 
-If registration is open every user with an account at the configured [forges](./11-forges/10-overview.md) can login to Woodpecker.
-This example enables open registration for users that are members of approved organizations:
+Registration is closed by default (`WOODPECKER_OPEN=false`). If registration is open (`WOODPECKER_OPEN=true`) then every user with an account at the configured forge can login to Woodpecker.
+
+To open registration:
+
+```diff
+# docker-compose.yml
+version: '3'
+
+services:
+  woodpecker-server:
+    [...]
+    environment:
+      - [...]
++     - WOODPECKER_OPEN=true
+```
+
+You can **also restrict** registration, by keep registration closed and ...  
+... **adding** new **users manually** via the CLI: `woodpecker-cli user add`, or  
+... allowing specific **admin users** via the `WOODPECKER_ADMIN` setting, or  
+by open registration and **filter by organization** membership through the `WOODPECKER_ORGS` setting.
+
+### To close registration, but allow specific admin users
+
+```diff
+# docker-compose.yml
+version: '3'
+
+services:
+  woodpecker-server:
+    [...]
+    environment:
+      - [...]
++     - WOODPECKER_OPEN=false
++     - WOODPECKER_ADMIN=johnsmith,janedoe
+```
+
+### To only allow registration of users, who are members of approved organizations
 
 ```diff
 # docker-compose.yml
@@ -18,7 +53,6 @@ services:
       - [...]
 +     - WOODPECKER_OPEN=true
 +     - WOODPECKER_ORGS=dolores,dogpatch
-
 ```
 
 ## Administrators
@@ -105,6 +139,47 @@ or generate a random one like this:
 
 `openssl rand -hex 32 | docker secret create woodpecker-agent-secret -`
 
+## Custom Javascript and CSS Styling (a.k.a. white-labeling)
+
+Woodpecker supports custom styling of the Web UI by providing custom JS and CSS files.
+These files must be present in the server's filesystem.
+They can be backed in a Docker image or mounted from a ConfigMap inside a Kubernetes environment.
+The configuration variables are independent of each other, which means it can be just one file present, or both.
+
+```text
+WOODPECKER_CUSTOM_CSS_FILE=/usr/local/www/woodpecker.css
+WOODPECKER_CUSTOM_CSS_FILE=/usr/local/www/woodpecker.js
+```
+
+The examples below show how to place a banner message in the top navigation bar of Woodpecker.
+
+##### woodpecker.css
+```css
+.banner-message {
+    position: absolute;
+    width: 280px;
+    height: 40px;
+    margin-left: 240px;
+    margin-top: 5px;
+    padding-top: 5px;
+    font-weight: bold;
+    background: red no-repeat;
+    text-align: center;
+}
+```
+
+##### woodpecker.js
+
+```javascript
+// place/copy a minified version of jQuery or ZeptoJS here ...
+!function(){"use strict";function e(){};/*...*/}();
+
+$().ready(function(){
+    $(".app nav img").first().htmlAfter("<div class='banner-message'>This is a demo banner message :)</div>")
+});
+```
+
+
 ## All server configuration options
 
 The following list describes all available server configuration options.
@@ -131,6 +206,13 @@ Server fully qualified URL of the user-facing hostname.
 
 Example: `WOODPECKER_HOST=http://woodpecker.example.org`
 
+### `WOODPECKER_WEBHOOK_HOST`
+> Default: value from `WOODPECKER_HOST` config env
+
+Server fully qualified URL of the Webhook-facing hostname.
+
+Example: `WOODPECKER_WEBHOOK_HOST=http://woodpecker-server.cicd.svc.cluster.local:8000`
+
 ### `WOODPECKER_SERVER_ADDR`
 > Default: `:8000`
 
@@ -155,6 +237,24 @@ Path to an SSL certificate key used by the server to accept HTTPS requests.
 
 Example: `WOODPECKER_SERVER_KEY=/path/to/key.pem`
 
+### `WOODPECKER_CUSTOM_CSS_FILE`
+> Default: empty
+
+File path for the server to serve a custom .CSS file, used for customizing the UI.
+Can be used for showing banner messages, logos, or environment-specific hints (a.k.a. white-labeling).
+The file must be UTF-8 encoded, to ensure all special characters are preserved.
+
+Example: `WOODPECKER_CUSTOM_CSS_FILE=/usr/local/www/woodpecker.css`
+
+### `WOODPECKER_CUSTOM_JS_FILE`
+> Default: empty
+
+File path for the server to serve a custom .JS file, used for customizing the UI.
+Can be used for showing banner messages, logos, or environment-specific hints (a.k.a. white-labeling).
+The file must be UTF-8 encoded, to ensure all special characters are preserved.
+
+Example: `WOODPECKER_CUSTOM_JS_FILE=/usr/local/www/woodpecker.js`
+
 ### `WOODPECKER_LETS_ENCRYPT`
 > Default: `false`
 
@@ -169,6 +269,11 @@ Configures the gRPC listener port.
 > Default: `secret`
 
 Configures the gRPC JWT secret.
+
+### `WOODPECKER_GRPC_SECRET_FILE`
+> Default: empty
+
+Read the value for `WOODPECKER_GRPC_SECRET` from the specified filepath.
 
 ### `WOODPECKER_METRICS_SERVER_ADDR`
 > Default: empty
@@ -353,13 +458,14 @@ Read the value for `WOODPECKER_PROMETHEUS_AUTH_TOKEN` from the specified filepat
 Context prefix Woodpecker will use to publish status messages to SCM. You probably will only need to change it if you run multiple Woodpecker instances for a single repository.
 
 ### `WOODPECKER_STATUS_CONTEXT_FORMAT`
-> Default: `{{ .context }}/{{ .event }}/{{ .pipeline }}`
+> Default: `{{ .context }}/{{ .event }}/{{ .workflow }}`
 
 Template for the status messages published to forges, uses [Go templates](https://pkg.go.dev/text/template) as template language.
 Supported variables:
+
 - `context`: Woodpecker's context (see `WOODPECKER_STATUS_CONTEXT`)
 - `event`: the event which started the pipeline
-- `pipeline`: the pipeline's name
+- `workflow`: the workflow's name
 - `owner`: the repo's owner
 - `repo`: the repo's name
 

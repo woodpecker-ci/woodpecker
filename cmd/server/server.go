@@ -341,6 +341,11 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 	server.Config.Server.Key = c.String("server-key")
 	server.Config.Server.AgentToken = c.String("agent-secret")
 	server.Config.Server.Host = c.String("server-host")
+	if c.IsSet("server-webhook-host") {
+		server.Config.Server.WebhookHost = c.String("server-webhook-host")
+	} else {
+		server.Config.Server.WebhookHost = c.String("server-host")
+	}
 	if c.IsSet("server-dev-oauth-host") {
 		server.Config.Server.OAuthHost = c.String("server-dev-oauth-host")
 	} else {
@@ -353,9 +358,12 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 	server.Config.Server.StatusContextFormat = c.String("status-context-format")
 	server.Config.Server.SessionExpires = c.Duration("session-expires")
 	server.Config.Server.RootURL = strings.TrimSuffix(c.String("root-url"), "/")
+	server.Config.Server.CustomCSSFile = strings.TrimSpace(c.String("custom-css-file"))
+	server.Config.Server.CustomJsFile = strings.TrimSpace(c.String("custom-js-file"))
 	server.Config.Pipeline.Networks = c.StringSlice("network")
 	server.Config.Pipeline.Volumes = c.StringSlice("volume")
 	server.Config.Pipeline.Privileged = c.StringSlice("escalate")
+	server.Config.Server.Migrations.AllowLong = c.Bool("migrations-allow-long")
 
 	// prometheus
 	server.Config.Prometheus.AuthToken = c.String("prometheus-auth-token")

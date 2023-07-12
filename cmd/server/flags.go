@@ -46,6 +46,11 @@ var flags = []cli.Flag{
 		Usage:   "server fully qualified url (<scheme>://<host>)",
 	},
 	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_WEBHOOK_HOST"},
+		Name:    "server-webhook-host",
+		Usage:   "server fully qualified url for forge's Webhooks (<scheme>://<host>)",
+	},
+	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_ROOT_URL"},
 		Name:    "root-url",
 		Usage:   "server url root (used for statics loading when having a url path prefix)",
@@ -73,6 +78,16 @@ var flags = []cli.Flag{
 		Usage:   "server ssl key path",
 	},
 	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_CUSTOM_CSS_FILE"},
+		Name:    "custom-css-file",
+		Usage:   "file path for the server to serve a custom .CSS file, used for customizing the UI",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_CUSTOM_JS_FILE"},
+		Name:    "custom-js-file",
+		Usage:   "file path for the server to serve a custom .JS file, used for customizing the UI",
+	},
+	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_LETS_ENCRYPT_EMAIL"},
 		Name:    "lets-encrypt-email",
 		Usage:   "let's encrypt email",
@@ -89,10 +104,11 @@ var flags = []cli.Flag{
 		Value:   ":9000",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_GRPC_SECRET"},
-		Name:    "grpc-secret",
-		Usage:   "grpc jwt secret",
-		Value:   "secret",
+		EnvVars:  []string{"WOODPECKER_GRPC_SECRET"},
+		Name:     "grpc-secret",
+		Usage:    "grpc jwt secret",
+		Value:    "secret",
+		FilePath: os.Getenv("WOODPECKER_GRPC_SECRET_FILE"),
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_METRICS_SERVER_ADDR"},
@@ -239,7 +255,12 @@ var flags = []cli.Flag{
 		EnvVars: []string{"WOODPECKER_STATUS_CONTEXT_FORMAT"},
 		Name:    "status-context-format",
 		Usage:   "status context format",
-		Value:   "{{ .context }}/{{ .event }}/{{ .pipeline }}",
+		Value:   "{{ .context }}/{{ .event }}/{{ .workflow }}",
+	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_MIGRATIONS_ALLOW_LONG"},
+		Name:    "migrations-allow-long",
+		Value:   false,
 	},
 	//
 	// resource limit parameters

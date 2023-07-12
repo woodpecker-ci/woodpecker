@@ -259,3 +259,15 @@ type BranchResp struct {
 type Branch struct {
 	Name string `json:"name"`
 }
+
+type PullRequestResp struct {
+	Page    uint           `json:"page"`
+	PageLen uint           `json:"pagelen"`
+	Size    uint           `json:"size"`
+	Values  []*PullRequest `json:"values"`
+}
+
+type PullRequest struct {
+	ID    uint   `json:"id"`
+	Title string `json:"title"`
+}

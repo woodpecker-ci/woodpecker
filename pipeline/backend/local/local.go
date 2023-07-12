@@ -220,12 +220,23 @@ func (e *local) Destroy(_ context.Context, c *types.Config) error {
 }
 
 func (e *local) getWorkflowIDFromStep(step *types.Step) (string, error) {
-	prefix := strings.Split(step.Name, "_stage_")
-	if len(prefix) < 2 {
-		return "", fmt.Errorf("invalid step name %s", step.Name)
+	sep := "_step_"
+	if strings.Contains(step.Name, sep) {
+		prefix := strings.Split(step.Name, sep)
+		if len(prefix) == 2 {
+			return prefix[0], nil
+		}
 	}
 
-	return prefix[0], nil
+	sep = "_clone"
+	if strings.Contains(step.Name, sep) {
+		prefix := strings.Split(step.Name, sep)
+		if len(prefix) == 2 {
+			return prefix[0], nil
+		}
+	}
+
+	return "", fmt.Errorf("invalid step name (%s) %s", sep, step.Name)
 }
 
 func (e *local) getWorkflowIDFromConfig(c *types.Config) (string, error) {

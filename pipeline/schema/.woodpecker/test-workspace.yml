@@ -2,7 +2,7 @@ workspace:
   base: /go
   path: src/github.com/octocat/hello-world
 
-pipeline:
+steps:
   build:
     image: golang:latest
     commands:

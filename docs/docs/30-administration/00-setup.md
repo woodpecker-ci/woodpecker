@@ -23,8 +23,8 @@ Below are resources requirements for Woodpecker components itself:
 
 | Component | Memory | CPU |
 | --------- | ------ | --- |
-| Server    | 32 MB  | 1   |
-| Agent     | 32 MB  | 1   |
+| Server    | 200 MB | 1   |
+| Agent     |  32 MB | 1   |
 
 Note, that those values do not include the operating system or workload (pipelines execution) resources consumption.
 
@@ -70,6 +70,7 @@ services:
     depends_on:
       - woodpecker-server
     volumes:
+      - woodpecker-agent-config:/etc/woodpecker
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - WOODPECKER_SERVER=woodpecker-server:9000

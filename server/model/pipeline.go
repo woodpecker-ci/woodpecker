@@ -15,7 +15,6 @@
 
 package model
 
-// swagger:model pipeline
 type Pipeline struct {
 	ID                  int64             `json:"id"                      xorm:"pk autoincr 'pipeline_id'"`
 	RepoID              int64             `json:"-"                       xorm:"UNIQUE(s) INDEX 'pipeline_repo_id'"`
@@ -25,7 +24,7 @@ type Pipeline struct {
 	Parent              int64             `json:"parent"                  xorm:"pipeline_parent"`
 	Event               WebhookEvent      `json:"event"                   xorm:"pipeline_event"`
 	Status              StatusValue       `json:"status"                  xorm:"INDEX 'pipeline_status'"`
-	Error               string            `json:"error"                   xorm:"pipeline_error"`
+	Error               string            `json:"error"                   xorm:"LONGTEXT 'pipeline_error'"`
 	Enqueued            int64             `json:"enqueued_at"             xorm:"pipeline_enqueued"`
 	Created             int64             `json:"created_at"              xorm:"pipeline_created"`
 	Updated             int64             `json:"updated_at"              xorm:"updated NOT NULL DEFAULT 0 'updated'"`
@@ -44,19 +43,22 @@ type Pipeline struct {
 	Avatar              string            `json:"author_avatar"           xorm:"pipeline_avatar"`
 	Email               string            `json:"author_email"            xorm:"pipeline_email"`
 	Link                string            `json:"link_url"                xorm:"pipeline_link"`
-	Signed              bool              `json:"signed"                  xorm:"pipeline_signed"`   // deprecate
-	Verified            bool              `json:"verified"                xorm:"pipeline_verified"` // deprecate
 	Reviewer            string            `json:"reviewed_by"             xorm:"pipeline_reviewer"`
 	Reviewed            int64             `json:"reviewed_at"             xorm:"pipeline_reviewed"`
-	Steps               []*Step           `json:"steps,omitempty"         xorm:"-"`
-	ChangedFiles        []string          `json:"changed_files,omitempty" xorm:"json 'changed_files'"`
+	Workflows           []*Workflow       `json:"workflows,omitempty"     xorm:"-"`
+	ChangedFiles        []string          `json:"changed_files,omitempty" xorm:"LONGTEXT 'changed_files'"`
 	AdditionalVariables map[string]string `json:"variables,omitempty"     xorm:"json 'additional_variables'"`
 	PullRequestLabels   []string          `json:"pr_labels,omitempty"     xorm:"json 'pr_labels'"`
-}
+} //	@name Pipeline
 
 // TableName return database table name for xorm
 func (Pipeline) TableName() string {
 	return "pipelines"
+}
+
+// IsMultiPipeline checks if step list contain more than one parent step
+func (p Pipeline) IsMultiPipeline() bool {
+	return len(p.Workflows) > 1
 }
 
 type UpdatePipelineStore interface {
@@ -66,4 +68,4 @@ type UpdatePipelineStore interface {
 type PipelineOptions struct {
 	Branch    string            `json:"branch"`
 	Variables map[string]string `json:"variables"`
-}
+} //	@name PipelineOptions

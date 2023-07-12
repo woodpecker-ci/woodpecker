@@ -3,49 +3,45 @@ import { computed, reactive, Ref, ref } from 'vue';
 
 import useApiClient from '~/compositions/useApiClient';
 import { Repo } from '~/lib/api/types';
-import { repoSlug } from '~/utils/helpers';
 
 export const useRepoStore = defineStore('repos', () => {
   const apiClient = useApiClient();
 
-  const repos: Map<string, Repo> = reactive(new Map());
-  const ownedRepoSlugs = ref<string[]>([]);
+  const repos: Map<number, Repo> = reactive(new Map());
+  const ownedRepoIds = ref<number[]>([]);
 
   const ownedRepos = computed(() =>
     Array.from(repos.entries())
-      .filter(([slug]) => ownedRepoSlugs.value.includes(slug))
+      .filter(([repoId]) => ownedRepoIds.value.includes(repoId))
       .map(([, repo]) => repo),
   );
 
-  function getRepo(owner: Ref<string>, name: Ref<string>) {
-    return computed(() => {
-      const slug = repoSlug(owner.value, name.value);
-      return repos.get(slug);
-    });
+  function getRepo(repoId: Ref<number>) {
+    return computed(() => repos.get(repoId.value));
   }
 
   function setRepo(repo: Repo) {
-    repos.set(repoSlug(repo), repo);
+    repos.set(repo.id, repo);
   }
 
-  async function loadRepo(owner: string, name: string) {
-    const repo = await apiClient.getRepo(owner, name);
-    repos.set(repoSlug(repo), repo);
+  async function loadRepo(repoId: number) {
+    const repo = await apiClient.getRepo(repoId);
+    repos.set(repo.id, repo);
     return repo;
   }
 
   async function loadRepos() {
     const _ownedRepos = await apiClient.getRepoList();
     _ownedRepos.forEach((repo) => {
-      repos.set(repoSlug(repo), repo);
+      repos.set(repo.id, repo);
     });
-    ownedRepoSlugs.value = _ownedRepos.map((repo) => repoSlug(repo));
+    ownedRepoIds.value = _ownedRepos.map((repo) => repo.id);
   }
 
   return {
     repos,
     ownedRepos,
-    ownedRepoSlugs,
+    ownedRepoIds,
     getRepo,
     setRepo,
     loadRepo,

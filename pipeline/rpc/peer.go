@@ -74,7 +74,7 @@ type Peer interface {
 	Update(c context.Context, id string, state State) error
 
 	// Log writes the pipeline log entry.
-	Log(c context.Context, id string, line *Line) error
+	Log(c context.Context, logEntry *LogEntry) error
 
 	// RegisterAgent register our agent to the server
 	RegisterAgent(ctx context.Context, platform, backend, version string, capacity int) (int64, error)
