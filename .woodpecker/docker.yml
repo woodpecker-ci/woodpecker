@@ -1,6 +1,7 @@
 when:
-  event: [push, pull_request]
-  branch: [master, release/*]
+  - event: pull_request
+  - event: push
+    branch: [master, release/*]
 
 depends_on:
   - test
