@@ -64,11 +64,31 @@ func New() (*gin.Engine, error) {
 	f := &prefixFS{httpFS, rootPath}
 	e.GET(rootPath+"/favicon.svg", redirect(server.Config.Server.RootPath+"/favicons/favicon-light-default.svg", http.StatusPermanentRedirect))
 	e.GET(rootPath+"/favicons/*filepath", serveFile(f))
-	e.GET(rootPath+"/assets/*filepath", serveFile(f))
+	e.GET(rootPath+"/assets/*filepath", handleCustomFilesAndAssets(f))
 
 	e.NoRoute(handleIndex)
 
 	return e, nil
+}
+
+func handleCustomFilesAndAssets(fs *prefixFS) func(ctx *gin.Context) {
+	serveFileOrEmptyContent := func(w http.ResponseWriter, r *http.Request, localFileName string) {
+		if len(localFileName) > 0 {
+			http.ServeFile(w, r, localFileName)
+		} else {
+			// prefer zero content over sending a 404 Not Found
+			http.ServeContent(w, r, localFileName, time.Now(), bytes.NewReader([]byte{}))
+		}
+	}
+	return func(ctx *gin.Context) {
+		if strings.HasSuffix(ctx.Request.RequestURI, "/assets/custom.js") {
+			serveFileOrEmptyContent(ctx.Writer, ctx.Request, server.Config.Server.CustomJsFile)
+		} else if strings.HasSuffix(ctx.Request.RequestURI, "/assets/custom.css") {
+			serveFileOrEmptyContent(ctx.Writer, ctx.Request, server.Config.Server.CustomCSSFile)
+		} else {
+			serveFile(fs)(ctx)
+		}
+	}
 }
 
 func serveFile(f *prefixFS) func(ctx *gin.Context) {

@@ -126,6 +126,7 @@ export type PipelineStep = {
   start_time?: number;
   end_time?: number;
   error?: string;
+  type?: StepType;
 };
 
 export type PipelineLog = {
@@ -140,3 +141,11 @@ export type PipelineLog = {
 export type PipelineFeed = Pipeline & {
   repo_id: number;
 };
+
+export enum StepType {
+  Clone = 1,
+  Service,
+  Plugin,
+  Commands,
+  Cache,
+}
