@@ -7,6 +7,8 @@ variables:
     # since we generate docs for cli tool we have to watch this too
     - "cli/**"
     - "cmd/cli/**"
+    # api docs
+    - "server/api/**"
 
 steps:
   build-cli:
@@ -56,7 +58,7 @@ steps:
   # TODO: add step to remove preview again after PR is closed (waiting for #286)
 
   deploy:
-    image: alpine:3.14.2
+    image: alpine:3.18
     secrets:
       - BOT_PRIVATE_KEY
     commands:

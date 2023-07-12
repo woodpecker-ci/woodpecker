@@ -58,6 +58,7 @@ module.exports = {
             position: 'left',
             label: 'API',
           },
+          { to: 'blog', label: 'Blog', position: 'left' },
           {
             type: 'docsVersionDropdown',
             position: 'right',
@@ -222,6 +223,12 @@ module.exports = {
               banner: 'none',
             },
           },
+        },
+        blog: {
+          blogTitle: 'Docusaurus blog!',
+          blogDescription: 'A Docusaurus powered blog!',
+          // postsPerPage: 'ALL',
+          // blogSidebarCount: 0,
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
