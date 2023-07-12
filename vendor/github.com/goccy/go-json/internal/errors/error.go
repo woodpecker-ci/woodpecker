@@ -155,3 +155,29 @@ func ErrInvalidCharacter(c byte, context string, cursor int64) *SyntaxError {
 		Offset: cursor,
 	}
 }
+
+func ErrInvalidBeginningOfValue(c byte, cursor int64) *SyntaxError {
+	return &SyntaxError{
+		msg:    fmt.Sprintf("invalid character '%c' looking for beginning of value", c),
+		Offset: cursor,
+	}
+}
+
+type PathError struct {
+	msg string
+}
+
+func (e *PathError) Error() string {
+	return fmt.Sprintf("json: invalid path format: %s", e.msg)
+}
+
+func ErrInvalidPath(msg string, args ...interface{}) *PathError {
+	if len(args) != 0 {
+		return &PathError{msg: fmt.Sprintf(msg, args...)}
+	}
+	return &PathError{msg: msg}
+}
+
+func ErrEmptyPath() *PathError {
+	return &PathError{msg: "path is empty"}
+}

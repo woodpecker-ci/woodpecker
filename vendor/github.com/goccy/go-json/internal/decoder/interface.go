@@ -94,6 +94,7 @@ func (d *interfaceDecoder) numDecoder(s *Stream) Decoder {
 
 var (
 	emptyInterfaceType = runtime.Type2RType(reflect.TypeOf((*interface{})(nil)).Elem())
+	EmptyInterfaceType = emptyInterfaceType
 	interfaceMapType   = runtime.Type2RType(
 		reflect.TypeOf((*map[string]interface{})(nil)).Elem(),
 	)
@@ -277,7 +278,7 @@ func (d *interfaceDecoder) decodeStreamEmptyInterface(s *Stream, depth int64, p 
 		}
 		break
 	}
-	return errors.ErrNotAtBeginningOfValue(s.totalOffset())
+	return errors.ErrInvalidBeginningOfValue(c, s.totalOffset())
 }
 
 type emptyInterface struct {
@@ -454,5 +455,74 @@ func (d *interfaceDecoder) decodeEmptyInterface(ctx *RuntimeContext, cursor, dep
 		**(**interface{})(unsafe.Pointer(&p)) = nil
 		return cursor, nil
 	}
-	return cursor, errors.ErrNotAtBeginningOfValue(cursor)
+	return cursor, errors.ErrInvalidBeginningOfValue(buf[cursor], cursor)
+}
+
+func NewPathDecoder() Decoder {
+	ifaceDecoder := &interfaceDecoder{
+		typ:        emptyInterfaceType,
+		structName: "",
+		fieldName:  "",
+		floatDecoder: newFloatDecoder("", "", func(p unsafe.Pointer, v float64) {
+			*(*interface{})(p) = v
+		}),
+		numberDecoder: newNumberDecoder("", "", func(p unsafe.Pointer, v json.Number) {
+			*(*interface{})(p) = v
+		}),
+		stringDecoder: newStringDecoder("", ""),
+	}
+	ifaceDecoder.sliceDecoder = newSliceDecoder(
+		ifaceDecoder,
+		emptyInterfaceType,
+		emptyInterfaceType.Size(),
+		"", "",
+	)
+	ifaceDecoder.mapDecoder = newMapDecoder(
+		interfaceMapType,
+		stringType,
+		ifaceDecoder.stringDecoder,
+		interfaceMapType.Elem(),
+		ifaceDecoder,
+		"", "",
+	)
+	return ifaceDecoder
+}
+
+var (
+	truebytes  = []byte("true")
+	falsebytes = []byte("false")
+)
+
+func (d *interfaceDecoder) DecodePath(ctx *RuntimeContext, cursor, depth int64) ([][]byte, int64, error) {
+	buf := ctx.Buf
+	cursor = skipWhiteSpace(buf, cursor)
+	switch buf[cursor] {
+	case '{':
+		return d.mapDecoder.DecodePath(ctx, cursor, depth)
+	case '[':
+		return d.sliceDecoder.DecodePath(ctx, cursor, depth)
+	case '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+		return d.floatDecoder.DecodePath(ctx, cursor, depth)
+	case '"':
+		return d.stringDecoder.DecodePath(ctx, cursor, depth)
+	case 't':
+		if err := validateTrue(buf, cursor); err != nil {
+			return nil, 0, err
+		}
+		cursor += 4
+		return [][]byte{truebytes}, cursor, nil
+	case 'f':
+		if err := validateFalse(buf, cursor); err != nil {
+			return nil, 0, err
+		}
+		cursor += 5
+		return [][]byte{falsebytes}, cursor, nil
+	case 'n':
+		if err := validateNull(buf, cursor); err != nil {
+			return nil, 0, err
+		}
+		cursor += 4
+		return [][]byte{nullbytes}, cursor, nil
+	}
+	return nil, cursor, errors.ErrInvalidBeginningOfValue(buf[cursor], cursor)
 }

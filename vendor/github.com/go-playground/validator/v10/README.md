@@ -1,7 +1,7 @@
 Package validator
 =================
-<img align="right" src="https://raw.githubusercontent.com/go-playground/validator/v9/logo.png">[![Join the chat at https://gitter.im/go-playground/validator](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/go-playground/validator?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-![Project status](https://img.shields.io/badge/version-10.10.0-green.svg)
+<img align="right" src="https://raw.githubusercontent.com/go-playground/validator/v10/logo.png">[![Join the chat at https://gitter.im/go-playground/validator](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/go-playground/validator?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+![Project status](https://img.shields.io/badge/version-10.14.1-green.svg)
 [![Build Status](https://travis-ci.org/go-playground/validator.svg?branch=master)](https://travis-ci.org/go-playground/validator)
 [![Coverage Status](https://coveralls.io/repos/go-playground/validator/badge.svg?branch=master&service=github)](https://coveralls.io/github/go-playground/validator?branch=master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/go-playground/validator)](https://goreportcard.com/report/github.com/go-playground/validator)
@@ -73,8 +73,8 @@ Baked-in Validations
 | - | - |
 | eqcsfield | Field Equals Another Field (relative)|
 | eqfield | Field Equals Another Field |
-| fieldcontains | NOT DOCUMENTED IN doc.go |
-| fieldexcludes | NOT DOCUMENTED IN doc.go |
+| fieldcontains | Check the indicated characters are present in the Field |
+| fieldexcludes | Check the indicated characters are not present in the field |
 | gtcsfield | Field Greater Than Another Relative Field |
 | gtecsfield | Field Greater Than or Equal To Another Relative Field |
 | gtefield | Field Greater Than or Equal To Another Field |
@@ -114,6 +114,7 @@ Baked-in Validations
 | unix_addr | Unix domain socket end point Address |
 | uri | URI String |
 | url | URL String |
+| http_url | HTTP URL String |
 | url_encoded | URL Encoded |
 | urn_rfc2141 | Urn RFC 2141 String |
 
@@ -130,14 +131,14 @@ Baked-in Validations
 | contains | Contains |
 | containsany | Contains Any |
 | containsrune | Contains Rune |
-| endsnotwith | Ends With |
+| endsnotwith | Ends Not With |
 | endswith | Ends With |
 | excludes | Excludes |
 | excludesall | Excludes All |
 | excludesrune | Excludes Rune |
 | lowercase | Lowercase |
 | multibyte | Multi-Byte Characters |
-| number | NOT DOCUMENTED IN doc.go |
+| number | Number |
 | numeric | Numeric |
 | printascii | Printable ASCII |
 | startsnotwith | Starts Not With |
@@ -149,10 +150,14 @@ Baked-in Validations
 | - | - |
 | base64 | Base64 String |
 | base64url | Base64URL String |
+| base64rawurl | Base64RawURL String |
 | bic | Business Identifier Code (ISO 9362) |
 | bcp47_language_tag | Language tag (BCP 47) |
 | btc_addr | Bitcoin Address |
 | btc_addr_bech32 | Bitcoin Bech32 Address (segwit) |
+| credit_card | Credit Card Number |
+| mongodb | MongoDB ObjectID |
+| cron | Cron |
 | datetime | Datetime |
 | e164 | e164 formatted phone number |
 | email | E-mail String
@@ -175,6 +180,7 @@ Baked-in Validations
 | jwt | JSON Web Token (JWT) |
 | latitude | Latitude |
 | longitude | Longitude |
+| luhn_checksum | Luhn Algorithm Checksum (for strings and (u)int) |
 | postcode_iso3166_alpha2 | Postcode |
 | postcode_iso3166_alpha2_field | Postcode |
 | rgb | RGB String |
@@ -189,24 +195,40 @@ Baked-in Validations
 | uuid5 | Universally Unique Identifier UUID v5 |
 | uuid5_rfc4122 | Universally Unique Identifier UUID v5 RFC4122 |
 | uuid_rfc4122 | Universally Unique Identifier UUID RFC4122 |
+| md4 | MD4 hash |
+| md5 | MD5 hash |
+| sha256 | SHA256 hash |
+| sha384 | SHA384 hash |
+| sha512 | SHA512 hash |
+| ripemd128 | RIPEMD-128 hash |
+| ripemd128 | RIPEMD-160 hash |
+| tiger128 | TIGER128 hash |
+| tiger160 | TIGER160 hash |
+| tiger192 | TIGER192 hash |
 | semver | Semantic Versioning 2.0.0 |
 | ulid | Universally Unique Lexicographically Sortable Identifier ULID |
+| cve | Common Vulnerabilities and Exposures Identifier (CVE id) |
 
 ### Comparisons:
 | Tag | Description |
 | - | - |
 | eq | Equals |
+| eq_ignore_case | Equals ignoring case |
 | gt | Greater than|
 | gte | Greater than or equal |
 | lt | Less Than |
 | lte | Less Than or Equal |
 | ne | Not Equal |
+| ne_ignore_case | Not Equal ignoring case |
 
 ### Other:
 | Tag | Description |
 | - | - |
-| dir | Directory |
-| file | File path |
+| dir | Existing Directory |
+| dirpath | Directory Path |
+| file | Existing File |
+| filepath | File Path |
+| image | Image |
 | isdefault | Is Default |
 | len | Length |
 | max | Maximum |
@@ -219,6 +241,8 @@ Baked-in Validations
 | required_with_all | Required With All |
 | required_without | Required Without |
 | required_without_all | Required Without All |
+| excluded_if | Excluded If |
+| excluded_unless | Excluded Unless |
 | excluded_with | Excluded With |
 | excluded_with_all | Excluded With All |
 | excluded_without | Excluded Without |

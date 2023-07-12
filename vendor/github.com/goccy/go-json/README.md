@@ -13,7 +13,7 @@ Fast JSON encoder/decoder compatible with encoding/json for Go
 ```
 * version ( expected release date )
 
-* v0.7.0
+* v0.9.0
  |
  | while maintaining compatibility with encoding/json, we will add convenient APIs
  |
@@ -21,9 +21,8 @@ Fast JSON encoder/decoder compatible with encoding/json for Go
 * v1.0.0
 ```
 
-We are accepting requests for features that will be implemented between v0.7.0 and v.1.0.0.
+We are accepting requests for features that will be implemented between v0.9.0 and v.1.0.0.
 If you have the API you need, please submit your issue [here](https://github.com/goccy/go-json/issues).
-For example, I'm thinking of supporting `context.Context` of `json.Marshaler` and decoding using JSON Path.
 
 # Features
 
@@ -32,6 +31,7 @@ For example, I'm thinking of supporting `context.Context` of `json.Marshaler` an
 - Flexible customization with options
 - Coloring the encoded string
 - Can propagate context.Context to `MarshalJSON` or `UnmarshalJSON`
+- Can dynamically filter the fields of the structure type-safely
 
 # Installation
 
@@ -184,7 +184,7 @@ func Marshal(v interface{}) ([]byte, error) {
 `json.Marshal` and `json.Unmarshal` receive `interface{}` value and they perform type determination dynamically to process.
 In normal case, you need to use the `reflect` library to determine the type dynamically, but since `reflect.Type` is defined as `interface`, when you call the method of `reflect.Type`, The reflect's argument is escaped.
 
-Therefore, the arguments for `Marshal` and `Unmarshal` are always escape to the heap.
+Therefore, the arguments for `Marshal` and `Unmarshal` are always escaped to the heap.
 However, `go-json` can use the feature of `reflect.Type` while avoiding escaping.
 
 `reflect.Type` is defined as `interface`, but in reality `reflect.Type` is implemented only by the structure `rtype` defined in the `reflect` package.
