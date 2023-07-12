@@ -18,7 +18,7 @@ steps:
     group: check
     image: *trivy_plugin
     settings:
-      skip-dirs: node_modules/,plugins/woodpecker-plugins/node_modules
+      skip-dirs: node_modules/,plugins/woodpecker-plugins/node_modules/
       dir:  docs/
       # TODO currently it is not fixable so just do not block currently
       exit-code: 0
