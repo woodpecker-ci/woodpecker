@@ -15,3 +15,4 @@ COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certifica
 COPY dist/server/${TARGETOS}/${TARGETARCH}/woodpecker-server /bin/
 
 ENTRYPOINT ["/bin/woodpecker-server"]
+VOLUME /var/lib/woodpecker

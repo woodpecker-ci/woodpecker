@@ -17,3 +17,4 @@ RUN mkdir -p /etc/woodpecker
 
 HEALTHCHECK CMD ["/bin/woodpecker-agent", "ping"]
 ENTRYPOINT ["/bin/woodpecker-agent"]
+VOLUME /etc/woodpecker

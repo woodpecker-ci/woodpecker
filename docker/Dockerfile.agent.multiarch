@@ -20,3 +20,4 @@ COPY --from=build /etc/woodpecker /etc
 
 HEALTHCHECK CMD ["/bin/woodpecker-agent", "ping"]
 ENTRYPOINT ["/bin/woodpecker-agent"]
+VOLUME /etc/woodpecker

@@ -12,3 +12,4 @@ EXPOSE 8000 9000 80 443
 COPY dist/server/${TARGETOS}/${TARGETARCH}/woodpecker-server /bin/
 
 ENTRYPOINT ["/bin/woodpecker-server"]
+VOLUME /var/lib/woodpecker
