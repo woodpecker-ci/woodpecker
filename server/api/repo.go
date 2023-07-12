@@ -39,18 +39,23 @@ import (
 // PostRepo
 //
 //	@Summary	Activate a repository
-//	@Router		/repos/{repo_id} [post]
+//	@Router		/repos [post]
 //	@Produce	json
 //	@Success	200	{object}	Repo
 //	@Tags		Repositories
-//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		Authorization			header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		forge_remote_id		query		string	true	"the id of a repository at the forge"
 func PostRepo(c *gin.Context) {
 	forge := server.Config.Services.Forge
 	_store := store.FromContext(c)
 	user := session.User(c)
 
 	forgeRemoteID := model.ForgeRemoteID(c.Query("forge_remote_id"))
+	if !forgeRemoteID.IsValid() {
+		c.String(http.StatusBadRequest, "No forge_remote_id provided")
+		return
+	}
+
 	repo, err := _store.GetRepoForgeID(forgeRemoteID)
 	enabledOnce := err == nil // if there's no error, the repo was found and enabled once already
 	if enabledOnce && repo.IsActive {

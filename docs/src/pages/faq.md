@@ -24,7 +24,7 @@ If you want all (new) features of Woodpecker and are willing to accept some poss
 
 You can find download links for the different releases in the [download section](/docs/downloads).
 
-## How to debug clone issues:
+## How to debug clone issues
 
 (And what to do with an error message like `fatal: could not read Username for 'https://<url>': No such device or address`)
 

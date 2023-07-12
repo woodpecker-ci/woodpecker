@@ -108,15 +108,16 @@ type (
 
 	// Step represents a process in the pipeline.
 	Step struct {
-		ID       int64  `json:"id"`
-		PID      int    `json:"pid"`
-		PPID     int    `json:"ppid"`
-		Name     string `json:"name"`
-		State    string `json:"state"`
-		Error    string `json:"error,omitempty"`
-		ExitCode int    `json:"exit_code"`
-		Started  int64  `json:"start_time,omitempty"`
-		Stopped  int64  `json:"end_time,omitempty"`
+		ID       int64    `json:"id"`
+		PID      int      `json:"pid"`
+		PPID     int      `json:"ppid"`
+		Name     string   `json:"name"`
+		State    string   `json:"state"`
+		Error    string   `json:"error,omitempty"`
+		ExitCode int      `json:"exit_code"`
+		Started  int64    `json:"start_time,omitempty"`
+		Stopped  int64    `json:"end_time,omitempty"`
+		Type     StepType `json:"type,omitempty"`
 	}
 
 	// Registry represents a docker registry with credentials.
