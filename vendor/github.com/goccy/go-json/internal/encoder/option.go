@@ -1,6 +1,9 @@
 package encoder
 
-import "context"
+import (
+	"context"
+	"io"
+)
 
 type OptionFlag uint8
 
@@ -11,12 +14,16 @@ const (
 	DebugOption
 	ColorizeOption
 	ContextOption
+	NormalizeUTF8Option
+	FieldQueryOption
 )
 
 type Option struct {
 	Flag        OptionFlag
 	ColorScheme *ColorScheme
 	Context     context.Context
+	DebugOut    io.Writer
+	DebugDOTOut io.WriteCloser
 }
 
 type EncodeFormat struct {

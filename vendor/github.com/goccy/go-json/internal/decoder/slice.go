@@ -9,6 +9,13 @@ import (
 	"github.com/goccy/go-json/internal/runtime"
 )
 
+var (
+	sliceType = runtime.Type2RType(
+		reflect.TypeOf((*sliceHeader)(nil)).Elem(),
+	)
+	nilSlice = unsafe.Pointer(&sliceHeader{})
+)
+
 type sliceDecoder struct {
 	elemType          *runtime.Type
 	isElemPointerType bool
@@ -107,7 +114,7 @@ func (d *sliceDecoder) DecodeStream(s *Stream, depth int64, p unsafe.Pointer) er
 			if err := nullBytes(s); err != nil {
 				return err
 			}
-			*(*unsafe.Pointer)(p) = nil
+			typedmemmove(sliceType, p, nilSlice)
 			return nil
 		case '[':
 			s.cursor++
@@ -216,7 +223,7 @@ func (d *sliceDecoder) Decode(ctx *RuntimeContext, cursor, depth int64, p unsafe
 				return 0, err
 			}
 			cursor += 4
-			*(*unsafe.Pointer)(p) = nil
+			typedmemmove(sliceType, p, nilSlice)
 			return cursor, nil
 		case '[':
 			cursor++
@@ -289,6 +296,85 @@ func (d *sliceDecoder) Decode(ctx *RuntimeContext, cursor, depth int64, p unsafe
 			return 0, d.errNumber(cursor)
 		default:
 			return 0, errors.ErrUnexpectedEndOfJSON("slice", cursor)
+		}
+	}
+}
+
+func (d *sliceDecoder) DecodePath(ctx *RuntimeContext, cursor, depth int64) ([][]byte, int64, error) {
+	buf := ctx.Buf
+	depth++
+	if depth > maxDecodeNestingDepth {
+		return nil, 0, errors.ErrExceededMaxDepth(buf[cursor], cursor)
+	}
+
+	ret := [][]byte{}
+	for {
+		switch buf[cursor] {
+		case ' ', '\n', '\t', '\r':
+			cursor++
+			continue
+		case 'n':
+			if err := validateNull(buf, cursor); err != nil {
+				return nil, 0, err
+			}
+			cursor += 4
+			return [][]byte{nullbytes}, cursor, nil
+		case '[':
+			cursor++
+			cursor = skipWhiteSpace(buf, cursor)
+			if buf[cursor] == ']' {
+				cursor++
+				return ret, cursor, nil
+			}
+			idx := 0
+			for {
+				child, found, err := ctx.Option.Path.node.Index(idx)
+				if err != nil {
+					return nil, 0, err
+				}
+				if found {
+					if child != nil {
+						oldPath := ctx.Option.Path.node
+						ctx.Option.Path.node = child
+						paths, c, err := d.valueDecoder.DecodePath(ctx, cursor, depth)
+						if err != nil {
+							return nil, 0, err
+						}
+						ctx.Option.Path.node = oldPath
+						ret = append(ret, paths...)
+						cursor = c
+					} else {
+						start := cursor
+						end, err := skipValue(buf, cursor, depth)
+						if err != nil {
+							return nil, 0, err
+						}
+						ret = append(ret, buf[start:end])
+						cursor = end
+					}
+				} else {
+					c, err := skipValue(buf, cursor, depth)
+					if err != nil {
+						return nil, 0, err
+					}
+					cursor = c
+				}
+				cursor = skipWhiteSpace(buf, cursor)
+				switch buf[cursor] {
+				case ']':
+					cursor++
+					return ret, cursor, nil
+				case ',':
+					idx++
+				default:
+					return nil, 0, errors.ErrInvalidCharacter(buf[cursor], "slice", cursor)
+				}
+				cursor++
+			}
+		case '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+			return nil, 0, d.errNumber(cursor)
+		default:
+			return nil, 0, errors.ErrUnexpectedEndOfJSON("slice", cursor)
 		}
 	}
 }

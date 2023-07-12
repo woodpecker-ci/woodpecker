@@ -1,6 +1,7 @@
 package decoder
 
 import (
+	"fmt"
 	"unsafe"
 
 	"github.com/goccy/go-json/internal/errors"
@@ -18,7 +19,9 @@ type arrayDecoder struct {
 }
 
 func newArrayDecoder(dec Decoder, elemType *runtime.Type, alen int, structName, fieldName string) *arrayDecoder {
-	zeroValue := *(*unsafe.Pointer)(unsafe_New(elemType))
+	// workaround to avoid checkptr errors. cannot use `*(*unsafe.Pointer)(unsafe_New(elemType))` directly.
+	zeroValuePtr := unsafe_New(elemType)
+	zeroValue := **(**unsafe.Pointer)(unsafe.Pointer(&zeroValuePtr))
 	return &arrayDecoder{
 		valueDecoder: dec,
 		elemType:     elemType,
@@ -166,4 +169,8 @@ func (d *arrayDecoder) Decode(ctx *RuntimeContext, cursor, depth int64, p unsafe
 			return 0, errors.ErrUnexpectedEndOfJSON("array", cursor)
 		}
 	}
+}
+
+func (d *arrayDecoder) DecodePath(ctx *RuntimeContext, cursor, depth int64) ([][]byte, int64, error) {
+	return nil, 0, fmt.Errorf("json: array decoder does not support decode path")
 }
