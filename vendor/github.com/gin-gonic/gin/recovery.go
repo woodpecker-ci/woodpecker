@@ -1,4 +1,4 @@
-// Copyright 2014 Manu Martinez-Almeida.  All rights reserved.
+// Copyright 2014 Manu Martinez-Almeida. All rights reserved.
 // Use of this source code is governed by a MIT style
 // license that can be found in the LICENSE file.
 
@@ -6,9 +6,9 @@ package gin
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
@@ -27,14 +27,14 @@ var (
 )
 
 // RecoveryFunc defines the function passable to CustomRecovery.
-type RecoveryFunc func(c *Context, err interface{})
+type RecoveryFunc func(c *Context, err any)
 
 // Recovery returns a middleware that recovers from any panics and writes a 500 if there was one.
 func Recovery() HandlerFunc {
 	return RecoveryWithWriter(DefaultErrorWriter)
 }
 
-//CustomRecovery returns a middleware that recovers from any panics and calls the provided handle func to handle it.
+// CustomRecovery returns a middleware that recovers from any panics and calls the provided handle func to handle it.
 func CustomRecovery(handle RecoveryFunc) HandlerFunc {
 	return RecoveryWithWriter(DefaultErrorWriter, handle)
 }
@@ -60,8 +60,11 @@ func CustomRecoveryWithWriter(out io.Writer, handle RecoveryFunc) HandlerFunc {
 				// condition that warrants a panic stack trace.
 				var brokenPipe bool
 				if ne, ok := err.(*net.OpError); ok {
-					if se, ok := ne.Err.(*os.SyscallError); ok {
-						if strings.Contains(strings.ToLower(se.Error()), "broken pipe") || strings.Contains(strings.ToLower(se.Error()), "connection reset by peer") {
+					var se *os.SyscallError
+					if errors.As(ne, &se) {
+						seStr := strings.ToLower(se.Error())
+						if strings.Contains(seStr, "broken pipe") ||
+							strings.Contains(seStr, "connection reset by peer") {
 							brokenPipe = true
 						}
 					}
@@ -89,7 +92,7 @@ func CustomRecoveryWithWriter(out io.Writer, handle RecoveryFunc) HandlerFunc {
 				}
 				if brokenPipe {
 					// If the connection is dead, we can't write a status to it.
-					c.Error(err.(error)) // nolint: errcheck
+					c.Error(err.(error)) //nolint: errcheck
 					c.Abort()
 				} else {
 					handle(c, err)
@@ -100,7 +103,7 @@ func CustomRecoveryWithWriter(out io.Writer, handle RecoveryFunc) HandlerFunc {
 	}
 }
 
-func defaultHandleRecovery(c *Context, err interface{}) {
+func defaultHandleRecovery(c *Context, _ any) {
 	c.AbortWithStatus(http.StatusInternalServerError)
 }
 
@@ -119,7 +122,7 @@ func stack(skip int) []byte {
 		// Print this much at least.  If we can't find the source, it won't show.
 		fmt.Fprintf(buf, "%s:%d (0x%x)\n", file, line, pc)
 		if file != lastFile {
-			data, err := ioutil.ReadFile(file)
+			data, err := os.ReadFile(file)
 			if err != nil {
 				continue
 			}
@@ -153,7 +156,7 @@ func function(pc uintptr) []byte {
 	//	runtime/debug.*T·ptrmethod
 	// and want
 	//	*T.ptrmethod
-	// Also the package path might contains dot (e.g. code.google.com/...),
+	// Also the package path might contain dot (e.g. code.google.com/...),
 	// so first eliminate the path prefix
 	if lastSlash := bytes.LastIndex(name, slash); lastSlash >= 0 {
 		name = name[lastSlash+1:]
@@ -161,11 +164,11 @@ func function(pc uintptr) []byte {
 	if period := bytes.Index(name, dot); period >= 0 {
 		name = name[period+1:]
 	}
-	name = bytes.Replace(name, centerDot, dot, -1)
+	name = bytes.ReplaceAll(name, centerDot, dot)
 	return name
 }
 
+// timeFormat returns a customized time string for logger.
 func timeFormat(t time.Time) string {
-	timeString := t.Format("2006/01/02 - 15:04:05")
-	return timeString
+	return t.Format("2006/01/02 - 15:04:05")
 }

@@ -35,6 +35,15 @@ type emptyInterface struct {
 	ptr unsafe.Pointer
 }
 
+type nonEmptyInterface struct {
+	itab *struct {
+		ityp *runtime.Type // static interface type
+		typ  *runtime.Type // dynamic concrete type
+		// unused fields...
+	}
+	ptr unsafe.Pointer
+}
+
 func errUnimplementedOp(op encoder.OpType) error {
 	return fmt.Errorf("encoder (indent): opcode %s has not been implemented", op)
 }
@@ -61,7 +70,19 @@ func loadNPtr(base uintptr, idx uint32, ptrNum uint8) uintptr {
 	return p
 }
 
-func ptrToUint64(p uintptr) uint64              { return **(**uint64)(unsafe.Pointer(&p)) }
+func ptrToUint64(p uintptr, bitSize uint8) uint64 {
+	switch bitSize {
+	case 8:
+		return (uint64)(**(**uint8)(unsafe.Pointer(&p)))
+	case 16:
+		return (uint64)(**(**uint16)(unsafe.Pointer(&p)))
+	case 32:
+		return (uint64)(**(**uint32)(unsafe.Pointer(&p)))
+	case 64:
+		return **(**uint64)(unsafe.Pointer(&p))
+	}
+	return 0
+}
 func ptrToFloat32(p uintptr) float32            { return **(**float32)(unsafe.Pointer(&p)) }
 func ptrToFloat64(p uintptr) float64            { return **(**float64)(unsafe.Pointer(&p)) }
 func ptrToBool(p uintptr) bool                  { return **(**bool)(unsafe.Pointer(&p)) }
@@ -107,8 +128,12 @@ func appendComma(_ *encoder.RuntimeContext, b []byte) []byte {
 	return append(b, ',', '\n')
 }
 
+func appendNullComma(_ *encoder.RuntimeContext, b []byte) []byte {
+	return append(b, "null,\n"...)
+}
+
 func appendColon(_ *encoder.RuntimeContext, b []byte) []byte {
-	return append(b, ':', ' ')
+	return append(b[:len(b)-2], ':', ' ')
 }
 
 func appendMapKeyValue(ctx *encoder.RuntimeContext, code *encoder.Opcode, b, key, value []byte) []byte {
@@ -148,8 +173,9 @@ func appendEmptyObject(_ *encoder.RuntimeContext, b []byte) []byte {
 
 func appendObjectEnd(ctx *encoder.RuntimeContext, code *encoder.Opcode, b []byte) []byte {
 	last := len(b) - 1
-	b[last] = '\n'
-	b = appendIndent(ctx, b, code.Indent-1)
+	// replace comma to newline
+	b[last-1] = '\n'
+	b = appendIndent(ctx, b[:last], code.Indent)
 	return append(b, '}', ',', '\n')
 }
 

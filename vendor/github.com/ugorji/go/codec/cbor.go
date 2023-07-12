@@ -7,6 +7,7 @@ import (
 	"math"
 	"reflect"
 	"time"
+	"unicode/utf8"
 )
 
 // major
@@ -610,6 +611,9 @@ func (d *cborDecDriver) DecodeBytes(bs []byte) (bsOut []byte) {
 		for i := 0; i < len(bs); i++ {
 			bs[i] = uint8(chkOvf.UintV(d.DecodeUint64(), 8))
 		}
+		for i := len(bs); i < slen; i++ {
+			bs = append(bs, uint8(chkOvf.UintV(d.DecodeUint64(), 8)))
+		}
 		return bs
 	}
 	clen := d.decLen()
@@ -626,7 +630,11 @@ func (d *cborDecDriver) DecodeBytes(bs []byte) (bsOut []byte) {
 }
 
 func (d *cborDecDriver) DecodeStringAsBytes() (s []byte) {
-	return d.DecodeBytes(nil)
+	s = d.DecodeBytes(nil)
+	if d.h.ValidateUnicode && !utf8.Valid(s) {
+		d.d.errorf("DecodeStringAsBytes: invalid UTF-8: %s", s)
+	}
+	return
 }
 
 func (d *cborDecDriver) DecodeTime() (t time.Time) {

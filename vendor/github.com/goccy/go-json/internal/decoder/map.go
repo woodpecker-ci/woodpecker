@@ -9,27 +9,40 @@ import (
 )
 
 type mapDecoder struct {
-	mapType       *runtime.Type
-	keyType       *runtime.Type
-	valueType     *runtime.Type
-	stringKeyType bool
-	keyDecoder    Decoder
-	valueDecoder  Decoder
-	structName    string
-	fieldName     string
+	mapType                 *runtime.Type
+	keyType                 *runtime.Type
+	valueType               *runtime.Type
+	canUseAssignFaststrType bool
+	keyDecoder              Decoder
+	valueDecoder            Decoder
+	structName              string
+	fieldName               string
 }
 
 func newMapDecoder(mapType *runtime.Type, keyType *runtime.Type, keyDec Decoder, valueType *runtime.Type, valueDec Decoder, structName, fieldName string) *mapDecoder {
 	return &mapDecoder{
-		mapType:       mapType,
-		keyDecoder:    keyDec,
-		keyType:       keyType,
-		stringKeyType: keyType.Kind() == reflect.String,
-		valueType:     valueType,
-		valueDecoder:  valueDec,
-		structName:    structName,
-		fieldName:     fieldName,
+		mapType:                 mapType,
+		keyDecoder:              keyDec,
+		keyType:                 keyType,
+		canUseAssignFaststrType: canUseAssignFaststrType(keyType, valueType),
+		valueType:               valueType,
+		valueDecoder:            valueDec,
+		structName:              structName,
+		fieldName:               fieldName,
 	}
+}
+
+const (
+	mapMaxElemSize = 128
+)
+
+// See detail: https://github.com/goccy/go-json/pull/283
+func canUseAssignFaststrType(key *runtime.Type, value *runtime.Type) bool {
+	indirectElem := value.Size() > mapMaxElemSize
+	if indirectElem {
+		return false
+	}
+	return key.Kind() == reflect.String
 }
 
 //go:linkname makemap reflect.makemap
@@ -45,8 +58,8 @@ func mapassign_faststr(t *runtime.Type, m unsafe.Pointer, s string) unsafe.Point
 func mapassign(t *runtime.Type, m unsafe.Pointer, k, v unsafe.Pointer)
 
 func (d *mapDecoder) mapassign(t *runtime.Type, m, k, v unsafe.Pointer) {
-	if d.stringKeyType {
-		mapV := mapassign_faststr(d.mapType, m, *(*string)(k))
+	if d.canUseAssignFaststrType {
+		mapV := mapassign_faststr(t, m, *(*string)(k))
 		typedmemmove(d.valueType, mapV, v)
 	} else {
 		mapassign(t, m, k, v)
@@ -74,13 +87,13 @@ func (d *mapDecoder) DecodeStream(s *Stream, depth int64, p unsafe.Pointer) erro
 	if mapValue == nil {
 		mapValue = makemap(d.mapType, 0)
 	}
-	if s.buf[s.cursor+1] == '}' {
+	s.cursor++
+	if s.skipWhiteSpace() == '}' {
 		*(*unsafe.Pointer)(p) = mapValue
-		s.cursor += 2
+		s.cursor++
 		return nil
 	}
 	for {
-		s.cursor++
 		k := unsafe_New(d.keyType)
 		if err := d.keyDecoder.DecodeStream(s, depth, k); err != nil {
 			return err
@@ -104,6 +117,7 @@ func (d *mapDecoder) DecodeStream(s *Stream, depth int64, p unsafe.Pointer) erro
 		if !s.equalChar(',') {
 			return errors.ErrExpected("comma after object value", s.totalOffset())
 		}
+		s.cursor++
 	}
 }
 
@@ -167,6 +181,99 @@ func (d *mapDecoder) Decode(ctx *RuntimeContext, cursor, depth int64, p unsafe.P
 		}
 		if buf[cursor] != ',' {
 			return 0, errors.ErrExpected("comma after object value", cursor)
+		}
+		cursor++
+	}
+}
+
+func (d *mapDecoder) DecodePath(ctx *RuntimeContext, cursor, depth int64) ([][]byte, int64, error) {
+	buf := ctx.Buf
+	depth++
+	if depth > maxDecodeNestingDepth {
+		return nil, 0, errors.ErrExceededMaxDepth(buf[cursor], cursor)
+	}
+
+	cursor = skipWhiteSpace(buf, cursor)
+	buflen := int64(len(buf))
+	if buflen < 2 {
+		return nil, 0, errors.ErrExpected("{} for map", cursor)
+	}
+	switch buf[cursor] {
+	case 'n':
+		if err := validateNull(buf, cursor); err != nil {
+			return nil, 0, err
+		}
+		cursor += 4
+		return [][]byte{nullbytes}, cursor, nil
+	case '{':
+	default:
+		return nil, 0, errors.ErrExpected("{ character for map value", cursor)
+	}
+	cursor++
+	cursor = skipWhiteSpace(buf, cursor)
+	if buf[cursor] == '}' {
+		cursor++
+		return nil, cursor, nil
+	}
+	keyDecoder, ok := d.keyDecoder.(*stringDecoder)
+	if !ok {
+		return nil, 0, &errors.UnmarshalTypeError{
+			Value:  "string",
+			Type:   reflect.TypeOf(""),
+			Offset: cursor,
+			Struct: d.structName,
+			Field:  d.fieldName,
+		}
+	}
+	ret := [][]byte{}
+	for {
+		key, keyCursor, err := keyDecoder.decodeByte(buf, cursor)
+		if err != nil {
+			return nil, 0, err
+		}
+		cursor = skipWhiteSpace(buf, keyCursor)
+		if buf[cursor] != ':' {
+			return nil, 0, errors.ErrExpected("colon after object key", cursor)
+		}
+		cursor++
+		child, found, err := ctx.Option.Path.Field(string(key))
+		if err != nil {
+			return nil, 0, err
+		}
+		if found {
+			if child != nil {
+				oldPath := ctx.Option.Path.node
+				ctx.Option.Path.node = child
+				paths, c, err := d.valueDecoder.DecodePath(ctx, cursor, depth)
+				if err != nil {
+					return nil, 0, err
+				}
+				ctx.Option.Path.node = oldPath
+				ret = append(ret, paths...)
+				cursor = c
+			} else {
+				start := cursor
+				end, err := skipValue(buf, cursor, depth)
+				if err != nil {
+					return nil, 0, err
+				}
+				ret = append(ret, buf[start:end])
+				cursor = end
+			}
+		} else {
+			c, err := skipValue(buf, cursor, depth)
+			if err != nil {
+				return nil, 0, err
+			}
+			cursor = c
+		}
+		cursor = skipWhiteSpace(buf, cursor)
+		if buf[cursor] == '}' {
+			cursor++
+			return ret, cursor, nil
+		}
+		if buf[cursor] != ',' {
+			return nil, 0, errors.ErrExpected("comma after object value", cursor)
 		}
 		cursor++
 	}

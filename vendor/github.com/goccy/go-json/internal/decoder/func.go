@@ -2,6 +2,7 @@ package decoder
 
 import (
 	"bytes"
+	"fmt"
 	"unsafe"
 
 	"github.com/goccy/go-json/internal/errors"
@@ -76,7 +77,7 @@ func (d *funcDecoder) DecodeStream(s *Stream, depth int64, p unsafe.Pointer) err
 			}
 		}
 	}
-	return errors.ErrNotAtBeginningOfValue(start)
+	return errors.ErrInvalidBeginningOfValue(s.buf[s.cursor], s.totalOffset())
 }
 
 func (d *funcDecoder) Decode(ctx *RuntimeContext, cursor, depth int64, p unsafe.Pointer) (int64, error) {
@@ -137,5 +138,9 @@ func (d *funcDecoder) Decode(ctx *RuntimeContext, cursor, depth int64, p unsafe.
 			}
 		}
 	}
-	return 0, errors.ErrNotAtBeginningOfValue(start)
+	return cursor, errors.ErrInvalidBeginningOfValue(buf[cursor], cursor)
+}
+
+func (d *funcDecoder) DecodePath(ctx *RuntimeContext, cursor, depth int64) ([][]byte, int64, error) {
+	return nil, 0, fmt.Errorf("json: func decoder does not support decode path")
 }
