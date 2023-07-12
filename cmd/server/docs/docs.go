@@ -3121,7 +3121,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "boolean",
-                        "description": "query not activated repos from forge too",
+                        "description": "query all repos, including inactive ones",
                         "name": "all",
                         "in": "query"
                     }
