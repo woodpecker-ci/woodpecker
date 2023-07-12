@@ -3,7 +3,7 @@ steps:
     image: woodpeckerci/plugin-ready-release-go
     pull: true
     settings:
-      release_branch: main
+      release_branch: ${CI_REPO_DEFAULT_BRANCH}
       forge_type: github
       git_email: woodpecker-bot@obermui.de
       github_token:
@@ -11,4 +11,4 @@ steps:
 
 when:
   event: push
-  branch: main
+  branch: ${CI_REPO_DEFAULT_BRANCH}
