@@ -70,6 +70,7 @@ services:
     depends_on:
       - woodpecker-server
     volumes:
+      - woodpecker-agent-config:/etc/woodpecker
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - WOODPECKER_SERVER=woodpecker-server:9000
