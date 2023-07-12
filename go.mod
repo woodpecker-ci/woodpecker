@@ -7,6 +7,7 @@ require (
 	codeberg.org/6543/go-yaml2json v1.0.0
 	codeberg.org/6543/xyaml v1.1.0
 	github.com/alessio/shellescape v1.4.1
+	github.com/andybalholm/brotli v1.0.5
 	github.com/antonmedv/expr v1.12.5
 	github.com/bmatcuk/doublestar/v4 v4.6.0
 	github.com/caddyserver/certmagic v0.17.2
@@ -26,6 +27,7 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/securecookie v1.1.1
 	github.com/joho/godotenv v1.5.1
+	github.com/klauspost/compress v1.16.5
 	github.com/lafriks/ttlcache/v3 v3.2.0
 	github.com/lib/pq v1.10.9
 	github.com/mattn/go-sqlite3 v1.14.16
