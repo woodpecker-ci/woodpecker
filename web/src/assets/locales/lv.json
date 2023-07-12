@@ -470,6 +470,7 @@
     "dl_cli": "Lejupielādēt komandrindas rīku",
     "internal_error": "Notikusi sistēmas iekšējā kļūda",
     "oauth_error": "Neizdevās autorizēties, izmantojot, OAuth piegādātāju",
+    "reset_token": "Atiestatīt talonu",
     "settings": "Lietotāja iestatījumi",
     "shell_setup": "Komandrindas iestatīšana",
     "shell_setup_before": "izpildiet komandrindā sekojošas darbības",

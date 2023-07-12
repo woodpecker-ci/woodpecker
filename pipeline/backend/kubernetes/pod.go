@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/rs/zerolog/log"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/common"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"golang.org/x/exp/maps"
@@ -94,16 +95,18 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 	labels["step"] = podName
 
 	var nodeSelector map[string]string
-	if platform, exist := step.Environment["CI_SYSTEM_PLATFORM"]; exist {
+	platform, exist := step.Environment["CI_SYSTEM_ARCH"]
+	if exist && platform != "" {
 		arch := strings.Split(platform, "/")[1]
 		nodeSelector = map[string]string{v1.LabelArchStable: arch}
+		log.Trace().Msgf("Using the node selector from the Agent's platform: %v", nodeSelector)
 	}
-
 	beOptNodeSelector := step.BackendOptions.Kubernetes.NodeSelector
 	if len(beOptNodeSelector) > 0 {
 		if len(nodeSelector) == 0 {
 			nodeSelector = beOptNodeSelector
 		} else {
+			log.Trace().Msgf("Appending labels to the node selector from the backend options: %v", beOptNodeSelector)
 			maps.Copy(nodeSelector, beOptNodeSelector)
 		}
 	}
