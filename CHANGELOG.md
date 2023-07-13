@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.15.11](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.11) - 2023-07-12
+
+* SECURITY
+  * Update github.com/gin-gonic/gin to 1.9.1 (#1989)
+* ENHANCEMENTS
+  * Allow gitea dev version (#914) (#1988)
+
 ## [0.15.10](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.10) - 2023-07-09
 
 * SECURITY
