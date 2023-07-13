@@ -141,7 +141,7 @@ func Test_GitLab(t *testing.T) {
 					)
 					req.Header = testdata.ServiceHookHeaders
 
-					hookRepo, pipeline, _, err := client.Hook(ctx, req)
+					hookRepo, pipeline, err := client.Hook(ctx, req)
 					assert.NoError(t, err)
 					if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
 						assert.Equal(t, pipeline.Event, model.EventPush)
@@ -164,7 +164,7 @@ func Test_GitLab(t *testing.T) {
 					)
 					req.Header = testdata.ServiceHookHeaders
 
-					hookRepo, pipeline, _, err := client.Hook(ctx, req)
+					hookRepo, pipeline, err := client.Hook(ctx, req)
 					assert.NoError(t, err)
 					if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
 						assert.Equal(t, "test", hookRepo.Owner)
@@ -187,7 +187,7 @@ func Test_GitLab(t *testing.T) {
 					req.Header = testdata.ServiceHookHeaders
 
 					// TODO: insert fake store into context to retrieve user & repo, this will activate fetching of ChangedFiles
-					hookRepo, pipeline, _, err := client.Hook(ctx, req)
+					hookRepo, pipeline, err := client.Hook(ctx, req)
 					assert.NoError(t, err)
 					if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
 						assert.Equal(t, "http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg", hookRepo.Avatar)

@@ -24,6 +24,7 @@ import (
 
 	"github.com/google/go-github/v39/github"
 
+	"github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/shared/utils"
 )
@@ -65,8 +66,9 @@ func parseHook(r *http.Request, merge bool) (*github.PullRequest, *model.Repo, *
 		return nil, repo, pipeline, err
 	case *github.PullRequestEvent:
 		return parsePullHook(hook, merge)
+	default:
+		return nil, nil, nil, &types.ErrIgnoreEvent{Event: github.Stringify(hook)}
 	}
-	return nil, nil, nil, nil
 }
 
 // parsePushHook parses a push hook and returns the Repo and Pipeline details.

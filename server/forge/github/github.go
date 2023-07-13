@@ -537,25 +537,20 @@ func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 
 // Hook parses the post-commit hook from the Request body
 // and returns the required data in a standard format.
-func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Pipeline, bool, error) {
+func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error) {
 	pull, repo, pipeline, err := parseHook(r, c.MergeRef)
 	if err != nil {
-		return nil, nil, false, err
-	}
-
-	// ignore event
-	if pull == nil && repo == nil && pipeline == nil {
-		return nil, nil, true, nil
+		return nil, nil, err
 	}
 
 	if pull != nil && len(pipeline.ChangedFiles) == 0 {
 		pipeline, err = c.loadChangedFilesFromPullRequest(ctx, pull, repo, pipeline)
 		if err != nil {
-			return nil, nil, false, err
+			return nil, nil, err
 		}
 	}
 
-	return repo, pipeline, false, nil
+	return repo, pipeline, nil
 }
 
 func (c *client) loadChangedFilesFromPullRequest(ctx context.Context, pull *github.PullRequest, tmpRepo *model.Repo, pipeline *model.Pipeline) (*model.Pipeline, error) {

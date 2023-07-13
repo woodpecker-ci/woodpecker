@@ -483,21 +483,16 @@ func (c *Gitea) PullRequests(ctx context.Context, u *model.User, r *model.Repo, 
 
 // Hook parses the incoming Gitea hook and returns the Repository and Pipeline
 // details. If the hook is unsupported nil values are returned.
-func (c *Gitea) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Pipeline, bool, error) {
+func (c *Gitea) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error) {
 	repo, pipeline, err := parseHook(r)
 	if err != nil {
-		return nil, nil, false, err
-	}
-
-	if repo == nil || pipeline == nil {
-		// ignore  hook
-		return nil, nil, true, nil
+		return nil, nil, err
 	}
 
 	if pipeline.Event == model.EventPull && len(pipeline.ChangedFiles) == 0 {
 		index, err := strconv.ParseInt(strings.Split(pipeline.Ref, "/")[2], 10, 64)
 		if err != nil {
-			return nil, nil, false, err
+			return nil, nil, err
 		}
 		pipeline.ChangedFiles, err = c.getChangedFilesForPR(ctx, repo, index)
 		if err != nil {
@@ -505,7 +500,7 @@ func (c *Gitea) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.
 		}
 	}
 
-	return repo, pipeline, false, nil
+	return repo, pipeline, nil
 }
 
 // OrgMembership returns if user is member of organization and if user

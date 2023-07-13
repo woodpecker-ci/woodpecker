@@ -33,6 +33,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/forge/common"
+	"github.com/woodpecker-ci/woodpecker/server/forge/types"
 	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store"
@@ -589,38 +590,37 @@ func (g *GitLab) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 
 // Hook parses the post-commit hook from the Request body
 // and returns the required data in a standard format.
-func (g *GitLab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *model.Pipeline, bool, error) {
+func (g *GitLab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *model.Pipeline, error) {
 	defer req.Body.Close()
 	payload, err := io.ReadAll(req.Body)
 	if err != nil {
-		return nil, nil, false, err
+		return nil, nil, err
 	}
 
-	parsed, err := gitlab.ParseWebhook(gitlab.WebhookEventType(req), payload)
+	eventType := gitlab.WebhookEventType(req)
+	parsed, err := gitlab.ParseWebhook(eventType, payload)
 	if err != nil {
-		return nil, nil, false, err
+		return nil, nil, err
 	}
 
 	switch event := parsed.(type) {
 	case *gitlab.MergeEvent:
 		mergeIID, repo, pipeline, err := convertMergeRequestHook(event, req)
 		if err != nil {
-			return nil, nil, false, err
+			return nil, nil, err
 		}
 
 		if pipeline, err = g.loadChangedFilesFromMergeRequest(ctx, repo, pipeline, mergeIID); err != nil {
-			return nil, nil, false, err
+			return nil, nil, err
 		}
 
-		return repo, pipeline, false, nil
+		return repo, pipeline, nil
 	case *gitlab.PushEvent:
-		r, p, err := convertPushHook(event)
-		return r, p, false, err
+		return convertPushHook(event)
 	case *gitlab.TagEvent:
-		r, p, err := convertTagHook(event)
-		return r, p, false, err
+		return convertTagHook(event)
 	default:
-		return nil, nil, true, nil
+		return nil, nil, &types.ErrIgnoreEvent{Event: eventType}
 	}
 }
 
