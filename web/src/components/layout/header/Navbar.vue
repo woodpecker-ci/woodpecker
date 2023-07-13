@@ -71,7 +71,7 @@ export default defineComponent({
     const route = useRoute();
     const authentication = useAuthentication();
     const { darkMode } = useDarkMode();
-    const docsUrl = window.WOODPECKER_DOCS;
+    const docsUrl = config.docs || undefined;
     const apiUrl = `${config.rootURL ?? ''}/swagger/index.html`;
 
     function doLogin() {
