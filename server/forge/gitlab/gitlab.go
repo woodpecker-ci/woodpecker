@@ -620,7 +620,7 @@ func (g *GitLab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 	case *gitlab.TagEvent:
 		return convertTagHook(event)
 	default:
-		return nil, nil, &types.ErrIgnoreEvent{Event: eventType}
+		return nil, nil, &types.ErrIgnoreEvent{Event: string(eventType)}
 	}
 }
 

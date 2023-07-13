@@ -237,7 +237,7 @@ func Test_bitbucket(t *testing.T) {
 			req.Header = http.Header{}
 			req.Header.Set(hookEvent, hookPush)
 
-			r, b, _, err := c.Hook(ctx, req)
+			r, b, err := c.Hook(ctx, req)
 			g.Assert(err).IsNil()
 			g.Assert(r.FullName).Equal("martinherren1984/publictestrepo")
 			g.Assert(b.Commit).Equal("c14c1bb05dfb1fdcdf06b31485fff61b0ea44277")

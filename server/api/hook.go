@@ -19,6 +19,7 @@
 package api
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"regexp"
@@ -27,6 +28,7 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/pipeline"
 	"github.com/woodpecker-ci/woodpecker/server/store"
@@ -106,19 +108,21 @@ func PostHook(c *gin.Context) {
 	_store := store.FromContext(c)
 	forge := server.Config.Services.Forge
 
-	tmpRepo, tmpBuild, ignored, err := forge.Hook(c, c.Request)
+	tmpRepo, tmpBuild, err := forge.Hook(c, c.Request)
 	if err != nil {
+		if errors.Is(err, &types.ErrIgnoreEvent{}) {
+			msg := fmt.Sprintf("forge driver: %s", err)
+			log.Debug().Err(err).Msg(msg)
+			c.String(http.StatusOK, msg)
+			return
+		}
+
 		msg := "failure to parse hook"
 		log.Debug().Err(err).Msg(msg)
 		c.String(http.StatusBadRequest, msg)
 		return
 	}
-	if ignored {
-		msg := "ignoring hook: by forge driver"
-		log.Debug().Msg(msg)
-		c.String(http.StatusOK, msg)
-		return
-	}
+
 	if tmpBuild == nil {
 		msg := "ignoring hook: hook parsing resulted in empty pipeline"
 		log.Debug().Msg(msg)
