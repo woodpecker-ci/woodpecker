@@ -15,8 +15,6 @@
 package main
 
 import (
-	"fmt"
-	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -72,94 +70,6 @@ func TestStringSliceAddToMap(t *testing.T) {
 			} else {
 				assert.EqualValues(t, tt.expected, tt.m)
 			}
-		})
-	}
-}
-
-func TestReadAgentIDFileNotExists(t *testing.T) {
-	assert.EqualValues(t, -1, readAgentID("foobar.conf"))
-}
-
-func TestReadAgentIDFileExists(t *testing.T) {
-	parameters := []struct {
-		input    string
-		expected int64
-	}{
-		{"42", 42},
-		{"42\n", 42},
-		{"  \t42\t\r\t", 42},
-		{"0", 0},
-		{"-1", -1},
-		{"foo", -1},
-		{"1f", -1},
-		{"", -1},
-		{"-42", -42},
-	}
-
-	for i := range parameters {
-		t.Run(fmt.Sprintf("Testing [%v]", i), func(t *testing.T) {
-			tmpF, errTmpF := os.CreateTemp("", "tmp_")
-			if !assert.NoError(t, errTmpF) {
-				t.FailNow()
-			}
-
-			errWrite := os.WriteFile(tmpF.Name(), []byte(parameters[i].input), 0o644)
-			if !assert.NoError(t, errWrite) {
-				t.FailNow()
-			}
-
-			actual := readAgentID(tmpF.Name())
-			assert.EqualValues(t, parameters[i].expected, actual)
-		})
-	}
-}
-
-func TestWriteAgentIDFileNotExists(t *testing.T) {
-	tmpF, errTmpF := os.CreateTemp("", "tmp_")
-	if !assert.NoError(t, errTmpF) {
-		t.FailNow()
-	}
-
-	writeAgentID(42, tmpF.Name())
-	actual, errRead := os.ReadFile(tmpF.Name())
-	if !assert.NoError(t, errRead) {
-		t.FailNow()
-	}
-	assert.EqualValues(t, "42\n", actual)
-}
-
-func TestWriteAgentIDFileExists(t *testing.T) {
-	parameters := []struct {
-		fileInput  string
-		writeInput int64
-		expected   string
-	}{
-		{"", 42, "42\n"},
-		{"\n", 42, "42\n"},
-		{"41\n", 42, "42\n"},
-		{"0", 42, "42\n"},
-		{"-1", 42, "42\n"},
-		{"foöbar", 42, "42\n"},
-	}
-
-	for i := range parameters {
-		t.Run(fmt.Sprintf("Testing [%v]", i), func(t *testing.T) {
-			tmpF, errTmpF := os.CreateTemp("", "tmp_")
-			if !assert.NoError(t, errTmpF) {
-				t.FailNow()
-			}
-
-			errWrite := os.WriteFile(tmpF.Name(), []byte(parameters[i].fileInput), 0o644)
-			if !assert.NoError(t, errWrite) {
-				t.FailNow()
-			}
-
-			writeAgentID(parameters[i].writeInput, tmpF.Name())
-			actual, errRead := os.ReadFile(tmpF.Name())
-			if !assert.NoError(t, errRead) {
-				t.FailNow()
-			}
-			assert.EqualValues(t, parameters[i].expected, actual)
 		})
 	}
 }

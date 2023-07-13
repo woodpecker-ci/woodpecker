@@ -430,7 +430,7 @@
         "oauth_error": "Error while authenticating against OAuth provider",
         "internal_error": "Some internal error occurred",
         "access_denied": "You are not allowed to login",
-        "token": "Your Personal Token",
+        "token": "Personal Access Token",
         "shell_setup": "Shell setup",
         "api_usage": "Example API Usage",
         "cli_usage": "Example CLI Usage",
