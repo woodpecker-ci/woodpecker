@@ -21,7 +21,7 @@
         <Icon v-if="forge === 'github'" name="github" />
         <Icon v-else-if="forge === 'gitea'" name="gitea" />
         <Icon v-else-if="forge === 'gitlab'" name="gitlab" />
-        <Icon v-else-if="forge === 'bitbucket' || forge === 'stash'" name="bitbucket" />
+        <Icon v-else-if="forge === 'bitbucket'" name="bitbucket" />
         <Icon v-else name="repo" />
       </IconButton>
       <IconButton
