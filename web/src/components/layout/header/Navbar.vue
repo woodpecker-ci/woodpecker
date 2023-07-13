@@ -69,7 +69,7 @@ export default defineComponent({
     const route = useRoute();
     const authentication = useAuthentication();
     const { darkMode } = useDarkMode();
-    const docsUrl = window.WOODPECKER_DOCS;
+    const docsUrl = config.docs || undefined;
 
     function doLogin() {
       authentication.authenticate(route.fullPath);
