@@ -3,6 +3,7 @@
 ## [1.0.0-rc1](https://github.com/woodpecker-ci/woodpecker/releases/tag/1.0.0-rc1) - 2023-06-X
 
 * BREAKING
+  * Drop support for Bitbucket Server (#1994)
   * Rename yaml `pipeline` to `steps` (#1833)
   * Drop ".drone.yml" as default pipeline config (#1795)
   * Build-in Env Vars, use _URL for all links/URLs (#1794)
@@ -90,6 +91,8 @@
   * Support conditional branch as an array to align with documentation (#836)
   * Fix redirect after login (#824)
 * ENHANCEMENTS
+  * Let HookParse func explicit ignore events (#1942)
+  * Link swagger in navbar (#1984)
   * Add option to read grpc-secret from file (#1972)
   * Let pipeline-compiler export step types (#1958)
   * docker backend use uuid instead of name as identifier (#1967)
