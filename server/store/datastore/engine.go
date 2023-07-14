@@ -15,10 +15,12 @@
 package datastore
 
 import (
+	"github.com/rs/zerolog"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/server/store/datastore/migration"
 
 	"xorm.io/xorm"
+	xlog "xorm.io/xorm/log"
 )
 
 type storage struct {
@@ -33,7 +35,15 @@ func NewEngine(opts *store.Opts) (store.Store, error) {
 		return nil, err
 	}
 
-	// engine.SetLogger(X) // TODO: special config to enable xorm logging
+	level := xlog.LogLevel(zerolog.GlobalLevel())
+	if !opts.XORM.Log {
+		level = xlog.LOG_OFF
+	}
+
+	logger := NewXORMLogger(level)
+	engine.SetLogger(logger)
+	engine.ShowSQL(opts.XORM.ShowSQL)
+
 	return &storage{
 		engine: engine,
 	}, nil
