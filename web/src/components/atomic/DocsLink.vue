@@ -12,13 +12,14 @@
 import { computed, toRef } from 'vue';
 
 import Icon from '~/components/atomic/Icon.vue';
+import useConfig from '~/compositions/useConfig';
 
 const props = defineProps<{
   url: string;
   topic: string;
 }>();
 
-const docsBaseUrl = window.WOODPECKER_DOCS;
+const docsBaseUrl = useConfig().docs;
 const url = toRef(props, 'url');
 const topic = toRef(props, 'topic');
 const docsUrl = computed(() => (url.value.startsWith('http') ? url.value : `${docsBaseUrl}${url.value}`));
