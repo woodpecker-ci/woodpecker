@@ -16,7 +16,7 @@ variables:
   - &platforms_server 'linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le,linux/riscv64'
   - &platforms_preview 'linux/amd64'
   - &platforms_alpine 'linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le'
-  - &build_args 'GO=1.20 ALPINE=3.16'
+  - &build_args 'GO=1.20 ALPINE=3.18'
 
 steps:
   vendor:
