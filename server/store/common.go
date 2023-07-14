@@ -23,5 +23,5 @@ type XORM struct {
 type Opts struct {
 	Driver string
 	Config string
-	XORM   *XORM
+	XORM   XORM
 }

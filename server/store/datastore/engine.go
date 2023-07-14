@@ -40,7 +40,7 @@ func NewEngine(opts *store.Opts) (store.Store, error) {
 		level = xlog.LOG_OFF
 	}
 
-	logger := NewXORMLogger(level)
+	logger := newXORMLogger(level)
 	engine.SetLogger(logger)
 	engine.ShowSQL(opts.XORM.ShowSQL)
 

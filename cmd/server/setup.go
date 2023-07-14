@@ -54,7 +54,7 @@ import (
 func setupStore(c *cli.Context) (store.Store, error) {
 	datasource := c.String("datasource")
 	driver := c.String("driver")
-	xorm := &store.XORM{
+	xorm := store.XORM{
 		Log:     c.Bool("log-xorm"),
 		ShowSQL: c.Bool("log-xorm-sql"),
 	}

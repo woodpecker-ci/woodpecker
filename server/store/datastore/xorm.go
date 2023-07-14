@@ -21,88 +21,86 @@ import (
 	xlog "xorm.io/xorm/log"
 )
 
-func NewXORMLogger(level xlog.LogLevel) *XORMLogger {
-	return &XORMLogger{
+func newXORMLogger(level xlog.LogLevel) xlog.Logger {
+	return &xormLogger{
 		level: level,
 	}
 }
 
-// XORMLogger custom log implementation for ILogger
-type XORMLogger struct {
+// xormLogger custom log implementation for ILogger
+type xormLogger struct {
 	level   xlog.LogLevel
 	showSQL bool
 }
 
-var _ xlog.Logger = &XORMLogger{}
-
 // Error implement ILogger
-func (x *XORMLogger) Error(v ...interface{}) {
+func (x *xormLogger) Error(v ...interface{}) {
 	if x.level <= xlog.LOG_ERR {
 		log.Error().Msg(fmt.Sprintln(v...))
 	}
 }
 
 // Errorf implement ILogger
-func (x *XORMLogger) Errorf(format string, v ...interface{}) {
+func (x *xormLogger) Errorf(format string, v ...interface{}) {
 	if x.level <= xlog.LOG_ERR {
 		log.Error().Msg(fmt.Sprintf(format, v...))
 	}
 }
 
 // Debug implement ILogger
-func (x *XORMLogger) Debug(v ...interface{}) {
+func (x *xormLogger) Debug(v ...interface{}) {
 	if x.level <= xlog.LOG_DEBUG {
 		log.Debug().Msg(fmt.Sprintln(v...))
 	}
 }
 
 // Debugf implement ILogger
-func (x *XORMLogger) Debugf(format string, v ...interface{}) {
+func (x *xormLogger) Debugf(format string, v ...interface{}) {
 	if x.level <= xlog.LOG_DEBUG {
 		log.Debug().Msg(fmt.Sprintf(format, v...))
 	}
 }
 
 // Info implement ILogger
-func (x *XORMLogger) Info(v ...interface{}) {
+func (x *xormLogger) Info(v ...interface{}) {
 	if x.level <= xlog.LOG_INFO {
 		log.Info().Msg(fmt.Sprintln(v...))
 	}
 }
 
 // Infof implement ILogger
-func (x *XORMLogger) Infof(format string, v ...interface{}) {
+func (x *xormLogger) Infof(format string, v ...interface{}) {
 	if x.level <= xlog.LOG_INFO {
 		log.Info().Msg(fmt.Sprintf(format, v...))
 	}
 }
 
 // Warn implement ILogger
-func (x *XORMLogger) Warn(v ...interface{}) {
+func (x *xormLogger) Warn(v ...interface{}) {
 	if x.level <= xlog.LOG_WARNING {
 		log.Warn().Msg(fmt.Sprintln(v...))
 	}
 }
 
 // Warnf implement ILogger
-func (x *XORMLogger) Warnf(format string, v ...interface{}) {
+func (x *xormLogger) Warnf(format string, v ...interface{}) {
 	if x.level <= xlog.LOG_WARNING {
 		log.Warn().Msg(fmt.Sprintf(format, v...))
 	}
 }
 
 // Level implement ILogger
-func (x *XORMLogger) Level() xlog.LogLevel {
+func (x *xormLogger) Level() xlog.LogLevel {
 	return xlog.LOG_INFO
 }
 
 // SetLevel implement ILogger
-func (x *XORMLogger) SetLevel(l xlog.LogLevel) {
+func (x *xormLogger) SetLevel(l xlog.LogLevel) {
 	x.level = l
 }
 
 // ShowSQL implement ILogger
-func (x *XORMLogger) ShowSQL(show ...bool) {
+func (x *xormLogger) ShowSQL(show ...bool) {
 	if len(show) == 0 {
 		x.showSQL = true
 		return
@@ -111,6 +109,6 @@ func (x *XORMLogger) ShowSQL(show ...bool) {
 }
 
 // IsShowSQL implement ILogger
-func (x *XORMLogger) IsShowSQL() bool {
+func (x *xormLogger) IsShowSQL() bool {
 	return x.showSQL
 }
