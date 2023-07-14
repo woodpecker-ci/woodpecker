@@ -20,6 +20,7 @@ import (
 	"net/http"
 
 	"github.com/woodpecker-ci/woodpecker/server/forge/bitbucket/internal"
+	"github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
@@ -34,15 +35,20 @@ const (
 // parseHook parses a Bitbucket hook from an http.Request request and returns
 // Repo and Pipeline detail. If a hook type is unsupported nil values are returned.
 func parseHook(r *http.Request) (*model.Repo, *model.Pipeline, error) {
-	payload, _ := io.ReadAll(r.Body)
+	payload, err := io.ReadAll(r.Body)
+	if err != nil {
+		return nil, nil, err
+	}
 
-	switch r.Header.Get(hookEvent) {
+	hookType := r.Header.Get(hookEvent)
+	switch hookType {
 	case hookPush:
 		return parsePushHook(payload)
 	case hookPullCreated, hookPullUpdated:
 		return parsePullHook(payload)
+	default:
+		return nil, nil, &types.ErrIgnoreEvent{Event: hookType}
 	}
-	return nil, nil, nil
 }
 
 // parsePushHook parses a push hook and returns the Repo and Pipeline details.
