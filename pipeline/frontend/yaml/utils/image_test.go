@@ -1,4 +1,4 @@
-package compiler
+package utils
 
 import (
 	"testing"
@@ -191,7 +191,7 @@ func Test_matchImage(t *testing.T) {
 		},
 	}
 	for _, test := range testdata {
-		got, want := matchImage(test.from, test.to), test.want
+		got, want := MatchImage(test.from, test.to), test.want
 		if got != want {
 			t.Errorf("Want image %q matching %q is %v", test.from, test.to, want)
 		}
@@ -250,7 +250,7 @@ func Test_matchHostname(t *testing.T) {
 		},
 	}
 	for _, test := range testdata {
-		got, want := matchHostname(test.image, test.hostname), test.want
+		got, want := MatchHostname(test.image, test.hostname), test.want
 		if got != want {
 			t.Errorf("Want image %q matching hostname %q is %v", test.image, test.hostname, want)
 		}

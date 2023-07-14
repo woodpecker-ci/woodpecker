@@ -44,3 +44,14 @@ const (
 	LogEntryMetadata
 	LogEntryProgress
 )
+
+// StepType identifies the type of step
+type StepType string
+
+const (
+	StepTypeClone    StepType = "clone"
+	StepTypeService  StepType = "service"
+	StepTypePlugin   StepType = "plugin"
+	StepTypeCommands StepType = "commands"
+	StepTypeCache    StepType = "cache"
+)

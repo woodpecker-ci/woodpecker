@@ -68,6 +68,8 @@ var Config = struct {
 		StatusContextFormat string
 		SessionExpires      time.Duration
 		RootURL             string
+		CustomCSSFile       string
+		CustomJsFile        string
 		Migrations          struct {
 			AllowLong bool
 		}

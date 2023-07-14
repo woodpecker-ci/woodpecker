@@ -36,17 +36,18 @@ const (
 // Step represents a process in the pipeline.
 type Step struct {
 	ID         int64       `json:"id"                   xorm:"pk autoincr 'step_id'"`
-	UUID       string      `json:"uuid"                 xorm:"UNIQUE INDEX 'step_uuid'"`
+	UUID       string      `json:"uuid"                 xorm:"INDEX 'step_uuid'"`
 	PipelineID int64       `json:"pipeline_id"          xorm:"UNIQUE(s) INDEX 'step_pipeline_id'"`
 	PID        int         `json:"pid"                  xorm:"UNIQUE(s) 'step_pid'"`
 	PPID       int         `json:"ppid"                 xorm:"step_ppid"`
 	Name       string      `json:"name"                 xorm:"step_name"`
 	State      StatusValue `json:"state"                xorm:"step_state"`
-	Error      string      `json:"error,omitempty"      xorm:"VARCHAR(500) step_error"`
+	Error      string      `json:"error,omitempty"      xorm:"TEXT 'step_error'"`
 	Failure    string      `json:"-"                    xorm:"step_failure"`
 	ExitCode   int         `json:"exit_code"            xorm:"step_exit_code"`
 	Started    int64       `json:"start_time,omitempty" xorm:"step_started"`
 	Stopped    int64       `json:"end_time,omitempty"   xorm:"step_stopped"`
+	Type       StepType    `json:"type,omitempty"       xorm:"step_type"`
 } //	@name Step
 
 type UpdateStepStore interface {
@@ -67,3 +68,14 @@ func (p *Step) Running() bool {
 func (p *Step) Failing() bool {
 	return p.Failure == FailureFail && (p.State == StatusError || p.State == StatusKilled || p.State == StatusFailure)
 }
+
+// StepType identifies the type of step
+type StepType string //	@name StepType
+
+const (
+	StepTypeClone    StepType = "clone"
+	StepTypeService  StepType = "service"
+	StepTypePlugin   StepType = "plugin"
+	StepTypeCommands StepType = "commands"
+	StepTypeCache    StepType = "cache"
+)
