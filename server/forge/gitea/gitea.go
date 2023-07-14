@@ -489,11 +489,6 @@ func (c *Gitea) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.
 		return nil, nil, err
 	}
 
-	if repo == nil || pipeline == nil {
-		// ignore  hook
-		return nil, nil, nil
-	}
-
 	if pipeline.Event == model.EventPull && len(pipeline.ChangedFiles) == 0 {
 		index, err := strconv.ParseInt(strings.Split(pipeline.Ref, "/")[2], 10, 64)
 		if err != nil {

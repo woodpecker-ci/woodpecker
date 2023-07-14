@@ -536,10 +536,6 @@ See [Gitea configuration](forges/gitea/#configuration)
 
 See [Bitbucket configuration](forges/bitbucket/#configuration)
 
-### `WOODPECKER_STASH_...`
-
-See [Bitbucket server configuration](forges/bitbucket_server/#configuration)
-
 ### `WOODPECKER_GITLAB_...`
 
 See [Gitlab configuration](forges/gitlab/#configuration)

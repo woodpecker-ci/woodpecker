@@ -33,6 +33,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/forge/common"
+	"github.com/woodpecker-ci/woodpecker/server/forge/types"
 	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store"
@@ -596,7 +597,8 @@ func (g *GitLab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 		return nil, nil, err
 	}
 
-	parsed, err := gitlab.ParseWebhook(gitlab.WebhookEventType(req), payload)
+	eventType := gitlab.WebhookEventType(req)
+	parsed, err := gitlab.ParseWebhook(eventType, payload)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -618,7 +620,7 @@ func (g *GitLab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 	case *gitlab.TagEvent:
 		return convertTagHook(event)
 	default:
-		return nil, nil, nil
+		return nil, nil, &types.ErrIgnoreEvent{Event: string(eventType)}
 	}
 }
 

@@ -1,3 +1,9 @@
+when:
+  - event: pull_request
+  - event: push
+    branch: [ main, release/* ]
+
+
 variables:
   - &golang_image 'golang:1.20.2'
   - &node_image 'node:18-alpine'
@@ -69,7 +75,7 @@ steps:
       - chmod 0600 $HOME/.ssh/id_rsa
       - git config --global user.email "woodpecker-bot@obermui.de"
       - git config --global user.name "woodpecker-bot"
-      - git clone -b ${CI_REPO_DEFAULT_BRANCH} --single-branch git@github.com:woodpecker-ci/woodpecker-ci.github.io.git /repo
+      - git clone --depth 1 --single-branch git@github.com:woodpecker-ci/woodpecker-ci.github.io.git /repo
       # copy all docs files and delete all old ones, but leave CNAME and index.yaml untouched
       - rsync -r --exclude .git --exclude CNAME --exclude index.yaml --exclude README.md --delete docs/build/ /repo
       - cd /repo

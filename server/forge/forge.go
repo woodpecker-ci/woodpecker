@@ -85,7 +85,7 @@ type Forge interface {
 
 	// Hook parses the post-commit hook from the Request body and returns the
 	// required data in a standard format.
-	Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error)
+	Hook(ctx context.Context, r *http.Request) (repo *model.Repo, pipeline *model.Pipeline, err error)
 
 	// OrgMembership returns if user is member of organization and if user
 	// is admin/owner in that organization.
