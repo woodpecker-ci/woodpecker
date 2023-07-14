@@ -34,7 +34,7 @@ func Test_bitbucket(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	s := httptest.NewServer(fixtures.Handler())
-	c := &config{URL: s.URL, API: s.URL}
+	c := &config{url: s.URL, API: s.URL}
 
 	g := goblin.Goblin(t)
 	ctx := context.Background()
@@ -45,7 +45,7 @@ func Test_bitbucket(t *testing.T) {
 
 		g.It("Should return client with default endpoint", func() {
 			forge, _ := New(&Opts{Client: "4vyW6b49Z", Secret: "a5012f6c6"})
-			g.Assert(forge.(*config).URL).Equal(DefaultURL)
+			g.Assert(forge.(*config).url).Equal(DefaultURL)
 			g.Assert(forge.(*config).API).Equal(DefaultAPI)
 			g.Assert(forge.(*config).Client).Equal("4vyW6b49Z")
 			g.Assert(forge.(*config).Secret).Equal("a5012f6c6")
@@ -227,7 +227,7 @@ func Test_bitbucket(t *testing.T) {
 		})
 
 		g.It("Should update the status", func() {
-			err := c.Status(ctx, fakeUser, fakeRepo, fakePipeline, fakeStep)
+			err := c.Status(ctx, fakeUser, fakeRepo, fakePipeline, fakeWorkflow)
 			g.Assert(err).IsNil()
 		})
 
@@ -309,7 +309,7 @@ var (
 		Commit: "9ecad50",
 	}
 
-	fakeStep = &model.Step{
+	fakeWorkflow = &model.Workflow{
 		Name:  "test",
 		State: model.StatusSuccess,
 	}

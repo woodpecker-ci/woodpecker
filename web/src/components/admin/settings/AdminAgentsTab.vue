@@ -66,6 +66,10 @@
             <TextField v-model="selectedAgent.token" :placeholder="$t('admin.settings.agents.token')" disabled />
           </InputField>
 
+          <InputField :label="$t('admin.settings.agents.id')">
+            <TextField :model-value="selectedAgent.id?.toString()" disabled />
+          </InputField>
+
           <InputField
             :label="$t('admin.settings.agents.backend.backend')"
             docs-url="docs/next/administration/backends/docker"
@@ -117,7 +121,7 @@
 
 <script lang="ts" setup>
 import { cloneDeep } from 'lodash';
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Badge from '~/components/atomic/Badge.vue';
@@ -131,6 +135,7 @@ import Panel from '~/components/layout/Panel.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
+import { usePagination } from '~/compositions/usePaginate';
 import { Agent } from '~/lib/api/types';
 import timeAgo from '~/utils/timeAgo';
 
@@ -138,13 +143,14 @@ const apiClient = useApiClient();
 const notifications = useNotifications();
 const { t } = useI18n();
 
-const agents = ref<Agent[]>([]);
 const selectedAgent = ref<Partial<Agent>>();
 const isEditingAgent = computed(() => !!selectedAgent.value?.id);
 
-async function loadAgents() {
-  agents.value = await apiClient.getAgents();
+async function loadAgents(page: number): Promise<Agent[] | null> {
+  return apiClient.getAgents(page);
 }
+
+const { resetPage, data: agents } = usePagination(loadAgents, () => !selectedAgent.value);
 
 const { doSubmit: saveAgent, isLoading: isSaving } = useAsyncAction(async () => {
   if (!selectedAgent.value) {
@@ -161,7 +167,7 @@ const { doSubmit: saveAgent, isLoading: isSaving } = useAsyncAction(async () => 
     title: t(isEditingAgent.value ? 'admin.settings.agents.saved' : 'admin.settings.agents.created'),
     type: 'success',
   });
-  await loadAgents();
+  resetPage();
 });
 
 const { doSubmit: deleteAgent, isLoading: isDeleting } = useAsyncAction(async (_agent: Agent) => {
@@ -172,7 +178,7 @@ const { doSubmit: deleteAgent, isLoading: isDeleting } = useAsyncAction(async (_
 
   await apiClient.deleteAgent(_agent);
   notifications.notify({ title: t('admin.settings.agents.deleted'), type: 'success' });
-  await loadAgents();
+  resetPage();
 });
 
 function editAgent(agent: Agent) {
@@ -182,18 +188,4 @@ function editAgent(agent: Agent) {
 function showAddAgent() {
   selectedAgent.value = cloneDeep({ name: '' });
 }
-
-const reloadInterval = ref<number>();
-onMounted(async () => {
-  await loadAgents();
-  reloadInterval.value = window.setInterval(async () => {
-    await loadAgents();
-  }, 5000);
-});
-
-onBeforeUnmount(() => {
-  if (reloadInterval.value) {
-    window.clearInterval(reloadInterval.value);
-  }
-});
 </script>

@@ -140,13 +140,16 @@ func (s storage) DeleteRepo(repo *model.Repo) error {
 
 // RepoList list all repos where permissions for specific user are stored
 // TODO: paginate
-func (s storage) RepoList(user *model.User, owned bool) ([]*model.Repo, error) {
-	repos := make([]*model.Repo, 0, perPage)
+func (s storage) RepoList(user *model.User, owned, active bool) ([]*model.Repo, error) {
+	repos := make([]*model.Repo, 0)
 	sess := s.engine.Table("repos").
 		Join("INNER", "perms", "perms.perm_repo_id = repos.repo_id").
 		Where("perms.perm_user_id = ?", user.ID)
 	if owned {
 		sess = sess.And(builder.Eq{"perms.perm_push": true}.Or(builder.Eq{"perms.perm_admin": true}))
+	}
+	if active {
+		sess = sess.And(builder.Eq{"repos.repo_active": true})
 	}
 	return repos, sess.
 		Asc("repo_full_name").

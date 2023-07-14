@@ -1,3 +1,9 @@
+when:
+  - event: pull_request
+  - event: push
+    branch: [ main, release/* ]
+
+
 variables:
   - &golang_image 'golang:1.20.2'
   - &node_image 'node:18-alpine'
@@ -7,8 +13,10 @@ variables:
     # since we generate docs for cli tool we have to watch this too
     - "cli/**"
     - "cmd/cli/**"
+    # api docs
+    - "server/api/**"
 
-pipeline:
+steps:
   build-cli:
     image: *golang_image
     commands:
@@ -56,7 +64,7 @@ pipeline:
   # TODO: add step to remove preview again after PR is closed (waiting for #286)
 
   deploy:
-    image: alpine:3.14.2
+    image: alpine:3.18
     secrets:
       - BOT_PRIVATE_KEY
     commands:
@@ -67,7 +75,7 @@ pipeline:
       - chmod 0600 $HOME/.ssh/id_rsa
       - git config --global user.email "woodpecker-bot@obermui.de"
       - git config --global user.name "woodpecker-bot"
-      - git clone -b ${CI_REPO_DEFAULT_BRANCH} --single-branch git@github.com:woodpecker-ci/woodpecker-ci.github.io.git /repo
+      - git clone --depth 1 --single-branch git@github.com:woodpecker-ci/woodpecker-ci.github.io.git /repo
       # copy all docs files and delete all old ones, but leave CNAME and index.yaml untouched
       - rsync -r --exclude .git --exclude CNAME --exclude index.yaml --exclude README.md --delete docs/build/ /repo
       - cd /repo

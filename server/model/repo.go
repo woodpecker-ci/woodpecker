@@ -21,13 +21,11 @@ import (
 )
 
 // Repo represents a repository.
-//
-// swagger:model repo
 type Repo struct {
 	ID     int64 `json:"id,omitempty"                    xorm:"pk autoincr 'repo_id'"`
 	UserID int64 `json:"-"                               xorm:"repo_user_id"`
 	// ForgeRemoteID is the unique identifier for the repository on the forge.
-	ForgeRemoteID                ForgeRemoteID  `json:"-"                               xorm:"forge_remote_id"`
+	ForgeRemoteID                ForgeRemoteID  `json:"forge_remote_id"                 xorm:"forge_remote_id"`
 	Owner                        string         `json:"owner"                           xorm:"UNIQUE(name) 'repo_owner'"`
 	Name                         string         `json:"name"                            xorm:"UNIQUE(name) 'repo_name'"`
 	FullName                     string         `json:"full_name"                       xorm:"UNIQUE 'repo_full_name'"`
@@ -37,7 +35,7 @@ type Repo struct {
 	Branch                       string         `json:"default_branch,omitempty"        xorm:"varchar(500) 'repo_branch'"`
 	SCMKind                      SCMKind        `json:"scm,omitempty"                   xorm:"varchar(50) 'repo_scm'"`
 	Timeout                      int64          `json:"timeout,omitempty"               xorm:"repo_timeout"`
-	Visibility                   RepoVisibly    `json:"visibility"                      xorm:"varchar(10) 'repo_visibility'"`
+	Visibility                   RepoVisibility `json:"visibility"                      xorm:"varchar(10) 'repo_visibility'"`
 	IsSCMPrivate                 bool           `json:"private"                         xorm:"repo_private"`
 	IsTrusted                    bool           `json:"trusted"                         xorm:"repo_trusted"`
 	IsGated                      bool           `json:"gated"                           xorm:"repo_gated"`
@@ -48,7 +46,7 @@ type Repo struct {
 	Perm                         *Perm          `json:"-"                               xorm:"-"`
 	CancelPreviousPipelineEvents []WebhookEvent `json:"cancel_previous_pipeline_events" xorm:"json 'cancel_previous_pipeline_events'"`
 	NetrcOnlyTrusted             bool           `json:"netrc_only_trusted"              xorm:"NOT NULL DEFAULT true 'netrc_only_trusted'"`
-}
+} //	@name Repo
 
 // TableName return database table name for xorm
 func (Repo) TableName() string {
@@ -109,7 +107,7 @@ type RepoPatch struct {
 	AllowPull                    *bool           `json:"allow_pr,omitempty"`
 	CancelPreviousPipelineEvents *[]WebhookEvent `json:"cancel_previous_pipeline_events"`
 	NetrcOnlyTrusted             *bool           `json:"netrc_only_trusted"`
-}
+} //	@name RepoPatch
 
 type ForgeRemoteID string
 

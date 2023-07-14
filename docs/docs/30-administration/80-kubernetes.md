@@ -1,6 +1,6 @@
 # Kubernetes
 
-Woodpecker does support Kubernetes as a backend.
+Woodpecker does support Kubernetes as a backend. See the [Kubernetes backend configuration](./22-backends/40-kubernetes.md#configuration) for backend-specific options.
 
 :::caution
 Kubernetes support is still experimental and not all pipeline features are fully supported yet.
@@ -52,4 +52,21 @@ helm upgrade --install woodpecker-agent --namespace <namespace> woodpecker/woodp
 
 # Uninstall
 helm delete woodpecker-agent
+```
+
+## Volumes
+
+To mount volumes a persistent volume (PV) and persistent volume claim (PVC) are needed on the cluster which can be referenced in steps via the `volume:` option.
+Assuming a PVC named "woodpecker-cache" exists, it can be referenced as follows in a step:
+
+```yaml
+steps:
+  "Restore Cache":
+    image: meltwater/drone-cache
+    volumes:
+      - woodpecker-cache:/woodpecker/src/cache
+    settings:
+      mount:
+        - "woodpecker-cache"
+    [...]
 ```

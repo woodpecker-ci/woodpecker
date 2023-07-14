@@ -1,4 +1,4 @@
-pipeline:
+steps:
   deploy:
     image: golang
     commands:

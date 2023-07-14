@@ -18,13 +18,22 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-// GetOrgSecret gets the named organization secret from the database
-// and writes to the response in json format.
+// GetOrgSecret
+//
+//	@Summary	Get the named organization secret
+//	@Router		/orgs/{owner}/secrets/{secret} [get]
+//	@Produce	json
+//	@Success	200	{object}	Secret
+//	@Tags		Organization secrets
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		owner			path	string	true	"the owner's name"
+//	@Param		secret			path	string	true	"the secret's name"
 func GetOrgSecret(c *gin.Context) {
 	var (
 		owner = c.Param("owner")
@@ -38,11 +47,20 @@ func GetOrgSecret(c *gin.Context) {
 	c.JSON(http.StatusOK, secret.Copy())
 }
 
-// GetOrgSecretList gest the organization secret list from
-// the database and writes to the response in json format.
+// GetOrgSecretList
+//
+//	@Summary	Get the organization secret list
+//	@Router		/orgs/{owner}/secrets [get]
+//	@Produce	json
+//	@Success	200	{array}	Secret
+//	@Tags		Organization secrets
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		owner			path	string	true	"the owner's name"
+//	@Param		page			query	int		false	"for response pagination, page offset number"	default(1)
+//	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
 func GetOrgSecretList(c *gin.Context) {
 	owner := c.Param("owner")
-	list, err := server.Config.Services.Secrets.OrgSecretList(owner)
+	list, err := server.Config.Services.Secrets.OrgSecretList(owner, session.Pagination(c))
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error getting secret list for %q. %s", owner, err)
 		return
@@ -55,7 +73,16 @@ func GetOrgSecretList(c *gin.Context) {
 	c.JSON(http.StatusOK, list)
 }
 
-// PostOrgSecret persists an organization secret to the database.
+// PostOrgSecret
+//
+//	@Summary	Persist/create an organization secret
+//	@Router		/orgs/{owner}/secrets [post]
+//	@Produce	json
+//	@Success	200	{object}	Secret
+//	@Tags		Organization secrets
+//	@Param		Authorization	header	string			true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		owner			path	string			true	"the owner's name"
+//	@Param		secretData		body	Secret	true	"the new secret"
 func PostOrgSecret(c *gin.Context) {
 	owner := c.Param("owner")
 
@@ -83,7 +110,17 @@ func PostOrgSecret(c *gin.Context) {
 	c.JSON(http.StatusOK, secret.Copy())
 }
 
-// PatchOrgSecret updates an organization secret in the database.
+// PatchOrgSecret
+//
+//	@Summary	Update an organization secret
+//	@Router		/orgs/{owner}/secrets/{secret} [patch]
+//	@Produce	json
+//	@Success	200	{object}	Secret
+//	@Tags		Organization secrets
+//	@Param		Authorization	header	string			true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		owner			path	string			true	"the owner's name"
+//	@Param		secret			path	string			true	"the secret's name"
+//	@Param		secretData		body	Secret	true	"the update secret data"
 func PatchOrgSecret(c *gin.Context) {
 	var (
 		owner = c.Param("owner")
@@ -124,7 +161,16 @@ func PatchOrgSecret(c *gin.Context) {
 	c.JSON(http.StatusOK, secret.Copy())
 }
 
-// DeleteOrgSecret deletes the named organization secret from the database.
+// DeleteOrgSecret
+//
+//	@Summary	Delete the named secret from an organization
+//	@Router		/orgs/{owner}/secrets/{secret} [delete]
+//	@Produce	plain
+//	@Success	200
+//	@Tags		Organization secrets
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		owner			path	string	true	"the owner's name"
+//	@Param		secret			path	string	true	"the secret's name"
 func DeleteOrgSecret(c *gin.Context) {
 	var (
 		owner = c.Param("owner")

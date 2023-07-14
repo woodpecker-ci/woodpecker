@@ -25,8 +25,16 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 )
 
-// GetSecret gets the named secret from the database and writes
-// to the response in json format.
+// GetSecret
+//
+//	@Summary	Get a named secret
+//	@Router		/repos/{repo_id}/secrets/{secretName} [get]
+//	@Produce	json
+//	@Success	200	{object}	Secret
+//	@Tags		Repository secrets
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		secretName		path	string	true	"the secret name"
 func GetSecret(c *gin.Context) {
 	var (
 		repo = session.Repo(c)
@@ -40,7 +48,16 @@ func GetSecret(c *gin.Context) {
 	c.JSON(http.StatusOK, secret.Copy())
 }
 
-// PostSecret persists the secret to the database.
+// PostSecret
+//
+//	@Summary	Persist/create a secret
+//	@Router		/repos/{repo_id}/secrets [post]
+//	@Produce	json
+//	@Success	200	{object}	Secret
+//	@Tags		Repository secrets
+//	@Param		Authorization	header	string			true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		secret			body	Secret	true	"the new secret"
 func PostSecret(c *gin.Context) {
 	repo := session.Repo(c)
 
@@ -68,7 +85,17 @@ func PostSecret(c *gin.Context) {
 	c.JSON(http.StatusOK, secret.Copy())
 }
 
-// PatchSecret updates the secret in the database.
+// PatchSecret
+//
+//	@Summary	Update a named secret
+//	@Router		/repos/{repo_id}/secrets/{secretName} [patch]
+//	@Produce	json
+//	@Success	200	{object}	Secret
+//	@Tags		Repository secrets
+//	@Param		Authorization	header	string			true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		secretName		path	string			true	"the secret name"
+//	@Param		secret			body	Secret	true	"the secret itself"
 func PatchSecret(c *gin.Context) {
 	var (
 		repo = session.Repo(c)
@@ -109,11 +136,20 @@ func PatchSecret(c *gin.Context) {
 	c.JSON(http.StatusOK, secret.Copy())
 }
 
-// GetSecretList gets the secret list from the database and writes
-// to the response in json format.
+// GetSecretList
+//
+//	@Summary	Get the secret list
+//	@Router		/repos/{repo_id}/secrets [get]
+//	@Produce	json
+//	@Success	200	{array}	Secret
+//	@Tags		Repository secrets
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		page			query	int		false	"for response pagination, page offset number"	default(1)
+//	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
 func GetSecretList(c *gin.Context) {
 	repo := session.Repo(c)
-	list, err := server.Config.Services.Secrets.SecretList(repo)
+	list, err := server.Config.Services.Secrets.SecretList(repo, session.Pagination(c))
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error getting secret list. %s", err)
 		return
@@ -126,7 +162,16 @@ func GetSecretList(c *gin.Context) {
 	c.JSON(http.StatusOK, list)
 }
 
-// DeleteSecret deletes the named secret from the database.
+// DeleteSecret
+//
+//	@Summary	Delete a named secret
+//	@Router		/repos/{repo_id}/secrets/{secretName} [delete]
+//	@Produce	plain
+//	@Success	200
+//	@Tags		Repository secrets
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		secretName		path	string	true	"the secret name"
 func DeleteSecret(c *gin.Context) {
 	var (
 		repo = session.Repo(c)

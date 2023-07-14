@@ -1,20 +1,32 @@
+when:
+  - event: pull_request
+  - event: push
+    branch: [ main, release/* ]
+
 variables:
   - &node_image 'node:18-alpine'
-  - &when_path
-      # related config files
-      - ".woodpecker/web.yml"
-      # web source code
-      - "web/**"
+  - &when
+    - path: &when_path
+        # related config files
+        - ".woodpecker/web.yml"
+        # web source code
+        - "web/**"
+        # api source code
+        - "server/api/**"
+      branch:
+        exclude: ${CI_REPO_DEFAULT_BRANCH}
+      event: push
+    - path: *when_path
+      event: [pull_request, tag, deployment]
 
-pipeline:
+steps:
   deps:
     image: *node_image
     directory: web/
     commands:
       - corepack enable
       - pnpm install --frozen-lockfile
-    when:
-      path: *when_path
+    when: *when
 
   lint:
     group: test
@@ -23,8 +35,7 @@ pipeline:
     commands:
       - corepack enable
       - pnpm lint
-    when:
-      path: *when_path
+    when: *when
 
   formatcheck:
     group: test
@@ -33,8 +44,7 @@ pipeline:
     commands:
       - corepack enable
       - pnpm formatcheck
-    when:
-      path: *when_path
+    when: *when
 
   typecheck:
     group: test
@@ -43,8 +53,7 @@ pipeline:
     commands:
       - corepack enable
       - pnpm typecheck
-    when:
-      path: *when_path
+    when: *when
 
   securitycheck:
     group: test
@@ -52,8 +61,7 @@ pipeline:
     commands:
       - trivy fs --exit-code 0 --skip-dirs node_modules/ --severity UNKNOWN,LOW web/
       - trivy fs --exit-code 1 --skip-dirs node_modules/ --severity MEDIUM,HIGH,CRITICAL web/
-    when:
-      path: *when_path
+    when: *when
 
   test:
     group: test
@@ -62,5 +70,4 @@ pipeline:
     commands:
       - corepack enable
       - pnpm test
-    when:
-      path: *when_path
+    when: *when

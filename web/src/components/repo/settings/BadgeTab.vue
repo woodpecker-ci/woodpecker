@@ -48,6 +48,7 @@ import InputField from '~/components/form/InputField.vue';
 import SelectField from '~/components/form/SelectField.vue';
 import Panel from '~/components/layout/Panel.vue';
 import useApiClient from '~/compositions/useApiClient';
+import { usePaginate } from '~/compositions/usePaginate';
 import { Repo } from '~/lib/api/types';
 
 export default defineComponent({
@@ -74,7 +75,7 @@ export default defineComponent({
         throw new Error('Unexpected: "repo" should be provided at this place');
       }
 
-      branches.value = (await apiClient.getRepoBranches(repo.value.owner, repo.value.name))
+      branches.value = (await usePaginate((page) => apiClient.getRepoBranches(repo.value.id, page)))
         .map((b) => ({
           value: b,
           text: b,
@@ -90,14 +91,9 @@ export default defineComponent({
       window.location.port ? `:${window.location.port}` : ''
     }`;
     const badgeUrl = computed(
-      () =>
-        `/api/badges/${repo.value.owner}/${repo.value.name}/status.svg${
-          branch.value !== '' ? `?branch=${branch.value}` : ''
-        }`,
+      () => `/api/badges/${repo.value.id}/status.svg${branch.value !== '' ? `?branch=${branch.value}` : ''}`,
     );
-    const repoUrl = computed(
-      () => `/${repo.value.owner}/${repo.value.name}${branch.value !== '' ? `/branches/${branch.value}` : ''}`,
-    );
+    const repoUrl = computed(() => `/${repo.value.id}${branch.value !== '' ? `/branches/${branch.value}` : ''}`);
 
     const badgeContent = computed(() => {
       if (!repo) {

@@ -21,30 +21,31 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/store/types"
 )
 
 func TestStepFind(t *testing.T) {
 	store, closer := newTestStore(t, new(model.Step), new(model.Pipeline))
+	sess := store.engine.NewSession()
+
 	defer closer()
 
 	steps := []*model.Step{
 		{
+			UUID:       "8d89104f-d44e-4b45-b86e-17f8b5e74a0e",
 			PipelineID: 1000,
 			PID:        1,
 			PPID:       2,
-			PGID:       3,
 			Name:       "build",
 			State:      model.StatusSuccess,
 			Error:      "pc load letter",
 			ExitCode:   255,
-			AgentID:    1,
-			Platform:   "linux/amd64",
-			Environ:    map[string]string{"GOLANG": "tip"},
 		},
 	}
-	assert.NoError(t, store.StepCreate(steps))
+	assert.NoError(t, store.stepCreate(sess, steps))
 	assert.EqualValues(t, 1, steps[0].ID)
-	assert.Error(t, store.StepCreate(steps))
+	assert.Error(t, store.stepCreate(sess, steps))
+	assert.NoError(t, sess.Close())
 
 	step, err := store.StepFind(&model.Pipeline{ID: 1000}, 1)
 	if !assert.NoError(t, err) {
@@ -57,18 +58,19 @@ func TestStepChild(t *testing.T) {
 	store, closer := newTestStore(t, new(model.Step), new(model.Pipeline))
 	defer closer()
 
-	err := store.StepCreate([]*model.Step{
+	sess := store.engine.NewSession()
+	err := store.stepCreate(sess, []*model.Step{
 		{
+			UUID:       "ea6d4008-8ace-4f8a-ad03-53f1756465d9",
 			PipelineID: 1,
 			PID:        1,
 			PPID:       1,
-			PGID:       1,
 			State:      "success",
 		},
 		{
+			UUID:       "2bf387f7-2913-4907-814c-c9ada88707c0",
 			PipelineID: 1,
 			PID:        2,
-			PGID:       2,
 			PPID:       1,
 			Name:       "build",
 			State:      "success",
@@ -78,6 +80,7 @@ func TestStepChild(t *testing.T) {
 		t.Errorf("Unexpected error: insert steps: %s", err)
 		return
 	}
+	_ = sess.Commit()
 	step, err := store.StepChild(&model.Pipeline{ID: 1}, 1, "build")
 	if err != nil {
 		t.Error(err)
@@ -96,25 +99,26 @@ func TestStepList(t *testing.T) {
 	store, closer := newTestStore(t, new(model.Step), new(model.Pipeline))
 	defer closer()
 
-	err := store.StepCreate([]*model.Step{
+	sess := store.engine.NewSession()
+	err := store.stepCreate(sess, []*model.Step{
 		{
+			UUID:       "2bf387f7-2913-4907-814c-c9ada88707c0",
 			PipelineID: 2,
 			PID:        1,
 			PPID:       1,
-			PGID:       1,
 			State:      "success",
 		},
 		{
+			UUID:       "4b04073c-1827-4aa4-a5f5-c7b21c5e44a6",
 			PipelineID: 1,
 			PID:        1,
 			PPID:       1,
-			PGID:       1,
 			State:      "success",
 		},
 		{
+			UUID:       "40aab045-970b-4892-b6df-6f825a7ec97a",
 			PipelineID: 1,
 			PID:        2,
-			PGID:       2,
 			PPID:       1,
 			Name:       "build",
 			State:      "success",
@@ -124,6 +128,7 @@ func TestStepList(t *testing.T) {
 		t.Errorf("Unexpected error: insert steps: %s", err)
 		return
 	}
+	_ = sess.Commit()
 	steps, err := store.StepList(&model.Pipeline{ID: 1})
 	if err != nil {
 		t.Error(err)
@@ -139,22 +144,21 @@ func TestStepUpdate(t *testing.T) {
 	defer closer()
 
 	step := &model.Step{
+		UUID:       "fc7c7fd6-553e-480b-8ed7-30d8563d0b79",
 		PipelineID: 1,
 		PID:        1,
 		PPID:       2,
-		PGID:       3,
 		Name:       "build",
 		State:      "pending",
 		Error:      "pc load letter",
 		ExitCode:   255,
-		AgentID:    1,
-		Platform:   "linux/amd64",
-		Environ:    map[string]string{"GOLANG": "tip"},
 	}
-	if err := store.StepCreate([]*model.Step{step}); err != nil {
+	sess := store.engine.NewSession()
+	if err := store.stepCreate(sess, []*model.Step{step}); err != nil {
 		t.Errorf("Unexpected error: insert step: %s", err)
 		return
 	}
+	_ = sess.Commit()
 	step.State = "running"
 	if err := store.StepUpdate(step); err != nil {
 		t.Errorf("Unexpected error: update step: %s", err)
@@ -174,12 +178,15 @@ func TestStepIndexes(t *testing.T) {
 	store, closer := newTestStore(t, new(model.Step), new(model.Pipeline))
 	defer closer()
 
-	if err := store.StepCreate([]*model.Step{
+	sess := store.engine.NewSession()
+	defer sess.Close()
+
+	if err := store.stepCreate(sess, []*model.Step{
 		{
+			UUID:       "4db7e5fc-5312-4d02-9e14-b51b9e3242cc",
 			PipelineID: 1,
 			PID:        1,
 			PPID:       1,
-			PGID:       1,
 			State:      "running",
 			Name:       "build",
 		},
@@ -189,18 +196,54 @@ func TestStepIndexes(t *testing.T) {
 	}
 
 	// fail due to duplicate pid
-	if err := store.StepCreate([]*model.Step{
+	if err := store.stepCreate(sess, []*model.Step{
 		{
+			UUID:       "c1f33a9e-2a02-4579-95ec-90255d785a12",
 			PipelineID: 1,
 			PID:        1,
 			PPID:       1,
-			PGID:       1,
 			State:      "success",
 			Name:       "clone",
 		},
 	}); err == nil {
 		t.Errorf("Unexpected error: duplicate pid")
 	}
+}
+
+func TestStepByUUID(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Step), new(model.Pipeline))
+	defer closer()
+
+	sess := store.engine.NewSession()
+	assert.NoError(t, store.stepCreate(sess, []*model.Step{
+		{
+			UUID:       "4db7e5fc-5312-4d02-9e14-b51b9e3242cc",
+			PipelineID: 1,
+			PID:        1,
+			PPID:       1,
+			State:      "running",
+			Name:       "build",
+		},
+		{
+			UUID:       "fc7c7fd6-553e-480b-8ed7-30d8563d0b79",
+			PipelineID: 4,
+			PID:        6,
+			PPID:       7,
+			Name:       "build",
+			State:      "pending",
+			Error:      "pc load letter",
+			ExitCode:   255,
+		},
+	}))
+	_ = sess.Close()
+
+	step, err := store.StepByUUID("4db7e5fc-5312-4d02-9e14-b51b9e3242cc")
+	assert.NoError(t, err)
+	assert.NotEmpty(t, step)
+
+	step, err = store.StepByUUID("52feb6f5-8ce2-40c0-9937-9d0e3349c98c")
+	assert.ErrorIs(t, err, types.RecordNotExist)
+	assert.Empty(t, step)
 }
 
 // TODO: func TestStepCascade(t *testing.T) {}

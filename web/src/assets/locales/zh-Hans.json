@@ -217,7 +217,7 @@
         },
         "general": "基本设置",
         "pipeline_path": {
-          "default": "默认: .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml",
+          "default": "默认: .woodpecker/*.yml -> .woodpecker.yml",
           "path": "流水线路径"
         },
         "project": "项目设置",

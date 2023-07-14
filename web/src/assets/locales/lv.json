@@ -365,7 +365,7 @@
           "netrc_only_trusted": "Atļaut izmantot Git autorizāciju tikai uzticamiem konteineriem"
         },
         "pipeline_path": {
-          "default": "Pēc noklusējuma: .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml",
+          "default": "Pēc noklusējuma: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml",
           "desc": "Ceļš uz konvejerdarba konfigurāciju, piemēram, {0}. Mapēm jābeidzas ar {0}.",
           "desc_path_example": "mans/ceļš/",
           "path": "Konvejerdarba ceļš"
@@ -470,6 +470,7 @@
     "dl_cli": "Lejupielādēt komandrindas rīku",
     "internal_error": "Notikusi sistēmas iekšējā kļūda",
     "oauth_error": "Neizdevās autorizēties, izmantojot, OAuth piegādātāju",
+    "reset_token": "Atiestatīt talonu",
     "settings": "Lietotāja iestatījumi",
     "shell_setup": "Komandrindas iestatīšana",
     "shell_setup_before": "izpildiet komandrindā sekojošas darbības",

@@ -10,7 +10,7 @@ import (
 var registryDeleteCmd = &cli.Command{
 	Name:      "rm",
 	Usage:     "remove a registry",
-	ArgsUsage: "[repo/name]",
+	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    registryDelete,
 	Flags: append(common.GlobalFlags,
 		common.RepoFlag,
@@ -24,19 +24,19 @@ var registryDeleteCmd = &cli.Command{
 
 func registryDelete(c *cli.Context) error {
 	var (
-		hostname = c.String("hostname")
-		reponame = c.String("repository")
+		hostname         = c.String("hostname")
+		repoIDOrFullName = c.String("repository")
 	)
-	if reponame == "" {
-		reponame = c.Args().First()
-	}
-	owner, name, err := internal.ParseRepo(reponame)
-	if err != nil {
-		return err
+	if repoIDOrFullName == "" {
+		repoIDOrFullName = c.Args().First()
 	}
 	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
 	}
-	return client.RegistryDelete(owner, name, hostname)
+	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
+	if err != nil {
+		return err
+	}
+	return client.RegistryDelete(repoID, hostname)
 }

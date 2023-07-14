@@ -7,6 +7,7 @@ ARG TARGETOS TARGETARCH
 RUN --mount=type=cache,target=/root/.cache/go-build \
     --mount=type=cache,target=/go/pkg \
     make build-agent
+RUN mkdir -p /etc/woodpecker
 
 FROM scratch
 ENV GODEBUG=netdns=go
@@ -16,6 +17,7 @@ EXPOSE 3000
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 # copy agent binary
 COPY --from=build /src/dist/woodpecker-agent /bin/
+COPY --from=build /etc/woodpecker /etc
 
 HEALTHCHECK CMD ["/bin/woodpecker-agent", "ping"]
 ENTRYPOINT ["/bin/woodpecker-agent"]

@@ -50,7 +50,6 @@ var Config = struct {
 		// Repos  model.RepoStore
 		// Builds model.BuildStore
 		// Logs   model.LogStore
-		Files model.FileStore
 		Steps model.StepStore
 		// Registries model.RegistryStore
 		// Secrets model.SecretStore
@@ -60,12 +59,20 @@ var Config = struct {
 		Cert                string
 		OAuthHost           string
 		Host                string
+		WebhookHost         string
 		Port                string
+		PortTLS             string
 		AgentToken          string
 		Docs                string
 		StatusContext       string
 		StatusContextFormat string
 		SessionExpires      time.Duration
+		RootURL             string
+		CustomCSSFile       string
+		CustomJsFile        string
+		Migrations          struct {
+			AllowLong bool
+		}
 		// Open bool
 		// Orgs map[string]struct{}
 		// Admins map[string]struct{}

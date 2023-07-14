@@ -36,17 +36,16 @@ ifeq (in_docker,$(firstword $(MAKECMDGOALS)))
   $(eval $(MAKE_ARGS):;@:)
 
   in_docker:
-	@[ "1" -eq "$(shell docker image ls woodpecker/make:local -a | wc -l)" ] && docker build -f ./docker/Dockerfile.make --build-arg GO=$(GO_VERSION) -t woodpecker/make:local . || echo reuse existing docker image
+	@[ "1" -eq "$(shell docker image ls woodpecker/make:local -a | wc -l)" ] && docker buildx build -f ./docker/Dockerfile.make --build-arg GO=$(GO_VERSION) -t woodpecker/make:local --load . || echo reuse existing docker image
 	@echo run in docker:
 	@docker run -it \
 		--user $(shell id -u):$(shell id -g) \
 		-e VERSION="$(VERSION)" \
 		-e BUILD_VERSION="$(BUILD_VERSION)" \
 		-e CI_COMMIT_SHA="$(CI_COMMIT_SHA)" \
-		-e GO_PACKAGES="$(GO_PACKAGES)" \
 		-e TARGETOS="$(TARGETOS)" \
 		-e TARGETARCH="$(TARGETARCH)" \
-		-e CGO_ENABLED="$(CGO_ENABLED)"
+		-e CGO_ENABLED="$(CGO_ENABLED)" \
 		-e GOPATH=/tmp/go \
 		-e HOME=/tmp/home \
 		-v $(PWD):/build --rm woodpecker/make:local make $(MAKE_ARGS)
@@ -92,8 +91,11 @@ clean: ## Clean build artifacts
 	@[ "1" != "$(shell docker image ls woodpecker/make:local -a | wc -l)" ] && docker image rm woodpecker/make:local || echo no docker image to clean
 
 .PHONY: generate
-generate: ## Run all code generations
+generate: generate-swagger ## Run all code generations
 	go generate ./...
+
+generate-swagger: install-tools ## Run swagger code generation
+	swag init -g server/api/ -g cmd/server/swagger.go --outputTypes go -output cmd/server/docs
 
 check-xgo: ## Check if xgo is installed
 	@hash xgo > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
@@ -109,6 +111,9 @@ install-tools: ## Install development tools
 	fi ; \
 	hash gofumpt > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		go install mvdan.cc/gofumpt@latest; \
+	fi ; \
+	hash swag > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
+		go install github.com/swaggo/swag/cmd/swag@latest; \
 	fi
 
 ui-dependencies: ## Install UI dependencies
@@ -140,11 +145,11 @@ test-cli: ## Test cli code
 	go test -race -cover -coverprofile cli-coverage.out -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/cli github.com/woodpecker-ci/woodpecker/cli/...
 
 test-server-datastore: ## Test server datastore
-	go test -timeout 30s -run TestMigrate github.com/woodpecker-ci/woodpecker/server/store/...
+	go test -timeout 120s -run TestMigrate github.com/woodpecker-ci/woodpecker/server/store/...
 	go test -race -timeout 30s -skip TestMigrate github.com/woodpecker-ci/woodpecker/server/store/...
 
 test-server-datastore-coverage: ## Test server datastore with coverage report
-	go test -race -cover -coverprofile datastore-coverage.out -timeout 30s github.com/woodpecker-ci/woodpecker/server/store/...
+	go test -race -cover -coverprofile datastore-coverage.out -timeout 120s github.com/woodpecker-ci/woodpecker/server/store/...
 
 test-ui: ui-dependencies ## Test UI code
 	(cd web/; pnpm run lint)
@@ -162,7 +167,7 @@ test: test-agent test-server test-server-datastore test-cli test-lib test-ui ## 
 build-ui: ## Build UI
 	(cd web/; pnpm install --frozen-lockfile; pnpm build)
 
-build-server: build-ui ## Build server
+build-server: build-ui generate-swagger ## Build server
 	CGO_ENABLED=${CGO_ENABLED} GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -ldflags '${LDFLAGS}' -o dist/woodpecker-server github.com/woodpecker-ci/woodpecker/cmd/server
 
 build-agent: ## Build agent
@@ -233,31 +238,6 @@ release-cli: ## Create cli binaries for release
 	tar -cvzf dist/woodpecker-cli_darwin_amd64.tar.gz  -C dist/cli/darwin_amd64  woodpecker-cli
 	tar -cvzf dist/woodpecker-cli_darwin_arm64.tar.gz  -C dist/cli/darwin_arm64  woodpecker-cli
 
-release-tarball: ## Create tarball for release
-	mkdir -p dist/
-	tar -cvzf dist/woodpecker-src-$(BUILD_VERSION).tar.gz \
-		agent \
-		cli \
-		cmd \
-		go.??? \
-		LICENSE \
-		Makefile \
-		pipeline \
-		server \
-		shared \
-		vendor \
-		version \
-		woodpecker-go \
-		web/index.html \
-		web/node_modules \
-		web/package.json \
-		web/public \
-		web/src \
-		web/tsconfig.* \
-		web/*.ts \
-		web/pnpm-lock.yaml \
-		web/web.go
-
 release-checksums: ## Create checksums for all release files
 	# generate shas for tar files
 	(cd dist/; sha256sum *.* > checksums.txt)
@@ -285,5 +265,6 @@ bundle: bundle-agent bundle-server bundle-cli ## Create all bundles
 .PHONY: docs
 docs: ## Generate docs (currently only for the cli)
 	go generate cmd/cli/app.go
+	go generate cmd/server/swagger.go
 
 endif

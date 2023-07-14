@@ -1,7 +1,7 @@
 # Workflows
 
 :::info
-This Feature is only available for GitHub, Gitea & GitLab repositories. Follow [this](https://github.com/woodpecker-ci/woodpecker/issues/131) issue to support further development.
+This Feature is only available for GitHub, Gitea & GitLab repositories. Follow [this](https://github.com/woodpecker-ci/woodpecker/issues/1138) issue to support further development.
 :::
 
 A pipeline has at least one workflow. A workflow is a set of steps that are executed in sequence using the same workspace which is a shared folder containing the repository and all the generated data from previous steps.
@@ -36,7 +36,7 @@ If you still need to pass artifacts between the workflows you need use some stor
 .woodpecker/.build.yml
 
 ```yaml
-pipeline:
+steps:
   build:
     image: debian:stable-slim
     commands:
@@ -47,7 +47,7 @@ pipeline:
 .woodpecker/.deploy.yml
 
 ```yaml
-pipeline:
+steps:
   deploy:
     image: debian:stable-slim
     commands:
@@ -62,7 +62,7 @@ depends_on:
 .woodpecker/.test.yml
 
 ```yaml
-pipeline:
+steps:
   test:
     image: debian:stable-slim
     commands:
@@ -76,7 +76,7 @@ depends_on:
 .woodpecker/.lint.yml
 
 ```yaml
-pipeline:
+steps:
   lint:
     image: debian:stable-slim
     commands:
@@ -97,7 +97,7 @@ Dependencies between workflows can be set with the `depends_on` element. A workf
 The name for a `depends_on` entry is the filename without the path, leading dots and without the file extension `.yml` or `.yaml`. If the project config for example uses `.woodpecker/` as path for CI files with a file named `.woodpecker/.lint.yml` the corresponding `depends_on` entry would be `lint`.
 
 ```diff
-pipeline:
+steps:
   deploy:
     image: debian:stable-slim
     commands:
@@ -112,7 +112,7 @@ pipeline:
 Workflows that need to run even on failures should set the `runs_on` tag.
 
 ```diff
-pipeline:
+steps:
   notify:
     image: debian:stable-slim
     commands:
@@ -124,19 +124,7 @@ depends_on:
 +runs_on: [ success, failure ]
 ```
 
-Some workflows don't need the source code, set the `skip_clone` tag to skip cloning:
-
-```diff
-
-pipeline:
-  notify:
-    image: debian:stable-slim
-    commands:
-      - echo notifying
-
-depends_on:
-  - deploy
-
-runs_on: [ success, failure ]
-+skip_clone: true
-```
+:::info
+Some workflows don't need the source code, like creating a notification on failure.
+Read more about `skip_clone` at [pipeline syntax](./20-pipeline-syntax.md#skip_clone)
+:::

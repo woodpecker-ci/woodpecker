@@ -19,7 +19,9 @@
     "add": "Adicionar repositório",
     "deploy_pipeline": {
       "variables": {
-        "add": "Adicionar variável"
+        "add": "Adicionar variável",
+        "name": "Nome da variável",
+        "value": "Valor da variável"
       }
     },
     "enable": {
@@ -29,19 +31,70 @@
       "reload": "Recarregar repositórios",
       "success": "Repositório habilitado"
     },
+    "manual_pipeline": {
+      "variables": {
+        "add": "Adicionar variável",
+        "desc": "Especifica variáveis adicionais para usar na sua pipeline. Variáveis com o mesmo nome serão sobreescrito.",
+        "name": "Nome da variável",
+        "value": "Valor da variável"
+      }
+    },
     "not_allowed": "Você não está autorizado a acessar este repositório",
     "open_in_forge": "Abrir repositório no Sistema de Controle de Versão",
     "settings": {
       "general": {
+        "allow_pr": {
+          "allow": "Permitir Pull Requests"
+        },
+        "cancel_prev": {
+          "cancel": "Cancelar pipelines anteriores"
+        },
         "general": "Geral",
         "project": "Configurações de Projeto",
         "protected": {
+          "desc": "Todas as pipeline necessitam de aprovação antes de serem executadas.",
           "protected": "Protegido"
         },
         "save": "Salvar configurações",
-        "success": "Configurações do repositório atualizadas"
+        "success": "Configurações do repositório atualizadas",
+        "timeout": {
+          "minutes": "minutos"
+        },
+        "trusted": {
+          "trusted": "Confiável"
+        },
+        "visibility": {
+          "internal": {
+            "desc": "Somente usuários autenticados na instância Woodpecker podem ver este projeto."
+          },
+          "private": {
+            "desc": "Somente você e outros donos do repositório podem ver este projeto.",
+            "private": "Privado"
+          },
+          "public": {
+            "desc": "Qualquer usuário pode ver seu projeto sem estar logado.",
+            "public": "Público"
+          },
+          "visibility": "Visibilidade do projeto"
+        }
       },
       "not_allowed": "Você não está autorizado a acessar as configurações deste repositório",
+      "secrets": {
+        "add": "Adicionar secret",
+        "created": "Secret criado",
+        "delete": "Excluir secret",
+        "delete_confirm": "Você realmente deseja excluir este secret?",
+        "deleted": "Secret excluído",
+        "edit": "Editar secret",
+        "images": {
+          "images": "Disponíveis para as seguintes imagens"
+        },
+        "name": "Nome",
+        "save": "Salvar secret",
+        "saved": "Secret salvo",
+        "show": "Exibir secrets",
+        "value": "Valor"
+      },
       "settings": "Configurações"
     },
     "user_none": "Esta organização / usuário ainda não tem nenhum projeto."

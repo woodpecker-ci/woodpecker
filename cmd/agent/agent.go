@@ -19,6 +19,7 @@ import (
 	"context"
 	"crypto/tls"
 	"errors"
+	"fmt"
 	"net/http"
 	"os"
 	"runtime"
@@ -31,10 +32,12 @@ import (
 	"github.com/tevino/abool"
 	"github.com/urfave/cli/v2"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	grpccredentials "google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 
 	"github.com/woodpecker-ci/woodpecker/agent"
 	agentRpc "github.com/woodpecker-ci/woodpecker/agent/rpc"
@@ -45,7 +48,8 @@ import (
 	"github.com/woodpecker-ci/woodpecker/version"
 )
 
-func loop(c *cli.Context) error {
+func run(c *cli.Context) error {
+	agentConfigPath := c.String("agent-config")
 	hostname := c.String("hostname")
 	if len(hostname) == 0 {
 		hostname, _ = os.Hostname()
@@ -106,9 +110,15 @@ func loop(c *cli.Context) error {
 	}
 	defer authConn.Close()
 
-	agentID := int64(-1) // TODO: store agent id in a file
+	agentConfig := readAgentConfig(agentConfigPath)
+
+	// deprecated
+	if agentConfig.AgentID == defaultAgentIDValue {
+		agentConfig.AgentID = readAgentID(c.String("agent-id-config-path"))
+	}
+
 	agentToken := c.String("grpc-token")
-	authClient := agentRpc.NewAuthGrpcClient(authConn, agentToken, agentID)
+	authClient := agentRpc.NewAuthGrpcClient(authConn, agentToken, agentConfig.AgentID)
 	authInterceptor, err := agentRpc.NewAuthInterceptor(authClient, 30*time.Minute)
 	if err != nil {
 		return err
@@ -170,10 +180,12 @@ func loop(c *cli.Context) error {
 		return err
 	}
 
-	agentID, err = client.RegisterAgent(ctx, platform, engine.Name(), version.String(), parallel)
+	agentConfig.AgentID, err = client.RegisterAgent(ctx, platform, engine.Name(), version.String(), parallel)
 	if err != nil {
 		return err
 	}
+
+	writeAgentConfig(agentConfig, agentConfigPath)
 
 	labels := map[string]string{
 		"hostname": hostname,
@@ -182,16 +194,15 @@ func loop(c *cli.Context) error {
 		"repo":     "*", // allow all repos by default
 	}
 
-	for _, v := range c.StringSlice("filter") {
-		parts := strings.SplitN(v, "=", 2)
-		labels[parts[0]] = parts[1]
+	if err := stringSliceAddToMap(c.StringSlice("filter"), labels); err != nil {
+		return err
 	}
 
 	filter := rpc.Filter{
 		Labels: labels,
 	}
 
-	log.Debug().Msgf("Agent registered with ID %d", agentID)
+	log.Debug().Msgf("Agent registered with ID %d", agentConfig.AgentID)
 
 	go func() {
 		for {
@@ -243,5 +254,38 @@ func loop(c *cli.Context) error {
 		version.String(), engine.Name(), platform, parallel)
 
 	wg.Wait()
+	return nil
+}
+
+func runWithRetry(context *cli.Context) error {
+	retryCount := context.Int("connect-retry-count")
+	retryDelay := context.Duration("connect-retry-delay")
+	var err error
+	for i := 0; i < retryCount; i++ {
+		if err = run(context); status.Code(err) == codes.Unavailable {
+			log.Warn().Err(err).Msg(fmt.Sprintf("cannot connect to server, retrying in %v", retryDelay))
+			time.Sleep(retryDelay)
+		} else {
+			break
+		}
+	}
+	return err
+}
+
+func stringSliceAddToMap(sl []string, m map[string]string) error {
+	if m == nil {
+		m = make(map[string]string)
+	}
+	for _, v := range sl {
+		parts := strings.SplitN(v, "=", 2)
+		switch len(parts) {
+		case 2:
+			m[parts[0]] = parts[1]
+		case 1:
+			return fmt.Errorf("key '%s' does not have a value assigned", parts[0])
+		default:
+			return fmt.Errorf("empty string in slice")
+		}
+	}
 	return nil
 }

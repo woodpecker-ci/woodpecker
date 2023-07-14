@@ -5,6 +5,7 @@
     "repos": "Repos",
     "repositories": "Repositories",
     "docs": "Docs",
+    "api": "API",
     "logout": "Logout",
     "search": "Search…",
     "username": "Username",
@@ -81,7 +82,7 @@
                 "success": "Repository settings updated",
                 "pipeline_path": {
                     "path": "Pipeline path",
-                    "default": "By default: .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml",
+                    "default": "By default: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml",
                     "desc": "Path to your pipeline config (for example {0}). Folders should end with a {1}.",
                     "desc_path_example": "my/path/"
                 },
@@ -342,6 +343,7 @@
                 "agents": "Agents",
                 "desc": "Agents registered for this server",
                 "none": "There are no agents yet.",
+                "id": "ID",
                 "add": "Add agent",
                 "save": "Save agent",
                 "show": "Show agents",
@@ -427,11 +429,12 @@
         "oauth_error": "Error while authenticating against OAuth provider",
         "internal_error": "Some internal error occurred",
         "access_denied": "You are not allowed to login",
-        "token": "Your Personal Token",
+        "token": "Personal Access Token",
         "shell_setup": "Shell setup",
         "api_usage": "Example API Usage",
         "cli_usage": "Example CLI Usage",
         "dl_cli": "Download CLI",
-        "shell_setup_before": "do shell setup steps before"
+        "shell_setup_before": "do shell setup steps before",
+        "reset_token": "Reset token"
     }
 }
