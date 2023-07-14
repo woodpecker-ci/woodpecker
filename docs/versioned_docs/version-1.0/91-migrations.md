@@ -2,11 +2,7 @@
 
 Some versions need some changes to the server configuration or the pipeline configuration files.
 
-## 1.1.0 (next)
-
-No breaking changes
-
-## 1.0.0
+## 1.0.0 (next)
 
 - The signature used to verify extensions calls (like those used for the [config-extension](./30-administration/100-external-configuration-api.md)) done by the Woodpecker server switched from using a shared-secret HMac to an ed25519 key-pair. Read more about it at the [config-extensions](./30-administration/100-external-configuration-api.md) documentation.
 - Refactored support of old agent filter labels and expression. Learn how to use the new [filter](./20-usage/20-pipeline-syntax.md#labels)
@@ -20,7 +16,7 @@ No breaking changes
 - Updated Prometheus gauge `*_job_*` to `*_step_*`
 - Renamed config env `WOODPECKER_MAX_PROCS` to `WOODPECKER_MAX_WORKFLOWS` (still available as fallback)
 - The pipelines are now also read from `.yaml` files, the new default order is `.woodpecker/*.yml` and `.woodpecker/*.yaml` (without any prioritization) -> `.woodpecker.yml` ->  `.woodpecker.yaml`
-- Dropped support for [Coding](https://coding.net/) and [Gogs](https://gogs.io).
+- Dropped support for [Coding](https://coding.net/), [Gogs](https://gogs.io) and Bitbucket Server (Stash).
 - `/api/queue/resume` & `/api/queue/pause` endpoint methods were changed from `GET` to `POST`
 - rename `pipeline:` key in your workflow config to `steps:`
 - If you want to migrate old logs to the new format, watch the error messages on start. If there are none we are good to go, else you have to plan a migration that can take hours. Set `WOODPECKER_MIGRATIONS_ALLOW_LONG` to true and let it run.
