@@ -17,18 +17,21 @@ package datastore
 import (
 	"fmt"
 
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	xlog "xorm.io/xorm/log"
 )
 
 func newXORMLogger(level xlog.LogLevel) xlog.Logger {
 	return &xormLogger{
-		level: level,
+		logger: log.With().Str("component", "xorm").Logger(),
+		level:  level,
 	}
 }
 
 // xormLogger custom log implementation for ILogger
 type xormLogger struct {
+	logger  zerolog.Logger
 	level   xlog.LogLevel
 	showSQL bool
 }
@@ -36,56 +39,56 @@ type xormLogger struct {
 // Error implement ILogger
 func (x *xormLogger) Error(v ...interface{}) {
 	if x.level <= xlog.LOG_ERR {
-		log.Error().Msg(fmt.Sprintln(v...))
+		x.logger.Error().Msg(fmt.Sprintln(v...))
 	}
 }
 
 // Errorf implement ILogger
 func (x *xormLogger) Errorf(format string, v ...interface{}) {
 	if x.level <= xlog.LOG_ERR {
-		log.Error().Msg(fmt.Sprintf(format, v...))
+		x.logger.Error().Msg(fmt.Sprintf(format, v...))
 	}
 }
 
 // Debug implement ILogger
 func (x *xormLogger) Debug(v ...interface{}) {
 	if x.level <= xlog.LOG_DEBUG {
-		log.Debug().Msg(fmt.Sprintln(v...))
+		x.logger.Debug().Msg(fmt.Sprintln(v...))
 	}
 }
 
 // Debugf implement ILogger
 func (x *xormLogger) Debugf(format string, v ...interface{}) {
 	if x.level <= xlog.LOG_DEBUG {
-		log.Debug().Msg(fmt.Sprintf(format, v...))
+		x.logger.Debug().Msg(fmt.Sprintf(format, v...))
 	}
 }
 
 // Info implement ILogger
 func (x *xormLogger) Info(v ...interface{}) {
 	if x.level <= xlog.LOG_INFO {
-		log.Info().Msg(fmt.Sprintln(v...))
+		x.logger.Info().Msg(fmt.Sprintln(v...))
 	}
 }
 
 // Infof implement ILogger
 func (x *xormLogger) Infof(format string, v ...interface{}) {
 	if x.level <= xlog.LOG_INFO {
-		log.Info().Msg(fmt.Sprintf(format, v...))
+		x.logger.Info().Msg(fmt.Sprintf(format, v...))
 	}
 }
 
 // Warn implement ILogger
 func (x *xormLogger) Warn(v ...interface{}) {
 	if x.level <= xlog.LOG_WARNING {
-		log.Warn().Msg(fmt.Sprintln(v...))
+		x.logger.Warn().Msg(fmt.Sprintln(v...))
 	}
 }
 
 // Warnf implement ILogger
 func (x *xormLogger) Warnf(format string, v ...interface{}) {
 	if x.level <= xlog.LOG_WARNING {
-		log.Warn().Msg(fmt.Sprintf(format, v...))
+		x.logger.Warn().Msg(fmt.Sprintf(format, v...))
 	}
 }
 
