@@ -47,5 +47,7 @@ const repoStore = useRepoStore();
 const pipeline = toRef(props, 'pipeline');
 const repo = repoStore.getRepo(computed(() => pipeline.value.repo_id));
 
+const config = useConfig();
+
 const { since, duration, message, created } = usePipeline(pipeline);
 </script>
