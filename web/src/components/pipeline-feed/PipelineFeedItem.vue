@@ -32,6 +32,7 @@
 import { Tooltip } from 'floating-vue';
 import { computed, toRef } from 'vue';
 
+import useConfig from '~/compositions/useConfig';
 import Icon from '~/components/atomic/Icon.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import usePipeline from '~/compositions/usePipeline';
