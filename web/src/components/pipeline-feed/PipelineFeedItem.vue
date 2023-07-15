@@ -2,7 +2,7 @@
   <div v-if="pipeline" class="flex text-color w-full">
     <PipelineStatusIcon :status="pipeline.status" class="flex items-center" />
     <div class="flex flex-col ml-4 min-w-0">
-      <span class="underline">{{ repo?.owner }} / {{ repo?.name }}</span>
+      <span <a class="text-blue-700 dark:text-link flex items-center" href="${config.rootURL ?? ''}{{ repo?.owner }}/{{ repo?.name }}" target="_blank">{{ repo?.owner }} / {{ repo?.name }}</a></span>
       <span class="whitespace-nowrap overflow-hidden overflow-ellipsis">{{ message }}</span>
       <div class="flex flex-col mt-2">
         <div class="flex space-x-2 items-center">
