@@ -87,7 +87,7 @@ export default defineComponent({
 
 <style scoped>
 .navbar-icon {
-  @apply w-11 h-11 rounded-full p-2.5;
+  @apply w-11 h-11 rounded-md p-2.5;
 }
 
 .navbar-icon :deep(svg) {
