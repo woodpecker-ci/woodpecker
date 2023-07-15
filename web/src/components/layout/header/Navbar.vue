@@ -1,6 +1,8 @@
 <template>
   <!-- Navbar -->
-  <nav class="flex bg-lime-600 text-neutral-content p-4 dark:bg-dark-gray-800 dark:border-b dark:border-gray-700">
+  <nav
+    class="flex bg-woodpecker-400 text-neutral-content p-4 dark:bg-dark-gray-800 dark:border-b dark:border-gray-700 font-bold"
+  >
     <!-- Left Links Box -->
     <div class="flex text-white dark:text-gray-400 items-center space-x-2">
       <!-- Logo -->

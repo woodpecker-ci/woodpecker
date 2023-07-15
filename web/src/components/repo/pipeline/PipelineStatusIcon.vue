@@ -8,7 +8,7 @@
       :class="{
         'text-red-400': pipelineStatusColors[status] === 'red',
         'text-gray-400': pipelineStatusColors[status] === 'gray',
-        'text-lime-400': pipelineStatusColors[status] === 'green',
+        'text-woodpecker-400': pipelineStatusColors[status] === 'green',
         'text-blue-400': pipelineStatusColors[status] === 'blue',
       }"
     />

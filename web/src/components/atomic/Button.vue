@@ -5,7 +5,7 @@
     :class="{
       'bg-white hover:bg-gray-200 border-gray-300 text-color dark:bg-dark-gray-600 dark:border-dark-400 dark:hover:bg-dark-gray-800':
         color === 'gray',
-      'bg-lime-600 hover:bg-lime-700 border-lime-800 text-white dark:text-gray-300 dark:bg-lime-900 dark:hover:bg-lime-800':
+      'bg-woodpecker-400 hover:bg-woodpecker-500 border-woodpecker-600 text-white dark:text-gray-300 dark:bg-woodpecker-500 dark:hover:bg-woodpecker-400':
         color === 'green',
       'bg-cyan-600 hover:bg-cyan-700 border-cyan-800 text-white dark:text-gray-300 dark:bg-cyan-900 dark:hover:bg-cyan-800':
         color === 'blue',

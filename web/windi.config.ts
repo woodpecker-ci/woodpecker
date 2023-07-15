@@ -9,6 +9,14 @@ export default defineConfig({
     extend: {
       colors: {
         greenish: '#4caf50',
+        woodpecker: {
+          100: '#BDFFAC',
+          200: '#7FD777',
+          300: '#4CAF50',
+          400: '#2A8737',
+          500: '#115F24',
+          600: '#043818',
+        },
         link: colors.blue[400],
         'dark-gray': {
           600: '#383c4a',

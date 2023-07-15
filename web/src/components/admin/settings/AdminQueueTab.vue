@@ -25,7 +25,7 @@
           :name="queueInfo.paused ? 'pause' : 'play'"
           :class="{
             'text-red-400': queueInfo.paused,
-            'text-lime-400': !queueInfo.paused,
+            'text-woodpecker-300': !queueInfo.paused,
           }"
         />
       </div>

@@ -7,7 +7,7 @@
           'bg-yellow-400 dark:bg-dark-200': pipeline.status === 'pending',
           'bg-red-400 dark:bg-red-800': pipelineStatusColors[pipeline.status] === 'red',
           'bg-gray-600 dark:bg-gray-500': pipelineStatusColors[pipeline.status] === 'gray',
-          'bg-lime-400 dark:bg-lime-900': pipelineStatusColors[pipeline.status] === 'green',
+          'bg-woodpecker-400 dark:bg-lime-900': pipelineStatusColors[pipeline.status] === 'green',
           'bg-blue-400 dark:bg-blue-900': pipelineStatusColors[pipeline.status] === 'blue',
         }"
       />

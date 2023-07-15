@@ -81,7 +81,7 @@ const data = computed(() => {
       label: t('admin.settings.queue.stats.worker_count'),
       value: props.stats.worker_count,
       perc: total.value > 0 ? (props.stats.worker_count / total.value) * 100 : 0,
-      color: 'bg-lime-400',
+      color: 'bg-woodpecker-300',
     },
     {
       key: 'running_count',

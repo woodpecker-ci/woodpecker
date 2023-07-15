@@ -83,7 +83,7 @@
 
       <div
         v-if="step?.end_time !== undefined"
-        :class="step.exit_code == 0 ? 'dark:text-lime-400 text-lime-700' : 'dark:text-red-400 text-red-600'"
+        :class="step.exit_code == 0 ? 'dark:text-woodpecker-400 text-lime-700' : 'dark:text-red-400 text-red-600'"
         class="w-full bg-gray-200 dark:bg-dark-gray-800 text-md p-4"
       >
         {{ $t('repo.pipeline.exit_code', { exitCode: step.exit_code }) }}
