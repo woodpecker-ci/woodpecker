@@ -41,7 +41,7 @@
       <ActivePipelines v-if="user" class="navbar-icon" />
       <!-- User Avatar -->
       <IconButton v-if="user" :to="{ name: 'user' }" :title="$t('user.settings')" class="navbar-icon !p-1.5">
-        <img v-if="user && user.avatar_url" class="rounded-full" :src="`${user.avatar_url}`" />
+        <img v-if="user && user.avatar_url" class="rounded-md" :src="`${user.avatar_url}`" />
       </IconButton>
       <!-- Login Button -->
       <Button v-else :text="$t('login')" @click="doLogin" />
@@ -87,7 +87,7 @@ export default defineComponent({
 
 <style scoped>
 .navbar-icon {
-  @apply w-11 h-11 rounded-full p-2.5;
+  @apply w-11 h-11 rounded-md p-2.5;
 }
 
 .navbar-icon :deep(svg) {
