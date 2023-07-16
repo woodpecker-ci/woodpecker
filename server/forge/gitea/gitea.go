@@ -537,8 +537,9 @@ func (c *Gitea) Org(ctx context.Context, u *model.User, owner string) (*model.Or
 	user, _, err := client.GetUserInfo(owner)
 	if user != nil && err == nil {
 		return &model.Org{
-			Name:   user.UserName,
-			IsUser: true,
+			Name:    user.UserName,
+			IsUser:  true,
+			Private: user.Visibility != gitea.VisibleTypePublic,
 		}, nil
 	}
 
@@ -548,7 +549,8 @@ func (c *Gitea) Org(ctx context.Context, u *model.User, owner string) (*model.Or
 	}
 
 	return &model.Org{
-		Name: org.UserName,
+		Name:    org.UserName,
+		Private: gitea.VisibleType(org.Visibility) != gitea.VisibleTypePublic,
 	}, nil
 }
 

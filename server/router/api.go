@@ -46,7 +46,7 @@ func apiRoutes(e *gin.Engine) {
 			users.DELETE("/:login", api.DeleteUser)
 		}
 
-		apiBase.GET("/orgs/lookup/*org_full_name", api.LookupOrg) // TODO: check if this public route is a security issue
+		apiBase.GET("/orgs/lookup/*org_full_name", api.LookupOrg)
 		orgBase := apiBase.Group("/orgs/:org_id")
 		{
 			orgBase.GET("/permissions", api.GetOrgPermissions)

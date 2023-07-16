@@ -20,6 +20,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/rs/zerolog/log"
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
@@ -118,6 +119,7 @@ func GetOrgPermissions(c *gin.Context) {
 //	@Param		org_full_name	path	string	true	"the organizations full-name / slug"
 func LookupOrg(c *gin.Context) {
 	_store := store.FromContext(c)
+
 	orgFullName := strings.TrimLeft(c.Param("org_full_name"), "/")
 
 	org, err := _store.OrgFindByName(orgFullName)
@@ -129,6 +131,34 @@ func LookupOrg(c *gin.Context) {
 
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
+	}
+
+	// don't leak private org infos
+	if org.Private {
+		user := session.User(c)
+		if user == nil {
+			c.String(http.StatusUnauthorized, "User not authorized")
+			return
+		}
+
+		if !user.Admin && org.IsUser {
+			if org.Name != user.Login {
+				c.String(http.StatusForbidden, "User not authorized")
+				return
+			}
+		} else if !user.Admin {
+			perm, err := server.Config.Services.Membership.Get(c, user, org.Name)
+			if err != nil {
+				log.Error().Msgf("Failed to check membership: %v", err)
+				c.String(http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+				return
+			}
+
+			if perm == nil || !perm.Member {
+				c.String(http.StatusForbidden, "User not authorized")
+				return
+			}
+		}
 	}
 
 	c.JSON(http.StatusOK, org)
