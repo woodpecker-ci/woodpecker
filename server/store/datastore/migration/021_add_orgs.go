@@ -16,6 +16,7 @@ package migration
 
 import (
 	"fmt"
+	"strings"
 
 	"xorm.io/builder"
 	"xorm.io/xorm"
@@ -63,7 +64,7 @@ var addOrgs = task{
 		orgs := make(map[string]*model.Org)
 		users := make(map[string]bool)
 		for _, repo := range repos {
-			orgName := repo.Owner
+			orgName := strings.ToLower(repo.Owner)
 
 			// check if it's a registered user
 			if _, ok := users[orgName]; !ok {
