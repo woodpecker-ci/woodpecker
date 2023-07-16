@@ -141,11 +141,9 @@ func LookupOrg(c *gin.Context) {
 			return
 		}
 
-		if !user.Admin && org.IsUser {
-			if org.Name != user.Login {
-				c.String(http.StatusForbidden, "User not authorized")
-				return
-			}
+		if !user.Admin && org.Name != user.Login {
+			c.String(http.StatusForbidden, "User not authorized")
+			return
 		} else if !user.Admin {
 			perm, err := server.Config.Services.Membership.Get(c, user, org.Name)
 			if err != nil {

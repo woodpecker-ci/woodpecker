@@ -140,7 +140,7 @@ func MustOrgMember(admin bool) gin.HandlerFunc {
 		}
 
 		// User can access his own, admin can access all
-		if (org.IsUser && org.Name == user.Login) || user.Admin {
+		if (org.Name == user.Login) || user.Admin {
 			c.Next()
 			return
 		}
