@@ -22,3 +22,8 @@ type Org struct {
 	// if name lookup has to check for membership or not
 	Private bool `json:"-"              xorm:"private"`
 } //	@name Org
+
+// TableName return database table name for xorm
+func (Org) TableName() string {
+	return "orgs"
+}

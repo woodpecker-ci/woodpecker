@@ -15,6 +15,8 @@
 package migration
 
 import (
+	"fmt"
+
 	"xorm.io/builder"
 	"xorm.io/xorm"
 
@@ -44,18 +46,18 @@ var addOrgs = task{
 	required: true,
 	fn: func(sess *xorm.Session) error {
 		if err := sess.Sync(new(model.Org), new(model.Repo)); err != nil {
-			return err
+			return fmt.Errorf("sync new models failed: %w", err)
 		}
 
 		// make sure the columns exist before removing them
 		if err := sess.Sync(new(oldSecret021)); err != nil {
-			return err
+			return fmt.Errorf("sync old secrets models failed: %w", err)
 		}
 
 		// get all org names from repos
 		var repos []*model.Repo
 		if err := sess.Find(&repos); err != nil {
-			return err
+			return fmt.Errorf("find all repos failed: %w", err)
 		}
 
 		orgs := make(map[string]*model.Org)
@@ -69,20 +71,20 @@ var addOrgs = task{
 					IsUser: false, // TODO: should we get this info from the forges?
 				}
 				if _, err := sess.Insert(org); err != nil {
-					return err
+					return fmt.Errorf("insert org %#v failed: %w", org, err)
 				}
 				orgs[orgName] = org
 
 				// update org secrets
 				var secrets []*oldSecret021
 				if err := sess.Where(builder.Eq{"secret_owner": orgName, "secret_repo_id": 0}).Find(&secrets); err != nil {
-					return err
+					return fmt.Errorf("get org secrets failed: %w", err)
 				}
 
 				for _, secret := range secrets {
 					secret.OrgID = org.ID
 					if _, err := sess.ID(secret.ID).Cols("secret_org_id").Update(secret); err != nil {
-						return err
+						return fmt.Errorf("update org secret %d failed: %w", secret.ID, err)
 					}
 				}
 			}
@@ -90,7 +92,7 @@ var addOrgs = task{
 			// update the repo
 			repo.OrgID = orgs[orgName].ID
 			if _, err := sess.ID(repo.ID).Cols("repo_org_id").Update(repo); err != nil {
-				return err
+				return fmt.Errorf("update repos failed: %w", err)
 			}
 		}
 
