@@ -61,14 +61,24 @@ var addOrgs = task{
 		}
 
 		orgs := make(map[string]*model.Org)
+		users := make(map[string]bool)
 		for _, repo := range repos {
 			orgName := repo.Owner
+
+			// check if it's a registered user
+			if _, ok := users[orgName]; !ok {
+				exist, err := sess.Where("user_login = ?", orgName).Exist(new(model.User))
+				if err != nil {
+					return err
+				}
+				users[orgName] = exist
+			}
 
 			// create org if not already created
 			if _, ok := orgs[orgName]; !ok {
 				org := &model.Org{
 					Name:   orgName,
-					IsUser: false, // TODO: should we get this info from the forges?
+					IsUser: users[orgName],
 				}
 				if _, err := sess.Insert(org); err != nil {
 					return fmt.Errorf("insert org %#v failed: %w", org, err)
