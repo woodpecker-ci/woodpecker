@@ -45,6 +45,12 @@ var addOrgs = task{
 	name:     "add-orgs",
 	required: true,
 	fn: func(sess *xorm.Session) error {
+		if exist, err := sess.IsTableExist("orgs"); exist && err == nil {
+			if err := sess.DropTable("orgs"); err != nil {
+				return fmt.Errorf("drop old orgs table failed: %w", err)
+			}
+		}
+
 		if err := sess.Sync(new(model.Org), new(model.Repo)); err != nil {
 			return fmt.Errorf("sync new models failed: %w", err)
 		}
