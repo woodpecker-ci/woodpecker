@@ -18,10 +18,10 @@ package bitbucket
 import (
 	"context"
 	"fmt"
+	"golang.org/x/oauth2"
 	"net/http"
 	"net/url"
-
-	"golang.org/x/oauth2"
+	"path/filepath"
 
 	shared_utils "github.com/woodpecker-ci/woodpecker/shared/utils"
 
@@ -223,8 +223,53 @@ func (c *config) File(ctx context.Context, u *model.User, r *model.Repo, p *mode
 	return []byte(*config), err
 }
 
-func (c *config) Dir(_ context.Context, _ *model.User, _ *model.Repo, _ *model.Pipeline, _ string) ([]*forge_types.FileMeta, error) {
-	return nil, forge_types.ErrNotImplemented
+// Dir fetches a folder from the bitbucket repository
+func (c *config) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model.Pipeline, f string) ([]*forge_types.FileMeta, error) {
+	var page *string
+	repoPathFiles := []*forge_types.FileMeta{}
+	for {
+		filesResp, err := c.newClient(ctx, u).GetRepoFiles(r.Owner, r.Name, p.Commit, f, page)
+		if err != nil {
+			return nil, err
+		}
+		totalFiles := 0
+		for _, file := range filesResp.Values {
+			totalFiles++
+			_, filename := filepath.Split(file.Path)
+			repoFile := forge_types.FileMeta{
+				Name: filename,
+			}
+			if file.Type == "commit_file" {
+				fileData, err := c.newClient(ctx, u).FindSource(r.Owner, r.Name, p.Commit, file.Path)
+				if err != nil {
+					return nil, err
+				}
+				if fileData != nil {
+					repoFile.Data = []byte(*fileData)
+				}
+			}
+			repoPathFiles = append(repoPathFiles, &repoFile)
+		}
+
+		// Check for more results page
+		if filesResp.Next == nil {
+			break
+		}
+		myUrl, err := url.Parse(*filesResp.Next)
+		if err != nil {
+			return nil, err
+		}
+		params, err := url.ParseQuery(myUrl.RawQuery)
+		if err != nil {
+			return nil, err
+		}
+		nextPage := params.Get("page")
+		if len(nextPage) == 0 {
+			break
+		}
+		page = &nextPage
+	}
+	return repoPathFiles, nil
 }
 
 // Status creates a pipeline status for the Bitbucket commit.
