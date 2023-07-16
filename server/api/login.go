@@ -111,6 +111,15 @@ func HandleAuth(c *gin.Context) {
 			c.Redirect(http.StatusSeeOther, "/login?error=internal_error")
 			return
 		}
+
+		// if another user already have activated repos on behave of that user,
+		// the user was stored as org. now we adopt it to the user.
+		if org, err := _store.OrgFindByName(u.Login); err == nil && org != nil {
+			org.IsUser = true
+			if err := _store.OrgUpdate(org); err != nil {
+				log.Error().Err(err).Msgf("on user creation, could not mark org as user")
+			}
+		}
 	}
 
 	// update the user meta data and authorization data.
