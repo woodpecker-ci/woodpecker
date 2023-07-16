@@ -24,17 +24,11 @@ import (
 )
 
 type oldSecret021 struct {
-	ID          int64    `json:"id"              xorm:"pk autoincr 'secret_id'"`
-	Owner       string   `json:"-"               xorm:"NOT NULL DEFAULT '' UNIQUE(s) INDEX 'secret_owner'"`
-	OrgID       int64    `json:"-"               xorm:"NOT NULL DEFAULT 0 UNIQUE(s) INDEX 'secret_org_id'"`
-	RepoID      int64    `json:"-"               xorm:"NOT NULL DEFAULT 0 UNIQUE(s) INDEX 'secret_repo_id'"`
-	Name        string   `json:"name"            xorm:"NOT NULL UNIQUE(s) INDEX 'secret_name'"`
-	Value       string   `json:"value,omitempty" xorm:"TEXT 'secret_value'"`
-	Images      []string `json:"image"           xorm:"json 'secret_images'"`
-	PluginsOnly bool     `json:"plugins_only"    xorm:"secret_plugins_only"`
-	Events      []string `json:"event"           xorm:"json 'secret_events'"`
-	SkipVerify  bool     `json:"-"               xorm:"secret_skip_verify"`
-	Conceal     bool     `json:"-"               xorm:"secret_conceal"`
+	ID     int64  `json:"id"              xorm:"pk autoincr 'secret_id'"`
+	Owner  string `json:"-"               xorm:"'secret_owner'"`
+	OrgID  int64  `json:"-"               xorm:"NOT NULL DEFAULT 0 UNIQUE(s) INDEX 'secret_org_id'"`
+	RepoID int64  `json:"-"               xorm:"NOT NULL DEFAULT 0 UNIQUE(s) INDEX 'secret_repo_id'"`
+	Name   string `json:"name"            xorm:"NOT NULL UNIQUE(s) INDEX 'secret_name'"`
 }
 
 func (oldSecret021) TableName() string {
