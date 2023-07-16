@@ -173,11 +173,10 @@ func runTasks(e *xorm.Engine, tasks []*task) error {
 
 			if taskErr = task.fn(sess); taskErr != nil {
 				aliveMsgCancel(nil)
-				if err2 := sess.Rollback(); err2 != nil {
-					taskErr = errors.Join(taskErr, err2)
+				if err := sess.Rollback(); err != nil {
+					taskErr = errors.Join(taskErr, err)
 				}
-			}
-			if err := sess.Commit(); err != nil {
+			} else if err := sess.Commit(); err != nil {
 				return err
 			}
 		} else if task.engineFn != nil {
