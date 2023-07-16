@@ -45,7 +45,7 @@ var addOrgs = task{
 			}
 		}
 
-		if err := sess.Sync(new(model.Org), new(model.Repo)); err != nil {
+		if err := sess.Sync(new(model.Org), new(model.Repo), new(model.User)); err != nil {
 			return fmt.Errorf("sync new models failed: %w", err)
 		}
 
@@ -69,7 +69,7 @@ var addOrgs = task{
 			if _, ok := users[orgName]; !ok {
 				exist, err := sess.Where("user_login = ?", orgName).Exist(new(model.User))
 				if err != nil {
-					return err
+					return fmt.Errorf("check if user '%s' exist failed: %w", orgName, err)
 				}
 				users[orgName] = exist
 			}
