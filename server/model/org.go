@@ -16,7 +16,7 @@ package model
 
 // Org represents an organization.
 type Org struct {
-	ID     int64  `json:"id,omitempty"                    xorm:"pk autoincr"`
-	Name   string `json:"name"`
-	IsUser bool   `json:"is_user"`
+	ID     int64  `json:"id,omitempty"   xorm:"pk autoincr"`
+	Name   string `json:"name"           xorm:"UNIQUE 'name'"`
+	IsUser bool   `json:"is_user"        xorm:"is_user"`
 } //	@name Org
