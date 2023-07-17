@@ -271,3 +271,11 @@ type PullRequest struct {
 	ID    uint   `json:"id"`
 	Title string `json:"title"`
 }
+
+type CommitsResp struct {
+	Values []*Commit `json:"values"`
+}
+
+type Commit struct {
+	Hash string `json:"hash"`
+}

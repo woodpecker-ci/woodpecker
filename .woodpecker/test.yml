@@ -67,15 +67,6 @@ steps:
     image: mstruebing/editorconfig-checker
     group: test
 
-  # Fixed with https://github.com/woodpecker-ci/woodpecker/pull/1753
-  # securitycheck:
-  #   group: test
-  #   image: aquasec/trivy:latest
-  #   commands:
-  #     - trivy fs --exit-code 0 --skip-dirs web/ --skip-dirs docs/ --severity UNKNOWN,LOW .
-  #     - trivy fs --exit-code 1 --skip-dirs web/ --skip-dirs docs/ --severity MEDIUM,HIGH,CRITICAL .
-  #   when: *when
-
   test:
     image: *golang_image
     group: test

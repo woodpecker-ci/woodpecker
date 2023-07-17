@@ -297,9 +297,8 @@ func (c *config) Branches(ctx context.Context, u *model.User, r *model.Repo, _ *
 }
 
 // BranchHead returns the sha of the head (latest commit) of the specified branch
-func (c *config) BranchHead(_ context.Context, _ *model.User, _ *model.Repo, _ string) (string, error) {
-	// TODO(1138): missing implementation
-	return "", forge_types.ErrNotImplemented
+func (c *config) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
+	return c.newClient(ctx, u).GetBranchHead(r.Owner, r.Name, branch)
 }
 
 // PullRequests returns the pull requests of the named repository.
