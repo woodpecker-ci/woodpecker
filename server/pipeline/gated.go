@@ -1,4 +1,4 @@
-// Copyright 2021 Woodpecker Authors
+// Copyright 2023 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,16 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package store
+package pipeline
 
-type XORM struct {
-	Log     bool
-	ShowSQL bool
-}
+import "github.com/woodpecker-ci/woodpecker/server/model"
 
-// Opts are options for a new database connection
-type Opts struct {
-	Driver string
-	Config string
-	XORM   XORM
+func setGatedState(repo *model.Repo, pipe *model.Pipeline) {
+	// TODO(336): extend gated feature with an allow/block List
+	if repo.IsGated &&
+		// events created by woodpecker itself should run right away
+		pipe.Event != model.EventCron && pipe.Event != model.EventManual {
+		pipe.Status = model.StatusBlocked
+	}
 }

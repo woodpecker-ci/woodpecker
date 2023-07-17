@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.15.11](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.11) - 2023-07-12
+
+* SECURITY
+  * Update github.com/gin-gonic/gin to 1.9.1 (#1989)
+* ENHANCEMENTS
+  * Allow gitea dev version (#914) (#1988)
+
+## [0.15.10](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.10) - 2023-07-09
+
+* SECURITY
+  * Fix agent auth (#1952) (#1953)
+  * Return after error (#1875) (#1876)
+  * Update github.com/docker/distribution (#1750)
+
 ## [0.15.9](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.15.9) - 2023-05-11
 
 * SECURITY
