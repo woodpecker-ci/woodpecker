@@ -55,5 +55,5 @@ func (s storage) OrgFindByName(name string) (*model.Org, error) {
 
 func (s storage) OrgRepoList(org *model.Org, p *model.ListOptions) ([]*model.Repo, error) {
 	var repos []*model.Repo
-	return repos, s.paginate(p).OrderBy("repo_id").Where("org_id = ?", org.ID).Find(&repos)
+	return repos, s.paginate(p).OrderBy("repo_id").Where("repo_org_id = ?", org.ID).Find(&repos)
 }
