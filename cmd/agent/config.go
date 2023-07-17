@@ -19,7 +19,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"os"
-	"strconv"
 	"strings"
 
 	"github.com/rs/zerolog/log"
@@ -71,24 +70,4 @@ func writeAgentConfig(conf AgentConfig, agentConfigPath string) {
 			log.Error().Err(err).Msgf("could not persist agent config at '%s'", agentConfigPath)
 		}
 	}
-}
-
-// deprecated
-func readAgentID(agentIDConfigPath string) int64 {
-	const defaultAgentIDValue = int64(-1)
-
-	rawAgentID, fileErr := os.ReadFile(agentIDConfigPath)
-	if fileErr != nil {
-		log.Debug().Err(fileErr).Msgf("could not open agent-id config file from %s", agentIDConfigPath)
-		return defaultAgentIDValue
-	}
-
-	strAgentID := strings.TrimSpace(string(rawAgentID))
-	agentID, parseErr := strconv.ParseInt(strAgentID, 10, 64)
-	if parseErr != nil {
-		log.Warn().Err(parseErr).Msg("could not parse agent-id config file content to int64")
-		return defaultAgentIDValue
-	}
-
-	return agentID
 }
