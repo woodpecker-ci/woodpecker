@@ -54,6 +54,10 @@ import (
 func setupStore(c *cli.Context) (store.Store, error) {
 	datasource := c.String("datasource")
 	driver := c.String("driver")
+	xorm := store.XORM{
+		Log:     c.Bool("log-xorm"),
+		ShowSQL: c.Bool("log-xorm-sql"),
+	}
 
 	if driver == "sqlite3" {
 		if datastore.SupportedDriver("sqlite3") {
@@ -78,6 +82,7 @@ func setupStore(c *cli.Context) (store.Store, error) {
 	opts := &store.Opts{
 		Driver: driver,
 		Config: datasource,
+		XORM:   xorm,
 	}
 	log.Trace().Msgf("setup datastore: %#v", *opts)
 	store, err := datastore.NewEngine(opts)

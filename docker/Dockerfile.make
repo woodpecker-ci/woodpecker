@@ -7,6 +7,7 @@ RUN apk add --no-cache --update make gcc binutils-gold musl-dev && \
 
 # Build packages.
 COPY --from=golang_image /usr/local/go /usr/local/go
+COPY Makefile /
 ENV PATH=$PATH:/usr/local/go/bin
 
 # Cache tools

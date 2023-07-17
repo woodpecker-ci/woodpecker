@@ -189,6 +189,16 @@ The following list describes all available server configuration options.
 
 Configures the logging level. Possible values are `trace`, `debug`, `info`, `warn`, `error`, `fatal`, `panic`, `disabled` and empty.
 
+### `WOODPECKER_LOG_XORM`
+> Default: `false`
+
+Enable XORM logs.
+
+### `WOODPECKER_LOG_XORM_SQL`
+> Default: `false`
+
+Enable XORM SQL command logs.
+
 ### `WOODPECKER_DEBUG_PRETTY`
 > Default: `false`
 

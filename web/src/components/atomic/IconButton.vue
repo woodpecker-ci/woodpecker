@@ -73,6 +73,6 @@ export default defineComponent({
 
 <style scoped>
 .icon-button {
-  @apply relative flex items-center justify-center px-1 py-1 rounded-full bg-transparent hover-effect overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed;
+  @apply relative flex items-center justify-center px-1 py-1 rounded-md bg-transparent hover-effect overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed;
 }
 </style>

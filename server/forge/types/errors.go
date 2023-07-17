@@ -15,7 +15,10 @@
 
 package types
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
 // AuthError represents forge authentication error.
 type AuthError struct {
@@ -40,3 +43,16 @@ func (ae *AuthError) Error() string {
 var _ error = new(AuthError)
 
 var ErrNotImplemented = errors.New("not implemented")
+
+type ErrIgnoreEvent struct {
+	Event string
+}
+
+func (err *ErrIgnoreEvent) Error() string {
+	return fmt.Sprintf("explicit ignored event '%s'", err.Event)
+}
+
+func (*ErrIgnoreEvent) Is(target error) bool {
+	_, ok := target.(*ErrIgnoreEvent) //nolint:errorlint
+	return ok
+}
