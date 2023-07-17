@@ -15,10 +15,15 @@
 package datastore
 
 import (
+	"strings"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 func (s storage) OrgCreate(org *model.Org) error {
+	// sanitize
+	org.Name = strings.ToLower(org.Name)
+	// insert
 	_, err := s.engine.Insert(org)
 	return err
 }
@@ -29,6 +34,9 @@ func (s storage) OrgGet(id int64) (*model.Org, error) {
 }
 
 func (s storage) OrgUpdate(org *model.Org) error {
+	// sanitize
+	org.Name = strings.ToLower(org.Name)
+	// update
 	_, err := s.engine.ID(org.ID).AllCols().Update(org)
 	return err
 }
@@ -38,6 +46,9 @@ func (s storage) OrgDelete(id int64) error {
 }
 
 func (s storage) OrgFindByName(name string) (*model.Org, error) {
+	// sanitize
+	name = strings.ToLower(name)
+	// find
 	org := new(model.Org)
 	return org, wrapGet(s.engine.Where("name = ?", name).Get(org))
 }
