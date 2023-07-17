@@ -64,7 +64,7 @@ func TestOrgCRUD(t *testing.T) {
 	assert.NoError(t, store.CreateRepo(&model.Repo{UserID: 1, Owner: "some_other_u", Name: "xyz", FullName: "some_other_u/xyz", OrgID: some_user.ID}))
 	assert.NoError(t, store.CreateRepo(&model.Repo{UserID: 1, Owner: "renamedorg", Name: "567", FullName: "renamedorg/567", OrgID: orgOne.ID}))
 
-	// get all orgs
+	// get all repos for specific org
 	repos, err := store.OrgRepoList(some_user, &model.ListOptions{All: true})
 	assert.NoError(t, err)
 	assert.Len(t, repos, 2)
