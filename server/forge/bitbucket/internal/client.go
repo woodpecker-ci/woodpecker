@@ -192,7 +192,7 @@ func (c *Client) GetBranchHead(owner, name, branch string) (string, error) {
 		return "", err
 	}
 	if len(out.Values) == 0 {
-		return "", fmt.Errorf("no commits in brach %s", branch)
+		return "", fmt.Errorf("no commits in branch %s", branch)
 	}
 	return out.Values[0].Hash, nil
 }
