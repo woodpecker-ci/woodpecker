@@ -57,18 +57,19 @@ func TestOrgCRUD(t *testing.T) {
 	assert.EqualValues(t, "renamedorg", orgOne.Name)
 
 	// create two more orgs and repos
-	some_user := &model.Org{Name: "some_other_u", IsUser: true}
-	assert.NoError(t, store.OrgCreate(some_user))
+	someUser := &model.Org{Name: "some_other_u", IsUser: true}
+	assert.NoError(t, store.OrgCreate(someUser))
 	assert.NoError(t, store.OrgCreate(&model.Org{Name: "some_other_org"}))
-	assert.NoError(t, store.CreateRepo(&model.Repo{UserID: 1, Owner: "some_other_u", Name: "abc", FullName: "some_other_u/abc", OrgID: some_user.ID}))
-	assert.NoError(t, store.CreateRepo(&model.Repo{UserID: 1, Owner: "some_other_u", Name: "xyz", FullName: "some_other_u/xyz", OrgID: some_user.ID}))
+	assert.NoError(t, store.CreateRepo(&model.Repo{UserID: 1, Owner: "some_other_u", Name: "abc", FullName: "some_other_u/abc", OrgID: someUser.ID}))
+	assert.NoError(t, store.CreateRepo(&model.Repo{UserID: 1, Owner: "some_other_u", Name: "xyz", FullName: "some_other_u/xyz", OrgID: someUser.ID}))
 	assert.NoError(t, store.CreateRepo(&model.Repo{UserID: 1, Owner: "renamedorg", Name: "567", FullName: "renamedorg/567", OrgID: orgOne.ID}))
 
-	// get all repos for specific org
-	repos, err := store.OrgRepoList(some_user, &model.ListOptions{All: true})
+	// get all repos for a specific org
+	repos, err := store.OrgRepoList(someUser, &model.ListOptions{All: true})
 	assert.NoError(t, err)
 	assert.Len(t, repos, 2)
 
+	// delete an org and check if it's gone
 	assert.NoError(t, store.OrgDelete(org1.ID))
 	assert.Error(t, store.OrgDelete(org1.ID))
 }
