@@ -38,7 +38,7 @@ func readAgentConfig(agentConfigPath string) AgentConfig {
 
 	rawAgentConf, err := os.ReadFile(agentConfigPath)
 	if err != nil {
-		if !os.IsNotExist(err) {
+		if os.IsNotExist(err) {
 			log.Info().Msgf("no agent config found at '%s', start with defaults", agentConfigPath)
 		} else {
 			log.Error().Err(err).Msgf("could not open agent config at '%s'", agentConfigPath)
