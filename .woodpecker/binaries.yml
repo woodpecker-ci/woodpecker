@@ -40,9 +40,6 @@ steps:
       PLATFORMS: linux|arm64/v8;linux|amd64;windows|amd64
       TAGS: bindata sqlite sqlite_unlock_notify netgo
       XGO_VERSION: *xgo_version
-    when:
-      branch: ${CI_REPO_DEFAULT_BRANCH}
-      event: push
 
   build-agent:
     group: build
