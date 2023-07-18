@@ -38,7 +38,7 @@ func readAgentConfig(agentConfigPath string) AgentConfig {
 
 	rawAgentConf, err := os.ReadFile(agentConfigPath)
 	if err != nil {
-		if !os.IsNotExist(err) {
+		if os.IsNotExist(err) {
 			log.Info().Msgf("no agent config found at '%s', start with defaults", agentConfigPath)
 		} else {
 			log.Error().Err(err).Msgf("could not open agent config at '%s'", agentConfigPath)
@@ -66,7 +66,7 @@ func writeAgentConfig(conf AgentConfig, agentConfigPath string) {
 	oldRawAgentConf, _ := os.ReadFile(agentConfigPath)
 
 	// if config differ write to disk
-	if bytes.Equal(rawAgentConf, oldRawAgentConf) {
+	if !bytes.Equal(rawAgentConf, oldRawAgentConf) {
 		if err := os.WriteFile(agentConfigPath, rawAgentConf, 0o644); err != nil {
 			log.Error().Err(err).Msgf("could not persist agent config at '%s'", agentConfigPath)
 		}
