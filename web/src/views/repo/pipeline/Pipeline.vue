@@ -10,8 +10,8 @@
 
       <div class="flex flex-grow relative">
         <div v-if="error" class="flex flex-col p-4">
-          <span class="text-red-400 font-bold text-xl mb-2">{{ $t('repo.pipeline.execution_error') }}</span>
-          <span class="text-red-400">{{ error }}</span>
+          <span class="text-wp-red-500 font-bold text-xl mb-2">{{ $t('repo.pipeline.execution_error') }}</span>
+          <span class="text-wp-red-500">{{ error }}</span>
         </div>
 
         <div v-else-if="pipeline.status === 'blocked'" class="flex flex-col flex-grow justify-center items-center p-2">

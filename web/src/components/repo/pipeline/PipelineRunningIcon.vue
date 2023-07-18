@@ -27,6 +27,6 @@ import WoodpeckerIcon from '../../../assets/woodpecker.svg?component';
 
 .woodpecker ::v-deep(path) {
   animation: peck 1s ease infinite;
-  @apply fill-gray-600 dark:fill-gray-500;
+  @apply fill-wp-gray-600 dark:fill-wp-gray-500;
 }
 </style>

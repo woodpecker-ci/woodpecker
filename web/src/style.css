@@ -1,3 +1,96 @@
+:root {
+  --wp-primary-100: theme('colors.internal-wp-primary.100');
+  --wp-primary-200: theme('colors.internal-wp-primary.200');
+  --wp-primary-300: theme('colors.internal-wp-primary.300');
+  --wp-primary-400: theme('colors.internal-wp-primary.400');
+  --wp-primary-500: theme('colors.internal-wp-primary.500');
+  --wp-primary-600: theme('colors.internal-wp-primary.600');
+
+  --wp-link: theme('colors.internal-wp-link');
+
+  --wp-dark-50: theme('colors.dark.50');
+  --wp-dark-100: theme('colors.dark.100');
+  --wp-dark-200: theme('colors.dark.200');
+  --wp-dark-300: theme('colors.dark.300');
+  --wp-dark-400: theme('colors.dark.400');
+  --wp-dark-500: theme('colors.dark.500');
+  --wp-dark-600: theme('colors.dark.600');
+  --wp-dark-700: theme('colors.dark.700');
+  --wp-dark-800: theme('colors.dark.800');
+  --wp-dark-900: theme('colors.dark.900');
+
+  --wp-light-50: theme('colors.light.50');
+  --wp-light-100: theme('colors.light.100');
+  --wp-light-200: theme('colors.light.200');
+  --wp-light-300: theme('colors.light.300');
+  --wp-light-400: theme('colors.light.400');
+  --wp-light-500: theme('colors.light.500');
+  --wp-light-600: theme('colors.light.600');
+  --wp-light-700: theme('colors.light.700');
+  --wp-light-800: theme('colors.light.800');
+  --wp-light-900: theme('colors.light.900');
+
+  --wp-red-50: theme('colors.red.50');
+  --wp-red-100: theme('colors.red.100');
+  --wp-red-200: theme('colors.red.200');
+  --wp-red-300: theme('colors.red.300');
+  --wp-red-400: theme('colors.red.400');
+  --wp-red-500: theme('colors.red.500');
+  --wp-red-600: theme('colors.red.600');
+  --wp-red-700: theme('colors.red.700');
+  --wp-red-800: theme('colors.red.800');
+  --wp-red-900: theme('colors.red.900');
+
+  --wp-green-50: theme('colors.green.50');
+  --wp-green-100: theme('colors.green.100');
+  --wp-green-200: theme('colors.green.200');
+  --wp-green-300: theme('colors.green.300');
+  --wp-green-400: theme('colors.green.400');
+  --wp-green-500: theme('colors.green.500');
+  --wp-green-600: theme('colors.green.600');
+  --wp-green-700: theme('colors.green.700');
+  --wp-green-800: theme('colors.green.800');
+  --wp-green-900: theme('colors.green.900');
+
+  --wp-blue-50: theme('colors.blue.50');
+  --wp-blue-100: theme('colors.blue.100');
+  --wp-blue-200: theme('colors.blue.200');
+  --wp-blue-300: theme('colors.blue.300');
+  --wp-blue-400: theme('colors.blue.400');
+  --wp-blue-500: theme('colors.blue.500');
+  --wp-blue-600: theme('colors.blue.600');
+  --wp-blue-700: theme('colors.blue.700');
+  --wp-blue-800: theme('colors.blue.800');
+  --wp-blue-900: theme('colors.blue.900');
+
+  --wp-yellow-50: theme('colors.yellow.50');
+  --wp-yellow-100: theme('colors.yellow.100');
+  --wp-yellow-200: theme('colors.yellow.200');
+  --wp-yellow-300: theme('colors.yellow.300');
+  --wp-yellow-400: theme('colors.yellow.400');
+  --wp-yellow-500: theme('colors.yellow.500');
+  --wp-yellow-600: theme('colors.yellow.600');
+  --wp-yellow-700: theme('colors.yellow.700');
+  --wp-yellow-800: theme('colors.yellow.800');
+  --wp-yellow-900: theme('colors.yellow.900');
+
+  --wp-gray-50: theme('colors.gray.50');
+  --wp-gray-100: theme('colors.gray.100');
+  --wp-gray-200: theme('colors.gray.200');
+  --wp-gray-300: theme('colors.gray.300');
+  --wp-gray-400: theme('colors.gray.400');
+  --wp-gray-500: theme('colors.gray.500');
+  --wp-gray-600: theme('colors.gray.600');
+  --wp-gray-700: theme('colors.gray.700');
+  --wp-gray-800: theme('colors.gray.800');
+  --wp-gray-900: theme('colors.gray.900');
+
+  --wp-darkgray-600: theme('colors.internal-wp-darkgray.600');
+  --wp-darkgray-700: theme('colors.internal-wp-darkgray.700');
+  --wp-darkgray-800: theme('colors.internal-wp-darkgray.800');
+  --wp-darkgray-900: theme('colors.internal-wp-darkgray.900');
+}
+
 html,
 body,
 #app {

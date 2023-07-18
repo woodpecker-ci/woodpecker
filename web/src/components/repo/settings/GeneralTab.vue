@@ -1,6 +1,6 @@
 <template>
   <Panel>
-    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-gray-600">
+    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-wp-gray-600">
       <h1 class="text-xl ml-2 text-color">{{ $t('repo.settings.general.general') }}</h1>
     </div>
 
@@ -16,10 +16,10 @@
         />
         <template #description>
           <i18n-t keypath="repo.settings.general.pipeline_path.desc" tag="p" class="text-sm text-color-alt">
-            <span class="bg-gray-300 dark:bg-dark-700 rounded-md px-1">{{
+            <span class="bg-wp-gray-300 dark:bg-wp-dark-700 rounded-md px-1">{{
               $t('repo.settings.general.pipeline_path.desc_path_example')
             }}</span>
-            <span class="bg-gray-300 dark:bg-dark-700 rounded-md px-1">/</span>
+            <span class="bg-wp-gray-300 dark:bg-wp-dark-700 rounded-md px-1">/</span>
           </i18n-t>
         </template>
       </InputField>
@@ -61,7 +61,7 @@
       <InputField docs-url="docs/usage/project-settings#timeout" :label="$t('repo.settings.general.timeout.timeout')">
         <div class="flex items-center">
           <NumberField v-model="repoSettings.timeout" class="w-24" />
-          <span class="ml-4 text-gray-600">{{ $t('repo.settings.general.timeout.minutes') }}</span>
+          <span class="ml-4 text-wp-gray-600">{{ $t('repo.settings.general.timeout.minutes') }}</span>
         </div>
       </InputField>
 

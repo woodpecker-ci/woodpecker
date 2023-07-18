@@ -3,13 +3,13 @@
     type="button"
     class="relative flex items-center py-1 px-2 rounded-md border shadow-sm cursor-pointer transition-all duration-150 overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
     :class="{
-      'bg-white hover:bg-gray-200 border-gray-300 text-color dark:bg-dark-gray-600 dark:border-dark-400 dark:hover:bg-dark-gray-800':
+      'bg-white hover:bg-wp-gray-200 border-wp-gray-300 text-color dark:bg-wp-darkgray-600 dark:border-wp-dark-400 dark:hover:bg-wp-darkgray-800':
         color === 'gray',
-      'bg-woodpecker-400 hover:bg-woodpecker-500 border-woodpecker-600 text-white dark:text-gray-300 dark:bg-woodpecker-500 dark:hover:bg-woodpecker-400':
+      'bg-wp-primary-400 hover:bg-wp-primary-500 border-wp-primary-600 text-white dark:text-wp-gray-300 dark:bg-wp-primary-500 dark:hover:bg-wp-primary-400':
         color === 'green',
-      'bg-cyan-600 hover:bg-cyan-700 border-cyan-800 text-white dark:text-gray-300 dark:bg-cyan-900 dark:hover:bg-cyan-800':
+      'bg-wp-blue-500 hover:bg-wp-blue-600 border-wp-blue-700 text-white dark:text-wp-gray-300 dark:bg-wp-blue-900 dark:hover:bg-wp-blue-800':
         color === 'blue',
-      'bg-red-500 hover:bg-red-600 border-red-700 text-white dark:text-gray-300 dark:bg-red-900 dark:hover:bg-red-800':
+      'bg-wp-red-500 hover:bg-wp-red-600 border-wp-red-700 text-white dark:text-wp-gray-300 dark:bg-wp-red-900 dark:hover:bg-wp-red-800':
         color === 'red',
       ...passedClasses,
     }"
@@ -26,10 +26,10 @@
         :class="{
           'opacity-100': isLoading,
           'opacity-0': !isLoading,
-          'bg-white dark:bg-dark-gray-700': color === 'gray',
-          'bg-lime-700': color === 'green',
-          'bg-cyan-700': color === 'blue',
-          'bg-red-600': color === 'red',
+          'bg-white dark:bg-wp-darkgray-700': color === 'gray',
+          'bg-wp-primary-700': color === 'green',
+          'bg-wp-blue-700': color === 'blue',
+          'bg-wp-red-600': color === 'red',
         }"
       >
         <Icon name="loading" class="animate-spin" />

@@ -3,7 +3,7 @@
     <input
       :id="`checkbox-${id}`"
       type="checkbox"
-      class="checkbox flex-shrink-0 relative border border-gray-400 cursor-pointer rounded-md transition-colors duration-150 w-5 h-5 checked:bg-woodpecker-400 checked:border-woodpecker-400 focus-visible:border-gray-600 dark:(border-gray-600 checked:bg-woodpecker-500 checked:border-woodpecker-500 focus-visible:border-gray-300 checked:focus-visible:border-gray-300)"
+      class="checkbox flex-shrink-0 relative border border-wp-gray-400 cursor-pointer rounded-md transition-colors duration-150 w-5 h-5 checked:bg-wp-primary-400 checked:border-wp-primary-400 focus-visible:border-wp-gray-600 dark:(border-wp-gray-600 checked:bg-wp-primary-500 checked:border-wp-primary-500 focus-visible:border-wp-gray-300 checked:focus-visible:border-wp-gray-300)"
       :checked="innerValue"
       @click="innerValue = !innerValue"
     />
@@ -82,7 +82,7 @@ export default defineComponent({
   border-width: 0 2px 2px 0;
   transform: translate(-50%, -60%) rotate(45deg);
   opacity: 0;
-  @apply dark:border-gray-300;
+  @apply dark:border-wp-gray-300;
 }
 
 .checkbox:checked::before {

@@ -1,10 +1,10 @@
 <template>
-  <div class="rounded-md w-full shadow overflow-hidden bg-gray-300 dark:bg-dark-gray-700">
+  <div class="rounded-md w-full shadow overflow-hidden bg-wp-gray-300 dark:bg-wp-darkgray-700">
     <component
       :is="collapsable ? 'button' : 'div'"
       v-if="title"
       type="button"
-      class="flex w-full font-bold gap-2 text-gray-200 bg-gray-400 dark:bg-dark-gray-800 px-4 py-2"
+      class="flex w-full font-bold gap-2 text-wp-gray-200 bg-wp-gray-400 dark:bg-wp-darkgray-800 px-4 py-2"
       @click="collapsed && (_collapsed = !_collapsed)"
     >
       <Icon
@@ -22,7 +22,7 @@
       }"
       class="transition-height duration-150 overflow-hidden"
     >
-      <div class="w-full p-4 bg-white dark:bg-dark-gray-700 text-color">
+      <div class="w-full p-4 bg-white dark:bg-wp-darkgray-700 text-color">
         <slot />
       </div>
     </div>

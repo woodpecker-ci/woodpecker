@@ -1,6 +1,6 @@
 <template>
   <Panel>
-    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-gray-600">
+    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-wp-gray-600">
       <div class="ml-2">
         <h1 class="text-xl text-color">{{ $t('admin.settings.users.users') }}</h1>
         <p class="text-sm text-color-alt">{{ $t('admin.settings.users.desc') }}</p>
@@ -34,7 +34,7 @@
         <IconButton
           icon="trash"
           :title="$t('admin.settings.users.delete_user')"
-          class="ml-2 w-8 h-8 hover:text-red-400 hover:dark:text-red-500"
+          class="ml-2 w-8 h-8 hover:text-wp-red-500 hover:dark:text-wp-red-500"
           :is-loading="isDeleting"
           @click="deleteUser(user)"
         />

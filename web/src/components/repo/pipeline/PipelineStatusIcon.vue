@@ -6,10 +6,10 @@
     <Icon
       :name="`status-${status}`"
       :class="{
-        'text-red-400': pipelineStatusColors[status] === 'red',
-        'text-gray-400': pipelineStatusColors[status] === 'gray',
-        'text-woodpecker-400': pipelineStatusColors[status] === 'green',
-        'text-blue-400': pipelineStatusColors[status] === 'blue',
+        'text-wp-red-500': pipelineStatusColors[status] === 'red',
+        'text-wp-gray-400': pipelineStatusColors[status] === 'gray',
+        'text-wp-green-500': pipelineStatusColors[status] === 'green',
+        'text-wp-blue-500': pipelineStatusColors[status] === 'blue',
       }"
     />
   </div>

@@ -3,7 +3,7 @@
     <input
       :id="`radio-${id}-${option.value}`"
       type="radio"
-      class="radio relative flex-shrink-0 border border-gray-400 cursor-pointer rounded-full w-5 h-5 checked:bg-woodpecker-400 checked:border-woodpecker-400 focus-visible:border-gray-600 dark:(border-gray-600 checked:bg-woodpecker-500 checked:border-woodpecker-500 focus-visible:border-gray-300 checked:focus-visible:border-gray-300)"
+      class="radio relative flex-shrink-0 border border-wp-gray-400 cursor-pointer rounded-full w-5 h-5 checked:bg-wp-primary-400 checked:border-wp-primary-400 focus-visible:border-wp-gray-600 dark:(border-wp-gray-600 checked:bg-wp-primary-500 checked:border-wp-primary-500 focus-visible:border-wp-gray-300 checked:focus-visible:border-wp-gray-300)"
       :value="option.value"
       :checked="innerValue.includes(option.value)"
       @click="innerValue = option.value"
@@ -81,7 +81,7 @@ export default defineComponent({
   background: white;
   transform: translate(-50%, -50%);
   opacity: 0;
-  @apply dark:bg-gray-300;
+  @apply dark:bg-wp-gray-300;
 }
 
 .radio:checked::before {

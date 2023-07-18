@@ -2,7 +2,7 @@
   <!-- overlay -->
   <div
     v-if="open"
-    class="fixed bg-gray-900 opacity-80 left-0 top-0 right-0 bottom-0 z-500 print:hidden"
+    class="fixed bg-wp-gray-900 opacity-80 left-0 top-0 right-0 bottom-0 z-500 print:hidden"
     @click="$emit('close')"
   />
   <!-- overlay end -->

@@ -1,7 +1,7 @@
 <template>
-  <div class="flex flex-col w-full md:w-3/12 md:ml-2 text-gray-600 dark:text-gray-400 gap-2 pb-2">
+  <div class="flex flex-col w-full md:w-3/12 md:ml-2 text-wp-gray-600 dark:text-wp-gray-400 gap-2 pb-2">
     <div
-      class="flex flex-wrap p-4 gap-1 justify-between flex-shrink-0 md:rounded-md bg-white shadow dark:bg-dark-gray-700"
+      class="flex flex-wrap p-4 gap-1 justify-between flex-shrink-0 md:rounded-md bg-white shadow dark:bg-wp-darkgray-700"
     >
       <div class="flex space-x-1 items-center flex-shrink-0">
         <div class="flex items-center">
@@ -17,7 +17,7 @@
         <Icon v-else-if="pipeline.event === 'tag'" name="tag" />
         <a
           v-else-if="pipeline.event === 'pull_request'"
-          class="flex items-center space-x-1 text-link min-w-0"
+          class="flex items-center space-x-1 text-wp-link min-w-0"
           :href="pipeline.link_url"
           target="_blank"
         >
@@ -31,7 +31,12 @@
           <Icon name="commit" />
           <span>{{ pipeline.commit.slice(0, 10) }}</span>
         </template>
-        <a v-else class="text-blue-700 dark:text-link flex items-center" :href="pipeline.link_url" target="_blank">
+        <a
+          v-else
+          class="text-wp-blue-700 dark:text-wp-link flex items-center"
+          :href="pipeline.link_url"
+          target="_blank"
+        >
           <Icon name="commit" />
           <span>{{ pipeline.commit.slice(0, 10) }}</span>
         </a>
@@ -47,7 +52,7 @@
         <div
           v-for="workflow in pipeline.workflows"
           :key="workflow.id"
-          class="p-2 md:rounded-md bg-white shadow dark:border-b-dark-gray-600 dark:bg-dark-gray-700"
+          class="p-2 md:rounded-md bg-white shadow dark:border-b-wp-darkgray-600 dark:bg-wp-darkgray-700"
         >
           <div class="flex flex-col gap-2">
             <div v-if="workflow.environ" class="flex flex-wrap gap-x-1 gap-y-2 text-xs justify-end pt-1 pr-1">

@@ -1,6 +1,6 @@
 <template>
   <Panel>
-    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-gray-600">
+    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-wp-gray-600">
       <div class="ml-2">
         <h1 class="text-xl text-color">{{ $t('repo.settings.secrets.secrets') }}</h1>
         <p class="text-sm text-color-alt">

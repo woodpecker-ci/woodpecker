@@ -1,6 +1,6 @@
 <template>
   <div v-if="stats" class="flex justify-center">
-    <div class="bg-gray-100 dark:bg-dark-gray-600 text-color dark:text-gray-400 rounded-md py-5 px-5 w-full">
+    <div class="bg-wp-gray-100 dark:bg-wp-darkgray-600 text-color dark:text-wp-gray-400 rounded-md py-5 px-5 w-full">
       <div class="flex w-full">
         <h3 class="text-lg font-semibold leading-tight uppercase flex-1">
           {{ $t('admin.settings.queue.stats.completed_count') }}
@@ -31,7 +31,7 @@
               v-for="(item, index) in data"
               :key="item.key"
               class="px-4 md:w-1/4 sm:w-full"
-              :class="{ 'md:border-l border-gray-300 dark:border-gray-600': index !== 0 }"
+              :class="{ 'md:border-l border-wp-gray-300 dark:border-wp-gray-600': index !== 0 }"
             >
               <div class="text-sm whitespace-nowrap overflow-hidden text-ellipsis">
                 <span class="inline-block w-2 h-2 rounded-full mr-1 align-middle" :class="`${item.color}`">&nbsp;</span>
@@ -81,28 +81,28 @@ const data = computed(() => {
       label: t('admin.settings.queue.stats.worker_count'),
       value: props.stats.worker_count,
       perc: total.value > 0 ? (props.stats.worker_count / total.value) * 100 : 0,
-      color: 'bg-woodpecker-300',
+      color: 'bg-wp-green-600',
     },
     {
       key: 'running_count',
       label: t('admin.settings.queue.stats.running_count'),
       value: props.stats.running_count,
       perc: total.value > 0 ? (props.stats.running_count / total.value) * 100 : 100,
-      color: 'bg-blue-400',
+      color: 'bg-wp-blue-600',
     },
     {
       key: 'pending_count',
       label: t('admin.settings.queue.stats.pending_count'),
       value: props.stats.pending_count,
       perc: total.value > 0 ? (props.stats.pending_count / total.value) * 100 : 0,
-      color: 'bg-gray-400',
+      color: 'bg-wp-gray-500',
     },
     {
       key: 'waiting_on_deps_count',
       label: t('admin.settings.queue.stats.waiting_on_deps_count'),
       value: props.stats.waiting_on_deps_count,
       perc: total.value > 0 ? (props.stats.waiting_on_deps_count / total.value) * 100 : 0,
-      color: 'bg-red-400',
+      color: 'bg-wp-red-600',
     },
   ];
 });

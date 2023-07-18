@@ -1,7 +1,7 @@
 <template>
   <div v-if="pipeline" class="flex flex-col pt-10 md:pt-0">
     <div
-      class="fixed top-0 left-0 w-full md:hidden flex px-4 py-2 bg-gray-600 dark:bg-dark-gray-800 text-gray-50"
+      class="fixed top-0 left-0 w-full md:hidden flex px-4 py-2 bg-wp-gray-600 dark:bg-wp-darkgray-800 text-wp-gray-50"
       @click="$emit('update:step-id', null)"
     >
       <span>{{ step?.name }}</span>
@@ -9,7 +9,7 @@
     </div>
 
     <div
-      class="flex flex-grow flex-col bg-white shadow dark:bg-dark-gray-700 md:m-2 md:mt-0 md:rounded-md overflow-hidden"
+      class="flex flex-grow flex-col bg-white shadow dark:bg-wp-darkgray-700 md:m-2 md:mt-0 md:rounded-md overflow-hidden"
       @mouseover="showActions = true"
       @mouseleave="showActions = false"
     >
@@ -40,11 +40,11 @@
           <a
             :id="`L${line.number}`"
             :href="`#L${line.number}`"
-            class="text-gray-500 whitespace-nowrap select-none text-right pl-1 pr-2"
+            class="text-wp-gray-500 whitespace-nowrap select-none text-right pl-1 pr-2"
             :class="{
-              'bg-opacity-40 dark:bg-opacity-50 bg-red-600 dark:bg-red-800': line.type === 'error',
-              'bg-opacity-40 dark:bg-opacity-50 bg-yellow-600 dark:bg-yellow-800': line.type === 'warning',
-              'bg-opacity-20 bg-blue-600': isSelected(line),
+              'bg-opacity-40 dark:bg-opacity-50 bg-wp-red-600 dark:bg-wp-red-800': line.type === 'error',
+              'bg-opacity-40 dark:bg-opacity-50 bg-wp-yellow-600 dark:bg-wp-yellow-800': line.type === 'warning',
+              'bg-opacity-20 bg-wp-blue-600': isSelected(line),
               underline: isSelected(line),
             }"
             >{{ line.number }}</a
@@ -53,19 +53,19 @@
           <span
             class="align-top text-color whitespace-pre-wrap break-words"
             :class="{
-              'bg-opacity-40 dark:bg-opacity-50 bg-red-600 dark:bg-red-800': line.type === 'error',
-              'bg-opacity-40 dark:bg-opacity-50 bg-yellow-600 dark:bg-yellow-800': line.type === 'warning',
-              'bg-opacity-20 bg-blue-600': isSelected(line),
+              'bg-opacity-40 dark:bg-opacity-50 bg-wp-red-600 dark:bg-wp-red-800': line.type === 'error',
+              'bg-opacity-40 dark:bg-opacity-50 bg-wp-yellow-600 dark:bg-wp-yellow-800': line.type === 'warning',
+              'bg-opacity-20 bg-wp-blue-600': isSelected(line),
             }"
             v-html="line.text"
           />
           <!-- eslint-enable vue/no-v-html -->
           <span
-            class="text-gray-500 whitespace-nowrap select-none text-right pr-1"
+            class="text-wp-gray-500 whitespace-nowrap select-none text-right pr-1"
             :class="{
-              'bg-opacity-40 dark:bg-opacity-50 bg-red-600 dark:bg-red-800': line.type === 'error',
-              'bg-opacity-40 dark:bg-opacity-50 bg-yellow-600 dark:bg-yellow-800': line.type === 'warning',
-              'bg-opacity-20 bg-blue-600': isSelected(line),
+              'bg-opacity-40 dark:bg-opacity-50 bg-wp-red-600 dark:bg-wp-red-800': line.type === 'error',
+              'bg-opacity-40 dark:bg-opacity-50 bg-wp-yellow-600 dark:bg-wp-yellow-800': line.type === 'warning',
+              'bg-opacity-20 bg-wp-blue-600': isSelected(line),
             }"
             >{{ formatTime(line.time) }}</span
           >
@@ -73,8 +73,8 @@
       </div>
 
       <div class="m-auto text-xl text-color">
-        <span v-if="step?.error" class="text-red-400">{{ step.error }}</span>
-        <span v-else-if="step?.state === 'skipped'" class="text-red-400">{{
+        <span v-if="step?.error" class="text-wp-red-500">{{ step.error }}</span>
+        <span v-else-if="step?.state === 'skipped'" class="text-wp-red-500">{{
           $t('repo.pipeline.actions.canceled')
         }}</span>
         <span v-else-if="!step?.start_time">{{ $t('repo.pipeline.step_not_started') }}</span>
@@ -83,8 +83,10 @@
 
       <div
         v-if="step?.end_time !== undefined"
-        :class="step.exit_code == 0 ? 'dark:text-woodpecker-400 text-lime-700' : 'dark:text-red-400 text-red-600'"
-        class="w-full bg-gray-200 dark:bg-dark-gray-800 text-md p-4"
+        :class="
+          step.exit_code == 0 ? 'dark:text-wp-green-500 text-wp-green-700' : 'dark:text-wp-red-500 text-wp-red-600'
+        "
+        class="w-full bg-wp-gray-200 dark:bg-wp-darkgray-800 text-md p-4 text-bold"
       >
         {{ $t('repo.pipeline.exit_code', { exitCode: step.exit_code }) }}
       </div>

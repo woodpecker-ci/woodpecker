@@ -21,7 +21,7 @@
       <div>
         <div class="flex items-center">
           <h2 class="text-lg text-color">{{ $t('user.api_usage') }}</h2>
-          <a :href="`${address}/swagger/index.html`" target="_blank" class="ml-4 text-link">Swagger UI</a>
+          <a :href="`${address}/swagger/index.html`" target="_blank" class="ml-4 text-wp-link">Swagger UI</a>
         </div>
         <pre class="cli-box">{{ usageWithCurl }}</pre>
       </div>
@@ -29,7 +29,7 @@
       <div>
         <div class="flex items-center">
           <h2 class="text-lg text-color">{{ $t('user.cli_usage') }}</h2>
-          <a :href="cliDownload" target="_blank" class="ml-4 text-link">{{ $t('user.dl_cli') }}</a>
+          <a :href="cliDownload" target="_blank" class="ml-4 text-wp-link">{{ $t('user.dl_cli') }}</a>
         </div>
         <pre class="cli-box">{{ usageWithCli }}</pre>
       </div>
@@ -105,7 +105,7 @@ const resetToken = async () => {
 
 <style scoped>
 .cli-box {
-  @apply bg-gray-500 p-2 rounded-md text-white break-words dark:bg-dark-400 dark:text-gray-400;
+  @apply bg-wp-gray-700 p-2 rounded-md text-wp-gray-100 break-words dark:bg-wp-dark-400 dark:text-wp-gray-400;
   white-space: pre-wrap;
 }
 </style>

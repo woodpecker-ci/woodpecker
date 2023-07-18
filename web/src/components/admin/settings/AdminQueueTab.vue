@@ -1,6 +1,6 @@
 <template>
   <Panel>
-    <div v-if="queueInfo" class="flex flex-row border-b mb-4 pb-4 items-center dark:border-gray-600">
+    <div v-if="queueInfo" class="flex flex-row border-b mb-4 pb-4 items-center dark:border-wp-gray-600">
       <div class="ml-2">
         <h1 class="text-xl text-color">{{ $t('admin.settings.queue.queue') }}</h1>
         <p class="text-sm text-color-alt">{{ $t('admin.settings.queue.desc') }}</p>
@@ -24,8 +24,8 @@
         <Icon
           :name="queueInfo.paused ? 'pause' : 'play'"
           :class="{
-            'text-red-400': queueInfo.paused,
-            'text-woodpecker-300': !queueInfo.paused,
+            'text-wp-red-600': queueInfo.paused,
+            'text-wp-green-600': !queueInfo.paused,
           }"
         />
       </div>
@@ -56,9 +56,9 @@
                   : 'status-declined'
               "
               :class="{
-                'text-red-400': task.status === 'waiting_on_deps',
-                'text-blue-400': task.status === 'running',
-                'text-gray-400': task.status === 'pending',
+                'text-wp-red-600': task.status === 'waiting_on_deps',
+                'text-wp-blue-600': task.status === 'running',
+                'text-wp-gray-500': task.status === 'pending',
               }"
             />
           </div>
