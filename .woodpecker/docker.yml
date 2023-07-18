@@ -1,7 +1,9 @@
+#when:
+#  - event: pull_request
+#  - event: push
+#    branch: [ main, release/* ]
 when:
-  - event: pull_request
-  - event: push
-    branch: [ main, release/* ]
+  event: tag
 
 depends_on:
   - test
