@@ -9,6 +9,8 @@ when:
 variables:
   - &golang_image 'golang:1.20.2'
   - &node_image 'node:18-alpine'
+  - &xgo_image 'techknowlogick/xgo:go-1.20.2'
+  - &xgo_version 'go-1.20.2'
 
 steps:
   build-web:
@@ -26,11 +28,19 @@ steps:
     commands:
       - go mod vendor
 
-  build-server:
+  cross-compile-server:
     group: build
-    image: *golang_image
+    image: *xgo_image
+    pull: true
     commands:
-      - make release-server
+      - apt update
+      - apt install -y tree
+      - make cross-compile-server
+    environment:
+      PLATFORMS: linux|arm64/v8;linux|amd64;windows|amd64
+      TAGS: bindata sqlite sqlite_unlock_notify netgo
+      XGO_VERSION: *xgo_version
+      TARGZ: '1'
 
   build-agent:
     group: build
