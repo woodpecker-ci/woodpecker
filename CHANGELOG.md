@@ -91,6 +91,8 @@
   * Support conditional branch as an array to align with documentation (#836)
   * Fix redirect after login (#824)
 * ENHANCEMENTS
+  * Add BranchHead implementation for bitbucket forge (#2011)
+  * Use global logger for xorm logs and add options (#1997)
   * Let HookParse func explicit ignore events (#1942)
   * Link swagger in navbar (#1984)
   * Add option to read grpc-secret from file (#1972)
