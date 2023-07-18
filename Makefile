@@ -207,9 +207,9 @@ release-server-xgo: check-xgo ## Create server binaries for release using xgo
 
 release-server: ## Create server binaries for release
 	# compile
-	GOOS=$(TARGETOS) GOARCH=$(TARGETARCH) CGO_ENABLED=${CGO_ENABLED} go build -ldflags '${LDFLAGS}' -o dist/server/$(TARGETOS)_$(TARGETARCH)/woodpecker-server github.com/woodpecker-ci/woodpecker/cmd/server
+	GOOS=$(TARGETOS) GOARCH=$(TARGETARCH) CGO_ENABLED=${CGO_ENABLED} go build -ldflags '${LDFLAGS}' -o dist/server/$(TARGETOS)_$(TARGETARCH)/woodpecker-server$(BIN_SUFFIX) github.com/woodpecker-ci/woodpecker/cmd/server
 	# tar binary files
-	tar -cvzf dist/woodpecker-server_$(TARGETOS)_$(TARGETARCH).tar.gz -C dist/server/$(TARGETOS)_$(TARGETARCH) woodpecker-server
+	tar -cvzf dist/woodpecker-server_$(TARGETOS)_$(TARGETARCH).tar.gz -C dist/server/$(TARGETOS)_$(TARGETARCH) woodpecker-server$(BIN_SUFFIX)
 
 release-agent: ## Create agent binaries for release
 	# compile
