@@ -3,9 +3,9 @@ GO_PACKAGES ?= $(shell go list ./... | grep -v /vendor/)
 TARGETOS ?= linux
 TARGETARCH ?= amd64
 
-BIN_SUFFIX := ""
-ifneq ($(TARGETOS),windows)
-	BIN_SUFFIX := ".exe"
+BIN_SUFFIX :=
+ifeq ($(TARGETOS),windows)
+	BIN_SUFFIX := .exe
 endif
 
 VERSION ?= next
