@@ -1,0 +1,29 @@
+when:
+  - event: [ pull_request, cron ]
+  - event: push
+    branch: [ main, release/* ]
+
+variables:
+  - &trivy_image aquasec/trivy:latest
+  - &trivy_plugin codeberg.org/woodpecker-plugins/trivy:latest
+
+steps:
+  check backend:
+    group: check
+    image: *trivy_plugin
+    settings:
+      skip-dirs: web/,docs/
+
+  check docs:
+    group: check
+    image: *trivy_plugin
+    settings:
+      skip-dirs: node_modules/,plugins/woodpecker-plugins/node_modules/
+      dir:  docs/
+
+  check web:
+    group: check
+    image: *trivy_plugin
+    settings:
+      skip-dirs: node_modules/
+      dir:  web/
