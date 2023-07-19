@@ -28,18 +28,7 @@ import (
 	"golang.org/x/exp/slices"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
-	"github.com/woodpecker-ci/woodpecker/shared/constant"
 )
-
-// notAllowedEnvVarOverwrites are all env vars that can not be overwritten by step config
-var notAllowedEnvVarOverwrites = []string{
-	"CI_NETRC_MACHINE",
-	"CI_NETRC_USERNAME",
-	"CI_NETRC_PASSWORD",
-	"CI_SCRIPT",
-	"HOME",
-	"SHELL",
-}
 
 type workflowState struct {
 	stepCMDs     map[string]*exec.Cmd
@@ -49,8 +38,9 @@ type workflowState struct {
 }
 
 type local struct {
-	workflows map[string]*workflowState
-	output    io.ReadCloser
+	workflows       map[string]*workflowState
+	output          io.ReadCloser
+	pluginGitBinary string
 }
 
 // New returns a new local Engine.
@@ -69,7 +59,7 @@ func (e *local) IsAvailable(context.Context) bool {
 }
 
 func (e *local) Load(context.Context) error {
-	// TODO: download plugin-git binary if not exist
+	e.loadClone()
 
 	return nil
 }
@@ -95,8 +85,6 @@ func (e *local) Setup(_ context.Context, c *types.Config) error {
 	if err := os.Mkdir(state.workspaceDir, 0o700); err != nil {
 		return err
 	}
-
-	// TODO: copy plugin-git binary to homeDir and set PATH
 
 	workflowID, err := e.getWorkflowIDFromConfig(c)
 	if err != nil {
@@ -127,30 +115,27 @@ func (e *local) Exec(ctx context.Context, step *types.Step) error {
 	// Set HOME
 	env = append(env, "HOME="+state.homeDir)
 
-	var command []string
-	if step.Image == constant.DefaultCloneImage {
-		// Default clone step
-		// TODO: use tmp HOME and insert netrc and delete it after clone
-		env = append(env, "CI_WORKSPACE="+state.workspaceDir)
-		command = append(command, "plugin-git")
-	} else {
-		// Use "image name" as run command
-		command = append(command, step.Image)
-		command = append(command, "-c")
-
-		// TODO: use commands directly
-		script := ""
-		for _, cmd := range step.Commands {
-			script += fmt.Sprintf("echo + %s\n%s\n\n", shellescape.Quote(cmd), cmd)
-		}
-		script = strings.TrimSpace(script)
-
-		// Deleting the initial lines removes netrc support but adds compatibility for more shells like fish
-		command = append(command, script)
+	switch step.Type {
+	case types.StepTypeClone:
+		return e.execClone(ctx, step, state, env)
+	case types.StepTypeCommands:
+		return e.execCommands(ctx, step, state, env)
+	default:
+		return ErrUnsupportedStepType
 	}
+}
+
+func (e *local) execCommands(ctx context.Context, step *types.Step, state *workflowState, env []string) error {
+	// TODO: use commands directly
+	script := ""
+	for _, cmd := range step.Commands {
+		script += fmt.Sprintf("echo + %s\n%s", strings.TrimSpace(shellescape.Quote(cmd)), cmd)
+	}
+	script = strings.TrimSpace(script)
 
 	// Prepare command
-	cmd := exec.CommandContext(ctx, command[0], command[1:]...)
+	// Use "image name" as run command (indicate shell)
+	cmd := exec.CommandContext(ctx, step.Image, "-c", script)
 	cmd.Env = env
 	cmd.Dir = state.workspaceDir
 
