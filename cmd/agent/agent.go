@@ -112,11 +112,6 @@ func run(c *cli.Context) error {
 
 	agentConfig := readAgentConfig(agentConfigPath)
 
-	// deprecated
-	if agentConfig.AgentID == defaultAgentIDValue {
-		agentConfig.AgentID = readAgentID(c.String("agent-id-config-path"))
-	}
-
 	agentToken := c.String("grpc-token")
 	authClient := agentRpc.NewAuthGrpcClient(authConn, agentToken, agentConfig.AgentID)
 	authInterceptor, err := agentRpc.NewAuthInterceptor(authClient, 30*time.Minute)
