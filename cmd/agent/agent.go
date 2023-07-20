@@ -215,16 +215,15 @@ func run(c *cli.Context) error {
 		}
 	}()
 
+	// load engine (e.g. init api client)
+	if err := engine.Load(backendCtx); err != nil {
+		log.Error().Err(err).Msg("cannot load backend engine")
+		return err
+	}
+
 	for i := 0; i < parallel; i++ {
 		go func() {
 			defer wg.Done()
-
-			// load engine (e.g. init api client)
-			err = engine.Load(backendCtx)
-			if err != nil {
-				log.Error().Err(err).Msg("cannot load backend engine")
-				return
-			}
 
 			r := agent.NewRunner(client, filter, hostname, counter, &engine)
 
