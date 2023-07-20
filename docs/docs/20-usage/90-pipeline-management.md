@@ -1,9 +1,11 @@
 # Advanced pipeline management
 
 ## Using variables
+
 Once your pipeline starts to grow in size, it will become important to keep it DRY ("Don't Repeat Yourself") by using variables and environment variables. Depending on your specific need, there are a number of options.
 
 ### YAML extensions
+
 As described in [Advanced YAML syntax](/docs/docs/20-usage/35-advanced-yaml-syntax.md).
 ```yml
 variables:
@@ -17,6 +19,7 @@ variables:
 Note that the `golang_image` alias cannot be used with string interpolation. But this is otherwise a good option for most cases.
 
 ### YAML extensions (alternate form)
+
 Another approach using YAML extensions:
 ```yml
 variables:
@@ -44,6 +47,7 @@ steps:
 ```
 
 ### Persisting environment data between steps
+
 One can create a file containing environment variables, and then source it in each step that needs them.
 ```yml
 steps:
@@ -61,6 +65,7 @@ steps:
 ```
 
 ### Declaring global variables in `docker-compose.yml`
+
 As described in [Global environment variables](/docs/docs/20-usage/50-environment.md#global-environment-variables), one can define global variables:
 ```yml
 services:
