@@ -1,1 +1,2 @@
 * test=auto eol=lf
+*.png -text -eol
