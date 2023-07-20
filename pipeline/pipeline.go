@@ -16,6 +16,8 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/multipart"
 )
 
+// TODO: move runtime into "runtime" subpackage
+
 type (
 	// State defines the pipeline and process state.
 	State struct {
@@ -69,7 +71,7 @@ func (r *Runtime) MakeLogger() zerolog.Logger {
 	return logCtx.Logger()
 }
 
-// Starts the execution of the pipeline and waits for it to complete
+// Starts the execution of an workflow and waits for it to complete
 func (r *Runtime) Run(runnerCtx context.Context) error {
 	logger := r.MakeLogger()
 	logger.Debug().Msgf("Executing %d stages, in order of:", len(r.spec.Stages))

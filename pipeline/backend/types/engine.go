@@ -17,19 +17,29 @@ type Engine interface {
 	// Load the backend engine.
 	Load(context.Context) error
 
-	// Setup the pipeline environment.
+	// Setup the workflow environment.
+	// TODO: rename to "SetupWorkflow"
+	// TODO: pass a task UUID
 	Setup(context.Context, *Config) error
 
-	// Exec start the pipeline step.
+	// Exec start the workflow step.
+	// TODO: rename to "StartStep" to make
+	// TODO: pass a task UUID
 	Exec(context.Context, *Step) error
 
-	// Wait for the pipeline step to complete and returns
+	// Wait for the workflow step to complete and returns
 	// the completion results.
+	// TODO: rename to "WaitStep" to make
+	// TODO: pass a task UUID
 	Wait(context.Context, *Step) (*State, error)
 
-	// Tail the pipeline step logs.
+	// Tail the workflow step logs.
+	// TODO: rename to "TailStep" to make
+	// TODO: pass a task UUID
 	Tail(context.Context, *Step) (io.ReadCloser, error)
 
-	// Destroy the pipeline environment.
+	// Destroy the workflow environment.
+	// TODO: rename to "DestroyWorkflow" to make
+	// TODO: pass a task UUID
 	Destroy(context.Context, *Config) error
 }
