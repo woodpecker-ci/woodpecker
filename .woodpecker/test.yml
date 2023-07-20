@@ -59,6 +59,7 @@ steps:
     group: test
     commands:
       - "make generate-swagger"
+      - git add . && git status && git reset
       - "DIFF=$(git diff | head)"
       - echo $DIFF
       - "[ -n \"$DIFF\" ] && { echo \"swagger not up to date, exec 'make generate-swagger' and commit\"; exit 1; } || true"
