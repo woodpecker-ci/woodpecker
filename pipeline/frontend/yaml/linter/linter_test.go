@@ -7,7 +7,8 @@ import (
 )
 
 func TestLint(t *testing.T) {
-	testdatas := []struct{ Title, Data string }{{Title: "map", Data: `
+	testdatas := []struct{ Title, Data string }{{
+		Title: "map", Data: `
 steps:
   build:
     image: docker
@@ -26,7 +27,9 @@ steps:
 services:
   redis:
     image: redis
-`}, {Title: "list", Data: `
+`,
+	}, {
+		Title: "list", Data: `
 steps:
   - name: build
     image: docker
@@ -42,7 +45,8 @@ steps:
     repo: foo/bar
     settings:
       foo: bar
-`}, {
+`,
+	}, {
 		Title: "merge maps", Data: `
 variables:
   step_template: &base-step
