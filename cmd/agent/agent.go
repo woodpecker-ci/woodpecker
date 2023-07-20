@@ -220,14 +220,15 @@ func run(c *cli.Context) error {
 		log.Error().Err(err).Msg("cannot load backend engine")
 		return err
 	}
+	log.Debug().Msgf("loaded %s backend engine", engine.Name())
 
 	for i := 0; i < parallel; i++ {
+		i := i
 		go func() {
 			defer wg.Done()
 
 			r := agent.NewRunner(client, filter, hostname, counter, &engine)
-
-			log.Debug().Msgf("loaded %s backend engine", engine.Name())
+			log.Debug().Msgf("created new runner %d", i)
 
 			for {
 				if sigterm.IsSet() {
