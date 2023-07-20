@@ -17,7 +17,7 @@ package local
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
@@ -62,8 +62,8 @@ func (e *local) execClone(ctx context.Context, step *types.Step, state *workflow
 	}
 
 	if step.Image != constant.DefaultCloneImage {
-		// TODO: write mesage into log
-		log.Warn().Msgf("clone step image '%s' does not match default git clone image. We ignore it asume git.")
+		// TODO: write message into log
+		log.Warn().Msgf("clone step image '%s' does not match default git clone image. We ignore it asume git.", step.Image)
 	}
 
 	rmCmd, err := writeNetRC(step, state)
@@ -108,7 +108,7 @@ func writeNetRC(step *types.Step, state *workflowState) (string, error) {
 		rmCmd = fmt.Sprintf("echo del \"%s\"", file)
 	}
 
-	return rmCmd, ioutil.WriteFile(file, []byte(fmt.Sprintf(
+	return rmCmd, os.WriteFile(file, []byte(fmt.Sprintf(
 		netrcFile,
 		step.Environment["CI_NETRC_MACHINE"],
 		step.Environment["CI_NETRC_USERNAME"],
