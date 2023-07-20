@@ -22,7 +22,15 @@ On the app server, one should create a script or cron job which polls for asset 
 
 This option is easy to maintain, but the downside is a short delay (one minute) before new assets are detected.
 
-## Using webhooks
+## Using a configuration management tool
+
+If you are using a configuration management tool (e.g. Ansible, Chef, Puppet), then you could setup the last pipeline step to call that tool so as to perform the redeployment.
+
+A [Drone](https://plugins.drone.io/plugins/ansible) plugin for Ansible exists and could be adapted accordingly.
+
+This option is complex and only suitable in an environment in which you're already using configuration management.
+
+## Using webhooks (recommended)
 
 If your forge (Github, Gitlab, Gitea, etc.) supports webhooks, then you could create a separate listening app that receives a webhook when new assets are available, and redeploys your app.
 
