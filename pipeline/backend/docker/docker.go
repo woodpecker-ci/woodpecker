@@ -101,7 +101,7 @@ func (e *docker) Load(ctx context.Context) error {
 	return nil
 }
 
-func (e *docker) SetupWorkflow(_ context.Context, conf *backend.Config) error {
+func (e *docker) SetupWorkflow(ctx context.Context, conf *backend.Config, taskUUID string) error {
 	for _, vol := range conf.Volumes {
 		_, err := e.client.VolumeCreate(noContext, volume.VolumeCreateBody{
 			Name:   vol.Name,
@@ -128,7 +128,7 @@ func (e *docker) SetupWorkflow(_ context.Context, conf *backend.Config) error {
 	return nil
 }
 
-func (e *docker) StartStep(ctx context.Context, step *backend.Step) error {
+func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID string) error {
 	config := toConfig(step)
 	hostConfig := toHostConfig(step)
 	containerName := toContainerName(step)
@@ -204,7 +204,7 @@ func (e *docker) StartStep(ctx context.Context, step *backend.Step) error {
 	return e.client.ContainerStart(ctx, containerName, startOpts)
 }
 
-func (e *docker) WaitStep(ctx context.Context, step *backend.Step) (*backend.State, error) {
+func (e *docker) WaitStep(ctx context.Context, step *backend.Step, taskUUID string) (*backend.State, error) {
 	containerName := toContainerName(step)
 
 	wait, errc := e.client.ContainerWait(ctx, containerName, "")
@@ -228,7 +228,7 @@ func (e *docker) WaitStep(ctx context.Context, step *backend.Step) (*backend.Sta
 	}, nil
 }
 
-func (e *docker) TailStep(ctx context.Context, step *backend.Step) (io.ReadCloser, error) {
+func (e *docker) TailStep(ctx context.Context, step *backend.Step, taskUUID string) (io.ReadCloser, error) {
 	logs, err := e.client.ContainerLogs(ctx, toContainerName(step), logsOpts)
 	if err != nil {
 		return nil, err
@@ -244,7 +244,7 @@ func (e *docker) TailStep(ctx context.Context, step *backend.Step) (io.ReadClose
 	return rc, nil
 }
 
-func (e *docker) DestroyWorkflow(_ context.Context, conf *backend.Config) error {
+func (e *docker) DestroyWorkflow(ctx context.Context, conf *backend.Config, taskUUID string) error {
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
 			containerName := toContainerName(step)

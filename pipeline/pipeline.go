@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/sync/errgroup"
@@ -47,6 +48,8 @@ type Runtime struct {
 	tracer Tracer
 	logger Logger
 
+	taskUUID string
+
 	Description map[string]string // The runtime descriptors.
 }
 
@@ -57,6 +60,7 @@ func New(spec *backend.Config, opts ...Option) *Runtime {
 	r.Description = map[string]string{}
 	r.spec = spec
 	r.ctx = context.Background()
+	r.taskUUID = uuid.New().String()
 	for _, opts := range opts {
 		opts(r)
 	}
@@ -88,13 +92,13 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 	}
 
 	defer func() {
-		if err := r.engine.DestroyWorkflow(runnerCtx, r.spec); err != nil {
+		if err := r.engine.DestroyWorkflow(runnerCtx, r.spec, r.taskUUID); err != nil {
 			logger.Error().Err(err).Msg("could not destroy engine")
 		}
 	}()
 
 	r.started = time.Now().Unix()
-	if err := r.engine.SetupWorkflow(r.ctx, r.spec); err != nil {
+	if err := r.engine.SetupWorkflow(r.ctx, r.spec, r.taskUUID); err != nil {
 		return err
 	}
 
@@ -217,13 +221,13 @@ func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 
 // Executes the step and returns the state and error.
 func (r *Runtime) exec(step *backend.Step) (*backend.State, error) {
-	if err := r.engine.StartStep(r.ctx, step); err != nil {
+	if err := r.engine.StartStep(r.ctx, step, r.taskUUID); err != nil {
 		return nil, err
 	}
 
 	var wg sync.WaitGroup
 	if r.logger != nil {
-		rc, err := r.engine.TailStep(r.ctx, step)
+		rc, err := r.engine.TailStep(r.ctx, step, r.taskUUID)
 		if err != nil {
 			return nil, err
 		}
@@ -248,7 +252,7 @@ func (r *Runtime) exec(step *backend.Step) (*backend.State, error) {
 	// Some pipeline backends, such as local, will close the pipe from Tail on Wait,
 	// so first make sure all reading has finished.
 	wg.Wait()
-	waitState, err := r.engine.WaitStep(r.ctx, step)
+	waitState, err := r.engine.WaitStep(r.ctx, step, r.taskUUID)
 	if err != nil {
 		if errors.Is(err, context.Canceled) {
 			return waitState, ErrCancel

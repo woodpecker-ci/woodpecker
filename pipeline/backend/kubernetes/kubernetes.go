@@ -115,7 +115,7 @@ func (e *kube) Load(context.Context) error {
 }
 
 // Setup the pipeline environment.
-func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config) error {
+func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID string) error {
 	log.Trace().Msgf("Setting up Kubernetes primitives")
 
 	for _, vol := range conf.Volumes {
@@ -168,7 +168,7 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config) error {
 }
 
 // Start the pipeline step.
-func (e *kube) StartStep(ctx context.Context, step *types.Step) error {
+func (e *kube) StartStep(ctx context.Context, step *types.Step, taskUUID string) error {
 	pod, err := Pod(e.config.Namespace, step, e.config.PodLabels, e.config.PodAnnotations)
 	if err != nil {
 		return err
@@ -181,7 +181,7 @@ func (e *kube) StartStep(ctx context.Context, step *types.Step) error {
 
 // Wait for the pipeline step to complete and returns
 // the completion results.
-func (e *kube) WaitStep(ctx context.Context, step *types.Step) (*types.State, error) {
+func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) (*types.State, error) {
 	podName, err := dnsName(step.Name)
 	if err != nil {
 		return nil, err
@@ -239,7 +239,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step) (*types.State, er
 }
 
 // Tail the pipeline step logs.
-func (e *kube) TailStep(ctx context.Context, step *types.Step) (io.ReadCloser, error) {
+func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) (io.ReadCloser, error) {
 	podName, err := dnsName(step.Name)
 	if err != nil {
 		return nil, err
@@ -308,7 +308,7 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step) (io.ReadCloser, e
 }
 
 // Destroy the pipeline environment.
-func (e *kube) DestroyWorkflow(_ context.Context, conf *types.Config) error {
+func (e *kube) DestroyWorkflow(ctx context.Context, conf *types.Config, taskUUID string) error {
 	gracePeriodSeconds := int64(0) // immediately
 	dpb := metav1.DeletePropagationBackground
 

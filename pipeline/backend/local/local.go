@@ -74,8 +74,8 @@ func (e *local) Load(context.Context) error {
 	return nil
 }
 
-// Setup the pipeline environment.
-func (e *local) SetupWorkflow(_ context.Context, c *types.Config) error {
+// SetupWorkflow the pipeline environment.
+func (e *local) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID string) error {
 	baseDir, err := os.MkdirTemp("", "woodpecker-local-*")
 	if err != nil {
 		return err
@@ -98,7 +98,7 @@ func (e *local) SetupWorkflow(_ context.Context, c *types.Config) error {
 
 	// TODO: copy plugin-git binary to homeDir and set PATH
 
-	workflowID, err := e.getWorkflowIDFromConfig(c)
+	workflowID, err := e.getWorkflowIDFromConfig(conf)
 	if err != nil {
 		return err
 	}
@@ -108,8 +108,8 @@ func (e *local) SetupWorkflow(_ context.Context, c *types.Config) error {
 	return nil
 }
 
-// Exec the pipeline step.
-func (e *local) StartStep(ctx context.Context, step *types.Step) error {
+// StartStep the pipeline step.
+func (e *local) StartStep(ctx context.Context, step *types.Step, taskUUID string) error {
 	state, err := e.getWorkflowStateFromStep(step)
 	if err != nil {
 		return err
@@ -163,9 +163,9 @@ func (e *local) StartStep(ctx context.Context, step *types.Step) error {
 	return cmd.Start()
 }
 
-// Wait for the pipeline step to complete and returns
+// WaitStep for the pipeline step to complete and returns
 // the completion results.
-func (e *local) WaitStep(_ context.Context, step *types.Step) (*types.State, error) {
+func (e *local) WaitStep(ctx context.Context, step *types.Step, taskUUID string) (*types.State, error) {
 	state, err := e.getWorkflowStateFromStep(step)
 	if err != nil {
 		return nil, err
@@ -192,14 +192,14 @@ func (e *local) WaitStep(_ context.Context, step *types.Step) (*types.State, err
 	}, err
 }
 
-// Tail the pipeline step logs.
-func (e *local) TailStep(context.Context, *types.Step) (io.ReadCloser, error) {
+// TailStep the pipeline step logs.
+func (e *local) TailStep(context.Context, *types.Step, string) (io.ReadCloser, error) {
 	return e.output, nil
 }
 
-// Destroy the pipeline environment.
-func (e *local) DestroyWorkflow(_ context.Context, c *types.Config) error {
-	state, err := e.getWorkflowStateFromConfig(c)
+// DestroyWorkflow the pipeline environment.
+func (e *local) DestroyWorkflow(ctx context.Context, conf *types.Config, taskUUID string) error {
+	state, err := e.getWorkflowStateFromConfig(conf)
 	if err != nil {
 		return err
 	}
@@ -209,7 +209,7 @@ func (e *local) DestroyWorkflow(_ context.Context, c *types.Config) error {
 		return err
 	}
 
-	workflowID, err := e.getWorkflowIDFromConfig(c)
+	workflowID, err := e.getWorkflowIDFromConfig(conf)
 	if err != nil {
 		return err
 	}

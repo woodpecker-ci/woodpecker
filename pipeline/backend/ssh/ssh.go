@@ -79,13 +79,13 @@ func (e *ssh) Load(ctx context.Context) error {
 	return nil
 }
 
-// Setup the pipeline environment.
-func (e *ssh) SetupWorkflow(_ context.Context, _ *types.Config) error {
+// SetupWorkflow create the workflow environment.
+func (e *ssh) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID string) error {
 	return nil
 }
 
-// Exec the pipeline step.
-func (e *ssh) StartStep(ctx context.Context, step *types.Step) error {
+// StartStep start the step.
+func (e *ssh) StartStep(ctx context.Context, step *types.Step, taskUUID string) error {
 	// Get environment variables
 	var command []string
 	for a, b := range step.Environment {
@@ -124,21 +124,21 @@ func (e *ssh) StartStep(ctx context.Context, step *types.Step) error {
 	return e.cmd.Start()
 }
 
-// Wait for the pipeline step to complete and returns
+// WaitStep for the pipeline step to complete and returns
 // the completion results.
-func (e *ssh) WaitStep(context.Context, *types.Step) (*types.State, error) {
+func (e *ssh) WaitStep(context.Context, *types.Step, string) (*types.State, error) {
 	return &types.State{
 		Exited: true,
 	}, e.cmd.Wait()
 }
 
-// Tail the pipeline step logs.
-func (e *ssh) TailStep(context.Context, *types.Step) (io.ReadCloser, error) {
+// TailStep the pipeline step logs.
+func (e *ssh) TailStep(context.Context, *types.Step, string) (io.ReadCloser, error) {
 	return e.output, nil
 }
 
-// Destroy the pipeline environment.
-func (e *ssh) DestroyWorkflow(context.Context, *types.Config) error {
+// DestroyWorkflow delete the workflow environment.
+func (e *ssh) DestroyWorkflow(context.Context, *types.Config, string) error {
 	e.client.Close()
 	sftp, err := e.client.NewSftp()
 	if err != nil {
