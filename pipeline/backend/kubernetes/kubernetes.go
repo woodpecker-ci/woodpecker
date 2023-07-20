@@ -115,7 +115,7 @@ func (e *kube) Load(context.Context) error {
 }
 
 // Setup the pipeline environment.
-func (e *kube) Setup(ctx context.Context, conf *types.Config) error {
+func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config) error {
 	log.Trace().Msgf("Setting up Kubernetes primitives")
 
 	for _, vol := range conf.Volumes {
@@ -168,7 +168,7 @@ func (e *kube) Setup(ctx context.Context, conf *types.Config) error {
 }
 
 // Start the pipeline step.
-func (e *kube) Exec(ctx context.Context, step *types.Step) error {
+func (e *kube) StartStep(ctx context.Context, step *types.Step) error {
 	pod, err := Pod(e.config.Namespace, step, e.config.PodLabels, e.config.PodAnnotations)
 	if err != nil {
 		return err
@@ -181,7 +181,7 @@ func (e *kube) Exec(ctx context.Context, step *types.Step) error {
 
 // Wait for the pipeline step to complete and returns
 // the completion results.
-func (e *kube) Wait(ctx context.Context, step *types.Step) (*types.State, error) {
+func (e *kube) WaitStep(ctx context.Context, step *types.Step) (*types.State, error) {
 	podName, err := dnsName(step.Name)
 	if err != nil {
 		return nil, err
@@ -239,7 +239,7 @@ func (e *kube) Wait(ctx context.Context, step *types.Step) (*types.State, error)
 }
 
 // Tail the pipeline step logs.
-func (e *kube) Tail(ctx context.Context, step *types.Step) (io.ReadCloser, error) {
+func (e *kube) TailStep(ctx context.Context, step *types.Step) (io.ReadCloser, error) {
 	podName, err := dnsName(step.Name)
 	if err != nil {
 		return nil, err
@@ -308,7 +308,7 @@ func (e *kube) Tail(ctx context.Context, step *types.Step) (io.ReadCloser, error
 }
 
 // Destroy the pipeline environment.
-func (e *kube) Destroy(_ context.Context, conf *types.Config) error {
+func (e *kube) DestroyWorkflow(_ context.Context, conf *types.Config) error {
 	gracePeriodSeconds := int64(0) // immediately
 	dpb := metav1.DeletePropagationBackground
 

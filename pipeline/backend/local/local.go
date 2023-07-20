@@ -75,7 +75,7 @@ func (e *local) Load(context.Context) error {
 }
 
 // Setup the pipeline environment.
-func (e *local) Setup(_ context.Context, c *types.Config) error {
+func (e *local) SetupWorkflow(_ context.Context, c *types.Config) error {
 	baseDir, err := os.MkdirTemp("", "woodpecker-local-*")
 	if err != nil {
 		return err
@@ -109,7 +109,7 @@ func (e *local) Setup(_ context.Context, c *types.Config) error {
 }
 
 // Exec the pipeline step.
-func (e *local) Exec(ctx context.Context, step *types.Step) error {
+func (e *local) StartStep(ctx context.Context, step *types.Step) error {
 	state, err := e.getWorkflowStateFromStep(step)
 	if err != nil {
 		return err
@@ -165,7 +165,7 @@ func (e *local) Exec(ctx context.Context, step *types.Step) error {
 
 // Wait for the pipeline step to complete and returns
 // the completion results.
-func (e *local) Wait(_ context.Context, step *types.Step) (*types.State, error) {
+func (e *local) WaitStep(_ context.Context, step *types.Step) (*types.State, error) {
 	state, err := e.getWorkflowStateFromStep(step)
 	if err != nil {
 		return nil, err
@@ -193,12 +193,12 @@ func (e *local) Wait(_ context.Context, step *types.Step) (*types.State, error) 
 }
 
 // Tail the pipeline step logs.
-func (e *local) Tail(context.Context, *types.Step) (io.ReadCloser, error) {
+func (e *local) TailStep(context.Context, *types.Step) (io.ReadCloser, error) {
 	return e.output, nil
 }
 
 // Destroy the pipeline environment.
-func (e *local) Destroy(_ context.Context, c *types.Config) error {
+func (e *local) DestroyWorkflow(_ context.Context, c *types.Config) error {
 	state, err := e.getWorkflowStateFromConfig(c)
 	if err != nil {
 		return err
