@@ -101,7 +101,9 @@ func (e *docker) Load(ctx context.Context) error {
 	return nil
 }
 
-func (e *docker) SetupWorkflow(ctx context.Context, conf *backend.Config, taskUUID string) error {
+func (e *docker) SetupWorkflow(_ context.Context, conf *backend.Config, taskUUID string) error {
+	log.Trace().Str("taskUUID", taskUUID).Msg("create workflow environment")
+
 	for _, vol := range conf.Volumes {
 		_, err := e.client.VolumeCreate(noContext, volume.VolumeCreateBody{
 			Name:   vol.Name,
@@ -129,6 +131,8 @@ func (e *docker) SetupWorkflow(ctx context.Context, conf *backend.Config, taskUU
 }
 
 func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID string) error {
+	log.Trace().Str("taskUUID", taskUUID).Msgf("start step %s", step.Name)
+
 	config := toConfig(step)
 	hostConfig := toHostConfig(step)
 	containerName := toContainerName(step)
@@ -205,6 +209,8 @@ func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID str
 }
 
 func (e *docker) WaitStep(ctx context.Context, step *backend.Step, taskUUID string) (*backend.State, error) {
+	log.Trace().Str("taskUUID", taskUUID).Msgf("wait for step %s", step.Name)
+
 	containerName := toContainerName(step)
 
 	wait, errc := e.client.ContainerWait(ctx, containerName, "")
@@ -229,6 +235,8 @@ func (e *docker) WaitStep(ctx context.Context, step *backend.Step, taskUUID stri
 }
 
 func (e *docker) TailStep(ctx context.Context, step *backend.Step, taskUUID string) (io.ReadCloser, error) {
+	log.Trace().Str("taskUUID", taskUUID).Msgf("tail logs of step %s", step.Name)
+
 	logs, err := e.client.ContainerLogs(ctx, toContainerName(step), logsOpts)
 	if err != nil {
 		return nil, err
@@ -244,7 +252,9 @@ func (e *docker) TailStep(ctx context.Context, step *backend.Step, taskUUID stri
 	return rc, nil
 }
 
-func (e *docker) DestroyWorkflow(ctx context.Context, conf *backend.Config, taskUUID string) error {
+func (e *docker) DestroyWorkflow(_ context.Context, conf *backend.Config, taskUUID string) error {
+	log.Trace().Str("taskUUID", taskUUID).Msgf("delete workflow environment")
+
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
 			containerName := toContainerName(step)

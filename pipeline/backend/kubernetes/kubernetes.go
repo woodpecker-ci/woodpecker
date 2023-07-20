@@ -116,7 +116,7 @@ func (e *kube) Load(context.Context) error {
 
 // Setup the pipeline environment.
 func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID string) error {
-	log.Trace().Msgf("Setting up Kubernetes primitives")
+	log.Trace().Str("taskUUID", taskUUID).Msgf("Setting up Kubernetes primitives")
 
 	for _, vol := range conf.Volumes {
 		pvc, err := PersistentVolumeClaim(e.config.Namespace, vol.Name, e.config.StorageClass, e.config.VolumeSize, e.config.StorageRwx)
@@ -174,7 +174,7 @@ func (e *kube) StartStep(ctx context.Context, step *types.Step, taskUUID string)
 		return err
 	}
 
-	log.Trace().Msgf("Creating pod: %s", pod.Name)
+	log.Trace().Str("taskUUID", taskUUID).Msgf("Creating pod: %s", pod.Name)
 	_, err = e.client.CoreV1().Pods(e.config.Namespace).Create(ctx, pod, metav1.CreateOptions{})
 	return err
 }
@@ -186,6 +186,8 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 	if err != nil {
 		return nil, err
 	}
+
+	log.Trace().Str("taskUUID", taskUUID).Msgf("Waiting for pod: %s", podName)
 
 	finished := make(chan bool)
 
@@ -244,6 +246,8 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 	if err != nil {
 		return nil, err
 	}
+
+	log.Trace().Str("taskUUID", taskUUID).Msgf("Tail logs of pod: %s", podName)
 
 	up := make(chan bool)
 
@@ -308,7 +312,9 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 }
 
 // Destroy the pipeline environment.
-func (e *kube) DestroyWorkflow(ctx context.Context, conf *types.Config, taskUUID string) error {
+func (e *kube) DestroyWorkflow(_ context.Context, conf *types.Config, taskUUID string) error {
+	log.Trace().Str("taskUUID", taskUUID).Msg("Deleting Kubernetes primitives")
+
 	gracePeriodSeconds := int64(0) // immediately
 	dpb := metav1.DeletePropagationBackground
 

@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/melbahja/goph"
+	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/common"
@@ -80,12 +81,14 @@ func (e *ssh) Load(ctx context.Context) error {
 }
 
 // SetupWorkflow create the workflow environment.
-func (e *ssh) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID string) error {
+func (e *ssh) SetupWorkflow(context.Context, *types.Config, string) error {
 	return nil
 }
 
 // StartStep start the step.
 func (e *ssh) StartStep(ctx context.Context, step *types.Step, taskUUID string) error {
+	log.Trace().Str("taskUUID", taskUUID).Msgf("Start step %s", step.Name)
+
 	// Get environment variables
 	var command []string
 	for a, b := range step.Environment {

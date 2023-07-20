@@ -25,6 +25,7 @@ import (
 	"strings"
 
 	"github.com/alessio/shellescape"
+	"github.com/rs/zerolog/log"
 	"golang.org/x/exp/slices"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
@@ -75,7 +76,9 @@ func (e *local) Load(context.Context) error {
 }
 
 // SetupWorkflow the pipeline environment.
-func (e *local) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID string) error {
+func (e *local) SetupWorkflow(_ context.Context, conf *types.Config, taskUUID string) error {
+	log.Trace().Str("taskUUID", taskUUID).Msg("create workflow environment")
+
 	baseDir, err := os.MkdirTemp("", "woodpecker-local-*")
 	if err != nil {
 		return err
@@ -110,6 +113,8 @@ func (e *local) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID 
 
 // StartStep the pipeline step.
 func (e *local) StartStep(ctx context.Context, step *types.Step, taskUUID string) error {
+	log.Trace().Str("taskUUID", taskUUID).Msgf("start step %s", step.Name)
+
 	state, err := e.getWorkflowStateFromStep(step)
 	if err != nil {
 		return err
@@ -165,7 +170,9 @@ func (e *local) StartStep(ctx context.Context, step *types.Step, taskUUID string
 
 // WaitStep for the pipeline step to complete and returns
 // the completion results.
-func (e *local) WaitStep(ctx context.Context, step *types.Step, taskUUID string) (*types.State, error) {
+func (e *local) WaitStep(_ context.Context, step *types.Step, taskUUID string) (*types.State, error) {
+	log.Trace().Str("taskUUID", taskUUID).Msgf("wait for step %s", step.Name)
+
 	state, err := e.getWorkflowStateFromStep(step)
 	if err != nil {
 		return nil, err
@@ -193,12 +200,15 @@ func (e *local) WaitStep(ctx context.Context, step *types.Step, taskUUID string)
 }
 
 // TailStep the pipeline step logs.
-func (e *local) TailStep(context.Context, *types.Step, string) (io.ReadCloser, error) {
+func (e *local) TailStep(_ context.Context, step *types.Step, taskUUID string) (io.ReadCloser, error) {
+	log.Trace().Str("taskUUID", taskUUID).Msgf("tail logs of step %s", step.Name)
 	return e.output, nil
 }
 
 // DestroyWorkflow the pipeline environment.
-func (e *local) DestroyWorkflow(ctx context.Context, conf *types.Config, taskUUID string) error {
+func (e *local) DestroyWorkflow(_ context.Context, conf *types.Config, taskUUID string) error {
+	log.Trace().Str("taskUUID", taskUUID).Msgf("delete workflow environment")
+
 	state, err := e.getWorkflowStateFromConfig(conf)
 	if err != nil {
 		return err
