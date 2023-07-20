@@ -23,6 +23,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/alessio/shellescape"
 	"github.com/rs/zerolog/log"
@@ -40,16 +41,14 @@ type workflowState struct {
 }
 
 type local struct {
-	workflows       map[string]*workflowState // TODO make atomic
+	workflows       sync.Map
 	output          io.ReadCloser
 	pluginGitBinary string
 }
 
 // New returns a new local Engine.
 func New() types.Engine {
-	return &local{
-		workflows: make(map[string]*workflowState),
-	}
+	return &local{}
 }
 
 func (e *local) Name() string {
@@ -90,12 +89,7 @@ func (e *local) SetupWorkflow(_ context.Context, conf *types.Config, taskUUID st
 		return err
 	}
 
-	workflowID, err := e.getWorkflowIDFromConfig(conf)
-	if err != nil {
-		return err
-	}
-
-	e.workflows[workflowID] = state
+	e.saveState(taskUUID, state)
 
 	return nil
 }
@@ -104,7 +98,7 @@ func (e *local) SetupWorkflow(_ context.Context, conf *types.Config, taskUUID st
 func (e *local) StartStep(ctx context.Context, step *types.Step, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("start step %s", step.Name)
 
-	state, err := e.getWorkflowStateFromStep(step)
+	state, err := e.getState(taskUUID)
 	if err != nil {
 		return err
 	}
@@ -159,7 +153,7 @@ func (e *local) execCommands(ctx context.Context, step *types.Step, state *workf
 func (e *local) WaitStep(_ context.Context, step *types.Step, taskUUID string) (*types.State, error) {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("wait for step %s", step.Name)
 
-	state, err := e.getWorkflowStateFromStep(step)
+	state, err := e.getState(taskUUID)
 	if err != nil {
 		return nil, err
 	}
@@ -195,7 +189,7 @@ func (e *local) TailStep(_ context.Context, step *types.Step, taskUUID string) (
 func (e *local) DestroyWorkflow(_ context.Context, conf *types.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("delete workflow environment")
 
-	state, err := e.getWorkflowStateFromConfig(conf)
+	state, err := e.getState(taskUUID)
 	if err != nil {
 		return err
 	}
@@ -205,69 +199,23 @@ func (e *local) DestroyWorkflow(_ context.Context, conf *types.Config, taskUUID 
 		return err
 	}
 
-	workflowID, err := e.getWorkflowIDFromConfig(conf)
-	if err != nil {
-		return err
-	}
-
-	delete(e.workflows, workflowID)
+	e.deleteState(taskUUID)
 
 	return err
 }
 
-func (e *local) getWorkflowIDFromStep(step *types.Step) (string, error) {
-	sep := "_step_"
-	if strings.Contains(step.Name, sep) {
-		prefix := strings.Split(step.Name, sep)
-		if len(prefix) == 2 {
-			return prefix[0], nil
-		}
-	}
-
-	sep = "_clone"
-	if strings.Contains(step.Name, sep) {
-		prefix := strings.Split(step.Name, sep)
-		if len(prefix) == 2 {
-			return prefix[0], nil
-		}
-	}
-
-	return "", fmt.Errorf("invalid step name (%s) %s", sep, step.Name)
-}
-
-func (e *local) getWorkflowIDFromConfig(c *types.Config) (string, error) {
-	if len(c.Volumes) < 1 {
-		return "", fmt.Errorf("no volumes found in config")
-	}
-
-	prefix := strings.Replace(c.Volumes[0].Name, "_default", "", 1)
-	return prefix, nil
-}
-
-func (e *local) getWorkflowStateFromConfig(c *types.Config) (*workflowState, error) {
-	workflowID, err := e.getWorkflowIDFromConfig(c)
-	if err != nil {
-		return nil, err
-	}
-
-	state, ok := e.workflows[workflowID]
+func (e *local) getState(taskUUID string) (*workflowState, error) {
+	state, ok := e.workflows.Load(taskUUID)
 	if !ok {
-		return nil, fmt.Errorf("workflow %s not found", workflowID)
+		return nil, ErrWorkflowStateNotFound
 	}
-
-	return state, nil
+	return state.(*workflowState), nil
 }
 
-func (e *local) getWorkflowStateFromStep(step *types.Step) (*workflowState, error) {
-	workflowID, err := e.getWorkflowIDFromStep(step)
-	if err != nil {
-		return nil, err
-	}
+func (e *local) saveState(taskUUID string, state *workflowState) {
+	e.workflows.Store(taskUUID, state)
+}
 
-	state, ok := e.workflows[workflowID]
-	if !ok {
-		return nil, fmt.Errorf("workflow %s not found", workflowID)
-	}
-
-	return state, nil
+func (e *local) deleteState(taskUUID string) {
+	e.workflows.Delete(taskUUID)
 }

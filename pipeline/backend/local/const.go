@@ -26,7 +26,10 @@ var notAllowedEnvVarOverwrites = []string{
 	"SHELL",
 }
 
-var ErrUnsupportedStepType = errors.New("unsupportet step type")
+var (
+	ErrUnsupportedStepType   = errors.New("unsupportet step type")
+	ErrWorkflowStateNotFound = errors.New("workflow state not found")
+)
 
 const netrcFile = `
 machine %s
