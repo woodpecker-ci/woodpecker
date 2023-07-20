@@ -16,6 +16,8 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/multipart"
 )
 
+// TODO: move runtime into "runtime" subpackage
+
 type (
 	// State defines the pipeline and process state.
 	State struct {

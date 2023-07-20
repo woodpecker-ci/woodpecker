@@ -17,19 +17,24 @@ type Engine interface {
 	// Load the backend engine.
 	Load(context.Context) error
 
-	// Setup the pipeline environment.
+	// Setup the workflow environment.
+	// TODO: rename to "SetupWorkflow"
 	Setup(context.Context, *Config) error
 
-	// Exec start the pipeline step.
+	// Exec start the workflow step.
+	// TODO: rename to "StartStep" to make
 	Exec(context.Context, *Step) error
 
-	// Wait for the pipeline step to complete and returns
+	// Wait for the workflow step to complete and returns
 	// the completion results.
+	// TODO: rename to "WaitStep" to make
 	Wait(context.Context, *Step) (*State, error)
 
-	// Tail the pipeline step logs.
+	// Tail the workflow step logs.
+	// TODO: rename to "TailStep" to make
 	Tail(context.Context, *Step) (io.ReadCloser, error)
 
-	// Destroy the pipeline environment.
+	// Destroy the workflow environment.
+	// TODO: rename to "DestroyWorkflow" to make
 	Destroy(context.Context, *Config) error
 }
