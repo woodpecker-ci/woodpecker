@@ -129,7 +129,7 @@ func (e *local) execCommands(ctx context.Context, step *types.Step, state *workf
 	// TODO: use commands directly
 	script := ""
 	for _, cmd := range step.Commands {
-		script += fmt.Sprintf("echo + %s\n%s", strings.TrimSpace(shellescape.Quote(cmd)), cmd)
+		script += fmt.Sprintf("echo + %s\n%s\n", strings.TrimSpace(shellescape.Quote(cmd)), cmd)
 	}
 	script = strings.TrimSpace(script)
 
