@@ -66,7 +66,7 @@ func (e *local) Load(context.Context) error {
 }
 
 // SetupWorkflow the pipeline environment.
-func (e *local) SetupWorkflow(_ context.Context, conf *types.Config, taskUUID string) error {
+func (e *local) SetupWorkflow(_ context.Context, _ *types.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msg("create workflow environment")
 
 	baseDir, err := os.MkdirTemp("", "woodpecker-local-*")
@@ -186,7 +186,7 @@ func (e *local) TailStep(_ context.Context, step *types.Step, taskUUID string) (
 }
 
 // DestroyWorkflow the pipeline environment.
-func (e *local) DestroyWorkflow(_ context.Context, conf *types.Config, taskUUID string) error {
+func (e *local) DestroyWorkflow(_ context.Context, _ *types.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("delete workflow environment")
 
 	state, err := e.getState(taskUUID)

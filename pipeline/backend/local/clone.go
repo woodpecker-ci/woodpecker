@@ -63,7 +63,7 @@ func (e *local) execClone(ctx context.Context, step *types.Step, state *workflow
 
 	if step.Image != constant.DefaultCloneImage {
 		// TODO: write message into log
-		log.Warn().Msgf("clone step image '%s' does not match default git clone image. We ignore it asume git.", step.Image)
+		log.Warn().Msgf("clone step image '%s' does not match default git clone image. We ignore it assume git.", step.Image)
 	}
 
 	rmCmd, err := writeNetRC(step, state)
