@@ -31,14 +31,15 @@ import (
 )
 
 type workflowState struct {
-	stepCMDs     map[string]*exec.Cmd
-	baseDir      string
-	homeDir      string
-	workspaceDir string
+	stepCMDs        map[string]*exec.Cmd
+	baseDir         string
+	homeDir         string
+	workspaceDir    string
+	pluginGitBinary string
 }
 
 type local struct {
-	workflows       map[string]*workflowState
+	workflows       map[string]*workflowState // TODO make atomic
 	output          io.ReadCloser
 	pluginGitBinary string
 }

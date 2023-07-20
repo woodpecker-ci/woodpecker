@@ -41,17 +41,19 @@ func (e *local) loadClone() {
 	e.pluginGitBinary = binary
 }
 
-func (e *local) setupClone() error {
-	if e.pluginGitBinary == "" {
-		log.Info().Msg("no global 'plugin-git' installed, try to download for current workflow")
-		// TODO: download plugin-git binary to homeDir and set PATH
-		return fmt.Errorf("download not implemented")
+func (e *local) setupClone(state *workflowState) error {
+	if e.pluginGitBinary != "" {
+		state.pluginGitBinary = e.pluginGitBinary
+		return nil
 	}
-	return nil
+
+	log.Info().Msg("no global 'plugin-git' installed, try to download for current workflow")
+	// TODO: download plugin-git binary to homeDir and set PATH
+	return fmt.Errorf("download not implemented")
 }
 
 func (e *local) execClone(ctx context.Context, step *types.Step, state *workflowState, env []string) error {
-	if err := e.setupClone(); err != nil {
+	if err := e.setupClone(state); err != nil {
 		return fmt.Errorf("setup clone step failed: %w", err)
 	}
 
@@ -78,9 +80,9 @@ func (e *local) execClone(ctx context.Context, step *types.Step, state *workflow
 		if err != nil {
 			return err
 		}
-		cmd = exec.CommandContext(ctx, pwsh, "-Command", fmt.Sprintf("%s\n$code=$?\n%s\nexit $code", e.pluginGitBinary, rmCmd))
+		cmd = exec.CommandContext(ctx, pwsh, "-Command", fmt.Sprintf("%s\n$code=$?\n%s\nexit $code", state.pluginGitBinary, rmCmd))
 	} else {
-		cmd = exec.CommandContext(ctx, "/bin/sh", "-c", fmt.Sprintf("%s ; $code=$? ; %s ; exit $code", e.pluginGitBinary, rmCmd))
+		cmd = exec.CommandContext(ctx, "/bin/sh", "-c", fmt.Sprintf("%s ; $code=$? ; %s ; exit $code", state.pluginGitBinary, rmCmd))
 	}
 	cmd.Env = env
 	cmd.Dir = state.workspaceDir
