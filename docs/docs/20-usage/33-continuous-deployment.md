@@ -1,0 +1,33 @@
+# Continuous Deployment
+
+A typical CI pipeline contains steps such as: *clone*, *build*, *test*, *package* and *push*. The final build product may be binaries pushed to a git repository or a docker container pushed to a container registry.
+
+When these should be deployed on an app server, the pipeline should include a *deploy* step, which represents the "CD" in CI/CD - the automatic deployment of a pipeline's final product.
+
+There are various ways to accomplish CD with Woodpecker, depending on your project's specific needs.
+
+## Invoking deploy script via SSH
+
+The final step in your pipeline could SSH into the app server, and run a deployment script.
+
+One of the benefits would be that the deployment script's output could be included in the pipeline's log. However in general, this is a complicated option as it tightly couples the CI and app servers.
+
+An SSH step could be written as a Woodpecker plugin; although there is no official ssh plugin, one does exist for [Drone](https://plugins.drone.io/plugins/ssh) and could be adapted accordingly.
+
+## Polling for asset changes
+
+This option completely decouples the CI and app servers, and there is no explicit deploy step in the pipeline.
+
+On the app server, one should create a script or cron job which polls for asset changes (every minute, say). When a new version is detected, the script redeploys the app.
+
+This option is easy to maintain, but the downside is a short delay (one minute) before new assets are detected.
+
+## Using webhooks
+
+If your forge (Github, Gitlab, Gitea, etc.) supports webhooks, then you could create a separate listening app that receives a webhook when new assets are available, and redeploys your app.
+
+The listening "app" can be something as simple as a PHP script.
+
+Alternatively, there are a number of popular webhook servers which simplify this process, so you only need to write your actual deployment script. For example, [webhook](https://github.com/adnanh/webhook) and [webhookd](https://github.com/ncarlier/webhookd).
+
+This is arguably the simplest and most maintainable solution.
