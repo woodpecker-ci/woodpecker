@@ -80,7 +80,7 @@ func (e *local) execClone(ctx context.Context, step *types.Step, state *workflow
 		if err != nil {
 			return err
 		}
-		cmd = exec.CommandContext(ctx, pwsh, "-Command", fmt.Sprintf("%s\n$code=$?\n%s\nexit $code", state.pluginGitBinary, rmCmd))
+		cmd = exec.CommandContext(ctx, pwsh, "-Command", fmt.Sprintf("%s ; $code=$? ; %s ; if (!$code) {[Environment]::Exit(1)}", state.pluginGitBinary, rmCmd))
 	} else {
 		cmd = exec.CommandContext(ctx, "/bin/sh", "-c", fmt.Sprintf("%s ; $code=$? ; %s ; exit $code", state.pluginGitBinary, rmCmd))
 	}
@@ -105,7 +105,7 @@ func writeNetRC(step *types.Step, state *workflowState) (string, error) {
 	rmCmd := fmt.Sprintf("rm \"%s\"", file)
 	if runtime.GOOS == "windows" {
 		file = filepath.Join(state.homeDir, "_netrc")
-		rmCmd = fmt.Sprintf("echo del \"%s\"", file)
+		rmCmd = fmt.Sprintf("del \"%s\"", file)
 	}
 
 	return rmCmd, os.WriteFile(file, []byte(fmt.Sprintf(
