@@ -4,7 +4,7 @@
 Once your pipeline starts to grow in size, it will become important to keep it DRY ("Don't Repeat Yourself") by using variables and environment variables. Depending on your specific need, there are a number of options.
 
 ### YAML extensions
-As described in [Advanced YAML syntax](./35-advanced-yaml-syntax.md).
+As described in [Advanced YAML syntax](/docs/docs/20-usage/35-advanced-yaml-syntax.md).
 ```yml
 variables:
   - &golang_image 'golang:1.18'
@@ -61,7 +61,7 @@ steps:
 ```
 
 ### Declaring global variables in `docker-compose.yml`
-As described in [Global environment variables](./50-advanced-yaml-syntax.md#global-environment-variables), one can define global variables:
+As described in [Global environment variables](/docs/docs/20-usage/50-environment.md#global-environment-variables), one can define global variables:
 ```yml
 services:
   woodpecker-server:
