@@ -16,6 +16,7 @@ import (
 	nomadApi "github.com/hashicorp/nomad/api"
 	vaultApi "github.com/hashicorp/vault/api"
 	"github.com/urfave/cli/v2"
+
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
 
@@ -87,14 +88,14 @@ func (nb *nomadBackend) Load(ctx context.Context) error {
 	return nil
 }
 
-func (nb *nomadBackend) Setup(ctx context.Context, conf *types.Config) error {
+func (nb *nomadBackend) SetupWorkflow(ctx context.Context, conf *types.Config, _ string) error {
 	for _, stage := range conf.Stages {
 		fmt.Println("stage", stage)
 	}
 	return nil
 }
 
-func (nb *nomadBackend) Exec(ctx context.Context, step *types.Step) error {
+func (nb *nomadBackend) StartStep(ctx context.Context, step *types.Step, _ string) error {
 	// region, err := nb.client.Agent().Region()
 	name := fmt.Sprintf("%s", step.Name)
 	fmt.Println("name is:", name)
@@ -116,7 +117,7 @@ func (nb *nomadBackend) Exec(ctx context.Context, step *types.Step) error {
 }
 
 // TODO: Should stderr and stdout be merged? Should the lines be prefixed somehow?
-func (nb *nomadBackend) Tail(ctx context.Context, step *types.Step) (io.ReadCloser, error) {
+func (nb *nomadBackend) TailStep(ctx context.Context, step *types.Step, _ string) (io.ReadCloser, error) {
 	qo := nomadApi.QueryOptions{}
 	fmt.Println("Getting evals")
 	fmt.Println("Getting allocs")
@@ -344,7 +345,7 @@ func followFile(client *nomadApi.Client, alloc *nomadApi.Allocation,
 	return r, nil
 }
 
-func (nb *nomadBackend) Wait(ctx context.Context, step *types.Step) (*types.State, error) {
+func (nb *nomadBackend) WaitStep(ctx context.Context, step *types.Step, _ string) (*types.State, error) {
 	// launch go routine with ticker
 	// timer? How long can woodpecker go?
 	// cancel with channel
@@ -425,7 +426,7 @@ func (nb *nomadBackend) taskState(allocId string) (string, error) {
 	return "unknonwn", nil
 }
 
-func (nb *nomadBackend) Destroy(context.Context, *types.Config) error {
+func (nb *nomadBackend) DestroyWorkflow(context.Context, *types.Config, string) error {
 	fmt.Println("this is where we'd tear stuff down")
 	return nil
 }
