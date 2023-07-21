@@ -544,7 +544,7 @@ adds a secret
 
 **--name**="": secret name
 
-**--organization, --org**="": organization id or full-name (e.g. 123 or octocat)
+**--organization**="": organization name (e.g. octocat)
 
 **--plugins-only**: secret limited to plugins
 
@@ -566,7 +566,7 @@ remove a secret
 
 **--name**="": secret name
 
-**--organization, --org**="": organization id or full-name (e.g. 123 or octocat)
+**--organization**="": organization name (e.g. octocat)
 
 **--repository, --repo**="": repository id or full-name (e.g. 134 or octocat/hello-world)
 
@@ -588,7 +588,7 @@ update a secret
 
 **--name**="": secret name
 
-**--organization, --org**="": organization id or full-name (e.g. 123 or octocat)
+**--organization**="": organization name (e.g. octocat)
 
 **--plugins-only**: secret limited to plugins
 
@@ -610,7 +610,7 @@ display secret info
 
 **--name**="": secret name
 
-**--organization, --org**="": organization id or full-name (e.g. 123 or octocat)
+**--organization**="": organization name (e.g. octocat)
 
 **--repository, --repo**="": repository id or full-name (e.g. 134 or octocat/hello-world)
 
@@ -626,7 +626,7 @@ list secrets
 
 **--log-level**="": set logging level (default: info)
 
-**--organization, --org**="": organization id or full-name (e.g. 123 or octocat)
+**--organization**="": organization name (e.g. octocat)
 
 **--repository, --repo**="": repository id or full-name (e.g. 134 or octocat/hello-world)
 
