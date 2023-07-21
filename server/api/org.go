@@ -137,12 +137,12 @@ func LookupOrg(c *gin.Context) {
 	if org.Private {
 		user := session.User(c)
 		if user == nil {
-			c.String(http.StatusUnauthorized, "User not authorized")
+			c.AbortWithStatus(http.StatusNotFound)
 			return
 		}
 
 		if !user.Admin && org.Name != user.Login {
-			c.String(http.StatusForbidden, "User not authorized")
+			c.AbortWithStatus(http.StatusNotFound)
 			return
 		} else if !user.Admin {
 			perm, err := server.Config.Services.Membership.Get(c, user, org.Name)
@@ -153,7 +153,7 @@ func LookupOrg(c *gin.Context) {
 			}
 
 			if perm == nil || !perm.Member {
-				c.String(http.StatusForbidden, "User not authorized")
+				c.AbortWithStatus(http.StatusNotFound)
 				return
 			}
 		}
