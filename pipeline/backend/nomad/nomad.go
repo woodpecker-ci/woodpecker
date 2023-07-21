@@ -169,7 +169,7 @@ func (nb *nomadBackend) Tail(ctx context.Context, step *types.Step) (io.ReadClos
 		return nil, fmt.Errorf("failed to retrieve alloc info: %s", err)
 	}
 	fmt.Println("finished getting alloc info")
-	//var offset int64 = defaultTailLines * bytesToLines
+	// var offset int64 = defaultTailLines * bytesToLines
 	var offset int64 = 0
 
 	// maybe replace by...

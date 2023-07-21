@@ -104,8 +104,8 @@ func generateNomadJob(ctx context.Context, step *types.Step) nomadApi.Job {
 		Reschedule: &nomadApi.ReschedulePolicy{
 			Attempts: &attempts,
 		},
-		//ConsulToken: &consulToken.SecretID,
-		//VaultToken:  &vaultToken,
+		// ConsulToken: &consulToken.SecretID,
+		// VaultToken:  &vaultToken,
 	}
 
 	return nj
