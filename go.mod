@@ -32,7 +32,6 @@ require (
 	github.com/melbahja/goph v1.3.1
 	github.com/moby/moby v20.10.24+incompatible
 	github.com/moby/term v0.5.0
-	github.com/mrjones/oauth v0.0.0-20190623134757-126b35219450
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.15.1

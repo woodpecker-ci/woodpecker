@@ -78,6 +78,7 @@ services:
 
 volumes:
   woodpecker-server-data:
+  woodpecker-agent-config:
 ```
 
 Woodpecker needs to know its own address. You must therefore provide the public address of it in `<scheme>://<hostname>` format. Please omit trailing slashes:
@@ -94,6 +95,7 @@ services:
 +     - WOODPECKER_HOST=${WOODPECKER_HOST}
 +     - WOODPECKER_HOST=${WOODPECKER_HOST}
 ```
+
 Woodpecker can also have its port's configured. It uses a separate port for gRPC and for HTTP. The agent performs gRPC calls and connects to the gRPC port.
 They can be configured with ADDR variables:
 
@@ -122,6 +124,7 @@ services:
 +     - WOODPECKER_GRPC_SECURE=true # defaults to false
 +     - WOODPECKER_GRPC_VERIFY=true # default
 ```
+
 As agents run pipeline steps as docker containers they require access to the host machine's Docker daemon:
 
 ```diff
@@ -137,6 +140,7 @@ services:
 ```
 
 Agents require the server address for agent-to-server communication. The agent connects to the server's gRPC port:
+
 ```diff
 # docker-compose.yml
 version: '3'

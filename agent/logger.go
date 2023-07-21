@@ -15,7 +15,6 @@
 package agent
 
 import (
-	"context"
 	"io"
 	"sync"
 
@@ -28,7 +27,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
 )
 
-func (r *Runner) createLogger(_ context.Context, logger zerolog.Logger, uploads *sync.WaitGroup, work *rpc.Pipeline) pipeline.LogFunc {
+func (r *Runner) createLogger(logger zerolog.Logger, uploads *sync.WaitGroup, work *rpc.Pipeline) pipeline.LogFunc {
 	return func(step *backend.Step, rc multipart.Reader) error {
 		loglogger := logger.With().
 			Str("image", step.Image).
@@ -55,12 +54,8 @@ func (r *Runner) createLogger(_ context.Context, logger zerolog.Logger, uploads 
 			log.Error().Err(err).Msg("copy limited logStream part")
 		}
 
-		loglogger.Debug().Msg("log stream copied")
-
-		defer func() {
-			loglogger.Debug().Msg("log stream closed")
-			uploads.Done()
-		}()
+		loglogger.Debug().Msg("log stream copied, close ...")
+		uploads.Done()
 
 		return nil
 	}

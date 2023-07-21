@@ -17,10 +17,7 @@ var secretDeleteCmd = &cli.Command{
 			Name:  "global",
 			Usage: "global secret",
 		},
-		&cli.StringFlag{
-			Name:  "organization",
-			Usage: "organization name (e.g. octocat)",
-		},
+		common.OrgFlag,
 		common.RepoFlag,
 		&cli.StringFlag{
 			Name:  "name",
@@ -37,7 +34,7 @@ func secretDelete(c *cli.Context) error {
 		return err
 	}
 
-	global, owner, repoID, err := parseTargetArgs(client, c)
+	global, orgID, repoID, err := parseTargetArgs(client, c)
 	if err != nil {
 		return err
 	}
@@ -45,8 +42,8 @@ func secretDelete(c *cli.Context) error {
 	if global {
 		return client.GlobalSecretDelete(secretName)
 	}
-	if owner != "" {
-		return client.OrgSecretDelete(owner, secretName)
+	if orgID != -1 {
+		return client.OrgSecretDelete(orgID, secretName)
 	}
 	return client.SecretDelete(repoID, secretName)
 }

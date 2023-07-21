@@ -30,6 +30,11 @@ No breaking changes
   - The existing badge endpoint `/api/badges/{owner}/{repo}` will still work, but whenever possible try to use the new endpoint using the `repo-id`: `/api/badges/{repo-id}`.
   - The UI urls for a repository changed from `/repos/{owner}/{repo}/...` to `/repos/{repo-id}/...`. You will be redirected automatically when using the old url.
   - The woodpecker-go api-client is now using the `repo-id` instead of `owner/repo` for all functions
+- Using `org-id` in favour of `owner` name
+  - :warning: The api endpoints `/api/orgs/{owner}/...` were replaced by new endpoints using the orgs id `/api/repos/{org-id}`
+  - To find the id of orgs use the `/api/orgs/lookup/{org_full_name}` endpoint.
+  - The UI urls for a organization changed from `/org/{owner}/...` to `/orgs/{org-id}/...`. You will be redirected automatically when using the old url.
+  - The woodpecker-go api-client is now using the `org-id` instead of `org name` for all functions
 
 ## 0.15.0
 
