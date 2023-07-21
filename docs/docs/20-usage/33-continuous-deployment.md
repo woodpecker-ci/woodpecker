@@ -12,7 +12,7 @@ The final step in your pipeline could SSH into the app server, and run a deploym
 
 One of the benefits would be that the deployment script's output could be included in the pipeline's log. However in general, this is a complicated option as it tightly couples the CI and app servers.
 
-An SSH step could be written as a Woodpecker plugin; although there is no official ssh plugin, one does exist for [Drone](https://plugins.drone.io/plugins/ssh) and could be adapted accordingly.
+An SSH step could be written by using an plugin, like [ssh](https://plugins.drone.io/plugins/ssh) or [git push](https://woodpecker-ci.org/plugins/Git%20Push).
 
 ## Polling for asset changes
 
@@ -26,7 +26,7 @@ This option is easy to maintain, but the downside is a short delay (one minute) 
 
 If you are using a configuration management tool (e.g. Ansible, Chef, Puppet), then you could setup the last pipeline step to call that tool so as to perform the redeployment.
 
-A [Drone](https://plugins.drone.io/plugins/ansible) plugin for Ansible exists and could be adapted accordingly.
+A plugin for [Ansible](https://plugins.drone.io/plugins/ansible) exists and could be adapted accordingly.
 
 This option is complex and only suitable in an environment in which you're already using configuration management.
 
