@@ -44,7 +44,7 @@ func (g *GitLab) convertGitLabRepo(_repo *gitlab.Project) (*model.Repo, error) {
 		Link:          _repo.WebURL,
 		Clone:         _repo.HTTPURLToRepo,
 		Branch:        _repo.DefaultBranch,
-		Visibility:    model.RepoVisibly(_repo.Visibility),
+		Visibility:    model.RepoVisibility(_repo.Visibility),
 		IsSCMPrivate:  !_repo.Public,
 		Perm: &model.Perm{
 			Pull:  isRead(_repo),
@@ -58,7 +58,7 @@ func (g *GitLab) convertGitLabRepo(_repo *gitlab.Project) (*model.Repo, error) {
 	}
 
 	if len(repo.Avatar) != 0 && !strings.HasPrefix(repo.Avatar, "http") {
-		repo.Avatar = fmt.Sprintf("%s/%s", g.URL, repo.Avatar)
+		repo.Avatar = fmt.Sprintf("%s/%s", g.url, repo.Avatar)
 	}
 
 	return repo, nil

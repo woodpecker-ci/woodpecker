@@ -67,6 +67,12 @@ var flags = []cli.Flag{
 		Name:    "hostname",
 		Usage:   "agent hostname",
 	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_AGENT_CONFIG_FILE"},
+		Name:    "agent-config",
+		Usage:   "agent config file path",
+		Value:   "/etc/woodpecker/agent.conf",
+	},
 	&cli.StringSliceFlag{
 		EnvVars: []string{"WOODPECKER_FILTER_LABELS"},
 		Name:    "filter",
@@ -190,6 +196,7 @@ var flags = []cli.Flag{
 		Usage:   "backend k8s additional worker pod annotations",
 		Value:   "",
 	},
+
 	// backend nomad
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_BACKEND_NOMAD_NAMESPACE"},
@@ -202,5 +209,18 @@ var flags = []cli.Flag{
 		Name:    "backend-nomad-datacenters",
 		Usage:   "comma separated list of nomad datacenters jobs can be launched in",
 		Value:   "",
+	},
+
+	&cli.IntFlag{
+		EnvVars: []string{"WOODPECKER_CONNECT_RETRY_COUNT"},
+		Name:    "connect-retry-count",
+		Usage:   "number of times to retry connecting to the server",
+		Value:   5,
+	},
+	&cli.DurationFlag{
+		EnvVars: []string{"WOODPECKER_CONNECT_RETRY_DELAY"},
+		Name:    "connect-retry-delay",
+		Usage:   "duration to wait before retrying to connect to the server",
+		Value:   time.Second * 2,
 	},
 }

@@ -322,7 +322,7 @@
           "netrc_only_trusted": "Hanya masukkan kredensial netrc ke kontainer yang terpercaya"
         },
         "pipeline_path": {
-          "default": "Secara bawaan: .woodpecker/*.yml → .woodpecker.yml → .drone.yml",
+          "default": "Secara bawaan: .woodpecker/*.{'{yaml,yml}'} → .woodpecker.yaml → .woodpecker.yml",
           "desc": "Jalur ke konfigurasi jalur pipa Anda (misalnya {0}). Folder seharusnya berakhir dengan sebuah {1}.",
           "desc_path_example": "jalur/saya/",
           "path": "Jalur pipa"
@@ -427,6 +427,7 @@
     "dl_cli": "Unduh CLI",
     "internal_error": "Terjadi beberapa kesalahan internal",
     "oauth_error": "Terjadi kesalahan saat mengotentikasi dengan penyedia OAuth",
+    "reset_token": "Atur ulang token",
     "settings": "Pengaturan Pengguna",
     "shell_setup": "Pengaturan shell",
     "shell_setup_before": "sebelumnya lakukan penyiapan shell",

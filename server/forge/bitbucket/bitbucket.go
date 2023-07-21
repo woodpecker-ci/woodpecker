@@ -23,6 +23,8 @@ import (
 
 	"golang.org/x/oauth2"
 
+	shared_utils "github.com/woodpecker-ci/woodpecker/shared/utils"
+
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/forge/bitbucket/internal"
@@ -45,7 +47,7 @@ type Opts struct {
 
 type config struct {
 	API    string
-	URL    string
+	url    string
 	Client string
 	Secret string
 }
@@ -55,7 +57,7 @@ type config struct {
 func New(opts *Opts) (forge.Forge, error) {
 	return &config{
 		API:    DefaultAPI,
-		URL:    DefaultURL,
+		url:    DefaultURL,
 		Client: opts.Client,
 		Secret: opts.Secret,
 	}, nil
@@ -65,6 +67,11 @@ func New(opts *Opts) (forge.Forge, error) {
 // Name returns the string name of this driver
 func (c *config) Name() string {
 	return "bitbucket"
+}
+
+// URL returns the root url of a configured forge
+func (c *config) URL() string {
+	return c.url
 }
 
 // Login authenticates an account with Bitbucket using the oauth2 protocol. The
@@ -132,21 +139,36 @@ func (c *config) Refresh(ctx context.Context, user *model.User) (bool, error) {
 
 // Teams returns a list of all team membership for the Bitbucket account.
 func (c *config) Teams(ctx context.Context, u *model.User) ([]*model.Team, error) {
-	opts := &internal.ListWorkspacesOpts{
-		PageLen: 100,
-		Role:    "member",
-	}
-	resp, err := c.newClient(ctx, u).ListWorkspaces(opts)
-	if err != nil {
-		return nil, err
-	}
-	return convertWorkspaceList(resp.Values), nil
+	return shared_utils.Paginate(func(page int) ([]*model.Team, error) {
+		opts := &internal.ListWorkspacesOpts{
+			PageLen: 100,
+			Page:    page,
+			Role:    "member",
+		}
+		resp, err := c.newClient(ctx, u).ListWorkspaces(opts)
+		if err != nil {
+			return nil, err
+		}
+		return convertWorkspaceList(resp.Values), nil
+	})
 }
 
 // Repo returns the named Bitbucket repository.
 func (c *config) Repo(ctx context.Context, u *model.User, remoteID model.ForgeRemoteID, owner, name string) (*model.Repo, error) {
 	if remoteID.IsValid() {
 		name = string(remoteID)
+	}
+	repos, err := c.Repos(ctx, u)
+	if err != nil {
+		return nil, err
+	}
+	if len(owner) == 0 {
+		for _, repo := range repos {
+			if string(repo.ForgeRemoteID) == name {
+				owner = repo.Owner
+				break
+			}
+		}
 	}
 	client := c.newClient(ctx, u)
 	repo, err := client.FindRepo(owner, name)
@@ -206,7 +228,7 @@ func (c *config) Dir(_ context.Context, _ *model.User, _ *model.Repo, _ *model.P
 }
 
 // Status creates a pipeline status for the Bitbucket commit.
-func (c *config) Status(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, _ *model.Step) error {
+func (c *config) Status(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, _ *model.Workflow) error {
 	status := internal.PipelineStatus{
 		State: convertStatus(pipeline.Status),
 		Desc:  common.GetPipelineStatusDescription(pipeline.Status),
@@ -261,7 +283,7 @@ func (c *config) Netrc(u *model.User, _ *model.Repo) (*model.Netrc, error) {
 }
 
 // Branches returns the names of all branches for the named repository.
-func (c *config) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]string, error) {
+func (c *config) Branches(ctx context.Context, u *model.User, r *model.Repo, _ *model.ListOptions) ([]string, error) {
 	bitbucketBranches, err := c.newClient(ctx, u).ListBranches(r.Owner, r.Name)
 	if err != nil {
 		return nil, err
@@ -275,13 +297,25 @@ func (c *config) Branches(ctx context.Context, u *model.User, r *model.Repo) ([]
 }
 
 // BranchHead returns the sha of the head (latest commit) of the specified branch
-func (c *config) BranchHead(_ context.Context, _ *model.User, _ *model.Repo, _ string) (string, error) {
-	// TODO(1138): missing implementation
-	return "", forge_types.ErrNotImplemented
+func (c *config) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
+	return c.newClient(ctx, u).GetBranchHead(r.Owner, r.Name, branch)
 }
 
-func (c *config) PullRequests(_ context.Context, _ *model.User, _ *model.Repo, _ *model.PaginationData) ([]*model.PullRequest, error) {
-	return nil, forge_types.ErrNotImplemented
+// PullRequests returns the pull requests of the named repository.
+func (c *config) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error) {
+	opts := internal.ListOpts{Page: p.Page, PageLen: p.Page}
+	pullRequests, err := c.newClient(ctx, u).ListPullRequests(r.Owner, r.Name, &opts)
+	if err != nil {
+		return nil, err
+	}
+	result := []*model.PullRequest{}
+	for _, pullRequest := range pullRequests {
+		result = append(result, &model.PullRequest{
+			Index: int64(pullRequest.ID),
+			Title: pullRequest.Title,
+		})
+	}
+	return result, nil
 }
 
 // Hook parses the incoming Bitbucket hook and returns the Repository and
@@ -328,8 +362,8 @@ func (c *config) newConfig(redirect string) *oauth2.Config {
 		ClientID:     c.Client,
 		ClientSecret: c.Secret,
 		Endpoint: oauth2.Endpoint{
-			AuthURL:  fmt.Sprintf("%s/site/oauth2/authorize", c.URL),
-			TokenURL: fmt.Sprintf("%s/site/oauth2/access_token", c.URL),
+			AuthURL:  fmt.Sprintf("%s/site/oauth2/authorize", c.url),
+			TokenURL: fmt.Sprintf("%s/site/oauth2/access_token", c.url),
 		},
 		RedirectURL: fmt.Sprintf("%s/authorize", redirect),
 	}

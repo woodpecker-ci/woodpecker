@@ -26,13 +26,13 @@ var reUsername = regexp.MustCompile("^[a-zA-Z0-9-_.]+$")
 var errUserLoginInvalid = errors.New("Invalid User Login")
 
 // User represents a registered user.
-//
-// swagger:model user
 type User struct {
 	// the id for this user.
 	//
 	// required: true
 	ID int64 `json:"id" xorm:"pk autoincr 'user_id'"`
+
+	ForgeRemoteID ForgeRemoteID `json:"-" xorm:"forge_remote_id"`
 
 	// Login is the username for this user.
 	//
@@ -58,13 +58,13 @@ type User struct {
 
 	// Admin indicates the user is a system administrator.
 	//
-	// NOTE: If the username is part of the WOODPECKER_ADMINS
+	// NOTE: If the username is part of the WOODPECKER_ADMIN
 	// environment variable this value will be set to true on login.
 	Admin bool `json:"admin,omitempty" xorm:"user_admin"`
 
 	// Hash is a unique token used to sign tokens.
 	Hash string `json:"-" xorm:"UNIQUE varchar(500) 'user_hash'"`
-}
+} //	@name User
 
 // TableName return database table name for xorm
 func (User) TableName() string {

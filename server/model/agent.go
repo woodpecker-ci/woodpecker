@@ -27,7 +27,7 @@ type Agent struct {
 	Capacity    int32  `json:"capacity"`
 	Version     string `json:"version"`
 	NoSchedule  bool   `json:"no_schedule"`
-}
+} //	@name Agent
 
 // TableName return database table name for xorm
 func (Agent) TableName() string {

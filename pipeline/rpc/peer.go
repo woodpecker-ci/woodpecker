@@ -44,17 +44,6 @@ type (
 		Timeout int64           `json:"timeout"`
 	}
 
-	// File defines a pipeline artifact.
-	File struct {
-		Name string            `json:"name"`
-		Step string            `json:"step"`
-		Mime string            `json:"mime"`
-		Time int64             `json:"time"`
-		Size int               `json:"size"`
-		Data []byte            `json:"data"`
-		Meta map[string]string `json:"meta"`
-	}
-
 	Version struct {
 		GrpcVersion   int32  `json:"grpc_version,omitempty"`
 		ServerVersion string `json:"server_version,omitempty"`
@@ -84,11 +73,8 @@ type Peer interface {
 	// Update updates the pipeline state.
 	Update(c context.Context, id string, state State) error
 
-	// Upload uploads the pipeline artifact.
-	Upload(c context.Context, id string, file *File) error
-
 	// Log writes the pipeline log entry.
-	Log(c context.Context, id string, line *Line) error
+	Log(c context.Context, logEntry *LogEntry) error
 
 	// RegisterAgent register our agent to the server
 	RegisterAgent(ctx context.Context, platform, backend, version string, capacity int) (int64, error)

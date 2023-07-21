@@ -17,6 +17,7 @@ package api
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -27,7 +28,6 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/logging"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/pubsub"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
@@ -61,7 +61,7 @@ func EventStreamSSE(c *gin.Context) {
 	user := session.User(c)
 	repo := map[string]bool{}
 	if user != nil {
-		repos, _ := store.FromContext(c).RepoList(user, false)
+		repos, _ := store.FromContext(c).RepoList(user, false, true)
 		for _, r := range repos {
 			repo[r.FullName] = true
 		}
@@ -121,6 +121,16 @@ func EventStreamSSE(c *gin.Context) {
 	}
 }
 
+// LogStream
+//
+//	@Summary	Log stream
+//	@Router		/logs/{repo_id}/{pipeline}/{stepID} [get]
+//	@Produce	plain
+//	@Success	200
+//	@Tags			Pipeline logs
+//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		pipeline	path	int		true		"the number of the pipeline"
+//	@Param		stepID		path	int		true		"the step id"
 func LogStreamSSE(c *gin.Context) {
 	c.Header("Content-Type", "text/event-stream")
 	c.Header("Cache-Control", "no-cache")
@@ -138,29 +148,46 @@ func LogStreamSSE(c *gin.Context) {
 	logWriteStringErr(io.WriteString(rw, ": ping\n\n"))
 	flusher.Flush()
 
-	repo := session.Repo(c)
 	_store := store.FromContext(c)
+	repo := session.Repo(c)
 
-	// // parse the pipeline number and step sequence number from
-	// // the request parameter.
-	pipelinen, _ := strconv.ParseInt(c.Param("pipeline"), 10, 64)
-	stepn, _ := strconv.Atoi(c.Param("number"))
-
-	pipeline, err := _store.GetPipelineNumber(repo, pipelinen)
+	pipeline, err := strconv.ParseInt(c.Param("pipeline"), 10, 64)
+	if err != nil {
+		log.Debug().Err(err).Msg("pipeline number invalid")
+		logWriteStringErr(io.WriteString(rw, "event: error\ndata: pipeline number invalid\n\n"))
+		return
+	}
+	pl, err := _store.GetPipelineNumber(repo, pipeline)
 	if err != nil {
 		log.Debug().Msgf("stream cannot get pipeline number: %v", err)
 		logWriteStringErr(io.WriteString(rw, "event: error\ndata: pipeline not found\n\n"))
 		return
 	}
-	step, err := _store.StepFind(pipeline, stepn)
+
+	stepID, err := strconv.ParseInt(c.Param("stepId"), 10, 64)
+	if err != nil {
+		log.Debug().Err(err).Msg("step id invalid")
+		logWriteStringErr(io.WriteString(rw, "event: error\ndata: step id invalid\n\n"))
+		return
+	}
+	step, err := _store.StepLoad(stepID)
 	if err != nil {
 		log.Debug().Msgf("stream cannot get step number: %v", err)
 		logWriteStringErr(io.WriteString(rw, "event: error\ndata: process not found\n\n"))
 		return
 	}
+
+	if step.PipelineID != pl.ID {
+		// make sure we can not read arbitrary logs by id
+		err = fmt.Errorf("step with id %d is not part of repo %s", stepID, repo.FullName)
+		log.Debug().Err(err).Msg("event error")
+		logWriteStringErr(io.WriteString(rw, "event: error\ndata: "+err.Error()+"\n\n"))
+		return
+	}
+
 	if step.State != model.StatusRunning {
-		log.Debug().Msg("stream not found.")
-		logWriteStringErr(io.WriteString(rw, "event: error\ndata: stream not found\n\n"))
+		log.Debug().Msg("step not running (anymore).")
+		logWriteStringErr(io.WriteString(rw, "event: error\ndata: step not running (anymore)\n\n"))
 		return
 	}
 
@@ -178,18 +205,14 @@ func LogStreamSSE(c *gin.Context) {
 	}()
 
 	go func() {
-		// TODO remove global variable
-		err := server.Config.Services.Logs.Tail(ctx, fmt.Sprint(step.ID), func(entries ...*logging.Entry) {
-			defer func() {
-				obj := recover() // fix #2480 // TODO: check if it's still needed
-				log.Trace().Msgf("pubsub subscribe recover return: %v", obj)
-			}()
+		err := server.Config.Services.Logs.Tail(ctx, step.ID, func(entries ...*model.LogEntry) {
 			for _, entry := range entries {
 				select {
 				case <-ctx.Done():
 					return
 				default:
-					logc <- entry.Data
+					ee, _ := json.Marshal(entry)
+					logc <- ee
 				}
 			}
 		})

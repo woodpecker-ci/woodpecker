@@ -17,6 +17,19 @@ Woodpecker is having two different kinds of releases: **stable** and **next**.
 
 To find out more about the differences between the two releases, please read the [FAQ](/faq).
 
+## Hardware Requirements
+
+Below are resources requirements for Woodpecker components itself:
+
+| Component | Memory | CPU |
+| --------- | ------ | --- |
+| Server    | 200 MB | 1   |
+| Agent     |  32 MB | 1   |
+
+Note, that those values do not include the operating system or workload (pipelines execution) resources consumption.
+
+In addition you need at least some kind of database which requires additional resources depending on the selected database system.
+
 ## Installation
 
 You can install Woodpecker on multiple ways:
@@ -57,6 +70,7 @@ services:
     depends_on:
       - woodpecker-server
     volumes:
+      - woodpecker-agent-config:/etc/woodpecker
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - WOODPECKER_SERVER=woodpecker-server:9000
@@ -174,3 +188,5 @@ A [Prometheus endpoint](./90-prometheus.md) is exposed.
 ## Behind a proxy
 
 See the [proxy guide](./70-proxy.md) if you want to see a setup behind Apache, Nginx, Caddy or ngrok.
+
+In the case you need to use Woodpecker with a URL path prefix (like: https://example.org/woodpecker/), you can use the option [`WOODPECKER_ROOT_URL`](./10-server-config.md#woodpecker_root_url).

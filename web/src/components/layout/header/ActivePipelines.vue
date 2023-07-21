@@ -7,7 +7,7 @@
       <div class="spinner-ring ring4" />
     </div>
     <div
-      class="flex items-center justify-center h-full w-full font-bold bg-white bg-opacity-15 dark:bg-black dark:bg-opacity-10 rounded-full"
+      class="flex items-center justify-center h-full w-full font-bold bg-white bg-opacity-15 dark:bg-black dark:bg-opacity-10 rounded-md"
     >
       {{ activePipelines.length || 0 }}
     </div>

@@ -27,33 +27,33 @@ import (
 var pipelineKillCmd = &cli.Command{
 	Name:      "kill",
 	Usage:     "force kill a pipeline",
-	ArgsUsage: "<repo/name> <pipeline>",
+	ArgsUsage: "<repo-id|repo-full-name> <pipeline>",
 	Action:    pipelineKill,
 	Hidden:    true,
 	Flags:     common.GlobalFlags,
 }
 
 func pipelineKill(c *cli.Context) (err error) {
-	repo := c.Args().First()
-	owner, name, err := internal.ParseRepo(repo)
-	if err != nil {
-		return err
-	}
 	number, err := strconv.Atoi(c.Args().Get(1))
 	if err != nil {
 		return err
 	}
 
+	repoIDOrFullName := c.Args().First()
 	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
 	}
-
-	err = client.PipelineKill(owner, name, number)
+	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("Force killing pipeline %s/%s#%d\n", owner, name, number)
+	err = client.PipelineKill(repoID, number)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Force killing pipeline %s#%d\n", repoIDOrFullName, number)
 	return nil
 }

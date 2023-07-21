@@ -23,9 +23,9 @@ import (
 var recreateAgentsTable = task{
 	name: "recreate-agents-table",
 	fn: func(sess *xorm.Session) error {
-		if err := dropTable(sess, "agents"); err != nil {
+		if err := sess.DropTable("agents"); err != nil {
 			return err
 		}
-		return sess.Sync2(new(model.Agent))
+		return sess.Sync(new(model.Agent))
 	},
 }

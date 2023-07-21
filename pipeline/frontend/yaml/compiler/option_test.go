@@ -3,10 +3,9 @@ package compiler
 import (
 	"os"
 	"reflect"
-	"strings"
 	"testing"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
 )
 
 func TestWithWorkspace(t *testing.T) {
@@ -98,9 +97,10 @@ func TestWithPrefix(t *testing.T) {
 }
 
 func TestWithMetadata(t *testing.T) {
-	metadata := frontend.Metadata{
-		Repo: frontend.Repo{
-			Name:     "octocat/hello-world",
+	metadata := metadata.Metadata{
+		Repo: metadata.Repo{
+			Owner:    "octacat",
+			Name:     "hello-world",
 			Private:  true,
 			Link:     "https://github.com/octocat/hello-world",
 			CloneURL: "https://github.com/octocat/hello-world.git",
@@ -113,11 +113,11 @@ func TestWithMetadata(t *testing.T) {
 		t.Errorf("WithMetadata must set compiler the metadata")
 	}
 
-	if compiler.env["CI_REPO_NAME"] != strings.Split(metadata.Repo.Name, "/")[1] {
+	if compiler.env["CI_REPO_NAME"] != metadata.Repo.Name {
 		t.Errorf("WithMetadata must set CI_REPO_NAME")
 	}
-	if compiler.env["CI_REPO_LINK"] != metadata.Repo.Link {
-		t.Errorf("WithMetadata must set CI_REPO_LINK")
+	if compiler.env["CI_REPO_URL"] != metadata.Repo.Link {
+		t.Errorf("WithMetadata must set CI_REPO_URL")
 	}
 	if compiler.env["CI_REPO_CLONE_URL"] != metadata.Repo.CloneURL {
 		t.Errorf("WithMetadata must set CI_REPO_CLONE_URL")

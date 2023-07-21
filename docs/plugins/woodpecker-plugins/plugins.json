@@ -103,6 +103,41 @@
       "name": "Woodpecker Feishu Bot",
       "docs": "https://github.com/wenerme/wode/raw/main/apps/woodpecker-feishu-bot/README.md",
       "verified": false
+    },
+    {
+      "name": "ntfy",
+      "docs": "https://codeberg.org/l-x/woodpecker-ntfy/raw/branch/main/docs.md",
+      "verified": false
+    },
+    {
+      "name": "Trivy",
+      "docs": "https://codeberg.org/woodpecker-plugins/trivy/raw/branch/main/docs.md",
+      "verified": true
+    },
+    {
+      "name": "MkDocs",
+      "docs": "https://codeberg.org/woodpecker-plugins/mkdocs/raw/branch/main/docs.md",
+      "verified": true
+    },
+    {
+      "name": "TODO-Checker",
+      "docs": "https://codeberg.org/Epsilon_02/todo-checker/raw/branch/main/README.md",
+      "verified": false
+    },
+    {
+      "name": "Nextcloud Upload",
+      "docs": "https://raw.githubusercontent.com/Ellpeck/WoodpeckerPlugins/main/nextcloud-upload/README.md",
+      "verified": false
+    },
+    {
+      "name": "Kubernetes Deployment or StatefulSet Update",
+      "docs": "https://raw.githubusercontent.com/euryecetelecom/woodpeckerci-kubernetes/master/README.md",
+      "verified": false
+    },
+    {
+      "name": "Dockle",
+      "docs": "https://raw.githubusercontent.com/euryecetelecom/woodpeckerci-dockle/master/README.md",
+      "verified": false
     }
   ]
 }

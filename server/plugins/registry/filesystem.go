@@ -75,8 +75,12 @@ func (b *filesystem) RegistryFind(*model.Repo, string) (*model.Registry, error) 
 	return nil, nil
 }
 
-func (b *filesystem) RegistryList(*model.Repo) ([]*model.Registry, error) {
-	return parseDockerConfig(b.path)
+func (b *filesystem) RegistryList(_ *model.Repo, p *model.ListOptions) ([]*model.Registry, error) {
+	regs, err := parseDockerConfig(b.path)
+	if err != nil {
+		return nil, err
+	}
+	return model.ApplyPagination(p, regs), nil
 }
 
 // decodeAuth decodes a base64 encoded string and returns username and password

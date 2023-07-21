@@ -7,12 +7,13 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
     --mount=type=cache,target=/go/pkg \
     make build-agent
 
-FROM alpine:3.16
+FROM alpine:3.18
 RUN apk add -U --no-cache ca-certificates
 ENV GODEBUG=netdns=go
 EXPOSE 3000
 
 COPY --from=build /src/dist/woodpecker-agent /bin/
+RUN mkdir -p /etc/woodpecker
 
 HEALTHCHECK CMD ["/bin/woodpecker-agent", "ping"]
 ENTRYPOINT ["/bin/woodpecker-agent"]

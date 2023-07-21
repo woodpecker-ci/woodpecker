@@ -18,6 +18,7 @@ package agent
 import (
 	"context"
 	"errors"
+	"fmt"
 	"sync"
 	"time"
 
@@ -29,14 +30,6 @@ import (
 	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
 	"github.com/woodpecker-ci/woodpecker/shared/utils"
-)
-
-// TODO: Implement log streaming.
-// Until now we need to limit the size of the logs and files that we upload.
-// The maximum grpc payload size is 4194304. So we need to set these limits below the maximum.
-const (
-	maxLogsUpload = 2000000 // this is per step
-	maxFileUpload = 1000000
 )
 
 type Runner struct {
@@ -148,7 +141,8 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 	var uploads sync.WaitGroup
 	err = pipeline.New(work.Config,
 		pipeline.WithContext(workflowCtx),
-		pipeline.WithLogger(r.createLogger(ctxmeta, logger, &uploads, work)),
+		pipeline.WithTaskUUID(fmt.Sprint(work.ID)),
+		pipeline.WithLogger(r.createLogger(logger, &uploads, work)),
 		pipeline.WithTracer(r.createTracer(ctxmeta, logger, work)),
 		pipeline.WithEngine(*r.engine),
 		pipeline.WithDescription(map[string]string{

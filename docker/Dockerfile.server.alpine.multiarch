@@ -1,4 +1,4 @@
-FROM alpine:3.16
+FROM alpine:3.18
 
 ARG TARGETOS TARGETARCH
 RUN apk add -U --no-cache ca-certificates

@@ -32,22 +32,22 @@ var (
 
 // SecretService defines a service for managing secrets.
 type SecretService interface {
-	SecretListPipeline(*Repo, *Pipeline) ([]*Secret, error)
+	SecretListPipeline(*Repo, *Pipeline, *ListOptions) ([]*Secret, error)
 	// Repository secrets
 	SecretFind(*Repo, string) (*Secret, error)
-	SecretList(*Repo) ([]*Secret, error)
+	SecretList(*Repo, *ListOptions) ([]*Secret, error)
 	SecretCreate(*Repo, *Secret) error
 	SecretUpdate(*Repo, *Secret) error
 	SecretDelete(*Repo, string) error
 	// Organization secrets
 	OrgSecretFind(string, string) (*Secret, error)
-	OrgSecretList(string) ([]*Secret, error)
+	OrgSecretList(string, *ListOptions) ([]*Secret, error)
 	OrgSecretCreate(string, *Secret) error
 	OrgSecretUpdate(string, *Secret) error
 	OrgSecretDelete(string, string) error
 	// Global secrets
 	GlobalSecretFind(string) (*Secret, error)
-	GlobalSecretList() ([]*Secret, error)
+	GlobalSecretList(*ListOptions) ([]*Secret, error)
 	GlobalSecretCreate(*Secret) error
 	GlobalSecretUpdate(*Secret) error
 	GlobalSecretDelete(string) error
@@ -56,19 +56,18 @@ type SecretService interface {
 // SecretStore persists secret information to storage.
 type SecretStore interface {
 	SecretFind(*Repo, string) (*Secret, error)
-	SecretList(*Repo, bool) ([]*Secret, error)
+	SecretList(*Repo, bool, *ListOptions) ([]*Secret, error)
 	SecretCreate(*Secret) error
 	SecretUpdate(*Secret) error
 	SecretDelete(*Secret) error
 	OrgSecretFind(string, string) (*Secret, error)
-	OrgSecretList(string) ([]*Secret, error)
+	OrgSecretList(string, *ListOptions) ([]*Secret, error)
 	GlobalSecretFind(string) (*Secret, error)
-	GlobalSecretList() ([]*Secret, error)
+	GlobalSecretList(*ListOptions) ([]*Secret, error)
 	SecretListAll() ([]*Secret, error)
 }
 
 // Secret represents a secret variable, such as a password or token.
-// swagger:model registry
 type Secret struct {
 	ID          int64          `json:"id"              xorm:"pk autoincr 'secret_id'"`
 	Owner       string         `json:"-"               xorm:"NOT NULL DEFAULT '' UNIQUE(s) INDEX 'secret_owner'"`
@@ -80,7 +79,7 @@ type Secret struct {
 	Events      []WebhookEvent `json:"event"           xorm:"json 'secret_events'"`
 	SkipVerify  bool           `json:"-"               xorm:"secret_skip_verify"`
 	Conceal     bool           `json:"-"               xorm:"secret_conceal"`
-}
+} //	@name Secret
 
 // TableName return database table name for xorm
 func (Secret) TableName() string {
@@ -125,8 +124,8 @@ var validDockerImageString = regexp.MustCompile(
 // Validate validates the required fields and formats.
 func (s *Secret) Validate() error {
 	for _, event := range s.Events {
-		if !ValidateWebhookEvent(event) {
-			return fmt.Errorf("%w: '%s'", ErrSecretEventInvalid, event)
+		if err := ValidateWebhookEvent(event); err != nil {
+			return errors.Join(err, ErrSecretEventInvalid)
 		}
 	}
 	if len(s.Events) == 0 {

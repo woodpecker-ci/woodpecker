@@ -2,16 +2,18 @@
 
 Agents are configured by the command line or environment variables. At the minimum you need the following information:
 
-```yaml
+```diff
 # docker-compose.yml
 version: '3'
 
 services:
   woodpecker-agent:
-  [...]
-  environment:
-+   - WOODPECKER_SERVER=localhost:9000
-+   - WOODPECKER_AGENT_SECRET="your-shared-secret-goes-here"
+    [...]
+    volumes:
+      - woodpecker-agent-config:/etc/woodpecker
+    environment:
++     - WOODPECKER_SERVER=localhost:9000
++     - WOODPECKER_AGENT_SECRET="your-shared-secret-goes-here"
 ```
 
 The following are automatically set and can be overridden:
@@ -23,7 +25,7 @@ The following are automatically set and can be overridden:
 
 By default the maximum processes that are run per agent is 1. If required you can add `WOODPECKER_MAX_WORKFLOWS` to increase your parallel processing on a per-agent basis.
 
-```yaml
+```diff
 # docker-compose.yml
 version: '3'
 
@@ -33,8 +35,41 @@ services:
   environment:
     - WOODPECKER_SERVER=localhost:9000
     - WOODPECKER_AGENT_SECRET="your-shared-secret-goes-here"
-+    - WOODPECKER_MAX_WORKFLOWS=4
++   - WOODPECKER_MAX_WORKFLOWS=4
 ```
+
+## Agent registration on server
+
+When the agent starts, it connects to the server using token from `WOODPECKER_AGENT_SECRET`. The server identifies agent and, if such agent doesn't exist, register him.
+There are two types of token, so would be two ways of agent registration.
+
+### Using system token
+
+_System token_ is a token that is used system-wide, e. g. when you set the same token in `WOODPECKER_AGENT_SECRET` on both the server and the agents.
+
+In that case registration process would be as follows:
+
+1. First time Agent communicates with Server using system token;
+2. Server registers Agent in DB, generates ID and sends this ID back to Agent;
+3. Agent stores ID in a file configured by `WOODPECKER_AGENT_CONFIG_FILE`.
+
+At the following startups Agent uses system token **and** ID.
+
+### Using agent token
+
+_Agent token_ is a token that is used by only particular agent. This unique token also configured by `WOODPECKER_AGENT_SECRET`, but only on the agent side.
+
+In that case you probably doesn't configure `WOODPECKER_AGENT_SECRET` on the server side. The registration process would be as follows:
+
+1. Administrator registers Agent manually in _Server settings - Agents - Add agent_;
+![Agent creation](./new-agent-registration.png)
+![Agent created](./new-agent-created.png)
+2. The token generated in previous step have to be provided to Agent in `WOODPECKER_AGENT_SECRET`;
+3. First time Agent communicates with Server using agent token;
+4. Server identifies Agent by the token and fills additional information provided by Agent;
+![Agent connected](./new-agent-connected.png)
+
+At following startups Agent uses own token only.
 
 ## All agent configuration options
 
@@ -58,7 +93,7 @@ A shared secret used by server and agents to authenticate communication. A secre
 ### `WOODPECKER_AGENT_SECRET_FILE`
 > Default: empty
 
-Read the value for `WOODPECKER_AGENT_SECRET` from the specified filepath
+Read the value for `WOODPECKER_AGENT_SECRET` from the specified filepath, e.g. `/etc/woodpecker/agent-secret.conf`
 
 ### `WOODPECKER_LOG_LEVEL`
 > Default: empty
@@ -79,6 +114,11 @@ Disable colored debug output.
 > Default: empty
 
 Configures the agent hostname.
+
+### `WOODPECKER_AGENT_CONFIG_FILE`
+> Default: `/etc/woodpecker/agent.conf`
+
+Configures the path of the agent config file.
 
 ### `WOODPECKER_MAX_WORKFLOWS`
 > Default: `1`
@@ -123,12 +163,34 @@ Configures if the gRPC server certificate should be verified, only valid when `W
 ### `WOODPECKER_BACKEND`
 > Default: `auto-detect`
 
-Configures the backend engine to run pipelines on. Possible values are `auto-detect`, `docker`, `local` or `ssh`.
+Configures the backend engine to run pipelines on. Possible values are `auto-detect`, `docker`, `local`, `ssh` or `kubernetes`.
 
 ### `WOODPECKER_BACKEND_DOCKER_*`
 
-See [Docker backend configuration](backends/docker/#configuration)
+See [Docker backend configuration](./22-backends/10-docker.md#configuration)
 
 ### `WOODPECKER_BACKEND_SSH_*`
 
-See [SSH backend configuration](backends/ssh/#configuration)
+See [SSH backend configuration](./22-backends/30-ssh.md#configuration)
+
+### `WOODPECKER_BACKEND_K8S_*`
+
+See [Kubernetes backend configuration](./22-backends/40-kubernetes.md#configuration)
+
+## Advanced Settings
+
+:::warning
+Only change these If you know what you do.
+:::
+
+### `WOODPECKER_CONNECT_RETRY_COUNT`
+
+> Default: `5`
+
+Configures number of times agent retries to connect to the server.
+
+### `WOODPECKER_CONNECT_RETRY_DELAY`
+
+> Default: `2s`
+
+Configures delay between agent connection retries to the server.

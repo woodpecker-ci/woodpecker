@@ -21,6 +21,7 @@ import (
 )
 
 type Account struct {
+	ID    int64  `json:"id"`
 	Login string `json:"username"`
 	Name  string `json:"display_name"`
 	Type  string `json:"type"`
@@ -257,4 +258,24 @@ type BranchResp struct {
 
 type Branch struct {
 	Name string `json:"name"`
+}
+
+type PullRequestResp struct {
+	Page    uint           `json:"page"`
+	PageLen uint           `json:"pagelen"`
+	Size    uint           `json:"size"`
+	Values  []*PullRequest `json:"values"`
+}
+
+type PullRequest struct {
+	ID    uint   `json:"id"`
+	Title string `json:"title"`
+}
+
+type CommitsResp struct {
+	Values []*Commit `json:"values"`
+}
+
+type Commit struct {
+	Hash string `json:"hash"`
 }
