@@ -18,6 +18,7 @@ package agent
 import (
 	"context"
 	"errors"
+	"fmt"
 	"sync"
 	"time"
 
@@ -140,7 +141,8 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 	var uploads sync.WaitGroup
 	err = pipeline.New(work.Config,
 		pipeline.WithContext(workflowCtx),
-		pipeline.WithLogger(r.createLogger(ctxmeta, logger, &uploads, work)),
+		pipeline.WithTaskUUID(fmt.Sprint(work.ID)),
+		pipeline.WithLogger(r.createLogger(logger, &uploads, work)),
 		pipeline.WithTracer(r.createTracer(ctxmeta, logger, work)),
 		pipeline.WithEngine(*r.engine),
 		pipeline.WithDescription(map[string]string{

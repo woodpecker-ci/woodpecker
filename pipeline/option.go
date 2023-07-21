@@ -42,3 +42,9 @@ func WithDescription(desc map[string]string) Option {
 		r.Description = desc
 	}
 }
+
+func WithTaskUUID(uuid string) Option {
+	return func(r *Runtime) {
+		r.taskUUID = uuid
+	}
+}
