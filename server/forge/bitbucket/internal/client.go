@@ -226,6 +226,13 @@ func (c *Client) ListPullRequests(owner, name string, opts *ListOpts) ([]*PullRe
 	return out.Values, err
 }
 
+func (c *Client) GetWorkspace(name string) (*Workspace, error) {
+	out := new(Workspace)
+	uri := fmt.Sprintf(pathWorkspace, c.base, name)
+	_, err := c.do(uri, get, nil, out)
+	return out, err
+}
+
 func (c *Client) do(rawurl, method string, in, out interface{}) (*string, error) {
 	uri, err := url.Parse(rawurl)
 	if err != nil {
