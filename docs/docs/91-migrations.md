@@ -29,7 +29,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Using `org-id` in favour of `owner` name
   - :warning: The api endpoints `/api/orgs/{owner}/...` were replaced by new endpoints using the orgs id `/api/repos/{org-id}`
   - To find the id of orgs use the `/api/orgs/lookup/{org_full_name}` endpoint.
-  - The UI urls for a repository changed from `/org/{owner}/...` to `/orgs/{org-id}/...`. You will be redirected automatically when using the old url.
+  - The UI urls for a organization changed from `/org/{owner}/...` to `/orgs/{org-id}/...`. You will be redirected automatically when using the old url.
   - The woodpecker-go api-client is now using the `org-id` instead of `org name` for all functions
 
 ## 0.15.0
