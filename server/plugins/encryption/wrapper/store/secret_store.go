@@ -99,7 +99,7 @@ func (wrapper *EncryptedSecretStore) SecretDelete(secret *model.Secret) error {
 	return wrapper.store.SecretDelete(secret)
 }
 
-func (wrapper *EncryptedSecretStore) OrgSecretFind(s, s2 string) (*model.Secret, error) {
+func (wrapper *EncryptedSecretStore) OrgSecretFind(s int64, s2 string) (*model.Secret, error) {
 	result, err := wrapper.store.OrgSecretFind(s, s2)
 	if err != nil {
 		return nil, err
@@ -112,7 +112,7 @@ func (wrapper *EncryptedSecretStore) OrgSecretFind(s, s2 string) (*model.Secret,
 	return result, nil
 }
 
-func (wrapper *EncryptedSecretStore) OrgSecretList(s string, p *model.ListOptions) ([]*model.Secret, error) {
+func (wrapper *EncryptedSecretStore) OrgSecretList(s int64, p *model.ListOptions) ([]*model.Secret, error) {
 	results, err := wrapper.store.OrgSecretList(s, p)
 	if err != nil {
 		return nil, err

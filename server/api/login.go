@@ -86,7 +86,7 @@ func HandleAuth(c *gin.Context) {
 		if len(config.Orgs) != 0 {
 			teams, terr := _forge.Teams(c, tmpuser)
 			if terr != nil || !config.IsMember(teams) {
-				log.Error().Msgf("cannot verify team membership for %s.", u.Login)
+				log.Error().Err(terr).Msgf("cannot verify team membership for %s.", u.Login)
 				c.Redirect(303, "/login?error=access_denied")
 				return
 			}
@@ -111,6 +111,15 @@ func HandleAuth(c *gin.Context) {
 			c.Redirect(http.StatusSeeOther, "/login?error=internal_error")
 			return
 		}
+
+		// if another user already have activated repos on behave of that user,
+		// the user was stored as org. now we adopt it to the user.
+		if org, err := _store.OrgFindByName(u.Login); err == nil && org != nil {
+			org.IsUser = true
+			if err := _store.OrgUpdate(org); err != nil {
+				log.Error().Err(err).Msgf("on user creation, could not mark org as user")
+			}
+		}
 	}
 
 	// update the user meta data and authorization data.
@@ -127,7 +136,7 @@ func HandleAuth(c *gin.Context) {
 	if len(config.Orgs) != 0 {
 		teams, terr := _forge.Teams(c, u)
 		if terr != nil || !config.IsMember(teams) {
-			log.Error().Msgf("cannot verify team membership for %s.", u.Login)
+			log.Error().Err(terr).Msgf("cannot verify team membership for %s.", u.Login)
 			c.Redirect(http.StatusSeeOther, "/login?error=access_denied")
 			return
 		}
