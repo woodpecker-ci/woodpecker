@@ -7,6 +7,7 @@ Once your pipeline starts to grow in size, it will become important to keep it D
 ### YAML extensions
 
 As described in [Advanced YAML syntax](./35-advanced-yaml-syntax.md).
+
 ```yml
 variables:
   - &golang_image 'golang:1.18'
@@ -16,11 +17,13 @@ variables:
      image: *golang_image
      commands: build
 ```
+
 Note that the `golang_image` alias cannot be used with string interpolation. But this is otherwise a good option for most cases.
 
 ### YAML extensions (alternate form)
 
 Another approach using YAML extensions:
+
 ```yml
 variables:
   - global_env: &global_env
@@ -49,6 +52,7 @@ steps:
 ### Persisting environment data between steps
 
 One can create a file containing environment variables, and then source it in each step that needs them.
+
 ```yml
 steps:
   init:
@@ -67,6 +71,7 @@ steps:
 ### Declaring global variables in `docker-compose.yml`
 
 As described in [Global environment variables](./50-environment.md#global-environment-variables), one can define global variables:
+
 ```yml
 services:
   woodpecker-server:
@@ -75,4 +80,5 @@ services:
       - WOODPECKER_ENVIRONMENT=first_var:value1,second_var:value2
       # ...
 ```
+
 Note that this tightly couples the server and app configurations (where the app is a completely separate application). But this is a good option for truly global variables which should apply to all steps in all pipelines for all apps.
