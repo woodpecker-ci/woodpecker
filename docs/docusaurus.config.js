@@ -220,11 +220,11 @@ module.exports = {
             },
             '1.0': {
               label: '1.0.x',
-              banner: 'none',
+              banner: 'unreleased',
             },
             '0.15': {
               label: '0.15.x',
-              banner: 'unmaintained',
+              banner: 'none',
             },
           },
         },
