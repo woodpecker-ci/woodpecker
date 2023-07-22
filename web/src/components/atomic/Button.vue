@@ -5,9 +5,9 @@
     :class="{
       'bg-wp-control-neutral-100 hover:bg-wp-control-neutral-200 border-wp-control-neutral-300 text-wp-text-100':
         color === 'gray',
-      'bg-wp-control-ok-200 hover:bg-wp-control-ok-100 border-wp-control-ok-300 text-white': color === 'green',
-      'bg-wp-control-info-100 hover:bg-wp-control-info-200 border-wp-control-info-300': color === 'blue',
-      'bg-wp-control-error-100 hover:bg-wp-control-error-200 border-wp-control-error-300': color === 'red',
+      'bg-wp-control-ok-100 hover:bg-wp-control-ok-200 border-wp-control-ok-300 text-white': color === 'green',
+      'bg-wp-control-info-100 hover:bg-wp-control-info-200 border-wp-control-info-300 text-white': color === 'blue',
+      'bg-wp-control-error-100 hover:bg-wp-control-error-200 border-wp-control-error-300 text-white': color === 'red',
       ...passedClasses,
     }"
     :title="title"
@@ -23,10 +23,10 @@
         :class="{
           'opacity-100': isLoading,
           'opacity-0': !isLoading,
-          'bg-white dark:bg-wp-darkgray-700': color === 'gray',
-          'bg-wp-primary-700': color === 'green',
-          'bg-blue-700': color === 'blue',
-          'bg-red-600': color === 'red',
+          'bg-wp-control-neutral-200': color === 'gray',
+          'bg-wp-control-ok-200': color === 'green',
+          'bg-wp-control-info-200': color === 'blue',
+          'bg-wp-control-error-200': color === 'red',
         }"
       >
         <Icon name="loading" class="animate-spin" />

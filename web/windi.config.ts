@@ -55,6 +55,11 @@ export default defineConfig({
           200: 'var(--wp-control-neutral-200)',
           300: 'var(--wp-control-neutral-300)',
         },
+        'wp-control-info': {
+          100: 'var(--wp-control-info-100)',
+          200: 'var(--wp-control-info-200)',
+          300: 'var(--wp-control-info-300)',
+        },
         'wp-control-ok': {
           100: 'var(--wp-control-ok-100)',
           200: 'var(--wp-control-ok-200)',

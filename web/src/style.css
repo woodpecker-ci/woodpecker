@@ -17,22 +17,22 @@
   --wp-control-neutral-200: theme('colors.gray.300');
   --wp-control-neutral-300: theme('colors.gray.400');
 
-  --wp-control-info-100: theme('colors.internal-wp-control-neutral.300');
-  --wp-control-info-200: theme('colors.internal-wp-control-neutral.400');
-  --wp-control-info-300: theme('colors.internal-wp-control-neutral.500');
+  --wp-control-info-100: theme('colors.cyan.600');
+  --wp-control-info-200: theme('colors.cyan.700');
+  --wp-control-info-300: theme('colors.cyan.800');
 
-  --wp-control-ok-100: theme('colors.internal-wp-primary.300');
-  --wp-control-ok-200: theme('colors.internal-wp-primary.400');
-  --wp-control-ok-300: theme('colors.internal-wp-primary.500');
+  --wp-control-ok-100: theme('colors.internal-wp-primary.400');
+  --wp-control-ok-200: theme('colors.internal-wp-primary.500');
+  --wp-control-ok-300: theme('colors.internal-wp-primary.600');
 
-  --wp-control-error-100: theme('colors.red.500');
-  --wp-control-error-200: theme('colors.red.600');
-  --wp-control-error-300: theme('colors.red.700');
+  --wp-control-error-100: theme('colors.red.600');
+  --wp-control-error-200: theme('colors.red.700');
+  --wp-control-error-300: theme('colors.red.800');
 
   --wp-pipeline-error-100: theme('colors.red.600');
   --wp-pipeline-neutral-100: theme('colors.gray.600');
   --wp-pipeline-ok-100: theme('colors.green.600');
-  --wp-pipeline-info-100: theme('colors.blue.600');
+  --wp-pipeline-info-100: theme('colors.cyan.600');
   --wp-pipeline-warn-100: theme('colors.yellow.400');
   --wp-pipeline-warn-200: theme('colors.yellow.600');
 
@@ -61,9 +61,17 @@
   --wp-control-neutral-200: theme('colors.internal-wp-secondary.600');
   --wp-control-neutral-300: theme('colors.internal-wp-secondary.700');
 
-  --wp-control-ok-100: theme('colors.internal-wp-primary.500');
-  --wp-control-ok-200: theme('colors.internal-wp-primary.400');
+  --wp-control-info-100: theme('colors.cyan.700');
+  --wp-control-info-200: theme('colors.cyan.800');
+  --wp-control-info-300: theme('colors.cyan.900');
+
+  --wp-control-ok-100: theme('colors.internal-wp-primary.400');
+  --wp-control-ok-200: theme('colors.internal-wp-primary.500');
   --wp-control-ok-300: theme('colors.internal-wp-primary.600');
+
+  --wp-control-error-100: theme('colors.red.700');
+  --wp-control-error-200: theme('colors.red.800');
+  --wp-control-error-300: theme('colors.red.900');
 
   --wp-code-100: theme('colors.internal-wp-secondary.700');
   --wp-code-200: theme('colors.internal-wp-secondary.800');

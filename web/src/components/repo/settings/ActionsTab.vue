@@ -4,9 +4,9 @@
       <h1 class="text-xl ml-2 text-wp-text-100">{{ $t('repo.settings.actions.actions') }}</h1>
     </div>
 
-    <div class="flex flex-col">
+    <div class="flex flex-wrap items-center">
       <Button
-        class="mr-auto mt-4"
+        class="mr-4 my-1"
         color="blue"
         start-icon="heal"
         :is-loading="isRepairingRepo"
@@ -16,7 +16,7 @@
 
       <Button
         v-if="isActive"
-        class="mr-auto mt-4"
+        class="mr-4 my-1"
         color="blue"
         start-icon="turn-off"
         :is-loading="isDeactivatingRepo"
@@ -25,7 +25,7 @@
       />
       <Button
         v-else
-        class="mr-auto mt-4"
+        class="mr-4 my-1"
         color="blue"
         start-icon="turn-off"
         :is-loading="isActivatingRepo"
@@ -34,7 +34,7 @@
       />
 
       <Button
-        class="mr-auto mt-4"
+        class="mr-4 my-1"
         color="red"
         start-icon="trash"
         :is-loading="isDeletingRepo"
