@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.0.0-rc1](https://github.com/woodpecker-ci/woodpecker/releases/tag/1.0.0-rc1) - 2023-07-21
+## [1.0.0-rc1](https://github.com/woodpecker-ci/woodpecker/releases/tag/1.0.0-rc1) - 2023-07-22
 
 * BREAKING
   * Use IDs to access organizations (#1873)
