@@ -15,9 +15,7 @@
         />
         <template #description>
           <i18n-t keypath="repo.settings.general.pipeline_path.desc" tag="p" class="text-sm text-wp-text-alt-100">
-            <span class="code-box-inline px-1">{{
-              $t('repo.settings.general.pipeline_path.desc_path_example')
-            }}</span>
+            <span class="code-box-inline px-1">{{ $t('repo.settings.general.pipeline_path.desc_path_example') }}</span>
             <span class="code-box-inline px-1">/</span>
           </i18n-t>
         </template>
@@ -60,7 +58,7 @@
       <InputField docs-url="docs/usage/project-settings#timeout" :label="$t('repo.settings.general.timeout.timeout')">
         <div class="flex items-center">
           <NumberField v-model="repoSettings.timeout" class="w-24" />
-          <span class="ml-4 text-wp-gray-600">{{ $t('repo.settings.general.timeout.minutes') }}</span>
+          <span class="ml-4 text-gray-600">{{ $t('repo.settings.general.timeout.minutes') }}</span>
         </div>
       </InputField>
 

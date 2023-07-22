@@ -6,10 +6,8 @@
       'bg-wp-control-neutral-100 hover:bg-wp-control-neutral-200 border-wp-control-neutral-300 text-wp-text-100':
         color === 'gray',
       'bg-wp-control-ok-200 hover:bg-wp-control-ok-100 border-wp-control-ok-300 text-white': color === 'green',
-      'bg-wp-blue-500 hover:bg-wp-blue-600 border-wp-blue-700 text-white dark:text-wp-gray-300 dark:bg-wp-blue-900 dark:hover:bg-wp-blue-800':
-        color === 'blue',
-      'bg-wp-red-500 hover:bg-wp-red-600 border-wp-red-700 text-white dark:text-wp-gray-300 dark:bg-wp-red-900 dark:hover:bg-wp-red-800':
-        color === 'red',
+      'bg-wp-control-info-100 hover:bg-wp-control-info-200 border-wp-control-info-300': color === 'blue',
+      'bg-wp-control-error-100 hover:bg-wp-control-error-200 border-wp-control-error-300': color === 'red',
       ...passedClasses,
     }"
     :title="title"
@@ -27,8 +25,8 @@
           'opacity-0': !isLoading,
           'bg-white dark:bg-wp-darkgray-700': color === 'gray',
           'bg-wp-primary-700': color === 'green',
-          'bg-wp-blue-700': color === 'blue',
-          'bg-wp-red-600': color === 'red',
+          'bg-blue-700': color === 'blue',
+          'bg-red-600': color === 'red',
         }"
       >
         <Icon name="loading" class="animate-spin" />

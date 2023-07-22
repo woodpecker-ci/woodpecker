@@ -16,7 +16,11 @@
     </div>
 
     <div v-if="!selectedAgent" class="space-y-4 text-wp-text-100">
-      <ListItem v-for="agent in agents" :key="agent.id" class="items-center">
+      <ListItem
+        v-for="agent in agents"
+        :key="agent.id"
+        class="items-center !bg-wp-background-200 !dark:bg-wp-background-100"
+      >
         <span>{{ agent.name || `Agent ${agent.id}` }}</span>
         <span class="ml-auto">
           <span class="hidden md:inline-block space-x-2">
@@ -35,7 +39,7 @@
         <IconButton
           icon="trash"
           :title="$t('admin.settings.agents.delete_agent')"
-          class="ml-2 w-8 h-8 hover:text-wp-red-500 hover:dark:text-wp-red-500"
+          class="ml-2 w-8 h-8 hover:text-wp-control-error-100"
           :is-loading="isDeleting"
           @click="deleteAgent(agent)"
         />

@@ -1,6 +1,6 @@
 <template>
   <main class="flex flex-col w-full h-full justify-center items-center">
-    <div v-if="errorMessage" class="bg-wp-red-500 text-white dark:text-wp-gray-500 p-4 rounded-md text-lg">
+    <div v-if="errorMessage" class="bg-red-500 text-white dark:text-gray-500 p-4 rounded-md text-lg">
       {{ errorMessage }}
     </div>
 

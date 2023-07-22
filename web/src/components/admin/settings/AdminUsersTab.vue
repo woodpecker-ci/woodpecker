@@ -16,7 +16,11 @@
     </div>
 
     <div v-if="!selectedUser" class="space-y-4 text-wp-text-100">
-      <ListItem v-for="user in users" :key="user.id" class="items-center gap-2">
+      <ListItem
+        v-for="user in users"
+        :key="user.id"
+        class="items-center gap-2 !bg-wp-background-200 !dark:bg-wp-background-100"
+      >
         <img v-if="user.avatar_url" class="rounded-md h-6" :src="user.avatar_url" />
         <span>{{ user.login }}</span>
         <Badge
@@ -34,7 +38,7 @@
         <IconButton
           icon="trash"
           :title="$t('admin.settings.users.delete_user')"
-          class="ml-2 w-8 h-8 hover:text-wp-red-500 hover:dark:text-wp-red-500"
+          class="ml-2 w-8 h-8 hover:text-wp-control-error-100"
           :is-loading="isDeleting"
           @click="deleteUser(user)"
         />

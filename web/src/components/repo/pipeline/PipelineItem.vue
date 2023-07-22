@@ -4,11 +4,11 @@
       <div
         class="h-full w-3"
         :class="{
-          'bg-wp-yellow-600 dark:bg-wp-dark-600': pipeline.status === 'pending',
-          'bg-wp-red-600 dark:bg-wp-red-600': pipelineStatusColors[pipeline.status] === 'red',
-          'bg-wp-gray-500 dark:bg-wp-gray-500': pipelineStatusColors[pipeline.status] === 'gray',
-          'bg-wp-green-600 dark:bg-wp-green-600': pipelineStatusColors[pipeline.status] === 'green',
-          'bg-wp-blue-600 dark:bg-wp-blue-600': pipelineStatusColors[pipeline.status] === 'blue',
+          'bg-wp-pipeline-warn-100 dark:bg-wp-pipeline-warn-200': pipeline.status === 'pending',
+          'bg-wp-pipeline-error-100': pipelineStatusColors[pipeline.status] === 'red',
+          'bg-wp-pipeline-neutral-100': pipelineStatusColors[pipeline.status] === 'gray',
+          'bg-wp-pipeline-ok-100': pipelineStatusColors[pipeline.status] === 'green',
+          'bg-wp-pipeline-info-100': pipelineStatusColors[pipeline.status] === 'blue',
         }"
       />
       <div class="w-8 flex flex-wrap justify-between items-center h-full">

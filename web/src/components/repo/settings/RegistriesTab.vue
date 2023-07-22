@@ -35,7 +35,7 @@
         />
         <IconButton
           icon="trash"
-          class="w-8 h-8 hover:text-wp-red-500 hover:dark:text-wp-red-500"
+          class="w-8 h-8 hover:text-wp-control-error-100"
           :is-loading="isDeleting"
           :title="$t('repo.settings.registries.delete')"
           @click="deleteRegistry(registry)"

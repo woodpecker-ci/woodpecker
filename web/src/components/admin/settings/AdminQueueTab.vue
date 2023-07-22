@@ -24,8 +24,8 @@
         <Icon
           :name="queueInfo.paused ? 'pause' : 'play'"
           :class="{
-            'text-wp-red-600': queueInfo.paused,
-            'text-wp-green-600': !queueInfo.paused,
+            'text-red-600': queueInfo.paused,
+            'text-green-600': !queueInfo.paused,
           }"
         />
       </div>
@@ -36,7 +36,11 @@
 
       <div v-if="tasks.length > 0" class="flex flex-col">
         <p class="mt-6 mb-2 text-xl">{{ $t('admin.settings.queue.tasks') }}</p>
-        <ListItem v-for="task in tasks" :key="task.id" class="items-center mb-2">
+        <ListItem
+          v-for="task in tasks"
+          :key="task.id"
+          class="items-center mb-2 !bg-wp-background-200 !dark:bg-wp-background-100"
+        >
           <div
             class="flex items-center"
             :title="
@@ -56,9 +60,9 @@
                   : 'status-declined'
               "
               :class="{
-                'text-wp-red-600': task.status === 'waiting_on_deps',
-                'text-wp-blue-600': task.status === 'running',
-                'text-wp-gray-500': task.status === 'pending',
+                'text-red-600': task.status === 'waiting_on_deps',
+                'text-blue-600': task.status === 'running',
+                'text-gray-500': task.status === 'pending',
               }"
             />
           </div>

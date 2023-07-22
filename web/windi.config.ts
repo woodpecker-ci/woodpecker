@@ -60,6 +60,11 @@ export default defineConfig({
           200: 'var(--wp-control-ok-200)',
           300: 'var(--wp-control-ok-300)',
         },
+        'wp-control-error': {
+          100: 'var(--wp-control-error-100)',
+          200: 'var(--wp-control-error-200)',
+          300: 'var(--wp-control-error-300)',
+        },
 
         'wp-pipeline-error': {
           100: 'var(--wp-pipeline-error-100)',
@@ -72,6 +77,10 @@ export default defineConfig({
         },
         'wp-pipeline-info': {
           100: 'var(--wp-pipeline-info-100)',
+        },
+        'wp-pipeline-warn': {
+          100: 'var(--wp-pipeline-warn-100)',
+          200: 'var(--wp-pipeline-warn-200)',
         },
 
         'wp-code': {

@@ -1,10 +1,12 @@
 <template>
-  <div class="rounded-md w-full shadow overflow-hidden bg-wp-background-100 dark:bg-wp-background-200">
+  <div
+    class="rounded-md w-full shadow overflow-hidden bg-wp-background-100 dark:bg-wp-background-200 border border-wp-background-400"
+  >
     <component
       :is="collapsable ? 'button' : 'div'"
       v-if="title"
       type="button"
-      class="flex w-full font-bold gap-2 text-wp-gray-200 px-4 py-2"
+      class="flex w-full font-bold gap-2 text-wp-text-100 px-4 py-2 bg-wp-background-300"
       @click="collapsed && (_collapsed = !_collapsed)"
     >
       <Icon
