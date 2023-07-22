@@ -2,7 +2,9 @@
   <Popup :open="open" @close="$emit('close')">
     <Panel v-if="!loading">
       <form @submit.prevent="triggerDeployPipeline">
-        <span class="text-xl text-wp-text-100">{{ $t('repo.deploy_pipeline.title', { pipelineId: pipelineNumber }) }}</span>
+        <span class="text-xl text-wp-text-100">{{
+          $t('repo.deploy_pipeline.title', { pipelineId: pipelineNumber })
+        }}</span>
         <InputField :label="$t('repo.deploy_pipeline.enter_target')">
           <TextField v-model="payload.environment" required />
         </InputField>

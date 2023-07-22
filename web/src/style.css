@@ -112,3 +112,12 @@ body,
 *::-webkit-scrollbar-corner {
   @apply bg-transparent;
 }
+
+.code-box {
+  @apply bg-wp-code-200 p-2 rounded-md text-wp-code-text-100 break-words;
+  white-space: pre-wrap;
+}
+
+.code-box-inline {
+  @apply bg-wp-code-200 rounded-md text-wp-code-text-100;
+}

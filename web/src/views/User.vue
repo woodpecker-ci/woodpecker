@@ -10,28 +10,28 @@
           <h2 class="text-lg text-wp-text-100">{{ $t('user.token') }}</h2>
           <Button class="ml-4" :text="$t('user.reset_token')" @click="resetToken" />
         </div>
-        <pre class="cli-box">{{ token }}</pre>
+        <pre class="code-box">{{ token }}</pre>
       </div>
 
       <div>
         <h2 class="text-lg text-wp-text-100">{{ $t('user.shell_setup') }}</h2>
-        <pre class="cli-box">{{ usageWithShell }}</pre>
+        <pre class="code-box">{{ usageWithShell }}</pre>
       </div>
 
       <div>
         <div class="flex items-center">
           <h2 class="text-lg text-wp-text-100">{{ $t('user.api_usage') }}</h2>
-          <a :href="`${address}/swagger/index.html`" target="_blank" class="ml-4 text-wp-link">Swagger UI</a>
+          <a :href="`${address}/swagger/index.html`" target="_blank" class="ml-4 text-wp-link-100">Swagger UI</a>
         </div>
-        <pre class="cli-box">{{ usageWithCurl }}</pre>
+        <pre class="code-box">{{ usageWithCurl }}</pre>
       </div>
 
       <div>
         <div class="flex items-center">
           <h2 class="text-lg text-wp-text-100">{{ $t('user.cli_usage') }}</h2>
-          <a :href="cliDownload" target="_blank" class="ml-4 text-wp-link">{{ $t('user.dl_cli') }}</a>
+          <a :href="cliDownload" target="_blank" class="ml-4 text-wp-link-100">{{ $t('user.dl_cli') }}</a>
         </div>
-        <pre class="cli-box">{{ usageWithCli }}</pre>
+        <pre class="code-box">{{ usageWithCli }}</pre>
       </div>
     </div>
   </Scaffold>
@@ -102,10 +102,3 @@ const resetToken = async () => {
   window.location.href = `${address}/logout`;
 };
 </script>
-
-<style scoped>
-.cli-box {
-  @apply bg-wp-gray-700 p-2 rounded-md text-wp-gray-100 break-words dark:bg-wp-dark-400 dark:text-wp-gray-400;
-  white-space: pre-wrap;
-}
-</style>

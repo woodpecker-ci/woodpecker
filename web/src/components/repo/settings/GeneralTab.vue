@@ -15,10 +15,10 @@
         />
         <template #description>
           <i18n-t keypath="repo.settings.general.pipeline_path.desc" tag="p" class="text-sm text-wp-text-alt-100">
-            <span class="bg-wp-code-200 text-wp-code-text-100 rounded-md px-1">{{
+            <span class="code-box-inline px-1">{{
               $t('repo.settings.general.pipeline_path.desc_path_example')
             }}</span>
-            <span class="bg-wp-code-200 text-wp-code-text-100 rounded-md px-1">/</span>
+            <span class="code-box-inline px-1">/</span>
           </i18n-t>
         </template>
       </InputField>

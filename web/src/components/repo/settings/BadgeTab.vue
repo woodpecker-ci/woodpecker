@@ -33,7 +33,7 @@
 
     <div v-if="badgeContent" class="flex flex-col space-y-4">
       <div>
-        <pre class="box">{{ badgeContent }}</pre>
+        <pre class="code-box">{{ badgeContent }}</pre>
       </div>
     </div>
   </Panel>
@@ -127,10 +127,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style scoped>
-.box {
-  @apply bg-wp-code-200 p-2 rounded-md text-wp-code-text-100 break-words;
-  white-space: pre-wrap;
-}
-</style>
