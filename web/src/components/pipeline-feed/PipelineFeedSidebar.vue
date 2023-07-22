@@ -16,7 +16,7 @@
       <PipelineFeedItem :pipeline="pipeline" />
     </router-link>
 
-    <span v-if="sortedPipelines.length === 0" class="text-color m-4">{{ $t('repo.pipeline.no_pipelines') }}</span>
+    <span v-if="sortedPipelines.length === 0" class="text-wp-text-100 m-4">{{ $t('repo.pipeline.no_pipelines') }}</span>
   </aside>
 </template>
 

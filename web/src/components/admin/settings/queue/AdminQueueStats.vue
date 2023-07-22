@@ -1,6 +1,8 @@
 <template>
   <div v-if="stats" class="flex justify-center">
-    <div class="bg-wp-gray-100 dark:bg-wp-darkgray-600 text-color dark:text-wp-gray-400 rounded-md py-5 px-5 w-full">
+    <div
+      class="bg-wp-gray-100 dark:bg-wp-darkgray-600 text-wp-text-100 dark:text-wp-gray-400 rounded-md py-5 px-5 w-full"
+    >
       <div class="flex w-full">
         <h3 class="text-lg font-semibold leading-tight uppercase flex-1">
           {{ $t('admin.settings.queue.stats.completed_count') }}

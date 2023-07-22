@@ -3,9 +3,9 @@
     <button
       v-for="tab in tabs"
       :key="tab.id"
-      class="w-full py-2 md:w-auto md:py-2 md:px-8 flex cursor-pointer md:border-b-2 text-color hover:text-wp-gray-700 dark:hover:text-wp-gray-400 items-center"
+      class="w-full py-2 md:w-auto md:py-2 md:px-8 flex cursor-pointer md:border-b-2 text-wp-text-100 hover:text-wp-gray-700 dark:hover:text-wp-gray-400 items-center"
       :class="{
-        'border-wp-gray-400 dark:border-wp-gray-600': activeTab === tab.id,
+        'border-wp-text-100': activeTab === tab.id,
         'border-transparent': activeTab !== tab.id,
       }"
       type="button"

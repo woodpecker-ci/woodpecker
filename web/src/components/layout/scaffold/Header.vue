@@ -1,5 +1,7 @@
 <template>
-  <header class="bg-white dark:bg-wp-darkgray-900 border-b dark:border-wp-gray-700 text-color">
+  <header
+    class="bg-wp-background-100 border-b-1 border-wp-background-400 dark:border-wp-background-100 dark:bg-wp-background-300 text-wp-text-100"
+  >
     <FluidContainer class="!py-0">
       <div class="flex w-full items-center justify-between py-4 <md:flex-row <md:gap-y-4">
         <div
@@ -15,13 +17,13 @@
             class="flex-shrink-0 mr-2 <md:hidden"
             @click="goBack"
           />
-          <h1 class="flex text-xl min-w-0 text-color items-center gap-x-2">
+          <h1 class="flex text-xl min-w-0 text-wp-text-100 items-center gap-x-2">
             <slot name="title" />
           </h1>
         </div>
         <TextField
           v-if="searchBoxPresent"
-          class="w-auto !bg-wp-gray-100 !dark:bg-wp-darkgray-600 placeholder-wp-gray-500 <md:w-full <md:order-3"
+          class="w-auto <md:w-full <md:order-3"
           :placeholder="$t('search')"
           :model-value="search"
           @update:model-value="(value: string) => $emit('update:search', value)"

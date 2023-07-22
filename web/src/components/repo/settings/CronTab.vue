@@ -1,9 +1,9 @@
 <template>
   <Panel>
-    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-wp-gray-600">
+    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-wp-background-100">
       <div class="ml-2">
-        <h1 class="text-xl text-color">{{ $t('repo.settings.crons.crons') }}</h1>
-        <p class="text-sm text-color-alt">
+        <h1 class="text-xl text-wp-text-100">{{ $t('repo.settings.crons.crons') }}</h1>
+        <p class="text-sm text-wp-text-alt-100">
           {{ $t('repo.settings.crons.desc') }}
           <DocsLink :topic="$t('repo.settings.crons.crons')" url="docs/usage/crons" />
         </p>
@@ -24,7 +24,7 @@
       />
     </div>
 
-    <div v-if="!selectedCron" class="space-y-4 text-color">
+    <div v-if="!selectedCron" class="space-y-4 text-wp-text-100">
       <ListItem v-for="cron in crons" :key="cron.id" class="items-center">
         <span>{{ cron.name }}</span>
         <span v-if="cron.next_exec && cron.next_exec > 0" class="ml-auto">
@@ -67,11 +67,11 @@
         </InputField>
 
         <div v-if="isEditingCron" class="ml-auto mb-4">
-          <span v-if="selectedCron.next_exec && selectedCron.next_exec > 0" class="text-color">
+          <span v-if="selectedCron.next_exec && selectedCron.next_exec > 0" class="text-wp-text-100">
             {{ $t('repo.settings.crons.next_exec') }}:
             {{ date.toLocaleString(new Date(selectedCron.next_exec * 1000)) }}
           </span>
-          <span v-else class="text-color">{{ $t('repo.settings.crons.not_executed_yet') }}</span>
+          <span v-else class="text-wp-text-100">{{ $t('repo.settings.crons.not_executed_yet') }}</span>
         </div>
 
         <div class="flex gap-2">

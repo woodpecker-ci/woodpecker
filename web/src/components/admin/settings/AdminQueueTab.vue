@@ -1,9 +1,9 @@
 <template>
   <Panel>
-    <div v-if="queueInfo" class="flex flex-row border-b mb-4 pb-4 items-center dark:border-wp-gray-600">
+    <div v-if="queueInfo" class="flex flex-row border-b mb-4 pb-4 items-center dark:border-wp-background-100">
       <div class="ml-2">
-        <h1 class="text-xl text-color">{{ $t('admin.settings.queue.queue') }}</h1>
-        <p class="text-sm text-color-alt">{{ $t('admin.settings.queue.desc') }}</p>
+        <h1 class="text-xl text-wp-text-100">{{ $t('admin.settings.queue.queue') }}</h1>
+        <p class="text-sm text-wp-text-alt-100">{{ $t('admin.settings.queue.desc') }}</p>
       </div>
 
       <div class="ml-auto flex items-center gap-2">

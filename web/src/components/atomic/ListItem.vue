@@ -1,9 +1,11 @@
 <template>
   <component
-    :is="to ? 'router-link' : clickable ? 'button' : 'div'"
+    :is="to ? 'router-link' : clickable ? 'control' : 'div'"
     :to="to"
-    class="w-full flex border rounded-md bg-white overflow-hidden p-4 border-wp-gray-300 dark:bg-wp-darkgray-700 dark:border-wp-dark-400"
-    :class="{ 'cursor-pointer hover:shadow-md hover:bg-wp-gray-200 dark:hover:bg-wp-darkgray-800': clickable || to }"
+    class="w-full flex border rounded-md bg-wp-background-100 overflow-hidden p-4 border-wp-background-400 dark:bg-wp-background-200"
+    :class="{
+      'cursor-pointer hover:shadow-md hover:bg-wp-background-300 dark:hover:bg-wp-background-300': clickable || to,
+    }"
   >
     <slot />
   </component>

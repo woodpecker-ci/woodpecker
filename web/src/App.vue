@@ -1,5 +1,5 @@
 <template>
-  <div class="app flex flex-col m-auto w-full h-full bg-wp-gray-100 dark:bg-wp-darkgray-600">
+  <div class="app flex flex-col m-auto w-full h-full bg-wp-background-200 dark:bg-wp-background-100">
     <router-view v-if="blank" />
     <template v-else>
       <Navbar />

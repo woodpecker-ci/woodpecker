@@ -1,7 +1,7 @@
 <template>
   <div v-if="pipeline" class="flex flex-col pt-10 md:pt-0">
     <div
-      class="fixed top-0 left-0 w-full md:hidden flex px-4 py-2 bg-wp-gray-600 dark:bg-wp-darkgray-800 text-wp-gray-50"
+      class="fixed top-0 left-0 w-full md:hidden flex px-4 py-2 bg-wp-background-400 text-wp-text-100"
       @click="$emit('update:step-id', null)"
     >
       <span>{{ step?.name }}</span>
@@ -9,11 +9,11 @@
     </div>
 
     <div
-      class="flex flex-grow flex-col bg-white shadow dark:bg-wp-darkgray-700 md:m-2 md:mt-0 md:rounded-md overflow-hidden"
+      class="flex flex-grow flex-col bg-wp-code-200 shadow md:m-2 md:mt-0 md:rounded-md overflow-hidden"
       @mouseover="showActions = true"
       @mouseleave="showActions = false"
     >
-      <div v-show="showActions" class="absolute top-0 right-0 z-40 mt-2 mr-4 hidden md:flex">
+      <div v-show="showActions" class="absolute top-0 right-0 z-40 mt-4 mr-6 hidden md:flex">
         <Button
           v-if="step?.end_time !== undefined"
           :is-loading="downloadInProgress"
@@ -34,13 +34,13 @@
       <div
         v-show="hasLogs && loadedLogs"
         ref="consoleElement"
-        class="w-full max-w-full grid grid-cols-[min-content,1fr,min-content] auto-rows-min flex-grow p-2 overflow-x-hidden overflow-y-auto"
+        class="w-full max-w-full grid grid-cols-[min-content,1fr,min-content] auto-rows-min flex-grow p-4 overflow-x-hidden overflow-y-auto"
       >
         <div v-for="line in log" :key="line.index" class="contents font-mono">
           <a
             :id="`L${line.number}`"
             :href="`#L${line.number}`"
-            class="text-wp-gray-500 whitespace-nowrap select-none text-right pl-1 pr-2"
+            class="text-wp-text-alt-100 whitespace-nowrap select-none text-right pr-6"
             :class="{
               'bg-opacity-40 dark:bg-opacity-50 bg-wp-red-600 dark:bg-wp-red-800': line.type === 'error',
               'bg-opacity-40 dark:bg-opacity-50 bg-wp-yellow-600 dark:bg-wp-yellow-800': line.type === 'warning',
@@ -51,7 +51,7 @@
           >
           <!-- eslint-disable vue/no-v-html -->
           <span
-            class="align-top text-color whitespace-pre-wrap break-words"
+            class="align-top text-wp-code-text-100 whitespace-pre-wrap break-words text-sm"
             :class="{
               'bg-opacity-40 dark:bg-opacity-50 bg-wp-red-600 dark:bg-wp-red-800': line.type === 'error',
               'bg-opacity-40 dark:bg-opacity-50 bg-wp-yellow-600 dark:bg-wp-yellow-800': line.type === 'warning',
@@ -61,7 +61,7 @@
           />
           <!-- eslint-enable vue/no-v-html -->
           <span
-            class="text-wp-gray-500 whitespace-nowrap select-none text-right pr-1"
+            class="text-wp-text-alt-100 whitespace-nowrap select-none text-right pr-1"
             :class="{
               'bg-opacity-40 dark:bg-opacity-50 bg-wp-red-600 dark:bg-wp-red-800': line.type === 'error',
               'bg-opacity-40 dark:bg-opacity-50 bg-wp-yellow-600 dark:bg-wp-yellow-800': line.type === 'warning',
@@ -72,7 +72,7 @@
         </div>
       </div>
 
-      <div class="m-auto text-xl text-color">
+      <div class="m-auto text-xl text-wp-text-100">
         <span v-if="step?.error" class="text-wp-red-500">{{ step.error }}</span>
         <span v-else-if="step?.state === 'skipped'" class="text-wp-red-500">{{
           $t('repo.pipeline.actions.canceled')
@@ -83,12 +83,10 @@
 
       <div
         v-if="step?.end_time !== undefined"
-        :class="
-          step.exit_code == 0 ? 'dark:text-wp-green-500 text-wp-green-700' : 'dark:text-wp-red-500 text-wp-red-600'
-        "
-        class="w-full bg-wp-gray-200 dark:bg-wp-darkgray-800 text-md p-4 text-bold"
+        class="flex items-center w-full bg-wp-code-100 text-md text-wp-code-text-100 p-4 text-bold"
       >
-        {{ $t('repo.pipeline.exit_code', { exitCode: step.exit_code }) }}
+        <PipelineStatusIcon :status="step.state" class="!h-4 !w-4" />
+        <span class="px-2">{{ $t('repo.pipeline.exit_code', { exitCode: step.exit_code }) }}</span>
       </div>
     </div>
   </div>
@@ -106,6 +104,7 @@ import { useRoute } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
 import Icon from '~/components/atomic/Icon.vue';
+import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useNotifications from '~/compositions/useNotifications';
 import { Pipeline, Repo } from '~/lib/api/types';

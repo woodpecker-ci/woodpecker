@@ -11,8 +11,8 @@
         class="items-center"
         :to="repo.active ? { name: 'repo', params: { repoId: repo.id } } : undefined"
       >
-        <span class="text-color">{{ repo.full_name }}</span>
-        <span v-if="repo.active" class="ml-auto text-color-alt">{{ $t('repo.enable.enabled') }}</span>
+        <span class="text-wp-text-100">{{ repo.full_name }}</span>
+        <span v-if="repo.active" class="ml-auto text-wp-text-alt-100">{{ $t('repo.enable.enabled') }}</span>
         <Button
           v-if="!repo.active"
           class="ml-auto"

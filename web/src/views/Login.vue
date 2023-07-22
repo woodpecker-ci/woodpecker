@@ -5,13 +5,13 @@
     </div>
 
     <div
-      class="flex flex-col w-full overflow-hidden md:m-8 md:rounded-md md:shadow md:border md:bg-white md:dark:bg-wp-darkgray-700 dark:border-wp-dark-200 md:flex-row md:w-3xl md:h-sm justify-center"
+      class="flex flex-col w-full overflow-hidden md:m-8 md:rounded-md md:shadow md:border md:border-wp-background-darker md:bg-white md:dark:bg-wp-darkgray-700 md:flex-row md:w-3xl md:h-sm justify-center"
     >
-      <div class="flex md:bg-wp-primary-400 md:dark:bg-wp-darkgray-800 md:w-3/5 justify-center items-center">
+      <div class="flex md:bg-wp-primary-200 md:dark:bg-wp-primary-300 md:w-3/5 justify-center items-center">
         <img class="w-48 h-48" src="../assets/logo.svg?url" />
       </div>
       <div class="flex flex-col my-8 md:w-2/5 p-4 items-center justify-center">
-        <h1 class="text-xl text-color">{{ $t('welcome') }}</h1>
+        <h1 class="text-xl text-wp-text-100">{{ $t('welcome') }}</h1>
         <Button class="mt-4" @click="doLogin">{{ $t('login') }}</Button>
       </div>
     </div>

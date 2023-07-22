@@ -1,9 +1,9 @@
 <template>
   <Panel>
-    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-wp-gray-600">
+    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-wp-background-100">
       <div class="ml-2">
-        <h1 class="text-xl text-color">{{ $t('org.settings.secrets.secrets') }}</h1>
-        <p class="text-sm text-color-alt">
+        <h1 class="text-xl text-wp-text-100">{{ $t('org.settings.secrets.secrets') }}</h1>
+        <p class="text-sm text-wp-text-alt-100">
           {{ $t('org.settings.secrets.desc') }}
           <DocsLink :topic="$t('org.settings.secrets.secrets')" url="docs/usage/secrets" />
         </p>

@@ -7,20 +7,20 @@
 
       <div>
         <div class="flex items-center mb-2">
-          <h2 class="text-lg text-color">{{ $t('user.token') }}</h2>
+          <h2 class="text-lg text-wp-text-100">{{ $t('user.token') }}</h2>
           <Button class="ml-4" :text="$t('user.reset_token')" @click="resetToken" />
         </div>
         <pre class="cli-box">{{ token }}</pre>
       </div>
 
       <div>
-        <h2 class="text-lg text-color">{{ $t('user.shell_setup') }}</h2>
+        <h2 class="text-lg text-wp-text-100">{{ $t('user.shell_setup') }}</h2>
         <pre class="cli-box">{{ usageWithShell }}</pre>
       </div>
 
       <div>
         <div class="flex items-center">
-          <h2 class="text-lg text-color">{{ $t('user.api_usage') }}</h2>
+          <h2 class="text-lg text-wp-text-100">{{ $t('user.api_usage') }}</h2>
           <a :href="`${address}/swagger/index.html`" target="_blank" class="ml-4 text-wp-link">Swagger UI</a>
         </div>
         <pre class="cli-box">{{ usageWithCurl }}</pre>
@@ -28,7 +28,7 @@
 
       <div>
         <div class="flex items-center">
-          <h2 class="text-lg text-color">{{ $t('user.cli_usage') }}</h2>
+          <h2 class="text-lg text-wp-text-100">{{ $t('user.cli_usage') }}</h2>
           <a :href="cliDownload" target="_blank" class="ml-4 text-wp-link">{{ $t('user.dl_cli') }}</a>
         </div>
         <pre class="cli-box">{{ usageWithCli }}</pre>

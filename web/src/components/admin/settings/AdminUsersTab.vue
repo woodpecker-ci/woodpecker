@@ -1,9 +1,9 @@
 <template>
   <Panel>
-    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-wp-gray-600">
+    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-wp-background-100">
       <div class="ml-2">
-        <h1 class="text-xl text-color">{{ $t('admin.settings.users.users') }}</h1>
-        <p class="text-sm text-color-alt">{{ $t('admin.settings.users.desc') }}</p>
+        <h1 class="text-xl text-wp-text-100">{{ $t('admin.settings.users.users') }}</h1>
+        <p class="text-sm text-wp-text-alt-100">{{ $t('admin.settings.users.desc') }}</p>
       </div>
       <Button
         v-if="selectedUser"
@@ -15,7 +15,7 @@
       <Button v-else class="ml-auto" :text="$t('admin.settings.users.add')" start-icon="plus" @click="showAddUser" />
     </div>
 
-    <div v-if="!selectedUser" class="space-y-4 text-color">
+    <div v-if="!selectedUser" class="space-y-4 text-wp-text-100">
       <ListItem v-for="user in users" :key="user.id" class="items-center gap-2">
         <img v-if="user.avatar_url" class="rounded-md h-6" :src="user.avatar_url" />
         <span>{{ user.login }}</span>

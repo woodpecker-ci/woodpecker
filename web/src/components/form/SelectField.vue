@@ -1,14 +1,14 @@
 <template>
   <select
     v-model="innerValue"
-    class="dark:bg-wp-darkgray-700 bg-transparent text-color border-wp-gray-200 dark:border-wp-dark-400 w-full border py-1 px-2 rounded-md"
+    class="bg-wp-control-neutral-100 text-wp-text-100 border-wp-control-neutral-200 w-full border py-1 px-2 rounded-md"
     :class="{
-      'text-color': innerValue === '',
+      'text-wp-text-100': innerValue === '',
       'text-wp-gray-900': innerValue !== '',
     }"
   >
     <option v-if="placeholder" value="" class="hidden">{{ placeholder }}</option>
-    <option v-for="option in options" :key="option.value" :value="option.value" class="text-color">
+    <option v-for="option in options" :key="option.value" :value="option.value" class="text-wp-text-100">
       {{ option.text }}
     </option>
   </select>

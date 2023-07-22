@@ -1,9 +1,9 @@
 <template>
   <Panel>
-    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-wp-gray-600">
+    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-wp-background-100">
       <div class="ml-2">
-        <h1 class="text-xl text-color">{{ $t('repo.settings.registries.creds') }}</h1>
-        <p class="text-sm text-color-alt">
+        <h1 class="text-xl text-wp-text-100">{{ $t('repo.settings.registries.creds') }}</h1>
+        <p class="text-sm text-wp-text-alt-100">
           {{ $t('repo.settings.registries.desc') }}
           <DocsLink :topic="$t('repo.settings.registries.creds')" url="docs/usage/registries" />
         </p>
@@ -24,7 +24,7 @@
       />
     </div>
 
-    <div v-if="!selectedRegistry" class="space-y-4 text-color">
+    <div v-if="!selectedRegistry" class="space-y-4 text-wp-text-100">
       <ListItem v-for="registry in registries" :key="registry.id" class="items-center">
         <span>{{ registry.address }}</span>
         <IconButton

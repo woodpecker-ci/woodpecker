@@ -1,6 +1,6 @@
 {
     "cancel": "Cancel",
-    "login": "Login",
+    "login": "Sign in",
     "welcome": "Welcome to Woodpecker",
     "repos": "Repos",
     "repositories": "Repositories",
@@ -238,7 +238,7 @@
             "step_not_started": "This step hasn't started yet.",
             "pipelines_for": "Pipelines for branch \"{branch}\"",
             "pipelines_for_pr": "Pipelines for pull request #{index}",
-            "exit_code": "exit code {exitCode}",
+            "exit_code": "Exit Code {exitCode}",
             "loading": "Loading…",
             "pipeline": "Pipeline #{pipelineId}",
             "log_download_error": "There was an error while downloading the log file",

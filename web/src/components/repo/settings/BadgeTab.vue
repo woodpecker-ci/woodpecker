@@ -1,7 +1,7 @@
 <template>
   <Panel>
-    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-wp-gray-600">
-      <h1 class="text-xl ml-2 text-color">{{ $t('repo.settings.badge.badge') }}</h1>
+    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-wp-background-100">
+      <h1 class="text-xl ml-2 text-wp-text-100">{{ $t('repo.settings.badge.badge') }}</h1>
       <a v-if="badgeUrl" :href="badgeUrl" target="_blank" class="ml-auto">
         <img :src="badgeUrl" />
       </a>
@@ -130,7 +130,7 @@ export default defineComponent({
 
 <style scoped>
 .box {
-  @apply bg-wp-gray-700 p-2 rounded-md text-gray-100 break-words dark:bg-wp-dark-400 dark:text-wp-gray-400;
+  @apply bg-wp-code-200 p-2 rounded-md text-wp-code-text-100 break-words;
   white-space: pre-wrap;
 }
 </style>

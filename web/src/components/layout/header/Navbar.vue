@@ -1,10 +1,10 @@
 <template>
   <!-- Navbar -->
   <nav
-    class="flex bg-wp-primary-400 text-neutral-content p-4 dark:bg-wp-darkgray-800 dark:border-b dark:border-wp-gray-700 font-bold"
+    class="flex bg-wp-primary-200 dark:bg-wp-primary-300 text-neutral-content p-4 border-b border-wp-background-100 font-bold text-wp-primary-text-100"
   >
     <!-- Left Links Box -->
-    <div class="flex text-white dark:text-wp-gray-500 items-center space-x-2">
+    <div class="flex items-center space-x-2">
       <!-- Logo -->
       <router-link :to="{ name: 'home' }" class="flex flex-col -my-2 px-2">
         <img class="w-8 h-8" src="../../../assets/logo.svg?url" />
@@ -21,7 +21,7 @@
       <a :href="apiUrl" target="_blank" class="navbar-link navbar-clickable hidden md:flex">{{ $t('api') }}</a>
     </div>
     <!-- Right Icons Box -->
-    <div class="flex ml-auto -m-1.5 items-center space-x-2 text-white dark:text-wp-gray-400">
+    <div class="flex ml-auto -m-1.5 items-center space-x-2">
       <!-- Dark Mode Toggle -->
       <IconButton
         :icon="darkMode ? 'dark' : 'light'"

@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-4 text-color">
+  <div class="space-y-4 text-wp-text-100">
     <ListItem v-for="secret in secrets" :key="secret.id" class="items-center">
       <span>{{ secret.name }}</span>
       <div class="ml-auto">
