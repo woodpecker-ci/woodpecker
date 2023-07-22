@@ -25,7 +25,11 @@
     </div>
 
     <div v-if="!selectedCron" class="space-y-4 text-wp-text-100">
-      <ListItem v-for="cron in crons" :key="cron.id" class="items-center">
+      <ListItem
+        v-for="cron in crons"
+        :key="cron.id"
+        class="items-center !bg-wp-background-200 !dark:bg-wp-background-100"
+      >
         <span>{{ cron.name }}</span>
         <span v-if="cron.next_exec && cron.next_exec > 0" class="ml-auto">
           {{ $t('repo.settings.crons.next_exec') }}: {{ date.toLocaleString(new Date(cron.next_exec * 1000)) }}</span

@@ -17,7 +17,7 @@
         <Icon v-else-if="pipeline.event === 'tag'" name="tag" />
         <a
           v-else-if="pipeline.event === 'pull_request'"
-          class="flex items-center space-x-1 text-wp-link-100 min-w-0"
+          class="flex items-center space-x-1 text-wp-link-100 hover:text-wp-link-200 min-w-0"
           :href="pipeline.link_url"
           target="_blank"
         >
@@ -31,7 +31,12 @@
           <Icon name="commit" />
           <span>{{ pipeline.commit.slice(0, 10) }}</span>
         </template>
-        <a v-else class="text-wp-link-100 flex items-center" :href="pipeline.link_url" target="_blank">
+        <a
+          v-else
+          class="text-wp-link-100 hover:text-wp-link-200 flex items-center"
+          :href="pipeline.link_url"
+          target="_blank"
+        >
           <Icon name="commit" />
           <span>{{ pipeline.commit.slice(0, 10) }}</span>
         </a>

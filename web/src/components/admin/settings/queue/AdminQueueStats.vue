@@ -83,28 +83,28 @@ const data = computed(() => {
       label: t('admin.settings.queue.stats.worker_count'),
       value: props.stats.worker_count,
       perc: total.value > 0 ? (props.stats.worker_count / total.value) * 100 : 0,
-      color: 'bg-green-600',
+      color: 'bg-wp-state-ok-100',
     },
     {
       key: 'running_count',
       label: t('admin.settings.queue.stats.running_count'),
       value: props.stats.running_count,
       perc: total.value > 0 ? (props.stats.running_count / total.value) * 100 : 100,
-      color: 'bg-blue-600',
+      color: 'bg-wp-state-info-100',
     },
     {
       key: 'pending_count',
       label: t('admin.settings.queue.stats.pending_count'),
       value: props.stats.pending_count,
       perc: total.value > 0 ? (props.stats.pending_count / total.value) * 100 : 0,
-      color: 'bg-gray-500',
+      color: 'bg-wp-state-neutral-100',
     },
     {
       key: 'waiting_on_deps_count',
       label: t('admin.settings.queue.stats.waiting_on_deps_count'),
       value: props.stats.waiting_on_deps_count,
       perc: total.value > 0 ? (props.stats.waiting_on_deps_count / total.value) * 100 : 0,
-      color: 'bg-red-600',
+      color: 'bg-wp-state-error-100',
     },
   ];
 });

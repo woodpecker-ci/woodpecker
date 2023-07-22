@@ -6,14 +6,8 @@
       class="items-center !bg-wp-background-200 !dark:bg-wp-background-100"
     >
       <span>{{ secret.name }}</span>
-      <div class="ml-auto">
-        <span
-          v-for="event in secret.event"
-          :key="event"
-          class="bg-gray-500 dark:bg-wp-dark-700 dark:text-gray-400 text-white rounded-md mx-1 py-1 px-2 text-sm"
-        >
-          {{ event }}
-        </span>
+      <div class="ml-auto space-x-2">
+        <Badge v-for="event in secret.event" :key="event" :label="event" />
       </div>
       <IconButton
         icon="edit"

@@ -24,8 +24,8 @@
         <Icon
           :name="queueInfo.paused ? 'pause' : 'play'"
           :class="{
-            'text-red-600': queueInfo.paused,
-            'text-green-600': !queueInfo.paused,
+            'text-wp-state-error-100': queueInfo.paused,
+            'text-wp-state-ok-100': !queueInfo.paused,
           }"
         />
       </div>
@@ -60,9 +60,9 @@
                   : 'status-declined'
               "
               :class="{
-                'text-red-600': task.status === 'waiting_on_deps',
-                'text-blue-600': task.status === 'running',
-                'text-gray-500': task.status === 'pending',
+                'text-wp-state-error-100': task.status === 'waiting_on_deps',
+                'text-wp-state-info-100': task.status === 'running',
+                'text-wp-state-neutral-100': task.status === 'pending',
               }"
             />
           </div>

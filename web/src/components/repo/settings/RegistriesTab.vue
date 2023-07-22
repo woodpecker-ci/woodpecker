@@ -25,7 +25,11 @@
     </div>
 
     <div v-if="!selectedRegistry" class="space-y-4 text-wp-text-100">
-      <ListItem v-for="registry in registries" :key="registry.id" class="items-center">
+      <ListItem
+        v-for="registry in registries"
+        :key="registry.id"
+        class="items-center !bg-wp-background-200 !dark:bg-wp-background-100"
+      >
         <span>{{ registry.address }}</span>
         <IconButton
           icon="edit"

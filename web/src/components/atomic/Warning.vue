@@ -1,6 +1,6 @@
 <template>
   <div
-    class="text-sm text-gray-600 font-bold rounded-md border border-solid p-2 border-wp-control-error-300 bg-wp-control-error-100"
+    class="text-sm text-gray-600 font-bold rounded-md border border-solid p-2 border-wp-hint-warn-200 bg-wp-hint-warn-100"
   >
     ⚠ {{ text }}
   </div>

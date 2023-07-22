@@ -21,7 +21,12 @@
       <div>
         <div class="flex items-center">
           <h2 class="text-lg text-wp-text-100">{{ $t('user.api_usage') }}</h2>
-          <a :href="`${address}/swagger/index.html`" target="_blank" class="ml-4 text-wp-link-100">Swagger UI</a>
+          <a
+            :href="`${address}/swagger/index.html`"
+            target="_blank"
+            class="ml-4 text-wp-link-100 hover:text-wp-link-200"
+            >Swagger UI</a
+          >
         </div>
         <pre class="code-box">{{ usageWithCurl }}</pre>
       </div>
@@ -29,7 +34,9 @@
       <div>
         <div class="flex items-center">
           <h2 class="text-lg text-wp-text-100">{{ $t('user.cli_usage') }}</h2>
-          <a :href="cliDownload" target="_blank" class="ml-4 text-wp-link-100">{{ $t('user.dl_cli') }}</a>
+          <a :href="cliDownload" target="_blank" class="ml-4 text-wp-link-100 hover:text-wp-link-200">{{
+            $t('user.dl_cli')
+          }}</a>
         </div>
         <pre class="code-box">{{ usageWithCli }}</pre>
       </div>
