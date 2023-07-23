@@ -6,6 +6,7 @@
   --wp-background-400: theme('colors.gray.300');
 
   --wp-text-100: theme('colors.gray.600');
+  --wp-text-200: theme('colors.gray.700');
   --wp-text-alt-100: theme('colors.gray.500');
 
   --wp-primary-100: theme('colors.int-wp-primary.300');
@@ -53,6 +54,7 @@
   --wp-background-400: theme('colors.int-wp-secondary.600');
 
   --wp-text-100: theme('colors.gray.400');
+  --wp-text-200: theme('colors.gray.300');
   --wp-text-alt-100: theme('colors.gray.500');
 
   --wp-primary-100: theme('colors.int-wp-secondary.300');

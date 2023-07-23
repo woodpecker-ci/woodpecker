@@ -181,7 +181,7 @@
         "tag": "Tag"
       },
       "execution_error": "Ausführungsfehler",
-      "exit_code": "Exit Code {exitCode}",
+      "exit_code": "Exit-Code {exitCode}",
       "files": "Geänderte Dateien ({files})",
       "loading": "Laden…",
       "log_download_error": "Beim Herunterladen der Log-Datei ist ein Fehler aufgetreten.",
@@ -257,7 +257,7 @@
         "tag": "Tag"
       },
       "execution_error": "Ausführungsfehler",
-      "exit_code": "Exit Code {exitCode}",
+      "exit_code": "Exit-Code {exitCode}",
       "files": "Geänderte Dateien ({files})",
       "loading": "Laden…",
       "log_download_error": "Beim Herunterladen der Log-Datei ist ein Fehler aufgetreten",

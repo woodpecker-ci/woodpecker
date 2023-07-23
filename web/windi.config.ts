@@ -136,6 +136,7 @@ export default defineConfig({
 
         'wp-text': {
           100: 'var(--wp-text-100)',
+          200: 'var(--wp-text-200)',
         },
         'wp-text-alt': {
           100: 'var(--wp-text-alt-100)',
