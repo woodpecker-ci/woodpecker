@@ -196,5 +196,5 @@ const activeTab = computed({
   },
 });
 
-const goBack = useRouteBackOrDefault({ name: 'repo' });
+const goBack = useRouteBackOrDefault({ name: 'repo' }, true);
 </script>

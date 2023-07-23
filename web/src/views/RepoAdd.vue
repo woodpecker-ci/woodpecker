@@ -62,5 +62,5 @@ const { doSubmit: activateRepo, isLoading: isActivatingRepo } = useAsyncAction(a
   await router.push({ name: 'repo', params: { repoId: _repo.id } });
 });
 
-const goBack = useRouteBackOrDefault({ name: 'repos' });
+const goBack = useRouteBackOrDefault({ name: 'repos' }, false);
 </script>

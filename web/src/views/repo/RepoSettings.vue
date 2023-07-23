@@ -73,5 +73,5 @@ onMounted(async () => {
   }
 });
 
-const goBack = useRouteBackOrDefault({ name: 'repo' });
+const goBack = useRouteBackOrDefault({ name: 'repo' }, false);
 </script>
