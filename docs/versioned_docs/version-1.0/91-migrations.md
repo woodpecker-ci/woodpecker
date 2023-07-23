@@ -2,7 +2,7 @@
 
 Some versions need some changes to the server configuration or the pipeline configuration files.
 
-## 1.1.0 (next)
+## next
 
 No breaking changes
 

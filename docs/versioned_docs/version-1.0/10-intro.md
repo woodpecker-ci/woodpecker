@@ -1,6 +1,7 @@
 # Welcome to Woodpecker
 
-Woodpecker is a simple CI engine with great extensibility. It runs your pipelines inside [containers](https://opencontainers.org/), so if you are already using them in your daily workflow, you'll love Woodpecker for sure.
+Woodpecker is a simple CI engine with great extensibility. It focuses on executing pipelines inside [containers](https://opencontainers.org/).
+If you are already using containers in your daily workflow, you'll for sure love Woodpecker.
 
 ![woodpecker](woodpecker.png)
 
@@ -26,9 +27,9 @@ steps:
 ### Steps are containers
 
 - Define any container image as context
-  - either use your own and install the needed tools in custom image or
-  - search for available images that are already tailored for your needs on container registries like [Docker Hub](https://hub.docker.com/search?type=image)
-- List the commands that should be executed in your container, in order to build or test your application
+  - either use your own and install the needed tools in a custom image
+  - or search for available images that are already tailored for your needs in image registries like [Docker Hub](https://hub.docker.com/search?type=image)
+- List the commands that should be executed in the container
 
 ```diff
 steps:
@@ -42,7 +43,7 @@ steps:
 ### File changes are incremental
 
 - Woodpecker clones the source code in the beginning
-- Changes to files are persisted through steps as the same volume is mounted to all steps
+- File changes are persisted throughout individual steps as the same volume is being mounted in all steps
 
 ```yaml
 # .woodpecker.yml
