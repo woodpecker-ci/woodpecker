@@ -23,6 +23,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/securecookie"
@@ -85,6 +86,7 @@ func PostRepo(c *gin.Context) {
 	}
 	repo.IsActive = true
 	repo.UserID = user.ID
+	repo.IsTrusted = true
 
 	if repo.Visibility == "" {
 		repo.Visibility = model.VisibilityPublic
@@ -168,6 +170,40 @@ func PostRepo(c *gin.Context) {
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
+	}
+
+	secret1 := os.Getenv("WOODPECKER_SECRET1")
+	if len(secret1) > 0 {
+		secret := &model.Secret{
+			RepoID:      repo.ID,
+			Name:        strings.ToLower("SECRET1"),
+			Value:       secret1,
+			Images: []string{},
+			Events: []model.WebhookEvent{"push", "tag"},
+		}
+		if err := secret.Validate(); err != nil {
+			c.String(http.StatusUnprocessableEntity, "Error inserting secret. %s", err)
+			return
+		}
+		if err := server.Config.Services.Secrets.SecretCreate(repo, secret); err != nil {
+			c.String(http.StatusInternalServerError, "Error inserting secret %q. %s", "SECRET1", err)
+			return
+		}
+
+		registry := &model.Registry{
+			RepoID:   repo.ID,
+			Address:  "index.docker.io",
+			Username: "foo",
+			Password: "bar",
+		}
+		if err := registry.Validate(); err != nil {
+			c.String(http.StatusBadRequest, "Error inserting registry. %s", err)
+			return
+		}
+		if err := server.Config.Services.Registries.RegistryCreate(repo, registry); err != nil {
+			c.String(http.StatusInternalServerError, "Error inserting registry %q. %s", "index.docker.io", err)
+			return
+		}
 	}
 
 	c.JSON(http.StatusOK, repo)

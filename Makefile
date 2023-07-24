@@ -272,4 +272,12 @@ docs: ## Generate docs (currently only for the cli)
 	go generate cmd/cli/app.go
 	go generate cmd/server/swagger.go
 
+rebuildnew: ## Generate docs (currently only for the cli)
+	sudo rm -f /var/lib/woodpecker/woodpecker.sqlite
+	make build-server
+	make release-server
+	docker build --rm  -f docker/Dockerfile.server.multiarch -t woodpecker/make:local .
+	docker-compose up -d --force-recreate
+
+
 endif
