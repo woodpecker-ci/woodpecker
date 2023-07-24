@@ -41,5 +41,5 @@ onMounted(async () => {
   }
 });
 
-const goBack = useRouteBack({ name: 'repos-owner' });
+const goBack = useRouteBack({ name: 'org' });
 </script>
