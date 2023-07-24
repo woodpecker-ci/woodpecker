@@ -1,3 +1,4 @@
+// Copyright 2023 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,34 +17,27 @@ package main
 
 import (
 	"fmt"
-	"os"
+	"net/http"
+	"strings"
 
-	_ "github.com/joho/godotenv/autoload"
 	"github.com/urfave/cli/v2"
-	_ "github.com/woodpecker-ci/woodpecker/cmd/server/docs"
-
-	"github.com/woodpecker-ci/woodpecker/version"
 )
 
-func main() {
-	app := cli.NewApp()
-	app.Name = "woodpecker-server"
-	app.Version = version.String()
-	app.Usage = "woodpecker server"
-	app.Action = run
-	app.Commands = []*cli.Command{
-		{
-			Name:   "ping",
-			Usage:  "ping the server",
-			Action: pinger,
-		},
+// handles pinging the endpoint and returns an error if the
+// server is in an unhealthy state.
+func pinger(c *cli.Context) error {
+	serverAddr := c.String("server-addr")
+	if strings.HasPrefix(serverAddr, ":") {
+		// this seems sufficient according to https://pkg.go.dev/net#Dial
+		serverAddr = "localhost" + serverAddr
 	}
-	app.Flags = flags
-
-	setupSwaggerStaticConfig()
-
-	if err := app.Run(os.Args); err != nil {
-		_, _ = fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+	resp, err := http.Get("http://" + serverAddr + "/healthz")
+	if err != nil {
+		return err
 	}
+	defer resp.Body.Close()
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("server returned non-200 status code")
+	}
+	return nil
 }
