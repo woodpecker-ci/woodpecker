@@ -49,7 +49,7 @@ import GeneralTab from '~/components/repo/settings/GeneralTab.vue';
 import RegistriesTab from '~/components/repo/settings/RegistriesTab.vue';
 import SecretsTab from '~/components/repo/settings/SecretsTab.vue';
 import useNotifications from '~/compositions/useNotifications';
-import { useRouteBackOrDefault } from '~/compositions/useRouteBackOrDefault';
+import { useRouteBack } from '~/compositions/useRouteBack';
 import { Repo, RepoPermissions } from '~/lib/api/types';
 
 const notifications = useNotifications();
@@ -73,5 +73,5 @@ onMounted(async () => {
   }
 });
 
-const goBack = useRouteBackOrDefault({ name: 'repo' });
+const goBack = useRouteBack({ name: 'repo' });
 </script>
