@@ -25,7 +25,7 @@ import Tab from '~/components/layout/scaffold/Tab.vue';
 import OrgSecretsTab from '~/components/org/settings/OrgSecretsTab.vue';
 import { inject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
-import { useRouteBackOrDefault } from '~/compositions/useRouteBackOrDefault';
+import { useRouteBack } from '~/compositions/useRouteBack';
 
 const notifications = useNotifications();
 const router = useRouter();
@@ -41,5 +41,5 @@ onMounted(async () => {
   }
 });
 
-const goBack = useRouteBackOrDefault({ name: 'repos-owner' }, false);
+const goBack = useRouteBack({ name: 'repos-owner' });
 </script>

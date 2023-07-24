@@ -37,7 +37,7 @@ import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
 import { useRepoSearch } from '~/compositions/useRepoSearch';
-import { useRouteBackOrDefault } from '~/compositions/useRouteBackOrDefault';
+import { useRouteBack } from '~/compositions/useRouteBack';
 import { Repo } from '~/lib/api/types';
 
 const router = useRouter();
@@ -62,5 +62,5 @@ const { doSubmit: activateRepo, isLoading: isActivatingRepo } = useAsyncAction(a
   await router.push({ name: 'repo', params: { repoId: _repo.id } });
 });
 
-const goBack = useRouteBackOrDefault({ name: 'repos' }, false);
+const goBack = useRouteBack({ name: 'repos' });
 </script>

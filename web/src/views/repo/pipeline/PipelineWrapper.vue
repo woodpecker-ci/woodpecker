@@ -91,7 +91,7 @@ import { useAsyncAction } from '~/compositions/useAsyncAction';
 import { useFavicon } from '~/compositions/useFavicon';
 import useNotifications from '~/compositions/useNotifications';
 import usePipeline from '~/compositions/usePipeline';
-import { useRouteBackOrDefault } from '~/compositions/useRouteBackOrDefault';
+import { useRouteBack } from '~/compositions/useRouteBack';
 import { Repo, RepoPermissions } from '~/lib/api/types';
 import { usePipelineStore } from '~/store/pipelines';
 
@@ -196,5 +196,5 @@ const activeTab = computed({
   },
 });
 
-const goBack = useRouteBackOrDefault({ name: 'repo' }, true);
+const goBack = useRouteBack({ name: 'repo' });
 </script>
