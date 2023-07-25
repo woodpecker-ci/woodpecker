@@ -16,7 +16,10 @@ package local
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -48,6 +51,35 @@ func (e *local) setupClone(state *workflowState) error {
 	}
 
 	log.Info().Msg("no global 'plugin-git' installed, try to download for current workflow")
+
+	type asset struct {
+		name               string
+		browserDownloadURL string `json:"browser_download_url"`
+	}
+
+	type release struct {
+		assets []asset
+	}
+
+	// get latest release
+	req, _ := http.NewRequest(http.MethodGet, "https://api.github.com/repos/woodpecker-ci/plugin-git/releases/latest", nil)
+	req.Header.Set("Accept", "application/vnd.github+json")
+	req.Header.Set("X-GitHub-Api-Version", "2022-11-28")
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("could not get latest release: %w", err)
+	}
+	raw, _ := io.ReadAll(resp.Body)
+	_ = resp.Body.Close()
+	var rel release
+	_ = json.Unmarshal(raw, &rel)
+
+	for _, at := range rel.assets {
+		fmt.Println(at.name)
+		fmt.Println(at.browserDownloadURL)
+		// TODO
+	}
+
 	// TODO: download plugin-git binary to homeDir and set PATH
 	return fmt.Errorf("download not implemented")
 }
