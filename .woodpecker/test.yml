@@ -1,7 +1,9 @@
 when:
-  - event: pull_request
+  - event: [pull_request, tag]
   - event: push
-    branch: [ main, release/* ]
+    branch:
+      - ${CI_REPO_DEFAULT_BRANCH}
+      - release/*
 
 variables:
   - &golang_image 'golang:1.20.2'

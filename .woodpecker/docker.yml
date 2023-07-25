@@ -1,7 +1,9 @@
 when:
-  - event: pull_request
+  - event: [pull_request, tag]
   - event: push
-    branch: [ main, release/* ]
+    branch:
+      - ${CI_REPO_DEFAULT_BRANCH}
+      - release/*
 
 depends_on:
   - test
@@ -85,8 +87,10 @@ steps:
       TAGS: bindata sqlite sqlite_unlock_notify netgo
       XGO_VERSION: *xgo_version
     when:
-      branch: ${CI_REPO_DEFAULT_BRANCH}
-      event: push
+      branch:
+        - ${CI_REPO_DEFAULT_BRANCH}
+        - release/*
+      event: [push, tag]
 
   publish-next-server:
     image: woodpeckerci/plugin-docker-buildx
