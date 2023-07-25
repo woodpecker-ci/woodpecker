@@ -19,9 +19,12 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/urfave/cli/v2"
 )
+
+const pingTimeout = 1 * time.Second
 
 // handles pinging the endpoint and returns an error if the
 // server is in an unhealthy state.
@@ -42,8 +45,12 @@ func pinger(c *cli.Context) error {
 	healthURL := fmt.Sprintf("%s://%s/healthz", scheme, serverAddr)
 
 	// ask server if all is healthy
-	resp, err := http.Get(healthURL)
+	client := http.Client{Timeout: pingTimeout}
+	resp, err := client.Get(healthURL)
 	if err != nil {
+		if strings.Contains(err.Error(), "deadline exceeded") {
+			return fmt.Errorf("ping timeout reached after %s", pingTimeout)
+		}
 		return err
 	}
 	defer resp.Body.Close()
