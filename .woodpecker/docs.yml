@@ -1,7 +1,9 @@
 when:
   - event: pull_request
   - event: push
-    branch: [ main, release/* ]
+    branch:
+      - ${CI_REPO_DEFAULT_BRANCH}
+      - release/*
 
 
 variables:
@@ -48,6 +50,7 @@ steps:
       forge_url: "https://github.com"
       forge_repo_token:
         from_secret: GITHUB_TOKEN_SURGE
+    failure: ignore
     when:
       event: pull_request
       path: *when_path

@@ -31,6 +31,13 @@ func main() {
 	app.Version = version.String()
 	app.Usage = "woodpecker server"
 	app.Action = run
+	app.Commands = []*cli.Command{
+		{
+			Name:   "ping",
+			Usage:  "ping the server",
+			Action: pinger,
+		},
+	}
 	app.Flags = flags
 
 	setupSwaggerStaticConfig()

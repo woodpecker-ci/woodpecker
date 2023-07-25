@@ -214,11 +214,15 @@ module.exports = {
           includeCurrentVersion: true,
           lastVersion: '0.15',
           versions: {
-            current: {
+            'current': {
               label: 'Next',
               banner: 'unreleased',
             },
-            0.15: {
+            '1.0': {
+              label: '1.0.x',
+              banner: 'unreleased',
+            },
+            '0.15': {
               label: '0.15.x',
               banner: 'none',
             },
