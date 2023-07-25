@@ -48,6 +48,7 @@ steps:
       forge_url: "https://github.com"
       forge_repo_token:
         from_secret: GITHUB_TOKEN_SURGE
+    failure: ignore
     when:
       event: pull_request
       path: *when_path

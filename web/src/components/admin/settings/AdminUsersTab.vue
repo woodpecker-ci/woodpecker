@@ -124,7 +124,6 @@ const { doSubmit: saveUser, isLoading: isSaving } = useAsyncAction(async () => {
       title: t('admin.settings.users.saved'),
       type: 'success',
     });
-    selectedUser.value = undefined;
   } else {
     selectedUser.value = await apiClient.createUser(selectedUser.value);
     notifications.notify({
@@ -132,6 +131,7 @@ const { doSubmit: saveUser, isLoading: isSaving } = useAsyncAction(async () => {
       type: 'success',
     });
   }
+  selectedUser.value = undefined;
   resetPage();
 });
 
