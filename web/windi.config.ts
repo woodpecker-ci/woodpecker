@@ -117,13 +117,8 @@ export default defineConfig({
           200: colors.yellow[300],
         },
         'int-wp-hint-warn-dark': {
-          100: tinycolor(colors.yellow[300]).desaturate(50).toString(),
-          200: tinycolor(colors.yellow[500]).desaturate(50).toString(),
-        },
-
-        'int-wp-link': {
-          100: colors.blue[500],
-          200: colors.blue[600],
+          100: tinycolor(colors.yellow[300]).desaturate(60).toString(),
+          200: tinycolor(colors.yellow[500]).desaturate(60).toString(),
         },
 
         // Theme colors

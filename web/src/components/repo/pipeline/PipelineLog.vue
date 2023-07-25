@@ -81,7 +81,7 @@
 
       <div
         v-if="step?.end_time !== undefined"
-        class="flex items-center w-full bg-wp-code-100 text-md text-wp-text-alt-100 p-4 text-bold"
+        class="flex items-center w-full bg-wp-code-100 text-md text-wp-text-alt-100 p-4 font-bold"
       >
         <PipelineStatusIcon :status="step.state" class="!h-4 !w-4" />
         <span class="px-2">{{ $t('repo.pipeline.exit_code', { exitCode: step.exit_code }) }}</span>

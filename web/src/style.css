@@ -43,8 +43,8 @@
   --wp-code-200: theme('colors.int-wp-secondary.600');
   --wp-code-text-100: theme('colors.gray.200');
 
-  --wp-link-100: theme('colors.int-wp-link.100');
-  --wp-link-200: theme('colors.int-wp-link.200');
+  --wp-link-100: theme('colors.blue.600');
+  --wp-link-200: theme('colors.blue.700');
 }
 
 :root[data-theme='dark'] {
@@ -53,14 +53,14 @@
   --wp-background-300: theme('colors.int-wp-secondary.500');
   --wp-background-400: theme('colors.int-wp-secondary.600');
 
-  --wp-text-100: theme('colors.gray.400');
-  --wp-text-200: theme('colors.gray.300');
-  --wp-text-alt-100: theme('colors.gray.500');
+  --wp-text-100: theme('colors.gray.300');
+  --wp-text-200: theme('colors.gray.200');
+  --wp-text-alt-100: theme('colors.gray.400');
 
   --wp-primary-100: theme('colors.int-wp-secondary.300');
   --wp-primary-200: theme('colors.int-wp-secondary.400');
   --wp-primary-300: theme('colors.int-wp-secondary.600');
-  --wp-primary-text-100: theme('colors.gray.400');
+  --wp-primary-text-100: theme('colors.gray.300');
 
   --wp-control-neutral-100: theme('colors.int-wp-secondary.300');
   --wp-control-neutral-200: theme('colors.int-wp-secondary.600');
@@ -89,7 +89,10 @@
 
   --wp-code-100: theme('colors.int-wp-secondary.700');
   --wp-code-200: theme('colors.int-wp-secondary.800');
-  --wp-code-text-100: theme('colors.gray.400');
+  --wp-code-text-100: theme('colors.gray.300');
+
+  --wp-link-100: theme('colors.blue.400');
+  --wp-link-200: theme('colors.blue.500');
 }
 
 html,
