@@ -21,6 +21,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
 )
 
@@ -43,6 +44,7 @@ func pinger(c *cli.Context) error {
 
 	// create the health url
 	healthURL := fmt.Sprintf("%s://%s/healthz", scheme, serverAddr)
+	log.Trace().Msgf("try to ping with url '%s'", healthURL)
 
 	// ask server if all is healthy
 	client := http.Client{Timeout: pingTimeout}
