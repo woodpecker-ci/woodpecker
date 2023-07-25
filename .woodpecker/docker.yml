@@ -86,7 +86,7 @@ steps:
       XGO_VERSION: *xgo_version
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
-      event: push
+      event: [push, tag]
 
   publish-next-server:
     image: woodpeckerci/plugin-docker-buildx
