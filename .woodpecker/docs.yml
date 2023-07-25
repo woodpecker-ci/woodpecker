@@ -47,7 +47,7 @@ steps:
       forge_type: github
       forge_url: "https://github.com"
       forge_repo_token:
-        from_secret: GITHUB_TOKEN_SURGE
+        from_secret: GITHUB_TOKEN
     failure: ignore
     when:
       event: pull_request
