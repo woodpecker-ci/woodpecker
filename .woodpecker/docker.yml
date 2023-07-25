@@ -85,7 +85,9 @@ steps:
       TAGS: bindata sqlite sqlite_unlock_notify netgo
       XGO_VERSION: *xgo_version
     when:
-      branch: ${CI_REPO_DEFAULT_BRANCH}
+      branch:
+        - ${CI_REPO_DEFAULT_BRANCH}
+        - release/*
       event: [push, tag]
 
   publish-next-server:
