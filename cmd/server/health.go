@@ -26,17 +26,28 @@ import (
 // handles pinging the endpoint and returns an error if the
 // server is in an unhealthy state.
 func pinger(c *cli.Context) error {
+	scheme := "http"
 	serverAddr := c.String("server-addr")
 	if strings.HasPrefix(serverAddr, ":") {
 		// this seems sufficient according to https://pkg.go.dev/net#Dial
 		serverAddr = "localhost" + serverAddr
 	}
-	resp, err := http.Get("http://" + serverAddr + "/healthz")
+
+	// if woodpecker do ssl on it's own
+	if c.String("server-cert") != "" || c.Bool("lets-encrypt") {
+		scheme = "https"
+	}
+
+	// create the health url
+	healthURL := fmt.Sprintf("%s://%s/healthz", scheme, serverAddr)
+
+	// ask server if all is healthy
+	resp, err := http.Get(healthURL)
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode != 200 {
+	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("server returned non-200 status code")
 	}
 	return nil
