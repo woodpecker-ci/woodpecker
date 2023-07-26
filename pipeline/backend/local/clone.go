@@ -54,12 +54,12 @@ func (e *local) setupClone(state *workflowState) error {
 	log.Info().Msg("no global 'plugin-git' installed, try to download for current workflow")
 
 	type asset struct {
-		name               string
-		browserDownloadURL string `json:"browser_download_url"`
+		Name               string
+		BrowserDownloadURL string `json:"browser_download_url"`
 	}
 
 	type release struct {
-		assets []asset
+		Assets []asset
 	}
 
 	// get latest release
@@ -75,30 +75,41 @@ func (e *local) setupClone(state *workflowState) error {
 	var rel release
 	_ = json.Unmarshal(raw, &rel)
 
-	for _, at := range rel.assets {
-		fmt.Println(at.name)
-		fmt.Println(at.browserDownloadURL)
-		if strings.Contains(at.name, runtime.GOOS) && strings.Contains(at.name, runtime.GOARCH) {
-			resp, err = http.Get(at.browserDownloadURL)
+	downloaded := false
+	for _, at := range rel.Assets {
+		if strings.Contains(at.Name, runtime.GOOS) && strings.Contains(at.Name, runtime.GOARCH) {
+			resp2, err := http.Get(at.BrowserDownloadURL)
 			if err != nil {
 				return fmt.Errorf("could not download plugin-git: %w", err)
 			}
+			defer resp2.Body.Close()
+
 			state.pluginGitBinary = filepath.Join(state.homeDir, "plugin-git")
 			if runtime.GOOS == "windows" {
 				state.pluginGitBinary += ".exe"
 			}
-			file, err := os.OpenFile(state.pluginGitBinary, os.O_CREATE, 0o755)
+
+			file, err := os.Create(state.pluginGitBinary)
 			if err != nil {
+				return fmt.Errorf("could not create plugin-git: %w", err)
+			}
+			defer file.Close()
+
+			if _, err := io.Copy(file, resp2.Body); err != nil {
 				return fmt.Errorf("could not download plugin-git: %w", err)
 			}
-			if _, err := io.Copy(file, resp.Body); err != nil {
-				return fmt.Errorf("could not download plugin-git: %w", err)
+			if err := os.Chmod(state.pluginGitBinary, 0o755); err != nil {
+				return err
 			}
+			downloaded = true
 			break
 		}
 	}
 
-	return fmt.Errorf("could not download plugin-git, binary for this os/arch not found")
+	if downloaded {
+		return fmt.Errorf("could not download plugin-git, binary for this os/arch not found")
+	}
+	return nil
 }
 
 func (e *local) execClone(ctx context.Context, step *types.Step, state *workflowState, env []string) error {
