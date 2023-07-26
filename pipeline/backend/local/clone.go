@@ -24,6 +24,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 
 	"github.com/rs/zerolog/log"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
@@ -77,11 +78,27 @@ func (e *local) setupClone(state *workflowState) error {
 	for _, at := range rel.assets {
 		fmt.Println(at.name)
 		fmt.Println(at.browserDownloadURL)
-		// TODO
+		if strings.Contains(at.name, runtime.GOOS) && strings.Contains(at.name, runtime.GOARCH) {
+			resp, err = http.Get(at.browserDownloadURL)
+			if err != nil {
+				return fmt.Errorf("could not download plugin-git: %w", err)
+			}
+			state.pluginGitBinary = filepath.Join(state.homeDir, "plugin-git")
+			if runtime.GOOS == "windows" {
+				state.pluginGitBinary += ".exe"
+			}
+			file, err := os.OpenFile(state.pluginGitBinary, os.O_CREATE, 0o755)
+			if err != nil {
+				return fmt.Errorf("could not download plugin-git: %w", err)
+			}
+			if _, err := io.Copy(file, resp.Body); err != nil {
+				return fmt.Errorf("could not download plugin-git: %w", err)
+			}
+			break
+		}
 	}
 
-	// TODO: download plugin-git binary to homeDir and set PATH
-	return fmt.Errorf("download not implemented")
+	return fmt.Errorf("could not download plugin-git, binary for this os/arch not found")
 }
 
 func (e *local) execClone(ctx context.Context, step *types.Step, state *workflowState, env []string) error {
