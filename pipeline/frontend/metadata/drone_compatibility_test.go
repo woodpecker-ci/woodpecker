@@ -47,7 +47,6 @@ CI_PREV_PIPELINE_STATUS=success
 CI_REPO=Epsilon_02/todo-checker
 CI_REPO_CLONE_URL=https://codeberg.org/Epsilon_02/todo-checker.git
 CI_REPO_DEFAULT_BRANCH=main
-CI_REPO_LINK=https://codeberg.org/Epsilon_02/todo-checker
 CI_REPO_NAME=todo-checker
 CI_REPO_OWNER=Epsilon_02
 CI_REPO_SCM=git
