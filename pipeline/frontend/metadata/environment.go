@@ -115,7 +115,6 @@ func (m *Metadata) Environ() map[string]string {
 		// DEPRECATED
 		"CI_SYSTEM_ARCH": m.Sys.Platform, // TODO: remove after v1.0.x version
 		// use CI_PIPELINE_*
-		"CI_BUILD_EVENT":         m.Curr.Event,
 		"CI_BUILD_LINK":          m.Curr.Link,
 		"CI_BUILD_DEPLOY_TARGET": m.Curr.Target,
 		"CI_BUILD_STATUS":        m.Curr.Status,
