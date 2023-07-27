@@ -79,7 +79,6 @@ func (r *Runner) createTracer(ctxmeta context.Context, logger zerolog.Logger, wo
 		state.Pipeline.Step.Environment["CI_SYSTEM_ARCH"] = runtime.GOOS + "/" + runtime.GOARCH
 
 		// DEPRECATED
-		state.Pipeline.Step.Environment["CI_BUILD_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
 		state.Pipeline.Step.Environment["CI_BUILD_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
 		state.Pipeline.Step.Environment["CI_JOB_STATUS"] = "success"
 		state.Pipeline.Step.Environment["CI_JOB_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)

@@ -11,7 +11,6 @@ import (
 func TestSetDroneEnviron(t *testing.T) {
 	woodpeckerVars := `CI=woodpecker
 CI_BUILD_FINISHED=1685749350
-CI_BUILD_STARTED=1685749339
 CI_COMMIT_AUTHOR=6543
 CI_COMMIT_AUTHOR_AVATAR=https://codeberg.org/avatars/09a234c768cb9bca78f6b2f82d6af173
 CI_COMMIT_BRANCH=main
