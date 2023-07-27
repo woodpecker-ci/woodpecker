@@ -17,6 +17,7 @@ package datastore
 import (
 	"fmt"
 	"runtime"
+	"strings"
 
 	"xorm.io/xorm"
 
@@ -66,5 +67,10 @@ func callerName(skip int) string {
 	if !ok {
 		return ""
 	}
-	return runtime.FuncForPC(pc).Name()
+	fnName := runtime.FuncForPC(pc).Name()
+	pIndex := strings.LastIndex(fnName, ".")
+	if pIndex != -1 {
+		fnName = fnName[pIndex+1:]
+	}
+	return fnName
 }
