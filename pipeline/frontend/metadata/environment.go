@@ -114,11 +114,6 @@ func (m *Metadata) Environ() map[string]string {
 
 		// DEPRECATED
 		"CI_SYSTEM_ARCH": m.Sys.Platform, // TODO: remove after v1.0.x version
-		// use CI_STEP_*
-		"CI_JOB_NUMBER":   strconv.Itoa(m.Step.Number),
-		"CI_JOB_STATUS":   "", // will be set by agent
-		"CI_JOB_STARTED":  "", // will be set by agent
-		"CI_JOB_FINISHED": "", // will be set by agent
 		// CI_REPO_CLONE_URL
 		"CI_REPO_REMOTE": m.Repo.CloneURL,
 		// use *_URL

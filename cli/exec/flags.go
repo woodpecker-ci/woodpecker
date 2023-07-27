@@ -273,11 +273,11 @@ var flags = []cli.Flag{
 		Name:    "workflow-name",
 	},
 	&cli.IntFlag{
-		EnvVars: []string{"CI_WORKFLOW_NUMBER", "CI_JOB_NUMBER"},
+		EnvVars: []string{"CI_WORKFLOW_NUMBER"},
 		Name:    "workflow-number",
 	},
 	&cli.IntFlag{
-		EnvVars: []string{"CI_STEP_NAME", "CI_JOB_NUMBER"},
+		EnvVars: []string{"CI_STEP_NAME"},
 		Name:    "step-name",
 	},
 	&cli.StringSliceFlag{
