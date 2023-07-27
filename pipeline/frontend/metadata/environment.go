@@ -114,8 +114,6 @@ func (m *Metadata) Environ() map[string]string {
 
 		// DEPRECATED
 		"CI_SYSTEM_ARCH": m.Sys.Platform, // TODO: remove after v1.0.x version
-		// use *_URL
-		"CI_SYSTEM_LINK": m.Sys.Link,
 	}
 	if m.Curr.Event == EventTag {
 		params["CI_COMMIT_TAG"] = strings.TrimPrefix(m.Curr.Commit.Ref, "refs/tags/")

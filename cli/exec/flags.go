@@ -110,7 +110,7 @@ var flags = []cli.Flag{
 		Value:   "woodpecker",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_SYSTEM_URL", "CI_SYSTEM_LINK"},
+		EnvVars: []string{"CI_SYSTEM_URL"},
 		Name:    "system-link",
 		Value:   "https://github.com/woodpecker-ci/woodpecker",
 	},

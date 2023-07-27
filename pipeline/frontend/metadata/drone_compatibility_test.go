@@ -52,7 +52,6 @@ CI_STEP_STARTED=1685749339
 CI_STEP_STATUS=success
 CI_SYSTEM_ARCH=linux/amd64
 CI_SYSTEM_HOST=ci.codeberg.org
-CI_SYSTEM_LINK=https://ci.codeberg.org
 CI_SYSTEM_NAME=woodpecker
 CI_SYSTEM_VERSION=next-dd644da3
 CI_WORKFLOW_NAME=woodpecker
