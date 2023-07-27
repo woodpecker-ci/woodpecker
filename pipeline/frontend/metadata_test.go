@@ -70,7 +70,7 @@ func TestMetadataFromStruct(t *testing.T) {
 			name:             "Test with empty info",
 			expectedMetadata: metadata.Metadata{Sys: metadata.System{Name: "woodpecker"}},
 			expectedEnviron: map[string]string{
-				"CI": "woodpecker", "CI_BUILD_FINISHED": "0",
+				"CI":               "woodpecker",
 				"CI_COMMIT_AUTHOR": "", "CI_COMMIT_AUTHOR_AVATAR": "", "CI_COMMIT_AUTHOR_EMAIL": "", "CI_COMMIT_BRANCH": "", "CI_COMMIT_LINK": "",
 				"CI_COMMIT_MESSAGE": "", "CI_COMMIT_PULL_REQUEST": "", "CI_COMMIT_PULL_REQUEST_LABELS": "", "CI_COMMIT_REF": "", "CI_COMMIT_REFSPEC": "", "CI_COMMIT_SHA": "", "CI_COMMIT_SOURCE_BRANCH": "",
 				"CI_COMMIT_TAG": "", "CI_COMMIT_TARGET_BRANCH": "", "CI_COMMIT_URL": "", "CI_FORGE_TYPE": "", "CI_FORGE_URL": "", "CI_JOB_FINISHED": "", "CI_JOB_NUMBER": "0", "CI_JOB_STARTED": "",
@@ -103,7 +103,7 @@ func TestMetadataFromStruct(t *testing.T) {
 				Workflow: metadata.Workflow{Name: "hello"},
 			},
 			expectedEnviron: map[string]string{
-				"CI": "woodpecker", "CI_BUILD_FINISHED": "0",
+				"CI":               "woodpecker",
 				"CI_COMMIT_AUTHOR": "", "CI_COMMIT_AUTHOR_AVATAR": "", "CI_COMMIT_AUTHOR_EMAIL": "", "CI_COMMIT_BRANCH": "", "CI_COMMIT_LINK": "",
 				"CI_COMMIT_MESSAGE": "", "CI_COMMIT_PULL_REQUEST": "", "CI_COMMIT_PULL_REQUEST_LABELS": "", "CI_COMMIT_REF": "", "CI_COMMIT_REFSPEC": "", "CI_COMMIT_SHA": "", "CI_COMMIT_SOURCE_BRANCH": "",
 				"CI_COMMIT_TAG": "", "CI_COMMIT_TARGET_BRANCH": "", "CI_COMMIT_URL": "", "CI_FORGE_TYPE": "gitea", "CI_FORGE_URL": "https://gitea.com", "CI_JOB_FINISHED": "", "CI_JOB_NUMBER": "0",
