@@ -44,7 +44,7 @@ If that does not work, try to make sure the container can reach your git server.
 ```yaml
 skip_clone: true
 
-pipeline:
+steps:
   build:
     image: debian:stable-backports
     commands:
