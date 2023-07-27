@@ -169,7 +169,7 @@ var flags = []cli.Flag{
 		Value:   "manual",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_PIPELINE_URL", "CI_PIPELINE_LINK"},
+		EnvVars: []string{"CI_PIPELINE_URL"},
 		Name:    "pipeline-link",
 	},
 	&cli.StringFlag{
