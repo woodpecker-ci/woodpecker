@@ -38,7 +38,6 @@ var DefaultTracer = TraceFunc(func(state *State) error {
 	state.Pipeline.Step.Environment["CI_STEP_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
 
 	// DEPRECATED
-	state.Pipeline.Step.Environment["CI_BUILD_STATUS"] = "success"
 	state.Pipeline.Step.Environment["CI_BUILD_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
 	state.Pipeline.Step.Environment["CI_BUILD_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
 	state.Pipeline.Step.Environment["CI_JOB_STATUS"] = "success"
@@ -49,7 +48,6 @@ var DefaultTracer = TraceFunc(func(state *State) error {
 		state.Pipeline.Step.Environment["CI_PIPELINE_STATUS"] = "failure"
 		state.Pipeline.Step.Environment["CI_STEP_STATUS"] = "failure"
 		// DEPRECATED
-		state.Pipeline.Step.Environment["CI_BUILD_STATUS"] = "failure"
 		state.Pipeline.Step.Environment["CI_JOB_STATUS"] = "failure"
 	}
 	return nil
