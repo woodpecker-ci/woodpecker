@@ -210,18 +210,18 @@ module.exports = {
       ({
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
-          editUrl: 'https://github.com/woodpecker-ci/woodpecker/edit/master/docs/',
+          editUrl: 'https://github.com/woodpecker-ci/woodpecker/edit/main/docs/',
           includeCurrentVersion: true,
           lastVersion: '1.0',
           versions: {
-            'current': {
+            current: {
               label: 'Next',
               banner: 'unreleased',
             },
             '1.0': {
               label: '1.0.x',
             },
-            '0.15': {
+            0.15: {
               label: '0.15.x',
               banner: 'unmaintained',
             },

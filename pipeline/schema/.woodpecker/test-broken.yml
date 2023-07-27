@@ -1,4 +1,4 @@
-branches: master
+branches: main
 
 matri:
   GO_VERSION:

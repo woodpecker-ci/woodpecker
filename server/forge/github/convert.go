@@ -23,7 +23,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-const defaultBranch = "master"
+const defaultBranch = "main"
 
 const (
 	statusPending = "pending"

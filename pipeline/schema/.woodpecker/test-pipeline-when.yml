@@ -1,10 +1,10 @@
 when:
-  - branch: [master, deploy]
+  - branch: [main, deploy]
     event: push
     path:
-      - "folder/**"
-      - "**/*.c"
-  - tag: "v**"
+      - 'folder/**'
+      - '**/*.c'
+  - tag: 'v**'
     event: tag
   - event: cron
     cron:
