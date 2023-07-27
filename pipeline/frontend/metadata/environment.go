@@ -114,14 +114,6 @@ func (m *Metadata) Environ() map[string]string {
 
 		// DEPRECATED
 		"CI_SYSTEM_ARCH": m.Sys.Platform, // TODO: remove after v1.0.x version
-		// use CI_PREV_PIPELINE_*
-		"CI_PREV_BUILD_EVENT":         m.Prev.Event,
-		"CI_PREV_BUILD_LINK":          m.Prev.Link,
-		"CI_PREV_BUILD_DEPLOY_TARGET": m.Prev.Target,
-		"CI_PREV_BUILD_STATUS":        m.Prev.Status,
-		"CI_PREV_BUILD_CREATED":       strconv.FormatInt(m.Prev.Created, 10),
-		"CI_PREV_BUILD_STARTED":       strconv.FormatInt(m.Prev.Started, 10),
-		"CI_PREV_BUILD_FINISHED":      strconv.FormatInt(m.Prev.Finished, 10),
 		// use CI_STEP_*
 		"CI_JOB_NUMBER":   strconv.Itoa(m.Step.Number),
 		"CI_JOB_STATUS":   "", // will be set by agent
