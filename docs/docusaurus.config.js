@@ -58,6 +58,7 @@ module.exports = {
             position: 'left',
             label: 'API',
           },
+          { to: 'blog', label: 'Blog', position: 'left' },
           {
             type: 'docsVersionDropdown',
             position: 'right',
@@ -211,17 +212,26 @@ module.exports = {
           sidebarPath: require.resolve('./sidebars.js'),
           editUrl: 'https://github.com/woodpecker-ci/woodpecker/edit/master/docs/',
           includeCurrentVersion: true,
-          lastVersion: '0.15',
+          lastVersion: '1.0',
           versions: {
-            current: {
+            'current': {
               label: 'Next',
               banner: 'unreleased',
             },
-            0.15: {
+            '1.0': {
+              label: '1.0.x',
+            },
+            '0.15': {
               label: '0.15.x',
-              banner: 'none',
+              banner: 'unmaintained',
             },
           },
+        },
+        blog: {
+          blogTitle: 'Docusaurus blog!',
+          blogDescription: 'A Docusaurus powered blog!',
+          // postsPerPage: 'ALL',
+          // blogSidebarCount: 0,
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),

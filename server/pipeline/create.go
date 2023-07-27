@@ -95,9 +95,8 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		pipeline.Finished = pipeline.Started
 		pipeline.Status = model.StatusError
 		pipeline.Error = fmt.Sprintf("failed to parse pipeline: %s", parseErr.Error())
-	} else if repo.IsGated {
-		// TODO(336) extend gated feature with an allow/block List
-		pipeline.Status = model.StatusBlocked
+	} else {
+		setGatedState(repo, pipeline)
 	}
 
 	err = _store.CreatePipeline(pipeline)

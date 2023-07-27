@@ -297,9 +297,8 @@ func (c *config) Branches(ctx context.Context, u *model.User, r *model.Repo, _ *
 }
 
 // BranchHead returns the sha of the head (latest commit) of the specified branch
-func (c *config) BranchHead(_ context.Context, _ *model.User, _ *model.Repo, _ string) (string, error) {
-	// TODO(1138): missing implementation
-	return "", forge_types.ErrNotImplemented
+func (c *config) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
+	return c.newClient(ctx, u).GetBranchHead(r.Owner, r.Name, branch)
 }
 
 // PullRequests returns the pull requests of the named repository.
@@ -333,6 +332,18 @@ func (c *config) OrgMembership(ctx context.Context, u *model.User, owner string)
 		return nil, err
 	}
 	return &model.OrgPerm{Member: perm != "", Admin: perm == "owner"}, nil
+}
+
+func (c *config) Org(ctx context.Context, u *model.User, owner string) (*model.Org, error) {
+	workspace, err := c.newClient(ctx, u).GetWorkspace(owner)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.Org{
+		Name:   workspace.Slug,
+		IsUser: false, // bitbucket uses workspaces (similar to orgs) for teams and single users so we can not distinguish between them
+	}, nil
 }
 
 // helper function to return the bitbucket oauth2 client

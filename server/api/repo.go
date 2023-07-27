@@ -39,18 +39,23 @@ import (
 // PostRepo
 //
 //	@Summary	Activate a repository
-//	@Router		/repos/{repo_id} [post]
+//	@Router		/repos [post]
 //	@Produce	json
 //	@Success	200	{object}	Repo
 //	@Tags		Repositories
-//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		Authorization			header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		forge_remote_id		query		string	true	"the id of a repository at the forge"
 func PostRepo(c *gin.Context) {
 	forge := server.Config.Services.Forge
 	_store := store.FromContext(c)
 	user := session.User(c)
 
 	forgeRemoteID := model.ForgeRemoteID(c.Query("forge_remote_id"))
+	if !forgeRemoteID.IsValid() {
+		c.String(http.StatusBadRequest, "No forge_remote_id provided")
+		return
+	}
+
 	repo, err := _store.GetRepoForgeID(forgeRemoteID)
 	enabledOnce := err == nil // if there's no error, the repo was found and enabled once already
 	if enabledOnce && repo.IsActive {
@@ -113,6 +118,31 @@ func PostRepo(c *gin.Context) {
 		server.Config.Server.WebhookHost,
 		sig,
 	)
+
+	// find org of repo
+	var org *model.Org
+	org, err = _store.OrgFindByName(repo.Owner)
+	if err != nil && !errors.Is(err, types.RecordNotExist) {
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	// create an org if it doesn't exist yet
+	if errors.Is(err, types.RecordNotExist) {
+		org, err = forge.Org(c, user, repo.Owner)
+		if err != nil {
+			c.String(http.StatusInternalServerError, "Could not fetch organization from forge.")
+			return
+		}
+
+		err = _store.OrgCreate(org)
+		if err != nil {
+			c.String(http.StatusInternalServerError, err.Error())
+			return
+		}
+	}
+
+	repo.OrgID = org.ID
 
 	err = forge.Activate(c, user, repo, link)
 	if err != nil {

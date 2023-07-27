@@ -1,3 +1,10 @@
+when:
+  - event: [pull_request, tag]
+  - event: push
+    branch:
+      - ${CI_REPO_DEFAULT_BRANCH}
+      - release/*
+
 depends_on:
   - test
   - web
@@ -7,7 +14,7 @@ variables:
   - &node_image 'node:18-alpine'
   - &xgo_image 'techknowlogick/xgo:go-1.20.2'
   - &xgo_version 'go-1.20.2'
-  - &platforms_release 'linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/386,linux/amd64,linux/ppc64le,linux/riscv64,linux/s390x,windows/amd64,freebsd/arm64,freebsd/amd64,openbsd/arm64,openbsd/amd64'
+  - &platforms_release 'linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/386,linux/amd64,linux/ppc64le,linux/riscv64,linux/s390x,freebsd/arm64,freebsd/amd64,openbsd/arm64,openbsd/amd64'
   - &platforms_server 'linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le,linux/riscv64'
   - &platforms_preview 'linux/amd64'
   - &platforms_alpine 'linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le'
@@ -80,8 +87,10 @@ steps:
       TAGS: bindata sqlite sqlite_unlock_notify netgo
       XGO_VERSION: *xgo_version
     when:
-      branch: ${CI_REPO_DEFAULT_BRANCH}
-      event: push
+      branch:
+        - ${CI_REPO_DEFAULT_BRANCH}
+        - release/*
+      event: [push, tag]
 
   publish-next-server:
     image: woodpeckerci/plugin-docker-buildx
