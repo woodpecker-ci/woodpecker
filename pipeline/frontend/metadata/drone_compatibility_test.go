@@ -13,7 +13,6 @@ func TestSetDroneEnviron(t *testing.T) {
 CI_COMMIT_AUTHOR=6543
 CI_COMMIT_AUTHOR_AVATAR=https://codeberg.org/avatars/09a234c768cb9bca78f6b2f82d6af173
 CI_COMMIT_BRANCH=main
-CI_COMMIT_LINK=https://codeberg.org/Epsilon_02/todo-checker/pulls/9
 CI_COMMIT_MESSAGE=fix testscript
 CI_COMMIT_PULL_REQUEST=9
 CI_COMMIT_REF=refs/pull/9/head

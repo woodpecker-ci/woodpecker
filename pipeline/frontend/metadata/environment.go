@@ -115,7 +115,6 @@ func (m *Metadata) Environ() map[string]string {
 		// DEPRECATED
 		"CI_SYSTEM_ARCH": m.Sys.Platform, // TODO: remove after v1.0.x version
 		// use *_URL
-		"CI_COMMIT_LINK":        m.Curr.Link,
 		"CI_PIPELINE_LINK":      m.Curr.Link,
 		"CI_PREV_COMMIT_LINK":   m.Prev.Link,
 		"CI_PREV_PIPELINE_LINK": m.Prev.Link,
