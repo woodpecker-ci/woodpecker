@@ -50,7 +50,6 @@ CI_REPO_DEFAULT_BRANCH=main
 CI_REPO_LINK=https://codeberg.org/Epsilon_02/todo-checker
 CI_REPO_NAME=todo-checker
 CI_REPO_OWNER=Epsilon_02
-CI_REPO_REMOTE=https://codeberg.org/Epsilon_02/todo-checker.git
 CI_REPO_SCM=git
 CI_STEP_FINISHED=1685749350
 CI_STEP_NAME=wp_01h1z7v5d1tskaqjexw0ng6w7d_0_step_3

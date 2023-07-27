@@ -128,7 +128,7 @@ var flags = []cli.Flag{
 		Name:    "repo-link",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_REPO_CLONE_URL", "CI_REPO_REMOTE"},
+		EnvVars: []string{"CI_REPO_CLONE_URL"},
 		Name:    "repo-clone-url",
 	},
 	&cli.StringFlag{
