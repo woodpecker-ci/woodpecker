@@ -233,7 +233,7 @@ var flags = []cli.Flag{
 		Name:    "prev-pipeline-event",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_PREV_PIPELINE_URL", "CI_PREV_PIPELINE_LINK"},
+		EnvVars: []string{"CI_PREV_PIPELINE_URL"},
 		Name:    "prev-pipeline-link",
 	},
 	&cli.StringFlag{
