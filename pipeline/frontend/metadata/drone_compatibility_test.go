@@ -12,7 +12,6 @@ func TestSetDroneEnviron(t *testing.T) {
 	woodpeckerVars := `CI=woodpecker
 CI_BUILD_CREATED=1685749339
 CI_BUILD_FINISHED=1685749350
-CI_BUILD_LINK=https://codeberg.org/Epsilon_02/todo-checker/pulls/9
 CI_BUILD_STARTED=1685749339
 CI_BUILD_STATUS=success
 CI_COMMIT_AUTHOR=6543
