@@ -12,7 +12,7 @@ hide_table_of_contents: false
 ---
 
 We are proud to present you Woodpecker v1.0.0.
-It took us quite some time, but now we are sure it's ready, and so you should really have a look at it.
+It took us quite some time, but now we are sure it's ready, and you should really have a look at it.
 
 <!--truncate-->
 
@@ -33,7 +33,7 @@ Schedule pipelines to run at specified intervals or times, optimizing repetitive
 
 With enhanced YAML support, managing complex configurations becomes a breeze.  
 Merge maps, apply overrides, and sequence merging—all within your YAML files.
-This is providing greater flexibility and control over your pipelines.
+This is providing more flexibility and control over your pipelines.
 [Read more](/docs/usage/advanced-yaml-syntax)
 
 ### Web-UI for Admins
@@ -52,7 +52,7 @@ If your language is not available or only partially translated, consider contrib
 ### Add `evaluate` to `when` Filter
 
 Enhance pipeline flexibility with the new "when evaluate" filter, enabling or disabling steps based on custom conditions.
-Tailor your workflows to respond dynamically to specific triggers and events.  
+Customize your workflows to dynamically respond to specific triggers and events.  
 [Read more](/docs/usage/pipeline-syntax#evaluate)
 
 ### Global- and Organization-Secrets
