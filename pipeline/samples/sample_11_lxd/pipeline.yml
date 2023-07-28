@@ -1,0 +1,21 @@
+pipeline:
+  test_0:
+    image: 'alpine'
+    commands:
+      - echo "Date from docker is $(date)" > docker_date
+      - cat docker_date
+
+  test_1:
+    image: 'lxd:alpine/3.18'
+    commands:
+      - echo "Test 1 $(cat docker_date)"
+
+  test_2:
+    image: 'lxd:alpine/3.18'
+    commands:
+      - echo "Test 2 $(cat docker_date)"
+
+  test_3:
+    image: 'lxd:alpine/3.18'
+    commands:
+      - echo "Test 3 $(cat docker_date)"
