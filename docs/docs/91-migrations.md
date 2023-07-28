@@ -35,9 +35,9 @@ Some versions need some changes to the server configuration or the pipeline conf
   - To find the id of orgs use the `/api/orgs/lookup/{org_full_name}` endpoint.
   - The UI urls for a organization changed from `/org/{owner}/...` to `/orgs/{org-id}/...`. You will be redirected automatically when using the old url.
   - The woodpecker-go api-client is now using the `org-id` instead of `org name` for all functions
-- The `command:` field was removed from steps. If you did use it you have to check if the entrypoint of the image you did use is a shell.
-  - If it is a shell, just rename `command:` to `commands:`
-  - If it's not, you have to prepend the entrypoint before and also rename it to `commands:` (e.g. `commands: <entrypoint> <cmd>`)
+- The `command:` field has been removed from steps. If you were using it, please check if the entrypoint of the image you used is a shell.
+  - If it is a shell, simply rename `command:` to `commands:`.
+  - If it's not, you need to prepend the entrypoint before and also rename it (e.g., `commands: <entrypoint> <cmd>`).
 
 ## 0.15.0
 
