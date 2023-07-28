@@ -7,8 +7,10 @@ If you are interested or have a custom script to do so, please get in contact wi
 
 ## Migrate from Drone <= v0.8
 
-- Make sure you upgrade to Drone v0.8
-- Upgrade to woodpecker v0.14.4, migration is run on startup
-- If you use Sqlite3, rename `drone.sqlite` to `woodpecker.sqlite` and  
-  Rename/Adjust volume-mount/folder from `/var/lib/drone/` to `/var/lib/woodpecker/`
-- Upgrade to woodpecker v1.0.0, migration is run on startup
+- Make sure you are already running Drone v0.8
+- Upgrade to Woodpecker v0.14.4, migration will be done during startup
+- If you are using Sqlite3, rename `drone.sqlite` to `woodpecker.sqlite` and
+  rename or adjust the mount/folder of the volume from `/var/lib/drone/`
+  to `/var/lib/woodpecker/`
+- Upgrade to Woodpecker v1.0.0, the migration will be performed during
+  startup
