@@ -13,6 +13,7 @@
   * Access repos by their IDs (#1691)
   * Drop "coding" support (#1644)
   * Add queue details UI for admins (#1632)
+  * Remove `command:` from steps (#1032)
   * Remove old `build` API routes (#1283)
   * Let single line command be a single command (#1009)
   * Drop deprecated environment vars (#920)
