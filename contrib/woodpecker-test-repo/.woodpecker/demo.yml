@@ -1,4 +1,4 @@
-pipeline:
+steps:
   demo:
     image: 'alpine'
     commands:
