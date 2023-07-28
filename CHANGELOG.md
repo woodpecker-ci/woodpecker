@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.0.0-rc1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v1.0.0-rc1) - 2023-07-25
+## [1.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v1.0.0) - 2023-07-29
 
 * BREAKING
   * Use IDs to access organizations (#1873)
@@ -59,6 +59,7 @@
   * Support plugin-only secrets (#1344)
   * Fix insecure /tmp usage in local backend (#872)
 * BUGFIXES
+  * Handle case where there is no latest pipeline for GetBadge (#2042) (#2050)
   * Fix repo gate protection (#1969)
   * Make secrets with "/" in name editable / deletable (#1938)
   * Fix Bitbucket implement missing features (#1887) (#1889)
