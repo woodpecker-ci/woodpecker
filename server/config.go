@@ -73,9 +73,7 @@ var Config = struct {
 		Migrations          struct {
 			AllowLong bool
 		}
-		// Open bool
-		// Orgs map[string]struct{}
-		// Admins map[string]struct{}
+		RepoDefaultBranch string
 	}
 	Prometheus struct {
 		AuthToken string

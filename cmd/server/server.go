@@ -328,6 +328,8 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 	server.Config.Pipeline.DefaultTimeout = c.Int64("default-pipeline-timeout")
 	server.Config.Pipeline.MaxTimeout = c.Int64("max-pipeline-timeout")
 
+	server.Config.Server.RepoDefaultBranch = c.String("default-repo-branch")
+
 	// limits
 	server.Config.Pipeline.Limits.MemSwapLimit = c.Int64("limit-mem-swap")
 	server.Config.Pipeline.Limits.MemLimit = c.Int64("limit-mem")

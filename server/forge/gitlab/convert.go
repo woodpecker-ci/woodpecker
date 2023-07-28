@@ -23,6 +23,7 @@ import (
 
 	"github.com/xanzy/go-gitlab"
 
+	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/shared/utils"
 )
@@ -53,8 +54,8 @@ func (g *GitLab) convertGitLabRepo(_repo *gitlab.Project) (*model.Repo, error) {
 		},
 	}
 
-	if len(repo.Branch) == 0 { // TODO: do we need that?
-		repo.Branch = "master"
+	if repo.Branch == "" {
+		repo.Branch = server.Config.Server.RepoDefaultBranch
 	}
 
 	if len(repo.Avatar) != 0 && !strings.HasPrefix(repo.Avatar, "http") {
@@ -104,7 +105,7 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 	if target.DefaultBranch != "" {
 		repo.Branch = target.DefaultBranch
 	} else {
-		repo.Branch = "master"
+		repo.Branch = server.Config.Server.RepoDefaultBranch
 	}
 
 	if target.AvatarURL != "" {

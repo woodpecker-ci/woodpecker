@@ -169,6 +169,12 @@ var flags = []cli.Flag{
 		Usage:   "The default time in minutes for a repo in minutes before a pipeline gets killed",
 		Value:   60,
 	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_DEFAULT_REPO_BRANCH"},
+		Name:    "default-repo-branch",
+		Usage:   "if a forge does not return a default branch, this value is used",
+		Value:   "main",
+	},
 	&cli.Int64Flag{
 		EnvVars: []string{"WOODPECKER_MAX_PIPELINE_TIMEOUT"},
 		Name:    "max-pipeline-timeout",

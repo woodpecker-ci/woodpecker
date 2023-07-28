@@ -20,10 +20,9 @@ import (
 
 	"github.com/google/go-github/v39/github"
 
+	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
-
-const defaultBranch = "master"
 
 const (
 	statusPending = "pending"
@@ -97,8 +96,8 @@ func convertRepo(from *github.Repository) *model.Repo {
 		Perm:          convertPerm(from.GetPermissions()),
 		SCMKind:       model.RepoGit,
 	}
-	if len(repo.Branch) == 0 {
-		repo.Branch = defaultBranch
+	if repo.Branch == "" {
+		repo.Branch = server.Config.Server.RepoDefaultBranch
 	}
 	return repo
 }
@@ -157,7 +156,7 @@ func convertRepoHook(eventRepo *github.PushEventRepository) *model.Repo {
 		SCMKind:       model.RepoGit,
 	}
 	if repo.Branch == "" {
-		repo.Branch = defaultBranch
+		repo.Branch = server.Config.Server.RepoDefaultBranch
 	}
 	if repo.FullName == "" {
 		repo.FullName = repo.Owner + "/" + repo.Name
