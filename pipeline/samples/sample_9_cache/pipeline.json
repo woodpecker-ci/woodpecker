@@ -24,7 +24,7 @@
             "CI_REPO": "drone/envsubst",
             "CI_REPO_URL": "https://github.com/drone/envsubst",
             "CI_REPO_NAME": "drone/envsubst",
-            "CI_REPO_REMOTE": "https://github.com/drone/envsubst.git",
+            "CI_REPO_CLONE_URL": "https://github.com/drone/envsubst.git",
             "CI_SYSTEM": "pipec",
             "CI_SYSTEM_PLATFORM": "linux/amd64",
             "CI_SYSTEM_URL": "https://github.com/cncd/pipec",
@@ -76,7 +76,7 @@
             "CI_REPO": "drone/envsubst",
             "CI_REPO_URL": "https://github.com/drone/envsubst",
             "CI_REPO_NAME": "drone/envsubst",
-            "CI_REPO_REMOTE": "https://github.com/drone/envsubst.git",
+            "CI_REPO_CLONE_URL": "https://github.com/drone/envsubst.git",
             "CI_SYSTEM": "pipec",
             "CI_SYSTEM_PLATFORM": "linux/amd64",
             "CI_SYSTEM_URL": "https://github.com/cncd/pipec",
@@ -96,7 +96,10 @@
             "PLUGIN_PATH": "/cache",
             "PLUGIN_RESTORE": "true"
           },
-          "volumes": ["pipeline_default:/pipeline", "/cache/drone/drone/envsubst:/cache"],
+          "volumes": [
+            "pipeline_default:/pipeline",
+            "/cache/drone/drone/envsubst:/cache"
+          ],
           "networks": [
             {
               "name": "pipeline_default",
@@ -132,7 +135,7 @@
             "CI_REPO": "drone/envsubst",
             "CI_REPO_URL": "https://github.com/drone/envsubst",
             "CI_REPO_NAME": "drone/envsubst",
-            "CI_REPO_REMOTE": "https://github.com/drone/envsubst.git",
+            "CI_REPO_CLONE_URL": "https://github.com/drone/envsubst.git",
             "CI_SCRIPT": "CmlmIFsgLW4gIiRDSV9ORVRSQ19NQUNISU5FIiBdOyB0aGVuCmNhdCA8PEVPRiA+ICRIT01FLy5uZXRyYwptYWNoaW5lICRDSV9ORVRSQ19NQUNISU5FCmxvZ2luICRDSV9ORVRSQ19VU0VSTkFNRQpwYXNzd29yZCAkQ0lfTkVUUkNfUEFTU1dPUkQKRU9GCmNobW9kIDA2MDAgJEhPTUUvLm5ldHJjCmZpCnVuc2V0IENJX05FVFJDX1VTRVJOQU1FCnVuc2V0IENJX05FVFJDX1BBU1NXT1JECnVuc2V0IENJX1NDUklQVAp1bnNldCBEUk9ORV9ORVRSQ19VU0VSTkFNRQp1bnNldCBEUk9ORV9ORVRSQ19QQVNTV09SRAoKZWNobyArICJucG0gaW5zdGFsbCIKbnBtIGluc3RhbGwKCmVjaG8gKyAibnBtIHRlc3QiCm5wbSB0ZXN0Cgo=",
             "CI_SYSTEM": "pipec",
             "CI_SYSTEM_PLATFORM": "linux/amd64",
@@ -188,7 +191,7 @@
             "CI_REPO": "drone/envsubst",
             "CI_REPO_URL": "https://github.com/drone/envsubst",
             "CI_REPO_NAME": "drone/envsubst",
-            "CI_REPO_REMOTE": "https://github.com/drone/envsubst.git",
+            "CI_REPO_CLONE_URL": "https://github.com/drone/envsubst.git",
             "CI_SYSTEM": "pipec",
             "CI_SYSTEM_PLATFORM": "linux/amd64",
             "CI_SYSTEM_URL": "https://github.com/cncd/pipec",
@@ -208,7 +211,10 @@
             "PLUGIN_PATH": "/cache",
             "PLUGIN_REBUILD": "true"
           },
-          "volumes": ["pipeline_default:/pipeline", "/cache/drone/drone/envsubst:/cache"],
+          "volumes": [
+            "pipeline_default:/pipeline",
+            "/cache/drone/drone/envsubst:/cache"
+          ],
           "networks": [
             {
               "name": "pipeline_default",

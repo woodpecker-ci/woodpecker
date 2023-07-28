@@ -24,7 +24,7 @@
             "CI_REPO": "drone/envsubst",
             "CI_REPO_URL": "https://github.com/drone/envsubst",
             "CI_REPO_NAME": "drone/envsubst",
-            "CI_REPO_REMOTE": "https://github.com/drone/envsubst.git",
+            "CI_REPO_CLONE_URL": "https://github.com/drone/envsubst.git",
             "CI_SYSTEM": "pipec",
             "CI_SYSTEM_PLATFORM": "windows/amd64",
             "CI_SYSTEM_URL": "https://github.com/cncd/pipec",
@@ -75,7 +75,7 @@
             "CI_REPO": "drone/envsubst",
             "CI_REPO_URL": "https://github.com/drone/envsubst",
             "CI_REPO_NAME": "drone/envsubst",
-            "CI_REPO_REMOTE": "https://github.com/drone/envsubst.git",
+            "CI_REPO_CLONE_URL": "https://github.com/drone/envsubst.git",
             "CI_SCRIPT": "CiRFcnJvckFjdGlvblByZWZlcmVuY2UgPSAnU3RvcCc7CiZjbWQgL2MgIm1rZGlyIGM6XHJvb3QiOwppZiAoJEVudjpDSV9ORVRSQ19NQUNISU5FKSB7CiRuZXRyYz1bc3RyaW5nXTo6Rm9ybWF0KCJ7MH1cX25ldHJjIiwkRW52OkhPTUUpOwoibWFjaGluZSAkRW52OkNJX05FVFJDX01BQ0hJTkUiID4+ICRuZXRyYzsKImxvZ2luICRFbnY6Q0lfTkVUUkNfVVNFUk5BTUUiID4+ICRuZXRyYzsKInBhc3N3b3JkICRFbnY6Q0lfTkVUUkNfUEFTU1dPUkQiID4+ICRuZXRyYzsKfTsKW0Vudmlyb25tZW50XTo6U2V0RW52aXJvbm1lbnRWYXJpYWJsZSgiQ0lfTkVUUkNfUEFTU1dPUkQiLCRudWxsKTsKW0Vudmlyb25tZW50XTo6U2V0RW52aXJvbm1lbnRWYXJpYWJsZSgiQ0lfU0NSSVBUIiwkbnVsbCk7CltFbnZpcm9ubWVudF06OlNldEVudmlyb25tZW50VmFyaWFibGUoIkRST05FX05FVFJDX1VTRVJOQU1FIiwkbnVsbCk7CltFbnZpcm9ubWVudF06OlNldEVudmlyb25tZW50VmFyaWFibGUoIkRST05FX05FVFJDX1BBU1NXT1JEIiwkbnVsbCk7CgpXcml0ZS1PdXRwdXQgKCcrICJnbyBnZXQgLXQgLlxcLi4uIicpOyAgW0NvbnNvbGVdOjpPdXQuRmx1c2goKQomIGdvIGdldCAtdCAuXC4uLjsgaWYgKCRMQVNURVhJVENPREUgLW5lIDApIHtleGl0ICRMQVNURVhJVENPREV9CgpXcml0ZS1PdXRwdXQgKCcrICJnbyBidWlsZCInKTsgIFtDb25zb2xlXTo6T3V0LkZsdXNoKCkKJiBnbyBidWlsZDsgaWYgKCRMQVNURVhJVENPREUgLW5lIDApIHtleGl0ICRMQVNURVhJVENPREV9CgpXcml0ZS1PdXRwdXQgKCcrICJnbyB0ZXN0IC12IicpOyAgW0NvbnNvbGVdOjpPdXQuRmx1c2goKQomIGdvIHRlc3QgLXY7IGlmICgkTEFTVEVYSVRDT0RFIC1uZSAwKSB7ZXhpdCAkTEFTVEVYSVRDT0RFfQoK",
             "CI_SYSTEM": "pipec",
             "CI_SYSTEM_PLATFORM": "windows/amd64",
@@ -92,7 +92,12 @@
             "HOME": "c:\\root",
             "SHELL": "powershell.exe"
           },
-          "entrypoint": ["powershell", "-noprofile", "-noninteractive", "-command"],
+          "entrypoint": [
+            "powershell",
+            "-noprofile",
+            "-noninteractive",
+            "-command"
+          ],
           "command": [
             "[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($Env:CI_SCRIPT)) | iex"
           ],
