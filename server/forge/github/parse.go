@@ -24,6 +24,7 @@ import (
 
 	"github.com/google/go-github/v39/github"
 
+	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/shared/utils"
@@ -133,7 +134,7 @@ func parseDeployHook(hook *github.DeploymentEvent) (*model.Repo, *model.Pipeline
 	if strings.HasPrefix(pipeline.Commit, pipeline.Ref) || pipeline.Commit == pipeline.Ref {
 		pipeline.Branch = hook.GetRepo().GetDefaultBranch()
 		if pipeline.Branch == "" {
-			pipeline.Branch = defaultBranch
+			pipeline.Branch = server.Config.Server.RepoDefaultBranch
 		}
 		pipeline.Ref = fmt.Sprintf("refs/heads/%s", pipeline.Branch)
 	}
