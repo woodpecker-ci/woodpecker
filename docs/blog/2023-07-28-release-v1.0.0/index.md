@@ -16,8 +16,8 @@ It took us quite some time, but now we are sure it's ready, and so you should re
 
 <!--truncate-->
 
-We've refactored a lot of code, so contributing to the codebase should be much easier.
-Furthermore, a ton of bugs where addressed and various enhancements introduced, along with some highly anticipated features.
+We've refactored a lot of code, so contributing to the codebase should be much easier.  
+Furthermore, a ton of bugs where addressed and various enhancements introduced, along with some highly anticipated features.  
 With Woodpecker v1.0.0, you can now substantially improve and streamline your code pipelines,
 empowering you to automate and optimize workflows like never before.
 
@@ -31,35 +31,36 @@ Schedule pipelines to run at specified intervals or times, optimizing repetitive
 
 ### YAML Map Merge, Overrides, and Sequence Merge Support
 
-With enhanced YAML support, managing complex configurations becomes a breeze. Merge maps, apply overrides, and sequence merging—all within your YAML files.
+With enhanced YAML support, managing complex configurations becomes a breeze.  
+Merge maps, apply overrides, and sequence merging—all within your YAML files.
 This is providing greater flexibility and control over your pipelines.
 [Read more](/docs/usage/advanced-yaml-syntax)
 
-### Add Web-UI for Admins
+### Web-UI for Admins
 
-Simplify administration tasks with Woodpecker's new Admin UI. Manage user accounts, agents, and tasks effortlessly.
-Now, you can effortlessly add new agents or pause the task queue to perform maintenance.
-![Image of admin queue view](admin_queue_ui.png)
+Simplify administration tasks with Woodpecker's new Admin UI.  
+Effortlessly manage user accounts, agents, and tasks, including adding new agents or pausing the task queue for maintenance.
+
+![Image of admin queue view](./admin_queue_ui.png)
 
 ### Localize Web-UI
 
-Embrace internationalization by changing your locale in the user settings. Interact with Woodpecker in the language of your choice, tailored to your preferences.
+Embrace internationalization by changing your locale in the user settings.  
+Interact with Woodpecker in the language of your choice, tailored to your preferences.  
 If your language is not available or only partially translated, consider contributing to our [Weblate](https://translate.woodpecker-ci.org/engage/woodpecker-ci/).
 
-### Add Evaluate to When Filter
+### Add `evaluate` to `when` Filter
 
 Enhance pipeline flexibility with the new "when evaluate" filter, enabling or disabling steps based on custom conditions.
-Tailor your workflows to respond dynamically to specific triggers and events.
+Tailor your workflows to respond dynamically to specific triggers and events.  
 [Read more](/docs/usage/pipeline-syntax#evaluate)
 
-### Global and Organization Secrets
+### Global- and Organization-Secrets
 
-Save time and effort by declaring secrets for your entire instance or organization.
+Save time and effort by declaring secrets for your entire instance or organization.  
 Simplify your workflow and securely manage sensitive information across projects.
 
-### Pipeline Log Output Download
-
-Retrieve pipeline log outputs effortlessly, empowering you to analyze and troubleshoot your pipelines.
+![Image of settings view of org secrets](./org_secrets.png)
 
 ## Changelog
 
