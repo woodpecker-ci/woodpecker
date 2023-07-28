@@ -76,7 +76,7 @@ func (r *Runner) createTracer(ctxmeta context.Context, logger zerolog.Logger, wo
 		state.Pipeline.Step.Environment["CI_STEP_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
 		state.Pipeline.Step.Environment["CI_STEP_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
 
-		state.Pipeline.Step.Environment["CI_SYSTEM_ARCH"] = runtime.GOOS + "/" + runtime.GOARCH
+		state.Pipeline.Step.Environment["CI_SYSTEM_PLATFORM"] = runtime.GOOS + "/" + runtime.GOARCH
 
 		// DEPRECATED
 		state.Pipeline.Step.Environment["CI_BUILD_STATUS"] = "success"
@@ -85,6 +85,7 @@ func (r *Runner) createTracer(ctxmeta context.Context, logger zerolog.Logger, wo
 		state.Pipeline.Step.Environment["CI_JOB_STATUS"] = "success"
 		state.Pipeline.Step.Environment["CI_JOB_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
 		state.Pipeline.Step.Environment["CI_JOB_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
+		state.Pipeline.Step.Environment["CI_SYSTEM_ARCH"] = runtime.GOOS + "/" + runtime.GOARCH
 
 		if state.Pipeline.Error != nil {
 			state.Pipeline.Step.Environment["CI_PIPELINE_STATUS"] = "failure"
