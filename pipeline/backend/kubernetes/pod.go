@@ -95,7 +95,7 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 	labels["step"] = podName
 
 	var nodeSelector map[string]string
-	platform, exist := step.Environment["CI_SYSTEM_ARCH"]
+	platform, exist := step.Environment["CI_SYSTEM_PLATFORM"]
 	if exist && platform != "" {
 		arch := strings.Split(platform, "/")[1]
 		nodeSelector = map[string]string{v1.LabelArchStable: arch}

@@ -2,9 +2,9 @@
 
 Some versions need some changes to the server configuration or the pipeline configuration files.
 
-## next
+## next (1.1.0)
 
-No breaking changes
+- Drop deprecated `CI_BUILD_*`, `CI_PREV_BUILD_*`, `CI_JOB_*`, `*_LINK`, `CI_SYSTEM_ARCH`, `CI_REPO_REMOTE` built-in environment variables
 
 ## 1.0.0
 
