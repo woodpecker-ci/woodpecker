@@ -110,25 +110,34 @@ var flags = []cli.Flag{
 		Value:   "woodpecker",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_SYSTEM_LINK"},
+		EnvVars: []string{"CI_SYSTEM_URL"},
 		Name:    "system-link",
 		Value:   "https://github.com/woodpecker-ci/woodpecker",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_REPO_NAME"},
-		Name:    "repo-name",
+		EnvVars: []string{"CI_REPO"},
+		Name:    "repo",
+		Usage:   "full repo name",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_REPO_LINK"},
+		EnvVars: []string{"CI_REPO_REMOTE_ID"},
+		Name:    "repo-remote-id",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"CI_REPO_URL"},
 		Name:    "repo-link",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_REPO_CLONE_URL", "CI_REPO_REMOTE"},
+		EnvVars: []string{"CI_REPO_CLONE_URL"},
 		Name:    "repo-clone-url",
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"CI_REPO_PRIVATE"},
 		Name:    "repo-private",
+	},
+	&cli.BoolFlag{
+		EnvVars: []string{"CI_REPO_TRUSTED"},
+		Name:    "repo-trusted",
 	},
 	&cli.IntFlag{
 		EnvVars: []string{"CI_PIPELINE_NUMBER"},
@@ -160,7 +169,7 @@ var flags = []cli.Flag{
 		Value:   "manual",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_PIPELINE_LINK"},
+		EnvVars: []string{"CI_PIPELINE_URL"},
 		Name:    "pipeline-link",
 	},
 	&cli.StringFlag{
@@ -224,7 +233,7 @@ var flags = []cli.Flag{
 		Name:    "prev-pipeline-event",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_PREV_PIPELINE_LINK"},
+		EnvVars: []string{"CI_PREV_PIPELINE_URL"},
 		Name:    "prev-pipeline-link",
 	},
 	&cli.StringFlag{
@@ -264,16 +273,24 @@ var flags = []cli.Flag{
 		Name:    "workflow-name",
 	},
 	&cli.IntFlag{
-		EnvVars: []string{"CI_WORKFLOW_NUMBER", "CI_JOB_NUMBER"},
+		EnvVars: []string{"CI_WORKFLOW_NUMBER"},
 		Name:    "workflow-number",
 	},
 	&cli.IntFlag{
-		EnvVars: []string{"CI_STEP_NAME", "CI_JOB_NUMBER"},
+		EnvVars: []string{"CI_STEP_NAME"},
 		Name:    "step-name",
 	},
 	&cli.StringSliceFlag{
 		EnvVars: []string{"CI_ENV"},
 		Name:    "env",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"CI_FORGE_TYPE"},
+		Name:    "forge-type",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"CI_FORGE_URL"},
+		Name:    "forge-url",
 	},
 
 	// backend docker

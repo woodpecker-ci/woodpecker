@@ -1,12 +1,15 @@
 package secret
 
 import (
+	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/urfave/cli/v2"
 
 	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/cli/internal"
+	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
 )
 
 // Command exports the secret command.
@@ -23,24 +26,46 @@ var Command = &cli.Command{
 	},
 }
 
-func parseTargetArgs(c *cli.Context) (global bool, owner, name string, err error) {
+func parseTargetArgs(client woodpecker.Client, c *cli.Context) (global bool, orgID, repoID int64, err error) {
 	if c.Bool("global") {
-		return true, "", "", nil
+		return true, -1, -1, nil
 	}
-	orgName := c.String("organization")
-	repoName := c.String("repository")
-	if orgName == "" && repoName == "" {
-		repoName = c.Args().First()
+
+	repoIDOrFullName := c.String("repository")
+	if repoIDOrFullName == "" {
+		repoIDOrFullName = c.Args().First()
 	}
-	if orgName == "" && !strings.Contains(repoName, "/") {
-		orgName = repoName
+
+	orgIDOrName := c.String("organization")
+	if orgIDOrName == "" && repoIDOrFullName == "" {
+		if err := cli.ShowSubcommandHelp(c); err != nil {
+			return false, -1, -1, err
+		}
+
+		return false, -1, -1, fmt.Errorf("missing arguments")
 	}
-	if orgName != "" {
-		return false, orgName, "", err
+
+	if orgIDOrName != "" && repoIDOrFullName == "" {
+		if orgID, err := strconv.ParseInt(orgIDOrName, 10, 64); err == nil {
+			return false, orgID, -1, nil
+		}
+
+		org, err := client.OrgLookup(orgIDOrName)
+		if err != nil {
+			return false, -1, -1, err
+		}
+
+		return false, org.ID, -1, nil
 	}
-	owner, name, err = internal.ParseRepo(repoName)
+
+	if orgIDOrName != "" && !strings.Contains(repoIDOrFullName, "/") {
+		repoIDOrFullName = orgIDOrName + "/" + repoIDOrFullName
+	}
+
+	repoID, err = internal.ParseRepo(client, repoIDOrFullName)
 	if err != nil {
-		return false, "", "", err
+		return false, -1, -1, err
 	}
-	return false, owner, name, nil
+
+	return false, -1, repoID, nil
 }

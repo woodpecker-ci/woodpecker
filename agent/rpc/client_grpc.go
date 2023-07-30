@@ -277,51 +277,15 @@ func (c *client) Update(ctx context.Context, id string, state rpc.State) (err er
 	return nil
 }
 
-// Upload uploads the pipeline artifact.
-func (c *client) Upload(ctx context.Context, id string, file *rpc.File) (err error) {
-	req := new(proto.UploadRequest)
-	req.Id = id
-	req.File = new(proto.File)
-	req.File.Name = file.Name
-	req.File.Mime = file.Mime
-	req.File.Step = file.Step
-	req.File.Size = int32(file.Size)
-	req.File.Time = file.Time
-	req.File.Data = file.Data
-	req.File.Meta = file.Meta
-	for {
-		_, err = c.client.Upload(ctx, req)
-		if err == nil {
-			break
-		}
-
-		log.Err(err).Msgf("grpc error: upload(): code: %v: %s", status.Code(err), err)
-
-		switch status.Code(err) {
-		case
-			codes.Aborted,
-			codes.DataLoss,
-			codes.DeadlineExceeded,
-			codes.Internal,
-			codes.Unavailable:
-			// non-fatal errors
-		default:
-			return err
-		}
-		<-time.After(backoff)
-	}
-	return nil
-}
-
 // Log writes the pipeline log entry.
-func (c *client) Log(ctx context.Context, id string, line *rpc.Line) (err error) {
+func (c *client) Log(ctx context.Context, logEntry *rpc.LogEntry) (err error) {
 	req := new(proto.LogRequest)
-	req.Id = id
-	req.Line = new(proto.Line)
-	req.Line.Out = line.Out
-	req.Line.Pos = int32(line.Pos)
-	req.Line.Step = line.Step
-	req.Line.Time = line.Time
+	req.LogEntry = new(proto.LogEntry)
+	req.LogEntry.StepUuid = logEntry.StepUUID
+	req.LogEntry.Data = logEntry.Data
+	req.LogEntry.Line = int32(logEntry.Line)
+	req.LogEntry.Time = logEntry.Time
+	req.LogEntry.Type = int32(logEntry.Type)
 	for {
 		_, err = c.client.Log(ctx, req)
 		if err == nil {

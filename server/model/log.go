@@ -14,9 +14,29 @@
 
 package model
 
-type Logs struct {
-	ID     int64  `xorm:"pk autoincr 'log_id'"`
-	StepID int64  `xorm:"UNIQUE 'log_step_id'"`
-	Data   []byte `xorm:"LONGBLOB 'log_data'"`
-	// TODO: add create timestamp
+// LogEntryType identifies the type of line in the logs.
+type LogEntryType int // @name	LogEntryType
+
+const (
+	LogEntryStdout LogEntryType = iota
+	LogEntryStderr
+	LogEntryExitCode
+	LogEntryMetadata
+	LogEntryProgress
+)
+
+type LogEntry struct {
+	ID      int64        `json:"id"       xorm:"pk autoincr 'id'"`
+	StepID  int64        `json:"step_id"  xorm:"INDEX 'step_id'"`
+	Time    int64        `json:"time"`
+	Line    int          `json:"line"`
+	Data    []byte       `json:"data"     xorm:"LONGBLOB"`
+	Created int64        `json:"-"        xorm:"created"`
+	Type    LogEntryType `json:"type"`
+} //	@name LogEntry
+
+// TODO: store info what specific command the line belongs to (must be optional and impl. by backend)
+
+func (LogEntry) TableName() string {
+	return "log_entries"
 }

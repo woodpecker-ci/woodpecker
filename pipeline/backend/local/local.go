@@ -25,6 +25,7 @@ import (
 	"strings"
 
 	"github.com/alessio/shellescape"
+	"github.com/rs/zerolog/log"
 	"golang.org/x/exp/slices"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
@@ -74,8 +75,10 @@ func (e *local) Load(context.Context) error {
 	return nil
 }
 
-// Setup the pipeline environment.
-func (e *local) Setup(_ context.Context, c *types.Config) error {
+// SetupWorkflow the pipeline environment.
+func (e *local) SetupWorkflow(_ context.Context, conf *types.Config, taskUUID string) error {
+	log.Trace().Str("taskUUID", taskUUID).Msg("create workflow environment")
+
 	baseDir, err := os.MkdirTemp("", "woodpecker-local-*")
 	if err != nil {
 		return err
@@ -98,7 +101,7 @@ func (e *local) Setup(_ context.Context, c *types.Config) error {
 
 	// TODO: copy plugin-git binary to homeDir and set PATH
 
-	workflowID, err := e.getWorkflowIDFromConfig(c)
+	workflowID, err := e.getWorkflowIDFromConfig(conf)
 	if err != nil {
 		return err
 	}
@@ -108,8 +111,10 @@ func (e *local) Setup(_ context.Context, c *types.Config) error {
 	return nil
 }
 
-// Exec the pipeline step.
-func (e *local) Exec(ctx context.Context, step *types.Step) error {
+// StartStep the pipeline step.
+func (e *local) StartStep(ctx context.Context, step *types.Step, taskUUID string) error {
+	log.Trace().Str("taskUUID", taskUUID).Msgf("start step %s", step.Name)
+
 	state, err := e.getWorkflowStateFromStep(step)
 	if err != nil {
 		return err
@@ -163,9 +168,11 @@ func (e *local) Exec(ctx context.Context, step *types.Step) error {
 	return cmd.Start()
 }
 
-// Wait for the pipeline step to complete and returns
+// WaitStep for the pipeline step to complete and returns
 // the completion results.
-func (e *local) Wait(_ context.Context, step *types.Step) (*types.State, error) {
+func (e *local) WaitStep(_ context.Context, step *types.Step, taskUUID string) (*types.State, error) {
+	log.Trace().Str("taskUUID", taskUUID).Msgf("wait for step %s", step.Name)
+
 	state, err := e.getWorkflowStateFromStep(step)
 	if err != nil {
 		return nil, err
@@ -192,14 +199,17 @@ func (e *local) Wait(_ context.Context, step *types.Step) (*types.State, error) 
 	}, err
 }
 
-// Tail the pipeline step logs.
-func (e *local) Tail(context.Context, *types.Step) (io.ReadCloser, error) {
+// TailStep the pipeline step logs.
+func (e *local) TailStep(_ context.Context, step *types.Step, taskUUID string) (io.ReadCloser, error) {
+	log.Trace().Str("taskUUID", taskUUID).Msgf("tail logs of step %s", step.Name)
 	return e.output, nil
 }
 
-// Destroy the pipeline environment.
-func (e *local) Destroy(_ context.Context, c *types.Config) error {
-	state, err := e.getWorkflowStateFromConfig(c)
+// DestroyWorkflow the pipeline environment.
+func (e *local) DestroyWorkflow(_ context.Context, conf *types.Config, taskUUID string) error {
+	log.Trace().Str("taskUUID", taskUUID).Msgf("delete workflow environment")
+
+	state, err := e.getWorkflowStateFromConfig(conf)
 	if err != nil {
 		return err
 	}
@@ -209,7 +219,7 @@ func (e *local) Destroy(_ context.Context, c *types.Config) error {
 		return err
 	}
 
-	workflowID, err := e.getWorkflowIDFromConfig(c)
+	workflowID, err := e.getWorkflowIDFromConfig(conf)
 	if err != nil {
 		return err
 	}
@@ -220,12 +230,23 @@ func (e *local) Destroy(_ context.Context, c *types.Config) error {
 }
 
 func (e *local) getWorkflowIDFromStep(step *types.Step) (string, error) {
-	prefix := strings.Split(step.Name, "_stage_")
-	if len(prefix) < 2 {
-		return "", fmt.Errorf("invalid step name %s", step.Name)
+	sep := "_step_"
+	if strings.Contains(step.Name, sep) {
+		prefix := strings.Split(step.Name, sep)
+		if len(prefix) == 2 {
+			return prefix[0], nil
+		}
 	}
 
-	return prefix[0], nil
+	sep = "_clone"
+	if strings.Contains(step.Name, sep) {
+		prefix := strings.Split(step.Name, sep)
+		if len(prefix) == 2 {
+			return prefix[0], nil
+		}
+	}
+
+	return "", fmt.Errorf("invalid step name (%s) %s", sep, step.Name)
 }
 
 func (e *local) getWorkflowIDFromConfig(c *types.Config) (string, error) {

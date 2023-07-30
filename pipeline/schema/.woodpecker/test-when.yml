@@ -1,4 +1,4 @@
-pipeline:
+steps:
   when-branch:
     image: alpine
     commands:
@@ -27,12 +27,12 @@ pipeline:
     when:
       event: [push, pull_request, tag, deployment]
 
-  when-tag:
+  when-ref:
     image: alpine
     commands:
       - echo "test"
     when:
-      tag: "v**"
+      ref: "refs/tags/v**"
 
   when-status:
     image: alpine
@@ -146,4 +146,4 @@ pipeline:
     commands: echo "test"
     when:
       - event: push
-        evaluate: 'CI_BUILD_EVENT == "push" && CI_REPO == "owner/repo"'
+        evaluate: 'CI_PIPELINE_EVENT == "push" && CI_REPO == "owner/repo"'

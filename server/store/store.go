@@ -18,8 +18,6 @@ package store
 //go:generate mockery --name Store --output mocks --case underscore
 
 import (
-	"io"
-
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
@@ -123,8 +121,8 @@ type Store interface {
 	SecretCreate(*model.Secret) error
 	SecretUpdate(*model.Secret) error
 	SecretDelete(*model.Secret) error
-	OrgSecretFind(string, string) (*model.Secret, error)
-	OrgSecretList(string, *model.ListOptions) ([]*model.Secret, error)
+	OrgSecretFind(int64, string) (*model.Secret, error)
+	OrgSecretList(int64, *model.ListOptions) ([]*model.Secret, error)
 	GlobalSecretFind(string) (*model.Secret, error)
 	GlobalSecretList(*model.ListOptions) ([]*model.Secret, error)
 
@@ -138,23 +136,18 @@ type Store interface {
 	// Steps
 	StepLoad(int64) (*model.Step, error)
 	StepFind(*model.Pipeline, int) (*model.Step, error)
+	StepByUUID(string) (*model.Step, error)
 	StepChild(*model.Pipeline, int, string) (*model.Step, error)
 	StepList(*model.Pipeline) ([]*model.Step, error)
-	StepCreate([]*model.Step) error
 	StepUpdate(*model.Step) error
 	StepClear(*model.Pipeline) error
+	StepListFromWorkflowFind(*model.Workflow) ([]*model.Step, error)
 
 	// Logs
-	LogFind(*model.Step) (io.ReadCloser, error)
-	// TODO: since we do ReadAll in any case a ioReader is not the best idea
-	// so either find a way to write log in chunks by xorm ...
-	LogSave(*model.Step, io.Reader) error
-
-	// Files
-	FileList(*model.Pipeline, *model.ListOptions) ([]*model.File, error)
-	FileFind(*model.Step, string) (*model.File, error)
-	FileRead(*model.Step, string) (io.ReadCloser, error)
-	FileCreate(*model.File, io.Reader) error
+	LogFind(*model.Step) ([]*model.LogEntry, error)
+	LogSave(*model.Step, []*model.LogEntry) error
+	LogAppend(logEntry *model.LogEntry) error
+	LogDelete(*model.Step) error
 
 	// Tasks
 	// TaskList TODO: paginate & opt filter
@@ -191,6 +184,22 @@ type Store interface {
 	AgentList(p *model.ListOptions) ([]*model.Agent, error)
 	AgentUpdate(*model.Agent) error
 	AgentDelete(*model.Agent) error
+
+	// Workflow
+	WorkflowGetTree(*model.Pipeline) ([]*model.Workflow, error)
+	WorkflowsCreate([]*model.Workflow) error
+	WorkflowLoad(int64) (*model.Workflow, error)
+	WorkflowUpdate(*model.Workflow) error
+
+	// Org
+	OrgCreate(*model.Org) error
+	OrgGet(int64) (*model.Org, error)
+	OrgFindByName(string) (*model.Org, error)
+	OrgUpdate(*model.Org) error
+	OrgDelete(int64) error
+
+	// Org repos
+	OrgRepoList(*model.Org, *model.ListOptions) ([]*model.Repo, error)
 
 	// Store operations
 	Ping() error

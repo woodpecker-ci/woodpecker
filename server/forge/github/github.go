@@ -57,22 +57,22 @@ type Opts struct {
 func New(opts Opts) (forge.Forge, error) {
 	r := &client{
 		API:        defaultAPI,
-		URL:        defaultURL,
+		url:        defaultURL,
 		Client:     opts.Client,
 		Secret:     opts.Secret,
 		SkipVerify: opts.SkipVerify,
 		MergeRef:   opts.MergeRef,
 	}
 	if opts.URL != defaultURL {
-		r.URL = strings.TrimSuffix(opts.URL, "/")
-		r.API = r.URL + "/api/v3/"
+		r.url = strings.TrimSuffix(opts.URL, "/")
+		r.API = r.url + "/api/v3/"
 	}
 
 	return r, nil
 }
 
 type client struct {
-	URL        string
+	url        string
 	API        string
 	Client     string
 	Secret     string
@@ -83,6 +83,11 @@ type client struct {
 // Name returns the string name of this driver
 func (c *client) Name() string {
 	return "github"
+}
+
+// URL returns the root url of a configured forge
+func (c *client) URL() string {
+	return c.url
 }
 
 // Login authenticates the session and returns the forge user details.
@@ -272,10 +277,7 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 }
 
 func (c *client) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error) {
-	token := ""
-	if u != nil {
-		token = u.Token
-	}
+	token := common.UserToken(ctx, r, u)
 	client := c.newClientToken(ctx, token)
 
 	pullRequests, _, err := client.PullRequests.List(ctx, r.Owner, r.Name, &github.PullRequestListOptions{
@@ -348,6 +350,27 @@ func (c *client) OrgMembership(ctx context.Context, u *model.User, owner string)
 	return &model.OrgPerm{Member: org.GetState() == "active", Admin: org.GetRole() == "admin"}, nil
 }
 
+func (c *client) Org(ctx context.Context, u *model.User, owner string) (*model.Org, error) {
+	client := c.newClientToken(ctx, u.Token)
+
+	user, _, err := client.Users.Get(ctx, owner)
+	if user != nil && err == nil {
+		return &model.Org{
+			Name:   user.GetName(),
+			IsUser: true,
+		}, nil
+	}
+
+	org, _, err := client.Organizations.Get(ctx, owner)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.Org{
+		Name: org.GetName(),
+	}, nil
+}
+
 // helper function to return the GitHub oauth2 context using an HTTPClient that
 // disables TLS verification if disabled in the forge settings.
 func (c *client) newContext(ctx context.Context) context.Context {
@@ -380,8 +403,8 @@ func (c *client) newConfig(req *http.Request) *oauth2.Config {
 		ClientSecret: c.Secret,
 		Scopes:       []string{"repo", "repo:status", "user:email", "read:org"},
 		Endpoint: oauth2.Endpoint{
-			AuthURL:  fmt.Sprintf("%s/login/oauth/authorize", c.URL),
-			TokenURL: fmt.Sprintf("%s/login/oauth/access_token", c.URL),
+			AuthURL:  fmt.Sprintf("%s/login/oauth/authorize", c.url),
+			TokenURL: fmt.Sprintf("%s/login/oauth/access_token", c.url),
 		},
 		RedirectURL: redirect,
 	}
@@ -454,7 +477,7 @@ var reDeploy = regexp.MustCompile(`.+/deployments/(\d+)`)
 
 // Status sends the commit status to the forge.
 // An example would be the GitHub pull request status.
-func (c *client) Status(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, step *model.Step) error {
+func (c *client) Status(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, workflow *model.Workflow) error {
 	client := c.newClientToken(ctx, user.Token)
 
 	if pipeline.Event == model.EventDeploy {
@@ -473,10 +496,10 @@ func (c *client) Status(ctx context.Context, user *model.User, repo *model.Repo,
 	}
 
 	_, _, err := client.Repositories.CreateStatus(ctx, repo.Owner, repo.Name, pipeline.Commit, &github.RepoStatus{
-		Context:     github.String(common.GetPipelineStatusContext(repo, pipeline, step)),
-		State:       github.String(convertStatus(step.State)),
-		Description: github.String(common.GetPipelineStatusDescription(step.State)),
-		TargetURL:   github.String(common.GetPipelineStatusLink(repo, pipeline, step)),
+		Context:     github.String(common.GetPipelineStatusContext(repo, pipeline, workflow)),
+		State:       github.String(convertStatus(workflow.State)),
+		Description: github.String(common.GetPipelineStatusDescription(workflow.State)),
+		TargetURL:   github.String(common.GetPipelineStatusLink(repo, pipeline, workflow)),
 	})
 	return err
 }
@@ -506,10 +529,7 @@ func (c *client) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 
 // Branches returns the names of all branches for the named repository.
 func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]string, error) {
-	token := ""
-	if u != nil {
-		token = u.Token
-	}
+	token := common.UserToken(ctx, r, u)
 	client := c.newClientToken(ctx, token)
 
 	githubBranches, _, err := client.Repositories.ListBranches(ctx, r.Owner, r.Name, &github.BranchListOptions{
@@ -528,10 +548,7 @@ func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo, p *
 
 // BranchHead returns the sha of the head (latest commit) of the specified branch
 func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
-	token := ""
-	if u != nil {
-		token = u.Token
-	}
+	token := common.UserToken(ctx, r, u)
 	b, _, err := c.newClientToken(ctx, token).Repositories.GetBranch(ctx, r.Owner, r.Name, branch, true)
 	if err != nil {
 		return "", err

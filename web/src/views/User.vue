@@ -19,7 +19,10 @@
       </div>
 
       <div>
-        <h2 class="text-lg text-color">{{ $t('user.api_usage') }}</h2>
+        <div class="flex items-center">
+          <h2 class="text-lg text-color">{{ $t('user.api_usage') }}</h2>
+          <a :href="`${address}/swagger/index.html`" target="_blank" class="ml-4 text-link">Swagger UI</a>
+        </div>
         <pre class="cli-box">{{ usageWithCurl }}</pre>
       </div>
 

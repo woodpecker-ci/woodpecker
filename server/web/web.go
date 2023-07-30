@@ -15,6 +15,7 @@
 package web
 
 import (
+	"bytes"
 	"crypto/md5"
 	"fmt"
 	"net/http"
@@ -63,11 +64,31 @@ func New() (*gin.Engine, error) {
 	h := http.FileServer(&prefixFS{httpFS, rootPath})
 	e.GET(rootPath+"/favicon.svg", redirect(server.Config.Server.RootURL+"/favicons/favicon-light-default.svg", http.StatusPermanentRedirect))
 	e.GET(rootPath+"/favicons/*filepath", gin.WrapH(h))
-	e.GET(rootPath+"/assets/*filepath", gin.WrapH(h))
+	e.GET(rootPath+"/assets/*filepath", gin.WrapH(handleCustomFilesAndAssets(h)))
 
 	e.NoRoute(handleIndex)
 
 	return e, nil
+}
+
+func handleCustomFilesAndAssets(assetHandler http.Handler) http.HandlerFunc {
+	serveFileOrEmptyContent := func(w http.ResponseWriter, r *http.Request, localFileName string) {
+		if len(localFileName) > 0 {
+			http.ServeFile(w, r, localFileName)
+		} else {
+			// prefer zero content over sending a 404 Not Found
+			http.ServeContent(w, r, localFileName, time.Now(), bytes.NewReader([]byte{}))
+		}
+	}
+	return func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasSuffix(r.RequestURI, "/assets/custom.js") {
+			serveFileOrEmptyContent(w, r, server.Config.Server.CustomJsFile)
+		} else if strings.HasSuffix(r.RequestURI, "/assets/custom.css") {
+			serveFileOrEmptyContent(w, r, server.Config.Server.CustomCSSFile)
+		} else {
+			assetHandler.ServeHTTP(w, r)
+		}
+	}
 }
 
 // redirect return gin helper to redirect a request

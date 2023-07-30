@@ -20,7 +20,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
 )
 
 // Option configures a compiler option.
@@ -67,7 +67,7 @@ func WithSecret(secrets ...Secret) Option {
 // and system metadata. The metadata is used to remove steps from
 // the compiled pipeline configuration that should be skipped. The
 // metadata is also added to each container as environment variables.
-func WithMetadata(metadata frontend.Metadata) Option {
+func WithMetadata(metadata metadata.Metadata) Option {
 	return func(compiler *Compiler) {
 		compiler.metadata = metadata
 

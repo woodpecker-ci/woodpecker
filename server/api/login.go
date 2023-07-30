@@ -26,6 +26,7 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/router/middleware"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/server/store/types"
@@ -47,7 +48,7 @@ func HandleLogin(c *gin.Context) {
 
 func HandleAuth(c *gin.Context) {
 	_store := store.FromContext(c)
-	forge := session.Forge(c)
+	_forge := session.Forge(c)
 
 	// when dealing with redirects we may need to adjust the content type. I
 	// cannot, however, remember why, so need to revisit this line.
@@ -64,7 +65,7 @@ func HandleAuth(c *gin.Context) {
 	if tmpuser == nil {
 		return
 	}
-	config := ToConfig(c)
+	config := middleware.GetConfig(c)
 
 	// get the user from the database
 	u, err := _store.GetUserRemoteID(tmpuser.ForgeRemoteID, tmpuser.Login)
@@ -84,9 +85,9 @@ func HandleAuth(c *gin.Context) {
 		// if self-registration is enabled for whitelisted organizations we need to
 		// check the user's organization membership.
 		if len(config.Orgs) != 0 {
-			teams, terr := forge.Teams(c, tmpuser)
+			teams, terr := _forge.Teams(c, tmpuser)
 			if terr != nil || !config.IsMember(teams) {
-				log.Error().Msgf("cannot verify team membership for %s.", u.Login)
+				log.Error().Err(terr).Msgf("cannot verify team membership for %s.", u.Login)
 				c.Redirect(303, "/login?error=access_denied")
 				return
 			}
@@ -111,6 +112,15 @@ func HandleAuth(c *gin.Context) {
 			c.Redirect(http.StatusSeeOther, "/login?error=internal_error")
 			return
 		}
+
+		// if another user already have activated repos on behave of that user,
+		// the user was stored as org. now we adopt it to the user.
+		if org, err := _store.OrgFindByName(u.Login); err == nil && org != nil {
+			org.IsUser = true
+			if err := _store.OrgUpdate(org); err != nil {
+				log.Error().Err(err).Msgf("on user creation, could not mark org as user")
+			}
+		}
 	}
 
 	// update the user meta data and authorization data.
@@ -125,9 +135,9 @@ func HandleAuth(c *gin.Context) {
 	// if self-registration is enabled for whitelisted organizations we need to
 	// check the user's organization membership.
 	if len(config.Orgs) != 0 {
-		teams, terr := forge.Teams(c, u)
+		teams, terr := _forge.Teams(c, u)
 		if terr != nil || !config.IsMember(teams) {
-			log.Error().Msgf("cannot verify team membership for %s.", u.Login)
+			log.Error().Err(terr).Msgf("cannot verify team membership for %s.", u.Login)
 			c.Redirect(http.StatusSeeOther, "/login?error=access_denied")
 			return
 		}
@@ -145,6 +155,35 @@ func HandleAuth(c *gin.Context) {
 		log.Error().Msgf("cannot create token for %s. %s", u.Login, err)
 		c.Redirect(http.StatusSeeOther, "/login?error=internal_error")
 		return
+	}
+
+	repos, _ := _forge.Repos(c, u)
+	for _, forgeRepo := range repos {
+		dbRepo, err := _store.GetRepoForgeID(forgeRepo.ForgeRemoteID)
+		if err != nil && errors.Is(err, types.RecordNotExist) {
+			continue
+		}
+		if err != nil {
+			log.Error().Msgf("cannot list repos for %s. %s", u.Login, err)
+			c.Redirect(http.StatusSeeOther, "/login?error=internal_error")
+			return
+		}
+
+		if !dbRepo.IsActive {
+			continue
+		}
+
+		log.Debug().Msgf("Synced user permission for %s %s", u.Login, dbRepo.FullName)
+		perm := forgeRepo.Perm
+		perm.Repo = dbRepo
+		perm.RepoID = dbRepo.ID
+		perm.UserID = u.ID
+		perm.Synced = time.Now().Unix()
+		if err := _store.PermUpsert(perm); err != nil {
+			log.Error().Msgf("cannot update permissions for %s. %s", u.Login, err)
+			c.Redirect(http.StatusSeeOther, "/login?error=internal_error")
+			return
+		}
 	}
 
 	httputil.SetCookie(c.Writer, c.Request, "user_sess", tokenString)
@@ -199,10 +238,4 @@ type tokenPayload struct {
 	Access  string `json:"access_token,omitempty"`
 	Refresh string `json:"refresh_token,omitempty"`
 	Expires int64  `json:"expires_in,omitempty"`
-}
-
-// ToConfig returns the config from the Context
-func ToConfig(c *gin.Context) *model.Settings {
-	v := c.MustGet("config")
-	return v.(*model.Settings)
 }

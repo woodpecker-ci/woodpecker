@@ -2,14 +2,11 @@
   <Scaffold enable-tabs :go-back="goBack">
     <template #title>
       <span>
-        <router-link :to="{ name: 'repos-owner', params: { repoOwner: repo.owner } }" class="hover:underline">
+        <router-link :to="{ name: 'org', params: { orgId: repo.org_id } }" class="hover:underline">
           {{ repo.owner }}
         </router-link>
         /
-        <router-link
-          :to="{ name: 'repo', params: { repoOwner: repo.owner, repoName: repo.name } }"
-          class="hover:underline"
-        >
+        <router-link :to="{ name: 'repo' }" class="hover:underline">
           {{ repo.name }}
         </router-link>
         /
@@ -52,7 +49,7 @@ import GeneralTab from '~/components/repo/settings/GeneralTab.vue';
 import RegistriesTab from '~/components/repo/settings/RegistriesTab.vue';
 import SecretsTab from '~/components/repo/settings/SecretsTab.vue';
 import useNotifications from '~/compositions/useNotifications';
-import { useRouteBackOrDefault } from '~/compositions/useRouteBackOrDefault';
+import { useRouteBack } from '~/compositions/useRouteBack';
 import { Repo, RepoPermissions } from '~/lib/api/types';
 
 const notifications = useNotifications();
@@ -76,5 +73,5 @@ onMounted(async () => {
   }
 });
 
-const goBack = useRouteBackOrDefault({ name: 'repo' });
+const goBack = useRouteBack({ name: 'repo' });
 </script>

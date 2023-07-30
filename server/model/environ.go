@@ -35,7 +35,6 @@ type EnvironStore interface {
 }
 
 // Environ represents an environment variable.
-// swagger:model environ
 type Environ struct {
 	ID    int64  `json:"id"`
 	Name  string `json:"name"`

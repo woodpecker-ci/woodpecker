@@ -30,6 +30,16 @@ var flags = []cli.Flag{
 		Usage:   "set logging level",
 	},
 	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_LOG_XORM"},
+		Name:    "log-xorm",
+		Usage:   "enable xorm logging",
+	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_LOG_XORM_SQL"},
+		Name:    "log-xorm-sql",
+		Usage:   "enable xorm sql command logging",
+	},
+	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_DEBUG_PRETTY"},
 		Name:    "pretty",
 		Usage:   "enable pretty-printed debug output",
@@ -44,6 +54,11 @@ var flags = []cli.Flag{
 		EnvVars: []string{"WOODPECKER_HOST"},
 		Name:    "server-host",
 		Usage:   "server fully qualified url (<scheme>://<host>)",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_WEBHOOK_HOST"},
+		Name:    "server-webhook-host",
+		Usage:   "server fully qualified url for forge's Webhooks (<scheme>://<host>)",
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_ROOT_URL"},
@@ -73,6 +88,16 @@ var flags = []cli.Flag{
 		Usage:   "server ssl key path",
 	},
 	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_CUSTOM_CSS_FILE"},
+		Name:    "custom-css-file",
+		Usage:   "file path for the server to serve a custom .CSS file, used for customizing the UI",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_CUSTOM_JS_FILE"},
+		Name:    "custom-js-file",
+		Usage:   "file path for the server to serve a custom .JS file, used for customizing the UI",
+	},
+	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_LETS_ENCRYPT_EMAIL"},
 		Name:    "lets-encrypt-email",
 		Usage:   "let's encrypt email",
@@ -89,10 +114,11 @@ var flags = []cli.Flag{
 		Value:   ":9000",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_GRPC_SECRET"},
-		Name:    "grpc-secret",
-		Usage:   "grpc jwt secret",
-		Value:   "secret",
+		EnvVars:  []string{"WOODPECKER_GRPC_SECRET"},
+		Name:     "grpc-secret",
+		Usage:    "grpc jwt secret",
+		Value:    "secret",
+		FilePath: os.Getenv("WOODPECKER_GRPC_SECRET_FILE"),
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_METRICS_SERVER_ADDR"},
@@ -239,7 +265,12 @@ var flags = []cli.Flag{
 		EnvVars: []string{"WOODPECKER_STATUS_CONTEXT_FORMAT"},
 		Name:    "status-context-format",
 		Usage:   "status context format",
-		Value:   "{{ .context }}/{{ .event }}/{{ .pipeline }}",
+		Value:   "{{ .context }}/{{ .event }}/{{ .workflow }}",
+	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_MIGRATIONS_ALLOW_LONG"},
+		Name:    "migrations-allow-long",
+		Value:   false,
 	},
 	//
 	// resource limit parameters
@@ -398,52 +429,6 @@ var flags = []cli.Flag{
 		EnvVars: []string{"WOODPECKER_GITLAB_SKIP_VERIFY"},
 		Name:    "gitlab-skip-verify",
 		Usage:   "gitlab skip ssl verification",
-	},
-	//
-	// Bitbucket Stash
-	//
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_STASH"},
-		Name:    "stash",
-		Usage:   "stash driver is enabled",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_STASH_URL"},
-		Name:    "stash-server",
-		Usage:   "stash server address",
-	},
-	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_STASH_CONSUMER_KEY"},
-		Name:     "stash-consumer-key",
-		Usage:    "stash oauth1 consumer key",
-		FilePath: os.Getenv("WOODPECKER_STASH_CONSUMER_KEY_FILE"),
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_STASH_CONSUMER_RSA"},
-		Name:    "stash-consumer-rsa",
-		Usage:   "stash oauth1 private key file",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_STASH_CONSUMER_RSA_STRING"},
-		Name:    "stash-consumer-rsa-string",
-		Usage:   "stash oauth1 private key string",
-	},
-	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_STASH_GIT_USERNAME"},
-		Name:     "stash-git-username",
-		Usage:    "stash service account username",
-		FilePath: os.Getenv("WOODPECKER_STASH_GIT_USERNAME_FILE"),
-	},
-	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_STASH_GIT_PASSWORD"},
-		Name:     "stash-git-password",
-		Usage:    "stash service account password",
-		FilePath: os.Getenv("WOODPECKER_STASH_GIT_PASSWORD_FILE"),
-	},
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_STASH_SKIP_VERIFY"},
-		Name:    "stash-skip-verify",
-		Usage:   "stash skip ssl verification",
 	},
 	//
 	// development flags

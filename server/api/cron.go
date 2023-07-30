@@ -27,8 +27,16 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
-// GetCron gets a cron job by id from the database and writes
-// to the response in json format.
+// GetCron
+//
+//	@Summary	Get a cron job by id
+//	@Router		/repos/{repo_id}/cron/{cron} [get]
+//	@Produce	json
+//	@Success	200	{object}	Cron
+//	@Tags		Repository cron jobs
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		cron			path	string	true	"the cron job id"
 func GetCron(c *gin.Context) {
 	repo := session.Repo(c)
 	id, err := strconv.ParseInt(c.Param("cron"), 10, 64)
@@ -45,7 +53,16 @@ func GetCron(c *gin.Context) {
 	c.JSON(http.StatusOK, cron)
 }
 
-// RunCron starts a cron job now.
+// RunCron
+//
+//	@Summary	Start a cron job now
+//	@Router		/repos/{repo_id}/cron/{cron} [post]
+//	@Produce	json
+//	@Success	200	{object}	Pipeline
+//	@Tags		Repository cron jobs
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		cron			path	string	true	"the cron job id"
 func RunCron(c *gin.Context) {
 	repo := session.Repo(c)
 	_store := store.FromContext(c)
@@ -76,7 +93,16 @@ func RunCron(c *gin.Context) {
 	c.JSON(http.StatusOK, pl)
 }
 
-// PostCron persists the cron job to the database.
+// PostCron
+//
+//	@Summary	Persist/creat a cron job
+//	@Router		/repos/{repo_id}/cron [post]
+//	@Produce	json
+//	@Success	200	{object}	Cron
+//	@Tags		Repository cron jobs
+//	@Param		Authorization	header	string		true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		cronJob			body	Cron	true	"the new cron job"
 func PostCron(c *gin.Context) {
 	repo := session.Repo(c)
 	user := session.User(c)
@@ -123,7 +149,17 @@ func PostCron(c *gin.Context) {
 	c.JSON(http.StatusOK, cron)
 }
 
-// PatchCron updates the cron job in the database.
+// PatchCron
+//
+//	@Summary	Update a cron job
+//	@Router		/repos/{repo_id}/cron/{cron} [patch]
+//	@Produce	json
+//	@Success	200	{object}	Cron
+//	@Tags		Repository cron jobs
+//	@Param		Authorization	header	string		true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		cron			path	string		true	"the cron job id"
+//	@Param		cronJob			body	Cron	true	"the cron job data"
 func PatchCron(c *gin.Context) {
 	repo := session.Repo(c)
 	user := session.User(c)
@@ -182,8 +218,17 @@ func PatchCron(c *gin.Context) {
 	c.JSON(http.StatusOK, cron)
 }
 
-// GetCronList gets the cron job list from the database and writes
-// to the response in json format.
+// GetCronList
+//
+//	@Summary	Get the cron job list
+//	@Router		/repos/{repo_id}/cron [get]
+//	@Produce	json
+//	@Success	200	{array}	Cron
+//	@Tags		Repository cron jobs
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		page			query	int		false	"for response pagination, page offset number"	default(1)
+//	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
 func GetCronList(c *gin.Context) {
 	repo := session.Repo(c)
 	list, err := store.FromContext(c).CronList(repo, session.Pagination(c))
@@ -194,7 +239,16 @@ func GetCronList(c *gin.Context) {
 	c.JSON(http.StatusOK, list)
 }
 
-// DeleteCron deletes the named cron job from the database.
+// DeleteCron
+//
+//	@Summary	Delete a cron job by id
+//	@Router		/repos/{repo_id}/cron/{cron} [delete]
+//	@Produce	plain
+//	@Success	200
+//	@Tags		Repository cron jobs
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		cron			path	string	true	"the cron job id"
 func DeleteCron(c *gin.Context) {
 	repo := session.Repo(c)
 	id, err := strconv.ParseInt(c.Param("cron"), 10, 64)

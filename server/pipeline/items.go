@@ -79,6 +79,7 @@ func createPipelineItems(c context.Context,
 		Envs:  envs,
 		Link:  server.Config.Server.Host,
 		Yamls: yamls,
+		Forge: server.Config.Services.Forge,
 	}
 	pipelineItems, err := b.Build()
 	if err != nil {

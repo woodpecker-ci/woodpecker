@@ -1,4 +1,4 @@
-pipeline:
+steps:
   ping:
     image: postgres
     commands:
