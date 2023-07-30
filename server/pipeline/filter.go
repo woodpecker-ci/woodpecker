@@ -22,12 +22,12 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
-	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/forge"
 	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-func zeroSteps(currentPipeline *model.Pipeline, forgeYamlConfigs []*forge_types.FileMeta) bool {
+func zeroSteps(_forge forge.Forge, currentPipeline *model.Pipeline, forgeYamlConfigs []*forge_types.FileMeta) bool {
 	b := pipeline.StepBuilder{
 		Repo:  &model.Repo{},
 		Curr:  currentPipeline,
@@ -37,7 +37,7 @@ func zeroSteps(currentPipeline *model.Pipeline, forgeYamlConfigs []*forge_types.
 		Regs:  []*model.Registry{},
 		Link:  "",
 		Yamls: forgeYamlConfigs,
-		Forge: server.Config.Services.Forge,
+		Forge: _forge,
 	}
 
 	pipelineItems, err := b.Build()
@@ -53,10 +53,10 @@ func zeroSteps(currentPipeline *model.Pipeline, forgeYamlConfigs []*forge_types.
 
 // TODO: parse yaml once and not for each filter function (-> move server/pipeline/filter* into pipeline/step_builder)
 // Check if at least one pipeline step will be execute otherwise we will just ignore this webhook
-func checkIfFiltered(repo *model.Repo, p *model.Pipeline, forgeYamlConfigs []*forge_types.FileMeta) (bool, error) {
+func checkIfFiltered(_forge forge.Forge, repo *model.Repo, p *model.Pipeline, forgeYamlConfigs []*forge_types.FileMeta) (bool, error) {
 	log.Trace().Msgf("hook.branchFiltered(): pipeline branch: '%s' pipeline event: '%s' config count: %d", p.Branch, p.Event, len(forgeYamlConfigs))
 
-	matchMetadata := frontend.MetadataFromStruct(server.Config.Services.Forge, repo, p, nil, nil, "")
+	matchMetadata := frontend.MetadataFromStruct(_forge, repo, p, nil, nil, "")
 
 	for _, forgeYamlConfig := range forgeYamlConfigs {
 		substitutedConfigData, err := frontend.EnvVarSubst(string(forgeYamlConfig.Data), matchMetadata.Environ())

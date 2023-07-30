@@ -126,9 +126,9 @@ func setupEnvironService(c *cli.Context, _ store.Store) model.EnvironService {
 	return environments.Parse(c.StringSlice("environment"))
 }
 
-func setupMembershipService(_ *cli.Context) cache.MembershipService {
+func setupMembershipService(_ *cli.Context, _store store.Store) cache.MembershipService {
 	// TODO: implement membership service without forge
-	return cache.NewMembershipService(r)
+	return cache.NewMembershipService(_store)
 }
 
 // setupForge helper function to setup the forge from the CLI arguments.

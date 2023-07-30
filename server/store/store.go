@@ -170,10 +170,11 @@ type Store interface {
 	CronGetLock(*model.Cron, int64) (bool, error)
 
 	// Forge
-	ForgeList() ([]*model.Forge, error)
-	ForgeGet(int64) (*model.Forge, error)
-	ForgeFind(*model.Repo) (*model.Forge, error)
 	ForgeCreate(*model.Forge) error
+	ForgeGet(int64) (*model.Forge, error)
+	ForgeFindByRepo(*model.Repo) (*model.Forge, error)
+	ForgeFindByUser(*model.User) (*model.Forge, error)
+	ForgeList(p *model.ListOptions) ([]*model.Forge, error)
 	ForgeUpdate(*model.Forge) error
 	ForgeDelete(*model.Forge) error
 

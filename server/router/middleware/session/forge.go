@@ -17,6 +17,7 @@ func Forge(c *gin.Context) forge.Forge {
 	}
 	f, ok := v.(forge.Forge)
 	if !ok {
+		// TODO: handle error to avoid panic
 		return nil
 	}
 	return f
@@ -33,7 +34,7 @@ func SetForge() gin.HandlerFunc {
 			return
 		}
 
-		forge, err := loader.GetForge(_store, repo)
+		forge, err := loader.GetForgeFromRepo(_store, repo)
 		if err != nil {
 			log.Debug().Err(err).Msg("Cannot get forge")
 			c.AbortWithStatus(http.StatusInternalServerError)

@@ -23,14 +23,19 @@ func (s storage) ForgeGet(id int64) (*model.Forge, error) {
 	return forge, wrapGet(s.engine.ID(id).Get(forge))
 }
 
-func (s storage) ForgeFind(repo *model.Repo) (*model.Forge, error) {
+func (s storage) ForgeFindByRepo(repo *model.Repo) (*model.Forge, error) {
 	forge := new(model.Forge)
 	return forge, wrapGet(s.engine.Where("forge_id=?", repo.ForgeID).Get(forge))
 }
 
-func (s storage) ForgeList() ([]*model.Forge, error) {
+func (s storage) ForgeFindByUser(user *model.User) (*model.Forge, error) {
+	forge := new(model.Forge)
+	return forge, wrapGet(s.engine.Where("forge_id=?", user.ForgeID).Get(forge))
+}
+
+func (s storage) ForgeList(p *model.ListOptions) ([]*model.Forge, error) {
 	forges := make([]*model.Forge, 0, 10)
-	return forges, s.engine.Find(&forges)
+	return forges, s.paginate(p).Find(&forges)
 }
 
 func (s storage) ForgeCreate(forge *model.Forge) error {

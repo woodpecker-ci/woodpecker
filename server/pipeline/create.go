@@ -38,7 +38,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		return nil, fmt.Errorf(msg)
 	}
 
-	_forge, err := loader.GetForge(_store, repo)
+	_forge, err := loader.GetForgeFromRepo(_store, repo)
 	if err != nil {
 		msg := fmt.Sprintf("failure to load forge for repo '%s'", repo.FullName)
 		log.Error().Err(err).Str("repo", repo.FullName).Msg(msg)
@@ -71,7 +71,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	configFetcher := forge.NewConfigFetcher(_forge, server.Config.Services.Timeout, server.Config.Services.ConfigService, repoUser, repo, pipeline)
 	forgeYamlConfigs, configFetchErr = configFetcher.Fetch(ctx)
 	if configFetchErr == nil {
-		filtered, parseErr = checkIfFiltered(repo, pipeline, forgeYamlConfigs)
+		filtered, parseErr = checkIfFiltered(_forge, repo, pipeline, forgeYamlConfigs)
 		if parseErr == nil {
 			if filtered {
 				err := ErrFiltered{Msg: "branch does not match restrictions defined in yaml"}
@@ -79,7 +79,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 				return nil, err
 			}
 
-			if zeroSteps(pipeline, forgeYamlConfigs) {
+			if zeroSteps(_forge, pipeline, forgeYamlConfigs) {
 				err := ErrFiltered{Msg: "step conditions yield zero runnable steps"}
 				log.Debug().Str("repo", repo.FullName).Msgf("%v", err)
 				return nil, err

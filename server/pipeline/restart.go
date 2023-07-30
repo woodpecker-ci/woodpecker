@@ -38,7 +38,7 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 		return nil, &ErrBadRequest{Msg: fmt.Sprintf("cannot restart a pipeline with status %s", lastPipeline.Status)}
 	}
 
-	forge, err := loader.GetForge(store, repo)
+	forge, err := loader.GetForgeFromRepo(store, repo)
 	if err != nil {
 		msg := fmt.Sprintf("failure to load forge for repo '%s'", repo.FullName)
 		log.Error().Err(err).Str("repo", repo.FullName).Msg(msg)

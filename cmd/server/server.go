@@ -38,7 +38,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc/proto"
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/cron"
-	"github.com/woodpecker-ci/woodpecker/server/forge"
 	woodpeckerGrpcServer "github.com/woodpecker-ci/woodpecker/server/grpc"
 	"github.com/woodpecker-ci/woodpecker/server/logging"
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -278,7 +277,7 @@ func run(c *cli.Context) error {
 	return g.Wait()
 }
 
-func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
+func setupEvilGlobals(c *cli.Context, v store.Store) {
 	// forge
 	server.Config.Services.Timeout = c.Duration("forge-timeout")
 
@@ -302,7 +301,7 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 	server.Config.Services.Secrets = setupSecretService(c, v)
 
 	server.Config.Services.Environ = setupEnvironService(c, v)
-	server.Config.Services.Membership = setupMembershipService(c)
+	server.Config.Services.Membership = setupMembershipService(c, v)
 
 	server.Config.Services.SignaturePrivateKey, server.Config.Services.SignaturePublicKey = setupSignatureKeys(v)
 

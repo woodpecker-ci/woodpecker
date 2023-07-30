@@ -280,6 +280,7 @@ func GetPipelineConfig(c *gin.Context) {
 //	@Param		number			path	int		true	"the number of the pipeline"
 func CancelPipeline(c *gin.Context) {
 	_store := store.FromContext(c)
+	_forge := session.Forge(c)
 	repo := session.Repo(c)
 	user := session.User(c)
 	num, _ := strconv.ParseInt(c.Params.ByName("number"), 10, 64)
@@ -290,7 +291,7 @@ func CancelPipeline(c *gin.Context) {
 		return
 	}
 
-	if err := pipeline.Cancel(c, _store, repo, user, pl); err != nil {
+	if err := pipeline.Cancel(c, _forge, _store, repo, user, pl); err != nil {
 		handlePipelineErr(c, err)
 	} else {
 		c.Status(http.StatusNoContent)

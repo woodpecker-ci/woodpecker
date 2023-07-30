@@ -54,7 +54,7 @@ func HandleAuth(c *gin.Context) {
 	// cannot, however, remember why, so need to revisit this line.
 	c.Writer.Header().Del("Content-Type")
 
-	tmpuser, err := forge.Login(c, c.Writer, c.Request)
+	tmpuser, err := _forge.Login(c, c.Writer, c.Request)
 	if err != nil {
 		log.Error().Msgf("cannot authenticate user. %s", err)
 		c.Redirect(http.StatusSeeOther, "/login?error=oauth_error")

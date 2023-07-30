@@ -119,6 +119,7 @@ func MustUser() gin.HandlerFunc {
 func MustOrgMember(admin bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		_store := store.FromContext(c)
+		_forge := Forge(c)
 
 		user := User(c)
 		if user == nil {
@@ -145,7 +146,7 @@ func MustOrgMember(admin bool) gin.HandlerFunc {
 			return
 		}
 
-		perm, err := server.Config.Services.Membership.Get(c, user, org.Name)
+		perm, err := server.Config.Services.Membership.Get(c, _forge, user, org.Name)
 		if err != nil {
 			log.Error().Msgf("Failed to check membership: %v", err)
 			c.String(http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))

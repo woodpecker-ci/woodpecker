@@ -3914,6 +3914,9 @@ const docTemplate = `{
                 "default_branch": {
                     "type": "string"
                 },
+                "forge_id": {
+                    "type": "integer"
+                },
                 "forge_remote_id": {
                     "description": "ForgeRemoteID is the unique identifier for the repository on the forge.",
                     "type": "string"
@@ -4186,6 +4189,9 @@ const docTemplate = `{
                 "email": {
                     "description": "Email is the email address for this user.\n\nrequired: true",
                     "type": "string"
+                },
+                "forge_id": {
+                    "type": "integer"
                 },
                 "id": {
                     "description": "the id for this user.\n\nrequired: true",

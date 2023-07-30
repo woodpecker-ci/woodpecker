@@ -26,7 +26,7 @@ import (
 
 // Decline update the status to declined for blocked pipeline because of a gated repo
 func Decline(ctx context.Context, store store.Store, pipeline *model.Pipeline, user *model.User, repo *model.Repo) (*model.Pipeline, error) {
-	forge, err := loader.GetForge(store, repo)
+	forge, err := loader.GetForgeFromRepo(store, repo)
 	if err != nil {
 		msg := fmt.Sprintf("failure to load forge for repo '%s'", repo.FullName)
 		log.Error().Err(err).Str("repo", repo.FullName).Msg(msg)

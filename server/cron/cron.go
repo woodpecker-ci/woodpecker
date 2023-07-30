@@ -112,7 +112,7 @@ func CreatePipeline(ctx context.Context, store store.Store, cron *model.Cron) (*
 		return nil, nil, err
 	}
 
-	_forge, err := loader.GetForge(store, repo)
+	_forge, err := loader.GetForgeFromRepo(store, repo)
 	if err != nil {
 		return nil, nil, err
 	}

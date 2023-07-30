@@ -390,7 +390,7 @@ func (s *RPC) updateForgeStatus(ctx context.Context, repo *model.Repo, pipeline 
 		return
 	}
 
-	_forge, err := loader.GetForge(s.store, repo)
+	_forge, err := loader.GetForgeFromRepo(s.store, repo)
 	if err != nil {
 		log.Error().Err(err).Msgf("can not get forge for repo '%s'", repo.FullName)
 		return

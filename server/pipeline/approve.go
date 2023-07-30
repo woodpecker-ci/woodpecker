@@ -33,7 +33,7 @@ func Approve(ctx context.Context, store store.Store, currentPipeline *model.Pipe
 		return nil, ErrBadRequest{Msg: fmt.Sprintf("cannot decline a pipeline with status %s", currentPipeline.Status)}
 	}
 
-	forge, err := loader.GetForge(store, repo)
+	forge, err := loader.GetForgeFromRepo(store, repo)
 	if err != nil {
 		msg := fmt.Sprintf("failure to load forge for repo '%s'", repo.FullName)
 		log.Error().Err(err).Str("repo", repo.FullName).Msg(msg)

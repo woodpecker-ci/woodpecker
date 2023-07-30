@@ -21,13 +21,14 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/queue"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
 // Cancel the pipeline and returns the status.
-func Cancel(ctx context.Context, store store.Store, repo *model.Repo, user *model.User, pipeline *model.Pipeline) error {
+func Cancel(ctx context.Context, _forge forge.Forge, store store.Store, repo *model.Repo, user *model.User, pipeline *model.Pipeline) error {
 	if pipeline.Status != model.StatusRunning && pipeline.Status != model.StatusPending && pipeline.Status != model.StatusBlocked {
 		return &ErrBadRequest{Msg: "Cannot cancel a non-running or non-pending or non-blocked pipeline"}
 	}
@@ -88,7 +89,7 @@ func Cancel(ctx context.Context, store store.Store, repo *model.Repo, user *mode
 		return err
 	}
 
-	updatePipelineStatus(ctx, killedPipeline, repo, user)
+	updatePipelineStatus(ctx, _forge, killedPipeline, repo, user)
 
 	if killedPipeline.Workflows, err = store.WorkflowGetTree(killedPipeline); err != nil {
 		return err
@@ -102,6 +103,7 @@ func Cancel(ctx context.Context, store store.Store, repo *model.Repo, user *mode
 
 func cancelPreviousPipelines(
 	ctx context.Context,
+	_forge forge.Forge,
 	_store store.Store,
 	pipeline *model.Pipeline,
 	repo *model.Repo,
@@ -152,7 +154,7 @@ func cancelPreviousPipelines(
 			continue
 		}
 
-		if err = Cancel(ctx, _store, repo, user, active); err != nil {
+		if err = Cancel(ctx, _forge, _store, repo, user, active); err != nil {
 			log.Error().
 				Err(err).
 				Str("Ref", active.Ref).

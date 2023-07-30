@@ -21,6 +21,7 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/store"
 
 	"github.com/lafriks/ttlcache/v3"
 )
@@ -28,26 +29,26 @@ import (
 // MembershipService is a service to check for user membership.
 type MembershipService interface {
 	// Get returns if the user is a member of the organization.
-	Get(ctx context.Context, u *model.User, org string) (*model.OrgPerm, error)
+	Get(ctx context.Context, _forge forge.Forge, u *model.User, org string) (*model.OrgPerm, error)
 }
 
 type membershipCache struct {
-	forge forge.Forge
 	cache *ttlcache.Cache[string, *model.OrgPerm]
+	store store.Store
 	ttl   time.Duration
 }
 
 // NewMembershipService creates a new membership service.
-func NewMembershipService(f forge.Forge) MembershipService {
+func NewMembershipService(_store store.Store) MembershipService {
 	return &membershipCache{
 		ttl:   10 * time.Minute,
-		forge: f,
+		store: _store,
 		cache: ttlcache.New(ttlcache.WithDisableTouchOnHit[string, *model.OrgPerm]()),
 	}
 }
 
 // Get returns if the user is a member of the organization.
-func (c *membershipCache) Get(ctx context.Context, u *model.User, org string) (*model.OrgPerm, error) {
+func (c *membershipCache) Get(ctx context.Context, _forge forge.Forge, u *model.User, org string) (*model.OrgPerm, error) {
 	key := fmt.Sprintf("%s-%s", u.ForgeRemoteID, org)
 	// Error can be safely ignored, as cache can only return error from loaders.
 	item, _ := c.cache.Get(key)
@@ -55,7 +56,12 @@ func (c *membershipCache) Get(ctx context.Context, u *model.User, org string) (*
 		return item.Value(), nil
 	}
 
-	perm, err := c.forge.OrgMembership(ctx, u, org)
+	// _forge, err := loader.GetForgeFromUser(c.store, u)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	perm, err := _forge.OrgMembership(ctx, u, org)
 	if err != nil {
 		return nil, err
 	}
