@@ -908,6 +908,6 @@ Woodpecker gives the ability to configure privileged mode in the YAML. You can u
  services:
    docker:
      image: docker:dind
-     command: [ "--storage-driver=vfs", "--tls=false" ]
+     commands: dockerd-entrypoint.sh --storage-driver=vfs --tls=false
 +    privileged: true
 ```

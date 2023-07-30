@@ -23,8 +23,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-const defaultBranch = "main"
-
 const (
 	statusPending = "pending"
 	statusSuccess = "success"
@@ -97,9 +95,6 @@ func convertRepo(from *github.Repository) *model.Repo {
 		Perm:          convertPerm(from.GetPermissions()),
 		SCMKind:       model.RepoGit,
 	}
-	if len(repo.Branch) == 0 {
-		repo.Branch = defaultBranch
-	}
 	return repo
 }
 
@@ -155,9 +150,6 @@ func convertRepoHook(eventRepo *github.PushEventRepository) *model.Repo {
 		Clone:         eventRepo.GetCloneURL(),
 		Branch:        eventRepo.GetDefaultBranch(),
 		SCMKind:       model.RepoGit,
-	}
-	if repo.Branch == "" {
-		repo.Branch = defaultBranch
 	}
 	if repo.FullName == "" {
 		repo.FullName = repo.Owner + "/" + repo.Name

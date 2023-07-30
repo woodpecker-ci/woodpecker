@@ -59,7 +59,7 @@ func convertRepo(from *internal.Repo, perm *internal.RepoPerm) *model.Repo {
 		IsSCMPrivate:  from.IsPrivate,
 		Avatar:        from.Owner.Links.Avatar.Href,
 		SCMKind:       model.SCMKind(from.Scm),
-		Branch:        "main",
+		Branch:        from.Mainbranch.Name,
 		Perm:          convertPerm(perm),
 	}
 	if repo.SCMKind == model.RepoHg {

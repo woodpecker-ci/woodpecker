@@ -53,10 +53,6 @@ func (g *GitLab) convertGitLabRepo(_repo *gitlab.Project) (*model.Repo, error) {
 		},
 	}
 
-	if len(repo.Branch) == 0 { // TODO: do we need that?
-		repo.Branch = "main"
-	}
-
 	if len(repo.Avatar) != 0 && !strings.HasPrefix(repo.Avatar, "http") {
 		repo.Avatar = fmt.Sprintf("%s/%s", g.url, repo.Avatar)
 	}
@@ -101,11 +97,7 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 		repo.Clone = target.HTTPURL
 	}
 
-	if target.DefaultBranch != "" {
-		repo.Branch = target.DefaultBranch
-	} else {
-		repo.Branch = "main"
-	}
+	repo.Branch = target.DefaultBranch
 
 	if target.AvatarURL != "" {
 		repo.Avatar = target.AvatarURL
