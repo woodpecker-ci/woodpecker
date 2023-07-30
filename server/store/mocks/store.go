@@ -471,6 +471,126 @@ func (_m *Store) DeleteUser(_a0 *model.User) error {
 	return r0
 }
 
+// ForgeCreate provides a mock function with given fields: _a0
+func (_m *Store) ForgeCreate(_a0 *model.Forge) error {
+	ret := _m.Called(_a0)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*model.Forge) error); ok {
+		r0 = rf(_a0)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// ForgeDelete provides a mock function with given fields: _a0
+func (_m *Store) ForgeDelete(_a0 *model.Forge) error {
+	ret := _m.Called(_a0)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*model.Forge) error); ok {
+		r0 = rf(_a0)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// ForgeFind provides a mock function with given fields: _a0
+func (_m *Store) ForgeFind(_a0 *model.Repo) (*model.Forge, error) {
+	ret := _m.Called(_a0)
+
+	var r0 *model.Forge
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*model.Repo) (*model.Forge, error)); ok {
+		return rf(_a0)
+	}
+	if rf, ok := ret.Get(0).(func(*model.Repo) *model.Forge); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Forge)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(*model.Repo) error); ok {
+		r1 = rf(_a0)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ForgeGet provides a mock function with given fields: _a0
+func (_m *Store) ForgeGet(_a0 int64) (*model.Forge, error) {
+	ret := _m.Called(_a0)
+
+	var r0 *model.Forge
+	var r1 error
+	if rf, ok := ret.Get(0).(func(int64) (*model.Forge, error)); ok {
+		return rf(_a0)
+	}
+	if rf, ok := ret.Get(0).(func(int64) *model.Forge); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Forge)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(int64) error); ok {
+		r1 = rf(_a0)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ForgeList provides a mock function with given fields:
+func (_m *Store) ForgeList() ([]*model.Forge, error) {
+	ret := _m.Called()
+
+	var r0 []*model.Forge
+	var r1 error
+	if rf, ok := ret.Get(0).(func() ([]*model.Forge, error)); ok {
+		return rf()
+	}
+	if rf, ok := ret.Get(0).(func() []*model.Forge); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.Forge)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ForgeUpdate provides a mock function with given fields: _a0
+func (_m *Store) ForgeUpdate(_a0 *model.Forge) error {
+	ret := _m.Called(_a0)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*model.Forge) error); ok {
+		r0 = rf(_a0)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // GetActivePipelineList provides a mock function with given fields: repo
 func (_m *Store) GetActivePipelineList(repo *model.Repo) ([]*model.Pipeline, error) {
 	ret := _m.Called(repo)
