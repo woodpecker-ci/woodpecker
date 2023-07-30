@@ -15,25 +15,13 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
-// setupForge helper function to setup the forge from the CLI arguments.
 func GetForgeFromRepo(store store.Store, repo *model.Repo) (forge.Forge, error) {
 	forge, err := store.ForgeFindByRepo(repo)
 	if err != nil {
 		return nil, err
 	}
 
-	switch forge.Type {
-	case "github":
-		return setupGitHub(forge)
-	case "gitlab":
-		return setupGitLab(forge)
-	case "bitbucket":
-		return setupBitbucket(forge)
-	case "gitea":
-		return setupGitea(forge)
-	default:
-		return nil, fmt.Errorf("version control system not configured")
-	}
+	return setupForge(forge)
 }
 
 func GetForgeFromUser(store store.Store, user *model.User) (forge.Forge, error) {
@@ -42,6 +30,10 @@ func GetForgeFromUser(store store.Store, user *model.User) (forge.Forge, error) 
 		return nil, err
 	}
 
+	return setupForge(forge)
+}
+
+func setupForge(forge *model.Forge) (forge.Forge, error) {
 	switch forge.Type {
 	case "github":
 		return setupGitHub(forge)
@@ -54,7 +46,6 @@ func GetForgeFromUser(store store.Store, user *model.User) (forge.Forge, error) 
 	default:
 		return nil, fmt.Errorf("version control system not configured")
 	}
-
 }
 
 // helper function to setup the Bitbucket forge from the CLI arguments.
