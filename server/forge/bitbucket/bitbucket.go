@@ -234,7 +234,6 @@ func (c *config) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model
 			return nil, err
 		}
 		for _, file := range filesResp.Values {
-			totalFiles++
 			_, filename := filepath.Split(file.Path)
 			repoFile := forge_types.FileMeta{
 				Name: filename,
@@ -259,7 +258,7 @@ func (c *config) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model
 		if err != nil {
 			return nil, err
 		}
-		params, err := url.ParseQuery(myUrl.RawQuery)
+		params, err := url.ParseQuery(nextPageUrl.RawQuery)
 		if err != nil {
 			return nil, err
 		}
