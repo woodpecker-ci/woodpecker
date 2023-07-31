@@ -232,7 +232,6 @@ func (c *config) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model
 		if err != nil {
 			return nil, err
 		}
-		totalFiles := 0
 		for _, file := range filesResp.Values {
 			totalFiles++
 			_, filename := filepath.Split(file.Path)
