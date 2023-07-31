@@ -10,6 +10,8 @@ require (
 	github.com/antonmedv/expr v1.12.5
 	github.com/bmatcuk/doublestar/v4 v4.6.0
 	github.com/caddyserver/certmagic v0.17.2
+	github.com/djherbis/buffer v1.2.0
+	github.com/djherbis/nio/v3 v3.0.1
 	github.com/docker/cli v20.10.24+incompatible
 	github.com/docker/distribution v2.8.2+incompatible
 	github.com/docker/docker v20.10.24+incompatible

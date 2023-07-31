@@ -15,9 +15,10 @@
 package agent
 
 import (
-	"io"
 	"sync"
 
+	"github.com/djherbis/buffer"
+	"github.com/djherbis/nio/v3"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
@@ -26,6 +27,8 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/multipart"
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
 )
+
+const writeBufferSize = 10240 // 10kb
 
 func (r *Runner) createLogger(logger zerolog.Logger, uploads *sync.WaitGroup, work *rpc.Pipeline) pipeline.LogFunc {
 	return func(step *backend.Step, rc multipart.Reader) error {
@@ -49,8 +52,9 @@ func (r *Runner) createLogger(logger zerolog.Logger, uploads *sync.WaitGroup, wo
 
 		loglogger.Debug().Msg("log stream opened")
 
+		writeBuf := buffer.New(writeBufferSize) // In memory Buffer
 		logStream := rpc.NewLineWriter(r.client, step.UUID, secrets...)
-		if _, err := io.Copy(logStream, part); err != nil {
+		if _, err := nio.Copy(logStream, part, writeBuf); err != nil {
 			log.Error().Err(err).Msg("copy limited logStream part")
 		}
 
