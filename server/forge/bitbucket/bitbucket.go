@@ -255,7 +255,7 @@ func (c *config) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model
 		if filesResp.Next == nil {
 			break
 		}
-		myUrl, err := url.Parse(*filesResp.Next)
+		nextPageUrl, err := url.Parse(*filesResp.Next)
 		if err != nil {
 			return nil, err
 		}
