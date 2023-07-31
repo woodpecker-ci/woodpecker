@@ -4,14 +4,14 @@ steps:
     commands:
       - echo "test"
     when:
-      branch: master
+      branch: main
 
   when-branch-array:
     image: alpine
     commands:
       - echo "test"
     when:
-      branch: [master, deploy]
+      branch: [main, deploy]
 
   when-event:
     image: alpine
@@ -32,7 +32,7 @@ steps:
     commands:
       - echo "test"
     when:
-      ref: "refs/tags/v**"
+      ref: 'refs/tags/v**'
 
   when-status:
     image: alpine
@@ -53,7 +53,7 @@ steps:
     commands:
       - echo "test"
     when:
-      platform: [ linux/*, windows/amd64 ]
+      platform: [linux/*, windows/amd64]
 
   when-environment:
     image: alpine
@@ -84,7 +84,7 @@ steps:
     commands:
       - echo "test"
     when:
-      path: "folder/**"
+      path: 'folder/**'
 
   when-path-array:
     image: alpine
@@ -92,8 +92,8 @@ steps:
       - echo "test"
     when:
       path:
-        - "folder/**"
-        - "**/*.c"
+        - 'folder/**'
+        - '**/*.c'
 
   when-path-include-exclude:
     image: alpine
@@ -101,9 +101,9 @@ steps:
       - echo "test"
     when:
       path:
-        include: [ '.woodpecker/*.yml', '*.ini' ]
-        exclude: [ '*.md', 'docs/**' ]
-        ignore_message: "[ALL]"
+        include: ['.woodpecker/*.yml', '*.ini']
+        exclude: ['*.md', 'docs/**']
+        ignore_message: '[ALL]'
 
   when-repo:
     image: alpine
@@ -127,7 +127,7 @@ steps:
     commands:
       - echo "test"
     when:
-      cron: "update locales"
+      cron: 'update locales'
       event: cron
 
   when-cron-list:

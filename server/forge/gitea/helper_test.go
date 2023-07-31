@@ -34,7 +34,7 @@ func Test_parse(t *testing.T) {
 			buf := bytes.NewBufferString(fixtures.HookPush)
 			hook, err := parsePush(buf)
 			g.Assert(err).IsNil()
-			g.Assert(hook.Ref).Equal("refs/heads/master")
+			g.Assert(hook.Ref).Equal("refs/heads/main")
 			g.Assert(hook.After).Equal("ef98532add3b2feb7a137426bba1248724367df5")
 			g.Assert(hook.Before).Equal("4b2626259b5a97b6b4eab5e6cca66adb986b672b")
 			g.Assert(hook.Compare).Equal("http://gitea.golang.org/gordon/hello-world/compare/4b2626259b5a97b6b4eab5e6cca66adb986b672b...ef98532add3b2feb7a137426bba1248724367df5")
@@ -86,8 +86,8 @@ func Test_parse(t *testing.T) {
 			g.Assert(hook.PullRequest.Body).Equal("please merge")
 			g.Assert(hook.PullRequest.State).Equal(gitea.StateOpen)
 			g.Assert(hook.PullRequest.Poster.UserName).Equal("gordon")
-			g.Assert(hook.PullRequest.Base.Name).Equal("master")
-			g.Assert(hook.PullRequest.Base.Ref).Equal("master")
+			g.Assert(hook.PullRequest.Base.Name).Equal("main")
+			g.Assert(hook.PullRequest.Base.Ref).Equal("main")
 			g.Assert(hook.PullRequest.Head.Name).Equal("feature/changes")
 			g.Assert(hook.PullRequest.Head.Ref).Equal("feature/changes")
 		})
@@ -100,7 +100,7 @@ func Test_parse(t *testing.T) {
 			g.Assert(pipeline.Commit).Equal(hook.After)
 			g.Assert(pipeline.Ref).Equal(hook.Ref)
 			g.Assert(pipeline.Link).Equal(hook.Commits[0].URL)
-			g.Assert(pipeline.Branch).Equal("master")
+			g.Assert(pipeline.Branch).Equal("main")
 			g.Assert(pipeline.Message).Equal(hook.Commits[0].Message)
 			g.Assert(pipeline.Avatar).Equal("http://1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87")
 			g.Assert(pipeline.Author).Equal(hook.Sender.UserName)
@@ -137,8 +137,8 @@ func Test_parse(t *testing.T) {
 			g.Assert(pipeline.Commit).Equal(hook.PullRequest.Head.Sha)
 			g.Assert(pipeline.Ref).Equal("refs/pull/1/head")
 			g.Assert(pipeline.Link).Equal(hook.PullRequest.URL)
-			g.Assert(pipeline.Branch).Equal("master")
-			g.Assert(pipeline.Refspec).Equal("feature/changes:master")
+			g.Assert(pipeline.Branch).Equal("main")
+			g.Assert(pipeline.Refspec).Equal("feature/changes:main")
 			g.Assert(pipeline.Message).Equal(hook.PullRequest.Title)
 			g.Assert(pipeline.Avatar).Equal("http://1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87")
 			g.Assert(pipeline.Author).Equal(hook.PullRequest.Poster.UserName)
@@ -201,14 +201,14 @@ func Test_parse(t *testing.T) {
 				CloneURL:      "http://gitea.golang.org/gophers/hello-world.git",
 				HTMLURL:       "http://gitea.golang.org/gophers/hello-world",
 				Private:       true,
-				DefaultBranch: "master",
+				DefaultBranch: "main",
 				Permissions:   &gitea.Permission{Admin: true},
 			}
 			repo := toRepo(&from)
 			g.Assert(repo.FullName).Equal(from.FullName)
 			g.Assert(repo.Owner).Equal(from.Owner.UserName)
 			g.Assert(repo.Name).Equal("hello-world")
-			g.Assert(repo.Branch).Equal("master")
+			g.Assert(repo.Branch).Equal("main")
 			g.Assert(repo.Link).Equal(from.HTMLURL)
 			g.Assert(repo.Clone).Equal(from.CloneURL)
 			g.Assert(repo.Avatar).Equal(from.Owner.AvatarURL)

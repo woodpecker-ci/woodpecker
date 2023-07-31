@@ -337,7 +337,7 @@ Always use authentication to clone repositories even if they are public. Needed 
 List of event names that will be canceled when a new pipeline for the same context (tag, branch) is created.
 
 ### `WOODPECKER_DEFAULT_CLONE_IMAGE`
-> Default is defined in [shared/constant/constant.go](https://github.com/woodpecker-ci/woodpecker/blob/master/shared/constant/constant.go)
+> Default is defined in [shared/constant/constant.go](https://github.com/woodpecker-ci/woodpecker/blob/main/shared/constant/constant.go)
 
 The default docker image to be used when cloning the repo
 
@@ -357,7 +357,7 @@ The maximum time in minutes you can set in the repo settings before a pipeline g
 Configures the session expiration time.
 
 ### `WOODPECKER_ESCALATE`
-> Defaults are defined in [shared/constant/constant.go](https://github.com/woodpecker-ci/woodpecker/blob/master/shared/constant/constant.go)
+> Defaults are defined in [shared/constant/constant.go](https://github.com/woodpecker-ci/woodpecker/blob/main/shared/constant/constant.go)
 
 Docker images to run in privileged mode. Only change if you are sure what you do!
 
