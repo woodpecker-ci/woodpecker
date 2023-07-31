@@ -227,8 +227,9 @@ func (c *config) File(ctx context.Context, u *model.User, r *model.Repo, p *mode
 func (c *config) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model.Pipeline, f string) ([]*forge_types.FileMeta, error) {
 	var page *string
 	repoPathFiles := []*forge_types.FileMeta{}
+	client := c.newClient(ctx, u)
 	for {
-		filesResp, err := c.newClient(ctx, u).GetRepoFiles(r.Owner, r.Name, p.Commit, f, page)
+		filesResp, err := client.GetRepoFiles(r.Owner, r.Name, p.Commit, f, page)
 		if err != nil {
 			return nil, err
 		}
