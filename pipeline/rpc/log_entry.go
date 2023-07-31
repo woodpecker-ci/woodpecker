@@ -18,6 +18,7 @@ package rpc
 import (
 	"context"
 	"fmt"
+	"io"
 	"strings"
 	"time"
 
@@ -64,7 +65,7 @@ type LineWriter struct {
 }
 
 // NewLineWriter returns a new line reader.
-func NewLineWriter(peer Peer, stepUUID string, secret ...string) *LineWriter {
+func NewLineWriter(peer Peer, stepUUID string, secret ...string) io.Writer {
 	return &LineWriter{
 		peer:     peer,
 		stepUUID: stepUUID,
@@ -95,14 +96,4 @@ func (w *LineWriter) Write(p []byte) (n int, err error) {
 
 	w.lines = append(w.lines, line)
 	return len(p), nil
-}
-
-// Lines returns the line history
-func (w *LineWriter) Lines() []*LogEntry {
-	return w.lines
-}
-
-// Clear clears the line history
-func (w *LineWriter) Clear() {
-	w.lines = w.lines[:0]
 }
