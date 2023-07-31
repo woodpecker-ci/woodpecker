@@ -101,9 +101,12 @@ version: '3'
 services:
   woodpecker-server:
     [...]
+    volumes:
+      - [...]
++     - /home/user/.docker/config.json:/root/.docker/config.json:ro
     environment:
       - [...]
-+     - WOODPECKER_DOCKER_CONFIG=/home/user/.docker/config.json
++     - WOODPECKER_DOCKER_CONFIG=/root/.docker/config.json
 ```
 
 ## Handling sensitive data in docker-compose and docker-swarm
