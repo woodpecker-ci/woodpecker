@@ -73,7 +73,7 @@ export default defineComponent({
     const authentication = useAuthentication();
     const { darkMode } = useDarkMode();
     const docsUrl = config.docs || undefined;
-    const apiUrl = `${config.rootURL ?? ''}/swagger/index.html`;
+    const apiUrl = `${config.rootPath ?? ''}/swagger/index.html`;
 
     function doLogin() {
       authentication.authenticate(route.fullPath);
