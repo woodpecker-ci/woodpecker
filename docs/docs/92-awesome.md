@@ -2,20 +2,20 @@
 
 A curated list of awesome things related to Woodpecker-CI.
 
-If you have some missing resources, please feel free to [open a pull-request](https://github.com/woodpecker-ci/woodpecker/edit/master/docs/docs/92-awesome.md) and add them.
+If you have some missing resources, please feel free to [open a pull-request](https://github.com/woodpecker-ci/woodpecker/edit/main/docs/docs/92-awesome.md) and add them.
 
 ## Official Resources
 
-- [Woodpecker CI pipeline configs](https://github.com/woodpecker-ci/woodpecker/tree/master/.woodpecker) - Complex setup containing different kind of pipelines
-  - [Golang tests](https://github.com/woodpecker-ci/woodpecker/blob/master/.woodpecker/test.yml)
-  - [Typescript, eslint & Vue](https://github.com/woodpecker-ci/woodpecker/blob/master/.woodpecker/web.yml)
-  - [Docusaurus & publishing to GitHub Pages](https://github.com/woodpecker-ci/woodpecker/blob/master/.woodpecker/docs.yml)
-  - [Docker container building](https://github.com/woodpecker-ci/woodpecker/blob/master/.woodpecker/docker.yml)
-  - [Helm chart linting & releasing](https://github.com/woodpecker-ci/woodpecker/blob/master/.woodpecker/helm.yml)
+- [Woodpecker CI pipeline configs](https://github.com/woodpecker-ci/woodpecker/tree/main/.woodpecker) - Complex setup containing different kind of pipelines
+  - [Golang tests](https://github.com/woodpecker-ci/woodpecker/blob/main/.woodpecker/test.yml)
+  - [Typescript, eslint & Vue](https://github.com/woodpecker-ci/woodpecker/blob/main/.woodpecker/web.yml)
+  - [Docusaurus & publishing to GitHub Pages](https://github.com/woodpecker-ci/woodpecker/blob/main/.woodpecker/docs.yml)
+  - [Docker container building](https://github.com/woodpecker-ci/woodpecker/blob/main/.woodpecker/docker.yml)
+  - [Helm chart linting & releasing](https://github.com/woodpecker-ci/woodpecker/blob/main/.woodpecker/helm.yml)
 
 ## Projects using Woodpecker
 
-- [Woodpecker-CI](https://github.com/woodpecker-ci/woodpecker/tree/master/.woodpecker) itself
+- [Woodpecker-CI](https://github.com/woodpecker-ci/woodpecker/tree/main/.woodpecker) itself
 - [All official plugins](https://github.com/woodpecker-ci?q=plugin&type=all)
 - [dessalines/thumb-key](https://github.com/dessalines/thumb-key/blob/main/.woodpecker.yml) - Android Jetpack compose linting and building
 

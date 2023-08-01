@@ -266,16 +266,16 @@ steps:
     settings:
       channel: dev
 +   when:
-+     - branch: master
++     - branch: main
 ```
 
-> The step now triggers on master, but also if the target branch of a pull request is `master`. Add an event condition to limit it further to pushes on master only.
+> The step now triggers on main branch, but also if the target branch of a pull request is `main`. Add an event condition to limit it further to pushes on main only.
 
-Execute a step if the branch is `master` or `develop`:
+Execute a step if the branch is `main` or `develop`:
 
 ```yaml
 when:
-  - branch: [master, develop]
+  - branch: [main, develop]
 ```
 
 Execute a step if the branch starts with `prefix/*`:
@@ -297,7 +297,7 @@ Execute a step using custom include and exclude logic:
 ```yaml
 when:
   - branch:
-      include: [ master, release/* ]
+      include: [ main, release/* ]
       exclude: [ release/1.0.0, release/1.1.* ]
 ```
 
@@ -765,7 +765,7 @@ Example conditional execution by branch:
 
 ```diff
 +when:
-+  branch: master
++  branch: main
 +
  steps:
    slack:
@@ -774,13 +774,13 @@ Example conditional execution by branch:
        channel: dev
 ```
 
-> The step now triggers on master, but also if the target branch of a pull request is `master`. Add an event condition to limit it further to pushes on master only.
+> The step now triggers on main, but also if the target branch of a pull request is `main`. Add an event condition to limit it further to pushes on main only.
 
-Execute a step if the branch is `master` or `develop`:
+Execute a step if the branch is `main` or `develop`:
 
 ```diff
 when:
-  branch: [master, develop]
+  branch: [main, develop]
 ```
 
 Execute a step if the branch starts with `prefix/*`:
@@ -795,7 +795,7 @@ Execute a step using custom include and exclude logic:
 ```diff
 when:
   branch:
-    include: [ master, release/* ]
+    include: [ main, release/* ]
     exclude: [ release/1.0.0, release/1.1.* ]
 ```
 
