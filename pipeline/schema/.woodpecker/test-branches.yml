@@ -1,4 +1,4 @@
-branches: master
+branches: main
 
 steps:
   build:

@@ -208,13 +208,4 @@ var flags = []cli.Flag{
 		Usage:   "duration to wait before retrying to connect to the server",
 		Value:   time.Second * 2,
 	},
-
-	// DEPRECATED
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_AGENT_ID_FILE"},
-		Name:    "agent-id-config-path",
-		Usage:   "agent-id config file path",
-		Value:   "/etc/woodpecker/agent-id.conf",
-		Hidden:  true,
-	},
 }

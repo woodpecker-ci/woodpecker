@@ -1,6 +1,6 @@
 branches:
-  include: master
-  exclude: [ develop, feature/* ]
+  include: main
+  exclude: [develop, feature/*]
 
 steps:
   build:

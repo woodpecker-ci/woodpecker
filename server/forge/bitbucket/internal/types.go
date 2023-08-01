@@ -99,15 +99,19 @@ type LinkClone struct {
 }
 
 type Repo struct {
-	UUID      string  `json:"uuid"`
-	Owner     Account `json:"owner"`
-	Name      string  `json:"name"`
-	FullName  string  `json:"full_name"`
-	Language  string  `json:"language"`
-	IsPrivate bool    `json:"is_private"`
-	Scm       string  `json:"scm"`
-	Desc      string  `json:"desc"`
-	Links     Links   `json:"links"`
+	UUID       string  `json:"uuid"`
+	Owner      Account `json:"owner"`
+	Name       string  `json:"name"`
+	FullName   string  `json:"full_name"`
+	Language   string  `json:"language"`
+	IsPrivate  bool    `json:"is_private"`
+	Scm        string  `json:"scm"`
+	Desc       string  `json:"desc"`
+	Links      Links   `json:"links"`
+	Mainbranch struct {
+		Type string `json:"type"`
+		Name string `json:"name"`
+	} `json:"mainbranch"`
 }
 
 type RepoResp struct {
@@ -270,4 +274,12 @@ type PullRequestResp struct {
 type PullRequest struct {
 	ID    uint   `json:"id"`
 	Title string `json:"title"`
+}
+
+type CommitsResp struct {
+	Values []*Commit `json:"values"`
+}
+
+type Commit struct {
+	Hash string `json:"hash"`
 }

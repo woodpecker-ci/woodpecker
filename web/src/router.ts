@@ -107,7 +107,7 @@ const routes: RouteRecordRaw[] = [
     ],
   },
   {
-    path: `${rootPath}/org/:orgName`,
+    path: `${rootPath}/orgs/:orgId`,
     component: (): Component => import('~/views/org/OrgWrapper.vue'),
     props: true,
     children: [
@@ -125,6 +125,11 @@ const routes: RouteRecordRaw[] = [
         props: true,
       },
     ],
+  },
+  {
+    path: `${rootPath}/org/:orgName/:pathMatch(.*)*`,
+    component: (): Component => import('~/views/org/OrgDeprecatedRedirect.vue'),
+    props: true,
   },
   {
     path: `${rootPath}/admin`,

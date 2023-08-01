@@ -19,7 +19,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"os"
-	"strconv"
 	"strings"
 
 	"github.com/rs/zerolog/log"
@@ -38,7 +37,7 @@ func readAgentConfig(agentConfigPath string) AgentConfig {
 
 	rawAgentConf, err := os.ReadFile(agentConfigPath)
 	if err != nil {
-		if !os.IsNotExist(err) {
+		if os.IsNotExist(err) {
 			log.Info().Msgf("no agent config found at '%s', start with defaults", agentConfigPath)
 		} else {
 			log.Error().Err(err).Msgf("could not open agent config at '%s'", agentConfigPath)
@@ -66,29 +65,9 @@ func writeAgentConfig(conf AgentConfig, agentConfigPath string) {
 	oldRawAgentConf, _ := os.ReadFile(agentConfigPath)
 
 	// if config differ write to disk
-	if bytes.Equal(rawAgentConf, oldRawAgentConf) {
+	if !bytes.Equal(rawAgentConf, oldRawAgentConf) {
 		if err := os.WriteFile(agentConfigPath, rawAgentConf, 0o644); err != nil {
 			log.Error().Err(err).Msgf("could not persist agent config at '%s'", agentConfigPath)
 		}
 	}
-}
-
-// deprecated
-func readAgentID(agentIDConfigPath string) int64 {
-	const defaultAgentIDValue = int64(-1)
-
-	rawAgentID, fileErr := os.ReadFile(agentIDConfigPath)
-	if fileErr != nil {
-		log.Debug().Err(fileErr).Msgf("could not open agent-id config file from %s", agentIDConfigPath)
-		return defaultAgentIDValue
-	}
-
-	strAgentID := strings.TrimSpace(string(rawAgentID))
-	agentID, parseErr := strconv.ParseInt(strAgentID, 10, 64)
-	if parseErr != nil {
-		log.Warn().Err(parseErr).Msg("could not parse agent-id config file content to int64")
-		return defaultAgentIDValue
-	}
-
-	return agentID
 }

@@ -489,11 +489,6 @@ func (c *Gitea) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.
 		return nil, nil, err
 	}
 
-	if repo == nil || pipeline == nil {
-		// ignore  hook
-		return nil, nil, nil
-	}
-
 	if pipeline.Event == model.EventPull && len(pipeline.ChangedFiles) == 0 {
 		index, err := strconv.ParseInt(strings.Split(pipeline.Ref, "/")[2], 10, 64)
 		if err != nil {
@@ -531,6 +526,32 @@ func (c *Gitea) OrgMembership(ctx context.Context, u *model.User, owner string) 
 	}
 
 	return &model.OrgPerm{Member: member, Admin: perm.IsAdmin || perm.IsOwner}, nil
+}
+
+func (c *Gitea) Org(ctx context.Context, u *model.User, owner string) (*model.Org, error) {
+	client, err := c.newClientToken(ctx, u.Token)
+	if err != nil {
+		return nil, err
+	}
+
+	user, _, err := client.GetUserInfo(owner)
+	if user != nil && err == nil {
+		return &model.Org{
+			Name:    user.UserName,
+			IsUser:  true,
+			Private: user.Visibility != gitea.VisibleTypePublic,
+		}, nil
+	}
+
+	org, _, err := client.GetOrg(owner)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.Org{
+		Name:    org.UserName,
+		Private: gitea.VisibleType(org.Visibility) != gitea.VisibleTypePublic,
+	}, nil
 }
 
 // helper function to return the Gitea client with Token

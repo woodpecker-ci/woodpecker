@@ -13,6 +13,9 @@ export type Repo = {
   // Currently this is either 'git' or 'hg' (Mercurial).
   scm: string;
 
+  // The id of the organization that owns the repository.
+  org_id: number;
+
   // The owner of the repository.
   owner: string;
 
