@@ -29,7 +29,7 @@ func main() {
   fmt.Println(user, err)
 
   // gets the named repository information
-  repo, err := client.Repo("woodpecker-ci", "woodpecker")
+  repo, err := client.RepoLookup("woodpecker-ci/woodpecker")
   fmt.Println(repo, err)
 }
 ```
