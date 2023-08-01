@@ -36,6 +36,7 @@ docker-compose.yml
 *.sqlite
 *.out
 /.env
+/.pnpm-store
 extras/
 /build/
 /dist/

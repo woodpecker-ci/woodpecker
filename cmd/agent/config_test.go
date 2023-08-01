@@ -15,7 +15,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"testing"
 
@@ -23,39 +22,40 @@ import (
 )
 
 func TestReadAgentIDFileNotExists(t *testing.T) {
-	assert.EqualValues(t, -1, readAgentID("foobar.conf"))
+	assert.EqualValues(t, -1, readAgentConfig("foobar.conf").AgentID)
 }
 
 func TestReadAgentIDFileExists(t *testing.T) {
-	parameters := []struct {
-		input    string
-		expected int64
-	}{
-		{"42", 42},
-		{"42\n", 42},
-		{"  \t42\t\r\t", 42},
-		{"0", 0},
-		{"-1", -1},
-		{"foo", -1},
-		{"1f", -1},
-		{"", -1},
-		{"-42", -42},
+	tmpF, errTmpF := os.CreateTemp("", "tmp_")
+	if !assert.NoError(t, errTmpF) {
+		t.FailNow()
+	}
+	defer os.Remove(tmpF.Name())
+
+	// there is an existing config
+	errWrite := os.WriteFile(tmpF.Name(), []byte(`{"agent_id":3}`), 0o644)
+	if !assert.NoError(t, errWrite) {
+		t.FailNow()
 	}
 
-	for i := range parameters {
-		t.Run(fmt.Sprintf("Testing [%v]", i), func(t *testing.T) {
-			tmpF, errTmpF := os.CreateTemp("", "tmp_")
-			if !assert.NoError(t, errTmpF) {
-				t.FailNow()
-			}
+	// read existing config
+	actual := readAgentConfig(tmpF.Name())
+	assert.EqualValues(t, AgentConfig{3}, actual)
 
-			errWrite := os.WriteFile(tmpF.Name(), []byte(parameters[i].input), 0o644)
-			if !assert.NoError(t, errWrite) {
-				t.FailNow()
-			}
+	// update existing config and check
+	actual.AgentID = 33
+	writeAgentConfig(actual, tmpF.Name())
+	actual = readAgentConfig(tmpF.Name())
+	assert.EqualValues(t, 33, actual.AgentID)
 
-			actual := readAgentID(tmpF.Name())
-			assert.EqualValues(t, parameters[i].expected, actual)
-		})
+	tmpF2, errTmpF := os.CreateTemp("", "tmp_")
+	if !assert.NoError(t, errTmpF) {
+		t.FailNow()
 	}
+	defer os.Remove(tmpF2.Name())
+
+	// write new config
+	writeAgentConfig(actual, tmpF2.Name())
+	actual = readAgentConfig(tmpF2.Name())
+	assert.EqualValues(t, 33, actual.AgentID)
 }

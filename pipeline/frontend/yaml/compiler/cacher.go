@@ -27,7 +27,7 @@ func (c *volumeCacher) Restore(repo, branch string, mounts []string) *yaml_types
 			"path":        "/cache",
 			"restore":     true,
 			"file":        strings.Replace(branch, "/", "_", -1) + ".tar",
-			"fallback_to": "master.tar",
+			"fallback_to": "main.tar",
 		},
 		Volumes: yaml_types.Volumes{
 			Volumes: []*yaml_types.Volume{

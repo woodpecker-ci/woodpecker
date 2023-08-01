@@ -30,6 +30,16 @@ var flags = []cli.Flag{
 		Usage:   "set logging level",
 	},
 	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_LOG_XORM"},
+		Name:    "log-xorm",
+		Usage:   "enable xorm logging",
+	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_LOG_XORM_SQL"},
+		Name:    "log-xorm-sql",
+		Usage:   "enable xorm sql command logging",
+	},
+	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_DEBUG_PRETTY"},
 		Name:    "pretty",
 		Usage:   "enable pretty-printed debug output",

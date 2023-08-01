@@ -1,7 +1,9 @@
 when:
-  - event: pull_request
+  - event: [pull_request, tag]
   - event: push
-    branch: [ main, release/* ]
+    branch:
+      - ${CI_REPO_DEFAULT_BRANCH}
+      - release/*
 
 variables:
   - &golang_image 'golang:1.20.2'
@@ -66,15 +68,6 @@ steps:
   lint-editorconfig:
     image: mstruebing/editorconfig-checker
     group: test
-
-  # Fixed with https://github.com/woodpecker-ci/woodpecker/pull/1753
-  # securitycheck:
-  #   group: test
-  #   image: aquasec/trivy:latest
-  #   commands:
-  #     - trivy fs --exit-code 0 --skip-dirs web/ --skip-dirs docs/ --severity UNKNOWN,LOW .
-  #     - trivy fs --exit-code 1 --skip-dirs web/ --skip-dirs docs/ --severity MEDIUM,HIGH,CRITICAL .
-  #   when: *when
 
   test:
     image: *golang_image
