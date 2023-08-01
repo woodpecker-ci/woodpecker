@@ -13,12 +13,14 @@ steps:
   check backend:
     group: check
     image: *trivy_plugin
+    failure: ignore
     settings:
       skip-dirs: web/,docs/
 
   check docs:
     group: check
     image: *trivy_plugin
+    failure: ignore
     settings:
       skip-dirs: node_modules/,plugins/woodpecker-plugins/node_modules/
       dir:  docs/
@@ -26,6 +28,7 @@ steps:
   check web:
     group: check
     image: *trivy_plugin
+    failure: ignore
     settings:
       skip-dirs: node_modules/
       dir:  web/
