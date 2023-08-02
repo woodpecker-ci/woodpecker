@@ -40,7 +40,7 @@
           <a
             :id="`L${line.number}`"
             :href="`#L${line.number}`"
-            class="text-wp-text-alt-100 whitespace-nowrap select-none text-right pl-2 pr-6"
+            class="text-wp-code-text-alt-100 whitespace-nowrap select-none text-right pl-2 pr-6"
             :class="{
               'bg-opacity-40 dark:bg-opacity-50 bg-red-600 dark:bg-red-800': line.type === 'error',
               'bg-opacity-40 dark:bg-opacity-50 bg-yellow-600 dark:bg-yellow-800': line.type === 'warning',
@@ -61,7 +61,7 @@
           />
           <!-- eslint-enable vue/no-v-html -->
           <span
-            class="text-wp-text-alt-100 whitespace-nowrap select-none text-right pr-1"
+            class="text-wp-code-text-alt-100 whitespace-nowrap select-none text-right pr-1"
             :class="{
               'bg-opacity-40 dark:bg-opacity-50 bg-red-600 dark:bg-red-800': line.type === 'error',
               'bg-opacity-40 dark:bg-opacity-50 bg-yellow-600 dark:bg-yellow-800': line.type === 'warning',
@@ -81,7 +81,7 @@
 
       <div
         v-if="step?.end_time !== undefined"
-        class="flex items-center w-full bg-wp-code-100 text-md text-wp-text-alt-100 p-4 font-bold"
+        class="flex items-center w-full bg-wp-code-100 text-md text-wp-code-text-alt-100 p-4 font-bold"
       >
         <PipelineStatusIcon :status="step.state" class="!h-4 !w-4" />
         <span class="px-2">{{ $t('repo.pipeline.exit_code', { exitCode: step.exit_code }) }}</span>
