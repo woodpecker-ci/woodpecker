@@ -43,11 +43,9 @@ import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
-import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import useApiClient from '~/compositions/useApiClient';
-import { setI18nLanguage } from '~/compositions/useI18n';
 
-const { t, locale } = useI18n();
+const { t } = useI18n();
 
 const apiClient = useApiClient();
 const token = ref<string | undefined>();
@@ -56,8 +54,7 @@ onMounted(async () => {
   token.value = await apiClient.getToken();
 });
 
-// eslint-disable-next-line no-restricted-globals
-const address = `${location.protocol}//${location.host}`; // port is included in location.host
+const address = `${window.location.protocol}//${window.location.host}`; // port is included in location.host
 
 const usageWithShell = computed(() => {
   let usage = `export WOODPECKER_SERVER="${address}"\n`;

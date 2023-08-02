@@ -2,7 +2,7 @@
   <Panel>
     <div class="flex flex-col">
       <div class="flex items-center text-wp-text-100 font-bold mb-2">
-        <label v-bind="$attrs">{{ $t('user.settings.language') }}</label>
+        <label>{{ $t('user.settings.language') }}</label>
       </div>
       <SelectField v-model="selectedLocale" :options="localeOptions" />
     </div>
@@ -18,10 +18,9 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import SelectField from '~/components/form/SelectField.vue';
-import InputField from '~/components/form/InputField.vue';
 import { setI18nLanguage } from '~/compositions/useI18n';
 
-const { t, locale } = useI18n();
+const { locale } = useI18n();
 
 const localeOptions = computed(() =>
   SUPPORTED_LOCALES.map((supportedLocale) => ({
