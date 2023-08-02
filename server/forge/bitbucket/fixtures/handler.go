@@ -38,6 +38,7 @@ func Handler() http.Handler {
 	e.GET("/2.0/repositories/:owner", getUserRepos)
 	e.GET("/2.0/user/", getUser)
 	e.GET("/2.0/user/permissions/repositories", getPermissions)
+	e.GET("/2.0/repositories/:owner/:name/commits/:commit", getBranchHead)
 
 	return e
 }
@@ -116,6 +117,15 @@ func getRepoFile(c *gin.Context) {
 		c.String(404, "")
 	default:
 		c.String(200, repoFilePayload)
+	}
+}
+
+func getBranchHead(c *gin.Context) {
+	switch c.Param("commit") {
+	case "branch_name":
+		c.String(200, branchCommitsPayload)
+	default:
+		c.String(404, "")
 	}
 }
 
@@ -243,6 +253,22 @@ const repoDirPayload = `
         {
             "path": ".gitignore",
             "type": "commit_file"
+        }
+    ]
+}
+`
+
+const branchCommitsPayload = `
+{
+    "values": [
+        {
+            "hash": "branch_head_name"
+        },
+        {
+            "hash": "random1"
+        },
+        {
+            "hash": "random2"
         }
     ]
 }
