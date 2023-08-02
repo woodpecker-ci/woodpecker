@@ -16,8 +16,9 @@ package fixtures
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 // Handler returns an http.Handler that is capable of handling a variety of mock

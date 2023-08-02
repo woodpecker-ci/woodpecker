@@ -22,16 +22,15 @@ import (
 	"net/url"
 	"path/filepath"
 
-	"golang.org/x/oauth2"
-
-	shared_utils "github.com/woodpecker-ci/woodpecker/shared/utils"
-
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/forge/bitbucket/internal"
 	"github.com/woodpecker-ci/woodpecker/server/forge/common"
 	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	shared_utils "github.com/woodpecker-ci/woodpecker/shared/utils"
+
+	"golang.org/x/oauth2"
 )
 
 // Bitbucket cloud endpoints.
