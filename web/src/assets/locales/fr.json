@@ -161,44 +161,27 @@
     "branches": "Branches",
     "build": {
       "actions": {
-        "cancel": "Annuler",
         "cancel_success": "Pipeline annulé",
-        "canceled": "Cette étape a été annulée.",
         "log_auto_scroll": "Automatiquement défiler vers le bas",
-        "log_auto_scroll_off": "Désactiver le défilement automatique",
         "log_download": "Télécharger",
-        "restart": "Redémarrer",
         "restart_success": "Pipeline redémarré"
       },
-      "config": "Configuration",
       "created": "Crée",
       "event": {
-        "cron": "Tache périodique",
         "deploy": "Déploiement",
-        "pr": "Pull Request",
-        "push": "Push",
-        "tag": "Tag"
+        "push": "Push"
       },
       "execution_error": "Erreur d'execution",
-      "exit_code": "Code de retour {exitCode}",
       "files": "Fichiers changés ({files})",
-      "loading": "Chargement…",
       "log_download_error": "Il y a eu une erreur lors du téléchargement du fichier de journal",
-      "no_files": "Aucun fichier n'a été modifié.",
       "no_pipeline_steps": "Aucune étape disponible !",
-      "no_pipelines": "Aucun pipeline n'a démarré pour le moment.",
       "pipeline": "Pipeline #{buildId}",
-      "pipelines_for": "Pipelines pour la branche \"{branch}\"",
       "protected": {
         "approve": "Approuver",
-        "approve_success": "Pipeline approuvé",
         "awaits": "Ce pipeline attends d'être approuvé par un mainteneur !",
-        "decline": "Refuser",
-        "decline_success": "Pipeline refusé",
-        "declined": "Le pipeline a été refusé !"
+        "decline_success": "Pipeline refusé"
       },
-      "step_not_started": "L'étape n'a pas démarré encore.",
-      "tasks": "Tâches"
+      "step_not_started": "L'étape n'a pas démarré encore."
     },
     "deploy_pipeline": {
       "enter_target": "Environnement de déploiement ciblé",
@@ -315,12 +298,10 @@
       "badge": {
         "badge": "Badge",
         "branch": "Branche",
-        "markdown": "Markdown",
         "type": "Syntaxe",
         "type_html": "HTML",
         "type_markdown": "Markdown",
-        "type_url": "URL",
-        "url_branch": "URL pour la branche spécifique"
+        "type_url": "URL"
       },
       "crons": {
         "add": "Ajouter une tâche planifiée",
