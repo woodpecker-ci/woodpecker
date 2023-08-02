@@ -42,6 +42,7 @@
   --wp-code-100: theme('colors.int-wp-secondary.300');
   --wp-code-200: theme('colors.int-wp-secondary.600');
   --wp-code-text-100: theme('colors.gray.200');
+  --wp-code-text-alt-100: theme('colors.gray.300');
 
   --wp-link-100: theme('colors.blue.600');
   --wp-link-200: theme('colors.blue.700');
@@ -90,6 +91,7 @@
   --wp-code-100: theme('colors.int-wp-secondary.700');
   --wp-code-200: theme('colors.int-wp-secondary.800');
   --wp-code-text-100: theme('colors.gray.300');
+  --wp-code-text-alt-100: theme('colors.gray.400');
 
   --wp-link-100: theme('colors.blue.400');
   --wp-link-200: theme('colors.blue.500');
