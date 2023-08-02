@@ -22,6 +22,7 @@
         <div class="flex items-center">
           <h2 class="text-lg text-wp-text-100">{{ $t('user.api_usage') }}</h2>
           <a
+            v-if="enableSwagger"
             :href="`${address}/swagger/index.html`"
             target="_blank"
             class="ml-4 text-wp-link-100 hover:text-wp-link-200"
@@ -56,9 +57,11 @@ import Button from '~/components/atomic/Button.vue';
 import SelectField from '~/components/form/SelectField.vue';
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import useApiClient from '~/compositions/useApiClient';
+import useConfig from '~/compositions/useConfig';
 import { setI18nLanguage } from '~/compositions/useI18n';
 
 const { t, locale } = useI18n();
+const { enableSwagger } = useConfig();
 
 const apiClient = useApiClient();
 const token = ref<string | undefined>();
