@@ -1,7 +1,7 @@
 <template>
   <Panel>
-    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-gray-600">
-      <h1 class="text-xl ml-2 text-color">{{ $t('repo.settings.general.general') }}</h1>
+    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-wp-background-100">
+      <h1 class="text-xl ml-2 text-wp-text-100">{{ $t('repo.settings.general.general') }}</h1>
     </div>
 
     <form v-if="repoSettings" class="flex flex-col" @submit.prevent="saveRepoSettings">
@@ -11,15 +11,12 @@
       >
         <TextField
           v-model="repoSettings.config_file"
-          class="max-w-124"
           :placeholder="$t('repo.settings.general.pipeline_path.default')"
         />
         <template #description>
-          <i18n-t keypath="repo.settings.general.pipeline_path.desc" tag="p" class="text-sm text-color-alt">
-            <span class="bg-gray-300 dark:bg-dark-700 rounded-md px-1">{{
-              $t('repo.settings.general.pipeline_path.desc_path_example')
-            }}</span>
-            <span class="bg-gray-300 dark:bg-dark-700 rounded-md px-1">/</span>
+          <i18n-t keypath="repo.settings.general.pipeline_path.desc" tag="p" class="text-sm text-wp-text-alt-100">
+            <span class="code-box-inline px-1">{{ $t('repo.settings.general.pipeline_path.desc_path_example') }}</span>
+            <span class="code-box-inline px-1">/</span>
           </i18n-t>
         </template>
       </InputField>
