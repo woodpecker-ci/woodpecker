@@ -28,7 +28,7 @@ import (
 const (
 	pathSelf           = "%s/api/user"
 	pathRepos          = "%s/api/user/repos"
-	pathRepoPost       = "%s/api/repos"
+	pathRepoPost       = "%s/api/repos?forge_remote_id=%d"
 	pathRepo           = "%s/api/repos/%d"
 	pathRepoLookup     = "%s/api/repos/lookup/%s"
 	pathRepoMove       = "%s/api/repos/%d/move?to=%s"
@@ -175,7 +175,7 @@ func (c *client) RepoListOpts(all bool) ([]*Repo, error) {
 // RepoPost activates a repository.
 func (c *client) RepoPost(forgeRemoteID int64) (*Repo, error) {
 	out := new(Repo)
-	uri := fmt.Sprintf(pathRepoPost+"?forge_remote_id=%d", c.addr, forgeRemoteID)
+	uri := fmt.Sprintf(pathRepoPost, c.addr, forgeRemoteID)
 	err := c.post(uri, nil, out)
 	return out, err
 }
