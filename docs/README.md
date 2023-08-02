@@ -31,5 +31,5 @@ Deployment happen via [CI](https://github.com/woodpecker-ci/woodpecker/blob/d59f
 To manually build the website and push it exec:
 
 ```sh
-GIT_USER=woodpecker-bot USE_SSH=true DEPLOYMENT_BRANCH=master pnpm deploy
+GIT_USER=woodpecker-bot USE_SSH=true DEPLOYMENT_BRANCH=main pnpm deploy
 ```

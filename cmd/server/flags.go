@@ -30,6 +30,16 @@ var flags = []cli.Flag{
 		Usage:   "set logging level",
 	},
 	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_LOG_XORM"},
+		Name:    "log-xorm",
+		Usage:   "enable xorm logging",
+	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_LOG_XORM_SQL"},
+		Name:    "log-xorm-sql",
+		Usage:   "enable xorm sql command logging",
+	},
+	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_DEBUG_PRETTY"},
 		Name:    "pretty",
 		Usage:   "enable pretty-printed debug output",
@@ -419,52 +429,6 @@ var flags = []cli.Flag{
 		EnvVars: []string{"WOODPECKER_GITLAB_SKIP_VERIFY"},
 		Name:    "gitlab-skip-verify",
 		Usage:   "gitlab skip ssl verification",
-	},
-	//
-	// Bitbucket Stash
-	//
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_STASH"},
-		Name:    "stash",
-		Usage:   "stash driver is enabled",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_STASH_URL"},
-		Name:    "stash-server",
-		Usage:   "stash server address",
-	},
-	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_STASH_CONSUMER_KEY"},
-		Name:     "stash-consumer-key",
-		Usage:    "stash oauth1 consumer key",
-		FilePath: os.Getenv("WOODPECKER_STASH_CONSUMER_KEY_FILE"),
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_STASH_CONSUMER_RSA"},
-		Name:    "stash-consumer-rsa",
-		Usage:   "stash oauth1 private key file",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_STASH_CONSUMER_RSA_STRING"},
-		Name:    "stash-consumer-rsa-string",
-		Usage:   "stash oauth1 private key string",
-	},
-	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_STASH_GIT_USERNAME"},
-		Name:     "stash-git-username",
-		Usage:    "stash service account username",
-		FilePath: os.Getenv("WOODPECKER_STASH_GIT_USERNAME_FILE"),
-	},
-	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_STASH_GIT_PASSWORD"},
-		Name:     "stash-git-password",
-		Usage:    "stash service account password",
-		FilePath: os.Getenv("WOODPECKER_STASH_GIT_PASSWORD_FILE"),
-	},
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_STASH_SKIP_VERIFY"},
-		Name:    "stash-skip-verify",
-		Usage:   "stash skip ssl verification",
 	},
 	//
 	// development flags

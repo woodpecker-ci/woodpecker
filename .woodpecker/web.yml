@@ -1,3 +1,10 @@
+when:
+  - event: [pull_request, tag]
+  - event: push
+    branch:
+      - ${CI_REPO_DEFAULT_BRANCH}
+      - release/*
+
 variables:
   - &node_image 'node:18-alpine'
   - &when
@@ -48,14 +55,6 @@ steps:
     commands:
       - corepack enable
       - pnpm typecheck
-    when: *when
-
-  securitycheck:
-    group: test
-    image: aquasec/trivy:latest
-    commands:
-      - trivy fs --exit-code 0 --skip-dirs node_modules/ --severity UNKNOWN,LOW web/
-      - trivy fs --exit-code 1 --skip-dirs node_modules/ --severity MEDIUM,HIGH,CRITICAL web/
     when: *when
 
   test:

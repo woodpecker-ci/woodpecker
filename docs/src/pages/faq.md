@@ -18,7 +18,7 @@ Woodpecker is having two different kinds of releases: **stable** and **next**.
 
 The **stable** releases (currently version 0.15) is a long-term supported (LTS) stable version. The stable releases are only getting bugfixes.
 
-The **next** release contains all bugfixes and features from `master`. Normally it should be pretty stable, but as its frequently updated, it might contain some bugs from time to time.
+The **next** release contains all bugfixes and features from `main` branch. Normally it should be pretty stable, but as its frequently updated, it might contain some bugs from time to time.
 
 If you want all (new) features of Woodpecker and are willing to accept some possible bugs from time to time, you should use the next release otherwise use the stable release.
 
@@ -44,7 +44,7 @@ If that does not work, try to make sure the container can reach your git server.
 ```yaml
 skip_clone: true
 
-pipeline:
+steps:
   build:
     image: debian:stable-backports
     commands:

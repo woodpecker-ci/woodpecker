@@ -77,7 +77,7 @@ func (c *config) URL() string {
 // Login authenticates an account with Bitbucket using the oauth2 protocol. The
 // Bitbucket account details are returned when the user is successfully authenticated.
 func (c *config) Login(ctx context.Context, w http.ResponseWriter, req *http.Request) (*model.User, error) {
-	config := c.newConfig(server.Config.Server.Host)
+	config := c.newOAuth2Config()
 
 	// get the OAuth errors
 	if err := req.FormValue("error"); err != "" {
@@ -122,7 +122,7 @@ func (c *config) Auth(ctx context.Context, token, secret string) (string, error)
 // Refresh refreshes the Bitbucket oauth2 access token. If the token is
 // refreshed the user is updated and a true value is returned.
 func (c *config) Refresh(ctx context.Context, user *model.User) (bool, error) {
-	config := c.newConfig("")
+	config := c.newOAuth2Config()
 	source := config.TokenSource(
 		ctx, &oauth2.Token{RefreshToken: user.Secret})
 
@@ -297,9 +297,8 @@ func (c *config) Branches(ctx context.Context, u *model.User, r *model.Repo, _ *
 }
 
 // BranchHead returns the sha of the head (latest commit) of the specified branch
-func (c *config) BranchHead(_ context.Context, _ *model.User, _ *model.Repo, _ string) (string, error) {
-	// TODO(1138): missing implementation
-	return "", forge_types.ErrNotImplemented
+func (c *config) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
+	return c.newClient(ctx, u).GetBranchHead(r.Owner, r.Name, branch)
 }
 
 // PullRequests returns the pull requests of the named repository.
@@ -335,6 +334,18 @@ func (c *config) OrgMembership(ctx context.Context, u *model.User, owner string)
 	return &model.OrgPerm{Member: perm != "", Admin: perm == "owner"}, nil
 }
 
+func (c *config) Org(ctx context.Context, u *model.User, owner string) (*model.Org, error) {
+	workspace, err := c.newClient(ctx, u).GetWorkspace(owner)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.Org{
+		Name:   workspace.Slug,
+		IsUser: false, // bitbucket uses workspaces (similar to orgs) for teams and single users so we can not distinguish between them
+	}, nil
+}
+
 // helper function to return the bitbucket oauth2 client
 func (c *config) newClient(ctx context.Context, u *model.User) *internal.Client {
 	if u == nil {
@@ -358,7 +369,7 @@ func (c *config) newClientToken(ctx context.Context, token, secret string) *inte
 }
 
 // helper function to return the bitbucket oauth2 config
-func (c *config) newConfig(redirect string) *oauth2.Config {
+func (c *config) newOAuth2Config() *oauth2.Config {
 	return &oauth2.Config{
 		ClientID:     c.Client,
 		ClientSecret: c.Secret,
@@ -366,7 +377,7 @@ func (c *config) newConfig(redirect string) *oauth2.Config {
 			AuthURL:  fmt.Sprintf("%s/site/oauth2/authorize", c.url),
 			TokenURL: fmt.Sprintf("%s/site/oauth2/access_token", c.url),
 		},
-		RedirectURL: fmt.Sprintf("%s/authorize", redirect),
+		RedirectURL: fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost),
 	}
 }
 

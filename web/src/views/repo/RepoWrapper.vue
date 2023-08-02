@@ -7,7 +7,7 @@
   >
     <template #title>
       <span class="flex">
-        <router-link :to="{ name: 'org', params: { orgName: repo?.owner } }" class="hover:underline">{{
+        <router-link :to="{ name: 'org', params: { orgId: repo.org_id } }" class="hover:underline">{{
           repo.owner
         }}</router-link>
         {{ `&nbsp;/&nbsp;${repo.name}` }}
@@ -21,7 +21,7 @@
         <Icon v-if="forge === 'github'" name="github" />
         <Icon v-else-if="forge === 'gitea'" name="gitea" />
         <Icon v-else-if="forge === 'gitlab'" name="gitlab" />
-        <Icon v-else-if="forge === 'bitbucket' || forge === 'stash'" name="bitbucket" />
+        <Icon v-else-if="forge === 'bitbucket'" name="bitbucket" />
         <Icon v-else name="repo" />
       </IconButton>
       <IconButton
