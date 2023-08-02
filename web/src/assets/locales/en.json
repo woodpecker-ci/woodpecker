@@ -425,16 +425,24 @@
         }
     },
     "user": {
-        "settings": "User Settings",
+        "user_settings": "User Settings",
+        "settings": {
+            "settings": "Settings",
+            "language": "Language"
+        },
+        "api": {
+            "api": "API",
+            "token": "Personal Access Token",
+            "shell_setup": "Shell setup",
+            "api_usage": "Example API Usage",
+            "cli_usage": "Example CLI Usage",
+            "dl_cli": "Download CLI",
+            "shell_setup_before": "do shell setup steps before",
+            "reset_token": "Reset token",
+            "swagger_ui": "Sagger UI",
+        },
         "oauth_error": "Error while authenticating against OAuth provider",
         "internal_error": "Some internal error occurred",
         "access_denied": "You are not allowed to login",
-        "token": "Personal Access Token",
-        "shell_setup": "Shell setup",
-        "api_usage": "Example API Usage",
-        "cli_usage": "Example CLI Usage",
-        "dl_cli": "Download CLI",
-        "shell_setup_before": "do shell setup steps before",
-        "reset_token": "Reset token"
     }
 }

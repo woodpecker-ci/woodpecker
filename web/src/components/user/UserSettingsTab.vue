@@ -1,0 +1,45 @@
+<template>
+  <Panel>
+    <div class="flex flex-col">
+      <div class="flex items-center text-wp-text-100 font-bold mb-2">
+        <label v-bind="$attrs">{{ $t('user.settings.language') }}</label>
+      </div>
+      <SelectField v-model="selectedLocale" :options="localeOptions" />
+    </div>
+  </Panel>
+</template>
+
+<script lang="ts" setup>
+import { useLocalStorage } from '@vueuse/core';
+import dayjs from 'dayjs';
+import TimeAgo from 'javascript-time-ago';
+import { SUPPORTED_LOCALES } from 'virtual:vue-i18n-supported-locales';
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+import SelectField from '~/components/form/SelectField.vue';
+import InputField from '~/components/form/InputField.vue';
+import { setI18nLanguage } from '~/compositions/useI18n';
+
+const { t, locale } = useI18n();
+
+const localeOptions = computed(() =>
+  SUPPORTED_LOCALES.map((supportedLocale) => ({
+    value: supportedLocale,
+    text: new Intl.DisplayNames(supportedLocale, { type: 'language' }).of(supportedLocale) || supportedLocale,
+  })),
+);
+
+const storedLocale = useLocalStorage('woodpecker:locale', locale.value);
+const selectedLocale = computed<string>({
+  async set(_selectedLocale) {
+    await setI18nLanguage(_selectedLocale);
+    storedLocale.value = _selectedLocale;
+    dayjs.locale(_selectedLocale);
+    TimeAgo.setDefaultLocale(_selectedLocale);
+  },
+  get() {
+    return storedLocale.value;
+  },
+});
+</script>

@@ -42,7 +42,7 @@
       <!-- Active Pipelines Indicator -->
       <ActivePipelines v-if="user" class="navbar-icon" />
       <!-- User Avatar -->
-      <IconButton v-if="user" :to="{ name: 'user' }" :title="$t('user.settings')" class="navbar-icon !p-1.5">
+      <IconButton v-if="user" :to="{ name: 'user' }" :title="$t('user.user_settings')" class="navbar-icon !p-1.5">
         <img v-if="user && user.avatar_url" class="rounded-md" :src="`${user.avatar_url}`" />
       </IconButton>
       <!-- Login Button -->
