@@ -1,6 +1,6 @@
 <template>
   <div
-    class="text-sm text-gray-600 font-bold rounded-md border border-solid p-2 border-yellow-500 bg-yellow-200 dark:bg-yellow-600 dark:border-yellow-800 dark:text-light-100"
+    class="text-sm text-gray-700 font-bold rounded-md border border-solid p-2 border-wp-hint-warn-200 bg-wp-hint-warn-100"
   >
     ⚠ {{ text }}
   </div>
