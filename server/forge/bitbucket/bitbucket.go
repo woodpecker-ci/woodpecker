@@ -22,6 +22,8 @@ import (
 	"net/url"
 	"path/filepath"
 
+	"golang.org/x/oauth2"
+
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/forge/bitbucket/internal"
@@ -29,8 +31,6 @@ import (
 	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	shared_utils "github.com/woodpecker-ci/woodpecker/shared/utils"
-
-	"golang.org/x/oauth2"
 )
 
 // Bitbucket cloud endpoints.
@@ -254,11 +254,11 @@ func (c *config) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model
 		if filesResp.Next == nil {
 			break
 		}
-		nextPageUrl, err := url.Parse(*filesResp.Next)
+		nextPageURL, err := url.Parse(*filesResp.Next)
 		if err != nil {
 			return nil, err
 		}
-		params, err := url.ParseQuery(nextPageUrl.RawQuery)
+		params, err := url.ParseQuery(nextPageURL.RawQuery)
 		if err != nil {
 			return nil, err
 		}
