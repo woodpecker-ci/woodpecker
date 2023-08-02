@@ -1,7 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite';
 import vue from '@vitejs/plugin-vue';
-import { readdirSync } from 'fs';
+import { copyFile, existsSync, mkdirSync, readdirSync } from 'fs';
 import path from 'path';
 import IconsResolver from 'unplugin-icons/resolver';
 import Icons from 'unplugin-icons/vite';
@@ -37,6 +37,39 @@ export default defineConfig({
       const resolvedVirtualModuleId = `\0${virtualModuleId}`;
 
       const filenames = readdirSync('src/assets/locales/').map((filename) => filename.replace('.json', ''));
+
+      if (!existsSync('src/assets/timeAgoLocales')) {
+        mkdirSync('src/assets/timeAgoLocales');
+      }
+
+      filenames.forEach((name) => {
+        // copy timeAgo language
+        if (name === 'zh-Hans') {
+          // zh-Hans is called zh in javascript-time-ago, so we need to rename this
+          copyFile(
+            'node_modules/javascript-time-ago/locale/zh.json.js',
+            'src/assets/timeAgoLocales/zh-Hans.json.js',
+            // eslint-disable-next-line promise/prefer-await-to-callbacks
+            (err) => {
+              if (err) {
+                throw err;
+              }
+            },
+          );
+        } else if (name !== 'en') {
+          // English is always directly loaded (compiled by Vite) and thus not copied
+          copyFile(
+            `node_modules/javascript-time-ago/locale/${name}.json.js`,
+            `src/assets/timeAgoLocales/${name}.json.js`,
+            // eslint-disable-next-line promise/prefer-await-to-callbacks
+            (err) => {
+              if (err) {
+                throw err;
+              }
+            },
+          );
+        }
+      });
 
       return {
         name: 'vue-i18n-supported-locales',
