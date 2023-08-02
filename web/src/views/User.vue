@@ -7,31 +7,38 @@
 
       <div>
         <div class="flex items-center mb-2">
-          <h2 class="text-lg text-color">{{ $t('user.token') }}</h2>
+          <h2 class="text-lg text-wp-text-100">{{ $t('user.token') }}</h2>
           <Button class="ml-4" :text="$t('user.reset_token')" @click="resetToken" />
         </div>
-        <pre class="cli-box">{{ token }}</pre>
+        <pre class="code-box">{{ token }}</pre>
       </div>
 
       <div>
-        <h2 class="text-lg text-color">{{ $t('user.shell_setup') }}</h2>
-        <pre class="cli-box">{{ usageWithShell }}</pre>
-      </div>
-
-      <div>
-        <div class="flex items-center">
-          <h2 class="text-lg text-color">{{ $t('user.api_usage') }}</h2>
-          <a :href="`${address}/swagger/index.html`" target="_blank" class="ml-4 text-link">Swagger UI</a>
-        </div>
-        <pre class="cli-box">{{ usageWithCurl }}</pre>
+        <h2 class="text-lg text-wp-text-100">{{ $t('user.shell_setup') }}</h2>
+        <pre class="code-box">{{ usageWithShell }}</pre>
       </div>
 
       <div>
         <div class="flex items-center">
-          <h2 class="text-lg text-color">{{ $t('user.cli_usage') }}</h2>
-          <a :href="cliDownload" target="_blank" class="ml-4 text-link">{{ $t('user.dl_cli') }}</a>
+          <h2 class="text-lg text-wp-text-100">{{ $t('user.api_usage') }}</h2>
+          <a
+            :href="`${address}/swagger/index.html`"
+            target="_blank"
+            class="ml-4 text-wp-link-100 hover:text-wp-link-200"
+            >Swagger UI</a
+          >
         </div>
-        <pre class="cli-box">{{ usageWithCli }}</pre>
+        <pre class="code-box">{{ usageWithCurl }}</pre>
+      </div>
+
+      <div>
+        <div class="flex items-center">
+          <h2 class="text-lg text-wp-text-100">{{ $t('user.cli_usage') }}</h2>
+          <a :href="cliDownload" target="_blank" class="ml-4 text-wp-link-100 hover:text-wp-link-200">{{
+            $t('user.dl_cli')
+          }}</a>
+        </div>
+        <pre class="code-box">{{ usageWithCli }}</pre>
       </div>
     </div>
   </Scaffold>
@@ -102,10 +109,3 @@ const resetToken = async () => {
   window.location.href = `${address}/logout`;
 };
 </script>
-
-<style scoped>
-.cli-box {
-  @apply bg-gray-500 p-2 rounded-md text-white break-words dark:bg-dark-400 dark:text-gray-400;
-  white-space: pre-wrap;
-}
-</style>
