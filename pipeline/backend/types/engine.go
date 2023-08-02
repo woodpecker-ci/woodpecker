@@ -8,23 +8,28 @@ import (
 // Engine defines a container orchestration backend and is used
 // to create and manage container resources.
 type Engine interface {
+	// Name returns the name of the backend.
 	Name() string
-	IsAvailable() bool
-	Load() error
 
-	// Setup the pipeline environment.
-	Setup(context.Context, *Config) error
+	// IsAvailable check if the backend is available.
+	IsAvailable(ctx context.Context) bool
 
-	// Exec start the pipeline step.
-	Exec(context.Context, *Step) error
+	// Load the backend engine.
+	Load(ctx context.Context) error
 
-	// Wait for the pipeline step to complete and returns
+	// SetupWorkflow the workflow environment.
+	SetupWorkflow(ctx context.Context, conf *Config, taskUUID string) error
+
+	// StartStep start the workflow step.
+	StartStep(ctx context.Context, step *Step, taskUUID string) error
+
+	// WaitStep for the workflow step to complete and returns
 	// the completion results.
-	Wait(context.Context, *Step) (*State, error)
+	WaitStep(ctx context.Context, step *Step, taskUUID string) (*State, error)
 
-	// Tail the pipeline step logs.
-	Tail(context.Context, *Step) (io.ReadCloser, error)
+	// TailStep the workflow step logs.
+	TailStep(ctx context.Context, step *Step, taskUUID string) (io.ReadCloser, error)
 
-	// Destroy the pipeline environment.
-	Destroy(context.Context, *Config) error
+	// DestroyWorkflow the workflow environment.
+	DestroyWorkflow(ctx context.Context, conf *Config, taskUUID string) error
 }

@@ -6,9 +6,15 @@ export type Repo = {
   // The unique identifier for the repository.
   id: number;
 
+  // The id of the repository on the source control management system.
+  forge_remote_id: string;
+
   // The source control management being used.
   // Currently this is either 'git' or 'hg' (Mercurial).
   scm: string;
+
+  // The id of the organization that owns the repository.
+  org_id: number;
 
   // The owner of the repository.
   owner: string;
@@ -57,6 +63,8 @@ export type Repo = {
 
   // Events that will cancel running pipelines before starting a new one
   cancel_previous_pipeline_events: string[];
+
+  netrc_only_trusted: boolean;
 };
 
 export enum RepoVisibility {
@@ -67,7 +75,14 @@ export enum RepoVisibility {
 
 export type RepoSettings = Pick<
   Repo,
-  'config_file' | 'timeout' | 'visibility' | 'trusted' | 'gated' | 'allow_pr' | 'cancel_previous_pipeline_events'
+  | 'config_file'
+  | 'timeout'
+  | 'visibility'
+  | 'trusted'
+  | 'gated'
+  | 'allow_pr'
+  | 'cancel_previous_pipeline_events'
+  | 'netrc_only_trusted'
 >;
 
 export type RepoPermissions = {

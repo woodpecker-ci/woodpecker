@@ -34,7 +34,7 @@ func Test_bitbucket(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	s := httptest.NewServer(fixtures.Handler())
-	c := &config{URL: s.URL, API: s.URL}
+	c := &config{url: s.URL, API: s.URL}
 
 	g := goblin.Goblin(t)
 	ctx := context.Background()
@@ -45,7 +45,7 @@ func Test_bitbucket(t *testing.T) {
 
 		g.It("Should return client with default endpoint", func() {
 			forge, _ := New(&Opts{Client: "4vyW6b49Z", Secret: "a5012f6c6"})
-			g.Assert(forge.(*config).URL).Equal(DefaultURL)
+			g.Assert(forge.(*config).url).Equal(DefaultURL)
 			g.Assert(forge.(*config).API).Equal(DefaultAPI)
 			g.Assert(forge.(*config).Client).Equal("4vyW6b49Z")
 			g.Assert(forge.(*config).Secret).Equal("a5012f6c6")
@@ -134,34 +134,6 @@ func Test_bitbucket(t *testing.T) {
 			g.It("Should handle not found errors", func() {
 				_, err := c.Repo(ctx, fakeUser, "", fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
 				g.Assert(err).IsNotNil()
-			})
-		})
-
-		g.Describe("When requesting repository permissions", func() {
-			g.It("Should handle not found errors", func() {
-				_, err := c.Perm(ctx, fakeUser, fakeRepoNotFound)
-				g.Assert(err).IsNotNil()
-			})
-			g.It("Should authorize read access", func() {
-				perm, err := c.Perm(ctx, fakeUser, fakeRepoReadOnly)
-				g.Assert(err).IsNil()
-				g.Assert(perm.Pull).IsTrue()
-				g.Assert(perm.Push).IsFalse()
-				g.Assert(perm.Admin).IsFalse()
-			})
-			g.It("Should authorize write access", func() {
-				perm, err := c.Perm(ctx, fakeUser, fakeRepoWriteOnly)
-				g.Assert(err).IsNil()
-				g.Assert(perm.Pull).IsTrue()
-				g.Assert(perm.Push).IsTrue()
-				g.Assert(perm.Admin).IsFalse()
-			})
-			g.It("Should authorize admin access", func() {
-				perm, err := c.Perm(ctx, fakeUser, fakeRepoAdmin)
-				g.Assert(err).IsNil()
-				g.Assert(perm.Pull).IsTrue()
-				g.Assert(perm.Push).IsTrue()
-				g.Assert(perm.Admin).IsTrue()
 			})
 		})
 
@@ -255,7 +227,7 @@ func Test_bitbucket(t *testing.T) {
 		})
 
 		g.It("Should update the status", func() {
-			err := c.Status(ctx, fakeUser, fakeRepo, fakePipeline, fakeStep)
+			err := c.Status(ctx, fakeUser, fakeRepo, fakePipeline, fakeWorkflow)
 			g.Assert(err).IsNil()
 		})
 
@@ -333,29 +305,11 @@ var (
 		FullName: "test_name/hook_empty",
 	}
 
-	fakeRepoReadOnly = &model.Repo{
-		Owner:    "test_name",
-		Name:     "permission_read",
-		FullName: "test_name/permission_read",
-	}
-
-	fakeRepoWriteOnly = &model.Repo{
-		Owner:    "test_name",
-		Name:     "permission_write",
-		FullName: "test_name/permission_write",
-	}
-
-	fakeRepoAdmin = &model.Repo{
-		Owner:    "test_name",
-		Name:     "permission_admin",
-		FullName: "test_name/permission_admin",
-	}
-
 	fakePipeline = &model.Pipeline{
 		Commit: "9ecad50",
 	}
 
-	fakeStep = &model.Step{
+	fakeWorkflow = &model.Workflow{
 		Name:  "test",
 		State: model.StatusSuccess,
 	}

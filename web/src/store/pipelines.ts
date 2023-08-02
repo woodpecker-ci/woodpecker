@@ -1,99 +1,101 @@
 import { defineStore } from 'pinia';
-import { computed, Ref, ref, toRef } from 'vue';
+import { computed, reactive, Ref, ref } from 'vue';
 
 import useApiClient from '~/compositions/useApiClient';
-import { Pipeline, PipelineFeed, PipelineStep } from '~/lib/api/types';
-import { comparePipelines, comparePipelinesWithStatus, isPipelineActive, repoSlug } from '~/utils/helpers';
+import { Pipeline, PipelineFeed, PipelineWorkflow } from '~/lib/api/types';
+import { useRepoStore } from '~/store/repos';
+import { comparePipelines, comparePipelinesWithStatus, isPipelineActive } from '~/utils/helpers';
 
-const apiClient = useApiClient();
+export const usePipelineStore = defineStore('pipelines', () => {
+  const apiClient = useApiClient();
+  const repoStore = useRepoStore();
 
-export default defineStore({
-  id: 'pipelines',
+  const pipelines: Map<number, Map<number, Pipeline>> = reactive(new Map());
 
-  state: () => ({
-    pipelines: {} as Record<string, Record<number, Pipeline>>,
-    pipelineFeed: [] as PipelineFeed[],
-  }),
+  function setPipeline(repoId: number, pipeline: Pipeline) {
+    const repoPipelines = pipelines.get(repoId) || new Map();
+    repoPipelines.set(pipeline.number, {
+      ...(repoPipelines.get(pipeline.number) || {}),
+      ...pipeline,
+    });
+    pipelines.set(repoId, repoPipelines);
+  }
 
-  getters: {
-    sortedPipelineFeed(state) {
-      return state.pipelineFeed.sort(comparePipelines);
-    },
-    activePipelines(state) {
-      return state.pipelineFeed.filter(isPipelineActive);
-    },
-  },
+  function getRepoPipelines(repoId: Ref<number>) {
+    return computed(() => Array.from(pipelines.get(repoId.value)?.values() || []).sort(comparePipelines));
+  }
 
-  actions: {
-    // setters
-    setPipeline(owner: string, repo: string, pipeline: Pipeline) {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      const _repoSlug = repoSlug(owner, repo);
-      if (!this.pipelines[_repoSlug]) {
-        this.pipelines[_repoSlug] = {};
-      }
+  function getPipeline(repoId: Ref<number>, _pipelineNumber: Ref<string>) {
+    return computed(() => {
+      const pipelineNumber = parseInt(_pipelineNumber.value, 10);
+      return pipelines.get(repoId.value)?.get(pipelineNumber);
+    });
+  }
 
-      const repoPipelines = this.pipelines[_repoSlug];
+  function setWorkflow(repoId: number, pipelineNumber: number, workflow: PipelineWorkflow) {
+    const pipeline = getPipeline(ref(repoId), ref(pipelineNumber.toString())).value;
+    if (!pipeline) {
+      throw new Error("Can't find pipeline");
+    }
 
-      // merge with available data
-      repoPipelines[pipeline.number] = { ...(repoPipelines[pipeline.number] || {}), ...pipeline };
+    if (!pipeline.workflows) {
+      pipeline.workflows = [];
+    }
 
-      this.pipelines = {
-        ...this.pipelines,
-        [_repoSlug]: repoPipelines,
-      };
-    },
-    setStep(owner: string, repo: string, pipelineNumber: number, step: PipelineStep) {
-      const pipeline = this.getPipeline(ref(owner), ref(repo), ref(pipelineNumber.toString())).value;
-      if (!pipeline) {
-        throw new Error("Can't find pipeline");
-      }
+    pipeline.workflows = [...pipeline.workflows.filter((p) => p.pid !== workflow.pid), workflow];
+    setPipeline(repoId, pipeline);
+  }
 
-      if (!pipeline.steps) {
-        pipeline.steps = [];
-      }
+  async function loadRepoPipelines(repoId: number) {
+    const _pipelines = await apiClient.getPipelineList(repoId);
+    _pipelines.forEach((pipeline) => {
+      setPipeline(repoId, pipeline);
+    });
+  }
 
-      pipeline.steps = [...pipeline.steps.filter((p) => p.pid !== step.pid), step];
-      this.setPipeline(owner, repo, pipeline);
-    },
-    setPipelineFeedItem(pipeline: PipelineFeed) {
-      const pipelineFeed = this.pipelineFeed.filter((b) => b.id !== pipeline.id);
-      this.pipelineFeed = [...pipelineFeed, pipeline];
-    },
+  async function loadPipeline(repoId: number, pipelinesNumber: number) {
+    const pipeline = await apiClient.getPipeline(repoId, pipelinesNumber);
+    setPipeline(repoId, pipeline);
+  }
 
-    // getters
-    getPipelines(owner: Ref<string>, repo: Ref<string>) {
-      return computed(() => {
-        const slug = repoSlug(owner.value, repo.value);
-        return toRef(this.pipelines, slug).value;
-      });
-    },
-    getSortedPipelines(owner: Ref<string>, repo: Ref<string>) {
-      return computed(() => Object.values(this.getPipelines(owner, repo).value || []).sort(comparePipelines).sort(comparePipelinesWithStatus));
-    },
-    getActivePipelines(owner: Ref<string>, repo: Ref<string>) {
-      const pipelines = this.getPipelines(owner, repo);
-      return computed(() => Object.values(pipelines.value).filter(isPipelineActive));
-    },
-    getPipeline(owner: Ref<string>, repo: Ref<string>, pipelineNumber: Ref<string>) {
-      const pipelines = this.getPipelines(owner, repo);
-      return computed(() => (pipelines.value || {})[parseInt(pipelineNumber.value, 10)]);
-    },
+  const pipelineFeed = computed(() =>
+    Array.from(pipelines.entries())
+      .reduce<PipelineFeed[]>((acc, [_repoId, repoPipelines]) => {
+        const repoPipelinesArray = Array.from(repoPipelines.entries()).map(
+          ([_pipelineNumber, pipeline]) =>
+            <PipelineFeed>{
+              ...pipeline,
+              repo_id: _repoId,
+              number: _pipelineNumber,
+            },
+        );
+        return [...acc, ...repoPipelinesArray];
+      }, [])
+      .sort(comparePipelinesWithStatus)
+      .filter((pipeline) => repoStore.ownedRepoIds.includes(pipeline.repo_id)),
+  );
 
-    // loading
-    async loadPipelines(owner: string, repo: string) {
-      const pipelines = await apiClient.getPipelineList(owner, repo);
-      pipelines.forEach((pipeline) => {
-        this.setPipeline(owner, repo, pipeline);
-      });
-    },
-    async loadPipeline(owner: string, repo: string, pipelinesNumber: number) {
-      const pipelines = await apiClient.getPipeline(owner, repo, pipelinesNumber);
-      this.setPipeline(owner, repo, pipelines);
-    },
-    async loadPipelineFeed() {
-      const pipelines = await apiClient.getPipelineFeed();
-      this.pipelineFeed = pipelines;
-    },
-  },
+  const activePipelines = computed(() => pipelineFeed.value.filter(isPipelineActive));
+
+  async function loadPipelineFeed() {
+    await repoStore.loadRepos();
+
+    const _pipelines = await apiClient.getPipelineFeed();
+    _pipelines.forEach((pipeline) => {
+      setPipeline(pipeline.repo_id, pipeline);
+    });
+  }
+
+  return {
+    pipelines,
+    setPipeline,
+    setWorkflow,
+    getRepoPipelines,
+    getPipeline,
+    loadRepoPipelines,
+    loadPipeline,
+    activePipelines,
+    pipelineFeed,
+    loadPipelineFeed,
+  };
 });

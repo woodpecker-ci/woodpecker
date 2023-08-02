@@ -15,15 +15,18 @@
 package session
 
 import (
+	"errors"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
-
 	"github.com/woodpecker-ci/woodpecker/server"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store"
+	"github.com/woodpecker-ci/woodpecker/server/store/types"
 )
 
 func Repo(c *gin.Context) *model.Repo {
@@ -35,20 +38,35 @@ func Repo(c *gin.Context) *model.Repo {
 	if !ok {
 		return nil
 	}
+	r.Perm = Perm(c)
 	return r
 }
 
 func SetRepo() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
-			_store = store.FromContext(c)
-			owner  = c.Param("owner")
-			name   = c.Param("name")
-			user   = User(c)
+			_store  = store.FromContext(c)
+			owner   = c.Param("owner")
+			name    = c.Param("name")
+			_repoID = c.Param("repo_id")
+			user    = User(c)
 		)
 
-		repo, err := _store.GetRepoName(owner + "/" + name)
-		if err == nil {
+		var repo *model.Repo
+		var err error
+		if _repoID != "" {
+			var repoID int64
+			repoID, err = strconv.ParseInt(_repoID, 10, 64)
+			if err != nil {
+				c.AbortWithStatus(http.StatusBadRequest)
+				return
+			}
+			repo, err = _store.GetRepo(repoID)
+		} else {
+			repo, err = _store.GetRepoName(owner + "/" + name)
+		}
+
+		if repo != nil {
 			c.Set("repo", repo)
 			c.Next()
 			return
@@ -61,11 +79,17 @@ func SetRepo() gin.HandlerFunc {
 			err.Error(),
 		)
 
-		if user != nil {
-			c.AbortWithStatus(http.StatusNotFound)
-		} else {
+		if user == nil {
 			c.AbortWithStatus(http.StatusUnauthorized)
+			return
 		}
+
+		if errors.Is(err, types.RecordNotExist) {
+			c.AbortWithStatus(http.StatusNotFound)
+			return
+		}
+
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
 	}
 }
 
@@ -88,8 +112,7 @@ func SetPerm() gin.HandlerFunc {
 		repo := Repo(c)
 		perm := new(model.Perm)
 
-		switch {
-		case user != nil:
+		if user != nil {
 			var err error
 			perm, err = _store.PermFind(user, repo)
 			if err != nil {
@@ -97,10 +120,12 @@ func SetPerm() gin.HandlerFunc {
 					user.Login, repo.FullName, err)
 			}
 			if time.Unix(perm.Synced, 0).Add(time.Hour).Before(time.Now()) {
-				perm, err = server.Config.Services.Forge.Perm(c, user, repo)
+				_repo, err := server.Config.Services.Forge.Repo(c, user, repo.ForgeRemoteID, repo.Owner, repo.Name)
 				if err == nil {
 					log.Debug().Msgf("Synced user permission for %s %s", user.Login, repo.FullName)
+					perm = _repo.Perm
 					perm.Repo = repo
+					perm.RepoID = repo.ID
 					perm.UserID = user.ID
 					perm.Synced = time.Now().Unix()
 					if err := _store.PermUpsert(perm); err != nil {
@@ -121,10 +146,7 @@ func SetPerm() gin.HandlerFunc {
 			perm.Admin = true
 		}
 
-		switch {
-		case repo.Visibility == model.VisibilityPublic:
-			perm.Pull = true
-		case repo.Visibility == model.VisibilityInternal && user != nil:
+		if repo.Visibility == model.VisibilityPublic || (repo.Visibility == model.VisibilityInternal && user != nil) {
 			perm.Pull = true
 		}
 

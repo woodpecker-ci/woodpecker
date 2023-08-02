@@ -1,7 +1,7 @@
 cache:
   - node_modules
 
-pipeline:
+steps:
   build:
     image: node
     commands:

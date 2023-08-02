@@ -27,31 +27,30 @@ import (
 var pipelineLastCmd = &cli.Command{
 	Name:      "last",
 	Usage:     "show latest pipeline details",
-	ArgsUsage: "<repo/name>",
+	ArgsUsage: "<repo-id|repo-full-name>",
 	Action:    pipelineLast,
 	Flags: append(common.GlobalFlags,
 		common.FormatFlag(tmplPipelineInfo),
 		&cli.StringFlag{
 			Name:  "branch",
 			Usage: "branch name",
-			Value: "master",
+			Value: "main",
 		},
 	),
 }
 
 func pipelineLast(c *cli.Context) error {
-	repo := c.Args().First()
-	owner, name, err := internal.ParseRepo(repo)
-	if err != nil {
-		return err
-	}
-
+	repoIDOrFullName := c.Args().First()
 	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
 	}
+	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
+	if err != nil {
+		return err
+	}
 
-	pipeline, err := client.PipelineLast(owner, name, c.String("branch"))
+	pipeline, err := client.PipelineLast(repoID, c.String("branch"))
 	if err != nil {
 		return err
 	}

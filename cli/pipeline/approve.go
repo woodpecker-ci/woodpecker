@@ -27,14 +27,18 @@ import (
 var pipelineApproveCmd = &cli.Command{
 	Name:      "approve",
 	Usage:     "approve a pipeline",
-	ArgsUsage: "<repo/name> <pipeline>",
+	ArgsUsage: "<repo-id|repo-full-name> <pipeline>",
 	Action:    pipelineApprove,
 	Flags:     common.GlobalFlags,
 }
 
 func pipelineApprove(c *cli.Context) (err error) {
-	repo := c.Args().First()
-	owner, name, err := internal.ParseRepo(repo)
+	repoIDOrFullName := c.Args().First()
+	client, err := internal.NewClient(c)
+	if err != nil {
+		return err
+	}
+	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
 	if err != nil {
 		return err
 	}
@@ -43,16 +47,11 @@ func pipelineApprove(c *cli.Context) (err error) {
 		return err
 	}
 
-	client, err := internal.NewClient(c)
+	_, err = client.PipelineApprove(repoID, number)
 	if err != nil {
 		return err
 	}
 
-	_, err = client.PipelineApprove(owner, name, number)
-	if err != nil {
-		return err
-	}
-
-	fmt.Printf("Approving pipeline %s/%s#%d\n", owner, name, number)
+	fmt.Printf("Approving pipeline %s#%d\n", repoIDOrFullName, number)
 	return nil
 }

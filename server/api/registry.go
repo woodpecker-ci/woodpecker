@@ -15,7 +15,6 @@
 package api
 
 import (
-	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -23,11 +22,18 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
-	"github.com/woodpecker-ci/woodpecker/server/store/types"
 )
 
-// GetRegistry gets the name registry from the database and writes
-// to the response in json format.
+// GetRegistry
+//
+//	@Summary	Get a named registry
+//	@Router		/repos/{repo_id}/registry/{registry} [get]
+//	@Produce	json
+//	@Success	200	{object}	Registry
+//	@Tags		Repository registries
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		registry		path	string	true	"the registry name"
 func GetRegistry(c *gin.Context) {
 	var (
 		repo = session.Repo(c)
@@ -35,13 +41,22 @@ func GetRegistry(c *gin.Context) {
 	)
 	registry, err := server.Config.Services.Registries.RegistryFind(repo, name)
 	if err != nil {
-		c.String(404, "Error getting registry %q. %s", name, err)
+		handleDbGetError(c, err)
 		return
 	}
 	c.JSON(200, registry.Copy())
 }
 
-// PostRegistry persists the registry to the database.
+// PostRegistry
+//
+//	@Summary	Persist/create a registry
+//	@Router		/repos/{repo_id}/registry [post]
+//	@Produce	json
+//	@Success	200	{object}	Registry
+//	@Tags		Repository registries
+//	@Param		Authorization	header	string			true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		registry		body	Registry	true	"the new registry data"
 func PostRegistry(c *gin.Context) {
 	repo := session.Repo(c)
 
@@ -59,17 +74,27 @@ func PostRegistry(c *gin.Context) {
 		Email:    in.Email,
 	}
 	if err := registry.Validate(); err != nil {
-		c.String(400, "Error inserting registry. %s", err)
+		c.String(http.StatusBadRequest, "Error inserting registry. %s", err)
 		return
 	}
 	if err := server.Config.Services.Registries.RegistryCreate(repo, registry); err != nil {
-		c.String(500, "Error inserting registry %q. %s", in.Address, err)
+		c.String(http.StatusInternalServerError, "Error inserting registry %q. %s", in.Address, err)
 		return
 	}
-	c.JSON(200, in.Copy())
+	c.JSON(http.StatusOK, in.Copy())
 }
 
-// PatchRegistry updates the registry in the database.
+// PatchRegistry
+//
+//	@Summary	Update a named registry
+//	@Router		/repos/{repo_id}/registry/{registry} [patch]
+//	@Produce	json
+//	@Success	200	{object}	Registry
+//	@Tags		Repository registries
+//	@Param		Authorization	header	string			true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		registry		path	string			true	"the registry name"
+//	@Param		registryData	body	Registry	true	"the attributes for the registry"
 func PatchRegistry(c *gin.Context) {
 	var (
 		repo = session.Repo(c)
@@ -85,7 +110,7 @@ func PatchRegistry(c *gin.Context) {
 
 	registry, err := server.Config.Services.Registries.RegistryFind(repo, name)
 	if err != nil {
-		c.String(404, "Error getting registry %q. %s", name, err)
+		handleDbGetError(c, err)
 		return
 	}
 	if in.Username != "" {
@@ -102,23 +127,32 @@ func PatchRegistry(c *gin.Context) {
 	}
 
 	if err := registry.Validate(); err != nil {
-		c.String(400, "Error updating registry. %s", err)
+		c.String(http.StatusUnprocessableEntity, "Error updating registry. %s", err)
 		return
 	}
 	if err := server.Config.Services.Registries.RegistryUpdate(repo, registry); err != nil {
-		c.String(500, "Error updating registry %q. %s", in.Address, err)
+		c.String(http.StatusInternalServerError, "Error updating registry %q. %s", in.Address, err)
 		return
 	}
-	c.JSON(200, in.Copy())
+	c.JSON(http.StatusOK, in.Copy())
 }
 
-// GetRegistryList gets the registry list from the database and writes
-// to the response in json format.
+// GetRegistryList
+//
+//	@Summary	Get the registry list
+//	@Router		/repos/{repo_id}/registry [get]
+//	@Produce	json
+//	@Success	200	{array}	Registry
+//	@Tags		Repository registries
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		page			query	int		false	"for response pagination, page offset number"	default(1)
+//	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
 func GetRegistryList(c *gin.Context) {
 	repo := session.Repo(c)
-	list, err := server.Config.Services.Registries.RegistryList(repo)
+	list, err := server.Config.Services.Registries.RegistryList(repo, session.Pagination(c))
 	if err != nil {
-		c.String(500, "Error getting registry list. %s", err)
+		c.String(http.StatusInternalServerError, "Error getting registry list. %s", err)
 		return
 	}
 	// copy the registry detail to remove the sensitive
@@ -126,10 +160,19 @@ func GetRegistryList(c *gin.Context) {
 	for i, registry := range list {
 		list[i] = registry.Copy()
 	}
-	c.JSON(200, list)
+	c.JSON(http.StatusOK, list)
 }
 
-// DeleteRegistry deletes the named registry from the database.
+// DeleteRegistry
+//
+//	@Summary	Delete a named registry
+//	@Router		/repos/{repo_id}/registry/{registry} [delete]
+//	@Produce	plain
+//	@Success	200
+//	@Tags		Repository registries
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		registry		path	string	true	"the registry name"
 func DeleteRegistry(c *gin.Context) {
 	var (
 		repo = session.Repo(c)
@@ -137,12 +180,8 @@ func DeleteRegistry(c *gin.Context) {
 	)
 	err := server.Config.Services.Registries.RegistryDelete(repo, name)
 	if err != nil {
-		if errors.Is(err, types.RecordNotExist) {
-			c.String(404, "no records found, cannot delete registry")
-			return
-		}
-		c.String(500, "Error deleting registry %q. %s", name, err)
+		handleDbGetError(c, err)
 		return
 	}
-	c.String(204, "")
+	c.String(http.StatusNoContent, "")
 }

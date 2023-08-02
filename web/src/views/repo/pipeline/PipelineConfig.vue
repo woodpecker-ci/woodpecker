@@ -1,6 +1,11 @@
 <template>
   <div class="flex flex-col gap-y-6">
-    <Panel v-for="pipelineConfig in pipelineConfigs || []" :key="pipelineConfig.hash" :title="pipelineConfig.name">
+    <Panel
+      v-for="pipelineConfig in pipelineConfigs || []"
+      :key="pipelineConfig.hash"
+      collapsable
+      :title="pipelineConfig.name"
+    >
       <SyntaxHighlight class="font-mono whitespace-pre overflow-auto" language="yaml" :code="pipelineConfig.data" />
     </Panel>
   </div>
@@ -36,9 +41,7 @@ export default defineComponent({
         throw new Error('Unexpected: "repo" & "pipeline" should be provided at this place');
       }
 
-      pipelineConfigs.value = (
-        await apiClient.getPipelineConfig(repo.value.owner, repo.value.name, pipeline.value.number)
-      ).map((i) => ({
+      pipelineConfigs.value = (await apiClient.getPipelineConfig(repo.value.id, pipeline.value.number)).map((i) => ({
         ...i,
         data: atob(i.data),
       }));

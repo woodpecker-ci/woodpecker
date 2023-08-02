@@ -1,12 +1,12 @@
 <template>
   <Panel>
-    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-gray-600">
-      <h1 class="text-xl ml-2 text-color">{{ $t('repo.settings.actions.actions') }}</h1>
+    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-wp-background-100">
+      <h1 class="text-xl ml-2 text-wp-text-100">{{ $t('repo.settings.actions.actions') }}</h1>
     </div>
 
-    <div class="flex flex-col">
+    <div class="flex flex-wrap items-center">
       <Button
-        class="mr-auto mt-4"
+        class="mr-4 my-1"
         color="blue"
         start-icon="heal"
         :is-loading="isRepairingRepo"
@@ -15,16 +15,26 @@
       />
 
       <Button
-        class="mr-auto mt-4"
+        v-if="isActive"
+        class="mr-4 my-1"
         color="blue"
         start-icon="turn-off"
         :is-loading="isDeactivatingRepo"
         :text="$t('repo.settings.actions.disable.disable')"
         @click="deactivateRepo"
       />
+      <Button
+        v-else
+        class="mr-4 my-1"
+        color="blue"
+        start-icon="turn-off"
+        :is-loading="isActivatingRepo"
+        :text="$t('repo.settings.actions.enable.enable')"
+        @click="activateRepo"
+      />
 
       <Button
-        class="mr-auto mt-4"
+        class="mr-4 my-1"
         color="red"
         start-icon="trash"
         :is-loading="isDeletingRepo"
@@ -35,8 +45,8 @@
   </Panel>
 </template>
 
-<script lang="ts">
-import { defineComponent, inject, Ref } from 'vue';
+<script lang="ts" setup>
+import { computed, inject, Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
@@ -47,62 +57,56 @@ import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
 import { Repo } from '~/lib/api/types';
 
-export default defineComponent({
-  name: 'ActionsTab',
+const apiClient = useApiClient();
+const router = useRouter();
+const notifications = useNotifications();
+const i18n = useI18n();
 
-  components: { Button, Panel },
+const repo = inject<Ref<Repo>>('repo');
 
-  setup() {
-    const apiClient = useApiClient();
-    const router = useRouter();
-    const notifications = useNotifications();
-    const i18n = useI18n();
+const { doSubmit: repairRepo, isLoading: isRepairingRepo } = useAsyncAction(async () => {
+  if (!repo) {
+    throw new Error('Unexpected: Repo should be set');
+  }
 
-    const repo = inject<Ref<Repo>>('repo');
-
-    const { doSubmit: repairRepo, isLoading: isRepairingRepo } = useAsyncAction(async () => {
-      if (!repo) {
-        throw new Error('Unexpected: Repo should be set');
-      }
-
-      await apiClient.repairRepo(repo.value.owner, repo.value.name);
-      notifications.notify({ title: i18n.t('repo.settings.actions.repair.success'), type: 'success' });
-    });
-
-    const { doSubmit: deleteRepo, isLoading: isDeletingRepo } = useAsyncAction(async () => {
-      if (!repo) {
-        throw new Error('Unexpected: Repo should be set');
-      }
-
-      // TODO use proper dialog
-      // eslint-disable-next-line no-alert, no-restricted-globals
-      if (!confirm(i18n.t('repo.settings.actions.delete.confirm'))) {
-        return;
-      }
-
-      await apiClient.deleteRepo(repo.value.owner, repo.value.name);
-      notifications.notify({ title: i18n.t('repo.settings.actions.delete.success'), type: 'success' });
-      await router.replace({ name: 'repos' });
-    });
-
-    const { doSubmit: deactivateRepo, isLoading: isDeactivatingRepo } = useAsyncAction(async () => {
-      if (!repo) {
-        throw new Error('Unexpected: Repo should be set');
-      }
-
-      await apiClient.deleteRepo(repo.value.owner, repo.value.name, false);
-      notifications.notify({ title: i18n.t('repo.settings.actions.disable.success'), type: 'success' });
-      await router.replace({ name: 'repos' });
-    });
-
-    return {
-      isRepairingRepo,
-      isDeletingRepo,
-      isDeactivatingRepo,
-      deleteRepo,
-      repairRepo,
-      deactivateRepo,
-    };
-  },
+  await apiClient.repairRepo(repo.value.id);
+  notifications.notify({ title: i18n.t('repo.settings.actions.repair.success'), type: 'success' });
 });
+
+const { doSubmit: deleteRepo, isLoading: isDeletingRepo } = useAsyncAction(async () => {
+  if (!repo) {
+    throw new Error('Unexpected: Repo should be set');
+  }
+
+  // TODO use proper dialog
+  // eslint-disable-next-line no-alert, no-restricted-globals
+  if (!confirm(i18n.t('repo.settings.actions.delete.confirm'))) {
+    return;
+  }
+
+  await apiClient.deleteRepo(repo.value.id);
+  notifications.notify({ title: i18n.t('repo.settings.actions.delete.success'), type: 'success' });
+  await router.replace({ name: 'repos' });
+});
+
+const { doSubmit: activateRepo, isLoading: isActivatingRepo } = useAsyncAction(async () => {
+  if (!repo) {
+    throw new Error('Unexpected: Repo should be set');
+  }
+
+  await apiClient.activateRepo(repo.value.forge_remote_id);
+  notifications.notify({ title: i18n.t('repo.settings.actions.enable.success'), type: 'success' });
+});
+
+const { doSubmit: deactivateRepo, isLoading: isDeactivatingRepo } = useAsyncAction(async () => {
+  if (!repo) {
+    throw new Error('Unexpected: Repo should be set');
+  }
+
+  await apiClient.deleteRepo(repo.value.id, false);
+  notifications.notify({ title: i18n.t('repo.settings.actions.disable.success'), type: 'success' });
+  await router.replace({ name: 'repos' });
+});
+
+const isActive = computed(() => repo?.value.active);
 </script>

@@ -1,6 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
-import vueI18n from '@intlify/vite-plugin-vue-i18n';
+import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite';
 import vue from '@vitejs/plugin-vue';
+import { readdirSync } from 'fs';
 import path from 'path';
 import IconsResolver from 'unplugin-icons/resolver';
 import Icons from 'unplugin-icons/vite';
@@ -15,8 +16,9 @@ function woodpeckerInfoPlugin() {
     name: 'woodpecker-info',
     configureServer() {
       const info =
-        'Please add `WOODPECKER_DEV_WWW_PROXY=http://localhost:8010` to your `.env` file.\n' +
-        'After starting the woodpecker server as well you should now be able to access the UI at http://localhost:8000/';
+        '1) Please add `WOODPECKER_DEV_WWW_PROXY=http://localhost:8010` to your `.env` file.\n' +
+        'After starting the woodpecker server as well you should now be able to access the UI at http://localhost:8000/\n\n' +
+        '2) If you want to run the vite dev server (`pnpm start`) within a container please set `VITE_DEV_SERVER_HOST=0.0.0.0`.';
       // eslint-disable-next-line no-console
       console.log(info);
     },
@@ -27,14 +29,36 @@ function woodpeckerInfoPlugin() {
 export default defineConfig({
   plugins: [
     vue(),
-    vueI18n({
+    VueI18nPlugin({
       include: path.resolve(__dirname, 'src/assets/locales/**'),
     }),
+    (() => {
+      const virtualModuleId = 'virtual:vue-i18n-supported-locales';
+      const resolvedVirtualModuleId = `\0${virtualModuleId}`;
+
+      const filenames = readdirSync('src/assets/locales/').map((filename) => filename.replace('.json', ''));
+
+      return {
+        name: 'vue-i18n-supported-locales',
+        // eslint-disable-next-line consistent-return
+        resolveId(id) {
+          if (id === virtualModuleId) {
+            return resolvedVirtualModuleId;
+          }
+        },
+        // eslint-disable-next-line consistent-return
+        load(id) {
+          if (id === resolvedVirtualModuleId) {
+            return `export const SUPPORTED_LOCALES = ${JSON.stringify(filenames)}`;
+          }
+        },
+      };
+    })(),
     WindiCSS(),
-    Icons(),
+    Icons({}),
     svgLoader(),
     Components({
-      resolvers: IconsResolver(),
+      resolvers: [IconsResolver()],
     }),
     woodpeckerInfoPlugin(),
     prismjs({
@@ -48,6 +72,7 @@ export default defineConfig({
   },
   logLevel: 'warn',
   server: {
+    host: process.env.VITE_DEV_SERVER_HOST || '127.0.0.1',
     port: 8010,
   },
 });

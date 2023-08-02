@@ -52,8 +52,11 @@ func Test_helper(t *testing.T) {
 			}
 			from.Owner.Links.Avatar.Href = "http://..."
 			from.Links.HTML.Href = "https://bitbucket.org/foo/bar"
+			fromPerm := &internal.RepoPerm{
+				Permission: "write",
+			}
 
-			to := convertRepo(from)
+			to := convertRepo(from, fromPerm)
 			g.Assert(to.Avatar).Equal(from.Owner.Links.Avatar.Href)
 			g.Assert(to.FullName).Equal(from.FullName)
 			g.Assert(to.Owner).Equal("octocat")
@@ -63,6 +66,8 @@ func Test_helper(t *testing.T) {
 			g.Assert(to.IsSCMPrivate).Equal(from.IsPrivate)
 			g.Assert(to.Clone).Equal(from.Links.HTML.Href)
 			g.Assert(to.Link).Equal(from.Links.HTML.Href)
+			g.Assert(to.Perm.Push).IsTrue()
+			g.Assert(to.Perm.Admin).IsFalse()
 		})
 
 		g.It("should convert team", func() {
@@ -120,7 +125,7 @@ func Test_helper(t *testing.T) {
 			hook.Actor.Login = "octocat"
 			hook.Actor.Links.Avatar.Href = "https://..."
 			hook.PullRequest.Dest.Commit.Hash = "73f9c44d"
-			hook.PullRequest.Dest.Branch.Name = "master"
+			hook.PullRequest.Dest.Branch.Name = "main"
 			hook.PullRequest.Dest.Repo.Links.HTML.Href = "https://bitbucket.org/foo/bar"
 			hook.PullRequest.Source.Branch.Name = "change"
 			hook.PullRequest.Source.Repo.FullName = "baz/bar"
@@ -135,8 +140,8 @@ func Test_helper(t *testing.T) {
 			g.Assert(pipeline.Commit).Equal(hook.PullRequest.Dest.Commit.Hash)
 			g.Assert(pipeline.Branch).Equal(hook.PullRequest.Dest.Branch.Name)
 			g.Assert(pipeline.Link).Equal(hook.PullRequest.Links.HTML.Href)
-			g.Assert(pipeline.Ref).Equal("refs/heads/master")
-			g.Assert(pipeline.Refspec).Equal("change:master")
+			g.Assert(pipeline.Ref).Equal("refs/heads/main")
+			g.Assert(pipeline.Refspec).Equal("change:main")
 			g.Assert(pipeline.CloneURL).Equal("https://bitbucket.org/baz/bar")
 			g.Assert(pipeline.Message).Equal(hook.PullRequest.Desc)
 			g.Assert(pipeline.Timestamp).Equal(hook.PullRequest.Updated.Unix())
@@ -145,7 +150,7 @@ func Test_helper(t *testing.T) {
 		g.It("should convert push hook to pipeline", func() {
 			change := internal.Change{}
 			change.New.Target.Hash = "73f9c44d"
-			change.New.Name = "master"
+			change.New.Name = "main"
 			change.New.Target.Links.HTML.Href = "https://bitbucket.org/foo/bar/commits/73f9c44d"
 			change.New.Target.Message = "updated README"
 			change.New.Target.Date = time.Now()
@@ -163,7 +168,7 @@ func Test_helper(t *testing.T) {
 			g.Assert(pipeline.Commit).Equal(change.New.Target.Hash)
 			g.Assert(pipeline.Branch).Equal(change.New.Name)
 			g.Assert(pipeline.Link).Equal(change.New.Target.Links.HTML.Href)
-			g.Assert(pipeline.Ref).Equal("refs/heads/master")
+			g.Assert(pipeline.Ref).Equal("refs/heads/main")
 			g.Assert(pipeline.Message).Equal(change.New.Target.Message)
 			g.Assert(pipeline.Timestamp).Equal(change.New.Target.Date.Unix())
 		})

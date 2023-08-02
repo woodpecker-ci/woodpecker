@@ -19,34 +19,40 @@
 package api
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"strconv"
 	"time"
 
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/store/types"
-
 	"github.com/gin-gonic/gin"
-	"github.com/rs/zerolog/log"
 
+	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/pipeline"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/server/store"
+	"github.com/woodpecker-ci/woodpecker/server/store/types"
 )
 
+// CreatePipeline
+//
+//	@Summary	Run/trigger a pipelines
+//	@Router		/repos/{repo_id}/pipelines [post]
+//	@Produce	json
+//	@Success	200	{object}	Pipeline
+//	@Tags			Pipelines
+//	@Param		Authorization	header	string					true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		options			body	PipelineOptions	true	"the options for the pipeline to run"
 func CreatePipeline(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
 
-	var p model.PipelineOptions
-
-	err := json.NewDecoder(c.Request.Body).Decode(&p)
+	// parse create options
+	var opts model.PipelineOptions
+	err := json.NewDecoder(c.Request.Body).Decode(&opts)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
@@ -54,9 +60,9 @@ func CreatePipeline(c *gin.Context) {
 
 	user := session.User(c)
 
-	lastCommit, _ := server.Config.Services.Forge.BranchHead(c, user, repo, p.Branch)
+	lastCommit, _ := server.Config.Services.Forge.BranchHead(c, user, repo, opts.Branch)
 
-	tmpBuild := createTmpPipeline(model.EventManual, lastCommit, repo, user, &p)
+	tmpBuild := createTmpPipeline(model.EventManual, lastCommit, repo, user, &opts)
 
 	pl, err := pipeline.Create(c, _store, repo, tmpBuild)
 	if err != nil {
@@ -87,26 +93,42 @@ func createTmpPipeline(event model.WebhookEvent, commitSHA string, repo *model.R
 	}
 }
 
+// GetPipelines
+//
+//	@Summary	Get pipelines, current running and past ones
+//	@Router		/repos/{repo_id}/pipelines [get]
+//	@Produce	json
+//	@Success	200	{array}	Pipeline
+//	@Tags		Pipelines
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id		path	int		true	"the repository id"
+//	@Param		page			query	int		false	"for response pagination, page offset number"	default(1)
+//	@Param		perPage		query	int		false	"for response pagination, max items per page"	default(50)
 func GetPipelines(c *gin.Context) {
 	repo := session.Repo(c)
-	page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
-	if err != nil {
-		_ = c.AbortWithError(http.StatusBadRequest, err)
-		return
-	}
 
-	pipelines, err := store.FromContext(c).GetPipelineList(repo, page)
+	pipelines, err := store.FromContext(c).GetPipelineList(repo, session.Pagination(c))
 	if err != nil {
 		if errors.Is(err, types.RecordNotExist) {
 			c.AbortWithStatus(http.StatusNotFound)
 			return
 		}
-		c.AbortWithStatus(http.StatusInternalServerError)
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 	c.JSON(http.StatusOK, pipelines)
 }
 
+// GetPipeline
+//
+//	@Summary	Pipeline information by number
+//	@Router		/repos/{repo_id}/pipelines/{number} [get]
+//	@Produce	json
+//	@Success	200	{object}	Pipeline
+//	@Tags		Pipelines
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id		path	int		true	"the repository id"
+//	@Param		number		path	int		true	"the number of the pipeline, OR 'latest'"
 func GetPipeline(c *gin.Context) {
 	_store := store.FromContext(c)
 	if c.Param("number") == "latest" {
@@ -123,16 +145,17 @@ func GetPipeline(c *gin.Context) {
 
 	pl, err := _store.GetPipelineNumber(repo, num)
 	if err != nil {
+		if errors.Is(err, types.RecordNotExist) {
+			c.AbortWithStatus(http.StatusNotFound)
+			return
+		}
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	files, _ := _store.FileList(pl)
-	steps, _ := _store.StepList(pl)
-	if pl.Steps, err = model.Tree(steps); err != nil {
+	if pl.Workflows, err = _store.WorkflowGetTree(pl); err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	pl.Files = files
 
 	c.JSON(http.StatusOK, pl)
 }
@@ -144,93 +167,83 @@ func GetPipelineLast(c *gin.Context) {
 
 	pl, err := _store.GetPipelineLast(repo, branch)
 	if err != nil {
-		c.String(http.StatusInternalServerError, err.Error())
+		handleDbGetError(c, err)
 		return
 	}
 
-	steps, err := _store.StepList(pl)
-	if err != nil {
-		_ = c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-	if pl.Steps, err = model.Tree(steps); err != nil {
+	if pl.Workflows, err = _store.WorkflowGetTree(pl); err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 	c.JSON(http.StatusOK, pl)
 }
 
-func GetPipelineLogs(c *gin.Context) {
-	_store := store.FromContext(c)
-	repo := session.Repo(c)
-
-	// parse the pipeline number and step sequence number from
-	// the request parameter.
-	num, _ := strconv.ParseInt(c.Params.ByName("number"), 10, 64)
-	ppid, _ := strconv.Atoi(c.Params.ByName("pid"))
-	name := c.Params.ByName("step")
-
-	pl, err := _store.GetPipelineNumber(repo, num)
-	if err != nil {
-		_ = c.AbortWithError(404, err)
-		return
-	}
-
-	step, err := _store.StepChild(pl, ppid, name)
-	if err != nil {
-		_ = c.AbortWithError(404, err)
-		return
-	}
-
-	rc, err := _store.LogFind(step)
-	if err != nil {
-		_ = c.AbortWithError(404, err)
-		return
-	}
-
-	defer rc.Close()
-
-	c.Header("Content-Type", "application/json")
-	if _, err := io.Copy(c.Writer, rc); err != nil {
-		log.Error().Err(err).Msg("could not copy log to http response")
-	}
-}
-
+// GetStepLogs
+//
+//	@Summary	Log information
+//	@Router		/repos/{repo_id}/logs/{number}/{stepID} [get]
+//	@Produce	json
+//	@Success	200 {array} LogEntry
+//	@Tags			Pipeline logs
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id		path	int		true	"the repository id"
+//	@Param		number		path	int		true		"the number of the pipeline"
+//	@Param		stepID		path	int		true		"the step id"
 func GetStepLogs(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
 
 	// parse the pipeline number and step sequence number from
 	// the request parameter.
-	num, _ := strconv.ParseInt(c.Params.ByName("number"), 10, 64)
-	pid, _ := strconv.Atoi(c.Params.ByName("pid"))
+	num, err := strconv.ParseInt(c.Params.ByName("number"), 10, 64)
+	if err != nil {
+		_ = c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
 
 	pl, err := _store.GetPipelineNumber(repo, num)
 	if err != nil {
-		_ = c.AbortWithError(http.StatusNotFound, err)
+		handleDbGetError(c, err)
 		return
 	}
 
-	step, err := _store.StepFind(pl, pid)
+	stepID, err := strconv.ParseInt(c.Params.ByName("stepId"), 10, 64)
 	if err != nil {
-		_ = c.AbortWithError(http.StatusNotFound, err)
+		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
 
-	rc, err := _store.LogFind(step)
+	step, err := _store.StepLoad(stepID)
 	if err != nil {
-		_ = c.AbortWithError(http.StatusNotFound, err)
+		handleDbGetError(c, err)
 		return
 	}
 
-	defer rc.Close()
-
-	c.Header("Content-Type", "application/json")
-	if _, err := io.Copy(c.Writer, rc); err != nil {
-		log.Error().Err(err).Msg("could not copy log to http response")
+	if step.PipelineID != pl.ID {
+		// make sure we can not read arbitrary logs by id
+		_ = c.AbortWithError(http.StatusBadRequest, fmt.Errorf("step with id %d is not part of repo %s", stepID, repo.FullName))
+		return
 	}
+
+	logs, err := _store.LogFind(step)
+	if err != nil {
+		handleDbGetError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, logs)
 }
 
+// GetPipelineConfig
+//
+//	@Summary	Pipeline configuration
+//	@Router		/repos/{repo_id}/pipelines/{number}/config [get]
+//	@Produce	json
+//	@Success	200	{array}	Config
+//	@Tags			Pipelines
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		number			path	int		true	"the number of the pipeline"
 func GetPipelineConfig(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
@@ -242,7 +255,7 @@ func GetPipelineConfig(c *gin.Context) {
 
 	pl, err := _store.GetPipelineNumber(repo, num)
 	if err != nil {
-		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		handleDbGetError(c, err)
 		return
 	}
 
@@ -255,26 +268,45 @@ func GetPipelineConfig(c *gin.Context) {
 	c.JSON(http.StatusOK, configs)
 }
 
-// CancelPipeline cancels a pipeline
+// CancelPipeline
+//
+//	@Summary	Cancels a pipeline
+//	@Router		/repos/{repo_id}/pipelines/{number}/cancel [post]
+//	@Produce	plain
+//	@Success	200
+//	@Tags		Pipelines
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		number			path	int		true	"the number of the pipeline"
 func CancelPipeline(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
+	user := session.User(c)
 	num, _ := strconv.ParseInt(c.Params.ByName("number"), 10, 64)
 
 	pl, err := _store.GetPipelineNumber(repo, num)
 	if err != nil {
-		_ = c.AbortWithError(http.StatusNotFound, err)
+		handleDbGetError(c, err)
 		return
 	}
 
-	if err := pipeline.Cancel(c, _store, repo, pl); err != nil {
+	if err := pipeline.Cancel(c, _store, repo, user, pl); err != nil {
 		handlePipelineErr(c, err)
 	} else {
 		c.Status(http.StatusNoContent)
 	}
 }
 
-// PostApproval start pipelines in gated repos
+// PostApproval
+//
+//	@Summary	Start pipelines in gated repos
+//	@Router		/repos/{repo_id}/pipelines/{number}/approve [post]
+//	@Produce	json
+//	@Success	200	{object}	Pipeline
+//	@Tags		Pipelines
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		number			path	int		true	"the number of the pipeline"
 func PostApproval(c *gin.Context) {
 	var (
 		_store = store.FromContext(c)
@@ -285,7 +317,7 @@ func PostApproval(c *gin.Context) {
 
 	pl, err := _store.GetPipelineNumber(repo, num)
 	if err != nil {
-		_ = c.AbortWithError(404, err)
+		handleDbGetError(c, err)
 		return
 	}
 
@@ -293,11 +325,20 @@ func PostApproval(c *gin.Context) {
 	if err != nil {
 		handlePipelineErr(c, err)
 	} else {
-		c.JSON(200, newpipeline)
+		c.JSON(http.StatusOK, newpipeline)
 	}
 }
 
-// PostDecline decline pipelines in gated repos
+// PostDecline
+//
+//	@Summary	Decline pipelines in gated repos
+//	@Router		/repos/{repo_id}/pipelines/{number}/decline [post]
+//	@Produce	json
+//	@Success	200	{object}	Pipeline
+//	@Tags		Pipelines
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		number			path	int		true	"the number of the pipeline"
 func PostDecline(c *gin.Context) {
 	var (
 		_store = store.FromContext(c)
@@ -316,20 +357,41 @@ func PostDecline(c *gin.Context) {
 	if err != nil {
 		handlePipelineErr(c, err)
 	} else {
-		c.JSON(200, pl)
+		c.JSON(http.StatusOK, pl)
 	}
 }
 
+// GetPipelineQueue
+//
+//	@Summary	List pipeline queues
+//	@Router		/pipelines [get]
+//	@Produce	json
+//	@Success	200	{array}	Feed
+//	@Tags		Pipeline queues
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 func GetPipelineQueue(c *gin.Context) {
 	out, err := store.FromContext(c).GetPipelineQueue()
 	if err != nil {
-		c.String(500, "Error getting pipeline queue. %s", err)
+		c.String(http.StatusInternalServerError, "Error getting pipeline queue. %s", err)
 		return
 	}
-	c.JSON(200, out)
+	c.JSON(http.StatusOK, out)
 }
 
-// PostPipeline restarts a pipeline optional with altered event, deploy or environment
+// PostPipeline
+//
+//	@Summary		Restart a pipeline
+//	@Description	Restarts a pipeline optional with altered event, deploy or environment
+//	@Router			/repos/{repo_id}/pipelines/{number} [post]
+//	@Produce		json
+//	@Success		200	{object}	Pipeline
+//	@Tags			Pipelines
+//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param			owner			path	string	true	"the repository owner's name"
+//	@Param			name			path	string	true	"the repository name"
+//	@Param			number			path	int		true	"the number of the pipeline"
+//	@Param			event			query	string	false	"override the event type"
+//	@Param			deploy_to		query	string	false	"override the target deploy value"
 func PostPipeline(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
@@ -342,15 +404,21 @@ func PostPipeline(c *gin.Context) {
 
 	user, err := _store.GetUser(repo.UserID)
 	if err != nil {
-		log.Error().Msgf("failure to find repo owner %s. %s", repo.FullName, err)
-		_ = c.AbortWithError(500, err)
+		if errors.Is(err, types.RecordNotExist) {
+			c.AbortWithStatus(http.StatusNotFound)
+			return
+		}
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
 	pl, err := _store.GetPipelineNumber(repo, num)
 	if err != nil {
-		log.Error().Msgf("failure to get pipeline %d. %s", num, err)
-		_ = c.AbortWithError(404, err)
+		if errors.Is(err, types.RecordNotExist) {
+			c.AbortWithStatus(http.StatusNotFound)
+			return
+		}
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
@@ -364,9 +432,8 @@ func PostPipeline(c *gin.Context) {
 	if event, ok := c.GetQuery("event"); ok {
 		pl.Event = model.WebhookEvent(event)
 
-		if !model.ValidateWebhookEvent(pl.Event) {
-			msg := fmt.Sprintf("pipeline event '%s' is invalid", event)
-			c.String(http.StatusBadRequest, msg)
+		if err := model.ValidateWebhookEvent(pl.Event); err != nil {
+			_ = c.AbortWithError(http.StatusBadRequest, err)
 			return
 		}
 	}
@@ -390,55 +457,53 @@ func PostPipeline(c *gin.Context) {
 	if err != nil {
 		handlePipelineErr(c, err)
 	} else {
-		c.JSON(200, newpipeline)
+		c.JSON(http.StatusOK, newpipeline)
 	}
 }
 
+// DeletePipelineLogs
+//
+//	@Summary	Deletes log
+//	@Router		/repos/{repo_id}/logs/{number} [post]
+//	@Produce	plain
+//	@Success	200
+//	@Tags		Pipeline logs
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		number			path	int		true	"the number of the pipeline"
 func DeletePipelineLogs(c *gin.Context) {
 	_store := store.FromContext(c)
 
 	repo := session.Repo(c)
-	user := session.User(c)
 	num, _ := strconv.ParseInt(c.Params.ByName("number"), 10, 64)
 
 	pl, err := _store.GetPipelineNumber(repo, num)
 	if err != nil {
-		_ = c.AbortWithError(404, err)
+		handleDbGetError(c, err)
 		return
 	}
 
 	steps, err := _store.StepList(pl)
 	if err != nil {
-		_ = c.AbortWithError(404, err)
+		_ = c.AbortWithError(http.StatusNotFound, err)
 		return
 	}
 
 	switch pl.Status {
 	case model.StatusRunning, model.StatusPending:
-		c.String(400, "Cannot delete logs for a pending or running pipeline")
+		c.String(http.StatusUnprocessableEntity, "Cannot delete logs for a pending or running pipeline")
 		return
 	}
 
 	for _, step := range steps {
-		t := time.Now().UTC()
-		buf := bytes.NewBufferString(fmt.Sprintf(deleteStr, step.Name, user.Login, t.Format(time.UnixDate)))
-		lerr := _store.LogSave(step, buf)
-		if lerr != nil {
-			err = lerr
+		if lErr := _store.LogDelete(step); err != nil {
+			err = errors.Join(err, lErr)
 		}
 	}
 	if err != nil {
-		c.String(400, "There was a problem deleting your logs. %s", err)
+		c.String(http.StatusInternalServerError, "There was a problem deleting your logs. %s", err)
 		return
 	}
 
-	c.String(204, "")
+	c.String(http.StatusNoContent, "")
 }
-
-var deleteStr = `[
-	{
-		"step": %q,
-		"pos": 0,
-		"out": "logs purged by %s on %s\n"
-	}
-]`

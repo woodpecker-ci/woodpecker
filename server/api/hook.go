@@ -19,16 +19,16 @@
 package api
 
 import (
+	"errors"
 	"fmt"
-	"math/rand"
 	"net/http"
 	"regexp"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 
 	"github.com/woodpecker-ci/woodpecker/server"
+	"github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/pipeline"
 	"github.com/woodpecker-ci/woodpecker/server/store"
@@ -37,26 +37,55 @@ import (
 
 var skipRe = regexp.MustCompile(`\[(?i:ci *skip|skip *ci)\]`)
 
-func init() {
-	rand.Seed(time.Now().UnixNano())
-}
-
+// GetQueueInfo
+//
+//	@Summary	Get pipeline queue information
+//	@Description	TODO: link the InfoT response object - this is blocked, until the `swaggo/swag` tool dependency is v1.18.12 or newer
+//	@Router		/queue/info [get]
+//	@Produce	json
+//	@Success	200	{object} map[string]string
+//	@Tags		Pipeline queues
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 func GetQueueInfo(c *gin.Context) {
-	c.IndentedJSON(200,
+	c.IndentedJSON(http.StatusOK,
 		server.Config.Services.Queue.Info(c),
 	)
 }
 
+// PauseQueue
+//
+//	@Summary	Pause a pipeline queue
+//	@Router		/queue/pause [post]
+//	@Produce	plain
+//	@Success	200
+//	@Tags		Pipeline queues
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 func PauseQueue(c *gin.Context) {
 	server.Config.Services.Queue.Pause()
 	c.Status(http.StatusOK)
 }
 
+// ResumeQueue
+//
+//	@Summary	Resume a pipeline queue
+//	@Router		/queue/resume [post]
+//	@Produce	plain
+//	@Success	200
+//	@Tags		Pipeline queues
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 func ResumeQueue(c *gin.Context) {
 	server.Config.Services.Queue.Resume()
 	c.Status(http.StatusOK)
 }
 
+// BlockTilQueueHasRunningItem
+//
+//	@Summary	Block til pipeline queue has a running item
+//	@Router		/queue/norunningpipelines [get]
+//	@Produce	plain
+//	@Success	200
+//	@Tags		Pipeline queues
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 func BlockTilQueueHasRunningItem(c *gin.Context) {
 	for {
 		info := server.Config.Services.Queue.Info(c)
@@ -67,18 +96,33 @@ func BlockTilQueueHasRunningItem(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-// PostHook start a pipeline triggered by a forges post webhook
+// PostHook
+//
+//	@Summary	Incoming webhook from forge
+//	@Router		/hook [post]
+//	@Produce	plain
+//	@Success	200
+//	@Tags		System
+//	@Param		hook	body	object	true	"the webhook payload; forge is automatically detected"
 func PostHook(c *gin.Context) {
 	_store := store.FromContext(c)
 	forge := server.Config.Services.Forge
 
 	tmpRepo, tmpBuild, err := forge.Hook(c, c.Request)
 	if err != nil {
+		if errors.Is(err, &types.ErrIgnoreEvent{}) {
+			msg := fmt.Sprintf("forge driver: %s", err)
+			log.Debug().Err(err).Msg(msg)
+			c.String(http.StatusOK, msg)
+			return
+		}
+
 		msg := "failure to parse hook"
 		log.Debug().Err(err).Msg(msg)
 		c.String(http.StatusBadRequest, msg)
 		return
 	}
+
 	if tmpBuild == nil {
 		msg := "ignoring hook: hook parsing resulted in empty pipeline"
 		log.Debug().Msg(msg)
@@ -179,6 +223,6 @@ func PostHook(c *gin.Context) {
 	if err != nil {
 		handlePipelineErr(c, err)
 	} else {
-		c.JSON(200, pl)
+		c.JSON(http.StatusOK, pl)
 	}
 }

@@ -1,9 +1,9 @@
 <template>
   <Panel>
-    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-gray-600">
+    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-wp-background-100">
       <div class="ml-2">
-        <h1 class="text-xl text-color">{{ $t('org.settings.secrets.secrets') }}</h1>
-        <p class="text-sm text-color-alt">
+        <h1 class="text-xl text-wp-text-100">{{ $t('org.settings.secrets.secrets') }}</h1>
+        <p class="text-sm text-wp-text-alt-100">
           {{ $t('org.settings.secrets.desc') }}
           <DocsLink :topic="$t('org.settings.secrets.secrets')" url="docs/usage/secrets" />
         </p>
@@ -33,13 +33,14 @@
       i18n-prefix="org.settings.secrets."
       :is-saving="isSaving"
       @save="createSecret"
+      @cancel="selectedSecret = undefined"
     />
   </Panel>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { cloneDeep } from 'lodash';
-import { computed, defineComponent, inject, onMounted, Ref, ref } from 'vue';
+import { computed, inject, Ref, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
@@ -50,6 +51,7 @@ import SecretList from '~/components/secrets/SecretList.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
+import { usePagination } from '~/compositions/usePaginate';
 import { Org, Secret, WebhookEvents } from '~/lib/api/types';
 
 const emptySecret = {
@@ -59,89 +61,61 @@ const emptySecret = {
   event: [WebhookEvents.Push],
 };
 
-export default defineComponent({
-  name: 'OrgSecretsTab',
+const apiClient = useApiClient();
+const notifications = useNotifications();
+const i18n = useI18n();
 
-  components: {
-    Button,
-    Panel,
-    DocsLink,
-    SecretList,
-    SecretEdit,
-  },
+const org = inject<Ref<Org>>('org');
+const selectedSecret = ref<Partial<Secret>>();
+const isEditingSecret = computed(() => !!selectedSecret.value?.id);
 
-  setup() {
-    const apiClient = useApiClient();
-    const notifications = useNotifications();
-    const i18n = useI18n();
+async function loadSecrets(page: number): Promise<Secret[] | null> {
+  if (!org?.value) {
+    throw new Error("Unexpected: Can't load org");
+  }
 
-    const org = inject<Ref<Org>>('org');
-    const secrets = ref<Secret[]>([]);
-    const selectedSecret = ref<Partial<Secret>>();
-    const isEditingSecret = computed(() => !!selectedSecret.value?.id);
+  return apiClient.getOrgSecretList(org.value.id, page);
+}
 
-    async function loadSecrets() {
-      if (!org?.value) {
-        throw new Error("Unexpected: Can't load org");
-      }
+const { resetPage, data: secrets } = usePagination(loadSecrets, () => !selectedSecret.value);
 
-      secrets.value = await apiClient.getOrgSecretList(org.value.name);
-    }
+const { doSubmit: createSecret, isLoading: isSaving } = useAsyncAction(async () => {
+  if (!org?.value) {
+    throw new Error("Unexpected: Can't load org");
+  }
 
-    const { doSubmit: createSecret, isLoading: isSaving } = useAsyncAction(async () => {
-      if (!org?.value) {
-        throw new Error("Unexpected: Can't load org");
-      }
+  if (!selectedSecret.value) {
+    throw new Error("Unexpected: Can't get secret");
+  }
 
-      if (!selectedSecret.value) {
-        throw new Error("Unexpected: Can't get secret");
-      }
-
-      if (isEditingSecret.value) {
-        await apiClient.updateOrgSecret(org.value.name, selectedSecret.value);
-      } else {
-        await apiClient.createOrgSecret(org.value.name, selectedSecret.value);
-      }
-      notifications.notify({
-        title: i18n.t(isEditingSecret.value ? 'org.settings.secrets.saved' : 'org.settings.secrets.created'),
-        type: 'success',
-      });
-      selectedSecret.value = undefined;
-      await loadSecrets();
-    });
-
-    const { doSubmit: deleteSecret, isLoading: isDeleting } = useAsyncAction(async (_secret: Secret) => {
-      if (!org?.value) {
-        throw new Error("Unexpected: Can't load org");
-      }
-
-      await apiClient.deleteOrgSecret(org.value.name, _secret.name);
-      notifications.notify({ title: i18n.t('org.settings.secrets.deleted'), type: 'success' });
-      await loadSecrets();
-    });
-
-    function editSecret(secret: Secret) {
-      selectedSecret.value = cloneDeep(secret);
-    }
-
-    function showAddSecret() {
-      selectedSecret.value = cloneDeep(emptySecret);
-    }
-
-    onMounted(async () => {
-      await loadSecrets();
-    });
-
-    return {
-      selectedSecret,
-      secrets,
-      isDeleting,
-      isSaving,
-      showAddSecret,
-      createSecret,
-      editSecret,
-      deleteSecret,
-    };
-  },
+  if (isEditingSecret.value) {
+    await apiClient.updateOrgSecret(org.value.id, selectedSecret.value);
+  } else {
+    await apiClient.createOrgSecret(org.value.id, selectedSecret.value);
+  }
+  notifications.notify({
+    title: i18n.t(isEditingSecret.value ? 'org.settings.secrets.saved' : 'org.settings.secrets.created'),
+    type: 'success',
+  });
+  selectedSecret.value = undefined;
+  resetPage();
 });
+
+const { doSubmit: deleteSecret, isLoading: isDeleting } = useAsyncAction(async (_secret: Secret) => {
+  if (!org?.value) {
+    throw new Error("Unexpected: Can't load org");
+  }
+
+  await apiClient.deleteOrgSecret(org.value.id, _secret.name);
+  notifications.notify({ title: i18n.t('org.settings.secrets.deleted'), type: 'success' });
+  resetPage();
+});
+
+function editSecret(secret: Secret) {
+  selectedSecret.value = cloneDeep(secret);
+}
+
+function showAddSecret() {
+  selectedSecret.value = cloneDeep(emptySecret);
+}
 </script>

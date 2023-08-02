@@ -1,9 +1,9 @@
 <template>
   <Panel>
-    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-gray-600">
+    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-wp-background-100">
       <div class="ml-2">
-        <h1 class="text-xl text-color">{{ $t('admin.settings.secrets.secrets') }}</h1>
-        <p class="text-sm text-color-alt">
+        <h1 class="text-xl text-wp-text-100">{{ $t('admin.settings.secrets.secrets') }}</h1>
+        <p class="text-sm text-wp-text-alt-100">
           {{ $t('admin.settings.secrets.desc') }}
           <DocsLink :topic="$t('admin.settings.secrets.secrets')" url="docs/usage/secrets" />
         </p>
@@ -40,13 +40,14 @@
       i18n-prefix="admin.settings.secrets."
       :is-saving="isSaving"
       @save="createSecret"
+      @cancel="selectedSecret = undefined"
     />
   </Panel>
 </template>
 
 <script lang="ts">
 import { cloneDeep } from 'lodash';
-import { computed, defineComponent, onMounted, ref } from 'vue';
+import { computed, defineComponent, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
@@ -58,6 +59,7 @@ import SecretList from '~/components/secrets/SecretList.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
+import { usePagination } from '~/compositions/usePaginate';
 import { Secret, WebhookEvents } from '~/lib/api/types';
 
 const emptySecret = {
@@ -84,13 +86,14 @@ export default defineComponent({
     const notifications = useNotifications();
     const i18n = useI18n();
 
-    const secrets = ref<Secret[]>([]);
     const selectedSecret = ref<Partial<Secret>>();
     const isEditingSecret = computed(() => !!selectedSecret.value?.id);
 
-    async function loadSecrets() {
-      secrets.value = await apiClient.getGlobalSecretList();
+    async function loadSecrets(page: number): Promise<Secret[] | null> {
+      return apiClient.getGlobalSecretList(page);
     }
+
+    const { resetPage, data: secrets } = usePagination(loadSecrets, () => !selectedSecret.value);
 
     const { doSubmit: createSecret, isLoading: isSaving } = useAsyncAction(async () => {
       if (!selectedSecret.value) {
@@ -107,13 +110,13 @@ export default defineComponent({
         type: 'success',
       });
       selectedSecret.value = undefined;
-      await loadSecrets();
+      resetPage();
     });
 
     const { doSubmit: deleteSecret, isLoading: isDeleting } = useAsyncAction(async (_secret: Secret) => {
       await apiClient.deleteGlobalSecret(_secret.name);
       notifications.notify({ title: i18n.t('admin.settings.secrets.deleted'), type: 'success' });
-      await loadSecrets();
+      resetPage();
     });
 
     function editSecret(secret: Secret) {
@@ -123,10 +126,6 @@ export default defineComponent({
     function showAddSecret() {
       selectedSecret.value = cloneDeep(emptySecret);
     }
-
-    onMounted(async () => {
-      await loadSecrets();
-    });
 
     return {
       selectedSecret,

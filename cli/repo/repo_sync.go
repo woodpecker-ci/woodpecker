@@ -20,6 +20,7 @@ var repoSyncCmd = &cli.Command{
 	),
 }
 
+// TODO: remove this and add an option to the list cmd as we do not store the remote repo list anymore
 func repoSync(c *cli.Context) error {
 	client, err := internal.NewClient(c)
 	if err != nil {

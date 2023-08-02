@@ -10,6 +10,12 @@ A Woodpecker deployment consists of two parts:
 >
 > You can add more agents to increase the number of parallel builds or set the agent's `WOODPECKER_MAX_PROCS=1` environment variable to increase the number of parallel builds for that agent.
 
+## Which version of Woodpecker should I use?
+
+Woodpecker is having two different kinds of releases: **stable** and **next**.
+
+To find out more about the differences between the two releases, please read the [FAQ](/faq).
+
 ## Installation
 
 You can install Woodpecker on multiple ways:

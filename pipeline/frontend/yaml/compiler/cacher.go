@@ -4,23 +4,22 @@ import (
 	"path"
 	"strings"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
+	yaml_types "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
 )
 
 // Cacher defines a compiler transform that can be used
 // to implement default caching for a repository.
 type Cacher interface {
-	Restore(repo, branch string, mounts []string) *yaml.Container
-	Rebuild(repo, branch string, mounts []string) *yaml.Container
+	Restore(repo, branch string, mounts []string) *yaml_types.Container
+	Rebuild(repo, branch string, mounts []string) *yaml_types.Container
 }
 
 type volumeCacher struct {
 	base string
 }
 
-func (c *volumeCacher) Restore(repo, branch string, mounts []string) *yaml.Container {
-	return &yaml.Container{
+func (c *volumeCacher) Restore(repo, branch string, mounts []string) *yaml_types.Container {
+	return &yaml_types.Container{
 		Name:  "rebuild_cache",
 		Image: "plugins/volume-cache:1.0.0",
 		Settings: map[string]interface{}{
@@ -28,10 +27,10 @@ func (c *volumeCacher) Restore(repo, branch string, mounts []string) *yaml.Conta
 			"path":        "/cache",
 			"restore":     true,
 			"file":        strings.Replace(branch, "/", "_", -1) + ".tar",
-			"fallback_to": "master.tar",
+			"fallback_to": "main.tar",
 		},
-		Volumes: types.Volumes{
-			Volumes: []*types.Volume{
+		Volumes: yaml_types.Volumes{
+			Volumes: []*yaml_types.Volume{
 				{
 					Source:      path.Join(c.base, repo),
 					Destination: "/cache",
@@ -42,8 +41,8 @@ func (c *volumeCacher) Restore(repo, branch string, mounts []string) *yaml.Conta
 	}
 }
 
-func (c *volumeCacher) Rebuild(repo, branch string, mounts []string) *yaml.Container {
-	return &yaml.Container{
+func (c *volumeCacher) Rebuild(repo, branch string, mounts []string) *yaml_types.Container {
+	return &yaml_types.Container{
 		Name:  "rebuild_cache",
 		Image: "plugins/volume-cache:1.0.0",
 		Settings: map[string]interface{}{
@@ -53,8 +52,8 @@ func (c *volumeCacher) Rebuild(repo, branch string, mounts []string) *yaml.Conta
 			"flush":   true,
 			"file":    strings.Replace(branch, "/", "_", -1) + ".tar",
 		},
-		Volumes: types.Volumes{
-			Volumes: []*types.Volume{
+		Volumes: yaml_types.Volumes{
+			Volumes: []*yaml_types.Volume{
 				{
 					Source:      path.Join(c.base, repo),
 					Destination: "/cache",
@@ -72,8 +71,8 @@ type s3Cacher struct {
 	region string
 }
 
-func (c *s3Cacher) Restore(repo, branch string, mounts []string) *yaml.Container {
-	return &yaml.Container{
+func (c *s3Cacher) Restore(_, _ string, mounts []string) *yaml_types.Container {
+	return &yaml_types.Container{
 		Name:  "rebuild_cache",
 		Image: "plugins/s3-cache:latest",
 		Settings: map[string]interface{}{
@@ -87,8 +86,8 @@ func (c *s3Cacher) Restore(repo, branch string, mounts []string) *yaml.Container
 	}
 }
 
-func (c *s3Cacher) Rebuild(repo, branch string, mounts []string) *yaml.Container {
-	return &yaml.Container{
+func (c *s3Cacher) Rebuild(_, _ string, mounts []string) *yaml_types.Container {
+	return &yaml_types.Container{
 		Name:  "rebuild_cache",
 		Image: "plugins/s3-cache:latest",
 		Settings: map[string]interface{}{

@@ -1,10 +1,10 @@
 <template>
-  <div class="app flex flex-col m-auto w-full h-full bg-gray-100 dark:bg-dark-gray-600">
+  <div class="app flex flex-col m-auto w-full h-full bg-wp-background-200 dark:bg-wp-background-100">
     <router-view v-if="blank" />
     <template v-else>
       <Navbar />
       <main class="relative flex min-h-0 h-full">
-        <div class="flex flex-col overflow-y-auto flex-grow">
+        <div id="scroll-component" class="flex flex-col overflow-y-auto flex-grow">
           <router-view />
         </div>
         <transition name="slide-right">
@@ -16,8 +16,8 @@
   </div>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent } from 'vue';
+<script lang="ts" setup>
+import { computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 
@@ -26,30 +26,30 @@ import PipelineFeedSidebar from '~/components/pipeline-feed/PipelineFeedSidebar.
 import useApiClient from '~/compositions/useApiClient';
 import useNotifications from '~/compositions/useNotifications';
 
-export default defineComponent({
-  name: 'App',
+const route = useRoute();
+const apiClient = useApiClient();
+const { notify } = useNotifications();
+const i18n = useI18n();
 
-  components: {
-    Navbar,
-    PipelineFeedSidebar,
-  },
-
-  setup() {
-    const route = useRoute();
-    const apiClient = useApiClient();
-    const notifications = useNotifications();
-    const i18n = useI18n();
-
-    // eslint-disable-next-line promise/prefer-await-to-callbacks
-    apiClient.setErrorHandler((err) => {
-      notifications.notify({ title: err.message || i18n.t('unknown_error'), type: 'error' });
-    });
-
-    const blank = computed(() => route.meta.blank);
-
-    return { blank };
-  },
+// eslint-disable-next-line promise/prefer-await-to-callbacks
+apiClient.setErrorHandler((err) => {
+  if (err.status === 404) {
+    notify({ title: i18n.t('errors.not_found'), type: 'error' });
+    return;
+  }
+  notify({ title: err.message || i18n.t('unknown_error'), type: 'error' });
 });
+
+const blank = computed(() => route.meta.blank);
+
+const { locale } = useI18n();
+watch(
+  locale,
+  () => {
+    document.documentElement.setAttribute('lang', locale.value);
+  },
+  { immediate: true },
+);
 </script>
 
 <style scoped>

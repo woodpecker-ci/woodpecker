@@ -2,12 +2,12 @@
   <Popup :open="open" @close="$emit('close')">
     <Panel v-if="!loading">
       <form @submit.prevent="triggerManualPipeline">
-        <span class="text-xl text-color">{{ $t('repo.manual_pipeline.title') }}</span>
+        <span class="text-xl text-wp-text-100">{{ $t('repo.manual_pipeline.title') }}</span>
         <InputField :label="$t('repo.manual_pipeline.select_branch')">
           <SelectField v-model="payload.branch" :options="branches" required />
         </InputField>
         <InputField :label="$t('repo.manual_pipeline.variables.title')">
-          <span class="text-sm text-color-alt mb-2">{{ $t('repo.manual_pipeline.variables.desc') }}</span>
+          <span class="text-sm text-wp-text-alt-100 mb-2">{{ $t('repo.manual_pipeline.variables.desc') }}</span>
           <div class="flex flex-col gap-2">
             <div v-for="(value, name) in payload.variables" :key="name" class="flex gap-4">
               <TextField :model-value="name" disabled />
@@ -56,6 +56,7 @@ import Panel from '~/components/layout/Panel.vue';
 import Popup from '~/components/layout/Popup.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { inject } from '~/compositions/useInjectProvide';
+import { usePaginate } from '~/compositions/usePaginate';
 
 defineProps<{
   open: boolean;
@@ -79,7 +80,7 @@ const newPipelineVariable = ref<{ name: string; value: string }>({ name: '', val
 
 const loading = ref(true);
 onMounted(async () => {
-  const data = await apiClient.getRepoBranches(repo.value.owner, repo.value.name);
+  const data = await usePaginate((page) => apiClient.getRepoBranches(repo.value.id, page));
   branches.value = data.map((e) => ({
     text: e,
     value: e,
@@ -102,7 +103,7 @@ function deleteVar(key: string) {
 
 async function triggerManualPipeline() {
   loading.value = true;
-  const pipeline = await apiClient.createPipeline(repo.value.owner, repo.value.name, payload.value);
+  const pipeline = await apiClient.createPipeline(repo.value.id, payload.value);
 
   emit('close');
 

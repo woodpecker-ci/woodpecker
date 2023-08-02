@@ -39,6 +39,7 @@ var Config = struct {
 		Registries          model.RegistryService
 		Environ             model.EnvironService
 		Forge               forge.Forge
+		Timeout             time.Duration
 		Membership          cache.MembershipService
 		ConfigService       config.Extension
 		SignaturePrivateKey crypto.PrivateKey
@@ -49,7 +50,6 @@ var Config = struct {
 		// Repos  model.RepoStore
 		// Builds model.BuildStore
 		// Logs   model.LogStore
-		Files model.FileStore
 		Steps model.StepStore
 		// Registries model.RegistryStore
 		// Secrets model.SecretStore
@@ -59,12 +59,20 @@ var Config = struct {
 		Cert                string
 		OAuthHost           string
 		Host                string
+		WebhookHost         string
 		Port                string
-		Pass                string
+		PortTLS             string
+		AgentToken          string
 		Docs                string
 		StatusContext       string
 		StatusContextFormat string
 		SessionExpires      time.Duration
+		RootURL             string
+		CustomCSSFile       string
+		CustomJsFile        string
+		Migrations          struct {
+			AllowLong bool
+		}
 		// Open bool
 		// Orgs map[string]struct{}
 		// Admins map[string]struct{}
@@ -80,6 +88,7 @@ var Config = struct {
 		Volumes                             []string
 		Networks                            []string
 		Privileged                          []string
+		DefaultTimeout                      int64
+		MaxTimeout                          int64
 	}
-	FlatPermissions bool // TODO(485) temporary workaround to not hit api rate limits
 }{}

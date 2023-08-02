@@ -1,17 +1,44 @@
+// Copyright 2021 Woodpecker Authors
+// Copyright 2011 Drone.IO Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 syntax = "proto3";
 
 option go_package = "github.com/woodpecker-ci/woodpecker/pipeline/rpc/proto";
 package proto;
 
-message File {
-  string name = 1;
-  string step = 2;
-  string mime = 3;
-  int64  time = 4;
-  int32  size = 5;
-  bytes  data = 6;
-  map<string, string> meta = 7;
+// !IMPORTANT!
+// Increased Version in version.go by 1 if you change something here!
+// !IMPORTANT!
+
+// Woodpecker Server Service
+service Woodpecker {
+  rpc Version       (Empty)                returns (VersionResponse) {}
+  rpc Next          (NextRequest)          returns (NextResponse) {}
+  rpc Init          (InitRequest)          returns (Empty) {}
+  rpc Wait          (WaitRequest)          returns (Empty) {}
+  rpc Done          (DoneRequest)          returns (Empty) {}
+  rpc Extend        (ExtendRequest)        returns (Empty) {}
+  rpc Update        (UpdateRequest)        returns (Empty) {}
+  rpc Log           (LogRequest)           returns (Empty) {}
+  rpc RegisterAgent (RegisterAgentRequest) returns (RegisterAgentResponse) {}
+  rpc ReportHealth  (ReportHealthRequest)  returns (Empty) {}
 }
+
+//
+// Basic Types
+//
 
 message State {
   string name = 1;
@@ -22,11 +49,12 @@ message State {
   string error = 6;
 }
 
-message Line {
-  string step = 1;
+message LogEntry {
+  string step_uuid = 1;
   int64  time = 2;
-  int32  pos = 3;
-  string out = 4;
+  int32  line = 3;
+  int32  type = 4; // 0 = stdout, 1 = stderr, 2 = exit-code, 3 = metadata, 4 = progress
+  string data = 5;
 }
 
 message Filter {
@@ -39,44 +67,12 @@ message Pipeline {
   bytes payload = 3;
 }
 
-message HealthCheckRequest {
-  string service = 1;
-}
-
-message HealthCheckResponse {
-  enum ServingStatus {
-    UNKNOWN = 0;
-    SERVING = 1;
-    NOT_SERVING = 2;
-  }
-  ServingStatus status = 1;
-}
-
-service Woodpecker {
-  rpc Next   (NextRequest)   returns (NextReply) {}
-  rpc Init   (InitRequest)   returns (Empty) {}
-  rpc Wait   (WaitRequest)   returns (Empty) {}
-  rpc Done   (DoneRequest)   returns (Empty) {}
-  rpc Extend (ExtendRequest) returns (Empty) {}
-  rpc Update (UpdateRequest) returns (Empty) {}
-  rpc Upload (UploadRequest) returns (Empty) {}
-  rpc Log    (LogRequest)    returns (Empty) {}
-}
-
-service Health {
-  rpc Check(HealthCheckRequest) returns (HealthCheckResponse);
-}
-
 //
-// next
+// Request types
 //
 
 message NextRequest {
   Filter filter = 1;
-}
-
-message NextReply {
-  Pipeline pipeline = 1;
 }
 
 message InitRequest {
@@ -97,21 +93,59 @@ message ExtendRequest {
   string id = 1;
 }
 
-message UploadRequest {
-  string id = 1;
-  File   file = 2;
-}
-
 message UpdateRequest {
   string id = 1;
   State  state = 2;
 }
 
 message LogRequest {
-  string id = 1;
-  Line   line = 2;
+  LogEntry logEntry = 1;
 }
 
 message Empty {
+}
 
+message ReportHealthRequest {
+  string status = 1;
+}
+
+message RegisterAgentRequest {
+  string platform = 1;
+  int32  capacity = 2;
+  string backend  = 3;
+  string version  = 4;
+}
+
+//
+// Response types
+//
+
+message VersionResponse {
+  int32  grpc_version   = 1;
+  string server_version = 2;
+}
+
+message NextResponse {
+  Pipeline pipeline = 1;
+}
+
+message RegisterAgentResponse {
+  int64 agent_id = 1;
+}
+
+// Woodpecker auth service is a simple service to authenticate agents and aquire a token
+
+service WoodpeckerAuth {
+  rpc Auth          (AuthRequest)          returns (AuthResponse) {}
+}
+
+message AuthRequest {
+  string agent_token = 1;
+  int64  agent_id    = 2;
+}
+
+message AuthResponse {
+  string status        = 1;
+  int64  agent_id      = 2;
+  string access_token  = 3;
 }

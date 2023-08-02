@@ -3,13 +3,13 @@
     <input
       :id="`checkbox-${id}`"
       type="checkbox"
-      class="checkbox flex-shrink-0 relative border border-gray-400 dark:border-gray-600 cursor-pointer rounded-md transition-colors duration-150 w-5 h-5 checked:bg-lime-600 checked:border-lime-600 dark:checked:bg-lime-800 dark:checked:border-lime-800 focus-visible:border-gray-600 dark:focus-visible:border-gray-400"
+      class="checkbox flex-shrink-0 relative border bg-wp-control-neutral-100 border-wp-control-neutral-200 cursor-pointer rounded-md transition-colors duration-150 w-5 h-5 checked:bg-wp-control-ok-200 checked:border-wp-control-ok-200 focus-visible:border-wp-control-neutral-300 checked:focus-visible:border-wp-control-ok-300"
       :checked="innerValue"
       @click="innerValue = !innerValue"
     />
     <div class="flex flex-col ml-4">
-      <label v-if="label" class="cursor-pointer text-color" :for="`checkbox-${id}`">{{ label }}</label>
-      <span v-if="description" class="text-sm text-color-alt">{{ description }}</span>
+      <label v-if="label" class="cursor-pointer text-wp-text-100" :for="`checkbox-${id}`">{{ label }}</label>
+      <span v-if="description" class="text-sm text-wp-text-alt-100">{{ description }}</span>
     </div>
   </div>
 </template>
@@ -82,7 +82,7 @@ export default defineComponent({
   border-width: 0 2px 2px 0;
   transform: translate(-50%, -60%) rotate(45deg);
   opacity: 0;
-  @apply dark:border-gray-400;
+  @apply dark:border-white;
 }
 
 .checkbox:checked::before {

@@ -76,7 +76,11 @@ func getWorkspaces(c *gin.Context) {
 	case "Bearer teams_not_found", "Bearer c81e728d":
 		c.String(404, "")
 	default:
-		c.String(200, workspacesPayload)
+		if c.Query("page") == "" || c.Query("page") == "1" {
+			c.String(200, workspacesPayload)
+		} else {
+			c.String(200, "{\"values\":[]}")
+		}
 	}
 }
 

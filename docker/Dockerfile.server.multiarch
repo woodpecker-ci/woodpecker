@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM golang:1.18 AS certs
+FROM --platform=$BUILDPLATFORM golang:1.20 AS certs
 
 FROM scratch
 ARG TARGETOS TARGETARCH
@@ -9,9 +9,10 @@ ENV XDG_CACHE_HOME=/var/lib/woodpecker
 ENV XDG_DATA_HOME=/var/lib/woodpecker
 EXPOSE 8000 9000 80 443
 
-# copy certs from golang:1.18 image
+# copy certs from certs image
 COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 # copy server binary
 COPY dist/server/${TARGETOS}/${TARGETARCH}/woodpecker-server /bin/
 
+HEALTHCHECK CMD ["/bin/woodpecker-server", "ping"]
 ENTRYPOINT ["/bin/woodpecker-server"]

@@ -193,7 +193,7 @@ func TestPipelines(t *testing.T) {
 			pipeline1 := &model.Pipeline{
 				RepoID: repo.ID,
 				Status: model.StatusPending,
-				Branch: "master",
+				Branch: "main",
 				Commit: "85f8c029b902ed9400bc600bac301a0aadb144ac",
 			}
 			pipeline2 := &model.Pipeline{
@@ -219,14 +219,14 @@ func TestPipelines(t *testing.T) {
 			pipeline1 := &model.Pipeline{
 				RepoID: repo.ID,
 				Status: model.StatusFailure,
-				Branch: "master",
+				Branch: "main",
 				Commit: "85f8c029b902ed9400bc600bac301a0aadb144ac",
 				Event:  model.EventPush,
 			}
 			pipeline2 := &model.Pipeline{
 				RepoID: repo.ID,
 				Status: model.StatusSuccess,
-				Branch: "master",
+				Branch: "main",
 				Commit: "85f8c029b902ed9400bc600bac301a0aadb144aa",
 				Event:  model.EventPush,
 			}
@@ -248,19 +248,19 @@ func TestPipelines(t *testing.T) {
 			pipeline1 := &model.Pipeline{
 				RepoID: repo.ID,
 				Status: model.StatusFailure,
-				Branch: "master",
+				Branch: "main",
 				Commit: "85f8c029b902ed9400bc600bac301a0aadb144ac",
 			}
 			pipeline2 := &model.Pipeline{
 				RepoID: repo.ID,
 				Status: model.StatusSuccess,
-				Branch: "master",
+				Branch: "main",
 				Commit: "85f8c029b902ed9400bc600bac301a0aadb144aa",
 			}
 			pipeline3 := &model.Pipeline{
 				RepoID: repo.ID,
 				Status: model.StatusRunning,
-				Branch: "master",
+				Branch: "main",
 				Commit: "85f8c029b902ed9400bc600bac301a0aadb144aa",
 			}
 			err1 := store.CreatePipeline(pipeline1, []*model.Step{}...)
@@ -292,7 +292,7 @@ func TestPipelines(t *testing.T) {
 			g.Assert(err1).IsNil()
 			err2 := store.CreatePipeline(pipeline2, []*model.Step{}...)
 			g.Assert(err2).IsNil()
-			pipelines, err3 := store.GetPipelineList(&model.Repo{ID: 1}, 1)
+			pipelines, err3 := store.GetPipelineList(&model.Repo{ID: 1}, &model.ListOptions{Page: 1, PerPage: 50})
 			g.Assert(err3).IsNil()
 			g.Assert(len(pipelines)).Equal(2)
 			g.Assert(pipelines[0].ID).Equal(pipeline2.ID)

@@ -1,7 +1,7 @@
 <template>
   <Panel>
-    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-gray-600">
-      <h1 class="text-xl ml-2 text-color">{{ $t('repo.settings.general.general') }}</h1>
+    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-wp-background-100">
+      <h1 class="text-xl ml-2 text-wp-text-100">{{ $t('repo.settings.general.general') }}</h1>
     </div>
 
     <form v-if="repoSettings" class="flex flex-col" @submit.prevent="saveRepoSettings">
@@ -11,12 +11,13 @@
       >
         <TextField
           v-model="repoSettings.config_file"
-          class="max-w-124"
           :placeholder="$t('repo.settings.general.pipeline_path.default')"
         />
         <template #description>
-          <!-- eslint-disable-next-line vue/no-v-html -->
-          <p class="text-sm text-color-alt" v-html="$t('repo.settings.general.pipeline_path.desc')" />
+          <i18n-t keypath="repo.settings.general.pipeline_path.desc" tag="p" class="text-sm text-wp-text-alt-100">
+            <span class="code-box-inline px-1">{{ $t('repo.settings.general.pipeline_path.desc_path_example') }}</span>
+            <span class="code-box-inline px-1">/</span>
+          </i18n-t>
         </template>
       </InputField>
 
@@ -33,6 +34,11 @@
           v-model="repoSettings.gated"
           :label="$t('repo.settings.general.protected.protected')"
           :description="$t('repo.settings.general.protected.desc')"
+        />
+        <Checkbox
+          v-model="repoSettings.netrc_only_trusted"
+          :label="$t('repo.settings.general.netrc_only_trusted.netrc_only_trusted')"
+          :description="$t('repo.settings.general.netrc_only_trusted.desc')"
         />
         <Checkbox
           v-if="user?.admin"
@@ -100,7 +106,7 @@ import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useAuthentication from '~/compositions/useAuthentication';
 import useNotifications from '~/compositions/useNotifications';
 import { Repo, RepoSettings, RepoVisibility, WebhookEvents } from '~/lib/api/types';
-import RepoStore from '~/store/repos';
+import { useRepoStore } from '~/store/repos';
 
 export default defineComponent({
   name: 'GeneralTab',
@@ -111,7 +117,7 @@ export default defineComponent({
     const apiClient = useApiClient();
     const notifications = useNotifications();
     const { user } = useAuthentication();
-    const repoStore = RepoStore();
+    const repoStore = useRepoStore();
     const i18n = useI18n();
 
     const repo = inject<Ref<Repo>>('repo');
@@ -130,6 +136,7 @@ export default defineComponent({
         trusted: repo.value.trusted,
         allow_pr: repo.value.allow_pr,
         cancel_previous_pipeline_events: repo.value.cancel_previous_pipeline_events || [],
+        netrc_only_trusted: repo.value.netrc_only_trusted,
       };
     }
 
@@ -138,7 +145,7 @@ export default defineComponent({
         throw new Error('Unexpected: Repo should be set');
       }
 
-      await repoStore.loadRepo(repo.value.owner, repo.value.name);
+      await repoStore.loadRepo(repo.value.id);
       loadRepoSettings();
     }
 
@@ -151,7 +158,7 @@ export default defineComponent({
         throw new Error('Unexpected: Repo-Settings should be set');
       }
 
-      await apiClient.updateRepo(repo.value.owner, repo.value.name, repoSettings.value);
+      await apiClient.updateRepo(repo.value.id, repoSettings.value);
       await loadRepo();
       notifications.notify({ title: i18n.t('repo.settings.general.success'), type: 'success' });
     });

@@ -14,5 +14,9 @@
       "./web"
   ],
   "prettier.configPath": "./web/.prettierrc.js",
-  "prettier.ignorePath": "./web/.prettierignore"
+  "prettier.ignorePath": "./web/.prettierignore",
+  "cSpell.words": [
+    "doublestar",
+    "multierr"
+  ]
 }

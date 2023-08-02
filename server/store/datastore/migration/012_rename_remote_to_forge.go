@@ -36,13 +36,10 @@ var renameRemoteToForge = task{
 		}
 
 		// make sure the column exist before rename it
-		if err := sess.Sync2(new(oldRepo012)); err != nil {
-			return err
-		}
-		if err := renameColumn(sess, "repos", "remote_id", "forge_id"); err != nil {
+		if err := sess.Sync(new(oldRepo012)); err != nil {
 			return err
 		}
 
-		return nil
+		return renameColumn(sess, "repos", "remote_id", "forge_id")
 	},
 }

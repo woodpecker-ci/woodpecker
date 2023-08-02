@@ -30,11 +30,10 @@ func (s storage) ConfigsForPipeline(pipelineID int64) ([]*model.Config, error) {
 }
 
 func (s storage) ConfigFindIdentical(repoID int64, hash string) (*model.Config, error) {
-	conf := &model.Config{
-		RepoID: repoID,
-		Hash:   hash,
-	}
-	if err := wrapGet(s.engine.Get(conf)); err != nil {
+	conf := new(model.Config)
+	if err := wrapGet(s.engine.Where(
+		builder.Eq{"config_repo_id": repoID, "config_hash": hash},
+	).Get(conf)); err != nil {
 		return nil, err
 	}
 	return conf, nil
@@ -43,8 +42,7 @@ func (s storage) ConfigFindIdentical(repoID int64, hash string) (*model.Config, 
 func (s storage) ConfigFindApproved(config *model.Config) (bool, error) {
 	return s.engine.Table("pipelines").Select("pipelines.pipeline_id").
 		Join("INNER", "pipeline_config", "pipelines.pipeline_id = pipeline_config.pipeline_id").
-		Where(builder.Eq{"pipelines.pipeline_repo_id": config.RepoID}.
-			And(builder.Eq{"pipeline_config.config_id": config.ID}).
+		Where(builder.Eq{"pipelines.pipeline_repo_id": config.RepoID, "pipeline_config.config_id": config.ID}.
 			And(builder.NotIn("pipelines.pipeline_status", model.StatusBlocked, model.StatusPending))).
 		Exist()
 }

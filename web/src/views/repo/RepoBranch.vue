@@ -1,6 +1,6 @@
 <template>
   <div class="flex w-full mb-4 justify-center">
-    <span class="text-color text-xl">{{ $t('repo.pipeline.pipelines_for', { branch }) }}</span>
+    <span class="text-wp-text-100 text-xl">{{ $t('repo.pipeline.pipelines_for', { branch }) }}</span>
   </div>
   <PipelineList :pipelines="pipelines" :repo="repo" />
 </template>
@@ -32,7 +32,9 @@ export default defineComponent({
     }
 
     const allPipelines = inject<Ref<Pipeline[]>>('pipelines');
-    const pipelines = computed(() => allPipelines?.value.filter((b) => b.branch === branch.value));
+    const pipelines = computed(() =>
+      allPipelines?.value.filter((b) => b.branch === branch.value && b.event !== 'pull_request'),
+    );
 
     return { pipelines, repo };
   },

@@ -18,7 +18,7 @@ import (
 	"context"
 	"io"
 	"os"
-	"strconv"
+	"runtime"
 	"strings"
 
 	"github.com/docker/docker/api/types"
@@ -29,8 +29,10 @@ import (
 	"github.com/moby/moby/pkg/stdcopy"
 	"github.com/moby/term"
 	"github.com/rs/zerolog/log"
+	"github.com/urfave/cli/v2"
 
 	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
+	"github.com/woodpecker-ci/woodpecker/shared/utils"
 )
 
 type docker struct {
@@ -40,8 +42,11 @@ type docker struct {
 	volumes    []string
 }
 
-// make sure docker implements Engine
-var _ backend.Engine = &docker{}
+const (
+	networkDriverNAT    = "nat"
+	networkDriverBridge = "bridge"
+	volumeDriver        = "local"
+)
 
 // New returns a new Docker Engine.
 func New() backend.Engine {
@@ -54,7 +59,7 @@ func (e *docker) Name() string {
 	return "docker"
 }
 
-func (e *docker) IsAvailable() bool {
+func (e *docker) IsAvailable(context.Context) bool {
 	if os.Getenv("DOCKER_HOST") != "" {
 		return true
 	}
@@ -63,18 +68,22 @@ func (e *docker) IsAvailable() bool {
 }
 
 // Load new client for Docker Engine using environment variables.
-func (e *docker) Load() error {
-	cli, err := client.NewClientWithOpts(client.FromEnv)
+func (e *docker) Load(ctx context.Context) error {
+	cl, err := client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
 		return err
 	}
-	e.client = cli
+	e.client = cl
 
-	e.enableIPv6, _ = strconv.ParseBool(os.Getenv("WOODPECKER_BACKEND_DOCKER_ENABLE_IPV6"))
+	c, ok := ctx.Value(backend.CliContext).(*cli.Context)
+	if !ok {
+		return backend.ErrNoCliContextFound
+	}
+	e.enableIPv6 = c.Bool("backend-docker-ipv6")
 
-	e.network = os.Getenv("WOODPECKER_BACKEND_DOCKER_NETWORK")
+	e.network = c.String("backend-docker-network")
 
-	volumes := strings.Split(os.Getenv("WOODPECKER_BACKEND_DOCKER_VOLUMES"), ",")
+	volumes := strings.Split(c.String("backend-docker-volumes"), ",")
 	e.volumes = make([]string, 0, len(volumes))
 	// Validate provided volume definitions
 	for _, v := range volumes {
@@ -92,24 +101,27 @@ func (e *docker) Load() error {
 	return nil
 }
 
-func (e *docker) Setup(_ context.Context, conf *backend.Config) error {
+func (e *docker) SetupWorkflow(_ context.Context, conf *backend.Config, taskUUID string) error {
+	log.Trace().Str("taskUUID", taskUUID).Msg("create workflow environment")
+
 	for _, vol := range conf.Volumes {
 		_, err := e.client.VolumeCreate(noContext, volume.VolumeCreateBody{
-			Name:       vol.Name,
-			Driver:     vol.Driver,
-			DriverOpts: vol.DriverOpts,
-			// Labels:     defaultLabels,
+			Name:   vol.Name,
+			Driver: volumeDriver,
 		})
 		if err != nil {
 			return err
 		}
 	}
+
+	networkDriver := networkDriverBridge
+	if runtime.GOOS == "windows" {
+		networkDriver = networkDriverNAT
+	}
 	for _, n := range conf.Networks {
 		_, err := e.client.NetworkCreate(noContext, n.Name, types.NetworkCreate{
-			Driver:     n.Driver,
-			Options:    n.DriverOpts,
+			Driver:     networkDriver,
 			EnableIPv6: e.enableIPv6,
-			// Labels:  defaultLabels,
 		})
 		if err != nil {
 			return err
@@ -118,9 +130,12 @@ func (e *docker) Setup(_ context.Context, conf *backend.Config) error {
 	return nil
 }
 
-func (e *docker) Exec(ctx context.Context, step *backend.Step) error {
+func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID string) error {
+	log.Trace().Str("taskUUID", taskUUID).Msgf("start step %s", step.Name)
+
 	config := toConfig(step)
 	hostConfig := toHostConfig(step)
+	containerName := toContainerName(step)
 
 	// create pull options with encoded authorization credentials.
 	pullopts := types.ImagePullOptions{}
@@ -133,12 +148,12 @@ func (e *docker) Exec(ctx context.Context, step *backend.Step) error {
 	if step.Pull {
 		responseBody, perr := e.client.ImagePull(ctx, config.Image, pullopts)
 		if perr == nil {
-			defer responseBody.Close()
-
+			// TODO(1936): show image pull progress in web-ui
 			fd, isTerminal := term.GetFdInfo(os.Stdout)
 			if err := jsonmessage.DisplayJSONMessagesStream(responseBody, os.Stdout, fd, isTerminal, nil); err != nil {
 				log.Error().Err(err).Msg("DisplayJSONMessagesStream")
 			}
+			responseBody.Close()
 		}
 		// Fix "Show warning when fail to auth to docker registry"
 		// (https://web.archive.org/web/20201023145804/https://github.com/drone/drone/issues/1917)
@@ -148,9 +163,9 @@ func (e *docker) Exec(ctx context.Context, step *backend.Step) error {
 	}
 
 	// add default volumes to the host configuration
-	hostConfig.Binds = append(hostConfig.Binds, e.volumes...)
+	hostConfig.Binds = utils.DedupStrings(append(hostConfig.Binds, e.volumes...))
 
-	_, err := e.client.ContainerCreate(ctx, config, hostConfig, nil, nil, step.Name)
+	_, err := e.client.ContainerCreate(ctx, config, hostConfig, nil, nil, containerName)
 	if client.IsErrNotFound(err) {
 		// automatically pull and try to re-create the image if the
 		// failure is caused because the image does not exist.
@@ -158,13 +173,14 @@ func (e *docker) Exec(ctx context.Context, step *backend.Step) error {
 		if perr != nil {
 			return perr
 		}
-		defer responseBody.Close()
+		// TODO(1936): show image pull progress in web-ui
 		fd, isTerminal := term.GetFdInfo(os.Stdout)
 		if err := jsonmessage.DisplayJSONMessagesStream(responseBody, os.Stdout, fd, isTerminal, nil); err != nil {
 			log.Error().Err(err).Msg("DisplayJSONMessagesStream")
 		}
+		responseBody.Close()
 
-		_, err = e.client.ContainerCreate(ctx, config, hostConfig, nil, nil, step.Name)
+		_, err = e.client.ContainerCreate(ctx, config, hostConfig, nil, nil, containerName)
 	}
 	if err != nil {
 		return err
@@ -172,7 +188,7 @@ func (e *docker) Exec(ctx context.Context, step *backend.Step) error {
 
 	if len(step.NetworkMode) == 0 {
 		for _, net := range step.Networks {
-			err = e.client.NetworkConnect(ctx, net.Name, step.Name, &network.EndpointSettings{
+			err = e.client.NetworkConnect(ctx, net.Name, containerName, &network.EndpointSettings{
 				Aliases: net.Aliases,
 			})
 			if err != nil {
@@ -182,24 +198,28 @@ func (e *docker) Exec(ctx context.Context, step *backend.Step) error {
 
 		// join the container to an existing network
 		if e.network != "" {
-			err = e.client.NetworkConnect(ctx, e.network, step.Name, &network.EndpointSettings{})
+			err = e.client.NetworkConnect(ctx, e.network, containerName, &network.EndpointSettings{})
 			if err != nil {
 				return err
 			}
 		}
 	}
 
-	return e.client.ContainerStart(ctx, step.Name, startOpts)
+	return e.client.ContainerStart(ctx, containerName, startOpts)
 }
 
-func (e *docker) Wait(ctx context.Context, step *backend.Step) (*backend.State, error) {
-	wait, errc := e.client.ContainerWait(ctx, step.Name, "")
+func (e *docker) WaitStep(ctx context.Context, step *backend.Step, taskUUID string) (*backend.State, error) {
+	log.Trace().Str("taskUUID", taskUUID).Msgf("wait for step %s", step.Name)
+
+	containerName := toContainerName(step)
+
+	wait, errc := e.client.ContainerWait(ctx, containerName, "")
 	select {
 	case <-wait:
 	case <-errc:
 	}
 
-	info, err := e.client.ContainerInspect(ctx, step.Name)
+	info, err := e.client.ContainerInspect(ctx, containerName)
 	if err != nil {
 		return nil, err
 	}
@@ -214,8 +234,10 @@ func (e *docker) Wait(ctx context.Context, step *backend.Step) (*backend.State, 
 	}, nil
 }
 
-func (e *docker) Tail(ctx context.Context, step *backend.Step) (io.ReadCloser, error) {
-	logs, err := e.client.ContainerLogs(ctx, step.Name, logsOpts)
+func (e *docker) TailStep(ctx context.Context, step *backend.Step, taskUUID string) (io.ReadCloser, error) {
+	log.Trace().Str("taskUUID", taskUUID).Msgf("tail logs of step %s", step.Name)
+
+	logs, err := e.client.ContainerLogs(ctx, toContainerName(step), logsOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -226,18 +248,20 @@ func (e *docker) Tail(ctx context.Context, step *backend.Step) (io.ReadCloser, e
 		_, _ = stdcopy.StdCopy(wc, wc, logs)
 		_ = logs.Close()
 		_ = wc.Close()
-		_ = rc.Close()
 	}()
 	return rc, nil
 }
 
-func (e *docker) Destroy(_ context.Context, conf *backend.Config) error {
+func (e *docker) DestroyWorkflow(_ context.Context, conf *backend.Config, taskUUID string) error {
+	log.Trace().Str("taskUUID", taskUUID).Msgf("delete workflow environment")
+
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
-			if err := e.client.ContainerKill(noContext, step.Name, "9"); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
+			containerName := toContainerName(step)
+			if err := e.client.ContainerKill(noContext, containerName, "9"); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
 				log.Error().Err(err).Msgf("could not kill container '%s'", stage.Name)
 			}
-			if err := e.client.ContainerRemove(noContext, step.Name, removeOpts); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
+			if err := e.client.ContainerRemove(noContext, containerName, removeOpts); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
 				log.Error().Err(err).Msgf("could not remove container '%s'", stage.Name)
 			}
 		}

@@ -1,9 +1,9 @@
 <template>
   <Panel>
-    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-gray-600">
+    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-wp-background-100">
       <div class="ml-2">
-        <h1 class="text-xl text-color">{{ $t('repo.settings.registries.creds') }}</h1>
-        <p class="text-sm text-color-alt">
+        <h1 class="text-xl text-wp-text-100">{{ $t('repo.settings.registries.creds') }}</h1>
+        <p class="text-sm text-wp-text-alt-100">
           {{ $t('repo.settings.registries.desc') }}
           <DocsLink :topic="$t('repo.settings.registries.creds')" url="docs/usage/registries" />
         </p>
@@ -24,8 +24,12 @@
       />
     </div>
 
-    <div v-if="!selectedRegistry" class="space-y-4 text-color">
-      <ListItem v-for="registry in registries" :key="registry.id" class="items-center">
+    <div v-if="!selectedRegistry" class="space-y-4 text-wp-text-100">
+      <ListItem
+        v-for="registry in registries"
+        :key="registry.id"
+        class="items-center !bg-wp-background-200 !dark:bg-wp-background-100"
+      >
         <span>{{ registry.address }}</span>
         <IconButton
           icon="edit"
@@ -35,7 +39,7 @@
         />
         <IconButton
           icon="trash"
-          class="w-8 h-8 hover:text-red-400 hover:dark:text-red-500"
+          class="w-8 h-8 hover:text-wp-control-error-100"
           :is-loading="isDeleting"
           :title="$t('repo.settings.registries.delete')"
           @click="deleteRegistry(registry)"
@@ -65,19 +69,22 @@
           <TextField v-model="selectedRegistry.password" :placeholder="$t('password')" required />
         </InputField>
 
-        <Button
-          type="submit"
-          color="green"
-          :is-loading="isSaving"
-          :text="isEditingRegistry ? $t('repo.settings.registries.save') : $t('repo.settings.registries.add')"
-        />
+        <div class="flex gap-2">
+          <Button type="button" color="gray" :text="$t('cancel')" @click="selectedRegistry = undefined" />
+          <Button
+            type="submit"
+            color="green"
+            :is-loading="isSaving"
+            :text="isEditingRegistry ? $t('repo.settings.registries.save') : $t('repo.settings.registries.add')"
+          />
+        </div>
       </form>
     </div>
   </Panel>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, onMounted, Ref, ref } from 'vue';
+import { computed, defineComponent, inject, Ref, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
@@ -90,6 +97,7 @@ import Panel from '~/components/layout/Panel.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
+import { usePagination } from '~/compositions/usePaginate';
 import { Repo } from '~/lib/api/types';
 import { Registry } from '~/lib/api/types/registry';
 
@@ -112,17 +120,18 @@ export default defineComponent({
     const i18n = useI18n();
 
     const repo = inject<Ref<Repo>>('repo');
-    const registries = ref<Registry[]>();
     const selectedRegistry = ref<Partial<Registry>>();
     const isEditingRegistry = computed(() => !!selectedRegistry.value?.id);
 
-    async function loadRegistries() {
+    async function loadRegistries(page: number): Promise<Registry[] | null> {
       if (!repo?.value) {
         throw new Error("Unexpected: Can't load repo");
       }
 
-      registries.value = await apiClient.getRegistryList(repo.value.owner, repo.value.name);
+      return apiClient.getRegistryList(repo.value.id, page);
     }
+
+    const { resetPage, data: registries } = usePagination(loadRegistries, () => !selectedRegistry.value);
 
     const { doSubmit: createRegistry, isLoading: isSaving } = useAsyncAction(async () => {
       if (!repo?.value) {
@@ -134,9 +143,9 @@ export default defineComponent({
       }
 
       if (isEditingRegistry.value) {
-        await apiClient.updateRegistry(repo.value.owner, repo.value.name, selectedRegistry.value);
+        await apiClient.updateRegistry(repo.value.id, selectedRegistry.value);
       } else {
-        await apiClient.createRegistry(repo.value.owner, repo.value.name, selectedRegistry.value);
+        await apiClient.createRegistry(repo.value.id, selectedRegistry.value);
       }
       notifications.notify({
         title: i18n.t(
@@ -145,7 +154,7 @@ export default defineComponent({
         type: 'success',
       });
       selectedRegistry.value = undefined;
-      await loadRegistries();
+      resetPage();
     });
 
     const { doSubmit: deleteRegistry, isLoading: isDeleting } = useAsyncAction(async (_registry: Registry) => {
@@ -154,13 +163,9 @@ export default defineComponent({
       }
 
       const registryAddress = encodeURIComponent(_registry.address);
-      await apiClient.deleteRegistry(repo.value.owner, repo.value.name, registryAddress);
+      await apiClient.deleteRegistry(repo.value.id, registryAddress);
       notifications.notify({ title: i18n.t('repo.settings.registries.deleted'), type: 'success' });
-      await loadRegistries();
-    });
-
-    onMounted(async () => {
-      await loadRegistries();
+      resetPage();
     });
 
     return { selectedRegistry, registries, isEditingRegistry, isSaving, isDeleting, createRegistry, deleteRegistry };

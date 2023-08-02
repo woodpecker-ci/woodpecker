@@ -33,3 +33,7 @@ You should not use `sess.Begin()`, `sess.Commit()` or `sess.Close()` inside a mi
 :::
 
 To automatically execute the migration after the start of the server, the new migration needs to be added to the end of `migrationTasks` in `server/store/datastore/migration/migration.go`. After a successful execution of that transaction the server will automatically add the migration to a list, so it won't be executed again on the next start.
+
+## Constants of official images
+
+All official default images, are saved in [shared/constant/constant.go](https://github.com/woodpecker-ci/woodpecker/blob/main/shared/constant/constant.go) and must be pinned by an exact tag.

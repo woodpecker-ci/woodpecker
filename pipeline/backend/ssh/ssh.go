@@ -2,12 +2,12 @@ package ssh
 
 import (
 	"context"
-	"fmt"
 	"io"
-	"os"
 	"strings"
 
 	"github.com/melbahja/goph"
+	"github.com/rs/zerolog/log"
+	"github.com/urfave/cli/v2"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/common"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
@@ -29,9 +29,6 @@ func (c readCloser) Close() error {
 	return nil
 }
 
-// make sure local implements Engine
-var _ types.Engine = &ssh{}
-
 // New returns a new ssh Engine.
 func New() types.Engine {
 	return &ssh{}
@@ -41,11 +38,12 @@ func (e *ssh) Name() string {
 	return "ssh"
 }
 
-func (e *ssh) IsAvailable() bool {
-	return os.Getenv("WOODPECKER_BACKEND_SSH_KEY") != "" || os.Getenv("WOODPECKER_BACKEND_SSH_PASSWORD") != ""
+func (e *ssh) IsAvailable(ctx context.Context) bool {
+	c, ok := ctx.Value(types.CliContext).(*cli.Context)
+	return ok && c.String("backend-ssh-address") != "" && c.String("backend-ssh-user") != "" && (c.String("backend-ssh-key") != "" || c.String("backend-ssh-password") != "")
 }
 
-func (e *ssh) Load() error {
+func (e *ssh) Load(ctx context.Context) error {
 	cmd, err := e.client.Command("/bin/env", "mktemp", "-d", "-p", "/tmp", "woodpecker-ssh-XXXXXXXXXX")
 	if err != nil {
 		return err
@@ -57,23 +55,22 @@ func (e *ssh) Load() error {
 	}
 
 	e.workingdir = string(dir)
-	address := os.Getenv("WOODPECKER_BACKEND_SSH_ADDRESS")
-	if address == "" {
-		return fmt.Errorf("missing SSH address")
+	c, ok := ctx.Value(types.CliContext).(*cli.Context)
+	if !ok {
+		return types.ErrNoCliContextFound
 	}
-	user := os.Getenv("WOODPECKER_BACKEND_SSH_USER")
-	if user == "" {
-		return fmt.Errorf("missing SSH user")
-	}
+	address := c.String("backend-ssh-address")
+	user := c.String("backend-ssh-user")
 	var auth goph.Auth
-	if file, has := os.LookupEnv("WOODPECKER_BACKEND_SSH_KEY"); has {
-		var err error
-		auth, err = goph.Key(file, os.Getenv("WOODPECKER_BACKEND_SSH_KEY_PASSWORD"))
+	if file := c.String("backend-ssh-key"); file != "" {
+		keyAuth, err := goph.Key(file, c.String("backend-ssh-key-password"))
 		if err != nil {
 			return err
 		}
-	} else {
-		auth = goph.Password(os.Getenv("WOODPECKER_BACKEND_SSH_PASSWORD"))
+		auth = append(auth, keyAuth...)
+	}
+	if password := c.String("backend-ssh-password"); password != "" {
+		auth = append(auth, goph.Password(password)...)
 	}
 	client, err := goph.New(user, address, auth)
 	if err != nil {
@@ -83,15 +80,17 @@ func (e *ssh) Load() error {
 	return nil
 }
 
-// Setup the pipeline environment.
-func (e *ssh) Setup(ctx context.Context, config *types.Config) error {
+// SetupWorkflow create the workflow environment.
+func (e *ssh) SetupWorkflow(context.Context, *types.Config, string) error {
 	return nil
 }
 
-// Exec the pipeline step.
-func (e *ssh) Exec(ctx context.Context, step *types.Step) error {
+// StartStep start the step.
+func (e *ssh) StartStep(ctx context.Context, step *types.Step, taskUUID string) error {
+	log.Trace().Str("taskUUID", taskUUID).Msgf("Start step %s", step.Name)
+
 	// Get environment variables
-	command := []string{}
+	var command []string
 	for a, b := range step.Environment {
 		if a != "HOME" && a != "SHELL" { // Don't override $HOME and $SHELL
 			command = append(command, a+"="+b)
@@ -128,21 +127,21 @@ func (e *ssh) Exec(ctx context.Context, step *types.Step) error {
 	return e.cmd.Start()
 }
 
-// Wait for the pipeline step to complete and returns
+// WaitStep for the pipeline step to complete and returns
 // the completion results.
-func (e *ssh) Wait(context.Context, *types.Step) (*types.State, error) {
+func (e *ssh) WaitStep(context.Context, *types.Step, string) (*types.State, error) {
 	return &types.State{
 		Exited: true,
 	}, e.cmd.Wait()
 }
 
-// Tail the pipeline step logs.
-func (e *ssh) Tail(context.Context, *types.Step) (io.ReadCloser, error) {
+// TailStep the pipeline step logs.
+func (e *ssh) TailStep(context.Context, *types.Step, string) (io.ReadCloser, error) {
 	return e.output, nil
 }
 
-// Destroy the pipeline environment.
-func (e *ssh) Destroy(context.Context, *types.Config) error {
+// DestroyWorkflow delete the workflow environment.
+func (e *ssh) DestroyWorkflow(context.Context, *types.Config, string) error {
 	e.client.Close()
 	sftp, err := e.client.NewSftp()
 	if err != nil {

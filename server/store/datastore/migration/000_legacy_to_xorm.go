@@ -76,7 +76,7 @@ var legacy2Xorm = task{
 		} {
 			exist, err := sess.Exist(&migrations{mig})
 			if err != nil {
-				return fmt.Errorf("test migration existence: %v", err)
+				return fmt.Errorf("test migration existence: %w", err)
 			}
 			if !exist {
 				log.Error().Msgf("migration step '%s' missing, please upgrade to last stable v0.14.x version first", mig)
@@ -86,20 +86,20 @@ var legacy2Xorm = task{
 
 		{ // recreate build_config
 			type BuildConfig struct {
-				ConfigID int64 `xorm:"NOT NULL 'config_id'"` // xorm.Sync2() do not use index info of sess -> so it try to create it twice
+				ConfigID int64 `xorm:"NOT NULL 'config_id'"` // xorm.Sync() do not use index info of sess -> so it tries to create it twice
 				BuildID  int64 `xorm:"NOT NULL 'build_id'"`
 			}
 			if err := renameTable(sess, "build_config", "old_build_config"); err != nil {
 				return err
 			}
-			if err := sess.Sync2(new(BuildConfig)); err != nil {
+			if err := sess.Sync(new(BuildConfig)); err != nil {
 				return err
 			}
 			if _, err := sess.Exec("INSERT INTO build_config (config_id, build_id) SELECT config_id,build_id FROM old_build_config;"); err != nil {
-				return fmt.Errorf("unable to set copy data into temp table %s. Error: %v", "old_build_config", err)
+				return fmt.Errorf("unable to set copy data into temp table %s. Error: %w", "old_build_config", err)
 			}
 			if err := sess.DropTable("old_build_config"); err != nil {
-				return fmt.Errorf("could not drop table '%s': %v", "old_build_config", err)
+				return fmt.Errorf("could not drop table '%s': %w", "old_build_config", err)
 			}
 		}
 
@@ -120,7 +120,7 @@ var legacy2Xorm = task{
 				"DROP INDEX IF EXISTS ix_perms_user ON perms;",
 			} {
 				if _, err := sess.Exec(exec); err != nil {
-					return fmt.Errorf("exec: '%s' failed: %v", exec, err)
+					return fmt.Errorf("exec: '%s' failed: %w", exec, err)
 				}
 			}
 		case schemas.SQLITE, schemas.POSTGRES:
@@ -138,7 +138,7 @@ var legacy2Xorm = task{
 				"DROP INDEX IF EXISTS ix_perms_user;",
 			} {
 				if _, err := sess.Exec(exec); err != nil {
-					return fmt.Errorf("exec: '%s' failed: %v", exec, err)
+					return fmt.Errorf("exec: '%s' failed: %w", exec, err)
 				}
 			}
 		default:

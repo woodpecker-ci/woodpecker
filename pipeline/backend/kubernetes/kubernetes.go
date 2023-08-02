@@ -2,7 +2,6 @@ package kubernetes
 
 import (
 	"context"
-	std_errors "errors"
 	"fmt"
 	"io"
 	"os"
@@ -11,12 +10,12 @@ import (
 
 	"github.com/rs/zerolog/log"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
+	"gopkg.in/yaml.v3"
 
 	"github.com/urfave/cli/v2"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -27,10 +26,7 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
-var (
-	ErrNoCliContextFound = std_errors.New("No CliContext in context found.")
-	noContext            = context.Background()
-)
+var noContext = context.Background()
 
 type kube struct {
 	ctx    context.Context
@@ -39,25 +35,43 @@ type kube struct {
 }
 
 type Config struct {
-	Namespace    string
-	StorageClass string
-	VolumeSize   string
-	StorageRwx   bool
+	Namespace      string
+	StorageClass   string
+	VolumeSize     string
+	StorageRwx     bool
+	PodLabels      map[string]string
+	PodAnnotations map[string]string
 }
 
 func configFromCliContext(ctx context.Context) (*Config, error) {
 	if ctx != nil {
 		if c, ok := ctx.Value(types.CliContext).(*cli.Context); ok {
-			return &Config{
-				Namespace:    c.String("backend-k8s-namespace"),
-				StorageClass: c.String("backend-k8s-storage-class"),
-				VolumeSize:   c.String("backend-k8s-volume-size"),
-				StorageRwx:   c.Bool("backend-k8s-storage-rwx"),
-			}, nil
+			config := Config{
+				Namespace:      c.String("backend-k8s-namespace"),
+				StorageClass:   c.String("backend-k8s-storage-class"),
+				VolumeSize:     c.String("backend-k8s-volume-size"),
+				StorageRwx:     c.Bool("backend-k8s-storage-rwx"),
+				PodLabels:      make(map[string]string), // just init empty map to prevent nil panic
+				PodAnnotations: make(map[string]string), // just init empty map to prevent nil panic
+			}
+			// Unmarshal label and annotation settings here to ensure they're valid on startup
+			if labels := c.String("backend-k8s-pod-labels"); labels != "" {
+				if err := yaml.Unmarshal([]byte(labels), &config.PodLabels); err != nil {
+					log.Error().Msgf("could not unmarshal pod labels '%s': %s", c.String("backend-k8s-pod-labels"), err)
+					return nil, err
+				}
+			}
+			if annotations := c.String("backend-k8s-pod-annotations"); annotations != "" {
+				if err := yaml.Unmarshal([]byte(c.String("backend-k8s-pod-annotations")), &config.PodAnnotations); err != nil {
+					log.Error().Msgf("could not unmarshal pod annotations '%s': %s", c.String("backend-k8s-pod-annotations"), err)
+					return nil, err
+				}
+			}
+			return &config, nil
 		}
 	}
 
-	return nil, ErrNoCliContextFound
+	return nil, types.ErrNoCliContextFound
 }
 
 // New returns a new Kubernetes Engine.
@@ -71,12 +85,12 @@ func (e *kube) Name() string {
 	return "kubernetes"
 }
 
-func (e *kube) IsAvailable() bool {
+func (e *kube) IsAvailable(context.Context) bool {
 	host := os.Getenv("KUBERNETES_SERVICE_HOST")
 	return len(host) > 0
 }
 
-func (e *kube) Load() error {
+func (e *kube) Load(context.Context) error {
 	config, err := configFromCliContext(e.ctx)
 	if err != nil {
 		return err
@@ -101,12 +115,16 @@ func (e *kube) Load() error {
 }
 
 // Setup the pipeline environment.
-func (e *kube) Setup(ctx context.Context, conf *types.Config) error {
-	log.Trace().Msgf("Setting up Kubernetes primitives")
+func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID string) error {
+	log.Trace().Str("taskUUID", taskUUID).Msgf("Setting up Kubernetes primitives")
 
 	for _, vol := range conf.Volumes {
-		pvc := PersistentVolumeClaim(e.config.Namespace, vol.Name, e.config.StorageClass, e.config.VolumeSize, e.config.StorageRwx)
-		_, err := e.client.CoreV1().PersistentVolumeClaims(e.config.Namespace).Create(ctx, pvc, metav1.CreateOptions{})
+		pvc, err := PersistentVolumeClaim(e.config.Namespace, vol.Name, e.config.StorageClass, e.config.VolumeSize, e.config.StorageRwx)
+		if err != nil {
+			return err
+		}
+
+		_, err = e.client.CoreV1().PersistentVolumeClaims(e.config.Namespace).Create(ctx, pvc, metav1.CreateOptions{})
 		if err != nil {
 			return err
 		}
@@ -117,10 +135,14 @@ func (e *kube) Setup(ctx context.Context, conf *types.Config) error {
 	for _, stage := range conf.Stages {
 		if stage.Alias == "services" {
 			for _, step := range stage.Steps {
-				log.Trace().Str("pod-name", podName(step)).Msgf("Creating service: %s", step.Name)
+				stepName, err := dnsName(step.Name)
+				if err != nil {
+					return err
+				}
+				log.Trace().Str("pod-name", stepName).Msgf("Creating service: %s", step.Name)
 				// TODO: support ports setting
-				// svc, err := Service(e.config.Namespace, step.Name, podName(step), step.Ports)
-				svc, err := Service(e.config.Namespace, step.Name, podName(step), []string{})
+				// svc, err := Service(e.config.Namespace, step.Name, stepName, step.Ports)
+				svc, err := Service(e.config.Namespace, step.Name, stepName, []string{})
 				if err != nil {
 					return err
 				}
@@ -146,17 +168,26 @@ func (e *kube) Setup(ctx context.Context, conf *types.Config) error {
 }
 
 // Start the pipeline step.
-func (e *kube) Exec(ctx context.Context, step *types.Step) error {
-	pod := Pod(e.config.Namespace, step)
-	log.Trace().Msgf("Creating pod: %s", pod.Name)
-	_, err := e.client.CoreV1().Pods(e.config.Namespace).Create(ctx, pod, metav1.CreateOptions{})
+func (e *kube) StartStep(ctx context.Context, step *types.Step, taskUUID string) error {
+	pod, err := Pod(e.config.Namespace, step, e.config.PodLabels, e.config.PodAnnotations)
+	if err != nil {
+		return err
+	}
+
+	log.Trace().Str("taskUUID", taskUUID).Msgf("Creating pod: %s", pod.Name)
+	_, err = e.client.CoreV1().Pods(e.config.Namespace).Create(ctx, pod, metav1.CreateOptions{})
 	return err
 }
 
 // Wait for the pipeline step to complete and returns
 // the completion results.
-func (e *kube) Wait(ctx context.Context, step *types.Step) (*types.State, error) {
-	podName := podName(step)
+func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) (*types.State, error) {
+	podName, err := dnsName(step.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Trace().Str("taskUUID", taskUUID).Msgf("Waiting for pod: %s", podName)
 
 	finished := make(chan bool)
 
@@ -176,12 +207,17 @@ func (e *kube) Wait(ctx context.Context, step *types.Step) (*types.State, error)
 
 	// TODO 5 seconds is against best practice, k3s didn't work otherwise
 	si := informers.NewSharedInformerFactoryWithOptions(e.client, 5*time.Second, informers.WithNamespace(e.config.Namespace))
-	si.Core().V1().Pods().Informer().AddEventHandler(
+	if _, err := si.Core().V1().Pods().Informer().AddEventHandler(
 		cache.ResourceEventHandlerFuncs{
 			UpdateFunc: podUpdated,
 		},
-	)
-	si.Start(wait.NeverStop)
+	); err != nil {
+		return nil, err
+	}
+
+	stop := make(chan struct{})
+	si.Start(stop)
+	defer close(stop)
 
 	// TODO Cancel on ctx.Done
 	<-finished
@@ -205,8 +241,13 @@ func (e *kube) Wait(ctx context.Context, step *types.Step) (*types.State, error)
 }
 
 // Tail the pipeline step logs.
-func (e *kube) Tail(ctx context.Context, step *types.Step) (io.ReadCloser, error) {
-	podName := podName(step)
+func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) (io.ReadCloser, error) {
+	podName, err := dnsName(step.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Trace().Str("taskUUID", taskUUID).Msgf("Tail logs of pod: %s", podName)
 
 	up := make(chan bool)
 
@@ -222,17 +263,23 @@ func (e *kube) Tail(ctx context.Context, step *types.Step) (io.ReadCloser, error
 
 	// TODO 5 seconds is against best practice, k3s didn't work otherwise
 	si := informers.NewSharedInformerFactoryWithOptions(e.client, 5*time.Second, informers.WithNamespace(e.config.Namespace))
-	si.Core().V1().Pods().Informer().AddEventHandler(
+	if _, err := si.Core().V1().Pods().Informer().AddEventHandler(
 		cache.ResourceEventHandlerFuncs{
 			UpdateFunc: podUpdated,
 		},
-	)
-	si.Start(wait.NeverStop)
+	); err != nil {
+		return nil, err
+	}
+
+	stop := make(chan struct{})
+	si.Start(stop)
+	defer close(stop)
 
 	<-up
 
 	opts := &v1.PodLogOptions{
-		Follow: true,
+		Follow:    true,
+		Container: podName,
 	}
 
 	logs, err := e.client.CoreV1().RESTClient().Get().
@@ -265,7 +312,9 @@ func (e *kube) Tail(ctx context.Context, step *types.Step) (io.ReadCloser, error
 }
 
 // Destroy the pipeline environment.
-func (e *kube) Destroy(_ context.Context, conf *types.Config) error {
+func (e *kube) DestroyWorkflow(_ context.Context, conf *types.Config, taskUUID string) error {
+	log.Trace().Str("taskUUID", taskUUID).Msg("Deleting Kubernetes primitives")
+
 	gracePeriodSeconds := int64(0) // immediately
 	dpb := metav1.DeletePropagationBackground
 
@@ -280,10 +329,14 @@ func (e *kube) Destroy(_ context.Context, conf *types.Config) error {
 
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
-			log.Trace().Msgf("Deleting pod: %s", podName(step))
-			if err := e.client.CoreV1().Pods(e.config.Namespace).Delete(noContext, podName(step), deleteOpts); err != nil {
+			stepName, err := dnsName(step.Name)
+			if err != nil {
+				return err
+			}
+			log.Trace().Msgf("Deleting pod: %s", stepName)
+			if err := e.client.CoreV1().Pods(e.config.Namespace).Delete(noContext, stepName, deleteOpts); err != nil {
 				if errors.IsNotFound(err) {
-					log.Trace().Err(err).Msgf("Unable to delete pod %s", podName(step))
+					log.Trace().Err(err).Msgf("Unable to delete pod %s", stepName)
 				} else {
 					return err
 				}
@@ -303,7 +356,7 @@ func (e *kube) Destroy(_ context.Context, conf *types.Config) error {
 				}
 				if err := e.client.CoreV1().Services(e.config.Namespace).Delete(noContext, svc.Name, deleteOpts); err != nil {
 					if errors.IsNotFound(err) {
-						log.Trace().Err(err).Msgf("Unable to service pod %s", svc.Name)
+						log.Trace().Err(err).Msgf("Unable to delete service %s", svc.Name)
 					} else {
 						return err
 					}
@@ -313,8 +366,11 @@ func (e *kube) Destroy(_ context.Context, conf *types.Config) error {
 	}
 
 	for _, vol := range conf.Volumes {
-		pvc := PersistentVolumeClaim(e.config.Namespace, vol.Name, e.config.StorageClass, e.config.VolumeSize, e.config.StorageRwx)
-		err := e.client.CoreV1().PersistentVolumeClaims(e.config.Namespace).Delete(noContext, pvc.Name, deleteOpts)
+		pvc, err := PersistentVolumeClaim(e.config.Namespace, vol.Name, e.config.StorageClass, e.config.VolumeSize, e.config.StorageRwx)
+		if err != nil {
+			return err
+		}
+		err = e.client.CoreV1().PersistentVolumeClaims(e.config.Namespace).Delete(noContext, pvc.Name, deleteOpts)
 		if err != nil {
 			if errors.IsNotFound(err) {
 				log.Trace().Err(err).Msgf("Unable to delete pvc %s", pvc.Name)

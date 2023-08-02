@@ -1,44 +1,50 @@
 import { defineStore } from 'pinia';
-import { computed, Ref, toRef } from 'vue';
+import { computed, reactive, Ref, ref } from 'vue';
 
 import useApiClient from '~/compositions/useApiClient';
 import { Repo } from '~/lib/api/types';
-import { repoSlug } from '~/utils/helpers';
 
-const apiClient = useApiClient();
+export const useRepoStore = defineStore('repos', () => {
+  const apiClient = useApiClient();
 
-export default defineStore({
-  id: 'repos',
+  const repos: Map<number, Repo> = reactive(new Map());
+  const ownedRepoIds = ref<number[]>([]);
 
-  state: () => ({
-    repos: {} as Record<string, Repo>,
-  }),
+  const ownedRepos = computed(() =>
+    Array.from(repos.entries())
+      .filter(([repoId]) => ownedRepoIds.value.includes(repoId))
+      .map(([, repo]) => repo),
+  );
 
-  actions: {
-    // getter
-    getRepo(owner: Ref<string>, name: Ref<string>) {
-      return computed(() => {
-        const slug = repoSlug(owner.value, name.value);
-        return toRef(this.repos, slug).value;
-      });
-    },
+  function getRepo(repoId: Ref<number>) {
+    return computed(() => repos.get(repoId.value));
+  }
 
-    // setter
-    setRepo(repo: Repo) {
-      this.repos[repoSlug(repo)] = repo;
-    },
+  function setRepo(repo: Repo) {
+    repos.set(repo.id, repo);
+  }
 
-    // loading
-    async loadRepo(owner: string, name: string) {
-      const repo = await apiClient.getRepo(owner, name);
-      this.repos[repoSlug(repo)] = repo;
-      return repo;
-    },
-    async loadRepos() {
-      const repos = await apiClient.getRepoList();
-      repos.forEach((repo) => {
-        this.repos[repoSlug(repo.owner, repo.name)] = repo;
-      });
-    },
-  },
+  async function loadRepo(repoId: number) {
+    const repo = await apiClient.getRepo(repoId);
+    repos.set(repo.id, repo);
+    return repo;
+  }
+
+  async function loadRepos() {
+    const _ownedRepos = await apiClient.getRepoList();
+    _ownedRepos.forEach((repo) => {
+      repos.set(repo.id, repo);
+    });
+    ownedRepoIds.value = _ownedRepos.map((repo) => repo.id);
+  }
+
+  return {
+    repos,
+    ownedRepos,
+    ownedRepoIds,
+    getRepo,
+    setRepo,
+    loadRepo,
+    loadRepos,
+  };
 });

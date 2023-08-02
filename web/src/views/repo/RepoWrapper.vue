@@ -7,8 +7,8 @@
   >
     <template #title>
       <span class="flex">
-        <router-link :to="{ name: 'repos-owner', params: { repoOwner } }" class="hover:underline">{{
-          repoOwner
+        <router-link :to="{ name: 'org', params: { orgId: repo.org_id } }" class="hover:underline">{{
+          repo.owner
         }}</router-link>
         {{ `&nbsp;/&nbsp;${repo.name}` }}
       </span>
@@ -21,7 +21,7 @@
         <Icon v-if="forge === 'github'" name="github" />
         <Icon v-else-if="forge === 'gitea'" name="gitea" />
         <Icon v-else-if="forge === 'gitlab'" name="gitlab" />
-        <Icon v-else-if="forge === 'bitbucket' || forge === 'stash'" name="bitbucket" />
+        <Icon v-else-if="forge === 'bitbucket'" name="bitbucket" />
         <Icon v-else name="repo" />
       </IconButton>
       <IconButton
@@ -43,6 +43,11 @@
 
     <Tab id="activity" :title="$t('repo.activity')" />
     <Tab id="branches" :title="$t('repo.branches')" />
+    <Tab
+      v-if="config.forge === 'gitea' || config.forge === 'github' || config.forge === 'gitlab'"
+      id="pull_requests"
+      :title="$t('repo.pull_requests')"
+    />
 
     <router-view />
   </Scaffold>
@@ -64,36 +69,29 @@ import useAuthentication from '~/compositions/useAuthentication';
 import useConfig from '~/compositions/useConfig';
 import useNotifications from '~/compositions/useNotifications';
 import { RepoPermissions } from '~/lib/api/types';
-import PipelineStore from '~/store/pipelines';
-import RepoStore from '~/store/repos';
+import { usePipelineStore } from '~/store/pipelines';
+import { useRepoStore } from '~/store/repos';
 
-const props = defineProps({
-  repoOwner: {
-    type: String,
-    required: true,
-  },
+const props = defineProps<{
+  repoId: string;
+}>();
 
-  repoName: {
-    type: String,
-    required: true,
-  },
-});
-
-const repoOwner = toRef(props, 'repoOwner');
-const repoName = toRef(props, 'repoName');
-const repoStore = RepoStore();
-const pipelineStore = PipelineStore();
+const _repoId = toRef(props, 'repoId');
+const repositoryId = computed(() => parseInt(_repoId.value, 10));
+const repoStore = useRepoStore();
+const pipelineStore = usePipelineStore();
 const apiClient = useApiClient();
 const notifications = useNotifications();
 const { isAuthenticated } = useAuthentication();
 const route = useRoute();
 const router = useRouter();
 const i18n = useI18n();
+const config = useConfig();
 
 const { forge } = useConfig();
-const repo = repoStore.getRepo(repoOwner, repoName);
+const repo = repoStore.getRepo(repositoryId);
 const repoPermissions = ref<RepoPermissions>();
-const pipelines = pipelineStore.getSortedPipelines(repoOwner, repoName);
+const pipelines = pipelineStore.getRepoPipelines(repositoryId);
 provide('repo', repo);
 provide('repo-permissions', repoPermissions);
 provide('pipelines', pipelines);
@@ -101,7 +99,7 @@ provide('pipelines', pipelines);
 const showManualPipelinePopup = ref(false);
 
 async function loadRepo() {
-  repoPermissions.value = await apiClient.getRepoPermissions(repoOwner.value, repoName.value);
+  repoPermissions.value = await apiClient.getRepoPermissions(repositoryId.value);
   if (!repoPermissions.value.pull) {
     notifications.notify({ type: 'error', title: i18n.t('repo.not_allowed') });
     // no access and not authenticated, redirect to login
@@ -113,37 +111,35 @@ async function loadRepo() {
     return;
   }
 
-  const apiRepo = await repoStore.loadRepo(repoOwner.value, repoName.value);
-  if (apiRepo.full_name !== `${repoOwner.value}/${repoName.value}`) {
-    await router.replace({
-      name: route.name ? route.name : 'repo',
-      params: { repoOwner: apiRepo.owner, repoName: apiRepo.name },
-    });
-    return;
-  }
-  await pipelineStore.loadPipelines(repoOwner.value, repoName.value);
+  await repoStore.loadRepo(repositoryId.value);
+  await pipelineStore.loadRepoPipelines(repositoryId.value);
 }
 
 onMounted(() => {
   loadRepo();
 });
 
-watch([repoOwner, repoName], () => {
+watch([repositoryId], () => {
   loadRepo();
 });
 
-const badgeUrl = computed(() => `/api/badges/${repo.value.owner}/${repo.value.name}/status.svg`);
+const badgeUrl = computed(() => repo.value && `/api/badges/${repo.value.id}/status.svg`);
 
 const activeTab = computed({
   get() {
     if (route.name === 'repo-branches' || route.name === 'repo-branch') {
       return 'branches';
     }
+    if (route.name === 'repo-pull-requests' || route.name === 'repo-pull-request') {
+      return 'pull_requests';
+    }
     return 'activity';
   },
   set(tab: string) {
     if (tab === 'branches') {
       router.push({ name: 'repo-branches' });
+    } else if (tab === 'pull_requests') {
+      router.push({ name: 'repo-pull-requests' });
     } else {
       router.push({ name: 'repo' });
     }
