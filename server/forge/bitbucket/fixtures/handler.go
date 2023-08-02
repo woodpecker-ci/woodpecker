@@ -108,6 +108,10 @@ func getRepoHooks(c *gin.Context) {
 
 func getRepoFile(c *gin.Context) {
 	switch c.Param("file") {
+	case "dir":
+		c.String(200, repoDirPayload)
+	case "dir_not_found/":
+		c.String(404, "")
 	case "file_not_found":
 		c.String(404, "")
 	default:
@@ -222,6 +226,27 @@ const repoHookPayload = `
 `
 
 const repoFilePayload = "dummy payload"
+
+const repoDirPayload = `
+{
+    "pagelen": 10,
+    "page": 1,
+    "values": [
+        {
+            "path": "README.md",
+            "type": "commit_file"
+        },
+        {
+            "path": "test",
+            "type": "commit_directory"
+        },
+        {
+            "path": ".gitignore",
+            "type": "commit_file"
+        }
+    ]
+}
+`
 
 const userPayload = `
 {

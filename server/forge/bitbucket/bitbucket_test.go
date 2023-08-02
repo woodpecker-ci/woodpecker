@@ -178,6 +178,20 @@ func Test_bitbucket(t *testing.T) {
 			})
 		})
 
+		g.Describe("When requesting repo directory contents", func() {
+			g.It("Should return the details", func() {
+				files, err := c.Dir(ctx, fakeUser, fakeRepo, fakePipeline, "/dir")
+				g.Assert(err).IsNil()
+				g.Assert(len(files)).Equal(3)
+				g.Assert(files[0].Name).Equal("README.md")
+				g.Assert(string(files[0].Data)).Equal("dummy payload")
+			})
+			g.It("Should handle not found errors", func() {
+				_, err := c.Dir(ctx, fakeUser, fakeRepo, fakePipeline, "/dir_not_found")
+				g.Assert(err).IsNotNil()
+			})
+		})
+
 		g.Describe("When activating a repository", func() {
 			g.It("Should error when malformed hook", func() {
 				err := c.Activate(ctx, fakeUser, fakeRepo, "%gh&%ij")
