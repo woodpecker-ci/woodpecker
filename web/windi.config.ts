@@ -195,6 +195,9 @@ export default defineConfig({
         'wp-code-text': {
           100: 'var(--wp-code-text-100)',
         },
+        'wp-code-text-alt': {
+          100: 'var(--wp-code-text-alt-100)',
+        },
 
         'wp-link': {
           100: 'var(--wp-link-100)',
