@@ -18,10 +18,11 @@ package bitbucket
 import (
 	"context"
 	"fmt"
-	"golang.org/x/oauth2"
 	"net/http"
 	"net/url"
 	"path/filepath"
+
+	"golang.org/x/oauth2"
 
 	shared_utils "github.com/woodpecker-ci/woodpecker/shared/utils"
 
