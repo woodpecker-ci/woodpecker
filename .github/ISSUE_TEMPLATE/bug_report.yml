@@ -56,9 +56,9 @@ body:
       label: Validations
       description: Before submitting the issue, please make sure you do the following
       options:
-        # - label: Follow our [Code of Conduct](https://github.com/woodpecker-ci/woodpecker/blob/master/CODE_OF_CONDUCT.md)
+        # - label: Follow our [Code of Conduct](https://github.com/woodpecker-ci/woodpecker/blob/main/CODE_OF_CONDUCT.md)
         #   required: true
-        - label: Read the [Contributing Guidelines](https://github.com/woodpecker-ci/woodpecker/blob/master/CONTRIBUTING.md).
+        - label: Read the [Contributing Guidelines](https://github.com/woodpecker-ci/woodpecker/blob/main/CONTRIBUTING.md).
           required: true
         - label: Read the [docs](https://woodpecker-ci.org/docs/intro).
           required: true

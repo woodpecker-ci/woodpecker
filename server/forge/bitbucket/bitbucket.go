@@ -78,7 +78,7 @@ func (c *config) URL() string {
 // Login authenticates an account with Bitbucket using the oauth2 protocol. The
 // Bitbucket account details are returned when the user is successfully authenticated.
 func (c *config) Login(ctx context.Context, w http.ResponseWriter, req *http.Request) (*model.User, error) {
-	config := c.newConfig(server.Config.Server.Host)
+	config := c.newOAuth2Config()
 
 	// get the OAuth errors
 	if err := req.FormValue("error"); err != "" {
@@ -123,7 +123,7 @@ func (c *config) Auth(ctx context.Context, token, secret string) (string, error)
 // Refresh refreshes the Bitbucket oauth2 access token. If the token is
 // refreshed the user is updated and a true value is returned.
 func (c *config) Refresh(ctx context.Context, user *model.User) (bool, error) {
-	config := c.newConfig("")
+	config := c.newOAuth2Config()
 	source := config.TokenSource(
 		ctx, &oauth2.Token{RefreshToken: user.Secret})
 
@@ -414,7 +414,7 @@ func (c *config) newClientToken(ctx context.Context, token, secret string) *inte
 }
 
 // helper function to return the bitbucket oauth2 config
-func (c *config) newConfig(redirect string) *oauth2.Config {
+func (c *config) newOAuth2Config() *oauth2.Config {
 	return &oauth2.Config{
 		ClientID:     c.Client,
 		ClientSecret: c.Secret,
@@ -422,7 +422,7 @@ func (c *config) newConfig(redirect string) *oauth2.Config {
 			AuthURL:  fmt.Sprintf("%s/site/oauth2/authorize", c.url),
 			TokenURL: fmt.Sprintf("%s/site/oauth2/access_token", c.url),
 		},
-		RedirectURL: fmt.Sprintf("%s/authorize", redirect),
+		RedirectURL: fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost),
 	}
 }
 

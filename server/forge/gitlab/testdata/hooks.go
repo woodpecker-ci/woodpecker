@@ -37,7 +37,7 @@ var ServiceHookPushBody = []byte(`{
   "event_name": "push",
   "before": "ffe8eb4f91d1fe6bc49f1e610e50e4b5767f0104",
   "after": "16862e368d8ab812e48833b741dad720d6e2cb7f",
-  "ref": "refs/heads/master",
+  "ref": "refs/heads/main",
   "checkout_sha": "16862e368d8ab812e48833b741dad720d6e2cb7f",
   "message": null,
   "user_id": 2,

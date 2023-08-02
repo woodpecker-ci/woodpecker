@@ -8,7 +8,7 @@ Woodpecker has integrated support for repository status badges. These badges can
 <scheme>://<hostname>/api/badges/<repo-id>/status.svg
 ```
 
-The status badge displays the status for the latest build to your default branch (e.g. master). You can customize the branch by adding the `branch` query parameter.
+The status badge displays the status for the latest build to your default branch (e.g. main). You can customize the branch by adding the `branch` query parameter.
 
 ```diff
 -<scheme>://<hostname>/api/badges/<repo-id>/status.svg

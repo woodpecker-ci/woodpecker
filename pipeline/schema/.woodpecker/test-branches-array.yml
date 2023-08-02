@@ -1,4 +1,4 @@
-branches: [master, pages]
+branches: [main, pages]
 
 steps:
   build:
