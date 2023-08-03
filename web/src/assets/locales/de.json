@@ -19,6 +19,7 @@
         "deleted": "Agent gelöscht",
         "desc": "Für diesen Server registrierte Agents",
         "edit_agent": "Agent bearbeiten",
+        "id": "ID",
         "last_contact": "Letzter Kontakt",
         "name": {
           "name": "Name",
@@ -110,6 +111,7 @@
       }
     }
   },
+  "api": "API",
   "back": "Zurück",
   "cancel": "Abbrechen",
   "color_scheme_dark": "Wechsle zu hellem Modus",
