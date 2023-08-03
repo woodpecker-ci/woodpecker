@@ -1,9 +1,6 @@
 when:
-  - event: pull_request
-  - event: push
-    branch:
-      - ${CI_REPO_DEFAULT_BRANCH}
-      - release/*
+  event: [pull_request, push, cron]
+  branch: ${CI_REPO_DEFAULT_BRANCH}
 
 
 variables:
