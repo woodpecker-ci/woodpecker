@@ -3,4 +3,6 @@ dist
 coverage/
 LICENSE
 components.d.ts
-src/assets/locales/
+!src/assets/locales/
+!src/assets/locales/*.json
+!src/assets/locales/en.json
