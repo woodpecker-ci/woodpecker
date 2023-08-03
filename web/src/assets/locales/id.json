@@ -422,16 +422,11 @@
   "url": "URL",
   "user": {
     "access_denied": "Anda tidak diperbolehkan untuk masuk",
-    "api_usage": "Contoh Penggunaan API",
     "cli_usage": "Contoh Penggunaan CLI",
-    "dl_cli": "Unduh CLI",
     "internal_error": "Terjadi beberapa kesalahan internal",
     "oauth_error": "Terjadi kesalahan saat mengotentikasi dengan penyedia OAuth",
-    "reset_token": "Atur ulang token",
     "settings": "Pengaturan Pengguna",
-    "shell_setup": "Pengaturan shell",
-    "shell_setup_before": "sebelumnya lakukan penyiapan shell",
-    "token": "Token Pribadi Anda"
+    "shell_setup_before": "sebelumnya lakukan penyiapan shell"
   },
   "username": "Nama pengguna",
   "welcome": "Selamat datang di Woodpecker"
