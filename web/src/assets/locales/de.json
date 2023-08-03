@@ -161,17 +161,13 @@
     "branches": "Branches",
     "build": {
       "actions": {
-        "log_auto_scroll": "Automatisches folgen",
         "restart_success": "Pipeline neu gestartet"
       },
       "event": {
-        "deploy": "Deploy",
         "tag": "Tag"
       },
-      "loading": "Laden…",
       "no_pipelines": "Bisher wurden noch keine Pipelines gestartet.",
       "protected": {
-        "approve_success": "Pipeline genehmigt",
         "declined": "Diese Pipeline ist abgelehnt worden!"
       }
     },
