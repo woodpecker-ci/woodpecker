@@ -47,11 +47,6 @@
     "activity": "Attività",
     "add": "Aggiungi repository",
     "branches": "Branch",
-    "build": {
-      "actions": {
-        "cancel": "Annulla"
-      }
-    },
     "deploy_pipeline": {
       "enter_target": "Ambiente di deploy destinazione",
       "title": "Azione l'evento di deploy per la pipeline corrente #{pipelineId}",
