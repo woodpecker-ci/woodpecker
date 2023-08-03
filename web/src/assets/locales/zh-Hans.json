@@ -74,9 +74,6 @@
     "activity": "活动",
     "add": "添加仓库",
     "branches": "分支",
-    "build": {
-      "tasks": "任务"
-    },
     "enable": {
       "enable": "启用",
       "enabled": "已经启用了",
