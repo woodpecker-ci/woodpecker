@@ -140,11 +140,12 @@ import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
+import useTimeAgo from '~/compositions/useTimeAgo';
 import { Agent } from '~/lib/api/types';
-import timeAgo from '~/utils/timeAgo';
 
 const apiClient = useApiClient();
 const notifications = useNotifications();
+const timeAgo = useTimeAgo();
 const { t } = useI18n();
 
 const selectedAgent = ref<Partial<Agent>>();

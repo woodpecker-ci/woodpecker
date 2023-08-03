@@ -422,16 +422,11 @@
   "url": "URL",
   "user": {
     "access_denied": "Jums nav tiesību autorizēties",
-    "api_usage": "Piemērs API izmantošanai",
     "cli_usage": "Piemērs komandrindas lietošanai",
-    "dl_cli": "Lejupielādēt komandrindas rīku",
     "internal_error": "Notikusi sistēmas iekšējā kļūda",
     "oauth_error": "Neizdevās autorizēties, izmantojot, OAuth piegādātāju",
-    "reset_token": "Atiestatīt talonu",
     "settings": "Lietotāja iestatījumi",
-    "shell_setup": "Komandrindas iestatīšana",
-    "shell_setup_before": "izpildiet komandrindā sekojošas darbības",
-    "token": "Personīgais talons"
+    "shell_setup_before": "izpildiet komandrindā sekojošas darbības"
   },
   "username": "Lietotāja vārds",
   "welcome": "Woodpecker"
