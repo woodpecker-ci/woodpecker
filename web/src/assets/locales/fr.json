@@ -422,10 +422,8 @@
   "url": "URL",
   "user": {
     "access_denied": "Vous n'êtes pas autorisé à vous connecter",
-    "cli_usage": "Exemple d'utilisation de la ligne de commande",
     "internal_error": "Une erreur interne est arrivé",
     "oauth_error": "Erreur lors de l’authentification auprès du fournisseur OAuth",
-    "settings": "Profil personnel",
     "shell_setup_before": "faites la mise en place dans le shell avant"
   },
   "username": "Nom d'utilisateur",

@@ -424,10 +424,8 @@
   "url": "URL",
   "user": {
     "access_denied": "Du bist nicht berechtigt, dich anzumelden",
-    "cli_usage": "Beispiel für die Kommandozeilen-Nutzung",
     "internal_error": "Ein interner Fehler ist aufgetreten",
     "oauth_error": "Fehler bei der Authentifizierung gegen OAuth-Anbieter",
-    "settings": "Benutzer-Einstellungen",
     "shell_setup_before": "Führe bitte die Schritte zur Einrichtung der Kommandozeile vorher aus"
   },
   "username": "Benutzername",

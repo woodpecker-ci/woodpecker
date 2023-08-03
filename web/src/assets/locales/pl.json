@@ -422,10 +422,8 @@
   "url": "URL",
   "user": {
     "access_denied": "Nie masz pozwolenia na zalogowanie",
-    "cli_usage": "Przykładowe użycie CLI",
     "internal_error": "Wystąpił błąd wewnętrzny",
     "oauth_error": "Błąd podczas uwierzytelnienia u dostawcy OAuth",
-    "settings": "Ustawienia użytkownika",
     "shell_setup_before": "wykonaj wcześniej konfigurację powłoki"
   },
   "username": "Nazwa użytkownika",

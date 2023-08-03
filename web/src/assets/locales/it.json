@@ -146,10 +146,8 @@
   "url": "URL",
   "user": {
     "access_denied": "Non hai il permesso di entrare",
-    "cli_usage": "Esempio di utilizzo CLI",
     "internal_error": "Errore interno",
     "oauth_error": "Errore durante l'autenticazione con il provider Oauth",
-    "settings": "Configurazione Utente",
     "shell_setup_before": "prima confogura la shell"
   },
   "username": "Nome utente",

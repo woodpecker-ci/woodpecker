@@ -422,10 +422,8 @@
   "url": "URL",
   "user": {
     "access_denied": "Jums nav tiesību autorizēties",
-    "cli_usage": "Piemērs komandrindas lietošanai",
     "internal_error": "Notikusi sistēmas iekšējā kļūda",
     "oauth_error": "Neizdevās autorizēties, izmantojot, OAuth piegādātāju",
-    "settings": "Lietotāja iestatījumi",
     "shell_setup_before": "izpildiet komandrindā sekojošas darbības"
   },
   "username": "Lietotāja vārds",

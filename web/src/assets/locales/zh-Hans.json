@@ -266,10 +266,8 @@
   "url": "URL",
   "user": {
     "access_denied": "你没有登陆的权限",
-    "cli_usage": "CLI 用例",
     "internal_error": "发生了一些内部错误",
-    "oauth_error": "Oauth 认证错误",
-    "token": "你的私人 Token"
+    "oauth_error": "Oauth 认证错误"
   },
   "username": "用户名",
   "welcome": "欢迎来到 Woodpecker"
