@@ -165,9 +165,9 @@ func (c *client) RepoList() ([]*Repo, error) {
 
 // RepoListOpts returns a list of all repositories to which
 // the user has explicit access in the host system.
-func (c *client) RepoListOpts(sync, all bool) ([]*Repo, error) {
+func (c *client) RepoListOpts(all bool) ([]*Repo, error) {
 	var out []*Repo
-	uri := fmt.Sprintf(pathRepos+"?flush=%v&all=%v", c.addr, sync, all)
+	uri := fmt.Sprintf(pathRepos+"?all=%v", c.addr, all)
 	err := c.get(uri, &out)
 	return out, err
 }
