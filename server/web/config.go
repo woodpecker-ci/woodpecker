@@ -45,7 +45,7 @@ func Config(c *gin.Context) {
 		"docs":           server.Config.Server.Docs,
 		"version":        version.String(),
 		"forge":          server.Config.Services.Forge.Name(),
-		"root_path":       server.Config.Server.RootPath,
+		"root_path":      server.Config.Server.RootPath,
 		"enable_swagger": server.Config.Server.EnableSwagger,
 	}
 
