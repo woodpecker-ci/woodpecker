@@ -159,9 +159,6 @@
     "activity": "Aktivitāte",
     "add": "Pievienot repozitoriju",
     "branches": "Atzari",
-    "build": {
-      "step_not_started": "Šis solis vēl nav uzsākts."
-    },
     "deploy_pipeline": {
       "enter_target": "Mērķa uzstādīšanas vide",
       "title": "Iniciēt uzstādīšanas notikumu šim konvejerdarbam #{pipelineId}",

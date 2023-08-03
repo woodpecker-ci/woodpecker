@@ -159,11 +159,6 @@
     "activity": "Aktivitäten",
     "add": "Repository hinzufügen",
     "branches": "Branches",
-    "build": {
-      "protected": {
-        "declined": "Diese Pipeline ist abgelehnt worden!"
-      }
-    },
     "deploy_pipeline": {
       "enter_target": "Zielumgebung des Deployments",
       "title": "Deployment für aktuelle Pipeline #{pipelineId} starten",
