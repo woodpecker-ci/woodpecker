@@ -425,7 +425,7 @@
         }
     },
     "user": {
-        "user_settings": "User Settings",
+        "settings_title": "User Settings",
         "settings": {
             "settings": "Settings",
             "language": "Language"
