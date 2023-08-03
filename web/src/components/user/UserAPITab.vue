@@ -9,10 +9,10 @@
 
     <div class="mt-2 mb-4">
       <div class="flex items-center mb-2">
-        <div class="flex items-center text-wp-text-100 font-bold">
+        <div class="flex flex-row items-center text-wp-text-100 font-bold">
           <label>{{ $t('user.settings.api.token') }}</label>
         </div>
-        <Button class="ml-4" :text="$t('user.settings.api.reset_token')" @click="resetToken" />
+        <Button class="ml-auto" :text="$t('user.settings.api.reset_token')" @click="resetToken" />
       </div>
       <pre class="code-box">{{ token }}</pre>
     </div>
