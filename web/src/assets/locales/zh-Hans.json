@@ -75,11 +75,7 @@
     "add": "添加仓库",
     "branches": "分支",
     "build": {
-      "actions": {
-        "restart_success": "流水线已重启"
-      },
       "exit_code": "退出代码 {exitCode}",
-      "pipelines_for": "{branch} 分支的流水线",
       "tasks": "任务"
     },
     "enable": {

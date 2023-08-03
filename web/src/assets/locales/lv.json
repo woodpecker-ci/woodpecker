@@ -160,11 +160,7 @@
     "add": "Pievienot repozitoriju",
     "branches": "Atzari",
     "build": {
-      "actions": {
-        "restart_success": "Konvejerdarbs pārstartēts"
-      },
       "execution_error": "Uzdevuma izpildes kļūda",
-      "pipeline": "Konvejerdarbs #{buildId}",
       "step_not_started": "Šis solis vēl nav uzsākts."
     },
     "deploy_pipeline": {

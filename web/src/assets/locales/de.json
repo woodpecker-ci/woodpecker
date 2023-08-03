@@ -160,13 +160,9 @@
     "add": "Repository hinzufügen",
     "branches": "Branches",
     "build": {
-      "actions": {
-        "restart_success": "Pipeline neu gestartet"
-      },
       "event": {
         "tag": "Tag"
       },
-      "no_pipelines": "Bisher wurden noch keine Pipelines gestartet.",
       "protected": {
         "declined": "Diese Pipeline ist abgelehnt worden!"
       }

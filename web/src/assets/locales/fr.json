@@ -160,11 +160,7 @@
     "add": "Ajouter un dépôt",
     "branches": "Branches",
     "build": {
-      "actions": {
-        "restart_success": "Pipeline redémarré"
-      },
       "execution_error": "Erreur d'execution",
-      "pipeline": "Pipeline #{buildId}",
       "step_not_started": "L'étape n'a pas démarré encore."
     },
     "deploy_pipeline": {
