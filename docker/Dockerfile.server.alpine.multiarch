@@ -11,4 +11,5 @@ EXPOSE 8000 9000 80 443
 
 COPY dist/server/${TARGETOS}/${TARGETARCH}/woodpecker-server /bin/
 
+HEALTHCHECK CMD ["/bin/woodpecker-server", "ping"]
 ENTRYPOINT ["/bin/woodpecker-server"]

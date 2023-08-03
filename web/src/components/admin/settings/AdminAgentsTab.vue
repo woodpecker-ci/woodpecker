@@ -1,9 +1,9 @@
 <template>
   <Panel>
-    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-gray-600">
+    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-wp-background-100">
       <div class="ml-2">
-        <h1 class="text-xl text-color">{{ $t('admin.settings.agents.agents') }}</h1>
-        <p class="text-sm text-color-alt">{{ $t('admin.settings.agents.desc') }}</p>
+        <h1 class="text-xl text-wp-text-100">{{ $t('admin.settings.agents.agents') }}</h1>
+        <p class="text-sm text-wp-text-alt-100">{{ $t('admin.settings.agents.desc') }}</p>
       </div>
       <Button
         v-if="selectedAgent"
@@ -15,8 +15,12 @@
       <Button v-else class="ml-auto" :text="$t('admin.settings.agents.add')" start-icon="plus" @click="showAddAgent" />
     </div>
 
-    <div v-if="!selectedAgent" class="space-y-4 text-color">
-      <ListItem v-for="agent in agents" :key="agent.id" class="items-center">
+    <div v-if="!selectedAgent" class="space-y-4 text-wp-text-100">
+      <ListItem
+        v-for="agent in agents"
+        :key="agent.id"
+        class="items-center !bg-wp-background-200 !dark:bg-wp-background-100"
+      >
         <span>{{ agent.name || `Agent ${agent.id}` }}</span>
         <span class="ml-auto">
           <span class="hidden md:inline-block space-x-2">
@@ -35,7 +39,7 @@
         <IconButton
           icon="trash"
           :title="$t('admin.settings.agents.delete_agent')"
-          class="ml-2 w-8 h-8 hover:text-red-400 hover:dark:text-red-500"
+          class="ml-2 w-8 h-8 hover:text-wp-control-error-100"
           :is-loading="isDeleting"
           @click="deleteAgent(agent)"
         />
@@ -85,7 +89,7 @@
             :label="$t('admin.settings.agents.capacity.capacity')"
             docs-url="docs/next/administration/agent-config#woodpecker_max_procs"
           >
-            <span class="text-color-alt">{{ $t('admin.settings.agents.capacity.desc') }}</span>
+            <span class="text-wp-text-alt-100">{{ $t('admin.settings.agents.capacity.desc') }}</span>
             <TextField :model-value="selectedAgent.capacity?.toString()" disabled />
           </InputField>
 

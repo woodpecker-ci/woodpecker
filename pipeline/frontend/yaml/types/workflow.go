@@ -23,9 +23,9 @@ type (
 		Networks WorkflowNetworks   `yaml:"networks,omitempty"`
 		Volumes  WorkflowVolumes    `yaml:"volumes,omitempty"`
 		// Deprecated
-		BranchesDontUseIt *constraint.List `yaml:"branches,omitempty"`
+		BranchesDontUseIt *constraint.List `yaml:"branches,omitempty"` // TODO: remove after v1.1.x version
 		// Deprecated
-		PipelineDontUseIt ContainerList `yaml:"pipeline,omitempty"`
+		PipelineDontUseIt ContainerList `yaml:"pipeline,omitempty"` // TODO: remove after v1.1.x version
 	}
 
 	// Workspace defines a pipeline workspace.

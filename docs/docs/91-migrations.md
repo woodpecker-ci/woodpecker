@@ -2,9 +2,9 @@
 
 Some versions need some changes to the server configuration or the pipeline configuration files.
 
-## next
+## next (1.1.0)
 
-No breaking changes
+- Drop deprecated `CI_BUILD_*`, `CI_PREV_BUILD_*`, `CI_JOB_*`, `*_LINK`, `CI_SYSTEM_ARCH`, `CI_REPO_REMOTE` built-in environment variables
 
 ## 1.0.0
 
@@ -35,6 +35,9 @@ No breaking changes
   - To find the id of orgs use the `/api/orgs/lookup/{org_full_name}` endpoint.
   - The UI urls for a organization changed from `/org/{owner}/...` to `/orgs/{org-id}/...`. You will be redirected automatically when using the old url.
   - The woodpecker-go api-client is now using the `org-id` instead of `org name` for all functions
+- The `command:` field has been removed from steps. If you were using it, please check if the entrypoint of the image you used is a shell.
+  - If it is a shell, simply rename `command:` to `commands:`.
+  - If it's not, you need to prepend the entrypoint before and also rename it (e.g., `commands: <entrypoint> <cmd>`).
 
 ## 0.15.0
 

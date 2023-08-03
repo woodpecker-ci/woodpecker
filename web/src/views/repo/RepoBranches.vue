@@ -3,7 +3,7 @@
     <ListItem
       v-for="branch in branches"
       :key="branch"
-      class="text-color"
+      class="text-wp-text-100"
       :to="{ name: 'repo-branch', params: { branch } }"
     >
       {{ branch }}

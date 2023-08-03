@@ -8,6 +8,7 @@ declare global {
     WOODPECKER_CSRF: string | undefined;
     WOODPECKER_FORGE: string | undefined;
     WOODPECKER_ROOT_URL: string | undefined;
+    WOODPECKER_ENABLE_SWAGGER: boolean | undefined;
   }
 }
 
@@ -18,4 +19,5 @@ export default () => ({
   csrf: window.WOODPECKER_CSRF || null,
   forge: window.WOODPECKER_FORGE || null,
   rootURL: window.WOODPECKER_ROOT_URL || null,
+  enableSwagger: window.WOODPECKER_ENABLE_SWAGGER || false,
 });

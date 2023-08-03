@@ -65,8 +65,8 @@ This is the reference list of all environment variables available to your pipeli
 | `CI_COMMIT_REF`                  | commit ref                                                                                   |
 | `CI_COMMIT_REFSPEC`              | commit ref spec                                                                              |
 | `CI_COMMIT_BRANCH`               | commit branch (equals target branch for pull requests)                                       |
-| `CI_COMMIT_SOURCE_BRANCH`        | commit source branch                                                                         |
-| `CI_COMMIT_TARGET_BRANCH`        | commit target branch                                                                         |
+| `CI_COMMIT_SOURCE_BRANCH`        | commit source branch (empty if event is not `pull_request`)                                  |
+| `CI_COMMIT_TARGET_BRANCH`        | commit target branch (empty if event is not `pull_request`)                                  |
 | `CI_COMMIT_TAG`                  | commit tag name (empty if event is not `tag`)                                                |
 | `CI_COMMIT_PULL_REQUEST`         | commit pull request number (empty if event is not `pull_request`)                            |
 | `CI_COMMIT_PULL_REQUEST_LABELS`  | labels assigned to pull request (empty if event is not `pull_request`)                       |
