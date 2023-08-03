@@ -18,13 +18,13 @@ func TestConstraint(t *testing.T) {
 	}{
 		// string value
 		{
-			conf: "master",
+			conf: "main",
 			with: "develop",
 			want: false,
 		},
 		{
-			conf: "master",
-			with: "master",
+			conf: "main",
+			with: "main",
 			want: true,
 		},
 		{
@@ -34,34 +34,34 @@ func TestConstraint(t *testing.T) {
 		},
 		// slice value
 		{
-			conf: "[ master, feature/* ]",
+			conf: "[ main, feature/* ]",
 			with: "develop",
 			want: false,
 		},
 		{
-			conf: "[ master, feature/* ]",
-			with: "master",
+			conf: "[ main, feature/* ]",
+			with: "main",
 			want: true,
 		},
 		{
-			conf: "[ master, feature/* ]",
+			conf: "[ main, feature/* ]",
 			with: "feature/foo",
 			want: true,
 		},
 		// includes block
 		{
-			conf: "include: master",
+			conf: "include: main",
 			with: "develop",
 			want: false,
 		},
 		{
-			conf: "include: master",
-			with: "master",
+			conf: "include: main",
+			with: "main",
 			want: true,
 		},
 		{
 			conf: "include: feature/*",
-			with: "master",
+			with: "main",
 			want: false,
 		},
 		{
@@ -70,34 +70,34 @@ func TestConstraint(t *testing.T) {
 			want: true,
 		},
 		{
-			conf: "include: [ master, feature/* ]",
+			conf: "include: [ main, feature/* ]",
 			with: "develop",
 			want: false,
 		},
 		{
-			conf: "include: [ master, feature/* ]",
-			with: "master",
+			conf: "include: [ main, feature/* ]",
+			with: "main",
 			want: true,
 		},
 		{
-			conf: "include: [ master, feature/* ]",
+			conf: "include: [ main, feature/* ]",
 			with: "feature/foo",
 			want: true,
 		},
 		// excludes block
 		{
-			conf: "exclude: master",
+			conf: "exclude: main",
 			with: "develop",
 			want: true,
 		},
 		{
-			conf: "exclude: master",
-			with: "master",
+			conf: "exclude: main",
+			with: "main",
 			want: false,
 		},
 		{
 			conf: "exclude: feature/*",
-			with: "master",
+			with: "main",
 			want: true,
 		},
 		{
@@ -106,13 +106,13 @@ func TestConstraint(t *testing.T) {
 			want: false,
 		},
 		{
-			conf: "exclude: [ master, develop ]",
-			with: "master",
+			conf: "exclude: [ main, develop ]",
+			with: "main",
 			want: false,
 		},
 		{
 			conf: "exclude: [ feature/*, bar ]",
-			with: "master",
+			with: "main",
 			want: true,
 		},
 		{
@@ -122,24 +122,24 @@ func TestConstraint(t *testing.T) {
 		},
 		// include and exclude blocks
 		{
-			conf: "{ include: [ master, feature/* ], exclude: [ develop ] }",
-			with: "master",
+			conf: "{ include: [ main, feature/* ], exclude: [ develop ] }",
+			with: "main",
 			want: true,
 		},
 		{
-			conf: "{ include: [ master, feature/* ], exclude: [ feature/bar ] }",
+			conf: "{ include: [ main, feature/* ], exclude: [ feature/bar ] }",
 			with: "feature/bar",
 			want: false,
 		},
 		{
-			conf: "{ include: [ master, feature/* ], exclude: [ master, develop ] }",
-			with: "master",
+			conf: "{ include: [ main, feature/* ], exclude: [ main, develop ] }",
+			with: "main",
 			want: false,
 		},
 		// empty blocks
 		{
 			conf: "",
-			with: "master",
+			with: "main",
 			want: true,
 		},
 	}
@@ -421,13 +421,13 @@ func TestConstraints(t *testing.T) {
 		{
 			desc: "global branch filter",
 			conf: "{ branch: develop }",
-			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush, Commit: metadata.Commit{Branch: "master"}}},
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush, Commit: metadata.Commit{Branch: "main"}}},
 			want: false,
 		},
 		{
 			desc: "global branch filter",
-			conf: "{ branch: master }",
-			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush, Commit: metadata.Commit{Branch: "master"}}},
+			conf: "{ branch: main }",
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush, Commit: metadata.Commit{Branch: "main"}}},
 			want: true,
 		},
 		{
@@ -451,7 +451,7 @@ func TestConstraints(t *testing.T) {
 		{
 			desc: "ref constraint",
 			conf: "{ ref: refs/tags/* }",
-			with: metadata.Metadata{Curr: metadata.Pipeline{Commit: metadata.Commit{Ref: "refs/heads/master"}, Event: metadata.EventPush}},
+			with: metadata.Metadata{Curr: metadata.Pipeline{Commit: metadata.Commit{Ref: "refs/heads/main"}, Event: metadata.EventPush}},
 			want: false,
 		},
 		{

@@ -307,7 +307,7 @@ func TestBranchFilter(t *testing.T) {
 steps:
   xxx:
     image: scratch
-branches: master
+branches: main
 `)},
 			{Data: []byte(`
 steps:

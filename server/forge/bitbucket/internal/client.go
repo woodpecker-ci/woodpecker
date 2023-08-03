@@ -48,6 +48,7 @@ const (
 	pathOrgPerms      = "%s/2.0/workspaces/%s/permissions?%s"
 	pathPullRequests  = "%s/2.0/repositories/%s/%s/pullrequests"
 	pathBranchCommits = "%s/2.0/repositories/%s/%s/commits/%s"
+	pathDir           = "%s/2.0/repositories/%s/%s/src/%s%s"
 )
 
 type Client struct {
@@ -229,6 +230,16 @@ func (c *Client) ListPullRequests(owner, name string, opts *ListOpts) ([]*PullRe
 func (c *Client) GetWorkspace(name string) (*Workspace, error) {
 	out := new(Workspace)
 	uri := fmt.Sprintf(pathWorkspace, c.base, name)
+	_, err := c.do(uri, get, nil, out)
+	return out, err
+}
+
+func (c *Client) GetRepoFiles(owner, name, revision, path string, page *string) (*DirResp, error) {
+	out := new(DirResp)
+	uri := fmt.Sprintf(pathDir, c.base, owner, name, revision, path)
+	if page != nil {
+		uri += "?page=" + *page
+	}
 	_, err := c.do(uri, get, nil, out)
 	return out, err
 }

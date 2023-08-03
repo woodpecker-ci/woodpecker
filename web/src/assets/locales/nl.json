@@ -74,9 +74,7 @@
   "url": "URL",
   "user": {
     "access_denied": "U heeft niet de rechten om in te loggen",
-    "internal_error": "Er is een interne fout opgetreden",
-    "settings": "Gebruikersinstellingen",
-    "token": "Uw persoonlijke sleutel"
+    "internal_error": "Er is een interne fout opgetreden"
   },
   "username": "Gebruikersnaam",
   "welcome": "Welkom bij Woodpecker"

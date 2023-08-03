@@ -289,6 +289,11 @@ var flags = []cli.Flag{
 		Name:    "migrations-allow-long",
 		Value:   false,
 	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_ENABLE_SWAGGER"},
+		Name:    "enable-swagger",
+		Value:   true,
+	},
 	//
 	// resource limit parameters
 	//

@@ -38,7 +38,7 @@ var Command = &cli.Command{
 		&cli.StringFlag{
 			Name:  "branch",
 			Usage: "branch filter",
-			Value: "master",
+			Value: "main",
 		},
 		&cli.StringFlag{
 			Name:  "event",
