@@ -17,6 +17,7 @@ package main
 import (
 	"context"
 	"crypto/tls"
+	"errors"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -216,10 +217,16 @@ func run(c *cli.Context) error {
 					NextProtos: []string{"h2", "http/1.1"},
 				},
 			}
-			return serve.ListenAndServeTLS(
+			err = serve.ListenAndServeTLS(
 				c.String("server-cert"),
 				c.String("server-key"),
 			)
+			if !errors.Is(err, http.ErrServerClosed) {
+				log.Fatal().Err(err).Msg("")
+			} else {
+				log.Info().Msgf("Server listening on '%s' serving https", server.Config.Server.PortTLS)
+			}
+			return err
 		})
 
 		// http to https redirect
@@ -236,7 +243,13 @@ func run(c *cli.Context) error {
 		}
 
 		g.Go(func() error {
-			return http.ListenAndServe(server.Config.Server.Port, http.HandlerFunc(redirect))
+			err := http.ListenAndServe(server.Config.Server.Port, http.HandlerFunc(redirect))
+			if !errors.Is(err, http.ErrServerClosed) {
+				log.Warn().Err(err).Msg("Not able to redirect from http to https")
+			} else {
+				log.Info().Msgf("Server listening on '%s' to redirect from http to https", server.Config.Server.Port)
+			}
+			return err
 		})
 	} else if c.Bool("lets-encrypt") {
 		// start the server with lets-encrypt
@@ -258,10 +271,16 @@ func run(c *cli.Context) error {
 	} else {
 		// start the server without tls
 		g.Go(func() error {
-			return http.ListenAndServe(
+			err := http.ListenAndServe(
 				c.String("server-addr"),
 				handler,
 			)
+			if !errors.Is(err, http.ErrServerClosed) {
+				log.Fatal().Err(err).Msg("")
+			} else {
+				log.Info().Msgf("Server listening on '%s' serving http", c.String("server-addr"))
+			}
+			return err
 		})
 	}
 
@@ -269,7 +288,13 @@ func run(c *cli.Context) error {
 		g.Go(func() error {
 			metricsRouter := gin.New()
 			metricsRouter.GET("/metrics", gin.WrapH(promhttp.Handler()))
-			return http.ListenAndServe(metricsServerAddr, metricsRouter)
+			err := http.ListenAndServe(metricsServerAddr, metricsRouter)
+			if !errors.Is(err, http.ErrServerClosed) {
+				log.Fatal().Err(err).Msg("")
+			} else {
+				log.Info().Msgf("Server listening on '%s' serving metrics", metricsServerAddr)
+			}
+			return err
 		})
 	}
 
