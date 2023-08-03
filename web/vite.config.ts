@@ -48,7 +48,7 @@ export default defineConfig({
           // zh-Hans is called zh in javascript-time-ago, so we need to rename this
           copyFile(
             'node_modules/javascript-time-ago/locale/zh.json.js',
-            'src/assets/timeAgoLocales/zh-Hans.json.js',
+            'src/assets/timeAgoLocales/zh-Hans.js',
             // eslint-disable-next-line promise/prefer-await-to-callbacks
             (err) => {
               if (err) {
@@ -60,7 +60,7 @@ export default defineConfig({
           // English is always directly loaded (compiled by Vite) and thus not copied
           copyFile(
             `node_modules/javascript-time-ago/locale/${name}.json.js`,
-            `src/assets/timeAgoLocales/${name}.json.js`,
+            `src/assets/timeAgoLocales/${name}.js`,
             // eslint-disable-next-line promise/prefer-await-to-callbacks
             (err) => {
               if (err) {
