@@ -2,7 +2,7 @@
   <Scaffold enable-tabs>
     <template #title>{{ $t('user.settings.settings') }}</template>
     <template #titleActions><Button :text="$t('logout')" :to="`${address}/logout`" /></template>
-    <Tab id="settings" :title="$t('user.settings.general.general')">
+    <Tab id="general" :title="$t('user.settings.general.general')">
       <UserGeneralTab />
     </Tab>
     <Tab id="api" :title="$t('user.settings.api.api')">
