@@ -717,7 +717,7 @@ func (g *GitLab) Org(ctx context.Context, u *model.User, owner string) (*model.O
 	}
 
 	return &model.Org{
-		Name:    groups[0].Name,
+		Name:    groups[0].FullPath,
 		Private: groups[0].Visibility != gitlab.PublicVisibility,
 	}, nil
 }
