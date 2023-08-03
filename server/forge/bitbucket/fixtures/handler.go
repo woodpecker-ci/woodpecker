@@ -38,7 +38,8 @@ func Handler() http.Handler {
 	e.GET("/2.0/repositories/:owner", getUserRepos)
 	e.GET("/2.0/user/", getUser)
 	e.GET("/2.0/user/permissions/repositories", getPermissions)
-
+	e.GET("/2.0/repositories/:owner/:name/commits/:commit", getBranchHead)
+	e.GET("/2.0/repositories/:owner/:name/pullrequests", getPullRequests)
 	return e
 }
 
@@ -116,6 +117,24 @@ func getRepoFile(c *gin.Context) {
 		c.String(404, "")
 	default:
 		c.String(200, repoFilePayload)
+	}
+}
+
+func getBranchHead(c *gin.Context) {
+	switch c.Param("commit") {
+	case "branch_name":
+		c.String(200, branchCommitsPayload)
+	default:
+		c.String(404, "")
+	}
+}
+
+func getPullRequests(c *gin.Context) {
+	switch c.Param("name") {
+	case "repo_name":
+		c.String(200, pullRequestsPayload)
+	default:
+		c.String(404, "")
 	}
 }
 
@@ -245,6 +264,40 @@ const repoDirPayload = `
             "type": "commit_file"
         }
     ]
+}
+`
+
+const branchCommitsPayload = `
+{
+    "values": [
+        {
+            "hash": "branch_head_name"
+        },
+        {
+            "hash": "random1"
+        },
+        {
+            "hash": "random2"
+        }
+    ]
+}
+`
+
+const pullRequestsPayload = `
+{
+		 "values": [
+        {
+            "id": 123,
+						"title": "PRs title"
+        },
+        {
+            "id": 456,
+						"title": "Another PRs title"
+        }
+    ],
+		"pagelen": 10,
+    "size": 2,
+    "page": 1
 }
 `
 

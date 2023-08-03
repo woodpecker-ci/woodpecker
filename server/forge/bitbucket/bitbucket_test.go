@@ -178,6 +178,36 @@ func Test_bitbucket(t *testing.T) {
 			})
 		})
 
+		g.Describe("When requesting repo branch HEAD", func() {
+			g.It("Should return the details", func() {
+				branchHead, err := c.BranchHead(ctx, fakeUser, fakeRepo, "branch_name")
+				g.Assert(err).IsNil()
+				g.Assert(branchHead).Equal("branch_head_name")
+			})
+			g.It("Should handle not found errors", func() {
+				_, err := c.BranchHead(ctx, fakeUser, fakeRepo, "branch_not_found")
+				g.Assert(err).IsNotNil()
+			})
+		})
+
+		g.Describe("When requesting repo pull requests", func() {
+			listOpts := model.ListOptions{
+				All:     false,
+				Page:    1,
+				PerPage: 10,
+			}
+			g.It("Should return the details", func() {
+				repoPRs, err := c.PullRequests(ctx, fakeUser, fakeRepo, &listOpts)
+				g.Assert(err).IsNil()
+				g.Assert(repoPRs[0].Title).Equal("PRs title")
+				g.Assert(repoPRs[0].Index).Equal(int64(123))
+			})
+			g.It("Should handle not found errors", func() {
+				_, err := c.PullRequests(ctx, fakeUser, fakeRepoNotFound, &listOpts)
+				g.Assert(err).IsNotNil()
+			})
+		})
+
 		g.Describe("When requesting repo directory contents", func() {
 			g.It("Should return the details", func() {
 				files, err := c.Dir(ctx, fakeUser, fakeRepo, fakePipeline, "/dir")
