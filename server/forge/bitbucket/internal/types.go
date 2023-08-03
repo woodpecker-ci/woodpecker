@@ -283,3 +283,16 @@ type CommitsResp struct {
 type Commit struct {
 	Hash string `json:"hash"`
 }
+
+type DirResp struct {
+	Page    uint    `json:"page"`
+	PageLen uint    `json:"pagelen"`
+	Next    *string `json:"next"`
+	Values  []*Dir  `json:"values"`
+}
+
+type Dir struct {
+	Path string `json:"path"`
+	Type string `json:"type"`
+	Size uint   `json:"size"`
+}
