@@ -1,11 +1,11 @@
 <template>
   <Scaffold enable-tabs>
-    <template #title>{{ $t('user.settings_title') }}</template>
+    <template #title>{{ $t('user.settings.settings') }}</template>
     <template #titleActions><Button :text="$t('logout')" :to="`${address}/logout`" /></template>
-    <Tab id="settings" :title="$t('user.settings.settings')">
-      <UserSettingsTab />
+    <Tab id="settings" :title="$t('user.settings.general.general')">
+      <UserGeneralTab />
     </Tab>
-    <Tab id="api" :title="$t('user.api.api')">
+    <Tab id="api" :title="$t('user.settings.api.api')">
       <UserAPITab />
     </Tab>
   </Scaffold>
@@ -15,7 +15,7 @@
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import Tab from '~/components/layout/scaffold/Tab.vue';
 import UserAPITab from '~/components/user/UserAPITab.vue';
-import UserSettingsTab from '~/components/user/UserSettingsTab.vue';
+import UserGeneralTab from '~/components/user/UserGeneralTab.vue';
 
 const address = `${window.location.protocol}//${window.location.host}`; // port is included in location.host
 </script>

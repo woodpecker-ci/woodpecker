@@ -2,7 +2,7 @@
   <Panel>
     <div class="flex flex-col">
       <div class="flex items-center text-wp-text-100 font-bold mb-2">
-        <label>{{ $t('user.settings.language') }}</label>
+        <label>{{ $t('user.settings.general.language') }}</label>
       </div>
       <SelectField v-model="selectedLocale" :options="localeOptions" />
     </div>

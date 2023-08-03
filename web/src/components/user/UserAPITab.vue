@@ -2,26 +2,26 @@
   <Panel>
     <div>
       <div class="flex items-center mb-2">
-        <h2 class="text-lg text-wp-text-100">{{ $t('user.api.token') }}</h2>
-        <Button class="ml-4" :text="$t('user.api.reset_token')" @click="resetToken" />
+        <h2 class="text-lg text-wp-text-100">{{ $t('user.settings.api.token') }}</h2>
+        <Button class="ml-4" :text="$t('user.settings.api.reset_token')" @click="resetToken" />
       </div>
       <pre class="code-box">{{ token }}</pre>
     </div>
 
     <div>
-      <h2 class="text-lg text-wp-text-100">{{ $t('user.api.shell_setup') }}</h2>
+      <h2 class="text-lg text-wp-text-100">{{ $t('user.settings.api.shell_setup') }}</h2>
       <pre class="code-box">{{ usageWithShell }}</pre>
     </div>
 
     <div>
       <div class="flex items-center">
-        <h2 class="text-lg text-wp-text-100">{{ $t('user.api.api_usage') }}</h2>
+        <h2 class="text-lg text-wp-text-100">{{ $t('user.settings.api.api_usage') }}</h2>
         <a
           v-if="enableSwagger"
           :href="`${address}/swagger/index.html`"
           target="_blank"
           class="ml-4 text-wp-link-100 hover:text-wp-link-200"
-          >{{ $t('user.api.swagger_ui') }}</a
+          >{{ $t('user.settings.api.swagger_ui') }}</a
         >
       </div>
       <pre class="code-box">{{ usageWithCurl }}</pre>
@@ -29,9 +29,9 @@
 
     <div>
       <div class="flex items-center">
-        <h2 class="text-lg text-wp-text-100">{{ $t('user.api.cli_usage') }}</h2>
+        <h2 class="text-lg text-wp-text-100">{{ $t('user.settings.api.cli_usage') }}</h2>
         <a :href="cliDownload" target="_blank" class="ml-4 text-wp-link-100 hover:text-wp-link-200">{{
-          $t('user.api.dl_cli')
+          $t('user.settings.api.dl_cli')
         }}</a>
       </div>
       <pre class="code-box">{{ usageWithCli }}</pre>
@@ -66,10 +66,10 @@ const usageWithShell = computed(() => {
 });
 
 const usageWithCurl = `# ${t(
-  'user.api.shell_setup_before',
+  'user.settings.api.shell_setup_before',
 )}\ncurl -i \${WOODPECKER_SERVER}/api/user -H "Authorization: Bearer \${WOODPECKER_TOKEN}"`;
 
-const usageWithCli = `# ${t('user.api.shell_setup_before')}\nwoodpecker info`;
+const usageWithCli = `# ${t('user.settings.api.shell_setup_before')}\nwoodpecker info`;
 
 const cliDownload = 'https://github.com/woodpecker-ci/woodpecker/releases';
 
