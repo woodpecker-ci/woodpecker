@@ -111,7 +111,7 @@ const HookPush = `
     "changes": [
       {
         "old": {
-          "name": "master",
+          "name": "main",
           "target": {
             "type": "commit",
             "hash": "a51241ae1f00cbe728930db48e890b18fd527f99",
@@ -159,13 +159,13 @@ const HookPush = `
           },
           "links": {
             "self": {
-              "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/refs/branches/master"
+              "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/refs/branches/main"
             },
             "commits": {
-              "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/commits/master"
+              "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/commits/main"
             },
             "html": {
-              "href": "https://bitbucket.org/martinherren1984/publictestrepo/branch/master"
+              "href": "https://bitbucket.org/martinherren1984/publictestrepo/branch/main"
             }
           },
           "type": "branch",
@@ -177,7 +177,7 @@ const HookPush = `
           "default_merge_strategy": "merge_commit"
         },
         "new": {
-          "name": "master",
+          "name": "main",
           "target": {
             "type": "commit",
             "hash": "c14c1bb05dfb1fdcdf06b31485fff61b0ea44277",
@@ -238,13 +238,13 @@ const HookPush = `
           },
           "links": {
             "self": {
-              "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/refs/branches/master"
+              "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/refs/branches/main"
             },
             "commits": {
-              "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/commits/master"
+              "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/commits/main"
             },
             "html": {
-              "href": "https://bitbucket.org/martinherren1984/publictestrepo/branch/master"
+              "href": "https://bitbucket.org/martinherren1984/publictestrepo/branch/main"
             }
           },
           "type": "branch",
@@ -412,7 +412,7 @@ const HookPull = `
     },
     "destination": {
       "branch": {
-        "name": "master"
+        "name": "main"
       },
       "commit": {
         "hash": "ce5965ddd289"

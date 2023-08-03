@@ -1,6 +1,8 @@
 <template>
   <div v-if="stats" class="flex justify-center">
-    <div class="bg-gray-100 dark:bg-dark-gray-600 text-color dark:text-gray-400 rounded-md py-5 px-5 w-full">
+    <div
+      class="bg-wp-background-200 border border-wp-background-300 dark:bg-wp-background-100 text-wp-text-100 rounded-md py-5 px-5 w-full"
+    >
       <div class="flex w-full">
         <h3 class="text-lg font-semibold leading-tight uppercase flex-1">
           {{ $t('admin.settings.queue.stats.completed_count') }}
@@ -81,28 +83,28 @@ const data = computed(() => {
       label: t('admin.settings.queue.stats.worker_count'),
       value: props.stats.worker_count,
       perc: total.value > 0 ? (props.stats.worker_count / total.value) * 100 : 0,
-      color: 'bg-lime-400',
+      color: 'bg-wp-state-ok-100',
     },
     {
       key: 'running_count',
       label: t('admin.settings.queue.stats.running_count'),
       value: props.stats.running_count,
       perc: total.value > 0 ? (props.stats.running_count / total.value) * 100 : 100,
-      color: 'bg-blue-400',
+      color: 'bg-wp-state-info-100',
     },
     {
       key: 'pending_count',
       label: t('admin.settings.queue.stats.pending_count'),
       value: props.stats.pending_count,
       perc: total.value > 0 ? (props.stats.pending_count / total.value) * 100 : 0,
-      color: 'bg-gray-400',
+      color: 'bg-wp-state-neutral-100',
     },
     {
       key: 'waiting_on_deps_count',
       label: t('admin.settings.queue.stats.waiting_on_deps_count'),
       value: props.stats.waiting_on_deps_count,
       perc: total.value > 0 ? (props.stats.waiting_on_deps_count / total.value) * 100 : 0,
-      color: 'bg-red-400',
+      color: 'bg-wp-state-error-100',
     },
   ];
 });

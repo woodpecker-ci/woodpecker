@@ -69,7 +69,9 @@ func Load(noRouteHandler http.HandlerFunc, middleware ...gin.HandlerFunc) http.H
 	e.GET("/healthz", api.Health)
 
 	apiRoutes(e)
-	setupSwaggerConfigAndRoutes(e)
+	if server.Config.Server.EnableSwagger {
+		setupSwaggerConfigAndRoutes(e)
+	}
 
 	return e
 }

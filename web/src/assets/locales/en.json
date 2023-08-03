@@ -238,7 +238,7 @@
             "step_not_started": "This step hasn't started yet.",
             "pipelines_for": "Pipelines for branch \"{branch}\"",
             "pipelines_for_pr": "Pipelines for pull request #{index}",
-            "exit_code": "exit code {exitCode}",
+            "exit_code": "Exit Code {exitCode}",
             "loading": "Loading…",
             "pipeline": "Pipeline #{pipelineId}",
             "log_download_error": "There was an error while downloading the log file",
@@ -425,16 +425,27 @@
         }
     },
     "user": {
-        "settings": "User Settings",
+        "settings": {
+            "settings": "User Settings",
+            "general": {
+                "general": "General",
+                "language": "Language"
+            },
+            "api": {
+              "api": "API",
+              "desc": "Personal Access Token and API usage",
+              "token": "Personal Access Token",
+              "shell_setup": "Shell setup",
+              "api_usage": "Example API Usage",
+              "cli_usage": "Example CLI Usage",
+              "dl_cli": "Download CLI",
+              "shell_setup_before": "do shell setup steps before",
+              "reset_token": "Reset token",
+              "swagger_ui": "Swagger UI",
+          }
+        },
         "oauth_error": "Error while authenticating against OAuth provider",
         "internal_error": "Some internal error occurred",
         "access_denied": "You are not allowed to login",
-        "token": "Personal Access Token",
-        "shell_setup": "Shell setup",
-        "api_usage": "Example API Usage",
-        "cli_usage": "Example CLI Usage",
-        "dl_cli": "Download CLI",
-        "shell_setup_before": "do shell setup steps before",
-        "reset_token": "Reset token"
     }
 }
