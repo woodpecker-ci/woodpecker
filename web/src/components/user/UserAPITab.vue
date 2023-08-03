@@ -7,22 +7,28 @@
       </div>
     </div>
 
-    <div>
+    <div class="mt-2 mb-4">
       <div class="flex items-center mb-2">
-        <h2 class="text-lg text-wp-text-100">{{ $t('user.settings.api.token') }}</h2>
+        <div class="flex items-center text-wp-text-100 font-bold">
+          <label>{{ $t('user.settings.api.token') }}</label>
+        </div>
         <Button class="ml-4" :text="$t('user.settings.api.reset_token')" @click="resetToken" />
       </div>
       <pre class="code-box">{{ token }}</pre>
     </div>
 
-    <div>
-      <h2 class="text-lg text-wp-text-100">{{ $t('user.settings.api.shell_setup') }}</h2>
+    <div class="mt-2 mb-4">
+      <div class="flex items-center text-wp-text-100 font-bold mb-2">
+        <label>{{ $t('user.settings.api.shell_setup') }}</label>
+      </div>
       <pre class="code-box">{{ usageWithShell }}</pre>
     </div>
 
-    <div>
-      <div class="flex items-center">
-        <h2 class="text-lg text-wp-text-100">{{ $t('user.settings.api.api_usage') }}</h2>
+    <div class="mt-2 mb-4">
+      <div class="flex items-center mb-2">
+        <div class="flex items-center text-wp-text-100 font-bold">
+          <label>{{ $t('user.settings.api.api_usage') }}</label>
+        </div>
         <a
           v-if="enableSwagger"
           :href="`${address}/swagger/index.html`"
@@ -34,9 +40,11 @@
       <pre class="code-box">{{ usageWithCurl }}</pre>
     </div>
 
-    <div>
-      <div class="flex items-center">
-        <h2 class="text-lg text-wp-text-100">{{ $t('user.settings.api.cli_usage') }}</h2>
+    <div class="mt-2 mb-4">
+      <div class="flex items-center mb-2">
+        <div class="flex items-center text-wp-text-100 font-bold">
+          <label>{{ $t('user.settings.api.cli_usage') }}</label>
+        </div>
         <a :href="cliDownload" target="_blank" class="ml-4 text-wp-link-100 hover:text-wp-link-200">{{
           $t('user.settings.api.dl_cli')
         }}</a>

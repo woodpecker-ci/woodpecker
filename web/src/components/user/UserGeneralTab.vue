@@ -4,7 +4,7 @@
       <h1 class="ml-2 text-xl text-wp-text-100">{{ $t('user.settings.general.general') }}</h1>
     </div>
 
-    <div class="flex flex-col">
+    <div class="flex flex-col mt-2 mb-4">
       <div class="flex items-center text-wp-text-100 font-bold mb-2">
         <label>{{ $t('user.settings.general.language') }}</label>
       </div>
