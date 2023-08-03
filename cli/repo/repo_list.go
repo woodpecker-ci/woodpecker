@@ -53,4 +53,4 @@ func repoList(c *cli.Context) error {
 }
 
 // template for repository list items
-var tmplRepoList = "\x1b[33m{{ .FullName }}\x1b[0m (id: {{ .ID }})"
+var tmplRepoList = "\x1b[33m{{ .FullName }}\x1b[0m (id: {{ .ID }}, forgeRemoteID: {{ .ForgeRemoteID }})"
