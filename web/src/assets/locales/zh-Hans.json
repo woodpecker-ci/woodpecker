@@ -74,46 +74,6 @@
     "activity": "活动",
     "add": "添加仓库",
     "branches": "分支",
-    "build": {
-      "actions": {
-        "cancel": "取消",
-        "cancel_success": "流水线已被取消",
-        "canceled": "该步骤已被取消。",
-        "log_auto_scroll": "自动滚动",
-        "log_auto_scroll_off": "关闭自动滚动",
-        "log_download": "下载",
-        "restart": "重启",
-        "restart_success": "流水线已重启"
-      },
-      "config": "配置",
-      "created": "已创建",
-      "event": {
-        "cron": "计划任务",
-        "deploy": "部署",
-        "push": "推送",
-        "tag": "标签"
-      },
-      "execution_error": "执行错误",
-      "exit_code": "退出代码 {exitCode}",
-      "files": "修改的文件（{files}）",
-      "loading": "载入中…",
-      "log_download_error": "下载日志文件中发生了错误",
-      "no_files": "没有文件修改。",
-      "no_pipeline_steps": "没有流水线步骤可用！",
-      "no_pipelines": "没有流水线曾启动。",
-      "pipeline": "流水线 #{buildId}",
-      "pipelines_for": "{branch} 分支的流水线",
-      "protected": {
-        "approve": "同意",
-        "approve_success": "流水线已被许可",
-        "awaits": "该流水线正在等待维护者许可！",
-        "decline": "拒绝",
-        "decline_success": "流水线已被拒绝",
-        "declined": "该流水线已被拒绝！"
-      },
-      "step_not_started": "该步骤还不曾启动过。",
-      "tasks": "任务"
-    },
     "enable": {
       "enable": "启用",
       "enabled": "已经启用了",
@@ -179,8 +139,7 @@
         }
       },
       "badge": {
-        "badge": "徽标",
-        "url_branch": "特定分支的 URL"
+        "badge": "徽标"
       },
       "crons": {
         "add": "创建计划",

@@ -1,8 +1,10 @@
 <template>
   <!-- Navbar -->
-  <nav class="flex bg-lime-600 text-neutral-content p-4 dark:bg-dark-gray-800 dark:border-b dark:border-gray-700">
+  <nav
+    class="flex bg-wp-primary-200 dark:bg-wp-primary-300 text-neutral-content p-4 border-b border-wp-background-100 font-bold text-wp-primary-text-100"
+  >
     <!-- Left Links Box -->
-    <div class="flex text-white dark:text-gray-400 items-center space-x-2">
+    <div class="flex items-center space-x-2">
       <!-- Logo -->
       <router-link :to="{ name: 'home' }" class="flex flex-col -my-2 px-2">
         <img class="w-8 h-8" src="../../../assets/logo.svg?url" />
@@ -16,10 +18,12 @@
       <!-- Docs Link -->
       <a :href="docsUrl" target="_blank" class="navbar-link navbar-clickable hidden md:flex">{{ $t('docs') }}</a>
       <!-- API Link -->
-      <a :href="apiUrl" target="_blank" class="navbar-link navbar-clickable hidden md:flex">{{ $t('api') }}</a>
+      <a v-if="enableSwagger" :href="apiUrl" target="_blank" class="navbar-link navbar-clickable hidden md:flex">{{
+        $t('api')
+      }}</a>
     </div>
     <!-- Right Icons Box -->
-    <div class="flex ml-auto -m-1.5 items-center space-x-2 text-white dark:text-gray-400">
+    <div class="flex ml-auto -m-1.5 items-center space-x-2">
       <!-- Dark Mode Toggle -->
       <IconButton
         :icon="darkMode ? 'dark' : 'light'"
@@ -80,7 +84,15 @@ export default defineComponent({
 
     const version = config.version?.startsWith('next') ? 'next' : config.version;
 
-    return { darkMode, user: authentication.user, doLogin, docsUrl, version, apiUrl };
+    return {
+      darkMode,
+      user: authentication.user,
+      doLogin,
+      docsUrl,
+      version,
+      apiUrl,
+      enableSwagger: config.enableSwagger,
+    };
   },
 });
 </script>

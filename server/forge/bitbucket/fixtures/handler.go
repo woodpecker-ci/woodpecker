@@ -38,7 +38,8 @@ func Handler() http.Handler {
 	e.GET("/2.0/repositories/:owner", getUserRepos)
 	e.GET("/2.0/user/", getUser)
 	e.GET("/2.0/user/permissions/repositories", getPermissions)
-
+	e.GET("/2.0/repositories/:owner/:name/commits/:commit", getBranchHead)
+	e.GET("/2.0/repositories/:owner/:name/pullrequests", getPullRequests)
 	return e
 }
 
@@ -108,10 +109,32 @@ func getRepoHooks(c *gin.Context) {
 
 func getRepoFile(c *gin.Context) {
 	switch c.Param("file") {
+	case "dir":
+		c.String(200, repoDirPayload)
+	case "dir_not_found/":
+		c.String(404, "")
 	case "file_not_found":
 		c.String(404, "")
 	default:
 		c.String(200, repoFilePayload)
+	}
+}
+
+func getBranchHead(c *gin.Context) {
+	switch c.Param("commit") {
+	case "branch_name":
+		c.String(200, branchCommitsPayload)
+	default:
+		c.String(404, "")
+	}
+}
+
+func getPullRequests(c *gin.Context) {
+	switch c.Param("name") {
+	case "repo_name":
+		c.String(200, pullRequestsPayload)
+	default:
+		c.String(404, "")
 	}
 }
 
@@ -222,6 +245,61 @@ const repoHookPayload = `
 `
 
 const repoFilePayload = "dummy payload"
+
+const repoDirPayload = `
+{
+    "pagelen": 10,
+    "page": 1,
+    "values": [
+        {
+            "path": "README.md",
+            "type": "commit_file"
+        },
+        {
+            "path": "test",
+            "type": "commit_directory"
+        },
+        {
+            "path": ".gitignore",
+            "type": "commit_file"
+        }
+    ]
+}
+`
+
+const branchCommitsPayload = `
+{
+    "values": [
+        {
+            "hash": "branch_head_name"
+        },
+        {
+            "hash": "random1"
+        },
+        {
+            "hash": "random2"
+        }
+    ]
+}
+`
+
+const pullRequestsPayload = `
+{
+		 "values": [
+        {
+            "id": 123,
+						"title": "PRs title"
+        },
+        {
+            "id": 456,
+						"title": "Another PRs title"
+        }
+    ],
+		"pagelen": 10,
+    "size": 2,
+    "page": 1
+}
+`
 
 const userPayload = `
 {

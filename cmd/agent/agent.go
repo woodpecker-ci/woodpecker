@@ -92,7 +92,7 @@ func run(c *cli.Context) error {
 
 	var transport grpc.DialOption
 	if c.Bool("grpc-secure") {
-		transport = grpc.WithTransportCredentials(grpccredentials.NewTLS(&tls.Config{InsecureSkipVerify: c.Bool("skip-insecure-grpc")}))
+		transport = grpc.WithTransportCredentials(grpccredentials.NewTLS(&tls.Config{InsecureSkipVerify: c.Bool("grpc-skip-insecure")}))
 	} else {
 		transport = grpc.WithTransportCredentials(insecure.NewCredentials())
 	}
