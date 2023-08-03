@@ -161,28 +161,19 @@
     "branches": "Branches",
     "build": {
       "actions": {
-        "cancel_success": "Pipeline abgebrochen",
         "log_auto_scroll": "Automatisches folgen",
-        "log_download": "Herunterladen",
         "restart_success": "Pipeline neu gestartet"
       },
-      "created": "Erstellt",
       "event": {
         "deploy": "Deploy",
-        "pr": "Pull-Request",
         "tag": "Tag"
       },
-      "exit_code": "Exit-Code {exitCode}",
       "loading": "Laden…",
-      "no_files": "Es wurden keine Dateien geändert.",
       "no_pipelines": "Bisher wurden noch keine Pipelines gestartet.",
-      "pipelines_for": "Pipelines für den Branch \"{branch}\"",
       "protected": {
         "approve_success": "Pipeline genehmigt",
-        "decline": "Ablehnen",
         "declined": "Diese Pipeline ist abgelehnt worden!"
-      },
-      "tasks": "Vorgänge"
+      }
     },
     "deploy_pipeline": {
       "enter_target": "Zielumgebung des Deployments",

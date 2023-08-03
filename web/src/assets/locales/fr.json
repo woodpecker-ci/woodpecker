@@ -161,25 +161,17 @@
     "branches": "Branches",
     "build": {
       "actions": {
-        "cancel_success": "Pipeline annulé",
         "log_auto_scroll": "Automatiquement défiler vers le bas",
-        "log_download": "Télécharger",
         "restart_success": "Pipeline redémarré"
       },
-      "created": "Crée",
       "event": {
-        "deploy": "Déploiement",
-        "push": "Push"
+        "deploy": "Déploiement"
       },
       "execution_error": "Erreur d'execution",
-      "files": "Fichiers changés ({files})",
       "log_download_error": "Il y a eu une erreur lors du téléchargement du fichier de journal",
-      "no_pipeline_steps": "Aucune étape disponible !",
       "pipeline": "Pipeline #{buildId}",
       "protected": {
-        "approve": "Approuver",
-        "awaits": "Ce pipeline attends d'être approuvé par un mainteneur !",
-        "decline_success": "Pipeline refusé"
+        "awaits": "Ce pipeline attends d'être approuvé par un mainteneur !"
       },
       "step_not_started": "L'étape n'a pas démarré encore."
     },

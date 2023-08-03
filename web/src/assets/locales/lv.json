@@ -161,25 +161,17 @@
     "branches": "Atzari",
     "build": {
       "actions": {
-        "cancel_success": "Konvejerdarbs atcelts",
         "log_auto_scroll": "Automātiski ritināt",
-        "log_download": "Lejupielādēt",
         "restart_success": "Konvejerdarbs pārstartēts"
       },
-      "created": "Izveidots",
       "event": {
-        "deploy": "Uzstādīšana",
-        "push": "Iesūtīšana"
+        "deploy": "Uzstādīšana"
       },
       "execution_error": "Uzdevuma izpildes kļūda",
-      "files": "Izmainītie faili ({files})",
       "log_download_error": "Veicot žurnālfaila lejupielādi notika kļūda",
-      "no_pipeline_steps": "Konvejerdarbam nav neviena soļa!",
       "pipeline": "Konvejerdarbs #{buildId}",
       "protected": {
-        "approve": "Apstiprināt",
-        "awaits": "Šim konvejerdarbam ir nepieciešams apstiprinājums no atbildīgajām personām!",
-        "decline_success": "Konvejerdarbs noraidīts"
+        "awaits": "Šim konvejerdarbam ir nepieciešams apstiprinājums no atbildīgajām personām!"
       },
       "step_not_started": "Šis solis vēl nav uzsākts."
     },
