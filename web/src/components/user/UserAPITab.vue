@@ -1,5 +1,12 @@
 <template>
   <Panel>
+    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-wp-background-100">
+      <div class="ml-2">
+        <h1 class="text-xl text-wp-text-100">{{ $t('user.settings.api.api') }}</h1>
+        <p class="text-sm text-wp-text-alt-100">{{ $t('user.settings.api.desc') }}</p>
+      </div>
+    </div>
+
     <div>
       <div class="flex items-center mb-2">
         <h2 class="text-lg text-wp-text-100">{{ $t('user.settings.api.token') }}</h2>

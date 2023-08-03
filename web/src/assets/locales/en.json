@@ -433,6 +433,7 @@
             },
             "api": {
               "api": "API",
+              "desc": "Personal Access Token and API usage",
               "token": "Personal Access Token",
               "shell_setup": "Shell setup",
               "api_usage": "Example API Usage",

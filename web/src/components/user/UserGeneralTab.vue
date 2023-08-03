@@ -1,5 +1,9 @@
 <template>
   <Panel>
+    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-wp-background-100">
+      <h1 class="ml-2 text-xl text-wp-text-100">{{ $t('user.settings.general.general') }}</h1>
+    </div>
+
     <div class="flex flex-col">
       <div class="flex items-center text-wp-text-100 font-bold mb-2">
         <label>{{ $t('user.settings.general.language') }}</label>
