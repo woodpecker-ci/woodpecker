@@ -441,7 +441,7 @@
               "dl_cli": "Download CLI",
               "shell_setup_before": "do shell setup steps before",
               "reset_token": "Reset token",
-              "swagger_ui": "Swagger UI",
+              "swagger_ui": "Swagger UI"
           }
         },
         "oauth_error": "Error while authenticating against OAuth provider",
