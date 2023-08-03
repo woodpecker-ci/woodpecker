@@ -160,7 +160,6 @@
     "add": "Ajouter un dépôt",
     "branches": "Branches",
     "build": {
-      "execution_error": "Erreur d'execution",
       "step_not_started": "L'étape n'a pas démarré encore."
     },
     "deploy_pipeline": {

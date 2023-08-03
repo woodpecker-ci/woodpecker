@@ -75,7 +75,6 @@
     "add": "添加仓库",
     "branches": "分支",
     "build": {
-      "exit_code": "退出代码 {exitCode}",
       "tasks": "任务"
     },
     "enable": {

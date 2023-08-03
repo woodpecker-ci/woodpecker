@@ -160,9 +160,6 @@
     "add": "Repository hinzufügen",
     "branches": "Branches",
     "build": {
-      "event": {
-        "tag": "Tag"
-      },
       "protected": {
         "declined": "Diese Pipeline ist abgelehnt worden!"
       }
