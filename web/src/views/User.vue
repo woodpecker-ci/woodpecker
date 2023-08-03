@@ -22,6 +22,7 @@
         <div class="flex items-center">
           <h2 class="text-lg text-wp-text-100">{{ $t('user.api_usage') }}</h2>
           <a
+            v-if="enableSwagger"
             :href="`${address}/swagger/index.html`"
             target="_blank"
             class="ml-4 text-wp-link-100 hover:text-wp-link-200"
@@ -60,6 +61,7 @@ import useConfig from '~/compositions/useConfig';
 import { setI18nLanguage } from '~/compositions/useI18n';
 
 const { t, locale } = useI18n();
+const { enableSwagger } = useConfig();
 
 const apiClient = useApiClient();
 const token = ref<string | undefined>();

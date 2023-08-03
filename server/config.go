@@ -73,6 +73,7 @@ var Config = struct {
 		Migrations          struct {
 			AllowLong bool
 		}
+		EnableSwagger bool
 		// Open bool
 		// Orgs map[string]struct{}
 		// Admins map[string]struct{}

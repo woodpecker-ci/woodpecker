@@ -18,7 +18,9 @@
       <!-- Docs Link -->
       <a :href="docsUrl" target="_blank" class="navbar-link navbar-clickable hidden md:flex">{{ $t('docs') }}</a>
       <!-- API Link -->
-      <a :href="apiUrl" target="_blank" class="navbar-link navbar-clickable hidden md:flex">{{ $t('api') }}</a>
+      <a v-if="enableSwagger" :href="apiUrl" target="_blank" class="navbar-link navbar-clickable hidden md:flex">{{
+        $t('api')
+      }}</a>
     </div>
     <!-- Right Icons Box -->
     <div class="flex ml-auto -m-1.5 items-center space-x-2">
@@ -83,7 +85,15 @@ export default defineComponent({
 
     const version = config.version?.startsWith('next') ? 'next' : config.version;
 
-    return { darkMode, user: authentication.user, doLogin, docsUrl, version, apiUrl };
+    return {
+      darkMode,
+      user: authentication.user,
+      doLogin,
+      docsUrl,
+      version,
+      apiUrl,
+      enableSwagger: config.enableSwagger,
+    };
   },
 });
 </script>

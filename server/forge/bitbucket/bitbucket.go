@@ -20,10 +20,9 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"path/filepath"
 
 	"golang.org/x/oauth2"
-
-	shared_utils "github.com/woodpecker-ci/woodpecker/shared/utils"
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/forge"
@@ -31,6 +30,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/forge/common"
 	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	shared_utils "github.com/woodpecker-ci/woodpecker/shared/utils"
 )
 
 // Bitbucket cloud endpoints.
@@ -223,8 +223,52 @@ func (c *config) File(ctx context.Context, u *model.User, r *model.Repo, p *mode
 	return []byte(*config), err
 }
 
-func (c *config) Dir(_ context.Context, _ *model.User, _ *model.Repo, _ *model.Pipeline, _ string) ([]*forge_types.FileMeta, error) {
-	return nil, forge_types.ErrNotImplemented
+// Dir fetches a folder from the bitbucket repository
+func (c *config) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model.Pipeline, f string) ([]*forge_types.FileMeta, error) {
+	var page *string
+	repoPathFiles := []*forge_types.FileMeta{}
+	client := c.newClient(ctx, u)
+	for {
+		filesResp, err := client.GetRepoFiles(r.Owner, r.Name, p.Commit, f, page)
+		if err != nil {
+			return nil, err
+		}
+		for _, file := range filesResp.Values {
+			_, filename := filepath.Split(file.Path)
+			repoFile := forge_types.FileMeta{
+				Name: filename,
+			}
+			if file.Type == "commit_file" {
+				fileData, err := c.newClient(ctx, u).FindSource(r.Owner, r.Name, p.Commit, file.Path)
+				if err != nil {
+					return nil, err
+				}
+				if fileData != nil {
+					repoFile.Data = []byte(*fileData)
+				}
+			}
+			repoPathFiles = append(repoPathFiles, &repoFile)
+		}
+
+		// Check for more results page
+		if filesResp.Next == nil {
+			break
+		}
+		nextPageURL, err := url.Parse(*filesResp.Next)
+		if err != nil {
+			return nil, err
+		}
+		params, err := url.ParseQuery(nextPageURL.RawQuery)
+		if err != nil {
+			return nil, err
+		}
+		nextPage := params.Get("page")
+		if len(nextPage) == 0 {
+			break
+		}
+		page = &nextPage
+	}
+	return repoPathFiles, nil
 }
 
 // Status creates a pipeline status for the Bitbucket commit.

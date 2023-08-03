@@ -72,7 +72,9 @@ func Load(noRouteHandler http.HandlerFunc, middleware ...gin.HandlerFunc) http.H
 	}
 
 	apiRoutes(base)
-	setupSwaggerConfigAndRoutes(e)
+	if server.Config.Server.EnableSwagger {
+		setupSwaggerConfigAndRoutes(e)
+	}
 
 	return e
 }

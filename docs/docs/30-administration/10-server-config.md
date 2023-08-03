@@ -535,6 +535,11 @@ Server URL path prefix (used for statics loading when having a url path prefix),
 
 Example: `WOODPECKER_ROOT_PATH=/woodpecker`
 
+### `WOODPECKER_ENABLE_SWAGGER`
+> Default: true
+
+Enable the Swagger UI for API documentation.
+
 ---
 
 ### `WOODPECKER_GITHUB_...`
