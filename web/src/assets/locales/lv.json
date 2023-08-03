@@ -161,18 +161,10 @@
     "branches": "Atzari",
     "build": {
       "actions": {
-        "log_auto_scroll": "Automātiski ritināt",
         "restart_success": "Konvejerdarbs pārstartēts"
       },
-      "event": {
-        "deploy": "Uzstādīšana"
-      },
       "execution_error": "Uzdevuma izpildes kļūda",
-      "log_download_error": "Veicot žurnālfaila lejupielādi notika kļūda",
       "pipeline": "Konvejerdarbs #{buildId}",
-      "protected": {
-        "awaits": "Šim konvejerdarbam ir nepieciešams apstiprinājums no atbildīgajām personām!"
-      },
       "step_not_started": "Šis solis vēl nav uzsākts."
     },
     "deploy_pipeline": {

@@ -76,18 +76,10 @@
     "branches": "分支",
     "build": {
       "actions": {
-        "log_auto_scroll": "自动滚动",
         "restart_success": "流水线已重启"
       },
-      "event": {
-        "deploy": "部署"
-      },
       "exit_code": "退出代码 {exitCode}",
-      "no_files": "没有文件修改。",
       "pipelines_for": "{branch} 分支的流水线",
-      "protected": {
-        "decline": "拒绝"
-      },
       "tasks": "任务"
     },
     "enable": {
