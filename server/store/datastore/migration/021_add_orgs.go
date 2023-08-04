@@ -25,11 +25,11 @@ import (
 )
 
 type oldSecret021 struct {
-	ID     int64  `json:"id"              xorm:"pk autoincr 'secret_id'"`
-	Owner  string `json:"-"               xorm:"'secret_owner'"`
-	OrgID  int64  `json:"-"               xorm:"NOT NULL DEFAULT 0 UNIQUE(s) INDEX 'secret_org_id'"`
-	RepoID int64  `json:"-"               xorm:"NOT NULL DEFAULT 0 UNIQUE(s) INDEX 'secret_repo_id'"`
-	Name   string `json:"name"            xorm:"NOT NULL UNIQUE(s) INDEX 'secret_name'"`
+	ID     int64  `xorm:"pk autoincr 'secret_id'"`
+	Owner  string `xorm:"'secret_owner'"`
+	OrgID  int64  `xorm:"NOT NULL DEFAULT 0 INDEX 'secret_org_id'"`
+	RepoID int64  `xorm:"NOT NULL DEFAULT 0 INDEX 'secret_repo_id'"`
+	Name   string `xorm:"NOT NULL INDEX 'secret_name'"`
 }
 
 func (oldSecret021) TableName() string {
