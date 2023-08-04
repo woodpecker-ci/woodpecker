@@ -57,7 +57,7 @@ This is the reference list of all environment variables available to your pipeli
 | `CI_REPO_SCM`                    | repository SCM (git)                                                                         |
 | `CI_REPO_URL`                    | repository web URL                                                                           |
 | `CI_REPO_CLONE_URL`              | repository clone URL                                                                         |
-| `CI_REPO_DEFAULT_BRANCH`         | repository default branch (master)                                                           |
+| `CI_REPO_DEFAULT_BRANCH`         | repository default branch (main)                                                           |
 | `CI_REPO_PRIVATE`                | repository is private                                                                        |
 | `CI_REPO_TRUSTED`                | repository is trusted                                                                        |
 |                                  | **Current Commit**                                                                           |

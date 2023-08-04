@@ -45,7 +45,7 @@ steps:
     directory: web/
     commands:
       - corepack enable
-      - pnpm formatcheck
+      - pnpm format:check
     when: *when
 
   typecheck:

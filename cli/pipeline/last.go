@@ -34,7 +34,7 @@ var pipelineLastCmd = &cli.Command{
 		&cli.StringFlag{
 			Name:  "branch",
 			Usage: "branch name",
-			Value: "master",
+			Value: "main",
 		},
 	),
 }
