@@ -34,6 +34,7 @@ service Woodpecker {
   rpc Log           (LogRequest)           returns (Empty) {}
   rpc RegisterAgent (RegisterAgentRequest) returns (RegisterAgentResponse) {}
   rpc ReportHealth  (ReportHealthRequest)  returns (Empty) {}
+  rpc TaintAgent    (Empty)                returns (Empty) {}
 }
 
 //

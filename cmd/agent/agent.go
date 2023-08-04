@@ -79,7 +79,12 @@ func run(c *cli.Context) error {
 		log.Logger = log.With().Caller().Logger()
 	}
 
-	counter.Polling = c.Int("max-workflows")
+	parallel := c.Int("max-workflows")
+	ephemeral := c.Bool("ephemeral")
+	if ephemeral && parallel > 1 {
+		parallel = 1
+	}
+	counter.Polling = parallel
 	counter.Running = 0
 
 	if c.Bool("healthcheck") {
@@ -164,10 +169,6 @@ func run(c *cli.Context) error {
 	backendCtx := context.WithValue(ctx, types.CliContext, c)
 	backend.Init(backendCtx)
 
-	var wg sync.WaitGroup
-	parallel := c.Int("max-workflows")
-	wg.Add(parallel)
-
 	// new engine
 	engine, err := backend.FindEngine(backendCtx, c.String("backend-engine"))
 	if err != nil {
@@ -222,6 +223,9 @@ func run(c *cli.Context) error {
 	}
 	log.Debug().Msgf("loaded %s backend engine", engine.Name())
 
+	var wg sync.WaitGroup
+	wg.Add(parallel)
+
 	for i := 0; i < parallel; i++ {
 		i := i
 		go func() {
@@ -240,6 +244,10 @@ func run(c *cli.Context) error {
 					log.Error().Err(err).Msg("pipeline done with error")
 					return
 				}
+
+				if ephemeral {
+					return
+				}
 			}
 		}()
 	}
@@ -249,6 +257,14 @@ func run(c *cli.Context) error {
 		version.String(), engine.Name(), platform, parallel)
 
 	wg.Wait()
+
+	if ephemeral {
+		log.Info().Msg("ephemeral agent consumed")
+		err := client.TaintAgent(ctx)
+		if err != nil {
+			log.Error().Err(err).Msg("tainting agent")
+		}
+	}
 	return nil
 }
 

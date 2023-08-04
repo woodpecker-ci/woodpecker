@@ -373,6 +373,17 @@ func (s *RPC) ReportHealth(ctx context.Context, status string) error {
 	return s.store.AgentUpdate(agent)
 }
 
+func (s *RPC) TaintAgent(ctx context.Context) error {
+	agent, err := s.getAgentFromContext(ctx)
+	if err != nil {
+		return err
+	}
+
+	agent.NoSchedule = true
+
+	return s.store.AgentUpdate(agent)
+}
+
 func (s *RPC) completeChildrenIfParentCompleted(completedWorkflow *model.Workflow) {
 	for _, c := range completedWorkflow.Children {
 		if c.Running() {

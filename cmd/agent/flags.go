@@ -85,6 +85,12 @@ var flags = []cli.Flag{
 		Value:   1,
 	},
 	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_AGENT_EPHEMERAL"},
+		Name:    "ephemeral",
+		Usage:   "single-use agent",
+		Value:   false,
+	},
+	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_HEALTHCHECK"},
 		Name:    "healthcheck",
 		Usage:   "enable healthcheck endpoint",

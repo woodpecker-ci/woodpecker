@@ -169,3 +169,9 @@ func (s *WoodpeckerServer) ReportHealth(c context.Context, req *proto.ReportHeal
 	err := s.peer.ReportHealth(c, req.GetStatus())
 	return res, err
 }
+
+func (s *WoodpeckerServer) TaintAgent(c context.Context, _ *proto.Empty) (*proto.Empty, error) {
+	res := new(proto.Empty)
+	err := s.peer.TaintAgent(c)
+	return res, err
+}
