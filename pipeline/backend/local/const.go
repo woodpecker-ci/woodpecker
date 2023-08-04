@@ -27,7 +27,7 @@ var notAllowedEnvVarOverwrites = []string{
 }
 
 var (
-	ErrUnsupportedStepType   = errors.New("unsupportet step type")
+	ErrUnsupportedStepType   = errors.New("unsupported step type")
 	ErrWorkflowStateNotFound = errors.New("workflow state not found")
 )
 
