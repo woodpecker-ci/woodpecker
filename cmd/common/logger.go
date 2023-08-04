@@ -32,7 +32,8 @@ var GlobalLoggerFlags = []cli.Flag{
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_LOG_FILE"},
 		Name:    "log-file",
-		Usage:   "if set, write to file not to stdout",
+		Usage:   "where logs are written to. 'stdout' and 'stderr' can be used as special keywords",
+		Value:   "stderr",
 	},
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_DEBUG_PRETTY"},
@@ -54,8 +55,13 @@ func SetupGlobalLogger(c *cli.Context) {
 	noColor := c.Bool("nocolor")
 	logFile := c.String("log-file")
 
-	file := os.Stderr
-	if logFile != "" {
+	var file *os.File
+	switch logFile {
+	case "", "stderr": // default case
+		file = os.Stderr
+	case "stdout":
+		file = os.Stdout
+	default: // a file was set
 		openFile, err := os.OpenFile(logFile, os.O_APPEND, 0o660)
 		if err != nil {
 			log.Fatal().Err(err).Msgf("could not open log file '%s'", logFile)
