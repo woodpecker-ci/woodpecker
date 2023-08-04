@@ -56,8 +56,8 @@ require (
 	k8s.io/api v0.27.1
 	k8s.io/apimachinery v0.27.1
 	k8s.io/client-go v0.27.1
-	xorm.io/builder v0.3.12
-	xorm.io/xorm v1.3.2
+	xorm.io/builder v0.3.13
+	xorm.io/xorm v1.3.3-0.20230726104636-c622cdaf893f
 )
 
 require (
