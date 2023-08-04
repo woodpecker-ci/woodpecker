@@ -29,11 +29,11 @@ var GlobalLoggerFlags = []cli.Flag{
 		Usage:   "set logging level",
 		Value:   "info",
 	},
-	//	&cli.StringFlag{
-	//		EnvVars: []string{"WOODPECKER_LOG_FILE"},
-	//		Name:    "log-file",
-	//		Usage:   "if set, write to file not to stdout",
-	//	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_LOG_FILE"},
+		Name:    "log-file",
+		Usage:   "if set, write to file not to stdout",
+	},
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_DEBUG_PRETTY"},
 		Name:    "pretty",
@@ -43,7 +43,7 @@ var GlobalLoggerFlags = []cli.Flag{
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_DEBUG_NOCOLOR"},
 		Name:    "nocolor",
-		Usage:   "disable colored debug output",
+		Usage:   "disable colored debug output, only has effect if pretty output is set too",
 		Value:   !IsInteractive(), // do color on interactive terminal by default
 	},
 }
@@ -52,12 +52,23 @@ func SetupGlobalLogger(c *cli.Context) {
 	logLevel := c.String("log-level")
 	pretty := c.Bool("pretty")
 	noColor := c.Bool("nocolor")
-	// toFile := c.String("log-file")
+	logFile := c.String("log-file")
+
+	file := os.Stderr
+	if logFile != "" {
+		openFile, err := os.OpenFile(logFile, os.O_APPEND, 0o660)
+		if err != nil {
+			log.Fatal().Err(err).Msgf("could not open log file '%s'", logFile)
+		}
+		file = openFile
+	}
+
+	log.Logger = zerolog.New(file).With().Timestamp().Logger()
 
 	if pretty {
 		log.Logger = log.Output(
 			zerolog.ConsoleWriter{
-				Out:     os.Stderr,
+				Out:     file,
 				NoColor: noColor,
 			},
 		)
