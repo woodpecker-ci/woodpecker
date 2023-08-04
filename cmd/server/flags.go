@@ -20,15 +20,11 @@ import (
 
 	"github.com/urfave/cli/v2"
 
+	"github.com/woodpecker-ci/woodpecker/cmd/common"
 	"github.com/woodpecker-ci/woodpecker/shared/constant"
 )
 
-var flags = []cli.Flag{
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_LOG_LEVEL"},
-		Name:    "log-level",
-		Usage:   "set logging level",
-	},
+var flags = append([]cli.Flag{
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_LOG_XORM"},
 		Name:    "log-xorm",
@@ -38,17 +34,6 @@ var flags = []cli.Flag{
 		EnvVars: []string{"WOODPECKER_LOG_XORM_SQL"},
 		Name:    "log-xorm-sql",
 		Usage:   "enable xorm sql command logging",
-	},
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_DEBUG_PRETTY"},
-		Name:    "pretty",
-		Usage:   "enable pretty-printed debug output",
-	},
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_DEBUG_NOCOLOR"},
-		Name:    "nocolor",
-		Usage:   "disable colored debug output",
-		Value:   true,
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_HOST"},
@@ -470,4 +455,4 @@ var flags = []cli.Flag{
 		Name:    "encryption-disable-flag",
 		Usage:   "Flag to decrypt all encrypted data and disable encryption on server",
 	},
-}
+}, common.GlobalLoggerFlags...)

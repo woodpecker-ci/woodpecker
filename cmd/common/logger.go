@@ -1,0 +1,80 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package common
+
+import (
+	"os"
+
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+	"github.com/urfave/cli/v2"
+)
+
+var GlobalLoggerFlags = []cli.Flag{
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_LOG_LEVEL"},
+		Name:    "log-level",
+		Usage:   "set logging level",
+		Value:   "info",
+	},
+	//	&cli.StringFlag{
+	//		EnvVars: []string{"WOODPECKER_LOG_FILE"},
+	//		Name:    "log-file",
+	//		Usage:   "if set, write to file not to stdout",
+	//	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_DEBUG_PRETTY"},
+		Name:    "pretty",
+		Usage:   "enable pretty-printed debug output",
+		Value:   IsInteractive(), // make pretty on interactive terminal by default
+	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_DEBUG_NOCOLOR"},
+		Name:    "nocolor",
+		Usage:   "disable colored debug output",
+		Value:   !IsInteractive(), // do color on interactive terminal by default
+	},
+}
+
+func SetupGlobalLogger(c *cli.Context) {
+	logLevel := c.String("log-level")
+	pretty := c.Bool("pretty")
+	noColor := c.Bool("nocolor")
+	// toFile := c.String("log-file")
+
+	if pretty {
+		log.Logger = log.Output(
+			zerolog.ConsoleWriter{
+				Out:     os.Stderr,
+				NoColor: noColor,
+			},
+		)
+	}
+
+	// TODO: format output & options to switch to json aka. option to add channels to send logs to
+
+	lvl, err := zerolog.ParseLevel(logLevel)
+	if err != nil {
+		log.Fatal().Msgf("unknown logging level: %s", logLevel)
+	}
+	zerolog.SetGlobalLevel(lvl)
+
+	// if debug or trace also log the caller
+	if zerolog.GlobalLevel() <= zerolog.DebugLevel {
+		log.Logger = log.With().Caller().Logger()
+	}
+
+	log.Log().Msgf("LogLevel = %s", zerolog.GlobalLevel().String())
+}
