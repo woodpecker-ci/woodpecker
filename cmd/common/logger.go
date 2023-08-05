@@ -62,7 +62,7 @@ func SetupGlobalLogger(c *cli.Context) {
 	case "stdout":
 		file = os.Stdout
 	default: // a file was set
-		openFile, err := os.OpenFile(logFile, os.O_APPEND, 0o660)
+		openFile, err := os.OpenFile(logFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o660)
 		if err != nil {
 			log.Fatal().Err(err).Msgf("could not open log file '%s'", logFile)
 		}
