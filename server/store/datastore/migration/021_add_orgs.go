@@ -27,8 +27,8 @@ import (
 type oldSecret021 struct {
 	ID     int64  `xorm:"pk autoincr 'secret_id'"`
 	Owner  string `xorm:"'secret_owner'"`
-	OrgID  int64  `xorm:"NOT NULL DEFAULT 0 INDEX 'secret_org_id'"`
-	RepoID int64  `xorm:"NOT NULL DEFAULT 0 INDEX 'secret_repo_id'"`
+	OrgID  int64  `xorm:"NOT NULL DEFAULT 0 'secret_org_id'"`
+	RepoID int64  `xorm:"NOT NULL DEFAULT 0 'secret_repo_id'"`
 	Name   string `xorm:"NOT NULL INDEX 'secret_name'"`
 }
 
@@ -51,7 +51,8 @@ var addOrgs = task{
 		}
 
 		// make sure the columns exist before removing them
-		if err := sess.Sync(new(oldSecret021)); err != nil {
+		// wait for https://gitea.com/xorm/xorm/pulls/2320
+		if _, err := sess.SyncWithOptions(xorm.SyncOptions{IgnoreConstrains: true, IgnoreIndices: true}, new(oldSecret021)); err != nil {
 			return fmt.Errorf("sync old secrets models failed: %w", err)
 		}
 
