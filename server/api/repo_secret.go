@@ -167,7 +167,7 @@ func GetSecretList(c *gin.Context) {
 //	@Summary	Delete a named secret
 //	@Router		/repos/{repo_id}/secrets/{secretName} [delete]
 //	@Produce	plain
-//	@Success	200
+//	@Success	204
 //	@Tags		Repository secrets
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		repo_id			path	int		true	"the repository id"
