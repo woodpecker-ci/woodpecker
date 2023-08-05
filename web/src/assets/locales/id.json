@@ -423,8 +423,7 @@
   "user": {
     "access_denied": "Anda tidak diperbolehkan untuk masuk",
     "internal_error": "Terjadi beberapa kesalahan internal",
-    "oauth_error": "Terjadi kesalahan saat mengotentikasi dengan penyedia OAuth",
-    "shell_setup_before": "sebelumnya lakukan penyiapan shell"
+    "oauth_error": "Terjadi kesalahan saat mengotentikasi dengan penyedia OAuth"
   },
   "username": "Nama pengguna",
   "welcome": "Selamat datang di Woodpecker"
