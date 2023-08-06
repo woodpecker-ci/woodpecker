@@ -34,7 +34,7 @@ RUN apk add -U --no-cache docker-credential-ecr-login
 
 ## Podman support
 
-While the agent was developed with Docker/Moby, Podman can also be used by setting the environment variable `DOCKER_SOCK` to point to the Podman socket. In order to work without workarounds, Podman 4.0 (or above) is required.
+While the agent was developed with Docker/Moby, Podman can also be used by setting the environment variable `DOCKER_HOST` to point to the Podman socket. In order to work without workarounds, Podman 4.0 (or above) is required.
 
 ## Image Cleanup
 
