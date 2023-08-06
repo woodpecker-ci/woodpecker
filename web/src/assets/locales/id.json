@@ -19,6 +19,7 @@
         "deleted": "Agen dihapus",
         "desc": "Agen terdaftar untuk server",
         "edit_agent": "Sunting agen",
+        "id": "ID",
         "last_contact": "Hubungan terakhir",
         "name": {
           "name": "Nama",
@@ -110,6 +111,7 @@
       }
     }
   },
+  "api": "API",
   "back": "Kembali",
   "cancel": "Batal",
   "color_scheme_dark": "Ubah ke mode terang",
@@ -423,7 +425,26 @@
   "user": {
     "access_denied": "Anda tidak diperbolehkan untuk masuk",
     "internal_error": "Terjadi beberapa kesalahan internal",
-    "oauth_error": "Terjadi kesalahan saat mengotentikasi dengan penyedia OAuth"
+    "oauth_error": "Terjadi kesalahan saat mengotentikasi dengan penyedia OAuth",
+    "settings": {
+      "api": {
+        "api": "API",
+        "api_usage": "Contoh Penggunaan API",
+        "cli_usage": "Contoh Penggunaan CLI",
+        "desc": "Penggunaan Token Akses Pribadi dan API",
+        "dl_cli": "Unduh CLI",
+        "reset_token": "atur ulang token",
+        "shell_setup": "Penyiapan shell",
+        "shell_setup_before": "lakukan tahap penyiapan shell sebelumnya",
+        "swagger_ui": "UI Swagger",
+        "token": "Token Akses Pribadi"
+      },
+      "general": {
+        "general": "Umum",
+        "language": "Bahasa"
+      },
+      "settings": "Pengaturan Pengguna"
+    }
   },
   "username": "Nama pengguna",
   "welcome": "Selamat datang di Woodpecker"
