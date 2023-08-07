@@ -158,7 +158,11 @@ func loadFile(path string) ([]byte, error) {
 }
 
 func replaceBytes(data []byte) []byte {
-	return bytes.ReplaceAll(data, []byte("/BASE_PATH"), []byte(server.Config.Server.RootPath))
+	data = bytes.ReplaceAll(data, []byte("/BASE_PATH"), []byte(server.Config.Server.RootPath))
+	data = bytes.ReplaceAll(data, []byte("/web-config.js"), []byte(server.Config.Server.RootPath+"/web-config.js"))
+	data = bytes.ReplaceAll(data, []byte("/assets/custom.css"), []byte(server.Config.Server.RootPath+"/assets/custom.css"))
+	data = bytes.ReplaceAll(data, []byte("/assets/custom.js"), []byte(server.Config.Server.RootPath+"/assets/custom.js"))
+	return data
 }
 
 func parseIndex() []byte {
