@@ -166,6 +166,9 @@ func parseIndex() []byte {
 	if err != nil {
 		log.Fatal().Err(err).Msg("can not find index.html")
 	}
+	data = bytes.ReplaceAll(data, []byte("/web-config.js"), []byte(server.Config.Server.RootPath+"/web-config.js"))
+	data = bytes.ReplaceAll(data, []byte("/assets/custom.css"), []byte(server.Config.Server.RootPath+"/assets/custom.css"))
+	data = bytes.ReplaceAll(data, []byte("/assets/custom.js"), []byte(server.Config.Server.RootPath+"/assets/custom.js"))
 	return data
 }
 
