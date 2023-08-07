@@ -2,16 +2,18 @@ import { Component } from 'vue';
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
 
 import useAuthentication from '~/compositions/useAuthentication';
+import useConfig from '~/compositions/useConfig';
 import useUserConfig from '~/compositions/useUserConfig';
 
+const { rootPath } = useConfig();
 const routes: RouteRecordRaw[] = [
   {
-    path: '/',
+    path: `${rootPath}/`,
     name: 'home',
-    redirect: '/repos',
+    redirect: `${rootPath}/repos`,
   },
   {
-    path: '/repos',
+    path: `${rootPath}/repos`,
     component: (): Component => import('~/views/RouterView.vue'),
     children: [
       {
@@ -105,7 +107,7 @@ const routes: RouteRecordRaw[] = [
     ],
   },
   {
-    path: '/orgs/:orgId',
+    path: `${rootPath}/orgs/:orgId`,
     component: (): Component => import('~/views/org/OrgWrapper.vue'),
     props: true,
     children: [
@@ -125,12 +127,12 @@ const routes: RouteRecordRaw[] = [
     ],
   },
   {
-    path: '/org/:orgName/:pathMatch(.*)*',
+    path: `${rootPath}/org/:orgName/:pathMatch(.*)*`,
     component: (): Component => import('~/views/org/OrgDeprecatedRedirect.vue'),
     props: true,
   },
   {
-    path: '/admin',
+    path: `${rootPath}/admin`,
     name: 'admin-settings',
     component: (): Component => import('~/views/admin/AdminSettings.vue'),
     props: true,
@@ -138,21 +140,21 @@ const routes: RouteRecordRaw[] = [
   },
 
   {
-    path: '/user',
+    path: `${rootPath}/user`,
     name: 'user',
     component: (): Component => import('~/views/User.vue'),
     meta: { authentication: 'required' },
     props: true,
   },
   {
-    path: '/login/error',
+    path: `${rootPath}/login/error`,
     name: 'login-error',
     component: (): Component => import('~/views/Login.vue'),
     meta: { blank: true },
     props: true,
   },
   {
-    path: '/do-login',
+    path: `${rootPath}/do-login`,
     name: 'login',
     component: (): Component => import('~/views/Login.vue'),
     meta: { blank: true },
@@ -161,18 +163,18 @@ const routes: RouteRecordRaw[] = [
 
   // TODO: deprecated routes => remove after some time
   {
-    path: '/:ownerOrOrgId',
+    path: `${rootPath}/:ownerOrOrgId`,
     redirect: (route) => ({ name: 'org', params: route.params }),
   },
   {
-    path: '/:repoOwner/:repoName/:pathMatch(.*)*',
+    path: `${rootPath}/:repoOwner/:repoName/:pathMatch(.*)*`,
     component: () => import('~/views/repo/RepoDeprecatedRedirect.vue'),
     props: true,
   },
 
   // not found handler
   {
-    path: '/:pathMatch(.*)*',
+    path: `${rootPath}/:pathMatch(.*)*`,
     name: 'not-found',
     component: (): Component => import('~/views/NotFound.vue'),
   },

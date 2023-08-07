@@ -1,5 +1,6 @@
 import { computed, ref, watch } from 'vue';
 
+import useConfig from '~/compositions/useConfig';
 import { useDarkMode } from '~/compositions/useDarkMode';
 import { PipelineStatus } from '~/lib/api/types';
 
@@ -13,12 +14,16 @@ watch(
   () => {
     const faviconPNG = document.getElementById('favicon-png');
     if (faviconPNG) {
-      (faviconPNG as HTMLLinkElement).href = `/favicons/favicon-${darkMode.value}-${faviconStatus.value}.png`;
+      (faviconPNG as HTMLLinkElement).href = `${useConfig().rootPath}/favicons/favicon-${darkMode.value}-${
+        faviconStatus.value
+      }.png`;
     }
 
     const faviconSVG = document.getElementById('favicon-svg');
     if (faviconSVG) {
-      (faviconSVG as HTMLLinkElement).href = `/favicons/favicon-${darkMode.value}-${faviconStatus.value}.svg`;
+      (faviconSVG as HTMLLinkElement).href = `${useConfig().rootPath}/favicons/favicon-${darkMode.value}-${
+        faviconStatus.value
+      }.svg`;
     }
   },
   { immediate: true },
