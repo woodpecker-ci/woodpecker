@@ -425,7 +425,26 @@
   "user": {
     "access_denied": "Du bist nicht berechtigt, dich anzumelden",
     "internal_error": "Ein interner Fehler ist aufgetreten",
-    "oauth_error": "Fehler bei der Authentifizierung gegen OAuth-Anbieter"
+    "oauth_error": "Fehler bei der Authentifizierung gegen OAuth-Anbieter",
+    "settings": {
+      "api": {
+        "api": "API",
+        "api_usage": "Beispiel zur Nutzung der API",
+        "cli_usage": "Beispiel zur Nutzung des CLI",
+        "desc": "Persönlicher Zugangsschlüssel und API-Nutzung",
+        "dl_cli": "CLI herunterladen",
+        "reset_token": "Zugangsschlüssel zurücksetzen",
+        "shell_setup": "Kommandozeilen-Einrichtung",
+        "shell_setup_before": "führe bitte die Schritte zur Einrichtung der Kommandozeile vorher aus",
+        "swagger_ui": "Swagger UI",
+        "token": "Persönlicher Zugangsschlüssel"
+      },
+      "general": {
+        "general": "Allgemein",
+        "language": "Sprache"
+      },
+      "settings": "Nutzereinstellungen"
+    }
   },
   "username": "Benutzername",
   "welcome": "Willkommen bei Woodpecker"
