@@ -40,7 +40,7 @@
 
 <script lang="ts" setup>
 import { cloneDeep } from 'lodash';
-import { computed, inject, Ref, ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
@@ -66,11 +66,18 @@ const apiClient = useApiClient();
 const notifications = useNotifications();
 const i18n = useI18n();
 
-const user = useAuthentication().user!!;
+const { user } = useAuthentication();
+if (!user) {
+  throw new Error('Unexpected: Unauthenticated');
+}
 const selectedSecret = ref<Partial<Secret>>();
 const isEditingSecret = computed(() => !!selectedSecret.value?.id);
 
 async function loadSecrets(page: number): Promise<Secret[] | null> {
+  if (!user) {
+    throw new Error('Unexpected: Unauthenticated');
+  }
+
   return apiClient.getOrgSecretList(user.org_id, page);
 }
 
