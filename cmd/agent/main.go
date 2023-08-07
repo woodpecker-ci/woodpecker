@@ -21,6 +21,12 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/urfave/cli/v2"
 
+	"github.com/woodpecker-ci/woodpecker/cmd/common"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/docker"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/kubernetes"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/local"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/ssh"
+	"github.com/woodpecker-ci/woodpecker/shared/utils"
 	"github.com/woodpecker-ci/woodpecker/version"
 )
 
@@ -37,7 +43,7 @@ func main() {
 			Action: pinger,
 		},
 	}
-	app.Flags = flags
+	app.Flags = utils.MergeSlices(flags, common.GlobalLoggerFlags, docker.Flags, ssh.Flags, kubernetes.Flags, local.Flags)
 
 	if err := app.Run(os.Args); err != nil {
 		fmt.Fprintln(os.Stderr, err)
