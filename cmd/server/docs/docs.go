@@ -4194,6 +4194,10 @@ const docTemplate = `{
                 "login": {
                     "description": "Login is the username for this user.\n\nrequired: true",
                     "type": "string"
+                },
+                "org_id": {
+                    "description": "OrgID is the of the user as model.Org.",
+                    "type": "integer"
                 }
             }
         },
