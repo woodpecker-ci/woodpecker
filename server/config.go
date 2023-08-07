@@ -91,5 +91,10 @@ var Config = struct {
 		Privileged                          []string
 		DefaultTimeout                      int64
 		MaxTimeout                          int64
+		Proxy                               struct {
+			No    string
+			Http  string
+			Https string
+		}
 	}
 }{}

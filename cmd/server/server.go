@@ -336,6 +336,11 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 	server.Config.Pipeline.Limits.CPUShares = c.Int64("limit-cpu-shares")
 	server.Config.Pipeline.Limits.CPUSet = c.String("limit-cpu-set")
 
+	// backend options for pipeline compiler
+	server.Config.Pipeline.Proxy.No = c.String("backend-no-proxy")
+	server.Config.Pipeline.Proxy.Http = c.String("backend-http-proxy")
+	server.Config.Pipeline.Proxy.Https = c.String("backend-https-proxy")
+
 	// server configuration
 	server.Config.Server.Cert = c.String("server-cert")
 	server.Config.Server.Key = c.String("server-key")

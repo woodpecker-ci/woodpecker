@@ -39,16 +39,17 @@ import (
 
 // StepBuilder Takes the hook data and the yaml and returns in internal data model
 type StepBuilder struct {
-	Repo  *model.Repo
-	Curr  *model.Pipeline
-	Last  *model.Pipeline
-	Netrc *model.Netrc
-	Secs  []*model.Secret
-	Regs  []*model.Registry
-	Link  string
-	Yamls []*forge_types.FileMeta
-	Envs  map[string]string
-	Forge metadata.ServerForge
+	Repo      *model.Repo
+	Curr      *model.Pipeline
+	Last      *model.Pipeline
+	Netrc     *model.Netrc
+	Secs      []*model.Secret
+	Regs      []*model.Registry
+	Link      string
+	Yamls     []*forge_types.FileMeta
+	Envs      map[string]string
+	Forge     metadata.ServerForge
+	ProxyOpts compiler.ProxyOptions
 }
 
 type Item struct {
@@ -281,7 +282,7 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, envi
 				stepID,
 			),
 		),
-		compiler.WithProxy(),
+		compiler.WithProxy(b.ProxyOpts),
 		compiler.WithWorkspaceFromURL("/woodpecker", b.Repo.Link),
 		compiler.WithMetadata(metadata),
 		compiler.WithTrusted(b.Repo.IsTrusted),

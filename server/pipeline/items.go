@@ -22,6 +22,7 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/compiler"
 	"github.com/woodpecker-ci/woodpecker/server"
 	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -78,6 +79,11 @@ func createPipelineItems(c context.Context, store store.Store,
 		Link:  server.Config.Server.Host,
 		Yamls: yamls,
 		Forge: server.Config.Services.Forge,
+		ProxyOpts: compiler.ProxyOptions{
+			NoProxy:    server.Config.Pipeline.Proxy.No,
+			HttpProxy:  server.Config.Pipeline.Proxy.Http,
+			HttpsProxy: server.Config.Pipeline.Proxy.Https,
+		},
 	}
 	pipelineItems, err := b.Build()
 	if err != nil {
