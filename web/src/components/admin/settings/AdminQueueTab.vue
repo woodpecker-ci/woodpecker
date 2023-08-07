@@ -1,9 +1,9 @@
 <template>
   <Panel>
-    <div v-if="queueInfo" class="flex flex-row border-b mb-4 pb-4 items-center dark:border-gray-600">
+    <div v-if="queueInfo" class="flex flex-row border-b mb-4 pb-4 items-center dark:border-wp-background-100">
       <div class="ml-2">
-        <h1 class="text-xl text-color">{{ $t('admin.settings.queue.queue') }}</h1>
-        <p class="text-sm text-color-alt">{{ $t('admin.settings.queue.desc') }}</p>
+        <h1 class="text-xl text-wp-text-100">{{ $t('admin.settings.queue.queue') }}</h1>
+        <p class="text-sm text-wp-text-alt-100">{{ $t('admin.settings.queue.desc') }}</p>
       </div>
 
       <div class="ml-auto flex items-center gap-2">
@@ -24,8 +24,8 @@
         <Icon
           :name="queueInfo.paused ? 'pause' : 'play'"
           :class="{
-            'text-red-400': queueInfo.paused,
-            'text-lime-400': !queueInfo.paused,
+            'text-wp-state-error-100': queueInfo.paused,
+            'text-wp-state-ok-100': !queueInfo.paused,
           }"
         />
       </div>
@@ -36,7 +36,11 @@
 
       <div v-if="tasks.length > 0" class="flex flex-col">
         <p class="mt-6 mb-2 text-xl">{{ $t('admin.settings.queue.tasks') }}</p>
-        <ListItem v-for="task in tasks" :key="task.id" class="items-center mb-2">
+        <ListItem
+          v-for="task in tasks"
+          :key="task.id"
+          class="items-center mb-2 !bg-wp-background-200 !dark:bg-wp-background-100"
+        >
           <div
             class="flex items-center"
             :title="
@@ -56,9 +60,9 @@
                   : 'status-declined'
               "
               :class="{
-                'text-red-400': task.status === 'waiting_on_deps',
-                'text-blue-400': task.status === 'running',
-                'text-gray-400': task.status === 'pending',
+                'text-wp-state-error-100': task.status === 'waiting_on_deps',
+                'text-wp-state-info-100': task.status === 'running',
+                'text-wp-state-neutral-100': task.status === 'pending',
               }"
             />
           </div>

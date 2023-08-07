@@ -1,7 +1,7 @@
 <template>
   <Panel>
-    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-gray-600">
-      <h1 class="text-xl ml-2 text-color">{{ $t('repo.settings.badge.badge') }}</h1>
+    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-wp-background-100">
+      <h1 class="text-xl ml-2 text-wp-text-100">{{ $t('repo.settings.badge.badge') }}</h1>
       <a v-if="badgeUrl" :href="badgeUrl" target="_blank" class="ml-auto">
         <img :src="badgeUrl" />
       </a>
@@ -33,7 +33,7 @@
 
     <div v-if="badgeContent" class="flex flex-col space-y-4">
       <div>
-        <pre class="box">{{ badgeContent }}</pre>
+        <pre class="code-box">{{ badgeContent }}</pre>
       </div>
     </div>
   </Panel>
@@ -48,6 +48,7 @@ import InputField from '~/components/form/InputField.vue';
 import SelectField from '~/components/form/SelectField.vue';
 import Panel from '~/components/layout/Panel.vue';
 import useApiClient from '~/compositions/useApiClient';
+import useConfig from '~/compositions/useConfig';
 import { usePaginate } from '~/compositions/usePaginate';
 import { Repo } from '~/lib/api/types';
 
@@ -89,7 +90,7 @@ export default defineComponent({
 
     const baseUrl = `${window.location.protocol}//${window.location.hostname}${
       window.location.port ? `:${window.location.port}` : ''
-    }`;
+    }${useConfig().rootPath}`;
     const badgeUrl = computed(
       () => `/api/badges/${repo.value.id}/status.svg${branch.value !== '' ? `?branch=${branch.value}` : ''}`,
     );
@@ -129,10 +130,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style scoped>
-.box {
-  @apply bg-gray-500 p-2 rounded-md text-white break-words dark:bg-dark-400 dark:text-gray-400;
-  white-space: pre-wrap;
-}
-</style>

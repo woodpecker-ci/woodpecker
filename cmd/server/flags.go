@@ -61,8 +61,8 @@ var flags = []cli.Flag{
 		Usage:   "server fully qualified url for forge's Webhooks (<scheme>://<host>)",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_ROOT_URL"},
-		Name:    "root-url",
+		EnvVars: []string{"WOODPECKER_ROOT_PATH", "WOODPECKER_ROOT_URL"},
+		Name:    "root-path",
 		Usage:   "server url root (used for statics loading when having a url path prefix)",
 	},
 	&cli.StringFlag{
@@ -271,6 +271,11 @@ var flags = []cli.Flag{
 		EnvVars: []string{"WOODPECKER_MIGRATIONS_ALLOW_LONG"},
 		Name:    "migrations-allow-long",
 		Value:   false,
+	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_ENABLE_SWAGGER"},
+		Name:    "enable-swagger",
+		Value:   true,
 	},
 	//
 	// resource limit parameters

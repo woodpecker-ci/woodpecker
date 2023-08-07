@@ -67,12 +67,13 @@ var Config = struct {
 		StatusContext       string
 		StatusContextFormat string
 		SessionExpires      time.Duration
-		RootURL             string
+		RootPath            string
 		CustomCSSFile       string
 		CustomJsFile        string
 		Migrations          struct {
 			AllowLong bool
 		}
+		EnableSwagger bool
 		// Open bool
 		// Orgs map[string]struct{}
 		// Admins map[string]struct{}

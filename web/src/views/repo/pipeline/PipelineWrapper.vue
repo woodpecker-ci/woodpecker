@@ -46,7 +46,7 @@
       </template>
 
       <template #tabActions>
-        <div class="flex justify-between gap-x-4 text-color flex-shrink-0 pb-2 md:p-0 mx-auto md:mr-0">
+        <div class="flex justify-between gap-x-4 text-wp-text-100 flex-shrink-0 pb-2 md:p-0 mx-auto md:mr-0">
           <div class="flex space-x-1 items-center flex-shrink-0">
             <Icon name="since" />
             <Tooltip>

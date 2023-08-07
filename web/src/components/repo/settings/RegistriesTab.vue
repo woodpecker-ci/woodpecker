@@ -1,9 +1,9 @@
 <template>
   <Panel>
-    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-gray-600">
+    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-wp-background-100">
       <div class="ml-2">
-        <h1 class="text-xl text-color">{{ $t('repo.settings.registries.creds') }}</h1>
-        <p class="text-sm text-color-alt">
+        <h1 class="text-xl text-wp-text-100">{{ $t('repo.settings.registries.creds') }}</h1>
+        <p class="text-sm text-wp-text-alt-100">
           {{ $t('repo.settings.registries.desc') }}
           <DocsLink :topic="$t('repo.settings.registries.creds')" url="docs/usage/registries" />
         </p>
@@ -24,8 +24,12 @@
       />
     </div>
 
-    <div v-if="!selectedRegistry" class="space-y-4 text-color">
-      <ListItem v-for="registry in registries" :key="registry.id" class="items-center">
+    <div v-if="!selectedRegistry" class="space-y-4 text-wp-text-100">
+      <ListItem
+        v-for="registry in registries"
+        :key="registry.id"
+        class="items-center !bg-wp-background-200 !dark:bg-wp-background-100"
+      >
         <span>{{ registry.address }}</span>
         <IconButton
           icon="edit"
@@ -35,7 +39,7 @@
         />
         <IconButton
           icon="trash"
-          class="w-8 h-8 hover:text-red-400 hover:dark:text-red-500"
+          class="w-8 h-8 hover:text-wp-control-error-100"
           :is-loading="isDeleting"
           :title="$t('repo.settings.registries.delete')"
           @click="deleteRegistry(registry)"
