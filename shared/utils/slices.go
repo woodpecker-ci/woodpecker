@@ -15,6 +15,7 @@
 package utils
 
 // MergeSlices return a new slice that combines all values of input slices
+// TODO: once https://github.com/golang/go/pull/61817 got merged, we should switch to it
 func MergeSlices[T any](slices ...[]T) []T {
 	sl := 0
 	for i := range slices {
