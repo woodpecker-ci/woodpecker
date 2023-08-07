@@ -14,6 +14,7 @@
 
 package utils
 
+// MergeSlices return a new slice that combines all values of input slices
 func MergeSlices[T any](slices ...[]T) []T {
 	sl := 0
 	for i := range slices {
