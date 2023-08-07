@@ -18,7 +18,6 @@ steps:
     commands:
       - corepack enable
       - pnpm install --frozen-lockfile
-    when: *when
 
   lint:
     group: test
@@ -27,7 +26,6 @@ steps:
     commands:
       - corepack enable
       - pnpm lint
-    when: *when
 
   formatcheck:
     group: test
@@ -36,7 +34,6 @@ steps:
     commands:
       - corepack enable
       - pnpm format:check
-    when: *when
 
   typecheck:
     group: test
@@ -45,7 +42,6 @@ steps:
     commands:
       - corepack enable
       - pnpm typecheck
-    when: *when
 
   test:
     group: test
@@ -54,4 +50,3 @@ steps:
     commands:
       - corepack enable
       - pnpm test
-    when: *when
