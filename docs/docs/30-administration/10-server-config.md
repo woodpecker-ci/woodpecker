@@ -528,12 +528,12 @@ Specify a configuration service endpoint, see [Configuration Extension](./100-ex
 
 Specify how many seconds before timeout when fetching the Woodpecker configuration from a Forge
 
-### `WOODPECKER_ROOT_URL`
+### `WOODPECKER_ROOT_PATH`
 > Default: ``
 
 Server URL path prefix (used for statics loading when having a url path prefix), should start with `/`
 
-Example: `WOODPECKER_ROOT_URL=/woodpecker`
+Example: `WOODPECKER_ROOT_PATH=/woodpecker`
 
 ### `WOODPECKER_ENABLE_SWAGGER`
 > Default: true

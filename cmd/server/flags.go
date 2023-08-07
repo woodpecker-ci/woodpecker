@@ -20,15 +20,11 @@ import (
 
 	"github.com/urfave/cli/v2"
 
+	"github.com/woodpecker-ci/woodpecker/cmd/common"
 	"github.com/woodpecker-ci/woodpecker/shared/constant"
 )
 
-var flags = []cli.Flag{
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_LOG_LEVEL"},
-		Name:    "log-level",
-		Usage:   "set logging level",
-	},
+var flags = append([]cli.Flag{
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_LOG_XORM"},
 		Name:    "log-xorm",
@@ -38,17 +34,6 @@ var flags = []cli.Flag{
 		EnvVars: []string{"WOODPECKER_LOG_XORM_SQL"},
 		Name:    "log-xorm-sql",
 		Usage:   "enable xorm sql command logging",
-	},
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_DEBUG_PRETTY"},
-		Name:    "pretty",
-		Usage:   "enable pretty-printed debug output",
-	},
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_DEBUG_NOCOLOR"},
-		Name:    "nocolor",
-		Usage:   "disable colored debug output",
-		Value:   true,
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_HOST"},
@@ -61,8 +46,8 @@ var flags = []cli.Flag{
 		Usage:   "server fully qualified url for forge's Webhooks (<scheme>://<host>)",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_ROOT_URL"},
-		Name:    "root-url",
+		EnvVars: []string{"WOODPECKER_ROOT_PATH", "WOODPECKER_ROOT_URL"},
+		Name:    "root-path",
 		Usage:   "server url root (used for statics loading when having a url path prefix)",
 	},
 	&cli.StringFlag{
@@ -278,6 +263,24 @@ var flags = []cli.Flag{
 		Value:   true,
 	},
 	//
+	// backend options for pipeline compiler
+	//
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_NO_PROXY", "NO_PROXY", "no_proxy"},
+		Usage:   "if set, pass the environment variable down as \"NO_PROXY\" to steps",
+		Name:    "backend-no-proxy",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_HTTP_PROXY", "HTTP_PROXY", "http_proxy"},
+		Usage:   "if set, pass the environment variable down as \"NO_PROXY\" to steps",
+		Name:    "backend-http-proxy",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_HTTPS_PROXY", "HTTPS_PROXY", "https_proxy"},
+		Usage:   "if set, pass the environment variable down as \"HTTPS_PROXY\" to steps",
+		Name:    "backend-https-proxy",
+	},
+	//
 	// resource limit parameters
 	//
 	&cli.DurationFlag{
@@ -470,4 +473,4 @@ var flags = []cli.Flag{
 		Name:    "encryption-disable-flag",
 		Usage:   "Flag to decrypt all encrypted data and disable encryption on server",
 	},
-}
+}, common.GlobalLoggerFlags...)

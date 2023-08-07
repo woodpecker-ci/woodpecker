@@ -19,6 +19,7 @@
         "deleted": "Agent effacé",
         "desc": "Agents enregistrés sur ce serveur",
         "edit_agent": "Éditer l'agent",
+        "id": "ID",
         "last_contact": "Dernier contact",
         "name": {
           "name": "Nom",
@@ -110,6 +111,7 @@
       }
     }
   },
+  "api": "API",
   "back": "Revenir en arrière",
   "cancel": "Annuler",
   "color_scheme_dark": "Basculer en couleurs claires",
@@ -424,7 +426,25 @@
     "access_denied": "Vous n'êtes pas autorisé à vous connecter",
     "internal_error": "Une erreur interne est arrivé",
     "oauth_error": "Erreur lors de l’authentification auprès du fournisseur OAuth",
-    "shell_setup_before": "faites la mise en place dans le shell avant"
+    "settings": {
+      "api": {
+        "api": "API",
+        "api_usage": "Exemple d'utilisation de l'API",
+        "cli_usage": "Exemple d'utilisation de l'interface en ligne de commande",
+        "desc": "Jeton d'Accès Personnel et usage de l'API",
+        "dl_cli": "Télécharger l'Interface en ligne de commande",
+        "reset_token": "Réinitialiser le jeton",
+        "shell_setup": "Configuration de l'interpréteur de commande",
+        "shell_setup_before": "Faites les étapes de configuration de l'interpréteur de commande avant",
+        "swagger_ui": "Interface Swagger",
+        "token": "Jeton d'Accès Personnel"
+      },
+      "general": {
+        "general": "Général",
+        "language": "Langue"
+      },
+      "settings": "Paramètres Utilisateur"
+    }
   },
   "username": "Nom d'utilisateur",
   "welcome": "Bienvenue sur Woodpecker"

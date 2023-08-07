@@ -15,10 +15,6 @@
 package main
 
 import (
-	"os"
-
-	"github.com/rs/zerolog"
-	zlog "github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
 
 	"github.com/woodpecker-ci/woodpecker/cli/common"
@@ -60,13 +56,8 @@ func newApp() *cli.App {
 		cron.Command,
 	}
 
-	zlog.Logger = zlog.Output(
-		zerolog.ConsoleWriter{
-			Out: os.Stderr,
-		},
-	)
 	for _, command := range app.Commands {
-		command.Before = common.SetupConsoleLogger
+		command.Before = common.SetupGlobalLogger
 	}
 
 	return app
