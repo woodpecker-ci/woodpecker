@@ -1,23 +1,23 @@
 when:
-  event: [pull_request, tag]
+  - event: [pull_request, tag]
+  - event: push
+    branch:
+      - ${CI_REPO_DEFAULT_BRANCH}
+      - release/*
 
 variables:
   - &golang_image 'golang:1.20.2'
   - &when
-    - path: &when_path
-        # related config files
-        - ".woodpecker/test.yml"
-        - ".golangci.yml"
-        # go source code
-        - "**/*.go"
-        - "go.*"
-        # schema changes
-        - "pipeline/schema/**"
-      branch:
-        exclude: ${CI_REPO_DEFAULT_BRANCH}
-      event: push
-    - path: *when_path
-      event: [pull_request, tag, deployment]
+    path: &when_path
+      # related config files
+      - ".woodpecker/test.yml"
+      - ".golangci.yml"
+      # go source code
+      - "**/*.go"
+      - "go.*"
+      # schema changes
+      - "pipeline/schema/**"
+    event: [pull_request, tag, deployment]
 
 steps:
   vendor:
