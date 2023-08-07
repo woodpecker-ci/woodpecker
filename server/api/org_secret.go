@@ -182,7 +182,7 @@ func PatchOrgSecret(c *gin.Context) {
 //	@Summary	Delete the named secret from an organization
 //	@Router		/orgs/{org_id}/secrets/{secret} [delete]
 //	@Produce	plain
-//	@Success	200
+//	@Success	204
 //	@Tags		Organization secrets
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		org_id	path	string	true	"the org's id"

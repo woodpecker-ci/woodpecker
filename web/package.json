@@ -11,8 +11,8 @@
     "build": "vite build --base=/BASE_PATH",
     "serve": "vite preview",
     "lint": "eslint --max-warnings 0 --ext .js,.ts,.vue,.json .",
-    "formatcheck": "prettier -c .",
-    "format:fix": "prettier --write .",
+    "format": "prettier --write .",
+    "format:check": "prettier -c .",
     "typecheck": "vue-tsc --noEmit",
     "test": "echo 'No tests configured' && exit 0"
   },

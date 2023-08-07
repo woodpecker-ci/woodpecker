@@ -1,451 +1,451 @@
 {
-    "cancel": "Cancel",
-    "login": "Login",
-    "welcome": "Welcome to Woodpecker",
-    "repos": "Repos",
-    "repositories": "Repositories",
-    "docs": "Docs",
-    "api": "API",
-    "logout": "Logout",
-    "search": "Search…",
-    "username": "Username",
-    "password": "Password",
-    "url": "URL",
-    "back": "Back",
-    "color_scheme_light": "Switch to dark mode",
-    "color_scheme_dark": "Switch to light mode",
-    "unknown_error": "An unknown error occurred",
-    "documentation_for": "Documentation for \"{topic}\"",
-    "pipeline_feed": "Pipeline feed",
-    "not_found": {
-        "not_found": "Whoa 404, either we broke something or you had a typing mishap :-/",
-        "back_home": "Back to home"
+  "cancel": "Cancel",
+  "login": "Login",
+  "welcome": "Welcome to Woodpecker",
+  "repos": "Repos",
+  "repositories": "Repositories",
+  "docs": "Docs",
+  "api": "API",
+  "logout": "Logout",
+  "search": "Search…",
+  "username": "Username",
+  "password": "Password",
+  "url": "URL",
+  "back": "Back",
+  "color_scheme_light": "Switch to dark mode",
+  "color_scheme_dark": "Switch to light mode",
+  "unknown_error": "An unknown error occurred",
+  "documentation_for": "Documentation for \"{topic}\"",
+  "pipeline_feed": "Pipeline feed",
+  "not_found": {
+    "not_found": "Whoa 404, either we broke something or you had a typing mishap :-/",
+    "back_home": "Back to home"
+  },
+  "errors": {
+    "not_found": "Server could not find requested object"
+  },
+  "time": {
+    "tmpl": "MMM D, YYYY, HH:mm z",
+    "weeks_short": "w",
+    "days_short": "d",
+    "hours_short": "h",
+    "min_short": "min",
+    "sec_short": "sec",
+    "not_started": "not started yet"
+  },
+  "repo": {
+    "manual_pipeline": {
+      "title": "Trigger a manual pipeline run",
+      "trigger": "Run pipeline",
+      "select_branch": "Select branch",
+      "variables": {
+        "add": "Add variable",
+        "title": "Additional pipeline variables",
+        "desc": "Specify additional variables to use in your pipeline. Variables with the same name will be overwritten.",
+        "name": "Variable name",
+        "value": "Variable value"
+      }
     },
-    "errors": {
-      "not_found": "Server could not find requested object"
+    "deploy_pipeline": {
+      "title": "Trigger deployment event for current pipeline #{pipelineId}",
+      "enter_target": "Target deployment environment",
+      "trigger": "Deploy",
+      "variables": {
+        "add": "Add variable",
+        "title": "Additional pipeline variables",
+        "desc": "Specify additional variables to use in your pipeline. Variables with the same name will be overwritten.",
+        "name": "Variable name",
+        "value": "Variable value"
+      }
     },
-    "time": {
-        "tmpl": "MMM D, YYYY, HH:mm z",
-        "weeks_short": "w",
-        "days_short": "d",
-        "hours_short": "h",
-        "min_short": "min",
-        "sec_short": "sec",
-        "not_started": "not started yet"
+    "activity": "Activity",
+    "branches": "Branches",
+    "pull_requests": "Pull requests",
+    "add": "Add repository",
+    "user_none": "This organization / user does not have any projects yet.",
+    "not_allowed": "You are not allowed to access this repository",
+    "enable": {
+      "reload": "Reload repositories",
+      "enable": "Enable",
+      "enabled": "Already enabled",
+      "success": "Repository enabled",
+      "list_reloaded": "Repository list reloaded"
     },
-    "repo": {
-        "manual_pipeline": {
-          "title": "Trigger a manual pipeline run",
-          "trigger": "Run pipeline",
-          "select_branch": "Select branch",
-          "variables": {
-            "add": "Add variable",
-            "title": "Additional pipeline variables",
-            "desc": "Specify additional variables to use in your pipeline. Variables with the same name will be overwritten.",
-            "name": "Variable name",
-            "value": "Variable value"
+    "open_in_forge": "Open Repository in Version Control System",
+    "settings": {
+      "settings": "Settings",
+      "not_allowed": "You are not allowed to access this repository's settings",
+      "general": {
+        "general": "General",
+        "project": "Project settings",
+        "save": "Save settings",
+        "success": "Repository settings updated",
+        "pipeline_path": {
+          "path": "Pipeline path",
+          "default": "By default: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml",
+          "desc": "Path to your pipeline config (for example {0}). Folders should end with a {1}.",
+          "desc_path_example": "my/path/"
+        },
+        "allow_pr": {
+          "allow": "Allow Pull Requests",
+          "desc": "Pipelines can run on pull requests."
+        },
+        "protected": {
+          "protected": "Protected",
+          "desc": "Every pipeline needs to be approved before being executed."
+        },
+        "netrc_only_trusted": {
+          "netrc_only_trusted": "Only inject netrc credentials into trusted containers",
+          "desc": "Only inject netrc credentials into trusted containers (recommended)."
+        },
+        "trusted": {
+          "trusted": "Trusted",
+          "desc": "Underlying pipeline containers get access to escalated capabilities like mounting volumes."
+        },
+        "visibility": {
+          "visibility": "Project visibility",
+          "public": {
+            "public": "Public",
+            "desc": "Every user can see your project without being logged in."
+          },
+          "private": {
+            "private": "Private",
+            "desc": "Only you and other owners of the repository can see this project."
+          },
+          "internal": {
+            "internal": "Internal",
+            "desc": "Only authenticated users of the Woodpecker instance can see this project."
           }
         },
-        "deploy_pipeline": {
-          "title": "Trigger deployment event for current pipeline #{pipelineId}",
-          "enter_target": "Target deployment environment",
-          "trigger": "Deploy",
-          "variables": {
-            "add": "Add variable",
-            "title": "Additional pipeline variables",
-            "desc": "Specify additional variables to use in your pipeline. Variables with the same name will be overwritten.",
-            "name": "Variable name",
-            "value": "Variable value"
-          }
+        "timeout": {
+          "timeout": "Timeout",
+          "minutes": "minutes"
         },
-        "activity": "Activity",
-        "branches": "Branches",
-        "pull_requests": "Pull requests",
-        "add": "Add repository",
-        "user_none": "This organization / user does not have any projects yet.",
-        "not_allowed": "You are not allowed to access this repository",
+        "cancel_prev": {
+          "cancel": "Cancel previous pipelines",
+          "desc": "Enable to cancel pending and running pipelines of the same event and context before starting the newly triggered one."
+        }
+      },
+      "secrets": {
+        "secrets": "Secrets",
+        "desc": "Secrets can be passed to individual pipeline steps at runtime as environmental variables.",
+        "none": "There are no secrets yet.",
+        "add": "Add secret",
+        "save": "Save secret",
+        "show": "Show secrets",
+        "name": "Name",
+        "value": "Value",
+        "delete_confirm": "Do you really want to delete this secret?",
+        "deleted": "Secret deleted",
+        "created": "Secret created",
+        "saved": "Secret saved",
+        "images": {
+          "images": "Available for following images",
+          "desc": "Comma separated list of images where this secret is available, leave empty to allow all images"
+        },
+        "events": {
+          "events": "Available at following events",
+          "pr_warning": "Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets."
+        },
+        "plugins_only": "Only available for plugins",
+        "edit": "Edit secret",
+        "delete": "Delete secret"
+      },
+      "registries": {
+        "registries": "Registries",
+        "creds": "Registry credentials",
+        "desc": "Registries credentials can be added to use private images for your pipeline.",
+        "show": "Show registries",
+        "add": "Add registry",
+        "none": "There are no registry credentials yet.",
+        "save": "Save registry",
+        "created": "Registry credentials created",
+        "saved": "Registry credentials saved",
+        "deleted": "Registry credentials deleted",
+        "address": {
+          "address": "Address",
+          "placeholder": "Registry Address (e.g. docker.io)"
+        },
+        "edit": "Edit registry",
+        "delete": "Delete registry"
+      },
+      "crons": {
+        "crons": "Crons",
+        "desc": "Cron jobs can be used to trigger pipelines on a regular basis.",
+        "show": "Show crons",
+        "add": "Add cron",
+        "none": "There are no crons yet.",
+        "save": "Save cron",
+        "created": "Cron created",
+        "saved": "Cron saved",
+        "deleted": "Cron deleted",
+        "next_exec": "Next execution",
+        "not_executed_yet": "Not executed yet",
+        "run": "Run now",
+        "branch": {
+          "title": "Branch",
+          "placeholder": "Branch (uses default branch if empty)"
+        },
+        "name": {
+          "name": "Name",
+          "placeholder": "Name of the cron job"
+        },
+        "schedule": {
+          "title": "Schedule (based on UTC)",
+          "placeholder": "Schedule"
+        },
+        "edit": "Edit cron",
+        "delete": "Delete cron"
+      },
+      "badge": {
+        "badge": "Badge",
+        "type": "Syntax",
+        "type_url": "URL",
+        "type_markdown": "Markdown",
+        "type_html": "HTML",
+        "branch": "Branch"
+      },
+      "actions": {
+        "actions": "Actions",
+        "repair": {
+          "repair": "Repair repository",
+          "success": "Repository repaired"
+        },
+        "disable": {
+          "disable": "Disable repository",
+          "success": "Repository disabled"
+        },
         "enable": {
-            "reload": "Reload repositories",
-            "enable": "Enable",
-            "enabled": "Already enabled",
-            "success": "Repository enabled",
-            "list_reloaded": "Repository list reloaded"
+          "enable": "Enable repository",
+          "success": "Repository enabled"
         },
-        "open_in_forge": "Open Repository in Version Control System",
-        "settings": {
-            "settings": "Settings",
-            "not_allowed": "You are not allowed to access this repository's settings",
-            "general": {
-                "general": "General",
-                "project": "Project settings",
-                "save": "Save settings",
-                "success": "Repository settings updated",
-                "pipeline_path": {
-                    "path": "Pipeline path",
-                    "default": "By default: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml",
-                    "desc": "Path to your pipeline config (for example {0}). Folders should end with a {1}.",
-                    "desc_path_example": "my/path/"
-                },
-                "allow_pr": {
-                    "allow": "Allow Pull Requests",
-                    "desc": "Pipelines can run on pull requests."
-                },
-                "protected": {
-                    "protected": "Protected",
-                    "desc": "Every pipeline needs to be approved before being executed."
-                },
-                "netrc_only_trusted": {
-                    "netrc_only_trusted": "Only inject netrc credentials into trusted containers",
-                    "desc": "Only inject netrc credentials into trusted containers (recommended)."
-                },
-              "trusted": {
-                    "trusted": "Trusted",
-                    "desc": "Underlying pipeline containers get access to escalated capabilities like mounting volumes."
-                },
-                "visibility": {
-                    "visibility": "Project visibility",
-                    "public": {
-                        "public": "Public",
-                        "desc": "Every user can see your project without being logged in."
-                    },
-                    "private": {
-                        "private": "Private",
-                        "desc": "Only you and other owners of the repository can see this project."
-                    },
-                    "internal": {
-                        "internal": "Internal",
-                        "desc": "Only authenticated users of the Woodpecker instance can see this project."
-                    }
-                },
-                "timeout": {
-                    "timeout": "Timeout",
-                    "minutes": "minutes"
-                },
-                "cancel_prev": {
-                    "cancel": "Cancel previous pipelines",
-                    "desc": "Enable to cancel pending and running pipelines of the same event and context before starting the newly triggered one."
-                }
-            },
-            "secrets": {
-                "secrets": "Secrets",
-                "desc": "Secrets can be passed to individual pipeline steps at runtime as environmental variables.",
-                "none": "There are no secrets yet.",
-                "add": "Add secret",
-                "save": "Save secret",
-                "show": "Show secrets",
-                "name": "Name",
-                "value": "Value",
-                "delete_confirm": "Do you really want to delete this secret?",
-                "deleted": "Secret deleted",
-                "created": "Secret created",
-                "saved": "Secret saved",
-                "images": {
-                    "images": "Available for following images",
-                    "desc": "Comma separated list of images where this secret is available, leave empty to allow all images"
-                },
-                "events": {
-                    "events": "Available at following events",
-                    "pr_warning": "Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets."
-                },
-                "plugins_only": "Only available for plugins",
-                "edit": "Edit secret",
-                "delete":"Delete secret"
-            },
-            "registries": {
-                "registries": "Registries",
-                "creds": "Registry credentials",
-                "desc": "Registries credentials can be added to use private images for your pipeline.",
-                "show": "Show registries",
-                "add": "Add registry",
-                "none": "There are no registry credentials yet.",
-                "save": "Save registry",
-                "created": "Registry credentials created",
-                "saved": "Registry credentials saved",
-                "deleted": "Registry credentials deleted",
-                "address": {
-                    "address": "Address",
-                    "placeholder": "Registry Address (e.g. docker.io)"
-                },
-                "edit": "Edit registry",
-                "delete":"Delete registry"
-            },
-            "crons": {
-                "crons": "Crons",
-                "desc": "Cron jobs can be used to trigger pipelines on a regular basis.",
-                "show": "Show crons",
-                "add": "Add cron",
-                "none": "There are no crons yet.",
-                "save": "Save cron",
-                "created": "Cron created",
-                "saved": "Cron saved",
-                "deleted": "Cron deleted",
-                "next_exec": "Next execution",
-                "not_executed_yet": "Not executed yet",
-                "run": "Run now",
-                "branch": {
-                    "title": "Branch",
-                    "placeholder": "Branch (uses default branch if empty)"
-                },
-                "name": {
-                    "name": "Name",
-                    "placeholder": "Name of the cron job"
-                },
-                "schedule": {
-                    "title": "Schedule (based on UTC)",
-                    "placeholder": "Schedule"
-                },
-                "edit": "Edit cron",
-                "delete": "Delete cron"
-            },
-            "badge": {
-                "badge": "Badge",
-                "type": "Syntax",
-                "type_url": "URL",
-                "type_markdown": "Markdown",
-                "type_html": "HTML",
-                "branch": "Branch"
-            },
-            "actions": {
-                "actions": "Actions",
-                "repair": {
-                    "repair": "Repair repository",
-                    "success": "Repository repaired"
-                },
-                "disable": {
-                    "disable": "Disable repository",
-                    "success": "Repository disabled"
-                },
-                "enable": {
-                  "enable": "Enable repository",
-                  "success": "Repository enabled"
-                },
-                "delete": {
-                    "delete": "Delete repository",
-                    "confirm": "All data will be lost after this action!!!\n\nDo you really want to proceed?",
-                    "success": "Repository deleted"
-                }
-            }
-        },
-        "pipeline": {
-            "created": "Created",
-            "tasks": "Tasks",
-            "config": "Config",
-            "files": "Changed files ({files})",
-            "no_files": "No files have been changed.",
-            "execution_error": "Execution error",
-            "no_pipelines": "No pipelines have been started yet.",
-            "no_pipeline_steps": "No pipeline steps available!",
-            "step_not_started": "This step hasn't started yet.",
-            "pipelines_for": "Pipelines for branch \"{branch}\"",
-            "pipelines_for_pr": "Pipelines for pull request #{index}",
-            "exit_code": "Exit Code {exitCode}",
-            "loading": "Loading…",
-            "pipeline": "Pipeline #{pipelineId}",
-            "log_download_error": "There was an error while downloading the log file",
-            "actions": {
-                "cancel": "Cancel",
-                "restart": "Restart",
-                "canceled": "This step has been canceled.",
-                "cancel_success": "Pipeline canceled",
-                "deploy": "Deploy",
-                "restart_success": "Pipeline restarted",
-                "log_download": "Download",
-                "log_auto_scroll": "Automatically scroll down",
-                "log_auto_scroll_off": "Turn off automatic scrolling"
-            },
-            "protected": {
-                "awaits": "This pipeline is awaiting approval by some maintainer!",
-                "approve": "Approve",
-                "decline": "Decline",
-                "declined": "This pipeline has been declined!",
-                "approve_success": "Pipeline approved",
-                "decline_success": "Pipeline declined"
-            },
-            "event": {
-                "push": "Push",
-                "tag": "Tag",
-                "pr": "Pull Request",
-                "deploy": "Deploy",
-                "cron": "Cron",
-                "manual": "Manual"
-            },
-            "status": {
-              "status": "Status: {status}",
-              "blocked": "blocked",
-              "pending": "pending",
-              "running": "running",
-              "started": "started",
-              "skipped": "skipped",
-              "success": "success",
-              "declined": "declined",
-              "error": "error",
-              "failure": "failure",
-              "killed": "killed"
-            }
+        "delete": {
+          "delete": "Delete repository",
+          "confirm": "All data will be lost after this action!!!\n\nDo you really want to proceed?",
+          "success": "Repository deleted"
         }
+      }
     },
-    "org": {
-        "settings": {
-            "settings": "Settings",
-            "not_allowed": "You are not allowed to access this organization's settings",
-            "secrets": {
-                "secrets": "Secrets",
-                "desc": "Organization secrets can be passed to all organization's repository individual pipeline steps at runtime as environmental variables.",
-                "none": "There are no organization secrets yet.",
-                "add": "Add secret",
-                "save": "Save secret",
-                "show": "Show secrets",
-                "name": "Name",
-                "value": "Value",
-                "deleted": "Organization secret deleted",
-                "created": "Organization secret created",
-                "saved": "Organization secret saved",
-                "images": {
-                    "images": "Available for following images",
-                    "desc": "Comma separated list of images where this secret is available, leave empty to allow all images"
-                },
-                "plugins_only": "Only available for plugins",
-                "events": {
-                    "events": "Available at following events",
-                    "pr_warning": "Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets."
-                }
-            }
-        }
-    },
-    "admin": {
-        "settings": {
-            "settings": "Settings",
-            "not_allowed": "You are not allowed to access server settings",
-            "secrets": {
-                "secrets": "Secrets",
-                "desc": "Global secrets can be passed to all repositories individual pipeline steps at runtime as environmental variables.",
-                "warning": "These secrets will be available for all server users.",
-                "none": "There are no global secrets yet.",
-                "add": "Add secret",
-                "save": "Save secret",
-                "show": "Show secrets",
-                "name": "Name",
-                "value": "Value",
-                "deleted": "Global secret deleted",
-                "created": "Global secret created",
-                "saved": "Global secret saved",
-                "images": {
-                    "images": "Available for following images",
-                    "desc": "Comma separated list of images where this secret is available, leave empty to allow all images"
-                },
-                "plugins_only": "Only available for plugins",
-                "events": {
-                    "events": "Available at following events",
-                    "pr_warning": "Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets."
-                }
-            },
-            "agents": {
-                "agents": "Agents",
-                "desc": "Agents registered for this server",
-                "none": "There are no agents yet.",
-                "id": "ID",
-                "add": "Add agent",
-                "save": "Save agent",
-                "show": "Show agents",
-                "created": "Agent created",
-                "saved": "Agent saved",
-                "deleted": "Agent deleted",
-                "name": {
-                    "name": "Name",
-                    "placeholder": "Name of the agent"
-                },
-                "no_schedule": {
-                    "name": "Disable agent",
-                    "placeholder": "Stop agent from taking new tasks"
-                },
-                "token": "Token",
-                "platform": {
-                  "platform": "Platform",
-                  "badge": "platform"
-                },
-                "backend": {
-                  "backend": "Backend",
-                  "badge": "backend"
-                },
-                "capacity": {
-                  "capacity": "Capacity",
-                  "desc": "The max amount of parallel pipelines executed by this agent.",
-                  "badge": "capacity"
-                },
-                "version": "Version",
-                "last_contact": "Last contact",
-                "never": "Never",
-                "delete_confirm": "Do you really want to delete this agent? It wont be able to connected to the server anymore.",
-                "edit_agent": "Edit agent",
-                "delete_agent": "Delete agent"
-            },
-            "queue": {
-              "queue": "Queue",
-              "desc": "Tasks waiting to be executed by agents",
-              "pause": "Pause",
-              "resume": "Resume",
-              "paused": "Queue is paused",
-              "resumed": "Queue is resumed",
-              "tasks": "Tasks",
-              "task_running": "Task is running",
-              "task_pending": "Task is pending",
-              "task_waiting_on_deps": "Task is waiting on dependencies",
-              "agent": "agent",
-              "waiting_for": "waiting for",
-              "stats": {
-                "completed_count": "Completed Tasks",
-                "worker_count": "Free",
-                "running_count": "Running",
-                "pending_count": "Pending",
-                "waiting_on_deps_count": "Waiting on dependencies"
-              }
-            },
-            "users": {
-              "users": "Users",
-              "desc": "Users registered for this server",
-              "login": "Login",
-              "email": "Email",
-              "avatar_url": "Avatar URL",
-              "save": "Save user",
-              "cancel": "Cancel",
-              "show":"Show users",
-              "add":"Add user",
-              "none":"There are no users yet.",
-              "delete_confirm": "Do you really want to delete this user?",
-              "deleted": "User deleted",
-              "created": "User created",
-              "saved": "User saved",
-              "admin": {
-                "admin": "Admin",
-                "placeholder": "User is an admin"
-              },
-              "delete_user": "Delete user",
-              "edit_user": "Edit user"
-            }
-        }
-    },
-    "user": {
-        "settings": {
-            "settings": "User Settings",
-            "general": {
-                "general": "General",
-                "language": "Language"
-            },
-            "api": {
-              "api": "API",
-              "desc": "Personal Access Token and API usage",
-              "token": "Personal Access Token",
-              "shell_setup": "Shell setup",
-              "api_usage": "Example API Usage",
-              "cli_usage": "Example CLI Usage",
-              "dl_cli": "Download CLI",
-              "shell_setup_before": "do shell setup steps before",
-              "reset_token": "Reset token",
-              "swagger_ui": "Swagger UI",
-          }
-        },
-        "oauth_error": "Error while authenticating against OAuth provider",
-        "internal_error": "Some internal error occurred",
-        "access_denied": "You are not allowed to login",
+    "pipeline": {
+      "created": "Created",
+      "tasks": "Tasks",
+      "config": "Config",
+      "files": "Changed files ({files})",
+      "no_files": "No files have been changed.",
+      "execution_error": "Execution error",
+      "no_pipelines": "No pipelines have been started yet.",
+      "no_pipeline_steps": "No pipeline steps available!",
+      "step_not_started": "This step hasn't started yet.",
+      "pipelines_for": "Pipelines for branch \"{branch}\"",
+      "pipelines_for_pr": "Pipelines for pull request #{index}",
+      "exit_code": "Exit Code {exitCode}",
+      "loading": "Loading…",
+      "pipeline": "Pipeline #{pipelineId}",
+      "log_download_error": "There was an error while downloading the log file",
+      "actions": {
+        "cancel": "Cancel",
+        "restart": "Restart",
+        "canceled": "This step has been canceled.",
+        "cancel_success": "Pipeline canceled",
+        "deploy": "Deploy",
+        "restart_success": "Pipeline restarted",
+        "log_download": "Download",
+        "log_auto_scroll": "Automatically scroll down",
+        "log_auto_scroll_off": "Turn off automatic scrolling"
+      },
+      "protected": {
+        "awaits": "This pipeline is awaiting approval by some maintainer!",
+        "approve": "Approve",
+        "decline": "Decline",
+        "declined": "This pipeline has been declined!",
+        "approve_success": "Pipeline approved",
+        "decline_success": "Pipeline declined"
+      },
+      "event": {
+        "push": "Push",
+        "tag": "Tag",
+        "pr": "Pull Request",
+        "deploy": "Deploy",
+        "cron": "Cron",
+        "manual": "Manual"
+      },
+      "status": {
+        "status": "Status: {status}",
+        "blocked": "blocked",
+        "pending": "pending",
+        "running": "running",
+        "started": "started",
+        "skipped": "skipped",
+        "success": "success",
+        "declined": "declined",
+        "error": "error",
+        "failure": "failure",
+        "killed": "killed"
+      }
     }
+  },
+  "org": {
+    "settings": {
+      "settings": "Settings",
+      "not_allowed": "You are not allowed to access this organization's settings",
+      "secrets": {
+        "secrets": "Secrets",
+        "desc": "Organization secrets can be passed to all organization's repository individual pipeline steps at runtime as environmental variables.",
+        "none": "There are no organization secrets yet.",
+        "add": "Add secret",
+        "save": "Save secret",
+        "show": "Show secrets",
+        "name": "Name",
+        "value": "Value",
+        "deleted": "Organization secret deleted",
+        "created": "Organization secret created",
+        "saved": "Organization secret saved",
+        "images": {
+          "images": "Available for following images",
+          "desc": "Comma separated list of images where this secret is available, leave empty to allow all images"
+        },
+        "plugins_only": "Only available for plugins",
+        "events": {
+          "events": "Available at following events",
+          "pr_warning": "Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets."
+        }
+      }
+    }
+  },
+  "admin": {
+    "settings": {
+      "settings": "Settings",
+      "not_allowed": "You are not allowed to access server settings",
+      "secrets": {
+        "secrets": "Secrets",
+        "desc": "Global secrets can be passed to all repositories individual pipeline steps at runtime as environmental variables.",
+        "warning": "These secrets will be available for all server users.",
+        "none": "There are no global secrets yet.",
+        "add": "Add secret",
+        "save": "Save secret",
+        "show": "Show secrets",
+        "name": "Name",
+        "value": "Value",
+        "deleted": "Global secret deleted",
+        "created": "Global secret created",
+        "saved": "Global secret saved",
+        "images": {
+          "images": "Available for following images",
+          "desc": "Comma separated list of images where this secret is available, leave empty to allow all images"
+        },
+        "plugins_only": "Only available for plugins",
+        "events": {
+          "events": "Available at following events",
+          "pr_warning": "Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets."
+        }
+      },
+      "agents": {
+        "agents": "Agents",
+        "desc": "Agents registered for this server",
+        "none": "There are no agents yet.",
+        "id": "ID",
+        "add": "Add agent",
+        "save": "Save agent",
+        "show": "Show agents",
+        "created": "Agent created",
+        "saved": "Agent saved",
+        "deleted": "Agent deleted",
+        "name": {
+          "name": "Name",
+          "placeholder": "Name of the agent"
+        },
+        "no_schedule": {
+          "name": "Disable agent",
+          "placeholder": "Stop agent from taking new tasks"
+        },
+        "token": "Token",
+        "platform": {
+          "platform": "Platform",
+          "badge": "platform"
+        },
+        "backend": {
+          "backend": "Backend",
+          "badge": "backend"
+        },
+        "capacity": {
+          "capacity": "Capacity",
+          "desc": "The max amount of parallel pipelines executed by this agent.",
+          "badge": "capacity"
+        },
+        "version": "Version",
+        "last_contact": "Last contact",
+        "never": "Never",
+        "delete_confirm": "Do you really want to delete this agent? It wont be able to connected to the server anymore.",
+        "edit_agent": "Edit agent",
+        "delete_agent": "Delete agent"
+      },
+      "queue": {
+        "queue": "Queue",
+        "desc": "Tasks waiting to be executed by agents",
+        "pause": "Pause",
+        "resume": "Resume",
+        "paused": "Queue is paused",
+        "resumed": "Queue is resumed",
+        "tasks": "Tasks",
+        "task_running": "Task is running",
+        "task_pending": "Task is pending",
+        "task_waiting_on_deps": "Task is waiting on dependencies",
+        "agent": "agent",
+        "waiting_for": "waiting for",
+        "stats": {
+          "completed_count": "Completed Tasks",
+          "worker_count": "Free",
+          "running_count": "Running",
+          "pending_count": "Pending",
+          "waiting_on_deps_count": "Waiting on dependencies"
+        }
+      },
+      "users": {
+        "users": "Users",
+        "desc": "Users registered for this server",
+        "login": "Login",
+        "email": "Email",
+        "avatar_url": "Avatar URL",
+        "save": "Save user",
+        "cancel": "Cancel",
+        "show": "Show users",
+        "add": "Add user",
+        "none": "There are no users yet.",
+        "delete_confirm": "Do you really want to delete this user?",
+        "deleted": "User deleted",
+        "created": "User created",
+        "saved": "User saved",
+        "admin": {
+          "admin": "Admin",
+          "placeholder": "User is an admin"
+        },
+        "delete_user": "Delete user",
+        "edit_user": "Edit user"
+      }
+    }
+  },
+  "user": {
+    "settings": {
+      "settings": "User Settings",
+      "general": {
+        "general": "General",
+        "language": "Language"
+      },
+      "api": {
+        "api": "API",
+        "desc": "Personal Access Token and API usage",
+        "token": "Personal Access Token",
+        "shell_setup": "Shell setup",
+        "api_usage": "Example API Usage",
+        "cli_usage": "Example CLI Usage",
+        "dl_cli": "Download CLI",
+        "shell_setup_before": "do shell setup steps before",
+        "reset_token": "Reset token",
+        "swagger_ui": "Swagger UI"
+      }
+    },
+    "oauth_error": "Error while authenticating against OAuth provider",
+    "internal_error": "Some internal error occurred",
+    "access_denied": "You are not allowed to login"
+  }
 }

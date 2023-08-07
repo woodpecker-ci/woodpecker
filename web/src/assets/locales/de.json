@@ -424,16 +424,8 @@
   "url": "URL",
   "user": {
     "access_denied": "Du bist nicht berechtigt, dich anzumelden",
-    "api_usage": "Beispiel für die API-Nutzung",
-    "cli_usage": "Beispiel für die Kommandozeilen-Nutzung",
-    "dl_cli": "Download Kommando-Zeilen-Tool",
     "internal_error": "Ein interner Fehler ist aufgetreten",
-    "oauth_error": "Fehler bei der Authentifizierung gegen OAuth-Anbieter",
-    "reset_token": "Token zurücksetzen",
-    "settings": "Benutzer-Einstellungen",
-    "shell_setup": "Kommandozeilen-Einrichtung",
-    "shell_setup_before": "Führe bitte die Schritte zur Einrichtung der Kommandozeile vorher aus",
-    "token": "Dein persönlicher Token"
+    "oauth_error": "Fehler bei der Authentifizierung gegen OAuth-Anbieter"
   },
   "username": "Benutzername",
   "welcome": "Willkommen bei Woodpecker"
