@@ -1,7 +1,7 @@
 when:
-  - event: [pull_request, push]
-    branch: ${CI_REPO_DEFAULT_BRANCH}
-    path:
+  - event: pull_request
+  - event: push
+    path: &when_path
       - "docs/**"
       - ".woodpecker/docs.yml"
       # since we generate docs for cli tool we have to watch this too
@@ -9,6 +9,7 @@ when:
       - "cmd/cli/**"
       # api docs
       - "server/api/**"
+    branch: ${CI_REPO_DEFAULT_BRANCH}
   - cron: update_docs
     event: cron
 
@@ -21,6 +22,9 @@ steps:
     image: *golang_image
     commands:
       - make docs
+    when:
+      - path: *when_path
+      - event: cron
 
   build:
     image: *node_image
@@ -29,6 +33,9 @@ steps:
       - corepack enable
       - pnpm install --frozen-lockfile
       - pnpm build
+    when:
+      - path: *when_path
+      - event: cron
 
   deploy-preview:
     image: woodpeckerci/plugin-surge-preview:next
@@ -43,6 +50,7 @@ steps:
     failure: ignore
     when:
       event: pull_request
+      path: *when_path
 
   # TODO: add step to remove preview again after PR is closed (waiting for #286)
 
@@ -68,4 +76,5 @@ steps:
       - git commit -m "Deploy website - based on ${CI_COMMIT_SHA}"
       - git push
     when:
-      - event: [push, cron]
+      event: [push, cron]
+      path: *when_path

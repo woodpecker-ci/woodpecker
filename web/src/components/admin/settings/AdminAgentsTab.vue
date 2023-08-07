@@ -24,9 +24,9 @@
         <span>{{ agent.name || `Agent ${agent.id}` }}</span>
         <span class="ml-auto">
           <span class="hidden md:inline-block space-x-2">
-            <Badge :label="$t('admin.settings.agents.platform.badge')" :value="agent.platform || '???'" />
-            <Badge :label="$t('admin.settings.agents.backend.badge')" :value="agent.backend || '???'" />
-            <Badge :label="$t('admin.settings.agents.capacity.badge')" :value="agent.capacity || '???'" />
+            <Badge v-if="agent.platform" :label="$t('admin.settings.agents.platform.badge')" :value="agent.platform" />
+            <Badge v-if="agent.backend" :label="$t('admin.settings.agents.backend.badge')" :value="agent.backend" />
+            <Badge v-if="agent.capacity" :label="$t('admin.settings.agents.capacity.badge')" :value="agent.capacity" />
           </span>
           <span class="ml-2">{{ agent.last_contact ? timeAgo.format(agent.last_contact * 1000) : 'never' }}</span>
         </span>
