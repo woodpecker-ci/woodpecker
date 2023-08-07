@@ -35,6 +35,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
 
+	"github.com/woodpecker-ci/woodpecker/cmd/common"
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc/proto"
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/cron"
@@ -55,31 +56,12 @@ import (
 )
 
 func run(c *cli.Context) error {
-	if c.Bool("pretty") {
-		log.Logger = log.Output(
-			zerolog.ConsoleWriter{
-				Out:     os.Stderr,
-				NoColor: c.Bool("nocolor"),
-			},
-		)
-	}
+	common.SetupGlobalLogger(c)
 
-	// TODO: format output & options to switch to json aka. option to add channels to send logs to
-	zerolog.SetGlobalLevel(zerolog.InfoLevel)
-	if c.IsSet("log-level") {
-		logLevelFlag := c.String("log-level")
-		lvl, err := zerolog.ParseLevel(logLevelFlag)
-		if err != nil {
-			log.Fatal().Msgf("unknown logging level: %s", logLevelFlag)
-		}
-		zerolog.SetGlobalLevel(lvl)
-	}
-	if zerolog.GlobalLevel() <= zerolog.DebugLevel {
-		log.Logger = log.With().Caller().Logger()
-	} else {
+	// set gin mode based on log level
+	if zerolog.GlobalLevel() > zerolog.DebugLevel {
 		gin.SetMode(gin.ReleaseMode)
 	}
-	log.Log().Msgf("LogLevel = %s", zerolog.GlobalLevel().String())
 
 	if c.String("server-host") == "" {
 		log.Fatal().Msg("WOODPECKER_HOST is not properly configured")
