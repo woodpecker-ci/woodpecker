@@ -1,25 +1,15 @@
 when:
-  - event: [pull_request, tag]
-  - event: push
-    branch:
-      - ${CI_REPO_DEFAULT_BRANCH}
-      - release/*
+  event: [pull_request, tag]
+  path: &when_path
+    # related config files
+    - ".woodpecker/web.yml"
+    # web source code
+    - "web/**"
+    # api source code
+    - "server/api/**"
 
 variables:
   - &node_image 'node:18-alpine'
-  - &when
-    - path: &when_path
-        # related config files
-        - ".woodpecker/web.yml"
-        # web source code
-        - "web/**"
-        # api source code
-        - "server/api/**"
-      branch:
-        exclude: ${CI_REPO_DEFAULT_BRANCH}
-      event: push
-    - path: *when_path
-      event: [pull_request, tag, deployment]
 
 steps:
   deps:
