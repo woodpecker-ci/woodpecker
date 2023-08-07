@@ -16,6 +16,7 @@ package migration
 
 import (
 	"fmt"
+
 	"xorm.io/xorm"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -48,10 +49,12 @@ var addOrgID = task{
 				return fmt.Errorf("getting org failed: %w", err)
 			} else if !has {
 				org = &model.Org{
-					Name: user.Login,
+					Name:   user.Login,
 					IsUser: true,
 				}
-				sess.Insert(org)
+				if _, err := sess.Insert(org); err != nil {
+					return fmt.Errorf("inserting org failed: %w", err)
+				}
 			}
 			user.OrgID = org.ID
 			if _, err := sess.Cols("user_org_id").Update(user); err != nil {

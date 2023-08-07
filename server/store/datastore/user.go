@@ -55,7 +55,7 @@ func (s storage) GetUserCount() (int64, error) {
 func (s storage) CreateUser(user *model.User) error {
 	sess := s.engine.NewSession()
 	org := &model.Org{
-		Name: user.Login,
+		Name:   user.Login,
 		IsUser: true,
 	}
 	err := s.orgCreate(org, sess)
