@@ -263,6 +263,24 @@ var flags = append([]cli.Flag{
 		Value:   true,
 	},
 	//
+	// backend options for pipeline compiler
+	//
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_NO_PROXY", "NO_PROXY", "no_proxy"},
+		Usage:   "if set, pass the environment variable down as \"NO_PROXY\" to steps",
+		Name:    "backend-no-proxy",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_HTTP_PROXY", "HTTP_PROXY", "http_proxy"},
+		Usage:   "if set, pass the environment variable down as \"NO_PROXY\" to steps",
+		Name:    "backend-http-proxy",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_HTTPS_PROXY", "HTTPS_PROXY", "https_proxy"},
+		Usage:   "if set, pass the environment variable down as \"HTTPS_PROXY\" to steps",
+		Name:    "backend-https-proxy",
+	},
+	//
 	// resource limit parameters
 	//
 	&cli.DurationFlag{
