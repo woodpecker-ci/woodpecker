@@ -20,6 +20,11 @@ variables:
       event: [pull_request, tag, deployment]
 
 steps:
+  lint-license-header:
+    image: *golang_image
+    commands:
+      - make lint-license-header
+
   vendor:
     image: *golang_image
     group: prepare
@@ -44,12 +49,6 @@ steps:
       - mkdir -p web/dist/
       - echo "test" > web/dist/index.html
     when: *when
-
-  lint-license-header:
-    image: *golang_image
-    commands:
-      - make lint-license-header
-
 
   lint:
     image: *golang_image
