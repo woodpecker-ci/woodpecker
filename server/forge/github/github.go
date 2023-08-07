@@ -395,9 +395,9 @@ func (c *client) newConfig(req *http.Request) *oauth2.Config {
 
 	intendedURL := req.URL.Query()["url"]
 	if len(intendedURL) > 0 {
-		redirect = fmt.Sprintf("%s/authorize?url=%s", server.Config.Server.OAuthHost, intendedURL[0])
+		redirect = fmt.Sprintf("%s%s/authorize?url=%s", server.Config.Server.OAuthHost, server.Config.Server.RootPath, intendedURL[0])
 	} else {
-		redirect = fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost)
+		redirect = fmt.Sprintf("%s%s/authorize", server.Config.Server.OAuthHost, server.Config.Server.RootPath)
 	}
 
 	return &oauth2.Config{

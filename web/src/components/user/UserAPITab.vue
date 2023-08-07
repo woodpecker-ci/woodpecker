@@ -63,7 +63,7 @@ import useApiClient from '~/compositions/useApiClient';
 import useConfig from '~/compositions/useConfig';
 
 const { t } = useI18n();
-const { enableSwagger } = useConfig();
+const { rootPath, enableSwagger } = useConfig();
 
 const apiClient = useApiClient();
 const token = ref<string | undefined>();
@@ -72,7 +72,7 @@ onMounted(async () => {
   token.value = await apiClient.getToken();
 });
 
-const address = `${window.location.protocol}//${window.location.host}`; // port is included in location.host
+const address = `${window.location.protocol}//${window.location.host}${rootPath}`; // port is included in location.host
 
 const usageWithShell = computed(() => {
   let usage = `export WOODPECKER_SERVER="${address}"\n`;
