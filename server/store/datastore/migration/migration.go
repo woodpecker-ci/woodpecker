@@ -54,6 +54,7 @@ var migrationTasks = []*task{
 	&migrateLogs2LogEntries,
 	&parentStepsToWorkflows,
 	&addOrgs,
+	&addOrgID,
 }
 
 var allBeans = []interface{}{

@@ -53,8 +53,18 @@ func (s storage) GetUserCount() (int64, error) {
 }
 
 func (s storage) CreateUser(user *model.User) error {
+	sess := s.engine.NewSession()
+	org := &model.Org{
+		Name: user.Login,
+		IsUser: true,
+	}
+	err := s.orgCreate(org, sess)
+	if err != nil {
+		return err
+	}
+	user.OrgID = org.ID
 	// only Insert set auto created ID back to object
-	_, err := s.engine.Insert(user)
+	_, err = sess.Insert(user)
 	return err
 }
 
