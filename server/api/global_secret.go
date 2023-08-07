@@ -152,7 +152,7 @@ func PatchGlobalSecret(c *gin.Context) {
 //	@Summary	Delete a global secret by name
 //	@Router		/secrets/{secret} [delete]
 //	@Produce	plain
-//	@Success	200
+//	@Success	204
 //	@Tags		Secrets
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		secret			path	string	true	"the secret's name"

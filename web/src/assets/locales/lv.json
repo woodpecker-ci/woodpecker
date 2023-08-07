@@ -423,8 +423,7 @@
   "user": {
     "access_denied": "Jums nav tiesību autorizēties",
     "internal_error": "Notikusi sistēmas iekšējā kļūda",
-    "oauth_error": "Neizdevās autorizēties, izmantojot, OAuth piegādātāju",
-    "shell_setup_before": "izpildiet komandrindā sekojošas darbības"
+    "oauth_error": "Neizdevās autorizēties, izmantojot, OAuth piegādātāju"
   },
   "username": "Lietotāja vārds",
   "welcome": "Woodpecker"

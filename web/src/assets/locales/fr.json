@@ -423,8 +423,7 @@
   "user": {
     "access_denied": "Vous n'êtes pas autorisé à vous connecter",
     "internal_error": "Une erreur interne est arrivé",
-    "oauth_error": "Erreur lors de l’authentification auprès du fournisseur OAuth",
-    "shell_setup_before": "faites la mise en place dans le shell avant"
+    "oauth_error": "Erreur lors de l’authentification auprès du fournisseur OAuth"
   },
   "username": "Nom d'utilisateur",
   "welcome": "Bienvenue sur Woodpecker"
