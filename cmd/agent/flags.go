@@ -114,33 +114,6 @@ var flags = []cli.Flag{
 		Value:   "auto-detect",
 	},
 
-	// backend ssh
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_SSH_ADDRESS"},
-		Name:    "backend-ssh-address",
-		Usage:   "backend ssh address",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_SSH_USER"},
-		Name:    "backend-ssh-user",
-		Usage:   "backend ssh user",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_SSH_KEY"},
-		Name:    "backend-ssh-key",
-		Usage:   "backend ssh key file",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_SSH_KEY_PASSWORD"},
-		Name:    "backend-ssh-key-password",
-		Usage:   "backend ssh key password",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_SSH_PASSWORD"},
-		Name:    "backend-ssh-password",
-		Usage:   "backend ssh password",
-	},
-
 	// backend k8s
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_BACKEND_K8S_NAMESPACE"},
