@@ -41,13 +41,13 @@ func isImagePullBackOffState(pod *v1.Pod) bool {
 
 // getClientOutOfCluster returns a k8s clientset to the request from outside of cluster
 func getClientOutOfCluster() (kubernetes.Interface, error) {
-	kubeconfigPath := os.Getenv("KUBECONFIG")
-	if kubeconfigPath == "" {
-		kubeconfigPath = os.Getenv("HOME") + "/.kube/config"
+	kubeConfigPath := os.Getenv("KUBECONFIG")
+	if kubeConfigPath == "" {
+		kubeConfigPath = os.Getenv("HOME") + "/.kube/config"
 	}
 
 	// use the current context in kubeconfig
-	config, err := clientcmd.BuildConfigFromFlags("", kubeconfigPath)
+	config, err := clientcmd.BuildConfigFromFlags("", kubeConfigPath)
 	if err != nil {
 		return nil, err
 	}
