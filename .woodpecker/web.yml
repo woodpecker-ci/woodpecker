@@ -1,6 +1,6 @@
 when:
   event: [pull_request, tag]
-  path: &when_path
+  path:
     # related config files
     - ".woodpecker/web.yml"
     # web source code
