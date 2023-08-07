@@ -51,7 +51,6 @@ var addOrgs = task{
 		}
 
 		// make sure the columns exist before removing them
-		// wait for https://gitea.com/xorm/xorm/pulls/2320
 		if _, err := sess.SyncWithOptions(xorm.SyncOptions{IgnoreConstrains: true, IgnoreIndices: true}, new(oldSecret021)); err != nil {
 			return fmt.Errorf("sync old secrets models failed: %w", err)
 		}
