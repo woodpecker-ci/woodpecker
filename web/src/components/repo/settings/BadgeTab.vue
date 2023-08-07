@@ -48,6 +48,7 @@ import InputField from '~/components/form/InputField.vue';
 import SelectField from '~/components/form/SelectField.vue';
 import Panel from '~/components/layout/Panel.vue';
 import useApiClient from '~/compositions/useApiClient';
+import useConfig from '~/compositions/useConfig';
 import { usePaginate } from '~/compositions/usePaginate';
 import { Repo } from '~/lib/api/types';
 
@@ -89,7 +90,7 @@ export default defineComponent({
 
     const baseUrl = `${window.location.protocol}//${window.location.hostname}${
       window.location.port ? `:${window.location.port}` : ''
-    }`;
+    }${useConfig().rootPath}`;
     const badgeUrl = computed(
       () => `/api/badges/${repo.value.id}/status.svg${branch.value !== '' ? `?branch=${branch.value}` : ''}`,
     );

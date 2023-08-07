@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts" setup>
-import WoodpeckerIcon from '../../../assets/woodpecker.svg?component';
+import WoodpeckerIcon from '~/assets/woodpecker.svg?component';
 </script>
 
 <style scoped>
