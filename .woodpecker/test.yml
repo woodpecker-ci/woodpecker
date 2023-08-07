@@ -8,16 +8,16 @@ when:
 variables:
   - &golang_image 'golang:1.20.2'
   - &when
-    path: &when_path
-      # related config files
-      - ".woodpecker/test.yml"
-      - ".golangci.yml"
-      # go source code
-      - "**/*.go"
-      - "go.*"
-      # schema changes
-      - "pipeline/schema/**"
-    event: [pull_request, tag, deployment]
+    - path: &when_path
+        # related config files
+        - ".woodpecker/test.yml"
+        - ".golangci.yml"
+        # go source code
+        - "**/*.go"
+        - "go.*"
+        # schema changes
+        - "pipeline/schema/**"
+      event: [pull_request, tag, deployment]
 
 steps:
   vendor:
