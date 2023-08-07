@@ -13,7 +13,6 @@ require (
 	github.com/docker/cli v20.10.24+incompatible
 	github.com/docker/distribution v2.8.2+incompatible
 	github.com/docker/docker v20.10.24+incompatible
-	github.com/docker/go-connections v0.4.0
 	github.com/docker/go-units v0.5.0
 	github.com/drone/envsubst v1.0.3
 	github.com/franela/goblin v0.0.0-20211003143422-0a4f594942bf
@@ -73,6 +72,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/davidmz/go-pageant v1.0.2 // indirect
 	github.com/docker/docker-credential-helpers v0.7.0 // indirect
+	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/emicklei/go-restful/v3 v3.9.0 // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
