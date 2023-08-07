@@ -47,22 +47,6 @@ var flags = []cli.Flag{
 		Value:   true,
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_LOG_LEVEL"},
-		Name:    "log-level",
-		Usage:   "set logging level",
-	},
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_DEBUG_PRETTY"},
-		Name:    "pretty",
-		Usage:   "enable pretty-printed debug output",
-	},
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_DEBUG_NOCOLOR"},
-		Name:    "nocolor",
-		Usage:   "disable colored debug output",
-		Value:   true,
-	},
-	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_HOSTNAME"},
 		Name:    "hostname",
 		Usage:   "agent hostname",

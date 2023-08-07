@@ -436,14 +436,14 @@
         "reset_token": "Zugangsschlüssel zurücksetzen",
         "shell_setup": "Kommandozeilen-Einrichtung",
         "shell_setup_before": "führe bitte die Schritte zur Einrichtung der Kommandozeile vorher aus",
-        "swagger_ui": "Swagger UI",
+        "swagger_ui": "Swagger-UI",
         "token": "Persönlicher Zugangsschlüssel"
       },
       "general": {
         "general": "Allgemein",
         "language": "Sprache"
       },
-      "settings": "Nutzereinstellungen"
+      "settings": "Benutzereinstellungen"
     }
   },
   "username": "Benutzername",
