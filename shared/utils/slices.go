@@ -20,9 +20,13 @@ func MergeSlices[T any](slices ...[]T) []T {
 	for i := range slices {
 		sl += len(slices[i])
 	}
-	result := make([]T, 0, sl)
-	for i := range slices {
-		result = append(result, slices[i]...)
+	result := make([]T, sl)
+	cp := 0
+	for _, s := range slices {
+		if sLen := len(s); sLen != 0 {
+			copy(result[cp:], s)
+			cp += sLen
+		}
 	}
 	return result
 }
