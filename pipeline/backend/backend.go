@@ -7,6 +7,8 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/docker"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/kubernetes"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/local"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/lxd"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/lxdocker"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/ssh"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
@@ -18,10 +20,12 @@ var (
 
 func Init(ctx context.Context) {
 	engines = []types.Engine{
+		lxdocker.New(),
 		docker.New(),
 		local.New(),
 		ssh.New(),
 		kubernetes.New(ctx),
+		lxd.New(),
 	}
 
 	enginesByName = make(map[string]types.Engine)
