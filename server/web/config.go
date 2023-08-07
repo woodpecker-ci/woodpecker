@@ -45,7 +45,7 @@ func Config(c *gin.Context) {
 		"docs":           server.Config.Server.Docs,
 		"version":        version.String(),
 		"forge":          server.Config.Services.Forge.Name(),
-		"root_url":       server.Config.Server.RootURL,
+		"root_path":      server.Config.Server.RootPath,
 		"enable_swagger": server.Config.Server.EnableSwagger,
 	}
 
@@ -75,6 +75,6 @@ window.WOODPECKER_CSRF = "{{ .csrf }}";
 window.WOODPECKER_VERSION = "{{ .version }}";
 window.WOODPECKER_DOCS = "{{ .docs }}";
 window.WOODPECKER_FORGE = "{{ .forge }}";
-window.WOODPECKER_ROOT_URL = "{{ .root_url }}";
+window.WOODPECKER_ROOT_PATH = "{{ .root_path }}";
 window.WOODPECKER_ENABLE_SWAGGER = {{ .enable_swagger }};
 `

@@ -67,7 +67,7 @@ var Config = struct {
 		StatusContext       string
 		StatusContextFormat string
 		SessionExpires      time.Duration
-		RootURL             string
+		RootPath            string
 		CustomCSSFile       string
 		CustomJsFile        string
 		Migrations          struct {

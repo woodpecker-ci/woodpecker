@@ -12,7 +12,7 @@
       class="flex flex-col w-full overflow-hidden md:m-8 md:rounded-md md:shadow md:border md:border-wp-background-400 md:bg-wp-background-100 md:dark:bg-wp-background-200 md:flex-row md:w-3xl md:h-sm justify-center"
     >
       <div class="flex md:bg-wp-primary-200 md:dark:bg-wp-primary-300 md:w-3/5 justify-center items-center">
-        <img class="w-48 h-48" src="../assets/logo.svg?url" />
+        <WoodpeckerLogo class="w-48 h-48" />
       </div>
       <div class="flex flex-col my-8 md:w-2/5 p-4 items-center justify-center">
         <h1 class="text-xl text-wp-text-100">{{ $t('welcome') }}</h1>
@@ -27,6 +27,7 @@ import { defineComponent, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
+import WoodpeckerLogo from '~/assets/logo.svg?component';
 import Button from '~/components/atomic/Button.vue';
 import useAuthentication from '~/compositions/useAuthentication';
 
@@ -35,6 +36,7 @@ export default defineComponent({
 
   components: {
     Button,
+    WoodpeckerLogo,
   },
 
   setup() {
