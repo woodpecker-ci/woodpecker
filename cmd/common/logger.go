@@ -67,6 +67,7 @@ func SetupGlobalLogger(c *cli.Context) {
 			log.Fatal().Err(err).Msgf("could not open log file '%s'", logFile)
 		}
 		file = openFile
+		noColor = true
 	}
 
 	log.Logger = zerolog.New(file).With().Timestamp().Logger()
