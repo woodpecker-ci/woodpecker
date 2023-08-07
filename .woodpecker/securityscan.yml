@@ -20,6 +20,9 @@ steps:
     settings:
       skip-dirs: node_modules/,plugins/woodpecker-plugins/node_modules/
       dir:  docs/
+    when:
+      event: [pull_request, push, cron]
+      branch: ${CI_REPO_DEFAULT_BRANCH}
 
   check web:
     group: check

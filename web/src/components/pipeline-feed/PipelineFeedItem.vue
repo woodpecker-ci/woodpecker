@@ -10,7 +10,7 @@
           <Tooltip>
             <span>{{ since }}</span>
             <template #popper
-              ><span class="font-bold">{{ $t('created') }}</span> {{ created }}</template
+              ><span class="font-bold">{{ $t('repo.pipeline.created') }}</span> {{ created }}</template
             >
           </Tooltip>
         </div>
