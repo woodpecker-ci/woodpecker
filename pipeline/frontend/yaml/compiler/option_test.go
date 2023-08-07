@@ -168,8 +168,8 @@ func TestWithProxy(t *testing.T) {
 	compiler := New(
 		WithProxy(ProxyOptions{
 			NoProxy:    noProxy,
-			HttpProxy:  httpProxy,
-			HttpsProxy: httpsProxy,
+			HTTPProxy:  httpProxy,
+			HTTPSProxy: httpsProxy,
 		}),
 	)
 	for key, value := range testdata {

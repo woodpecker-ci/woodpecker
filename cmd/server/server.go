@@ -338,8 +338,8 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 
 	// backend options for pipeline compiler
 	server.Config.Pipeline.Proxy.No = c.String("backend-no-proxy")
-	server.Config.Pipeline.Proxy.Http = c.String("backend-http-proxy")
-	server.Config.Pipeline.Proxy.Https = c.String("backend-https-proxy")
+	server.Config.Pipeline.Proxy.HTTP = c.String("backend-http-proxy")
+	server.Config.Pipeline.Proxy.HTTPS = c.String("backend-https-proxy")
 
 	// server configuration
 	server.Config.Server.Cert = c.String("server-cert")

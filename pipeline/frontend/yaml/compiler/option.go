@@ -218,8 +218,8 @@ func WithNetrcOnlyTrusted(only bool) Option {
 
 type ProxyOptions struct {
 	NoProxy    string
-	HttpProxy  string
-	HttpsProxy string
+	HTTPProxy  string
+	HTTPSProxy string
 }
 
 // WithProxy configures the compiler with HTTP_PROXY, HTTPS_PROXY,
@@ -230,10 +230,10 @@ func WithProxy(opt ProxyOptions) Option {
 		map[string]string{
 			"no_proxy":    opt.NoProxy,
 			"NO_PROXY":    opt.NoProxy,
-			"http_proxy":  opt.HttpProxy,
-			"HTTP_PROXY":  opt.HttpProxy,
-			"HTTPS_PROXY": opt.HttpsProxy,
-			"https_proxy": opt.HttpsProxy,
+			"http_proxy":  opt.HTTPProxy,
+			"HTTP_PROXY":  opt.HTTPProxy,
+			"HTTPS_PROXY": opt.HTTPSProxy,
+			"https_proxy": opt.HTTPSProxy,
 		},
 	)
 }

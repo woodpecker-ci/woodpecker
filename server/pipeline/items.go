@@ -81,8 +81,8 @@ func createPipelineItems(c context.Context, store store.Store,
 		Forge: server.Config.Services.Forge,
 		ProxyOpts: compiler.ProxyOptions{
 			NoProxy:    server.Config.Pipeline.Proxy.No,
-			HttpProxy:  server.Config.Pipeline.Proxy.Http,
-			HttpsProxy: server.Config.Pipeline.Proxy.Https,
+			HTTPProxy:  server.Config.Pipeline.Proxy.HTTP,
+			HTTPSProxy: server.Config.Pipeline.Proxy.HTTPS,
 		},
 	}
 	pipelineItems, err := b.Build()

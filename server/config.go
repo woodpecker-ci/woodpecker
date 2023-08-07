@@ -93,8 +93,8 @@ var Config = struct {
 		MaxTimeout                          int64
 		Proxy                               struct {
 			No    string
-			Http  string
-			Https string
+			HTTP  string
+			HTTPS string
 		}
 	}
 }{}

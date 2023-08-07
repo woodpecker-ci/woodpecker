@@ -190,8 +190,8 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 		),
 		compiler.WithProxy(compiler.ProxyOptions{
 			NoProxy:    c.String("backend-no-proxy"),
-			HttpProxy:  c.String("backend-http-proxy"),
-			HttpsProxy: c.String("backend-https-proxy"),
+			HTTPProxy:  c.String("backend-http-proxy"),
+			HTTPSProxy: c.String("backend-https-proxy"),
 		}),
 		compiler.WithLocal(
 			c.Bool("local"),
