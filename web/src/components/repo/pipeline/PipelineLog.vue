@@ -13,22 +13,27 @@
       @mouseover="showActions = true"
       @mouseleave="showActions = false"
     >
-      <div v-show="showActions" class="absolute top-0 right-0 z-40 mt-4 mr-6 hidden md:flex">
-        <Button
-          v-if="step?.end_time !== undefined"
-          :is-loading="downloadInProgress"
-          :title="$t('repo.pipeline.actions.log_download')"
-          start-icon="download"
-          @click="download"
-        />
-        <Button
-          v-if="step?.end_time === undefined"
-          :title="
-            autoScroll ? $t('repo.pipeline.actions.log_auto_scroll_off') : $t('repo.pipeline.actions.log_auto_scroll')
-          "
-          :start-icon="autoScroll ? 'auto-scroll' : 'auto-scroll-off'"
-          @click="autoScroll = !autoScroll"
-        />
+      <div class="flex flex-row items-center w-full bg-wp-code-100 px-4 py-2">
+        <span class="text-base font-bold text-wp-code-text-alt-100">{{ $t('repo.pipeline.log_title') }}</span>
+        <div class="flex flex-row items-center ml-auto gap-x-2">
+          <IconButton
+            v-if="step?.end_time !== undefined"
+            :is-loading="downloadInProgress"
+            :title="$t('repo.pipeline.actions.log_download')"
+            class="!hover:bg-white !hover:bg-opacity-10"
+            icon="download"
+            @click="download"
+          />
+          <IconButton
+            v-if="step?.end_time === undefined"
+            :title="
+              autoScroll ? $t('repo.pipeline.actions.log_auto_scroll_off') : $t('repo.pipeline.actions.log_auto_scroll')
+            "
+            class="!hover:bg-white !hover:bg-opacity-10"
+            :icon="autoScroll ? 'auto-scroll' : 'auto-scroll-off'"
+            @click="autoScroll = !autoScroll"
+          />
+        </div>
       </div>
 
       <div
@@ -100,8 +105,8 @@ import { computed, inject, nextTick, onMounted, Ref, ref, toRef, watch } from 'v
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 
-import Button from '~/components/atomic/Button.vue';
 import Icon from '~/components/atomic/Icon.vue';
+import IconButton from '~/components/atomic/IconButton.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useNotifications from '~/compositions/useNotifications';
