@@ -69,6 +69,12 @@ func (e *docker) IsAvailable(context.Context) bool {
 
 // Load new client for Docker Engine using environment variables.
 func (e *docker) Load(ctx context.Context) error {
+	/* TODO
+	DOCKER_HOST to set the url to the docker server.
+	DOCKER_API_VERSION to set the version of the API to reach, leave empty for latest.
+	DOCKER_CERT_PATH to load the TLS certificates from.
+	DOCKER_TLS_VERIFY to enable or disable TLS verification, off by default.
+	*/
 	cl, err := client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
 		return err
