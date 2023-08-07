@@ -65,6 +65,11 @@ steps:
     image: mstruebing/editorconfig-checker
     group: test
 
+  lint-license-header:
+    image: *golang_image
+    commands:
+      - make lint-license-header
+
   test:
     image: *golang_image
     group: test

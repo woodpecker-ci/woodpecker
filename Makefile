@@ -139,6 +139,12 @@ lint-ui: ## Lint UI code
 	(cd web/; pnpm lesshint)
 	(cd web/; pnpm lint --quiet)
 
+lint-license-header: ## Lint license header
+	@hash addlicense > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
+		go install github.com/google/addlicense@latest; \
+	fi
+	addlicense -check -f LICENSE -l apache -c "Woodpecker Authors" **/*.go
+
 test-agent: ## Test agent code
 	go test -race -cover -coverprofile agent-coverage.out -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/agent github.com/woodpecker-ci/woodpecker/agent/...
 
