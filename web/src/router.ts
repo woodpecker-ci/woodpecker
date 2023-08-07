@@ -132,7 +132,7 @@ const routes: RouteRecordRaw[] = [
     props: true,
   },
   {
-    path: '${rootPath}/admin',
+    path: `${rootPath}/admin`,
     component: (): Component => import('~/views/RouterView.vue'),
     meta: { authentication: 'required' },
     children: [
