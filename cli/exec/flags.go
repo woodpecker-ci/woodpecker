@@ -312,45 +312,6 @@ var flags = []cli.Flag{
 		Name:    "forge-url",
 	},
 
-	// backend docker
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_DOCKER_HOST", "DOCKER_HOST"},
-		Name:    "backend-docker-host",
-		Usage:   "path to docker socket or url to the docker server",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_DOCKER_API_VERSION", "DOCKER_API_VERSION"},
-		Name:    "backend-docker-api-version",
-		Usage:   "the version of the API to reach, leave empty for latest.",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_DOCKER_CERT_PATH", "DOCKER_CERT_PATH"},
-		Name:    "backend-docker-cert",
-		Usage:   "path to load the TLS certificates for connecting to docker server",
-	},
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_DOCKER_TLS_VERIFY", "DOCKER_TLS_VERIFY"},
-		Name:    "backend-docker-tls-verify",
-		Usage:   "enable or disable TLS verification for connecting to docker server",
-		Value:   true,
-	},
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_DOCKER_ENABLE_IPV6"},
-		Name:    "backend-docker-ipv6",
-		Usage:   "backend docker enable IPV6",
-		Value:   false,
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_DOCKER_NETWORK"},
-		Name:    "backend-docker-network",
-		Usage:   "backend docker network",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_DOCKER_VOLUMES"},
-		Name:    "backend-docker-volumes",
-		Usage:   "backend docker volumes (comma separated)",
-	},
-
 	// backend ssh
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_BACKEND_SSH_ADDRESS"},

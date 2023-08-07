@@ -21,6 +21,8 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/urfave/cli/v2"
 
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/docker"
+	"github.com/woodpecker-ci/woodpecker/shared/utils"
 	"github.com/woodpecker-ci/woodpecker/version"
 )
 
@@ -37,7 +39,7 @@ func main() {
 			Action: pinger,
 		},
 	}
-	app.Flags = flags
+	app.Flags = utils.MergeSlices(flags, docker.Flags)
 
 	if err := app.Run(os.Args); err != nil {
 		fmt.Fprintln(os.Stderr, err)
