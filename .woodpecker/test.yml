@@ -45,6 +45,12 @@ steps:
       - echo "test" > web/dist/index.html
     when: *when
 
+  lint-license-header:
+    image: *golang_image
+    commands:
+      - make lint-license-header
+
+
   lint:
     image: *golang_image
     group: test
@@ -64,11 +70,6 @@ steps:
   lint-editorconfig:
     image: mstruebing/editorconfig-checker
     group: test
-
-  lint-license-header:
-    image: *golang_image
-    commands:
-      - make lint-license-header
 
   test:
     image: *golang_image
