@@ -22,6 +22,7 @@ import (
 	"github.com/urfave/cli/v2"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/docker"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/kubernetes"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/ssh"
 	"github.com/woodpecker-ci/woodpecker/shared/utils"
 	"github.com/woodpecker-ci/woodpecker/version"
@@ -40,7 +41,7 @@ func main() {
 			Action: pinger,
 		},
 	}
-	app.Flags = utils.MergeSlices(flags, docker.Flags, ssh.Flags)
+	app.Flags = utils.MergeSlices(flags, docker.Flags, ssh.Flags, kubernetes.Flags)
 
 	if err := app.Run(os.Args); err != nil {
 		fmt.Fprintln(os.Stderr, err)
