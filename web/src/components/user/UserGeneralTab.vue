@@ -1,11 +1,8 @@
 <template>
   <Settings :title="$t('user.settings.general.general')">
-    <div class="flex flex-col mt-2 mb-4">
-      <div class="flex items-center text-wp-text-100 font-bold mb-2">
-        <label>{{ $t('user.settings.general.language') }}</label>
-      </div>
+    <InputField :label="$t('user.settings.general.language')">
       <SelectField v-model="selectedLocale" :options="localeOptions" />
-    </div>
+    </InputField>
   </Settings>
 </template>
 
