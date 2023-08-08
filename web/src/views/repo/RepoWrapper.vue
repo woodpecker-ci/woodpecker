@@ -17,7 +17,7 @@
       <a v-if="badgeUrl" :href="badgeUrl" target="_blank" class="ml-2">
         <img :src="badgeUrl" />
       </a>
-      <IconButton :href="repo.link_url" :title="$t('repo.open_in_forge')" :icon="forge ? forge : 'repo'" />
+      <IconButton :href="repo.link_url" :title="$t('repo.open_in_forge')" :icon="forge ?? 'repo'" />
       <IconButton
         v-if="repoPermissions.admin"
         :to="{ name: 'repo-settings' }"

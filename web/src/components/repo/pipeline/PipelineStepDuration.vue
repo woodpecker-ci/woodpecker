@@ -9,16 +9,10 @@ import { useElapsedTime } from '~/compositions/useElapsedTime';
 import { PipelineStep, PipelineWorkflow } from '~/lib/api/types';
 import { durationAsNumber } from '~/utils/duration';
 
-const props = withDefaults(
-  defineProps<{
-    step: PipelineStep;
-    workflow: PipelineWorkflow;
-  }>(),
-  {
-    step: undefined,
-    workflow: undefined,
-  },
-);
+const props = defineProps<{
+  step?: PipelineStep;
+  workflow?: PipelineWorkflow;
+}>();
 
 const step = toRef(props, 'step');
 const workflow = toRef(props, 'workflow');
