@@ -1,12 +1,5 @@
 <template>
-  <Panel>
-    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-wp-background-100">
-      <div class="ml-2">
-        <h1 class="text-xl text-wp-text-100">{{ $t('user.settings.api.api') }}</h1>
-        <p class="text-sm text-wp-text-alt-100">{{ $t('user.settings.api.desc') }}</p>
-      </div>
-    </div>
-
+  <Settings :title="$t('user.settings.api.api')" :desc="$t('user.settings.api.desc')">
     <div class="mt-2 mb-4">
       <div class="flex items-center mb-2">
         <div class="flex flex-row items-center text-wp-text-100 font-bold">
@@ -51,7 +44,7 @@
       </div>
       <pre class="code-box">{{ usageWithCli }}</pre>
     </div>
-  </Panel>
+  </Settings>
 </template>
 
 <script lang="ts" setup>
@@ -59,6 +52,7 @@ import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
+import Settings from '~/components/layout/Settings.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useConfig from '~/compositions/useConfig';
 

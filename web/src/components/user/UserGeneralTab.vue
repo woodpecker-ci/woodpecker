@@ -1,16 +1,12 @@
 <template>
-  <Panel>
-    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-wp-background-100">
-      <h1 class="ml-2 text-xl text-wp-text-100">{{ $t('user.settings.general.general') }}</h1>
-    </div>
-
+  <Settings :title="$t('user.settings.general.general')">
     <div class="flex flex-col mt-2 mb-4">
       <div class="flex items-center text-wp-text-100 font-bold mb-2">
         <label>{{ $t('user.settings.general.language') }}</label>
       </div>
       <SelectField v-model="selectedLocale" :options="localeOptions" />
     </div>
-  </Panel>
+  </Settings>
 </template>
 
 <script lang="ts" setup>
@@ -22,6 +18,7 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import SelectField from '~/components/form/SelectField.vue';
+import Settings from '~/components/layout/Settings.vue';
 import { setI18nLanguage } from '~/compositions/useI18n';
 
 const { locale } = useI18n();
