@@ -88,8 +88,8 @@
   </Panel>
 </template>
 
-<script lang="ts">
-import { defineComponent, inject, onMounted, Ref, ref } from 'vue';
+<script lang="ts" setup>
+import { inject, onMounted, Ref, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
@@ -108,101 +108,84 @@ import useNotifications from '~/compositions/useNotifications';
 import { Repo, RepoSettings, RepoVisibility, WebhookEvents } from '~/lib/api/types';
 import { useRepoStore } from '~/store/repos';
 
-export default defineComponent({
-  name: 'GeneralTab',
+const apiClient = useApiClient();
+const notifications = useNotifications();
+const { user } = useAuthentication();
+const repoStore = useRepoStore();
+const i18n = useI18n();
 
-  components: { Button, Panel, InputField, TextField, RadioField, NumberField, Checkbox, CheckboxesField },
+const repo = inject<Ref<Repo>>('repo');
+const repoSettings = ref<RepoSettings>();
 
-  setup() {
-    const apiClient = useApiClient();
-    const notifications = useNotifications();
-    const { user } = useAuthentication();
-    const repoStore = useRepoStore();
-    const i18n = useI18n();
+function loadRepoSettings() {
+  if (!repo) {
+    throw new Error('Unexpected: Repo should be set');
+  }
 
-    const repo = inject<Ref<Repo>>('repo');
-    const repoSettings = ref<RepoSettings>();
+  repoSettings.value = {
+    config_file: repo.value.config_file,
+    timeout: repo.value.timeout,
+    visibility: repo.value.visibility,
+    gated: repo.value.gated,
+    trusted: repo.value.trusted,
+    allow_pr: repo.value.allow_pr,
+    cancel_previous_pipeline_events: repo.value.cancel_previous_pipeline_events || [],
+    netrc_only_trusted: repo.value.netrc_only_trusted,
+  };
+}
 
-    function loadRepoSettings() {
-      if (!repo) {
-        throw new Error('Unexpected: Repo should be set');
-      }
+async function loadRepo() {
+  if (!repo) {
+    throw new Error('Unexpected: Repo should be set');
+  }
 
-      repoSettings.value = {
-        config_file: repo.value.config_file,
-        timeout: repo.value.timeout,
-        visibility: repo.value.visibility,
-        gated: repo.value.gated,
-        trusted: repo.value.trusted,
-        allow_pr: repo.value.allow_pr,
-        cancel_previous_pipeline_events: repo.value.cancel_previous_pipeline_events || [],
-        netrc_only_trusted: repo.value.netrc_only_trusted,
-      };
-    }
+  await repoStore.loadRepo(repo.value.id);
+  loadRepoSettings();
+}
 
-    async function loadRepo() {
-      if (!repo) {
-        throw new Error('Unexpected: Repo should be set');
-      }
+const { doSubmit: saveRepoSettings, isLoading: isSaving } = useAsyncAction(async () => {
+  if (!repo) {
+    throw new Error('Unexpected: Repo should be set');
+  }
 
-      await repoStore.loadRepo(repo.value.id);
-      loadRepoSettings();
-    }
+  if (!repoSettings.value) {
+    throw new Error('Unexpected: Repo-Settings should be set');
+  }
 
-    const { doSubmit: saveRepoSettings, isLoading: isSaving } = useAsyncAction(async () => {
-      if (!repo) {
-        throw new Error('Unexpected: Repo should be set');
-      }
-
-      if (!repoSettings.value) {
-        throw new Error('Unexpected: Repo-Settings should be set');
-      }
-
-      await apiClient.updateRepo(repo.value.id, repoSettings.value);
-      await loadRepo();
-      notifications.notify({ title: i18n.t('repo.settings.general.success'), type: 'success' });
-    });
-
-    onMounted(() => {
-      loadRepoSettings();
-    });
-
-    const projectVisibilityOptions: RadioOption[] = [
-      {
-        value: RepoVisibility.Public,
-        text: i18n.t('repo.settings.general.visibility.public.public'),
-        description: i18n.t('repo.settings.general.visibility.public.desc'),
-      },
-      {
-        value: RepoVisibility.Internal,
-        text: i18n.t('repo.settings.general.visibility.internal.internal'),
-        description: i18n.t('repo.settings.general.visibility.internal.desc'),
-      },
-      {
-        value: RepoVisibility.Private,
-        text: i18n.t('repo.settings.general.visibility.private.private'),
-        description: i18n.t('repo.settings.general.visibility.private.desc'),
-      },
-    ];
-
-    const cancelPreviousPipelineEventsOptions: CheckboxOption[] = [
-      { value: WebhookEvents.Push, text: i18n.t('repo.pipeline.event.push') },
-      { value: WebhookEvents.Tag, text: i18n.t('repo.pipeline.event.tag') },
-      {
-        value: WebhookEvents.PullRequest,
-        text: i18n.t('repo.pipeline.event.pr'),
-      },
-      { value: WebhookEvents.Deploy, text: i18n.t('repo.pipeline.event.deploy') },
-    ];
-
-    return {
-      user,
-      repoSettings,
-      isSaving,
-      saveRepoSettings,
-      projectVisibilityOptions,
-      cancelPreviousPipelineEventsOptions,
-    };
-  },
+  await apiClient.updateRepo(repo.value.id, repoSettings.value);
+  await loadRepo();
+  notifications.notify({ title: i18n.t('repo.settings.general.success'), type: 'success' });
 });
+
+onMounted(() => {
+  loadRepoSettings();
+});
+
+const projectVisibilityOptions: RadioOption[] = [
+  {
+    value: RepoVisibility.Public,
+    text: i18n.t('repo.settings.general.visibility.public.public'),
+    description: i18n.t('repo.settings.general.visibility.public.desc'),
+  },
+  {
+    value: RepoVisibility.Internal,
+    text: i18n.t('repo.settings.general.visibility.internal.internal'),
+    description: i18n.t('repo.settings.general.visibility.internal.desc'),
+  },
+  {
+    value: RepoVisibility.Private,
+    text: i18n.t('repo.settings.general.visibility.private.private'),
+    description: i18n.t('repo.settings.general.visibility.private.desc'),
+  },
+];
+
+const cancelPreviousPipelineEventsOptions: CheckboxOption[] = [
+  { value: WebhookEvents.Push, text: i18n.t('repo.pipeline.event.push') },
+  { value: WebhookEvents.Tag, text: i18n.t('repo.pipeline.event.tag') },
+  {
+    value: WebhookEvents.PullRequest,
+    text: i18n.t('repo.pipeline.event.pr'),
+  },
+  { value: WebhookEvents.Deploy, text: i18n.t('repo.pipeline.event.deploy') },
+];
 </script>
