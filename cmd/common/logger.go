@@ -15,8 +15,10 @@
 package common
 
 import (
+	"io"
 	"os"
 
+	"github.com/6543/logfile-open"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
@@ -55,14 +57,14 @@ func SetupGlobalLogger(c *cli.Context) {
 	noColor := c.Bool("nocolor")
 	logFile := c.String("log-file")
 
-	var file *os.File
+	var file io.ReadWriteCloser
 	switch logFile {
 	case "", "stderr": // default case
 		file = os.Stderr
 	case "stdout":
 		file = os.Stdout
 	default: // a file was set
-		openFile, err := os.OpenFile(logFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o660)
+		openFile, err := logfile.OpenFileWithContext(c.Context, logFile, 0o660)
 		if err != nil {
 			log.Fatal().Err(err).Msgf("could not open log file '%s'", logFile)
 		}
