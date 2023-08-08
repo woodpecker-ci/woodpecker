@@ -7,20 +7,14 @@ import { computed, toRef } from 'vue';
 
 import TextField from '~/components/form/TextField.vue';
 
-const props = withDefaults(
-  defineProps<{
-    modelValue: number;
+const props = defineProps<{
+  modelValue: number;
+  placeholder?: string;
+}>();
 
-    placeholder: string;
-  }>(),
-  {
-    modelValue: undefined,
-
-    placeholder: '',
-  },
-);
-
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits<{
+  (event: 'update:modelValue', value: number): void;
+}>();
 
 const modelValue = toRef(props, 'modelValue');
 const innerValue = computed({

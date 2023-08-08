@@ -25,7 +25,9 @@ const props = defineProps<{
   options: RadioOption[];
 }>();
 
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits<{
+  (event: 'update:modelValue', value: string): void;
+}>();
 
 const modelValue = toRef(props, 'modelValue');
 const innerValue = computed({

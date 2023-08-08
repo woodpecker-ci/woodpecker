@@ -23,7 +23,9 @@ const props = defineProps<{
   description?: string;
 }>();
 
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits<{
+  (event: 'update:modelValue', value: boolean): void;
+}>();
 
 const modelValue = toRef(props, 'modelValue');
 const innerValue = computed({
