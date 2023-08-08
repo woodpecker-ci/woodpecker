@@ -45,9 +45,9 @@
   </Panel>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { cloneDeep } from 'lodash';
-import { computed, defineComponent, ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
@@ -69,74 +69,48 @@ const emptySecret = {
   event: [WebhookEvents.Push],
 };
 
-export default defineComponent({
-  name: 'AdminSecretsTab',
+const apiClient = useApiClient();
+const notifications = useNotifications();
+const i18n = useI18n();
 
-  components: {
-    Button,
-    Panel,
-    DocsLink,
-    SecretList,
-    SecretEdit,
-    Warning,
-  },
+const selectedSecret = ref<Partial<Secret>>();
+const isEditingSecret = computed(() => !!selectedSecret.value?.id);
 
-  setup() {
-    const apiClient = useApiClient();
-    const notifications = useNotifications();
-    const i18n = useI18n();
+async function loadSecrets(page: number): Promise<Secret[] | null> {
+  return apiClient.getGlobalSecretList(page);
+}
 
-    const selectedSecret = ref<Partial<Secret>>();
-    const isEditingSecret = computed(() => !!selectedSecret.value?.id);
+const { resetPage, data: secrets } = usePagination(loadSecrets, () => !selectedSecret.value);
 
-    async function loadSecrets(page: number): Promise<Secret[] | null> {
-      return apiClient.getGlobalSecretList(page);
-    }
+const { doSubmit: createSecret, isLoading: isSaving } = useAsyncAction(async () => {
+  if (!selectedSecret.value) {
+    throw new Error("Unexpected: Can't get secret");
+  }
 
-    const { resetPage, data: secrets } = usePagination(loadSecrets, () => !selectedSecret.value);
-
-    const { doSubmit: createSecret, isLoading: isSaving } = useAsyncAction(async () => {
-      if (!selectedSecret.value) {
-        throw new Error("Unexpected: Can't get secret");
-      }
-
-      if (isEditingSecret.value) {
-        await apiClient.updateGlobalSecret(selectedSecret.value);
-      } else {
-        await apiClient.createGlobalSecret(selectedSecret.value);
-      }
-      notifications.notify({
-        title: i18n.t(isEditingSecret.value ? 'admin.settings.secrets.saved' : 'admin.settings.secrets.created'),
-        type: 'success',
-      });
-      selectedSecret.value = undefined;
-      resetPage();
-    });
-
-    const { doSubmit: deleteSecret, isLoading: isDeleting } = useAsyncAction(async (_secret: Secret) => {
-      await apiClient.deleteGlobalSecret(_secret.name);
-      notifications.notify({ title: i18n.t('admin.settings.secrets.deleted'), type: 'success' });
-      resetPage();
-    });
-
-    function editSecret(secret: Secret) {
-      selectedSecret.value = cloneDeep(secret);
-    }
-
-    function showAddSecret() {
-      selectedSecret.value = cloneDeep(emptySecret);
-    }
-
-    return {
-      selectedSecret,
-      secrets,
-      isDeleting,
-      isSaving,
-      showAddSecret,
-      createSecret,
-      editSecret,
-      deleteSecret,
-    };
-  },
+  if (isEditingSecret.value) {
+    await apiClient.updateGlobalSecret(selectedSecret.value);
+  } else {
+    await apiClient.createGlobalSecret(selectedSecret.value);
+  }
+  notifications.notify({
+    title: i18n.t(isEditingSecret.value ? 'admin.settings.secrets.saved' : 'admin.settings.secrets.created'),
+    type: 'success',
+  });
+  selectedSecret.value = undefined;
+  resetPage();
 });
+
+const { doSubmit: deleteSecret, isLoading: isDeleting } = useAsyncAction(async (_secret: Secret) => {
+  await apiClient.deleteGlobalSecret(_secret.name);
+  notifications.notify({ title: i18n.t('admin.settings.secrets.deleted'), type: 'success' });
+  resetPage();
+});
+
+function editSecret(secret: Secret) {
+  selectedSecret.value = cloneDeep(secret);
+}
+
+function showAddSecret() {
+  selectedSecret.value = cloneDeep(emptySecret);
+}
 </script>
