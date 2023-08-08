@@ -6,17 +6,8 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-
-export default defineComponent({
-  name: 'Warning',
-
-  props: {
-    text: {
-      type: String,
-      required: true,
-    },
-  },
-});
+<script lang="ts" setup>
+defineProps<{
+  text: string;
+}>();
 </script>
