@@ -56,8 +56,8 @@ require (
 	k8s.io/api v0.27.1
 	k8s.io/apimachinery v0.27.1
 	k8s.io/client-go v0.27.1
-	xorm.io/builder v0.3.12
-	xorm.io/xorm v1.3.2
+	xorm.io/builder v0.3.13
+	xorm.io/xorm v1.3.3-0.20230726104636-c622cdaf893f
 )
 
 require (
@@ -155,3 +155,5 @@ require (
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.3 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )
+
+replace xorm.io/xorm => gitea.com/6543/xorm v1.3.3-0.20230807141308-fc77a3b490a8
