@@ -1,5 +1,5 @@
 <template>
-  <div v-if="pipeline" class="flex text-color w-full">
+  <div v-if="pipeline" class="flex text-wp-text-100 w-full">
     <PipelineStatusIcon :status="pipeline.status" class="flex items-center" />
     <div class="flex flex-col ml-4 min-w-0">
       <span class="underline">{{ repo?.owner }} / {{ repo?.name }}</span>
@@ -10,7 +10,7 @@
           <Tooltip>
             <span>{{ since }}</span>
             <template #popper
-              ><span class="font-bold">{{ $t('created') }}</span> {{ created }}</template
+              ><span class="font-bold">{{ $t('repo.pipeline.created') }}</span> {{ created }}</template
             >
           </Tooltip>
         </div>

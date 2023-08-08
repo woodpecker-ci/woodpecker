@@ -19,6 +19,7 @@
         "deleted": "Agent effacé",
         "desc": "Agents enregistrés sur ce serveur",
         "edit_agent": "Éditer l'agent",
+        "id": "ID",
         "last_contact": "Dernier contact",
         "name": {
           "name": "Nom",
@@ -110,6 +111,7 @@
       }
     }
   },
+  "api": "API",
   "back": "Revenir en arrière",
   "cancel": "Annuler",
   "color_scheme_dark": "Basculer en couleurs claires",
@@ -159,47 +161,6 @@
     "activity": "Activité",
     "add": "Ajouter un dépôt",
     "branches": "Branches",
-    "build": {
-      "actions": {
-        "cancel": "Annuler",
-        "cancel_success": "Pipeline annulé",
-        "canceled": "Cette étape a été annulée.",
-        "log_auto_scroll": "Automatiquement défiler vers le bas",
-        "log_auto_scroll_off": "Désactiver le défilement automatique",
-        "log_download": "Télécharger",
-        "restart": "Redémarrer",
-        "restart_success": "Pipeline redémarré"
-      },
-      "config": "Configuration",
-      "created": "Crée",
-      "event": {
-        "cron": "Tache périodique",
-        "deploy": "Déploiement",
-        "pr": "Pull Request",
-        "push": "Push",
-        "tag": "Tag"
-      },
-      "execution_error": "Erreur d'execution",
-      "exit_code": "Code de retour {exitCode}",
-      "files": "Fichiers changés ({files})",
-      "loading": "Chargement…",
-      "log_download_error": "Il y a eu une erreur lors du téléchargement du fichier de journal",
-      "no_files": "Aucun fichier n'a été modifié.",
-      "no_pipeline_steps": "Aucune étape disponible !",
-      "no_pipelines": "Aucun pipeline n'a démarré pour le moment.",
-      "pipeline": "Pipeline #{buildId}",
-      "pipelines_for": "Pipelines pour la branche \"{branch}\"",
-      "protected": {
-        "approve": "Approuver",
-        "approve_success": "Pipeline approuvé",
-        "awaits": "Ce pipeline attends d'être approuvé par un mainteneur !",
-        "decline": "Refuser",
-        "decline_success": "Pipeline refusé",
-        "declined": "Le pipeline a été refusé !"
-      },
-      "step_not_started": "L'étape n'a pas démarré encore.",
-      "tasks": "Tâches"
-    },
     "deploy_pipeline": {
       "enter_target": "Environnement de déploiement ciblé",
       "title": "Déclenchement d'un événement de déploiement pour le pipeline courant #{pipelineId}",
@@ -315,12 +276,10 @@
       "badge": {
         "badge": "Badge",
         "branch": "Branche",
-        "markdown": "Markdown",
         "type": "Syntaxe",
         "type_html": "HTML",
         "type_markdown": "Markdown",
-        "type_url": "URL",
-        "url_branch": "URL pour la branche spécifique"
+        "type_url": "URL"
       },
       "crons": {
         "add": "Ajouter une tâche planifiée",
@@ -465,16 +424,27 @@
   "url": "URL",
   "user": {
     "access_denied": "Vous n'êtes pas autorisé à vous connecter",
-    "api_usage": "Exemple d'utilisation de l'API",
-    "cli_usage": "Exemple d'utilisation de la ligne de commande",
-    "dl_cli": "Télécharger l'interface en ligne de commande",
     "internal_error": "Une erreur interne est arrivé",
     "oauth_error": "Erreur lors de l’authentification auprès du fournisseur OAuth",
-    "reset_token": "Effacer le jeton",
-    "settings": "Profil personnel",
-    "shell_setup": "Utilisation avec un shell",
-    "shell_setup_before": "faites la mise en place dans le shell avant",
-    "token": "Votre jeton personnel"
+    "settings": {
+      "api": {
+        "api": "API",
+        "api_usage": "Exemple d'utilisation de l'API",
+        "cli_usage": "Exemple d'utilisation de l'interface en ligne de commande",
+        "desc": "Jeton d'Accès Personnel et usage de l'API",
+        "dl_cli": "Télécharger l'Interface en ligne de commande",
+        "reset_token": "Réinitialiser le jeton",
+        "shell_setup": "Configuration de l'interpréteur de commande",
+        "shell_setup_before": "Faites les étapes de configuration de l'interpréteur de commande avant",
+        "swagger_ui": "Interface Swagger",
+        "token": "Jeton d'Accès Personnel"
+      },
+      "general": {
+        "general": "Général",
+        "language": "Langue"
+      },
+      "settings": "Paramètres Utilisateur"
+    }
   },
   "username": "Nom d'utilisateur",
   "welcome": "Bienvenue sur Woodpecker"

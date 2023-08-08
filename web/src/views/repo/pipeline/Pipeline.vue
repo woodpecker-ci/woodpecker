@@ -10,13 +10,13 @@
 
       <div class="flex flex-grow relative">
         <div v-if="error" class="flex flex-col p-4">
-          <span class="text-red-400 font-bold text-xl mb-2">{{ $t('repo.pipeline.execution_error') }}</span>
-          <span class="text-red-400">{{ error }}</span>
+          <span class="text-wp-state-error-100 font-bold text-xl mb-2">{{ $t('repo.pipeline.execution_error') }}</span>
+          <span class="text-wp-state-error-100">{{ error }}</span>
         </div>
 
         <div v-else-if="pipeline.status === 'blocked'" class="flex flex-col flex-grow justify-center items-center p-2">
-          <Icon name="status-blocked" class="w-16 h-16 text-color mb-4" />
-          <p class="text-xl text-color mb-4">{{ $t('repo.pipeline.protected.awaits') }}</p>
+          <Icon name="status-blocked" class="w-16 h-16 text-wp-text-100 mb-4" />
+          <p class="text-xl text-wp-text-100 mb-4">{{ $t('repo.pipeline.protected.awaits') }}</p>
           <div v-if="repoPermissions.push" class="flex space-x-4">
             <Button
               color="green"
@@ -34,8 +34,8 @@
         </div>
 
         <div v-else-if="pipeline.status === 'declined'" class="flex flex-col flex-grow justify-center items-center">
-          <Icon name="status-blocked" class="w-16 h-16 text-color mb-4" />
-          <p class="text-xl text-color">{{ $t('repo.pipeline.protected.declined') }}</p>
+          <Icon name="status-blocked" class="w-16 h-16 text-wp-text-100 mb-4" />
+          <p class="text-xl text-wp-text-100">{{ $t('repo.pipeline.protected.declined') }}</p>
         </div>
 
         <PipelineLog

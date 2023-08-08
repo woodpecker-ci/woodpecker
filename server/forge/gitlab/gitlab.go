@@ -93,7 +93,7 @@ func (g *GitLab) oauth2Config(ctx context.Context) (*oauth2.Config, context.Cont
 				TokenURL: fmt.Sprintf("%s/oauth/token", g.url),
 			},
 			Scopes:      []string{defaultScope},
-			RedirectURL: fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost),
+			RedirectURL: fmt.Sprintf("%s%s/authorize", server.Config.Server.OAuthHost, server.Config.Server.RootPath),
 		},
 
 		context.WithValue(ctx, oauth2.HTTPClient, &http.Client{Transport: &http.Transport{
@@ -717,7 +717,7 @@ func (g *GitLab) Org(ctx context.Context, u *model.User, owner string) (*model.O
 	}
 
 	return &model.Org{
-		Name:    groups[0].Name,
+		Name:    groups[0].FullPath,
 		Private: groups[0].Visibility != gitlab.PublicVisibility,
 	}, nil
 }

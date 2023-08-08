@@ -27,7 +27,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/tevino/abool"
 	"github.com/urfave/cli/v2"
@@ -41,6 +40,7 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/agent"
 	agentRpc "github.com/woodpecker-ci/woodpecker/agent/rpc"
+	"github.com/woodpecker-ci/woodpecker/cmd/common"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
@@ -49,6 +49,8 @@ import (
 )
 
 func run(c *cli.Context) error {
+	common.SetupGlobalLogger(c)
+
 	agentConfigPath := c.String("agent-config")
 	hostname := c.String("hostname")
 	if len(hostname) == 0 {
@@ -56,28 +58,6 @@ func run(c *cli.Context) error {
 	}
 
 	platform := runtime.GOOS + "/" + runtime.GOARCH
-
-	if c.Bool("pretty") {
-		log.Logger = log.Output(
-			zerolog.ConsoleWriter{
-				Out:     os.Stderr,
-				NoColor: c.Bool("nocolor"),
-			},
-		)
-	}
-
-	zerolog.SetGlobalLevel(zerolog.InfoLevel)
-	if c.IsSet("log-level") {
-		logLevelFlag := c.String("log-level")
-		lvl, err := zerolog.ParseLevel(logLevelFlag)
-		if err != nil {
-			log.Fatal().Msgf("unknown logging level: %s", logLevelFlag)
-		}
-		zerolog.SetGlobalLevel(lvl)
-	}
-	if zerolog.GlobalLevel() <= zerolog.DebugLevel {
-		log.Logger = log.With().Caller().Logger()
-	}
 
 	counter.Polling = c.Int("max-workflows")
 	counter.Running = 0
@@ -92,7 +72,7 @@ func run(c *cli.Context) error {
 
 	var transport grpc.DialOption
 	if c.Bool("grpc-secure") {
-		transport = grpc.WithTransportCredentials(grpccredentials.NewTLS(&tls.Config{InsecureSkipVerify: c.Bool("skip-insecure-grpc")}))
+		transport = grpc.WithTransportCredentials(grpccredentials.NewTLS(&tls.Config{InsecureSkipVerify: c.Bool("grpc-skip-insecure")}))
 	} else {
 		transport = grpc.WithTransportCredentials(insecure.NewCredentials())
 	}

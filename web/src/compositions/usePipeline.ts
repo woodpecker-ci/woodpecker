@@ -6,7 +6,8 @@ import { useElapsedTime } from '~/compositions/useElapsedTime';
 import { Pipeline } from '~/lib/api/types';
 import { prettyDuration } from '~/utils/duration';
 import { convertEmojis } from '~/utils/emoji';
-import timeAgo from '~/utils/timeAgo';
+
+import useTimeAgo from './useTimeAgo';
 
 const { toLocaleString } = useDate();
 
@@ -27,6 +28,7 @@ export default (pipeline: Ref<Pipeline | undefined>) => {
   const { time: sinceElapsed } = useElapsedTime(sinceUnderOneHour, sinceRaw);
 
   const i18n = useI18n();
+  const timeAgo = useTimeAgo();
   const since = computed(() => {
     if (sinceRaw.value === 0) {
       return i18n.t('time.not_started');

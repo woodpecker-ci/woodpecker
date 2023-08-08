@@ -1,7 +1,6 @@
 package compiler
 
 import (
-	"os"
 	"reflect"
 	"testing"
 
@@ -153,24 +152,10 @@ func TestWithNetrc(t *testing.T) {
 }
 
 func TestWithProxy(t *testing.T) {
-	// do not execute the test if the host machine sets http proxy
-	// environment variables to avoid interference with other tests.
-	if noProxy != "" || httpProxy != "" || httpsProxy != "" {
-		t.SkipNow()
-		return
-	}
-
 	// alter the default values
-	noProxy = "example.com"
-	httpProxy = "bar.com"
-	httpsProxy = "baz.com"
-
-	// reset the default values
-	defer func() {
-		noProxy = ""
-		httpProxy = ""
-		httpsProxy = ""
-	}()
+	noProxy := "example.com"
+	httpProxy := "bar.com"
+	httpsProxy := "baz.com"
 
 	testdata := map[string]string{
 		"no_proxy":    noProxy,
@@ -181,7 +166,11 @@ func TestWithProxy(t *testing.T) {
 		"HTTPS_PROXY": httpsProxy,
 	}
 	compiler := New(
-		WithProxy(),
+		WithProxy(ProxyOptions{
+			NoProxy:    noProxy,
+			HTTPProxy:  httpProxy,
+			HTTPSProxy: httpsProxy,
+		}),
 	)
 	for key, value := range testdata {
 		if compiler.env[key] != value {
@@ -204,26 +193,6 @@ func TestWithEnviron(t *testing.T) {
 	}
 	if compiler.env["SHOW"] != "true" {
 		t.Errorf("WithEnviron should set SHOW")
-	}
-}
-
-func TestGetenv(t *testing.T) {
-	defer func() {
-		os.Unsetenv("X_TEST_FOO")
-		os.Unsetenv("x_test_bar")
-		os.Unsetenv("x_test_baz")
-	}()
-	os.Setenv("X_TEST_FOO", "foo")
-	os.Setenv("x_test_bar", "bar")
-	os.Setenv("x_test_baz", "")
-	if getenv("x_test_foo") != "foo" {
-		t.Errorf("Expect X_TEST_FOO=foo")
-	}
-	if getenv("X_TEST_BAR") != "bar" {
-		t.Errorf("Expect x_test_bar=bar")
-	}
-	if getenv("x_test_baz") != "" {
-		t.Errorf("Expect x_test_bar=bar is empty")
 	}
 }
 

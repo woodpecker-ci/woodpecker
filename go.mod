@@ -6,6 +6,7 @@ require (
 	code.gitea.io/sdk/gitea v0.15.1-0.20221016183512-2d9ee57af1e0
 	codeberg.org/6543/go-yaml2json v1.0.0
 	codeberg.org/6543/xyaml v1.1.0
+	github.com/6543/logfile-open v1.1.1
 	github.com/alessio/shellescape v1.4.1
 	github.com/antonmedv/expr v1.12.5
 	github.com/bmatcuk/doublestar/v4 v4.6.0
@@ -13,6 +14,7 @@ require (
 	github.com/docker/cli v20.10.24+incompatible
 	github.com/docker/distribution v2.8.2+incompatible
 	github.com/docker/docker v20.10.24+incompatible
+	github.com/docker/go-connections v0.4.0
 	github.com/docker/go-units v0.5.0
 	github.com/drone/envsubst v1.0.3
 	github.com/franela/goblin v0.0.0-20211003143422-0a4f594942bf
@@ -50,14 +52,15 @@ require (
 	golang.org/x/net v0.10.0
 	golang.org/x/oauth2 v0.8.0
 	golang.org/x/sync v0.2.0
+	golang.org/x/term v0.11.0
 	google.golang.org/grpc v1.55.0
 	google.golang.org/protobuf v1.30.0
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.27.1
 	k8s.io/apimachinery v0.27.1
 	k8s.io/client-go v0.27.1
-	xorm.io/builder v0.3.12
-	xorm.io/xorm v1.3.2
+	xorm.io/builder v0.3.13
+	xorm.io/xorm v1.3.3-0.20230726104636-c622cdaf893f
 )
 
 require (
@@ -72,7 +75,6 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/davidmz/go-pageant v1.0.2 // indirect
 	github.com/docker/docker-credential-helpers v0.7.0 // indirect
-	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/emicklei/go-restful/v3 v3.9.0 // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
@@ -138,8 +140,7 @@ require (
 	go.uber.org/zap v1.23.0 // indirect
 	golang.org/x/arch v0.3.0 // indirect
 	golang.org/x/mod v0.9.0 // indirect
-	golang.org/x/sys v0.8.0 // indirect
-	golang.org/x/term v0.8.0 // indirect
+	golang.org/x/sys v0.11.0 // indirect
 	golang.org/x/text v0.9.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	golang.org/x/tools v0.7.0 // indirect
@@ -155,3 +156,5 @@ require (
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.3 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )
+
+replace xorm.io/xorm => gitea.com/6543/xorm v1.3.3-0.20230807141308-fc77a3b490a8
