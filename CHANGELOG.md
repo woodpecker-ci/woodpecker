@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v1.0.2) - 2023-08-08
+
+* BUGFIXES
+  * Fix router (#2164)
+
 ## [1.0.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v1.0.1) - 2023-08-08
 
 * SECURITY
