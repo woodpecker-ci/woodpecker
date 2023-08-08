@@ -71,10 +71,6 @@ func Load(noRouteHandler http.HandlerFunc, middleware ...gin.HandlerFunc) http.H
 		base.GET("/healthz", api.Health)
 	}
 
-	e.GET("/metrics", metrics.PromHandler())
-	e.GET("/version", api.Version)
-	e.GET("/healthz", api.Health)
-
 	apiRoutes(base)
 	setupSwaggerConfigAndRoutes(e)
 
