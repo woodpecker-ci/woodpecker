@@ -35,14 +35,14 @@ func DedupStrings(src []string) []string {
 	return dst
 }
 
-// EqualStringSlice compare two string slices if they have equal values independent of how they are sorted
-func EqualStringSlice(l1, l2 []string) bool {
-	if len(l1) != len(l2) {
+// EqualSliceValues compare two slices if they have equal values independent of how they are sorted
+func EqualSliceValues[E comparable](s1, s2 []E) bool {
+	if len(s1) != len(s2) {
 		return false
 	}
 
-	m1 := sliceToCountMap(l1)
-	m2 := sliceToCountMap(l2)
+	m1 := sliceToCountMap(s1)
+	m2 := sliceToCountMap(s2)
 
 	for k, v := range m1 {
 		if m2[k] != v {
@@ -53,8 +53,8 @@ func EqualStringSlice(l1, l2 []string) bool {
 	return true
 }
 
-func sliceToCountMap(list []string) map[string]int {
-	m := make(map[string]int)
+func sliceToCountMap[E comparable](list []E) map[E]int {
+	m := make(map[E]int)
 	for i := range list {
 		m[list[i]]++
 	}
