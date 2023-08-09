@@ -9,5 +9,5 @@ type Stage struct {
 	Steps []*Step `json:"steps,omitempty"`
 
 	// TODO check if it can de-/serialized
-	StepDAG dagger.GraphEdge[Step]
+	StepDAG dagger.GraphEdge[*Step]
 }

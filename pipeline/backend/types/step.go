@@ -47,3 +47,16 @@ const (
 	StepTypeCommands StepType = "commands"
 	StepTypeCache    StepType = "cache"
 )
+
+// impl dagger.Node interface
+func (step *Step) ID() string {
+	return step.UUID
+}
+
+func (step *Step) Metadata() map[string]string {
+	return nil
+}
+
+func (step *Step) SetMetadata(metadata map[string]string) {
+	return
+}
