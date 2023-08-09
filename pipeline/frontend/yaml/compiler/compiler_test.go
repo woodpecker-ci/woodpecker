@@ -40,3 +40,7 @@ func TestSecretAvailable(t *testing.T) {
 		Commands: yaml_base_types.StringOrSlice{"echo 'this is not a plugin'"},
 	}))
 }
+
+func TestCompilerCompile(t *testing.T) {
+
+}
