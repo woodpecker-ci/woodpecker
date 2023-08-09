@@ -16,6 +16,7 @@ package api
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
@@ -27,19 +28,23 @@ import (
 // GetOrgSecret
 //
 //	@Summary	Get the named organization secret
-//	@Router		/orgs/{owner}/secrets/{secret} [get]
+//	@Router		/orgs/{org_id}/secrets/{secret} [get]
 //	@Produce	json
 //	@Success	200	{object}	Secret
-//	@Tags		Organization secrets
+//	@Tags			Organization secrets
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		owner			path	string	true	"the owner's name"
+//	@Param		org_id			path	string	true	"the org's id"
 //	@Param		secret			path	string	true	"the secret's name"
 func GetOrgSecret(c *gin.Context) {
-	var (
-		owner = c.Param("owner")
-		name  = c.Param("secret")
-	)
-	secret, err := server.Config.Services.Secrets.OrgSecretFind(owner, name)
+	name := c.Param("secret")
+
+	orgID, err := strconv.ParseInt(c.Param("org_id"), 10, 64)
+	if err != nil {
+		c.String(http.StatusBadRequest, "Error parsing org id. %s", err)
+		return
+	}
+
+	secret, err := server.Config.Services.Secrets.OrgSecretFind(orgID, name)
 	if err != nil {
 		handleDbGetError(c, err)
 		return
@@ -50,19 +55,24 @@ func GetOrgSecret(c *gin.Context) {
 // GetOrgSecretList
 //
 //	@Summary	Get the organization secret list
-//	@Router		/orgs/{owner}/secrets [get]
+//	@Router		/orgs/{org_id}/secrets [get]
 //	@Produce	json
 //	@Success	200	{array}	Secret
-//	@Tags		Organization secrets
+//	@Tags			Organization secrets
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		owner			path	string	true	"the owner's name"
+//	@Param		org_id		path	string	true	"the org's id"
 //	@Param		page			query	int		false	"for response pagination, page offset number"	default(1)
-//	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
+//	@Param		perPage		query	int		false	"for response pagination, max items per page"	default(50)
 func GetOrgSecretList(c *gin.Context) {
-	owner := c.Param("owner")
-	list, err := server.Config.Services.Secrets.OrgSecretList(owner, session.Pagination(c))
+	orgID, err := strconv.ParseInt(c.Param("org_id"), 10, 64)
 	if err != nil {
-		c.String(http.StatusInternalServerError, "Error getting secret list for %q. %s", owner, err)
+		c.String(http.StatusBadRequest, "Error parsing org id. %s", err)
+		return
+	}
+
+	list, err := server.Config.Services.Secrets.OrgSecretList(orgID, session.Pagination(c))
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Error getting secret list for %q. %s", orgID, err)
 		return
 	}
 	// copy the secret detail to remove the sensitive
@@ -79,20 +89,24 @@ func GetOrgSecretList(c *gin.Context) {
 //	@Router		/orgs/{owner}/secrets [post]
 //	@Produce	json
 //	@Success	200	{object}	Secret
-//	@Tags		Organization secrets
+//	@Tags			Organization secrets
 //	@Param		Authorization	header	string			true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		owner			path	string			true	"the owner's name"
+//	@Param		org_id				path	string	true	"the org's id"
 //	@Param		secretData		body	Secret	true	"the new secret"
 func PostOrgSecret(c *gin.Context) {
-	owner := c.Param("owner")
+	orgID, err := strconv.ParseInt(c.Param("org_id"), 10, 64)
+	if err != nil {
+		c.String(http.StatusBadRequest, "Error parsing org id. %s", err)
+		return
+	}
 
 	in := new(model.Secret)
 	if err := c.Bind(in); err != nil {
-		c.String(http.StatusBadRequest, "Error parsing org %q secret. %s", owner, err)
+		c.String(http.StatusBadRequest, "Error parsing org %q secret. %s", orgID, err)
 		return
 	}
 	secret := &model.Secret{
-		Owner:       owner,
+		OrgID:       orgID,
 		Name:        in.Name,
 		Value:       in.Value,
 		Events:      in.Events,
@@ -100,11 +114,11 @@ func PostOrgSecret(c *gin.Context) {
 		PluginsOnly: in.PluginsOnly,
 	}
 	if err := secret.Validate(); err != nil {
-		c.String(http.StatusUnprocessableEntity, "Error inserting org %q secret. %s", owner, err)
+		c.String(http.StatusUnprocessableEntity, "Error inserting org %q secret. %s", orgID, err)
 		return
 	}
-	if err := server.Config.Services.Secrets.OrgSecretCreate(owner, secret); err != nil {
-		c.String(http.StatusInternalServerError, "Error inserting org %q secret %q. %s", owner, in.Name, err)
+	if err := server.Config.Services.Secrets.OrgSecretCreate(orgID, secret); err != nil {
+		c.String(http.StatusInternalServerError, "Error inserting org %q secret %q. %s", orgID, in.Name, err)
 		return
 	}
 	c.JSON(http.StatusOK, secret.Copy())
@@ -113,28 +127,30 @@ func PostOrgSecret(c *gin.Context) {
 // PatchOrgSecret
 //
 //	@Summary	Update an organization secret
-//	@Router		/orgs/{owner}/secrets/{secret} [patch]
+//	@Router		/orgs/{org_id}/secrets/{secret} [patch]
 //	@Produce	json
 //	@Success	200	{object}	Secret
 //	@Tags		Organization secrets
 //	@Param		Authorization	header	string			true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		owner			path	string			true	"the owner's name"
+//	@Param		org_id			path	string			true	"the org's id"
 //	@Param		secret			path	string			true	"the secret's name"
-//	@Param		secretData		body	Secret	true	"the update secret data"
+//	@Param		secretData	body	Secret	true	"the update secret data"
 func PatchOrgSecret(c *gin.Context) {
-	var (
-		owner = c.Param("owner")
-		name  = c.Param("secret")
-	)
+	name := c.Param("secret")
+	orgID, err := strconv.ParseInt(c.Param("org_id"), 10, 64)
+	if err != nil {
+		c.String(http.StatusBadRequest, "Error parsing org id. %s", err)
+		return
+	}
 
 	in := new(model.Secret)
-	err := c.Bind(in)
+	err = c.Bind(in)
 	if err != nil {
 		c.String(http.StatusBadRequest, "Error parsing secret. %s", err)
 		return
 	}
 
-	secret, err := server.Config.Services.Secrets.OrgSecretFind(owner, name)
+	secret, err := server.Config.Services.Secrets.OrgSecretFind(orgID, name)
 	if err != nil {
 		handleDbGetError(c, err)
 		return
@@ -151,11 +167,11 @@ func PatchOrgSecret(c *gin.Context) {
 	secret.PluginsOnly = in.PluginsOnly
 
 	if err := secret.Validate(); err != nil {
-		c.String(http.StatusUnprocessableEntity, "Error updating org %q secret. %s", owner, err)
+		c.String(http.StatusUnprocessableEntity, "Error updating org %q secret. %s", orgID, err)
 		return
 	}
-	if err := server.Config.Services.Secrets.OrgSecretUpdate(owner, secret); err != nil {
-		c.String(http.StatusInternalServerError, "Error updating org %q secret %q. %s", owner, in.Name, err)
+	if err := server.Config.Services.Secrets.OrgSecretUpdate(orgID, secret); err != nil {
+		c.String(http.StatusInternalServerError, "Error updating org %q secret %q. %s", orgID, in.Name, err)
 		return
 	}
 	c.JSON(http.StatusOK, secret.Copy())
@@ -164,19 +180,22 @@ func PatchOrgSecret(c *gin.Context) {
 // DeleteOrgSecret
 //
 //	@Summary	Delete the named secret from an organization
-//	@Router		/orgs/{owner}/secrets/{secret} [delete]
+//	@Router		/orgs/{org_id}/secrets/{secret} [delete]
 //	@Produce	plain
-//	@Success	200
+//	@Success	204
 //	@Tags		Organization secrets
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		owner			path	string	true	"the owner's name"
-//	@Param		secret			path	string	true	"the secret's name"
+//	@Param		org_id	path	string	true	"the org's id"
+//	@Param		secret	path	string	true	"the secret's name"
 func DeleteOrgSecret(c *gin.Context) {
-	var (
-		owner = c.Param("owner")
-		name  = c.Param("secret")
-	)
-	if err := server.Config.Services.Secrets.OrgSecretDelete(owner, name); err != nil {
+	name := c.Param("secret")
+	orgID, err := strconv.ParseInt(c.Param("org_id"), 10, 64)
+	if err != nil {
+		c.String(http.StatusBadRequest, "Error parsing org id. %s", err)
+		return
+	}
+
+	if err := server.Config.Services.Secrets.OrgSecretDelete(orgID, name); err != nil {
 		handleDbGetError(c, err)
 		return
 	}

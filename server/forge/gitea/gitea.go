@@ -103,7 +103,7 @@ func (c *Gitea) oauth2Config(ctx context.Context) (*oauth2.Config, context.Conte
 				AuthURL:  fmt.Sprintf(authorizeTokenURL, c.url),
 				TokenURL: fmt.Sprintf(accessTokenURL, c.url),
 			},
-			RedirectURL: fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost),
+			RedirectURL: fmt.Sprintf("%s%s/authorize", server.Config.Server.OAuthHost, server.Config.Server.RootPath),
 		},
 
 		context.WithValue(ctx, oauth2.HTTPClient, &http.Client{Transport: &http.Transport{
@@ -526,6 +526,32 @@ func (c *Gitea) OrgMembership(ctx context.Context, u *model.User, owner string) 
 	}
 
 	return &model.OrgPerm{Member: member, Admin: perm.IsAdmin || perm.IsOwner}, nil
+}
+
+func (c *Gitea) Org(ctx context.Context, u *model.User, owner string) (*model.Org, error) {
+	client, err := c.newClientToken(ctx, u.Token)
+	if err != nil {
+		return nil, err
+	}
+
+	user, _, err := client.GetUserInfo(owner)
+	if user != nil && err == nil {
+		return &model.Org{
+			Name:    user.UserName,
+			IsUser:  true,
+			Private: user.Visibility != gitea.VisibleTypePublic,
+		}, nil
+	}
+
+	org, _, err := client.GetOrg(owner)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.Org{
+		Name:    org.UserName,
+		Private: gitea.VisibleType(org.Visibility) != gitea.VisibleTypePublic,
+	}, nil
 }
 
 // helper function to return the Gitea client with Token

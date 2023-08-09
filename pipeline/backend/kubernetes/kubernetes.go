@@ -1,3 +1,17 @@
+// Copyright 2022 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package kubernetes
 
 import (
@@ -115,8 +129,8 @@ func (e *kube) Load(context.Context) error {
 }
 
 // Setup the pipeline environment.
-func (e *kube) Setup(ctx context.Context, conf *types.Config) error {
-	log.Trace().Msgf("Setting up Kubernetes primitives")
+func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID string) error {
+	log.Trace().Str("taskUUID", taskUUID).Msgf("Setting up Kubernetes primitives")
 
 	for _, vol := range conf.Volumes {
 		pvc, err := PersistentVolumeClaim(e.config.Namespace, vol.Name, e.config.StorageClass, e.config.VolumeSize, e.config.StorageRwx)
@@ -168,24 +182,26 @@ func (e *kube) Setup(ctx context.Context, conf *types.Config) error {
 }
 
 // Start the pipeline step.
-func (e *kube) Exec(ctx context.Context, step *types.Step) error {
+func (e *kube) StartStep(ctx context.Context, step *types.Step, taskUUID string) error {
 	pod, err := Pod(e.config.Namespace, step, e.config.PodLabels, e.config.PodAnnotations)
 	if err != nil {
 		return err
 	}
 
-	log.Trace().Msgf("Creating pod: %s", pod.Name)
+	log.Trace().Str("taskUUID", taskUUID).Msgf("Creating pod: %s", pod.Name)
 	_, err = e.client.CoreV1().Pods(e.config.Namespace).Create(ctx, pod, metav1.CreateOptions{})
 	return err
 }
 
 // Wait for the pipeline step to complete and returns
 // the completion results.
-func (e *kube) Wait(ctx context.Context, step *types.Step) (*types.State, error) {
+func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) (*types.State, error) {
 	podName, err := dnsName(step.Name)
 	if err != nil {
 		return nil, err
 	}
+
+	log.Trace().Str("taskUUID", taskUUID).Msgf("Waiting for pod: %s", podName)
 
 	finished := make(chan bool)
 
@@ -239,11 +255,13 @@ func (e *kube) Wait(ctx context.Context, step *types.Step) (*types.State, error)
 }
 
 // Tail the pipeline step logs.
-func (e *kube) Tail(ctx context.Context, step *types.Step) (io.ReadCloser, error) {
+func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) (io.ReadCloser, error) {
 	podName, err := dnsName(step.Name)
 	if err != nil {
 		return nil, err
 	}
+
+	log.Trace().Str("taskUUID", taskUUID).Msgf("Tail logs of pod: %s", podName)
 
 	up := make(chan bool)
 
@@ -308,7 +326,9 @@ func (e *kube) Tail(ctx context.Context, step *types.Step) (io.ReadCloser, error
 }
 
 // Destroy the pipeline environment.
-func (e *kube) Destroy(_ context.Context, conf *types.Config) error {
+func (e *kube) DestroyWorkflow(_ context.Context, conf *types.Config, taskUUID string) error {
+	log.Trace().Str("taskUUID", taskUUID).Msg("Deleting Kubernetes primitives")
+
 	gracePeriodSeconds := int64(0) // immediately
 	dpb := metav1.DeletePropagationBackground
 

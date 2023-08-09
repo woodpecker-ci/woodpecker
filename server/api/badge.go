@@ -80,7 +80,9 @@ func GetBadge(c *gin.Context) {
 
 	pipeline, err := _store.GetPipelineLast(repo, branch)
 	if err != nil {
-		log.Warn().Err(err).Msg("")
+		if !errors.Is(err, types.RecordNotExist) {
+			log.Warn().Err(err).Msg("could not get last pipeline for badge")
+		}
 		pipeline = nil
 	}
 
@@ -110,7 +112,12 @@ func GetCC(c *gin.Context) {
 	}
 
 	pipelines, err := _store.GetPipelineList(repo, &model.ListOptions{Page: 1, PerPage: 1})
-	if err != nil || len(pipelines) == 0 {
+	if err != nil && !errors.Is(err, types.RecordNotExist) {
+		log.Warn().Err(err).Msg("could not get pipeline list")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	if len(pipelines) == 0 {
 		c.AbortWithStatus(http.StatusNotFound)
 		return
 	}

@@ -46,7 +46,7 @@
       </template>
 
       <template #tabActions>
-        <div class="flex justify-between gap-x-4 text-color flex-shrink-0 pb-2 md:p-0 mx-auto md:mr-0">
+        <div class="flex justify-between gap-x-4 text-wp-text-100 flex-shrink-0 pb-2 md:p-0 mx-auto md:mr-0">
           <div class="flex space-x-1 items-center flex-shrink-0">
             <Icon name="since" />
             <Tooltip>
@@ -91,7 +91,7 @@ import { useAsyncAction } from '~/compositions/useAsyncAction';
 import { useFavicon } from '~/compositions/useFavicon';
 import useNotifications from '~/compositions/useNotifications';
 import usePipeline from '~/compositions/usePipeline';
-import { useRouteBackOrDefault } from '~/compositions/useRouteBackOrDefault';
+import { useRouteBack } from '~/compositions/useRouteBack';
 import { Repo, RepoPermissions } from '~/lib/api/types';
 import { usePipelineStore } from '~/store/pipelines';
 
@@ -196,5 +196,5 @@ const activeTab = computed({
   },
 });
 
-const goBack = useRouteBackOrDefault({ name: 'repo' });
+const goBack = useRouteBack({ name: 'repo' });
 </script>

@@ -21,10 +21,7 @@ var secretCreateCmd = &cli.Command{
 			Name:  "global",
 			Usage: "global secret",
 		},
-		&cli.StringFlag{
-			Name:  "organization",
-			Usage: "organization name (e.g. octocat)",
-		},
+		common.OrgFlag,
 		common.RepoFlag,
 		&cli.StringFlag{
 			Name:  "name",
@@ -74,7 +71,7 @@ func secretCreate(c *cli.Context) error {
 		secret.Value = string(out)
 	}
 
-	global, owner, repoID, err := parseTargetArgs(client, c)
+	global, orgID, repoID, err := parseTargetArgs(client, c)
 	if err != nil {
 		return err
 	}
@@ -83,10 +80,12 @@ func secretCreate(c *cli.Context) error {
 		_, err = client.GlobalSecretCreate(secret)
 		return err
 	}
-	if owner != "" {
-		_, err = client.OrgSecretCreate(owner, secret)
+
+	if orgID != -1 {
+		_, err = client.OrgSecretCreate(orgID, secret)
 		return err
 	}
+
 	_, err = client.SecretCreate(repoID, secret)
 	return err
 }

@@ -783,7 +783,82 @@ const docTemplate = `{
                 }
             }
         },
-        "/orgs/{owner}/permissions": {
+        "/org/lookup/{org_full_name}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Organizations"
+                ],
+                "summary": "Lookup organization by full-name",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "the organizations full-name / slug",
+                        "name": "org_full_name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Org"
+                        }
+                    }
+                }
+            }
+        },
+        "/orgs/{org_id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Organization"
+                ],
+                "summary": "Get organization by id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "the organziation's id",
+                        "name": "org_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Org"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/orgs/{org_id}/permissions": {
             "get": {
                 "produces": [
                     "application/json"
@@ -803,8 +878,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "the owner's name",
-                        "name": "owner",
+                        "description": "the organziation's id",
+                        "name": "org_id",
                         "in": "path",
                         "required": true
                     }
@@ -822,7 +897,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/orgs/{owner}/secrets": {
+        "/orgs/{org_id}/secrets": {
             "get": {
                 "produces": [
                     "application/json"
@@ -842,8 +917,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "the owner's name",
-                        "name": "owner",
+                        "description": "the org's id",
+                        "name": "org_id",
                         "in": "path",
                         "required": true
                     },
@@ -873,52 +948,9 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
-            "post": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Organization secrets"
-                ],
-                "summary": "Persist/create an organization secret",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "default": "Bearer \u003cpersonal access token\u003e",
-                        "description": "Insert your personal access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the owner's name",
-                        "name": "owner",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "the new secret",
-                        "name": "secretData",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/Secret"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/Secret"
-                        }
-                    }
-                }
             }
         },
-        "/orgs/{owner}/secrets/{secret}": {
+        "/orgs/{org_id}/secrets/{secret}": {
             "get": {
                 "produces": [
                     "application/json"
@@ -938,8 +970,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "the owner's name",
-                        "name": "owner",
+                        "description": "the org's id",
+                        "name": "org_id",
                         "in": "path",
                         "required": true
                     },
@@ -979,8 +1011,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "the owner's name",
-                        "name": "owner",
+                        "description": "the org's id",
+                        "name": "org_id",
                         "in": "path",
                         "required": true
                     },
@@ -993,8 +1025,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK"
+                    "204": {
+                        "description": "No Content"
                     }
                 }
             },
@@ -1017,8 +1049,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "the owner's name",
-                        "name": "owner",
+                        "description": "the org's id",
+                        "name": "org_id",
                         "in": "path",
                         "required": true
                     },
@@ -1031,6 +1063,51 @@ const docTemplate = `{
                     },
                     {
                         "description": "the update secret data",
+                        "name": "secretData",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Secret"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Secret"
+                        }
+                    }
+                }
+            }
+        },
+        "/orgs/{owner}/secrets": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Organization secrets"
+                ],
+                "summary": "Persist/create an organization secret",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "the org's id",
+                        "name": "org_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "the new secret",
                         "name": "secretData",
                         "in": "body",
                         "required": true,
@@ -2767,8 +2844,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK"
+                    "204": {
+                        "description": "No Content"
                     }
                 }
             },
@@ -2966,8 +3043,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK"
+                    "204": {
+                        "description": "No Content"
                     }
                 }
             },
@@ -3603,6 +3680,20 @@ const docTemplate = `{
                 }
             }
         },
+        "Org": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "is_user": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "OrgPerm": {
             "type": "object",
             "properties": {
@@ -3844,6 +3935,9 @@ const docTemplate = `{
                 },
                 "netrc_only_trusted": {
                     "type": "boolean"
+                },
+                "org_id": {
+                    "type": "integer"
                 },
                 "owner": {
                     "type": "string"

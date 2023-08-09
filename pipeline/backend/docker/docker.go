@@ -17,13 +17,16 @@ package docker
 import (
 	"context"
 	"io"
+	"net/http"
 	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/api/types/volume"
+	"github.com/docker/go-connections/tlsconfig"
 	"github.com/moby/moby/client"
 	"github.com/moby/moby/pkg/jsonmessage"
 	"github.com/moby/moby/pkg/stdcopy"
@@ -67,20 +70,56 @@ func (e *docker) IsAvailable(context.Context) bool {
 	return err == nil
 }
 
+func httpClientOfOpts(dockerCertPath string, verifyTLS bool) *http.Client {
+	if dockerCertPath == "" {
+		return nil
+	}
+
+	options := tlsconfig.Options{
+		CAFile:             filepath.Join(dockerCertPath, "ca.pem"),
+		CertFile:           filepath.Join(dockerCertPath, "cert.pem"),
+		KeyFile:            filepath.Join(dockerCertPath, "key.pem"),
+		InsecureSkipVerify: !verifyTLS,
+	}
+	tlsConf, err := tlsconfig.Client(options)
+	if err != nil {
+		log.Error().Err(err).Msg("could not create http client out of docker backend options")
+		return nil
+	}
+
+	return &http.Client{
+		Transport:     &http.Transport{TLSClientConfig: tlsConf},
+		CheckRedirect: client.CheckRedirect,
+	}
+}
+
 // Load new client for Docker Engine using environment variables.
 func (e *docker) Load(ctx context.Context) error {
-	cl, err := client.NewClientWithOpts(client.FromEnv)
+	c, ok := ctx.Value(backend.CliContext).(*cli.Context)
+	if !ok {
+		return backend.ErrNoCliContextFound
+	}
+
+	var dockerClientOpts []client.Opt
+	if httpClient := httpClientOfOpts(c.String("backend-docker-cert"), c.Bool("backend-docker-tls-verify")); httpClient != nil {
+		dockerClientOpts = append(dockerClientOpts, client.WithHTTPClient(httpClient))
+	}
+	if dockerHost := c.String("backend-docker-host"); dockerHost != "" {
+		dockerClientOpts = append(dockerClientOpts, client.WithHost(dockerHost))
+	}
+	if dockerAPIVersion := c.String("backend-docker-api-version"); dockerAPIVersion != "" {
+		dockerClientOpts = append(dockerClientOpts, client.WithVersion(dockerAPIVersion))
+	} else {
+		dockerClientOpts = append(dockerClientOpts, client.WithAPIVersionNegotiation())
+	}
+
+	cl, err := client.NewClientWithOpts(dockerClientOpts...)
 	if err != nil {
 		return err
 	}
 	e.client = cl
 
-	c, ok := ctx.Value(backend.CliContext).(*cli.Context)
-	if !ok {
-		return backend.ErrNoCliContextFound
-	}
 	e.enableIPv6 = c.Bool("backend-docker-ipv6")
-
 	e.network = c.String("backend-docker-network")
 
 	volumes := strings.Split(c.String("backend-docker-volumes"), ",")
@@ -101,7 +140,9 @@ func (e *docker) Load(ctx context.Context) error {
 	return nil
 }
 
-func (e *docker) Setup(_ context.Context, conf *backend.Config) error {
+func (e *docker) SetupWorkflow(_ context.Context, conf *backend.Config, taskUUID string) error {
+	log.Trace().Str("taskUUID", taskUUID).Msg("create workflow environment")
+
 	for _, vol := range conf.Volumes {
 		_, err := e.client.VolumeCreate(noContext, volume.VolumeCreateBody{
 			Name:   vol.Name,
@@ -128,7 +169,9 @@ func (e *docker) Setup(_ context.Context, conf *backend.Config) error {
 	return nil
 }
 
-func (e *docker) Exec(ctx context.Context, step *backend.Step) error {
+func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID string) error {
+	log.Trace().Str("taskUUID", taskUUID).Msgf("start step %s", step.Name)
+
 	config := toConfig(step)
 	hostConfig := toHostConfig(step)
 	containerName := toContainerName(step)
@@ -204,7 +247,9 @@ func (e *docker) Exec(ctx context.Context, step *backend.Step) error {
 	return e.client.ContainerStart(ctx, containerName, startOpts)
 }
 
-func (e *docker) Wait(ctx context.Context, step *backend.Step) (*backend.State, error) {
+func (e *docker) WaitStep(ctx context.Context, step *backend.Step, taskUUID string) (*backend.State, error) {
+	log.Trace().Str("taskUUID", taskUUID).Msgf("wait for step %s", step.Name)
+
 	containerName := toContainerName(step)
 
 	wait, errc := e.client.ContainerWait(ctx, containerName, "")
@@ -228,7 +273,9 @@ func (e *docker) Wait(ctx context.Context, step *backend.Step) (*backend.State, 
 	}, nil
 }
 
-func (e *docker) Tail(ctx context.Context, step *backend.Step) (io.ReadCloser, error) {
+func (e *docker) TailStep(ctx context.Context, step *backend.Step, taskUUID string) (io.ReadCloser, error) {
+	log.Trace().Str("taskUUID", taskUUID).Msgf("tail logs of step %s", step.Name)
+
 	logs, err := e.client.ContainerLogs(ctx, toContainerName(step), logsOpts)
 	if err != nil {
 		return nil, err
@@ -244,7 +291,9 @@ func (e *docker) Tail(ctx context.Context, step *backend.Step) (io.ReadCloser, e
 	return rc, nil
 }
 
-func (e *docker) Destroy(_ context.Context, conf *backend.Config) error {
+func (e *docker) DestroyWorkflow(_ context.Context, conf *backend.Config, taskUUID string) error {
+	log.Trace().Str("taskUUID", taskUUID).Msgf("delete workflow environment")
+
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
 			containerName := toContainerName(step)

@@ -11,8 +11,8 @@
         class="items-center"
         :to="repo.active ? { name: 'repo', params: { repoId: repo.id } } : undefined"
       >
-        <span class="text-color">{{ repo.full_name }}</span>
-        <span v-if="repo.active" class="ml-auto text-color-alt">{{ $t('repo.enable.enabled') }}</span>
+        <span class="text-wp-text-100">{{ repo.full_name }}</span>
+        <span v-if="repo.active" class="ml-auto text-wp-text-alt-100">{{ $t('repo.enable.enabled') }}</span>
         <Button
           v-if="!repo.active"
           class="ml-auto"
@@ -37,7 +37,7 @@ import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
 import { useRepoSearch } from '~/compositions/useRepoSearch';
-import { useRouteBackOrDefault } from '~/compositions/useRouteBackOrDefault';
+import { useRouteBack } from '~/compositions/useRouteBack';
 import { Repo } from '~/lib/api/types';
 
 const router = useRouter();
@@ -62,5 +62,5 @@ const { doSubmit: activateRepo, isLoading: isActivatingRepo } = useAsyncAction(a
   await router.push({ name: 'repo', params: { repoId: _repo.id } });
 });
 
-const goBack = useRouteBackOrDefault({ name: 'repos' });
+const goBack = useRouteBack({ name: 'repos' });
 </script>

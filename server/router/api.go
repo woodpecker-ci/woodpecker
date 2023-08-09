@@ -23,7 +23,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 )
 
-func apiRoutes(e *gin.Engine) {
+func apiRoutes(e *gin.RouterGroup) {
 	apiBase := e.Group("/api")
 	{
 		user := apiBase.Group("/user")
@@ -46,13 +46,15 @@ func apiRoutes(e *gin.Engine) {
 			users.DELETE("/:login", api.DeleteUser)
 		}
 
-		orgBase := apiBase.Group("/orgs/:owner")
+		apiBase.GET("/orgs/lookup/*org_full_name", api.LookupOrg)
+		orgBase := apiBase.Group("/orgs/:org_id")
 		{
 			orgBase.GET("/permissions", api.GetOrgPermissions)
 
 			org := orgBase.Group("")
 			{
 				org.Use(session.MustOrgMember(true))
+				org.GET("", api.GetOrg)
 				org.GET("/secrets", api.GetOrgSecretList)
 				org.POST("/secrets", api.PostOrgSecret)
 				org.GET("/secrets/:secret", api.GetOrgSecret)

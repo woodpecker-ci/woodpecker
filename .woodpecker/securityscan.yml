@@ -1,7 +1,9 @@
 when:
   - event: [ pull_request, cron ]
   - event: push
-    branch: [ main, release/* ]
+    branch:
+      - ${CI_REPO_DEFAULT_BRANCH}
+      - release/*
 
 variables:
   - &trivy_image aquasec/trivy:latest
@@ -20,6 +22,9 @@ steps:
     settings:
       skip-dirs: node_modules/,plugins/woodpecker-plugins/node_modules/
       dir:  docs/
+    when:
+      event: [pull_request, push, cron]
+      branch: ${CI_REPO_DEFAULT_BRANCH}
 
   check web:
     group: check

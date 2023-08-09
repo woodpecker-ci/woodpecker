@@ -1,7 +1,9 @@
 when:
-  - event: pull_request
+  - event: [pull_request, tag]
   - event: push
-    branch: [ main, release/* ]
+    branch:
+      - ${CI_REPO_DEFAULT_BRANCH}
+      - release/*
 
 variables:
   - &golang_image 'golang:1.20.2'
@@ -15,10 +17,6 @@ variables:
         - "go.*"
         # schema changes
         - "pipeline/schema/**"
-      branch:
-        exclude: ${CI_REPO_DEFAULT_BRANCH}
-      event: push
-    - path: *when_path
       event: [pull_request, tag, deployment]
 
 steps:

@@ -210,23 +210,26 @@ module.exports = {
       ({
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
-          editUrl: 'https://github.com/woodpecker-ci/woodpecker/edit/master/docs/',
+          editUrl: 'https://github.com/woodpecker-ci/woodpecker/edit/main/docs/',
           includeCurrentVersion: true,
-          lastVersion: '0.15',
+          lastVersion: '1.0',
           versions: {
-            current: {
+            'current': {
               label: 'Next',
               banner: 'unreleased',
             },
-            0.15: {
+            '1.0': {
+              label: '1.0.x',
+            },
+            '0.15': {
               label: '0.15.x',
-              banner: 'none',
+              banner: 'unmaintained',
             },
           },
         },
         blog: {
-          blogTitle: 'Docusaurus blog!',
-          blogDescription: 'A Docusaurus powered blog!',
+          blogTitle: 'Blog',
+          blogDescription: 'A blog for release announcements, turorials...',
           // postsPerPage: 'ALL',
           // blogSidebarCount: 0,
         },
