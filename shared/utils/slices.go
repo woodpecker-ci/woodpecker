@@ -31,3 +31,29 @@ func MergeSlices[T any](slices ...[]T) []T {
 	}
 	return result
 }
+
+// EqualSliceValues compare two slices if they have equal values independent of how they are sorted
+func EqualSliceValues[E comparable](s1, s2 []E) bool {
+	if len(s1) != len(s2) {
+		return false
+	}
+
+	m1 := sliceToCountMap(s1)
+	m2 := sliceToCountMap(s2)
+
+	for k, v := range m1 {
+		if m2[k] != v {
+			return false
+		}
+	}
+
+	return true
+}
+
+func sliceToCountMap[E comparable](list []E) map[E]int {
+	m := make(map[E]int)
+	for i := range list {
+		m[list[i]]++
+	}
+	return m
+}
