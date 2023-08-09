@@ -9,6 +9,7 @@ require (
 	github.com/6543/logfile-open v1.1.1
 	github.com/alessio/shellescape v1.4.1
 	github.com/antonmedv/expr v1.12.5
+	github.com/autom8ter/dagger/v3 v3.1.6
 	github.com/bmatcuk/doublestar/v4 v4.6.0
 	github.com/caddyserver/certmagic v0.17.2
 	github.com/docker/cli v20.10.24+incompatible
@@ -39,7 +40,7 @@ require (
 	github.com/prometheus/client_golang v1.15.1
 	github.com/robfig/cron v1.2.0
 	github.com/rs/zerolog v1.29.1
-	github.com/stretchr/testify v1.8.3
+	github.com/stretchr/testify v1.8.4
 	github.com/swaggo/files v1.0.1
 	github.com/swaggo/gin-swagger v1.6.0
 	github.com/swaggo/swag v1.16.1
@@ -51,7 +52,7 @@ require (
 	golang.org/x/exp v0.0.0-20230425010034-47ecfdc1ba53
 	golang.org/x/net v0.10.0
 	golang.org/x/oauth2 v0.8.0
-	golang.org/x/sync v0.2.0
+	golang.org/x/sync v0.3.0
 	golang.org/x/term v0.11.0
 	google.golang.org/grpc v1.55.0
 	google.golang.org/protobuf v1.30.0
@@ -67,6 +68,7 @@ require (
 	github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1 // indirect
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/Microsoft/go-winio v0.6.1 // indirect
+	github.com/autom8ter/async v1.0.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bytedance/sonic v1.9.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
@@ -77,6 +79,7 @@ require (
 	github.com/docker/docker-credential-helpers v0.7.0 // indirect
 	github.com/emicklei/go-restful/v3 v3.9.0 // indirect
 	github.com/fatih/color v1.13.0 // indirect
+	github.com/fogleman/gg v1.3.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-fed/httpsig v1.1.0 // indirect
@@ -88,8 +91,10 @@ require (
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.14.0 // indirect
+	github.com/goccy/go-graphviz v0.1.1 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
+	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/gnostic v0.5.7-v3refs // indirect
@@ -139,6 +144,7 @@ require (
 	go.uber.org/multierr v1.8.0 // indirect
 	go.uber.org/zap v1.23.0 // indirect
 	golang.org/x/arch v0.3.0 // indirect
+	golang.org/x/image v0.6.0 // indirect
 	golang.org/x/mod v0.9.0 // indirect
 	golang.org/x/sys v0.11.0 // indirect
 	golang.org/x/text v0.9.0 // indirect
