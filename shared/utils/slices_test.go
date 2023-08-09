@@ -54,4 +54,7 @@ func TestEqualSliceValues(t *testing.T) {
 	for _, tc := range tests {
 		assert.EqualValues(t, tc.out, EqualSliceValues(tc.in1, tc.in2), "could not correctly process input: '%#v', %#v", tc.in1, tc.in2)
 	}
+
+	assert.True(t, EqualSliceValues([]bool{true, false, false}, []bool{false, false, true}))
+	assert.False(t, EqualSliceValues([]bool{true, false, false}, []bool{true, false, true}))
 }
