@@ -35,6 +35,13 @@ func ParseBytes(b []byte) (*types.Workflow, error) {
 	}
 	out.PipelineDontUseIt.ContainerList = nil
 
+	// support deprecated platform filter
+	if out.PlatformDontUseIt == "" {
+		if _, set := out.Labels["platform"]; !set {
+			out.Labels["platform"] = out.PlatformDontUseIt
+		}
+	}
+
 	return out, nil
 }
 
