@@ -221,6 +221,7 @@
       "files": "Geänderte Dateien ({files})",
       "loading": "Laden…",
       "log_download_error": "Beim Herunterladen der Log-Datei ist ein Fehler aufgetreten",
+      "log_title": "Logs des Schrittes",
       "no_files": "Es wurden keine Dateien geändert.",
       "no_pipeline_steps": "Keine Schritte in der Pipeline vorhanden!",
       "no_pipelines": "Bisher wurden noch keine Pipelines gestartet.",
