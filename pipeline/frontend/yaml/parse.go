@@ -6,6 +6,7 @@ import (
 	"codeberg.org/6543/xyaml"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types/base"
 )
 
 // ParseBytes parses the configuration from bytes b.
@@ -27,10 +28,14 @@ func ParseBytes(b []byte) (*types.Workflow, error) {
 	}
 
 	// support deprecated platform filter
-	if out.PlatformDontUseIt == "" {
+	if out.PlatformDontUseIt != "" {
+		if out.Labels == nil {
+			out.Labels = make(base.SliceOrMap)
+		}
 		if _, set := out.Labels["platform"]; !set {
 			out.Labels["platform"] = out.PlatformDontUseIt
 		}
+		out.PlatformDontUseIt = ""
 	}
 
 	return out, nil
