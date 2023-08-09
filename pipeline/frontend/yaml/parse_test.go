@@ -125,23 +125,27 @@ func TestParse(t *testing.T) {
 }
 
 func TestParseLegacy(t *testing.T) {
+	// adjust with https://github.com/woodpecker-ci/woodpecker/pull/2181
 	sampleYamlPipelineLegacy := `
-pipeline:
+platform: linux/amd64
+labels:
+  platform: linux/arm64
+
+steps:
   say hello:
     image: bash
     commands: echo hello
 `
 
 	sampleYamlPipelineLegacyIgnore := `
+platform: linux/amd64
+labels:
+  platform: linux/arm64
+
 steps:
   say hello:
     image: bash
     commands: echo hello
-
-pipeline:
-  old crap:
-    image: bash
-    commands: meh!
 `
 
 	workflow1, err := ParseString(sampleYamlPipelineLegacy)
