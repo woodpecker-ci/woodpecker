@@ -221,6 +221,7 @@
       "files": "Fichiers changés ({files})",
       "loading": "Chargement…",
       "log_download_error": "Il y a eu une erreur lors du téléchargement du fichier de journal",
+      "log_title": "Journal des étapes",
       "no_files": "Aucun fichier n'a été modifié.",
       "no_pipeline_steps": "Aucune étape disponible !",
       "no_pipelines": "Aucun pipeline n'a démarré pour le moment.",
