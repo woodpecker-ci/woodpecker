@@ -19,12 +19,12 @@ func ParseBytes(b []byte) (*types.Workflow, error) {
 
 	// fail hard on deprecated branch filter
 	if out.BranchesDontUseIt != nil {
-		return nil, fmt.Errorf("\"branches:\" filter got removed, use \"branch\" in global when filter")
+		return nil, fmt.Errorf("\"branches:\" filter got removed, use \"branch\" in global when filter instead")
 	}
 
 	// fail hard on deprecated pipeline keyword
 	if len(out.PipelineDontUseIt.ContainerList) != 0 {
-		return nil, fmt.Errorf("\"pipeline:\" got removed, user \"steps:\"")
+		return nil, fmt.Errorf("\"pipeline:\" got removed, use \"steps:\" instead")
 	}
 
 	// support deprecated platform filter
