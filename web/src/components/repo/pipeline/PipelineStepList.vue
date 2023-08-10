@@ -79,7 +79,6 @@
           <div
             class="transition-height duration-150 overflow-hidden"
             :class="{
-              'max-h-screen': !workflowsCollapsed[workflow.id],
               'max-h-0': workflowsCollapsed[workflow.id],
               'ml-6': pipeline.workflows && pipeline.workflows.length > 1,
             }"
