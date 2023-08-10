@@ -9,8 +9,6 @@ They do not need to be set for both but only for the part to which it is relevan
 
 ```yml
 server:
-  enabled: true
-
   env:
     WOODPECKER_SESSION_EXPIRES: "300h"
     [...]
