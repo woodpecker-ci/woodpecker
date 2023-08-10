@@ -65,6 +65,13 @@ steps:
     image: mstruebing/editorconfig-checker
     group: test
 
+  lint-license-header:
+    image: *golang_image
+    commands:
+      - go install github.com/google/addlicense@latest
+      - "addlicense -check -ignore \"vendor/**\" **/*.go"
+    when: *when
+
   test:
     image: *golang_image
     group: test
