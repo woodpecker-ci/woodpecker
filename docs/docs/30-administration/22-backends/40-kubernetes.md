@@ -2,7 +2,23 @@
 
 The kubernetes backend executes steps inside standalone pods. A temporary PVC is created for the lifetime of the pipeline to transfer files between steps.
 
-## Configuration
+## General Configuration
+
+These env vars can be set in the `env:` sections of both `server` and `agent`.
+They do not need to be set for both but only for the part to which it is relevant to.
+
+```yml
+server:
+  enabled: true
+
+  env:
+    WOODPECKER_SESSION_EXPIRES: "300h"
+    [...]
+
+agent:
+  env:
+    [...]
+```
 
 - `WOODPECKER_BACKEND_K8S_NAMESPACE` (default: `woodpecker`)
 
