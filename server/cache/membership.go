@@ -22,7 +22,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 
-	"github.com/lafriks/ttlcache/v3"
+	"github.com/jellydator/ttlcache/v3"
 )
 
 // MembershipService is a service to check for user membership.
@@ -49,8 +49,7 @@ func NewMembershipService(f forge.Forge) MembershipService {
 // Get returns if the user is a member of the organization.
 func (c *membershipCache) Get(ctx context.Context, u *model.User, org string) (*model.OrgPerm, error) {
 	key := fmt.Sprintf("%s-%s", u.ForgeRemoteID, org)
-	// Error can be safely ignored, as cache can only return error from loaders.
-	item, _ := c.cache.Get(key)
+	item := c.cache.Get(key)
 	if item != nil && !item.IsExpired() {
 		return item.Value(), nil
 	}
