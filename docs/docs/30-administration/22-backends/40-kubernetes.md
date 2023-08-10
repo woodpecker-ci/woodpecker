@@ -4,35 +4,29 @@ The kubernetes backend executes steps inside standalone pods. A temporary PVC is
 
 ## Configuration
 
-### `WOODPECKER_BACKEND_K8S_NAMESPACE`
-> Default: `woodpecker`
+- `WOODPECKER_BACKEND_K8S_NAMESPACE` (default: `woodpecker`)
 
-The namespace to create worker pods in.
+  The namespace to create worker pods in.
 
-### `WOODPECKER_BACKEND_K8S_VOLUME_SIZE`
-> Default: `10G`
+- `WOODPECKER_BACKEND_K8S_VOLUME_SIZE` (default: `10G`)
 
-The volume size of the pipeline volume.
+  The volume size of the pipeline volume.
 
-### `WOODPECKER_BACKEND_K8S_STORAGE_CLASS`
-> Default: empty
+- `WOODPECKER_BACKEND_K8S_STORAGE_CLASS` (default: empty)
 
-The storage class to use for the pipeline volume.
+  The storage class to use for the pipeline volume.
 
-### `WOODPECKER_BACKEND_K8S_STORAGE_RWX`
-> Default: `true`
+- `WOODPECKER_BACKEND_K8S_STORAGE_RWX` (default: `true`)
 
-Determines if `RWX` should be used for the pipeline volume's [access mode](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes). If false, `RWO` is used instead.
+  Determines if `RWX` should be used for the pipeline volume's [access mode](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes). If false, `RWO` is used instead.
 
-### `WOODPECKER_BACKEND_K8S_POD_LABELS`
-> Default: empty
+- `WOODPECKER_BACKEND_K8S_POD_LABELS` (default: empty)
 
-Additional labels to apply to worker pods. Must be a YAML object, e.g. `{"example.com/test-label":"test-value"}`.
+  Additional labels to apply to worker pods. Must be a YAML object, e.g. `{"example.com/test-label":"test-value"}`.
 
-### `WOODPECKER_BACKEND_K8S_POD_ANNOTATIONS`
-> Default: empty
+- `WOODPECKER_BACKEND_K8S_POD_ANNOTATIONS` (default: empty)
 
-Additional annotations to apply to worker pods. Must be a YAML object, e.g. `{"example.com/test-annotation":"test-value"}`.
+  Additional annotations to apply to worker pods. Must be a YAML object, e.g. `{"example.com/test-annotation":"test-value"}`.
 
 ## Job specific configuration
 
@@ -45,7 +39,7 @@ Here is an example definition with an arbitrary `resources` definition below the
 
 ```yml
 steps:
-  "My kubernetes step":
+  'My kubernetes step':
     image: alpine
     commands:
       - echo "Hello world"
@@ -72,6 +66,7 @@ By default the pod will use "kubernetes.io/arch" inferred from top-level "platfo
 See the [kubernetes documentation](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector) for more information on using nodeSelector.
 
 Example pipeline configuration:
+
 ```yaml
 steps:
   build:
