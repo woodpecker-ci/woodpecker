@@ -64,7 +64,7 @@ func Test_parser(t *testing.T) {
 				g.Assert(r).IsNotNil()
 				g.Assert(b).IsNotNil()
 				g.Assert(b.Event).Equal(model.EventPush)
-				g.Assert(utils.EqualStringSlice(b.ChangedFiles, []string{"CHANGELOG.md", "app/controller/application.rb"})).IsTrue()
+				g.Assert(utils.EqualSliceValues(b.ChangedFiles, []string{"CHANGELOG.md", "app/controller/application.rb"})).IsTrue()
 			})
 		})
 		g.Describe("given a push hook from an branch creation", func() {

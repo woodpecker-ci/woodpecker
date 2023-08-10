@@ -54,7 +54,6 @@ type StepBuilder struct {
 
 type Item struct {
 	Workflow  *model.Workflow
-	Platform  string
 	Labels    map[string]string
 	DependsOn []string
 	RunsOn    []string
@@ -171,7 +170,6 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 		Labels:    parsed.Labels,
 		DependsOn: parsed.DependsOn,
 		RunsOn:    parsed.RunsOn,
-		Platform:  parsed.Platform,
 	}
 	if item.Labels == nil {
 		item.Labels = map[string]string{}
