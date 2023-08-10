@@ -39,7 +39,26 @@ Additional annotations to apply to worker pods. Must be a YAML object, e.g. `{"e
 ### Resources
 
 The kubernetes backend also allows for specifying requests and limits on a per-step basic, most commonly for CPU and memory.
-See the [kubernetes documentation](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/) for more information on using resources.
+We recommend to add a `resources` definition to all steps to ensure efficient scheduling.
+
+Here is an example definition with an arbitrary `resources` definition below the `backend_options` section:
+
+```yml
+steps:
+  "My kubernetes step":
+    image: alpine
+    commands:
+      - echo "Hello world"
+    backend_options:
+      kubernetes:
+        resources:
+          requests:
+            memory: 200Mi
+            cpu: 100m
+          limits:
+            memory: 400Mi
+            cpu: 1000m
+```
 
 ### serviceAccountName
 
