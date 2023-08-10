@@ -1,12 +1,6 @@
 # Kubernetes backend
 
-:::caution
-Kubernetes support is still experimental and not all pipeline features are fully supported yet.
-
-Check the [current state](https://github.com/woodpecker-ci/woodpecker/issues/1513)
-:::
-
-The kubernetes backend executes each step inside a newly created pod. A PVC is also created for the lifetime of the pipeline, for transferring files between steps.
+The kubernetes backend executes steps inside standalone pods. A temporary PVC is created for the lifetime of the pipeline to transfer files between steps.
 
 ## Configuration
 
@@ -78,4 +72,21 @@ steps:
             memory: 256Mi
         nodeSelector:
           beta.kubernetes.io/instance-type: p3.8xlarge
+```
+
+### Volumes
+
+To mount volumes a persistent volume (PV) and persistent volume claim (PVC) are needed on the cluster which can be referenced in steps via the `volume:` option.
+Assuming a PVC named "woodpecker-cache" exists, it can be referenced as follows in a step:
+
+```yaml
+steps:
+  "Restore Cache":
+    image: meltwater/drone-cache
+    volumes:
+      - woodpecker-cache:/woodpecker/src/cache
+    settings:
+      mount:
+        - "woodpecker-cache"
+    [...]
 ```
