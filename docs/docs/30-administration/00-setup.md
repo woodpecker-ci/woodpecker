@@ -35,7 +35,7 @@ In addition you need at least some kind of database which requires additional re
 You can install Woodpecker on multiple ways:
 
 - Using [docker-compose](#docker-compose) with the official [container images](../80-downloads.md#docker-images)
-- By deploying to a [Kubernetes](./80-kubernetes.md) with manifests or Woodpeckers official Helm charts
+- Using [Kubernetes](./#kubernetes) via the Woodpeckers Helm chart
 - Using [binaries](../80-downloads.md)
 
 ### docker-compose
