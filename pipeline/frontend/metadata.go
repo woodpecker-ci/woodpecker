@@ -55,14 +55,15 @@ func MetadataFromStruct(forge metadata.ServerForge, repo *model.Repo, pipeline, 
 	fRepo := metadata.Repo{}
 	if repo != nil {
 		fRepo = metadata.Repo{
-			Name:     repo.Name,
-			Owner:    repo.Owner,
-			RemoteID: fmt.Sprint(repo.ForgeRemoteID),
-			Link:     repo.Link,
-			CloneURL: repo.Clone,
-			Private:  repo.IsSCMPrivate,
-			Branch:   repo.Branch,
-			Trusted:  repo.IsTrusted,
+			Name:        repo.Name,
+			Owner:       repo.Owner,
+			RemoteID:    fmt.Sprint(repo.ForgeRemoteID),
+			Link:        repo.Link,
+			CloneURL:    repo.Clone,
+			CloneURLSSH: repo.CloneSSH,
+			Private:     repo.IsSCMPrivate,
+			Branch:      repo.Branch,
+			Trusted:     repo.IsTrusted,
 		}
 
 		if idx := strings.LastIndex(repo.FullName, "/"); idx != -1 {

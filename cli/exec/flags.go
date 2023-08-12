@@ -151,6 +151,10 @@ var flags = []cli.Flag{
 		Name:    "repo-clone-url",
 	},
 	&cli.StringFlag{
+		EnvVars: []string{"CI_REPO_CLONE_URL_SSH"},
+		Name:    "repo-clone-url-ssh",
+	},
+	&cli.StringFlag{
 		EnvVars: []string{"CI_REPO_PRIVATE"},
 		Name:    "repo-private",
 	},

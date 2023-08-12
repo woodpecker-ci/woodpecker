@@ -45,6 +45,7 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_REPO_SCM":            "git",
 		"CI_REPO_URL":            m.Repo.Link,
 		"CI_REPO_CLONE_URL":      m.Repo.CloneURL,
+		"CI_REPO_CLONE_URL_SSH":  m.Repo.CloneURLSSH,
 		"CI_REPO_DEFAULT_BRANCH": m.Repo.Branch,
 		"CI_REPO_PRIVATE":        strconv.FormatBool(m.Repo.Private),
 		"CI_REPO_TRUSTED":        strconv.FormatBool(m.Repo.Trusted),

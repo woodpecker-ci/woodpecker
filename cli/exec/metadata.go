@@ -42,13 +42,14 @@ func metadataFromContext(c *cli.Context, axis matrix.Axis) metadata.Metadata {
 
 	return metadata.Metadata{
 		Repo: metadata.Repo{
-			Name:     repoName,
-			Owner:    repoOwner,
-			RemoteID: c.String("repo-remote-id"),
-			Link:     c.String("repo-link"),
-			CloneURL: c.String("repo-clone-url"),
-			Private:  c.Bool("repo-private"),
-			Trusted:  c.Bool("repo-trusted"),
+			Name:        repoName,
+			Owner:       repoOwner,
+			RemoteID:    c.String("repo-remote-id"),
+			Link:        c.String("repo-link"),
+			CloneURL:    c.String("repo-clone-url"),
+			CloneURLSSH: c.String("repo-clone-url-ssh"),
+			Private:     c.Bool("repo-private"),
+			Trusted:     c.Bool("repo-trusted"),
 		},
 		Curr: metadata.Pipeline{
 			Number:   c.Int64("pipeline-number"),

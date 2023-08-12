@@ -43,6 +43,7 @@ func (g *GitLab) convertGitLabRepo(_repo *gitlab.Project) (*model.Repo, error) {
 		Avatar:        _repo.AvatarURL,
 		Link:          _repo.WebURL,
 		Clone:         _repo.HTTPURLToRepo,
+		CloneSSH:      _repo.SSHURLToRepo,
 		Branch:        _repo.DefaultBranch,
 		Visibility:    model.RepoVisibility(_repo.Visibility),
 		IsSCMPrivate:  !_repo.Public,
@@ -96,6 +97,11 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 	} else {
 		repo.Clone = target.HTTPURL
 	}
+	if target.GitSSHURL != "" {
+		repo.CloneSSH = target.GitSSHURL
+	} else {
+		repo.CloneSSH = target.SSHURL
+	}
 
 	repo.Branch = target.DefaultBranch
 
@@ -143,6 +149,7 @@ func convertPushHook(hook *gitlab.PushEvent) (*model.Repo, *model.Pipeline, erro
 	repo.Avatar = hook.Project.AvatarURL
 	repo.Link = hook.Project.WebURL
 	repo.Clone = hook.Project.GitHTTPURL
+	repo.CloneSSH = hook.Project.GitSSHURL
 	repo.FullName = hook.Project.PathWithNamespace
 	repo.Branch = hook.Project.DefaultBranch
 
@@ -195,6 +202,7 @@ func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Pipeline, error)
 	repo.Avatar = hook.Project.AvatarURL
 	repo.Link = hook.Project.WebURL
 	repo.Clone = hook.Project.GitHTTPURL
+	repo.CloneSSH = hook.Project.GitSSHURL
 	repo.FullName = hook.Project.PathWithNamespace
 	repo.Branch = hook.Project.DefaultBranch
 
