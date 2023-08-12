@@ -67,6 +67,8 @@ steps:
   lint-editorconfig:
     image: mstruebing/editorconfig-checker
     group: test
+    when:
+      path: *when_path
 
   lint-license-header:
     image: *golang_image
