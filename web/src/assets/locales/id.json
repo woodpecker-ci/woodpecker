@@ -221,6 +221,7 @@
       "files": "Berkas yang diubah ({files})",
       "loading": "Memuat…",
       "log_download_error": "Terjadi sebuah kesalahan saat mengunduh berkas catatan",
+      "log_title": "Catatan Langkah",
       "no_files": "Tidak ada berkas yang telah diubah.",
       "no_pipeline_steps": "Tidak ada langkah jalur pipa yang tersedia!",
       "no_pipelines": "Belum ada jalur pipa yang dimulai.",
