@@ -18,8 +18,7 @@ variables:
   - &platforms_server 'linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le,linux/riscv64'
   - &platforms_preview 'linux/amd64'
   - &platforms_alpine 'linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le'
-  - &when_path
-    # - '.woodpecker/docker.yml'
+  - &when_path # - '.woodpecker/docker.yml'
     - 'agent/**'
     - 'cli/**'
     - 'cmd/**'
@@ -45,6 +44,12 @@ variables:
   - &publish_repos_server 'woodpeckerci/woodpecker-server,quay.io/woodpeckerci/woodpecker-server'
   - &publish_repos_agent 'woodpeckerci/woodpecker-agent,quay.io/woodpeckerci/woodpecker-agent'
   - &publish_repos_cli 'woodpeckerci/woodpecker-cli,quay.io/woodpeckerci/woodpecker-cli'
+
+clone:
+  git:
+    image: woodpeckerci/plugin-git
+    when:
+      - event: [pull_request, tag]
 
 steps:
   vendor:
