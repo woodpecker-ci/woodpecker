@@ -34,7 +34,7 @@ type (
 		RemoteID    string   `json:"remote_id,omitempty"`
 		Link        string   `json:"link,omitempty"`
 		CloneURL    string   `json:"clone_url,omitempty"`
-		CloneURLSSH string   `json:"clone_url_ssh,omitempty"`
+		CloneSSHURL string   `json:"clone_url_ssh,omitempty"`
 		Private     bool     `json:"private,omitempty"`
 		Secrets     []Secret `json:"secrets,omitempty"`
 		Branch      string   `json:"default_branch,omitempty"`
