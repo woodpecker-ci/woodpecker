@@ -9,7 +9,7 @@ variables:
   - &golang_image 'golang:1.20.2'
   - &when_path
         # related config files
-        - ".woodpecker/test.yml"
+        # - ".woodpecker/test.yml"
         - ".golangci.yml"
         # go source code
         - "**/*.go"
