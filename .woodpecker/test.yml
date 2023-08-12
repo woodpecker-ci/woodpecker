@@ -10,7 +10,7 @@ variables:
   - &when
     - path: &when_path
         # related config files
-        - ".woodpecker/test.yml"
+        # - ".woodpecker/test.yml"
         - ".golangci.yml"
         # go source code
         - "**/*.go"
