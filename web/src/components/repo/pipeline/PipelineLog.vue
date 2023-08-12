@@ -1,20 +1,16 @@
 <template>
   <div v-if="pipeline" class="flex flex-col pt-10 md:pt-0">
     <div
-      class="fixed top-0 left-0 w-full md:hidden flex px-4 py-2 bg-wp-background-100 dark:bg-wp-background-200 text-wp-text-100"
-      @click="$emit('update:step-id', null)"
-    >
-      <span>{{ step?.name }}</span>
-      <Icon name="close" class="ml-auto" />
-    </div>
-
-    <div
       class="flex flex-grow flex-col code-box shadow !p-0 !rounded-none md:m-2 md:mt-0 !md:rounded-md overflow-hidden"
       @mouseover="showActions = true"
       @mouseleave="showActions = false"
     >
-      <div class="flex flex-row items-center w-full bg-wp-code-100 px-4 py-2">
-        <span class="text-base font-bold text-wp-code-text-alt-100">{{ $t('repo.pipeline.log_title') }}</span>
+      <div class="<md:fixed <md:top-0 <md:left-0 flex flex-row items-center w-full bg-wp-code-100 px-4 py-2">
+        <span class="text-base font-bold text-wp-code-text-alt-100">
+          <span class="<md:hidden">{{ $t('repo.pipeline.log_title') }}</span>
+          <span class="md:hidden">{{ step?.name }}</span>
+        </span>
+
         <div class="flex flex-row items-center ml-auto gap-x-2">
           <IconButton
             v-if="step?.end_time !== undefined"
@@ -32,6 +28,11 @@
             class="!hover:bg-white !hover:bg-opacity-10"
             :icon="autoScroll ? 'auto-scroll' : 'auto-scroll-off'"
             @click="autoScroll = !autoScroll"
+          />
+          <IconButton
+            class="!hover:bg-white !hover:bg-opacity-10 !md:hidden"
+            icon="close"
+            @click="$emit('update:step-id', null)"
           />
         </div>
       </div>
