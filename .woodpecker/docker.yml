@@ -19,7 +19,7 @@ variables:
   - &platforms_preview 'linux/amd64'
   - &platforms_alpine 'linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le'
   - &when_path
-    - '.woodpecker/docker.yml'
+    # - '.woodpecker/docker.yml'
     - 'agent/**'
     - 'cli/**'
     - 'cmd/**'
