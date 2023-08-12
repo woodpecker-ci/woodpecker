@@ -1,5 +1,9 @@
 # Kubernetes backend
 
+:::info
+Not all pipeline features are fully supported yet for this backend.
+Check [the Kubernetes overview issue](https://github.com/woodpecker-ci/woodpecker/issues/1513) for a summary.
+
 The kubernetes backend executes steps inside standalone pods. A temporary PVC is created for the lifetime of the pipeline to transfer files between steps.
 
 ## General Configuration
