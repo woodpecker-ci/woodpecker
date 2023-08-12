@@ -106,7 +106,6 @@ import { computed, inject, nextTick, onMounted, Ref, ref, toRef, watch } from 'v
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 
-import Icon from '~/components/atomic/Icon.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import useApiClient from '~/compositions/useApiClient';
