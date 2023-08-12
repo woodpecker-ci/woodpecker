@@ -29,6 +29,7 @@ steps:
     commands:
       - go run github.com/woodpecker-ci/woodpecker/cmd/cli lint
     when:
+      - event: pull_request
       - path:
         - ".woodpecker/**"
         - "pipeline/schema/**"
@@ -48,7 +49,8 @@ steps:
     commands:
       - make lint
     when:
-      path: *when_path
+      - event: pull_request
+      - path: *when_path
 
   check_swagger:
     image: *golang_image
@@ -58,13 +60,15 @@ steps:
       - "DIFF=$(git diff | head)"
       - "[ -n \"$DIFF\" ] && { echo \"swagger not up to date, exec 'make generate-swagger' and commit\"; exit 1; } || true"
     when:
-      path: *when_path
+      - event: pull_request
+      - path: *when_path
 
   lint-editorconfig:
     image: mstruebing/editorconfig-checker
     group: test
     when:
-      path: *when_path
+      - event: pull_request
+      - path: *when_path
 
   lint-license-header:
     image: *golang_image
@@ -72,7 +76,8 @@ steps:
       - go install github.com/google/addlicense@latest
       - "addlicense -check -ignore \"vendor/**\" **/*.go"
     when:
-      path: *when_path
+      - event: pull_request
+      - path: *when_path
 
   test:
     image: *golang_image
