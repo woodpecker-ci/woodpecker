@@ -1,16 +1,5 @@
 when:
   - event: [pull_request, tag]
-    path: &when_path
-      - "docker/**"
-      - "web/**"
-      # related config files
-      # - ".woodpecker/test.yml"
-      - ".golangci.yml"
-      # go source code
-      - "**/*.go"
-      - "go.*"
-      # schema changes
-      - "pipeline/schema/**"
   - event: push
     branch:
       - ${CI_REPO_DEFAULT_BRANCH}
