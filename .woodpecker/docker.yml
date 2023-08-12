@@ -4,13 +4,6 @@ when:
     branch:
       - ${CI_REPO_DEFAULT_BRANCH}
       - release/*
-    path: &when_path
-      - "agent/**"
-      - "cli/**"
-      - "cmd/**"
-      - "server/**"
-      - "shared/**"
-      - "woodpecker-go/**"
 
 depends_on:
   - test
@@ -61,14 +54,6 @@ steps:
       - corepack enable
       - pnpm install --frozen-lockfile
       - pnpm build
-    when:
-      path: &when_path
-        - "agent/**"
-        - "cli/**"
-        - "cmd/**"
-        - "server/**"
-        - "shared/**"
-        - "woodpecker-go/**"
 
   cross-compile-server-preview:
     image: *xgo_image
@@ -83,13 +68,6 @@ steps:
       XGO_VERSION: *xgo_version
     when:
       event: pull_request
-      path: &when_path
-        - "agent/**"
-        - "cli/**"
-        - "cmd/**"
-        - "server/**"
-        - "shared/**"
-        - "woodpecker-go/**"
 
   publish-server-preview:
     image: woodpeckerci/plugin-docker-buildx
@@ -102,13 +80,6 @@ steps:
       tag: pull_${CI_COMMIT_PULL_REQUEST}
     when:
       event: pull_request
-      path: &when_path
-        - "agent/**"
-        - "cli/**"
-        - "cmd/**"
-        - "server/**"
-        - "shared/**"
-        - "woodpecker-go/**"
 
   publish-server-alpine-preview:
     image: woodpeckerci/plugin-docker-buildx
@@ -121,13 +92,6 @@ steps:
       tag: pull_${CI_COMMIT_PULL_REQUEST}-alpine
     when:
       event: pull_request
-      path: &when_path
-        - "agent/**"
-        - "cli/**"
-        - "cmd/**"
-        - "server/**"
-        - "shared/**"
-        - "woodpecker-go/**"
 
   cross-compile-server:
     image: *xgo_image
@@ -239,13 +203,6 @@ steps:
       tag: pull_${CI_COMMIT_PULL_REQUEST}
     when:
       event: pull_request
-      path: &when_path
-        - "agent/**"
-        - "cli/**"
-        - "cmd/**"
-        - "server/**"
-        - "shared/**"
-        - "woodpecker-go/**"
 
   publish-next-agent:
     group: docker
@@ -340,13 +297,6 @@ steps:
       tag: pull_${CI_COMMIT_PULL_REQUEST}
     when:
       event: pull_request
-      path: &when_path
-        - "agent/**"
-        - "cli/**"
-        - "cmd/**"
-        - "server/**"
-        - "shared/**"
-        - "woodpecker-go/**"
 
   publish-next-cli:
     group: docker

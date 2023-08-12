@@ -15,7 +15,6 @@ variables:
       - "web/**"
       # api source code
       - "server/api/**"
-      - "web/**"
     event: [pull_request, tag, deployment]
 
 steps:
