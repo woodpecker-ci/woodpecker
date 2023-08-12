@@ -18,20 +18,17 @@ variables:
   - &platforms_server 'linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le,linux/riscv64'
   - &platforms_preview 'linux/amd64'
   - &platforms_alpine 'linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le'
-  - &when
-    - path: &when_path
-        # related config files
-        - ".woodpecker/docker.yml"
-        # go source code
-        - 'agent/**'
-        - 'cli/**'
-        - 'cmd/**'
-        - 'docker/**'
-        - 'server/**'
-        - 'shared/**'
-        - 'web/**'
-        - 'woodpecker-go/**'
-      event: [pull_request, tag, deployment]
+  - &when_path # related config files
+    - '.woodpecker/docker.yml'
+    # go source code
+    - 'agent/**'
+    - 'cli/**'
+    - 'cmd/**'
+    - 'docker/**'
+    - 'server/**'
+    - 'shared/**'
+    - 'web/**'
+    - 'woodpecker-go/**'
 
   # vars used on push / tag events only
   - publish_logins: &publish_logins # Default DockerHub login

@@ -7,15 +7,13 @@ when:
 
 variables:
   - &node_image 'node:18-alpine'
-  - &when
-    - path: &when_path
-        # related config files
-        - ".woodpecker/web.yml"
-        # web source code
-        - 'web/**'
-        # api source code
-        - 'server/api/**'
-      event: [pull_request, tag, deployment]
+  - &when_path
+      # related config files
+      - ".woodpecker/web.yml"
+      # web source code
+      - 'web/**'
+      # api source code
+      - 'server/api/**'
 
 steps:
   deps:
