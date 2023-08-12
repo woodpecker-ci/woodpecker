@@ -1,12 +1,5 @@
 when:
   - event: [ pull_request, cron ]
-    path: &when_path
-      - "agent/**"
-      - "cli/**"
-      - "cmd/**"
-      - "server/**"
-      - "shared/**"
-      - "woodpecker-go/**"
   - event: push
     branch:
       - ${CI_REPO_DEFAULT_BRANCH}
@@ -29,6 +22,14 @@ steps:
     image: *trivy_plugin
     settings:
       skip-dirs: web/,docs/
+    when:
+      path: &when_path
+        - "agent/**"
+        - "cli/**"
+        - "cmd/**"
+        - "server/**"
+        - "shared/**"
+        - "woodpecker-go/**"
 
   check docs:
     group: check
@@ -38,6 +39,13 @@ steps:
       dir:  docs/
     when:
       event: [pull_request, push, cron]
+      path: &when_path
+        - "agent/**"
+        - "cli/**"
+        - "cmd/**"
+        - "server/**"
+        - "shared/**"
+        - "woodpecker-go/**"
       branch: ${CI_REPO_DEFAULT_BRANCH}
 
   check web:
@@ -46,3 +54,11 @@ steps:
     settings:
       skip-dirs: node_modules/
       dir:  web/
+    when:
+      path: &when_path
+        - "agent/**"
+        - "cli/**"
+        - "cmd/**"
+        - "server/**"
+        - "shared/**"
+        - "woodpecker-go/**"

@@ -1,12 +1,5 @@
 when:
   - event: [pull_request, tag]
-    path: &when_path
-      - "agent/**"
-      - "cli/**"
-      - "cmd/**"
-      - "server/**"
-      - "shared/**"
-      - "woodpecker-go/**"
   - event: push
     branch:
       - ${CI_REPO_DEFAULT_BRANCH}
@@ -31,6 +24,12 @@ variables:
         - "go.*"
         # schema changes
         - "pipeline/schema/**"
+        - "agent/**"
+        - "cli/**"
+        - "cmd/**"
+        - "server/**"
+        - "shared/**"
+        - "woodpecker-go/**"
       event: [pull_request, tag, deployment]
 
 steps:
