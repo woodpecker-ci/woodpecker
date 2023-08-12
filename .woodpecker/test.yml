@@ -33,8 +33,8 @@ steps:
     commands:
       - go run github.com/woodpecker-ci/woodpecker/cmd/cli lint
     when:
+      - <<: *when
       - path:
-        - *when_path
         - "pipeline/schema/**"
 
   dummy-web:
