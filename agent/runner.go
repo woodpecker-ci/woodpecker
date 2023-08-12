@@ -32,7 +32,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/shared/utils"
 )
 
-var ErrAgentTainted = errors.New("agent tainted")
+var ErrNoWorkflow = errors.New("no workflow")
 
 type Runner struct {
 	client    rpc.Peer
@@ -66,7 +66,7 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 		return err
 	}
 	if work == nil {
-		return nil
+		return ErrNoWorkflow
 	}
 
 	// if ephemeral, taint the agent before running any workload.
@@ -205,9 +205,6 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 		logger.Debug().Msg("updating pipeline status complete")
 	}
 
-	if r.ephemeral {
-		return ErrAgentTainted
-	}
 	return nil
 }
 

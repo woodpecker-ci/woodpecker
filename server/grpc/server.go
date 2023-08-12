@@ -81,7 +81,7 @@ func (s *WoodpeckerServer) Next(c context.Context, req *proto.NextRequest) (*pro
 		return res, err
 	}
 	if pipeline == nil {
-		return res, status.Error(codes.Unavailable, "no pipeline available: try again")
+		return res, status.Error(codes.Unavailable, "no pipeline available")
 	}
 
 	res.Pipeline = new(proto.Pipeline)

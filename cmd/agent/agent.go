@@ -62,6 +62,7 @@ func run(c *cli.Context) error {
 	parallel := c.Int("max-workflows")
 	ephemeral := c.Bool("ephemeral")
 	if ephemeral && parallel > 1 {
+		log.Warn().Msgf("max-workflows forced from %d to 1 due to agent running ephemerally", parallel)
 		parallel = 1
 	}
 
@@ -221,12 +222,16 @@ func run(c *cli.Context) error {
 				}
 
 				log.Debug().Msg("polling new steps")
-				if err := r.Run(ctx); errors.Is(err, agent.ErrAgentTainted) {
-					// agent is only consumed/tainted when running ephemerally.
-					log.Info().Msg("agent consumed")
-					return
+				if err := r.Run(ctx); errors.Is(err, agent.ErrNoWorkflow) {
+					continue
 				} else if err != nil {
 					log.Error().Err(err).Msg("pipeline done with error")
+					return
+				}
+
+				if ephemeral {
+					// agent is only tainted when running ephemerally.
+					log.Info().Msg("agent tainted")
 					return
 				}
 			}
