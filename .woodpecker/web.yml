@@ -10,7 +10,7 @@ variables:
   - &when
     - path: &when_path
         # related config files
-        # - ".woodpecker/web.yml"
+        - ".woodpecker/web.yml"
         # web source code
         - 'web/**'
         # api source code

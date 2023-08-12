@@ -21,7 +21,8 @@ variables:
   - &when
     - path: &when_path
         # related config files
-        # - ".woodpecker/docker.yml"
+        - ".woodpecker/docker.yml"
+        # go source code
         - 'agent/**'
         - 'cli/**'
         - 'cmd/**'
