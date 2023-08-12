@@ -1,9 +1,23 @@
 when:
   - event: [ pull_request, cron ]
+    path: &when_path
+      - "agent/**"
+      - "cli/**"
+      - "cmd/**"
+      - "server/**"
+      - "shared/**"
+      - "woodpecker-go/**"
   - event: push
     branch:
       - ${CI_REPO_DEFAULT_BRANCH}
       - release/*
+    path: &when_path
+      - "agent/**"
+      - "cli/**"
+      - "cmd/**"
+      - "server/**"
+      - "shared/**"
+      - "woodpecker-go/**"
 
 variables:
   - &trivy_image aquasec/trivy:latest

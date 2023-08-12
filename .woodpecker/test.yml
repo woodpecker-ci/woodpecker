@@ -1,9 +1,23 @@
 when:
   - event: [pull_request, tag]
+    path: &when_path
+      - "agent/**"
+      - "cli/**"
+      - "cmd/**"
+      - "server/**"
+      - "shared/**"
+      - "woodpecker-go/**"
   - event: push
     branch:
       - ${CI_REPO_DEFAULT_BRANCH}
       - release/*
+    path: &when_path
+      - "agent/**"
+      - "cli/**"
+      - "cmd/**"
+      - "server/**"
+      - "shared/**"
+      - "woodpecker-go/**"
 
 variables:
   - &golang_image 'golang:1.20.2'

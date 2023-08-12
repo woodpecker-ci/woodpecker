@@ -1,5 +1,7 @@
 when:
   - event: [pull_request, tag]
+    path: &when_path
+      - "web/**"
   - event: push
     branch:
       - ${CI_REPO_DEFAULT_BRANCH}
