@@ -20,6 +20,8 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc/proto"
@@ -79,7 +81,7 @@ func (s *WoodpeckerServer) Next(c context.Context, req *proto.NextRequest) (*pro
 		return res, err
 	}
 	if pipeline == nil {
-		return res, err
+		return res, status.Error(codes.Unavailable, "no pipeline available: try again")
 	}
 
 	res.Pipeline = new(proto.Pipeline)
