@@ -134,7 +134,7 @@ ui-dependencies: ## Install UI dependencies
 .PHONY: lint
 lint: install-tools ## Lint code
 	@echo "Running golangci-lint"
-	golangci-lint run --timeout 10m
+	golangci-lint run --timeout 15m
 	@echo "Running zerolog linter"
 	lint github.com/woodpecker-ci/woodpecker/cmd/agent
 	lint github.com/woodpecker-ci/woodpecker/cmd/cli
