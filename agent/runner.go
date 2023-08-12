@@ -32,21 +32,25 @@ import (
 	"github.com/woodpecker-ci/woodpecker/shared/utils"
 )
 
+var ErrAgentTainted = errors.New("agent tainted")
+
 type Runner struct {
-	client   rpc.Peer
-	filter   rpc.Filter
-	hostname string
-	counter  *State
-	engine   *backend.Engine
+	client    rpc.Peer
+	filter    rpc.Filter
+	hostname  string
+	counter   *State
+	engine    *backend.Engine
+	ephemeral bool
 }
 
-func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, state *State, backend *backend.Engine) Runner {
+func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, state *State, backend *backend.Engine, ephemeral bool) Runner {
 	return Runner{
-		client:   workEngine,
-		filter:   f,
-		hostname: h,
-		counter:  state,
-		engine:   backend,
+		client:    workEngine,
+		filter:    f,
+		hostname:  h,
+		counter:   state,
+		engine:    backend,
+		ephemeral: ephemeral,
 	}
 }
 
@@ -63,6 +67,14 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 	}
 	if work == nil {
 		return nil
+	}
+
+	// if ephemeral, taint the agent before running any workload.
+	if r.ephemeral {
+		err = r.client.TaintAgent(runnerCtx)
+		if err != nil {
+			return fmt.Errorf("tainting agent: %w", err)
+		}
 	}
 
 	timeout := time.Hour
@@ -193,6 +205,9 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 		logger.Debug().Msg("updating pipeline status complete")
 	}
 
+	if r.ephemeral {
+		return ErrAgentTainted
+	}
 	return nil
 }
 

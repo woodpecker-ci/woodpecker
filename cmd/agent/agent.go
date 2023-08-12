@@ -231,7 +231,7 @@ func run(c *cli.Context) error {
 		go func() {
 			defer wg.Done()
 
-			r := agent.NewRunner(client, filter, hostname, counter, &engine)
+			r := agent.NewRunner(client, filter, hostname, counter, &engine, ephemeral)
 			log.Debug().Msgf("created new runner %d", i)
 
 			for {
@@ -240,12 +240,12 @@ func run(c *cli.Context) error {
 				}
 
 				log.Debug().Msg("polling new steps")
-				if err := r.Run(ctx); err != nil {
-					log.Error().Err(err).Msg("pipeline done with error")
+				if err := r.Run(ctx); errors.Is(err, agent.ErrAgentTainted) {
+					// agent is only consumed/tainted when running ephemerally.
+					log.Info().Msg("agent consumed")
 					return
-				}
-
-				if ephemeral {
+				} else if err != nil {
+					log.Error().Err(err).Msg("pipeline done with error")
 					return
 				}
 			}
@@ -258,13 +258,6 @@ func run(c *cli.Context) error {
 
 	wg.Wait()
 
-	if ephemeral {
-		log.Info().Msg("ephemeral agent consumed")
-		err := client.TaintAgent(ctx)
-		if err != nil {
-			log.Error().Err(err).Msg("tainting agent")
-		}
-	}
 	return nil
 }
 
