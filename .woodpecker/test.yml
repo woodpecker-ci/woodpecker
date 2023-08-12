@@ -14,9 +14,6 @@ variables:
         # go source code
         - "**/*.go"
         - "go.*"
-        # schema changes
-        - ".woodpecker/**"
-        - "pipeline/schema/**"
 
 steps:
   vendor:
@@ -32,7 +29,9 @@ steps:
     commands:
       - go run github.com/woodpecker-ci/woodpecker/cmd/cli lint
     when:
-      path: *when_path
+      - path:
+        - ".woodpecker/**"
+        - "pipeline/schema/**"
 
   dummy-web:
     image: *golang_image
