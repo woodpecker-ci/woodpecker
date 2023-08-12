@@ -9,26 +9,14 @@
   </Panel>
 </template>
 
-<script lang="ts">
-import { defineComponent, inject, Ref } from 'vue';
+<script lang="ts" setup>
+import { inject, Ref } from 'vue';
 
 import Panel from '~/components/layout/Panel.vue';
 import { Pipeline } from '~/lib/api/types';
 
-export default defineComponent({
-  name: 'PipelineChangedFiles',
-
-  components: {
-    Panel,
-  },
-
-  setup() {
-    const pipeline = inject<Ref<Pipeline>>('pipeline');
-    if (!pipeline) {
-      throw new Error('Unexpected: "pipeline" should be provided at this place');
-    }
-
-    return { pipeline };
-  },
-});
+const pipeline = inject<Ref<Pipeline>>('pipeline');
+if (!pipeline) {
+  throw new Error('Unexpected: "pipeline" should be provided at this place');
+}
 </script>

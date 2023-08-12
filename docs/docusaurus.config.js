@@ -228,8 +228,8 @@ module.exports = {
           },
         },
         blog: {
-          blogTitle: 'Docusaurus blog!',
-          blogDescription: 'A Docusaurus powered blog!',
+          blogTitle: 'Blog',
+          blogDescription: 'A blog for release announcements, turorials...',
           // postsPerPage: 'ALL',
           // blogSidebarCount: 0,
         },

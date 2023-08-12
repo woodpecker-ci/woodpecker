@@ -221,6 +221,7 @@
       "files": "Geänderte Dateien ({files})",
       "loading": "Laden…",
       "log_download_error": "Beim Herunterladen der Log-Datei ist ein Fehler aufgetreten",
+      "log_title": "Logs des Schrittes",
       "no_files": "Es wurden keine Dateien geändert.",
       "no_pipeline_steps": "Keine Schritte in der Pipeline vorhanden!",
       "no_pipelines": "Bisher wurden noch keine Pipelines gestartet.",
@@ -284,14 +285,14 @@
       "crons": {
         "add": "Cron hinzufügen",
         "branch": {
-          "placeholder": "Branch (Verwendet Standard-Branch wenn leer)",
+          "placeholder": "Branch (verwendet Standard-Branch wenn leer)",
           "title": "Branch"
         },
         "created": "Cron erstellt",
         "crons": "Crons",
         "delete": "Cron löschen",
         "deleted": "Cron gelöscht",
-        "desc": "Cron-Jobs können dazu verwendet werden in regelmäßigen Abständen Pipeline(s) zu starten.",
+        "desc": "Cron-Jobs können dazu verwendet werden in regelmäßigen Abständen Pipelines zu starten.",
         "edit": "Cron bearbeiten",
         "name": {
           "name": "Name",
@@ -436,14 +437,14 @@
         "reset_token": "Zugangsschlüssel zurücksetzen",
         "shell_setup": "Kommandozeilen-Einrichtung",
         "shell_setup_before": "führe bitte die Schritte zur Einrichtung der Kommandozeile vorher aus",
-        "swagger_ui": "Swagger UI",
+        "swagger_ui": "Swagger-UI",
         "token": "Persönlicher Zugangsschlüssel"
       },
       "general": {
         "general": "Allgemein",
         "language": "Sprache"
       },
-      "settings": "Nutzereinstellungen"
+      "settings": "Benutzereinstellungen"
     }
   },
   "username": "Benutzername",

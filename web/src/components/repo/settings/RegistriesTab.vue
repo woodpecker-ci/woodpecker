@@ -83,8 +83,8 @@
   </Panel>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, inject, Ref, ref } from 'vue';
+<script lang="ts" setup>
+import { computed, inject, Ref, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
@@ -101,74 +101,56 @@ import { usePagination } from '~/compositions/usePaginate';
 import { Repo } from '~/lib/api/types';
 import { Registry } from '~/lib/api/types/registry';
 
-export default defineComponent({
-  name: 'RegistriesTab',
+const apiClient = useApiClient();
+const notifications = useNotifications();
+const i18n = useI18n();
 
-  components: {
-    Button,
-    Panel,
-    ListItem,
-    IconButton,
-    InputField,
-    TextField,
-    DocsLink,
-  },
+const repo = inject<Ref<Repo>>('repo');
+const selectedRegistry = ref<Partial<Registry>>();
+const isEditingRegistry = computed(() => !!selectedRegistry.value?.id);
 
-  setup() {
-    const apiClient = useApiClient();
-    const notifications = useNotifications();
-    const i18n = useI18n();
+async function loadRegistries(page: number): Promise<Registry[] | null> {
+  if (!repo?.value) {
+    throw new Error("Unexpected: Can't load repo");
+  }
 
-    const repo = inject<Ref<Repo>>('repo');
-    const selectedRegistry = ref<Partial<Registry>>();
-    const isEditingRegistry = computed(() => !!selectedRegistry.value?.id);
+  return apiClient.getRegistryList(repo.value.id, page);
+}
 
-    async function loadRegistries(page: number): Promise<Registry[] | null> {
-      if (!repo?.value) {
-        throw new Error("Unexpected: Can't load repo");
-      }
+const { resetPage, data: registries } = usePagination(loadRegistries, () => !selectedRegistry.value);
 
-      return apiClient.getRegistryList(repo.value.id, page);
-    }
+const { doSubmit: createRegistry, isLoading: isSaving } = useAsyncAction(async () => {
+  if (!repo?.value) {
+    throw new Error("Unexpected: Can't load repo");
+  }
 
-    const { resetPage, data: registries } = usePagination(loadRegistries, () => !selectedRegistry.value);
+  if (!selectedRegistry.value) {
+    throw new Error("Unexpected: Can't get registry");
+  }
 
-    const { doSubmit: createRegistry, isLoading: isSaving } = useAsyncAction(async () => {
-      if (!repo?.value) {
-        throw new Error("Unexpected: Can't load repo");
-      }
+  if (isEditingRegistry.value) {
+    await apiClient.updateRegistry(repo.value.id, selectedRegistry.value);
+  } else {
+    await apiClient.createRegistry(repo.value.id, selectedRegistry.value);
+  }
+  notifications.notify({
+    title: i18n.t(
+      isEditingRegistry.value ? 'repo.settings.registries.saved' : i18n.t('repo.settings.registries.created'),
+    ),
+    type: 'success',
+  });
+  selectedRegistry.value = undefined;
+  resetPage();
+});
 
-      if (!selectedRegistry.value) {
-        throw new Error("Unexpected: Can't get registry");
-      }
+const { doSubmit: deleteRegistry, isLoading: isDeleting } = useAsyncAction(async (_registry: Registry) => {
+  if (!repo?.value) {
+    throw new Error("Unexpected: Can't load repo");
+  }
 
-      if (isEditingRegistry.value) {
-        await apiClient.updateRegistry(repo.value.id, selectedRegistry.value);
-      } else {
-        await apiClient.createRegistry(repo.value.id, selectedRegistry.value);
-      }
-      notifications.notify({
-        title: i18n.t(
-          isEditingRegistry.value ? 'repo.settings.registries.saved' : i18n.t('repo.settings.registries.created'),
-        ),
-        type: 'success',
-      });
-      selectedRegistry.value = undefined;
-      resetPage();
-    });
-
-    const { doSubmit: deleteRegistry, isLoading: isDeleting } = useAsyncAction(async (_registry: Registry) => {
-      if (!repo?.value) {
-        throw new Error("Unexpected: Can't load repo");
-      }
-
-      const registryAddress = encodeURIComponent(_registry.address);
-      await apiClient.deleteRegistry(repo.value.id, registryAddress);
-      notifications.notify({ title: i18n.t('repo.settings.registries.deleted'), type: 'success' });
-      resetPage();
-    });
-
-    return { selectedRegistry, registries, isEditingRegistry, isSaving, isDeleting, createRegistry, deleteRegistry };
-  },
+  const registryAddress = encodeURIComponent(_registry.address);
+  await apiClient.deleteRegistry(repo.value.id, registryAddress);
+  notifications.notify({ title: i18n.t('repo.settings.registries.deleted'), type: 'success' });
+  resetPage();
 });
 </script>

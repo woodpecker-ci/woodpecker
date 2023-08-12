@@ -109,7 +109,7 @@ export default class ApiClient {
       access_token: this.token || undefined,
     });
     let _path = this.server ? this.server + path : path;
-    _path = this.token ? `${path}?${query}` : path;
+    _path = this.token ? `${_path}?${query}` : _path;
 
     const events = new EventSource(_path);
     events.onmessage = (event) => {

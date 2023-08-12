@@ -193,4 +193,4 @@ A [Prometheus endpoint](./90-prometheus.md) is exposed.
 
 See the [proxy guide](./70-proxy.md) if you want to see a setup behind Apache, Nginx, Caddy or ngrok.
 
-In the case you need to use Woodpecker with a URL path prefix (like: https://example.org/woodpecker/), you can use the option [`WOODPECKER_ROOT_URL`](./10-server-config.md#woodpecker_root_url).
+In the case you need to use Woodpecker with a URL path prefix (like: https://example.org/woodpecker/), you can use the option [`WOODPECKER_ROOT_PATH`](./10-server-config.md#woodpecker_root_path).
