@@ -25,16 +25,16 @@ steps:
     group: prepare
     commands:
       - go mod vendor
-    when: *when
+    when:
+      path: *when_path
 
   lint-pipeline:
     image: *golang_image
     commands:
       - go run github.com/woodpecker-ci/woodpecker/cmd/cli lint
     when:
-      - <<: *when
+      - <<: *when_path
       - path:
-        - ".woodpecker/**"
         - "pipeline/schema/**"
 
   dummy-web:
@@ -43,14 +43,16 @@ steps:
     commands:
       - mkdir -p web/dist/
       - echo "test" > web/dist/index.html
-    when: *when
+    when:
+      path: *when_path
 
   lint:
     image: *golang_image
     group: test
     commands:
       - make lint
-    when: *when
+    when:
+      path: *when_path
 
   check_swagger:
     image: *golang_image
@@ -59,7 +61,8 @@ steps:
       - "make generate-swagger"
       - "DIFF=$(git diff | head)"
       - "[ -n \"$DIFF\" ] && { echo \"swagger not up to date, exec 'make generate-swagger' and commit\"; exit 1; } || true"
-    when: *when
+    when:
+      path: *when_path
 
   lint-editorconfig:
     image: mstruebing/editorconfig-checker
@@ -70,7 +73,8 @@ steps:
     commands:
       - go install github.com/google/addlicense@latest
       - "addlicense -check -ignore \"vendor/**\" **/*.go"
-    when: *when
+    when:
+      path: *when_path
 
   test:
     image: *golang_image
@@ -80,7 +84,8 @@ steps:
       - make test-server
       - make test-cli
       - make test-lib
-    when: *when
+    when:
+      path: *when_path
 
   sqlite:
     image: *golang_image
@@ -89,7 +94,8 @@ steps:
       - WOODPECKER_DATABASE_DRIVER=sqlite3
     commands:
       - make test-server-datastore-coverage
-    when: *when
+    when:
+      path: *when_path
 
   postgres:
     image: *golang_image
@@ -99,7 +105,8 @@ steps:
       - WOODPECKER_DATABASE_DATASOURCE=host=service-postgres user=postgres dbname=postgres sslmode=disable
     commands:
       - make test-server-datastore
-    when: *when
+    when:
+      path: *when_path
 
   mysql:
     image: *golang_image
@@ -109,7 +116,8 @@ steps:
       - WOODPECKER_DATABASE_DATASOURCE=root@tcp(service-mysql:3306)/test?parseTime=true
     commands:
       - make test-server-datastore
-    when: *when
+    when:
+      path: *when_path
 
   codecov:
     pull: true
@@ -123,7 +131,8 @@ steps:
         - datastore-coverage.out
       token:
         from_secret: codecov_token
-    when: *when
+    when:
+      path: *when_path
     failure: ignore
 
 services:
@@ -133,7 +142,8 @@ services:
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_HOST_AUTH_METHOD=trust
-    when: *when
+    when:
+      path: *when_path
 
   service-mysql:
     image: mysql:5.6.27
@@ -141,4 +151,5 @@ services:
     environment:
       - MYSQL_DATABASE=test
       - MYSQL_ALLOW_EMPTY_PASSWORD=yes
-    when: *when
+    when:
+      path: *when_path
