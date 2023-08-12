@@ -23,14 +23,10 @@ variables:
         # related config files
         - ".woodpecker/docker.yml"
         # go source code
-        - 'agent/**'
-        - 'cli/**'
-        - 'cmd/**'
-        - 'docker/**'
-        - 'server/**'
-        - 'shared/**'
+        - '**/*.go'
+        - 'go.*'
         - 'web/**'
-        - 'woodpecker-go/**'
+        - 'docker/**'
       event: [pull_request, tag, deployment]
 
   # vars used on push / tag events only
