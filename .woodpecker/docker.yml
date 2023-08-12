@@ -1,5 +1,14 @@
 when:
   - event: [pull_request, tag]
+    path: &when_path
+      - "agent/**"
+      - "cli/**"
+      - "cmd/**"
+      - "docker/**"
+      - "server/**"
+      - "shared/**"
+      - "web/**"
+      - "woodpecker-go/**"
   - event: push
     branch:
       - ${CI_REPO_DEFAULT_BRANCH}
@@ -54,6 +63,8 @@ steps:
       - corepack enable
       - pnpm install --frozen-lockfile
       - pnpm build
+    when:
+      path: *when_path
 
   cross-compile-server-preview:
     image: *xgo_image
@@ -68,6 +79,7 @@ steps:
       XGO_VERSION: *xgo_version
     when:
       event: pull_request
+      path: *when_path
 
   publish-server-preview:
     image: woodpeckerci/plugin-docker-buildx
@@ -80,6 +92,7 @@ steps:
       tag: pull_${CI_COMMIT_PULL_REQUEST}
     when:
       event: pull_request
+      path: *when_path
 
   publish-server-alpine-preview:
     image: woodpeckerci/plugin-docker-buildx
@@ -92,6 +105,7 @@ steps:
       tag: pull_${CI_COMMIT_PULL_REQUEST}-alpine
     when:
       event: pull_request
+      path: *when_path
 
   cross-compile-server:
     image: *xgo_image
@@ -203,6 +217,7 @@ steps:
       tag: pull_${CI_COMMIT_PULL_REQUEST}
     when:
       event: pull_request
+      path: *when_path
 
   publish-next-agent:
     group: docker
@@ -297,6 +312,7 @@ steps:
       tag: pull_${CI_COMMIT_PULL_REQUEST}
     when:
       event: pull_request
+      path: *when_path
 
   publish-next-cli:
     group: docker
