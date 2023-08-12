@@ -45,12 +45,6 @@ variables:
   - &publish_repos_agent 'woodpeckerci/woodpecker-agent,quay.io/woodpeckerci/woodpecker-agent'
   - &publish_repos_cli 'woodpeckerci/woodpecker-cli,quay.io/woodpeckerci/woodpecker-cli'
 
-clone:
-  git:
-    image: woodpeckerci/plugin-git
-    when:
-      - event: [pull_request, tag]
-
 steps:
   vendor:
     image: *golang_image
