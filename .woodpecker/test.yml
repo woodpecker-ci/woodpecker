@@ -22,14 +22,15 @@ steps:
     commands:
       - go mod vendor
     when:
-      path: *when_path
+      - event: [pull_request, tag, deployment]
+      - path: *when_path
 
   lint-pipeline:
     image: *golang_image
     commands:
       - go run github.com/woodpecker-ci/woodpecker/cmd/cli lint
     when:
-      - event: pull_request
+      - event: [pull_request, tag, deployment]
       - path:
         - ".woodpecker/**"
         - "pipeline/schema/**"
@@ -41,7 +42,8 @@ steps:
       - mkdir -p web/dist/
       - echo "test" > web/dist/index.html
     when:
-      path: *when_path
+      - event: [pull_request, tag, deployment]
+      - path: *when_path
 
   lint:
     image: *golang_image
@@ -67,7 +69,7 @@ steps:
     image: mstruebing/editorconfig-checker
     group: test
     when:
-      - event: pull_request
+      - event: [pull_request, tag, deployment]
       - path: *when_path
 
   lint-license-header:
@@ -76,7 +78,7 @@ steps:
       - go install github.com/google/addlicense@latest
       - "addlicense -check -ignore \"vendor/**\" **/*.go"
     when:
-      - event: pull_request
+      - event: [pull_request, tag, deployment]
       - path: *when_path
 
   test:
@@ -88,7 +90,8 @@ steps:
       - make test-cli
       - make test-lib
     when:
-      path: *when_path
+      - event: [pull_request, tag, deployment]
+      - path: *when_path
 
   sqlite:
     image: *golang_image
@@ -98,7 +101,8 @@ steps:
     commands:
       - make test-server-datastore-coverage
     when:
-      path: *when_path
+      - event: [pull_request, tag, deployment]
+      - path: *when_path
 
   postgres:
     image: *golang_image
@@ -109,7 +113,8 @@ steps:
     commands:
       - make test-server-datastore
     when:
-      path: *when_path
+      - event: [pull_request, tag, deployment]
+      - path: *when_path
 
   mysql:
     image: *golang_image
@@ -120,7 +125,8 @@ steps:
     commands:
       - make test-server-datastore
     when:
-      path: *when_path
+      - event: [pull_request, tag, deployment]
+      - path: *when_path
 
   codecov:
     pull: true
@@ -135,7 +141,8 @@ steps:
       token:
         from_secret: codecov_token
     when:
-      path: *when_path
+      - event: [pull_request, tag, deployment]
+      - path: *when_path
     failure: ignore
 
 services:
@@ -146,7 +153,8 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_HOST_AUTH_METHOD=trust
     when:
-      path: *when_path
+      - event: [pull_request, tag, deployment]
+      - path: *when_path
 
   service-mysql:
     image: mysql:5.6.27
@@ -155,4 +163,5 @@ services:
       - MYSQL_DATABASE=test
       - MYSQL_ALLOW_EMPTY_PASSWORD=yes
     when:
-      path: *when_path
+      - event: [pull_request, tag, deployment]
+      - path: *when_path
