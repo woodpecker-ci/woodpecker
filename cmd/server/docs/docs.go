@@ -1025,8 +1025,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK"
+                    "204": {
+                        "description": "No Content"
                     }
                 }
             },
@@ -2844,8 +2844,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK"
+                    "204": {
+                        "description": "No Content"
                     }
                 }
             },
@@ -3043,8 +3043,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK"
+                    "204": {
+                        "description": "No Content"
                     }
                 }
             },
@@ -3906,6 +3906,9 @@ const docTemplate = `{
                     }
                 },
                 "clone_url": {
+                    "type": "string"
+                },
+                "clone_url_ssh": {
                     "type": "string"
                 },
                 "config_file": {

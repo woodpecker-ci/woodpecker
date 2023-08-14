@@ -65,6 +65,25 @@ var flags = []cli.Flag{
 	},
 
 	//
+	// backend options for pipeline compiler
+	//
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_NO_PROXY", "NO_PROXY", "no_proxy"},
+		Usage:   "if set, pass the environment variable down as \"NO_PROXY\" to steps",
+		Name:    "backend-no-proxy",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_HTTP_PROXY", "HTTP_PROXY", "http_proxy"},
+		Usage:   "if set, pass the environment variable down as \"NO_PROXY\" to steps",
+		Name:    "backend-http-proxy",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_HTTPS_PROXY", "HTTPS_PROXY", "https_proxy"},
+		Usage:   "if set, pass the environment variable down as \"HTTPS_PROXY\" to steps",
+		Name:    "backend-https-proxy",
+	},
+
+	//
 	// Please note the below flags should match the flags from
 	// pipeline/frontend/metadata.go and should be kept synchronized.
 	//
@@ -130,6 +149,10 @@ var flags = []cli.Flag{
 	&cli.StringFlag{
 		EnvVars: []string{"CI_REPO_CLONE_URL"},
 		Name:    "repo-clone-url",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"CI_REPO_CLONE_SSH_URL"},
+		Name:    "repo-clone-ssh-url",
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"CI_REPO_PRIVATE"},
@@ -291,88 +314,5 @@ var flags = []cli.Flag{
 	&cli.StringFlag{
 		EnvVars: []string{"CI_FORGE_URL"},
 		Name:    "forge-url",
-	},
-
-	// backend docker
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_DOCKER_ENABLE_IPV6"},
-		Name:    "backend-docker-ipv6",
-		Usage:   "backend docker enable IPV6",
-		Value:   false,
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_DOCKER_NETWORK"},
-		Name:    "backend-docker-network",
-		Usage:   "backend docker network",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_DOCKER_VOLUMES"},
-		Name:    "backend-docker-volumes",
-		Usage:   "backend docker volumes (comma separated)",
-	},
-
-	// backend ssh
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_SSH_ADDRESS"},
-		Name:    "backend-ssh-address",
-		Usage:   "backend ssh address",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_SSH_USER"},
-		Name:    "backend-ssh-user",
-		Usage:   "backend ssh user",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_SSH_KEY"},
-		Name:    "backend-ssh-key",
-		Usage:   "backend ssh key file",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_SSH_KEY_PASSWORD"},
-		Name:    "backend-ssh-key-password",
-		Usage:   "backend ssh key password",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_SSH_PASSWORD"},
-		Name:    "backend-ssh-password",
-		Usage:   "backend ssh password",
-	},
-
-	// backend k8s
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_K8S_NAMESPACE"},
-		Name:    "backend-k8s-namespace",
-		Usage:   "backend k8s namespace",
-		Value:   "woodpecker",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_K8S_VOLUME_SIZE"},
-		Name:    "backend-k8s-volume-size",
-		Usage:   "backend k8s volume size (default 10G)",
-		Value:   "10G",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_K8S_STORAGE_CLASS"},
-		Name:    "backend-k8s-storage-class",
-		Usage:   "backend k8s storage class",
-		Value:   "",
-	},
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_K8S_STORAGE_RWX"},
-		Name:    "backend-k8s-storage-rwx",
-		Usage:   "backend k8s storage access mode, should ReadWriteMany (RWX) instead of ReadWriteOnce (RWO) be used? (default: true)",
-		Value:   true,
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_K8S_POD_LABELS"},
-		Name:    "backend-k8s-pod-labels",
-		Usage:   "backend k8s additional worker pod labels",
-		Value:   "",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_K8S_POD_ANNOTATIONS"},
-		Name:    "backend-k8s-pod-annotations",
-		Usage:   "backend k8s additional worker pod annotations",
-		Value:   "",
 	},
 }

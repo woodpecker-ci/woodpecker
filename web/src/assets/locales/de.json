@@ -19,6 +19,7 @@
         "deleted": "Agent gelöscht",
         "desc": "Für diesen Server registrierte Agents",
         "edit_agent": "Agent bearbeiten",
+        "id": "ID",
         "last_contact": "Letzter Kontakt",
         "name": {
           "name": "Name",
@@ -110,6 +111,7 @@
       }
     }
   },
+  "api": "API",
   "back": "Zurück",
   "cancel": "Abbrechen",
   "color_scheme_dark": "Wechsle zu hellem Modus",
@@ -219,6 +221,7 @@
       "files": "Geänderte Dateien ({files})",
       "loading": "Laden…",
       "log_download_error": "Beim Herunterladen der Log-Datei ist ein Fehler aufgetreten",
+      "log_title": "Logs des Schrittes",
       "no_files": "Es wurden keine Dateien geändert.",
       "no_pipeline_steps": "Keine Schritte in der Pipeline vorhanden!",
       "no_pipelines": "Bisher wurden noch keine Pipelines gestartet.",
@@ -282,14 +285,14 @@
       "crons": {
         "add": "Cron hinzufügen",
         "branch": {
-          "placeholder": "Branch (Verwendet Standard-Branch wenn leer)",
+          "placeholder": "Branch (verwendet Standard-Branch wenn leer)",
           "title": "Branch"
         },
         "created": "Cron erstellt",
         "crons": "Crons",
         "delete": "Cron löschen",
         "deleted": "Cron gelöscht",
-        "desc": "Cron-Jobs können dazu verwendet werden in regelmäßigen Abständen Pipeline(s) zu starten.",
+        "desc": "Cron-Jobs können dazu verwendet werden in regelmäßigen Abständen Pipelines zu starten.",
         "edit": "Cron bearbeiten",
         "name": {
           "name": "Name",
@@ -422,16 +425,27 @@
   "url": "URL",
   "user": {
     "access_denied": "Du bist nicht berechtigt, dich anzumelden",
-    "api_usage": "Beispiel für die API-Nutzung",
-    "cli_usage": "Beispiel für die Kommandozeilen-Nutzung",
-    "dl_cli": "Download Kommando-Zeilen-Tool",
     "internal_error": "Ein interner Fehler ist aufgetreten",
     "oauth_error": "Fehler bei der Authentifizierung gegen OAuth-Anbieter",
-    "reset_token": "Token zurücksetzen",
-    "settings": "Benutzer-Einstellungen",
-    "shell_setup": "Kommandozeilen-Einrichtung",
-    "shell_setup_before": "Führe bitte die Schritte zur Einrichtung der Kommandozeile vorher aus",
-    "token": "Dein persönlicher Token"
+    "settings": {
+      "api": {
+        "api": "API",
+        "api_usage": "Beispiel zur Nutzung der API",
+        "cli_usage": "Beispiel zur Nutzung des CLI",
+        "desc": "Persönlicher Zugangsschlüssel und API-Nutzung",
+        "dl_cli": "CLI herunterladen",
+        "reset_token": "Zugangsschlüssel zurücksetzen",
+        "shell_setup": "Kommandozeilen-Einrichtung",
+        "shell_setup_before": "führe bitte die Schritte zur Einrichtung der Kommandozeile vorher aus",
+        "swagger_ui": "Swagger-UI",
+        "token": "Persönlicher Zugangsschlüssel"
+      },
+      "general": {
+        "general": "Allgemein",
+        "language": "Sprache"
+      },
+      "settings": "Benutzereinstellungen"
+    }
   },
   "username": "Benutzername",
   "welcome": "Willkommen bei Woodpecker"

@@ -422,16 +422,8 @@
   "url": "URL",
   "user": {
     "access_denied": "Nie masz pozwolenia na zalogowanie",
-    "api_usage": "Przykładowe użycie API",
-    "cli_usage": "Przykładowe użycie CLI",
-    "dl_cli": "Pobierz CLI",
     "internal_error": "Wystąpił błąd wewnętrzny",
-    "oauth_error": "Błąd podczas uwierzytelnienia u dostawcy OAuth",
-    "reset_token": "Resetuj token",
-    "settings": "Ustawienia użytkownika",
-    "shell_setup": "Konfiguracja powłoki systemowej",
-    "shell_setup_before": "wykonaj wcześniej konfigurację powłoki",
-    "token": "Twój token osobisty"
+    "oauth_error": "Błąd podczas uwierzytelnienia u dostawcy OAuth"
   },
   "username": "Nazwa użytkownika",
   "welcome": "Witamy w Woodpecker"

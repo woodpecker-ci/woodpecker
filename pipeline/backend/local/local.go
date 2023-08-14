@@ -23,42 +23,32 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/alessio/shellescape"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/exp/slices"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
-	"github.com/woodpecker-ci/woodpecker/shared/constant"
 )
 
-// notAllowedEnvVarOverwrites are all env vars that can not be overwritten by step config
-var notAllowedEnvVarOverwrites = []string{
-	"CI_NETRC_MACHINE",
-	"CI_NETRC_USERNAME",
-	"CI_NETRC_PASSWORD",
-	"CI_SCRIPT",
-	"HOME",
-	"SHELL",
-}
-
 type workflowState struct {
-	stepCMDs     map[string]*exec.Cmd
-	baseDir      string
-	homeDir      string
-	workspaceDir string
+	stepCMDs        map[string]*exec.Cmd
+	baseDir         string
+	homeDir         string
+	workspaceDir    string
+	pluginGitBinary string
 }
 
 type local struct {
-	workflows map[string]*workflowState
-	output    io.ReadCloser
+	workflows       sync.Map
+	output          io.ReadCloser
+	pluginGitBinary string
 }
 
 // New returns a new local Engine.
 func New() types.Engine {
-	return &local{
-		workflows: make(map[string]*workflowState),
-	}
+	return &local{}
 }
 
 func (e *local) Name() string {
@@ -70,13 +60,13 @@ func (e *local) IsAvailable(context.Context) bool {
 }
 
 func (e *local) Load(context.Context) error {
-	// TODO: download plugin-git binary if not exist
+	e.loadClone()
 
 	return nil
 }
 
 // SetupWorkflow the pipeline environment.
-func (e *local) SetupWorkflow(_ context.Context, conf *types.Config, taskUUID string) error {
+func (e *local) SetupWorkflow(_ context.Context, _ *types.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msg("create workflow environment")
 
 	baseDir, err := os.MkdirTemp("", "woodpecker-local-*")
@@ -99,14 +89,7 @@ func (e *local) SetupWorkflow(_ context.Context, conf *types.Config, taskUUID st
 		return err
 	}
 
-	// TODO: copy plugin-git binary to homeDir and set PATH
-
-	workflowID, err := e.getWorkflowIDFromConfig(conf)
-	if err != nil {
-		return err
-	}
-
-	e.workflows[workflowID] = state
+	e.saveState(taskUUID, state)
 
 	return nil
 }
@@ -115,7 +98,7 @@ func (e *local) SetupWorkflow(_ context.Context, conf *types.Config, taskUUID st
 func (e *local) StartStep(ctx context.Context, step *types.Step, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("start step %s", step.Name)
 
-	state, err := e.getWorkflowStateFromStep(step)
+	state, err := e.getState(taskUUID)
 	if err != nil {
 		return err
 	}
@@ -132,30 +115,27 @@ func (e *local) StartStep(ctx context.Context, step *types.Step, taskUUID string
 	// Set HOME
 	env = append(env, "HOME="+state.homeDir)
 
-	var command []string
-	if step.Image == constant.DefaultCloneImage {
-		// Default clone step
-		// TODO: use tmp HOME and insert netrc and delete it after clone
-		env = append(env, "CI_WORKSPACE="+state.workspaceDir)
-		command = append(command, "plugin-git")
-	} else {
-		// Use "image name" as run command
-		command = append(command, step.Image)
-		command = append(command, "-c")
-
-		// TODO: use commands directly
-		script := ""
-		for _, cmd := range step.Commands {
-			script += fmt.Sprintf("echo + %s\n%s\n\n", shellescape.Quote(cmd), cmd)
-		}
-		script = strings.TrimSpace(script)
-
-		// Deleting the initial lines removes netrc support but adds compatibility for more shells like fish
-		command = append(command, script)
+	switch step.Type {
+	case types.StepTypeClone:
+		return e.execClone(ctx, step, state, env)
+	case types.StepTypeCommands:
+		return e.execCommands(ctx, step, state, env)
+	default:
+		return ErrUnsupportedStepType
 	}
+}
+
+func (e *local) execCommands(ctx context.Context, step *types.Step, state *workflowState, env []string) error {
+	// TODO: use commands directly
+	script := ""
+	for _, cmd := range step.Commands {
+		script += fmt.Sprintf("echo + %s\n%s\n", strings.TrimSpace(shellescape.Quote(cmd)), cmd)
+	}
+	script = strings.TrimSpace(script)
 
 	// Prepare command
-	cmd := exec.CommandContext(ctx, command[0], command[1:]...)
+	// Use "image name" as run command (indicate shell)
+	cmd := exec.CommandContext(ctx, step.Image, "-c", script)
 	cmd.Env = env
 	cmd.Dir = state.workspaceDir
 
@@ -173,7 +153,7 @@ func (e *local) StartStep(ctx context.Context, step *types.Step, taskUUID string
 func (e *local) WaitStep(_ context.Context, step *types.Step, taskUUID string) (*types.State, error) {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("wait for step %s", step.Name)
 
-	state, err := e.getWorkflowStateFromStep(step)
+	state, err := e.getState(taskUUID)
 	if err != nil {
 		return nil, err
 	}
@@ -206,10 +186,10 @@ func (e *local) TailStep(_ context.Context, step *types.Step, taskUUID string) (
 }
 
 // DestroyWorkflow the pipeline environment.
-func (e *local) DestroyWorkflow(_ context.Context, conf *types.Config, taskUUID string) error {
+func (e *local) DestroyWorkflow(_ context.Context, _ *types.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("delete workflow environment")
 
-	state, err := e.getWorkflowStateFromConfig(conf)
+	state, err := e.getState(taskUUID)
 	if err != nil {
 		return err
 	}
@@ -219,69 +199,23 @@ func (e *local) DestroyWorkflow(_ context.Context, conf *types.Config, taskUUID 
 		return err
 	}
 
-	workflowID, err := e.getWorkflowIDFromConfig(conf)
-	if err != nil {
-		return err
-	}
-
-	delete(e.workflows, workflowID)
+	e.deleteState(taskUUID)
 
 	return err
 }
 
-func (e *local) getWorkflowIDFromStep(step *types.Step) (string, error) {
-	sep := "_step_"
-	if strings.Contains(step.Name, sep) {
-		prefix := strings.Split(step.Name, sep)
-		if len(prefix) == 2 {
-			return prefix[0], nil
-		}
-	}
-
-	sep = "_clone"
-	if strings.Contains(step.Name, sep) {
-		prefix := strings.Split(step.Name, sep)
-		if len(prefix) == 2 {
-			return prefix[0], nil
-		}
-	}
-
-	return "", fmt.Errorf("invalid step name (%s) %s", sep, step.Name)
-}
-
-func (e *local) getWorkflowIDFromConfig(c *types.Config) (string, error) {
-	if len(c.Volumes) < 1 {
-		return "", fmt.Errorf("no volumes found in config")
-	}
-
-	prefix := strings.Replace(c.Volumes[0].Name, "_default", "", 1)
-	return prefix, nil
-}
-
-func (e *local) getWorkflowStateFromConfig(c *types.Config) (*workflowState, error) {
-	workflowID, err := e.getWorkflowIDFromConfig(c)
-	if err != nil {
-		return nil, err
-	}
-
-	state, ok := e.workflows[workflowID]
+func (e *local) getState(taskUUID string) (*workflowState, error) {
+	state, ok := e.workflows.Load(taskUUID)
 	if !ok {
-		return nil, fmt.Errorf("workflow %s not found", workflowID)
+		return nil, ErrWorkflowStateNotFound
 	}
-
-	return state, nil
+	return state.(*workflowState), nil
 }
 
-func (e *local) getWorkflowStateFromStep(step *types.Step) (*workflowState, error) {
-	workflowID, err := e.getWorkflowIDFromStep(step)
-	if err != nil {
-		return nil, err
-	}
+func (e *local) saveState(taskUUID string, state *workflowState) {
+	e.workflows.Store(taskUUID, state)
+}
 
-	state, ok := e.workflows[workflowID]
-	if !ok {
-		return nil, fmt.Errorf("workflow %s not found", workflowID)
-	}
-
-	return state, nil
+func (e *local) deleteState(taskUUID string) {
+	e.workflows.Delete(taskUUID)
 }

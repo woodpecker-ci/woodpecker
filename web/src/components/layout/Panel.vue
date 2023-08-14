@@ -7,7 +7,7 @@
       v-if="title"
       type="button"
       class="flex w-full font-bold gap-2 text-wp-text-100 px-4 py-2 bg-wp-background-300"
-      @click="collapsed && (_collapsed = !_collapsed)"
+      @click="_collapsed = !_collapsed"
     >
       <Icon
         v-if="collapsable"

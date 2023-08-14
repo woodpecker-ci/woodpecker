@@ -35,88 +35,59 @@
   </button>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, PropType } from 'vue';
+<script lang="ts" setup>
+import { computed, useAttrs } from 'vue';
 import { RouteLocationRaw, useRouter } from 'vue-router';
 
 import Icon, { IconNames } from '~/components/atomic/Icon.vue';
 
-export default defineComponent({
-  name: 'Button',
-
-  components: { Icon },
-
-  props: {
-    text: {
-      type: String,
-      default: null,
-    },
-
-    title: {
-      type: String,
-      default: null,
-    },
-
-    disabled: {
-      type: Boolean,
-      required: false,
-    },
-
-    to: {
-      type: [String, Object, null] as PropType<RouteLocationRaw | null>,
-      default: null,
-    },
-
-    color: {
-      type: String as PropType<'blue' | 'green' | 'red' | 'gray'>,
-      default: 'gray',
-    },
-
-    startIcon: {
-      type: String as PropType<IconNames | null>,
-      default: null,
-    },
-
-    endIcon: {
-      type: String as PropType<IconNames | null>,
-      default: null,
-    },
-
-    isLoading: {
-      type: Boolean,
-    },
+const props = withDefaults(
+  defineProps<{
+    text: string;
+    title?: string;
+    disabled?: boolean;
+    to: RouteLocationRaw | null;
+    color: 'blue' | 'green' | 'red' | 'gray';
+    startIcon: IconNames | null;
+    endIcon: IconNames | null;
+    isLoading?: boolean;
+  }>(),
+  {
+    text: '',
+    title: undefined,
+    to: null,
+    color: 'gray',
+    startIcon: null,
+    endIcon: null,
   },
+);
 
-  setup(props, { attrs }) {
-    const router = useRouter();
+const router = useRouter();
 
-    async function doClick() {
-      if (props.isLoading) {
-        return;
-      }
+async function doClick() {
+  if (props.isLoading) {
+    return;
+  }
 
-      if (!props.to) {
-        return;
-      }
+  if (!props.to) {
+    return;
+  }
 
-      if (typeof props.to === 'string' && props.to.startsWith('http')) {
-        window.location.href = props.to;
-        return;
-      }
+  if (typeof props.to === 'string' && props.to.startsWith('http')) {
+    window.location.href = props.to;
+    return;
+  }
 
-      await router.push(props.to);
-    }
+  await router.push(props.to);
+}
 
-    const passedClasses = computed(() => {
-      const classes: Record<string, boolean> = {};
-      const origClass = (attrs.class as string) || '';
-      origClass.split(' ').forEach((c) => {
-        classes[c] = true;
-      });
-      return classes;
-    });
-
-    return { doClick, passedClasses };
-  },
+const attrs = useAttrs();
+const passedClasses = computed(() => {
+  const classes: Record<string, boolean> = {};
+  const origClass = (attrs.class as string) || '';
+  origClass.split(' ').forEach((c) => {
+    classes[c] = true;
+  });
+  return classes;
 });
 </script>
