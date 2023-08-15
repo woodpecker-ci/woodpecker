@@ -23,6 +23,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
 	yaml_types "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
 	yaml_base_types "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types/base"
+	"github.com/woodpecker-ci/woodpecker/shared/constant"
 )
 
 func TestSecretAvailable(t *testing.T) {
@@ -89,7 +90,7 @@ func TestCompilerCompile(t *testing.T) {
 			Name:      "test_clone",
 			Alias:     "clone",
 			Type:      backend_types.StepTypeClone,
-			Image:     "docker.io/woodpeckerci/plugin-git:2.1.0",
+			Image:     constant.DefaultCloneImage,
 			OnSuccess: true,
 			Failure:   "fail",
 			Volumes:   []string{defaultVolumes[0].Name + ":"},
