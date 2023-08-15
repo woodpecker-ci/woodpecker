@@ -277,7 +277,6 @@
         },
         "event": {
           "description": "Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#event",
-          "default": ["push", "pull_request", "tag", "deployment"],
           "oneOf": [
             {
               "type": "array",
@@ -370,7 +369,7 @@
       }
     },
     "event_enum": {
-      "enum": ["push", "pull_request", "tag", "deployment", "cron", "manual"]
+      "enum": ["push", "pull_request", "pull_request_closed", "tag", "deployment", "cron", "manual"]
     },
     "constraint_list": {
       "oneOf": [
@@ -488,7 +487,7 @@
       "description": "Advanced options for the different agent backends",
       "type": "object",
       "properties": {
-        "kubernetes" :{
+        "kubernetes": {
           "$ref": "#/definitions/step_backend_kubernetes_resources"
         }
       }
@@ -497,7 +496,7 @@
       "description": "Advanced options for the kubernetes agent backends",
       "type": "object",
       "properties": {
-        "resources" :{
+        "resources": {
           "$ref": "#/definitions/step_backend_kubernetes_resources"
         }
       }

@@ -16,7 +16,7 @@
         <Icon v-if="pipeline.event === 'deployment'" name="deployment" />
         <Icon v-else-if="pipeline.event === 'tag'" name="tag" />
         <a
-          v-else-if="pipeline.event === 'pull_request'"
+          v-else-if="pipeline.event === 'pull_request' || pipeline.event === 'pull_request_closed'"
           class="flex items-center space-x-1 text-wp-link-100 hover:text-wp-link-200 min-w-0"
           :href="pipeline.link_url"
           target="_blank"
@@ -24,7 +24,9 @@
           <Icon name="pull_request" />
           <span class="truncate">{{ prettyRef }}</span>
         </a>
-        <span v-if="pipeline.event !== 'pull_request'" class="truncate">{{ pipeline.branch }}</span>
+        <span v-if="pipeline.event !== 'pull_request' && pipeline.event !== 'pull_request_closed'" class="truncate">{{
+          pipeline.branch
+        }}</span>
       </div>
       <div class="flex items-center flex-shrink-0">
         <template v-if="pipeline.event === 'pull_request'">
