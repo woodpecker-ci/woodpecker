@@ -46,7 +46,7 @@ var secretUpdateCmd = &cli.Command{
 			Usage: "secret value",
 		},
 		&cli.StringSliceFlag{
-			Name:  "event",
+			Name:  "events",
 			Usage: "secret limited to these events",
 		},
 		&cli.StringSliceFlag{
@@ -66,7 +66,7 @@ func secretUpdate(c *cli.Context) error {
 		Name:   strings.ToLower(c.String("name")),
 		Value:  c.String("value"),
 		Images: c.StringSlice("images"),
-		Events: c.StringSlice("event"),
+		Events: c.StringSlice("events"),
 	}
 	if strings.HasPrefix(secret.Value, "@") {
 		path := strings.TrimPrefix(secret.Value, "@")
