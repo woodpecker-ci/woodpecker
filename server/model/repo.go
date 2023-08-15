@@ -47,7 +47,6 @@ type Repo struct {
 	Hash                         string         `json:"-"                               xorm:"varchar(500) 'repo_hash'"`
 	Perm                         *Perm          `json:"-"                               xorm:"-"`
 	CancelPreviousPipelineEvents []WebhookEvent `json:"cancel_previous_pipeline_events" xorm:"json 'cancel_previous_pipeline_events'"`
-	NetrcOnlyTrusted             bool           `json:"netrc_only_trusted"              xorm:"NOT NULL DEFAULT true 'netrc_only_trusted'"`
 } //	@name Repo
 
 // TableName return database table name for xorm
@@ -111,7 +110,6 @@ type RepoPatch struct {
 	Visibility                   *string         `json:"visibility,omitempty"`
 	AllowPull                    *bool           `json:"allow_pr,omitempty"`
 	CancelPreviousPipelineEvents *[]WebhookEvent `json:"cancel_previous_pipeline_events"`
-	NetrcOnlyTrusted             *bool           `json:"netrc_only_trusted"`
 } //	@name RepoPatch
 
 type ForgeRemoteID string

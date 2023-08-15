@@ -46,7 +46,6 @@ type (
 		AllowPullRequests            bool     `json:"allow_pr"`
 		Config                       string   `json:"config_file"`
 		CancelPreviousPipelineEvents []string `json:"cancel_previous_pipeline_events"`
-		NetrcOnlyTrusted             bool     `json:"netrc_only_trusted"`
 	}
 
 	// RepoPatch defines a repository patch request.
