@@ -7,7 +7,7 @@
     >
       <span>{{ secret.name }}</span>
       <div class="ml-auto space-x-2">
-        <Badge v-for="event in secret.event" :key="event" :label="event" />
+        <Badge v-for="event in secret.events" :key="event" :label="event" />
       </div>
       <IconButton
         icon="edit"

@@ -67,12 +67,11 @@ func PostSecret(c *gin.Context) {
 		return
 	}
 	secret := &model.Secret{
-		RepoID:      repo.ID,
-		Name:        strings.ToLower(in.Name),
-		Value:       in.Value,
-		Events:      in.Events,
-		Images:      in.Images,
-		PluginsOnly: in.PluginsOnly,
+		RepoID: repo.ID,
+		Name:   strings.ToLower(in.Name),
+		Value:  in.Value,
+		Events: in.Events,
+		Images: in.Images,
 	}
 	if err := secret.Validate(); err != nil {
 		c.String(http.StatusUnprocessableEntity, "Error inserting secret. %s", err)
@@ -123,7 +122,6 @@ func PatchSecret(c *gin.Context) {
 	if in.Images != nil {
 		secret.Images = in.Images
 	}
-	secret.PluginsOnly = in.PluginsOnly
 
 	if err := secret.Validate(); err != nil {
 		c.String(http.StatusUnprocessableEntity, "Error updating secret. %s", err)
