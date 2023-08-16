@@ -108,7 +108,7 @@ func PostHook(c *gin.Context) {
 	_store := store.FromContext(c)
 	forge := server.Config.Services.Forge
 
-	tmpRepo, tmpBuild, err := forge.Hook(c, c.Request)
+	tmpRepo, tmpPipeline, err := forge.Hook(c, c.Request)
 	if err != nil {
 		if errors.Is(err, &types.ErrIgnoreEvent{}) {
 			msg := fmt.Sprintf("forge driver: %s", err)
@@ -123,7 +123,7 @@ func PostHook(c *gin.Context) {
 		return
 	}
 
-	if tmpBuild == nil {
+	if tmpPipeline == nil {
 		msg := "ignoring hook: hook parsing resulted in empty pipeline"
 		log.Debug().Msg(msg)
 		c.String(http.StatusOK, msg)
@@ -136,11 +136,11 @@ func PostHook(c *gin.Context) {
 		return
 	}
 
-	// skip the tmpBuild if any case-insensitive combination of the words "skip" and "ci"
+	// skip the tmpPipeline if any case-insensitive combination of the words "skip" and "ci"
 	// wrapped in square brackets appear in the commit message
-	skipMatch := skipRe.FindString(tmpBuild.Message)
+	skipMatch := skipRe.FindString(tmpPipeline.Message)
 	if len(skipMatch) > 0 {
-		msg := fmt.Sprintf("ignoring hook: %s found in %s", skipMatch, tmpBuild.Commit)
+		msg := fmt.Sprintf("ignoring hook: %s found in %s", skipMatch, tmpPipeline.Commit)
 		log.Debug().Msg(msg)
 		c.String(http.StatusNoContent, msg)
 		return
@@ -212,14 +212,14 @@ func PostHook(c *gin.Context) {
 		return
 	}
 
-	if tmpBuild.Event == model.EventPull && !repo.AllowPull {
+	if tmpPipeline.Event == model.EventPull && !repo.AllowPull {
 		msg := "ignoring hook: pull requests are disabled for this repo in woodpecker"
 		log.Debug().Str("repo", repo.FullName).Msg(msg)
 		c.String(http.StatusNoContent, msg)
 		return
 	}
 
-	pl, err := pipeline.Create(c, _store, repo, tmpBuild)
+	pl, err := pipeline.Create(c, _store, repo, tmpPipeline)
 	if err != nil {
 		handlePipelineErr(c, err)
 	} else {
