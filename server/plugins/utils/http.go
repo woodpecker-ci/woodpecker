@@ -24,7 +24,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/go-ap/httpsig"
+	"github.com/go-fed/httpsig"
 )
 
 // Send makes an http request to the given endpoint, writing the input
@@ -81,8 +81,14 @@ func Send(ctx context.Context, method, path string, privateKey crypto.PrivateKey
 
 func SignHTTPRequest(privateKey crypto.PrivateKey, req *http.Request) error {
 	pubKeyID := "woodpecker-ci-plugins"
+	headersToSign := []string{httpsig.RequestTarget, "date"}
+	secondsTillExpire := int64(10)
 
-	signer := httpsig.NewEd25519Signer(pubKeyID, privateKey, nil)
+	signer, _, err := httpsig.NewSigner([]httpsig.Algorithm{httpsig.ED25519}, httpsig.DigestSha512, headersToSign, httpsig.Signature, secondsTillExpire)
+	if err != nil {
+		return err
+	}
 
-	return signer.Sign(req)
+	// TODO: sign header "digest" too, need body to be set
+	return signer.SignRequest(privateKey, pubKeyID, req, nil)
 }
