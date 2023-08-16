@@ -1,51 +1,77 @@
 # Kubernetes backend
 
-:::caution
-Kubernetes support is still experimental and not all pipeline features are fully supported yet.
-
-Check the [current state](https://github.com/woodpecker-ci/woodpecker/issues/1513)
+:::info
+Not all pipeline features are fully supported yet for this backend.
+Check [the Kubernetes overview issue](https://github.com/woodpecker-ci/woodpecker/issues/1513) for a summary.
 :::
 
-The kubernetes backend executes each step inside a newly created pod. A PVC is also created for the lifetime of the pipeline, for transferring files between steps.
+The kubernetes backend executes steps inside standalone pods. A temporary PVC is created for the lifetime of the pipeline to transfer files between steps.
 
-## Configuration
+## General Configuration
 
-### `WOODPECKER_BACKEND_K8S_NAMESPACE`
-> Default: `woodpecker`
+These env vars can be set in the `env:` sections of both `server` and `agent`.
+They do not need to be set for both but only for the part to which it is relevant to.
 
-The namespace to create worker pods in.
+```yml
+server:
+  env:
+    WOODPECKER_SESSION_EXPIRES: "300h"
+    [...]
 
-### `WOODPECKER_BACKEND_K8S_VOLUME_SIZE`
-> Default: `10G`
+agent:
+  env:
+    [...]
+```
 
-The volume size of the pipeline volume.
+- `WOODPECKER_BACKEND_K8S_NAMESPACE` (default: `woodpecker`)
 
-### `WOODPECKER_BACKEND_K8S_STORAGE_CLASS`
-> Default: empty
+  The namespace to create worker pods in.
 
-The storage class to use for the pipeline volume.
+- `WOODPECKER_BACKEND_K8S_VOLUME_SIZE` (default: `10G`)
 
-### `WOODPECKER_BACKEND_K8S_STORAGE_RWX`
-> Default: `true`
+  The volume size of the pipeline volume.
 
-Determines if `RWX` should be used for the pipeline volume's [access mode](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes). If false, `RWO` is used instead.
+- `WOODPECKER_BACKEND_K8S_STORAGE_CLASS` (default: empty)
 
-### `WOODPECKER_BACKEND_K8S_POD_LABELS`
-> Default: empty
+  The storage class to use for the pipeline volume.
 
-Additional labels to apply to worker pods. Must be a YAML object, e.g. `{"example.com/test-label":"test-value"}`.
+- `WOODPECKER_BACKEND_K8S_STORAGE_RWX` (default: `true`)
 
-### `WOODPECKER_BACKEND_K8S_POD_ANNOTATIONS`
-> Default: empty
+  Determines if `RWX` should be used for the pipeline volume's [access mode](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes). If false, `RWO` is used instead.
 
-Additional annotations to apply to worker pods. Must be a YAML object, e.g. `{"example.com/test-annotation":"test-value"}`.
+- `WOODPECKER_BACKEND_K8S_POD_LABELS` (default: empty)
+
+  Additional labels to apply to worker pods. Must be a YAML object, e.g. `{"example.com/test-label":"test-value"}`.
+
+- `WOODPECKER_BACKEND_K8S_POD_ANNOTATIONS` (default: empty)
+
+  Additional annotations to apply to worker pods. Must be a YAML object, e.g. `{"example.com/test-annotation":"test-value"}`.
 
 ## Job specific configuration
 
 ### Resources
 
 The kubernetes backend also allows for specifying requests and limits on a per-step basic, most commonly for CPU and memory.
-See the [kubernetes documentation](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/) for more information on using resources.
+We recommend to add a `resources` definition to all steps to ensure efficient scheduling.
+
+Here is an example definition with an arbitrary `resources` definition below the `backend_options` section:
+
+```yml
+steps:
+  'My kubernetes step':
+    image: alpine
+    commands:
+      - echo "Hello world"
+    backend_options:
+      kubernetes:
+        resources:
+          requests:
+            memory: 200Mi
+            cpu: 100m
+          limits:
+            memory: 400Mi
+            cpu: 1000m
+```
 
 ### serviceAccountName
 
@@ -59,6 +85,7 @@ By default the pod will use "kubernetes.io/arch" inferred from top-level "platfo
 See the [kubernetes documentation](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector) for more information on using nodeSelector.
 
 Example pipeline configuration:
+
 ```yaml
 steps:
   build:
@@ -78,4 +105,21 @@ steps:
             memory: 256Mi
         nodeSelector:
           beta.kubernetes.io/instance-type: p3.8xlarge
+```
+
+### Volumes
+
+To mount volumes a persistent volume (PV) and persistent volume claim (PVC) are needed on the cluster which can be referenced in steps via the `volume:` option.
+Assuming a PVC named "woodpecker-cache" exists, it can be referenced as follows in a step:
+
+```yaml
+steps:
+  "Restore Cache":
+    image: meltwater/drone-cache
+    volumes:
+      - woodpecker-cache:/woodpecker/src/cache
+    settings:
+      mount:
+        - "woodpecker-cache"
+    [...]
 ```

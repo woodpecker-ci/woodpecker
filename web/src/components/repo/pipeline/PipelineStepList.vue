@@ -48,7 +48,7 @@
     </div>
 
     <div class="flex-grow min-h-0 w-full relative">
-      <div class="absolute top-0 left-0 right-0 h-full flex flex-col overflow-y-scroll gap-y-2">
+      <div class="absolute top-0 left-0 right-0 h-full flex flex-col md:overflow-y-scroll gap-y-2">
         <div
           v-for="workflow in pipeline.workflows"
           :key="workflow.id"
@@ -84,7 +84,6 @@
           <div
             class="transition-height duration-150 overflow-hidden"
             :class="{
-              'max-h-screen': !workflowsCollapsed[workflow.id],
               'max-h-0': workflowsCollapsed[workflow.id],
               'ml-6': pipeline.workflows && pipeline.workflows.length > 1,
             }"

@@ -101,6 +101,9 @@ generate: generate-swagger ## Run all code generations
 generate-swagger: install-tools ## Run swagger code generation
 	swag init -g server/api/ -g cmd/server/swagger.go --outputTypes go -output cmd/server/docs
 
+generate-license-header: install-tools
+	addlicense -c "Woodpecker Authors" -ignore "vendor/**" **/*.go
+
 check-xgo: ## Check if xgo is installed
 	@hash xgo > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		$(GO) install src.techknowlogick.com/xgo@latest; \
@@ -118,6 +121,9 @@ install-tools: ## Install development tools
 	fi ; \
 	hash swag > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		go install github.com/swaggo/swag/cmd/swag@latest; \
+	fi ; \
+	hash addlicense > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
+		go install github.com/google/addlicense@latest; \
 	fi
 
 ui-dependencies: ## Install UI dependencies
