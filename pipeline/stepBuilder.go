@@ -62,7 +62,6 @@ type Item struct {
 
 func (b *StepBuilder) Build() ([]*Item, error) {
 	var items []*Item
-	var err error
 
 	b.Yamls = forge_types.SortByName(b.Yamls)
 
@@ -108,7 +107,7 @@ func (b *StepBuilder) Build() ([]*Item, error) {
 		return nil, fmt.Errorf("pipeline has no startpoint")
 	}
 
-	return items, err
+	return items, nil
 }
 
 func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.Axis, data string) (*Item, error) {
