@@ -1,31 +1,40 @@
+when:
+  - event: [pull_request, tag]
+  - event: push
+    branch:
+      - ${CI_REPO_DEFAULT_BRANCH}
+      - release/*
+
 variables:
   - &golang_image 'golang:1.20.2'
-  - &when_path # related config files
-    - '.woodpecker/test.yml'
-    - '.golangci.yml'
-    # go source code
-    - '**/*.go'
-    - 'go.*'
-    # schema changes
-    - 'pipeline/frontend/yaml/linter/schema/**'
+  - &when
+    - path: &when_path # related config files
+        - '.woodpecker/test.yml'
+        - '.golangci.yml'
+        # go source code
+        - '**/*.go'
+        - 'go.*'
+        # schema changes
+        - 'pipeline/schema/**'
+      event: [pull_request, tag, deployment]
 
-pipeline:
+steps:
   vendor:
     image: *golang_image
     group: prepare
     commands:
       - go mod vendor
-    when:
-      path: *when_path
+    when: *when
 
   lint-pipeline:
     image: *golang_image
     commands:
       - go run github.com/woodpecker-ci/woodpecker/cmd/cli lint
     when:
-      path:
-        - '.woodpecker/**'
-        - 'pipeline/frontend/yaml/linter/schema/**'
+      - <<: *when
+      - path:
+          - '.woodpecker/**'
+          - 'pipeline/schema/**'
 
   dummy-web:
     image: *golang_image
@@ -33,29 +42,34 @@ pipeline:
     commands:
       - mkdir -p web/dist/
       - echo "test" > web/dist/index.html
-    when:
-      path: *when_path
+    when: *when
 
   lint:
     image: *golang_image
     group: test
     commands:
       - make lint
-    when:
-      path: *when_path
+    when: *when
+
+  check_swagger:
+    image: *golang_image
+    group: test
+    commands:
+      - 'make generate-swagger'
+      - 'DIFF=$(git diff | head)'
+      - '[ -n "$DIFF" ] && { echo "swagger not up to date, exec ''make generate-swagger'' and commit"; exit 1; } || true'
+    when: *when
 
   lint-editorconfig:
     image: mstruebing/editorconfig-checker
     group: test
 
-  securitycheck:
-    group: test
-    image: aquasec/trivy:latest
+  lint-license-header:
+    image: *golang_image
     commands:
-      - trivy fs --exit-code 0 --skip-dirs web/ --skip-dirs docs/ --severity UNKNOWN,LOW .
-      - trivy fs --exit-code 1 --skip-dirs web/ --skip-dirs docs/ --severity MEDIUM,HIGH,CRITICAL .
-    when:
-      path: *when_path
+      - go install github.com/google/addlicense@latest
+      - 'addlicense -check -ignore "vendor/**" **/*.go'
+    when: *when
 
   test:
     image: *golang_image
@@ -65,8 +79,7 @@ pipeline:
       - make test-server
       - make test-cli
       - make test-lib
-    when:
-      path: *when_path
+    when: *when
 
   sqlite:
     image: *golang_image
@@ -75,8 +88,7 @@ pipeline:
       - WOODPECKER_DATABASE_DRIVER=sqlite3
     commands:
       - make test-server-datastore-coverage
-    when:
-      path: *when_path
+    when: *when
 
   postgres:
     image: *golang_image
@@ -86,8 +98,7 @@ pipeline:
       - WOODPECKER_DATABASE_DATASOURCE=host=service-postgres user=postgres dbname=postgres sslmode=disable
     commands:
       - make test-server-datastore
-    when:
-      path: *when_path
+    when: *when
 
   mysql:
     image: *golang_image
@@ -97,8 +108,7 @@ pipeline:
       - WOODPECKER_DATABASE_DATASOURCE=root@tcp(service-mysql:3306)/test?parseTime=true
     commands:
       - make test-server-datastore
-    when:
-      path: *when_path
+    when: *when
 
   codecov:
     pull: true
@@ -112,8 +122,7 @@ pipeline:
         - datastore-coverage.out
       token:
         from_secret: codecov_token
-    when:
-      path: *when_path
+    when: *when
     failure: ignore
 
 services:
@@ -123,8 +132,7 @@ services:
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_HOST_AUTH_METHOD=trust
-    when:
-      path: *when_path
+    when: *when
 
   service-mysql:
     image: mysql:5.6.27
@@ -132,5 +140,4 @@ services:
     environment:
       - MYSQL_DATABASE=test
       - MYSQL_ALLOW_EMPTY_PASSWORD=yes
-    when:
-      path: *when_path
+    when: *when

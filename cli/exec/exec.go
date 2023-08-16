@@ -30,9 +30,11 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/pipeline"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/docker"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/kubernetes"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/local"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/ssh"
 	backendTypes "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/compiler"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/linter"
@@ -47,7 +49,7 @@ var Command = &cli.Command{
 	Usage:     "execute a local pipeline",
 	ArgsUsage: "[path/to/.woodpecker.yaml]",
 	Action:    run,
-	Flags:     append(common.GlobalFlags, flags...),
+	Flags:     utils.MergeSlices(common.GlobalFlags, flags, docker.Flags, ssh.Flags, kubernetes.Flags, local.Flags),
 }
 
 func run(c *cli.Context) error {
@@ -186,7 +188,11 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 		compiler.WithPrefix(
 			c.String("prefix"),
 		),
-		compiler.WithProxy(),
+		compiler.WithProxy(compiler.ProxyOptions{
+			NoProxy:    c.String("backend-no-proxy"),
+			HTTPProxy:  c.String("backend-http-proxy"),
+			HTTPSProxy: c.String("backend-https-proxy"),
+		}),
 		compiler.WithLocal(
 			c.Bool("local"),
 		),
@@ -203,7 +209,7 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 		return err
 	}
 
-	backendCtx := context.WithValue(c.Context, types.CliContext, c)
+	backendCtx := context.WithValue(c.Context, backendTypes.CliContext, c)
 	backend.Init(backendCtx)
 
 	engine, err := backend.FindEngine(backendCtx, c.String("backend-engine"))
@@ -232,81 +238,6 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 	).Run(c.Context)
 }
 
-// return the metadata from the cli context.
-func metadataFromContext(c *cli.Context, axis matrix.Axis) frontend.Metadata {
-	platform := c.String("system-platform")
-	if platform == "" {
-		platform = runtime.GOOS + "/" + runtime.GOARCH
-	}
-
-	return frontend.Metadata{
-		Repo: frontend.Repo{
-			Name:     c.String("repo-name"),
-			Link:     c.String("repo-link"),
-			CloneURL: c.String("repo-clone-url"),
-			Private:  c.Bool("repo-private"),
-		},
-		Curr: frontend.Pipeline{
-			Number:   c.Int64("pipeline-number"),
-			Parent:   c.Int64("pipeline-parent"),
-			Created:  c.Int64("pipeline-created"),
-			Started:  c.Int64("pipeline-started"),
-			Finished: c.Int64("pipeline-finished"),
-			Status:   c.String("pipeline-status"),
-			Event:    c.String("pipeline-event"),
-			Link:     c.String("pipeline-link"),
-			Target:   c.String("pipeline-target"),
-			Commit: frontend.Commit{
-				Sha:     c.String("commit-sha"),
-				Ref:     c.String("commit-ref"),
-				Refspec: c.String("commit-refspec"),
-				Branch:  c.String("commit-branch"),
-				Message: c.String("commit-message"),
-				Author: frontend.Author{
-					Name:   c.String("commit-author-name"),
-					Email:  c.String("commit-author-email"),
-					Avatar: c.String("commit-author-avatar"),
-				},
-			},
-		},
-		Prev: frontend.Pipeline{
-			Number:   c.Int64("prev-pipeline-number"),
-			Created:  c.Int64("prev-pipeline-created"),
-			Started:  c.Int64("prev-pipeline-started"),
-			Finished: c.Int64("prev-pipeline-finished"),
-			Status:   c.String("prev-pipeline-status"),
-			Event:    c.String("prev-pipeline-event"),
-			Link:     c.String("prev-pipeline-link"),
-			Commit: frontend.Commit{
-				Sha:     c.String("prev-commit-sha"),
-				Ref:     c.String("prev-commit-ref"),
-				Refspec: c.String("prev-commit-refspec"),
-				Branch:  c.String("prev-commit-branch"),
-				Message: c.String("prev-commit-message"),
-				Author: frontend.Author{
-					Name:   c.String("prev-commit-author-name"),
-					Email:  c.String("prev-commit-author-email"),
-					Avatar: c.String("prev-commit-author-avatar"),
-				},
-			},
-		},
-		Workflow: frontend.Workflow{
-			Name:   c.String("workflow-name"),
-			Number: c.Int("workflow-number"),
-			Matrix: axis,
-		},
-		Step: frontend.Step{
-			Name:   c.String("step-name"),
-			Number: c.Int("step-number"),
-		},
-		Sys: frontend.System{
-			Name:     c.String("system-name"),
-			Link:     c.String("system-link"),
-			Platform: platform,
-		},
-	}
-}
-
 func convertPathForWindows(path string) string {
 	base := filepath.VolumeName(path)
 	if len(base) == 2 {
@@ -324,7 +255,7 @@ var defaultLogger = pipeline.LogFunc(func(step *backendTypes.Step, rc multipart.
 		return err
 	}
 
-	logStream := NewLineWriter(step.Alias)
+	logStream := NewLineWriter(step.Alias, step.UUID)
 	_, err = io.Copy(logStream, part)
 	return err
 })

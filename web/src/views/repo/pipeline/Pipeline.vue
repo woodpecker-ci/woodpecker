@@ -2,7 +2,7 @@
   <FluidContainer full-width class="flex flex-col flex-grow">
     <div class="flex w-full min-h-0 flex-grow">
       <PipelineStepList
-        v-if="pipeline?.steps?.length || 0 > 0"
+        v-if="pipeline?.workflows?.length || 0 > 0"
         v-model:selected-step-id="selectedStepId"
         :class="{ 'hidden md:flex': pipeline.status === 'blocked' }"
         :pipeline="pipeline"
@@ -10,13 +10,13 @@
 
       <div class="flex flex-grow relative">
         <div v-if="error" class="flex flex-col p-4">
-          <span class="text-red-400 font-bold text-xl mb-2">{{ $t('repo.pipeline.execution_error') }}</span>
-          <span class="text-red-400">{{ error }}</span>
+          <span class="text-wp-state-error-100 font-bold text-xl mb-2">{{ $t('repo.pipeline.execution_error') }}</span>
+          <span class="text-wp-state-error-100">{{ error }}</span>
         </div>
 
         <div v-else-if="pipeline.status === 'blocked'" class="flex flex-col flex-grow justify-center items-center p-2">
-          <Icon name="status-blocked" class="w-16 h-16 text-color mb-4" />
-          <p class="text-xl text-color mb-4">{{ $t('repo.pipeline.protected.awaits') }}</p>
+          <Icon name="status-blocked" class="w-16 h-16 text-wp-text-100 mb-4" />
+          <p class="text-xl text-wp-text-100 mb-4">{{ $t('repo.pipeline.protected.awaits') }}</p>
           <div v-if="repoPermissions.push" class="flex space-x-4">
             <Button
               color="green"
@@ -34,8 +34,8 @@
         </div>
 
         <div v-else-if="pipeline.status === 'declined'" class="flex flex-col flex-grow justify-center items-center">
-          <Icon name="status-blocked" class="w-16 h-16 text-color mb-4" />
-          <p class="text-xl text-color">{{ $t('repo.pipeline.protected.declined') }}</p>
+          <Icon name="status-blocked" class="w-16 h-16 text-wp-text-100 mb-4" />
+          <p class="text-xl text-wp-text-100">{{ $t('repo.pipeline.protected.declined') }}</p>
         </div>
 
         <PipelineLog
@@ -85,18 +85,18 @@ if (!repo || !repoPermissions || !pipeline) {
 const stepId = toRef(props, 'stepId');
 
 const defaultStepId = computed(() => {
-  if (!pipeline.value || !pipeline.value.steps || !pipeline.value.steps[0].children) {
+  if (!pipeline.value || !pipeline.value.workflows || !pipeline.value.workflows[0].children) {
     return null;
   }
 
-  return pipeline.value.steps[0].children[0].pid;
+  return pipeline.value.workflows[0].children[0].pid;
 });
 
 const selectedStepId = computed({
   get() {
     if (stepId.value !== '' && stepId.value !== null && stepId.value !== undefined) {
       const id = parseInt(stepId.value, 10);
-      const step = pipeline.value?.steps?.reduce(
+      const step = pipeline.value?.workflows?.reduce(
         (prev, p) => prev || p.children?.find((c) => c.pid === id),
         undefined as PipelineStep | undefined,
       );
@@ -125,7 +125,7 @@ const selectedStepId = computed({
   },
 });
 
-const selectedStep = computed(() => findStep(pipeline.value.steps || [], selectedStepId.value || -1));
+const selectedStep = computed(() => findStep(pipeline.value.workflows || [], selectedStepId.value || -1));
 const error = computed(() => pipeline.value?.error || selectedStep.value?.error);
 
 const { doSubmit: approvePipeline, isLoading: isApprovingPipeline } = useAsyncAction(async () => {
@@ -133,7 +133,7 @@ const { doSubmit: approvePipeline, isLoading: isApprovingPipeline } = useAsyncAc
     throw new Error('Unexpected: Repo is undefined');
   }
 
-  await apiClient.approvePipeline(repo.value.owner, repo.value.name, `${pipeline.value.number}`);
+  await apiClient.approvePipeline(repo.value.id, `${pipeline.value.number}`);
   notifications.notify({ title: i18n.t('repo.pipeline.protected.approve_success'), type: 'success' });
 });
 
@@ -142,7 +142,7 @@ const { doSubmit: declinePipeline, isLoading: isDecliningPipeline } = useAsyncAc
     throw new Error('Unexpected: Repo is undefined');
   }
 
-  await apiClient.declinePipeline(repo.value.owner, repo.value.name, `${pipeline.value.number}`);
+  await apiClient.declinePipeline(repo.value.id, `${pipeline.value.number}`);
   notifications.notify({ title: i18n.t('repo.pipeline.protected.decline_success'), type: 'success' });
 });
 </script>

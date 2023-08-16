@@ -51,7 +51,7 @@ WOODPECKER_CONFIG_SERVICE_ENDPOINT=https://example.com/ciconfig
     "author": "myUser",
     "author_avatar": "https://myforge.com/avatars/d6b3f7787a685fcdf2a44e2c685c7e03",
     "author_email": "my@email.com",
-    "branch": "master",
+    "branch": "main",
     "changed_files": [
       "somefilename.txt"
     ],
@@ -67,7 +67,7 @@ WOODPECKER_CONFIG_SERVICE_ENDPOINT=https://example.com/ciconfig
     "message": "test old config\n",
     "number": 0,
     "parent": 0,
-    "ref": "refs/heads/master",
+    "ref": "refs/heads/main",
     "refspec": "",
     "clone_url": "",
     "reviewed_at": 0,
@@ -84,7 +84,7 @@ WOODPECKER_CONFIG_SERVICE_ENDPOINT=https://example.com/ciconfig
   "configs": [
     {
       "name": ".woodpecker.yml",
-      "data": "pipeline:\n  backend:\n    image: alpine\n    commands:\n      - echo \"Hello there from Repo (.woodpecker.yml)\"\n"
+      "data": "steps:\n  backend:\n    image: alpine\n    commands:\n      - echo \"Hello there from Repo (.woodpecker.yml)\"\n"
     }
   ]
 }
@@ -97,7 +97,7 @@ WOODPECKER_CONFIG_SERVICE_ENDPOINT=https://example.com/ciconfig
   "configs": [
     {
       "name": "central-override",
-      "data": "pipeline:\n  backend:\n    image: alpine\n    commands:\n      - echo \"Hello there from ConfigAPI\"\n"
+      "data": "steps:\n  backend:\n    image: alpine\n    commands:\n      - echo \"Hello there from ConfigAPI\"\n"
     }
   ]
 }

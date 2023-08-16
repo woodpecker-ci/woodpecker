@@ -1,3 +1,17 @@
+// Copyright 2022 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package ssh
 
 import (
@@ -6,6 +20,7 @@ import (
 	"strings"
 
 	"github.com/melbahja/goph"
+	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/common"
@@ -79,13 +94,15 @@ func (e *ssh) Load(ctx context.Context) error {
 	return nil
 }
 
-// Setup the pipeline environment.
-func (e *ssh) Setup(_ context.Context, _ *types.Config) error {
+// SetupWorkflow create the workflow environment.
+func (e *ssh) SetupWorkflow(context.Context, *types.Config, string) error {
 	return nil
 }
 
-// Exec the pipeline step.
-func (e *ssh) Exec(ctx context.Context, step *types.Step) error {
+// StartStep start the step.
+func (e *ssh) StartStep(ctx context.Context, step *types.Step, taskUUID string) error {
+	log.Trace().Str("taskUUID", taskUUID).Msgf("Start step %s", step.Name)
+
 	// Get environment variables
 	var command []string
 	for a, b := range step.Environment {
@@ -124,21 +141,21 @@ func (e *ssh) Exec(ctx context.Context, step *types.Step) error {
 	return e.cmd.Start()
 }
 
-// Wait for the pipeline step to complete and returns
+// WaitStep for the pipeline step to complete and returns
 // the completion results.
-func (e *ssh) Wait(context.Context, *types.Step) (*types.State, error) {
+func (e *ssh) WaitStep(context.Context, *types.Step, string) (*types.State, error) {
 	return &types.State{
 		Exited: true,
 	}, e.cmd.Wait()
 }
 
-// Tail the pipeline step logs.
-func (e *ssh) Tail(context.Context, *types.Step) (io.ReadCloser, error) {
+// TailStep the pipeline step logs.
+func (e *ssh) TailStep(context.Context, *types.Step, string) (io.ReadCloser, error) {
 	return e.output, nil
 }
 
-// Destroy the pipeline environment.
-func (e *ssh) Destroy(context.Context, *types.Config) error {
+// DestroyWorkflow delete the workflow environment.
+func (e *ssh) DestroyWorkflow(context.Context, *types.Config, string) error {
 	e.client.Close()
 	sftp, err := e.client.NewSftp()
 	if err != nil {

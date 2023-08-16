@@ -21,8 +21,10 @@ import (
 	"testing"
 
 	"github.com/franela/goblin"
+	"github.com/stretchr/testify/assert"
 
 	"github.com/woodpecker-ci/woodpecker/server/forge/gitea/fixtures"
+	"github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/shared/utils"
 )
@@ -38,7 +40,7 @@ func Test_parser(t *testing.T) {
 			r, b, err := parseHook(req)
 			g.Assert(r).IsNil()
 			g.Assert(b).IsNil()
-			g.Assert(err).IsNil()
+			assert.ErrorIs(t, err, &types.ErrIgnoreEvent{})
 		})
 		g.It("given a PR hook", func() {
 			buf := bytes.NewBufferString(fixtures.HookPullRequest)
@@ -62,7 +64,7 @@ func Test_parser(t *testing.T) {
 				g.Assert(r).IsNotNil()
 				g.Assert(b).IsNotNil()
 				g.Assert(b.Event).Equal(model.EventPush)
-				g.Assert(utils.EqualStringSlice(b.ChangedFiles, []string{"CHANGELOG.md", "app/controller/application.rb"})).IsTrue()
+				g.Assert(utils.EqualSliceValues(b.ChangedFiles, []string{"CHANGELOG.md", "app/controller/application.rb"})).IsTrue()
 			})
 		})
 		g.Describe("given a push hook from an branch creation", func() {

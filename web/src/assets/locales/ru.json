@@ -322,7 +322,7 @@
           "netrc_only_trusted": "Вводите учетные данные netrc только внутри контейнеров которым вы доверяете"
         },
         "pipeline_path": {
-          "default": "По умолчанию: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml -> .drone.yml",
+          "default": "По умолчанию: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml",
           "desc": "Путь к конфигурации вашего конвейера (например: {0}). При указании директории путь должен заканчиваться символом {1}.",
           "desc_path_example": "мой/путь/",
           "path": "Конфигурация конвейера"
@@ -422,15 +422,8 @@
   "url": "URL",
   "user": {
     "access_denied": "У вас нет прав для входа в систему",
-    "api_usage": "Пример прямого использования API",
-    "cli_usage": "Пример использования CLI",
-    "dl_cli": "Скачать CLI",
     "internal_error": "Произошла внутренняя ошибка",
-    "oauth_error": "Ошибка при аутентификации через OAuth провайдера",
-    "settings": "Настройки пользователя",
-    "shell_setup": "Настройка через терминал",
-    "shell_setup_before": "выполните следующие шаги для настройки и проверки CLI",
-    "token": "Ваш персональный API токен"
+    "oauth_error": "Ошибка при аутентификации через OAuth провайдера"
   },
   "username": "Имя пользователя",
   "welcome": "Добро пожаловать в Woodpecker"

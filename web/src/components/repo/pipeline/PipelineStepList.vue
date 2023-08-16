@@ -1,7 +1,7 @@
 <template>
-  <div class="flex flex-col w-full md:w-3/12 md:ml-2 text-gray-600 dark:text-gray-400 gap-2 pb-2">
+  <div class="flex flex-col w-full md:w-3/12 md:max-w-md md:min-w-xs md:ml-2 text-wp-text-100 gap-2 pb-2">
     <div
-      class="flex flex-wrap p-4 gap-1 justify-between flex-shrink-0 md:rounded-md bg-white shadow dark:bg-dark-gray-700"
+      class="flex flex-wrap p-4 gap-1 justify-between flex-shrink-0 md:rounded-md border bg-wp-background-100 border-wp-background-400 dark:bg-wp-background-200"
     >
       <div class="flex space-x-1 items-center flex-shrink-0">
         <div class="flex items-center">
@@ -17,7 +17,7 @@
         <Icon v-else-if="pipeline.event === 'tag'" name="tag" />
         <a
           v-else-if="pipeline.event === 'pull_request'"
-          class="flex items-center space-x-1 text-link min-w-0"
+          class="flex items-center space-x-1 text-wp-link-100 hover:text-wp-link-200 min-w-0"
           :href="pipeline.link_url"
           target="_blank"
         >
@@ -31,23 +31,28 @@
           <Icon name="commit" />
           <span>{{ pipeline.commit.slice(0, 10) }}</span>
         </template>
-        <a v-else class="text-blue-700 dark:text-link flex items-center" :href="pipeline.link_url" target="_blank">
+        <a
+          v-else
+          class="text-wp-link-100 hover:text-wp-link-200 flex items-center"
+          :href="pipeline.link_url"
+          target="_blank"
+        >
           <Icon name="commit" />
           <span>{{ pipeline.commit.slice(0, 10) }}</span>
         </a>
       </div>
     </div>
 
-    <div v-if="pipeline.steps === undefined || pipeline.steps.length === 0" class="m-auto mt-4">
+    <div v-if="pipeline.workflows === undefined || pipeline.workflows.length === 0" class="m-auto mt-4">
       <span>{{ $t('repo.pipeline.no_pipeline_steps') }}</span>
     </div>
 
     <div class="flex-grow min-h-0 w-full relative">
-      <div class="absolute top-0 left-0 right-0 h-full flex flex-col overflow-y-scroll gap-y-2">
+      <div class="absolute top-0 left-0 right-0 h-full flex flex-col md:overflow-y-scroll gap-y-2">
         <div
-          v-for="workflow in pipeline.steps"
+          v-for="workflow in pipeline.workflows"
           :key="workflow.id"
-          class="p-2 md:rounded-md bg-white shadow dark:border-b-dark-gray-600 dark:bg-dark-gray-700"
+          class="p-2 md:rounded-md shadow border bg-wp-background-100 border-wp-background-400 dark:bg-wp-background-200"
         >
           <div class="flex flex-col gap-2">
             <div v-if="workflow.environ" class="flex flex-wrap gap-x-1 gap-y-2 text-xs justify-end pt-1 pr-1">
@@ -56,10 +61,10 @@
               </div>
             </div>
             <button
-              v-if="pipeline.steps && pipeline.steps.length > 1"
+              v-if="pipeline.workflows && pipeline.workflows.length > 1"
               type="button"
               :title="workflow.name"
-              class="flex items-center gap-2 py-2 px-1 hover-effect rounded-md"
+              class="flex items-center gap-2 py-2 px-1 hover-effect hover:bg-wp-background-300 dark:hover:bg-wp-background-400 rounded-md"
               @click="workflowsCollapsed[workflow.id] = !workflowsCollapsed[workflow.id]"
             >
               <Icon
@@ -71,7 +76,7 @@
               <span class="truncate">{{ workflow.name }}</span>
               <PipelineStepDuration
                 v-if="workflow.start_time !== workflow.end_time"
-                :step="workflow"
+                :workflow="workflow"
                 class="mr-1 pr-2px"
               />
             </button>
@@ -79,9 +84,8 @@
           <div
             class="transition-height duration-150 overflow-hidden"
             :class="{
-              'max-h-screen': !workflowsCollapsed[workflow.id],
               'max-h-0': workflowsCollapsed[workflow.id],
-              'ml-6': pipeline.steps && pipeline.steps.length > 1,
+              'ml-6': pipeline.workflows && pipeline.workflows.length > 1,
             }"
           >
             <button
@@ -89,11 +93,11 @@
               :key="step.pid"
               type="button"
               :title="step.name"
-              class="flex p-2 gap-2 border-2 border-transparent rounded-md items-center hover-effect w-full"
+              class="flex p-2 gap-2 border-2 border-transparent rounded-md items-center hover-effect hover:bg-wp-background-300 dark:hover:bg-wp-background-400 w-full"
               :class="{
-                'bg-black bg-opacity-10 dark:bg-white dark:bg-opacity-5': selectedStepId && selectedStepId === step.pid,
+                'bg-wp-background-300 dark:bg-wp-background-400': selectedStepId && selectedStepId === step.pid,
                 'mt-1':
-                  (pipeline.steps && pipeline.steps.length > 1) ||
+                  (pipeline.workflows && pipeline.workflows.length > 1) ||
                   (workflow.children && step.pid !== workflow.children[0].pid),
               }"
               @click="$emit('update:selected-step-id', step.pid)"
@@ -132,8 +136,8 @@ const pipeline = toRef(props, 'pipeline');
 const { prettyRef } = usePipeline(pipeline);
 
 const workflowsCollapsed = ref<Record<PipelineStep['id'], boolean>>(
-  props.pipeline.steps && props.pipeline.steps.length > 1
-    ? (props.pipeline.steps || []).reduce(
+  props.pipeline.workflows && props.pipeline.workflows.length > 1
+    ? (props.pipeline.workflows || []).reduce(
         (collapsed, workflow) => ({
           ...collapsed,
           [workflow.id]: ['success', 'skipped', 'blocked'].includes(workflow.state),

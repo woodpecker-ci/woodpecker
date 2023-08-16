@@ -3,6 +3,11 @@ GO_PACKAGES ?= $(shell go list ./... | grep -v /vendor/)
 TARGETOS ?= linux
 TARGETARCH ?= amd64
 
+BIN_SUFFIX :=
+ifeq ($(TARGETOS),windows)
+	BIN_SUFFIX := .exe
+endif
+
 VERSION ?= next
 VERSION_NUMBER ?= 0.0.0
 ifneq ($(CI_COMMIT_TAG),)
@@ -22,7 +27,7 @@ CGO_ENABLED ?= 1 # only used to compile server
 
 HAS_GO = $(shell hash go > /dev/null 2>&1 && echo "GO" || echo "NOGO" )
 ifeq ($(HAS_GO),GO)
-	XGO_VERSION ?= go-1.19.x
+	XGO_VERSION ?= go-1.20.x
 	CGO_CFLAGS ?= $(shell go env CGO_CFLAGS)
 endif
 CGO_CFLAGS ?=
@@ -35,17 +40,16 @@ ifeq (in_docker,$(firstword $(MAKECMDGOALS)))
   $(eval $(MAKE_ARGS):;@:)
 
   in_docker:
-	@[ "1" -eq "$(shell docker image ls woodpecker/make:local -a | wc -l)" ] && docker build -f ./docker/Dockerfile.make -t woodpecker/make:local . || echo reuse existing docker image
+	@[ "1" -eq "$(shell docker image ls woodpecker/make:local -a | wc -l)" ] && docker buildx build -f ./docker/Dockerfile.make -t woodpecker/make:local --load . || echo reuse existing docker image
 	@echo run in docker:
 	@docker run -it \
 		--user $(shell id -u):$(shell id -g) \
 		-e VERSION="$(VERSION)" \
 		-e BUILD_VERSION="$(BUILD_VERSION)" \
 		-e CI_COMMIT_SHA="$(CI_COMMIT_SHA)" \
-		-e GO_PACKAGES="$(GO_PACKAGES)" \
 		-e TARGETOS="$(TARGETOS)" \
 		-e TARGETARCH="$(TARGETARCH)" \
-		-e CGO_ENABLED="$(CGO_ENABLED)"
+		-e CGO_ENABLED="$(CGO_ENABLED)" \
 		-e GOPATH=/tmp/go \
 		-e HOME=/tmp/home \
 		-v $(PWD):/build --rm woodpecker/make:local make $(MAKE_ARGS)
@@ -91,8 +95,14 @@ clean: ## Clean build artifacts
 	@[ "1" != "$(shell docker image ls woodpecker/make:local -a | wc -l)" ] && docker image rm woodpecker/make:local || echo no docker image to clean
 
 .PHONY: generate
-generate: ## Run all code generations
+generate: generate-swagger ## Run all code generations
 	go generate ./...
+
+generate-swagger: install-tools ## Run swagger code generation
+	swag init -g server/api/ -g cmd/server/swagger.go --outputTypes go -output cmd/server/docs
+
+generate-license-header: install-tools
+	addlicense -c "Woodpecker Authors" -ignore "vendor/**" **/*.go
 
 check-xgo: ## Check if xgo is installed
 	@hash xgo > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
@@ -108,6 +118,12 @@ install-tools: ## Install development tools
 	fi ; \
 	hash gofumpt > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		go install mvdan.cc/gofumpt@latest; \
+	fi ; \
+	hash swag > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
+		go install github.com/swaggo/swag/cmd/swag@latest; \
+	fi ; \
+	hash addlicense > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
+		go install github.com/google/addlicense@latest; \
 	fi
 
 ui-dependencies: ## Install UI dependencies
@@ -139,11 +155,11 @@ test-cli: ## Test cli code
 	go test -race -cover -coverprofile cli-coverage.out -timeout 30s github.com/woodpecker-ci/woodpecker/cmd/cli github.com/woodpecker-ci/woodpecker/cli/...
 
 test-server-datastore: ## Test server datastore
-	go test -timeout 30s -run TestMigrate github.com/woodpecker-ci/woodpecker/server/store/...
+	go test -timeout 120s -run TestMigrate github.com/woodpecker-ci/woodpecker/server/store/...
 	go test -race -timeout 30s -skip TestMigrate github.com/woodpecker-ci/woodpecker/server/store/...
 
 test-server-datastore-coverage: ## Test server datastore with coverage report
-	go test -race -cover -coverprofile datastore-coverage.out -timeout 30s github.com/woodpecker-ci/woodpecker/server/store/...
+	go test -race -cover -coverprofile datastore-coverage.out -timeout 120s github.com/woodpecker-ci/woodpecker/server/store/...
 
 test-ui: ui-dependencies ## Test UI code
 	(cd web/; pnpm run lint)
@@ -161,14 +177,14 @@ test: test-agent test-server test-server-datastore test-cli test-lib test-ui ## 
 build-ui: ## Build UI
 	(cd web/; pnpm install --frozen-lockfile; pnpm build)
 
-build-server: build-ui ## Build server
-	CGO_ENABLED=${CGO_ENABLED} GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -ldflags '${LDFLAGS}' -o dist/woodpecker-server github.com/woodpecker-ci/woodpecker/cmd/server
+build-server: build-ui generate-swagger ## Build server
+	CGO_ENABLED=${CGO_ENABLED} GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -ldflags '${LDFLAGS}' -o dist/woodpecker-server${BIN_SUFFIX} github.com/woodpecker-ci/woodpecker/cmd/server
 
 build-agent: ## Build agent
-	CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -ldflags '${LDFLAGS}' -o dist/woodpecker-agent github.com/woodpecker-ci/woodpecker/cmd/agent
+	CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -ldflags '${LDFLAGS}' -o dist/woodpecker-agent${BIN_SUFFIX} github.com/woodpecker-ci/woodpecker/cmd/agent
 
 build-cli: ## Build cli
-	CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -ldflags '${LDFLAGS}' -o dist/woodpecker-cli github.com/woodpecker-ci/woodpecker/cmd/cli
+	CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -ldflags '${LDFLAGS}' -o dist/woodpecker-cli${BIN_SUFFIX} github.com/woodpecker-ci/woodpecker/cmd/cli
 
 build: build-agent build-server build-cli ## Build all binaries
 
@@ -192,70 +208,46 @@ release-server-xgo: check-xgo ## Create server binaries for release using xgo
 
 	CGO_CFLAGS="$(CGO_CFLAGS)" xgo -go $(XGO_VERSION) -dest ./dist/server/$(TARGETOS)-$(TARGETARCH_XGO) -tags 'netgo osusergo $(TAGS)' -ldflags '-linkmode external $(LDFLAGS)' -targets '$(TARGETOS)/$(TARGETARCH_XGO)' -out woodpecker-server -pkg cmd/server .
 	mkdir -p ./dist/server/$(TARGETOS)/$(TARGETARCH_BUILDX)
-	mv /build/woodpecker-server-$(TARGETOS)-$(TARGETARCH_XGO) ./dist/server/$(TARGETOS)/$(TARGETARCH_BUILDX)/woodpecker-server
+	mv /build/woodpecker-server-$(TARGETOS)*-$(TARGETARCH_XGO)$(BIN_SUFFIX) ./dist/server/$(TARGETOS)/$(TARGETARCH_BUILDX)/woodpecker-server$(BIN_SUFFIX)
+	[ "${TARGZ}" -eq "1" ] && tar -cvzf dist/woodpecker-server_$(TARGETOS)_$(TARGETARCH_BUILDX).tar.gz -C dist/server/$(TARGETOS)/$(TARGETARCH_BUILDX) woodpecker-server$(BIN_SUFFIX) || echo "skip tar.gz binary"
 
 release-server: ## Create server binaries for release
 	# compile
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=${CGO_ENABLED} go build -ldflags '${LDFLAGS}' -o dist/server/linux_amd64/woodpecker-server github.com/woodpecker-ci/woodpecker/cmd/server
+	GOOS=$(TARGETOS) GOARCH=$(TARGETARCH) CGO_ENABLED=${CGO_ENABLED} go build -ldflags '${LDFLAGS}' -o dist/server/$(TARGETOS)_$(TARGETARCH)/woodpecker-server$(BIN_SUFFIX) github.com/woodpecker-ci/woodpecker/cmd/server
 	# tar binary files
-	tar -cvzf dist/woodpecker-server_linux_amd64.tar.gz   -C dist/server/linux_amd64 woodpecker-server
+	tar -cvzf dist/woodpecker-server_$(TARGETOS)_$(TARGETARCH).tar.gz -C dist/server/$(TARGETOS)_$(TARGETARCH) woodpecker-server$(BIN_SUFFIX)
 
 release-agent: ## Create agent binaries for release
 	# compile
-	GOOS=linux   GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o dist/agent/linux_amd64/woodpecker-agent   github.com/woodpecker-ci/woodpecker/cmd/agent
-	GOOS=linux   GOARCH=arm64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o dist/agent/linux_arm64/woodpecker-agent   github.com/woodpecker-ci/woodpecker/cmd/agent
-	GOOS=linux   GOARCH=arm   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o dist/agent/linux_arm/woodpecker-agent     github.com/woodpecker-ci/woodpecker/cmd/agent
-	GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o dist/agent/windows_amd64/woodpecker-agent github.com/woodpecker-ci/woodpecker/cmd/agent
-	GOOS=darwin  GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o dist/agent/darwin_amd64/woodpecker-agent  github.com/woodpecker-ci/woodpecker/cmd/agent
-	GOOS=darwin  GOARCH=arm64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o dist/agent/darwin_arm64/woodpecker-agent  github.com/woodpecker-ci/woodpecker/cmd/agent
+	GOOS=linux   GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o dist/agent/linux_amd64/woodpecker-agent       github.com/woodpecker-ci/woodpecker/cmd/agent
+	GOOS=linux   GOARCH=arm64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o dist/agent/linux_arm64/woodpecker-agent       github.com/woodpecker-ci/woodpecker/cmd/agent
+	GOOS=linux   GOARCH=arm   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o dist/agent/linux_arm/woodpecker-agent         github.com/woodpecker-ci/woodpecker/cmd/agent
+	GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o dist/agent/windows_amd64/woodpecker-agent.exe github.com/woodpecker-ci/woodpecker/cmd/agent
+	GOOS=darwin  GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o dist/agent/darwin_amd64/woodpecker-agent      github.com/woodpecker-ci/woodpecker/cmd/agent
+	GOOS=darwin  GOARCH=arm64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o dist/agent/darwin_arm64/woodpecker-agent      github.com/woodpecker-ci/woodpecker/cmd/agent
 	# tar binary files
 	tar -cvzf dist/woodpecker-agent_linux_amd64.tar.gz   -C dist/agent/linux_amd64   woodpecker-agent
 	tar -cvzf dist/woodpecker-agent_linux_arm64.tar.gz   -C dist/agent/linux_arm64   woodpecker-agent
 	tar -cvzf dist/woodpecker-agent_linux_arm.tar.gz     -C dist/agent/linux_arm     woodpecker-agent
-	tar -cvzf dist/woodpecker-agent_windows_amd64.tar.gz -C dist/agent/windows_amd64 woodpecker-agent
+	tar -cvzf dist/woodpecker-agent_windows_amd64.tar.gz -C dist/agent/windows_amd64 woodpecker-agent.exe
 	tar -cvzf dist/woodpecker-agent_darwin_amd64.tar.gz  -C dist/agent/darwin_amd64  woodpecker-agent
 	tar -cvzf dist/woodpecker-agent_darwin_arm64.tar.gz  -C dist/agent/darwin_arm64  woodpecker-agent
 
 release-cli: ## Create cli binaries for release
 	# compile
-	GOOS=linux   GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o dist/cli/linux_amd64/woodpecker-cli   github.com/woodpecker-ci/woodpecker/cmd/cli
-	GOOS=linux   GOARCH=arm64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o dist/cli/linux_arm64/woodpecker-cli   github.com/woodpecker-ci/woodpecker/cmd/cli
-	GOOS=linux   GOARCH=arm   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o dist/cli/linux_arm/woodpecker-cli     github.com/woodpecker-ci/woodpecker/cmd/cli
-	GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o dist/cli/windows_amd64/woodpecker-cli github.com/woodpecker-ci/woodpecker/cmd/cli
-	GOOS=darwin  GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o dist/cli/darwin_amd64/woodpecker-cli  github.com/woodpecker-ci/woodpecker/cmd/cli
-	GOOS=darwin  GOARCH=arm64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o dist/cli/darwin_arm64/woodpecker-cli  github.com/woodpecker-ci/woodpecker/cmd/cli
+	GOOS=linux   GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o dist/cli/linux_amd64/woodpecker-cli       github.com/woodpecker-ci/woodpecker/cmd/cli
+	GOOS=linux   GOARCH=arm64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o dist/cli/linux_arm64/woodpecker-cli       github.com/woodpecker-ci/woodpecker/cmd/cli
+	GOOS=linux   GOARCH=arm   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o dist/cli/linux_arm/woodpecker-cli         github.com/woodpecker-ci/woodpecker/cmd/cli
+	GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o dist/cli/windows_amd64/woodpecker-cli.exe github.com/woodpecker-ci/woodpecker/cmd/cli
+	GOOS=darwin  GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o dist/cli/darwin_amd64/woodpecker-cli      github.com/woodpecker-ci/woodpecker/cmd/cli
+	GOOS=darwin  GOARCH=arm64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o dist/cli/darwin_arm64/woodpecker-cli      github.com/woodpecker-ci/woodpecker/cmd/cli
 	# tar binary files
 	tar -cvzf dist/woodpecker-cli_linux_amd64.tar.gz   -C dist/cli/linux_amd64   woodpecker-cli
 	tar -cvzf dist/woodpecker-cli_linux_arm64.tar.gz   -C dist/cli/linux_arm64   woodpecker-cli
 	tar -cvzf dist/woodpecker-cli_linux_arm.tar.gz     -C dist/cli/linux_arm     woodpecker-cli
-	tar -cvzf dist/woodpecker-cli_windows_amd64.tar.gz -C dist/cli/windows_amd64 woodpecker-cli
+	tar -cvzf dist/woodpecker-cli_windows_amd64.tar.gz -C dist/cli/windows_amd64 woodpecker-cli.exe
 	tar -cvzf dist/woodpecker-cli_darwin_amd64.tar.gz  -C dist/cli/darwin_amd64  woodpecker-cli
 	tar -cvzf dist/woodpecker-cli_darwin_arm64.tar.gz  -C dist/cli/darwin_arm64  woodpecker-cli
-
-release-tarball: ## Create tarball for release
-	mkdir -p dist/
-	tar -cvzf dist/woodpecker-src-$(BUILD_VERSION).tar.gz \
-		agent \
-		cli \
-		cmd \
-		go.??? \
-		LICENSE \
-		Makefile \
-		pipeline \
-		server \
-		shared \
-		vendor \
-		version \
-		woodpecker-go \
-		web/index.html \
-		web/node_modules \
-		web/package.json \
-		web/public \
-		web/src \
-		web/tsconfig.* \
-		web/*.ts \
-		web/pnpm-lock.yaml \
-		web/web.go
 
 release-checksums: ## Create checksums for all release files
 	# generate shas for tar files
@@ -284,5 +276,6 @@ bundle: bundle-agent bundle-server bundle-cli ## Create all bundles
 .PHONY: docs
 docs: ## Generate docs (currently only for the cli)
 	go generate cmd/cli/app.go
+	go generate cmd/server/swagger.go
 
 endif

@@ -6,9 +6,15 @@ export type Repo = {
   // The unique identifier for the repository.
   id: number;
 
+  // The id of the repository on the source control management system.
+  forge_remote_id: string;
+
   // The source control management being used.
   // Currently this is either 'git' or 'hg' (Mercurial).
   scm: string;
+
+  // The id of the organization that owns the repository.
+  org_id: number;
 
   // The owner of the repository.
   owner: string;
@@ -57,6 +63,7 @@ export type Repo = {
 
   // Events that will cancel running pipelines before starting a new one
   cancel_previous_pipeline_events: string[];
+
   netrc_only_trusted: boolean;
 };
 

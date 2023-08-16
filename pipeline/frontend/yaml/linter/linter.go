@@ -1,11 +1,25 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package linter
 
 import (
 	"errors"
 	"fmt"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/linter/schema"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
 	"go.uber.org/multierr"
 )
 
@@ -30,22 +44,23 @@ func New(opts ...Option) *Linter {
 }
 
 // Lint lints the configuration.
-func (l *Linter) Lint(rawConfig string, c *yaml.Config) error {
+func (l *Linter) Lint(rawConfig string, c *types.Workflow) error {
 	var linterErr error
 
-	if len(c.Pipeline.Containers) == 0 {
+	if len(c.Steps.ContainerList) == 0 {
 		linterErr = multierr.Append(linterErr, &LinterError{
 			Message: "Invalid or missing pipeline section",
 			Field:   "pipeline",
 		})
 	}
-	if err := l.lint(c.Clone.Containers, blockClone); err != nil {
+
+	if err := l.lint(c.Clone.ContainerList, blockClone); err != nil {
 		linterErr = multierr.Append(linterErr, err)
 	}
-	if err := l.lint(c.Pipeline.Containers, blockPipeline); err != nil {
+	if err := l.lint(c.Steps.ContainerList, blockPipeline); err != nil {
 		linterErr = multierr.Append(linterErr, err)
 	}
-	if err := l.lint(c.Services.Containers, blockServices); err != nil {
+	if err := l.lint(c.Services.ContainerList, blockServices); err != nil {
 		linterErr = multierr.Append(linterErr, err)
 	}
 
@@ -62,7 +77,7 @@ func (l *Linter) Lint(rawConfig string, c *yaml.Config) error {
 	return linterErr
 }
 
-func (l *Linter) lint(containers []*yaml.Container, _ uint8) error {
+func (l *Linter) lint(containers []*types.Container, _ uint8) error {
 	var linterErr error
 
 	for _, container := range containers {
@@ -82,14 +97,14 @@ func (l *Linter) lint(containers []*yaml.Container, _ uint8) error {
 	return linterErr
 }
 
-func (l *Linter) lintImage(c *yaml.Container) error {
+func (l *Linter) lintImage(c *types.Container) error {
 	if len(c.Image) == 0 {
 		return &LinterError{Message: "Invalid or missing image", Field: fmt.Sprintf("pipeline.%s", c.Name)}
 	}
 	return nil
 }
 
-func (l *Linter) lintCommands(c *yaml.Container) error {
+func (l *Linter) lintCommands(c *types.Container) error {
 	if len(c.Commands) == 0 {
 		return nil
 	}
@@ -103,7 +118,7 @@ func (l *Linter) lintCommands(c *yaml.Container) error {
 	return nil
 }
 
-func (l *Linter) lintTrusted(c *yaml.Container) error {
+func (l *Linter) lintTrusted(c *types.Container) error {
 	if c.Privileged {
 		return &LinterError{Message: "Insufficient privileges to use privileged mode", Field: fmt.Sprintf("pipeline.%s", c.Name)}
 	}
@@ -158,12 +173,12 @@ func (l *Linter) lintSchema(rawConfig string) error {
 	return linterErr
 }
 
-func (l *Linter) lintDeprecations(c *yaml.Config) error {
+func (l *Linter) lintDeprecations(c *types.Workflow) error {
 	// TODO: add deprecation warnings
 	return nil
 }
 
-func (l *Linter) lintBadHabits(c *yaml.Config) error {
+func (l *Linter) lintBadHabits(c *types.Workflow) error {
 	// TODO: add bad habit warnings
 	return nil
 }
@@ -173,8 +188,7 @@ func IsBlockingError(e error) bool {
 	for _, err := range linterErrors {
 		var linterError *LinterError
 		if errors.As(err, &linterError) {
-			if linterError.Warning {
-			} else {
+			if !linterError.Warning {
 				return true
 			}
 		} else {

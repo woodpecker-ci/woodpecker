@@ -17,7 +17,7 @@ package fixtures
 // HookPush is a sample Gitea push hook
 const HookPush = `
 {
-  "ref": "refs/heads/master",
+  "ref": "refs/heads/main",
   "before": "4b2626259b5a97b6b4eab5e6cca66adb986b672b",
   "after": "ef98532add3b2feb7a137426bba1248724367df5",
   "compare_url": "http://gitea.golang.org/gordon/hello-world/compare/4b2626259b5a97b6b4eab5e6cca66adb986b672b...ef98532add3b2feb7a137426bba1248724367df5",
@@ -81,7 +81,7 @@ const HookPushBranch = `
   "ref": "refs/heads/fdsafdsa",
   "before": "0000000000000000000000000000000000000000",
   "after": "28c3613ae62640216bea5e7dc71aa65356e4298b",
-  "compare_url": "https://codeberg.org/meisam/woodpecktester/compare/master...28c3613ae62640216bea5e7dc71aa65356e4298b",
+  "compare_url": "https://codeberg.org/meisam/woodpecktester/compare/main...28c3613ae62640216bea5e7dc71aa65356e4298b",
   "commits": [],
   "head_commit": {
     "id": "28c3613ae62640216bea5e7dc71aa65356e4298b",
@@ -157,7 +157,7 @@ const HookPushBranch = `
     "open_issues_count": 0,
     "open_pr_counter": 0,
     "release_counter": 0,
-    "default_branch": "master",
+    "default_branch": "main",
     "archived": false,
     "created_at": "2022-07-04T00:34:39+02:00",
     "updated_at": "2022-07-24T20:31:29+02:00",
@@ -253,7 +253,7 @@ const HookPushTag = `{
     "html_url": "http://gitea.golang.org/gordon/hello-world",
     "ssh_url": "git@gitea.golang.org:gordon/hello-world.git",
     "clone_url": "http://gitea.golang.org/gordon/hello-world.git",
-    "default_branch": "master",
+    "default_branch": "main",
     "created_at": "2015-10-22T19:32:44Z",
     "updated_at": "2016-11-24T13:37:16Z",
 		"permissions": {
@@ -290,8 +290,8 @@ const HookPullRequest = `{
       "avatar_url": "http://gitea.golang.org///1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87"
     },
     "base": {
-      "label": "master",
-      "ref": "master",
+      "label": "main",
+      "ref": "main",
       "sha": "9353195a19e45482665306e466c832c46560532d"
     },
     "head": {
@@ -315,7 +315,7 @@ const HookPullRequest = `{
     "private": true,
     "html_url": "http://gitea.golang.org/gordon/hello-world",
     "clone_url": "https://gitea.golang.org/gordon/hello-world.git",
-    "default_branch": "master",
+    "default_branch": "main",
 		"permissions": {
 			"admin": true,
 			"push": true,

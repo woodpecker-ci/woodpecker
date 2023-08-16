@@ -34,7 +34,7 @@ func Test_bitbucket(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	s := httptest.NewServer(fixtures.Handler())
-	c := &config{URL: s.URL, API: s.URL}
+	c := &config{url: s.URL, API: s.URL}
 
 	g := goblin.Goblin(t)
 	ctx := context.Background()
@@ -45,7 +45,7 @@ func Test_bitbucket(t *testing.T) {
 
 		g.It("Should return client with default endpoint", func() {
 			forge, _ := New(&Opts{Client: "4vyW6b49Z", Secret: "a5012f6c6"})
-			g.Assert(forge.(*config).URL).Equal(DefaultURL)
+			g.Assert(forge.(*config).url).Equal(DefaultURL)
 			g.Assert(forge.(*config).API).Equal(DefaultAPI)
 			g.Assert(forge.(*config).Client).Equal("4vyW6b49Z")
 			g.Assert(forge.(*config).Secret).Equal("a5012f6c6")
@@ -178,6 +178,50 @@ func Test_bitbucket(t *testing.T) {
 			})
 		})
 
+		g.Describe("When requesting repo branch HEAD", func() {
+			g.It("Should return the details", func() {
+				branchHead, err := c.BranchHead(ctx, fakeUser, fakeRepo, "branch_name")
+				g.Assert(err).IsNil()
+				g.Assert(branchHead).Equal("branch_head_name")
+			})
+			g.It("Should handle not found errors", func() {
+				_, err := c.BranchHead(ctx, fakeUser, fakeRepo, "branch_not_found")
+				g.Assert(err).IsNotNil()
+			})
+		})
+
+		g.Describe("When requesting repo pull requests", func() {
+			listOpts := model.ListOptions{
+				All:     false,
+				Page:    1,
+				PerPage: 10,
+			}
+			g.It("Should return the details", func() {
+				repoPRs, err := c.PullRequests(ctx, fakeUser, fakeRepo, &listOpts)
+				g.Assert(err).IsNil()
+				g.Assert(repoPRs[0].Title).Equal("PRs title")
+				g.Assert(repoPRs[0].Index).Equal(int64(123))
+			})
+			g.It("Should handle not found errors", func() {
+				_, err := c.PullRequests(ctx, fakeUser, fakeRepoNotFound, &listOpts)
+				g.Assert(err).IsNotNil()
+			})
+		})
+
+		g.Describe("When requesting repo directory contents", func() {
+			g.It("Should return the details", func() {
+				files, err := c.Dir(ctx, fakeUser, fakeRepo, fakePipeline, "/dir")
+				g.Assert(err).IsNil()
+				g.Assert(len(files)).Equal(3)
+				g.Assert(files[0].Name).Equal("README.md")
+				g.Assert(string(files[0].Data)).Equal("dummy payload")
+			})
+			g.It("Should handle not found errors", func() {
+				_, err := c.Dir(ctx, fakeUser, fakeRepo, fakePipeline, "/dir_not_found")
+				g.Assert(err).IsNotNil()
+			})
+		})
+
 		g.Describe("When activating a repository", func() {
 			g.It("Should error when malformed hook", func() {
 				err := c.Activate(ctx, fakeUser, fakeRepo, "%gh&%ij")
@@ -227,7 +271,7 @@ func Test_bitbucket(t *testing.T) {
 		})
 
 		g.It("Should update the status", func() {
-			err := c.Status(ctx, fakeUser, fakeRepo, fakePipeline, fakeStep)
+			err := c.Status(ctx, fakeUser, fakeRepo, fakePipeline, fakeWorkflow)
 			g.Assert(err).IsNil()
 		})
 
@@ -309,7 +353,7 @@ var (
 		Commit: "9ecad50",
 	}
 
-	fakeStep = &model.Step{
+	fakeWorkflow = &model.Workflow{
 		Name:  "test",
 		State: model.StatusSuccess,
 	}

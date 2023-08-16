@@ -23,7 +23,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 )
 
-func apiRoutes(e *gin.Engine) {
+func apiRoutes(e *gin.RouterGroup) {
 	apiBase := e.Group("/api")
 	{
 		user := apiBase.Group("/user")
@@ -46,13 +46,15 @@ func apiRoutes(e *gin.Engine) {
 			users.DELETE("/:login", api.DeleteUser)
 		}
 
-		orgBase := apiBase.Group("/orgs/:owner")
+		apiBase.GET("/orgs/lookup/*org_full_name", api.LookupOrg)
+		orgBase := apiBase.Group("/orgs/:org_id")
 		{
 			orgBase.GET("/permissions", api.GetOrgPermissions)
 
 			org := orgBase.Group("")
 			{
 				org.Use(session.MustOrgMember(true))
+				org.GET("", api.GetOrg)
 				org.GET("/secrets", api.GetOrgSecretList)
 				org.POST("/secrets", api.PostOrgSecret)
 				org.GET("/secrets/:secret", api.GetOrgSecret)
@@ -61,8 +63,9 @@ func apiRoutes(e *gin.Engine) {
 			}
 		}
 
-		apiBase.POST("/repos/:owner/:name", session.MustUser(), api.PostRepo)
-		repoBase := apiBase.Group("/repos/:owner/:name")
+		apiBase.GET("/repos/lookup/*repo_full_name", api.LookupRepo) // TODO: check if this public route is a security issue
+		apiBase.POST("/repos", session.MustUser(), api.PostRepo)
+		repoBase := apiBase.Group("/repos/:repo_id")
 		{
 			repoBase.Use(session.SetRepo())
 			repoBase.Use(session.SetPerm())
@@ -89,14 +92,10 @@ func apiRoutes(e *gin.Engine) {
 				repo.POST("/pipelines/:number/approve", session.MustPush, api.PostApproval)
 				repo.POST("/pipelines/:number/decline", session.MustPush, api.PostDecline)
 
-				repo.GET("/logs/:number/:pid", api.GetStepLogs)
-				repo.GET("/logs/:number/:pid/:step", api.GetPipelineLogs)
+				repo.GET("/logs/:number/:stepId", api.GetStepLogs)
 
 				// requires push permissions
 				repo.DELETE("/logs/:number", session.MustPush, api.DeletePipelineLogs)
-
-				repo.GET("/files/:number", api.FileList)
-				repo.GET("/files/:number/:step/*file", api.FileGet)
 
 				// requires push permissions
 				repo.GET("/secrets", session.MustPush, api.GetSecretList)
@@ -129,10 +128,16 @@ func apiRoutes(e *gin.Engine) {
 			}
 		}
 
-		badges := apiBase.Group("/badges/:owner/:name")
+		badges := apiBase.Group("/badges/:repo_id_or_owner")
 		{
 			badges.GET("/status.svg", api.GetBadge)
 			badges.GET("/cc.xml", api.GetCC)
+		}
+
+		_badges := apiBase.Group("/badges/:repo_id_or_owner/:repo_name")
+		{
+			_badges.GET("/status.svg", api.GetBadge)
+			_badges.GET("/cc.xml", api.GetCC)
 		}
 
 		pipelines := apiBase.Group("/pipelines")
@@ -182,6 +187,15 @@ func apiRoutes(e *gin.Engine) {
 
 		apiBase.POST("/hook", api.PostHook)
 
+		stream := apiBase.Group("/stream")
+		{
+			stream.GET("/logs/:repo_id/:pipeline/:stepId",
+				session.SetRepo(),
+				session.SetPerm(),
+				session.MustPull,
+				api.LogStreamSSE)
+		}
+
 		if zerolog.GlobalLevel() <= zerolog.DebugLevel {
 			debugger := apiBase.Group("/debug")
 			{
@@ -207,11 +221,5 @@ func apiRoutes(e *gin.Engine) {
 	sse := e.Group("/stream")
 	{
 		sse.GET("/events", api.EventStreamSSE)
-		sse.GET("/logs/:owner/:name/:pipeline/:number",
-			session.SetRepo(),
-			session.SetPerm(),
-			session.MustPull,
-			api.LogStreamSSE,
-		)
 	}
 }

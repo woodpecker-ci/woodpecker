@@ -1,11 +1,11 @@
-branches: master
+branches: main
 
 matri:
   GO_VERSION:
     - 1.14
     - 1.13
 
-pipeline:
+steps:
   test:
     image: golang:${GO_VERSION}
     commands:

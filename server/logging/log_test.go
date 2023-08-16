@@ -1,3 +1,17 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package logging
 
 import (
@@ -7,14 +21,15 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 func TestLogging(t *testing.T) {
 	var (
 		wg sync.WaitGroup
 
-		testPath  = "test"
-		testEntry = &Entry{
+		testStepID = int64(123)
+		testEntry  = &model.LogEntry{
 			Data: []byte("test"),
 		}
 	)
@@ -24,27 +39,27 @@ func TestLogging(t *testing.T) {
 	)
 
 	logger := New()
-	assert.NoError(t, logger.Open(ctx, testPath))
+	assert.NoError(t, logger.Open(ctx, testStepID))
 	go func() {
-		assert.NoError(t, logger.Tail(ctx, testPath, func(entry ...*Entry) { wg.Done() }))
+		assert.NoError(t, logger.Tail(ctx, testStepID, func(entry ...*model.LogEntry) { wg.Done() }))
 	}()
 	go func() {
-		assert.NoError(t, logger.Tail(ctx, testPath, func(entry ...*Entry) { wg.Done() }))
+		assert.NoError(t, logger.Tail(ctx, testStepID, func(entry ...*model.LogEntry) { wg.Done() }))
 	}()
 
 	<-time.After(500 * time.Millisecond)
 
 	wg.Add(4)
 	go func() {
-		assert.NoError(t, logger.Write(ctx, testPath, testEntry))
-		assert.NoError(t, logger.Write(ctx, testPath, testEntry))
+		assert.NoError(t, logger.Write(ctx, testStepID, testEntry))
+		assert.NoError(t, logger.Write(ctx, testStepID, testEntry))
 	}()
 
 	wg.Wait()
 
 	wg.Add(1)
 	go func() {
-		assert.NoError(t, logger.Tail(ctx, testPath, func(entry ...*Entry) { wg.Done() }))
+		assert.NoError(t, logger.Tail(ctx, testStepID, func(entry ...*model.LogEntry) { wg.Done() }))
 	}()
 
 	<-time.After(500 * time.Millisecond)

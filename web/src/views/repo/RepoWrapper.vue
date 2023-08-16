@@ -7,8 +7,8 @@
   >
     <template #title>
       <span class="flex">
-        <router-link :to="{ name: 'repos-owner', params: { repoOwner } }" class="hover:underline">{{
-          repoOwner
+        <router-link :to="{ name: 'org', params: { orgId: repo.org_id } }" class="hover:underline">{{
+          repo.owner
         }}</router-link>
         {{ `&nbsp;/&nbsp;${repo.name}` }}
       </span>
@@ -17,13 +17,7 @@
       <a v-if="badgeUrl" :href="badgeUrl" target="_blank" class="ml-2">
         <img :src="badgeUrl" />
       </a>
-      <IconButton :href="repo.link_url" :title="$t('repo.open_in_forge')">
-        <Icon v-if="forge === 'github'" name="github" />
-        <Icon v-else-if="forge === 'gitea'" name="gitea" />
-        <Icon v-else-if="forge === 'gitlab'" name="gitlab" />
-        <Icon v-else-if="forge === 'bitbucket' || forge === 'stash'" name="bitbucket" />
-        <Icon v-else name="repo" />
-      </IconButton>
+      <IconButton :href="repo.link_url" :title="$t('repo.open_in_forge')" :icon="forge ?? 'repo'" />
       <IconButton
         v-if="repoPermissions.admin"
         :to="{ name: 'repo-settings' }"
@@ -59,7 +53,6 @@ import { computed, onMounted, provide, ref, toRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
-import Icon from '~/components/atomic/Icon.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import ManualPipelinePopup from '~/components/layout/popups/ManualPipelinePopup.vue';
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
@@ -72,20 +65,12 @@ import { RepoPermissions } from '~/lib/api/types';
 import { usePipelineStore } from '~/store/pipelines';
 import { useRepoStore } from '~/store/repos';
 
-const props = defineProps({
-  repoOwner: {
-    type: String,
-    required: true,
-  },
+const props = defineProps<{
+  repoId: string;
+}>();
 
-  repoName: {
-    type: String,
-    required: true,
-  },
-});
-
-const repoOwner = toRef(props, 'repoOwner');
-const repoName = toRef(props, 'repoName');
+const _repoId = toRef(props, 'repoId');
+const repositoryId = computed(() => parseInt(_repoId.value, 10));
 const repoStore = useRepoStore();
 const pipelineStore = usePipelineStore();
 const apiClient = useApiClient();
@@ -97,9 +82,9 @@ const i18n = useI18n();
 const config = useConfig();
 
 const { forge } = useConfig();
-const repo = repoStore.getRepo(repoOwner, repoName);
+const repo = repoStore.getRepo(repositoryId);
 const repoPermissions = ref<RepoPermissions>();
-const pipelines = pipelineStore.getRepoPipelines(repoOwner, repoName);
+const pipelines = pipelineStore.getRepoPipelines(repositoryId);
 provide('repo', repo);
 provide('repo-permissions', repoPermissions);
 provide('pipelines', pipelines);
@@ -107,7 +92,7 @@ provide('pipelines', pipelines);
 const showManualPipelinePopup = ref(false);
 
 async function loadRepo() {
-  repoPermissions.value = await apiClient.getRepoPermissions(repoOwner.value, repoName.value);
+  repoPermissions.value = await apiClient.getRepoPermissions(repositoryId.value);
   if (!repoPermissions.value.pull) {
     notifications.notify({ type: 'error', title: i18n.t('repo.not_allowed') });
     // no access and not authenticated, redirect to login
@@ -119,26 +104,19 @@ async function loadRepo() {
     return;
   }
 
-  const apiRepo = await repoStore.loadRepo(repoOwner.value, repoName.value);
-  if (apiRepo.full_name !== `${repoOwner.value}/${repoName.value}`) {
-    await router.replace({
-      name: route.name ? route.name : 'repo',
-      params: { repoOwner: apiRepo.owner, repoName: apiRepo.name },
-    });
-    return;
-  }
-  await pipelineStore.loadRepoPipelines(repoOwner.value, repoName.value);
+  await repoStore.loadRepo(repositoryId.value);
+  await pipelineStore.loadRepoPipelines(repositoryId.value);
 }
 
 onMounted(() => {
   loadRepo();
 });
 
-watch([repoOwner, repoName], () => {
+watch([repositoryId], () => {
   loadRepo();
 });
 
-const badgeUrl = computed(() => repo.value && `/api/badges/${repo.value.owner}/${repo.value.name}/status.svg`);
+const badgeUrl = computed(() => repo.value && `${config.rootPath}/api/badges/${repo.value.id}/status.svg`);
 
 const activeTab = computed({
   get() {

@@ -39,7 +39,7 @@ func load(t *testing.T, config string) *GitLab {
 	_url.RawQuery = ""
 
 	gitlab := GitLab{}
-	gitlab.URL = _url.String()
+	gitlab.url = _url.String()
 	gitlab.ClientID = params.Get("client_id")
 	gitlab.ClientSecret = params.Get("client_secret")
 	gitlab.SkipVerify, _ = strconv.ParseBool(params.Get("skip_verify"))
@@ -149,7 +149,7 @@ func Test_GitLab(t *testing.T) {
 						assert.Equal(t, "woodpecker", hookRepo.Name)
 						assert.Equal(t, "http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg", hookRepo.Avatar)
 						assert.Equal(t, "develop", hookRepo.Branch)
-						assert.Equal(t, "refs/heads/master", pipeline.Ref)
+						assert.Equal(t, "refs/heads/main", pipeline.Ref)
 						assert.Equal(t, []string{"cmd/cli/main.go"}, pipeline.ChangedFiles)
 					}
 				})

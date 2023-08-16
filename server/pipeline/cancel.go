@@ -27,12 +27,12 @@ import (
 )
 
 // Cancel the pipeline and returns the status.
-func Cancel(ctx context.Context, store store.Store, repo *model.Repo, pipeline *model.Pipeline) error {
+func Cancel(ctx context.Context, store store.Store, repo *model.Repo, user *model.User, pipeline *model.Pipeline) error {
 	if pipeline.Status != model.StatusRunning && pipeline.Status != model.StatusPending && pipeline.Status != model.StatusBlocked {
 		return &ErrBadRequest{Msg: "Cannot cancel a non-running or non-pending or non-blocked pipeline"}
 	}
 
-	steps, err := store.StepList(pipeline)
+	workflows, err := store.WorkflowGetTree(pipeline)
 	if err != nil {
 		return &ErrNotFound{Msg: err.Error()}
 	}
@@ -42,15 +42,12 @@ func Cancel(ctx context.Context, store store.Store, repo *model.Repo, pipeline *
 		stepsToCancel []string
 		stepsToEvict  []string
 	)
-	for _, step := range steps {
-		if step.PPID != 0 {
-			continue
+	for _, workflow := range workflows {
+		if workflow.State == model.StatusRunning {
+			stepsToCancel = append(stepsToCancel, fmt.Sprint(workflow.ID))
 		}
-		if step.State == model.StatusRunning {
-			stepsToCancel = append(stepsToCancel, fmt.Sprint(step.ID))
-		}
-		if step.State == model.StatusPending {
-			stepsToEvict = append(stepsToEvict, fmt.Sprint(step.ID))
+		if workflow.State == model.StatusPending {
+			stepsToEvict = append(stepsToEvict, fmt.Sprint(workflow.ID))
 		}
 	}
 
@@ -70,34 +67,33 @@ func Cancel(ctx context.Context, store store.Store, repo *model.Repo, pipeline *
 
 	// Then update the DB status for pending pipelines
 	// Running ones will be set when the agents stop on the cancel signal
-	for _, step := range steps {
-		if step.State == model.StatusPending {
-			if step.PPID != 0 {
+	for _, workflow := range workflows {
+		if workflow.State == model.StatusPending {
+			if _, err = UpdateWorkflowToStatusSkipped(store, *workflow); err != nil {
+				log.Error().Err(err).Msgf("cannot update workflow with id %d state", workflow.ID)
+			}
+		}
+		for _, step := range workflow.Children {
+			if step.State == model.StatusPending {
 				if _, err = UpdateStepToStatusSkipped(store, *step, 0); err != nil {
-					log.Error().Msgf("error: done: cannot update step_id %d state: %s", step.ID, err)
-				}
-			} else {
-				if _, err = UpdateStepToStatusKilled(store, *step); err != nil {
-					log.Error().Msgf("error: done: cannot update step_id %d state: %s", step.ID, err)
+					log.Error().Err(err).Msgf("cannot update workflow with id %d state", workflow.ID)
 				}
 			}
 		}
 	}
 
-	killedBuild, err := UpdateToStatusKilled(store, *pipeline)
+	killedPipeline, err := UpdateToStatusKilled(store, *pipeline)
 	if err != nil {
 		log.Error().Err(err).Msgf("UpdateToStatusKilled: %v", pipeline)
 		return err
 	}
 
-	steps, err = store.StepList(killedBuild)
-	if err != nil {
-		return &ErrNotFound{Msg: err.Error()}
-	}
-	if killedBuild.Steps, err = model.Tree(steps); err != nil {
+	updatePipelineStatus(ctx, killedPipeline, repo, user)
+
+	if killedPipeline.Workflows, err = store.WorkflowGetTree(killedPipeline); err != nil {
 		return err
 	}
-	if err := publishToTopic(ctx, killedBuild, repo); err != nil {
+	if err := publishToTopic(ctx, killedPipeline, repo); err != nil {
 		log.Error().Err(err).Msg("publishToTopic")
 	}
 
@@ -109,6 +105,7 @@ func cancelPreviousPipelines(
 	_store store.Store,
 	pipeline *model.Pipeline,
 	repo *model.Repo,
+	user *model.User,
 ) error {
 	// check this event should cancel previous pipelines
 	eventIncluded := false
@@ -128,18 +125,18 @@ func cancelPreviousPipelines(
 		return err
 	}
 
-	pipelineNeedsCancel := func(active *model.Pipeline) (bool, error) {
+	pipelineNeedsCancel := func(active *model.Pipeline) bool {
 		// always filter on same event
 		if active.Event != pipeline.Event {
-			return false, nil
+			return false
 		}
 
 		// find events for the same context
 		switch pipeline.Event {
 		case model.EventPush:
-			return pipeline.Branch == active.Branch, nil
+			return pipeline.Branch == active.Branch
 		default:
-			return pipeline.Refspec == active.Refspec, nil
+			return pipeline.Refspec == active.Refspec
 		}
 	}
 
@@ -149,20 +146,13 @@ func cancelPreviousPipelines(
 			continue
 		}
 
-		cancel, err := pipelineNeedsCancel(active)
-		if err != nil {
-			log.Error().
-				Err(err).
-				Str("Ref", active.Ref).
-				Msg("Error while trying to cancel pipeline, skipping")
-			continue
-		}
+		cancel := pipelineNeedsCancel(active)
 
 		if !cancel {
 			continue
 		}
 
-		if err = Cancel(ctx, _store, repo, active); err != nil {
+		if err = Cancel(ctx, _store, repo, user, active); err != nil {
 			log.Error().
 				Err(err).
 				Str("Ref", active.Ref).

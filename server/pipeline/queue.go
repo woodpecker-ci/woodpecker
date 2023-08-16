@@ -37,7 +37,6 @@ func queuePipeline(repo *model.Repo, pipelineItems []*pipeline.Item) error {
 		for k, v := range item.Labels {
 			task.Labels[k] = v
 		}
-		task.Labels["platform"] = item.Platform
 		task.Labels["repo"] = repo.FullName
 		task.Dependencies = taskIds(item.DependsOn, pipelineItems)
 		task.RunOn = item.RunsOn
@@ -49,9 +48,6 @@ func queuePipeline(repo *model.Repo, pipelineItems []*pipeline.Item) error {
 			Timeout: repo.Timeout,
 		})
 
-		if err := server.Config.Services.Logs.Open(context.Background(), task.ID); err != nil {
-			return err
-		}
 		tasks = append(tasks, task)
 	}
 	return server.Config.Services.Queue.PushAtOnce(context.Background(), tasks)

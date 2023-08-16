@@ -54,6 +54,12 @@ module.exports = {
             label: 'Awesome',
           },
           {
+            to: '/api',
+            position: 'left',
+            label: 'API',
+          },
+          { to: 'blog', label: 'Blog', position: 'left' },
+          {
             type: 'docsVersionDropdown',
             position: 'right',
           },
@@ -204,24 +210,50 @@ module.exports = {
       ({
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
-          editUrl: 'https://github.com/woodpecker-ci/woodpecker/edit/master/docs/',
+          editUrl: 'https://github.com/woodpecker-ci/woodpecker/edit/main/docs/',
           includeCurrentVersion: true,
-          lastVersion: '0.15',
+          lastVersion: '1.0',
           versions: {
-            current: {
+            'current': {
               label: 'Next',
               banner: 'unreleased',
             },
-            0.15: {
+            '1.0': {
+              label: '1.0.x',
+            },
+            '0.15': {
               label: '0.15.x',
-              banner: 'none',
+              banner: 'unmaintained',
             },
           },
+        },
+        blog: {
+          blogTitle: 'Blog',
+          blogDescription: 'A blog for release announcements, turorials...',
+          // postsPerPage: 'ALL',
+          // blogSidebarCount: 0,
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
         },
       }),
+    ],
+    [
+      'redocusaurus',
+      {
+        // Plugin Options for loading OpenAPI files
+        specs: [
+          {
+            spec: 'swagger.json',
+            route: '/api/',
+          },
+        ],
+        // Theme Options for modifying how redoc renders them
+        theme: {
+          // Change with your site colors
+          primaryColor: '#1890ff',
+        },
+      },
     ],
   ],
   webpack: {

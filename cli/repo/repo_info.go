@@ -1,3 +1,17 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package repo
 
 import (
@@ -13,7 +27,7 @@ import (
 var repoInfoCmd = &cli.Command{
 	Name:      "info",
 	Usage:     "show repository details",
-	ArgsUsage: "<repo/name>",
+	ArgsUsage: "<repo-id|repo-full-name>",
 	Action:    repoInfo,
 	Flags: append(common.GlobalFlags,
 		common.FormatFlag(tmplRepoInfo),
@@ -21,18 +35,17 @@ var repoInfoCmd = &cli.Command{
 }
 
 func repoInfo(c *cli.Context) error {
-	arg := c.Args().First()
-	owner, name, err := internal.ParseRepo(arg)
-	if err != nil {
-		return err
-	}
-
+	repoIDOrFullName := c.Args().First()
 	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
 	}
+	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
+	if err != nil {
+		return err
+	}
 
-	repo, err := client.Repo(owner, name)
+	repo, err := client.Repo(repoID)
 	if err != nil {
 		return err
 	}
@@ -47,11 +60,12 @@ func repoInfo(c *cli.Context) error {
 // template for repo information
 var tmplRepoInfo = `Owner: {{ .Owner }}
 Repo: {{ .Name }}
-Type: {{ .Kind }}
-Config: {{ .Config }}
+Link: {{ .Link }}
+Config path: {{ .Config }}
 Visibility: {{ .Visibility }}
 Private: {{ .IsSCMPrivate }}
 Trusted: {{ .IsTrusted }}
 Gated: {{ .IsGated }}
-Forge: {{ .Clone }}
+Clone url: {{ .Clone }}
+Allow pull-requests: {{ .AllowPullRequests }}
 `

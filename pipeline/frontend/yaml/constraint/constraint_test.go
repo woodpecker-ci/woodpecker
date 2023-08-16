@@ -1,3 +1,17 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package constraint
 
 import (
@@ -7,6 +21,7 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
 )
 
 func TestConstraint(t *testing.T) {
@@ -17,13 +32,13 @@ func TestConstraint(t *testing.T) {
 	}{
 		// string value
 		{
-			conf: "master",
+			conf: "main",
 			with: "develop",
 			want: false,
 		},
 		{
-			conf: "master",
-			with: "master",
+			conf: "main",
+			with: "main",
 			want: true,
 		},
 		{
@@ -33,34 +48,34 @@ func TestConstraint(t *testing.T) {
 		},
 		// slice value
 		{
-			conf: "[ master, feature/* ]",
+			conf: "[ main, feature/* ]",
 			with: "develop",
 			want: false,
 		},
 		{
-			conf: "[ master, feature/* ]",
-			with: "master",
+			conf: "[ main, feature/* ]",
+			with: "main",
 			want: true,
 		},
 		{
-			conf: "[ master, feature/* ]",
+			conf: "[ main, feature/* ]",
 			with: "feature/foo",
 			want: true,
 		},
 		// includes block
 		{
-			conf: "include: master",
+			conf: "include: main",
 			with: "develop",
 			want: false,
 		},
 		{
-			conf: "include: master",
-			with: "master",
+			conf: "include: main",
+			with: "main",
 			want: true,
 		},
 		{
 			conf: "include: feature/*",
-			with: "master",
+			with: "main",
 			want: false,
 		},
 		{
@@ -69,34 +84,34 @@ func TestConstraint(t *testing.T) {
 			want: true,
 		},
 		{
-			conf: "include: [ master, feature/* ]",
+			conf: "include: [ main, feature/* ]",
 			with: "develop",
 			want: false,
 		},
 		{
-			conf: "include: [ master, feature/* ]",
-			with: "master",
+			conf: "include: [ main, feature/* ]",
+			with: "main",
 			want: true,
 		},
 		{
-			conf: "include: [ master, feature/* ]",
+			conf: "include: [ main, feature/* ]",
 			with: "feature/foo",
 			want: true,
 		},
 		// excludes block
 		{
-			conf: "exclude: master",
+			conf: "exclude: main",
 			with: "develop",
 			want: true,
 		},
 		{
-			conf: "exclude: master",
-			with: "master",
+			conf: "exclude: main",
+			with: "main",
 			want: false,
 		},
 		{
 			conf: "exclude: feature/*",
-			with: "master",
+			with: "main",
 			want: true,
 		},
 		{
@@ -105,13 +120,13 @@ func TestConstraint(t *testing.T) {
 			want: false,
 		},
 		{
-			conf: "exclude: [ master, develop ]",
-			with: "master",
+			conf: "exclude: [ main, develop ]",
+			with: "main",
 			want: false,
 		},
 		{
 			conf: "exclude: [ feature/*, bar ]",
-			with: "master",
+			with: "main",
 			want: true,
 		},
 		{
@@ -121,24 +136,24 @@ func TestConstraint(t *testing.T) {
 		},
 		// include and exclude blocks
 		{
-			conf: "{ include: [ master, feature/* ], exclude: [ develop ] }",
-			with: "master",
+			conf: "{ include: [ main, feature/* ], exclude: [ develop ] }",
+			with: "main",
 			want: true,
 		},
 		{
-			conf: "{ include: [ master, feature/* ], exclude: [ feature/bar ] }",
+			conf: "{ include: [ main, feature/* ], exclude: [ feature/bar ] }",
 			with: "feature/bar",
 			want: false,
 		},
 		{
-			conf: "{ include: [ master, feature/* ], exclude: [ master, develop ] }",
-			with: "master",
+			conf: "{ include: [ main, feature/* ], exclude: [ main, develop ] }",
+			with: "main",
 			want: false,
 		},
 		// empty blocks
 		{
 			conf: "",
-			with: "master",
+			with: "main",
 			want: true,
 		},
 	}
@@ -403,15 +418,16 @@ func TestConstraints(t *testing.T) {
 	testdata := []struct {
 		desc string
 		conf string
-		with frontend.Metadata
+		with metadata.Metadata
+		env  map[string]string
 		want bool
 	}{
 		{
 			desc: "no constraints, must match on default events",
 			conf: "",
-			with: frontend.Metadata{
-				Curr: frontend.Pipeline{
-					Event: frontend.EventPush,
+			with: metadata.Metadata{
+				Curr: metadata.Pipeline{
+					Event: metadata.EventPush,
 				},
 			},
 			want: true,
@@ -419,107 +435,118 @@ func TestConstraints(t *testing.T) {
 		{
 			desc: "global branch filter",
 			conf: "{ branch: develop }",
-			with: frontend.Metadata{Curr: frontend.Pipeline{Event: frontend.EventPush, Commit: frontend.Commit{Branch: "master"}}},
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush, Commit: metadata.Commit{Branch: "main"}}},
 			want: false,
 		},
 		{
 			desc: "global branch filter",
-			conf: "{ branch: master }",
-			with: frontend.Metadata{Curr: frontend.Pipeline{Event: frontend.EventPush, Commit: frontend.Commit{Branch: "master"}}},
+			conf: "{ branch: main }",
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush, Commit: metadata.Commit{Branch: "main"}}},
 			want: true,
 		},
 		{
 			desc: "repo constraint",
 			conf: "{ repo: owner/* }",
-			with: frontend.Metadata{Curr: frontend.Pipeline{Event: frontend.EventPush}, Repo: frontend.Repo{Name: "owner/repo"}},
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush}, Repo: metadata.Repo{Owner: "owner", Name: "repo"}},
 			want: true,
 		},
 		{
 			desc: "repo constraint",
 			conf: "{ repo: octocat/* }",
-			with: frontend.Metadata{Curr: frontend.Pipeline{Event: frontend.EventPush}, Repo: frontend.Repo{Name: "owner/repo"}},
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush}, Repo: metadata.Repo{Owner: "owner", Name: "repo"}},
 			want: false,
 		},
 		{
 			desc: "ref constraint",
 			conf: "{ ref: refs/tags/* }",
-			with: frontend.Metadata{Curr: frontend.Pipeline{Commit: frontend.Commit{Ref: "refs/tags/v1.0.0"}, Event: frontend.EventPush}},
+			with: metadata.Metadata{Curr: metadata.Pipeline{Commit: metadata.Commit{Ref: "refs/tags/v1.0.0"}, Event: metadata.EventPush}},
 			want: true,
 		},
 		{
 			desc: "ref constraint",
 			conf: "{ ref: refs/tags/* }",
-			with: frontend.Metadata{Curr: frontend.Pipeline{Commit: frontend.Commit{Ref: "refs/heads/master"}, Event: frontend.EventPush}},
+			with: metadata.Metadata{Curr: metadata.Pipeline{Commit: metadata.Commit{Ref: "refs/heads/main"}, Event: metadata.EventPush}},
 			want: false,
 		},
 		{
 			desc: "platform constraint",
 			conf: "{ platform: linux/amd64 }",
-			with: frontend.Metadata{Curr: frontend.Pipeline{Event: frontend.EventPush}, Sys: frontend.System{Platform: "linux/amd64"}},
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush}, Sys: metadata.System{Platform: "linux/amd64"}},
 			want: true,
 		},
 		{
 			desc: "platform constraint",
 			conf: "{ repo: linux/amd64 }",
-			with: frontend.Metadata{Curr: frontend.Pipeline{Event: frontend.EventPush}, Sys: frontend.System{Platform: "windows/amd64"}},
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush}, Sys: metadata.System{Platform: "windows/amd64"}},
 			want: false,
 		},
 		{
 			desc: "instance constraint",
 			conf: "{ instance: agent.tld }",
-			with: frontend.Metadata{Curr: frontend.Pipeline{Event: frontend.EventPush}, Sys: frontend.System{Host: "agent.tld"}},
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush}, Sys: metadata.System{Host: "agent.tld"}},
 			want: true,
 		},
 		{
 			desc: "instance constraint",
 			conf: "{ instance: agent.tld }",
-			with: frontend.Metadata{Curr: frontend.Pipeline{Event: frontend.EventPush}, Sys: frontend.System{Host: "beta.agent.tld"}},
-			want: false,
-		},
-		{
-			desc: "filter cron by default constraint",
-			conf: "{}",
-			with: frontend.Metadata{Curr: frontend.Pipeline{Event: frontend.EventCron}},
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush}, Sys: metadata.System{Host: "beta.agent.tld"}},
 			want: false,
 		},
 		{
 			desc: "filter cron by matching name",
 			conf: "{ event: cron, cron: job1 }",
-			with: frontend.Metadata{Curr: frontend.Pipeline{Event: frontend.EventCron, Cron: "job1"}},
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventCron, Cron: "job1"}},
 			want: true,
 		},
 		{
 			desc: "filter cron by name",
 			conf: "{ event: cron, cron: job2 }",
-			with: frontend.Metadata{Curr: frontend.Pipeline{Event: frontend.EventCron, Cron: "job1"}},
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventCron, Cron: "job1"}},
 			want: false,
 		},
 		{
-			desc: "no constraints, event gets filtered by default event filter",
-			conf: "",
-			with: frontend.Metadata{
-				Curr: frontend.Pipeline{Event: "non-default"},
+			desc: "filter with build-in env passes",
+			conf: "{ branch: ${CI_REPO_DEFAULT_BRANCH} }",
+			with: metadata.Metadata{
+				Curr: metadata.Pipeline{Event: metadata.EventPush, Commit: metadata.Commit{Branch: "stable"}},
+				Repo: metadata.Repo{Branch: "stable"},
 			},
-			want: false,
+			want: true,
 		},
 		{
 			desc: "filter by eval based on event",
 			conf: `{ evaluate: 'CI_PIPELINE_EVENT == "push"' }`,
-			with: frontend.Metadata{Curr: frontend.Pipeline{Event: frontend.EventPush}},
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush}},
 			want: true,
 		},
 		{
 			desc: "filter by eval based on event and repo",
 			conf: `{ evaluate: 'CI_PIPELINE_EVENT == "push" && CI_REPO == "owner/repo"' }`,
-			with: frontend.Metadata{Curr: frontend.Pipeline{Event: frontend.EventPush}, Repo: frontend.Repo{Name: "owner/repo"}},
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush}, Repo: metadata.Repo{Owner: "owner", Name: "repo"}},
 			want: true,
+		},
+		{
+			desc: "filter by eval based on custom variable",
+			conf: `{ evaluate: 'TESTVAR == "testval"' }`,
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventManual}},
+			env:  map[string]string{"TESTVAR": "testval"},
+			want: true,
+		},
+		{
+			desc: "filter by eval based on custom variable",
+			conf: `{ evaluate: 'TESTVAR == "testval"' }`,
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventManual}},
+			env:  map[string]string{"TESTVAR": "qwe"},
+			want: false,
 		},
 	}
 
 	for _, test := range testdata {
 		t.Run(test.desc, func(t *testing.T) {
-			c := parseConstraints(t, test.conf)
-			got, err := c.Match(test.with, false)
+			conf, err := frontend.EnvVarSubst(test.conf, test.with.Environ())
+			assert.NoError(t, err)
+			c := parseConstraints(t, conf)
+			got, err := c.Match(test.with, false, test.env)
 			if err != nil {
 				t.Errorf("Match returned error: %v", err)
 			}

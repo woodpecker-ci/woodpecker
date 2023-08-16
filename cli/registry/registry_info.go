@@ -1,3 +1,17 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package registry
 
 import (
@@ -13,7 +27,7 @@ import (
 var registryInfoCmd = &cli.Command{
 	Name:      "info",
 	Usage:     "display registry info",
-	ArgsUsage: "[repo/name]",
+	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    registryInfo,
 	Flags: append(common.GlobalFlags,
 		common.RepoFlag,
@@ -28,22 +42,22 @@ var registryInfoCmd = &cli.Command{
 
 func registryInfo(c *cli.Context) error {
 	var (
-		hostname = c.String("hostname")
-		reponame = c.String("repository")
-		format   = c.String("format") + "\n"
+		hostname         = c.String("hostname")
+		repoIDOrFullName = c.String("repository")
+		format           = c.String("format") + "\n"
 	)
-	if reponame == "" {
-		reponame = c.Args().First()
-	}
-	owner, name, err := internal.ParseRepo(reponame)
-	if err != nil {
-		return err
+	if repoIDOrFullName == "" {
+		repoIDOrFullName = c.Args().First()
 	}
 	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
 	}
-	registry, err := client.Registry(owner, name, hostname)
+	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
+	if err != nil {
+		return err
+	}
+	registry, err := client.Registry(repoID, hostname)
 	if err != nil {
 		return err
 	}

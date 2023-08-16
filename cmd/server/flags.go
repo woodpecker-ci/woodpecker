@@ -20,25 +20,20 @@ import (
 
 	"github.com/urfave/cli/v2"
 
+	"github.com/woodpecker-ci/woodpecker/cmd/common"
 	"github.com/woodpecker-ci/woodpecker/shared/constant"
 )
 
-var flags = []cli.Flag{
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_LOG_LEVEL"},
-		Name:    "log-level",
-		Usage:   "set logging level",
+var flags = append([]cli.Flag{
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_LOG_XORM"},
+		Name:    "log-xorm",
+		Usage:   "enable xorm logging",
 	},
 	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_DEBUG_PRETTY"},
-		Name:    "pretty",
-		Usage:   "enable pretty-printed debug output",
-	},
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_DEBUG_NOCOLOR"},
-		Name:    "nocolor",
-		Usage:   "disable colored debug output",
-		Value:   true,
+		EnvVars: []string{"WOODPECKER_LOG_XORM_SQL"},
+		Name:    "log-xorm-sql",
+		Usage:   "enable xorm sql command logging",
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_HOST"},
@@ -46,8 +41,13 @@ var flags = []cli.Flag{
 		Usage:   "server fully qualified url (<scheme>://<host>)",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_ROOT_URL"},
-		Name:    "root-url",
+		EnvVars: []string{"WOODPECKER_WEBHOOK_HOST"},
+		Name:    "server-webhook-host",
+		Usage:   "server fully qualified url for forge's Webhooks (<scheme>://<host>)",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_ROOT_PATH", "WOODPECKER_ROOT_URL"},
+		Name:    "root-path",
 		Usage:   "server url root (used for statics loading when having a url path prefix)",
 	},
 	&cli.StringFlag{
@@ -73,6 +73,16 @@ var flags = []cli.Flag{
 		Usage:   "server ssl key path",
 	},
 	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_CUSTOM_CSS_FILE"},
+		Name:    "custom-css-file",
+		Usage:   "file path for the server to serve a custom .CSS file, used for customizing the UI",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_CUSTOM_JS_FILE"},
+		Name:    "custom-js-file",
+		Usage:   "file path for the server to serve a custom .JS file, used for customizing the UI",
+	},
+	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_LETS_ENCRYPT_EMAIL"},
 		Name:    "lets-encrypt-email",
 		Usage:   "let's encrypt email",
@@ -89,10 +99,11 @@ var flags = []cli.Flag{
 		Value:   ":9000",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_GRPC_SECRET"},
-		Name:    "grpc-secret",
-		Usage:   "grpc jwt secret",
-		Value:   "secret",
+		EnvVars:  []string{"WOODPECKER_GRPC_SECRET"},
+		Name:     "grpc-secret",
+		Usage:    "grpc jwt secret",
+		Value:    "secret",
+		FilePath: os.Getenv("WOODPECKER_GRPC_SECRET_FILE"),
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_METRICS_SERVER_ADDR"},
@@ -239,7 +250,35 @@ var flags = []cli.Flag{
 		EnvVars: []string{"WOODPECKER_STATUS_CONTEXT_FORMAT"},
 		Name:    "status-context-format",
 		Usage:   "status context format",
-		Value:   "{{ .context }}/{{ .event }}/{{ .pipeline }}",
+		Value:   "{{ .context }}/{{ .event }}/{{ .workflow }}",
+	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_MIGRATIONS_ALLOW_LONG"},
+		Name:    "migrations-allow-long",
+		Value:   false,
+	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_ENABLE_SWAGGER"},
+		Name:    "enable-swagger",
+		Value:   true,
+	},
+	//
+	// backend options for pipeline compiler
+	//
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_NO_PROXY", "NO_PROXY", "no_proxy"},
+		Usage:   "if set, pass the environment variable down as \"NO_PROXY\" to steps",
+		Name:    "backend-no-proxy",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_HTTP_PROXY", "HTTP_PROXY", "http_proxy"},
+		Usage:   "if set, pass the environment variable down as \"NO_PROXY\" to steps",
+		Name:    "backend-http-proxy",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_HTTPS_PROXY", "HTTPS_PROXY", "https_proxy"},
+		Usage:   "if set, pass the environment variable down as \"HTTPS_PROXY\" to steps",
+		Name:    "backend-https-proxy",
 	},
 	//
 	// resource limit parameters
@@ -316,37 +355,6 @@ var flags = []cli.Flag{
 		EnvVars: []string{"WOODPECKER_GITHUB_SKIP_VERIFY"},
 		Name:    "github-skip-verify",
 		Usage:   "github skip ssl verification",
-	},
-	//
-	// Gogs
-	//
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_GOGS"},
-		Name:    "gogs",
-		Usage:   "gogs driver is enabled",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_GOGS_URL"},
-		Name:    "gogs-server",
-		Usage:   "gogs server address",
-		Value:   "https://try.gogs.io",
-	},
-	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_GOGS_GIT_USERNAME"},
-		Name:     "gogs-git-username",
-		Usage:    "gogs service account username",
-		FilePath: os.Getenv("WOODPECKER_GOGS_GIT_USERNAME_FILE"),
-	},
-	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_GOGS_GIT_PASSWORD"},
-		Name:     "gogs-git-password",
-		Usage:    "gogs service account password",
-		FilePath: os.Getenv("WOODPECKER_GOGS_GIT_PASSWORD_FILE"),
-	},
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_GOGS_SKIP_VERIFY"},
-		Name:    "gogs-skip-verify",
-		Usage:   "gogs skip ssl verification",
 	},
 	//
 	// Gitea
@@ -431,52 +439,6 @@ var flags = []cli.Flag{
 		Usage:   "gitlab skip ssl verification",
 	},
 	//
-	// Bitbucket Stash
-	//
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_STASH"},
-		Name:    "stash",
-		Usage:   "stash driver is enabled",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_STASH_URL"},
-		Name:    "stash-server",
-		Usage:   "stash server address",
-	},
-	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_STASH_CONSUMER_KEY"},
-		Name:     "stash-consumer-key",
-		Usage:    "stash oauth1 consumer key",
-		FilePath: os.Getenv("WOODPECKER_STASH_CONSUMER_KEY_FILE"),
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_STASH_CONSUMER_RSA"},
-		Name:    "stash-consumer-rsa",
-		Usage:   "stash oauth1 private key file",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_STASH_CONSUMER_RSA_STRING"},
-		Name:    "stash-consumer-rsa-string",
-		Usage:   "stash oauth1 private key string",
-	},
-	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_STASH_GIT_USERNAME"},
-		Name:     "stash-git-username",
-		Usage:    "stash service account username",
-		FilePath: os.Getenv("WOODPECKER_STASH_GIT_USERNAME_FILE"),
-	},
-	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_STASH_GIT_PASSWORD"},
-		Name:     "stash-git-password",
-		Usage:    "stash service account password",
-		FilePath: os.Getenv("WOODPECKER_STASH_GIT_PASSWORD_FILE"),
-	},
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_STASH_SKIP_VERIFY"},
-		Name:    "stash-skip-verify",
-		Usage:   "stash skip ssl verification",
-	},
-	//
 	// development flags
 	//
 	&cli.StringFlag{
@@ -511,4 +473,4 @@ var flags = []cli.Flag{
 		Name:    "encryption-disable-flag",
 		Usage:   "Flag to decrypt all encrypted data and disable encryption on server",
 	},
-}
+}, common.GlobalLoggerFlags...)

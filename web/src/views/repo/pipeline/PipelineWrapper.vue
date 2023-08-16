@@ -46,7 +46,7 @@
       </template>
 
       <template #tabActions>
-        <div class="flex justify-between gap-x-4 text-color flex-shrink-0 pb-2 md:p-0 mx-auto md:mr-0">
+        <div class="flex justify-between gap-x-4 text-wp-text-100 flex-shrink-0 pb-2 md:p-0 mx-auto md:mr-0">
           <div class="flex space-x-1 items-center flex-shrink-0">
             <Icon name="since" />
             <Tooltip>
@@ -91,13 +91,12 @@ import { useAsyncAction } from '~/compositions/useAsyncAction';
 import { useFavicon } from '~/compositions/useFavicon';
 import useNotifications from '~/compositions/useNotifications';
 import usePipeline from '~/compositions/usePipeline';
-import { useRouteBackOrDefault } from '~/compositions/useRouteBackOrDefault';
+import { useRouteBack } from '~/compositions/useRouteBack';
 import { Repo, RepoPermissions } from '~/lib/api/types';
 import { usePipelineStore } from '~/store/pipelines';
 
 const props = defineProps<{
-  repoOwner: string;
-  repoName: string;
+  repoId: string;
   pipelineId: string;
 }>();
 
@@ -110,15 +109,15 @@ const i18n = useI18n();
 
 const pipelineStore = usePipelineStore();
 const pipelineId = toRef(props, 'pipelineId');
-const repoOwner = toRef(props, 'repoOwner');
-const repoName = toRef(props, 'repoName');
+const _repoId = toRef(props, 'repoId');
+const repositoryId = computed(() => parseInt(_repoId.value, 10));
 const repo = inject<Ref<Repo>>('repo');
 const repoPermissions = inject<Ref<RepoPermissions>>('repo-permissions');
 if (!repo || !repoPermissions) {
   throw new Error('Unexpected: "repo" & "repoPermissions" should be provided at this place');
 }
 
-const pipeline = pipelineStore.getPipeline(repoOwner, repoName, pipelineId);
+const pipeline = pipelineStore.getPipeline(repositoryId, pipelineId);
 const { since, duration, created } = usePipeline(pipeline);
 provide('pipeline', pipeline);
 
@@ -131,7 +130,7 @@ async function loadPipeline(): Promise<void> {
     throw new Error('Unexpected: Repo is undefined');
   }
 
-  await pipelineStore.loadPipeline(repo.value.owner, repo.value.name, parseInt(pipelineId.value, 10));
+  await pipelineStore.loadPipeline(repo.value.id, parseInt(pipelineId.value, 10));
 
   favicon.updateStatus(pipeline.value?.status);
 }
@@ -141,18 +140,11 @@ const { doSubmit: cancelPipeline, isLoading: isCancelingPipeline } = useAsyncAct
     throw new Error('Unexpected: Repo is undefined');
   }
 
-  if (!pipeline.value?.steps) {
-    throw new Error('Unexpected: Pipeline steps not loaded');
+  if (!pipeline.value?.number) {
+    throw new Error('Unexpected: Pipeline number not found');
   }
 
-  // TODO: is selectedStepId right?
-  // const step = findStep(pipeline.value.steps, selectedStepId.value || 2);
-
-  // if (!step) {
-  //   throw new Error('Unexpected: Step not found');
-  // }
-
-  await apiClient.cancelPipeline(repo.value.owner, repo.value.name, parseInt(pipelineId.value, 10));
+  await apiClient.cancelPipeline(repo.value.id, pipeline.value.number);
   notifications.notify({ title: i18n.t('repo.pipeline.actions.cancel_success'), type: 'success' });
 });
 
@@ -161,14 +153,18 @@ const { doSubmit: restartPipeline, isLoading: isRestartingPipeline } = useAsyncA
     throw new Error('Unexpected: Repo is undefined');
   }
 
-  await apiClient.restartPipeline(repo.value.owner, repo.value.name, pipelineId.value, { fork: true });
+  const newPipeline = await apiClient.restartPipeline(repo.value.id, pipelineId.value, {
+    fork: true,
+  });
   notifications.notify({ title: i18n.t('repo.pipeline.actions.restart_success'), type: 'success' });
-  // TODO: directly send to newest pipeline?
-  await router.push({ name: 'repo', params: { repoName: repo.value.name, repoOwner: repo.value.owner } });
+  await router.push({
+    name: 'repo-pipeline',
+    params: { pipelineId: newPipeline.number },
+  });
 });
 
 onMounted(loadPipeline);
-watch([repoName, repoOwner, pipelineId], loadPipeline);
+watch([repositoryId, pipelineId], loadPipeline);
 onBeforeUnmount(() => {
   favicon.updateStatus('default');
 });
@@ -200,5 +196,5 @@ const activeTab = computed({
   },
 });
 
-const goBack = useRouteBackOrDefault({ name: 'repo' });
+const goBack = useRouteBack({ name: 'repo' });
 </script>

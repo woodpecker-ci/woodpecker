@@ -1,3 +1,17 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package internal
 
 import (
@@ -5,6 +19,7 @@ import (
 	"crypto/x509"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/rs/zerolog/log"
@@ -76,15 +91,16 @@ func NewClient(c *cli.Context) (woodpecker.Client, error) {
 }
 
 // ParseRepo parses the repository owner and name from a string.
-func ParseRepo(str string) (user, repo string, err error) {
-	parts := strings.Split(str, "/")
-	if len(parts) != 2 {
-		err = fmt.Errorf("Error: Invalid or missing repository. eg octocat/hello-world")
-		return
+func ParseRepo(client woodpecker.Client, str string) (repoID int64, err error) {
+	if strings.Contains(str, "/") {
+		repo, err := client.RepoLookup(str)
+		if err != nil {
+			return 0, err
+		}
+		return repo.ID, nil
 	}
-	user = parts[0]
-	repo = parts[1]
-	return
+
+	return strconv.ParseInt(str, 10, 64)
 }
 
 // ParseKeyPair parses a key=value pair.
