@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/1.0.2) - 2023-08-16
+
+* SECURITY
+  * Validate webhook before change any data (#2221) (#2222)
+* BUGFIXES
+  * Bump default git clone plugin (#2215) (#2220)
+  * Show all steps (#2190) (#2191)
+
 ## [1.0.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v1.0.1) - 2023-08-08
 
 * SECURITY
