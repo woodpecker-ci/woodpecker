@@ -109,7 +109,7 @@ func PostHook(c *gin.Context) {
 	forge := server.Config.Services.Forge
 
 	//
-	// 1. Parse hook forge specific
+	// Parse webhook
 	//
 
 	tmpRepo, tmpPipeline, err := forge.Hook(c, c.Request)
@@ -141,8 +141,8 @@ func PostHook(c *gin.Context) {
 	}
 
 	//
-	// 1.1 Skip if message indicates that
-	// TODO: moved into global pipeline conditions logic
+	// Skip if commit message contains skip-ci
+	// TODO: move into global pipeline conditions logic
 	//
 
 	// skip the tmpPipeline if any case-insensitive combination of the words "skip" and "ci"
@@ -156,7 +156,7 @@ func PostHook(c *gin.Context) {
 	}
 
 	//
-	// 2. Get related repo from store and take repo renaming into account
+	// Get related repo from store and take repo renaming into account
 	//
 
 	repo, err := _store.GetRepoNameFallback(tmpRepo.ForgeRemoteID, tmpRepo.FullName)
@@ -214,7 +214,7 @@ func PostHook(c *gin.Context) {
 	}
 
 	//
-	// 4. Now we are sure it's valid so we start to create / update repo information
+	// Update repo
 	//
 
 	if oldFullName != tmpRepo.FullName {
@@ -234,7 +234,7 @@ func PostHook(c *gin.Context) {
 	}
 
 	//
-	// 5. Now we check if pull requests are allowed for this repo
+	// Check if pull requests are allowed for this repo
 	//
 
 	if tmpPipeline.Event == model.EventPull && !repo.AllowPull {
