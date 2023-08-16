@@ -22,7 +22,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/go-ap/httpsig"
+	"github.com/go-fed/httpsig"
 	"github.com/stretchr/testify/assert"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/utils"
 )
@@ -50,19 +50,17 @@ func TestSign(t *testing.T) {
 	}
 
 	VerifyHandler := func(w http.ResponseWriter, r *http.Request) {
-		keystore := httpsig.NewMemoryKeyStore()
-		keystore.SetKey(pubKeyID, pubEd25519Key)
-
-		verifier := httpsig.NewVerifier(keystore)
-		verifier.SetRequiredHeaders([]string{"(request-target)", "date"})
-
-		keyID, err := verifier.Verify(r)
+		verifier, err := httpsig.NewVerifier(r)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		if keyID != pubKeyID {
-			t.Fatalf("expected key ID %q, got %q", pubKeyID, keyID)
+		if verifier.KeyId() != pubKeyID {
+			t.Fatalf("expected key ID %q, got %q", pubKeyID, verifier.KeyId())
+		}
+
+		if err := verifier.Verify(pubEd25519Key, httpsig.ED25519); err != nil {
+			t.Fatal(err)
 		}
 
 		w.WriteHeader(http.StatusOK)
