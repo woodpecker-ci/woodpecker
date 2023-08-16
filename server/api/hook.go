@@ -109,7 +109,7 @@ func PostHook(c *gin.Context) {
 	forge := server.Config.Services.Forge
 
 	//
-	// Parse webhook
+	// 1. Parse webhook
 	//
 
 	tmpRepo, tmpPipeline, err := forge.Hook(c, c.Request)
@@ -156,7 +156,7 @@ func PostHook(c *gin.Context) {
 	}
 
 	//
-	// Get related repo from store and take repo renaming into account
+	// 2. Get related repo from store and take repo renaming into account
 	//
 
 	repo, err := _store.GetRepoNameFallback(tmpRepo.ForgeRemoteID, tmpRepo.FullName)
@@ -214,7 +214,7 @@ func PostHook(c *gin.Context) {
 	}
 
 	//
-	// Update repo
+	// 4. Update repo
 	//
 
 	if oldFullName != tmpRepo.FullName {
@@ -234,7 +234,7 @@ func PostHook(c *gin.Context) {
 	}
 
 	//
-	// Check if pull requests are allowed for this repo
+	// 5. Check if pull requests are allowed for this repo
 	//
 
 	if tmpPipeline.Event == model.EventPull && !repo.AllowPull {
