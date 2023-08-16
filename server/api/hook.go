@@ -35,6 +35,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/shared/token"
 )
 
+// TODO: move this into the global when filter
 var skipRe = regexp.MustCompile(`\[(?i:ci *skip|skip *ci)\]`)
 
 // GetQueueInfo
@@ -170,6 +171,7 @@ func PostHook(c *gin.Context) {
 		}
 	}
 
+	// TODO: we should only update and/or create a redirect for repos after the hook was token was validated
 	repo.Update(tmpRepo)
 	err = _store.UpdateRepo(repo)
 	if err != nil {
