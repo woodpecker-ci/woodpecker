@@ -102,6 +102,11 @@ func (when *When) Match(metadata metadata.Metadata, global bool, env map[string]
 		}
 	}
 
+	if when.IsEmpty() {
+		// test against default Constraints
+		empty := &Constraint{}
+		return empty.Match(metadata, global, env)
+	}
 	return false, nil
 }
 
