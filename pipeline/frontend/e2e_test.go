@@ -57,7 +57,7 @@ func TestParse(t *testing.T) {
 		// compiler.WithRegistry(registries...),
 		compiler.WithSecret(secrets...),
 		compiler.WithPrefix("test"),
-		compiler.WithProxy(),
+		// compiler.WithProxy(),
 		compiler.WithWorkspaceFromURL("/woodpecker", repoLink),
 		// compiler.WithMetadata(metadata),
 	).Compile(parsed)
@@ -72,7 +72,7 @@ func TestParse(t *testing.T) {
 }
 
 var sampleYaml = `
-pipeline:
+steps:
   test:
     image: golang
     commands:
