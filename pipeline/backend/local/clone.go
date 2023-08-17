@@ -75,7 +75,7 @@ func (e *local) execClone(ctx context.Context, step *types.Step, state *workflow
 		return fmt.Errorf("setup clone step failed: %w", err)
 	}
 
-	if !strings.Contains(step.Image, "woodpeckerci/plugin-git") {
+	if !strings.Contains(step.Image, "plugin-git") {
 		log.Warn().Msgf("clone step image '%s' does not match default git clone image. We ignore it and use our plugin-git anyway.", step.Image)
 	}
 
