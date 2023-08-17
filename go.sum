@@ -8,8 +8,8 @@ codeberg.org/6543/xyaml v1.1.0/go.mod h1:jI7afXLZUxeL4rNNsG1SlHh78L+gma9lK1bIeby
 gitea.com/xorm/sqlfiddle v0.0.0-20180821085327-62ce714f951a h1:lSA0F4e9A2NcQSqGqTOXqu2aRi/XEQxDCBwM8yJtE6s=
 gitea.com/xorm/sqlfiddle v0.0.0-20180821085327-62ce714f951a/go.mod h1:EXuID2Zs0pAQhH8yz+DNjUbjppKQzKFAn28TMYPB6IU=
 gitee.com/travelliu/dm v1.8.11192/go.mod h1:DHTzyhCrM843x9VdKVbZ+GKXGRbKM2sJ4LxihRxShkE=
-github.com/6543/logfile-open v1.2.0 h1:LNJLKk58JnJEWvbbTycfHh2wOPPUCuby5nyxXZhvGn4=
-github.com/6543/logfile-open v1.2.0/go.mod h1:ZoEy7pW2mexmQxiZIqPCeh8vUxVuiHYXmSZNbvEb51g=
+github.com/6543/logfile-open v1.2.1 h1:az+TtNHclTAKaHfFCTSbuduMllANox1gM9qLQr7LV5I=
+github.com/6543/logfile-open v1.2.1/go.mod h1:ZoEy7pW2mexmQxiZIqPCeh8vUxVuiHYXmSZNbvEb51g=
 github.com/Azure/azure-sdk-for-go/sdk/azcore v0.19.0/go.mod h1:h6H6c8enJmmocHUbLiiGY6sx7f9i+X3m1CHdd5c6Rdw=
 github.com/Azure/azure-sdk-for-go/sdk/azidentity v0.11.0/go.mod h1:HcM1YX14R7CJcghJGOYCgdezslRSVzqwLf/q+4Y2r/0=
 github.com/Azure/azure-sdk-for-go/sdk/internal v0.7.0/go.mod h1:yqy467j36fJxcRV2TzfVZ1pCb5vxm4BtZPUdYWe/Xo8=
