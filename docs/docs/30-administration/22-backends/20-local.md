@@ -88,6 +88,17 @@ steps:
       [...]
 ```
 
+### Plugins are just binary's to be exec
+
+```yaml
+steps:
+  build:
+    image: /usr/bin/tree
+```
+
+If there are no commands, we thread them as plugin as usual.
+Plugins in local backend terms are just binary's to be executed by name if they can be looked up in `$PATH` or as absolute path.
+
 ### Using labels to filter tasks
 
 You can use the [agent configuration
