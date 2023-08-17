@@ -88,7 +88,7 @@ steps:
       [...]
 ```
 
-### Plugins are just binary's to be exec
+### Plugins as Executable Binaries
 
 ```yaml
 steps:
@@ -96,8 +96,8 @@ steps:
     image: /usr/bin/tree
 ```
 
-If there are no commands, we thread them as plugin as usual.
-Plugins in local backend terms are just binary's to be executed by name if they can be looked up in `$PATH` or as absolute path.
+If no commands are provided, we treat them as plugins in the usual manner.  
+In the context of the local backend, plugins are simply executable binaries, which can be located using their name if they are listed in `$PATH`, or through an absolute path.
 
 ### Using labels to filter tasks
 
