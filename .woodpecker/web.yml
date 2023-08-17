@@ -61,5 +61,3 @@ steps:
       - corepack enable
       - pnpm test
     when: *when
-
-# enforce arm run

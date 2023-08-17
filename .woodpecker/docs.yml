@@ -78,5 +78,3 @@ steps:
     when:
       event: [push, cron]
       path: *when_path
-
-# enforce arm run
