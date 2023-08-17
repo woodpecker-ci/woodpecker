@@ -18,12 +18,15 @@ type ErrNotFound struct {
 	Msg string
 }
 
-func (e *ErrNotFound) Error() string {
+func (e ErrNotFound) Error() string {
 	return e.Msg
 }
 
-func (e *ErrNotFound) Is(target error) bool {
-	_, ok := target.(*ErrNotFound) //nolint:errorlint
+func (e ErrNotFound) Is(target error) bool {
+	_, ok := target.(ErrNotFound) //nolint:errorlint
+	if !ok {
+		_, ok = target.(*ErrNotFound) //nolint:errorlint
+	}
 	return ok
 }
 
@@ -31,12 +34,15 @@ type ErrBadRequest struct {
 	Msg string
 }
 
-func (e *ErrBadRequest) Error() string {
+func (e ErrBadRequest) Error() string {
 	return e.Msg
 }
 
-func (e *ErrBadRequest) Is(target error) bool {
-	_, ok := target.(*ErrBadRequest) //nolint:errorlint
+func (e ErrBadRequest) Is(target error) bool {
+	_, ok := target.(ErrBadRequest) //nolint:errorlint
+	if !ok {
+		_, ok = target.(*ErrBadRequest) //nolint:errorlint
+	}
 	return ok
 }
 
@@ -44,11 +50,14 @@ type ErrFiltered struct {
 	Msg string
 }
 
-func (e *ErrFiltered) Error() string {
+func (e ErrFiltered) Error() string {
 	return "ignoring hook: " + e.Msg
 }
 
 func (e *ErrFiltered) Is(target error) bool {
-	_, ok := target.(*ErrFiltered) //nolint:errorlint
+	_, ok := target.(ErrFiltered) //nolint:errorlint
+	if !ok {
+		_, ok = target.(*ErrFiltered) //nolint:errorlint
+	}
 	return ok
 }
