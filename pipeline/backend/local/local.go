@@ -153,7 +153,6 @@ func (e *local) execCommands(ctx context.Context, step *types.Step, state *workf
 
 // execPlugin use step.Image as exec binary
 func (e *local) execPlugin(ctx context.Context, step *types.Step, state *workflowState, env []string) error {
-	// Use "image name" as run command
 	cmd := exec.CommandContext(ctx, step.Image)
 	cmd.Env = env
 	cmd.Dir = state.workspaceDir
