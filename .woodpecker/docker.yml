@@ -375,3 +375,5 @@ steps:
       logins: *publish_logins
     when:
       event: tag
+
+# enforce arm run

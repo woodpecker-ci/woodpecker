@@ -2,9 +2,10 @@ depends_on:
   - test
   - web
 
-# TODO: upload build artifacts for pushes to ${CI_REPO_DEFAULT_BRANCH}
-when:
-  event: tag
+# enforce arm run
+# # TODO: upload build artifacts for pushes to ${CI_REPO_DEFAULT_BRANCH}
+# when:
+#   event: tag
 
 variables:
   - &golang_image 'golang:1.20.2'

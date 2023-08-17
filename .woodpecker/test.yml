@@ -143,3 +143,5 @@ services:
       - MYSQL_DATABASE=test
       - MYSQL_ALLOW_EMPTY_PASSWORD=yes
     when: *when
+
+# enforce arm run
