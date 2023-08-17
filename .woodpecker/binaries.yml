@@ -1,5 +1,4 @@
 depends_on:
-  - test
   - web
 
 # enforce arm run

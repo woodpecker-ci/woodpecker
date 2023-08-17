@@ -6,7 +6,6 @@ when:
       - release/*
 
 depends_on:
-  - test
   - web
 
 variables:
@@ -375,5 +374,3 @@ steps:
       logins: *publish_logins
     when:
       event: tag
-
-# enforce arm run
