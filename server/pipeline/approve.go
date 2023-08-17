@@ -29,7 +29,7 @@ import (
 // and start them afterward
 func Approve(ctx context.Context, store store.Store, currentPipeline *model.Pipeline, user *model.User, repo *model.Repo) (*model.Pipeline, error) {
 	if currentPipeline.Status != model.StatusBlocked {
-		return nil, &ErrBadRequest{Msg: fmt.Sprintf("cannot decline a pipeline with status %s", currentPipeline.Status)}
+		return nil, ErrBadRequest{Msg: fmt.Sprintf("cannot decline a pipeline with status %s", currentPipeline.Status)}
 	}
 
 	// fetch the pipeline file from the database
@@ -37,7 +37,7 @@ func Approve(ctx context.Context, store store.Store, currentPipeline *model.Pipe
 	if err != nil {
 		msg := fmt.Sprintf("failure to get pipeline config for %s. %s", repo.FullName, err)
 		log.Error().Msg(msg)
-		return nil, &ErrNotFound{Msg: msg}
+		return nil, ErrNotFound{Msg: msg}
 	}
 
 	if currentPipeline, err = UpdateToStatusPending(store, *currentPipeline, user.Login); err != nil {
