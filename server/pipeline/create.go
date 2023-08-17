@@ -66,7 +66,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		filtered, parseErr = checkIfFiltered(repo, pipeline, forgeYamlConfigs)
 		if parseErr == nil {
 			if filtered {
-				err := ErrFiltered{Msg: "branch does not match restrictions defined in yaml"}
+				err := ErrFiltered{Msg: "global when filter of all workflows do skip this pipeline"}
 				log.Debug().Str("repo", repo.FullName).Msgf("%v", err)
 				return nil, err
 			}
