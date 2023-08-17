@@ -64,7 +64,7 @@ func (e *local) setupClone(state *workflowState) error {
 // execClone executes a clone-step locally
 func (e *local) execClone(ctx context.Context, step *types.Step, state *workflowState, env []string) error {
 	if scm := step.Environment["CI_REPO_SCM"]; scm != "git" {
-		return fmt.Errorf("local backend can only clone from git repos")
+		return fmt.Errorf("local backend can only clone from git repos, but this repo use '%s'", scm)
 	}
 
 	if err := checkGitCloneCap(); err != nil {
