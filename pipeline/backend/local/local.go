@@ -155,7 +155,7 @@ func (e *local) execCommands(ctx context.Context, step *types.Step, state *workf
 func (e *local) execPlugin(ctx context.Context, step *types.Step, state *workflowState, env []string) error {
 	binary, err := exec.LookPath(step.Image)
 	if err != nil {
-		return fmt.Errorf("exec plugin: %w", err)
+		return fmt.Errorf("lookup plugin binary: %w", err)
 	}
 
 	cmd := exec.CommandContext(ctx, binary)
