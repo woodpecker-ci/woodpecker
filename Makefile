@@ -15,7 +15,7 @@ CI_COMMIT_SHA ?= $(shell git rev-parse HEAD)
 # it's a tagged release
 ifneq ($(CI_COMMIT_TAG),)
 	BUILD_VERSION := $(CI_COMMIT_TAG:v%=%)
-	VERSION_NUMBER := ${VERSION}
+	VERSION_NUMBER := ${CI_COMMIT_TAG:v%=%}
 else
 	# append commit-sha to next version
 	ifeq ($(VERSION),next)
