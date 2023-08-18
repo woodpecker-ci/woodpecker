@@ -88,14 +88,20 @@ func (e *local) execClone(ctx context.Context, step *types.Step, state *workflow
 
 	// Prepare command
 	var cmd *exec.Cmd
-	if runtime.GOOS == "windows" {
-		pwsh, err := exec.LookPath("powershell.exe")
-		if err != nil {
-			return err
+	if rmCmd != "" {
+		// if we have a netrc injected we have to make sure it's deleted in any case after clone was attempted
+		if runtime.GOOS == "windows" {
+			pwsh, err := exec.LookPath("powershell.exe")
+			if err != nil {
+				return err
+			}
+			cmd = exec.CommandContext(ctx, pwsh, "-Command", fmt.Sprintf("%s ; $code=$? ; %s ; if (!$code) {[Environment]::Exit(1)}", state.pluginGitBinary, rmCmd))
+		} else {
+			cmd = exec.CommandContext(ctx, "/bin/sh", "-c", fmt.Sprintf("%s ; export code=$? ; %s ; exit $code", state.pluginGitBinary, rmCmd))
 		}
-		cmd = exec.CommandContext(ctx, pwsh, "-Command", fmt.Sprintf("%s ; $code=$? ; %s ; if (!$code) {[Environment]::Exit(1)}", state.pluginGitBinary, rmCmd))
 	} else {
-		cmd = exec.CommandContext(ctx, "/bin/sh", "-c", fmt.Sprintf("%s ; $code=$? ; %s ; exit $code", state.pluginGitBinary, rmCmd))
+		// if we have NO netrc, we can just exec the clone directly
+		cmd = exec.CommandContext(ctx, state.pluginGitBinary)
 	}
 	cmd.Env = env
 	cmd.Dir = state.workspaceDir
@@ -112,6 +118,7 @@ func (e *local) execClone(ctx context.Context, step *types.Step, state *workflow
 // writeNetRC write a netrc file into the home dir of a given workflow state
 func writeNetRC(step *types.Step, state *workflowState) (string, error) {
 	if step.Environment["CI_NETRC_MACHINE"] == "" {
+		log.Trace().Msg("no netrc to write")
 		return "", nil
 	}
 
@@ -122,6 +129,7 @@ func writeNetRC(step *types.Step, state *workflowState) (string, error) {
 		rmCmd = fmt.Sprintf("del \"%s\"", file)
 	}
 
+	log.Trace().Msgf("try to write netrc to '%s'", file)
 	return rmCmd, os.WriteFile(file, []byte(fmt.Sprintf(
 		netrcFile,
 		step.Environment["CI_NETRC_MACHINE"],
@@ -179,6 +187,7 @@ func downloadLatestGitPluginBinary(dest string) error {
 			}
 
 			// download successful
+			log.Trace().Msgf("download of 'plugin-git' to '%s' successful", dest)
 			return nil
 		}
 	}
