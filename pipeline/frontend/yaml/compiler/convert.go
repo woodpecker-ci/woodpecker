@@ -125,6 +125,7 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 			},
 			ServiceAccountName: container.BackendOptions.Kubernetes.ServiceAccountName,
 			NodeSelector:       container.BackendOptions.Kubernetes.NodeSelector,
+			Tolerations:        []backend_types.Toleration{},
 		},
 	}
 

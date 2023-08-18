@@ -84,6 +84,11 @@ Specify the label which is used to select the node where the job should be execu
 By default the pod will use "kubernetes.io/arch" inferred from top-level "platform" setting which is deducted from the agents' environment variable CI_SYSTEM_PLATFORM. To overwrite this, you need to specify this label in the nodeSelector section.
 See the [kubernetes documentation](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector) for more information on using nodeSelector.
 
+### tolerations
+
+When you use nodeSelector and the node pool is configured with Taints, you needs to specify the Tollerations. Tolerations allow the scheduler to schedule pods with matching taints.
+See the [kubernetes documentation](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/) for more information on using tolerations.
+
 Example pipeline configuration:
 
 ```yaml
@@ -105,6 +110,11 @@ steps:
             memory: 256Mi
         nodeSelector:
           beta.kubernetes.io/instance-type: p3.8xlarge
+        tolerations:
+        - key: "key1"
+          operator: "Equal"
+          value: "value1"
+          effect: "NoSchedule"
 ```
 
 ### Volumes

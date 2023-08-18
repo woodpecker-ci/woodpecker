@@ -23,9 +23,18 @@ type KubernetesBackendOptions struct {
 	Resources          Resources         `yaml:"resources,omitempty"`
 	ServiceAccountName string            `yaml:"serviceAccountName,omitempty"`
 	NodeSelector       map[string]string `yaml:"nodeSelector,omitempty"`
+	Tolerations        []Toleration      `yaml:"tolerations,omitempty"`
 }
 
 type Resources struct {
 	Requests map[string]string `yaml:"requests,omitempty"`
 	Limits   map[string]string `yaml:"limits,omitempty"`
+}
+
+type Toleration struct {
+	Key               string `yaml:"key,omitempty"`
+	Operator          string `yaml:"operator,omitempty"`
+	Value             string `yaml:"value,omitempty"`
+	Effect            string `yaml:"effect,omitempty"`
+	TolerationSeconds *int64 `yaml:"tolerationSeconds,omitempty"`
 }

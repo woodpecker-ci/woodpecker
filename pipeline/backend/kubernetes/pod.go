@@ -125,6 +125,20 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 		}
 	}
 
+	var tolerations []v1.Toleration
+	if len(step.BackendOptions.Kubernetes.Tolerations) > 0 {
+		for _, t := range step.BackendOptions.Kubernetes.Tolerations {
+			toleration := v1.Toleration{
+				Key:               t.Key,
+				Operator:          v1.TolerationOperator(t.Operator),
+				Value:             t.Value,
+				Effect:            v1.TaintEffect(t.Effect),
+				TolerationSeconds: t.TolerationSeconds,
+			}
+			tolerations = append(tolerations, toleration)
+		}
+	}
+
 	pod := &v1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        podName,
