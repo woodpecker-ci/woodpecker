@@ -15,6 +15,7 @@
 package agent
 
 import (
+	"bufio"
 	"io"
 	"sync"
 
@@ -26,6 +27,8 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/multipart"
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
 )
+
+const writeBufferSize = 10240 // 10kb
 
 func (r *Runner) createLogger(logger zerolog.Logger, uploads *sync.WaitGroup, work *rpc.Pipeline) pipeline.LogFunc {
 	return func(step *backend.Step, rc multipart.Reader) error {
@@ -50,7 +53,8 @@ func (r *Runner) createLogger(logger zerolog.Logger, uploads *sync.WaitGroup, wo
 		loglogger.Debug().Msg("log stream opened")
 
 		logStream := rpc.NewLineWriter(r.client, step.UUID, secrets...)
-		if _, err := io.Copy(logStream, part); err != nil {
+		buffLogStream := bufio.NewWriterSize(logStream, writeBufferSize)
+		if _, err := io.Copy(buffLogStream, part); err != nil {
 			log.Error().Err(err).Msg("copy limited logStream part")
 		}
 
