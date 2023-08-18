@@ -110,6 +110,7 @@ func (e *local) execClone(ctx context.Context, step *types.Step, state *workflow
 // writeNetRC write a netrc file into the home dir of a given workflow state
 func writeNetRC(step *types.Step, state *workflowState) (string, error) {
 	if step.Environment["CI_NETRC_MACHINE"] == "" {
+		log.Trace().Msg("no netrc to write")
 		return "echo \"no netrc to delete\"", nil
 	}
 
@@ -120,6 +121,7 @@ func writeNetRC(step *types.Step, state *workflowState) (string, error) {
 		rmCmd = fmt.Sprintf("del \"%s\"", file)
 	}
 
+	log.Trace().Msgf("try to write netrc to '%s'", file)
 	return rmCmd, os.WriteFile(file, []byte(fmt.Sprintf(
 		netrcFile,
 		step.Environment["CI_NETRC_MACHINE"],
