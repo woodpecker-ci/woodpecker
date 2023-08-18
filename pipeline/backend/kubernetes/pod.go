@@ -150,6 +150,7 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 			RestartPolicy:      v1.RestartPolicyNever,
 			HostAliases:        hostAliases,
 			NodeSelector:       nodeSelector,
+			Tolerations:        tolerations,
 			ServiceAccountName: serviceAccountName,
 			Containers: []v1.Container{{
 				Name:            podName,
