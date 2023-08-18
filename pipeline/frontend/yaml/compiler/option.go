@@ -25,6 +25,10 @@ import (
 // Option configures a compiler option.
 type Option func(*Compiler)
 
+func noopOption() Option {
+	return func(*Compiler) {}
+}
+
 // WithOption configures the compiler with the given option if
 // boolean b evaluates to true.
 func WithOption(option Option, b bool) Option {
@@ -226,6 +230,13 @@ type ProxyOptions struct {
 // and NO_PROXY environment variables added by default to every
 // container in the pipeline.
 func WithProxy(opt ProxyOptions) Option {
+	// if options are all empty we don't set any env var
+	if opt.HTTPProxy == "" &&
+		opt.HTTPSProxy == "" &&
+		opt.NoProxy == "" {
+		return noopOption()
+	}
+	// else we pass on as upper- and lower-case
 	return WithEnviron(
 		map[string]string{
 			"no_proxy":    opt.NoProxy,
