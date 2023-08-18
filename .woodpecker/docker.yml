@@ -16,6 +16,7 @@ variables:
   - &platforms_server 'linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le,linux/riscv64'
   - &platforms_preview 'linux/amd64'
   - &platforms_alpine 'linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le'
+  - &build_args 'CI_COMMIT_SHA=${CI_COMMIT_SHA},CI_COMMIT_BRANCH=${CI_COMMIT_BRANCH},CI_COMMIT_TAG=${CI_COMMIT_TAG}'
 
   # vars used on push / tag events only
   - publish_logins: &publish_logins
@@ -199,6 +200,7 @@ steps:
       dockerfile: docker/Dockerfile.agent.multiarch
       platforms: *platforms_preview
       tag: pull_${CI_COMMIT_PULL_REQUEST}
+      build_args: *build_args
     when:
       event: pull_request
 
@@ -211,6 +213,7 @@ steps:
       platforms: *platforms_release
       tag: [next, "next-${CI_COMMIT_SHA:0:10}"]
       logins: *publish_logins
+      build_args: *build_args
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
@@ -224,6 +227,7 @@ steps:
       platforms: *platforms_alpine
       tag: [next-alpine, "next-${CI_COMMIT_SHA:0:10}-alpine"]
       logins: *publish_logins
+      build_args: *build_args
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
@@ -237,6 +241,7 @@ steps:
       platforms: *platforms_release
       tag: ${CI_COMMIT_BRANCH##release/}
       logins: *publish_logins
+      build_args: *build_args
     when:
       branch: release/*
       event: push
@@ -250,6 +255,7 @@ steps:
       platforms: *platforms_alpine
       tag: ${CI_COMMIT_BRANCH##release/}
       logins: *publish_logins
+      build_args: *build_args
     when:
       branch: release/*
       event: push
@@ -264,6 +270,7 @@ steps:
       # remove 'latest' on older version branches to avoid accidental downgrade
       tag: [latest, "${CI_COMMIT_TAG}"]
       logins: *publish_logins
+      build_args: *build_args
     when:
       event: tag
 
@@ -277,6 +284,7 @@ steps:
       # remove 'latest-alpine' on older version branches to avoid accidental downgrade
       tag: [latest-alpine, "${CI_COMMIT_TAG}-alpine"]
       logins: *publish_logins
+      build_args: *build_args
     when:
       event: tag
 
@@ -293,6 +301,7 @@ steps:
       dockerfile: docker/Dockerfile.cli.multiarch
       platforms: *platforms_preview
       tag: pull_${CI_COMMIT_PULL_REQUEST}
+      build_args: *build_args
     when:
       event: pull_request
 
@@ -305,6 +314,7 @@ steps:
       platforms: *platforms_release
       tag: [next, "next-${CI_COMMIT_SHA:0:10}"]
       logins: *publish_logins
+      build_args: *build_args
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
@@ -318,6 +328,7 @@ steps:
       platforms: *platforms_alpine
       tag: [next-alpine, "next-${CI_COMMIT_SHA:0:10}-alpine"]
       logins: *publish_logins
+      build_args: *build_args
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
@@ -331,6 +342,7 @@ steps:
       platforms: *platforms_release
       tag: ${CI_COMMIT_BRANCH##release/}
       logins: *publish_logins
+      build_args: *build_args
     when:
       branch: release/*
       event: push
@@ -344,6 +356,7 @@ steps:
       platforms: *platforms_alpine
       tag: ${CI_COMMIT_BRANCH##release/}
       logins: *publish_logins
+      build_args: *build_args
     when:
       branch: release/*
       event: push
@@ -358,6 +371,7 @@ steps:
       # remove 'latest' on older version branches to avoid accidental downgrade
       tag: [latest, "${CI_COMMIT_TAG}"]
       logins: *publish_logins
+      build_args: *build_args
     when:
       event: tag
 
@@ -371,5 +385,6 @@ steps:
       # remove 'latest-alpine' on older version branches to avoid accidental downgrade
       tag: [latest-alpine, "${CI_COMMIT_TAG}-alpine"]
       logins: *publish_logins
+      build_args: *build_args
     when:
       event: tag
