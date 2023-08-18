@@ -110,7 +110,7 @@ func (e *local) execClone(ctx context.Context, step *types.Step, state *workflow
 // writeNetRC write a netrc file into the home dir of a given workflow state
 func writeNetRC(step *types.Step, state *workflowState) (string, error) {
 	if step.Environment["CI_NETRC_MACHINE"] == "" {
-		return "", nil
+		return "echo \"no netrc to delete\"", nil
 	}
 
 	file := filepath.Join(state.homeDir, ".netrc")
@@ -177,6 +177,7 @@ func downloadLatestGitPluginBinary(dest string) error {
 			}
 
 			// download successful
+			log.Trace().Msgf("download of 'plugin-git' to '%s' successful", dest)
 			return nil
 		}
 	}
