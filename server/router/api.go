@@ -194,6 +194,7 @@ func apiRoutes(e *gin.RouterGroup) {
 				session.SetPerm(),
 				session.MustPull,
 				api.LogStreamSSE)
+			stream.GET("/events", api.EventStreamSSE)
 		}
 
 		if zerolog.GlobalLevel() <= zerolog.DebugLevel {

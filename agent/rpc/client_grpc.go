@@ -20,6 +20,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cenkalti/backoff/v4"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -29,8 +30,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc/proto"
 )
-
-var backoff = time.Second
 
 // set grpc version on compile time to compare against server version response
 const ClientGrpcVersion int32 = proto.Version
@@ -52,6 +51,13 @@ func (c *client) Close() error {
 	return c.conn.Close()
 }
 
+func (c *client) newBackOff() backoff.BackOff {
+	b := backoff.NewExponentialBackOff()
+	b.MaxInterval = 10 * time.Second
+	b.InitialInterval = 10 * time.Millisecond
+	return b
+}
+
 // Version returns the server- & grpc-version
 func (c *client) Version(ctx context.Context) (*rpc.Version, error) {
 	res, err := c.client.Version(ctx, &proto.Empty{})
@@ -68,6 +74,7 @@ func (c *client) Version(ctx context.Context) (*rpc.Version, error) {
 func (c *client) Next(ctx context.Context, f rpc.Filter) (*rpc.Pipeline, error) {
 	var res *proto.NextResponse
 	var err error
+	retry := c.newBackOff()
 	req := new(proto.NextRequest)
 	req.Filter = new(proto.Filter)
 	req.Filter.Labels = f.Labels
@@ -96,10 +103,12 @@ func (c *client) Next(ctx context.Context, f rpc.Filter) (*rpc.Pipeline, error) 
 		default:
 			return nil, err
 		}
-		if ctx.Err() != nil {
+
+		select {
+		case <-time.After(retry.NextBackOff()):
+		case <-ctx.Done():
 			return nil, ctx.Err()
 		}
-		<-time.After(backoff)
 	}
 
 	if res.GetPipeline() == nil {
@@ -118,6 +127,7 @@ func (c *client) Next(ctx context.Context, f rpc.Filter) (*rpc.Pipeline, error) 
 
 // Wait blocks until the pipeline is complete.
 func (c *client) Wait(ctx context.Context, id string) (err error) {
+	retry := c.newBackOff()
 	req := new(proto.WaitRequest)
 	req.Id = id
 	for {
@@ -139,13 +149,19 @@ func (c *client) Wait(ctx context.Context, id string) (err error) {
 		default:
 			return err
 		}
-		<-time.After(backoff)
+
+		select {
+		case <-time.After(retry.NextBackOff()):
+		case <-ctx.Done():
+			return ctx.Err()
+		}
 	}
 	return nil
 }
 
 // Init signals the pipeline is initialized.
 func (c *client) Init(ctx context.Context, id string, state rpc.State) (err error) {
+	retry := c.newBackOff()
 	req := new(proto.InitRequest)
 	req.Id = id
 	req.State = new(proto.State)
@@ -174,13 +190,19 @@ func (c *client) Init(ctx context.Context, id string, state rpc.State) (err erro
 		default:
 			return err
 		}
-		<-time.After(backoff)
+
+		select {
+		case <-time.After(retry.NextBackOff()):
+		case <-ctx.Done():
+			return ctx.Err()
+		}
 	}
 	return nil
 }
 
 // Done signals the pipeline is complete.
 func (c *client) Done(ctx context.Context, id string, state rpc.State) (err error) {
+	retry := c.newBackOff()
 	req := new(proto.DoneRequest)
 	req.Id = id
 	req.State = new(proto.State)
@@ -209,13 +231,19 @@ func (c *client) Done(ctx context.Context, id string, state rpc.State) (err erro
 		default:
 			return err
 		}
-		<-time.After(backoff)
+
+		select {
+		case <-time.After(retry.NextBackOff()):
+		case <-ctx.Done():
+			return ctx.Err()
+		}
 	}
 	return nil
 }
 
 // Extend extends the pipeline deadline
 func (c *client) Extend(ctx context.Context, id string) (err error) {
+	retry := c.newBackOff()
 	req := new(proto.ExtendRequest)
 	req.Id = id
 	for {
@@ -237,13 +265,19 @@ func (c *client) Extend(ctx context.Context, id string) (err error) {
 		default:
 			return err
 		}
-		<-time.After(backoff)
+
+		select {
+		case <-time.After(retry.NextBackOff()):
+		case <-ctx.Done():
+			return ctx.Err()
+		}
 	}
 	return nil
 }
 
 // Update updates the pipeline state.
 func (c *client) Update(ctx context.Context, id string, state rpc.State) (err error) {
+	retry := c.newBackOff()
 	req := new(proto.UpdateRequest)
 	req.Id = id
 	req.State = new(proto.State)
@@ -272,13 +306,19 @@ func (c *client) Update(ctx context.Context, id string, state rpc.State) (err er
 		default:
 			return err
 		}
-		<-time.After(backoff)
+
+		select {
+		case <-time.After(retry.NextBackOff()):
+		case <-ctx.Done():
+			return ctx.Err()
+		}
 	}
 	return nil
 }
 
 // Log writes the pipeline log entry.
 func (c *client) Log(ctx context.Context, logEntry *rpc.LogEntry) (err error) {
+	retry := c.newBackOff()
 	req := new(proto.LogRequest)
 	req.LogEntry = new(proto.LogEntry)
 	req.LogEntry.StepUuid = logEntry.StepUUID
@@ -305,7 +345,12 @@ func (c *client) Log(ctx context.Context, logEntry *rpc.LogEntry) (err error) {
 		default:
 			return err
 		}
-		<-time.After(backoff)
+
+		select {
+		case <-time.After(retry.NextBackOff()):
+		case <-ctx.Done():
+			return ctx.Err()
+		}
 	}
 	return nil
 }
@@ -322,6 +367,7 @@ func (c *client) RegisterAgent(ctx context.Context, platform, backend, version s
 }
 
 func (c *client) ReportHealth(ctx context.Context) (err error) {
+	retry := c.newBackOff()
 	req := new(proto.ReportHealthRequest)
 	req.Status = "I am alive!"
 
@@ -341,6 +387,11 @@ func (c *client) ReportHealth(ctx context.Context) (err error) {
 		default:
 			return err
 		}
-		<-time.After(backoff)
+
+		select {
+		case <-time.After(retry.NextBackOff()):
+		case <-ctx.Done():
+			return ctx.Err()
+		}
 	}
 }
