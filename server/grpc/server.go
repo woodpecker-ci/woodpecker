@@ -20,6 +20,8 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc/proto"
@@ -79,7 +81,7 @@ func (s *WoodpeckerServer) Next(c context.Context, req *proto.NextRequest) (*pro
 		return res, err
 	}
 	if pipeline == nil {
-		return res, err
+		return res, status.Error(codes.Unavailable, "no pipeline available")
 	}
 
 	res.Pipeline = new(proto.Pipeline)
@@ -167,5 +169,11 @@ func (s *WoodpeckerServer) RegisterAgent(c context.Context, req *proto.RegisterA
 func (s *WoodpeckerServer) ReportHealth(c context.Context, req *proto.ReportHealthRequest) (*proto.Empty, error) {
 	res := new(proto.Empty)
 	err := s.peer.ReportHealth(c, req.GetStatus())
+	return res, err
+}
+
+func (s *WoodpeckerServer) TaintAgent(c context.Context, _ *proto.Empty) (*proto.Empty, error) {
+	res := new(proto.Empty)
+	err := s.peer.TaintAgent(c)
 	return res, err
 }

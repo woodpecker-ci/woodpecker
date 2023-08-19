@@ -125,6 +125,11 @@ Configures the path of the agent config file.
 
 Configures the number of parallel workflows.
 
+### `WOODPECKER_AGENT_EPHEMERAL`
+> Default: `false`
+
+Configures the agent to disable itself (no_schedule) after one workflow. When configured, `WOODPECKER_MAX_WORKFLOWS` is forced to 1.
+
 ### `WOODPECKER_FILTER_LABELS`
 > Default: empty
 

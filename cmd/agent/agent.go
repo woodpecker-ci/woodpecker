@@ -59,7 +59,14 @@ func run(c *cli.Context) error {
 
 	platform := runtime.GOOS + "/" + runtime.GOARCH
 
-	counter.Polling = c.Int("max-workflows")
+	parallel := c.Int("max-workflows")
+	ephemeral := c.Bool("ephemeral")
+	if ephemeral && parallel > 1 {
+		log.Warn().Msgf("max-workflows forced from %d to 1 due to agent running ephemerally", parallel)
+		parallel = 1
+	}
+
+	counter.Polling = parallel
 	counter.Running = 0
 
 	if c.Bool("healthcheck") {
@@ -144,10 +151,6 @@ func run(c *cli.Context) error {
 	backendCtx := context.WithValue(ctx, types.CliContext, c)
 	backend.Init(backendCtx)
 
-	var wg sync.WaitGroup
-	parallel := c.Int("max-workflows")
-	wg.Add(parallel)
-
 	// new engine
 	engine, err := backend.FindEngine(backendCtx, c.String("backend-engine"))
 	if err != nil {
@@ -202,12 +205,15 @@ func run(c *cli.Context) error {
 	}
 	log.Debug().Msgf("loaded %s backend engine", engine.Name())
 
+	var wg sync.WaitGroup
+	wg.Add(parallel)
+
 	for i := 0; i < parallel; i++ {
 		i := i
 		go func() {
 			defer wg.Done()
 
-			r := agent.NewRunner(client, filter, hostname, counter, &engine)
+			r := agent.NewRunner(client, filter, hostname, counter, &engine, ephemeral)
 			log.Debug().Msgf("created new runner %d", i)
 
 			for {
@@ -216,8 +222,16 @@ func run(c *cli.Context) error {
 				}
 
 				log.Debug().Msg("polling new steps")
-				if err := r.Run(ctx); err != nil {
+				if err := r.Run(ctx); errors.Is(err, agent.ErrNoWorkflow) {
+					continue
+				} else if err != nil {
 					log.Error().Err(err).Msg("pipeline done with error")
+					return
+				}
+
+				if ephemeral {
+					// agent is only tainted when running ephemerally.
+					log.Info().Msg("agent tainted")
 					return
 				}
 			}
@@ -229,6 +243,7 @@ func run(c *cli.Context) error {
 		version.String(), engine.Name(), platform, parallel)
 
 	wg.Wait()
+
 	return nil
 }
 

@@ -395,3 +395,8 @@ func (c *client) ReportHealth(ctx context.Context) (err error) {
 		}
 	}
 }
+
+func (c *client) TaintAgent(ctx context.Context) error {
+	_, err := c.client.TaintAgent(ctx, &proto.Empty{})
+	return err
+}
