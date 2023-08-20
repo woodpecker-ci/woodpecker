@@ -46,3 +46,15 @@ func TestLongMessageShortKey(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, input, output)
 }
+
+func TestAdditionalInfoMismatch(t *testing.T) {
+	aes, err := NewAes(string(random.GetRandomBytes(32)))
+	assert.Nil(t, err)
+
+	cipher, err := aes.Encrypt("secret value", "id1")
+	assert.Nil(t, err)
+
+	_, err = aes.Decrypt(cipher, "id2")
+	assert.ErrorContains(t, err, "cipher: message authentication failed")
+}
+
