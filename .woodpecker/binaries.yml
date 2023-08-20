@@ -28,19 +28,24 @@ steps:
     commands:
       - go mod vendor
 
-  cross-compile-server:
-    group: build
-    image: *xgo_image
-    pull: true
+#  cross-compile-server:
+#    group: build
+#    image: *xgo_image
+#    pull: true
+#    commands:
+#      - apt update
+#      - apt install -y tree
+#      - make cross-compile-server
+#    environment:
+#      PLATFORMS: linux|arm64/v8;linux|amd64;windows|amd64
+#      TAGS: bindata sqlite sqlite_unlock_notify netgo
+#      XGO_VERSION: *xgo_version
+#      TARGZ: '1'
+  dummy-compile-server:
+    image: bash
     commands:
-      - apt update
-      - apt install -y tree
-      - make cross-compile-server
-    environment:
-      PLATFORMS: linux|arm64/v8;linux|amd64;windows|amd64
-      TAGS: bindata sqlite sqlite_unlock_notify netgo
-      XGO_VERSION: *xgo_version
-      TARGZ: '1'
+      - mkdir -p dist/server/linux/{amd64,arm64}  dist/server/windows/amd64 dist/{agent,cli}/linux/{amd64,arm,arm64}
+      - touch dist/server/linux/{amd64,arm64}/woodpecker-server dist/server/windows/amd64/woodpecker-server.exe dist/cli/linux/{amd64,arm,arm64}/woodpecker-cli dist/agent/linux/{amd64,arm,arm64}/woodpecker-agent dist/woodpecker-server_{linux_amd64,linux_arm64,windows_amd64}.tar.gz
 
   build-agent:
     group: build
@@ -71,15 +76,15 @@ steps:
     - ls -la dist/*.*
     - cat dist/checksums.txt
 
-  release:
-    image: plugins/github-release
-    secrets:
-      - source: github_token
-        target: github_release_api_key
-    settings:
-      files:
-        - dist/*.tar.gz
-        - dist/*.deb
-        - dist/*.rpm
-        - dist/checksums.txt
-      title: ${CI_COMMIT_TAG##v}
+#  release:
+#    image: plugins/github-release
+#    secrets:
+#      - source: github_token
+#        target: github_release_api_key
+#    settings:
+#      files:
+#        - dist/*.tar.gz
+#        - dist/*.deb
+#        - dist/*.rpm
+#        - dist/checksums.txt
+#      title: ${CI_COMMIT_TAG##v}
