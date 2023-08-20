@@ -5,14 +5,9 @@
       <span class="underline">{{ repo?.owner }} / {{ repo?.name }}</span>
       <span class="whitespace-nowrap overflow-hidden overflow-ellipsis">{{ message }}</span>
       <div class="flex flex-col mt-2">
-        <div class="flex space-x-2 items-center">
+        <div class="flex space-x-2 items-center" :title="created">
           <Icon name="since" />
-          <Tooltip>
-            <span>{{ since }}</span>
-            <template #popper
-              ><span class="font-bold">{{ $t('repo.pipeline.created') }}</span> {{ created }}</template
-            >
-          </Tooltip>
+          <span>{{ since }}</span>
         </div>
         <div class="flex space-x-2 items-center">
           <Icon name="duration" />
@@ -24,7 +19,6 @@
 </template>
 
 <script lang="ts" setup>
-import { Tooltip } from 'floating-vue';
 import { computed, toRef } from 'vue';
 
 import Icon from '~/components/atomic/Icon.vue';
