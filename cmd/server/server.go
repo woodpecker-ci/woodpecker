@@ -90,7 +90,6 @@ func run(c *cli.Context) error {
 		log.Fatal().Err(err).Msg("")
 	}
 
-	server.Config.Server.Migrations.AllowLong = c.Bool("migrations-allow-long")
 	_store, err := setupStore(c)
 	if err != nil {
 		log.Fatal().Err(err).Msg("")
