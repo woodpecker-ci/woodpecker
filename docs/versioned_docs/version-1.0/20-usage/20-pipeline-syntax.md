@@ -423,7 +423,7 @@ Path conditions are applied only to **push** and **pull_request** events.
 It is currently **only available** for GitHub, GitLab and Gitea (version 1.18.0 and newer)
 :::
 
-Execute a pipeline step only when certain files were changed:
+Execute a step only when certain files were changed:
 
 ```yaml
 when:
