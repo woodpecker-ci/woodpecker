@@ -16,6 +16,7 @@
 package pipeline
 
 import (
+	"errors"
 	"fmt"
 	"path/filepath"
 	"strings"
@@ -136,12 +137,15 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 	}
 
 	// lint pipeline
-	linterErr := linter.New(
+	err = linter.New(
 		linter.WithTrusted(b.Repo.IsTrusted),
 	).Lint(substituted, parsed)
-	if linterErr != nil && linter.IsBlockingError(linterErr) {
+	var linterErr *linter.LinterError
+	if errors.As(err, &linterErr) && linterErr != nil && linterErr.IsBlocking() {
 		return nil, &yaml.PipelineParseError{Err: linterErr}
 	}
+
+	// TODO: handle case that isn't a LinterError
 
 	// checking if filtered.
 	if match, err := parsed.When.Match(workflowMetadata, true, environ); !match && err == nil {

@@ -23,7 +23,6 @@ import (
 	"strings"
 
 	"github.com/urfave/cli/v2"
-	"go.uber.org/multierr"
 
 	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
@@ -90,11 +89,16 @@ func lintFile(_ *cli.Context, file string) error {
 		return err
 	}
 
-	lerr := linter.New(linter.WithTrusted(true)).Lint(string(buf), c)
-	if lerr != nil {
+	err = linter.New(linter.WithTrusted(true)).Lint(string(buf), c)
+	if err != nil {
 		fmt.Println("🔥 Config has errors or warnings")
 
-		linterErrors := multierr.Errors(lerr)
+		var linterError *linter.LinterError
+		if !errors.As(err, &linterError) {
+			return err
+		}
+
+		linterErrors := linterError.Unwrap()
 		for _, err := range linterErrors {
 			var linterError *linter.LinterError
 			if errors.As(err, &linterError) {
@@ -108,7 +112,7 @@ func lintFile(_ *cli.Context, file string) error {
 			}
 		}
 
-		if linter.IsBlockingError(lerr) {
+		if linterError.IsBlocking() {
 			return errors.New("config has errors")
 		}
 

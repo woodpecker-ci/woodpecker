@@ -66,7 +66,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		filtered, parseErr = checkIfFiltered(repo, pipeline, forgeYamlConfigs)
 		if parseErr == nil {
 			if filtered {
-				err := ErrFiltered{Msg: "branch does not match restrictions defined in yaml"}
+				err := ErrFiltered{Msg: "pipeline does not match when-filters defined in yaml"}
 				log.Debug().Str("repo", repo.FullName).Msgf("%v", err)
 				return nil, err
 			}
@@ -84,11 +84,11 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	pipeline.Status = model.StatusPending
 
 	if configFetchErr != nil {
-		log.Debug().Str("repo", repo.FullName).Err(configFetchErr).Msgf("cannot find config '%s' in '%s' with user: '%s'", repo.Config, pipeline.Ref, repoUser.Login)
+		log.Debug().Str("repo", repo.FullName).Err(configFetchErr).Msgf("cannot find or get config '%s' in '%s' with user: '%s'", repo.Config, pipeline.Ref, repoUser.Login)
 		pipeline.Started = time.Now().Unix()
 		pipeline.Finished = pipeline.Started
 		pipeline.Status = model.StatusError
-		pipeline.Error = fmt.Sprintf("pipeline definition not found in %s", repo.FullName)
+		pipeline.Error = fmt.Sprintf("unable to get or find pipeline definition for %s", repo.FullName)
 	} else if parseErr != nil {
 		log.Debug().Str("repo", repo.FullName).Err(parseErr).Msg("failed to parse yaml")
 		pipeline.Started = time.Now().Unix()

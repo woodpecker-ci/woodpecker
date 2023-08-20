@@ -96,6 +96,7 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 
 	newPipeline, pipelineItems, err := createPipelineItems(ctx, store, newPipeline, user, repo, pipelineFiles, envs)
 	if err != nil {
+		// TODO: is this correct?? we get an parsing error and return the pipeline without starting it?
 		if errors.Is(err, &yaml.PipelineParseError{}) {
 			return newPipeline, nil
 		}

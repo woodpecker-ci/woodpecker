@@ -20,7 +20,6 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/linter/schema"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
-	"go.uber.org/multierr"
 )
 
 const (
@@ -48,30 +47,30 @@ func (l *Linter) Lint(rawConfig string, c *types.Workflow) error {
 	var linterErr error
 
 	if len(c.Steps.ContainerList) == 0 {
-		linterErr = multierr.Append(linterErr, &LinterError{
+		linterErr = errors.Join(linterErr, &LinterError{
 			Message: "Invalid or missing pipeline section",
 			Field:   "pipeline",
 		})
 	}
 
 	if err := l.lint(c.Clone.ContainerList, blockClone); err != nil {
-		linterErr = multierr.Append(linterErr, err)
+		linterErr = errors.Join(linterErr, err)
 	}
 	if err := l.lint(c.Steps.ContainerList, blockPipeline); err != nil {
-		linterErr = multierr.Append(linterErr, err)
+		linterErr = errors.Join(linterErr, err)
 	}
 	if err := l.lint(c.Services.ContainerList, blockServices); err != nil {
-		linterErr = multierr.Append(linterErr, err)
+		linterErr = errors.Join(linterErr, err)
 	}
 
 	if err := l.lintSchema(rawConfig); err != nil {
-		linterErr = multierr.Append(linterErr, err)
+		linterErr = errors.Join(linterErr, err)
 	}
 	if err := l.lintDeprecations(c); err != nil {
-		linterErr = multierr.Append(linterErr, err)
+		linterErr = errors.Join(linterErr, err)
 	}
 	if err := l.lintBadHabits(c); err != nil {
-		linterErr = multierr.Append(linterErr, err)
+		linterErr = errors.Join(linterErr, err)
 	}
 
 	return linterErr
@@ -82,15 +81,15 @@ func (l *Linter) lint(containers []*types.Container, _ uint8) error {
 
 	for _, container := range containers {
 		if err := l.lintImage(container); err != nil {
-			linterErr = multierr.Append(linterErr, err)
+			linterErr = errors.Join(linterErr, err)
 		}
 		if !l.trusted {
 			if err := l.lintTrusted(container); err != nil {
-				linterErr = multierr.Append(linterErr, err)
+				linterErr = errors.Join(linterErr, err)
 			}
 		}
 		if err := l.lintCommands(container); err != nil {
-			linterErr = multierr.Append(linterErr, err)
+			linterErr = errors.Join(linterErr, err)
 		}
 	}
 
@@ -163,7 +162,7 @@ func (l *Linter) lintSchema(rawConfig string) error {
 	schemaErrors, err := schema.LintString(rawConfig)
 	if err != nil {
 		for _, schemaError := range schemaErrors {
-			linterErr = multierr.Append(linterErr, &LinterError{
+			linterErr = errors.Join(linterErr, &LinterError{
 				Message: schemaError.Description(),
 				Field:   schemaError.Field(),
 				Warning: true, // TODO: let pipelines fail if the schema is invalid
@@ -181,19 +180,4 @@ func (l *Linter) lintDeprecations(c *types.Workflow) error {
 func (l *Linter) lintBadHabits(c *types.Workflow) error {
 	// TODO: add bad habit warnings
 	return nil
-}
-
-func IsBlockingError(e error) bool {
-	linterErrors := multierr.Errors(e)
-	for _, err := range linterErrors {
-		var linterError *LinterError
-		if errors.As(err, &linterError) {
-			if !linterError.Warning {
-				return true
-			}
-		} else {
-			return true
-		}
-	}
-	return false
 }
