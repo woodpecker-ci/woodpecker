@@ -260,34 +260,26 @@ func run(c *cli.Context) error {
 	return g.Wait()
 }
 
-func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
+func setupEvilGlobals(c *cli.Context, store store.Store, f forge.Forge) {
 	// forge
 	server.Config.Services.Forge = f
 	server.Config.Services.Timeout = c.Duration("forge-timeout")
 
 	// services
-	server.Config.Services.Queue = setupQueue(c, v)
+	server.Config.Services.Queue = setupQueue(c, store)
 	server.Config.Services.Logs = logging.New()
 	server.Config.Services.Pubsub = pubsub.New()
 	if err := server.Config.Services.Pubsub.Create(context.Background(), "topic/events"); err != nil {
 		log.Error().Err(err).Msg("could not create pubsub service")
 	}
-	server.Config.Services.Registries = setupRegistryService(c, v)
+	server.Config.Services.Registries = setupRegistryService(c, store)
 
-	// TODO(1544): fix encrypted store
-	// // encryption
-	// encryptedSecretStore := encryptedStore.NewSecretStore(v)
-	// err := encryption.Encryption(c, v).WithClient(encryptedSecretStore).Build()
-	// if err != nil {
-	// 	log.Fatal().Err(err).Msg("could not create encryption service")
-	// }
-	// server.Config.Services.Secrets = setupSecretService(c, encryptedSecretStore)
-	server.Config.Services.Secrets = setupSecretService(c, v)
+	server.Config.Services.Secrets = setupSecretService(c, store)
 
-	server.Config.Services.Environ = setupEnvironService(c, v)
+	server.Config.Services.Environ = setupEnvironService(c, store)
 	server.Config.Services.Membership = setupMembershipService(c, f)
 
-	server.Config.Services.SignaturePrivateKey, server.Config.Services.SignaturePublicKey = setupSignatureKeys(v)
+	server.Config.Services.SignaturePrivateKey, server.Config.Services.SignaturePublicKey = setupSignatureKeys(store)
 
 	if endpoint := c.String("config-service-endpoint"); endpoint != "" {
 		server.Config.Services.ConfigService = config.NewHTTP(endpoint, server.Config.Services.SignaturePrivateKey)

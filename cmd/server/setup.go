@@ -48,8 +48,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/queue"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/server/store/datastore"
-	"github.com/woodpecker-ci/woodpecker/server/store/encryped"
-	"github.com/woodpecker-ci/woodpecker/server/store/encryption"
+	"github.com/woodpecker-ci/woodpecker/server/store/encryption/aes"
 	"github.com/woodpecker-ci/woodpecker/server/store/types"
 )
 
@@ -85,25 +84,16 @@ func setupStore(c *cli.Context) (store.Store, error) {
 		XORM:   xorm,
 	}
 	log.Trace().Msgf("setup datastore: %#v", *opts)
-	_store, err := datastore.NewEngine(opts)
+	store, err := datastore.NewEngine(opts)
 	if err != nil {
 		log.Fatal().Err(err).Msg("could not open datastore")
 	}
 
-	// load store encryption if aes or tink key wass provided
-	if c.String("encryption-key") != "" {
-		_store = encrypted.NewEncryptedStore(_store)
-		err := encryption.Encryption(c, _store).WithClient(encryptedSecretStore).Build()
-		if err != nil {
-			log.Fatal().Err(err).Msg("could not create encryption service")
-		}
-	}
-
-	if err := _store.Migrate(); err != nil {
+	if err := store.Migrate(); err != nil {
 		log.Fatal().Err(err).Msg("could not migrate datastore")
 	}
 
-	return _store, nil
+	return store, nil
 }
 
 func checkSqliteFileExist(path string) error {
@@ -119,8 +109,15 @@ func setupQueue(c *cli.Context, s store.Store) queue.Queue {
 	return queue.WithTaskStore(queue.New(c.Context), s)
 }
 
-func setupSecretService(c *cli.Context, s model.SecretStore) model.SecretService {
-	return secrets.New(c.Context, s)
+func setupSecretService(ctx *cli.Context, store model.SecretStore) model.SecretService {
+	secretSvc := secrets.New(ctx.Context, store)
+
+	if ctx.String("encryption-key") != "" {
+		aesSvc := aes.New()
+		secretSvc = secrets.NewEncrypted(secretSvc, aesSvc)
+	}
+
+	return secretSvc
 }
 
 func setupRegistryService(c *cli.Context, s store.Store) model.RegistryService {
