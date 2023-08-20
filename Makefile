@@ -15,7 +15,7 @@ CI_COMMIT_SHA ?= $(shell git rev-parse HEAD)
 # it's a tagged release
 ifneq ($(CI_COMMIT_TAG),)
 	BUILD_VERSION := $(CI_COMMIT_TAG:v%=%)
-	VERSION_NUMBER := ${VERSION}
+	VERSION_NUMBER := ${CI_COMMIT_TAG:v%=%}
 else
 	# append commit-sha to next version
 	ifeq ($(VERSION),next)
@@ -168,7 +168,7 @@ test-server-datastore-coverage: ## Test server datastore with coverage report
 
 test-ui: ui-dependencies ## Test UI code
 	(cd web/; pnpm run lint)
-	(cd web/; pnpm run formatcheck)
+	(cd web/; pnpm run format:check)
 	(cd web/; pnpm run typecheck)
 	(cd web/; pnpm run test)
 
