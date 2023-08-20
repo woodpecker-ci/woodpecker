@@ -15,21 +15,70 @@
 package aes
 
 import (
+	"crypto/aes"
 	"crypto/cipher"
 	"encoding/base64"
 	"fmt"
 
 	"github.com/google/tink/go/subtle/random"
+	"golang.org/x/crypto/bcrypt"
+	"golang.org/x/crypto/sha3"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/store"
+	"github.com/woodpecker-ci/woodpecker/server/store/encryption"
+)
+
+const (
+	Sha256Size         = 32
+	AESGCMSIVNonceSize = 12
 )
 
 type aesEncryptionService struct {
-	cipher  cipher.AEAD
-	keyID   string
-	store   store.Store
-	clients []model.EncryptionClient
+	keyId  string
+	cipher cipher.AEAD
+}
+
+func NewAes(password string) (encryption.EncryptionService, error) {
+	key, err := hash([]byte(password))
+	if err != nil {
+		return nil, NewKeyGenerationError(err)
+	}
+
+	keyHash, err := bcrypt.GenerateFromPassword(key, bcrypt.DefaultCost)
+	if err != nil {
+		return nil, NewKeyGenerationIdError(err)
+	}
+
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return nil, NewCipherLoadingError(err)
+	}
+
+	aead, err := cipher.NewGCM(block)
+	if err != nil {
+		return nil, NewCipherLoadingError(err)
+	}
+
+	service := aesEncryptionService{
+		keyId:  string(keyHash),
+		cipher: aead,
+	}
+
+	return &service, nil
+}
+
+func hash(data []byte) ([]byte, error) {
+	result := make([]byte, Sha256Size)
+	sha := sha3.NewShake256()
+
+	_, err := sha.Write(data)
+	if err != nil {
+		return nil, NewHashCalculationError(err)
+	}
+	_, err = sha.Read(result)
+	if err != nil {
+		return nil, NewHashCalculationError(err)
+	}
+	return result, nil
 }
 
 func (svc *aesEncryptionService) Encrypt(plaintext, associatedData string) (string, error) {
@@ -49,7 +98,7 @@ func (svc *aesEncryptionService) Encrypt(plaintext, associatedData string) (stri
 func (svc *aesEncryptionService) Decrypt(ciphertext, associatedData string) (string, error) {
 	bytes, err := base64.StdEncoding.DecodeString(ciphertext)
 	if err != nil {
-		return "", fmt.Errorf(errTemplateBase64DecryptionFailed, err)
+		return "", NewBase64DecryptionError(err)
 	}
 
 	nonce := bytes[:AESGCMSIVNonceSize]
@@ -57,11 +106,31 @@ func (svc *aesEncryptionService) Decrypt(ciphertext, associatedData string) (str
 
 	plaintext, err := svc.cipher.Open(nil, nonce, message, []byte(associatedData))
 	if err != nil {
-		return "", fmt.Errorf(errTemplateDecryptionFailed, err)
+		return "", NewDecryptionError(err)
 	}
 	return string(plaintext), nil
 }
 
-func (svc *aesEncryptionService) Disable() error {
-	return svc.disable()
+func NewHashCalculationError(e error) error {
+	return fmt.Errorf("failed calculating hash: %w", e)
+}
+
+func NewKeyGenerationError(e error) error {
+	return fmt.Errorf("failed generating key from passphrase: %w", e)
+}
+
+func NewKeyGenerationIdError(e error) error {
+	return fmt.Errorf("failed generating key id: %w", e)
+}
+
+func NewCipherLoadingError(e error) error {
+	return fmt.Errorf("failed loading encryption cipher: %w", e)
+}
+
+func NewBase64DecryptionError(e error) error {
+	return fmt.Errorf("Base64 decryption failed: %w", e)
+}
+
+func NewDecryptionError(e error) error {
+	return fmt.Errorf("decryption error: %w", e)
 }

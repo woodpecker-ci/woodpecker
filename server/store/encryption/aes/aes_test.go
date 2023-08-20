@@ -22,8 +22,7 @@ import (
 )
 
 func TestShortMessageLongKey(t *testing.T) {
-	aes := &aesEncryptionService{}
-	err := aes.loadCipher(string(random.GetRandomBytes(32)))
+	aes, err := NewAes(string(random.GetRandomBytes(32)))
 	assert.Nil(t, err)
 
 	input := string(random.GetRandomBytes(4))
@@ -36,8 +35,7 @@ func TestShortMessageLongKey(t *testing.T) {
 }
 
 func TestLongMessageShortKey(t *testing.T) {
-	aes := &aesEncryptionService{}
-	err := aes.loadCipher(string(random.GetRandomBytes(12)))
+	aes, err := NewAes(string(random.GetRandomBytes(12)))
 	assert.Nil(t, err)
 
 	input := string(random.GetRandomBytes(1024))

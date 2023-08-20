@@ -459,8 +459,8 @@ var flags = append([]cli.Flag{
 	//
 	&cli.StringFlag{
 		EnvVars:  []string{"WOODPECKER_ENCRYPTION_KEY"},
-		Name:     "encryption-raw-key",
-		Usage:    "Raw encryption key",
+		Name:     "encryption-key",
+		Usage:    "AES encryption key",
 		FilePath: os.Getenv("WOODPECKER_ENCRYPTION_KEY_FILE"),
 	},
 	&cli.StringFlag{

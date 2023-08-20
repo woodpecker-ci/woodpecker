@@ -42,13 +42,13 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/forge/github"
 	"github.com/woodpecker-ci/woodpecker/server/forge/gitlab"
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/plugins/encryption"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/environments"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/registry"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/secrets"
 	"github.com/woodpecker-ci/woodpecker/server/queue"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/server/store/datastore"
-	"github.com/woodpecker-ci/woodpecker/server/store/encryption/aes"
 	"github.com/woodpecker-ci/woodpecker/server/store/types"
 )
 
@@ -112,12 +112,23 @@ func setupQueue(c *cli.Context, s store.Store) queue.Queue {
 func setupSecretService(ctx *cli.Context, store model.SecretStore) model.SecretService {
 	secretSvc := secrets.New(ctx.Context, store)
 
-	if ctx.String("encryption-key") != "" {
-		aesSvc := aes.New()
-		secretSvc = secrets.NewEncrypted(secretSvc, aesSvc)
+	if aesKey := ctx.String("encryption-key"); aesKey != "" {
+		aesSecretsSvc, err := setupAesSecretService(&secretSvc, aesKey)
+		if err != nil {
+			log.Fatal().Err(err).Msg("failed to set up encryption for secrets service")
+		}
+		return aesSecretsSvc
 	}
 
 	return secretSvc
+}
+
+func setupAesSecretService(secretSvc *model.SecretService, aesKey string) (model.SecretService, error) {
+	aesSvc, err := encryption.NewAes(aesKey)
+	if err != nil {
+		return nil, err
+	}
+	return secrets.NewEncrypted(secretSvc, &aesSvc), nil
 }
 
 func setupRegistryService(c *cli.Context, s store.Store) model.RegistryService {
