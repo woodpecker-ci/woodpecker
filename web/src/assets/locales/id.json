@@ -207,7 +207,6 @@
         "restart_success": "Jalur pipa dimulai ulang"
       },
       "config": "Konfigurasi",
-      "created": "Dibuat",
       "event": {
         "cron": "Kron",
         "deploy": "Luncur",

@@ -207,7 +207,6 @@
         "restart_success": "Pipeline neu gestartet"
       },
       "config": "Konfiguration",
-      "created": "Erstellt",
       "event": {
         "cron": "Cron",
         "deploy": "Deploy",

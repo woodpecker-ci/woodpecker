@@ -205,7 +205,6 @@
         "restart_success": "Konvejerdarbs pārstartēts"
       },
       "config": "Konfigurācija",
-      "created": "Izveidots",
       "event": {
         "cron": "Plānotais darbs",
         "deploy": "Uzstādīšana",
