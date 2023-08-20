@@ -19,7 +19,7 @@ import (
 	"strconv"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/store/encryption"
+	"github.com/woodpecker-ci/woodpecker/server/plugins/encryption"
 )
 
 type encryptedSecretService struct {

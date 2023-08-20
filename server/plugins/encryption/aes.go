@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package aes
+package encryption
 
 import (
 	"crypto/aes"
@@ -23,8 +23,6 @@ import (
 	"github.com/google/tink/go/subtle/random"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/crypto/sha3"
-
-	"github.com/woodpecker-ci/woodpecker/server/store/encryption"
 )
 
 const (
@@ -37,7 +35,7 @@ type aesEncryptionService struct {
 	cipher cipher.AEAD
 }
 
-func NewAes(password string) (encryption.EncryptionService, error) {
+func NewAes(password string) (EncryptionService, error) {
 	key, err := hash([]byte(password))
 	if err != nil {
 		return nil, NewKeyGenerationError(err)
