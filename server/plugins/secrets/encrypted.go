@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/rs/zerolog/log"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/encryption"
 )
@@ -216,6 +217,8 @@ func (ess *encryptedSecretService) GlobalSecretDelete(name string) error {
 }
 
 func (ess *encryptedSecretService) encrypt(secret *model.Secret) error {
+	log.Debug().Int64("id", secret.ID).Str("name", secret.Name).Msg("encryption")
+
 	encryptedValue, err := ess.encryptionSvc.Encrypt(secret.Value, strconv.Itoa(int(secret.ID)))
 	if err != nil {
 		return fmt.Errorf("failed to encrypt secret id=%d: %w", secret.ID, err)
@@ -225,6 +228,8 @@ func (ess *encryptedSecretService) encrypt(secret *model.Secret) error {
 }
 
 func (ess *encryptedSecretService) decrypt(secret *model.Secret) error {
+	log.Debug().Int64("id", secret.ID).Str("name", secret.Name).Msg("decryption")
+
 	decryptedValue, err := ess.encryptionSvc.Decrypt(secret.Value, strconv.Itoa(int(secret.ID)))
 	if err != nil {
 		return fmt.Errorf("failed to decrypt secret id=%d: %w", secret.ID, err)

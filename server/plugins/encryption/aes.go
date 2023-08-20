@@ -21,6 +21,7 @@ import (
 	"fmt"
 
 	"github.com/google/tink/go/subtle/random"
+	"github.com/rs/zerolog/log"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/crypto/sha3"
 )
@@ -36,6 +37,8 @@ type aesEncryptionService struct {
 }
 
 func NewAes(password string) (EncryptionService, error) {
+	log.Debug().Msg("initializing AES encryption service")
+
 	key, err := hash([]byte(password))
 	if err != nil {
 		return nil, NewKeyGenerationError(err)
@@ -61,6 +64,7 @@ func NewAes(password string) (EncryptionService, error) {
 		cipher: aead,
 	}
 
+	log.Debug().Msg("AES encryption service has been initialized")
 	return &service, nil
 }
 
@@ -90,11 +94,11 @@ func (svc *aesEncryptionService) Encrypt(plaintext, associatedData string) (stri
 	result = append(result, nonce...)
 	result = append(result, ciphertext...)
 
-	return base64.StdEncoding.EncodeToString(result), nil
+	return base64.RawStdEncoding.EncodeToString(result), nil
 }
 
 func (svc *aesEncryptionService) Decrypt(ciphertext, associatedData string) (string, error) {
-	bytes, err := base64.StdEncoding.DecodeString(ciphertext)
+	bytes, err := base64.RawStdEncoding.DecodeString(ciphertext)
 	if err != nil {
 		return "", NewBase64DecryptionError(err)
 	}
