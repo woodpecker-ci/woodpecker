@@ -55,19 +55,26 @@ steps:
       - pnpm install --frozen-lockfile
       - pnpm build
 
-  cross-compile-server-preview:
-    image: *xgo_image
-    pull: true
+# TODO: have an xgo arm image
+#  cross-compile-server-preview:
+#    image: *xgo_image
+#    pull: true
+#    commands:
+#      - apt update
+#      - apt install -y tree
+#      - make cross-compile-server
+#    environment:
+#      PLATFORMS: linux|amd64
+#      TAGS: bindata sqlite sqlite_unlock_notify netgo
+#      XGO_VERSION: *xgo_version
+#    when:
+#      event: pull_request
+  dummy-compile-server:
+    image: bash
     commands:
-      - apt update
-      - apt install -y tree
-      - make cross-compile-server
-    environment:
-      PLATFORMS: linux|amd64
-      TAGS: bindata sqlite sqlite_unlock_notify netgo
-      XGO_VERSION: *xgo_version
-    when:
-      event: pull_request
+      - mkdir -p dist/server/linux/amd64
+      - echo 'echo binary' > dist/server/linux/amd64/woodpecker-server
+      - chmod +x dist/server/linux/amd64/woodpecker-server
 
   publish-server-preview:
     image: woodpeckerci/plugin-docker-buildx
