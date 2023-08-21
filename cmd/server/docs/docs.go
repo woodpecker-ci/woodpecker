@@ -3908,6 +3908,9 @@ const docTemplate = `{
                 "clone_url": {
                     "type": "string"
                 },
+                "clone_url_ssh": {
+                    "type": "string"
+                },
                 "config_file": {
                     "type": "string"
                 },

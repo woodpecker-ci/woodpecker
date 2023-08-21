@@ -423,14 +423,21 @@ Path conditions are applied only to **push** and **pull_request** events.
 It is currently **only available** for GitHub, GitLab and Gitea (version 1.18.0 and newer)
 :::
 
-Execute a step only on a pipeline with certain files being changed:
+Execute a step only when certain files were changed:
 
 ```yaml
 when:
-  - path: "src/*"
+  - path: "src/*.js"
 ```
 
-You can use [glob patterns](https://github.com/bmatcuk/doublestar#patterns) to match the changed files and specify if the step should run if a file matching that pattern has been changed `include` or if some files have **not** been changed `exclude`.
+One can also use [glob patterns](https://github.com/bmatcuk/doublestar#patterns):
+
+```yaml
+when:
+  - path: "src/**/*.js"
+```
+
+To match whether the files have been changed or not changed, use `include` or `exclude` respectively:
 
 ```yaml
 when:
