@@ -47,14 +47,9 @@
 
       <template #tabActions>
         <div class="flex justify-between gap-x-4 text-wp-text-100 flex-shrink-0 pb-2 md:p-0 mx-auto md:mr-0">
-          <div class="flex space-x-1 items-center flex-shrink-0">
+          <div class="flex space-x-1 items-center flex-shrink-0" :title="created">
             <Icon name="since" />
-            <Tooltip>
-              <span>{{ since }}</span>
-              <template #popper
-                ><span class="font-bold">{{ $t('repo.pipeline.created') }}</span> {{ created }}</template
-              >
-            </Tooltip>
+            <span>{{ since }}</span>
           </div>
           <div class="flex space-x-1 items-center flex-shrink-0">
             <Icon name="duration" />
@@ -76,7 +71,6 @@
 </template>
 
 <script lang="ts" setup>
-import { Tooltip } from 'floating-vue';
 import { computed, inject, onBeforeUnmount, onMounted, provide, Ref, ref, toRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
