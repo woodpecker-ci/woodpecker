@@ -104,6 +104,7 @@ declare module '@vue/runtime-core' {
     TextField: typeof import('./src/components/form/TextField.vue')['default']
     UserAPITab: typeof import('./src/components/user/UserAPITab.vue')['default']
     UserGeneralTab: typeof import('./src/components/user/UserGeneralTab.vue')['default']
+    UserSecretsTab: typeof import('./src/components/user/UserSecretsTab.vue')['default']
     Warning: typeof import('./src/components/atomic/Warning.vue')['default']
   }
 }

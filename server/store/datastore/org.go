@@ -18,13 +18,18 @@ import (
 	"strings"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	"xorm.io/xorm"
 )
 
 func (s storage) OrgCreate(org *model.Org) error {
+	return s.orgCreate(org, s.engine.NewSession())
+}
+
+func (s storage) orgCreate(org *model.Org, sess *xorm.Session) error {
 	// sanitize
 	org.Name = strings.ToLower(org.Name)
 	// insert
-	_, err := s.engine.Insert(org)
+	_, err := sess.Insert(org)
 	return err
 }
 
