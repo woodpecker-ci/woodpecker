@@ -54,14 +54,9 @@
           <span class="truncate">{{ duration }}</span>
         </div>
 
-        <div class="flex space-x-2 items-center min-w-0">
+        <div class="flex space-x-2 items-center min-w-0" :title="created">
           <Icon name="since" />
-          <Tooltip>
-            <span>{{ since }}</span>
-            <template #popper>
-              <span class="font-bold">{{ $t('repo.pipeline.created') }}</span> {{ created }}
-            </template>
-          </Tooltip>
+          <span>{{ since }}</span>
         </div>
       </div>
     </div>
@@ -69,7 +64,6 @@
 </template>
 
 <script lang="ts" setup>
-import { Tooltip } from 'floating-vue';
 import { toRef } from 'vue';
 
 import Icon from '~/components/atomic/Icon.vue';
