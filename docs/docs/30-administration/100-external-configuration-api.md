@@ -7,6 +7,10 @@ Every request sent by Woodpecker is signed using a [http-signature](https://data
 
 A simplistic example configuration service can be found here: [https://github.com/woodpecker-ci/example-config-service](https://github.com/woodpecker-ci/example-config-service)
 
+:::warning
+You need to trust the external config service as it is getting secret information about the repository and pipeline and has the ability to change pipeline configs that could run malicious tasks.
+:::
+
 ## Config
 
 ```shell
