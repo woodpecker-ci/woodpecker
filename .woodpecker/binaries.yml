@@ -44,8 +44,8 @@ steps:
   dummy-compile-server:
     image: bash
     commands:
-      - mkdir -p dist/server/linux/{amd64,arm64}  dist/server/windows/amd64 dist/{agent,cli}/linux/{amd64,arm,arm64}
-      - touch dist/server/linux/{amd64,arm64}/woodpecker-server dist/server/windows/amd64/woodpecker-server.exe dist/cli/linux/{amd64,arm,arm64}/woodpecker-cli dist/agent/linux/{amd64,arm,arm64}/woodpecker-agent dist/woodpecker-server_{linux_amd64,linux_arm64,windows_amd64}.tar.gz
+      - mkdir -p dist/server/linux/amd64 dist/server/linux/arm64 dist/server/windows/amd64 dist/agent/linux/amd64 dist/agent/linux/arm dist/agent/linux/arm64 dist/cli/linux/amd64 dist/cli/linux/arm dist/cli/linux/arm64
+      - touch dist/server/linux/amd64/woodpecker-server dist/server/linux/arm64/woodpecker-server dist/server/windows/amd64/woodpecker-server.exe dist/cli/linux/amd64/woodpecker-cli dist/cli/linux/arm/woodpecker-cli dist/cli/linux/arm64/woodpecker-cli dist/agent/linux/amd64/woodpecker-agent dist/agent/linux/arm/woodpecker-agent dist/agent/linux/arm64/woodpecker-agent dist/woodpecker-server_linux_amd64.tar.gz dist/woodpecker-server_linux_arm64.tar.gz dist/woodpecker-server_windows_amd64.tar.gz
 
   build-agent:
     group: build
