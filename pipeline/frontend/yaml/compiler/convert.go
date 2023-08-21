@@ -119,10 +119,11 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 	var tolerations []backend_types.Toleration
 	for _, t := range container.BackendOptions.Kubernetes.Tolerations {
 		tolerations = append(tolerations, backend_types.Toleration{
-			Key:      t.Key,
-			Operator: backend_types.TolerationOperator(t.Operator),
-			Value:    t.Value,
-			Effect:   backend_types.TaintEffect(t.Effect),
+			Key:               t.Key,
+			Operator:          backend_types.TolerationOperator(t.Operator),
+			Value:             t.Value,
+			Effect:            backend_types.TaintEffect(t.Effect),
+			TolerationSeconds: t.TolerationSeconds,
 		})
 	}
 
