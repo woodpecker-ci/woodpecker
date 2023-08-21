@@ -1,29 +1,19 @@
 <template>
-  <Panel>
-    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-wp-background-100">
-      <div class="ml-2">
-        <h1 class="text-xl text-wp-text-100">{{ $t('admin.settings.secrets.secrets') }}</h1>
-        <p class="text-sm text-wp-text-alt-100">
-          {{ $t('admin.settings.secrets.desc') }}
-          <DocsLink :topic="$t('admin.settings.secrets.secrets')" url="docs/usage/secrets" />
-        </p>
-        <Warning :text="$t('admin.settings.secrets.warning')" />
-      </div>
+  <Settings
+    :title="$t('admin.settings.secrets.secrets')"
+    :desc="$t('admin.settings.secrets.desc')"
+    docs-url="docs/usage/secrets"
+    :warning="$t('admin.settings.secrets.warning')"
+  >
+    <template #titleActions>
       <Button
         v-if="selectedSecret"
-        class="ml-auto"
         :text="$t('admin.settings.secrets.show')"
         start-icon="back"
         @click="selectedSecret = undefined"
       />
-      <Button
-        v-else
-        class="ml-auto"
-        :text="$t('admin.settings.secrets.add')"
-        start-icon="plus"
-        @click="showAddSecret"
-      />
-    </div>
+      <Button v-else :text="$t('admin.settings.secrets.add')" start-icon="plus" @click="showAddSecret" />
+    </template>
 
     <SecretList
       v-if="!selectedSecret"
@@ -42,7 +32,7 @@
       @save="createSecret"
       @cancel="selectedSecret = undefined"
     />
-  </Panel>
+  </Settings>
 </template>
 
 <script lang="ts" setup>
@@ -51,9 +41,7 @@ import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
-import DocsLink from '~/components/atomic/DocsLink.vue';
-import Warning from '~/components/atomic/Warning.vue';
-import Panel from '~/components/layout/Panel.vue';
+import Settings from '~/components/layout/Settings.vue';
 import SecretEdit from '~/components/secrets/SecretEdit.vue';
 import SecretList from '~/components/secrets/SecretList.vue';
 import useApiClient from '~/compositions/useApiClient';
