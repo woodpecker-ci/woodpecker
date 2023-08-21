@@ -75,9 +75,7 @@ func (cf *configFetcher) Fetch(ctx context.Context) (files []*types.FileMeta, er
 
 			log.Trace().Msgf("ConfigFetch[%s]: getting config from external http service", cf.repo.FullName)
 			netrc, err := cf.forge.Netrc(cf.user, cf.repo)
-
 			if err != nil {
-				log.Error().Err(err).Msg("could not get Netrc data from forge")
 				return nil, fmt.Errorf("could not get Netrc data from forge: %w", err)
 			}
 
