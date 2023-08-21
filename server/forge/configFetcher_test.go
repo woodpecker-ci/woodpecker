@@ -519,6 +519,8 @@ func TestFetchFromConfigService(t *testing.T) {
 			f.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("File not found"))
 			f.On("Dir", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("Directory not found"))
 
+			f.On("Netrc", mock.Anything, mock.Anything).Return(nil, fmt.Errorf("Failed to generate netrc"))
+
 			configFetcher := forge.NewConfigFetcher(
 				f,
 				time.Second*3,
