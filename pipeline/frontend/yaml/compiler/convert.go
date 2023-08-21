@@ -116,6 +116,17 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		}
 	}
 
+	tolerations := make([]backend_types.Toleration, len(container.BackendOptions.Kubernetes.Tolerations))
+	for i, t := range container.BackendOptions.Kubernetes.Tolerations {
+		tolerations[i] = backend_types.Toleration{
+			Key:               t.Key,
+			Operator:          backend_types.TolerationOperator(t.Operator),
+			Value:             t.Value,
+			Effect:            backend_types.TaintEffect(t.Effect),
+			TolerationSeconds: t.TolerationSeconds,
+		}
+	}
+
 	// Kubernetes advanced settings
 	backendOptions := backend_types.BackendOptions{
 		Kubernetes: backend_types.KubernetesBackendOptions{
@@ -125,7 +136,7 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 			},
 			ServiceAccountName: container.BackendOptions.Kubernetes.ServiceAccountName,
 			NodeSelector:       container.BackendOptions.Kubernetes.NodeSelector,
-			Tolerations:        []backend_types.Toleration{},
+			Tolerations:        tolerations,
 		},
 	}
 
