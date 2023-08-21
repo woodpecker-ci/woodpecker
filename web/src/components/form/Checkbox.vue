@@ -8,57 +8,34 @@
       @click="innerValue = !innerValue"
     />
     <div class="flex flex-col ml-4">
-      <label v-if="label" class="cursor-pointer text-wp-text-100" :for="`checkbox-${id}`">{{ label }}</label>
+      <label class="cursor-pointer text-wp-text-100" :for="`checkbox-${id}`">{{ label }}</label>
       <span v-if="description" class="text-sm text-wp-text-alt-100">{{ description }}</span>
     </div>
   </div>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, toRef } from 'vue';
+<script lang="ts" setup>
+import { computed, toRef } from 'vue';
 
-export default defineComponent({
-  name: 'Checkbox',
+const props = defineProps<{
+  modelValue: boolean;
+  label: string;
+  description?: string;
+}>();
 
-  props: {
-    modelValue: {
-      type: Boolean,
-      required: true,
-    },
+const emit = defineEmits<{
+  (event: 'update:modelValue', value: boolean): void;
+}>();
 
-    label: {
-      type: String,
-      default: null,
-    },
-
-    description: {
-      type: String,
-      default: null,
-    },
-  },
-
-  emits: {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    'update:modelValue': (_value: boolean): boolean => true,
-  },
-
-  setup: (props, ctx) => {
-    const modelValue = toRef(props, 'modelValue');
-    const innerValue = computed({
-      get: () => modelValue.value,
-      set: (value) => {
-        ctx.emit('update:modelValue', value);
-      },
-    });
-
-    const id = (Math.random() + 1).toString(36).substring(7);
-
-    return {
-      id,
-      innerValue,
-    };
+const modelValue = toRef(props, 'modelValue');
+const innerValue = computed({
+  get: () => modelValue.value,
+  set: (value) => {
+    emit('update:modelValue', value);
   },
 });
+
+const id = (Math.random() + 1).toString(36).substring(7);
 </script>
 
 <style scoped>

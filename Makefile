@@ -10,16 +10,21 @@ endif
 
 VERSION ?= next
 VERSION_NUMBER ?= 0.0.0
-ifneq ($(CI_COMMIT_TAG),)
-	VERSION := $(CI_COMMIT_TAG:v%=%)
-	VERSION_NUMBER := ${VERSION}
-endif
+CI_COMMIT_SHA ?= $(shell git rev-parse HEAD)
 
-# append commit-sha to next version
-BUILD_VERSION ?= $(VERSION)
-ifeq ($(BUILD_VERSION),next)
-	CI_COMMIT_SHA ?= $(shell git rev-parse HEAD)
-	BUILD_VERSION := $(shell echo "next-$(shell echo ${CI_COMMIT_SHA} | head -c 8)")
+# it's a tagged release
+ifneq ($(CI_COMMIT_TAG),)
+	BUILD_VERSION := $(CI_COMMIT_TAG:v%=%)
+	VERSION_NUMBER := ${CI_COMMIT_TAG:v%=%}
+else
+	# append commit-sha to next version
+	ifeq ($(VERSION),next)
+		BUILD_VERSION := $(shell echo "next-$(shell echo ${CI_COMMIT_SHA} | cut -c -10)")
+	endif
+	# append commit-sha to release branch version
+	ifeq ($(shell echo ${CI_COMMIT_BRANCH} | cut -c -9),release/v)
+		BUILD_VERSION := $(shell echo "$(shell echo ${CI_COMMIT_BRANCH} | cut -c 10-)-$(shell echo ${CI_COMMIT_SHA} | cut -c -10)")
+	endif
 endif
 
 LDFLAGS := -s -w -extldflags "-static" -X github.com/woodpecker-ci/woodpecker/version.Version=${BUILD_VERSION}
@@ -101,6 +106,9 @@ generate: generate-swagger ## Run all code generations
 generate-swagger: install-tools ## Run swagger code generation
 	swag init -g server/api/ -g cmd/server/swagger.go --outputTypes go -output cmd/server/docs
 
+generate-license-header: install-tools
+	addlicense -c "Woodpecker Authors" -ignore "vendor/**" **/*.go
+
 check-xgo: ## Check if xgo is installed
 	@hash xgo > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		$(GO) install src.techknowlogick.com/xgo@latest; \
@@ -118,6 +126,9 @@ install-tools: ## Install development tools
 	fi ; \
 	hash swag > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		go install github.com/swaggo/swag/cmd/swag@latest; \
+	fi ; \
+	hash addlicense > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
+		go install github.com/google/addlicense@latest; \
 	fi
 
 ui-dependencies: ## Install UI dependencies
@@ -157,7 +168,7 @@ test-server-datastore-coverage: ## Test server datastore with coverage report
 
 test-ui: ui-dependencies ## Test UI code
 	(cd web/; pnpm run lint)
-	(cd web/; pnpm run formatcheck)
+	(cd web/; pnpm run format:check)
 	(cd web/; pnpm run typecheck)
 	(cd web/; pnpm run test)
 

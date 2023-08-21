@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.0.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v1.0.2) - 2023-08-16
+
+* SECURITY
+  * Validate webhook before change any data (#2221) (#2222)
+* BUGFIXES
+  * Bump default git clone plugin (#2215) (#2220)
+  * Show all steps (#2190) (#2191)
+
+## [1.0.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v1.0.1) - 2023-08-08
+
+* SECURITY
+  * Fix WOODPECKER_GRPC_VERIFY being ignored (#2077) (#2082)
+* BUGFIXES
+  * Fix 'add-orgs' migration (#2117) (#2145)
+  * Fix UI and backend paths with subpath (#1799) (#2133)
+  * Fix swagger response code (#2119) (#2121)
+  * Forge Github Org: Use `login` instead of `name` (#2104) (#2106)
+  * Client.go: Backport fix RepoPost path (#2100)
+  * Fix translation key (#2098)
+
 ## [1.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v1.0.0) - 2023-07-29
 
 * BREAKING

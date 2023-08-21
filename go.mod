@@ -6,7 +6,7 @@ require (
 	code.gitea.io/sdk/gitea v0.15.1-0.20221016183512-2d9ee57af1e0
 	codeberg.org/6543/go-yaml2json v1.0.0
 	codeberg.org/6543/xyaml v1.1.0
-	github.com/6543/logfile-open v1.1.1
+	github.com/6543/logfile-open v1.2.1
 	github.com/alessio/shellescape v1.4.1
 	github.com/antonmedv/expr v1.12.5
 	github.com/bmatcuk/doublestar/v4 v4.6.0
@@ -27,8 +27,8 @@ require (
 	github.com/google/tink/go v1.7.0
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/securecookie v1.1.1
+	github.com/jellydator/ttlcache/v3 v3.0.1
 	github.com/joho/godotenv v1.5.1
-	github.com/lafriks/ttlcache/v3 v3.2.0
 	github.com/lib/pq v1.10.9
 	github.com/mattn/go-sqlite3 v1.14.16
 	github.com/melbahja/goph v1.3.1
@@ -60,7 +60,7 @@ require (
 	k8s.io/apimachinery v0.27.1
 	k8s.io/client-go v0.27.1
 	xorm.io/builder v0.3.13
-	xorm.io/xorm v1.3.3-0.20230726104636-c622cdaf893f
+	xorm.io/xorm v1.3.3-0.20230809032852-db7c2640627d
 )
 
 require (
@@ -69,6 +69,7 @@ require (
 	github.com/Microsoft/go-winio v0.6.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bytedance/sonic v1.9.1 // indirect
+	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
@@ -156,5 +157,3 @@ require (
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.3 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )
-
-replace xorm.io/xorm => gitea.com/6543/xorm v1.3.3-0.20230807141308-fc77a3b490a8
