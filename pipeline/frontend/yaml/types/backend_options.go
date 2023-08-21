@@ -32,9 +32,24 @@ type Resources struct {
 }
 
 type Toleration struct {
-	Key               string `yaml:"key,omitempty"`
-	Operator          string `yaml:"operator,omitempty"`
-	Value             string `yaml:"value,omitempty"`
-	Effect            string `yaml:"effect,omitempty"`
-	TolerationSeconds *int64 `yaml:"tolerationSeconds,omitempty"`
+	Key               string             `yaml:"key,omitempty"`
+	Operator          TolerationOperator `yaml:"operator,omitempty"`
+	Value             string             `yaml:"value,omitempty"`
+	Effect            TaintEffect        `yaml:"effect,omitempty"`
+	TolerationSeconds *int64             `yaml:"tolerationSeconds,omitempty"`
 }
+
+type TaintEffect string
+
+const (
+	TaintEffectNoSchedule       TaintEffect = "NoSchedule"
+	TaintEffectPreferNoSchedule TaintEffect = "PreferNoSchedule"
+	TaintEffectNoExecute        TaintEffect = "NoExecute"
+)
+
+type TolerationOperator string
+
+const (
+	TolerationOpExists TolerationOperator = "Exists"
+	TolerationOpEqual  TolerationOperator = "Equal"
+)

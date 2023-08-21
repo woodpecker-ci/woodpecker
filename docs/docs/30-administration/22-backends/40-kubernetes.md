@@ -86,7 +86,7 @@ See the [kubernetes documentation](https://kubernetes.io/docs/concepts/schedulin
 
 ### tolerations
 
-When you use nodeSelector and the node pool is configured with Taints, you needs to specify the Tollerations. Tolerations allow the scheduler to schedule pods with matching taints.
+When you use nodeSelector and the node pool is configured with Taints, you need to specify the Tolerations. Tolerations allow the scheduler to schedule pods with matching taints.
 See the [kubernetes documentation](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/) for more information on using tolerations.
 
 Example pipeline configuration:
@@ -115,6 +115,7 @@ steps:
           operator: "Equal"
           value: "value1"
           effect: "NoSchedule"
+          tolerationSeconds: 3600
 ```
 
 ### Volumes

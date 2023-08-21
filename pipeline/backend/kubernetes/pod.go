@@ -126,7 +126,8 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 	}
 
 	var tolerations []v1.Toleration
-	if len(step.BackendOptions.Kubernetes.Tolerations) > 0 {
+	beTolerations := step.BackendOptions.Kubernetes.Tolerations
+	if len(beTolerations) > 0 {
 		for _, t := range step.BackendOptions.Kubernetes.Tolerations {
 			toleration := v1.Toleration{
 				Key:               t.Key,
@@ -137,6 +138,7 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 			}
 			tolerations = append(tolerations, toleration)
 		}
+		log.Trace().Msgf("Tolerations that will be used in the backend options: %v", beTolerations)
 	}
 
 	pod := &v1.Pod{

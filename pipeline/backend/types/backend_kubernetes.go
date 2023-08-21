@@ -28,7 +28,7 @@ type Resources struct {
 	Limits   map[string]string `json:"limits,omitempty"`
 }
 
-// Tolerations defines an array with kubernetes tolerations definition
+// Defines Kubernetes toleration
 type Toleration struct {
 	Key               string             `json:"key,omitempty"`
 	Operator          TolerationOperator `json:"operator,omitempty"`
