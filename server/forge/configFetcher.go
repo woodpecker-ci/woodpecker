@@ -74,7 +74,14 @@ func (cf *configFetcher) Fetch(ctx context.Context) (files []*types.FileMeta, er
 			defer cancel() // ok here as we only try http fetching once, returning on fail and success
 
 			log.Trace().Msgf("ConfigFetch[%s]: getting config from external http service", cf.repo.FullName)
-			newConfigs, useOld, err := cf.configExtension.FetchConfig(fetchCtx, cf.repo, cf.pipeline, files)
+			netrc, err := cf.forge.Netrc(cf.user, cf.repo)
+
+			if err != nil {
+				log.Error().Msg("Failed to get netrc " + err.Error())
+				return nil, fmt.Errorf("On Fetching config via http : %w", err)
+			}
+
+			newConfigs, useOld, err := cf.configExtension.FetchConfig(fetchCtx, cf.repo, cf.pipeline, files, netrc)
 			if err != nil {
 				log.Error().Msg("Got error " + err.Error())
 				return nil, fmt.Errorf("On Fetching config via http : %w", err)
@@ -109,7 +116,7 @@ func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config 
 		return nil, fmt.Errorf("user defined config '%s' not found: %w", config, err)
 	}
 
-	log.Trace().Msgf("ConfigFetch[%s]: user did not defined own config, following default procedure", cf.repo.FullName)
+	log.Trace().Msgf("ConfigFetch[%s]: user did not define own config, following default procedure", cf.repo.FullName)
 	// for the order see shared/constants/constants.go
 	fileMeta, err := cf.getFirstAvailableConfig(ctx, constant.DefaultConfigOrder[:], false)
 	if err == nil {
