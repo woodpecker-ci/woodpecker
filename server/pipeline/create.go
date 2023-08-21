@@ -89,6 +89,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		pipeline.Finished = pipeline.Started
 		pipeline.Status = model.StatusError
 		pipeline.Error = fmt.Sprintf("pipeline definition not found in %s", repo.FullName)
+		return pipeline, nil
 	} else if parseErr != nil {
 		log.Debug().Str("repo", repo.FullName).Err(parseErr).Msg("failed to parse yaml")
 		pipeline.Started = time.Now().Unix()
