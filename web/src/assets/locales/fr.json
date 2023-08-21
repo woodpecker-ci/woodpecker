@@ -207,7 +207,6 @@
         "restart_success": "Pipeline redémarré"
       },
       "config": "Configuration",
-      "created": "Crée",
       "event": {
         "cron": "Tâche périodique",
         "deploy": "Déploiement",

@@ -94,7 +94,6 @@
         "restart_success": "流水线已重启"
       },
       "config": "配置",
-      "created": "已创建",
       "event": {
         "cron": "计划任务",
         "deploy": "部署",
