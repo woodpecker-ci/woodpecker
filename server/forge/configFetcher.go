@@ -77,8 +77,8 @@ func (cf *configFetcher) Fetch(ctx context.Context) (files []*types.FileMeta, er
 			netrc, err := cf.forge.Netrc(cf.user, cf.repo)
 
 			if err != nil {
-				log.Error().Msg("Failed to get netrc " + err.Error())
-				return nil, fmt.Errorf("On Fetching config via http : %w", err)
+				log.Error().Err(err).Msg("could not get Netrc data from forge")
+				return nil, fmt.Errorf("could not get Netrc data from forge: %w", err)
 			}
 
 			newConfigs, useOld, err := cf.configExtension.FetchConfig(fetchCtx, cf.repo, cf.pipeline, files, netrc)
