@@ -62,10 +62,10 @@ func (cp *http) FetchConfig(ctx context.Context, repo *model.Repo, pipeline *mod
 
 	response := new(responseStructure)
 	body := requestStructure{
-		Repo: repo,
-		Pipeline: pipeline,
+		Repo:          repo,
+		Pipeline:      pipeline,
 		Configuration: currentConfigs,
-		Netrc: netrc,
+		Netrc:         netrc,
 	}
 
 	status, err := utils.Send(ctx, "POST", cp.endpoint, cp.privateKey, body, response)
