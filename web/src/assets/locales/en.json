@@ -227,7 +227,6 @@
       }
     },
     "pipeline": {
-      "created": "Created",
       "tasks": "Tasks",
       "config": "Config",
       "files": "Changed files ({files})",
@@ -431,6 +430,28 @@
       "general": {
         "general": "General",
         "language": "Language"
+      },
+      "secrets": {
+        "secrets": "Secrets",
+        "desc": "User secrets can be passed to all user's repository individual pipeline steps at runtime as environmental variables.",
+        "none": "There are no user secrets yet.",
+        "add": "Add secret",
+        "save": "Save secret",
+        "show": "Show secrets",
+        "name": "Name",
+        "value": "Value",
+        "deleted": "User secret deleted",
+        "created": "User secret created",
+        "saved": "User secret saved",
+        "images": {
+          "images": "Available for following images",
+          "desc": "Comma separated list of images where this secret is available, leave empty to allow all images"
+        },
+        "plugins_only": "Only available for plugins",
+        "events": {
+          "events": "Available at following events",
+          "pr_warning": "Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets."
+        }
       },
       "api": {
         "api": "API",
