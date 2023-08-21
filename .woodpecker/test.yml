@@ -61,9 +61,9 @@ steps:
       - "[ -n \"$DIFF\" ] && { echo \"swagger not up to date, exec 'make generate-swagger' and commit\"; exit 1; } || true"
     when: *when
 
- lint-editorconfig:
-   image: codeberg.org/6543/docker-images/editorconfig-checker
-   group: test
+  lint-editorconfig:
+    image: codeberg.org/6543/docker-images/editorconfig-checker
+    group: test
 
   lint-license-header:
     image: *golang_image
