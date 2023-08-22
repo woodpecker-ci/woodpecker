@@ -14,20 +14,20 @@ CI_COMMIT_SHA ?= $(shell git rev-parse HEAD)
 
 # it's a tagged release
 ifneq ($(CI_COMMIT_TAG),)
-	BUILD_VERSION := $(CI_COMMIT_TAG:v%=%)
+	VERSION := $(CI_COMMIT_TAG:v%=%)
 	VERSION_NUMBER := ${CI_COMMIT_TAG:v%=%}
 else
 	# append commit-sha to next version
 	ifeq ($(VERSION),next)
-		BUILD_VERSION := $(shell echo "next-$(shell echo ${CI_COMMIT_SHA} | cut -c -10)")
+		VERSION := $(shell echo "next-$(shell echo ${CI_COMMIT_SHA} | cut -c -10)")
 	endif
 	# append commit-sha to release branch version
 	ifeq ($(shell echo ${CI_COMMIT_BRANCH} | cut -c -9),release/v)
-		BUILD_VERSION := $(shell echo "$(shell echo ${CI_COMMIT_BRANCH} | cut -c 10-)-$(shell echo ${CI_COMMIT_SHA} | cut -c -10)")
+		VERSION := $(shell echo "$(shell echo ${CI_COMMIT_BRANCH} | cut -c 10-)-$(shell echo ${CI_COMMIT_SHA} | cut -c -10)")
 	endif
 endif
 
-LDFLAGS := -s -w -extldflags "-static" -X github.com/woodpecker-ci/woodpecker/version.Version=${BUILD_VERSION}
+LDFLAGS := -s -w -extldflags "-static" -X github.com/woodpecker-ci/woodpecker/version.Version=${VERSION}
 CGO_ENABLED ?= 1 # only used to compile server
 
 HAS_GO = $(shell hash go > /dev/null 2>&1 && echo "GO" || echo "NOGO" )
@@ -50,7 +50,6 @@ ifeq (in_docker,$(firstword $(MAKECMDGOALS)))
 	@docker run -it \
 		--user $(shell id -u):$(shell id -g) \
 		-e VERSION="$(VERSION)" \
-		-e BUILD_VERSION="$(BUILD_VERSION)" \
 		-e CI_COMMIT_SHA="$(CI_COMMIT_SHA)" \
 		-e TARGETOS="$(TARGETOS)" \
 		-e TARGETARCH="$(TARGETARCH)" \
@@ -68,7 +67,7 @@ all: help
 
 .PHONY: version
 version: ## Print the current version
-	@echo ${BUILD_VERSION}
+	@echo ${VERSION}
 
 # The help target prints out all targets with their descriptions organized
 # beneath their categories. The categories are represented by '##@' and the
