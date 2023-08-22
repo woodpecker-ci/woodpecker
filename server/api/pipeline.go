@@ -456,6 +456,7 @@ func PostPipeline(c *gin.Context) {
 	netrc, err := server.Config.Services.Forge.Netrc(user, repo)
 	if err != nil {
 		handlePipelineErr(c, err)
+		return
 	}
 
 	newpipeline, err := pipeline.Restart(c, _store, pl, user, repo, envs, netrc)
