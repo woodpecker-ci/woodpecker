@@ -1,7 +1,7 @@
 GO_PACKAGES ?= $(shell go list ./... | grep -v /vendor/)
 
-TARGETOS ?= linux
-TARGETARCH ?= amd64
+TARGETOS ?= $(shell go env GOOS)
+TARGETARCH ?= $(shell go env GOARCH)
 
 BIN_SUFFIX :=
 ifeq ($(TARGETOS),windows)
