@@ -39,6 +39,12 @@ var (
 	indexHTML []byte
 )
 
+const (
+	contentTypeHeader     = "Content-Type"
+	contentTypeJavaScript = "text/javascript"
+	contentTypeCSS        = "text/css"
+)
+
 type prefixFS struct {
 	fs     http.FileSystem
 	prefix string
@@ -82,8 +88,10 @@ func handleCustomFilesAndAssets(fs *prefixFS) func(ctx *gin.Context) {
 	}
 	return func(ctx *gin.Context) {
 		if strings.HasSuffix(ctx.Request.RequestURI, "/assets/custom.js") {
+			ctx.Writer.Header().Set(contentTypeHeader, contentTypeJavaScript)
 			serveFileOrEmptyContent(ctx.Writer, ctx.Request, server.Config.Server.CustomJsFile)
 		} else if strings.HasSuffix(ctx.Request.RequestURI, "/assets/custom.css") {
+			ctx.Writer.Header().Set(contentTypeHeader, contentTypeCSS)
 			serveFileOrEmptyContent(ctx.Writer, ctx.Request, server.Config.Server.CustomCSSFile)
 		} else {
 			serveFile(fs)(ctx)
