@@ -56,6 +56,6 @@ var addOrgID = task{
 			}
 		}
 
-		return dropTableColumns(sess, "secrets", "secret_owner")
+		return nil
 	},
 }
