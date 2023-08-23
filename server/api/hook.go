@@ -231,6 +231,9 @@ func PostHook(c *gin.Context) {
 	//
 
 	pl, err := pipeline.Create(c, _store, repo, tmpPipeline)
+	if errors.Is(err, pipeline.ErrConfigNotFound{}) {
+		return
+	}
 	if err != nil {
 		handlePipelineErr(c, err)
 	} else {

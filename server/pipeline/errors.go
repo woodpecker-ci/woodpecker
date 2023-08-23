@@ -61,3 +61,19 @@ func (e *ErrFiltered) Is(target error) bool {
 	}
 	return ok
 }
+
+type ErrConfigNotFound struct {
+	Msg string
+}
+
+func (e ErrConfigNotFound) Error() string {
+	return e.Msg
+}
+
+func (e ErrConfigNotFound) Is(target error) bool {
+	_, ok := target.(ErrConfigNotFound) //nolint:errorlint
+	if !ok {
+		_, ok = target.(*ErrConfigNotFound) //nolint:errorlint
+	}
+	return ok
+}

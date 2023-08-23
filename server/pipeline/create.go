@@ -85,11 +85,12 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 
 	if configFetchErr != nil {
 		log.Debug().Str("repo", repo.FullName).Err(configFetchErr).Msgf("cannot find config '%s' in '%s' with user: '%s'", repo.Config, pipeline.Ref, repoUser.Login)
+		err := &ErrConfigNotFound{Msg: fmt.Sprintf("pipeline definition not found in %s", repo.FullName)}
 		pipeline.Started = time.Now().Unix()
 		pipeline.Finished = pipeline.Started
 		pipeline.Status = model.StatusError
-		pipeline.Error = fmt.Sprintf("pipeline definition not found in %s", repo.FullName)
-		return pipeline, nil
+		pipeline.Error = err.Msg
+		return nil, err
 	} else if parseErr != nil {
 		log.Debug().Str("repo", repo.FullName).Err(parseErr).Msg("failed to parse yaml")
 		pipeline.Started = time.Now().Unix()
