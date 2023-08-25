@@ -18,16 +18,20 @@ import (
 	"errors"
 	"fmt"
 	"path"
+	"regexp"
 	"strings"
 
 	"github.com/antonmedv/expr"
 	"github.com/bmatcuk/doublestar/v4"
+	"github.com/rs/zerolog/log"
 	"golang.org/x/exp/maps"
 	"gopkg.in/yaml.v3"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
 	yaml_base_types "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types/base"
 )
+
+var skipRe = regexp.MustCompile(`\[(?i:ci *skip|skip *ci)\]`)
 
 type (
 	// When defines a set of runtime constraints.
@@ -78,6 +82,16 @@ func (when *When) IsEmpty() bool {
 
 // Returns true if at least one of the internal constraints is true.
 func (when *When) Match(metadata metadata.Metadata, global bool, env map[string]string) (bool, error) {
+	if global {
+		// skip the whole workflow if any case-insensitive combination of the words "skip" and "ci"
+		// wrapped in square brackets appear in the commit message
+		skipMatch := skipRe.FindString(metadata.Curr.Commit.Message)
+		if len(skipMatch) > 0 {
+			log.Debug().Msgf("skip workflow as keyword to do so was detected in commit message '%s'", metadata.Curr.Commit.Message)
+			return false, nil
+		}
+	}
+
 	for _, c := range when.Constraints {
 		match, err := c.Match(metadata, global, env)
 		if err != nil {

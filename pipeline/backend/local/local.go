@@ -120,13 +120,16 @@ func (e *local) StartStep(ctx context.Context, step *types.Step, taskUUID string
 		return e.execClone(ctx, step, state, env)
 	case types.StepTypeCommands:
 		return e.execCommands(ctx, step, state, env)
+	case types.StepTypePlugin:
+		return e.execPlugin(ctx, step, state, env)
 	default:
 		return ErrUnsupportedStepType
 	}
 }
 
+// execCommands use step.Image as shell and run the commands in it
 func (e *local) execCommands(ctx context.Context, step *types.Step, state *workflowState, env []string) error {
-	// TODO: use commands directly
+	// TODO: find a way to simulate commands to be exec as stdin user commands instead of generating a script and hope the shell understands
 	script := ""
 	for _, cmd := range step.Commands {
 		script += fmt.Sprintf("echo + %s\n%s\n", strings.TrimSpace(shellescape.Quote(cmd)), cmd)
@@ -136,6 +139,26 @@ func (e *local) execCommands(ctx context.Context, step *types.Step, state *workf
 	// Prepare command
 	// Use "image name" as run command (indicate shell)
 	cmd := exec.CommandContext(ctx, step.Image, "-c", script)
+	cmd.Env = env
+	cmd.Dir = state.workspaceDir
+
+	// Get output and redirect Stderr to Stdout
+	e.output, _ = cmd.StdoutPipe()
+	cmd.Stderr = cmd.Stdout
+
+	state.stepCMDs[step.Name] = cmd
+
+	return cmd.Start()
+}
+
+// execPlugin use step.Image as exec binary
+func (e *local) execPlugin(ctx context.Context, step *types.Step, state *workflowState, env []string) error {
+	binary, err := exec.LookPath(step.Image)
+	if err != nil {
+		return fmt.Errorf("lookup plugin binary: %w", err)
+	}
+
+	cmd := exec.CommandContext(ctx, binary)
 	cmd.Env = env
 	cmd.Dir = state.workspaceDir
 
