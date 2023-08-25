@@ -1,8 +1,9 @@
 <template>
   <header
     class="bg-wp-background-100 border-b-1 border-wp-background-400 dark:border-wp-background-100 dark:bg-wp-background-300 text-wp-text-100"
+    :class="{ 'px-4': fullWidth }"
   >
-    <FluidContainer class="!py-0">
+    <FluidContainer :full-width="fullWidth" class="!py-0">
       <div class="flex w-full items-center justify-between py-4 <md:flex-row <md:gap-y-4">
         <div
           class="flex items-center min-w-0 justify-start <md:justify-center"
@@ -62,6 +63,7 @@ const props = defineProps<{
   goBack?: () => void;
   enableTabs?: boolean;
   search?: string;
+  fullWidth?: boolean;
 }>();
 defineEmits(['update:search']);
 
