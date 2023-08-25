@@ -18,8 +18,7 @@ variables:
   - &platforms_server 'linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le,linux/riscv64'
   - &platforms_preview 'linux/amd64'
   - &platforms_alpine 'linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le'
-  - &when_path
-    # related config files
+  - &when_path # related config files
     - '.woodpecker/docker.yml'
     # go source code
     - '**/*.go'
@@ -28,8 +27,9 @@ variables:
     - 'docker/**'
 
   # vars used on push / tag events only
-  - publish_logins: &publish_logins # Default DockerHub login
+  - publish_logins: &publish_logins
       - registry: https://index.docker.io/v1/
+        # Default DockerHub login
         username:
           from_secret: docker_username
         password:
