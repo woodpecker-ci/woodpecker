@@ -443,6 +443,22 @@
         "general": "Général",
         "language": "Langue"
       },
+      "secrets": {
+        "add": "Ajouter un secret",
+        "events": {
+          "events": "Disponible pour les événements suivants",
+          "pr_warning": "Attention, si cette option est activé, un acteur malicieux peut proposer une pull request qui affiche vos secrets."
+        },
+        "images": {
+          "images": "Disponible pour les images suivantes"
+        },
+        "name": "Nom",
+        "plugins_only": "Disponible uniquement pour les plugins",
+        "save": "Enregistrer le secret",
+        "secrets": "Secrets",
+        "show": "Afficher les secrets",
+        "value": "Valeur"
+      },
       "settings": "Paramètres Utilisateur"
     }
   },
