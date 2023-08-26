@@ -8,14 +8,15 @@
       :fluid-content="activeTab !== 'tasks'"
       :full-width="true"
     >
-      <template #title>
-        <span class="flex-shrink-0 text-center">{{ $t('repo.pipeline.pipeline', { pipelineId }) }}</span>
-        <span class="<md:hidden">-</span>
-        <span class="text-center truncate">{{ message }}</span>
-      </template>
+      <template #title>{{ repo.full_name }}</template>
 
       <template #titleActions>
-        <PipelineStatusIcon :status="pipeline.status" class="flex flex-shrink-0" />
+        <div class="flex items-center justify-end gap-x-2">
+          <PipelineStatusIcon :status="pipeline.status" class="flex flex-shrink-0" />
+          <span class="flex-shrink-0 text-center">{{ $t('repo.pipeline.pipeline', { pipelineId }) }}</span>
+          <span class="<md:hidden">-</span>
+          <span class="text-center truncate">{{ message }}</span>
+        </div>
 
         <template v-if="repoPermissions.push">
           <Button
