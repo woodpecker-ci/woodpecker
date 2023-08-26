@@ -1,7 +1,7 @@
 <template>
   <div v-if="pipeline" class="flex flex-col pt-10 md:pt-0">
     <div
-      class="flex flex-grow flex-col code-box shadow !p-0 !rounded-none md:m-2 md:mt-0 !md:rounded-md overflow-hidden"
+      class="flex flex-grow flex-col code-box shadow !p-0 !rounded-none md:m-4 md:mt-0 !md:rounded-md overflow-hidden"
       @mouseover="showActions = true"
       @mouseleave="showActions = false"
     >
