@@ -40,13 +40,13 @@
       <div
         v-show="hasLogs && loadedLogs"
         ref="consoleElement"
-        class="w-full max-w-full grid grid-cols-[min-content,1fr,min-content] p-4 auto-rows-min flex-grow overflow-x-hidden overflow-y-auto"
+        class="w-full max-w-full grid grid-cols-[min-content,minmax(0,1fr),min-content] p-4 auto-rows-min flex-grow overflow-x-hidden overflow-y-auto"
       >
         <div v-for="line in log" :key="line.index" class="contents font-mono">
           <a
             :id="`L${line.number}`"
             :href="`#L${line.number}`"
-            class="text-wp-code-text-alt-100 whitespace-nowrap select-none text-right pl-2 pr-6"
+            class="text-wp-code-text-alt-100 text-xs whitespace-nowrap select-none text-right pl-2 pr-6"
             :class="{
               'bg-opacity-40 dark:bg-opacity-50 bg-red-600 dark:bg-red-800': line.type === 'error',
               'bg-opacity-40 dark:bg-opacity-50 bg-yellow-600 dark:bg-yellow-800': line.type === 'warning',
@@ -57,7 +57,7 @@
           >
           <!-- eslint-disable vue/no-v-html -->
           <span
-            class="align-top whitespace-pre-wrap break-words text-sm"
+            class="align-top whitespace-pre-wrap break-words text-xs"
             :class="{
               'bg-opacity-40 dark:bg-opacity-50 bg-10.168.64.121-600 dark:bg-red-800': line.type === 'error',
               'bg-opacity-40 dark:bg-opacity-50 bg-yellow-600 dark:bg-yellow-800': line.type === 'warning',
@@ -67,7 +67,7 @@
           />
           <!-- eslint-enable vue/no-v-html -->
           <span
-            class="text-wp-code-text-alt-100 whitespace-nowrap select-none text-right pr-1"
+            class="text-wp-code-text-alt-100 text-xs whitespace-nowrap select-none text-right pr-1"
             :class="{
               'bg-opacity-40 dark:bg-opacity-50 bg-red-600 dark:bg-red-800': line.type === 'error',
               'bg-opacity-40 dark:bg-opacity-50 bg-yellow-600 dark:bg-yellow-800': line.type === 'warning',
