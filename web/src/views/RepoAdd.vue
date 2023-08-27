@@ -17,7 +17,7 @@
           v-if="!repo.active"
           class="ml-auto"
           :text="$t('repo.enable.enable')"
-          :is-loading="isActivatingRepo && repoToActivate?.id === repo.id"
+          :is-loading="isActivatingRepo && repoToActivate?.forge_remote_id === repo.forge_remote_id"
           @click="activateRepo(repo)"
         />
       </ListItem>
