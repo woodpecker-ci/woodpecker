@@ -1,5 +1,5 @@
 <template>
-  <FluidContainer full-width class="flex flex-col flex-grow">
+  <FluidContainer full-width class="flex flex-col flex-grow md:min-h-[calc(100%+1rem)]">
     <div class="flex w-full min-h-0 flex-grow">
       <PipelineStepList
         v-if="pipeline?.workflows?.length || 0 > 0"
