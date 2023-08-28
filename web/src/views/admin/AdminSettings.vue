@@ -9,6 +9,9 @@
     <Tab id="users" :title="$t('admin.settings.users.users')">
       <AdminUsersTab />
     </Tab>
+    <Tab id="orgs" :title="$t('admin.settings.orgs.orgs')">
+      <AdminOrgsTab />
+    </Tab>
     <Tab id="agents" :title="$t('admin.settings.agents.agents')">
       <AdminAgentsTab />
     </Tab>
@@ -24,6 +27,7 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
 import AdminAgentsTab from '~/components/admin/settings/AdminAgentsTab.vue';
+import AdminOrgsTab from '~/components/admin/settings/AdminOrgsTab.vue';
 import AdminQueueTab from '~/components/admin/settings/AdminQueueTab.vue';
 import AdminSecretsTab from '~/components/admin/settings/AdminSecretsTab.vue';
 import AdminUsersTab from '~/components/admin/settings/AdminUsersTab.vue';
