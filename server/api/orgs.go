@@ -53,7 +53,7 @@ func GetOrgs(c *gin.Context) {
 //	@Success		204	{object}	Org
 //	@Tags			Orgs
 //	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param			login			path	string	true	"the user's login name"
+//	@Param			id			path	string	true	"the org's id"
 func DeleteOrg(c *gin.Context) {
 	_store := store.FromContext(c)
 

@@ -887,8 +887,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "the user's login name",
-                        "name": "login",
+                        "description": "the org's id",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     }
