@@ -1,11 +1,11 @@
 <template>
   <Panel v-if="pipeline">
     <div v-if="pipeline.changed_files === undefined || pipeline.changed_files.length < 1" class="w-full">
-      <span class="text-wp-text-100">{{ $t('repo.pipeline.no_files') }}</span>
+      <div class="text-wp-text-alt-100 text-center">{{ $t('repo.pipeline.no_files') }}</div>
     </div>
-    <div v-for="file in pipeline.changed_files" v-else :key="file" class="w-full">
-      <div>- {{ file }}</div>
-    </div>
+    <ul v-else class="list-disc list-inside w-full">
+      <li v-for="file in pipeline.changed_files" :key="file">{{ file }}</li>
+    </ul>
   </Panel>
 </template>
 
