@@ -64,7 +64,7 @@ func (s storage) OrgRepoList(org *model.Org, p *model.ListOptions) ([]*model.Rep
 	return repos, s.paginate(p).OrderBy("repo_id").Where("repo_org_id = ?", org.ID).Find(&repos)
 }
 
-func (s storage) GetOrgList(p *model.ListOptions) ([]*model.Org, error) {
+func (s storage) OrgList(p *model.ListOptions) ([]*model.Org, error) {
 	var orgs []*model.Org
 	return orgs, s.paginate(p).Where("is_user = ?", false).OrderBy("id").Find(&orgs)
 }

@@ -497,32 +497,6 @@ func (_m *Store) GetActivePipelineList(repo *model.Repo) ([]*model.Pipeline, err
 	return r0, r1
 }
 
-// GetOrgList provides a mock function with given fields: _a0
-func (_m *Store) GetOrgList(_a0 *model.ListOptions) ([]*model.Org, error) {
-	ret := _m.Called(_a0)
-
-	var r0 []*model.Org
-	var r1 error
-	if rf, ok := ret.Get(0).(func(*model.ListOptions) ([]*model.Org, error)); ok {
-		return rf(_a0)
-	}
-	if rf, ok := ret.Get(0).(func(*model.ListOptions) []*model.Org); ok {
-		r0 = rf(_a0)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*model.Org)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(*model.ListOptions) error); ok {
-		r1 = rf(_a0)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // GetPipeline provides a mock function with given fields: _a0
 func (_m *Store) GetPipeline(_a0 int64) (*model.Pipeline, error) {
 	ret := _m.Called(_a0)
@@ -1267,6 +1241,32 @@ func (_m *Store) OrgGet(_a0 int64) (*model.Org, error) {
 	}
 
 	if rf, ok := ret.Get(1).(func(int64) error); ok {
+		r1 = rf(_a0)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// OrgList provides a mock function with given fields: _a0
+func (_m *Store) OrgList(_a0 *model.ListOptions) ([]*model.Org, error) {
+	ret := _m.Called(_a0)
+
+	var r0 []*model.Org
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*model.ListOptions) ([]*model.Org, error)); ok {
+		return rf(_a0)
+	}
+	if rf, ok := ret.Get(0).(func(*model.ListOptions) []*model.Org); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.Org)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(*model.ListOptions) error); ok {
 		r1 = rf(_a0)
 	} else {
 		r1 = ret.Error(1)

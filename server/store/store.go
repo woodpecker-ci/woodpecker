@@ -189,7 +189,7 @@ type Store interface {
 	OrgFindByName(string) (*model.Org, error)
 	OrgUpdate(*model.Org) error
 	OrgDelete(int64) error
-	GetOrgList(*model.ListOptions) ([]*model.Org, error)
+	OrgList(*model.ListOptions) ([]*model.Org, error)
 
 	// Org repos
 	OrgRepoList(*model.Org, *model.ListOptions) ([]*model.Repo, error)

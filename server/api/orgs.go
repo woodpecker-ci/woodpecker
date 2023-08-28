@@ -36,7 +36,7 @@ import (
 //	@Param			page			query	int		false	"for response pagination, page offset number"	default(1)
 //	@Param			perPage			query	int		false	"for response pagination, max items per page"	default(50)
 func GetOrgs(c *gin.Context) {
-	orgs, err := store.FromContext(c).GetOrgList(session.Pagination(c))
+	orgs, err := store.FromContext(c).OrgList(session.Pagination(c))
 	if err != nil {
 		c.String(500, "Error getting user list. %s", err)
 		return
