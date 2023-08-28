@@ -897,7 +897,7 @@ const docTemplate = `{
                     "204": {
                         "description": "No Content",
                         "schema": {
-                            "$ref": "#/definitions/User"
+                            "$ref": "#/definitions/Org"
                         }
                     }
                 }

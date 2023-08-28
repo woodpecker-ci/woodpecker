@@ -50,7 +50,7 @@ func GetOrgs(c *gin.Context) {
 //	@Description	Deletes the given org. Requires admin rights.
 //	@Router			/orgs/{id} [delete]
 //	@Produce		json
-//	@Success		204	{object}	User
+//	@Success		204	{object}	Org
 //	@Tags			Orgs
 //	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param			login			path	string	true	"the user's login name"
