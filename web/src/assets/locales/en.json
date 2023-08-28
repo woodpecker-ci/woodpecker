@@ -68,6 +68,7 @@
       "reload": "Reload repositories",
       "enable": "Enable",
       "enabled": "Already enabled",
+      "disabled": "Disabled",
       "success": "Repository enabled",
       "list_reloaded": "Repository list reloaded"
     },

@@ -61,8 +61,8 @@ func GetBadge(c *gin.Context) {
 		repo, err = _store.GetRepo(repoID)
 	}
 
-	if err != nil || !repo.IsActive {
-		if err == nil || errors.Is(err, types.RecordNotExist) {
+	if err != nil {
+		if errors.Is(err, types.RecordNotExist) {
 			c.AbortWithStatus(http.StatusNotFound)
 			return
 		}

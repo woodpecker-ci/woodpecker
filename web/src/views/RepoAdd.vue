@@ -13,13 +13,19 @@
       >
         <span class="text-wp-text-100">{{ repo.full_name }}</span>
         <span v-if="repo.active" class="ml-auto text-wp-text-alt-100">{{ $t('repo.enable.enabled') }}</span>
-        <Button
-          v-if="!repo.active"
-          class="ml-auto"
-          :text="$t('repo.enable.enable')"
-          :is-loading="isActivatingRepo && repoToActivate?.forge_remote_id === repo.forge_remote_id"
-          @click="activateRepo(repo)"
-        />
+        <div v-else class="ml-auto flex items-center">
+          <router-link
+            v-if="repo.id"
+            :to="{ name: 'repo', params: { repoId: repo.id } }"
+            class="text-wp-text-alt-100 mr-2"
+            >{{ $t('repo.enable.disabled') }}</router-link
+          >
+          <Button
+            :text="$t('repo.enable.enable')"
+            :is-loading="isActivatingRepo && repoToActivate?.forge_remote_id === repo.forge_remote_id"
+            @click="activateRepo(repo)"
+          />
+        </div>
       </ListItem>
     </div>
   </Scaffold>
