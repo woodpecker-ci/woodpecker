@@ -27,8 +27,9 @@
               :href="pipeline.link_url"
               target="_blank"
             >
-              <Icon name="commit" />
-              <span>{{ pipeline.commit.slice(0, 10) }}</span>
+              <Icon v-if="pipeline.event === 'push'" name="push" />
+              <Icon v-if="pipeline.event === 'pull_request'" name="pull_request" />
+              <span>{{ prettyRef }}</span>
             </a>
           </div>
           <div v-if="repoPermissions.push" class="flex space-x-4">
@@ -76,6 +77,7 @@ import PipelineStepList from '~/components/repo/pipeline/PipelineStepList.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
+import usePipeline from '~/compositions/usePipeline';
 import { Pipeline, PipelineStep, Repo, RepoPermissions } from '~/lib/api/types';
 import { findStep } from '~/utils/helpers';
 
@@ -138,6 +140,8 @@ const selectedStepId = computed({
     router.replace({ params: { ...route.params, stepId: `${_selectedStepId}` } });
   },
 });
+
+const { prettyRef } = usePipeline(pipeline);
 
 const selectedStep = computed(() => findStep(pipeline.value.workflows || [], selectedStepId.value || -1));
 const error = computed(() => pipeline.value?.error || selectedStep.value?.error);
