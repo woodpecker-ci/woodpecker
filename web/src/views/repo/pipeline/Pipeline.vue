@@ -10,13 +10,27 @@
 
       <div class="flex flex-grow relative">
         <PipelineInfo v-if="error">
-          <span class="text-wp-state-error-100 font-bold text-xl mb-2">{{ $t('repo.pipeline.execution_error') }}</span>
-          <span class="text-wp-state-error-100">{{ error }}</span>
+          <Icon name="status-error" class="w-16 h-16 text-wp-state-error-100" />
+          <div class="flex gap-2">
+            <span class="font-bold text-xl mb-2 capitalize">{{ $t('repo.pipeline.execution_error') }}:</span>
+            <span class="text-xl">{{ error }}</span>
+          </div>
         </PipelineInfo>
 
         <PipelineInfo v-else-if="pipeline.status === 'blocked'">
-          <Icon name="status-blocked" class="w-16 h-16 text-wp-text-100 mb-4" />
-          <p class="text-xl text-wp-text-100 mb-4">{{ $t('repo.pipeline.protected.awaits') }}</p>
+          <Icon name="status-blocked" class="w-16 h-16" />
+          <span class="text-xl">{{ $t('repo.pipeline.protected.awaits') }}</span>
+          <div class="flex justify-center items-center gap-2 text-xl">
+            <span>{{ $t('repo.pipeline.protected.review') }}:</span>
+            <a
+              class="text-wp-link-100 hover:text-wp-link-200 flex items-center"
+              :href="pipeline.link_url"
+              target="_blank"
+            >
+              <Icon name="commit" />
+              <span>{{ pipeline.commit.slice(0, 10) }}</span>
+            </a>
+          </div>
           <div v-if="repoPermissions.push" class="flex space-x-4">
             <Button
               color="green"
@@ -34,8 +48,8 @@
         </PipelineInfo>
 
         <PipelineInfo v-else-if="pipeline.status === 'declined'">
-          <Icon name="status-blocked" class="w-16 h-16 text-wp-text-100 mb-4" />
-          <p class="text-xl text-wp-text-100">{{ $t('repo.pipeline.protected.declined') }}</p>
+          <Icon name="status-blocked" class="w-16 h-16" />
+          <p class="text-xl">{{ $t('repo.pipeline.protected.declined') }}</p>
         </PipelineInfo>
 
         <PipelineLog
