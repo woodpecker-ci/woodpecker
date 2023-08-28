@@ -21,6 +21,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/securecookie"
+
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
@@ -90,15 +91,15 @@ func GetRepos(c *gin.Context) {
 	user := session.User(c)
 	all, _ := strconv.ParseBool(c.Query("all"))
 
-	activeRepos, err := _store.RepoList(user, true, true)
-	if err != nil {
-		c.String(http.StatusInternalServerError, "Error fetching repository list. %s", err)
-		return
-	}
-
 	if all {
+		dbRepos, err := _store.RepoList(user, true, false)
+		if err != nil {
+			c.String(http.StatusInternalServerError, "Error fetching repository list. %s", err)
+			return
+		}
+
 		active := map[model.ForgeRemoteID]*model.Repo{}
-		for _, r := range activeRepos {
+		for _, r := range dbRepos {
 			active[r.ForgeRemoteID] = r
 		}
 
@@ -111,10 +112,10 @@ func GetRepos(c *gin.Context) {
 		var repos []*model.Repo
 		for _, r := range _repos {
 			if r.Perm.Push {
-				if active[r.ForgeRemoteID] != nil && active[r.ForgeRemoteID].IsActive {
+				if active[r.ForgeRemoteID] != nil {
 					existingRepo := active[r.ForgeRemoteID]
 					existingRepo.Update(r)
-					existingRepo.IsActive = true
+					existingRepo.IsActive = active[r.ForgeRemoteID].IsActive
 					repos = append(repos, existingRepo)
 				} else {
 					repos = append(repos, r)
@@ -123,6 +124,12 @@ func GetRepos(c *gin.Context) {
 		}
 
 		c.JSON(http.StatusOK, repos)
+		return
+	}
+
+	activeRepos, err := _store.RepoList(user, true, true)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Error fetching repository list. %s", err)
 		return
 	}
 
