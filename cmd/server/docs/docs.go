@@ -873,7 +873,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Users"
+                    "Orgs"
                 ],
                 "summary": "Delete an org",
                 "parameters": [
