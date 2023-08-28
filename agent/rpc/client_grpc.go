@@ -111,15 +111,15 @@ func (c *client) Next(ctx context.Context, f rpc.Filter) (*rpc.Workflow, error) 
 		}
 	}
 
-	if res.GetPipeline() == nil {
+	if res.GetWorkflow() == nil {
 		return nil, nil
 	}
 
 	w := new(rpc.Workflow)
-	w.ID = res.GetPipeline().GetId()
-	w.Timeout = res.GetPipeline().GetTimeout()
+	w.ID = res.GetWorkflow().GetId()
+	w.Timeout = res.GetWorkflow().GetTimeout()
 	w.Config = new(backend.Config)
-	if err := json.Unmarshal(res.GetPipeline().GetPayload(), w.Config); err != nil {
+	if err := json.Unmarshal(res.GetWorkflow().GetPayload(), w.Config); err != nil {
 		log.Error().Err(err).Msgf("could not unmarshal workflow config of '%s'", w.ID)
 	}
 	return w, nil
