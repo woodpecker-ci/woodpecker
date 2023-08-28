@@ -70,7 +70,7 @@
         "desc": "Globale Geheimnisse können an alle Repositories als Umgebungsvariablen übergeben werden.",
         "events": {
           "events": "Verfügbar für folgende Ereignisse",
-          "pr_warning": "Bitte sei vorsichtig da ein Fremder einen Pull-Request erstellen könnte, um deine Geheimnisse zu erhalten."
+          "pr_warning": "Bitte sei vorsichtig mit dieser Option, da eine böswillige Person über einen Pull-Request deine Geheimnisse erhalten könnte."
         },
         "images": {
           "desc": "Komma getrennte Liste aller Images, für die dieses Geheimnis verwendet werden kann. Freilassen, um alle Images zu erlauben",
@@ -207,7 +207,6 @@
         "restart_success": "Pipeline neu gestartet"
       },
       "config": "Konfiguration",
-      "created": "Erstellt",
       "event": {
         "cron": "Cron",
         "deploy": "Deploy",
@@ -390,7 +389,7 @@
         "edit": "Geheimnis bearbeiten",
         "events": {
           "events": "Verfügbar bei folgenden Ereignissen",
-          "pr_warning": "Sei bitte vorsichtig mit dieser Option, da ein bösartiger Akteur eine bösartigen Pull-Request erstellen kann, der deine Geheimnisse preisgibt."
+          "pr_warning": "Bitte sei vorsichtig mit dieser Option, da eine böswillige Person über einen Pull-Request deine Geheimnisse erhalten könnte."
         },
         "images": {
           "desc": "Durch Kommata getrennte Liste der Images, für die dieses Geheimnis verfügbar ist; leer lassen, um alle Images zuzulassen",
@@ -443,6 +442,28 @@
       "general": {
         "general": "Allgemein",
         "language": "Sprache"
+      },
+      "secrets": {
+        "add": "Geheimnis hinzufügen",
+        "created": "Benutzer-Geheimnis erstellt",
+        "deleted": "Benutzer-Geheimnis gelöscht",
+        "desc": "Benutzer-Geheimnisse können an alle Repositories des Benutzers als Umgebungsvariablen übergeben werden.",
+        "events": {
+          "events": "Verfügbar für folgende Ereignisse",
+          "pr_warning": "Bitte sei vorsichtig mit dieser Option, da eine böswillige Person über einen Pull-Request deine Geheimnisse erhalten könnte."
+        },
+        "images": {
+          "desc": "Komma getrennte Liste aller Images, für die dieses Geheimnis verwendet werden kann. Freilassen, um alle Images zu erlauben",
+          "images": "Verfügbar für die folgenden Images"
+        },
+        "name": "Name",
+        "none": "Es existieren noch keine Benutzer-Geheimnisse.",
+        "plugins_only": "Nur für Plugins verfügbar",
+        "save": "Geheimnis speichern",
+        "saved": "Benutzer-Geheimnis gespeichert",
+        "secrets": "Geheimnisse",
+        "show": "Geheimnisse anzeigen",
+        "value": "Wert"
       },
       "settings": "Benutzereinstellungen"
     }

@@ -207,7 +207,6 @@
         "restart_success": "Pipeline redémarré"
       },
       "config": "Configuration",
-      "created": "Crée",
       "event": {
         "cron": "Tâche périodique",
         "deploy": "Déploiement",
@@ -444,7 +443,27 @@
         "general": "Général",
         "language": "Langue"
       },
-      "settings": "Paramètres Utilisateur"
+      "secrets": {
+        "add": "Ajouter un secret",
+        "created": "Secret d'utilisateur crée",
+        "deleted": "Secret d'utilisateur effacé",
+        "events": {
+          "events": "Disponible pour les événements suivants",
+          "pr_warning": "Attention, si cette option est activé, un acteur malicieux peut proposer une pull request qui affiche vos secrets."
+        },
+        "images": {
+          "images": "Disponible pour les images suivantes"
+        },
+        "name": "Nom",
+        "none": "Il n'y a pas encore de secrets d'utilisateur.",
+        "plugins_only": "Disponible uniquement pour les plugins",
+        "save": "Enregistrer le secret",
+        "saved": "Secret d'utilisateur enregistré",
+        "secrets": "Secrets",
+        "show": "Afficher les secrets",
+        "value": "Valeur"
+      },
+      "settings": "Paramètres du compte utilisateur"
     }
   },
   "username": "Nom d'utilisateur",

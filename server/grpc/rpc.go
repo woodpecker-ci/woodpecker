@@ -53,7 +53,7 @@ type RPC struct {
 }
 
 // Next implements the rpc.Next function
-func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Pipeline, error) {
+func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, error) {
 	metadata, ok := grpcMetadata.FromIncomingContext(c)
 	if ok {
 		hostname, ok := metadata["hostname"]
@@ -82,9 +82,9 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Pipeline, er
 		}
 
 		if task.ShouldRun() {
-			pipeline := new(rpc.Pipeline)
-			err = json.Unmarshal(task.Data, pipeline)
-			return pipeline, err
+			workflow := new(rpc.Workflow)
+			err = json.Unmarshal(task.Data, workflow)
+			return workflow, err
 		}
 
 		if err := s.Done(c, task.ID, rpc.State{}); err != nil {
