@@ -11,9 +11,9 @@
       <div class="flex flex-grow relative">
         <PipelineInfo v-if="error">
           <Icon name="status-error" class="w-16 h-16 text-wp-state-error-100" />
-          <div class="flex gap-2">
-            <span class="font-bold text-xl mb-2 capitalize">{{ $t('repo.pipeline.execution_error') }}:</span>
-            <span class="text-xl">{{ error }}</span>
+          <div class="flex gap-2 text-xl">
+            <span class="capitalize">{{ $t('repo.pipeline.execution_error') }}:</span>
+            <span>{{ error }}</span>
           </div>
         </PipelineInfo>
 
@@ -21,7 +21,7 @@
           <Icon name="status-blocked" class="w-16 h-16" />
           <span class="text-xl">{{ $t('repo.pipeline.protected.awaits') }}</span>
           <div class="flex justify-center items-center gap-2 text-xl">
-            <span>{{ $t('repo.pipeline.protected.review') }}:</span>
+            <span class="capitalize">{{ $t('repo.pipeline.protected.review') }}:</span>
             <a
               class="text-wp-link-100 hover:text-wp-link-200 flex items-center"
               :href="pipeline.link_url"
