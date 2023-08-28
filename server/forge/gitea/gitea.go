@@ -546,6 +546,9 @@ func (c *Gitea) Org(ctx context.Context, u *model.User, owner string) (*model.Or
 	}
 
 	user, _, err := client.GetUserInfo(owner)
+	if err != nil {
+		return nil, err
+	}
 	return &model.Org{
 		Name:    user.UserName,
 		IsUser:  true,
