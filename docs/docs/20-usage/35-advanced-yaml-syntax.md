@@ -88,3 +88,8 @@ steps:
      - echo echo from second step
      - <<: *post_cmds
 ```
+
+## References
+
+- [Official specification](https://yaml.org/spec/1.2.2/#3222-anchors-and-aliases)
+- [Cheatsheet](https://learnxinyminutes.com/docs/yaml)
