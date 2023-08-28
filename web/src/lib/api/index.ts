@@ -303,6 +303,14 @@ export default class WoodpeckerClient extends ApiClient {
     return this._delete('/api/user/token') as Promise<string>;
   }
 
+  getOrgs(page: number): Promise<Org[] | null> {
+    return this._get(`/api/orgs?page=${page}`) as Promise<Org[] | null>;
+  }
+
+  deleteOrg(org: Org): Promise<unknown> {
+    return this._delete(`/api/orgs/${org.id}`);
+  }
+
   // eslint-disable-next-line promise/prefer-await-to-callbacks
   on(callback: (data: { pipeline?: Pipeline; repo?: Repo; step?: PipelineWorkflow }) => void): EventSource {
     return this._subscribe('/api/stream/events', callback, {

@@ -24,7 +24,7 @@
           <Icon name="pull_request" />
           <span class="truncate">{{ prettyRef }}</span>
         </a>
-        <span v-if="pipeline.event !== 'pull_request'" class="truncate">{{ pipeline.branch }}</span>
+        <span v-if="pipeline.event !== 'pull_request'" class="truncate">{{ prettyRef }}</span>
       </div>
       <div class="flex items-center flex-shrink-0">
         <template v-if="pipeline.event === 'pull_request'">
@@ -48,7 +48,7 @@
     </div>
 
     <div class="flex-grow min-h-0 w-full relative">
-      <div class="absolute top-0 left-0 right-0 h-full flex flex-col md:overflow-y-scroll gap-y-2">
+      <div class="absolute top-0 left-0 right-0 h-full flex flex-col md:overflow-y-auto gap-y-2">
         <div
           v-for="workflow in pipeline.workflows"
           :key="workflow.id"
