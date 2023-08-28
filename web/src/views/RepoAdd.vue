@@ -17,7 +17,7 @@
           <router-link
             v-if="repo.id"
             :to="{ name: 'repo', params: { repoId: repo.id } }"
-            class="text-wp-text-alt-100 mr-2"
+            class="text-wp-text-alt-100 mr-2 hover:text-wp-link-200"
             >{{ $t('repo.enable.disabled') }}</router-link
           >
           <Button
