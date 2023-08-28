@@ -17,8 +17,9 @@ package datastore
 import (
 	"strings"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
 	"xorm.io/xorm"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 func (s storage) OrgCreate(org *model.Org) error {
@@ -61,4 +62,9 @@ func (s storage) OrgFindByName(name string) (*model.Org, error) {
 func (s storage) OrgRepoList(org *model.Org, p *model.ListOptions) ([]*model.Repo, error) {
 	var repos []*model.Repo
 	return repos, s.paginate(p).OrderBy("repo_id").Where("repo_org_id = ?", org.ID).Find(&repos)
+}
+
+func (s storage) OrgList(p *model.ListOptions) ([]*model.Org, error) {
+	var orgs []*model.Org
+	return orgs, s.paginate(p).Where("is_user = ?", false).OrderBy("id").Find(&orgs)
 }
