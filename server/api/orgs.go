@@ -38,10 +38,10 @@ import (
 func GetOrgs(c *gin.Context) {
 	orgs, err := store.FromContext(c).OrgList(session.Pagination(c))
 	if err != nil {
-		c.String(500, "Error getting user list. %s", err)
+		c.String(http.StatusInternalServerError, "Error getting user list. %s", err)
 		return
 	}
-	c.JSON(200, orgs)
+	c.JSON(http.StatusOK, orgs)
 }
 
 // DeleteOrg
