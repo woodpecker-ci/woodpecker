@@ -14,7 +14,7 @@
       </span>
     </template>
     <template #titleActions>
-      <a v-if="badgeUrl" :href="badgeUrl" target="_blank" class="ml-2">
+      <a v-if="badgeUrl" :href="badgeUrl" target="_blank">
         <img :src="badgeUrl" />
       </a>
       <IconButton :href="repo.link_url" :title="$t('repo.open_in_forge')" :icon="forge ?? 'repo'" />
