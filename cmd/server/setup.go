@@ -109,26 +109,24 @@ func setupQueue(c *cli.Context, s store.Store) queue.Queue {
 	return queue.WithTaskStore(queue.New(c.Context), s)
 }
 
-func setupSecretService(ctx *cli.Context, store model.SecretStore) model.SecretService {
-	secretSvc := secrets.New(ctx.Context, store)
-
-	if aesKey := ctx.String("encryption-key"); aesKey != "" {
-		aesSecretsSvc, err := setupAesSecretService(&secretSvc, aesKey)
+func setupEncryptionService(ctx *cli.Context) encryption.EncryptionService {
+	if aesKey := ctx.String("encryption-aes-key"); aesKey != "" {
+		encSvc, err := encryption.NewAes(aesKey)
 		if err != nil {
-			log.Fatal().Err(err).Msg("failed to set up encryption for secrets service")
+			log.Fatal().Err(err).Msg("failed to set up AES encryption service")
 		}
-		return aesSecretsSvc
+		return encSvc
 	}
 
-	return secretSvc
+	return nil
 }
 
-func setupAesSecretService(secretSvc *model.SecretService, aesKey string) (model.SecretService, error) {
-	aesSvc, err := encryption.NewAes(aesKey)
+func setupSecretService(ctx *cli.Context, store model.SecretStore) model.SecretService {
+	secretSvc, err := secrets.NewService(ctx, store)
 	if err != nil {
-		return nil, err
+		log.Fatal().Err(err).Msg("failed to set up secrets service")
 	}
-	return secrets.NewEncrypted(secretSvc, &aesSvc), nil
+	return secretSvc
 }
 
 func setupRegistryService(c *cli.Context, s store.Store) model.RegistryService {

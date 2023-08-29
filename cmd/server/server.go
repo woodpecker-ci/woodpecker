@@ -274,6 +274,7 @@ func setupEvilGlobals(c *cli.Context, store store.Store, f forge.Forge) {
 	}
 	server.Config.Services.Registries = setupRegistryService(c, store)
 
+	server.Config.Services.Encryption = setupEncryptionService(c)
 	server.Config.Services.Secrets = setupSecretService(c, store)
 
 	server.Config.Services.Environ = setupEnvironService(c, store)

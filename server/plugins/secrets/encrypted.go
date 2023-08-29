@@ -16,38 +16,91 @@ package secrets
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/rs/zerolog/log"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/encryption"
 )
 
-type encryptedSecretService struct {
+const (
+	secretValueTemplate = "_%s_"
+)
+
+type EncryptedSecretService struct {
 	secretSvc     model.SecretService
 	encryptionSvc encryption.EncryptionService
 }
 
-func NewEncrypted(secretService *model.SecretService, encryptionService *encryption.EncryptionService) model.SecretService {
-	return &encryptedSecretService{
-		secretSvc:     *secretService,
-		encryptionSvc: *encryptionService,
+func NewEncrypted(secretService model.SecretService, encryptionService encryption.EncryptionService) EncryptedSecretService {
+	return EncryptedSecretService{
+		secretSvc:     secretService,
+		encryptionSvc: encryptionService,
 	}
 }
 
-func (ess *encryptedSecretService) SecretFind(repo *model.Repo, name string) (*model.Secret, error) {
+func (ess *EncryptedSecretService) EncryptSecret(secret *model.Secret) error {
+	log.Debug().Int64("id", secret.ID).Str("name", secret.Name).Msg("encryption")
+
+	encryptedValue, err := ess.encryptionSvc.Encrypt(secret.Value, secret.Name)
+	if err != nil {
+		return fmt.Errorf("failed to encrypt secret id=%d: %w", secret.ID, err)
+	}
+	encodedValue := ess.encodeSecretValue(encryptedValue)
+	secret.Value = encodedValue
+	return nil
+}
+
+func (ess *EncryptedSecretService) encodeSecretValue(value string) string {
+	return ess.header() + value
+}
+
+func (ess *EncryptedSecretService) DecryptSecret(secret *model.Secret) error {
+	log.Debug().Int64("id", secret.ID).Str("name", secret.Name).Msg("decryption")
+
+	decodedValue := ess.decodeSecretValue(secret.Value)
+	decryptedValue, err := ess.encryptionSvc.Decrypt(decodedValue, secret.Name)
+	if err != nil {
+		return fmt.Errorf("failed to decrypt secret id=%d: %w", secret.ID, err)
+	}
+	secret.Value = decryptedValue
+	return nil
+}
+
+func (ess *EncryptedSecretService) decodeSecretValue(value string) string {
+	return strings.TrimPrefix(value, ess.header())
+}
+
+func (ess *EncryptedSecretService) decryptList(secrets []*model.Secret) error {
+	for _, secret := range secrets {
+		err := ess.DecryptSecret(secret)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (ess *EncryptedSecretService) header() string {
+	return fmt.Sprintf(secretValueTemplate, ess.encryptionSvc.Algo())
+}
+
+// SecretService interface
+
+func (ess *EncryptedSecretService) SecretFind(repo *model.Repo, name string) (*model.Secret, error) {
 	var err error
 	secret, err := ess.secretSvc.SecretFind(repo, name)
 	if err != nil {
 		return nil, err
 	}
-	err = ess.decrypt(secret)
+	err = ess.DecryptSecret(secret)
 	if err != nil {
 		return nil, err
 	}
 	return secret, nil
 }
 
-func (ess *encryptedSecretService) SecretList(repo *model.Repo, listOpt *model.ListOptions) ([]*model.Secret, error) {
+func (ess *EncryptedSecretService) SecretList(repo *model.Repo, listOpt *model.ListOptions) ([]*model.Secret, error) {
 	var err error
 	secrets, err := ess.secretSvc.SecretList(repo, listOpt)
 	if err != nil {
@@ -60,7 +113,7 @@ func (ess *encryptedSecretService) SecretList(repo *model.Repo, listOpt *model.L
 	return secrets, nil
 }
 
-func (ess *encryptedSecretService) SecretListPipeline(repo *model.Repo, pipeline *model.Pipeline, listOpt *model.ListOptions) ([]*model.Secret, error) {
+func (ess *EncryptedSecretService) SecretListPipeline(repo *model.Repo, pipeline *model.Pipeline, listOpt *model.ListOptions) ([]*model.Secret, error) {
 	var err error
 	secrets, err := ess.secretSvc.SecretListPipeline(repo, pipeline, listOpt)
 	if err != nil {
@@ -73,9 +126,9 @@ func (ess *encryptedSecretService) SecretListPipeline(repo *model.Repo, pipeline
 	return secrets, nil
 }
 
-func (ess *encryptedSecretService) SecretCreate(repo *model.Repo, in *model.Secret) error {
+func (ess *EncryptedSecretService) SecretCreate(repo *model.Repo, in *model.Secret) error {
 	var err error
-	err = ess.encrypt(in)
+	err = ess.EncryptSecret(in)
 	if err != nil {
 		return err
 	}
@@ -86,9 +139,9 @@ func (ess *encryptedSecretService) SecretCreate(repo *model.Repo, in *model.Secr
 	return nil
 }
 
-func (ess *encryptedSecretService) SecretUpdate(repo *model.Repo, in *model.Secret) error {
+func (ess *EncryptedSecretService) SecretUpdate(repo *model.Repo, in *model.Secret) error {
 	var err error
-	err = ess.encrypt(in)
+	err = ess.EncryptSecret(in)
 	if err != nil {
 		return err
 	}
@@ -99,24 +152,24 @@ func (ess *encryptedSecretService) SecretUpdate(repo *model.Repo, in *model.Secr
 	return nil
 }
 
-func (ess *encryptedSecretService) SecretDelete(repo *model.Repo, name string) error {
+func (ess *EncryptedSecretService) SecretDelete(repo *model.Repo, name string) error {
 	return ess.secretSvc.SecretDelete(repo, name)
 }
 
-func (ess *encryptedSecretService) OrgSecretFind(owner int64, name string) (*model.Secret, error) {
+func (ess *EncryptedSecretService) OrgSecretFind(owner int64, name string) (*model.Secret, error) {
 	var err error
 	secret, err := ess.secretSvc.OrgSecretFind(owner, name)
 	if err != nil {
 		return nil, err
 	}
-	err = ess.decrypt(secret)
+	err = ess.DecryptSecret(secret)
 	if err != nil {
 		return nil, err
 	}
 	return secret, nil
 }
 
-func (ess *encryptedSecretService) OrgSecretList(owner int64, listOpt *model.ListOptions) ([]*model.Secret, error) {
+func (ess *EncryptedSecretService) OrgSecretList(owner int64, listOpt *model.ListOptions) ([]*model.Secret, error) {
 	var err error
 	secrets, err := ess.secretSvc.OrgSecretList(owner, listOpt)
 	if err != nil {
@@ -129,9 +182,9 @@ func (ess *encryptedSecretService) OrgSecretList(owner int64, listOpt *model.Lis
 	return secrets, nil
 }
 
-func (ess *encryptedSecretService) OrgSecretCreate(owner int64, in *model.Secret) error {
+func (ess *EncryptedSecretService) OrgSecretCreate(owner int64, in *model.Secret) error {
 	var err error
-	err = ess.encrypt(in)
+	err = ess.EncryptSecret(in)
 	if err != nil {
 		return err
 	}
@@ -142,9 +195,9 @@ func (ess *encryptedSecretService) OrgSecretCreate(owner int64, in *model.Secret
 	return nil
 }
 
-func (ess *encryptedSecretService) OrgSecretUpdate(owner int64, in *model.Secret) error {
+func (ess *EncryptedSecretService) OrgSecretUpdate(owner int64, in *model.Secret) error {
 	var err error
-	err = ess.encrypt(in)
+	err = ess.EncryptSecret(in)
 	if err != nil {
 		return err
 	}
@@ -155,24 +208,24 @@ func (ess *encryptedSecretService) OrgSecretUpdate(owner int64, in *model.Secret
 	return nil
 }
 
-func (ess *encryptedSecretService) OrgSecretDelete(owner int64, name string) error {
+func (ess *EncryptedSecretService) OrgSecretDelete(owner int64, name string) error {
 	return ess.secretSvc.OrgSecretDelete(owner, name)
 }
 
-func (ess *encryptedSecretService) GlobalSecretFind(owner string) (*model.Secret, error) {
+func (ess *EncryptedSecretService) GlobalSecretFind(owner string) (*model.Secret, error) {
 	var err error
 	secret, err := ess.secretSvc.GlobalSecretFind(owner)
 	if err != nil {
 		return nil, err
 	}
-	err = ess.decrypt(secret)
+	err = ess.DecryptSecret(secret)
 	if err != nil {
 		return nil, err
 	}
 	return secret, nil
 }
 
-func (ess *encryptedSecretService) GlobalSecretList(listOpt *model.ListOptions) ([]*model.Secret, error) {
+func (ess *EncryptedSecretService) GlobalSecretList(listOpt *model.ListOptions) ([]*model.Secret, error) {
 	var err error
 	secrets, err := ess.secretSvc.GlobalSecretList(listOpt)
 	if err != nil {
@@ -185,9 +238,9 @@ func (ess *encryptedSecretService) GlobalSecretList(listOpt *model.ListOptions) 
 	return secrets, nil
 }
 
-func (ess *encryptedSecretService) GlobalSecretCreate(in *model.Secret) error {
+func (ess *EncryptedSecretService) GlobalSecretCreate(in *model.Secret) error {
 	var err error
-	err = ess.encrypt(in)
+	err = ess.EncryptSecret(in)
 	if err != nil {
 		return err
 	}
@@ -198,9 +251,9 @@ func (ess *encryptedSecretService) GlobalSecretCreate(in *model.Secret) error {
 	return nil
 }
 
-func (ess *encryptedSecretService) GlobalSecretUpdate(in *model.Secret) error {
+func (ess *EncryptedSecretService) GlobalSecretUpdate(in *model.Secret) error {
 	var err error
-	err = ess.encrypt(in)
+	err = ess.EncryptSecret(in)
 	if err != nil {
 		return err
 	}
@@ -211,38 +264,6 @@ func (ess *encryptedSecretService) GlobalSecretUpdate(in *model.Secret) error {
 	return nil
 }
 
-func (ess *encryptedSecretService) GlobalSecretDelete(name string) error {
+func (ess *EncryptedSecretService) GlobalSecretDelete(name string) error {
 	return ess.secretSvc.GlobalSecretDelete(name)
-}
-
-func (ess *encryptedSecretService) encrypt(secret *model.Secret) error {
-	log.Debug().Int64("id", secret.ID).Str("name", secret.Name).Msg("encryption")
-
-	encryptedValue, err := ess.encryptionSvc.Encrypt(secret.Value, secret.Name)
-	if err != nil {
-		return fmt.Errorf("failed to encrypt secret id=%d: %w", secret.ID, err)
-	}
-	secret.Value = encryptedValue
-	return nil
-}
-
-func (ess *encryptedSecretService) decrypt(secret *model.Secret) error {
-	log.Debug().Int64("id", secret.ID).Str("name", secret.Name).Msg("decryption")
-
-	decryptedValue, err := ess.encryptionSvc.Decrypt(secret.Value, secret.Name)
-	if err != nil {
-		return fmt.Errorf("failed to decrypt secret id=%d: %w", secret.ID, err)
-	}
-	secret.Value = decryptedValue
-	return nil
-}
-
-func (ess *encryptedSecretService) decryptList(secrets []*model.Secret) error {
-	for _, secret := range secrets {
-		err := ess.decrypt(secret)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
 }

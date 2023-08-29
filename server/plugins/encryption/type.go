@@ -15,6 +15,7 @@
 package encryption
 
 type EncryptionService interface {
+	Algo() string
 	Encrypt(plaintext, associatedData string) (string, error)
 	Decrypt(ciphertext, associatedData string) (string, error)
 }

@@ -27,6 +27,7 @@ import (
 )
 
 const (
+	AesAlgo            = "aes"
 	Sha256Size         = 32
 	AESGCMSIVNonceSize = 12
 )
@@ -81,6 +82,10 @@ func hash(data []byte) ([]byte, error) {
 		return nil, NewHashCalculationError(err)
 	}
 	return result, nil
+}
+
+func (svc *aesEncryptionService) Algo() string {
+	return AesAlgo
 }
 
 func (svc *aesEncryptionService) Encrypt(plaintext, associatedData string) (string, error) {

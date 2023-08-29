@@ -26,6 +26,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/logging"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/config"
+	"github.com/woodpecker-ci/woodpecker/server/plugins/encryption"
 	"github.com/woodpecker-ci/woodpecker/server/pubsub"
 	"github.com/woodpecker-ci/woodpecker/server/queue"
 )
@@ -35,6 +36,7 @@ var Config = struct {
 		Pubsub              pubsub.Publisher
 		Queue               queue.Queue
 		Logs                logging.Log
+		Encryption          encryption.EncryptionService
 		Secrets             model.SecretService
 		Registries          model.RegistryService
 		Environ             model.EnvironService

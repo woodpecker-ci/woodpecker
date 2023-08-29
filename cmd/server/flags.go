@@ -455,17 +455,23 @@ var flags = append([]cli.Flag{
 		Hidden:  true,
 	},
 	//
-	// secrets encryption in DB
+	// encryption
 	//
 	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_ENCRYPTION_KEY"},
-		Name:     "encryption-key",
+		EnvVars:  []string{"WOODPECKER_ENCRYPTION_AES_KEY"},
+		Name:     "encryption-aes-key",
 		Usage:    "AES encryption key",
-		FilePath: os.Getenv("WOODPECKER_ENCRYPTION_KEY_FILE"),
+		FilePath: os.Getenv("WOODPECKER_ENCRYPTION_AES_KEY_FILE"),
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_ENCRYPTION_TINK_KEYSET_FILE"},
 		Name:    "encryption-tink-keyset",
 		Usage:   "Google tink AEAD-compatible keyset file to encrypt secrets in DB",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_SECRETS_ENCRYPTION_MODE"},
+		Name:    "secrets-encryption-mode",
+		Usage:   "secrets encryption mode",
+		Value:   "Disabled",
 	},
 }, common.GlobalLoggerFlags...)
