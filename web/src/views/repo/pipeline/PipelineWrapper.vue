@@ -11,7 +11,7 @@
       <template #title>{{ repo.full_name }}</template>
 
       <template #titleActions>
-        <div class="flex md:items-center flex-col py-2 gap-x-2 md:flex-row md:justify-between">
+        <div class="flex md:items-center flex-col gap-x-2 md:flex-row md:justify-between">
           <div class="flex content-start gap-x-2 py-2 md:mr-2">
             <PipelineStatusIcon :status="pipeline.status" class="flex flex-shrink-0" />
             <span class="flex-shrink-0 text-center">{{ $t('repo.pipeline.pipeline', { pipelineId }) }}</span>
