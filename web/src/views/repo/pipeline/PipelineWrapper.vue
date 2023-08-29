@@ -67,9 +67,13 @@
       <Tab id="tasks" :title="$t('repo.pipeline.tasks')" />
       <Tab id="config" :title="$t('repo.pipeline.config')" />
       <Tab
-        v-if="pipeline.event === 'push' || pipeline.event === 'pull_request'"
+        v-if="
+          (pipeline.event === 'push' || pipeline.event === 'pull_request') &&
+          pipeline.changed_files &&
+          pipeline.changed_files.length > 0
+        "
         id="changed-files"
-        :title="$t('repo.pipeline.files', { files: pipeline.changed_files?.length || 0 })"
+        :title="$t('repo.pipeline.files', { files: pipeline.changed_files.length })"
       />
       <router-view />
     </Scaffold>

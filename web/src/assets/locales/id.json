@@ -42,6 +42,16 @@
         "version": "Versi"
       },
       "not_allowed": "Anda tidak diperbolehkan untuk mengakses pengaturan peladen",
+      "orgs": {
+        "delete_confirm": "Apakah Anda benar-benar ingin menghapus organisasi ini?",
+        "delete_org": "Hapus organisasi",
+        "deleted": "Organisasi dihapus",
+        "desc": "Organisasi yang memiliki repositori di server ini",
+        "none": "Belum ada organisasi.",
+        "org_settings": "Pengaturan organisasi",
+        "orgs": "Organisasi",
+        "view": "Tampilkan organisasi"
+      },
       "queue": {
         "agent": "agen",
         "desc": "Tugas tertunda yang akan dilakukan oleh agen",
