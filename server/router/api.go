@@ -63,7 +63,7 @@ func apiRoutes(e *gin.RouterGroup) {
 			}
 		}
 
-		apiBase.GET("/repos/lookup/:owner/:name", session.SetRepo(), session.SetPerm(), session.MustPull, api.LookupRepo)
+		apiBase.GET("/repos/lookup/*repo_full_name", session.SetRepo(), session.SetPerm(), session.MustPull, api.LookupRepo)
 		apiBase.POST("/repos", session.MustUser(), api.PostRepo)
 		repoBase := apiBase.Group("/repos/:repo_id")
 		{
