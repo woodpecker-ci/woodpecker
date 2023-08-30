@@ -16,7 +16,9 @@
             <PipelineStatusIcon :status="pipeline.status" class="flex flex-shrink-0" />
             <span class="flex-shrink-0 text-center">{{ $t('repo.pipeline.pipeline', { pipelineId }) }}</span>
             <span class="hidden md:inline-block">-</span>
-            <span class="min-w-0 whitespace-nowrap overflow-hidden overflow-ellipsis" :title="message">{{ title }}</span>
+            <span class="min-w-0 whitespace-nowrap overflow-hidden overflow-ellipsis" :title="message">{{
+              title
+            }}</span>
           </div>
 
           <template v-if="repoPermissions.push">
