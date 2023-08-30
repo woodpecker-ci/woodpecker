@@ -3,7 +3,7 @@
     <PipelineStatusIcon :status="pipeline.status" class="flex items-center" />
     <div class="flex flex-col ml-4 min-w-0">
       <span class="underline">{{ repo?.owner }} / {{ repo?.name }}</span>
-      <span class="whitespace-nowrap overflow-hidden overflow-ellipsis">{{ message }}</span>
+      <span class="whitespace-nowrap overflow-hidden overflow-ellipsis" :title="message">{{ title }}</span>
       <div class="flex flex-col mt-2">
         <div class="flex space-x-2 items-center" :title="created">
           <Icon name="since" />
@@ -36,5 +36,5 @@ const repoStore = useRepoStore();
 const pipeline = toRef(props, 'pipeline');
 const repo = repoStore.getRepo(computed(() => pipeline.value.repo_id));
 
-const { since, duration, message, created } = usePipeline(pipeline);
+const { since, duration, message, title, created } = usePipeline(pipeline);
 </script>

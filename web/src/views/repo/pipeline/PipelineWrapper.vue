@@ -11,12 +11,14 @@
       <template #title>{{ repo.full_name }}</template>
 
       <template #titleActions>
-        <div class="flex md:items-center flex-col gap-x-2 md:flex-row md:justify-between">
-          <div class="flex content-start gap-x-2 py-2 md:mr-2">
+        <div class="flex md:items-center flex-col gap-x-2 md:flex-row md:justify-between min-w-0">
+          <div class="flex content-start gap-x-2 py-2 md:mr-2 min-w-0">
             <PipelineStatusIcon :status="pipeline.status" class="flex flex-shrink-0" />
             <span class="flex-shrink-0 text-center">{{ $t('repo.pipeline.pipeline', { pipelineId }) }}</span>
             <span class="hidden md:inline-block">-</span>
-            <span class="text-center truncate">{{ message }}</span>
+            <span class="min-w-0 whitespace-nowrap overflow-hidden overflow-ellipsis" :title="message">{{
+              title
+            }}</span>
           </div>
 
           <template v-if="repoPermissions.push">
@@ -122,10 +124,8 @@ if (!repo || !repoPermissions) {
 }
 
 const pipeline = pipelineStore.getPipeline(repositoryId, pipelineId);
-const { since, duration, created } = usePipeline(pipeline);
+const { since, duration, created, message, title } = usePipeline(pipeline);
 provide('pipeline', pipeline);
-
-const { message } = usePipeline(pipeline);
 
 const showDeployPipelinePopup = ref(false);
 

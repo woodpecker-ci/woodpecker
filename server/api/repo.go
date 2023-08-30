@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -277,21 +276,7 @@ func ChownRepo(c *gin.Context) {
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		repo_full_name	path	string	true	"the repository full-name / slug"
 func LookupRepo(c *gin.Context) {
-	_store := store.FromContext(c)
-	repoFullName := strings.TrimLeft(c.Param("repo_full_name"), "/")
-
-	repo, err := _store.GetRepoName(repoFullName)
-	if err != nil {
-		if errors.Is(err, types.RecordNotExist) {
-			c.AbortWithStatus(http.StatusNotFound)
-			return
-		}
-
-		_ = c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-
-	c.JSON(http.StatusOK, repo)
+	c.JSON(http.StatusOK, session.Repo(c))
 }
 
 // GetRepo
