@@ -68,6 +68,7 @@
       "reload": "Reload repositories",
       "enable": "Enable",
       "enabled": "Already enabled",
+      "disabled": "Disabled",
       "success": "Repository enabled",
       "list_reloaded": "Repository list reloaded"
     },
@@ -421,6 +422,16 @@
         },
         "delete_user": "Delete user",
         "edit_user": "Edit user"
+      },
+      "orgs": {
+        "orgs": "Organizations",
+        "desc": "Organizations owning repositories on this server",
+        "none": "There are no organizations yet.",
+        "org_settings": "Organization settings",
+        "delete_org": "Delete organization",
+        "deleted": "Organization deleted",
+        "delete_confirm": "Do you really want to delete this organization?",
+        "view": "View organization"
       }
     }
   },

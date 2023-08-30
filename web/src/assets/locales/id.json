@@ -42,6 +42,16 @@
         "version": "Versi"
       },
       "not_allowed": "Anda tidak diperbolehkan untuk mengakses pengaturan peladen",
+      "orgs": {
+        "delete_confirm": "Apakah Anda benar-benar ingin menghapus organisasi ini?",
+        "delete_org": "Hapus organisasi",
+        "deleted": "Organisasi dihapus",
+        "desc": "Organisasi yang memiliki repositori di server ini",
+        "none": "Belum ada organisasi.",
+        "org_settings": "Pengaturan organisasi",
+        "orgs": "Organisasi",
+        "view": "Tampilkan organisasi"
+      },
       "queue": {
         "agent": "agen",
         "desc": "Tugas tertunda yang akan dilakukan oleh agen",
@@ -442,6 +452,28 @@
       "general": {
         "general": "Umum",
         "language": "Bahasa"
+      },
+      "secrets": {
+        "add": "Tambahkan rahasia",
+        "created": "Rahasia pengguna dibuat",
+        "deleted": "Rahasia pengguna dihapus",
+        "desc": "Rahasia pengguna dapat diteruskan ke semua jalur pipa individu di semua repositori pengguna saat dijalankan sebagai variabel lingkungan.",
+        "events": {
+          "events": "Tersedia di peristiwa berikut",
+          "pr_warning": "Harap berhati-hati dengan opsi ini karena seseorang dapat mengirimkan permintaan penarikan berbahaya yang dapat mengekspos rahasia Anda."
+        },
+        "images": {
+          "desc": "Daftar citra di mana rahasia ini tersedia yang dipisahkan oleh koma, tinggalkan kosong untuk memperbolehkan semua citra",
+          "images": "Tersedia untuk citra berikut"
+        },
+        "name": "Nama",
+        "none": "Belum ada rahasia pengguna.",
+        "plugins_only": "Hanya tersedia untuk plugin",
+        "save": "Simpan rahasia",
+        "saved": "Rahasia pengguna disimpan",
+        "secrets": "Rahasia",
+        "show": "Tampilkan rahasia",
+        "value": "Nilai"
       },
       "settings": "Pengaturan Pengguna"
     }

@@ -1,11 +1,12 @@
 <template>
   <header
     class="bg-wp-background-100 border-b-1 border-wp-background-400 dark:border-wp-background-100 dark:bg-wp-background-300 text-wp-text-100"
+    :class="{ 'md:px-4': fullWidth }"
   >
-    <FluidContainer class="!py-0">
-      <div class="flex w-full items-center justify-between py-4 <md:flex-row <md:gap-y-4">
+    <FluidContainer :full-width="fullWidth" class="!py-0">
+      <div class="flex w-full md:items-center flex-col py-3 gap-y-2 md:flex-row md:justify-between">
         <div
-          class="flex items-center min-w-0 justify-start <md:justify-center"
+          class="flex items-center content-start"
           :class="{
             'md:flex-1': searchBoxPresent,
           }"
@@ -14,7 +15,7 @@
             v-if="goBack"
             icon="back"
             :title="$t('back')"
-            class="flex-shrink-0 mr-2 <md:hidden"
+            class="flex-shrink-0 mr-2 <md:hidden md:justify-between w-8 h-8"
             @click="goBack"
           />
           <h1 class="flex text-xl min-w-0 text-wp-text-100 items-center gap-x-2">
@@ -30,7 +31,7 @@
         />
         <div
           v-if="$slots.titleActions"
-          class="flex items-center justify-end gap-x-2 <md:w-full <md:justify-center"
+          class="flex items-center md:justify-end gap-x-2"
           :class="{
             'md:flex-1': searchBoxPresent,
           }"
@@ -39,12 +40,9 @@
         </div>
       </div>
 
-      <div v-if="enableTabs" class="flex justify-between">
+      <div v-if="enableTabs" class="flex md:items-center flex-col py-2 md:flex-row md:justify-between md:py-0">
         <Tabs class="<md:order-2" />
-        <div
-          v-if="$slots.titleActions"
-          class="flex items-center justify-end gap-x-2 md:mb-2 <md:w-full <md:justify-center <md:order-1"
-        >
+        <div v-if="$slots.titleActions" class="flex content-start md:justify-end">
           <slot name="tabActions" />
         </div>
       </div>
@@ -62,6 +60,7 @@ const props = defineProps<{
   goBack?: () => void;
   enableTabs?: boolean;
   search?: string;
+  fullWidth?: boolean;
 }>();
 defineEmits(['update:search']);
 
