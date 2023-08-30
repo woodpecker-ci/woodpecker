@@ -16,7 +16,9 @@
             <PipelineStatusIcon :status="pipeline.status" class="flex flex-shrink-0" />
             <span class="flex-shrink-0 text-center">{{ $t('repo.pipeline.pipeline', { pipelineId }) }}</span>
             <span class="hidden md:inline-block">-</span>
-            <span class="min-w-0 whitespace-nowrap overflow-hidden overflow-ellipsis">{{ message }}</span>
+            <span class="min-w-0 whitespace-nowrap overflow-hidden overflow-ellipsis" :title="message">{{
+              title
+            }}</span>
           </div>
 
           <template v-if="repoPermissions.push">
@@ -122,10 +124,8 @@ if (!repo || !repoPermissions) {
 }
 
 const pipeline = pipelineStore.getPipeline(repositoryId, pipelineId);
-const { since, duration, created } = usePipeline(pipeline);
+const { since, duration, created, message, title } = usePipeline(pipeline);
 provide('pipeline', pipeline);
-
-const { message } = usePipeline(pipeline);
 
 const showDeployPipelinePopup = ref(false);
 

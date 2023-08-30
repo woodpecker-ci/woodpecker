@@ -26,9 +26,11 @@
       <div class="w-full md:w-auto md:mx-4 flex items-center min-w-0">
         <span class="text-wp-text-alt-100 <md:hidden">#{{ pipeline.number }}</span>
         <span class="text-wp-text-alt-100 <md:hidden mx-2">-</span>
-        <span class="text-wp-text-100 <md:underline whitespace-nowrap overflow-hidden overflow-ellipsis">{{
-          message
-        }}</span>
+        <span
+          class="text-wp-text-100 <md:underline whitespace-nowrap overflow-hidden overflow-ellipsis"
+          :title="message"
+          >{{ title }}</span
+        >
       </div>
 
       <div
@@ -79,5 +81,5 @@ const props = defineProps<{
 }>();
 
 const pipeline = toRef(props, 'pipeline');
-const { since, duration, message, prettyRef, created } = usePipeline(pipeline);
+const { since, duration, message, title, prettyRef, created } = usePipeline(pipeline);
 </script>
