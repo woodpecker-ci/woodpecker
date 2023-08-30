@@ -269,7 +269,7 @@ func ChownRepo(c *gin.Context) {
 // LookupRepo
 //
 //	@Summary	Get repository by full-name
-//	@Router		/repos/lookup/{owner}/{name} [get]
+//	@Router		/repos/lookup/{repo_full_name} [get]
 //	@Produce	json
 //	@Success	200	{object}	Repo
 //	@Tags		Repositories
