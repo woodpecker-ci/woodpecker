@@ -10,16 +10,21 @@ endif
 
 VERSION ?= next
 VERSION_NUMBER ?= 0.0.0
-ifneq ($(CI_COMMIT_TAG),)
-	VERSION := $(CI_COMMIT_TAG:v%=%)
-	VERSION_NUMBER := ${VERSION}
-endif
+CI_COMMIT_SHA ?= $(shell git rev-parse HEAD)
 
-# append commit-sha to next version
-BUILD_VERSION ?= $(VERSION)
-ifeq ($(BUILD_VERSION),next)
-	CI_COMMIT_SHA ?= $(shell git rev-parse HEAD)
-	BUILD_VERSION := $(shell echo "next-$(shell echo ${CI_COMMIT_SHA} | head -c 8)")
+# it's a tagged release
+ifneq ($(CI_COMMIT_TAG),)
+	BUILD_VERSION := $(CI_COMMIT_TAG:v%=%)
+	VERSION_NUMBER := ${CI_COMMIT_TAG:v%=%}
+else
+	# append commit-sha to next version
+	ifeq ($(VERSION),next)
+		BUILD_VERSION := $(shell echo "next-$(shell echo ${CI_COMMIT_SHA} | cut -c -10)")
+	endif
+	# append commit-sha to release branch version
+	ifeq ($(shell echo ${CI_COMMIT_BRANCH} | cut -c -9),release/v)
+		BUILD_VERSION := $(shell echo "$(shell echo ${CI_COMMIT_BRANCH} | cut -c 10-)-$(shell echo ${CI_COMMIT_SHA} | cut -c -10)")
+	endif
 endif
 
 LDFLAGS := -s -w -extldflags "-static" -X github.com/woodpecker-ci/woodpecker/version.Version=${BUILD_VERSION}

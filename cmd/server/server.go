@@ -357,13 +357,16 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 	server.Config.Server.StatusContext = c.String("status-context")
 	server.Config.Server.StatusContextFormat = c.String("status-context-format")
 	server.Config.Server.SessionExpires = c.Duration("session-expires")
-	server.Config.Server.RootURL = strings.TrimSuffix(c.String("root-url"), "/")
+	rootPath := strings.TrimSuffix(c.String("root-path"), "/")
+	if rootPath != "" && !strings.HasPrefix(rootPath, "/") {
+		rootPath = "/" + rootPath
+	}
+	server.Config.Server.RootPath = rootPath
 	server.Config.Server.CustomCSSFile = strings.TrimSpace(c.String("custom-css-file"))
 	server.Config.Server.CustomJsFile = strings.TrimSpace(c.String("custom-js-file"))
 	server.Config.Pipeline.Networks = c.StringSlice("network")
 	server.Config.Pipeline.Volumes = c.StringSlice("volume")
 	server.Config.Pipeline.Privileged = c.StringSlice("escalate")
-	server.Config.Server.Migrations.AllowLong = c.Bool("migrations-allow-long")
 
 	// prometheus
 	server.Config.Prometheus.AuthToken = c.String("prometheus-auth-token")

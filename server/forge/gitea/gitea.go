@@ -103,7 +103,7 @@ func (c *Gitea) oauth2Config(ctx context.Context) (*oauth2.Config, context.Conte
 				AuthURL:  fmt.Sprintf(authorizeTokenURL, c.url),
 				TokenURL: fmt.Sprintf(accessTokenURL, c.url),
 			},
-			RedirectURL: fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost),
+			RedirectURL: fmt.Sprintf("%s%s/authorize", server.Config.Server.OAuthHost, server.Config.Server.RootPath),
 		},
 
 		context.WithValue(ctx, oauth2.HTTPClient, &http.Client{Transport: &http.Transport{
@@ -489,7 +489,7 @@ func (c *Gitea) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.
 		return nil, nil, err
 	}
 
-	if pipeline.Event == model.EventPull && len(pipeline.ChangedFiles) == 0 {
+	if pipeline != nil && pipeline.Event == model.EventPull && len(pipeline.ChangedFiles) == 0 {
 		index, err := strconv.ParseInt(strings.Split(pipeline.Ref, "/")[2], 10, 64)
 		if err != nil {
 			return nil, nil, err

@@ -23,7 +23,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 )
 
-func apiRoutes(e *gin.Engine) {
+func apiRoutes(e *gin.RouterGroup) {
 	apiBase := e.Group("/api")
 	{
 		user := apiBase.Group("/user")
