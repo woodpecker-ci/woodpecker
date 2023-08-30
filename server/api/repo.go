@@ -274,8 +274,7 @@ func ChownRepo(c *gin.Context) {
 //	@Success	200	{object}	Repo
 //	@Tags		Repositories
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		owner	path	string	true	"the repository owner"
-//	@Param		name	path	string	true	"the repository name"
+//	@Param		repo_full_name	path	string	true	"the repository full-name / slug"
 func LookupRepo(c *gin.Context) {
 	c.JSON(http.StatusOK, session.Repo(c))
 }
