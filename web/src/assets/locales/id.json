@@ -184,6 +184,7 @@
       }
     },
     "enable": {
+      "disabled": "Nonaktif",
       "enable": "Aktifkan",
       "enabled": "Sudah diaktifkan",
       "list_reloaded": "Daftar repositori dimuat ulang",
