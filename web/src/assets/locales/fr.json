@@ -42,6 +42,16 @@
         "version": "Version"
       },
       "not_allowed": "Vous n'êtes pas autorisé à accéder aux réglages du serveur",
+      "orgs": {
+        "delete_confirm": "Voulez vous vraiment effacer cette organisation ?",
+        "delete_org": "Effacer l'organisation",
+        "deleted": "Organisation effacée",
+        "desc": "Organisations possédant des dépôts sur ce serveur",
+        "none": "Il n'y a pas encore d'organisation.",
+        "org_settings": "Réglages de l'organisation",
+        "orgs": "Organisations",
+        "view": "Voir l'organisation"
+      },
       "queue": {
         "agent": "agent",
         "desc": "Taches en attente d’exécution par des agents",
@@ -174,6 +184,7 @@
       }
     },
     "enable": {
+      "disabled": "Désactivé",
       "enable": "Activer",
       "enabled": "Déjà activé",
       "list_reloaded": "Liste des dépôts actualisée",
