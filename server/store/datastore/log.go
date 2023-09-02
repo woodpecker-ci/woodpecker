@@ -50,6 +50,5 @@ func (s storage) LogAppend(logEntry *model.LogEntry) error {
 }
 
 func (s storage) LogDelete(step *model.Step) error {
-	_, err := s.engine.Where("step_id = ?", step.ID).Delete(new(model.LogEntry))
-	return err
+	return wrapDelete(s.engine.Where("step_id = ?", step.ID).Delete(new(model.LogEntry)))
 }

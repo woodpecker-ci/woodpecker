@@ -15,8 +15,9 @@
 package datastore
 
 import (
-	"github.com/woodpecker-ci/woodpecker/server/model"
 	"xorm.io/xorm"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 func (s storage) GetUser(id int64) (*model.User, error) {
@@ -84,7 +85,7 @@ func (s storage) DeleteUser(user *model.User) error {
 		return err
 	}
 
-	if _, err := sess.Where("perm_user_id = ?", user.ID).Delete(new(model.Perm)); err != nil {
+	if err := wrapDelete(sess.Where("perm_user_id = ?", user.ID).Delete(new(model.Perm))); err != nil {
 		return err
 	}
 

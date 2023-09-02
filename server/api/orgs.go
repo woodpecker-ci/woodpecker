@@ -65,7 +65,8 @@ func DeleteOrg(c *gin.Context) {
 
 	err = _store.OrgDelete(orgID)
 	if err != nil {
-		c.String(http.StatusInternalServerError, "Error deleting org %d. %s", orgID, err)
+		handleDbGetError(c, err)
+		return
 	}
 
 	c.Status(http.StatusNoContent)

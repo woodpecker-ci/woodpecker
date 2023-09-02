@@ -163,7 +163,7 @@ func DeleteUser(c *gin.Context) {
 		return
 	}
 	if err = _store.DeleteUser(user); err != nil {
-		c.String(http.StatusInternalServerError, "Error deleting user. %s", err)
+		handleDbGetError(c, err)
 		return
 	}
 	c.String(http.StatusOK, "")
