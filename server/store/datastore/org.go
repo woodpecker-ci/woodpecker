@@ -48,7 +48,26 @@ func (s storage) OrgUpdate(org *model.Org) error {
 }
 
 func (s storage) OrgDelete(id int64) error {
-	return wrapDelete(s.engine.ID(id).Delete(new(model.Org)))
+	return s.orgDelete(s.engine.NewSession(), id)
+}
+
+func (s storage) orgDelete(sess *xorm.Session, id int64) error {
+	if _, err := sess.Where("secret_org_id = ?", id).Delete(new(model.Secret)); err != nil {
+		return err
+	}
+
+	var repos []*model.Repo
+	if err := sess.Where("repo_org_id = ?", id).Find(&repos); err != nil {
+		return err
+	}
+
+	for _, repo := range repos {
+		if err := s.deleteRepo(sess, repo); err != nil {
+			return err
+		}
+	}
+
+	return wrapDelete(sess.ID(id).Delete(new(model.Org)))
 }
 
 func (s storage) OrgFindByName(name string) (*model.Org, error) {
