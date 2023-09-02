@@ -198,7 +198,7 @@ func PatchRepo(c *gin.Context) {
 		return
 	}
 	if in.IsTrusted != nil && *in.IsTrusted != repo.IsTrusted && !user.Admin {
-		log.Trace().Msgf("user '%s' wants to make repo trusted without being an instance admin ", user.Login)
+		log.Trace().Msgf("user '%s' wants to make repo trusted without being an instance admin", user.Login)
 		c.String(http.StatusForbidden, "Insufficient privileges")
 		return
 	}
@@ -464,7 +464,7 @@ func RepairRepo(c *gin.Context) {
 		return
 	}
 
-	c.Writer.WriteHeader(http.StatusOK)
+	c.Status(http.StatusOK)
 }
 
 // MoveRepo
@@ -485,7 +485,7 @@ func MoveRepo(c *gin.Context) {
 
 	to, exists := c.GetQuery("to")
 	if !exists {
-		err := fmt.Errorf("Missing required to query value")
+		err := fmt.Errorf("missing required to query value")
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
@@ -548,5 +548,5 @@ func MoveRepo(c *gin.Context) {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
-	c.Writer.WriteHeader(http.StatusOK)
+	c.Status(http.StatusOK)
 }

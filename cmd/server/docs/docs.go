@@ -605,7 +605,7 @@ const docTemplate = `{
         },
         "/healthz": {
             "get": {
-                "description": "If everything is fine, just a 200 will be returned, a 500 signals server state is unhealthy.",
+                "description": "If everything is fine, just a 204 will be returned, a 500 signals server state is unhealthy.",
                 "produces": [
                     "text/plain"
                 ],
@@ -614,8 +614,8 @@ const docTemplate = `{
                 ],
                 "summary": "Health information",
                 "responses": {
-                    "200": {
-                        "description": "OK"
+                    "204": {
+                        "description": "No Content"
                     },
                     "500": {
                         "description": "Internal Server Error"
@@ -3304,7 +3304,7 @@ const docTemplate = `{
                 "tags": [
                     "User"
                 ],
-                "summary": "Return the token of the current user as stringª",
+                "summary": "Return the token of the current user as string",
                 "parameters": [
                     {
                         "type": "string",
