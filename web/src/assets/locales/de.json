@@ -184,6 +184,7 @@
       }
     },
     "enable": {
+      "disabled": "Deaktiviert",
       "enable": "Aktivieren",
       "enabled": "Bereits aktiviert",
       "list_reloaded": "Repository-Liste neu geladen",
