@@ -153,7 +153,7 @@ func deletePipeline(sess *xorm.Session, pipelineID int64) error {
 			}
 		}
 	}
-	if err := wrapDelete(sess.Where("pipeline_id = ?", pipelineID).Delete(new(model.PipelineConfig))); err != nil {
+	if _, err := sess.Where("pipeline_id = ?", pipelineID).Delete(new(model.PipelineConfig)); err != nil {
 		return err
 	}
 	return wrapDelete(sess.ID(pipelineID).Delete(new(model.Pipeline)))

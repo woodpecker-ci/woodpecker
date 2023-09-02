@@ -98,19 +98,19 @@ func (s storage) DeleteRepo(repo *model.Repo) error {
 		return err
 	}
 
-	if err := wrapDelete(sess.Where("config_repo_id = ?", repo.ID).Delete(new(model.Config))); err != nil {
+	if _, err := sess.Where("config_repo_id = ?", repo.ID).Delete(new(model.Config)); err != nil {
 		return err
 	}
-	if err := wrapDelete(sess.Where("perm_repo_id = ?", repo.ID).Delete(new(model.Perm))); err != nil {
+	if _, err := sess.Where("perm_repo_id = ?", repo.ID).Delete(new(model.Perm)); err != nil {
 		return err
 	}
-	if err := wrapDelete(sess.Where("registry_repo_id = ?", repo.ID).Delete(new(model.Registry))); err != nil {
+	if _, err := sess.Where("registry_repo_id = ?", repo.ID).Delete(new(model.Registry)); err != nil {
 		return err
 	}
-	if err := wrapDelete(sess.Where("secret_repo_id = ?", repo.ID).Delete(new(model.Secret))); err != nil {
+	if _, err := sess.Where("secret_repo_id = ?", repo.ID).Delete(new(model.Secret)); err != nil {
 		return err
 	}
-	if err := wrapDelete(sess.Where("repo_id = ?", repo.ID).Delete(new(model.Redirection))); err != nil {
+	if _, err := sess.Where("repo_id = ?", repo.ID).Delete(new(model.Redirection)); err != nil {
 		return err
 	}
 

@@ -85,7 +85,7 @@ func (s storage) DeleteUser(user *model.User) error {
 		return err
 	}
 
-	if err := wrapDelete(sess.Where("perm_user_id = ?", user.ID).Delete(new(model.Perm))); err != nil {
+	if _, err := sess.Where("perm_user_id = ?", user.ID).Delete(new(model.Perm)); err != nil {
 		return err
 	}
 
