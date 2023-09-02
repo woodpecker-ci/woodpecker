@@ -149,8 +149,8 @@ func PostUser(c *gin.Context) {
 //	@Summary		Delete a user
 //	@Description	Deletes the given user. Requires admin rights.
 //	@Router			/users/{login} [delete]
-//	@Produce		json
-//	@Success		200	{object}	User
+//	@Produce		plain
+//	@Success		204
 //	@Tags			Users
 //	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param			login			path	string	true	"the user's login name"
@@ -166,5 +166,5 @@ func DeleteUser(c *gin.Context) {
 		handleDbError(c, err)
 		return
 	}
-	c.String(http.StatusOK, "")
+	c.Status(http.StatusNoContent)
 }

@@ -246,7 +246,7 @@ func GetCronList(c *gin.Context) {
 //	@Summary	Delete a cron job by id
 //	@Router		/repos/{repo_id}/cron/{cron} [delete]
 //	@Produce	plain
-//	@Success	200
+//	@Success	204
 //	@Tags		Repository cron jobs
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		repo_id			path	int		true	"the repository id"

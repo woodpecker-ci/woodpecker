@@ -455,7 +455,7 @@ func PostPipeline(c *gin.Context) {
 //	@Summary	Deletes log
 //	@Router		/repos/{repo_id}/logs/{number} [post]
 //	@Produce	plain
-//	@Success	200
+//	@Success	204
 //	@Tags		Pipeline logs
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		repo_id			path	int		true	"the repository id"
