@@ -131,7 +131,7 @@ func (s storage) DeleteRepo(repo *model.Repo) error {
 		}
 	}
 
-	if _, err := sess.ID(repo.ID).Delete(new(model.Repo)); err != nil {
+	if err := wrapDelete(sess.ID(repo.ID).Delete(new(model.Repo))); err != nil {
 		return err
 	}
 

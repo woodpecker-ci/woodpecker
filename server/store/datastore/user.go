@@ -15,8 +15,9 @@
 package datastore
 
 import (
-	"github.com/woodpecker-ci/woodpecker/server/model"
 	"xorm.io/xorm"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 func (s storage) GetUser(id int64) (*model.User, error) {
