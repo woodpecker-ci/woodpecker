@@ -181,5 +181,5 @@ func DeleteSecret(c *gin.Context) {
 		handleDbGetError(c, err)
 		return
 	}
-	c.String(http.StatusNoContent, "")
+	c.Status(http.StatusNoContent)
 }

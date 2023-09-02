@@ -40,10 +40,10 @@ import (
 func GetUsers(c *gin.Context) {
 	users, err := store.FromContext(c).GetUserList(session.Pagination(c))
 	if err != nil {
-		c.String(500, "Error getting user list. %s", err)
+		c.String(http.StatusInternalServerError, "Error getting user list. %s", err)
 		return
 	}
-	c.JSON(200, users)
+	c.JSON(http.StatusOK, users)
 }
 
 // GetUser
@@ -62,7 +62,7 @@ func GetUser(c *gin.Context) {
 		handleDbGetError(c, err)
 		return
 	}
-	c.JSON(200, user)
+	c.JSON(http.StatusOK, user)
 }
 
 // PatchUser
@@ -159,12 +159,12 @@ func DeleteUser(c *gin.Context) {
 
 	user, err := _store.GetUserLogin(c.Param("login"))
 	if err != nil {
-		c.String(404, "Cannot find user. %s", err)
+		handleDbGetError(c, err)
 		return
 	}
 	if err = _store.DeleteUser(user); err != nil {
-		c.String(500, "Error deleting user. %s", err)
+		c.String(http.StatusInternalServerError, "Error deleting user. %s", err)
 		return
 	}
-	c.String(200, "")
+	c.String(http.StatusOK, "")
 }

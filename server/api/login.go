@@ -210,7 +210,7 @@ func GetLoginToken(c *gin.Context) {
 
 	user, err := _store.GetUserLogin(login)
 	if err != nil {
-		_ = c.AbortWithError(http.StatusNotFound, err)
+		handleDbGetError(c, err)
 		return
 	}
 

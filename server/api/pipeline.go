@@ -33,7 +33,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/pipeline"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/server/store"
-	"github.com/woodpecker-ci/woodpecker/server/store/types"
 )
 
 // CreatePipeline
@@ -109,10 +108,6 @@ func GetPipelines(c *gin.Context) {
 
 	pipelines, err := store.FromContext(c).GetPipelineList(repo, session.Pagination(c))
 	if err != nil {
-		if errors.Is(err, types.RecordNotExist) {
-			c.AbortWithStatus(http.StatusNotFound)
-			return
-		}
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
@@ -145,11 +140,7 @@ func GetPipeline(c *gin.Context) {
 
 	pl, err := _store.GetPipelineNumber(repo, num)
 	if err != nil {
-		if errors.Is(err, types.RecordNotExist) {
-			c.AbortWithStatus(http.StatusNotFound)
-			return
-		}
-		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		handleDbGetError(c, err)
 		return
 	}
 	if pl.Workflows, err = _store.WorkflowGetTree(pl); err != nil {
@@ -349,7 +340,7 @@ func PostDecline(c *gin.Context) {
 
 	pl, err := _store.GetPipelineNumber(repo, num)
 	if err != nil {
-		c.String(http.StatusNotFound, "%v", err)
+		handleDbGetError(c, err)
 		return
 	}
 
@@ -404,25 +395,17 @@ func PostPipeline(c *gin.Context) {
 
 	user, err := _store.GetUser(repo.UserID)
 	if err != nil {
-		if errors.Is(err, types.RecordNotExist) {
-			c.AbortWithStatus(http.StatusNotFound)
-			return
-		}
-		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		handleDbGetError(c, err)
 		return
 	}
 
 	pl, err := _store.GetPipelineNumber(repo, num)
 	if err != nil {
-		if errors.Is(err, types.RecordNotExist) {
-			c.AbortWithStatus(http.StatusNotFound)
-			return
-		}
-		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		handleDbGetError(c, err)
 		return
 	}
 
-	// refresh the token to make sure, pipeline.ReStart can still obtain the pipeline config if necessary again
+	// refresh the token to make sure, pipeline.Restart can still obtain the pipeline config if necessary again
 	refreshUserToken(c, user)
 
 	// make Deploy overridable
@@ -491,7 +474,7 @@ func DeletePipelineLogs(c *gin.Context) {
 
 	steps, err := _store.StepList(pl)
 	if err != nil {
-		_ = c.AbortWithError(http.StatusNotFound, err)
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
@@ -511,5 +494,5 @@ func DeletePipelineLogs(c *gin.Context) {
 		return
 	}
 
-	c.String(http.StatusNoContent, "")
+	c.Status(http.StatusNoContent)
 }

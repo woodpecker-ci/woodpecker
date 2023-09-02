@@ -89,7 +89,7 @@ func GetAgentTasks(c *gin.Context) {
 
 	agent, err := store.FromContext(c).AgentFind(agentID)
 	if err != nil {
-		c.String(http.StatusNotFound, "Cannot find agent. %s", err)
+		handleDbGetError(c, err)
 		return
 	}
 
@@ -208,5 +208,5 @@ func DeleteAgent(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "Error deleting user. %s", err)
 		return
 	}
-	c.String(http.StatusNoContent, "")
+	c.Status(http.StatusNoContent)
 }

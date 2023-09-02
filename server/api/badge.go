@@ -62,11 +62,7 @@ func GetBadge(c *gin.Context) {
 	}
 
 	if err != nil {
-		if errors.Is(err, types.RecordNotExist) {
-			c.AbortWithStatus(http.StatusNotFound)
-			return
-		}
-		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		handleDbGetError(c, err)
 		return
 	}
 

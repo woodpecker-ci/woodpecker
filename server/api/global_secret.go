@@ -18,6 +18,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 
 	"github.com/woodpecker-ci/woodpecker/server"
@@ -162,5 +163,5 @@ func DeleteGlobalSecret(c *gin.Context) {
 		handleDbGetError(c, err)
 		return
 	}
-	c.String(http.StatusNoContent, "")
+	c.Status(http.StatusNoContent)
 }

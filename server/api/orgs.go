@@ -68,5 +68,5 @@ func DeleteOrg(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "Error deleting org %d. %s", orgID, err)
 	}
 
-	c.String(http.StatusNoContent, "")
+	c.Status(http.StatusNoContent)
 }
