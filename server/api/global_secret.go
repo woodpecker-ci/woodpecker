@@ -62,7 +62,7 @@ func GetGlobalSecret(c *gin.Context) {
 	name := c.Param("secret")
 	secret, err := server.Config.Services.Secrets.GlobalSecretFind(name)
 	if err != nil {
-		handleDbGetError(c, err)
+		handleDbError(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, secret.Copy())
@@ -123,7 +123,7 @@ func PatchGlobalSecret(c *gin.Context) {
 
 	secret, err := server.Config.Services.Secrets.GlobalSecretFind(name)
 	if err != nil {
-		handleDbGetError(c, err)
+		handleDbError(c, err)
 		return
 	}
 	if in.Value != "" {
@@ -160,7 +160,7 @@ func PatchGlobalSecret(c *gin.Context) {
 func DeleteGlobalSecret(c *gin.Context) {
 	name := c.Param("secret")
 	if err := server.Config.Services.Secrets.GlobalSecretDelete(name); err != nil {
-		handleDbGetError(c, err)
+		handleDbError(c, err)
 		return
 	}
 	c.Status(http.StatusNoContent)

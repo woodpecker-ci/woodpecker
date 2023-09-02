@@ -49,7 +49,7 @@ func GetOrg(c *gin.Context) {
 
 	org, err := _store.OrgGet(orgID)
 	if err != nil {
-		handleDbGetError(c, err)
+		handleDbError(c, err)
 		return
 	}
 
@@ -122,7 +122,7 @@ func LookupOrg(c *gin.Context) {
 
 	org, err := _store.OrgFindByName(orgFullName)
 	if err != nil {
-		handleDbGetError(c, err)
+		handleDbError(c, err)
 		return
 	}
 

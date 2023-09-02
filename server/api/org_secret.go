@@ -47,7 +47,7 @@ func GetOrgSecret(c *gin.Context) {
 
 	secret, err := server.Config.Services.Secrets.OrgSecretFind(orgID, name)
 	if err != nil {
-		handleDbGetError(c, err)
+		handleDbError(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, secret.Copy())
@@ -153,7 +153,7 @@ func PatchOrgSecret(c *gin.Context) {
 
 	secret, err := server.Config.Services.Secrets.OrgSecretFind(orgID, name)
 	if err != nil {
-		handleDbGetError(c, err)
+		handleDbError(c, err)
 		return
 	}
 	if in.Value != "" {
@@ -197,7 +197,7 @@ func DeleteOrgSecret(c *gin.Context) {
 	}
 
 	if err := server.Config.Services.Secrets.OrgSecretDelete(orgID, name); err != nil {
-		handleDbGetError(c, err)
+		handleDbError(c, err)
 		return
 	}
 	c.Status(http.StatusNoContent)

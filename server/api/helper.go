@@ -41,7 +41,7 @@ func handlePipelineErr(c *gin.Context, err error) {
 	}
 }
 
-func handleDbGetError(c *gin.Context, err error) {
+func handleDbError(c *gin.Context, err error) {
 	if errors.Is(err, types.RecordNotExist) {
 		c.AbortWithStatus(http.StatusNotFound)
 		return

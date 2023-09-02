@@ -144,7 +144,7 @@ func PostHook(c *gin.Context) {
 	repo, err := _store.GetRepoNameFallback(tmpRepo.ForgeRemoteID, tmpRepo.FullName)
 	if err != nil {
 		log.Error().Err(err).Msgf("failure to get repo %s from store", tmpRepo.FullName)
-		handleDbGetError(c, err)
+		handleDbError(c, err)
 		return
 	}
 	if !repo.IsActive {

@@ -62,7 +62,7 @@ func GetBadge(c *gin.Context) {
 	}
 
 	if err != nil {
-		handleDbGetError(c, err)
+		handleDbError(c, err)
 		return
 	}
 
@@ -103,7 +103,7 @@ func GetCC(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo, err := _store.GetRepoName(c.Param("owner") + "/" + c.Param("name"))
 	if err != nil {
-		handleDbGetError(c, err)
+		handleDbError(c, err)
 		return
 	}
 
