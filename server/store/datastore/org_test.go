@@ -23,7 +23,7 @@ import (
 )
 
 func TestOrgCRUD(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Org), new(model.Repo))
+	store, closer := newTestStore(t, new(model.Org), new(model.Repo), new(model.Secret), new(model.Config), new(model.Perm), new(model.Registry), new(model.Redirection), new(model.Pipeline))
 	defer closer()
 
 	org1 := &model.Org{

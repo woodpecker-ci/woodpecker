@@ -81,6 +81,10 @@ func (s storage) DeleteUser(user *model.User) error {
 		return err
 	}
 
+	if err := s.orgDelete(sess, user.OrgID); err != nil {
+		return err
+	}
+
 	if err := wrapDelete(sess.ID(user.ID).Delete(new(model.User))); err != nil {
 		return err
 	}
