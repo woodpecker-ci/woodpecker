@@ -89,6 +89,7 @@ func (s storage) UpdateRepo(repo *model.Repo) error {
 	_, err := s.engine.ID(repo.ID).AllCols().Update(repo)
 	return err
 }
+
 func (s storage) DeleteRepo(repo *model.Repo) error {
 	return s.deleteRepo(s.engine.NewSession(), repo)
 }
