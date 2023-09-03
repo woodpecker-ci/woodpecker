@@ -65,7 +65,7 @@ func GetAgent(c *gin.Context) {
 
 	agent, err := store.FromContext(c).AgentFind(agentID)
 	if err != nil {
-		handleDbGetError(c, err)
+		handleDbError(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, agent)
@@ -89,7 +89,7 @@ func GetAgentTasks(c *gin.Context) {
 
 	agent, err := store.FromContext(c).AgentFind(agentID)
 	if err != nil {
-		c.String(http.StatusNotFound, "Cannot find agent. %s", err)
+		handleDbError(c, err)
 		return
 	}
 
@@ -132,7 +132,7 @@ func PatchAgent(c *gin.Context) {
 
 	agent, err := _store.AgentFind(agentID)
 	if err != nil {
-		handleDbGetError(c, err)
+		handleDbError(c, err)
 		return
 	}
 	agent.Name = in.Name
@@ -201,12 +201,12 @@ func DeleteAgent(c *gin.Context) {
 
 	agent, err := _store.AgentFind(agentID)
 	if err != nil {
-		handleDbGetError(c, err)
+		handleDbError(c, err)
 		return
 	}
 	if err = _store.AgentDelete(agent); err != nil {
 		c.String(http.StatusInternalServerError, "Error deleting user. %s", err)
 		return
 	}
-	c.String(http.StatusNoContent, "")
+	c.Status(http.StatusNoContent)
 }

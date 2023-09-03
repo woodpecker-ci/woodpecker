@@ -605,7 +605,7 @@ const docTemplate = `{
         },
         "/healthz": {
             "get": {
-                "description": "If everything is fine, just a 200 will be returned, a 500 signals server state is unhealthy.",
+                "description": "If everything is fine, just a 204 will be returned, a 500 signals server state is unhealthy.",
                 "produces": [
                     "text/plain"
                 ],
@@ -614,8 +614,8 @@ const docTemplate = `{
                 ],
                 "summary": "Health information",
                 "responses": {
-                    "200": {
-                        "description": "OK"
+                    "204": {
+                        "description": "No Content"
                     },
                     "500": {
                         "description": "Internal Server Error"
@@ -869,7 +869,7 @@ const docTemplate = `{
             "delete": {
                 "description": "Deletes the given org. Requires admin rights.",
                 "produces": [
-                    "application/json"
+                    "text/plain"
                 ],
                 "tags": [
                     "Orgs"
@@ -894,10 +894,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content",
-                        "schema": {
-                            "$ref": "#/definitions/Org"
-                        }
+                        "description": "No Content"
                     }
                 }
             }
@@ -1888,8 +1885,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK"
+                    "204": {
+                        "description": "No Content"
                     }
                 }
             },
@@ -1978,8 +1975,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK"
+                    "204": {
+                        "description": "No Content"
                     }
                 }
             }
@@ -2717,8 +2714,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK"
+                    "204": {
+                        "description": "No Content"
                     }
                 }
             },
@@ -3357,7 +3354,7 @@ const docTemplate = `{
                 "tags": [
                     "User"
                 ],
-                "summary": "Return the token of the current user as stringª",
+                "summary": "Return the token of the current user as string",
                 "parameters": [
                     {
                         "type": "string",
@@ -3523,7 +3520,7 @@ const docTemplate = `{
             "delete": {
                 "description": "Deletes the given user. Requires admin rights.",
                 "produces": [
-                    "application/json"
+                    "text/plain"
                 ],
                 "tags": [
                     "Users"
@@ -3547,11 +3544,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/User"
-                        }
+                    "204": {
+                        "description": "No Content"
                     }
                 }
             },

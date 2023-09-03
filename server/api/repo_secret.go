@@ -42,7 +42,7 @@ func GetSecret(c *gin.Context) {
 	)
 	secret, err := server.Config.Services.Secrets.SecretFind(repo, name)
 	if err != nil {
-		handleDbGetError(c, err)
+		handleDbError(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, secret.Copy())
@@ -111,7 +111,7 @@ func PatchSecret(c *gin.Context) {
 
 	secret, err := server.Config.Services.Secrets.SecretFind(repo, name)
 	if err != nil {
-		handleDbGetError(c, err)
+		handleDbError(c, err)
 		return
 	}
 	if in.Value != "" {
@@ -178,8 +178,8 @@ func DeleteSecret(c *gin.Context) {
 		name = c.Param("secret")
 	)
 	if err := server.Config.Services.Secrets.SecretDelete(repo, name); err != nil {
-		handleDbGetError(c, err)
+		handleDbError(c, err)
 		return
 	}
-	c.String(http.StatusNoContent, "")
+	c.Status(http.StatusNoContent)
 }

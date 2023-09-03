@@ -91,13 +91,11 @@ func (s storage) UpdateRepo(repo *model.Repo) error {
 }
 
 func (s storage) DeleteRepo(repo *model.Repo) error {
-	const batchSize = perPage
-	sess := s.engine.NewSession()
-	defer sess.Close()
-	if err := sess.Begin(); err != nil {
-		return err
-	}
+	return s.deleteRepo(s.engine.NewSession(), repo)
+}
 
+func (s storage) deleteRepo(sess *xorm.Session, repo *model.Repo) error {
+	const batchSize = perPage
 	if _, err := sess.Where("config_repo_id = ?", repo.ID).Delete(new(model.Config)); err != nil {
 		return err
 	}
@@ -131,11 +129,7 @@ func (s storage) DeleteRepo(repo *model.Repo) error {
 		}
 	}
 
-	if _, err := sess.ID(repo.ID).Delete(new(model.Repo)); err != nil {
-		return err
-	}
-
-	return sess.Commit()
+	return wrapDelete(sess.ID(repo.ID).Delete(new(model.Repo)))
 }
 
 // RepoList list all repos where permissions for specific user are stored
