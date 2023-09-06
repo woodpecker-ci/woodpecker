@@ -22,6 +22,7 @@ import (
 
 	"github.com/rs/zerolog/log"
 
+	"github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
@@ -53,7 +54,7 @@ func parseHook(r *http.Request) (*model.Repo, *model.Pipeline, error) {
 		return parsePullRequestHook(r.Body)
 	}
 	log.Debug().Msgf("unsuported hook type: '%s'", hookType)
-	return nil, nil, nil
+	return nil, nil, &types.ErrIgnoreEvent{Event: hookType}
 }
 
 // parsePushHook parses a push hook and returns the Repo and Pipeline details.

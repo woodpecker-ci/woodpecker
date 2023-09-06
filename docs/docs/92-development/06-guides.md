@@ -36,4 +36,4 @@ To automatically execute the migration after the start of the server, the new mi
 
 ## Constants of official images
 
-All official default images, are saved in [shared/constant/constant.go](https://github.com/woodpecker-ci/woodpecker/blob/master/shared/constant/constant.go) and must be pinned by an exact tag.
+All official default images, are saved in [shared/constant/constant.go](https://github.com/woodpecker-ci/woodpecker/blob/main/shared/constant/constant.go) and must be pinned by an exact tag.

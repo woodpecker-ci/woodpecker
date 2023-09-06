@@ -17,7 +17,7 @@ package fixtures
 // HookPush is a sample push hook.
 // https://developer.github.com/v3/activity/events/types/#pushevent
 const HookPush = `{
-  "ref": "refs/heads/master",
+  "ref": "refs/heads/main",
   "before": "2f780193b136b72bfea4eeb640786a8c4450c7a2",
   "after": "366701fde727cb7a9e7f21eb88264f59f6f9b89c",
   "repository": {
@@ -131,9 +131,9 @@ const HookPush = `{
     "forks": 84,
     "open_issues": 123,
     "watchers": 659,
-    "default_branch": "master",
+    "default_branch": "main",
     "stargazers": 659,
-    "master_branch": "master",
+    "main_branch": "main",
     "organization": "woodpecker-ci"
   },
   "pusher": {
@@ -263,8 +263,8 @@ const HookPullRequest = `
       "avatar_url": "https://avatars.githubusercontent.com/u/6752317?v=3"
     },
     "base": {
-      "label": "baxterthehacker:master",
-      "ref": "master",
+      "label": "baxterthehacker:main",
+      "ref": "main",
       "sha": "9353195a19e45482665306e466c832c46560532d"
     },
     "head": {
@@ -284,7 +284,7 @@ const HookPullRequest = `
     "private": true,
     "html_url": "https://github.com/baxterthehacker/public-repo",
     "clone_url": "https://github.com/baxterthehacker/public-repo.git",
-    "default_branch": "master"
+    "default_branch": "main"
   },
   "sender": {
     "login": "octocat",
@@ -322,7 +322,7 @@ const HookDeploy = `
     "url": "https://api.github.com/repos/baxterthehacker/public-repo/deployments/710692",
     "id": 710692,
     "sha": "9049f1265b7d61be4a8904a9a27120d2064dab3b",
-    "ref": "master",
+    "ref": "main",
     "task": "deploy",
     "payload": {
     },
@@ -344,7 +344,7 @@ const HookDeploy = `
     "private": true,
     "html_url": "https://github.com/baxterthehacker/public-repo",
     "clone_url": "https://github.com/baxterthehacker/public-repo.git",
-    "default_branch": "master"
+    "default_branch": "main"
   },
   "sender": {
     "login": "baxterthehacker",

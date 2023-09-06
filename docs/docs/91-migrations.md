@@ -2,7 +2,14 @@
 
 Some versions need some changes to the server configuration or the pipeline configuration files.
 
-## 1.0.0 (next)
+## next (1.1.0)
+
+- Drop deprecated `CI_BUILD_*`, `CI_PREV_BUILD_*`, `CI_JOB_*`, `*_LINK`, `CI_SYSTEM_ARCH`, `CI_REPO_REMOTE` built-in environment variables
+- Drop deprecated `pipeline:` keyword for steps in yaml config
+- Drop deprecated `branches:` keyword for global branch filter
+- Deprecate `platform:` filter in favor of `labels:`, [read more](./20-usage/20-pipeline-syntax.md#filter-by-platform)
+
+## 1.0.0
 
 - The signature used to verify extensions calls (like those used for the [config-extension](./30-administration/100-external-configuration-api.md)) done by the Woodpecker server switched from using a shared-secret HMac to an ed25519 key-pair. Read more about it at the [config-extensions](./30-administration/100-external-configuration-api.md) documentation.
 - Refactored support of old agent filter labels and expression. Learn how to use the new [filter](./20-usage/20-pipeline-syntax.md#labels)
@@ -16,7 +23,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Updated Prometheus gauge `*_job_*` to `*_step_*`
 - Renamed config env `WOODPECKER_MAX_PROCS` to `WOODPECKER_MAX_WORKFLOWS` (still available as fallback)
 - The pipelines are now also read from `.yaml` files, the new default order is `.woodpecker/*.yml` and `.woodpecker/*.yaml` (without any prioritization) -> `.woodpecker.yml` ->  `.woodpecker.yaml`
-- Dropped support for [Coding](https://coding.net/) and [Gogs](https://gogs.io).
+- Dropped support for [Coding](https://coding.net/), [Gogs](https://gogs.io) and Bitbucket Server (Stash).
 - `/api/queue/resume` & `/api/queue/pause` endpoint methods were changed from `GET` to `POST`
 - rename `pipeline:` key in your workflow config to `steps:`
 - If you want to migrate old logs to the new format, watch the error messages on start. If there are none we are good to go, else you have to plan a migration that can take hours. Set `WOODPECKER_MIGRATIONS_ALLOW_LONG` to true and let it run.
@@ -26,6 +33,14 @@ Some versions need some changes to the server configuration or the pipeline conf
   - The existing badge endpoint `/api/badges/{owner}/{repo}` will still work, but whenever possible try to use the new endpoint using the `repo-id`: `/api/badges/{repo-id}`.
   - The UI urls for a repository changed from `/repos/{owner}/{repo}/...` to `/repos/{repo-id}/...`. You will be redirected automatically when using the old url.
   - The woodpecker-go api-client is now using the `repo-id` instead of `owner/repo` for all functions
+- Using `org-id` in favour of `owner` name
+  - :warning: The api endpoints `/api/orgs/{owner}/...` were replaced by new endpoints using the orgs id `/api/repos/{org-id}`
+  - To find the id of orgs use the `/api/orgs/lookup/{org_full_name}` endpoint.
+  - The UI urls for a organization changed from `/org/{owner}/...` to `/orgs/{org-id}/...`. You will be redirected automatically when using the old url.
+  - The woodpecker-go api-client is now using the `org-id` instead of `org name` for all functions
+- The `command:` field has been removed from steps. If you were using it, please check if the entrypoint of the image you used is a shell.
+  - If it is a shell, simply rename `command:` to `commands:`.
+  - If it's not, you need to prepend the entrypoint before and also rename it (e.g., `commands: <entrypoint> <cmd>`).
 
 ## 0.15.0
 

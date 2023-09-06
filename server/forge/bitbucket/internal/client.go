@@ -34,19 +34,21 @@ const (
 )
 
 const (
-	pathUser         = "%s/2.0/user/"
-	pathEmails       = "%s/2.0/user/emails"
-	pathPermissions  = "%s/2.0/user/permissions/repositories?q=repository.full_name=%q"
-	pathWorkspace    = "%s/2.0/workspaces/?%s"
-	pathRepo         = "%s/2.0/repositories/%s/%s"
-	pathRepos        = "%s/2.0/repositories/%s?%s"
-	pathHook         = "%s/2.0/repositories/%s/%s/hooks/%s"
-	pathHooks        = "%s/2.0/repositories/%s/%s/hooks?%s"
-	pathSource       = "%s/2.0/repositories/%s/%s/src/%s/%s"
-	pathStatus       = "%s/2.0/repositories/%s/%s/commit/%s/statuses/build"
-	pathBranches     = "%s/2.0/repositories/%s/%s/refs/branches"
-	pathOrgPerms     = "%s/2.0/workspaces/%s/permissions?%s"
-	pathPullRequests = "%s/2.0/repositories/%s/%s/pullrequests"
+	pathUser          = "%s/2.0/user/"
+	pathEmails        = "%s/2.0/user/emails"
+	pathPermissions   = "%s/2.0/user/permissions/repositories?q=repository.full_name=%q"
+	pathWorkspace     = "%s/2.0/workspaces/?%s"
+	pathRepo          = "%s/2.0/repositories/%s/%s"
+	pathRepos         = "%s/2.0/repositories/%s?%s"
+	pathHook          = "%s/2.0/repositories/%s/%s/hooks/%s"
+	pathHooks         = "%s/2.0/repositories/%s/%s/hooks?%s"
+	pathSource        = "%s/2.0/repositories/%s/%s/src/%s/%s"
+	pathStatus        = "%s/2.0/repositories/%s/%s/commit/%s/statuses/build"
+	pathBranches      = "%s/2.0/repositories/%s/%s/refs/branches"
+	pathOrgPerms      = "%s/2.0/workspaces/%s/permissions?%s"
+	pathPullRequests  = "%s/2.0/repositories/%s/%s/pullrequests"
+	pathBranchCommits = "%s/2.0/repositories/%s/%s/commits/%s"
+	pathDir           = "%s/2.0/repositories/%s/%s/src/%s%s"
 )
 
 type Client struct {
@@ -183,6 +185,19 @@ func (c *Client) ListBranches(owner, name string) ([]*Branch, error) {
 	return out.Values, err
 }
 
+func (c *Client) GetBranchHead(owner, name, branch string) (string, error) {
+	out := new(CommitsResp)
+	uri := fmt.Sprintf(pathBranchCommits, c.base, owner, name, branch)
+	_, err := c.do(uri, get, nil, out)
+	if err != nil {
+		return "", err
+	}
+	if len(out.Values) == 0 {
+		return "", fmt.Errorf("no commits in branch %s", branch)
+	}
+	return out.Values[0].Hash, nil
+}
+
 func (c *Client) GetUserWorkspaceMembership(workspace, user string) (string, error) {
 	out := new(WorkspaceMembershipResp)
 	opts := &ListOpts{Page: 1, PageLen: 100}
@@ -210,6 +225,23 @@ func (c *Client) ListPullRequests(owner, name string, opts *ListOpts) ([]*PullRe
 	uri := fmt.Sprintf(pathPullRequests, c.base, owner, name)
 	_, err := c.do(uri, get, opts.Encode(), out)
 	return out.Values, err
+}
+
+func (c *Client) GetWorkspace(name string) (*Workspace, error) {
+	out := new(Workspace)
+	uri := fmt.Sprintf(pathWorkspace, c.base, name)
+	_, err := c.do(uri, get, nil, out)
+	return out, err
+}
+
+func (c *Client) GetRepoFiles(owner, name, revision, path string, page *string) (*DirResp, error) {
+	out := new(DirResp)
+	uri := fmt.Sprintf(pathDir, c.base, owner, name, revision, path)
+	if page != nil {
+		uri += "?page=" + *page
+	}
+	_, err := c.do(uri, get, nil, out)
+	return out, err
 }
 
 func (c *Client) do(rawurl, method string, in, out interface{}) (*string, error) {

@@ -23,7 +23,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 )
 
-func apiRoutes(e *gin.Engine) {
+func apiRoutes(e *gin.RouterGroup) {
 	apiBase := e.Group("/api")
 	{
 		user := apiBase.Group("/user")
@@ -46,22 +46,29 @@ func apiRoutes(e *gin.Engine) {
 			users.DELETE("/:login", api.DeleteUser)
 		}
 
-		orgBase := apiBase.Group("/orgs/:owner")
+		orgs := apiBase.Group("/orgs")
 		{
-			orgBase.GET("/permissions", api.GetOrgPermissions)
-
-			org := orgBase.Group("")
+			orgs.GET("", session.MustAdmin(), api.GetOrgs)
+			orgs.GET("/lookup/*org_full_name", api.LookupOrg)
+			orgBase := orgs.Group("/:org_id")
 			{
-				org.Use(session.MustOrgMember(true))
-				org.GET("/secrets", api.GetOrgSecretList)
-				org.POST("/secrets", api.PostOrgSecret)
-				org.GET("/secrets/:secret", api.GetOrgSecret)
-				org.PATCH("/secrets/:secret", api.PatchOrgSecret)
-				org.DELETE("/secrets/:secret", api.DeleteOrgSecret)
+				orgBase.GET("/permissions", api.GetOrgPermissions)
+
+				org := orgBase.Group("")
+				{
+					org.Use(session.MustOrgMember(true))
+					org.DELETE("", session.MustAdmin(), api.DeleteOrg)
+					org.GET("", api.GetOrg)
+					org.GET("/secrets", api.GetOrgSecretList)
+					org.POST("/secrets", api.PostOrgSecret)
+					org.GET("/secrets/:secret", api.GetOrgSecret)
+					org.PATCH("/secrets/:secret", api.PatchOrgSecret)
+					org.DELETE("/secrets/:secret", api.DeleteOrgSecret)
+				}
 			}
 		}
 
-		apiBase.GET("/repos/lookup/*repo_full_name", api.LookupRepo) // TODO: check if this public route is a security issue
+		apiBase.GET("/repos/lookup/*repo_full_name", session.SetRepo(), session.SetPerm(), session.MustPull, api.LookupRepo)
 		apiBase.POST("/repos", session.MustUser(), api.PostRepo)
 		repoBase := apiBase.Group("/repos/:repo_id")
 		{
@@ -192,6 +199,7 @@ func apiRoutes(e *gin.Engine) {
 				session.SetPerm(),
 				session.MustPull,
 				api.LogStreamSSE)
+			stream.GET("/events", api.EventStreamSSE)
 		}
 
 		if zerolog.GlobalLevel() <= zerolog.DebugLevel {

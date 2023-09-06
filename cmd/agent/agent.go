@@ -23,12 +23,10 @@ import (
 	"net/http"
 	"os"
 	"runtime"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
 
-	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/tevino/abool"
 	"github.com/urfave/cli/v2"
@@ -42,6 +40,7 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/agent"
 	agentRpc "github.com/woodpecker-ci/woodpecker/agent/rpc"
+	"github.com/woodpecker-ci/woodpecker/cmd/common"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
@@ -50,35 +49,15 @@ import (
 )
 
 func run(c *cli.Context) error {
-	agentIDConfigPath := c.String("agent-id-config-path")
+	common.SetupGlobalLogger(c)
+
+	agentConfigPath := c.String("agent-config")
 	hostname := c.String("hostname")
 	if len(hostname) == 0 {
 		hostname, _ = os.Hostname()
 	}
 
 	platform := runtime.GOOS + "/" + runtime.GOARCH
-
-	if c.Bool("pretty") {
-		log.Logger = log.Output(
-			zerolog.ConsoleWriter{
-				Out:     os.Stderr,
-				NoColor: c.Bool("nocolor"),
-			},
-		)
-	}
-
-	zerolog.SetGlobalLevel(zerolog.InfoLevel)
-	if c.IsSet("log-level") {
-		logLevelFlag := c.String("log-level")
-		lvl, err := zerolog.ParseLevel(logLevelFlag)
-		if err != nil {
-			log.Fatal().Msgf("unknown logging level: %s", logLevelFlag)
-		}
-		zerolog.SetGlobalLevel(lvl)
-	}
-	if zerolog.GlobalLevel() <= zerolog.DebugLevel {
-		log.Logger = log.With().Caller().Logger()
-	}
 
 	counter.Polling = c.Int("max-workflows")
 	counter.Running = 0
@@ -93,7 +72,7 @@ func run(c *cli.Context) error {
 
 	var transport grpc.DialOption
 	if c.Bool("grpc-secure") {
-		transport = grpc.WithTransportCredentials(grpccredentials.NewTLS(&tls.Config{InsecureSkipVerify: c.Bool("skip-insecure-grpc")}))
+		transport = grpc.WithTransportCredentials(grpccredentials.NewTLS(&tls.Config{InsecureSkipVerify: c.Bool("grpc-skip-insecure")}))
 	} else {
 		transport = grpc.WithTransportCredentials(insecure.NewCredentials())
 	}
@@ -111,9 +90,10 @@ func run(c *cli.Context) error {
 	}
 	defer authConn.Close()
 
-	agentID := readAgentID(agentIDConfigPath)
+	agentConfig := readAgentConfig(agentConfigPath)
+
 	agentToken := c.String("grpc-token")
-	authClient := agentRpc.NewAuthGrpcClient(authConn, agentToken, agentID)
+	authClient := agentRpc.NewAuthGrpcClient(authConn, agentToken, agentConfig.AgentID)
 	authInterceptor, err := agentRpc.NewAuthInterceptor(authClient, 30*time.Minute)
 	if err != nil {
 		return err
@@ -175,12 +155,12 @@ func run(c *cli.Context) error {
 		return err
 	}
 
-	agentID, err = client.RegisterAgent(ctx, platform, engine.Name(), version.String(), parallel)
+	agentConfig.AgentID, err = client.RegisterAgent(ctx, platform, engine.Name(), version.String(), parallel)
 	if err != nil {
 		return err
 	}
 
-	writeAgentID(agentID, agentIDConfigPath)
+	writeAgentConfig(agentConfig, agentConfigPath)
 
 	labels := map[string]string{
 		"hostname": hostname,
@@ -197,7 +177,7 @@ func run(c *cli.Context) error {
 		Labels: labels,
 	}
 
-	log.Debug().Msgf("Agent registered with ID %d", agentID)
+	log.Debug().Msgf("Agent registered with ID %d", agentConfig.AgentID)
 
 	go func() {
 		for {
@@ -215,20 +195,20 @@ func run(c *cli.Context) error {
 		}
 	}()
 
+	// load engine (e.g. init api client)
+	if err := engine.Load(backendCtx); err != nil {
+		log.Error().Err(err).Msg("cannot load backend engine")
+		return err
+	}
+	log.Debug().Msgf("loaded %s backend engine", engine.Name())
+
 	for i := 0; i < parallel; i++ {
+		i := i
 		go func() {
 			defer wg.Done()
 
-			// load engine (e.g. init api client)
-			err = engine.Load(backendCtx)
-			if err != nil {
-				log.Error().Err(err).Msg("cannot load backend engine")
-				return
-			}
-
 			r := agent.NewRunner(client, filter, hostname, counter, &engine)
-
-			log.Debug().Msgf("loaded %s backend engine", engine.Name())
+			log.Debug().Msgf("created new runner %d", i)
 
 			for {
 				if sigterm.IsSet() {
@@ -283,34 +263,4 @@ func stringSliceAddToMap(sl []string, m map[string]string) error {
 		}
 	}
 	return nil
-}
-
-func readAgentID(agentIDConfigPath string) int64 {
-	const defaultAgentIDValue = int64(-1)
-
-	rawAgentID, fileErr := os.ReadFile(agentIDConfigPath)
-	if fileErr != nil {
-		log.Debug().Err(fileErr).Msgf("could not open agent-id config file from %s", agentIDConfigPath)
-		return defaultAgentIDValue
-	}
-
-	strAgentID := strings.TrimSpace(string(rawAgentID))
-	agentID, parseErr := strconv.ParseInt(strAgentID, 10, 64)
-	if parseErr != nil {
-		log.Warn().Err(parseErr).Msg("could not parse agent-id config file content to int64")
-		return defaultAgentIDValue
-	}
-
-	return agentID
-}
-
-func writeAgentID(agentID int64, agentIDConfigPath string) {
-	currentAgentID := readAgentID(agentIDConfigPath)
-
-	if currentAgentID != agentID {
-		err := os.WriteFile(agentIDConfigPath, []byte(strconv.FormatInt(agentID, 10)+"\n"), 0o644)
-		if err != nil {
-			log.Warn().Err(err).Msgf("could not write agent-id config file to %s", agentIDConfigPath)
-		}
-	}
 }

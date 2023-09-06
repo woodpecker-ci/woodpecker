@@ -1,12 +1,8 @@
 <template>
-  <Panel>
-    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-gray-600">
-      <h1 class="text-xl ml-2 text-color">{{ $t('repo.settings.actions.actions') }}</h1>
-    </div>
-
-    <div class="flex flex-col">
+  <Settings :title="$t('repo.settings.actions.actions')">
+    <div class="flex flex-wrap items-center">
       <Button
-        class="mr-auto mt-4"
+        class="mr-4 my-1"
         color="blue"
         start-icon="heal"
         :is-loading="isRepairingRepo"
@@ -16,7 +12,7 @@
 
       <Button
         v-if="isActive"
-        class="mr-auto mt-4"
+        class="mr-4 my-1"
         color="blue"
         start-icon="turn-off"
         :is-loading="isDeactivatingRepo"
@@ -25,7 +21,7 @@
       />
       <Button
         v-else
-        class="mr-auto mt-4"
+        class="mr-4 my-1"
         color="blue"
         start-icon="turn-off"
         :is-loading="isActivatingRepo"
@@ -34,7 +30,7 @@
       />
 
       <Button
-        class="mr-auto mt-4"
+        class="mr-4 my-1"
         color="red"
         start-icon="trash"
         :is-loading="isDeletingRepo"
@@ -42,7 +38,7 @@
         @click="deleteRepo"
       />
     </div>
-  </Panel>
+  </Settings>
 </template>
 
 <script lang="ts" setup>
@@ -51,7 +47,7 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
-import Panel from '~/components/layout/Panel.vue';
+import Settings from '~/components/layout/Settings.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';

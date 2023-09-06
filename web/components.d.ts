@@ -12,6 +12,7 @@ declare module '@vue/runtime-core' {
     ActionsTab: typeof import('./src/components/repo/settings/ActionsTab.vue')['default']
     ActivePipelines: typeof import('./src/components/layout/header/ActivePipelines.vue')['default']
     AdminAgentsTab: typeof import('./src/components/admin/settings/AdminAgentsTab.vue')['default']
+    AdminOrgsTab: typeof import('./src/components/admin/settings/AdminOrgsTab.vue')['default']
     AdminQueueStats: typeof import('./src/components/admin/settings/queue/AdminQueueStats.vue')['default']
     AdminQueueTab: typeof import('./src/components/admin/settings/AdminQueueTab.vue')['default']
     AdminSecretsTab: typeof import('./src/components/admin/settings/AdminSecretsTab.vue')['default']
@@ -98,9 +99,13 @@ declare module '@vue/runtime-core' {
     SecretList: typeof import('./src/components/secrets/SecretList.vue')['default']
     SecretsTab: typeof import('./src/components/repo/settings/SecretsTab.vue')['default']
     SelectField: typeof import('./src/components/form/SelectField.vue')['default']
+    Settings: typeof import('./src/components/layout/Settings.vue')['default']
     Tab: typeof import('./src/components/layout/scaffold/Tab.vue')['default']
     Tabs: typeof import('./src/components/layout/scaffold/Tabs.vue')['default']
     TextField: typeof import('./src/components/form/TextField.vue')['default']
+    UserAPITab: typeof import('./src/components/user/UserAPITab.vue')['default']
+    UserGeneralTab: typeof import('./src/components/user/UserGeneralTab.vue')['default']
+    UserSecretsTab: typeof import('./src/components/user/UserSecretsTab.vue')['default']
     Warning: typeof import('./src/components/atomic/Warning.vue')['default']
   }
 }

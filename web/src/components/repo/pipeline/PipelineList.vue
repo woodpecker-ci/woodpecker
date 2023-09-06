@@ -10,7 +10,7 @@
       :pipeline="pipeline"
     />
     <Panel v-if="pipelines.length === 0">
-      <span class="text-color">{{ $t('repo.pipeline.no_pipelines') }}</span>
+      <span class="text-wp-text-100">{{ $t('repo.pipeline.no_pipelines') }}</span>
     </Panel>
   </div>
 </template>

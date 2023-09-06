@@ -121,8 +121,8 @@ type Store interface {
 	SecretCreate(*model.Secret) error
 	SecretUpdate(*model.Secret) error
 	SecretDelete(*model.Secret) error
-	OrgSecretFind(string, string) (*model.Secret, error)
-	OrgSecretList(string, *model.ListOptions) ([]*model.Secret, error)
+	OrgSecretFind(int64, string) (*model.Secret, error)
+	OrgSecretList(int64, *model.ListOptions) ([]*model.Secret, error)
 	GlobalSecretFind(string) (*model.Secret, error)
 	GlobalSecretList(*model.ListOptions) ([]*model.Secret, error)
 
@@ -182,6 +182,17 @@ type Store interface {
 	WorkflowsCreate([]*model.Workflow) error
 	WorkflowLoad(int64) (*model.Workflow, error)
 	WorkflowUpdate(*model.Workflow) error
+
+	// Org
+	OrgCreate(*model.Org) error
+	OrgGet(int64) (*model.Org, error)
+	OrgFindByName(string) (*model.Org, error)
+	OrgUpdate(*model.Org) error
+	OrgDelete(int64) error
+	OrgList(*model.ListOptions) ([]*model.Org, error)
+
+	// Org repos
+	OrgRepoList(*model.Org, *model.ListOptions) ([]*model.Repo, error)
 
 	// Store operations
 	Ping() error

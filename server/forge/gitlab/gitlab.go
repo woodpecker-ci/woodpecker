@@ -92,7 +92,7 @@ func (g *GitLab) oauth2Config(ctx context.Context) (*oauth2.Config, context.Cont
 				TokenURL: fmt.Sprintf("%s/oauth/token", g.url),
 			},
 			Scopes:      []string{defaultScope},
-			RedirectURL: fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost),
+			RedirectURL: fmt.Sprintf("%s%s/authorize", server.Config.Server.OAuthHost, server.Config.Server.RootPath),
 		},
 
 		context.WithValue(ctx, oauth2.HTTPClient, &http.Client{Transport: &http.Transport{
@@ -596,7 +596,8 @@ func (g *GitLab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 		return nil, nil, err
 	}
 
-	parsed, err := gitlab.ParseWebhook(gitlab.WebhookEventType(req), payload)
+	eventType := gitlab.WebhookEventType(req)
+	parsed, err := gitlab.ParseWebhook(eventType, payload)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -618,7 +619,7 @@ func (g *GitLab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 	case *gitlab.TagEvent:
 		return convertTagHook(event)
 	default:
-		return nil, nil, nil
+		return nil, nil, &forge_types.ErrIgnoreEvent{Event: string(eventType)}
 	}
 }
 
@@ -676,6 +677,48 @@ func (g *GitLab) OrgMembership(ctx context.Context, u *model.User, owner string)
 	}
 
 	return &model.OrgPerm{}, nil
+}
+
+func (g *GitLab) Org(ctx context.Context, u *model.User, owner string) (*model.Org, error) {
+	client, err := newClient(g.url, u.Token, g.SkipVerify)
+	if err != nil {
+		return nil, err
+	}
+
+	users, _, err := client.Users.ListUsers(&gitlab.ListUsersOptions{
+		ListOptions: gitlab.ListOptions{
+			Page:    1,
+			PerPage: 1,
+		},
+		Username: gitlab.String(owner),
+	})
+	if len(users) == 1 && err == nil {
+		return &model.Org{
+			Name:    users[0].Username,
+			IsUser:  true,
+			Private: users[0].PrivateProfile,
+		}, nil
+	}
+
+	groups, _, err := client.Groups.ListGroups(&gitlab.ListGroupsOptions{
+		ListOptions: gitlab.ListOptions{
+			Page:    1,
+			PerPage: 1,
+		},
+		Search: gitlab.String(owner),
+	}, gitlab.WithContext(ctx))
+	if err != nil {
+		return nil, err
+	}
+
+	if len(groups) != 1 {
+		return nil, fmt.Errorf("could not find org %s", owner)
+	}
+
+	return &model.Org{
+		Name:    groups[0].FullPath,
+		Private: groups[0].Visibility != gitlab.PublicVisibility,
+	}, nil
 }
 
 func (g *GitLab) loadChangedFilesFromMergeRequest(ctx context.Context, tmpRepo *model.Repo, pipeline *model.Pipeline, mergeIID int) (*model.Pipeline, error) {

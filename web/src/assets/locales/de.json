@@ -19,6 +19,7 @@
         "deleted": "Agent gelöscht",
         "desc": "Für diesen Server registrierte Agents",
         "edit_agent": "Agent bearbeiten",
+        "id": "ID",
         "last_contact": "Letzter Kontakt",
         "name": {
           "name": "Name",
@@ -41,6 +42,16 @@
         "version": "Version"
       },
       "not_allowed": "Du darfst nicht auf die Server-Einstellungen zugreifen",
+      "orgs": {
+        "delete_confirm": "Möchtest du diese Organisation wirklich löschen? Das wird auch alle Repositories löschen, die dieser Organisation gehören.",
+        "delete_org": "Organisation löschen",
+        "deleted": "Organisation gelöscht",
+        "desc": "Organisationen mit Repositories auf diesem Server",
+        "none": "Es gibt noch keine Organisationen.",
+        "org_settings": "Organisations-Einstellungen",
+        "orgs": "Organisationen",
+        "view": "Organisation anzeigen"
+      },
       "queue": {
         "agent": "Agent",
         "desc": "Aufgaben, die darauf warten, von Agents ausgeführt zu werden",
@@ -69,7 +80,7 @@
         "desc": "Globale Geheimnisse können an alle Repositories als Umgebungsvariablen übergeben werden.",
         "events": {
           "events": "Verfügbar für folgende Ereignisse",
-          "pr_warning": "Bitte sei vorsichtig da ein Fremder einen Pull-Request erstellen könnte, um deine Geheimnisse zu erhalten."
+          "pr_warning": "Bitte sei vorsichtig mit dieser Option, da eine böswillige Person über einen Pull-Request deine Geheimnisse erhalten könnte."
         },
         "images": {
           "desc": "Komma getrennte Liste aller Images, für die dieses Geheimnis verwendet werden kann. Freilassen, um alle Images zu erlauben",
@@ -95,7 +106,7 @@
         "avatar_url": "URL des Profilbilds",
         "cancel": "Abbrechen",
         "created": "Benutzer erstellt",
-        "delete_confirm": "Möchtest du diesen Benutzer wirklich löschen?",
+        "delete_confirm": "Möchtest du diesen Benutzer wirklich löschen? Das wird auch alle Repositories löschen, die diesem Benutzer gehören.",
         "delete_user": "Benutzer löschen",
         "deleted": "Benutzer gelöscht",
         "desc": "Auf diesem Server registrierte Benutzer",
@@ -110,6 +121,7 @@
       }
     }
   },
+  "api": "API",
   "back": "Zurück",
   "cancel": "Abbrechen",
   "color_scheme_dark": "Wechsle zu hellem Modus",
@@ -159,48 +171,6 @@
     "activity": "Aktivitäten",
     "add": "Repository hinzufügen",
     "branches": "Branches",
-    "build": {
-      "actions": {
-        "cancel": "Abbrechen",
-        "cancel_success": "Pipeline abgebrochen",
-        "canceled": "Dieser Schritt wurde abgebrochen.",
-        "log_auto_scroll": "Automatisches folgen",
-        "log_auto_scroll_off": "Schalte automatisches folgen aus",
-        "log_download": "Herunterladen",
-        "restart": "Neustarten",
-        "restart_success": "Pipeline neu gestartet"
-      },
-      "config": "Konfiguration",
-      "created": "Erstellt",
-      "event": {
-        "cron": "Cron",
-        "deploy": "Deploy",
-        "manual": "Manuell",
-        "pr": "Pull-Request",
-        "push": "Push",
-        "tag": "Tag"
-      },
-      "execution_error": "Ausführungsfehler",
-      "exit_code": "Exit-Code {exitCode}",
-      "files": "Geänderte Dateien ({files})",
-      "loading": "Laden…",
-      "log_download_error": "Beim Herunterladen der Log-Datei ist ein Fehler aufgetreten.",
-      "no_files": "Es wurden keine Dateien geändert.",
-      "no_pipeline_steps": "Keine Schritte in der Pipeline vorhanden!",
-      "no_pipelines": "Bisher wurden noch keine Pipelines gestartet.",
-      "pipeline": "Pipeline #{buildId}",
-      "pipelines_for": "Pipelines für den Branch \"{branch}\"",
-      "protected": {
-        "approve": "Genehmigen",
-        "approve_success": "Pipeline genehmigt",
-        "awaits": "Diese Pipeline wartet auf die Genehmigung durch einen Maintainer!",
-        "decline": "Ablehnen",
-        "decline_success": "Pipeline abgelehnt",
-        "declined": "Diese Pipeline ist abgelehnt worden!"
-      },
-      "step_not_started": "Dieser Schritt hat noch nicht begonnen.",
-      "tasks": "Vorgänge"
-    },
     "deploy_pipeline": {
       "enter_target": "Zielumgebung des Deployments",
       "title": "Deployment für aktuelle Pipeline #{pipelineId} starten",
@@ -214,6 +184,7 @@
       }
     },
     "enable": {
+      "disabled": "Deaktiviert",
       "enable": "Aktivieren",
       "enabled": "Bereits aktiviert",
       "list_reloaded": "Repository-Liste neu geladen",
@@ -247,7 +218,6 @@
         "restart_success": "Pipeline neu gestartet"
       },
       "config": "Konfiguration",
-      "created": "Erstellt",
       "event": {
         "cron": "Cron",
         "deploy": "Deploy",
@@ -261,6 +231,7 @@
       "files": "Geänderte Dateien ({files})",
       "loading": "Laden…",
       "log_download_error": "Beim Herunterladen der Log-Datei ist ein Fehler aufgetreten",
+      "log_title": "Logs des Schrittes",
       "no_files": "Es wurden keine Dateien geändert.",
       "no_pipeline_steps": "Keine Schritte in der Pipeline vorhanden!",
       "no_pipelines": "Bisher wurden noch keine Pipelines gestartet.",
@@ -316,24 +287,22 @@
       "badge": {
         "badge": "Abzeichen",
         "branch": "Branch",
-        "markdown": "Markdown",
         "type": "Syntax",
         "type_html": "HTML",
         "type_markdown": "Markdown",
-        "type_url": "URL",
-        "url_branch": "URL für bestimmten Branch"
+        "type_url": "URL"
       },
       "crons": {
         "add": "Cron hinzufügen",
         "branch": {
-          "placeholder": "Branch (Verwendet Standard-Branch wenn leer)",
+          "placeholder": "Branch (verwendet Standard-Branch wenn leer)",
           "title": "Branch"
         },
         "created": "Cron erstellt",
         "crons": "Crons",
         "delete": "Cron löschen",
         "deleted": "Cron gelöscht",
-        "desc": "Cron-Jobs können dazu verwendet werden in regelmäßigen Abständen Pipeline(s) zu starten.",
+        "desc": "Cron-Jobs können dazu verwendet werden in regelmäßigen Abständen Pipelines zu starten.",
         "edit": "Cron bearbeiten",
         "name": {
           "name": "Name",
@@ -431,7 +400,7 @@
         "edit": "Geheimnis bearbeiten",
         "events": {
           "events": "Verfügbar bei folgenden Ereignissen",
-          "pr_warning": "Sei bitte vorsichtig mit dieser Option, da ein bösartiger Akteur eine bösartigen Pull-Request erstellen kann, der deine Geheimnisse preisgibt."
+          "pr_warning": "Bitte sei vorsichtig mit dieser Option, da eine böswillige Person über einen Pull-Request deine Geheimnisse erhalten könnte."
         },
         "images": {
           "desc": "Durch Kommata getrennte Liste der Images, für die dieses Geheimnis verfügbar ist; leer lassen, um alle Images zuzulassen",
@@ -466,16 +435,49 @@
   "url": "URL",
   "user": {
     "access_denied": "Du bist nicht berechtigt, dich anzumelden",
-    "api_usage": "Beispiel für die API-Nutzung",
-    "cli_usage": "Beispiel für die Kommandozeilen-Nutzung",
-    "dl_cli": "Download Kommando-Zeilen-Tool",
     "internal_error": "Ein interner Fehler ist aufgetreten",
     "oauth_error": "Fehler bei der Authentifizierung gegen OAuth-Anbieter",
-    "reset_token": "Token zurücksetzen",
-    "settings": "Benutzer-Einstellungen",
-    "shell_setup": "Kommandozeilen-Einrichtung",
-    "shell_setup_before": "Führe bitte die Schritte zur Einrichtung der Kommandozeile vorher aus",
-    "token": "Dein persönlicher Token"
+    "settings": {
+      "api": {
+        "api": "API",
+        "api_usage": "Beispiel zur Nutzung der API",
+        "cli_usage": "Beispiel zur Nutzung des CLI",
+        "desc": "Persönlicher Zugangsschlüssel und API-Nutzung",
+        "dl_cli": "CLI herunterladen",
+        "reset_token": "Zugangsschlüssel zurücksetzen",
+        "shell_setup": "Kommandozeilen-Einrichtung",
+        "shell_setup_before": "führe bitte die Schritte zur Einrichtung der Kommandozeile vorher aus",
+        "swagger_ui": "Swagger-UI",
+        "token": "Persönlicher Zugangsschlüssel"
+      },
+      "general": {
+        "general": "Allgemein",
+        "language": "Sprache"
+      },
+      "secrets": {
+        "add": "Geheimnis hinzufügen",
+        "created": "Benutzer-Geheimnis erstellt",
+        "deleted": "Benutzer-Geheimnis gelöscht",
+        "desc": "Benutzer-Geheimnisse können an alle Repositories des Benutzers als Umgebungsvariablen übergeben werden.",
+        "events": {
+          "events": "Verfügbar für folgende Ereignisse",
+          "pr_warning": "Bitte sei vorsichtig mit dieser Option, da eine böswillige Person über einen Pull-Request deine Geheimnisse erhalten könnte."
+        },
+        "images": {
+          "desc": "Komma getrennte Liste aller Images, für die dieses Geheimnis verwendet werden kann. Freilassen, um alle Images zu erlauben",
+          "images": "Verfügbar für die folgenden Images"
+        },
+        "name": "Name",
+        "none": "Es existieren noch keine Benutzer-Geheimnisse.",
+        "plugins_only": "Nur für Plugins verfügbar",
+        "save": "Geheimnis speichern",
+        "saved": "Benutzer-Geheimnis gespeichert",
+        "secrets": "Geheimnisse",
+        "show": "Geheimnisse anzeigen",
+        "value": "Wert"
+      },
+      "settings": "Benutzereinstellungen"
+    }
   },
   "username": "Benutzername",
   "welcome": "Willkommen bei Woodpecker"

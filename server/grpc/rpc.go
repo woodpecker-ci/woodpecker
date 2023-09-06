@@ -28,7 +28,6 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/rs/zerolog/log"
-	"google.golang.org/grpc/metadata"
 	grpcMetadata "google.golang.org/grpc/metadata"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
@@ -53,7 +52,7 @@ type RPC struct {
 }
 
 // Next implements the rpc.Next function
-func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Pipeline, error) {
+func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, error) {
 	metadata, ok := grpcMetadata.FromIncomingContext(c)
 	if ok {
 		hostname, ok := metadata["hostname"]
@@ -82,9 +81,9 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Pipeline, er
 		}
 
 		if task.ShouldRun() {
-			pipeline := new(rpc.Pipeline)
-			err = json.Unmarshal(task.Data, pipeline)
-			return pipeline, err
+			workflow := new(rpc.Workflow)
+			err = json.Unmarshal(task.Data, workflow)
+			return workflow, err
 		}
 
 		if err := s.Done(c, task.ID, rpc.State{}); err != nil {
@@ -428,7 +427,7 @@ func (s *RPC) notify(c context.Context, repo *model.Repo, pipeline *model.Pipeli
 }
 
 func (s *RPC) getAgentFromContext(ctx context.Context) (*model.Agent, error) {
-	md, ok := metadata.FromIncomingContext(ctx)
+	md, ok := grpcMetadata.FromIncomingContext(ctx)
 	if !ok {
 		return nil, errors.New("metadata is not provided")
 	}

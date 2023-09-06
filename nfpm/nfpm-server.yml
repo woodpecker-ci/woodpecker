@@ -8,5 +8,5 @@ license: Apache 2.0
 maintainer: Woodpecker Authors <maintainer@woodpecker-ci.org>
 section: daemon/system
 contents:
-- src: ./dist/server/linux_amd64/woodpecker-server
+- src: ./dist/server/linux/amd64/woodpecker-server
   dst: /usr/local/bin/woodpecker-server

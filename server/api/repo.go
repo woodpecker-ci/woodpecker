@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -39,18 +38,23 @@ import (
 // PostRepo
 //
 //	@Summary	Activate a repository
-//	@Router		/repos/{repo_id} [post]
+//	@Router		/repos [post]
 //	@Produce	json
 //	@Success	200	{object}	Repo
 //	@Tags		Repositories
-//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		Authorization			header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		forge_remote_id		query		string	true	"the id of a repository at the forge"
 func PostRepo(c *gin.Context) {
 	forge := server.Config.Services.Forge
 	_store := store.FromContext(c)
 	user := session.User(c)
 
 	forgeRemoteID := model.ForgeRemoteID(c.Query("forge_remote_id"))
+	if !forgeRemoteID.IsValid() {
+		c.String(http.StatusBadRequest, "No forge_remote_id provided")
+		return
+	}
+
 	repo, err := _store.GetRepoForgeID(forgeRemoteID)
 	enabledOnce := err == nil // if there's no error, the repo was found and enabled once already
 	if enabledOnce && repo.IsActive {
@@ -109,10 +113,35 @@ func PostRepo(c *gin.Context) {
 	}
 
 	link := fmt.Sprintf(
-		"%s/hook?access_token=%s",
+		"%s/api/hook?access_token=%s",
 		server.Config.Server.WebhookHost,
 		sig,
 	)
+
+	// find org of repo
+	var org *model.Org
+	org, err = _store.OrgFindByName(repo.Owner)
+	if err != nil && !errors.Is(err, types.RecordNotExist) {
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	// create an org if it doesn't exist yet
+	if errors.Is(err, types.RecordNotExist) {
+		org, err = forge.Org(c, user, repo.Owner)
+		if err != nil {
+			c.String(http.StatusInternalServerError, "Could not fetch organization from forge.")
+			return
+		}
+
+		err = _store.OrgCreate(org)
+		if err != nil {
+			c.String(http.StatusInternalServerError, err.Error())
+			return
+		}
+	}
+
+	repo.OrgID = org.ID
 
 	err = forge.Activate(c, user, repo, link)
 	if err != nil {
@@ -169,7 +198,7 @@ func PatchRepo(c *gin.Context) {
 		return
 	}
 	if in.IsTrusted != nil && *in.IsTrusted != repo.IsTrusted && !user.Admin {
-		log.Trace().Msgf("user '%s' wants to make repo trusted without being an instance admin ", user.Login)
+		log.Trace().Msgf("user '%s' wants to make repo trusted without being an instance admin", user.Login)
 		c.String(http.StatusForbidden, "Insufficient privileges")
 		return
 	}
@@ -247,21 +276,7 @@ func ChownRepo(c *gin.Context) {
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		repo_full_name	path	string	true	"the repository full-name / slug"
 func LookupRepo(c *gin.Context) {
-	_store := store.FromContext(c)
-	repoFullName := strings.TrimLeft(c.Param("repo_full_name"), "/")
-
-	repo, err := _store.GetRepoName(repoFullName)
-	if err != nil {
-		if errors.Is(err, types.RecordNotExist) {
-			c.AbortWithStatus(http.StatusNotFound)
-			return
-		}
-
-		_ = c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-
-	c.JSON(http.StatusOK, repo)
+	c.JSON(http.StatusOK, session.Repo(c))
 }
 
 // GetRepo
@@ -369,7 +384,7 @@ func DeleteRepo(c *gin.Context) {
 
 	if remove {
 		if err := _store.DeleteRepo(repo); err != nil {
-			_ = c.AbortWithError(http.StatusInternalServerError, err)
+			handleDbError(c, err)
 			return
 		}
 	}
@@ -405,9 +420,9 @@ func RepairRepo(c *gin.Context) {
 	}
 
 	// reconstruct the link
-	host := server.Config.Server.Host
+	host := server.Config.Server.WebhookHost
 	link := fmt.Sprintf(
-		"%s/hook?access_token=%s",
+		"%s/api/hook?access_token=%s",
 		host,
 		sig,
 	)
@@ -449,7 +464,7 @@ func RepairRepo(c *gin.Context) {
 		return
 	}
 
-	c.Writer.WriteHeader(http.StatusOK)
+	c.Status(http.StatusOK)
 }
 
 // MoveRepo
@@ -470,7 +485,7 @@ func MoveRepo(c *gin.Context) {
 
 	to, exists := c.GetQuery("to")
 	if !exists {
-		err := fmt.Errorf("Missing required to query value")
+		err := fmt.Errorf("missing required to query value")
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
@@ -521,7 +536,7 @@ func MoveRepo(c *gin.Context) {
 	// reconstruct the link
 	host := server.Config.Server.Host
 	link := fmt.Sprintf(
-		"%s/hook?access_token=%s",
+		"%s/api/hook?access_token=%s",
 		host,
 		sig,
 	)
@@ -533,5 +548,5 @@ func MoveRepo(c *gin.Context) {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
-	c.Writer.WriteHeader(http.StatusOK)
+	c.Status(http.StatusOK)
 }

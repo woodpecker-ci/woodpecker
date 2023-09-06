@@ -1,6 +1,6 @@
 <template>
   <div class="flex w-full mb-4 justify-center">
-    <span class="text-color text-xl">{{ $t('repo.pipeline.pipelines_for_pr', { index: pullRequest }) }}</span>
+    <span class="text-wp-text-100 text-xl">{{ $t('repo.pipeline.pipelines_for_pr', { index: pullRequest }) }}</span>
   </div>
   <PipelineList :pipelines="pipelines" :repo="repo" />
 </template>
@@ -11,12 +11,9 @@ import { computed, inject, Ref, toRef } from 'vue';
 import PipelineList from '~/components/repo/pipeline/PipelineList.vue';
 import { Pipeline, Repo, RepoPermissions } from '~/lib/api/types';
 
-const props = defineProps({
-  pullRequest: {
-    type: String,
-    required: true,
-  },
-});
+const props = defineProps<{
+  pullRequest: string;
+}>();
 const pullRequest = toRef(props, 'pullRequest');
 const repo = inject<Ref<Repo>>('repo');
 const repoPermissions = inject<Ref<RepoPermissions>>('repo-permissions');

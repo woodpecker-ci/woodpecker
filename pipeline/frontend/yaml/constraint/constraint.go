@@ -1,19 +1,37 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package constraint
 
 import (
 	"errors"
 	"fmt"
 	"path"
+	"regexp"
 	"strings"
 
 	"github.com/antonmedv/expr"
 	"github.com/bmatcuk/doublestar/v4"
+	"github.com/rs/zerolog/log"
 	"golang.org/x/exp/maps"
 	"gopkg.in/yaml.v3"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
 	yaml_base_types "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types/base"
 )
+
+var skipRe = regexp.MustCompile(`\[(?i:ci *skip|skip *ci)\]`)
 
 type (
 	// When defines a set of runtime constraints.
@@ -64,6 +82,16 @@ func (when *When) IsEmpty() bool {
 
 // Returns true if at least one of the internal constraints is true.
 func (when *When) Match(metadata metadata.Metadata, global bool, env map[string]string) (bool, error) {
+	if global {
+		// skip the whole workflow if any case-insensitive combination of the words "skip" and "ci"
+		// wrapped in square brackets appear in the commit message
+		skipMatch := skipRe.FindString(metadata.Curr.Commit.Message)
+		if len(skipMatch) > 0 {
+			log.Debug().Msgf("skip workflow as keyword to do so was detected in commit message '%s'", metadata.Curr.Commit.Message)
+			return false, nil
+		}
+	}
+
 	for _, c := range when.Constraints {
 		match, err := c.Match(metadata, global, env)
 		if err != nil {

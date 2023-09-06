@@ -19,6 +19,7 @@
         "deleted": "Agen dihapus",
         "desc": "Agen terdaftar untuk server",
         "edit_agent": "Sunting agen",
+        "id": "ID",
         "last_contact": "Hubungan terakhir",
         "name": {
           "name": "Nama",
@@ -41,6 +42,16 @@
         "version": "Versi"
       },
       "not_allowed": "Anda tidak diperbolehkan untuk mengakses pengaturan peladen",
+      "orgs": {
+        "delete_confirm": "Apakah Anda benar-benar ingin menghapus organisasi ini? Ini juga akan menghapus semua repositori yang dimiliki oleh organisasi ini.",
+        "delete_org": "Hapus organisasi",
+        "deleted": "Organisasi dihapus",
+        "desc": "Organisasi yang memiliki repositori di server ini",
+        "none": "Belum ada organisasi.",
+        "org_settings": "Pengaturan organisasi",
+        "orgs": "Organisasi",
+        "view": "Tampilkan organisasi"
+      },
       "queue": {
         "agent": "agen",
         "desc": "Tugas tertunda yang akan dilakukan oleh agen",
@@ -95,7 +106,7 @@
         "avatar_url": "URL Avatar",
         "cancel": "Batal",
         "created": "Pengguna dibuat",
-        "delete_confirm": "Apakah Anda ingin menghapus pengguna ini?",
+        "delete_confirm": "Apakah Anda ingin menghapus pengguna ini? Ini juga akan menghapus semua repositori yang dimiliki oleh pengguna ini.",
         "delete_user": "Hapus pengguna",
         "deleted": "Pengguna dihapus",
         "desc": "Pengguna terdaftar untuk server ini",
@@ -110,6 +121,7 @@
       }
     }
   },
+  "api": "API",
   "back": "Kembali",
   "cancel": "Batal",
   "color_scheme_dark": "Ubah ke mode terang",
@@ -172,6 +184,7 @@
       }
     },
     "enable": {
+      "disabled": "Nonaktif",
       "enable": "Aktifkan",
       "enabled": "Sudah diaktifkan",
       "list_reloaded": "Daftar repositori dimuat ulang",
@@ -205,7 +218,6 @@
         "restart_success": "Jalur pipa dimulai ulang"
       },
       "config": "Konfigurasi",
-      "created": "Dibuat",
       "event": {
         "cron": "Kron",
         "deploy": "Luncur",
@@ -219,6 +231,7 @@
       "files": "Berkas yang diubah ({files})",
       "loading": "Memuat…",
       "log_download_error": "Terjadi sebuah kesalahan saat mengunduh berkas catatan",
+      "log_title": "Catatan Langkah",
       "no_files": "Tidak ada berkas yang telah diubah.",
       "no_pipeline_steps": "Tidak ada langkah jalur pipa yang tersedia!",
       "no_pipelines": "Belum ada jalur pipa yang dimulai.",
@@ -422,16 +435,49 @@
   "url": "URL",
   "user": {
     "access_denied": "Anda tidak diperbolehkan untuk masuk",
-    "api_usage": "Contoh Penggunaan API",
-    "cli_usage": "Contoh Penggunaan CLI",
-    "dl_cli": "Unduh CLI",
     "internal_error": "Terjadi beberapa kesalahan internal",
     "oauth_error": "Terjadi kesalahan saat mengotentikasi dengan penyedia OAuth",
-    "reset_token": "Atur ulang token",
-    "settings": "Pengaturan Pengguna",
-    "shell_setup": "Pengaturan shell",
-    "shell_setup_before": "sebelumnya lakukan penyiapan shell",
-    "token": "Token Pribadi Anda"
+    "settings": {
+      "api": {
+        "api": "API",
+        "api_usage": "Contoh Penggunaan API",
+        "cli_usage": "Contoh Penggunaan CLI",
+        "desc": "Penggunaan Token Akses Pribadi dan API",
+        "dl_cli": "Unduh CLI",
+        "reset_token": "atur ulang token",
+        "shell_setup": "Penyiapan shell",
+        "shell_setup_before": "lakukan tahap penyiapan shell sebelumnya",
+        "swagger_ui": "UI Swagger",
+        "token": "Token Akses Pribadi"
+      },
+      "general": {
+        "general": "Umum",
+        "language": "Bahasa"
+      },
+      "secrets": {
+        "add": "Tambahkan rahasia",
+        "created": "Rahasia pengguna dibuat",
+        "deleted": "Rahasia pengguna dihapus",
+        "desc": "Rahasia pengguna dapat diteruskan ke semua jalur pipa individu di semua repositori pengguna saat dijalankan sebagai variabel lingkungan.",
+        "events": {
+          "events": "Tersedia di peristiwa berikut",
+          "pr_warning": "Harap berhati-hati dengan opsi ini karena seseorang dapat mengirimkan permintaan penarikan berbahaya yang dapat mengekspos rahasia Anda."
+        },
+        "images": {
+          "desc": "Daftar citra di mana rahasia ini tersedia yang dipisahkan oleh koma, tinggalkan kosong untuk memperbolehkan semua citra",
+          "images": "Tersedia untuk citra berikut"
+        },
+        "name": "Nama",
+        "none": "Belum ada rahasia pengguna.",
+        "plugins_only": "Hanya tersedia untuk plugin",
+        "save": "Simpan rahasia",
+        "saved": "Rahasia pengguna disimpan",
+        "secrets": "Rahasia",
+        "show": "Tampilkan rahasia",
+        "value": "Nilai"
+      },
+      "settings": "Pengaturan Pengguna"
+    }
   },
   "username": "Nama pengguna",
   "welcome": "Selamat datang di Woodpecker"

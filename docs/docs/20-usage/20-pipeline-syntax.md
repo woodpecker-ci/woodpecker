@@ -266,16 +266,16 @@ steps:
     settings:
       channel: dev
 +   when:
-+     - branch: master
++     - branch: main
 ```
 
-> The step now triggers on master, but also if the target branch of a pull request is `master`. Add an event condition to limit it further to pushes on master only.
+> The step now triggers on main branch, but also if the target branch of a pull request is `main`. Add an event condition to limit it further to pushes on main only.
 
-Execute a step if the branch is `master` or `develop`:
+Execute a step if the branch is `main` or `develop`:
 
 ```yaml
 when:
-  - branch: [master, develop]
+  - branch: [main, develop]
 ```
 
 Execute a step if the branch starts with `prefix/*`:
@@ -297,7 +297,7 @@ Execute a step using custom include and exclude logic:
 ```yaml
 when:
   - branch:
-      include: [ master, release/* ]
+      include: [ main, release/* ]
       exclude: [ release/1.0.0, release/1.1.* ]
 ```
 
@@ -452,7 +452,7 @@ Run on pushes to the default branch for the repository `owner/repo`:
 
 ```yaml
 when:
-  - evaluate: 'CI_BUILD_EVENT == "push" && CI_REPO == "owner/repo" && CI_COMMIT_BRANCH == CI_REPO_DEFAULT_BRANCH'
+  - evaluate: 'CI_PIPELINE_EVENT == "push" && CI_REPO == "owner/repo" && CI_COMMIT_BRANCH == CI_REPO_DEFAULT_BRANCH'
 ```
 
 Run on commits created by user `woodpecker-ci`:
@@ -603,26 +603,6 @@ Woodpecker has integrated support for matrix builds. Woodpecker executes a separ
 
 For more details check the [matrix build docs](./30-matrix-workflows.md).
 
-## `platform`
-
-To configure your pipeline to only be executed on an agent with a specific platform, you can use the `platform` key.
-Have a look at the official [go docs](https://go.dev/doc/install/source) for the available platforms. The syntax of the platform is `GOOS/GOARCH` like `linux/arm64` or `linux/amd64`.
-
-Example:
-
-Assuming we have two agents, one `arm` and one `amd64`. Previously this pipeline would have executed on **either agent**, as Woodpecker is not fussy about where it runs the pipelines. By setting the following option it will only be executed on an agent with the platform `linux/arm64`.
-
-```diff
-+platform: linux/arm64
-
-steps:
-  build:
-    image: golang
-    commands:
-      - go build
-      - go test
-```
-
 ## `labels`
 
 You can set labels for your pipeline to select an agent to execute the pipeline on. An agent will pick up and run a pipeline when **every** label assigned to a pipeline matches the agents labels.
@@ -646,6 +626,23 @@ steps:
     commands:
       - go build
       - go test
+```
+
+### Filter by platform
+
+To configure your pipeline to only be executed on an agent with a specific platform, you can use the `platform` key.
+Have a look at the official [go docs](https://go.dev/doc/install/source) for the available platforms. The syntax of the platform is `GOOS/GOARCH` like `linux/arm64` or `linux/amd64`.
+
+Example:
+
+Assuming we have two agents, one `linux/arm` and one `linux/amd64`. Previously this pipeline would have executed on **either agent**, as Woodpecker is not fussy about where it runs the pipelines. By setting the following option it will only be executed on an agent with the platform `linux/arm64`.
+
+```diff
++labels:
++  platform: linux/arm64
+
+steps:
+  [...]
 ```
 
 ## `variables`
@@ -765,7 +762,7 @@ Example conditional execution by branch:
 
 ```diff
 +when:
-+  branch: master
++  branch: main
 +
  steps:
    slack:
@@ -774,13 +771,13 @@ Example conditional execution by branch:
        channel: dev
 ```
 
-> The step now triggers on master, but also if the target branch of a pull request is `master`. Add an event condition to limit it further to pushes on master only.
+> The step now triggers on main, but also if the target branch of a pull request is `main`. Add an event condition to limit it further to pushes on main only.
 
-Execute a step if the branch is `master` or `develop`:
+Execute a step if the branch is `main` or `develop`:
 
 ```diff
 when:
-  branch: [master, develop]
+  branch: [main, develop]
 ```
 
 Execute a step if the branch starts with `prefix/*`:
@@ -795,7 +792,7 @@ Execute a step using custom include and exclude logic:
 ```diff
 when:
   branch:
-    include: [ master, release/* ]
+    include: [ main, release/* ]
     exclude: [ release/1.0.0, release/1.1.* ]
 ```
 
@@ -908,6 +905,6 @@ Woodpecker gives the ability to configure privileged mode in the YAML. You can u
  services:
    docker:
      image: docker:dind
-     command: [ "--storage-driver=vfs", "--tls=false" ]
+     commands: dockerd-entrypoint.sh --storage-driver=vfs --tls=false
 +    privileged: true
 ```

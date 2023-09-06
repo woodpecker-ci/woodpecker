@@ -16,7 +16,6 @@ package compiler
 
 import (
 	"net/url"
-	"os"
 	"path/filepath"
 	"strings"
 
@@ -25,6 +24,10 @@ import (
 
 // Option configures a compiler option.
 type Option func(*Compiler)
+
+func noopOption() Option {
+	return func(*Compiler) {}
+}
 
 // WithOption configures the compiler with the given option if
 // boolean b evaluates to true.
@@ -174,22 +177,6 @@ func WithS3Cacher(access, secret, region, bucket string) Option {
 	}
 }
 
-// WithProxy configures the compiler with HTTP_PROXY, HTTPS_PROXY,
-// and NO_PROXY environment variables added by default to every
-// container in the pipeline.
-func WithProxy() Option {
-	return WithEnviron(
-		map[string]string{
-			"no_proxy":    noProxy,
-			"NO_PROXY":    noProxy,
-			"http_proxy":  httpProxy,
-			"HTTP_PROXY":  httpProxy,
-			"HTTPS_PROXY": httpsProxy,
-			"https_proxy": httpsProxy,
-		},
-	)
-}
-
 // WithNetworks configures the compiler with additional networks
 // to be connected to pipeline containers
 func WithNetworks(networks ...string) Option {
@@ -233,38 +220,29 @@ func WithNetrcOnlyTrusted(only bool) Option {
 	}
 }
 
-// TODO(bradrydzewski) consider an alternate approach to
-// WithProxy where the proxy strings are passed directly
-// to the function as named parameters.
+type ProxyOptions struct {
+	NoProxy    string
+	HTTPProxy  string
+	HTTPSProxy string
+}
 
-// func WithProxy2(http, https, none string) Option {
-// 	return WithEnviron(
-// 		map[string]string{
-// 			"no_proxy":    none,
-// 			"NO_PROXY":    none,
-// 			"http_proxy":  http,
-// 			"HTTP_PROXY":  http,
-// 			"HTTPS_PROXY": https,
-// 			"https_proxy": https,
-// 		},
-// 	)
-// }
-
-var (
-	noProxy    = getenv("no_proxy")
-	httpProxy  = getenv("https_proxy")
-	httpsProxy = getenv("https_proxy")
-)
-
-// getenv returns the named environment variable.
-func getenv(name string) (value string) {
-	name = strings.ToUpper(name)
-	if value := os.Getenv(name); value != "" {
-		return value
+// WithProxy configures the compiler with HTTP_PROXY, HTTPS_PROXY,
+// and NO_PROXY environment variables added by default to every
+// container in the pipeline.
+func WithProxy(opt ProxyOptions) Option {
+	if opt.HTTPProxy == "" &&
+		opt.HTTPSProxy == "" &&
+		opt.NoProxy == "" {
+		return noopOption()
 	}
-	name = strings.ToLower(name)
-	if value := os.Getenv(name); value != "" {
-		return value
-	}
-	return
+	return WithEnviron(
+		map[string]string{
+			"no_proxy":    opt.NoProxy,
+			"NO_PROXY":    opt.NoProxy,
+			"http_proxy":  opt.HTTPProxy,
+			"HTTP_PROXY":  opt.HTTPProxy,
+			"HTTPS_PROXY": opt.HTTPSProxy,
+			"https_proxy": opt.HTTPSProxy,
+		},
+	)
 }

@@ -1,3 +1,10 @@
+when:
+  - event: [pull_request, tag]
+  - event: push
+    branch:
+      - ${CI_REPO_DEFAULT_BRANCH}
+      - release/*
+
 variables:
   - &golang_image 'golang:1.20.2'
   - &when
@@ -10,10 +17,6 @@ variables:
         - "go.*"
         # schema changes
         - "pipeline/schema/**"
-      branch:
-        exclude: ${CI_REPO_DEFAULT_BRANCH}
-      event: push
-    - path: *when_path
       event: [pull_request, tag, deployment]
 
 steps:
@@ -62,14 +65,12 @@ steps:
     image: mstruebing/editorconfig-checker
     group: test
 
-  # Fixed with https://github.com/woodpecker-ci/woodpecker/pull/1753
-  # securitycheck:
-  #   group: test
-  #   image: aquasec/trivy:latest
-  #   commands:
-  #     - trivy fs --exit-code 0 --skip-dirs web/ --skip-dirs docs/ --severity UNKNOWN,LOW .
-  #     - trivy fs --exit-code 1 --skip-dirs web/ --skip-dirs docs/ --severity MEDIUM,HIGH,CRITICAL .
-  #   when: *when
+  lint-license-header:
+    image: *golang_image
+    commands:
+      - go install github.com/google/addlicense@latest
+      - "addlicense -check -ignore \"vendor/**\" **/*.go"
+    when: *when
 
   test:
     image: *golang_image

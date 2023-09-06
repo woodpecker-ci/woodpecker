@@ -64,6 +64,9 @@ type User struct {
 
 	// Hash is a unique token used to sign tokens.
 	Hash string `json:"-" xorm:"UNIQUE varchar(500) 'user_hash'"`
+
+	// OrgID is the of the user as model.Org.
+	OrgID int64 `json:"org_id" xorm:"user_org_id"`
 } //	@name User
 
 // TableName return database table name for xorm

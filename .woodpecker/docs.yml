@@ -1,12 +1,21 @@
+when:
+  - event: pull_request
+  - event: push
+    path: &when_path
+      - "docs/**"
+      - ".woodpecker/docs.yml"
+      # since we generate docs for cli tool we have to watch this too
+      - "cli/**"
+      - "cmd/cli/**"
+      # api docs
+      - "server/api/**"
+    branch: ${CI_REPO_DEFAULT_BRANCH}
+  - cron: update_docs
+    event: cron
+
 variables:
   - &golang_image 'golang:1.20.2'
   - &node_image 'node:18-alpine'
-  - &when_path
-    - "docs/**"
-    - ".woodpecker/docs.yml"
-    # since we generate docs for cli tool we have to watch this too
-    - "cli/**"
-    - "cmd/cli/**"
 
 steps:
   build-cli:
@@ -15,8 +24,7 @@ steps:
       - make docs
     when:
       - path: *when_path
-      - cron: update_docs
-        event: cron
+      - event: cron
 
   build:
     image: *node_image
@@ -27,17 +35,7 @@ steps:
       - pnpm build
     when:
       - path: *when_path
-      - cron: update_docs
-        event: cron
-
-  securitycheck:
-    image: aquasec/trivy:latest
-    commands:
-      - trivy fs --exit-code 0 --skip-dirs node_modules/ --skip-dirs plugins/woodpecker-plugins/node_modules --severity UNKNOWN,LOW docs/
-      # TODO currently it is not fixable so just do not block currently
-      - trivy fs --exit-code 0 --skip-dirs node_modules/ --skip-dirs plugins/woodpecker-plugins/node_modules --severity MEDIUM,HIGH,CRITICAL docs/
-    when:
-      path: *when_path
+      - event: cron
 
   deploy-preview:
     image: woodpeckerci/plugin-surge-preview:next
@@ -49,6 +47,7 @@ steps:
       forge_url: "https://github.com"
       forge_repo_token:
         from_secret: GITHUB_TOKEN_SURGE
+    failure: ignore
     when:
       event: pull_request
       path: *when_path
@@ -56,7 +55,7 @@ steps:
   # TODO: add step to remove preview again after PR is closed (waiting for #286)
 
   deploy:
-    image: alpine:3.14.2
+    image: alpine:3.18
     secrets:
       - BOT_PRIVATE_KEY
     commands:
@@ -67,7 +66,7 @@ steps:
       - chmod 0600 $HOME/.ssh/id_rsa
       - git config --global user.email "woodpecker-bot@obermui.de"
       - git config --global user.name "woodpecker-bot"
-      - git clone -b ${CI_REPO_DEFAULT_BRANCH} --single-branch git@github.com:woodpecker-ci/woodpecker-ci.github.io.git /repo
+      - git clone --depth 1 --single-branch git@github.com:woodpecker-ci/woodpecker-ci.github.io.git /repo
       # copy all docs files and delete all old ones, but leave CNAME and index.yaml untouched
       - rsync -r --exclude .git --exclude CNAME --exclude index.yaml --exclude README.md --delete docs/build/ /repo
       - cd /repo
@@ -77,8 +76,5 @@ steps:
       - git commit -m "Deploy website - based on ${CI_COMMIT_SHA}"
       - git push
     when:
-      - event: push
-        branch: ${CI_REPO_DEFAULT_BRANCH}
-        path: *when_path
-      - cron: update_docs
-        event: cron
+      event: [push, cron]
+      path: *when_path

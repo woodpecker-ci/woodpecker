@@ -3,6 +3,8 @@ import { createI18n } from 'vue-i18n';
 
 import { getUserLanguage } from '~/utils/locale';
 
+import { loadTimeAgoLocale } from './useTimeAgo';
+
 const userLanguage = getUserLanguage();
 const fallbackLocale = 'en';
 export const i18n = createI18n({
@@ -16,6 +18,8 @@ export const loadLocaleMessages = async (locale: string) => {
   const { default: messages } = await import(`~/assets/locales/${locale}.json`);
 
   i18n.global.setLocaleMessage(locale, messages);
+
+  loadTimeAgoLocale(locale);
 
   return nextTick();
 };
