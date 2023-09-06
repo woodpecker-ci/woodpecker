@@ -210,7 +210,7 @@ func (c *client) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 			return nil, err
 		}
 		for _, repo := range list {
-			if repo.Archived != nil && *repo.Archived == true {
+			if repo.GetArchived() {
 				continue
 			}
 			repos = append(repos, convertRepo(repo))
