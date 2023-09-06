@@ -420,7 +420,7 @@ func RepairRepo(c *gin.Context) {
 	}
 
 	// reconstruct the link
-	host := server.Config.Server.Host
+	host := server.Config.Server.WebhookHost
 	link := fmt.Sprintf(
 		"%s/api/hook?access_token=%s",
 		host,
