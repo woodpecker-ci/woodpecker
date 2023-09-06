@@ -70,6 +70,7 @@ func New(opts Opts) (forge.Forge, error) {
 		ClientID:     opts.ClientID,
 		ClientSecret: opts.ClientSecret,
 		SkipVerify:   opts.SkipVerify,
+		HideArchives: true,
 	}, nil
 }
 
