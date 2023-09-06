@@ -269,7 +269,7 @@ func (c *Gitea) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error)
 		)
 		result := make([]*model.Repo, 0, len(repos))
 		for _, repo := range repos {
-			if repo.Archived == true {
+			if repo.Archived {
 				continue
 			}
 			result = append(result, toRepo(repo))
