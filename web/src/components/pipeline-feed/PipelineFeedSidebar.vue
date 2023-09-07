@@ -28,6 +28,5 @@ import PipelineFeedItem from '~/components/pipeline-feed/PipelineFeedItem.vue';
 import usePipelineFeed from '~/compositions/usePipelineFeed';
 
 const pipelineFeed = usePipelineFeed();
-const { isOpen, sortedPipelines } = pipelineFeed;
-const { close } = pipelineFeed;
+const { close, isOpen, sortedPipelines } = pipelineFeed;
 </script>
