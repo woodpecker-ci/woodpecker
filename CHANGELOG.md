@@ -1,5 +1,155 @@
 # Changelog
 
+## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-09-07
+
+### ❤️ Thanks to all contributors! ❤️
+
+@anbraten, @xoxys, @mzampetakis, @math3vz, @qwerty287, @LTek-online, @testwill, @pat-s, @lonix1, @6543, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @runephilosof-karnovgroup, @azdle, @praneeth-ovckd, @nupplaphil
+
+### 💥 Breaking changes
+
+- Move "skip ci" logic into global pipeline conditions [[#2216](https://github.com/woodpecker-ci/woodpecker/pull/2216)]
+- Deprecate "platform" filter in favour of "labels" [[#2181](https://github.com/woodpecker-ci/woodpecker/pull/2181)]
+- fail hard on deprecated pipeline keys [[#2180](https://github.com/woodpecker-ci/woodpecker/pull/2180)]
+- client lib: remove useles "sync" option from RepoListOpts [[#2090](https://github.com/woodpecker-ci/woodpecker/pull/2090)]
+- Drop deprecated built-in environment variables [[#2048](https://github.com/woodpecker-ci/woodpecker/pull/2048)]
+
+### 🔒 Security
+
+- Check permissions on repo lookup [[#2357](https://github.com/woodpecker-ci/woodpecker/pull/2357)]
+- Change token logging to trace level [[#2247](https://github.com/woodpecker-ci/woodpecker/pull/2247)]
+- Validate webhook before change any data (#2221) [[#2222](https://github.com/woodpecker-ci/woodpecker/pull/2222)]
+- Validate webhook before change any data [[#2221](https://github.com/woodpecker-ci/woodpecker/pull/2221)]
+- Fix WOODPECKER_GRPC_VERIFY being ignored (#2077) [[#2082](https://github.com/woodpecker-ci/woodpecker/pull/2082)]
+
+### ✨ Features
+
+- Add org list [[#2338](https://github.com/woodpecker-ci/woodpecker/pull/2338)]
+- Add option to configure tolerations in kubernetes backend [[#2249](https://github.com/woodpecker-ci/woodpecker/pull/2249)]
+- Support user secrets [[#2126](https://github.com/woodpecker-ci/woodpecker/pull/2126)]
+- Add opt save global log output to file [[#2115](https://github.com/woodpecker-ci/woodpecker/pull/2115)]
+- Add ping command to server to allow container healthchecks [[#2030](https://github.com/woodpecker-ci/woodpecker/pull/2030)]
+
+### 🐛 Bug Fixes
+
+- Do not list archived repos for all forges [[#2374](https://github.com/woodpecker-ci/woodpecker/pull/2374)]
+- fix(server/api/repo): Fix repair webhook host [[#2372](https://github.com/woodpecker-ci/woodpecker/pull/2372)]
+-  Delete repos/secrets on org deletion [[#2367](https://github.com/woodpecker-ci/woodpecker/pull/2367)]
+- Fix org fetching [[#2343](https://github.com/woodpecker-ci/woodpecker/pull/2343)]
+- Show correct event in pipeline step list [[#2334](https://github.com/woodpecker-ci/woodpecker/pull/2334)]
+- Add min height to mobile pipeline view and fix overflow [[#2335](https://github.com/woodpecker-ci/woodpecker/pull/2335)]
+- Fix grid column size in pipeline log view [[#2336](https://github.com/woodpecker-ci/woodpecker/pull/2336)]
+- Fix button loading spinner when activating repos [[#2333](https://github.com/woodpecker-ci/woodpecker/pull/2333)]
+- Fix migration [[#2319](https://github.com/woodpecker-ci/woodpecker/pull/2319)]
+- make WOODPECKER_MIGRATIONS_ALLOW_LONG have an actuall effect [[#2251](https://github.com/woodpecker-ci/woodpecker/pull/2251)]
+- Docker build dont ignore ci env vars [[#2238](https://github.com/woodpecker-ci/woodpecker/pull/2238)]
+- Handle parsed hooks that should be ignored [[#2243](https://github.com/woodpecker-ci/woodpecker/pull/2243)]
+- Set correct version for release branch releases [[#2227](https://github.com/woodpecker-ci/woodpecker/pull/2227)]
+- Bump default git clone plugin (#2215) [[#2220](https://github.com/woodpecker-ci/woodpecker/pull/2220)]
+- Bump default git clone plugin [[#2215](https://github.com/woodpecker-ci/woodpecker/pull/2215)]
+- Show all steps (#2190) [[#2191](https://github.com/woodpecker-ci/woodpecker/pull/2191)]
+- Show all steps [[#2190](https://github.com/woodpecker-ci/woodpecker/pull/2190)]
+- Fix pipeline config collapsing [[#2166](https://github.com/woodpecker-ci/woodpecker/pull/2166)]
+- Fix 'add-orgs' migration (#2117) [[#2145](https://github.com/woodpecker-ci/woodpecker/pull/2145)]
+- Fix 'add-orgs' migration [[#2117](https://github.com/woodpecker-ci/woodpecker/pull/2117)]
+- Fix UI and backend paths with subpath (#1799) [[#2133](https://github.com/woodpecker-ci/woodpecker/pull/2133)]
+- Fix vite server [[#2134](https://github.com/woodpecker-ci/woodpecker/pull/2134)]
+- Fix UI and backend paths with subpath [[#1799](https://github.com/woodpecker-ci/woodpecker/pull/1799)]
+- docs: Environment Variable Seems to be `DOCKER_HOST`, not `DOCKER_SOCK` [[#2122](https://github.com/woodpecker-ci/woodpecker/pull/2122)]
+- Fix swagger response code (#2119) [[#2121](https://github.com/woodpecker-ci/woodpecker/pull/2121)]
+- Fix swagger response code [[#2119](https://github.com/woodpecker-ci/woodpecker/pull/2119)]
+- Forge Github Org: Use `login` instead of `name` (#2104) [[#2106](https://github.com/woodpecker-ci/woodpecker/pull/2106)]
+- Forge Github Org: Use `login` instead of `name` [[#2104](https://github.com/woodpecker-ci/woodpecker/pull/2104)]
+- Fix translation key [[#2098](https://github.com/woodpecker-ci/woodpecker/pull/2098)]
+- client.go: Backport fix RepoPost path [[#2100](https://github.com/woodpecker-ci/woodpecker/pull/2100)]
+- client.go: Fix RepoPost path [[#2091](https://github.com/woodpecker-ci/woodpecker/pull/2091)]
+- Fix alt text contrast in code boxes [[#2089](https://github.com/woodpecker-ci/woodpecker/pull/2089)]
+- Fix WOODPECKER_GRPC_VERIFY being ignored [[#2077](https://github.com/woodpecker-ci/woodpecker/pull/2077)]
+- Handle case where there is no latest pipeline for GetBadge (#2042) [[#2050](https://github.com/woodpecker-ci/woodpecker/pull/2050)]
+- Handle case where there is no latest pipeline for GetBadge [[#2042](https://github.com/woodpecker-ci/woodpecker/pull/2042)]
+
+### 📈 Enhancement
+
+- Use API error helpers and improve response codes [[#2366](https://github.com/woodpecker-ci/woodpecker/pull/2366)]
+- Import packages only once [[#2362](https://github.com/woodpecker-ci/woodpecker/pull/2362)]
+- Only show commit title [[#2361](https://github.com/woodpecker-ci/woodpecker/pull/2361)]
+- Use full width header on pipeline view and show repo name [[#2327](https://github.com/woodpecker-ci/woodpecker/pull/2327)]
+- Show that repo is disabled [[#2340](https://github.com/woodpecker-ci/woodpecker/pull/2340)]
+- add spacing to pipeline feed spinner [[#2326](https://github.com/woodpecker-ci/woodpecker/pull/2326)]
+- make: autodetect host platform [[#2322](https://github.com/woodpecker-ci/woodpecker/pull/2322)]
+- Add "plugin" support to local backend [[#2239](https://github.com/woodpecker-ci/woodpecker/pull/2239)]
+- Rename grpc pipeline to workflow [[#2173](https://github.com/woodpecker-ci/woodpecker/pull/2173)]
+- Pass netrc data to external config service request [[#2310](https://github.com/woodpecker-ci/woodpecker/pull/2310)]
+- Create settings-panel vue component and use InputFields [[#2177](https://github.com/woodpecker-ci/woodpecker/pull/2177)]
+- Use browser-native tooltips [[#2189](https://github.com/woodpecker-ci/woodpecker/pull/2189)]
+- Improve agent rpc retry logic with exponential backoff [[#2205](https://github.com/woodpecker-ci/woodpecker/pull/2205)]
+- Skip settings proxy config with WithProxy if its empty [[#2242](https://github.com/woodpecker-ci/woodpecker/pull/2242)]
+- Move hook and events-stream routes to use `/api` prefix [[#2212](https://github.com/woodpecker-ci/woodpecker/pull/2212)]
+- Add SSH clone URL env var [[#2198](https://github.com/woodpecker-ci/woodpecker/pull/2198)]
+- Small improvements to mobile interface [[#2202](https://github.com/woodpecker-ci/woodpecker/pull/2202)]
+- Switch to upstream ttlcache [[#2187](https://github.com/woodpecker-ci/woodpecker/pull/2187)]
+- make EqualStringSlice to generic EqualSliceValues [[#2179](https://github.com/woodpecker-ci/woodpecker/pull/2179)]
+- Pass netrc to trusted clone images [[#2163](https://github.com/woodpecker-ci/woodpecker/pull/2163)]
+- Use Vue setup directive [[#2165](https://github.com/woodpecker-ci/woodpecker/pull/2165)]
+- Release file lock on USR1 signal [[#2151](https://github.com/woodpecker-ci/woodpecker/pull/2151)]
+- Add header to pipeline log and always show buttons [[#2140](https://github.com/woodpecker-ci/woodpecker/pull/2140)]
+- Make sure we dont have hidden options for backend and pipeline compiler [[#2123](https://github.com/woodpecker-ci/woodpecker/pull/2123)]
+- Enhance local backend [[#2017](https://github.com/woodpecker-ci/woodpecker/pull/2017)]
+- Don't show badge without information [[#2130](https://github.com/woodpecker-ci/woodpecker/pull/2130)]
+- CLI repo sync: Show `forge-remote-id` [[#2125](https://github.com/woodpecker-ci/woodpecker/pull/2125)]
+- CLI repo sync: Show `forge-remote-id` [[#2103](https://github.com/woodpecker-ci/woodpecker/pull/2103)]
+- Lazy-load TimeAgo locales [[#2094](https://github.com/woodpecker-ci/woodpecker/pull/2094)]
+- Improve user settings [[#2087](https://github.com/woodpecker-ci/woodpecker/pull/2087)]
+- Allow to disable swagger [[#2093](https://github.com/woodpecker-ci/woodpecker/pull/2093)]
+- Change master to main [[#2044](https://github.com/woodpecker-ci/woodpecker/pull/2044)]
+- Remove default branch fallbacks [[#2065](https://github.com/woodpecker-ci/woodpecker/pull/2065)]
+- Remove fallback check for old sqlite file location [[#2046](https://github.com/woodpecker-ci/woodpecker/pull/2046)]
+- let generic datastore error include func name [[#2041](https://github.com/woodpecker-ci/woodpecker/pull/2041)]
+
+### 📚 Documentation
+
+- clarify setup with gitlab with RFC1918 nets and non standard TLDs [[#2363](https://github.com/woodpecker-ci/woodpecker/pull/2363)]
+- Clarify env var `CI` in docs [[#2349](https://github.com/woodpecker-ci/woodpecker/pull/2349)]
+- docs: yaml cheatsheet for advanced syntax [[#2329](https://github.com/woodpecker-ci/woodpecker/pull/2329)]
+- Improve explanation for globs in when:path [[#2252](https://github.com/woodpecker-ci/woodpecker/pull/2252)]
+- Fix usage description for backend-http-proxy flag [[#2250](https://github.com/woodpecker-ci/woodpecker/pull/2250)]
+- Restructure k8s documentation [[#2193](https://github.com/woodpecker-ci/woodpecker/pull/2193)]
+- Update list of "projects using Woodpecker" [[#2196](https://github.com/woodpecker-ci/woodpecker/pull/2196)]
+- Update 92-awesome.md [[#2195](https://github.com/woodpecker-ci/woodpecker/pull/2195)]
+- Better blog title/desc [[#2182](https://github.com/woodpecker-ci/woodpecker/pull/2182)]
+- Fix version in FAQ [[#2101](https://github.com/woodpecker-ci/woodpecker/pull/2101)]
+- Add blog posts/tutorials [[#2095](https://github.com/woodpecker-ci/woodpecker/pull/2095)]
+- update version docs about versioning [[#2086](https://github.com/woodpecker-ci/woodpecker/pull/2086)]
+- Fix client example [[#2085](https://github.com/woodpecker-ci/woodpecker/pull/2085)]
+- Update docs deps to address cves [[#2080](https://github.com/woodpecker-ci/woodpecker/pull/2080)]
+- fix: global registry docs [[#2070](https://github.com/woodpecker-ci/woodpecker/pull/2070)]
+- Improve bitbucket docs [[#2066](https://github.com/woodpecker-ci/woodpecker/pull/2066)]
+- update docs about versioning [[#2043](https://github.com/woodpecker-ci/woodpecker/pull/2043)]
+- Set v1.0 documents as default and mark v0.15 as unmaintained [[#2034](https://github.com/woodpecker-ci/woodpecker/pull/2034)]
+
+### Misc
+
+- Add release helper [[#1976](https://github.com/woodpecker-ci/woodpecker/pull/1976)]
+- Fix typo in GitLab docs [[#2376](https://github.com/woodpecker-ci/woodpecker/pull/2376)]
+- Execute `make generate` with new versions [[#2365](https://github.com/woodpecker-ci/woodpecker/pull/2365)]
+- Truncate commit message in pipeline log view header [[#2356](https://github.com/woodpecker-ci/woodpecker/pull/2356)]
+- Increase header padding again [[#2348](https://github.com/woodpecker-ci/woodpecker/pull/2348)]
+- Use html list for changed files list [[#2346](https://github.com/woodpecker-ci/woodpecker/pull/2346)]
+- Fix mobile login view [[#2332](https://github.com/woodpecker-ci/woodpecker/pull/2332)]
+- fix regression and add trace in clone for local backend [[#2241](https://github.com/woodpecker-ci/woodpecker/pull/2241)]
+- Check for correct license header [[#2137](https://github.com/woodpecker-ci/woodpecker/pull/2137)]
+- Add TestCompilerCompile [[#2183](https://github.com/woodpecker-ci/woodpecker/pull/2183)]
+- Use min/max width for pipeline step list [[#2141](https://github.com/woodpecker-ci/woodpecker/pull/2141)]
+- Use fix width for pipeline step list [[#2138](https://github.com/woodpecker-ci/woodpecker/pull/2138)]
+- Fix `docs` workflow [[#2128](https://github.com/woodpecker-ci/woodpecker/pull/2128)]
+- Add some tests for bitbucket forge  [[#2097](https://github.com/woodpecker-ci/woodpecker/pull/2097)]
+- Support bitbucket Dir() [[#2045](https://github.com/woodpecker-ci/woodpecker/pull/2045)]
+- Use consistent woodpecker color scheme [[#2003](https://github.com/woodpecker-ci/woodpecker/pull/2003)]
+- Publish releases and branch tags to quay.io too [[#2069](https://github.com/woodpecker-ci/woodpecker/pull/2069)]
+- Bump default clone image version to 2.1.0 [[#2053](https://github.com/woodpecker-ci/woodpecker/pull/2053)]
+- Fix wrong repo url used by badges (#2037) [[#2039](https://github.com/woodpecker-ci/woodpecker/pull/2039)]
+- Fix wrong repo url used by badges [[#2037](https://github.com/woodpecker-ci/woodpecker/pull/2037)]
+
 ## [1.0.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v1.0.2) - 2023-08-16
 
 * SECURITY
