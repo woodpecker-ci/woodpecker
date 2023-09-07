@@ -46,24 +46,29 @@ func apiRoutes(e *gin.RouterGroup) {
 			users.DELETE("/:login", api.DeleteUser)
 		}
 
-		apiBase.GET("/orgs/lookup/*org_full_name", api.LookupOrg)
-		orgBase := apiBase.Group("/orgs/:org_id")
+		orgs := apiBase.Group("/orgs")
 		{
-			orgBase.GET("/permissions", api.GetOrgPermissions)
-
-			org := orgBase.Group("")
+			orgs.GET("", session.MustAdmin(), api.GetOrgs)
+			orgs.GET("/lookup/*org_full_name", api.LookupOrg)
+			orgBase := orgs.Group("/:org_id")
 			{
-				org.Use(session.MustOrgMember(true))
-				org.GET("", api.GetOrg)
-				org.GET("/secrets", api.GetOrgSecretList)
-				org.POST("/secrets", api.PostOrgSecret)
-				org.GET("/secrets/:secret", api.GetOrgSecret)
-				org.PATCH("/secrets/:secret", api.PatchOrgSecret)
-				org.DELETE("/secrets/:secret", api.DeleteOrgSecret)
+				orgBase.GET("/permissions", api.GetOrgPermissions)
+
+				org := orgBase.Group("")
+				{
+					org.Use(session.MustOrgMember(true))
+					org.DELETE("", session.MustAdmin(), api.DeleteOrg)
+					org.GET("", api.GetOrg)
+					org.GET("/secrets", api.GetOrgSecretList)
+					org.POST("/secrets", api.PostOrgSecret)
+					org.GET("/secrets/:secret", api.GetOrgSecret)
+					org.PATCH("/secrets/:secret", api.PatchOrgSecret)
+					org.DELETE("/secrets/:secret", api.DeleteOrgSecret)
+				}
 			}
 		}
 
-		apiBase.GET("/repos/lookup/*repo_full_name", api.LookupRepo) // TODO: check if this public route is a security issue
+		apiBase.GET("/repos/lookup/*repo_full_name", session.SetRepo(), session.SetPerm(), session.MustPull, api.LookupRepo)
 		apiBase.POST("/repos", session.MustUser(), api.PostRepo)
 		repoBase := apiBase.Group("/repos/:repo_id")
 		{

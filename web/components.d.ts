@@ -12,6 +12,7 @@ declare module '@vue/runtime-core' {
     ActionsTab: typeof import('./src/components/repo/settings/ActionsTab.vue')['default']
     ActivePipelines: typeof import('./src/components/layout/header/ActivePipelines.vue')['default']
     AdminAgentsTab: typeof import('./src/components/admin/settings/AdminAgentsTab.vue')['default']
+    AdminOrgsTab: typeof import('./src/components/admin/settings/AdminOrgsTab.vue')['default']
     AdminQueueStats: typeof import('./src/components/admin/settings/queue/AdminQueueStats.vue')['default']
     AdminQueueTab: typeof import('./src/components/admin/settings/AdminQueueTab.vue')['default']
     AdminSecretsTab: typeof import('./src/components/admin/settings/AdminSecretsTab.vue')['default']

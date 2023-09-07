@@ -269,6 +269,9 @@ func (c *Gitea) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error)
 		)
 		result := make([]*model.Repo, 0, len(repos))
 		for _, repo := range repos {
+			if repo.Archived {
+				continue
+			}
 			result = append(result, toRepo(repo))
 		}
 		return result, err
@@ -534,23 +537,25 @@ func (c *Gitea) Org(ctx context.Context, u *model.User, owner string) (*model.Or
 		return nil, err
 	}
 
-	user, _, err := client.GetUserInfo(owner)
-	if user != nil && err == nil {
-		return &model.Org{
-			Name:    user.UserName,
-			IsUser:  true,
-			Private: user.Visibility != gitea.VisibleTypePublic,
-		}, nil
-	}
-
 	org, _, err := client.GetOrg(owner)
 	if err != nil {
 		return nil, err
 	}
+	if org != nil {
+		return &model.Org{
+			Name:    org.UserName,
+			Private: gitea.VisibleType(org.Visibility) != gitea.VisibleTypePublic,
+		}, nil
+	}
 
+	user, _, err := client.GetUserInfo(owner)
+	if err != nil {
+		return nil, err
+	}
 	return &model.Org{
-		Name:    org.UserName,
-		Private: gitea.VisibleType(org.Visibility) != gitea.VisibleTypePublic,
+		Name:    user.UserName,
+		IsUser:  true,
+		Private: user.Visibility != gitea.VisibleTypePublic,
 	}, nil
 }
 

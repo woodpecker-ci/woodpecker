@@ -6,47 +6,55 @@
       disable-hash-mode
       :go-back="goBack"
       :fluid-content="activeTab !== 'tasks'"
+      :full-width="true"
     >
-      <template #title>
-        <span class="flex-shrink-0 text-center">{{ $t('repo.pipeline.pipeline', { pipelineId }) }}</span>
-        <span class="<md:hidden">-</span>
-        <span class="text-center truncate">{{ message }}</span>
-      </template>
+      <template #title>{{ repo.full_name }}</template>
 
       <template #titleActions>
-        <PipelineStatusIcon :status="pipeline.status" class="flex flex-shrink-0" />
+        <div class="flex md:items-center flex-col gap-x-2 md:flex-row md:justify-between min-w-0">
+          <div class="flex content-start gap-x-2 py-2 md:mr-2 min-w-0">
+            <PipelineStatusIcon :status="pipeline.status" class="flex flex-shrink-0" />
+            <span class="flex-shrink-0 text-center">{{ $t('repo.pipeline.pipeline', { pipelineId }) }}</span>
+            <span class="hidden md:inline-block">-</span>
+            <span class="min-w-0 whitespace-nowrap overflow-hidden overflow-ellipsis" :title="message">{{
+              title
+            }}</span>
+          </div>
 
-        <template v-if="repoPermissions.push">
-          <Button
-            v-if="pipeline.status === 'pending' || pipeline.status === 'running'"
-            class="flex-shrink-0"
-            :text="$t('repo.pipeline.actions.cancel')"
-            :is-loading="isCancelingPipeline"
-            @click="cancelPipeline"
-          />
-          <Button
-            v-else-if="pipeline.status !== 'blocked' && pipeline.status !== 'declined'"
-            class="flex-shrink-0"
-            :text="$t('repo.pipeline.actions.restart')"
-            :is-loading="isRestartingPipeline"
-            @click="restartPipeline"
-          />
-          <Button
-            v-if="pipeline.status === 'success'"
-            class="flex-shrink-0"
-            :text="$t('repo.pipeline.actions.deploy')"
-            @click="showDeployPipelinePopup = true"
-          />
-          <DeployPipelinePopup
-            :pipeline-number="pipelineId"
-            :open="showDeployPipelinePopup"
-            @close="showDeployPipelinePopup = false"
-          />
-        </template>
+          <template v-if="repoPermissions.push">
+            <div class="flex content-start gap-x-2">
+              <Button
+                v-if="pipeline.status === 'pending' || pipeline.status === 'running'"
+                class="flex-shrink-0"
+                :text="$t('repo.pipeline.actions.cancel')"
+                :is-loading="isCancelingPipeline"
+                @click="cancelPipeline"
+              />
+              <Button
+                v-else-if="pipeline.status !== 'blocked' && pipeline.status !== 'declined'"
+                class="flex-shrink-0"
+                :text="$t('repo.pipeline.actions.restart')"
+                :is-loading="isRestartingPipeline"
+                @click="restartPipeline"
+              />
+              <Button
+                v-if="pipeline.status === 'success'"
+                class="flex-shrink-0"
+                :text="$t('repo.pipeline.actions.deploy')"
+                @click="showDeployPipelinePopup = true"
+              />
+              <DeployPipelinePopup
+                :pipeline-number="pipelineId"
+                :open="showDeployPipelinePopup"
+                @close="showDeployPipelinePopup = false"
+              />
+            </div>
+          </template>
+        </div>
       </template>
 
       <template #tabActions>
-        <div class="flex justify-between gap-x-4 text-wp-text-100 flex-shrink-0 pb-2 md:p-0 mx-auto md:mr-0">
+        <div class="flex gap-x-4">
           <div class="flex space-x-1 items-center flex-shrink-0" :title="created">
             <Icon name="since" />
             <span>{{ since }}</span>
@@ -61,9 +69,13 @@
       <Tab id="tasks" :title="$t('repo.pipeline.tasks')" />
       <Tab id="config" :title="$t('repo.pipeline.config')" />
       <Tab
-        v-if="pipeline.event === 'push' || pipeline.event === 'pull_request'"
+        v-if="
+          (pipeline.event === 'push' || pipeline.event === 'pull_request') &&
+          pipeline.changed_files &&
+          pipeline.changed_files.length > 0
+        "
         id="changed-files"
-        :title="$t('repo.pipeline.files', { files: pipeline.changed_files?.length || 0 })"
+        :title="$t('repo.pipeline.files', { files: pipeline.changed_files.length })"
       />
       <router-view />
     </Scaffold>
@@ -112,10 +124,8 @@ if (!repo || !repoPermissions) {
 }
 
 const pipeline = pipelineStore.getPipeline(repositoryId, pipelineId);
-const { since, duration, created } = usePipeline(pipeline);
+const { since, duration, created, message, title } = usePipeline(pipeline);
 provide('pipeline', pipeline);
-
-const { message } = usePipeline(pipeline);
 
 const showDeployPipelinePopup = ref(false);
 
