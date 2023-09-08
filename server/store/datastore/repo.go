@@ -149,3 +149,15 @@ func (s storage) RepoList(user *model.User, owned, active bool) ([]*model.Repo, 
 		Asc("repo_full_name").
 		Find(&repos)
 }
+
+// RepoListAll list all repos
+func (s storage) RepoListAll(active bool, p *model.ListOptions) ([]*model.Repo, error) {
+	repos := make([]*model.Repo, 0)
+	sess := s.paginate(p).Table("repos")
+	if active {
+		sess = sess.And(builder.Eq{"repos.repo_active": true})
+	}
+	return repos, sess.
+		Asc("repo_full_name").
+		Find(&repos)
+}

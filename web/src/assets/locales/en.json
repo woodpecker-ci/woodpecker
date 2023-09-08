@@ -432,6 +432,14 @@
         "deleted": "Organization deleted",
         "delete_confirm": "Do you really want to delete this organization? This will also delete all repositories owned by this organization.",
         "view": "View organization"
+      },
+      "repos": {
+        "repos": "Repositories",
+        "desc": "Repositories that are or were enabled on this server",
+        "none": "There are no repositories yet.",
+        "view": "View repository",
+        "settings": "Repository settings",
+        "disabled": "Disabled"
       }
     }
   },
