@@ -1583,6 +1583,32 @@ func (_m *Store) RepoList(user *model.User, owned bool, active bool) ([]*model.R
 	return r0, r1
 }
 
+// RepoListAll provides a mock function with given fields: active, p
+func (_m *Store) RepoListAll(active bool, p *model.ListOptions) ([]*model.Repo, error) {
+	ret := _m.Called(active, p)
+
+	var r0 []*model.Repo
+	var r1 error
+	if rf, ok := ret.Get(0).(func(bool, *model.ListOptions) ([]*model.Repo, error)); ok {
+		return rf(active, p)
+	}
+	if rf, ok := ret.Get(0).(func(bool, *model.ListOptions) []*model.Repo); ok {
+		r0 = rf(active, p)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.Repo)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(bool, *model.ListOptions) error); ok {
+		r1 = rf(active, p)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // RepoListLatest provides a mock function with given fields: _a0
 func (_m *Store) RepoListLatest(_a0 *model.User) ([]*model.Feed, error) {
 	ret := _m.Called(_a0)
