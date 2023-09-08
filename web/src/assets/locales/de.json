@@ -43,7 +43,7 @@
       },
       "not_allowed": "Du darfst nicht auf die Server-Einstellungen zugreifen",
       "orgs": {
-        "delete_confirm": "Möchtest du diese Organisation wirklich löschen?",
+        "delete_confirm": "Möchtest du diese Organisation wirklich löschen? Das wird auch alle Repositories löschen, die dieser Organisation gehören.",
         "delete_org": "Organisation löschen",
         "deleted": "Organisation gelöscht",
         "desc": "Organisationen mit Repositories auf diesem Server",
@@ -106,7 +106,7 @@
         "avatar_url": "URL des Profilbilds",
         "cancel": "Abbrechen",
         "created": "Benutzer erstellt",
-        "delete_confirm": "Möchtest du diesen Benutzer wirklich löschen?",
+        "delete_confirm": "Möchtest du diesen Benutzer wirklich löschen? Das wird auch alle Repositories löschen, die diesem Benutzer gehören.",
         "delete_user": "Benutzer löschen",
         "deleted": "Benutzer gelöscht",
         "desc": "Auf diesem Server registrierte Benutzer",
@@ -184,6 +184,7 @@
       }
     },
     "enable": {
+      "disabled": "Deaktiviert",
       "enable": "Aktivieren",
       "enabled": "Bereits aktiviert",
       "list_reloaded": "Repository-Liste neu geladen",

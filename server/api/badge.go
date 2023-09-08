@@ -62,11 +62,7 @@ func GetBadge(c *gin.Context) {
 	}
 
 	if err != nil {
-		if errors.Is(err, types.RecordNotExist) {
-			c.AbortWithStatus(http.StatusNotFound)
-			return
-		}
-		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		handleDbError(c, err)
 		return
 	}
 
@@ -107,7 +103,7 @@ func GetCC(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo, err := _store.GetRepoName(c.Param("owner") + "/" + c.Param("name"))
 	if err != nil {
-		handleDbGetError(c, err)
+		handleDbError(c, err)
 		return
 	}
 
