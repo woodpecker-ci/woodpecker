@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@xoxys, @anbraten, @mzampetakis, @math3vz, @qwerty287, @LTek-online, @testwill, @pat-s, @lonix1, @6543, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @runephilosof-karnovgroup, @azdle, @praneeth-ovckd, @nupplaphil
+@qwerty287, @renovate[bot], @xoxys, @anbraten, @mzampetakis, @math3vz, @LTek-online, @testwill, @pat-s, @lonix1, @6543, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @runephilosof-karnovgroup, @azdle, @praneeth-ovckd, @nupplaphil
 
 ### 💥 Breaking changes
 
@@ -24,6 +24,7 @@
 
 ### ✨ Features
 
+- Add repos list for admins [[#2347](https://github.com/woodpecker-ci/woodpecker/pull/2347)]
 - Add org list [[#2338](https://github.com/woodpecker-ci/woodpecker/pull/2338)]
 - Add option to configure tolerations in kubernetes backend [[#2249](https://github.com/woodpecker-ci/woodpecker/pull/2249)]
 - Support user secrets [[#2126](https://github.com/woodpecker-ci/woodpecker/pull/2126)]
@@ -130,6 +131,9 @@
 
 ### Misc
 
+- fix(deps): update module github.com/alessio/shellescape to v1.4.2 [[#2381](https://github.com/woodpecker-ci/woodpecker/pull/2381)]
+- fix(deps): update golang.org/x/exp digest to 9212866 [[#2380](https://github.com/woodpecker-ci/woodpecker/pull/2380)]
+- Configure Renovate [[#2360](https://github.com/woodpecker-ci/woodpecker/pull/2360)]
 - Add option to render button as link [[#2378](https://github.com/woodpecker-ci/woodpecker/pull/2378)]
 - Add release helper [[#1976](https://github.com/woodpecker-ci/woodpecker/pull/1976)]
 - Fix typo in GitLab docs [[#2376](https://github.com/woodpecker-ci/woodpecker/pull/2376)]
