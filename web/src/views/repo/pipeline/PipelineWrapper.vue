@@ -12,7 +12,7 @@
 
       <template #titleActions>
         <div class="flex md:items-center flex-col gap-2 md:flex-row md:justify-between min-w-0">
-          <div class="flex content-start gap-x-2 md:mr-2 min-w-0">
+          <div class="flex content-start gap-2 min-w-0">
             <PipelineStatusIcon :status="pipeline.status" class="flex flex-shrink-0" />
             <span class="flex-shrink-0 text-center">{{ $t('repo.pipeline.pipeline', { pipelineId }) }}</span>
             <span class="hidden md:inline-block">-</span>
@@ -21,7 +21,7 @@
             }}</span>
           </div>
 
-          <template v-if="repoPermissions.push">
+          <template v-if="repoPermissions.push && pipeline.status !== 'declined'">
             <div class="flex content-start gap-x-2">
               <Button
                 v-if="pipeline.status === 'pending' || pipeline.status === 'running'"
@@ -31,7 +31,7 @@
                 @click="cancelPipeline"
               />
               <Button
-                v-else-if="pipeline.status !== 'blocked' && pipeline.status !== 'declined'"
+                v-else-if="pipeline.status !== 'blocked'"
                 class="flex-shrink-0"
                 :text="$t('repo.pipeline.actions.restart')"
                 :is-loading="isRestartingPipeline"
