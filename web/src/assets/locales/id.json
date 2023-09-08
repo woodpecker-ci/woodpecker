@@ -43,7 +43,7 @@
       },
       "not_allowed": "Anda tidak diperbolehkan untuk mengakses pengaturan peladen",
       "orgs": {
-        "delete_confirm": "Apakah Anda benar-benar ingin menghapus organisasi ini?",
+        "delete_confirm": "Apakah Anda benar-benar ingin menghapus organisasi ini? Ini juga akan menghapus semua repositori yang dimiliki oleh organisasi ini.",
         "delete_org": "Hapus organisasi",
         "deleted": "Organisasi dihapus",
         "desc": "Organisasi yang memiliki repositori di server ini",
@@ -106,7 +106,7 @@
         "avatar_url": "URL Avatar",
         "cancel": "Batal",
         "created": "Pengguna dibuat",
-        "delete_confirm": "Apakah Anda ingin menghapus pengguna ini?",
+        "delete_confirm": "Apakah Anda ingin menghapus pengguna ini? Ini juga akan menghapus semua repositori yang dimiliki oleh pengguna ini.",
         "delete_user": "Hapus pengguna",
         "deleted": "Pengguna dihapus",
         "desc": "Pengguna terdaftar untuk server ini",
@@ -184,6 +184,7 @@
       }
     },
     "enable": {
+      "disabled": "Nonaktif",
       "enable": "Aktifkan",
       "enabled": "Sudah diaktifkan",
       "list_reloaded": "Daftar repositori dimuat ulang",

@@ -143,23 +143,20 @@ func PostHook(c *gin.Context) {
 
 	repo, err := _store.GetRepoNameFallback(tmpRepo.ForgeRemoteID, tmpRepo.FullName)
 	if err != nil {
-		msg := fmt.Sprintf("failure to get repo %s from store", tmpRepo.FullName)
-		log.Error().Err(err).Msg(msg)
-		c.String(http.StatusNotFound, msg)
+		log.Error().Err(err).Msgf("failure to get repo %s from store", tmpRepo.FullName)
+		handleDbError(c, err)
 		return
 	}
 	if !repo.IsActive {
-		msg := fmt.Sprintf("ignoring hook: repo %s is inactive", tmpRepo.FullName)
-		log.Debug().Msg(msg)
-		c.String(http.StatusNoContent, msg)
+		log.Debug().Msgf("ignoring hook: repo %s is inactive", tmpRepo.FullName)
+		c.Status(http.StatusNoContent)
 		return
 	}
 	oldFullName := repo.FullName
 
 	if repo.UserID == 0 {
-		msg := fmt.Sprintf("ignoring hook. repo %s has no owner.", repo.FullName)
-		log.Warn().Msg(msg)
-		c.String(http.StatusNoContent, msg)
+		log.Warn().Msgf("ignoring hook. repo %s has no owner.", repo.FullName)
+		c.Status(http.StatusNoContent)
 		return
 	}
 
@@ -220,9 +217,8 @@ func PostHook(c *gin.Context) {
 	//
 
 	if tmpPipeline.Event == model.EventPull && !repo.AllowPull {
-		msg := "ignoring hook: pull requests are disabled for this repo in woodpecker"
-		log.Debug().Str("repo", repo.FullName).Msg(msg)
-		c.String(http.StatusNoContent, msg)
+		log.Debug().Str("repo", repo.FullName).Msg("ignoring hook: pull requests are disabled for this repo in woodpecker")
+		c.Status(http.StatusNoContent)
 		return
 	}
 

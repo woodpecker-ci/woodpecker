@@ -412,7 +412,7 @@
         "show": "Show users",
         "add": "Add user",
         "none": "There are no users yet.",
-        "delete_confirm": "Do you really want to delete this user?",
+        "delete_confirm": "Do you really want to delete this user? This will also delete all repositories owned by this user.",
         "deleted": "User deleted",
         "created": "User created",
         "saved": "User saved",
@@ -430,8 +430,16 @@
         "org_settings": "Organization settings",
         "delete_org": "Delete organization",
         "deleted": "Organization deleted",
-        "delete_confirm": "Do you really want to delete this organization?",
+        "delete_confirm": "Do you really want to delete this organization? This will also delete all repositories owned by this organization.",
         "view": "View organization"
+      },
+      "repos": {
+        "repos": "Repositories",
+        "desc": "Repositories that are or were enabled on this server",
+        "none": "There are no repositories yet.",
+        "view": "View repository",
+        "settings": "Repository settings",
+        "disabled": "Disabled"
       }
     }
   },

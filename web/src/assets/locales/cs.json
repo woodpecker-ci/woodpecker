@@ -1,0 +1,31 @@
+{
+  "admin": {
+    "settings": {
+      "orgs": {
+        "delete_confirm": "Opravdu chcete tuto organizaci smazat? Tím se odstraní také všechna úložiště vlastněná touto organizací."
+      },
+      "users": {
+        "delete_confirm": "Opravdu chcete tohoto uživatele odstranit? Tím se odstraní také všechna úložiště, která tento uživatel vlastní."
+      }
+    }
+  },
+  "cancel": "Zrušit",
+  "docs": "Doky",
+  "login": "Přihlášení",
+  "logout": "Odhlášení",
+  "not_found": {
+    "not_found": "Páni 404, buď jsme něco rozbili, nebo jsi měl překlep :-/"
+  },
+  "repo": {
+    "settings": {
+      "actions": {
+        "delete": {
+          "confirm": "Po této akci budou všechna data ztracena!!!\n\nOpravdu chcete pokračovat?"
+        }
+      }
+    }
+  },
+  "repositories": "Repozitáře",
+  "search": "Hledání…",
+  "welcome": "Vítejte ve Woodpecker"
+}
