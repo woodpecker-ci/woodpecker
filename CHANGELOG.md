@@ -131,6 +131,12 @@
 
 ### Misc
 
+- fix(deps): update module github.com/google/uuid to v1.3.1 [[#2386](https://github.com/woodpecker-ci/woodpecker/pull/2386)]
+- chore(deps): update dependency unplugin-vue-components to ^0.25.0 [[#2395](https://github.com/woodpecker-ci/woodpecker/pull/2395)]
+- fix(deps): update dependency @intlify/unplugin-vue-i18n to ^0.13.0 [[#2398](https://github.com/woodpecker-ci/woodpecker/pull/2398)]
+- chore(deps): update dependency unplugin-icons to ^0.17.0 [[#2394](https://github.com/woodpecker-ci/woodpecker/pull/2394)]
+- chore(deps): update golang docker tag [[#2396](https://github.com/woodpecker-ci/woodpecker/pull/2396)]
+- fix(deps): update module github.com/moby/moby to v20.10.25+incompatible [[#2388](https://github.com/woodpecker-ci/woodpecker/pull/2388)]
 - fix(deps): update module github.com/docker/docker to v20.10.25+incompatible [[#2385](https://github.com/woodpecker-ci/woodpecker/pull/2385)]
 - fix(deps): update module github.com/docker/cli to v20.10.25+incompatible [[#2384](https://github.com/woodpecker-ci/woodpecker/pull/2384)]
 - fix(deps): update module github.com/alessio/shellescape to v1.4.2 [[#2381](https://github.com/woodpecker-ci/woodpecker/pull/2381)]
