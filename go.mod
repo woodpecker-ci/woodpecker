@@ -11,6 +11,7 @@ require (
 	github.com/antonmedv/expr v1.12.5
 	github.com/bmatcuk/doublestar/v4 v4.6.0
 	github.com/caddyserver/certmagic v0.17.2
+	github.com/cenkalti/backoff/v4 v4.2.1
 	github.com/docker/cli v20.10.24+incompatible
 	github.com/docker/distribution v2.8.2+incompatible
 	github.com/docker/docker v20.10.24+incompatible
@@ -47,12 +48,12 @@ require (
 	github.com/urfave/cli/v2 v2.25.3
 	github.com/xanzy/go-gitlab v0.83.0
 	github.com/xeipuuv/gojsonschema v1.2.0
-	golang.org/x/crypto v0.9.0
-	golang.org/x/exp v0.0.0-20230425010034-47ecfdc1ba53
-	golang.org/x/net v0.10.0
+	golang.org/x/crypto v0.13.0
+	golang.org/x/exp v0.0.0-20230905200255-921286631fa9
+	golang.org/x/net v0.15.0
 	golang.org/x/oauth2 v0.8.0
-	golang.org/x/sync v0.2.0
-	golang.org/x/term v0.11.0
+	golang.org/x/sync v0.3.0
+	golang.org/x/term v0.12.0
 	google.golang.org/grpc v1.55.0
 	google.golang.org/protobuf v1.30.0
 	gopkg.in/yaml.v3 v3.0.1
@@ -69,7 +70,6 @@ require (
 	github.com/Microsoft/go-winio v0.6.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bytedance/sonic v1.9.1 // indirect
-	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
@@ -140,11 +140,11 @@ require (
 	go.uber.org/multierr v1.8.0 // indirect
 	go.uber.org/zap v1.23.0 // indirect
 	golang.org/x/arch v0.3.0 // indirect
-	golang.org/x/mod v0.9.0 // indirect
-	golang.org/x/sys v0.11.0 // indirect
-	golang.org/x/text v0.9.0 // indirect
+	golang.org/x/mod v0.12.0 // indirect
+	golang.org/x/sys v0.12.0 // indirect
+	golang.org/x/text v0.13.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
-	golang.org/x/tools v0.7.0 // indirect
+	golang.org/x/tools v0.13.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20230306155012-7f2fa6fef1f4 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
