@@ -59,7 +59,7 @@
     "prettier": "^2.8.8",
     "tinycolor2": "^1.6.0",
     "typescript": "5.0.3",
-    "unplugin-icons": "^0.16.3",
+    "unplugin-icons": "^0.17.0",
     "unplugin-vue-components": "^0.24.1",
     "vite": "^4.3.9",
     "vite-plugin-prismjs": "^0.0.8",
