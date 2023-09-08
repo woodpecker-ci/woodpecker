@@ -21,7 +21,7 @@
             }}</span>
           </div>
 
-          <template v-if="repoPermissions.push && pipeline.status !== 'declined'">
+          <template v-if="repoPermissions.push && pipeline.status !== 'declined' && pipeline.status !== 'blocked'">
             <div class="flex content-start gap-x-2">
               <Button
                 v-if="pipeline.status === 'pending' || pipeline.status === 'running'"
@@ -31,7 +31,6 @@
                 @click="cancelPipeline"
               />
               <Button
-                v-else-if="pipeline.status !== 'blocked'"
                 class="flex-shrink-0"
                 :text="$t('repo.pipeline.actions.restart')"
                 :is-loading="isRestartingPipeline"
