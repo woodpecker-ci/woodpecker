@@ -550,3 +550,28 @@ func MoveRepo(c *gin.Context) {
 	}
 	c.Status(http.StatusOK)
 }
+
+// GetAllRepos
+//
+//	@Summary	List all repositories on the server. Requires admin rights.
+//	@Router		/repos [get]
+//	@Produce	json
+//	@Success	200	{array}	Repo
+//	@Tags		Repositories
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		active				query	bool	false	"only list active repos"
+//	@Param		page			query	int		false	"for response pagination, page offset number"	default(1)
+//	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
+func GetAllRepos(c *gin.Context) {
+	_store := store.FromContext(c)
+
+	active, _ := strconv.ParseBool(c.Query("active"))
+
+	repos, err := _store.RepoListAll(active, session.Pagination(c))
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Error fetching repository list. %s", err)
+		return
+	}
+
+	c.JSON(http.StatusOK, repos)
+}
