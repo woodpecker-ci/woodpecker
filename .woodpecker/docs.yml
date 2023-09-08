@@ -14,7 +14,7 @@ when:
     event: cron
 
 variables:
-  - &golang_image 'golang:1.20.2'
+  - &golang_image 'golang:1.21.1'
   - &node_image 'node:18-alpine'
 
 steps:

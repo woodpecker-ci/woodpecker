@@ -26,14 +26,14 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/google/go-github/v39 v39.2.0
 	github.com/google/tink/go v1.7.0
-	github.com/google/uuid v1.3.0
+	github.com/google/uuid v1.3.1
 	github.com/gorilla/securecookie v1.1.1
 	github.com/jellydator/ttlcache/v3 v3.0.1
 	github.com/joho/godotenv v1.5.1
 	github.com/lib/pq v1.10.9
 	github.com/mattn/go-sqlite3 v1.14.16
 	github.com/melbahja/goph v1.3.1
-	github.com/moby/moby v20.10.24+incompatible
+	github.com/moby/moby v20.10.25+incompatible
 	github.com/moby/term v0.5.0
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/pkg/errors v0.9.1
