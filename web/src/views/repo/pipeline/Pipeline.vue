@@ -20,19 +20,15 @@
         <PipelineInfo v-else-if="pipeline.status === 'blocked'">
           <Icon name="status-blocked" class="w-16 h-16" />
           <span class="text-xl">{{ $t('repo.pipeline.protected.awaits') }}</span>
-          <div class="flex flex-wrap items-center justify-center gap-2 text-xl">
-            <span class="capitalize">{{ $t('repo.pipeline.protected.review') }}:</span>
-            <a
-              class="text-wp-link-100 hover:text-wp-link-200 flex items-center"
-              :href="pipeline.link_url"
-              target="_blank"
-            >
-              <Icon v-if="pipeline.event === 'push'" name="push" />
-              <Icon v-if="pipeline.event === 'pull_request'" name="pull_request" />
-              <span>{{ prettyRef }}</span>
-            </a>
-          </div>
           <div v-if="repoPermissions.push" class="flex space-x-4">
+            <Button
+              color="blue"
+              :start-icon="forge ?? 'repo'"
+              :text="$t('repo.pipeline.protected.review')"
+              :is-loading="isApprovingPipeline"
+              :to="pipeline.link_url"
+              :title="message"
+            />
             <Button
               color="green"
               :text="$t('repo.pipeline.protected.approve')"
@@ -76,6 +72,7 @@ import PipelineLog from '~/components/repo/pipeline/PipelineLog.vue';
 import PipelineStepList from '~/components/repo/pipeline/PipelineStepList.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
+import useConfig from '~/compositions/useConfig';
 import useNotifications from '~/compositions/useNotifications';
 import usePipeline from '~/compositions/usePipeline';
 import { Pipeline, PipelineStep, Repo, RepoPermissions } from '~/lib/api/types';
@@ -141,7 +138,8 @@ const selectedStepId = computed({
   },
 });
 
-const { prettyRef } = usePipeline(pipeline);
+const { forge } = useConfig();
+const { message } = usePipeline(pipeline);
 
 const selectedStep = computed(() => findStep(pipeline.value.workflows || [], selectedStepId.value || -1));
 const error = computed(() => pipeline.value?.error || selectedStep.value?.error);
