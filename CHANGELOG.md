@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@qwerty287, @renovate[bot], @xoxys, @anbraten, @mzampetakis, @math3vz, @LTek-online, @testwill, @pat-s, @lonix1, @6543, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @runephilosof-karnovgroup, @azdle, @praneeth-ovckd, @nupplaphil
+@renovate[bot], @qwerty287, @xoxys, @anbraten, @mzampetakis, @math3vz, @LTek-online, @testwill, @pat-s, @lonix1, @6543, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @runephilosof-karnovgroup, @azdle, @praneeth-ovckd, @nupplaphil
 
 ### 💥 Breaking changes
 
@@ -131,6 +131,8 @@
 
 ### Misc
 
+- fix(deps): update module github.com/docker/docker to v20.10.25+incompatible [[#2385](https://github.com/woodpecker-ci/woodpecker/pull/2385)]
+- fix(deps): update module github.com/docker/cli to v20.10.25+incompatible [[#2384](https://github.com/woodpecker-ci/woodpecker/pull/2384)]
 - fix(deps): update module github.com/alessio/shellescape to v1.4.2 [[#2381](https://github.com/woodpecker-ci/woodpecker/pull/2381)]
 - fix(deps): update golang.org/x/exp digest to 9212866 [[#2380](https://github.com/woodpecker-ci/woodpecker/pull/2380)]
 - Configure Renovate [[#2360](https://github.com/woodpecker-ci/woodpecker/pull/2360)]
