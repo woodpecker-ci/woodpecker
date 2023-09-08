@@ -1,31 +1,76 @@
 {
   "admin": {
     "settings": {
+      "not_allowed": "Nemáte povolen přístup k nastavení serveru",
       "orgs": {
-        "delete_confirm": "Opravdu chcete tuto organizaci smazat? Tím se odstraní také všechna úložiště vlastněná touto organizací."
+        "delete_confirm": "Opravdu chcete tuto organizaci smazat? Tím se odstraní také všechna úložiště vlastněná touto organizací.",
+        "desc": "Organizace vlastnící úložiště na tomto serveru"
       },
       "users": {
         "delete_confirm": "Opravdu chcete tohoto uživatele odstranit? Tím se odstraní také všechna úložiště, která tento uživatel vlastní."
       }
     }
   },
+  "back": "Zpět",
   "cancel": "Zrušit",
+  "color_scheme_dark": "Přepnutí do režimu světla",
+  "color_scheme_light": "Přepnutí do tmavého režimu",
   "docs": "Doky",
+  "errors": {
+    "not_found": "Server nemohl najít požadovaný objekt"
+  },
   "login": "Přihlášení",
   "logout": "Odhlášení",
   "not_found": {
+    "back_home": "Zpět na úvod",
     "not_found": "Páni 404, buď jsme něco rozbili, nebo jsi měl překlep :-/"
   },
+  "org": {
+    "settings": {
+      "not_allowed": "Nemáte přístup k nastavení této organizace"
+    }
+  },
+  "password": "Heslo",
   "repo": {
+    "pipeline": {
+      "log_download_error": "Při stahování souboru protokolu došlo k chybě",
+      "no_files": "Žádné soubory nebyly změněny."
+    },
     "settings": {
       "actions": {
         "delete": {
           "confirm": "Po této akci budou všechna data ztracena!!!\n\nOpravdu chcete pokračovat?"
         }
+      },
+      "general": {
+        "netrc_only_trusted": {
+          "desc": "Pověření netrc vkládejte pouze do důvěryhodných kontejnerů (doporučeno).",
+          "netrc_only_trusted": "Pověření netrc vkládat pouze do důvěryhodných kontejnerů"
+        },
+        "visibility": {
+          "internal": {
+            "desc": "Tento projekt mohou vidět pouze ověření uživatelé instance programu Woodpecker."
+          },
+          "public": {
+            "desc": "Každý uživatel může vidět váš projekt, aniž by byl přihlášen."
+          }
+        }
       }
-    }
+    },
+    "user_none": "Tato organizace / uživatel zatím nemá žádné projekty."
   },
   "repositories": "Repozitáře",
   "search": "Hledání…",
+  "unknown_error": "Došlo k neznámé chybě",
+  "user": {
+    "access_denied": "Nejste oprávněni se přihlásit",
+    "oauth_error": "Chyba při ověřování proti poskytovateli OAuth",
+    "settings": {
+      "api": {
+        "desc": "Osobní přístupový token a používání API"
+      }
+    }
+  },
+  "username": "Uživatelské jméno",
   "welcome": "Vítejte ve Woodpecker"
 }
