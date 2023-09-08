@@ -8,6 +8,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Drop deprecated `pipeline:` keyword for steps in yaml config
 - Drop deprecated `branches:` keyword for global branch filter
 - Deprecate `platform:` filter in favor of `labels:`, [read more](./20-usage/20-pipeline-syntax.md#filter-by-platform)
+- Ignore branches without a Woodpecker configuration
 
 ## 1.0.0
 
