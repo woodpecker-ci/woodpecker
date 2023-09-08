@@ -20,7 +20,7 @@
         <PipelineInfo v-else-if="pipeline.status === 'blocked'">
           <Icon name="status-blocked" class="w-16 h-16" />
           <span class="text-xl">{{ $t('repo.pipeline.protected.awaits') }}</span>
-          <div v-if="repoPermissions.push" class="flex space-x-4">
+          <div v-if="repoPermissions.push" class="flex gap-2 flex-wrap items-center justify-center">
             <Button
               color="blue"
               :start-icon="forge ?? 'repo'"
