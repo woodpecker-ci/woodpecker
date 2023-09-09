@@ -131,6 +131,7 @@
 
 ### Misc
 
+- fix(deps): update module google.golang.org/protobuf to v1.31.0 [[#2409](https://github.com/woodpecker-ci/woodpecker/pull/2409)]
 - fix(deps): update kubernetes packages to v0.28.1 [[#2399](https://github.com/woodpecker-ci/woodpecker/pull/2399)]
 - fix(deps): update module github.com/swaggo/swag to v1.16.2 [[#2390](https://github.com/woodpecker-ci/woodpecker/pull/2390)]
 - fix(deps): update dependency @easyops-cn/docusaurus-search-local to ^0.36.0 [[#2406](https://github.com/woodpecker-ci/woodpecker/pull/2406)]
