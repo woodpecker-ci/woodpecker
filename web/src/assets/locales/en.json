@@ -255,7 +255,8 @@
         "log_auto_scroll_off": "Turn off automatic scrolling"
       },
       "protected": {
-        "awaits": "This pipeline is awaiting approval by some maintainer!",
+        "review": "Review changes",
+        "awaits": "This pipeline is awaiting approval by a maintainer!",
         "approve": "Approve",
         "decline": "Decline",
         "declined": "This pipeline has been declined!",

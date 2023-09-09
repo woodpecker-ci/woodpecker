@@ -83,6 +83,7 @@ declare module '@vue/runtime-core' {
     Panel: typeof import('./src/components/layout/Panel.vue')['default']
     PipelineFeedItem: typeof import('./src/components/pipeline-feed/PipelineFeedItem.vue')['default']
     PipelineFeedSidebar: typeof import('./src/components/pipeline-feed/PipelineFeedSidebar.vue')['default']
+    PipelineInfo: typeof import('./src/components/repo/pipeline/PipelineInfo.vue')['default']
     PipelineItem: typeof import('./src/components/repo/pipeline/PipelineItem.vue')['default']
     PipelineList: typeof import('./src/components/repo/pipeline/PipelineList.vue')['default']
     PipelineLog: typeof import('./src/components/repo/pipeline/PipelineLog.vue')['default']
