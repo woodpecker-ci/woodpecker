@@ -1,10 +1,10 @@
 # Changelog
 
-## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-09-08
+## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-09-09
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@renovate[bot], @qwerty287, @xoxys, @anbraten, @mzampetakis, @math3vz, @LTek-online, @testwill, @pat-s, @lonix1, @6543, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @runephilosof-karnovgroup, @azdle, @praneeth-ovckd, @nupplaphil
+@renovate[bot], @xoxys, @qwerty287, @anbraten, @mzampetakis, @math3vz, @LTek-online, @testwill, @pat-s, @lonix1, @6543, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @runephilosof-karnovgroup, @azdle, @praneeth-ovckd, @nupplaphil
 
 ### 💥 Breaking changes
 
@@ -131,6 +131,14 @@
 
 ### Misc
 
+- fix(deps): update kubernetes packages to v0.28.1 [[#2399](https://github.com/woodpecker-ci/woodpecker/pull/2399)]
+- fix(deps): update module github.com/swaggo/swag to v1.16.2 [[#2390](https://github.com/woodpecker-ci/woodpecker/pull/2390)]
+- fix(deps): update dependency @easyops-cn/docusaurus-search-local to ^0.36.0 [[#2406](https://github.com/woodpecker-ci/woodpecker/pull/2406)]
+- Harmonize pipeline status information and add a review link to the approval [[#2345](https://github.com/woodpecker-ci/woodpecker/pull/2345)]
+- fix(deps): update module github.com/stretchr/testify to v1.8.4 [[#2389](https://github.com/woodpecker-ci/woodpecker/pull/2389)]
+- fix(deps): update module github.com/caddyserver/certmagic to v0.19.2 [[#2401](https://github.com/woodpecker-ci/woodpecker/pull/2401)]
+- chore(deps): update postgres docker tag to v12.16 [[#2397](https://github.com/woodpecker-ci/woodpecker/pull/2397)]
+- fix(deps): update module github.com/mattn/go-sqlite3 to v1.14.17 [[#2387](https://github.com/woodpecker-ci/woodpecker/pull/2387)]
 - fix(deps): update module github.com/google/uuid to v1.3.1 [[#2386](https://github.com/woodpecker-ci/woodpecker/pull/2386)]
 - chore(deps): update dependency unplugin-vue-components to ^0.25.0 [[#2395](https://github.com/woodpecker-ci/woodpecker/pull/2395)]
 - fix(deps): update dependency @intlify/unplugin-vue-i18n to ^0.13.0 [[#2398](https://github.com/woodpecker-ci/woodpecker/pull/2398)]
