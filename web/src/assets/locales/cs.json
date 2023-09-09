@@ -6,7 +6,19 @@
         "delete_confirm": "Opravdu chcete tuto organizaci smazat? Tím se odstraní také všechna úložiště vlastněná touto organizací.",
         "desc": "Organizace vlastnící úložiště na tomto serveru"
       },
+      "secrets": {
+        "events": {
+          "events": "Dostupné na následujících akcích"
+        },
+        "images": {
+          "images": "Dostupné pro následující snímky"
+        }
+      },
       "users": {
+        "add": "Přidat uživatele",
+        "admin": {
+          "admin": "Admin"
+        },
         "delete_confirm": "Opravdu chcete tohoto uživatele odstranit? Tím se odstraní také všechna úložiště, která tento uživatel vlastní."
       }
     }
@@ -27,47 +39,153 @@
   },
   "org": {
     "settings": {
-      "not_allowed": "Nemáte přístup k nastavení této organizace"
+      "not_allowed": "Nemáte přístup k nastavení této organizace",
+      "secrets": {
+        "events": {
+          "events": "Dostupné na následujících akcích"
+        },
+        "images": {
+          "images": "Dostupné pro následující snímky"
+        }
+      }
     }
   },
   "password": "Heslo",
   "repo": {
+    "activity": "Aktivita",
+    "deploy_pipeline": {
+      "variables": {
+        "add": "Přidat proměnnou",
+        "name": "Název proměnné",
+        "value": "Proměnná hodnota"
+      }
+    },
+    "enable": {
+      "disabled": "Bezbariérový",
+      "enable": "Povolit",
+      "enabled": "Již povoleno",
+      "reload": "Znovunačtení úložišť"
+    },
+    "manual_pipeline": {
+      "variables": {
+        "add": "Přidat proměnnou",
+        "name": "Název proměnné",
+        "value": "Proměnná hodnota"
+      }
+    },
     "pipeline": {
+      "actions": {
+        "log_auto_scroll": "Automatické posouvání dolů"
+      },
+      "config": "Konfigurace",
       "log_download_error": "Při stahování souboru protokolu došlo k chybě",
-      "no_files": "Žádné soubory nebyly změněny."
+      "no_files": "Žádné soubory nebyly změněny.",
+      "protected": {
+        "approve": "Schválit"
+      }
     },
     "settings": {
       "actions": {
+        "actions": "Akce",
         "delete": {
           "confirm": "Po této akci budou všechna data ztracena!!!\n\nOpravdu chcete pokračovat?"
         }
       },
+      "badge": {
+        "type": "Syntaxe"
+      },
+      "crons": {
+        "name": {
+          "name": "Název"
+        },
+        "next_exec": "Další provedení",
+        "not_executed_yet": "Zatím neprovedeno",
+        "run": "Běžte nyní",
+        "schedule": {
+          "placeholder": "Harmonogram",
+          "title": "Harmonogram (na základě UTC)"
+        }
+      },
       "general": {
+        "general": "Obecné",
         "netrc_only_trusted": {
           "desc": "Pověření netrc vkládejte pouze do důvěryhodných kontejnerů (doporučeno).",
           "netrc_only_trusted": "Pověření netrc vkládat pouze do důvěryhodných kontejnerů"
         },
+        "pipeline_path": {
+          "desc_path_example": "moje/cesta/"
+        },
+        "project": "Nastavení projektu",
+        "protected": {
+          "protected": "Chráněný"
+        },
+        "save": "Uložit nastavení",
+        "timeout": {
+          "minutes": "minuty",
+          "timeout": "Časový limit"
+        },
+        "trusted": {
+          "trusted": "Důvěryhodný"
+        },
         "visibility": {
           "internal": {
-            "desc": "Tento projekt mohou vidět pouze ověření uživatelé instance programu Woodpecker."
+            "desc": "Tento projekt mohou vidět pouze ověření uživatelé instance programu Woodpecker.",
+            "internal": "Interní"
+          },
+          "private": {
+            "private": "Soukromé"
           },
           "public": {
-            "desc": "Každý uživatel může vidět váš projekt, aniž by byl přihlášen."
-          }
+            "desc": "Každý uživatel může vidět váš projekt, aniž by byl přihlášen.",
+            "public": "Veřejnost"
+          },
+          "visibility": "Zviditelnění projektu"
         }
-      }
+      },
+      "registries": {
+        "address": {
+          "address": "Adresa"
+        }
+      },
+      "secrets": {
+        "events": {
+          "events": "Dostupné na následujících akcích"
+        },
+        "images": {
+          "images": "Dostupné pro následující obrázky"
+        },
+        "name": "Název",
+        "value": "Hodnoty"
+      },
+      "settings": "Nastavení"
     },
     "user_none": "Tato organizace / uživatel zatím nemá žádné projekty."
   },
   "repositories": "Repozitáře",
   "search": "Hledání…",
+  "time": {
+    "not_started": "zatím nezačal"
+  },
   "unknown_error": "Došlo k neznámé chybě",
   "user": {
     "access_denied": "Nejste oprávněni se přihlásit",
+    "internal_error": "Došlo k nějaké interní chybě",
     "oauth_error": "Chyba při ověřování proti poskytovateli OAuth",
     "settings": {
       "api": {
-        "desc": "Osobní přístupový token a používání API"
+        "desc": "Osobní přístupový token a používání API",
+        "reset_token": "Resetovat token",
+        "shell_setup": "Nastavení shellu",
+        "shell_setup_before": "proveďte kroky nastavení shellu před",
+        "token": "Osobní přístupový token"
+      },
+      "secrets": {
+        "events": {
+          "events": "Dostupné na následujících akcích"
+        },
+        "images": {
+          "images": "Dostupné pro následující snímky"
+        }
       }
     }
   },
