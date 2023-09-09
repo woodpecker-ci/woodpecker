@@ -46,7 +46,7 @@ require (
 	github.com/swaggo/swag v1.16.2
 	github.com/tevino/abool v1.2.0
 	github.com/urfave/cli/v2 v2.25.7
-	github.com/xanzy/go-gitlab v0.83.0
+	github.com/xanzy/go-gitlab v0.91.1
 	github.com/xeipuuv/gojsonschema v1.2.0
 	golang.org/x/crypto v0.13.0
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9
