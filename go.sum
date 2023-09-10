@@ -819,3 +819,5 @@ xorm.io/builder v0.3.13 h1:a3jmiVVL19psGeXx8GIurTp7p0IIgqeDmwhcR6BAOAo=
 xorm.io/builder v0.3.13/go.mod h1:aUW0S9eb9VCaPohFCH3j7czOx1PMW3i1HrSzbLYGBSE=
 xorm.io/xorm v1.3.3-0.20230809032852-db7c2640627d h1:b7PELOEyjOC9qyGsGfBXgkub5714cFEsy4HiyCyCHfg=
 xorm.io/xorm v1.3.3-0.20230809032852-db7c2640627d/go.mod h1:qFJGFoVYbbIdnz2vaL5OxSQ2raleMpyRRalnq3n9OJo=
+xorm.io/xorm v1.3.3 h1:L5/GOhvgMcwJYYRjzPf3lTTTf6JcaTd1Mb9A/Iqvccw=
+xorm.io/xorm v1.3.3/go.mod h1:qFJGFoVYbbIdnz2vaL5OxSQ2raleMpyRRalnq3n9OJo=
