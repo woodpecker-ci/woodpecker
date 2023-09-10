@@ -55,6 +55,7 @@ var migrationTasks = []*task{
 	&parentStepsToWorkflows,
 	&addOrgs,
 	&addOrgID,
+	&alterTableTasksUpdateColumnTaskDataType,
 }
 
 var allBeans = []interface{}{
