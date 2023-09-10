@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@renovate[bot], @xoxys, @qwerty287, @anbraten, @mzampetakis, @math3vz, @LTek-online, @testwill, @pat-s, @lonix1, @6543, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @runephilosof-karnovgroup, @azdle, @praneeth-ovckd, @nupplaphil
+@s3lph, @renovate[bot], @xoxys, @qwerty287, @anbraten, @mzampetakis, @math3vz, @LTek-online, @testwill, @pat-s, @lonix1, @6543, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @runephilosof-karnovgroup, @azdle, @praneeth-ovckd, @nupplaphil
 
 ### 💥 Breaking changes
 
@@ -33,6 +33,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fix: change tasks.task_data column type to longblob in mysql [[#2418](https://github.com/woodpecker-ci/woodpecker/pull/2418)]
 - Fix health check [[#2412](https://github.com/woodpecker-ci/woodpecker/pull/2412)]
 - Do not list archived repos for all forges [[#2374](https://github.com/woodpecker-ci/woodpecker/pull/2374)]
 - fix(server/api/repo): Fix repair webhook host [[#2372](https://github.com/woodpecker-ci/woodpecker/pull/2372)]
@@ -132,6 +133,9 @@
 
 ### Misc
 
+- fix(deps): update dependency @kyvg/vue3-notification to v3 [[#2427](https://github.com/woodpecker-ci/woodpecker/pull/2427)]
+- fix(deps): update dependency @intlify/unplugin-vue-i18n to v1 [[#2426](https://github.com/woodpecker-ci/woodpecker/pull/2426)]
+- chore(deps): update typescript-eslint monorepo to v6 (major) [[#2425](https://github.com/woodpecker-ci/woodpecker/pull/2425)]
 - chore(deps): update react monorepo to v18 (major) [[#2424](https://github.com/woodpecker-ci/woodpecker/pull/2424)]
 - chore(deps): update dependency prettier to v3 [[#2420](https://github.com/woodpecker-ci/woodpecker/pull/2420)]
 - chore(deps): update dependency eslint-config-prettier to v9 [[#2415](https://github.com/woodpecker-ci/woodpecker/pull/2415)]
