@@ -12,8 +12,8 @@ dependencies:
     specifier: ^1.0.0
     version: 1.0.1(vue-i18n@9.2.2)
   '@kyvg/vue3-notification':
-    specifier: ^2.9.1
-    version: 2.9.1(vue@3.3.4)
+    specifier: ^3.0.0
+    version: 3.0.1(vue@3.3.4)
   '@vueuse/components':
     specifier: ^10.4.0
     version: 10.4.0(vue@3.3.4)
@@ -796,8 +796,8 @@ packages:
       '@jridgewell/sourcemap-codec': 1.4.14
     dev: true
 
-  /@kyvg/vue3-notification@2.9.1(vue@3.3.4):
-    resolution: {integrity: sha512-FsY8g25tQetr3etnarxHtCeNFKssH8sheFu13LyL2JJmOOel437QqKV5n4RBDDDTIo55iKgIVYXeojliXYdEhw==}
+  /@kyvg/vue3-notification@3.0.1(vue@3.3.4):
+    resolution: {integrity: sha512-6g4Sm03PM1Cc0atHHqQk5+ZtekXaxEXf9YVhfTv9FnUiNYKdquwVMuysj0cJabobsNSQSOASjqMg3+ndV2SqWw==}
     peerDependencies:
       vue: ^3.0.0
     dependencies:
