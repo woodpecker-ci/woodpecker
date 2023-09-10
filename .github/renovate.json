@@ -4,27 +4,28 @@
   "prConcurrentLimit": 5,
   "packageRules": [
     {
+      "matchManagers": ["gomod", "npm", "dockerfile"],
+      "labels": ["dependencies"]
+    },
+    {
       "groupName": "golang deps non-major",
       "matchManagers": ["gomod"],
       "matchUpdateTypes": ["minor", "patch"],
-      "extends": ["schedule:daily"],
-      "labels": ["dependencies"]
+      "extends": ["schedule:daily"]
     },
     {
       "groupName": "web npm deps non-major",
       "matchManagers": ["npm"],
       "matchUpdateTypes": ["minor", "patch"],
       "matchFileNames": ["web/package.json"],
-      "extends": ["schedule:daily"],
-      "labels": ["dependencies"]
+      "extends": ["schedule:daily"]
     },
     {
       "groupName": "docs npm deps non-major",
       "matchManagers": ["npm"],
       "matchUpdateTypes": ["minor", "patch"],
       "matchFileNames": ["docs/**/package.json"],
-      "extends": ["schedule:daily"],
-      "labels": ["dependencies"]
+      "extends": ["schedule:daily"]
     }
   ]
 }
