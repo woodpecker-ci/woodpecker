@@ -1,10 +1,10 @@
 # Changelog
 
-## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-09-09
+## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-09-10
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@qwerty287, @renovate[bot], @xoxys, @anbraten, @mzampetakis, @math3vz, @LTek-online, @testwill, @pat-s, @lonix1, @6543, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @runephilosof-karnovgroup, @azdle, @praneeth-ovckd, @nupplaphil
+@renovate[bot], @xoxys, @qwerty287, @anbraten, @mzampetakis, @math3vz, @LTek-online, @testwill, @pat-s, @lonix1, @6543, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @runephilosof-karnovgroup, @azdle, @praneeth-ovckd, @nupplaphil
 
 ### 💥 Breaking changes
 
@@ -132,6 +132,21 @@
 
 ### Misc
 
+- chore(deps): update react monorepo to v18 (major) [[#2424](https://github.com/woodpecker-ci/woodpecker/pull/2424)]
+- chore(deps): update dependency prettier to v3 [[#2420](https://github.com/woodpecker-ci/woodpecker/pull/2420)]
+- chore(deps): update dependency eslint-config-prettier to v9 [[#2415](https://github.com/woodpecker-ci/woodpecker/pull/2415)]
+- chore(deps): update dependency @tsconfig/docusaurus to v2 [[#2410](https://github.com/woodpecker-ci/woodpecker/pull/2410)]
+- chore(deps): update dependency typescript to v5 [[#2421](https://github.com/woodpecker-ci/woodpecker/pull/2421)]
+- chore(deps): update dependency concurrently to v8 [[#2414](https://github.com/woodpecker-ci/woodpecker/pull/2414)]
+- Add renovate deps groups [[#2417](https://github.com/woodpecker-ci/woodpecker/pull/2417)]
+- fix(deps): update module xorm.io/xorm to v1.3.3 [[#2393](https://github.com/woodpecker-ci/woodpecker/pull/2393)]
+- chore(deps): update dependency marked to v9 [[#2419](https://github.com/woodpecker-ci/woodpecker/pull/2419)]
+- chore(deps): update dependency @types/marked to v5 [[#2411](https://github.com/woodpecker-ci/woodpecker/pull/2411)]
+- fix(deps): update module github.com/rs/zerolog to v1.30.0 [[#2404](https://github.com/woodpecker-ci/woodpecker/pull/2404)]
+- fix(deps): update module github.com/jellydator/ttlcache/v3 to v3.1.0 [[#2402](https://github.com/woodpecker-ci/woodpecker/pull/2402)]
+- fix(deps): update module github.com/xanzy/go-gitlab to v0.91.1 [[#2405](https://github.com/woodpecker-ci/woodpecker/pull/2405)]
+- fix(deps): update module github.com/antonmedv/expr to v1.15.1 [[#2400](https://github.com/woodpecker-ci/woodpecker/pull/2400)]
+- chore(deps): update dependency axios to v1 [[#2413](https://github.com/woodpecker-ci/woodpecker/pull/2413)]
 - fix(deps): update module github.com/prometheus/client_golang to v1.16.0 [[#2403](https://github.com/woodpecker-ci/woodpecker/pull/2403)]
 - fix(deps): update module github.com/urfave/cli/v2 to v2.25.7 [[#2391](https://github.com/woodpecker-ci/woodpecker/pull/2391)]
 - fix(deps): update module google.golang.org/protobuf to v1.31.0 [[#2409](https://github.com/woodpecker-ci/woodpecker/pull/2409)]
