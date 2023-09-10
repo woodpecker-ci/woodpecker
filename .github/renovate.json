@@ -1,6 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:base", ":maintainLockFilesWeekly"],
+  "extends": ["config:recommended", ":maintainLockFilesWeekly"],
   "prConcurrentLimit": 5,
   "packageRules": [
     {
