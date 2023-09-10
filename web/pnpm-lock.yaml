@@ -9,8 +9,8 @@ overrides:
 
 dependencies:
   '@intlify/unplugin-vue-i18n':
-    specifier: ^0.13.0
-    version: 0.13.0(vue-i18n@9.2.2)
+    specifier: ^1.0.0
+    version: 1.0.1(vue-i18n@9.2.2)
   '@kyvg/vue3-notification':
     specifier: ^2.9.1
     version: 2.9.1(vue@3.3.4)
@@ -240,7 +240,7 @@ packages:
       '@babel/helper-validator-option': 7.22.5
       browserslist: 4.21.9
       lru-cache: 5.1.1
-      semver: 7.5.3
+      semver: 7.5.4
     dev: true
 
   /@babel/helper-environment-visitor@7.22.5:
@@ -668,11 +668,11 @@ packages:
     dependencies:
       '@intlify/message-compiler': 9.3.0
       '@intlify/shared': 9.3.0
-      acorn: 8.9.0
+      acorn: 8.10.0
       escodegen: 2.1.0
       estree-walker: 2.0.2
       jsonc-eslint-parser: 2.3.0
-      magic-string: 0.30.0
+      magic-string: 0.30.3
       mlly: 1.4.2
       source-map-js: 1.0.2
       vue-i18n: 9.2.2(vue@3.3.4)
@@ -722,8 +722,8 @@ packages:
     engines: {node: '>= 16'}
     dev: false
 
-  /@intlify/unplugin-vue-i18n@0.13.0(vue-i18n@9.2.2):
-    resolution: {integrity: sha512-Mm9NhcvbsSZ5FXXnCpL/XFCk1hPp809hxErNmnwqGp21JjYOKGp3wpQSrpvGk33ZrHZbhPqAu70IEVEAxVZ5+A==}
+  /@intlify/unplugin-vue-i18n@1.0.1(vue-i18n@9.2.2):
+    resolution: {integrity: sha512-fqiT42Sd619juSjjBcv5x3itVZ+77xYSB0AaQHpE01gPyfc7TNGaKDsTJJXGzkTCznOSjnhJZbiTzrZEnJ1vDQ==}
     engines: {node: '>= 14.16'}
     peerDependencies:
       petite-vue-i18n: '*'
@@ -742,7 +742,7 @@ packages:
       '@rollup/pluginutils': 5.0.2
       '@vue/compiler-sfc': 3.3.4
       debug: 4.3.4
-      fast-glob: 3.3.0
+      fast-glob: 3.3.1
       js-yaml: 4.1.0
       json5: 2.2.3
       pathe: 1.1.1
@@ -1241,7 +1241,7 @@ packages:
       '@antfu/utils': 0.7.6
       '@windicss/config': 1.9.0
       debug: 4.3.4
-      fast-glob: 3.3.0
+      fast-glob: 3.3.1
       magic-string: 0.30.0
       micromatch: 4.0.5
       windicss: 3.5.6
@@ -1260,12 +1260,6 @@ packages:
     resolution: {integrity: sha512-F0SAmZ8iUtS//m8DmCTA0jlh6TDKkHQyK6xc6V4KDTyZKA9dnvX9/3sRTVQrWm79glUAZbnmmNcdYwUIHWVybw==}
     engines: {node: '>=0.4.0'}
     hasBin: true
-
-  /acorn@8.9.0:
-    resolution: {integrity: sha512-jaVNAFBHNLXspO543WnNNPZFRtavh3skAkITqD0/2aeMkKZTN+254PyhwxFYrk3vQ1xfY+2wbesJMs/JC8/PwQ==}
-    engines: {node: '>=0.4.0'}
-    hasBin: true
-    dev: false
 
   /ajv@6.12.6:
     resolution: {integrity: sha512-j3fVLgvTo527anyYyJOGTYJbG+vnnQYvE0m5mmkc1TK+nxAppkCLMIL0aZ4dblVCNoGShhm+kzE4ZUykBoMg4g==}
@@ -2177,6 +2171,7 @@ packages:
       glob-parent: 5.1.2
       merge2: 1.4.1
       micromatch: 4.0.5
+    dev: true
 
   /fast-glob@3.3.1:
     resolution: {integrity: sha512-kNFPyjhh5cKjrUltxs+wFx+ZkbRaxxmZ+X0ZU31SOsxCEtP9VPgtq2teZw1DebupL5GmDaNQ6yKMMVcM41iqDg==}
@@ -2187,7 +2182,6 @@ packages:
       glob-parent: 5.1.2
       merge2: 1.4.1
       micromatch: 4.0.5
-    dev: true
 
   /fast-json-stable-stringify@2.1.0:
     resolution: {integrity: sha512-lhd/wF+Lk98HZoTCtlVraHtfh5XYijIjalXck7saUtuanSDyLMxnHhSXEDJqHxD7msR8D0uCmqlkwjCV8xvwHw==}
@@ -2685,7 +2679,7 @@ packages:
       acorn: 8.10.0
       eslint-visitor-keys: 3.4.1
       espree: 9.6.0
-      semver: 7.5.3
+      semver: 7.5.4
     dev: false
 
   /jsonc-parser@3.2.0:
@@ -2750,7 +2744,6 @@ packages:
     engines: {node: '>=12'}
     dependencies:
       '@jridgewell/sourcemap-codec': 1.4.15
-    dev: true
 
   /mdn-data@2.0.28:
     resolution: {integrity: sha512-aylIc7Z9y4yzHYAJNuESG3hfhC+0Ibp/MAMiaOZgNv4pmEdFyfZhhhny4MNiAfWdBQ1RQ2mfDWmM1x8SvGyp8g==}
@@ -3200,6 +3193,7 @@ packages:
     hasBin: true
     dependencies:
       lru-cache: 6.0.0
+    dev: true
 
   /semver@7.5.4:
     resolution: {integrity: sha512-1bCSESV6Pv+i21Hvpxp3Dx+pSD8lIPt8uVjRrxAUt/nbswYc+tK6Y2btiULjd4+fnq15PX+nqQDC7Oft7WkwcA==}
@@ -3207,7 +3201,6 @@ packages:
     hasBin: true
     dependencies:
       lru-cache: 6.0.0
-    dev: true
 
   /shebang-command@2.0.0:
     resolution: {integrity: sha512-kHxr2zZpYtdmrN1qDjrrX/Z1rR1kG8Dx+gkpK1G4eXmvXswmcE1hTWBWYUzlraYw1/yZp6YuDY77YtvbN0dmDA==}
