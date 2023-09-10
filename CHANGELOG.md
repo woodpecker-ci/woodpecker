@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@s3lph, @renovate[bot], @xoxys, @qwerty287, @anbraten, @mzampetakis, @math3vz, @LTek-online, @testwill, @pat-s, @lonix1, @6543, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @runephilosof-karnovgroup, @azdle, @praneeth-ovckd, @nupplaphil
+@renovate[bot], @s3lph, @xoxys, @qwerty287, @anbraten, @mzampetakis, @math3vz, @LTek-online, @testwill, @pat-s, @lonix1, @6543, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @runephilosof-karnovgroup, @azdle, @praneeth-ovckd, @nupplaphil
 
 ### 💥 Breaking changes
 
@@ -133,6 +133,13 @@
 
 ### Misc
 
+- fix(deps): update golang deps non-major [[#2437](https://github.com/woodpecker-ci/woodpecker/pull/2437)]
+- fix: change config.config_data column type to longblob in mysql [[#2434](https://github.com/woodpecker-ci/woodpecker/pull/2434)]
+- chore(deps): update postgres docker tag to v15 [[#2423](https://github.com/woodpecker-ci/woodpecker/pull/2423)]
+- fix(deps): update dependency esbuild-loader to v4 [[#2433](https://github.com/woodpecker-ci/woodpecker/pull/2433)]
+- fix(deps): update dependency clsx to v2 [[#2432](https://github.com/woodpecker-ci/woodpecker/pull/2432)]
+- fix(deps): update dependency @vueuse/core to v10 [[#2430](https://github.com/woodpecker-ci/woodpecker/pull/2430)]
+- fix(deps): update dependency @svgr/webpack to v8 [[#2429](https://github.com/woodpecker-ci/woodpecker/pull/2429)]
 - fix(deps): update dependency @kyvg/vue3-notification to v3 [[#2427](https://github.com/woodpecker-ci/woodpecker/pull/2427)]
 - fix(deps): update dependency @intlify/unplugin-vue-i18n to v1 [[#2426](https://github.com/woodpecker-ci/woodpecker/pull/2426)]
 - chore(deps): update typescript-eslint monorepo to v6 (major) [[#2425](https://github.com/woodpecker-ci/woodpecker/pull/2425)]
