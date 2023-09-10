@@ -1,33 +1,141 @@
 {
   "admin": {
     "settings": {
+      "agents": {
+        "add": "Přidat agent",
+        "agents": "Agenti",
+        "backend": {
+          "backend": "Backend",
+          "badge": "backend"
+        },
+        "capacity": {
+          "badge": "kapacita",
+          "capacity": "Kapacita",
+          "desc": "Maximální počet paralelních potrubí prováděných tímto agentem."
+        },
+        "created": "Agent vytvořen",
+        "delete_agent": "Odstranit agent",
+        "delete_confirm": "Opravdu chcete tohoto agenta odstranit? Už se nebude moci připojit k serveru.",
+        "deleted": "Agent smazán",
+        "desc": "Agenti registrovaní pro tento server",
+        "edit_agent": "Upravit agent",
+        "id": "ID",
+        "last_contact": "Poslední kontakt",
+        "name": {
+          "name": "Název",
+          "placeholder": "Jméno agenta"
+        },
+        "never": "Nikdy",
+        "no_schedule": {
+          "name": "Zakázat agent",
+          "placeholder": "Zastavení přebírání nových úkolů agentem"
+        },
+        "none": "Zatím zde nejsou žádní agenti.",
+        "platform": {
+          "badge": "platforma",
+          "platform": "Platforma"
+        },
+        "save": "Uložit agent",
+        "saved": "Agent uložen",
+        "show": "Ukázat agenty",
+        "token": "Tokeny",
+        "version": "Verze"
+      },
       "not_allowed": "Nemáte povolen přístup k nastavení serveru",
       "orgs": {
         "delete_confirm": "Opravdu chcete tuto organizaci smazat? Tím se odstraní také všechna úložiště vlastněná touto organizací.",
-        "desc": "Organizace vlastnící úložiště na tomto serveru"
+        "delete_org": "Odstranit organizaci",
+        "deleted": "Organizace vymazána",
+        "desc": "Organizace vlastnící úložiště na tomto serveru",
+        "none": "Zatím neexistují žádné organizace.",
+        "org_settings": "Organizační nastavení",
+        "orgs": "Organizace",
+        "view": "Zobrazit organizaci"
+      },
+      "queue": {
+        "agent": "agent",
+        "desc": "Úlohy čekající na provedení agenty",
+        "pause": "Pauza",
+        "paused": "Fronta je pozastavena",
+        "queue": "Fronta",
+        "resume": "Resumé",
+        "resumed": "Fronta je obnovena",
+        "stats": {
+          "completed_count": "Dokončené úkoly",
+          "pending_count": "Čeká se na",
+          "running_count": "Běhání",
+          "waiting_on_deps_count": "Čekání na závislosti",
+          "worker_count": "Zdarma"
+        },
+        "task_pending": "Úkol je v řešení",
+        "task_running": "Úloha je spuštěna",
+        "task_waiting_on_deps": "Úloha čeká na závislosti",
+        "tasks": "Úkoly",
+        "waiting_for": "čekání na"
+      },
+      "repos": {
+        "desc": "Úložiště, která jsou nebo byla na tomto serveru povolena",
+        "disabled": "Bezbariérový",
+        "none": "Zatím neexistují žádná úložiště.",
+        "repos": "Repozitáře",
+        "settings": "Repozitář nastavení",
+        "view": "Zobrazit Repozitář"
       },
       "secrets": {
+        "add": "Přidat tajemství",
+        "created": "Vytvoření globálního tajemství",
+        "deleted": "Globální tajemství odstraněno",
+        "desc": "Globální tajemství lze předat všem úložištím jednotlivých kroků pipeline za běhu jako proměnné prostředí.",
         "events": {
-          "events": "Dostupné na následujících akcích"
+          "events": "Dostupné na následujících akcích",
+          "pr_warning": "S touto možností buďte opatrní, protože špatný subjekt může odeslat škodlivý požadavek na stažení, který odhalí vaše tajemství."
         },
         "images": {
+          "desc": "Seznam obrázků oddělených čárkou, u kterých je toto tajemství k dispozici, pokud chcete povolit všechny obrázky, nechte prázdný",
           "images": "Dostupné pro následující snímky"
-        }
+        },
+        "name": "Název",
+        "none": "Zatím neexistují žádná globální tajemství.",
+        "plugins_only": "K dispozici pouze pro pluginy",
+        "save": "Uložit tajemství",
+        "saved": "Globální tajemství uloženo",
+        "secrets": "Tajemství",
+        "show": "Zobrazit tajemství",
+        "value": "Hodnoty",
+        "warning": "Tato tajemství budou k dispozici všem uživatelům serveru."
       },
+      "settings": "Nastavení",
       "users": {
         "add": "Přidat uživatele",
         "admin": {
-          "admin": "Admin"
+          "admin": "Admin",
+          "placeholder": "Uživatel je admin"
         },
-        "delete_confirm": "Opravdu chcete tohoto uživatele odstranit? Tím se odstraní také všechna úložiště, která tento uživatel vlastní."
+        "avatar_url": "Adresa URL avatara",
+        "cancel": "Zrušit",
+        "created": "Uživatel vytvořil",
+        "delete_confirm": "Opravdu chcete tohoto uživatele odstranit? Tím se odstraní také všechna úložiště, která tento uživatel vlastní.",
+        "delete_user": "Odstranění uživatele",
+        "deleted": "Smazaný uživatel",
+        "desc": "Uživatelé registrovaní pro tento server",
+        "edit_user": "Upravit uživatele",
+        "email": "E-mail",
+        "login": "Přihlášení",
+        "none": "Zatím nejsou žádní uživatelé.",
+        "save": "Uložit uživatele",
+        "saved": "Uživatel uložil",
+        "show": "Zobrazit uživatele",
+        "users": "Uživatelé"
       }
     }
   },
+  "api": "API",
   "back": "Zpět",
   "cancel": "Zrušit",
   "color_scheme_dark": "Přepnutí do režimu světla",
   "color_scheme_light": "Přepnutí do tmavého režimu",
   "docs": "Doky",
+  "documentation_for": "Dokumentace k \"{topic}\"",
   "errors": {
     "not_found": "Server nemohl najít požadovaný objekt"
   },
@@ -41,22 +149,45 @@
     "settings": {
       "not_allowed": "Nemáte přístup k nastavení této organizace",
       "secrets": {
+        "add": "Přidat tajemství",
+        "created": "Vytvořené organizační tajemství",
+        "deleted": "Organizační tajemství vymazáno",
+        "desc": "Tajemství organizace lze za běhu předat jednotlivým krokům pipeline úložiště všech organizací jako proměnné prostředí.",
         "events": {
-          "events": "Dostupné na následujících akcích"
+          "events": "Dostupné na následujících akcích",
+          "pr_warning": "S touto možností buďte opatrní, protože špatný subjekt může odeslat škodlivý požadavek na stažení, který odhalí vaše tajemství."
         },
         "images": {
+          "desc": "Seznam obrázků oddělených čárkou, u kterých je toto tajemství k dispozici, pokud chcete povolit všechny obrázky, nechte prázdný",
           "images": "Dostupné pro následující snímky"
-        }
-      }
+        },
+        "name": "Název",
+        "none": "Zatím neexistují žádná tajemství organizace.",
+        "plugins_only": "K dispozici pouze pro pluginy",
+        "save": "Uložit tajemství",
+        "saved": "Uložené tajemství organizace",
+        "secrets": "Tajemství",
+        "show": "Zobrazit tajemství",
+        "value": "Hodnoty"
+      },
+      "settings": "Nastavení"
     }
   },
   "password": "Heslo",
+  "pipeline_feed": "Přívodní potrubí",
   "repo": {
     "activity": "Aktivita",
+    "add": "Přidat repozitář",
+    "branches": "Pobočky",
     "deploy_pipeline": {
+      "enter_target": "Prostředí cílového nasazení",
+      "title": "Spuštění události nasazení pro aktuální potrubí #{pipelineId}",
+      "trigger": "Nasazení",
       "variables": {
         "add": "Přidat proměnnou",
+        "desc": "Zadejte další proměnné, které chcete použít v potrubí. Proměnné se stejným názvem budou přepsány.",
         "name": "Název proměnné",
+        "title": "Dodatečné proměnné potrubí",
         "value": "Proměnná hodnota"
       }
     },
@@ -64,67 +195,173 @@
       "disabled": "Bezbariérový",
       "enable": "Povolit",
       "enabled": "Již povoleno",
-      "reload": "Znovunačtení úložišť"
+      "list_reloaded": "Repozitář znovu načtený seznam",
+      "reload": "Znovunačtení úložišť",
+      "success": "Repozitář povoleno"
     },
     "manual_pipeline": {
+      "select_branch": "Vyberte pobočku",
+      "title": "Spuštění ručního spuštění potrubí",
+      "trigger": "Spustit potrubí",
       "variables": {
         "add": "Přidat proměnnou",
+        "desc": "Zadejte další proměnné, které chcete použít v potrubí. Proměnné se stejným názvem budou přepsány.",
         "name": "Název proměnné",
+        "title": "Další proměnné potrubí",
         "value": "Proměnná hodnota"
       }
     },
+    "not_allowed": "Nemáte povolen přístup k tomuto repozitář",
+    "open_in_forge": "Otevřený repozitář v systému řízení verzí",
     "pipeline": {
       "actions": {
-        "log_auto_scroll": "Automatické posouvání dolů"
+        "cancel": "Storno",
+        "cancel_success": "Potrubí zrušeno",
+        "canceled": "Tento krok byl zrušen.",
+        "deploy": "Nasazení",
+        "log_auto_scroll": "Automatické posouvání dolů",
+        "log_auto_scroll_off": "Vypnutí automatického posouvání",
+        "log_download": "Stáhnout",
+        "restart": "Restart",
+        "restart_success": "Opětovné spuštění potrubí"
       },
       "config": "Konfigurace",
+      "event": {
+        "cron": "cron",
+        "deploy": "Nasazení",
+        "manual": "Manuál",
+        "pr": "Žádost o stažení",
+        "push": "Push",
+        "tag": "Tag"
+      },
+      "execution_error": "Chyba provedení",
+      "exit_code": "Kód ukončení {exitCode}",
+      "files": "Změněné soubory ({files})",
+      "loading": "Načítání…",
       "log_download_error": "Při stahování souboru protokolu došlo k chybě",
+      "log_title": "Krokové protokoly",
       "no_files": "Žádné soubory nebyly změněny.",
+      "no_pipeline_steps": "Nejsou k dispozici žádné kroky v potrubí!",
+      "no_pipelines": "Žádné potrubí zatím nebylo spuštěno.",
+      "pipeline": "Potrubí #{pipelineId}",
+      "pipelines_for": "Potrubí pro větev \"{branch}\"",
+      "pipelines_for_pr": "Potrubí pro požadavek na stažení #{index}",
       "protected": {
-        "approve": "Schválit"
-      }
+        "approve": "Schválit",
+        "approve_success": "Potrubí schváleno",
+        "awaits": "Toto potrubí čeká na schválení správcem!",
+        "decline": "Pokles",
+        "decline_success": "Potrubí kleslo",
+        "declined": "Tento plynovod byl odmítnut!",
+        "review": "Přezkoumání změn"
+      },
+      "status": {
+        "blocked": "blokované",
+        "declined": "odmítnuto",
+        "error": "chyba",
+        "failure": "selhání",
+        "killed": "zabil",
+        "pending": "čeká na",
+        "running": "běžící",
+        "skipped": "přeskočil",
+        "started": "začal",
+        "status": "Stav: {status}",
+        "success": "úspěch"
+      },
+      "step_not_started": "Tento krok ještě nebyl zahájen.",
+      "tasks": "Úkoly"
     },
+    "pull_requests": "Žádosti o stažení",
     "settings": {
       "actions": {
         "actions": "Akce",
         "delete": {
-          "confirm": "Po této akci budou všechna data ztracena!!!\n\nOpravdu chcete pokračovat?"
+          "confirm": "Po této akci budou všechna data ztracena!!!\n\nOpravdu chcete pokračovat?",
+          "delete": "Odstranit repozitář",
+          "success": "Repozitář smazáno"
+        },
+        "disable": {
+          "disable": "Zakázat repozitář",
+          "success": "Repozitář zakázáno"
+        },
+        "enable": {
+          "enable": "Povolit repozitář",
+          "success": "Repozitář povoleno"
+        },
+        "repair": {
+          "repair": "Oprava repozitář",
+          "success": "Repozitář opravené"
         }
       },
       "badge": {
-        "type": "Syntaxe"
+        "badge": "Odznak",
+        "branch": "Pobočka",
+        "type": "Syntaxe",
+        "type_html": "HTML",
+        "type_markdown": "Markdown",
+        "type_url": "URL"
       },
       "crons": {
+        "add": "Přidat cron",
+        "branch": {
+          "placeholder": "Větev (pokud je prázdná, použije se výchozí větev)",
+          "title": "Pobočka"
+        },
+        "created": "Cron vytvořil",
+        "crons": "Crons",
+        "delete": "Odstranit cron",
+        "deleted": "Cron odstraněn",
+        "desc": "K pravidelnému spouštění potrubí lze použít úlohy Cron.",
+        "edit": "Upravit cron",
         "name": {
-          "name": "Název"
+          "name": "Název",
+          "placeholder": "Název úlohy cron"
         },
         "next_exec": "Další provedení",
+        "none": "Zatím zde nejsou žádné crony.",
         "not_executed_yet": "Zatím neprovedeno",
         "run": "Běžte nyní",
+        "save": "Uložit cron",
+        "saved": "Cron uložen",
         "schedule": {
           "placeholder": "Harmonogram",
           "title": "Harmonogram (na základě UTC)"
-        }
+        },
+        "show": "Zobrazit crons"
       },
       "general": {
+        "allow_pr": {
+          "allow": "Povolit žádosti o stažení",
+          "desc": "Potrubí lze spouštět na základě požadavků na stažení."
+        },
+        "cancel_prev": {
+          "cancel": "Zrušení předchozích potrubí",
+          "desc": "Umožňuje zrušit čekající a spuštěné pipeline stejné události a kontextu před spuštěním nově spuštěné pipeline."
+        },
         "general": "Obecné",
         "netrc_only_trusted": {
           "desc": "Pověření netrc vkládejte pouze do důvěryhodných kontejnerů (doporučeno).",
           "netrc_only_trusted": "Pověření netrc vkládat pouze do důvěryhodných kontejnerů"
         },
         "pipeline_path": {
-          "desc_path_example": "moje/cesta/"
+          "default": "Ve výchozím nastavení: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml",
+          "desc": "Cesta ke konfiguraci potrubí (například {0}). Složky by měly končit znakem {1}.",
+          "desc_path_example": "moje/cesta/",
+          "path": "Cesta potrubí"
         },
         "project": "Nastavení projektu",
         "protected": {
+          "desc": "Každý plynovod musí být před provedením schválen.",
           "protected": "Chráněný"
         },
         "save": "Uložit nastavení",
+        "success": "Repozitář aktualizace nastavení",
         "timeout": {
           "minutes": "minuty",
           "timeout": "Časový limit"
         },
         "trusted": {
+          "desc": "Základní kontejnery potrubí získávají přístup k rozšířeným možnostem, jako je například připojování svazků.",
           "trusted": "Důvěryhodný"
         },
         "visibility": {
@@ -133,6 +370,7 @@
             "internal": "Interní"
           },
           "private": {
+            "desc": "Pouze vy a ostatní majitelé repozitáře mohou tento projekt vidět.",
             "private": "Soukromé"
           },
           "public": {
@@ -142,51 +380,112 @@
           "visibility": "Zviditelnění projektu"
         }
       },
+      "not_allowed": "Nemáte přístup k nastavení tohoto úložiště",
       "registries": {
+        "add": "Přidat rejstřík",
         "address": {
-          "address": "Adresa"
-        }
+          "address": "Adresa",
+          "placeholder": "Adresa registru (např. docker.io)"
+        },
+        "created": "Vytvořená pověření k registru",
+        "creds": "Pověření k registraci",
+        "delete": "Odstranění registru",
+        "deleted": "Odstranění pověření registru",
+        "desc": "Lze přidat pověření k registrům a používat soukromé obrazy pro potrubí.",
+        "edit": "Upravit registr",
+        "none": "V registru zatím nejsou žádná pověření.",
+        "registries": "Registry",
+        "save": "Uložit registr",
+        "saved": "Uložená pověření k registru",
+        "show": "Zobrazit registry"
       },
       "secrets": {
+        "add": "Přidat tajemství",
+        "created": "Tajemství vytvořeno",
+        "delete": "Odstranit tajemství",
+        "delete_confirm": "Opravdu chcete toto tajemství vymazat?",
+        "deleted": "Tajemství odstraněno",
+        "desc": "Tajemství lze předávat jednotlivým krokům potrubí za běhu jako proměnné prostředí.",
+        "edit": "Upravit tajemství",
         "events": {
-          "events": "Dostupné na následujících akcích"
+          "events": "Dostupné na následujících akcích",
+          "pr_warning": "S touto možností buďte opatrní, protože špatný subjekt může odeslat škodlivý požadavek na stažení, který odhalí vaše tajemství."
         },
         "images": {
+          "desc": "Seznam obrázků oddělených čárkou, u kterých je toto tajemství k dispozici, pokud chcete povolit všechny obrázky, nechte prázdný",
           "images": "Dostupné pro následující obrázky"
         },
         "name": "Název",
+        "none": "Žádná tajemství zatím neexistují.",
+        "plugins_only": "K dispozici pouze pro pluginy",
+        "save": "Uložit tajemství",
+        "saved": "Tajemství uloženo",
+        "secrets": "Tajemství",
+        "show": "Zobrazit tajemství",
         "value": "Hodnoty"
       },
       "settings": "Nastavení"
     },
     "user_none": "Tato organizace / uživatel zatím nemá žádné projekty."
   },
+  "repos": "Repozitář",
   "repositories": "Repozitáře",
   "search": "Hledání…",
   "time": {
-    "not_started": "zatím nezačal"
+    "days_short": "d",
+    "hours_short": "h",
+    "min_short": "min",
+    "not_started": "zatím nezačal",
+    "sec_short": "sek",
+    "tmpl": "MMM D, RRRR, HH:mm z",
+    "weeks_short": "t"
   },
   "unknown_error": "Došlo k neznámé chybě",
+  "url": "URL",
   "user": {
     "access_denied": "Nejste oprávněni se přihlásit",
     "internal_error": "Došlo k nějaké interní chybě",
     "oauth_error": "Chyba při ověřování proti poskytovateli OAuth",
     "settings": {
       "api": {
+        "api": "API",
+        "api_usage": "Příklad využití API",
+        "cli_usage": "Příklad použití CLI",
         "desc": "Osobní přístupový token a používání API",
+        "dl_cli": "Stáhnout CLI",
         "reset_token": "Resetovat token",
         "shell_setup": "Nastavení shellu",
         "shell_setup_before": "proveďte kroky nastavení shellu před",
+        "swagger_ui": "Rozhraní Swagger UI",
         "token": "Osobní přístupový token"
       },
+      "general": {
+        "general": "Obecné",
+        "language": "Jazyk"
+      },
       "secrets": {
+        "add": "Přidat tajemství",
+        "created": "Vytvoření uživatelského tajemství",
+        "deleted": "Vymazání uživatelského tajemství",
+        "desc": "Uživatelská tajemství lze za běhu předávat jednotlivým krokům pipeline všech uživatelských úložišť jako proměnné prostředí.",
         "events": {
-          "events": "Dostupné na následujících akcích"
+          "events": "Dostupné na následujících akcích",
+          "pr_warning": "S touto možností buďte opatrní, protože špatný subjekt může odeslat škodlivý požadavek na stažení, který odhalí vaše tajemství."
         },
         "images": {
+          "desc": "Seznam obrázků oddělených čárkou, u kterých je toto tajemství k dispozici, pokud chcete povolit všechny obrázky, nechte prázdný",
           "images": "Dostupné pro následující snímky"
-        }
-      }
+        },
+        "name": "Název",
+        "none": "Zatím nejsou k dispozici žádná uživatelská tajemství.",
+        "plugins_only": "Dostupné pouze pro zásuvné moduly",
+        "save": "Uložit tajemství",
+        "saved": "Uložený uživatelský sekret",
+        "secrets": "Tajemství",
+        "show": "Zobrazit tajemství",
+        "value": "Hodnoty"
+      },
+      "settings": "Uživatelská nastavení"
     }
   },
   "username": "Uživatelské jméno",
