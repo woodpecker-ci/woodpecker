@@ -111,8 +111,8 @@ importers:
         specifier: ^7.6.0
         version: 7.6.0
       marked:
-        specifier: ^4.3.0
-        version: 4.3.0
+        specifier: ^9.0.0
+        version: 9.0.0
       tslib:
         specifier: ^2.6.1
         version: 2.6.1
@@ -6153,6 +6153,13 @@ packages:
     resolution: {integrity: sha512-PRsaiG84bK+AMvxziE/lCFss8juXjNaWzVbN5tXAm4XjeaS9NAHhop+PjQxz2A9h8Q4M/xGmzP8vqNwy6JeK0A==}
     engines: {node: '>= 12'}
     hasBin: true
+    dev: false
+
+  /marked@9.0.0:
+    resolution: {integrity: sha512-37yoTpjU+TSXb9OBYY5n78z/CqXh76KiQj9xsKxEdztzU9fRLmbWO5YqKxgCVGKlNdexppnbKTkwB3RipVri8w==}
+    engines: {node: '>= 16'}
+    hasBin: true
+    dev: true
 
   /mdast-squeeze-paragraphs@4.0.0:
     resolution: {integrity: sha512-zxdPn69hkQ1rm4J+2Cs2j6wDEv7O17TfXTJ33tl/+JPIoEmtV9t2ZzBM5LPHE8QlHsmVD8t3vPKCyY3oH+H8MQ==}
