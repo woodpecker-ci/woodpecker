@@ -89,11 +89,12 @@ func (e *lxc) Name() string {
 	return "lxc"
 }
 
-func (e *lxc) IsAvailable() bool {
+func (e *lxc) IsAvailable(ctx context.Context) bool {
+	// TODO: deteckt lxc binary
 	return true
 }
 
-func (e *lxc) Load() error {
+func (e *lxc) Load(ctx context.Context) error {
 	dir, err := os.MkdirTemp("", "woodpecker-lxc-*")
 	e.rundir = dir
 	e.name = path.Base(dir)
@@ -125,7 +126,7 @@ func (e *lxc) ContainerName(name string) string {
 	return e.name + "-" + strings.ReplaceAll(name, "_", "")
 }
 
-func (e *lxc) Setup(ctx context.Context, config *types.Config) error {
+func (e *lxc) SetupWorkflow(ctx context.Context, config *types.Config, taskUUID string) error {
 	e.workspace = e.rundir + "/workspace"
 	log.Debug().Msgf("config %d %+v", len(config.Volumes), config.Volumes[0])
 	host := os.Getenv("WOODPECKER_BACKEND_LXC_NETWORK_READY_HOST")
@@ -164,8 +165,7 @@ var (
 	acceptableRegexp = regexp.MustCompile(acceptable)
 )
 
-// Exec the pipeline step.
-func (e *lxc) Exec(ctx context.Context, step *types.Step) error {
+func (e *lxc) StartStep(ctx context.Context, step *types.Step, taskUUID string) error {
 	var env []string
 	for a, b := range step.Environment {
 		env = append(env, a+"="+b)
@@ -246,7 +246,7 @@ func (e *lxc) Exec(ctx context.Context, step *types.Step) error {
 	return e.cmd.Start()
 }
 
-func (e *lxc) Wait(context.Context, *types.Step) (*types.State, error) {
+func (e *lxc) WaitStep(ctx context.Context, step *types.Step, taskUUID string) (*types.State, error) {
 	err := e.cmd.Wait()
 	ExitCode := 0
 
@@ -262,7 +262,7 @@ func (e *lxc) Wait(context.Context, *types.Step) (*types.State, error) {
 	}, err
 }
 
-func (e *lxc) Tail(context.Context, *types.Step) (io.ReadCloser, error) {
+func (e *lxc) TailStep(ctx context.Context, step *types.Step, taskUUID string) (io.ReadCloser, error) {
 	return e.output, nil
 }
 
@@ -275,7 +275,7 @@ lxc-ls -1 --filter="^{{.Name}}" | while read container ; do
 done
 `))
 
-func (e *lxc) Destroy(ctx context.Context, conf *types.Config) error {
+func (e *lxc) DestroyWorkflow(ctx context.Context, conf *types.Config, taskUUID string) error {
 	script := e.rundir + "/destroy.sh"
 	if err := writeScript(destroyTemplate, struct {
 		Name string
