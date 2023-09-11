@@ -73,6 +73,14 @@
         "tasks": "Tugas",
         "waiting_for": "menunggu"
       },
+      "repos": {
+        "desc": "Repositori yang sudah atau sebelumnya diaktifkan di server ini",
+        "disabled": "Dinonaktifkan",
+        "none": "Belum ada repositori.",
+        "repos": "Repositori",
+        "settings": "Pengaturan repositori",
+        "view": "Tampilkan repositori"
+      },
       "secrets": {
         "add": "Tambahkan rahasia",
         "created": "Rahasia global dibuat",
@@ -244,7 +252,8 @@
         "awaits": "Jalur pipa ini menunggu untuk disetujui oleh seorang pemelihara!",
         "decline": "Tolak",
         "decline_success": "Jalur pipa ditolak",
-        "declined": "Jalur pipa ini telah ditolak!"
+        "declined": "Jalur pipa ini telah ditolak!",
+        "review": "Tinjau perubahan"
       },
       "status": {
         "blocked": "diblokir",
