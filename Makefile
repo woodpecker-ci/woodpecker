@@ -167,7 +167,7 @@ test-server-datastore-coverage: ## Test server datastore with coverage report
 
 test-ui: ui-dependencies ## Test UI code
 	(cd web/; pnpm run lint)
-	(cd web/; pnpm run format:check)
+	(cd web/; pnpm run formatcheck)
 	(cd web/; pnpm run typecheck)
 	(cd web/; pnpm run test)
 

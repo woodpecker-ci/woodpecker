@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"regexp"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
@@ -33,6 +34,8 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/shared/token"
 )
+
+var skipRe = regexp.MustCompile(`\[(?i:ci *skip|skip *ci)\]`)
 
 // GetQueueInfo
 //
@@ -134,6 +137,21 @@ func PostHook(c *gin.Context) {
 		msg := "failure to ascertain repo from hook"
 		log.Debug().Msg(msg)
 		c.String(http.StatusBadRequest, msg)
+		return
+	}
+
+	//
+	// Skip if commit message contains skip-ci
+	// TODO: move into global pipeline conditions logic
+	//
+
+	// skip the tmpPipeline if any case-insensitive combination of the words "skip" and "ci"
+	// wrapped in square brackets appear in the commit message
+	skipMatch := skipRe.FindString(tmpPipeline.Message)
+	if len(skipMatch) > 0 {
+		msg := fmt.Sprintf("ignoring hook: %s found in %s", skipMatch, tmpPipeline.Commit)
+		log.Debug().Msg(msg)
+		c.String(http.StatusNoContent, msg)
 		return
 	}
 
