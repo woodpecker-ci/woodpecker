@@ -15,7 +15,12 @@
 
 package model
 
-type WebhookEvent string
+import (
+	"errors"
+	"fmt"
+)
+
+type WebhookEvent string //	@name WebhookEvent
 
 const (
 	EventPush   WebhookEvent = "push"
@@ -32,17 +37,19 @@ func (wel WebhookEventList) Len() int           { return len(wel) }
 func (wel WebhookEventList) Swap(i, j int)      { wel[i], wel[j] = wel[j], wel[i] }
 func (wel WebhookEventList) Less(i, j int) bool { return wel[i] < wel[j] }
 
-func ValidateWebhookEvent(s WebhookEvent) bool {
+var ErrInvalidWebhookEvent = errors.New("invalid webhook event")
+
+func ValidateWebhookEvent(s WebhookEvent) error {
 	switch s {
 	case EventPush, EventPull, EventTag, EventDeploy, EventCron, EventManual:
-		return true
+		return nil
 	default:
-		return false
+		return fmt.Errorf("%w: %s", ErrInvalidWebhookEvent, s)
 	}
 }
 
 // StatusValue represent pipeline states woodpecker know
-type StatusValue string
+type StatusValue string //	@name StatusValue
 
 const (
 	StatusSkipped  StatusValue = "skipped"
@@ -57,7 +64,7 @@ const (
 )
 
 // SCMKind represent different version control systems
-type SCMKind string
+type SCMKind string //	@name SCMKind
 
 const (
 	RepoGit      SCMKind = "git"
@@ -66,11 +73,11 @@ const (
 	RepoPerforce SCMKind = "perforce"
 )
 
-// RepoVisibly represent to wat state a repo in woodpecker is visible to others
-type RepoVisibly string
+// RepoVisibility represent to wat state a repo in woodpecker is visible to others
+type RepoVisibility string //	@name RepoVisibility
 
 const (
-	VisibilityPublic   RepoVisibly = "public"
-	VisibilityPrivate  RepoVisibly = "private"
-	VisibilityInternal RepoVisibly = "internal"
+	VisibilityPublic   RepoVisibility = "public"
+	VisibilityPrivate  RepoVisibility = "private"
+	VisibilityInternal RepoVisibility = "internal"
 )

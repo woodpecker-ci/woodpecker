@@ -4,11 +4,13 @@ tasks:
       WOODPECKER_OPEN: true
       WOODPECKER_ADMIN: woodpecker
       WOODPECKER_HOST: http://host.docker.internal:8000
-      WOODPECKER_SECRET: "1234"
+      WOODPECKER_SECRET: '1234'
       WOODPECKER_GITEA: true
       WOODPECKER_DEV_WWW_PROXY: http://localhost:8010
       WOODPECKER_BACKEND_DOCKER_NETWORK: ci_default
     init: |
+      GO_VERSION=1.20
+      curl -fsSL https://dl.google.com/go/go$GO_VERSION.linux-amd64.tar.gz | tar xzs -C ~/
       go mod tidy
       mkdir -p web/dist
       touch web/dist/index.html
@@ -26,7 +28,7 @@ tasks:
   - name: Agent
     env:
       WOODPECKER_SERVER: localhost:9000
-      WOODPECKER_SECRET: "1234"
+      WOODPECKER_SECRET: '1234'
       WOODPECKER_MAX_WORKFLOWS: 1
       WOODPECKER_HEALTHCHECK: false
     command: |
@@ -39,7 +41,7 @@ tasks:
       $DOCKER_COMPOSE_CMD up -d
       until curl --output /dev/null --silent --head --fail http://localhost:3000; do printf '.'; sleep 1; done
       $GITEA_CLI_CMD admin user create --username woodpecker --password password --email woodpecker@localhost --admin
-      export GITEA_TOKEN=$($GITEA_CLI_CMD admin user generate-access-token -u woodpecker --raw)
+      export GITEA_TOKEN=$($GITEA_CLI_CMD admin user generate-access-token -u woodpecker --scopes repo,write:application --raw)
       GITEA_OAUTH_APP=$(curl -X 'POST' 'http://localhost:3000/api/v1/user/applications/oauth2' \
         -H 'accept: application/json' -H 'Content-Type: application/json' -H "Authorization: token ${GITEA_TOKEN}" \
         -d "{ \"name\": \"Woodpecker CI\", \"confidential_client\": true, \"redirect_uris\": [ \"https://8000-${GITPOD_WORKSPACE_ID}.${GITPOD_WORKSPACE_CLUSTER_HOST}/authorize\" ] }")
@@ -62,6 +64,7 @@ tasks:
       git add .
       git commit -m ":tada: Initial commit"
       git push -u origin main
+      cd ../..
       gp sync-done gitea
       $DOCKER_COMPOSE_CMD logs -f
   - name: App
@@ -101,12 +104,12 @@ ports:
 
 vscode:
   extensions:
-    - "golang.go"
-    - "EditorConfig.EditorConfig"
-    - "dbaeumer.vscode-eslint"
-    - "esbenp.prettier-vscode"
-    - "voorjaar.windicss-intellisense"
-    - "Vue.volar"
-    - "redhat.vscode-yaml"
-    - "davidanson.vscode-markdownlint"
-    - "streetsidesoftware.code-spell-checker"
+    - 'golang.go'
+    - 'EditorConfig.EditorConfig'
+    - 'dbaeumer.vscode-eslint'
+    - 'esbenp.prettier-vscode'
+    - 'voorjaar.windicss-intellisense'
+    - 'Vue.volar'
+    - 'redhat.vscode-yaml'
+    - 'davidanson.vscode-markdownlint'
+    - 'streetsidesoftware.code-spell-checker'

@@ -1,3 +1,17 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package registry
 
 import (
@@ -30,16 +44,16 @@ func (c combined) RegistryFind(repo *model.Repo, name string) (*model.Registry, 
 	return nil, nil
 }
 
-func (c combined) RegistryList(repo *model.Repo) ([]*model.Registry, error) {
+func (c combined) RegistryList(repo *model.Repo, p *model.ListOptions) ([]*model.Registry, error) {
 	var registries []*model.Registry
 	for _, registry := range c.registries {
-		list, err := registry.RegistryList(repo)
+		list, err := registry.RegistryList(repo, &model.ListOptions{All: true})
 		if err != nil {
 			return nil, err
 		}
 		registries = append(registries, list...)
 	}
-	return registries, nil
+	return model.ApplyPagination(p, registries), nil
 }
 
 func (c combined) RegistryCreate(repo *model.Repo, registry *model.Registry) error {

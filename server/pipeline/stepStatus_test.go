@@ -19,13 +19,15 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 type mockUpdateStepStore struct{}
 
-func (m *mockUpdateStepStore) StepUpdate(build *model.Step) error {
+func (m *mockUpdateStepStore) StepUpdate(_ *model.Step) error {
 	return nil
 }
 
@@ -40,7 +42,9 @@ func TestUpdateStepStatusNotExited(t *testing.T) {
 		ExitCode: 137,
 		Error:    "not an error",
 	}
-	step, _ := UpdateStepStatus(&mockUpdateStepStore{}, model.Step{}, state, int64(1))
+	step := &model.Step{}
+	err := UpdateStepStatus(&mockUpdateStepStore{}, step, state, int64(1))
+	assert.NoError(t, err)
 
 	if step.State != model.StatusRunning {
 		t.Errorf("Step status not equals '%s' != '%s'", model.StatusRunning, step.State)
@@ -67,7 +71,8 @@ func TestUpdateStepStatusNotExitedButStopped(t *testing.T) {
 		ExitCode: 137,
 		Error:    "not an error",
 	}
-	step, _ = UpdateStepStatus(&mockUpdateStepStore{}, *step, state, int64(42))
+	err := UpdateStepStatus(&mockUpdateStepStore{}, step, state, int64(42))
+	assert.NoError(t, err)
 
 	if step.State != model.StatusRunning {
 		t.Errorf("Step status not equals '%s' != '%s'", model.StatusRunning, step.State)
@@ -92,7 +97,10 @@ func TestUpdateStepStatusExited(t *testing.T) {
 		ExitCode: 137,
 		Error:    "an error",
 	}
-	step, _ := UpdateStepStatus(&mockUpdateStepStore{}, model.Step{}, state, int64(42))
+
+	step := &model.Step{}
+	err := UpdateStepStatus(&mockUpdateStepStore{}, step, state, int64(42))
+	assert.NoError(t, err)
 
 	if step.State != model.StatusKilled {
 		t.Errorf("Step status not equals '%s' != '%s'", model.StatusKilled, step.State)
@@ -116,7 +124,9 @@ func TestUpdateStepStatusExitedButNot137(t *testing.T) {
 		Finished: int64(34),
 		Error:    "an error",
 	}
-	step, _ := UpdateStepStatus(&mockUpdateStepStore{}, model.Step{}, state, int64(42))
+	step := &model.Step{}
+	err := UpdateStepStatus(&mockUpdateStepStore{}, step, state, int64(42))
+	assert.NoError(t, err)
 
 	if step.State != model.StatusFailure {
 		t.Errorf("Step status not equals '%s' != '%s'", model.StatusFailure, step.State)
@@ -141,7 +151,9 @@ func TestUpdateStepStatusExitedWithCode(t *testing.T) {
 		ExitCode: 1,
 		Error:    "an error",
 	}
-	step, _ := UpdateStepStatus(&mockUpdateStepStore{}, model.Step{}, state, int64(42))
+	step := &model.Step{}
+	err := UpdateStepStatus(&mockUpdateStepStore{}, step, state, int64(42))
+	assert.NoError(t, err)
 
 	if step.State != model.StatusFailure {
 		t.Errorf("Step status not equals '%s' != '%s'", model.StatusFailure, step.State)

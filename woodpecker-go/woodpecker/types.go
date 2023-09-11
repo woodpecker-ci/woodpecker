@@ -27,23 +27,26 @@ type (
 
 	// Repo represents a repository.
 	Repo struct {
-		ID         int64  `json:"id,omitempty"`
-		Owner      string `json:"owner"`
-		Name       string `json:"name"`
-		FullName   string `json:"full_name"`
-		Avatar     string `json:"avatar_url,omitempty"`
-		Link       string `json:"link_url,omitempty"`
-		Kind       string `json:"scm,omitempty"`
-		Clone      string `json:"clone_url,omitempty"`
-		Branch     string `json:"default_branch,omitempty"`
-		Timeout    int64  `json:"timeout,omitempty"`
-		Visibility string `json:"visibility"`
-		IsPrivate  bool   `json:"private,omitempty"`
-		IsTrusted  bool   `json:"trusted"`
-		IsStarred  bool   `json:"starred,omitempty"`
-		IsGated    bool   `json:"gated"`
-		AllowPull  bool   `json:"allow_pr"`
-		Config     string `json:"config_file"`
+		ID                           int64    `json:"id,omitempty"`
+		ForgeRemoteID                string   `json:"forge_remote_id"`
+		Owner                        string   `json:"owner"`
+		Name                         string   `json:"name"`
+		FullName                     string   `json:"full_name"`
+		Avatar                       string   `json:"avatar_url,omitempty"`
+		Link                         string   `json:"link_url,omitempty"`
+		Clone                        string   `json:"clone_url,omitempty"`
+		DefaultBranch                string   `json:"default_branch,omitempty"`
+		SCMKind                      string   `json:"scm,omitempty"`
+		Timeout                      int64    `json:"timeout,omitempty"`
+		Visibility                   string   `json:"visibility"`
+		IsSCMPrivate                 bool     `json:"private"`
+		IsTrusted                    bool     `json:"trusted"`
+		IsGated                      bool     `json:"gated"`
+		IsActive                     bool     `json:"active"`
+		AllowPullRequests            bool     `json:"allow_pr"`
+		Config                       string   `json:"config_file"`
+		CancelPreviousPipelineEvents []string `json:"cancel_previous_pipeline_events"`
+		NetrcOnlyTrusted             bool     `json:"netrc_only_trusted"`
 	}
 
 	// RepoPatch defines a repository patch request.
@@ -59,51 +62,62 @@ type (
 
 	// Pipeline defines a pipeline object.
 	Pipeline struct {
-		ID        int64   `json:"id"`
-		Number    int     `json:"number"`
-		Parent    int     `json:"parent"`
-		Event     string  `json:"event"`
-		Status    string  `json:"status"`
-		Error     string  `json:"error"`
-		Enqueued  int64   `json:"enqueued_at"`
-		Created   int64   `json:"created_at"`
-		Started   int64   `json:"started_at"`
-		Finished  int64   `json:"finished_at"`
-		Deploy    string  `json:"deploy_to"`
-		Commit    string  `json:"commit"`
-		Branch    string  `json:"branch"`
-		Ref       string  `json:"ref"`
-		Refspec   string  `json:"refspec"`
-		CloneURL  string  `json:"clone_url"`
-		Title     string  `json:"title"`
-		Message   string  `json:"message"`
-		Timestamp int64   `json:"timestamp"`
-		Sender    string  `json:"sender"`
-		Author    string  `json:"author"`
-		Avatar    string  `json:"author_avatar"`
-		Email     string  `json:"author_email"`
-		Link      string  `json:"link_url"`
-		Reviewer  string  `json:"reviewed_by"`
-		Reviewed  int64   `json:"reviewed_at"`
-		Steps     []*Step `json:"steps,omitempty"`
+		ID        int64       `json:"id"`
+		Number    int         `json:"number"`
+		Parent    int         `json:"parent"`
+		Event     string      `json:"event"`
+		Status    string      `json:"status"`
+		Error     string      `json:"error"`
+		Enqueued  int64       `json:"enqueued_at"`
+		Created   int64       `json:"created_at"`
+		Started   int64       `json:"started_at"`
+		Finished  int64       `json:"finished_at"`
+		Deploy    string      `json:"deploy_to"`
+		Commit    string      `json:"commit"`
+		Branch    string      `json:"branch"`
+		Ref       string      `json:"ref"`
+		Refspec   string      `json:"refspec"`
+		CloneURL  string      `json:"clone_url"`
+		Title     string      `json:"title"`
+		Message   string      `json:"message"`
+		Timestamp int64       `json:"timestamp"`
+		Sender    string      `json:"sender"`
+		Author    string      `json:"author"`
+		Avatar    string      `json:"author_avatar"`
+		Email     string      `json:"author_email"`
+		Link      string      `json:"link_url"`
+		Reviewer  string      `json:"reviewed_by"`
+		Reviewed  int64       `json:"reviewed_at"`
+		Workflows []*Workflow `json:"workflows,omitempty"`
+	}
+
+	// Workflow represents a workflow in the pipeline.
+	Workflow struct {
+		ID       int64             `json:"id"`
+		PID      int               `json:"pid"`
+		Name     string            `json:"name"`
+		State    string            `json:"state"`
+		Error    string            `json:"error,omitempty"`
+		Started  int64             `json:"start_time,omitempty"`
+		Stopped  int64             `json:"end_time,omitempty"`
+		AgentID  int64             `json:"agent_id,omitempty"`
+		Platform string            `json:"platform,omitempty"`
+		Environ  map[string]string `json:"environ,omitempty"`
+		Children []*Step           `json:"children,omitempty"`
 	}
 
 	// Step represents a process in the pipeline.
 	Step struct {
-		ID       int64             `json:"id"`
-		PID      int               `json:"pid"`
-		PPID     int               `json:"ppid"`
-		PGID     int               `json:"pgid"`
-		Name     string            `json:"name"`
-		State    string            `json:"state"`
-		Error    string            `json:"error,omitempty"`
-		ExitCode int               `json:"exit_code"`
-		Started  int64             `json:"start_time,omitempty"`
-		Stopped  int64             `json:"end_time,omitempty"`
-		Machine  string            `json:"machine,omitempty"`
-		Platform string            `json:"platform,omitempty"`
-		Environ  map[string]string `json:"environ,omitempty"`
-		Children []*Step           `json:"children,omitempty"`
+		ID       int64    `json:"id"`
+		PID      int      `json:"pid"`
+		PPID     int      `json:"ppid"`
+		Name     string   `json:"name"`
+		State    string   `json:"state"`
+		Error    string   `json:"error,omitempty"`
+		ExitCode int      `json:"exit_code"`
+		Started  int64    `json:"start_time,omitempty"`
+		Stopped  int64    `json:"end_time,omitempty"`
+		Type     StepType `json:"type,omitempty"`
 	}
 
 	// Registry represents a docker registry with credentials.
@@ -173,10 +187,14 @@ type (
 		Level string `json:"log-level"`
 	}
 
-	// Logs is the JSON data for a logs response
-	Logs struct {
-		Step   string `json:"step"`
-		Output string `json:"out"`
+	// LogEntry is a single log entry
+	LogEntry struct {
+		ID     int64        `json:"id"`
+		StepID int64        `json:"step_id"`
+		Time   int64        `json:"time"`
+		Line   int          `json:"line"`
+		Data   []byte       `json:"data"`
+		Type   LogEntryType `json:"type"`
 	}
 
 	// Cron is the JSON data of a cron job
@@ -195,5 +213,39 @@ type (
 	PipelineOptions struct {
 		Branch    string            `json:"branch"`
 		Variables map[string]string `json:"variables"`
+	}
+
+	// Agent is the JSON data for an agent
+	Agent struct {
+		ID          int64  `json:"id"`
+		Created     int64  `json:"created"`
+		Updated     int64  `json:"updated"`
+		Name        string `json:"name"`
+		OwnerID     int64  `json:"owner_id"`
+		Token       string `json:"token"`
+		LastContact int64  `json:"last_contact"`
+		Platform    string `json:"platform"`
+		Backend     string `json:"backend"`
+		Capacity    int32  `json:"capacity"`
+		Version     string `json:"version"`
+		NoSchedule  bool   `json:"no_schedule"`
+	}
+
+	// Task is the JSON data for a task
+	Task struct {
+		ID           string            `json:"id"`
+		Data         []byte            `json:"data"`
+		Labels       map[string]string `json:"labels"`
+		Dependencies []string          `json:"dependencies"`
+		RunOn        []string          `json:"run_on"`
+		DepStatus    map[string]string `json:"dep_status"`
+		AgentID      int64             `json:"agent_id"`
+	}
+
+	// Org is the JSON data for an organization
+	Org struct {
+		ID     int64  `json:"id"`
+		Name   string `json:"name"`
+		IsUser bool   `json:"is_user"`
 	}
 )

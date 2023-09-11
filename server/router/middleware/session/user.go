@@ -16,6 +16,7 @@ package session
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -48,10 +49,6 @@ func SetUser() gin.HandlerFunc {
 			return user.Hash, err
 		})
 		if err == nil {
-			confv := c.MustGet("config")
-			if conf, ok := confv.(*model.Settings); ok {
-				user.Admin = conf.IsAdmin(user)
-			}
 			c.Set("user", user)
 
 			// if this is a session token (ie not the API token)
@@ -121,36 +118,47 @@ func MustUser() gin.HandlerFunc {
 
 func MustOrgMember(admin bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		_store := store.FromContext(c)
+
 		user := User(c)
-		owner := c.Param("owner")
 		if user == nil {
 			c.String(http.StatusUnauthorized, "User not authorized")
 			c.Abort()
 			return
 		}
-		if owner == "" {
-			c.String(http.StatusForbidden, "User not authorized")
-			c.Abort()
+
+		orgID, err := strconv.ParseInt(c.Param("org_id"), 10, 64)
+		if err != nil {
+			c.String(http.StatusBadRequest, "Error parsing org id. %s", err)
 			return
 		}
+
+		org, err := _store.OrgGet(orgID)
+		if err != nil {
+			c.String(http.StatusNotFound, "Organization not found")
+			return
+		}
+
 		// User can access his own, admin can access all
-		if user.Login == owner || user.Admin {
+		if (org.Name == user.Login) || user.Admin {
 			c.Next()
 			return
 		}
 
-		perm, err := server.Config.Services.Membership.Get(c, user, owner)
+		perm, err := server.Config.Services.Membership.Get(c, user, org.Name)
 		if err != nil {
 			log.Error().Msgf("Failed to check membership: %v", err)
 			c.String(http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			c.Abort()
 			return
 		}
+
 		if perm == nil || (!admin && !perm.Member) || (admin && !perm.Admin) {
 			c.String(http.StatusForbidden, "User not authorized")
 			c.Abort()
 			return
 		}
+
 		c.Next()
 	}
 }

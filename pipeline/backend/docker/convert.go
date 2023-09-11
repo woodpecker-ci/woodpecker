@@ -30,7 +30,7 @@ import (
 func toConfig(step *types.Step) *container.Config {
 	config := &container.Config{
 		Image:        step.Image,
-		Labels:       step.Labels,
+		Labels:       map[string]string{"wp_uuid": step.UUID},
 		WorkingDir:   step.WorkingDir,
 		AttachStdout: true,
 		AttachStderr: true,
@@ -52,6 +52,10 @@ func toConfig(step *types.Step) *container.Config {
 		config.Volumes = toVol(step.Volumes)
 	}
 	return config
+}
+
+func toContainerName(step *types.Step) string {
+	return "wp_" + step.UUID
 }
 
 // returns a container host configuration.

@@ -1,9 +1,9 @@
 # Environment variables
 
-Woodpecker provides the ability to pass environment variables to individual pipeline steps. Example pipeline step with custom environment variables:
+Woodpecker provides the ability to pass environment variables to individual pipeline steps. Note that these can't overwrite any existing, built-in variables. Example pipeline step with custom environment variables:
 
 ```diff
-pipeline:
+steps:
   build:
     image: golang
 +   environment:
@@ -18,7 +18,7 @@ pipeline:
 Please note that the environment section is not able to expand environment variables. If you need to expand variables they should be exported in the commands section.
 
 ```diff
-pipeline:
+steps:
   build:
     image: golang
 -   environment:
@@ -32,7 +32,7 @@ pipeline:
 > Please be warned that `${variable}` expressions are subject to pre-processing. If you do not want the pre-processor to evaluate your expression it must be escaped:
 
 ```diff
-pipeline:
+steps:
   build:
     image: golang
     commands:
@@ -47,16 +47,18 @@ pipeline:
 This is the reference list of all environment variables available to your pipeline containers. These are injected into your pipeline step and plugins containers, at runtime.
 
 | NAME                             | Description                                                                                  |
-|----------------------------------|----------------------------------------------------------------------------------------------|
-| `CI=woodpecker`                  | environment is woodpecker                                                                    |
+| -------------------------------- | -------------------------------------------------------------------------------------------- |
+| `CI`                             | CI environment name (value: `woodpecker`)                                                          |
 |                                  | **Repository**                                                                               |
 | `CI_REPO`                        | repository full name `<owner>/<name>`                                                        |
 | `CI_REPO_OWNER`                  | repository owner                                                                             |
 | `CI_REPO_NAME`                   | repository name                                                                              |
+| `CI_REPO_REMOTE_ID`              | repository remote ID, is the UID it has in the forge                                         |
 | `CI_REPO_SCM`                    | repository SCM (git)                                                                         |
-| `CI_REPO_LINK`                   | repository link                                                                              |
+| `CI_REPO_URL`                    | repository web URL                                                                           |
 | `CI_REPO_CLONE_URL`              | repository clone URL                                                                         |
-| `CI_REPO_DEFAULT_BRANCH`         | repository default branch (master)                                                           |
+| `CI_REPO_CLONE_SSH_URL`          | repository SSH clone URL                                                                     |
+| `CI_REPO_DEFAULT_BRANCH`         | repository default branch (main)                                                             |
 | `CI_REPO_PRIVATE`                | repository is private                                                                        |
 | `CI_REPO_TRUSTED`                | repository is trusted                                                                        |
 |                                  | **Current Commit**                                                                           |
@@ -64,11 +66,12 @@ This is the reference list of all environment variables available to your pipeli
 | `CI_COMMIT_REF`                  | commit ref                                                                                   |
 | `CI_COMMIT_REFSPEC`              | commit ref spec                                                                              |
 | `CI_COMMIT_BRANCH`               | commit branch (equals target branch for pull requests)                                       |
-| `CI_COMMIT_SOURCE_BRANCH`        | commit source branch                                                                         |
-| `CI_COMMIT_TARGET_BRANCH`        | commit target branch                                                                         |
+| `CI_COMMIT_SOURCE_BRANCH`        | commit source branch (empty if event is not `pull_request`)                                  |
+| `CI_COMMIT_TARGET_BRANCH`        | commit target branch (empty if event is not `pull_request`)                                  |
 | `CI_COMMIT_TAG`                  | commit tag name (empty if event is not `tag`)                                                |
 | `CI_COMMIT_PULL_REQUEST`         | commit pull request number (empty if event is not `pull_request`)                            |
-| `CI_COMMIT_LINK`                 | commit link in forge                                                                         |
+| `CI_COMMIT_PULL_REQUEST_LABELS`  | labels assigned to pull request (empty if event is not `pull_request`)                       |
+| `CI_COMMIT_URL`                  | commit link in forge                                                                         |
 | `CI_COMMIT_MESSAGE`              | commit message                                                                               |
 | `CI_COMMIT_AUTHOR`               | commit author username                                                                       |
 | `CI_COMMIT_AUTHOR_EMAIL`         | commit author email address                                                                  |
@@ -77,14 +80,16 @@ This is the reference list of all environment variables available to your pipeli
 | `CI_PIPELINE_NUMBER`             | pipeline number                                                                              |
 | `CI_PIPELINE_PARENT`             | number of parent pipeline                                                                    |
 | `CI_PIPELINE_EVENT`              | pipeline event (push, pull_request, tag, deployment)                                         |
-| `CI_PIPELINE_LINK`               | pipeline link in CI                                                                          |
+| `CI_PIPELINE_URL`                | link to the forge's web UI for the commit(s) or tag that triggered the pipeline              |
 | `CI_PIPELINE_DEPLOY_TARGET`      | pipeline deploy target for `deployment` events (ie production)                               |
 | `CI_PIPELINE_STATUS`             | pipeline status (success, failure)                                                           |
 | `CI_PIPELINE_CREATED`            | pipeline created UNIX timestamp                                                              |
 | `CI_PIPELINE_STARTED`            | pipeline started UNIX timestamp                                                              |
 | `CI_PIPELINE_FINISHED`           | pipeline finished UNIX timestamp                                                             |
+|                                  | **Current workflow**                                                                         |
+| `CI_WORKFLOW_NAME`               | workflow name                                                                                |
 |                                  | **Current step**                                                                             |
-| `CI_STEP_NUMBER`                 | step number                                                                                  |
+| `CI_STEP_NAME`                   | step name                                                                                    |
 | `CI_STEP_STATUS`                 | step status (success, failure)                                                               |
 | `CI_STEP_STARTED`                | step started UNIX timestamp                                                                  |
 | `CI_STEP_FINISHED`               | step finished UNIX timestamp                                                                 |
@@ -95,7 +100,7 @@ This is the reference list of all environment variables available to your pipeli
 | `CI_PREV_COMMIT_BRANCH`          | previous commit branch                                                                       |
 | `CI_PREV_COMMIT_SOURCE_BRANCH`   | previous commit source branch                                                                |
 | `CI_PREV_COMMIT_TARGET_BRANCH`   | previous commit target branch                                                                |
-| `CI_PREV_COMMIT_LINK`            | previous commit link in forge                                                                |
+| `CI_PREV_COMMIT_URL`             | previous commit link in forge                                                                |
 | `CI_PREV_COMMIT_MESSAGE`         | previous commit message                                                                      |
 | `CI_PREV_COMMIT_AUTHOR`          | previous commit author username                                                              |
 | `CI_PREV_COMMIT_AUTHOR_EMAIL`    | previous commit author email address                                                         |
@@ -104,7 +109,7 @@ This is the reference list of all environment variables available to your pipeli
 | `CI_PREV_PIPELINE_NUMBER`        | previous pipeline number                                                                     |
 | `CI_PREV_PIPELINE_PARENT`        | previous pipeline number of parent pipeline                                                  |
 | `CI_PREV_PIPELINE_EVENT`         | previous pipeline event (push, pull_request, tag, deployment)                                |
-| `CI_PREV_PIPELINE_LINK`          | previous pipeline link in CI                                                                 |
+| `CI_PREV_PIPELINE_URL`           | previous pipeline link in CI                                                                 |
 | `CI_PREV_PIPELINE_DEPLOY_TARGET` | previous pipeline deploy target for `deployment` events (ie production)                      |
 | `CI_PREV_PIPELINE_STATUS`        | previous pipeline status (success, failure)                                                  |
 | `CI_PREV_PIPELINE_CREATED`       | previous pipeline created UNIX timestamp                                                     |
@@ -114,9 +119,12 @@ This is the reference list of all environment variables available to your pipeli
 | `CI_WORKSPACE`                   | Path of the workspace where source code gets cloned to                                       |
 |                                  | **System**                                                                                   |
 | `CI_SYSTEM_NAME`                 | name of the CI system: `woodpecker`                                                          |
-| `CI_SYSTEM_LINK`                 | link to CI system                                                                            |
+| `CI_SYSTEM_URL`                  | link to CI system                                                                            |
 | `CI_SYSTEM_HOST`                 | hostname of CI server                                                                        |
 | `CI_SYSTEM_VERSION`              | version of the server                                                                        |
+|                                  | **Forge**                                                                                    |
+| `CI_FORGE_TYPE`                  | name of forge (gitea, github, ...)                                                           |
+| `CI_FORGE_URL`                   | root URL of configured forge                                                                 |
 |                                  | **Internal** - Please don't use!                                                             |
 | `CI_SCRIPT`                      | Internal script path. Used to call pipeline step commands.                                   |
 | `CI_NETRC_USERNAME`              | Credentials for private repos to be able to clone data. (Only available for specific images) |
@@ -139,7 +147,7 @@ services:
 These can be used, for example, to manage the image tag used by multiple projects.
 
 ```diff
-pipeline:
+steps:
   build:
 -   image: golang:1.18
 +   image: golang:${GOLANG_VERSION}
@@ -157,7 +165,7 @@ Woodpecker provides the ability to substitute environment variables at runtime. 
 Example commit substitution:
 
 ```diff
-pipeline:
+steps:
   docker:
     image: plugins/docker
     settings:
@@ -167,7 +175,7 @@ pipeline:
 Example tag substitution:
 
 ```diff
-pipeline:
+steps:
   docker:
     image: plugins/docker
     settings:
@@ -195,7 +203,7 @@ Woodpecker also emulates bash string operations. This gives us the ability to ma
 Example variable substitution with substring:
 
 ```diff
-pipeline:
+steps:
   docker:
     image: plugins/docker
     settings:
@@ -205,7 +213,7 @@ pipeline:
 Example variable substitution strips `v` prefix from `v.1.0.0`:
 
 ```diff
-pipeline:
+steps:
   docker:
     image: plugins/docker
     settings:

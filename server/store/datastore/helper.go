@@ -15,16 +15,64 @@
 package datastore
 
 import (
+	"fmt"
+	"runtime"
+	"strings"
+
+	"xorm.io/xorm"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store/types"
 )
 
 // wrapGet return error if err not nil or if requested entry do not exist
 func wrapGet(exist bool, err error) error {
-	if err != nil {
-		return err
-	}
 	if !exist {
 		return types.RecordNotExist
 	}
+	if err != nil {
+		// we only ask for the function's name if needed, as it's not as preformatted as to just execute it
+		fnName := callerName(2)
+		return fmt.Errorf("%s: %w", fnName, err)
+	}
 	return nil
+}
+
+// wrapDelete return error if err not nil or if requested entry do not exist
+func wrapDelete(c int64, err error) error {
+	if c == 0 {
+		return types.RecordNotExist
+	}
+	if err != nil {
+		// we only ask for the function's name if needed, as it's not as preformatted as to just execute it
+		fnName := callerName(2)
+		return fmt.Errorf("%s: %w", fnName, err)
+	}
+	return nil
+}
+
+func (s storage) paginate(p *model.ListOptions) *xorm.Session {
+	if p.All {
+		return s.engine.NewSession()
+	}
+	if p.PerPage < 1 {
+		p.PerPage = 1
+	}
+	if p.Page < 1 {
+		p.Page = 1
+	}
+	return s.engine.Limit(p.PerPage, p.PerPage*(p.Page-1))
+}
+
+func callerName(skip int) string {
+	pc, _, _, ok := runtime.Caller(skip)
+	if !ok {
+		return ""
+	}
+	fnName := runtime.FuncForPC(pc).Name()
+	pIndex := strings.LastIndex(fnName, ".")
+	if pIndex != -1 {
+		fnName = fnName[pIndex+1:]
+	}
+	return fnName
 }

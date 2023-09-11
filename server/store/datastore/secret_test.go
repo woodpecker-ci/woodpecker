@@ -73,7 +73,7 @@ func TestSecretList(t *testing.T) {
 
 	createTestSecrets(t, store)
 
-	list, err := store.SecretList(&model.Repo{ID: 1, Owner: "org"}, false)
+	list, err := store.SecretList(&model.Repo{ID: 1, OrgID: 12}, false, &model.ListOptions{Page: 1, PerPage: 50})
 	assert.NoError(t, err)
 	assert.Len(t, list, 2)
 }
@@ -95,7 +95,7 @@ func TestSecretPipelineList(t *testing.T) {
 
 	createTestSecrets(t, store)
 
-	list, err := store.SecretList(&model.Repo{ID: 1, Owner: "org"}, true)
+	list, err := store.SecretList(&model.Repo{ID: 1, OrgID: 12}, true, &model.ListOptions{Page: 1, PerPage: 50})
 	assert.NoError(t, err)
 	assert.Len(t, list, 4)
 }
@@ -179,7 +179,7 @@ func TestSecretIndexes(t *testing.T) {
 
 func createTestSecrets(t *testing.T, store *storage) {
 	assert.NoError(t, store.SecretCreate(&model.Secret{
-		Owner: "org",
+		OrgID: 12,
 		Name:  "usr",
 		Value: "sec",
 	}))
@@ -204,7 +204,7 @@ func TestOrgSecretFind(t *testing.T) {
 	defer closer()
 
 	err := store.SecretCreate(&model.Secret{
-		Owner:  "org",
+		OrgID:  12,
 		Name:   "password",
 		Value:  "correct-horse-battery-staple",
 		Images: []string{"golang", "node"},
@@ -215,13 +215,13 @@ func TestOrgSecretFind(t *testing.T) {
 		return
 	}
 
-	secret, err := store.OrgSecretFind("org", "password")
+	secret, err := store.OrgSecretFind(12, "password")
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	if got, want := secret.Owner, "org"; got != want {
-		t.Errorf("Want owner %s, got %s", want, got)
+	if got, want := secret.OrgID, int64(12); got != want {
+		t.Errorf("Want org_id %d, got %d", want, got)
 	}
 	if got, want := secret.Name, "password"; got != want {
 		t.Errorf("Want secret name %s, got %s", want, got)
@@ -249,7 +249,7 @@ func TestOrgSecretList(t *testing.T) {
 
 	createTestSecrets(t, store)
 
-	list, err := store.OrgSecretList("org")
+	list, err := store.OrgSecretList(12, &model.ListOptions{All: true})
 	assert.NoError(t, err)
 	assert.Len(t, list, 1)
 
@@ -302,7 +302,7 @@ func TestGlobalSecretList(t *testing.T) {
 
 	createTestSecrets(t, store)
 
-	list, err := store.GlobalSecretList()
+	list, err := store.GlobalSecretList(&model.ListOptions{All: true})
 	assert.NoError(t, err)
 	assert.Len(t, list, 1)
 

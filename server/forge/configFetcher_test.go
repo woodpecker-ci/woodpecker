@@ -114,7 +114,7 @@ func TestFetch(t *testing.T) {
 			expectedError: false,
 		},
 		{
-			name:       "Default config check .woodpecker.yml before .woodpecker.yaml",
+			name:       "Default config check .woodpecker.yaml before .woodpecker.yml",
 			repoConfig: "",
 			files: []file{{
 				name: ".woodpecker.yaml",
@@ -124,7 +124,7 @@ func TestFetch(t *testing.T) {
 				data: dummyData,
 			}},
 			expectedFileNames: []string{
-				".woodpecker.yml",
+				".woodpecker.yaml",
 			},
 			expectedError: false,
 		},
@@ -144,11 +144,11 @@ func TestFetch(t *testing.T) {
 			name:       "Use old config on 204 response",
 			repoConfig: "",
 			files: []file{{
-				name: ".drone.yml",
+				name: ".woodpecker.yaml",
 				data: dummyData,
 			}},
 			expectedFileNames: []string{
-				".drone.yml",
+				".woodpecker.yaml",
 			},
 			expectedError: false,
 		},
@@ -202,11 +202,11 @@ func TestFetch(t *testing.T) {
 				name: ".woodpecker.yml",
 				data: nil,
 			}, {
-				name: ".drone.yml",
+				name: ".woodpecker.yaml",
 				data: dummyData,
 			}},
 			expectedFileNames: []string{
-				".drone.yml",
+				".woodpecker.yaml",
 			},
 			expectedError: false,
 		},
@@ -220,7 +220,7 @@ func TestFetch(t *testing.T) {
 				name: ".woodpecker.yml",
 				data: dummyData,
 			}, {
-				name: ".drone.yml",
+				name: ".woodpecker.yaml",
 				data: dummyData,
 			}, {
 				name: ".my-ci-folder/test.yml",
@@ -384,7 +384,7 @@ func TestFetchFromConfigService(t *testing.T) {
 				name: ".woodpecker.yml",
 				data: nil,
 			}, {
-				name: ".drone.yml",
+				name: ".woodpecker.yaml",
 				data: dummyData,
 			}},
 			expectedFileNames: []string{},
@@ -400,7 +400,7 @@ func TestFetchFromConfigService(t *testing.T) {
 				name: ".woodpecker.yml",
 				data: dummyData,
 			}, {
-				name: ".drone.yml",
+				name: ".woodpecker.yaml",
 				data: dummyData,
 			}, {
 				name: ".my-ci-folder/test.yml",
@@ -518,6 +518,8 @@ func TestFetchFromConfigService(t *testing.T) {
 			// if the previous mocks do not match return not found errors
 			f.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("File not found"))
 			f.On("Dir", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("Directory not found"))
+
+			f.On("Netrc", mock.Anything, mock.Anything).Return(&model.Netrc{Machine: "mock", Login: "mock", Password: "mock"}, nil)
 
 			configFetcher := forge.NewConfigFetcher(
 				f,

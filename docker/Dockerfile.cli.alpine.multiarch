@@ -1,13 +1,13 @@
-FROM --platform=$BUILDPLATFORM golang:1.18 AS build
+FROM --platform=$BUILDPLATFORM golang:1.21 AS build
 
 WORKDIR /src
 COPY . .
-ARG TARGETOS TARGETARCH
+ARG TARGETOS TARGETARCH CI_COMMIT_SHA CI_COMMIT_TAG CI_COMMIT_BRANCH
 RUN --mount=type=cache,target=/root/.cache/go-build \
     --mount=type=cache,target=/go/pkg \
     make build-cli
 
-FROM alpine:3.16
+FROM alpine:3.18
 RUN apk add -U --no-cache ca-certificates
 ENV GODEBUG=netdns=go
 

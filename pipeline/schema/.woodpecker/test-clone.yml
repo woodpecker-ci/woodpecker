@@ -7,7 +7,7 @@ clone:
     submodule_override:
       my-module: https://github.com/octocat/my-module.git
 
-pipeline:
+steps:
   test:
     image: alpine
     commands:

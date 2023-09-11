@@ -24,6 +24,14 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server"
 )
 
+// GetSignaturePublicKey
+//
+//	@Summary	Get server's signature public key
+//	@Router		/signature/public-key [get]
+//	@Produce	plain
+//	@Success	200
+//	@Tags		System
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 func GetSignaturePublicKey(c *gin.Context) {
 	b, err := x509.MarshalPKIXPublicKey(server.Config.Services.SignaturePublicKey)
 	if err != nil {
@@ -37,5 +45,5 @@ func GetSignaturePublicKey(c *gin.Context) {
 		Bytes: b,
 	}
 
-	c.String(200, "%s", pem.EncodeToMemory(block))
+	c.String(http.StatusOK, "%s", pem.EncodeToMemory(block))
 }

@@ -17,7 +17,6 @@ package datastore
 
 import (
 	"testing"
-	"time"
 
 	"github.com/franela/goblin"
 	"github.com/stretchr/testify/assert"
@@ -103,6 +102,22 @@ func TestRepos(t *testing.T) {
 			g.Assert(repo.Name).Equal(getrepo.Name)
 		})
 
+		g.It("Should Get a Repo by Name (case-insensitive)", func() {
+			repo := model.Repo{
+				UserID:   1,
+				FullName: "bradrydzewski/TEST",
+				Owner:    "bradrydzewski",
+				Name:     "TEST",
+			}
+			g.Assert(store.CreateRepo(&repo)).IsNil()
+			getrepo, err := store.GetRepoName("Bradrydzewski/test")
+			g.Assert(err).IsNil()
+			g.Assert(repo.ID).Equal(getrepo.ID)
+			g.Assert(repo.UserID).Equal(getrepo.UserID)
+			g.Assert(repo.Owner).Equal(getrepo.Owner)
+			g.Assert(repo.Name).Equal(getrepo.Name)
+		})
+
 		g.It("Should Enforce Unique Repo Name", func() {
 			repo1 := model.Repo{
 				UserID:   1,
@@ -125,7 +140,7 @@ func TestRepos(t *testing.T) {
 }
 
 func TestRepoList(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm))
+	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm), new(model.Org))
 	defer closer()
 
 	user := &model.User{
@@ -164,7 +179,7 @@ func TestRepoList(t *testing.T) {
 		assert.NoError(t, store.PermUpsert(perm))
 	}
 
-	repos, err := store.RepoList(user, false)
+	repos, err := store.RepoList(user, false, false)
 	if err != nil {
 		t.Error(err)
 		return
@@ -181,7 +196,7 @@ func TestRepoList(t *testing.T) {
 }
 
 func TestOwnedRepoList(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm))
+	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm), new(model.Org))
 	defer closer()
 
 	user := &model.User{
@@ -229,7 +244,7 @@ func TestOwnedRepoList(t *testing.T) {
 		assert.NoError(t, store.PermUpsert(perm))
 	}
 
-	repos, err := store.RepoList(user, true)
+	repos, err := store.RepoList(user, true, false)
 	if err != nil {
 		t.Error(err)
 		return
@@ -277,104 +292,6 @@ func TestRepoCount(t *testing.T) {
 	}
 }
 
-func TestRepoBatch(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm), new(model.Redirection))
-	defer closer()
-
-	if !assert.NoError(t, store.CreateRepo(&model.Repo{
-		ForgeRemoteID: "5",
-		UserID:        1,
-		FullName:      "foo/bar",
-		Owner:         "foo",
-		Name:          "bar",
-		IsActive:      true,
-	})) {
-		return
-	}
-
-	repos := []*model.Repo{
-		{
-			ForgeRemoteID: "5",
-			UserID:        1,
-			FullName:      "foo/bar",
-			Owner:         "foo",
-			Name:          "bar",
-			IsActive:      true,
-			Perm: &model.Perm{
-				UserID: 1,
-				Pull:   true,
-				Push:   true,
-				Admin:  true,
-				Synced: time.Now().Unix(),
-			},
-		},
-		{
-			ForgeRemoteID: "6",
-			UserID:        1,
-			FullName:      "bar/baz",
-			Owner:         "bar",
-			Name:          "baz",
-			IsActive:      true,
-		},
-		{
-			ForgeRemoteID: "7",
-			UserID:        1,
-			FullName:      "baz/qux",
-			Owner:         "baz",
-			Name:          "qux",
-			IsActive:      true,
-		},
-		{
-			ForgeRemoteID: "8",
-			UserID:        0, // not activated repos do hot have a user id assigned
-			FullName:      "baz/notes",
-			Owner:         "baz",
-			Name:          "notes",
-			IsActive:      false,
-		},
-	}
-	if !assert.NoError(t, store.RepoBatch(repos)) {
-		return
-	}
-
-	// check DB state
-	perm, err := store.PermFind(&model.User{ID: 1}, repos[0])
-	assert.NoError(t, err)
-	assert.True(t, perm.Admin)
-
-	repo := &model.Repo{
-		ForgeRemoteID: "5",
-		FullName:      "foo/bar",
-		Owner:         "foo",
-		Name:          "bar",
-		Perm: &model.Perm{
-			UserID: 1,
-			Pull:   true,
-			Push:   true,
-			Admin:  false,
-			Synced: time.Now().Unix(),
-		},
-	}
-	assert.NoError(t, store.RepoBatch([]*model.Repo{repo}))
-	assert.EqualValues(t, repos[0].ID, repo.ID)
-
-	// check current DB state
-	_, err = store.engine.ID(repo.ID).Get(repo)
-	assert.NoError(t, err)
-	assert.True(t, repo.IsActive)
-	perm, err = store.PermFind(&model.User{ID: 1}, repos[0])
-	assert.NoError(t, err)
-	assert.False(t, perm.Admin)
-
-	allRepos := make([]*model.Repo, 0, 4)
-	assert.NoError(t, store.engine.Find(&allRepos))
-	assert.Len(t, allRepos, 4)
-
-	count, err := store.GetRepoCount()
-	assert.NoError(t, err)
-	assert.EqualValues(t, 3, count)
-}
-
 func TestRepoCrud(t *testing.T) {
 	store, closer := newTestStore(t,
 		new(model.Repo),
@@ -382,9 +299,8 @@ func TestRepoCrud(t *testing.T) {
 		new(model.Perm),
 		new(model.Pipeline),
 		new(model.PipelineConfig),
-		new(model.Logs),
+		new(model.LogEntry),
 		new(model.Step),
-		new(model.File),
 		new(model.Secret),
 		new(model.Registry),
 		new(model.Config),
@@ -418,6 +334,7 @@ func TestRepoCrud(t *testing.T) {
 		RepoID: repoUnrelated.ID,
 	}
 	stepUnrelated := model.Step{
+		UUID: "44c0de71-a6be-41c9-b860-e3716d1dfcef",
 		Name: "a unrelated step",
 	}
 	assert.NoError(t, store.CreatePipeline(&pipelineUnrelated, &stepUnrelated))
@@ -452,13 +369,18 @@ func TestRepoRedirection(t *testing.T) {
 	assert.NoError(t, store.CreateRepo(&repo))
 
 	repoUpdated := model.Repo{
+		ID:            repo.ID,
 		ForgeRemoteID: "1",
 		FullName:      "bradrydzewski/test-renamed",
 		Owner:         "bradrydzewski",
 		Name:          "test-renamed",
 	}
 
-	assert.NoError(t, store.RepoBatch([]*model.Repo{&repoUpdated}))
+	assert.NoError(t, store.UpdateRepo(&repoUpdated))
+	assert.NoError(t, store.CreateRedirection(&model.Redirection{
+		RepoID:   repo.ID,
+		FullName: repo.FullName,
+	}))
 
 	// test redirection from old repo name
 	repoFromStore, err := store.GetRepoNameFallback("1", "bradrydzewski/test")

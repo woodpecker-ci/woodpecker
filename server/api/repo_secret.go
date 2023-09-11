@@ -25,8 +25,16 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 )
 
-// GetSecret gets the named secret from the database and writes
-// to the response in json format.
+// GetSecret
+//
+//	@Summary	Get a named secret
+//	@Router		/repos/{repo_id}/secrets/{secretName} [get]
+//	@Produce	json
+//	@Success	200	{object}	Secret
+//	@Tags		Repository secrets
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		secretName		path	string	true	"the secret name"
 func GetSecret(c *gin.Context) {
 	var (
 		repo = session.Repo(c)
@@ -34,13 +42,22 @@ func GetSecret(c *gin.Context) {
 	)
 	secret, err := server.Config.Services.Secrets.SecretFind(repo, name)
 	if err != nil {
-		c.String(404, "Error getting secret %q. %s", name, err)
+		handleDbError(c, err)
 		return
 	}
-	c.JSON(200, secret.Copy())
+	c.JSON(http.StatusOK, secret.Copy())
 }
 
-// PostSecret persists the secret to the database.
+// PostSecret
+//
+//	@Summary	Persist/create a secret
+//	@Router		/repos/{repo_id}/secrets [post]
+//	@Produce	json
+//	@Success	200	{object}	Secret
+//	@Tags		Repository secrets
+//	@Param		Authorization	header	string			true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		secret			body	Secret	true	"the new secret"
 func PostSecret(c *gin.Context) {
 	repo := session.Repo(c)
 
@@ -58,17 +75,27 @@ func PostSecret(c *gin.Context) {
 		PluginsOnly: in.PluginsOnly,
 	}
 	if err := secret.Validate(); err != nil {
-		c.String(400, "Error inserting secret. %s", err)
+		c.String(http.StatusUnprocessableEntity, "Error inserting secret. %s", err)
 		return
 	}
 	if err := server.Config.Services.Secrets.SecretCreate(repo, secret); err != nil {
-		c.String(500, "Error inserting secret %q. %s", in.Name, err)
+		c.String(http.StatusInternalServerError, "Error inserting secret %q. %s", in.Name, err)
 		return
 	}
-	c.JSON(200, secret.Copy())
+	c.JSON(http.StatusOK, secret.Copy())
 }
 
-// PatchSecret updates the secret in the database.
+// PatchSecret
+//
+//	@Summary	Update a named secret
+//	@Router		/repos/{repo_id}/secrets/{secretName} [patch]
+//	@Produce	json
+//	@Success	200	{object}	Secret
+//	@Tags		Repository secrets
+//	@Param		Authorization	header	string			true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		secretName		path	string			true	"the secret name"
+//	@Param		secret			body	Secret	true	"the secret itself"
 func PatchSecret(c *gin.Context) {
 	var (
 		repo = session.Repo(c)
@@ -84,7 +111,7 @@ func PatchSecret(c *gin.Context) {
 
 	secret, err := server.Config.Services.Secrets.SecretFind(repo, name)
 	if err != nil {
-		c.String(404, "Error getting secret %q. %s", name, err)
+		handleDbError(c, err)
 		return
 	}
 	if in.Value != "" {
@@ -99,23 +126,32 @@ func PatchSecret(c *gin.Context) {
 	secret.PluginsOnly = in.PluginsOnly
 
 	if err := secret.Validate(); err != nil {
-		c.String(400, "Error updating secret. %s", err)
+		c.String(http.StatusUnprocessableEntity, "Error updating secret. %s", err)
 		return
 	}
 	if err := server.Config.Services.Secrets.SecretUpdate(repo, secret); err != nil {
-		c.String(500, "Error updating secret %q. %s", in.Name, err)
+		c.String(http.StatusInternalServerError, "Error updating secret %q. %s", in.Name, err)
 		return
 	}
-	c.JSON(200, secret.Copy())
+	c.JSON(http.StatusOK, secret.Copy())
 }
 
-// GetSecretList gets the secret list from the database and writes
-// to the response in json format.
+// GetSecretList
+//
+//	@Summary	Get the secret list
+//	@Router		/repos/{repo_id}/secrets [get]
+//	@Produce	json
+//	@Success	200	{array}	Secret
+//	@Tags		Repository secrets
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		page			query	int		false	"for response pagination, page offset number"	default(1)
+//	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
 func GetSecretList(c *gin.Context) {
 	repo := session.Repo(c)
-	list, err := server.Config.Services.Secrets.SecretList(repo)
+	list, err := server.Config.Services.Secrets.SecretList(repo, session.Pagination(c))
 	if err != nil {
-		c.String(500, "Error getting secret list. %s", err)
+		c.String(http.StatusInternalServerError, "Error getting secret list. %s", err)
 		return
 	}
 	// copy the secret detail to remove the sensitive
@@ -123,18 +159,27 @@ func GetSecretList(c *gin.Context) {
 	for i, secret := range list {
 		list[i] = secret.Copy()
 	}
-	c.JSON(200, list)
+	c.JSON(http.StatusOK, list)
 }
 
-// DeleteSecret deletes the named secret from the database.
+// DeleteSecret
+//
+//	@Summary	Delete a named secret
+//	@Router		/repos/{repo_id}/secrets/{secretName} [delete]
+//	@Produce	plain
+//	@Success	204
+//	@Tags		Repository secrets
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		secretName		path	string	true	"the secret name"
 func DeleteSecret(c *gin.Context) {
 	var (
 		repo = session.Repo(c)
 		name = c.Param("secret")
 	)
 	if err := server.Config.Services.Secrets.SecretDelete(repo, name); err != nil {
-		c.String(500, "Error deleting secret %q. %s", name, err)
+		handleDbError(c, err)
 		return
 	}
-	c.String(204, "")
+	c.Status(http.StatusNoContent)
 }

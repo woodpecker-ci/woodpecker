@@ -30,7 +30,7 @@ import (
 var pipelineCreateCmd = &cli.Command{
 	Name:      "create",
 	Usage:     "create new pipeline",
-	ArgsUsage: "<repo/name>",
+	ArgsUsage: "<repo-id|repo-full-name>",
 	Action:    pipelineCreate,
 	Flags: append(common.GlobalFlags,
 		common.FormatFlag(tmplPipelineList),
@@ -47,14 +47,12 @@ var pipelineCreateCmd = &cli.Command{
 }
 
 func pipelineCreate(c *cli.Context) error {
-	repo := c.Args().First()
-
-	owner, name, err := internal.ParseRepo(repo)
+	repoIDOrFullName := c.Args().First()
+	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
 	}
-
-	client, err := internal.NewClient(c)
+	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
 	if err != nil {
 		return err
 	}
@@ -74,7 +72,7 @@ func pipelineCreate(c *cli.Context) error {
 		Variables: variables,
 	}
 
-	pipeline, err := client.PipelineCreate(owner, name, options)
+	pipeline, err := client.PipelineCreate(repoID, options)
 	if err != nil {
 		return err
 	}
@@ -84,9 +82,5 @@ func pipelineCreate(c *cli.Context) error {
 		return err
 	}
 
-	if err := tmpl.Execute(os.Stdout, pipeline); err != nil {
-		return err
-	}
-
-	return nil
+	return tmpl.Execute(os.Stdout, pipeline)
 }

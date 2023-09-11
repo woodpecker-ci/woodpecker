@@ -23,8 +23,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-const defaultBranch = "master"
-
 const (
 	statusPending = "pending"
 	statusSuccess = "success"
@@ -91,14 +89,12 @@ func convertRepo(from *github.Repository) *model.Repo {
 		Link:          from.GetHTMLURL(),
 		IsSCMPrivate:  from.GetPrivate(),
 		Clone:         from.GetCloneURL(),
+		CloneSSH:      from.GetSSHURL(),
 		Branch:        from.GetDefaultBranch(),
 		Owner:         from.GetOwner().GetLogin(),
 		Avatar:        from.GetOwner().GetAvatarURL(),
 		Perm:          convertPerm(from.GetPermissions()),
 		SCMKind:       model.RepoGit,
-	}
-	if len(repo.Branch) == 0 {
-		repo.Branch = defaultBranch
 	}
 	return repo
 }
@@ -153,14 +149,22 @@ func convertRepoHook(eventRepo *github.PushEventRepository) *model.Repo {
 		Link:          eventRepo.GetHTMLURL(),
 		IsSCMPrivate:  eventRepo.GetPrivate(),
 		Clone:         eventRepo.GetCloneURL(),
+		CloneSSH:      eventRepo.GetSSHURL(),
 		Branch:        eventRepo.GetDefaultBranch(),
 		SCMKind:       model.RepoGit,
-	}
-	if repo.Branch == "" {
-		repo.Branch = defaultBranch
 	}
 	if repo.FullName == "" {
 		repo.FullName = repo.Owner + "/" + repo.Name
 	}
 	return repo
+}
+
+// covertLabels is a helper function used to convert a GitHub label list to
+// the common Woodpecker label structure.
+func convertLabels(from []*github.Label) []string {
+	labels := make([]string, len(from))
+	for i, label := range from {
+		labels[i] = *label.Name
+	}
+	return labels
 }

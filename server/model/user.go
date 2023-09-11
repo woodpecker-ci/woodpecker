@@ -26,13 +26,13 @@ var reUsername = regexp.MustCompile("^[a-zA-Z0-9-_.]+$")
 var errUserLoginInvalid = errors.New("Invalid User Login")
 
 // User represents a registered user.
-//
-// swagger:model user
 type User struct {
 	// the id for this user.
 	//
 	// required: true
 	ID int64 `json:"id" xorm:"pk autoincr 'user_id'"`
+
+	ForgeRemoteID ForgeRemoteID `json:"-" xorm:"forge_remote_id"`
 
 	// Login is the username for this user.
 	//
@@ -56,24 +56,18 @@ type User struct {
 	// the avatar url for this user.
 	Avatar string `json:"avatar_url" xorm:" varchar(500) 'user_avatar'"`
 
-	// Activate indicates the user is active in the system.
-	Active bool `json:"active" xorm:"user_active"`
-
-	// Synced is the timestamp when the user was synced with the forge.
-	Synced int64 `json:"synced" xorm:"user_synced"`
-
 	// Admin indicates the user is a system administrator.
 	//
-	// NOTE: This is sourced from the WOODPECKER_ADMINS environment variable and is no
-	// longer persisted in the database.
-	Admin bool `json:"admin,omitempty" xorm:"-"`
+	// NOTE: If the username is part of the WOODPECKER_ADMIN
+	// environment variable this value will be set to true on login.
+	Admin bool `json:"admin,omitempty" xorm:"user_admin"`
 
 	// Hash is a unique token used to sign tokens.
 	Hash string `json:"-" xorm:"UNIQUE varchar(500) 'user_hash'"`
 
-	// DEPRECATED Admin indicates the user is a system administrator.
-	XAdmin bool `json:"-" xorm:"user_admin"`
-}
+	// OrgID is the of the user as model.Org.
+	OrgID int64 `json:"org_id" xorm:"user_org_id"`
+} //	@name User
 
 // TableName return database table name for xorm
 func (User) TableName() string {

@@ -21,6 +21,7 @@ import (
 )
 
 type Account struct {
+	ID    int64  `json:"id"`
 	Login string `json:"username"`
 	Name  string `json:"display_name"`
 	Type  string `json:"type"`
@@ -98,15 +99,19 @@ type LinkClone struct {
 }
 
 type Repo struct {
-	UUID      string  `json:"uuid"`
-	Owner     Account `json:"owner"`
-	Name      string  `json:"name"`
-	FullName  string  `json:"full_name"`
-	Language  string  `json:"language"`
-	IsPrivate bool    `json:"is_private"`
-	Scm       string  `json:"scm"`
-	Desc      string  `json:"desc"`
-	Links     Links   `json:"links"`
+	UUID       string  `json:"uuid"`
+	Owner      Account `json:"owner"`
+	Name       string  `json:"name"`
+	FullName   string  `json:"full_name"`
+	Language   string  `json:"language"`
+	IsPrivate  bool    `json:"is_private"`
+	Scm        string  `json:"scm"`
+	Desc       string  `json:"desc"`
+	Links      Links   `json:"links"`
+	Mainbranch struct {
+		Type string `json:"type"`
+		Name string `json:"name"`
+	} `json:"mainbranch"`
 }
 
 type RepoResp struct {
@@ -257,4 +262,37 @@ type BranchResp struct {
 
 type Branch struct {
 	Name string `json:"name"`
+}
+
+type PullRequestResp struct {
+	Page    uint           `json:"page"`
+	PageLen uint           `json:"pagelen"`
+	Size    uint           `json:"size"`
+	Values  []*PullRequest `json:"values"`
+}
+
+type PullRequest struct {
+	ID    uint   `json:"id"`
+	Title string `json:"title"`
+}
+
+type CommitsResp struct {
+	Values []*Commit `json:"values"`
+}
+
+type Commit struct {
+	Hash string `json:"hash"`
+}
+
+type DirResp struct {
+	Page    uint    `json:"page"`
+	PageLen uint    `json:"pagelen"`
+	Next    *string `json:"next"`
+	Values  []*Dir  `json:"values"`
+}
+
+type Dir struct {
+	Path string `json:"path"`
+	Type string `json:"type"`
+	Size uint   `json:"size"`
 }

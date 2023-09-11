@@ -30,6 +30,10 @@ scrape_configs:
        - targets: ['woodpecker.domain.com']
 ```
 
+## Unauthenticated Access
+
+Alternatively, the unprotected `/metrics` endpoint might be exposed on the internal port. (Port is configurable via the `WOODPECKER_METRICS_SERVER_ADDR` environment variable, e.g. `:9001`.)
+
 ## Metric Reference
 
 List of Prometheus metrics specific to Woodpecker:
@@ -37,11 +41,11 @@ List of Prometheus metrics specific to Woodpecker:
 ```
 # HELP woodpecker_pipeline_count Pipeline count.
 # TYPE woodpecker_pipeline_count counter
-woodpecker_build_count{branch="master",pipeline="total",repo="woodpecker-ci/woodpecker",status="success"} 3
+woodpecker_build_count{branch="main",pipeline="total",repo="woodpecker-ci/woodpecker",status="success"} 3
 woodpecker_build_count{branch="mkdocs",pipeline="total",repo="woodpecker-ci/woodpecker",status="success"} 3
 # HELP woodpecker_pipeline_time Build time.
 # TYPE woodpecker_pipeline_time gauge
-woodpecker_build_time{branch="master",pipeline="total",repo="woodpecker-ci/woodpecker",status="success"} 116
+woodpecker_build_time{branch="main",pipeline="total",repo="woodpecker-ci/woodpecker",status="success"} 116
 woodpecker_build_time{branch="mkdocs",pipeline="total",repo="woodpecker-ci/woodpecker",status="success"} 155
 # HELP woodpecker_pipeline_total_count Total number of builds.
 # TYPE woodpecker_pipeline_total_count gauge

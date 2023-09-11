@@ -9,7 +9,7 @@
     <img src="https://ci.woodpecker-ci.org/api/badges/woodpecker-ci/woodpecker/status.svg">
   </a>
   <a href="https://codecov.io/gh/woodpecker-ci/woodpecker">
-    <img src="https://codecov.io/gh/woodpecker-ci/woodpecker/branch/master/graph/badge.svg"/>
+    <img src="https://codecov.io/gh/woodpecker-ci/woodpecker/branch/main/graph/badge.svg"/>
   </a>
   <a href="https://translate.woodpecker-ci.org/engage/woodpecker-ci/">
     <img src="https://translate.woodpecker-ci.org/widgets/woodpecker-ci/-/ui/svg-badge.svg" alt="Translation status" />
@@ -109,7 +109,7 @@ Here are some places where people mention Woodpecker:
 
 - [GitHub](https://github.com/topics/WoodpeckerCI)
 - [Codeberg](https://codeberg.org/explore/repos?q=woodpeckerci&topic=1)
-- [Twitter](https://twitter.com/hashtag/WoodpeckerCI?f=live)
+- [Twitter](https://twitter.com/search?q=%23WoodpeckerCI&src=typed_query)
 - [Fediverse](https://mastodon.social/tags/WoodpeckerCI)
 
 ## ✨ Stars over time

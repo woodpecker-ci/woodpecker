@@ -1,3 +1,17 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package secret
 
 import (
@@ -14,17 +28,14 @@ import (
 var secretCreateCmd = &cli.Command{
 	Name:      "add",
 	Usage:     "adds a secret",
-	ArgsUsage: "[org/repo|org]",
+	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    secretCreate,
 	Flags: append(common.GlobalFlags,
 		&cli.BoolFlag{
 			Name:  "global",
 			Usage: "global secret",
 		},
-		&cli.StringFlag{
-			Name:  "organization",
-			Usage: "organization name (e.g. octocat)",
-		},
+		common.OrgFlag,
 		common.RepoFlag,
 		&cli.StringFlag{
 			Name:  "name",
@@ -74,7 +85,7 @@ func secretCreate(c *cli.Context) error {
 		secret.Value = string(out)
 	}
 
-	global, owner, repo, err := parseTargetArgs(c)
+	global, orgID, repoID, err := parseTargetArgs(client, c)
 	if err != nil {
 		return err
 	}
@@ -83,11 +94,13 @@ func secretCreate(c *cli.Context) error {
 		_, err = client.GlobalSecretCreate(secret)
 		return err
 	}
-	if repo == "" {
-		_, err = client.OrgSecretCreate(owner, secret)
+
+	if orgID != -1 {
+		_, err = client.OrgSecretCreate(orgID, secret)
 		return err
 	}
-	_, err = client.SecretCreate(owner, repo, secret)
+
+	_, err = client.SecretCreate(repoID, secret)
 	return err
 }
 

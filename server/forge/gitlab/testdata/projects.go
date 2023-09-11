@@ -20,7 +20,7 @@ var allProjectsPayload = []byte(`
 	{
 		"id": 4,
 		"description": null,
-		"default_branch": "master",
+		"default_branch": "main",
 		"public": false,
 		"visibility_level": 0,
 		"ssh_url_to_repo": "git@example.com:diaspora/diaspora-client.git",
@@ -51,12 +51,22 @@ var allProjectsPayload = []byte(`
 			"path": "diaspora",
 			"updated_at": "2013-09-30T13:46:02Z"
 		},
-		"archived": false
+		"archived": false,
+		"permissions": {
+			"project_access": {
+				"access_level": 10,
+				"notification_level": 3
+			},
+			"group_access": {
+				"access_level": 50,
+				"notification_level": 3
+			}
+		}
 	},
 	{
 		"id": 6,
 		"description": null,
-		"default_branch": "master",
+		"default_branch": "main",
 		"public": false,
 		"visibility_level": 0,
 		"ssh_url_to_repo": "git@example.com:brightbox/puppet.git",
@@ -87,7 +97,17 @@ var allProjectsPayload = []byte(`
 			"path": "brightbox",
 			"updated_at": "2013-09-30T13:46:02Z"
 		},
-		"archived": true
+		"archived": true,
+		"permissions": {
+			"project_access": {
+				"access_level": 10,
+				"notification_level": 3
+			},
+			"group_access": {
+				"access_level": 50,
+				"notification_level": 3
+			}
+		}
 	}
 ]
 `)
@@ -97,7 +117,7 @@ var notArchivedProjectsPayload = []byte(`
 	{
 		"id": 4,
 		"description": null,
-		"default_branch": "master",
+		"default_branch": "main",
 		"public": false,
 		"visibility_level": 0,
 		"ssh_url_to_repo": "git@example.com:diaspora/diaspora-client.git",
@@ -128,7 +148,17 @@ var notArchivedProjectsPayload = []byte(`
 			"path": "diaspora",
 			"updated_at": "2013-09-30T13:46:02Z"
 		},
-		"archived": false
+		"archived": false,
+		"permissions": {
+			"project_access": {
+				"access_level": 10,
+				"notification_level": 3
+			},
+			"group_access": {
+				"access_level": 50,
+				"notification_level": 3
+			}
+		}
 	}
 ]
 `)
@@ -137,7 +167,7 @@ var project4Payload = []byte(`
 {
 	"id": 4,
 	"description": null,
-	"default_branch": "master",
+	"default_branch": "main",
 	"public": false,
 	"visibility_level": 0,
 	"ssh_url_to_repo": "git@example.com:diaspora/diaspora-client.git",
@@ -186,7 +216,7 @@ var project6Payload = []byte(`
 {
 	"id": 6,
 	"description": null,
-	"default_branch": "master",
+	"default_branch": "main",
 	"public": false,
 	"visibility_level": 0,
 	"ssh_url_to_repo": "git@example.com:brightbox/puppet.git",

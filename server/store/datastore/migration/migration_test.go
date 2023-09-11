@@ -1,3 +1,17 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package migration
 
 import (
@@ -43,16 +57,16 @@ func createSQLiteDB(t *testing.T) string {
 	return tmpF.Name()
 }
 
-func testDB(t *testing.T, new bool) (engine *xorm.Engine, close func()) {
+func testDB(t *testing.T, new bool) (engine *xorm.Engine, closeDB func()) {
 	driver := testDriver()
 	var err error
-	close = func() {}
+	closeDB = func() {}
 	switch driver {
 	case "sqlite3":
 		config := ":memory:"
 		if !new {
 			config = createSQLiteDB(t)
-			close = func() {
+			closeDB = func() {
 				_ = os.Remove(config)
 			}
 		}
@@ -86,9 +100,9 @@ func TestMigrate(t *testing.T) {
 	}
 
 	// init new db
-	engine, close := testDB(t, true)
+	engine, closeDB := testDB(t, true)
 	assert.NoError(t, Migrate(engine))
-	close()
+	closeDB()
 
 	dbType := engine.Dialect().URI().DBType
 	if dbType == schemas.MYSQL || dbType == schemas.POSTGRES {
@@ -97,7 +111,7 @@ func TestMigrate(t *testing.T) {
 	}
 
 	// migrate old db
-	engine, close = testDB(t, false)
+	engine, closeDB = testDB(t, false)
 	assert.NoError(t, Migrate(engine))
-	close()
+	closeDB()
 }

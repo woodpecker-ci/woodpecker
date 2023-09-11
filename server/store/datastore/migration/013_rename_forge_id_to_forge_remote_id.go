@@ -22,10 +22,6 @@ var renameForgeIDToForgeRemoteID = task{
 	name:     "rename-forge-id-to-forge-remote-id",
 	required: true,
 	fn: func(sess *xorm.Session) error {
-		if err := renameColumn(sess, "repos", "forge_id", "forge_remote_id"); err != nil {
-			return err
-		}
-
-		return nil
+		return renameColumn(sess, "repos", "forge_id", "forge_remote_id")
 	},
 }

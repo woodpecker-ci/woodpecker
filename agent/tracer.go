@@ -26,7 +26,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
 )
 
-func (r *Runner) createTracer(ctxmeta context.Context, logger zerolog.Logger, work *rpc.Pipeline) pipeline.TraceFunc {
+func (r *Runner) createTracer(ctxmeta context.Context, logger zerolog.Logger, workflow *rpc.Workflow) pipeline.TraceFunc {
 	return func(state *pipeline.State) error {
 		steplogger := logger.With().
 			Str("image", state.Pipeline.Step.Image).
@@ -50,7 +50,7 @@ func (r *Runner) createTracer(ctxmeta context.Context, logger zerolog.Logger, wo
 		defer func() {
 			steplogger.Debug().Msg("update step status")
 
-			if uerr := r.client.Update(ctxmeta, work.ID, stepState); uerr != nil {
+			if uerr := r.client.Update(ctxmeta, workflow.ID, stepState); uerr != nil {
 				steplogger.Debug().
 					Err(uerr).
 					Msg("update step status error")
@@ -76,23 +76,11 @@ func (r *Runner) createTracer(ctxmeta context.Context, logger zerolog.Logger, wo
 		state.Pipeline.Step.Environment["CI_STEP_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
 		state.Pipeline.Step.Environment["CI_STEP_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
 
-		state.Pipeline.Step.Environment["CI_SYSTEM_ARCH"] = runtime.GOOS + "/" + runtime.GOARCH
-
-		// DEPRECATED
-		state.Pipeline.Step.Environment["CI_BUILD_STATUS"] = "success"
-		state.Pipeline.Step.Environment["CI_BUILD_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
-		state.Pipeline.Step.Environment["CI_BUILD_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
-		state.Pipeline.Step.Environment["CI_JOB_STATUS"] = "success"
-		state.Pipeline.Step.Environment["CI_JOB_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
-		state.Pipeline.Step.Environment["CI_JOB_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
+		state.Pipeline.Step.Environment["CI_SYSTEM_PLATFORM"] = runtime.GOOS + "/" + runtime.GOARCH
 
 		if state.Pipeline.Error != nil {
 			state.Pipeline.Step.Environment["CI_PIPELINE_STATUS"] = "failure"
 			state.Pipeline.Step.Environment["CI_STEP_STATUS"] = "failure"
-
-			// DEPRECATED
-			state.Pipeline.Step.Environment["CI_BUILD_STATUS"] = "failure"
-			state.Pipeline.Step.Environment["CI_JOB_STATUS"] = "failure"
 		}
 
 		return nil

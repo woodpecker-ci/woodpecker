@@ -1,10 +1,10 @@
 <template>
-  <div class="app flex flex-col m-auto w-full h-full bg-gray-100 dark:bg-dark-gray-600">
+  <div class="app flex flex-col m-auto w-full h-full bg-wp-background-200 dark:bg-wp-background-100">
     <router-view v-if="blank" />
     <template v-else>
       <Navbar />
       <main class="relative flex min-h-0 h-full">
-        <div class="flex flex-col overflow-y-auto flex-grow">
+        <div id="scroll-component" class="flex flex-col overflow-y-auto flex-grow">
           <router-view />
         </div>
         <transition name="slide-right">
@@ -33,6 +33,10 @@ const i18n = useI18n();
 
 // eslint-disable-next-line promise/prefer-await-to-callbacks
 apiClient.setErrorHandler((err) => {
+  if (err.status === 404) {
+    notify({ title: i18n.t('errors.not_found'), type: 'error' });
+    return;
+  }
   notify({ title: err.message || i18n.t('unknown_error'), type: 'error' });
 });
 

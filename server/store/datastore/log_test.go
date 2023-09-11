@@ -1,4 +1,4 @@
-// Copyright 2018 Drone.IO Inc.
+// Copyright 2023 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,64 +15,84 @@
 package datastore
 
 import (
-	"bytes"
-	"io"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-func TestLogCreateFind(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Step), new(model.Logs))
+func TestLogCreateFindDelete(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Step), new(model.LogEntry))
 	defer closer()
 
 	step := model.Step{
 		ID: 1,
 	}
-	buf := bytes.NewBufferString("echo hi")
-	err := store.LogSave(&step, buf)
-	if err != nil {
-		t.Errorf("Unexpected error: log create: %s", err)
+
+	logEntries := []*model.LogEntry{
+		{
+			StepID: step.ID,
+			Data:   []byte("hello"),
+			Line:   1,
+			Time:   0,
+		},
+		{
+			StepID: step.ID,
+			Data:   []byte("world"),
+			Line:   2,
+			Time:   10,
+		},
 	}
 
-	rc, err := store.LogFind(&step)
-	if err != nil {
-		t.Errorf("Unexpected error: log create: %s", err)
-	}
+	// first insert should just work
+	assert.NoError(t, store.LogSave(&step, logEntries))
 
-	defer rc.Close()
-	out, _ := io.ReadAll(rc)
-	if got, want := string(out), "echo hi"; got != want {
-		t.Errorf("Want log data %s, got %s", want, got)
-	}
+	// we want to find our inserted logs
+	_logEntries, err := store.LogFind(&step)
+	assert.NoError(t, err)
+	assert.Len(t, _logEntries, len(logEntries))
+
+	// delete and check
+	assert.NoError(t, store.LogDelete(&step))
+	_logEntries, err = store.LogFind(&step)
+	assert.NoError(t, err)
+	assert.Len(t, _logEntries, 0)
 }
 
-func TestLogUpdate(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Step), new(model.Logs))
+func TestLogAppend(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Step), new(model.LogEntry))
 	defer closer()
 
 	step := model.Step{
 		ID: 1,
 	}
-	buf1 := bytes.NewBufferString("echo hi")
-	buf2 := bytes.NewBufferString("echo allo?")
-	err1 := store.LogSave(&step, buf1)
-	err2 := store.LogSave(&step, buf2)
-	if err1 != nil {
-		t.Errorf("Unexpected error: log create: %s", err1)
-	}
-	if err2 != nil {
-		t.Errorf("Unexpected error: log update: %s", err2)
+	logEntries := []*model.LogEntry{
+		{
+			StepID: step.ID,
+			Data:   []byte("hello"),
+			Line:   1,
+			Time:   0,
+		},
+		{
+			StepID: step.ID,
+			Data:   []byte("world"),
+			Line:   2,
+			Time:   10,
+		},
 	}
 
-	rc, err := store.LogFind(&step)
-	if err != nil {
-		t.Errorf("Unexpected error: log create: %s", err)
+	assert.NoError(t, store.LogSave(&step, logEntries))
+
+	logEntry := &model.LogEntry{
+		StepID: step.ID,
+		Data:   []byte("allo?"),
+		Line:   3,
+		Time:   20,
 	}
 
-	defer rc.Close()
-	out, _ := io.ReadAll(rc)
-	if got, want := string(out), "echo allo?"; got != want {
-		t.Errorf("Want log data %s, got %s", want, got)
-	}
+	assert.NoError(t, store.LogAppend(logEntry))
+
+	_logEntries, err := store.LogFind(&step)
+	assert.NoError(t, err)
+	assert.Len(t, _logEntries, len(logEntries)+1)
 }

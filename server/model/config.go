@@ -30,8 +30,8 @@ type Config struct {
 	RepoID int64  `json:"-"    xorm:"UNIQUE(s) 'config_repo_id'"`
 	Hash   string `json:"hash" xorm:"UNIQUE(s) 'config_hash'"`
 	Name   string `json:"name" xorm:"config_name"`
-	Data   []byte `json:"data" xorm:"config_data"`
-}
+	Data   []byte `json:"data" xorm:"LONGBLOB 'config_data'"`
+} //	@name Config
 
 // PipelineConfig is the n:n relation between Pipeline and Config
 type PipelineConfig struct {

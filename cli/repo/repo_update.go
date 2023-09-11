@@ -28,7 +28,7 @@ import (
 var repoUpdateCmd = &cli.Command{
 	Name:      "update",
 	Usage:     "update a repository",
-	ArgsUsage: "<repo/name>",
+	ArgsUsage: "<repo-id|repo-full-name>",
 	Action:    repoUpdate,
 	Flags: append(common.GlobalFlags,
 		&cli.BoolFlag{
@@ -63,13 +63,12 @@ var repoUpdateCmd = &cli.Command{
 }
 
 func repoUpdate(c *cli.Context) error {
-	repo := c.Args().First()
-	owner, name, err := internal.ParseRepo(repo)
+	repoIDOrFullName := c.Args().First()
+	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
 	}
-
-	client, err := internal.NewClient(c)
+	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
 	if err != nil {
 		return err
 	}
@@ -111,9 +110,11 @@ func repoUpdate(c *cli.Context) error {
 		patch.PipelineCounter = &pipelineCounter
 	}
 
-	if _, err := client.RepoPatch(owner, name, patch); err != nil {
+	repo, err := client.RepoPatch(repoID, patch)
+	if err != nil {
 		return err
 	}
-	fmt.Printf("Successfully updated repository %s/%s\n", owner, name)
+
+	fmt.Printf("Successfully updated repository %s\n", repo.FullName)
 	return nil
 }

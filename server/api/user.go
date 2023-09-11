@@ -18,125 +18,132 @@ import (
 	"encoding/base32"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/securecookie"
-	"github.com/rs/zerolog/log"
 
 	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/shared/token"
 )
 
+// GetSelf
+//
+//	@Summary	Returns the currently authenticated user.
+//	@Router		/user [get]
+//	@Produce	json
+//	@Success	200	{object}	User
+//	@Tags		User
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 func GetSelf(c *gin.Context) {
-	c.JSON(200, session.User(c))
+	c.JSON(http.StatusOK, session.User(c))
 }
 
+// GetFeed
+//
+//	@Summary		A feed entry for a build.
+//	@Description	Feed entries can be used to display information on the latest builds.
+//	@Router			/user/feed [get]
+//	@Produce		json
+//	@Success		200	{object}	Feed
+//	@Tags			User
+//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 func GetFeed(c *gin.Context) {
 	_store := store.FromContext(c)
-	_forge := server.Config.Services.Forge
 
 	user := session.User(c)
 	latest, _ := strconv.ParseBool(c.Query("latest"))
 
-	if time.Unix(user.Synced, 0).Add(time.Hour * 72).Before(time.Now()) {
-		log.Debug().Msgf("sync begin: %s", user.Login)
-
-		user.Synced = time.Now().Unix()
-		if err := _store.UpdateUser(user); err != nil {
-			log.Error().Err(err).Msg("UpdateUser")
-			return
-		}
-
-		config := ToConfig(c)
-
-		sync := forge.Syncer{
-			Forge: _forge,
-			Store: _store,
-			Perms: _store,
-			Match: forge.NamespaceFilter(config.OwnersWhitelist),
-		}
-		if err := sync.Sync(c, user, server.Config.FlatPermissions); err != nil {
-			log.Debug().Msgf("sync error: %s: %s", user.Login, err)
-		} else {
-			log.Debug().Msgf("sync complete: %s", user.Login)
-		}
-	}
-
 	if latest {
 		feed, err := _store.RepoListLatest(user)
 		if err != nil {
-			c.String(500, "Error fetching feed. %s", err)
+			c.String(http.StatusInternalServerError, "Error fetching feed. %s", err)
 		} else {
-			c.JSON(200, feed)
+			c.JSON(http.StatusOK, feed)
 		}
 		return
 	}
 
 	feed, err := _store.UserFeed(user)
 	if err != nil {
-		c.String(500, "Error fetching user feed. %s", err)
+		c.String(http.StatusInternalServerError, "Error fetching user feed. %s", err)
 		return
 	}
-	c.JSON(200, feed)
+	c.JSON(http.StatusOK, feed)
 }
 
+// GetRepos
+//
+//	@Summary		Get user's repos
+//	@Description	Retrieve the currently authenticated User's Repository list
+//	@Router			/user/repos [get]
+//	@Produce		json
+//	@Success		200	{array}	Repo
+//	@Tags			User
+//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param			all		query	bool	false	"query all repos, including inactive ones"
 func GetRepos(c *gin.Context) {
 	_store := store.FromContext(c)
 	_forge := server.Config.Services.Forge
 
 	user := session.User(c)
 	all, _ := strconv.ParseBool(c.Query("all"))
-	flush, _ := strconv.ParseBool(c.Query("flush"))
 
-	if flush || time.Unix(user.Synced, 0).Add(time.Hour*72).Before(time.Now()) {
-		log.Debug().Msgf("sync begin: %s", user.Login)
-		user.Synced = time.Now().Unix()
-		if err := _store.UpdateUser(user); err != nil {
-			log.Err(err).Msgf("update user '%s'", user.Login)
+	if all {
+		dbRepos, err := _store.RepoList(user, true, false)
+		if err != nil {
+			c.String(http.StatusInternalServerError, "Error fetching repository list. %s", err)
 			return
 		}
 
-		config := ToConfig(c)
-
-		sync := forge.Syncer{
-			Forge: _forge,
-			Store: _store,
-			Perms: _store,
-			Match: forge.NamespaceFilter(config.OwnersWhitelist),
+		active := map[model.ForgeRemoteID]*model.Repo{}
+		for _, r := range dbRepos {
+			active[r.ForgeRemoteID] = r
 		}
 
-		if err := sync.Sync(c, user, server.Config.FlatPermissions); err != nil {
-			log.Debug().Msgf("sync error: %s: %s", user.Login, err)
-		} else {
-			log.Debug().Msgf("sync complete: %s", user.Login)
+		_repos, err := _forge.Repos(c, user)
+		if err != nil {
+			c.String(http.StatusInternalServerError, "Error fetching repository list. %s", err)
+			return
 		}
-	}
 
-	repos, err := _store.RepoList(user, true)
-	if err != nil {
-		c.String(500, "Error fetching repository list. %s", err)
-		return
-	}
+		var repos []*model.Repo
+		for _, r := range _repos {
+			if r.Perm.Push {
+				if active[r.ForgeRemoteID] != nil {
+					existingRepo := active[r.ForgeRemoteID]
+					existingRepo.Update(r)
+					existingRepo.IsActive = active[r.ForgeRemoteID].IsActive
+					repos = append(repos, existingRepo)
+				} else {
+					repos = append(repos, r)
+				}
+			}
+		}
 
-	if all {
 		c.JSON(http.StatusOK, repos)
 		return
 	}
 
-	active := make([]*model.Repo, 0)
-	for _, repo := range repos {
-		if repo.IsActive {
-			active = append(active, repo)
-		}
+	activeRepos, err := _store.RepoList(user, true, true)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Error fetching repository list. %s", err)
+		return
 	}
-	c.JSON(http.StatusOK, active)
+
+	c.JSON(http.StatusOK, activeRepos)
 }
 
+// PostToken
+//
+//	@Summary		Return the token of the current user as string
+//	@Router			/user/token [post]
+//	@Produce		plain
+//	@Success		200
+//	@Tags			User
+//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 func PostToken(c *gin.Context) {
 	user := session.User(c)
 	tokenString, err := token.New(token.UserToken, user.Login).Sign(user.Hash)
@@ -147,6 +154,15 @@ func PostToken(c *gin.Context) {
 	c.String(http.StatusOK, tokenString)
 }
 
+// DeleteToken
+//
+//	@Summary		Reset a token
+//	@Description	Reset's the current personal access token of the user and returns a new one.
+//	@Router			/user/token [delete]
+//	@Produce		plain
+//	@Success		200
+//	@Tags			User
+//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 func DeleteToken(c *gin.Context) {
 	_store := store.FromContext(c)
 
@@ -155,7 +171,7 @@ func DeleteToken(c *gin.Context) {
 		securecookie.GenerateRandomKey(32),
 	)
 	if err := _store.UpdateUser(user); err != nil {
-		c.String(500, "Error revoking tokens. %s", err)
+		c.String(http.StatusInternalServerError, "Error revoking tokens. %s", err)
 		return
 	}
 

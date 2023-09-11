@@ -28,6 +28,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/pubsub"
 	"github.com/woodpecker-ci/woodpecker/server/queue"
 	"github.com/woodpecker-ci/woodpecker/server/store"
+	"github.com/woodpecker-ci/woodpecker/version"
 )
 
 // WoodpeckerServer is a grpc server implementation.
@@ -36,7 +37,7 @@ type WoodpeckerServer struct {
 	peer RPC
 }
 
-func NewWoodpeckerServer(forge forge.Forge, queue queue.Queue, logger logging.Log, pubsub pubsub.Publisher, store store.Store, host string) *WoodpeckerServer {
+func NewWoodpeckerServer(forge forge.Forge, queue queue.Queue, logger logging.Log, pubsub pubsub.Publisher, store store.Store, host string) proto.WoodpeckerServer {
 	pipelineTime := promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
 		Name:      "pipeline_time",
@@ -60,12 +61,19 @@ func NewWoodpeckerServer(forge forge.Forge, queue queue.Queue, logger logging.Lo
 	return &WoodpeckerServer{peer: peer}
 }
 
-func (s *WoodpeckerServer) Next(c context.Context, req *proto.NextRequest) (*proto.NextReply, error) {
+func (s *WoodpeckerServer) Version(_ context.Context, _ *proto.Empty) (*proto.VersionResponse, error) {
+	return &proto.VersionResponse{
+		GrpcVersion:   proto.Version,
+		ServerVersion: version.String(),
+	}, nil
+}
+
+func (s *WoodpeckerServer) Next(c context.Context, req *proto.NextRequest) (*proto.NextResponse, error) {
 	filter := rpc.Filter{
 		Labels: req.GetFilter().GetLabels(),
 	}
 
-	res := new(proto.NextReply)
+	res := new(proto.NextResponse)
 	pipeline, err := s.peer.Next(c, filter)
 	if err != nil {
 		return res, err
@@ -74,10 +82,10 @@ func (s *WoodpeckerServer) Next(c context.Context, req *proto.NextRequest) (*pro
 		return res, err
 	}
 
-	res.Pipeline = new(proto.Pipeline)
-	res.Pipeline.Id = pipeline.ID
-	res.Pipeline.Timeout = pipeline.Timeout
-	res.Pipeline.Payload, _ = json.Marshal(pipeline.Config)
+	res.Workflow = new(proto.Workflow)
+	res.Workflow.Id = pipeline.ID
+	res.Workflow.Timeout = pipeline.Timeout
+	res.Workflow.Payload, _ = json.Marshal(pipeline.Config)
 
 	return res, err
 }
@@ -110,22 +118,6 @@ func (s *WoodpeckerServer) Update(c context.Context, req *proto.UpdateRequest) (
 	return res, err
 }
 
-func (s *WoodpeckerServer) Upload(c context.Context, req *proto.UploadRequest) (*proto.Empty, error) {
-	file := &rpc.File{
-		Data: req.GetFile().GetData(),
-		Mime: req.GetFile().GetMime(),
-		Name: req.GetFile().GetName(),
-		Step: req.GetFile().GetStep(),
-		Size: int(req.GetFile().GetSize()),
-		Time: req.GetFile().GetTime(),
-		Meta: req.GetFile().GetMeta(),
-	}
-
-	res := new(proto.Empty)
-	err := s.peer.Upload(c, req.GetId(), file)
-	return res, err
-}
-
 func (s *WoodpeckerServer) Done(c context.Context, req *proto.DoneRequest) (*proto.Empty, error) {
 	state := rpc.State{
 		Error:    req.GetState().GetError(),
@@ -153,14 +145,15 @@ func (s *WoodpeckerServer) Extend(c context.Context, req *proto.ExtendRequest) (
 }
 
 func (s *WoodpeckerServer) Log(c context.Context, req *proto.LogRequest) (*proto.Empty, error) {
-	line := &rpc.Line{
-		Out:  req.GetLine().GetOut(),
-		Pos:  int(req.GetLine().GetPos()),
-		Time: req.GetLine().GetTime(),
-		Step: req.GetLine().GetStep(),
+	logEntry := &rpc.LogEntry{
+		Data:     req.GetLogEntry().GetData(),
+		Line:     int(req.GetLogEntry().GetLine()),
+		Time:     req.GetLogEntry().GetTime(),
+		StepUUID: req.GetLogEntry().GetStepUuid(),
+		Type:     int(req.GetLogEntry().GetType()),
 	}
 	res := new(proto.Empty)
-	err := s.peer.Log(c, req.GetId(), line)
+	err := s.peer.Log(c, logEntry)
 	return res, err
 }
 

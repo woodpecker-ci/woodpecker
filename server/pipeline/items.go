@@ -22,13 +22,14 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/compiler"
 	"github.com/woodpecker-ci/woodpecker/server"
 	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
-func createPipelineItems(ctx context.Context, store store.Store,
+func createPipelineItems(c context.Context, store store.Store,
 	currentPipeline *model.Pipeline, user *model.User, repo *model.Repo,
 	yamls []*forge_types.FileMeta, envs map[string]string,
 ) (*model.Pipeline, []*pipeline.Item, error) {
@@ -43,12 +44,12 @@ func createPipelineItems(ctx context.Context, store store.Store,
 		log.Error().Err(err).Str("repo", repo.FullName).Msgf("Error getting last pipeline before pipeline number '%d'", currentPipeline.Number)
 	}
 
-	secs, err := server.Config.Services.Secrets.SecretListPipeline(repo, currentPipeline)
+	secs, err := server.Config.Services.Secrets.SecretListPipeline(repo, currentPipeline, &model.ListOptions{All: true})
 	if err != nil {
 		log.Error().Err(err).Msgf("Error getting secrets for %s#%d", repo.FullName, currentPipeline.Number)
 	}
 
-	regs, err := server.Config.Services.Registries.RegistryList(repo)
+	regs, err := server.Config.Services.Registries.RegistryList(repo, &model.ListOptions{All: true})
 	if err != nil {
 		log.Error().Err(err).Msgf("Error getting registry credentials for %s#%d", repo.FullName, currentPipeline.Number)
 	}
@@ -77,12 +78,20 @@ func createPipelineItems(ctx context.Context, store store.Store,
 		Envs:  envs,
 		Link:  server.Config.Server.Host,
 		Yamls: yamls,
+		Forge: server.Config.Services.Forge,
+		ProxyOpts: compiler.ProxyOptions{
+			NoProxy:    server.Config.Pipeline.Proxy.No,
+			HTTPProxy:  server.Config.Pipeline.Proxy.HTTP,
+			HTTPSProxy: server.Config.Pipeline.Proxy.HTTPS,
+		},
 	}
 	pipelineItems, err := b.Build()
 	if err != nil {
 		currentPipeline, uerr := UpdateToStatusError(store, *currentPipeline, err)
 		if uerr != nil {
 			log.Error().Err(err).Msgf("Error setting error status of pipeline for %s#%d", repo.FullName, currentPipeline.Number)
+		} else {
+			updatePipelineStatus(c, currentPipeline, repo, user)
 		}
 		return currentPipeline, nil, err
 	}

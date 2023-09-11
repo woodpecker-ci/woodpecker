@@ -1,16 +1,33 @@
+// Copyright 2022 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package kubernetes
 
 import (
+	"fmt"
 	"strings"
 
+	"github.com/rs/zerolog/log"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/common"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
+	"golang.org/x/exp/maps"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func Pod(namespace string, step *types.Step, labels, annotations map[string]string) *v1.Pod {
+func Pod(namespace string, step *types.Step, labels, annotations map[string]string) (*v1.Pod, error) {
 	var (
 		vols       []v1.Volume
 		volMounts  []v1.VolumeMount
@@ -20,24 +37,29 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 
 	if step.WorkingDir != "" {
 		for _, vol := range step.Volumes {
+			volumeName, err := dnsName(strings.Split(vol, ":")[0])
+			if err != nil {
+				return nil, err
+			}
+
 			vols = append(vols, v1.Volume{
-				Name: volumeName(vol),
+				Name: volumeName,
 				VolumeSource: v1.VolumeSource{
 					PersistentVolumeClaim: &v1.PersistentVolumeClaimVolumeSource{
-						ClaimName: volumeName(vol),
+						ClaimName: volumeName,
 						ReadOnly:  false,
 					},
 				},
 			})
 
 			volMounts = append(volMounts, v1.VolumeMount{
-				Name:      volumeName(vol),
+				Name:      volumeName,
 				MountPath: volumeMountPath(vol),
 			})
 		}
 	}
 
-	pullPolicy := v1.PullIfNotPresent
+	var pullPolicy v1.PullPolicy
 	if step.Pull {
 		pullPolicy = v1.PullAlways
 	}
@@ -57,51 +79,83 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 		hostAliases = append(hostAliases, v1.HostAlias{IP: host[1], Hostnames: []string{host[0]}})
 	}
 
-	// TODO: add support for resource limits
-	// if step.Resources.CPULimit == "" {
-	// 	step.Resources.CPULimit = "2"
-	// }
-	// if step.Resources.MemoryLimit == "" {
-	// 	step.Resources.MemoryLimit = "2G"
-	// }
-	// memoryLimit := resource.MustParse(step.Resources.MemoryLimit)
-	// CPULimit := resource.MustParse(step.Resources.CPULimit)
-
-	memoryLimit := resource.MustParse("2G")
-	CPULimit := resource.MustParse("2")
-
-	memoryLimitValue, _ := memoryLimit.AsInt64()
-	CPULimitValue, _ := CPULimit.AsInt64()
-	loadfactor := 0.5
-
-	memoryRequest := resource.NewQuantity(int64(float64(memoryLimitValue)*loadfactor), resource.DecimalSI)
-	CPURequest := resource.NewQuantity(int64(float64(CPULimitValue)*loadfactor), resource.DecimalSI)
-
-	resources := v1.ResourceRequirements{
-		Requests: v1.ResourceList{
-			v1.ResourceMemory: *memoryRequest,
-			v1.ResourceCPU:    *CPURequest,
-		},
-		Limits: v1.ResourceList{
-			v1.ResourceMemory: memoryLimit,
-			v1.ResourceCPU:    CPULimit,
-		},
+	resourceRequirements := v1.ResourceRequirements{Requests: v1.ResourceList{}, Limits: v1.ResourceList{}}
+	var err error
+	for key, val := range step.BackendOptions.Kubernetes.Resources.Requests {
+		resourceKey := v1.ResourceName(key)
+		resourceRequirements.Requests[resourceKey], err = resource.ParseQuantity(val)
+		if err != nil {
+			return nil, fmt.Errorf("resource request '%v' quantity '%v': %w", key, val, err)
+		}
+	}
+	for key, val := range step.BackendOptions.Kubernetes.Resources.Limits {
+		resourceKey := v1.ResourceName(key)
+		resourceRequirements.Limits[resourceKey], err = resource.ParseQuantity(val)
+		if err != nil {
+			return nil, fmt.Errorf("resource limit '%v' quantity '%v': %w", key, val, err)
+		}
 	}
 
-	labels["step"] = podName(step)
+	var serviceAccountName string
+	if step.BackendOptions.Kubernetes.ServiceAccountName != "" {
+		serviceAccountName = step.BackendOptions.Kubernetes.ServiceAccountName
+	}
 
-	return &v1.Pod{
+	podName, err := dnsName(step.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	labels["step"] = podName
+
+	var nodeSelector map[string]string
+	platform, exist := step.Environment["CI_SYSTEM_PLATFORM"]
+	if exist && platform != "" {
+		arch := strings.Split(platform, "/")[1]
+		nodeSelector = map[string]string{v1.LabelArchStable: arch}
+		log.Trace().Msgf("Using the node selector from the Agent's platform: %v", nodeSelector)
+	}
+	beOptNodeSelector := step.BackendOptions.Kubernetes.NodeSelector
+	if len(beOptNodeSelector) > 0 {
+		if len(nodeSelector) == 0 {
+			nodeSelector = beOptNodeSelector
+		} else {
+			log.Trace().Msgf("Appending labels to the node selector from the backend options: %v", beOptNodeSelector)
+			maps.Copy(nodeSelector, beOptNodeSelector)
+		}
+	}
+
+	var tolerations []v1.Toleration
+	beTolerations := step.BackendOptions.Kubernetes.Tolerations
+	if len(beTolerations) > 0 {
+		for _, t := range step.BackendOptions.Kubernetes.Tolerations {
+			toleration := v1.Toleration{
+				Key:               t.Key,
+				Operator:          v1.TolerationOperator(t.Operator),
+				Value:             t.Value,
+				Effect:            v1.TaintEffect(t.Effect),
+				TolerationSeconds: t.TolerationSeconds,
+			}
+			tolerations = append(tolerations, toleration)
+		}
+		log.Trace().Msgf("Tolerations that will be used in the backend options: %v", beTolerations)
+	}
+
+	pod := &v1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        podName(step),
+			Name:        podName,
 			Namespace:   namespace,
 			Labels:      labels,
 			Annotations: annotations,
 		},
 		Spec: v1.PodSpec{
-			RestartPolicy: v1.RestartPolicyNever,
-			HostAliases:   hostAliases,
+			RestartPolicy:      v1.RestartPolicyNever,
+			HostAliases:        hostAliases,
+			NodeSelector:       nodeSelector,
+			Tolerations:        tolerations,
+			ServiceAccountName: serviceAccountName,
 			Containers: []v1.Container{{
-				Name:            podName(step),
+				Name:            podName,
 				Image:           step.Image,
 				ImagePullPolicy: pullPolicy,
 				Command:         entrypoint,
@@ -109,7 +163,7 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 				WorkingDir:      step.WorkingDir,
 				Env:             mapToEnvVars(step.Environment),
 				VolumeMounts:    volMounts,
-				Resources:       resources,
+				Resources:       resourceRequirements,
 				SecurityContext: &v1.SecurityContext{
 					Privileged: &step.Privileged,
 				},
@@ -118,10 +172,8 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 			Volumes:          vols,
 		},
 	}
-}
 
-func podName(s *types.Step) string {
-	return dnsName(s.Name)
+	return pod, nil
 }
 
 func mapToEnvVars(m map[string]string) []v1.EnvVar {

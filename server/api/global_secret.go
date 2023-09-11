@@ -17,16 +17,26 @@ package api
 import (
 	"net/http"
 
+	"github.com/gin-gonic/gin"
+
+	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
+
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
-
-	"github.com/gin-gonic/gin"
 )
 
-// GetGlobalSecretList gets the global secret list from
-// the database and writes to the response in json format.
+// GetGlobalSecretList
+//
+//	@Summary	Get the global secret list
+//	@Router		/secrets [get]
+//	@Produce	json
+//	@Success	200	{array}	Secret
+//	@Tags		Secrets
+//	@Param		Authorization	header	string	true	"Insert your personal access token"				default(Bearer <personal access token>)
+//	@Param		page			query	int		false	"for response pagination, page offset number"	default(1)
+//	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
 func GetGlobalSecretList(c *gin.Context) {
-	list, err := server.Config.Services.Secrets.GlobalSecretList()
+	list, err := server.Config.Services.Secrets.GlobalSecretList(session.Pagination(c))
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error getting global secret list. %s", err)
 		return
@@ -39,19 +49,34 @@ func GetGlobalSecretList(c *gin.Context) {
 	c.JSON(http.StatusOK, list)
 }
 
-// GetGlobalSecret gets the named global secret from the database
-// and writes to the response in json format.
+// GetGlobalSecret
+//
+//	@Summary	Get a global secret by name
+//	@Router		/secrets/{secret} [get]
+//	@Produce	json
+//	@Success	200	{object}	Secret
+//	@Tags		Secrets
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		secret			path	string	true	"the secret's name"
 func GetGlobalSecret(c *gin.Context) {
 	name := c.Param("secret")
 	secret, err := server.Config.Services.Secrets.GlobalSecretFind(name)
 	if err != nil {
-		c.String(404, "Error getting global secret %q. %s", name, err)
+		handleDbError(c, err)
 		return
 	}
-	c.JSON(200, secret.Copy())
+	c.JSON(http.StatusOK, secret.Copy())
 }
 
-// PostGlobalSecret persists a global secret to the database.
+// PostGlobalSecret
+//
+//	@Summary	Persist/create a global secret
+//	@Router		/secrets [post]
+//	@Produce	json
+//	@Success	200	{object}	Secret
+//	@Tags		Secrets
+//	@Param		Authorization	header	string			true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		secret			body	Secret	true	"the secret object data"
 func PostGlobalSecret(c *gin.Context) {
 	in := new(model.Secret)
 	if err := c.Bind(in); err != nil {
@@ -66,17 +91,26 @@ func PostGlobalSecret(c *gin.Context) {
 		PluginsOnly: in.PluginsOnly,
 	}
 	if err := secret.Validate(); err != nil {
-		c.String(400, "Error inserting global secret. %s", err)
+		c.String(http.StatusBadRequest, "Error inserting global secret. %s", err)
 		return
 	}
 	if err := server.Config.Services.Secrets.GlobalSecretCreate(secret); err != nil {
-		c.String(500, "Error inserting global secret %q. %s", in.Name, err)
+		c.String(http.StatusInternalServerError, "Error inserting global secret %q. %s", in.Name, err)
 		return
 	}
-	c.JSON(200, secret.Copy())
+	c.JSON(http.StatusOK, secret.Copy())
 }
 
-// PatchGlobalSecret updates a global secret in the database.
+// PatchGlobalSecret
+//
+//	@Summary	Update a global secret by name
+//	@Router		/secrets/{secret} [patch]
+//	@Produce	json
+//	@Success	200	{object}	Secret
+//	@Tags		Secrets
+//	@Param		Authorization	header	string			true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		secret			path	string			true	"the secret's name"
+//	@Param		secretData		body	Secret	true	"the secret's data"
 func PatchGlobalSecret(c *gin.Context) {
 	name := c.Param("secret")
 
@@ -89,7 +123,7 @@ func PatchGlobalSecret(c *gin.Context) {
 
 	secret, err := server.Config.Services.Secrets.GlobalSecretFind(name)
 	if err != nil {
-		c.String(404, "Error getting global secret %q. %s", name, err)
+		handleDbError(c, err)
 		return
 	}
 	if in.Value != "" {
@@ -104,22 +138,30 @@ func PatchGlobalSecret(c *gin.Context) {
 	secret.PluginsOnly = in.PluginsOnly
 
 	if err := secret.Validate(); err != nil {
-		c.String(400, "Error updating global secret. %s", err)
+		c.String(http.StatusBadRequest, "Error updating global secret. %s", err)
 		return
 	}
 	if err := server.Config.Services.Secrets.GlobalSecretUpdate(secret); err != nil {
-		c.String(500, "Error updating global secret %q. %s", in.Name, err)
+		c.String(http.StatusInternalServerError, "Error updating global secret %q. %s", in.Name, err)
 		return
 	}
-	c.JSON(200, secret.Copy())
+	c.JSON(http.StatusOK, secret.Copy())
 }
 
-// DeleteGlobalSecret deletes the named global secret from the database.
+// DeleteGlobalSecret
+//
+//	@Summary	Delete a global secret by name
+//	@Router		/secrets/{secret} [delete]
+//	@Produce	plain
+//	@Success	204
+//	@Tags		Secrets
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		secret			path	string	true	"the secret's name"
 func DeleteGlobalSecret(c *gin.Context) {
 	name := c.Param("secret")
 	if err := server.Config.Services.Secrets.GlobalSecretDelete(name); err != nil {
-		c.String(500, "Error deleting global secret %q. %s", name, err)
+		handleDbError(c, err)
 		return
 	}
-	c.String(204, "")
+	c.Status(http.StatusNoContent)
 }

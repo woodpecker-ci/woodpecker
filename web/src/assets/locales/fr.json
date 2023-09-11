@@ -10,12 +10,16 @@
         },
         "capacity": {
           "badge": "capacité",
-          "capacity": "Capacité"
+          "capacity": "Capacité",
+          "desc": "Le nombre maximum de pipelines exécutées en parallèle par cet agent."
         },
         "created": "Agent crée",
+        "delete_agent": "Effacer l'agent",
         "delete_confirm": "Voulez vous vraiment effacer cet agent ? Il ne pourra plus se connecter sur le serveur.",
         "deleted": "Agent effacé",
         "desc": "Agents enregistrés sur ce serveur",
+        "edit_agent": "Éditer l'agent",
+        "id": "ID",
         "last_contact": "Dernier contact",
         "name": {
           "name": "Nom",
@@ -38,6 +42,42 @@
         "version": "Version"
       },
       "not_allowed": "Vous n'êtes pas autorisé à accéder aux réglages du serveur",
+      "orgs": {
+        "delete_confirm": "Voulez-vous vraiment effacer cette organisation ? Cela supprimera tous les dépôts que possède cette organisation.",
+        "delete_org": "Effacer l'organisation",
+        "deleted": "Organisation effacée",
+        "desc": "Organisations possédant des dépôts sur ce serveur",
+        "none": "Il n'y a pas encore d'organisation.",
+        "org_settings": "Réglages de l'organisation",
+        "orgs": "Organisations",
+        "view": "Voir l'organisation"
+      },
+      "queue": {
+        "agent": "agent",
+        "desc": "Taches en attente d’exécution par des agents",
+        "pause": "Mettre en pause",
+        "paused": "La queue est en pause",
+        "queue": "Queue",
+        "resume": "Relancer",
+        "resumed": "La queue est repartie",
+        "stats": {
+          "completed_count": "Tâches complétées",
+          "pending_count": "En attente",
+          "running_count": "En cours d’exécution",
+          "waiting_on_deps_count": "En attente de dépendances",
+          "worker_count": "Libre"
+        },
+        "task_pending": "La tâche est en attente",
+        "task_running": "La tâche est en cours d’exécution",
+        "task_waiting_on_deps": "La tâche est en attente de ses dépendances",
+        "tasks": "Tâches",
+        "waiting_for": "en attente de"
+      },
+      "repos": {
+        "none": "Il n'y a pas encore de dépôts.",
+        "repos": "Dépôts",
+        "view": "Voir le dépôt"
+      },
       "secrets": {
         "add": "Ajouter un secret",
         "created": "Secret global crée",
@@ -61,14 +101,41 @@
         "value": "Valeur",
         "warning": "Ces secrets seront disponibles pour tout les comptes du serveur."
       },
-      "settings": "Réglages"
+      "settings": "Réglages",
+      "users": {
+        "add": "Ajouter un compte utilisateur",
+        "admin": {
+          "admin": "Administrateur",
+          "placeholder": "Le compte utilisateur est un administrateur"
+        },
+        "avatar_url": "URL de l'avatar",
+        "cancel": "Annuler",
+        "created": "Compte utilisateur créé",
+        "delete_confirm": "Voulez vous vraiment supprimer ce compte utilisateur ? Cela supprimera tout les dépôts que possède ce compte utilisateur.",
+        "delete_user": "Effacer le compte utilisateur",
+        "deleted": "Compte utilisateur effacé",
+        "desc": "Utilisateurs enregistrés sur le serveur",
+        "edit_user": "Éditer le compte utilisateur",
+        "email": "Courriel",
+        "login": "Login",
+        "none": "Il n'y a pas de compte utilisateur pour le moment.",
+        "save": "Enregistrer le compte utilisateur",
+        "saved": "Compte utilisateur enregistré",
+        "show": "Afficher les comptes utilisateurs",
+        "users": "Utilisateurs"
+      }
     }
   },
+  "api": "API",
   "back": "Revenir en arrière",
+  "cancel": "Annuler",
   "color_scheme_dark": "Basculer en couleurs claires",
   "color_scheme_light": "Basculer en couleurs sombres",
   "docs": "Docs",
   "documentation_for": "Documentation sur \"{topic}\"",
+  "errors": {
+    "not_found": "Le serveur n'a pas pu trouver l'objet demandé"
+  },
   "login": "Connexion",
   "logout": "Déconnexion",
   "not_found": {
@@ -109,47 +176,6 @@
     "activity": "Activité",
     "add": "Ajouter un dépôt",
     "branches": "Branches",
-    "build": {
-      "actions": {
-        "cancel": "Annuler",
-        "cancel_success": "Pipeline annulé",
-        "canceled": "Cette étape a été annulée.",
-        "log_auto_scroll": "Automatiquement défiler vers le bas",
-        "log_auto_scroll_off": "Désactiver le défilement automatique",
-        "log_download": "Télécharger",
-        "restart": "Redémarrer",
-        "restart_success": "Pipeline redémarré"
-      },
-      "config": "Configuration",
-      "created": "Crée",
-      "event": {
-        "cron": "Tache périodique",
-        "deploy": "Déploiement",
-        "pr": "Pull Request",
-        "push": "Push",
-        "tag": "Tag"
-      },
-      "execution_error": "Erreur d'execution",
-      "exit_code": "Code de retour {exitCode}",
-      "files": "Fichiers changés ({files})",
-      "loading": "Chargement…",
-      "log_download_error": "Il y a eu une erreur lors du téléchargement du fichier de journal",
-      "no_files": "Aucun fichier n'a été modifié.",
-      "no_pipeline_steps": "Aucune étape disponible !",
-      "no_pipelines": "Aucun pipeline n'a démarré pour le moment.",
-      "pipeline": "Pipeline #{buildId}",
-      "pipelines_for": "Pipelines pour la branche \"{branch}\"",
-      "protected": {
-        "approve": "Approuver",
-        "approve_success": "Pipeline approuvé",
-        "awaits": "Ce pipeline attends d'être approuvé par un mainteneur !",
-        "decline": "Refuser",
-        "decline_success": "Pipeline refusé",
-        "declined": "Le pipeline a été refusé !"
-      },
-      "step_not_started": "L'étape n'a pas démarré encore.",
-      "tasks": "Tâches"
-    },
     "deploy_pipeline": {
       "enter_target": "Environnement de déploiement ciblé",
       "title": "Déclenchement d'un événement de déploiement pour le pipeline courant #{pipelineId}",
@@ -163,6 +189,7 @@
       }
     },
     "enable": {
+      "disabled": "Désactivé",
       "enable": "Activer",
       "enabled": "Déjà activé",
       "list_reloaded": "Liste des dépôts actualisée",
@@ -196,7 +223,6 @@
         "restart_success": "Pipeline redémarré"
       },
       "config": "Configuration",
-      "created": "Crée",
       "event": {
         "cron": "Tâche périodique",
         "deploy": "Déploiement",
@@ -210,15 +236,17 @@
       "files": "Fichiers changés ({files})",
       "loading": "Chargement…",
       "log_download_error": "Il y a eu une erreur lors du téléchargement du fichier de journal",
+      "log_title": "Journal des étapes",
       "no_files": "Aucun fichier n'a été modifié.",
       "no_pipeline_steps": "Aucune étape disponible !",
       "no_pipelines": "Aucun pipeline n'a démarré pour le moment.",
       "pipeline": "Pipeline #{pipelineId}",
       "pipelines_for": "Pipelines pour la branche \"{branch}\"",
+      "pipelines_for_pr": "Pipeline pour la pull request #{index}",
       "protected": {
         "approve": "Approuver",
         "approve_success": "Pipeline approuvé",
-        "awaits": "Ce pipeline attends d'être approuvé par un mainteneur !",
+        "awaits": "Ce pipeline attend d'être approuvé par un mainteneur !",
         "decline": "Refuser",
         "decline_success": "Pipeline refusé",
         "declined": "Le pipeline a été refusé !"
@@ -233,12 +261,13 @@
         "running": "en cours",
         "skipped": "sauté",
         "started": "démarré",
-        "status": "Status : {status}",
+        "status": "État : {status}",
         "success": "réussi"
       },
       "step_not_started": "L'étape n'a pas démarré encore.",
       "tasks": "Tâches"
     },
+    "pull_requests": "Pull requests",
     "settings": {
       "actions": {
         "actions": "Actions",
@@ -251,6 +280,10 @@
           "disable": "Désactiver le dépôt",
           "success": "Dépôt désactivé"
         },
+        "enable": {
+          "enable": "Activer le dépôt",
+          "success": "Dépôt activé"
+        },
         "repair": {
           "repair": "Réparer un dépôt",
           "success": "Dépôt réparé"
@@ -259,12 +292,10 @@
       "badge": {
         "badge": "Badge",
         "branch": "Branche",
-        "markdown": "Markdown",
         "type": "Syntaxe",
         "type_html": "HTML",
         "type_markdown": "Markdown",
-        "type_url": "URL",
-        "url_branch": "URL pour la branche spécifique"
+        "type_url": "URL"
       },
       "crons": {
         "add": "Ajouter une tâche planifiée",
@@ -304,9 +335,14 @@
           "desc": "Activer pour forcer l'annulation des pipelines en cours et en attente pour le même contexte et le même événement avant de démarrer un nouveau pipeline déclenché par un événement."
         },
         "general": "Général",
+        "netrc_only_trusted": {
+          "desc": "Injecter les identifiants netrc uniquement dans des conteneurs de confiance (recommandé).",
+          "netrc_only_trusted": "Injecter les identifiants netrc uniquement dans des conteneurs de confiance"
+        },
         "pipeline_path": {
-          "default": "Par défaut : .woodpecker/*.yml -> .woodpecker.yml -> .drone.yml",
-          "desc": "Le chemin vers votre configuration de pipeline (for example <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">mon/chemin/</span>). Le dossier doit se terminer par <span class=\"bg-gray-300 dark:bg-dark-700 rounded-md px-1\">/</span>.",
+          "default": "Par défaut : .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml",
+          "desc": "Le chemin vers votre configuration de pipeline (par example {0}). Les dossiers doivent finir par {1}.",
+          "desc_path_example": "mon/chemin/",
           "path": "Chemin vers le pipeline"
         },
         "project": "Paramètres du projet",
@@ -321,7 +357,7 @@
           "timeout": "Délai d’inactivité"
         },
         "trusted": {
-          "desc": "Les conteneurs du pipeline ont accès à des capacités privilégiées comme le montage un volume.",
+          "desc": "Les conteneurs du pipeline ont accès à des capacités privilégiées comme le montage de volumes.",
           "trusted": "Vérifié"
         },
         "visibility": {
@@ -363,6 +399,7 @@
         "add": "Ajouter un secret",
         "created": "Secret crée",
         "delete": "Effacer le secret",
+        "delete_confirm": "Voulez vous vraiment effacer ce secret ?",
         "deleted": "Secret effacé",
         "desc": "Les secrets sont transmis sous forme de variable d’environnement lors de l’exécution d'une étape d'un pipeline.",
         "edit": "Modifier le secret",
@@ -403,15 +440,47 @@
   "url": "URL",
   "user": {
     "access_denied": "Vous n'êtes pas autorisé à vous connecter",
-    "api_usage": "Exemple d'utilisation de l'API",
-    "cli_usage": "Exemple d'utilisation de la ligne de commande",
-    "dl_cli": "Télécharger l'interface en ligne de commande",
     "internal_error": "Une erreur interne est arrivé",
     "oauth_error": "Erreur lors de l’authentification auprès du fournisseur OAuth",
-    "settings": "Profil personnel",
-    "shell_setup": "Utilisation avec un shell",
-    "shell_setup_before": "faites la mise en place dans le shell avant",
-    "token": "Votre jeton personnel"
+    "settings": {
+      "api": {
+        "api": "API",
+        "api_usage": "Exemple d'utilisation de l'API",
+        "cli_usage": "Exemple d'utilisation de l'interface en ligne de commande",
+        "desc": "Jeton d'Accès Personnel et usage de l'API",
+        "dl_cli": "Télécharger l'Interface en ligne de commande",
+        "reset_token": "Réinitialiser le jeton",
+        "shell_setup": "Configuration de l'interpréteur de commande",
+        "shell_setup_before": "Faites les étapes de configuration de l'interpréteur de commande avant",
+        "swagger_ui": "Interface Swagger",
+        "token": "Jeton d'Accès Personnel"
+      },
+      "general": {
+        "general": "Général",
+        "language": "Langue"
+      },
+      "secrets": {
+        "add": "Ajouter un secret",
+        "created": "Secret d'utilisateur crée",
+        "deleted": "Secret d'utilisateur effacé",
+        "events": {
+          "events": "Disponible pour les événements suivants",
+          "pr_warning": "Attention, si cette option est activé, un acteur malicieux peut proposer une pull request qui affiche vos secrets."
+        },
+        "images": {
+          "images": "Disponible pour les images suivantes"
+        },
+        "name": "Nom",
+        "none": "Il n'y a pas encore de secrets d'utilisateur.",
+        "plugins_only": "Disponible uniquement pour les plugins",
+        "save": "Enregistrer le secret",
+        "saved": "Secret d'utilisateur enregistré",
+        "secrets": "Secrets",
+        "show": "Afficher les secrets",
+        "value": "Valeur"
+      },
+      "settings": "Paramètres du compte utilisateur"
+    }
   },
   "username": "Nom d'utilisateur",
   "welcome": "Bienvenue sur Woodpecker"

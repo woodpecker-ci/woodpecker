@@ -16,32 +16,141 @@ package api
 
 import (
 	"net/http"
+	"strconv"
+	"strings"
+
+	"github.com/rs/zerolog/log"
+
+	"github.com/gin-gonic/gin"
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
-
-	"github.com/gin-gonic/gin"
+	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
-// GetOrgPermissions returns the permissions of the current user in the given organization.
+// GetOrg
+//
+//	@Summary	Get organization by id
+//	@Router		/orgs/{org_id} [get]
+//	@Produce	json
+//	@Success	200	{array}	Org
+//	@Tags		Organization
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		org_id			path	string	true	"the organziation's id"
+func GetOrg(c *gin.Context) {
+	_store := store.FromContext(c)
+
+	orgID, err := strconv.ParseInt(c.Param("org_id"), 10, 64)
+	if err != nil {
+		c.String(http.StatusBadRequest, "Error parsing org id. %s", err)
+		return
+	}
+
+	org, err := _store.OrgGet(orgID)
+	if err != nil {
+		handleDbError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, org)
+}
+
+// GetOrgPermissions
+//
+//	@Summary	Get the permissions of the current user in the given organization
+//	@Router		/orgs/{org_id}/permissions [get]
+//	@Produce	json
+//	@Success	200	{array}	OrgPerm
+//	@Tags		Organization permissions
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		org_id			path	string	true	"the organziation's id"
 func GetOrgPermissions(c *gin.Context) {
-	var (
-		err   error
-		user  = session.User(c)
-		owner = c.Param("owner")
-	)
+	user := session.User(c)
+	_store := store.FromContext(c)
+
+	orgID, err := strconv.ParseInt(c.Param("org_id"), 10, 64)
+	if err != nil {
+		c.String(http.StatusBadRequest, "Error parsing org id. %s", err)
+		return
+	}
 
 	if user == nil {
 		c.JSON(http.StatusOK, &model.OrgPerm{})
 		return
 	}
 
-	perm, err := server.Config.Services.Membership.Get(c, user, owner)
+	org, err := _store.OrgGet(orgID)
 	if err != nil {
-		c.String(http.StatusInternalServerError, "Error getting membership for %q. %s", owner, err)
+		c.String(http.StatusInternalServerError, "Error getting org %d. %s", orgID, err)
+		return
+	}
+
+	if (org.IsUser && org.Name == user.Login) || (user.Admin && !org.IsUser) {
+		c.JSON(http.StatusOK, &model.OrgPerm{
+			Member: true,
+			Admin:  true,
+		})
+		return
+	} else if org.IsUser {
+		c.JSON(http.StatusOK, &model.OrgPerm{})
+		return
+	}
+
+	perm, err := server.Config.Services.Membership.Get(c, user, org.Name)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Error getting membership for %d. %s", orgID, err)
 		return
 	}
 
 	c.JSON(http.StatusOK, perm)
+}
+
+// LookupOrg
+//
+//	@Summary	Lookup organization by full-name
+//	@Router		/org/lookup/{org_full_name} [get]
+//	@Produce	json
+//	@Success	200	{object}	Org
+//	@Tags		Organizations
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		org_full_name	path	string	true	"the organizations full-name / slug"
+func LookupOrg(c *gin.Context) {
+	_store := store.FromContext(c)
+
+	orgFullName := strings.TrimLeft(c.Param("org_full_name"), "/")
+
+	org, err := _store.OrgFindByName(orgFullName)
+	if err != nil {
+		handleDbError(c, err)
+		return
+	}
+
+	// don't leak private org infos
+	if org.Private {
+		user := session.User(c)
+		if user == nil {
+			c.AbortWithStatus(http.StatusNotFound)
+			return
+		}
+
+		if !user.Admin && org.Name != user.Login {
+			c.AbortWithStatus(http.StatusNotFound)
+			return
+		} else if !user.Admin {
+			perm, err := server.Config.Services.Membership.Get(c, user, org.Name)
+			if err != nil {
+				log.Error().Msgf("Failed to check membership: %v", err)
+				c.Status(http.StatusInternalServerError)
+				return
+			}
+
+			if perm == nil || !perm.Member {
+				c.AbortWithStatus(http.StatusNotFound)
+				return
+			}
+		}
+	}
+
+	c.JSON(http.StatusOK, org)
 }

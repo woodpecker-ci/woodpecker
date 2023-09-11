@@ -1,3 +1,17 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package pubsub
 
 import (
@@ -22,7 +36,7 @@ func New() Publisher {
 	}
 }
 
-func (p *publisher) Create(c context.Context, dest string) error {
+func (p *publisher) Create(_ context.Context, dest string) error {
 	p.Lock()
 	_, ok := p.topics[dest]
 	if !ok {
@@ -33,7 +47,7 @@ func (p *publisher) Create(c context.Context, dest string) error {
 	return nil
 }
 
-func (p *publisher) Publish(c context.Context, dest string, message Message) error {
+func (p *publisher) Publish(_ context.Context, dest string, message Message) error {
 	p.Lock()
 	t, ok := p.topics[dest]
 	p.Unlock()
@@ -63,7 +77,7 @@ func (p *publisher) Subscribe(c context.Context, dest string, receiver Receiver)
 	return nil
 }
 
-func (p *publisher) Remove(c context.Context, dest string) error {
+func (p *publisher) Remove(_ context.Context, dest string) error {
 	p.Lock()
 	t, ok := p.topics[dest]
 	if ok {

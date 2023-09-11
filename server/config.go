@@ -50,7 +50,6 @@ var Config = struct {
 		// Repos  model.RepoStore
 		// Builds model.BuildStore
 		// Logs   model.LogStore
-		Files model.FileStore
 		Steps model.StepStore
 		// Registries model.RegistryStore
 		// Secrets model.SecretStore
@@ -60,12 +59,21 @@ var Config = struct {
 		Cert                string
 		OAuthHost           string
 		Host                string
+		WebhookHost         string
 		Port                string
+		PortTLS             string
 		AgentToken          string
 		Docs                string
 		StatusContext       string
 		StatusContextFormat string
 		SessionExpires      time.Duration
+		RootPath            string
+		CustomCSSFile       string
+		CustomJsFile        string
+		Migrations          struct {
+			AllowLong bool
+		}
+		EnableSwagger bool
 		// Open bool
 		// Orgs map[string]struct{}
 		// Admins map[string]struct{}
@@ -81,6 +89,12 @@ var Config = struct {
 		Volumes                             []string
 		Networks                            []string
 		Privileged                          []string
+		DefaultTimeout                      int64
+		MaxTimeout                          int64
+		Proxy                               struct {
+			No    string
+			HTTP  string
+			HTTPS string
+		}
 	}
-	FlatPermissions bool // TODO(485) temporary workaround to not hit api rate limits
 }{}

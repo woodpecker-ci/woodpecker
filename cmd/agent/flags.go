@@ -47,25 +47,15 @@ var flags = []cli.Flag{
 		Value:   true,
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_LOG_LEVEL"},
-		Name:    "log-level",
-		Usage:   "set logging level",
-	},
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_DEBUG_PRETTY"},
-		Name:    "pretty",
-		Usage:   "enable pretty-printed debug output",
-	},
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_DEBUG_NOCOLOR"},
-		Name:    "nocolor",
-		Usage:   "disable colored debug output",
-		Value:   true,
-	},
-	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_HOSTNAME"},
 		Name:    "hostname",
 		Usage:   "agent hostname",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_AGENT_CONFIG_FILE"},
+		Name:    "agent-config",
+		Usage:   "agent config file path",
+		Value:   "/etc/woodpecker/agent.conf",
 	},
 	&cli.StringSliceFlag{
 		EnvVars: []string{"WOODPECKER_FILTER_LABELS"},
@@ -106,45 +96,5 @@ var flags = []cli.Flag{
 		Name:    "backend-engine",
 		Usage:   "backend engine to run pipelines on",
 		Value:   "auto-detect",
-	},
-
-	// TODO: add flags of backends
-
-	// backend k8s
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_K8S_NAMESPACE"},
-		Name:    "backend-k8s-namespace",
-		Usage:   "backend k8s namespace",
-		Value:   "woodpecker",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_K8S_VOLUME_SIZE"},
-		Name:    "backend-k8s-volume-size",
-		Usage:   "backend k8s volume size (default 10G)",
-		Value:   "10G",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_K8S_STORAGE_CLASS"},
-		Name:    "backend-k8s-storage-class",
-		Usage:   "backend k8s storage class",
-		Value:   "",
-	},
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_K8S_STORAGE_RWX"},
-		Name:    "backend-k8s-storage-rwx",
-		Usage:   "backend k8s storage access mode, should ReadWriteMany (RWX) instead of ReadWriteOnce (RWO) be used? (default: true)",
-		Value:   true,
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_K8S_POD_LABELS"},
-		Name:    "backend-k8s-pod-labels",
-		Usage:   "backend k8s additional worker pod labels",
-		Value:   "",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_K8S_POD_ANNOTATIONS"},
-		Name:    "backend-k8s-pod-annotations",
-		Usage:   "backend k8s additional worker pod annotations",
-		Value:   "",
 	},
 }
