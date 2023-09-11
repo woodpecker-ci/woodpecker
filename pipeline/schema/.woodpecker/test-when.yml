@@ -146,4 +146,4 @@ steps:
     commands: echo "test"
     when:
       - event: push
-        evaluate: 'CI_PIPELINE_EVENT == "push" && CI_REPO == "owner/repo"'
+        evaluate: 'CI_BUILD_EVENT == "push" && CI_REPO == "owner/repo"'

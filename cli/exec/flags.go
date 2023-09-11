@@ -129,7 +129,7 @@ var flags = []cli.Flag{
 		Value:   "woodpecker",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_SYSTEM_URL"},
+		EnvVars: []string{"CI_SYSTEM_URL", "CI_SYSTEM_LINK"},
 		Name:    "system-link",
 		Value:   "https://github.com/woodpecker-ci/woodpecker",
 	},
@@ -143,11 +143,11 @@ var flags = []cli.Flag{
 		Name:    "repo-remote-id",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_REPO_URL"},
+		EnvVars: []string{"CI_REPO_URL", "CI_REPO_LINK"},
 		Name:    "repo-link",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_REPO_CLONE_URL"},
+		EnvVars: []string{"CI_REPO_CLONE_URL", "CI_REPO_REMOTE"},
 		Name:    "repo-clone-url",
 	},
 	&cli.StringFlag{
@@ -192,7 +192,7 @@ var flags = []cli.Flag{
 		Value:   "manual",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_PIPELINE_URL"},
+		EnvVars: []string{"CI_PIPELINE_URL", "CI_PIPELINE_LINK"},
 		Name:    "pipeline-link",
 	},
 	&cli.StringFlag{
@@ -256,7 +256,7 @@ var flags = []cli.Flag{
 		Name:    "prev-pipeline-event",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_PREV_PIPELINE_URL"},
+		EnvVars: []string{"CI_PREV_PIPELINE_URL", "CI_PREV_PIPELINE_LINK"},
 		Name:    "prev-pipeline-link",
 	},
 	&cli.StringFlag{
@@ -296,11 +296,11 @@ var flags = []cli.Flag{
 		Name:    "workflow-name",
 	},
 	&cli.IntFlag{
-		EnvVars: []string{"CI_WORKFLOW_NUMBER"},
+		EnvVars: []string{"CI_WORKFLOW_NUMBER", "CI_JOB_NUMBER"},
 		Name:    "workflow-number",
 	},
 	&cli.IntFlag{
-		EnvVars: []string{"CI_STEP_NAME"},
+		EnvVars: []string{"CI_STEP_NAME", "CI_JOB_NUMBER"},
 		Name:    "step-name",
 	},
 	&cli.StringSliceFlag{

@@ -459,7 +459,7 @@ Run on pushes to the default branch for the repository `owner/repo`:
 
 ```yaml
 when:
-  - evaluate: 'CI_PIPELINE_EVENT == "push" && CI_REPO == "owner/repo" && CI_COMMIT_BRANCH == CI_REPO_DEFAULT_BRANCH'
+  - evaluate: 'CI_BUILD_EVENT == "push" && CI_REPO == "owner/repo" && CI_COMMIT_BRANCH == CI_REPO_DEFAULT_BRANCH'
 ```
 
 Run on commits created by user `woodpecker-ci`:
