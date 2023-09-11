@@ -139,8 +139,11 @@ func TestParse(t *testing.T) {
 }
 
 func TestParseLegacy(t *testing.T) {
+	// adjust with https://github.com/woodpecker-ci/woodpecker/pull/2181
 	sampleYamlPipelineLegacy := `
 platform: linux/amd64
+labels:
+  platform: linux/arm64
 
 steps:
   say hello:
@@ -149,9 +152,9 @@ steps:
 `
 
 	sampleYamlPipelineLegacyIgnore := `
-platform: windows/amd64
+platform: linux/amd64
 labels:
-  platform: linux/amd64
+  platform: linux/arm64
 
 steps:
   say hello:

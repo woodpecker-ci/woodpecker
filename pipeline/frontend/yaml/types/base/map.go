@@ -20,7 +20,7 @@ import (
 	"strings"
 )
 
-// SliceOrMap represents a map of strings, string slice are converted into a map
+// SliceOrMap represents a slice or a map of strings.
 type SliceOrMap map[string]string
 
 // UnmarshalYAML implements the Unmarshaler interface.

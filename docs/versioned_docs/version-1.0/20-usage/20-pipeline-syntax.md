@@ -612,10 +612,6 @@ For more details check the [matrix build docs](./30-matrix-workflows.md).
 
 ## `platform`
 
-:::warning
-will be deprecated with v1.1.0 in favor of labels.
-:::
-
 To configure your pipeline to only be executed on an agent with a specific platform, you can use the `platform` key.
 Have a look at the official [go docs](https://go.dev/doc/install/source) for the available platforms. The syntax of the platform is `GOOS/GOARCH` like `linux/arm64` or `linux/amd64`.
 

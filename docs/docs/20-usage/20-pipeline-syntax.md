@@ -603,6 +603,26 @@ Woodpecker has integrated support for matrix builds. Woodpecker executes a separ
 
 For more details check the [matrix build docs](./30-matrix-workflows.md).
 
+## `platform`
+
+To configure your pipeline to only be executed on an agent with a specific platform, you can use the `platform` key.
+Have a look at the official [go docs](https://go.dev/doc/install/source) for the available platforms. The syntax of the platform is `GOOS/GOARCH` like `linux/arm64` or `linux/amd64`.
+
+Example:
+
+Assuming we have two agents, one `arm` and one `amd64`. Previously this pipeline would have executed on **either agent**, as Woodpecker is not fussy about where it runs the pipelines. By setting the following option it will only be executed on an agent with the platform `linux/arm64`.
+
+```diff
++platform: linux/arm64
+
+steps:
+  build:
+    image: golang
+    commands:
+      - go build
+      - go test
+```
+
 ## `labels`
 
 You can set labels for your pipeline to select an agent to execute the pipeline on. An agent will pick up and run a pipeline when **every** label assigned to a pipeline matches the agents labels.
@@ -626,23 +646,6 @@ steps:
     commands:
       - go build
       - go test
-```
-
-### Filter by platform
-
-To configure your pipeline to only be executed on an agent with a specific platform, you can use the `platform` key.
-Have a look at the official [go docs](https://go.dev/doc/install/source) for the available platforms. The syntax of the platform is `GOOS/GOARCH` like `linux/arm64` or `linux/amd64`.
-
-Example:
-
-Assuming we have two agents, one `linux/arm` and one `linux/amd64`. Previously this pipeline would have executed on **either agent**, as Woodpecker is not fussy about where it runs the pipelines. By setting the following option it will only be executed on an agent with the platform `linux/arm64`.
-
-```diff
-+labels:
-+  platform: linux/arm64
-
-steps:
-  [...]
 ```
 
 ## `variables`
