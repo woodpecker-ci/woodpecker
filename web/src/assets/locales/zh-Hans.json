@@ -40,6 +40,16 @@
         "version": "版本"
       },
       "not_allowed": "你没有访问服务器设置的权限",
+      "orgs": {
+        "delete_confirm": "你真的想删除该组织吗？这也将删除该组织拥有的所有存储库。",
+        "delete_org": "删除组织",
+        "deleted": "组织已删除",
+        "desc": "在此服务器上拥有存储库的组织",
+        "none": "还没有任何组织。",
+        "org_settings": "组织设置",
+        "orgs": "组织",
+        "view": "查看组织"
+      },
       "queue": {
         "agent": "代理",
         "desc": "正在等待代理执行的任务",
@@ -92,7 +102,7 @@
         "avatar_url": "Avatar URL",
         "cancel": "取消",
         "created": "用户已创建",
-        "delete_confirm": "你真的想删除这个用户吗？",
+        "delete_confirm": "你真的想删除这个用户吗？这也将删除该用户拥有的所有存储库。",
         "delete_user": "删除用户",
         "deleted": "删除用户",
         "desc": "注册此服务器的用户",
@@ -152,6 +162,7 @@
     }
   },
   "password": "密码",
+  "pipeline_feed": "流水线视图",
   "repo": {
     "activity": "活动",
     "add": "添加仓库",
@@ -169,6 +180,7 @@
       }
     },
     "enable": {
+      "disabled": "已禁用",
       "enable": "启用",
       "enabled": "已经启用了",
       "list_reloaded": "仓库列表已刷新",
@@ -232,7 +244,7 @@
       },
       "status": {
         "blocked": "已屏蔽",
-        "declined": "拒绝",
+        "declined": "已拒绝",
         "error": "错误",
         "failure": "失败",
         "killed": "已终止",
