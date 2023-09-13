@@ -23,7 +23,7 @@ import (
 	"time"
 
 	"github.com/rs/zerolog/log"
-	"github.com/tevino/abool"
+	"github.com/tevino/abool/v2"
 	"google.golang.org/grpc/metadata"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline"
