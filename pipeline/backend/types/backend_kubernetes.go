@@ -19,6 +19,7 @@ type KubernetesBackendOptions struct {
 	Resources          Resources         `json:"resouces,omitempty"`
 	ServiceAccountName string            `json:"serviceAccountName,omitempty"`
 	NodeSelector       map[string]string `json:"nodeSelector,omitempty"`
+	Tolerations        []Toleration      `json:"tolerations,omitempty"`
 }
 
 // Resources defines two maps for kubernetes resource definitions
@@ -26,3 +27,27 @@ type Resources struct {
 	Requests map[string]string `json:"requests,omitempty"`
 	Limits   map[string]string `json:"limits,omitempty"`
 }
+
+// Defines Kubernetes toleration
+type Toleration struct {
+	Key               string             `json:"key,omitempty"`
+	Operator          TolerationOperator `json:"operator,omitempty"`
+	Value             string             `json:"value,omitempty"`
+	Effect            TaintEffect        `json:"effect,omitempty"`
+	TolerationSeconds *int64             `json:"tolerationSeconds,omitempty"`
+}
+
+type TaintEffect string
+
+const (
+	TaintEffectNoSchedule       TaintEffect = "NoSchedule"
+	TaintEffectPreferNoSchedule TaintEffect = "PreferNoSchedule"
+	TaintEffectNoExecute        TaintEffect = "NoExecute"
+)
+
+type TolerationOperator string
+
+const (
+	TolerationOpExists TolerationOperator = "Exists"
+	TolerationOpEqual  TolerationOperator = "Equal"
+)

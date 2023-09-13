@@ -13,13 +13,14 @@
       >
         <span class="text-wp-text-100">{{ repo.full_name }}</span>
         <span v-if="repo.active" class="ml-auto text-wp-text-alt-100">{{ $t('repo.enable.enabled') }}</span>
-        <Button
-          v-if="!repo.active"
-          class="ml-auto"
-          :text="$t('repo.enable.enable')"
-          :is-loading="isActivatingRepo && repoToActivate?.id === repo.id"
-          @click="activateRepo(repo)"
-        />
+        <div v-else class="ml-auto flex items-center">
+          <Badge v-if="repo.id" class="<md:hidden mr-2" :label="$t('repo.enable.disabled')" />
+          <Button
+            :text="$t('repo.enable.enable')"
+            :is-loading="isActivatingRepo && repoToActivate?.forge_remote_id === repo.forge_remote_id"
+            @click="activateRepo(repo)"
+          />
+        </div>
       </ListItem>
     </div>
   </Scaffold>
@@ -30,6 +31,7 @@ import { onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
+import Badge from '~/components/atomic/Badge.vue';
 import Button from '~/components/atomic/Button.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';

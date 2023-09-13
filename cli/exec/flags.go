@@ -74,7 +74,7 @@ var flags = []cli.Flag{
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_BACKEND_HTTP_PROXY", "HTTP_PROXY", "http_proxy"},
-		Usage:   "if set, pass the environment variable down as \"NO_PROXY\" to steps",
+		Usage:   "if set, pass the environment variable down as \"HTTP_PROXY\" to steps",
 		Name:    "backend-http-proxy",
 	},
 	&cli.StringFlag{

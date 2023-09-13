@@ -1,7 +1,7 @@
 GO_PACKAGES ?= $(shell go list ./... | grep -v /vendor/)
 
-TARGETOS ?= linux
-TARGETARCH ?= amd64
+TARGETOS ?= $(shell go env GOOS)
+TARGETARCH ?= $(shell go env GOARCH)
 
 BIN_SUFFIX :=
 ifeq ($(TARGETOS),windows)
@@ -10,19 +10,24 @@ endif
 
 VERSION ?= next
 VERSION_NUMBER ?= 0.0.0
+CI_COMMIT_SHA ?= $(shell git rev-parse HEAD)
+
+# it's a tagged release
 ifneq ($(CI_COMMIT_TAG),)
 	VERSION := $(CI_COMMIT_TAG:v%=%)
-	VERSION_NUMBER := ${VERSION}
+	VERSION_NUMBER := ${CI_COMMIT_TAG:v%=%}
+else
+	# append commit-sha to next version
+	ifeq ($(VERSION),next)
+		VERSION := $(shell echo "next-$(shell echo ${CI_COMMIT_SHA} | cut -c -10)")
+	endif
+	# append commit-sha to release branch version
+	ifeq ($(shell echo ${CI_COMMIT_BRANCH} | cut -c -9),release/v)
+		VERSION := $(shell echo "$(shell echo ${CI_COMMIT_BRANCH} | cut -c 10-)-$(shell echo ${CI_COMMIT_SHA} | cut -c -10)")
+	endif
 endif
 
-# append commit-sha to next version
-BUILD_VERSION ?= $(VERSION)
-ifeq ($(BUILD_VERSION),next)
-	CI_COMMIT_SHA ?= $(shell git rev-parse HEAD)
-	BUILD_VERSION := $(shell echo "next-$(shell echo ${CI_COMMIT_SHA} | head -c 8)")
-endif
-
-LDFLAGS := -s -w -extldflags "-static" -X github.com/woodpecker-ci/woodpecker/version.Version=${BUILD_VERSION}
+LDFLAGS := -s -w -extldflags "-static" -X github.com/woodpecker-ci/woodpecker/version.Version=${VERSION}
 CGO_ENABLED ?= 1 # only used to compile server
 
 HAS_GO = $(shell hash go > /dev/null 2>&1 && echo "GO" || echo "NOGO" )
@@ -45,7 +50,6 @@ ifeq (in_docker,$(firstword $(MAKECMDGOALS)))
 	@docker run -it \
 		--user $(shell id -u):$(shell id -g) \
 		-e VERSION="$(VERSION)" \
-		-e BUILD_VERSION="$(BUILD_VERSION)" \
 		-e CI_COMMIT_SHA="$(CI_COMMIT_SHA)" \
 		-e TARGETOS="$(TARGETOS)" \
 		-e TARGETARCH="$(TARGETARCH)" \
@@ -63,7 +67,7 @@ all: help
 
 .PHONY: version
 version: ## Print the current version
-	@echo ${BUILD_VERSION}
+	@echo ${VERSION}
 
 # The help target prints out all targets with their descriptions organized
 # beneath their categories. The categories are represented by '##@' and the
@@ -134,7 +138,7 @@ ui-dependencies: ## Install UI dependencies
 .PHONY: lint
 lint: install-tools ## Lint code
 	@echo "Running golangci-lint"
-	golangci-lint run --timeout 10m
+	golangci-lint run --timeout 15m
 	@echo "Running zerolog linter"
 	lint github.com/woodpecker-ci/woodpecker/cmd/agent
 	lint github.com/woodpecker-ci/woodpecker/cmd/cli
@@ -163,7 +167,7 @@ test-server-datastore-coverage: ## Test server datastore with coverage report
 
 test-ui: ui-dependencies ## Test UI code
 	(cd web/; pnpm run lint)
-	(cd web/; pnpm run formatcheck)
+	(cd web/; pnpm run format:check)
 	(cd web/; pnpm run typecheck)
 	(cd web/; pnpm run test)
 

@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM golang:1.20 AS certs
+FROM --platform=$BUILDPLATFORM golang:1.21 AS certs
 
 FROM scratch
 ARG TARGETOS TARGETARCH
