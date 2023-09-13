@@ -153,6 +153,7 @@
 
 ### Misc
 
+- fix(deps): update module github.com/google/go-github/v39 to v55 [[#2456](https://github.com/woodpecker-ci/woodpecker/pull/2456)]
 - fix(deps): update module github.com/golang-jwt/jwt/v4 to v5 [[#2449](https://github.com/woodpecker-ci/woodpecker/pull/2449)]
 - fix(deps): update module github.com/golang-jwt/jwt/v4 to v5 [[#2447](https://github.com/woodpecker-ci/woodpecker/pull/2447)]
 - chore(deps): update node.js to v20 [[#2422](https://github.com/woodpecker-ci/woodpecker/pull/2422)]
