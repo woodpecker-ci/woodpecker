@@ -21,7 +21,7 @@
     "@kyvg/vue3-notification": "^3.0.0",
     "@vueuse/components": "^10.4.0",
     "@vueuse/core": "^10.0.0",
-    "ansi_up": "^5.2.1",
+    "ansi_up": "^6.0.0",
     "dayjs": "^1.11.9",
     "fuse.js": "^6.6.2",
     "humanize-duration": "^3.28.0",
