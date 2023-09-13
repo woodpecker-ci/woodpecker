@@ -249,7 +249,8 @@
         "awaits": "Ce pipeline attend d'être approuvé par un mainteneur !",
         "decline": "Refuser",
         "decline_success": "Pipeline refusé",
-        "declined": "Le pipeline a été refusé !"
+        "declined": "Le pipeline a été refusé !",
+        "review": "Vérifier les changements"
       },
       "status": {
         "blocked": "bloqué",
