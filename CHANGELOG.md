@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@renovate[bot], @xoxys, @s3lph, @qwerty287, @anbraten, @mzampetakis, @math3vz, @LTek-online, @testwill, @pat-s, @lonix1, @6543, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @runephilosof-karnovgroup, @azdle, @praneeth-ovckd, @nupplaphil
+@lonix1, @renovate[bot], @xoxys, @s3lph, @qwerty287, @anbraten, @mzampetakis, @math3vz, @LTek-online, @testwill, @pat-s, @6543, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @runephilosof-karnovgroup, @azdle, @praneeth-ovckd, @nupplaphil
 
 ### 💥 Breaking changes
 
@@ -34,6 +34,7 @@
 
 ### 📚 Documentation
 
+- docs: missing info for runs_on [[#2457](https://github.com/woodpecker-ci/woodpecker/pull/2457)]
 - Add hint about alternative pipeline skip syntax [[#2443](https://github.com/woodpecker-ci/woodpecker/pull/2443)]
 - Fix typo in GitLab docs [[#2376](https://github.com/woodpecker-ci/woodpecker/pull/2376)]
 - clarify setup with gitlab with RFC1918 nets and non standard TLDs [[#2363](https://github.com/woodpecker-ci/woodpecker/pull/2363)]
