@@ -21,8 +21,8 @@ dependencies:
     specifier: ^10.0.0
     version: 10.4.0(vue@3.3.4)
   ansi_up:
-    specifier: ^5.2.1
-    version: 5.2.1
+    specifier: ^6.0.0
+    version: 6.0.2
   dayjs:
     specifier: ^1.11.9
     version: 1.11.9
@@ -1265,8 +1265,8 @@ packages:
       color-convert: 2.0.1
     dev: true
 
-  /ansi_up@5.2.1:
-    resolution: {integrity: sha512-5bz5T/7FRmlxA37zDXhG6cAwlcZtfnmNLDJra66EEIT3kYlw5aPJdbkJEhm59D6kA4Wi5ict6u6IDYHJaQlH+g==}
+  /ansi_up@6.0.2:
+    resolution: {integrity: sha512-3G3vKvl1ilEp7J1u6BmULpMA0xVoW/f4Ekqhl8RTrJrhEBkonKn5k3bUc5Xt+qDayA6iDX0jyUh3AbZjB/l0tw==}
     dev: false
 
   /anymatch@3.1.3:
