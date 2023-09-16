@@ -100,7 +100,7 @@
 import '~/style/console.css';
 
 import { useStorage } from '@vueuse/core';
-import AnsiUp from 'ansi_up';
+import { AnsiUp } from 'ansi_up';
 import { debounce } from 'lodash';
 import { computed, inject, nextTick, onMounted, Ref, ref, toRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';

@@ -3,12 +3,12 @@ module github.com/woodpecker-ci/woodpecker
 go 1.20
 
 require (
-	code.gitea.io/sdk/gitea v0.15.1-0.20221016183512-2d9ee57af1e0
+	code.gitea.io/sdk/gitea v0.16.0
 	codeberg.org/6543/go-yaml2json v1.0.0
 	codeberg.org/6543/xyaml v1.1.0
 	github.com/6543/logfile-open v1.2.1
 	github.com/alessio/shellescape v1.4.2
-	github.com/antonmedv/expr v1.15.1
+	github.com/antonmedv/expr v1.15.2
 	github.com/bmatcuk/doublestar/v4 v4.6.0
 	github.com/caddyserver/certmagic v0.19.2
 	github.com/cenkalti/backoff/v4 v4.2.1
@@ -44,7 +44,7 @@ require (
 	github.com/swaggo/files v1.0.1
 	github.com/swaggo/gin-swagger v1.6.0
 	github.com/swaggo/swag v1.16.2
-	github.com/tevino/abool v1.2.0
+	github.com/tevino/abool/v2 v2.1.0
 	github.com/urfave/cli/v2 v2.25.7
 	github.com/xanzy/go-gitlab v0.91.1
 	github.com/xeipuuv/gojsonschema v1.2.0
@@ -54,12 +54,12 @@ require (
 	golang.org/x/oauth2 v0.12.0
 	golang.org/x/sync v0.3.0
 	golang.org/x/term v0.12.0
-	google.golang.org/grpc v1.58.0
+	google.golang.org/grpc v1.58.1
 	google.golang.org/protobuf v1.31.0
 	gopkg.in/yaml.v3 v3.0.1
-	k8s.io/api v0.28.1
-	k8s.io/apimachinery v0.28.1
-	k8s.io/client-go v0.28.1
+	k8s.io/api v0.28.2
+	k8s.io/apimachinery v0.28.2
+	k8s.io/client-go v0.28.2
 	xorm.io/builder v0.3.13
 	xorm.io/xorm v1.3.3
 )
