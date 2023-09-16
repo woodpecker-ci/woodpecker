@@ -4,6 +4,10 @@
   "prConcurrentLimit": 5,
   "packageRules": [
     {
+      "matchManagers": ["docker-compose"],
+      "labels": ["devx"]
+    },
+    {
       "matchManagers": ["gomod", "npm", "dockerfile"],
       "labels": ["dependencies"]
     },
