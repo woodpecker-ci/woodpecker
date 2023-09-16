@@ -1,10 +1,10 @@
 # Changelog
 
-## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-09-13
+## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-09-16
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@lonix1, @renovate[bot], @xoxys, @s3lph, @qwerty287, @anbraten, @mzampetakis, @math3vz, @LTek-online, @testwill, @pat-s, @6543, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @runephilosof-karnovgroup, @azdle, @praneeth-ovckd, @nupplaphil
+@qwerty287, @renovate[bot], @lonix1, @xoxys, @s3lph, @anbraten, @mzampetakis, @math3vz, @LTek-online, @testwill, @pat-s, @6543, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @runephilosof-karnovgroup, @azdle, @praneeth-ovckd, @nupplaphil
 
 ### 💥 Breaking changes
 
@@ -34,6 +34,7 @@
 
 ### 📚 Documentation
 
+- Add videos [[#2465](https://github.com/woodpecker-ci/woodpecker/pull/2465)]
 - docs: missing info for runs_on [[#2457](https://github.com/woodpecker-ci/woodpecker/pull/2457)]
 - Add hint about alternative pipeline skip syntax [[#2443](https://github.com/woodpecker-ci/woodpecker/pull/2443)]
 - Fix typo in GitLab docs [[#2376](https://github.com/woodpecker-ci/woodpecker/pull/2376)]
@@ -154,6 +155,11 @@
 
 ### Misc
 
+- Update gitea sdk [[#2464](https://github.com/woodpecker-ci/woodpecker/pull/2464)]
+- fix(deps): update golang deps non-major [[#2462](https://github.com/woodpecker-ci/woodpecker/pull/2462)]
+- fix(deps): update dependency ansi_up to v6 [[#2431](https://github.com/woodpecker-ci/woodpecker/pull/2431)]
+- chore(deps): update web npm deps non-major [[#2461](https://github.com/woodpecker-ci/woodpecker/pull/2461)]
+- fix(deps): update module github.com/tevino/abool to v2 [[#2460](https://github.com/woodpecker-ci/woodpecker/pull/2460)]
 - fix(deps): update module github.com/google/go-github/v39 to v55 [[#2456](https://github.com/woodpecker-ci/woodpecker/pull/2456)]
 - fix(deps): update module github.com/golang-jwt/jwt/v4 to v5 [[#2449](https://github.com/woodpecker-ci/woodpecker/pull/2449)]
 - fix(deps): update module github.com/golang-jwt/jwt/v4 to v5 [[#2447](https://github.com/woodpecker-ci/woodpecker/pull/2447)]
