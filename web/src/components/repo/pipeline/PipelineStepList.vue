@@ -10,13 +10,9 @@
         </div>
         <span>{{ pipeline.author }}</span>
       </div>
-      <div class="flex space-x-1 items-center min-w-0">
-        <Icon v-if="pipeline.event === 'manual'" name="manual-pipeline" />
-        <Icon v-if="pipeline.event === 'push'" name="push" />
-        <Icon v-if="pipeline.event === 'deployment'" name="deployment" />
-        <Icon v-else-if="pipeline.event === 'tag'" name="tag" />
+      <div>
         <a
-          v-else-if="pipeline.event === 'pull_request'"
+          v-if="pipeline.event === 'pull_request'"
           class="flex items-center space-x-1 text-wp-link-100 hover:text-wp-link-200 min-w-0"
           :href="pipeline.link_url"
           target="_blank"
@@ -24,7 +20,21 @@
           <Icon name="pull_request" />
           <span class="truncate">{{ prettyRef }}</span>
         </a>
-        <span v-if="pipeline.event !== 'pull_request'" class="truncate">{{ prettyRef }}</span>
+        <router-link
+          v-else-if="pipeline.event === 'push' || pipeline.event === 'manual'"
+          class="flex items-center space-x-1 text-wp-link-100 hover:text-wp-link-200 min-w-0"
+          :to="{ name: 'repo-branch', params: { branch: prettyRef } }"
+        >
+          <Icon v-if="pipeline.event === 'manual'" name="manual-pipeline" />
+          <Icon v-else-if="pipeline.event === 'push'" name="push" />
+          <span class="truncate">{{ prettyRef }}</span>
+        </router-link>
+        <div v-else class="flex space-x-1 items-center min-w-0">
+          <Icon v-if="pipeline.event === 'deployment'" name="deployment" />
+          <Icon v-else-if="pipeline.event === 'tag'" name="tag" />
+
+          <span class="truncate">{{ prettyRef }}</span>
+        </div>
       </div>
       <div class="flex items-center flex-shrink-0">
         <template v-if="pipeline.event === 'pull_request'">
