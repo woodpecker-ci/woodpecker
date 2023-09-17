@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-09-16
+## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-09-17
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -16,6 +16,7 @@
 
 ### 🔒 Security
 
+- Never log tokens [[#2466](https://github.com/woodpecker-ci/woodpecker/pull/2466)]
 - Check permissions on repo lookup [[#2357](https://github.com/woodpecker-ci/woodpecker/pull/2357)]
 - Change token logging to trace level [[#2247](https://github.com/woodpecker-ci/woodpecker/pull/2247)]
 - Validate webhook before change any data (#2221) [[#2222](https://github.com/woodpecker-ci/woodpecker/pull/2222)]
