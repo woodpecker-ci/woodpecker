@@ -14,7 +14,6 @@
         v-if="pipeline.event === 'pull_request'"
         class="flex items-center space-x-1 text-wp-link-100 hover:text-wp-link-200 min-w-0"
         :href="pipeline.link_url"
-        target="_blank"
       >
         <Icon name="pull_request" />
         <span class="truncate">{{ prettyRef }}</span>
