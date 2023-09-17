@@ -5,6 +5,7 @@
   "packageRules": [
     {
       "matchManagers": ["docker-compose"],
+      "matchFileNames": ["docker-compose.gitpod.yml"],
       "labels": ["devx"]
     },
     {
