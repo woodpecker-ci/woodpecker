@@ -21,17 +21,17 @@
           <span class="truncate">{{ prettyRef }}</span>
         </a>
         <router-link
-          v-else-if="pipeline.event === 'push' || pipeline.event === 'manual'"
+          v-else-if="pipeline.event === 'push' || pipeline.event === 'manual' || pipeline.event === 'deployment'"
           class="flex items-center space-x-1 text-wp-link-100 hover:text-wp-link-200 min-w-0"
           :to="{ name: 'repo-branch', params: { branch: prettyRef } }"
         >
           <Icon v-if="pipeline.event === 'manual'" name="manual-pipeline" />
           <Icon v-else-if="pipeline.event === 'push'" name="push" />
+          <Icon v-else-if="pipeline.event === 'deployment'" name="deployment" />
           <span class="truncate">{{ prettyRef }}</span>
         </router-link>
         <div v-else class="flex space-x-1 items-center min-w-0">
-          <Icon v-if="pipeline.event === 'deployment'" name="deployment" />
-          <Icon v-else-if="pipeline.event === 'tag'" name="tag" />
+          <Icon v-if="pipeline.event === 'tag'" name="tag" />
 
           <span class="truncate">{{ prettyRef }}</span>
         </div>
