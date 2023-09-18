@@ -1,72 +1,72 @@
 # GitHub
 
-Woodpecker comes with built-in support for GitHub and GitHub Enterprise. To enable GitHub you should configure the Woodpecker server using the following environment variables:
+Woodpecker comes with built-in support for GitHub and GitHub Enterprise.
+To use Woodpecker with GitHub the following environment variables should be set for the server component:
 
 ```diff
-# docker-compose.yml
-version: '3'
-
-services:
-  woodpecker-server:
-    [...]
-    environment:
-      - [...]
-+     - WOODPECKER_GITHUB=true
 +     - WOODPECKER_GITHUB_CLIENT=${WOODPECKER_GITHUB_CLIENT}
 +     - WOODPECKER_GITHUB_SECRET=${WOODPECKER_GITHUB_SECRET}
-
-  woodpecker-agent:
-    [...]
 ```
 
-## Registration
+You will get these values from GitHub when you register your application.
+To do so, go to Settings -> Developer Settings -> GitHub Apps -> New GitHub App.
 
-Register your application with GitHub to create your client id and secret. It is very important that the authorization callback URL matches your http(s) scheme and hostname exactly with `<scheme>://<host>/authorize` as the path.
+## App Settings
 
-Please use this screenshot for reference:
+- Name: An arbitrary name for your App
+- Homepage URL: The URL of your Woodpecker instance
+- Callback URL: `https://<your-woodpecker-instance>/authorize`
+- Leave "Request user authorization (OAuth) during installation" and "Enable Device Flow" unchecked
+- Leave "Webhook" and "Post Installation" fields empty
+- (optional) Upload the Woodpecker Logo: https://avatars.githubusercontent.com/u/84780935?s=200&v=4
 
-![github oauth setup](github_oauth.png)
+## App Permissions
 
-## Configuration
+The app must be granted the following permissions:
+
+Repository:
+
+- Commit statuses: Read & write
+- Contents: Read & write
+- Deployments: Read & write
+- Metadata: Read-only
+- Pull requests: Read & write
+- Secrets: Read & write
+- Webhooks: Read & write
+
+Organization:
+
+- Members: Read-only
+
+Account:
+
+- Email addresses: Read-only
+
+## Client Secret
+
+After your App has been created, you can generate a client secret.
+Use this one for the `WOODPECKER_GITHUB_SECRET` environment variable.
+
+## Installing the app
+
+In the app settings, click on "Install App" and give the app permissions to the repositories you want to use with Woodpecker.
+
+## All GitHub Configuration Options
 
 This is a full list of configuration options. Please note that many of these options use default configuration values that should work for the majority of installations.
 
-### `WOODPECKER_GITHUB`
-> Default: `false`
+- `WOODPECKER_GITHUB` - Enables the GitHub driver (Default: `false`)
 
-Enables the GitHub driver.
+- `WOODPECKER_GITHUB_URL` - Configures the GitHub server address (Default: `https://github.com`)
 
-### `WOODPECKER_GITHUB_URL`
-> Default: `https://github.com`
+- `WOODPECKER_GITHUB_CLIENT` - Configures the GitHub OAuth client id to authorize access (Default: empty)
 
-Configures the GitHub server address.
+- `WOODPECKER_GITHUB_CLIENT_FILE` - Read the value for `WOODPECKER_GITHUB_CLIENT` from the specified filepath (Default: empty)
 
-### `WOODPECKER_GITHUB_CLIENT`
-> Default: empty
+- `WOODPECKER_GITHUB_SECRET` - Configures the GitHub OAuth client secret. This is used to authorize access. (Default: empty)
 
-Configures the GitHub OAuth client id. This is used to authorize access.
+- `WOODPECKER_GITHUB_SECRET_FILE` - Read the value for `WOODPECKER_GITHUB_SECRET` from the specified filepath 9Default: empty)
 
-### `WOODPECKER_GITHUB_CLIENT_FILE`
-> Default: empty
+  `WOODPECKER_GITHUB_MERGE_REF` - (Default: `true`)
 
-Read the value for `WOODPECKER_GITHUB_CLIENT` from the specified filepath
-
-### `WOODPECKER_GITHUB_SECRET`
-> Default: empty
-
-Configures the GitHub OAuth client secret. This is used to authorize access.
-
-### `WOODPECKER_GITHUB_SECRET_FILE`
-> Default: empty
-
-Read the value for `WOODPECKER_GITHUB_SECRET` from the specified filepath
-
-### `WOODPECKER_GITHUB_MERGE_REF`
-> Default: `true`
-
-TODO
-
-### `WOODPECKER_GITHUB_SKIP_VERIFY`
-> Default: `false`
-
-Configure if SSL verification should be skipped.
+- `WOODPECKER_GITHUB_SKIP_VERIFY` - Configure if SSL verification should be skipped (Default: `false`)
