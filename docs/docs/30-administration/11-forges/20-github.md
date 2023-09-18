@@ -66,7 +66,7 @@ This is a full list of configuration options. Please note that many of these opt
 
 - `WOODPECKER_GITHUB_SECRET` - Configures the GitHub OAuth client secret. This is used to authorize access. (Default: empty)
 
-- `WOODPECKER_GITHUB_SECRET_FILE` - Read the value for `WOODPECKER_GITHUB_SECRET` from the specified filepath 9Default: empty)
+- `WOODPECKER_GITHUB_SECRET_FILE` - Read the value for `WOODPECKER_GITHUB_SECRET` from the specified filepath (Default: empty)
 
   `WOODPECKER_GITHUB_MERGE_REF` - (Default: `true`)
 
