@@ -12,7 +12,7 @@ require (
 	github.com/bmatcuk/doublestar/v4 v4.6.0
 	github.com/caddyserver/certmagic v0.19.2
 	github.com/cenkalti/backoff/v4 v4.2.1
-	github.com/docker/cli v20.10.25+incompatible
+	github.com/docker/cli v24.0.6+incompatible
 	github.com/docker/distribution v2.8.2+incompatible
 	github.com/docker/docker v20.10.25+incompatible
 	github.com/docker/go-connections v0.4.0
