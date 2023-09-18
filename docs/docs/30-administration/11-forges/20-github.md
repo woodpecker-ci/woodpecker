@@ -3,9 +3,10 @@
 Woodpecker comes with built-in support for GitHub and GitHub Enterprise.
 To use Woodpecker with GitHub the following environment variables should be set for the server component:
 
-```diff
-+     - WOODPECKER_GITHUB_CLIENT=${WOODPECKER_GITHUB_CLIENT}
-+     - WOODPECKER_GITHUB_SECRET=${WOODPECKER_GITHUB_SECRET}
+```sh
+WOODPECKER_GITHUB=true
+WOODPECKER_GITHUB_CLIENT=YOUR_GITHUB_CLIENT_ID
+WOODPECKER_GITHUB_SECRET=YOUR_GITHUB_CLIENT_SECRET
 ```
 
 You will get these values from GitHub when you register your application.
@@ -22,7 +23,7 @@ To do so, go to Settings -> Developer Settings -> GitHub Apps -> New GitHub App.
 
 ## App Permissions
 
-The app must be granted the following permissions:
+The app must be granted the following permissions (under App Settings -> Permissions):
 
 Repository:
 
@@ -42,7 +43,7 @@ Account:
 
 - Email addresses: Read-only
 
-## Client Secret
+## Client Secret Creation
 
 After your App has been created, you can generate a client secret.
 Use this one for the `WOODPECKER_GITHUB_SECRET` environment variable.
