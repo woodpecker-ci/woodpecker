@@ -68,6 +68,7 @@
       "reload": "Reload repositories",
       "enable": "Enable",
       "enabled": "Already enabled",
+      "disabled": "Disabled",
       "success": "Repository enabled",
       "list_reloaded": "Repository list reloaded"
     },
@@ -227,7 +228,6 @@
       }
     },
     "pipeline": {
-      "created": "Created",
       "tasks": "Tasks",
       "config": "Config",
       "files": "Changed files ({files})",
@@ -255,7 +255,8 @@
         "log_auto_scroll_off": "Turn off automatic scrolling"
       },
       "protected": {
-        "awaits": "This pipeline is awaiting approval by some maintainer!",
+        "review": "Review changes",
+        "awaits": "This pipeline is awaiting approval by a maintainer!",
         "approve": "Approve",
         "decline": "Decline",
         "declined": "This pipeline has been declined!",
@@ -412,7 +413,7 @@
         "show": "Show users",
         "add": "Add user",
         "none": "There are no users yet.",
-        "delete_confirm": "Do you really want to delete this user?",
+        "delete_confirm": "Do you really want to delete this user? This will also delete all repositories owned by this user.",
         "deleted": "User deleted",
         "created": "User created",
         "saved": "User saved",
@@ -422,6 +423,24 @@
         },
         "delete_user": "Delete user",
         "edit_user": "Edit user"
+      },
+      "orgs": {
+        "orgs": "Organizations",
+        "desc": "Organizations owning repositories on this server",
+        "none": "There are no organizations yet.",
+        "org_settings": "Organization settings",
+        "delete_org": "Delete organization",
+        "deleted": "Organization deleted",
+        "delete_confirm": "Do you really want to delete this organization? This will also delete all repositories owned by this organization.",
+        "view": "View organization"
+      },
+      "repos": {
+        "repos": "Repositories",
+        "desc": "Repositories that are or were enabled on this server",
+        "none": "There are no repositories yet.",
+        "view": "View repository",
+        "settings": "Repository settings",
+        "disabled": "Disabled"
       }
     }
   },
@@ -431,6 +450,28 @@
       "general": {
         "general": "General",
         "language": "Language"
+      },
+      "secrets": {
+        "secrets": "Secrets",
+        "desc": "User secrets can be passed to all user's repository individual pipeline steps at runtime as environmental variables.",
+        "none": "There are no user secrets yet.",
+        "add": "Add secret",
+        "save": "Save secret",
+        "show": "Show secrets",
+        "name": "Name",
+        "value": "Value",
+        "deleted": "User secret deleted",
+        "created": "User secret created",
+        "saved": "User secret saved",
+        "images": {
+          "images": "Available for following images",
+          "desc": "Comma separated list of images where this secret is available, leave empty to allow all images"
+        },
+        "plugins_only": "Only available for plugins",
+        "events": {
+          "events": "Available at following events",
+          "pr_warning": "Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets."
+        }
       },
       "api": {
         "api": "API",

@@ -379,7 +379,6 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 	server.Config.Pipeline.Networks = c.StringSlice("network")
 	server.Config.Pipeline.Volumes = c.StringSlice("volume")
 	server.Config.Pipeline.Privileged = c.StringSlice("escalate")
-	server.Config.Server.Migrations.AllowLong = c.Bool("migrations-allow-long")
 	server.Config.Server.EnableSwagger = c.Bool("enable-swagger")
 
 	// prometheus

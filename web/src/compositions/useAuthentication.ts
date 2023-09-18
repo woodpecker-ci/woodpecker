@@ -14,4 +14,4 @@ export default () =>
       }
       window.location.href = `${useConfig().rootPath}/login`;
     },
-  } as const);
+  }) as const;
