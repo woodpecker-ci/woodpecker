@@ -4,7 +4,7 @@
   "$id": "https://woodpecker-ci.org/schema/woodpecker.json",
   "description": "Schema of a Woodpecker pipeline file. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax",
   "type": "object",
-  "required": ["steps"],
+  "required": ["version", "steps"],
   "additionalProperties": false,
   "properties": {
     "$schema": {
@@ -19,7 +19,7 @@
     "branches": { "$ref": "#/definitions/branches" },
     "when": { "$ref": "#/definitions/pipeline_when" },
     "steps": { "$ref": "#/definitions/step_list" },
-    "pipeline": { "$ref": "#/definitions/step_list", "description": "depricated, use steps" },
+    "pipeline": { "$ref": "#/definitions/step_list", "description": "deprecated, use steps" },
     "services": { "$ref": "#/definitions/services" },
     "workspace": { "$ref": "#/definitions/workspace" },
     "matrix": { "$ref": "#/definitions/matrix" },
@@ -34,7 +34,8 @@
       "type": "array",
       "minLength": 1,
       "items": { "type": "string" }
-    }
+    },
+    "version": { "type": "number" }
   },
   "definitions": {
     "clone": {

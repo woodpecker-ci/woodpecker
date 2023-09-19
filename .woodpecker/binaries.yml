@@ -1,3 +1,5 @@
+version: 1
+
 depends_on:
   - test
   - web
