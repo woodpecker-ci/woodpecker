@@ -21,7 +21,7 @@ import (
 	"runtime"
 
 	"github.com/rs/zerolog/log"
-	"github.com/tevino/abool"
+	"github.com/tevino/abool/v2"
 	"xorm.io/xorm"
 
 	"github.com/woodpecker-ci/woodpecker/server"
