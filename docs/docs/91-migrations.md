@@ -2,12 +2,12 @@
 
 Some versions need some changes to the server configuration or the pipeline configuration files.
 
-## next (1.1.0)
+## next (2.0.0)
 
-- Drop deprecated `CI_BUILD_*`, `CI_PREV_BUILD_*`, `CI_JOB_*`, `*_LINK`, `CI_SYSTEM_ARCH`, `CI_REPO_REMOTE` built-in environment variables
-- Drop deprecated `pipeline:` keyword for steps in yaml config
-- Drop deprecated `branches:` keyword for global branch filter
-- Deprecate `platform:` filter in favor of `labels:`, [read more](./20-usage/20-pipeline-syntax.md#filter-by-platform)
+- Dropped deprecated `CI_BUILD_*`, `CI_PREV_BUILD_*`, `CI_JOB_*`, `*_LINK`, `CI_SYSTEM_ARCH`, `CI_REPO_REMOTE` built-in environment variables
+- Dropped deprecated `pipeline:` keyword in favor of `steps:` in pipeline config
+- Dropped deprecated `branches:` filter in favor of global [`when.branch`](./20-usage/20-pipeline-syntax.md#branch-1) filter
+- Deprecated `platform:` filter in favor of `labels:`, [read more](./20-usage/20-pipeline-syntax.md#filter-by-platform)
 
 ## 1.0.0
 
