@@ -647,9 +647,9 @@ steps:
 
 ## `variables`
 
-Woodpecker supports [YAML anchors & aliases](https://yaml.org/spec/1.2.2/#3222-anchors-and-aliases) in the pipeline configuration. These can be used as variables to not repeat yourself.
+Woodpecker supports using [YAML anchors & aliases](https://yaml.org/spec/1.2.2/#3222-anchors-and-aliases) as variables in the pipeline configuration.
 
-For more details and examples check the [Advanced YAML syntax docs](./35-advanced-yaml-syntax.md)
+For more details and examples check the [Advanced usage docs](./90-advanced-usage.md)
 
 ## `clone`
 
