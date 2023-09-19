@@ -1,11 +1,27 @@
+// Copyright 2022 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package kubernetes
 
 import (
 	"fmt"
 	"strings"
 
+	"github.com/rs/zerolog/log"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/common"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
+	"golang.org/x/exp/maps"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -43,7 +59,7 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 		}
 	}
 
-	pullPolicy := v1.PullIfNotPresent
+	var pullPolicy v1.PullPolicy
 	if step.Pull {
 		pullPolicy = v1.PullAlways
 	}
@@ -80,6 +96,11 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 		}
 	}
 
+	var serviceAccountName string
+	if step.BackendOptions.Kubernetes.ServiceAccountName != "" {
+		serviceAccountName = step.BackendOptions.Kubernetes.ServiceAccountName
+	}
+
 	podName, err := dnsName(step.Name)
 	if err != nil {
 		return nil, err
@@ -87,15 +108,38 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 
 	labels["step"] = podName
 
-	var platform string
-	for _, e := range mapToEnvVars(step.Environment) {
-		if e.Name == "CI_SYSTEM_ARCH" {
-			platform = e.Value
-			break
+	var nodeSelector map[string]string
+	platform, exist := step.Environment["CI_SYSTEM_PLATFORM"]
+	if exist && platform != "" {
+		arch := strings.Split(platform, "/")[1]
+		nodeSelector = map[string]string{v1.LabelArchStable: arch}
+		log.Trace().Msgf("Using the node selector from the Agent's platform: %v", nodeSelector)
+	}
+	beOptNodeSelector := step.BackendOptions.Kubernetes.NodeSelector
+	if len(beOptNodeSelector) > 0 {
+		if len(nodeSelector) == 0 {
+			nodeSelector = beOptNodeSelector
+		} else {
+			log.Trace().Msgf("Appending labels to the node selector from the backend options: %v", beOptNodeSelector)
+			maps.Copy(nodeSelector, beOptNodeSelector)
 		}
 	}
 
-	NodeSelector := map[string]string{"kubernetes.io/arch": strings.Split(platform, "/")[1]}
+	var tolerations []v1.Toleration
+	beTolerations := step.BackendOptions.Kubernetes.Tolerations
+	if len(beTolerations) > 0 {
+		for _, t := range step.BackendOptions.Kubernetes.Tolerations {
+			toleration := v1.Toleration{
+				Key:               t.Key,
+				Operator:          v1.TolerationOperator(t.Operator),
+				Value:             t.Value,
+				Effect:            v1.TaintEffect(t.Effect),
+				TolerationSeconds: t.TolerationSeconds,
+			}
+			tolerations = append(tolerations, toleration)
+		}
+		log.Trace().Msgf("Tolerations that will be used in the backend options: %v", beTolerations)
+	}
 
 	pod := &v1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
@@ -105,9 +149,11 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 			Annotations: annotations,
 		},
 		Spec: v1.PodSpec{
-			RestartPolicy: v1.RestartPolicyNever,
-			HostAliases:   hostAliases,
-			NodeSelector:  NodeSelector,
+			RestartPolicy:      v1.RestartPolicyNever,
+			HostAliases:        hostAliases,
+			NodeSelector:       nodeSelector,
+			Tolerations:        tolerations,
+			ServiceAccountName: serviceAccountName,
 			Containers: []v1.Container{{
 				Name:            podName,
 				Image:           step.Image,

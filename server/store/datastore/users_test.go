@@ -24,7 +24,7 @@ import (
 )
 
 func TestUsers(t *testing.T) {
-	store, closer := newTestStore(t, new(model.User), new(model.Repo), new(model.Pipeline), new(model.Step), new(model.Perm))
+	store, closer := newTestStore(t, new(model.User), new(model.Repo), new(model.Pipeline), new(model.Step), new(model.Perm), new(model.Org), new(model.Secret))
 	defer closer()
 
 	g := goblin.Goblin(t)
@@ -39,6 +39,8 @@ func TestUsers(t *testing.T) {
 			_, err = store.engine.Exec("DELETE FROM pipelines")
 			g.Assert(err).IsNil()
 			_, err = store.engine.Exec("DELETE FROM steps")
+			g.Assert(err).IsNil()
+			_, err = store.engine.Exec("DELETE FROM orgs")
 			g.Assert(err).IsNil()
 		})
 
@@ -245,9 +247,9 @@ func TestUsers(t *testing.T) {
 			pipelines, err := store.UserFeed(user)
 			g.Assert(err).IsNil()
 			g.Assert(len(pipelines)).Equal(3)
-			g.Assert(pipelines[0].FullName).Equal(repo2.FullName)
-			g.Assert(pipelines[1].FullName).Equal(repo1.FullName)
-			g.Assert(pipelines[2].FullName).Equal(repo1.FullName)
+			g.Assert(pipelines[0].RepoID).Equal(repo2.ID)
+			g.Assert(pipelines[1].RepoID).Equal(repo1.ID)
+			g.Assert(pipelines[2].RepoID).Equal(repo1.ID)
 		})
 	})
 }

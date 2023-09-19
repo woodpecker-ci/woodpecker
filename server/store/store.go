@@ -100,6 +100,7 @@ type Store interface {
 	// Repositories
 	RepoList(user *model.User, owned, active bool) ([]*model.Repo, error)
 	RepoListLatest(*model.User) ([]*model.Feed, error)
+	RepoListAll(active bool, p *model.ListOptions) ([]*model.Repo, error)
 
 	// Permissions
 	PermFind(user *model.User, repo *model.Repo) (*model.Perm, error)
@@ -121,8 +122,8 @@ type Store interface {
 	SecretCreate(*model.Secret) error
 	SecretUpdate(*model.Secret) error
 	SecretDelete(*model.Secret) error
-	OrgSecretFind(string, string) (*model.Secret, error)
-	OrgSecretList(string, *model.ListOptions) ([]*model.Secret, error)
+	OrgSecretFind(int64, string) (*model.Secret, error)
+	OrgSecretList(int64, *model.ListOptions) ([]*model.Secret, error)
 	GlobalSecretFind(string) (*model.Secret, error)
 	GlobalSecretList(*model.ListOptions) ([]*model.Secret, error)
 
@@ -139,9 +140,9 @@ type Store interface {
 	StepByUUID(string) (*model.Step, error)
 	StepChild(*model.Pipeline, int, string) (*model.Step, error)
 	StepList(*model.Pipeline) ([]*model.Step, error)
-	StepCreate([]*model.Step) error
 	StepUpdate(*model.Step) error
 	StepClear(*model.Pipeline) error
+	StepListFromWorkflowFind(*model.Workflow) ([]*model.Step, error)
 
 	// Logs
 	LogFind(*model.Step) ([]*model.LogEntry, error)
@@ -176,6 +177,23 @@ type Store interface {
 	AgentList(p *model.ListOptions) ([]*model.Agent, error)
 	AgentUpdate(*model.Agent) error
 	AgentDelete(*model.Agent) error
+
+	// Workflow
+	WorkflowGetTree(*model.Pipeline) ([]*model.Workflow, error)
+	WorkflowsCreate([]*model.Workflow) error
+	WorkflowLoad(int64) (*model.Workflow, error)
+	WorkflowUpdate(*model.Workflow) error
+
+	// Org
+	OrgCreate(*model.Org) error
+	OrgGet(int64) (*model.Org, error)
+	OrgFindByName(string) (*model.Org, error)
+	OrgUpdate(*model.Org) error
+	OrgDelete(int64) error
+	OrgList(*model.ListOptions) ([]*model.Org, error)
+
+	// Org repos
+	OrgRepoList(*model.Org, *model.ListOptions) ([]*model.Repo, error)
 
 	// Store operations
 	Ping() error

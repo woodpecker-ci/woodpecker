@@ -19,7 +19,7 @@ import (
 	"testing"
 
 	"github.com/franela/goblin"
-	"github.com/google/go-github/v39/github"
+	"github.com/google/go-github/v55/github"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
@@ -188,7 +188,7 @@ func Test_helper(t *testing.T) {
 					Number:  github.Int(42),
 					Title:   github.String("Updated README.md"),
 					Base: &github.PullRequestBranch{
-						Ref: github.String("master"),
+						Ref: github.String("main"),
 					},
 					Head: &github.PullRequestBranch{
 						Ref: github.String("changes"),
@@ -211,7 +211,7 @@ func Test_helper(t *testing.T) {
 			g.Assert(pipeline.Event).Equal(model.EventPull)
 			g.Assert(pipeline.Branch).Equal(*from.PullRequest.Base.Ref)
 			g.Assert(pipeline.Ref).Equal("refs/pull/42/merge")
-			g.Assert(pipeline.Refspec).Equal("changes:master")
+			g.Assert(pipeline.Refspec).Equal("changes:main")
 			g.Assert(pipeline.CloneURL).Equal("https://github.com/octocat/hello-world-fork")
 			g.Assert(pipeline.Commit).Equal(*from.PullRequest.Head.SHA)
 			g.Assert(pipeline.Message).Equal(*from.PullRequest.Title)
@@ -226,7 +226,7 @@ func Test_helper(t *testing.T) {
 			from.Deployment.Description = github.String(":shipit:")
 			from.Deployment.Environment = github.String("production")
 			from.Deployment.ID = github.Int64(42)
-			from.Deployment.Ref = github.String("master")
+			from.Deployment.Ref = github.String("main")
 			from.Deployment.SHA = github.String("f72fc19")
 			from.Deployment.URL = github.String("https://github.com/octocat/hello-world")
 			from.Sender.Login = github.String("octocat")
@@ -235,8 +235,8 @@ func Test_helper(t *testing.T) {
 			_, pipeline, err := parseDeployHook(from)
 			g.Assert(err).IsNil()
 			g.Assert(pipeline.Event).Equal(model.EventDeploy)
-			g.Assert(pipeline.Branch).Equal("master")
-			g.Assert(pipeline.Ref).Equal("refs/heads/master")
+			g.Assert(pipeline.Branch).Equal("main")
+			g.Assert(pipeline.Ref).Equal("refs/heads/main")
 			g.Assert(pipeline.Commit).Equal(*from.Deployment.SHA)
 			g.Assert(pipeline.Message).Equal(*from.Deployment.Description)
 			g.Assert(pipeline.Link).Equal(*from.Deployment.URL)
@@ -253,13 +253,13 @@ func Test_helper(t *testing.T) {
 			from.HeadCommit.Message = github.String("updated README.md")
 			from.HeadCommit.URL = github.String("https://github.com/octocat/hello-world")
 			from.HeadCommit.ID = github.String("f72fc19")
-			from.Ref = github.String("refs/heads/master")
+			from.Ref = github.String("refs/heads/main")
 
 			_, pipeline, err := parsePushHook(from)
 			g.Assert(err).IsNil()
 			g.Assert(pipeline.Event).Equal(model.EventPush)
-			g.Assert(pipeline.Branch).Equal("master")
-			g.Assert(pipeline.Ref).Equal("refs/heads/master")
+			g.Assert(pipeline.Branch).Equal("main")
+			g.Assert(pipeline.Ref).Equal("refs/heads/main")
 			g.Assert(pipeline.Commit).Equal(*from.HeadCommit.ID)
 			g.Assert(pipeline.Message).Equal(*from.HeadCommit.Message)
 			g.Assert(pipeline.Link).Equal(*from.HeadCommit.URL)
@@ -282,18 +282,18 @@ func Test_helper(t *testing.T) {
 		g.It("should convert tag's base branch from webhook to pipeline's branch ", func() {
 			from := &github.PushEvent{}
 			from.Ref = github.String("refs/tags/v1.0.0")
-			from.BaseRef = github.String("refs/heads/master")
+			from.BaseRef = github.String("refs/heads/main")
 
 			_, pipeline, err := parsePushHook(from)
 			g.Assert(err).IsNil()
 			g.Assert(pipeline.Event).Equal(model.EventTag)
-			g.Assert(pipeline.Branch).Equal("master")
+			g.Assert(pipeline.Branch).Equal("main")
 		})
 
 		g.It("should not convert tag's base_ref from webhook if not prefixed with 'ref/heads/'", func() {
 			from := &github.PushEvent{}
 			from.Ref = github.String("refs/tags/v1.0.0")
-			from.BaseRef = github.String("refs/refs/master")
+			from.BaseRef = github.String("refs/refs/main")
 
 			_, pipeline, err := parsePushHook(from)
 			g.Assert(err).IsNil()

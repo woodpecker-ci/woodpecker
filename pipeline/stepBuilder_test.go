@@ -47,7 +47,7 @@ func TestGlobalEnvsubst(t *testing.T) {
 		Link:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
-pipeline:
+steps:
   build:
     image: ${IMAGE}
     yyy: ${CI_COMMIT_MESSAGE}
@@ -82,7 +82,7 @@ func TestMissingGlobalEnvsubst(t *testing.T) {
 		Link:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
-pipeline:
+steps:
   build:
     image: ${IMAGE}
     yyy: ${CI_COMMIT_MESSAGE}
@@ -114,13 +114,13 @@ bbb`,
 		Link:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
-pipeline:
+steps:
   xxx:
     image: scratch
     yyy: ${CI_COMMIT_MESSAGE}
 `)},
 			{Data: []byte(`
-pipeline:
+steps:
   build:
     image: scratch
     yyy: ${CI_COMMIT_MESSAGE}
@@ -149,12 +149,12 @@ func TestMultiPipeline(t *testing.T) {
 		Link:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
-pipeline:
+steps:
   xxx:
     image: scratch
 `)},
 			{Data: []byte(`
-pipeline:
+steps:
   build:
     image: scratch
 `)},
@@ -184,17 +184,17 @@ func TestDependsOn(t *testing.T) {
 		Link:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Name: "lint", Data: []byte(`
-pipeline:
+steps:
   build:
     image: scratch
 `)},
 			{Name: "test", Data: []byte(`
-pipeline:
+steps:
   build:
     image: scratch
 `)},
 			{Data: []byte(`
-pipeline:
+steps:
   deploy:
     image: scratch
 
@@ -231,7 +231,7 @@ func TestRunsOn(t *testing.T) {
 		Link:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
-pipeline:
+steps:
   deploy:
     image: scratch
 
@@ -268,12 +268,12 @@ func TestPipelineName(t *testing.T) {
 		Link:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Name: ".woodpecker/lint.yml", Data: []byte(`
-pipeline:
+steps:
   build:
     image: scratch
 `)},
 			{Name: ".woodpecker/.test.yml", Data: []byte(`
-pipeline:
+steps:
   build:
     image: scratch
 `)},
@@ -290,7 +290,7 @@ pipeline:
 	}
 }
 
-func TestBranchFilter(t *testing.T) {
+func TestRootWhenBranchFilter(t *testing.T) {
 	t.Parallel()
 
 	b := StepBuilder{
@@ -304,13 +304,14 @@ func TestBranchFilter(t *testing.T) {
 		Link:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
-pipeline:
+steps:
   xxx:
     image: scratch
-branches: master
+when:
+  branch: main
 `)},
 			{Data: []byte(`
-pipeline:
+steps:
   build:
     image: scratch
 `)},
@@ -346,7 +347,7 @@ func TestRootWhenFilter(t *testing.T) {
 when:
   event:
     - tester
-pipeline:
+steps:
   xxx:
     image: scratch
 `)},
@@ -354,12 +355,12 @@ pipeline:
 when:
   event:
     - push
-pipeline:
+steps:
   xxx:
     image: scratch
 `)},
 			{Data: []byte(`
-pipeline:
+steps:
   build:
     image: scratch
 `)},
@@ -393,7 +394,7 @@ func TestZeroSteps(t *testing.T) {
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 skip_clone: true
-pipeline:
+steps:
   build:
     when:
       branch: notdev
@@ -428,19 +429,19 @@ func TestZeroStepsAsMultiPipelineDeps(t *testing.T) {
 		Yamls: []*forge_types.FileMeta{
 			{Name: "zerostep", Data: []byte(`
 skip_clone: true
-pipeline:
+steps:
   build:
     when:
       branch: notdev
     image: scratch
 `)},
 			{Name: "justastep", Data: []byte(`
-pipeline:
+steps:
   build:
     image: scratch
 `)},
 			{Name: "shouldbefiltered", Data: []byte(`
-pipeline:
+steps:
   build:
     image: scratch
 depends_on: [ zerostep ]
@@ -477,25 +478,25 @@ func TestZeroStepsAsMultiPipelineTransitiveDeps(t *testing.T) {
 		Yamls: []*forge_types.FileMeta{
 			{Name: "zerostep", Data: []byte(`
 skip_clone: true
-pipeline:
+steps:
   build:
     when:
       branch: notdev
     image: scratch
 `)},
 			{Name: "justastep", Data: []byte(`
-pipeline:
+steps:
   build:
     image: scratch
 `)},
 			{Name: "shouldbefiltered", Data: []byte(`
-pipeline:
+steps:
   build:
     image: scratch
 depends_on: [ zerostep ]
 `)},
 			{Name: "shouldbefilteredtoo", Data: []byte(`
-pipeline:
+steps:
   build:
     image: scratch
 depends_on: [ shouldbefiltered ]
@@ -533,7 +534,7 @@ func TestTree(t *testing.T) {
 		Link:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
-pipeline:
+steps:
   build:
     image: scratch
 `)},
@@ -545,14 +546,11 @@ pipeline:
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(pipeline.Steps) != 3 {
+	if len(pipeline.Workflows) != 1 {
 		t.Fatal("Should generate three in total")
 	}
-	if pipeline.Steps[1].PPID != 1 {
-		t.Fatal("Clone step should be a children of the stage")
-	}
-	if pipeline.Steps[2].PPID != 1 {
-		t.Fatal("Pipeline step should be a children of the stage")
+	if len(pipeline.Workflows[0].Children) != 2 {
+		t.Fatal("Workflow should have two children")
 	}
 }
 

@@ -20,7 +20,7 @@ var allProjectsPayload = []byte(`
 	{
 		"id": 4,
 		"description": null,
-		"default_branch": "master",
+		"default_branch": "main",
 		"public": false,
 		"visibility_level": 0,
 		"ssh_url_to_repo": "git@example.com:diaspora/diaspora-client.git",
@@ -66,7 +66,7 @@ var allProjectsPayload = []byte(`
 	{
 		"id": 6,
 		"description": null,
-		"default_branch": "master",
+		"default_branch": "main",
 		"public": false,
 		"visibility_level": 0,
 		"ssh_url_to_repo": "git@example.com:brightbox/puppet.git",
@@ -117,7 +117,7 @@ var notArchivedProjectsPayload = []byte(`
 	{
 		"id": 4,
 		"description": null,
-		"default_branch": "master",
+		"default_branch": "main",
 		"public": false,
 		"visibility_level": 0,
 		"ssh_url_to_repo": "git@example.com:diaspora/diaspora-client.git",
@@ -167,7 +167,7 @@ var project4Payload = []byte(`
 {
 	"id": 4,
 	"description": null,
-	"default_branch": "master",
+	"default_branch": "main",
 	"public": false,
 	"visibility_level": 0,
 	"ssh_url_to_repo": "git@example.com:diaspora/diaspora-client.git",
@@ -216,7 +216,7 @@ var project6Payload = []byte(`
 {
 	"id": 6,
 	"description": null,
-	"default_branch": "master",
+	"default_branch": "main",
 	"public": false,
 	"visibility_level": 0,
 	"ssh_url_to_repo": "git@example.com:brightbox/puppet.git",

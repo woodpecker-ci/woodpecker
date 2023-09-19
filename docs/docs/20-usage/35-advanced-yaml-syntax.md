@@ -6,7 +6,8 @@ You can use [YAML anchors & aliases](https://yaml.org/spec/1.2.2/#3222-anchors-a
 
 To convert this:
 ```yml
-pipeline:
+version: 1
+steps:
   test:
     image: golang:1.18
     commands: go test ./...
@@ -18,10 +19,11 @@ pipeline:
 Just add a new section called **variables** like this:
 
 ```diff
+ version: 1
 +variables:
 +  - &golang_image 'golang:1.18'
 
- pipeline:
+ steps:
    test:
 -    image: golang:1.18
 +    image: *golang_image
@@ -35,6 +37,7 @@ Just add a new section called **variables** like this:
 ## Map merges and overwrites
 
 ```yaml
+version: 1
 variables:
   - &base-plugin-settings
     target: dist
@@ -44,7 +47,7 @@ variables:
     special: true
   - &some-plugin codeberg.org/6543/docker-images/print_env
 
-pipeline:
+steps:
   develop:
     image: *some-plugin
     settings:
@@ -65,6 +68,7 @@ pipeline:
 ## Sequence merges
 
 ```yaml
+version: 1
 variables:
   pre_cmds: &pre_cmds
    - echo start
@@ -74,7 +78,7 @@ variables:
   hello_cmd: &hello_cmd
    - echo hello
 
-pipeline:
+steps:
   step1:
     image: debian
     commands:
@@ -88,3 +92,8 @@ pipeline:
      - echo echo from second step
      - <<: *post_cmds
 ```
+
+## References
+
+- [Official specification](https://yaml.org/spec/1.2.2/#3222-anchors-and-aliases)
+- [Cheatsheet](https://learnxinyminutes.com/docs/yaml)

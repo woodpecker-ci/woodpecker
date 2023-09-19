@@ -1,13 +1,27 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package types
 
 import (
 	"fmt"
 
-	"golang.org/x/exp/slices"
 	"gopkg.in/yaml.v3"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/constraint"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types/base"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/utils"
 	"github.com/woodpecker-ci/woodpecker/shared/constant"
 )
 
@@ -38,26 +52,21 @@ type (
 		Privileged bool `yaml:"privileged,omitempty"`
 
 		// Undocumented
-		CapAdd        []string            `yaml:"cap_add,omitempty"`
-		CapDrop       []string            `yaml:"cap_drop,omitempty"`
-		CPUQuota      base.StringOrInt    `yaml:"cpu_quota,omitempty"`
-		CPUSet        string              `yaml:"cpuset,omitempty"`
-		CPUShares     base.StringOrInt    `yaml:"cpu_shares,omitempty"`
-		Devices       []string            `yaml:"devices,omitempty"`
-		DNSSearch     base.StringOrSlice  `yaml:"dns_search,omitempty"`
-		DNS           base.StringOrSlice  `yaml:"dns,omitempty"`
-		ExtraHosts    []string            `yaml:"extra_hosts,omitempty"`
-		IpcMode       string              `yaml:"ipc_mode,omitempty"`
-		Isolation     string              `yaml:"isolation,omitempty"`
-		MemLimit      base.MemStringOrInt `yaml:"mem_limit,omitempty"`
-		MemSwapLimit  base.MemStringOrInt `yaml:"memswap_limit,omitempty"`
-		MemSwappiness base.MemStringOrInt `yaml:"mem_swappiness,omitempty"`
-		NetworkMode   string              `yaml:"network_mode,omitempty"`
-		Networks      Networks            `yaml:"networks,omitempty"`
-		ShmSize       base.MemStringOrInt `yaml:"shm_size,omitempty"`
-		Sysctls       base.SliceOrMap     `yaml:"sysctls,omitempty"`
-		Tmpfs         []string            `yaml:"tmpfs,omitempty"`
-		Ulimits       Ulimits             `yaml:"ulimits,omitempty"`
+		CPUQuota     base.StringOrInt    `yaml:"cpu_quota,omitempty"`
+		CPUSet       string              `yaml:"cpuset,omitempty"`
+		CPUShares    base.StringOrInt    `yaml:"cpu_shares,omitempty"`
+		Devices      []string            `yaml:"devices,omitempty"`
+		DNSSearch    base.StringOrSlice  `yaml:"dns_search,omitempty"`
+		DNS          base.StringOrSlice  `yaml:"dns,omitempty"`
+		ExtraHosts   []string            `yaml:"extra_hosts,omitempty"`
+		IpcMode      string              `yaml:"ipc_mode,omitempty"`
+		MemLimit     base.MemStringOrInt `yaml:"mem_limit,omitempty"`
+		MemSwapLimit base.MemStringOrInt `yaml:"memswap_limit,omitempty"`
+		NetworkMode  string              `yaml:"network_mode,omitempty"`
+		Networks     Networks            `yaml:"networks,omitempty"`
+		ShmSize      base.MemStringOrInt `yaml:"shm_size,omitempty"`
+		Sysctls      base.SliceOrMap     `yaml:"sysctls,omitempty"`
+		Tmpfs        []string            `yaml:"tmpfs,omitempty"`
 	}
 )
 
@@ -114,5 +123,5 @@ func (c *Container) IsPlugin() bool {
 }
 
 func (c *Container) IsTrustedCloneImage() bool {
-	return c.IsPlugin() && slices.Contains(constant.TrustedCloneImages, c.Image)
+	return c.IsPlugin() && utils.MatchImage(c.Image, constant.TrustedCloneImages...)
 }

@@ -20,6 +20,7 @@ var PrivilegedPlugins = []string{
 	"plugins/gcr",
 	"plugins/ecr",
 	"woodpeckerci/plugin-docker-buildx",
+	"codeberg.org/woodpecker-plugins/docker-buildx",
 }
 
 // DefaultConfigOrder represent the priority in witch woodpecker search for a pipeline config by default
@@ -32,9 +33,10 @@ var DefaultConfigOrder = [...]string{
 
 const (
 	// DefaultCloneImage can be changed by 'WOODPECKER_DEFAULT_CLONE_IMAGE' at runtime
-	DefaultCloneImage = "docker.io/woodpeckerci/plugin-git:2.0.3"
+	DefaultCloneImage = "docker.io/woodpeckerci/plugin-git:2.1.1"
 )
 
 var TrustedCloneImages = []string{
 	DefaultCloneImage,
+	"quay.io/woodpeckerci/plugin-git",
 }

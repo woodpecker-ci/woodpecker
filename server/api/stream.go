@@ -124,12 +124,11 @@ func EventStreamSSE(c *gin.Context) {
 // LogStream
 //
 //	@Summary	Log stream
-//	@Router		/logs/{owner}/{name}/{pipeline}/{stepID} [get]
+//	@Router		/logs/{repo_id}/{pipeline}/{stepID} [get]
 //	@Produce	plain
 //	@Success	200
 //	@Tags			Pipeline logs
-//	@Param		owner			path	string	true	"the repository owner's name"
-//	@Param		name			path	string	true	"the repository name"
+//	@Param		repo_id			path	int		true	"the repository id"
 //	@Param		pipeline	path	int		true		"the number of the pipeline"
 //	@Param		stepID		path	int		true		"the step id"
 func LogStreamSSE(c *gin.Context) {
@@ -187,8 +186,8 @@ func LogStreamSSE(c *gin.Context) {
 	}
 
 	if step.State != model.StatusRunning {
-		log.Debug().Msg("stream not found.")
-		logWriteStringErr(io.WriteString(rw, "event: error\ndata: stream not found\n\n"))
+		log.Debug().Msg("step not running (anymore).")
+		logWriteStringErr(io.WriteString(rw, "event: error\ndata: step not running (anymore)\n\n"))
 		return
 	}
 

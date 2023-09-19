@@ -1,7 +1,16 @@
 {
   "admin": {
     "settings": {
+      "queue": {
+        "agent": "agente",
+        "stats": {
+          "completed_count": "Task completo",
+          "worker_count": "Liberi"
+        },
+        "waiting_for": "in attesa"
+      },
       "users": {
+        "add": "Aggiungi utente",
         "admin": {
           "admin": "Amministatore",
           "placeholder": "L'utente è un amministratore"
@@ -11,8 +20,9 @@
         "delete_user": "Cancella utente",
         "deleted": "Utente cancellato",
         "edit_user": "Modifica utente",
-        "none": "Non ci sono ancora utenti",
-        "saved": "Utente salvato"
+        "none": "Non ci sono ancora utenti.",
+        "saved": "Utente salvato",
+        "show": "Mostra utenti"
       }
     }
   },
@@ -37,11 +47,6 @@
     "activity": "Attività",
     "add": "Aggiungi repository",
     "branches": "Branch",
-    "build": {
-      "actions": {
-        "cancel": "Annulla"
-      }
-    },
     "deploy_pipeline": {
       "enter_target": "Ambiente di deploy destinazione",
       "title": "Azione l'evento di deploy per la pipeline corrente #{pipelineId}",
@@ -141,16 +146,8 @@
   "url": "URL",
   "user": {
     "access_denied": "Non hai il permesso di entrare",
-    "api_usage": "Esempio di utilizzo API",
-    "cli_usage": "Esempio di utilizzo CLI",
-    "dl_cli": "Scarica CLI",
     "internal_error": "Errore interno",
-    "oauth_error": "Errore durante l'autenticazione con il provider Oauth",
-    "reset_token": "Reimposta token",
-    "settings": "Configurazione Utente",
-    "shell_setup": "Configurazione shell",
-    "shell_setup_before": "prima confogura la shell",
-    "token": "Il tuo Token Personale"
+    "oauth_error": "Errore durante l'autenticazione con il provider Oauth"
   },
   "username": "Nome utente",
   "welcome": "Benvenuti in Woodpecker"

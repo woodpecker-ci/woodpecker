@@ -1,3 +1,17 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package types
 
 import (
@@ -13,8 +27,6 @@ import (
 
 var containerYaml = []byte(`
 image: golang:latest
-cap_add: [ ALL ]
-cap_drop: [ NET_ADMIN, SYS_ADMIN ]
 commands:
   - go build
   - go test
@@ -33,7 +45,6 @@ environment:
 extra_hosts:
  - somehost:162.242.195.82
  - otherhost:50.31.209.229
-isolation: hyperv
 name: my-build-container
 network_mode: bridge
 networks:
@@ -44,7 +55,6 @@ privileged: true
 shm_size: 1kb
 mem_limit: 1kb
 memswap_limit: 1kb
-mem_swappiness: 1kb
 volumes:
   - /var/lib/mysql
   - /opt/data:/var/lib/mysql
@@ -52,7 +62,7 @@ volumes:
 tmpfs:
   - /var/lib/test
 when:
-  - branch: master
+  - branch: main
   - event: cron
     cron: job1
 settings:
@@ -62,25 +72,21 @@ settings:
 
 func TestUnmarshalContainer(t *testing.T) {
 	want := Container{
-		CapAdd:        []string{"ALL"},
-		CapDrop:       []string{"NET_ADMIN", "SYS_ADMIN"},
-		Commands:      base.StringOrSlice{"go build", "go test"},
-		CPUQuota:      base.StringOrInt(11),
-		CPUSet:        "1,2",
-		CPUShares:     base.StringOrInt(99),
-		Detached:      true,
-		Devices:       []string{"/dev/ttyUSB0:/dev/ttyUSB0"},
-		Directory:     "example/",
-		DNS:           base.StringOrSlice{"8.8.8.8"},
-		DNSSearch:     base.StringOrSlice{"example.com"},
-		Environment:   base.SliceOrMap{"RACK_ENV": "development", "SHOW": "true"},
-		ExtraHosts:    []string{"somehost:162.242.195.82", "otherhost:50.31.209.229"},
-		Image:         "golang:latest",
-		Isolation:     "hyperv",
-		MemLimit:      base.MemStringOrInt(1024),
-		MemSwapLimit:  base.MemStringOrInt(1024),
-		MemSwappiness: base.MemStringOrInt(1024),
-		Name:          "my-build-container",
+		Commands:     base.StringOrSlice{"go build", "go test"},
+		CPUQuota:     base.StringOrInt(11),
+		CPUSet:       "1,2",
+		CPUShares:    base.StringOrInt(99),
+		Detached:     true,
+		Devices:      []string{"/dev/ttyUSB0:/dev/ttyUSB0"},
+		Directory:    "example/",
+		DNS:          base.StringOrSlice{"8.8.8.8"},
+		DNSSearch:    base.StringOrSlice{"example.com"},
+		Environment:  base.SliceOrMap{"RACK_ENV": "development", "SHOW": "true"},
+		ExtraHosts:   []string{"somehost:162.242.195.82", "otherhost:50.31.209.229"},
+		Image:        "golang:latest",
+		MemLimit:     base.MemStringOrInt(1024),
+		MemSwapLimit: base.MemStringOrInt(1024),
+		Name:         "my-build-container",
 		Networks: Networks{
 			Networks: []*Network{
 				{Name: "some-network"},
@@ -103,7 +109,7 @@ func TestUnmarshalContainer(t *testing.T) {
 			Constraints: []constraint.Constraint{
 				{
 					Branch: constraint.List{
-						Include: []string{"master"},
+						Include: []string{"main"},
 					},
 				},
 				{

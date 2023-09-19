@@ -47,7 +47,7 @@ These guidelines aim to have consistent wording in the swagger doc:
 * `@Param Authorization` is almost always present, there are just a few un-protected endpoints
 
 There are many examples in the server/api package, which you can use a blueprint.
-More enhanced information you can find here https://github.com/swaggo/swag/blob/master/README.md#declarative-comments-format
+More enhanced information you can find here https://github.com/swaggo/swag/blob/main/README.md#declarative-comments-format
 
 ### Manual code generation
 

@@ -2,8 +2,8 @@
   <input
     v-if="lines === 1"
     v-model="innerValue"
-    class="w-full border border-gray-200 py-1 px-2 rounded-md bg-white dark:bg-dark-gray-700 dark:border-dark-400 focus-visible:outline-none focus-visible:border-gray-600 dark:focus-visible:border-gray-400"
-    :class="{ 'bg-gray-200 dark:bg-gray-600': disabled }"
+    class="w-full border border-wp-control-neutral-200 py-1 px-2 rounded-md bg-wp-background-100 focus-visible:outline-none focus-visible:border-wp-control-neutral-300"
+    :class="{ 'opacity-50': disabled }"
     :disabled="disabled"
     :type="type"
     :placeholder="placeholder"
@@ -11,63 +11,42 @@
   <textarea
     v-else
     v-model="innerValue"
-    class="w-full border border-gray-200 py-1 px-2 rounded-md bg-white dark:bg-dark-gray-700 dark:border-dark-400 focus-visible:outline-none focus-visible:border-gray-600 dark:focus-visible:border-gray-400"
-    :class="{ 'bg-gray-200 dark:bg-gray-600': disabled }"
+    class="w-full border border-wp-control-neutral-200 py-1 px-2 rounded-md bg-wp-background-100 focus-visible:outline-none focus-visible:border-wp-control-neutral-300"
+    :class="{ 'opacity-50': disabled }"
     :disabled="disabled"
     :placeholder="placeholder"
     :rows="lines"
   />
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, toRef } from 'vue';
+<script lang="ts" setup>
+import { computed, toRef } from 'vue';
 
-export default defineComponent({
-  name: 'TextField',
-
-  props: {
-    modelValue: {
-      type: String,
-      default: '',
-    },
-
-    placeholder: {
-      type: String,
-      default: '',
-    },
-
-    type: {
-      type: String,
-      default: 'text',
-    },
-
-    lines: {
-      type: Number,
-      default: 1,
-    },
-
-    disabled: {
-      type: Boolean,
-    },
+const props = withDefaults(
+  defineProps<{
+    modelValue: string;
+    placeholder: string;
+    type: string;
+    lines: number;
+    disabled?: boolean;
+  }>(),
+  {
+    modelValue: '',
+    placeholder: '',
+    type: 'text',
+    lines: 1,
   },
+);
 
-  emits: {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    'update:modelValue': (_value: string): boolean => true,
-  },
+const emit = defineEmits<{
+  (event: 'update:modelValue', value: string): void;
+}>();
 
-  setup: (props, ctx) => {
-    const modelValue = toRef(props, 'modelValue');
-    const innerValue = computed({
-      get: () => modelValue.value,
-      set: (value) => {
-        ctx.emit('update:modelValue', value);
-      },
-    });
-
-    return {
-      innerValue,
-    };
+const modelValue = toRef(props, 'modelValue');
+const innerValue = computed({
+  get: () => modelValue.value,
+  set: (value) => {
+    emit('update:modelValue', value);
   },
 });
 </script>

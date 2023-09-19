@@ -6,7 +6,8 @@ import { useElapsedTime } from '~/compositions/useElapsedTime';
 import { Pipeline } from '~/lib/api/types';
 import { prettyDuration } from '~/utils/duration';
 import { convertEmojis } from '~/utils/emoji';
-import timeAgo from '~/utils/timeAgo';
+
+import useTimeAgo from './useTimeAgo';
 
 const { toLocaleString } = useDate();
 
@@ -27,6 +28,7 @@ export default (pipeline: Ref<Pipeline | undefined>) => {
   const { time: sinceElapsed } = useElapsedTime(sinceUnderOneHour, sinceRaw);
 
   const i18n = useI18n();
+  const timeAgo = useTimeAgo();
   const since = computed(() => {
     if (sinceRaw.value === 0) {
       return i18n.t('time.not_started');
@@ -82,6 +84,8 @@ export default (pipeline: Ref<Pipeline | undefined>) => {
     return convertEmojis(pipeline.value.message);
   });
 
+  const title = computed(() => message.value.split('\n')[0]);
+
   const prettyRef = computed(() => {
     if (pipeline.value?.event === 'push') {
       return pipeline.value.branch;
@@ -116,5 +120,5 @@ export default (pipeline: Ref<Pipeline | undefined>) => {
     return toLocaleString(new Date(start * 1000));
   });
 
-  return { since, duration, message, prettyRef, created };
+  return { since, duration, message, title, prettyRef, created };
 };

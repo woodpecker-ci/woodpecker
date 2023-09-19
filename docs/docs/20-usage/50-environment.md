@@ -1,9 +1,10 @@
 # Environment variables
 
-Woodpecker provides the ability to pass environment variables to individual pipeline steps. Example pipeline step with custom environment variables:
+Woodpecker provides the ability to pass environment variables to individual pipeline steps. Note that these can't overwrite any existing, built-in variables. Example pipeline step with custom environment variables:
 
 ```diff
-pipeline:
+version: 1
+steps:
   build:
     image: golang
 +   environment:
@@ -18,7 +19,8 @@ pipeline:
 Please note that the environment section is not able to expand environment variables. If you need to expand variables they should be exported in the commands section.
 
 ```diff
-pipeline:
+version: 1
+steps:
   build:
     image: golang
 -   environment:
@@ -32,7 +34,8 @@ pipeline:
 > Please be warned that `${variable}` expressions are subject to pre-processing. If you do not want the pre-processor to evaluate your expression it must be escaped:
 
 ```diff
-pipeline:
+version: 1
+steps:
   build:
     image: golang
     commands:
@@ -48,7 +51,7 @@ This is the reference list of all environment variables available to your pipeli
 
 | NAME                             | Description                                                                                  |
 | -------------------------------- | -------------------------------------------------------------------------------------------- |
-| `CI=woodpecker`                  | environment is woodpecker                                                                    |
+| `CI`                             | CI environment name (value: `woodpecker`)                                                          |
 |                                  | **Repository**                                                                               |
 | `CI_REPO`                        | repository full name `<owner>/<name>`                                                        |
 | `CI_REPO_OWNER`                  | repository owner                                                                             |
@@ -57,7 +60,8 @@ This is the reference list of all environment variables available to your pipeli
 | `CI_REPO_SCM`                    | repository SCM (git)                                                                         |
 | `CI_REPO_URL`                    | repository web URL                                                                           |
 | `CI_REPO_CLONE_URL`              | repository clone URL                                                                         |
-| `CI_REPO_DEFAULT_BRANCH`         | repository default branch (master)                                                           |
+| `CI_REPO_CLONE_SSH_URL`          | repository SSH clone URL                                                                     |
+| `CI_REPO_DEFAULT_BRANCH`         | repository default branch (main)                                                             |
 | `CI_REPO_PRIVATE`                | repository is private                                                                        |
 | `CI_REPO_TRUSTED`                | repository is trusted                                                                        |
 |                                  | **Current Commit**                                                                           |
@@ -65,8 +69,8 @@ This is the reference list of all environment variables available to your pipeli
 | `CI_COMMIT_REF`                  | commit ref                                                                                   |
 | `CI_COMMIT_REFSPEC`              | commit ref spec                                                                              |
 | `CI_COMMIT_BRANCH`               | commit branch (equals target branch for pull requests)                                       |
-| `CI_COMMIT_SOURCE_BRANCH`        | commit source branch                                                                         |
-| `CI_COMMIT_TARGET_BRANCH`        | commit target branch                                                                         |
+| `CI_COMMIT_SOURCE_BRANCH`        | commit source branch (empty if event is not `pull_request`)                                  |
+| `CI_COMMIT_TARGET_BRANCH`        | commit target branch (empty if event is not `pull_request`)                                  |
 | `CI_COMMIT_TAG`                  | commit tag name (empty if event is not `tag`)                                                |
 | `CI_COMMIT_PULL_REQUEST`         | commit pull request number (empty if event is not `pull_request`)                            |
 | `CI_COMMIT_PULL_REQUEST_LABELS`  | labels assigned to pull request (empty if event is not `pull_request`)                       |
@@ -146,7 +150,8 @@ services:
 These can be used, for example, to manage the image tag used by multiple projects.
 
 ```diff
-pipeline:
+version: 1
+steps:
   build:
 -   image: golang:1.18
 +   image: golang:${GOLANG_VERSION}
@@ -164,7 +169,8 @@ Woodpecker provides the ability to substitute environment variables at runtime. 
 Example commit substitution:
 
 ```diff
-pipeline:
+version: 1
+steps:
   docker:
     image: plugins/docker
     settings:
@@ -174,7 +180,8 @@ pipeline:
 Example tag substitution:
 
 ```diff
-pipeline:
+version: 1
+steps:
   docker:
     image: plugins/docker
     settings:
@@ -202,7 +209,8 @@ Woodpecker also emulates bash string operations. This gives us the ability to ma
 Example variable substitution with substring:
 
 ```diff
-pipeline:
+version: 1
+steps:
   docker:
     image: plugins/docker
     settings:
@@ -212,7 +220,8 @@ pipeline:
 Example variable substitution strips `v` prefix from `v.1.0.0`:
 
 ```diff
-pipeline:
+version: 1
+steps:
   docker:
     image: plugins/docker
     settings:

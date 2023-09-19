@@ -1,3 +1,17 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package compiler
 
 import (
@@ -8,14 +22,16 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
+	"golang.org/x/exp/maps"
 
 	backend_types "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/compiler/settings"
 	yaml_types "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/utils"
 )
 
-func (c *Compiler) createProcess(name string, container *yaml_types.Container, section string) *backend_types.Step {
+func (c *Compiler) createProcess(name string, container *yaml_types.Container, stepType backend_types.StepType) *backend_types.Step {
 	var (
 		uuid = uuid.New()
 
@@ -52,22 +68,13 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 
 	// append default environment variables
 	environment := map[string]string{}
-	for k, v := range container.Environment {
-		environment[k] = v
-	}
-	for k, v := range c.env {
-		switch v {
-		case "", "0", "false":
-			continue
-		default:
-			environment[k] = v
-		}
-	}
+	maps.Copy(environment, container.Environment)
+	maps.Copy(environment, c.env)
 
 	environment["CI_WORKSPACE"] = path.Join(c.base, c.path)
 	environment["CI_STEP_NAME"] = name
 
-	if section == "services" || container.Detached {
+	if stepType == backend_types.StepTypeService || container.Detached {
 		detached = true
 	}
 
@@ -88,13 +95,13 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		}
 	}
 
-	if matchImage(container.Image, c.escalated...) && container.IsPlugin() {
+	if utils.MatchImage(container.Image, c.escalated...) && container.IsPlugin() {
 		privileged = true
 	}
 
 	authConfig := backend_types.Auth{}
 	for _, registry := range c.registries {
-		if matchHostname(container.Image, registry.Hostname) {
+		if utils.MatchHostname(container.Image, registry.Hostname) {
 			authConfig.Username = registry.Username
 			authConfig.Password = registry.Password
 			authConfig.Email = registry.Email
@@ -109,6 +116,17 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		}
 	}
 
+	var tolerations []backend_types.Toleration
+	for _, t := range container.BackendOptions.Kubernetes.Tolerations {
+		tolerations = append(tolerations, backend_types.Toleration{
+			Key:               t.Key,
+			Operator:          backend_types.TolerationOperator(t.Operator),
+			Value:             t.Value,
+			Effect:            backend_types.TaintEffect(t.Effect),
+			TolerationSeconds: t.TolerationSeconds,
+		})
+	}
+
 	// Kubernetes advanced settings
 	backendOptions := backend_types.BackendOptions{
 		Kubernetes: backend_types.KubernetesBackendOptions{
@@ -116,6 +134,9 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 				Limits:   container.BackendOptions.Kubernetes.Resources.Limits,
 				Requests: container.BackendOptions.Kubernetes.Resources.Requests,
 			},
+			ServiceAccountName: container.BackendOptions.Kubernetes.ServiceAccountName,
+			NodeSelector:       container.BackendOptions.Kubernetes.NodeSelector,
+			Tolerations:        tolerations,
 		},
 	}
 
@@ -157,6 +178,7 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 	return &backend_types.Step{
 		Name:           name,
 		UUID:           uuid.String(),
+		Type:           stepType,
 		Alias:          container.Name,
 		Image:          container.Image,
 		Pull:           container.Pull,

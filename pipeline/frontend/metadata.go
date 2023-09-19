@@ -37,7 +37,7 @@ func EnvVarSubst(yaml string, environ map[string]string) (string, error) {
 }
 
 // MetadataFromStruct return the metadata from a pipeline will run with.
-func MetadataFromStruct(forge metadata.ServerForge, repo *model.Repo, pipeline, last *model.Pipeline, workflow *model.Step, link string) metadata.Metadata {
+func MetadataFromStruct(forge metadata.ServerForge, repo *model.Repo, pipeline, last *model.Pipeline, workflow *model.Workflow, link string) metadata.Metadata {
 	host := link
 	uri, err := url.Parse(link)
 	if err == nil {
@@ -55,14 +55,15 @@ func MetadataFromStruct(forge metadata.ServerForge, repo *model.Repo, pipeline, 
 	fRepo := metadata.Repo{}
 	if repo != nil {
 		fRepo = metadata.Repo{
-			Name:     repo.Name,
-			Owner:    repo.Owner,
-			RemoteID: fmt.Sprint(repo.ForgeRemoteID),
-			Link:     repo.Link,
-			CloneURL: repo.Clone,
-			Private:  repo.IsSCMPrivate,
-			Branch:   repo.Branch,
-			Trusted:  repo.IsTrusted,
+			Name:        repo.Name,
+			Owner:       repo.Owner,
+			RemoteID:    fmt.Sprint(repo.ForgeRemoteID),
+			Link:        repo.Link,
+			CloneURL:    repo.Clone,
+			CloneSSHURL: repo.CloneSSH,
+			Private:     repo.IsSCMPrivate,
+			Branch:      repo.Branch,
+			Trusted:     repo.IsTrusted,
 		}
 
 		if idx := strings.LastIndex(repo.FullName, "/"); idx != -1 {

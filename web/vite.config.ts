@@ -1,7 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite';
 import vue from '@vitejs/plugin-vue';
-import { readdirSync } from 'fs';
+import { copyFile, existsSync, mkdirSync, readdirSync } from 'fs';
 import path from 'path';
 import IconsResolver from 'unplugin-icons/resolver';
 import Icons from 'unplugin-icons/vite';
@@ -16,8 +16,9 @@ function woodpeckerInfoPlugin() {
     name: 'woodpecker-info',
     configureServer() {
       const info =
-        'Please add `WOODPECKER_DEV_WWW_PROXY=http://localhost:8010` to your `.env` file.\n' +
-        'After starting the woodpecker server as well you should now be able to access the UI at http://localhost:8000/';
+        '1) Please add `WOODPECKER_DEV_WWW_PROXY=http://localhost:8010` to your `.env` file.\n' +
+        'After starting the woodpecker server as well you should now be able to access the UI at http://localhost:8000/\n\n' +
+        '2) If you want to run the vite dev server (`pnpm start`) within a container please set `VITE_DEV_SERVER_HOST=0.0.0.0`.';
       // eslint-disable-next-line no-console
       console.log(info);
     },
@@ -36,6 +37,39 @@ export default defineConfig({
       const resolvedVirtualModuleId = `\0${virtualModuleId}`;
 
       const filenames = readdirSync('src/assets/locales/').map((filename) => filename.replace('.json', ''));
+
+      if (!existsSync('src/assets/timeAgoLocales')) {
+        mkdirSync('src/assets/timeAgoLocales');
+      }
+
+      filenames.forEach((name) => {
+        // copy timeAgo language
+        if (name === 'zh-Hans') {
+          // zh-Hans is called zh in javascript-time-ago, so we need to rename this
+          copyFile(
+            'node_modules/javascript-time-ago/locale/zh.json.js',
+            'src/assets/timeAgoLocales/zh-Hans.js',
+            // eslint-disable-next-line promise/prefer-await-to-callbacks
+            (err) => {
+              if (err) {
+                throw err;
+              }
+            },
+          );
+        } else if (name !== 'en') {
+          // English is always directly loaded (compiled by Vite) and thus not copied
+          copyFile(
+            `node_modules/javascript-time-ago/locale/${name}.json.js`,
+            `src/assets/timeAgoLocales/${name}.js`,
+            // eslint-disable-next-line promise/prefer-await-to-callbacks
+            (err) => {
+              if (err) {
+                throw err;
+              }
+            },
+          );
+        }
+      });
 
       return {
         name: 'vue-i18n-supported-locales',
@@ -71,6 +105,7 @@ export default defineConfig({
   },
   logLevel: 'warn',
   server: {
+    host: process.env.VITE_DEV_SERVER_HOST || '127.0.0.1',
     port: 8010,
   },
 });

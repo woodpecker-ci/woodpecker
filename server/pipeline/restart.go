@@ -30,7 +30,7 @@ import (
 )
 
 // Restart a pipeline by creating a new one out of the old and start it
-func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipeline, user *model.User, repo *model.Repo, envs map[string]string) (*model.Pipeline, error) {
+func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipeline, user *model.User, repo *model.Repo, envs map[string]string, netrc *model.Netrc) (*model.Pipeline, error) {
 	switch lastPipeline.Status {
 	case model.StatusDeclined,
 		model.StatusBlocked:
@@ -58,7 +58,7 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 			currentFileMeta[i] = &forge_types.FileMeta{Name: cfg.Name, Data: cfg.Data}
 		}
 
-		newConfig, useOld, err := server.Config.Services.ConfigService.FetchConfig(ctx, repo, lastPipeline, currentFileMeta)
+		newConfig, useOld, err := server.Config.Services.ConfigService.FetchConfig(ctx, repo, lastPipeline, currentFileMeta, netrc)
 		if err != nil {
 			return nil, &ErrBadRequest{
 				Msg: fmt.Sprintf("On fetching external pipeline config: %s", err),

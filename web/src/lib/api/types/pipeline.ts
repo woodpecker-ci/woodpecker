@@ -83,7 +83,7 @@ export type Pipeline = {
 
   // The steps associated with this pipeline.
   // A pipeline will have multiple steps if a matrix pipeline was used or if a rebuild was requested.
-  steps?: PipelineStep[];
+  workflows?: PipelineWorkflow[];
 
   changed_files?: string[];
 };
@@ -100,22 +100,33 @@ export type PipelineStatus =
   | 'started'
   | 'success';
 
+export type PipelineWorkflow = {
+  id: number;
+  pipeline_id: number;
+  pid: number;
+  name: string;
+  state: PipelineStatus;
+  environ?: Record<string, string>;
+  start_time?: number;
+  end_time?: number;
+  agent_id?: number;
+  error?: string;
+  children: PipelineStep[];
+};
+
 export type PipelineStep = {
   id: number;
   uuid: string;
   pipeline_id: number;
   pid: number;
   ppid: number;
-  pgid: number;
   name: string;
   state: PipelineStatus;
   exit_code: number;
-  environ?: Record<string, string>;
   start_time?: number;
   end_time?: number;
-  machine?: string;
   error?: string;
-  children?: PipelineStep[];
+  type?: StepType;
 };
 
 export type PipelineLog = {
@@ -128,7 +139,13 @@ export type PipelineLog = {
 };
 
 export type PipelineFeed = Pipeline & {
-  owner: string;
-  name: string;
-  full_name: string;
+  repo_id: number;
 };
+
+export enum StepType {
+  Clone = 1,
+  Service,
+  Plugin,
+  Commands,
+  Cache,
+}

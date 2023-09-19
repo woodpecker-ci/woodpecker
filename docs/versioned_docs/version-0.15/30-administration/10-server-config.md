@@ -4,7 +4,7 @@
 
 Registration is closed by default. While disabled an administrator needs to add new users manually (exp. `woodpecker-cli user add`).
 
-If registration is open every user with an account at the configured [SCM](docs/administration/vcs/overview) can login to Woodpecker.
+If registration is open every user with an account at the configured [SCM](./11-vcs/10-overview.md) can login to Woodpecker.
 This example enables open registration for users that are members of approved organizations:
 
 ```diff

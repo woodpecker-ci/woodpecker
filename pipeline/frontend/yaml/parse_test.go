@@ -1,9 +1,24 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package yaml
 
 import (
 	"testing"
 
 	"github.com/franela/goblin"
+	"github.com/stretchr/testify/assert"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
 	yaml_base_types "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types/base"
@@ -83,7 +98,7 @@ func TestParse(t *testing.T) {
 					Curr: metadata.Pipeline{
 						Event: "tester",
 					},
-				}, false)
+				}, false, nil)
 				g.Assert(match).Equal(true)
 				g.Assert(err).IsNil()
 			})
@@ -93,7 +108,7 @@ func TestParse(t *testing.T) {
 					Curr: metadata.Pipeline{
 						Event: "tester2",
 					},
-				}, false)
+				}, false, nil)
 				g.Assert(match).Equal(true)
 				g.Assert(err).IsNil()
 			})
@@ -105,7 +120,7 @@ func TestParse(t *testing.T) {
 							Branch: "tester",
 						},
 					},
-				}, true)
+				}, true, nil)
 				g.Assert(match).Equal(true)
 				g.Assert(err).IsNil()
 			})
@@ -115,7 +130,7 @@ func TestParse(t *testing.T) {
 					Curr: metadata.Pipeline{
 						Event: "push",
 					},
-				}, false)
+				}, false, nil)
 				g.Assert(match).Equal(false)
 				g.Assert(err).IsNil()
 			})
@@ -123,7 +138,44 @@ func TestParse(t *testing.T) {
 	})
 }
 
+func TestParseLegacy(t *testing.T) {
+	sampleYamlPipelineLegacy := `
+platform: linux/amd64
+
+steps:
+  say hello:
+    image: bash
+    commands: echo hello
+`
+
+	sampleYamlPipelineLegacyIgnore := `
+platform: windows/amd64
+labels:
+  platform: linux/amd64
+
+steps:
+  say hello:
+    image: bash
+    commands: echo hello
+`
+
+	workflow1, err := ParseString(sampleYamlPipelineLegacy)
+	if !assert.NoError(t, err) {
+		t.Fail()
+	}
+
+	workflow2, err := ParseString(sampleYamlPipelineLegacyIgnore)
+	if !assert.NoError(t, err) {
+		t.Fail()
+	}
+
+	assert.EqualValues(t, workflow1, workflow2)
+	assert.Len(t, workflow1.Steps.ContainerList, 1)
+	assert.EqualValues(t, "say hello", workflow1.Steps.ContainerList[0].Name)
+}
+
 var sampleYaml = `
+version: 1
 image: hello-world
 when:
   - event:
@@ -137,7 +189,7 @@ build:
 workspace:
   path: src/github.com/octocat/hello-world
   base: /go
-pipeline:
+steps:
   test:
     image: golang
     commands:
@@ -178,7 +230,7 @@ runs_on:
 var simpleYamlAnchors = `
 vars:
   image: &image plugins/slack
-pipeline:
+steps:
   notify_success:
     image: *image
 `
@@ -186,7 +238,7 @@ pipeline:
 var sampleVarYaml = `
 _slack: &SLACK
   image: plugins/slack
-pipeline:
+steps:
   notify_fail: *SLACK
   notify_success:
     << : *SLACK

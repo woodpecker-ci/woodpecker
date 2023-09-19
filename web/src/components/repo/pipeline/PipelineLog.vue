@@ -1,64 +1,96 @@
 <template>
   <div v-if="pipeline" class="flex flex-col pt-10 md:pt-0">
     <div
-      class="fixed top-0 left-0 w-full md:hidden flex px-4 py-2 bg-gray-600 dark:bg-dark-gray-800 text-gray-50"
-      @click="$emit('update:step-id', null)"
-    >
-      <span>{{ step?.name }}</span>
-      <Icon name="close" class="ml-auto" />
-    </div>
-
-    <div
-      class="flex flex-grow flex-col bg-white shadow dark:bg-dark-gray-700 md:m-2 md:mt-0 md:rounded-md overflow-hidden"
+      class="flex flex-grow flex-col code-box shadow !p-0 !rounded-none md:m-4 md:mt-0 !md:rounded-md overflow-hidden"
       @mouseover="showActions = true"
       @mouseleave="showActions = false"
     >
-      <div v-show="showActions" class="absolute top-0 right-0 z-40 mt-2 mr-4 hidden md:flex">
-        <Button
-          v-if="step?.end_time !== undefined"
-          :is-loading="downloadInProgress"
-          :title="$t('repo.pipeline.actions.log_download')"
-          start-icon="download"
-          @click="download"
-        />
-        <Button
-          v-if="step?.end_time === undefined"
-          :title="
-            autoScroll ? $t('repo.pipeline.actions.log_auto_scroll_off') : $t('repo.pipeline.actions.log_auto_scroll')
-          "
-          :start-icon="autoScroll ? 'auto-scroll' : 'auto-scroll-off'"
-          @click="autoScroll = !autoScroll"
-        />
+      <div class="<md:fixed <md:top-0 <md:left-0 flex flex-row items-center w-full bg-wp-code-100 px-4 py-2">
+        <span class="text-base font-bold text-wp-code-text-alt-100">
+          <span class="<md:hidden">{{ $t('repo.pipeline.log_title') }}</span>
+          <span class="md:hidden">{{ step?.name }}</span>
+        </span>
+
+        <div class="flex flex-row items-center ml-auto gap-x-2">
+          <IconButton
+            v-if="step?.end_time !== undefined"
+            :is-loading="downloadInProgress"
+            :title="$t('repo.pipeline.actions.log_download')"
+            class="!hover:bg-white !hover:bg-opacity-10"
+            icon="download"
+            @click="download"
+          />
+          <IconButton
+            v-if="step?.end_time === undefined"
+            :title="
+              autoScroll ? $t('repo.pipeline.actions.log_auto_scroll_off') : $t('repo.pipeline.actions.log_auto_scroll')
+            "
+            class="!hover:bg-white !hover:bg-opacity-10"
+            :icon="autoScroll ? 'auto-scroll' : 'auto-scroll-off'"
+            @click="autoScroll = !autoScroll"
+          />
+          <IconButton
+            class="!hover:bg-white !hover:bg-opacity-10 !md:hidden"
+            icon="close"
+            @click="$emit('update:step-id', null)"
+          />
+        </div>
       </div>
 
       <div
         v-show="hasLogs && loadedLogs"
         ref="consoleElement"
-        class="w-full max-w-full grid grid-cols-[min-content,1fr,min-content] auto-rows-min flex-grow p-2 gap-x-2 overflow-x-hidden overflow-y-auto"
+        class="w-full max-w-full grid grid-cols-[min-content,minmax(0,1fr),min-content] p-4 auto-rows-min flex-grow overflow-x-hidden overflow-y-auto text-xs md:text-sm"
       >
-        <div v-for="line in log" :id="`L${line.index}`" :key="line.index" class="contents font-mono">
-          <span class="text-gray-500 whitespace-nowrap select-none text-right">{{ line.index + 1 }}</span>
-          <!-- eslint-disable-next-line vue/no-v-html -->
-          <span class="align-top text-color whitespace-pre-wrap break-words" v-html="line.text" />
-          <span class="text-gray-500 whitespace-nowrap select-none text-right">{{ formatTime(line.time) }}</span>
+        <div v-for="line in log" :key="line.index" class="contents font-mono">
+          <a
+            :id="`L${line.number}`"
+            :href="`#L${line.number}`"
+            class="text-wp-code-text-alt-100 whitespace-nowrap select-none text-right pl-2 pr-6"
+            :class="{
+              'bg-opacity-40 dark:bg-opacity-50 bg-red-600 dark:bg-red-800': line.type === 'error',
+              'bg-opacity-40 dark:bg-opacity-50 bg-yellow-600 dark:bg-yellow-800': line.type === 'warning',
+              'bg-opacity-30 bg-blue-600': isSelected(line),
+              underline: isSelected(line),
+            }"
+            >{{ line.number }}</a
+          >
+          <!-- eslint-disable vue/no-v-html -->
+          <span
+            class="align-top whitespace-pre-wrap break-words"
+            :class="{
+              'bg-opacity-40 dark:bg-opacity-50 bg-10.168.64.121-600 dark:bg-red-800': line.type === 'error',
+              'bg-opacity-40 dark:bg-opacity-50 bg-yellow-600 dark:bg-yellow-800': line.type === 'warning',
+              'bg-opacity-30 bg-blue-600': isSelected(line),
+            }"
+            v-html="line.text"
+          />
+          <!-- eslint-enable vue/no-v-html -->
+          <span
+            class="text-wp-code-text-alt-100 whitespace-nowrap select-none text-right pr-1"
+            :class="{
+              'bg-opacity-40 dark:bg-opacity-50 bg-red-600 dark:bg-red-800': line.type === 'error',
+              'bg-opacity-40 dark:bg-opacity-50 bg-yellow-600 dark:bg-yellow-800': line.type === 'warning',
+              'bg-opacity-30 bg-blue-600': isSelected(line),
+            }"
+            >{{ formatTime(line.time) }}</span
+          >
         </div>
       </div>
 
-      <div class="m-auto text-xl text-color">
-        <span v-if="step?.error" class="text-red-400">{{ step.error }}</span>
-        <span v-else-if="step?.state === 'skipped'" class="text-red-400">{{
-          $t('repo.pipeline.actions.canceled')
-        }}</span>
+      <div class="m-auto text-xl text-wp-text-alt-100">
+        <span v-if="step?.error">{{ step.error }}</span>
+        <span v-else-if="step?.state === 'skipped'">{{ $t('repo.pipeline.actions.canceled') }}</span>
         <span v-else-if="!step?.start_time">{{ $t('repo.pipeline.step_not_started') }}</span>
         <div v-else-if="!loadedLogs">{{ $t('repo.pipeline.loading') }}</div>
       </div>
 
       <div
         v-if="step?.end_time !== undefined"
-        :class="step.exit_code == 0 ? 'dark:text-lime-400 text-lime-700' : 'dark:text-red-400 text-red-600'"
-        class="w-full bg-gray-200 dark:bg-dark-gray-800 text-md p-4"
+        class="flex items-center w-full bg-wp-code-100 text-md text-wp-code-text-alt-100 p-4 font-bold"
       >
-        {{ $t('repo.pipeline.exit_code', { exitCode: step.exit_code }) }}
+        <PipelineStatusIcon :status="step.state" class="!h-4 !w-4" />
+        <span class="px-2">{{ $t('repo.pipeline.exit_code', { exitCode: step.exit_code }) }}</span>
       </div>
     </div>
   </div>
@@ -68,13 +100,14 @@
 import '~/style/console.css';
 
 import { useStorage } from '@vueuse/core';
-import AnsiUp from 'ansi_up';
+import { AnsiUp } from 'ansi_up';
 import { debounce } from 'lodash';
 import { computed, inject, nextTick, onMounted, Ref, ref, toRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useRoute } from 'vue-router';
 
-import Button from '~/components/atomic/Button.vue';
-import Icon from '~/components/atomic/Icon.vue';
+import IconButton from '~/components/atomic/IconButton.vue';
+import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useNotifications from '~/compositions/useNotifications';
 import { Pipeline, Repo } from '~/lib/api/types';
@@ -82,8 +115,10 @@ import { findStep, isStepFinished, isStepRunning } from '~/utils/helpers';
 
 type LogLine = {
   index: number;
+  number: number;
   text: string;
   time?: number;
+  type: 'error' | 'warning' | null;
 };
 
 const props = defineProps<{
@@ -101,10 +136,11 @@ const pipeline = toRef(props, 'pipeline');
 const stepId = toRef(props, 'stepId');
 const repo = inject<Ref<Repo>>('repo');
 const apiClient = useApiClient();
+const route = useRoute();
 
 const loadedStepSlug = ref<string>();
 const stepSlug = computed(() => `${repo?.value.owner} - ${repo?.value.name} - ${pipeline.value.id} - ${stepId.value}`);
-const step = computed(() => pipeline.value && findStep(pipeline.value.steps || [], stepId.value));
+const step = computed(() => pipeline.value && findStep(pipeline.value.workflows || [], stepId.value));
 const stream = ref<EventSource>();
 const log = ref<LogLine[]>();
 const consoleElement = ref<Element>();
@@ -124,16 +160,33 @@ const logBuffer = ref<LogLine[]>([]);
 
 const maxLineCount = 500; // TODO: think about way to support lazy-loading more than last 300 logs (#776)
 
+function isSelected(line: LogLine): boolean {
+  return route.hash === `#L${line.number}`;
+}
+
 function formatTime(time?: number): string {
   return time === undefined ? '' : `${time}s`;
 }
 
-function writeLog(line: LogLine) {
+function writeLog(line: Partial<LogLine>) {
   logBuffer.value.push({
     index: line.index ?? 0,
-    text: ansiUp.value.ansi_to_html(line.text),
+    number: (line.index ?? 0) + 1,
+    text: ansiUp.value.ansi_to_html(line.text ?? ''),
     time: line.time ?? 0,
+    type: null, // TODO: implement way to detect errors and warnings
   });
+}
+
+// SOURCE: https://stackoverflow.com/questions/30106476/using-javascripts-atob-to-decode-base64-doesnt-properly-decode-utf-8-strings
+function b64DecodeUnicode(str: string) {
+  return decodeURIComponent(
+    window
+      .atob(str)
+      .split('')
+      .map((c) => `%${`00${c.charCodeAt(0).toString(16)}`.slice(-2)}`)
+      .join(''),
+  );
 }
 
 function scrollDown() {
@@ -178,7 +231,9 @@ const flushLogs = debounce((scroll: boolean) => {
 
   log.value = buffer;
 
-  if (scroll && autoScroll.value) {
+  if (route.hash.length > 0) {
+    nextTick(() => document.getElementById(route.hash.substring(1))?.scrollIntoView());
+  } else if (scroll && autoScroll.value) {
     scrollDown();
   }
 }, 500);
@@ -190,7 +245,7 @@ async function download() {
   let logs;
   try {
     downloadInProgress.value = true;
-    logs = await apiClient.getLogs(repo.value.owner, repo.value.name, pipeline.value.number, step.value.id);
+    logs = await apiClient.getLogs(repo.value.id, pipeline.value.number, step.value.id);
   } catch (e) {
     notifications.notifyError(e, i18n.t('repo.pipeline.log_download_error'));
     return;
@@ -198,7 +253,7 @@ async function download() {
     downloadInProgress.value = false;
   }
   const fileURL = window.URL.createObjectURL(
-    new Blob([logs.map((line) => atob(line.data)).join('')], {
+    new Blob([logs.map((line) => b64DecodeUnicode(line.data)).join('')], {
       type: 'text/plain',
     }),
   );
@@ -239,22 +294,16 @@ async function loadLogs() {
   }
 
   if (isStepFinished(step.value)) {
-    const logs = await apiClient.getLogs(repo.value.owner, repo.value.name, pipeline.value.number, step.value.id);
-    logs?.forEach((line) => writeLog({ index: line.line, text: atob(line.data), time: line.time }));
+    const logs = await apiClient.getLogs(repo.value.id, pipeline.value.number, step.value.id);
+    logs?.forEach((line) => writeLog({ index: line.line, text: b64DecodeUnicode(line.data), time: line.time }));
     flushLogs(false);
   }
 
   if (isStepRunning(step.value)) {
-    stream.value = apiClient.streamLogs(
-      repo.value.owner,
-      repo.value.name,
-      pipeline.value.number,
-      step.value.id,
-      (line) => {
-        writeLog({ index: line.line, text: atob(line.data), time: line.time });
-        flushLogs(true);
-      },
-    );
+    stream.value = apiClient.streamLogs(repo.value.id, pipeline.value.number, step.value.id, (line) => {
+      writeLog({ index: line.line, text: b64DecodeUnicode(line.data), time: line.time });
+      flushLogs(true);
+    });
   }
 }
 

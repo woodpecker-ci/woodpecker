@@ -66,7 +66,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		filtered, parseErr = checkIfFiltered(repo, pipeline, forgeYamlConfigs)
 		if parseErr == nil {
 			if filtered {
-				err := ErrFiltered{Msg: "branch does not match restrictions defined in yaml"}
+				err := ErrFiltered{Msg: "global when filter of all workflows do skip this pipeline"}
 				log.Debug().Str("repo", repo.FullName).Msgf("%v", err)
 				return nil, err
 			}
@@ -81,7 +81,6 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 
 	// update some pipeline fields
 	pipeline.RepoID = repo.ID
-	pipeline.Verified = true
 	pipeline.Status = model.StatusPending
 
 	if configFetchErr != nil {
@@ -96,12 +95,11 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		pipeline.Finished = pipeline.Started
 		pipeline.Status = model.StatusError
 		pipeline.Error = fmt.Sprintf("failed to parse pipeline: %s", parseErr.Error())
-	} else if repo.IsGated {
-		// TODO(336) extend gated feature with an allow/block List
-		pipeline.Status = model.StatusBlocked
+	} else {
+		setGatedState(repo, pipeline)
 	}
 
-	err = _store.CreatePipeline(pipeline, pipeline.Steps...)
+	err = _store.CreatePipeline(pipeline)
 	if err != nil {
 		msg := fmt.Sprintf("failure to save pipeline for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)

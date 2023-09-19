@@ -15,15 +15,16 @@
 package datastore
 
 import (
+	"xorm.io/builder"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 func (s storage) RegistryFind(repo *model.Repo, addr string) (*model.Registry, error) {
-	reg := &model.Registry{
-		RepoID:  repo.ID,
-		Address: addr,
-	}
-	return reg, wrapGet(s.engine.Get(reg))
+	reg := new(model.Registry)
+	return reg, wrapGet(s.engine.Where(
+		builder.Eq{"registry_repo_id": repo.ID, "registry_addr": addr},
+	).Get(reg))
 }
 
 func (s storage) RegistryList(repo *model.Repo, p *model.ListOptions) ([]*model.Registry, error) {
@@ -47,6 +48,5 @@ func (s storage) RegistryDelete(repo *model.Repo, addr string) error {
 	if err != nil {
 		return err
 	}
-	_, err = s.engine.ID(registry.ID).Delete(new(model.Registry))
-	return err
+	return wrapDelete(s.engine.ID(registry.ID).Delete(new(model.Registry)))
 }

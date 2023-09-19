@@ -35,6 +35,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
 
+	"github.com/woodpecker-ci/woodpecker/cmd/common"
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc/proto"
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/cron"
@@ -55,31 +56,12 @@ import (
 )
 
 func run(c *cli.Context) error {
-	if c.Bool("pretty") {
-		log.Logger = log.Output(
-			zerolog.ConsoleWriter{
-				Out:     os.Stderr,
-				NoColor: c.Bool("nocolor"),
-			},
-		)
-	}
+	common.SetupGlobalLogger(c)
 
-	// TODO: format output & options to switch to json aka. option to add channels to send logs to
-	zerolog.SetGlobalLevel(zerolog.InfoLevel)
-	if c.IsSet("log-level") {
-		logLevelFlag := c.String("log-level")
-		lvl, err := zerolog.ParseLevel(logLevelFlag)
-		if err != nil {
-			log.Fatal().Msgf("unknown logging level: %s", logLevelFlag)
-		}
-		zerolog.SetGlobalLevel(lvl)
-	}
-	if zerolog.GlobalLevel() <= zerolog.DebugLevel {
-		log.Logger = log.With().Caller().Logger()
-	} else {
+	// set gin mode based on log level
+	if zerolog.GlobalLevel() > zerolog.DebugLevel {
 		gin.SetMode(gin.ReleaseMode)
 	}
-	log.Log().Msgf("LogLevel = %s", zerolog.GlobalLevel().String())
 
 	if c.String("server-host") == "" {
 		log.Fatal().Msg("WOODPECKER_HOST is not properly configured")
@@ -336,11 +318,21 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 	server.Config.Pipeline.Limits.CPUShares = c.Int64("limit-cpu-shares")
 	server.Config.Pipeline.Limits.CPUSet = c.String("limit-cpu-set")
 
+	// backend options for pipeline compiler
+	server.Config.Pipeline.Proxy.No = c.String("backend-no-proxy")
+	server.Config.Pipeline.Proxy.HTTP = c.String("backend-http-proxy")
+	server.Config.Pipeline.Proxy.HTTPS = c.String("backend-https-proxy")
+
 	// server configuration
 	server.Config.Server.Cert = c.String("server-cert")
 	server.Config.Server.Key = c.String("server-key")
 	server.Config.Server.AgentToken = c.String("agent-secret")
 	server.Config.Server.Host = c.String("server-host")
+	if c.IsSet("server-webhook-host") {
+		server.Config.Server.WebhookHost = c.String("server-webhook-host")
+	} else {
+		server.Config.Server.WebhookHost = c.String("server-host")
+	}
 	if c.IsSet("server-dev-oauth-host") {
 		server.Config.Server.OAuthHost = c.String("server-dev-oauth-host")
 	} else {
@@ -352,10 +344,17 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 	server.Config.Server.StatusContext = c.String("status-context")
 	server.Config.Server.StatusContextFormat = c.String("status-context-format")
 	server.Config.Server.SessionExpires = c.Duration("session-expires")
-	server.Config.Server.RootURL = strings.TrimSuffix(c.String("root-url"), "/")
+	rootPath := strings.TrimSuffix(c.String("root-path"), "/")
+	if rootPath != "" && !strings.HasPrefix(rootPath, "/") {
+		rootPath = "/" + rootPath
+	}
+	server.Config.Server.RootPath = rootPath
+	server.Config.Server.CustomCSSFile = strings.TrimSpace(c.String("custom-css-file"))
+	server.Config.Server.CustomJsFile = strings.TrimSpace(c.String("custom-js-file"))
 	server.Config.Pipeline.Networks = c.StringSlice("network")
 	server.Config.Pipeline.Volumes = c.StringSlice("volume")
 	server.Config.Pipeline.Privileged = c.StringSlice("escalate")
+	server.Config.Server.EnableSwagger = c.Bool("enable-swagger")
 
 	// prometheus
 	server.Config.Prometheus.AuthToken = c.String("prometheus-auth-token")

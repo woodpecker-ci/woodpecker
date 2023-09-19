@@ -1,29 +1,34 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package compiler
 
 import (
 	"fmt"
 	"path"
-	"strings"
 
 	backend_types "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
 	yaml_types "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/utils"
 	"github.com/woodpecker-ci/woodpecker/shared/constant"
 )
 
-// TODO(bradrydzewski) compiler should handle user-defined volumes from YAML
-// TODO(bradrydzewski) compiler should handle user-defined networks from YAML
-
 const (
-	windowsPrefix = "windows/"
-
 	defaultCloneName = "clone"
 
-	networkDriverNAT    = "nat"
-	networkDriverBridge = "bridge"
-
 	nameServices = "services"
-	namePipeline = "pipeline"
 )
 
 // Registry represents registry credentials
@@ -43,7 +48,7 @@ type Secret struct {
 }
 
 func (s *Secret) Available(container *yaml_types.Container) bool {
-	return (len(s.Match) == 0 || matchImage(container.Image, s.Match...)) && (!s.PluginOnly || container.IsPlugin())
+	return (len(s.Match) == 0 || utils.MatchImage(container.Image, s.Match...)) && (!s.PluginOnly || container.IsPlugin())
 }
 
 type secretMap map[string]Secret
@@ -104,7 +109,7 @@ func New(opts ...Option) *Compiler {
 func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, error) {
 	config := new(backend_types.Config)
 
-	if match, err := conf.When.Match(c.metadata, true); !match && err == nil {
+	if match, err := conf.When.Match(c.metadata, true, c.env); !match && err == nil {
 		// This pipeline does not match the configured filter so return an empty config and stop further compilation.
 		// An empty pipeline will just be skipped completely.
 		return config, nil
@@ -114,22 +119,13 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 
 	// create a default volume
 	config.Volumes = append(config.Volumes, &backend_types.Volume{
-		Name:   fmt.Sprintf("%s_default", c.prefix),
-		Driver: "local",
+		Name: fmt.Sprintf("%s_default", c.prefix),
 	})
 
 	// create a default network
-	if strings.HasPrefix(c.metadata.Sys.Platform, windowsPrefix) {
-		config.Networks = append(config.Networks, &backend_types.Network{
-			Name:   fmt.Sprintf("%s_default", c.prefix),
-			Driver: networkDriverNAT,
-		})
-	} else {
-		config.Networks = append(config.Networks, &backend_types.Network{
-			Name:   fmt.Sprintf("%s_default", c.prefix),
-			Driver: networkDriverBridge,
-		})
-	}
+	config.Networks = append(config.Networks, &backend_types.Network{
+		Name: fmt.Sprintf("%s_default", c.prefix),
+	})
 
 	// create secrets for mask
 	for _, sec := range c.secrets {
@@ -167,7 +163,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			Environment: c.cloneEnv,
 		}
 		name := fmt.Sprintf("%s_clone", c.prefix)
-		step := c.createProcess(name, container, defaultCloneName)
+		step := c.createProcess(name, container, backend_types.StepTypeClone)
 
 		stage := new(backend_types.Stage)
 		stage.Name = name
@@ -177,7 +173,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 		config.Stages = append(config.Stages, stage)
 	} else if !c.local && !conf.SkipClone {
 		for i, container := range conf.Clone.ContainerList {
-			if match, err := container.When.Match(c.metadata, false); !match && err == nil {
+			if match, err := container.When.Match(c.metadata, false, c.env); !match && err == nil {
 				continue
 			} else if err != nil {
 				return nil, err
@@ -188,7 +184,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			stage.Alias = container.Name
 
 			name := fmt.Sprintf("%s_clone_%d", c.prefix, i)
-			step := c.createProcess(name, container, defaultCloneName)
+			step := c.createProcess(name, container, backend_types.StepTypeClone)
 
 			// only inject netrc if it's a trusted repo or a trusted plugin
 			if !c.netrcOnlyTrusted || c.trustedPipeline || (container.IsPlugin() && container.IsTrustedCloneImage()) {
@@ -212,14 +208,14 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 		stage.Alias = nameServices
 
 		for i, container := range conf.Services.ContainerList {
-			if match, err := container.When.Match(c.metadata, false); !match && err == nil {
+			if match, err := container.When.Match(c.metadata, false, c.env); !match && err == nil {
 				continue
 			} else if err != nil {
 				return nil, err
 			}
 
 			name := fmt.Sprintf("%s_%s_%d", c.prefix, nameServices, i)
-			step := c.createProcess(name, container, nameServices)
+			step := c.createProcess(name, container, backend_types.StepTypeService)
 			stage.Steps = append(stage.Steps, step)
 		}
 		config.Stages = append(config.Stages, stage)
@@ -234,7 +230,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			continue
 		}
 
-		if match, err := container.When.Match(c.metadata, false); !match && err == nil {
+		if match, err := container.When.Match(c.metadata, false, c.env); !match && err == nil {
 			continue
 		} else if err != nil {
 			return nil, err
@@ -250,7 +246,19 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 		}
 
 		name := fmt.Sprintf("%s_step_%d", c.prefix, i)
-		step := c.createProcess(name, container, namePipeline)
+		stepType := backend_types.StepTypeCommands
+		if container.IsPlugin() {
+			stepType = backend_types.StepTypePlugin
+		}
+		step := c.createProcess(name, container, stepType)
+
+		// inject netrc if it's a trusted repo or a trusted clone-plugin
+		if c.trustedPipeline || (container.IsPlugin() && container.IsTrustedCloneImage()) {
+			for k, v := range c.cloneEnv {
+				step.Environment[k] = v
+			}
+		}
+
 		stage.Steps = append(stage.Steps, step)
 	}
 
@@ -266,7 +274,7 @@ func (c *Compiler) setupCache(conf *yaml_types.Workflow, ir *backend_types.Confi
 
 	container := c.cacher.Restore(path.Join(c.metadata.Repo.Owner, c.metadata.Repo.Name), c.metadata.Curr.Commit.Branch, conf.Cache)
 	name := fmt.Sprintf("%s_restore_cache", c.prefix)
-	step := c.createProcess(name, container, "cache")
+	step := c.createProcess(name, container, backend_types.StepTypeCache)
 
 	stage := new(backend_types.Stage)
 	stage.Name = name
@@ -283,7 +291,7 @@ func (c *Compiler) setupCacheRebuild(conf *yaml_types.Workflow, ir *backend_type
 	container := c.cacher.Rebuild(path.Join(c.metadata.Repo.Owner, c.metadata.Repo.Name), c.metadata.Curr.Commit.Branch, conf.Cache)
 
 	name := fmt.Sprintf("%s_rebuild_cache", c.prefix)
-	step := c.createProcess(name, container, "cache")
+	step := c.createProcess(name, container, backend_types.StepTypeCache)
 
 	stage := new(backend_types.Stage)
 	stage.Name = name

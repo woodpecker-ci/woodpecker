@@ -59,6 +59,7 @@ var Config = struct {
 		Cert                string
 		OAuthHost           string
 		Host                string
+		WebhookHost         string
 		Port                string
 		PortTLS             string
 		AgentToken          string
@@ -66,7 +67,13 @@ var Config = struct {
 		StatusContext       string
 		StatusContextFormat string
 		SessionExpires      time.Duration
-		RootURL             string
+		RootPath            string
+		CustomCSSFile       string
+		CustomJsFile        string
+		Migrations          struct {
+			AllowLong bool
+		}
+		EnableSwagger bool
 		// Open bool
 		// Orgs map[string]struct{}
 		// Admins map[string]struct{}
@@ -84,5 +91,10 @@ var Config = struct {
 		Privileged                          []string
 		DefaultTimeout                      int64
 		MaxTimeout                          int64
+		Proxy                               struct {
+			No    string
+			HTTP  string
+			HTTPS string
+		}
 	}
 }{}

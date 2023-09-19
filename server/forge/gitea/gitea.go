@@ -103,7 +103,7 @@ func (c *Gitea) oauth2Config(ctx context.Context) (*oauth2.Config, context.Conte
 				AuthURL:  fmt.Sprintf(authorizeTokenURL, c.url),
 				TokenURL: fmt.Sprintf(accessTokenURL, c.url),
 			},
-			RedirectURL: fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost),
+			RedirectURL: fmt.Sprintf("%s%s/authorize", server.Config.Server.OAuthHost, server.Config.Server.RootPath),
 		},
 
 		context.WithValue(ctx, oauth2.HTTPClient, &http.Client{Transport: &http.Transport{
@@ -269,6 +269,9 @@ func (c *Gitea) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error)
 		)
 		result := make([]*model.Repo, 0, len(repos))
 		for _, repo := range repos {
+			if repo.Archived {
+				continue
+			}
 			result = append(result, toRepo(repo))
 		}
 		return result, err
@@ -321,7 +324,7 @@ func (c *Gitea) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.
 }
 
 // Status is supported by the Gitea driver.
-func (c *Gitea) Status(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, step *model.Step) error {
+func (c *Gitea) Status(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, workflow *model.Workflow) error {
 	client, err := c.newClientToken(ctx, user.Token)
 	if err != nil {
 		return err
@@ -332,10 +335,10 @@ func (c *Gitea) Status(ctx context.Context, user *model.User, repo *model.Repo, 
 		repo.Name,
 		pipeline.Commit,
 		gitea.CreateStatusOption{
-			State:       getStatus(step.State),
-			TargetURL:   common.GetPipelineStatusLink(repo, pipeline, step),
-			Description: common.GetPipelineStatusDescription(step.State),
-			Context:     common.GetPipelineStatusContext(repo, pipeline, step),
+			State:       getStatus(workflow.State),
+			TargetURL:   common.GetPipelineStatusLink(repo, pipeline, workflow),
+			Description: common.GetPipelineStatusDescription(workflow.State),
+			Context:     common.GetPipelineStatusContext(repo, pipeline, workflow),
 		},
 	)
 	return err
@@ -489,12 +492,7 @@ func (c *Gitea) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.
 		return nil, nil, err
 	}
 
-	if repo == nil || pipeline == nil {
-		// ignore  hook
-		return nil, nil, nil
-	}
-
-	if pipeline.Event == model.EventPull && len(pipeline.ChangedFiles) == 0 {
+	if pipeline != nil && pipeline.Event == model.EventPull && len(pipeline.ChangedFiles) == 0 {
 		index, err := strconv.ParseInt(strings.Split(pipeline.Ref, "/")[2], 10, 64)
 		if err != nil {
 			return nil, nil, err
@@ -531,6 +529,34 @@ func (c *Gitea) OrgMembership(ctx context.Context, u *model.User, owner string) 
 	}
 
 	return &model.OrgPerm{Member: member, Admin: perm.IsAdmin || perm.IsOwner}, nil
+}
+
+func (c *Gitea) Org(ctx context.Context, u *model.User, owner string) (*model.Org, error) {
+	client, err := c.newClientToken(ctx, u.Token)
+	if err != nil {
+		return nil, err
+	}
+
+	org, _, err := client.GetOrg(owner)
+	if err != nil {
+		return nil, err
+	}
+	if org != nil {
+		return &model.Org{
+			Name:    org.UserName,
+			Private: gitea.VisibleType(org.Visibility) != gitea.VisibleTypePublic,
+		}, nil
+	}
+
+	user, _, err := client.GetUserInfo(owner)
+	if err != nil {
+		return nil, err
+	}
+	return &model.Org{
+		Name:    user.UserName,
+		IsUser:  true,
+		Private: user.Visibility != gitea.VisibleTypePublic,
+	}, nil
 }
 
 // helper function to return the Gitea client with Token

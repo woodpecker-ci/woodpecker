@@ -1,3 +1,17 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package pipeline
 
 import (
@@ -37,20 +51,9 @@ var DefaultTracer = TraceFunc(func(state *State) error {
 	state.Pipeline.Step.Environment["CI_STEP_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
 	state.Pipeline.Step.Environment["CI_STEP_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
 
-	// DEPRECATED
-	state.Pipeline.Step.Environment["CI_BUILD_STATUS"] = "success"
-	state.Pipeline.Step.Environment["CI_BUILD_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
-	state.Pipeline.Step.Environment["CI_BUILD_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
-	state.Pipeline.Step.Environment["CI_JOB_STATUS"] = "success"
-	state.Pipeline.Step.Environment["CI_JOB_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
-	state.Pipeline.Step.Environment["CI_JOB_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
-
 	if state.Pipeline.Error != nil {
 		state.Pipeline.Step.Environment["CI_PIPELINE_STATUS"] = "failure"
 		state.Pipeline.Step.Environment["CI_STEP_STATUS"] = "failure"
-		// DEPRECATED
-		state.Pipeline.Step.Environment["CI_BUILD_STATUS"] = "failure"
-		state.Pipeline.Step.Environment["CI_JOB_STATUS"] = "failure"
 	}
 	return nil
 })

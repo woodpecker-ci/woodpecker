@@ -41,6 +41,14 @@
         "version": "Versija"
       },
       "not_allowed": "Nav piekļuves servera iestatījumiem",
+      "orgs": {
+        "delete_org": "Dzēst organizāciju",
+        "deleted": "Organizācija dzēsta",
+        "desc": "Organizācijas, kurām pieder repozitoriji šajā serverī",
+        "none": "Vēl nav nevienas organizācijas.",
+        "org_settings": "Organizācijas iestatījumi",
+        "orgs": "Organizācijas"
+      },
       "queue": {
         "agent": "aģents",
         "desc": "Uzdevumi, kuri gaida izpildi",
@@ -159,47 +167,6 @@
     "activity": "Aktivitāte",
     "add": "Pievienot repozitoriju",
     "branches": "Atzari",
-    "build": {
-      "actions": {
-        "cancel": "Atcelt",
-        "cancel_success": "Konvejerdarbs atcelts",
-        "canceled": "Šis solis tika atcelts.",
-        "log_auto_scroll": "Automātiski ritināt",
-        "log_auto_scroll_off": "Atslēgt automātisko ritināšanu",
-        "log_download": "Lejupielādēt",
-        "restart": "Pārstartēt",
-        "restart_success": "Konvejerdarbs pārstartēts"
-      },
-      "config": "Konfigurācija",
-      "created": "Izveidots",
-      "event": {
-        "cron": "Plānotais darbs",
-        "deploy": "Uzstādīšana",
-        "pr": "Izmaiņu pieprasījums",
-        "push": "Iesūtīšana",
-        "tag": "Tags"
-      },
-      "execution_error": "Uzdevuma izpildes kļūda",
-      "exit_code": "iziešanas kods {exitCode}",
-      "files": "Izmainītie faili ({files})",
-      "loading": "Notiek ielāde…",
-      "log_download_error": "Veicot žurnālfaila lejupielādi notika kļūda",
-      "no_files": "Neviens fails nav mainīts.",
-      "no_pipeline_steps": "Konvejerdarbam nav neviena soļa!",
-      "no_pipelines": "Neviens konvejerdarbs vēl nav uzsākts.",
-      "pipeline": "Konvejerdarbs #{buildId}",
-      "pipelines_for": "Konvejerdarbi atzaram \"{branch}\"",
-      "protected": {
-        "approve": "Apstiprināt",
-        "approve_success": "Konvejerdarbs apstiprināts",
-        "awaits": "Šim konvejerdarbam ir nepieciešams apstiprinājums no atbildīgajām personām!",
-        "decline": "Noraidīt",
-        "decline_success": "Konvejerdarbs noraidīts",
-        "declined": "Šis konvejerdarbs tika noraidīts!"
-      },
-      "step_not_started": "Šis solis vēl nav uzsākts.",
-      "tasks": "Uzdevumi"
-    },
     "deploy_pipeline": {
       "enter_target": "Mērķa uzstādīšanas vide",
       "title": "Iniciēt uzstādīšanas notikumu šim konvejerdarbam #{pipelineId}",
@@ -213,6 +180,7 @@
       }
     },
     "enable": {
+      "disabled": "Invalīdi",
       "enable": "Iespējot",
       "enabled": "Jau ir iespējots",
       "list_reloaded": "Repozitoriju sarakts tika pārlādēts",
@@ -246,7 +214,6 @@
         "restart_success": "Konvejerdarbs pārstartēts"
       },
       "config": "Konfigurācija",
-      "created": "Izveidots",
       "event": {
         "cron": "Plānotais darbs",
         "deploy": "Uzstādīšana",
@@ -260,6 +227,7 @@
       "files": "Izmainītie faili ({files})",
       "loading": "Notiek ielāde…",
       "log_download_error": "Veicot žurnālfaila lejupielādi notika kļūda",
+      "log_title": "Soļu žurnāli",
       "no_files": "Neviens fails nav mainīts.",
       "no_pipeline_steps": "Konvejerdarbam nav neviena soļa!",
       "no_pipelines": "Neviens konvejerdarbs vēl nav uzsākts.",
@@ -272,7 +240,8 @@
         "awaits": "Šim konvejerdarbam ir nepieciešams apstiprinājums no atbildīgajām personām!",
         "decline": "Noraidīt",
         "decline_success": "Konvejerdarbs noraidīts",
-        "declined": "Šis konvejerdarbs tika noraidīts!"
+        "declined": "Šis konvejerdarbs tika noraidīts!",
+        "review": "Pārskatiet izmaiņas"
       },
       "status": {
         "blocked": "bloķēts",
@@ -315,12 +284,10 @@
       "badge": {
         "badge": "Nozīmīte",
         "branch": "Atzars",
-        "markdown": "Markdown",
         "type": "Pieraksta veids",
         "type_html": "HTML",
         "type_markdown": "Markdown",
-        "type_url": "URL",
-        "url_branch": "URL konkrētam atzaram"
+        "type_url": "URL"
       },
       "crons": {
         "add": "Pievienot plānoto darbu",
@@ -465,15 +432,8 @@
   "url": "URL",
   "user": {
     "access_denied": "Jums nav tiesību autorizēties",
-    "api_usage": "Piemērs API izmantošanai",
-    "cli_usage": "Piemērs komandrindas lietošanai",
-    "dl_cli": "Lejupielādēt komandrindas rīku",
     "internal_error": "Notikusi sistēmas iekšējā kļūda",
-    "oauth_error": "Neizdevās autorizēties, izmantojot, OAuth piegādātāju",
-    "settings": "Lietotāja iestatījumi",
-    "shell_setup": "Komandrindas iestatīšana",
-    "shell_setup_before": "izpildiet komandrindā sekojošas darbības",
-    "token": "Personīgais talons"
+    "oauth_error": "Neizdevās autorizēties, izmantojot, OAuth piegādātāju"
   },
   "username": "Lietotāja vārds",
   "welcome": "Woodpecker"

@@ -1,18 +1,37 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package constraint
 
 import (
 	"errors"
 	"fmt"
 	"path"
+	"regexp"
 	"strings"
 
 	"github.com/antonmedv/expr"
 	"github.com/bmatcuk/doublestar/v4"
+	"github.com/rs/zerolog/log"
+	"golang.org/x/exp/maps"
 	"gopkg.in/yaml.v3"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
 	yaml_base_types "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types/base"
 )
+
+var skipRe = regexp.MustCompile(`\[(?i:ci *skip|skip *ci)\]`)
 
 type (
 	// When defines a set of runtime constraints.
@@ -62,9 +81,19 @@ func (when *When) IsEmpty() bool {
 }
 
 // Returns true if at least one of the internal constraints is true.
-func (when *When) Match(metadata metadata.Metadata, global bool) (bool, error) {
+func (when *When) Match(metadata metadata.Metadata, global bool, env map[string]string) (bool, error) {
+	if global {
+		// skip the whole workflow if any case-insensitive combination of the words "skip" and "ci"
+		// wrapped in square brackets appear in the commit message
+		skipMatch := skipRe.FindString(metadata.Curr.Commit.Message)
+		if len(skipMatch) > 0 {
+			log.Debug().Msgf("skip workflow as keyword to do so was detected in commit message '%s'", metadata.Curr.Commit.Message)
+			return false, nil
+		}
+	}
+
 	for _, c := range when.Constraints {
-		match, err := c.Match(metadata, global)
+		match, err := c.Match(metadata, global, env)
 		if err != nil {
 			return false, err
 		}
@@ -76,7 +105,7 @@ func (when *When) Match(metadata metadata.Metadata, global bool) (bool, error) {
 	if when.IsEmpty() {
 		// test against default Constraints
 		empty := &Constraint{}
-		return empty.Match(metadata, global)
+		return empty.Match(metadata, global, env)
 	}
 	return false, nil
 }
@@ -139,11 +168,9 @@ func (when *When) UnmarshalYAML(value *yaml.Node) error {
 
 // Match returns true if all constraints match the given input. If a single
 // constraint fails a false value is returned.
-func (c *Constraint) Match(m metadata.Metadata, global bool) (bool, error) {
+func (c *Constraint) Match(m metadata.Metadata, global bool, env map[string]string) (bool, error) {
 	match := true
 	if !global {
-		c.SetDefaultEventFilter()
-
 		// apply step only filters
 		match = c.Matrix.Match(m.Workflow.Matrix)
 	}
@@ -169,8 +196,12 @@ func (c *Constraint) Match(m metadata.Metadata, global bool) (bool, error) {
 	}
 
 	if c.Evaluate != "" {
-		env := m.Environ()
-		out, err := expr.Compile(c.Evaluate, expr.Env(env), expr.AsBool())
+		if env == nil {
+			env = m.Environ()
+		} else {
+			maps.Copy(env, m.Environ())
+		}
+		out, err := expr.Compile(c.Evaluate, expr.Env(env), expr.AllowUndefinedVariables(), expr.AsBool())
 		if err != nil {
 			return false, err
 		}
@@ -182,19 +213,6 @@ func (c *Constraint) Match(m metadata.Metadata, global bool) (bool, error) {
 	}
 
 	return match, nil
-}
-
-// SetDefaultEventFilter set default e event filter if not event filter is already set
-func (c *Constraint) SetDefaultEventFilter() {
-	if c.Event.IsEmpty() {
-		c.Event.Include = []string{
-			metadata.EventPush,
-			metadata.EventPull,
-			metadata.EventTag,
-			metadata.EventDeploy,
-			metadata.EventManual,
-		}
-	}
 }
 
 // IsEmpty return true if a constraint has no conditions

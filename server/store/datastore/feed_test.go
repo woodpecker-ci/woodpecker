@@ -23,7 +23,7 @@ import (
 )
 
 func TestGetPipelineQueue(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm), new(model.Pipeline))
+	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm), new(model.Pipeline), new(model.Org))
 	defer closer()
 
 	user := &model.User{
@@ -64,7 +64,7 @@ func TestGetPipelineQueue(t *testing.T) {
 }
 
 func TestUserFeed(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm), new(model.Pipeline))
+	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm), new(model.Pipeline), new(model.Org))
 	defer closer()
 
 	user := &model.User{
@@ -115,7 +115,7 @@ func TestUserFeed(t *testing.T) {
 }
 
 func TestRepoListLatest(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm), new(model.Pipeline))
+	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm), new(model.Pipeline), new(model.Org))
 	defer closer()
 
 	user := &model.User{
@@ -126,6 +126,7 @@ func TestRepoListLatest(t *testing.T) {
 	assert.NoError(t, store.CreateUser(user))
 
 	repo1 := &model.Repo{
+		ID:            1,
 		Owner:         "bradrydzewski",
 		Name:          "test",
 		FullName:      "bradrydzewski/test",
@@ -133,6 +134,7 @@ func TestRepoListLatest(t *testing.T) {
 		IsActive:      true,
 	}
 	repo2 := &model.Repo{
+		ID:            2,
 		Owner:         "test",
 		Name:          "test",
 		FullName:      "test/test",
@@ -140,6 +142,7 @@ func TestRepoListLatest(t *testing.T) {
 		IsActive:      true,
 	}
 	repo3 := &model.Repo{
+		ID:            3,
 		Owner:         "octocat",
 		Name:          "hello-world",
 		FullName:      "octocat/hello-world",
@@ -189,13 +192,13 @@ func TestRepoListLatest(t *testing.T) {
 	if got, want := pipelines[0].Status, string(model.StatusRunning); want != got {
 		t.Errorf("Want repository status %s, got %s", want, got)
 	}
-	if got, want := pipelines[0].FullName, repo1.FullName; want != got {
-		t.Errorf("Want repository name %s, got %s", want, got)
+	if got, want := pipelines[0].RepoID, repo1.ID; want != got {
+		t.Errorf("Want repository id %d, got %d", want, got)
 	}
 	if got, want := pipelines[1].Status, string(model.StatusKilled); want != got {
 		t.Errorf("Want repository status %s, got %s", want, got)
 	}
-	if got, want := pipelines[1].FullName, repo2.FullName; want != got {
-		t.Errorf("Want repository name %s, got %s", want, got)
+	if got, want := pipelines[1].RepoID, repo2.ID; want != got {
+		t.Errorf("Want repository id %d, got %d", want, got)
 	}
 }

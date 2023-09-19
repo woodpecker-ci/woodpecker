@@ -30,7 +30,10 @@ import (
 	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/pipeline"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/docker"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/kubernetes"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/local"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/ssh"
 	backendTypes "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/compiler"
@@ -46,7 +49,7 @@ var Command = &cli.Command{
 	Usage:     "execute a local pipeline",
 	ArgsUsage: "[path/to/.woodpecker.yaml]",
 	Action:    run,
-	Flags:     append(common.GlobalFlags, flags...),
+	Flags:     utils.MergeSlices(common.GlobalFlags, flags, docker.Flags, ssh.Flags, kubernetes.Flags, local.Flags),
 }
 
 func run(c *cli.Context) error {
@@ -185,7 +188,11 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 		compiler.WithPrefix(
 			c.String("prefix"),
 		),
-		compiler.WithProxy(),
+		compiler.WithProxy(compiler.ProxyOptions{
+			NoProxy:    c.String("backend-no-proxy"),
+			HTTPProxy:  c.String("backend-http-proxy"),
+			HTTPSProxy: c.String("backend-https-proxy"),
+		}),
 		compiler.WithLocal(
 			c.Bool("local"),
 		),
@@ -202,7 +209,7 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 		return err
 	}
 
-	backendCtx := context.WithValue(c.Context, types.CliContext, c)
+	backendCtx := context.WithValue(c.Context, backendTypes.CliContext, c)
 	backend.Init(backendCtx)
 
 	engine, err := backend.FindEngine(backendCtx, c.String("backend-engine"))

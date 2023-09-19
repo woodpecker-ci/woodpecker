@@ -14,9 +14,13 @@
 
 package common
 
-import "github.com/urfave/cli/v2"
+import (
+	"github.com/urfave/cli/v2"
 
-var GlobalFlags = []cli.Flag{
+	"github.com/woodpecker-ci/woodpecker/cmd/common"
+)
+
+var GlobalFlags = append([]cli.Flag{
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_TOKEN"},
 		Name:    "token",
@@ -47,13 +51,7 @@ var GlobalFlags = []cli.Flag{
 		Usage:   "socks proxy ignored",
 		Hidden:  true,
 	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_LOG_LEVEL"},
-		Name:    "log-level",
-		Usage:   "set logging level",
-		Value:   "info",
-	},
-}
+}, common.GlobalLoggerFlags...)
 
 // FormatFlag return format flag with value set based on template
 // if hidden value is set, flag will be hidden
@@ -70,5 +68,11 @@ func FormatFlag(tmpl string, hidden ...bool) *cli.StringFlag {
 var RepoFlag = &cli.StringFlag{
 	Name:    "repository",
 	Aliases: []string{"repo"},
-	Usage:   "repository name (e.g. octocat/hello-world)",
+	Usage:   "repository id or full-name (e.g. 134 or octocat/hello-world)",
+}
+
+var OrgFlag = &cli.StringFlag{
+	Name:    "organization",
+	Aliases: []string{"org"},
+	Usage:   "organization id or full-name (e.g. 123 or octocat)",
 }

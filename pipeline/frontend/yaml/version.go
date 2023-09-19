@@ -15,4 +15,4 @@
 package yaml
 
 // Version of this package and it's subpackages
-const Version = "1"
+const Version = 1

@@ -7,7 +7,7 @@ clone:
     image: woodpeckerci/plugin-git
     depth: 50
 
-pipeline:
+steps:
 
   # these steps define a parallel execution
   # group and will fan out.

@@ -27,6 +27,7 @@ web/dist/**
 web/node_modules/
 web/*.log
 web/.env
+.pnpm-store
 
 ### Docker ###
 docker-compose.yml

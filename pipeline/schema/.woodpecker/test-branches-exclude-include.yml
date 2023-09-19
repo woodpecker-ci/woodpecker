@@ -1,8 +1,8 @@
 branches:
-  include: master
-  exclude: [ develop, feature/* ]
+  include: main
+  exclude: [develop, feature/*]
 
-pipeline:
+steps:
   build:
     image: golang
     commands:

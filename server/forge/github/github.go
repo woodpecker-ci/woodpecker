@@ -25,7 +25,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/google/go-github/v39/github"
+	"github.com/google/go-github/v55/github"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 
@@ -209,7 +209,12 @@ func (c *client) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 		if err != nil {
 			return nil, err
 		}
-		repos = append(repos, convertRepoList(list)...)
+		for _, repo := range list {
+			if repo.GetArchived() {
+				continue
+			}
+			repos = append(repos, convertRepo(repo))
+		}
 		opts.Page = resp.NextPage
 	}
 	return repos, nil
@@ -350,6 +355,29 @@ func (c *client) OrgMembership(ctx context.Context, u *model.User, owner string)
 	return &model.OrgPerm{Member: org.GetState() == "active", Admin: org.GetRole() == "admin"}, nil
 }
 
+func (c *client) Org(ctx context.Context, u *model.User, owner string) (*model.Org, error) {
+	client := c.newClientToken(ctx, u.Token)
+
+	user, _, err := client.Users.Get(ctx, owner)
+	log.Trace().Msgf("Github user for owner %s = %v", owner, user)
+	if user != nil && err == nil {
+		return &model.Org{
+			Name:   user.GetLogin(),
+			IsUser: true,
+		}, nil
+	}
+
+	org, _, err := client.Organizations.Get(ctx, owner)
+	log.Trace().Msgf("Github organization for owner %s = %v", owner, org)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.Org{
+		Name: org.GetLogin(),
+	}, nil
+}
+
 // helper function to return the GitHub oauth2 context using an HTTPClient that
 // disables TLS verification if disabled in the forge settings.
 func (c *client) newContext(ctx context.Context) context.Context {
@@ -372,9 +400,9 @@ func (c *client) newConfig(req *http.Request) *oauth2.Config {
 
 	intendedURL := req.URL.Query()["url"]
 	if len(intendedURL) > 0 {
-		redirect = fmt.Sprintf("%s/authorize?url=%s", server.Config.Server.OAuthHost, intendedURL[0])
+		redirect = fmt.Sprintf("%s%s/authorize?url=%s", server.Config.Server.OAuthHost, server.Config.Server.RootPath, intendedURL[0])
 	} else {
-		redirect = fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost)
+		redirect = fmt.Sprintf("%s%s/authorize", server.Config.Server.OAuthHost, server.Config.Server.RootPath)
 	}
 
 	return &oauth2.Config{
@@ -456,7 +484,7 @@ var reDeploy = regexp.MustCompile(`.+/deployments/(\d+)`)
 
 // Status sends the commit status to the forge.
 // An example would be the GitHub pull request status.
-func (c *client) Status(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, step *model.Step) error {
+func (c *client) Status(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, workflow *model.Workflow) error {
 	client := c.newClientToken(ctx, user.Token)
 
 	if pipeline.Event == model.EventDeploy {
@@ -475,10 +503,10 @@ func (c *client) Status(ctx context.Context, user *model.User, repo *model.Repo,
 	}
 
 	_, _, err := client.Repositories.CreateStatus(ctx, repo.Owner, repo.Name, pipeline.Commit, &github.RepoStatus{
-		Context:     github.String(common.GetPipelineStatusContext(repo, pipeline, step)),
-		State:       github.String(convertStatus(step.State)),
-		Description: github.String(common.GetPipelineStatusDescription(step.State)),
-		TargetURL:   github.String(common.GetPipelineStatusLink(repo, pipeline, step)),
+		Context:     github.String(common.GetPipelineStatusContext(repo, pipeline, workflow)),
+		State:       github.String(convertStatus(workflow.State)),
+		Description: github.String(common.GetPipelineStatusDescription(workflow.State)),
+		TargetURL:   github.String(common.GetPipelineStatusLink(repo, pipeline, workflow)),
 	})
 	return err
 }

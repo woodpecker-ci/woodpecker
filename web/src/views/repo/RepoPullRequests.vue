@@ -3,12 +3,12 @@
     <ListItem
       v-for="pullRequest in pullRequests"
       :key="pullRequest.index"
-      class="text-color"
+      class="text-wp-text-100"
       :to="{ name: 'repo-pull-request', params: { pullRequest: pullRequest.index } }"
     >
-      <span class="text-color-alt <md:hidden">#{{ pullRequest.index }}</span>
-      <span class="text-color-alt <md:hidden mx-2">-</span>
-      <span class="text-color <md:underline whitespace-nowrap overflow-hidden overflow-ellipsis">{{
+      <span class="text-wp-text-alt-100 <md:hidden">#{{ pullRequest.index }}</span>
+      <span class="text-wp-text-alt-100 <md:hidden mx-2">-</span>
+      <span class="text-wp-text-100 <md:underline whitespace-nowrap overflow-hidden overflow-ellipsis">{{
         pullRequest.title
       }}</span>
     </ListItem>
@@ -35,7 +35,7 @@ async function loadPullRequests(page: number): Promise<PullRequest[]> {
     throw new Error('Unexpected: "repo" should be provided at this place');
   }
 
-  return apiClient.getRepoPullRequests(repo.value.owner, repo.value.name, page);
+  return apiClient.getRepoPullRequests(repo.value.id, page);
 }
 
 const { resetPage, data: pullRequests } = usePagination(loadPullRequests);

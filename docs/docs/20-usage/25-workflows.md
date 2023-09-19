@@ -36,7 +36,8 @@ If you still need to pass artifacts between the workflows you need use some stor
 .woodpecker/.build.yml
 
 ```yaml
-pipeline:
+version: 1
+steps:
   build:
     image: debian:stable-slim
     commands:
@@ -47,7 +48,8 @@ pipeline:
 .woodpecker/.deploy.yml
 
 ```yaml
-pipeline:
+version: 1
+steps:
   deploy:
     image: debian:stable-slim
     commands:
@@ -62,7 +64,8 @@ depends_on:
 .woodpecker/.test.yml
 
 ```yaml
-pipeline:
+version: 1
+steps:
   test:
     image: debian:stable-slim
     commands:
@@ -76,7 +79,8 @@ depends_on:
 .woodpecker/.lint.yml
 
 ```yaml
-pipeline:
+version: 1
+steps:
   lint:
     image: debian:stable-slim
     commands:
@@ -97,7 +101,8 @@ Dependencies between workflows can be set with the `depends_on` element. A workf
 The name for a `depends_on` entry is the filename without the path, leading dots and without the file extension `.yml` or `.yaml`. If the project config for example uses `.woodpecker/` as path for CI files with a file named `.woodpecker/.lint.yml` the corresponding `depends_on` entry would be `lint`.
 
 ```diff
-pipeline:
+version: 1
+steps:
   deploy:
     image: debian:stable-slim
     commands:
@@ -112,7 +117,8 @@ pipeline:
 Workflows that need to run even on failures should set the `runs_on` tag.
 
 ```diff
-pipeline:
+version: 1
+steps:
   notify:
     image: debian:stable-slim
     commands:

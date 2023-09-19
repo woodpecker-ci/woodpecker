@@ -17,6 +17,8 @@ package session
 import (
 	"errors"
 	"net/http"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -44,35 +46,46 @@ func Repo(c *gin.Context) *model.Repo {
 func SetRepo() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
-			_store = store.FromContext(c)
-			owner  = c.Param("owner")
-			name   = c.Param("name")
-			user   = User(c)
+			_store   = store.FromContext(c)
+			fullName = strings.TrimLeft(c.Param("repo_full_name"), "/")
+			_repoID  = c.Param("repo_id")
+			user     = User(c)
 		)
 
-		repo, err := _store.GetRepoName(owner + "/" + name)
-		if err == nil {
+		var repo *model.Repo
+		var err error
+		if _repoID != "" {
+			var repoID int64
+			repoID, err = strconv.ParseInt(_repoID, 10, 64)
+			if err != nil {
+				c.AbortWithStatus(http.StatusBadRequest)
+				return
+			}
+			repo, err = _store.GetRepo(repoID)
+		} else {
+			repo, err = _store.GetRepoName(fullName)
+		}
+
+		if repo != nil {
 			c.Set("repo", repo)
 			c.Next()
 			return
 		}
 
 		// debugging
-		log.Debug().Msgf("Cannot find repository %s/%s. %s",
-			owner,
-			name,
-			err.Error(),
-		)
+		log.Debug().Err(err).Msgf("Cannot find repository %s.", fullName)
 
-		if user != nil {
-			if errors.Is(err, types.RecordNotExist) {
-				c.AbortWithStatus(http.StatusNotFound)
-				return
-			}
-			_ = c.AbortWithError(http.StatusInternalServerError, err)
-		} else {
+		if user == nil {
 			c.AbortWithStatus(http.StatusUnauthorized)
+			return
 		}
+
+		if errors.Is(err, types.RecordNotExist) {
+			c.AbortWithStatus(http.StatusNotFound)
+			return
+		}
+
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
 	}
 }
 

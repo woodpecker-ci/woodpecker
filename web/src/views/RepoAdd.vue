@@ -9,27 +9,29 @@
         v-for="repo in searchedRepos"
         :key="repo.id"
         class="items-center"
-        :to="repo.active ? { name: 'repo', params: { repoOwner: repo.owner, repoName: repo.name } } : undefined"
+        :to="repo.active ? { name: 'repo', params: { repoId: repo.id } } : undefined"
       >
-        <span class="text-color">{{ repo.full_name }}</span>
-        <span v-if="repo.active" class="ml-auto text-color-alt">{{ $t('repo.enable.enabled') }}</span>
-        <Button
-          v-if="!repo.active"
-          class="ml-auto"
-          :text="$t('repo.enable.enable')"
-          :is-loading="isActivatingRepo && repoToActivate?.id === repo.id"
-          @click="activateRepo(repo)"
-        />
+        <span class="text-wp-text-100">{{ repo.full_name }}</span>
+        <span v-if="repo.active" class="ml-auto text-wp-text-alt-100">{{ $t('repo.enable.enabled') }}</span>
+        <div v-else class="ml-auto flex items-center">
+          <Badge v-if="repo.id" class="<md:hidden mr-2" :label="$t('repo.enable.disabled')" />
+          <Button
+            :text="$t('repo.enable.enable')"
+            :is-loading="isActivatingRepo && repoToActivate?.forge_remote_id === repo.forge_remote_id"
+            @click="activateRepo(repo)"
+          />
+        </div>
       </ListItem>
     </div>
   </Scaffold>
 </template>
 
-<script lang="ts">
-import { defineComponent, onMounted, ref } from 'vue';
+<script lang="ts" setup>
+import { onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
+import Badge from '~/components/atomic/Badge.vue';
 import Button from '~/components/atomic/Button.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
@@ -37,51 +39,30 @@ import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
 import { useRepoSearch } from '~/compositions/useRepoSearch';
-import { useRouteBackOrDefault } from '~/compositions/useRouteBackOrDefault';
+import { useRouteBack } from '~/compositions/useRouteBack';
 import { Repo } from '~/lib/api/types';
 
-export default defineComponent({
-  name: 'RepoAdd',
+const router = useRouter();
+const apiClient = useApiClient();
+const notifications = useNotifications();
+const repos = ref<Repo[]>();
+const repoToActivate = ref<Repo>();
+const search = ref('');
+const i18n = useI18n();
 
-  components: {
-    Button,
-    ListItem,
-    Scaffold,
-  },
+const { searchedRepos } = useRepoSearch(repos, search);
 
-  setup() {
-    const router = useRouter();
-    const apiClient = useApiClient();
-    const notifications = useNotifications();
-    const repos = ref<Repo[]>();
-    const repoToActivate = ref<Repo>();
-    const search = ref('');
-    const i18n = useI18n();
-
-    const { searchedRepos } = useRepoSearch(repos, search);
-
-    onMounted(async () => {
-      repos.value = await apiClient.getRepoList({ all: true });
-    });
-
-    const { doSubmit: activateRepo, isLoading: isActivatingRepo } = useAsyncAction(async (repo: Repo) => {
-      repoToActivate.value = repo;
-      await apiClient.activateRepo(repo.owner, repo.name);
-      notifications.notify({ title: i18n.t('repo.enable.success'), type: 'success' });
-      repoToActivate.value = undefined;
-      await router.push({ name: 'repo', params: { repoName: repo.name, repoOwner: repo.owner } });
-    });
-
-    const goBack = useRouteBackOrDefault({ name: 'repos' });
-
-    return {
-      isActivatingRepo,
-      repoToActivate,
-      goBack,
-      activateRepo,
-      searchedRepos,
-      search,
-    };
-  },
+onMounted(async () => {
+  repos.value = await apiClient.getRepoList({ all: true });
 });
+
+const { doSubmit: activateRepo, isLoading: isActivatingRepo } = useAsyncAction(async (repo: Repo) => {
+  repoToActivate.value = repo;
+  const _repo = await apiClient.activateRepo(repo.forge_remote_id);
+  notifications.notify({ title: i18n.t('repo.enable.success'), type: 'success' });
+  repoToActivate.value = undefined;
+  await router.push({ name: 'repo', params: { repoId: _repo.id } });
+});
+
+const goBack = useRouteBack({ name: 'repos' });
 </script>
