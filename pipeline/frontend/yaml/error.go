@@ -17,8 +17,8 @@ package yaml
 import "errors"
 
 var (
-	ErrUnsuportedVersion = errors.New("unsuported yaml version detected")
-	ErrMissingVersion    = errors.New("missing yaml version")
+	ErrUnsuportedVersion = errors.New("unsuported pipeline config version detected")
+	ErrMissingVersion    = errors.New("missing pipeline config version")
 )
 
 // PipelineParseError is an error that occurs when the pipeline parsing fails.
