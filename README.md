@@ -56,29 +56,6 @@ Please consider to donate and become a backer. 🙏 [[Become a backer](https://o
 
 <a href="https://opencollective.com/woodpecker-ci" target="_blank"><img src="https://opencollective.com/woodpecker-ci/backers.svg?width=890"></a>
 
-## 🚀 Usage
-
-### .woodpecker.yml
-
-- Place your pipeline in a file named `.woodpecker.yml` in your repository
-- Pipeline steps can be named as you like
-- Run any command in the commands section
-
-[Read More](https://woodpecker-ci.org/docs/usage/intro)
-
-### Build steps are containers
-
-- Define any Docker image as context
-- Install the needed tools in custom Docker images, use them as context
-
-[Read More](https://woodpecker-ci.org/docs/usage/pipeline-syntax#steps)
-
-### Plugins
-
-Woodpecker has [official plugins](https://woodpecker-ci.org/plugins), but you can also use your own.
-
-[Read More](https://woodpecker-ci.org/docs/usage/plugins/plugins)
-
 ## 📖 Documentation
 
 https://woodpecker-ci.org/
@@ -99,9 +76,9 @@ We use an own [Weblate](https://weblate.org/en/) instance at [translate.woodpeck
 
 ## 👋 Who uses Woodpecker?
 
-[Codeberg](https://codeberg.org), the Woodpecker project itself, and many others.
+Woodpecker is used by [itself](https://ci.woodpecker-ci.org/woodpecker/woodpecker-ci/) multiple well-known companies, organizations like [Codeberg](https://codeberg.org), hobbyist and many others.
 
-Leave a [comment](https://github.com/woodpecker-ci/woodpecker/issues/122) if you're using it as well.
+Leave a [comment](https://github.com/woodpecker-ci/woodpecker/discussions/2149) if you're using it as well.
 
 Also consider using the topic `WoodpeckerCI` in your repository, so others can learn from your config and use the hashtag `#WoodpeckerCI` when talking about the project on social media!
 
