@@ -125,7 +125,7 @@ Configures the number of parallel workflows.
 ### `WOODPECKER_FILTER_LABELS`
 > Default: empty
 
-Configures labels to filter pipeline pick up. Use a list of key-value pairs like `key=value,second-key=*`. `*` can be used as a wildcard. By default agents provide three additional labels `platform=os/arch`, `hostname=my-agent` and `repo=*` which can be overwritten if needed. To learn how labels work check out the [pipeline syntax page](../20-usage/20-pipeline-syntax.md#labels).
+Configures labels to filter pipeline pick up. Use a list of key-value pairs like `key=value,second-key=*`. `*` can be used as a wildcard. By default agents provide three additional labels `platform=os/arch`, `hostname=my-agent` and `repo=*` which can be overwritten if needed. To learn how labels work check out the [pipeline syntax page](../20-usage/20-workflow-syntax.md#labels).
 
 ### `WOODPECKER_HEALTHCHECK`
 > Default: `true`
