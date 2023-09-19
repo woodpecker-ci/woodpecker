@@ -369,7 +369,7 @@ steps:
 #### `platform`
 
 :::note
-This condition should be used in conjunction with a [matrix](./30-matrix-workflows.md#example-matrix-pipeline-using-multiple-platforms) pipeline as a regular pipeline will only executed by a single agent which only has one arch.
+This condition should be used in conjunction with a [matrix](./30-matrix-workflows.md#example-matrix-pipeline-using-multiple-platforms) pipeline as a regular pipeline will only be executed by a single agent which only has one arch.
 :::
 
 Execute a step for a specific platform:
