@@ -154,7 +154,7 @@ func TestLintErrors(t *testing.T) {
 	}
 
 	for _, test := range testdata {
-		conf, err := yaml.ParseString("version: 1\n"+test.from)
+		conf, err := yaml.ParseString("version: 1\n" + test.from)
 		if err != nil {
 			t.Fatalf("Cannot unmarshal yaml %q. Error: %s", test.from, err)
 		}
