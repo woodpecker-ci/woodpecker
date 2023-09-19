@@ -47,6 +47,7 @@ func TestGlobalEnvsubst(t *testing.T) {
 		Link:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
+version: 1
 steps:
   build:
     image: ${IMAGE}
@@ -82,6 +83,7 @@ func TestMissingGlobalEnvsubst(t *testing.T) {
 		Link:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
+version: 1
 steps:
   build:
     image: ${IMAGE}
@@ -114,12 +116,14 @@ bbb`,
 		Link:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
+version: 1
 steps:
   xxx:
     image: scratch
     yyy: ${CI_COMMIT_MESSAGE}
 `)},
 			{Data: []byte(`
+version: 1
 steps:
   build:
     image: scratch
@@ -149,11 +153,13 @@ func TestMultiPipeline(t *testing.T) {
 		Link:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
+version: 1
 steps:
   xxx:
     image: scratch
 `)},
 			{Data: []byte(`
+version: 1
 steps:
   build:
     image: scratch
@@ -184,16 +190,19 @@ func TestDependsOn(t *testing.T) {
 		Link:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Name: "lint", Data: []byte(`
+version: 1
 steps:
   build:
     image: scratch
 `)},
 			{Name: "test", Data: []byte(`
+version: 1
 steps:
   build:
     image: scratch
 `)},
 			{Data: []byte(`
+version: 1
 steps:
   deploy:
     image: scratch
@@ -231,6 +240,7 @@ func TestRunsOn(t *testing.T) {
 		Link:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
+version: 1
 steps:
   deploy:
     image: scratch
@@ -268,11 +278,13 @@ func TestPipelineName(t *testing.T) {
 		Link:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Name: ".woodpecker/lint.yml", Data: []byte(`
+version: 1
 steps:
   build:
     image: scratch
 `)},
 			{Name: ".woodpecker/.test.yml", Data: []byte(`
+version: 1
 steps:
   build:
     image: scratch
@@ -304,6 +316,7 @@ func TestRootWhenBranchFilter(t *testing.T) {
 		Link:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
+version: 1
 steps:
   xxx:
     image: scratch
@@ -311,6 +324,7 @@ when:
   branch: main
 `)},
 			{Data: []byte(`
+version: 1
 steps:
   build:
     image: scratch
@@ -344,6 +358,7 @@ func TestRootWhenFilter(t *testing.T) {
 		Link:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
+version: 1
 when:
   event:
     - tester
@@ -352,6 +367,7 @@ steps:
     image: scratch
 `)},
 			{Data: []byte(`
+version: 1
 when:
   event:
     - push
@@ -360,6 +376,7 @@ steps:
     image: scratch
 `)},
 			{Data: []byte(`
+version: 1
 steps:
   build:
     image: scratch
@@ -393,6 +410,7 @@ func TestZeroSteps(t *testing.T) {
 		Link:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
+version: 1
 skip_clone: true
 steps:
   build:
@@ -428,6 +446,7 @@ func TestZeroStepsAsMultiPipelineDeps(t *testing.T) {
 		Link:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Name: "zerostep", Data: []byte(`
+version: 1
 skip_clone: true
 steps:
   build:
@@ -436,11 +455,13 @@ steps:
     image: scratch
 `)},
 			{Name: "justastep", Data: []byte(`
+version: 1
 steps:
   build:
     image: scratch
 `)},
 			{Name: "shouldbefiltered", Data: []byte(`
+version: 1
 steps:
   build:
     image: scratch
@@ -477,6 +498,7 @@ func TestZeroStepsAsMultiPipelineTransitiveDeps(t *testing.T) {
 		Link:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Name: "zerostep", Data: []byte(`
+version: 1
 skip_clone: true
 steps:
   build:
@@ -485,17 +507,20 @@ steps:
     image: scratch
 `)},
 			{Name: "justastep", Data: []byte(`
+version: 1
 steps:
   build:
     image: scratch
 `)},
 			{Name: "shouldbefiltered", Data: []byte(`
+version: 1
 steps:
   build:
     image: scratch
 depends_on: [ zerostep ]
 `)},
 			{Name: "shouldbefilteredtoo", Data: []byte(`
+version: 1
 steps:
   build:
     image: scratch
@@ -534,6 +559,7 @@ func TestTree(t *testing.T) {
 		Link:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
+version: 1
 steps:
   build:
     image: scratch

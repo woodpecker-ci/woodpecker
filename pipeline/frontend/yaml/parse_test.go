@@ -140,6 +140,7 @@ func TestParse(t *testing.T) {
 
 func TestParseLegacy(t *testing.T) {
 	sampleYamlPipelineLegacy := `
+version: 1
 platform: linux/amd64
 
 steps:
@@ -149,6 +150,7 @@ steps:
 `
 
 	sampleYamlPipelineLegacyIgnore := `
+version: 1
 platform: windows/amd64
 labels:
   platform: linux/amd64
@@ -228,6 +230,7 @@ runs_on:
 `
 
 var simpleYamlAnchors = `
+version: 1
 vars:
   image: &image plugins/slack
 steps:
@@ -236,6 +239,7 @@ steps:
 `
 
 var sampleVarYaml = `
+version: 1
 _slack: &SLACK
   image: plugins/slack
 steps:
