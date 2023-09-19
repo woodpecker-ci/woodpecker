@@ -4,5 +4,5 @@ coverage/
 LICENSE
 components.d.ts
 src/assets/locales/*.json
-src/assets/timeAgoLocales/*.json
+src/assets/timeAgoLocales/
 !src/assets/locales/en.json
