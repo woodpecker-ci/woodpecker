@@ -39,7 +39,7 @@ variables:
   - &publish_repos_cli 'woodpeckerci/woodpecker-cli,quay.io/woodpeckerci/woodpecker-cli'
 
 steps:
-  vendor:
+  - name: vendor
     image: *golang_image
     pull: true
     commands:
@@ -48,7 +48,7 @@ steps:
   ###############
   # S e r v e r #
   ###############
-  build-web:
+  - name: build-web
     image: *node_image
     directory: web/
     commands:
@@ -56,7 +56,7 @@ steps:
       - pnpm install --frozen-lockfile
       - pnpm build
 
-  cross-compile-server-preview:
+  - name: cross-compile-server-preview
     image: *xgo_image
     pull: true
     commands:
@@ -70,7 +70,7 @@ steps:
     when:
       event: pull_request
 
-  publish-server-preview:
+  - name: publish-server-preview
     image: woodpeckerci/plugin-docker-buildx
     secrets: [ docker_username, docker_password ]
     group: docker
@@ -82,7 +82,7 @@ steps:
     when:
       event: pull_request
 
-  publish-server-alpine-preview:
+  - name: publish-server-alpine-preview
     image: woodpeckerci/plugin-docker-buildx
     secrets: [ docker_username, docker_password ]
     group: docker
@@ -94,7 +94,7 @@ steps:
     when:
       event: pull_request
 
-  cross-compile-server:
+  - name: cross-compile-server
     image: *xgo_image
     pull: true
     commands:
@@ -111,7 +111,7 @@ steps:
         - release/*
       event: [push, tag]
 
-  publish-next-server:
+  - name: publish-next-server
     image: woodpeckerci/plugin-docker-buildx
     group: docker
     settings:
@@ -124,7 +124,7 @@ steps:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
 
-  publish-next-server-alpine:
+  - name: publish-next-server-alpine
     image: woodpeckerci/plugin-docker-buildx
     group: docker
     settings:
@@ -137,7 +137,7 @@ steps:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
 
-  publish-release-branch-server:
+  - name: publish-release-branch-server
     image: woodpeckerci/plugin-docker-buildx
     group: docker
     settings:
@@ -150,7 +150,7 @@ steps:
       branch: release/*
       event: push
 
-  publish-release-branch-server-alpine:
+  - name: publish-release-branch-server-alpine
     image: woodpeckerci/plugin-docker-buildx
     group: docker
     settings:
@@ -163,7 +163,7 @@ steps:
       branch: release/*
       event: push
 
-  release-server:
+  - name: release-server
     group: docker
     image: woodpeckerci/plugin-docker-buildx
     settings:
@@ -176,7 +176,7 @@ steps:
     when:
       event: tag
 
-  release-server-alpine:
+  - name: release-server-alpine
     group: docker
     image: woodpeckerci/plugin-docker-buildx
     settings:
@@ -193,7 +193,7 @@ steps:
   # A g e n t #
   #############
 
-  publish-agent-preview:
+  - name: publish-agent-preview
     group: docker
     image: woodpeckerci/plugin-docker-buildx
     secrets: [ docker_username, docker_password ]
@@ -206,7 +206,7 @@ steps:
     when:
       event: pull_request
 
-  publish-next-agent:
+  - name: publish-next-agent
     group: docker
     image: woodpeckerci/plugin-docker-buildx
     settings:
@@ -220,7 +220,7 @@ steps:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
 
-  publish-next-agent-alpine:
+  - name: publish-next-agent-alpine
     group: docker
     image: woodpeckerci/plugin-docker-buildx
     settings:
@@ -234,7 +234,7 @@ steps:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
 
-  publish-release-branch-agent:
+  - name: publish-release-branch-agent
     group: docker
     image: woodpeckerci/plugin-docker-buildx
     settings:
@@ -248,7 +248,7 @@ steps:
       branch: release/*
       event: push
 
-  publish-release-branch-agent-alpine:
+  - name: publish-release-branch-agent-alpine
     group: docker
     image: woodpeckerci/plugin-docker-buildx
     settings:
@@ -262,7 +262,7 @@ steps:
       branch: release/*
       event: push
 
-  release-agent:
+  - name: release-agent
     group: docker
     image: woodpeckerci/plugin-docker-buildx
     settings:
@@ -276,7 +276,7 @@ steps:
     when:
       event: tag
 
-  release-agent-alpine:
+  - name: release-agent-alpine
     group: docker
     image: woodpeckerci/plugin-docker-buildx
     settings:
@@ -294,7 +294,7 @@ steps:
   # C L I #
   #########
 
-  publish-cli-preview:
+  - name: publish-cli-preview
     group: docker
     image: woodpeckerci/plugin-docker-buildx
     secrets: [ docker_username, docker_password ]
@@ -307,7 +307,7 @@ steps:
     when:
       event: pull_request
 
-  publish-next-cli:
+  - name: publish-next-cli
     group: docker
     image: woodpeckerci/plugin-docker-buildx
     settings:
@@ -321,7 +321,7 @@ steps:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
 
-  publish-next-cli-alpine:
+  - name: publish-next-cli-alpine
     group: docker
     image: woodpeckerci/plugin-docker-buildx
     settings:
@@ -335,7 +335,7 @@ steps:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
 
-  publish-release-branch-cli:
+  - name: publish-release-branch-cli
     group: docker
     image: woodpeckerci/plugin-docker-buildx
     settings:
@@ -349,7 +349,7 @@ steps:
       branch: release/*
       event: push
 
-  publish-release-branch-cli-alpine:
+  - name: publish-release-branch-cli-alpine
     group: docker
     image: woodpeckerci/plugin-docker-buildx
     settings:
@@ -363,7 +363,7 @@ steps:
       branch: release/*
       event: push
 
-  release-cli:
+  - name: release-cli
     group: docker
     image: woodpeckerci/plugin-docker-buildx
     settings:
@@ -377,7 +377,7 @@ steps:
     when:
       event: tag
 
-  release-cli-alpine:
+  - name: release-cli-alpine
     group: docker
     image: woodpeckerci/plugin-docker-buildx
     settings:

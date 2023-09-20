@@ -18,7 +18,7 @@ variables:
   - &node_image 'node:20-alpine'
 
 steps:
-  build-cli:
+  - name: build-cli
     image: *golang_image
     commands:
       - make docs
@@ -26,7 +26,7 @@ steps:
       - path: *when_path
       - event: cron
 
-  build:
+  - name: build
     image: *node_image
     directory: docs/
     commands:
@@ -37,7 +37,7 @@ steps:
       - path: *when_path
       - event: cron
 
-  deploy-preview:
+  - name: deploy-preview
     image: woodpeckerci/plugin-surge-preview:next
     settings:
       path: "docs/build/"
@@ -54,7 +54,7 @@ steps:
 
   # TODO: add step to remove preview again after PR is closed (waiting for #286)
 
-  deploy:
+  - name: deploy
     image: alpine:3.18
     secrets:
       - BOT_PRIVATE_KEY

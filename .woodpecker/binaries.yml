@@ -13,7 +13,7 @@ variables:
   - &xgo_version 'go-1.20.2'
 
 steps:
-  build-web:
+  - name: build-web
     group: prepare
     image: *node_image
     directory: web/
@@ -22,13 +22,13 @@ steps:
       - pnpm install --frozen-lockfile
       - pnpm build
 
-  vendor:
+  - name: vendor
     group: prepare
     image: *golang_image
     commands:
       - go mod vendor
 
-  cross-compile-server:
+  - name: cross-compile-server
     group: build
     image: *xgo_image
     pull: true
@@ -42,36 +42,36 @@ steps:
       XGO_VERSION: *xgo_version
       TARGZ: '1'
 
-  build-agent:
+  - name: build-agent
     group: build
     image: *golang_image
     commands:
       - make release-agent
 
-  build-cli:
+  - name: build-cli
     group: build
     image: *golang_image
     commands:
       - make release-cli
 
-  build-deb-rpm:
+  - name: build-deb-rpm
     group: bundle
     image: *golang_image
     commands:
       - make bundle
 
-  checksums:
+  - name: checksums
     image: *golang_image
     commands:
       - make release-checksums
 
-  release-dryrun:
+  - name: release-dryrun
     image: *golang_image
     commands:
     - ls -la dist/*.*
     - cat dist/checksums.txt
 
-  release:
+  - name: release
     image: plugins/github-release
     secrets:
       - source: github_token

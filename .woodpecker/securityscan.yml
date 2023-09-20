@@ -10,13 +10,13 @@ variables:
   - &trivy_plugin codeberg.org/woodpecker-plugins/trivy:latest
 
 steps:
-  check backend:
+  - name: check backend
     group: check
     image: *trivy_plugin
     settings:
       skip-dirs: web/,docs/
 
-  check docs:
+  - name: check docs
     group: check
     image: *trivy_plugin
     settings:
@@ -26,7 +26,7 @@ steps:
       event: [pull_request, push, cron]
       branch: ${CI_REPO_DEFAULT_BRANCH}
 
-  check web:
+  - name: check web
     group: check
     image: *trivy_plugin
     settings:

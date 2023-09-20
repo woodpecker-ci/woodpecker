@@ -18,7 +18,7 @@ variables:
     event: [pull_request, tag, deployment]
 
 steps:
-  deps:
+  - name: deps
     image: *node_image
     directory: web/
     commands:
@@ -26,7 +26,7 @@ steps:
       - pnpm install --frozen-lockfile
     when: *when
 
-  lint:
+  - name: lint
     group: test
     image: *node_image
     directory: web/
@@ -35,7 +35,7 @@ steps:
       - pnpm lint
     when: *when
 
-  formatcheck:
+  - name: formatcheck
     group: test
     image: *node_image
     directory: web/
@@ -44,7 +44,7 @@ steps:
       - pnpm format:check
     when: *when
 
-  typecheck:
+  - name: typecheck
     group: test
     image: *node_image
     directory: web/
@@ -53,7 +53,7 @@ steps:
       - pnpm typecheck
     when: *when
 
-  test:
+  - name: test
     group: test
     image: *node_image
     directory: web/

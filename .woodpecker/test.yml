@@ -20,14 +20,14 @@ variables:
       event: [pull_request, tag, deployment]
 
 steps:
-  vendor:
+  - name: vendor
     image: *golang_image
     group: prepare
     commands:
       - go mod vendor
     when: *when
 
-  lint-pipeline:
+  - name: lint-pipeline
     image: *golang_image
     commands:
       - go run github.com/woodpecker-ci/woodpecker/cmd/cli lint
@@ -37,7 +37,7 @@ steps:
         - ".woodpecker/**"
         - "pipeline/schema/**"
 
-  dummy-web:
+  - name: dummy-web
     image: *golang_image
     group: prepare
     commands:
@@ -45,14 +45,14 @@ steps:
       - echo "test" > web/dist/index.html
     when: *when
 
-  lint:
+  - name: lint
     image: *golang_image
     group: test
     commands:
       - make lint
     when: *when
 
-  check_swagger:
+  - name: check_swagger
     image: *golang_image
     group: test
     commands:
@@ -61,18 +61,18 @@ steps:
       - "[ -n \"$DIFF\" ] && { echo \"swagger not up to date, exec 'make generate-swagger' and commit\"; exit 1; } || true"
     when: *when
 
-  lint-editorconfig:
+  - name: lint-editorconfig
     image: mstruebing/editorconfig-checker
     group: test
 
-  lint-license-header:
+  - name: lint-license-header
     image: *golang_image
     commands:
       - go install github.com/google/addlicense@latest
       - "addlicense -check -ignore \"vendor/**\" **/*.go"
     when: *when
 
-  test:
+  - name: test
     image: *golang_image
     group: test
     commands:
@@ -82,7 +82,7 @@ steps:
       - make test-lib
     when: *when
 
-  sqlite:
+  - name: sqlite
     image: *golang_image
     group: test
     environment:
@@ -91,7 +91,7 @@ steps:
       - make test-server-datastore-coverage
     when: *when
 
-  postgres:
+  - name: postgres
     image: *golang_image
     group: test
     environment:
@@ -101,7 +101,7 @@ steps:
       - make test-server-datastore
     when: *when
 
-  mysql:
+  - name: mysql
     image: *golang_image
     group: test
     environment:
@@ -111,7 +111,7 @@ steps:
       - make test-server-datastore
     when: *when
 
-  codecov:
+  - name: codecov
     pull: true
     image: woodpeckerci/plugin-codecov:next-alpine
     settings:
@@ -127,7 +127,7 @@ steps:
     failure: ignore
 
 services:
-  service-postgres:
+  - name: service-postgres
     image: postgres:11
     ports: ["5432"]
     environment:
@@ -135,7 +135,7 @@ services:
       - POSTGRES_HOST_AUTH_METHOD=trust
     when: *when
 
-  service-mysql:
+  - name: service-mysql
     image: mysql:5.6.27
     ports: ["3306"]
     environment:

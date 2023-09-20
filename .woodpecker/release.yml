@@ -1,5 +1,5 @@
 steps:
-  release:
+  - name: release
     image: woodpeckerci/plugin-ready-release-go
     pull: true
     settings:
