@@ -12,7 +12,7 @@ when:
         - hello
 
 steps:
-  echo:
+  - name: echo
     image: alpine
     commands:
       - echo "test"

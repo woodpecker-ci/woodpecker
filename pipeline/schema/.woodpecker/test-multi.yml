@@ -1,5 +1,5 @@
 steps:
-  deploy:
+  - name: deploy
     image: golang
     commands:
       - go test

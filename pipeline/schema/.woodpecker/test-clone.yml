@@ -8,7 +8,7 @@ clone:
       my-module: https://github.com/octocat/my-module.git
 
 steps:
-  test:
+  - name: test
     image: alpine
     commands:
       - echo "test"

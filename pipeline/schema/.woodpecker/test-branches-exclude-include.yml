@@ -1,9 +1,0 @@
-branches:
-  include: main
-  exclude: [develop, feature/*]
-
-steps:
-  build:
-    image: golang
-    commands:
-      - go test

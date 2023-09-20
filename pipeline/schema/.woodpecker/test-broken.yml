@@ -6,10 +6,10 @@ matri:
     - 1.13
 
 steps:
-  test:
+  - name: test
     image: golang:${GO_VERSION}
     commands:
       - echo "test ${DATABAS}"
 
-  build:
+  - name: build
     commands: go build

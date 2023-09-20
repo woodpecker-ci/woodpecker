@@ -24,9 +24,9 @@ type (
 	Workflow struct {
 		When      constraint.When `yaml:"when,omitempty"`
 		Workspace Workspace       `yaml:"workspace,omitempty"`
-		Clone     []*Container    `yaml:"clone,omitempty"`
-		Steps     []*Container    `yaml:"steps,omitempty"`
-		Services  []*Container    `yaml:"services,omitempty"`
+		Clone     ContainerList   `yaml:"clone,omitempty"`
+		Steps     ContainerList   `yaml:"steps,omitempty"`
+		Services  ContainerList   `yaml:"services,omitempty"`
 		Labels    base.SliceOrMap `yaml:"labels,omitempty"`
 		DependsOn []string        `yaml:"depends_on,omitempty"`
 		RunsOn    []string        `yaml:"runs_on,omitempty"`

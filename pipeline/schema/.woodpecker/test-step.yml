@@ -1,26 +1,26 @@
 steps:
-  image:
+  - name: image
     image: golang
     commands:
       - go test
 
-  image-pull:
+  - name: image-pull
     image: golang
     pull: true
     commands:
       - go test
 
-  single-command:
+  - name: single-command
     image: golang
     commands: go test
 
-  commands:
+  - name: commands
     image: golang
     commands:
       - go get
       - go test
 
-  environment:
+  - name: environment
     image: golang
     environment:
       CGO: 0
@@ -29,7 +29,7 @@ steps:
     commands:
       - go test
 
-  environment-array:
+  - name: environment-array
     image: golang
     environment:
       - CGO=0
@@ -38,7 +38,7 @@ steps:
     commands:
       - go test
 
-  secrets:
+  - name: secrets
     image: docker
     commands:
       - echo $DOCKER_USERNAME
@@ -48,17 +48,17 @@ steps:
       - source: docker_prod_password
         target: docker_password
 
-  group:
+  - name: group
     group: test
     image: golang
     commands:
       - go test
 
-  detached:
+  - name: detached
     image: redis
     detach: true
 
-  volume:
+  - name: volume
     image: docker
     commands:
       - docker build --rm -t octocat/hello-world .

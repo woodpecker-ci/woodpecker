@@ -151,6 +151,15 @@ func TestUnmarshalContainers(t *testing.T) {
 			},
 		},
 		{
+			from: "{ name: build, image: golang }",
+			want: []*Container{
+				{
+					Name:  "build",
+					Image: "golang",
+				},
+			},
+		},
+		{
 			from: "[{ name: unit_test, image: node, settings: { normal_setting: true } }]",
 			want: []*Container{
 				{
@@ -264,10 +273,10 @@ func TestUnmarshalContainers(t *testing.T) {
 	}
 	for _, test := range testdata {
 		in := []byte(test.from)
-		var got []*Container
+		got := ContainerList{}
 		err := yaml.Unmarshal(in, &got)
 		assert.NoError(t, err)
-		assert.EqualValues(t, test.want, got, "problem parsing containers %q", test.from)
+		assert.EqualValues(t, test.want, got.ContainerList, "problem parsing containers %q", test.from)
 	}
 }
 
@@ -275,12 +284,13 @@ func TestUnmarshalContainers(t *testing.T) {
 // are provided to verify error messages are returned.
 func TestUnmarshalContainersErr(t *testing.T) {
 	testdata := []string{
-		"foo: { name: [ foo, bar] }",
+		"- name: [ foo, bar]",
+		"name: [ foo, bar]",
 		"- foo",
 	}
 	for _, test := range testdata {
 		in := []byte(test)
-		var containers []*Container
+		containers := new(ContainerList)
 		err := yaml.Unmarshal(in, &containers)
 		assert.Error(t, err, "wanted error for containers %q", test)
 	}

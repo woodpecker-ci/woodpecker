@@ -16,14 +16,11 @@
     },
     "clone": { "$ref": "#/definitions/clone" },
     "skip_clone": { "type": "boolean" },
-    "branches": { "$ref": "#/definitions/branches" },
     "when": { "$ref": "#/definitions/pipeline_when" },
     "steps": { "$ref": "#/definitions/step_list" },
-    "pipeline": { "$ref": "#/definitions/step_list", "description": "depricated, use steps" },
     "services": { "$ref": "#/definitions/services" },
     "workspace": { "$ref": "#/definitions/workspace" },
     "matrix": { "$ref": "#/definitions/matrix" },
-    "platform": { "$ref": "#/definitions/platform" },
     "labels": { "$ref": "#/definitions/labels" },
     "depends_on": {
       "type": "array",
@@ -96,7 +93,7 @@
     "step_list": {
       "description": "The steps section defines a list of steps which will be executed serially, in the order in which they are defined. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax",
       "oneOf": [
-        { "type": "object", "additionalProperties": { "$ref": "#/definitions/step" }, "minProperties": 1 },
+        { "$ref": "#/definitions/step" },
         { "type": "array", "items": { "$ref": "#/definitions/step" }, "minLength": 1 }
       ]
     },
@@ -202,8 +199,11 @@
       "description": "Every step of your pipeline executes arbitrary commands inside a specified docker container. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#steps",
       "type": "object",
       "additionalProperties": false,
-      "required": ["image"],
+      "required": ["image", "name"],
       "properties": {
+        "name": {
+          "type": "string"
+        },
         "image": {
           "$ref": "#/definitions/step_image"
         },

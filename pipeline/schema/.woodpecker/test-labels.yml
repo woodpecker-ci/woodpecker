@@ -4,7 +4,7 @@ labels:
   hostname: ""
 
 steps:
-  build:
+  - name: build
     image: golang:latest
     commands:
       - go test

@@ -1,5 +1,5 @@
 steps:
-  test:
+  - name: test
     image: alpine
     commands:
       - echo "test"

@@ -6,12 +6,12 @@ variables:
       - whoami
 
 steps:
-  test-base-step:
+  - name: test-base-step
     <<: *base-step
-  test base step with latest image:
+  - name: test base step with latest image
     <<: *base-step
     image: golang:latest
-  test list overwrite:
+  - name: test list overwrite
     <<: *base-step
     commands:
       - <<: *base-cmds

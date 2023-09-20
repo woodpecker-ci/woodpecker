@@ -1,61 +1,61 @@
 steps:
-  when-branch:
+  - name: when-branch
     image: alpine
     commands:
       - echo "test"
     when:
       branch: main
 
-  when-branch-array:
+  - name: when-branch-array
     image: alpine
     commands:
       - echo "test"
     when:
       branch: [main, deploy]
 
-  when-event:
+  - name: when-event
     image: alpine
     commands:
       - echo "test"
     when:
       event: push
 
-  when-event-array:
+  - name: when-event-array
     image: alpine
     commands:
       - echo "test"
     when:
       event: [push, pull_request, tag, deployment]
 
-  when-ref:
+  - name: when-ref
     image: alpine
     commands:
       - echo "test"
     when:
       ref: 'refs/tags/v**'
 
-  when-status:
+  - name: when-status
     image: alpine
     commands:
       - echo "test"
     when:
       status: [success, failure]
 
-  when-platform:
+  - name: when-platform
     image: alpine
     commands:
       - echo "test"
     when:
       platform: linux/amd64
 
-  when-platform-array:
+  - name: when-platform-array
     image: alpine
     commands:
       - echo "test"
     when:
       platform: [linux/*, windows/amd64]
 
-  when-environment:
+  - name: when-environment
     image: alpine
     commands:
       - echo "test"
@@ -63,7 +63,7 @@ steps:
       environment: production
       event: deployment
 
-  when-matrix:
+  - name: when-matrix
     image: alpine
     commands:
       - echo "test"
@@ -72,21 +72,21 @@ steps:
         GO_VERSION: 1.5
         REDIS_VERSION: 2.8
 
-  when-instance:
+  - name: when-instance
     image: alpine
     commands:
       - echo "test"
     when:
       instance: stage.woodpecker.company.com
 
-  when-path:
+  - name: when-path
     image: alpine
     commands:
       - echo "test"
     when:
       path: 'folder/**'
 
-  when-path-array:
+  - name: when-path-array
     image: alpine
     commands:
       - echo "test"
@@ -95,7 +95,7 @@ steps:
         - 'folder/**'
         - '**/*.c'
 
-  when-path-include-exclude:
+  - name: when-path-include-exclude
     image: alpine
     commands:
       - echo "test"
@@ -105,14 +105,14 @@ steps:
         exclude: ['*.md', 'docs/**']
         ignore_message: '[ALL]'
 
-  when-repo:
+  - name: when-repo
     image: alpine
     commands:
       - echo "test"
     when:
       repo: test/test
 
-  when-multi:
+  - name: when-multi
     image: alpine
     commands:
       - echo "test"
@@ -122,7 +122,7 @@ steps:
       - event: push
         branch: main
 
-  when-cron:
+  - name: when-cron
     image: alpine
     commands:
       - echo "test"
@@ -130,7 +130,7 @@ steps:
       cron: 'update locales'
       event: cron
 
-  when-cron-list:
+  - name: when-cron-list
     image: alpine
     commands: echo "test"
     when:
@@ -141,7 +141,7 @@ steps:
             - hello
           exclude: hi
 
-  when-evaluate:
+  - name: when-evaluate
     image: alpine
     commands: echo "test"
     when:

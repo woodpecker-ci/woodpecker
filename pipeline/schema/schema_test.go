@@ -33,18 +33,6 @@ func TestSchema(t *testing.T) {
 		fail     bool
 	}{
 		{
-			name:     "Branches",
-			testFile: ".woodpecker/test-branches.yml",
-		},
-		{
-			name:     "Branches Array",
-			testFile: ".woodpecker/test-branches-array.yml",
-		},
-		{
-			name:     "Branches exclude & include",
-			testFile: ".woodpecker/test-branches-exclude-include.yml",
-		},
-		{
 			name:     "Clone",
 			testFile: ".woodpecker/test-clone.yml",
 		},
@@ -83,10 +71,6 @@ func TestSchema(t *testing.T) {
 		{
 			name:     "Workspace",
 			testFile: ".woodpecker/test-workspace.yml",
-		},
-		{
-			name:     "Platform",
-			testFile: ".woodpecker/test-platform.yml",
 		},
 		{
 			name:     "Labels",
