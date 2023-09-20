@@ -142,7 +142,7 @@ func TestUnmarshalContainers(t *testing.T) {
 		want []*Container
 	}{
 		{
-			from: "build: { image: golang }",
+			from: "[{ name: build, image: golang }]",
 			want: []*Container{
 				{
 					Name:  "build",
@@ -151,7 +151,7 @@ func TestUnmarshalContainers(t *testing.T) {
 			},
 		},
 		{
-			from: "test: { name: unit_test, image: node, settings: { normal_setting: true } }",
+			from: "[{ name: unit_test, image: node, settings: { normal_setting: true } }]",
 			want: []*Container{
 				{
 					Name:  "unit_test",
@@ -163,18 +163,18 @@ func TestUnmarshalContainers(t *testing.T) {
 			},
 		},
 		{
-			from: `publish-agent:
-    group: bundle
-    image: print/env
-    settings:
-      repo: woodpeckerci/woodpecker-agent
-      dry_run: true
-      dockerfile: docker/Dockerfile.agent
-      tag: [next, latest]
-    secrets: [docker_username, docker_password]
-    when:
-      branch: ${CI_REPO_DEFAULT_BRANCH}
-      event: push`,
+			from: `- name: publish-agent
+  group: bundle
+  image: print/env
+  settings:
+    repo: woodpeckerci/woodpecker-agent
+    dry_run: true
+    dockerfile: docker/Dockerfile.agent
+    tag: [next, latest]
+  secrets: [docker_username, docker_password]
+  when:
+    branch: ${CI_REPO_DEFAULT_BRANCH}
+    event: push`,
 			want: []*Container{
 				{
 					Name:  "publish-agent",
@@ -205,16 +205,16 @@ func TestUnmarshalContainers(t *testing.T) {
 			},
 		},
 		{
-			from: `publish-cli:
-    group: docker
-    image: print/env
-    settings:
-      repo: woodpeckerci/woodpecker-cli
-      dockerfile: docker/Dockerfile.cli
-      tag: [next]
-    when:
-      branch: ${CI_REPO_DEFAULT_BRANCH}
-      event: push`,
+			from: `- name: publish-cli
+  group: docker
+  image: print/env
+  settings:
+    repo: woodpeckerci/woodpecker-cli
+    dockerfile: docker/Dockerfile.cli
+    tag: [next]
+  when:
+    branch: ${CI_REPO_DEFAULT_BRANCH}
+    event: push`,
 			want: []*Container{
 				{
 					Name:  "publish-cli",
@@ -237,12 +237,12 @@ func TestUnmarshalContainers(t *testing.T) {
 			},
 		},
 		{
-			from: `publish-cli:
-    image: print/env
-    when:
-      - branch: ${CI_REPO_DEFAULT_BRANCH}
-        event: push
-      - event: pull_request`,
+			from: `- name: publish-cli
+  image: print/env
+  when:
+    - branch: ${CI_REPO_DEFAULT_BRANCH}
+      event: push
+    - event: pull_request`,
 			want: []*Container{
 				{
 					Name:  "publish-cli",
@@ -264,10 +264,10 @@ func TestUnmarshalContainers(t *testing.T) {
 	}
 	for _, test := range testdata {
 		in := []byte(test.from)
-		got := ContainerList{}
+		var got []*Container
 		err := yaml.Unmarshal(in, &got)
 		assert.NoError(t, err)
-		assert.EqualValues(t, test.want, got.ContainerList, "problem parsing containers %q", test.from)
+		assert.EqualValues(t, test.want, got, "problem parsing containers %q", test.from)
 	}
 }
 
@@ -280,7 +280,7 @@ func TestUnmarshalContainersErr(t *testing.T) {
 	}
 	for _, test := range testdata {
 		in := []byte(test)
-		containers := new(ContainerList)
+		var containers []*Container
 		err := yaml.Unmarshal(in, &containers)
 		assert.Error(t, err, "wanted error for containers %q", test)
 	}

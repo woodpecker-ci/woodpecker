@@ -120,10 +120,10 @@ func TestCompilerCompile(t *testing.T) {
 		},
 	}, {
 		name: "workflow with one dummy step",
-		fronConf: &yaml_types.Workflow{Steps: yaml_types.ContainerList{ContainerList: []*yaml_types.Container{{
+		fronConf: &yaml_types.Workflow{Steps: []*yaml_types.Container{{
 			Name:  "dummy",
 			Image: "dummy_img",
-		}}}},
+		}}},
 		backConf: &backend_types.Config{
 			Networks: defaultNetworks,
 			Volumes:  defaultVolumes,
@@ -144,7 +144,7 @@ func TestCompilerCompile(t *testing.T) {
 		},
 	}, {
 		name: "workflow with three steps and one group",
-		fronConf: &yaml_types.Workflow{Steps: yaml_types.ContainerList{ContainerList: []*yaml_types.Container{{
+		fronConf: &yaml_types.Workflow{Steps: []*yaml_types.Container{{
 			Name:     "echo env",
 			Image:    "bash",
 			Commands: []string{"env"},
@@ -158,7 +158,7 @@ func TestCompilerCompile(t *testing.T) {
 			Group:    "parallel",
 			Image:    "bash",
 			Commands: []string{"echo 2"},
-		}}}},
+		}}},
 		backConf: &backend_types.Config{
 			Networks: defaultNetworks,
 			Volumes:  defaultVolumes,

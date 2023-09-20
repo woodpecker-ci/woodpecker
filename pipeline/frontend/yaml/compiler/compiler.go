@@ -151,7 +151,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 	}
 
 	// add default clone step
-	if !c.local && len(conf.Clone.ContainerList) == 0 && !conf.SkipClone {
+	if !c.local && len(conf.Clone) == 0 && !conf.SkipClone {
 		cloneSettings := map[string]interface{}{"depth": "0"}
 		if c.metadata.Curr.Event == metadata.EventTag {
 			cloneSettings["tags"] = "true"
@@ -172,7 +172,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 
 		config.Stages = append(config.Stages, stage)
 	} else if !c.local && !conf.SkipClone {
-		for i, container := range conf.Clone.ContainerList {
+		for i, container := range conf.Clone {
 			if match, err := container.When.Match(c.metadata, false, c.env); !match && err == nil {
 				continue
 			} else if err != nil {
@@ -202,12 +202,12 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 	c.setupCache(conf, config)
 
 	// add services steps
-	if len(conf.Services.ContainerList) != 0 {
+	if len(conf.Services) != 0 {
 		stage := new(backend_types.Stage)
 		stage.Name = fmt.Sprintf("%s_%s", c.prefix, nameServices)
 		stage.Alias = nameServices
 
-		for i, container := range conf.Services.ContainerList {
+		for i, container := range conf.Services {
 			if match, err := container.When.Match(c.metadata, false, c.env); !match && err == nil {
 				continue
 			} else if err != nil {
@@ -224,7 +224,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 	// add pipeline steps. 1 pipeline step per stage, at the moment
 	var stage *backend_types.Stage
 	var group string
-	for i, container := range conf.Steps.ContainerList {
+	for i, container := range conf.Steps {
 		// Skip if local and should not run local
 		if c.local && !container.When.IsLocal() {
 			continue

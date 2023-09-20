@@ -42,16 +42,16 @@ func New(opts ...Option) *Linter {
 
 // Lint lints the configuration.
 func (l *Linter) Lint(c *types.Workflow) error {
-	if len(c.Steps.ContainerList) == 0 {
+	if len(c.Steps) == 0 {
 		return fmt.Errorf("Invalid or missing pipeline section")
 	}
-	if err := l.lint(c.Clone.ContainerList, blockClone); err != nil {
+	if err := l.lint(c.Clone, blockClone); err != nil {
 		return err
 	}
-	if err := l.lint(c.Steps.ContainerList, blockPipeline); err != nil {
+	if err := l.lint(c.Steps, blockPipeline); err != nil {
 		return err
 	}
-	return l.lint(c.Services.ContainerList, blockServices)
+	return l.lint(c.Services, blockServices)
 }
 
 func (l *Linter) lint(containers []*types.Container, _ uint8) error {

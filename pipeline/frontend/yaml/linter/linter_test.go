@@ -22,27 +22,6 @@ import (
 
 func TestLint(t *testing.T) {
 	testdatas := []struct{ Title, Data string }{{
-		Title: "map", Data: `
-steps:
-  build:
-    image: docker
-    privileged: true
-    network_mode: host
-    volumes:
-      - /tmp:/tmp
-    commands:
-      - go build
-      - go test
-  publish:
-    image: plugins/docker
-    repo: foo/bar
-    settings:
-      foo: bar
-services:
-  redis:
-    image: redis
-`,
-	}, {
 		Title: "list", Data: `
 steps:
   - name: build
@@ -69,9 +48,9 @@ variables:
       - go version
 
 steps:
-  test base step:
+  - name: test base step
     <<: *base-step
-  test base step with latest image:
+  - name: test base step with latest image
     <<: *base-step
     image: golang:latest
 `,
@@ -100,52 +79,52 @@ func TestLintErrors(t *testing.T) {
 			want: "Invalid or missing pipeline section",
 		},
 		{
-			from: "steps: { build: { image: '' }  }",
+			from: "steps: [ { name: build, image: '' } ]",
 			want: "Invalid or missing image",
 		},
 		{
-			from: "steps: { build: { image: golang, privileged: true }  }",
+			from: "steps: [ { name: build, image: golang, privileged: true } ]",
 			want: "Insufficient privileges to use privileged mode",
 		},
 		{
-			from: "steps: { build: { image: golang, shm_size: 10gb }  }",
+			from: "steps: [ { name: build, image: golang, shm_size: 10gb } ]",
 			want: "Insufficient privileges to override shm_size",
 		},
 		{
-			from: "steps: { build: { image: golang, dns: [ 8.8.8.8 ] }  }",
+			from: "steps: [ { name: build, image: golang, dns: [ 8.8.8.8 ] } ]",
 			want: "Insufficient privileges to use custom dns",
 		},
 
 		{
-			from: "steps: { build: { image: golang, dns_search: [ example.com ] }  }",
+			from: "steps: [ { name: build, image: golang, dns_search: [ example.com ] } ]",
 			want: "Insufficient privileges to use dns_search",
 		},
 		{
-			from: "steps: { build: { image: golang, devices: [ '/dev/tty0:/dev/tty0' ] }  }",
+			from: "steps: [ { name: build, image: golang, devices: [ '/dev/tty0:/dev/tty0' ] } ]",
 			want: "Insufficient privileges to use devices",
 		},
 		{
-			from: "steps: { build: { image: golang, extra_hosts: [ 'somehost:162.242.195.82' ] }  }",
+			from: "steps: [ { name: build, image: golang, extra_hosts: [ 'somehost:162.242.195.82' ] } ]",
 			want: "Insufficient privileges to use extra_hosts",
 		},
 		{
-			from: "steps: { build: { image: golang, network_mode: host }  }",
+			from: "steps: [ { name: build, image: golang, network_mode: host } ]",
 			want: "Insufficient privileges to use network_mode",
 		},
 		{
-			from: "steps: { build: { image: golang, networks: [ outside, default ] }  }",
+			from: "steps: [ { name: build, image: golang, networks: [ outside, default ] } ]",
 			want: "Insufficient privileges to use networks",
 		},
 		{
-			from: "steps: { build: { image: golang, volumes: [ '/opt/data:/var/lib/mysql' ] }  }",
+			from: "steps: [ { name: build, image: golang, volumes: [ '/opt/data:/var/lib/mysql' ] } ]",
 			want: "Insufficient privileges to use volumes",
 		},
 		{
-			from: "steps: { build: { image: golang, network_mode: 'container:name' }  }",
+			from: "steps: [ { name: build, image: golang, network_mode: 'container:name' } ]",
 			want: "Insufficient privileges to use network_mode",
 		},
 		{
-			from: "steps: { build: { image: golang, sysctls: [ net.core.somaxconn=1024 ] }  }",
+			from: "steps: [ { name: build, image: golang, sysctls: [ net.core.somaxconn=1024 ] } ]",
 			want: "Insufficient privileges to use sysctls",
 		},
 	}
