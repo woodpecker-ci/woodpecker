@@ -551,8 +551,11 @@
       "type": "object",
       "additionalProperties": false,
       "minProperties": 1,
-      "required": ["image"],
+      "required": ["name", "image"],
       "properties": {
+        "name": {
+          "type": "string"
+        },
         "image": {
           "$ref": "#/definitions/step_image"
         },
