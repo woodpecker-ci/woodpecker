@@ -74,8 +74,11 @@
         "waiting_for": "en attente de"
       },
       "repos": {
+        "desc": "Dépôts actifs ou anciennement actifs sur ce serveur",
+        "disabled": "Désactivé",
         "none": "Il n'y a pas encore de dépôts.",
         "repos": "Dépôts",
+        "settings": "Réglages du dépôt",
         "view": "Voir le dépôt"
       },
       "secrets": {
@@ -464,11 +467,13 @@
         "add": "Ajouter un secret",
         "created": "Secret d'utilisateur crée",
         "deleted": "Secret d'utilisateur effacé",
+        "desc": "Les secrets d'utilisateur peuvent être passés à toutes les étapes du pipeline des dépôtsde l'utilisateur sous forme de variables d'environnement.",
         "events": {
           "events": "Disponible pour les événements suivants",
           "pr_warning": "Attention, si cette option est activé, un acteur malicieux peut proposer une pull request qui affiche vos secrets."
         },
         "images": {
+          "desc": "Liste d'images séparé par des virgules où ce secret sera utilisable, laisser vide pour autoriser toutes les images",
           "images": "Disponible pour les images suivantes"
         },
         "name": "Nom",
