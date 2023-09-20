@@ -127,7 +127,8 @@ steps:
     failure: ignore
 
 services:
-  - name: service-postgres
+  # TODO replace next line (currently breaks schema) - name: service-postgres
+  service-postgres:
     image: postgres:11
     ports: ["5432"]
     environment:
@@ -135,7 +136,8 @@ services:
       - POSTGRES_HOST_AUTH_METHOD=trust
     when: *when
 
-  - name: service-mysql
+  # TODO replace next line (currently breaks schema) - name: service-mysql
+  service-mysql:
     image: mysql:5.6.27
     ports: ["3306"]
     environment:
