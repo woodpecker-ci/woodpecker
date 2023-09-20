@@ -4,6 +4,11 @@
   "prConcurrentLimit": 5,
   "packageRules": [
     {
+      "matchManagers": ["docker-compose"],
+      "matchFileNames": ["docker-compose.gitpod.yml"],
+      "labels": ["devx"]
+    },
+    {
       "matchManagers": ["gomod", "npm", "dockerfile"],
       "labels": ["dependencies"]
     },
