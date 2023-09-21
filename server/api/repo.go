@@ -389,8 +389,7 @@ func DeleteRepo(c *gin.Context) {
 		}
 	}
 
-	host := server.Config.Server.WebhookHost
-	if err := server.Config.Services.Forge.Deactivate(c, user, repo, host); err != nil {
+	if err := server.Config.Services.Forge.Deactivate(c, user, repo, server.Config.Server.WebhookHost); err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
