@@ -6,7 +6,7 @@ steps:
       - go test
 
 services:
-  database:
+  - name: database
     image: mysql
-  cache:
+  - name: cache
     image: redis
