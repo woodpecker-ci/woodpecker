@@ -118,7 +118,7 @@ func GetCC(c *gin.Context) {
 		return
 	}
 
-	url := fmt.Sprintf("%s%s/%s/%d", server.Config.Server.Host, server.Config.Server.RootPath, repo.FullName, pipelines[0].Number)
+	url := fmt.Sprintf("%s/%s/%d", server.Config.Server.Host, repo.FullName, pipelines[0].Number)
 	cc := ccmenu.New(repo, pipelines[0], url)
 	c.XML(http.StatusOK, cc)
 }
