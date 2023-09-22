@@ -389,7 +389,7 @@ func DeleteRepo(c *gin.Context) {
 		}
 	}
 
-	if err := server.Config.Services.Forge.Deactivate(c, user, repo, server.Config.Server.Host); err != nil {
+	if err := server.Config.Services.Forge.Deactivate(c, user, repo, server.Config.Server.WebhookHost); err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
@@ -534,7 +534,7 @@ func MoveRepo(c *gin.Context) {
 	}
 
 	// reconstruct the link
-	host := server.Config.Server.Host
+	host := server.Config.Server.WebhookHost
 	link := fmt.Sprintf(
 		"%s/api/hook?access_token=%s",
 		host,
