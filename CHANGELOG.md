@@ -1,17 +1,18 @@
 # Changelog
 
-## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-09-19
+## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-09-22
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@pat-s, @renovate[bot], @xoxys, @qwerty287, @lonix1, @s3lph, @anbraten, @mzampetakis, @math3vz, @LTek-online, @testwill, @6543, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @runephilosof-karnovgroup, @azdle, @praneeth-ovckd, @nupplaphil
+@tomix1024, @renovate[bot], @qwerty287, @pat-s, @xoxys, @lonix1, @s3lph, @anbraten, @mzampetakis, @math3vz, @LTek-online, @testwill, @6543, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @runephilosof-karnovgroup, @azdle, @praneeth-ovckd, @nupplaphil
 
 ### 💥 Breaking changes
 
+- Remove deprecated options parsing [[#2480](https://github.com/woodpecker-ci/woodpecker/pull/2480)]
 - Move "skip ci" logic into global pipeline conditions [[#2216](https://github.com/woodpecker-ci/woodpecker/pull/2216)]
 - Deprecate "platform" filter in favour of "labels" [[#2181](https://github.com/woodpecker-ci/woodpecker/pull/2181)]
 - fail hard on deprecated pipeline keys [[#2180](https://github.com/woodpecker-ci/woodpecker/pull/2180)]
-- client lib: remove useles "sync" option from RepoListOpts [[#2090](https://github.com/woodpecker-ci/woodpecker/pull/2090)]
+- client lib: remove useless "sync" option from RepoListOpts [[#2090](https://github.com/woodpecker-ci/woodpecker/pull/2090)]
 - Drop deprecated built-in environment variables [[#2048](https://github.com/woodpecker-ci/woodpecker/pull/2048)]
 
 ### 🔒 Security
@@ -33,34 +34,9 @@
 - Support bitbucket Dir() and support multi-workflows [[#2045](https://github.com/woodpecker-ci/woodpecker/pull/2045)]
 - Add ping command to server to allow container healthchecks [[#2030](https://github.com/woodpecker-ci/woodpecker/pull/2030)]
 
-### 📚 Documentation
-
-- Update GH app installation instructions [[#2472](https://github.com/woodpecker-ci/woodpecker/pull/2472)]
-- Add videos [[#2465](https://github.com/woodpecker-ci/woodpecker/pull/2465)]
-- docs: missing info for runs_on [[#2457](https://github.com/woodpecker-ci/woodpecker/pull/2457)]
-- Add hint about alternative pipeline skip syntax [[#2443](https://github.com/woodpecker-ci/woodpecker/pull/2443)]
-- Fix typo in GitLab docs [[#2376](https://github.com/woodpecker-ci/woodpecker/pull/2376)]
-- clarify setup with gitlab with RFC1918 nets and non standard TLDs [[#2363](https://github.com/woodpecker-ci/woodpecker/pull/2363)]
-- Clarify env var `CI` in docs [[#2349](https://github.com/woodpecker-ci/woodpecker/pull/2349)]
-- docs: yaml cheatsheet for advanced syntax [[#2329](https://github.com/woodpecker-ci/woodpecker/pull/2329)]
-- Improve explanation for globs in when:path [[#2252](https://github.com/woodpecker-ci/woodpecker/pull/2252)]
-- Fix usage description for backend-http-proxy flag [[#2250](https://github.com/woodpecker-ci/woodpecker/pull/2250)]
-- Restructure k8s documentation [[#2193](https://github.com/woodpecker-ci/woodpecker/pull/2193)]
-- Update list of "projects using Woodpecker" [[#2196](https://github.com/woodpecker-ci/woodpecker/pull/2196)]
-- Update 92-awesome.md [[#2195](https://github.com/woodpecker-ci/woodpecker/pull/2195)]
-- Better blog title/desc [[#2182](https://github.com/woodpecker-ci/woodpecker/pull/2182)]
-- Fix version in FAQ [[#2101](https://github.com/woodpecker-ci/woodpecker/pull/2101)]
-- Add blog posts/tutorials [[#2095](https://github.com/woodpecker-ci/woodpecker/pull/2095)]
-- update version docs about versioning [[#2086](https://github.com/woodpecker-ci/woodpecker/pull/2086)]
-- Fix client example [[#2085](https://github.com/woodpecker-ci/woodpecker/pull/2085)]
-- Update docs deps to address cves [[#2080](https://github.com/woodpecker-ci/woodpecker/pull/2080)]
-- fix: global registry docs [[#2070](https://github.com/woodpecker-ci/woodpecker/pull/2070)]
-- Improve bitbucket docs [[#2066](https://github.com/woodpecker-ci/woodpecker/pull/2066)]
-- update docs about versioning [[#2043](https://github.com/woodpecker-ci/woodpecker/pull/2043)]
-- Set v1.0 documents as default and mark v0.15 as unmaintained [[#2034](https://github.com/woodpecker-ci/woodpecker/pull/2034)]
-
 ### 📈 Enhancement
 
+- Fix usage of WOODPECKER_ROOT_PATH [[#2485](https://github.com/woodpecker-ci/woodpecker/pull/2485)]
 - Some UI enhancement [[#2468](https://github.com/woodpecker-ci/woodpecker/pull/2468)]
 - Harmonize pipeline status information and add a review link to the approval [[#2345](https://github.com/woodpecker-ci/woodpecker/pull/2345)]
 - Add Renovate [[#2360](https://github.com/woodpecker-ci/woodpecker/pull/2360)]
@@ -111,6 +87,32 @@
 - Remove fallback check for old sqlite file location [[#2046](https://github.com/woodpecker-ci/woodpecker/pull/2046)]
 - let generic datastore error include func name [[#2041](https://github.com/woodpecker-ci/woodpecker/pull/2041)]
 
+### 📚 Documentation
+
+- Update GH app installation instructions [[#2472](https://github.com/woodpecker-ci/woodpecker/pull/2472)]
+- Add videos [[#2465](https://github.com/woodpecker-ci/woodpecker/pull/2465)]
+- docs: missing info for runs_on [[#2457](https://github.com/woodpecker-ci/woodpecker/pull/2457)]
+- Add hint about alternative pipeline skip syntax [[#2443](https://github.com/woodpecker-ci/woodpecker/pull/2443)]
+- Fix typo in GitLab docs [[#2376](https://github.com/woodpecker-ci/woodpecker/pull/2376)]
+- clarify setup with gitlab with RFC1918 nets and non standard TLDs [[#2363](https://github.com/woodpecker-ci/woodpecker/pull/2363)]
+- Clarify env var `CI` in docs [[#2349](https://github.com/woodpecker-ci/woodpecker/pull/2349)]
+- docs: yaml cheatsheet for advanced syntax [[#2329](https://github.com/woodpecker-ci/woodpecker/pull/2329)]
+- Improve explanation for globs in when:path [[#2252](https://github.com/woodpecker-ci/woodpecker/pull/2252)]
+- Fix usage description for backend-http-proxy flag [[#2250](https://github.com/woodpecker-ci/woodpecker/pull/2250)]
+- Restructure k8s documentation [[#2193](https://github.com/woodpecker-ci/woodpecker/pull/2193)]
+- Update list of "projects using Woodpecker" [[#2196](https://github.com/woodpecker-ci/woodpecker/pull/2196)]
+- Update 92-awesome.md [[#2195](https://github.com/woodpecker-ci/woodpecker/pull/2195)]
+- Better blog title/desc [[#2182](https://github.com/woodpecker-ci/woodpecker/pull/2182)]
+- Fix version in FAQ [[#2101](https://github.com/woodpecker-ci/woodpecker/pull/2101)]
+- Add blog posts/tutorials [[#2095](https://github.com/woodpecker-ci/woodpecker/pull/2095)]
+- update version docs about versioning [[#2086](https://github.com/woodpecker-ci/woodpecker/pull/2086)]
+- Fix client example [[#2085](https://github.com/woodpecker-ci/woodpecker/pull/2085)]
+- Update docs deps to address cves [[#2080](https://github.com/woodpecker-ci/woodpecker/pull/2080)]
+- fix: global registry docs [[#2070](https://github.com/woodpecker-ci/woodpecker/pull/2070)]
+- Improve bitbucket docs [[#2066](https://github.com/woodpecker-ci/woodpecker/pull/2066)]
+- update docs about versioning [[#2043](https://github.com/woodpecker-ci/woodpecker/pull/2043)]
+- Set v1.0 documents as default and mark v0.15 as unmaintained [[#2034](https://github.com/woodpecker-ci/woodpecker/pull/2034)]
+
 ### 🐛 Bug Fixes
 
 - fix: change config.config_data column type to longblob in mysql [[#2434](https://github.com/woodpecker-ci/woodpecker/pull/2434)]
@@ -158,6 +160,7 @@
 
 ### Misc
 
+- fix(deps): update golang deps non-major [[#2486](https://github.com/woodpecker-ci/woodpecker/pull/2486)]
 - chore(deps): lock file maintenance [[#2469](https://github.com/woodpecker-ci/woodpecker/pull/2469)]
 - Add devx lable to compose file PRs [[#2467](https://github.com/woodpecker-ci/woodpecker/pull/2467)]
 - chore(deps): update postgres docker tag to v16 [[#2463](https://github.com/woodpecker-ci/woodpecker/pull/2463)]
