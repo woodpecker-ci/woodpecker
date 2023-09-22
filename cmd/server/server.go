@@ -73,6 +73,10 @@ func run(c *cli.Context) error {
 		)
 	}
 
+	if _, err := url.Parse(c.String("server-host")); err != nil {
+		log.Fatal().Err(err).Msg("could not parse WOODPECKER_HOST")
+	}
+
 	if strings.Contains(c.String("server-host"), "://localhost") {
 		log.Warn().Msg(
 			"WOODPECKER_HOST should probably be publicly accessible (not localhost)",
@@ -325,9 +329,6 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 	server.Config.Server.Key = c.String("server-key")
 	server.Config.Server.AgentToken = c.String("agent-secret")
 	serverHost := c.String("server-host")
-	if _, err := url.Parse(serverHost); err != nil {
-		log.Fatal().Err(err).Msg("could not parse WOODPECKER_HOST")
-	}
 	server.Config.Server.Host = serverHost
 	if c.IsSet("server-webhook-host") {
 		server.Config.Server.WebhookHost = c.String("server-webhook-host")

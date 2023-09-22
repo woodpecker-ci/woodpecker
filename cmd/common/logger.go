@@ -96,5 +96,5 @@ func SetupGlobalLogger(c *cli.Context) {
 		log.Logger = log.With().Caller().Logger()
 	}
 
-	log.Log().Msgf("LogLevel = %s", zerolog.GlobalLevel().String())
+	log.Info().Msgf("LogLevel = %s", zerolog.GlobalLevel().String())
 }
