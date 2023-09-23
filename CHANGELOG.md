@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@qwerty287, @tomix1024, @renovate[bot], @pat-s, @xoxys, @lonix1, @s3lph, @anbraten, @mzampetakis, @math3vz, @LTek-online, @testwill, @6543, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @runephilosof-karnovgroup, @azdle, @praneeth-ovckd, @nupplaphil
+@xoxys, @qwerty287, @tomix1024, @renovate[bot], @pat-s, @lonix1, @s3lph, @anbraten, @mzampetakis, @math3vz, @LTek-online, @testwill, @6543, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @azdle, @runephilosof-karnovgroup, @praneeth-ovckd
 
 ### 💥 Breaking changes
 
@@ -20,9 +20,7 @@
 - Never log tokens [[#2466](https://github.com/woodpecker-ci/woodpecker/pull/2466)]
 - Check permissions on repo lookup [[#2357](https://github.com/woodpecker-ci/woodpecker/pull/2357)]
 - Change token logging to trace level [[#2247](https://github.com/woodpecker-ci/woodpecker/pull/2247)]
-- Validate webhook before change any data (#2221) [[#2222](https://github.com/woodpecker-ci/woodpecker/pull/2222)]
 - Validate webhook before change any data [[#2221](https://github.com/woodpecker-ci/woodpecker/pull/2221)]
-- Fix WOODPECKER_GRPC_VERIFY being ignored (#2077) [[#2082](https://github.com/woodpecker-ci/woodpecker/pull/2082)]
 
 ### ✨ Features
 
@@ -76,7 +74,6 @@
 - Make sure we dont have hidden options for backend and pipeline compiler [[#2123](https://github.com/woodpecker-ci/woodpecker/pull/2123)]
 - Enhance local backend [[#2017](https://github.com/woodpecker-ci/woodpecker/pull/2017)]
 - Don't show badge without information [[#2130](https://github.com/woodpecker-ci/woodpecker/pull/2130)]
-- CLI repo sync: Show `forge-remote-id` [[#2125](https://github.com/woodpecker-ci/woodpecker/pull/2125)]
 - CLI repo sync: Show `forge-remote-id` [[#2103](https://github.com/woodpecker-ci/woodpecker/pull/2103)]
 - Lazy-load TimeAgo locales [[#2094](https://github.com/woodpecker-ci/woodpecker/pull/2094)]
 - Improve user settings [[#2087](https://github.com/woodpecker-ci/woodpecker/pull/2087)]
@@ -84,7 +81,6 @@
 - Use consistent woodpecker color scheme [[#2003](https://github.com/woodpecker-ci/woodpecker/pull/2003)]
 - Change master to main [[#2044](https://github.com/woodpecker-ci/woodpecker/pull/2044)]
 - Remove default branch fallbacks [[#2065](https://github.com/woodpecker-ci/woodpecker/pull/2065)]
-- Bump default clone image version to 2.1.0 [[#2053](https://github.com/woodpecker-ci/woodpecker/pull/2053)]
 - Remove fallback check for old sqlite file location [[#2046](https://github.com/woodpecker-ci/woodpecker/pull/2046)]
 - let generic datastore error include func name [[#2041](https://github.com/woodpecker-ci/woodpecker/pull/2041)]
 
@@ -118,7 +114,6 @@
 
 - fix: change config.config_data column type to longblob in mysql [[#2434](https://github.com/woodpecker-ci/woodpecker/pull/2434)]
 - Fix: change tasks.task_data column type to longblob in mysql [[#2418](https://github.com/woodpecker-ci/woodpecker/pull/2418)]
-- Fix health check [[#2412](https://github.com/woodpecker-ci/woodpecker/pull/2412)]
 - Do not list archived repos for all forges [[#2374](https://github.com/woodpecker-ci/woodpecker/pull/2374)]
 - fix(server/api/repo): Fix repair webhook host [[#2372](https://github.com/woodpecker-ci/woodpecker/pull/2372)]
 -  Delete repos/secrets on org deletion [[#2367](https://github.com/woodpecker-ci/woodpecker/pull/2367)]
@@ -128,39 +123,25 @@
 - Fix grid column size in pipeline log view [[#2336](https://github.com/woodpecker-ci/woodpecker/pull/2336)]
 - Fix mobile login view [[#2332](https://github.com/woodpecker-ci/woodpecker/pull/2332)]
 - Fix button loading spinner when activating repos [[#2333](https://github.com/woodpecker-ci/woodpecker/pull/2333)]
-- Fix migration [[#2319](https://github.com/woodpecker-ci/woodpecker/pull/2319)]
 - make WOODPECKER_MIGRATIONS_ALLOW_LONG have an actuall effect [[#2251](https://github.com/woodpecker-ci/woodpecker/pull/2251)]
 - Docker build dont ignore ci env vars [[#2238](https://github.com/woodpecker-ci/woodpecker/pull/2238)]
-- fix regression and add trace in clone for local backend [[#2241](https://github.com/woodpecker-ci/woodpecker/pull/2241)]
 - Handle parsed hooks that should be ignored [[#2243](https://github.com/woodpecker-ci/woodpecker/pull/2243)]
 - Set correct version for release branch releases [[#2227](https://github.com/woodpecker-ci/woodpecker/pull/2227)]
-- Bump default git clone plugin (#2215) [[#2220](https://github.com/woodpecker-ci/woodpecker/pull/2220)]
 - Bump default git clone plugin [[#2215](https://github.com/woodpecker-ci/woodpecker/pull/2215)]
-- Show all steps (#2190) [[#2191](https://github.com/woodpecker-ci/woodpecker/pull/2191)]
 - Show all steps [[#2190](https://github.com/woodpecker-ci/woodpecker/pull/2190)]
 - Fix pipeline config collapsing [[#2166](https://github.com/woodpecker-ci/woodpecker/pull/2166)]
-- Fix 'add-orgs' migration (#2117) [[#2145](https://github.com/woodpecker-ci/woodpecker/pull/2145)]
 - Fix 'add-orgs' migration [[#2117](https://github.com/woodpecker-ci/woodpecker/pull/2117)]
-- Fix UI and backend paths with subpath (#1799) [[#2133](https://github.com/woodpecker-ci/woodpecker/pull/2133)]
-- Fix vite server [[#2134](https://github.com/woodpecker-ci/woodpecker/pull/2134)]
-- Fix UI and backend paths with subpath [[#1799](https://github.com/woodpecker-ci/woodpecker/pull/1799)]
 - docs: Environment Variable Seems to be `DOCKER_HOST`, not `DOCKER_SOCK` [[#2122](https://github.com/woodpecker-ci/woodpecker/pull/2122)]
-- Fix swagger response code (#2119) [[#2121](https://github.com/woodpecker-ci/woodpecker/pull/2121)]
 - Fix swagger response code [[#2119](https://github.com/woodpecker-ci/woodpecker/pull/2119)]
-- Forge Github Org: Use `login` instead of `name` (#2104) [[#2106](https://github.com/woodpecker-ci/woodpecker/pull/2106)]
 - Forge Github Org: Use `login` instead of `name` [[#2104](https://github.com/woodpecker-ci/woodpecker/pull/2104)]
-- Fix translation key [[#2098](https://github.com/woodpecker-ci/woodpecker/pull/2098)]
-- client.go: Backport fix RepoPost path [[#2100](https://github.com/woodpecker-ci/woodpecker/pull/2100)]
 - client.go: Fix RepoPost path [[#2091](https://github.com/woodpecker-ci/woodpecker/pull/2091)]
 - Fix alt text contrast in code boxes [[#2089](https://github.com/woodpecker-ci/woodpecker/pull/2089)]
 - Fix WOODPECKER_GRPC_VERIFY being ignored [[#2077](https://github.com/woodpecker-ci/woodpecker/pull/2077)]
-- Handle case where there is no latest pipeline for GetBadge (#2042) [[#2050](https://github.com/woodpecker-ci/woodpecker/pull/2050)]
 - Handle case where there is no latest pipeline for GetBadge [[#2042](https://github.com/woodpecker-ci/woodpecker/pull/2042)]
-- Fix wrong repo url used by badges (#2037) [[#2039](https://github.com/woodpecker-ci/woodpecker/pull/2039)]
-- Fix wrong repo url used by badges [[#2037](https://github.com/woodpecker-ci/woodpecker/pull/2037)]
 
 ### Misc
 
+- Fix broken link to 3rd party plugin library [[#2494](https://github.com/woodpecker-ci/woodpecker/pull/2494)]
 - fix(deps): update golang deps non-major [[#2486](https://github.com/woodpecker-ci/woodpecker/pull/2486)]
 - chore(deps): lock file maintenance [[#2469](https://github.com/woodpecker-ci/woodpecker/pull/2469)]
 - Add devx lable to compose file PRs [[#2467](https://github.com/woodpecker-ci/woodpecker/pull/2467)]
