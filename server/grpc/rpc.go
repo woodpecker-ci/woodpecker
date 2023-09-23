@@ -46,7 +46,6 @@ type RPC struct {
 	pubsub        pubsub.Publisher
 	logger        logging.Log
 	store         store.Store
-	host          string
 	pipelineTime  *prometheus.GaugeVec
 	pipelineCount *prometheus.CounterVec
 }
