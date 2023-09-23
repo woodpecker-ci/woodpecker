@@ -1,10 +1,10 @@
 # Changelog
 
-## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-09-22
+## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-09-23
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@tomix1024, @renovate[bot], @qwerty287, @pat-s, @xoxys, @lonix1, @s3lph, @anbraten, @mzampetakis, @math3vz, @LTek-online, @testwill, @6543, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @runephilosof-karnovgroup, @azdle, @praneeth-ovckd, @nupplaphil
+@qwerty287, @tomix1024, @renovate[bot], @pat-s, @xoxys, @lonix1, @s3lph, @anbraten, @mzampetakis, @math3vz, @LTek-online, @testwill, @6543, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @runephilosof-karnovgroup, @azdle, @praneeth-ovckd, @nupplaphil
 
 ### 💥 Breaking changes
 
@@ -36,6 +36,7 @@
 
 ### 📈 Enhancement
 
+- Some cleanups about host config [[#2490](https://github.com/woodpecker-ci/woodpecker/pull/2490)]
 - Fix usage of WOODPECKER_ROOT_PATH [[#2485](https://github.com/woodpecker-ci/woodpecker/pull/2485)]
 - Some UI enhancement [[#2468](https://github.com/woodpecker-ci/woodpecker/pull/2468)]
 - Harmonize pipeline status information and add a review link to the approval [[#2345](https://github.com/woodpecker-ci/woodpecker/pull/2345)]
