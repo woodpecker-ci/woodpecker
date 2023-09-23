@@ -421,7 +421,7 @@ func (c *config) newOAuth2Config() *oauth2.Config {
 			AuthURL:  fmt.Sprintf("%s/site/oauth2/authorize", c.url),
 			TokenURL: fmt.Sprintf("%s/site/oauth2/access_token", c.url),
 		},
-		RedirectURL: fmt.Sprintf("%s%s/authorize", server.Config.Server.OAuthHost, server.Config.Server.RootPath),
+		RedirectURL: fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost),
 	}
 }
 

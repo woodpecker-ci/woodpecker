@@ -20,13 +20,15 @@
         "desc": "注册到此服务器的代理",
         "edit_agent": "编辑代理",
         "id": "ID",
+        "last_contact": "最后访问",
         "name": {
           "name": "名称",
           "placeholder": "代理名称"
         },
         "never": "绝不",
         "no_schedule": {
-          "name": "禁用代理"
+          "name": "禁用代理",
+          "placeholder": "阻止代理接受新任务"
         },
         "none": "还未添加任何代理。",
         "platform": {
@@ -62,12 +64,22 @@
           "completed_count": "已完成的任务",
           "pending_count": "等待中",
           "running_count": "运行中",
-          "waiting_on_deps_count": "等待依赖项"
+          "waiting_on_deps_count": "等待依赖项",
+          "worker_count": "空闲"
         },
         "task_pending": "任务正在等待中",
         "task_running": "任务正在运行",
+        "task_waiting_on_deps": "任务正在等待依赖项",
         "tasks": "任务",
         "waiting_for": "正在等待"
+      },
+      "repos": {
+        "desc": "该服务器上已启用或曾经启用的仓库",
+        "disabled": "已禁用",
+        "none": "目前还没有存储库。",
+        "repos": "仓库",
+        "settings": "仓库设置",
+        "view": "查看仓库"
       },
       "secrets": {
         "add": "添加密钥",
@@ -240,7 +252,8 @@
         "awaits": "该流水线正在等待维护者许可！",
         "decline": "拒绝",
         "decline_success": "流水线已被拒绝",
-        "declined": "该流水线已被拒绝！"
+        "declined": "该流水线已被拒绝！",
+        "review": "审查变更"
       },
       "status": {
         "blocked": "已屏蔽",
