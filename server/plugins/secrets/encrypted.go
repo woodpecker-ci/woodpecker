@@ -32,11 +32,16 @@ type EncryptedSecretService struct {
 	encryptionSvc encryption.EncryptionService
 }
 
-func NewEncrypted(secretService model.SecretService, encryptionService encryption.EncryptionService) EncryptedSecretService {
+func NewEncrypted(secretService model.SecretService, encryptionService encryption.EncryptionService) (EncryptedSecretService, error) {
+	var err error
+	if secretService == nil || encryptionService == nil {
+		err = fmt.Errorf("secret and encryption services cannot be nil")
+	}
+
 	return EncryptedSecretService{
 		secretSvc:     secretService,
 		encryptionSvc: encryptionService,
-	}
+	}, err
 }
 
 func (ess *EncryptedSecretService) EncryptSecret(secret *model.Secret) error {

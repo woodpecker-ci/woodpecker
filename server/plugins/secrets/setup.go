@@ -39,13 +39,16 @@ func NewService(ctx *cli.Context, store model.SecretStore) (model.SecretService,
 	log.Debug().Str("mode", string(encryptionMode)).Msg("setting up secrets service")
 
 	if encryptionMode == EncryptionModeEnabled {
-		ess := NewEncrypted(secretSvc, server.Config.Services.Encryption)
-		return &ess, nil
+		ess, err := NewEncrypted(secretSvc, server.Config.Services.Encryption)
+		return &ess, err
 	}
 
 	if encryptionMode == EncryptionModeEnabledAndEncrypt {
-		ess := NewEncrypted(secretSvc, server.Config.Services.Encryption)
-		err := encryptAll(store, &ess)
+		ess, err := NewEncrypted(secretSvc, server.Config.Services.Encryption)
+		if err != nil {
+			return &ess, err
+		}
+		err = encryptAll(store, &ess)
 		if err != nil {
 			return nil, err
 		}
@@ -53,8 +56,11 @@ func NewService(ctx *cli.Context, store model.SecretStore) (model.SecretService,
 	}
 
 	if encryptionMode == EncryptionModeDisabledAndDecrypt {
-		ess := NewEncrypted(secretSvc, server.Config.Services.Encryption)
-		err := decryptAll(store, &ess)
+		ess, err := NewEncrypted(secretSvc, server.Config.Services.Encryption)
+		if err != nil {
+			return &ess, err
+		}
+		err = decryptAll(store, &ess)
 		if err != nil {
 			return nil, err
 		}
