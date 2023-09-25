@@ -9,48 +9,23 @@ WOODPECKER_GITHUB_CLIENT=YOUR_GITHUB_CLIENT_ID
 WOODPECKER_GITHUB_SECRET=YOUR_GITHUB_CLIENT_SECRET
 ```
 
-You will get these values from GitHub when you register your application.
-To do so, go to Settings -> Developer Settings -> GitHub Apps -> New GitHub App.
+You will get these values from GitHub when you register your OAuth application.
+To do so, go to Settings -> Developer Settings -> GitHub Apps -> New Oauth2 App.
+
+:::warning
+Do not use a "GitHub App" instead of an Oauth2 app as the former will not work correctly with Woodpecker right now (because user access tokens are not being refreshed automatically)
 
 ## App Settings
 
 - Name: An arbitrary name for your App
 - Homepage URL: The URL of your Woodpecker instance
 - Callback URL: `https://<your-woodpecker-instance>/authorize`
-- Leave "Request user authorization (OAuth) during installation" and "Enable Device Flow" unchecked
-- Leave "Webhook" and "Post Installation" fields empty
 - (optional) Upload the Woodpecker Logo: https://avatars.githubusercontent.com/u/84780935?s=200&v=4
-
-## App Permissions
-
-The app must be granted the following permissions (under App Settings -> Permissions):
-
-Repository:
-
-- Commit statuses: Read & write
-- Contents: Read & write
-- Deployments: Read & write
-- Metadata: Read-only
-- Pull requests: Read & write
-- Secrets: Read & write
-- Webhooks: Read & write
-
-Organization:
-
-- Members: Read-only
-
-Account:
-
-- Email addresses: Read-only
 
 ## Client Secret Creation
 
 After your App has been created, you can generate a client secret.
 Use this one for the `WOODPECKER_GITHUB_SECRET` environment variable.
-
-## Installing the app
-
-In the app settings, click on "Install App" and give the app permissions to the repositories you want to use with Woodpecker.
 
 ## All GitHub Configuration Options
 
