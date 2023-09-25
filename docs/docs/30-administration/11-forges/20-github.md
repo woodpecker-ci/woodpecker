@@ -14,6 +14,7 @@ To do so, go to Settings -> Developer Settings -> GitHub Apps -> New Oauth2 App.
 
 :::warning
 Do not use a "GitHub App" instead of an Oauth2 app as the former will not work correctly with Woodpecker right now (because user access tokens are not being refreshed automatically)
+:::
 
 ## App Settings
 
