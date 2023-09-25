@@ -1,10 +1,10 @@
 # Changelog
 
-## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-09-23
+## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-09-25
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@xoxys, @qwerty287, @tomix1024, @renovate[bot], @pat-s, @lonix1, @s3lph, @anbraten, @mzampetakis, @math3vz, @LTek-online, @testwill, @6543, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @azdle, @runephilosof-karnovgroup, @praneeth-ovckd
+@renovate[bot], @xoxys, @qwerty287, @tomix1024, @pat-s, @lonix1, @s3lph, @anbraten, @mzampetakis, @math3vz, @LTek-online, @testwill, @6543, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @azdle, @runephilosof-karnovgroup, @praneeth-ovckd
 
 ### 💥 Breaking changes
 
@@ -141,6 +141,7 @@
 
 ### Misc
 
+- chore(deps): lock file maintenance [[#2497](https://github.com/woodpecker-ci/woodpecker/pull/2497)]
 - Fix broken link to 3rd party plugin library [[#2494](https://github.com/woodpecker-ci/woodpecker/pull/2494)]
 - fix(deps): update golang deps non-major [[#2486](https://github.com/woodpecker-ci/woodpecker/pull/2486)]
 - chore(deps): lock file maintenance [[#2469](https://github.com/woodpecker-ci/woodpecker/pull/2469)]
