@@ -93,8 +93,7 @@ services:
     environment:
       - [...]
 +     - WOODPECKER_HOST=${WOODPECKER_HOST}
-+     - WOODPECKER_HOST=${WOODPECKER_HOST}
-```
+é```
 
 Woodpecker can also have its port's configured. It uses a separate port for gRPC and for HTTP. The agent performs gRPC calls and connects to the gRPC port.
 They can be configured with ADDR variables:
