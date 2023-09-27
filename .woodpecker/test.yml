@@ -62,7 +62,7 @@ steps:
     when: *when
 
   lint-editorconfig:
-    image: mstruebing/editorconfig-checker
+    image: codeberg.org/6543/docker-images/editorconfig-checker
     group: test
 
   lint-license-header:
@@ -111,20 +111,20 @@ steps:
       - make test-server-datastore
     when: *when
 
-  codecov:
-    pull: true
-    image: woodpeckerci/plugin-codecov:next-alpine
-    settings:
-      files:
-        - agent-coverage.out
-        - cli-coverage.out
-        - coverage.out
-        - server-coverage.out
-        - datastore-coverage.out
-      token:
-        from_secret: codecov_token
-    when: *when
-    failure: ignore
+# codecov:
+#   pull: true
+#   image: woodpeckerci/plugin-codecov:next-alpine
+#   settings:
+#     files:
+#       - agent-coverage.out
+#       - cli-coverage.out
+#       - coverage.out
+#       - server-coverage.out
+#       - datastore-coverage.out
+#     token:
+#       from_secret: codecov_token
+#   when: *when
+#   failure: ignore
 
 services:
   service-postgres:
@@ -142,3 +142,5 @@ services:
       - MYSQL_DATABASE=test
       - MYSQL_ALLOW_EMPTY_PASSWORD=yes
     when: *when
+
+# enforce arm run
