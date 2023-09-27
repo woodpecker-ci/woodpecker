@@ -38,6 +38,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/cache"
 	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/forge/bitbucket"
+	"github.com/woodpecker-ci/woodpecker/server/forge/bitbucketserver"
 	"github.com/woodpecker-ci/woodpecker/server/forge/gitea"
 	"github.com/woodpecker-ci/woodpecker/server/forge/github"
 	"github.com/woodpecker-ci/woodpecker/server/forge/gitlab"
@@ -141,6 +142,8 @@ func setupForge(c *cli.Context) (forge.Forge, error) {
 		return setupGitLab(c)
 	case c.Bool("bitbucket"):
 		return setupBitbucket(c)
+	case c.Bool("stash"):
+		return setupStash(c)
 	case c.Bool("gitea"):
 		return setupGitea(c)
 	default:
@@ -175,6 +178,21 @@ func setupGitea(c *cli.Context) (forge.Forge, error) {
 	}
 	log.Trace().Msgf("Forge (gitea) opts: %#v", opts)
 	return gitea.New(opts)
+}
+
+// setupStash helper function to setup the Stash forge from the CLI arguments.
+func setupStash(c *cli.Context) (forge.Forge, error) {
+	opts := bitbucketserver.Opts{
+		URL:               c.String("stash-server"),
+		Username:          c.String("stash-git-username"),
+		Password:          c.String("stash-git-password"),
+		ConsumerKey:       c.String("stash-consumer-key"),
+		ConsumerRSA:       c.String("stash-consumer-rsa"),
+		ConsumerRSAString: c.String("stash-consumer-rsa-string"),
+		SkipVerify:        c.Bool("stash-skip-verify"),
+	}
+	log.Trace().Msgf("Forge (bitbucketserver) opts: %#v", opts)
+	return bitbucketserver.New(opts)
 }
 
 // setupGitLab helper function to setup the GitLab forge from the CLI arguments.

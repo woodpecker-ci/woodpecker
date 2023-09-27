@@ -35,6 +35,8 @@ require (
 	github.com/melbahja/goph v1.3.1
 	github.com/moby/moby v20.10.25+incompatible
 	github.com/moby/term v0.5.0
+	github.com/mrjones/oauth v0.0.0-20190623134757-126b35219450
+	github.com/neticdk/go-bitbucket v0.1.2
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.16.0
@@ -106,6 +108,7 @@ require (
 	github.com/imdario/mergo v0.3.12 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
+	github.com/julienschmidt/httprouter v1.3.0 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.5 // indirect
 	github.com/kr/fs v0.1.0 // indirect
 	github.com/leodido/go-urn v1.2.4 // indirect
