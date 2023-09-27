@@ -14,6 +14,8 @@
 
 package pipeline
 
+import "errors"
+
 type ErrNotFound struct {
 	Msg string
 }
@@ -38,26 +40,7 @@ func (e ErrBadRequest) Error() string {
 	return e.Msg
 }
 
-func (e ErrBadRequest) Is(target error) bool {
-	_, ok := target.(ErrBadRequest) //nolint:errorlint
-	if !ok {
-		_, ok = target.(*ErrBadRequest) //nolint:errorlint
-	}
-	return ok
-}
-
-type ErrFiltered struct {
-	Msg string
-}
-
-func (e ErrFiltered) Error() string {
-	return "ignoring hook: " + e.Msg
-}
-
-func (e *ErrFiltered) Is(target error) bool {
-	_, ok := target.(ErrFiltered) //nolint:errorlint
-	if !ok {
-		_, ok = target.(*ErrFiltered) //nolint:errorlint
-	}
-	return ok
-}
+var (
+	ErrFilteredRestrictions = errors.New("ignoring hook: branch does not match restrictions defined in yaml") // global when filter of all workflows do skip this pipeline
+	ErrFilteredSteps        = errors.New("ignoring hook: step conditions yield zero runnable steps")
+)
