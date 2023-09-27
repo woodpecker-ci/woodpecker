@@ -69,7 +69,7 @@ func Test_stash(t *testing.T) {
 			g.It("should return repository details", func() {
 				repo, err := c.Repo(ctx, fakeUser, model.ForgeRemoteID("1234"), "PRJ", "repo-slug")
 				g.Assert(err).IsNil()
-				g.Assert(repo.Name).Equal("repo-slug")
+				g.Assert(repo.Name).Equal("repo-slug-2")
 				g.Assert(repo.Owner).Equal("PRJ")
 				g.Assert(repo.Perm).Equal(&model.Perm{Pull: true})
 				g.Assert(repo.Branch).Equal("main")

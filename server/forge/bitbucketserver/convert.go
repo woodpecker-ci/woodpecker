@@ -36,9 +36,13 @@ func convertStatus(status model.StatusValue) bb.BuildStatusState {
 	}
 }
 
+func convertID(id uint64) model.ForgeRemoteID {
+	return model.ForgeRemoteID(fmt.Sprintf("%d", id))
+}
+
 func convertRepo(from *bb.Repository, perm *model.Perm, branch string) *model.Repo {
 	r := &model.Repo{
-		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprintf("%d", from.ID)),
+		ForgeRemoteID: convertID(from.ID),
 		Name:          from.Slug,
 		Owner:         from.Project.Key,
 		Branch:        branch,

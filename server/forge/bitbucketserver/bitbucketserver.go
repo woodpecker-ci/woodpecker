@@ -163,30 +163,54 @@ func (*client) Auth(_ context.Context, _, _ string) (string, error) {
 	return "", fmt.Errorf("Not Implemented")
 }
 
-func (c *client) Repo(ctx context.Context, u *model.User, _ model.ForgeRemoteID, owner, name string) (*model.Repo, error) {
+func (c *client) Repo(ctx context.Context, u *model.User, rID model.ForgeRemoteID, owner, name string) (*model.Repo, error) {
 	bc, err := c.newClient(u)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create bitbucket client: %w", err)
 	}
 
-	r, _, err := bc.Projects.GetRepository(ctx, owner, name)
-	if err != nil {
-		return nil, fmt.Errorf("unable to get repository: %w", err)
+	var repo *bb.Repository
+	if rID.IsValid() {
+		opts := &bb.RepositorySearchOptions{Permission: bb.PermissionRepoRead, ListOptions: bb.ListOptions{Limit: 250}}
+		for {
+			repos, resp, err := bc.Projects.SearchRepositories(ctx, opts)
+			if err != nil {
+				return nil, fmt.Errorf("unable to search repositories: %w", err)
+			}
+			for _, r := range repos {
+				if rID == convertID(r.ID) {
+					repo = r
+					break
+				}
+			}
+			if resp.LastPage {
+				break
+			}
+			opts.Start = resp.NextPageStart
+		}
+		if repo == nil {
+			return nil, fmt.Errorf("unable to find repository with id: %s", rID)
+		}
+	} else {
+		repo, _, err = bc.Projects.GetRepository(ctx, owner, name)
+		if err != nil {
+			return nil, fmt.Errorf("unable to get repository: %w", err)
+		}
 	}
 
-	b, _, err := bc.Projects.GetDefaultBranch(ctx, owner, name)
+	b, _, err := bc.Projects.GetDefaultBranch(ctx, repo.Project.Key, repo.Slug)
 	if err != nil {
 		return nil, fmt.Errorf("unable to fetch default branch: %w", err)
 	}
 
 	perms := &model.Perm{Pull: true}
-	_, _, err = bc.Projects.ListWebhooks(ctx, owner, name, &bb.ListOptions{})
+	_, _, err = bc.Projects.ListWebhooks(ctx, repo.Project.Key, repo.Slug, &bb.ListOptions{})
 	if err == nil {
 		perms.Push = true
 		perms.Admin = true
 	}
 
-	return convertRepo(r, perms, b.DisplayID), nil
+	return convertRepo(repo, perms, b.DisplayID), nil
 }
 
 func (c *client) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {
@@ -221,7 +245,7 @@ func (c *client) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 		}
 		for _, r := range repos {
 			for i, c := range all {
-				if c.ForgeRemoteID == model.ForgeRemoteID(fmt.Sprintf("%d", r.ID)) {
+				if c.ForgeRemoteID == convertID(r.ID) {
 					all[i].Perm = &model.Perm{Pull: true, Push: true, Admin: true}
 					break
 				}
