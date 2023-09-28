@@ -142,8 +142,8 @@ func setupForge(c *cli.Context) (forge.Forge, error) {
 		return setupGitLab(c)
 	case c.Bool("bitbucket"):
 		return setupBitbucket(c)
-	case c.Bool("stash"):
-		return setupStash(c)
+	case c.Bool("bitbucket-dc"):
+		return setupBitbucketServer(c)
 	case c.Bool("gitea"):
 		return setupGitea(c)
 	default:
@@ -180,16 +180,16 @@ func setupGitea(c *cli.Context) (forge.Forge, error) {
 	return gitea.New(opts)
 }
 
-// setupStash helper function to setup the Stash forge from the CLI arguments.
-func setupStash(c *cli.Context) (forge.Forge, error) {
+// setupBitbucketServer helper function to setup the Bitbucket DataCenter/Server forge from the CLI arguments.
+func setupBitbucketServer(c *cli.Context) (forge.Forge, error) {
 	opts := bitbucketserver.Opts{
-		URL:               c.String("stash-server"),
-		Username:          c.String("stash-git-username"),
-		Password:          c.String("stash-git-password"),
-		ConsumerKey:       c.String("stash-consumer-key"),
-		ConsumerRSA:       c.String("stash-consumer-rsa"),
-		ConsumerRSAString: c.String("stash-consumer-rsa-string"),
-		SkipVerify:        c.Bool("stash-skip-verify"),
+		URL:               c.String("bitbucket-dc-server"),
+		Username:          c.String("bitbucket-dc-git-username"),
+		Password:          c.String("bitbucket-dc-git-password"),
+		ConsumerKey:       c.String("bitbucket-dc-consumer-key"),
+		ConsumerRSA:       c.String("bitbucket-dc-consumer-rsa"),
+		ConsumerRSAString: c.String("bitbucket-dc-consumer-rsa-string"),
+		SkipVerify:        c.Bool("bitbucket-dc-skip-verify"),
 	}
 	log.Trace().Msgf("Forge (bitbucketserver) opts: %#v", opts)
 	return bitbucketserver.New(opts)

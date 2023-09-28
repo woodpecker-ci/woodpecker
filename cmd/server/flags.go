@@ -439,50 +439,50 @@ var flags = append([]cli.Flag{
 		Usage:   "gitlab skip ssl verification",
 	},
 	//
-	// Bitbucket Server (previously Stash)
+	// Bitbucket DataCenter/Server (previously Stash)
 	//
 	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_STASH"},
-		Name:    "stash",
-		Usage:   "stash driver is enabled",
+		EnvVars: []string{"WOODPECKER_BITBUCKET_DC"},
+		Name:    "bitbucket-dc",
+		Usage:   "Bitbucket DataCenter/Server driver is enabled",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_STASH_URL"},
-		Name:    "stash-server",
-		Usage:   "stash server address",
+		EnvVars: []string{"WOODPECKER_BITBUCKET_DC_URL"},
+		Name:    "bitbucket-dc-server",
+		Usage:   "Bitbucket DataCenter/Server server address",
 	},
 	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_STASH_CONSUMER_KEY"},
-		Name:     "stash-consumer-key",
-		Usage:    "stash oauth1 consumer key",
-		FilePath: os.Getenv("WOODPECKER_STASH_CONSUMER_KEY_FILE"),
+		EnvVars:  []string{"WOODPECKER_BITBUCKET_DC_CONSUMER_KEY"},
+		Name:     "bitbucket-dc-consumer-key",
+		Usage:    "Bitbucket DataCenter/Server oauth1 consumer key",
+		FilePath: os.Getenv("WOODPECKER_BITBUCKET_DC_CONSUMER_KEY_FILE"),
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_STASH_CONSUMER_RSA"},
-		Name:    "stash-consumer-rsa",
-		Usage:   "stash oauth1 private key file",
+		EnvVars: []string{"WOODPECKER_BITBUCKET_DC_CONSUMER_RSA"},
+		Name:    "bitbucket-dc-consumer-rsa",
+		Usage:   "Bitbucket DataCenter/Server oauth1 private key file",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_STASH_CONSUMER_RSA_STRING"},
-		Name:    "stash-consumer-rsa-string",
-		Usage:   "stash oauth1 private key string",
+		EnvVars: []string{"WOODPECKER_BITBUCKET_DC_CONSUMER_RSA_STRING"},
+		Name:    "bitbucket-dc-consumer-rsa-string",
+		Usage:   "Bitbucket DataCenter/Server oauth1 private key string",
 	},
 	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_STASH_GIT_USERNAME"},
-		Name:     "stash-git-username",
-		Usage:    "stash service account username",
-		FilePath: os.Getenv("WOODPECKER_STASH_GIT_USERNAME_FILE"),
+		EnvVars:  []string{"WOODPECKER_BITBUCKET_DC_GIT_USERNAME"},
+		Name:     "bitbucket-dc-git-username",
+		Usage:    "Bitbucket DataCenter/Server service account username",
+		FilePath: os.Getenv("WOODPECKER_BITBUCKET_DC_GIT_USERNAME_FILE"),
 	},
 	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_STASH_GIT_PASSWORD"},
-		Name:     "stash-git-password",
-		Usage:    "stash service account password",
-		FilePath: os.Getenv("WOODPECKER_STASH_GIT_PASSWORD_FILE"),
+		EnvVars:  []string{"WOODPECKER_BITBUCKET_DC_GIT_PASSWORD"},
+		Name:     "bitbucket-dc-git-password",
+		Usage:    "Bitbucket DataCenter/Server service account password",
+		FilePath: os.Getenv("WOODPECKER_BITBUCKET_DC_GIT_PASSWORD_FILE"),
 	},
 	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_STASH_SKIP_VERIFY"},
-		Name:    "stash-skip-verify",
-		Usage:   "stash skip ssl verification",
+		EnvVars: []string{"WOODPECKER_BITBUCKET_DC_SKIP_VERIFY"},
+		Name:    "bitbucket-dc-skip-verify",
+		Usage:   "Bitbucket DataCenter/Server skip ssl verification",
 	},
 	//
 	// development flags

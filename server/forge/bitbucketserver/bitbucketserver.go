@@ -49,7 +49,7 @@ const (
 
 // Opts defines configuration options.
 type Opts struct {
-	URL               string // Stash server url.
+	URL               string // Bitbucket server url for API access.
 	Username          string // Git machine account username.
 	Password          string // Git machine account password.
 	ConsumerKey       string // Oauth1 consumer key.
@@ -67,7 +67,7 @@ type client struct {
 	Consumer   *oauth.Consumer
 }
 
-// New returns a Forge implementation that integrates with Bitbucket Server,
+// New returns a Forge implementation that integrates with Bitbucket DataCenter/Server,
 // the on-premise edition of Bitbucket Cloud, formerly known as Stash.
 func New(opts Opts) (forge.Forge, error) {
 	config := &client{
@@ -114,7 +114,7 @@ func New(opts Opts) (forge.Forge, error) {
 
 // Name returns the string name of this driver
 func (c *client) Name() string {
-	return "stash"
+	return "bitbucket_dc"
 }
 
 // URL returns the root url of a configured forge
@@ -158,7 +158,7 @@ func (c *client) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 	return convertUser(user, accessToken.Token, c.url), nil
 }
 
-// Auth is not supported by the Stash driver.
+// Auth is not supported.
 func (*client) Auth(_ context.Context, _, _ string) (string, error) {
 	return "", fmt.Errorf("Not Implemented")
 }
@@ -550,13 +550,13 @@ func (c *client) updatePipelineFromCommit(ctx context.Context, r *model.Repo, p 
 	return p, nil
 }
 
-// Teams is not supported by the Stash driver.
+// Teams is not supported.
 func (*client) Teams(_ context.Context, _ *model.User) ([]*model.Team, error) {
 	var teams []*model.Team
 	return teams, nil
 }
 
-// TeamPerm is not supported by the Stash driver.
+// TeamPerm is not supported.
 func (*client) TeamPerm(_ *model.User, _ string) (*model.Perm, error) {
 	return nil, nil
 }

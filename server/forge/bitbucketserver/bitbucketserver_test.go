@@ -28,7 +28,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-func Test_stash(t *testing.T) {
+func Test_Bitbucket_DC(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	s := fixtures.Server()
@@ -40,7 +40,7 @@ func Test_stash(t *testing.T) {
 
 	ctx := context.Background()
 	g := goblin.Goblin(t)
-	g.Describe("Stash/Bitbucket Server", func() {
+	g.Describe("Bitbucket DataCenter/Server", func() {
 		g.After(func() {
 			s.Close()
 		})

@@ -11,12 +11,12 @@ services:
     [...]
     environment:
       - [...]
-+     - WOODPECKER_STASH=true
-+     - WOODPECKER_STASH_GIT_USERNAME=foo
-+     - WOODPECKER_STASH_GIT_PASSWORD=bar
-+     - WOODPECKER_STASH_CONSUMER_KEY=95c0282573633eb25e82
-+     - WOODPECKER_STASH_CONSUMER_RSA=/etc/bitbucket/key.pem
-+     - WOODPECKER_STASH_URL=http://stash.mycompany.com
++     - WOODPECKER_BITBUCKET_DC=true
++     - WOODPECKER_BITBUCKET_DC_GIT_USERNAME=foo
++     - WOODPECKER_BITBUCKET_DC_GIT_PASSWORD=bar
++     - WOODPECKER_BITBUCKET_DC_CONSUMER_KEY=95c0282573633eb25e82
++     - WOODPECKER_BITBUCKET_DC_CONSUMER_RSA=/etc/bitbucket/key.pem
++     - WOODPECKER_BITBUCKET_DC_URL=http://stash.mycompany.com
     volumes:
 +     - /path/to/key.pem:/path/to/key.pem
 
@@ -51,12 +51,12 @@ services:
     [...]
     environment:
       - [...]
-      - WOODPECKER_STASH=true
-      - WOODPECKER_STASH_GIT_USERNAME=foo
-      - WOODPECKER_STASH_GIT_PASSWORD=bar
-      - WOODPECKER_STASH_CONSUMER_KEY=95c0282573633eb25e82
-+     - WOODPECKER_STASH_CONSUMER_RSA=/etc/bitbucket/key.pem
-      - WOODPECKER_STASH_URL=http://stash.mycompany.com
+      - WOODPECKER_BITBUCKET_DC=true
+      - WOODPECKER_BITBUCKET_DC_GIT_USERNAME=foo
+      - WOODPECKER_BITBUCKET_DC_GIT_PASSWORD=bar
+      - WOODPECKER_BITBUCKET_DC_CONSUMER_KEY=95c0282573633eb25e82
++     - WOODPECKER_BITBUCKET_DC_CONSUMER_RSA=/etc/bitbucket/key.pem
+      - WOODPECKER_BITBUCKET_DC_URL=http://stash.mycompany.com
 +  volumes:
 +     - /etc/bitbucket/key.pem:/etc/bitbucket/key.pem
 
@@ -75,12 +75,12 @@ services:
     [...]
     environment:
       - [...]
-      - WOODPECKER_STASH=true
-      - WOODPECKER_STASH_GIT_USERNAME=foo
-      - WOODPECKER_STASH_GIT_PASSWORD=bar
-      - WOODPECKER_STASH_CONSUMER_KEY=95c0282573633eb25e82
-+     - WOODPECKER_STASH_CONSUMER_RSA_STRING=contentOfPemKeyAsString
-      - WOODPECKER_STASH_URL=http://stash.mycompany.com
+      - WOODPECKER_BITBUCKET_DC=true
+      - WOODPECKER_BITBUCKET_DC_GIT_USERNAME=foo
+      - WOODPECKER_BITBUCKET_DC_GIT_PASSWORD=bar
+      - WOODPECKER_BITBUCKET_DC_CONSUMER_KEY=95c0282573633eb25e82
++     - WOODPECKER_BITBUCKET_DC_CONSUMER_RSA_STRING=contentOfPemKeyAsString
+      - WOODPECKER_BITBUCKET_DC_URL=http://stash.mycompany.com
 
   woodpecker-agent:
     [...]
@@ -100,57 +100,57 @@ Please use http://woodpecker.mycompany.com/authorize as the Authorization callba
 
 This is a full list of configuration options. Please note that many of these options use default configuration values that should work for the majority of installations.
 
-### `WOODPECKER_STASH`
+### `WOODPECKER_BITBUCKET_DC`
 > Default: `false`
 
 Enables the Bitbucket Server driver.
 
-### `WOODPECKER_STASH_URL`
+### `WOODPECKER_BITBUCKET_DC_URL`
 > Default: empty
 
 Configures the Bitbucket Server address.
 
-### `WOODPECKER_STASH_CONSUMER_KEY`
+### `WOODPECKER_BITBUCKET_DC_CONSUMER_KEY`
 > Default: empty
 
 Configures your Bitbucket Server consumer key.
 
-### `WOODPECKER_STASH_CONSUMER_KEY_FILE`
+### `WOODPECKER_BITBUCKET_DC_CONSUMER_KEY_FILE`
 > Default: empty
 
-Read the value for `WOODPECKER_STASH_CONSUMER_KEY` from the specified filepath
+Read the value for `WOODPECKER_BITBUCKET_DC_CONSUMER_KEY` from the specified filepath
 
-### `WOODPECKER_STASH_CONSUMER_RSA`
+### `WOODPECKER_BITBUCKET_DC_CONSUMER_RSA`
 > Default: empty
 
 Configures the path to your Bitbucket Server private key file.
 
-### `WOODPECKER_STASH_CONSUMER_RSA_STRING`
+### `WOODPECKER_BITBUCKET_DC_CONSUMER_RSA_STRING`
 > Default: empty
 
 Configures your Bitbucket Server private key.
 
-### `WOODPECKER_STASH_GIT_USERNAME`
+### `WOODPECKER_BITBUCKET_DC_GIT_USERNAME`
 > Default: empty
 
 This username is used to authenticate and clone all private repositories.
 
-### `WOODPECKER_STASH_GIT_USERNAME_FILE`
+### `WOODPECKER_BITBUCKET_DC_GIT_USERNAME_FILE`
 > Default: empty
 
-Read the value for `WOODPECKER_STASH_GIT_USERNAME` from the specified filepath
+Read the value for `WOODPECKER_BITBUCKET_DC_GIT_USERNAME` from the specified filepath
 
-### `WOODPECKER_STASH_GIT_PASSWORD`
+### `WOODPECKER_BITBUCKET_DC_GIT_PASSWORD`
 > Default: empty
 
 The password is used to authenticate and clone all private repositories.
 
-### `WOODPECKER_STASH_GIT_PASSWORD_FILE`
+### `WOODPECKER_BITBUCKET_DC_GIT_PASSWORD_FILE`
 > Default: empty
 
-Read the value for `WOODPECKER_STASH_GIT_PASSWORD` from the specified filepath
+Read the value for `WOODPECKER_BITBUCKET_DC_GIT_PASSWORD` from the specified filepath
 
-### `WOODPECKER_STASH_SKIP_VERIFY`
+### `WOODPECKER_BITBUCKET_DC_SKIP_VERIFY`
 > Default: `false`
 
 Configure if SSL verification should be skipped.

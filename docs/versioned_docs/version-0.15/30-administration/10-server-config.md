@@ -304,7 +304,7 @@ See [Gitea configuration](vcs/gitea/#configuration)
 
 See [Bitbucket configuration](vcs/bitbucket/#configuration)
 
-### `WOODPECKER_STASH_...`
+### `WOODPECKER_BITBUCKET_DC_...`
 
 See [Bitbucket server configuration](vcs/bitbucket_server/#configuration)
 
