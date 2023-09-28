@@ -126,10 +126,11 @@ func authorLabel(name string) string {
 
 func convertUser(user *bb.User, token, baseURL string) *model.User {
 	return &model.User{
-		Login:  user.Slug,
-		Token:  token,
-		Email:  user.Email,
-		Avatar: bitbucketAvatarURL(baseURL, user.Slug),
+		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprintf("%d", user.ID)),
+		Login:         user.Slug,
+		Token:         token,
+		Email:         user.Email,
+		Avatar:        bitbucketAvatarURL(baseURL, user.Slug),
 	}
 }
 
