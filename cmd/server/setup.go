@@ -143,7 +143,7 @@ func setupForge(c *cli.Context) (forge.Forge, error) {
 	case c.Bool("bitbucket"):
 		return setupBitbucket(c)
 	case c.Bool("bitbucket-dc"):
-		return setupBitbucketServer(c)
+		return setupBitbucketDatacenter(c)
 	case c.Bool("gitea"):
 		return setupGitea(c)
 	default:
@@ -180,8 +180,8 @@ func setupGitea(c *cli.Context) (forge.Forge, error) {
 	return gitea.New(opts)
 }
 
-// setupBitbucketServer helper function to setup the Bitbucket DataCenter/Server forge from the CLI arguments.
-func setupBitbucketServer(c *cli.Context) (forge.Forge, error) {
+// setupBitbucketDatacenter helper function to setup the Bitbucket DataCenter/Server forge from the CLI arguments.
+func setupBitbucketDatacenter(c *cli.Context) (forge.Forge, error) {
 	opts := bitbucketserver.Opts{
 		URL:               c.String("bitbucket-dc-server"),
 		Username:          c.String("bitbucket-dc-git-username"),
