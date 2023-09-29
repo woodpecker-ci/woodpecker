@@ -569,7 +569,7 @@ func (c *client) OrgMembership(_ context.Context, _ *model.User, _ string) (*mod
 }
 
 // Org fetches the organization from the forge by name. If the name is a user an org with type user is returned.
-func (c *client) Org(ctx context.Context, u *model.User, owner string) (*model.Org, error) {
+func (c *client) Org(_ context.Context, _ *model.User, _ string) (*model.Org, error) {
 	// TODO: Not implemented currently
 	return nil, nil
 }

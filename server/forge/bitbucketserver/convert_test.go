@@ -25,6 +25,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
+//nolint:misspell
 func Test_helper(t *testing.T) {
 	g := goblin.Goblin(t)
 	g.Describe("Bitbucket Server converter", func() {
