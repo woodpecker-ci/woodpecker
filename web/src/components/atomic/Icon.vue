@@ -75,6 +75,7 @@ export type IconNames =
   | 'gitea'
   | 'gitlab'
   | 'bitbucket'
+  | 'bitbucket_dc'
   | 'question'
   | 'list'
   | 'loading'

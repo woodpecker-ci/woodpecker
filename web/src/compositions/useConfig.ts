@@ -6,7 +6,7 @@ declare global {
     WOODPECKER_DOCS: string | undefined;
     WOODPECKER_VERSION: string | undefined;
     WOODPECKER_CSRF: string | undefined;
-    WOODPECKER_FORGE: 'github' | 'gitlab' | 'gitea' | 'bitbucket' | undefined;
+    WOODPECKER_FORGE: 'github' | 'gitlab' | 'gitea' | 'bitbucket' | 'bitbucket_dc' | undefined;
     WOODPECKER_ROOT_PATH: string | undefined;
     WOODPECKER_ENABLE_SWAGGER: boolean | undefined;
   }

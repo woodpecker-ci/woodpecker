@@ -38,7 +38,12 @@
     <Tab id="activity" :title="$t('repo.activity')" />
     <Tab id="branches" :title="$t('repo.branches')" />
     <Tab
-      v-if="config.forge === 'gitea' || config.forge === 'github' || config.forge === 'gitlab'  || config.forge === 'bitbucket_dc'"
+      v-if="
+        config.forge === 'gitea' ||
+        config.forge === 'github' ||
+        config.forge === 'gitlab' ||
+        config.forge === 'bitbucket_dc'
+      "
       id="pull_requests"
       :title="$t('repo.pull_requests')"
     />
