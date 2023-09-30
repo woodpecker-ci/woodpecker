@@ -754,8 +754,8 @@ func (g *GitLab) loadChangedFilesFromMergeRequest(ctx context.Context, tmpRepo *
 		return nil, err
 	}
 
-	files := make([]string, 0, len(changes.Changes)*2)
-	for _, file := range changes.Changes {
+	files := make([]string, 0, len(changes)*2)
+	for _, file := range changes {
 		files = append(files, file.NewPath, file.OldPath)
 	}
 	pipeline.ChangedFiles = utils.DedupStrings(files)
