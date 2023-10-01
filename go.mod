@@ -32,7 +32,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/lib/pq v1.10.9
 	github.com/mattn/go-sqlite3 v1.14.17
-	github.com/melbahja/goph v1.3.1
+	github.com/melbahja/goph v1.4.0
 	github.com/moby/moby v20.10.26+incompatible
 	github.com/moby/term v0.5.0
 	github.com/oklog/ulid/v2 v2.1.0
