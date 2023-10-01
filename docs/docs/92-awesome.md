@@ -51,6 +51,8 @@ If you have some missing resources, please feel free to [open a pull-request](ht
 ## Videos
 
 - [Replace Ansible Semaphore with Woodpecker CI](https://www.youtube.com/watch?v=d610YPvCB0E)
+- ["unexpected EOF" error when trying to pair Woodpecker CI served through the Caddy with Gitea](https://www.youtube.com/watch?v=n7Hyvt71Np0)
+- [CICD Environment in Docker Swarm behind Caddy Server - Part 2 Woodpeckerci](https://www.youtube.com/watch?v=rkbw_k7JvS0)
 
 ## Plugins
 

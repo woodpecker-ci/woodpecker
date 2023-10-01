@@ -14,8 +14,8 @@ when:
     event: cron
 
 variables:
-  - &golang_image 'golang:1.20.2'
-  - &node_image 'node:18-alpine'
+  - &golang_image 'golang:1.21.1'
+  - &node_image 'node:20-alpine'
 
 steps:
   build-cli:

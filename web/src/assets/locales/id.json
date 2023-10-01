@@ -43,7 +43,7 @@
       },
       "not_allowed": "Anda tidak diperbolehkan untuk mengakses pengaturan peladen",
       "orgs": {
-        "delete_confirm": "Apakah Anda benar-benar ingin menghapus organisasi ini?",
+        "delete_confirm": "Apakah Anda benar-benar ingin menghapus organisasi ini? Ini juga akan menghapus semua repositori yang dimiliki oleh organisasi ini.",
         "delete_org": "Hapus organisasi",
         "deleted": "Organisasi dihapus",
         "desc": "Organisasi yang memiliki repositori di server ini",
@@ -72,6 +72,14 @@
         "task_waiting_on_deps": "Tugas sedang menunggu ketergantungan",
         "tasks": "Tugas",
         "waiting_for": "menunggu"
+      },
+      "repos": {
+        "desc": "Repositori yang sudah atau sebelumnya diaktifkan di server ini",
+        "disabled": "Dinonaktifkan",
+        "none": "Belum ada repositori.",
+        "repos": "Repositori",
+        "settings": "Pengaturan repositori",
+        "view": "Tampilkan repositori"
       },
       "secrets": {
         "add": "Tambahkan rahasia",
@@ -106,7 +114,7 @@
         "avatar_url": "URL Avatar",
         "cancel": "Batal",
         "created": "Pengguna dibuat",
-        "delete_confirm": "Apakah Anda ingin menghapus pengguna ini?",
+        "delete_confirm": "Apakah Anda ingin menghapus pengguna ini? Ini juga akan menghapus semua repositori yang dimiliki oleh pengguna ini.",
         "delete_user": "Hapus pengguna",
         "deleted": "Pengguna dihapus",
         "desc": "Pengguna terdaftar untuk server ini",
@@ -184,6 +192,7 @@
       }
     },
     "enable": {
+      "disabled": "Nonaktif",
       "enable": "Aktifkan",
       "enabled": "Sudah diaktifkan",
       "list_reloaded": "Daftar repositori dimuat ulang",
@@ -243,7 +252,8 @@
         "awaits": "Jalur pipa ini menunggu untuk disetujui oleh seorang pemelihara!",
         "decline": "Tolak",
         "decline_success": "Jalur pipa ditolak",
-        "declined": "Jalur pipa ini telah ditolak!"
+        "declined": "Jalur pipa ini telah ditolak!",
+        "review": "Tinjau perubahan"
       },
       "status": {
         "blocked": "diblokir",

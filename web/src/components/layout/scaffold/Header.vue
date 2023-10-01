@@ -4,7 +4,7 @@
     :class="{ 'md:px-4': fullWidth }"
   >
     <FluidContainer :full-width="fullWidth" class="!py-0">
-      <div class="flex w-full md:items-center flex-col py-2 gap-y-2 md:flex-row md:justify-between">
+      <div class="flex w-full md:items-center flex-col py-3 gap-2 md:gap-10 md:flex-row md:justify-between">
         <div
           class="flex items-center content-start"
           :class="{
@@ -31,7 +31,7 @@
         />
         <div
           v-if="$slots.titleActions"
-          class="flex items-center md:justify-end gap-x-2"
+          class="flex items-center md:justify-end gap-x-2 min-w-0"
           :class="{
             'md:flex-1': searchBoxPresent,
           }"

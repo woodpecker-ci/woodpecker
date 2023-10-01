@@ -126,13 +126,14 @@ func CreatePipeline(ctx context.Context, store store.Store, f forge.Forge, cron 
 	// the pipeline.
 	if refresher, ok := f.(forge.Refresher); ok {
 		refreshed, err := refresher.Refresh(ctx, creator)
-		log.Debug().Msgf("token refreshed: %t", refreshed)
 		if err != nil {
 			log.Error().Err(err).Msgf("failed to refresh oauth2 token for creator: %s", creator.Login)
 		} else if refreshed {
 			if err := store.UpdateUser(creator); err != nil {
 				log.Error().Err(err).Msgf("error while updating creator: %s", creator.Login)
 				// move forward
+			} else {
+				log.Debug().Msgf("token refreshed for creator: %s", creator.Login)
 			}
 		}
 	}

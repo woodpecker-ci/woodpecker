@@ -42,7 +42,7 @@ Keep in mind the name is optional, if not added the steps will be numerated.
 
 ### Skip Commits
 
-Woodpecker gives the ability to skip individual commits by adding `[CI SKIP]` to the commit message. Note this is case-insensitive.
+Woodpecker gives the ability to skip individual commits by adding `[SKIP CI]` or `[CI SKIP]` to the commit message. Note this is case-insensitive.
 
 ```sh
 git commit -m "updated README [CI SKIP]"
@@ -886,6 +886,10 @@ when:
 ## `depends_on`
 
 Woodpecker supports to define multiple workflows for a repository. Those workflows will run independent from each other. To depend them on each other you can use the [`depends_on`](./25-workflows.md#flow-control) keyword.
+
+## `runs_on`
+
+Workflows that should run even on failure should set the `runs_on` tag. See [here](./25-workflows.md#flow-control) for an example.
 
 ## Privileged mode
 

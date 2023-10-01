@@ -138,7 +138,7 @@ func GetRepos(c *gin.Context) {
 
 // PostToken
 //
-//	@Summary		Return the token of the current user as stringª
+//	@Summary		Return the token of the current user as string
 //	@Router			/user/token [post]
 //	@Produce		plain
 //	@Success		200

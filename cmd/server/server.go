@@ -73,6 +73,10 @@ func run(c *cli.Context) error {
 		)
 	}
 
+	if _, err := url.Parse(c.String("server-host")); err != nil {
+		log.Fatal().Err(err).Msg("could not parse WOODPECKER_HOST")
+	}
+
 	if strings.Contains(c.String("server-host"), "://localhost") {
 		log.Warn().Msg(
 			"WOODPECKER_HOST should probably be publicly accessible (not localhost)",
@@ -136,7 +140,6 @@ func run(c *cli.Context) error {
 			server.Config.Services.Logs,
 			server.Config.Services.Pubsub,
 			_store,
-			server.Config.Server.Host,
 		)
 		proto.RegisterWoodpeckerServer(grpcServer, woodpeckerServer)
 
@@ -206,11 +209,9 @@ func run(c *cli.Context) error {
 
 		// http to https redirect
 		redirect := func(w http.ResponseWriter, req *http.Request) {
-			serverHost := server.Config.Server.Host
-			serverHost = strings.TrimPrefix(serverHost, "http://")
-			serverHost = strings.TrimPrefix(serverHost, "https://")
+			serverURL, _ := url.Parse(server.Config.Server.Host)
 			req.URL.Scheme = "https"
-			req.URL.Host = serverHost
+			req.URL.Host = serverURL.Host
 
 			w.Header().Set("Strict-Transport-Security", "max-age=31536000")
 
@@ -327,16 +328,17 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 	server.Config.Server.Cert = c.String("server-cert")
 	server.Config.Server.Key = c.String("server-key")
 	server.Config.Server.AgentToken = c.String("agent-secret")
-	server.Config.Server.Host = c.String("server-host")
+	serverHost := c.String("server-host")
+	server.Config.Server.Host = serverHost
 	if c.IsSet("server-webhook-host") {
 		server.Config.Server.WebhookHost = c.String("server-webhook-host")
 	} else {
-		server.Config.Server.WebhookHost = c.String("server-host")
+		server.Config.Server.WebhookHost = serverHost
 	}
 	if c.IsSet("server-dev-oauth-host") {
 		server.Config.Server.OAuthHost = c.String("server-dev-oauth-host")
 	} else {
-		server.Config.Server.OAuthHost = c.String("server-host")
+		server.Config.Server.OAuthHost = serverHost
 	}
 	server.Config.Server.Port = c.String("server-addr")
 	server.Config.Server.PortTLS = c.String("server-addr-tls")
@@ -344,7 +346,13 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 	server.Config.Server.StatusContext = c.String("status-context")
 	server.Config.Server.StatusContextFormat = c.String("status-context-format")
 	server.Config.Server.SessionExpires = c.Duration("session-expires")
-	rootPath := strings.TrimSuffix(c.String("root-path"), "/")
+	rootPath := c.String("root-path")
+	if !c.IsSet("root-path") {
+		// Extract RootPath from Host...
+		u, _ := url.Parse(server.Config.Server.Host)
+		rootPath = u.Path
+	}
+	rootPath = strings.TrimSuffix(rootPath, "/")
 	if rootPath != "" && !strings.HasPrefix(rootPath, "/") {
 		rootPath = "/" + rootPath
 	}

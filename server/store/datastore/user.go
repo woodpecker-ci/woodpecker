@@ -15,8 +15,9 @@
 package datastore
 
 import (
-	"github.com/woodpecker-ci/woodpecker/server/model"
 	"xorm.io/xorm"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 func (s storage) GetUser(id int64) (*model.User, error) {
@@ -77,6 +78,10 @@ func (s storage) DeleteUser(user *model.User) error {
 	sess := s.engine.NewSession()
 	defer sess.Close()
 	if err := sess.Begin(); err != nil {
+		return err
+	}
+
+	if err := s.orgDelete(sess, user.OrgID); err != nil {
 		return err
 	}
 

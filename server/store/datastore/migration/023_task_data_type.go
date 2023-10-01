@@ -12,28 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package yaml
+package migration
 
 import (
-	"codeberg.org/6543/xyaml"
-
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
+	"xorm.io/xorm"
+	"xorm.io/xorm/schemas"
 )
 
-// ParseBytes parses the configuration from bytes b.
-func ParseBytes(b []byte) (*types.Workflow, error) {
-	out := new(types.Workflow)
-	err := xyaml.Unmarshal(b, out)
-	if err != nil {
-		return nil, err
-	}
+var alterTableTasksUpdateColumnTaskDataType = task{
+	name: "alter-table-tasks-update-type-of-task-data",
+	fn: func(sess *xorm.Session) (err error) {
+		dialect := sess.Engine().Dialect().URI().DBType
 
-	return out, nil
-}
+		switch dialect {
+		case schemas.MYSQL:
+			_, err = sess.Exec("ALTER TABLE tasks MODIFY COLUMN task_data LONGBLOB")
+		default:
+			// xorm uses the same type for all blob sizes in sqlite and postgres
+			return nil
+		}
 
-// ParseString parses the configuration from string s.
-func ParseString(s string) (*types.Workflow, error) {
-	return ParseBytes(
-		[]byte(s),
-	)
+		return err
+	},
 }
