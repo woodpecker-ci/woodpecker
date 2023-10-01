@@ -25,18 +25,27 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server"
 )
 
-func Test_custom_file_returns_OK_and_empty_content(t *testing.T) {
+func Test_custom_file_returns_OK_and_empty_content_and_fitting_mimetype(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
-	customFiles := []string{
-		"/assets/custom.js",
-		"/assets/custom.css",
+	filesToTest := []struct {
+		fileUrl  string
+		mimetype string
+	}{
+		{
+			fileUrl:  "/assets/custom.js",
+			mimetype: "application/javascript",
+		},
+		{
+			fileUrl:  "/assets/custom.css",
+			mimetype: "text/css",
+		},
 	}
 
-	for _, f := range customFiles {
-		t.Run(f, func(t *testing.T) {
-			request, err := http.NewRequest(http.MethodGet, f, nil)
-			request.RequestURI = f // additional required for mocking
+	for _, f := range filesToTest {
+		t.Run(f.fileUrl, func(t *testing.T) {
+			request, err := http.NewRequest(http.MethodGet, f.fileUrl, nil)
+			request.RequestURI = f.fileUrl // additional required for mocking
 			assert.NoError(t, err)
 
 			rr := httptest.NewRecorder()
@@ -45,6 +54,7 @@ func Test_custom_file_returns_OK_and_empty_content(t *testing.T) {
 
 			assert.Equal(t, 200, rr.Code)
 			assert.Equal(t, []byte(nil), rr.Body.Bytes())
+			assert.Contains(t, rr.Header().Get("Content-Type"), f.mimetype)
 		})
 	}
 }
