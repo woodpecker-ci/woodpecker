@@ -44,7 +44,7 @@ const (
 	authorizeTokenURL = "%s/plugins/servlet/oauth/authorize"
 	accessTokenURL    = "%s/plugins/servlet/oauth/access-token"
 
-	secret = "045dfb11b042c3c44d68274fd22338e0" // TODO: Temporary
+	secret = "045dfb11b042c3c44d68274fd22338e0" // TODO: Temporary 32 bytes?
 )
 
 // Opts defines configuration options.
@@ -171,7 +171,7 @@ func (c *client) Repo(ctx context.Context, u *model.User, rID model.ForgeRemoteI
 
 	var repo *bb.Repository
 	if rID.IsValid() {
-		opts := &bb.RepositorySearchOptions{Permission: bb.PermissionRepoRead, ListOptions: bb.ListOptions{Limit: 250}}
+		opts := &bb.RepositorySearchOptions{Permission: bb.PermissionRepoWrite, ListOptions: bb.ListOptions{Limit: 250}}
 		for {
 			repos, resp, err := bc.Projects.SearchRepositories(ctx, opts)
 			if err != nil {
@@ -203,10 +203,9 @@ func (c *client) Repo(ctx context.Context, u *model.User, rID model.ForgeRemoteI
 		return nil, fmt.Errorf("unable to fetch default branch: %w", err)
 	}
 
-	perms := &model.Perm{Pull: true}
+	perms := &model.Perm{Pull: true, Push: true}
 	_, _, err = bc.Projects.ListWebhooks(ctx, repo.Project.Key, repo.Slug, &bb.ListOptions{})
 	if err == nil {
-		perms.Push = true
 		perms.Admin = true
 	}
 
@@ -219,7 +218,7 @@ func (c *client) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 		return nil, fmt.Errorf("unable to create bitbucket client: %w", err)
 	}
 
-	opts := &bb.RepositorySearchOptions{Permission: bb.PermissionRepoRead, ListOptions: bb.ListOptions{Limit: 250}}
+	opts := &bb.RepositorySearchOptions{Permission: bb.PermissionRepoWrite, ListOptions: bb.ListOptions{Limit: 250}}
 	var all []*model.Repo
 	for {
 		repos, resp, err := bc.Projects.SearchRepositories(ctx, opts)
@@ -227,7 +226,7 @@ func (c *client) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 			return nil, fmt.Errorf("unable to search repositories: %w", err)
 		}
 		for _, r := range repos {
-			perms := &model.Perm{Pull: true, Push: false, Admin: false}
+			perms := &model.Perm{Pull: true, Push: true, Admin: false}
 			all = append(all, convertRepo(r, perms, ""))
 		}
 		if resp.LastPage {
