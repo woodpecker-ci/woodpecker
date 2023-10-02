@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package bitbucketserver
+package bitbucketdatacenter
 
 import (
 	"context"
@@ -24,11 +24,11 @@ import (
 
 	"github.com/franela/goblin"
 	"github.com/gin-gonic/gin"
-	"github.com/woodpecker-ci/woodpecker/server/forge/bitbucketserver/fixtures"
+	"github.com/woodpecker-ci/woodpecker/server/forge/bitbucketdatacenter/fixtures"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-func Test_Bitbucket_DC(t *testing.T) {
+func TestBitbucketDC(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	s := fixtures.Server()

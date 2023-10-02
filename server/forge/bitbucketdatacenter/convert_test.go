@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package bitbucketserver
+package bitbucketdatacenter
 
 import (
 	"testing"
@@ -26,7 +26,7 @@ import (
 )
 
 //nolint:misspell
-func Test_helper(t *testing.T) {
+func TestHelper(t *testing.T) {
 	g := goblin.Goblin(t)
 	g.Describe("Bitbucket Server converter", func() {
 		g.It("should convert status", func() {

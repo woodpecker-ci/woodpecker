@@ -38,7 +38,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/cache"
 	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/forge/bitbucket"
-	"github.com/woodpecker-ci/woodpecker/server/forge/bitbucketserver"
+	"github.com/woodpecker-ci/woodpecker/server/forge/bitbucketdatacenter"
 	"github.com/woodpecker-ci/woodpecker/server/forge/gitea"
 	"github.com/woodpecker-ci/woodpecker/server/forge/github"
 	"github.com/woodpecker-ci/woodpecker/server/forge/gitlab"
@@ -182,7 +182,7 @@ func setupGitea(c *cli.Context) (forge.Forge, error) {
 
 // setupBitbucketDatacenter helper function to setup the Bitbucket DataCenter/Server forge from the CLI arguments.
 func setupBitbucketDatacenter(c *cli.Context) (forge.Forge, error) {
-	opts := bitbucketserver.Opts{
+	opts := bitbucketdatacenter.Opts{
 		URL:               c.String("bitbucket-dc-server"),
 		Username:          c.String("bitbucket-dc-git-username"),
 		Password:          c.String("bitbucket-dc-git-password"),
@@ -191,8 +191,8 @@ func setupBitbucketDatacenter(c *cli.Context) (forge.Forge, error) {
 		ConsumerRSAString: c.String("bitbucket-dc-consumer-rsa-string"),
 		SkipVerify:        c.Bool("bitbucket-dc-skip-verify"),
 	}
-	log.Trace().Msgf("Forge (bitbucketserver) opts: %#v", opts)
-	return bitbucketserver.New(opts)
+	log.Trace().Msgf("Forge (bitbucketdatacenter) opts: %#v", opts)
+	return bitbucketdatacenter.New(opts)
 }
 
 // setupGitLab helper function to setup the GitLab forge from the CLI arguments.
