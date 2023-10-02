@@ -29,16 +29,16 @@ func Test_custom_file_returns_OK_and_empty_content_and_fitting_mimetype(t *testi
 	gin.SetMode(gin.TestMode)
 
 	filesToTest := []struct {
-		fileURL  string
-		mimetype string
+		fileURL       string
+		shortMimetype string
 	}{
 		{
-			fileURL:  "/assets/custom.js",
-			mimetype: "application/javascript",
+			fileURL:       "/assets/custom.js",
+			shortMimetype: "javascript", // using just the short version, since it depends on the go runtime/version
 		},
 		{
-			fileURL:  "/assets/custom.css",
-			mimetype: "text/css",
+			fileURL:       "/assets/custom.css",
+			shortMimetype: "css", // using just the short version, since it depends on the go runtime/version
 		},
 	}
 
@@ -54,7 +54,7 @@ func Test_custom_file_returns_OK_and_empty_content_and_fitting_mimetype(t *testi
 
 			assert.Equal(t, 200, rr.Code)
 			assert.Equal(t, []byte(nil), rr.Body.Bytes())
-			assert.Contains(t, rr.Header().Get("Content-Type"), f.mimetype)
+			assert.Contains(t, rr.Header().Get("Content-Type"), f.shortMimetype)
 		})
 	}
 }
