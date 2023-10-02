@@ -71,7 +71,7 @@ func TestBitbucketDC(t *testing.T) {
 				g.Assert(err).IsNil()
 				g.Assert(repo.Name).Equal("repo-slug-2")
 				g.Assert(repo.Owner).Equal("PRJ")
-				g.Assert(repo.Perm).Equal(&model.Perm{Pull: true})
+				g.Assert(repo.Perm).Equal(&model.Perm{Pull: true, Push: true})
 				g.Assert(repo.Branch).Equal("main")
 			})
 		})
