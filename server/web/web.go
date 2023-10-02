@@ -72,7 +72,7 @@ func New() (*gin.Engine, error) {
 }
 
 func handleCustomFilesAndAssets(fs *prefixFS) func(ctx *gin.Context) {
-	serveFileOrEmptyContent := func(w http.ResponseWriter, r *http.Request, localFileName string, contentTypeName string) {
+	serveFileOrEmptyContent := func(w http.ResponseWriter, r *http.Request, localFileName, contentTypeName string) {
 		if len(localFileName) > 0 {
 			http.ServeFile(w, r, localFileName)
 		} else {

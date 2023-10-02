@@ -29,23 +29,23 @@ func Test_custom_file_returns_OK_and_empty_content_and_fitting_mimetype(t *testi
 	gin.SetMode(gin.TestMode)
 
 	filesToTest := []struct {
-		fileUrl  string
+		fileURL  string
 		mimetype string
 	}{
 		{
-			fileUrl:  "/assets/custom.js",
+			fileURL:  "/assets/custom.js",
 			mimetype: "application/javascript",
 		},
 		{
-			fileUrl:  "/assets/custom.css",
+			fileURL:  "/assets/custom.css",
 			mimetype: "text/css",
 		},
 	}
 
 	for _, f := range filesToTest {
-		t.Run(f.fileUrl, func(t *testing.T) {
-			request, err := http.NewRequest(http.MethodGet, f.fileUrl, nil)
-			request.RequestURI = f.fileUrl // additional required for mocking
+		t.Run(f.fileURL, func(t *testing.T) {
+			request, err := http.NewRequest(http.MethodGet, f.fileURL, nil)
+			request.RequestURI = f.fileURL // additional required for mocking
 			assert.NoError(t, err)
 
 			rr := httptest.NewRecorder()
