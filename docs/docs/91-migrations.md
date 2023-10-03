@@ -24,7 +24,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Renamed config env `WOODPECKER_MAX_PROCS` to `WOODPECKER_MAX_WORKFLOWS` (still available as fallback)
 - The pipelines are now also read from `.yaml` files, the new default order is `.woodpecker/*.yml` and `.woodpecker/*.yaml` (without any prioritization) -> `.woodpecker.yml` ->  `.woodpecker.yaml`
 - Dropped support for [Coding](https://coding.net/) and [Gogs](https://gogs.io)
-- Migrated from Bitbucket Stash support to Bitbucket Datacenter / server support
+- Migrated from Bitbucket Stash support to Bitbucket Datacenter / server support, rename env `WOODPECKER_STASH` to `WOODPECKER_BITBUCKET_DC` and webhooks need to be re-installed (e.g., using "repair" on the project in Woodpecker)
 - `/api/queue/resume` & `/api/queue/pause` endpoint methods were changed from `GET` to `POST`
 - rename `pipeline:` key in your workflow config to `steps:`
 - If you want to migrate old logs to the new format, watch the error messages on start. If there are none we are good to go, else you have to plan a migration that can take hours. Set `WOODPECKER_MIGRATIONS_ALLOW_LONG` to true and let it run.
