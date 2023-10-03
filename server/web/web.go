@@ -72,12 +72,12 @@ func New() (*gin.Engine, error) {
 }
 
 func handleCustomFilesAndAssets(fs *prefixFS) func(ctx *gin.Context) {
-	serveFileOrEmptyContent := func(w http.ResponseWriter, r *http.Request, localFileName, contentTypeName string) {
+	serveFileOrEmptyContent := func(w http.ResponseWriter, r *http.Request, localFileName, fileName string) {
 		if len(localFileName) > 0 {
 			http.ServeFile(w, r, localFileName)
 		} else {
 			// prefer zero content over sending a 404 Not Found
-			http.ServeContent(w, r, contentTypeName, time.Now(), bytes.NewReader([]byte{}))
+			http.ServeContent(w, r, fileName, time.Now(), bytes.NewReader([]byte{}))
 		}
 	}
 	return func(ctx *gin.Context) {
