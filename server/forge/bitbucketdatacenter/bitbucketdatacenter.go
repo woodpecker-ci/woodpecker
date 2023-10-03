@@ -43,8 +43,6 @@ const (
 	requestTokenURL   = "%s/plugins/servlet/oauth/request-token"
 	authorizeTokenURL = "%s/plugins/servlet/oauth/authorize"
 	accessTokenURL    = "%s/plugins/servlet/oauth/access-token"
-
-	secret = "045dfb11b042c3c44d68274fd22338e0" // TODO: Temporary 32 bytes?
 )
 
 // Opts defines configuration options.
@@ -420,7 +418,7 @@ func (c *client) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 		Events: []bb.EventKey{bb.EventKeyRepoRefsChanged, bb.EventKeyPullRequestFrom},
 		Active: true,
 		Config: &bb.WebhookConfiguration{
-			Secret: secret,
+			Secret: r.Hash,
 		},
 	}
 	_, _, err = bc.Projects.CreateWebhook(ctx, r.Owner, r.Name, webhook)
@@ -468,7 +466,7 @@ func (c *client) Deactivate(ctx context.Context, u *model.User, r *model.Repo, l
 }
 
 func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error) {
-	ev, err := bb.ParsePayload(r, []byte(secret))
+	ev, payload, err := bb.ParsePayloadWithoutSignature(r)
 	if err != nil {
 		return nil, nil, fmt.Errorf("unable to parse payload from webhook invocation: %w", err)
 	}
@@ -486,7 +484,17 @@ func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model
 		return nil, nil, nil
 	}
 
-	pipe, err = c.updatePipelineFromCommit(ctx, repo, pipe)
+	user, repo, err := c.getUserAndRepo(ctx, repo)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	err = bb.ValidateSignature(r, payload, []byte(repo.Hash))
+	if err != nil {
+		return nil, nil, fmt.Errorf("unable to validate signature on incoming webhook payload: %w", err)
+	}
+
+	pipe, err = c.updatePipelineFromCommit(ctx, user, repo, pipe)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -498,26 +506,31 @@ func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model
 	return repo, pipe, nil
 }
 
-func (c *client) updatePipelineFromCommit(ctx context.Context, r *model.Repo, p *model.Pipeline) (*model.Pipeline, error) {
-	if p == nil {
-		return nil, nil
-	}
-
+func (c *client) getUserAndRepo(ctx context.Context, r *model.Repo) (*model.User, *model.Repo, error) {
 	_store, ok := store.TryFromContext(ctx)
 	if !ok {
 		log.Error().Msg("could not get store from context")
-		return nil, nil
+		return nil, nil, fmt.Errorf("unable to get store from context")
 	}
 
 	repo, err := _store.GetRepoForgeID(r.ForgeRemoteID)
 	if err != nil {
-		return nil, err
+		return nil, nil, fmt.Errorf("unable to get repo: %w", err)
 	}
 	log.Trace().Any("repo", repo).Msg("got repo")
 
-	u, err := _store.GetUser(repo.UserID)
+	user, err := _store.GetUser(repo.UserID)
 	if err != nil {
-		return nil, err
+		return nil, nil, fmt.Errorf("unable to get user: %w", err)
+	}
+	log.Trace().Any("user", user).Msg("got user")
+
+	return user, repo, nil
+}
+
+func (c *client) updatePipelineFromCommit(ctx context.Context, u *model.User, r *model.Repo, p *model.Pipeline) (*model.Pipeline, error) {
+	if p == nil {
+		return nil, nil
 	}
 
 	bc, err := c.newClient(u)
@@ -525,7 +538,7 @@ func (c *client) updatePipelineFromCommit(ctx context.Context, r *model.Repo, p 
 		return nil, fmt.Errorf("unable to create bitbucket client: %w", err)
 	}
 
-	commit, _, err := bc.Projects.GetCommit(ctx, repo.Owner, repo.Name, p.Commit)
+	commit, _, err := bc.Projects.GetCommit(ctx, r.Owner, r.Name, p.Commit)
 	if err != nil {
 		return nil, fmt.Errorf("unable to read commit: %w", err)
 	}
@@ -533,7 +546,7 @@ func (c *client) updatePipelineFromCommit(ctx context.Context, r *model.Repo, p 
 
 	opts := &bb.ListOptions{}
 	for {
-		changes, resp, err := bc.Projects.ListChanges(ctx, repo.Owner, repo.Name, p.Commit, opts)
+		changes, resp, err := bc.Projects.ListChanges(ctx, r.Owner, r.Name, p.Commit, opts)
 		if err != nil {
 			return nil, fmt.Errorf("unable to list commit changes: %w", err)
 		}
