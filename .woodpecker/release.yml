@@ -1,6 +1,6 @@
 steps:
   release:
-    image: woodpeckerci/plugin-ready-release-go
+    image: woodpeckerci/plugin-ready-release-go:6.1.0
     pull: true
     settings:
       release_branch: ${CI_REPO_DEFAULT_BRANCH}
