@@ -23,33 +23,9 @@ type KubernetesBackendOptions struct {
 	Resources          Resources         `yaml:"resources,omitempty"`
 	ServiceAccountName string            `yaml:"serviceAccountName,omitempty"`
 	NodeSelector       map[string]string `yaml:"nodeSelector,omitempty"`
-	Tolerations        []Toleration      `yaml:"tolerations,omitempty"`
 }
 
 type Resources struct {
 	Requests map[string]string `yaml:"requests,omitempty"`
 	Limits   map[string]string `yaml:"limits,omitempty"`
 }
-
-type Toleration struct {
-	Key               string             `yaml:"key,omitempty"`
-	Operator          TolerationOperator `yaml:"operator,omitempty"`
-	Value             string             `yaml:"value,omitempty"`
-	Effect            TaintEffect        `yaml:"effect,omitempty"`
-	TolerationSeconds *int64             `yaml:"tolerationSeconds,omitempty"`
-}
-
-type TaintEffect string
-
-const (
-	TaintEffectNoSchedule       TaintEffect = "NoSchedule"
-	TaintEffectPreferNoSchedule TaintEffect = "PreferNoSchedule"
-	TaintEffectNoExecute        TaintEffect = "NoExecute"
-)
-
-type TolerationOperator string
-
-const (
-	TolerationOpExists TolerationOperator = "Exists"
-	TolerationOpEqual  TolerationOperator = "Equal"
-)
