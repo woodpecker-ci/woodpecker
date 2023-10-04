@@ -72,19 +72,19 @@ func New() (*gin.Engine, error) {
 }
 
 func handleCustomFilesAndAssets(fs *prefixFS) func(ctx *gin.Context) {
-	serveFileOrEmptyContent := func(w http.ResponseWriter, r *http.Request, localFileName string) {
+	serveFileOrEmptyContent := func(w http.ResponseWriter, r *http.Request, localFileName, fileName string) {
 		if len(localFileName) > 0 {
 			http.ServeFile(w, r, localFileName)
 		} else {
 			// prefer zero content over sending a 404 Not Found
-			http.ServeContent(w, r, localFileName, time.Now(), bytes.NewReader([]byte{}))
+			http.ServeContent(w, r, fileName, time.Now(), bytes.NewReader([]byte{}))
 		}
 	}
 	return func(ctx *gin.Context) {
 		if strings.HasSuffix(ctx.Request.RequestURI, "/assets/custom.js") {
-			serveFileOrEmptyContent(ctx.Writer, ctx.Request, server.Config.Server.CustomJsFile)
+			serveFileOrEmptyContent(ctx.Writer, ctx.Request, server.Config.Server.CustomJsFile, "file.js")
 		} else if strings.HasSuffix(ctx.Request.RequestURI, "/assets/custom.css") {
-			serveFileOrEmptyContent(ctx.Writer, ctx.Request, server.Config.Server.CustomCSSFile)
+			serveFileOrEmptyContent(ctx.Writer, ctx.Request, server.Config.Server.CustomCSSFile, "file.css")
 		} else {
 			serveFile(fs)(ctx)
 		}

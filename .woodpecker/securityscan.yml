@@ -7,7 +7,7 @@ when:
 
 variables:
   - &trivy_image aquasec/trivy:latest
-  - &trivy_plugin codeberg.org/woodpecker-plugins/trivy:latest
+  - &trivy_plugin codeberg.org/woodpecker-plugins/trivy:1.0.0
 
 steps:
   - name: check backend
