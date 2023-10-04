@@ -117,9 +117,6 @@ install-tools: ## Install development tools
 	@hash golangci-lint > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest; \
 	fi ; \
-	hash lint > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
-		go install github.com/rs/zerolog/cmd/lint@latest; \
-	fi ; \
 	hash gofumpt > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		go install mvdan.cc/gofumpt@latest; \
 	fi ; \
@@ -139,10 +136,6 @@ ui-dependencies: ## Install UI dependencies
 lint: install-tools ## Lint code
 	@echo "Running golangci-lint"
 	golangci-lint run --timeout 15m
-	@echo "Running zerolog linter"
-	lint github.com/woodpecker-ci/woodpecker/cmd/agent
-	lint github.com/woodpecker-ci/woodpecker/cmd/cli
-	lint github.com/woodpecker-ci/woodpecker/cmd/server
 
 lint-ui: ## Lint UI code
 	(cd web/; pnpm install)

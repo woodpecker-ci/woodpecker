@@ -33,6 +33,7 @@ linters:
     - gofumpt
     - errorlint
     - forbidigo
+    - zerologlint
 
 run:
   timeout: 5m
