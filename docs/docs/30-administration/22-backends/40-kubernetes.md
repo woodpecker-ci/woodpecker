@@ -80,9 +80,31 @@ See the [kubernetes documentation](https://kubernetes.io/docs/concepts/security/
 
 ### nodeSelector
 
-Specify the label which is used to select the node where the job should be executed. Labels defined here will be appended to a list already containing "kubernetes.io/arch".
-By default the pod will use "kubernetes.io/arch" inferred from top-level "platform" setting which is deducted from the agents' environment variable CI_SYSTEM_PLATFORM. To overwrite this, you need to specify this label in the nodeSelector section.
-See the [kubernetes documentation](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector) for more information on using nodeSelector.
+Specify the label which is used to select the node where the job should be executed.
+Labels defined here will be appended to a list already containing "kubernetes.io/arch".
+By default the pod will use "kubernetes.io/arch" inferred from top-level "platform" setting which is deducted from the agents' environment variable CI_SYSTEM_PLATFORM.
+To overwrite this, you need to specify this label in the `nodeSelector` section of the `backend_options`.
+See the [kubernetes documentation](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector) for more information on about the `nodeSelector` setting.
+
+A practical example is when you are running a matrix-build and you want to delegate specific elements of the matrix to run on a certain architecture.
+In this case, define an arbitrary key in the matrix section of the respective matrix element:
+
+```yml
+matrix:
+  include:
+    - NAME: runner1
+      ARCH: arm64
+```
+
+And then overwrit the `nodeSelector` in the `backend_options` section of the step(s):
+
+```yml
+[...]
+    backend_options:
+      kubernetes:
+        nodeSelector:
+          kubernetes.io/arch: "${ARCH}"
+```
 
 ### tolerations
 
