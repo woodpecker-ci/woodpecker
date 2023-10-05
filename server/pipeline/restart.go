@@ -39,7 +39,7 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 
 	var pipelineFiles []*forge_types.FileMeta
 
-	// fetch the old pipeline config from database
+	// fetch the old pipeline config from the database
 	configs, err := store.ConfigsForPipeline(lastPipeline.ID)
 	if err != nil {
 		msg := fmt.Sprintf("failure to get pipeline config for %s. %s", repo.FullName, err)
@@ -51,7 +51,7 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 		pipelineFiles = append(pipelineFiles, &forge_types.FileMeta{Data: y.Data, Name: y.Name})
 	}
 
-	// If config extension is active we should refetch the config in case something changed
+	// If config extension is active, we should refetch the config in case something changed
 	if server.Config.Services.ConfigService != nil && server.Config.Services.ConfigService.IsConfigured() {
 		currentFileMeta := make([]*forge_types.FileMeta, len(configs))
 		for i, cfg := range configs {
@@ -114,7 +114,6 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 	return newPipeline, nil
 }
 
-// TODO: reuse at create.go too
 func persistPipelineConfigs(store store.Store, configs []*model.Config, pipelineID int64) error {
 	for _, conf := range configs {
 		pipelineConfig := &model.PipelineConfig{
