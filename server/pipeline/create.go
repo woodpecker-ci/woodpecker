@@ -39,17 +39,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	// If the forge has a refresh token, the current access token
 	// may be stale. Therefore, we should refresh prior to dispatching
 	// the pipeline.
-	if refresher, ok := server.Config.Services.Forge.(forge.Refresher); ok {
-		refreshed, err := refresher.Refresh(ctx, repoUser)
-		if err != nil {
-			log.Error().Err(err).Msgf("failed to refresh oauth2 token for repoUser: %s", repoUser.Login)
-		} else if refreshed {
-			if err := _store.UpdateUser(repoUser); err != nil {
-				log.Error().Err(err).Msgf("error while updating repoUser: %s", repoUser.Login)
-				// move forward
-			}
-		}
-	}
+	forge.Refresh(ctx, server.Config.Services.Forge, _store, repoUser)
 
 	// update some pipeline fields
 	pipeline.RepoID = repo.ID
@@ -105,7 +95,6 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 
 	if pipeline.Status == model.StatusBlocked {
 		publishPipeline(ctx, pipeline, repo, repoUser)
-
 		return pipeline, nil
 	}
 

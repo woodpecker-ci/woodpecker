@@ -15,10 +15,6 @@
 package token
 
 import (
-	"time"
-
-	"github.com/rs/zerolog/log"
-
 	"github.com/gin-gonic/gin"
 
 	"github.com/woodpecker-ci/woodpecker/server"
@@ -29,43 +25,8 @@ import (
 
 func Refresh(c *gin.Context) {
 	user := session.User(c)
-	if user == nil {
-		c.Next()
-		return
-	}
-
-	// check if the forge includes the ability to
-	// refresh the user token.
-	_forge := server.Config.Services.Forge
-	refresher, ok := _forge.(forge.Refresher)
-	if !ok {
-		c.Next()
-		return
-	}
-
-	// check to see if the user token is expired or
-	// will expire within the next 30 minutes (1800 seconds).
-	// If not, there is nothing we really need to do here.
-	if time.Now().UTC().Unix() < (user.Expiry - 1800) {
-		c.Next()
-		return
-	}
-
-	// attempts to refresh the access token. If the
-	// token is refreshed, we must also persist to the
-	// database.
-	ok, err := refresher.Refresh(c, user)
-	if err != nil {
-		log.Error().Err(err).Msgf("refresh oauth token of user '%s' failed", user.Login)
-	} else if ok {
-		err := store.FromContext(c).UpdateUser(user)
-		if err != nil {
-			// we only log the error at this time. not sure
-			// if we really want to fail the request, do we?
-			log.Error().Msgf("cannot refresh access token for %s. %s", user.Login, err)
-		} else {
-			log.Debug().Msgf("refreshed access token for %s", user.Login)
-		}
+	if user != nil {
+		forge.Refresh(c, server.Config.Services.Forge, store.FromContext(c), user)
 	}
 
 	c.Next()
