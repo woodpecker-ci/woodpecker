@@ -87,13 +87,20 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	pipeline = setPipelineStepsOnPipeline(pipeline, pipelineItems)
 
 	// persist the pipeline config for historical correctness, restarts, etc
+	var configs []*model.Config
 	for _, forgeYamlConfig := range forgeYamlConfigs {
-		_, err := findOrPersistPipelineConfig(_store, pipeline, forgeYamlConfig)
+		config, err := findOrPersistPipelineConfig(_store, pipeline, forgeYamlConfig)
 		if err != nil {
 			msg := fmt.Sprintf("failure to find or persist pipeline config for %s", repo.FullName)
 			log.Error().Err(err).Msg(msg)
 			return nil, fmt.Errorf(msg)
 		}
+		configs = append(configs, config)
+	}
+	if err := persistPipelineConfigs(_store, configs, pipeline.ID); err != nil {
+		msg := fmt.Sprintf("failure to find or persist pipeline config for %s", repo.FullName)
+		log.Error().Err(err).Msg(msg)
+		return nil, fmt.Errorf(msg)
 	}
 
 	if pipeline.Status == model.StatusBlocked {
