@@ -69,7 +69,7 @@ func (cf *configFetcher) Fetch(ctx context.Context) (files []*types.FileMeta, er
 			continue
 		}
 
-		if cf.configExtension != nil && cf.configExtension.IsConfigured() {
+		if cf.configExtension != nil {
 			fetchCtx, cancel := context.WithTimeout(ctx, cf.timeout)
 			defer cancel() // ok here as we only try http fetching once, returning on fail and success
 

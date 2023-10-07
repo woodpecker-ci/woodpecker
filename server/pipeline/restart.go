@@ -51,8 +51,8 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 		pipelineFiles = append(pipelineFiles, &forge_types.FileMeta{Data: y.Data, Name: y.Name})
 	}
 
-	// If config extension is active we should refetch the config in case something changed
-	if server.Config.Services.ConfigService != nil && server.Config.Services.ConfigService.IsConfigured() {
+	// If the config extension is active we should refetch the config in case something changed
+	if server.Config.Services.ConfigService != nil {
 		currentFileMeta := make([]*forge_types.FileMeta, len(configs))
 		for i, cfg := range configs {
 			currentFileMeta[i] = &forge_types.FileMeta{Name: cfg.Name, Data: cfg.Data}
