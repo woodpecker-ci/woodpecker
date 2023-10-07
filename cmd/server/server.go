@@ -97,12 +97,6 @@ func run(c *cli.Context) error {
 		)
 	}
 
-	if strings.HasSuffix(c.String("server-host"), "/") {
-		log.Fatal().Msg(
-			"WOODPECKER_HOST must not have trailing slash",
-		)
-	}
-
 	_forge, err := setupForge(c)
 	if err != nil {
 		log.Fatal().Err(err).Msg("")
@@ -243,7 +237,7 @@ func run(c *cli.Context) error {
 		certmagic.DefaultACME.Email = c.String("lets-encrypt-email")
 		certmagic.DefaultACME.Agreed = true
 
-		address, err := url.Parse(c.String("server-host"))
+		address, err := url.Parse(strings.TrimSuffix(c.String("server-host"), "/"))
 		if err != nil {
 			return err
 		}
@@ -340,16 +334,17 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 	server.Config.Server.Cert = c.String("server-cert")
 	server.Config.Server.Key = c.String("server-key")
 	server.Config.Server.AgentToken = c.String("agent-secret")
-	server.Config.Server.Host = c.String("server-host")
+	serverHost := strings.TrimSuffix(c.String("server-host"), "/")
+	server.Config.Server.Host = serverHost
 	if c.IsSet("server-webhook-host") {
 		server.Config.Server.WebhookHost = c.String("server-webhook-host")
 	} else {
-		server.Config.Server.WebhookHost = c.String("server-host")
+		server.Config.Server.WebhookHost = serverHost
 	}
 	if c.IsSet("server-dev-oauth-host") {
 		server.Config.Server.OAuthHost = c.String("server-dev-oauth-host")
 	} else {
-		server.Config.Server.OAuthHost = c.String("server-host")
+		server.Config.Server.OAuthHost = serverHost
 	}
 	server.Config.Server.Port = c.String("server-addr")
 	server.Config.Server.PortTLS = c.String("server-addr-tls")
