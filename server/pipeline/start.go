@@ -38,7 +38,7 @@ func start(ctx context.Context, store store.Store, activePipeline *model.Pipelin
 		return nil, err
 	}
 
-	if err := publishToTopic(ctx, activePipeline, repo); err != nil {
+	if err := publishToTopic(activePipeline, repo); err != nil {
 		log.Error().Err(err).Msg("publishToTopic")
 	}
 

@@ -15,7 +15,6 @@
 package pipeline
 
 import (
-	"context"
 	"encoding/json"
 	"strconv"
 
@@ -25,7 +24,7 @@ import (
 )
 
 // publishToTopic publishes message to UI clients
-func publishToTopic(c context.Context, pipeline *model.Pipeline, repo *model.Repo) (err error) {
+func publishToTopic(pipeline *model.Pipeline, repo *model.Repo) (err error) {
 	message := pubsub.Message{
 		Labels: map[string]string{
 			"repo":    repo.FullName,
@@ -38,5 +37,6 @@ func publishToTopic(c context.Context, pipeline *model.Pipeline, repo *model.Rep
 		Repo:     *repo,
 		Pipeline: pipelineCopy,
 	})
-	return server.Config.Services.Pubsub.Publish(c, "topic/events", message)
+	server.Config.Services.Pubsub.Publish(message)
+	return nil
 }

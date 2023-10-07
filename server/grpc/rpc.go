@@ -43,7 +43,7 @@ import (
 type RPC struct {
 	forge         forge.Forge
 	queue         queue.Queue
-	pubsub        pubsub.Publisher
+	pubsub        *pubsub.Publisher
 	logger        logging.Log
 	store         store.Store
 	pipelineTime  *prometheus.GaugeVec
@@ -150,9 +150,7 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 		Repo:     *repo,
 		Pipeline: *currentPipeline,
 	})
-	if err := s.pubsub.Publish(c, "topic/events", message); err != nil {
-		log.Error().Err(err).Msg("can not publish step list to")
-	}
+	s.pubsub.Publish(message)
 
 	return nil
 }
@@ -208,9 +206,7 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 			Repo:     *repo,
 			Pipeline: *currentPipeline,
 		})
-		if err := s.pubsub.Publish(c, "topic/events", message); err != nil {
-			log.Error().Err(err).Msg("can not publish step list to")
-		}
+		s.pubsub.Publish(message)
 	}()
 
 	workflow, err = pipeline.UpdateWorkflowToStatusStarted(s.store, *workflow, state)
@@ -297,7 +293,7 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 		}
 	}()
 
-	if err := s.notify(c, repo, currentPipeline); err != nil {
+	if err := s.notify(repo, currentPipeline); err != nil {
 		return err
 	}
 
@@ -408,7 +404,7 @@ func (s *RPC) updateForgeStatus(ctx context.Context, repo *model.Repo, pipeline 
 	}
 }
 
-func (s *RPC) notify(c context.Context, repo *model.Repo, pipeline *model.Pipeline) (err error) {
+func (s *RPC) notify(repo *model.Repo, pipeline *model.Pipeline) (err error) {
 	message := pubsub.Message{
 		Labels: map[string]string{
 			"repo":    repo.FullName,
@@ -419,9 +415,7 @@ func (s *RPC) notify(c context.Context, repo *model.Repo, pipeline *model.Pipeli
 		Repo:     *repo,
 		Pipeline: *pipeline,
 	})
-	if err := s.pubsub.Publish(c, "topic/events", message); err != nil {
-		log.Error().Err(err).Msgf("grpc could not notify event: '%v'", message)
-	}
+	s.pubsub.Publish(message)
 	return nil
 }
 

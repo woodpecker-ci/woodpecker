@@ -117,7 +117,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	}
 
 	if pipeline.Status == model.StatusError {
-		if err := publishToTopic(ctx, pipeline, repo); err != nil {
+		if err := publishToTopic(pipeline, repo); err != nil {
 			log.Error().Err(err).Msg("publishToTopic")
 		}
 
@@ -134,7 +134,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	}
 
 	if pipeline.Status == model.StatusBlocked {
-		if err := publishToTopic(ctx, pipeline, repo); err != nil {
+		if err := publishToTopic(pipeline, repo); err != nil {
 			log.Error().Err(err).Msg("publishToTopic")
 		}
 
