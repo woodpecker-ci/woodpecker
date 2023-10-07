@@ -101,10 +101,19 @@ func GetBadge(c *gin.Context) {
 //	@Param			name	path	string	true	"the repository name"
 func GetCC(c *gin.Context) {
 	_store := store.FromContext(c)
-	repo, err := _store.GetRepoName(c.Param("owner") + "/" + c.Param("name"))
-	if err != nil {
-		handleDbError(c, err)
-		return
+	var repo *model.Repo
+	var err error
+
+	if c.Param("repo_name") != "" {
+		repo, err = _store.GetRepoName(c.Param("repo_id_or_owner") + "/" + c.Param("repo_name"))
+	} else {
+		var repoID int64
+		repoID, err = strconv.ParseInt(c.Param("repo_id_or_owner"), 10, 64)
+		if err != nil {
+			c.AbortWithStatus(http.StatusBadRequest)
+			return
+		}
+		repo, err = _store.GetRepo(repoID)
 	}
 
 	pipelines, err := _store.GetPipelineList(repo, &model.ListOptions{Page: 1, PerPage: 1})
@@ -118,7 +127,7 @@ func GetCC(c *gin.Context) {
 		return
 	}
 
-	url := fmt.Sprintf("%s/%s/%d", server.Config.Server.Host, repo.FullName, pipelines[0].Number)
+	url := fmt.Sprintf("%s/repos/%d/pipeline/%d", server.Config.Server.Host, repo.ID, pipelines[0].Number)
 	cc := ccmenu.New(repo, pipelines[0], url)
 	c.XML(http.StatusOK, cc)
 }
