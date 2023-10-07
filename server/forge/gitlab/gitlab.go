@@ -447,7 +447,7 @@ func (g *GitLab) getTokenAndWebURL(link string) (token, webURL string, err error
 		return "", "", err
 	}
 	token = uri.Query().Get("access_token")
-	webURL = fmt.Sprintf("%s://%s/api/hook", uri.Scheme, uri.Host)
+	webURL = fmt.Sprintf("%s://%s/%s", uri.Scheme, uri.Host, strings.TrimPrefix(uri.Path, "/"))
 	return token, webURL, nil
 }
 
