@@ -749,7 +749,7 @@ func (g *GitLab) loadChangedFilesFromMergeRequest(ctx context.Context, tmpRepo *
 		return nil, err
 	}
 
-	changes, _, err := client.MergeRequests.ListMergeRequesDiffs(_repo.ID, mergeIID, &gitlab.ListMergeRequesDiffsOptions{}, gitlab.WithContext(ctx))
+	changes, _, err := client.MergeRequests.ListMergeRequestDiffs(_repo.ID, mergeIID, &gitlab.ListMergeRequestDiffsOptions{}, gitlab.WithContext(ctx))
 	if err != nil {
 		return nil, err
 	}
