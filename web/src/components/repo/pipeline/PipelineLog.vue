@@ -275,7 +275,7 @@ async function loadLogs() {
   if (loadedStepSlug.value === stepSlug.value) {
     return;
   }
-  loadedStepSlug.value = stepSlug.value;
+
   log.value = undefined;
   logBuffer.value = [];
   ansiUp.value = new AnsiUp();
@@ -294,12 +294,12 @@ async function loadLogs() {
   }
 
   if (isStepFinished(step.value)) {
+    loadedStepSlug.value = stepSlug.value;
     const logs = await apiClient.getLogs(repo.value.id, pipeline.value.number, step.value.id);
     logs?.forEach((line) => writeLog({ index: line.line, text: b64DecodeUnicode(line.data), time: line.time }));
     flushLogs(false);
-  }
-
-  if (isStepRunning(step.value)) {
+  } else if (isStepRunning(step.value)) {
+    loadedStepSlug.value = stepSlug.value;
     stream.value = apiClient.streamLogs(repo.value.id, pipeline.value.number, step.value.id, (line) => {
       writeLog({ index: line.line, text: b64DecodeUnicode(line.data), time: line.time });
       flushLogs(true);
@@ -308,17 +308,21 @@ async function loadLogs() {
 }
 
 onMounted(async () => {
-  loadLogs();
+  await loadLogs();
 });
 
-watch(stepSlug, () => {
-  loadLogs();
+watch(stepSlug, async () => {
+  await loadLogs();
 });
 
-watch(step, (oldStep, newStep) => {
-  if (oldStep && oldStep.name === newStep?.name && oldStep?.end_time !== newStep?.end_time) {
-    if (autoScroll.value) {
+watch(step, async (newStep, oldStep) => {
+  if (oldStep?.name === newStep?.name) {
+    if (oldStep?.end_time !== newStep?.end_time && autoScroll.value) {
       scrollDown();
+    }
+
+    if (oldStep?.state !== newStep?.state) {
+      await loadLogs();
     }
   }
 });
