@@ -295,7 +295,7 @@ func (c *config) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 	return c.newClient(ctx, u).CreateHook(r.Owner, r.Name, &internal.Hook{
 		Active: true,
 		Desc:   rawurl.Host,
-		Events: []string{"repo:push"},
+		Events: []string{"repo:push", "pullrequest:created"},
 		URL:    link,
 	})
 }
@@ -327,12 +327,12 @@ func (c *config) Netrc(u *model.User, _ *model.Repo) (*model.Netrc, error) {
 }
 
 // Branches returns the names of all branches for the named repository.
-func (c *config) Branches(ctx context.Context, u *model.User, r *model.Repo, _ *model.ListOptions) ([]string, error) {
-	bitbucketBranches, err := c.newClient(ctx, u).ListBranches(r.Owner, r.Name)
+func (c *config) Branches(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]string, error) {
+	opts := internal.ListOpts{Page: p.Page, PageLen: p.PerPage}
+	bitbucketBranches, err := c.newClient(ctx, u).ListBranches(r.Owner, r.Name, &opts)
 	if err != nil {
 		return nil, err
 	}
-
 	branches := make([]string, 0)
 	for _, branch := range bitbucketBranches {
 		branches = append(branches, branch.Name)
@@ -347,7 +347,7 @@ func (c *config) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 
 // PullRequests returns the pull requests of the named repository.
 func (c *config) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error) {
-	opts := internal.ListOpts{Page: p.Page, PageLen: p.Page}
+	opts := internal.ListOpts{Page: p.Page, PageLen: p.PerPage}
 	pullRequests, err := c.newClient(ctx, u).ListPullRequests(r.Owner, r.Name, &opts)
 	if err != nil {
 		return nil, err
@@ -421,7 +421,7 @@ func (c *config) newOAuth2Config() *oauth2.Config {
 			AuthURL:  fmt.Sprintf("%s/site/oauth2/authorize", c.url),
 			TokenURL: fmt.Sprintf("%s/site/oauth2/access_token", c.url),
 		},
-		RedirectURL: fmt.Sprintf("%s%s/authorize", server.Config.Server.OAuthHost, server.Config.Server.RootPath),
+		RedirectURL: fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost),
 	}
 }
 
