@@ -88,7 +88,7 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 		}
 		return newPipeline, nil
 	}
-	if err := persistPipelineConfigs(store, configs, newPipeline.ID); err != nil {
+	if err := linkPipelineConfigs(store, configs, newPipeline.ID); err != nil {
 		msg := fmt.Sprintf("failure to persist pipeline config for %s.", repo.FullName)
 		log.Error().Err(err).Msg(msg)
 		return nil, fmt.Errorf(msg)
@@ -114,7 +114,7 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 	return newPipeline, nil
 }
 
-func persistPipelineConfigs(store store.Store, configs []*model.Config, pipelineID int64) error {
+func linkPipelineConfigs(store store.Store, configs []*model.Config, pipelineID int64) error {
 	for _, conf := range configs {
 		pipelineConfig := &model.PipelineConfig{
 			ConfigID:   conf.ID,
