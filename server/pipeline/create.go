@@ -87,6 +87,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		}
 		configs = append(configs, config)
 	}
+        // link pipeline to persisted configs
 	if err := persistPipelineConfigs(_store, configs, pipeline.ID); err != nil {
 		msg := fmt.Sprintf("failed to find or persist pipeline config for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
