@@ -50,10 +50,6 @@ func NewHTTP(endpoint string, privateKey crypto.PrivateKey) Extension {
 	return &http{endpoint, privateKey}
 }
 
-func (cp *http) IsConfigured() bool {
-	return cp.endpoint != ""
-}
-
 func (cp *http) FetchConfig(ctx context.Context, repo *model.Repo, pipeline *model.Pipeline, currentFileMeta []*forge_types.FileMeta, netrc *model.Netrc) (configData []*forge_types.FileMeta, useOld bool, err error) {
 	currentConfigs := make([]*config, len(currentFileMeta))
 	for i, pipe := range currentFileMeta {

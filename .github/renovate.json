@@ -35,6 +35,11 @@
       "matchUpdateTypes": ["minor", "patch"],
       "matchFileNames": ["docs/**/package.json"],
       "extends": ["schedule:daily"]
+    },
+    {
+      "matchDatasources": ["docker"],
+      "matchPackagePatterns": ["xgo"],
+      "versioning": "regex:^go-(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))$"
     }
   ]
 }
