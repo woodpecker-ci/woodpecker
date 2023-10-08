@@ -45,6 +45,7 @@ export default class ApiClient {
       headers: {
         ...(method !== 'GET' && this.csrf ? { 'X-CSRF-TOKEN': this.csrf } : {}),
         ...(this.token ? { Authorization: `Bearer ${this.token}` } : {}),
+        ...(data ? { 'Content-Type': 'application/json' } : {}),
       },
       body: data ? JSON.stringify(data) : undefined,
     });
