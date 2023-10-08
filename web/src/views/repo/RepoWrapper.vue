@@ -68,6 +68,7 @@ import useConfig from '~/compositions/useConfig';
 import { useForgeStore } from '~/compositions/useForgeStore';
 import useNotifications from '~/compositions/useNotifications';
 import type { Forge, RepoPermissions } from '~/lib/api/types';
+import useRepos from '~/compositions/useRepos';
 import { usePipelineStore } from '~/store/pipelines';
 import { useRepoStore } from '~/store/repos';
 
@@ -87,6 +88,7 @@ const router = useRouter();
 const i18n = useI18n();
 const config = useConfig();
 const forgeStore = useForgeStore();
+const { updateLastAccess } = useRepos();
 
 const repo = repoStore.getRepo(repositoryId);
 const repoPermissions = ref<RepoPermissions>();
@@ -121,6 +123,7 @@ async function loadRepo() {
   if (repo.value) {
     forge.value = (await forgeStore.getForge(repo.value?.forge_id)).value;
   }
+  updateLastAccess(repositoryId.value);
 }
 
 onMounted(() => {
