@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@categulario, @mzampetakis, @qwerty287, @Timshel, @6543, @renovate[bot], @pat-s, @nitram509, @Denperidge, @xoxys, @tomix1024, @lonix1, @s3lph, @anbraten, @math3vz, @LTek-online, @testwill, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @azdle, @runephilosof-karnovgroup, @praneeth-ovckd
+@anbraten, @qwerty287, @categulario, @mzampetakis, @Timshel, @6543, @renovate[bot], @pat-s, @nitram509, @Denperidge, @xoxys, @tomix1024, @lonix1, @s3lph, @math3vz, @LTek-online, @testwill, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @azdle, @runephilosof-karnovgroup, @praneeth-ovckd
 
 ### 💥 Breaking changes
 
@@ -32,39 +32,9 @@
 - Support bitbucket Dir() and support multi-workflows [[#2045](https://github.com/woodpecker-ci/woodpecker/pull/2045)]
 - Add ping command to server to allow container healthchecks [[#2030](https://github.com/woodpecker-ci/woodpecker/pull/2030)]
 
-### 📚 Documentation
-
-- Fix incorrect yaml syntax for `ref` in docs [[#2518](https://github.com/woodpecker-ci/woodpecker/pull/2518)]
-- Local image documentation [[#2521](https://github.com/woodpecker-ci/woodpecker/pull/2521)]
-- Adds bitbucket tag support in docs [[#2536](https://github.com/woodpecker-ci/woodpecker/pull/2536)]
-- Fix docs duplicate WOODPECKER_HOST assignment [[#2501](https://github.com/woodpecker-ci/woodpecker/pull/2501)]
-- Update github auth install [[#2499](https://github.com/woodpecker-ci/woodpecker/pull/2499)]
-- Update GH app installation instructions [[#2472](https://github.com/woodpecker-ci/woodpecker/pull/2472)]
-- Add videos [[#2465](https://github.com/woodpecker-ci/woodpecker/pull/2465)]
-- docs: missing info for runs_on [[#2457](https://github.com/woodpecker-ci/woodpecker/pull/2457)]
-- Add hint about alternative pipeline skip syntax [[#2443](https://github.com/woodpecker-ci/woodpecker/pull/2443)]
-- Fix typo in GitLab docs [[#2376](https://github.com/woodpecker-ci/woodpecker/pull/2376)]
-- clarify setup with gitlab with RFC1918 nets and non standard TLDs [[#2363](https://github.com/woodpecker-ci/woodpecker/pull/2363)]
-- Clarify env var `CI` in docs [[#2349](https://github.com/woodpecker-ci/woodpecker/pull/2349)]
-- docs: yaml cheatsheet for advanced syntax [[#2329](https://github.com/woodpecker-ci/woodpecker/pull/2329)]
-- Improve explanation for globs in when:path [[#2252](https://github.com/woodpecker-ci/woodpecker/pull/2252)]
-- Fix usage description for backend-http-proxy flag [[#2250](https://github.com/woodpecker-ci/woodpecker/pull/2250)]
-- Restructure k8s documentation [[#2193](https://github.com/woodpecker-ci/woodpecker/pull/2193)]
-- Update list of "projects using Woodpecker" [[#2196](https://github.com/woodpecker-ci/woodpecker/pull/2196)]
-- Update 92-awesome.md [[#2195](https://github.com/woodpecker-ci/woodpecker/pull/2195)]
-- Better blog title/desc [[#2182](https://github.com/woodpecker-ci/woodpecker/pull/2182)]
-- Fix version in FAQ [[#2101](https://github.com/woodpecker-ci/woodpecker/pull/2101)]
-- Add blog posts/tutorials [[#2095](https://github.com/woodpecker-ci/woodpecker/pull/2095)]
-- update version docs about versioning [[#2086](https://github.com/woodpecker-ci/woodpecker/pull/2086)]
-- Fix client example [[#2085](https://github.com/woodpecker-ci/woodpecker/pull/2085)]
-- Update docs deps to address cves [[#2080](https://github.com/woodpecker-ci/woodpecker/pull/2080)]
-- fix: global registry docs [[#2070](https://github.com/woodpecker-ci/woodpecker/pull/2070)]
-- Improve bitbucket docs [[#2066](https://github.com/woodpecker-ci/woodpecker/pull/2066)]
-- update docs about versioning [[#2043](https://github.com/woodpecker-ci/woodpecker/pull/2043)]
-- Set v1.0 documents as default and mark v0.15 as unmaintained [[#2034](https://github.com/woodpecker-ci/woodpecker/pull/2034)]
-
 ### 🐛 Bug Fixes
 
+- UI cleanups and improvements [[#2548](https://github.com/woodpecker-ci/woodpecker/pull/2548)]
 - Fix PR event trigger and list for bitbucket repos [[#2539](https://github.com/woodpecker-ci/woodpecker/pull/2539)]
 - Fix ccmenu endpoint [[#2543](https://github.com/woodpecker-ci/woodpecker/pull/2543)]
 - Trim last "/" from WOODPECKER_HOST config [[#2538](https://github.com/woodpecker-ci/woodpecker/pull/2538)]
@@ -96,6 +66,37 @@
 - Fix alt text contrast in code boxes [[#2089](https://github.com/woodpecker-ci/woodpecker/pull/2089)]
 - Fix WOODPECKER_GRPC_VERIFY being ignored [[#2077](https://github.com/woodpecker-ci/woodpecker/pull/2077)]
 - Handle case where there is no latest pipeline for GetBadge [[#2042](https://github.com/woodpecker-ci/woodpecker/pull/2042)]
+
+### 📚 Documentation
+
+- Fix incorrect yaml syntax for `ref` in docs [[#2518](https://github.com/woodpecker-ci/woodpecker/pull/2518)]
+- Local image documentation [[#2521](https://github.com/woodpecker-ci/woodpecker/pull/2521)]
+- Adds bitbucket tag support in docs [[#2536](https://github.com/woodpecker-ci/woodpecker/pull/2536)]
+- Fix docs duplicate WOODPECKER_HOST assignment [[#2501](https://github.com/woodpecker-ci/woodpecker/pull/2501)]
+- Update github auth install [[#2499](https://github.com/woodpecker-ci/woodpecker/pull/2499)]
+- Update GH app installation instructions [[#2472](https://github.com/woodpecker-ci/woodpecker/pull/2472)]
+- Add videos [[#2465](https://github.com/woodpecker-ci/woodpecker/pull/2465)]
+- docs: missing info for runs_on [[#2457](https://github.com/woodpecker-ci/woodpecker/pull/2457)]
+- Add hint about alternative pipeline skip syntax [[#2443](https://github.com/woodpecker-ci/woodpecker/pull/2443)]
+- Fix typo in GitLab docs [[#2376](https://github.com/woodpecker-ci/woodpecker/pull/2376)]
+- clarify setup with gitlab with RFC1918 nets and non standard TLDs [[#2363](https://github.com/woodpecker-ci/woodpecker/pull/2363)]
+- Clarify env var `CI` in docs [[#2349](https://github.com/woodpecker-ci/woodpecker/pull/2349)]
+- docs: yaml cheatsheet for advanced syntax [[#2329](https://github.com/woodpecker-ci/woodpecker/pull/2329)]
+- Improve explanation for globs in when:path [[#2252](https://github.com/woodpecker-ci/woodpecker/pull/2252)]
+- Fix usage description for backend-http-proxy flag [[#2250](https://github.com/woodpecker-ci/woodpecker/pull/2250)]
+- Restructure k8s documentation [[#2193](https://github.com/woodpecker-ci/woodpecker/pull/2193)]
+- Update list of "projects using Woodpecker" [[#2196](https://github.com/woodpecker-ci/woodpecker/pull/2196)]
+- Update 92-awesome.md [[#2195](https://github.com/woodpecker-ci/woodpecker/pull/2195)]
+- Better blog title/desc [[#2182](https://github.com/woodpecker-ci/woodpecker/pull/2182)]
+- Fix version in FAQ [[#2101](https://github.com/woodpecker-ci/woodpecker/pull/2101)]
+- Add blog posts/tutorials [[#2095](https://github.com/woodpecker-ci/woodpecker/pull/2095)]
+- update version docs about versioning [[#2086](https://github.com/woodpecker-ci/woodpecker/pull/2086)]
+- Fix client example [[#2085](https://github.com/woodpecker-ci/woodpecker/pull/2085)]
+- Update docs deps to address cves [[#2080](https://github.com/woodpecker-ci/woodpecker/pull/2080)]
+- fix: global registry docs [[#2070](https://github.com/woodpecker-ci/woodpecker/pull/2070)]
+- Improve bitbucket docs [[#2066](https://github.com/woodpecker-ci/woodpecker/pull/2066)]
+- update docs about versioning [[#2043](https://github.com/woodpecker-ci/woodpecker/pull/2043)]
+- Set v1.0 documents as default and mark v0.15 as unmaintained [[#2034](https://github.com/woodpecker-ci/woodpecker/pull/2034)]
 
 ### 📈 Enhancement
 
@@ -154,6 +155,8 @@
 
 ### Misc
 
+- Update issue config [[#2353](https://github.com/woodpecker-ci/woodpecker/pull/2353)]
+- Add test for handling pipeline error [[#2547](https://github.com/woodpecker-ci/woodpecker/pull/2547)]
 - chore(deps): update golang docker tag to v1.21.2 [[#2532](https://github.com/woodpecker-ci/woodpecker/pull/2532)]
 - fix(deps): update golang.org/x/exp digest to 7918f67 [[#2535](https://github.com/woodpecker-ci/woodpecker/pull/2535)]
 - fix(deps): update golang deps non-major [[#2533](https://github.com/woodpecker-ci/woodpecker/pull/2533)]
