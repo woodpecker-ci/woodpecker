@@ -20,13 +20,15 @@
         "desc": "注册到此服务器的代理",
         "edit_agent": "编辑代理",
         "id": "ID",
+        "last_contact": "最后访问",
         "name": {
           "name": "名称",
           "placeholder": "代理名称"
         },
         "never": "绝不",
         "no_schedule": {
-          "name": "禁用代理"
+          "name": "禁用代理",
+          "placeholder": "阻止代理接受新任务"
         },
         "none": "还未添加任何代理。",
         "platform": {
@@ -40,6 +42,16 @@
         "version": "版本"
       },
       "not_allowed": "你没有访问服务器设置的权限",
+      "orgs": {
+        "delete_confirm": "你真的想删除该组织吗？这也将删除该组织拥有的所有存储库。",
+        "delete_org": "删除组织",
+        "deleted": "组织已删除",
+        "desc": "在此服务器上拥有存储库的组织",
+        "none": "还没有任何组织。",
+        "org_settings": "组织设置",
+        "orgs": "组织",
+        "view": "查看组织"
+      },
       "queue": {
         "agent": "代理",
         "desc": "正在等待代理执行的任务",
@@ -52,12 +64,22 @@
           "completed_count": "已完成的任务",
           "pending_count": "等待中",
           "running_count": "运行中",
-          "waiting_on_deps_count": "等待依赖项"
+          "waiting_on_deps_count": "等待依赖项",
+          "worker_count": "空闲"
         },
         "task_pending": "任务正在等待中",
         "task_running": "任务正在运行",
+        "task_waiting_on_deps": "任务正在等待依赖项",
         "tasks": "任务",
         "waiting_for": "正在等待"
+      },
+      "repos": {
+        "desc": "该服务器上已启用或曾经启用的仓库",
+        "disabled": "已禁用",
+        "none": "目前还没有存储库。",
+        "repos": "仓库",
+        "settings": "仓库设置",
+        "view": "查看仓库"
       },
       "secrets": {
         "add": "添加密钥",
@@ -92,7 +114,7 @@
         "avatar_url": "Avatar URL",
         "cancel": "取消",
         "created": "用户已创建",
-        "delete_confirm": "你真的想删除这个用户吗？",
+        "delete_confirm": "你真的想删除这个用户吗？这也将删除该用户拥有的所有存储库。",
         "delete_user": "删除用户",
         "deleted": "删除用户",
         "desc": "注册此服务器的用户",
@@ -152,6 +174,7 @@
     }
   },
   "password": "密码",
+  "pipeline_feed": "流水线视图",
   "repo": {
     "activity": "活动",
     "add": "添加仓库",
@@ -169,6 +192,7 @@
       }
     },
     "enable": {
+      "disabled": "已禁用",
       "enable": "启用",
       "enabled": "已经启用了",
       "list_reloaded": "仓库列表已刷新",
@@ -228,11 +252,12 @@
         "awaits": "该流水线正在等待维护者许可！",
         "decline": "拒绝",
         "decline_success": "流水线已被拒绝",
-        "declined": "该流水线已被拒绝！"
+        "declined": "该流水线已被拒绝！",
+        "review": "审查变更"
       },
       "status": {
         "blocked": "已屏蔽",
-        "declined": "拒绝",
+        "declined": "已拒绝",
         "error": "错误",
         "failure": "失败",
         "killed": "已终止",

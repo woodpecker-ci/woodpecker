@@ -42,6 +42,16 @@
         "version": "Version"
       },
       "not_allowed": "Du darfst nicht auf die Server-Einstellungen zugreifen",
+      "orgs": {
+        "delete_confirm": "Möchtest du diese Organisation wirklich löschen? Das wird auch alle Repositories löschen, die dieser Organisation gehören.",
+        "delete_org": "Organisation löschen",
+        "deleted": "Organisation gelöscht",
+        "desc": "Organisationen mit Repositories auf diesem Server",
+        "none": "Es gibt noch keine Organisationen.",
+        "org_settings": "Organisations-Einstellungen",
+        "orgs": "Organisationen",
+        "view": "Organisation anzeigen"
+      },
       "queue": {
         "agent": "Agent",
         "desc": "Aufgaben, die darauf warten, von Agents ausgeführt zu werden",
@@ -62,6 +72,14 @@
         "task_waiting_on_deps": "Aufgabe wartet auf Abhängigkeiten",
         "tasks": "Aufgaben",
         "waiting_for": "wartet auf"
+      },
+      "repos": {
+        "desc": "Repositories, die auf dem Server aktiviert sind oder waren",
+        "disabled": "Deaktiviert",
+        "none": "Es gibt noch keine Repositories.",
+        "repos": "Repositories",
+        "settings": "Repository-Einstellungen",
+        "view": "Repository anzeigen"
       },
       "secrets": {
         "add": "Geheimnis hinzufügen",
@@ -96,7 +114,7 @@
         "avatar_url": "URL des Profilbilds",
         "cancel": "Abbrechen",
         "created": "Benutzer erstellt",
-        "delete_confirm": "Möchtest du diesen Benutzer wirklich löschen?",
+        "delete_confirm": "Möchtest du diesen Benutzer wirklich löschen? Das wird auch alle Repositories löschen, die diesem Benutzer gehören.",
         "delete_user": "Benutzer löschen",
         "deleted": "Benutzer gelöscht",
         "desc": "Auf diesem Server registrierte Benutzer",
@@ -174,6 +192,7 @@
       }
     },
     "enable": {
+      "disabled": "Deaktiviert",
       "enable": "Aktivieren",
       "enabled": "Bereits aktiviert",
       "list_reloaded": "Repository-Liste neu geladen",
@@ -233,7 +252,8 @@
         "awaits": "Diese Pipeline wartet auf die Genehmigung durch einen Maintainer!",
         "decline": "Ablehnen",
         "decline_success": "Pipeline abgelehnt",
-        "declined": "Diese Pipeline ist abgelehnt worden!"
+        "declined": "Diese Pipeline ist abgelehnt worden!",
+        "review": "Änderungen überprüfen"
       },
       "status": {
         "blocked": "blockiert",

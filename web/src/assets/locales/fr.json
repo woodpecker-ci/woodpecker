@@ -42,6 +42,16 @@
         "version": "Version"
       },
       "not_allowed": "Vous n'êtes pas autorisé à accéder aux réglages du serveur",
+      "orgs": {
+        "delete_confirm": "Voulez-vous vraiment effacer cette organisation ? Cela supprimera tous les dépôts que possède cette organisation.",
+        "delete_org": "Effacer l'organisation",
+        "deleted": "Organisation effacée",
+        "desc": "Organisations possédant des dépôts sur ce serveur",
+        "none": "Il n'y a pas encore d'organisation.",
+        "org_settings": "Réglages de l'organisation",
+        "orgs": "Organisations",
+        "view": "Voir l'organisation"
+      },
       "queue": {
         "agent": "agent",
         "desc": "Taches en attente d’exécution par des agents",
@@ -62,6 +72,14 @@
         "task_waiting_on_deps": "La tâche est en attente de ses dépendances",
         "tasks": "Tâches",
         "waiting_for": "en attente de"
+      },
+      "repos": {
+        "desc": "Dépôts actifs ou anciennement actifs sur ce serveur",
+        "disabled": "Désactivé",
+        "none": "Il n'y a pas encore de dépôts.",
+        "repos": "Dépôts",
+        "settings": "Réglages du dépôt",
+        "view": "Voir le dépôt"
       },
       "secrets": {
         "add": "Ajouter un secret",
@@ -95,8 +113,8 @@
         },
         "avatar_url": "URL de l'avatar",
         "cancel": "Annuler",
-        "created": "Compte utilisateur effacé",
-        "delete_confirm": "Voulez vous vraiment supprimer ce compte utilisateur ?",
+        "created": "Compte utilisateur créé",
+        "delete_confirm": "Voulez vous vraiment supprimer ce compte utilisateur ? Cela supprimera tout les dépôts que possède ce compte utilisateur.",
         "delete_user": "Effacer le compte utilisateur",
         "deleted": "Compte utilisateur effacé",
         "desc": "Utilisateurs enregistrés sur le serveur",
@@ -174,6 +192,7 @@
       }
     },
     "enable": {
+      "disabled": "Désactivé",
       "enable": "Activer",
       "enabled": "Déjà activé",
       "list_reloaded": "Liste des dépôts actualisée",
@@ -230,10 +249,11 @@
       "protected": {
         "approve": "Approuver",
         "approve_success": "Pipeline approuvé",
-        "awaits": "Ce pipeline attends d'être approuvé par un mainteneur !",
+        "awaits": "Ce pipeline attend d'être approuvé par un mainteneur !",
         "decline": "Refuser",
         "decline_success": "Pipeline refusé",
-        "declined": "Le pipeline a été refusé !"
+        "declined": "Le pipeline a été refusé !",
+        "review": "Vérifier les changements"
       },
       "status": {
         "blocked": "bloqué",
@@ -245,7 +265,7 @@
         "running": "en cours",
         "skipped": "sauté",
         "started": "démarré",
-        "status": "Status : {status}",
+        "status": "État : {status}",
         "success": "réussi"
       },
       "step_not_started": "L'étape n'a pas démarré encore.",
@@ -341,7 +361,7 @@
           "timeout": "Délai d’inactivité"
         },
         "trusted": {
-          "desc": "Les conteneurs du pipeline ont accès à des capacités privilégiées comme le montage un volume.",
+          "desc": "Les conteneurs du pipeline ont accès à des capacités privilégiées comme le montage de volumes.",
           "trusted": "Vérifié"
         },
         "visibility": {
@@ -447,11 +467,13 @@
         "add": "Ajouter un secret",
         "created": "Secret d'utilisateur crée",
         "deleted": "Secret d'utilisateur effacé",
+        "desc": "Les secrets d'utilisateur peuvent être passés à toutes les étapes du pipeline des dépôtsde l'utilisateur sous forme de variables d'environnement.",
         "events": {
           "events": "Disponible pour les événements suivants",
           "pr_warning": "Attention, si cette option est activé, un acteur malicieux peut proposer une pull request qui affiche vos secrets."
         },
         "images": {
+          "desc": "Liste d'images séparé par des virgules où ce secret sera utilisable, laisser vide pour autoriser toutes les images",
           "images": "Disponible pour les images suivantes"
         },
         "name": "Nom",

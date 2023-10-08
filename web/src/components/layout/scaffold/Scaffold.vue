@@ -3,6 +3,7 @@
     :go-back="goBack"
     :enable-tabs="enableTabs"
     :search="search"
+    :full-width="fullWidth"
     @update:search="(value) => $emit('update:search', value)"
   >
     <template #title><slot name="title" /></template>
@@ -36,6 +37,7 @@ export interface Props {
 
   // Content
   fluidContent?: boolean;
+  fullWidth?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {

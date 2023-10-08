@@ -37,7 +37,7 @@ type WoodpeckerServer struct {
 	peer RPC
 }
 
-func NewWoodpeckerServer(forge forge.Forge, queue queue.Queue, logger logging.Log, pubsub pubsub.Publisher, store store.Store, host string) proto.WoodpeckerServer {
+func NewWoodpeckerServer(forge forge.Forge, queue queue.Queue, logger logging.Log, pubsub pubsub.Publisher, store store.Store) proto.WoodpeckerServer {
 	pipelineTime := promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
 		Name:      "pipeline_time",
@@ -54,7 +54,6 @@ func NewWoodpeckerServer(forge forge.Forge, queue queue.Queue, logger logging.Lo
 		queue:         queue,
 		pubsub:        pubsub,
 		logger:        logger,
-		host:          host,
 		pipelineTime:  pipelineTime,
 		pipelineCount: pipelineCount,
 	}
@@ -82,10 +81,10 @@ func (s *WoodpeckerServer) Next(c context.Context, req *proto.NextRequest) (*pro
 		return res, err
 	}
 
-	res.Pipeline = new(proto.Pipeline)
-	res.Pipeline.Id = pipeline.ID
-	res.Pipeline.Timeout = pipeline.Timeout
-	res.Pipeline.Payload, _ = json.Marshal(pipeline.Config)
+	res.Workflow = new(proto.Workflow)
+	res.Workflow.Id = pipeline.ID
+	res.Workflow.Timeout = pipeline.Timeout
+	res.Workflow.Payload, _ = json.Marshal(pipeline.Config)
 
 	return res, err
 }

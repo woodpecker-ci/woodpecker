@@ -14,8 +14,8 @@ when:
     event: cron
 
 variables:
-  - &golang_image 'golang:1.20.2'
-  - &node_image 'node:18-alpine'
+  - &golang_image 'golang:1.21.2'
+  - &node_image 'node:20-alpine'
 
 steps:
   build-cli:
@@ -38,7 +38,7 @@ steps:
       - event: cron
 
   deploy-preview:
-    image: woodpeckerci/plugin-surge-preview:next
+    image: woodpeckerci/plugin-surge-preview:1.2.0
     settings:
       path: "docs/build/"
       surge_token:

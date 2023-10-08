@@ -1,5 +1,4 @@
-const lightCodeTheme = require('prism-react-renderer/themes/github');
-const darkCodeTheme = require('prism-react-renderer/themes/dracula');
+const codeThemes = require('prism-react-renderer').themes;
 const path = require('path');
 
 /** @type {import('@docusaurus/types').Config} */
@@ -138,8 +137,8 @@ module.exports = {
         copyright: `Copyright © ${new Date().getFullYear()} Woodpecker CI. Built with Docusaurus.`,
       },
       prism: {
-        theme: lightCodeTheme,
-        darkTheme: darkCodeTheme,
+        theme: codeThemes.github,
+        darkTheme: codeThemes.dracula,
       },
       announcementBar: {
         id: 'github-star',
