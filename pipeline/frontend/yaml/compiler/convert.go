@@ -216,13 +216,18 @@ func convertKubernetesBackendOptions(kubeOpt *yaml_types.KubernetesBackendOption
 		})
 	}
 
-	securityContext := backend_types.SecurityContext{
-		Privileged:               kubeOpt.SecurityContext.Privileged,
-		RunAsUser:                kubeOpt.SecurityContext.RunAsUser,
-		RunAsGroup:               kubeOpt.SecurityContext.RunAsGroup,
-		RunAsNonRoot:             kubeOpt.SecurityContext.RunAsNonRoot,
-		ReadOnlyRootFilesystem:   kubeOpt.SecurityContext.ReadOnlyRootFilesystem,
-		AllowPrivilegeEscalation: kubeOpt.SecurityContext.AllowPrivilegeEscalation,
+	var securityContext *backend_types.SecurityContext
+	if kubeOpt.SecurityContext != nil {
+		securityContext = &backend_types.SecurityContext{
+			RunAsUser:                kubeOpt.SecurityContext.RunAsUser,
+			RunAsGroup:               kubeOpt.SecurityContext.RunAsGroup,
+			RunAsNonRoot:             kubeOpt.SecurityContext.RunAsNonRoot,
+			SupplementalGroups:       kubeOpt.SecurityContext.SupplementalGroups,
+			FSGroup:                  kubeOpt.SecurityContext.FSGroup,
+			Privileged:               kubeOpt.SecurityContext.Privileged,
+			ReadOnlyRootFilesystem:   kubeOpt.SecurityContext.ReadOnlyRootFilesystem,
+			AllowPrivilegeEscalation: kubeOpt.SecurityContext.AllowPrivilegeEscalation,
+		}
 	}
 
 	return backend_types.KubernetesBackendOptions{

@@ -24,7 +24,7 @@ type KubernetesBackendOptions struct {
 	ServiceAccountName string            `yaml:"serviceAccountName,omitempty"`
 	NodeSelector       map[string]string `yaml:"nodeSelector,omitempty"`
 	Tolerations        []Toleration      `yaml:"tolerations,omitempty"`
-	SecurityContext    SecurityContext   `yaml:"securityContext,omitempty"`
+	SecurityContext    *SecurityContext  `yaml:"securityContext,omitempty"`
 }
 
 type Resources struct {
@@ -56,10 +56,14 @@ const (
 )
 
 type SecurityContext struct {
-	Privileged               *bool  `yaml:"privileged,omitempty"`
-	RunAsUser                *int64 `yaml:"runAsUser,omitempty"`
-	RunAsGroup               *int64 `yaml:"runAsGroup,omitempty"`
-	RunAsNonRoot             *bool  `yaml:"runAsNonRoot,omitempty"`
-	ReadOnlyRootFilesystem   *bool  `yaml:"readOnlyRootFilesystem,omitempty"`
-	AllowPrivilegeEscalation *bool  `yaml:"allowPrivilegeEscalation,omitempty"`
+	// Pod Security Context
+	RunAsUser          *int64  `yaml:"runAsUser,omitempty"`
+	RunAsGroup         *int64  `yaml:"runAsGroup,omitempty"`
+	RunAsNonRoot       *bool   `yaml:"runAsNonRoot,omitempty"`
+	SupplementalGroups []int64 `yaml:"supplementalGroups,omitempty"`
+	FSGroup            *int64  `yaml:"fsGroup,omitempty"`
+	// Container Security Context
+	Privileged               *bool `yaml:"privileged,omitempty"`
+	ReadOnlyRootFilesystem   *bool `yaml:"readOnlyRootFilesystem,omitempty"`
+	AllowPrivilegeEscalation *bool `yaml:"allowPrivilegeEscalation,omitempty"`
 }

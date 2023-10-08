@@ -142,7 +142,10 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 		log.Trace().Msgf("Tolerations that will be used in the backend options: %v", beTolerations)
 	}
 
-	securityContext := securityContext(step)
+	beSecurityContext := step.BackendOptions.Kubernetes.SecurityContext
+	log.Trace().Interface("Security context", beSecurityContext).Msg("Security context that will be used for containers")
+	podSecCtx := podSecurityContext(beSecurityContext)
+	containerSecCtx := containerSecurityContext(beSecurityContext, step.Privileged)
 
 	pod := &v1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
@@ -157,6 +160,7 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 			NodeSelector:       nodeSelector,
 			Tolerations:        tolerations,
 			ServiceAccountName: serviceAccountName,
+			SecurityContext:    podSecCtx,
 			Containers: []v1.Container{{
 				Name:            podName,
 				Image:           step.Image,
@@ -167,7 +171,7 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 				Env:             mapToEnvVars(step.Environment),
 				VolumeMounts:    volMounts,
 				Resources:       resourceRequirements,
-				SecurityContext: securityContext,
+				SecurityContext: containerSecCtx,
 			}},
 			ImagePullSecrets: []v1.LocalObjectReference{{Name: "regcred"}},
 			Volumes:          vols,
@@ -196,21 +200,32 @@ func volumeMountPath(i string) string {
 	return s[0]
 }
 
-func securityContext(step *types.Step) *v1.SecurityContext {
-	sc := step.BackendOptions.Kubernetes.SecurityContext
-	log.Trace().Interface("Security context", sc).Msg("Security context that will be used for containers")
+func podSecurityContext(sc *types.SecurityContext) *v1.PodSecurityContext {
+	if sc != nil {
+		return &v1.PodSecurityContext{
+			RunAsUser:          sc.RunAsUser,
+			RunAsGroup:         sc.RunAsGroup,
+			RunAsNonRoot:       sc.RunAsNonRoot,
+			SupplementalGroups: sc.SupplementalGroups,
+			FSGroup:            sc.FSGroup,
+		}
+	}
+	return nil
+}
 
-	privileged := step.Privileged
-	if sc.Privileged != nil {
-		privileged = step.Privileged || *sc.Privileged
+func containerSecurityContext(sc *types.SecurityContext, privileged bool) *v1.SecurityContext {
+	containerSecCtx := &v1.SecurityContext{
+		Privileged: &privileged,
 	}
 
-	return &v1.SecurityContext{
-		Privileged:               &privileged,
-		RunAsUser:                sc.RunAsUser,
-		RunAsGroup:               sc.RunAsGroup,
-		RunAsNonRoot:             sc.RunAsNonRoot,
-		ReadOnlyRootFilesystem:   sc.ReadOnlyRootFilesystem,
-		AllowPrivilegeEscalation: sc.AllowPrivilegeEscalation,
+	if sc != nil {
+		if sc.Privileged != nil {
+			privileged = privileged || *sc.Privileged
+			containerSecCtx.Privileged = &privileged
+		}
+		containerSecCtx.ReadOnlyRootFilesystem = sc.ReadOnlyRootFilesystem
+		containerSecCtx.AllowPrivilegeEscalation = sc.AllowPrivilegeEscalation
 	}
+
+	return containerSecCtx
 }
