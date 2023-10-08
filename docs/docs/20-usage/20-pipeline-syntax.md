@@ -163,6 +163,31 @@ To make a private registry globally available check the [server configuration do
 
 For specific details on configuring access to Google Container Registry, please view the docs [here](https://cloud.google.com/container-registry/docs/advanced-authentication#using_a_json_key_file).
 
+##### Local Images
+
+It's possible to build a local image by mounting the docker socket as a volume.
+
+With a `Dockerfile` at the root of the project:
+
+```diff
+steps:
+  build-image:
+    image: docker
+    commands:
+      - docker build --rm -t local/project-image .
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  build-project:
+    image: local/project-image
+    commands:
+      - ./build.sh
+```
+
+:::warning
+For this privileged rights are needed only available to admins. In addition this only works when using a single agent.
+:::
+
 ### `commands`
 
 Commands of every pipeline step are executed serially as if you would enter them into your local shell.
