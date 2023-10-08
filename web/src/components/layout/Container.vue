@@ -5,9 +5,7 @@
 </template>
 
 <script setup lang="ts">
-export interface Props {
+defineProps<{
   fullWidth?: boolean;
-}
-
-defineProps<Props>();
+}>();
 </script>
