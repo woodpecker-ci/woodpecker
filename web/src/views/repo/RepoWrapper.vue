@@ -57,6 +57,7 @@ import useApiClient from '~/compositions/useApiClient';
 import useAuthentication from '~/compositions/useAuthentication';
 import useConfig from '~/compositions/useConfig';
 import useNotifications from '~/compositions/useNotifications';
+import useRepos from '~/compositions/useRepos';
 import { RepoPermissions } from '~/lib/api/types';
 import { usePipelineStore } from '~/store/pipelines';
 import { useRepoStore } from '~/store/repos';
@@ -76,6 +77,7 @@ const route = useRoute();
 const router = useRouter();
 const i18n = useI18n();
 const config = useConfig();
+const { updateLastAccess } = useRepos();
 
 const { forge } = useConfig();
 const repo = repoStore.getRepo(repositoryId);
@@ -102,6 +104,7 @@ async function loadRepo() {
 
   await repoStore.loadRepo(repositoryId.value);
   await pipelineStore.loadRepoPipelines(repositoryId.value);
+  updateLastAccess(repositoryId.value);
 }
 
 onMounted(() => {
