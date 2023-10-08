@@ -4323,7 +4323,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "admin": {
-                    "description": "Admin indicates the user is a system administrator.\n\nNOTE: If the username is part of the WOODPECKER_ADMIN\nenvironment variable this value will be set to true on login.",
+                    "description": "Admin indicates the user is a system administrator.\n\nNOTE: If the username is part of the WOODPECKER_ADMIN\nenvironment variable, this value will be set to true on login.",
                     "type": "boolean"
                 },
                 "avatar_url": {

@@ -215,14 +215,14 @@ Disable colored debug output.
 ### `WOODPECKER_HOST`
 > Default: empty
 
-Server fully qualified URL of the user-facing hostname.
+Server fully qualified URL of the user-facing hostname and path prefix.
 
-Example: `WOODPECKER_HOST=http://woodpecker.example.org`
+Example: `WOODPECKER_HOST=http://woodpecker.example.org` or `WOODPECKER_HOST=http://example.org/woodpecker`
 
 ### `WOODPECKER_WEBHOOK_HOST`
 > Default: value from `WOODPECKER_HOST` config env
 
-Server fully qualified URL of the Webhook-facing hostname.
+Server fully qualified URL of the Webhook-facing hostname and path prefix.
 
 Example: `WOODPECKER_WEBHOOK_HOST=http://woodpecker-server.cicd.svc.cluster.local:8000`
 
@@ -529,7 +529,7 @@ Specify a configuration service endpoint, see [Configuration Extension](./100-ex
 Specify how many seconds before timeout when fetching the Woodpecker configuration from a Forge
 
 ### `WOODPECKER_ROOT_PATH`
-> Default: ``
+> Default: extracted from `WOODPECKER_HOST`
 
 Server URL path prefix (used for statics loading when having a url path prefix), should start with `/`
 

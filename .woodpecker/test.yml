@@ -6,7 +6,7 @@ when:
       - release/*
 
 variables:
-  - &golang_image 'golang:1.21.1'
+  - &golang_image 'golang:1.21.2'
   - &when
     - path: &when_path # related config files
         - '.woodpecker/test.yml'
@@ -61,7 +61,7 @@ steps:
     when: *when
 
   lint-editorconfig:
-    image: mstruebing/editorconfig-checker
+    image: mstruebing/editorconfig-checker:2.7.1
     group: test
 
   lint-license-header:
