@@ -142,6 +142,8 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 		log.Trace().Msgf("Tolerations that will be used in the backend options: %v", beTolerations)
 	}
 
+	securityContext := securityContext(step)
+
 	pod := &v1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        podName,
@@ -165,9 +167,7 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 				Env:             mapToEnvVars(step.Environment),
 				VolumeMounts:    volMounts,
 				Resources:       resourceRequirements,
-				SecurityContext: &v1.SecurityContext{
-					Privileged: &step.Privileged,
-				},
+				SecurityContext: securityContext,
 			}},
 			ImagePullSecrets: []v1.LocalObjectReference{{Name: "regcred"}},
 			Volumes:          vols,
@@ -194,4 +194,23 @@ func volumeMountPath(i string) string {
 		return s[1]
 	}
 	return s[0]
+}
+
+func securityContext(step *types.Step) *v1.SecurityContext {
+	sc := step.BackendOptions.Kubernetes.SecurityContext
+	log.Trace().Interface("Security context", sc).Msg("Security context that will be used for containers")
+
+	privileged := step.Privileged
+	if sc.Privileged != nil {
+		privileged = step.Privileged || *sc.Privileged
+	}
+
+	return &v1.SecurityContext{
+		Privileged:               &privileged,
+		RunAsUser:                sc.RunAsUser,
+		RunAsGroup:               sc.RunAsGroup,
+		RunAsNonRoot:             sc.RunAsNonRoot,
+		ReadOnlyRootFilesystem:   sc.ReadOnlyRootFilesystem,
+		AllowPrivilegeEscalation: sc.AllowPrivilegeEscalation,
+	}
 }
