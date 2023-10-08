@@ -316,7 +316,7 @@ func TestFetch(t *testing.T) {
 			configFetcher := forge.NewConfigFetcher(
 				f,
 				time.Second*3,
-				config.NewHTTP("", ""),
+				nil,
 				&model.User{Token: "xxx"},
 				repo,
 				&model.Pipeline{Commit: "89ab7b2d6bfb347144ac7c557e638ab402848fee"},
