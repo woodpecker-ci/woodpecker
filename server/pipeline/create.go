@@ -69,7 +69,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 
 	err = _store.CreatePipeline(pipeline)
 	if err != nil {
-		msg := fmt.Errorf("failure to save pipeline for %s", repo.FullName)
+		msg := fmt.Errorf("failed to save pipeline for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg.Error())
 		return nil, msg
 	}
@@ -81,14 +81,14 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	for _, forgeYamlConfig := range forgeYamlConfigs {
 		config, err := findOrPersistPipelineConfig(_store, pipeline, forgeYamlConfig)
 		if err != nil {
-			msg := fmt.Sprintf("failure to find or persist pipeline config for %s", repo.FullName)
+			msg := fmt.Sprintf("failed to find or persist pipeline config for %s", repo.FullName)
 			log.Error().Err(err).Msg(msg)
 			return nil, fmt.Errorf(msg)
 		}
 		configs = append(configs, config)
 	}
 	if err := persistPipelineConfigs(_store, configs, pipeline.ID); err != nil {
-		msg := fmt.Sprintf("failure to find or persist pipeline config for %s", repo.FullName)
+		msg := fmt.Sprintf("failed to find or persist pipeline config for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
 		return nil, fmt.Errorf(msg)
 	}
@@ -100,7 +100,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 
 	pipeline, err = start(ctx, _store, pipeline, repoUser, repo, pipelineItems)
 	if err != nil {
-		msg := fmt.Sprintf("failure to start pipeline for %s", repo.FullName)
+		msg := fmt.Sprintf("failed to start pipeline for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
 		return nil, fmt.Errorf(msg)
 	}
@@ -115,7 +115,7 @@ func persistPipelineWithErr(ctx context.Context, _store store.Store, pipeline *m
 	pipeline.Error = err
 	dbErr := _store.CreatePipeline(pipeline)
 	if dbErr != nil {
-		msg := fmt.Errorf("failure to save pipeline for %s", repo.FullName)
+		msg := fmt.Errorf("failed to save pipeline for %s", repo.FullName)
 		log.Error().Err(dbErr).Msg(msg.Error())
 		return msg
 	}
