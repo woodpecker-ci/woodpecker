@@ -7,7 +7,7 @@
 </template>
 
 <script lang="ts" setup>
-import { useLocalStorage } from '@vueuse/core';
+import { useStorage } from '@vueuse/core';
 import dayjs from 'dayjs';
 import TimeAgo from 'javascript-time-ago';
 import { SUPPORTED_LOCALES } from 'virtual:vue-i18n-supported-locales';
@@ -27,7 +27,7 @@ const localeOptions = computed(() =>
   })),
 );
 
-const storedLocale = useLocalStorage('woodpecker:locale', locale.value);
+const storedLocale = useStorage('woodpecker:locale', locale.value);
 const selectedLocale = computed<string>({
   async set(_selectedLocale) {
     await setI18nLanguage(_selectedLocale);
