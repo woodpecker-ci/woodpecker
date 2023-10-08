@@ -33,7 +33,6 @@ func publishToTopic(c context.Context, pipeline *model.Pipeline, repo *model.Rep
 		},
 	}
 	pipelineCopy := *pipeline
-	pipelineCopy.Workflows = nil // never send workflow lists
 
 	message.Data, _ = json.Marshal(model.Event{
 		Repo:     *repo,
