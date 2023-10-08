@@ -373,8 +373,8 @@ This allows you to filter, for example, tags that must start with **v**:
 
 ```yaml
 when:
-  event: tag
-  ref: refs/tags/v*
+  - event: tag
+    ref: refs/tags/v*
 ```
 
 #### `status`
