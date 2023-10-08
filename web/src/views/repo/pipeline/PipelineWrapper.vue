@@ -6,7 +6,7 @@
       disable-hash-mode
       :go-back="goBack"
       :fluid-content="activeTab === 'tasks'"
-      full-width
+      full-width-header
     >
       <template #title>{{ repo.full_name }}</template>
 

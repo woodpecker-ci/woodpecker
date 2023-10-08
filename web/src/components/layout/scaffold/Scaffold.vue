@@ -3,7 +3,7 @@
     :go-back="goBack"
     :enable-tabs="enableTabs"
     :search="search"
-    :full-width="fullWidth"
+    :full-width="fullWidthHeader"
     @update:search="(value) => $emit('update:search', value)"
   >
     <template #title><slot name="title" /></template>
@@ -12,15 +12,15 @@
   </Header>
 
   <slot v-if="fluidContent" />
-  <FluidContainer v-else>
+  <Container v-else>
     <slot />
-  </FluidContainer>
+  </Container>
 </template>
 
 <script setup lang="ts">
 import { toRef } from 'vue';
 
-import FluidContainer from '~/components/layout/FluidContainer.vue';
+import Container from '~/components/layout/Container.vue';
 import { useTabsProvider } from '~/compositions/useTabs';
 
 import Header from './Header.vue';
@@ -29,6 +29,7 @@ const props = defineProps<{
   // Header
   goBack?: () => void;
   search?: string;
+  fullWidthHeader?: boolean;
 
   // Tabs
   enableTabs?: boolean;
@@ -37,7 +38,6 @@ const props = defineProps<{
 
   // Content
   fluidContent?: boolean;
-  fullWidth?: boolean;
 }>();
 
 const emit = defineEmits<{

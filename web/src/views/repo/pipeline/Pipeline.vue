@@ -1,5 +1,5 @@
 <template>
-  <FluidContainer full-width class="flex flex-col flex-grow md:min-h-xs">
+  <Container full-width class="flex flex-col flex-grow md:min-h-xs">
     <div class="flex w-full min-h-0 flex-grow">
       <PipelineStepList
         v-if="pipeline?.workflows?.length || 0 > 0"
@@ -56,7 +56,7 @@
         />
       </div>
     </div>
-  </FluidContainer>
+  </Container>
 </template>
 
 <script lang="ts" setup>
@@ -66,7 +66,7 @@ import { useRoute, useRouter } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
 import Icon from '~/components/atomic/Icon.vue';
-import FluidContainer from '~/components/layout/FluidContainer.vue';
+import Container from '~/components/layout/Container.vue';
 import PipelineLog from '~/components/repo/pipeline/PipelineLog.vue';
 import PipelineStepList from '~/components/repo/pipeline/PipelineStepList.vue';
 import useApiClient from '~/compositions/useApiClient';
