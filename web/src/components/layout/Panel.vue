@@ -36,15 +36,10 @@ import { computed, ref } from 'vue';
 
 import Icon from '~/components/atomic/Icon.vue';
 
-const props = withDefaults(
-  defineProps<{
-    title?: string;
-    collapsable?: boolean;
-  }>(),
-  {
-    title: '',
-  },
-);
+const props = defineProps<{
+  title?: string;
+  collapsable?: boolean;
+}>();
 
 /**
  * _collapsed is used to store the internal state of the panel, but is
