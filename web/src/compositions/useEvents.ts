@@ -29,12 +29,5 @@ export default () => {
     }
     const { pipeline } = data;
     pipelineStore.setPipeline(repo.id, pipeline);
-
-    // contains step update
-    if (!data.step) {
-      return;
-    }
-    const { step } = data;
-    pipelineStore.setWorkflow(repo.id, pipeline.number, step);
   });
 };
