@@ -25,7 +25,6 @@
               color="blue"
               :start-icon="forge ?? 'repo'"
               :text="$t('repo.pipeline.protected.review')"
-              :is-loading="isApprovingPipeline"
               :to="pipeline.link_url"
               :title="message"
             />

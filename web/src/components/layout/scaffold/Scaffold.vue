@@ -11,10 +11,10 @@
     <template v-if="$slots.tabActions" #tabActions><slot name="tabActions" /></template>
   </Header>
 
-  <FluidContainer v-if="fluidContent">
+  <slot v-if="fluidContent" />
+  <FluidContainer v-else>
     <slot />
   </FluidContainer>
-  <slot v-else />
 </template>
 
 <script setup lang="ts">
@@ -25,7 +25,7 @@ import { useTabsProvider } from '~/compositions/useTabs';
 
 import Header from './Header.vue';
 
-export interface Props {
+const props = defineProps<{
   // Header
   goBack?: () => void;
   search?: string;
@@ -33,26 +33,17 @@ export interface Props {
   // Tabs
   enableTabs?: boolean;
   disableHashMode?: boolean;
-  activeTab: string;
+  activeTab?: string;
 
   // Content
   fluidContent?: boolean;
   fullWidth?: boolean;
-}
+}>();
 
-const props = withDefaults(defineProps<Props>(), {
-  goBack: undefined,
-  search: undefined,
-  // eslint-disable-next-line vue/no-boolean-default
-  disableHashMode: false,
-  // eslint-disable-next-line vue/no-boolean-default
-  enableTabs: false,
-  activeTab: '',
-  // eslint-disable-next-line vue/no-boolean-default
-  fluidContent: true,
-});
-
-const emit = defineEmits(['update:activeTab', 'update:search']);
+const emit = defineEmits<{
+  (event: 'update:activeTab', value: string): void;
+  (event: 'update:search', value: string): void;
+}>();
 
 if (props.enableTabs) {
   useTabsProvider({

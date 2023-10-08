@@ -5,8 +5,8 @@
       enable-tabs
       disable-hash-mode
       :go-back="goBack"
-      :fluid-content="activeTab !== 'tasks'"
-      :full-width="true"
+      :fluid-content="activeTab === 'tasks'"
+      full-width
     >
       <template #title>{{ repo.full_name }}</template>
 
