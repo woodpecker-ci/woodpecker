@@ -20,7 +20,7 @@ services:
 ## Configure MySQL/MariaDB
 
 The below example demonstrates MySQL database configuration. See the official driver [documentation](https://github.com/go-sql-driver/mysql#dsn-data-source-name) for configuration options and examples.
-Note that starting with Woodpecker 2.0, the minimum required MySQL version is **8**.
+The minimum version of MySQL/MariaDB required is determined by the `go-sql-driver/mysql` - see [it's README](https://github.com/go-sql-driver/mysql#requirements) for more information.
 
 ```diff
 # docker-compose.yml
