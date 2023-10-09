@@ -35,7 +35,7 @@
       "minLength": 1,
       "items": { "type": "string" }
     },
-    "version": { "type": "number" }
+    "version": { "type": "number", "default": 1 }
   },
   "definitions": {
     "clone": {
