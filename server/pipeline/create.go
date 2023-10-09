@@ -59,13 +59,13 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 
 	if configFetchErr != nil {
 		log.Debug().Str("repo", repo.FullName).Err(configFetchErr).Msgf("cannot find config '%s' in '%s' with user: '%s'", repo.Config, pipeline.Ref, repoUser.Login)
-		return nil, persistPipelineWithErr(ctx, _store, pipeline, repo, repoUser, fmt.Sprintf("pipeline definition not found in %s", repo.FullName))
+		return nil, persistPipelineWithErr(ctx, _forge, _store, pipeline, repo, repoUser, fmt.Sprintf("pipeline definition not found in %s", repo.FullName))
 	}
 
-	pipelineItems, parseErr := parsePipeline(_store, _forge, pipeline, repoUser, repo, forgeYamlConfigs, nil)
+	pipelineItems, parseErr := parsePipeline(_forge, _store, pipeline, repoUser, repo, forgeYamlConfigs, nil)
 	if parseErr != nil {
 		log.Debug().Str("repo", repo.FullName).Err(parseErr).Msg("failed to parse yaml")
-		return nil, persistPipelineWithErr(ctx, _store, pipeline, repo, repoUser, fmt.Sprintf("failed to parse pipeline: %s", parseErr.Error()))
+		return nil, persistPipelineWithErr(ctx, _forge, _store, pipeline, repo, repoUser, fmt.Sprintf("failed to parse pipeline: %s", parseErr.Error()))
 	}
 
 	if len(pipelineItems) == 0 {
@@ -103,7 +103,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	}
 
 	if pipeline.Status == model.StatusBlocked {
-		publishPipeline(ctx, pipeline, repo, repoUser)
+		publishPipeline(ctx, _forge, pipeline, repo, repoUser)
 		return pipeline, nil
 	}
 
@@ -117,7 +117,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	return pipeline, nil
 }
 
-func persistPipelineWithErr(ctx context.Context, _store store.Store, pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User, err string) error {
+func persistPipelineWithErr(ctx context.Context, _forge forge.Forge, _store store.Store, pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User, err string) error {
 	pipeline.Started = time.Now().Unix()
 	pipeline.Finished = pipeline.Started
 	pipeline.Status = model.StatusError
@@ -129,7 +129,7 @@ func persistPipelineWithErr(ctx context.Context, _store store.Store, pipeline *m
 		return msg
 	}
 
-	publishPipeline(ctx, pipeline, repo, repoUser)
+	publishPipeline(ctx, _forge, pipeline, repo, repoUser)
 
 	return nil
 }
