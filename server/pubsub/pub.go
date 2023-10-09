@@ -57,7 +57,7 @@ func (p *Publisher) Publish(message Message) {
 
 func (p *Publisher) Subscribe(c context.Context, receiver Receiver) {
 	p.Lock()
-	p.subs[&receiver] = true
+	p.subs[&receiver] = struct{}{}
 	p.Unlock()
 	<-c.Done()
 	p.Lock()
