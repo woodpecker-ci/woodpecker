@@ -22,6 +22,5 @@ import (
 )
 
 type Extension interface {
-	IsConfigured() bool
 	FetchConfig(ctx context.Context, repo *model.Repo, pipeline *model.Pipeline, currentFileMeta []*forge_types.FileMeta, netrc *model.Netrc) (configData []*forge_types.FileMeta, useOld bool, err error)
 }
