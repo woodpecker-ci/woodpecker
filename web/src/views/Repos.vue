@@ -13,14 +13,16 @@
         <div
           class="flex flex-col border rounded-md bg-wp-background-100 overflow-hidden p-4 border-wp-background-400 dark:bg-wp-background-200 cursor-pointer hover:shadow-md hover:bg-wp-background-300 dark:hover:bg-wp-background-300"
         >
-          <div class="flex justify-between">
+          <div class="flex items-center gap-2">
+            <img v-if="repo.avatar_url" :src="repo.avatar_url" class="w-8 h-8" alt="..." />
+            <Icon v-else name="repo" class="text-wp-text-100" />
             <span class="text-wp-text-100 text-xl">{{ `${repo.owner} / ${repo.name}` }}</span>
-            <Icon name="repo" class="text-wp-text-100" />
+            <Badge v-if="repo.visibility === RepoVisibility.Public" label="public" class="ml-auto" />
           </div>
 
-          <div class="mt-4 flex gap-2">
+          <div class="mt-8 flex gap-2">
             <PipelineStatusIcon status="failure" />
-            <span class="text-wp-text-100">last pipeline was successful</span>
+            <span class="text-wp-text-100">last pipeline was successful 20 mins ago</span>
           </div>
         </div>
       </router-link>
@@ -31,12 +33,14 @@
 <script lang="ts" setup>
 import { computed, onMounted, ref } from 'vue';
 
+import Badge from '~/components/atomic/Badge.vue';
 import Button from '~/components/atomic/Button.vue';
 import Icon from '~/components/atomic/Icon.vue';
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import useRepos from '~/compositions/useRepos';
 import { useRepoSearch } from '~/compositions/useRepoSearch';
+import { RepoVisibility } from '~/lib/api/types';
 import { useRepoStore } from '~/store/repos';
 
 const repoStore = useRepoStore();
