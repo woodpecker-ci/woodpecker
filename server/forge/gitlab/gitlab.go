@@ -447,7 +447,7 @@ func (g *GitLab) getTokenAndWebURL(link string) (token, webURL string, err error
 		return "", "", err
 	}
 	token = uri.Query().Get("access_token")
-	webURL = fmt.Sprintf("%s://%s/api/hook", uri.Scheme, uri.Host)
+	webURL = fmt.Sprintf("%s://%s/%s", uri.Scheme, uri.Host, strings.TrimPrefix(uri.Path, "/"))
 	return token, webURL, nil
 }
 
@@ -749,7 +749,7 @@ func (g *GitLab) loadChangedFilesFromMergeRequest(ctx context.Context, tmpRepo *
 		return nil, err
 	}
 
-	changes, _, err := client.MergeRequests.ListMergeRequesDiffs(_repo.ID, mergeIID, &gitlab.ListMergeRequesDiffsOptions{}, gitlab.WithContext(ctx))
+	changes, _, err := client.MergeRequests.ListMergeRequestDiffs(_repo.ID, mergeIID, &gitlab.ListMergeRequestDiffsOptions{}, gitlab.WithContext(ctx))
 	if err != nil {
 		return nil, err
 	}

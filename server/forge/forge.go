@@ -94,10 +94,3 @@ type Forge interface {
 	// Org fetches the organization from the forge by name. If the name is a user an org with type user is returned.
 	Org(ctx context.Context, u *model.User, org string) (*model.Org, error)
 }
-
-// Refresher refreshes an oauth token and expiration for the given user. It
-// returns true if the token was refreshed, false if the token was not refreshed,
-// and error if it failed to refresh.
-type Refresher interface {
-	Refresh(context.Context, *model.User) (bool, error)
-}

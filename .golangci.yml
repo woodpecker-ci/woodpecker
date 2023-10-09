@@ -4,7 +4,7 @@ linters-settings:
   misspell:
     locale: US
   gofumpt:
-    lang-version: "1.20"
+    lang-version: "1.21"
     extra-rules: true
   forbidigo:
     forbid:
@@ -33,10 +33,11 @@ linters:
     - gofumpt
     - errorlint
     - forbidigo
+    - zerologlint
 
 run:
   timeout: 5m
-  go: '1.20'
+  go: '1.21'
 
 issues:
   exclude-rules:

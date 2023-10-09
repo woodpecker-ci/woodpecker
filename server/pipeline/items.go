@@ -29,10 +29,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
-func createPipelineItems(c context.Context, store store.Store,
-	currentPipeline *model.Pipeline, user *model.User, repo *model.Repo,
-	yamls []*forge_types.FileMeta, envs map[string]string,
-) (*model.Pipeline, []*pipeline.Item, error) {
+func parsePipeline(store store.Store, currentPipeline *model.Pipeline, user *model.User, repo *model.Repo, yamls []*forge_types.FileMeta, envs map[string]string) ([]*pipeline.Item, error) {
 	netrc, err := server.Config.Services.Forge.Netrc(user, repo)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to generate netrc file")
@@ -87,16 +84,70 @@ func createPipelineItems(c context.Context, store store.Store,
 	}
 	pipelineItems, err := b.Build()
 	if err != nil {
+		return nil, err
+	}
+
+	return pipelineItems, nil
+}
+
+func createPipelineItems(c context.Context, store store.Store,
+	currentPipeline *model.Pipeline, user *model.User, repo *model.Repo,
+	yamls []*forge_types.FileMeta, envs map[string]string,
+) (*model.Pipeline, []*pipeline.Item, error) {
+	pipelineItems, err := parsePipeline(store, currentPipeline, user, repo, yamls, envs)
+	if err != nil {
 		currentPipeline, uerr := UpdateToStatusError(store, *currentPipeline, err)
 		if uerr != nil {
-			log.Error().Err(err).Msgf("Error setting error status of pipeline for %s#%d", repo.FullName, currentPipeline.Number)
+			log.Error().Err(uerr).Msgf("Error setting error status of pipeline for %s#%d", repo.FullName, currentPipeline.Number)
 		} else {
 			updatePipelineStatus(c, currentPipeline, repo, user)
 		}
 		return currentPipeline, nil, err
 	}
 
-	currentPipeline = pipeline.SetPipelineStepsOnPipeline(b.Curr, pipelineItems)
+	currentPipeline = setPipelineStepsOnPipeline(currentPipeline, pipelineItems)
 
 	return currentPipeline, pipelineItems, nil
+}
+
+// setPipelineStepsOnPipeline is the link between pipeline representation in "pipeline package" and server
+// to be specific this func currently is used to convert the pipeline.Item list (crafted by StepBuilder.Build()) into
+// a pipeline that can be stored in the database by the server
+func setPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*pipeline.Item) *model.Pipeline {
+	var pidSequence int
+	for _, item := range pipelineItems {
+		if pidSequence < item.Workflow.PID {
+			pidSequence = item.Workflow.PID
+		}
+	}
+
+	for _, item := range pipelineItems {
+		for _, stage := range item.Config.Stages {
+			var gid int
+			for _, step := range stage.Steps {
+				pidSequence++
+				if gid == 0 {
+					gid = pidSequence
+				}
+				step := &model.Step{
+					Name:       step.Alias,
+					UUID:       step.UUID,
+					PipelineID: pipeline.ID,
+					PID:        pidSequence,
+					PPID:       item.Workflow.PID,
+					State:      model.StatusPending,
+					Failure:    step.Failure,
+					Type:       model.StepType(step.Type),
+				}
+				if item.Workflow.State == model.StatusSkipped {
+					step.State = model.StatusSkipped
+				}
+				item.Workflow.Children = append(item.Workflow.Children, step)
+			}
+		}
+		item.Workflow.PipelineID = pipeline.ID
+		pipeline.Workflows = append(pipeline.Workflows, item.Workflow)
+	}
+
+	return pipeline
 }

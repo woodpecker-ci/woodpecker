@@ -2,10 +2,10 @@
 
 ## Supported features
 
-| Feature | [GitHub](github/) | [Gitea / Forgejo](gitea/) | [Gitlab](gitlab/) | [Bitbucket](bitbucket/) | [Bitbucket Datacenter](bitbucket_datacenter/)
+| Feature | [GitHub](github/) | [Gitea / Forgejo](gitea/) | [Gitlab](gitlab/) | [Bitbucket](bitbucket/) | [Bitbucket Datacenter](bitbucket_datacenter/) |
 | --- | :---: | :---: | :---: | :---: | :---: |
 | Event: Push | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| Event: Tag | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | :white_check_mark: |
+| Event: Tag | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
 | Event: Pull-Request | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
 | Event: Deploy | :white_check_mark: | :x: | :x: | :x: | :x: |
 | [Multiple workflows](../../20-usage/25-workflows.md) | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |

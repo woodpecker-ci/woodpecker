@@ -16,15 +16,16 @@ package kubernetes
 
 import (
 	"fmt"
+	"maps"
 	"strings"
 
 	"github.com/rs/zerolog/log"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/common"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
-	"golang.org/x/exp/maps"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/common"
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
 
 func Pod(namespace string, step *types.Step, labels, annotations map[string]string) (*v1.Pod, error) {

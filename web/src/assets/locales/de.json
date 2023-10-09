@@ -73,6 +73,14 @@
         "tasks": "Aufgaben",
         "waiting_for": "wartet auf"
       },
+      "repos": {
+        "desc": "Repositories, die auf dem Server aktiviert sind oder waren",
+        "disabled": "Deaktiviert",
+        "none": "Es gibt noch keine Repositories.",
+        "repos": "Repositories",
+        "settings": "Repository-Einstellungen",
+        "view": "Repository anzeigen"
+      },
       "secrets": {
         "add": "Geheimnis hinzufügen",
         "created": "Globales Geheimnis erstellt",
@@ -244,7 +252,8 @@
         "awaits": "Diese Pipeline wartet auf die Genehmigung durch einen Maintainer!",
         "decline": "Ablehnen",
         "decline_success": "Pipeline abgelehnt",
-        "declined": "Diese Pipeline ist abgelehnt worden!"
+        "declined": "Diese Pipeline ist abgelehnt worden!",
+        "review": "Änderungen überprüfen"
       },
       "status": {
         "blocked": "blockiert",

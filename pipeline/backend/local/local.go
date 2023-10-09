@@ -22,12 +22,12 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"strings"
 	"sync"
 
 	"github.com/alessio/shellescape"
 	"github.com/rs/zerolog/log"
-	"golang.org/x/exp/slices"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
