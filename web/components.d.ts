@@ -21,6 +21,7 @@ declare module 'vue' {
     Button: typeof import('./src/components/atomic/Button.vue')['default']
     Checkbox: typeof import('./src/components/form/Checkbox.vue')['default']
     CheckboxesField: typeof import('./src/components/form/CheckboxesField.vue')['default']
+    Container: typeof import('./src/components/layout/Container.vue')['default']
     CronTab: typeof import('./src/components/repo/settings/CronTab.vue')['default']
     DeployPipelinePopup: typeof import('./src/components/layout/popups/DeployPipelinePopup.vue')['default']
     DocsLink: typeof import('./src/components/atomic/DocsLink.vue')['default']
