@@ -16,13 +16,13 @@ package compiler
 
 import (
 	"fmt"
+	"maps"
 	"path"
 	"path/filepath"
 	"strings"
 
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
-	"golang.org/x/exp/maps"
 
 	backend_types "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"

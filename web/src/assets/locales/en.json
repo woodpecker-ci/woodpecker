@@ -489,5 +489,6 @@
     "oauth_error": "Error while authenticating against OAuth provider",
     "internal_error": "Some internal error occurred",
     "access_denied": "You are not allowed to login"
-  }
+  },
+  "default": "default"
 }

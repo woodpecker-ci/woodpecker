@@ -7,10 +7,10 @@ when:
   event: tag
 
 variables:
-  - &golang_image 'golang:1.21.1'
+  - &golang_image 'golang:1.21.2'
   - &node_image 'node:20-alpine'
-  - &xgo_image 'techknowlogick/xgo:go-1.20.2'
-  - &xgo_version 'go-1.20.2'
+  - &xgo_image 'techknowlogick/xgo:go-1.21.2'
+  - &xgo_version 'go-1.21.2'
 
 steps:
   build-web:

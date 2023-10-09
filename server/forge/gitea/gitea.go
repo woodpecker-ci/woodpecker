@@ -173,7 +173,7 @@ func (c *Gitea) Auth(ctx context.Context, token, _ string) (string, error) {
 }
 
 // Refresh refreshes the Gitea oauth2 access token. If the token is
-// refreshed the user is updated and a true value is returned.
+// refreshed, the user is updated and a true value is returned.
 func (c *Gitea) Refresh(ctx context.Context, user *model.User) (bool, error) {
 	config, oauth2Ctx := c.oauth2Config(ctx)
 	config.RedirectURL = ""
