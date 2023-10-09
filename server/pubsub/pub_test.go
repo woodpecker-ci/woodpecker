@@ -19,6 +19,8 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestPubsub(t *testing.T) {
@@ -36,7 +38,7 @@ func TestPubsub(t *testing.T) {
 
 	broker := New()
 	go func() {
-		broker.Subscribe(ctx, func(message Message) { wg.Done() })
+		broker.Subscribe(ctx, func(message Message) { assert.Equal(t, testMessage, message); wg.Done() })
 	}()
 	go func() {
 		broker.Subscribe(ctx, func(message Message) { wg.Done() })

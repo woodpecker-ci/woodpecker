@@ -102,7 +102,7 @@ func (s *RPC) Extend(c context.Context, id string) error {
 }
 
 // Update implements the rpc.Update function
-func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
+func (s *RPC) Update(_ context.Context, id string, state rpc.State) error {
 	workflowID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		return err
