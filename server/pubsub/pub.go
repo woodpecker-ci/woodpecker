@@ -37,7 +37,7 @@ type Receiver func(Message)
 type Publisher struct {
 	sync.Mutex
 
-	subs map[*Receiver]bool
+	subs map[*Receiver]struct{}
 }
 
 // New creates an in-memory publisher.
