@@ -43,7 +43,7 @@ type Publisher struct {
 // New creates an in-memory publisher.
 func New() *Publisher {
 	return &Publisher{
-		subs: make(map[*Receiver]bool),
+		subs: make(map[*Receiver]struct{}),
 	}
 }
 
