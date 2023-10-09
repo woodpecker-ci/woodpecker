@@ -295,7 +295,7 @@ func (c *config) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 	return c.newClient(ctx, u).CreateHook(r.Owner, r.Name, &internal.Hook{
 		Active: true,
 		Desc:   rawurl.Host,
-		Events: []string{"repo:push"},
+		Events: []string{"repo:push", "pullrequest:created"},
 		URL:    link,
 	})
 }

@@ -8,7 +8,7 @@ when:
       - release/*
 
 variables:
-  - &golang_image 'golang:1.21.1'
+  - &golang_image 'golang:1.21.2'
   - &when
     - path: &when_path
         # related config files

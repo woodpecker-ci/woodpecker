@@ -24,10 +24,10 @@ import { computed, toRef } from 'vue';
 
 const props = withDefaults(
   defineProps<{
-    modelValue: string;
-    placeholder: string;
-    type: string;
-    lines: number;
+    modelValue?: string;
+    placeholder?: string;
+    type?: string;
+    lines?: number;
     disabled?: boolean;
   }>(),
   {

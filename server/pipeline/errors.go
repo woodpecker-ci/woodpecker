@@ -14,6 +14,8 @@
 
 package pipeline
 
+import "errors"
+
 type ErrNotFound struct {
 	Msg string
 }
@@ -46,18 +48,4 @@ func (e ErrBadRequest) Is(target error) bool {
 	return ok
 }
 
-type ErrFiltered struct {
-	Msg string
-}
-
-func (e ErrFiltered) Error() string {
-	return "ignoring hook: " + e.Msg
-}
-
-func (e *ErrFiltered) Is(target error) bool {
-	_, ok := target.(ErrFiltered) //nolint:errorlint
-	if !ok {
-		_, ok = target.(*ErrFiltered) //nolint:errorlint
-	}
-	return ok
-}
+var ErrFiltered = errors.New("ignoring hook: 'when' filters filtered out all steps")
