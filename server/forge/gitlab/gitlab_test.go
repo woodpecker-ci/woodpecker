@@ -110,12 +110,12 @@ func Test_GitLab(t *testing.T) {
 		// Test activate method
 		g.Describe("Activate", func() {
 			g.It("Should be success", func() {
-				err := client.Activate(ctx, &user, &repo, "http://example.com/api/hook/test/test?access_token=token")
+				err := client.Activate(ctx, &user, &repo, "http://example.com/api/hook?access_token=token")
 				assert.NoError(t, err)
 			})
 
 			g.It("Should be failed, when token not given", func() {
-				err := client.Activate(ctx, &user, &repo, "http://example.com/api/hook/test/test")
+				err := client.Activate(ctx, &user, &repo, "http://example.com/api/hook")
 
 				g.Assert(err).IsNotNil()
 			})
@@ -124,7 +124,7 @@ func Test_GitLab(t *testing.T) {
 		// Test deactivate method
 		g.Describe("Deactivate", func() {
 			g.It("Should be success", func() {
-				err := client.Deactivate(ctx, &user, &repo, "http://example.com/api/hook/test/test?access_token=token")
+				err := client.Deactivate(ctx, &user, &repo, "http://example.com/api/hook?access_token=token")
 
 				g.Assert(err).IsNil()
 			})
@@ -149,7 +149,7 @@ func Test_GitLab(t *testing.T) {
 						assert.Equal(t, "woodpecker", hookRepo.Name)
 						assert.Equal(t, "http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg", hookRepo.Avatar)
 						assert.Equal(t, "develop", hookRepo.Branch)
-						assert.Equal(t, "refs/heads/master", pipeline.Ref)
+						assert.Equal(t, "refs/heads/main", pipeline.Ref)
 						assert.Equal(t, []string{"cmd/cli/main.go"}, pipeline.ChangedFiles)
 					}
 				})

@@ -25,7 +25,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/google/go-github/v39/github"
+	"github.com/google/go-github/v55/github"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 
@@ -209,7 +209,12 @@ func (c *client) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 		if err != nil {
 			return nil, err
 		}
-		repos = append(repos, convertRepoList(list)...)
+		for _, repo := range list {
+			if repo.GetArchived() {
+				continue
+			}
+			repos = append(repos, convertRepo(repo))
+		}
 		opts.Page = resp.NextPage
 	}
 	return repos, nil
@@ -354,20 +359,22 @@ func (c *client) Org(ctx context.Context, u *model.User, owner string) (*model.O
 	client := c.newClientToken(ctx, u.Token)
 
 	user, _, err := client.Users.Get(ctx, owner)
+	log.Trace().Msgf("Github user for owner %s = %v", owner, user)
 	if user != nil && err == nil {
 		return &model.Org{
-			Name:   user.GetName(),
+			Name:   user.GetLogin(),
 			IsUser: true,
 		}, nil
 	}
 
 	org, _, err := client.Organizations.Get(ctx, owner)
+	log.Trace().Msgf("Github organization for owner %s = %v", owner, org)
 	if err != nil {
 		return nil, err
 	}
 
 	return &model.Org{
-		Name: org.GetName(),
+		Name: org.GetLogin(),
 	}, nil
 }
 

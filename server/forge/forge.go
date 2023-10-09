@@ -103,10 +103,3 @@ func FromContext(ctx context.Context) (Forge, bool) {
 	f, ok := ctx.Value("forge").(Forge)
 	return f, ok
 }
-
-// Refresher refreshes an oauth token and expiration for the given user. It
-// returns true if the token was refreshed, false if the token was not refreshed,
-// and error if it failed to refresh.
-type Refresher interface {
-	Refresh(context.Context, *model.User) (bool, error)
-}

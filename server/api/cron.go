@@ -20,6 +20,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+
 	cronScheduler "github.com/woodpecker-ci/woodpecker/server/cron"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/pipeline"
@@ -47,7 +48,7 @@ func GetCron(c *gin.Context) {
 
 	cron, err := store.FromContext(c).CronFind(repo, id)
 	if err != nil {
-		handleDbGetError(c, err)
+		handleDbError(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, cron)
@@ -74,7 +75,7 @@ func RunCron(c *gin.Context) {
 
 	cron, err := _store.CronFind(repo, id)
 	if err != nil {
-		handleDbGetError(c, err)
+		handleDbError(c, err)
 		return
 	}
 
@@ -181,7 +182,7 @@ func PatchCron(c *gin.Context) {
 
 	cron, err := _store.CronFind(repo, id)
 	if err != nil {
-		handleDbGetError(c, err)
+		handleDbError(c, err)
 		return
 	}
 	if in.Branch != "" {
@@ -244,7 +245,7 @@ func GetCronList(c *gin.Context) {
 //	@Summary	Delete a cron job by id
 //	@Router		/repos/{repo_id}/cron/{cron} [delete]
 //	@Produce	plain
-//	@Success	200
+//	@Success	204
 //	@Tags		Repository cron jobs
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		repo_id			path	int		true	"the repository id"
@@ -257,8 +258,8 @@ func DeleteCron(c *gin.Context) {
 		return
 	}
 	if err := store.FromContext(c).CronDelete(repo, id); err != nil {
-		handleDbGetError(c, err)
+		handleDbError(c, err)
 		return
 	}
-	c.String(http.StatusNoContent, "")
+	c.Status(http.StatusNoContent)
 }

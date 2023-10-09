@@ -39,9 +39,7 @@ func start(ctx context.Context, forge forge.Forge, store store.Store, activePipe
 		return nil, err
 	}
 
-	if err := publishToTopic(ctx, activePipeline, repo); err != nil {
-		log.Error().Err(err).Msg("publishToTopic")
-	}
+	publishPipeline(ctx, forge, activePipeline, repo, user)
 
 	if err := queuePipeline(repo, pipelineItems); err != nil {
 		log.Error().Err(err).Msg("queuePipeline")
@@ -60,7 +58,13 @@ func start(ctx context.Context, forge forge.Forge, store store.Store, activePipe
 		}
 	}
 
-	updatePipelineStatus(ctx, forge, activePipeline, repo, user)
-
 	return activePipeline, nil
+}
+
+func publishPipeline(ctx context.Context, forge forge.Forge, pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User) {
+	if err := publishToTopic(ctx, pipeline, repo); err != nil {
+		log.Error().Err(err).Msg("publishToTopic")
+	}
+
+	updatePipelineStatus(ctx, forge, pipeline, repo, repoUser)
 }

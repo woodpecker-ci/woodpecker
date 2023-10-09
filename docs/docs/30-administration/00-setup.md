@@ -35,7 +35,7 @@ In addition you need at least some kind of database which requires additional re
 You can install Woodpecker on multiple ways:
 
 - Using [docker-compose](#docker-compose) with the official [container images](../80-downloads.md#docker-images)
-- By deploying to a [Kubernetes](./80-kubernetes.md) with manifests or Woodpeckers official Helm charts
+- Using [Kubernetes](./#kubernetes) via the Woodpeckers Helm chart
 - Using [binaries](../80-downloads.md)
 
 ### docker-compose
@@ -92,7 +92,6 @@ services:
     [...]
     environment:
       - [...]
-+     - WOODPECKER_HOST=${WOODPECKER_HOST}
 +     - WOODPECKER_HOST=${WOODPECKER_HOST}
 ```
 
@@ -171,6 +170,16 @@ services:
 +     - WOODPECKER_AGENT_SECRET=${WOODPECKER_AGENT_SECRET}
 ```
 
+### Kubernetes 
+
+We recommended to deploy Woodpecker using the [Woodpecker helm chart](https://github.com/woodpecker-ci/helm).
+Have a look at the [`values.yaml`](https://github.com/woodpecker-ci/helm/blob/main/values.yaml) config files for all available settings.
+
+The chart contains two subcharts, `server` and `agent` which are automatically configured as needed.
+The chart started off with two independent charts but was merged into one to simplify the deployment at start of 2023.
+
+A couple of backend-specific config env vars exists which are described in the [kubernetes backend docs](./22-backends/40-kubernetes.md).
+
 ## Authentication
 
 Authentication is done using OAuth and is delegated to your forge which is configured by using environment variables. The example above demonstrates basic GitHub integration.
@@ -193,4 +202,4 @@ A [Prometheus endpoint](./90-prometheus.md) is exposed.
 
 See the [proxy guide](./70-proxy.md) if you want to see a setup behind Apache, Nginx, Caddy or ngrok.
 
-In the case you need to use Woodpecker with a URL path prefix (like: https://example.org/woodpecker/), you can use the option [`WOODPECKER_ROOT_URL`](./10-server-config.md#woodpecker_root_url).
+In the case you need to use Woodpecker with a URL path prefix (like: https://example.org/woodpecker/), you can use the option [`WOODPECKER_ROOT_PATH`](./10-server-config.md#woodpecker_root_path).

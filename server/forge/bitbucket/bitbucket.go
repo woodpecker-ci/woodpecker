@@ -20,10 +20,9 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"path/filepath"
 
 	"golang.org/x/oauth2"
-
-	shared_utils "github.com/woodpecker-ci/woodpecker/shared/utils"
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/forge"
@@ -31,6 +30,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/forge/common"
 	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	shared_utils "github.com/woodpecker-ci/woodpecker/shared/utils"
 )
 
 // Bitbucket cloud endpoints.
@@ -77,7 +77,7 @@ func (c *config) URL() string {
 // Login authenticates an account with Bitbucket using the oauth2 protocol. The
 // Bitbucket account details are returned when the user is successfully authenticated.
 func (c *config) Login(ctx context.Context, w http.ResponseWriter, req *http.Request) (*model.User, error) {
-	config := c.newConfig(server.Config.Server.Host)
+	config := c.newOAuth2Config()
 
 	// get the OAuth errors
 	if err := req.FormValue("error"); err != "" {
@@ -122,7 +122,7 @@ func (c *config) Auth(ctx context.Context, token, secret string) (string, error)
 // Refresh refreshes the Bitbucket oauth2 access token. If the token is
 // refreshed the user is updated and a true value is returned.
 func (c *config) Refresh(ctx context.Context, user *model.User) (bool, error) {
-	config := c.newConfig("")
+	config := c.newOAuth2Config()
 	source := config.TokenSource(
 		ctx, &oauth2.Token{RefreshToken: user.Secret})
 
@@ -223,8 +223,52 @@ func (c *config) File(ctx context.Context, u *model.User, r *model.Repo, p *mode
 	return []byte(*config), err
 }
 
-func (c *config) Dir(_ context.Context, _ *model.User, _ *model.Repo, _ *model.Pipeline, _ string) ([]*forge_types.FileMeta, error) {
-	return nil, forge_types.ErrNotImplemented
+// Dir fetches a folder from the bitbucket repository
+func (c *config) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model.Pipeline, f string) ([]*forge_types.FileMeta, error) {
+	var page *string
+	repoPathFiles := []*forge_types.FileMeta{}
+	client := c.newClient(ctx, u)
+	for {
+		filesResp, err := client.GetRepoFiles(r.Owner, r.Name, p.Commit, f, page)
+		if err != nil {
+			return nil, err
+		}
+		for _, file := range filesResp.Values {
+			_, filename := filepath.Split(file.Path)
+			repoFile := forge_types.FileMeta{
+				Name: filename,
+			}
+			if file.Type == "commit_file" {
+				fileData, err := c.newClient(ctx, u).FindSource(r.Owner, r.Name, p.Commit, file.Path)
+				if err != nil {
+					return nil, err
+				}
+				if fileData != nil {
+					repoFile.Data = []byte(*fileData)
+				}
+			}
+			repoPathFiles = append(repoPathFiles, &repoFile)
+		}
+
+		// Check for more results page
+		if filesResp.Next == nil {
+			break
+		}
+		nextPageURL, err := url.Parse(*filesResp.Next)
+		if err != nil {
+			return nil, err
+		}
+		params, err := url.ParseQuery(nextPageURL.RawQuery)
+		if err != nil {
+			return nil, err
+		}
+		nextPage := params.Get("page")
+		if len(nextPage) == 0 {
+			break
+		}
+		page = &nextPage
+	}
+	return repoPathFiles, nil
 }
 
 // Status creates a pipeline status for the Bitbucket commit.
@@ -251,7 +295,7 @@ func (c *config) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 	return c.newClient(ctx, u).CreateHook(r.Owner, r.Name, &internal.Hook{
 		Active: true,
 		Desc:   rawurl.Host,
-		Events: []string{"repo:push"},
+		Events: []string{"repo:push", "pullrequest:created"},
 		URL:    link,
 	})
 }
@@ -283,12 +327,12 @@ func (c *config) Netrc(u *model.User, _ *model.Repo) (*model.Netrc, error) {
 }
 
 // Branches returns the names of all branches for the named repository.
-func (c *config) Branches(ctx context.Context, u *model.User, r *model.Repo, _ *model.ListOptions) ([]string, error) {
-	bitbucketBranches, err := c.newClient(ctx, u).ListBranches(r.Owner, r.Name)
+func (c *config) Branches(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]string, error) {
+	opts := internal.ListOpts{Page: p.Page, PageLen: p.PerPage}
+	bitbucketBranches, err := c.newClient(ctx, u).ListBranches(r.Owner, r.Name, &opts)
 	if err != nil {
 		return nil, err
 	}
-
 	branches := make([]string, 0)
 	for _, branch := range bitbucketBranches {
 		branches = append(branches, branch.Name)
@@ -303,7 +347,7 @@ func (c *config) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 
 // PullRequests returns the pull requests of the named repository.
 func (c *config) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error) {
-	opts := internal.ListOpts{Page: p.Page, PageLen: p.Page}
+	opts := internal.ListOpts{Page: p.Page, PageLen: p.PerPage}
 	pullRequests, err := c.newClient(ctx, u).ListPullRequests(r.Owner, r.Name, &opts)
 	if err != nil {
 		return nil, err
@@ -369,7 +413,7 @@ func (c *config) newClientToken(ctx context.Context, token, secret string) *inte
 }
 
 // helper function to return the bitbucket oauth2 config
-func (c *config) newConfig(redirect string) *oauth2.Config {
+func (c *config) newOAuth2Config() *oauth2.Config {
 	return &oauth2.Config{
 		ClientID:     c.Client,
 		ClientSecret: c.Secret,
@@ -377,7 +421,7 @@ func (c *config) newConfig(redirect string) *oauth2.Config {
 			AuthURL:  fmt.Sprintf("%s/site/oauth2/authorize", c.url),
 			TokenURL: fmt.Sprintf("%s/site/oauth2/access_token", c.url),
 		},
-		RedirectURL: fmt.Sprintf("%s/authorize", redirect),
+		RedirectURL: fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost),
 	}
 }
 

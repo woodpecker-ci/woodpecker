@@ -8,18 +8,18 @@
       <IconButton
         v-if="orgPermissions.admin"
         icon="settings"
-        :to="{ name: 'org-settings' }"
+        :to="{ name: org.is_user ? 'user' : 'org-settings' }"
         :title="$t('org.settings.settings')"
       />
     </template>
 
     <div class="space-y-4">
       <ListItem v-for="repo in searchedRepos" :key="repo.id" :to="{ name: 'repo', params: { repoId: repo.id } }">
-        <span class="text-color">{{ `${repo.owner} / ${repo.name}` }}</span>
+        <span class="text-wp-text-100">{{ `${repo.owner} / ${repo.name}` }}</span>
       </ListItem>
     </div>
     <div v-if="(searchedRepos || []).length <= 0" class="text-center">
-      <span class="text-color m-auto">{{ $t('repo.user_none') }}</span>
+      <span class="text-wp-text-100 m-auto">{{ $t('repo.user_none') }}</span>
     </div>
   </Scaffold>
 </template>

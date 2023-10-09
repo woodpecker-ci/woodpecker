@@ -127,21 +127,10 @@ func CreatePipeline(ctx context.Context, store store.Store, cron *model.Cron) (*
 		return nil, nil, err
 	}
 
-	// if the forge has a refresh token, the current access token
+	// If the forge has a refresh token, the current access token
 	// may be stale. Therefore, we should refresh prior to dispatching
 	// the pipeline.
-	if refresher, ok := _forge.(forge.Refresher); ok {
-		refreshed, err := refresher.Refresh(ctx, creator)
-		log.Debug().Msgf("token refreshed: %t", refreshed)
-		if err != nil {
-			log.Error().Err(err).Msgf("failed to refresh oauth2 token for creator: %s", creator.Login)
-		} else if refreshed {
-			if err := store.UpdateUser(creator); err != nil {
-				log.Error().Err(err).Msgf("error while updating creator: %s", creator.Login)
-				// move forward
-			}
-		}
-	}
+	forge.Refresh(ctx, _forge, store, creator)
 
 	commit, err := _forge.BranchHead(ctx, creator, repo, cron.Branch)
 	if err != nil {

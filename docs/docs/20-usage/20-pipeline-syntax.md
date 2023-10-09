@@ -42,7 +42,7 @@ Keep in mind the name is optional, if not added the steps will be numerated.
 
 ### Skip Commits
 
-Woodpecker gives the ability to skip individual commits by adding `[CI SKIP]` to the commit message. Note this is case-insensitive.
+Woodpecker gives the ability to skip individual commits by adding `[SKIP CI]` or `[CI SKIP]` to the commit message. Note this is case-insensitive.
 
 ```sh
 git commit -m "updated README [CI SKIP]"
@@ -163,6 +163,31 @@ To make a private registry globally available check the [server configuration do
 
 For specific details on configuring access to Google Container Registry, please view the docs [here](https://cloud.google.com/container-registry/docs/advanced-authentication#using_a_json_key_file).
 
+##### Local Images
+
+It's possible to build a local image by mounting the docker socket as a volume.
+
+With a `Dockerfile` at the root of the project:
+
+```diff
+steps:
+  build-image:
+    image: docker
+    commands:
+      - docker build --rm -t local/project-image .
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  build-project:
+    image: local/project-image
+    commands:
+      - ./build.sh
+```
+
+:::warning
+For this privileged rights are needed only available to admins. In addition this only works when using a single agent.
+:::
+
 ### `commands`
 
 Commands of every pipeline step are executed serially as if you would enter them into your local shell.
@@ -266,16 +291,16 @@ steps:
     settings:
       channel: dev
 +   when:
-+     - branch: master
++     - branch: main
 ```
 
-> The step now triggers on master, but also if the target branch of a pull request is `master`. Add an event condition to limit it further to pushes on master only.
+> The step now triggers on main branch, but also if the target branch of a pull request is `main`. Add an event condition to limit it further to pushes on main only.
 
-Execute a step if the branch is `master` or `develop`:
+Execute a step if the branch is `main` or `develop`:
 
 ```yaml
 when:
-  - branch: [master, develop]
+  - branch: [main, develop]
 ```
 
 Execute a step if the branch starts with `prefix/*`:
@@ -297,7 +322,7 @@ Execute a step using custom include and exclude logic:
 ```yaml
 when:
   - branch:
-      include: [ master, release/* ]
+      include: [ main, release/* ]
       exclude: [ release/1.0.0, release/1.1.* ]
 ```
 
@@ -348,8 +373,8 @@ This allows you to filter, for example, tags that must start with **v**:
 
 ```yaml
 when:
-  event: tag
-  ref: refs/tags/v*
+  - event: tag
+    ref: refs/tags/v*
 ```
 
 #### `status`
@@ -603,26 +628,6 @@ Woodpecker has integrated support for matrix builds. Woodpecker executes a separ
 
 For more details check the [matrix build docs](./30-matrix-workflows.md).
 
-## `platform`
-
-To configure your pipeline to only be executed on an agent with a specific platform, you can use the `platform` key.
-Have a look at the official [go docs](https://go.dev/doc/install/source) for the available platforms. The syntax of the platform is `GOOS/GOARCH` like `linux/arm64` or `linux/amd64`.
-
-Example:
-
-Assuming we have two agents, one `arm` and one `amd64`. Previously this pipeline would have executed on **either agent**, as Woodpecker is not fussy about where it runs the pipelines. By setting the following option it will only be executed on an agent with the platform `linux/arm64`.
-
-```diff
-+platform: linux/arm64
-
-steps:
-  build:
-    image: golang
-    commands:
-      - go build
-      - go test
-```
-
 ## `labels`
 
 You can set labels for your pipeline to select an agent to execute the pipeline on. An agent will pick up and run a pipeline when **every** label assigned to a pipeline matches the agents labels.
@@ -646,6 +651,23 @@ steps:
     commands:
       - go build
       - go test
+```
+
+### Filter by platform
+
+To configure your pipeline to only be executed on an agent with a specific platform, you can use the `platform` key.
+Have a look at the official [go docs](https://go.dev/doc/install/source) for the available platforms. The syntax of the platform is `GOOS/GOARCH` like `linux/arm64` or `linux/amd64`.
+
+Example:
+
+Assuming we have two agents, one `linux/arm` and one `linux/amd64`. Previously this pipeline would have executed on **either agent**, as Woodpecker is not fussy about where it runs the pipelines. By setting the following option it will only be executed on an agent with the platform `linux/arm64`.
+
+```diff
++labels:
++  platform: linux/arm64
+
+steps:
+  [...]
 ```
 
 ## `variables`
@@ -765,7 +787,7 @@ Example conditional execution by branch:
 
 ```diff
 +when:
-+  branch: master
++  branch: main
 +
  steps:
    slack:
@@ -774,13 +796,13 @@ Example conditional execution by branch:
        channel: dev
 ```
 
-> The step now triggers on master, but also if the target branch of a pull request is `master`. Add an event condition to limit it further to pushes on master only.
+> The step now triggers on main, but also if the target branch of a pull request is `main`. Add an event condition to limit it further to pushes on main only.
 
-Execute a step if the branch is `master` or `develop`:
+Execute a step if the branch is `main` or `develop`:
 
 ```diff
 when:
-  branch: [master, develop]
+  branch: [main, develop]
 ```
 
 Execute a step if the branch starts with `prefix/*`:
@@ -795,7 +817,7 @@ Execute a step using custom include and exclude logic:
 ```diff
 when:
   branch:
-    include: [ master, release/* ]
+    include: [ main, release/* ]
     exclude: [ release/1.0.0, release/1.1.* ]
 ```
 
@@ -889,6 +911,10 @@ when:
 ## `depends_on`
 
 Woodpecker supports to define multiple workflows for a repository. Those workflows will run independent from each other. To depend them on each other you can use the [`depends_on`](./25-workflows.md#flow-control) keyword.
+
+## `runs_on`
+
+Workflows that should run even on failure should set the `runs_on` tag. See [here](./25-workflows.md#flow-control) for an example.
 
 ## Privileged mode
 

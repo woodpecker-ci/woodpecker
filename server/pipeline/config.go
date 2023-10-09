@@ -44,13 +44,5 @@ func findOrPersistPipelineConfig(store store.Store, currentPipeline *model.Pipel
 		}
 	}
 
-	pipelineConfig := &model.PipelineConfig{
-		ConfigID:   conf.ID,
-		PipelineID: currentPipeline.ID,
-	}
-	if err := store.PipelineConfigCreate(pipelineConfig); err != nil {
-		return nil, err
-	}
-
 	return conf, nil
 }

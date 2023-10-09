@@ -48,6 +48,5 @@ func (s storage) RegistryDelete(repo *model.Repo, addr string) error {
 	if err != nil {
 		return err
 	}
-	_, err = s.engine.ID(registry.ID).Delete(new(model.Registry))
-	return err
+	return wrapDelete(s.engine.ID(registry.ID).Delete(new(model.Registry)))
 }

@@ -33,7 +33,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/forge/common"
-	"github.com/woodpecker-ci/woodpecker/server/forge/types"
 	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store"
@@ -71,6 +70,7 @@ func New(opts Opts) (forge.Forge, error) {
 		ClientID:     opts.ClientID,
 		ClientSecret: opts.ClientSecret,
 		SkipVerify:   opts.SkipVerify,
+		HideArchives: true,
 	}, nil
 }
 
@@ -447,7 +447,7 @@ func (g *GitLab) getTokenAndWebURL(link string) (token, webURL string, err error
 		return "", "", err
 	}
 	token = uri.Query().Get("access_token")
-	webURL = fmt.Sprintf("%s://%s/api/hook", uri.Scheme, uri.Host)
+	webURL = fmt.Sprintf("%s://%s/%s", uri.Scheme, uri.Host, strings.TrimPrefix(uri.Path, "/"))
 	return token, webURL, nil
 }
 
@@ -620,7 +620,7 @@ func (g *GitLab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 	case *gitlab.TagEvent:
 		return convertTagHook(event)
 	default:
-		return nil, nil, &types.ErrIgnoreEvent{Event: string(eventType)}
+		return nil, nil, &forge_types.ErrIgnoreEvent{Event: string(eventType)}
 	}
 }
 
@@ -717,7 +717,7 @@ func (g *GitLab) Org(ctx context.Context, u *model.User, owner string) (*model.O
 	}
 
 	return &model.Org{
-		Name:    groups[0].Name,
+		Name:    groups[0].FullPath,
 		Private: groups[0].Visibility != gitlab.PublicVisibility,
 	}, nil
 }
@@ -749,13 +749,13 @@ func (g *GitLab) loadChangedFilesFromMergeRequest(ctx context.Context, tmpRepo *
 		return nil, err
 	}
 
-	changes, _, err := client.MergeRequests.GetMergeRequestChanges(_repo.ID, mergeIID, &gitlab.GetMergeRequestChangesOptions{}, gitlab.WithContext(ctx))
+	changes, _, err := client.MergeRequests.ListMergeRequestDiffs(_repo.ID, mergeIID, &gitlab.ListMergeRequestDiffsOptions{}, gitlab.WithContext(ctx))
 	if err != nil {
 		return nil, err
 	}
 
-	files := make([]string, 0, len(changes.Changes)*2)
-	for _, file := range changes.Changes {
+	files := make([]string, 0, len(changes)*2)
+	for _, file := range changes {
 		files = append(files, file.NewPath, file.OldPath)
 	}
 	pipeline.ChangedFiles = utils.DedupStrings(files)

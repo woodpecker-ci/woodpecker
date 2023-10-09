@@ -6,20 +6,16 @@ when:
       - release/*
 
 variables:
-  - &node_image 'node:18-alpine'
+  - &node_image 'node:20-alpine'
   - &when
-    - path: &when_path
-        # related config files
-        - ".woodpecker/web.yml"
-        # web source code
-        - "web/**"
-        # api source code
-        - "server/api/**"
-      branch:
-        exclude: ${CI_REPO_DEFAULT_BRANCH}
-      event: push
-    - path: *when_path
-      event: [pull_request, tag, deployment]
+    path:
+      # related config files
+      - ".woodpecker/web.yml"
+      # web source code
+      - "web/**"
+      # api source code
+      - "server/api/**"
+    event: [pull_request, tag, deployment]
 
 steps:
   deps:
@@ -45,7 +41,7 @@ steps:
     directory: web/
     commands:
       - corepack enable
-      - pnpm formatcheck
+      - pnpm format:check
     when: *when
 
   typecheck:

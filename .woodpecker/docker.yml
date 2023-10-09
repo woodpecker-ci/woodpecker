@@ -10,14 +10,33 @@ depends_on:
   - web
 
 variables:
-  - &golang_image 'golang:1.20.2'
-  - &node_image 'node:18-alpine'
-  - &xgo_image 'techknowlogick/xgo:go-1.20.2'
-  - &xgo_version 'go-1.20.2'
+  - &golang_image 'golang:1.21.2'
+  - &node_image 'node:20-alpine'
+  - &xgo_image 'techknowlogick/xgo:go-1.21.2'
+  - &xgo_version 'go-1.21.2'
   - &platforms_release 'linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/386,linux/amd64,linux/ppc64le,linux/riscv64,linux/s390x,freebsd/arm64,freebsd/amd64,openbsd/arm64,openbsd/amd64'
   - &platforms_server 'linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le,linux/riscv64'
   - &platforms_preview 'linux/amd64'
   - &platforms_alpine 'linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le'
+  - &build_args 'CI_COMMIT_SHA=${CI_COMMIT_SHA},CI_COMMIT_BRANCH=${CI_COMMIT_BRANCH},CI_COMMIT_TAG=${CI_COMMIT_TAG}'
+
+  # vars used on push / tag events only
+  - publish_logins: &publish_logins
+      # Default DockerHub login
+      - registry: https://index.docker.io/v1/
+        username:
+          from_secret: docker_username
+        password:
+          from_secret: docker_password
+      # Additional Quay.IO login
+      - registry: https://quay.io
+        username:
+          from_secret: QUAY_IO_USER
+        password:
+          from_secret: QUAY_IO_TOKEN
+  - &publish_repos_server 'woodpeckerci/woodpecker-server,quay.io/woodpeckerci/woodpecker-server'
+  - &publish_repos_agent 'woodpeckerci/woodpecker-agent,quay.io/woodpeckerci/woodpecker-agent'
+  - &publish_repos_cli 'woodpeckerci/woodpecker-cli,quay.io/woodpeckerci/woodpecker-cli'
 
 steps:
   vendor:
@@ -52,7 +71,7 @@ steps:
       event: pull_request
 
   publish-server-preview:
-    image: woodpeckerci/plugin-docker-buildx
+    image: woodpeckerci/plugin-docker-buildx:2.1.0
     secrets: [ docker_username, docker_password ]
     group: docker
     settings:
@@ -64,7 +83,7 @@ steps:
       event: pull_request
 
   publish-server-alpine-preview:
-    image: woodpeckerci/plugin-docker-buildx
+    image: woodpeckerci/plugin-docker-buildx:2.1.0
     secrets: [ docker_username, docker_password ]
     group: docker
     settings:
@@ -93,80 +112,80 @@ steps:
       event: [push, tag]
 
   publish-next-server:
-    image: woodpeckerci/plugin-docker-buildx
+    image: woodpeckerci/plugin-docker-buildx:2.1.0
     group: docker
-    secrets: [docker_username, docker_password]
     settings:
-      repo: woodpeckerci/woodpecker-server
+      repo: *publish_repos_server
       dockerfile: docker/Dockerfile.server.multiarch
       platforms: *platforms_server
       tag: [next, "next-${CI_COMMIT_SHA:0:10}"]
+      logins: *publish_logins
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
 
   publish-next-server-alpine:
-    image: woodpeckerci/plugin-docker-buildx
+    image: woodpeckerci/plugin-docker-buildx:2.1.0
     group: docker
-    secrets: [ docker_username, docker_password ]
     settings:
-      repo: woodpeckerci/woodpecker-server
+      repo: *publish_repos_server
       dockerfile: docker/Dockerfile.server.alpine.multiarch
       platforms: *platforms_alpine
       tag: [next-alpine, "next-${CI_COMMIT_SHA:0:10}-alpine"]
+      logins: *publish_logins
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
 
   publish-release-branch-server:
-    image: woodpeckerci/plugin-docker-buildx
+    image: woodpeckerci/plugin-docker-buildx:2.1.0
     group: docker
-    secrets: [docker_username, docker_password]
     settings:
-      repo: woodpeckerci/woodpecker-server
+      repo: *publish_repos_server
       dockerfile: docker/Dockerfile.server.multiarch
       platforms: *platforms_server
       tag: ${CI_COMMIT_BRANCH##release/}
+      logins: *publish_logins
     when:
       branch: release/*
       event: push
 
   publish-release-branch-server-alpine:
-    image: woodpeckerci/plugin-docker-buildx
+    image: woodpeckerci/plugin-docker-buildx:2.1.0
     group: docker
-    secrets: [ docker_username, docker_password ]
     settings:
-      repo: woodpeckerci/woodpecker-server
+      repo: *publish_repos_server
       dockerfile: docker/Dockerfile.server.alpine.multiarch
       platforms: *platforms_alpine
       tag: ${CI_COMMIT_BRANCH##release/}
+      logins: *publish_logins
     when:
       branch: release/*
       event: push
 
   release-server:
     group: docker
-    image: woodpeckerci/plugin-docker-buildx
-    secrets: [docker_username, docker_password]
+    image: woodpeckerci/plugin-docker-buildx:2.1.0
     settings:
-      repo: woodpeckerci/woodpecker-server
+      repo: *publish_repos_server
       dockerfile: docker/Dockerfile.server.multiarch
       platforms: *platforms_server
       # remove 'latest' on older version branches to avoid accidental downgrade
       tag: [latest, "${CI_COMMIT_TAG}"]
+      logins: *publish_logins
     when:
       event: tag
 
   release-server-alpine:
     group: docker
-    image: woodpeckerci/plugin-docker-buildx
-    secrets: [ docker_username, docker_password ]
+    image: woodpeckerci/plugin-docker-buildx:2.1.0
     settings:
-      repo: woodpeckerci/woodpecker-server
+      repo: *publish_repos_server
       dockerfile: docker/Dockerfile.server.alpine.multiarch
       platforms: *platforms_alpine
       # remove 'latest-alpine' on older version branches to avoid accidental downgrade
       tag: [latest-alpine, "${CI_COMMIT_TAG}-alpine"]
+      logins: *publish_logins
     when:
       event: tag
 
@@ -176,91 +195,98 @@ steps:
 
   publish-agent-preview:
     group: docker
-    image: woodpeckerci/plugin-docker-buildx
+    image: woodpeckerci/plugin-docker-buildx:2.1.0
     secrets: [ docker_username, docker_password ]
     settings:
       repo: woodpeckerci/woodpecker-agent
       dockerfile: docker/Dockerfile.agent.multiarch
       platforms: *platforms_preview
       tag: pull_${CI_COMMIT_PULL_REQUEST}
+      build_args: *build_args
     when:
       event: pull_request
 
   publish-next-agent:
     group: docker
-    image: woodpeckerci/plugin-docker-buildx
-    secrets: [docker_username, docker_password]
+    image: woodpeckerci/plugin-docker-buildx:2.1.0
     settings:
-      repo: woodpeckerci/woodpecker-agent
+      repo: *publish_repos_agent
       dockerfile: docker/Dockerfile.agent.multiarch
       platforms: *platforms_release
       tag: [next, "next-${CI_COMMIT_SHA:0:10}"]
+      logins: *publish_logins
+      build_args: *build_args
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
 
   publish-next-agent-alpine:
     group: docker
-    image: woodpeckerci/plugin-docker-buildx
-    secrets: [ docker_username, docker_password ]
+    image: woodpeckerci/plugin-docker-buildx:2.1.0
     settings:
-      repo: woodpeckerci/woodpecker-agent
+      repo: *publish_repos_agent
       dockerfile: docker/Dockerfile.agent.alpine.multiarch
       platforms: *platforms_alpine
       tag: [next-alpine, "next-${CI_COMMIT_SHA:0:10}-alpine"]
+      logins: *publish_logins
+      build_args: *build_args
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
 
   publish-release-branch-agent:
     group: docker
-    image: woodpeckerci/plugin-docker-buildx
-    secrets: [docker_username, docker_password]
+    image: woodpeckerci/plugin-docker-buildx:2.1.0
     settings:
-      repo: woodpeckerci/woodpecker-agent
+      repo: *publish_repos_agent
       dockerfile: docker/Dockerfile.agent.multiarch
       platforms: *platforms_release
       tag: ${CI_COMMIT_BRANCH##release/}
+      logins: *publish_logins
+      build_args: *build_args
     when:
       branch: release/*
       event: push
 
   publish-release-branch-agent-alpine:
     group: docker
-    image: woodpeckerci/plugin-docker-buildx
-    secrets: [ docker_username, docker_password ]
+    image: woodpeckerci/plugin-docker-buildx:2.1.0
     settings:
-      repo: woodpeckerci/woodpecker-agent
+      repo: *publish_repos_agent
       dockerfile: docker/Dockerfile.agent.alpine.multiarch
       platforms: *platforms_alpine
       tag: ${CI_COMMIT_BRANCH##release/}
+      logins: *publish_logins
+      build_args: *build_args
     when:
       branch: release/*
       event: push
 
   release-agent:
     group: docker
-    image: woodpeckerci/plugin-docker-buildx
-    secrets: [docker_username, docker_password]
+    image: woodpeckerci/plugin-docker-buildx:2.1.0
     settings:
-      repo: woodpeckerci/woodpecker-agent
+      repo: *publish_repos_agent
       dockerfile: docker/Dockerfile.agent.multiarch
       platforms: *platforms_release
       # remove 'latest' on older version branches to avoid accidental downgrade
       tag: [latest, "${CI_COMMIT_TAG}"]
+      logins: *publish_logins
+      build_args: *build_args
     when:
       event: tag
 
   release-agent-alpine:
     group: docker
-    image: woodpeckerci/plugin-docker-buildx
-    secrets: [ docker_username, docker_password ]
+    image: woodpeckerci/plugin-docker-buildx:2.1.0
     settings:
-      repo: woodpeckerci/woodpecker-agent
+      repo: *publish_repos_agent
       dockerfile: docker/Dockerfile.agent.alpine.multiarch
       platforms: *platforms_alpine
       # remove 'latest-alpine' on older version branches to avoid accidental downgrade
       tag: [latest-alpine, "${CI_COMMIT_TAG}-alpine"]
+      logins: *publish_logins
+      build_args: *build_args
     when:
       event: tag
 
@@ -270,90 +296,97 @@ steps:
 
   publish-cli-preview:
     group: docker
-    image: woodpeckerci/plugin-docker-buildx
+    image: woodpeckerci/plugin-docker-buildx:2.1.0
     secrets: [ docker_username, docker_password ]
     settings:
       repo: woodpeckerci/woodpecker-cli
       dockerfile: docker/Dockerfile.cli.multiarch
       platforms: *platforms_preview
       tag: pull_${CI_COMMIT_PULL_REQUEST}
+      build_args: *build_args
     when:
       event: pull_request
 
   publish-next-cli:
     group: docker
-    image: woodpeckerci/plugin-docker-buildx
-    secrets: [docker_username, docker_password]
+    image: woodpeckerci/plugin-docker-buildx:2.1.0
     settings:
-      repo: woodpeckerci/woodpecker-cli
+      repo: *publish_repos_cli
       dockerfile: docker/Dockerfile.cli.multiarch
       platforms: *platforms_release
       tag: [next, "next-${CI_COMMIT_SHA:0:10}"]
+      logins: *publish_logins
+      build_args: *build_args
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
 
   publish-next-cli-alpine:
     group: docker
-    image: woodpeckerci/plugin-docker-buildx
-    secrets: [ docker_username, docker_password ]
+    image: woodpeckerci/plugin-docker-buildx:2.1.0
     settings:
-      repo: woodpeckerci/woodpecker-cli
+      repo: *publish_repos_cli
       dockerfile: docker/Dockerfile.cli.alpine.multiarch
       platforms: *platforms_alpine
       tag: [next-alpine, "next-${CI_COMMIT_SHA:0:10}-alpine"]
+      logins: *publish_logins
+      build_args: *build_args
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
 
   publish-release-branch-cli:
     group: docker
-    image: woodpeckerci/plugin-docker-buildx
-    secrets: [docker_username, docker_password]
+    image: woodpeckerci/plugin-docker-buildx:2.1.0
     settings:
-      repo: woodpeckerci/woodpecker-cli
+      repo: *publish_repos_cli
       dockerfile: docker/Dockerfile.cli.multiarch
       platforms: *platforms_release
       tag: ${CI_COMMIT_BRANCH##release/}
+      logins: *publish_logins
+      build_args: *build_args
     when:
       branch: release/*
       event: push
 
   publish-release-branch-cli-alpine:
     group: docker
-    image: woodpeckerci/plugin-docker-buildx
-    secrets: [ docker_username, docker_password ]
+    image: woodpeckerci/plugin-docker-buildx:2.1.0
     settings:
-      repo: woodpeckerci/woodpecker-cli
+      repo: *publish_repos_cli
       dockerfile: docker/Dockerfile.cli.alpine.multiarch
       platforms: *platforms_alpine
       tag: ${CI_COMMIT_BRANCH##release/}
+      logins: *publish_logins
+      build_args: *build_args
     when:
       branch: release/*
       event: push
 
   release-cli:
     group: docker
-    image: woodpeckerci/plugin-docker-buildx
-    secrets: [docker_username, docker_password]
+    image: woodpeckerci/plugin-docker-buildx:2.1.0
     settings:
-      repo: woodpeckerci/woodpecker-cli
+      repo: *publish_repos_cli
       dockerfile: docker/Dockerfile.cli.multiarch
       platforms: *platforms_release
       # remove 'latest' on older version branches to avoid accidental downgrade
       tag: [latest, "${CI_COMMIT_TAG}"]
+      logins: *publish_logins
+      build_args: *build_args
     when:
       event: tag
 
   release-cli-alpine:
     group: docker
-    image: woodpeckerci/plugin-docker-buildx
-    secrets: [ docker_username, docker_password ]
+    image: woodpeckerci/plugin-docker-buildx:2.1.0
     settings:
-      repo: woodpeckerci/woodpecker-cli
+      repo: *publish_repos_cli
       dockerfile: docker/Dockerfile.cli.alpine.multiarch
       platforms: *platforms_alpine
       # remove 'latest-alpine' on older version branches to avoid accidental downgrade
       tag: [latest-alpine, "${CI_COMMIT_TAG}-alpine"]
+      logins: *publish_logins
+      build_args: *build_args
     when:
       event: tag

@@ -9,7 +9,7 @@
     <img src="https://ci.woodpecker-ci.org/api/badges/woodpecker-ci/woodpecker/status.svg">
   </a>
   <a href="https://codecov.io/gh/woodpecker-ci/woodpecker">
-    <img src="https://codecov.io/gh/woodpecker-ci/woodpecker/branch/master/graph/badge.svg"/>
+    <img src="https://codecov.io/gh/woodpecker-ci/woodpecker/branch/main/graph/badge.svg"/>
   </a>
   <a href="https://translate.woodpecker-ci.org/engage/woodpecker-ci/">
     <img src="https://translate.woodpecker-ci.org/widgets/woodpecker-ci/-/ui/svg-badge.svg" alt="Translation status" />

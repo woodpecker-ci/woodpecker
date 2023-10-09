@@ -22,7 +22,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/google/go-github/v39/github"
+	"github.com/google/go-github/v55/github"
 
 	"github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -132,9 +132,6 @@ func parseDeployHook(hook *github.DeploymentEvent) (*model.Repo, *model.Pipeline
 	// if the ref is a sha or short sha we need to manually construct the ref.
 	if strings.HasPrefix(pipeline.Commit, pipeline.Ref) || pipeline.Commit == pipeline.Ref {
 		pipeline.Branch = hook.GetRepo().GetDefaultBranch()
-		if pipeline.Branch == "" {
-			pipeline.Branch = defaultBranch
-		}
 		pipeline.Ref = fmt.Sprintf("refs/heads/%s", pipeline.Branch)
 	}
 	// if the ref is a branch we should make sure it has refs/heads prefix

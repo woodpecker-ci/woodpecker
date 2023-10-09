@@ -1,22 +1,18 @@
 <template>
-  <Panel>
-    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-gray-600">
-      <div class="ml-2">
-        <h1 class="text-xl text-color">{{ $t('org.settings.secrets.secrets') }}</h1>
-        <p class="text-sm text-color-alt">
-          {{ $t('org.settings.secrets.desc') }}
-          <DocsLink :topic="$t('org.settings.secrets.secrets')" url="docs/usage/secrets" />
-        </p>
-      </div>
+  <Settings
+    :title="$t('org.settings.secrets.secrets')"
+    :desc="$t('org.settings.secrets.desc')"
+    docs-url="docs/usage/secrets"
+  >
+    <template #titleActions>
       <Button
         v-if="selectedSecret"
-        class="ml-auto"
         :text="$t('org.settings.secrets.show')"
         start-icon="back"
         @click="selectedSecret = undefined"
       />
-      <Button v-else class="ml-auto" :text="$t('org.settings.secrets.add')" start-icon="plus" @click="showAddSecret" />
-    </div>
+      <Button v-else :text="$t('org.settings.secrets.add')" start-icon="plus" @click="showAddSecret" />
+    </template>
 
     <SecretList
       v-if="!selectedSecret"
@@ -35,7 +31,7 @@
       @save="createSecret"
       @cancel="selectedSecret = undefined"
     />
-  </Panel>
+  </Settings>
 </template>
 
 <script lang="ts" setup>
@@ -44,8 +40,7 @@ import { computed, inject, Ref, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
-import DocsLink from '~/components/atomic/DocsLink.vue';
-import Panel from '~/components/layout/Panel.vue';
+import Settings from '~/components/layout/Settings.vue';
 import SecretEdit from '~/components/secrets/SecretEdit.vue';
 import SecretList from '~/components/secrets/SecretList.vue';
 import useApiClient from '~/compositions/useApiClient';
