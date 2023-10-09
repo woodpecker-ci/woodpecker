@@ -137,6 +137,8 @@ steps:
 
 ## Tips and tricks
 
+### CRI-O
+
 CRI-O users currently need to configure the workspace for all workflows in order for them to run correctly. Add the following at the beginning of your configuration:
 
 ```yml
