@@ -16,10 +16,7 @@ package yaml
 
 import "errors"
 
-var (
-	ErrUnsuportedVersion = errors.New("unsuported pipeline config version detected")
-	ErrMissingVersion    = errors.New("missing pipeline config version")
-)
+var ErrUnsuportedVersion = errors.New("unsuported pipeline config version detected")
 
 // PipelineParseError is an error that occurs when the pipeline parsing fails.
 type PipelineParseError struct {

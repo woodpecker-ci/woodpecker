@@ -32,8 +32,6 @@ Read more at: [https://github.com/go-yaml/yaml](https://github.com/go-yaml/yaml/
 Example pipeline configuration:
 
 ```yaml
-version: 1
-
 steps:
   build:
     image: golang
@@ -52,8 +50,6 @@ services:
 Example pipeline configuration with multiple, serial steps:
 
 ```yaml
-version: 1
-
 steps:
   backend:
     image: golang

@@ -33,7 +33,6 @@ matrix:
 Matrix variables are interpolated in the YAML using the `${VARIABLE}` syntax, before the YAML is parsed. This is an example YAML file before interpolating matrix parameters:
 
 ```yaml
-version: 1
 matrix:
   GO_VERSION:
     - 1.4
@@ -59,7 +58,6 @@ services:
 Example YAML file after injecting the matrix parameters:
 
 ```diff
-version: 1
 steps:
   build:
 -   image: golang:${GO_VERSION}
@@ -83,7 +81,6 @@ services:
 ### Example matrix pipeline based on Docker image tag
 
 ```yaml
-version: 1
 matrix:
   TAG:
     - 1.7
@@ -101,7 +98,6 @@ steps:
 ### Example matrix pipeline based on container image
 
 ```yaml
-version: 1
 matrix:
   IMAGE:
     - golang:1.7
@@ -119,7 +115,6 @@ steps:
 ### Example matrix pipeline using multiple platforms
 
 ```yaml
-version: 1
 matrix:
   platform:
     - linux/amd64

@@ -52,7 +52,8 @@ func checkVersion(b []byte) (int, error) {
 	}{}
 	_ = xyaml.Unmarshal(b, &ver)
 	if ver.Version == 0 {
-		return 0, ErrMissingVersion
+		// default: version 1
+		return 1, nil
 	}
 
 	if ver.Version != Version {

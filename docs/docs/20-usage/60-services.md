@@ -7,7 +7,6 @@ Services are accessed using custom hostnames.
 In the example below, the MySQL service is assigned the hostname `database` and is available at `database:3306`.
 
 ```diff
-version: 1
 steps:
   build:
     image: golang
@@ -44,7 +43,6 @@ services:
 Service and long running containers can also be included in the pipeline section of the configuration using the detach parameter without blocking other steps. This should be used when explicit control over startup order is required.
 
 ```diff
-version: 1
 steps:
   build:
     image: golang
@@ -69,7 +67,6 @@ Containers from detached steps will terminate when the pipeline ends.
 Service containers require time to initialize and begin to accept connections. If you are unable to connect to a service you may need to wait a few seconds or implement a backoff.
 
 ```diff
-version: 1
 steps:
   test:
     image: golang
@@ -86,7 +83,6 @@ services:
 ## Complete Pipeline Example
 
 ```yml
-version: 1
 services:
   database:
     image: mysql

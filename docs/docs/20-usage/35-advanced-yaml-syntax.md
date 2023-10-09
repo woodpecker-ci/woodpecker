@@ -6,7 +6,6 @@ You can use [YAML anchors & aliases](https://yaml.org/spec/1.2.2/#3222-anchors-a
 
 To convert this:
 ```yml
-version: 1
 steps:
   test:
     image: golang:1.18
@@ -19,7 +18,6 @@ steps:
 Just add a new section called **variables** like this:
 
 ```diff
- version: 1
 +variables:
 +  - &golang_image 'golang:1.18'
 
@@ -37,7 +35,6 @@ Just add a new section called **variables** like this:
 ## Map merges and overwrites
 
 ```yaml
-version: 1
 variables:
   - &base-plugin-settings
     target: dist
@@ -68,7 +65,6 @@ steps:
 ## Sequence merges
 
 ```yaml
-version: 1
 variables:
   pre_cmds: &pre_cmds
    - echo start

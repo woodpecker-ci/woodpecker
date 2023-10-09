@@ -9,7 +9,6 @@ Once your pipeline starts to grow in size, it will become important to keep it D
 As described in [Advanced YAML syntax](./35-advanced-yaml-syntax.md).
 
 ```yml
-version: 1
 variables:
   - &golang_image 'golang:1.18'
 
@@ -26,7 +25,6 @@ Note that the `golang_image` alias cannot be used with string interpolation. But
 Another approach using YAML extensions:
 
 ```yml
-version: 1
 variables:
   - global_env: &global_env
     - BASH_VERSION=1.2.3
@@ -56,7 +54,6 @@ steps:
 One can create a file containing environment variables, and then source it in each step that needs them.
 
 ```yml
-version: 1
 steps:
   init:
     image: bash
