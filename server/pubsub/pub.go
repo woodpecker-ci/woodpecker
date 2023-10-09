@@ -37,15 +37,13 @@ type Receiver func(Message)
 type Publisher struct {
 	sync.Mutex
 
-	done chan struct{}
-	subs map[*Receiver]struct{}
+	subs map[*Receiver]bool
 }
 
 // New creates an in-memory publisher.
 func New() *Publisher {
 	return &Publisher{
-		done: make(chan struct{}),
-		subs: make(map[*Receiver]struct{}),
+		subs: make(map[*Receiver]bool),
 	}
 }
 
@@ -59,11 +57,10 @@ func (p *Publisher) Publish(message Message) {
 
 func (p *Publisher) Subscribe(c context.Context, receiver Receiver) {
 	p.Lock()
-	p.subs[&receiver] = struct{}{}
+	p.subs[&receiver] = true
 	p.Unlock()
 	select {
 	case <-c.Done():
-	case <-p.done:
 	}
 	p.Lock()
 	delete(p.subs, &receiver)
