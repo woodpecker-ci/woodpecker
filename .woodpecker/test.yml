@@ -136,7 +136,7 @@ services:
     when: *when
 
   service-mysql:
-    image: mysql:5.6.27
+    image: mysql:8.1.0
     ports: ["3306"]
     environment:
       - MYSQL_DATABASE=test
