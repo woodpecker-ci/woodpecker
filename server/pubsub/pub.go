@@ -59,9 +59,7 @@ func (p *Publisher) Subscribe(c context.Context, receiver Receiver) {
 	p.Lock()
 	p.subs[&receiver] = true
 	p.Unlock()
-	select {
-	case <-c.Done():
-	}
+	<-c.Done()
 	p.Lock()
 	delete(p.subs, &receiver)
 	p.Unlock()
