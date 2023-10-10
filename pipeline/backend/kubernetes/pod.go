@@ -28,7 +28,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
 
-func Pod(namespace string, step *types.Step, labels, annotations map[string]string) (*v1.Pod, error) {
+func Pod(namespace string, step *types.Step, labels, annotations map[string]string, secCtxConf SecurityContextConfig) (*v1.Pod, error) {
 	var (
 		vols       []v1.Volume
 		volMounts  []v1.VolumeMount
@@ -144,7 +144,7 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 
 	beSecurityContext := step.BackendOptions.Kubernetes.SecurityContext
 	log.Trace().Interface("Security context", beSecurityContext).Msg("Security context that will be used for pods/containers")
-	podSecCtx := podSecurityContext(beSecurityContext)
+	podSecCtx := podSecurityContext(beSecurityContext, secCtxConf)
 	containerSecCtx := containerSecurityContext(beSecurityContext, step.Privileged)
 
 	pod := &v1.Pod{
@@ -200,28 +200,34 @@ func volumeMountPath(i string) string {
 	return s[0]
 }
 
-func podSecurityContext(sc *types.SecurityContext) *v1.PodSecurityContext {
-	if sc != nil {
-		return &v1.PodSecurityContext{
-			RunAsNonRoot: sc.RunAsNonRoot,
-			RunAsUser:    sc.RunAsUser,
-			RunAsGroup:   sc.RunAsGroup,
-			FSGroup:      sc.FSGroup,
-		}
+func podSecurityContext(sc *types.SecurityContext, secCtxConf SecurityContextConfig) *v1.PodSecurityContext {
+	podSecCtx := &v1.PodSecurityContext{}
+
+	nonRoot := secCtxConf.RunAsNonRoot
+	if sc != nil && sc.RunAsNonRoot != nil {
+		nonRoot = *sc.RunAsNonRoot
 	}
-	return nil
+	if nonRoot {
+		podSecCtx.RunAsNonRoot = &nonRoot
+	}
+
+	if sc != nil {
+		podSecCtx.RunAsUser = sc.RunAsUser
+		podSecCtx.RunAsGroup = sc.RunAsGroup
+		podSecCtx.FSGroup = sc.FSGroup
+	}
+
+	return podSecCtx
 }
 
 func containerSecurityContext(sc *types.SecurityContext, privileged bool) *v1.SecurityContext {
-	containerSecCtx := &v1.SecurityContext{
-		Privileged: &privileged,
-	}
+	containerSecCtx := &v1.SecurityContext{}
 
-	if sc != nil {
-		if sc.Privileged != nil {
-			privileged = privileged || *sc.Privileged
-			containerSecCtx.Privileged = &privileged
-		}
+	if sc != nil && sc.Privileged != nil {
+		privileged = privileged || *sc.Privileged
+	}
+	if privileged {
+		containerSecCtx.Privileged = &privileged
 	}
 
 	return containerSecCtx

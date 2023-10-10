@@ -49,12 +49,16 @@ type kube struct {
 }
 
 type Config struct {
-	Namespace      string
-	StorageClass   string
-	VolumeSize     string
-	StorageRwx     bool
-	PodLabels      map[string]string
-	PodAnnotations map[string]string
+	Namespace       string
+	StorageClass    string
+	VolumeSize      string
+	StorageRwx      bool
+	PodLabels       map[string]string
+	PodAnnotations  map[string]string
+	SecurityContext SecurityContextConfig
+}
+type SecurityContextConfig struct {
+	RunAsNonRoot bool
 }
 
 func configFromCliContext(ctx context.Context) (*Config, error) {
@@ -67,6 +71,9 @@ func configFromCliContext(ctx context.Context) (*Config, error) {
 				StorageRwx:     c.Bool("backend-k8s-storage-rwx"),
 				PodLabels:      make(map[string]string), // just init empty map to prevent nil panic
 				PodAnnotations: make(map[string]string), // just init empty map to prevent nil panic
+				SecurityContext: SecurityContextConfig{
+					RunAsNonRoot: c.Bool("backend-k8s-secctx-nonroot"),
+				},
 			}
 			// Unmarshal label and annotation settings here to ensure they're valid on startup
 			if labels := c.String("backend-k8s-pod-labels"); labels != "" {
@@ -183,7 +190,7 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID s
 
 // Start the pipeline step.
 func (e *kube) StartStep(ctx context.Context, step *types.Step, taskUUID string) error {
-	pod, err := Pod(e.config.Namespace, step, e.config.PodLabels, e.config.PodAnnotations)
+	pod, err := Pod(e.config.Namespace, step, e.config.PodLabels, e.config.PodAnnotations, e.config.SecurityContext)
 	if err != nil {
 		return err
 	}
