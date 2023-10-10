@@ -201,34 +201,55 @@ func volumeMountPath(i string) string {
 }
 
 func podSecurityContext(sc *types.SecurityContext, secCtxConf SecurityContextConfig) *v1.PodSecurityContext {
-	podSecCtx := &v1.PodSecurityContext{}
+	var (
+		nonRoot *bool
+		user    *int64
+		group   *int64
+		fsGroup *int64
+	)
 
-	nonRoot := secCtxConf.RunAsNonRoot
 	if sc != nil && sc.RunAsNonRoot != nil {
-		nonRoot = *sc.RunAsNonRoot
-	}
-	if nonRoot {
-		podSecCtx.RunAsNonRoot = &nonRoot
+		if *sc.RunAsNonRoot {
+			nonRoot = sc.RunAsNonRoot // true
+		}
+	} else if secCtxConf.RunAsNonRoot {
+		nonRoot = &secCtxConf.RunAsNonRoot // true
 	}
 
 	if sc != nil {
-		podSecCtx.RunAsUser = sc.RunAsUser
-		podSecCtx.RunAsGroup = sc.RunAsGroup
-		podSecCtx.FSGroup = sc.FSGroup
+		user = sc.RunAsUser
+		group = sc.RunAsGroup
+		fsGroup = sc.FSGroup
 	}
 
-	return podSecCtx
+	if nonRoot == nil && user == nil && group == nil && fsGroup == nil {
+		return nil
+	}
+
+	return &v1.PodSecurityContext{
+		RunAsNonRoot: nonRoot,
+		RunAsUser:    user,
+		RunAsGroup:   group,
+		FSGroup:      fsGroup,
+	}
 }
 
-func containerSecurityContext(sc *types.SecurityContext, privileged bool) *v1.SecurityContext {
-	containerSecCtx := &v1.SecurityContext{}
+func containerSecurityContext(sc *types.SecurityContext, stepPrivileged bool) *v1.SecurityContext {
+	var (
+		privileged *bool
+	)
 
-	if sc != nil && sc.Privileged != nil {
-		privileged = privileged || *sc.Privileged
-	}
-	if privileged {
-		containerSecCtx.Privileged = &privileged
+	if sc != nil && sc.Privileged != nil && *sc.Privileged {
+		privileged = sc.Privileged // true
+	} else if stepPrivileged {
+		privileged = &stepPrivileged // true
 	}
 
-	return containerSecCtx
+	if privileged == nil {
+		return nil
+	}
+
+	return &v1.SecurityContext{
+		Privileged: privileged,
+	}
 }
