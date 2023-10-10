@@ -1,10 +1,10 @@
 # Changelog
 
-## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-10-09
+## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-10-10
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@qwerty287, @dominic-p, @renovate[bot], @anbraten, @categulario, @mzampetakis, @Timshel, @6543, @pat-s, @nitram509, @Denperidge, @xoxys, @tomix1024, @lonix1, @s3lph, @math3vz, @LTek-online, @testwill, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @azdle, @runephilosof-karnovgroup, @praneeth-ovckd
+@Exar04, @renovate[bot], @qwerty287, @dominic-p, @anbraten, @categulario, @mzampetakis, @Timshel, @6543, @pat-s, @nitram509, @Denperidge, @xoxys, @tomix1024, @lonix1, @s3lph, @math3vz, @LTek-online, @testwill, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @azdle, @runephilosof-karnovgroup, @praneeth-ovckd
 
 ### 💥 Breaking changes
 
@@ -33,6 +33,7 @@
 
 ### 📚 Documentation
 
+- Remove redundant definition of webhook form docs [[#2561](https://github.com/woodpecker-ci/woodpecker/pull/2561)]
 - Add notes about CRI-O specific config [[#2546](https://github.com/woodpecker-ci/woodpecker/pull/2546)]
 - Fix incorrect yaml syntax for `ref` in docs [[#2518](https://github.com/woodpecker-ci/woodpecker/pull/2518)]
 - Local image documentation [[#2521](https://github.com/woodpecker-ci/woodpecker/pull/2521)]
@@ -155,6 +156,7 @@
 
 ### Misc
 
+- fix(deps): update module github.com/xanzy/go-gitlab to v0.93.1 [[#2560](https://github.com/woodpecker-ci/woodpecker/pull/2560)]
 - Require Go 1.21 [[#2553](https://github.com/woodpecker-ci/woodpecker/pull/2553)]
 - chore(deps): update techknowlogick/xgo docker tag to go-1.21.2 [[#2523](https://github.com/woodpecker-ci/woodpecker/pull/2523)]
 - Update issue config [[#2353](https://github.com/woodpecker-ci/woodpecker/pull/2353)]
