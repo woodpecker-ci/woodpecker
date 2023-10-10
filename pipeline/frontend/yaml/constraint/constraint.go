@@ -16,22 +16,18 @@ package constraint
 
 import (
 	"fmt"
+	"maps"
 	"path"
-	"regexp"
 	"strings"
 
 	"github.com/antonmedv/expr"
 	"github.com/bmatcuk/doublestar/v4"
-	"github.com/rs/zerolog/log"
 	"go.uber.org/multierr"
-	"golang.org/x/exp/maps"
 	"gopkg.in/yaml.v3"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
-	yaml_base_types "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types/base"
+	yamlBaseTypes "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types/base"
 )
-
-var skipRe = regexp.MustCompile(`\[(?i:ci *skip|skip *ci)\]`)
 
 type (
 	// When defines a set of runtime constraints.
@@ -51,7 +47,7 @@ type (
 		Cron        List
 		Status      List
 		Matrix      Map
-		Local       yaml_base_types.BoolTrue
+		Local       yamlBaseTypes.BoolTrue
 		Path        Path
 		Evaluate    string `yaml:"evaluate,omitempty"`
 	}
@@ -82,16 +78,6 @@ func (when *When) IsEmpty() bool {
 
 // Returns true if at least one of the internal constraints is true.
 func (when *When) Match(metadata metadata.Metadata, global bool, env map[string]string) (bool, error) {
-	if global {
-		// skip the whole workflow if any case-insensitive combination of the words "skip" and "ci"
-		// wrapped in square brackets appear in the commit message
-		skipMatch := skipRe.FindString(metadata.Curr.Commit.Message)
-		if len(skipMatch) > 0 {
-			log.Debug().Msgf("skip workflow as keyword to do so was detected in commit message '%s'", metadata.Curr.Commit.Message)
-			return false, nil
-		}
-	}
-
 	for _, c := range when.Constraints {
 		match, err := c.Match(metadata, global, env)
 		if err != nil {
@@ -258,11 +244,11 @@ func (c *List) Excludes(v string) bool {
 // UnmarshalYAML unmarshals the constraint.
 func (c *List) UnmarshalYAML(value *yaml.Node) error {
 	out1 := struct {
-		Include yaml_base_types.StringOrSlice
-		Exclude yaml_base_types.StringOrSlice
+		Include yamlBaseTypes.StringOrSlice
+		Exclude yamlBaseTypes.StringOrSlice
 	}{}
 
-	var out2 yaml_base_types.StringOrSlice
+	var out2 yamlBaseTypes.StringOrSlice
 
 	err1 := value.Decode(&out1)
 	err2 := value.Decode(&out2)
@@ -289,7 +275,7 @@ func (c *Map) Match(params map[string]string) bool {
 		return true
 	}
 
-	// exclusions are processed first. So we can include everything and then
+	// Exclusions are processed first. So we can include everything and then
 	// selectively include others.
 	if len(c.Exclude) != 0 {
 		var matches int
@@ -337,12 +323,12 @@ func (c *Map) UnmarshalYAML(unmarshal func(interface{}) error) error {
 // UnmarshalYAML unmarshal the constraint.
 func (c *Path) UnmarshalYAML(value *yaml.Node) error {
 	out1 := struct {
-		Include       yaml_base_types.StringOrSlice `yaml:"include,omitempty"`
-		Exclude       yaml_base_types.StringOrSlice `yaml:"exclude,omitempty"`
-		IgnoreMessage string                        `yaml:"ignore_message,omitempty"`
+		Include       yamlBaseTypes.StringOrSlice `yaml:"include,omitempty"`
+		Exclude       yamlBaseTypes.StringOrSlice `yaml:"exclude,omitempty"`
+		IgnoreMessage string                      `yaml:"ignore_message,omitempty"`
 	}{}
 
-	var out2 yaml_base_types.StringOrSlice
+	var out2 yamlBaseTypes.StringOrSlice
 
 	err1 := value.Decode(&out1)
 	err2 := value.Decode(&out2)
