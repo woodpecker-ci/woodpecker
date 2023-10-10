@@ -143,7 +143,7 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 	}
 
 	beSecurityContext := step.BackendOptions.Kubernetes.SecurityContext
-	log.Trace().Interface("Security context", beSecurityContext).Msg("Security context that will be used for containers")
+	log.Trace().Interface("Security context", beSecurityContext).Msg("Security context that will be used for pods/containers")
 	podSecCtx := podSecurityContext(beSecurityContext)
 	containerSecCtx := containerSecurityContext(beSecurityContext, step.Privileged)
 
@@ -203,11 +203,10 @@ func volumeMountPath(i string) string {
 func podSecurityContext(sc *types.SecurityContext) *v1.PodSecurityContext {
 	if sc != nil {
 		return &v1.PodSecurityContext{
-			RunAsUser:          sc.RunAsUser,
-			RunAsGroup:         sc.RunAsGroup,
-			RunAsNonRoot:       sc.RunAsNonRoot,
-			SupplementalGroups: sc.SupplementalGroups,
-			FSGroup:            sc.FSGroup,
+			RunAsNonRoot: sc.RunAsNonRoot,
+			RunAsUser:    sc.RunAsUser,
+			RunAsGroup:   sc.RunAsGroup,
+			FSGroup:      sc.FSGroup,
 		}
 	}
 	return nil
@@ -223,8 +222,6 @@ func containerSecurityContext(sc *types.SecurityContext, privileged bool) *v1.Se
 			privileged = privileged || *sc.Privileged
 			containerSecCtx.Privileged = &privileged
 		}
-		containerSecCtx.ReadOnlyRootFilesystem = sc.ReadOnlyRootFilesystem
-		containerSecCtx.AllowPrivilegeEscalation = sc.AllowPrivilegeEscalation
 	}
 
 	return containerSecCtx

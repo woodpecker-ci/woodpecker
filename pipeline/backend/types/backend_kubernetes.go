@@ -54,14 +54,9 @@ const (
 )
 
 type SecurityContext struct {
-	// Pod Security Context
-	RunAsUser          *int64  `json:"runAsUser,omitempty"`
-	RunAsGroup         *int64  `json:"runAsGroup,omitempty"`
-	RunAsNonRoot       *bool   `json:"runAsNonRoot,omitempty"`
-	SupplementalGroups []int64 `json:"supplementalGroups,omitempty"`
-	FSGroup            *int64  `json:"fsGroup,omitempty"`
-	// Container Security Context
-	Privileged               *bool `json:"privileged,omitempty"`
-	ReadOnlyRootFilesystem   *bool `json:"readOnlyRootFilesystem,omitempty"`
-	AllowPrivilegeEscalation *bool `json:"allowPrivilegeEscalation,omitempty"`
+	Privileged   *bool  `json:"privileged,omitempty"`
+	RunAsNonRoot *bool  `json:"runAsNonRoot,omitempty"`
+	RunAsUser    *int64 `json:"runAsUser,omitempty"`
+	RunAsGroup   *int64 `json:"runAsGroup,omitempty"`
+	FSGroup      *int64 `json:"fsGroup,omitempty"`
 }

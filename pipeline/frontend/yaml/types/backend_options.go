@@ -56,14 +56,9 @@ const (
 )
 
 type SecurityContext struct {
-	// Pod Security Context
-	RunAsUser          *int64  `yaml:"runAsUser,omitempty"`
-	RunAsGroup         *int64  `yaml:"runAsGroup,omitempty"`
-	RunAsNonRoot       *bool   `yaml:"runAsNonRoot,omitempty"`
-	SupplementalGroups []int64 `yaml:"supplementalGroups,omitempty"`
-	FSGroup            *int64  `yaml:"fsGroup,omitempty"`
-	// Container Security Context
-	Privileged               *bool `yaml:"privileged,omitempty"`
-	ReadOnlyRootFilesystem   *bool `yaml:"readOnlyRootFilesystem,omitempty"`
-	AllowPrivilegeEscalation *bool `yaml:"allowPrivilegeEscalation,omitempty"`
+	Privileged   *bool  `yaml:"privileged,omitempty"`
+	RunAsNonRoot *bool  `yaml:"runAsNonRoot,omitempty"`
+	RunAsUser    *int64 `yaml:"runAsUser,omitempty"`
+	RunAsGroup   *int64 `yaml:"runAsGroup,omitempty"`
+	FSGroup      *int64 `yaml:"fsGroup,omitempty"`
 }
