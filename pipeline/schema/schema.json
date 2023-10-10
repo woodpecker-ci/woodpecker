@@ -489,7 +489,7 @@
       "type": "object",
       "properties": {
         "kubernetes" :{
-          "$ref": "#/definitions/step_backend_kubernetes_resources"
+          "$ref": "#/definitions/step_backend_kubernetes"
         }
       }
     },
@@ -499,6 +499,9 @@
       "properties": {
         "resources" :{
           "$ref": "#/definitions/step_backend_kubernetes_resources"
+        },
+        "securityContext": {
+          "$ref": "#/definitions/step_backend_kubernetes_security_context"
         }
       }
     },
@@ -511,6 +514,27 @@
         },
         "limits": {
           "$ref": "#/definitions/step_kubernetes_resources_object"
+        }
+      }
+    },
+    "step_backend_kubernetes_security_context": {
+      "description": "Pods / containers security context. Read more: https://woodpecker-ci.org/docs/administration/backends/kubernetes",
+      "type": "object",
+      "properties": {
+        "privileged": {
+          "type": "boolean"
+        },
+        "runAsNonRoot": {
+          "type": "boolean"
+        },
+        "runAsUser": {
+          "type": "number"
+        },
+        "runAsGroup": {
+          "type": "number"
+        },
+        "fsGroup": {
+          "type": "number"
         }
       }
     },
