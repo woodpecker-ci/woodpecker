@@ -62,7 +62,7 @@ steps:
     when: *when
 
   lint-editorconfig:
-    image: mstruebing/editorconfig-checker:2.7.1
+    image: mstruebing/editorconfig-checker:2.7.2
     group: test
 
   lint-license-header:
