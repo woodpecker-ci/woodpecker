@@ -83,7 +83,7 @@ See the [kubernetes documentation](https://kubernetes.io/docs/concepts/security/
 Specifies the label which is used to select the node on which the job will be executed.
 
 Labels defined here will be appended to a list which already contains `"kubernetes.io/arch"`.
-`"kubernetes.io/arch"` is inferred from the agents' environment variable `CI_SYSTEM_PLATFORM`.
+By default `"kubernetes.io/arch"` is inferred from the agents' platform. One can override it by setting that label in the `nodeSelector` section of the `backend_options`.
 Without a manual overwrite, builds will be randomly assigned to the runners and inherit their respective architectures.
 
 To overwrite this, one needs to set the label in the `nodeSelector` section of the `backend_options`.
