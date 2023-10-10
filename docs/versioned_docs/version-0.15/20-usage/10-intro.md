@@ -14,12 +14,6 @@ Webhooks are used to trigger pipeline executions. When you push code to your rep
 >
 > Note that manually creating webhooks yourself is not possible. This is because webhooks are signed using a per-repository secret key which is not exposed to end users.
 
-# Webhooks
-
-When you activate your repository Woodpecker automatically add webhooks to your version control system (e.g. GitHub). There is no manual configuration required.
-
-Webhooks are used to trigger pipeline executions. When you push code to your repository, open a pull request, or create a tag, your version control system will automatically send a webhook to Woodpecker which will in turn trigger pipeline execution.
-
 ## Configuration
 
 To configure your pipeline you should place a `.woodpecker.yml` file in the root of your repository. The .woodpecker.yml file is used to define your pipeline steps. It is a superset of the widely used docker-compose file format.
