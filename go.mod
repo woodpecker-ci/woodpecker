@@ -48,6 +48,7 @@ require (
 	github.com/urfave/cli/v2 v2.25.7
 	github.com/xanzy/go-gitlab v0.93.0
 	github.com/xeipuuv/gojsonschema v1.2.0
+	go.uber.org/multierr v1.11.0
 	golang.org/x/crypto v0.14.0
 	golang.org/x/exp v0.0.0-20231006140011-7918f672742d
 	golang.org/x/net v0.16.0
@@ -141,7 +142,6 @@ require (
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
 	github.com/zeebo/blake3 v0.2.3 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
-	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.24.0 // indirect
 	golang.org/x/arch v0.3.0 // indirect
 	golang.org/x/mod v0.13.0 // indirect

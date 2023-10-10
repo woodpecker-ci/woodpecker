@@ -17,12 +17,12 @@ package lint
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/urfave/cli/v2"
+	"go.uber.org/multierr"
 
 	"github.com/woodpecker-ci/woodpecker/cli/common"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
@@ -77,7 +77,7 @@ func lintFile(_ *cli.Context, file string) error {
 	}
 	defer fi.Close()
 
-	buf, err := ioutil.ReadFile(file)
+	buf, err := os.ReadFile(file)
 	if err != nil {
 		return err
 	}
@@ -98,8 +98,8 @@ func lintFile(_ *cli.Context, file string) error {
 			return err
 		}
 
-		linterErrors := linterError.Unwrap()
-		for _, err := range linterErrors {
+		errs := multierr.Errors(err)
+		for _, err := range errs {
 			var linterError *linter.LinterError
 			if errors.As(err, &linterError) {
 				if linterError.Warning {

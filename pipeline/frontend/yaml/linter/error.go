@@ -1,56 +1,40 @@
 package linter
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+
+	"go.uber.org/multierr"
+)
 
 type LinterError struct {
-	Message string         `json:"message"`
-	Field   string         `json:"field"`
-	Warning bool           `json:"warning"` // This error is a just warning and does not prevent the pipeline from running
-	Errors  []*LinterError `json:"errors,omitempty"`
+	Message string `json:"message"`
+	Field   string `json:"field"`
+	Warning bool   `json:"warning"` // This error is a just warning and does not prevent the pipeline from running
 }
 
 func (e *LinterError) Error() string {
-	if e.Errors == nil || len(e.Errors) == 0 {
+	errs := multierr.Errors(e)
+	if len(errs) == 1 {
 		return fmt.Sprintf("linter error in %s: %s", e.Field, e.Message)
 	}
 
 	errStr := "Got multiple linter errors:\n"
-	for _, err := range e.Errors {
+	for _, err := range errs {
 		errStr += "- " + err.Error() + "\n"
 	}
 	return errStr
 }
 
-func (e LinterError) Unwrap() []*LinterError {
-	return e.Errors
-}
-
-func (e *LinterError) AddError(err *LinterError) {
-	if e.Errors == nil {
-		e.Errors = make([]*LinterError, 0)
-	}
-
-	if len(e.Errors) == 0 {
-		e.Errors = append(e.Errors, &LinterError{
-			Message: e.Message,
-			Field:   e.Field,
-			Warning: e.Warning,
-		})
-		e.Message = ""
-		e.Field = ""
-		e.Warning = false
-	}
-
-	if err.Errors != nil && len(err.Errors) > 0 {
-		e.Errors = append(e.Errors, err.Errors...)
-	} else {
-		e.Errors = append(e.Errors, err)
-	}
-}
-
 func (e *LinterError) IsBlocking() bool {
-	for _, err := range e.Errors {
-		if !err.Warning {
+	errs := multierr.Errors(e)
+	for _, err := range errs {
+		var linterError *LinterError
+		if errors.As(err, &linterError) {
+			if !linterError.Warning {
+				return true
+			}
+		} else {
 			return true
 		}
 	}
