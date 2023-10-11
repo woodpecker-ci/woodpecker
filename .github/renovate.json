@@ -17,8 +17,14 @@
       "labels": ["build"]
     },
     {
+      "groupName": "golang",
+      "matchManagers": ["golang"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "extends": ["schedule:daily"]
+    },
+    {
       "groupName": "golang deps non-major",
-      "matchManagers": ["gomod", "golang"],
+      "matchManagers": ["gomod"],
       "matchUpdateTypes": ["minor", "patch"],
       "extends": ["schedule:daily"]
     },
