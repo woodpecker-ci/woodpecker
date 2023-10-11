@@ -9,7 +9,7 @@
       "labels": ["devx"]
     },
     {
-      "matchManagers": ["gomod", "npm", "dockerfile", "golang"],
+      "matchManagers": ["gomod", "npm", "dockerfile"],
       "labels": ["dependencies"]
     },
     {
@@ -17,14 +17,13 @@
       "labels": ["build"]
     },
     {
-      "groupName": "golang",
-      "matchManagers": ["golang"],
-      "matchPackagePatterns": ["xgo"],
+      "groupName": "golang (lang)",
+      "matchPackagePatterns": ["^golang$", "xgo"],
       "matchUpdateTypes": ["minor", "patch"],
       "extends": ["schedule:daily"]
     },
     {
-      "groupName": "golang deps non-major",
+      "groupName": "golang (packages)",
       "matchManagers": ["gomod"],
       "matchUpdateTypes": ["minor", "patch"],
       "extends": ["schedule:daily"]
