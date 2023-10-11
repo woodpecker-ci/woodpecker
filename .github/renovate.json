@@ -19,6 +19,7 @@
     {
       "groupName": "golang",
       "matchManagers": ["golang"],
+      "matchPackagePatterns": ["xgo"],
       "matchUpdateTypes": ["minor", "patch"],
       "extends": ["schedule:daily"]
     },
