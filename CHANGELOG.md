@@ -1,10 +1,10 @@
 # Changelog
 
-## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-10-10
+## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-10-11
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@Exar04, @renovate[bot], @qwerty287, @dominic-p, @anbraten, @categulario, @mzampetakis, @Timshel, @6543, @pat-s, @nitram509, @Denperidge, @xoxys, @tomix1024, @lonix1, @s3lph, @math3vz, @LTek-online, @testwill, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @azdle, @runephilosof-karnovgroup, @praneeth-ovckd
+@pat-s, @renovate[bot], @Exar04, @qwerty287, @dominic-p, @anbraten, @categulario, @mzampetakis, @Timshel, @6543, @nitram509, @Denperidge, @xoxys, @tomix1024, @lonix1, @s3lph, @math3vz, @LTek-online, @testwill, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @azdle, @runephilosof-karnovgroup, @praneeth-ovckd
 
 ### 💥 Breaking changes
 
@@ -156,6 +156,13 @@
 
 ### Misc
 
+- Fix renovate [[#2569](https://github.com/woodpecker-ci/woodpecker/pull/2569)]
+- renovate: add `golang` group [[#2567](https://github.com/woodpecker-ci/woodpecker/pull/2567)]
+- chore(deps): update golang docker tag to v1.21.3 [[#2564](https://github.com/woodpecker-ci/woodpecker/pull/2564)]
+- chore(deps): update techknowlogick/xgo docker tag to go-1.21.3 [[#2565](https://github.com/woodpecker-ci/woodpecker/pull/2565)]
+- fix(deps): update golang deps non-major [[#2566](https://github.com/woodpecker-ci/woodpecker/pull/2566)]
+- chore(deps): update mstruebing/editorconfig-checker docker tag to v2.7.2 [[#2563](https://github.com/woodpecker-ci/woodpecker/pull/2563)]
+- Bump to mysql 8 [[#2559](https://github.com/woodpecker-ci/woodpecker/pull/2559)]
 - fix(deps): update module github.com/xanzy/go-gitlab to v0.93.1 [[#2560](https://github.com/woodpecker-ci/woodpecker/pull/2560)]
 - Require Go 1.21 [[#2553](https://github.com/woodpecker-ci/woodpecker/pull/2553)]
 - chore(deps): update techknowlogick/xgo docker tag to go-1.21.2 [[#2523](https://github.com/woodpecker-ci/woodpecker/pull/2523)]
