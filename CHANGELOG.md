@@ -1,10 +1,10 @@
 # Changelog
 
-## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-10-11
+## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-10-12
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@pat-s, @renovate[bot], @Exar04, @qwerty287, @dominic-p, @anbraten, @categulario, @mzampetakis, @Timshel, @6543, @nitram509, @Denperidge, @xoxys, @tomix1024, @lonix1, @s3lph, @math3vz, @LTek-online, @testwill, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @azdle, @runephilosof-karnovgroup, @praneeth-ovckd
+@JohnWalkerx, @pat-s, @renovate[bot], @Exar04, @qwerty287, @dominic-p, @anbraten, @categulario, @mzampetakis, @Timshel, @6543, @nitram509, @Denperidge, @xoxys, @tomix1024, @lonix1, @s3lph, @math3vz, @LTek-online, @testwill, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @azdle, @runephilosof-karnovgroup, @praneeth-ovckd
 
 ### 💥 Breaking changes
 
@@ -156,6 +156,7 @@
 
 ### Misc
 
+- Add plugin "NixOS Remote Builder" to plugin index [[#2571](https://github.com/woodpecker-ci/woodpecker/pull/2571)]
 - Fix renovate [[#2569](https://github.com/woodpecker-ci/woodpecker/pull/2569)]
 - renovate: add `golang` group [[#2567](https://github.com/woodpecker-ci/woodpecker/pull/2567)]
 - chore(deps): update golang docker tag to v1.21.3 [[#2564](https://github.com/woodpecker-ci/woodpecker/pull/2564)]
