@@ -10,10 +10,10 @@ depends_on:
   - web
 
 variables:
-  - &golang_image 'golang:1.21.1'
+  - &golang_image 'golang:1.21.3'
   - &node_image 'node:20-alpine'
-  - &xgo_image 'techknowlogick/xgo:go-1.20.2'
-  - &xgo_version 'go-1.20.2'
+  - &xgo_image 'techknowlogick/xgo:go-1.21.3'
+  - &xgo_version 'go-1.21.2'
   - &platforms_release 'linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/386,linux/amd64,linux/ppc64le,linux/riscv64,linux/s390x,freebsd/arm64,freebsd/amd64,openbsd/arm64,openbsd/amd64'
   - &platforms_server 'linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le,linux/riscv64'
   - &platforms_preview 'linux/amd64'

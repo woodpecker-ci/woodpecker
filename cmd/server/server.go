@@ -15,7 +15,6 @@
 package main
 
 import (
-	"context"
 	"crypto/tls"
 	"net"
 	"net/http"
@@ -80,12 +79,6 @@ func run(c *cli.Context) error {
 	if strings.Contains(c.String("server-host"), "://localhost") {
 		log.Warn().Msg(
 			"WOODPECKER_HOST should probably be publicly accessible (not localhost)",
-		)
-	}
-
-	if strings.HasSuffix(c.String("server-host"), "/") {
-		log.Fatal().Msg(
-			"WOODPECKER_HOST must not have trailing slash",
 		)
 	}
 
@@ -226,7 +219,7 @@ func run(c *cli.Context) error {
 		certmagic.DefaultACME.Email = c.String("lets-encrypt-email")
 		certmagic.DefaultACME.Agreed = true
 
-		address, err := url.Parse(c.String("server-host"))
+		address, err := url.Parse(strings.TrimSuffix(c.String("server-host"), "/"))
 		if err != nil {
 			return err
 		}
@@ -270,9 +263,6 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 	server.Config.Services.Queue = setupQueue(c, v)
 	server.Config.Services.Logs = logging.New()
 	server.Config.Services.Pubsub = pubsub.New()
-	if err := server.Config.Services.Pubsub.Create(context.Background(), "topic/events"); err != nil {
-		log.Error().Err(err).Msg("could not create pubsub service")
-	}
 	server.Config.Services.Registries = setupRegistryService(c, v)
 
 	// TODO(1544): fix encrypted store
@@ -328,7 +318,7 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 	server.Config.Server.Cert = c.String("server-cert")
 	server.Config.Server.Key = c.String("server-key")
 	server.Config.Server.AgentToken = c.String("agent-secret")
-	serverHost := c.String("server-host")
+	serverHost := strings.TrimSuffix(c.String("server-host"), "/")
 	server.Config.Server.Host = serverHost
 	if c.IsSet("server-webhook-host") {
 		server.Config.Server.WebhookHost = c.String("server-webhook-host")

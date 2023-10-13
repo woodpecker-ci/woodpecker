@@ -32,7 +32,7 @@ import (
 
 var Config = struct {
 	Services struct {
-		Pubsub              pubsub.Publisher
+		Pubsub              *pubsub.Publisher
 		Queue               queue.Queue
 		Logs                logging.Log
 		Secrets             model.SecretService

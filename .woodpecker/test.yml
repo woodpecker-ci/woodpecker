@@ -6,7 +6,7 @@ when:
       - release/*
 
 variables:
-  - &golang_image 'golang:1.21.1'
+  - &golang_image 'golang:1.21.3'
   - &when
     - path: &when_path
         # related config files
@@ -62,7 +62,7 @@ steps:
     when: *when
 
   - name: lint-editorconfig
-    image: mstruebing/editorconfig-checker:2.7.1
+    image: mstruebing/editorconfig-checker:2.7.2
     group: test
 
   - name: lint-license-header
@@ -140,7 +140,7 @@ services:
   # TODO replace next lines (currently breaks schema) - name: service-mysql
   service-mysql:
     name: service-mysql
-    image: mysql:5.6.27
+    image: mysql:8.1.0
     ports: ["3306"]
     environment:
       - MYSQL_DATABASE=test
