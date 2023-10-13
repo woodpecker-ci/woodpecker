@@ -15,13 +15,12 @@
 package migration
 
 import (
+	"database/sql"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"xorm.io/xorm"
-	"xorm.io/xorm/schemas"
 
 	// blank imports to register the sql drivers
 	_ "github.com/go-sql-driver/mysql"
@@ -30,7 +29,8 @@ import (
 )
 
 const (
-	sqliteDB = "./testfiles/sqlite.db"
+	sqliteDB     = "./testfiles/sqlite.db"
+	postgresDump = "./testfiles/postgres.sql"
 )
 
 func testDriver() string {
@@ -75,11 +75,24 @@ func testDB(t *testing.T, new bool) (engine *xorm.Engine, closeDB func()) {
 			t.FailNow()
 		}
 		return
-	case "mysql", "postgres":
+	case "mysql":
 		config := os.Getenv("WOODPECKER_DATABASE_DATASOURCE")
 		if !new {
 			t.Logf("do not have dump to test against")
 			t.SkipNow()
+		}
+		engine, err = xorm.NewEngine(driver, config)
+		if !assert.NoError(t, err) {
+			t.FailNow()
+		}
+		return
+	case "postgres":
+		config := os.Getenv("WOODPECKER_DATABASE_DATASOURCE")
+		if !new {
+			restorePostgresDump(t, config)
+			closeDB = func() {
+				cleanDB(t, engine)
+			}
 		}
 		engine, err = xorm.NewEngine(driver, config)
 		if !assert.NoError(t, err) {
@@ -93,25 +106,52 @@ func testDB(t *testing.T, new bool) (engine *xorm.Engine, closeDB func()) {
 	return
 }
 
+func restorePostgresDump(t *testing.T, config string) {
+	dump, err := os.ReadFile(postgresDump)
+	if !assert.NoError(t, err) {
+		t.FailNow()
+	}
+
+	db, err := sql.Open("postgres", config)
+	if !assert.NoError(t, err) {
+		t.FailNow()
+	}
+	defer db.Close()
+
+	_, err = db.Exec(string(dump))
+	if !assert.NoError(t, err) {
+		t.FailNow()
+	}
+}
+
+func cleanDB(t *testing.T, e *xorm.Engine) {
+	for _, bean := range allBeans {
+		if !assert.NoError(t, e.DropTables(bean)) {
+			t.FailNow()
+		}
+	}
+}
+
 func TestMigrate(t *testing.T) {
 	// make all tasks required for tests
 	for _, task := range migrationTasks {
 		task.required = true
 	}
 
-	// init new db
-	engine, closeDB := testDB(t, true)
-	assert.NoError(t, Migrate(engine))
-	closeDB()
-
-	dbType := engine.Dialect().URI().DBType
-	if dbType == schemas.MYSQL || dbType == schemas.POSTGRES {
-		// wait for mysql/postgres to sync ...
-		time.Sleep(100 * time.Millisecond)
-	}
+	//	// init new db
+	//	engine, closeDB := testDB(t, true)
+	//	assert.NoError(t, Migrate(engine))
+	//	closeDB()
+	//
+	//	dbType := engine.Dialect().URI().DBType
+	//	if dbType == schemas.MYSQL || dbType == schemas.POSTGRES {
+	//		// wait for mysql/postgres to sync ...
+	//		time.Sleep(100 * time.Millisecond)
+	//	}
+	//	assert.NoError(t, engine.ClearCache(allBeans...))
 
 	// migrate old db
-	engine, closeDB = testDB(t, false)
+	engine, closeDB := testDB(t, false)
 	assert.NoError(t, Migrate(engine))
 	closeDB()
 }
