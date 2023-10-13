@@ -84,7 +84,7 @@ steps:
       - make test-cli
       - make test-lib
     when:
-      - path: &when_path
+      - path: *when_path
 
   sqlite:
     image: *golang_image
@@ -94,7 +94,7 @@ steps:
     commands:
       - make test-server-datastore-coverage
     when:
-      - path: &when_path
+      - path: *when_path
 
   postgres:
     image: *golang_image
@@ -129,7 +129,7 @@ steps:
       token:
         from_secret: codecov_token
     when:
-      - path: &when_path
+      - path: *when_path
     failure: ignore
 
 services:
