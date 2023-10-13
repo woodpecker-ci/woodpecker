@@ -134,6 +134,7 @@
   "cancel": "Annuler",
   "color_scheme_dark": "Basculer en couleurs claires",
   "color_scheme_light": "Basculer en couleurs sombres",
+  "default": "défaut",
   "docs": "Docs",
   "documentation_for": "Documentation sur \"{topic}\"",
   "errors": {

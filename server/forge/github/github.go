@@ -25,7 +25,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/google/go-github/v55/github"
+	"github.com/google/go-github/v56/github"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 
@@ -556,7 +556,7 @@ func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo, p *
 // BranchHead returns the sha of the head (latest commit) of the specified branch
 func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
 	token := common.UserToken(ctx, r, u)
-	b, _, err := c.newClientToken(ctx, token).Repositories.GetBranch(ctx, r.Owner, r.Name, branch, true)
+	b, _, err := c.newClientToken(ctx, token).Repositories.GetBranch(ctx, r.Owner, r.Name, branch, 1)
 	if err != nil {
 		return "", err
 	}

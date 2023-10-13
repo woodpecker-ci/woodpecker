@@ -38,8 +38,8 @@ matrix:
     - 1.4
     - 1.3
   DATABASE:
-    - mysql:5.5
-    - mysql:6.5
+    - mysql:8
+    - mysql:5
     - mariadb:10.1
 
 steps:
@@ -68,12 +68,12 @@ steps:
       - go test
 +   environment:
 +     - GO_VERSION=1.4
-+     - DATABASE=mysql:5.5
++     - DATABASE=mysql:8
 
 services:
   database:
 -   image: ${DATABASE}
-+   image: mysql:5.5
++   image: mysql:8
 ```
 
 ## Examples
