@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@pat-s, @qwerty287, @renovate[bot], @JohnWalkerx, @Exar04, @dominic-p, @anbraten, @categulario, @mzampetakis, @Timshel, @6543, @nitram509, @Denperidge, @xoxys, @tomix1024, @lonix1, @s3lph, @math3vz, @LTek-online, @testwill, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @azdle, @runephilosof-karnovgroup, @praneeth-ovckd
+@qwerty287, @pat-s, @renovate[bot], @JohnWalkerx, @Exar04, @dominic-p, @anbraten, @categulario, @mzampetakis, @Timshel, @6543, @nitram509, @Denperidge, @xoxys, @tomix1024, @lonix1, @s3lph, @math3vz, @LTek-online, @testwill, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @azdle, @runephilosof-karnovgroup, @praneeth-ovckd
 
 ### 💥 Breaking changes
 
@@ -158,6 +158,7 @@
 
 ### Misc
 
+- Run tests on `main` branch [[#2576](https://github.com/woodpecker-ci/woodpecker/pull/2576)]
 - fix(deps): update module github.com/google/go-github/v55 to v56 [[#2573](https://github.com/woodpecker-ci/woodpecker/pull/2573)]
 - Add plugin "NixOS Remote Builder" to plugin index [[#2571](https://github.com/woodpecker-ci/woodpecker/pull/2571)]
 - Fix renovate [[#2569](https://github.com/woodpecker-ci/woodpecker/pull/2569)]
