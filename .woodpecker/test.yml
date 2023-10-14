@@ -44,7 +44,8 @@ steps:
     commands:
       - mkdir -p web/dist/
       - echo "test" > web/dist/index.html
-    when: *when
+    when:
+      - path: *when_path
 
   lint:
     image: *golang_image
