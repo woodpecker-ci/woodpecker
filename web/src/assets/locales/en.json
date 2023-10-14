@@ -97,7 +97,7 @@
         },
         "netrc_only_trusted": {
           "netrc_only_trusted": "Only inject netrc credentials (= git credentials) into trusted containers.",
-          "desc": "Disabling this option allows the usage of the git credentials used during checkout in all containers."
+          "desc": "Disabling this option allows the usage of git credentials during cloning and in other pipeline containers."
         },
         "trusted": {
           "trusted": "Trusted",
