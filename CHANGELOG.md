@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@qwerty287, @OskarsPakers, @pat-s, @renovate[bot], @JohnWalkerx, @Exar04, @dominic-p, @anbraten, @categulario, @mzampetakis, @Timshel, @6543, @nitram509, @Denperidge, @xoxys, @tomix1024, @lonix1, @s3lph, @math3vz, @LTek-online, @testwill, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @azdle, @runephilosof-karnovgroup, @praneeth-ovckd
+@JohnWalkerx, @qwerty287, @OskarsPakers, @pat-s, @renovate[bot], @Exar04, @dominic-p, @anbraten, @categulario, @mzampetakis, @Timshel, @6543, @nitram509, @Denperidge, @xoxys, @tomix1024, @lonix1, @s3lph, @math3vz, @LTek-online, @testwill, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @azdle, @runephilosof-karnovgroup, @praneeth-ovckd
 
 ### 💥 Breaking changes
 
@@ -34,6 +34,7 @@
 
 ### 📚 Documentation
 
+- Add plugin "Gitea Create Pull Request" to plugin index [[#2581](https://github.com/woodpecker-ci/woodpecker/pull/2581)]
 - Adjust github scopes and clarify documentation. [[#2578](https://github.com/woodpecker-ci/woodpecker/pull/2578)]
 - Remove redundant definition of webhook form docs [[#2561](https://github.com/woodpecker-ci/woodpecker/pull/2561)]
 - Add notes about CRI-O specific config [[#2546](https://github.com/woodpecker-ci/woodpecker/pull/2546)]
