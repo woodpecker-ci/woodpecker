@@ -25,7 +25,8 @@ steps:
     group: prepare
     commands:
       - go mod vendor
-    when: *when
+    when:
+      - path: *when_path
 
   lint-pipeline:
     image: *golang_image
