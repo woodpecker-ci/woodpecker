@@ -408,7 +408,7 @@ func (c *client) newConfig(req *http.Request) *oauth2.Config {
 	return &oauth2.Config{
 		ClientID:     c.Client,
 		ClientSecret: c.Secret,
-		Scopes:       []string{"repo", "repo:status", "user:email", "read:org"},
+		Scopes:       []string{"repo", "user:email", "read:org"},
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  fmt.Sprintf("%s/login/oauth/authorize", c.url),
 			TokenURL: fmt.Sprintf("%s/login/oauth/access_token", c.url),
