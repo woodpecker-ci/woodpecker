@@ -153,6 +153,6 @@
       "name": "Release Helper",
       "docs": "https://github.com/woodpecker-ci/plugin-ready-release-go/blob/main/README.md",
       "verified": true
-    },
+    }
   ]
 }
