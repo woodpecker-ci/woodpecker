@@ -95,6 +95,11 @@
       "verified": true
     },
     {
+      "name": "Gitea Create Pull Request",
+      "docs": "https://codeberg.org/JohnWalkerx/gitea-pull-request-create-plugin/raw/branch/main/docs.md",
+      "verified": false
+    },
+    {
       "name": "Woodpecker Email",
       "docs": "https://gitnet.fr/deblan/woodpecker-email/raw/branch/develop/DOCS.md",
       "verified": false
