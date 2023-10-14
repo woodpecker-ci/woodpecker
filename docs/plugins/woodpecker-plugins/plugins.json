@@ -148,6 +148,11 @@
       "name": "NixOS Remote Builder",
       "docs": "https://codeberg.org/JohnWalkerx/nix-remote-builder-plugin/raw/branch/main/docs.md",
       "verified": false
-    }
+    },
+    {
+      "name": "Release Helper",
+      "docs": "https://github.com/woodpecker-ci/plugin-ready-release-go/blob/main/README.md",
+      "verified": true
+    },
   ]
 }
