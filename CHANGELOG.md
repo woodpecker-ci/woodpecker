@@ -3,6 +3,7 @@
 ## [1.0.3](https://github.com/woodpecker-ci/woodpecker/releases/tag/1.0.3) - 2023-10-14
 
 * SECURITY
+  * Update dependencies (#2587)
   * Frontend: bump postcss to 8.4.31 (#2541)
   * Check permissions on repo lookup (#2358)
   * Change token logging to trace level (#2247) (#2248)
