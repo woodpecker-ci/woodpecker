@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.0.3](https://github.com/woodpecker-ci/woodpecker/releases/tag/1.0.3) - 2023-10-14
+## [1.0.3](https://github.com/woodpecker-ci/woodpecker/releases/tag/v1.0.3) - 2023-10-14
 
 * SECURITY
   * Update dependencies (#2587)
@@ -20,7 +20,7 @@
 * MISC
   * Rebuild swagger with latest version (#2455)
 
-## [1.0.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/1.0.2) - 2023-08-16
+## [1.0.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v1.0.2) - 2023-08-16
 
 * SECURITY
   * Validate webhook before change any data (#2221) (#2222)
