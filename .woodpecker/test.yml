@@ -19,7 +19,7 @@ variables:
         - "go.*"
         # schema changes
         - "pipeline/schema/**"
-      event: [pull_request, tag, deployment]
+      event: [pull_request, tag]
 
 steps:
   vendor:
@@ -27,7 +27,8 @@ steps:
     group: prepare
     commands:
       - go mod vendor
-    when: *when
+    when:
+      - path: *when_path
 
   lint-pipeline:
     image: *golang_image
@@ -45,7 +46,8 @@ steps:
     commands:
       - mkdir -p web/dist/
       - echo "test" > web/dist/index.html
-    when: *when
+    when:
+      - path: *when_path
 
   lint:
     image: *golang_image
@@ -66,9 +68,12 @@ steps:
   lint-editorconfig:
     image: mstruebing/editorconfig-checker:2.7.2
     group: test
+    when:
+      - event: [pull_request, tag]
 
   lint-license-header:
     image: *golang_image
+    group: test
     commands:
       - go install github.com/google/addlicense@latest
       - "addlicense -check -ignore \"vendor/**\" **/*.go"
@@ -82,7 +87,8 @@ steps:
       - make test-server
       - make test-cli
       - make test-lib
-    when: *when
+    when:
+      - path: *when_path
 
   sqlite:
     image: *golang_image
@@ -91,7 +97,8 @@ steps:
       - WOODPECKER_DATABASE_DRIVER=sqlite3
     commands:
       - make test-server-datastore-coverage
-    when: *when
+    when:
+      - path: *when_path
 
   postgres:
     image: *golang_image
@@ -125,7 +132,8 @@ steps:
         - datastore-coverage.out
       token:
         from_secret: codecov_token
-    when: *when
+    when:
+      - path: *when_path
     failure: ignore
 
 services:
