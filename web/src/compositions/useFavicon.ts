@@ -1,10 +1,10 @@
 import { computed, ref, watch } from 'vue';
 
 import useConfig from '~/compositions/useConfig';
-import { useDarkMode } from '~/compositions/useDarkMode';
+import { useTheme } from '~/compositions/useTheme';
 import { PipelineStatus } from '~/lib/api/types';
 
-const darkMode = computed(() => (useDarkMode().darkMode.value ? 'dark' : 'light'));
+const darkMode = computed(() => (useTheme().darkMode.value ? 'dark' : 'light'));
 
 type Status = 'default' | 'success' | 'pending' | 'error';
 const faviconStatus = ref<Status>('default');
