@@ -3,7 +3,7 @@
   "extends": [
     "config:recommended",
     ":maintainLockFilesWeekly",
-    "schedule:automergeEarlyMondays",
+    "schedule:automergeDaily",
     "schedule:weekends"
   ],
   "prConcurrentLimit": 5,
