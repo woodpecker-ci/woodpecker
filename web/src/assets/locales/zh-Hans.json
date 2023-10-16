@@ -269,7 +269,7 @@
         "status": "状态: {status}",
         "success": "成功"
       },
-      "step_not_started": "该步骤还不曾启动过。",
+      "step_not_started": "该步骤尚未启动。",
       "tasks": "任务"
     },
     "pull_requests": "合并请求",
