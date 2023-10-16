@@ -7,8 +7,8 @@ Secrets are exposed to your pipeline steps and plugins as uppercase environment 
 Woodpecker provides three different levels to add secrets to your pipeline. The following list shows the priority of the different levels. If a secret is defined in multiple levels, will be used following this priorities: Repository secrets > Organization secrets > Global secrets.
 
 1. **Repository secrets**: They are available to all pipelines of an repository.
-1. **Organization secrets**: They are available to all pipelines of an organization.
-1. **Global secrets**: Can be configured by an instance admin.
+2. **Organization secrets**: They are available to all pipelines of an organization.
+3. **Global secrets**: Can be configured by an instance admin.
    They are available to all pipelines of the **whole** Woodpecker instance and should therefore **only** be used for secrets that are allowed to be read by **all** users.
 
 ## Usage
