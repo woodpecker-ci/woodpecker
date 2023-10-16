@@ -1,6 +1,11 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended", ":maintainLockFilesWeekly"],
+  "extends": [
+    "config:recommended",
+    ":maintainLockFilesWeekly",
+    "schedule:automergeEarlyMondays",
+    "schedule:weekends"
+  ],
   "prConcurrentLimit": 5,
   "packageRules": [
     {
@@ -19,28 +24,24 @@
     {
       "groupName": "golang (lang)",
       "matchPackagePatterns": ["^golang$", "xgo"],
-      "matchUpdateTypes": ["minor", "patch"],
-      "extends": ["schedule:daily"]
+      "matchUpdateTypes": ["minor", "patch"]
     },
     {
       "groupName": "golang (packages)",
       "matchManagers": ["gomod"],
-      "matchUpdateTypes": ["minor", "patch"],
-      "extends": ["schedule:daily"]
+      "matchUpdateTypes": ["minor", "patch"]
     },
     {
       "groupName": "web npm deps non-major",
       "matchManagers": ["npm"],
       "matchUpdateTypes": ["minor", "patch"],
-      "matchFileNames": ["web/package.json"],
-      "extends": ["schedule:daily"]
+      "matchFileNames": ["web/package.json"]
     },
     {
       "groupName": "docs npm deps non-major",
       "matchManagers": ["npm"],
       "matchUpdateTypes": ["minor", "patch"],
-      "matchFileNames": ["docs/**/package.json"],
-      "extends": ["schedule:daily"]
+      "matchFileNames": ["docs/**/package.json"]
     },
     {
       "matchDatasources": ["docker"],
