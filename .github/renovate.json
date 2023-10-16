@@ -1,11 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended",
-    ":maintainLockFilesWeekly",
-    "schedule:automergeDaily",
-    "schedule:weekends"
-  ],
+  "extends": ["github>woodpecker-ci/renovate-config"],
   "prConcurrentLimit": 5,
   "packageRules": [
     {
