@@ -1,10 +1,10 @@
 # Changelog
 
-## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-10-15
+## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-10-16
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@renovate[bot], @pat-s, @JohnWalkerx, @qwerty287, @OskarsPakers, @Exar04, @dominic-p, @anbraten, @categulario, @mzampetakis, @Timshel, @6543, @nitram509, @Denperidge, @xoxys, @tomix1024, @lonix1, @s3lph, @math3vz, @LTek-online, @testwill, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @azdle, @runephilosof-karnovgroup, @praneeth-ovckd
+@qwerty287, @renovate[bot], @pat-s, @JohnWalkerx, @OskarsPakers, @Exar04, @dominic-p, @anbraten, @categulario, @mzampetakis, @Timshel, @6543, @nitram509, @Denperidge, @xoxys, @tomix1024, @lonix1, @s3lph, @math3vz, @LTek-online, @testwill, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @azdle, @runephilosof-karnovgroup, @praneeth-ovckd
 
 ### 💥 Breaking changes
 
@@ -161,6 +161,7 @@
 
 ### Misc
 
+- Update README badge link [[#2596](https://github.com/woodpecker-ci/woodpecker/pull/2596)]
 - fix(deps): update golang (packages) to v23.0.7+incompatible [[#2586](https://github.com/woodpecker-ci/woodpecker/pull/2586)]
 - Fix missing web dist [[#2580](https://github.com/woodpecker-ci/woodpecker/pull/2580)]
 - Run tests on `main` branch [[#2576](https://github.com/woodpecker-ci/woodpecker/pull/2576)]
