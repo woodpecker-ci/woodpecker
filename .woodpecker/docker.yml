@@ -5,9 +5,9 @@ when:
       - ${CI_REPO_DEFAULT_BRANCH}
       - release/*
 
-depends_on:
-  - test
-  - web
+# depends_on:
+#   - test
+#   - web
 
 variables:
   - &golang_image 'golang:1.21.3'
@@ -24,14 +24,12 @@ variables:
   - publish_logins: &publish_logins
       # Default DockerHub login
       - registry: https://index.docker.io/v1/
-        username:
-          from_secret: docker_username
+        username: woodpeckerbot
         password:
           from_secret: docker_password
       # Additional Quay.IO login
       - registry: https://quay.io
-        username:
-          from_secret: QUAY_IO_USER
+        username: 'woodpeckerci+wp_ci'
         password:
           from_secret: QUAY_IO_TOKEN
   - &publish_repos_server 'woodpeckerci/woodpecker-server,quay.io/woodpeckerci/woodpecker-server'
@@ -79,6 +77,8 @@ steps:
       dockerfile: docker/Dockerfile.server.multiarch
       platforms: *platforms_preview
       tag: pull_${CI_COMMIT_PULL_REQUEST}
+      logins: *publish_logins
+      dry_run: true
     when:
       event: pull_request
 
@@ -91,6 +91,8 @@ steps:
       dockerfile: docker/Dockerfile.server.alpine.multiarch
       platforms: *platforms_preview
       tag: pull_${CI_COMMIT_PULL_REQUEST}-alpine
+      logins: *publish_logins
+      dry_run: true
     when:
       event: pull_request
 
@@ -196,13 +198,14 @@ steps:
   publish-agent-preview:
     group: docker
     image: woodpeckerci/plugin-docker-buildx:2.1.0
-    secrets: [ docker_username, docker_password ]
     settings:
       repo: woodpeckerci/woodpecker-agent
       dockerfile: docker/Dockerfile.agent.multiarch
       platforms: *platforms_preview
       tag: pull_${CI_COMMIT_PULL_REQUEST}
       build_args: *build_args
+      logins: *publish_logins
+      dry_run: true
     when:
       event: pull_request
 
@@ -297,13 +300,14 @@ steps:
   publish-cli-preview:
     group: docker
     image: woodpeckerci/plugin-docker-buildx:2.1.0
-    secrets: [ docker_username, docker_password ]
     settings:
       repo: woodpeckerci/woodpecker-cli
       dockerfile: docker/Dockerfile.cli.multiarch
       platforms: *platforms_preview
       tag: pull_${CI_COMMIT_PULL_REQUEST}
       build_args: *build_args
+      logins: *publish_logins
+      dry_run: true
     when:
       event: pull_request
 
