@@ -57,7 +57,7 @@ func (b *builtin) SecretListPipeline(repo *model.Repo, _ *model.Pipeline, p *mod
 		{Global: true},
 	} {
 		for _, secret := range s {
-			if secret.Global() == cond.Global && secret.Organization() == cond.Organization {
+			if !(secret.Global() == cond.Global && secret.Organization() == cond.Organization) {
 				continue
 			}
 			if _, ok := uniq[secret.Name]; ok {
