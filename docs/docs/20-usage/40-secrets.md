@@ -4,6 +4,15 @@ Woodpecker provides the ability to store named parameters external to the YAML c
 
 Secrets are exposed to your pipeline steps and plugins as uppercase environment variables and can therefore be referenced in the commands section of your pipeline.
 
+Woodpecker provides three different levels to add secrets to your pipeline. The following list shows the priority of the different levels. If a secret is defined in multiple levels, will be used following this priorities: Repository secrets > Organization secrets > Global secrets.
+
+1. **Repository secrets**: They are available to all pipelines of an repository.
+1. **Organization secrets**: They are available to all pipelines of an organization.
+1. **Global secrets**: Can be configured by an instance admin.
+   They are available to all pipelines of the **whole** Woodpecker instance and should therefore **only** be used for secrets that are allowed to be read by **all** users.
+
+## Usage
+
 ```diff
 steps:
   docker:
@@ -45,7 +54,7 @@ steps:
 
 ## Adding Secrets
 
-Secrets are added to the Woodpecker secret store on the UI or with the CLI.
+Secrets are added to the Woodpecker in the UI or with the CLI.
 
 ## Alternate Names
 
@@ -88,7 +97,7 @@ If you enable the option "Only available for plugins", always set an image filte
 If you only set an image filter, you could still access the secret using the same image and by specifying a command that prints it.
 :::
 
-## Examples
+## CLI Examples
 
 Create the secret using default settings. The secret will be available to all images in your pipeline, and will be available to all push, tag, and deployment events (not pull request events).
 
