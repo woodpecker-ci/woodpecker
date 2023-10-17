@@ -28,7 +28,6 @@ import (
 
 	"github.com/rs/zerolog/log"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
-	"github.com/woodpecker-ci/woodpecker/shared/constant"
 )
 
 // checkGitCloneCap check if we have the git binary on hand
@@ -64,17 +63,20 @@ func (e *local) setupClone(state *workflowState) error {
 
 // execClone executes a clone-step locally
 func (e *local) execClone(ctx context.Context, step *types.Step, state *workflowState, env []string) error {
-	if err := e.setupClone(state); err != nil {
-		return fmt.Errorf("setup clone step failed: %w", err)
+	if scm := step.Environment["CI_REPO_SCM"]; scm != "git" {
+		return fmt.Errorf("local backend can only clone from git repos, but this repo use '%s'", scm)
 	}
 
 	if err := checkGitCloneCap(); err != nil {
 		return fmt.Errorf("check for git clone capabilities failed: %w", err)
 	}
 
-	if step.Image != constant.DefaultCloneImage {
-		// TODO: write message into log
-		log.Warn().Msgf("clone step image '%s' does not match default git clone image. We ignore it assume git.", step.Image)
+	if err := e.setupClone(state); err != nil {
+		return fmt.Errorf("setup clone step failed: %w", err)
+	}
+
+	if !strings.Contains(step.Image, "plugin-git") {
+		log.Warn().Msgf("clone step image '%s' does not match default git clone image. We ignore it and use our plugin-git anyway.", step.Image)
 	}
 
 	rmCmd, err := writeNetRC(step, state)
@@ -86,14 +88,20 @@ func (e *local) execClone(ctx context.Context, step *types.Step, state *workflow
 
 	// Prepare command
 	var cmd *exec.Cmd
-	if runtime.GOOS == "windows" {
-		pwsh, err := exec.LookPath("powershell.exe")
-		if err != nil {
-			return err
+	if rmCmd != "" {
+		// if we have a netrc injected we have to make sure it's deleted in any case after clone was attempted
+		if runtime.GOOS == "windows" {
+			pwsh, err := exec.LookPath("powershell.exe")
+			if err != nil {
+				return err
+			}
+			cmd = exec.CommandContext(ctx, pwsh, "-Command", fmt.Sprintf("%s ; $code=$? ; %s ; if (!$code) {[Environment]::Exit(1)}", state.pluginGitBinary, rmCmd))
+		} else {
+			cmd = exec.CommandContext(ctx, "/bin/sh", "-c", fmt.Sprintf("%s ; export code=$? ; %s ; exit $code", state.pluginGitBinary, rmCmd))
 		}
-		cmd = exec.CommandContext(ctx, pwsh, "-Command", fmt.Sprintf("%s ; $code=$? ; %s ; if (!$code) {[Environment]::Exit(1)}", state.pluginGitBinary, rmCmd))
 	} else {
-		cmd = exec.CommandContext(ctx, "/bin/sh", "-c", fmt.Sprintf("%s ; $code=$? ; %s ; exit $code", state.pluginGitBinary, rmCmd))
+		// if we have NO netrc, we can just exec the clone directly
+		cmd = exec.CommandContext(ctx, state.pluginGitBinary)
 	}
 	cmd.Env = env
 	cmd.Dir = state.workspaceDir
@@ -110,6 +118,7 @@ func (e *local) execClone(ctx context.Context, step *types.Step, state *workflow
 // writeNetRC write a netrc file into the home dir of a given workflow state
 func writeNetRC(step *types.Step, state *workflowState) (string, error) {
 	if step.Environment["CI_NETRC_MACHINE"] == "" {
+		log.Trace().Msg("no netrc to write")
 		return "", nil
 	}
 
@@ -120,12 +129,8 @@ func writeNetRC(step *types.Step, state *workflowState) (string, error) {
 		rmCmd = fmt.Sprintf("del \"%s\"", file)
 	}
 
-	return rmCmd, os.WriteFile(file, []byte(fmt.Sprintf(
-		netrcFile,
-		step.Environment["CI_NETRC_MACHINE"],
-		step.Environment["CI_NETRC_USERNAME"],
-		step.Environment["CI_NETRC_PASSWORD"],
-	)), 0o600)
+	log.Trace().Msgf("try to write netrc to '%s'", file)
+	return rmCmd, os.WriteFile(file, []byte(genNetRC(step.Environment)), 0o600)
 }
 
 // downloadLatestGitPluginBinary download the latest plugin-git binary based on runtime OS and Arch
@@ -177,6 +182,7 @@ func downloadLatestGitPluginBinary(dest string) error {
 			}
 
 			// download successful
+			log.Trace().Msgf("download of 'plugin-git' to '%s' successful", dest)
 			return nil
 		}
 	}

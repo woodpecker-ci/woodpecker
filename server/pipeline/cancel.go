@@ -93,9 +93,7 @@ func Cancel(ctx context.Context, store store.Store, repo *model.Repo, user *mode
 	if killedPipeline.Workflows, err = store.WorkflowGetTree(killedPipeline); err != nil {
 		return err
 	}
-	if err := publishToTopic(ctx, killedPipeline, repo); err != nil {
-		log.Error().Err(err).Msg("publishToTopic")
-	}
+	publishToTopic(killedPipeline, repo)
 
 	return nil
 }

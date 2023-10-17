@@ -42,7 +42,7 @@ Keep in mind the name is optional, if not added the steps will be numerated.
 
 ### Skip Commits
 
-Woodpecker gives the ability to skip individual commits by adding `[CI SKIP]` to the commit message. Note this is case-insensitive.
+Woodpecker gives the ability to skip individual commits by adding `[SKIP CI]` or `[CI SKIP]` to the commit message. Note this is case-insensitive.
 
 ```sh
 git commit -m "updated README [CI SKIP]"
@@ -162,6 +162,31 @@ To make a private registry globally available check the [server configuration do
 ##### GCR registry support
 
 For specific details on configuring access to Google Container Registry, please view the docs [here](https://cloud.google.com/container-registry/docs/advanced-authentication#using_a_json_key_file).
+
+##### Local Images
+
+It's possible to build a local image by mounting the docker socket as a volume.
+
+With a `Dockerfile` at the root of the project:
+
+```diff
+steps:
+  build-image:
+    image: docker
+    commands:
+      - docker build --rm -t local/project-image .
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  build-project:
+    image: local/project-image
+    commands:
+      - ./build.sh
+```
+
+:::warning
+For this privileged rights are needed only available to admins. In addition this only works when using a single agent.
+:::
 
 ### `commands`
 
@@ -348,8 +373,8 @@ This allows you to filter, for example, tags that must start with **v**:
 
 ```yaml
 when:
-  event: tag
-  ref: refs/tags/v*
+  - event: tag
+    ref: refs/tags/v*
 ```
 
 #### `status`
@@ -886,6 +911,10 @@ when:
 ## `depends_on`
 
 Woodpecker supports to define multiple workflows for a repository. Those workflows will run independent from each other. To depend them on each other you can use the [`depends_on`](./25-workflows.md#flow-control) keyword.
+
+## `runs_on`
+
+Workflows that should run even on failure should set the `runs_on` tag. See [here](./25-workflows.md#flow-control) for an example.
 
 ## Privileged mode
 

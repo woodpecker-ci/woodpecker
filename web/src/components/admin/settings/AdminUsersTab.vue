@@ -1,19 +1,14 @@
 <template>
-  <Panel>
-    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-wp-background-100">
-      <div class="ml-2">
-        <h1 class="text-xl text-wp-text-100">{{ $t('admin.settings.users.users') }}</h1>
-        <p class="text-sm text-wp-text-alt-100">{{ $t('admin.settings.users.desc') }}</p>
-      </div>
+  <Settings :title="$t('admin.settings.users.users')" :desc="$t('admin.settings.users.desc')">
+    <template #titleActions>
       <Button
         v-if="selectedUser"
-        class="ml-auto"
         :text="$t('admin.settings.users.show')"
         start-icon="back"
         @click="selectedUser = undefined"
       />
-      <Button v-else class="ml-auto" :text="$t('admin.settings.users.add')" start-icon="plus" @click="showAddUser" />
-    </div>
+      <Button v-else :text="$t('admin.settings.users.add')" start-icon="plus" @click="showAddUser" />
+    </template>
 
     <div v-if="!selectedUser" class="space-y-4 text-wp-text-100">
       <ListItem
@@ -83,7 +78,7 @@
         </div>
       </form>
     </div>
-  </Panel>
+  </Settings>
 </template>
 
 <script lang="ts" setup>
@@ -97,7 +92,7 @@ import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import InputField from '~/components/form/InputField.vue';
 import TextField from '~/components/form/TextField.vue';
-import Panel from '~/components/layout/Panel.vue';
+import Settings from '~/components/layout/Settings.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';

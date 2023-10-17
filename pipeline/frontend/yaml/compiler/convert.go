@@ -16,13 +16,13 @@ package compiler
 
 import (
 	"fmt"
+	"maps"
 	"path"
 	"path/filepath"
 	"strings"
 
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
-	"golang.org/x/exp/maps"
 
 	backend_types "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
@@ -116,6 +116,17 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		}
 	}
 
+	var tolerations []backend_types.Toleration
+	for _, t := range container.BackendOptions.Kubernetes.Tolerations {
+		tolerations = append(tolerations, backend_types.Toleration{
+			Key:               t.Key,
+			Operator:          backend_types.TolerationOperator(t.Operator),
+			Value:             t.Value,
+			Effect:            backend_types.TaintEffect(t.Effect),
+			TolerationSeconds: t.TolerationSeconds,
+		})
+	}
+
 	// Kubernetes advanced settings
 	backendOptions := backend_types.BackendOptions{
 		Kubernetes: backend_types.KubernetesBackendOptions{
@@ -125,6 +136,7 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 			},
 			ServiceAccountName: container.BackendOptions.Kubernetes.ServiceAccountName,
 			NodeSelector:       container.BackendOptions.Kubernetes.NodeSelector,
+			Tolerations:        tolerations,
 		},
 	}
 

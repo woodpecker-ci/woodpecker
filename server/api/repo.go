@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -114,7 +113,7 @@ func PostRepo(c *gin.Context) {
 	}
 
 	link := fmt.Sprintf(
-		"%s/hook?access_token=%s",
+		"%s/api/hook?access_token=%s",
 		server.Config.Server.WebhookHost,
 		sig,
 	)
@@ -199,7 +198,7 @@ func PatchRepo(c *gin.Context) {
 		return
 	}
 	if in.IsTrusted != nil && *in.IsTrusted != repo.IsTrusted && !user.Admin {
-		log.Trace().Msgf("user '%s' wants to make repo trusted without being an instance admin ", user.Login)
+		log.Trace().Msgf("user '%s' wants to make repo trusted without being an instance admin", user.Login)
 		c.String(http.StatusForbidden, "Insufficient privileges")
 		return
 	}
@@ -277,21 +276,7 @@ func ChownRepo(c *gin.Context) {
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		repo_full_name	path	string	true	"the repository full-name / slug"
 func LookupRepo(c *gin.Context) {
-	_store := store.FromContext(c)
-	repoFullName := strings.TrimLeft(c.Param("repo_full_name"), "/")
-
-	repo, err := _store.GetRepoName(repoFullName)
-	if err != nil {
-		if errors.Is(err, types.RecordNotExist) {
-			c.AbortWithStatus(http.StatusNotFound)
-			return
-		}
-
-		_ = c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-
-	c.JSON(http.StatusOK, repo)
+	c.JSON(http.StatusOK, session.Repo(c))
 }
 
 // GetRepo
@@ -399,12 +384,12 @@ func DeleteRepo(c *gin.Context) {
 
 	if remove {
 		if err := _store.DeleteRepo(repo); err != nil {
-			_ = c.AbortWithError(http.StatusInternalServerError, err)
+			handleDbError(c, err)
 			return
 		}
 	}
 
-	if err := server.Config.Services.Forge.Deactivate(c, user, repo, server.Config.Server.Host); err != nil {
+	if err := server.Config.Services.Forge.Deactivate(c, user, repo, server.Config.Server.WebhookHost); err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
@@ -435,9 +420,9 @@ func RepairRepo(c *gin.Context) {
 	}
 
 	// reconstruct the link
-	host := server.Config.Server.Host
+	host := server.Config.Server.WebhookHost
 	link := fmt.Sprintf(
-		"%s/hook?access_token=%s",
+		"%s/api/hook?access_token=%s",
 		host,
 		sig,
 	)
@@ -479,7 +464,7 @@ func RepairRepo(c *gin.Context) {
 		return
 	}
 
-	c.Writer.WriteHeader(http.StatusOK)
+	c.Status(http.StatusOK)
 }
 
 // MoveRepo
@@ -500,7 +485,7 @@ func MoveRepo(c *gin.Context) {
 
 	to, exists := c.GetQuery("to")
 	if !exists {
-		err := fmt.Errorf("Missing required to query value")
+		err := fmt.Errorf("missing required to query value")
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
@@ -549,9 +534,9 @@ func MoveRepo(c *gin.Context) {
 	}
 
 	// reconstruct the link
-	host := server.Config.Server.Host
+	host := server.Config.Server.WebhookHost
 	link := fmt.Sprintf(
-		"%s/hook?access_token=%s",
+		"%s/api/hook?access_token=%s",
 		host,
 		sig,
 	)
@@ -563,5 +548,30 @@ func MoveRepo(c *gin.Context) {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
-	c.Writer.WriteHeader(http.StatusOK)
+	c.Status(http.StatusOK)
+}
+
+// GetAllRepos
+//
+//	@Summary	List all repositories on the server. Requires admin rights.
+//	@Router		/repos [get]
+//	@Produce	json
+//	@Success	200	{array}	Repo
+//	@Tags		Repositories
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		active				query	bool	false	"only list active repos"
+//	@Param		page			query	int		false	"for response pagination, page offset number"	default(1)
+//	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
+func GetAllRepos(c *gin.Context) {
+	_store := store.FromContext(c)
+
+	active, _ := strconv.ParseBool(c.Query("active"))
+
+	repos, err := _store.RepoListAll(active, session.Pagination(c))
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Error fetching repository list. %s", err)
+		return
+	}
+
+	c.JSON(http.StatusOK, repos)
 }

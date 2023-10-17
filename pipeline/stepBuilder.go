@@ -79,11 +79,10 @@ func (b *StepBuilder) Build() ([]*Item, error) {
 
 		for _, axis := range axes {
 			workflow := &model.Workflow{
-				PipelineID: b.Curr.ID,
-				PID:        pidSequence,
-				State:      model.StatusPending,
-				Environ:    axis,
-				Name:       SanitizePath(y.Name),
+				PID:     pidSequence,
+				State:   model.StatusPending,
+				Environ: axis,
+				Name:    SanitizePath(y.Name),
 			}
 			item, err := b.genItemForWorkflow(workflow, axis, string(y.Data))
 			if err != nil {
@@ -102,7 +101,7 @@ func (b *StepBuilder) Build() ([]*Item, error) {
 
 	items = filterItemsWithMissingDependencies(items)
 
-	// check if at least one step can start, if list is not empty
+	// check if at least one step can start if slice is not empty
 	if len(items) > 0 && !stepListContainsItemsToRun(items) {
 		return nil, fmt.Errorf("pipeline has no startpoint")
 	}
@@ -145,9 +144,9 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 	// checking if filtered.
 	if match, err := parsed.When.Match(workflowMetadata, true, environ); !match && err == nil {
 		log.Debug().Str("pipeline", workflow.Name).Msg(
-			"Marked as skipped, dose not match metadata",
+			"Marked as skipped, does not match metadata",
 		)
-		workflow.State = model.StatusSkipped
+		return nil, nil
 	} else if err != nil {
 		log.Debug().Str("pipeline", workflow.Name).Msg(
 			"Pipeline config could not be parsed",
@@ -285,47 +284,6 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, envi
 		compiler.WithTrusted(b.Repo.IsTrusted),
 		compiler.WithNetrcOnlyTrusted(b.Repo.NetrcOnlyTrusted),
 	).Compile(parsed)
-}
-
-// SetPipelineStepsOnPipeline is the link between pipeline representation in "pipeline package" and server
-// to be specific this func currently is used to convert the pipeline.Item list (crafted by StepBuilder.Build()) into
-// a pipeline that can be stored in the database by the server
-func SetPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*Item) *model.Pipeline {
-	var pidSequence int
-	for _, item := range pipelineItems {
-		if pidSequence < item.Workflow.PID {
-			pidSequence = item.Workflow.PID
-		}
-	}
-
-	for _, item := range pipelineItems {
-		for _, stage := range item.Config.Stages {
-			var gid int
-			for _, step := range stage.Steps {
-				pidSequence++
-				if gid == 0 {
-					gid = pidSequence
-				}
-				step := &model.Step{
-					Name:       step.Alias,
-					UUID:       step.UUID,
-					PipelineID: pipeline.ID,
-					PID:        pidSequence,
-					PPID:       item.Workflow.PID,
-					State:      model.StatusPending,
-					Failure:    step.Failure,
-					Type:       model.StepType(step.Type),
-				}
-				if item.Workflow.State == model.StatusSkipped {
-					step.State = model.StatusSkipped
-				}
-				item.Workflow.Children = append(item.Workflow.Children, step)
-			}
-		}
-		pipeline.Workflows = append(pipeline.Workflows, item.Workflow)
-	}
-
-	return pipeline
 }
 
 func SanitizePath(path string) string {

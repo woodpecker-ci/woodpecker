@@ -1,5 +1,5 @@
 <template>
-  <FluidContainer full-width class="flex flex-col flex-grow">
+  <Container full-width class="flex flex-col flex-grow md:min-h-xs">
     <div class="flex w-full min-h-0 flex-grow">
       <PipelineStepList
         v-if="pipeline?.workflows?.length || 0 > 0"
@@ -9,15 +9,25 @@
       />
 
       <div class="flex flex-grow relative">
-        <div v-if="error" class="flex flex-col p-4">
-          <span class="text-wp-state-error-100 font-bold text-xl mb-2">{{ $t('repo.pipeline.execution_error') }}</span>
-          <span class="text-wp-state-error-100">{{ error }}</span>
-        </div>
+        <PipelineInfo v-if="error">
+          <Icon name="status-error" class="w-16 h-16 text-wp-state-error-100" />
+          <div class="flex flex-wrap items-center justify-center gap-2 text-xl">
+            <span class="capitalize">{{ $t('repo.pipeline.execution_error') }}:</span>
+            <span>{{ error }}</span>
+          </div>
+        </PipelineInfo>
 
-        <div v-else-if="pipeline.status === 'blocked'" class="flex flex-col flex-grow justify-center items-center p-2">
-          <Icon name="status-blocked" class="w-16 h-16 text-wp-text-100 mb-4" />
-          <p class="text-xl text-wp-text-100 mb-4">{{ $t('repo.pipeline.protected.awaits') }}</p>
-          <div v-if="repoPermissions.push" class="flex space-x-4">
+        <PipelineInfo v-else-if="pipeline.status === 'blocked'">
+          <Icon name="status-blocked" class="w-16 h-16" />
+          <span class="text-xl">{{ $t('repo.pipeline.protected.awaits') }}</span>
+          <div v-if="repoPermissions.push" class="flex gap-2 flex-wrap items-center justify-center">
+            <Button
+              color="blue"
+              :start-icon="forge ?? 'repo'"
+              :text="$t('repo.pipeline.protected.review')"
+              :to="pipeline.link_url"
+              :title="message"
+            />
             <Button
               color="green"
               :text="$t('repo.pipeline.protected.approve')"
@@ -31,12 +41,12 @@
               @click="declinePipeline"
             />
           </div>
-        </div>
+        </PipelineInfo>
 
-        <div v-else-if="pipeline.status === 'declined'" class="flex flex-col flex-grow justify-center items-center">
-          <Icon name="status-blocked" class="w-16 h-16 text-wp-text-100 mb-4" />
-          <p class="text-xl text-wp-text-100">{{ $t('repo.pipeline.protected.declined') }}</p>
-        </div>
+        <PipelineInfo v-else-if="pipeline.status === 'declined'">
+          <Icon name="status-blocked" class="w-16 h-16" />
+          <p class="text-xl">{{ $t('repo.pipeline.protected.declined') }}</p>
+        </PipelineInfo>
 
         <PipelineLog
           v-else-if="selectedStepId"
@@ -46,7 +56,7 @@
         />
       </div>
     </div>
-  </FluidContainer>
+  </Container>
 </template>
 
 <script lang="ts" setup>
@@ -56,12 +66,14 @@ import { useRoute, useRouter } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
 import Icon from '~/components/atomic/Icon.vue';
-import FluidContainer from '~/components/layout/FluidContainer.vue';
+import Container from '~/components/layout/Container.vue';
 import PipelineLog from '~/components/repo/pipeline/PipelineLog.vue';
 import PipelineStepList from '~/components/repo/pipeline/PipelineStepList.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
+import useConfig from '~/compositions/useConfig';
 import useNotifications from '~/compositions/useNotifications';
+import usePipeline from '~/compositions/usePipeline';
 import { Pipeline, PipelineStep, Repo, RepoPermissions } from '~/lib/api/types';
 import { findStep } from '~/utils/helpers';
 
@@ -124,6 +136,9 @@ const selectedStepId = computed({
     router.replace({ params: { ...route.params, stepId: `${_selectedStepId}` } });
   },
 });
+
+const { forge } = useConfig();
+const { message } = usePipeline(pipeline);
 
 const selectedStep = computed(() => findStep(pipeline.value.workflows || [], selectedStepId.value || -1));
 const error = computed(() => pipeline.value?.error || selectedStep.value?.error);

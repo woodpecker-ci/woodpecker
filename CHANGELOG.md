@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.0.3](https://github.com/woodpecker-ci/woodpecker/releases/tag/v1.0.3) - 2023-10-14
+
+* SECURITY
+  * Update dependencies (#2587)
+  * Frontend: bump postcss to 8.4.31 (#2541)
+  * Check permissions on repo lookup (#2358)
+  * Change token logging to trace level (#2247) (#2248)
+* BUGFIXES
+  * Fix gitlab hooks (#2537) (#2542)
+  * Trim last "/" from WOODPECKER_HOST config (#2538) (#2540)
+  * Fix(server/api/repo): Fix repair webhook host (#2372) (#2452)
+  * Show correct event in pipeline step list (#2448)
+  * Make WOODPECKER_MIGRATIONS_ALLOW_LONG have an actuall effect (#2251) (#2309)
+  * Docker build dont ignore ci env vars (#2238) (#2246)
+  * Handle parsed hooks that should be ignored (#2243) (#2244)
+  * Return 204 not 500 on filtered pipeline (#2230)
+  * Set correct version for release branch releases (#2227) (#2229)
+* MISC
+  * Rebuild swagger with latest version (#2455)
+
+## [1.0.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v1.0.2) - 2023-08-16
+
+* SECURITY
+  * Validate webhook before change any data (#2221) (#2222)
+* BUGFIXES
+  * Bump default git clone plugin (#2215) (#2220)
+  * Show all steps (#2190) (#2191)
+
 ## [1.0.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v1.0.1) - 2023-08-08
 
 * SECURITY

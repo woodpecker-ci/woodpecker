@@ -1,7 +1,7 @@
 <template>
   <div v-if="pipeline" class="flex flex-col pt-10 md:pt-0">
     <div
-      class="flex flex-grow flex-col code-box shadow !p-0 !rounded-none md:m-2 md:mt-0 !md:rounded-md overflow-hidden"
+      class="flex flex-grow flex-col code-box shadow !p-0 !rounded-none md:m-4 md:mt-0 !md:rounded-md overflow-hidden"
       @mouseover="showActions = true"
       @mouseleave="showActions = false"
     >
@@ -40,7 +40,7 @@
       <div
         v-show="hasLogs && loadedLogs"
         ref="consoleElement"
-        class="w-full max-w-full grid grid-cols-[min-content,1fr,min-content] p-4 auto-rows-min flex-grow overflow-x-hidden overflow-y-auto"
+        class="w-full max-w-full grid grid-cols-[min-content,minmax(0,1fr),min-content] p-4 auto-rows-min flex-grow overflow-x-hidden overflow-y-auto text-xs md:text-sm"
       >
         <div v-for="line in log" :key="line.index" class="contents font-mono">
           <a
@@ -57,7 +57,7 @@
           >
           <!-- eslint-disable vue/no-v-html -->
           <span
-            class="align-top whitespace-pre-wrap break-words text-sm"
+            class="align-top whitespace-pre-wrap break-words"
             :class="{
               'bg-opacity-40 dark:bg-opacity-50 bg-10.168.64.121-600 dark:bg-red-800': line.type === 'error',
               'bg-opacity-40 dark:bg-opacity-50 bg-yellow-600 dark:bg-yellow-800': line.type === 'warning',
@@ -100,7 +100,7 @@
 import '~/style/console.css';
 
 import { useStorage } from '@vueuse/core';
-import AnsiUp from 'ansi_up';
+import { AnsiUp } from 'ansi_up';
 import { debounce } from 'lodash';
 import { computed, inject, nextTick, onMounted, Ref, ref, toRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -275,7 +275,7 @@ async function loadLogs() {
   if (loadedStepSlug.value === stepSlug.value) {
     return;
   }
-  loadedStepSlug.value = stepSlug.value;
+
   log.value = undefined;
   logBuffer.value = [];
   ansiUp.value = new AnsiUp();
@@ -294,12 +294,12 @@ async function loadLogs() {
   }
 
   if (isStepFinished(step.value)) {
+    loadedStepSlug.value = stepSlug.value;
     const logs = await apiClient.getLogs(repo.value.id, pipeline.value.number, step.value.id);
     logs?.forEach((line) => writeLog({ index: line.line, text: b64DecodeUnicode(line.data), time: line.time }));
     flushLogs(false);
-  }
-
-  if (isStepRunning(step.value)) {
+  } else if (isStepRunning(step.value)) {
+    loadedStepSlug.value = stepSlug.value;
     stream.value = apiClient.streamLogs(repo.value.id, pipeline.value.number, step.value.id, (line) => {
       writeLog({ index: line.line, text: b64DecodeUnicode(line.data), time: line.time });
       flushLogs(true);
@@ -308,17 +308,21 @@ async function loadLogs() {
 }
 
 onMounted(async () => {
-  loadLogs();
+  await loadLogs();
 });
 
-watch(stepSlug, () => {
-  loadLogs();
+watch(stepSlug, async () => {
+  await loadLogs();
 });
 
-watch(step, (oldStep, newStep) => {
-  if (oldStep && oldStep.name === newStep?.name && oldStep?.end_time !== newStep?.end_time) {
-    if (autoScroll.value) {
+watch(step, async (newStep, oldStep) => {
+  if (oldStep?.name === newStep?.name) {
+    if (oldStep?.end_time !== newStep?.end_time && autoScroll.value) {
       scrollDown();
+    }
+
+    if (oldStep?.state !== newStep?.state) {
+      await loadLogs();
     }
   }
 });
