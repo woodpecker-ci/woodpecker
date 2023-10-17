@@ -21,6 +21,8 @@ import (
 type oldSecret025 struct {
 	ID          int64 `json:"id"              xorm:"pk autoincr 'secret_id'"`
 	PluginsOnly bool  `json:"plugins_only"    xorm:"secret_plugins_only"`
+	SkipVerify  bool  `json:"-"               xorm:"secret_skip_verify"`
+	Conceal     bool  `json:"-"               xorm:"secret_conceal"`
 }
 
 func (oldSecret025) TableName() string {
@@ -34,6 +36,6 @@ var removePluginOnlyOptionFromSecretsTable = task{
 		if err := sess.Sync(new(oldSecret025)); err != nil {
 			return err
 		}
-		return dropTableColumns(sess, "secrets", "secret_plugins_only")
+		return dropTableColumns(sess, "secrets", "secret_plugins_only", "secret_skip_verify", "secret_conceal")
 	},
 }
