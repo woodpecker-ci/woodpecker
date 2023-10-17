@@ -38,7 +38,7 @@ steps:
       - event: cron
 
   deploy-preview:
-    image: woodpeckerci/plugin-surge-preview:1.2.0
+    image: woodpeckerci/plugin-surge-preview:1.2.2
     settings:
       path: "docs/build/"
       surge_token:

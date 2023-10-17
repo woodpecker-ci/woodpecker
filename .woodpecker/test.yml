@@ -136,7 +136,7 @@ steps:
 
 services:
   service-postgres:
-    image: postgres:11
+    image: postgres:16
     ports: ["5432"]
     environment:
       - POSTGRES_USER=postgres
