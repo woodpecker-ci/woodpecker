@@ -11,7 +11,7 @@ export function useTabsProvider({
   disableHashMode,
   updateActiveTabProp,
 }: {
-  activeTabProp: Ref<string>;
+  activeTabProp: Ref<string | undefined>;
   updateActiveTabProp: (tab: string) => void;
   disableHashMode: Ref<boolean>;
 }) {

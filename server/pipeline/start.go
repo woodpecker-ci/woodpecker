@@ -61,9 +61,6 @@ func start(ctx context.Context, store store.Store, activePipeline *model.Pipelin
 }
 
 func publishPipeline(ctx context.Context, pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User) {
-	if err := publishToTopic(ctx, pipeline, repo); err != nil {
-		log.Error().Err(err).Msg("publishToTopic")
-	}
-
+	publishToTopic(pipeline, repo)
 	updatePipelineStatus(ctx, pipeline, repo, repoUser)
 }

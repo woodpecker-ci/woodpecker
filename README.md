@@ -20,7 +20,7 @@
   <a href="https://matrix.to/#/#woodpecker:matrix.org" title="Join the Matrix space at https://matrix.to/#/#woodpecker:matrix.org">
     <img src="https://img.shields.io/matrix/woodpecker:matrix.org?label=matrix">
   </a>
-  <a href="https://goreportcard.com/badge/github.com/woodpecker-ci/woodpecker" title="Go Report Card">
+  <a href="https://goreportcard.com/report/github.com/woodpecker-ci/woodpecker" title="Go Report Card">
     <img src="https://goreportcard.com/badge/github.com/woodpecker-ci/woodpecker">
   </a>
   <a href="https://godoc.org/github.com/woodpecker-ci/woodpecker" title="GoDoc">
