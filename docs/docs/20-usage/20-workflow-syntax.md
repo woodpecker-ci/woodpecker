@@ -50,8 +50,8 @@ git commit -m "updated README [CI SKIP]"
 
 ## Steps
 
-Every step of your workflow executes arbitrary commands inside a specified container. The defined commands are executed serially.
-The associated commit of a current workflow run is checked out with git to a workspace which is mounted to every step of the workflow as the working directory.
+Every step of your workflow executes commands inside a specified container. The defined commands are executed serially.
+The associated commit is checked out with git to a workspace which is mounted to every step of the workflow as the working directory.
 
 ```diff
  steps:
