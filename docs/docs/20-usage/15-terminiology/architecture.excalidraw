@@ -1336,15 +1336,18 @@
     },
     {
       "type": "text",
-      "version": 376,
-      "versionNonce": 240433307,
-      "isDeleted": false,
-      "id": "hbdYbC8cWZimkwmRGQhFf",
-      "fillStyle": "solid",
-      "strokeWidth": 4,
-      "strokeStyle": "solid",
-      "roughness": 0,
-      "opacity": 100,
+      "version": 376,- add some images explaining the architecture & terminology with
+pipeline -> workflow -> step
+- combine advanced config usage
+- rename pipeline syntax to workflow syntax (and most references to
+pipeline steps etc as well)
+- update agent registration part
+- add bug note to secrets encryption setting
+- remove usage from readme to point to up-to-date docs page
+- typos
+- closes #1408
+
+---------
       "angle": 0,
       "x": 1094.1972977313717,
       "y": 681.8988272758752,
