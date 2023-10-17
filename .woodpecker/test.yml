@@ -76,6 +76,11 @@ steps:
       - 'addlicense -check -ignore "vendor/**" **/*.go'
     when: *when
 
+  prettier:
+    image: woodpeckerci/plugin-prettier:next
+    group: test
+    when: *when
+
   test:
     image: *golang_image
     group: test
@@ -132,10 +137,6 @@ steps:
     when:
       - path: *when_path
     failure: ignore
-
-  prettier:
-    image: woodpeckerci/plugin-prettier:next
-    when: *when
 
 services:
   service-postgres:
