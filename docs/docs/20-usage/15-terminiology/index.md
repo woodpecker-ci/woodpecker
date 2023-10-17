@@ -6,7 +6,7 @@
 
 ## Pipeline, workflow & step
 
-![](pipeline-workflow-step.svg)
+![Relation between pipelines, workflows and steps](pipeline-workflow-step.svg)
 
 ## Glossary
 
