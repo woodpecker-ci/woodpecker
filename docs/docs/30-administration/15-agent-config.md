@@ -23,7 +23,7 @@ The following are automatically set and can be overridden:
 
 ## Workflows per agent
 
-By default the maximum workflows that are executed in parallel on an agent is 1. If required you can add `WOODPECKER_MAX_WORKFLOWS` to increase your parallel processing for an agent.
+By default, the maximum workflows that are executed in parallel on an agent is 1. If required, you can add `WOODPECKER_MAX_WORKFLOWS` to increase your parallel processing for an agent.
 
 ```diff
 # docker-compose.yml
@@ -46,14 +46,14 @@ There are two types of tokens to connect an agent to the server:
 
 ### Using system token
 
-A _system token_ is a token that is used system-wide, e. g. when you set the same token in `WOODPECKER_AGENT_SECRET` on both the server and the agents.
+A _system token_ is a token that is used system-wide, e.g. when you set the same token in `WOODPECKER_AGENT_SECRET` on both the server and the agents.
 
 In that case registration process would be as following:
 
-1. The first time the agent communicates with the server it is using the system token
-1. The server registers the agent in its database if not done before and generates a unique ID which is then send back to the agent
+1. The first time the agent communicates with the server, it is using the system token
+1. The server registers the agent in its database if not done before and generates a unique ID which is then sent back to the agent
 1. The agent stores the received ID in a file (configured by `WOODPECKER_AGENT_CONFIG_FILE`)
-1. At the following startups the agent uses the system token **and** its received ID to identify itself to the server
+1. At the following startups, the agent uses the system token **and** its received ID to identify itself to the server
 
 ### Using agent token
 
@@ -125,7 +125,7 @@ Configures the number of parallel workflows.
 ### `WOODPECKER_FILTER_LABELS`
 > Default: empty
 
-Configures labels to filter pipeline pick up. Use a list of key-value pairs like `key=value,second-key=*`. `*` can be used as a wildcard. By default agents provide three additional labels `platform=os/arch`, `hostname=my-agent` and `repo=*` which can be overwritten if needed. To learn how labels work check out the [pipeline syntax page](../20-usage/20-workflow-syntax.md#labels).
+Configures labels to filter pipeline pick up. Use a list of key-value pairs like `key=value,second-key=*`. `*` can be used as a wildcard. By default, agents provide three additional labels `platform=os/arch`, `hostname=my-agent` and `repo=*` which can be overwritten if needed. To learn how labels work, check out the [pipeline syntax page](../20-usage/20-workflow-syntax.md#labels).
 
 ### `WOODPECKER_HEALTHCHECK`
 > Default: `true`

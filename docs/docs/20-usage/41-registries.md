@@ -37,7 +37,7 @@ Example registry hostname matching logic:
 
 ## Global registry support
 
-To make a private registry globally available check the [server configuration docs](../30-administration/10-server-config.md#global-registry-setting).
+To make a private registry globally available, check the [server configuration docs](../30-administration/10-server-config.md#global-registry-setting).
 
 ## GCR registry support
 
@@ -46,7 +46,7 @@ For specific details on configuring access to Google Container Registry, please 
 ## Local Images
 
 :::warning
-For this privileged rights are needed only available to admins. In addition this only works when using a single agent.
+For this, privileged rights are needed only available to admins. In addition, this only works when using a single agent.
 :::
 
 It's possible to build a local image by mounting the docker socket as a volume.
