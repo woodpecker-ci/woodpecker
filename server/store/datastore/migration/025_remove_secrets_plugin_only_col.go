@@ -15,14 +15,17 @@
 package migration
 
 import (
+	"fmt"
+
 	"xorm.io/xorm"
 )
 
 type oldSecret025 struct {
-	ID          int64 `json:"id"              xorm:"pk autoincr 'secret_id'"`
-	PluginsOnly bool  `json:"plugins_only"    xorm:"secret_plugins_only"`
-	SkipVerify  bool  `json:"-"               xorm:"secret_skip_verify"`
-	Conceal     bool  `json:"-"               xorm:"secret_conceal"`
+	ID          int64    `json:"id"              xorm:"pk autoincr 'secret_id'"`
+	PluginsOnly bool     `json:"plugins_only"    xorm:"secret_plugins_only"`
+	SkipVerify  bool     `json:"-"               xorm:"secret_skip_verify"`
+	Conceal     bool     `json:"-"               xorm:"secret_conceal"`
+	Images      []string `json:"images"          xorm:"json 'secret_images'"`
 }
 
 func (oldSecret025) TableName() string {
@@ -36,6 +39,23 @@ var removePluginOnlyOptionFromSecretsTable = task{
 		if err := sess.Sync(new(oldSecret025)); err != nil {
 			return err
 		}
+
+		// get all secrets
+		var secrets []*oldSecret025
+		if err := sess.Find(&secrets); err != nil {
+			return fmt.Errorf("find all secrets failed: %w", err)
+		}
+
+		for _, secret := range secrets {
+			if !secret.PluginsOnly && secret.Images != nil && len(secret.Images) > 0 {
+				// if secret has an image list and should not only be used by plugins, then empty the image list
+				secret.Images = []string{}
+				if _, err := sess.Cols("images").Update(secret); err != nil {
+					return fmt.Errorf("updating secret failed: %w", err)
+				}
+			}
+		}
+
 		return dropTableColumns(sess, "secrets", "secret_plugins_only", "secret_skip_verify", "secret_conceal")
 	},
 }
