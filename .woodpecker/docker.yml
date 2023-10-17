@@ -23,12 +23,14 @@ variables:
   # vars used on push / tag events only
   - publish_logins: &publish_logins # Default DockerHub login
       - registry: https://index.docker.io/v1/
-        username: woodpeckerbot
+        username:
+          from_secret: docker_username
         password:
           from_secret: docker_password
       # Additional Quay.IO login
       - registry: https://quay.io
-        username: 'woodpeckerci+wp_ci'
+        username:
+          from_secret: QUAY_IO_USER
         password:
           from_secret: QUAY_IO_TOKEN
   - &publish_repos_server 'woodpeckerci/woodpecker-server,quay.io/woodpeckerci/woodpecker-server'
@@ -76,7 +78,6 @@ steps:
       dockerfile: docker/Dockerfile.server.multiarch
       platforms: *platforms_preview
       tag: pull_${CI_COMMIT_PULL_REQUEST}
-      dry_run: true
     when:
       event: pull_request
 
@@ -89,7 +90,6 @@ steps:
       dockerfile: docker/Dockerfile.server.alpine.multiarch
       platforms: *platforms_preview
       tag: pull_${CI_COMMIT_PULL_REQUEST}-alpine
-      dry_run: true
     when:
       event: pull_request
 
@@ -202,7 +202,6 @@ steps:
       platforms: *platforms_preview
       tag: pull_${CI_COMMIT_PULL_REQUEST}
       build_args: *build_args
-      dry_run: true
     when:
       event: pull_request
 
@@ -304,7 +303,6 @@ steps:
       platforms: *platforms_preview
       tag: pull_${CI_COMMIT_PULL_REQUEST}
       build_args: *build_args
-      dry_run: true
     when:
       event: pull_request
 
