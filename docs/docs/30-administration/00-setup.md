@@ -24,7 +24,7 @@ Below are resources requirements for Woodpecker components itself:
 | Component | Memory | CPU |
 | --------- | ------ | --- |
 | Server    | 200 MB | 1   |
-| Agent     |  32 MB | 1   |
+| Agent     | 32 MB  | 1   |
 
 Note, that those values do not include the operating system or workload (pipelines execution) resources consumption.
 
@@ -170,7 +170,7 @@ services:
 +     - WOODPECKER_AGENT_SECRET=${WOODPECKER_AGENT_SECRET}
 ```
 
-### Kubernetes 
+### Kubernetes
 
 We recommended to deploy Woodpecker using the [Woodpecker helm chart](https://github.com/woodpecker-ci/helm).
 Have a look at the [`values.yaml`](https://github.com/woodpecker-ci/helm/blob/main/values.yaml) config files for all available settings.

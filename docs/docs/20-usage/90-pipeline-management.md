@@ -27,10 +27,10 @@ Another approach using YAML extensions:
 ```yml
 variables:
   - global_env: &global_env
-    - BASH_VERSION=1.2.3
-    - PATH_SRC=src/
-    - PATH_TEST=test/
-    - FOO=something
+      - BASH_VERSION=1.2.3
+      - PATH_SRC=src/
+      - PATH_TEST=test/
+      - FOO=something
 
 steps:
   build:
@@ -58,8 +58,8 @@ steps:
   init:
     image: bash
     commands:
-      echo "FOO=hello" >> envvars
-      echo "BAR=world" >> envvars
+      - echo "FOO=hello" >> envvars
+      - echo "BAR=world" >> envvars
 
   debug:
     image: bash

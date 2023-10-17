@@ -11,7 +11,7 @@ scrape_configs:
     bearer_token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
     static_configs:
-       - targets: ['woodpecker.domain.com']
+      - targets: ['woodpecker.domain.com']
 ```
 
 ## Authorization

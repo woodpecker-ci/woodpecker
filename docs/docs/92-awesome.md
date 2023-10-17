@@ -31,7 +31,7 @@ If you have some missing resources, please feel free to [open a pull-request](ht
 
 ## Configuration Services
 
-- [Dynamic Pipelines for Nix Flakes](https://github.com/pinpox/woodpecker-flake-pipeliner) - Define pipelines as Nix Flake outputs 
+- [Dynamic Pipelines for Nix Flakes](https://github.com/pinpox/woodpecker-flake-pipeliner) - Define pipelines as Nix Flake outputs
 
 ## Pipelines
 

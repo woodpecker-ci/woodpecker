@@ -19,7 +19,7 @@ Image variants:
 - The `vX.X` images are based on the current release branch (e.g. `release/v1.0`) and can be used to get bugfixes asap
 - The `next` images are based on the current `main` branch and should not be used for production environments
 
-``` bash
+```bash
 # server
 docker pull woodpeckerci/woodpecker-server:latest
 docker pull woodpeckerci/woodpecker-server:latest-alpine

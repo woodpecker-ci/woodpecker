@@ -322,8 +322,8 @@ Execute a step using custom include and exclude logic:
 ```yaml
 when:
   - branch:
-      include: [ main, release/* ]
-      exclude: [ release/1.0.0, release/1.1.* ]
+      include: [main, release/*]
+      exclude: [release/1.0.0, release/1.1.*]
 ```
 
 #### `event`
@@ -408,7 +408,7 @@ Execute a step for a specific platform using wildcards:
 
 ```yaml
 when:
-  - platform:  [ linux/*, windows/amd64 ]
+  - platform: [linux/*, windows/amd64]
 ```
 
 #### `environment`
@@ -452,7 +452,7 @@ Execute a step only on a pipeline with certain files being changed:
 
 ```yaml
 when:
-  - path: "src/*"
+  - path: 'src/*'
 ```
 
 You can use [glob patterns](https://github.com/bmatcuk/doublestar#patterns) to match the changed files and specify if the step should run if a file matching that pattern has been changed `include` or if some files have **not** been changed `exclude`.
@@ -460,9 +460,9 @@ You can use [glob patterns](https://github.com/bmatcuk/doublestar#patterns) to m
 ```yaml
 when:
   - path:
-      include: [ '.woodpecker/*.yml', '*.ini' ]
-      exclude: [ '*.md', 'docs/**' ]
-      ignore_message: "[ALL]"
+      include: ['.woodpecker/*.yml', '*.ini']
+      exclude: ['*.md', 'docs/**']
+      ignore_message: '[ALL]'
 ```
 
 **Hint:** Passing a defined ignore-message like `[ALL]` inside the commit message will ignore all path conditions.
