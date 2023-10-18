@@ -80,7 +80,7 @@ steps:
       platforms: *platforms_preview
       tag: pull_${CI_COMMIT_PULL_REQUEST}
     when:
-      event: pull_request
+      evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS == "build_pr_images"'
 
   publish-server-alpine-preview:
     image: woodpeckerci/plugin-docker-buildx:2.1.0
@@ -92,7 +92,7 @@ steps:
       platforms: *platforms_preview
       tag: pull_${CI_COMMIT_PULL_REQUEST}-alpine
     when:
-      event: pull_request
+      evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS == "build_pr_images"'
 
   cross-compile-server:
     image: *xgo_image
@@ -204,7 +204,7 @@ steps:
       tag: pull_${CI_COMMIT_PULL_REQUEST}
       build_args: *build_args
     when:
-      event: pull_request
+      evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS == "build_pr_images"'
 
   publish-next-agent:
     group: docker
@@ -305,7 +305,7 @@ steps:
       tag: pull_${CI_COMMIT_PULL_REQUEST}
       build_args: *build_args
     when:
-      event: pull_request
+      evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS == "build_pr_images"'
 
   publish-next-cli:
     group: docker
