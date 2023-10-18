@@ -118,21 +118,21 @@ steps:
       - make test-server-datastore
     when: *when
 
-  codecov:
-    pull: true
-    image: woodpeckerci/plugin-codecov:next-alpine
-    settings:
-      files:
-        - agent-coverage.out
-        - cli-coverage.out
-        - coverage.out
-        - server-coverage.out
-        - datastore-coverage.out
-      token:
-        from_secret: codecov_token
-    when:
-      - path: *when_path
-    failure: ignore
+  # codecov:
+  #   pull: true
+  #   image: woodpeckerci/plugin-codecov:next-alpine
+  #   settings:
+  #     files:
+  #       - agent-coverage.out
+  #       - cli-coverage.out
+  #       - coverage.out
+  #       - server-coverage.out
+  #       - datastore-coverage.out
+  #     token:
+  #       from_secret: codecov_token
+  #   when:
+  #     - path: *when_path
+  #   failure: ignore
 
 services:
   service-postgres:

@@ -9,7 +9,7 @@ depends_on:
 variables:
   - &golang_image 'golang:1.21.3'
   - &node_image 'node:20-alpine'
-  - &xgo_image 'techknowlogick/xgo:go-1.21.3'
+  - &xgo_image 'pats22/xgo:go-1.21.3'
   - &xgo_version 'go-1.21.2'
 
 steps:
