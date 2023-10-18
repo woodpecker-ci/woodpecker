@@ -22,9 +22,9 @@ import (
 
 // Command exports the pipeline command set.
 var Command = &cli.Command{
-	Name:    "pipeline",
-	Usage:   "manage pipelines",
-	Flags:   common.GlobalFlags,
+	Name:  "pipeline",
+	Usage: "manage pipelines",
+	Flags: common.GlobalFlags,
 	Subcommands: []*cli.Command{
 		pipelineListCmd,
 		pipelineLastCmd,
