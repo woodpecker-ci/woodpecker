@@ -1,5 +1,13 @@
 # Terminology
 
+## Woodpecker architecture
+
+![Woodpecker architecture](architecture.svg)
+
+## Pipeline, workflow & step
+
+![Relation between pipelines, workflows and steps](pipeline-workflow-step.svg)
+
 ## Glossary
 
 - **Woodpecker CI**: The project name around Woodpecker.
@@ -24,19 +32,20 @@
 - **Dependency**: [Workflows][Workflow] can depend on each other, and if possible, they are executed in parallel.
 - **Status**: Status refers to the outcome of a step or [workflow][Workflow] after it has been executed, determined by the internal command exit code. At the end of a [workflow][Workflow], its status is sent to the [forge][Forge].
 
-## Terms
+## Conventions
 
-Sometimes there exist multiple terms that can be used for a thing, we try to define it here once and stick to it.
+Sometimes there are multiple terms that can be used to describe something. This section lists the preferred terms to use in Woodpecker:
 
-- environment variables `*_LINK` should be `*_URL`, also in code, use `URL()` instead of `Link` ([Vote](https://framadate.org/jVSQHwIGfJYy82IL))
-- **Pipelines** were previously called **builds**
-- **Steps** were previously called **jobs**
+- Environment variables `*_LINK` should be called `*_URL`. In the code use `URL()` instead of `Link()`
+- Use the term **pipelines** instead of the previous **builds**
+- Use the term **steps** instead of the previous **jobs**
 
-[Pipeline]:  ./20-pipeline-syntax.md
-[Workflow]:  ./25-workflows.md
-[Forge]:     ../30-administration/11-forges/10-overview.md
-[Plugin]:    ./51-plugins/10-plugins.md
-[Workspace]: ./20-pipeline-syntax.md#workspace
-[Matrix]:    ./30-matrix-workflows.md
-[Docker]:    ../30-administration/22-backends/10-docker.md
-[Local]:     ../30-administration/22-backends/20-local.md
+<!-- References -->
+[Pipeline]:  ../20-workflow-syntax.md
+[Workflow]:  ../25-workflows.md
+[Forge]:     ../../30-administration/11-forges/10-overview.md
+[Plugin]:    ../51-plugins/10-plugins.md
+[Workspace]: ../20-workflow-syntax.md#workspace
+[Matrix]:    ../30-matrix-workflows.md
+[Docker]:    ../../30-administration/22-backends/10-docker.md
+[Local]:     ../../30-administration/22-backends/20-local.md

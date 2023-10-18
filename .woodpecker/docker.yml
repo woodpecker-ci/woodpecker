@@ -9,10 +9,10 @@ depends_on:
   - web
 
 variables:
-  - &golang_image 'golang:1.20.2'
-  - &node_image 'node:18-alpine'
-  - &xgo_image 'techknowlogick/xgo:go-1.20.2'
-  - &xgo_version 'go-1.20.2'
+  - &golang_image 'golang:1.21.3'
+  - &node_image 'node:20-alpine'
+  - &xgo_image 'techknowlogick/xgo:go-1.21.3'
+  - &xgo_version 'go-1.21.2'
   - &platforms_release 'linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/386,linux/amd64,linux/ppc64le,linux/riscv64,linux/s390x,freebsd/arm64,freebsd/amd64,openbsd/arm64,openbsd/amd64'
   - &platforms_server 'linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le,linux/riscv64'
   - &platforms_preview 'linux/amd64'
@@ -77,7 +77,7 @@ steps:
       - chmod +x dist/server/linux/amd64/woodpecker-server
 
   publish-server-preview:
-    image: woodpeckerci/plugin-docker-buildx
+    image: woodpeckerci/plugin-docker-buildx:2.1.0
     secrets: [ docker_username, docker_password ]
     group: docker
     settings:
@@ -89,7 +89,7 @@ steps:
       event: pull_request
 
   publish-server-alpine-preview:
-    image: woodpeckerci/plugin-docker-buildx
+    image: woodpeckerci/plugin-docker-buildx:2.1.0
     secrets: [ docker_username, docker_password ]
     group: docker
     settings:
@@ -118,7 +118,7 @@ steps:
       event: [push, tag]
 
   publish-next-server:
-    image: woodpeckerci/plugin-docker-buildx
+    image: woodpeckerci/plugin-docker-buildx:2.1.0
     group: docker
     settings:
       repo: *publish_repos_server
@@ -131,7 +131,7 @@ steps:
       event: push
 
   publish-next-server-alpine:
-    image: woodpeckerci/plugin-docker-buildx
+    image: woodpeckerci/plugin-docker-buildx:2.1.0
     group: docker
     settings:
       repo: *publish_repos_server
@@ -144,7 +144,7 @@ steps:
       event: push
 
   publish-release-branch-server:
-    image: woodpeckerci/plugin-docker-buildx
+    image: woodpeckerci/plugin-docker-buildx:2.1.0
     group: docker
     settings:
       repo: *publish_repos_server
@@ -157,7 +157,7 @@ steps:
       event: push
 
   publish-release-branch-server-alpine:
-    image: woodpeckerci/plugin-docker-buildx
+    image: woodpeckerci/plugin-docker-buildx:2.1.0
     group: docker
     settings:
       repo: *publish_repos_server
@@ -171,7 +171,7 @@ steps:
 
   release-server:
     group: docker
-    image: woodpeckerci/plugin-docker-buildx
+    image: woodpeckerci/plugin-docker-buildx:2.1.0
     settings:
       repo: *publish_repos_server
       dockerfile: docker/Dockerfile.server.multiarch
@@ -184,7 +184,7 @@ steps:
 
   release-server-alpine:
     group: docker
-    image: woodpeckerci/plugin-docker-buildx
+    image: woodpeckerci/plugin-docker-buildx:2.1.0
     settings:
       repo: *publish_repos_server
       dockerfile: docker/Dockerfile.server.alpine.multiarch
@@ -201,7 +201,7 @@ steps:
 
   publish-agent-preview:
     group: docker
-    image: woodpeckerci/plugin-docker-buildx
+    image: woodpeckerci/plugin-docker-buildx:2.1.0
     secrets: [ docker_username, docker_password ]
     settings:
       repo: woodpeckerci/woodpecker-agent
@@ -214,7 +214,7 @@ steps:
 
   publish-next-agent:
     group: docker
-    image: woodpeckerci/plugin-docker-buildx
+    image: woodpeckerci/plugin-docker-buildx:2.1.0
     settings:
       repo: *publish_repos_agent
       dockerfile: docker/Dockerfile.agent.multiarch
@@ -228,7 +228,7 @@ steps:
 
   publish-next-agent-alpine:
     group: docker
-    image: woodpeckerci/plugin-docker-buildx
+    image: woodpeckerci/plugin-docker-buildx:2.1.0
     settings:
       repo: *publish_repos_agent
       dockerfile: docker/Dockerfile.agent.alpine.multiarch
@@ -242,7 +242,7 @@ steps:
 
   publish-release-branch-agent:
     group: docker
-    image: woodpeckerci/plugin-docker-buildx
+    image: woodpeckerci/plugin-docker-buildx:2.1.0
     settings:
       repo: *publish_repos_agent
       dockerfile: docker/Dockerfile.agent.multiarch
@@ -256,7 +256,7 @@ steps:
 
   publish-release-branch-agent-alpine:
     group: docker
-    image: woodpeckerci/plugin-docker-buildx
+    image: woodpeckerci/plugin-docker-buildx:2.1.0
     settings:
       repo: *publish_repos_agent
       dockerfile: docker/Dockerfile.agent.alpine.multiarch
@@ -270,7 +270,7 @@ steps:
 
   release-agent:
     group: docker
-    image: woodpeckerci/plugin-docker-buildx
+    image: woodpeckerci/plugin-docker-buildx:2.1.0
     settings:
       repo: *publish_repos_agent
       dockerfile: docker/Dockerfile.agent.multiarch
@@ -284,7 +284,7 @@ steps:
 
   release-agent-alpine:
     group: docker
-    image: woodpeckerci/plugin-docker-buildx
+    image: woodpeckerci/plugin-docker-buildx:2.1.0
     settings:
       repo: *publish_repos_agent
       dockerfile: docker/Dockerfile.agent.alpine.multiarch
@@ -302,7 +302,7 @@ steps:
 
   publish-cli-preview:
     group: docker
-    image: woodpeckerci/plugin-docker-buildx
+    image: woodpeckerci/plugin-docker-buildx:2.1.0
     secrets: [ docker_username, docker_password ]
     settings:
       repo: woodpeckerci/woodpecker-cli
@@ -315,7 +315,7 @@ steps:
 
   publish-next-cli:
     group: docker
-    image: woodpeckerci/plugin-docker-buildx
+    image: woodpeckerci/plugin-docker-buildx:2.1.0
     settings:
       repo: *publish_repos_cli
       dockerfile: docker/Dockerfile.cli.multiarch
@@ -329,7 +329,7 @@ steps:
 
   publish-next-cli-alpine:
     group: docker
-    image: woodpeckerci/plugin-docker-buildx
+    image: woodpeckerci/plugin-docker-buildx:2.1.0
     settings:
       repo: *publish_repos_cli
       dockerfile: docker/Dockerfile.cli.alpine.multiarch
@@ -343,7 +343,7 @@ steps:
 
   publish-release-branch-cli:
     group: docker
-    image: woodpeckerci/plugin-docker-buildx
+    image: woodpeckerci/plugin-docker-buildx:2.1.0
     settings:
       repo: *publish_repos_cli
       dockerfile: docker/Dockerfile.cli.multiarch
@@ -357,7 +357,7 @@ steps:
 
   publish-release-branch-cli-alpine:
     group: docker
-    image: woodpeckerci/plugin-docker-buildx
+    image: woodpeckerci/plugin-docker-buildx:2.1.0
     settings:
       repo: *publish_repos_cli
       dockerfile: docker/Dockerfile.cli.alpine.multiarch
@@ -371,7 +371,7 @@ steps:
 
   release-cli:
     group: docker
-    image: woodpeckerci/plugin-docker-buildx
+    image: woodpeckerci/plugin-docker-buildx:2.1.0
     settings:
       repo: *publish_repos_cli
       dockerfile: docker/Dockerfile.cli.multiarch
@@ -385,7 +385,7 @@ steps:
 
   release-cli-alpine:
     group: docker
-    image: woodpeckerci/plugin-docker-buildx
+    image: woodpeckerci/plugin-docker-buildx:2.1.0
     settings:
       repo: *publish_repos_cli
       dockerfile: docker/Dockerfile.cli.alpine.multiarch

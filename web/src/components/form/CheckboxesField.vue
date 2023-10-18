@@ -16,24 +16,17 @@ import { computed, toRef } from 'vue';
 import Checkbox from './Checkbox.vue';
 import { CheckboxOption } from './form.types';
 
-const props = withDefaults(
-  defineProps<{
-    modelValue: CheckboxOption['value'][];
-    options: CheckboxOption[];
-  }>(),
-  {
-    modelValue: () => [],
-    options: undefined,
-  },
-);
-
+const props = defineProps<{
+  modelValue?: CheckboxOption['value'][];
+  options?: CheckboxOption[];
+}>();
 const emit = defineEmits<{
   (event: 'update:modelValue', value: CheckboxOption['value'][]): void;
 }>();
 
 const modelValue = toRef(props, 'modelValue');
 const innerValue = computed({
-  get: () => modelValue.value,
+  get: () => modelValue.value || [],
   set: (value) => {
     emit('update:modelValue', value);
   },

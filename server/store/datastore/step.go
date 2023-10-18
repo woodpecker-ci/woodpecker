@@ -105,6 +105,5 @@ func deleteStep(sess *xorm.Session, stepID int64) error {
 	if _, err := sess.Where("step_id = ?", stepID).Delete(new(model.LogEntry)); err != nil {
 		return err
 	}
-	_, err := sess.ID(stepID).Delete(new(model.Step))
-	return err
+	return wrapDelete(sess.ID(stepID).Delete(new(model.Step)))
 }

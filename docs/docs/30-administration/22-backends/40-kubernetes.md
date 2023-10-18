@@ -84,6 +84,11 @@ Specify the label which is used to select the node where the job should be execu
 By default the pod will use "kubernetes.io/arch" inferred from top-level "platform" setting which is deducted from the agents' environment variable CI_SYSTEM_PLATFORM. To overwrite this, you need to specify this label in the nodeSelector section.
 See the [kubernetes documentation](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector) for more information on using nodeSelector.
 
+### tolerations
+
+When you use nodeSelector and the node pool is configured with Taints, you need to specify the Tolerations. Tolerations allow the scheduler to schedule pods with matching taints.
+See the [kubernetes documentation](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/) for more information on using tolerations.
+
 Example pipeline configuration:
 
 ```yaml
@@ -105,6 +110,12 @@ steps:
             memory: 256Mi
         nodeSelector:
           beta.kubernetes.io/instance-type: p3.8xlarge
+        tolerations:
+        - key: "key1"
+          operator: "Equal"
+          value: "value1"
+          effect: "NoSchedule"
+          tolerationSeconds: 3600
 ```
 
 ### Volumes
@@ -123,3 +134,17 @@ steps:
         - "woodpecker-cache"
     [...]
 ```
+
+## Tips and tricks
+
+### CRI-O
+
+CRI-O users currently need to configure the workspace for all workflows in order for them to run correctly. Add the following at the beginning of your configuration:
+
+```yml
+workspace:
+  base: "/woodpecker"
+  path: "/"
+```
+
+See [this issue](https://github.com/woodpecker-ci/woodpecker/issues/2510) for more details.

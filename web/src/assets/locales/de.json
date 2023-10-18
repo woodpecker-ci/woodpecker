@@ -42,6 +42,16 @@
         "version": "Version"
       },
       "not_allowed": "Du darfst nicht auf die Server-Einstellungen zugreifen",
+      "orgs": {
+        "delete_confirm": "Möchtest du diese Organisation wirklich löschen? Das wird auch alle Repositories löschen, die dieser Organisation gehören.",
+        "delete_org": "Organisation löschen",
+        "deleted": "Organisation gelöscht",
+        "desc": "Organisationen mit Repositories auf diesem Server",
+        "none": "Es gibt noch keine Organisationen.",
+        "org_settings": "Organisations-Einstellungen",
+        "orgs": "Organisationen",
+        "view": "Organisation anzeigen"
+      },
       "queue": {
         "agent": "Agent",
         "desc": "Aufgaben, die darauf warten, von Agents ausgeführt zu werden",
@@ -63,6 +73,14 @@
         "tasks": "Aufgaben",
         "waiting_for": "wartet auf"
       },
+      "repos": {
+        "desc": "Repositories, die auf dem Server aktiviert sind oder waren",
+        "disabled": "Deaktiviert",
+        "none": "Es gibt noch keine Repositories.",
+        "repos": "Repositories",
+        "settings": "Repository-Einstellungen",
+        "view": "Repository anzeigen"
+      },
       "secrets": {
         "add": "Geheimnis hinzufügen",
         "created": "Globales Geheimnis erstellt",
@@ -70,7 +88,7 @@
         "desc": "Globale Geheimnisse können an alle Repositories als Umgebungsvariablen übergeben werden.",
         "events": {
           "events": "Verfügbar für folgende Ereignisse",
-          "pr_warning": "Bitte sei vorsichtig da ein Fremder einen Pull-Request erstellen könnte, um deine Geheimnisse zu erhalten."
+          "pr_warning": "Bitte sei vorsichtig mit dieser Option, da eine böswillige Person über einen Pull-Request deine Geheimnisse erhalten könnte."
         },
         "images": {
           "desc": "Komma getrennte Liste aller Images, für die dieses Geheimnis verwendet werden kann. Freilassen, um alle Images zu erlauben",
@@ -96,7 +114,7 @@
         "avatar_url": "URL des Profilbilds",
         "cancel": "Abbrechen",
         "created": "Benutzer erstellt",
-        "delete_confirm": "Möchtest du diesen Benutzer wirklich löschen?",
+        "delete_confirm": "Möchtest du diesen Benutzer wirklich löschen? Das wird auch alle Repositories löschen, die diesem Benutzer gehören.",
         "delete_user": "Benutzer löschen",
         "deleted": "Benutzer gelöscht",
         "desc": "Auf diesem Server registrierte Benutzer",
@@ -116,6 +134,7 @@
   "cancel": "Abbrechen",
   "color_scheme_dark": "Wechsle zu hellem Modus",
   "color_scheme_light": "Wechsle zu dunklem Modus",
+  "default": "Standard",
   "docs": "Docs",
   "documentation_for": "Dokumentation für „{topic}“",
   "errors": {
@@ -174,6 +193,7 @@
       }
     },
     "enable": {
+      "disabled": "Deaktiviert",
       "enable": "Aktivieren",
       "enabled": "Bereits aktiviert",
       "list_reloaded": "Repository-Liste neu geladen",
@@ -207,7 +227,6 @@
         "restart_success": "Pipeline neu gestartet"
       },
       "config": "Konfiguration",
-      "created": "Erstellt",
       "event": {
         "cron": "Cron",
         "deploy": "Deploy",
@@ -234,7 +253,8 @@
         "awaits": "Diese Pipeline wartet auf die Genehmigung durch einen Maintainer!",
         "decline": "Ablehnen",
         "decline_success": "Pipeline abgelehnt",
-        "declined": "Diese Pipeline ist abgelehnt worden!"
+        "declined": "Diese Pipeline ist abgelehnt worden!",
+        "review": "Änderungen überprüfen"
       },
       "status": {
         "blocked": "blockiert",
@@ -390,7 +410,7 @@
         "edit": "Geheimnis bearbeiten",
         "events": {
           "events": "Verfügbar bei folgenden Ereignissen",
-          "pr_warning": "Sei bitte vorsichtig mit dieser Option, da ein bösartiger Akteur eine bösartigen Pull-Request erstellen kann, der deine Geheimnisse preisgibt."
+          "pr_warning": "Bitte sei vorsichtig mit dieser Option, da eine böswillige Person über einen Pull-Request deine Geheimnisse erhalten könnte."
         },
         "images": {
           "desc": "Durch Kommata getrennte Liste der Images, für die dieses Geheimnis verfügbar ist; leer lassen, um alle Images zuzulassen",
@@ -443,6 +463,28 @@
       "general": {
         "general": "Allgemein",
         "language": "Sprache"
+      },
+      "secrets": {
+        "add": "Geheimnis hinzufügen",
+        "created": "Benutzer-Geheimnis erstellt",
+        "deleted": "Benutzer-Geheimnis gelöscht",
+        "desc": "Benutzer-Geheimnisse können an alle Repositories des Benutzers als Umgebungsvariablen übergeben werden.",
+        "events": {
+          "events": "Verfügbar für folgende Ereignisse",
+          "pr_warning": "Bitte sei vorsichtig mit dieser Option, da eine böswillige Person über einen Pull-Request deine Geheimnisse erhalten könnte."
+        },
+        "images": {
+          "desc": "Komma getrennte Liste aller Images, für die dieses Geheimnis verwendet werden kann. Freilassen, um alle Images zu erlauben",
+          "images": "Verfügbar für die folgenden Images"
+        },
+        "name": "Name",
+        "none": "Es existieren noch keine Benutzer-Geheimnisse.",
+        "plugins_only": "Nur für Plugins verfügbar",
+        "save": "Geheimnis speichern",
+        "saved": "Benutzer-Geheimnis gespeichert",
+        "secrets": "Geheimnisse",
+        "show": "Geheimnisse anzeigen",
+        "value": "Wert"
       },
       "settings": "Benutzereinstellungen"
     }

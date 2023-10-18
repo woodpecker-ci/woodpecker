@@ -70,8 +70,8 @@ func (c *client) Version(ctx context.Context) (*rpc.Version, error) {
 	}, nil
 }
 
-// Next returns the next pipeline in the queue.
-func (c *client) Next(ctx context.Context, f rpc.Filter) (*rpc.Pipeline, error) {
+// Next returns the next workflow in the queue.
+func (c *client) Next(ctx context.Context, f rpc.Filter) (*rpc.Workflow, error) {
 	var res *proto.NextResponse
 	var err error
 	retry := c.newBackOff()
@@ -111,21 +111,21 @@ func (c *client) Next(ctx context.Context, f rpc.Filter) (*rpc.Pipeline, error) 
 		}
 	}
 
-	if res.GetPipeline() == nil {
+	if res.GetWorkflow() == nil {
 		return nil, nil
 	}
 
-	p := new(rpc.Pipeline)
-	p.ID = res.GetPipeline().GetId()
-	p.Timeout = res.GetPipeline().GetTimeout()
-	p.Config = new(backend.Config)
-	if err := json.Unmarshal(res.GetPipeline().GetPayload(), p.Config); err != nil {
-		log.Error().Err(err).Msgf("could not unmarshal pipeline config of '%s'", p.ID)
+	w := new(rpc.Workflow)
+	w.ID = res.GetWorkflow().GetId()
+	w.Timeout = res.GetWorkflow().GetTimeout()
+	w.Config = new(backend.Config)
+	if err := json.Unmarshal(res.GetWorkflow().GetPayload(), w.Config); err != nil {
+		log.Error().Err(err).Msgf("could not unmarshal workflow config of '%s'", w.ID)
 	}
-	return p, nil
+	return w, nil
 }
 
-// Wait blocks until the pipeline is complete.
+// Wait blocks until the workflow is complete.
 func (c *client) Wait(ctx context.Context, id string) (err error) {
 	retry := c.newBackOff()
 	req := new(proto.WaitRequest)
@@ -159,7 +159,7 @@ func (c *client) Wait(ctx context.Context, id string) (err error) {
 	return nil
 }
 
-// Init signals the pipeline is initialized.
+// Init signals the workflow is initialized.
 func (c *client) Init(ctx context.Context, id string, state rpc.State) (err error) {
 	retry := c.newBackOff()
 	req := new(proto.InitRequest)
@@ -200,7 +200,7 @@ func (c *client) Init(ctx context.Context, id string, state rpc.State) (err erro
 	return nil
 }
 
-// Done signals the pipeline is complete.
+// Done signals the work is complete.
 func (c *client) Done(ctx context.Context, id string, state rpc.State) (err error) {
 	retry := c.newBackOff()
 	req := new(proto.DoneRequest)
@@ -241,7 +241,7 @@ func (c *client) Done(ctx context.Context, id string, state rpc.State) (err erro
 	return nil
 }
 
-// Extend extends the pipeline deadline
+// Extend extends the workflow deadline
 func (c *client) Extend(ctx context.Context, id string) (err error) {
 	retry := c.newBackOff()
 	req := new(proto.ExtendRequest)
@@ -275,7 +275,7 @@ func (c *client) Extend(ctx context.Context, id string) (err error) {
 	return nil
 }
 
-// Update updates the pipeline state.
+// Update updates the workflow state.
 func (c *client) Update(ctx context.Context, id string, state rpc.State) (err error) {
 	retry := c.newBackOff()
 	req := new(proto.UpdateRequest)
@@ -316,7 +316,7 @@ func (c *client) Update(ctx context.Context, id string, state rpc.State) (err er
 	return nil
 }
 
-// Log writes the pipeline log entry.
+// Log writes the workflow log entry.
 func (c *client) Log(ctx context.Context, logEntry *rpc.LogEntry) (err error) {
 	retry := c.newBackOff()
 	req := new(proto.LogRequest)

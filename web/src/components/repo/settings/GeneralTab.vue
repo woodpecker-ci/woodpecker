@@ -1,9 +1,5 @@
 <template>
-  <Panel>
-    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-wp-background-100">
-      <h1 class="text-xl ml-2 text-wp-text-100">{{ $t('repo.settings.general.general') }}</h1>
-    </div>
-
+  <Settings :title="$t('repo.settings.general.general')">
     <form v-if="repoSettings" class="flex flex-col" @submit.prevent="saveRepoSettings">
       <InputField
         docs-url="docs/usage/project-settings#pipeline-path"
@@ -85,7 +81,7 @@
         :text="$t('repo.settings.general.save')"
       />
     </form>
-  </Panel>
+  </Settings>
 </template>
 
 <script lang="ts" setup>
@@ -100,7 +96,7 @@ import InputField from '~/components/form/InputField.vue';
 import NumberField from '~/components/form/NumberField.vue';
 import RadioField from '~/components/form/RadioField.vue';
 import TextField from '~/components/form/TextField.vue';
-import Panel from '~/components/layout/Panel.vue';
+import Settings from '~/components/layout/Settings.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useAuthentication from '~/compositions/useAuthentication';

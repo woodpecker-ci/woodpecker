@@ -205,7 +205,6 @@
         "restart_success": "Uruchomiono potok ponownie"
       },
       "config": "Konfiguracja",
-      "created": "Utworzono",
       "event": {
         "cron": "Cron",
         "deploy": "Wdrażanie",

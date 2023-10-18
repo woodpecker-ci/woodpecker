@@ -28,7 +28,6 @@ import (
 
 	"github.com/rs/zerolog/log"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
-	"github.com/woodpecker-ci/woodpecker/shared/constant"
 )
 
 // checkGitCloneCap check if we have the git binary on hand
@@ -64,17 +63,20 @@ func (e *local) setupClone(state *workflowState) error {
 
 // execClone executes a clone-step locally
 func (e *local) execClone(ctx context.Context, step *types.Step, state *workflowState, env []string) error {
-	if err := e.setupClone(state); err != nil {
-		return fmt.Errorf("setup clone step failed: %w", err)
+	if scm := step.Environment["CI_REPO_SCM"]; scm != "git" {
+		return fmt.Errorf("local backend can only clone from git repos, but this repo use '%s'", scm)
 	}
 
 	if err := checkGitCloneCap(); err != nil {
 		return fmt.Errorf("check for git clone capabilities failed: %w", err)
 	}
 
-	if step.Image != constant.DefaultCloneImage {
-		// TODO: write message into log
-		log.Warn().Msgf("clone step image '%s' does not match default git clone image. We ignore it assume git.", step.Image)
+	if err := e.setupClone(state); err != nil {
+		return fmt.Errorf("setup clone step failed: %w", err)
+	}
+
+	if !strings.Contains(step.Image, "plugin-git") {
+		log.Warn().Msgf("clone step image '%s' does not match default git clone image. We ignore it and use our plugin-git anyway.", step.Image)
 	}
 
 	rmCmd, err := writeNetRC(step, state)
@@ -128,12 +130,7 @@ func writeNetRC(step *types.Step, state *workflowState) (string, error) {
 	}
 
 	log.Trace().Msgf("try to write netrc to '%s'", file)
-	return rmCmd, os.WriteFile(file, []byte(fmt.Sprintf(
-		netrcFile,
-		step.Environment["CI_NETRC_MACHINE"],
-		step.Environment["CI_NETRC_USERNAME"],
-		step.Environment["CI_NETRC_PASSWORD"],
-	)), 0o600)
+	return rmCmd, os.WriteFile(file, []byte(genNetRC(step.Environment)), 0o600)
 }
 
 // downloadLatestGitPluginBinary download the latest plugin-git binary based on runtime OS and Arch
