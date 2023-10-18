@@ -28,24 +28,24 @@ steps:
     commands:
       - go mod vendor
 
-#  cross-compile-server:
-#    group: build
-#    image: *xgo_image
-#    pull: true
-#    commands:
-#      - apt update
-#      - apt install -y tree
-#      - make cross-compile-server
-#    environment:
-#      PLATFORMS: linux|arm64/v8;linux|amd64;windows|amd64
-#      TAGS: bindata sqlite sqlite_unlock_notify netgo
-#      XGO_VERSION: *xgo_version
-#      TARGZ: '1'
-  dummy-compile-server:
-    image: bash
+  cross-compile-server:
+    group: build
+    image: *xgo_image
+    pull: true
     commands:
-      - mkdir -p dist/server/linux/amd64 dist/server/linux/arm64 dist/server/windows/amd64 dist/agent/linux/amd64 dist/agent/linux/arm dist/agent/linux/arm64 dist/cli/linux/amd64 dist/cli/linux/arm dist/cli/linux/arm64
-      - touch dist/server/linux/amd64/woodpecker-server dist/server/linux/arm64/woodpecker-server dist/server/windows/amd64/woodpecker-server.exe dist/cli/linux/amd64/woodpecker-cli dist/cli/linux/arm/woodpecker-cli dist/cli/linux/arm64/woodpecker-cli dist/agent/linux/amd64/woodpecker-agent dist/agent/linux/arm/woodpecker-agent dist/agent/linux/arm64/woodpecker-agent dist/woodpecker-server_linux_amd64.tar.gz dist/woodpecker-server_linux_arm64.tar.gz dist/woodpecker-server_windows_amd64.tar.gz
+      - apt update
+      - apt install -y tree
+      - make cross-compile-server
+    environment:
+      PLATFORMS: linux|arm64/v8;linux|amd64;windows|amd64
+      TAGS: bindata sqlite sqlite_unlock_notify netgo
+      XGO_VERSION: *xgo_version
+      TARGZ: '1'
+  # dummy-compile-server:
+  #   image: bash
+  #   commands:
+  #     - mkdir -p dist/server/linux/amd64 dist/server/linux/arm64 dist/server/windows/amd64 dist/agent/linux/amd64 dist/agent/linux/arm dist/agent/linux/arm64 dist/cli/linux/amd64 dist/cli/linux/arm dist/cli/linux/arm64
+  #     - touch dist/server/linux/amd64/woodpecker-server dist/server/linux/arm64/woodpecker-server dist/server/windows/amd64/woodpecker-server.exe dist/cli/linux/amd64/woodpecker-cli dist/cli/linux/arm/woodpecker-cli dist/cli/linux/arm64/woodpecker-cli dist/agent/linux/amd64/woodpecker-agent dist/agent/linux/arm/woodpecker-agent dist/agent/linux/arm64/woodpecker-agent dist/woodpecker-server_linux_amd64.tar.gz dist/woodpecker-server_linux_arm64.tar.gz dist/woodpecker-server_windows_amd64.tar.gz
 
   build-agent:
     group: build
@@ -73,9 +73,8 @@ steps:
   release-dryrun:
     image: *golang_image
     commands:
-    - ls -la dist/*.*
-    - cat dist/checksums.txt
-
+      - ls -la dist/*.*
+      - cat dist/checksums.txt
 #  release:
 #    image: plugins/github-release
 #    secrets:

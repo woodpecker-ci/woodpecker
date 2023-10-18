@@ -20,8 +20,7 @@ variables:
   - &build_args 'CI_COMMIT_SHA=${CI_COMMIT_SHA},CI_COMMIT_BRANCH=${CI_COMMIT_BRANCH},CI_COMMIT_TAG=${CI_COMMIT_TAG}'
 
   # vars used on push / tag events only
-  - publish_logins: &publish_logins
-      # Default DockerHub login
+  - publish_logins: &publish_logins # Default DockerHub login
       - registry: https://index.docker.io/v1/
         username:
           from_secret: docker_username
@@ -55,30 +54,30 @@ steps:
       - pnpm install --frozen-lockfile
       - pnpm build
 
-# TODO: have an xgo arm image
-#  cross-compile-server-preview:
-#    image: *xgo_image
-#    pull: true
-#    commands:
-#      - apt update
-#      - apt install -y tree
-#      - make cross-compile-server
-#    environment:
-#      PLATFORMS: linux|amd64
-#      TAGS: bindata sqlite sqlite_unlock_notify netgo
-#      XGO_VERSION: *xgo_version
-#    when:
-#      event: pull_request
-  dummy-compile-server:
-    image: bash
+  # TODO: have an xgo arm image
+  cross-compile-server-preview:
+    image: *xgo_image
+    pull: true
     commands:
-      - mkdir -p dist/server/linux/amd64
-      - echo 'echo binary' > dist/server/linux/amd64/woodpecker-server
-      - chmod +x dist/server/linux/amd64/woodpecker-server
+      - apt update
+      - apt install -y tree
+      - make cross-compile-server
+    environment:
+      PLATFORMS: linux|amd64
+      TAGS: bindata sqlite sqlite_unlock_notify netgo
+      XGO_VERSION: *xgo_version
+    when:
+      event: pull_request
+  # dummy-compile-server:
+  #   image: bash
+  #   commands:
+  #     - mkdir -p dist/server/linux/amd64
+  #     - echo 'echo binary' > dist/server/linux/amd64/woodpecker-server
+  #     - chmod +x dist/server/linux/amd64/woodpecker-server
 
   publish-server-preview:
     image: woodpeckerci/plugin-docker-buildx:2.1.0
-    secrets: [ docker_username, docker_password ]
+    secrets: [docker_username, docker_password]
     group: docker
     settings:
       repo: woodpeckerci/woodpecker-server
@@ -90,7 +89,7 @@ steps:
 
   publish-server-alpine-preview:
     image: woodpeckerci/plugin-docker-buildx:2.1.0
-    secrets: [ docker_username, docker_password ]
+    secrets: [docker_username, docker_password]
     group: docker
     settings:
       repo: woodpeckerci/woodpecker-server
@@ -124,7 +123,7 @@ steps:
       repo: *publish_repos_server
       dockerfile: docker/Dockerfile.server.multiarch
       platforms: *platforms_server
-      tag: [next, "next-${CI_COMMIT_SHA:0:10}"]
+      tag: [next, 'next-${CI_COMMIT_SHA:0:10}']
       logins: *publish_logins
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
@@ -137,7 +136,7 @@ steps:
       repo: *publish_repos_server
       dockerfile: docker/Dockerfile.server.alpine.multiarch
       platforms: *platforms_alpine
-      tag: [next-alpine, "next-${CI_COMMIT_SHA:0:10}-alpine"]
+      tag: [next-alpine, 'next-${CI_COMMIT_SHA:0:10}-alpine']
       logins: *publish_logins
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
@@ -177,7 +176,7 @@ steps:
       dockerfile: docker/Dockerfile.server.multiarch
       platforms: *platforms_server
       # remove 'latest' on older version branches to avoid accidental downgrade
-      tag: [latest, "${CI_COMMIT_TAG}"]
+      tag: [latest, '${CI_COMMIT_TAG}']
       logins: *publish_logins
     when:
       event: tag
@@ -190,7 +189,7 @@ steps:
       dockerfile: docker/Dockerfile.server.alpine.multiarch
       platforms: *platforms_alpine
       # remove 'latest-alpine' on older version branches to avoid accidental downgrade
-      tag: [latest-alpine, "${CI_COMMIT_TAG}-alpine"]
+      tag: [latest-alpine, '${CI_COMMIT_TAG}-alpine']
       logins: *publish_logins
     when:
       event: tag
@@ -202,7 +201,7 @@ steps:
   publish-agent-preview:
     group: docker
     image: woodpeckerci/plugin-docker-buildx:2.1.0
-    secrets: [ docker_username, docker_password ]
+    secrets: [docker_username, docker_password]
     settings:
       repo: woodpeckerci/woodpecker-agent
       dockerfile: docker/Dockerfile.agent.multiarch
@@ -219,7 +218,7 @@ steps:
       repo: *publish_repos_agent
       dockerfile: docker/Dockerfile.agent.multiarch
       platforms: *platforms_release
-      tag: [next, "next-${CI_COMMIT_SHA:0:10}"]
+      tag: [next, 'next-${CI_COMMIT_SHA:0:10}']
       logins: *publish_logins
       build_args: *build_args
     when:
@@ -233,7 +232,7 @@ steps:
       repo: *publish_repos_agent
       dockerfile: docker/Dockerfile.agent.alpine.multiarch
       platforms: *platforms_alpine
-      tag: [next-alpine, "next-${CI_COMMIT_SHA:0:10}-alpine"]
+      tag: [next-alpine, 'next-${CI_COMMIT_SHA:0:10}-alpine']
       logins: *publish_logins
       build_args: *build_args
     when:
@@ -276,7 +275,7 @@ steps:
       dockerfile: docker/Dockerfile.agent.multiarch
       platforms: *platforms_release
       # remove 'latest' on older version branches to avoid accidental downgrade
-      tag: [latest, "${CI_COMMIT_TAG}"]
+      tag: [latest, '${CI_COMMIT_TAG}']
       logins: *publish_logins
       build_args: *build_args
     when:
@@ -290,7 +289,7 @@ steps:
       dockerfile: docker/Dockerfile.agent.alpine.multiarch
       platforms: *platforms_alpine
       # remove 'latest-alpine' on older version branches to avoid accidental downgrade
-      tag: [latest-alpine, "${CI_COMMIT_TAG}-alpine"]
+      tag: [latest-alpine, '${CI_COMMIT_TAG}-alpine']
       logins: *publish_logins
       build_args: *build_args
     when:
@@ -303,7 +302,7 @@ steps:
   publish-cli-preview:
     group: docker
     image: woodpeckerci/plugin-docker-buildx:2.1.0
-    secrets: [ docker_username, docker_password ]
+    secrets: [docker_username, docker_password]
     settings:
       repo: woodpeckerci/woodpecker-cli
       dockerfile: docker/Dockerfile.cli.multiarch
@@ -320,7 +319,7 @@ steps:
       repo: *publish_repos_cli
       dockerfile: docker/Dockerfile.cli.multiarch
       platforms: *platforms_release
-      tag: [next, "next-${CI_COMMIT_SHA:0:10}"]
+      tag: [next, 'next-${CI_COMMIT_SHA:0:10}']
       logins: *publish_logins
       build_args: *build_args
     when:
@@ -334,7 +333,7 @@ steps:
       repo: *publish_repos_cli
       dockerfile: docker/Dockerfile.cli.alpine.multiarch
       platforms: *platforms_alpine
-      tag: [next-alpine, "next-${CI_COMMIT_SHA:0:10}-alpine"]
+      tag: [next-alpine, 'next-${CI_COMMIT_SHA:0:10}-alpine']
       logins: *publish_logins
       build_args: *build_args
     when:
@@ -377,7 +376,7 @@ steps:
       dockerfile: docker/Dockerfile.cli.multiarch
       platforms: *platforms_release
       # remove 'latest' on older version branches to avoid accidental downgrade
-      tag: [latest, "${CI_COMMIT_TAG}"]
+      tag: [latest, '${CI_COMMIT_TAG}']
       logins: *publish_logins
       build_args: *build_args
     when:
@@ -391,7 +390,7 @@ steps:
       dockerfile: docker/Dockerfile.cli.alpine.multiarch
       platforms: *platforms_alpine
       # remove 'latest-alpine' on older version branches to avoid accidental downgrade
-      tag: [latest-alpine, "${CI_COMMIT_TAG}-alpine"]
+      tag: [latest-alpine, '${CI_COMMIT_TAG}-alpine']
       logins: *publish_logins
       build_args: *build_args
     when:
