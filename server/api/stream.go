@@ -79,7 +79,7 @@ func EventStreamSSE(c *gin.Context) {
 	}()
 
 	go func() {
-		err := server.Config.Services.Pubsub.Subscribe(ctx, "topic/events", func(m pubsub.Message) {
+		server.Config.Services.Pubsub.Subscribe(ctx, func(m pubsub.Message) {
 			defer func() {
 				obj := recover() // fix #2480 // TODO: check if it's still needed
 				log.Trace().Msgf("pubsub subscribe recover return: %v", obj)
@@ -95,10 +95,7 @@ func EventStreamSSE(c *gin.Context) {
 				}
 			}
 		})
-		if err != nil {
-			log.Error().Err(err).Msg("Subscribe failed")
-		}
-		cancel(err)
+		cancel(nil)
 	}()
 
 	for {
