@@ -24,16 +24,17 @@ package proto;
 
 // Woodpecker Server Service
 service Woodpecker {
-  rpc Version       (Empty)                returns (VersionResponse) {}
-  rpc Next          (NextRequest)          returns (NextResponse) {}
-  rpc Init          (InitRequest)          returns (Empty) {}
-  rpc Wait          (WaitRequest)          returns (Empty) {}
-  rpc Done          (DoneRequest)          returns (Empty) {}
-  rpc Extend        (ExtendRequest)        returns (Empty) {}
-  rpc Update        (UpdateRequest)        returns (Empty) {}
-  rpc Log           (LogRequest)           returns (Empty) {}
-  rpc RegisterAgent (RegisterAgentRequest) returns (RegisterAgentResponse) {}
-  rpc ReportHealth  (ReportHealthRequest)  returns (Empty) {}
+  rpc Version         (Empty)                returns (VersionResponse) {}
+  rpc Next            (NextRequest)          returns (NextResponse) {}
+  rpc Init            (InitRequest)          returns (Empty) {}
+  rpc Wait            (WaitRequest)          returns (Empty) {}
+  rpc Done            (DoneRequest)          returns (Empty) {}
+  rpc Extend          (ExtendRequest)        returns (Empty) {}
+  rpc Update          (UpdateRequest)        returns (Empty) {}
+  rpc Log             (LogRequest)           returns (Empty) {}
+  rpc RegisterAgent   (RegisterAgentRequest) returns (RegisterAgentResponse) {}
+  rpc UnregisterAgent (Empty)                returns (Empty) {}
+  rpc ReportHealth    (ReportHealthRequest)  returns (Empty) {}
 }
 
 //

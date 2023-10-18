@@ -40,6 +40,10 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
+const (
+	EngineName = "kubernetes"
+)
+
 var noContext = context.Background()
 
 type kube struct {
@@ -96,7 +100,7 @@ func New(ctx context.Context) types.Engine {
 }
 
 func (e *kube) Name() string {
-	return "kubernetes"
+	return EngineName
 }
 
 func (e *kube) IsAvailable(context.Context) bool {

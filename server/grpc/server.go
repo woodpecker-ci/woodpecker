@@ -163,6 +163,11 @@ func (s *WoodpeckerServer) RegisterAgent(c context.Context, req *proto.RegisterA
 	return res, err
 }
 
+func (s *WoodpeckerServer) UnregisterAgent(ctx context.Context, _ *proto.Empty) (*proto.Empty, error) {
+	err := s.peer.UnregisterAgent(ctx)
+	return new(proto.Empty), err
+}
+
 func (s *WoodpeckerServer) ReportHealth(c context.Context, req *proto.ReportHealthRequest) (*proto.Empty, error) {
 	res := new(proto.Empty)
 	err := s.peer.ReportHealth(c, req.GetStatus())
