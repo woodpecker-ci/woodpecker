@@ -94,6 +94,32 @@ steps:
     when:
       evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS == "build_pr_images"'
 
+  publish-server-preview-dry:
+    image: woodpeckerci/plugin-docker-buildx:2.1.0
+    secrets: [ docker_username, docker_password ]
+    group: docker
+    settings:
+      dry_run: true
+      repo: woodpeckerci/woodpecker-server
+      dockerfile: docker/Dockerfile.server.multiarch
+      platforms: *platforms_preview
+      tag: pull_${CI_COMMIT_PULL_REQUEST}
+    when:
+      evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS == ""'
+
+  publish-server-alpine-preview-dry:
+    image: woodpeckerci/plugin-docker-buildx:2.1.0
+    secrets: [ docker_username, docker_password ]
+    group: docker
+    settings:
+      dry_run: true
+      repo: woodpeckerci/woodpecker-server
+      dockerfile: docker/Dockerfile.server.alpine.multiarch
+      platforms: *platforms_preview
+      tag: pull_${CI_COMMIT_PULL_REQUEST}-alpine
+    when:
+      evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS == ""'
+
   cross-compile-server:
     image: *xgo_image
     pull: true
@@ -206,6 +232,20 @@ steps:
     when:
       evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS == "build_pr_images"'
 
+  publish-agent-preview-dry:
+    group: docker
+    image: woodpeckerci/plugin-docker-buildx:2.1.0
+    secrets: [ docker_username, docker_password ]
+    settings:
+      dry_run: true
+      repo: woodpeckerci/woodpecker-agent
+      dockerfile: docker/Dockerfile.agent.multiarch
+      platforms: *platforms_preview
+      tag: pull_${CI_COMMIT_PULL_REQUEST}
+      build_args: *build_args
+    when:
+      evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS == ""'
+
   publish-next-agent:
     group: docker
     image: woodpeckerci/plugin-docker-buildx:2.1.0
@@ -306,6 +346,20 @@ steps:
       build_args: *build_args
     when:
       evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS == "build_pr_images"'
+
+  publish-cli-preview-dry:
+    group: docker
+    image: woodpeckerci/plugin-docker-buildx:2.1.0
+    secrets: [ docker_username, docker_password ]
+    settings:
+      dry_run: true
+      repo: woodpeckerci/woodpecker-cli
+      dockerfile: docker/Dockerfile.cli.multiarch
+      platforms: *platforms_preview
+      tag: pull_${CI_COMMIT_PULL_REQUEST}
+      build_args: *build_args
+    when:
+      evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS == ""'
 
   publish-next-cli:
     group: docker
