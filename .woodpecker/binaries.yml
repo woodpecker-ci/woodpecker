@@ -2,7 +2,7 @@ depends_on:
   - test
   - web
 
-# # TODO: upload build artifacts for pushes to ${CI_REPO_DEFAULT_BRANCH}
+# TODO: upload build artifacts for pushes to ${CI_REPO_DEFAULT_BRANCH}
 when:
   event: tag
 
