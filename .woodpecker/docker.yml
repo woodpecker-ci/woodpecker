@@ -6,6 +6,7 @@ when:
       - release/*
 
 depends_on:
+  - test
   - web
 
 variables:
@@ -54,7 +55,6 @@ steps:
       - pnpm install --frozen-lockfile
       - pnpm build
 
-  # TODO: have an xgo arm image
   cross-compile-server-preview:
     image: *xgo_image
     pull: true
@@ -68,12 +68,6 @@ steps:
       XGO_VERSION: *xgo_version
     when:
       event: pull_request
-  # dummy-compile-server:
-  #   image: bash
-  #   commands:
-  #     - mkdir -p dist/server/linux/amd64
-  #     - echo 'echo binary' > dist/server/linux/amd64/woodpecker-server
-  #     - chmod +x dist/server/linux/amd64/woodpecker-server
 
   publish-server-preview:
     image: woodpeckerci/plugin-docker-buildx:2.1.0

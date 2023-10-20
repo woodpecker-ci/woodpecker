@@ -1,10 +1,10 @@
 depends_on:
+  - test
   - web
 
-# enforce arm run
 # # TODO: upload build artifacts for pushes to ${CI_REPO_DEFAULT_BRANCH}
-# when:
-#   event: tag
+when:
+  event: tag
 
 variables:
   - &golang_image 'golang:1.21.3'
@@ -75,15 +75,15 @@ steps:
     commands:
       - ls -la dist/*.*
       - cat dist/checksums.txt
-#  release:
-#    image: plugins/github-release
-#    secrets:
-#      - source: github_token
-#        target: github_release_api_key
-#    settings:
-#      files:
-#        - dist/*.tar.gz
-#        - dist/*.deb
-#        - dist/*.rpm
-#        - dist/checksums.txt
-#      title: ${CI_COMMIT_TAG##v}
+  release:
+    image: plugins/github-release
+    secrets:
+      - source: github_token
+        target: github_release_api_key
+    settings:
+      files:
+        - dist/*.tar.gz
+        - dist/*.deb
+        - dist/*.rpm
+        - dist/checksums.txt
+      title: ${CI_COMMIT_TAG##v}
