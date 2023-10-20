@@ -120,7 +120,8 @@ matrix:
     - linux/amd64
     - linux/arm64
 
-platform: ${platform}
+labels:
+  platform: ${platform}
 
 steps:
   test:
@@ -136,3 +137,7 @@ steps:
     when:
       platform: linux/arm*
 ```
+
+:::note
+If you want to control the architecture of a pipeline on a Kubernetes runner, see [the nodeSelector documentation of the Kubernetes backend](../30-administration/22-backends/40-kubernetes.md#nodeSelector).
+:::
