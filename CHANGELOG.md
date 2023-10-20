@@ -1,13 +1,14 @@
 # Changelog
 
-## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-10-17
+## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-10-20
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@pat-s, @renovate[bot], @anbraten, @qwerty287, @JohnWalkerx, @OskarsPakers, @Exar04, @dominic-p, @categulario, @mzampetakis, @Timshel, @6543, @nitram509, @Denperidge, @xoxys, @tomix1024, @lonix1, @s3lph, @math3vz, @LTek-online, @testwill, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @azdle, @runephilosof-karnovgroup, @praneeth-ovckd
+@pat-s, @qwerty287, @nitram509, @renovate[bot], @anbraten, @JohnWalkerx, @OskarsPakers, @Exar04, @dominic-p, @categulario, @mzampetakis, @Timshel, @6543, @Denperidge, @xoxys, @tomix1024, @lonix1, @s3lph, @math3vz, @LTek-online, @testwill, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @azdle, @runephilosof-karnovgroup, @praneeth-ovckd
 
 ### 💥 Breaking changes
 
+- Remove deprecated `build` command [[#2602](https://github.com/woodpecker-ci/woodpecker/pull/2602)]
 - Update to docker 23 [[#2577](https://github.com/woodpecker-ci/woodpecker/pull/2577)]
 - Remove deprecated options parsing [[#2480](https://github.com/woodpecker-ci/woodpecker/pull/2480)]
 - Deprecate "platform" filter in favour of "labels" [[#2181](https://github.com/woodpecker-ci/woodpecker/pull/2181)]
@@ -34,6 +35,8 @@
 
 ### 📚 Documentation
 
+- [doc] improve documentation WOODPECKER_SESSION_EXPIRES [[#2603](https://github.com/woodpecker-ci/woodpecker/pull/2603)]
+- Update documentation WRT to recent `$platform` changes [[#2531](https://github.com/woodpecker-ci/woodpecker/pull/2531)]
 - Add plugin "GitHub release" [[#2592](https://github.com/woodpecker-ci/woodpecker/pull/2592)]
 - Cleanup docs [[#2478](https://github.com/woodpecker-ci/woodpecker/pull/2478)]
 - Add plugin "Release helper" [[#2584](https://github.com/woodpecker-ci/woodpecker/pull/2584)]
@@ -164,6 +167,8 @@
 
 ### Misc
 
+- Only publish PR images when label is set [[#2608](https://github.com/woodpecker-ci/woodpecker/pull/2608)]
+- chore(deps): lock file maintenance [[#2595](https://github.com/woodpecker-ci/woodpecker/pull/2595)]
 - chore(deps): update postgres docker tag to v16 [[#2588](https://github.com/woodpecker-ci/woodpecker/pull/2588)]
 - Update renovate schedule & use central config repo [[#2597](https://github.com/woodpecker-ci/woodpecker/pull/2597)]
 - chore(deps): update woodpeckerci/plugin-surge-preview docker tag to v1.2.2 [[#2593](https://github.com/woodpecker-ci/woodpecker/pull/2593)]
