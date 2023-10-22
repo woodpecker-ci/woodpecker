@@ -11,7 +11,7 @@ depends_on:
 
 variables:
   - &golang_image 'golang:1.21.3'
-  - &node_image 'node:20-alpine'
+  - &node_image 'node:21-alpine'
   - &xgo_image 'techknowlogick/xgo:go-1.21.3'
   - &xgo_version 'go-1.21.2'
   - &platforms_release 'linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/386,linux/amd64,linux/ppc64le,linux/riscv64,linux/s390x,freebsd/arm64,freebsd/amd64,openbsd/arm64,openbsd/amd64'
