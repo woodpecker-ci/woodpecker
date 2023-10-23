@@ -35,6 +35,7 @@
 
 ### 📚 Documentation
 
+- doc: improve prometheus docs [[#2617](https://github.com/woodpecker-ci/woodpecker/pull/2617)]
 - docs add nixos install instructions [[#2616](https://github.com/woodpecker-ci/woodpecker/pull/2616)]
 - Add prettier plugin [[#2621](https://github.com/woodpecker-ci/woodpecker/pull/2621)]
 - [doc] improve documentation WOODPECKER_SESSION_EXPIRES [[#2603](https://github.com/woodpecker-ci/woodpecker/pull/2603)]
@@ -77,6 +78,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fix `CI_WORKSPACE` in local backend [[#2627](https://github.com/woodpecker-ci/woodpecker/pull/2627)]
 - Some mobile UI fixes [[#2624](https://github.com/woodpecker-ci/woodpecker/pull/2624)]
 - Fix secret priority [[#2599](https://github.com/woodpecker-ci/woodpecker/pull/2599)]
 - UI cleanups and improvements [[#2548](https://github.com/woodpecker-ci/woodpecker/pull/2548)]
@@ -171,6 +173,7 @@
 
 ### Misc
 
+- Do not run docker prepare steps [[#2626](https://github.com/woodpecker-ci/woodpecker/pull/2626)]
 - Fix docker workflow and only run if needed [[#2625](https://github.com/woodpecker-ci/woodpecker/pull/2625)]
 - fix(deps): update golang (packages) [[#2614](https://github.com/woodpecker-ci/woodpecker/pull/2614)]
 - chore(deps): lock file maintenance [[#2620](https://github.com/woodpecker-ci/woodpecker/pull/2620)]
