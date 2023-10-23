@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@Janik-Haag, @qwerty287, @renovate[bot], @pat-s, @nitram509, @anbraten, @JohnWalkerx, @OskarsPakers, @Exar04, @dominic-p, @categulario, @mzampetakis, @Timshel, @6543, @Denperidge, @xoxys, @tomix1024, @lonix1, @s3lph, @math3vz, @LTek-online, @testwill, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @azdle, @runephilosof-karnovgroup, @praneeth-ovckd
+@qwerty287, @Janik-Haag, @renovate[bot], @pat-s, @nitram509, @anbraten, @JohnWalkerx, @OskarsPakers, @Exar04, @dominic-p, @categulario, @mzampetakis, @Timshel, @6543, @Denperidge, @xoxys, @tomix1024, @lonix1, @s3lph, @math3vz, @LTek-online, @testwill, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @azdle, @runephilosof-karnovgroup, @praneeth-ovckd
 
 ### 💥 Breaking changes
 
@@ -35,6 +35,8 @@
 
 ### 📚 Documentation
 
+- Add autoscaler docs [[#2631](https://github.com/woodpecker-ci/woodpecker/pull/2631)]
+- Rework setup docs [[#2630](https://github.com/woodpecker-ci/woodpecker/pull/2630)]
 - doc: improve prometheus docs [[#2617](https://github.com/woodpecker-ci/woodpecker/pull/2617)]
 - docs add nixos install instructions [[#2616](https://github.com/woodpecker-ci/woodpecker/pull/2616)]
 - Add prettier plugin [[#2621](https://github.com/woodpecker-ci/woodpecker/pull/2621)]
