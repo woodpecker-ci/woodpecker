@@ -120,3 +120,13 @@ Some versions need some changes to the server configuration or the pipeline conf
 ## 0.14.0
 
 No breaking changes
+
+## From Drone
+
+:::warning
+Migration from Drone is only possible if you were running Drone <= v0.8.
+:::
+
+1. Make sure you are already running Drone v0.8
+2. Upgrade to Woodpecker v0.14.4, migration will be done during startup
+3. Upgrade to the latest Woodpecker version. Pay attention to the breaking changes listed above.
