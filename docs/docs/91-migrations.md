@@ -9,6 +9,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Dropped deprecated `branches:` filter in favor of global [`when.branch`](./20-usage/20-workflow-syntax.md#branch-1) filter
 - Deprecated `platform:` filter in favor of `labels:`, [read more](./20-usage/20-workflow-syntax.md#filter-by-platform)
 - Removed `build` alias for `pipeline` command in CLI
+- Removed `ssh` backend. Use an agent directly on the SSH machine using the `local` backend.
 
 ## 1.0.0
 
