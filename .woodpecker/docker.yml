@@ -55,6 +55,16 @@ steps:
     pull: true
     commands:
       - go mod vendor
+    when:
+      - event: pull_request
+        evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
+      - event: pull_request
+        path: *when_path
+      - branch:
+          - ${CI_REPO_DEFAULT_BRANCH}
+          - release/*
+        event: [push, tag]
+        path: *when_path
 
   ###############
   # S e r v e r #
@@ -66,6 +76,16 @@ steps:
       - corepack enable
       - pnpm install --frozen-lockfile
       - pnpm build
+    when:
+      - event: pull_request
+        evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
+      - event: pull_request
+        path: *when_path
+      - branch:
+          - ${CI_REPO_DEFAULT_BRANCH}
+          - release/*
+        event: [push, tag]
+        path: *when_path
 
   cross-compile-server-preview:
     image: *xgo_image
