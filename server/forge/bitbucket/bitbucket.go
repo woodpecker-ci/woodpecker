@@ -312,7 +312,9 @@ func (c *config) Deactivate(ctx context.Context, u *model.User, r *model.Repo, l
 	client := c.newClient(ctx, u)
 
 	hooks, err := shared_utils.Paginate(func(page int) ([]*internal.Hook, error) {
-		hooks, err := client.ListHooks(r.Owner, r.Name, &internal.ListOpts{})
+		hooks, err := client.ListHooks(r.Owner, r.Name, &internal.ListOpts{
+			Page: page,
+		})
 		if err != nil {
 			return nil, err
 		}
