@@ -5,11 +5,11 @@
     </InputField>
     <InputField :label="$t('user.settings.general.theme.theme')">
       <SelectField
-        v-model="selectedTheme"
+        v-model="theme"
         :options="[
-          { value: Theme.Auto, text: $t('user.settings.general.theme.auto') },
-          { value: Theme.Light, text: $t('user.settings.general.theme.light') },
-          { value: Theme.Dark, text: $t('user.settings.general.theme.dark') },
+          { value: 'auto', text: $t('user.settings.general.theme.auto') },
+          { value: 'light', text: $t('user.settings.general.theme.light') },
+          { value: 'dark', text: $t('user.settings.general.theme.dark') },
         ]"
       />
     </InputField>
@@ -27,7 +27,7 @@ import { useI18n } from 'vue-i18n';
 import SelectField from '~/components/form/SelectField.vue';
 import Settings from '~/components/layout/Settings.vue';
 import { setI18nLanguage } from '~/compositions/useI18n';
-import { Theme, useTheme } from '~/compositions/useTheme';
+import { useTheme } from '~/compositions/useTheme';
 
 const { locale } = useI18n();
 const { theme } = useTheme();
@@ -49,15 +49,6 @@ const selectedLocale = computed<string>({
   },
   get() {
     return storedLocale.value;
-  },
-});
-
-const selectedTheme = computed<Theme>({
-  set(_selectedTheme) {
-    theme.value = _selectedTheme;
-  },
-  get() {
-    return theme.value;
   },
 });
 </script>

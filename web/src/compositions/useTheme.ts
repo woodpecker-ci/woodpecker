@@ -1,23 +1,11 @@
-import { computed, ref, watch } from 'vue';
+import { BasicColorSchema, useColorMode } from '@vueuse/core';
+import { computed, watch } from 'vue';
 
-export enum Theme {
-  Auto = 'auto',
-  Light = 'light',
-  Dark = 'dark',
-}
+const { system, store } = useColorMode();
+const resolvedTheme = computed(() => (store.value === 'auto' ? system.value : store.value));
 
-const LS_THEME = 'woodpecker:theme';
-const activeTheme = ref(Theme.Auto);
-
-function resolveAuto(theme: Theme) {
-  if (theme === Theme.Auto) {
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? Theme.Dark : Theme.Light;
-  }
-  return theme;
-}
-
-watch(activeTheme, (theme) => {
-  if (resolveAuto(theme) === Theme.Dark) {
+watch(store, () => {
+  if (resolvedTheme.value === 'dark') {
     document.documentElement.classList.remove('light');
     document.documentElement.classList.add('dark');
     document.documentElement.setAttribute('data-theme', 'dark');
@@ -30,30 +18,20 @@ watch(activeTheme, (theme) => {
   }
 });
 
-function setTheme(theme: Theme) {
-  activeTheme.value = theme;
-  localStorage.setItem(LS_THEME, theme);
+function setTheme(theme: BasicColorSchema) {
+  store.value = theme;
 }
 
-function load() {
-  const isActive = localStorage.getItem(LS_THEME) as Theme | null;
-  if (isActive === null) {
-    setTheme(Theme.Auto);
-  } else {
-    setTheme(isActive);
-  }
-}
-
-load();
+setTheme(store.value);
 
 export function useTheme() {
   return {
-    darkMode: computed(() => resolveAuto(activeTheme.value) === Theme.Dark),
+    darkMode: computed(() => resolvedTheme.value === 'dark'),
     theme: computed({
       get() {
-        return activeTheme.value;
+        return store.value;
       },
-      set(theme: Theme) {
+      set(theme: BasicColorSchema) {
         setTheme(theme);
       },
     }),
