@@ -31,6 +31,11 @@
       "verified": true
     },
     {
+      "name": "Prettier",
+      "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-prettier/main/docs.md",
+      "verified": true
+    },
+    {
       "name": "Block Git changes",
       "docs": "https://codeberg.org/qwerty287/woodpecker-block-git-changes/raw/branch/main/docs.md",
       "verified": false
@@ -38,6 +43,11 @@
     {
       "name": "Regex check",
       "docs": "https://codeberg.org/qwerty287/woodpecker-regex-check/raw/branch/main/docs.md",
+      "verified": false
+    },
+    {
+      "name": "Gitea Create Pull Request",
+      "docs": "https://codeberg.org/JohnWalkerx/gitea-pull-request-create-plugin/raw/branch/main/docs.md",
       "verified": false
     },
     {
@@ -138,6 +148,21 @@
       "name": "Dockle",
       "docs": "https://raw.githubusercontent.com/euryecetelecom/woodpeckerci-dockle/master/README.md",
       "verified": false
+    },
+    {
+      "name": "NixOS Remote Builder",
+      "docs": "https://codeberg.org/JohnWalkerx/nix-remote-builder-plugin/raw/branch/main/docs.md",
+      "verified": false
+    },
+    {
+      "name": "Release Helper",
+      "docs": "https://raw.githubusercontent.com/woodpeckerci/plugin-ready-release-go/main/docs.md",
+      "verified": true
+    },
+    {
+      "name": "GitHub Release",
+      "docs": "https://raw.githubusercontent.com/woodpeckerci/plugin-github-release/main/docs.md",
+      "verified": true
     }
   ]
 }
