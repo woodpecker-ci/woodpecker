@@ -36,6 +36,7 @@ You can install Woodpecker on multiple ways:
 
 - Using [docker-compose](#docker-compose) with the official [container images](../80-downloads.md#docker-images)
 - Using [Kubernetes](#kubernetes) via the Woodpeckers Helm chart
+- Using [NixOS](#nixos) via the [NixOS module](https://search.nixos.org/options?channel=unstable&size=200&sort=relevance&query=woodpecker)
 - Using [binaries](../80-downloads.md)
 
 ### docker-compose
