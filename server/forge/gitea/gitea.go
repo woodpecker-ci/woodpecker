@@ -47,7 +47,7 @@ import (
 const (
 	authorizeTokenURL = "%s/login/oauth/authorize"
 	accessTokenURL    = "%s/login/oauth/access_token"
-	perPage           = 50
+	defaultPageSize   = 50
 	giteaDevVersion   = "v1.18.0"
 )
 
@@ -56,6 +56,7 @@ type Gitea struct {
 	ClientID     string
 	ClientSecret string
 	SkipVerify   bool
+	pageSize     int
 }
 
 // Opts defines configuration options.
@@ -207,7 +208,7 @@ func (c *Gitea) Teams(ctx context.Context, u *model.User) ([]*model.Team, error)
 			gitea.ListOrgsOptions{
 				ListOptions: gitea.ListOptions{
 					Page:     page,
-					PageSize: perPage,
+					PageSize: c.perPage(ctx),
 				},
 			},
 		)
@@ -263,7 +264,7 @@ func (c *Gitea) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error)
 			gitea.ListReposOptions{
 				ListOptions: gitea.ListOptions{
 					Page:     page,
-					PageSize: perPage,
+					PageSize: c.perPage(ctx),
 				},
 			},
 		)
@@ -640,4 +641,20 @@ func (c *Gitea) getChangedFilesForPR(ctx context.Context, repo *model.Repo, inde
 		}
 		return files, nil
 	})
+}
+
+func (c *Gitea) perPage(ctx context.Context) int {
+	if c.pageSize == 0 {
+		client, err := c.newClientToken(ctx, "")
+		if err != nil {
+			return defaultPageSize
+		}
+
+		api, _, err := client.GetGlobalAPISettings()
+		if err != nil {
+			return defaultPageSize
+		}
+		c.pageSize = api.MaxResponseItems
+	}
+	return c.pageSize
 }
