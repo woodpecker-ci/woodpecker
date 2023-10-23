@@ -15,7 +15,7 @@ when:
 
 variables:
   - &golang_image 'golang:1.21.3'
-  - &node_image 'node:20-alpine'
+  - &node_image 'node:21-alpine'
 
 steps:
   build-cli:
