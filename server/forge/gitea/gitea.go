@@ -411,10 +411,10 @@ func (c *Gitea) Deactivate(ctx context.Context, u *model.User, r *model.Repo, li
 		return err
 	}
 
-	hooks, err := shared_utils.Paginate(func (page int) ([]*gitea.Hook, error) {
+	hooks, err := shared_utils.Paginate(func(page int) ([]*gitea.Hook, error) {
 		hooks, _, err := client.ListRepoHooks(r.Owner, r.Name, gitea.ListHooksOptions{
 			ListOptions: gitea.ListOptions{
-				Page: page,
+				Page:     page,
 				PageSize: c.perPage(ctx),
 			},
 		})

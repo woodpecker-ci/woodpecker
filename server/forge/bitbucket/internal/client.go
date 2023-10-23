@@ -112,7 +112,7 @@ func (c *Client) ListRepos(workspace string, opts *ListOpts) (*RepoResp, error) 
 }
 
 func (c *Client) ListReposAll(workspace string) ([]*Repo, error) {
-	return shared_utils.Paginate(func (page int) ([]*Repo, error) {
+	return shared_utils.Paginate(func(page int) ([]*Repo, error) {
 		resp, err := c.ListRepos(workspace, &ListOpts{Page: page, PageLen: 100})
 		if err != nil {
 			return nil, err

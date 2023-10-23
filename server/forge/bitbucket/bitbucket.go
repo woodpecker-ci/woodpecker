@@ -187,10 +187,9 @@ func (c *config) Repo(ctx context.Context, u *model.User, remoteID model.ForgeRe
 func (c *config) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {
 	client := c.newClient(ctx, u)
 
-
-	workspaces, err := shared_utils.Paginate(func (page int) ([]*internal.Workspace, error) {
+	workspaces, err := shared_utils.Paginate(func(page int) ([]*internal.Workspace, error) {
 		resp, err := client.ListWorkspaces(&internal.ListWorkspacesOpts{
-			Page: page,
+			Page:    page,
 			PageLen: 100,
 			Role:    "member",
 		})
@@ -199,7 +198,6 @@ func (c *config) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 		}
 		return resp.Values, nil
 	})
-
 	if err != nil {
 		return nil, err
 	}
@@ -314,11 +312,11 @@ func (c *config) Deactivate(ctx context.Context, u *model.User, r *model.Repo, l
 	client := c.newClient(ctx, u)
 
 	hooks, err := shared_utils.Paginate(func(page int) ([]*internal.Hook, error) {
-			hooks, err := client.ListHooks(r.Owner, r.Name, &internal.ListOpts{})
-			if err != nil {
-				return nil, err
-			}
-			return hooks.Values, nil
+		hooks, err := client.ListHooks(r.Owner, r.Name, &internal.ListOpts{})
+		if err != nil {
+			return nil, err
+		}
+		return hooks.Values, nil
 	})
 	if err != nil {
 		return err
