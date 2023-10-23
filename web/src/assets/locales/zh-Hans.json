@@ -243,7 +243,7 @@
       "log_title": "步骤日志",
       "no_files": "没有文件修改。",
       "no_pipeline_steps": "没有流水线步骤可用！",
-      "no_pipelines": "没有流水线曾启动。",
+      "no_pipelines": "尚未启动过流水线。",
       "pipeline": "流水线 #{pipelineId}",
       "pipelines_for": "{branch} 分支的流水线",
       "pipelines_for_pr": "来自合并请求 #{index} 的流水线",
@@ -269,7 +269,7 @@
         "status": "状态: {status}",
         "success": "成功"
       },
-      "step_not_started": "该步骤还不曾启动过。",
+      "step_not_started": "该步骤尚未启动。",
       "tasks": "任务"
     },
     "pull_requests": "合并请求",

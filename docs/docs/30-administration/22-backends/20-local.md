@@ -96,14 +96,14 @@ steps:
     image: /usr/bin/tree
 ```
 
-If no commands are provided, we treat them as plugins in the usual manner.  
+If no commands are provided, we treat them as plugins in the usual manner.
 In the context of the local backend, plugins are simply executable binaries, which can be located using their name if they are listed in `$PATH`, or through an absolute path.
 
 ### Using labels to filter tasks
 
 You can use the [agent configuration
 options](../15-agent-config.md#woodpecker_filter_labels) and the
-[pipeline syntax](../../20-usage/20-pipeline-syntax.md#labels) to only run certain
+[pipeline syntax](../../20-usage/20-workflow-syntax.md#labels) to only run certain
 pipelines on certain agents. Example:
 
 Define a `label` `type` with value `exec` for a particular agent:

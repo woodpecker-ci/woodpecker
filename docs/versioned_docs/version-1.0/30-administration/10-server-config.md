@@ -352,6 +352,9 @@ The maximum time in minutes you can set in the repo settings before a pipeline g
 > Default: `72h`
 
 Configures the session expiration time.
+Context: when someone does log into Woodpecker, a temporary session token is created.
+As long as the session is valid (until it expires or log-out),
+a user can log into Woodpecker, without re-authentication.
 
 ### `WOODPECKER_ESCALATE`
 > Defaults are defined in [shared/constant/constant.go](https://github.com/woodpecker-ci/woodpecker/blob/master/shared/constant/constant.go)
