@@ -9,7 +9,7 @@ require (
 	github.com/6543/logfile-open v1.2.1
 	github.com/alessio/shellescape v1.4.2
 	github.com/antonmedv/expr v1.15.3
-	github.com/bmatcuk/doublestar/v4 v4.6.0
+	github.com/bmatcuk/doublestar/v4 v4.6.1
 	github.com/caddyserver/certmagic v0.19.2
 	github.com/cenkalti/backoff/v4 v4.2.1
 	github.com/distribution/reference v0.5.0
@@ -19,7 +19,7 @@ require (
 	github.com/docker/go-units v0.5.0
 	github.com/drone/envsubst v1.0.3
 	github.com/franela/goblin v0.0.0-20211003143422-0a4f594942bf
-	github.com/fsnotify/fsnotify v1.6.0
+	github.com/fsnotify/fsnotify v1.7.0
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-ap/httpsig v0.0.0-20221203064646-3647b4d88fdf
 	github.com/go-sql-driver/mysql v1.7.1
@@ -46,19 +46,19 @@ require (
 	github.com/swaggo/swag v1.16.2
 	github.com/tevino/abool/v2 v2.1.0
 	github.com/urfave/cli/v2 v2.25.7
-	github.com/xanzy/go-gitlab v0.93.1
+	github.com/xanzy/go-gitlab v0.93.2
 	github.com/xeipuuv/gojsonschema v1.2.0
 	golang.org/x/crypto v0.14.0
 	golang.org/x/net v0.17.0
 	golang.org/x/oauth2 v0.13.0
 	golang.org/x/sync v0.4.0
 	golang.org/x/term v0.13.0
-	google.golang.org/grpc v1.58.3
+	google.golang.org/grpc v1.59.0
 	google.golang.org/protobuf v1.31.0
 	gopkg.in/yaml.v3 v3.0.1
-	k8s.io/api v0.28.2
-	k8s.io/apimachinery v0.28.2
-	k8s.io/client-go v0.28.2
+	k8s.io/api v0.28.3
+	k8s.io/apimachinery v0.28.3
+	k8s.io/client-go v0.28.3
 	xorm.io/builder v0.3.13
 	xorm.io/xorm v1.3.3
 )
@@ -147,7 +147,7 @@ require (
 	golang.org/x/time v0.3.0 // indirect
 	golang.org/x/tools v0.14.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20230711160842-782d3b101e98 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20230822172742-b8732ec3820d // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gotest.tools/v3 v3.4.0 // indirect
