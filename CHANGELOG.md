@@ -1,10 +1,10 @@
 # Changelog
 
-## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-10-21
+## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-10-23
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@pat-s, @qwerty287, @nitram509, @renovate[bot], @anbraten, @JohnWalkerx, @OskarsPakers, @Exar04, @dominic-p, @categulario, @mzampetakis, @Timshel, @6543, @Denperidge, @xoxys, @tomix1024, @lonix1, @s3lph, @math3vz, @LTek-online, @testwill, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @azdle, @runephilosof-karnovgroup, @praneeth-ovckd
+@renovate[bot], @pat-s, @qwerty287, @nitram509, @anbraten, @JohnWalkerx, @OskarsPakers, @Exar04, @dominic-p, @categulario, @mzampetakis, @Timshel, @6543, @Denperidge, @xoxys, @tomix1024, @lonix1, @s3lph, @math3vz, @LTek-online, @testwill, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @azdle, @runephilosof-karnovgroup, @praneeth-ovckd
 
 ### 💥 Breaking changes
 
@@ -167,6 +167,10 @@
 
 ### Misc
 
+- fix(deps): update golang (packages) [[#2614](https://github.com/woodpecker-ci/woodpecker/pull/2614)]
+- chore(deps): lock file maintenance [[#2620](https://github.com/woodpecker-ci/woodpecker/pull/2620)]
+- chore(deps): update codeberg.org/woodpecker-plugins/trivy docker tag to v1.0.1 [[#2618](https://github.com/woodpecker-ci/woodpecker/pull/2618)]
+- chore(deps): update node.js to v21 [[#2615](https://github.com/woodpecker-ci/woodpecker/pull/2615)]
 - Only publish PR images when label is set [[#2608](https://github.com/woodpecker-ci/woodpecker/pull/2608)]
 - chore(deps): lock file maintenance [[#2595](https://github.com/woodpecker-ci/woodpecker/pull/2595)]
 - chore(deps): update postgres docker tag to v16 [[#2588](https://github.com/woodpecker-ci/woodpecker/pull/2588)]
