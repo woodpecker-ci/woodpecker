@@ -22,6 +22,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"slices"
 	"strings"
 	"sync"
@@ -134,13 +135,17 @@ func (e *local) execCommands(ctx context.Context, step *types.Step, state *workf
 	// TODO: find a way to simulate commands to be exec as stdin user commands instead of generating a script and hope the shell understands
 	script := ""
 	for _, cmd := range step.Commands {
-		script += fmt.Sprintf("echo + %s\n%s\n", strings.TrimSpace(shellescape.Quote(cmd)), cmd)
+		script += fmt.Sprintf("echo %s\n%s\n", strings.TrimSpace(shellescape.Quote("+ "+cmd)), cmd)
 	}
 	script = strings.TrimSpace(script)
 
 	// Prepare command
 	// Use "image name" as run command (indicate shell)
-	cmd := exec.CommandContext(ctx, step.Image, "-c", script)
+	commandArg := "-c"
+	if runtime.GOOS == "windows" {
+		commandArg = "/c"
+	}
+	cmd := exec.CommandContext(ctx, step.Image, commandArg, script)
 	cmd.Env = env
 	cmd.Dir = state.workspaceDir
 
