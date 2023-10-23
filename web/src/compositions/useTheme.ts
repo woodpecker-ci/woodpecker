@@ -1,10 +1,13 @@
 import { BasicColorSchema, useColorMode } from '@vueuse/core';
 import { computed, watch } from 'vue';
 
-const { system, store } = useColorMode();
-const resolvedTheme = computed(() => (store.value === 'auto' ? system.value : store.value));
+const { store: storeTheme, state: resolvedTheme } = useColorMode({
+  storageKey: 'woodpecker:theme',
+});
 
-watch(store, () => {
+watch(storeTheme, updateTheme);
+
+function updateTheme() {
   if (resolvedTheme.value === 'dark') {
     document.documentElement.classList.remove('light');
     document.documentElement.classList.add('dark');
@@ -16,23 +19,19 @@ watch(store, () => {
     document.documentElement.setAttribute('data-theme', 'light');
     document.querySelector('meta[name=theme-color]')?.setAttribute('content', '#369943'); // internal-wp-primary-400
   }
-});
-
-function setTheme(theme: BasicColorSchema) {
-  store.value = theme;
 }
 
-setTheme(store.value);
+updateTheme();
 
 export function useTheme() {
   return {
-    darkMode: computed(() => resolvedTheme.value === 'dark'),
+    resolvedTheme,
     theme: computed({
       get() {
-        return store.value;
+        return storeTheme.value;
       },
       set(theme: BasicColorSchema) {
-        setTheme(theme);
+        storeTheme.value = theme;
       },
     }),
   };
