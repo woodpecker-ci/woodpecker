@@ -1,4 +1,4 @@
-# NixOS Deployment
+# NixOS
 
 :::info
 Note that this module is not maintained by the woodpecker-developers.

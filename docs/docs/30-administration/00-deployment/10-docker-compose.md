@@ -1,45 +1,4 @@
-# Setup
-
-A Woodpecker deployment consists of two parts:
-
-- A server which is the heart of Woodpecker and ships the web interface.
-- Next to one server you can deploy any number of agents which will run the pipelines.
-
-> Each agent is able to process one pipeline step by default.
->
-> If you have 4 agents installed and connected to the Woodpecker server, your system will process 4 builds in parallel.
->
-> You can add more agents to increase the number of parallel steps or set the agent's `WOODPECKER_MAX_WORKFLOWS=1` environment variable to increase the number of parallel workflows for that agent.
-
-## Which version of Woodpecker should I use?
-
-Woodpecker is having two different kinds of releases: **stable** and **next**.
-
-To find out more about the differences between the two releases, please read the [FAQ](/faq).
-
-## Hardware Requirements
-
-Below are resources requirements for Woodpecker components itself:
-
-| Component | Memory | CPU |
-| --------- | ------ | --- |
-| Server    | 200 MB | 1   |
-| Agent     |  32 MB | 1   |
-
-Note, that those values do not include the operating system or workload (pipelines execution) resources consumption.
-
-In addition you need at least some kind of database which requires additional resources depending on the selected database system.
-
-## Installation
-
-You can install Woodpecker on multiple ways:
-
-- Using [docker-compose](#docker-compose) with the official [container images](../80-downloads.md#docker-images)
-- Using [Kubernetes](#kubernetes) via the Woodpeckers Helm chart
-- Using [NixOS](#nixos) via the [NixOS module](https://search.nixos.org/options?channel=unstable&size=200&sort=relevance&query=woodpecker)
-- Using [binaries](../80-downloads.md)
-
-### docker-compose
+# docker-compose
 
 The below [docker-compose](https://docs.docker.com/compose/) configuration can be used to start a Woodpecker server with a single agent.
 
@@ -171,36 +130,25 @@ services:
 +     - WOODPECKER_AGENT_SECRET=${WOODPECKER_AGENT_SECRET}
 ```
 
-### Kubernetes
+## Docker images
 
-We recommended to deploy Woodpecker using the [Woodpecker helm chart](https://github.com/woodpecker-ci/helm).
-Have a look at the [`values.yaml`](https://github.com/woodpecker-ci/helm/blob/main/values.yaml) config files for all available settings.
+Image variants:
 
-The chart contains two subcharts, `server` and `agent` which are automatically configured as needed.
-The chart started off with two independent charts but was merged into one to simplify the deployment at start of 2023.
+- The `latest` image is the latest stable release
+- The `vX.X.X` images are stable releases
+- The `vX.X` images are based on the current release branch (e.g. `release/v1.0`) and can be used to get bugfixes asap
+- The `next` images are based on the current `main` branch and should not be used for production environments
 
-A couple of backend-specific config env vars exists which are described in the [kubernetes backend docs](./22-backends/40-kubernetes.md).
+``` bash
+# server
+docker pull woodpeckerci/woodpecker-server:latest
+docker pull woodpeckerci/woodpecker-server:latest-alpine
 
-## Authentication
+# agent
+docker pull woodpeckerci/woodpecker-agent:latest
+docker pull woodpeckerci/woodpecker-agent:latest-alpine
 
-Authentication is done using OAuth and is delegated to your forge which is configured by using environment variables. The example above demonstrates basic GitHub integration.
-
-See the complete reference for all supported forges [here](./11-forges/10-overview.md).
-
-## Database
-
-By default Woodpecker uses a SQLite database which requires zero installation or configuration. See the [database settings](./30-database.md) page to further configure it or use MySQL or Postgres.
-
-## SSL
-
-Woodpecker supports SSL configuration by using Let's encrypt or by using own certificates. See the [SSL guide](./60-ssl.md).
-
-## Metrics
-
-A [Prometheus endpoint](./90-prometheus.md) is exposed.
-
-## Behind a proxy
-
-See the [proxy guide](./70-proxy.md) if you want to see a setup behind Apache, Nginx, Caddy or ngrok.
-
-In the case you need to use Woodpecker with a URL path prefix (like: https://example.org/woodpecker/), you can use the option [`WOODPECKER_ROOT_PATH`](./10-server-config.md#woodpecker_root_path).
+# cli
+docker pull woodpeckerci/woodpecker-cli:latest
+docker pull woodpeckerci/woodpecker-cli:latest-alpine
+```
