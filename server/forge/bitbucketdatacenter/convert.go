@@ -74,6 +74,9 @@ func convertRepositoryPushEvent(ev *bb.RepositoryPushEvent, baseURL string) *mod
 		// No ToHash present - could be "DELETE"
 		return nil
 	}
+	if change.Type == bb.RepositoryPushEventChangeTypeDelete {
+		return nil
+	}
 
 	pipeline := &model.Pipeline{
 		Commit:    change.ToHash,
