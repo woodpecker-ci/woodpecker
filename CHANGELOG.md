@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@renovate[bot], @pat-s, @qwerty287, @nitram509, @anbraten, @JohnWalkerx, @OskarsPakers, @Exar04, @dominic-p, @categulario, @mzampetakis, @Timshel, @6543, @Denperidge, @xoxys, @tomix1024, @lonix1, @s3lph, @math3vz, @LTek-online, @testwill, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @azdle, @runephilosof-karnovgroup, @praneeth-ovckd
+@qwerty287, @renovate[bot], @pat-s, @nitram509, @anbraten, @JohnWalkerx, @OskarsPakers, @Exar04, @dominic-p, @categulario, @mzampetakis, @Timshel, @6543, @Denperidge, @xoxys, @tomix1024, @lonix1, @s3lph, @math3vz, @LTek-online, @testwill, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @azdle, @runephilosof-karnovgroup, @praneeth-ovckd
 
 ### 💥 Breaking changes
 
@@ -35,6 +35,7 @@
 
 ### 📚 Documentation
 
+- Add prettier plugin [[#2621](https://github.com/woodpecker-ci/woodpecker/pull/2621)]
 - [doc] improve documentation WOODPECKER_SESSION_EXPIRES [[#2603](https://github.com/woodpecker-ci/woodpecker/pull/2603)]
 - Update documentation WRT to recent `$platform` changes [[#2531](https://github.com/woodpecker-ci/woodpecker/pull/2531)]
 - Add plugin "GitHub release" [[#2592](https://github.com/woodpecker-ci/woodpecker/pull/2592)]
