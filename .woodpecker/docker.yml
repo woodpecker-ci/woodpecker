@@ -24,19 +24,30 @@ variables:
   - publish_logins: &publish_logins
       # Default DockerHub login
       - registry: https://index.docker.io/v1/
-        username:
-          from_secret: docker_username
+        username: woodpeckerbot
         password:
           from_secret: docker_password
       # Additional Quay.IO login
       - registry: https://quay.io
-        username:
-          from_secret: QUAY_IO_USER
+        username: 'woodpeckerci+wp_ci'
         password:
           from_secret: QUAY_IO_TOKEN
   - &publish_repos_server 'woodpeckerci/woodpecker-server,quay.io/woodpeckerci/woodpecker-server'
   - &publish_repos_agent 'woodpeckerci/woodpecker-agent,quay.io/woodpeckerci/woodpecker-agent'
   - &publish_repos_cli 'woodpeckerci/woodpecker-cli,quay.io/woodpeckerci/woodpecker-cli'
+  - path: &when_path
+      # web source code
+      - "web/**"
+      # api source code
+      - "server/api/**"
+      # go source code
+      - "**/*.go"
+      - "go.*"
+      # schema changes
+      - "pipeline/schema/**"
+      # Dockerfile changes
+      - "docker/**"
+
 
 steps:
   vendor:
@@ -68,11 +79,14 @@ steps:
       TAGS: bindata sqlite sqlite_unlock_notify netgo
       XGO_VERSION: *xgo_version
     when:
-      event: pull_request
+      - event: pull_request
+        evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
+      - event: pull_request
+        path: *when_path
 
   publish-server-preview:
     image: woodpeckerci/plugin-docker-buildx:2.1.0
-    secrets: [ docker_username, docker_password ]
+    secrets: [ docker_password ]
     group: docker
     settings:
       repo: woodpeckerci/woodpecker-server
@@ -81,10 +95,11 @@ steps:
       tag: pull_${CI_COMMIT_PULL_REQUEST}
     when:
       evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
+      event: pull_request
 
   publish-server-alpine-preview:
     image: woodpeckerci/plugin-docker-buildx:2.1.0
-    secrets: [ docker_username, docker_password ]
+    secrets: [ docker_password ]
     group: docker
     settings:
       repo: woodpeckerci/woodpecker-server
@@ -93,10 +108,11 @@ steps:
       tag: pull_${CI_COMMIT_PULL_REQUEST}-alpine
     when:
       evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
+      event: pull_request
 
   publish-server-preview-dry:
     image: woodpeckerci/plugin-docker-buildx:2.1.0
-    secrets: [ docker_username, docker_password ]
+    secrets: [ docker_password ]
     group: docker
     settings:
       dry_run: true
@@ -106,10 +122,12 @@ steps:
       tag: pull_${CI_COMMIT_PULL_REQUEST}
     when:
       evaluate: 'not (CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images")'
+      event: pull_request
+      path: *when_path
 
   publish-server-alpine-preview-dry:
     image: woodpeckerci/plugin-docker-buildx:2.1.0
-    secrets: [ docker_username, docker_password ]
+    secrets: [ docker_password ]
     group: docker
     settings:
       dry_run: true
@@ -119,6 +137,8 @@ steps:
       tag: pull_${CI_COMMIT_PULL_REQUEST}-alpine
     when:
       evaluate: 'not (CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images")'
+      event: pull_request
+      path: *when_path
 
   cross-compile-server:
     image: *xgo_image
@@ -136,6 +156,7 @@ steps:
         - ${CI_REPO_DEFAULT_BRANCH}
         - release/*
       event: [push, tag]
+      path: *when_path
 
   publish-next-server:
     image: woodpeckerci/plugin-docker-buildx:2.1.0
@@ -149,6 +170,7 @@ steps:
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
+      path: *when_path
 
   publish-next-server-alpine:
     image: woodpeckerci/plugin-docker-buildx:2.1.0
@@ -162,6 +184,7 @@ steps:
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
+      path: *when_path
 
   publish-release-branch-server:
     image: woodpeckerci/plugin-docker-buildx:2.1.0
@@ -175,6 +198,7 @@ steps:
     when:
       branch: release/*
       event: push
+      path: *when_path
 
   publish-release-branch-server-alpine:
     image: woodpeckerci/plugin-docker-buildx:2.1.0
@@ -188,6 +212,7 @@ steps:
     when:
       branch: release/*
       event: push
+      path: *when_path
 
   release-server:
     group: docker
@@ -222,7 +247,7 @@ steps:
   publish-agent-preview:
     group: docker
     image: woodpeckerci/plugin-docker-buildx:2.1.0
-    secrets: [ docker_username, docker_password ]
+    secrets: [ docker_password ]
     settings:
       repo: woodpeckerci/woodpecker-agent
       dockerfile: docker/Dockerfile.agent.multiarch
@@ -231,11 +256,12 @@ steps:
       build_args: *build_args
     when:
       evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
+      event: pull_request
 
   publish-agent-preview-dry:
     group: docker
     image: woodpeckerci/plugin-docker-buildx:2.1.0
-    secrets: [ docker_username, docker_password ]
+    secrets: [ docker_password ]
     settings:
       dry_run: true
       repo: woodpeckerci/woodpecker-agent
@@ -245,6 +271,8 @@ steps:
       build_args: *build_args
     when:
       evaluate: 'not (CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images")'
+      event: pull_request
+      path: *when_path
 
   publish-next-agent:
     group: docker
@@ -259,6 +287,7 @@ steps:
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
+      path: *when_path
 
   publish-next-agent-alpine:
     group: docker
@@ -273,6 +302,7 @@ steps:
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
+      path: *when_path
 
   publish-release-branch-agent:
     group: docker
@@ -287,6 +317,7 @@ steps:
     when:
       branch: release/*
       event: push
+      path: *when_path
 
   publish-release-branch-agent-alpine:
     group: docker
@@ -301,6 +332,7 @@ steps:
     when:
       branch: release/*
       event: push
+      path: *when_path
 
   release-agent:
     group: docker
@@ -337,7 +369,7 @@ steps:
   publish-cli-preview:
     group: docker
     image: woodpeckerci/plugin-docker-buildx:2.1.0
-    secrets: [ docker_username, docker_password ]
+    secrets: [ docker_password ]
     settings:
       repo: woodpeckerci/woodpecker-cli
       dockerfile: docker/Dockerfile.cli.multiarch
@@ -346,11 +378,12 @@ steps:
       build_args: *build_args
     when:
       evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
+      event: pull_request
 
   publish-cli-preview-dry:
     group: docker
     image: woodpeckerci/plugin-docker-buildx:2.1.0
-    secrets: [ docker_username, docker_password ]
+    secrets: [ docker_password ]
     settings:
       dry_run: true
       repo: woodpeckerci/woodpecker-cli
@@ -360,6 +393,8 @@ steps:
       build_args: *build_args
     when:
       evaluate: 'not (CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images")'
+      event: pull_request
+      path: *when_path
 
   publish-next-cli:
     group: docker
@@ -374,6 +409,7 @@ steps:
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
+      path: *when_path
 
   publish-next-cli-alpine:
     group: docker
@@ -388,6 +424,7 @@ steps:
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
+      path: *when_path
 
   publish-release-branch-cli:
     group: docker
@@ -402,6 +439,7 @@ steps:
     when:
       branch: release/*
       event: push
+      path: *when_path
 
   publish-release-branch-cli-alpine:
     group: docker
@@ -416,6 +454,7 @@ steps:
     when:
       branch: release/*
       event: push
+      path: *when_path
 
   release-cli:
     group: docker
