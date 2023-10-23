@@ -108,8 +108,8 @@ steps:
   init:
     image: bash
     commands:
-      echo "FOO=hello" >> envvars
-      echo "BAR=world" >> envvars
+      - echo "FOO=hello" >> envvars
+      - echo "BAR=world" >> envvars
 
   debug:
     image: bash

@@ -4,10 +4,11 @@
 Secrets encryption is currently broken and therefore disabled by default. It will be fixed in an upcoming release.
 
 Check:
+
 - https://github.com/woodpecker-ci/woodpecker/issues/1541 and
 - https://github.com/woodpecker-ci/woodpecker/pull/2300
-:::
 
+:::
 
 By default, Woodpecker does not encrypt secrets in its database. You can enable encryption
 using simple AES key or more advanced [Google TINK](https://developers.google.com/tink) encryption.
