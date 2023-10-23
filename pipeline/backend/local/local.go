@@ -112,9 +112,10 @@ func (e *local) StartStep(ctx context.Context, step *types.Step, taskUUID string
 		}
 	}
 
-	// Set HOME
+	// Set HOME and CI_WORKSPACE
 	env = append(env, "HOME="+state.homeDir)
 	env = append(env, "USERPROFILE="+state.homeDir)
+	env = append(env, "CI_WORKSPACE="+state.workspaceDir)
 
 	switch step.Type {
 	case types.StepTypeClone:
