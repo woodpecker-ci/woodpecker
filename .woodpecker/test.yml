@@ -59,7 +59,7 @@ steps:
     commands:
       - 'make generate-swagger'
       - 'DIFF=$(git diff | head)'
-      - '[ -n "$DIFF" ] && { echo "swagger not up to date, exec ''make generate-swagger'' and commit"; exit 1; } || true'
+      - '[ -n "$DIFF" ] && { echo "swagger not up to date, exec `make generate-swagger` and commit"; exit 1; } || true'
     when: *when
 
   lint-editorconfig:
@@ -140,7 +140,7 @@ steps:
 
 services:
   service-postgres:
-    image: postgres:11
+    image: postgres:16
     ports: ['5432']
     environment:
       - POSTGRES_USER=postgres

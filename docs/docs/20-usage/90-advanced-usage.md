@@ -1,6 +1,10 @@
-# Advanced YAML syntax
+# Advanced usage
 
-## Anchors & aliases
+## Advanced YAML syntax
+
+YAML has some advanced syntax features that can be used like variables to reduce duplication in your pipeline config:
+
+### Anchors & aliases
 
 You can use [YAML anchors & aliases](https://yaml.org/spec/1.2.2/#3222-anchors-and-aliases) as variables in your pipeline config.
 
@@ -33,7 +37,7 @@ Just add a new section called **variables** like this:
      commands: build
 ```
 
-## Map merges and overwrites
+### Map merges and overwrites
 
 ```yaml
 variables:
@@ -63,7 +67,7 @@ steps:
       branch: main
 ```
 
-## Sequence merges
+### Sequence merges
 
 ```yaml
 variables:
@@ -90,7 +94,41 @@ steps:
       - <<: *post_cmds
 ```
 
-## References
+### References
 
-- [Official specification](https://yaml.org/spec/1.2.2/#3222-anchors-and-aliases)
-- [Cheatsheet](https://learnxinyminutes.com/docs/yaml)
+- [Official YAML specification](https://yaml.org/spec/1.2.2/#3222-anchors-and-aliases)
+- [YAML Cheatsheet](https://learnxinyminutes.com/docs/yaml)
+
+## Persisting environment data between steps
+
+One can create a file containing environment variables, and then source it in each step that needs them.
+
+```yml
+steps:
+  init:
+    image: bash
+    commands:
+      echo "FOO=hello" >> envvars
+      echo "BAR=world" >> envvars
+
+  debug:
+    image: bash
+    commands:
+      - source envvars
+      - echo $FOO
+```
+
+## Declaring global variables in `docker-compose.yml`
+
+As described in [Global environment variables](./50-environment.md#global-environment-variables), one can define global variables:
+
+```yml
+services:
+  woodpecker-server:
+    # ...
+    environment:
+      - WOODPECKER_ENVIRONMENT=first_var:value1,second_var:value2
+      # ...
+```
+
+Note that this tightly couples the server and app configurations (where the app is a completely separate application). But this is a good option for truly global variables which should apply to all steps in all pipelines for all apps.

@@ -84,8 +84,6 @@ func (e *local) execClone(ctx context.Context, step *types.Step, state *workflow
 		return err
 	}
 
-	env = append(env, "CI_WORKSPACE="+state.workspaceDir)
-
 	// Prepare command
 	var cmd *exec.Cmd
 	if rmCmd != "" {
