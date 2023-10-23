@@ -35,7 +35,8 @@ In addition you need at least some kind of database which requires additional re
 You can install Woodpecker on multiple ways:
 
 - Using [docker-compose](#docker-compose) with the official [container images](../80-downloads.md#docker-images)
-- Using [Kubernetes](./#kubernetes) via the Woodpeckers Helm chart
+- Using [Kubernetes](#kubernetes) via the Woodpeckers Helm chart
+- Using [NixOS](#nixos) via the [NixOS module](https://search.nixos.org/options?channel=unstable&size=200&sort=relevance&query=woodpecker)
 - Using [binaries](../80-downloads.md)
 
 ### docker-compose
@@ -170,7 +171,7 @@ services:
 +     - WOODPECKER_AGENT_SECRET=${WOODPECKER_AGENT_SECRET}
 ```
 
-### Kubernetes 
+### Kubernetes
 
 We recommended to deploy Woodpecker using the [Woodpecker helm chart](https://github.com/woodpecker-ci/helm).
 Have a look at the [`values.yaml`](https://github.com/woodpecker-ci/helm/blob/main/values.yaml) config files for all available settings.
