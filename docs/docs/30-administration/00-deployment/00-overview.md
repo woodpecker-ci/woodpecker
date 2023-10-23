@@ -7,9 +7,9 @@ A Woodpecker deployment consists of two parts:
 
 > Each agent is able to process one pipeline step by default.
 >
-> If you have 4 agents installed and connected to the Woodpecker server, your system will process 4 builds in parallel.
+> If you have 4 agents installed and connected to the Woodpecker server, your system will process 4 workflows in parallel.
 >
-> You can add more agents to increase the number of parallel steps or set the agent's `WOODPECKER_MAX_WORKFLOWS=1` environment variable to increase the number of parallel workflows for that agent.
+> You can add more agents to increase the number of parallel workflows or set the agent's `WOODPECKER_MAX_WORKFLOWS=1` environment variable to increase the number of parallel workflows for that agent.
 
 ## Which version of Woodpecker should I use?
 
@@ -19,7 +19,7 @@ To find out more about the differences between the two releases, please read the
 
 ## Hardware Requirements
 
-Below are resources requirements for Woodpecker components itself:
+Below are minimal resources requirements for Woodpecker components itself:
 
 | Component | Memory | CPU |
 | --------- | ------ | --- |
@@ -40,7 +40,7 @@ You can install Woodpecker on multiple ways:
 
 ## Authentication
 
-Authentication is done using OAuth and is delegated to your forge which is configured by using environment variables. The example above demonstrates basic GitHub integration.
+Authentication is done using OAuth and is delegated to your forge which is configured using environment variables.
 
 See the complete reference for all supported forges [here](../11-forges/10-overview.md).
 
@@ -50,7 +50,7 @@ By default Woodpecker uses a SQLite database which requires zero installation or
 
 ## SSL
 
-Woodpecker supports SSL configuration by using Let's encrypt or by using own certificates. See the [SSL guide](../60-ssl.md).
+Woodpecker supports SSL configuration by using Let's encrypt or by using own certificates. See the [SSL guide](../60-ssl.md). You can also put it behind a [reverse proxy](#behind-a-proxy)
 
 ## Metrics
 
