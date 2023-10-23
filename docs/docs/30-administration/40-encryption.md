@@ -1,6 +1,15 @@
 # Secrets encryption
 
-By default, Woodpecker does not encrypt secrets in its database. You can enable encryption 
+:::danger
+Secrets encryption is currently broken and therefore disabled by default. It will be fixed in an upcoming release.
+
+Check:
+- https://github.com/woodpecker-ci/woodpecker/issues/1541 and
+- https://github.com/woodpecker-ci/woodpecker/pull/2300
+:::
+
+
+By default, Woodpecker does not encrypt secrets in its database. You can enable encryption
 using simple AES key or more advanced [Google TINK](https://developers.google.com/tink) encryption.
 
 ## Common
@@ -8,7 +17,7 @@ using simple AES key or more advanced [Google TINK](https://developers.google.co
 ### Enabling secrets encryption
 
 To enable secrets encryption and encrypt all existing secrets in database set
-`WOODPECKER_ENCRYPTION_KEY`, `WOODPECKER_ENCRYPTION_KEY_FILE` or `WOODPECKER_ENCRYPTION_TINK_KEYSET_PATH` environment 
+`WOODPECKER_ENCRYPTION_KEY`, `WOODPECKER_ENCRYPTION_KEY_FILE` or `WOODPECKER_ENCRYPTION_TINK_KEYSET_PATH` environment
 variable depending on encryption method of your choice.
 
 After encryption is enabled you will be unable to start Woodpecker server without providing valid encryption key!
@@ -45,7 +54,7 @@ You will need plaintext AEAD-compatible Google TINK keyset to encrypt your data.
 
 To generate it and then rotate keys if needed, install `tinkey`([installation guide](https://developers.google.com/tink/install-tinkey))
 
-Keyset contains one or more keys, used to encrypt or decrypt your data, and primary key ID, used to determine which key 
+Keyset contains one or more keys, used to encrypt or decrypt your data, and primary key ID, used to determine which key
 to use while encrypting new data.
 
 Keyset generation example:

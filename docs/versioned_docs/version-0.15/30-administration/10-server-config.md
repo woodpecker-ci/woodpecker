@@ -173,6 +173,9 @@ The default docker image to be used when cloning the repo
 > Default: `72h`
 
 Configures the session expiration time.
+Context: when someone does log into Woodpecker, a temporary session token is created.
+As long as the session is valid (until it expires or log-out),
+a user can log into Woodpecker, without re-authentication.
 
 ### `WOODPECKER_ESCALATE`
 > Default: `plugins/docker,plugins/gcr,plugins/ecr,woodpeckerci/plugin-docker,woodpeckerci/plugin-docker-buildx`
