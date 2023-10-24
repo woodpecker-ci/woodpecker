@@ -551,7 +551,12 @@ func RepairAllRepos(c *gin.Context) {
 func repairRepo(c *gin.Context, repo *model.Repo, withPerms bool) {
 	forge := server.Config.Services.Forge
 	_store := store.FromContext(c)
-	user := session.User(c)
+
+	user, err := _store.GetUser(repo.UserID)
+	if err != nil {
+		handleDbError(c, err)
+		return
+	}
 
 	// creates the jwt token used to verify the repository
 	t := token.New(token.HookToken, repo.FullName)
