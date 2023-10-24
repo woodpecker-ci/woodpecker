@@ -24,10 +24,8 @@ import (
 	"path/filepath"
 	"runtime"
 	"slices"
-	"strings"
 	"sync"
 
-	"github.com/alessio/shellescape"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/transform"
@@ -134,22 +132,9 @@ func (e *local) StartStep(ctx context.Context, step *types.Step, taskUUID string
 
 // execCommands use step.Image as shell and run the commands in it
 func (e *local) execCommands(ctx context.Context, step *types.Step, state *workflowState, env []string) error {
-	// TODO: find a way to simulate commands to be exec as stdin user commands instead of generating a script and hope the shell understands
-	script := ""
-	for _, cmd := range step.Commands {
-		script += fmt.Sprintf("echo %s\n%s\n", strings.TrimSpace(shellescape.Quote("+ "+cmd)), cmd)
-	}
-	script = strings.TrimSpace(script)
-
 	// Prepare command
 	// Use "image name" as run command (indicate shell)
-	commandArg := "-c"
-	switch strings.ToLower(step.Image) {
-	case "cmd", "cmd.exe":
-		commandArg = "/c"
-		script = strings.ReplaceAll(script, "\n", "; ")
-	}
-	cmd := exec.CommandContext(ctx, step.Image, "-noninteractive", commandArg, script)
+	cmd := exec.CommandContext(ctx, step.Image, genCmdByShell(step.Image, step.Commands)...)
 	cmd.Env = env
 	cmd.Dir = state.workspaceDir
 
