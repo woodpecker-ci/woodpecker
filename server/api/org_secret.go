@@ -107,12 +107,11 @@ func PostOrgSecret(c *gin.Context) {
 		return
 	}
 	secret := &model.Secret{
-		OrgID:       orgID,
-		Name:        in.Name,
-		Value:       in.Value,
-		Events:      in.Events,
-		Images:      in.Images,
-		PluginsOnly: in.PluginsOnly,
+		OrgID:  orgID,
+		Name:   in.Name,
+		Value:  in.Value,
+		Events: in.Events,
+		Images: in.Images,
 	}
 	if err := secret.Validate(); err != nil {
 		c.String(http.StatusUnprocessableEntity, "Error inserting org %q secret. %s", orgID, err)
@@ -165,7 +164,6 @@ func PatchOrgSecret(c *gin.Context) {
 	if in.Images != nil {
 		secret.Images = in.Images
 	}
-	secret.PluginsOnly = in.PluginsOnly
 
 	if err := secret.Validate(); err != nil {
 		c.String(http.StatusUnprocessableEntity, "Error updating org %q secret. %s", orgID, err)

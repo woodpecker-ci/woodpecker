@@ -16,12 +16,10 @@
 
       <InputField :label="$t(i18nPrefix + 'images.images')">
         <TextField v-model="images" :placeholder="$t(i18nPrefix + 'images.desc')" />
-
-        <Checkbox v-model="innerValue.plugins_only" class="mt-4" :label="$t(i18nPrefix + 'plugins_only')" />
       </InputField>
 
       <InputField :label="$t(i18nPrefix + 'events.events')">
-        <CheckboxesField v-model="innerValue.event" :options="secretEventsOptions" />
+        <CheckboxesField v-model="innerValue.events" :options="secretEventsOptions" />
       </InputField>
 
       <div class="flex gap-2">
@@ -71,11 +69,11 @@ const innerValue = computed({
 });
 const images = computed<string>({
   get() {
-    return innerValue.value?.image?.join(',') || '';
+    return innerValue.value?.images?.join(',') || '';
   },
   set(value) {
     if (innerValue.value) {
-      innerValue.value.image = value
+      innerValue.value.images = value
         .split(',')
         .map((s) => s.trim())
         .filter((s) => s !== '');
