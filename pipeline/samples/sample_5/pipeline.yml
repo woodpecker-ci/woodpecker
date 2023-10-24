@@ -8,7 +8,6 @@ clone:
     depth: 50
 
 steps:
-
   # these steps define a parallel execution
   # group and will fan out.
 
