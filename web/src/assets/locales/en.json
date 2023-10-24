@@ -443,7 +443,7 @@
         "disabled": "Disabled",
         "repair": {
           "repair": "Repair all",
-          "success": "Repositories repaired",
+          "success": "Repositories repaired"
         }
       }
     }

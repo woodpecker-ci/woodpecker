@@ -39,6 +39,8 @@
 </template>
 
 <script lang="ts" setup>
+import { useI18n } from 'vue-i18n';
+
 import Badge from '~/components/atomic/Badge.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
@@ -51,6 +53,7 @@ import { Repo } from '~/lib/api/types';
 
 const apiClient = useApiClient();
 const notifications = useNotifications();
+const i18n = useI18n();
 
 async function loadRepos(page: number): Promise<Repo[] | null> {
   return apiClient.getAllRepos(page);
