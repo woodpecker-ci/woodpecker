@@ -10,7 +10,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Deprecated `platform:` filter in favor of `labels:`, [read more](./20-usage/20-workflow-syntax.md#filter-by-platform)
 - Removed `build` alias for `pipeline` command in CLI
 - Removed `ssh` backend. Use an agent directly on the SSH machine using the `local` backend.
-- Removed `/hook` and `/stream` API paths in favor of `/api/(hook|stream)`. You may need to use the "Repair repository" button in the repo settings to recreate the forge hook.
+- Removed `/hook` and `/stream` API paths in favor of `/api/(hook|stream)`. You may need to use the "Repair repository" button in the repo settings or "Repair all" in the admin settings to recreate the forge hook.
 
 ## 1.0.0
 
