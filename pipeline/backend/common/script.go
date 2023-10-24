@@ -37,10 +37,3 @@ func GenerateContainerConf(commands []string) (env map[string]string, entry, cmd
 
 	return env, entry, cmd
 }
-
-func GenerateScript(commands []string) string {
-	if runtime.GOOS == "windows" {
-		return generateScriptWindows(commands)
-	}
-	return generateScriptPosix(commands)
-}

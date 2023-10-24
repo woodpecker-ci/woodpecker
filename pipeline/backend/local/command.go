@@ -34,7 +34,7 @@ func genCmdByShell(shell string, cmds []string) (args []string) {
 		return []string{"/c", script}
 	case "fish":
 	case "powershell", "pwsh":
-		return []string{"-noninteractive", "-c", "$ErrorActionPreference = \"Stop\"; " + script}
+		return []string{"-noprofile", "-noninteractive", "-c", "$ErrorActionPreference = \"Stop\"; " + script}
 	default:
 		// normal posix shells
 		return []string{"-e", "-c", script}
