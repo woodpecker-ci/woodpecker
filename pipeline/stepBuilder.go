@@ -240,10 +240,9 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, envi
 			continue
 		}
 		secrets = append(secrets, compiler.Secret{
-			Name:       sec.Name,
-			Value:      sec.Value,
-			Match:      sec.Images,
-			PluginOnly: sec.PluginsOnly,
+			Name:           sec.Name,
+			Value:          sec.Value,
+			AllowedPlugins: sec.Images,
 		})
 	}
 
