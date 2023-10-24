@@ -10,11 +10,12 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Deprecated `platform:` filter in favor of `labels:`, [read more](./20-usage/20-workflow-syntax.md#filter-by-platform)
 - Removed `build` alias for `pipeline` command in CLI
 - Removed `ssh` backend. Use an agent directly on the SSH machine using the `local` backend.
+- Removed `/hook` and `/stream` API paths in favor of `/api/(hook|stream)`. You may need to use the "Repair repository" button in the repo settings to recreate the forge hook.
 
 ## 1.0.0
 
-- The signature used to verify extensions calls (like those used for the [config-extension](./30-administration/100-external-configuration-api.md)) done by the Woodpecker server switched from using a shared-secret HMac to an ed25519 key-pair. Read more about it at the [config-extensions](./30-administration/100-external-configuration-api.md) documentation.
-- Refactored support of old agent filter labels and expression. Learn how to use the new [filter](./20-usage/20-workflow-syntax.md#labels)
+- The signature used to verify extension calls (like those used for the [config-extension](./30-administration/100-external-configuration-api.md)) done by the Woodpecker server switched from using a shared-secret HMac to an ed25519 key-pair. Read more about it at the [config-extensions](./30-administration/100-external-configuration-api.md) documentation.
+- Refactored support for old agent filter labels and expressions. Learn how to use the new [filter](./20-usage/20-workflow-syntax.md#labels)
 - Renamed step environment variable `CI_SYSTEM_ARCH` to `CI_SYSTEM_PLATFORM`. Same applies for the cli exec variable.
 - Renamed environment variables `CI_BUILD_*` and `CI_PREV_BUILD_*` to `CI_PIPELINE_*` and `CI_PREV_PIPELINE_*`, old ones are still available but deprecated
 - Renamed environment variables `CI_JOB_*` to `CI_STEP_*`, old ones are still available but deprecated
