@@ -73,6 +73,7 @@ func apiRoutes(e *gin.RouterGroup) {
 			repo.GET("/lookup/*repo_full_name", session.SetRepo(), session.SetPerm(), session.MustPull, api.LookupRepo)
 			repo.POST("", session.MustUser(), api.PostRepo)
 			repo.GET("", session.MustAdmin(), api.GetAllRepos)
+			repo.POST("/repair", session.MustAdmin(), api.RepairAllRepos)
 			repoBase := repo.Group("/:repo_id")
 			{
 				repoBase.Use(session.SetRepo())
