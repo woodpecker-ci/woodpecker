@@ -18,4 +18,4 @@ steps:
     commands:
       - echo this step should execute, despite failure
     when:
-      status: [ failure ]
+      status: [failure]

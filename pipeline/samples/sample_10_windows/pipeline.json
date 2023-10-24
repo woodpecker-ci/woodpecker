@@ -92,12 +92,7 @@
             "HOME": "c:\\root",
             "SHELL": "powershell.exe"
           },
-          "entrypoint": [
-            "powershell",
-            "-noprofile",
-            "-noninteractive",
-            "-command"
-          ],
+          "entrypoint": ["powershell", "-noprofile", "-noninteractive", "-command"],
           "command": [
             "[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($Env:CI_SCRIPT)) | iex"
           ],

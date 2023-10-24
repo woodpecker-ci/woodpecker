@@ -15,7 +15,7 @@ variables:
         - '**/*.go'
         - 'go.*'
         # schema changes
-        - "pipeline/schema/**"
+        - 'pipeline/schema/**'
       event: [pull_request, tag]
 
 steps:
@@ -59,7 +59,7 @@ steps:
     commands:
       - 'make generate-swagger'
       - 'DIFF=$(git diff | head)'
-      - '[ -n "$DIFF" ] && { echo "swagger not up to date, exec ''make generate-swagger'' and commit"; exit 1; } || true'
+      - '[ -n "$DIFF" ] && { echo "swagger not up to date, exec `make generate-swagger` and commit"; exit 1; } || true'
     when: *when
 
   lint-editorconfig:
@@ -74,6 +74,11 @@ steps:
     commands:
       - go install github.com/google/addlicense@latest
       - 'addlicense -check -ignore "vendor/**" **/*.go'
+    when: *when
+
+  prettier:
+    image: woodpeckerci/plugin-prettier:next
+    group: test
     when: *when
 
   test:
@@ -119,7 +124,7 @@ steps:
 
   codecov:
     pull: true
-    image: woodpeckerci/plugin-codecov:next-alpine
+    image: woodpeckerci/plugin-codecov:2.1.0
     settings:
       files:
         - agent-coverage.out
@@ -136,7 +141,7 @@ steps:
 services:
   service-postgres:
     image: postgres:16
-    ports: ["5432"]
+    ports: ['5432']
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_HOST_AUTH_METHOD=trust
@@ -144,7 +149,7 @@ services:
 
   service-mysql:
     image: mysql:8.1.0
-    ports: ["3306"]
+    ports: ['3306']
     environment:
       - MYSQL_DATABASE=test
       - MYSQL_ALLOW_EMPTY_PASSWORD=yes
