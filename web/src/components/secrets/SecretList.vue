@@ -6,12 +6,12 @@
       class="items-center !bg-wp-background-200 !dark:bg-wp-background-100"
     >
       <span>{{ secret.name }}</span>
-      <div class="ml-auto space-x-2">
+      <div class="ml-auto space-x-2 <md:hidden">
         <Badge v-for="event in secret.events" :key="event" :label="event" />
       </div>
       <IconButton
         icon="edit"
-        class="ml-2 w-8 h-8"
+        class="ml-2 <md:ml-auto w-8 h-8"
         :title="$t('repo.settings.secrets.edit')"
         @click="editSecret(secret)"
       />

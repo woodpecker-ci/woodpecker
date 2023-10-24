@@ -41,7 +41,12 @@ func Handler() http.Handler {
 }
 
 func listRepoHooks(c *gin.Context) {
-	c.String(200, listRepoHookPayloads)
+	page := c.Query("page")
+	if page != "" && page != "1" {
+		c.String(200, "[]")
+	} else {
+		c.String(200, listRepoHookPayloads)
+	}
 }
 
 func getRepo(c *gin.Context) {

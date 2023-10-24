@@ -49,7 +49,7 @@ import (
 )
 
 func run(c *cli.Context) error {
-	common.SetupGlobalLogger(c)
+	common.SetupGlobalLogger(c, true)
 
 	agentConfigPath := c.String("agent-config")
 	hostname := c.String("hostname")
