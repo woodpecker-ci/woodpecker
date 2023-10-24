@@ -124,7 +124,7 @@ steps:
 
   codecov:
     pull: true
-    image: woodpeckerci/plugin-codecov:2.1.0
+    image: woodpeckerci/plugin-codecov:2.1.1
     settings:
       files:
         - agent-coverage.out
@@ -136,7 +136,6 @@ steps:
         from_secret: codecov_token
     when:
       - path: *when_path
-    failure: ignore
 
 services:
   service-postgres:
