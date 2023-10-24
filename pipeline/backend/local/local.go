@@ -22,12 +22,15 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"slices"
 	"strings"
 	"sync"
 
 	"github.com/alessio/shellescape"
 	"github.com/rs/zerolog/log"
+	"golang.org/x/text/encoding/unicode"
+	"golang.org/x/text/transform"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
@@ -153,6 +156,12 @@ func (e *local) execCommands(ctx context.Context, step *types.Step, state *workf
 	// Get output and redirect Stderr to Stdout
 	e.output, _ = cmd.StdoutPipe()
 	cmd.Stderr = cmd.Stdout
+
+	if runtime.GOOS == "windows" {
+		// we get non utf8 output from windows so just sanitize it
+		// TODO: remove hack
+		e.output = io.NopCloser(transform.NewReader(e.output, unicode.UTF8.NewDecoder().Transformer))
+	}
 
 	state.stepCMDs[step.Name] = cmd
 
