@@ -4212,7 +4212,7 @@ const docTemplate = `{
         "Secret": {
             "type": "object",
             "properties": {
-                "event": {
+                "events": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/WebhookEvent"
@@ -4221,7 +4221,7 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "image": {
+                "images": {
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -4229,9 +4229,6 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
-                },
-                "plugins_only": {
-                    "type": "boolean"
                 },
                 "value": {
                     "type": "string"
