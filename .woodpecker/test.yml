@@ -124,7 +124,7 @@ steps:
 
   codecov:
     pull: true
-    image: woodpeckerci/plugin-codecov:2.1.1
+    image: woodpeckerci/plugin-codecov:2.1.2
     settings:
       files:
         - agent-coverage.out
