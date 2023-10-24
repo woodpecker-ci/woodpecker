@@ -33,6 +33,8 @@ func genCmdByShell(shell string, cmds []string) (args []string) {
 		script = strings.ReplaceAll(script, "\n", "; ")
 		return []string{"/c", script}
 	case "fish":
+		// TODO: exit on error
+		return []string{"-c", script}
 	case "powershell", "pwsh":
 		return []string{"-noprofile", "-noninteractive", "-c", "$ErrorActionPreference = \"Stop\"; " + script}
 	default:
