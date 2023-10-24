@@ -224,13 +224,4 @@ func apiRoutes(e *gin.RouterGroup) {
 			}
 		}
 	}
-
-	// TODO: remove /hook in favor of /api/hook
-	e.POST("/hook", api.PostHook)
-
-	// TODO: move to /api/stream
-	sse := e.Group("/stream")
-	{
-		sse.GET("/events", api.EventStreamSSE)
-	}
 }
