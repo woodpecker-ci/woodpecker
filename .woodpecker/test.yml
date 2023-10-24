@@ -136,6 +136,7 @@ steps:
         from_secret: codecov_token
     when:
       - path: *when_path
+    failure: ignore
 
 services:
   service-postgres:
