@@ -4,10 +4,11 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@qwerty287, @pat-s, @anbraten, @Janik-Haag, @renovate[bot], @nitram509, @JohnWalkerx, @OskarsPakers, @Exar04, @dominic-p, @categulario, @mzampetakis, @Timshel, @6543, @Denperidge, @xoxys, @tomix1024, @lonix1, @s3lph, @math3vz, @LTek-online, @testwill, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @azdle, @runephilosof-karnovgroup, @praneeth-ovckd
+@anbraten, @pat-s, @qwerty287, @Janik-Haag, @renovate[bot], @nitram509, @JohnWalkerx, @OskarsPakers, @Exar04, @dominic-p, @categulario, @mzampetakis, @Timshel, @6543, @Denperidge, @xoxys, @tomix1024, @lonix1, @s3lph, @math3vz, @LTek-online, @testwill, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @azdle, @runephilosof-karnovgroup, @praneeth-ovckd
 
 ### 💥 Breaking changes
 
+- Remove plugin-only option from secrets [[#2213](https://github.com/woodpecker-ci/woodpecker/pull/2213)]
 - Remove deprecated API paths [[#2639](https://github.com/woodpecker-ci/woodpecker/pull/2639)]
 - Remove SSH backend [[#2635](https://github.com/woodpecker-ci/woodpecker/pull/2635)]
 - Remove deprecated `build` command [[#2602](https://github.com/woodpecker-ci/woodpecker/pull/2602)]
@@ -181,6 +182,7 @@
 
 ### Misc
 
+- Bump codecov version to fix build [[#2644](https://github.com/woodpecker-ci/woodpecker/pull/2644)]
 - Fix codecov plugin version [[#2643](https://github.com/woodpecker-ci/woodpecker/pull/2643)]
 - Add prettier [[#2600](https://github.com/woodpecker-ci/woodpecker/pull/2600)]
 - Do not run docker prepare steps [[#2626](https://github.com/woodpecker-ci/woodpecker/pull/2626)]
