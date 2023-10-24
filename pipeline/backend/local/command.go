@@ -33,7 +33,7 @@ func genCmdByShell(shell string, cmds []string) (args []string, err error) {
 	case "cmd":
 		script := ""
 		for _, cmd := range cmds {
-			script += fmt.Sprintf("echo %s\n%s || exit 1\n", strings.TrimSpace(shellescape.Quote("+ "+cmd)), cmd)
+			script += fmt.Sprintf("%s || exit 1\n", cmd)
 		}
 		cmd, err := os.CreateTemp(os.TempDir(), "*.cmd")
 		if err != nil {
