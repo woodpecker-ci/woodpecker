@@ -1903,7 +1903,7 @@ const docTemplate = `{
             }
         },
         "/repos/{repo_id}/logs/{number}": {
-            "post": {
+            "delete": {
                 "produces": [
                     "text/plain"
                 ],
