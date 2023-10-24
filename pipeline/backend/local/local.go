@@ -149,7 +149,7 @@ func (e *local) execCommands(ctx context.Context, step *types.Step, state *workf
 		commandArg = "/c"
 		script = strings.ReplaceAll(script, "\n", "; ")
 	}
-	cmd := exec.CommandContext(ctx, step.Image, commandArg, script)
+	cmd := exec.CommandContext(ctx, step.Image, "-noninteractive", commandArg, script)
 	cmd.Env = env
 	cmd.Dir = state.workspaceDir
 
