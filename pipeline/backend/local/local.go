@@ -132,9 +132,14 @@ func (e *local) StartStep(ctx context.Context, step *types.Step, taskUUID string
 
 // execCommands use step.Image as shell and run the commands in it
 func (e *local) execCommands(ctx context.Context, step *types.Step, state *workflowState, env []string) error {
-	// Prepare command
+	// Prepare commands
+	args, err := genCmdByShell(step.Image, step.Commands)
+	if err != nil {
+		return fmt.Errorf("could not convert commands into args: %w", err)
+	}
+
 	// Use "image name" as run command (indicate shell)
-	cmd := exec.CommandContext(ctx, step.Image, genCmdByShell(step.Image, step.Commands)...)
+	cmd := exec.CommandContext(ctx, step.Image, args...)
 	cmd.Env = env
 	cmd.Dir = state.workspaceDir
 
