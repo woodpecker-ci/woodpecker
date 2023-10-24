@@ -55,7 +55,7 @@ import (
 )
 
 func run(c *cli.Context) error {
-	common.SetupGlobalLogger(c)
+	common.SetupGlobalLogger(c, true)
 
 	// set gin mode based on log level
 	if zerolog.GlobalLevel() > zerolog.DebugLevel {

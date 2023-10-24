@@ -284,11 +284,9 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 
 	// make sure writes to pubsub are non blocking (https://github.com/woodpecker-ci/woodpecker/blob/c919f32e0b6432a95e1a6d3d0ad662f591adf73f/server/logging/log.go#L9)
 	go func() {
-		for _, wf := range currentPipeline.Workflows {
-			for _, step := range wf.Children {
-				if err := s.logger.Close(c, step.ID); err != nil {
-					logger.Error().Err(err).Msgf("done: cannot close log stream for step %d", step.ID)
-				}
+		for _, step := range workflow.Children {
+			if err := s.logger.Close(c, step.ID); err != nil {
+				logger.Error().Err(err).Msgf("done: cannot close log stream for step %d", step.ID)
 			}
 		}
 	}()

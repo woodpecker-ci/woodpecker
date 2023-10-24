@@ -21,6 +21,6 @@ import (
 )
 
 func SetupGlobalLogger(c *cli.Context) error {
-	common.SetupGlobalLogger(c)
+	common.SetupGlobalLogger(c, false)
 	return nil
 }

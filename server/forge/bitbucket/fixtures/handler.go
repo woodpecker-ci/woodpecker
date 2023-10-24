@@ -103,7 +103,11 @@ func getRepoHooks(c *gin.Context) {
 	case "hook_empty":
 		c.String(200, "{}")
 	default:
-		c.String(200, repoHookPayload)
+		if c.Query("page") == "" || c.Query("page") == "1" {
+			c.String(200, repoHookPayload)
+		} else {
+			c.String(200, "{\"values\":[]}")
+		}
 	}
 }
 
@@ -174,7 +178,11 @@ func getUserRepos(c *gin.Context) {
 	case "Bearer repos_not_found", "Bearer 70efdf2e":
 		c.String(404, "")
 	default:
-		c.String(200, userRepoPayload)
+		if c.Query("page") == "" || c.Query("page") == "1" {
+			c.String(200, userRepoPayload)
+		} else {
+			c.String(200, "{\"values\":[]}")
+		}
 	}
 }
 
