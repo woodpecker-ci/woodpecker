@@ -67,5 +67,3 @@ steps:
     commands:
       - ./build.sh
 ```
-
-

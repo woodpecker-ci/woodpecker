@@ -37,7 +37,6 @@ steps:
 +       from_secret: secret_token
 ```
 
-
 Please note parameter expressions are subject to pre-processing. When using secrets in parameter expressions they should be escaped.
 
 ```diff
@@ -93,7 +92,7 @@ Please be careful when exposing secrets to pull requests. If your repository is 
 To prevent abusing your secrets with malicious pull requests, you can limit a secret to a list of images. They are not available to any other container. In addition, you can make the secret available only for plugins (steps without user-defined commands).
 
 :::warning
-If you enable the option "Only available for plugins", always set an image filter too. Otherwise, the secret can be accessed by a very simple self-developed plugin and is thus *not* safe.
+If you enable the option "Only available for plugins", always set an image filter too. Otherwise, the secret can be accessed by a very simple self-developed plugin and is thus _not_ safe.
 If you only set an image filter, you could still access the secret using the same image and by specifying a command that prints it.
 :::
 

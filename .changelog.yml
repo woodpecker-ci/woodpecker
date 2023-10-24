@@ -8,47 +8,37 @@ service: github
 
 # Changelog groups and which labeled PRs to add to each group
 groups:
-  -
-    name: BREAKING
+  - name: BREAKING
     labels:
       - breaking
-  -
-    name: FEATURES
+  - name: FEATURES
     labels:
       - feature
-  -
-    name: SECURITY
+  - name: SECURITY
     labels:
       - security
-  -
-    name: BUGFIXES
+  - name: BUGFIXES
     labels:
       - bug
-  -
-    name: ENHANCEMENTS
+  - name: ENHANCEMENTS
     labels:
       - enhancement
       - refactor
       - ui
-  -
-    name: TESTING
+  - name: TESTING
     labels:
       - tests
-  -
-    name: TRANSLATION
+  - name: TRANSLATION
     labels:
       - kind/translation
-  -
-    name: BUILD
+  - name: BUILD
     labels:
       - kind/build
       - kind/lint
-  -
-    name: DOCUMENTATION
+  - name: DOCUMENTATION
     labels:
       - documentation
-  -
-    name: MISC
+  - name: MISC
     default: true
 
 # regex indicating which labels to skip for the changelog

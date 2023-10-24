@@ -96,10 +96,7 @@
             "PLUGIN_PATH": "/cache",
             "PLUGIN_RESTORE": "true"
           },
-          "volumes": [
-            "pipeline_default:/pipeline",
-            "/cache/drone/drone/envsubst:/cache"
-          ],
+          "volumes": ["pipeline_default:/pipeline", "/cache/drone/drone/envsubst:/cache"],
           "networks": [
             {
               "name": "pipeline_default",
@@ -211,10 +208,7 @@
             "PLUGIN_PATH": "/cache",
             "PLUGIN_REBUILD": "true"
           },
-          "volumes": [
-            "pipeline_default:/pipeline",
-            "/cache/drone/drone/envsubst:/cache"
-          ],
+          "volumes": ["pipeline_default:/pipeline", "/cache/drone/drone/envsubst:/cache"],
           "networks": [
             {
               "name": "pipeline_default",
