@@ -743,45 +743,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/logs/{repo_id}/{pipeline}/{stepID}": {
-            "get": {
-                "produces": [
-                    "text/plain"
-                ],
-                "tags": [
-                    "Pipeline logs"
-                ],
-                "summary": "Log stream",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "the repository id",
-                        "name": "repo_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "the number of the pipeline",
-                        "name": "pipeline",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "the step id",
-                        "name": "stepID",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                }
-            }
-        },
         "/org/lookup/{org_full_name}": {
             "get": {
                 "produces": [
@@ -1968,7 +1929,7 @@ const docTemplate = `{
             }
         },
         "/repos/{repo_id}/logs/{number}": {
-            "post": {
+            "delete": {
                 "produces": [
                     "text/plain"
                 ],
@@ -3264,6 +3225,62 @@ const docTemplate = `{
                         "description": "Insert your personal access token",
                         "name": "Authorization",
                         "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/stream/events": {
+            "get": {
+                "description": "event source streaming for compatibility with quic and http2",
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Events"
+                ],
+                "summary": "Event stream",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/stream/logs/{repo_id}/{pipeline}/{stepID}": {
+            "get": {
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Pipeline logs"
+                ],
+                "summary": "Log stream",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the number of the pipeline",
+                        "name": "pipeline",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the step id",
+                        "name": "stepID",
+                        "in": "path",
                         "required": true
                     }
                 ],
