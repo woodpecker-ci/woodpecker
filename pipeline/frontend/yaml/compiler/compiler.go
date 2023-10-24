@@ -41,13 +41,13 @@ type Registry struct {
 }
 
 type Secret struct {
-	Name          string
-	Value         string
-	AllowedImages []string
+	Name           string
+	Value          string
+	AllowedPlugins []string
 }
 
 func (s *Secret) Available(container *yaml_types.Container) bool {
-	return (len(s.AllowedImages) == 0 || utils.MatchImage(container.Image, s.AllowedImages...)) && (len(s.AllowedImages) == 0 || container.IsPlugin())
+	return (len(s.AllowedPlugins) == 0 || utils.MatchImage(container.Image, s.AllowedPlugins...)) && (len(s.AllowedPlugins) == 0 || container.IsPlugin())
 }
 
 type secretMap map[string]Secret
