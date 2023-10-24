@@ -22,7 +22,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"runtime"
 	"slices"
 	"strings"
 	"sync"
@@ -142,8 +141,10 @@ func (e *local) execCommands(ctx context.Context, step *types.Step, state *workf
 	// Prepare command
 	// Use "image name" as run command (indicate shell)
 	commandArg := "-c"
-	if runtime.GOOS == "windows" {
+	switch strings.ToLower(step.Image) {
+	case "cmd", "cmd.exe":
 		commandArg = "/c"
+		script = strings.ReplaceAll(script, "\n", "; ")
 	}
 	cmd := exec.CommandContext(ctx, step.Image, commandArg, script)
 	cmd.Env = env
