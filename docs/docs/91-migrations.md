@@ -26,7 +26,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Updated Prometheus gauge `build_*` to `pipeline_*`
 - Updated Prometheus gauge `*_job_*` to `*_step_*`
 - Renamed config env `WOODPECKER_MAX_PROCS` to `WOODPECKER_MAX_WORKFLOWS` (still available as fallback)
-- The pipelines are now also read from `.yaml` files, the new default order is `.woodpecker/*.yml` and `.woodpecker/*.yaml` (without any prioritization) -> `.woodpecker.yml` ->  `.woodpecker.yaml`
+- The pipelines are now also read from `.yaml` files, the new default order is `.woodpecker/*.yml` and `.woodpecker/*.yaml` (without any prioritization) -> `.woodpecker.yml` -> `.woodpecker.yaml`
 - Dropped support for [Coding](https://coding.net/), [Gogs](https://gogs.io) and Bitbucket Server (Stash).
 - `/api/queue/resume` & `/api/queue/pause` endpoint methods were changed from `GET` to `POST`
 - rename `pipeline:` key in your workflow config to `steps:`
@@ -61,12 +61,14 @@ Some versions need some changes to the server configuration or the pipeline conf
 
 - Dropped support for `DRONE_*` environment variables. The according `WOODPECKER_*` variables must be used instead.
   Additionally some alternative namings have been removed to simplify maintenance:
+
   - `WOODPECKER_AGENT_SECRET` replaces `WOODPECKER_SECRET`, `DRONE_SECRET`, `WOODPECKER_PASSWORD`, `DRONE_PASSWORD` and `DRONE_AGENT_SECRET`.
   - `WOODPECKER_HOST` replaces `DRONE_HOST` and `DRONE_SERVER_HOST`.
   - `WOODPECKER_DATABASE_DRIVER` replaces `DRONE_DATABASE_DRIVER` and `DATABASE_DRIVER`.
   - `WOODPECKER_DATABASE_DATASOURCE` replaces `DRONE_DATABASE_DATASOURCE` and `DATABASE_CONFIG`.
 
 - Dropped support for `DRONE_*` environment variables in pipeline steps. Pipeline meta-data can be accessed with `CI_*` variables.
+
   - `CI_*` prefix replaces `DRONE_*`
   - `CI` value is now `woodpecker`
   - `DRONE=true` has been removed
@@ -96,6 +98,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Default workspace base path has moved from `/drone` to `/woodpecker`
 
 - Default SQLite database location has changed:
+
   - `/var/lib/drone/drone.sqlite` -> `/var/lib/woodpecker/woodpecker.sqlite`
   - `drone.sqlite` -> `woodpecker.sqlite`
 
@@ -114,7 +117,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 
 - `WOODPECKER_DEBUG` option for server and agent got removed in favor of `WOODPECKER_LOG_LEVEL=debug`
 
-- Remove unused server flags which can safely be removed from your server config: `WOODPECKER_QUIC`,  `WOODPECKER_GITHUB_SCOPE`, `WOODPECKER_GITHUB_GIT_USERNAME`, `WOODPECKER_GITHUB_GIT_PASSWORD`, `WOODPECKER_GITHUB_PRIVATE_MODE`, `WOODPECKER_GITEA_GIT_USERNAME`, `WOODPECKER_GITEA_GIT_PASSWORD`, `WOODPECKER_GITEA_PRIVATE_MODE`, `WOODPECKER_GITLAB_GIT_USERNAME`, `WOODPECKER_GITLAB_GIT_PASSWORD`, `WOODPECKER_GITLAB_PRIVATE_MODE`
+- Remove unused server flags which can safely be removed from your server config: `WOODPECKER_QUIC`, `WOODPECKER_GITHUB_SCOPE`, `WOODPECKER_GITHUB_GIT_USERNAME`, `WOODPECKER_GITHUB_GIT_PASSWORD`, `WOODPECKER_GITHUB_PRIVATE_MODE`, `WOODPECKER_GITEA_GIT_USERNAME`, `WOODPECKER_GITEA_GIT_PASSWORD`, `WOODPECKER_GITEA_PRIVATE_MODE`, `WOODPECKER_GITLAB_GIT_USERNAME`, `WOODPECKER_GITLAB_GIT_PASSWORD`, `WOODPECKER_GITLAB_PRIVATE_MODE`
 
 - Dropped support for manually setting the agents platform with `WOODPECKER_PLATFORM`. The platform is now automatically detected.
 

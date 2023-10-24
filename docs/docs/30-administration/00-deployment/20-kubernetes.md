@@ -7,4 +7,3 @@ The chart contains two subcharts, `server` and `agent` which are automatically c
 The chart started off with two independent charts but was merged into one to simplify the deployment at start of 2023.
 
 A couple of backend-specific config env vars exists which are described in the [kubernetes backend docs](../22-backends/40-kubernetes.md).
- 

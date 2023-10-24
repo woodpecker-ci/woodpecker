@@ -56,9 +56,7 @@ WOODPECKER_CONFIG_SERVICE_ENDPOINT=https://example.com/ciconfig
     "author_avatar": "https://myforge.com/avatars/d6b3f7787a685fcdf2a44e2c685c7e03",
     "author_email": "my@email.com",
     "branch": "main",
-    "changed_files": [
-      "somefilename.txt"
-    ],
+    "changed_files": ["somefilename.txt"],
     "commit": "2fff90f8d288a4640e90f05049fe30e61a14fd50",
     "created_at": 0,
     "deploy_to": "",

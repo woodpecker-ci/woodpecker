@@ -19,4 +19,4 @@ steps:
     image: plugins/slack
     channel: builds
     username: drone
-    secrets: [ slack_webhook ]
+    secrets: [slack_webhook]
