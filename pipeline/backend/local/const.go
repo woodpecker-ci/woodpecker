@@ -27,6 +27,7 @@ var notAllowedEnvVarOverwrites = []string{
 	"CI_SCRIPT",
 	"HOME",
 	"SHELL",
+	"CI_WORKSPACE",
 }
 
 var (

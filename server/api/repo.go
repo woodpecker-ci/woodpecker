@@ -401,70 +401,15 @@ func DeleteRepo(c *gin.Context) {
 //	@Summary	Repair a repository
 //	@Router		/repos/{repo_id}/repair [post]
 //	@Produce	plain
-//	@Success	200
+//	@Success	204
 //	@Tags		Repositories
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		repo_id			path	int		true	"the repository id"
 func RepairRepo(c *gin.Context) {
-	forge := server.Config.Services.Forge
-	_store := store.FromContext(c)
 	repo := session.Repo(c)
-	user := session.User(c)
+	repairRepo(c, repo, true)
 
-	// creates the jwt token used to verify the repository
-	t := token.New(token.HookToken, repo.FullName)
-	sig, err := t.Sign(repo.Hash)
-	if err != nil {
-		c.String(http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	// reconstruct the link
-	host := server.Config.Server.WebhookHost
-	link := fmt.Sprintf(
-		"%s/api/hook?access_token=%s",
-		host,
-		sig,
-	)
-
-	from, err := forge.Repo(c, user, repo.ForgeRemoteID, repo.Owner, repo.Name)
-	if err != nil {
-		log.Error().Err(err).Msgf("get repo '%s/%s' from forge", repo.Owner, repo.Name)
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-
-	if repo.FullName != from.FullName {
-		// create a redirection
-		err = _store.CreateRedirection(&model.Redirection{RepoID: repo.ID, FullName: repo.FullName})
-		if err != nil {
-			_ = c.AbortWithError(http.StatusInternalServerError, err)
-			return
-		}
-	}
-
-	repo.Update(from)
-	if err := _store.UpdateRepo(repo); err != nil {
-		_ = c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-	repo.Perm.Pull = from.Perm.Pull
-	repo.Perm.Push = from.Perm.Push
-	repo.Perm.Admin = from.Perm.Admin
-	if err := _store.PermUpsert(repo.Perm); err != nil {
-		_ = c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-
-	if err := forge.Deactivate(c, user, repo, host); err != nil {
-		log.Trace().Err(err).Msgf("deactivate repo '%s' to repair failed", repo.FullName)
-	}
-	if err := forge.Activate(c, user, repo, link); err != nil {
-		c.String(http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	c.Status(http.StatusOK)
+	c.Status(http.StatusNoContent)
 }
 
 // MoveRepo
@@ -574,4 +519,97 @@ func GetAllRepos(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, repos)
+}
+
+// RepairAllRepos
+//
+//	@Summary	Repair all repositories on the server. Requires admin rights.
+//	@Router		/repos/repair [post]
+//	@Produce	plain
+//	@Success	204
+//	@Tags		Repositories
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+func RepairAllRepos(c *gin.Context) {
+	_store := store.FromContext(c)
+
+	repos, err := _store.RepoListAll(true, &model.ListOptions{All: true})
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Error fetching repository list. %s", err)
+		return
+	}
+
+	for _, r := range repos {
+		repairRepo(c, r, false)
+		if c.Writer.Written() {
+			return
+		}
+	}
+
+	c.Status(http.StatusNoContent)
+}
+
+func repairRepo(c *gin.Context, repo *model.Repo, withPerms bool) {
+	forge := server.Config.Services.Forge
+	_store := store.FromContext(c)
+
+	user, err := _store.GetUser(repo.UserID)
+	if err != nil {
+		handleDbError(c, err)
+		return
+	}
+
+	// creates the jwt token used to verify the repository
+	t := token.New(token.HookToken, repo.FullName)
+	sig, err := t.Sign(repo.Hash)
+	if err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	// reconstruct the link
+	host := server.Config.Server.WebhookHost
+	link := fmt.Sprintf(
+		"%s/api/hook?access_token=%s",
+		host,
+		sig,
+	)
+
+	from, err := forge.Repo(c, user, repo.ForgeRemoteID, repo.Owner, repo.Name)
+	if err != nil {
+		log.Error().Err(err).Msgf("get repo '%s/%s' from forge", repo.Owner, repo.Name)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	if repo.FullName != from.FullName {
+		// create a redirection
+		err = _store.CreateRedirection(&model.Redirection{RepoID: repo.ID, FullName: repo.FullName})
+		if err != nil {
+			_ = c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
+	}
+
+	repo.Update(from)
+	if err := _store.UpdateRepo(repo); err != nil {
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	if withPerms {
+		repo.Perm.Pull = from.Perm.Pull
+		repo.Perm.Push = from.Perm.Push
+		repo.Perm.Admin = from.Perm.Admin
+		if err := _store.PermUpsert(repo.Perm); err != nil {
+			_ = c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
+	}
+
+	if err := forge.Deactivate(c, user, repo, host); err != nil {
+		log.Trace().Err(err).Msgf("deactivate repo '%s' to repair failed", repo.FullName)
+	}
+	if err := forge.Activate(c, user, repo, link); err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
 }

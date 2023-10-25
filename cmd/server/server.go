@@ -15,7 +15,6 @@
 package main
 
 import (
-	"context"
 	"crypto/tls"
 	"net"
 	"net/http"
@@ -56,7 +55,7 @@ import (
 )
 
 func run(c *cli.Context) error {
-	common.SetupGlobalLogger(c)
+	common.SetupGlobalLogger(c, true)
 
 	// set gin mode based on log level
 	if zerolog.GlobalLevel() > zerolog.DebugLevel {
@@ -264,9 +263,6 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 	server.Config.Services.Queue = setupQueue(c, v)
 	server.Config.Services.Logs = logging.New()
 	server.Config.Services.Pubsub = pubsub.New()
-	if err := server.Config.Services.Pubsub.Create(context.Background(), "topic/events"); err != nil {
-		log.Error().Err(err).Msg("could not create pubsub service")
-	}
 	server.Config.Services.Registries = setupRegistryService(c, v)
 
 	// TODO(1544): fix encrypted store
@@ -336,7 +332,6 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 	}
 	server.Config.Server.Port = c.String("server-addr")
 	server.Config.Server.PortTLS = c.String("server-addr-tls")
-	server.Config.Server.Docs = c.String("docs")
 	server.Config.Server.StatusContext = c.String("status-context")
 	server.Config.Server.StatusContextFormat = c.String("status-context-format")
 	server.Config.Server.SessionExpires = c.Duration("session-expires")

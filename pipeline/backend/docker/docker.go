@@ -144,7 +144,7 @@ func (e *docker) SetupWorkflow(_ context.Context, conf *backend.Config, taskUUID
 	log.Trace().Str("taskUUID", taskUUID).Msg("create workflow environment")
 
 	for _, vol := range conf.Volumes {
-		_, err := e.client.VolumeCreate(noContext, volume.VolumeCreateBody{
+		_, err := e.client.VolumeCreate(noContext, volume.CreateOptions{
 			Name:   vol.Name,
 			Driver: volumeDriver,
 		})
