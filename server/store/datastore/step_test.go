@@ -246,4 +246,39 @@ func TestStepByUUID(t *testing.T) {
 	assert.Empty(t, step)
 }
 
-// TODO: func TestStepCascade(t *testing.T) {}
+func TestStepLoad(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Step))
+	defer closer()
+
+	sess := store.engine.NewSession()
+	assert.NoError(t, store.stepCreate(sess, []*model.Step{
+		{
+			UUID:       "4db7e5fc-5312-4d02-9e14-b51b9e3242cc",
+			PipelineID: 1,
+			PID:        1,
+			PPID:       1,
+			State:      "running",
+			Name:       "build",
+		},
+		{
+			UUID:       "fc7c7fd6-553e-480b-8ed7-30d8563d0b79",
+			PipelineID: 4,
+			PID:        6,
+			PPID:       7,
+			Name:       "build",
+			State:      "pending",
+			Error:      "pc load letter",
+			ExitCode:   255,
+		},
+	}))
+	_ = sess.Close()
+
+	step, err := store.StepLoad(1)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, step)
+	assert.Equal(t, step.UUID, "4db7e5fc-5312-4d02-9e14-b51b9e3242cc")
+
+	step, err = store.StepLoad(5)
+	assert.ErrorIs(t, err, types.RecordNotExist)
+	assert.Empty(t, step)
+}
