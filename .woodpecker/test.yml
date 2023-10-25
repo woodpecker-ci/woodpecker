@@ -76,7 +76,7 @@ steps:
       - 'addlicense -check -ignore "vendor/**" **/*.go'
     when: *when
 
-  prettier:
+  - name: prettier
     image: woodpeckerci/plugin-prettier:next
     group: test
     when: *when
