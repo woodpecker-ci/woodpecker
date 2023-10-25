@@ -14,6 +14,7 @@ repos:
     rev: v1.55.1
     hooks:
       - id: golangci-lint
+      - id: golangci-lint-full
   - repo: https://github.com/igorshubovych/markdownlint-cli
     rev: v0.37.0
     hooks:
@@ -29,12 +30,12 @@ repos:
 
 ci:
   autofix_commit_msg: |
-    [pre-commit.ci] auto fixes from pre-commit.com hooks
+    [pre-commit.ci] auto fixes from pre-commit.com hooks [CI SKIP]
 
     for more information, see https://pre-commit.ci
   autofix_prs: true
   autoupdate_branch: ''
   autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
   autoupdate_schedule: monthly
-  skip: [check-hooks-apply, check-useless-excludes]
+  skip: [check-hooks-apply, check-useless-excludes, golangci-lint]
   submodules: false
