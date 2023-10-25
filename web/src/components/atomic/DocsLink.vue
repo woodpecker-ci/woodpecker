@@ -12,7 +12,6 @@
 import { computed, toRef } from 'vue';
 
 import Icon from '~/components/atomic/Icon.vue';
-import useConfig from '~/compositions/useConfig';
 
 const props = defineProps<{
   url: string;
