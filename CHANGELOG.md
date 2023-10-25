@@ -8,6 +8,7 @@
 
 ### 💥 Breaking changes
 
+- Remove `WOODPECKER_DOCS` config [[#2647](https://github.com/woodpecker-ci/woodpecker/pull/2647)]
 - Remove plugin-only option from secrets [[#2213](https://github.com/woodpecker-ci/woodpecker/pull/2213)]
 - Remove deprecated API paths [[#2639](https://github.com/woodpecker-ci/woodpecker/pull/2639)]
 - Remove SSH backend [[#2635](https://github.com/woodpecker-ci/woodpecker/pull/2635)]
