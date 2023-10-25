@@ -1,7 +1,7 @@
 version: 1
 
 when:
-  - event: [ pull_request, cron ]
+  - event: [pull_request, cron]
   - event: push
     branch:
       - ${CI_REPO_DEFAULT_BRANCH}
@@ -23,7 +23,7 @@ steps:
     image: *trivy_plugin
     settings:
       skip-dirs: node_modules/,plugins/woodpecker-plugins/node_modules/
-      dir:  docs/
+      dir: docs/
     when:
       event: [pull_request, push, cron]
       branch: ${CI_REPO_DEFAULT_BRANCH}
@@ -33,4 +33,4 @@ steps:
     image: *trivy_plugin
     settings:
       skip-dirs: node_modules/
-      dir:  web/
+      dir: web/

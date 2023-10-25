@@ -4,7 +4,7 @@ export type Secret = {
   id: string;
   name: string;
   value: string;
-  event: WebhookEvents[];
-  image: string[];
+  events: WebhookEvents[];
+  images: string[];
   plugins_only: string;
 };

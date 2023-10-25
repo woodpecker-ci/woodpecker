@@ -489,7 +489,7 @@
       "description": "Advanced options for the different agent backends",
       "type": "object",
       "properties": {
-        "kubernetes" :{
+        "kubernetes": {
           "$ref": "#/definitions/step_backend_kubernetes_resources"
         }
       }
@@ -498,7 +498,7 @@
       "description": "Advanced options for the kubernetes agent backends",
       "type": "object",
       "properties": {
-        "resources" :{
+        "resources": {
           "$ref": "#/definitions/step_backend_kubernetes_resources"
         }
       }

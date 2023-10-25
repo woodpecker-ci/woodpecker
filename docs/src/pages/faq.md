@@ -54,9 +54,11 @@ steps:
 ```
 
 Get the container id using `docker ps` and copy the id from the first column. Enter the container with: `docker exec -it 1234asdf  bash` (replace `1234asdf` with the docker id). Then try to clone the git repository with the commands from the failing pipeline:
+
 ```bash
 git init
 git remote add origin https://git.example.com/username/repo.git
 git fetch --no-tags origin +refs/heads/branch:
 ```
+
 (replace the url AND the branch with the correct values, use your username and password as log in values)
