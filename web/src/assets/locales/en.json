@@ -438,7 +438,11 @@
         "none": "There are no repositories yet.",
         "view": "View repository",
         "settings": "Repository settings",
-        "disabled": "Disabled"
+        "disabled": "Disabled",
+        "repair": {
+          "repair": "Repair all",
+          "success": "Repositories repaired"
+        }
       }
     }
   },

@@ -134,11 +134,11 @@ steps:
         nodeSelector:
           beta.kubernetes.io/instance-type: p3.8xlarge
         tolerations:
-        - key: "key1"
-          operator: "Equal"
-          value: "value1"
-          effect: "NoSchedule"
-          tolerationSeconds: 3600
+          - key: 'key1'
+            operator: 'Equal'
+            value: 'value1'
+            effect: 'NoSchedule'
+            tolerationSeconds: 3600
 ```
 
 ### Volumes
@@ -166,8 +166,8 @@ CRI-O users currently need to configure the workspace for all workflows in order
 
 ```yml
 workspace:
-  base: "/woodpecker"
-  path: "/"
+  base: '/woodpecker'
+  path: '/'
 ```
 
 See [this issue](https://github.com/woodpecker-ci/woodpecker/issues/2510) for more details.
