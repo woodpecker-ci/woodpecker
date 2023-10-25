@@ -19,8 +19,7 @@ const props = defineProps<{
   topic: string;
 }>();
 
-const docsBaseUrl = useConfig().docs;
 const url = toRef(props, 'url');
 const topic = toRef(props, 'topic');
-const docsUrl = computed(() => (url.value.startsWith('http') ? url.value : `${docsBaseUrl}${url.value}`));
+const docsUrl = computed(() => (url.value.startsWith('http') ? url.value : `https://woodpecker-ci.org/${url.value}`));
 </script>
