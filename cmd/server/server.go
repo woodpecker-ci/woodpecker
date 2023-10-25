@@ -332,7 +332,6 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 	}
 	server.Config.Server.Port = c.String("server-addr")
 	server.Config.Server.PortTLS = c.String("server-addr-tls")
-	server.Config.Server.Docs = c.String("docs")
 	server.Config.Server.StatusContext = c.String("status-context")
 	server.Config.Server.StatusContextFormat = c.String("status-context-format")
 	server.Config.Server.SessionExpires = c.Duration("session-expires")
