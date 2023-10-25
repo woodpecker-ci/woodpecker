@@ -8,15 +8,14 @@ when:
 variables:
   - &golang_image 'golang:1.21.3'
   - &when
-    - path: &when_path
-        # related config files
-        - ".woodpecker/test.yml"
-        - ".golangci.yml"
+    - path: &when_path # related config files
+        - '.woodpecker/test.yml'
+        - '.golangci.yml'
         # go source code
-        - "**/*.go"
-        - "go.*"
+        - '**/*.go'
+        - 'go.*'
         # schema changes
-        - "pipeline/schema/**"
+        - 'pipeline/schema/**'
       event: [pull_request, tag]
 
 steps:
@@ -35,8 +34,8 @@ steps:
     when:
       - <<: *when
       - path:
-        - ".woodpecker/**"
-        - "pipeline/schema/**"
+          - '.woodpecker/**'
+          - 'pipeline/schema/**'
 
   - name: dummy-web
     image: *golang_image
@@ -58,9 +57,9 @@ steps:
     image: *golang_image
     group: test
     commands:
-      - "make generate-swagger"
-      - "DIFF=$(git diff | head)"
-      - "[ -n \"$DIFF\" ] && { echo \"swagger not up to date, exec 'make generate-swagger' and commit\"; exit 1; } || true"
+      - 'make generate-swagger'
+      - 'DIFF=$(git diff | head)'
+      - '[ -n "$DIFF" ] && { echo "swagger not up to date, exec `make generate-swagger` and commit"; exit 1; } || true'
     when: *when
 
   - name: lint-editorconfig
@@ -74,7 +73,12 @@ steps:
     group: test
     commands:
       - go install github.com/google/addlicense@latest
-      - "addlicense -check -ignore \"vendor/**\" **/*.go"
+      - 'addlicense -check -ignore "vendor/**" **/*.go'
+    when: *when
+
+  prettier:
+    image: woodpeckerci/plugin-prettier:next
+    group: test
     when: *when
 
   - name: test
@@ -120,7 +124,7 @@ steps:
 
   - name: codecov
     pull: true
-    image: woodpeckerci/plugin-codecov:next-alpine
+    image: woodpeckerci/plugin-codecov:2.1.2
     settings:
       files:
         - agent-coverage.out
@@ -139,7 +143,7 @@ services:
   service-postgres:
     name: service-postgres
     image: postgres:16
-    ports: ["5432"]
+    ports: ['5432']
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_HOST_AUTH_METHOD=trust
@@ -149,7 +153,7 @@ services:
   service-mysql:
     name: service-mysql
     image: mysql:8.1.0
-    ports: ["3306"]
+    ports: ['3306']
     environment:
       - MYSQL_DATABASE=test
       - MYSQL_ALLOW_EMPTY_PASSWORD=yes

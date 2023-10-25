@@ -68,8 +68,8 @@ steps:
   - name: release-dryrun
     image: *golang_image
     commands:
-    - ls -la dist/*.*
-    - cat dist/checksums.txt
+      - ls -la dist/*.*
+      - cat dist/checksums.txt
 
   - name: release
     image: plugins/github-release

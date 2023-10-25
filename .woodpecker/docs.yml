@@ -2,13 +2,13 @@ when:
   - event: pull_request
   - event: push
     path: &when_path
-      - "docs/**"
-      - ".woodpecker/docs.yml"
+      - 'docs/**'
+      - '.woodpecker/docs.yml'
       # since we generate docs for cli tool we have to watch this too
-      - "cli/**"
-      - "cmd/cli/**"
+      - 'cli/**'
+      - 'cmd/cli/**'
       # api docs
-      - "server/api/**"
+      - 'server/api/**'
     branch: ${CI_REPO_DEFAULT_BRANCH}
   - cron: update_docs
     event: cron
@@ -40,11 +40,11 @@ steps:
   - name: deploy-preview
     image: woodpeckerci/plugin-surge-preview:1.2.2
     settings:
-      path: "docs/build/"
+      path: 'docs/build/'
       surge_token:
         from_secret: SURGE_TOKEN
       forge_type: github
-      forge_url: "https://github.com"
+      forge_url: 'https://github.com'
       forge_repo_token:
         from_secret: GITHUB_TOKEN_SURGE
     failure: ignore
