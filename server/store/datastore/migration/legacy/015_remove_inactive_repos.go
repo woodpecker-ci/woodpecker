@@ -12,20 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package migration
+package legacy
 
 import (
 	"xorm.io/xorm"
-
-	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-var recreateAgentsTable = task{
-	name: "recreate-agents-table",
+var removeInactiveRepos = task{
+	name:     "remove-inactive-repos",
+	required: true,
 	fn: func(sess *xorm.Session) error {
-		if err := sess.DropTable("agents"); err != nil {
+		// If the timeout is 0, the repo was never activated, so we remove it.
+		_, err := sess.Table("repos").Where("repo_active = ?", false).And("repo_timeout = ?", 0).Delete()
+		if err != nil {
 			return err
 		}
-		return sess.Sync(new(model.Agent))
+
+		return dropTableColumns(sess, "users", "user_synced")
 	},
 }

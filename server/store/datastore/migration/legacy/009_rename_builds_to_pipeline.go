@@ -12,22 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package migration
+package legacy
 
 import (
 	"xorm.io/xorm"
 )
 
-var removeInactiveRepos = task{
-	name:     "remove-inactive-repos",
+var renameBuildsToPipeline = task{
+	name:     "rename-builds-to-pipeline",
 	required: true,
 	fn: func(sess *xorm.Session) error {
-		// If the timeout is 0, the repo was never activated, so we remove it.
-		_, err := sess.Table("repos").Where("repo_active = ?", false).And("repo_timeout = ?", 0).Delete()
+		err := renameTable(sess, "builds", "pipelines")
 		if err != nil {
 			return err
 		}
-
-		return dropTableColumns(sess, "users", "user_synced")
+		err = renameTable(sess, "build_config", "pipeline_config")
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 }

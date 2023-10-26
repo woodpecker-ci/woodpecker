@@ -1,4 +1,4 @@
-// Copyright 2023 Woodpecker Authors
+// Copyright 2022 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,33 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package migration
+package legacy
 
 import (
 	"xorm.io/xorm"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
-type oldPipeline018 struct {
-	ID       int64 `xorm:"pk autoincr 'pipeline_id'"`
-	Signed   bool  `xorm:"pipeline_signed"`
-	Verified bool  `xorm:"pipeline_verified"`
-}
-
-func (oldPipeline018) TableName() string {
-	return "pipelines"
-}
-
-var dropOldCols = task{
-	name: "drop-old-col",
+var recreateAgentsTable = task{
+	name: "recreate-agents-table",
 	fn: func(sess *xorm.Session) error {
-		// make sure columns on pipelines exist
-		if err := sess.Sync(new(oldPipeline018)); err != nil {
+		if err := sess.DropTable("agents"); err != nil {
 			return err
 		}
-		if err := dropTableColumns(sess, "steps", "step_pgid"); err != nil {
-			return err
-		}
-
-		return dropTableColumns(sess, "pipelines", "pipeline_signed", "pipeline_verified")
+		return sess.Sync(new(model.Agent))
 	},
 }

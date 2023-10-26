@@ -52,7 +52,7 @@ import (
 )
 
 func setupStore(c *cli.Context) (store.Store, error) {
-	// TODO: find a better way than global var to pass down to allow long migrations
+	// TODO: find a better way than global var to pass down to allow long migrations -> remove for 3.x
 	server.Config.Server.Migrations.AllowLong = c.Bool("migrations-allow-long")
 	datasource := c.String("datasource")
 	driver := c.String("driver")
@@ -90,7 +90,7 @@ func setupStore(c *cli.Context) (store.Store, error) {
 		log.Fatal().Err(err).Msg("could not open datastore")
 	}
 
-	if err := store.Migrate(); err != nil {
+	if err := store.Migrate(c.Bool("migrations-allow-long")); err != nil {
 		log.Fatal().Err(err).Msg("could not migrate datastore")
 	}
 

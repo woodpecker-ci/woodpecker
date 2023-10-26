@@ -12,18 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package migration
+package legacy
 
 import (
 	"xorm.io/xorm"
 )
 
-var alterTableReposDropAllowDeploysAllowTags = task{
-	name: "drop-allow-push-tags-deploys-columns",
+var alterTableReposDropFallback = task{
+	name: "alter-table-drop-repo-fallback",
 	fn: func(sess *xorm.Session) error {
-		return dropTableColumns(sess, "repos",
-			"repo_allow_deploys",
-			"repo_allow_tags",
-		)
+		return dropTableColumns(sess, "repos", "repo_fallback")
 	},
 }

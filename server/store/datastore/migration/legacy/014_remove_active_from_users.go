@@ -12,15 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package migration
+package legacy
 
 import (
 	"xorm.io/xorm"
 )
 
-var dropSenders = task{
-	name: "drop-senders",
+var removeActiveFromUsers = task{
+	name:     "remove-active-from-users",
+	required: true,
 	fn: func(sess *xorm.Session) error {
-		return sess.DropTable("senders")
+		return dropTableColumns(sess, "users", "user_active")
 	},
 }

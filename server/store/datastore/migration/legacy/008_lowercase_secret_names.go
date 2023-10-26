@@ -12,15 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package migration
+package legacy
 
 import (
 	"xorm.io/xorm"
 )
 
-var dropFiles = task{
-	name: "drop-files",
-	fn: func(sess *xorm.Session) error {
-		return sess.DropTable("files")
+var lowercaseSecretNames = task{
+	name: "lowercase-secret-names",
+	fn: func(sess *xorm.Session) (err error) {
+		_, err = sess.Exec("UPDATE secrets SET secret_name = LOWER(secret_name);")
+		return err
 	},
 }

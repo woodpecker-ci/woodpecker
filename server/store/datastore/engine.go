@@ -16,6 +16,7 @@ package datastore
 
 import (
 	"github.com/rs/zerolog"
+
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/server/store/datastore/migration"
 
@@ -54,8 +55,8 @@ func (s storage) Ping() error {
 }
 
 // Migrate old storage or init new one
-func (s storage) Migrate() error {
-	return migration.Migrate(s.engine)
+func (s storage) Migrate(allowLong bool) error {
+	return migration.Migrate(s.engine, allowLong)
 }
 
 func (s storage) Close() error {

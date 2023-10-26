@@ -58,6 +58,7 @@ require (
 	k8s.io/api v0.28.3
 	k8s.io/apimachinery v0.28.3
 	k8s.io/client-go v0.28.3
+	src.techknowlogick.com/xormigrate v1.6.0
 	xorm.io/builder v0.3.13
 	xorm.io/xorm v1.3.3
 )

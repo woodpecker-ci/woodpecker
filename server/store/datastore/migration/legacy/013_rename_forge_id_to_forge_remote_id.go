@@ -1,4 +1,4 @@
-// Copyright 2021 Woodpecker Authors
+// Copyright 2022 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,15 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package migration
+package legacy
 
 import (
 	"xorm.io/xorm"
 )
 
-var alterTableReposDropCounter = task{
-	name: "alter-table-drop-counter",
+var renameForgeIDToForgeRemoteID = task{
+	name:     "rename-forge-id-to-forge-remote-id",
+	required: true,
 	fn: func(sess *xorm.Session) error {
-		return dropTableColumns(sess, "repos", "repo_counter")
+		return renameColumn(sess, "repos", "forge_id", "forge_remote_id")
 	},
 }
