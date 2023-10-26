@@ -41,6 +41,7 @@ func newApp() *cli.App {
 	app.Usage = "command line utility"
 	app.EnableBashCompletion = true
 	app.Flags = common.GlobalFlags
+	app.Before = common.SetupGlobalLogger
 	app.Commands = []*cli.Command{
 		pipeline.Command,
 		log.Command,
@@ -54,10 +55,6 @@ func newApp() *cli.App {
 		lint.Command,
 		loglevel.Command,
 		cron.Command,
-	}
-
-	for _, command := range app.Commands {
-		command.Before = common.SetupGlobalLogger
 	}
 
 	return app

@@ -57,6 +57,7 @@ var migrationTasks = []*task{
 	&addOrgID,
 	&alterTableTasksUpdateColumnTaskDataType,
 	&alterTableConfigUpdateColumnConfigDataType,
+	&removePluginOnlyOptionFromSecretsTable,
 }
 
 var allBeans = []interface{}{

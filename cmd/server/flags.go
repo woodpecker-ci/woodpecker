@@ -160,12 +160,6 @@ var flags = append([]cli.Flag{
 		Usage:   "The maximum time in minutes you can set in the repo settings before a pipeline gets killed",
 		Value:   120,
 	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_DOCS"},
-		Name:    "docs",
-		Usage:   "link to user documentation",
-		Value:   "https://woodpecker-ci.org/",
-	},
 	&cli.DurationFlag{
 		EnvVars: []string{"WOODPECKER_SESSION_EXPIRES"},
 		Name:    "session-expires",

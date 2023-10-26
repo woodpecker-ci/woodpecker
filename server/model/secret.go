@@ -69,16 +69,13 @@ type SecretStore interface {
 
 // Secret represents a secret variable, such as a password or token.
 type Secret struct {
-	ID          int64          `json:"id"              xorm:"pk autoincr 'secret_id'"`
-	OrgID       int64          `json:"-"               xorm:"NOT NULL DEFAULT 0 UNIQUE(s) INDEX 'secret_org_id'"`
-	RepoID      int64          `json:"-"               xorm:"NOT NULL DEFAULT 0 UNIQUE(s) INDEX 'secret_repo_id'"`
-	Name        string         `json:"name"            xorm:"NOT NULL UNIQUE(s) INDEX 'secret_name'"`
-	Value       string         `json:"value,omitempty" xorm:"TEXT 'secret_value'"`
-	Images      []string       `json:"image"           xorm:"json 'secret_images'"`
-	PluginsOnly bool           `json:"plugins_only"    xorm:"secret_plugins_only"`
-	Events      []WebhookEvent `json:"event"           xorm:"json 'secret_events'"`
-	SkipVerify  bool           `json:"-"               xorm:"secret_skip_verify"`
-	Conceal     bool           `json:"-"               xorm:"secret_conceal"`
+	ID     int64          `json:"id"              xorm:"pk autoincr 'secret_id'"`
+	OrgID  int64          `json:"-"               xorm:"NOT NULL DEFAULT 0 UNIQUE(s) INDEX 'secret_org_id'"`
+	RepoID int64          `json:"-"               xorm:"NOT NULL DEFAULT 0 UNIQUE(s) INDEX 'secret_repo_id'"`
+	Name   string         `json:"name"            xorm:"NOT NULL UNIQUE(s) INDEX 'secret_name'"`
+	Value  string         `json:"value,omitempty" xorm:"TEXT 'secret_value'"`
+	Images []string       `json:"images"          xorm:"json 'secret_images'"`
+	Events []WebhookEvent `json:"events"          xorm:"json 'secret_events'"`
 } //	@name Secret
 
 // TableName return database table name for xorm
@@ -154,13 +151,12 @@ func (s *Secret) Validate() error {
 // Copy makes a copy of the secret without the value.
 func (s *Secret) Copy() *Secret {
 	return &Secret{
-		ID:          s.ID,
-		OrgID:       s.OrgID,
-		RepoID:      s.RepoID,
-		Name:        s.Name,
-		Images:      s.Images,
-		PluginsOnly: s.PluginsOnly,
-		Events:      sortEvents(s.Events),
+		ID:     s.ID,
+		OrgID:  s.OrgID,
+		RepoID: s.RepoID,
+		Name:   s.Name,
+		Images: s.Images,
+		Events: sortEvents(s.Events),
 	}
 }
 
