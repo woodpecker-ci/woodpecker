@@ -5,8 +5,6 @@ const { store: storeTheme, state: resolvedTheme } = useColorMode({
   storageKey: 'woodpecker:theme',
 });
 
-watch(storeTheme, updateTheme);
-
 function updateTheme() {
   if (resolvedTheme.value === 'dark') {
     document.documentElement.classList.remove('light');
@@ -20,6 +18,8 @@ function updateTheme() {
     document.querySelector('meta[name=theme-color]')?.setAttribute('content', '#369943'); // internal-wp-primary-400
   }
 }
+
+watch(storeTheme, updateTheme);
 
 updateTheme();
 
