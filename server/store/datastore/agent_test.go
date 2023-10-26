@@ -18,6 +18,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
@@ -31,7 +32,7 @@ func TestAgentFindByToken(t *testing.T) {
 		Token: "secret-token",
 	}
 	err := store.AgentCreate(agent)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	_agent, err := store.AgentFindByToken(agent.Token)
 	if err != nil {
@@ -55,10 +56,10 @@ func TestAgentFindByID(t *testing.T) {
 		Token: "secret-token",
 	}
 	err := store.AgentCreate(agent)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	_agent, err := store.AgentFind(agent.ID)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, "secret-token", _agent.Token)
 }
 
@@ -77,15 +78,15 @@ func TestAgentList(t *testing.T) {
 		Token: "secret-token-2",
 	}
 	err := store.AgentCreate(agent1)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	err = store.AgentCreate(agent2)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	agents, err := store.AgentList(&model.ListOptions{All: true})
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, 2, len(agents))
 
 	agents, err = store.AgentList(&model.ListOptions{Page: 1, PerPage: 1})
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, 1, len(agents))
 }
