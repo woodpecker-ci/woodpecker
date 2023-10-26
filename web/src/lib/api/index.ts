@@ -8,7 +8,6 @@ import {
   PipelineConfig,
   PipelineFeed,
   PipelineLog,
-  PipelineWorkflow,
   PullRequest,
   QueueInfo,
   Registry,
@@ -303,9 +302,25 @@ export default class WoodpeckerClient extends ApiClient {
     return this._delete('/api/user/token') as Promise<string>;
   }
 
+  getOrgs(page: number): Promise<Org[] | null> {
+    return this._get(`/api/orgs?page=${page}`) as Promise<Org[] | null>;
+  }
+
+  deleteOrg(org: Org): Promise<unknown> {
+    return this._delete(`/api/orgs/${org.id}`);
+  }
+
+  getAllRepos(page: number): Promise<Repo[] | null> {
+    return this._get(`/api/repos?page=${page}`) as Promise<Repo[] | null>;
+  }
+
+  repairAllRepos(): Promise<unknown> {
+    return this._post(`/api/repos/repair`) as Promise<unknown>;
+  }
+
   // eslint-disable-next-line promise/prefer-await-to-callbacks
-  on(callback: (data: { pipeline?: Pipeline; repo?: Repo; step?: PipelineWorkflow }) => void): EventSource {
-    return this._subscribe('/stream/events', callback, {
+  on(callback: (data: { pipeline?: Pipeline; repo?: Repo }) => void): EventSource {
+    return this._subscribe('/api/stream/events', callback, {
       reconnect: true,
     });
   }

@@ -1,5 +1,4 @@
-const lightCodeTheme = require('prism-react-renderer/themes/github');
-const darkCodeTheme = require('prism-react-renderer/themes/dracula');
+const codeThemes = require('prism-react-renderer').themes;
 const path = require('path');
 
 /** @type {import('@docusaurus/types').Config} */
@@ -138,8 +137,8 @@ module.exports = {
         copyright: `Copyright © ${new Date().getFullYear()} Woodpecker CI. Built with Docusaurus.`,
       },
       prism: {
-        theme: lightCodeTheme,
-        darkTheme: darkCodeTheme,
+        theme: codeThemes.github,
+        darkTheme: codeThemes.dracula,
       },
       announcementBar: {
         id: 'github-star',
@@ -214,22 +213,22 @@ module.exports = {
           includeCurrentVersion: true,
           lastVersion: '1.0',
           versions: {
-            'current': {
+            current: {
               label: 'Next',
               banner: 'unreleased',
             },
             '1.0': {
               label: '1.0.x',
             },
-            '0.15': {
+            0.15: {
               label: '0.15.x',
               banner: 'unmaintained',
             },
           },
         },
         blog: {
-          blogTitle: 'Docusaurus blog!',
-          blogDescription: 'A Docusaurus powered blog!',
+          blogTitle: 'Blog',
+          blogDescription: 'A blog for release announcements, turorials...',
           // postsPerPage: 'ALL',
           // blogSidebarCount: 0,
         },

@@ -47,22 +47,6 @@ var flags = []cli.Flag{
 		Value:   true,
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_LOG_LEVEL"},
-		Name:    "log-level",
-		Usage:   "set logging level",
-	},
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_DEBUG_PRETTY"},
-		Name:    "pretty",
-		Usage:   "enable pretty-printed debug output",
-	},
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_DEBUG_NOCOLOR"},
-		Name:    "nocolor",
-		Usage:   "disable colored debug output",
-		Value:   true,
-	},
-	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_HOSTNAME"},
 		Name:    "hostname",
 		Usage:   "agent hostname",
@@ -112,100 +96,5 @@ var flags = []cli.Flag{
 		Name:    "backend-engine",
 		Usage:   "backend engine to run pipelines on",
 		Value:   "auto-detect",
-	},
-
-	// backend docker
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_DOCKER_ENABLE_IPV6"},
-		Name:    "backend-docker-ipv6",
-		Usage:   "backend docker enable IPV6",
-		Value:   false,
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_DOCKER_NETWORK"},
-		Name:    "backend-docker-network",
-		Usage:   "backend docker network",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_DOCKER_VOLUMES"},
-		Name:    "backend-docker-volumes",
-		Usage:   "backend docker volumes (comma separated)",
-	},
-
-	// backend ssh
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_SSH_ADDRESS"},
-		Name:    "backend-ssh-address",
-		Usage:   "backend ssh address",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_SSH_USER"},
-		Name:    "backend-ssh-user",
-		Usage:   "backend ssh user",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_SSH_KEY"},
-		Name:    "backend-ssh-key",
-		Usage:   "backend ssh key file",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_SSH_KEY_PASSWORD"},
-		Name:    "backend-ssh-key-password",
-		Usage:   "backend ssh key password",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_SSH_PASSWORD"},
-		Name:    "backend-ssh-password",
-		Usage:   "backend ssh password",
-	},
-
-	// backend k8s
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_K8S_NAMESPACE"},
-		Name:    "backend-k8s-namespace",
-		Usage:   "backend k8s namespace",
-		Value:   "woodpecker",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_K8S_VOLUME_SIZE"},
-		Name:    "backend-k8s-volume-size",
-		Usage:   "backend k8s volume size (default 10G)",
-		Value:   "10G",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_K8S_STORAGE_CLASS"},
-		Name:    "backend-k8s-storage-class",
-		Usage:   "backend k8s storage class",
-		Value:   "",
-	},
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_K8S_STORAGE_RWX"},
-		Name:    "backend-k8s-storage-rwx",
-		Usage:   "backend k8s storage access mode, should ReadWriteMany (RWX) instead of ReadWriteOnce (RWO) be used? (default: true)",
-		Value:   true,
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_K8S_POD_LABELS"},
-		Name:    "backend-k8s-pod-labels",
-		Usage:   "backend k8s additional worker pod labels",
-		Value:   "",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_K8S_POD_ANNOTATIONS"},
-		Name:    "backend-k8s-pod-annotations",
-		Usage:   "backend k8s additional worker pod annotations",
-		Value:   "",
-	},
-	&cli.IntFlag{
-		EnvVars: []string{"WOODPECKER_CONNECT_RETRY_COUNT"},
-		Name:    "connect-retry-count",
-		Usage:   "number of times to retry connecting to the server",
-		Value:   5,
-	},
-	&cli.DurationFlag{
-		EnvVars: []string{"WOODPECKER_CONNECT_RETRY_DELAY"},
-		Name:    "connect-retry-delay",
-		Usage:   "duration to wait before retrying to connect to the server",
-		Value:   time.Second * 2,
 	},
 }

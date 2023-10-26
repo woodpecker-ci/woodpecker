@@ -20,6 +20,7 @@ services:
 ## Configure MySQL/MariaDB
 
 The below example demonstrates MySQL database configuration. See the official driver [documentation](https://github.com/go-sql-driver/mysql#dsn-data-source-name) for configuration options and examples.
+The minimum version of MySQL/MariaDB required is determined by the `go-sql-driver/mysql` - see [it's README](https://github.com/go-sql-driver/mysql#requirements) for more information.
 
 ```diff
 # docker-compose.yml

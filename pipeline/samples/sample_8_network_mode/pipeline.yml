@@ -11,7 +11,7 @@ steps:
   build:
     image: tutum/curl
     # A container named "vpn" should exist on the same docker daemon
-    network_mode: "container:vpn"
+    network_mode: 'container:vpn'
     # Replace HOST_OR_IP with the IP or hostname of a server behind the VPN
     commands:
       - curl -s -f -L http://HOST_OR_IP/

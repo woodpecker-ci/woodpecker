@@ -205,7 +205,6 @@
         "restart_success": "Uruchomiono potok ponownie"
       },
       "config": "Konfiguracja",
-      "created": "Utworzono",
       "event": {
         "cron": "Cron",
         "deploy": "Wdrażanie",
@@ -423,8 +422,7 @@
   "user": {
     "access_denied": "Nie masz pozwolenia na zalogowanie",
     "internal_error": "Wystąpił błąd wewnętrzny",
-    "oauth_error": "Błąd podczas uwierzytelnienia u dostawcy OAuth",
-    "shell_setup_before": "wykonaj wcześniej konfigurację powłoki"
+    "oauth_error": "Błąd podczas uwierzytelnienia u dostawcy OAuth"
   },
   "username": "Nazwa użytkownika",
   "welcome": "Witamy w Woodpecker"

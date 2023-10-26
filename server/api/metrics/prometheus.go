@@ -43,14 +43,14 @@ func PromHandler() gin.HandlerFunc {
 		header := c.Request.Header.Get("Authorization")
 
 		if header == "" {
-			c.String(401, errInvalidToken.Error())
+			c.String(http.StatusUnauthorized, errInvalidToken.Error())
 			return
 		}
 
 		bearer := fmt.Sprintf("Bearer %s", token)
 
 		if header != bearer {
-			c.String(401, errInvalidToken.Error())
+			c.String(http.StatusForbidden, errInvalidToken.Error())
 			return
 		}
 

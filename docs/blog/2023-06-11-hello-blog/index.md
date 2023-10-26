@@ -15,7 +15,7 @@ Welcome to this blog. This is our first post on this blog ...
 
 <!--truncate-->
 
-In the future we will  post about our releases and other things like tutorials.
+In the future we will post about our releases and other things like tutorials.
 
 We are currently working on the `1.0.0` release of Woodpecker. This release will include a lot of new features and improvements which most of you probably already tested using the `next` tag.
 

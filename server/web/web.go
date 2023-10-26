@@ -17,10 +17,11 @@ package web
 import (
 	"bytes"
 	"crypto/md5"
+	"errors"
 	"fmt"
+	"io"
+	"io/fs"
 	"net/http"
-	"net/url"
-	"regexp"
 	"strings"
 	"time"
 
@@ -54,39 +55,75 @@ func New() (*gin.Engine, error) {
 
 	e.Use(setupCache)
 
-	rootURL, _ := url.Parse(server.Config.Server.RootURL)
-	rootPath := rootURL.Path
+	rootPath := server.Config.Server.RootPath
 
 	httpFS, err := web.HTTPFS()
 	if err != nil {
 		return nil, err
 	}
-	h := http.FileServer(&prefixFS{httpFS, rootPath})
-	e.GET(rootPath+"/favicon.svg", redirect(server.Config.Server.RootURL+"/favicons/favicon-light-default.svg", http.StatusPermanentRedirect))
-	e.GET(rootPath+"/favicons/*filepath", gin.WrapH(h))
-	e.GET(rootPath+"/assets/*filepath", gin.WrapH(handleCustomFilesAndAssets(h)))
+	f := &prefixFS{httpFS, rootPath}
+	e.GET(rootPath+"/favicon.svg", redirect(server.Config.Server.RootPath+"/favicons/favicon-light-default.svg", http.StatusPermanentRedirect))
+	e.GET(rootPath+"/favicons/*filepath", serveFile(f))
+	e.GET(rootPath+"/assets/*filepath", handleCustomFilesAndAssets(f))
 
 	e.NoRoute(handleIndex)
 
 	return e, nil
 }
 
-func handleCustomFilesAndAssets(assetHandler http.Handler) http.HandlerFunc {
-	serveFileOrEmptyContent := func(w http.ResponseWriter, r *http.Request, localFileName string) {
+func handleCustomFilesAndAssets(fs *prefixFS) func(ctx *gin.Context) {
+	serveFileOrEmptyContent := func(w http.ResponseWriter, r *http.Request, localFileName, fileName string) {
 		if len(localFileName) > 0 {
 			http.ServeFile(w, r, localFileName)
 		} else {
 			// prefer zero content over sending a 404 Not Found
-			http.ServeContent(w, r, localFileName, time.Now(), bytes.NewReader([]byte{}))
+			http.ServeContent(w, r, fileName, time.Now(), bytes.NewReader([]byte{}))
 		}
 	}
-	return func(w http.ResponseWriter, r *http.Request) {
-		if strings.HasSuffix(r.RequestURI, "/assets/custom.js") {
-			serveFileOrEmptyContent(w, r, server.Config.Server.CustomJsFile)
-		} else if strings.HasSuffix(r.RequestURI, "/assets/custom.css") {
-			serveFileOrEmptyContent(w, r, server.Config.Server.CustomCSSFile)
+	return func(ctx *gin.Context) {
+		if strings.HasSuffix(ctx.Request.RequestURI, "/assets/custom.js") {
+			serveFileOrEmptyContent(ctx.Writer, ctx.Request, server.Config.Server.CustomJsFile, "file.js")
+		} else if strings.HasSuffix(ctx.Request.RequestURI, "/assets/custom.css") {
+			serveFileOrEmptyContent(ctx.Writer, ctx.Request, server.Config.Server.CustomCSSFile, "file.css")
 		} else {
-			assetHandler.ServeHTTP(w, r)
+			serveFile(fs)(ctx)
+		}
+	}
+}
+
+func serveFile(f *prefixFS) func(ctx *gin.Context) {
+	return func(ctx *gin.Context) {
+		file, err := f.Open(ctx.Request.URL.Path)
+		if err != nil {
+			code := http.StatusInternalServerError
+			if errors.Is(err, fs.ErrNotExist) {
+				code = http.StatusNotFound
+			} else if errors.Is(err, fs.ErrPermission) {
+				code = http.StatusForbidden
+			}
+			ctx.Status(code)
+			return
+		}
+		data, err := io.ReadAll(file)
+		if err != nil {
+			ctx.Status(http.StatusInternalServerError)
+			return
+		}
+		var mime string
+		switch {
+		case strings.HasSuffix(ctx.Request.URL.Path, ".js"):
+			mime = "text/javascript"
+		case strings.HasSuffix(ctx.Request.URL.Path, ".css"):
+			mime = "text/css"
+		case strings.HasSuffix(ctx.Request.URL.Path, ".png"):
+			mime = "image/png"
+		case strings.HasSuffix(ctx.Request.URL.Path, ".svg"):
+			mime = "image/svg"
+		}
+		ctx.Status(http.StatusOK)
+		ctx.Writer.Header().Set("Content-Type", mime)
+		if _, err := ctx.Writer.Write(replaceBytes(data)); err != nil {
+			log.Error().Err(err).Msgf("can not write %s", ctx.Request.URL.Path)
 		}
 	}
 }
@@ -112,15 +149,27 @@ func handleIndex(c *gin.Context) {
 	}
 }
 
+func loadFile(path string) ([]byte, error) {
+	data, err := web.Lookup(path)
+	if err != nil {
+		return nil, err
+	}
+	return replaceBytes(data), nil
+}
+
+func replaceBytes(data []byte) []byte {
+	return bytes.ReplaceAll(data, []byte("/BASE_PATH"), []byte(server.Config.Server.RootPath))
+}
+
 func parseIndex() []byte {
-	data, err := web.Lookup("index.html")
+	data, err := loadFile("index.html")
 	if err != nil {
 		log.Fatal().Err(err).Msg("can not find index.html")
 	}
-	if server.Config.Server.RootURL == "" {
-		return data
-	}
-	return regexp.MustCompile(`/\S+\.(js|css|png|svg)`).ReplaceAll(data, []byte(server.Config.Server.RootURL+"$0"))
+	data = bytes.ReplaceAll(data, []byte("/web-config.js"), []byte(server.Config.Server.RootPath+"/web-config.js"))
+	data = bytes.ReplaceAll(data, []byte("/assets/custom.css"), []byte(server.Config.Server.RootPath+"/assets/custom.css"))
+	data = bytes.ReplaceAll(data, []byte("/assets/custom.js"), []byte(server.Config.Server.RootPath+"/assets/custom.js"))
+	return data
 }
 
 func setupCache(c *gin.Context) {

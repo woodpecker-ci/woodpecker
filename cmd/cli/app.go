@@ -15,10 +15,6 @@
 package main
 
 import (
-	"os"
-
-	"github.com/rs/zerolog"
-	zlog "github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
 
 	"github.com/woodpecker-ci/woodpecker/cli/common"
@@ -45,6 +41,7 @@ func newApp() *cli.App {
 	app.Usage = "command line utility"
 	app.EnableBashCompletion = true
 	app.Flags = common.GlobalFlags
+	app.Before = common.SetupGlobalLogger
 	app.Commands = []*cli.Command{
 		pipeline.Command,
 		log.Command,
@@ -58,15 +55,6 @@ func newApp() *cli.App {
 		lint.Command,
 		loglevel.Command,
 		cron.Command,
-	}
-
-	zlog.Logger = zlog.Output(
-		zerolog.ConsoleWriter{
-			Out: os.Stderr,
-		},
-	)
-	for _, command := range app.Commands {
-		command.Before = common.SetupConsoleLogger
 	}
 
 	return app

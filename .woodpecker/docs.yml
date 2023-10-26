@@ -1,19 +1,21 @@
 when:
-  event: [pull_request, push, cron]
-  branch: ${CI_REPO_DEFAULT_BRANCH}
-
+  - event: pull_request
+  - event: push
+    path: &when_path
+      - 'docs/**'
+      - '.woodpecker/docs.yml'
+      # since we generate docs for cli tool we have to watch this too
+      - 'cli/**'
+      - 'cmd/cli/**'
+      # api docs
+      - 'server/api/**'
+    branch: ${CI_REPO_DEFAULT_BRANCH}
+  - cron: update_docs
+    event: cron
 
 variables:
-  - &golang_image 'golang:1.20.2'
-  - &node_image 'node:18-alpine'
-  - &when_path
-    - "docs/**"
-    - ".woodpecker/docs.yml"
-    # since we generate docs for cli tool we have to watch this too
-    - "cli/**"
-    - "cmd/cli/**"
-    # api docs
-    - "server/api/**"
+  - &golang_image 'golang:1.21.3'
+  - &node_image 'node:21-alpine'
 
 steps:
   build-cli:
@@ -22,8 +24,7 @@ steps:
       - make docs
     when:
       - path: *when_path
-      - cron: update_docs
-        event: cron
+      - event: cron
 
   build:
     image: *node_image
@@ -34,17 +35,16 @@ steps:
       - pnpm build
     when:
       - path: *when_path
-      - cron: update_docs
-        event: cron
+      - event: cron
 
   deploy-preview:
-    image: woodpeckerci/plugin-surge-preview:next
+    image: woodpeckerci/plugin-surge-preview:1.2.2
     settings:
-      path: "docs/build/"
+      path: 'docs/build/'
       surge_token:
         from_secret: SURGE_TOKEN
       forge_type: github
-      forge_url: "https://github.com"
+      forge_url: 'https://github.com'
       forge_repo_token:
         from_secret: GITHUB_TOKEN_SURGE
     failure: ignore
@@ -76,8 +76,5 @@ steps:
       - git commit -m "Deploy website - based on ${CI_COMMIT_SHA}"
       - git push
     when:
-      - event: push
-        branch: ${CI_REPO_DEFAULT_BRANCH}
-        path: *when_path
-      - cron: update_docs
-        event: cron
+      event: [push, cron]
+      path: *when_path

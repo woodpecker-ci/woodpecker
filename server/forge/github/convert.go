@@ -18,7 +18,7 @@ package github
 import (
 	"fmt"
 
-	"github.com/google/go-github/v39/github"
+	"github.com/google/go-github/v56/github"
 
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
@@ -89,6 +89,7 @@ func convertRepo(from *github.Repository) *model.Repo {
 		Link:          from.GetHTMLURL(),
 		IsSCMPrivate:  from.GetPrivate(),
 		Clone:         from.GetCloneURL(),
+		CloneSSH:      from.GetSSHURL(),
 		Branch:        from.GetDefaultBranch(),
 		Owner:         from.GetOwner().GetLogin(),
 		Avatar:        from.GetOwner().GetAvatarURL(),
@@ -148,6 +149,7 @@ func convertRepoHook(eventRepo *github.PushEventRepository) *model.Repo {
 		Link:          eventRepo.GetHTMLURL(),
 		IsSCMPrivate:  eventRepo.GetPrivate(),
 		Clone:         eventRepo.GetCloneURL(),
+		CloneSSH:      eventRepo.GetSSHURL(),
 		Branch:        eventRepo.GetDefaultBranch(),
 		SCMKind:       model.RepoGit,
 	}

@@ -316,7 +316,7 @@ func TestFetch(t *testing.T) {
 			configFetcher := forge.NewConfigFetcher(
 				f,
 				time.Second*3,
-				config.NewHTTP("", ""),
+				nil,
 				&model.User{Token: "xxx"},
 				repo,
 				&model.Pipeline{Commit: "89ab7b2d6bfb347144ac7c557e638ab402848fee"},
@@ -518,6 +518,8 @@ func TestFetchFromConfigService(t *testing.T) {
 			// if the previous mocks do not match return not found errors
 			f.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("File not found"))
 			f.On("Dir", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("Directory not found"))
+
+			f.On("Netrc", mock.Anything, mock.Anything).Return(&model.Netrc{Machine: "mock", Login: "mock", Password: "mock"}, nil)
 
 			configFetcher := forge.NewConfigFetcher(
 				f,

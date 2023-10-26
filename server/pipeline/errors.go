@@ -14,12 +14,22 @@
 
 package pipeline
 
+import "errors"
+
 type ErrNotFound struct {
 	Msg string
 }
 
 func (e ErrNotFound) Error() string {
 	return e.Msg
+}
+
+func (e ErrNotFound) Is(target error) bool {
+	_, ok := target.(ErrNotFound) //nolint:errorlint
+	if !ok {
+		_, ok = target.(*ErrNotFound) //nolint:errorlint
+	}
+	return ok
 }
 
 type ErrBadRequest struct {
@@ -30,10 +40,12 @@ func (e ErrBadRequest) Error() string {
 	return e.Msg
 }
 
-type ErrFiltered struct {
-	Msg string
+func (e ErrBadRequest) Is(target error) bool {
+	_, ok := target.(ErrBadRequest) //nolint:errorlint
+	if !ok {
+		_, ok = target.(*ErrBadRequest) //nolint:errorlint
+	}
+	return ok
 }
 
-func (e ErrFiltered) Error() string {
-	return "ignoring hook: " + e.Msg
-}
+var ErrFiltered = errors.New("ignoring hook: 'when' filters filtered out all steps")

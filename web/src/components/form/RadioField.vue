@@ -15,50 +15,29 @@
   </div>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, PropType, toRef } from 'vue';
+<script lang="ts" setup>
+import { computed, toRef } from 'vue';
 
 import { RadioOption } from './form.types';
 
-export default defineComponent({
-  name: 'RadioField',
+const props = defineProps<{
+  modelValue: string;
+  options: RadioOption[];
+}>();
 
-  components: {},
+const emit = defineEmits<{
+  (event: 'update:modelValue', value: string): void;
+}>();
 
-  props: {
-    modelValue: {
-      type: String,
-      required: true,
-    },
-
-    options: {
-      type: Array as PropType<RadioOption[]>,
-      required: true,
-    },
-  },
-
-  emits: {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    'update:modelValue': (_value: RadioOption['value']): boolean => true,
-  },
-
-  setup: (props, ctx) => {
-    const modelValue = toRef(props, 'modelValue');
-    const innerValue = computed({
-      get: () => modelValue.value,
-      set: (value) => {
-        ctx.emit('update:modelValue', value);
-      },
-    });
-
-    const id = (Math.random() + 1).toString(36).substring(7);
-
-    return {
-      id,
-      innerValue,
-    };
+const modelValue = toRef(props, 'modelValue');
+const innerValue = computed({
+  get: () => modelValue.value,
+  set: (value) => {
+    emit('update:modelValue', value);
   },
 });
+
+const id = (Math.random() + 1).toString(36).substring(7);
 </script>
 
 <style scoped>

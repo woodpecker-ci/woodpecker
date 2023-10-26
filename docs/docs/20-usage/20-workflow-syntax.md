@@ -1,6 +1,6 @@
-# Pipeline syntax
+# Workflow syntax
 
-The pipeline section defines a list of steps to build, test and deploy your code. Pipeline steps are executed serially, in the order in which they are defined. If a step returns a non-zero exit code, the pipeline immediately aborts and returns a failure status.
+The workflow section defines a list of steps to build, test and deploy your code. Steps are executed serially, in the order in which they are defined. If a step returns a non-zero exit code, the workflow and therefore all other workflows and the pipeline immediately aborts and returns a failure status.
 
 Example steps:
 
@@ -19,7 +19,7 @@ steps:
       - npm run build
 ```
 
-In the above example we define two pipeline steps, `frontend` and `backend`. The names of these steps are completely arbitrary.
+In the above example we define two steps, `frontend` and `backend`. The names of these steps are completely arbitrary.
 
 Another way to name a step is by using the name keyword:
 
@@ -42,7 +42,7 @@ Keep in mind the name is optional, if not added the steps will be numerated.
 
 ### Skip Commits
 
-Woodpecker gives the ability to skip individual commits by adding `[CI SKIP]` to the commit message. Note this is case-insensitive.
+Woodpecker gives the ability to skip individual commits by adding `[SKIP CI]` or `[CI SKIP]` to the commit message. Note this is case-insensitive.
 
 ```sh
 git commit -m "updated README [CI SKIP]"
@@ -50,8 +50,8 @@ git commit -m "updated README [CI SKIP]"
 
 ## Steps
 
-Every step of your pipeline executes arbitrary commands inside a specified container. The defined commands are executed serially.
-The associated commit of a current pipeline run is checked out with git to a workspace which is mounted to every step of the pipeline as the working directory.
+Every step of your workflow executes commands inside a specified container. The defined commands are executed serially.
+The associated commit is checked out with git to a workspace which is mounted to every step of the workflow as the working directory.
 
 ```diff
  steps:
@@ -64,7 +64,7 @@ The associated commit of a current pipeline run is checked out with git to a wor
 
 ### File changes are incremental
 
-- Woodpecker clones the source code in the beginning pipeline
+- Woodpecker clones the source code in the beginning of the workflow
 - Changes to files are persisted through steps as the same volume is mounted to all steps
 
 ```yaml
@@ -82,7 +82,7 @@ steps:
 
 ### `image`
 
-Woodpecker pulls the defined image and uses it as environment to execute the pipeline step commands, for plugins and for service containers.
+Woodpecker pulls the defined image and uses it as environment to execute the workflow step commands, for plugins and for service containers.
 
 When using the `local` backend, the `image` entry is used to specify the shell, such as Bash or Fish, that is used to run the commands.
 
@@ -122,50 +122,11 @@ Woodpecker does not automatically upgrade container images. Example configuratio
 +    pull: true
 ```
 
-##### Images from private registries
-
-You must provide registry credentials on the UI in order to pull private pipeline images defined in your YAML configuration file.
-
-These credentials are never exposed to your pipeline, which means they cannot be used to push, and are safe to use with pull requests, for example. Pushing to a registry still require setting credentials for the appropriate plugin.
-
-Example configuration using a private image:
-
-```diff
- steps:
-   build:
-+    image: gcr.io/custom/golang
-     commands:
-       - go build
-       - go test
-```
-
-Woodpecker matches the registry hostname to each image in your YAML. If the hostnames match, the registry credentials are used to authenticate to your registry and pull the image. Note that registry credentials are used by the Woodpecker agent and are never exposed to your build containers.
-
-Example registry hostnames:
-
-- Image `gcr.io/foo/bar` has hostname `gcr.io`
-- Image `foo/bar` has hostname `docker.io`
-- Image `qux.com:8000/foo/bar` has hostname `qux.com:8000`
-
-Example registry hostname matching logic:
-
-- Hostname `gcr.io` matches image `gcr.io/foo/bar`
-- Hostname `docker.io` matches `golang`
-- Hostname `docker.io` matches `library/golang`
-- Hostname `docker.io` matches `bradyrydzewski/golang`
-- Hostname `docker.io` matches `bradyrydzewski/golang:latest`
-
-##### Global registry support
-
-To make a private registry globally available check the [server configuration docs](../30-administration/10-server-config.md#global-registry-setting).
-
-##### GCR registry support
-
-For specific details on configuring access to Google Container Registry, please view the docs [here](https://cloud.google.com/container-registry/docs/advanced-authentication#using_a_json_key_file).
+Learn more how you can use images from [different registries](./41-registries.md).
 
 ### `commands`
 
-Commands of every pipeline step are executed serially as if you would enter them into your local shell.
+Commands of every step are executed serially as if you would enter them into your local shell.
 
 ```diff
  steps:
@@ -196,19 +157,19 @@ docker run --entrypoint=build.sh golang
 
 ### `environment`
 
-Woodpecker provides the ability to pass environment variables to individual pipeline steps.
+Woodpecker provides the ability to pass environment variables to individual steps.
 
 For more details check the [environment docs](./50-environment.md).
 
 ### `secrets`
 
-Woodpecker provides the ability to store named parameters external to the YAML configuration file, in a central secret store. These secrets can be passed to individual steps of the pipeline at runtime.
+Woodpecker provides the ability to store named parameters external to the YAML configuration file, in a central secret store. These secrets can be passed to individual steps of the workflow at runtime.
 
 For more details check the [secrets docs](./40-secrets.md).
 
 ### `failure`
 
-Some of the pipeline steps may be allowed to fail without causing the whole pipeline to report a failure (e.g., a step executing a linting check). To enable this, add `failure: ignore` to your pipeline step. If Woodpecker encounters an error while executing the step, it will report it as failed but still execute the next steps of the pipeline, if any, without affecting the status of the pipeline.
+Some of the steps may be allowed to fail without causing the whole workflow and therefore pipeline to report a failure (e.g., a step executing a linting check). To enable this, add `failure: ignore` to your step. If Woodpecker encounters an error while executing the step, it will report it as failed but still executes the next steps of the workflow, if any, without affecting the status of the workflow.
 
 ```diff
  steps:
@@ -222,7 +183,7 @@ Some of the pipeline steps may be allowed to fail without causing the whole pipe
 
 ### `when` - Conditional Execution
 
-Woodpecker supports defining a list of conditions for a pipeline step by using a `when` block. If at least one of the conditions in the `when` block evaluate to true the step is executed, otherwise it is skipped. A condition can be a check like:
+Woodpecker supports defining a list of conditions for a step by using a `when` block. If at least one of the conditions in the `when` block evaluate to true the step is executed, otherwise it is skipped. A condition can be a check like:
 
 ```diff
  steps:
@@ -297,8 +258,8 @@ Execute a step using custom include and exclude logic:
 ```yaml
 when:
   - branch:
-      include: [ main, release/* ]
-      exclude: [ release/1.0.0, release/1.1.* ]
+      include: [main, release/*]
+      exclude: [release/1.0.0, release/1.1.*]
 ```
 
 #### `event`
@@ -343,18 +304,18 @@ when:
 
 #### `ref`
 
-The `ref` filter compares the git reference against which the pipeline is executed.
+The `ref` filter compares the git reference against which the workflow is executed.
 This allows you to filter, for example, tags that must start with **v**:
 
 ```yaml
 when:
-  event: tag
-  ref: refs/tags/v*
+  - event: tag
+    ref: refs/tags/v*
 ```
 
 #### `status`
 
-There are use cases for executing pipeline steps on failure, such as sending notifications for failed pipelines. Use the status constraint to execute steps even when the pipeline fails:
+There are use cases for executing steps on failure, such as sending notifications for failed workflow / pipeline. Use the status constraint to execute steps even when the workflow fails:
 
 ```diff
 steps:
@@ -369,7 +330,7 @@ steps:
 #### `platform`
 
 :::note
-This condition should be used in conjunction with a [matrix](./30-matrix-workflows.md#example-matrix-pipeline-using-multiple-platforms) pipeline as a regular pipeline will only executed by a single agent which only has one arch.
+This condition should be used in conjunction with a [matrix](./30-matrix-workflows.md#example-matrix-pipeline-using-multiple-platforms) workflow as a regular workflow will only be executed by a single agent which only has one arch.
 :::
 
 Execute a step for a specific platform:
@@ -383,7 +344,7 @@ Execute a step for a specific platform using wildcards:
 
 ```yaml
 when:
-  - platform:  [ linux/*, windows/amd64 ]
+  - platform: [linux/*, windows/amd64]
 ```
 
 #### `environment`
@@ -427,7 +388,7 @@ Execute a step only on a pipeline with certain files being changed:
 
 ```yaml
 when:
-  - path: "src/*"
+  - path: 'src/*'
 ```
 
 You can use [glob patterns](https://github.com/bmatcuk/doublestar#patterns) to match the changed files and specify if the step should run if a file matching that pattern has been changed `include` or if some files have **not** been changed `exclude`.
@@ -435,9 +396,9 @@ You can use [glob patterns](https://github.com/bmatcuk/doublestar#patterns) to m
 ```yaml
 when:
   - path:
-      include: [ '.woodpecker/*.yml', '*.ini' ]
-      exclude: [ '*.md', 'docs/**' ]
-      ignore_message: "[ALL]"
+      include: ['.woodpecker/*.yml', '*.ini']
+      exclude: ['*.md', 'docs/**']
+      ignore_message: '[ALL]'
 ```
 
 **Hint:** Passing a defined ignore-message like `[ALL]` inside the commit message will ignore all path conditions.
@@ -485,7 +446,7 @@ when:
 
 ### `group` - Parallel execution
 
-Woodpecker supports parallel step execution for same-machine fan-in and fan-out. Parallel steps are configured using the `group` attribute. This instructs the pipeline runner to execute the named group in parallel.
+Woodpecker supports parallel step execution for same-machine fan-in and fan-out. Parallel steps are configured using the `group` attribute. This instructs the agent to execute the named group in parallel.
 
 Example parallel configuration:
 
@@ -509,7 +470,7 @@ Example parallel configuration:
      repo: octocat/hello-world
 ```
 
-In the above example, the `frontend` and `backend` steps are executed in parallel. The pipeline runner will not execute the `publish` step until the group completes.
+In the above example, the `frontend` and `backend` steps are executed in parallel. The agent will not execute the `publish` step until the group completes.
 
 ### `volumes`
 
@@ -519,7 +480,7 @@ For more details check the [volumes docs](./70-volumes.md).
 
 ### `detach`
 
-Woodpecker gives the ability to detach steps to run them in background until the pipeline finishes.
+Woodpecker gives the ability to detach steps to run them in background until the workflow finishes.
 
 For more details check the [service docs](./60-services.md#detachment).
 
@@ -529,13 +490,13 @@ Using `directory`, you can set a subdirectory of your repository or an absolute 
 
 ## `services`
 
-Woodpecker can provide service containers. They can for example be used to run databases or cache containers during the execution of pipeline.
+Woodpecker can provide service containers. They can for example be used to run databases or cache containers during the execution of workflow.
 
 For more details check the [services docs](./60-services.md).
 
 ## `workspace`
 
-The workspace defines the shared volume and working directory shared by all pipeline steps. The default workspace matches the below pattern, based on your repository URL.
+The workspace defines the shared volume and working directory shared by all workflow steps. The default workspace matches the below pattern, based on your repository URL.
 
 ```txt
 /woodpecker/src/github.com/octocat/hello-world
@@ -556,7 +517,7 @@ The workspace can be customized using the workspace block in the YAML file:
        - go test
 ```
 
-The base attribute defines a shared base volume available to all pipeline steps. This ensures your source code, dependencies and compiled binaries are persisted and shared between steps.
+The base attribute defines a shared base volume available to all steps. This ensures your source code, dependencies and compiled binaries are persisted and shared between steps.
 
 ```diff
  workspace:
@@ -603,34 +564,14 @@ Woodpecker has integrated support for matrix builds. Woodpecker executes a separ
 
 For more details check the [matrix build docs](./30-matrix-workflows.md).
 
-## `platform`
-
-To configure your pipeline to only be executed on an agent with a specific platform, you can use the `platform` key.
-Have a look at the official [go docs](https://go.dev/doc/install/source) for the available platforms. The syntax of the platform is `GOOS/GOARCH` like `linux/arm64` or `linux/amd64`.
-
-Example:
-
-Assuming we have two agents, one `arm` and one `amd64`. Previously this pipeline would have executed on **either agent**, as Woodpecker is not fussy about where it runs the pipelines. By setting the following option it will only be executed on an agent with the platform `linux/arm64`.
-
-```diff
-+platform: linux/arm64
-
-steps:
-  build:
-    image: golang
-    commands:
-      - go build
-      - go test
-```
-
 ## `labels`
 
-You can set labels for your pipeline to select an agent to execute the pipeline on. An agent will pick up and run a pipeline when **every** label assigned to a pipeline matches the agents labels.
+You can set labels for your workflow to select an agent to execute the workflow on. An agent will pick up and run a workflow when **every** label assigned to it matches the agents labels.
 
 To set additional agent labels check the [agent configuration options](../30-administration/15-agent-config.md#woodpecker_filter_labels). Agents will have at least four default labels: `platform=agent-os/agent-arch`, `hostname=my-agent`, `backend=docker` (type of the agent backend) and `repo=*`. Agents can use a `*` as a wildcard for a label. For example `repo=*` will match every repo.
 
-Pipeline labels with an empty value will be ignored.
-By default each pipeline has at least the `repo=your-user/your-repo-name` label. If you have set the [platform attribute](#platform) for your pipeline it will have a label like `platform=your-os/your-arch` as well.
+Workflow labels with an empty value will be ignored.
+By default each workflow has at least the `repo=your-user/your-repo-name` label. If you have set the [platform attribute](#platform) for your workflow it will have a label like `platform=your-os/your-arch` as well.
 
 You can add additional labels as a key value map:
 
@@ -648,17 +589,34 @@ steps:
       - go test
 ```
 
+### Filter by platform
+
+To configure your workflow to only be executed on an agent with a specific platform, you can use the `platform` key.
+Have a look at the official [go docs](https://go.dev/doc/install/source) for the available platforms. The syntax of the platform is `GOOS/GOARCH` like `linux/arm64` or `linux/amd64`.
+
+Example:
+
+Assuming we have two agents, one `linux/arm` and one `linux/amd64`. Previously this workflow would have executed on **either agent**, as Woodpecker is not fussy about where it runs the workflows. By setting the following option it will only be executed on an agent with the platform `linux/arm64`.
+
+```diff
++labels:
++  platform: linux/arm64
+
+steps:
+  [...]
+```
+
 ## `variables`
 
-Woodpecker supports [YAML anchors & aliases](https://yaml.org/spec/1.2.2/#3222-anchors-and-aliases) in the pipeline configuration. These can be used as variables to not repeat yourself.
+Woodpecker supports using [YAML anchors & aliases](https://yaml.org/spec/1.2.2/#3222-anchors-and-aliases) as variables in the workflow configuration.
 
-For more details and examples check the [Advanced YAML syntax docs](./35-advanced-yaml-syntax.md)
+For more details and examples check the [Advanced usage docs](./90-advanced-usage.md)
 
 ## `clone`
 
 Woodpecker automatically configures a default clone step if not explicitly defined. When using the `local` backend, the [plugin-git](https://github.com/woodpecker-ci/plugin-git) binary must be on your `$PATH` for the default clone step to work. If not, you can still write a manual clone step.
 
-You can manually configure the clone step in your pipeline for customization:
+You can manually configure the clone step in your workflow for customization:
 
 ```diff
 +clone:
@@ -736,9 +694,9 @@ By default Woodpecker is automatically adding a clone step. This clone step can 
 skip_clone: true
 ```
 
-## `when` - Global pipeline conditions
+## `when` - Global workflow conditions
 
-Woodpecker gives the ability to skip whole pipelines (not just steps #when---conditional-execution-1) based on certain conditions by a `when` block. If all conditions in the `when` block evaluate to true the pipeline is executed, otherwise it is skipped, but treated as successful and other pipelines depending on it will still continue.
+Woodpecker gives the ability to skip whole workflows (not just steps #when---conditional-execution-1) based on certain conditions by a `when` block. If all conditions in the `when` block evaluate to true the workflow is executed, otherwise it is skipped, but treated as successful and other workflows depending on it will still continue.
 
 ### `repo`
 
@@ -889,6 +847,10 @@ when:
 ## `depends_on`
 
 Woodpecker supports to define multiple workflows for a repository. Those workflows will run independent from each other. To depend them on each other you can use the [`depends_on`](./25-workflows.md#flow-control) keyword.
+
+## `runs_on`
+
+Workflows that should run even on failure should set the `runs_on` tag. See [here](./25-workflows.md#flow-control) for an example.
 
 ## Privileged mode
 

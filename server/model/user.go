@@ -23,7 +23,7 @@ import (
 // validate a username (e.g. from github)
 var reUsername = regexp.MustCompile("^[a-zA-Z0-9-_.]+$")
 
-var errUserLoginInvalid = errors.New("Invalid User Login")
+var errUserLoginInvalid = errors.New("invalid user login")
 
 // User represents a registered user.
 type User struct {
@@ -59,11 +59,14 @@ type User struct {
 	// Admin indicates the user is a system administrator.
 	//
 	// NOTE: If the username is part of the WOODPECKER_ADMIN
-	// environment variable this value will be set to true on login.
+	// environment variable, this value will be set to true on login.
 	Admin bool `json:"admin,omitempty" xorm:"user_admin"`
 
 	// Hash is a unique token used to sign tokens.
 	Hash string `json:"-" xorm:"UNIQUE varchar(500) 'user_hash'"`
+
+	// OrgID is the of the user as model.Org.
+	OrgID int64 `json:"org_id" xorm:"user_org_id"`
 } //	@name User
 
 // TableName return database table name for xorm

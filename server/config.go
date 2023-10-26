@@ -32,7 +32,7 @@ import (
 
 var Config = struct {
 	Services struct {
-		Pubsub              pubsub.Publisher
+		Pubsub              *pubsub.Publisher
 		Queue               queue.Queue
 		Logs                logging.Log
 		Secrets             model.SecretService
@@ -63,11 +63,10 @@ var Config = struct {
 		Port                string
 		PortTLS             string
 		AgentToken          string
-		Docs                string
 		StatusContext       string
 		StatusContextFormat string
 		SessionExpires      time.Duration
-		RootURL             string
+		RootPath            string
 		CustomCSSFile       string
 		CustomJsFile        string
 		Migrations          struct {
@@ -91,5 +90,10 @@ var Config = struct {
 		Privileged                          []string
 		DefaultTimeout                      int64
 		MaxTimeout                          int64
+		Proxy                               struct {
+			No    string
+			HTTP  string
+			HTTPS string
+		}
 	}
 }{}

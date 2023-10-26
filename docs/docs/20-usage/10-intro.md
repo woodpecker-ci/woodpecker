@@ -10,15 +10,9 @@ Webhooks are used to trigger pipeline executions. When you push code to your rep
 
 > Required Permissions
 >
->The user who enables a repo in Woodpecker must have `Admin` rights on that repo, so that Woodpecker can add the webhook.
+> The user who enables a repo in Woodpecker must have `Admin` rights on that repo, so that Woodpecker can add the webhook.
 >
 > Note that manually creating webhooks yourself is not possible. This is because webhooks are signed using a per-repository secret key which is not exposed to end users.
-
-# Webhooks
-
-When you activate your repository Woodpecker automatically add webhooks to your forge (e.g. GitHub). There is no manual configuration required.
-
-Webhooks are used to trigger pipeline executions. When you push code to your repository, open a pull request, or create a tag, your forge will automatically send a webhook to Woodpecker which will in turn trigger pipeline execution.
 
 ## Configuration
 

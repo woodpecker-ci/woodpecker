@@ -42,7 +42,7 @@ func GetSecret(c *gin.Context) {
 	)
 	secret, err := server.Config.Services.Secrets.SecretFind(repo, name)
 	if err != nil {
-		handleDbGetError(c, err)
+		handleDbError(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, secret.Copy())
@@ -67,12 +67,11 @@ func PostSecret(c *gin.Context) {
 		return
 	}
 	secret := &model.Secret{
-		RepoID:      repo.ID,
-		Name:        strings.ToLower(in.Name),
-		Value:       in.Value,
-		Events:      in.Events,
-		Images:      in.Images,
-		PluginsOnly: in.PluginsOnly,
+		RepoID: repo.ID,
+		Name:   strings.ToLower(in.Name),
+		Value:  in.Value,
+		Events: in.Events,
+		Images: in.Images,
 	}
 	if err := secret.Validate(); err != nil {
 		c.String(http.StatusUnprocessableEntity, "Error inserting secret. %s", err)
@@ -111,7 +110,7 @@ func PatchSecret(c *gin.Context) {
 
 	secret, err := server.Config.Services.Secrets.SecretFind(repo, name)
 	if err != nil {
-		handleDbGetError(c, err)
+		handleDbError(c, err)
 		return
 	}
 	if in.Value != "" {
@@ -123,7 +122,6 @@ func PatchSecret(c *gin.Context) {
 	if in.Images != nil {
 		secret.Images = in.Images
 	}
-	secret.PluginsOnly = in.PluginsOnly
 
 	if err := secret.Validate(); err != nil {
 		c.String(http.StatusUnprocessableEntity, "Error updating secret. %s", err)
@@ -167,7 +165,7 @@ func GetSecretList(c *gin.Context) {
 //	@Summary	Delete a named secret
 //	@Router		/repos/{repo_id}/secrets/{secretName} [delete]
 //	@Produce	plain
-//	@Success	200
+//	@Success	204
 //	@Tags		Repository secrets
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		repo_id			path	int		true	"the repository id"
@@ -178,8 +176,8 @@ func DeleteSecret(c *gin.Context) {
 		name = c.Param("secret")
 	)
 	if err := server.Config.Services.Secrets.SecretDelete(repo, name); err != nil {
-		handleDbGetError(c, err)
+		handleDbError(c, err)
 		return
 	}
-	c.String(http.StatusNoContent, "")
+	c.Status(http.StatusNoContent)
 }
