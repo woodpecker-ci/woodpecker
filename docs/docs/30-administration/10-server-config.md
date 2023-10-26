@@ -346,12 +346,6 @@ Example: `user1,user2`
 
 Enable to allow user registration.
 
-### `WOODPECKER_DOCS`
-
-> Default: `https://woodpecker-ci.org/`
-
-Link to documentation in the UI.
-
 ### `WOODPECKER_AUTHENTICATE_PUBLIC_REPOS`
 
 > Default: `false`
