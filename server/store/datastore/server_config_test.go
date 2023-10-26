@@ -66,4 +66,8 @@ func TestServerConfigGetSet(t *testing.T) {
 		t.Errorf("Unexpected: no error on missing config: %v", err)
 		return
 	}
+	if value != "" {
+		t.Errorf("Unexpected: got value on missing config: %s", value)
+		return
+	}
 }
