@@ -235,9 +235,7 @@ func podSecurityContext(sc *types.SecurityContext, secCtxConf SecurityContextCon
 }
 
 func containerSecurityContext(sc *types.SecurityContext, stepPrivileged bool) *v1.SecurityContext {
-	var (
-		privileged *bool
-	)
+	var privileged *bool
 
 	if sc != nil && sc.Privileged != nil && *sc.Privileged {
 		privileged = sc.Privileged // true
