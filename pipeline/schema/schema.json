@@ -4,9 +4,7 @@
   "$id": "https://woodpecker-ci.org/schema/woodpecker.json",
   "description": "Schema of a Woodpecker pipeline file. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax",
   "type": "object",
-  "required": [
-    "steps"
-  ],
+  "required": ["steps"],
   "additionalProperties": false,
   "properties": {
     "$schema": {
@@ -257,9 +255,7 @@
       "description": "Every step of your pipeline executes arbitrary commands inside a specified docker container. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#steps",
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "image"
-      ],
+      "required": ["image"],
       "properties": {
         "image": {
           "$ref": "#/definitions/step_image"
@@ -299,10 +295,7 @@
         "failure": {
           "description": "How to handle the failure of this step. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#failure",
           "type": "string",
-          "enum": [
-            "fail",
-            "ignore"
-          ],
+          "enum": ["fail", "ignore"],
           "default": "fail"
         },
         "backend_options": {
@@ -339,12 +332,7 @@
         },
         "event": {
           "description": "Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#event",
-          "default": [
-            "push",
-            "pull_request",
-            "tag",
-            "deployment"
-          ],
+          "default": ["push", "pull_request", "tag", "deployment"],
           "oneOf": [
             {
               "type": "array",
@@ -374,18 +362,12 @@
               "minLength": 1,
               "items": {
                 "type": "string",
-                "enum": [
-                  "success",
-                  "failure"
-                ]
+                "enum": ["success", "failure"]
               }
             },
             {
               "type": "string",
-              "enum": [
-                "success",
-                "failure"
-              ]
+              "enum": ["success", "failure"]
             }
           ]
         },
@@ -401,11 +383,7 @@
           "description": "Read more: https://woodpecker-ci.org/docs/usage/matrix-pipelines",
           "type": "object",
           "additionalProperties": {
-            "type": [
-              "boolean",
-              "string",
-              "number"
-            ]
+            "type": ["boolean", "string", "number"]
           }
         },
         "instance": {
@@ -454,14 +432,7 @@
       }
     },
     "event_enum": {
-      "enum": [
-        "push",
-        "pull_request",
-        "tag",
-        "deployment",
-        "cron",
-        "manual"
-      ]
+      "enum": ["push", "pull_request", "tag", "deployment", "cron", "manual"]
     },
     "constraint_list": {
       "oneOf": [
@@ -547,11 +518,7 @@
         {
           "type": "object",
           "additionalProperties": {
-            "type": [
-              "boolean",
-              "string",
-              "number"
-            ]
+            "type": ["boolean", "string", "number"]
           }
         }
       ]
@@ -566,10 +533,7 @@
           },
           {
             "type": "object",
-            "required": [
-              "source",
-              "target"
-            ],
+            "required": ["source", "target"],
             "properties": {
               "source": {
                 "type": "string"
@@ -587,13 +551,7 @@
       "description": "Change the settings of your plugin. Read more: https://woodpecker-ci.org/docs/usage/plugins/plugins",
       "type": "object",
       "additionalProperties": {
-        "type": [
-          "boolean",
-          "string",
-          "number",
-          "array",
-          "object"
-        ]
+        "type": ["boolean", "string", "number", "array", "object"]
       }
     },
     "step_volumes": {
@@ -701,9 +659,7 @@
       "type": "object",
       "additionalProperties": false,
       "minProperties": 1,
-      "required": [
-        "image"
-      ],
+      "required": ["image"],
       "properties": {
         "image": {
           "$ref": "#/definitions/step_image"
@@ -766,11 +722,7 @@
       "additionalProperties": {
         "type": "array",
         "items": {
-          "type": [
-            "boolean",
-            "string",
-            "number"
-          ]
+          "type": ["boolean", "string", "number"]
         },
         "minLength": 1
       }
@@ -784,11 +736,7 @@
       "description": "Configures the labels used for the agent selection. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#clone",
       "type": "object",
       "additionalProperties": {
-        "type": [
-          "boolean",
-          "string",
-          "number"
-        ]
+        "type": ["boolean", "string", "number"]
       }
     }
   }
