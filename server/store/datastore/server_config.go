@@ -43,7 +43,9 @@ func (s storage) ServerConfigSet(key, value string) error {
 		return err
 	}
 
-	_, err = s.engine.Where("key = ?", config.Key).Cols("value").Update(config)
+	_, err = s.engine.Cols("value").Update(config, &model.ServerConfig{
+		Key: key,
+	})
 	return err
 }
 
