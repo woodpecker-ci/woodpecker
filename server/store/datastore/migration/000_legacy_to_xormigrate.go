@@ -52,7 +52,7 @@ var legacyToXormigrate = xormigrate.Migration{
 			"remove-plugin-only-option-from-secrets-table",
 		}
 
-		// TODO remove in 3.x
+		// TODO remove in 3.x and move to MigrateSession
 		if err := legacy.Migrate(engine); err != nil {
 			return err
 		}

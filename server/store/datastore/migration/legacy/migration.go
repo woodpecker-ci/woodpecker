@@ -93,8 +93,6 @@ type task struct {
 }
 
 func Migrate(e *xorm.Engine) error {
-	e.SetDisableGlobalCache(true)
-
 	if err := e.Sync(new(migrations)); err != nil {
 		return fmt.Errorf("error to create migrations table: %w", err)
 	}
@@ -123,8 +121,6 @@ func Migrate(e *xorm.Engine) error {
 	if err := runTasks(e, migrationTasks); err != nil {
 		return fmt.Errorf("run tasks failed: %w", err)
 	}
-
-	e.SetDisableGlobalCache(false)
 
 	if err := syncAll(e); err != nil {
 		return fmt.Errorf("msg: %w", err)
