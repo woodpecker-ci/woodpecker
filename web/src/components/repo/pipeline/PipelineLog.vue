@@ -151,7 +151,7 @@ const hasLogs = computed(
     // we do not have logs for skipped steps
     repo?.value && pipeline.value && step.value && step.value.state !== 'skipped' && step.value.state !== 'killed',
 );
-const autoScroll = useStorage('log-auto-scroll', false);
+const autoScroll = useStorage('woodpecker:log-auto-scroll', false);
 const showActions = ref(false);
 const downloadInProgress = ref(false);
 const ansiUp = ref(new AnsiUp());
