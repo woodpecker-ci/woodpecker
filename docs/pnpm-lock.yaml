@@ -59,7 +59,7 @@ importers:
         specifier: ^2.0.0
         version: 2.0.2
       '@types/react':
-        specifier: ^18.2.31
+        specifier: 18.2.31
         version: 18.2.31
       '@types/react-helmet':
         specifier: ^6.1.6
