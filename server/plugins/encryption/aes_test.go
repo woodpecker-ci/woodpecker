@@ -24,27 +24,27 @@ import (
 func TestShortMessageLongKey(t *testing.T) {
 	aes := &aesEncryptionService{}
 	err := aes.loadCipher(string(random.GetRandomBytes(32)))
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	input := string(random.GetRandomBytes(4))
 	cipher, err := aes.Encrypt(input, "")
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	output, err := aes.Decrypt(cipher, "")
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, input, output)
 }
 
 func TestLongMessageShortKey(t *testing.T) {
 	aes := &aesEncryptionService{}
 	err := aes.loadCipher(string(random.GetRandomBytes(12)))
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	input := string(random.GetRandomBytes(1024))
 	cipher, err := aes.Encrypt(input, "")
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	output, err := aes.Decrypt(cipher, "")
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, input, output)
 }
