@@ -56,6 +56,7 @@ Build step containers are started up within the agent pod.
 Warning: this approach requires `privileged` access. Also DinD's reputation hasn't been too high in the early days of Docker - this changed somewhat over time, and there are organizations succeeding with this approach.
 
 server.yaml
+
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -153,6 +154,7 @@ spec:
 ```
 
 agent.yaml
+
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -210,4 +212,3 @@ spec:
       - name: sock-dir
         emptyDir: {}
 ```
-

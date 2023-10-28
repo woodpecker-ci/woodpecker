@@ -52,7 +52,7 @@ Alternatively, the unprotected `/metrics` endpoint might be exposed on the inter
 
 List of Prometheus metrics specific to Woodpecker:
 
-```
+```yaml
 # HELP woodpecker_pipeline_count Pipeline count.
 # TYPE woodpecker_pipeline_count counter
 woodpecker_build_count{branch="main",pipeline="total",repo="woodpecker-ci/woodpecker",status="success"} 3

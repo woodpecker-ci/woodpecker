@@ -1,6 +1,7 @@
 # Setup
 
 A Woodpecker deployment consists of two parts:
+
 - A server which is the heart of Woodpecker and ships the webinterface.
 - Next to one server you can deploy any number of agents which will run the pipelines.
 
@@ -19,6 +20,7 @@ To find out more about the differences between the two releases, please read the
 ## Installation
 
 You can install Woodpecker on multiple ways:
+
 - Using [docker-compose](#docker-compose) with the official [docker images](../80-downloads.md#docker-images)
 - By deploying to a [Kubernetes](./80-kubernetes.md) with manifests or Woodpeckers official Helm charts
 - Using [binaries](../80-downloads.md)

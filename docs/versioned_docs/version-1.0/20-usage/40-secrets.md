@@ -28,7 +28,6 @@ steps:
 +       from_secret: secret_token
 ```
 
-
 Please note parameter expressions are subject to pre-processing. When using secrets in parameter expressions they should be escaped.
 
 ```diff
