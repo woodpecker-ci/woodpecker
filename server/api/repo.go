@@ -417,7 +417,7 @@ func RepairRepo(c *gin.Context) {
 //	@Summary	Move a repository to a new owner
 //	@Router		/repos/{repo_id}/move [post]
 //	@Produce	plain
-//	@Success	200
+//	@Success	204
 //	@Tags		Repositories
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		repo_id			path	int		true	"the repository id"
@@ -493,7 +493,7 @@ func MoveRepo(c *gin.Context) {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
-	c.Status(http.StatusOK)
+	c.Status(http.StatusNoContent)
 }
 
 // GetAllRepos
