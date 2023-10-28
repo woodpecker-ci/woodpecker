@@ -14,11 +14,10 @@ repos:
     rev: v1.55.1
     hooks:
       - id: golangci-lint
-      - id: golangci-lint-full
   - repo: https://github.com/igorshubovych/markdownlint-cli
     rev: v0.37.0
     hooks:
-      - id: markdownlint-fix
+      - id: markdownlint
   - repo: https://github.com/mrtazz/checkmake
     rev: 0.2.2
     hooks:
@@ -37,5 +36,5 @@ ci:
   autoupdate_branch: ''
   autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
   autoupdate_schedule: monthly
-  skip: [check-hooks-apply, check-useless-excludes, golangci-lint]
+  skip: [check-hooks-apply, check-useless-excludes]
   submodules: false
