@@ -22,8 +22,8 @@ importers:
         specifier: ^0.36.0
         version: 0.36.0(@docusaurus/theme-common@2.4.3)(react-dom@18.2.0)(react@18.2.0)(typescript@5.2.2)
       '@mdx-js/react':
-        specifier: ^1.6.22
-        version: 1.6.22(react@18.2.0)
+        specifier: ^3.0.0
+        version: 3.0.0(@types/react@18.2.31)(react@18.2.0)
       '@svgr/webpack':
         specifier: ^8.0.0
         version: 8.1.0(typescript@5.2.2)
@@ -2807,6 +2807,17 @@ packages:
     dependencies:
       react: 18.2.0
 
+  /@mdx-js/react@3.0.0(@types/react@18.2.31)(react@18.2.0):
+    resolution: {integrity: sha512-nDctevR9KyYFyV+m+/+S4cpzCWHqj+iHDHq3QrsWezcC+B17uZdIWgCguESUkwFhM3n/56KxWVE3V6EokrmONQ==}
+    peerDependencies:
+      '@types/react': '>=16'
+      react: '>=16'
+    dependencies:
+      '@types/mdx': 2.0.9
+      '@types/react': 18.2.31
+      react: 18.2.0
+    dev: false
+
   /@mdx-js/util@1.6.22:
     resolution: {integrity: sha512-H1rQc1ZOHANWBvPcW+JpGwr+juXSxM8Q8YCkm3GhZd8REu1fHR3z99CErO1p9pkcfcxZnMdIZdIsXkOHY0NilA==}
 
@@ -3424,6 +3435,10 @@ packages:
     resolution: {integrity: sha512-gVZ04PGgw1qLZKsnWnyFv4ORnaJ+DXLdHTVSFbU8yX6xZ34Bjg4Q32yPkmveUP1yItXReKfB0Aknlh/3zxTKAw==}
     dependencies:
       '@types/unist': 2.0.9
+
+  /@types/mdx@2.0.9:
+    resolution: {integrity: sha512-OKMdj17y8Cs+k1r0XFyp59ChSOwf8ODGtMQ4mnpfz5eFDk1aO41yN3pSKGuvVzmWAkFp37seubY1tzOVpwfWwg==}
+    dev: false
 
   /@types/mime@1.3.4:
     resolution: {integrity: sha512-1Gjee59G25MrQGk8bsNvC6fxNiRgUlGn2wlhGf95a59DrprnnHk80FIMMFG9XHMdrfsuA119ht06QPDXA1Z7tw==}
