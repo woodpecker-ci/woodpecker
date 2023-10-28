@@ -23,7 +23,7 @@
     "@vueuse/core": "^10.0.0",
     "ansi_up": "^6.0.0",
     "dayjs": "^1.11.9",
-    "fuse.js": "^6.6.2",
+    "fuse.js": "^7.0.0",
     "humanize-duration": "^3.28.0",
     "javascript-time-ago": "^2.5.9",
     "lodash": "^4.17.21",
