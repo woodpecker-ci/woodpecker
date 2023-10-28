@@ -14,8 +14,8 @@ when:
     event: cron
 
 variables:
-  - &golang_image 'golang:1.21.3'
-  - &node_image 'node:21-alpine'
+  - &golang_image 'golang:1.21.3@sha256:24a09375a6216764a3eda6a25490a88ac178b5fcb9511d59d0da5ebf9e496474'
+  - &node_image 'node:21-alpine@sha256:df76a9449df49785f89d517764012e3396b063ba3e746e8d88f36e9f332b1864'
 
 steps:
   build-cli:
@@ -38,7 +38,7 @@ steps:
       - event: cron
 
   deploy-preview:
-    image: woodpeckerci/plugin-surge-preview:1.2.2
+    image: woodpeckerci/plugin-surge-preview:1.2.2@sha256:7774113b37e1ae71406b427761003a6c5e5b6fe8c08ce7e06bb060f7201fd34f
     settings:
       path: 'docs/build/'
       surge_token:
@@ -55,7 +55,7 @@ steps:
   # TODO: add step to remove preview again after PR is closed (waiting for #286)
 
   deploy:
-    image: alpine:3.18
+    image: alpine:3.18@sha256:eece025e432126ce23f223450a0326fbebde39cdf496a85d8c016293fc851978
     secrets:
       - BOT_PRIVATE_KEY
     commands:

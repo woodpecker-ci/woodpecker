@@ -7,9 +7,9 @@ when:
   event: tag
 
 variables:
-  - &golang_image 'golang:1.21.3'
-  - &node_image 'node:21-alpine'
-  - &xgo_image 'techknowlogick/xgo:go-1.21.3'
+  - &golang_image 'golang:1.21.3@sha256:24a09375a6216764a3eda6a25490a88ac178b5fcb9511d59d0da5ebf9e496474'
+  - &node_image 'node:21-alpine@sha256:df76a9449df49785f89d517764012e3396b063ba3e746e8d88f36e9f332b1864'
+  - &xgo_image 'techknowlogick/xgo:go-1.21.3@sha256:899daf416e5e60e4f003c12b4bf02c5a7ead841141a74acb72769b094c3a0eb2'
   - &xgo_version 'go-1.21.2'
 
 steps:
@@ -72,7 +72,7 @@ steps:
       - cat dist/checksums.txt
 
   release:
-    image: plugins/github-release
+    image: plugins/github-release@sha256:cdd1d46d4453aa6b3083e95df047d68e12d27435fa1eaf0cd1a611622a7de113
     secrets:
       - source: github_token
         target: github_release_api_key
