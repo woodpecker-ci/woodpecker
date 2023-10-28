@@ -43,6 +43,7 @@ func (s storage) ServerConfigSet(key, value string) error {
 		return err
 	}
 
+	// TODO change to Where() when https://gitea.com/xorm/xorm/issues/2358 is solved
 	_, err = s.engine.Cols("value").Update(config, &model.ServerConfig{
 		Key: key,
 	})
