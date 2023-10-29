@@ -18,6 +18,9 @@ repos:
     rev: v0.37.0
     hooks:
       - id: markdownlint
+        args: [--rules, sentences-per-line]
+        additional_dependencies: [sentences-per-line]
+        exclude: '^docs/versioned_docs/.*$'
   - repo: https://github.com/mrtazz/checkmake
     rev: 0.2.2
     hooks:

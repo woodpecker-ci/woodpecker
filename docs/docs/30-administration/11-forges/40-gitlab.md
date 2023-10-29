@@ -1,6 +1,7 @@
 # GitLab
 
-Woodpecker comes with built-in support for the GitLab version 8.2 and higher. To enable GitLab you should configure the Woodpecker container using the following environment variables:
+Woodpecker comes with built-in support for the GitLab version 8.2 and higher.
+To enable GitLab you should configure the Woodpecker container using the following environment variables:
 
 ```diff
 # docker-compose.yml
@@ -21,15 +22,19 @@ services:
 
 ## Registration
 
-You must register your application with GitLab in order to generate a Client and Secret. Navigate to your account settings and choose Applications from the menu, and click New Application.
+You must register your application with GitLab in order to generate a Client and Secret.
+Navigate to your account settings and choose Applications from the menu, and click New Application.
 
-Please use `http://woodpecker.mycompany.com/authorize` as the Authorization callback URL. Grant `api` scope to the application.
+Please use `http://woodpecker.mycompany.com/authorize` as the Authorization callback URL.
+Grant `api` scope to the application.
 
-If you run the Woodpecker CI server on a private IP (RFC1918) or use a non standard TLD (e.g. `.local`, `.intern`) with your GitLab instance, you might also need to allow local connections in GitLab, otherwise API requests will fail. In GitLab, navigate to the Admin dashboard, then go to `Settings > Network > Outbound requests` and enable `Allow requests to the local network from web hooks and services`.
+If you run the Woodpecker CI server on a private IP (RFC1918) or use a non standard TLD (e.g. `.local`, `.intern`) with your GitLab instance, you might also need to allow local connections in GitLab, otherwise API requests will fail.
+In GitLab, navigate to the Admin dashboard, then go to `Settings > Network > Outbound requests` and enable `Allow requests to the local network from web hooks and services`.
 
 ## Configuration
 
-This is a full list of configuration options. Please note that many of these options use default configuration values that should work for the majority of installations.
+This is a full list of configuration options.
+Please note that many of these options use default configuration values that should work for the majority of installations.
 
 ### `WOODPECKER_GITLAB`
 
@@ -47,7 +52,8 @@ Configures the GitLab server address.
 
 > Default: empty
 
-Configures the GitLab OAuth client id. This is used to authorize access.
+Configures the GitLab OAuth client id.
+This is used to authorize access.
 
 ### `WOODPECKER_GITLAB_CLIENT_FILE`
 
@@ -59,7 +65,8 @@ Read the value for `WOODPECKER_GITLAB_CLIENT` from the specified filepath
 
 > Default: empty
 
-Configures the GitLab OAuth client secret. This is used to authorize access.
+Configures the GitLab OAuth client secret.
+This is used to authorize access.
 
 ### `WOODPECKER_GITLAB_SECRET_FILE`
 

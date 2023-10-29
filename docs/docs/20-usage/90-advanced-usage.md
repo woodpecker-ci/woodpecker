@@ -131,4 +131,5 @@ services:
       # ...
 ```
 
-Note that this tightly couples the server and app configurations (where the app is a completely separate application). But this is a good option for truly global variables which should apply to all steps in all pipelines for all apps.
+Note that this tightly couples the server and app configurations (where the app is a completely separate application).
+But this is a good option for truly global variables which should apply to all steps in all pipelines for all apps.

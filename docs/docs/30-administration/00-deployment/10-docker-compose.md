@@ -2,7 +2,8 @@
 
 The below [docker-compose](https://docs.docker.com/compose/) configuration can be used to start a Woodpecker server with a single agent.
 
-It relies on a number of environment variables that you must set before running `docker-compose up`. The variables are described below.
+It relies on a number of environment variables that you must set before running `docker-compose up`.
+The variables are described below.
 
 ```yaml
 # docker-compose.yml
@@ -41,7 +42,9 @@ volumes:
   woodpecker-agent-config:
 ```
 
-Woodpecker needs to know its own address. You must therefore provide the public address of it in `<scheme>://<hostname>` format. Please omit trailing slashes:
+Woodpecker needs to know its own address.
+You must therefore provide the public address of it in `<scheme>://<hostname>` format.
+Please omit trailing slashes:
 
 ```diff
 # docker-compose.yml
@@ -55,7 +58,9 @@ services:
 +     - WOODPECKER_HOST=${WOODPECKER_HOST}
 ```
 
-Woodpecker can also have its port's configured. It uses a separate port for gRPC and for HTTP. The agent performs gRPC calls and connects to the gRPC port.
+Woodpecker can also have its port's configured.
+It uses a separate port for gRPC and for HTTP.
+The agent performs gRPC calls and connects to the gRPC port.
 They can be configured with ADDR variables:
 
 ```diff
@@ -70,7 +75,9 @@ services:
 +     - WOODPECKER_SERVER_ADDR=${WOODPECKER_HTTP_ADDR}
 ```
 
-Reverse proxying can also be [configured for gRPC](../proxy#caddy). If the agents are connecting over the internet, it should also be SSL encrypted. The agent then needs to be configured to be secure:
+Reverse proxying can also be [configured for gRPC](../proxy#caddy).
+If the agents are connecting over the internet, it should also be SSL encrypted.
+The agent then needs to be configured to be secure:
 
 ```diff
 # docker-compose.yml
@@ -98,7 +105,8 @@ services:
 +     - /var/run/docker.sock:/var/run/docker.sock
 ```
 
-Agents require the server address for agent-to-server communication. The agent connects to the server's gRPC port:
+Agents require the server address for agent-to-server communication.
+The agent connects to the server's gRPC port:
 
 ```diff
 # docker-compose.yml
@@ -111,7 +119,9 @@ services:
 +     - WOODPECKER_SERVER=woodpecker-server:9000
 ```
 
-The server and agents use a shared secret to authenticate communication. This should be a random string of your choosing and should be kept private. You can generate such string with `openssl rand -hex 32`:
+The server and agents use a shared secret to authenticate communication.
+This should be a random string of your choosing and should be kept private.
+You can generate such string with `openssl rand -hex 32`:
 
 ```diff
 # docker-compose.yml

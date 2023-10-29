@@ -1,6 +1,7 @@
 # Bitbucket
 
-Woodpecker comes with built-in support for Bitbucket Cloud. To enable Bitbucket Cloud you should configure the Woodpecker container using the following environment variables:
+Woodpecker comes with built-in support for Bitbucket Cloud.
+To enable Bitbucket Cloud you should configure the Woodpecker container using the following environment variables:
 
 ```diff
 # docker-compose.yml
@@ -21,7 +22,8 @@ services:
 
 ## Registration
 
-You must register an OAuth application at Bitbucket in order to get a key and secret combination for woodpecker. Navigate to your workspace settings and choose `OAuth consumers` from the menu, and finally click `Add Consumer` (the url should be like: `https://bitbucket.org/[your-project-name]/workspace/settings/api`).
+You must register an OAuth application at Bitbucket in order to get a key and secret combination for woodpecker.
+Navigate to your workspace settings and choose `OAuth consumers` from the menu, and finally click `Add Consumer` (the url should be like: `https://bitbucket.org/[your-project-name]/workspace/settings/api`).
 
 Please set a name and set the `Callback URL` like this:
 
@@ -46,7 +48,8 @@ Webhooks: Read and Write
 
 ## Configuration
 
-This is a full list of configuration options. Please note that many of these options use default configuration values that should work for the majority of installations.
+This is a full list of configuration options.
+Please note that many of these options use default configuration values that should work for the majority of installations.
 
 ### `WOODPECKER_BITBUCKET`
 
@@ -58,7 +61,8 @@ Enables the Bitbucket driver.
 
 > Default: empty
 
-Configures the Bitbucket OAuth client key. This is used to authorize access.
+Configures the Bitbucket OAuth client key.
+This is used to authorize access.
 
 ### `WOODPECKER_BITBUCKET_CLIENT_FILE`
 
@@ -70,7 +74,8 @@ Read the value for `WOODPECKER_BITBUCKET_CLIENT` from the specified filepath
 
 > Default: empty
 
-Configures the Bitbucket OAuth client secret. This is used to authorize access.
+Configures the Bitbucket OAuth client secret.
+This is used to authorize access.
 
 ### `WOODPECKER_BITBUCKET_SECRET_FILE`
 
@@ -80,5 +85,6 @@ Read the value for `WOODPECKER_BITBUCKET_SECRET` from the specified filepath
 
 ## Missing Features
 
-Merge requests are not currently supported. We are interested in patches to include this functionality.
+Merge requests are not currently supported.
+We are interested in patches to include this functionality.
 If you are interested in contributing to Woodpecker and submitting a patch please **contact us** via [Discord](https://discord.gg/fcMQqSMXJy) or [Matrix](https://matrix.to/#/#WoodpeckerCI-Develop:obermui.de).

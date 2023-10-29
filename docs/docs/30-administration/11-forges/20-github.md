@@ -30,7 +30,8 @@ Use this one for the `WOODPECKER_GITHUB_SECRET` environment variable.
 
 ## All GitHub Configuration Options
 
-This is a full list of configuration options. Please note that many of these options use default configuration values that should work for the majority of installations.
+This is a full list of configuration options.
+Please note that many of these options use default configuration values that should work for the majority of installations.
 
 - `WOODPECKER_GITHUB` - Enables the GitHub driver (Default: `false`)
 
@@ -40,7 +41,8 @@ This is a full list of configuration options. Please note that many of these opt
 
 - `WOODPECKER_GITHUB_CLIENT_FILE` - Read the value for `WOODPECKER_GITHUB_CLIENT` from the specified filepath (Default: empty)
 
-- `WOODPECKER_GITHUB_SECRET` - Configures the GitHub OAuth client secret. This is used to authorize access. (Default: empty)
+- `WOODPECKER_GITHUB_SECRET` - Configures the GitHub OAuth client secret.
+  This is used to authorize access (Default: empty)
 
 - `WOODPECKER_GITHUB_SECRET_FILE` - Read the value for `WOODPECKER_GITHUB_SECRET` from the specified filepath (Default: empty)
 

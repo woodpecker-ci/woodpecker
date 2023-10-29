@@ -46,11 +46,14 @@ See the complete reference for all supported forges [here](../11-forges/10-overv
 
 ## Database
 
-By default Woodpecker uses a SQLite database which requires zero installation or configuration. See the [database settings](../30-database.md) page to further configure it or use MySQL or Postgres.
+By default Woodpecker uses a SQLite database which requires zero installation or configuration.
+See the [database settings](../30-database.md) page to further configure it or use MySQL or Postgres.
 
 ## SSL
 
-Woodpecker supports SSL configuration by using Let's encrypt or by using own certificates. See the [SSL guide](../60-ssl.md). You can also put it behind a [reverse proxy](#behind-a-proxy)
+Woodpecker supports SSL configuration by using Let's encrypt or by using own certificates.
+See the [SSL guide](../60-ssl.md).
+You can also put it behind a [reverse proxy](#behind-a-proxy)
 
 ## Metrics
 
@@ -65,7 +68,8 @@ In the case you need to use Woodpecker with a URL path prefix (like: <https://ex
 ## Third-party installation methods
 
 :::info
-These installation methods are not officially supported. If you experience issues with them, please open issues in the specific repositories.
+These installation methods are not officially supported.
+If you experience issues with them, please open issues in the specific repositories.
 :::
 
 - Using [NixOS](./30-nixos.md) via the [NixOS module](https://search.nixos.org/options?channel=unstable&size=200&sort=relevance&query=woodpecker)

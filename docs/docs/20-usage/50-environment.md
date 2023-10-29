@@ -1,6 +1,8 @@
 # Environment variables
 
-Woodpecker provides the ability to pass environment variables to individual pipeline steps. Note that these can't overwrite any existing, built-in variables. Example pipeline step with custom environment variables:
+Woodpecker provides the ability to pass environment variables to individual pipeline steps.
+Note that these can't overwrite any existing, built-in variables.
+Example pipeline step with custom environment variables:
 
 ```diff
 steps:
@@ -15,7 +17,8 @@ steps:
       - go test
 ```
 
-Please note that the environment section is not able to expand environment variables. If you need to expand variables they should be exported in the commands section.
+Please note that the environment section is not able to expand environment variables.
+If you need to expand variables they should be exported in the commands section.
 
 ```diff
 steps:
@@ -29,7 +32,8 @@ steps:
       - go test
 ```
 
-> Please be warned that `${variable}` expressions are subject to pre-processing. If you do not want the pre-processor to evaluate your expression it must be escaped:
+> Please be warned that `${variable}` expressions are subject to pre-processing.
+> If you do not want the pre-processor to evaluate your expression it must be escaped:
 
 ```diff
 steps:
@@ -44,7 +48,8 @@ steps:
 
 ## Built-in environment variables
 
-This is the reference list of all environment variables available to your pipeline containers. These are injected into your pipeline step and plugins containers, at runtime.
+This is the reference list of all environment variables available to your pipeline containers.
+These are injected into your pipeline step and plugins containers, at runtime.
 
 | NAME                             | Description                                                                                  |
 | -------------------------------- | -------------------------------------------------------------------------------------------- |
@@ -126,14 +131,15 @@ This is the reference list of all environment variables available to your pipeli
 | `CI_FORGE_TYPE`                  | name of forge (gitea, github, ...)                                                           |
 | `CI_FORGE_URL`                   | root URL of configured forge                                                                 |
 |                                  | **Internal** - Please don't use!                                                             |
-| `CI_SCRIPT`                      | Internal script path. Used to call pipeline step commands.                                   |
+| `CI_SCRIPT`                      | Internal script path.\ Used to call pipeline step commands.                                   |
 | `CI_NETRC_USERNAME`              | Credentials for private repos to be able to clone data. (Only available for specific images) |
 | `CI_NETRC_PASSWORD`              | Credentials for private repos to be able to clone data. (Only available for specific images) |
 | `CI_NETRC_MACHINE`               | Credentials for private repos to be able to clone data. (Only available for specific images) |
 
 ## Global environment variables
 
-If you want specific environment variables to be available in all of your pipelines use the `WOODPECKER_ENVIRONMENT` setting on the Woodpecker server. Note that these can't overwrite any existing, built-in variables.
+If you want specific environment variables to be available in all of your pipelines use the `WOODPECKER_ENVIRONMENT` setting on the Woodpecker server.
+Note that these can't overwrite any existing, built-in variables.
 
 ```diff
 services:
@@ -160,7 +166,8 @@ steps:
 
 ## String Substitution
 
-Woodpecker provides the ability to substitute environment variables at runtime. This gives us the ability to use dynamic settings, commands and filters in our pipeline configuration.
+Woodpecker provides the ability to substitute environment variables at runtime.
+This gives us the ability to use dynamic settings, commands and filters in our pipeline configuration.
 
 Example commit substitution:
 
@@ -184,7 +191,9 @@ steps:
 
 ## String Operations
 
-Woodpecker also emulates bash string operations. This gives us the ability to manipulate the strings prior to substitution. Example use cases might include substring and stripping prefix or suffix values.
+Woodpecker also emulates bash string operations.
+This gives us the ability to manipulate the strings prior to substitution.
+Example use cases might include substring and stripping prefix or suffix values.
 
 | OPERATION          | DESCRIPTION                                      |
 | ------------------ | ------------------------------------------------ |

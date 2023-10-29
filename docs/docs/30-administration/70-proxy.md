@@ -2,7 +2,8 @@
 
 ## Apache
 
-This guide provides a brief overview for installing Woodpecker server behind the Apache2 web-server. This is an example configuration:
+This guide provides a brief overview for installing Woodpecker server behind the Apache2 web-server.
+This is an example configuration:
 
 ```nohighlight
 ProxyPreserveHost On
@@ -33,7 +34,8 @@ ProxyPassReverse / http://127.0.0.1:8000/
 
 ## Nginx
 
-This guide provides a basic overview for installing Woodpecker server behind the Nginx web-server. For more advanced configuration options please consult the official Nginx [documentation](https://www.nginx.com/resources/admin-guide/).
+This guide provides a basic overview for installing Woodpecker server behind the Nginx web-server.
+For more advanced configuration options please consult the official Nginx [documentation](https://www.nginx.com/resources/admin-guide/).
 
 Example configuration:
 
@@ -80,7 +82,8 @@ server {
 
 ## Caddy
 
-This guide provides a brief overview for installing Woodpecker server behind the [Caddy web-server](https://caddyserver.com/). This is an example caddyfile proxy configuration:
+This guide provides a brief overview for installing Woodpecker server behind the [Caddy web-server](https://caddyserver.com/).
+This is an example caddyfile proxy configuration:
 
 ```caddy
 # expose WebUI and API
@@ -95,7 +98,8 @@ woodpeckeragent.example.com {
 ```
 
 :::note
-Above configuration shows how to create reverse-proxies for web and agent communication. If your agent uses SSL do not forget to enable [WOODPECKER_GRPC_SECURE](./15-agent-config.md#woodpecker_grpc_secure).
+Above configuration shows how to create reverse-proxies for web and agent communication.
+If your agent uses SSL do not forget to enable [WOODPECKER_GRPC_SECURE](./15-agent-config.md#woodpecker_grpc_secure).
 :::
 
 ## Ngrok
@@ -110,7 +114,8 @@ Set `WOODPECKER_HOST` (for example in `docker-compose.yml`) to the ngrok URL (us
 
 ## Traefik
 
-To install the Woodpecker server behind a [Traefik](https://traefik.io/) load balancer, you must expose both the `http` and the `gRPC` ports. Here is a comprehensive example, considering you are running Traefik with docker swarm and want to do TLS termination and automatic redirection from http to https.
+To install the Woodpecker server behind a [Traefik](https://traefik.io/) load balancer, you must expose both the `http` and the `gRPC` ports.
+Here is a comprehensive example, considering you are running Traefik with docker swarm and want to do TLS termination and automatic redirection from http to https.
 
 ```yml
 version: '3.8'
