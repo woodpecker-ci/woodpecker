@@ -5,11 +5,12 @@ A Woodpecker deployment consists of two parts:
 - A server which is the heart of Woodpecker and ships the web interface.
 - Next to one server you can deploy any number of agents which will run the pipelines.
 
-> Each agent is able to process one pipeline step by default.
+Each agent is able to process one pipeline step by default.
+If you have 4 agents installed and connected to the Woodpecker server, your system will process 4 workflows in parallel.
 
-> If you have 4 agents installed and connected to the Woodpecker server, your system will process 4 workflows in parallel.
-
-> You can add more agents to increase the number of parallel workflows or set the agent's `WOODPECKER_MAX_WORKFLOWS=1` environment variable to increase the number of parallel workflows for that agent.
+:::tip
+You can add more agents to increase the number of parallel workflows or set the agent's `WOODPECKER_MAX_WORKFLOWS=1` environment variable to increase the number of parallel workflows for that agent.
+:::
 
 ## Which version of Woodpecker should I use?
 

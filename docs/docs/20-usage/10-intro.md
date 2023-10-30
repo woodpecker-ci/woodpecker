@@ -11,12 +11,14 @@ When you push code to your repository, open a pull request, or create a tag, you
 
 ![repository list](repo-list.png)
 
-> Required Permissions
+## Required Permissions
 
-> The user who enables a repo in Woodpecker must have `Admin` rights on that repo, so that Woodpecker can add the webhook.
+The user who enables a repo in Woodpecker must have `Admin` rights on that repo, so that Woodpecker can add the webhook.
 
+:::note
 > Note that manually creating webhooks yourself is not possible.
 > This is because webhooks are signed using a per-repository secret key which is not exposed to end users.
+:::
 
 ## Configuration
 
