@@ -70,8 +70,12 @@ make docs
 go run github.com/swaggo/swag/cmd/swag@latest fmt -g server/api/z.go
 ```
 
+<!-- markdownlint-disable no-space-in-code -->
+
 **WARNING, known issue**: using swag v1.18.12 , there's a bug when running the `fmt` command,
 which makes the swagger generator failing, because it can't find the models/structs/types anymore.
 To fix it, please replace `// @name\tModelName` with `// @name ModelName`,
 which means, replace the tab (`\t`) with a space (` `).
 See <https://github.com/swaggo/swag/pull/1594> == once this is merged and released, the mentioned issue is obsolete.
+
+<!-- markdownlint-enable no-space-in-code -->
