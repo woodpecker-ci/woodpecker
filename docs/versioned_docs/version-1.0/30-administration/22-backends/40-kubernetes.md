@@ -11,37 +11,37 @@ The kubernetes backend executes each step inside a newly created pod. A PVC is a
 ## Configuration
 
 ### `WOODPECKER_BACKEND_K8S_NAMESPACE`
->
+
 > Default: `woodpecker`
 
 The namespace to create worker pods in.
 
 ### `WOODPECKER_BACKEND_K8S_VOLUME_SIZE`
->
+
 > Default: `10G`
 
 The volume size of the pipeline volume.
 
 ### `WOODPECKER_BACKEND_K8S_STORAGE_CLASS`
->
+
 > Default: empty
 
 The storage class to use for the pipeline volume.
 
 ### `WOODPECKER_BACKEND_K8S_STORAGE_RWX`
->
+
 > Default: `true`
 
 Determines if `RWX` should be used for the pipeline volume's [access mode](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes). If false, `RWO` is used instead.
 
 ### `WOODPECKER_BACKEND_K8S_POD_LABELS`
->
+
 > Default: empty
 
 Additional labels to apply to worker pods. Must be a YAML object, e.g. `{"example.com/test-label":"test-value"}`.
 
 ### `WOODPECKER_BACKEND_K8S_POD_ANNOTATIONS`
->
+
 > Default: empty
 
 Additional annotations to apply to worker pods. Must be a YAML object, e.g. `{"example.com/test-annotation":"test-value"}`.
