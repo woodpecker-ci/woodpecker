@@ -341,7 +341,11 @@ func (e *kube) StopStep(ctx context.Context, step *types.Step, taskUUID string) 
 		PropagationPolicy:  &dpb,
 	}
 
-	return e.client.CoreV1().Pods(e.config.Namespace).Delete(ctx, podName, deleteOpts)
+	if err := e.client.CoreV1().Pods(e.config.Namespace).Delete(ctx, podName, deleteOpts); err != nil && !errors.IsNotFound(err) {
+		return err
+	}
+
+	return nil
 }
 
 // Destroy the pipeline environment.
