@@ -5,8 +5,8 @@ Secrets encryption is currently broken and therefore disabled by default. It wil
 
 Check:
 
-- https://github.com/woodpecker-ci/woodpecker/issues/1541 and
-- https://github.com/woodpecker-ci/woodpecker/pull/2300
+- <https://github.com/woodpecker-ci/woodpecker/issues/1541> and
+- <https://github.com/woodpecker-ci/woodpecker/pull/2300>
 
 :::
 
