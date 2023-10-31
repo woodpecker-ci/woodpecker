@@ -77,6 +77,10 @@
         "desc": "Dépôts actifs ou anciennement actifs sur ce serveur",
         "disabled": "Désactivé",
         "none": "Il n'y a pas encore de dépôts.",
+        "repair": {
+          "repair": "Tout réparer",
+          "success": "Dépôts réparés"
+        },
         "repos": "Dépôts",
         "settings": "Réglages du dépôt",
         "view": "Voir le dépôt"
