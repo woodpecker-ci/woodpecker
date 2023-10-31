@@ -210,4 +210,3 @@ spec:
       - name: sock-dir
         emptyDir: {}
 ```
-

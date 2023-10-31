@@ -15,7 +15,7 @@
     "@docusaurus/types": "^2.4.1",
     "@tsconfig/docusaurus": "^2.0.0",
     "@types/marked": "^5.0.0",
-    "@types/node": "^18.18.6",
+    "@types/node": "^20.0.0",
     "axios": "^1.6.0",
     "concurrently": "^8.0.0",
     "marked": "^9.1.2",
@@ -27,7 +27,7 @@
     "react-dom": "^17.0.2 || ^18.0.0"
   },
   "dependencies": {
-    "fuse.js": "^6.6.2",
+    "fuse.js": "^7.0.0",
     "yaml": "^2.3.1"
   }
 }
