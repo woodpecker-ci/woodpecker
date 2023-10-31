@@ -1,3 +1,5 @@
+# Woodpecker
+
 <p align="center">
   <a href="https://github.com/woodpecker-ci/woodpecker/">
     <img alt="Woodpecker" src="docs/static/img/logo.svg" width="220"/>
@@ -41,12 +43,13 @@
   <a href="https://www.tickgit.com/browse?repo=github.com/woodpecker-ci/woodpecker" title="TODOs">
     <img src="https://badgen.net/https/api.tickgit.com/badgen/github.com/woodpecker-ci/woodpecker">
   </a>
+  <a href="https://github.com/pre-commit/pre-commit" title="TODOs">
+    <img src="https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit">
+  </a>
 </p>
 <br/>
 
-# Woodpecker
-
-> Woodpecker is a community fork of the Drone CI system.
+Woodpecker is a community fork of the Drone CI system.
 
 ![woodpecker](docs/docs/woodpecker.png)
 
@@ -58,7 +61,7 @@ Please consider to donate and become a backer. 🙏 [[Become a backer](https://o
 
 ## 📖 Documentation
 
-https://woodpecker-ci.org/
+<https://woodpecker-ci.org/>
 
 ## ✨ Contribute
 
