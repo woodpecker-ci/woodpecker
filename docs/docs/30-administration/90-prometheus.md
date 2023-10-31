@@ -46,7 +46,7 @@ scrape_configs:
 
 ## Unauthenticated Access
 
-Alternatively, the unprotected `/metrics` endpoint might be exposed on the internal port. (Port is configurable via the `WOODPECKER_METRICS_SERVER_ADDR` environment variable, e.g. `:9001`.)
+Alternatively, the unprotected `/metrics` endpoint might be exposed on the internal port (Port is configurable via the `WOODPECKER_METRICS_SERVER_ADDR` environment variable, e.g. `:9001`).
 
 ## Metric Reference
 
