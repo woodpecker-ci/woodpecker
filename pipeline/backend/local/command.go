@@ -37,7 +37,6 @@ func genCmdByShell(shell string, cmds []string) (args []string, err error) {
 			script += fmt.Sprintf("@%s\n", cmd)
 			script += "@IF NOT %ERRORLEVEL% == 0 exit %ERRORLEVEL%\n"
 		}
-		// TODO: set temp dir
 		cmd, err := os.CreateTemp(os.TempDir(), "*.cmd")
 		if err != nil {
 			return nil, err
