@@ -274,6 +274,10 @@ func (r *Runtime) exec(step *backend.Step) (*backend.State, error) {
 		return nil, err
 	}
 
+	if err := r.engine.StopStep(r.ctx, step, r.taskUUID); err != nil {
+		return nil, err
+	}
+
 	if waitState.OOMKilled {
 		return waitState, &OomError{
 			Name: step.Name,

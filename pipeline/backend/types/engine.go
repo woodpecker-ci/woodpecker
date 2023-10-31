@@ -44,6 +44,9 @@ type Engine interface {
 	// TailStep the workflow step logs.
 	TailStep(ctx context.Context, step *Step, taskUUID string) (io.ReadCloser, error)
 
+	// StopStep stop the workflow step.
+	StopStep(ctx context.Context, step *Step, taskUUID string) error
+
 	// DestroyWorkflow the workflow environment.
 	DestroyWorkflow(ctx context.Context, conf *Config, taskUUID string) error
 }

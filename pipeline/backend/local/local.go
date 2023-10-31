@@ -215,6 +215,11 @@ func (e *local) TailStep(_ context.Context, step *types.Step, taskUUID string) (
 	return e.output, nil
 }
 
+func (e *local) StopStep(_ context.Context, _ *types.Step, _ string) error {
+	// WaitStep already waits for the command to finish, so there is nothing to do here.
+	return nil
+}
+
 // DestroyWorkflow the pipeline environment.
 func (e *local) DestroyWorkflow(_ context.Context, _ *types.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("delete workflow environment")
