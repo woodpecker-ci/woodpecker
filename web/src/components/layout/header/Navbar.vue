@@ -16,7 +16,9 @@
         <span class="hidden md:flex">{{ $t('repositories') }}</span>
       </router-link>
       <!-- Docs Link -->
-      <a :href="docsUrl" target="_blank" class="navbar-link navbar-clickable hidden md:flex">{{ $t('docs') }}</a>
+      <a href="https://woodpecker-ci.org/" target="_blank" class="navbar-link navbar-clickable hidden md:flex">{{
+        $t('docs')
+      }}</a>
       <!-- API Link -->
       <a v-if="enableSwagger" :href="apiUrl" target="_blank" class="navbar-link navbar-clickable hidden md:flex">{{
         $t('api')
@@ -37,9 +39,8 @@
         class="navbar-icon"
         :title="$t('admin.settings.settings')"
         :to="{ name: 'admin-settings' }"
-      >
-        <i-clarity-settings-solid />
-      </IconButton>
+        icon="settings"
+      />
 
       <!-- Active Pipelines Indicator -->
       <ActivePipelines v-if="user" class="navbar-icon" />
@@ -53,8 +54,7 @@
   </nav>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script lang="ts" setup>
 import { useRoute } from 'vue-router';
 
 import WoodpeckerLogo from '~/assets/logo.svg?component';
@@ -66,36 +66,19 @@ import { useDarkMode } from '~/compositions/useDarkMode';
 
 import ActivePipelines from './ActivePipelines.vue';
 
-export default defineComponent({
-  name: 'Navbar',
+const config = useConfig();
+const route = useRoute();
+const authentication = useAuthentication();
+const { user } = authentication;
+const { darkMode } = useDarkMode();
+const apiUrl = `${config.rootPath ?? ''}/swagger/index.html`;
 
-  components: { Button, ActivePipelines, IconButton, WoodpeckerLogo },
+function doLogin() {
+  authentication.authenticate(route.fullPath);
+}
 
-  setup() {
-    const config = useConfig();
-    const route = useRoute();
-    const authentication = useAuthentication();
-    const { darkMode } = useDarkMode();
-    const docsUrl = config.docs || undefined;
-    const apiUrl = `${config.rootPath ?? ''}/swagger/index.html`;
-
-    function doLogin() {
-      authentication.authenticate(route.fullPath);
-    }
-
-    const version = config.version?.startsWith('next') ? 'next' : config.version;
-
-    return {
-      darkMode,
-      user: authentication.user,
-      doLogin,
-      docsUrl,
-      version,
-      apiUrl,
-      enableSwagger: config.enableSwagger,
-    };
-  },
-});
+const version = config.version?.startsWith('next') ? 'next' : config.version;
+const { enableSwagger } = config;
 </script>
 
 <style scoped>

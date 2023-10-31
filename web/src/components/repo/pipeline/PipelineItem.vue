@@ -26,9 +26,11 @@
       <div class="w-full md:w-auto md:mx-4 flex items-center min-w-0">
         <span class="text-wp-text-alt-100 <md:hidden">#{{ pipeline.number }}</span>
         <span class="text-wp-text-alt-100 <md:hidden mx-2">-</span>
-        <span class="text-wp-text-100 <md:underline whitespace-nowrap overflow-hidden overflow-ellipsis">{{
-          message
-        }}</span>
+        <span
+          class="text-wp-text-100 <md:underline whitespace-nowrap overflow-hidden overflow-ellipsis"
+          :title="message"
+          >{{ title }}</span
+        >
       </div>
 
       <div
@@ -57,23 +59,17 @@
           <span class="truncate">{{ duration }}</span>
         </div>
 
-        <div class="flex space-x-2 items-center min-w-0">
+        <div class="flex space-x-2 items-center min-w-0" :title="created">
           <Icon name="since" />
-          <Tooltip>
-            <span>{{ since }}</span>
-            <template #popper>
-              <span class="font-bold">{{ $t('repo.pipeline.created') }}</span> {{ created }}
-            </template>
-          </Tooltip>
+          <span>{{ since }}</span>
         </div>
       </div>
     </div>
   </ListItem>
 </template>
 
-<script lang="ts">
-import { Tooltip } from 'floating-vue';
-import { defineComponent, PropType, toRef } from 'vue';
+<script lang="ts" setup>
+import { toRef } from 'vue';
 
 import Icon from '~/components/atomic/Icon.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
@@ -83,23 +79,10 @@ import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vu
 import usePipeline from '~/compositions/usePipeline';
 import { Pipeline } from '~/lib/api/types';
 
-export default defineComponent({
-  name: 'PipelineItem',
+const props = defineProps<{
+  pipeline: Pipeline;
+}>();
 
-  components: { Icon, PipelineStatusIcon, ListItem, PipelineRunningIcon, Tooltip },
-
-  props: {
-    pipeline: {
-      type: Object as PropType<Pipeline>,
-      required: true,
-    },
-  },
-
-  setup(props) {
-    const pipeline = toRef(props, 'pipeline');
-    const { since, duration, message, prettyRef, created } = usePipeline(pipeline);
-
-    return { since, duration, message, prettyRef, pipelineStatusColors, created };
-  },
-});
+const pipeline = toRef(props, 'pipeline');
+const { since, duration, message, title, prettyRef, created } = usePipeline(pipeline);
 </script>

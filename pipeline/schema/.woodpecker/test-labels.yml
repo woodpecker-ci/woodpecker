@@ -1,7 +1,7 @@
 labels:
   location: europe
   weather: sun
-  hostname: ""
+  hostname: ''
 
 steps:
   build:

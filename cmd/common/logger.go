@@ -51,7 +51,7 @@ var GlobalLoggerFlags = []cli.Flag{
 	},
 }
 
-func SetupGlobalLogger(c *cli.Context) {
+func SetupGlobalLogger(c *cli.Context, printLvl bool) {
 	logLevel := c.String("log-level")
 	pretty := c.Bool("pretty")
 	noColor := c.Bool("nocolor")
@@ -96,5 +96,7 @@ func SetupGlobalLogger(c *cli.Context) {
 		log.Logger = log.With().Caller().Logger()
 	}
 
-	log.Log().Msgf("LogLevel = %s", zerolog.GlobalLevel().String())
+	if printLvl {
+		log.Info().Msgf("LogLevel = %s", zerolog.GlobalLevel().String())
+	}
 }

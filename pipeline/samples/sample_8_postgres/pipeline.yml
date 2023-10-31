@@ -14,4 +14,3 @@ services:
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_DB=test
-

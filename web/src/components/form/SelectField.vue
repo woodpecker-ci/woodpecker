@@ -10,48 +10,26 @@
   </select>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, PropType, toRef } from 'vue';
+<script lang="ts" setup>
+import { computed, toRef } from 'vue';
 
 import { SelectOption } from './form.types';
 
-export default defineComponent({
-  name: 'SelectField',
+const props = defineProps<{
+  modelValue: string;
+  placeholder?: string;
+  options: SelectOption[];
+}>();
 
-  props: {
-    modelValue: {
-      type: String,
-      default: null,
-    },
+const emit = defineEmits<{
+  (event: 'update:modelValue', value: string): void;
+}>();
 
-    placeholder: {
-      type: String,
-      default: null,
-    },
-
-    options: {
-      type: Array as PropType<SelectOption[]>,
-      required: true,
-    },
-  },
-
-  emits: {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    'update:modelValue': (_value: SelectOption['value'] | null): boolean => true,
-  },
-
-  setup: (props, ctx) => {
-    const modelValue = toRef(props, 'modelValue');
-    const innerValue = computed({
-      get: () => modelValue.value,
-      set: (selectedValue) => {
-        ctx.emit('update:modelValue', selectedValue);
-      },
-    });
-
-    return {
-      innerValue,
-    };
+const modelValue = toRef(props, 'modelValue');
+const innerValue = computed({
+  get: () => modelValue.value,
+  set: (selectedValue) => {
+    emit('update:modelValue', selectedValue);
   },
 });
 </script>

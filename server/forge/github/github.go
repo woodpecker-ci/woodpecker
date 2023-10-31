@@ -25,7 +25,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/google/go-github/v39/github"
+	"github.com/google/go-github/v56/github"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 
@@ -209,7 +209,12 @@ func (c *client) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 		if err != nil {
 			return nil, err
 		}
-		repos = append(repos, convertRepoList(list)...)
+		for _, repo := range list {
+			if repo.GetArchived() {
+				continue
+			}
+			repos = append(repos, convertRepo(repo))
+		}
 		opts.Page = resp.NextPage
 	}
 	return repos, nil
@@ -395,15 +400,15 @@ func (c *client) newConfig(req *http.Request) *oauth2.Config {
 
 	intendedURL := req.URL.Query()["url"]
 	if len(intendedURL) > 0 {
-		redirect = fmt.Sprintf("%s%s/authorize?url=%s", server.Config.Server.OAuthHost, server.Config.Server.RootPath, intendedURL[0])
+		redirect = fmt.Sprintf("%s/authorize?url=%s", server.Config.Server.OAuthHost, intendedURL[0])
 	} else {
-		redirect = fmt.Sprintf("%s%s/authorize", server.Config.Server.OAuthHost, server.Config.Server.RootPath)
+		redirect = fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost)
 	}
 
 	return &oauth2.Config{
 		ClientID:     c.Client,
 		ClientSecret: c.Secret,
-		Scopes:       []string{"repo", "repo:status", "user:email", "read:org"},
+		Scopes:       []string{"repo", "user:email", "read:org"},
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  fmt.Sprintf("%s/login/oauth/authorize", c.url),
 			TokenURL: fmt.Sprintf("%s/login/oauth/access_token", c.url),
@@ -551,7 +556,7 @@ func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo, p *
 // BranchHead returns the sha of the head (latest commit) of the specified branch
 func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
 	token := common.UserToken(ctx, r, u)
-	b, _, err := c.newClientToken(ctx, token).Repositories.GetBranch(ctx, r.Owner, r.Name, branch, true)
+	b, _, err := c.newClientToken(ctx, token).Repositories.GetBranch(ctx, r.Owner, r.Name, branch, 1)
 	if err != nil {
 		return "", err
 	}

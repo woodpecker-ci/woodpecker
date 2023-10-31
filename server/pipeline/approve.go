@@ -25,7 +25,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
-// Approve update the status to pending for blocked pipeline because of a gated repo
+// Approve update the status to pending for a blocked pipeline because of a gated repo
 // and start them afterward
 func Approve(ctx context.Context, store store.Store, currentPipeline *model.Pipeline, user *model.User, repo *model.Repo) (*model.Pipeline, error) {
 	if currentPipeline.Status != model.StatusBlocked {

@@ -423,14 +423,21 @@ Path conditions are applied only to **push** and **pull_request** events.
 It is currently **only available** for GitHub, GitLab and Gitea (version 1.18.0 and newer)
 :::
 
-Execute a step only on a pipeline with certain files being changed:
+Execute a step only when certain files were changed:
 
 ```yaml
 when:
-  - path: "src/*"
+  - path: "src/*.js"
 ```
 
-You can use [glob patterns](https://github.com/bmatcuk/doublestar#patterns) to match the changed files and specify if the step should run if a file matching that pattern has been changed `include` or if some files have **not** been changed `exclude`.
+One can also use [glob patterns](https://github.com/bmatcuk/doublestar#patterns):
+
+```yaml
+when:
+  - path: "src/**/*.js"
+```
+
+To match whether the files have been changed or not changed, use `include` or `exclude` respectively:
 
 ```yaml
 when:
@@ -604,6 +611,10 @@ Woodpecker has integrated support for matrix builds. Woodpecker executes a separ
 For more details check the [matrix build docs](./30-matrix-workflows.md).
 
 ## `platform`
+
+:::warning
+will be deprecated with v1.1.0 in favor of labels.
+:::
 
 To configure your pipeline to only be executed on an agent with a specific platform, you can use the `platform` key.
 Have a look at the official [go docs](https://go.dev/doc/install/source) for the available platforms. The syntax of the platform is `GOOS/GOARCH` like `linux/arm64` or `linux/amd64`.

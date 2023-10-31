@@ -1,3 +1,17 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package pubsub
 
 import (
@@ -5,71 +19,48 @@ import (
 	"sync"
 )
 
-type subscriber struct {
-	receiver Receiver
+// Message defines a published message.
+type Message struct {
+	// ID identifies this message.
+	ID string `json:"id,omitempty"`
+
+	// Data is the actual data in the entry.
+	Data []byte `json:"data"`
+
+	// Labels represents the key-value pairs the entry is labeled with.
+	Labels map[string]string `json:"labels,omitempty"`
 }
 
-type publisher struct {
+// Receiver receives published messages.
+type Receiver func(Message)
+
+type Publisher struct {
 	sync.Mutex
 
-	topics map[string]*topic
+	subs map[*Receiver]struct{}
 }
 
 // New creates an in-memory publisher.
-func New() Publisher {
-	return &publisher{
-		topics: make(map[string]*topic),
+func New() *Publisher {
+	return &Publisher{
+		subs: make(map[*Receiver]struct{}),
 	}
 }
 
-func (p *publisher) Create(_ context.Context, dest string) error {
+func (p *Publisher) Publish(message Message) {
 	p.Lock()
-	_, ok := p.topics[dest]
-	if !ok {
-		t := newTopic(dest)
-		p.topics[dest] = t
+	for s := range p.subs {
+		go (*s)(message)
 	}
 	p.Unlock()
-	return nil
 }
 
-func (p *publisher) Publish(_ context.Context, dest string, message Message) error {
+func (p *Publisher) Subscribe(c context.Context, receiver Receiver) {
 	p.Lock()
-	t, ok := p.topics[dest]
+	p.subs[&receiver] = struct{}{}
 	p.Unlock()
-	if !ok {
-		return ErrNotFound
-	}
-	t.publish(message)
-	return nil
-}
-
-func (p *publisher) Subscribe(c context.Context, dest string, receiver Receiver) error {
+	<-c.Done()
 	p.Lock()
-	t, ok := p.topics[dest]
+	delete(p.subs, &receiver)
 	p.Unlock()
-	if !ok {
-		return ErrNotFound
-	}
-	s := &subscriber{
-		receiver: receiver,
-	}
-	t.subscribe(s)
-	select {
-	case <-c.Done():
-	case <-t.done:
-	}
-	t.unsubscribe(s)
-	return nil
-}
-
-func (p *publisher) Remove(_ context.Context, dest string) error {
-	p.Lock()
-	t, ok := p.topics[dest]
-	if ok {
-		delete(p.topics, dest)
-		t.close()
-	}
-	p.Unlock()
-	return nil
 }

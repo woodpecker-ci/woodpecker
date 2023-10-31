@@ -104,7 +104,7 @@ func Test_parse(t *testing.T) {
 			g.Assert(pipeline.Message).Equal(hook.Commits[0].Message)
 			g.Assert(pipeline.Avatar).Equal("http://1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87")
 			g.Assert(pipeline.Author).Equal(hook.Sender.UserName)
-			g.Assert(utils.EqualStringSlice(pipeline.ChangedFiles, []string{"CHANGELOG.md", "app/controller/application.rb"})).IsTrue()
+			g.Assert(utils.EqualSliceValues(pipeline.ChangedFiles, []string{"CHANGELOG.md", "app/controller/application.rb"})).IsTrue()
 		})
 
 		g.It("Should return a Repo struct from a push hook", func() {

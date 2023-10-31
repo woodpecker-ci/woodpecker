@@ -14,16 +14,10 @@
       </span>
     </template>
     <template #titleActions>
-      <a v-if="badgeUrl" :href="badgeUrl" target="_blank" class="ml-2">
+      <a v-if="badgeUrl" :href="badgeUrl" target="_blank">
         <img :src="badgeUrl" />
       </a>
-      <IconButton :href="repo.link_url" :title="$t('repo.open_in_forge')">
-        <Icon v-if="forge === 'github'" name="github" />
-        <Icon v-else-if="forge === 'gitea'" name="gitea" />
-        <Icon v-else-if="forge === 'gitlab'" name="gitlab" />
-        <Icon v-else-if="forge === 'bitbucket'" name="bitbucket" />
-        <Icon v-else name="repo" />
-      </IconButton>
+      <IconButton :href="repo.link_url" :title="$t('repo.open_in_forge')" :icon="forge ?? 'repo'" />
       <IconButton
         v-if="repoPermissions.admin"
         :to="{ name: 'repo-settings' }"
@@ -43,11 +37,7 @@
 
     <Tab id="activity" :title="$t('repo.activity')" />
     <Tab id="branches" :title="$t('repo.branches')" />
-    <Tab
-      v-if="config.forge === 'gitea' || config.forge === 'github' || config.forge === 'gitlab'"
-      id="pull_requests"
-      :title="$t('repo.pull_requests')"
-    />
+    <Tab id="pull_requests" :title="$t('repo.pull_requests')" />
 
     <router-view />
   </Scaffold>
@@ -59,7 +49,6 @@ import { computed, onMounted, provide, ref, toRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
-import Icon from '~/components/atomic/Icon.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import ManualPipelinePopup from '~/components/layout/popups/ManualPipelinePopup.vue';
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';

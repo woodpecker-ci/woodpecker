@@ -4,4 +4,4 @@ steps:
     commands:
       - go test
 
-runs_on: [ success, failure ]
+runs_on: [success, failure]

@@ -22,12 +22,13 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
+	"runtime"
+	"slices"
 	"sync"
 
-	"github.com/alessio/shellescape"
 	"github.com/rs/zerolog/log"
-	"golang.org/x/exp/slices"
+	"golang.org/x/text/encoding/unicode"
+	"golang.org/x/text/transform"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
@@ -112,30 +113,59 @@ func (e *local) StartStep(ctx context.Context, step *types.Step, taskUUID string
 		}
 	}
 
-	// Set HOME
+	// Set HOME and CI_WORKSPACE
 	env = append(env, "HOME="+state.homeDir)
+	env = append(env, "USERPROFILE="+state.homeDir)
+	env = append(env, "CI_WORKSPACE="+state.workspaceDir)
 
 	switch step.Type {
 	case types.StepTypeClone:
 		return e.execClone(ctx, step, state, env)
 	case types.StepTypeCommands:
 		return e.execCommands(ctx, step, state, env)
+	case types.StepTypePlugin:
+		return e.execPlugin(ctx, step, state, env)
 	default:
 		return ErrUnsupportedStepType
 	}
 }
 
+// execCommands use step.Image as shell and run the commands in it
 func (e *local) execCommands(ctx context.Context, step *types.Step, state *workflowState, env []string) error {
-	// TODO: use commands directly
-	script := ""
-	for _, cmd := range step.Commands {
-		script += fmt.Sprintf("echo + %s\n%s\n", strings.TrimSpace(shellescape.Quote(cmd)), cmd)
+	// Prepare commands
+	args, err := genCmdByShell(step.Image, step.Commands)
+	if err != nil {
+		return fmt.Errorf("could not convert commands into args: %w", err)
 	}
-	script = strings.TrimSpace(script)
 
-	// Prepare command
 	// Use "image name" as run command (indicate shell)
-	cmd := exec.CommandContext(ctx, step.Image, "-c", script)
+	cmd := exec.CommandContext(ctx, step.Image, args...)
+	cmd.Env = env
+	cmd.Dir = state.workspaceDir
+
+	// Get output and redirect Stderr to Stdout
+	e.output, _ = cmd.StdoutPipe()
+	cmd.Stderr = cmd.Stdout
+
+	if runtime.GOOS == "windows" {
+		// we get non utf8 output from windows so just sanitize it
+		// TODO: remove hack
+		e.output = io.NopCloser(transform.NewReader(e.output, unicode.UTF8.NewDecoder().Transformer))
+	}
+
+	state.stepCMDs[step.Name] = cmd
+
+	return cmd.Start()
+}
+
+// execPlugin use step.Image as exec binary
+func (e *local) execPlugin(ctx context.Context, step *types.Step, state *workflowState, env []string) error {
+	binary, err := exec.LookPath(step.Image)
+	if err != nil {
+		return fmt.Errorf("lookup plugin binary: %w", err)
+	}
+
+	cmd := exec.CommandContext(ctx, binary)
 	cmd.Env = env
 	cmd.Dir = state.workspaceDir
 

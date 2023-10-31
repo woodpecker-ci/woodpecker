@@ -47,7 +47,7 @@ import (
 const (
 	authorizeTokenURL = "%s/login/oauth/authorize"
 	accessTokenURL    = "%s/login/oauth/access_token"
-	perPage           = 50
+	defaultPageSize   = 50
 	giteaDevVersion   = "v1.18.0"
 )
 
@@ -56,6 +56,7 @@ type Gitea struct {
 	ClientID     string
 	ClientSecret string
 	SkipVerify   bool
+	pageSize     int
 }
 
 // Opts defines configuration options.
@@ -103,7 +104,7 @@ func (c *Gitea) oauth2Config(ctx context.Context) (*oauth2.Config, context.Conte
 				AuthURL:  fmt.Sprintf(authorizeTokenURL, c.url),
 				TokenURL: fmt.Sprintf(accessTokenURL, c.url),
 			},
-			RedirectURL: fmt.Sprintf("%s%s/authorize", server.Config.Server.OAuthHost, server.Config.Server.RootPath),
+			RedirectURL: fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost),
 		},
 
 		context.WithValue(ctx, oauth2.HTTPClient, &http.Client{Transport: &http.Transport{
@@ -173,7 +174,7 @@ func (c *Gitea) Auth(ctx context.Context, token, _ string) (string, error) {
 }
 
 // Refresh refreshes the Gitea oauth2 access token. If the token is
-// refreshed the user is updated and a true value is returned.
+// refreshed, the user is updated and a true value is returned.
 func (c *Gitea) Refresh(ctx context.Context, user *model.User) (bool, error) {
 	config, oauth2Ctx := c.oauth2Config(ctx)
 	config.RedirectURL = ""
@@ -207,7 +208,7 @@ func (c *Gitea) Teams(ctx context.Context, u *model.User) ([]*model.Team, error)
 			gitea.ListOrgsOptions{
 				ListOptions: gitea.ListOptions{
 					Page:     page,
-					PageSize: perPage,
+					PageSize: c.perPage(ctx),
 				},
 			},
 		)
@@ -263,12 +264,15 @@ func (c *Gitea) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error)
 			gitea.ListReposOptions{
 				ListOptions: gitea.ListOptions{
 					Page:     page,
-					PageSize: perPage,
+					PageSize: c.perPage(ctx),
 				},
 			},
 		)
 		result := make([]*model.Repo, 0, len(repos))
 		for _, repo := range repos {
+			if repo.Archived {
+				continue
+			}
 			result = append(result, toRepo(repo))
 		}
 		return result, err
@@ -407,7 +411,15 @@ func (c *Gitea) Deactivate(ctx context.Context, u *model.User, r *model.Repo, li
 		return err
 	}
 
-	hooks, _, err := client.ListRepoHooks(r.Owner, r.Name, gitea.ListHooksOptions{})
+	hooks, err := shared_utils.Paginate(func(page int) ([]*gitea.Hook, error) {
+		hooks, _, err := client.ListRepoHooks(r.Owner, r.Name, gitea.ListHooksOptions{
+			ListOptions: gitea.ListOptions{
+				Page:     page,
+				PageSize: c.perPage(ctx),
+			},
+		})
+		return hooks, err
+	})
 	if err != nil {
 		return err
 	}
@@ -489,7 +501,7 @@ func (c *Gitea) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.
 		return nil, nil, err
 	}
 
-	if pipeline.Event == model.EventPull && len(pipeline.ChangedFiles) == 0 {
+	if pipeline != nil && pipeline.Event == model.EventPull && len(pipeline.ChangedFiles) == 0 {
 		index, err := strconv.ParseInt(strings.Split(pipeline.Ref, "/")[2], 10, 64)
 		if err != nil {
 			return nil, nil, err
@@ -534,23 +546,25 @@ func (c *Gitea) Org(ctx context.Context, u *model.User, owner string) (*model.Or
 		return nil, err
 	}
 
-	user, _, err := client.GetUserInfo(owner)
-	if user != nil && err == nil {
-		return &model.Org{
-			Name:    user.UserName,
-			IsUser:  true,
-			Private: user.Visibility != gitea.VisibleTypePublic,
-		}, nil
-	}
-
 	org, _, err := client.GetOrg(owner)
 	if err != nil {
 		return nil, err
 	}
+	if org != nil {
+		return &model.Org{
+			Name:    org.UserName,
+			Private: gitea.VisibleType(org.Visibility) != gitea.VisibleTypePublic,
+		}, nil
+	}
 
+	user, _, err := client.GetUserInfo(owner)
+	if err != nil {
+		return nil, err
+	}
 	return &model.Org{
-		Name:    org.UserName,
-		Private: gitea.VisibleType(org.Visibility) != gitea.VisibleTypePublic,
+		Name:    user.UserName,
+		IsUser:  true,
+		Private: user.Visibility != gitea.VisibleTypePublic,
 	}, nil
 }
 
@@ -616,12 +630,6 @@ func (c *Gitea) getChangedFilesForPR(ctx context.Context, repo *model.Repo, inde
 		return nil, err
 	}
 
-	if client.CheckServerVersionConstraint(">= 1.18.0") != nil {
-		// version too low
-		log.Debug().Msg("Gitea version does not support getting changed files for PRs")
-		return []string{}, nil
-	}
-
 	return shared_utils.Paginate(func(page int) ([]string, error) {
 		giteaFiles, _, err := client.ListPullRequestFiles(repo.Owner, repo.Name, index,
 			gitea.ListPullRequestFilesOptions{ListOptions: gitea.ListOptions{Page: page}})
@@ -635,4 +643,20 @@ func (c *Gitea) getChangedFilesForPR(ctx context.Context, repo *model.Repo, inde
 		}
 		return files, nil
 	})
+}
+
+func (c *Gitea) perPage(ctx context.Context) int {
+	if c.pageSize == 0 {
+		client, err := c.newClientToken(ctx, "")
+		if err != nil {
+			return defaultPageSize
+		}
+
+		api, _, err := client.GetGlobalAPISettings()
+		if err != nil {
+			return defaultPageSize
+		}
+		c.pageSize = api.MaxResponseItems
+	}
+	return c.pageSize
 }

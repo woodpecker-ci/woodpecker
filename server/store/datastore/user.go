@@ -15,8 +15,9 @@
 package datastore
 
 import (
-	"github.com/woodpecker-ci/woodpecker/server/model"
 	"xorm.io/xorm"
+
+	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
 func (s storage) GetUser(id int64) (*model.User, error) {
@@ -53,8 +54,18 @@ func (s storage) GetUserCount() (int64, error) {
 }
 
 func (s storage) CreateUser(user *model.User) error {
+	sess := s.engine.NewSession()
+	org := &model.Org{
+		Name:   user.Login,
+		IsUser: true,
+	}
+	err := s.orgCreate(org, sess)
+	if err != nil {
+		return err
+	}
+	user.OrgID = org.ID
 	// only Insert set auto created ID back to object
-	_, err := s.engine.Insert(user)
+	_, err = sess.Insert(user)
 	return err
 }
 
@@ -67,6 +78,10 @@ func (s storage) DeleteUser(user *model.User) error {
 	sess := s.engine.NewSession()
 	defer sess.Close()
 	if err := sess.Begin(); err != nil {
+		return err
+	}
+
+	if err := s.orgDelete(sess, user.OrgID); err != nil {
 		return err
 	}
 

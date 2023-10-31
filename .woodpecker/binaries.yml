@@ -7,10 +7,10 @@ when:
   event: tag
 
 variables:
-  - &golang_image 'golang:1.20.2'
-  - &node_image 'node:18-alpine'
-  - &xgo_image 'techknowlogick/xgo:go-1.20.2'
-  - &xgo_version 'go-1.20.2'
+  - &golang_image 'golang:1.21.3'
+  - &node_image 'node:21-alpine'
+  - &xgo_image 'techknowlogick/xgo:go-1.21.3'
+  - &xgo_version 'go-1.21.2'
 
 steps:
   build-web:
@@ -68,8 +68,8 @@ steps:
   release-dryrun:
     image: *golang_image
     commands:
-    - ls -la dist/*.*
-    - cat dist/checksums.txt
+      - ls -la dist/*.*
+      - cat dist/checksums.txt
 
   release:
     image: plugins/github-release
