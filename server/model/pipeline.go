@@ -119,3 +119,18 @@ func (e *PipelineError) GetErrors() []*PipelineError {
 
 	return pipelineErrors
 }
+
+func (e *PipelineError) OnlyWarnings() bool {
+	for _, _err := range multierr.Errors(e) {
+		var err *PipelineError
+		if errors.As(_err, &err) {
+			if !err.IsWarning {
+				return false
+			}
+		} else {
+			return false
+		}
+	}
+
+	return true
+}
