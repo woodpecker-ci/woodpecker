@@ -22,8 +22,7 @@ For security reasons, Maintainers must use 2FA for their accounts and if possibl
 
 Since Woodpecker is a pure community organization without any company support, to keep the development healthy we will elect two owners every year.\
 This can also happen when a owner propose a vote or the majority of the maintainers do so.\
-All maintainers may vote to elect up to two candidates.
-When the new owners have been elected, the old owners will give up ownership to the newly elected owners.
+All maintainers may vote to elect up to two candidates. When the new owners have been elected, the old owners will give up ownership to the newly elected owners.
 If an owner is unable to do so, the other owners will assist in ceding ownership to the newly elected owners.
 
 For security reasons, Owners must use 2FA.\
@@ -47,16 +46,20 @@ they served:
 
 ## Code Review
 
-Once code review starts on your PR, do not rebase nor squash your branch as it makes it difficult to review the new changes.
-Only if there is a need, sync your branch by merging the base branch into yours.
-Don't worry about merge commits messing up your tree as the final merge process squashes all commits into one, with the visible commit message (first line) being the PR title + PR index and description being the PR's first comment.
+Once code review starts on your PR, do not rebase nor squash your branch as it makes it
+difficult to review the new changes. Only if there is a need, sync your branch by merging
+the base branch into yours. Don't worry about merge commits messing up your tree as
+the final merge process squashes all commits into one, with the visible commit message (first
+line) being the PR title + PR index and description being the PR's first comment.
 
-Once your PR gets approved, don't worry about keeping it up-to-date or breaking builds (unless there's a merge conflict or a request is made by a maintainer to make modifications).
-It is the maintainer team's responsibility from this point to get it merged.
+Once your PR gets approved, don't worry about keeping it up-to-date or breaking
+builds (unless there's a merge conflict or a request is made by a maintainer to make
+modifications). It is the maintainer team's responsibility from this point to get it merged.
 
 ## Versioning
 
-We use [Semantic Versioning](https://semver.org/) to be able, to communicate when admins have to do manual migration steps and when they can just bump versions up.
+We use [Semantic Versioning](https://semver.org/) to be able,
+to communicate when admins have to do manual migration steps and when they can just bump versions up.
 
 ## Development
 

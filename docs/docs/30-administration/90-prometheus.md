@@ -1,7 +1,6 @@
 # Prometheus
 
-Woodpecker is compatible with Prometheus and exposes a `/metrics` endpoint if the environment variable `WOODPECKER_PROMETHEUS_AUTH_TOKEN` is set.
-Please note that access to the metrics endpoint is restricted and requires the authorization token from the environment variable mentioned above.
+Woodpecker is compatible with Prometheus and exposes a `/metrics` endpoint if the environment variable `WOODPECKER_PROMETHEUS_AUTH_TOKEN` is set. Please note that access to the metrics endpoint is restricted and requires the authorization token from the environment variable mentioned above.
 
 ```yaml
 global:
@@ -17,8 +16,7 @@ scrape_configs:
 
 ## Authorization
 
-An administrator will need to generate a user API token and configure in the Prometheus configuration file as a bearer token.
-Please see the following example:
+An administrator will need to generate a user API token and configure in the Prometheus configuration file as a bearer token. Please see the following example:
 
 ```diff
 global:
@@ -48,7 +46,7 @@ scrape_configs:
 
 ## Unauthenticated Access
 
-Alternatively, the unprotected `/metrics` endpoint might be exposed on the internal port (Port is configurable via the `WOODPECKER_METRICS_SERVER_ADDR` environment variable, e.g. `:9001`).
+Alternatively, the unprotected `/metrics` endpoint might be exposed on the internal port. (Port is configurable via the `WOODPECKER_METRICS_SERVER_ADDR` environment variable, e.g. `:9001`.)
 
 ## Metric Reference
 

@@ -1,7 +1,6 @@
 # Status Badges
 
-Woodpecker has integrated support for repository status badges.
-These badges can be added to your website or project readme file to display the status of your code.
+Woodpecker has integrated support for repository status badges. These badges can be added to your website or project readme file to display the status of your code.
 
 ## Badge endpoint
 
@@ -9,8 +8,7 @@ These badges can be added to your website or project readme file to display the 
 <scheme>://<hostname>/api/badges/<repo-id>/status.svg
 ```
 
-The status badge displays the status for the latest build to your default branch (e.g. main).
-You can customize the branch by adding the `branch` query parameter.
+The status badge displays the status for the latest build to your default branch (e.g. main). You can customize the branch by adding the `branch` query parameter.
 
 ```diff
 -<scheme>://<hostname>/api/badges/<repo-id>/status.svg

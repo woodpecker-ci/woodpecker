@@ -1,13 +1,10 @@
 # Secrets
 
-Woodpecker provides the ability to store named parameters external to the YAML configuration file, in a central secret store.
-These secrets can be passed to individual steps of the pipeline at runtime.
+Woodpecker provides the ability to store named parameters external to the YAML configuration file, in a central secret store. These secrets can be passed to individual steps of the pipeline at runtime.
 
 Secrets are exposed to your pipeline steps and plugins as uppercase environment variables and can therefore be referenced in the commands section of your pipeline.
 
-Woodpecker provides three different levels to add secrets to your pipeline.
-The following list shows the priority of the different levels.
-If a secret is defined in multiple levels, will be used following this priorities: Repository secrets > Organization secrets > Global secrets.
+Woodpecker provides three different levels to add secrets to your pipeline. The following list shows the priority of the different levels. If a secret is defined in multiple levels, will be used following this priorities: Repository secrets > Organization secrets > Global secrets.
 
 1. **Repository secrets**: They are available to all pipelines of an repository.
 2. **Organization secrets**: They are available to all pipelines of an organization.
@@ -40,8 +37,7 @@ steps:
 +       from_secret: secret_token
 ```
 
-Please note parameter expressions are subject to pre-processing.
-When using secrets in parameter expressions they should be escaped.
+Please note parameter expressions are subject to pre-processing. When using secrets in parameter expressions they should be escaped.
 
 ```diff
 steps:
@@ -61,8 +57,7 @@ Secrets are added to the Woodpecker in the UI or with the CLI.
 
 ## Alternate Names
 
-There may be scenarios where you are required to store secrets using alternate names.
-You can map the alternate secret name to the expected name using the below syntax:
+There may be scenarios where you are required to store secrets using alternate names. You can map the alternate secret name to the expected name using the below syntax:
 
 ```diff
 steps:
@@ -77,8 +72,7 @@ steps:
 
 ## Pull Requests
 
-Secrets are not exposed to pull requests by default.
-You can override this behavior by creating the secret and enabling the `pull_request` event type.
+Secrets are not exposed to pull requests by default. You can override this behavior by creating the secret and enabling the `pull_request` event type.
 
 ```diff
 woodpecker-cli secret add \
@@ -91,20 +85,15 @@ woodpecker-cli secret add \
   -value <value>
 ```
 
-Please be careful when exposing secrets to pull requests.
-If your repository is open source and accepts pull requests your secrets are not safe.
-A bad actor can submit a malicious pull request that exposes your secrets.
+Please be careful when exposing secrets to pull requests. If your repository is open source and accepts pull requests your secrets are not safe. A bad actor can submit a malicious pull request that exposes your secrets.
 
 ## Image filter
 
-To prevent abusing your secrets from malicious usage, you can limit a secret to a list of images.
-If enabled they are not available to any other plugin (steps without user-defined commands).
-If you or an attacker defines explicit commands, the secrets will not be available to the container to prevent leaking them.
+To prevent abusing your secrets from malicious usage, you can limit a secret to a list of images. If enabled they are not available to any other plugin (steps without user-defined commands). If you or an attacker defines explicit commands, the secrets will not be available to the container to prevent leaking them.
 
 ## CLI Examples
 
-Create the secret using default settings.
-The secret will be available to all images in your pipeline, and will be available to all push, tag, and deployment events (not pull request events).
+Create the secret using default settings. The secret will be available to all images in your pipeline, and will be available to all push, tag, and deployment events (not pull request events).
 
 ```diff
 woodpecker-cli secret add \
@@ -147,8 +136,7 @@ woodpecker-cli secret add \
   -value <value>
 ```
 
-Loading secrets from file using curl `@` syntax.
-This is the recommended approach for loading secrets from file to preserve newlines:
+Loading secrets from file using curl `@` syntax. This is the recommended approach for loading secrets from file to preserve newlines:
 
 ```diff
 woodpecker-cli secret add \

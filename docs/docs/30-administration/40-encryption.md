@@ -1,8 +1,7 @@
 # Secrets encryption
 
 :::danger
-Secrets encryption is currently broken and therefore disabled by default.
-It will be fixed in an upcoming release.
+Secrets encryption is currently broken and therefore disabled by default. It will be fixed in an upcoming release.
 
 Check:
 
@@ -11,23 +10,27 @@ Check:
 
 :::
 
-By default, Woodpecker does not encrypt secrets in its database.
-You can enable encryption using simple AES key or more advanced [Google TINK](https://developers.google.com/tink) encryption.
+By default, Woodpecker does not encrypt secrets in its database. You can enable encryption
+using simple AES key or more advanced [Google TINK](https://developers.google.com/tink) encryption.
 
 ## Common
 
 ### Enabling secrets encryption
 
-To enable secrets encryption and encrypt all existing secrets in database set `WOODPECKER_ENCRYPTION_KEY`, `WOODPECKER_ENCRYPTION_KEY_FILE` or `WOODPECKER_ENCRYPTION_TINK_KEYSET_PATH` environment variable depending on encryption method of your choice.
+To enable secrets encryption and encrypt all existing secrets in database set
+`WOODPECKER_ENCRYPTION_KEY`, `WOODPECKER_ENCRYPTION_KEY_FILE` or `WOODPECKER_ENCRYPTION_TINK_KEYSET_PATH` environment
+variable depending on encryption method of your choice.
 
 After encryption is enabled you will be unable to start Woodpecker server without providing valid encryption key!
 
 ### Disabling encryption and decrypting all secrets
 
-To disable secrets encryption and decrypt database you need to start server with valid `WOODPECKER_ENCRYPTION_KEY` or `WOODPECKER_ENCRYPTION_TINK_KEYSET_FILE` environment variable set depending on enabled encryption method, and `WOODPECKER_ENCRYPTION_DISABLE` set to true.
+To disable secrets encryption and decrypt database you need to start server with valid
+`WOODPECKER_ENCRYPTION_KEY` or `WOODPECKER_ENCRYPTION_TINK_KEYSET_FILE` environment variable set depending on
+enabled encryption method, and `WOODPECKER_ENCRYPTION_DISABLE` set to true.
 
-After secrets was decrypted server will proceed working in unencrypted mode.
-You will not need to use "disable encryption" variable or encryption keys to start server anymore.
+After secrets was decrypted server will proceed working in unencrypted mode. You will not need to use "disable encryption"
+variable or encryption keys to start server anymore.
 
 ## AES
 
@@ -56,9 +59,10 @@ You can manage encryption on server using these two environment variables:
 
 You will need plaintext AEAD-compatible Google TINK keyset to encrypt your data.
 
-To generate it and then rotate keys if needed, install `tinkey`([installation guide](https://developers.google.com/tink/install-tinkey)).
+To generate it and then rotate keys if needed, install `tinkey`([installation guide](https://developers.google.com/tink/install-tinkey))
 
-Keyset contains one or more keys, used to encrypt or decrypt your data, and primary key ID, used to determine which key to use while encrypting new data.
+Keyset contains one or more keys, used to encrypt or decrypt your data, and primary key ID, used to determine which key
+to use while encrypting new data.
 
 Keyset generation example:
 
@@ -74,5 +78,6 @@ Use `tinkey` to rotate encryption keys in your existing keyset:
 tinkey rotate-keyset --in keyset_v1.json --out keyset_v2.json --key-template AES256_GCM
 ```
 
-Then you just need to replace server keyset file with the new one.
-At the moment server detects new encryption keyset it will re-encrypt all existing secrets with the new key, so you will be unable to start server with previous keyset anymore.
+Then you just need to replace server keyset file with the new one. At the moment server detects new encryption
+keyset it will re-encrypt all existing secrets with the new key, so you will be unable to start server with previous
+keyset anymore.

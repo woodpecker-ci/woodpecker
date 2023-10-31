@@ -1,8 +1,6 @@
 # Workflow syntax
 
-The workflow section defines a list of steps to build, test and deploy your code.
-Steps are executed serially, in the order in which they are defined.
-If a step returns a non-zero exit code, the workflow and therefore all other workflows and the pipeline immediately aborts and returns a failure status.
+The workflow section defines a list of steps to build, test and deploy your code. Steps are executed serially, in the order in which they are defined. If a step returns a non-zero exit code, the workflow and therefore all other workflows and the pipeline immediately aborts and returns a failure status.
 
 Example steps:
 
@@ -21,8 +19,7 @@ steps:
       - npm run build
 ```
 
-In the above example we define two steps, `frontend` and `backend`.
-The names of these steps are completely arbitrary.
+In the above example we define two steps, `frontend` and `backend`. The names of these steps are completely arbitrary.
 
 Another way to name a step is by using the name keyword:
 
@@ -45,8 +42,7 @@ Keep in mind the name is optional, if not added the steps will be numerated.
 
 ## Skip Commits
 
-Woodpecker gives the ability to skip individual commits by adding `[SKIP CI]` or `[CI SKIP]` to the commit message.
-Note this is case-insensitive.
+Woodpecker gives the ability to skip individual commits by adding `[SKIP CI]` or `[CI SKIP]` to the commit message. Note this is case-insensitive.
 
 ```sh
 git commit -m "updated README [CI SKIP]"
@@ -54,8 +50,7 @@ git commit -m "updated README [CI SKIP]"
 
 ## Steps
 
-Every step of your workflow executes commands inside a specified container.
-The defined commands are executed serially.
+Every step of your workflow executes commands inside a specified container. The defined commands are executed serially.
 The associated commit is checked out with git to a workspace which is mounted to every step of the workflow as the working directory.
 
 ```diff
@@ -118,8 +113,7 @@ image: index.docker.io/library/golang
 image: index.docker.io/library/golang:1.7
 ```
 
-Woodpecker does not automatically upgrade container images.
-Example configuration to always pull the latest image when updates are available:
+Woodpecker does not automatically upgrade container images. Example configuration to always pull the latest image when updates are available:
 
 ```diff
  steps:
@@ -143,9 +137,7 @@ Commands of every step are executed serially as if you would enter them into you
 +      - go test
 ```
 
-There is no magic here.
-The above commands are converted to a simple shell script.
-The commands in the above example are roughly converted to the below script:
+There is no magic here. The above commands are converted to a simple shell script. The commands in the above example are roughly converted to the below script:
 
 ```sh
 #!/bin/sh
@@ -155,15 +147,13 @@ go build
 go test
 ```
 
-The above shell script is then executed as the container entrypoint.
-The below docker command is an (incomplete) example of how the script is executed:
+The above shell script is then executed as the container entrypoint. The below docker command is an (incomplete) example of how the script is executed:
 
 ```sh
 docker run --entrypoint=build.sh golang
 ```
 
-> Please note that only build steps can define commands.
-> You cannot use commands with plugins or services.
+> Please note that only build steps can define commands. You cannot use commands with plugins or services.
 
 ### `environment`
 
@@ -173,16 +163,13 @@ For more details check the [environment docs](./50-environment.md).
 
 ### `secrets`
 
-Woodpecker provides the ability to store named parameters external to the YAML configuration file, in a central secret store.
-These secrets can be passed to individual steps of the workflow at runtime.
+Woodpecker provides the ability to store named parameters external to the YAML configuration file, in a central secret store. These secrets can be passed to individual steps of the workflow at runtime.
 
 For more details check the [secrets docs](./40-secrets.md).
 
 ### `failure`
 
-Some of the steps may be allowed to fail without causing the whole workflow and therefore pipeline to report a failure (e.g., a step executing a linting check).
-To enable this, add `failure: ignore` to your step.
-If Woodpecker encounters an error while executing the step, it will report it as failed but still executes the next steps of the workflow, if any, without affecting the status of the workflow.
+Some of the steps may be allowed to fail without causing the whole workflow and therefore pipeline to report a failure (e.g., a step executing a linting check). To enable this, add `failure: ignore` to your step. If Woodpecker encounters an error while executing the step, it will report it as failed but still executes the next steps of the workflow, if any, without affecting the status of the workflow.
 
 ```diff
  steps:
@@ -196,9 +183,7 @@ If Woodpecker encounters an error while executing the step, it will report it as
 
 ### `when` - Conditional Execution
 
-Woodpecker supports defining a list of conditions for a step by using a `when` block.
-If at least one of the conditions in the `when` block evaluate to true the step is executed, otherwise it is skipped.
-A condition can be a check like:
+Woodpecker supports defining a list of conditions for a step by using a `when` block. If at least one of the conditions in the `when` block evaluate to true the step is executed, otherwise it is skipped. A condition can be a check like:
 
 ```diff
  steps:
@@ -245,8 +230,7 @@ steps:
 +     - branch: main
 ```
 
-> The step now triggers on main branch, but also if the target branch of a pull request is `main`.
-> Add an event condition to limit it further to pushes on main only.
+> The step now triggers on main branch, but also if the target branch of a pull request is `main`. Add an event condition to limit it further to pushes on main only.
 
 Execute a step if the branch is `main` or `develop`:
 
@@ -262,8 +246,7 @@ when:
   - branch: prefix/*
 ```
 
-The branch matching is done using [doublestar](https://github.com/bmatcuk/doublestar/#usage), note that a pattern starting with `*` should be put between quotes and a literal `/` needs to be escaped.
-A few examples:
+The branch matching is done using [doublestar](https://github.com/bmatcuk/doublestar/#usage), note that a pattern starting with `*` should be put between quotes and a literal `/` needs to be escaped. A few examples:
 
 - `*\\/*` to match patterns with exactly 1 `/`
 - `*\\/**` to match patters with at least 1 `/`
@@ -332,8 +315,7 @@ when:
 
 #### `status`
 
-There are use cases for executing steps on failure, such as sending notifications for failed workflow / pipeline.
-Use the status constraint to execute steps even when the workflow fails:
+There are use cases for executing steps on failure, such as sending notifications for failed workflow / pipeline. Use the status constraint to execute steps even when the workflow fails:
 
 ```diff
 steps:
@@ -423,8 +405,7 @@ when:
 
 #### `evaluate`
 
-Execute a step only if the provided evaluate expression is equal to true.
-Both built-in [`CI_`](./50-environment.md#built-in-environment-variables) and custom variables can be used inside the expression.
+Execute a step only if the provided evaluate expression is equal to true. Both built-in [`CI_`](./50-environment.md#built-in-environment-variables) and custom variables can be used inside the expression.
 
 The expression syntax can be found in [the docs](https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md) of the underlying library.
 
@@ -465,9 +446,7 @@ when:
 
 ### `group` - Parallel execution
 
-Woodpecker supports parallel step execution for same-machine fan-in and fan-out.
-Parallel steps are configured using the `group` attribute.
-This instructs the agent to execute the named group in parallel.
+Woodpecker supports parallel step execution for same-machine fan-in and fan-out. Parallel steps are configured using the `group` attribute. This instructs the agent to execute the named group in parallel.
 
 Example parallel configuration:
 
@@ -491,13 +470,11 @@ Example parallel configuration:
      repo: octocat/hello-world
 ```
 
-In the above example, the `frontend` and `backend` steps are executed in parallel.
-The agent will not execute the `publish` step until the group completes.
+In the above example, the `frontend` and `backend` steps are executed in parallel. The agent will not execute the `publish` step until the group completes.
 
 ### `volumes`
 
-Woodpecker gives the ability to define Docker volumes in the YAML.
-You can use this parameter to mount files or folders on the host machine into your containers.
+Woodpecker gives the ability to define Docker volumes in the YAML. You can use this parameter to mount files or folders on the host machine into your containers.
 
 For more details check the [volumes docs](./70-volumes.md).
 
@@ -513,15 +490,13 @@ Using `directory`, you can set a subdirectory of your repository or an absolute 
 
 ## `services`
 
-Woodpecker can provide service containers.
-They can for example be used to run databases or cache containers during the execution of workflow.
+Woodpecker can provide service containers. They can for example be used to run databases or cache containers during the execution of workflow.
 
 For more details check the [services docs](./60-services.md).
 
 ## `workspace`
 
-The workspace defines the shared volume and working directory shared by all workflow steps.
-The default workspace matches the below pattern, based on your repository URL.
+The workspace defines the shared volume and working directory shared by all workflow steps. The default workspace matches the below pattern, based on your repository URL.
 
 ```txt
 /woodpecker/src/github.com/octocat/hello-world
@@ -542,8 +517,7 @@ The workspace can be customized using the workspace block in the YAML file:
        - go test
 ```
 
-The base attribute defines a shared base volume available to all steps.
-This ensures your source code, dependencies and compiled binaries are persisted and shared between steps.
+The base attribute defines a shared base volume available to all steps. This ensures your source code, dependencies and compiled binaries are persisted and shared between steps.
 
 ```diff
  workspace:
@@ -571,9 +545,7 @@ docker run --volume=my-named-volume:/go golang:latest
 docker run --volume=my-named-volume:/go node:latest
 ```
 
-The path attribute defines the working directory of your build.
-This is where your code is cloned and will be the default working directory of every step in your build process.
-The path must be relative and is combined with your base path.
+The path attribute defines the working directory of your build. This is where your code is cloned and will be the default working directory of every step in your build process. The path must be relative and is combined with your base path.
 
 ```diff
  workspace:
@@ -588,24 +560,18 @@ git clone https://github.com/octocat/hello-world \
 
 ## `matrix`
 
-Woodpecker has integrated support for matrix builds.
-Woodpecker executes a separate build task for each combination in the matrix, allowing you to build and test a single commit against multiple configurations.
+Woodpecker has integrated support for matrix builds. Woodpecker executes a separate build task for each combination in the matrix, allowing you to build and test a single commit against multiple configurations.
 
 For more details check the [matrix build docs](./30-matrix-workflows.md).
 
 ## `labels`
 
-You can set labels for your workflow to select an agent to execute the workflow on.
-An agent will pick up and run a workflow when **every** label assigned to it matches the agents labels.
+You can set labels for your workflow to select an agent to execute the workflow on. An agent will pick up and run a workflow when **every** label assigned to it matches the agents labels.
 
-To set additional agent labels check the [agent configuration options](../30-administration/15-agent-config.md#woodpecker_filter_labels).
-Agents will have at least four default labels: `platform=agent-os/agent-arch`, `hostname=my-agent`, `backend=docker` (type of the agent backend) and `repo=*`.
-Agents can use a `*` as a wildcard for a label.
-For example `repo=*` will match every repo.
+To set additional agent labels check the [agent configuration options](../30-administration/15-agent-config.md#woodpecker_filter_labels). Agents will have at least four default labels: `platform=agent-os/agent-arch`, `hostname=my-agent`, `backend=docker` (type of the agent backend) and `repo=*`. Agents can use a `*` as a wildcard for a label. For example `repo=*` will match every repo.
 
 Workflow labels with an empty value will be ignored.
-By default each workflow has at least the `repo=your-user/your-repo-name` label.
-If you have set the [platform attribute](#platform) for your workflow it will have a label like `platform=your-os/your-arch` as well.
+By default each workflow has at least the `repo=your-user/your-repo-name` label. If you have set the [platform attribute](#platform) for your workflow it will have a label like `platform=your-os/your-arch` as well.
 
 You can add additional labels as a key value map:
 
@@ -626,14 +592,11 @@ steps:
 ### Filter by platform
 
 To configure your workflow to only be executed on an agent with a specific platform, you can use the `platform` key.
-Have a look at the official [go docs](https://go.dev/doc/install/source) for the available platforms.
-The syntax of the platform is `GOOS/GOARCH` like `linux/arm64` or `linux/amd64`.
+Have a look at the official [go docs](https://go.dev/doc/install/source) for the available platforms. The syntax of the platform is `GOOS/GOARCH` like `linux/arm64` or `linux/amd64`.
 
 Example:
 
-Assuming we have two agents, one `linux/arm` and one `linux/amd64`.
-Previously this workflow would have executed on **either agent**, as Woodpecker is not fussy about where it runs the workflows.
-By setting the following option it will only be executed on an agent with the platform `linux/arm64`.
+Assuming we have two agents, one `linux/arm` and one `linux/amd64`. Previously this workflow would have executed on **either agent**, as Woodpecker is not fussy about where it runs the workflows. By setting the following option it will only be executed on an agent with the platform `linux/arm64`.
 
 ```diff
 +labels:
@@ -651,9 +614,7 @@ For more details and examples check the [Advanced usage docs](./90-advanced-usag
 
 ## `clone`
 
-Woodpecker automatically configures a default clone step if not explicitly defined.
-When using the `local` backend, the [plugin-git](https://github.com/woodpecker-ci/plugin-git) binary must be on your `$PATH` for the default clone step to work.
-If not, you can still write a manual clone step.
+Woodpecker automatically configures a default clone step if not explicitly defined. When using the `local` backend, the [plugin-git](https://github.com/woodpecker-ci/plugin-git) binary must be on your `$PATH` for the default clone step to work. If not, you can still write a manual clone step.
 
 You can manually configure the clone step in your workflow for customization:
 
@@ -727,9 +688,7 @@ steps:
 
 ## `skip_clone`
 
-By default Woodpecker is automatically adding a clone step.
-This clone step can be configured by the [clone](#clone) property.
-If you do not need a `clone` step at all you can skip it using:
+By default Woodpecker is automatically adding a clone step. This clone step can be configured by the [clone](#clone) property. If you do not need a `clone` step at all you can skip it using:
 
 ```yaml
 skip_clone: true
@@ -737,8 +696,7 @@ skip_clone: true
 
 ## `when` - Global workflow conditions
 
-Woodpecker gives the ability to skip whole workflows (not just steps #when---conditional-execution-1) based on certain conditions by a `when` block.
-If all conditions in the `when` block evaluate to true the workflow is executed, otherwise it is skipped, but treated as successful and other workflows depending on it will still continue.
+Woodpecker gives the ability to skip whole workflows (not just steps #when---conditional-execution-1) based on certain conditions by a `when` block. If all conditions in the `when` block evaluate to true the workflow is executed, otherwise it is skipped, but treated as successful and other workflows depending on it will still continue.
 
 ### `repo`
 
@@ -774,8 +732,7 @@ Example conditional execution by branch:
        channel: dev
 ```
 
-> The step now triggers on main, but also if the target branch of a pull request is `main`.
-> Add an event condition to limit it further to pushes on main only.
+> The step now triggers on main, but also if the target branch of a pull request is `main`. Add an event condition to limit it further to pushes on main only.
 
 Execute a step if the branch is `main` or `develop`:
 
@@ -889,22 +846,17 @@ when:
 
 ## `depends_on`
 
-Woodpecker supports to define multiple workflows for a repository.
-Those workflows will run independent from each other.
-To depend them on each other you can use the [`depends_on`](./25-workflows.md#flow-control) keyword.
+Woodpecker supports to define multiple workflows for a repository. Those workflows will run independent from each other. To depend them on each other you can use the [`depends_on`](./25-workflows.md#flow-control) keyword.
 
 ## `runs_on`
 
-Workflows that should run even on failure should set the `runs_on` tag.
-See [here](./25-workflows.md#flow-control) for an example.
+Workflows that should run even on failure should set the `runs_on` tag. See [here](./25-workflows.md#flow-control) for an example.
 
 ## Privileged mode
 
-Woodpecker gives the ability to configure privileged mode in the YAML.
-You can use this parameter to launch containers with escalated capabilities.
+Woodpecker gives the ability to configure privileged mode in the YAML. You can use this parameter to launch containers with escalated capabilities.
 
-> Privileged mode is only available to trusted repositories and for security reasons should only be used in private environments.
-> See [project settings](./71-project-settings.md#trusted) to enable trusted mode.
+> Privileged mode is only available to trusted repositories and for security reasons should only be used in private environments. See [project settings](./71-project-settings.md#trusted) to enable trusted mode.
 
 ```diff
  steps:

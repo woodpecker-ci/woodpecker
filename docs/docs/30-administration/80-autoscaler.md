@@ -2,8 +2,7 @@
 
 If your would like dynamically scale your agents with the load, you can use [our autoscaler](https://github.com/woodpecker-ci/autoscaler).
 
-Please note that the autoscaler is not feature-complete yet.
-You can follow the progress [here](https://github.com/woodpecker-ci/autoscaler#roadmap).
+Please note that the autoscaler is not feature-complete yet. You can follow the progress [here](https://github.com/woodpecker-ci/autoscaler#roadmap).
 
 ## Setup
 

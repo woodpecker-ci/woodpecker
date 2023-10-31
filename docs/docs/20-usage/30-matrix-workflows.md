@@ -1,7 +1,6 @@
 # Matrix workflows
 
-Woodpecker has integrated support for matrix workflows.
-Woodpecker executes a separate workflow for each combination in the matrix, allowing you to build and test against multiple configurations.
+Woodpecker has integrated support for matrix workflows. Woodpecker executes a separate workflow for each combination in the matrix, allowing you to build and test against multiple configurations.
 
 Example matrix definition:
 
@@ -31,8 +30,7 @@ matrix:
 
 ## Interpolation
 
-Matrix variables are interpolated in the YAML using the `${VARIABLE}` syntax, before the YAML is parsed.
-This is an example YAML file before interpolating matrix parameters:
+Matrix variables are interpolated in the YAML using the `${VARIABLE}` syntax, before the YAML is parsed. This is an example YAML file before interpolating matrix parameters:
 
 ```yaml
 matrix:

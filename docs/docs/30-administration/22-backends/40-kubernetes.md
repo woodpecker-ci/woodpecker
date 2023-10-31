@@ -5,8 +5,7 @@ Not all pipeline features are fully supported yet for this backend.
 Check [the Kubernetes overview issue](https://github.com/woodpecker-ci/woodpecker/issues/1513) for a summary.
 :::
 
-The kubernetes backend executes steps inside standalone pods.
-A temporary PVC is created for the lifetime of the pipeline to transfer files between steps.
+The kubernetes backend executes steps inside standalone pods. A temporary PVC is created for the lifetime of the pipeline to transfer files between steps.
 
 ## General Configuration
 
@@ -38,18 +37,15 @@ agent:
 
 - `WOODPECKER_BACKEND_K8S_STORAGE_RWX` (default: `true`)
 
-  Determines if `RWX` should be used for the pipeline volume's [access mode](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes).
-  If false, `RWO` is used instead.
+  Determines if `RWX` should be used for the pipeline volume's [access mode](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes). If false, `RWO` is used instead.
 
 - `WOODPECKER_BACKEND_K8S_POD_LABELS` (default: empty)
 
-  Additional labels to apply to worker pods.
-  Must be a YAML object, e.g. `{"example.com/test-label":"test-value"}`.
+  Additional labels to apply to worker pods. Must be a YAML object, e.g. `{"example.com/test-label":"test-value"}`.
 
 - `WOODPECKER_BACKEND_K8S_POD_ANNOTATIONS` (default: empty)
 
-  Additional annotations to apply to worker pods.
-  Must be a YAML object, e.g. `{"example.com/test-annotation":"test-value"}`.
+  Additional annotations to apply to worker pods. Must be a YAML object, e.g. `{"example.com/test-annotation":"test-value"}`.
 
 ## Job specific configuration
 
@@ -79,8 +75,7 @@ steps:
 
 ### serviceAccountName
 
-Specify the name of the ServiceAccount which the build pod will mount.
-This serviceAccount must be created externally.
+Specify the name of the ServiceAccount which the build pod will mount. This serviceAccount must be created externally.
 See the [kubernetes documentation](https://kubernetes.io/docs/concepts/security/service-accounts/) for more information on using serviceAccounts.
 
 ### nodeSelector
@@ -88,8 +83,7 @@ See the [kubernetes documentation](https://kubernetes.io/docs/concepts/security/
 Specifies the label which is used to select the node on which the job will be executed.
 
 Labels defined here will be appended to a list which already contains `"kubernetes.io/arch"`.
-By default `"kubernetes.io/arch"` is inferred from the agents' platform.
-One can override it by setting that label in the `nodeSelector` section of the `backend_options`.
+By default `"kubernetes.io/arch"` is inferred from the agents' platform. One can override it by setting that label in the `nodeSelector` section of the `backend_options`.
 Without a manual overwrite, builds will be randomly assigned to the runners and inherit their respective architectures.
 
 To overwrite this, one needs to set the label in the `nodeSelector` section of the `backend_options`.
@@ -115,8 +109,7 @@ And then overwrite the `nodeSelector` in the `backend_options` section of the st
 
 ### tolerations
 
-When you use nodeSelector and the node pool is configured with Taints, you need to specify the Tolerations.
-Tolerations allow the scheduler to schedule pods with matching taints.
+When you use nodeSelector and the node pool is configured with Taints, you need to specify the Tolerations. Tolerations allow the scheduler to schedule pods with matching taints.
 See the [kubernetes documentation](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/) for more information on using tolerations.
 
 Example pipeline configuration:
@@ -169,8 +162,7 @@ steps:
 
 ### CRI-O
 
-CRI-O users currently need to configure the workspace for all workflows in order for them to run correctly.
-Add the following at the beginning of your configuration:
+CRI-O users currently need to configure the workspace for all workflows in order for them to run correctly. Add the following at the beginning of your configuration:
 
 ```yml
 workspace:

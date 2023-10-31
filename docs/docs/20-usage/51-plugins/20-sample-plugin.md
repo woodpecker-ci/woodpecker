@@ -42,8 +42,7 @@ RUN apk -Uuv add curl ca-certificates
 ENTRYPOINT /bin/script.sh
 ```
 
-Build and publish your plugin to the Docker registry.
-Once published your plugin can be shared with the broader Woodpecker community.
+Build and publish your plugin to the Docker registry. Once published your plugin can be shared with the broader Woodpecker community.
 
 ```nohighlight
 docker build -t foo/webhook .

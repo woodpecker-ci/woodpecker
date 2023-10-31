@@ -8,27 +8,18 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Dropped deprecated `pipeline:` keyword in favor of `steps:` in pipeline config
 - Dropped deprecated `branches:` filter in favor of global [`when.branch`](./20-usage/20-workflow-syntax.md#branch-1) filter
 - Deprecated `platform:` filter in favor of `labels:`, [read more](./20-usage/20-workflow-syntax.md#filter-by-platform)
-- Secrets `event` property was renamed to `events` and `image` to `images` as both are lists.
-  The new property `events` / `images` has to be used in the api and as cli argument.
-  The old properties `event` and `image` were removed.
-- The secrets `plugin_only` option was removed.
-  Secrets with images are now always only available for plugins using listed by the `images` property.
-  Existing secrets with a list of `images` will now only be available to the listed images if they are used as a plugin.
-- Removed `build` alias for `pipeline` command in CLI.
-- Removed `ssh` backend.
-  Use an agent directly on the SSH machine using the `local` backend.
-- Removed `/hook` and `/stream` API paths in favor of `/api/(hook|stream)`.
-  You may need to use the "Repair repository" button in the repo settings or "Repair all" in the admin settings to recreate the forge hook.
-- Removed `WOODPECKER_DOCS` config variable.
+- Secrets `event` property was renamed to `events` and `image` to `images` as both are lists. The new property `events` / `images` has to be used in the api and as cli argument. The old properties `event` and `image` were removed.
+- The secrets `plugin_only` option was removed. Secrets with images are now always only available for plugins using listed by the `images` property. Existing secrets with a list of `images` will now only be available to the listed images if they are used as a plugin.
+- Removed `build` alias for `pipeline` command in CLI
+- Removed `ssh` backend. Use an agent directly on the SSH machine using the `local` backend.
+- Removed `/hook` and `/stream` API paths in favor of `/api/(hook|stream)`. You may need to use the "Repair repository" button in the repo settings or "Repair all" in the admin settings to recreate the forge hook.
+- Removed `WOODPECKER_DOCS` config variable
 
 ## 1.0.0
 
-- The signature used to verify extension calls (like those used for the [config-extension](./30-administration/100-external-configuration-api.md)) done by the Woodpecker server switched from using a shared-secret HMac to an ed25519 key-pair.
-  Read more about it at the [config-extensions](./30-administration/100-external-configuration-api.md) documentation.
-- Refactored support for old agent filter labels and expressions.
-  Learn how to use the new [filter](./20-usage/20-workflow-syntax.md#labels)
-- Renamed step environment variable `CI_SYSTEM_ARCH` to `CI_SYSTEM_PLATFORM`.
-  Same applies for the cli exec variable.
+- The signature used to verify extension calls (like those used for the [config-extension](./30-administration/100-external-configuration-api.md)) done by the Woodpecker server switched from using a shared-secret HMac to an ed25519 key-pair. Read more about it at the [config-extensions](./30-administration/100-external-configuration-api.md) documentation.
+- Refactored support for old agent filter labels and expressions. Learn how to use the new [filter](./20-usage/20-workflow-syntax.md#labels)
+- Renamed step environment variable `CI_SYSTEM_ARCH` to `CI_SYSTEM_PLATFORM`. Same applies for the cli exec variable.
 - Renamed environment variables `CI_BUILD_*` and `CI_PREV_BUILD_*` to `CI_PIPELINE_*` and `CI_PREV_PIPELINE_*`, old ones are still available but deprecated
 - Renamed environment variables `CI_JOB_*` to `CI_STEP_*`, old ones are still available but deprecated
 - Renamed environment variable `CI_REPO_REMOTE` to `CI_REPO_CLONE_URL`, old is still available but deprecated
@@ -41,24 +32,19 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Dropped support for [Coding](https://coding.net/), [Gogs](https://gogs.io) and Bitbucket Server (Stash).
 - `/api/queue/resume` & `/api/queue/pause` endpoint methods were changed from `GET` to `POST`
 - rename `pipeline:` key in your workflow config to `steps:`
-- If you want to migrate old logs to the new format, watch the error messages on start.
-  If there are none we are good to go, else you have to plan a migration that can take hours.
-  Set `WOODPECKER_MIGRATIONS_ALLOW_LONG` to true and let it run.
+- If you want to migrate old logs to the new format, watch the error messages on start. If there are none we are good to go, else you have to plan a migration that can take hours. Set `WOODPECKER_MIGRATIONS_ALLOW_LONG` to true and let it run.
 - Using `repo-id` in favor of `owner/repo` combination
   - :warning: The api endpoints `/api/repos/{owner}/{repo}/...` were replaced by new endpoints using the repos id `/api/repos/{repo-id}`
   - To find the id of a repo use the `/api/repos/lookup/{repo-full-name-with-slashes}` endpoint.
   - The existing badge endpoint `/api/badges/{owner}/{repo}` will still work, but whenever possible try to use the new endpoint using the `repo-id`: `/api/badges/{repo-id}`.
-  - The UI urls for a repository changed from `/repos/{owner}/{repo}/...` to `/repos/{repo-id}/...`.
-    You will be redirected automatically when using the old url.
+  - The UI urls for a repository changed from `/repos/{owner}/{repo}/...` to `/repos/{repo-id}/...`. You will be redirected automatically when using the old url.
   - The woodpecker-go api-client is now using the `repo-id` instead of `owner/repo` for all functions
 - Using `org-id` in favour of `owner` name
   - :warning: The api endpoints `/api/orgs/{owner}/...` were replaced by new endpoints using the orgs id `/api/repos/{org-id}`
   - To find the id of orgs use the `/api/orgs/lookup/{org_full_name}` endpoint.
-  - The UI urls for a organization changed from `/org/{owner}/...` to `/orgs/{org-id}/...`.
-    You will be redirected automatically when using the old url.
+  - The UI urls for a organization changed from `/org/{owner}/...` to `/orgs/{org-id}/...`. You will be redirected automatically when using the old url.
   - The woodpecker-go api-client is now using the `org-id` instead of `org name` for all functions
-- The `command:` field has been removed from steps.
-  If you were using it, please check if the entrypoint of the image you used is a shell.
+- The `command:` field has been removed from steps. If you were using it, please check if the entrypoint of the image you used is a shell.
   - If it is a shell, simply rename `command:` to `commands:`.
   - If it's not, you need to prepend the entrypoint before and also rename it (e.g., `commands: <entrypoint> <cmd>`).
 
@@ -68,16 +54,14 @@ Some versions need some changes to the server configuration or the pipeline conf
 
   `.woodpecker/*.yml` -> `.woodpecker.yml` -> `.drone.yml`
 
-  Only projects created after updating will have an empty value by default.
-  Existing projects will stick to the current pipeline path which is `.drone.yml` in most cases.
+  Only projects created after updating will have an empty value by default. Existing projects will stick to the current pipeline path which is `.drone.yml` in most cases.
 
   Read more about it at the [Project Settings](./20-usage/71-project-settings.md#pipeline-path)
 
 - From version `0.15.0` ongoing there will be three types of docker images: `latest`, `next` and `x.x.x` with an alpine variant for each type like `latest-alpine`.
   If you used `latest` before to try pre-release features you should switch to `next` after this release.
 
-- Dropped support for `DRONE_*` environment variables.
-  The according `WOODPECKER_*` variables must be used instead.
+- Dropped support for `DRONE_*` environment variables. The according `WOODPECKER_*` variables must be used instead.
   Additionally some alternative namings have been removed to simplify maintenance:
 
   - `WOODPECKER_AGENT_SECRET` replaces `WOODPECKER_SECRET`, `DRONE_SECRET`, `WOODPECKER_PASSWORD`, `DRONE_PASSWORD` and `DRONE_AGENT_SECRET`.
@@ -85,15 +69,12 @@ Some versions need some changes to the server configuration or the pipeline conf
   - `WOODPECKER_DATABASE_DRIVER` replaces `DRONE_DATABASE_DRIVER` and `DATABASE_DRIVER`.
   - `WOODPECKER_DATABASE_DATASOURCE` replaces `DRONE_DATABASE_DATASOURCE` and `DATABASE_CONFIG`.
 
-- Dropped support for `DRONE_*` environment variables in pipeline steps.
-  Pipeline meta-data can be accessed with `CI_*` variables.
+- Dropped support for `DRONE_*` environment variables in pipeline steps. Pipeline meta-data can be accessed with `CI_*` variables.
 
   - `CI_*` prefix replaces `DRONE_*`
   - `CI` value is now `woodpecker`
   - `DRONE=true` has been removed
-  - Some variables got deprecated and will be removed in future versions.
-    Please migrate to the new names.
-    Same applies for `DRONE_` of them.
+  - Some variables got deprecated and will be removed in future versions. Please migrate to the new names. Same applies for `DRONE_` of them.
     - CI_ARCH => use CI_SYSTEM_ARCH
     - CI_COMMIT => CI_COMMIT_SHA
     - CI_TAG => CI_COMMIT_TAG
@@ -140,8 +121,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 
 - Remove unused server flags which can safely be removed from your server config: `WOODPECKER_QUIC`, `WOODPECKER_GITHUB_SCOPE`, `WOODPECKER_GITHUB_GIT_USERNAME`, `WOODPECKER_GITHUB_GIT_PASSWORD`, `WOODPECKER_GITHUB_PRIVATE_MODE`, `WOODPECKER_GITEA_GIT_USERNAME`, `WOODPECKER_GITEA_GIT_PASSWORD`, `WOODPECKER_GITEA_PRIVATE_MODE`, `WOODPECKER_GITLAB_GIT_USERNAME`, `WOODPECKER_GITLAB_GIT_PASSWORD`, `WOODPECKER_GITLAB_PRIVATE_MODE`
 
-- Dropped support for manually setting the agents platform with `WOODPECKER_PLATFORM`.
-  The platform is now automatically detected.
+- Dropped support for manually setting the agents platform with `WOODPECKER_PLATFORM`. The platform is now automatically detected.
 
 - Use `WOODPECKER_STATUS_CONTEXT` instead of the deprecated options `WOODPECKER_GITHUB_CONTEXT` and `WOODPECKER_GITEA_CONTEXT`.
 
@@ -157,5 +137,4 @@ Migration from Drone is only possible if you were running Drone <= v0.8.
 
 1. Make sure you are already running Drone v0.8
 2. Upgrade to Woodpecker v0.14.4, migration will be done during startup
-3. Upgrade to the latest Woodpecker version.
-   Pay attention to the breaking changes listed above.
+3. Upgrade to the latest Woodpecker version. Pay attention to the breaking changes listed above.
