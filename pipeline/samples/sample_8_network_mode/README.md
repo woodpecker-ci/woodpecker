@@ -1,12 +1,14 @@
+# Example
+
 Compile the yaml to the intermediate representation:
 
-```
+```sh
 pipec compile
 ```
 
 Execute the intermediate representation:
 
-```
+```sh
 pipec exec
 ```
 
@@ -15,4 +17,4 @@ by other container. This is useful for example to allow the CI to connect with s
 behind a VPN.
 
 Before to start you need to create a container that connects to the VPN (using one of
-the openvpn client images like https://github.com/ekristen/docker-openvpn-client).
+the openvpn client images like <https://github.com/ekristen/docker-openvpn-client>).

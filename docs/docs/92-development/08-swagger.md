@@ -11,23 +11,23 @@ Whenever you change, add or enhance an API endpoint, please update the godocs.
 
 You don't require any extra tools on your machine, all Swagger tooling is automatically fetched by standard Go tools.
 
-### Gin-Handler API documentation guideline
+## Gin-Handler API documentation guideline
 
 Here's a typical example of how annotations for Swagger documentation look like...
 
 ```text
 --- server/api/user.go ---
-//	@Summary		Get a user
-//	@Description	Returns a user with the specified login name. Requires admin rights.
-//	@Router			/users/{login} [get]
-//	@Produce		json
-//	@Success		200	{object}	User
-//	@Tags			Users
-//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param			login			path	string	true	"the user's login name"
+// @Summary  Get a user
+// @Description Returns a user with the specified login name. Requires admin rights.
+// @Router   /users/{login} [get]
+// @Produce  json
+// @Success  200 {object} User
+// @Tags   Users
+// @Param   Authorization header string true "Insert your personal access token" default(Bearer <personal access token>)
+// @Param   login   path string true "the user's login name"
 // @Param   foobar  query   string false "optional foobar parameter"
-//	@Param	  page    query	int		false	"for response pagination, page offset number"	default(1)
-//	@Param   perPage query	int		false	"for response pagination, max items per page"	default(50)
+// @Param   page    query int  false "for response pagination, page offset number" default(1)
+// @Param   perPage query int  false "for response pagination, max items per page" default(50)
 ```
 
 ```text
@@ -35,7 +35,7 @@ Here's a typical example of how annotations for Swagger documentation look like.
 type User struct {
   ID int64 `json:"id" xorm:"pk autoincr 'user_id'"`
 // ...
-} //	@name User
+} // @name User
 ```
 
 These guidelines aim to have consistent wording in the swagger doc:
@@ -48,11 +48,11 @@ These guidelines aim to have consistent wording in the swagger doc:
 - `@Param Authorization` is almost always present, there are just a few un-protected endpoints
 
 There are many examples in the server/api package, which you can use a blueprint.
-More enhanced information you can find here https://github.com/swaggo/swag/blob/main/README.md#declarative-comments-format
+More enhanced information you can find here <https://github.com/swaggo/swag/blob/main/README.md#declarative-comments-format>
 
 ### Manual code generation
 
-##### generate the server's Go code containing the Swagger
+#### generate the server's Go code containing the Swagger
 
 ```shell
 make generate-swagger
@@ -70,8 +70,12 @@ make docs
 go run github.com/swaggo/swag/cmd/swag@latest fmt -g server/api/z.go
 ```
 
+<!-- markdownlint-disable no-space-in-code -->
+
 **WARNING, known issue**: using swag v1.18.12 , there's a bug when running the `fmt` command,
 which makes the swagger generator failing, because it can't find the models/structs/types anymore.
 To fix it, please replace `// @name\tModelName` with `// @name ModelName`,
 which means, replace the tab (`\t`) with a space (` `).
-See https://github.com/swaggo/swag/pull/1594 == once this is merged and released, the mentioned issue is obsolete.
+See <https://github.com/swaggo/swag/pull/1594> == once this is merged and released, the mentioned issue is obsolete.
+
+<!-- markdownlint-enable no-space-in-code -->

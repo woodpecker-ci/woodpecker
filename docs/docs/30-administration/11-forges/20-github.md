@@ -21,7 +21,7 @@ Do not use a "GitHub App" instead of an Oauth2 app as the former will not work c
 - Name: An arbitrary name for your App
 - Homepage URL: The URL of your Woodpecker instance
 - Callback URL: `https://<your-woodpecker-instance>/authorize`
-- (optional) Upload the Woodpecker Logo: https://avatars.githubusercontent.com/u/84780935?s=200&v=4
+- (optional) Upload the Woodpecker Logo: <https://avatars.githubusercontent.com/u/84780935?s=200&v=4>
 
 ## Client Secret Creation
 
