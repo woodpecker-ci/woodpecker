@@ -122,7 +122,8 @@ func persistPipelineWithErr(ctx context.Context, _store store.Store, pipeline *m
 	pipeline.Started = time.Now().Unix()
 	pipeline.Finished = pipeline.Started
 	pipeline.Status = model.StatusError
-	pipeline.Errors = ErrorToPipelineErrors(fmt.Errorf(err))
+	e := model.PipelineError{Message: err}
+	pipeline.Errors = e.GetErrors()
 	dbErr := _store.CreatePipeline(pipeline)
 	if dbErr != nil {
 		msg := fmt.Errorf("failed to save pipeline for %s", repo.FullName)

@@ -16,9 +16,6 @@ package pipeline
 
 import (
 	"errors"
-
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"go.uber.org/multierr"
 )
 
 type ErrNotFound struct {
@@ -54,20 +51,3 @@ func (e ErrBadRequest) Is(target error) bool {
 }
 
 var ErrFiltered = errors.New("ignoring hook: 'when' filters filtered out all steps")
-
-func ErrorToPipelineErrors(err error) []*model.PipelineError {
-	var pipelineErrors []*model.PipelineError
-	for _, _err := range multierr.Errors(err) {
-		var err *model.PipelineError
-		if errors.As(_err, &err) {
-			pipelineErrors = append(pipelineErrors, err)
-		} else {
-			pipelineErrors = append(pipelineErrors, &model.PipelineError{
-				Message: err.Error(),
-				Type:    model.PipelineErrorTypeGeneral,
-			})
-		}
-	}
-
-	return pipelineErrors
-}

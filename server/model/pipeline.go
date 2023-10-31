@@ -15,6 +15,12 @@
 
 package model
 
+import (
+	"errors"
+
+	"go.uber.org/multierr"
+)
+
 type Pipeline struct {
 	ID                  int64             `json:"id"                      xorm:"pk autoincr 'pipeline_id'"`
 	RepoID              int64             `json:"-"                       xorm:"UNIQUE(s) INDEX 'pipeline_repo_id'"`
@@ -93,6 +99,23 @@ type PipelineError struct {
 	Data      interface{}       `json:"data"`
 }
 
-func (e PipelineError) Error() string {
+func (e *PipelineError) Error() string {
 	return e.Message
+}
+
+func (e *PipelineError) GetErrors() []*PipelineError {
+	var pipelineErrors []*PipelineError
+	for _, _err := range multierr.Errors(e) {
+		var err *PipelineError
+		if errors.As(_err, &err) {
+			pipelineErrors = append(pipelineErrors, err)
+		} else {
+			pipelineErrors = append(pipelineErrors, &PipelineError{
+				Message: err.Error(),
+				Type:    PipelineErrorTypeGeneral,
+			})
+		}
+	}
+
+	return pipelineErrors
 }
