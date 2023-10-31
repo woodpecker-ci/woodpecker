@@ -94,56 +94,48 @@ Woodpecker uses `git+https` to clone repositories, however, Bitbucket Server doe
 
 You must register your application with Bitbucket Server in order to generate a consumer key. Navigate to your account settings and choose Applications from the menu, and click Register new application. Now copy & paste the text value from `/etc/bitbucket/key.pub` into the `Public Key` in the incoming link part of the application registration.
 
-Please use <http://woodpecker.mycompany.com/authorize> as the Authorization callback URL.
+Please use http://woodpecker.mycompany.com/authorize as the Authorization callback URL.
 
 ## Configuration
 
 This is a full list of configuration options. Please note that many of these options use default configuration values that should work for the majority of installations.
 
 ### `WOODPECKER_STASH`
-
 > Default: `false`
 
 Enables the Bitbucket Server driver.
 
 ### `WOODPECKER_STASH_URL`
-
 > Default: empty
 
 Configures the Bitbucket Server address.
 
 ### `WOODPECKER_STASH_CONSUMER_KEY`
-
 > Default: empty
 
 Configures your Bitbucket Server consumer key.
 
 ### `WOODPECKER_STASH_CONSUMER_RSA`
-
 > Default: empty
 
 Configures the path to your Bitbucket Server private key file.
 
 ### `WOODPECKER_STASH_CONSUMER_RSA_STRING`
-
 > Default: empty
 
 Configures your Bitbucket Server private key.
 
 ### `WOODPECKER_STASH_GIT_USERNAME`
-
 > Default: empty
 
 This username is used to authenticate and clone all private repositories.
 
 ### `WOODPECKER_STASH_GIT_PASSWORD`
-
 > Default: empty
 
 The password is used to authenticate and clone all private repositories.
 
 ### `WOODPECKER_STASH_SKIP_VERIFY`
-
 > Default: `false`
 
 Configure if SSL verification should be skipped.

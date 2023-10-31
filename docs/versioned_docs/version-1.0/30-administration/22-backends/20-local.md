@@ -77,6 +77,7 @@ manual clone step.
 The `image` entry is used to specify the shell, such as Bash or Fish, that is
 used to run the commands.
 
+
 ```yaml
 # .woodpecker.yml
 
@@ -114,3 +115,4 @@ labels:
 steps:
   [...]
 ```
+

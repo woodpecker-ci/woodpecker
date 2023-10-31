@@ -34,7 +34,7 @@ scrape_configs:
 
 List of prometheus metrics specific to Woodpecker:
 
-```yaml
+```
 # HELP woodpecker_build_count Build count.
 # TYPE woodpecker_build_count counter
 woodpecker_build_count{branch="master",pipeline="total",repo="woodpecker-ci/woodpecker",status="success"} 3

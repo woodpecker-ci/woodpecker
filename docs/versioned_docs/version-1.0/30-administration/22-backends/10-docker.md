@@ -5,19 +5,16 @@ This is the original backend used with Woodpecker. The docker backend executes e
 ## Configuration
 
 ### `WOODPECKER_BACKEND_DOCKER_NETWORK`
-
 > Default: empty
 
 Set to the name of an existing network which will be attached to all your pipeline containers (steps). Please be careful as this allows the containers of different pipelines to access each other!
 
 ### `WOODPECKER_BACKEND_DOCKER_ENABLE_IPV6`
-
 > Default: `false`
 
 Enable IPv6 for the networks used by pipeline containers (steps). Make sure you configured your docker daemon to support IPv6.
 
 ### `WOODPECKER_BACKEND_DOCKER_VOLUMES`
-
 > Default: empty
 
 List of default volumes separated by comma to be mounted to all pipeline containers (steps). For example to use custom CA

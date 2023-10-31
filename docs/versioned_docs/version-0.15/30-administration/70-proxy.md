@@ -1,7 +1,6 @@
 # Proxy
 
 ## Apache
-
 This guide provides a brief overview for installing Woodpecker server behind the Apache2 webserver. This is an example configuration:
 
 ```nohighlight
@@ -89,10 +88,9 @@ woodpecker.example.com {
 ```
 
 ## Ngrok
-
 After installing [ngrok](https://ngrok.com/), open a new console and run:
 
-```sh
+```
 ngrok http 8000
 ```
 

@@ -40,7 +40,7 @@ steps:
 
 Keep in mind the name is optional, if not added the steps will be numerated.
 
-## Skip Commits
+### Skip Commits
 
 Woodpecker gives the ability to skip individual commits by adding `[CI SKIP]` to the commit message. Note this is case-insensitive.
 
@@ -122,7 +122,7 @@ Woodpecker does not automatically upgrade container images. Example configuratio
 +    pull: true
 ```
 
-#### Images from private registries
+##### Images from private registries
 
 You must provide registry credentials on the UI in order to pull private pipeline images defined in your YAML configuration file.
 

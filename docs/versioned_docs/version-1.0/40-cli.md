@@ -1,14 +1,14 @@
 # CLI
 
-## NAME
+# NAME
 
 woodpecker-cli - command line utility
 
-## SYNOPSIS
+# SYNOPSIS
 
 woodpecker-cli
 
-```sh
+```
 [--log-level]=[value]
 [--server|-s]=[value]
 [--token|-t]=[value]
@@ -16,11 +16,11 @@ woodpecker-cli
 
 **Usage**:
 
-```sh
+```
 woodpecker-cli [GLOBAL OPTIONS] command [COMMAND OPTIONS] [ARGUMENTS...]
 ```
 
-## GLOBAL OPTIONS
+# GLOBAL OPTIONS
 
 **--log-level**="": set logging level (default: info)
 
@@ -28,7 +28,8 @@ woodpecker-cli [GLOBAL OPTIONS] command [COMMAND OPTIONS] [ARGUMENTS...]
 
 **--token, -t**="": server auth token
 
-## COMMANDS
+
+# COMMANDS
 
 ## pipeline, build
 
@@ -303,37 +304,37 @@ execute a local pipeline
 
 **--backend-ssh-user**="": backend ssh user
 
-**--commit-author-avatar**="":
+**--commit-author-avatar**="": 
 
-**--commit-author-email**="":
+**--commit-author-email**="": 
 
-**--commit-author-name**="":
+**--commit-author-name**="": 
 
-**--commit-branch**="":
+**--commit-branch**="": 
 
-**--commit-message**="":
+**--commit-message**="": 
 
-**--commit-ref**="":
+**--commit-ref**="": 
 
-**--commit-refspec**="":
+**--commit-refspec**="": 
 
-**--commit-sha**="":
+**--commit-sha**="": 
 
-**--env**="":
+**--env**="": 
 
-**--forge-type**="":
+**--forge-type**="": 
 
-**--forge-url**="":
+**--forge-url**="": 
 
 **--local**: run from local directory
 
 **--log-level**="": set logging level (default: info)
 
-**--netrc-machine**="":
+**--netrc-machine**="": 
 
-**--netrc-password**="":
+**--netrc-password**="": 
 
-**--netrc-username**="":
+**--netrc-username**="": 
 
 **--network**="": external networks
 
@@ -343,7 +344,7 @@ execute a local pipeline
 
 **--pipeline-finished**="":  (default: 0)
 
-**--pipeline-link**="":
+**--pipeline-link**="": 
 
 **--pipeline-number**="":  (default: 0)
 
@@ -351,63 +352,63 @@ execute a local pipeline
 
 **--pipeline-started**="":  (default: 0)
 
-**--pipeline-status**="":
+**--pipeline-status**="": 
 
-**--pipeline-target**="":
+**--pipeline-target**="": 
 
-**--prev-commit-author-avatar**="":
+**--prev-commit-author-avatar**="": 
 
-**--prev-commit-author-email**="":
+**--prev-commit-author-email**="": 
 
-**--prev-commit-author-name**="":
+**--prev-commit-author-name**="": 
 
-**--prev-commit-branch**="":
+**--prev-commit-branch**="": 
 
-**--prev-commit-message**="":
+**--prev-commit-message**="": 
 
-**--prev-commit-ref**="":
+**--prev-commit-ref**="": 
 
-**--prev-commit-refspec**="":
+**--prev-commit-refspec**="": 
 
-**--prev-commit-sha**="":
+**--prev-commit-sha**="": 
 
 **--prev-pipeline-created**="":  (default: 0)
 
-**--prev-pipeline-event**="":
+**--prev-pipeline-event**="": 
 
 **--prev-pipeline-finished**="":  (default: 0)
 
-**--prev-pipeline-link**="":
+**--prev-pipeline-link**="": 
 
 **--prev-pipeline-number**="":  (default: 0)
 
 **--prev-pipeline-started**="":  (default: 0)
 
-**--prev-pipeline-status**="":
+**--prev-pipeline-status**="": 
 
 **--privileged**="": privileged plugins (default: "plugins/docker", "plugins/gcr", "plugins/ecr", "woodpeckerci/plugin-docker-buildx")
 
 **--repo**="": full repo name
 
-**--repo-clone-url**="":
+**--repo-clone-url**="": 
 
-**--repo-link**="":
+**--repo-link**="": 
 
-**--repo-private**="":
+**--repo-private**="": 
 
-**--repo-remote-id**="":
+**--repo-remote-id**="": 
 
-**--repo-trusted**:
+**--repo-trusted**: 
 
 **--server, -s**="": server address
 
 **--step-name**="":  (default: 0)
 
-**--system-link**="":  (default: <https://github.com/woodpecker-ci/woodpecker>)
+**--system-link**="":  (default: https://github.com/woodpecker-ci/woodpecker)
 
 **--system-name**="":  (default: woodpecker)
 
-**--system-platform**="":
+**--system-platform**="": 
 
 **--timeout**="": pipeline timeout (default: 0s)
 

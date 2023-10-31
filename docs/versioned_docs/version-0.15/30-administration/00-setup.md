@@ -1,14 +1,13 @@
 # Setup
 
 A Woodpecker deployment consists of two parts:
-
 - A server which is the heart of Woodpecker and ships the webinterface.
 - Next to one server you can deploy any number of agents which will run the pipelines.
 
 > Each agent is able to process one pipeline step by default.
-
+>
 > If you have 4 agents installed and connected to the Woodpecker server, your system will process 4 builds in parallel.
-
+>
 > You can add more agents to increase the number of parallel builds or set the agent's `WOODPECKER_MAX_PROCS=1` environment variable to increase the number of parallel builds for that agent.
 
 ## Which version of Woodpecker should I use?
@@ -20,7 +19,6 @@ To find out more about the differences between the two releases, please read the
 ## Installation
 
 You can install Woodpecker on multiple ways:
-
 - Using [docker-compose](#docker-compose) with the official [docker images](../80-downloads.md#docker-images)
 - By deploying to a [Kubernetes](./80-kubernetes.md) with manifests or Woodpeckers official Helm charts
 - Using [binaries](../80-downloads.md)

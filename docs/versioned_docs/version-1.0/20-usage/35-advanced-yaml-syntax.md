@@ -5,7 +5,6 @@
 You can use [YAML anchors & aliases](https://yaml.org/spec/1.2.2/#3222-anchors-and-aliases) as variables in your pipeline config.
 
 To convert this:
-
 ```yml
 steps:
   test:

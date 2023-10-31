@@ -54,7 +54,6 @@ Some versions need some changes to the server configuration or the pipeline conf
   - `drone.sqlite` -> `woodpecker.sqlite`
 
 - Plugin Settings moved into `settings` section:
-
   ```diff
    pipeline:
    something:

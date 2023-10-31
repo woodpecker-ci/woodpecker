@@ -1,7 +1,6 @@
 # CLI
 
 ```docker run --rm woodpeckerci/woodpecker-cli:v0.15```
-
 ```bash
 NAME:
    woodpecker-cli - command line utility

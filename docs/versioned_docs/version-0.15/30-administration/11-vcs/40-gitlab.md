@@ -32,31 +32,26 @@ If you run the Woodpecker CI server on the same host as the GitLab instance, you
 This is a full list of configuration options. Please note that many of these options use default configuration values that should work for the majority of installations.
 
 ### `WOODPECKER_GITLAB`
-
 > Default: `false`
 
 Enables the GitLab driver.
 
 ### `WOODPECKER_GITLAB_URL`
-
 > Default: `https://gitlab.com`
 
 Configures the GitLab server address.
 
 ### `WOODPECKER_GITLAB_CLIENT`
-
 > Default: empty
 
 Configures the GitLab OAuth client id. This is used to authorize access.
 
 ### `WOODPECKER_GITLAB_SECRET`
-
 > Default: empty
 
 Configures the GitLab OAuth client secret. This is used to authorize access.
 
 ### `WOODPECKER_GITLAB_SKIP_VERIFY`
-
 > Default: `false`
 
 Configure if SSL verification should be skipped.

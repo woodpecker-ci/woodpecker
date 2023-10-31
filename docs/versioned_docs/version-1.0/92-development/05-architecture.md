@@ -37,7 +37,7 @@
 | `server/shared/**`   | TODO: move and split [#974](https://github.com/woodpecker-ci/woodpecker/issues/974) |
 | `server/web/**`      | server SPA                                                                          |
 
-- `../` = `server/`
+* `../` = `server/`
 
 ### Agent
 

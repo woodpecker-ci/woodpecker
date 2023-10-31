@@ -3,6 +3,7 @@
 Woodpecker supports two ways of enabling SSL communication. You can either use Let's Encrypt to get automated SSL support with
 renewal or provide your own SSL certificates.
 
+
 ## Let's Encrypt
 
 Woodpecker supports automated SSL configuration and updates using Let's Encrypt.
@@ -33,7 +34,7 @@ Note that Woodpecker uses the hostname from the `WOODPECKER_HOST` environment va
 
 Woodpecker writes the certificates to the below directory:
 
-```sh
+```
 /var/lib/woodpecker/golang-autocert
 ```
 
