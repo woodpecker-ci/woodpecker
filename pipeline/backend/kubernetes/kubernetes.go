@@ -372,9 +372,7 @@ func (e *kube) DestroyWorkflow(_ context.Context, conf *types.Config, taskUUID s
 			}
 			log.Trace().Msgf("Deleting pod: %s", stepName)
 			if err := e.client.CoreV1().Pods(e.config.Namespace).Delete(noContext, stepName, deleteOpts); err != nil {
-				if errors.IsNotFound(err) {
-					log.Trace().Err(err).Msgf("Unable to delete pod %s", stepName)
-				} else {
+				if !errors.IsNotFound(err) {
 					return err
 				}
 			}
