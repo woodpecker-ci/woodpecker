@@ -15,7 +15,7 @@
       </InputField>
 
       <InputField :label="$t(i18nPrefix + 'images.images')">
-        <TextField v-model="images" :placeholder="$t(i18nPrefix + 'images.desc')" />
+        <TextField v-model="innerValue.images" :placeholder="$t(i18nPrefix + 'images.desc')" />
       </InputField>
 
       <InputField :label="$t(i18nPrefix + 'events.events')">
