@@ -4,10 +4,11 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@renovate[bot], @HamburgerJungeJr, @qwerty287, @pat-s, @6543, @anbraten, @Janik-Haag, @nitram509, @JohnWalkerx, @OskarsPakers, @Exar04, @dominic-p, @categulario, @mzampetakis, @Timshel, @Denperidge, @xoxys, @tomix1024, @lonix1, @s3lph, @math3vz, @LTek-online, @testwill, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @azdle, @runephilosof-karnovgroup, @praneeth-ovckd
+@6543, @renovate[bot], @HamburgerJungeJr, @qwerty287, @pat-s, @anbraten, @Janik-Haag, @nitram509, @JohnWalkerx, @OskarsPakers, @Exar04, @dominic-p, @categulario, @mzampetakis, @Timshel, @Denperidge, @xoxys, @tomix1024, @lonix1, @s3lph, @math3vz, @LTek-online, @testwill, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @azdle, @runephilosof-karnovgroup, @praneeth-ovckd
 
 ### 💥 Breaking changes
 
+- Do not sanitzie secrets with 3 or less chars [[#2680](https://github.com/woodpecker-ci/woodpecker/pull/2680)]
 - fix(deps): update docker to v24 [[#2675](https://github.com/woodpecker-ci/woodpecker/pull/2675)]
 - Remove `WOODPECKER_DOCS` config [[#2647](https://github.com/woodpecker-ci/woodpecker/pull/2647)]
 - Remove plugin-only option from secrets [[#2213](https://github.com/woodpecker-ci/woodpecker/pull/2213)]
