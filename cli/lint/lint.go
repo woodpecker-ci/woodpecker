@@ -93,26 +93,22 @@ func lintFile(_ *cli.Context, file string) error {
 	if err != nil {
 		fmt.Println("🔥 Config has errors or warnings")
 
-		var linterError *linter.LinterError
-		if !errors.As(err, &linterError) {
-			return err
-		}
-
-		errs := multierr.Errors(err)
-		for _, err := range errs {
+		hasErrors := true
+		for _, err := range multierr.Errors(err) {
 			var linterError *linter.LinterError
 			if errors.As(err, &linterError) {
 				if linterError.Warning {
 					fmt.Printf("\t⚠️  %s: %s\n", linterError.Field, linterError.Message)
 				} else {
 					fmt.Printf("\t❌ %s: %s\n", linterError.Field, linterError.Message)
+					hasErrors = true
 				}
 			} else {
 				return err
 			}
 		}
 
-		if linterError.IsBlocking() {
+		if hasErrors {
 			return errors.New("config has errors")
 		}
 
