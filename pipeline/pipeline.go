@@ -274,7 +274,7 @@ func (r *Runtime) exec(step *backend.Step) (*backend.State, error) {
 		return nil, err
 	}
 
-	if err := r.engine.StopStep(r.ctx, step, r.taskUUID); err != nil {
+	if err := r.engine.DestroyStep(r.ctx, step, r.taskUUID); err != nil {
 		return nil, err
 	}
 

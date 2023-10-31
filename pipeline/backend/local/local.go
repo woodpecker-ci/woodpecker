@@ -215,7 +215,7 @@ func (e *local) TailStep(_ context.Context, step *types.Step, taskUUID string) (
 	return e.output, nil
 }
 
-func (e *local) StopStep(_ context.Context, _ *types.Step, _ string) error {
+func (e *local) DestroyStep(_ context.Context, _ *types.Step, _ string) error {
 	// WaitStep already waits for the command to finish, so there is nothing to do here.
 	return nil
 }

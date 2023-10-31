@@ -325,7 +325,7 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 	// return rc, nil
 }
 
-func (e *kube) StopStep(ctx context.Context, step *types.Step, taskUUID string) error {
+func (e *kube) DestroyStep(ctx context.Context, step *types.Step, taskUUID string) error {
 	podName, err := dnsName(step.Name)
 	if err != nil {
 		return err

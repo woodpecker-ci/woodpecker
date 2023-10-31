@@ -291,7 +291,7 @@ func (e *docker) TailStep(ctx context.Context, step *backend.Step, taskUUID stri
 	return rc, nil
 }
 
-func (e *docker) StopStep(ctx context.Context, step *backend.Step, taskUUID string) error {
+func (e *docker) DestroyStep(ctx context.Context, step *backend.Step, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("stop step %s", step.Name)
 
 	containerName := toContainerName(step)
