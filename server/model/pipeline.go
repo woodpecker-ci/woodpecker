@@ -70,14 +70,6 @@ type PipelineOptions struct {
 	Variables map[string]string `json:"variables"`
 } //	@name PipelineOptions
 
-type PipelineErrorType string
-
-const (
-	PipelineErrorTypeLinter      PipelineErrorType = "linter"      // some error with the config syntax
-	PipelineErrorTypeDeprecation PipelineErrorType = "deprecation" // using some deprecated feature
-	PipelineErrorTypeCompiler    PipelineErrorType = "compiler"    // some error with the config semantics
-)
-
 // config not found / failed to fetch
 // config matrix
 // config subsitution
@@ -85,10 +77,20 @@ const (
 // linter
 // compiler
 
+type PipelineErrorType string
+
+const (
+	PipelineErrorTypeLinter      PipelineErrorType = "linter"      // some error with the config syntax
+	PipelineErrorTypeDeprecation PipelineErrorType = "deprecation" // using some deprecated feature
+	PipelineErrorTypeCompiler    PipelineErrorType = "compiler"    // some error with the config semantics
+	PipelineErrorTypeGeneral     PipelineErrorType = "general"
+)
+
 type PipelineError struct {
-	Type    PipelineErrorType `json:"type"`
-	Message string            `json:"message"`
-	Data    string            `json:"data"`
+	Type      PipelineErrorType `json:"type"`
+	Message   string            `json:"message"`
+	IsWarning bool              `json:"is_warning"`
+	Data      interface{}       `json:"data"`
 }
 
 func (e PipelineError) Error() string {
