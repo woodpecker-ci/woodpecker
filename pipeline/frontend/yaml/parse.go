@@ -15,9 +15,12 @@
 package yaml
 
 import (
+	"fmt"
+
 	"codeberg.org/6543/xyaml"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types/base"
 )
 
 // ParseBytes parses the configuration from bytes b.
@@ -26,6 +29,27 @@ func ParseBytes(b []byte) (*types.Workflow, error) {
 	err := xyaml.Unmarshal(b, out)
 	if err != nil {
 		return nil, err
+	}
+
+	// fail hard on deprecated branch filter
+	if out.BranchesDontUseIt != nil {
+		return nil, fmt.Errorf("\"branches:\" filter got removed, use \"branch\" in global when filter instead")
+	}
+
+	// fail hard on deprecated pipeline keyword
+	if len(out.PipelineDontUseIt.ContainerList) != 0 {
+		return nil, fmt.Errorf("\"pipeline:\" got removed, use \"steps:\" instead")
+	}
+
+	// support deprecated platform filter
+	if out.PlatformDontUseIt != "" {
+		if out.Labels == nil {
+			out.Labels = make(base.SliceOrMap)
+		}
+		if _, set := out.Labels["platform"]; !set {
+			out.Labels["platform"] = out.PlatformDontUseIt
+		}
+		out.PlatformDontUseIt = ""
 	}
 
 	return out, nil
