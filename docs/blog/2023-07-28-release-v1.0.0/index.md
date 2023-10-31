@@ -21,7 +21,7 @@ Furthermore, a ton of bugs where addressed and various enhancements introduced, 
 With Woodpecker v1.0.0, you can now substantially improve and streamline your code pipelines,
 empowering you to automate and optimize workflows like never before.
 
-## Some picked highlights:
+## Some picked highlights
 
 ### Add Support for Cron Jobs
 
