@@ -10,11 +10,11 @@ extends: null
 # MD003/heading-style/header-style - Heading style
 MD003:
   # Heading style
-  style: "atx"
+  style: 'atx'
 
 # MD004/ul-style - Unordered list style
 MD004:
-  style: "dash"
+  style: 'dash'
 
 # MD007/ul-indent - Unordered list indentation
 MD007:
@@ -85,12 +85,12 @@ MD025:
 # MD026/no-trailing-punctuation - Trailing punctuation in heading
 MD026:
   # Punctuation characters
-  punctuation: ".,;:!。，；：！"
+  punctuation: '.,;:!。，；：！'
 
 # MD029/ol-prefix - Ordered list item prefix
 MD029:
   # List style
-  style: "one_or_ordered"
+  style: 'one_or_ordered'
 
 # MD030/list-marker-space - Spaces after list markers
 MD030:
@@ -111,12 +111,12 @@ MD033:
 # MD035/hr-style - Horizontal rule style
 MD035:
   # Horizontal rule style
-  style: "---"
+  style: '---'
 
 # MD036/no-emphasis-as-heading/no-emphasis-as-header - Emphasis used instead of a heading
 MD036:
   # Punctuation characters
-  punctuation: ".,;:!?。，；：！？"
+  punctuation: '.,;:!?。，；：！？'
 
 # MD041/first-line-heading/first-line-h1 - First line in a file should be a top-level heading
 MD041:
@@ -135,9 +135,9 @@ MD044:
 # MD046/code-block-style - Code block style
 MD046:
   # Block style
-  style: "fenced"
+  style: 'fenced'
 
 # MD048/code-fence-style - Code fence style
 MD048:
   # Code fence syle
-  style: "backtick"
+  style: 'backtick'
