@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@qwerty287, @renovate[bot], @pat-s, @6543, @anbraten, @Janik-Haag, @nitram509, @JohnWalkerx, @OskarsPakers, @Exar04, @dominic-p, @categulario, @mzampetakis, @Timshel, @Denperidge, @xoxys, @tomix1024, @lonix1, @s3lph, @math3vz, @LTek-online, @testwill, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @azdle, @runephilosof-karnovgroup, @praneeth-ovckd
+@renovate[bot], @qwerty287, @pat-s, @6543, @anbraten, @Janik-Haag, @nitram509, @JohnWalkerx, @OskarsPakers, @Exar04, @dominic-p, @categulario, @mzampetakis, @Timshel, @Denperidge, @xoxys, @tomix1024, @lonix1, @s3lph, @math3vz, @LTek-online, @testwill, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @azdle, @runephilosof-karnovgroup, @praneeth-ovckd
 
 ### 💥 Breaking changes
 
@@ -187,6 +187,7 @@
 
 ### Misc
 
+- fix(deps): update golang (packages) [[#2671](https://github.com/woodpecker-ci/woodpecker/pull/2671)]
 - Use `pre-commit`  [[#2650](https://github.com/woodpecker-ci/woodpecker/pull/2650)]
 - fix(deps): update dependency fuse.js to v7 [[#2666](https://github.com/woodpecker-ci/woodpecker/pull/2666)]
 - chore(deps): update dependency @types/node to v20 [[#2664](https://github.com/woodpecker-ci/woodpecker/pull/2664)]
