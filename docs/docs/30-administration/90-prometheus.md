@@ -46,13 +46,13 @@ scrape_configs:
 
 ## Unauthenticated Access
 
-Alternatively, the unprotected `/metrics` endpoint might be exposed on the internal port. (Port is configurable via the `WOODPECKER_METRICS_SERVER_ADDR` environment variable, e.g. `:9001`.)
+Alternatively, the unprotected `/metrics` endpoint might be exposed on the internal port (Port is configurable via the `WOODPECKER_METRICS_SERVER_ADDR` environment variable, e.g. `:9001`).
 
 ## Metric Reference
 
 List of Prometheus metrics specific to Woodpecker:
 
-```
+```yaml
 # HELP woodpecker_pipeline_count Pipeline count.
 # TYPE woodpecker_pipeline_count counter
 woodpecker_build_count{branch="main",pipeline="total",repo="woodpecker-ci/woodpecker",status="success"} 3
