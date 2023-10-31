@@ -14,7 +14,12 @@
 
 package pipeline
 
-import "errors"
+import (
+	"errors"
+
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/linter"
+	"github.com/woodpecker-ci/woodpecker/server/model"
+)
 
 type ErrNotFound struct {
 	Msg string
@@ -49,3 +54,20 @@ func (e ErrBadRequest) Is(target error) bool {
 }
 
 var ErrFiltered = errors.New("ignoring hook: 'when' filters filtered out all steps")
+
+func ErrorToPipelineErrors(err error) []*model.PipelineError {
+	var linterError *linter.LinterError
+	if !errors.As(err, &linterError) {
+		return nil
+	}
+
+	var pipelineErrors []*model.PipelineError
+	for _, err := range linterError.Errors {
+		pipelineErrors = append(pipelineErrors, &model.PipelineError{
+			Message: err.Error(),
+			Type:    "linter",
+		})
+	}
+
+	return pipelineErrors
+}

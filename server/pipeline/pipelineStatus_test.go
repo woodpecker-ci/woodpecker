@@ -92,8 +92,8 @@ func TestUpdateToStatusError(t *testing.T) {
 
 	pipeline, _ := UpdateToStatusError(&mockUpdatePipelineStore{}, model.Pipeline{}, errors.New("error"))
 
-	if pipeline.Error != "error" {
-		t.Errorf("Pipeline error not equals 'error' != '%s'", pipeline.Error)
+	if pipeline.Errors != "error" {
+		t.Errorf("Pipeline error not equals 'error' != '%s'", pipeline.Errors)
 	} else if model.StatusError != pipeline.Status {
 		t.Errorf("Pipeline status not equals '%s' != '%s'", model.StatusError, pipeline.Status)
 	} else if now > pipeline.Started {

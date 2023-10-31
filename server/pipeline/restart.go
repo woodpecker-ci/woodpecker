@@ -137,6 +137,6 @@ func createNewOutOfOld(old *model.Pipeline) *model.Pipeline {
 	newPipeline.Started = 0
 	newPipeline.Finished = 0
 	newPipeline.Enqueued = time.Now().UTC().Unix()
-	newPipeline.Error = ""
+	newPipeline.Errors = nil
 	return &newPipeline
 }

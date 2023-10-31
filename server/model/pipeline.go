@@ -24,7 +24,7 @@ type Pipeline struct {
 	Parent              int64             `json:"parent"                  xorm:"pipeline_parent"`
 	Event               WebhookEvent      `json:"event"                   xorm:"pipeline_event"`
 	Status              StatusValue       `json:"status"                  xorm:"INDEX 'pipeline_status'"`
-	Error               string            `json:"error"                   xorm:"LONGTEXT 'pipeline_error'"`
+	Errors              []*PipelineError  `json:"errors"                  xorm:"json 'pipeline_errors'"`
 	Enqueued            int64             `json:"enqueued_at"             xorm:"pipeline_enqueued"`
 	Created             int64             `json:"created_at"              xorm:"pipeline_created"`
 	Updated             int64             `json:"updated_at"              xorm:"updated NOT NULL DEFAULT 0 'updated'"`
@@ -69,3 +69,28 @@ type PipelineOptions struct {
 	Branch    string            `json:"branch"`
 	Variables map[string]string `json:"variables"`
 } //	@name PipelineOptions
+
+type PipelineErrorType string
+
+const (
+	PipelineErrorTypeLinter      PipelineErrorType = "linter"      // some error with the config syntax
+	PipelineErrorTypeDeprecation PipelineErrorType = "deprecation" // using some deprecated feature
+	PipelineErrorTypeCompiler    PipelineErrorType = "compiler"    // some error with the config semantics
+)
+
+// config not found / failed to fetch
+// config matrix
+// config subsitution
+// config yaml parsing
+// linter
+// compiler
+
+type PipelineError struct {
+	Type    PipelineErrorType `json:"type"`
+	Message string            `json:"message"`
+	Data    string            `json:"data"`
+}
+
+func (e PipelineError) Error() string {
+	return e.Message
+}

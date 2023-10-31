@@ -48,7 +48,7 @@ func UpdateStatusToDone(store model.UpdatePipelineStore, pipeline model.Pipeline
 }
 
 func UpdateToStatusError(store model.UpdatePipelineStore, pipeline model.Pipeline, err error) (*model.Pipeline, error) {
-	pipeline.Error = err.Error()
+	pipeline.Errors = ErrorToPipelineErrors(err)
 	pipeline.Status = model.StatusError
 	pipeline.Started = time.Now().Unix()
 	pipeline.Finished = pipeline.Started
