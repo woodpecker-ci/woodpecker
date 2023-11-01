@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"runtime"
 	"strings"
 	"time"
 
@@ -46,6 +47,7 @@ type kube struct {
 	ctx    context.Context
 	client kubernetes.Interface
 	config *Config
+	goos   string
 }
 
 type Config struct {
@@ -104,10 +106,10 @@ func (e *kube) IsAvailable(context.Context) bool {
 	return len(host) > 0
 }
 
-func (e *kube) Load(context.Context) error {
+func (e *kube) Load(context.Context) (*types.EngineInfo, error) {
 	config, err := configFromCliContext(e.ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	e.config = config
 
@@ -120,12 +122,16 @@ func (e *kube) Load(context.Context) error {
 	}
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	e.client = kubeClient
 
-	return nil
+	// TODO(2693): use info resp of kubeClient to define platform var
+	e.goos = runtime.GOOS
+	return &types.EngineInfo{
+		Platform: runtime.GOOS + "/" + runtime.GOARCH,
+	}, nil
 }
 
 // Setup the pipeline environment.
@@ -183,7 +189,7 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID s
 
 // Start the pipeline step.
 func (e *kube) StartStep(ctx context.Context, step *types.Step, taskUUID string) error {
-	pod, err := Pod(e.config.Namespace, step, e.config.PodLabels, e.config.PodAnnotations)
+	pod, err := Pod(e.config.Namespace, step, e.config.PodLabels, e.config.PodAnnotations, e.goos)
 	if err != nil {
 		return err
 	}
