@@ -4,10 +4,11 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@anbraten, @6543, @renovate[bot], @HamburgerJungeJr, @qwerty287, @pat-s, @Janik-Haag, @nitram509, @JohnWalkerx, @OskarsPakers, @Exar04, @dominic-p, @categulario, @mzampetakis, @Timshel, @Denperidge, @xoxys, @tomix1024, @lonix1, @s3lph, @math3vz, @LTek-online, @testwill, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @azdle, @runephilosof-karnovgroup, @praneeth-ovckd
+@xoxys, @6543, @runephilosof-karnovgroup, @qwerty287, @anbraten, @renovate[bot], @HamburgerJungeJr, @pat-s, @Janik-Haag, @nitram509, @JohnWalkerx, @OskarsPakers, @Exar04, @dominic-p, @categulario, @mzampetakis, @Timshel, @Denperidge, @tomix1024, @lonix1, @s3lph, @math3vz, @LTek-online, @testwill, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @azdle, @praneeth-ovckd
 
 ### 💥 Breaking changes
 
+- Woodpecker-go: Use Feed instead Activity [[#2690](https://github.com/woodpecker-ci/woodpecker/pull/2690)]
 - Do not sanitzie secrets with 3 or less chars [[#2680](https://github.com/woodpecker-ci/woodpecker/pull/2680)]
 - fix(deps): update docker to v24 [[#2675](https://github.com/woodpecker-ci/woodpecker/pull/2675)]
 - Remove `WOODPECKER_DOCS` config [[#2647](https://github.com/woodpecker-ci/woodpecker/pull/2647)]
@@ -17,8 +18,8 @@
 - Remove deprecated `build` command [[#2602](https://github.com/woodpecker-ci/woodpecker/pull/2602)]
 - Remove deprecated options parsing [[#2480](https://github.com/woodpecker-ci/woodpecker/pull/2480)]
 - Deprecate "platform" filter in favour of "labels" [[#2181](https://github.com/woodpecker-ci/woodpecker/pull/2181)]
-- fail hard on deprecated pipeline keys [[#2180](https://github.com/woodpecker-ci/woodpecker/pull/2180)]
-- client lib: remove useless "sync" option from RepoListOpts [[#2090](https://github.com/woodpecker-ci/woodpecker/pull/2090)]
+- Fail on deprecated pipeline keys [[#2180](https://github.com/woodpecker-ci/woodpecker/pull/2180)]
+- Remove useless "sync" option from RepoListOpts from the client lib [[#2090](https://github.com/woodpecker-ci/woodpecker/pull/2090)]
 - Drop deprecated built-in environment variables [[#2048](https://github.com/woodpecker-ci/woodpecker/pull/2048)]
 
 ### 🔒 Security
@@ -26,7 +27,7 @@
 - Never log tokens [[#2466](https://github.com/woodpecker-ci/woodpecker/pull/2466)]
 - Check permissions on repo lookup [[#2357](https://github.com/woodpecker-ci/woodpecker/pull/2357)]
 - Change token logging to trace level [[#2247](https://github.com/woodpecker-ci/woodpecker/pull/2247)]
-- Validate webhook before change any data [[#2221](https://github.com/woodpecker-ci/woodpecker/pull/2221)]
+- Validate webhook before changing any data [[#2221](https://github.com/woodpecker-ci/woodpecker/pull/2221)]
 
 ### ✨ Features
 
@@ -40,6 +41,10 @@
 
 ### 📈 Enhancement
 
+- Print local backend command logs [[#2678](https://github.com/woodpecker-ci/woodpecker/pull/2678)]
+- Report problems with listening to ports and exit [[#2102](https://github.com/woodpecker-ci/woodpecker/pull/2102)]
+- Use path.Join for server side path generation [[#2689](https://github.com/woodpecker-ci/woodpecker/pull/2689)]
+- Refactor UI dark/bright mode [[#2590](https://github.com/woodpecker-ci/woodpecker/pull/2590)]
 - Stop steps after they are done [[#2681](https://github.com/woodpecker-ci/woodpecker/pull/2681)]
 - Fix where syntax [[#2676](https://github.com/woodpecker-ci/woodpecker/pull/2676)]
 - Add "Repair all" button [[#2642](https://github.com/woodpecker-ci/woodpecker/pull/2642)]
@@ -49,14 +54,14 @@
 - Refactor/simplify pubsub [[#2554](https://github.com/woodpecker-ci/woodpecker/pull/2554)]
 - Refactor pipeline parsing and forge refreshing [[#2527](https://github.com/woodpecker-ci/woodpecker/pull/2527)]
 - Fix gitlab hooks and simplify config extension [[#2537](https://github.com/woodpecker-ci/woodpecker/pull/2537)]
-- local backend set home variable windows-equivalent too  [[#2323](https://github.com/woodpecker-ci/woodpecker/pull/2323)]
+- Set home variable in local backend for windows  [[#2323](https://github.com/woodpecker-ci/woodpecker/pull/2323)]
 - Some cleanups about host config [[#2490](https://github.com/woodpecker-ci/woodpecker/pull/2490)]
 - Fix usage of WOODPECKER_ROOT_PATH [[#2485](https://github.com/woodpecker-ci/woodpecker/pull/2485)]
 - Some UI enhancement [[#2468](https://github.com/woodpecker-ci/woodpecker/pull/2468)]
 - Harmonize pipeline status information and add a review link to the approval [[#2345](https://github.com/woodpecker-ci/woodpecker/pull/2345)]
 - Add Renovate [[#2360](https://github.com/woodpecker-ci/woodpecker/pull/2360)]
 - Add option to render button as link [[#2378](https://github.com/woodpecker-ci/woodpecker/pull/2378)]
-- close sidebar on outside click [[#2325](https://github.com/woodpecker-ci/woodpecker/pull/2325)]
+- Close sidebar on outside clicks [[#2325](https://github.com/woodpecker-ci/woodpecker/pull/2325)]
 - Add release helper [[#1976](https://github.com/woodpecker-ci/woodpecker/pull/1976)]
 - Use API error helpers and improve response codes [[#2366](https://github.com/woodpecker-ci/woodpecker/pull/2366)]
 - Import packages only once [[#2362](https://github.com/woodpecker-ci/woodpecker/pull/2362)]
@@ -67,8 +72,8 @@
 - Use full width header on pipeline view and show repo name [[#2327](https://github.com/woodpecker-ci/woodpecker/pull/2327)]
 - Use html list for changed files list [[#2346](https://github.com/woodpecker-ci/woodpecker/pull/2346)]
 - Show that repo is disabled [[#2340](https://github.com/woodpecker-ci/woodpecker/pull/2340)]
-- add spacing to pipeline feed spinner [[#2326](https://github.com/woodpecker-ci/woodpecker/pull/2326)]
-- make: autodetect host platform [[#2322](https://github.com/woodpecker-ci/woodpecker/pull/2322)]
+- Add spacing to pipeline feed spinner [[#2326](https://github.com/woodpecker-ci/woodpecker/pull/2326)]
+- Autodetect host platform in Makefile [[#2322](https://github.com/woodpecker-ci/woodpecker/pull/2322)]
 - Add "plugin" support to local backend [[#2239](https://github.com/woodpecker-ci/woodpecker/pull/2239)]
 - Rename grpc pipeline to workflow [[#2173](https://github.com/woodpecker-ci/woodpecker/pull/2173)]
 - Pass netrc data to external config service request [[#2310](https://github.com/woodpecker-ci/woodpecker/pull/2310)]
@@ -80,7 +85,7 @@
 - Add SSH clone URL env var [[#2198](https://github.com/woodpecker-ci/woodpecker/pull/2198)]
 - Small improvements to mobile interface [[#2202](https://github.com/woodpecker-ci/woodpecker/pull/2202)]
 - Switch to upstream ttlcache [[#2187](https://github.com/woodpecker-ci/woodpecker/pull/2187)]
-- make EqualStringSlice to generic EqualSliceValues [[#2179](https://github.com/woodpecker-ci/woodpecker/pull/2179)]
+- Convert EqualStringSlice to generic EqualSliceValues [[#2179](https://github.com/woodpecker-ci/woodpecker/pull/2179)]
 - Pass netrc to trusted clone images [[#2163](https://github.com/woodpecker-ci/woodpecker/pull/2163)]
 - Use Vue setup directive [[#2165](https://github.com/woodpecker-ci/woodpecker/pull/2165)]
 - Release file lock on USR1 signal [[#2151](https://github.com/woodpecker-ci/woodpecker/pull/2151)]
@@ -98,7 +103,7 @@
 - Change master to main [[#2044](https://github.com/woodpecker-ci/woodpecker/pull/2044)]
 - Remove default branch fallbacks [[#2065](https://github.com/woodpecker-ci/woodpecker/pull/2065)]
 - Remove fallback check for old sqlite file location [[#2046](https://github.com/woodpecker-ci/woodpecker/pull/2046)]
-- let generic datastore error include func name [[#2041](https://github.com/woodpecker-ci/woodpecker/pull/2041)]
+- Include the function name in generic datastore errors  [[#2041](https://github.com/woodpecker-ci/woodpecker/pull/2041)]
 
 ### 🐛 Bug Fixes
 
@@ -190,6 +195,7 @@
 
 ### Misc
 
+- Use full qualifyer for images [[#2692](https://github.com/woodpecker-ci/woodpecker/pull/2692)]
 - chore(deps): lock file maintenance [[#2673](https://github.com/woodpecker-ci/woodpecker/pull/2673)]
 - fix(deps): update golang (packages) [[#2671](https://github.com/woodpecker-ci/woodpecker/pull/2671)]
 - Use `pre-commit`  [[#2650](https://github.com/woodpecker-ci/woodpecker/pull/2650)]
