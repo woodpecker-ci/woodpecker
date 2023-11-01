@@ -114,6 +114,7 @@ func lintFile(_ *cli.Context, file string) error {
 				line = fmt.Sprintf("%s %s", line, err.Message)
 			}
 
+			// TODO: use table output
 			fmt.Printf("%s\n", line)
 		}
 
