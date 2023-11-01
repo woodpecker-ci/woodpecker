@@ -56,7 +56,7 @@ type Client interface {
 
 	// RepoListOpts returns a list of all repositories to which the user has
 	// explicit access in the host system.
-	RepoListOpts(bool, bool) ([]*Repo, error)
+	RepoListOpts(bool) ([]*Repo, error)
 
 	// RepoPost activates a repository.
 	RepoPost(forgeRemoteID int64) (*Repo, error)
@@ -88,7 +88,7 @@ type Client interface {
 	PipelineList(repoID int64) ([]*Pipeline, error)
 
 	// PipelineQueue returns a list of enqueued pipelines.
-	PipelineQueue() ([]*Activity, error)
+	PipelineQueue() ([]*Feed, error)
 
 	// PipelineCreate returns creates a pipeline on specified branch.
 	PipelineCreate(repoID int64, opts *PipelineOptions) (*Pipeline, error)
@@ -148,20 +148,26 @@ type Client interface {
 	// SecretDelete deletes a secret.
 	SecretDelete(repoID int64, secret string) error
 
+	// Org returns an organization by name.
+	Org(orgID int64) (*Org, error)
+
+	// OrgLookup returns an organization id by name.
+	OrgLookup(orgName string) (*Org, error)
+
 	// OrgSecret returns an organization secret by name.
-	OrgSecret(owner, secret string) (*Secret, error)
+	OrgSecret(orgID int64, secret string) (*Secret, error)
 
 	// OrgSecretList returns a list of all organization secrets.
-	OrgSecretList(owner string) ([]*Secret, error)
+	OrgSecretList(orgID int64) ([]*Secret, error)
 
 	// OrgSecretCreate creates an organization secret.
-	OrgSecretCreate(owner string, secret *Secret) (*Secret, error)
+	OrgSecretCreate(orgID int64, secret *Secret) (*Secret, error)
 
 	// OrgSecretUpdate updates an organization secret.
-	OrgSecretUpdate(owner string, secret *Secret) (*Secret, error)
+	OrgSecretUpdate(orgID int64, secret *Secret) (*Secret, error)
 
 	// OrgSecretDelete deletes an organization secret.
-	OrgSecretDelete(owner, secret string) error
+	OrgSecretDelete(orgID int64, secret string) error
 
 	// GlobalSecret returns an global secret by name.
 	GlobalSecret(secret string) (*Secret, error)

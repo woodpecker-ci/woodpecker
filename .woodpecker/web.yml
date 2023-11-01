@@ -1,18 +1,21 @@
+when:
+  - event: [pull_request, tag]
+  - event: push
+    branch:
+      - ${CI_REPO_DEFAULT_BRANCH}
+      - release/*
+
 variables:
-  - &node_image 'node:18-alpine'
+  - &node_image 'docker.io/node:21-alpine'
   - &when
-    - path: &when_path
-        # related config files
-        - ".woodpecker/web.yml"
-        # web source code
-        - "web/**"
-        # api source code
-        - "server/api/**"
-      branch:
-        exclude: ${CI_REPO_DEFAULT_BRANCH}
-      event: push
-    - path: *when_path
-      event: [pull_request, tag, deployment]
+    path:
+      # related config files
+      - '.woodpecker/web.yml'
+      # web source code
+      - 'web/**'
+      # api source code
+      - 'server/api/**'
+    event: [pull_request, tag, deployment]
 
 steps:
   deps:
@@ -38,7 +41,7 @@ steps:
     directory: web/
     commands:
       - corepack enable
-      - pnpm formatcheck
+      - pnpm format:check
     when: *when
 
   typecheck:
@@ -48,14 +51,6 @@ steps:
     commands:
       - corepack enable
       - pnpm typecheck
-    when: *when
-
-  securitycheck:
-    group: test
-    image: aquasec/trivy:latest
-    commands:
-      - trivy fs --exit-code 0 --skip-dirs node_modules/ --severity UNKNOWN,LOW web/
-      - trivy fs --exit-code 1 --skip-dirs node_modules/ --severity MEDIUM,HIGH,CRITICAL web/
     when: *when
 
   test:

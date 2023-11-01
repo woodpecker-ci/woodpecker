@@ -12,8 +12,8 @@ services:
     environment:
       - [...]
 +     - WOODPECKER_BITBUCKET=true
-+     - WOODPECKER_BITBUCKET_CLIENT=95c0282573633eb25e82
-+     - WOODPECKER_BITBUCKET_SECRET=30f5064039e6b359e075
++     - WOODPECKER_BITBUCKET_CLIENT=... # called "Key" in Bitbucket
++     - WOODPECKER_BITBUCKET_SECRET=...
 
   woodpecker-agent:
     [...]
@@ -21,49 +21,59 @@ services:
 
 ## Registration
 
-You must register your application with Bitbucket in order to generate a client and secret. Navigate to your account settings and choose OAuth from the menu, and click Add Consumer.
+You must register an OAuth application at Bitbucket in order to get a key and secret combination for woodpecker. Navigate to your workspace settings and choose `OAuth consumers` from the menu, and finally click `Add Consumer` (the url should be like: `https://bitbucket.org/[your-project-name]/workspace/settings/api`).
 
-Please use the Authorization callback URL:
+Please set a name and set the `Callback URL` like this:
 
 ```nohighlight
-http://woodpecker.mycompany.com/authorize
+https://<your-woodpecker-address>/authorize
 ```
+
+![bitbucket oauth setup](bitbucket_oauth.png)
 
 Please also be sure to check the following permissions:
 
 ```nohighlight
-Account:Email
-Account:Read
-Team Membership:Read
-Repositories:Read
-Webhooks:Read and Write
+Account: Email, Read
+Workspace membership: Read
+Projects: Read
+Repositories: Read
+Pull requests: Read
+Webhooks: Read and Write
 ```
+
+![bitbucket permissions](bitbucket_permissions.png)
 
 ## Configuration
 
 This is a full list of configuration options. Please note that many of these options use default configuration values that should work for the majority of installations.
 
 ### `WOODPECKER_BITBUCKET`
+
 > Default: `false`
 
 Enables the Bitbucket driver.
 
 ### `WOODPECKER_BITBUCKET_CLIENT`
+
 > Default: empty
 
-Configures the Bitbucket OAuth client id. This is used to authorize access.
+Configures the Bitbucket OAuth client key. This is used to authorize access.
 
 ### `WOODPECKER_BITBUCKET_CLIENT_FILE`
+
 > Default: empty
 
 Read the value for `WOODPECKER_BITBUCKET_CLIENT` from the specified filepath
 
 ### `WOODPECKER_BITBUCKET_SECRET`
+
 > Default: empty
 
 Configures the Bitbucket OAuth client secret. This is used to authorize access.
 
 ### `WOODPECKER_BITBUCKET_SECRET_FILE`
+
 > Default: empty
 
 Read the value for `WOODPECKER_BITBUCKET_SECRET` from the specified filepath

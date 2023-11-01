@@ -1,3 +1,5 @@
+# Woodpecker
+
 <p align="center">
   <a href="https://github.com/woodpecker-ci/woodpecker/">
     <img alt="Woodpecker" src="docs/static/img/logo.svg" width="220"/>
@@ -9,7 +11,7 @@
     <img src="https://ci.woodpecker-ci.org/api/badges/woodpecker-ci/woodpecker/status.svg">
   </a>
   <a href="https://codecov.io/gh/woodpecker-ci/woodpecker">
-    <img src="https://codecov.io/gh/woodpecker-ci/woodpecker/branch/master/graph/badge.svg"/>
+    <img src="https://codecov.io/gh/woodpecker-ci/woodpecker/branch/main/graph/badge.svg"/>
   </a>
   <a href="https://translate.woodpecker-ci.org/engage/woodpecker-ci/">
     <img src="https://translate.woodpecker-ci.org/widgets/woodpecker-ci/-/ui/svg-badge.svg" alt="Translation status" />
@@ -20,7 +22,7 @@
   <a href="https://matrix.to/#/#woodpecker:matrix.org" title="Join the Matrix space at https://matrix.to/#/#woodpecker:matrix.org">
     <img src="https://img.shields.io/matrix/woodpecker:matrix.org?label=matrix">
   </a>
-  <a href="https://goreportcard.com/badge/github.com/woodpecker-ci/woodpecker" title="Go Report Card">
+  <a href="https://goreportcard.com/report/github.com/woodpecker-ci/woodpecker" title="Go Report Card">
     <img src="https://goreportcard.com/badge/github.com/woodpecker-ci/woodpecker">
   </a>
   <a href="https://godoc.org/github.com/woodpecker-ci/woodpecker" title="GoDoc">
@@ -41,12 +43,13 @@
   <a href="https://www.tickgit.com/browse?repo=github.com/woodpecker-ci/woodpecker" title="TODOs">
     <img src="https://badgen.net/https/api.tickgit.com/badgen/github.com/woodpecker-ci/woodpecker">
   </a>
+  <a href="https://github.com/pre-commit/pre-commit" title="TODOs">
+    <img src="https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit">
+  </a>
 </p>
 <br/>
 
-# Woodpecker
-
-> Woodpecker is a community fork of the Drone CI system.
+Woodpecker is a community fork of the Drone CI system.
 
 ![woodpecker](docs/docs/woodpecker.png)
 
@@ -56,32 +59,9 @@ Please consider to donate and become a backer. 🙏 [[Become a backer](https://o
 
 <a href="https://opencollective.com/woodpecker-ci" target="_blank"><img src="https://opencollective.com/woodpecker-ci/backers.svg?width=890"></a>
 
-## 🚀 Usage
-
-### .woodpecker.yml
-
-- Place your pipeline in a file named `.woodpecker.yml` in your repository
-- Pipeline steps can be named as you like
-- Run any command in the commands section
-
-[Read More](https://woodpecker-ci.org/docs/usage/intro)
-
-### Build steps are containers
-
-- Define any Docker image as context
-- Install the needed tools in custom Docker images, use them as context
-
-[Read More](https://woodpecker-ci.org/docs/usage/pipeline-syntax#steps)
-
-### Plugins
-
-Woodpecker has [official plugins](https://woodpecker-ci.org/plugins), but you can also use your own.
-
-[Read More](https://woodpecker-ci.org/docs/usage/plugins/plugins)
-
 ## 📖 Documentation
 
-https://woodpecker-ci.org/
+<https://woodpecker-ci.org/>
 
 ## ✨ Contribute
 
@@ -99,9 +79,9 @@ We use an own [Weblate](https://weblate.org/en/) instance at [translate.woodpeck
 
 ## 👋 Who uses Woodpecker?
 
-[Codeberg](https://codeberg.org), the Woodpecker project itself, and many others.
+Woodpecker is used by [itself](https://ci.woodpecker-ci.org/woodpecker/woodpecker-ci/) multiple well-known companies, organizations like [Codeberg](https://codeberg.org), hobbyist and many others.
 
-Leave a [comment](https://github.com/woodpecker-ci/woodpecker/issues/122) if you're using it as well.
+Leave a [comment](https://github.com/woodpecker-ci/woodpecker/discussions/2149) if you're using it as well.
 
 Also consider using the topic `WoodpeckerCI` in your repository, so others can learn from your config and use the hashtag `#WoodpeckerCI` when talking about the project on social media!
 

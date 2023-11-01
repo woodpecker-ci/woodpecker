@@ -52,7 +52,7 @@ type Forge interface {
 	// Repos fetches a list of repos from the forge.
 	Repos(ctx context.Context, u *model.User) ([]*model.Repo, error)
 
-	// File fetches a file from the forge repository and returns in string
+	// File fetches a file from the forge repository and returns it in string
 	// format.
 	File(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]byte, error)
 
@@ -85,16 +85,12 @@ type Forge interface {
 
 	// Hook parses the post-commit hook from the Request body and returns the
 	// required data in a standard format.
-	Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error)
+	Hook(ctx context.Context, r *http.Request) (repo *model.Repo, pipeline *model.Pipeline, err error)
 
 	// OrgMembership returns if user is member of organization and if user
 	// is admin/owner in that organization.
-	OrgMembership(ctx context.Context, u *model.User, owner string) (*model.OrgPerm, error)
-}
+	OrgMembership(ctx context.Context, u *model.User, org string) (*model.OrgPerm, error)
 
-// Refresher refreshes an oauth token and expiration for the given user. It
-// returns true if the token was refreshed, false if the token was not refreshed,
-// and error if it failed to refresh.
-type Refresher interface {
-	Refresh(context.Context, *model.User) (bool, error)
+	// Org fetches the organization from the forge by name. If the name is a user an org with type user is returned.
+	Org(ctx context.Context, u *model.User, org string) (*model.Org, error)
 }

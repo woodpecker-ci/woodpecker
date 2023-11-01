@@ -57,7 +57,7 @@ func (b *builtin) SecretListPipeline(repo *model.Repo, _ *model.Pipeline, p *mod
 		{Global: true},
 	} {
 		for _, secret := range s {
-			if secret.Global() == cond.Global && secret.Organization() == cond.Organization {
+			if secret.Global() != cond.Global || secret.Organization() != cond.Organization {
 				continue
 			}
 			if _, ok := uniq[secret.Name]; ok {
@@ -86,23 +86,23 @@ func (b *builtin) SecretDelete(repo *model.Repo, name string) error {
 	return b.store.SecretDelete(secret)
 }
 
-func (b *builtin) OrgSecretFind(owner, name string) (*model.Secret, error) {
+func (b *builtin) OrgSecretFind(owner int64, name string) (*model.Secret, error) {
 	return b.store.OrgSecretFind(owner, name)
 }
 
-func (b *builtin) OrgSecretList(owner string, p *model.ListOptions) ([]*model.Secret, error) {
+func (b *builtin) OrgSecretList(owner int64, p *model.ListOptions) ([]*model.Secret, error) {
 	return b.store.OrgSecretList(owner, p)
 }
 
-func (b *builtin) OrgSecretCreate(_ string, in *model.Secret) error {
+func (b *builtin) OrgSecretCreate(_ int64, in *model.Secret) error {
 	return b.store.SecretCreate(in)
 }
 
-func (b *builtin) OrgSecretUpdate(_ string, in *model.Secret) error {
+func (b *builtin) OrgSecretUpdate(_ int64, in *model.Secret) error {
 	return b.store.SecretUpdate(in)
 }
 
-func (b *builtin) OrgSecretDelete(owner, name string) error {
+func (b *builtin) OrgSecretDelete(owner int64, name string) error {
 	secret, err := b.store.OrgSecretFind(owner, name)
 	if err != nil {
 		return err

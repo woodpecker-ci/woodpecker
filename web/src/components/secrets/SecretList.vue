@@ -1,25 +1,23 @@
 <template>
-  <div class="space-y-4 text-color">
-    <ListItem v-for="secret in secrets" :key="secret.id" class="items-center">
+  <div class="space-y-4 text-wp-text-100">
+    <ListItem
+      v-for="secret in secrets"
+      :key="secret.id"
+      class="items-center !bg-wp-background-200 !dark:bg-wp-background-100"
+    >
       <span>{{ secret.name }}</span>
-      <div class="ml-auto">
-        <span
-          v-for="event in secret.event"
-          :key="event"
-          class="bg-gray-500 dark:bg-dark-700 dark:text-gray-400 text-white rounded-md mx-1 py-1 px-2 text-sm"
-        >
-          {{ event }}
-        </span>
+      <div class="ml-auto space-x-2 <md:hidden">
+        <Badge v-for="event in secret.events" :key="event" :label="event" />
       </div>
       <IconButton
         icon="edit"
-        class="ml-2 w-8 h-8"
+        class="ml-2 <md:ml-auto w-8 h-8"
         :title="$t('repo.settings.secrets.edit')"
         @click="editSecret(secret)"
       />
       <IconButton
         icon="trash"
-        class="ml-2 w-8 h-8 hover:text-red-400 hover:dark:text-red-500"
+        class="ml-2 w-8 h-8 hover:text-wp-control-error-100"
         :is-loading="isDeleting"
         :title="$t('repo.settings.secrets.delete')"
         @click="deleteSecret(secret)"

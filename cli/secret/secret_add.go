@@ -1,3 +1,17 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package secret
 
 import (
@@ -21,10 +35,7 @@ var secretCreateCmd = &cli.Command{
 			Name:  "global",
 			Usage: "global secret",
 		},
-		&cli.StringFlag{
-			Name:  "organization",
-			Usage: "organization name (e.g. octocat)",
-		},
+		common.OrgFlag,
 		common.RepoFlag,
 		&cli.StringFlag{
 			Name:  "name",
@@ -35,16 +46,12 @@ var secretCreateCmd = &cli.Command{
 			Usage: "secret value",
 		},
 		&cli.StringSliceFlag{
-			Name:  "event",
+			Name:  "events",
 			Usage: "secret limited to these events",
 		},
 		&cli.StringSliceFlag{
-			Name:  "image",
+			Name:  "images",
 			Usage: "secret limited to these images",
-		},
-		&cli.BoolFlag{
-			Name:  "plugins-only",
-			Usage: "secret limited to plugins",
 		},
 	),
 }
@@ -56,11 +63,10 @@ func secretCreate(c *cli.Context) error {
 	}
 
 	secret := &woodpecker.Secret{
-		Name:        strings.ToLower(c.String("name")),
-		Value:       c.String("value"),
-		Images:      c.StringSlice("image"),
-		PluginsOnly: c.Bool("plugins-only"),
-		Events:      c.StringSlice("event"),
+		Name:   strings.ToLower(c.String("name")),
+		Value:  c.String("value"),
+		Images: c.StringSlice("images"),
+		Events: c.StringSlice("events"),
 	}
 	if len(secret.Events) == 0 {
 		secret.Events = defaultSecretEvents
@@ -74,7 +80,7 @@ func secretCreate(c *cli.Context) error {
 		secret.Value = string(out)
 	}
 
-	global, owner, repoID, err := parseTargetArgs(client, c)
+	global, orgID, repoID, err := parseTargetArgs(client, c)
 	if err != nil {
 		return err
 	}
@@ -83,10 +89,12 @@ func secretCreate(c *cli.Context) error {
 		_, err = client.GlobalSecretCreate(secret)
 		return err
 	}
-	if owner != "" {
-		_, err = client.OrgSecretCreate(owner, secret)
+
+	if orgID != -1 {
+		_, err = client.OrgSecretCreate(orgID, secret)
 		return err
 	}
+
 	_, err = client.SecretCreate(repoID, secret)
 	return err
 }

@@ -53,6 +53,11 @@ var migrationTasks = []*task{
 	&initLogsEntriesTable,
 	&migrateLogs2LogEntries,
 	&parentStepsToWorkflows,
+	&addOrgs,
+	&addOrgID,
+	&alterTableTasksUpdateColumnTaskDataType,
+	&alterTableConfigUpdateColumnConfigDataType,
+	&removePluginOnlyOptionFromSecretsTable,
 }
 
 var allBeans = []interface{}{
@@ -72,6 +77,7 @@ var allBeans = []interface{}{
 	new(model.Cron),
 	new(model.Redirection),
 	new(model.Workflow),
+	new(model.Org),
 }
 
 type migrations struct {
@@ -106,39 +112,47 @@ func Migrate(e *xorm.Engine) error {
 	e.SetDisableGlobalCache(true)
 
 	if err := e.Sync(new(migrations)); err != nil {
-		return err
+		return fmt.Errorf("error to create migrations table: %w", err)
 	}
 
 	sess := e.NewSession()
 	defer sess.Close()
 	if err := sess.Begin(); err != nil {
-		return err
+		return fmt.Errorf("could not create initial migration session: %w", err)
 	}
 
 	// check if we have a fresh installation or need to check for migrations
 	c, err := sess.Count(new(migrations))
 	if err != nil {
-		return err
+		return fmt.Errorf("could not count migrations: %w", err)
 	}
 
 	if c == 0 {
 		if err := initNew(sess); err != nil {
-			return err
+			return fmt.Errorf("could not init a new database: %w", err)
 		}
-		return sess.Commit()
+		if err := sess.Commit(); err != nil {
+			return fmt.Errorf("could not commit initial migration session: %w", err)
+		}
+
+		return nil
 	}
 
 	if err := sess.Commit(); err != nil {
-		return err
+		return fmt.Errorf("could not commit initial migration session: %w", err)
 	}
 
 	if err := runTasks(e, migrationTasks); err != nil {
-		return err
+		return fmt.Errorf("run tasks failed: %w", err)
 	}
 
 	e.SetDisableGlobalCache(false)
 
-	return syncAll(e)
+	if err := syncAll(e); err != nil {
+		return fmt.Errorf("msg: %w", err)
+	}
+
+	return nil
 }
 
 func runTasks(e *xorm.Engine, tasks []*task) error {
@@ -166,17 +180,16 @@ func runTasks(e *xorm.Engine, tasks []*task) error {
 			sess := e.NewSession().NoCache()
 			defer sess.Close()
 			if err := sess.Begin(); err != nil {
-				return err
+				return fmt.Errorf("could not begin session for '%s': %w", task.name, err)
 			}
 
 			if taskErr = task.fn(sess); taskErr != nil {
 				aliveMsgCancel(nil)
-				if err2 := sess.Rollback(); err2 != nil {
-					taskErr = errors.Join(taskErr, err2)
+				if err := sess.Rollback(); err != nil {
+					taskErr = errors.Join(taskErr, err)
 				}
-			}
-			if err := sess.Commit(); err != nil {
-				return err
+			} else if err := sess.Commit(); err != nil {
+				return fmt.Errorf("could not commit session for '%s': %w", task.name, err)
 			}
 		} else if task.engineFn != nil {
 			taskErr = task.engineFn(e)
@@ -189,7 +202,7 @@ func runTasks(e *xorm.Engine, tasks []*task) error {
 		aliveMsgCancel(nil)
 		if taskErr != nil {
 			if task.required {
-				return taskErr
+				return fmt.Errorf("migration task '%s' failed: %w", task.name, taskErr)
 			}
 			log.Error().Err(taskErr).Msgf("migration task '%s' failed but is not required", task.name)
 			continue
@@ -197,7 +210,7 @@ func runTasks(e *xorm.Engine, tasks []*task) error {
 		log.Debug().Msgf("migration task '%s' done", task.name)
 
 		if _, err := e.Insert(&migrations{task.name}); err != nil {
-			return err
+			return fmt.Errorf("migration task '%s' could not be marked as finished: %w", task.name, err)
 		}
 
 		migCache[task.name] = true

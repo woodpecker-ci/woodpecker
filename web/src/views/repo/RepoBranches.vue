@@ -3,10 +3,11 @@
     <ListItem
       v-for="branch in branches"
       :key="branch"
-      class="text-color"
+      class="text-wp-text-100"
       :to="{ name: 'repo-branch', params: { branch } }"
     >
       {{ branch }}
+      <Badge v-if="branch === repo?.default_branch" :label="$t('default')" class="ml-auto" />
     </ListItem>
   </div>
 </template>
@@ -14,6 +15,7 @@
 <script lang="ts" setup>
 import { inject, Ref, watch } from 'vue';
 
+import Badge from '~/components/atomic/Badge.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { usePagination } from '~/compositions/usePaginate';

@@ -20,8 +20,10 @@ import (
 	"testing"
 
 	"github.com/franela/goblin"
+	"github.com/stretchr/testify/assert"
 
 	"github.com/woodpecker-ci/woodpecker/server/forge/bitbucket/fixtures"
+	"github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
 
@@ -37,7 +39,7 @@ func Test_parser(t *testing.T) {
 			r, b, err := parseHook(req)
 			g.Assert(r).IsNil()
 			g.Assert(b).IsNil()
-			g.Assert(err).IsNil()
+			assert.ErrorIs(t, err, &types.ErrIgnoreEvent{})
 		})
 
 		g.Describe("Given a pull request hook payload", func() {

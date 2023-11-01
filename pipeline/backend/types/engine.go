@@ -1,3 +1,17 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package types
 
 import (
@@ -11,25 +25,33 @@ type Engine interface {
 	// Name returns the name of the backend.
 	Name() string
 
-	// Check if the backend is available.
-	IsAvailable(context.Context) bool
+	// IsAvailable check if the backend is available.
+	IsAvailable(ctx context.Context) bool
 
-	// Load the backend engine.
-	Load(context.Context) error
+	// Load loads the backend engine.
+	Load(ctx context.Context) (*EngineInfo, error)
 
-	// Setup the pipeline environment.
-	Setup(context.Context, *Config) error
+	// SetupWorkflow sets up the workflow environment.
+	SetupWorkflow(ctx context.Context, conf *Config, taskUUID string) error
 
-	// Exec start the pipeline step.
-	Exec(context.Context, *Step) error
+	// StartStep starts the workflow step.
+	StartStep(ctx context.Context, step *Step, taskUUID string) error
 
-	// Wait for the pipeline step to complete and returns
+	// WaitStep waits for the workflow step to complete and returns
 	// the completion results.
-	Wait(context.Context, *Step) (*State, error)
+	WaitStep(ctx context.Context, step *Step, taskUUID string) (*State, error)
 
-	// Tail the pipeline step logs.
-	Tail(context.Context, *Step) (io.ReadCloser, error)
+	// TailStep tails the workflow step logs.
+	TailStep(ctx context.Context, step *Step, taskUUID string) (io.ReadCloser, error)
 
-	// Destroy the pipeline environment.
-	Destroy(context.Context, *Config) error
+	// DestroyStep destroys the workflow step.
+	DestroyStep(ctx context.Context, step *Step, taskUUID string) error
+
+	// DestroyWorkflow destroys the workflow environment.
+	DestroyWorkflow(ctx context.Context, conf *Config, taskUUID string) error
+}
+
+// EngineInfo represents the reported information of a loaded engine
+type EngineInfo struct {
+	Platform string
 }

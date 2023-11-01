@@ -12,6 +12,6 @@ export default () =>
         const config = useUserConfig();
         config.setUserConfig('redirectUrl', url);
       }
-      window.location.href = '/login';
+      window.location.href = `${useConfig().rootPath}/login`;
     },
-  } as const);
+  }) as const;

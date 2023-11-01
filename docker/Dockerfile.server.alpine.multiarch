@@ -1,4 +1,4 @@
-FROM alpine:3.18
+FROM docker.io/alpine:3.18
 
 ARG TARGETOS TARGETARCH
 RUN apk add -U --no-cache ca-certificates
@@ -11,4 +11,5 @@ EXPOSE 8000 9000 80 443
 
 COPY dist/server/${TARGETOS}/${TARGETARCH}/woodpecker-server /bin/
 
+HEALTHCHECK CMD ["/bin/woodpecker-server", "ping"]
 ENTRYPOINT ["/bin/woodpecker-server"]

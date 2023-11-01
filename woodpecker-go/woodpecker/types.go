@@ -132,20 +132,18 @@ type (
 
 	// Secret represents a secret variable, such as a password or token.
 	Secret struct {
-		ID          int64    `json:"id"`
-		Name        string   `json:"name"`
-		Value       string   `json:"value,omitempty"`
-		Images      []string `json:"image"`
-		PluginsOnly bool     `json:"plugins_only"`
-		Events      []string `json:"event"`
+		ID     int64    `json:"id"`
+		Name   string   `json:"name"`
+		Value  string   `json:"value,omitempty"`
+		Images []string `json:"images"`
+		Events []string `json:"events"`
 	}
 
-	// Activity represents an item in the user's feed or timeline.
-	Activity struct {
-		Owner    string `json:"owner"`
-		Name     string `json:"name"`
-		FullName string `json:"full_name"`
-		Number   int    `json:"number,omitempty"`
+	// Feed represents an item in the user's feed or timeline.
+	Feed struct {
+		RepoID   int64  `json:"repo_id"`
+		ID       int64  `json:"id,omitempty"`
+		Number   int64  `json:"number,omitempty"`
 		Event    string `json:"event,omitempty"`
 		Status   string `json:"status,omitempty"`
 		Created  int64  `json:"created_at,omitempty"`
@@ -155,7 +153,7 @@ type (
 		Branch   string `json:"branch,omitempty"`
 		Ref      string `json:"ref,omitempty"`
 		Refspec  string `json:"refspec,omitempty"`
-		CloneURL string `json:"clone_url,omitempty"`
+		Remote   string `json:"remote,omitempty"`
 		Title    string `json:"title,omitempty"`
 		Message  string `json:"message,omitempty"`
 		Author   string `json:"author,omitempty"`
@@ -240,5 +238,12 @@ type (
 		RunOn        []string          `json:"run_on"`
 		DepStatus    map[string]string `json:"dep_status"`
 		AgentID      int64             `json:"agent_id"`
+	}
+
+	// Org is the JSON data for an organization
+	Org struct {
+		ID     int64  `json:"id"`
+		Name   string `json:"name"`
+		IsUser bool   `json:"is_user"`
 	}
 )

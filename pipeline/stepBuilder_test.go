@@ -290,7 +290,7 @@ steps:
 	}
 }
 
-func TestBranchFilter(t *testing.T) {
+func TestRootWhenBranchFilter(t *testing.T) {
 	t.Parallel()
 
 	b := StepBuilder{
@@ -307,7 +307,8 @@ func TestBranchFilter(t *testing.T) {
 steps:
   xxx:
     image: scratch
-branches: master
+when:
+  branch: main
 `)},
 			{Data: []byte(`
 steps:
@@ -512,44 +513,6 @@ depends_on: [ shouldbefiltered ]
 	}
 	if pipelineItems[0].Workflow.Name != "justastep" {
 		t.Fatal("justastep should have been generated")
-	}
-}
-
-func TestTree(t *testing.T) {
-	t.Parallel()
-
-	pipeline := &model.Pipeline{
-		Event: model.EventPush,
-	}
-
-	b := StepBuilder{
-		Forge: getMockForge(t),
-		Repo:  &model.Repo{},
-		Curr:  pipeline,
-		Last:  &model.Pipeline{},
-		Netrc: &model.Netrc{},
-		Secs:  []*model.Secret{},
-		Regs:  []*model.Registry{},
-		Link:  "",
-		Yamls: []*forge_types.FileMeta{
-			{Data: []byte(`
-steps:
-  build:
-    image: scratch
-`)},
-		},
-	}
-
-	pipelineItems, err := b.Build()
-	pipeline = SetPipelineStepsOnPipeline(pipeline, pipelineItems)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(pipeline.Workflows) != 1 {
-		t.Fatal("Should generate three in total")
-	}
-	if len(pipeline.Workflows[0].Children) != 2 {
-		t.Fatal("Workflow should have two children")
 	}
 }
 

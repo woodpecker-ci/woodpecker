@@ -1,13 +1,13 @@
 <template>
   <IconButton :title="$t('pipeline_feed')" class="!p-1.5 relative text-current" @click="toggle">
-    <div v-if="activePipelines.length > 0" class="spinner">
+    <div v-if="activePipelines.length > 0" class="spinner m-1">
       <div class="spinner-ring ring1" />
       <div class="spinner-ring ring2" />
       <div class="spinner-ring ring3" />
       <div class="spinner-ring ring4" />
     </div>
     <div
-      class="flex items-center justify-center h-full w-full font-bold bg-white bg-opacity-15 dark:bg-black dark:bg-opacity-10 rounded-full"
+      class="flex items-center justify-center h-full w-full font-bold bg-white bg-opacity-15 dark:bg-black dark:bg-opacity-10 rounded-md"
     >
       {{ activePipelines.length || 0 }}
     </div>

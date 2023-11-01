@@ -1,3 +1,17 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package compiler
 
 import (
@@ -27,14 +41,13 @@ type Registry struct {
 }
 
 type Secret struct {
-	Name       string
-	Value      string
-	Match      []string
-	PluginOnly bool
+	Name           string
+	Value          string
+	AllowedPlugins []string
 }
 
 func (s *Secret) Available(container *yaml_types.Container) bool {
-	return (len(s.Match) == 0 || utils.MatchImage(container.Image, s.Match...)) && (!s.PluginOnly || container.IsPlugin())
+	return (len(s.AllowedPlugins) == 0 || utils.MatchImage(container.Image, s.AllowedPlugins...)) && (len(s.AllowedPlugins) == 0 || container.IsPlugin())
 }
 
 type secretMap map[string]Secret
@@ -237,6 +250,14 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			stepType = backend_types.StepTypePlugin
 		}
 		step := c.createProcess(name, container, stepType)
+
+		// inject netrc if it's a trusted repo or a trusted clone-plugin
+		if c.trustedPipeline || (container.IsPlugin() && container.IsTrustedCloneImage()) {
+			for k, v := range c.cloneEnv {
+				step.Environment[k] = v
+			}
+		}
+
 		stage.Steps = append(stage.Steps, step)
 	}
 

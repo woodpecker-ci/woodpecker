@@ -28,6 +28,7 @@ import (
 const (
 	pathSelf           = "%s/api/user"
 	pathRepos          = "%s/api/user/repos"
+	pathRepoPost       = "%s/api/repos?forge_remote_id=%d"
 	pathRepo           = "%s/api/repos/%d"
 	pathRepoLookup     = "%s/api/repos/lookup/%s"
 	pathRepoMove       = "%s/api/repos/%d/move?to=%s"
@@ -46,8 +47,10 @@ const (
 	pathRepoRegistry   = "%s/api/repos/%d/registry/%s"
 	pathRepoCrons      = "%s/api/repos/%d/cron"
 	pathRepoCron       = "%s/api/repos/%d/cron/%d"
-	pathOrgSecrets     = "%s/api/orgs/%s/secrets"
-	pathOrgSecret      = "%s/api/orgs/%s/secrets/%s"
+	pathOrg            = "%s/api/orgs/%d"
+	pathOrgLookup      = "%s/api/orgs/lookup/%s"
+	pathOrgSecrets     = "%s/api/orgs/%d/secrets"
+	pathOrgSecret      = "%s/api/orgs/%d/secrets/%s"
 	pathGlobalSecrets  = "%s/api/secrets"
 	pathGlobalSecret   = "%s/api/secrets/%s"
 	pathUsers          = "%s/api/users"
@@ -162,9 +165,9 @@ func (c *client) RepoList() ([]*Repo, error) {
 
 // RepoListOpts returns a list of all repositories to which
 // the user has explicit access in the host system.
-func (c *client) RepoListOpts(sync, all bool) ([]*Repo, error) {
+func (c *client) RepoListOpts(all bool) ([]*Repo, error) {
 	var out []*Repo
-	uri := fmt.Sprintf(pathRepos+"?flush=%v&all=%v", c.addr, sync, all)
+	uri := fmt.Sprintf(pathRepos+"?all=%v", c.addr, all)
 	err := c.get(uri, &out)
 	return out, err
 }
@@ -172,7 +175,7 @@ func (c *client) RepoListOpts(sync, all bool) ([]*Repo, error) {
 // RepoPost activates a repository.
 func (c *client) RepoPost(forgeRemoteID int64) (*Repo, error) {
 	out := new(Repo)
-	uri := fmt.Sprintf(pathRepo, c.addr, forgeRemoteID)
+	uri := fmt.Sprintf(pathRepoPost, c.addr, forgeRemoteID)
 	err := c.post(uri, nil, out)
 	return out, err
 }
@@ -248,8 +251,8 @@ func (c *client) PipelineCreate(repoID int64, options *PipelineOptions) (*Pipeli
 }
 
 // PipelineQueue returns a list of enqueued pipelines.
-func (c *client) PipelineQueue() ([]*Activity, error) {
-	var out []*Activity
+func (c *client) PipelineQueue() ([]*Feed, error) {
+	var out []*Feed
 	uri := fmt.Sprintf(pathPipelineQueue, c.addr)
 	err := c.get(uri, &out)
 	return out, err
@@ -397,41 +400,57 @@ func (c *client) SecretDelete(repoID int64, secret string) error {
 	return c.delete(uri)
 }
 
+// Org returns an organization by id.
+func (c *client) Org(orgID int64) (*Org, error) {
+	out := new(Org)
+	uri := fmt.Sprintf(pathOrg, c.addr, orgID)
+	err := c.get(uri, out)
+	return out, err
+}
+
+// OrgLookup returns a organsization by its name.
+func (c *client) OrgLookup(name string) (*Org, error) {
+	out := new(Org)
+	uri := fmt.Sprintf(pathOrgLookup, c.addr, name)
+	err := c.get(uri, out)
+	return out, err
+}
+
 // OrgSecret returns an organization secret by name.
-func (c *client) OrgSecret(owner, secret string) (*Secret, error) {
+func (c *client) OrgSecret(orgID int64, secret string) (*Secret, error) {
 	out := new(Secret)
-	uri := fmt.Sprintf(pathOrgSecret, c.addr, owner, secret)
+	uri := fmt.Sprintf(pathOrgSecret, c.addr, orgID, secret)
 	err := c.get(uri, out)
 	return out, err
 }
 
 // OrgSecretList returns a list of all organization secrets.
-func (c *client) OrgSecretList(owner string) ([]*Secret, error) {
+func (c *client) OrgSecretList(orgID int64) ([]*Secret, error) {
 	var out []*Secret
-	uri := fmt.Sprintf(pathOrgSecrets, c.addr, owner)
+	uri := fmt.Sprintf(pathOrgSecrets, c.addr, orgID)
 	err := c.get(uri, &out)
 	return out, err
 }
 
 // OrgSecretCreate creates an organization secret.
-func (c *client) OrgSecretCreate(owner string, in *Secret) (*Secret, error) {
+func (c *client) OrgSecretCreate(orgID int64, in *Secret) (*Secret, error) {
 	out := new(Secret)
-	uri := fmt.Sprintf(pathOrgSecrets, c.addr, owner)
+	uri := fmt.Sprintf(pathOrgSecrets, c.addr, orgID)
 	err := c.post(uri, in, out)
 	return out, err
 }
 
 // OrgSecretUpdate updates an organization secret.
-func (c *client) OrgSecretUpdate(owner string, in *Secret) (*Secret, error) {
+func (c *client) OrgSecretUpdate(orgID int64, in *Secret) (*Secret, error) {
 	out := new(Secret)
-	uri := fmt.Sprintf(pathOrgSecret, c.addr, owner, in.Name)
+	uri := fmt.Sprintf(pathOrgSecret, c.addr, orgID, in.Name)
 	err := c.patch(uri, in, out)
 	return out, err
 }
 
 // OrgSecretDelete deletes an organization secret.
-func (c *client) OrgSecretDelete(owner, secret string) error {
-	uri := fmt.Sprintf(pathOrgSecret, c.addr, owner, secret)
+func (c *client) OrgSecretDelete(orgID int64, secret string) error {
+	uri := fmt.Sprintf(pathOrgSecret, c.addr, orgID, secret)
 	return c.delete(uri)
 }
 

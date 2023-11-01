@@ -28,10 +28,10 @@ import (
 // Health
 //
 //	@Summary		Health information
-//	@Description	If everything is fine, just a 200 will be returned, a 500 signals server state is unhealthy.
+//	@Description	If everything is fine, just a 204 will be returned, a 500 signals server state is unhealthy.
 //	@Router			/healthz [get]
 //	@Produce		plain
-//	@Success		200
+//	@Success		204
 //	@Failure		500
 //	@Tags			System
 func Health(c *gin.Context) {
@@ -39,7 +39,7 @@ func Health(c *gin.Context) {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
-	c.String(http.StatusOK, "")
+	c.Status(http.StatusNoContent)
 }
 
 // Version

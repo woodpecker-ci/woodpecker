@@ -7,8 +7,10 @@ when:
   event: tag
 
 variables:
-  - &golang_image 'golang:1.20.2'
-  - &node_image 'node:18-alpine'
+  - &golang_image 'docker.io/golang:1.21.3'
+  - &node_image 'docker.io/node:21-alpine'
+  - &xgo_image 'docker.io/techknowlogick/xgo:go-1.21.3'
+  - &xgo_version 'go-1.21.2'
 
 steps:
   build-web:
@@ -26,11 +28,19 @@ steps:
     commands:
       - go mod vendor
 
-  build-server:
+  cross-compile-server:
     group: build
-    image: *golang_image
+    image: *xgo_image
+    pull: true
     commands:
-      - make release-server
+      - apt update
+      - apt install -y tree
+      - make cross-compile-server
+    environment:
+      PLATFORMS: linux|arm64/v8;linux|amd64;windows|amd64
+      TAGS: bindata sqlite sqlite_unlock_notify netgo
+      XGO_VERSION: *xgo_version
+      TARGZ: '1'
 
   build-agent:
     group: build
@@ -58,11 +68,11 @@ steps:
   release-dryrun:
     image: *golang_image
     commands:
-    - ls -la dist/*.*
-    - cat dist/checksums.txt
+      - ls -la dist/*.*
+      - cat dist/checksums.txt
 
   release:
-    image: plugins/github-release
+    image: docker.io/plugins/github-release
     secrets:
       - source: github_token
         target: github_release_api_key

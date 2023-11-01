@@ -2,12 +2,12 @@ import ApiClient, { encodeQueryString } from './client';
 import {
   Agent,
   Cron,
+  Org,
   OrgPermissions,
   Pipeline,
   PipelineConfig,
   PipelineFeed,
   PipelineLog,
-  PipelineWorkflow,
   PullRequest,
   QueueInfo,
   Registry,
@@ -190,26 +190,34 @@ export default class WoodpeckerClient extends ApiClient {
     return this._post(`/api/repos/${repoId}/cron/${cronId}`) as Promise<Pipeline>;
   }
 
-  getOrgPermissions(owner: string): Promise<OrgPermissions> {
-    return this._get(`/api/orgs/${owner}/permissions`) as Promise<OrgPermissions>;
+  getOrg(orgId: number): Promise<Org> {
+    return this._get(`/api/orgs/${orgId}`) as Promise<Org>;
   }
 
-  getOrgSecretList(owner: string, page: number): Promise<Secret[] | null> {
-    return this._get(`/api/orgs/${owner}/secrets?page=${page}`) as Promise<Secret[] | null>;
+  lookupOrg(name: string): Promise<Org> {
+    return this._get(`/api/orgs/lookup/${name}`) as Promise<Org>;
   }
 
-  createOrgSecret(owner: string, secret: Partial<Secret>): Promise<unknown> {
-    return this._post(`/api/orgs/${owner}/secrets`, secret);
+  getOrgPermissions(orgId: number): Promise<OrgPermissions> {
+    return this._get(`/api/orgs/${orgId}/permissions`) as Promise<OrgPermissions>;
   }
 
-  updateOrgSecret(owner: string, secret: Partial<Secret>): Promise<unknown> {
+  getOrgSecretList(orgId: number, page: number): Promise<Secret[] | null> {
+    return this._get(`/api/orgs/${orgId}/secrets?page=${page}`) as Promise<Secret[] | null>;
+  }
+
+  createOrgSecret(orgId: number, secret: Partial<Secret>): Promise<unknown> {
+    return this._post(`/api/orgs/${orgId}/secrets`, secret);
+  }
+
+  updateOrgSecret(orgId: number, secret: Partial<Secret>): Promise<unknown> {
     const secretName = encodeURIComponent(secret.name ?? '');
-    return this._patch(`/api/orgs/${owner}/secrets/${secretName}`, secret);
+    return this._patch(`/api/orgs/${orgId}/secrets/${secretName}`, secret);
   }
 
-  deleteOrgSecret(owner: string, secretName: string): Promise<unknown> {
+  deleteOrgSecret(orgId: number, secretName: string): Promise<unknown> {
     const name = encodeURIComponent(secretName);
-    return this._delete(`/api/orgs/${owner}/secrets/${name}`);
+    return this._delete(`/api/orgs/${orgId}/secrets/${name}`);
   }
 
   getGlobalSecretList(page: number): Promise<Secret[] | null> {
@@ -294,9 +302,25 @@ export default class WoodpeckerClient extends ApiClient {
     return this._delete('/api/user/token') as Promise<string>;
   }
 
+  getOrgs(page: number): Promise<Org[] | null> {
+    return this._get(`/api/orgs?page=${page}`) as Promise<Org[] | null>;
+  }
+
+  deleteOrg(org: Org): Promise<unknown> {
+    return this._delete(`/api/orgs/${org.id}`);
+  }
+
+  getAllRepos(page: number): Promise<Repo[] | null> {
+    return this._get(`/api/repos?page=${page}`) as Promise<Repo[] | null>;
+  }
+
+  repairAllRepos(): Promise<unknown> {
+    return this._post(`/api/repos/repair`) as Promise<unknown>;
+  }
+
   // eslint-disable-next-line promise/prefer-await-to-callbacks
-  on(callback: (data: { pipeline?: Pipeline; repo?: Repo; step?: PipelineWorkflow }) => void): EventSource {
-    return this._subscribe('/stream/events', callback, {
+  on(callback: (data: { pipeline?: Pipeline; repo?: Repo }) => void): EventSource {
+    return this._subscribe('/api/stream/events', callback, {
       reconnect: true,
     });
   }

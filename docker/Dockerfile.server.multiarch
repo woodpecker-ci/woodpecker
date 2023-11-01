@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM golang:1.20 AS certs
+FROM --platform=$BUILDPLATFORM docker.io/golang:1.21 AS certs
 
 FROM scratch
 ARG TARGETOS TARGETARCH
@@ -14,4 +14,5 @@ COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certifica
 # copy server binary
 COPY dist/server/${TARGETOS}/${TARGETARCH}/woodpecker-server /bin/
 
+HEALTHCHECK CMD ["/bin/woodpecker-server", "ping"]
 ENTRYPOINT ["/bin/woodpecker-server"]
