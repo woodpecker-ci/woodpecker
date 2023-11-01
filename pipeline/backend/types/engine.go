@@ -29,7 +29,7 @@ type Engine interface {
 	IsAvailable(ctx context.Context) bool
 
 	// Load the backend engine.
-	Load(ctx context.Context) error
+	Load(ctx context.Context) (*EngineInfo, error)
 
 	// SetupWorkflow the workflow environment.
 	SetupWorkflow(ctx context.Context, conf *Config, taskUUID string) error
@@ -46,4 +46,10 @@ type Engine interface {
 
 	// DestroyWorkflow the workflow environment.
 	DestroyWorkflow(ctx context.Context, conf *Config, taskUUID string) error
+}
+
+// EngineInfo represents the reported information of a loaded engine
+type EngineInfo struct {
+	Platform string
+	Backend  string
 }

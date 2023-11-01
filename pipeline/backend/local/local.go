@@ -60,10 +60,13 @@ func (e *local) IsAvailable(context.Context) bool {
 	return true
 }
 
-func (e *local) Load(context.Context) error {
+func (e *local) Load(context.Context) (*types.EngineInfo, error) {
 	e.loadClone()
 
-	return nil
+	return &types.EngineInfo{
+		Backend:  e.Name(),
+		Platform: runtime.GOOS + "/" + runtime.GOARCH,
+	}, nil
 }
 
 // SetupWorkflow the pipeline environment.

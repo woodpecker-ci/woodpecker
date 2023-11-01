@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"runtime"
 	"strings"
 	"time"
 
@@ -104,10 +105,10 @@ func (e *kube) IsAvailable(context.Context) bool {
 	return len(host) > 0
 }
 
-func (e *kube) Load(context.Context) error {
+func (e *kube) Load(context.Context) (*types.EngineInfo, error) {
 	config, err := configFromCliContext(e.ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	e.config = config
 
@@ -120,12 +121,16 @@ func (e *kube) Load(context.Context) error {
 	}
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	e.client = kubeClient
 
-	return nil
+	return &types.EngineInfo{
+		Backend: e.Name(),
+		// TODO: use info resp of kubeClient to define platform var
+		Platform: runtime.GOOS + "/" + runtime.GOARCH,
+	}, nil
 }
 
 // Setup the pipeline environment.

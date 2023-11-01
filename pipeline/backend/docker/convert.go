@@ -76,9 +76,6 @@ func toHostConfig(step *types.Step) *container.HostConfig {
 		Sysctls:    step.Sysctls,
 	}
 
-	// if len(step.VolumesFrom) != 0 {
-	// 	config.VolumesFrom = step.VolumesFrom
-	// }
 	if len(step.NetworkMode) != 0 {
 		config.NetworkMode = container.NetworkMode(step.NetworkMode)
 	}
