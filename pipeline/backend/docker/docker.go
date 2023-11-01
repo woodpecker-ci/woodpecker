@@ -350,8 +350,8 @@ func isErrContainerNotFoundOrNotRunning(err error) bool {
 	return err != nil && (strings.Contains(err.Error(), "No such container") || strings.Contains(err.Error(), "is not running"))
 }
 
-// normalizeArchType converts what docker info reports als arch
-// and convert it into the runtime.GOARCH format
+// normalizeArchType converts the arch type reported by docker info into
+// the runtime.GOARCH format
 // TODO: find out if we we need to convert other arch types too
 func normalizeArchType(s string) string {
 	switch s {
