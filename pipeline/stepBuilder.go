@@ -25,6 +25,7 @@ import (
 	"go.uber.org/multierr"
 
 	backend_types "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
+	"github.com/woodpecker-ci/woodpecker/pipeline/errors"
 	pipeline_errors "github.com/woodpecker-ci/woodpecker/pipeline/errors"
 	yaml_types "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
 	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
@@ -128,21 +129,21 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 	// substitute vars
 	substituted, err := frontend.EnvVarSubst(data, environ)
 	if err != nil {
-		return nil, err
+		return nil, multierr.Append(errorsAndWarnings, err)
 	}
 
 	// parse yaml pipeline
 	parsed, err := yaml.ParseString(substituted)
 	if err != nil {
-		return nil, &yaml.PipelineParseError{Err: err}
+		return nil, &errors.PipelineError{Message: err.Error(), Type: errors.PipelineErrorTypeCompiler}
 	}
 
 	// lint pipeline
-	err = linter.New(
+	errorsAndWarnings = multierr.Append(errorsAndWarnings, linter.New(
 		linter.WithTrusted(b.Repo.IsTrusted),
-	).Lint(substituted, parsed)
-	if !pipeline_errors.HasBlockingErrors(err) {
-		return nil, err
+	).Lint(substituted, parsed))
+	if pipeline_errors.HasBlockingErrors(errorsAndWarnings) {
+		return nil, errorsAndWarnings
 	}
 
 	// checking if filtered.
@@ -155,7 +156,7 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 		log.Debug().Str("pipeline", workflow.Name).Msg(
 			"Pipeline config could not be parsed",
 		)
-		return nil, err
+		return nil, multierr.Append(errorsAndWarnings, err)
 	}
 
 	ir, err := b.toInternalRepresentation(parsed, environ, workflowMetadata, workflow.ID)
