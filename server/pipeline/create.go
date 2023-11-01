@@ -79,11 +79,16 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	err = _store.CreatePipeline(pipeline)
 	if err != nil {
 		msg := fmt.Errorf("failed to save pipeline for %s", repo.FullName)
-		log.Error().Err(err).Msg(msg.Error())
+		log.Error().Str("repo", repo.FullName).Err(err).Msg(msg.Error())
 		return nil, msg
 	}
 
 	pipeline = setPipelineStepsOnPipeline(pipeline, pipelineItems)
+
+	if err := _store.WorkflowsCreate(pipeline.Workflows); err != nil {
+		log.Error().Err(err).Str("repo", repo.FullName).Msgf("error persisting steps for %s#%d", repo.FullName, pipeline.Number)
+		return nil, err
+	}
 
 	// persist the pipeline config for historical correctness, restarts, etc
 	var configs []*model.Config

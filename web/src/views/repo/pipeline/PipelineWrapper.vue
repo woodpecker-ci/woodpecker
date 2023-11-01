@@ -8,7 +8,17 @@
       :fluid-content="activeTab === 'tasks'"
       full-width-header
     >
-      <template #title>{{ repo.full_name }}</template>
+      <template #title>
+        <span>
+          <router-link :to="{ name: 'org', params: { orgId: repo.org_id } }" class="hover:underline">
+            {{ repo.owner }}
+          </router-link>
+          /
+          <router-link :to="{ name: 'repo' }" class="hover:underline">
+            {{ repo.name }}
+          </router-link>
+        </span>
+      </template>
 
       <template #titleActions>
         <div class="flex md:items-center flex-col gap-2 md:flex-row md:justify-between min-w-0">
