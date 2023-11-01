@@ -25,7 +25,7 @@ updateTheme();
 
 export function useTheme() {
   return {
-    theme,
+    theme: resolvedTheme,
     storeTheme,
   };
 }
