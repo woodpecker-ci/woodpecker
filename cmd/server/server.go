@@ -84,12 +84,12 @@ func run(c *cli.Context) error {
 
 	_forge, err := setupForge(c)
 	if err != nil {
-		log.Fatal().Err(err).Msg("")
+		log.Fatal().Err(err).Msg("can't setup forge")
 	}
 
 	_store, err := setupStore(c)
 	if err != nil {
-		log.Fatal().Err(err).Msg("")
+		log.Fatal().Err(err).Msg("cant't setup database store")
 	}
 	defer func() {
 		if err := _store.Close(); err != nil {
@@ -111,8 +111,7 @@ func run(c *cli.Context) error {
 	g.Go(func() error {
 		lis, err := net.Listen("tcp", c.String("grpc-addr"))
 		if err != nil {
-			log.Error().Err(err).Msg("failed to listen on grpc-addr")
-			return err
+			log.Fatal().Err(err).Msg("failed to listen on grpc-addr")
 		}
 
 		jwtSecret := c.String("grpc-secret")
@@ -145,8 +144,7 @@ func run(c *cli.Context) error {
 
 		err = grpcServer.Serve(lis)
 		if err != nil {
-			log.Error().Err(err).Msg("failed to serve grpc server")
-			return err
+			log.Fatal().Err(err).Msg("failed to serve grpc server")
 		}
 		return nil
 	})
@@ -157,8 +155,7 @@ func run(c *cli.Context) error {
 	if proxyWebUI == "" {
 		webEngine, err := web.New()
 		if err != nil {
-			log.Error().Err(err).Msg("failed to create web engine")
-			return err
+			log.Fatal().Err(err).Msg("failed to create web engine")
 		}
 		webUIServe = webEngine.ServeHTTP
 	} else {
@@ -198,8 +195,8 @@ func run(c *cli.Context) error {
 				c.String("server-cert"),
 				c.String("server-key"),
 			)
-			if !errors.Is(err, http.ErrServerClosed) {
-				log.Fatal().Err(err).Msg("")
+			if err != nil && !errors.Is(err, http.ErrServerClosed) {
+				log.Fatal().Err(err).Msg("failed to start server with tls")
 			}
 			return err
 		})
@@ -217,8 +214,8 @@ func run(c *cli.Context) error {
 
 		g.Go(func() error {
 			err := http.ListenAndServe(server.Config.Server.Port, http.HandlerFunc(redirect))
-			if !errors.Is(err, http.ErrServerClosed) {
-				log.Fatal().Err(err).Msg("Not able to start server to redirect from http to https")
+			if err != nil && !errors.Is(err, http.ErrServerClosed) {
+				log.Fatal().Err(err).Msg("unable to start server to redirect from http to https")
 			}
 			return err
 		})
@@ -245,8 +242,8 @@ func run(c *cli.Context) error {
 				c.String("server-addr"),
 				handler,
 			)
-			if !errors.Is(err, http.ErrServerClosed) {
-				log.Fatal().Err(err).Msg("Can't start server")
+			if err != nil && !errors.Is(err, http.ErrServerClosed) {
+				log.Fatal().Err(err).Msg("could not start server")
 			}
 			return err
 		})
@@ -257,8 +254,8 @@ func run(c *cli.Context) error {
 			metricsRouter := gin.New()
 			metricsRouter.GET("/metrics", gin.WrapH(promhttp.Handler()))
 			err := http.ListenAndServe(metricsServerAddr, metricsRouter)
-			if !errors.Is(err, http.ErrServerClosed) {
-				log.Fatal().Err(err).Msg("Can't start metrics server")
+			if err != nil && !errors.Is(err, http.ErrServerClosed) {
+				log.Fatal().Err(err).Msg("could not start metrics server")
 			}
 			return err
 		})
