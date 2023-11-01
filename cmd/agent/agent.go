@@ -176,9 +176,10 @@ func run(c *cli.Context) error {
 		return err
 	}
 
-	err = writeAgentConfig(agentConfig, agentConfigPath)
-	if err == nil {
-		agentConfigPersisted.Set()
+	if agentConfigPath != "" {
+		if err := writeAgentConfig(agentConfig, agentConfigPath); err == nil {
+			agentConfigPersisted.Set()
+		}
 	}
 
 	labels := map[string]string{

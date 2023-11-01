@@ -35,6 +35,10 @@ func readAgentConfig(agentConfigPath string) AgentConfig {
 		AgentID: defaultAgentIDValue,
 	}
 
+	if agentConfigPath == "" {
+		return conf
+	}
+
 	rawAgentConf, err := os.ReadFile(agentConfigPath)
 	if err != nil {
 		if os.IsNotExist(err) {
