@@ -103,48 +103,47 @@ steps:
 
   publish-server-preview:
     image: woodpeckerci/plugin-docker-buildx:2.2.0
-    secrets: [docker_password]
     group: docker
     settings:
       repo: woodpeckerci/woodpecker-server
       dockerfile: docker/Dockerfile.server.multiarch
       platforms: *platforms_preview
       tag: pull_${CI_COMMIT_PULL_REQUEST}
+      logins: *publish_logins
     when:
       evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
       event: pull_request
 
   publish-server-alpine-preview:
     image: woodpeckerci/plugin-docker-buildx:2.2.0
-    secrets: [docker_password]
     group: docker
     settings:
       repo: woodpeckerci/woodpecker-server
       dockerfile: docker/Dockerfile.server.alpine.multiarch
       platforms: *platforms_preview
       tag: pull_${CI_COMMIT_PULL_REQUEST}-alpine
+      logins: *publish_logins
     when:
       evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
       event: pull_request
 
-  publish-server-preview-dry:
+  build-server:
     image: woodpeckerci/plugin-docker-buildx:2.2.0
-    secrets: [docker_password]
     group: docker
     settings:
       dry_run: true
       repo: woodpeckerci/woodpecker-server
       dockerfile: docker/Dockerfile.server.multiarch
       platforms: *platforms_preview
+      logins: *publish_logins
       tag: pull_${CI_COMMIT_PULL_REQUEST}
     when:
       evaluate: 'not (CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images")'
       event: pull_request
       path: *when_path
 
-  publish-server-alpine-preview-dry:
+  build-server-alpine:
     image: woodpeckerci/plugin-docker-buildx:2.2.0
-    secrets: [docker_password]
     group: docker
     settings:
       dry_run: true
@@ -264,21 +263,20 @@ steps:
   publish-agent-preview:
     group: docker
     image: woodpeckerci/plugin-docker-buildx:2.2.0
-    secrets: [docker_password]
     settings:
       repo: woodpeckerci/woodpecker-agent
       dockerfile: docker/Dockerfile.agent.multiarch
       platforms: *platforms_preview
       tag: pull_${CI_COMMIT_PULL_REQUEST}
       build_args: *build_args
+      logins: *publish_logins
     when:
       evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
       event: pull_request
 
-  publish-agent-preview-dry:
+  build-agent:
     group: docker
     image: woodpeckerci/plugin-docker-buildx:2.2.0
-    secrets: [docker_password]
     settings:
       dry_run: true
       repo: woodpeckerci/woodpecker-agent
@@ -386,21 +384,20 @@ steps:
   publish-cli-preview:
     group: docker
     image: woodpeckerci/plugin-docker-buildx:2.2.0
-    secrets: [docker_password]
     settings:
       repo: woodpeckerci/woodpecker-cli
       dockerfile: docker/Dockerfile.cli.multiarch
       platforms: *platforms_preview
       tag: pull_${CI_COMMIT_PULL_REQUEST}
       build_args: *build_args
+      logins: *publish_logins
     when:
       evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
       event: pull_request
 
-  publish-cli-preview-dry:
+  build-cli:
     group: docker
     image: woodpeckerci/plugin-docker-buildx:2.2.0
-    secrets: [docker_password]
     settings:
       dry_run: true
       repo: woodpeckerci/woodpecker-cli
