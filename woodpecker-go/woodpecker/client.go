@@ -251,8 +251,8 @@ func (c *client) PipelineCreate(repoID int64, options *PipelineOptions) (*Pipeli
 }
 
 // PipelineQueue returns a list of enqueued pipelines.
-func (c *client) PipelineQueue() ([]*Activity, error) {
-	var out []*Activity
+func (c *client) PipelineQueue() ([]*Feed, error) {
+	var out []*Feed
 	uri := fmt.Sprintf(pathPipelineQueue, c.addr)
 	err := c.get(uri, &out)
 	return out, err

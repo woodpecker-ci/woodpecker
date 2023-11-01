@@ -25,7 +25,6 @@ declare module 'vue' {
     CronTab: typeof import('./src/components/repo/settings/CronTab.vue')['default']
     DeployPipelinePopup: typeof import('./src/components/layout/popups/DeployPipelinePopup.vue')['default']
     DocsLink: typeof import('./src/components/atomic/DocsLink.vue')['default']
-    FluidContainer: typeof import('./src/components/layout/FluidContainer.vue')['default']
     GeneralTab: typeof import('./src/components/repo/settings/GeneralTab.vue')['default']
     Header: typeof import('./src/components/layout/scaffold/Header.vue')['default']
     IBiCheckCircleFill: typeof import('~icons/bi/check-circle-fill')['default']

@@ -2,8 +2,6 @@
   "api": "API",
   "back": "Terug",
   "cancel": "Annuleren",
-  "color_scheme_dark": "Wissel naar lichte modus",
-  "color_scheme_light": "Wissel naar donkere modus",
   "docs": "Documentatie",
   "documentation_for": "Documentatie voor \"{topic}\"",
   "errors": {
