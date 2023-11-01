@@ -1,8 +1,6 @@
 {
   "back": "Voltar",
   "cancel": "Cancelar",
-  "color_scheme_dark": "Mudar para o modo claro",
-  "color_scheme_light": "Mudar para o modo escuro",
   "docs": "Documentação",
   "documentation_for": "Documentação para \"{topic}\"",
   "errors": {
