@@ -45,6 +45,8 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
 	"github.com/woodpecker-ci/woodpecker/shared/utils"
 	"github.com/woodpecker-ci/woodpecker/version"
+	"github.com/woodpecker-ci/woodpecker/shared/addon"
+	addonTypes "github.com/woodpecker-ci/woodpecker/shared/addon/types"
 )
 
 func run(c *cli.Context) error {
@@ -138,17 +140,14 @@ func run(c *cli.Context) error {
 		return err
 	}
 
-	backendCtx := context.WithValue(ctx, types.CliContext, c)
-	backend.Init(backendCtx)
-
 	var wg sync.WaitGroup
 	parallel := c.Int("max-workflows")
 	wg.Add(parallel)
 
 	// new engine
-	engine, err := backend.FindEngine(backendCtx, c.String("backend-engine"))
+	backendCtx := context.WithValue(ctx, types.CliContext, c)
+	engine, err := getEngine(c, backendCtx)
 	if err != nil {
-		log.Error().Err(err).Msgf("cannot find backend engine '%s'", c.String("backend-engine"))
 		return err
 	}
 
@@ -228,6 +227,25 @@ func run(c *cli.Context) error {
 
 	wg.Wait()
 	return nil
+}
+
+func getEngine(c *cli.Context, backendCtx context.Context) (types.Engine, error) {
+	addonEngine, err := addon.Load[types.Engine](c.StringSlice("addons"), addonTypes.TypeForge)
+	if err != nil {
+		log.Error().Err(err).Msg("cannot load addon")
+		return nil, err
+	}
+	if addonEngine != nil {
+		return addonEngine.Value, nil
+	}
+
+	backend.Init(backendCtx)
+	engine, err := backend.FindEngine(backendCtx, c.String("backend-engine"))
+	if err != nil {
+		log.Error().Err(err).Msgf("cannot find backend engine '%s'", c.String("backend-engine"))
+		return nil, err
+	}
+	return engine, nil
 }
 
 func runWithRetry(context *cli.Context) error {

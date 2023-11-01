@@ -528,6 +528,12 @@ Supported variables:
 - `owner`: the repo's owner
 - `repo`: the repo's name
 
+### WOODPECKER_ADDONS
+
+> Default: empty
+
+List of addon files. See [addons](./75-addons/00-addons.md).
+
 ---
 
 ### `WOODPECKER_LIMIT_MEM_SWAP`

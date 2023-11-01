@@ -22,7 +22,8 @@ Directly import Woodpecker's Go package (`github.com/woodpecker-ci/woodpecker`) 
 
 | Plugin type | Return type |
 | --- | --- |
-| `Forge` | `forge.Forge` |
+| `Forge` | `"github.com/woodpecker-ci/woodpecker/server/forge".Forge` |
+| `Engine` | `"github.com/woodpecker-ci/woodpecker/pipeline/backend/types".Engine` |
 
 ## Compiling
 
@@ -39,6 +40,14 @@ The output file is your plugin which is now ready to use.
 Plugins must directly directly depend on Woodpecker's core (`github.com/woodpecker-ci/woodpecker`).
 The plugin must have been built with **excatly the same code** as the Woodpecker instance you'd like to use it on. This means: If you build your plugin with a specific commit from Woodpecker `next`, you can likely only use it with the Woodpecker version compiled from this commit.
 Also, if you change something inside of Woodpecker without commiting, it might fail because you need to recompile your plugin with this code.
+
+:::info
+It is recommended to at least support the latest released version of Woodpecker.
+:::
+
+### Compile for different versions
+
+As long as there were no changes to Woodpecker's interfaces or they are backwards-compatible, you can easily compile the addon for multiple version by changing the version of `github.com/woodpecker-ci/woodpecker` using `go get` before compiling.
 
 ## Example structure
 
@@ -67,5 +76,5 @@ type config struct {
 	l zerolog.Logger
 }
 
-// ... in this case, config must implement `forge.Forge`. You must directly use Woodpecker's packages - see imports above.
+// ... in this case, `config` must implement `forge.Forge`. You must directly use Woodpecker's packages - see imports above.
 ```

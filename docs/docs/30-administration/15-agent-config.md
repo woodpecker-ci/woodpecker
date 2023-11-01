@@ -180,6 +180,12 @@ Configures if the gRPC server certificate should be verified, only valid when `W
 
 Configures the backend engine to run pipelines on. Possible values are `auto-detect`, `docker`, `local` or `kubernetes`.
 
+### WOODPECKER_ADDONS
+
+> Default: empty
+
+List of addon files. See [addons](./75-addons/00-addons.md).
+
 ### `WOODPECKER_BACKEND_DOCKER_*`
 
 See [Docker backend configuration](./22-backends/10-docker.md#configuration)
