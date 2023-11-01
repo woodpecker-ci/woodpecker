@@ -160,7 +160,7 @@ func run(c *cli.Context) error {
 	}
 	log.Debug().Msgf("loaded %s backend engine", engine.Name())
 
-	agentConfig.AgentID, err = client.RegisterAgent(ctx, engInfo.Platform, engInfo.Backend, version.String(), parallel)
+	agentConfig.AgentID, err = client.RegisterAgent(ctx, engInfo.Platform, engine.Name(), version.String(), parallel)
 	if err != nil {
 		return err
 	}
@@ -170,7 +170,7 @@ func run(c *cli.Context) error {
 	labels := map[string]string{
 		"hostname": hostname,
 		"platform": engInfo.Platform,
-		"backend":  engInfo.Backend,
+		"backend":  engine.Name(),
 		"repo":     "*", // allow all repos by default
 	}
 
@@ -224,7 +224,7 @@ func run(c *cli.Context) error {
 
 	log.Info().Msgf(
 		"Starting Woodpecker agent with version '%s' and backend '%s' using platform '%s' running up to %d pipelines in parallel",
-		version.String(), engInfo.Backend, engInfo.Platform, parallel)
+		version.String(), engine.Name(), engInfo.Platform, parallel)
 
 	wg.Wait()
 	return nil

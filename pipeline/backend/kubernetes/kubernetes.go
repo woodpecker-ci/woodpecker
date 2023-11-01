@@ -130,7 +130,6 @@ func (e *kube) Load(context.Context) (*types.EngineInfo, error) {
 	// TODO: use info resp of kubeClient to define platform var
 	e.goos = runtime.GOOS
 	return &types.EngineInfo{
-		Backend:  e.Name(),
 		Platform: runtime.GOOS + "/" + runtime.GOARCH,
 	}, nil
 }

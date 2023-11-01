@@ -64,7 +64,6 @@ func (e *local) Load(context.Context) (*types.EngineInfo, error) {
 	e.loadClone()
 
 	return &types.EngineInfo{
-		Backend:  e.Name(),
 		Platform: runtime.GOOS + "/" + runtime.GOARCH,
 	}, nil
 }

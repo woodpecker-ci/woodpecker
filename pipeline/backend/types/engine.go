@@ -54,5 +54,4 @@ type Engine interface {
 // EngineInfo represents the reported information of a loaded engine
 type EngineInfo struct {
 	Platform string
-	Backend  string
 }

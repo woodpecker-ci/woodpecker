@@ -143,7 +143,6 @@ func (e *docker) Load(ctx context.Context) (*backend.EngineInfo, error) {
 	}
 
 	return &backend.EngineInfo{
-		Backend:  e.Name(),
 		Platform: e.info.OSType + "/" + normalizeArchType(e.info.Architecture),
 	}, nil
 }
