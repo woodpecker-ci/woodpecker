@@ -112,8 +112,6 @@
   },
   "back": "Назад",
   "cancel": "Отменить",
-  "color_scheme_dark": "Использовать светлую тему",
-  "color_scheme_light": "Использовать тёмную тему",
   "docs": "Документация",
   "documentation_for": "Документация о \"{topic}\"",
   "errors": {

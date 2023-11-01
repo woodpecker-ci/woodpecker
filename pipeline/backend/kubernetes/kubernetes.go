@@ -325,6 +325,29 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 	// return rc, nil
 }
 
+func (e *kube) DestroyStep(ctx context.Context, step *types.Step, taskUUID string) error {
+	podName, err := dnsName(step.Name)
+	if err != nil {
+		return err
+	}
+
+	log.Trace().Str("taskUUID", taskUUID).Msgf("Stopping pod: %s", podName)
+
+	gracePeriodSeconds := int64(0) // immediately
+	dpb := metav1.DeletePropagationBackground
+
+	deleteOpts := metav1.DeleteOptions{
+		GracePeriodSeconds: &gracePeriodSeconds,
+		PropagationPolicy:  &dpb,
+	}
+
+	if err := e.client.CoreV1().Pods(e.config.Namespace).Delete(ctx, podName, deleteOpts); err != nil && !errors.IsNotFound(err) {
+		return err
+	}
+
+	return nil
+}
+
 // Destroy the pipeline environment.
 func (e *kube) DestroyWorkflow(_ context.Context, conf *types.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msg("Deleting Kubernetes primitives")
@@ -349,9 +372,7 @@ func (e *kube) DestroyWorkflow(_ context.Context, conf *types.Config, taskUUID s
 			}
 			log.Trace().Msgf("Deleting pod: %s", stepName)
 			if err := e.client.CoreV1().Pods(e.config.Namespace).Delete(noContext, stepName, deleteOpts); err != nil {
-				if errors.IsNotFound(err) {
-					log.Trace().Err(err).Msgf("Unable to delete pod %s", stepName)
-				} else {
+				if !errors.IsNotFound(err) {
 					return err
 				}
 			}

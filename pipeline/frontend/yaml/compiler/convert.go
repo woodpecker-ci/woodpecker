@@ -18,7 +18,6 @@ import (
 	"fmt"
 	"maps"
 	"path"
-	"path/filepath"
 	"strings"
 
 	"github.com/google/uuid"
@@ -211,8 +210,8 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 }
 
 func (c *Compiler) stepWorkdir(container *yaml_types.Container) string {
-	if filepath.IsAbs(container.Directory) {
+	if path.IsAbs(container.Directory) {
 		return container.Directory
 	}
-	return filepath.Join(c.base, c.path, container.Directory)
+	return path.Join(c.base, c.path, container.Directory)
 }
