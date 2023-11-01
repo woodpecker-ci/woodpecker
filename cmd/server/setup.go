@@ -49,6 +49,8 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store"
 	"github.com/woodpecker-ci/woodpecker/server/store/datastore"
 	"github.com/woodpecker-ci/woodpecker/server/store/types"
+	"github.com/woodpecker-ci/woodpecker/shared/addon"
+	addonTypes "github.com/woodpecker-ci/woodpecker/shared/addon/types"
 )
 
 func setupStore(c *cli.Context) (store.Store, error) {
@@ -132,8 +134,16 @@ func setupMembershipService(_ *cli.Context, r forge.Forge) cache.MembershipServi
 	return cache.NewMembershipService(r)
 }
 
-// setupForge helper function to setup the forge from the CLI arguments.
+// setupForge helper function to set up the forge from the CLI arguments.
 func setupForge(c *cli.Context) (forge.Forge, error) {
+	add, err := addon.Load[forge.Forge](c.StringSlice("addons"), addonTypes.TypeForge)
+	if err != nil {
+		return nil, err
+	}
+	if add != nil {
+		return add.Value, nil
+	}
+
 	switch {
 	case c.Bool("github"):
 		return setupGitHub(c)

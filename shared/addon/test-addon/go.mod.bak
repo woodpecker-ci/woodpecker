@@ -1,0 +1,16 @@
+module woodpecker/addon
+
+go 1.21.2
+
+require (
+	github.com/rs/zerolog v1.31.0
+	github.com/woodpecker-ci/woodpecker v0.15.1-0.20231101160134-037703028e08
+)
+
+require (
+	github.com/go-ap/httpsig v0.0.0-20221203064646-3647b4d88fdf // indirect
+	github.com/mattn/go-colorable v0.1.13 // indirect
+	github.com/mattn/go-isatty v0.0.19 // indirect
+	github.com/robfig/cron v1.2.0 // indirect
+	golang.org/x/sys v0.13.0 // indirect
+)
