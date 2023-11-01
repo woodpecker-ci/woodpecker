@@ -115,10 +115,14 @@ func (s *Secret) Match(event WebhookEvent) bool {
 }
 
 var validDockerImageString = regexp.MustCompile(
-	`^([\w\d\-_\.\/]*` + // optional url prefix
-		`[\w\d\-_]+` + // image name
-		`)+` +
-		`(:[\w\d\-_]+)?$`, // optional image tag
+	`^(` +
+		`[\w\d\-_\.]+` + // hostname
+		`(:\d+)?` + // optional port
+		`/)?` + // optional hostname + port
+		`([\w\d\-_\.][\w\d\-_\.\/]*/)?` + // optional url prefix
+		`([\w\d\-_]+)` + // image name
+		`(:[\w\d\-_]+)?` + // optional image tag
+		`$`,
 )
 
 // Validate validates the required fields and formats.
