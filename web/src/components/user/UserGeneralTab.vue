@@ -5,7 +5,7 @@
     </InputField>
     <InputField :label="$t('user.settings.general.theme.theme')">
       <SelectField
-        v-model="theme"
+        v-model="storeTheme"
         :options="[
           { value: 'auto', text: $t('user.settings.general.theme.auto') },
           { value: 'light', text: $t('user.settings.general.theme.light') },
@@ -30,7 +30,7 @@ import { setI18nLanguage } from '~/compositions/useI18n';
 import { useTheme } from '~/compositions/useTheme';
 
 const { locale } = useI18n();
-const { theme } = useTheme();
+const { storeTheme } = useTheme();
 
 const localeOptions = computed(() =>
   SUPPORTED_LOCALES.map((supportedLocale) => ({

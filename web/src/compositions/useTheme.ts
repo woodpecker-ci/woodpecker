@@ -1,5 +1,5 @@
-import { BasicColorSchema, useColorMode } from '@vueuse/core';
-import { computed, watch } from 'vue';
+import { useColorMode } from '@vueuse/core';
+import { watch } from 'vue';
 
 const { store: storeTheme, state: resolvedTheme } = useColorMode({
   storageKey: 'woodpecker:theme',
@@ -25,7 +25,7 @@ updateTheme();
 
 export function useTheme() {
   return {
-    resolvedTheme,
-    theme: storeTheme,
+    theme,
+    storeTheme,
   };
 }
