@@ -52,8 +52,8 @@ import { Repo, Secret, WebhookEvents } from '~/lib/api/types';
 const emptySecret = {
   name: '',
   value: '',
-  image: [],
-  event: [WebhookEvents.Push],
+  images: [],
+  events: [WebhookEvents.Push],
 };
 
 const apiClient = useApiClient();

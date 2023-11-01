@@ -152,7 +152,7 @@ services:
   # TODO replace next lines (currently breaks schema) - name: service-mysql
   service-mysql:
     name: service-mysql
-    image: mysql:8.1.0
+    image: mysql:8.2.0
     ports: ['3306']
     environment:
       - MYSQL_DATABASE=test

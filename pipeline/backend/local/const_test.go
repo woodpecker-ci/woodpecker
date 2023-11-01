@@ -1,4 +1,4 @@
-// Copyright 2022 Woodpecker Authors
+// Copyright 2023 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,26 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package shared
+package local
 
-import "strings"
+import (
+	"testing"
 
-func NewSecretsReplacer(secrets []string) *strings.Replacer {
-	var oldnew []string
-	for _, old := range secrets {
-		old = strings.TrimSpace(old)
-		if len(old) <= 3 {
-			continue
-		}
-		// since replacer is executed on each line we have to split multi-line-secrets
-		for _, part := range strings.Split(old, "\n") {
-			if len(part) == 0 {
-				continue
-			}
-			oldnew = append(oldnew, part)
-			oldnew = append(oldnew, "********")
-		}
-	}
+	"github.com/stretchr/testify/assert"
+)
 
-	return strings.NewReplacer(oldnew...)
+func TestGenNetRC(t *testing.T) {
+	assert.Equal(t, `
+machine machine
+login user
+password pass
+`, genNetRC(map[string]string{
+		"CI_NETRC_MACHINE":  "machine",
+		"CI_NETRC_USERNAME": "user",
+		"CI_NETRC_PASSWORD": "pass",
+	}))
 }

@@ -22,12 +22,13 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"slices"
-	"strings"
 	"sync"
 
-	"github.com/alessio/shellescape"
 	"github.com/rs/zerolog/log"
+	"golang.org/x/text/encoding/unicode"
+	"golang.org/x/text/transform"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
@@ -131,22 +132,26 @@ func (e *local) StartStep(ctx context.Context, step *types.Step, taskUUID string
 
 // execCommands use step.Image as shell and run the commands in it
 func (e *local) execCommands(ctx context.Context, step *types.Step, state *workflowState, env []string) error {
-	// TODO: find a way to simulate commands to be exec as stdin user commands instead of generating a script and hope the shell understands
-	script := ""
-	for _, cmd := range step.Commands {
-		script += fmt.Sprintf("echo + %s\n%s\n", strings.TrimSpace(shellescape.Quote(cmd)), cmd)
+	// Prepare commands
+	args, err := genCmdByShell(step.Image, step.Commands)
+	if err != nil {
+		return fmt.Errorf("could not convert commands into args: %w", err)
 	}
-	script = strings.TrimSpace(script)
 
-	// Prepare command
 	// Use "image name" as run command (indicate shell)
-	cmd := exec.CommandContext(ctx, step.Image, "-c", script)
+	cmd := exec.CommandContext(ctx, step.Image, args...)
 	cmd.Env = env
 	cmd.Dir = state.workspaceDir
 
 	// Get output and redirect Stderr to Stdout
 	e.output, _ = cmd.StdoutPipe()
 	cmd.Stderr = cmd.Stdout
+
+	if runtime.GOOS == "windows" {
+		// we get non utf8 output from windows so just sanitize it
+		// TODO: remove hack
+		e.output = io.NopCloser(transform.NewReader(e.output, unicode.UTF8.NewDecoder().Transformer))
+	}
 
 	state.stepCMDs[step.Name] = cmd
 

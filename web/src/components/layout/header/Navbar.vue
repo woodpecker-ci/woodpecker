@@ -16,7 +16,9 @@
         <span class="hidden md:flex">{{ $t('repositories') }}</span>
       </router-link>
       <!-- Docs Link -->
-      <a :href="docsUrl" target="_blank" class="navbar-link navbar-clickable hidden md:flex">{{ $t('docs') }}</a>
+      <a href="https://woodpecker-ci.org/" target="_blank" class="navbar-link navbar-clickable hidden md:flex">{{
+        $t('docs')
+      }}</a>
       <!-- API Link -->
       <a v-if="enableSwagger" :href="apiUrl" target="_blank" class="navbar-link navbar-clickable hidden md:flex">{{
         $t('api')
@@ -69,7 +71,6 @@ const route = useRoute();
 const authentication = useAuthentication();
 const { user } = authentication;
 const { darkMode } = useDarkMode();
-const docsUrl = config.docs || undefined;
 const apiUrl = `${config.rootPath ?? ''}/swagger/index.html`;
 
 function doLogin() {

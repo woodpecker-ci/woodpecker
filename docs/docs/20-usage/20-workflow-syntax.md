@@ -40,7 +40,7 @@ steps:
 
 Keep in mind the name is optional, if not added the steps will be numerated.
 
-### Skip Commits
+## Skip Commits
 
 Woodpecker gives the ability to skip individual commits by adding `[SKIP CI]` or `[CI SKIP]` to the commit message. Note this is case-insensitive.
 

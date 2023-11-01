@@ -28,6 +28,7 @@ If you have some missing resources, please feel free to [open a pull-request](ht
 - [Ansible NAS](https://github.com/davestephens/ansible-nas/) - a homelab Ansible playbook that can set up Woodpecker-CI and Gitea
 - [picus](https://github.com/windsource/picus) - Picus connects to a Woodpecker CI server and creates an agent in the cloud when there are pending workflows.
 - [Hetzner cloud](https://www.hetzner.com/cloud) based [Woodpecker compatible autoscaler](https://git.ljoonal.xyz/ljoonal/hetzner-ci-autoscaler) - Creates and destroys VPS instances based on the count of pending & running jobs.
+- [woodpecker-lint](https://git.schmidl.dev/schtobia/woodpecker-lint) - A repository for linting a woodpecker config file via pre-commit hook
 
 ## Configuration Services
 
