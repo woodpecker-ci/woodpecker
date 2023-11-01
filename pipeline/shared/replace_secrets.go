@@ -20,7 +20,7 @@ func NewSecretsReplacer(secrets []string) *strings.Replacer {
 	var oldnew []string
 	for _, old := range secrets {
 		old = strings.TrimSpace(old)
-		if len(old) == 0 {
+		if len(old) <= 3 {
 			continue
 		}
 		// since replacer is executed on each line we have to split multi-line-secrets
