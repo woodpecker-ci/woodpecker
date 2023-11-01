@@ -112,8 +112,6 @@
   },
   "back": "Powrót",
   "cancel": "Anuluj",
-  "color_scheme_dark": "Przełącz na tryb jasny",
-  "color_scheme_light": "Przełącz na tryb ciemny",
   "docs": "Dokumentacja",
   "documentation_for": "Dokumentacja do tematu \"{topic}\"",
   "errors": {
@@ -205,7 +203,6 @@
         "restart_success": "Uruchomiono potok ponownie"
       },
       "config": "Konfiguracja",
-      "created": "Utworzono",
       "event": {
         "cron": "Cron",
         "deploy": "Wdrażanie",
@@ -422,16 +419,8 @@
   "url": "URL",
   "user": {
     "access_denied": "Nie masz pozwolenia na zalogowanie",
-    "api_usage": "Przykładowe użycie API",
-    "cli_usage": "Przykładowe użycie CLI",
-    "dl_cli": "Pobierz CLI",
     "internal_error": "Wystąpił błąd wewnętrzny",
-    "oauth_error": "Błąd podczas uwierzytelnienia u dostawcy OAuth",
-    "reset_token": "Resetuj token",
-    "settings": "Ustawienia użytkownika",
-    "shell_setup": "Konfiguracja powłoki systemowej",
-    "shell_setup_before": "wykonaj wcześniej konfigurację powłoki",
-    "token": "Twój token osobisty"
+    "oauth_error": "Błąd podczas uwierzytelnienia u dostawcy OAuth"
   },
   "username": "Nazwa użytkownika",
   "welcome": "Witamy w Woodpecker"

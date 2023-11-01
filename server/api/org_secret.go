@@ -19,6 +19,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
 
 	"github.com/woodpecker-ci/woodpecker/server"
@@ -46,7 +47,7 @@ func GetOrgSecret(c *gin.Context) {
 
 	secret, err := server.Config.Services.Secrets.OrgSecretFind(orgID, name)
 	if err != nil {
-		handleDbGetError(c, err)
+		handleDbError(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, secret.Copy())
@@ -106,12 +107,11 @@ func PostOrgSecret(c *gin.Context) {
 		return
 	}
 	secret := &model.Secret{
-		OrgID:       orgID,
-		Name:        in.Name,
-		Value:       in.Value,
-		Events:      in.Events,
-		Images:      in.Images,
-		PluginsOnly: in.PluginsOnly,
+		OrgID:  orgID,
+		Name:   in.Name,
+		Value:  in.Value,
+		Events: in.Events,
+		Images: in.Images,
 	}
 	if err := secret.Validate(); err != nil {
 		c.String(http.StatusUnprocessableEntity, "Error inserting org %q secret. %s", orgID, err)
@@ -152,7 +152,7 @@ func PatchOrgSecret(c *gin.Context) {
 
 	secret, err := server.Config.Services.Secrets.OrgSecretFind(orgID, name)
 	if err != nil {
-		handleDbGetError(c, err)
+		handleDbError(c, err)
 		return
 	}
 	if in.Value != "" {
@@ -164,7 +164,6 @@ func PatchOrgSecret(c *gin.Context) {
 	if in.Images != nil {
 		secret.Images = in.Images
 	}
-	secret.PluginsOnly = in.PluginsOnly
 
 	if err := secret.Validate(); err != nil {
 		c.String(http.StatusUnprocessableEntity, "Error updating org %q secret. %s", orgID, err)
@@ -182,7 +181,7 @@ func PatchOrgSecret(c *gin.Context) {
 //	@Summary	Delete the named secret from an organization
 //	@Router		/orgs/{org_id}/secrets/{secret} [delete]
 //	@Produce	plain
-//	@Success	200
+//	@Success	204
 //	@Tags		Organization secrets
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		org_id	path	string	true	"the org's id"
@@ -196,8 +195,8 @@ func DeleteOrgSecret(c *gin.Context) {
 	}
 
 	if err := server.Config.Services.Secrets.OrgSecretDelete(orgID, name); err != nil {
-		handleDbGetError(c, err)
+		handleDbError(c, err)
 		return
 	}
-	c.String(http.StatusNoContent, "")
+	c.Status(http.StatusNoContent)
 }

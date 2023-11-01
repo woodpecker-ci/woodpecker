@@ -52,6 +52,8 @@ import (
 )
 
 func setupStore(c *cli.Context) (store.Store, error) {
+	// TODO: find a better way than global var to pass down to allow long migrations
+	server.Config.Server.Migrations.AllowLong = c.Bool("migrations-allow-long")
 	datasource := c.String("datasource")
 	driver := c.String("driver")
 	xorm := store.XORM{
@@ -279,13 +281,12 @@ func setupSignatureKeys(_store store.Store) (crypto.PrivateKey, crypto.PublicKey
 	} else if err != nil {
 		log.Fatal().Err(err).Msgf("Failed to load private key")
 		return nil, nil
-	} else {
-		privKeyStr, err := hex.DecodeString(privKey)
-		if err != nil {
-			log.Fatal().Err(err).Msgf("Failed to decode private key")
-			return nil, nil
-		}
-		privKey := ed25519.PrivateKey(privKeyStr)
-		return privKey, privKey.Public()
 	}
+	privKeyStr, err := hex.DecodeString(privKey)
+	if err != nil {
+		log.Fatal().Err(err).Msgf("Failed to decode private key")
+		return nil, nil
+	}
+	privateKey := ed25519.PrivateKey(privKeyStr)
+	return privateKey, privateKey.Public()
 }

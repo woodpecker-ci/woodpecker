@@ -61,7 +61,7 @@ message Filter {
   map<string, string> labels = 1;
 }
 
-message Pipeline {
+message Workflow {
   string id = 1;
   int64 timeout = 2;
   bytes payload = 3;
@@ -126,7 +126,7 @@ message VersionResponse {
 }
 
 message NextResponse {
-  Pipeline pipeline = 1;
+  Workflow workflow = 1;
 }
 
 message RegisterAgentResponse {

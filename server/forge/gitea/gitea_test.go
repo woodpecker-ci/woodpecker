@@ -161,7 +161,7 @@ func Test_gitea(t *testing.T) {
 			g.Assert(b).IsNotNil()
 			g.Assert(err).IsNil()
 			g.Assert(b.Event).Equal(model.EventPull)
-			g.Assert(utils.EqualStringSlice(b.ChangedFiles, []string{"README.md"})).IsTrue()
+			g.Assert(utils.EqualSliceValues(b.ChangedFiles, []string{"README.md"})).IsTrue()
 		})
 	})
 }

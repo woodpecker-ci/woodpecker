@@ -17,11 +17,16 @@ export default () => {
     setUserConfig('isPipelineFeedOpen', !userConfig.value.isPipelineFeedOpen);
   }
 
+  function close() {
+    setUserConfig('isPipelineFeedOpen', false);
+  }
+
   const sortedPipelines = toRef(pipelineStore, 'pipelineFeed');
   const activePipelines = toRef(pipelineStore, 'activePipelines');
 
   return {
     toggle,
+    close,
     isOpen,
     sortedPipelines,
     activePipelines,

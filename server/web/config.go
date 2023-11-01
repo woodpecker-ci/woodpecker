@@ -40,12 +40,12 @@ func Config(c *gin.Context) {
 	}
 
 	configData := map[string]interface{}{
-		"user":     user,
-		"csrf":     csrf,
-		"docs":     server.Config.Server.Docs,
-		"version":  version.String(),
-		"forge":    server.Config.Services.Forge.Name(),
-		"root_url": server.Config.Server.RootURL,
+		"user":           user,
+		"csrf":           csrf,
+		"version":        version.String(),
+		"forge":          server.Config.Services.Forge.Name(),
+		"root_path":      server.Config.Server.RootPath,
+		"enable_swagger": server.Config.Server.EnableSwagger,
 	}
 
 	// default func map with json parser.
@@ -72,7 +72,7 @@ const configTemplate = `
 window.WOODPECKER_USER = {{ json .user }};
 window.WOODPECKER_CSRF = "{{ .csrf }}";
 window.WOODPECKER_VERSION = "{{ .version }}";
-window.WOODPECKER_DOCS = "{{ .docs }}";
 window.WOODPECKER_FORGE = "{{ .forge }}";
-window.WOODPECKER_ROOT_URL = "{{ .root_url }}";
+window.WOODPECKER_ROOT_PATH = "{{ .root_path }}";
+window.WOODPECKER_ENABLE_SWAGGER = {{ .enable_swagger }};
 `

@@ -34,14 +34,10 @@ import (
 )
 
 func HandleLogin(c *gin.Context) {
-	var (
-		w = c.Writer
-		r = c.Request
-	)
-	if err := r.FormValue("error"); err != "" {
-		http.Redirect(w, r, "/login/error?code="+err, 303)
+	if err := c.Request.FormValue("error"); err != "" {
+		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login/error?code="+err)
 	} else {
-		http.Redirect(w, r, "/authorize", 303)
+		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/authorize")
 	}
 }
 
@@ -56,7 +52,7 @@ func HandleAuth(c *gin.Context) {
 	tmpuser, err := _forge.Login(c, c.Writer, c.Request)
 	if err != nil {
 		log.Error().Msgf("cannot authenticate user. %s", err)
-		c.Redirect(http.StatusSeeOther, "/login?error=oauth_error")
+		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=oauth_error")
 		return
 	}
 	// this will happen when the user is redirected by the forge as
@@ -77,7 +73,7 @@ func HandleAuth(c *gin.Context) {
 		// if self-registration is disabled we should return a not authorized error
 		if !config.Open && !config.IsAdmin(tmpuser) {
 			log.Error().Msgf("cannot register %s. registration closed", tmpuser.Login)
-			c.Redirect(http.StatusSeeOther, "/login?error=access_denied")
+			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=access_denied")
 			return
 		}
 
@@ -87,7 +83,7 @@ func HandleAuth(c *gin.Context) {
 			teams, terr := _forge.Teams(c, tmpuser)
 			if terr != nil || !config.IsMember(teams) {
 				log.Error().Err(terr).Msgf("cannot verify team membership for %s.", u.Login)
-				c.Redirect(303, "/login?error=access_denied")
+				c.Redirect(303, server.Config.Server.RootPath+"/login?error=access_denied")
 				return
 			}
 		}
@@ -108,7 +104,7 @@ func HandleAuth(c *gin.Context) {
 		// insert the user into the database
 		if err := _store.CreateUser(u); err != nil {
 			log.Error().Msgf("cannot insert %s. %s", u.Login, err)
-			c.Redirect(http.StatusSeeOther, "/login?error=internal_error")
+			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
 			return
 		}
 
@@ -137,14 +133,14 @@ func HandleAuth(c *gin.Context) {
 		teams, terr := _forge.Teams(c, u)
 		if terr != nil || !config.IsMember(teams) {
 			log.Error().Err(terr).Msgf("cannot verify team membership for %s.", u.Login)
-			c.Redirect(http.StatusSeeOther, "/login?error=access_denied")
+			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=access_denied")
 			return
 		}
 	}
 
 	if err := _store.UpdateUser(u); err != nil {
 		log.Error().Msgf("cannot update %s. %s", u.Login, err)
-		c.Redirect(http.StatusSeeOther, "/login?error=internal_error")
+		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
 		return
 	}
 
@@ -152,7 +148,7 @@ func HandleAuth(c *gin.Context) {
 	tokenString, err := token.New(token.SessToken, u.Login).SignExpires(u.Hash, exp)
 	if err != nil {
 		log.Error().Msgf("cannot create token for %s. %s", u.Login, err)
-		c.Redirect(http.StatusSeeOther, "/login?error=internal_error")
+		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
 		return
 	}
 
@@ -187,13 +183,13 @@ func HandleAuth(c *gin.Context) {
 
 	httputil.SetCookie(c.Writer, c.Request, "user_sess", tokenString)
 
-	c.Redirect(http.StatusSeeOther, "/")
+	c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/")
 }
 
 func GetLogout(c *gin.Context) {
 	httputil.DelCookie(c.Writer, c.Request, "user_sess")
 	httputil.DelCookie(c.Writer, c.Request, "user_last")
-	c.Redirect(http.StatusSeeOther, "/")
+	c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/")
 }
 
 func GetLoginToken(c *gin.Context) {
@@ -214,7 +210,7 @@ func GetLoginToken(c *gin.Context) {
 
 	user, err := _store.GetUserLogin(login)
 	if err != nil {
-		_ = c.AbortWithError(http.StatusNotFound, err)
+		handleDbError(c, err)
 		return
 	}
 

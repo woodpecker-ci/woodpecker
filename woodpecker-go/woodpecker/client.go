@@ -28,6 +28,7 @@ import (
 const (
 	pathSelf           = "%s/api/user"
 	pathRepos          = "%s/api/user/repos"
+	pathRepoPost       = "%s/api/repos?forge_remote_id=%d"
 	pathRepo           = "%s/api/repos/%d"
 	pathRepoLookup     = "%s/api/repos/lookup/%s"
 	pathRepoMove       = "%s/api/repos/%d/move?to=%s"
@@ -164,9 +165,9 @@ func (c *client) RepoList() ([]*Repo, error) {
 
 // RepoListOpts returns a list of all repositories to which
 // the user has explicit access in the host system.
-func (c *client) RepoListOpts(sync, all bool) ([]*Repo, error) {
+func (c *client) RepoListOpts(all bool) ([]*Repo, error) {
 	var out []*Repo
-	uri := fmt.Sprintf(pathRepos+"?flush=%v&all=%v", c.addr, sync, all)
+	uri := fmt.Sprintf(pathRepos+"?all=%v", c.addr, all)
 	err := c.get(uri, &out)
 	return out, err
 }
@@ -174,7 +175,7 @@ func (c *client) RepoListOpts(sync, all bool) ([]*Repo, error) {
 // RepoPost activates a repository.
 func (c *client) RepoPost(forgeRemoteID int64) (*Repo, error) {
 	out := new(Repo)
-	uri := fmt.Sprintf(pathRepo, c.addr, forgeRemoteID)
+	uri := fmt.Sprintf(pathRepoPost, c.addr, forgeRemoteID)
 	err := c.post(uri, nil, out)
 	return out, err
 }
@@ -250,8 +251,8 @@ func (c *client) PipelineCreate(repoID int64, options *PipelineOptions) (*Pipeli
 }
 
 // PipelineQueue returns a list of enqueued pipelines.
-func (c *client) PipelineQueue() ([]*Activity, error) {
-	var out []*Activity
+func (c *client) PipelineQueue() ([]*Feed, error) {
+	var out []*Feed
 	uri := fmt.Sprintf(pathPipelineQueue, c.addr)
 	err := c.get(uri, &out)
 	return out, err

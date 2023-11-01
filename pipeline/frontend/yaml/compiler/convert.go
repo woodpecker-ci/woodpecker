@@ -1,14 +1,27 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package compiler
 
 import (
 	"fmt"
+	"maps"
 	"path"
-	"path/filepath"
 	"strings"
 
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
-	"golang.org/x/exp/maps"
 
 	backend_types "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
@@ -102,6 +115,17 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		}
 	}
 
+	var tolerations []backend_types.Toleration
+	for _, t := range container.BackendOptions.Kubernetes.Tolerations {
+		tolerations = append(tolerations, backend_types.Toleration{
+			Key:               t.Key,
+			Operator:          backend_types.TolerationOperator(t.Operator),
+			Value:             t.Value,
+			Effect:            backend_types.TaintEffect(t.Effect),
+			TolerationSeconds: t.TolerationSeconds,
+		})
+	}
+
 	// Kubernetes advanced settings
 	backendOptions := backend_types.BackendOptions{
 		Kubernetes: backend_types.KubernetesBackendOptions{
@@ -111,6 +135,7 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 			},
 			ServiceAccountName: container.BackendOptions.Kubernetes.ServiceAccountName,
 			NodeSelector:       container.BackendOptions.Kubernetes.NodeSelector,
+			Tolerations:        tolerations,
 		},
 	}
 
@@ -186,8 +211,8 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 }
 
 func (c *Compiler) stepWorkdir(container *yaml_types.Container) string {
-	if filepath.IsAbs(container.Directory) {
+	if path.IsAbs(container.Directory) {
 		return container.Directory
 	}
-	return filepath.Join(c.base, c.path, container.Directory)
+	return path.Join(c.base, c.path, container.Directory)
 }

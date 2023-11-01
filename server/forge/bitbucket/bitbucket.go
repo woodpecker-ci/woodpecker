@@ -20,10 +20,9 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"path/filepath"
 
 	"golang.org/x/oauth2"
-
-	shared_utils "github.com/woodpecker-ci/woodpecker/shared/utils"
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/forge"
@@ -31,6 +30,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/forge/common"
 	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
+	shared_utils "github.com/woodpecker-ci/woodpecker/shared/utils"
 )
 
 // Bitbucket cloud endpoints.
@@ -158,11 +158,11 @@ func (c *config) Repo(ctx context.Context, u *model.User, remoteID model.ForgeRe
 	if remoteID.IsValid() {
 		name = string(remoteID)
 	}
-	repos, err := c.Repos(ctx, u)
-	if err != nil {
-		return nil, err
-	}
-	if len(owner) == 0 {
+	if owner == "" {
+		repos, err := c.Repos(ctx, u)
+		if err != nil {
+			return nil, err
+		}
 		for _, repo := range repos {
 			if string(repo.ForgeRemoteID) == name {
 				owner = repo.Owner
@@ -187,20 +187,26 @@ func (c *config) Repo(ctx context.Context, u *model.User, remoteID model.ForgeRe
 func (c *config) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {
 	client := c.newClient(ctx, u)
 
-	var all []*model.Repo
-
-	resp, err := client.ListWorkspaces(&internal.ListWorkspacesOpts{
-		PageLen: 100,
-		Role:    "member",
+	workspaces, err := shared_utils.Paginate(func(page int) ([]*internal.Workspace, error) {
+		resp, err := client.ListWorkspaces(&internal.ListWorkspacesOpts{
+			Page:    page,
+			PageLen: 100,
+			Role:    "member",
+		})
+		if err != nil {
+			return nil, err
+		}
+		return resp.Values, nil
 	})
 	if err != nil {
-		return all, err
+		return nil, err
 	}
 
-	for _, workspace := range resp.Values {
+	var all []*model.Repo
+	for _, workspace := range workspaces {
 		repos, err := client.ListReposAll(workspace.Slug)
 		if err != nil {
-			return all, err
+			return nil, err
 		}
 		for _, repo := range repos {
 			perm, err := client.GetPermission(repo.FullName)
@@ -223,8 +229,52 @@ func (c *config) File(ctx context.Context, u *model.User, r *model.Repo, p *mode
 	return []byte(*config), err
 }
 
-func (c *config) Dir(_ context.Context, _ *model.User, _ *model.Repo, _ *model.Pipeline, _ string) ([]*forge_types.FileMeta, error) {
-	return nil, forge_types.ErrNotImplemented
+// Dir fetches a folder from the bitbucket repository
+func (c *config) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model.Pipeline, f string) ([]*forge_types.FileMeta, error) {
+	var page *string
+	repoPathFiles := []*forge_types.FileMeta{}
+	client := c.newClient(ctx, u)
+	for {
+		filesResp, err := client.GetRepoFiles(r.Owner, r.Name, p.Commit, f, page)
+		if err != nil {
+			return nil, err
+		}
+		for _, file := range filesResp.Values {
+			_, filename := filepath.Split(file.Path)
+			repoFile := forge_types.FileMeta{
+				Name: filename,
+			}
+			if file.Type == "commit_file" {
+				fileData, err := c.newClient(ctx, u).FindSource(r.Owner, r.Name, p.Commit, file.Path)
+				if err != nil {
+					return nil, err
+				}
+				if fileData != nil {
+					repoFile.Data = []byte(*fileData)
+				}
+			}
+			repoPathFiles = append(repoPathFiles, &repoFile)
+		}
+
+		// Check for more results page
+		if filesResp.Next == nil {
+			break
+		}
+		nextPageURL, err := url.Parse(*filesResp.Next)
+		if err != nil {
+			return nil, err
+		}
+		params, err := url.ParseQuery(nextPageURL.RawQuery)
+		if err != nil {
+			return nil, err
+		}
+		nextPage := params.Get("page")
+		if len(nextPage) == 0 {
+			break
+		}
+		page = &nextPage
+	}
+	return repoPathFiles, nil
 }
 
 // Status creates a pipeline status for the Bitbucket commit.
@@ -251,7 +301,7 @@ func (c *config) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 	return c.newClient(ctx, u).CreateHook(r.Owner, r.Name, &internal.Hook{
 		Active: true,
 		Desc:   rawurl.Host,
-		Events: []string{"repo:push"},
+		Events: []string{"repo:push", "pullrequest:created"},
 		URL:    link,
 	})
 }
@@ -261,11 +311,19 @@ func (c *config) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 func (c *config) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
 	client := c.newClient(ctx, u)
 
-	hooks, err := client.ListHooks(r.Owner, r.Name, &internal.ListOpts{})
+	hooks, err := shared_utils.Paginate(func(page int) ([]*internal.Hook, error) {
+		hooks, err := client.ListHooks(r.Owner, r.Name, &internal.ListOpts{
+			Page: page,
+		})
+		if err != nil {
+			return nil, err
+		}
+		return hooks.Values, nil
+	})
 	if err != nil {
 		return err
 	}
-	hook := matchingHooks(hooks.Values, link)
+	hook := matchingHooks(hooks, link)
 	if hook != nil {
 		return client.DeleteHook(r.Owner, r.Name, hook.UUID)
 	}
@@ -283,12 +341,12 @@ func (c *config) Netrc(u *model.User, _ *model.Repo) (*model.Netrc, error) {
 }
 
 // Branches returns the names of all branches for the named repository.
-func (c *config) Branches(ctx context.Context, u *model.User, r *model.Repo, _ *model.ListOptions) ([]string, error) {
-	bitbucketBranches, err := c.newClient(ctx, u).ListBranches(r.Owner, r.Name)
+func (c *config) Branches(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]string, error) {
+	opts := internal.ListOpts{Page: p.Page, PageLen: p.PerPage}
+	bitbucketBranches, err := c.newClient(ctx, u).ListBranches(r.Owner, r.Name, &opts)
 	if err != nil {
 		return nil, err
 	}
-
 	branches := make([]string, 0)
 	for _, branch := range bitbucketBranches {
 		branches = append(branches, branch.Name)
@@ -303,7 +361,7 @@ func (c *config) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 
 // PullRequests returns the pull requests of the named repository.
 func (c *config) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error) {
-	opts := internal.ListOpts{Page: p.Page, PageLen: p.Page}
+	opts := internal.ListOpts{Page: p.Page, PageLen: p.PerPage}
 	pullRequests, err := c.newClient(ctx, u).ListPullRequests(r.Owner, r.Name, &opts)
 	if err != nil {
 		return nil, err

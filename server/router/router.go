@@ -22,9 +22,9 @@ import (
 	"github.com/rs/zerolog/log"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+
 	"github.com/woodpecker-ci/woodpecker/cmd/server/docs"
 	"github.com/woodpecker-ci/woodpecker/server"
-
 	"github.com/woodpecker-ci/woodpecker/server/api"
 	"github.com/woodpecker-ci/woodpecker/server/api/metrics"
 	"github.com/woodpecker-ci/woodpecker/server/router/middleware/header"
@@ -53,31 +53,36 @@ func Load(noRouteHandler http.HandlerFunc, middleware ...gin.HandlerFunc) http.H
 
 	e.NoRoute(gin.WrapF(noRouteHandler))
 
-	e.GET("/web-config.js", web.Config)
-
-	e.GET("/logout", api.GetLogout)
-	e.GET("/login", api.HandleLogin)
-	auth := e.Group("/authorize")
+	base := e.Group(server.Config.Server.RootPath)
 	{
-		auth.GET("", api.HandleAuth)
-		auth.POST("", api.HandleAuth)
-		auth.POST("/token", api.GetLoginToken)
+		base.GET("/web-config.js", web.Config)
+
+		base.GET("/logout", api.GetLogout)
+		base.GET("/login", api.HandleLogin)
+		auth := base.Group("/authorize")
+		{
+			auth.GET("", api.HandleAuth)
+			auth.POST("", api.HandleAuth)
+			auth.POST("/token", api.GetLoginToken)
+		}
+
+		base.GET("/metrics", metrics.PromHandler())
+		base.GET("/version", api.Version)
+		base.GET("/healthz", api.Health)
 	}
 
-	e.GET("/metrics", metrics.PromHandler())
-	e.GET("/version", api.Version)
-	e.GET("/healthz", api.Health)
-
-	apiRoutes(e)
-	setupSwaggerConfigAndRoutes(e)
+	apiRoutes(base)
+	if server.Config.Server.EnableSwagger {
+		setupSwaggerConfigAndRoutes(e)
+	}
 
 	return e
 }
 
 func setupSwaggerConfigAndRoutes(e *gin.Engine) {
 	docs.SwaggerInfo.Host = getHost(server.Config.Server.Host)
-	docs.SwaggerInfo.BasePath = server.Config.Server.RootURL + "/api"
-	e.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+	docs.SwaggerInfo.BasePath = server.Config.Server.RootPath + "/api"
+	e.GET(server.Config.Server.RootPath+"/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 }
 
 func getHost(s string) string {

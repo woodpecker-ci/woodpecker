@@ -23,6 +23,8 @@ import (
 	"net/http"
 	"net/url"
 
+	shared_utils "github.com/woodpecker-ci/woodpecker/shared/utils"
+
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/bitbucket"
 )
@@ -44,10 +46,11 @@ const (
 	pathHooks         = "%s/2.0/repositories/%s/%s/hooks?%s"
 	pathSource        = "%s/2.0/repositories/%s/%s/src/%s/%s"
 	pathStatus        = "%s/2.0/repositories/%s/%s/commit/%s/statuses/build"
-	pathBranches      = "%s/2.0/repositories/%s/%s/refs/branches"
+	pathBranches      = "%s/2.0/repositories/%s/%s/refs/branches?%s"
 	pathOrgPerms      = "%s/2.0/workspaces/%s/permissions?%s"
 	pathPullRequests  = "%s/2.0/repositories/%s/%s/pullrequests"
 	pathBranchCommits = "%s/2.0/repositories/%s/%s/commits/%s"
+	pathDir           = "%s/2.0/repositories/%s/%s/src/%s%s"
 )
 
 type Client struct {
@@ -109,21 +112,13 @@ func (c *Client) ListRepos(workspace string, opts *ListOpts) (*RepoResp, error) 
 }
 
 func (c *Client) ListReposAll(workspace string) ([]*Repo, error) {
-	page := 1
-	var repos []*Repo
-
-	for {
+	return shared_utils.Paginate(func(page int) ([]*Repo, error) {
 		resp, err := c.ListRepos(workspace, &ListOpts{Page: page, PageLen: 100})
 		if err != nil {
-			return repos, err
+			return nil, err
 		}
-		repos = append(repos, resp.Values...)
-		if len(resp.Next) == 0 {
-			break
-		}
-		page = resp.Page + 1
-	}
-	return repos, nil
+		return resp.Values, nil
+	})
 }
 
 func (c *Client) FindHook(owner, name, id string) (*Hook, error) {
@@ -177,9 +172,9 @@ func (c *Client) GetPermission(fullName string) (*RepoPerm, error) {
 	return out.Values[0], nil
 }
 
-func (c *Client) ListBranches(owner, name string) ([]*Branch, error) {
+func (c *Client) ListBranches(owner, name string, opts *ListOpts) ([]*Branch, error) {
 	out := new(BranchResp)
-	uri := fmt.Sprintf(pathBranches, c.base, owner, name)
+	uri := fmt.Sprintf(pathBranches, c.base, owner, name, opts.Encode())
 	_, err := c.do(uri, get, nil, out)
 	return out.Values, err
 }
@@ -229,6 +224,16 @@ func (c *Client) ListPullRequests(owner, name string, opts *ListOpts) ([]*PullRe
 func (c *Client) GetWorkspace(name string) (*Workspace, error) {
 	out := new(Workspace)
 	uri := fmt.Sprintf(pathWorkspace, c.base, name)
+	_, err := c.do(uri, get, nil, out)
+	return out, err
+}
+
+func (c *Client) GetRepoFiles(owner, name, revision, path string, page *string) (*DirResp, error) {
+	out := new(DirResp)
+	uri := fmt.Sprintf(pathDir, c.base, owner, name, revision, path)
+	if page != nil {
+		uri += "?page=" + *page
+	}
 	_, err := c.do(uri, get, nil, out)
 	return out, err
 }

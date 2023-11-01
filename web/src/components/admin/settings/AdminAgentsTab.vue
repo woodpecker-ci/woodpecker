@@ -1,19 +1,14 @@
 <template>
-  <Panel>
-    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-wp-background-100">
-      <div class="ml-2">
-        <h1 class="text-xl text-wp-text-100">{{ $t('admin.settings.agents.agents') }}</h1>
-        <p class="text-sm text-wp-text-alt-100">{{ $t('admin.settings.agents.desc') }}</p>
-      </div>
+  <Settings :title="$t('admin.settings.agents.agents')" :desc="$t('admin.settings.agents.desc')">
+    <template #titleActions>
       <Button
         v-if="selectedAgent"
-        class="ml-auto"
         :text="$t('admin.settings.agents.show')"
         start-icon="back"
         @click="selectedAgent = undefined"
       />
-      <Button v-else class="ml-auto" :text="$t('admin.settings.agents.add')" start-icon="plus" @click="showAddAgent" />
-    </div>
+      <Button v-else :text="$t('admin.settings.agents.add')" start-icon="plus" @click="showAddAgent" />
+    </template>
 
     <div v-if="!selectedAgent" class="space-y-4 text-wp-text-100">
       <ListItem
@@ -24,11 +19,13 @@
         <span>{{ agent.name || `Agent ${agent.id}` }}</span>
         <span class="ml-auto">
           <span class="hidden md:inline-block space-x-2">
-            <Badge :label="$t('admin.settings.agents.platform.badge')" :value="agent.platform || '???'" />
-            <Badge :label="$t('admin.settings.agents.backend.badge')" :value="agent.backend || '???'" />
-            <Badge :label="$t('admin.settings.agents.capacity.badge')" :value="agent.capacity || '???'" />
+            <Badge v-if="agent.platform" :label="$t('admin.settings.agents.platform.badge')" :value="agent.platform" />
+            <Badge v-if="agent.backend" :label="$t('admin.settings.agents.backend.badge')" :value="agent.backend" />
+            <Badge v-if="agent.capacity" :label="$t('admin.settings.agents.capacity.badge')" :value="agent.capacity" />
           </span>
-          <span class="ml-2">{{ agent.last_contact ? timeAgo.format(agent.last_contact * 1000) : 'never' }}</span>
+          <span class="ml-2">{{
+            agent.last_contact ? timeAgo.format(agent.last_contact * 1000) : $t('admin.settings.agents.never')
+          }}</span>
         </span>
         <IconButton
           icon="edit"
@@ -120,7 +117,7 @@
         </div>
       </form>
     </div>
-  </Panel>
+  </Settings>
 </template>
 
 <script lang="ts" setup>
@@ -135,16 +132,17 @@ import ListItem from '~/components/atomic/ListItem.vue';
 import Checkbox from '~/components/form/Checkbox.vue';
 import InputField from '~/components/form/InputField.vue';
 import TextField from '~/components/form/TextField.vue';
-import Panel from '~/components/layout/Panel.vue';
+import Settings from '~/components/layout/Settings.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
+import useTimeAgo from '~/compositions/useTimeAgo';
 import { Agent } from '~/lib/api/types';
-import timeAgo from '~/utils/timeAgo';
 
 const apiClient = useApiClient();
 const notifications = useNotifications();
+const timeAgo = useTimeAgo();
 const { t } = useI18n();
 
 const selectedAgent = ref<Partial<Agent>>();

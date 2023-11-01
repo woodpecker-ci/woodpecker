@@ -4,6 +4,15 @@ Woodpecker provides the ability to store named parameters external to the YAML c
 
 Secrets are exposed to your pipeline steps and plugins as uppercase environment variables and can therefore be referenced in the commands section of your pipeline.
 
+Woodpecker provides three different levels to add secrets to your pipeline. The following list shows the priority of the different levels. If a secret is defined in multiple levels, will be used following this priorities: Repository secrets > Organization secrets > Global secrets.
+
+1. **Repository secrets**: They are available to all pipelines of an repository.
+2. **Organization secrets**: They are available to all pipelines of an organization.
+3. **Global secrets**: Can be configured by an instance admin.
+   They are available to all pipelines of the **whole** Woodpecker instance and should therefore **only** be used for secrets that are allowed to be read by **all** users.
+
+## Usage
+
 ```diff
 steps:
   docker:
@@ -28,7 +37,6 @@ steps:
 +       from_secret: secret_token
 ```
 
-
 Please note parameter expressions are subject to pre-processing. When using secrets in parameter expressions they should be escaped.
 
 ```diff
@@ -45,7 +53,7 @@ steps:
 
 ## Adding Secrets
 
-Secrets are added to the Woodpecker secret store on the UI or with the CLI.
+Secrets are added to the Woodpecker in the UI or with the CLI.
 
 ## Alternate Names
 
@@ -81,14 +89,9 @@ Please be careful when exposing secrets to pull requests. If your repository is 
 
 ## Image filter
 
-To prevent abusing your secrets with malicious pull requests, you can limit a secret to a list of images. They are not available to any other container. In addition, you can make the secret available only for plugins (steps without user-defined commands).
+To prevent abusing your secrets from malicious usage, you can limit a secret to a list of images. If enabled they are not available to any other plugin (steps without user-defined commands). If you or an attacker defines explicit commands, the secrets will not be available to the container to prevent leaking them.
 
-:::warning
-If you enable the option "Only available for plugins", always set an image filter too. Otherwise, the secret can be accessed by a very simple self-developed plugin and is thus *not* safe.
-If you only set an image filter, you could still access the secret using the same image and by specifying a command that prints it.
-:::
-
-## Examples
+## CLI Examples
 
 Create the secret using default settings. The secret will be available to all images in your pipeline, and will be available to all push, tag, and deployment events (not pull request events).
 
