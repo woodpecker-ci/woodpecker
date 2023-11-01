@@ -74,8 +74,15 @@
         "waiting_for": "en attente de"
       },
       "repos": {
+        "desc": "Dépôts actifs ou anciennement actifs sur ce serveur",
+        "disabled": "Désactivé",
         "none": "Il n'y a pas encore de dépôts.",
+        "repair": {
+          "repair": "Tout réparer",
+          "success": "Dépôts réparés"
+        },
         "repos": "Dépôts",
+        "settings": "Réglages du dépôt",
         "view": "Voir le dépôt"
       },
       "secrets": {
@@ -129,8 +136,7 @@
   "api": "API",
   "back": "Revenir en arrière",
   "cancel": "Annuler",
-  "color_scheme_dark": "Basculer en couleurs claires",
-  "color_scheme_light": "Basculer en couleurs sombres",
+  "default": "défaut",
   "docs": "Docs",
   "documentation_for": "Documentation sur \"{topic}\"",
   "errors": {
@@ -464,11 +470,13 @@
         "add": "Ajouter un secret",
         "created": "Secret d'utilisateur crée",
         "deleted": "Secret d'utilisateur effacé",
+        "desc": "Les secrets d'utilisateur peuvent être passés à toutes les étapes du pipeline des dépôtsde l'utilisateur sous forme de variables d'environnement.",
         "events": {
           "events": "Disponible pour les événements suivants",
           "pr_warning": "Attention, si cette option est activé, un acteur malicieux peut proposer une pull request qui affiche vos secrets."
         },
         "images": {
+          "desc": "Liste d'images séparé par des virgules où ce secret sera utilisable, laisser vide pour autoriser toutes les images",
           "images": "Disponible pour les images suivantes"
         },
         "name": "Nom",

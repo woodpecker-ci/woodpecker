@@ -80,9 +80,32 @@ See the [kubernetes documentation](https://kubernetes.io/docs/concepts/security/
 
 ### nodeSelector
 
-Specify the label which is used to select the node where the job should be executed. Labels defined here will be appended to a list already containing "kubernetes.io/arch".
-By default the pod will use "kubernetes.io/arch" inferred from top-level "platform" setting which is deducted from the agents' environment variable CI_SYSTEM_PLATFORM. To overwrite this, you need to specify this label in the nodeSelector section.
-See the [kubernetes documentation](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector) for more information on using nodeSelector.
+Specifies the label which is used to select the node on which the job will be executed.
+
+Labels defined here will be appended to a list which already contains `"kubernetes.io/arch"`.
+By default `"kubernetes.io/arch"` is inferred from the agents' platform. One can override it by setting that label in the `nodeSelector` section of the `backend_options`.
+Without a manual overwrite, builds will be randomly assigned to the runners and inherit their respective architectures.
+
+To overwrite this, one needs to set the label in the `nodeSelector` section of the `backend_options`.
+A practical example for this is when running a matrix-build and delegating specific elements of the matrix to run on a specific architecture.
+In this case, one must define an arbitrary key in the matrix section of the respective matrix element:
+
+```yml
+matrix:
+  include:
+    - NAME: runner1
+      ARCH: arm64
+```
+
+And then overwrite the `nodeSelector` in the `backend_options` section of the step(s) using the name of the respective env var:
+
+```yml
+[...]
+    backend_options:
+      kubernetes:
+        nodeSelector:
+          kubernetes.io/arch: "${ARCH}"
+```
 
 ### tolerations
 
@@ -111,11 +134,11 @@ steps:
         nodeSelector:
           beta.kubernetes.io/instance-type: p3.8xlarge
         tolerations:
-        - key: "key1"
-          operator: "Equal"
-          value: "value1"
-          effect: "NoSchedule"
-          tolerationSeconds: 3600
+          - key: 'key1'
+            operator: 'Equal'
+            value: 'value1'
+            effect: 'NoSchedule'
+            tolerationSeconds: 3600
 ```
 
 ### Volumes
@@ -134,3 +157,17 @@ steps:
         - "woodpecker-cache"
     [...]
 ```
+
+## Tips and tricks
+
+### CRI-O
+
+CRI-O users currently need to configure the workspace for all workflows in order for them to run correctly. Add the following at the beginning of your configuration:
+
+```yml
+workspace:
+  base: '/woodpecker'
+  path: '/'
+```
+
+See [this issue](https://github.com/woodpecker-ci/woodpecker/issues/2510) for more details.

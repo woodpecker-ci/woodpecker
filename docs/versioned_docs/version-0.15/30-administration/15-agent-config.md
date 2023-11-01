@@ -79,8 +79,8 @@ See [Conditionals Pipeline](../20-usage/20-pipeline-syntax.md#step-when---condit
 ## All agent configuration options
 
 Here is the full list of configuration options and their default variables.
-#### `DOCKER_HOST` 
-> Default: empty 
+#### `DOCKER_HOST`
+> Default: empty
 
 Point to an alternate socket file or host. For example, "unix:////run/podman/podman.sock"
 

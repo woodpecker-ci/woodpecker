@@ -1,5 +1,14 @@
 <template>
   <Settings :title="$t('admin.settings.repos.repos')" :desc="$t('admin.settings.repos.desc')">
+    <template #titleActions>
+      <Button
+        start-icon="heal"
+        :is-loading="isRepairingRepos"
+        :text="$t('admin.settings.repos.repair.repair')"
+        @click="repairRepos"
+      />
+    </template>
+
     <div class="space-y-4 text-wp-text-100">
       <ListItem
         v-for="repo in repos"
@@ -30,19 +39,30 @@
 </template>
 
 <script lang="ts" setup>
+import { useI18n } from 'vue-i18n';
+
 import Badge from '~/components/atomic/Badge.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import Settings from '~/components/layout/Settings.vue';
 import useApiClient from '~/compositions/useApiClient';
+import { useAsyncAction } from '~/compositions/useAsyncAction';
+import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
 import { Repo } from '~/lib/api/types';
 
 const apiClient = useApiClient();
+const notifications = useNotifications();
+const i18n = useI18n();
 
 async function loadRepos(page: number): Promise<Repo[] | null> {
   return apiClient.getAllRepos(page);
 }
 
 const { data: repos } = usePagination(loadRepos);
+
+const { doSubmit: repairRepos, isLoading: isRepairingRepos } = useAsyncAction(async () => {
+  await apiClient.repairAllRepos();
+  notifications.notify({ title: i18n.t('admin.settings.repos.repair.success'), type: 'success' });
+});
 </script>

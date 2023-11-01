@@ -84,8 +84,6 @@ func (e *local) execClone(ctx context.Context, step *types.Step, state *workflow
 		return err
 	}
 
-	env = append(env, "CI_WORKSPACE="+state.workspaceDir)
-
 	// Prepare command
 	var cmd *exec.Cmd
 	if rmCmd != "" {
@@ -130,12 +128,7 @@ func writeNetRC(step *types.Step, state *workflowState) (string, error) {
 	}
 
 	log.Trace().Msgf("try to write netrc to '%s'", file)
-	return rmCmd, os.WriteFile(file, []byte(fmt.Sprintf(
-		netrcFile,
-		step.Environment["CI_NETRC_MACHINE"],
-		step.Environment["CI_NETRC_USERNAME"],
-		step.Environment["CI_NETRC_PASSWORD"],
-	)), 0o600)
+	return rmCmd, os.WriteFile(file, []byte(genNetRC(step.Environment)), 0o600)
 }
 
 // downloadLatestGitPluginBinary download the latest plugin-git binary based on runtime OS and Arch

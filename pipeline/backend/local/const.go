@@ -14,7 +14,10 @@
 
 package local
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
 // notAllowedEnvVarOverwrites are all env vars that can not be overwritten by step config
 var notAllowedEnvVarOverwrites = []string{
@@ -24,6 +27,7 @@ var notAllowedEnvVarOverwrites = []string{
 	"CI_SCRIPT",
 	"HOME",
 	"SHELL",
+	"CI_WORKSPACE",
 }
 
 var (
@@ -36,3 +40,12 @@ machine %s
 login %s
 password %s
 `
+
+func genNetRC(env map[string]string) string {
+	return fmt.Sprintf(
+		netrcFile,
+		env["CI_NETRC_MACHINE"],
+		env["CI_NETRC_USERNAME"],
+		env["CI_NETRC_PASSWORD"],
+	)
+}

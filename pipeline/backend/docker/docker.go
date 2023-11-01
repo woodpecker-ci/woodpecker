@@ -144,7 +144,7 @@ func (e *docker) SetupWorkflow(_ context.Context, conf *backend.Config, taskUUID
 	log.Trace().Str("taskUUID", taskUUID).Msg("create workflow environment")
 
 	for _, vol := range conf.Volumes {
-		_, err := e.client.VolumeCreate(noContext, volume.VolumeCreateBody{
+		_, err := e.client.VolumeCreate(noContext, volume.CreateOptions{
 			Name:   vol.Name,
 			Driver: volumeDriver,
 		})
@@ -289,6 +289,22 @@ func (e *docker) TailStep(ctx context.Context, step *backend.Step, taskUUID stri
 		_ = wc.Close()
 	}()
 	return rc, nil
+}
+
+func (e *docker) DestroyStep(ctx context.Context, step *backend.Step, taskUUID string) error {
+	log.Trace().Str("taskUUID", taskUUID).Msgf("stop step %s", step.Name)
+
+	containerName := toContainerName(step)
+
+	if err := e.client.ContainerKill(ctx, containerName, "9"); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
+		return err
+	}
+
+	if err := e.client.ContainerRemove(ctx, containerName, removeOpts); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
+		return err
+	}
+
+	return nil
 }
 
 func (e *docker) DestroyWorkflow(_ context.Context, conf *backend.Config, taskUUID string) error {

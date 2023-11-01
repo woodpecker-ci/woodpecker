@@ -63,6 +63,7 @@ else
 
 ##@ General
 
+.PHONY: all
 all: help
 
 .PHONY: version
@@ -117,9 +118,6 @@ install-tools: ## Install development tools
 	@hash golangci-lint > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest; \
 	fi ; \
-	hash lint > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
-		go install github.com/rs/zerolog/cmd/lint@latest; \
-	fi ; \
 	hash gofumpt > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		go install mvdan.cc/gofumpt@latest; \
 	fi ; \
@@ -139,10 +137,6 @@ ui-dependencies: ## Install UI dependencies
 lint: install-tools ## Lint code
 	@echo "Running golangci-lint"
 	golangci-lint run --timeout 15m
-	@echo "Running zerolog linter"
-	lint github.com/woodpecker-ci/woodpecker/cmd/agent
-	lint github.com/woodpecker-ci/woodpecker/cmd/cli
-	lint github.com/woodpecker-ci/woodpecker/cmd/server
 
 lint-ui: ## Lint UI code
 	(cd web/; pnpm install)
@@ -174,6 +168,7 @@ test-ui: ui-dependencies ## Test UI code
 test-lib: ## Test lib code
 	go test -race -cover -coverprofile coverage.out -timeout 30s $(shell go list ./... | grep -v '/cmd\|/agent\|/cli\|/server')
 
+.PHONY: test
 test: test-agent test-server test-server-datastore test-cli test-lib test-ui ## Run all tests
 
 ##@ Build
@@ -190,6 +185,7 @@ build-agent: ## Build agent
 build-cli: ## Build cli
 	CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -ldflags '${LDFLAGS}' -o dist/woodpecker-cli${BIN_SUFFIX} github.com/woodpecker-ci/woodpecker/cmd/cli
 
+.PHONY: build
 build: build-agent build-server build-cli ## Build all binaries
 
 release-frontend: build-frontend ## Build frontend
@@ -257,6 +253,7 @@ release-checksums: ## Create checksums for all release files
 	# generate shas for tar files
 	(cd dist/; sha256sum *.* > checksums.txt)
 
+.PHONY: release
 release: release-frontend release-server release-agent release-cli ## Release all binaries
 
 bundle-prepare: ## Prepare the bundles
@@ -274,6 +271,7 @@ bundle-cli: bundle-prepare ## Create bundles for cli
 	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/nfpm-cli.yml --target ./dist --packager deb
 	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/nfpm-cli.yml --target ./dist --packager rpm
 
+.PHONY: bundle
 bundle: bundle-agent bundle-server bundle-cli ## Create all bundles
 
 ##@ Docs

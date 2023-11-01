@@ -48,7 +48,7 @@ This is the reference list of all environment variables available to your pipeli
 
 | NAME                             | Description                                                                                  |
 | -------------------------------- | -------------------------------------------------------------------------------------------- |
-| `CI`                             | CI environment name (value: `woodpecker`)                                                          |
+| `CI`                             | CI environment name (value: `woodpecker`)                                                    |
 |                                  | **Repository**                                                                               |
 | `CI_REPO`                        | repository full name `<owner>/<name>`                                                        |
 | `CI_REPO_OWNER`                  | repository owner                                                                             |

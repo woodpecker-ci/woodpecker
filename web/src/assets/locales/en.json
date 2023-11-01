@@ -12,8 +12,6 @@
   "password": "Password",
   "url": "URL",
   "back": "Back",
-  "color_scheme_light": "Switch to dark mode",
-  "color_scheme_dark": "Switch to light mode",
   "unknown_error": "An unknown error occurred",
   "documentation_for": "Documentation for \"{topic}\"",
   "pipeline_feed": "Pipeline feed",
@@ -440,7 +438,11 @@
         "none": "There are no repositories yet.",
         "view": "View repository",
         "settings": "Repository settings",
-        "disabled": "Disabled"
+        "disabled": "Disabled",
+        "repair": {
+          "repair": "Repair all",
+          "success": "Repositories repaired"
+        }
       }
     }
   },
@@ -449,7 +451,13 @@
       "settings": "User Settings",
       "general": {
         "general": "General",
-        "language": "Language"
+        "language": "Language",
+        "theme": {
+          "theme": "Theme",
+          "light": "Light",
+          "dark": "Dark",
+          "auto": "Auto"
+        }
       },
       "secrets": {
         "secrets": "Secrets",
@@ -489,5 +497,6 @@
     "oauth_error": "Error while authenticating against OAuth provider",
     "internal_error": "Some internal error occurred",
     "access_denied": "You are not allowed to login"
-  }
+  },
+  "default": "default"
 }

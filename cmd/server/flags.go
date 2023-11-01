@@ -38,12 +38,12 @@ var flags = append([]cli.Flag{
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_HOST"},
 		Name:    "server-host",
-		Usage:   "server fully qualified url (<scheme>://<host>)",
+		Usage:   "server fully qualified url (<scheme>://<host>[/<prefixpath>])",
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_WEBHOOK_HOST"},
 		Name:    "server-webhook-host",
-		Usage:   "server fully qualified url for forge's Webhooks (<scheme>://<host>)",
+		Usage:   "server fully qualified url for forge's Webhooks (<scheme>://<host>[/<prefixpath>])",
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_ROOT_PATH", "WOODPECKER_ROOT_URL"},
@@ -159,12 +159,6 @@ var flags = append([]cli.Flag{
 		Name:    "max-pipeline-timeout",
 		Usage:   "The maximum time in minutes you can set in the repo settings before a pipeline gets killed",
 		Value:   120,
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_DOCS"},
-		Name:    "docs",
-		Usage:   "link to user documentation",
-		Value:   "https://woodpecker-ci.org/",
 	},
 	&cli.DurationFlag{
 		EnvVars: []string{"WOODPECKER_SESSION_EXPIRES"},
@@ -450,7 +444,7 @@ var flags = append([]cli.Flag{
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_DEV_OAUTH_HOST"},
 		Name:    "server-dev-oauth-host",
-		Usage:   "server fully qualified url (<scheme>://<host>) used for oauth redirect (used for development)",
+		Usage:   "server fully qualified url (<scheme>://<host>[/<prefixpath>]) used for oauth redirect (used for development)",
 		Value:   "",
 		Hidden:  true,
 	},

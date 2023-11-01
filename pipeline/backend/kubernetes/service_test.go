@@ -56,6 +56,6 @@ func TestService(t *testing.T) {
 
 	s, _ := Service("foo", "bar", "baz", []string{"1", "2", "3"})
 	j, err := json.Marshal(s)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.JSONEq(t, expected, string(j))
 }

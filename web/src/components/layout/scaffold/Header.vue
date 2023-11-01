@@ -3,7 +3,7 @@
     class="bg-wp-background-100 border-b-1 border-wp-background-400 dark:border-wp-background-100 dark:bg-wp-background-300 text-wp-text-100"
     :class="{ 'md:px-4': fullWidth }"
   >
-    <FluidContainer :full-width="fullWidth" class="!py-0">
+    <Container :full-width="fullWidth" class="!py-0">
       <div class="flex w-full md:items-center flex-col py-3 gap-2 md:gap-10 md:flex-row md:justify-between">
         <div
           class="flex items-center content-start"
@@ -46,13 +46,13 @@
           <slot name="tabActions" />
         </div>
       </div>
-    </FluidContainer>
+    </Container>
   </header>
 </template>
 
 <script setup lang="ts">
 import TextField from '~/components/form/TextField.vue';
-import FluidContainer from '~/components/layout/FluidContainer.vue';
+import Container from '~/components/layout/Container.vue';
 
 import Tabs from './Tabs.vue';
 

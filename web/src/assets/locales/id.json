@@ -77,6 +77,10 @@
         "desc": "Repositori yang sudah atau sebelumnya diaktifkan di server ini",
         "disabled": "Dinonaktifkan",
         "none": "Belum ada repositori.",
+        "repair": {
+          "repair": "Perbaiki semua",
+          "success": "Repositori diperbaiki"
+        },
         "repos": "Repositori",
         "settings": "Pengaturan repositori",
         "view": "Tampilkan repositori"
@@ -132,8 +136,7 @@
   "api": "API",
   "back": "Kembali",
   "cancel": "Batal",
-  "color_scheme_dark": "Ubah ke mode terang",
-  "color_scheme_light": "Ubah ke mode gelap",
+  "default": "bawaan",
   "docs": "Dokumentasi",
   "documentation_for": "Dokumentasi untuk \"{topic}\"",
   "errors": {

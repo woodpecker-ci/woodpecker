@@ -43,10 +43,9 @@ import (
 type RPC struct {
 	forge         forge.Forge
 	queue         queue.Queue
-	pubsub        pubsub.Publisher
+	pubsub        *pubsub.Publisher
 	logger        logging.Log
 	store         store.Store
-	host          string
 	pipelineTime  *prometheus.GaugeVec
 	pipelineCount *prometheus.CounterVec
 }
@@ -103,7 +102,7 @@ func (s *RPC) Extend(c context.Context, id string) error {
 }
 
 // Update implements the rpc.Update function
-func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
+func (s *RPC) Update(_ context.Context, id string, state rpc.State) error {
 	workflowID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		return err
@@ -151,9 +150,7 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 		Repo:     *repo,
 		Pipeline: *currentPipeline,
 	})
-	if err := s.pubsub.Publish(c, "topic/events", message); err != nil {
-		log.Error().Err(err).Msg("can not publish step list to")
-	}
+	s.pubsub.Publish(message)
 
 	return nil
 }
@@ -209,9 +206,7 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 			Repo:     *repo,
 			Pipeline: *currentPipeline,
 		})
-		if err := s.pubsub.Publish(c, "topic/events", message); err != nil {
-			log.Error().Err(err).Msg("can not publish step list to")
-		}
+		s.pubsub.Publish(message)
 	}()
 
 	workflow, err = pipeline.UpdateWorkflowToStatusStarted(s.store, *workflow, state)
@@ -289,16 +284,14 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 
 	// make sure writes to pubsub are non blocking (https://github.com/woodpecker-ci/woodpecker/blob/c919f32e0b6432a95e1a6d3d0ad662f591adf73f/server/logging/log.go#L9)
 	go func() {
-		for _, wf := range currentPipeline.Workflows {
-			for _, step := range wf.Children {
-				if err := s.logger.Close(c, step.ID); err != nil {
-					logger.Error().Err(err).Msgf("done: cannot close log stream for step %d", step.ID)
-				}
+		for _, step := range workflow.Children {
+			if err := s.logger.Close(c, step.ID); err != nil {
+				logger.Error().Err(err).Msgf("done: cannot close log stream for step %d", step.ID)
 			}
 		}
 	}()
 
-	if err := s.notify(c, repo, currentPipeline); err != nil {
+	if err := s.notify(repo, currentPipeline); err != nil {
 		return err
 	}
 
@@ -389,16 +382,7 @@ func (s *RPC) updateForgeStatus(ctx context.Context, repo *model.Repo, pipeline 
 		return
 	}
 
-	if refresher, ok := s.forge.(forge.Refresher); ok {
-		ok, err := refresher.Refresh(ctx, user)
-		if err != nil {
-			log.Error().Err(err).Msgf("grpc: refresh oauth token of user '%s' failed", user.Login)
-		} else if ok {
-			if err := s.store.UpdateUser(user); err != nil {
-				log.Error().Err(err).Msg("fail to save user to store after refresh oauth token")
-			}
-		}
-	}
+	forge.Refresh(ctx, s.forge, s.store, user)
 
 	// only do status updates for parent steps
 	if workflow != nil {
@@ -409,7 +393,7 @@ func (s *RPC) updateForgeStatus(ctx context.Context, repo *model.Repo, pipeline 
 	}
 }
 
-func (s *RPC) notify(c context.Context, repo *model.Repo, pipeline *model.Pipeline) (err error) {
+func (s *RPC) notify(repo *model.Repo, pipeline *model.Pipeline) (err error) {
 	message := pubsub.Message{
 		Labels: map[string]string{
 			"repo":    repo.FullName,
@@ -420,9 +404,7 @@ func (s *RPC) notify(c context.Context, repo *model.Repo, pipeline *model.Pipeli
 		Repo:     *repo,
 		Pipeline: *pipeline,
 	})
-	if err := s.pubsub.Publish(c, "topic/events", message); err != nil {
-		log.Error().Err(err).Msgf("grpc could not notify event: '%v'", message)
-	}
+	s.pubsub.Publish(message)
 	return nil
 }
 

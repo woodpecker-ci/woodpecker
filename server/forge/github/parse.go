@@ -22,7 +22,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/google/go-github/v55/github"
+	"github.com/google/go-github/v56/github"
 
 	"github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -96,9 +96,6 @@ func parsePushHook(hook *github.PushEvent) (*model.Repo, *model.Pipeline, error)
 	if len(pipeline.Author) == 0 {
 		pipeline.Author = hook.GetHeadCommit().GetAuthor().GetLogin()
 	}
-	// if len(pipeline.Email) == 0 {
-	// TODO: default to gravatar?
-	// }
 	if strings.HasPrefix(pipeline.Ref, "refs/tags/") {
 		// just kidding, this is actually a tag event. Why did this come as a push
 		// event we'll never know!
