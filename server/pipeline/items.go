@@ -82,12 +82,7 @@ func parsePipeline(store store.Store, currentPipeline *model.Pipeline, user *mod
 			HTTPSProxy: server.Config.Pipeline.Proxy.HTTPS,
 		},
 	}
-	pipelineItems, err := b.Build()
-	if err != nil {
-		return nil, err
-	}
-
-	return pipelineItems, nil
+	return b.Build()
 }
 
 func createPipelineItems(c context.Context, store store.Store,

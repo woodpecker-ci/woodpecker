@@ -42,10 +42,7 @@ func (l *Linter) Lint(rawConfig string, c *types.Workflow) error {
 	var linterErr error
 
 	if len(c.Steps.ContainerList) == 0 {
-		linterErr = multierr.Append(linterErr, &LinterError{
-			Message: "Invalid or missing pipeline section",
-			Field:   "pipeline",
-		})
+		linterErr = multierr.Append(linterErr, newLinterError("Invalid or missing pipeline section", "pipeline", false))
 	}
 
 	if err := l.lint(c.Clone.ContainerList); err != nil {
@@ -93,7 +90,7 @@ func (l *Linter) lint(containers []*types.Container) error {
 
 func (l *Linter) lintImage(c *types.Container) error {
 	if len(c.Image) == 0 {
-		return &LinterError{Message: "Invalid or missing image", Field: fmt.Sprintf("pipeline.%s", c.Name)}
+		return newLinterError("Invalid or missing image", fmt.Sprintf("pipeline.%s", c.Name), false)
 	}
 	return nil
 }
@@ -107,47 +104,47 @@ func (l *Linter) lintCommands(c *types.Container) error {
 		for key := range c.Settings {
 			keys = append(keys, key)
 		}
-		return &LinterError{Message: fmt.Sprintf("Cannot configure both commands and custom attributes %v", keys), Field: fmt.Sprintf("pipeline.%s", c.Name)}
+		return newLinterError(fmt.Sprintf("Cannot configure both commands and custom attributes %v", keys), fmt.Sprintf("pipeline.%s", c.Name), false)
 	}
 	return nil
 }
 
 func (l *Linter) lintTrusted(c *types.Container) error {
 	if c.Privileged {
-		return &LinterError{Message: "Insufficient privileges to use privileged mode", Field: fmt.Sprintf("pipeline.%s", c.Name)}
+		return newLinterError("Insufficient privileges to use privileged mode", fmt.Sprintf("pipeline.%s", c.Name), false)
 	}
 	if c.ShmSize != 0 {
-		return &LinterError{Message: "Insufficient privileges to override shm_size", Field: fmt.Sprintf("pipeline.%s", c.Name)}
+		return newLinterError("Insufficient privileges to override shm_size", fmt.Sprintf("pipeline.%s", c.Name), false)
 	}
 	if len(c.DNS) != 0 {
-		return &LinterError{Message: "Insufficient privileges to use custom dns", Field: fmt.Sprintf("pipeline.%s", c.Name)}
+		return newLinterError("Insufficient privileges to use custom dns", fmt.Sprintf("pipeline.%s", c.Name), false)
 	}
 	if len(c.DNSSearch) != 0 {
-		return &LinterError{Message: "Insufficient privileges to use dns_search", Field: fmt.Sprintf("pipeline.%s", c.Name)}
+		return newLinterError("Insufficient privileges to use dns_search", fmt.Sprintf("pipeline.%s", c.Name), false)
 	}
 	if len(c.Devices) != 0 {
-		return &LinterError{Message: "Insufficient privileges to use devices", Field: fmt.Sprintf("pipeline.%s", c.Name)}
+		return newLinterError("Insufficient privileges to use devices", fmt.Sprintf("pipeline.%s", c.Name), false)
 	}
 	if len(c.ExtraHosts) != 0 {
-		return &LinterError{Message: "Insufficient privileges to use extra_hosts", Field: fmt.Sprintf("pipeline.%s", c.Name)}
+		return newLinterError("Insufficient privileges to use extra_hosts", fmt.Sprintf("pipeline.%s", c.Name), false)
 	}
 	if len(c.NetworkMode) != 0 {
-		return &LinterError{Message: "Insufficient privileges to use network_mode", Field: fmt.Sprintf("pipeline.%s", c.Name)}
+		return newLinterError("Insufficient privileges to use network_mode", fmt.Sprintf("pipeline.%s", c.Name), false)
 	}
 	if len(c.IpcMode) != 0 {
-		return &LinterError{Message: "Insufficient privileges to use ipc_mode", Field: fmt.Sprintf("pipeline.%s", c.Name)}
+		return newLinterError("Insufficient privileges to use ipc_mode", fmt.Sprintf("pipeline.%s", c.Name), false)
 	}
 	if len(c.Sysctls) != 0 {
-		return &LinterError{Message: "Insufficient privileges to use sysctls", Field: fmt.Sprintf("pipeline.%s", c.Name)}
+		return newLinterError("Insufficient privileges to use sysctls", fmt.Sprintf("pipeline.%s", c.Name), false)
 	}
 	if c.Networks.Networks != nil && len(c.Networks.Networks) != 0 {
-		return &LinterError{Message: "Insufficient privileges to use networks", Field: fmt.Sprintf("pipeline.%s", c.Name)}
+		return newLinterError("Insufficient privileges to use networks", fmt.Sprintf("pipeline.%s", c.Name), false)
 	}
 	if c.Volumes.Volumes != nil && len(c.Volumes.Volumes) != 0 {
-		return &LinterError{Message: "Insufficient privileges to use volumes", Field: fmt.Sprintf("pipeline.%s", c.Name)}
+		return newLinterError("Insufficient privileges to use volumes", fmt.Sprintf("pipeline.%s", c.Name), false)
 	}
 	if len(c.Tmpfs) != 0 {
-		return &LinterError{Message: "Insufficient privileges to use tmpfs", Field: fmt.Sprintf("pipeline.%s", c.Name)}
+		return newLinterError("Insufficient privileges to use tmpfs", fmt.Sprintf("pipeline.%s", c.Name), false)
 	}
 	return nil
 }
@@ -157,11 +154,11 @@ func (l *Linter) lintSchema(rawConfig string) error {
 	schemaErrors, err := schema.LintString(rawConfig)
 	if err != nil {
 		for _, schemaError := range schemaErrors {
-			linterErr = multierr.Append(linterErr, &LinterError{
-				Message: schemaError.Description(),
-				Field:   schemaError.Field(),
-				Warning: true, // TODO: let pipelines fail if the schema is invalid
-			})
+			linterErr = multierr.Append(linterErr, newLinterError(
+				schemaError.Description(),
+				schemaError.Field(),
+				true, // TODO: let pipelines fail if the schema is invalid
+			))
 		}
 	}
 	return linterErr

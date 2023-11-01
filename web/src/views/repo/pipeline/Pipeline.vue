@@ -12,8 +12,8 @@
         <PipelineInfo v-if="error">
           <Icon name="status-error" class="w-16 h-16 text-wp-state-error-100" />
           <div class="flex flex-wrap items-center justify-center gap-2 text-xl">
-            <span class="capitalize">{{ $t('repo.pipeline.execution_error') }}:</span>
-            <span>{{ error }}</span>
+            <!-- <span class="capitalize">{{ $t('repo.pipeline.execution_error') }}:</span> -->
+            <span class="whitespace-pre text-left">{{ error }}</span>
           </div>
         </PipelineInfo>
 
@@ -141,7 +141,7 @@ const { forge } = useConfig();
 const { message } = usePipeline(pipeline);
 
 const selectedStep = computed(() => findStep(pipeline.value.workflows || [], selectedStepId.value || -1));
-const error = computed(() => pipeline.value?.error || selectedStep.value?.error);
+const error = computed(() => pipeline.value?.errors || selectedStep.value?.error);
 
 const { doSubmit: approvePipeline, isLoading: isApprovingPipeline } = useAsyncAction(async () => {
   if (!repo) {
