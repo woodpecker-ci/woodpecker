@@ -77,7 +77,7 @@ steps:
     when: *when
 
   prettier:
-    image: quay.io/woodpeckerci/plugin-prettier:next
+    image: docker.io/woodpeckerci/plugin-prettier:next
     group: test
     when: *when
 
@@ -124,7 +124,7 @@ steps:
 
   codecov:
     pull: true
-    image: quay.io/woodpeckerci/plugin-codecov:2.1.2
+    image: docker.io/woodpeckerci/plugin-codecov:2.1.2
     settings:
       files:
         - agent-coverage.out
