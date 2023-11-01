@@ -1,4 +1,4 @@
-FROM alpine:3.18
+FROM docker.io/alpine:3.18
 
 # renovate: datasource=repology depName=alpine_3_18/ca-certificates versioning=loose
 ENV CA_CERTIFICATES_VERSION="20230506-r0"

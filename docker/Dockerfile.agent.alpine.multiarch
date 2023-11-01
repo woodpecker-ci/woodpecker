@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM golang:1.21 AS build
+FROM --platform=$BUILDPLATFORM docker.io/golang:1.21 AS build
 
 WORKDIR /src
 COPY . .
@@ -6,8 +6,8 @@ ARG TARGETOS TARGETARCH CI_COMMIT_SHA CI_COMMIT_TAG CI_COMMIT_BRANCH
 RUN --mount=type=cache,target=/root/.cache/go-build \
     --mount=type=cache,target=/go/pkg \
     make build-agent
-
-FROM alpine:3.18
+    
+FROM docker.io/alpine:3.18
 # renovate: datasource=repology depName=alpine_3_18/ca-certificates versioning=loose
 ENV CA_CERTIFICATES_VERSION="20230506-r0"
 RUN apk add -U --no-cache ca-certificates=${CA_CERTIFICATES_VERSION}
