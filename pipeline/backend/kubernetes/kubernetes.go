@@ -47,6 +47,7 @@ type kube struct {
 	ctx    context.Context
 	client kubernetes.Interface
 	config *Config
+	goos   string
 }
 
 type Config struct {
@@ -126,9 +127,10 @@ func (e *kube) Load(context.Context) (*types.EngineInfo, error) {
 
 	e.client = kubeClient
 
+	// TODO: use info resp of kubeClient to define platform var
+	e.goos = runtime.GOOS
 	return &types.EngineInfo{
-		Backend: e.Name(),
-		// TODO: use info resp of kubeClient to define platform var
+		Backend:  e.Name(),
 		Platform: runtime.GOOS + "/" + runtime.GOARCH,
 	}, nil
 }
@@ -188,7 +190,7 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID s
 
 // Start the pipeline step.
 func (e *kube) StartStep(ctx context.Context, step *types.Step, taskUUID string) error {
-	pod, err := Pod(e.config.Namespace, step, e.config.PodLabels, e.config.PodAnnotations)
+	pod, err := Pod(e.config.Namespace, step, e.config.PodLabels, e.config.PodAnnotations, e.goos)
 	if err != nil {
 		return err
 	}

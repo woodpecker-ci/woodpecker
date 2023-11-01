@@ -180,7 +180,7 @@ func (e *docker) SetupWorkflow(_ context.Context, conf *backend.Config, taskUUID
 func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("start step %s", step.Name)
 
-	config := toConfig(step)
+	config := e.toConfig(step)
 	hostConfig := toHostConfig(step)
 	containerName := toContainerName(step)
 
