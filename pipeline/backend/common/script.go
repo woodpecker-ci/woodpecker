@@ -16,12 +16,11 @@ package common
 
 import (
 	"encoding/base64"
-	"runtime"
 )
 
-func GenerateContainerConf(commands []string) (env map[string]string, entry, cmd []string) {
+func GenerateContainerConf(commands []string, goos string) (env map[string]string, entry, cmd []string) {
 	env = make(map[string]string)
-	if runtime.GOOS == "windows" {
+	if goos == "windows" {
 		env["CI_SCRIPT"] = base64.StdEncoding.EncodeToString([]byte(generateScriptWindows(commands)))
 		env["HOME"] = "c:\\root"
 		env["SHELL"] = "powershell.exe"

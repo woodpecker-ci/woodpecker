@@ -20,7 +20,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
 
 	"github.com/docker/docker/api/types"
@@ -43,6 +42,7 @@ type docker struct {
 	enableIPv6 bool
 	network    string
 	volumes    []string
+	info       types.Info
 }
 
 const (
@@ -94,10 +94,10 @@ func httpClientOfOpts(dockerCertPath string, verifyTLS bool) *http.Client {
 }
 
 // Load new client for Docker Engine using environment variables.
-func (e *docker) Load(ctx context.Context) error {
+func (e *docker) Load(ctx context.Context) (*backend.EngineInfo, error) {
 	c, ok := ctx.Value(backend.CliContext).(*cli.Context)
 	if !ok {
-		return backend.ErrNoCliContextFound
+		return nil, backend.ErrNoCliContextFound
 	}
 
 	var dockerClientOpts []client.Opt
@@ -115,9 +115,14 @@ func (e *docker) Load(ctx context.Context) error {
 
 	cl, err := client.NewClientWithOpts(dockerClientOpts...)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	e.client = cl
+
+	e.info, err = cl.Info(ctx)
+	if err != nil {
+		return nil, err
+	}
 
 	e.enableIPv6 = c.Bool("backend-docker-ipv6")
 	e.network = c.String("backend-docker-network")
@@ -137,7 +142,9 @@ func (e *docker) Load(ctx context.Context) error {
 		e.volumes = append(e.volumes, strings.Join(parts, ":"))
 	}
 
-	return nil
+	return &backend.EngineInfo{
+		Platform: e.info.OSType + "/" + normalizeArchType(e.info.Architecture),
+	}, nil
 }
 
 func (e *docker) SetupWorkflow(_ context.Context, conf *backend.Config, taskUUID string) error {
@@ -154,7 +161,7 @@ func (e *docker) SetupWorkflow(_ context.Context, conf *backend.Config, taskUUID
 	}
 
 	networkDriver := networkDriverBridge
-	if runtime.GOOS == "windows" {
+	if e.info.OSType == "windows" {
 		networkDriver = networkDriverNAT
 	}
 	for _, n := range conf.Networks {
@@ -172,7 +179,7 @@ func (e *docker) SetupWorkflow(_ context.Context, conf *backend.Config, taskUUID
 func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("start step %s", step.Name)
 
-	config := toConfig(step)
+	config := e.toConfig(step)
 	hostConfig := toHostConfig(step)
 	containerName := toContainerName(step)
 
@@ -262,9 +269,6 @@ func (e *docker) WaitStep(ctx context.Context, step *backend.Step, taskUUID stri
 	if err != nil {
 		return nil, err
 	}
-	// if info.State.Running {
-	// TODO
-	// }
 
 	return &backend.State{
 		Exited:    true,
@@ -359,4 +363,16 @@ func isErrContainerNotFoundOrNotRunning(err error) bool {
 	// Error response from daemon: Cannot kill container: ...: Container ... is not running"
 	// Error: No such container: ...
 	return err != nil && (strings.Contains(err.Error(), "No such container") || strings.Contains(err.Error(), "is not running"))
+}
+
+// normalizeArchType converts the arch type reported by docker info into
+// the runtime.GOARCH format
+// TODO: find out if we we need to convert other arch types too
+func normalizeArchType(s string) string {
+	switch s {
+	case "x86_64":
+		return "amd64"
+	default:
+		return s
+	}
 }
