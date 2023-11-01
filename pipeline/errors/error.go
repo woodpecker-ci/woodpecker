@@ -13,7 +13,7 @@ const (
 	PipelineErrorTypeLinter      PipelineErrorType = "linter"      // some error with the config syntax
 	PipelineErrorTypeDeprecation PipelineErrorType = "deprecation" // using some deprecated feature
 	PipelineErrorTypeCompiler    PipelineErrorType = "compiler"    // some error with the config semantics
-	PipelineErrorTypeGeneral     PipelineErrorType = "general"
+	PipelineErrorTypeGeneric     PipelineErrorType = "generic"     // some generic error
 )
 
 type PipelineError struct {
@@ -23,8 +23,24 @@ type PipelineError struct {
 	Data      interface{}       `json:"data"`
 }
 
+type LinterErrorData struct {
+	Field string `json:"field"`
+}
+
 func (e *PipelineError) Error() string {
-	return fmt.Sprintf("[%s]: %s", e.Type, e.Message)
+	return fmt.Sprintf("[%s] %s", e.Type, e.Message)
+}
+
+func (e *PipelineError) GetLinterData() *LinterErrorData {
+	if e.Type != PipelineErrorTypeLinter {
+		return nil
+	}
+
+	if data, ok := e.Data.(*LinterErrorData); ok {
+		return data
+	}
+
+	return nil
 }
 
 func GetPipelineErrors(err error) []*PipelineError {
@@ -36,7 +52,7 @@ func GetPipelineErrors(err error) []*PipelineError {
 		} else {
 			pipelineErrors = append(pipelineErrors, &PipelineError{
 				Message: err.Error(),
-				Type:    PipelineErrorTypeGeneral,
+				Type:    PipelineErrorTypeGeneric,
 			})
 		}
 	}

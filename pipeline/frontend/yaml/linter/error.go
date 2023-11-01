@@ -18,15 +18,11 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/errors"
 )
 
-type ErrorData struct {
-	Field string `json:"field"`
-}
-
 func newLinterError(message, field string, isWarning bool) *errors.PipelineError {
 	return &errors.PipelineError{
 		Type:      errors.PipelineErrorTypeLinter,
 		Message:   message,
-		Data:      &ErrorData{Field: field},
+		Data:      &errors.LinterErrorData{Field: field},
 		IsWarning: isWarning,
 	}
 }

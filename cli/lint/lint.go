@@ -18,13 +18,15 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 
+	"github.com/muesli/termenv"
 	"github.com/urfave/cli/v2"
-	"go.uber.org/multierr"
 
 	"github.com/woodpecker-ci/woodpecker/cli/common"
+	pipeline_errors "github.com/woodpecker-ci/woodpecker/pipeline/errors"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/linter"
 )
@@ -71,6 +73,8 @@ func lintDir(c *cli.Context, dir string) error {
 }
 
 func lintFile(_ *cli.Context, file string) error {
+	output := termenv.NewOutput(os.Stdout)
+
 	fi, err := os.Open(file)
 	if err != nil {
 		return err
@@ -91,21 +95,26 @@ func lintFile(_ *cli.Context, file string) error {
 
 	err = linter.New(linter.WithTrusted(true)).Lint(string(buf), c)
 	if err != nil {
-		fmt.Println("🔥 Config has errors or warnings")
+		fmt.Printf("🔥 %s has errors:\n", output.String(path.Base(file)).Underline())
 
 		hasErrors := true
-		for _, err := range multierr.Errors(err) {
-			var linterError *linter.LinterError
-			if errors.As(err, &linterError) {
-				if linterError.Warning {
-					fmt.Printf("\t⚠️  %s: %s\n", linterError.Field, linterError.Message)
-				} else {
-					fmt.Printf("\t❌ %s: %s\n", linterError.Field, linterError.Message)
-					hasErrors = true
-				}
+		for _, err := range pipeline_errors.GetPipelineErrors(err) {
+			line := "  "
+
+			if err.IsWarning {
+				line = fmt.Sprintf("%s ⚠️ ", line)
 			} else {
-				return err
+				line = fmt.Sprintf("%s ❌", line)
+				hasErrors = true
 			}
+
+			if data := err.GetLinterData(); data != nil {
+				line = fmt.Sprintf("%s %s\t%s", line, output.String(data.Field).Bold(), err.Message)
+			} else {
+				line = fmt.Sprintf("%s %s", line, err.Message)
+			}
+
+			fmt.Printf("%s\n", line)
 		}
 
 		if hasErrors {
