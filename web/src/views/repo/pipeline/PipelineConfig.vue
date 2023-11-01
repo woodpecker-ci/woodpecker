@@ -4,6 +4,7 @@
       v-for="pipelineConfig in pipelineConfigs || []"
       :key="pipelineConfig.hash"
       collapsable
+      collapsed-by-default
       :title="pipelineConfig.name"
     >
       <SyntaxHighlight class="font-mono whitespace-pre overflow-auto" language="yaml" :code="pipelineConfig.data" />
