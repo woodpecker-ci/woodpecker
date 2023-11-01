@@ -1,13 +1,13 @@
 when:
-  - event: [ pull_request, cron ]
+  - event: [pull_request, cron]
   - event: push
     branch:
       - ${CI_REPO_DEFAULT_BRANCH}
       - release/*
 
 variables:
-  - &trivy_image aquasec/trivy:latest
-  - &trivy_plugin codeberg.org/woodpecker-plugins/trivy:1.0.1
+  - &trivy_image aquasec/trivy:0.46.1
+  - &trivy_plugin woodpeckerci/plugin-trivy:1.0.1
 
 steps:
   check backend:
@@ -21,7 +21,7 @@ steps:
     image: *trivy_plugin
     settings:
       skip-dirs: node_modules/,plugins/woodpecker-plugins/node_modules/
-      dir:  docs/
+      dir: docs/
     when:
       event: [pull_request, push, cron]
       branch: ${CI_REPO_DEFAULT_BRANCH}
@@ -31,4 +31,4 @@ steps:
     image: *trivy_plugin
     settings:
       skip-dirs: node_modules/
-      dir:  web/
+      dir: web/

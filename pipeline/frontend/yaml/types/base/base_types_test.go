@@ -35,7 +35,7 @@ func TestStringorIntYaml(t *testing.T) {
 		assert.Equal(t, StringOrInt(10), s.Foo)
 
 		d, err := yaml.Marshal(&s)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 
 		s2 := StructStringorInt{}
 		assert.NoError(t, yaml.Unmarshal(d, &s2))
@@ -57,7 +57,7 @@ func TestStringOrSliceYaml(t *testing.T) {
 	assert.Equal(t, StringOrSlice{"bar", "baz"}, s.Foo)
 
 	d, err := yaml.Marshal(&s)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	s2 := StructStringOrSlice{}
 	assert.NoError(t, yaml.Unmarshal(d, &s2))
@@ -79,7 +79,7 @@ func TestSliceOrMapYaml(t *testing.T) {
 	assert.Equal(t, SliceOrMap{"bar": "baz", "far": "faz"}, s.Foos)
 
 	d, err := yaml.Marshal(&s)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	s2 := StructSliceorMap{}
 	assert.NoError(t, yaml.Unmarshal(d, &s2))
@@ -106,7 +106,7 @@ func TestStr2SliceOrMapPtrMap(t *testing.T) {
 		Bars: []string{},
 	}}
 	d, err := yaml.Marshal(&s)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	s2 := map[string]*StructSliceorMap{}
 	assert.NoError(t, yaml.Unmarshal(d, &s2))

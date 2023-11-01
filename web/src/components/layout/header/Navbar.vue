@@ -16,7 +16,9 @@
         <span class="hidden md:flex">{{ $t('repositories') }}</span>
       </router-link>
       <!-- Docs Link -->
-      <a :href="docsUrl" target="_blank" class="navbar-link navbar-clickable hidden md:flex">{{ $t('docs') }}</a>
+      <a href="https://woodpecker-ci.org/" target="_blank" class="navbar-link navbar-clickable hidden md:flex">{{
+        $t('docs')
+      }}</a>
       <!-- API Link -->
       <a v-if="enableSwagger" :href="apiUrl" target="_blank" class="navbar-link navbar-clickable hidden md:flex">{{
         $t('api')
@@ -24,13 +26,6 @@
     </div>
     <!-- Right Icons Box -->
     <div class="flex ml-auto -m-1.5 items-center space-x-2">
-      <!-- Dark Mode Toggle -->
-      <IconButton
-        :icon="darkMode ? 'dark' : 'light'"
-        :title="$t(darkMode ? 'color_scheme_dark' : 'color_scheme_light')"
-        class="navbar-icon"
-        @click="darkMode = !darkMode"
-      />
       <!-- Admin Settings -->
       <IconButton
         v-if="user?.admin"
@@ -60,7 +55,6 @@ import Button from '~/components/atomic/Button.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import useAuthentication from '~/compositions/useAuthentication';
 import useConfig from '~/compositions/useConfig';
-import { useDarkMode } from '~/compositions/useDarkMode';
 
 import ActivePipelines from './ActivePipelines.vue';
 
@@ -68,8 +62,6 @@ const config = useConfig();
 const route = useRoute();
 const authentication = useAuthentication();
 const { user } = authentication;
-const { darkMode } = useDarkMode();
-const docsUrl = config.docs || undefined;
 const apiUrl = `${config.rootPath ?? ''}/swagger/index.html`;
 
 function doLogin() {

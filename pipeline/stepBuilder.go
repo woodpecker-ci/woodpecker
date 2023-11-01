@@ -77,12 +77,13 @@ func (b *StepBuilder) Build() ([]*Item, error) {
 			axes = append(axes, matrix.Axis{})
 		}
 
-		for _, axis := range axes {
+		for i, axis := range axes {
 			workflow := &model.Workflow{
 				PID:     pidSequence,
 				State:   model.StatusPending,
 				Environ: axis,
 				Name:    SanitizePath(y.Name),
+				AxisID:  i + 1,
 			}
 			item, err := b.genItemForWorkflow(workflow, axis, string(y.Data))
 			if err != nil {
@@ -235,10 +236,9 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, envi
 			continue
 		}
 		secrets = append(secrets, compiler.Secret{
-			Name:       sec.Name,
-			Value:      sec.Value,
-			Match:      sec.Images,
-			PluginOnly: sec.PluginsOnly,
+			Name:           sec.Name,
+			Value:          sec.Value,
+			AllowedPlugins: sec.Images,
 		})
 	}
 

@@ -88,7 +88,7 @@ type Client interface {
 	PipelineList(repoID int64) ([]*Pipeline, error)
 
 	// PipelineQueue returns a list of enqueued pipelines.
-	PipelineQueue() ([]*Activity, error)
+	PipelineQueue() ([]*Feed, error)
 
 	// PipelineCreate returns creates a pipeline on specified branch.
 	PipelineCreate(repoID int64, opts *PipelineOptions) (*Pipeline, error)

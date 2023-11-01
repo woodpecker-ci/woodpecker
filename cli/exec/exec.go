@@ -33,7 +33,6 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/docker"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/kubernetes"
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/local"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/ssh"
 	backendTypes "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/compiler"
@@ -49,7 +48,7 @@ var Command = &cli.Command{
 	Usage:     "execute a local pipeline",
 	ArgsUsage: "[path/to/.woodpecker.yaml]",
 	Action:    run,
-	Flags:     utils.MergeSlices(common.GlobalFlags, flags, docker.Flags, ssh.Flags, kubernetes.Flags, local.Flags),
+	Flags:     utils.MergeSlices(common.GlobalFlags, flags, docker.Flags, kubernetes.Flags, local.Flags),
 }
 
 func run(c *cli.Context) error {
@@ -217,7 +216,7 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 		return err
 	}
 
-	if err = engine.Load(backendCtx); err != nil {
+	if _, err = engine.Load(backendCtx); err != nil {
 		return err
 	}
 

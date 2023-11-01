@@ -6,18 +6,10 @@
     "**/*.code-search": true,
     "vendor/": true
   },
-  "go.lintTool":"golangci-lint",
-  "go.lintFlags": [
-    "--fast"
-  ],
-  "eslint.workingDirectories": [
-      "./web"
-  ],
+  "go.lintTool": "golangci-lint",
+  "go.lintFlags": ["--fast"],
+  "eslint.workingDirectories": ["./web"],
   "prettier.configPath": "./web/.prettierrc.js",
   "prettier.ignorePath": "./web/.prettierignore",
-  "cSpell.words": [
-    "Curr",
-    "doublestar",
-    "multierr"
-  ]
+  "cSpell.words": ["Curr", "doublestar", "ERRORLEVEL", "multierr"]
 }
