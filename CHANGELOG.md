@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@xoxys, @6543, @runephilosof-karnovgroup, @qwerty287, @anbraten, @renovate[bot], @HamburgerJungeJr, @pat-s, @Janik-Haag, @nitram509, @JohnWalkerx, @OskarsPakers, @Exar04, @dominic-p, @categulario, @mzampetakis, @Timshel, @Denperidge, @tomix1024, @lonix1, @s3lph, @math3vz, @LTek-online, @testwill, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @azdle, @praneeth-ovckd
+@6543, @bitethecode, @xoxys, @runephilosof-karnovgroup, @qwerty287, @anbraten, @renovate[bot], @HamburgerJungeJr, @pat-s, @Janik-Haag, @nitram509, @JohnWalkerx, @OskarsPakers, @Exar04, @dominic-p, @categulario, @mzampetakis, @Timshel, @Denperidge, @tomix1024, @lonix1, @s3lph, @math3vz, @LTek-online, @testwill, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @azdle, @praneeth-ovckd
 
 ### 💥 Breaking changes
 
@@ -41,6 +41,8 @@
 
 ### 📈 Enhancement
 
+- Let the backend engine report the current platform [[#2688](https://github.com/woodpecker-ci/woodpecker/pull/2688)]
+- Showing the pending pipelines on top [[#1488](https://github.com/woodpecker-ci/woodpecker/pull/1488)]
 - Print local backend command logs [[#2678](https://github.com/woodpecker-ci/woodpecker/pull/2678)]
 - Report problems with listening to ports and exit [[#2102](https://github.com/woodpecker-ci/woodpecker/pull/2102)]
 - Use path.Join for server side path generation [[#2689](https://github.com/woodpecker-ci/woodpecker/pull/2689)]
