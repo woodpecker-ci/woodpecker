@@ -26,13 +26,6 @@ updateTheme();
 export function useTheme() {
   return {
     resolvedTheme,
-    theme: computed({
-      get() {
-        return storeTheme.value;
-      },
-      set(theme: BasicColorSchema) {
-        storeTheme.value = theme;
-      },
-    }),
+    theme: storeTheme,
   };
 }

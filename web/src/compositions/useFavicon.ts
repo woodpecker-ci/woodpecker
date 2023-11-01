@@ -4,7 +4,8 @@ import useConfig from '~/compositions/useConfig';
 import { useTheme } from '~/compositions/useTheme';
 import { PipelineStatus } from '~/lib/api/types';
 
-const darkMode = computed(() => useTheme().resolvedTheme.value);
+const { resolvedTheme } = useTheme();
+const darkMode = computed(() => resolvedTheme.value);
 
 type Status = 'default' | 'success' | 'pending' | 'error';
 const faviconStatus = ref<Status>('default');
