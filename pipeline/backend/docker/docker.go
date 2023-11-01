@@ -296,6 +296,22 @@ func (e *docker) TailStep(ctx context.Context, step *backend.Step, taskUUID stri
 	return rc, nil
 }
 
+func (e *docker) DestroyStep(ctx context.Context, step *backend.Step, taskUUID string) error {
+	log.Trace().Str("taskUUID", taskUUID).Msgf("stop step %s", step.Name)
+
+	containerName := toContainerName(step)
+
+	if err := e.client.ContainerKill(ctx, containerName, "9"); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
+		return err
+	}
+
+	if err := e.client.ContainerRemove(ctx, containerName, removeOpts); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
+		return err
+	}
+
+	return nil
+}
+
 func (e *docker) DestroyWorkflow(_ context.Context, conf *backend.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("delete workflow environment")
 
