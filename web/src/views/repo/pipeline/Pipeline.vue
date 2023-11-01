@@ -29,36 +29,40 @@
 
         <Container v-else-if="pipeline.status === 'blocked'">
           <Panel>
-            <Icon name="status-blocked" class="w-16 h-16" />
-            <span class="text-xl">{{ $t('repo.pipeline.protected.awaits') }}</span>
-            <div v-if="repoPermissions.push" class="flex gap-2 flex-wrap items-center justify-center">
-              <Button
-                color="blue"
-                :start-icon="forge ?? 'repo'"
-                :text="$t('repo.pipeline.protected.review')"
-                :to="pipeline.link_url"
-                :title="message"
-              />
-              <Button
-                color="green"
-                :text="$t('repo.pipeline.protected.approve')"
-                :is-loading="isApprovingPipeline"
-                @click="approvePipeline"
-              />
-              <Button
-                color="red"
-                :text="$t('repo.pipeline.protected.decline')"
-                :is-loading="isDecliningPipeline"
-                @click="declinePipeline"
-              />
+            <div class="flex flex-col items-center gap-4">
+              <Icon name="status-blocked" class="w-16 h-16" />
+              <span class="text-xl">{{ $t('repo.pipeline.protected.awaits') }}</span>
+              <div v-if="repoPermissions.push" class="flex gap-2 flex-wrap items-center justify-center">
+                <Button
+                  color="blue"
+                  :start-icon="forge ?? 'repo'"
+                  :text="$t('repo.pipeline.protected.review')"
+                  :to="pipeline.link_url"
+                  :title="message"
+                />
+                <Button
+                  color="green"
+                  :text="$t('repo.pipeline.protected.approve')"
+                  :is-loading="isApprovingPipeline"
+                  @click="approvePipeline"
+                />
+                <Button
+                  color="red"
+                  :text="$t('repo.pipeline.protected.decline')"
+                  :is-loading="isDecliningPipeline"
+                  @click="declinePipeline"
+                />
+              </div>
             </div>
           </Panel>
         </Container>
 
         <Container v-else-if="pipeline.status === 'declined'">
           <Panel>
-            <Icon name="status-blocked" class="w-16 h-16" />
-            <p class="text-xl">{{ $t('repo.pipeline.protected.declined') }}</p>
+            <div class="flex flex-col items-center gap-4">
+              <Icon name="status-declined" class="w-16 h-16 text-wp-state-error-100" />
+              <p class="text-xl">{{ $t('repo.pipeline.protected.declined') }}</p>
+            </div>
           </Panel>
         </Container>
 
@@ -110,13 +114,7 @@ if (!repo || !repoPermissions || !pipeline) {
 
 const stepId = toRef(props, 'stepId');
 
-const defaultStepId = computed(() => {
-  if (!pipeline.value || !pipeline.value.workflows || !pipeline.value.workflows[0].children) {
-    return null;
-  }
-
-  return pipeline.value.workflows[0].children[0].pid;
-});
+const defaultStepId = computed(() => pipeline.value?.workflows?.[0].children?.[0].pid ?? null);
 
 const selectedStepId = computed({
   get() {

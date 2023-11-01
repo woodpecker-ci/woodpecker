@@ -75,8 +75,6 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	if len(pipelineItems) == 0 && parseErr == nil {
 		log.Debug().Str("repo", repo.FullName).Msg(ErrFiltered.Error())
 		return nil, ErrFiltered
-	} else if parseErr != nil {
-		return nil, persistPipelineWithErr(ctx, _store, pipeline, repo, repoUser, parseErr)
 	}
 
 	setGatedState(repo, pipeline)

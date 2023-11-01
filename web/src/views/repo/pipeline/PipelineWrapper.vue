@@ -76,6 +76,11 @@
         id="changed-files"
         :title="$t('repo.pipeline.files', { files: pipeline.changed_files.length })"
       />
+      <Tab
+        v-if="pipeline.errors.length > 0"
+        id="errors"
+        :title="$t('repo.pipeline.files', { files: pipeline.errors.length })"
+      />
       <router-view />
     </Scaffold>
   </template>
@@ -195,6 +200,10 @@ const activeTab = computed({
 
     if (tab === 'config') {
       router.replace({ name: 'repo-pipeline-config' });
+    }
+
+    if (tab === 'errors') {
+      router.replace({ name: 'repo-pipeline-errors' });
     }
   },
 });
