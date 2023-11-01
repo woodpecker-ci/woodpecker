@@ -135,7 +135,6 @@ steps:
       repo: woodpeckerci/woodpecker-server
       dockerfile: docker/Dockerfile.server.multiarch
       platforms: *platforms_preview
-      logins: *publish_logins
       tag: pull_${CI_COMMIT_PULL_REQUEST}
     when:
       evaluate: 'not (CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images")'
