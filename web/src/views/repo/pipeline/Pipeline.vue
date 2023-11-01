@@ -8,45 +8,59 @@
         :pipeline="pipeline"
       />
 
-      <div class="flex flex-grow relative">
-        <PipelineInfo v-if="error">
-          <Icon name="status-error" class="w-16 h-16 text-wp-state-error-100" />
-          <div class="flex flex-wrap items-center justify-center gap-2 text-xl">
-            <!-- <span class="capitalize">{{ $t('repo.pipeline.execution_error') }}:</span> -->
-            <span class="whitespace-pre text-left">{{ error }}</span>
-          </div>
-        </PipelineInfo>
+      <div class="flex items-start justify-center flex-grow relative">
+        <Container v-if="hasBlockingError">
+          <Panel>
+            <div class="flex flex-col items-center mb-4 gap-2">
+              <Icon name="status-error" class="w-16 h-16 text-wp-state-error-100" />
+              <!-- <span class="capitalize text-xl">{{ $t('repo.pipeline.execution_error') }}</span> -->
+            </div>
+            <div class="grid justify-center gap-2 text-left grid-3-1">
+              <template v-for="(error, i) in errors" :key="i">
+                <span>{{ error.is_warning ? '⚠️' : '❌' }}</span>
+                <span>[{{ error.type }}]</span>
+                <span v-if="error.type === 'linter'" class="underline">{{ (error.data as any)?.field }}</span>
+                <span v-else />
+                <span class="ml-4">{{ error.message }}</span>
+              </template>
+            </div>
+          </Panel>
+        </Container>
 
-        <PipelineInfo v-else-if="pipeline.status === 'blocked'">
-          <Icon name="status-blocked" class="w-16 h-16" />
-          <span class="text-xl">{{ $t('repo.pipeline.protected.awaits') }}</span>
-          <div v-if="repoPermissions.push" class="flex gap-2 flex-wrap items-center justify-center">
-            <Button
-              color="blue"
-              :start-icon="forge ?? 'repo'"
-              :text="$t('repo.pipeline.protected.review')"
-              :to="pipeline.link_url"
-              :title="message"
-            />
-            <Button
-              color="green"
-              :text="$t('repo.pipeline.protected.approve')"
-              :is-loading="isApprovingPipeline"
-              @click="approvePipeline"
-            />
-            <Button
-              color="red"
-              :text="$t('repo.pipeline.protected.decline')"
-              :is-loading="isDecliningPipeline"
-              @click="declinePipeline"
-            />
-          </div>
-        </PipelineInfo>
+        <Container v-else-if="pipeline.status === 'blocked'">
+          <Panel>
+            <Icon name="status-blocked" class="w-16 h-16" />
+            <span class="text-xl">{{ $t('repo.pipeline.protected.awaits') }}</span>
+            <div v-if="repoPermissions.push" class="flex gap-2 flex-wrap items-center justify-center">
+              <Button
+                color="blue"
+                :start-icon="forge ?? 'repo'"
+                :text="$t('repo.pipeline.protected.review')"
+                :to="pipeline.link_url"
+                :title="message"
+              />
+              <Button
+                color="green"
+                :text="$t('repo.pipeline.protected.approve')"
+                :is-loading="isApprovingPipeline"
+                @click="approvePipeline"
+              />
+              <Button
+                color="red"
+                :text="$t('repo.pipeline.protected.decline')"
+                :is-loading="isDecliningPipeline"
+                @click="declinePipeline"
+              />
+            </div>
+          </Panel>
+        </Container>
 
-        <PipelineInfo v-else-if="pipeline.status === 'declined'">
-          <Icon name="status-blocked" class="w-16 h-16" />
-          <p class="text-xl">{{ $t('repo.pipeline.protected.declined') }}</p>
-        </PipelineInfo>
+        <Container v-else-if="pipeline.status === 'declined'">
+          <Panel>
+            <Icon name="status-blocked" class="w-16 h-16" />
+            <p class="text-xl">{{ $t('repo.pipeline.protected.declined') }}</p>
+          </Panel>
+        </Container>
 
         <PipelineLog
           v-else-if="selectedStepId"
@@ -74,7 +88,7 @@ import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useConfig from '~/compositions/useConfig';
 import useNotifications from '~/compositions/useNotifications';
 import usePipeline from '~/compositions/usePipeline';
-import { Pipeline, PipelineStep, Repo, RepoPermissions } from '~/lib/api/types';
+import { Pipeline, Repo, RepoPermissions } from '~/lib/api/types';
 import { findStep } from '~/utils/helpers';
 
 const props = defineProps<{
@@ -108,10 +122,7 @@ const selectedStepId = computed({
   get() {
     if (stepId.value !== '' && stepId.value !== null && stepId.value !== undefined) {
       const id = parseInt(stepId.value, 10);
-      const step = pipeline.value?.workflows?.reduce(
-        (prev, p) => prev || p.children?.find((c) => c.pid === id),
-        undefined as PipelineStep | undefined,
-      );
+      const step = pipeline.value?.workflows?.find((p) => p.children?.find((c) => c.pid === id));
       if (step) {
         return step.pid;
       }
@@ -141,7 +152,18 @@ const { forge } = useConfig();
 const { message } = usePipeline(pipeline);
 
 const selectedStep = computed(() => findStep(pipeline.value.workflows || [], selectedStepId.value || -1));
-const error = computed(() => pipeline.value?.errors || selectedStep.value?.error);
+const errors = computed(() => {
+  const e = pipeline.value?.errors ?? [];
+  if (selectedStep.value?.error) {
+    e.push({
+      type: 'generic',
+      message: selectedStep.value.error,
+      is_warning: false,
+    });
+  }
+  return e;
+});
+const hasBlockingError = computed(() => errors.value.some((e) => !e.is_warning));
 
 const { doSubmit: approvePipeline, isLoading: isApprovingPipeline } = useAsyncAction(async () => {
   if (!repo) {
@@ -161,3 +183,9 @@ const { doSubmit: declinePipeline, isLoading: isDecliningPipeline } = useAsyncAc
   notifications.notify({ title: i18n.t('repo.pipeline.protected.decline_success'), type: 'success' });
 });
 </script>
+
+<style scoped>
+.grid-3-1 {
+  grid-template-columns: auto auto auto 1fr;
+}
+</style>

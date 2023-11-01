@@ -3,7 +3,8 @@ import { WebhookEvents } from './webhook';
 export type PipelineError = {
   type: string;
   message: string;
-  data: unknown;
+  data?: unknown;
+  is_warning: boolean;
 };
 
 // A pipeline for a repository.
