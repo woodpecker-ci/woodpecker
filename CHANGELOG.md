@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@qwerty287, @6543, @bitethecode, @xoxys, @runephilosof-karnovgroup, @anbraten, @renovate[bot], @HamburgerJungeJr, @pat-s, @Janik-Haag, @nitram509, @JohnWalkerx, @OskarsPakers, @Exar04, @dominic-p, @categulario, @mzampetakis, @Timshel, @Denperidge, @tomix1024, @lonix1, @s3lph, @math3vz, @LTek-online, @testwill, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @azdle, @praneeth-ovckd
+@pat-s, @qwerty287, @6543, @bitethecode, @xoxys, @runephilosof-karnovgroup, @anbraten, @renovate[bot], @HamburgerJungeJr, @Janik-Haag, @nitram509, @JohnWalkerx, @OskarsPakers, @Exar04, @dominic-p, @categulario, @mzampetakis, @Timshel, @Denperidge, @tomix1024, @lonix1, @s3lph, @math3vz, @LTek-online, @testwill, @klinux, @pinpox, @zc-devs, @hpidcock, @lafriks, @ChewingBever, @azdle, @praneeth-ovckd
 
 ### 💥 Breaking changes
 
@@ -59,7 +59,7 @@
 - Fix: change tasks.task_data column type to longblob in mysql [[#2418](https://github.com/woodpecker-ci/woodpecker/pull/2418)]
 - Do not list archived repos for all forges [[#2374](https://github.com/woodpecker-ci/woodpecker/pull/2374)]
 - fix(server/api/repo): Fix repair webhook host [[#2372](https://github.com/woodpecker-ci/woodpecker/pull/2372)]
--  Delete repos/secrets on org deletion [[#2367](https://github.com/woodpecker-ci/woodpecker/pull/2367)]
+- Delete repos/secrets on org deletion [[#2367](https://github.com/woodpecker-ci/woodpecker/pull/2367)]
 - Fix org fetching [[#2343](https://github.com/woodpecker-ci/woodpecker/pull/2343)]
 - Show correct event in pipeline step list [[#2334](https://github.com/woodpecker-ci/woodpecker/pull/2334)]
 - Add min height to mobile pipeline view and fix overflow [[#2335](https://github.com/woodpecker-ci/woodpecker/pull/2335)]
@@ -198,6 +198,7 @@
 
 ### Misc
 
+- Pin alpine versions in Dockerfile [[#2649](https://github.com/woodpecker-ci/woodpecker/pull/2649)]
 - Use full qualifyer for images [[#2692](https://github.com/woodpecker-ci/woodpecker/pull/2692)]
 - chore(deps): lock file maintenance [[#2673](https://github.com/woodpecker-ci/woodpecker/pull/2673)]
 - fix(deps): update golang (packages) [[#2671](https://github.com/woodpecker-ci/woodpecker/pull/2671)]
