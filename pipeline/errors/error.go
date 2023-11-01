@@ -61,6 +61,10 @@ func GetPipelineErrors(err error) []*PipelineError {
 }
 
 func HasBlockingErrors(err error) bool {
+	if err == nil {
+		return false
+	}
+
 	errs := GetPipelineErrors(err)
 
 	for _, err := range errs {

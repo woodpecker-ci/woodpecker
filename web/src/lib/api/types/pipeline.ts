@@ -22,7 +22,7 @@ export type Pipeline = {
   //  The current status of the pipeline.
   status: PipelineStatus;
 
-  errors: PipelineError[];
+  errors?: PipelineError[];
 
   // When the pipeline request was received.
   created_at: number;

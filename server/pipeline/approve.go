@@ -20,6 +20,7 @@ import (
 
 	"github.com/rs/zerolog/log"
 
+	"github.com/woodpecker-ci/woodpecker/pipeline/errors"
 	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store"
@@ -50,10 +51,12 @@ func Approve(ctx context.Context, store store.Store, currentPipeline *model.Pipe
 	}
 
 	currentPipeline, pipelineItems, err := createPipelineItems(ctx, store, currentPipeline, user, repo, yamls, nil)
-	if err != nil {
+	if errors.HasBlockingErrors(err) {
 		msg := fmt.Sprintf("failure to createBuildItems for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
 		return nil, err
+	} else if err != nil {
+		currentPipeline.Errors = errors.GetPipelineErrors(err)
 	}
 
 	currentPipeline, err = start(ctx, store, currentPipeline, user, repo, pipelineItems)
