@@ -17,7 +17,6 @@ package pipeline
 
 import (
 	"fmt"
-	"path"
 	"path/filepath"
 	"strings"
 
@@ -78,19 +77,13 @@ func (b *StepBuilder) Build() ([]*Item, error) {
 			axes = append(axes, matrix.Axis{})
 		}
 
-		isMatrix := len(axes) > 1
-
 		for i, axis := range axes {
-			name := SanitizePath(y.Name)
-			if isMatrix {
-				name = path.Join(name, fmt.Sprint(i))
-			}
-
 			workflow := &model.Workflow{
 				PID:     pidSequence,
 				State:   model.StatusPending,
 				Environ: axis,
-				Name:    name,
+				Name:    SanitizePath(y.Name),
+				AxisID:  i + 1,
 			}
 			item, err := b.genItemForWorkflow(workflow, axis, string(y.Data))
 			if err != nil {
