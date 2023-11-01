@@ -31,9 +31,11 @@ func genCmdByShell(shell string, cmds []string) (args []string, err error) {
 
 	switch strings.TrimSuffix(strings.ToLower(shell), ".exe") {
 	case "cmd":
-		script := ""
+		script := "@SET PROMPT=$\n"
 		for _, cmd := range cmds {
-			script += fmt.Sprintf("%s || exit 1\n", cmd)
+			script += fmt.Sprintf("@echo + %s\n", strings.TrimSpace(shellescape.Quote(cmd)))
+			script += fmt.Sprintf("@%s\n", cmd)
+			script += "@IF NOT %ERRORLEVEL% == 0 exit %ERRORLEVEL%\n"
 		}
 		cmd, err := os.CreateTemp(os.TempDir(), "*.cmd")
 		if err != nil {
