@@ -139,12 +139,11 @@ type (
 		Events []string `json:"events"`
 	}
 
-	// Activity represents an item in the user's feed or timeline.
-	Activity struct {
-		Owner    string `json:"owner"`
-		Name     string `json:"name"`
-		FullName string `json:"full_name"`
-		Number   int    `json:"number,omitempty"`
+	// Feed represents an item in the user's feed or timeline.
+	Feed struct {
+		RepoID   int64  `json:"repo_id"`
+		ID       int64  `json:"id,omitempty"`
+		Number   int64  `json:"number,omitempty"`
 		Event    string `json:"event,omitempty"`
 		Status   string `json:"status,omitempty"`
 		Created  int64  `json:"created_at,omitempty"`
@@ -154,7 +153,7 @@ type (
 		Branch   string `json:"branch,omitempty"`
 		Ref      string `json:"ref,omitempty"`
 		Refspec  string `json:"refspec,omitempty"`
-		CloneURL string `json:"clone_url,omitempty"`
+		Remote   string `json:"remote,omitempty"`
 		Title    string `json:"title,omitempty"`
 		Message  string `json:"message,omitempty"`
 		Author   string `json:"author,omitempty"`

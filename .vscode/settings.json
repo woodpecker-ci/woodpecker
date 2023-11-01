@@ -11,5 +11,5 @@
   "eslint.workingDirectories": ["./web"],
   "prettier.configPath": "./web/.prettierrc.js",
   "prettier.ignorePath": "./web/.prettierignore",
-  "cSpell.words": ["Curr", "doublestar", "multierr"]
+  "cSpell.words": ["Curr", "doublestar", "ERRORLEVEL", "multierr"]
 }
