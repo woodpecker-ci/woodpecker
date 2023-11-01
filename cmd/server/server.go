@@ -22,7 +22,6 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"os"
 	"strings"
 	"time"
 
@@ -205,8 +204,6 @@ func run(c *cli.Context) error {
 			)
 			if !errors.Is(err, http.ErrServerClosed) {
 				log.Fatal().Err(err).Msg("")
-			} else {
-				log.Info().Msgf("Server listening on '%s' serving https", server.Config.Server.PortTLS)
 			}
 			return err
 		})
@@ -227,9 +224,7 @@ func run(c *cli.Context) error {
 		g.Go(func() error {
 			err := http.ListenAndServe(server.Config.Server.Port, http.HandlerFunc(redirect))
 			if !errors.Is(err, http.ErrServerClosed) {
-				log.Warn().Err(err).Msg("Not able to redirect from http to https")
-			} else {
-				log.Info().Msgf("Server listening on '%s' to redirect from http to https", server.Config.Server.Port)
+				log.Fatal().Err(err).Msg("Not able to start server to redirect from http to https")
 			}
 			return err
 		})
@@ -245,8 +240,7 @@ func run(c *cli.Context) error {
 
 		g.Go(func() error {
 			if err := certmagic.HTTPS([]string{address.Host}, handler); err != nil {
-				log.Err(err).Msg("certmagic does not work")
-				os.Exit(1)
+				log.Fatal().Err(err).Msg("certmagic does not work")
 			}
 			return nil
 		})
@@ -258,9 +252,7 @@ func run(c *cli.Context) error {
 				handler,
 			)
 			if !errors.Is(err, http.ErrServerClosed) {
-				log.Fatal().Err(err).Msg("")
-			} else {
-				log.Info().Msgf("Server listening on '%s' serving http", c.String("server-addr"))
+				log.Fatal().Err(err).Msg("Can't start server")
 			}
 			return err
 		})
@@ -272,9 +264,7 @@ func run(c *cli.Context) error {
 			metricsRouter.GET("/metrics", gin.WrapH(promhttp.Handler()))
 			err := http.ListenAndServe(metricsServerAddr, metricsRouter)
 			if !errors.Is(err, http.ErrServerClosed) {
-				log.Fatal().Err(err).Msg("")
-			} else {
-				log.Info().Msgf("Server listening on '%s' serving metrics", metricsServerAddr)
+				log.Fatal().Err(err).Msg("Can't start metrics server")
 			}
 			return err
 		})
