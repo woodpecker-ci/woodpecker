@@ -2,6 +2,10 @@ depends_on:
   - test
   - web
 
+# TODO: upload build artifacts for pushes to ${CI_REPO_DEFAULT_BRANCH}
+when:
+  event: tag
+
 variables:
   - &golang_image 'docker.io/golang:1.21.3'
   - &node_image 'docker.io/node:21-alpine'
