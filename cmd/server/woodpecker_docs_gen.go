@@ -22,6 +22,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"path"
 
@@ -42,4 +43,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	fmt.Println("generated swagger.json")
 }

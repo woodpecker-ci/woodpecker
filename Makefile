@@ -105,6 +105,7 @@ generate: generate-swagger ## Run all code generations
 
 generate-swagger: install-tools ## Run swagger code generation
 	swag init -g server/api/ -g cmd/server/swagger.go --outputTypes go -output cmd/server/docs
+	cd cmd/server && go run woodpecker_docs_gen.go swagger.go
 
 generate-license-header: install-tools
 	addlicense -c "Woodpecker Authors" -ignore "vendor/**" **/*.go
