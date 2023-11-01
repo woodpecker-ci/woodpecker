@@ -20,9 +20,9 @@ services:
 +     - WOODPECKER_OPEN=true
 ```
 
-You can **also restrict** registration, by keep registration closed and ...  
-... **adding** new **users manually** via the CLI: `woodpecker-cli user add`, or  
-... allowing specific **admin users** via the `WOODPECKER_ADMIN` setting, or  
+You can **also restrict** registration, by keep registration closed and ...\
+... **adding** new **users manually** via the CLI: `woodpecker-cli user add`, or\
+... allowing specific **admin users** via the `WOODPECKER_ADMIN` setting, or\
 by open registration and **filter by organization** membership through the `WOODPECKER_ORGS` setting.
 
 ### To close registration, but allow specific admin users
@@ -156,7 +156,7 @@ WOODPECKER_CUSTOM_CSS_FILE=/usr/local/www/woodpecker.js
 
 The examples below show how to place a banner message in the top navigation bar of Woodpecker.
 
-##### woodpecker.css
+### woodpecker.css
 
 ```css
 .banner-message {
@@ -172,7 +172,7 @@ The examples below show how to place a banner message in the top navigation bar 
 }
 ```
 
-##### woodpecker.js
+### woodpecker.js
 
 ```javascript
 // place/copy a minified version of jQuery or ZeptoJS here ...
@@ -345,12 +345,6 @@ Example: `user1,user2`
 > Default: `false`
 
 Enable to allow user registration.
-
-### `WOODPECKER_DOCS`
-
-> Default: `https://woodpecker-ci.org/`
-
-Link to documentation in the UI.
 
 ### `WOODPECKER_AUTHENTICATE_PUBLIC_REPOS`
 

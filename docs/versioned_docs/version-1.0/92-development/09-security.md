@@ -1,6 +1,6 @@
 # Security
 
-We take security seriously.  
+We take security seriously.
 If you discover a security issue, please bring it to their attention right away!
 
 ### Reporting a Vulnerability

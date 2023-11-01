@@ -29,8 +29,6 @@
   },
   "back": "Назад",
   "cancel": "Скасувати",
-  "color_scheme_dark": "Перехід у світловий режим",
-  "color_scheme_light": "Перехід у темний режим",
   "docs": "Документи",
   "documentation_for": "Документація для \"{topic}\"",
   "errors": {
