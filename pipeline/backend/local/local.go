@@ -45,11 +45,15 @@ type local struct {
 	workflows       sync.Map
 	output          io.ReadCloser
 	pluginGitBinary string
+	os, arch        string
 }
 
 // New returns a new local Engine.
 func New() types.Engine {
-	return &local{}
+	return &local{
+		os:   runtime.GOOS,
+		arch: runtime.GOARCH,
+	}
 }
 
 func (e *local) Name() string {
@@ -64,7 +68,7 @@ func (e *local) Load(context.Context) (*types.EngineInfo, error) {
 	e.loadClone()
 
 	return &types.EngineInfo{
-		Platform: runtime.GOOS + "/" + runtime.GOARCH,
+		Platform: e.os + "/" + e.arch,
 	}, nil
 }
 
@@ -149,7 +153,7 @@ func (e *local) execCommands(ctx context.Context, step *types.Step, state *workf
 	e.output, _ = cmd.StdoutPipe()
 	cmd.Stderr = cmd.Stdout
 
-	if runtime.GOOS == "windows" {
+	if e.os == "windows" {
 		// we get non utf8 output from windows so just sanitize it
 		// TODO: remove hack
 		e.output = io.NopCloser(transform.NewReader(e.output, unicode.UTF8.NewDecoder().Transformer))
