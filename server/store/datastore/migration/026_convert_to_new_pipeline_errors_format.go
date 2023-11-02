@@ -20,8 +20,8 @@ import (
 )
 
 type oldPipeline026 struct {
-	ID     int64  `json:"id"              xorm:"pk autoincr 'secret_id'"`
-	Errors string `json:"error"                  xorm:"json 'pipeline_error'"`
+	ID    int64  `json:"id"              xorm:"pk autoincr 'pipeline_id'"`
+	Error string `json:"error"           xorm:"json 'pipeline_error'"`
 }
 
 func (oldPipeline026) TableName() string {
@@ -36,7 +36,7 @@ type PipelineError026 struct {
 }
 
 type newPipeline026 struct {
-	ID     int64                   `json:"id"              xorm:"pk autoincr 'secret_id'"`
+	ID     int64                   `json:"id"              xorm:"pk autoincr 'pipeline_id'"`
 	Errors []*errors.PipelineError `json:"errors"          xorm:"json 'pipeline_errors'"`
 }
 
@@ -58,14 +58,13 @@ var convertToNewPipelineErrorFormat = task{
 		}
 
 		for _, oldPipeline := range oldPipelines {
-			var pipelineErrors []*PipelineError026
 
 			var newPipeline newPipeline026
 			newPipeline.ID = oldPipeline.ID
-			for _, pipelineError := range pipelineErrors {
+			if oldPipeline.Error != "" {
 				newPipeline.Errors = []*errors.PipelineError{{
 					Type:    "generic",
-					Message: pipelineError.Message,
+					Message: oldPipeline.Error,
 				}}
 			}
 
