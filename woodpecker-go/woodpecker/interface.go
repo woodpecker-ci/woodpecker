@@ -77,7 +77,7 @@ type Client interface {
 	RepoDel(repoID int64) error
 
 	// Pipeline returns a repository pipeline by number.
-	Pipeline(repoID int64, pipeline int) (*Pipeline, error)
+	Pipeline(repoID, pipeline int64) (*Pipeline, error)
 
 	// PipelineLast returns the latest repository pipeline by branch. An empty branch
 	// will result in the default branch.
@@ -94,29 +94,29 @@ type Client interface {
 	PipelineCreate(repoID int64, opts *PipelineOptions) (*Pipeline, error)
 
 	// PipelineStart re-starts a stopped pipeline.
-	PipelineStart(repoID int64, num int, params map[string]string) (*Pipeline, error)
+	PipelineStart(repoID, num int64, params map[string]string) (*Pipeline, error)
 
 	// PipelineStop stops the given pipeline.
-	PipelineStop(repoID int64, pipeline int) error
+	PipelineStop(repoID, pipeline int64) error
 
 	// PipelineApprove approves a blocked pipeline.
-	PipelineApprove(repoID int64, pipeline int) (*Pipeline, error)
+	PipelineApprove(repoID, pipeline int64) (*Pipeline, error)
 
 	// PipelineDecline declines a blocked pipeline.
-	PipelineDecline(repoID int64, pipeline int) (*Pipeline, error)
+	PipelineDecline(repoID, pipeline int64) (*Pipeline, error)
 
 	// PipelineKill force kills the running pipeline.
-	PipelineKill(repoID int64, pipeline int) error
+	PipelineKill(repoID, pipeline int64) error
 
 	// StepLogEntries returns the LogEntries for the given pipeline step
-	StepLogEntries(repoID int64, pipeline, stepID int) ([]*LogEntry, error)
+	StepLogEntries(repoID, pipeline, stepID int64) ([]*LogEntry, error)
 
 	// Deploy triggers a deployment for an existing pipeline using the specified
 	// target environment.
-	Deploy(repoID int64, pipeline int, env string, params map[string]string) (*Pipeline, error)
+	Deploy(repoID, pipeline int64, env string, params map[string]string) (*Pipeline, error)
 
 	// LogsPurge purges the pipeline logs for the specified pipeline.
-	LogsPurge(repoID int64, pipeline int) error
+	LogsPurge(repoID, pipeline int64) error
 
 	// Registry returns a registry by hostname.
 	Registry(repoID int64, hostname string) (*Registry, error)
