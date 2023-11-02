@@ -34,6 +34,7 @@ func (e *docker) toConfig(step *types.Step) *container.Config {
 		WorkingDir:   step.WorkingDir,
 		AttachStdout: true,
 		AttachStderr: true,
+		Volumes:      toVol(step.Volumes),
 	}
 
 	if len(step.Commands) != 0 {
@@ -47,9 +48,6 @@ func (e *docker) toConfig(step *types.Step) *container.Config {
 
 	if len(step.Environment) != 0 {
 		config.Env = toEnv(step.Environment)
-	}
-	if len(step.Volumes) != 0 {
-		config.Volumes = toVol(step.Volumes)
 	}
 	return config
 }
@@ -116,7 +114,10 @@ func toHostConfig(step *types.Step) *container.HostConfig {
 // helper function that converts a slice of volume paths to a set of
 // unique volume names.
 func toVol(paths []string) map[string]struct{} {
-	set := map[string]struct{}{}
+	if len(paths) == 0 {
+		return nil
+	}
+	set := make(map[string]struct{})
 	for _, path := range paths {
 		parts, err := splitVolumeParts(path)
 		if err != nil {
@@ -135,7 +136,9 @@ func toVol(paths []string) map[string]struct{} {
 func toEnv(env map[string]string) []string {
 	var envs []string
 	for k, v := range env {
-		envs = append(envs, k+"="+v)
+		if k != "" {
+			envs = append(envs, k+"="+v)
+		}
 	}
 	return envs
 }
