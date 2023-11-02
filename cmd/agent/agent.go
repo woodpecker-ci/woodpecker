@@ -118,9 +118,20 @@ func run(c *cli.Context) error {
 		context.Background(),
 		metadata.Pairs("hostname", hostname),
 	)
+
+	agentConfigPersisted := abool.New()
 	ctx = utils.WithContextSigtermCallback(ctx, func() {
-		println("ctrl+c received, terminating process")
+		log.Info().Msg("Termination signal is received, shutting down")
 		sigterm.Set()
+
+		// Remove stateless agents from server
+		if agentConfigPersisted.IsNotSet() {
+			log.Debug().Msg("Unregistering agent from server")
+			err := client.UnregisterAgent(ctx)
+			if err != nil {
+				log.Err(err).Msg("Failed to unregister agent from server")
+			}
+		}
 	})
 
 	// check if grpc server version is compatible with agent
@@ -165,7 +176,11 @@ func run(c *cli.Context) error {
 		return err
 	}
 
-	writeAgentConfig(agentConfig, agentConfigPath)
+	if agentConfigPath != "" {
+		if err := writeAgentConfig(agentConfig, agentConfigPath); err == nil {
+			agentConfigPersisted.Set()
+		}
+	}
 
 	labels := map[string]string{
 		"hostname": hostname,
@@ -187,6 +202,7 @@ func run(c *cli.Context) error {
 	go func() {
 		for {
 			if sigterm.IsSet() {
+				log.Debug().Msg("Terminating health reporting")
 				return
 			}
 
@@ -210,6 +226,7 @@ func run(c *cli.Context) error {
 
 			for {
 				if sigterm.IsSet() {
+					log.Debug().Msgf("terminating runner %d", i)
 					return
 				}
 

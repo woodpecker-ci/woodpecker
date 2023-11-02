@@ -35,6 +35,10 @@ func readAgentConfig(agentConfigPath string) AgentConfig {
 		AgentID: defaultAgentIDValue,
 	}
 
+	if agentConfigPath == "" {
+		return conf
+	}
+
 	rawAgentConf, err := os.ReadFile(agentConfigPath)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -54,11 +58,11 @@ func readAgentConfig(agentConfigPath string) AgentConfig {
 	return conf
 }
 
-func writeAgentConfig(conf AgentConfig, agentConfigPath string) {
+func writeAgentConfig(conf AgentConfig, agentConfigPath string) error {
 	rawAgentConf, err := json.Marshal(conf)
 	if err != nil {
 		log.Error().Err(err).Msg("could not marshal agent config")
-		return
+		return err
 	}
 
 	// get old config
@@ -68,6 +72,9 @@ func writeAgentConfig(conf AgentConfig, agentConfigPath string) {
 	if !bytes.Equal(rawAgentConf, oldRawAgentConf) {
 		if err := os.WriteFile(agentConfigPath, rawAgentConf, 0o644); err != nil {
 			log.Error().Err(err).Msgf("could not persist agent config at '%s'", agentConfigPath)
+			return err
 		}
 	}
+
+	return nil
 }
