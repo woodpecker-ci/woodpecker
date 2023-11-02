@@ -24,8 +24,8 @@ func Service(namespace, name, podName string, ports []uint16) (*v1.Service, erro
 	var svcPorts []v1.ServicePort
 	for _, port := range ports {
 		svcPorts = append(svcPorts, v1.ServicePort{
-			Port:       port,
-			TargetPort: intstr.IntOrString{IntVal: port},
+			Port:       int32(port),
+			TargetPort: intstr.IntOrString{IntVal: int32(port)},
 		})
 	}
 
