@@ -18,6 +18,7 @@ import (
 	"codeberg.org/6543/xyaml"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
+	"github.com/woodpecker-ci/woodpecker/shared/constant"
 )
 
 // ParseBytes parses the configuration from bytes b.
@@ -53,7 +54,7 @@ func checkVersion(b []byte) (int, error) {
 	_ = xyaml.Unmarshal(b, &ver)
 	if ver.Version == 0 {
 		// default: version 1
-		return 1, nil
+		return constant.DefaultPipelineVersion, nil
 	}
 
 	if ver.Version != Version {
