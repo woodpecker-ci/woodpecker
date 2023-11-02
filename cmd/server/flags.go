@@ -244,7 +244,7 @@ var flags = append([]cli.Flag{
 		EnvVars: []string{"WOODPECKER_STATUS_CONTEXT_FORMAT"},
 		Name:    "status-context-format",
 		Usage:   "status context format",
-		Value:   "{{ .context }}/{{ .event }}/{{ .workflow }}",
+		Value:   "{{ .context }}/{{ .event }}/{{ .workflow }}{{if not (eq .axis_id 0}}/{{.axis_id}}{{end}}",
 	},
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_MIGRATIONS_ALLOW_LONG"},

@@ -8,7 +8,9 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
     make build-cli
 
 FROM docker.io/alpine:3.18
-RUN apk add -U --no-cache ca-certificates
+# renovate: datasource=repology depName=alpine_3_18/ca-certificates versioning=loose
+ENV CA_CERTIFICATES_VERSION="20230506-r0"
+RUN apk add -U --no-cache ca-certificates=${CA_CERTIFICATES_VERSION}
 ENV GODEBUG=netdns=go
 
 COPY --from=build /src/dist/woodpecker-cli /bin/
