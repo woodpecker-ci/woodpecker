@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"runtime"
 	"strings"
 	"time"
 
@@ -40,12 +41,17 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
+const (
+	EngineName = "kubernetes"
+)
+
 var noContext = context.Background()
 
 type kube struct {
 	ctx    context.Context
 	client kubernetes.Interface
 	config *Config
+	goos   string
 }
 
 type Config struct {
@@ -96,7 +102,7 @@ func New(ctx context.Context) types.Engine {
 }
 
 func (e *kube) Name() string {
-	return "kubernetes"
+	return EngineName
 }
 
 func (e *kube) IsAvailable(context.Context) bool {
@@ -104,10 +110,10 @@ func (e *kube) IsAvailable(context.Context) bool {
 	return len(host) > 0
 }
 
-func (e *kube) Load(context.Context) error {
+func (e *kube) Load(context.Context) (*types.EngineInfo, error) {
 	config, err := configFromCliContext(e.ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	e.config = config
 
@@ -120,12 +126,16 @@ func (e *kube) Load(context.Context) error {
 	}
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	e.client = kubeClient
 
-	return nil
+	// TODO(2693): use info resp of kubeClient to define platform var
+	e.goos = runtime.GOOS
+	return &types.EngineInfo{
+		Platform: runtime.GOOS + "/" + runtime.GOARCH,
+	}, nil
 }
 
 // Setup the pipeline environment.
@@ -181,7 +191,7 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID s
 
 // Start the pipeline step.
 func (e *kube) StartStep(ctx context.Context, step *types.Step, taskUUID string) error {
-	pod, err := Pod(e.config.Namespace, step, e.config.PodLabels, e.config.PodAnnotations)
+	pod, err := Pod(e.config.Namespace, step, e.config.PodLabels, e.config.PodAnnotations, e.goos)
 	if err != nil {
 		return err
 	}
@@ -323,6 +333,29 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 	// return rc, nil
 }
 
+func (e *kube) DestroyStep(ctx context.Context, step *types.Step, taskUUID string) error {
+	podName, err := dnsName(step.Name)
+	if err != nil {
+		return err
+	}
+
+	log.Trace().Str("taskUUID", taskUUID).Msgf("Stopping pod: %s", podName)
+
+	gracePeriodSeconds := int64(0) // immediately
+	dpb := metav1.DeletePropagationBackground
+
+	deleteOpts := metav1.DeleteOptions{
+		GracePeriodSeconds: &gracePeriodSeconds,
+		PropagationPolicy:  &dpb,
+	}
+
+	if err := e.client.CoreV1().Pods(e.config.Namespace).Delete(ctx, podName, deleteOpts); err != nil && !errors.IsNotFound(err) {
+		return err
+	}
+
+	return nil
+}
+
 // Destroy the pipeline environment.
 func (e *kube) DestroyWorkflow(_ context.Context, conf *types.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msg("Deleting Kubernetes primitives")
@@ -347,9 +380,7 @@ func (e *kube) DestroyWorkflow(_ context.Context, conf *types.Config, taskUUID s
 			}
 			log.Trace().Msgf("Deleting pod: %s", stepName)
 			if err := e.client.CoreV1().Pods(e.config.Namespace).Delete(noContext, stepName, deleteOpts); err != nil {
-				if errors.IsNotFound(err) {
-					log.Trace().Err(err).Msgf("Unable to delete pod %s", stepName)
-				} else {
+				if !errors.IsNotFound(err) {
 					return err
 				}
 			}

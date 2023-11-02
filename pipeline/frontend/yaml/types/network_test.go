@@ -91,7 +91,7 @@ network2:
 	}
 	for _, network := range networks {
 		bytes, err := yaml.Marshal(network.networks)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, network.expected, string(bytes), "should be equal")
 	}
 }
