@@ -22,11 +22,11 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
-	"github.com/woodpecker-ci/woodpecker/server"
-	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/store"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml"
+	"go.woodpecker-ci.org/woodpecker/server"
+	forge_types "go.woodpecker-ci.org/woodpecker/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/server/store"
 )
 
 // Restart a pipeline by creating a new one out of the old and start it

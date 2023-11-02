@@ -24,9 +24,9 @@ import (
 
 	"github.com/google/go-github/v56/github"
 
-	"github.com/woodpecker-ci/woodpecker/server/forge/types"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/shared/utils"
 )
 
 const (

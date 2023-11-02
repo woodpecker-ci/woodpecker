@@ -25,8 +25,8 @@ import (
 	"github.com/bmatcuk/doublestar/v4"
 	"gopkg.in/yaml.v3"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
-	yamlBaseTypes "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types/base"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/metadata"
+	yamlBaseTypes "go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/types/base"
 )
 
 type (

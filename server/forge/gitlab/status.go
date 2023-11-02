@@ -17,7 +17,7 @@ package gitlab
 import (
 	"github.com/xanzy/go-gitlab"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/server/model"
 )
 
 // getStatus is a helper that converts a Woodpecker status to a Gitlab status.

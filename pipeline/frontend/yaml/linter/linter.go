@@ -17,7 +17,7 @@ package linter
 import (
 	"fmt"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/types"
 )
 
 const (

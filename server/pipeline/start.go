@@ -19,10 +19,10 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline"
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/store"
+	"go.woodpecker-ci.org/woodpecker/pipeline"
+	"go.woodpecker-ci.org/woodpecker/server"
+	"go.woodpecker-ci.org/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/server/store"
 )
 
 // start a pipeline, make sure it was stored persistent in the store before

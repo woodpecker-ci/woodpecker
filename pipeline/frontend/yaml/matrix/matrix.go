@@ -17,7 +17,7 @@ package matrix
 import (
 	"strings"
 
-	pipeline "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
+	pipeline "go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml"
 
 	"codeberg.org/6543/xyaml"
 )

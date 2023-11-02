@@ -15,7 +15,7 @@
 
 syntax = "proto3";
 
-option go_package = "github.com/woodpecker-ci/woodpecker/pipeline/rpc/proto";
+option go_package = "go.woodpecker-ci.org/woodpecker/pipeline/rpc/proto";
 package proto;
 
 // !IMPORTANT!
