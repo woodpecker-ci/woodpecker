@@ -79,6 +79,9 @@ type Peer interface {
 	// RegisterAgent register our agent to the server
 	RegisterAgent(ctx context.Context, platform, backend, version string, capacity int) (int64, error)
 
+	// UnregisterAgent unregister our agent from the server
+	UnregisterAgent(ctx context.Context) error
+
 	// ReportHealth reports health status of the agent to the server
 	ReportHealth(c context.Context) error
 }

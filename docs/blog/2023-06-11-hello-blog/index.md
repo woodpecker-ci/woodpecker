@@ -1,6 +1,6 @@
 ---
 title: Welcome Woodpecker's blog
-description: This our first post on Woodpecker.
+description: This our first post on Woodpecker
 slug: hello-blog
 authors:
   - name: Anbraten

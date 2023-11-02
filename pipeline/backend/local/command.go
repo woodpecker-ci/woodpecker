@@ -22,7 +22,7 @@ import (
 	"github.com/alessio/shellescape"
 )
 
-func genCmdByShell(shell string, cmds []string) (args []string, err error) {
+func (e *local) genCmdByShell(shell string, cmds []string) (args []string, err error) {
 	script := ""
 	for _, cmd := range cmds {
 		script += fmt.Sprintf("echo %s\n%s\n", strings.TrimSpace(shellescape.Quote("+ "+cmd)), cmd)
@@ -31,11 +31,13 @@ func genCmdByShell(shell string, cmds []string) (args []string, err error) {
 
 	switch strings.TrimSuffix(strings.ToLower(shell), ".exe") {
 	case "cmd":
-		script := ""
+		script := "@SET PROMPT=$\n"
 		for _, cmd := range cmds {
-			script += fmt.Sprintf("%s || exit 1\n", cmd)
+			script += fmt.Sprintf("@echo + %s\n", strings.TrimSpace(shellescape.Quote(cmd)))
+			script += fmt.Sprintf("@%s\n", cmd)
+			script += "@IF NOT %ERRORLEVEL% == 0 exit %ERRORLEVEL%\n"
 		}
-		cmd, err := os.CreateTemp(os.TempDir(), "*.cmd")
+		cmd, err := os.CreateTemp(e.tempDir, "*.cmd")
 		if err != nil {
 			return nil, err
 		}

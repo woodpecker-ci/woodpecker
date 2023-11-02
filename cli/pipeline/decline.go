@@ -43,7 +43,7 @@ func pipelineDecline(c *cli.Context) (err error) {
 		return err
 	}
 
-	number, err := strconv.Atoi(c.Args().Get(1))
+	number, err := strconv.ParseInt(c.Args().Get(1), 10, 64)
 	if err != nil {
 		return err
 	}

@@ -366,6 +366,11 @@ func (c *client) RegisterAgent(ctx context.Context, platform, backend, version s
 	return res.GetAgentId(), err
 }
 
+func (c *client) UnregisterAgent(ctx context.Context) error {
+	_, err := c.client.UnregisterAgent(ctx, &proto.Empty{})
+	return err
+}
+
 func (c *client) ReportHealth(ctx context.Context) (err error) {
 	retry := c.newBackOff()
 	req := new(proto.ReportHealthRequest)
