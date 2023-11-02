@@ -28,22 +28,30 @@ type Engine interface {
 	// IsAvailable check if the backend is available.
 	IsAvailable(ctx context.Context) bool
 
-	// Load the backend engine.
-	Load(ctx context.Context) error
+	// Load loads the backend engine.
+	Load(ctx context.Context) (*EngineInfo, error)
 
-	// SetupWorkflow the workflow environment.
+	// SetupWorkflow sets up the workflow environment.
 	SetupWorkflow(ctx context.Context, conf *Config, taskUUID string) error
 
-	// StartStep start the workflow step.
+	// StartStep starts the workflow step.
 	StartStep(ctx context.Context, step *Step, taskUUID string) error
 
-	// WaitStep for the workflow step to complete and returns
+	// WaitStep waits for the workflow step to complete and returns
 	// the completion results.
 	WaitStep(ctx context.Context, step *Step, taskUUID string) (*State, error)
 
-	// TailStep the workflow step logs.
+	// TailStep tails the workflow step logs.
 	TailStep(ctx context.Context, step *Step, taskUUID string) (io.ReadCloser, error)
 
-	// DestroyWorkflow the workflow environment.
+	// DestroyStep destroys the workflow step.
+	DestroyStep(ctx context.Context, step *Step, taskUUID string) error
+
+	// DestroyWorkflow destroys the workflow environment.
 	DestroyWorkflow(ctx context.Context, conf *Config, taskUUID string) error
+}
+
+// EngineInfo represents the reported information of a loaded engine
+type EngineInfo struct {
+	Platform string
 }

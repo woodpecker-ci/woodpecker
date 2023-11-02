@@ -112,8 +112,6 @@
   },
   "back": "Powrót",
   "cancel": "Anuluj",
-  "color_scheme_dark": "Przełącz na tryb jasny",
-  "color_scheme_light": "Przełącz na tryb ciemny",
   "docs": "Dokumentacja",
   "documentation_for": "Dokumentacja do tematu \"{topic}\"",
   "errors": {

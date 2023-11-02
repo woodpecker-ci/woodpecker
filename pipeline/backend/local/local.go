@@ -45,11 +45,15 @@ type local struct {
 	workflows       sync.Map
 	output          io.ReadCloser
 	pluginGitBinary string
+	os, arch        string
 }
 
 // New returns a new local Engine.
 func New() types.Engine {
-	return &local{}
+	return &local{
+		os:   runtime.GOOS,
+		arch: runtime.GOARCH,
+	}
 }
 
 func (e *local) Name() string {
@@ -60,10 +64,12 @@ func (e *local) IsAvailable(context.Context) bool {
 	return true
 }
 
-func (e *local) Load(context.Context) error {
+func (e *local) Load(context.Context) (*types.EngineInfo, error) {
 	e.loadClone()
 
-	return nil
+	return &types.EngineInfo{
+		Platform: e.os + "/" + e.arch,
+	}, nil
 }
 
 // SetupWorkflow the pipeline environment.
@@ -147,7 +153,7 @@ func (e *local) execCommands(ctx context.Context, step *types.Step, state *workf
 	e.output, _ = cmd.StdoutPipe()
 	cmd.Stderr = cmd.Stdout
 
-	if runtime.GOOS == "windows" {
+	if e.os == "windows" {
 		// we get non utf8 output from windows so just sanitize it
 		// TODO: remove hack
 		e.output = io.NopCloser(transform.NewReader(e.output, unicode.UTF8.NewDecoder().Transformer))
@@ -213,6 +219,11 @@ func (e *local) WaitStep(_ context.Context, step *types.Step, taskUUID string) (
 func (e *local) TailStep(_ context.Context, step *types.Step, taskUUID string) (io.ReadCloser, error) {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("tail logs of step %s", step.Name)
 	return e.output, nil
+}
+
+func (e *local) DestroyStep(_ context.Context, _ *types.Step, _ string) error {
+	// WaitStep already waits for the command to finish, so there is nothing to do here.
+	return nil
 }
 
 // DestroyWorkflow the pipeline environment.

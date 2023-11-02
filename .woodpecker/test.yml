@@ -8,7 +8,7 @@ when:
       - release/*
 
 variables:
-  - &golang_image 'golang:1.21.3'
+  - &golang_image 'docker.io/golang:1.21.3'
   - &when
     - path: &when_path # related config files
         - '.woodpecker/test.yml'
@@ -65,7 +65,7 @@ steps:
     when: *when
 
   lint-editorconfig:
-    image: mstruebing/editorconfig-checker:2.7.2
+    image: docker.io/mstruebing/editorconfig-checker:2.7.2
     group: test
     when:
       - event: [pull_request, tag]
@@ -79,7 +79,7 @@ steps:
     when: *when
 
   prettier:
-    image: woodpeckerci/plugin-prettier:next
+    image: docker.io/woodpeckerci/plugin-prettier:next
     group: test
     when: *when
 
@@ -126,7 +126,7 @@ steps:
 
   codecov:
     pull: true
-    image: woodpeckerci/plugin-codecov:2.1.2
+    image: docker.io/woodpeckerci/plugin-codecov:2.1.2
     settings:
       files:
         - agent-coverage.out
@@ -142,7 +142,7 @@ steps:
 
 services:
   service-postgres:
-    image: postgres:16
+    image: docker.io/postgres:16
     ports: ['5432']
     environment:
       - POSTGRES_USER=postgres
@@ -150,7 +150,7 @@ services:
     when: *when
 
   service-mysql:
-    image: mysql:8.2.0
+    image: docker.io/mysql:8.2.0
     ports: ['3306']
     environment:
       - MYSQL_DATABASE=test

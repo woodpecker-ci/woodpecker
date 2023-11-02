@@ -8,7 +8,7 @@ when:
       - release/*
 
 variables:
-  - &node_image 'node:21-alpine'
+  - &node_image 'docker.io/node:21-alpine'
   - &when
     path:
       # related config files
