@@ -15,10 +15,17 @@
 package yaml
 
 import (
+	"fmt"
+
 	"codeberg.org/6543/xyaml"
 
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/constraint"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
+<<<<<<< HEAD
 	"github.com/woodpecker-ci/woodpecker/shared/constant"
+=======
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types/base"
+>>>>>>> main
 )
 
 // ParseBytes parses the configuration from bytes b.
@@ -36,6 +43,36 @@ func ParseBytes(b []byte) (*types.Workflow, error) {
 
 	// make sure detected version is set
 	out.Version = yamlVersion
+
+	// support deprecated branch filter
+	if out.BranchesDontUseIt != nil {
+		if out.When.Constraints == nil {
+			out.When.Constraints = []constraint.Constraint{{Branch: *out.BranchesDontUseIt}}
+		} else if len(out.When.Constraints) == 1 && out.When.Constraints[0].Branch.IsEmpty() {
+			out.When.Constraints[0].Branch = *out.BranchesDontUseIt
+		} else {
+			return nil, fmt.Errorf("could not apply deprecated branches filter into global when filter")
+		}
+		out.BranchesDontUseIt = nil
+	}
+
+	// support deprecated pipeline keyword
+	if len(out.PipelineDontUseIt.ContainerList) != 0 && len(out.Steps.ContainerList) == 0 {
+		out.Steps.ContainerList = out.PipelineDontUseIt.ContainerList
+	}
+
+	// support deprecated platform filter
+	if out.PlatformDontUseIt != "" {
+		if out.Labels == nil {
+			out.Labels = make(base.SliceOrMap)
+		}
+		if _, set := out.Labels["platform"]; !set {
+			out.Labels["platform"] = out.PlatformDontUseIt
+		}
+		out.PlatformDontUseIt = ""
+	}
+	out.PipelineDontUseIt.ContainerList = nil
+>>>>>>> main
 
 	return out, nil
 }

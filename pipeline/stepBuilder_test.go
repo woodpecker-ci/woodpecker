@@ -302,7 +302,7 @@ steps:
 	}
 }
 
-func TestRootWhenBranchFilter(t *testing.T) {
+func TestBranchFilter(t *testing.T) {
 	t.Parallel()
 
 	b := StepBuilder{
@@ -320,8 +320,7 @@ version: 1
 steps:
   xxx:
     image: scratch
-when:
-  branch: main
+branches: main
 `)},
 			{Data: []byte(`
 version: 1
