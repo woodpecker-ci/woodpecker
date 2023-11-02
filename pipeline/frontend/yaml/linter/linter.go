@@ -42,7 +42,7 @@ func (l *Linter) Lint(rawConfig string, c *types.Workflow) error {
 	var linterErr error
 
 	if len(c.Steps.ContainerList) == 0 {
-		linterErr = multierr.Append(linterErr, newLinterError("Invalid or missing pipeline section", "pipeline", false))
+		linterErr = multierr.Append(linterErr, newLinterError("Invalid or missing steps section", "steps", false))
 	}
 
 	if err := l.lint(c.Clone.ContainerList); err != nil {
@@ -90,7 +90,7 @@ func (l *Linter) lint(containers []*types.Container) error {
 
 func (l *Linter) lintImage(c *types.Container) error {
 	if len(c.Image) == 0 {
-		return newLinterError("Invalid or missing image", fmt.Sprintf("pipeline.%s", c.Name), false)
+		return newLinterError("Invalid or missing image", fmt.Sprintf("steps.%s", c.Name), false)
 	}
 	return nil
 }
@@ -104,47 +104,48 @@ func (l *Linter) lintCommands(c *types.Container) error {
 		for key := range c.Settings {
 			keys = append(keys, key)
 		}
-		return newLinterError(fmt.Sprintf("Cannot configure both commands and custom attributes %v", keys), fmt.Sprintf("pipeline.%s", c.Name), false)
+		return newLinterError(fmt.Sprintf("Cannot configure both commands and custom attributes %v", keys), fmt.Sprintf("steps.%s", c.Name), false)
 	}
 	return nil
 }
 
 func (l *Linter) lintTrusted(c *types.Container) error {
+	yamlPath := fmt.Sprintf("steps.%s", c.Name)
 	if c.Privileged {
-		return newLinterError("Insufficient privileges to use privileged mode", fmt.Sprintf("pipeline.%s", c.Name), false)
+		return newLinterError("Insufficient privileges to use privileged mode", yamlPath, false)
 	}
 	if c.ShmSize != 0 {
-		return newLinterError("Insufficient privileges to override shm_size", fmt.Sprintf("pipeline.%s", c.Name), false)
+		return newLinterError("Insufficient privileges to override shm_size", yamlPath, false)
 	}
 	if len(c.DNS) != 0 {
-		return newLinterError("Insufficient privileges to use custom dns", fmt.Sprintf("pipeline.%s", c.Name), false)
+		return newLinterError("Insufficient privileges to use custom dns", yamlPath, false)
 	}
 	if len(c.DNSSearch) != 0 {
-		return newLinterError("Insufficient privileges to use dns_search", fmt.Sprintf("pipeline.%s", c.Name), false)
+		return newLinterError("Insufficient privileges to use dns_search", yamlPath, false)
 	}
 	if len(c.Devices) != 0 {
-		return newLinterError("Insufficient privileges to use devices", fmt.Sprintf("pipeline.%s", c.Name), false)
+		return newLinterError("Insufficient privileges to use devices", yamlPath, false)
 	}
 	if len(c.ExtraHosts) != 0 {
-		return newLinterError("Insufficient privileges to use extra_hosts", fmt.Sprintf("pipeline.%s", c.Name), false)
+		return newLinterError("Insufficient privileges to use extra_hosts", yamlPath, false)
 	}
 	if len(c.NetworkMode) != 0 {
-		return newLinterError("Insufficient privileges to use network_mode", fmt.Sprintf("pipeline.%s", c.Name), false)
+		return newLinterError("Insufficient privileges to use network_mode", yamlPath, false)
 	}
 	if len(c.IpcMode) != 0 {
-		return newLinterError("Insufficient privileges to use ipc_mode", fmt.Sprintf("pipeline.%s", c.Name), false)
+		return newLinterError("Insufficient privileges to use ipc_mode", yamlPath, false)
 	}
 	if len(c.Sysctls) != 0 {
-		return newLinterError("Insufficient privileges to use sysctls", fmt.Sprintf("pipeline.%s", c.Name), false)
+		return newLinterError("Insufficient privileges to use sysctls", yamlPath, false)
 	}
 	if c.Networks.Networks != nil && len(c.Networks.Networks) != 0 {
-		return newLinterError("Insufficient privileges to use networks", fmt.Sprintf("pipeline.%s", c.Name), false)
+		return newLinterError("Insufficient privileges to use networks", yamlPath, false)
 	}
 	if c.Volumes.Volumes != nil && len(c.Volumes.Volumes) != 0 {
-		return newLinterError("Insufficient privileges to use volumes", fmt.Sprintf("pipeline.%s", c.Name), false)
+		return newLinterError("Insufficient privileges to use volumes", yamlPath, false)
 	}
 	if len(c.Tmpfs) != 0 {
-		return newLinterError("Insufficient privileges to use tmpfs", fmt.Sprintf("pipeline.%s", c.Name), false)
+		return newLinterError("Insufficient privileges to use tmpfs", yamlPath, false)
 	}
 	return nil
 }
