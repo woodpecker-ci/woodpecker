@@ -109,7 +109,7 @@ steps:
       repo: woodpeckerci/woodpecker-server
       dockerfile: docker/Dockerfile.server.multiarch
       platforms: *platforms_preview
-      tag: pull_2705
+      tag: pull_${CI_COMMIT_PULL_REQUEST}
       logins: *publish_logins
     when:
       evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
