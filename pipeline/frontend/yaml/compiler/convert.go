@@ -165,9 +165,9 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		cpuSet = c.reslimit.CPUSet
 	}
 
-	var ports []int32
+	var ports []uint16
 	for _, port := range container.Ports {
-		ports = append(ports, int32(port))
+		ports = append(ports, uint16(port))
 	}
 
 	// at least one constraint contain status success, or all constraints have no status set
