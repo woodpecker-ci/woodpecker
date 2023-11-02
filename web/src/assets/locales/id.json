@@ -464,7 +464,13 @@
       },
       "general": {
         "general": "Umum",
-        "language": "Bahasa"
+        "language": "Bahasa",
+        "theme": {
+          "auto": "Otomatis",
+          "dark": "Gelap",
+          "light": "Terang",
+          "theme": "Tema"
+        }
       },
       "secrets": {
         "add": "Tambahkan rahasia",
