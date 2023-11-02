@@ -70,13 +70,14 @@ type (
 	// Pipeline defines a pipeline object.
 	Pipeline struct {
 		ID        int64         `json:"id"`
-		Number    int           `json:"number"`
-		Parent    int           `json:"parent"`
+		Number    int64         `json:"number"`
+		Parent    int64         `json:"parent"`
 		Event     string        `json:"event"`
 		Status    string        `json:"status"`
 		Errors    PipelineError `json:"errors"`
 		Enqueued  int64         `json:"enqueued_at"`
 		Created   int64         `json:"created_at"`
+		Updated   int64         `json:"updated_at"`
 		Started   int64         `json:"started_at"`
 		Finished  int64         `json:"finished_at"`
 		Deploy    string        `json:"deploy_to"`

@@ -123,3 +123,12 @@ labels:
 
 steps: [...]
 ```
+
+### Change temp directory
+
+We use the default temp directory to create folders for workflows.
+This directory can be changed by:
+
+```env
+WOODPECKER_BACKEND_LOCAL_TEMP_DIR=/some/other/dir
+```

@@ -51,7 +51,7 @@ func pipelineStart(c *cli.Context) (err error) {
 	}
 
 	pipelineArg := c.Args().Get(1)
-	var number int
+	var number int64
 	if pipelineArg == "last" {
 		// Fetch the pipeline number from the last pipeline
 		pipeline, err := client.PipelineLast(repoID, "")
@@ -63,7 +63,7 @@ func pipelineStart(c *cli.Context) (err error) {
 		if len(pipelineArg) == 0 {
 			return errors.New("missing step number")
 		}
-		number, err = strconv.Atoi(pipelineArg)
+		number, err = strconv.ParseInt(pipelineArg, 10, 64)
 		if err != nil {
 			return err
 		}
