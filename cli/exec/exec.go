@@ -216,7 +216,7 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 		return err
 	}
 
-	if err = engine.Load(backendCtx); err != nil {
+	if _, err = engine.Load(backendCtx); err != nil {
 		return err
 	}
 

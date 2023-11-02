@@ -68,6 +68,8 @@ when:
 settings:
   foo: bar
   baz: false
+ports:
+  - 8080
 `)
 
 func TestUnmarshalContainer(t *testing.T) {
@@ -126,6 +128,7 @@ func TestUnmarshalContainer(t *testing.T) {
 			"foo": "bar",
 			"baz": false,
 		},
+		Ports: []base.StringOrInt{8080},
 	}
 	got := Container{}
 	err := yaml.Unmarshal(containerYaml, &got)

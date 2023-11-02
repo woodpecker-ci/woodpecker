@@ -78,12 +78,13 @@ func (b *StepBuilder) Build() (items []*Item, errorsAndWarnings error) {
 			axes = append(axes, matrix.Axis{})
 		}
 
-		for _, axis := range axes {
+		for i, axis := range axes {
 			workflow := &model.Workflow{
 				PID:     pidSequence,
 				State:   model.StatusPending,
 				Environ: axis,
 				Name:    SanitizePath(y.Name),
+				AxisID:  i + 1,
 			}
 			item, err := b.genItemForWorkflow(workflow, axis, string(y.Data))
 			if err != nil && pipeline_errors.HasBlockingErrors(err) {

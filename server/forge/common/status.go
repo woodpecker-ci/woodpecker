@@ -19,6 +19,8 @@ import (
 	"fmt"
 	"text/template"
 
+	"github.com/rs/zerolog/log"
+
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 )
@@ -41,8 +43,10 @@ func GetPipelineStatusContext(repo *model.Repo, pipeline *model.Pipeline, workfl
 		"workflow": workflow.Name,
 		"owner":    repo.Owner,
 		"repo":     repo.Name,
+		"axis_id":  workflow.AxisID,
 	})
 	if err != nil {
+		log.Error().Err(err).Msg("could not create status context")
 		return ""
 	}
 

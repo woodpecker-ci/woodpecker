@@ -27,7 +27,7 @@ import (
 )
 
 // returns a container configuration.
-func toConfig(step *types.Step) *container.Config {
+func (e *docker) toConfig(step *types.Step) *container.Config {
 	config := &container.Config{
 		Image:        step.Image,
 		Labels:       map[string]string{"wp_uuid": step.UUID},
@@ -37,7 +37,7 @@ func toConfig(step *types.Step) *container.Config {
 	}
 
 	if len(step.Commands) != 0 {
-		env, entry, cmd := common.GenerateContainerConf(step.Commands)
+		env, entry, cmd := common.GenerateContainerConf(step.Commands, e.info.OSType)
 		for k, v := range env {
 			step.Environment[k] = v
 		}
@@ -76,9 +76,6 @@ func toHostConfig(step *types.Step) *container.HostConfig {
 		Sysctls:    step.Sysctls,
 	}
 
-	// if len(step.VolumesFrom) != 0 {
-	// 	config.VolumesFrom = step.VolumesFrom
-	// }
 	if len(step.NetworkMode) != 0 {
 		config.NetworkMode = container.NetworkMode(step.NetworkMode)
 	}
