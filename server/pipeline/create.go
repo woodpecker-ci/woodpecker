@@ -88,11 +88,6 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 
 	pipeline = setPipelineStepsOnPipeline(pipeline, pipelineItems)
 
-	if err := _store.WorkflowsCreate(pipeline.Workflows); err != nil {
-		log.Error().Err(err).Str("repo", repo.FullName).Msgf("error persisting steps for %s#%d", repo.FullName, pipeline.Number)
-		return nil, err
-	}
-
 	// persist the pipeline config for historical correctness, restarts, etc
 	var configs []*model.Config
 	for _, forgeYamlConfig := range forgeYamlConfigs {
