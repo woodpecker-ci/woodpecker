@@ -9,11 +9,21 @@
       />
 
       <div class="flex items-start justify-center flex-grow relative">
-        <Container v-if="hasBlockingError" class="py-0">
+        <Container v-if="selectedStep?.error || true" class="py-0">
           <Panel>
             <div class="flex flex-col items-center gap-4">
               <Icon name="status-error" class="w-16 h-16 text-wp-state-error-100" />
-              <span class="capitalize text-xl">{{ $t('repo.pipeline.we_got_some_errors') }}</span>
+              <span class="text-xl">{{ $t('repo.pipeline.we_got_some_errors') }}</span>
+              <span class="whitespace-pre">{{ selectedStep?.error || 'Docker had some trouble :(' }}</span>
+            </div>
+          </Panel>
+        </Container>
+
+        <Container v-else-if="pipeline.errors?.some((e) => !e.is_warning)" class="py-0">
+          <Panel>
+            <div class="flex flex-col items-center gap-4">
+              <Icon name="status-error" class="w-16 h-16 text-wp-state-error-100" />
+              <span class="text-xl">{{ $t('repo.pipeline.we_got_some_errors') }}</span>
               <Button color="red" :text="$t('repo.pipeline.show_errors')" :to="{ name: 'repo-pipeline-errors' }" />
             </div>
           </Panel>
@@ -59,7 +69,7 @@
         </Container>
 
         <PipelineLog
-          v-else-if="selectedStepId"
+          v-else-if="selectedStepId !== null"
           v-model:step-id="selectedStepId"
           :pipeline="pipeline"
           class="fixed top-0 left-0 w-full h-full md:absolute"
@@ -129,7 +139,7 @@ const selectedStepId = computed({
     return null;
   },
   set(_selectedStepId: number | null) {
-    if (!_selectedStepId) {
+    if (_selectedStepId === null) {
       router.replace({ params: { ...route.params, stepId: '' } });
       return;
     }
@@ -142,18 +152,6 @@ const { forge } = useConfig();
 const { message } = usePipeline(pipeline);
 
 const selectedStep = computed(() => findStep(pipeline.value.workflows || [], selectedStepId.value || -1));
-const errors = computed(() => {
-  const e = pipeline.value?.errors ?? [];
-  if (selectedStep.value?.error) {
-    e.push({
-      type: 'generic',
-      message: selectedStep.value.error,
-      is_warning: false,
-    });
-  }
-  return e;
-});
-const hasBlockingError = computed(() => errors.value.some((e) => !e.is_warning));
 
 const { doSubmit: approvePipeline, isLoading: isApprovingPipeline } = useAsyncAction(async () => {
   if (!repo) {
