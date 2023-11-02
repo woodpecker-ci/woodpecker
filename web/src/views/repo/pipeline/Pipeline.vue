@@ -9,25 +9,17 @@
       />
 
       <div class="flex items-start justify-center flex-grow relative">
-        <Container v-if="hasBlockingError">
+        <Container v-if="hasBlockingError" class="py-0">
           <Panel>
-            <div class="flex flex-col items-center mb-4 gap-2">
+            <div class="flex flex-col items-center gap-4">
               <Icon name="status-error" class="w-16 h-16 text-wp-state-error-100" />
-              <!-- <span class="capitalize text-xl">{{ $t('repo.pipeline.execution_error') }}</span> -->
-            </div>
-            <div class="grid justify-center gap-2 text-left grid-3-1">
-              <template v-for="(error, i) in errors" :key="i">
-                <span>{{ error.is_warning ? '⚠️' : '❌' }}</span>
-                <span>[{{ error.type }}]</span>
-                <span v-if="error.type === 'linter'" class="underline">{{ (error.data as any)?.field }}</span>
-                <span v-else />
-                <span class="ml-4">{{ error.message }}</span>
-              </template>
+              <span class="capitalize text-xl">{{ $t('repo.pipeline.we_got_some_errors') }}</span>
+              <Button color="red" :text="$t('repo.pipeline.show_errors')" :to="{ name: 'repo-pipeline-errors' }" />
             </div>
           </Panel>
         </Container>
 
-        <Container v-else-if="pipeline.status === 'blocked'">
+        <Container v-else-if="pipeline.status === 'blocked'" class="py-0">
           <Panel>
             <div class="flex flex-col items-center gap-4">
               <Icon name="status-blocked" class="w-16 h-16" />
@@ -57,7 +49,7 @@
           </Panel>
         </Container>
 
-        <Container v-else-if="pipeline.status === 'declined'">
+        <Container v-else-if="pipeline.status === 'declined'" class="py-0">
           <Panel>
             <div class="flex flex-col items-center gap-4">
               <Icon name="status-declined" class="w-16 h-16 text-wp-state-error-100" />
@@ -181,9 +173,3 @@ const { doSubmit: declinePipeline, isLoading: isDecliningPipeline } = useAsyncAc
   notifications.notify({ title: i18n.t('repo.pipeline.protected.decline_success'), type: 'success' });
 });
 </script>
-
-<style scoped>
-.grid-3-1 {
-  grid-template-columns: auto auto auto 1fr;
-}
-</style>

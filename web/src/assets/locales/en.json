@@ -230,7 +230,6 @@
       "config": "Config",
       "files": "Changed files ({files})",
       "no_files": "No files have been changed.",
-      "execution_error": "Execution error",
       "no_pipelines": "No pipelines have been started yet.",
       "no_pipeline_steps": "No pipeline steps available!",
       "step_not_started": "This step hasn't started yet.",
@@ -281,7 +280,11 @@
         "error": "error",
         "failure": "failure",
         "killed": "killed"
-      }
+      },
+      "errors": "Errors ({count})",
+      "warnings": "Warnings ({count})",
+      "show_errors": "Show errors",
+      "we_got_some_errors": "Ohh no, we got some errors!"
     }
   },
   "org": {

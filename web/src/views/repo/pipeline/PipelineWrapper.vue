@@ -64,6 +64,21 @@
     </template>
 
     <Tab id="tasks" :title="$t('repo.pipeline.tasks')" />
+    <Tab
+      v-if="pipeline.errors && pipeline.errors.length > 0"
+      id="errors"
+      :title="
+        pipeline.errors.some((e) => !e.is_warning)
+          ? '❌ ' +
+            $t('repo.pipeline.errors', {
+              count: pipeline.errors?.length,
+            })
+          : '⚠️ ' +
+            $t('repo.pipeline.warnings', {
+              count: pipeline.errors?.length,
+            })
+      "
+    />
     <Tab id="config" :title="$t('repo.pipeline.config')" />
     <Tab
       v-if="
@@ -74,11 +89,7 @@
       id="changed-files"
       :title="$t('repo.pipeline.files', { files: pipeline.changed_files?.length })"
     />
-    <Tab
-      v-if="pipeline.errors && pipeline.errors.length > 0"
-      id="errors"
-      :title="$t('repo.pipeline.files', { files: pipeline.errors?.length })"
-    />
+
     <router-view />
   </Scaffold>
 </template>
@@ -182,6 +193,10 @@ const activeTab = computed({
 
     if (route.name === 'repo-pipeline-config') {
       return 'config';
+    }
+
+    if (route.name === 'repo-pipeline-errors') {
+      return 'errors';
     }
 
     return 'tasks';
