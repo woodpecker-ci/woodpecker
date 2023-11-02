@@ -60,35 +60,42 @@ type (
 		PipelineCounter *int    `json:"pipeline_counter,omitempty"`
 	}
 
+	PipelineError struct {
+		Type      string      `json:"type"`
+		Message   string      `json:"message"`
+		IsWarning bool        `json:"is_warning"`
+		Data      interface{} `json:"data"`
+	}
+
 	// Pipeline defines a pipeline object.
 	Pipeline struct {
-		ID        int64       `json:"id"`
-		Number    int         `json:"number"`
-		Parent    int         `json:"parent"`
-		Event     string      `json:"event"`
-		Status    string      `json:"status"`
-		Error     string      `json:"error"`
-		Enqueued  int64       `json:"enqueued_at"`
-		Created   int64       `json:"created_at"`
-		Started   int64       `json:"started_at"`
-		Finished  int64       `json:"finished_at"`
-		Deploy    string      `json:"deploy_to"`
-		Commit    string      `json:"commit"`
-		Branch    string      `json:"branch"`
-		Ref       string      `json:"ref"`
-		Refspec   string      `json:"refspec"`
-		CloneURL  string      `json:"clone_url"`
-		Title     string      `json:"title"`
-		Message   string      `json:"message"`
-		Timestamp int64       `json:"timestamp"`
-		Sender    string      `json:"sender"`
-		Author    string      `json:"author"`
-		Avatar    string      `json:"author_avatar"`
-		Email     string      `json:"author_email"`
-		Link      string      `json:"link_url"`
-		Reviewer  string      `json:"reviewed_by"`
-		Reviewed  int64       `json:"reviewed_at"`
-		Workflows []*Workflow `json:"workflows,omitempty"`
+		ID        int64         `json:"id"`
+		Number    int           `json:"number"`
+		Parent    int           `json:"parent"`
+		Event     string        `json:"event"`
+		Status    string        `json:"status"`
+		Errors    PipelineError `json:"errors"`
+		Enqueued  int64         `json:"enqueued_at"`
+		Created   int64         `json:"created_at"`
+		Started   int64         `json:"started_at"`
+		Finished  int64         `json:"finished_at"`
+		Deploy    string        `json:"deploy_to"`
+		Commit    string        `json:"commit"`
+		Branch    string        `json:"branch"`
+		Ref       string        `json:"ref"`
+		Refspec   string        `json:"refspec"`
+		CloneURL  string        `json:"clone_url"`
+		Title     string        `json:"title"`
+		Message   string        `json:"message"`
+		Timestamp int64         `json:"timestamp"`
+		Sender    string        `json:"sender"`
+		Author    string        `json:"author"`
+		Avatar    string        `json:"author_avatar"`
+		Email     string        `json:"author_email"`
+		Link      string        `json:"link_url"`
+		Reviewer  string        `json:"reviewed_by"`
+		Reviewed  int64         `json:"reviewed_at"`
+		Workflows []*Workflow   `json:"workflows,omitempty"`
 	}
 
 	// Workflow represents a workflow in the pipeline.
