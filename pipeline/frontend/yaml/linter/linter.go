@@ -45,13 +45,13 @@ func (l *Linter) Lint(rawConfig string, c *types.Workflow) error {
 		linterErr = multierr.Append(linterErr, newLinterError("Invalid or missing steps section", "steps", false))
 	}
 
-	if err := l.lint(c.Clone.ContainerList); err != nil {
+	if err := l.lintContainers(c.Clone.ContainerList); err != nil {
 		linterErr = multierr.Append(linterErr, err)
 	}
-	if err := l.lint(c.Steps.ContainerList); err != nil {
+	if err := l.lintContainers(c.Steps.ContainerList); err != nil {
 		linterErr = multierr.Append(linterErr, err)
 	}
-	if err := l.lint(c.Services.ContainerList); err != nil {
+	if err := l.lintContainers(c.Services.ContainerList); err != nil {
 		linterErr = multierr.Append(linterErr, err)
 	}
 
@@ -68,7 +68,7 @@ func (l *Linter) Lint(rawConfig string, c *types.Workflow) error {
 	return linterErr
 }
 
-func (l *Linter) lint(containers []*types.Container) error {
+func (l *Linter) lintContainers(containers []*types.Container) error {
 	var linterErr error
 
 	for _, container := range containers {
