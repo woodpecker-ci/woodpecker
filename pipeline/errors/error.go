@@ -51,7 +51,7 @@ func GetPipelineErrors(err error) []*PipelineError {
 			pipelineErrors = append(pipelineErrors, err)
 		} else {
 			pipelineErrors = append(pipelineErrors, &PipelineError{
-				Message: err.Error(),
+				Message: _err.Error(),
 				Type:    PipelineErrorTypeGeneric,
 			})
 		}
