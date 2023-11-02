@@ -21,11 +21,8 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/constraint"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
-<<<<<<< HEAD
-	"github.com/woodpecker-ci/woodpecker/shared/constant"
-=======
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types/base"
->>>>>>> main
+	"github.com/woodpecker-ci/woodpecker/shared/constant"
 )
 
 // ParseBytes parses the configuration from bytes b.
@@ -72,7 +69,6 @@ func ParseBytes(b []byte) (*types.Workflow, error) {
 		out.PlatformDontUseIt = ""
 	}
 	out.PipelineDontUseIt.ContainerList = nil
->>>>>>> main
 
 	return out, nil
 }
