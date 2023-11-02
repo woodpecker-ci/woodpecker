@@ -215,7 +215,6 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 
 			name := fmt.Sprintf("%s_%s_%d", c.prefix, nameServices, i)
 			step := c.createProcess(name, container, backend_types.StepTypeService)
-
 			stage.Steps = append(stage.Steps, step)
 		}
 		config.Stages = append(config.Stages, stage)
@@ -282,7 +281,6 @@ func (c *Compiler) setupCache(conf *yaml_types.Workflow, ir *backend_types.Confi
 	stage.Steps = append(stage.Steps, step)
 
 	ir.Stages = append(ir.Stages, stage)
-	return
 }
 
 func (c *Compiler) setupCacheRebuild(conf *yaml_types.Workflow, ir *backend_types.Config) {
