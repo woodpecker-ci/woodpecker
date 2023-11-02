@@ -21,6 +21,7 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
+	"github.com/rs/zerolog/log"
 
 	backend_types "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
@@ -29,7 +30,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/utils"
 )
 
-func (c *Compiler) createProcess(name string, container *yaml_types.Container, stepType backend_types.StepType) (*backend_types.Step, error) {
+func (c *Compiler) createProcess(name string, container *yaml_types.Container, stepType backend_types.StepType) *backend_types.Step {
 	var (
 		uuid = uuid.New()
 
@@ -89,7 +90,7 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		}
 
 		if err := settings.ParamsToEnv(container.Settings, environment, pluginSecrets.toStringMap()); err != nil {
-			return nil, err
+			log.Error().Err(err).Msg("paramsToEnv")
 		}
 	}
 
@@ -212,7 +213,7 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		IpcMode:        ipcMode,
 		Ports:          ports,
 		BackendOptions: backendOptions,
-	}, nil
+	}
 }
 
 func (c *Compiler) stepWorkdir(container *yaml_types.Container) string {

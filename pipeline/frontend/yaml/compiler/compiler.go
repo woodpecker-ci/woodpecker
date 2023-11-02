@@ -162,10 +162,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			Environment: c.cloneEnv,
 		}
 		name := fmt.Sprintf("%s_clone", c.prefix)
-		step, err := c.createProcess(name, container, backend_types.StepTypeClone)
-		if err != nil {
-			return nil, err
-		}
+		step := c.createProcess(name, container, backend_types.StepTypeClone)
 
 		stage := new(backend_types.Stage)
 		stage.Name = name
@@ -186,10 +183,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			stage.Alias = container.Name
 
 			name := fmt.Sprintf("%s_clone_%d", c.prefix, i)
-			step, err := c.createProcess(name, container, backend_types.StepTypeClone)
-			if err != nil {
-				return nil, err
-			}
+			step := c.createProcess(name, container, backend_types.StepTypeClone)
 
 			// only inject netrc if it's a trusted repo or a trusted plugin
 			if !c.netrcOnlyTrusted || c.trustedPipeline || (container.IsPlugin() && container.IsTrustedCloneImage()) {
@@ -204,10 +198,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 		}
 	}
 
-	err := c.setupCache(conf, config)
-	if err != nil {
-		return nil, err
-	}
+	c.setupCache(conf, config)
 
 	// add services steps
 	if len(conf.Services.ContainerList) != 0 {
@@ -223,10 +214,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			}
 
 			name := fmt.Sprintf("%s_%s_%d", c.prefix, nameServices, i)
-			step, err := c.createProcess(name, container, backend_types.StepTypeService)
-			if err != nil {
-				return nil, err
-			}
+			step := c.createProcess(name, container, backend_types.StepTypeService)
 
 			stage.Steps = append(stage.Steps, step)
 		}
@@ -262,10 +250,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 		if container.IsPlugin() {
 			stepType = backend_types.StepTypePlugin
 		}
-		step, err := c.createProcess(name, container, stepType)
-		if err != nil {
-			return nil, err
-		}
+		step := c.createProcess(name, container, stepType)
 
 		// inject netrc if it's a trusted repo or a trusted clone-plugin
 		if c.trustedPipeline || (container.IsPlugin() && container.IsTrustedCloneImage()) {
@@ -277,25 +262,19 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 		stage.Steps = append(stage.Steps, step)
 	}
 
-	err = c.setupCacheRebuild(conf, config)
-	if err != nil {
-		return nil, err
-	}
+	c.setupCacheRebuild(conf, config)
 
 	return config, nil
 }
 
-func (c *Compiler) setupCache(conf *yaml_types.Workflow, ir *backend_types.Config) error {
+func (c *Compiler) setupCache(conf *yaml_types.Workflow, ir *backend_types.Config) {
 	if c.local || len(conf.Cache) == 0 || c.cacher == nil {
-		return nil
+		return
 	}
 
 	container := c.cacher.Restore(path.Join(c.metadata.Repo.Owner, c.metadata.Repo.Name), c.metadata.Curr.Commit.Branch, conf.Cache)
 	name := fmt.Sprintf("%s_restore_cache", c.prefix)
-	step, err := c.createProcess(name, container, backend_types.StepTypeCache)
-	if err != nil {
-		return err
-	}
+	step := c.createProcess(name, container, backend_types.StepTypeCache)
 
 	stage := new(backend_types.Stage)
 	stage.Name = name
@@ -303,20 +282,17 @@ func (c *Compiler) setupCache(conf *yaml_types.Workflow, ir *backend_types.Confi
 	stage.Steps = append(stage.Steps, step)
 
 	ir.Stages = append(ir.Stages, stage)
-	return nil
+	return
 }
 
-func (c *Compiler) setupCacheRebuild(conf *yaml_types.Workflow, ir *backend_types.Config) error {
+func (c *Compiler) setupCacheRebuild(conf *yaml_types.Workflow, ir *backend_types.Config) {
 	if c.local || len(conf.Cache) == 0 || c.metadata.Curr.Event != metadata.EventPush || c.cacher == nil {
-		return nil
+		return
 	}
 	container := c.cacher.Rebuild(path.Join(c.metadata.Repo.Owner, c.metadata.Repo.Name), c.metadata.Curr.Commit.Branch, conf.Cache)
 
 	name := fmt.Sprintf("%s_rebuild_cache", c.prefix)
-	step, err := c.createProcess(name, container, backend_types.StepTypeCache)
-	if err != nil {
-		return err
-	}
+	step := c.createProcess(name, container, backend_types.StepTypeCache)
 
 	stage := new(backend_types.Stage)
 	stage.Name = name
@@ -324,5 +300,4 @@ func (c *Compiler) setupCacheRebuild(conf *yaml_types.Workflow, ir *backend_type
 	stage.Steps = append(stage.Steps, step)
 
 	ir.Stages = append(ir.Stages, stage)
-	return nil
 }

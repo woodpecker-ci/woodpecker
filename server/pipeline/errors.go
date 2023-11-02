@@ -14,9 +14,7 @@
 
 package pipeline
 
-import (
-	"errors"
-)
+import "errors"
 
 type ErrNotFound struct {
 	Msg string
