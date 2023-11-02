@@ -17,6 +17,10 @@ package docker
 import (
 	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
 
 func TestSplitVolumeParts(t *testing.T) {
@@ -84,4 +88,13 @@ func TestSplitVolumeParts(t *testing.T) {
 			}
 		}
 	}
+}
+
+func TestToContainerName(t *testing.T) {
+	step := &types.Step{
+		Name:  "hello",
+		Alias: "hello",
+		UUID:  "f51821af-4cb8-435e-a3c2-3a684185d828",
+	}
+	assert.EqualValues(t, "wp_f51821af-4cb8-435e-a3c2-3a684185d828", toContainerName(step))
 }
