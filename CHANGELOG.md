@@ -4,10 +4,11 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@zc-devs, @pat-s, @qwerty287, @6543, @bitethecode, @xoxys, @runephilosof-karnovgroup, @anbraten, @renovate[bot], @HamburgerJungeJr, @Janik-Haag, @nitram509, @JohnWalkerx, @OskarsPakers, @Exar04, @dominic-p, @categulario, @mzampetakis, @Timshel, @Denperidge, @tomix1024, @lonix1, @s3lph, @math3vz, @LTek-online, @testwill, @klinux, @pinpox, @hpidcock, @lafriks, @ChewingBever, @azdle, @praneeth-ovckd
+@runephilosof-karnovgroup, @zc-devs, @pat-s, @qwerty287, @6543, @bitethecode, @xoxys, @anbraten, @renovate[bot], @HamburgerJungeJr, @Janik-Haag, @nitram509, @JohnWalkerx, @OskarsPakers, @Exar04, @dominic-p, @categulario, @mzampetakis, @Timshel, @Denperidge, @tomix1024, @lonix1, @s3lph, @math3vz, @LTek-online, @testwill, @klinux, @pinpox, @hpidcock, @lafriks, @ChewingBever, @azdle, @praneeth-ovckd
 
 ### 💥 Breaking changes
 
+- Use int64 for IDs in woodpecker client lib [[#2703](https://github.com/woodpecker-ci/woodpecker/pull/2703)]
 - Woodpecker-go: Use Feed instead Activity [[#2690](https://github.com/woodpecker-ci/woodpecker/pull/2690)]
 - Do not sanitzie secrets with 3 or less chars [[#2680](https://github.com/woodpecker-ci/woodpecker/pull/2680)]
 - fix(deps): update docker to v24 [[#2675](https://github.com/woodpecker-ci/woodpecker/pull/2675)]
