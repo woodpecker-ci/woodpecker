@@ -268,6 +268,12 @@ func (c *Gitea) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error)
 				},
 			},
 		)
+
+		// Log the list of repositories
+		for _, repo := range repos {
+			log.Debug().Str("repository_name", repo.Name).Str("owner", repo.Owner.UserName).Msg("Repository Info")
+		}
+
 		result := make([]*model.Repo, 0, len(repos))
 		for _, repo := range repos {
 			if repo.Archived {
