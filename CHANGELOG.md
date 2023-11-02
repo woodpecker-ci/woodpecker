@@ -41,6 +41,7 @@
 
 ### 📈 Enhancement
 
+- Add ports into pipeline backend step model [[#2656](https://github.com/woodpecker-ci/woodpecker/pull/2656)]
 - Unregister stateless agents from server on termination [[#2606](https://github.com/woodpecker-ci/woodpecker/pull/2606)]
 - Let the backend engine report the current platform [[#2688](https://github.com/woodpecker-ci/woodpecker/pull/2688)]
 - Showing the pending pipelines on top [[#1488](https://github.com/woodpecker-ci/woodpecker/pull/1488)]
