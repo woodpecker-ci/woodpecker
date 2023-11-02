@@ -73,7 +73,6 @@ steps:
 +       target: docker_password
 ```
 
-
 ### Use in Pull Requests events
 
 Secrets are not exposed to pull requests by default. You can override this behavior by creating the secret and enabling the `pull_request` event type, either in UI or by CLI, see below.
