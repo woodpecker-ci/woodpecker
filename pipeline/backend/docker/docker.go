@@ -317,11 +317,8 @@ func (e *docker) DestroyStep(ctx context.Context, step *backend.Step, taskUUID s
 	return nil
 }
 
-func (e *docker) DestroyWorkflow(_ context.Context, conf *backend.Config, taskUUID string) error {
+func (e *docker) DestroyWorkflow(ctx context.Context, conf *backend.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("delete workflow environment")
-
-	// make sure we do destroy it
-	ctx := context.Background()
 
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {

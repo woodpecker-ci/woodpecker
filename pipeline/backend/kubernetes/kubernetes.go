@@ -45,8 +45,6 @@ const (
 	EngineName = "kubernetes"
 )
 
-var noContext = context.Background()
-
 type kube struct {
 	ctx    context.Context
 	client kubernetes.Interface
@@ -357,7 +355,7 @@ func (e *kube) DestroyStep(ctx context.Context, step *types.Step, taskUUID strin
 }
 
 // Destroy the pipeline environment.
-func (e *kube) DestroyWorkflow(_ context.Context, conf *types.Config, taskUUID string) error {
+func (e *kube) DestroyWorkflow(ctx context.Context, conf *types.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msg("Deleting Kubernetes primitives")
 
 	gracePeriodSeconds := int64(0) // immediately
@@ -368,7 +366,6 @@ func (e *kube) DestroyWorkflow(_ context.Context, conf *types.Config, taskUUID s
 		PropagationPolicy:  &dpb,
 	}
 
-	// Use noContext because the ctx sent to this function will be canceled/done in case of error or canceled by user.
 	// Don't abort on 404 errors from k8s, they most likely mean that the pod hasn't been created yet, usually because pipeline was canceled before running all steps.
 	// Trace log them in case the info could be useful when troubleshooting.
 
@@ -379,7 +376,7 @@ func (e *kube) DestroyWorkflow(_ context.Context, conf *types.Config, taskUUID s
 				return err
 			}
 			log.Trace().Msgf("Deleting pod: %s", stepName)
-			if err := e.client.CoreV1().Pods(e.config.Namespace).Delete(noContext, stepName, deleteOpts); err != nil {
+			if err := e.client.CoreV1().Pods(e.config.Namespace).Delete(ctx, stepName, deleteOpts); err != nil {
 				if !errors.IsNotFound(err) {
 					return err
 				}
@@ -395,7 +392,7 @@ func (e *kube) DestroyWorkflow(_ context.Context, conf *types.Config, taskUUID s
 				if err != nil {
 					return err
 				}
-				if err := e.client.CoreV1().Services(e.config.Namespace).Delete(noContext, svc.Name, deleteOpts); err != nil {
+				if err := e.client.CoreV1().Services(e.config.Namespace).Delete(ctx, svc.Name, deleteOpts); err != nil {
 					if errors.IsNotFound(err) {
 						log.Trace().Err(err).Msgf("Unable to delete service %s", svc.Name)
 					} else {
@@ -411,7 +408,7 @@ func (e *kube) DestroyWorkflow(_ context.Context, conf *types.Config, taskUUID s
 		if err != nil {
 			return err
 		}
-		err = e.client.CoreV1().PersistentVolumeClaims(e.config.Namespace).Delete(noContext, pvc.Name, deleteOpts)
+		err = e.client.CoreV1().PersistentVolumeClaims(e.config.Namespace).Delete(ctx, pvc.Name, deleteOpts)
 		if err != nil {
 			if errors.IsNotFound(err) {
 				log.Trace().Err(err).Msgf("Unable to delete pvc %s", pvc.Name)
