@@ -9,12 +9,12 @@
       />
 
       <div class="flex items-start justify-center flex-grow relative">
-        <Container v-if="selectedStep?.error || true" class="py-0">
+        <Container v-if="selectedStep?.error" class="py-0">
           <Panel>
             <div class="flex flex-col items-center gap-4">
               <Icon name="status-error" class="w-16 h-16 text-wp-state-error-100" />
               <span class="text-xl">{{ $t('repo.pipeline.we_got_some_errors') }}</span>
-              <span class="whitespace-pre">{{ selectedStep?.error || 'Docker had some trouble :(' }}</span>
+              <span class="whitespace-pre">{{ selectedStep?.error }}</span>
             </div>
           </Panel>
         </Container>
