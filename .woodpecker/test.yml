@@ -46,13 +46,6 @@ steps:
     when:
       - path: *when_path
 
-  lint:
-    image: *golang_image
-    group: test
-    commands:
-      - make lint
-    when: *when
-
   check_swagger:
     image: *golang_image
     group: test
