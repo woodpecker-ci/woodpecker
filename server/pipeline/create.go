@@ -65,14 +65,14 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	}
 
 	pipelineItems, parseErr := parsePipeline(_store, pipeline, repoUser, repo, forgeYamlConfigs, nil)
-	if parseErr != nil && errors.HasBlockingErrors(parseErr) {
+	if errors.HasBlockingErrors(parseErr) {
 		log.Debug().Str("repo", repo.FullName).Err(parseErr).Msg("failed to parse yaml")
 		return nil, persistPipelineWithErr(ctx, _store, pipeline, repo, repoUser, parseErr)
 	} else if parseErr != nil {
 		pipeline.Errors = errors.GetPipelineErrors(parseErr)
 	}
 
-	if len(pipelineItems) == 0 && parseErr == nil {
+	if len(pipelineItems) == 0 {
 		log.Debug().Str("repo", repo.FullName).Msg(ErrFiltered.Error())
 		return nil, ErrFiltered
 	}
