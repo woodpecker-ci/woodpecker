@@ -1,13 +1,20 @@
 <template>
-  <Settings :title="$t('admin.settings.info.info')" :desc="$t('admin.settings.info.desc')">
+  <Settings :title="$t('info')">
     <div class="flex flex-col items-center gap-4">
       <WoodpeckerLogo class="w-48 h-48" />
       <p class="text-xl">
-        You are running woodpecker version <span class="font-bold">{{ version?.current }}</span>
+        {{ $t('running_version') }} <span class="font-bold">{{ version?.current }}</span>
       </p>
-      <span v-if="version?.needsUpdate" class="text-red-400"
-        >Please update your Woodpecker instance to {{ version.latest }}</span
-      >
+      <span v-if="version?.needsUpdate" class="text-int-wp-state-error-100">
+        {{ $t('update_woodpecker') }}
+        <a
+          :href="`https://github.com/woodpecker-ci/woodpecker/releases/tag/${version.latest}`"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="underline"
+          >{{ version.latest }}</a
+        >
+      </span>
     </div>
   </Settings>
 </template>

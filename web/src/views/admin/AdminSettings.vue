@@ -3,7 +3,7 @@
     <template #title>
       {{ $t('repo.settings.settings') }}
     </template>
-    <Tab id="info" :title="$t('admin.settings.info')">
+    <Tab id="info" :title="$t('info')">
       <AdminInfoTab />
     </Tab>
     <Tab id="secrets" :title="$t('admin.settings.secrets.secrets')">

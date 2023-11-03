@@ -501,5 +501,8 @@
     "internal_error": "Some internal error occurred",
     "access_denied": "You are not allowed to login"
   },
-  "default": "default"
+  "default": "default",
+  "info": "Systeminfo",
+  "running_version": "You are running woodpecker",
+  "update_woodpecker": "Please update your Woodpecker instance to"
 }
