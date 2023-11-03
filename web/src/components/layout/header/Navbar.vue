@@ -8,7 +8,7 @@
       <!-- Logo -->
       <router-link :to="{ name: 'home' }" class="flex flex-col -my-2 px-2">
         <WoodpeckerLogo class="w-8 h-8" />
-        <span class="text-xs" :title="config.version">{{ version }}</span>
+        <span class="text-xs">{{ version }}</span>
       </router-link>
       <!-- Repo Link -->
       <router-link v-if="user" :to="{ name: 'repos' }" class="navbar-link navbar-clickable">
