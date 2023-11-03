@@ -20,29 +20,36 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type xormigrateLogger struct {}
+type xormigrateLogger struct{}
 
 func (l *xormigrateLogger) Debug(v ...interface{}) {
 	log.Debug().Msg(fmt.Sprint(v...))
 }
+
 func (l *xormigrateLogger) Debugf(format string, v ...interface{}) {
 	log.Debug().Msgf(format, v...)
 }
+
 func (l *xormigrateLogger) Info(v ...interface{}) {
 	log.Info().Msg(fmt.Sprint(v...))
 }
+
 func (l *xormigrateLogger) Infof(format string, v ...interface{}) {
 	log.Info().Msgf(format, v...)
 }
+
 func (l *xormigrateLogger) Warn(v ...interface{}) {
 	log.Warn().Msg(fmt.Sprint(v...))
 }
+
 func (l *xormigrateLogger) Warnf(format string, v ...interface{}) {
 	log.Warn().Msgf(format, v...)
 }
+
 func (l *xormigrateLogger) Error(v ...interface{}) {
 	log.Error().Msg(fmt.Sprint(v...))
 }
+
 func (l *xormigrateLogger) Errorf(format string, v ...interface{}) {
 	log.Error().Msgf(format, v...)
 }
