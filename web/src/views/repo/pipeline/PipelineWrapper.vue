@@ -3,7 +3,7 @@
     <Scaffold
       v-model:activeTab="activeTab"
       enable-tabs
-      disable-hash-mode
+      disable-tab-url-hash-mode
       :go-back="goBack"
       :fluid-content="activeTab === 'tasks'"
       full-width-header

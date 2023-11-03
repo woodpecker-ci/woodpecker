@@ -9,12 +9,10 @@ import { computed, onMounted, ref } from 'vue';
 
 import { Tab, useTabsClient } from '~/compositions/useTabs';
 
-export interface Props {
+const props = defineProps<{
   id?: string;
   title: string;
-}
-
-const props = defineProps<Props>();
+}>();
 
 const { tabs, activeTab } = useTabsClient();
 const tab = ref<Tab>();
