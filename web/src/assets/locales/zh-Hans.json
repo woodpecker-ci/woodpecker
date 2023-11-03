@@ -237,7 +237,6 @@
         "push": "推送",
         "tag": "标签"
       },
-      "execution_error": "执行错误",
       "exit_code": "退出代码 {exitCode}",
       "files": "修改的文件（{files}）",
       "loading": "载入中…",

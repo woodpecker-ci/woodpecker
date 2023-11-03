@@ -22,6 +22,7 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline"
+	pipeline_errors "github.com/woodpecker-ci/woodpecker/pipeline/errors"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/compiler"
 	"github.com/woodpecker-ci/woodpecker/server"
 	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
@@ -82,12 +83,7 @@ func parsePipeline(store store.Store, currentPipeline *model.Pipeline, user *mod
 			HTTPSProxy: server.Config.Pipeline.Proxy.HTTPS,
 		},
 	}
-	pipelineItems, err := b.Build()
-	if err != nil {
-		return nil, err
-	}
-
-	return pipelineItems, nil
+	return b.Build()
 }
 
 func createPipelineItems(c context.Context, store store.Store,
@@ -102,12 +98,15 @@ func createPipelineItems(c context.Context, store store.Store,
 		} else {
 			updatePipelineStatus(c, currentPipeline, repo, user)
 		}
-		return currentPipeline, nil, err
+
+		if pipeline_errors.HasBlockingErrors(err) {
+			return currentPipeline, nil, err
+		}
 	}
 
 	currentPipeline = setPipelineStepsOnPipeline(currentPipeline, pipelineItems)
 
-	return currentPipeline, pipelineItems, nil
+	return currentPipeline, pipelineItems, err
 }
 
 // setPipelineStepsOnPipeline is the link between pipeline representation in "pipeline package" and server
