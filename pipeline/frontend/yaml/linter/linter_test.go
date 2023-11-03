@@ -17,6 +17,8 @@ package linter
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/woodpecker-ci/woodpecker/pipeline/errors"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
 )
 
@@ -26,8 +28,6 @@ func TestLint(t *testing.T) {
 steps:
   build:
     image: docker
-    privileged: true
-    network_mode: host
     volumes:
       - /tmp:/tmp
     commands:
@@ -35,8 +35,8 @@ steps:
       - go test
   publish:
     image: plugins/docker
-    repo: foo/bar
     settings:
+      repo: foo/bar
       foo: bar
 services:
   redis:
@@ -47,8 +47,6 @@ services:
 steps:
   - name: build
     image: docker
-    privileged: true
-    network_mode: host
     volumes:
       - /tmp:/tmp
     commands:
@@ -56,8 +54,8 @@ steps:
       - go test
   - name: publish
     image: plugins/docker
-    repo: foo/bar
     settings:
+      repo: foo/bar
       foo: bar
 `,
 	}, {
@@ -98,7 +96,7 @@ func TestLintErrors(t *testing.T) {
 	}{
 		{
 			from: "",
-			want: "Invalid or missing pipeline section",
+			want: "Invalid or missing steps section",
 		},
 		{
 			from: "steps: { build: { image: '' }  }",
@@ -160,8 +158,16 @@ func TestLintErrors(t *testing.T) {
 		lerr := New().Lint(test.from, conf)
 		if lerr == nil {
 			t.Errorf("Expected lint error for configuration %q", test.from)
-		} else if lerr.Error() != test.want {
-			t.Errorf("Want error %q, got %q", test.want, lerr.Error())
 		}
+
+		lerrors := errors.GetPipelineErrors(lerr)
+		found := false
+		for _, lerr := range lerrors {
+			if lerr.Message == test.want {
+				found = true
+				break
+			}
+		}
+		assert.True(t, found, "Expected error %q, got %q", test.want, lerrors)
 	}
 }
