@@ -94,7 +94,7 @@ import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useConfig from '~/compositions/useConfig';
 import useNotifications from '~/compositions/useNotifications';
 import usePipeline from '~/compositions/usePipeline';
-import { Pipeline, Repo, RepoPermissions } from '~/lib/api/types';
+import { Pipeline, PipelineStep, Repo, RepoPermissions } from '~/lib/api/types';
 import { findStep } from '~/utils/helpers';
 
 const props = defineProps<{
@@ -122,7 +122,10 @@ const selectedStepId = computed({
   get() {
     if (stepId.value !== '' && stepId.value !== null && stepId.value !== undefined) {
       const id = parseInt(stepId.value, 10);
-      const step = pipeline.value?.workflows?.find((p) => p.children?.find((c) => c.pid === id));
+      const step = pipeline.value?.workflows?.reduce(
+        (prev, p) => prev || p.children?.find((c) => c.pid === id),
+        undefined as PipelineStep | undefined,
+      );
       if (step) {
         return step.pid;
       }
