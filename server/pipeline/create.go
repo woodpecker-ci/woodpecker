@@ -22,6 +22,7 @@ import (
 
 	"github.com/rs/zerolog/log"
 
+	"github.com/woodpecker-ci/woodpecker/pipeline/errors"
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -60,13 +61,15 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 
 	if configFetchErr != nil {
 		log.Debug().Str("repo", repo.FullName).Err(configFetchErr).Msgf("cannot find config '%s' in '%s' with user: '%s'", repo.Config, pipeline.Ref, repoUser.Login)
-		return nil, persistPipelineWithErr(ctx, _store, pipeline, repo, repoUser, fmt.Sprintf("pipeline definition not found in %s", repo.FullName))
+		return nil, persistPipelineWithErr(ctx, _store, pipeline, repo, repoUser, fmt.Errorf("pipeline definition not found in %s", repo.FullName))
 	}
 
 	pipelineItems, parseErr := parsePipeline(_store, pipeline, repoUser, repo, forgeYamlConfigs, nil)
-	if parseErr != nil {
+	if errors.HasBlockingErrors(parseErr) {
 		log.Debug().Str("repo", repo.FullName).Err(parseErr).Msg("failed to parse yaml")
-		return nil, persistPipelineWithErr(ctx, _store, pipeline, repo, repoUser, fmt.Sprintf("failed to parse pipeline: %s", parseErr.Error()))
+		return nil, persistPipelineWithErr(ctx, _store, pipeline, repo, repoUser, parseErr)
+	} else if parseErr != nil {
+		pipeline.Errors = errors.GetPipelineErrors(parseErr)
 	}
 
 	if len(pipelineItems) == 0 {
@@ -118,11 +121,11 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	return pipeline, nil
 }
 
-func persistPipelineWithErr(ctx context.Context, _store store.Store, pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User, err string) error {
+func persistPipelineWithErr(ctx context.Context, _store store.Store, pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User, err error) error {
 	pipeline.Started = time.Now().Unix()
 	pipeline.Finished = pipeline.Started
 	pipeline.Status = model.StatusError
-	pipeline.Error = err
+	pipeline.Errors = errors.GetPipelineErrors(err)
 	dbErr := _store.CreatePipeline(pipeline)
 	if dbErr != nil {
 		msg := fmt.Errorf("failed to save pipeline for %s", repo.FullName)

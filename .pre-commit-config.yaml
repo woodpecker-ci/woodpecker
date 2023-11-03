@@ -7,7 +7,7 @@ repos:
     rev: v2.3.0
     hooks:
       - id: check-yaml
-        exclude: 'pipeline/schema/.woodpecker/test-merge-map-and-sequence.yml'
+        exclude: 'pipeline/frontend/yaml/linter/schema/.woodpecker/test-merge-map-and-sequence.yml'
       - id: end-of-file-fixer
       - id: trailing-whitespace
   - repo: https://github.com/golangci/golangci-lint
