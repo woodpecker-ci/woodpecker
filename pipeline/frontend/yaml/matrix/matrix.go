@@ -17,7 +17,7 @@ package matrix
 import (
 	"strings"
 
-	pipeline "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
+	"github.com/woodpecker-ci/woodpecker/pipeline/errors"
 
 	"codeberg.org/6543/xyaml"
 )
@@ -116,7 +116,7 @@ func parse(raw []byte) (Matrix, error) {
 		Matrix map[string][]string
 	}{}
 	if err := xyaml.Unmarshal(raw, &data); err != nil {
-		return nil, &pipeline.PipelineParseError{Err: err}
+		return nil, &errors.PipelineError{Message: err.Error(), Type: errors.PipelineErrorTypeCompiler}
 	}
 	return data.Matrix, nil
 }
@@ -129,7 +129,7 @@ func parseList(raw []byte) ([]Axis, error) {
 	}{}
 
 	if err := xyaml.Unmarshal(raw, &data); err != nil {
-		return nil, &pipeline.PipelineParseError{Err: err}
+		return nil, &errors.PipelineError{Message: err.Error(), Type: errors.PipelineErrorTypeCompiler}
 	}
 	return data.Matrix.Include, nil
 }

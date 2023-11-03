@@ -3,7 +3,7 @@
     v-if="repo && repoPermissions && $route.meta.repoHeader"
     v-model:activeTab="activeTab"
     enable-tabs
-    disable-hash-mode
+    disable-tab-url-hash-mode
   >
     <template #title>
       <span class="flex">

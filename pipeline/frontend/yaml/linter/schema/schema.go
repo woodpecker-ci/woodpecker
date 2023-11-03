@@ -15,6 +15,7 @@
 package schema
 
 import (
+	"bytes"
 	_ "embed"
 	"fmt"
 	"io"
@@ -61,4 +62,8 @@ func Lint(r io.Reader) ([]gojsonschema.ResultError, error) {
 	}
 
 	return nil, nil
+}
+
+func LintString(s string) ([]gojsonschema.ResultError, error) {
+	return Lint(bytes.NewBufferString(s))
 }

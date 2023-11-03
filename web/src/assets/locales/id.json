@@ -237,7 +237,6 @@
         "push": "Dorongan",
         "tag": "Tag"
       },
-      "execution_error": "Kesalahan eksekusi",
       "exit_code": "kode keluar {exitCode}",
       "files": "Berkas yang diubah ({files})",
       "loading": "Memuat…",
@@ -464,7 +463,13 @@
       },
       "general": {
         "general": "Umum",
-        "language": "Bahasa"
+        "language": "Bahasa",
+        "theme": {
+          "auto": "Otomatis",
+          "dark": "Gelap",
+          "light": "Terang",
+          "theme": "Tema"
+        }
       },
       "secrets": {
         "add": "Tambahkan rahasia",
