@@ -44,7 +44,7 @@ func TestReadAgentIDFileExists(t *testing.T) {
 
 	// update existing config and check
 	actual.AgentID = 33
-	writeAgentConfig(actual, tmpF.Name())
+	_ = writeAgentConfig(actual, tmpF.Name())
 	actual = readAgentConfig(tmpF.Name())
 	assert.EqualValues(t, 33, actual.AgentID)
 
@@ -55,7 +55,7 @@ func TestReadAgentIDFileExists(t *testing.T) {
 	defer os.Remove(tmpF2.Name())
 
 	// write new config
-	writeAgentConfig(actual, tmpF2.Name())
+	_ = writeAgentConfig(actual, tmpF2.Name())
 	actual = readAgentConfig(tmpF2.Name())
 	assert.EqualValues(t, 33, actual.AgentID)
 }

@@ -27,6 +27,7 @@ import (
 	"sync"
 
 	"github.com/rs/zerolog/log"
+	"github.com/urfave/cli/v2"
 	"golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/transform"
 
@@ -42,14 +43,19 @@ type workflowState struct {
 }
 
 type local struct {
+	tempDir         string
 	workflows       sync.Map
 	output          io.ReadCloser
 	pluginGitBinary string
+	os, arch        string
 }
 
 // New returns a new local Engine.
 func New() types.Engine {
-	return &local{}
+	return &local{
+		os:   runtime.GOOS,
+		arch: runtime.GOARCH,
+	}
 }
 
 func (e *local) Name() string {
@@ -60,17 +66,24 @@ func (e *local) IsAvailable(context.Context) bool {
 	return true
 }
 
-func (e *local) Load(context.Context) error {
+func (e *local) Load(ctx context.Context) (*types.EngineInfo, error) {
+	c, ok := ctx.Value(types.CliContext).(*cli.Context)
+	if ok {
+		e.tempDir = c.String("backend-local-temp-dir")
+	}
+
 	e.loadClone()
 
-	return nil
+	return &types.EngineInfo{
+		Platform: e.os + "/" + e.arch,
+	}, nil
 }
 
 // SetupWorkflow the pipeline environment.
 func (e *local) SetupWorkflow(_ context.Context, _ *types.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msg("create workflow environment")
 
-	baseDir, err := os.MkdirTemp("", "woodpecker-local-*")
+	baseDir, err := os.MkdirTemp(e.tempDir, "woodpecker-local-*")
 	if err != nil {
 		return err
 	}
@@ -133,7 +146,7 @@ func (e *local) StartStep(ctx context.Context, step *types.Step, taskUUID string
 // execCommands use step.Image as shell and run the commands in it
 func (e *local) execCommands(ctx context.Context, step *types.Step, state *workflowState, env []string) error {
 	// Prepare commands
-	args, err := genCmdByShell(step.Image, step.Commands)
+	args, err := e.genCmdByShell(step.Image, step.Commands)
 	if err != nil {
 		return fmt.Errorf("could not convert commands into args: %w", err)
 	}
@@ -147,7 +160,7 @@ func (e *local) execCommands(ctx context.Context, step *types.Step, state *workf
 	e.output, _ = cmd.StdoutPipe()
 	cmd.Stderr = cmd.Stdout
 
-	if runtime.GOOS == "windows" {
+	if e.os == "windows" {
 		// we get non utf8 output from windows so just sanitize it
 		// TODO: remove hack
 		e.output = io.NopCloser(transform.NewReader(e.output, unicode.UTF8.NewDecoder().Transformer))

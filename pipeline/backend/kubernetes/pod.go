@@ -28,7 +28,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 )
 
-func Pod(namespace string, step *types.Step, labels, annotations map[string]string, secCtxConf SecurityContextConfig) (*v1.Pod, error) {
+func Pod(namespace string, step *types.Step, labels, annotations map[string]string, goos string, secCtxConf SecurityContextConfig) (*v1.Pod, error) {
 	var (
 		vols       []v1.Volume
 		volMounts  []v1.VolumeMount
@@ -66,7 +66,7 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 	}
 
 	if len(step.Commands) != 0 {
-		scriptEnv, entry, cmds := common.GenerateContainerConf(step.Commands)
+		scriptEnv, entry, cmds := common.GenerateContainerConf(step.Commands, goos)
 		for k, v := range scriptEnv {
 			step.Environment[k] = v
 		}
