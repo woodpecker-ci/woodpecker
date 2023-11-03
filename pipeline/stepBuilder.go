@@ -84,7 +84,9 @@ func (b *StepBuilder) Build() (items []*Item, errorsAndWarnings error) {
 				State:   model.StatusPending,
 				Environ: axis,
 				Name:    SanitizePath(y.Name),
-				AxisID:  i + 1,
+			}
+			if len(axes) > 1 {
+				workflow.AxisID = i + 1
 			}
 			item, err := b.genItemForWorkflow(workflow, axis, string(y.Data))
 			if err != nil && pipeline_errors.HasBlockingErrors(err) {
