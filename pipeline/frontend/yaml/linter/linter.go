@@ -19,6 +19,7 @@ import (
 
 	"go.uber.org/multierr"
 
+	"github.com/woodpecker-ci/woodpecker/pipeline/errors"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/linter/schema"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
 )
@@ -165,8 +166,40 @@ func (l *Linter) lintSchema(rawConfig string) error {
 	return linterErr
 }
 
-func (l *Linter) lintDeprecations(_ *types.Workflow) error {
-	// TODO: add deprecation warnings
+func (l *Linter) lintDeprecations(workflow *types.Workflow) error {
+	if workflow.PipelineDontUseIt.ContainerList != nil {
+		return &errors.PipelineError{
+			Type:    errors.PipelineErrorTypeDeprecation,
+			Message: "Please use 'steps:' instead of deprecated 'pipeline:' list",
+			Data: errors.DeprecationErrorData{
+				Docs: "https://woodpecker-ci.org/docs/next/migrations#next-200",
+			},
+			IsWarning: true,
+		}
+	}
+
+	if workflow.PlatformDontUseIt != "" {
+		return &errors.PipelineError{
+			Type:    errors.PipelineErrorTypeDeprecation,
+			Message: "Please use labels instead of deprecated 'platform' filters",
+			Data: errors.DeprecationErrorData{
+				Docs: "https://woodpecker-ci.org/docs/next/migrations#next-200",
+			},
+			IsWarning: true,
+		}
+	}
+
+	if !workflow.BranchesDontUseIt.IsEmpty() {
+		return &errors.PipelineError{
+			Type:    errors.PipelineErrorTypeDeprecation,
+			Message: "Please use global when instead of deprecated 'branches' filter",
+			Data: errors.DeprecationErrorData{
+				Docs: "https://woodpecker-ci.org/docs/next/migrations#next-200",
+			},
+			IsWarning: true,
+		}
+	}
+
 	return nil
 }
 

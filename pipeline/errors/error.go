@@ -27,6 +27,10 @@ type LinterErrorData struct {
 	Field string `json:"field"`
 }
 
+type DeprecationErrorData struct {
+	Docs string `json:"docs"`
+}
+
 func (e *PipelineError) Error() string {
 	return fmt.Sprintf("[%s] %s", e.Type, e.Message)
 }
