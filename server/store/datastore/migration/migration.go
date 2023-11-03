@@ -66,6 +66,8 @@ func Migrate(e *xorm.Engine, allowLong bool) error {
 		})
 	}
 
+	m.SetLogger(&xormigrateLogger{})
+
 	if err := m.Migrate(); err != nil {
 		return err
 	}
