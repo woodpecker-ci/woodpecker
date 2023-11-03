@@ -1155,13 +1155,13 @@ func (_m *Store) LogSave(_a0 *model.Step, _a1 []*model.LogEntry) error {
 	return r0
 }
 
-// Migrate provides a mock function with given fields:
-func (_m *Store) Migrate() error {
-	ret := _m.Called()
+// Migrate provides a mock function with given fields: _a0
+func (_m *Store) Migrate(_a0 bool) error {
+	ret := _m.Called(_a0)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func() error); ok {
-		r0 = rf()
+	if rf, ok := ret.Get(0).(func(bool) error); ok {
+		r0 = rf(_a0)
 	} else {
 		r0 = ret.Error(0)
 	}
