@@ -54,7 +54,7 @@ var flags = []cli.Flag{
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_AGENT_CONFIG_FILE"},
 		Name:    "agent-config",
-		Usage:   "agent config file path",
+		Usage:   "agent config file path, if set empty the agent will be stateless and unregister on termination",
 		Value:   "/etc/woodpecker/agent.conf",
 	},
 	&cli.StringSliceFlag{

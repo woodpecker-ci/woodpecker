@@ -1,7 +1,10 @@
 FROM docker.io/alpine:3.18
 
+# renovate: datasource=repology depName=alpine_3_18/ca-certificates versioning=loose
+ENV CA_CERTIFICATES_VERSION="20230506-r0"
+
 ARG TARGETOS TARGETARCH
-RUN apk add -U --no-cache ca-certificates
+RUN apk add -U --no-cache ca-certificates=${CA_CERTIFICATES_VERSION}
 ENV GODEBUG=netdns=go
 ENV WOODPECKER_DATABASE_DATASOURCE=/var/lib/woodpecker/woodpecker.sqlite
 ENV WOODPECKER_DATABASE_DRIVER=sqlite3

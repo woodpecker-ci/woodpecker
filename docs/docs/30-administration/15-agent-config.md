@@ -194,6 +194,10 @@ See [Docker backend configuration](./22-backends/10-docker.md#configuration)
 
 See [Kubernetes backend configuration](./22-backends/40-kubernetes.md#configuration)
 
+### `WOODPECKER_BACKEND_LOCAL_*`
+
+See [Local backend configuration](./22-backends/20-local.md#further-configuration)
+
 ## Advanced Settings
 
 :::warning

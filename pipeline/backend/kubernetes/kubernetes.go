@@ -41,6 +41,10 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
+const (
+	EngineName = "kubernetes"
+)
+
 var noContext = context.Background()
 
 type kube struct {
@@ -98,7 +102,7 @@ func New(ctx context.Context) types.Engine {
 }
 
 func (e *kube) Name() string {
-	return "kubernetes"
+	return EngineName
 }
 
 func (e *kube) IsAvailable(context.Context) bool {
@@ -160,9 +164,7 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID s
 					return err
 				}
 				log.Trace().Str("pod-name", stepName).Msgf("Creating service: %s", step.Name)
-				// TODO: support ports setting
-				// svc, err := Service(e.config.Namespace, step.Name, stepName, step.Ports)
-				svc, err := Service(e.config.Namespace, step.Name, stepName, []string{})
+				svc, err := Service(e.config.Namespace, step.Name, step.Alias, step.Ports)
 				if err != nil {
 					return err
 				}
@@ -389,9 +391,7 @@ func (e *kube) DestroyWorkflow(_ context.Context, conf *types.Config, taskUUID s
 		if stage.Alias == "services" {
 			for _, step := range stage.Steps {
 				log.Trace().Msgf("Deleting service: %s", step.Name)
-				// TODO: support ports setting
-				// svc, err := Service(e.config.Namespace, step.Name, step.Alias, step.Ports)
-				svc, err := Service(e.config.Namespace, step.Name, step.Alias, []string{})
+				svc, err := Service(e.config.Namespace, step.Name, step.Alias, step.Ports)
 				if err != nil {
 					return err
 				}

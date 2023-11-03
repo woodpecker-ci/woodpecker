@@ -164,6 +164,11 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		cpuSet = c.reslimit.CPUSet
 	}
 
+	var ports []uint16
+	for _, port := range container.Ports {
+		ports = append(ports, uint16(port))
+	}
+
 	// at least one constraint contain status success, or all constraints have no status set
 	onSuccess := container.When.IncludesStatusSuccess()
 	// at least one constraint must include the status failure.
@@ -206,6 +211,7 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		Failure:        failure,
 		NetworkMode:    networkMode,
 		IpcMode:        ipcMode,
+		Ports:          ports,
 		BackendOptions: backendOptions,
 	}
 }

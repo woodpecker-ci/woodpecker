@@ -47,6 +47,7 @@ type (
 		Settings       map[string]interface{} `yaml:"settings"`
 		Volumes        Volumes                `yaml:"volumes,omitempty"`
 		When           constraint.When        `yaml:"when,omitempty"`
+		Ports          []base.StringOrInt     `yaml:"ports,omitempty"`
 
 		// Docker Specific
 		Privileged bool `yaml:"privileged,omitempty"`
