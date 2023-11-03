@@ -136,6 +136,14 @@ const pipeline = pipelineStore.getPipeline(repositoryId, pipelineId);
 const { since, duration, created, message, title } = usePipeline(pipeline);
 provide('pipeline', pipeline);
 
+watch(
+  pipeline,
+  () => {
+    favicon.updateStatus(pipeline.value?.status);
+  },
+  { immediate: true },
+);
+
 const showDeployPipelinePopup = ref(false);
 
 async function loadPipeline(): Promise<void> {
@@ -144,8 +152,6 @@ async function loadPipeline(): Promise<void> {
   }
 
   await pipelineStore.loadPipeline(repo.value.id, parseInt(pipelineId.value, 10));
-
-  favicon.updateStatus(pipeline.value?.status);
 }
 
 const { doSubmit: cancelPipeline, isLoading: isCancelingPipeline } = useAsyncAction(async () => {
