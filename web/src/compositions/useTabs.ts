@@ -27,12 +27,8 @@ export function useTabsProvider({
     }
 
     const hashTab = route.hash.replace(/^#/, '');
-    if (hashTab) {
-      activeTab.value = hashTab;
-      return;
-    }
-
-    activeTab.value = tabs.value[0].id;
+    // eslint-disable-next-line no-param-reassign
+    activeTab.value = hashTab ?? tabs.value[0].id;
   });
 }
 
