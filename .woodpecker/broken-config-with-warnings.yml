@@ -1,0 +1,20 @@
+steps:
+  - name: first
+    image: alpine
+    commands:
+      - echo "test"
+      - sleep 10s
+      - echo "done"
+  - name: second
+    image: alpine
+    hello: world123
+    commands:
+      - echo "test"
+      - sleep 10s
+      - echo "done"
+  - name: plugin123
+    image: 123
+    settings:
+      template: config/k8s/service.yml
+    commands:
+      - echo "hello"
