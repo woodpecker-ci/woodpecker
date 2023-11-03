@@ -21,9 +21,7 @@ import (
 	"time"
 
 	"github.com/rs/zerolog/log"
-	"go.uber.org/multierr"
 
-	pipeline_errors "github.com/woodpecker-ci/woodpecker/pipeline/errors"
 	"github.com/woodpecker-ci/woodpecker/server"
 	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -97,10 +95,6 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 
 	newPipeline, pipelineItems, err := createPipelineItems(ctx, store, newPipeline, user, repo, pipelineFiles, envs)
 	if err != nil {
-		// TODO: is this correct?? we get an parsing error and return the pipeline without starting it?
-		if e := multierr.Errors(err); len(e) > 0 || errors.Is(err, &pipeline_errors.PipelineError{}) {
-			return newPipeline, nil
-		}
 		msg := fmt.Sprintf("failure to createPipelineItems for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
 		return nil, fmt.Errorf(msg)
