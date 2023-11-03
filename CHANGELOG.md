@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@Janik-Haag, @6543, @jbiblio, @qwerty287, @runephilosof-karnovgroup, @zc-devs, @pat-s, @bitethecode, @xoxys, @anbraten, @renovate[bot], @HamburgerJungeJr, @nitram509, @JohnWalkerx, @OskarsPakers, @Exar04, @dominic-p, @categulario, @mzampetakis, @Timshel, @Denperidge, @tomix1024, @lonix1, @s3lph, @math3vz, @LTek-online, @testwill, @klinux, @pinpox, @hpidcock, @lafriks, @ChewingBever, @azdle, @praneeth-ovckd
+@anbraten, @Janik-Haag, @6543, @jbiblio, @qwerty287, @runephilosof-karnovgroup, @zc-devs, @pat-s, @bitethecode, @xoxys, @renovate[bot], @HamburgerJungeJr, @nitram509, @JohnWalkerx, @OskarsPakers, @Exar04, @dominic-p, @categulario, @mzampetakis, @Timshel, @Denperidge, @tomix1024, @lonix1, @s3lph, @math3vz, @LTek-online, @testwill, @klinux, @pinpox, @hpidcock, @lafriks, @ChewingBever, @azdle, @praneeth-ovckd
 
 ### 💥 Breaking changes
 
@@ -40,6 +40,7 @@
 
 ### 📈 Enhancement
 
+- Enhance linter and errors [[#1572](https://github.com/woodpecker-ci/woodpecker/pull/1572)]
 - Option to change temp dir for local backend [[#2702](https://github.com/woodpecker-ci/woodpecker/pull/2702)]
 - Revert breaking pipeline changes [[#2677](https://github.com/woodpecker-ci/woodpecker/pull/2677)]
 - Add ports into pipeline backend step model [[#2656](https://github.com/woodpecker-ci/woodpecker/pull/2656)]
