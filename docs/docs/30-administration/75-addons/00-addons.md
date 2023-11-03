@@ -7,6 +7,12 @@ Addons can be used for:
 - Forges
 - Agent backends
 
+## Restrictions
+
+Addons are restricted by how Go plugins work. This includes the following restrictions:
+- only supported on Linux, FreeBSD and macOS
+- addons must have been built for the correct Woodpecker version. If an addon is not provided specifically for this version, you likely won't be able to use it.
+
 ## Usage
 
 To use an addon, download the addon version built for your Woodpecker version. Then, you can add the following to your configuration:
