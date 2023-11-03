@@ -54,11 +54,17 @@ func Migrate(e *xorm.Engine, allowLong bool) error {
 	e.SetDisableGlobalCache(true)
 
 	m := xormigrate.New(e, migrationTasks)
-	m.InitSchema(func(engine *xorm.Engine) error {
-		// do nothing on schema init, models are synced in any case below
-		return nil
-	})
 	m.AllowLong(allowLong)
+	// TODO remove in 3.0
+	oldCount, err := e.Table("migrations").Count()
+	if oldCount < 1 || err != nil {
+		// allow new schema initialization if old migrations table is empty or it does not exist (err != nil)
+		// schema initialization will always run if we call `InitSchema`
+		m.InitSchema(func(engine *xorm.Engine) error {
+			// do nothing on schema init, models are synced in any case below
+			return nil
+		})
+	}
 
 	if err := m.Migrate(); err != nil {
 		return err
