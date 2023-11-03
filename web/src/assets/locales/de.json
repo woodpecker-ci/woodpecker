@@ -237,7 +237,6 @@
         "push": "Push",
         "tag": "Tag"
       },
-      "execution_error": "Ausführungsfehler",
       "exit_code": "Exit-Code {exitCode}",
       "files": "Geänderte Dateien ({files})",
       "loading": "Laden…",
