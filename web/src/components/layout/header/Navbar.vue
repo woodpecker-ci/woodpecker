@@ -8,7 +8,9 @@
       <!-- Logo -->
       <router-link :to="{ name: 'home' }" class="flex flex-col -my-2 px-2">
         <WoodpeckerLogo class="w-8 h-8" />
-        <span class="text-xs">{{ version }}</span>
+        <span class="text-xs" :class="{ 'text-red-500': version?.needsUpdate }" :title="version?.current">{{
+          version?.currentShort
+        }}</span>
       </router-link>
       <!-- Repo Link -->
       <router-link v-if="user" :to="{ name: 'repos' }" class="navbar-link navbar-clickable">
@@ -55,9 +57,11 @@ import Button from '~/components/atomic/Button.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import useAuthentication from '~/compositions/useAuthentication';
 import useConfig from '~/compositions/useConfig';
+import { useVersion } from '~/compositions/useVersion';
 
 import ActivePipelines from './ActivePipelines.vue';
 
+const version = useVersion();
 const config = useConfig();
 const route = useRoute();
 const authentication = useAuthentication();
@@ -68,7 +72,6 @@ function doLogin() {
   authentication.authenticate(route.fullPath);
 }
 
-const version = config.version?.startsWith('next') ? 'next' : config.version;
 const { enableSwagger } = config;
 </script>
 

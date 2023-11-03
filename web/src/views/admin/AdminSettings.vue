@@ -3,6 +3,9 @@
     <template #title>
       {{ $t('repo.settings.settings') }}
     </template>
+    <Tab id="info" :title="$t('admin.settings.info')">
+      <AdminInfoTab />
+    </Tab>
     <Tab id="secrets" :title="$t('admin.settings.secrets.secrets')">
       <AdminSecretsTab />
     </Tab>
@@ -30,6 +33,7 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
 import AdminAgentsTab from '~/components/admin/settings/AdminAgentsTab.vue';
+import AdminInfoTab from '~/components/admin/settings/AdminInfoTab.vue';
 import AdminOrgsTab from '~/components/admin/settings/AdminOrgsTab.vue';
 import AdminQueueTab from '~/components/admin/settings/AdminQueueTab.vue';
 import AdminReposTab from '~/components/admin/settings/AdminReposTab.vue';
