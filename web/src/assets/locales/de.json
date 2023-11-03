@@ -77,6 +77,10 @@
         "desc": "Repositories, die auf dem Server aktiviert sind oder waren",
         "disabled": "Deaktiviert",
         "none": "Es gibt noch keine Repositories.",
+        "repair": {
+          "repair": "Alle reparieren",
+          "success": "Repositories repariert"
+        },
         "repos": "Repositories",
         "settings": "Repository-Einstellungen",
         "view": "Repository anzeigen"
@@ -132,8 +136,6 @@
   "api": "API",
   "back": "Zurück",
   "cancel": "Abbrechen",
-  "color_scheme_dark": "Wechsle zu hellem Modus",
-  "color_scheme_light": "Wechsle zu dunklem Modus",
   "default": "Standard",
   "docs": "Docs",
   "documentation_for": "Dokumentation für „{topic}“",

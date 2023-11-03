@@ -54,12 +54,12 @@ func GetQueueInfo(c *gin.Context) {
 //	@Summary	Pause a pipeline queue
 //	@Router		/queue/pause [post]
 //	@Produce	plain
-//	@Success	200
+//	@Success	204
 //	@Tags		Pipeline queues
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 func PauseQueue(c *gin.Context) {
 	server.Config.Services.Queue.Pause()
-	c.Status(http.StatusOK)
+	c.Status(http.StatusNoContent)
 }
 
 // ResumeQueue
@@ -67,12 +67,12 @@ func PauseQueue(c *gin.Context) {
 //	@Summary	Resume a pipeline queue
 //	@Router		/queue/resume [post]
 //	@Produce	plain
-//	@Success	200
+//	@Success	204
 //	@Tags		Pipeline queues
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 func ResumeQueue(c *gin.Context) {
 	server.Config.Services.Queue.Resume()
-	c.Status(http.StatusOK)
+	c.Status(http.StatusNoContent)
 }
 
 // BlockTilQueueHasRunningItem
@@ -80,7 +80,7 @@ func ResumeQueue(c *gin.Context) {
 //	@Summary	Block til pipeline queue has a running item
 //	@Router		/queue/norunningpipelines [get]
 //	@Produce	plain
-//	@Success	200
+//	@Success	204
 //	@Tags		Pipeline queues
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 func BlockTilQueueHasRunningItem(c *gin.Context) {
@@ -90,7 +90,7 @@ func BlockTilQueueHasRunningItem(c *gin.Context) {
 			break
 		}
 	}
-	c.Status(http.StatusOK)
+	c.Status(http.StatusNoContent)
 }
 
 // PostHook

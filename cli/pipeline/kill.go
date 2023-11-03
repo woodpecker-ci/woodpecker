@@ -34,7 +34,7 @@ var pipelineKillCmd = &cli.Command{
 }
 
 func pipelineKill(c *cli.Context) (err error) {
-	number, err := strconv.Atoi(c.Args().Get(1))
+	number, err := strconv.ParseInt(c.Args().Get(1), 10, 64)
 	if err != nil {
 		return err
 	}

@@ -350,6 +350,18 @@ func (s *RPC) RegisterAgent(ctx context.Context, platform, backend, version stri
 	return agent.ID, nil
 }
 
+func (s *RPC) UnregisterAgent(ctx context.Context) error {
+	agent, err := s.getAgentFromContext(ctx)
+	log.Debug().Msgf("unregistering agent with ID %d", agent.ID)
+	if err != nil {
+		return err
+	}
+
+	err = s.store.AgentDelete(agent)
+
+	return err
+}
+
 func (s *RPC) ReportHealth(ctx context.Context, status string) error {
 	agent, err := s.getAgentFromContext(ctx)
 	if err != nil {
