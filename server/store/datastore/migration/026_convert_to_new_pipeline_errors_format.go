@@ -16,12 +16,13 @@ package migration
 
 import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/errors"
+	"github.com/woodpecker-ci/woodpecker/server/model"
 	"xorm.io/xorm"
 )
 
 type oldPipeline026 struct {
 	ID    int64  `json:"id"              xorm:"pk autoincr 'pipeline_id'"`
-	Error string `json:"error"           xorm:"json 'pipeline_error'"`
+	Error string `json:"error"           xorm:"LONGTEXT 'pipeline_error'"`
 }
 
 func (oldPipeline026) TableName() string {
@@ -45,10 +46,16 @@ func (newPipeline026) TableName() string {
 }
 
 var convertToNewPipelineErrorFormat = task{
-	name: "convert-to-new-pipeline-error-format",
+	name:     "convert-to-new-pipeline-error-format",
+	required: true,
 	fn: func(sess *xorm.Session) (err error) {
-		// make sure plugin_only column exists
+		// make sure pipeline_error column exists
 		if err := sess.Sync(new(oldPipeline026)); err != nil {
+			return err
+		}
+
+		// add new pipeline_errors column
+		if err := sess.Sync(new(model.Pipeline)); err != nil {
 			return err
 		}
 
