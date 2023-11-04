@@ -26,7 +26,7 @@ import { Tab, useTabsClient } from '~/compositions/useTabs';
 const router = useRouter();
 const route = useRoute();
 
-const { activeTab, tabs, disableHashMode } = useTabsClient();
+const { activeTab, tabs, disableUrlHashMode } = useTabsClient();
 
 async function selectTab(tab: Tab) {
   if (tab.id === undefined) {
@@ -34,7 +34,8 @@ async function selectTab(tab: Tab) {
   }
 
   activeTab.value = tab.id;
-  if (!disableHashMode.value) {
+
+  if (!disableUrlHashMode.value) {
     await router.replace({ params: route.params, hash: `#${tab.id}` });
   }
 }

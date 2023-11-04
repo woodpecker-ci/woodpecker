@@ -62,7 +62,10 @@ const props = defineProps<{
   search?: string;
   fullWidth?: boolean;
 }>();
-defineEmits(['update:search']);
+
+defineEmits<{
+  (event: 'update:search', query: string): void;
+}>();
 
 const searchBoxPresent = props.search !== undefined;
 </script>
