@@ -31,8 +31,8 @@ import (
 	grpcMetadata "google.golang.org/grpc/metadata"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
+	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/forge"
-	"github.com/woodpecker-ci/woodpecker/server/forge/loader"
 	"github.com/woodpecker-ci/woodpecker/server/logging"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/pipeline"
@@ -394,7 +394,7 @@ func (s *RPC) updateForgeStatus(ctx context.Context, repo *model.Repo, pipeline 
 		return
 	}
 
-	_forge, err := loader.GetForgeFromRepo(s.store, repo)
+	_forge, err := server.Config.Services.Forge.FromRepo(repo)
 	if err != nil {
 		log.Error().Err(err).Msgf("can not get forge for repo '%s'", repo.FullName)
 		return

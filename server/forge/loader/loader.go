@@ -4,8 +4,11 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
+	"time"
 
+	"github.com/jellydator/ttlcache/v3"
 	"github.com/rs/zerolog/log"
+
 	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/forge/bitbucket"
 	"github.com/woodpecker-ci/woodpecker/server/forge/gitea"
@@ -15,22 +18,47 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
-func GetForgeFromRepo(store store.Store, repo *model.Repo) (forge.Forge, error) {
-	forge, err := store.ForgeFindByRepo(repo)
-	if err != nil {
-		return nil, err
-	}
-
-	return setupForge(forge)
+type forgeLoader struct {
+	cache *ttlcache.Cache[int64, forge.Forge]
+	store store.Store
+	ttl   time.Duration
 }
 
-func GetForgeFromUser(store store.Store, user *model.User) (forge.Forge, error) {
-	forge, err := store.ForgeFindByUser(user)
+func NewForgeService(_store store.Store) forge.ForgeService {
+	return &forgeLoader{
+		ttl:   10 * time.Minute,
+		store: _store,
+		cache: ttlcache.New(ttlcache.WithDisableTouchOnHit[int64, forge.Forge]()),
+	}
+}
+
+func (f *forgeLoader) getForgeByID(id int64) (forge.Forge, error) {
+	item := f.cache.Get(id)
+	if item != nil && !item.IsExpired() {
+		return item.Value(), nil
+	}
+
+	forgeModel, err := f.store.ForgeGet(id)
 	if err != nil {
 		return nil, err
 	}
 
-	return setupForge(forge)
+	forge, err := setupForge(forgeModel)
+	if err != nil {
+		return nil, err
+	}
+
+	f.cache.Set(id, forge, f.ttl)
+
+	return forge, nil
+}
+
+func (f *forgeLoader) FromRepo(repo *model.Repo) (forge.Forge, error) {
+	return f.getForgeByID(repo.ForgeID)
+}
+
+func (f *forgeLoader) FromUser(user *model.User) (forge.Forge, error) {
+	return f.getForgeByID(user.ForgeID)
 }
 
 func setupForge(forge *model.Forge) (forge.Forge, error) {
@@ -44,7 +72,7 @@ func setupForge(forge *model.Forge) (forge.Forge, error) {
 	case "gitea":
 		return setupGitea(forge)
 	default:
-		return nil, fmt.Errorf("version control system not configured")
+		return nil, fmt.Errorf("forge not configured")
 	}
 }
 
@@ -71,7 +99,7 @@ func setupGitea(forge *model.Forge) (forge.Forge, error) {
 		SkipVerify: forge.SkipVerify,
 	}
 	if len(opts.URL) == 0 {
-		log.Fatal().Msg("WOODPECKER_GITEA_URL must be set")
+		return nil, fmt.Errorf("WOODPECKER_GITEA_URL must be set")
 	}
 	log.Trace().Msgf("Forge (gitea) opts: %#v", opts)
 	return gitea.New(opts)

@@ -28,6 +28,11 @@ import (
 
 // TODO: use pagination
 
+type ForgeService interface {
+	FromRepo(repo *model.Repo) (Forge, error)
+	FromUser(user *model.User) (Forge, error)
+}
+
 type Forge interface {
 	// Name returns the string name of this driver
 	Name() string

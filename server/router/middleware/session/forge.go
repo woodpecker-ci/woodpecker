@@ -5,9 +5,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
+	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/forge"
-	"github.com/woodpecker-ci/woodpecker/server/forge/loader"
-	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
 func Forge(c *gin.Context) forge.Forge {
@@ -24,16 +23,29 @@ func Forge(c *gin.Context) forge.Forge {
 
 func SetForge() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		_store := store.FromContext(c)
 		repo := Repo(c)
 
 		if repo == nil {
-			log.Debug().Msg("Cannot find repository")
-			c.AbortWithStatus(http.StatusNotFound)
+			user := User(c)
+			if user == nil {
+				log.Error().Msg("Needs a user or repository to load get the forge")
+				c.AbortWithStatus(http.StatusInternalServerError)
+				return
+			}
+
+			forge, err := server.Config.Services.Forge.FromUser(user)
+			if err != nil {
+				log.Debug().Err(err).Msg("Cannot get forge")
+				c.AbortWithStatus(http.StatusInternalServerError)
+				return
+			}
+
+			c.Set("forge", forge)
+			c.Next()
 			return
 		}
 
-		forge, err := loader.GetForgeFromRepo(_store, repo)
+		forge, err := server.Config.Services.Forge.FromRepo(repo)
 		if err != nil {
 			log.Debug().Err(err).Msg("Cannot get forge")
 			c.AbortWithStatus(http.StatusInternalServerError)

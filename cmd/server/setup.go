@@ -33,6 +33,8 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/cache"
+	"github.com/woodpecker-ci/woodpecker/server/forge"
+	"github.com/woodpecker-ci/woodpecker/server/forge/loader"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/environments"
 	"github.com/woodpecker-ci/woodpecker/server/plugins/registry"
@@ -122,6 +124,10 @@ func setupEnvironService(c *cli.Context, _ store.Store) model.EnvironService {
 
 func setupMembershipService(_ *cli.Context, _store store.Store) cache.MembershipService {
 	return cache.NewMembershipService(_store)
+}
+
+func setupForgeService(_ *cli.Context, _store store.Store) forge.ForgeService {
+	return loader.NewForgeService(_store)
 }
 
 func setupMetrics(g *errgroup.Group, _store store.Store) {

@@ -22,8 +22,8 @@ import (
 	"github.com/robfig/cron"
 	"github.com/rs/zerolog/log"
 
+	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/forge"
-	"github.com/woodpecker-ci/woodpecker/server/forge/loader"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/pipeline"
 	"github.com/woodpecker-ci/woodpecker/server/store"
@@ -112,7 +112,7 @@ func CreatePipeline(ctx context.Context, store store.Store, cron *model.Cron) (*
 		return nil, nil, err
 	}
 
-	_forge, err := loader.GetForgeFromRepo(store, repo)
+	_forge, err := server.Config.Services.Forge.FromRepo(repo)
 	if err != nil {
 		return nil, nil, err
 	}
