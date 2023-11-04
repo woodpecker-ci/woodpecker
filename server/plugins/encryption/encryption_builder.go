@@ -67,7 +67,6 @@ func (b builder) serviceBuilder(keyType string) (model.EncryptionServiceBuilder,
 		return newAES(b.ctx, b.store), nil
 	} else if keyType == keyTypeNone {
 		return &noEncryptionBuilder{}, nil
-	} else {
-		return nil, fmt.Errorf(errMessageTemplateUnsupportedKeyType, keyType)
 	}
+	return nil, fmt.Errorf(errMessageTemplateUnsupportedKeyType, keyType)
 }

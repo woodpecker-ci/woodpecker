@@ -24,7 +24,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
-// Decline update the status to declined for blocked pipeline because of a gated repo
+// Decline updates the status to declined for blocked pipelines because of a gated repo
 func Decline(ctx context.Context, store store.Store, pipeline *model.Pipeline, user *model.User, repo *model.Repo) (*model.Pipeline, error) {
 	forge, err := loader.GetForgeFromRepo(store, repo)
 	if err != nil {
@@ -37,7 +37,7 @@ func Decline(ctx context.Context, store store.Store, pipeline *model.Pipeline, u
 		return nil, fmt.Errorf("cannot decline a pipeline with status %s", pipeline.Status)
 	}
 
-	_, err = UpdateToStatusDeclined(store, *pipeline, user.Login)
+	pipeline, err = UpdateToStatusDeclined(store, *pipeline, user.Login)
 	if err != nil {
 		return nil, fmt.Errorf("error updating pipeline. %w", err)
 	}
@@ -48,9 +48,7 @@ func Decline(ctx context.Context, store store.Store, pipeline *model.Pipeline, u
 
 	updatePipelineStatus(ctx, forge, pipeline, repo, user)
 
-	if err := publishToTopic(ctx, pipeline, repo); err != nil {
-		log.Error().Err(err).Msg("publishToTopic")
-	}
+	publishToTopic(pipeline, repo)
 
 	return pipeline, nil
 }

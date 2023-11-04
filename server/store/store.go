@@ -141,7 +141,6 @@ type Store interface {
 	StepChild(*model.Pipeline, int, string) (*model.Step, error)
 	StepList(*model.Pipeline) ([]*model.Step, error)
 	StepUpdate(*model.Step) error
-	StepClear(*model.Pipeline) error
 	StepListFromWorkflowFind(*model.Workflow) ([]*model.Step, error)
 
 	// Logs

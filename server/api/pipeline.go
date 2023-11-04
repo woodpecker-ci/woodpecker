@@ -455,7 +455,7 @@ func PostPipeline(c *gin.Context) {
 // DeletePipelineLogs
 //
 //	@Summary	Deletes log
-//	@Router		/repos/{repo_id}/logs/{number} [post]
+//	@Router		/repos/{repo_id}/logs/{number} [delete]
 //	@Produce	plain
 //	@Success	204
 //	@Tags		Pipeline logs

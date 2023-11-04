@@ -50,7 +50,8 @@ func TestGlobalEnvsubst(t *testing.T) {
 steps:
   build:
     image: ${IMAGE}
-    yyy: ${CI_COMMIT_MESSAGE}
+    settings:
+      yyy: ${CI_COMMIT_MESSAGE}
 `)},
 		},
 	}
@@ -85,7 +86,8 @@ func TestMissingGlobalEnvsubst(t *testing.T) {
 steps:
   build:
     image: ${IMAGE}
-    yyy: ${CI_COMMIT_MESSAGE}
+    settings:
+      yyy: ${CI_COMMIT_MESSAGE}
 `)},
 		},
 	}
@@ -117,13 +119,15 @@ bbb`,
 steps:
   xxx:
     image: scratch
-    yyy: ${CI_COMMIT_MESSAGE}
+    settings:
+      yyy: ${CI_COMMIT_MESSAGE}
 `)},
 			{Data: []byte(`
 steps:
   build:
     image: scratch
-    yyy: ${CI_COMMIT_MESSAGE}
+    settings:
+      yyy: ${CI_COMMIT_MESSAGE}
 `)},
 		},
 	}
@@ -290,7 +294,7 @@ steps:
 	}
 }
 
-func TestRootWhenBranchFilter(t *testing.T) {
+func TestBranchFilter(t *testing.T) {
 	t.Parallel()
 
 	b := StepBuilder{
@@ -307,8 +311,7 @@ func TestRootWhenBranchFilter(t *testing.T) {
 steps:
   xxx:
     image: scratch
-when:
-  branch: main
+branches: main
 `)},
 			{Data: []byte(`
 steps:
@@ -336,7 +339,7 @@ func TestRootWhenFilter(t *testing.T) {
 	b := StepBuilder{
 		Forge: getMockForge(t),
 		Repo:  &model.Repo{},
-		Curr:  &model.Pipeline{Event: "tester"},
+		Curr:  &model.Pipeline{Event: "tag"},
 		Last:  &model.Pipeline{},
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
@@ -346,7 +349,7 @@ func TestRootWhenFilter(t *testing.T) {
 			{Data: []byte(`
 when:
   event:
-    - tester
+    - tag
 steps:
   xxx:
     image: scratch

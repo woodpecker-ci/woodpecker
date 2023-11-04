@@ -2,20 +2,20 @@ when:
   - event: pull_request
   - event: push
     path: &when_path
-      - "docs/**"
-      - ".woodpecker/docs.yml"
+      - 'docs/**'
+      - '.woodpecker/docs.yml'
       # since we generate docs for cli tool we have to watch this too
-      - "cli/**"
-      - "cmd/cli/**"
+      - 'cli/**'
+      - 'cmd/cli/**'
       # api docs
-      - "server/api/**"
+      - 'server/api/**'
     branch: ${CI_REPO_DEFAULT_BRANCH}
   - cron: update_docs
     event: cron
 
 variables:
-  - &golang_image 'golang:1.21.2'
-  - &node_image 'node:20-alpine'
+  - &golang_image 'docker.io/golang:1.21.3'
+  - &node_image 'docker.io/node:21-alpine'
 
 steps:
   build-cli:
@@ -38,13 +38,13 @@ steps:
       - event: cron
 
   deploy-preview:
-    image: woodpeckerci/plugin-surge-preview:1.2.0
+    image: docker.io/woodpeckerci/plugin-surge-preview:1.2.2
     settings:
-      path: "docs/build/"
+      path: 'docs/build/'
       surge_token:
         from_secret: SURGE_TOKEN
       forge_type: github
-      forge_url: "https://github.com"
+      forge_url: 'https://github.com'
       forge_repo_token:
         from_secret: GITHUB_TOKEN_SURGE
     failure: ignore
@@ -55,7 +55,7 @@ steps:
   # TODO: add step to remove preview again after PR is closed (waiting for #286)
 
   deploy:
-    image: alpine:3.18
+    image: docker.io/alpine:3.18
     secrets:
       - BOT_PRIVATE_KEY
     commands:

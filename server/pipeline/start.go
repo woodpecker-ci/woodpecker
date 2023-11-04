@@ -20,7 +20,6 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/woodpecker-ci/woodpecker/pipeline"
-	"github.com/woodpecker-ci/woodpecker/server"
 	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"github.com/woodpecker-ci/woodpecker/server/store"
@@ -46,25 +45,10 @@ func start(ctx context.Context, forge forge.Forge, store store.Store, activePipe
 		return nil, err
 	}
 
-	// open logs streamer for each step
-	for _, wf := range activePipeline.Workflows {
-		for _, step := range wf.Children {
-			stepID := step.ID
-			go func() {
-				if err := server.Config.Services.Logs.Open(context.Background(), stepID); err != nil {
-					log.Error().Err(err).Msgf("could not open log stream for step %d", stepID)
-				}
-			}()
-		}
-	}
-
 	return activePipeline, nil
 }
 
 func publishPipeline(ctx context.Context, forge forge.Forge, pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User) {
-	if err := publishToTopic(ctx, pipeline, repo); err != nil {
-		log.Error().Err(err).Msg("publishToTopic")
-	}
-
+	publishToTopic(pipeline, repo)
 	updatePipelineStatus(ctx, forge, pipeline, repo, repoUser)
 }

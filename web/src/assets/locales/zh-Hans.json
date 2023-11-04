@@ -77,6 +77,10 @@
         "desc": "该服务器上已启用或曾经启用的仓库",
         "disabled": "已禁用",
         "none": "目前还没有存储库。",
+        "repair": {
+          "repair": "修复所有",
+          "success": "仓库已修复"
+        },
         "repos": "仓库",
         "settings": "仓库设置",
         "view": "查看仓库"
@@ -132,8 +136,7 @@
   "api": "API",
   "back": "返回",
   "cancel": "取消",
-  "color_scheme_dark": "切换到浅色模式",
-  "color_scheme_light": "切换到深色模式",
+  "default": "默认",
   "docs": "文档",
   "documentation_for": "\"{topic}\"的文档",
   "errors": {
@@ -234,7 +237,6 @@
         "push": "推送",
         "tag": "标签"
       },
-      "execution_error": "执行错误",
       "exit_code": "退出代码 {exitCode}",
       "files": "修改的文件（{files}）",
       "loading": "载入中…",
@@ -242,7 +244,7 @@
       "log_title": "步骤日志",
       "no_files": "没有文件修改。",
       "no_pipeline_steps": "没有流水线步骤可用！",
-      "no_pipelines": "没有流水线曾启动。",
+      "no_pipelines": "尚未启动过流水线。",
       "pipeline": "流水线 #{pipelineId}",
       "pipelines_for": "{branch} 分支的流水线",
       "pipelines_for_pr": "来自合并请求 #{index} 的流水线",
@@ -268,7 +270,7 @@
         "status": "状态: {status}",
         "success": "成功"
       },
-      "step_not_started": "该步骤还不曾启动过。",
+      "step_not_started": "该步骤尚未启动。",
       "tasks": "任务"
     },
     "pull_requests": "合并请求",

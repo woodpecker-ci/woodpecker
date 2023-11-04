@@ -57,6 +57,8 @@ var migrationTasks = []*task{
 	&addOrgID,
 	&alterTableTasksUpdateColumnTaskDataType,
 	&alterTableConfigUpdateColumnConfigDataType,
+	&removePluginOnlyOptionFromSecretsTable,
+	&convertToNewPipelineErrorFormat,
 }
 
 var allBeans = []interface{}{
