@@ -15,10 +15,15 @@
 package migration
 
 import (
+	"runtime"
+
 	"github.com/woodpecker-ci/woodpecker/pipeline/errors"
 	"github.com/woodpecker-ci/woodpecker/server/model"
 	"xorm.io/xorm"
 )
+
+// perPage019 set the size of the slice to read per page
+var perPage026 = 100
 
 type oldPipeline026 struct {
 	ID    int64  `json:"id"              xorm:"pk autoincr 'pipeline_id'"`
@@ -59,25 +64,48 @@ var convertToNewPipelineErrorFormat = task{
 			return err
 		}
 
-		var oldPipelines []*oldPipeline026
-		if err := sess.Find(&oldPipelines); err != nil {
-			return err
-		}
+		page := 0
+		offset := 0
+		oldPipelines := make([]*oldPipeline026, 0, perPage026)
 
-		for _, oldPipeline := range oldPipelines {
-
-			var newPipeline newPipeline026
-			newPipeline.ID = oldPipeline.ID
-			if oldPipeline.Error != "" {
-				newPipeline.Errors = []*errors.PipelineError{{
-					Type:    "generic",
-					Message: oldPipeline.Error,
-				}}
-			}
-
-			if _, err := sess.ID(oldPipeline.ID).Cols("pipeline_errors").Update(&newPipeline); err != nil {
+		for {
+			sess := sess.Engine().NewSession().NoCache()
+			defer sess.Close()
+			if err := sess.Begin(); err != nil {
 				return err
 			}
+			oldPipelines = oldPipelines[:0]
+
+			err := sess.Limit(perPage019, offset).Find(&oldPipelines)
+			if err != nil {
+				return err
+			}
+
+			for _, oldPipeline := range oldPipelines {
+				var newPipeline newPipeline026
+				newPipeline.ID = oldPipeline.ID
+				if oldPipeline.Error != "" {
+					newPipeline.Errors = []*errors.PipelineError{{
+						Type:    "generic",
+						Message: oldPipeline.Error,
+					}}
+				}
+
+				if _, err := sess.ID(oldPipeline.ID).Cols("pipeline_errors").Update(&newPipeline); err != nil {
+					return err
+				}
+			}
+
+			if err := sess.Commit(); err != nil {
+				return err
+			}
+
+			if len(oldPipelines) < perPage026 {
+				break
+			}
+
+			runtime.GC()
+			page++
 		}
 
 		return dropTableColumns(sess, "pipelines", "pipeline_error")
