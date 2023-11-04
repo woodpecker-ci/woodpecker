@@ -503,6 +503,6 @@
   },
   "default": "default",
   "info": "Info",
-  "running_version": "You are running woodpecker {0}",
+  "running_version": "You are running Woodpecker {0}",
   "update_woodpecker": "Please update your Woodpecker instance to {0}"
 }
