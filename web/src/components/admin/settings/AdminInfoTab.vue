@@ -2,11 +2,12 @@
   <Settings :title="$t('info')">
     <div class="flex flex-col items-center gap-4">
       <WoodpeckerLogo class="w-48 h-48" />
-      <p class="text-xl">
-        {{ $t('running_version') }} <span class="font-bold">{{ version?.current }}</span>
-      </p>
-      <span v-if="version?.needsUpdate" class="text-int-wp-state-error-100">
-        {{ $t('update_woodpecker') }}
+
+      <i18n-t keypath="running_version" tag="p" class="text-xl">
+        <span class="font-bold">{{ version?.current }}</span>
+      </i18n-t>
+
+      <i18n-t v-if="version?.needsUpdate" keypath="update_woodpecker" tag="span" class="text-int-wp-state-error-100">
         <a
           :href="`https://github.com/woodpecker-ci/woodpecker/releases/tag/${version.latest}`"
           target="_blank"
@@ -14,7 +15,7 @@
           class="underline"
           >{{ version.latest }}</a
         >
-      </span>
+      </i18n-t>
     </div>
   </Settings>
 </template>
