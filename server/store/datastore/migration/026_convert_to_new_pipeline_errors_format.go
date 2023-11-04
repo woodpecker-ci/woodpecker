@@ -69,11 +69,6 @@ var convertToNewPipelineErrorFormat = task{
 		oldPipelines := make([]*oldPipeline026, 0, perPage026)
 
 		for {
-			sess := sess.Engine().NewSession().NoCache()
-			defer sess.Close()
-			if err := sess.Begin(); err != nil {
-				return err
-			}
 			oldPipelines = oldPipelines[:0]
 
 			err := sess.Limit(perPage019, offset).Where("pipeline_error != null").Find(&oldPipelines)
@@ -92,10 +87,6 @@ var convertToNewPipelineErrorFormat = task{
 				if _, err := sess.ID(oldPipeline.ID).Cols("pipeline_errors").Update(&newPipeline); err != nil {
 					return err
 				}
-			}
-
-			if err := sess.Commit(); err != nil {
-				return err
 			}
 
 			if len(oldPipelines) < perPage026 {
