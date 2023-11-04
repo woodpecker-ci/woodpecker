@@ -69,8 +69,8 @@ steps:
       - git config --global user.name "woodpecker-bot"
       - git clone --depth 1 --single-branch git@github.com:woodpecker-ci/woodpecker-ci.github.io.git /repo
       # update latest and next version
-      - $${CI_PIPELINE_EVENT} == "tag" && jq --arg version "${CI_COMMIT_TAG}" '.latest = $version' repo/version.json > repo/version.json
-      - $${CI_PIPELINE_EVENT} == "push" && jq --arg version "next-${CI_COMMIT_SHA:0:10}" '.next = $version' repo/version.json > repo/version.json
+      - if [ "$CI_PIPELINE_EVENT" == "tag" ] ; then jq '.latest = ${CI_COMMIT_TAG}' repo/version.json > repo/version.json.tmp && mv repo/version.json.tmp repo/version.json ; fi
+      - if [ "$CI_PIPELINE_EVENT" == "push" ] ; then jq "next-" '.next = ${CI_COMMIT_SHA:0:10}' repo/version.json > repo/version.json.tmp && mv repo/version.json.tmp repo/version.json ; fi
       # copy all docs files and delete all old ones, but leave CNAME and index.yaml untouched
       - rsync -r --exclude .git --exclude CNAME --exclude index.yaml --exclude README.md --exclude version.json --delete docs/build/ /repo
       - cd /repo
