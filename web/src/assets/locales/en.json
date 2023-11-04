@@ -502,7 +502,7 @@
     "access_denied": "You are not allowed to login"
   },
   "default": "default",
-  "info": "Systeminfo",
+  "info": "Info",
   "running_version": "You are running woodpecker",
   "update_woodpecker": "Please update your Woodpecker instance to"
 }
