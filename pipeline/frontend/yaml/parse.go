@@ -15,6 +15,7 @@
 package yaml
 
 import (
+	"errors"
 	"fmt"
 
 	"codeberg.org/6543/xyaml"
