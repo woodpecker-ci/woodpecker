@@ -23,7 +23,6 @@ import (
 
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
 	"github.com/woodpecker-ci/woodpecker/pipeline/rpc/proto"
-	"github.com/woodpecker-ci/woodpecker/server/forge"
 	"github.com/woodpecker-ci/woodpecker/server/logging"
 	"github.com/woodpecker-ci/woodpecker/server/pubsub"
 	"github.com/woodpecker-ci/woodpecker/server/queue"
@@ -37,7 +36,7 @@ type WoodpeckerServer struct {
 	peer RPC
 }
 
-func NewWoodpeckerServer(forge forge.Forge, queue queue.Queue, logger logging.Log, pubsub *pubsub.Publisher, store store.Store) proto.WoodpeckerServer {
+func NewWoodpeckerServer(queue queue.Queue, logger logging.Log, pubsub *pubsub.Publisher, store store.Store) proto.WoodpeckerServer {
 	pipelineTime := promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
 		Name:      "pipeline_time",
