@@ -25,7 +25,7 @@
     "prism-react-renderer": "^2.0.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
-    "redocusaurus": "^1.6.3",
+    "redocusaurus": "^2.0.0",
     "url-loader": "^4.1.1"
   },
   "browserslist": {
