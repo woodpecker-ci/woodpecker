@@ -24,6 +24,7 @@ type PipelineError struct {
 }
 
 type LinterErrorData struct {
+	File  string `json:"file"`
 	Field string `json:"field"`
 }
 
