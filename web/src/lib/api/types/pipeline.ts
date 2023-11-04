@@ -1,9 +1,9 @@
 import { WebhookEvents } from './webhook';
 
-export type PipelineError = {
+export type PipelineError<D = unknown> = {
   type: string;
   message: string;
-  data?: unknown;
+  data?: D;
   is_warning: boolean;
 };
 
