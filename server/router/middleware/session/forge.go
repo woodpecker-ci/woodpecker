@@ -17,7 +17,6 @@ func Forge(c *gin.Context) forge.Forge {
 	}
 	f, ok := v.(forge.Forge)
 	if !ok {
-		// TODO: handle error to avoid panic
 		return nil
 	}
 	return f
