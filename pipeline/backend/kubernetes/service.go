@@ -20,7 +20,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
-func Service(namespace, name, podName string, ports []uint16) (*v1.Service, error) {
+func Service(namespace, name string, ports []uint16) (*v1.Service, error) {
 	var svcPorts []v1.ServicePort
 	for _, port := range ports {
 		svcPorts = append(svcPorts, v1.ServicePort{
@@ -42,7 +42,7 @@ func Service(namespace, name, podName string, ports []uint16) (*v1.Service, erro
 		Spec: v1.ServiceSpec{
 			Type: v1.ServiceTypeClusterIP,
 			Selector: map[string]string{
-				"step": podName,
+				"step": dnsName,
 			},
 			Ports: svcPorts,
 		},
