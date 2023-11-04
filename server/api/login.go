@@ -17,6 +17,7 @@ package api
 import (
 	"encoding/base32"
 	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -33,15 +34,30 @@ import (
 	"github.com/woodpecker-ci/woodpecker/shared/token"
 )
 
-func HandleLogin(c *gin.Context) {
-	if err := c.Request.FormValue("error"); err != "" {
-		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login/error?code="+err)
-	} else {
-		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/authorize")
+// Start the authorization process by redirecting the user to the forge
+func Auth(c *gin.Context) {
+	_store := store.FromContext(c)
+
+	forgeID := int64(1) // TODO: hardcoded for now
+
+	_forge, err := _store.ForgeGet(forgeID)
+	if err != nil {
+		log.Error().Err(err).Msgf("cannot get forge %d. %s", forgeID, err)
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		return
 	}
+
+	state := "123"
+
+	c.SetCookie("wp_oauth_state", state, 300, "/", "", false, true)
+
+	redirectURL := fmt.Sprintf("%s/authorize", server.Config.Server.RootPath)
+
+	_forge.AuthRedirect(c, c.Writer, c.Request, redirectURL)
 }
 
-func HandleAuth(c *gin.Context) {
+// HandleCallback handles the authorization callback from the forge
+func Callback(c *gin.Context) {
 	_store := store.FromContext(c)
 	_forge := server.Config.Services.Forge
 

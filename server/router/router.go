@@ -57,13 +57,17 @@ func Load(noRouteHandler http.HandlerFunc, middleware ...gin.HandlerFunc) http.H
 	{
 		base.GET("/web-config.js", web.Config)
 
-		base.GET("/logout", api.GetLogout)
-		base.GET("/login", api.HandleLogin)
-		auth := base.Group("/authorize")
+		auth := base.Group("/auth")
 		{
-			auth.GET("", api.HandleAuth)
-			auth.POST("", api.HandleAuth)
-			auth.POST("/token", api.GetLoginToken)
+			auth.GET("", api.Auth)
+			auth.GET("/logout", api.GetLogout)
+		}
+
+		authorize := base.Group("/authorize")
+		{
+			authorize.GET("", api.Callback)
+			authorize.POST("", api.Callback)
+			authorize.POST("/token", api.GetLoginToken) // TODO: still needed? who is using this?
 		}
 
 		base.GET("/metrics", metrics.PromHandler())
