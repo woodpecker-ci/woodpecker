@@ -21,7 +21,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/schema"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/linter/schema"
 )
 
 func TestSchema(t *testing.T) {

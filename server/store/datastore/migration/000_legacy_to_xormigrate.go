@@ -50,6 +50,7 @@ var legacyToXormigrate = xormigrate.Migration{
 			"alter-table-tasks-update-type-of-task-data",
 			"alter-table-config-update-type-of-config-data",
 			"remove-plugin-only-option-from-secrets-table",
+			"convert-to-new-pipeline-error-format",
 		}
 
 		// TODO remove in 3.x and move to MigrateSession

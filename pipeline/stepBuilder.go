@@ -22,8 +22,11 @@ import (
 
 	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog/log"
+	"go.uber.org/multierr"
 
 	backend_types "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
+	"github.com/woodpecker-ci/woodpecker/pipeline/errors"
+	pipeline_errors "github.com/woodpecker-ci/woodpecker/pipeline/errors"
 	yaml_types "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
 	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
 
@@ -60,9 +63,7 @@ type Item struct {
 	Config    *backend_types.Config
 }
 
-func (b *StepBuilder) Build() ([]*Item, error) {
-	var items []*Item
-
+func (b *StepBuilder) Build() (items []*Item, errorsAndWarnings error) {
 	b.Yamls = forge_types.SortByName(b.Yamls)
 
 	pidSequence := 1
@@ -83,12 +84,17 @@ func (b *StepBuilder) Build() ([]*Item, error) {
 				State:   model.StatusPending,
 				Environ: axis,
 				Name:    SanitizePath(y.Name),
-				AxisID:  i + 1,
+			}
+			if len(axes) > 1 {
+				workflow.AxisID = i + 1
 			}
 			item, err := b.genItemForWorkflow(workflow, axis, string(y.Data))
-			if err != nil {
+			if err != nil && pipeline_errors.HasBlockingErrors(err) {
 				return nil, err
+			} else if err != nil {
+				errorsAndWarnings = multierr.Append(errorsAndWarnings, err)
 			}
+
 			if item == nil {
 				continue
 			}
@@ -104,13 +110,13 @@ func (b *StepBuilder) Build() ([]*Item, error) {
 
 	// check if at least one step can start if slice is not empty
 	if len(items) > 0 && !stepListContainsItemsToRun(items) {
-		return nil, fmt.Errorf("pipeline has no startpoint")
+		return nil, fmt.Errorf("pipeline has no steps to run")
 	}
 
-	return items, nil
+	return items, errorsAndWarnings
 }
 
-func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.Axis, data string) (*Item, error) {
+func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.Axis, data string) (item *Item, errorsAndWarnings error) {
 	workflowMetadata := frontend.MetadataFromStruct(b.Forge, b.Repo, b.Curr, b.Last, workflow, b.Link)
 	environ := b.environmentVariables(workflowMetadata, axis)
 
@@ -126,20 +132,21 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 	// substitute vars
 	substituted, err := frontend.EnvVarSubst(data, environ)
 	if err != nil {
-		return nil, err
+		return nil, multierr.Append(errorsAndWarnings, err)
 	}
 
 	// parse yaml pipeline
 	parsed, err := yaml.ParseString(substituted)
 	if err != nil {
-		return nil, &yaml.PipelineParseError{Err: err}
+		return nil, &errors.PipelineError{Message: err.Error(), Type: errors.PipelineErrorTypeCompiler}
 	}
 
 	// lint pipeline
-	if err := linter.New(
+	errorsAndWarnings = multierr.Append(errorsAndWarnings, linter.New(
 		linter.WithTrusted(b.Repo.IsTrusted),
-	).Lint(parsed); err != nil {
-		return nil, &yaml.PipelineParseError{Err: err}
+	).Lint(substituted, parsed))
+	if pipeline_errors.HasBlockingErrors(errorsAndWarnings) {
+		return nil, errorsAndWarnings
 	}
 
 	// checking if filtered.
@@ -152,19 +159,19 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 		log.Debug().Str("pipeline", workflow.Name).Msg(
 			"Pipeline config could not be parsed",
 		)
-		return nil, err
+		return nil, multierr.Append(errorsAndWarnings, err)
 	}
 
 	ir, err := b.toInternalRepresentation(parsed, environ, workflowMetadata, workflow.ID)
 	if err != nil {
-		return nil, err
+		return nil, multierr.Append(errorsAndWarnings, err)
 	}
 
 	if len(ir.Stages) == 0 {
 		return nil, nil
 	}
 
-	item := &Item{
+	item = &Item{
 		Workflow:  workflow,
 		Config:    ir,
 		Labels:    parsed.Labels,
@@ -175,7 +182,7 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 		item.Labels = map[string]string{}
 	}
 
-	return item, nil
+	return item, errorsAndWarnings
 }
 
 func stepListContainsItemsToRun(items []*Item) bool {
