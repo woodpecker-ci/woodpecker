@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@anbraten, @Janik-Haag, @6543, @jbiblio, @qwerty287, @runephilosof-karnovgroup, @zc-devs, @pat-s, @bitethecode, @xoxys, @renovate[bot], @HamburgerJungeJr, @nitram509, @JohnWalkerx, @OskarsPakers, @Exar04, @dominic-p, @categulario, @mzampetakis, @Timshel, @Denperidge, @tomix1024, @lonix1, @s3lph, @math3vz, @LTek-online, @testwill, @klinux, @pinpox, @hpidcock, @lafriks, @ChewingBever, @azdle, @praneeth-ovckd
+@anbraten, @J-Ha, @renovate[bot], @Janik-Haag, @6543, @jbiblio, @qwerty287, @runephilosof-karnovgroup, @zc-devs, @pat-s, @bitethecode, @xoxys, @HamburgerJungeJr, @nitram509, @JohnWalkerx, @OskarsPakers, @Exar04, @dominic-p, @categulario, @mzampetakis, @Timshel, @Denperidge, @tomix1024, @lonix1, @s3lph, @math3vz, @LTek-online, @testwill, @klinux, @pinpox, @hpidcock, @lafriks, @ChewingBever, @azdle, @praneeth-ovckd
 
 ### 💥 Breaking changes
 
@@ -30,6 +30,7 @@
 
 ### ✨ Features
 
+- Add version and update notes [[#2722](https://github.com/woodpecker-ci/woodpecker/pull/2722)]
 - Add repos list for admins [[#2347](https://github.com/woodpecker-ci/woodpecker/pull/2347)]
 - Add org list [[#2338](https://github.com/woodpecker-ci/woodpecker/pull/2338)]
 - Add option to configure tolerations in kubernetes backend [[#2249](https://github.com/woodpecker-ci/woodpecker/pull/2249)]
@@ -40,6 +41,7 @@
 
 ### 🐛 Bug Fixes
 
+- Use unique label selector for pod label for kubernetes services [[#2723](https://github.com/woodpecker-ci/woodpecker/pull/2723)]
 - Some UI fixes [[#2698](https://github.com/woodpecker-ci/woodpecker/pull/2698)]
 - Fix active tab not updating on prop change [[#2712](https://github.com/woodpecker-ci/woodpecker/pull/2712)]
 - Unique status for matrix  [[#2695](https://github.com/woodpecker-ci/woodpecker/pull/2695)]
@@ -205,6 +207,7 @@
 
 ### Misc
 
+- Update woodpeckerci/plugin-ready-release-go Docker tag to v0.7.0 [[#2728](https://github.com/woodpecker-ci/woodpecker/pull/2728)]
 - Add grafana dashobard to awesome [[#2710](https://github.com/woodpecker-ci/woodpecker/pull/2710)]
 - Pin alpine versions in Dockerfile [[#2649](https://github.com/woodpecker-ci/woodpecker/pull/2649)]
 - Use full qualifyer for images [[#2692](https://github.com/woodpecker-ci/woodpecker/pull/2692)]
