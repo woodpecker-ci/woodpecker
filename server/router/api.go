@@ -77,6 +77,7 @@ func apiRoutes(e *gin.RouterGroup) {
 			repoBase := repo.Group("/:repo_id")
 			{
 				repoBase.Use(session.SetRepo())
+				repoBase.Use(session.SetForge())
 				repoBase.Use(session.SetPerm())
 
 				repoBase.GET("/permissions", api.GetRepoPermissions)

@@ -46,9 +46,8 @@ import (
 //	@Param		forge_remote_id		query		string	true	"the id of a repository at the forge"
 func PostRepo(c *gin.Context) {
 	_store := store.FromContext(c)
-	user := session.User(c)
-	repo := session.Repo(c)
 	forge := session.Forge(c)
+	user := session.User(c)
 
 	forgeRemoteID := model.ForgeRemoteID(c.Query("forge_remote_id"))
 	if !forgeRemoteID.IsValid() {
@@ -550,8 +549,8 @@ func RepairAllRepos(c *gin.Context) {
 }
 
 func repairRepo(c *gin.Context, repo *model.Repo, withPerms bool) {
-	forge := server.Config.Services.Forge
 	_store := store.FromContext(c)
+	forge := session.Forge(c)
 
 	user, err := _store.GetUser(repo.UserID)
 	if err != nil {

@@ -94,12 +94,3 @@ type Forge interface {
 	// Org fetches the organization from the forge by name. If the name is a user an org with type user is returned.
 	Org(ctx context.Context, u *model.User, org string) (*model.Org, error)
 }
-
-func NewContext(ctx context.Context, f Forge) context.Context {
-	return context.WithValue(ctx, "forge", f)
-}
-
-func FromContext(ctx context.Context) (Forge, bool) {
-	f, ok := ctx.Value("forge").(Forge)
-	return f, ok
-}

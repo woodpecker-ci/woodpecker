@@ -25,12 +25,12 @@ func (s storage) ForgeGet(id int64) (*model.Forge, error) {
 
 func (s storage) ForgeFindByRepo(repo *model.Repo) (*model.Forge, error) {
 	forge := new(model.Forge)
-	return forge, wrapGet(s.engine.Where("forge_id=?", repo.ForgeID).Get(forge))
+	return forge, wrapGet(s.engine.ID(repo.ForgeID).Get(forge))
 }
 
 func (s storage) ForgeFindByUser(user *model.User) (*model.Forge, error) {
 	forge := new(model.Forge)
-	return forge, wrapGet(s.engine.Where("forge_id=?", user.ForgeID).Get(forge))
+	return forge, wrapGet(s.engine.ID(user.ForgeID).Get(forge))
 }
 
 func (s storage) ForgeList(p *model.ListOptions) ([]*model.Forge, error) {
