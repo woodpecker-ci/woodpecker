@@ -76,7 +76,7 @@ var convertToNewPipelineErrorFormat = task{
 			}
 			oldPipelines = oldPipelines[:0]
 
-			err := sess.Limit(perPage019, offset).Find(&oldPipelines)
+			err := sess.Limit(perPage019, offset).Where("pipeline_error != null").Find(&oldPipelines)
 			if err != nil {
 				return err
 			}
@@ -84,12 +84,10 @@ var convertToNewPipelineErrorFormat = task{
 			for _, oldPipeline := range oldPipelines {
 				var newPipeline newPipeline026
 				newPipeline.ID = oldPipeline.ID
-				if oldPipeline.Error != "" {
-					newPipeline.Errors = []*errors.PipelineError{{
-						Type:    "generic",
-						Message: oldPipeline.Error,
-					}}
-				}
+				newPipeline.Errors = []*errors.PipelineError{{
+					Type:    "generic",
+					Message: oldPipeline.Error,
+				}}
 
 				if _, err := sess.ID(oldPipeline.ID).Cols("pipeline_errors").Update(&newPipeline); err != nil {
 					return err
