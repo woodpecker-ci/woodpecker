@@ -28,7 +28,6 @@ woodpecker-cli [GLOBAL OPTIONS] command [COMMAND OPTIONS] [ARGUMENTS...]
 
 **--token, -t**="": server auth token
 
-
 # COMMANDS
 
 ## pipeline, build
@@ -49,7 +48,7 @@ show pipeline history
 
 **--event**="": event filter
 
-**--format**="": format output (default: [33mPipeline #{{ .Number }} [0m
+**--format**="": format output (default: `Pipeline #{{ .Number }}
 Status: {{ .Status }}
 Event: {{ .Event }}
 Commit: {{ .Commit }}
@@ -57,7 +56,7 @@ Branch: {{ .Branch }}
 Ref: {{ .Ref }}
 Author: {{ .Author }} {{ if .Email }}<{{.Email}}>{{ end }}
 Message: {{ .Message }}
-)
+)`
 
 **--limit**="": limit the list size (default: 0)
 
@@ -75,14 +74,14 @@ show latest pipeline details
 
 **--branch**="": branch name (default: master)
 
-**--format**="": format output (default: Number: {{ .Number }}
+**--format**="": format output (default: Number: `{{ .Number }}
 Status: {{ .Status }}
 Event: {{ .Event }}
 Commit: {{ .Commit }}
 Branch: {{ .Branch }}
 Ref: {{ .Ref }}
 Message: {{ .Message }}
-Author: {{ .Author }}
+Author: {{ .Author }}`
 )
 
 **--log-level**="": set logging level (default: info)
@@ -105,14 +104,14 @@ show pipeline logs
 
 show pipeline details
 
-**--format**="": format output (default: Number: {{ .Number }}
+**--format**="": format output (default: Number: `{{ .Number }}
 Status: {{ .Status }}
 Event: {{ .Event }}
 Commit: {{ .Commit }}
 Branch: {{ .Branch }}
 Ref: {{ .Ref }}
 Message: {{ .Message }}
-Author: {{ .Author }}
+Author: {{ .Author }}`
 )
 
 **--log-level**="": set logging level (default: info)
@@ -167,14 +166,14 @@ decline a pipeline
 
 show pipeline queue
 
-**--format**="": format output (default: [33m{{ .FullName }} #{{ .Number }} [0m
+**--format**="": format output (default: `{{ .FullName }} #{{ .Number }}
 Status: {{ .Status }}
 Event: {{ .Event }}
 Commit: {{ .Commit }}
 Branch: {{ .Branch }}
 Ref: {{ .Ref }}
 Author: {{ .Author }} {{ if .Email }}<{{.Email}}>{{ end }}
-Message: {{ .Message }}
+Message: {{ .Message }}`
 )
 
 **--log-level**="": set logging level (default: info)
@@ -187,9 +186,8 @@ Message: {{ .Message }}
 
 show pipeline steps
 
-**--format**="": format output (default: [33mStep #{{ .PID }} [0m
-Step: {{ .Name }}
-State: {{ .State }}
+**--format**="": format output (default: `Step #{{ .PID }} Step: {{ .Name }}
+State: {{ .State }}`
 )
 
 **--log-level**="": set logging level (default: info)
@@ -204,14 +202,14 @@ create new pipeline
 
 **--branch**="": branch to create pipeline from
 
-**--format**="": format output (default: [33mPipeline #{{ .Number }} [0m
+**--format**="": format output (default: `Pipeline #{{ .Number }}
 Status: {{ .Status }}
 Event: {{ .Event }}
 Commit: {{ .Commit }}
 Branch: {{ .Branch }}
 Ref: {{ .Ref }}
 Author: {{ .Author }} {{ if .Email }}<{{.Email}}>{{ end }}
-Message: {{ .Message }}
+Message: {{ .Message }}`
 )
 
 **--log-level**="": set logging level (default: info)
@@ -250,14 +248,14 @@ deploy code
 
 **--event**="": event filter (default: push)
 
-**--format**="": format output (default: Number: {{ .Number }}
+**--format**="": format output (default: Number: `{{ .Number }}
 Status: {{ .Status }}
 Commit: {{ .Commit }}
 Branch: {{ .Branch }}
 Ref: {{ .Ref }}
 Message: {{ .Message }}
 Author: {{ .Author }}
-Target: {{ .Deploy }}
+Target: {{ .Deploy }}`
 )
 
 **--log-level**="": set logging level (default: info)
@@ -338,19 +336,19 @@ execute a local pipeline
 
 **--network**="": external networks
 
-**--pipeline-created**="":  (default: 0)
+**--pipeline-created**="": (default: 0)
 
-**--pipeline-event**="":  (default: manual)
+**--pipeline-event**="": (default: manual)
 
-**--pipeline-finished**="":  (default: 0)
+**--pipeline-finished**="": (default: 0)
 
 **--pipeline-link**="":
 
-**--pipeline-number**="":  (default: 0)
+**--pipeline-number**="": (default: 0)
 
-**--pipeline-parent**="":  (default: 0)
+**--pipeline-parent**="": (default: 0)
 
-**--pipeline-started**="":  (default: 0)
+**--pipeline-started**="": (default: 0)
 
 **--pipeline-status**="":
 
@@ -372,17 +370,17 @@ execute a local pipeline
 
 **--prev-commit-sha**="":
 
-**--prev-pipeline-created**="":  (default: 0)
+**--prev-pipeline-created**="": (default: 0)
 
 **--prev-pipeline-event**="":
 
-**--prev-pipeline-finished**="":  (default: 0)
+**--prev-pipeline-finished**="": (default: 0)
 
 **--prev-pipeline-link**="":
 
-**--prev-pipeline-number**="":  (default: 0)
+**--prev-pipeline-number**="": (default: 0)
 
-**--prev-pipeline-started**="":  (default: 0)
+**--prev-pipeline-started**="": (default: 0)
 
 **--prev-pipeline-status**="":
 
@@ -402,11 +400,11 @@ execute a local pipeline
 
 **--server, -s**="": server address
 
-**--step-name**="":  (default: 0)
+**--step-name**="": (default: 0)
 
-**--system-link**="":  (default: https://github.com/woodpecker-ci/woodpecker)
+**--system-link**="": (default: https://github.com/woodpecker-ci/woodpecker)
 
-**--system-name**="":  (default: woodpecker)
+**--system-name**="": (default: woodpecker)
 
 **--system-platform**="":
 
@@ -416,13 +414,13 @@ execute a local pipeline
 
 **--volumes**="": pipeline volumes
 
-**--workflow-name**="":  (default: 0)
+**--workflow-name**="": (default: 0)
 
-**--workflow-number**="":  (default: 0)
+**--workflow-number**="": (default: 0)
 
-**--workspace-base**="":  (default: /woodpecker)
+**--workspace-base**="": (default: /woodpecker)
 
-**--workspace-path**="":  (default: src)
+**--workspace-path**="": (default: src)
 
 ## info
 
@@ -648,7 +646,7 @@ manage repositories
 
 list all repos
 
-**--format**="": format output (default: [33m{{ .FullName }}[0m (id: {{ .ID }}))
+**--format**="": format output (default: `{{ .FullName }} (id: {{ .ID }})`)
 
 **--log-level**="": set logging level (default: info)
 
@@ -662,7 +660,7 @@ list all repos
 
 show repository details
 
-**--format**="": format output (default: Owner: {{ .Owner }}
+**--format**="": format output (default: Owner: `{{ .Owner }}
 Repo: {{ .Name }}
 Link: {{ .Link }}
 Config path: {{ .Config }}
@@ -671,7 +669,7 @@ Private: {{ .IsSCMPrivate }}
 Trusted: {{ .IsTrusted }}
 Gated: {{ .IsGated }}
 Clone url: {{ .Clone }}
-Allow pull-requests: {{ .AllowPullRequests }}
+Allow pull-requests: {{ .AllowPullRequests }}`
 )
 
 **--log-level**="": set logging level (default: info)
@@ -748,7 +746,7 @@ assume ownership of a repository
 
 synchronize the repository list
 
-**--format**="": format output (default: [33m{{ .FullName }}[0m (id: {{ .ID }}))
+**--format**="": format output (default: `{{ .FullName }} (id: {{ .ID }})`)
 
 **--log-level**="": set logging level (default: info)
 
@@ -770,7 +768,7 @@ manage users
 
 list all users
 
-**--format**="": format output (default: {{ .Login }})
+**--format**="": format output (default: `{{ .Login }}`)
 
 **--log-level**="": set logging level (default: info)
 
@@ -782,8 +780,8 @@ list all users
 
 show user details
 
-**--format**="": format output (default: User: {{ .Login }}
-Email: {{ .Email }})
+**--format**="": format output (default: User: `{{ .Login }}
+Email: {{ .Email }}`)
 
 **--log-level**="": set logging level (default: info)
 

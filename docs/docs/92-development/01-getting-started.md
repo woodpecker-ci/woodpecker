@@ -20,11 +20,11 @@ Simply start Woodpecker in Gitpod by clicking on the following badge. You can lo
 
 ### Install Go
 
-Install Golang (>=1.20) as described by [this guide](https://go.dev/doc/install).
+Install Golang ({'>='}1.20) as described by [this guide](https://go.dev/doc/install).
 
 ### Install make
 
-> GNU Make is a tool which controls the generation of executables and other non-source files of a program from the program's source files (<https://www.gnu.org/software/make/>).
+> GNU Make is a tool which controls the generation of executables and other non-source files of a program from the program's source files ({'<'}https://www.gnu.org/software/make/{'>'}).
 
 Install make on:
 
@@ -34,7 +34,7 @@ Install make on:
 
 ### Install Node.js & pnpm
 
-Install [Node.js (>=14)](https://nodejs.org/en/download/) if you want to build Woodpeckers UI or documentation.
+Install [Node.js ({'>='}14)](https://nodejs.org/en/download/) if you want to build Woodpeckers UI or documentation.
 
 For dependencies installation (node_modules) for the UI and documentation of Woodpecker the package-manager pnpm is used. The installation of pnpm is described by [this guide](https://pnpm.io/installation).
 
@@ -53,8 +53,8 @@ WOODPECKER_HOST=http://your-dev-address.com
 
 # github (sample for a forge config - see /docs/administration/forge/overview for other forges)
 WOODPECKER_GITHUB=true
-WOODPECKER_GITHUB_CLIENT=<redacted>
-WOODPECKER_GITHUB_SECRET=<redacted>
+WOODPECKER_GITHUB_CLIENT={'<'}redacted{'>'}
+WOODPECKER_GITHUB_SECRET={'<'}redacted{'>'}
 
 # agent
 WOODPECKER_SERVER=localhost:9000
@@ -123,7 +123,7 @@ make test-frontend
 If you want to test a specific go file you can also use:
 
 ```bash
-go test -race -timeout 30s github.com/woodpecker-ci/woodpecker/<path-to-the-package-or-file-to-test>
+go test -race -timeout 30s github.com/woodpecker-ci/woodpecker/{'<'}path-to-the-package-or-file-to-test{'>'}
 ```
 
 Or you can open the test-file inside [VS-Code](#developing-with-vs-code) and run or debug the test by clicking on the inline commands:

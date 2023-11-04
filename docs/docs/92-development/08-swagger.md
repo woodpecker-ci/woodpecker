@@ -23,7 +23,7 @@ Here's a typical example of how annotations for Swagger documentation look like.
 // @Produce  json
 // @Success  200 {object} User
 // @Tags   Users
-// @Param   Authorization header string true "Insert your personal access token" default(Bearer <personal access token>)
+// @Param   Authorization header string true "Insert your personal access token" default(Bearer {'<'}personal access token{'>'})
 // @Param   login   path string true "the user's login name"
 // @Param   foobar  query   string false "optional foobar parameter"
 // @Param   page    query int  false "for response pagination, page offset number" default(1)
@@ -48,7 +48,7 @@ These guidelines aim to have consistent wording in the swagger doc:
 - `@Param Authorization` is almost always present, there are just a few un-protected endpoints
 
 There are many examples in the server/api package, which you can use a blueprint.
-More enhanced information you can find here <https://github.com/swaggo/swag/blob/main/README.md#declarative-comments-format>
+More enhanced information you can find here {'<'}https://github.com/swaggo/swag/blob/main/README.md#declarative-comments-format{'>'}
 
 ### Manual code generation
 
@@ -76,6 +76,6 @@ go run github.com/swaggo/swag/cmd/swag@latest fmt -g server/api/z.go
 which makes the swagger generator failing, because it can't find the models/structs/types anymore.
 To fix it, please replace `// @name\tModelName` with `// @name ModelName`,
 which means, replace the tab (`\t`) with a space (` `).
-See <https://github.com/swaggo/swag/pull/1594> == once this is merged and released, the mentioned issue is obsolete.
+See {'<'}https://github.com/swaggo/swag/pull/1594{'>'} == once this is merged and released, the mentioned issue is obsolete.
 
 <!-- markdownlint-enable no-space-in-code -->

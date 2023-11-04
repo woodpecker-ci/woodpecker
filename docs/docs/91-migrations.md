@@ -130,7 +130,7 @@ No breaking changes
 ## From Drone
 
 :::warning
-Migration from Drone is only possible if you were running Drone <= v0.8.
+Migration from Drone is only possible if you were running Drone {'<='} v0.8.
 :::
 
 1. Make sure you are already running Drone v0.8
