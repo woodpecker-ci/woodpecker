@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-11-03
+## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-11-04
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -40,6 +40,7 @@
 
 ### 🐛 Bug Fixes
 
+- Some UI fixes [[#2698](https://github.com/woodpecker-ci/woodpecker/pull/2698)]
 - Fix active tab not updating on prop change [[#2712](https://github.com/woodpecker-ci/woodpecker/pull/2712)]
 - Unique status for matrix  [[#2695](https://github.com/woodpecker-ci/woodpecker/pull/2695)]
 - Fix secret image filter regex [[#2674](https://github.com/woodpecker-ci/woodpecker/pull/2674)]
