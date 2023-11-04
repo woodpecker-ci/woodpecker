@@ -51,7 +51,8 @@ version: 1
 steps:
   build:
     image: ${IMAGE}
-    yyy: ${CI_COMMIT_MESSAGE}
+    settings:
+      yyy: ${CI_COMMIT_MESSAGE}
 `)},
 		},
 	}
@@ -87,7 +88,8 @@ version: 1
 steps:
   build:
     image: ${IMAGE}
-    yyy: ${CI_COMMIT_MESSAGE}
+    settings:
+      yyy: ${CI_COMMIT_MESSAGE}
 `)},
 		},
 	}
@@ -120,14 +122,16 @@ version: 1
 steps:
   xxx:
     image: scratch
-    yyy: ${CI_COMMIT_MESSAGE}
+    settings:
+      yyy: ${CI_COMMIT_MESSAGE}
 `)},
 			{Data: []byte(`
 version: 1
 steps:
   build:
     image: scratch
-    yyy: ${CI_COMMIT_MESSAGE}
+    settings:
+      yyy: ${CI_COMMIT_MESSAGE}
 `)},
 		},
 	}
@@ -349,7 +353,7 @@ func TestRootWhenFilter(t *testing.T) {
 	b := StepBuilder{
 		Forge: getMockForge(t),
 		Repo:  &model.Repo{},
-		Curr:  &model.Pipeline{Event: "tester"},
+		Curr:  &model.Pipeline{Event: "tag"},
 		Last:  &model.Pipeline{},
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
@@ -360,7 +364,7 @@ func TestRootWhenFilter(t *testing.T) {
 version: 1
 when:
   event:
-    - tester
+    - tag
 steps:
   xxx:
     image: scratch

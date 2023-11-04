@@ -205,6 +205,10 @@
       "additionalProperties": false,
       "required": ["image"],
       "properties": {
+        "name": {
+          "description": "The name of the step. Can be used if using the array style steps list.",
+          "type": "string"
+        },
         "image": {
           "$ref": "#/definitions/step_image"
         },

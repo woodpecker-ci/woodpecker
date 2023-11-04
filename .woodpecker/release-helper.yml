@@ -2,7 +2,7 @@ version: 1
 
 steps:
   release-helper:
-    image: woodpeckerci/plugin-ready-release-go:0.6.1
+    image: woodpeckerci/plugin-ready-release-go:0.7.0
     pull: true
     settings:
       release_branch: ${CI_REPO_DEFAULT_BRANCH}

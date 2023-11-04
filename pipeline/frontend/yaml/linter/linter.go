@@ -17,13 +17,10 @@ package linter
 import (
 	"fmt"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
-)
+	"go.uber.org/multierr"
 
-const (
-	blockClone uint8 = iota
-	blockPipeline
-	blockServices
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/linter/schema"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
 )
 
 // A Linter lints a pipeline configuration.
@@ -41,39 +38,59 @@ func New(opts ...Option) *Linter {
 }
 
 // Lint lints the configuration.
-func (l *Linter) Lint(c *types.Workflow) error {
+func (l *Linter) Lint(rawConfig string, c *types.Workflow) error {
+	var linterErr error
+
 	if len(c.Steps.ContainerList) == 0 {
-		return fmt.Errorf("Invalid or missing pipeline section")
+		linterErr = multierr.Append(linterErr, newLinterError("Invalid or missing steps section", "steps", false))
 	}
-	if err := l.lint(c.Clone.ContainerList, blockClone); err != nil {
-		return err
+
+	if err := l.lintContainers(c.Clone.ContainerList); err != nil {
+		linterErr = multierr.Append(linterErr, err)
 	}
-	if err := l.lint(c.Steps.ContainerList, blockPipeline); err != nil {
-		return err
+	if err := l.lintContainers(c.Steps.ContainerList); err != nil {
+		linterErr = multierr.Append(linterErr, err)
 	}
-	return l.lint(c.Services.ContainerList, blockServices)
+	if err := l.lintContainers(c.Services.ContainerList); err != nil {
+		linterErr = multierr.Append(linterErr, err)
+	}
+
+	if err := l.lintSchema(rawConfig); err != nil {
+		linterErr = multierr.Append(linterErr, err)
+	}
+	if err := l.lintDeprecations(c); err != nil {
+		linterErr = multierr.Append(linterErr, err)
+	}
+	if err := l.lintBadHabits(c); err != nil {
+		linterErr = multierr.Append(linterErr, err)
+	}
+
+	return linterErr
 }
 
-func (l *Linter) lint(containers []*types.Container, _ uint8) error {
+func (l *Linter) lintContainers(containers []*types.Container) error {
+	var linterErr error
+
 	for _, container := range containers {
 		if err := l.lintImage(container); err != nil {
-			return err
+			linterErr = multierr.Append(linterErr, err)
 		}
 		if !l.trusted {
 			if err := l.lintTrusted(container); err != nil {
-				return err
+				linterErr = multierr.Append(linterErr, err)
 			}
 		}
 		if err := l.lintCommands(container); err != nil {
-			return err
+			linterErr = multierr.Append(linterErr, err)
 		}
 	}
-	return nil
+
+	return linterErr
 }
 
 func (l *Linter) lintImage(c *types.Container) error {
 	if len(c.Image) == 0 {
-		return fmt.Errorf("Invalid or missing image")
+		return newLinterError("Invalid or missing image", fmt.Sprintf("steps.%s", c.Name), false)
 	}
 	return nil
 }
@@ -87,47 +104,73 @@ func (l *Linter) lintCommands(c *types.Container) error {
 		for key := range c.Settings {
 			keys = append(keys, key)
 		}
-		return fmt.Errorf("Cannot configure both commands and custom attributes %v", keys)
+		return newLinterError(fmt.Sprintf("Cannot configure both commands and custom attributes %v", keys), fmt.Sprintf("steps.%s", c.Name), false)
 	}
 	return nil
 }
 
 func (l *Linter) lintTrusted(c *types.Container) error {
+	yamlPath := fmt.Sprintf("steps.%s", c.Name)
 	if c.Privileged {
-		return fmt.Errorf("Insufficient privileges to use privileged mode")
+		return newLinterError("Insufficient privileges to use privileged mode", yamlPath, false)
 	}
 	if c.ShmSize != 0 {
-		return fmt.Errorf("Insufficient privileges to override shm_size")
+		return newLinterError("Insufficient privileges to override shm_size", yamlPath, false)
 	}
 	if len(c.DNS) != 0 {
-		return fmt.Errorf("Insufficient privileges to use custom dns")
+		return newLinterError("Insufficient privileges to use custom dns", yamlPath, false)
 	}
 	if len(c.DNSSearch) != 0 {
-		return fmt.Errorf("Insufficient privileges to use dns_search")
+		return newLinterError("Insufficient privileges to use dns_search", yamlPath, false)
 	}
 	if len(c.Devices) != 0 {
-		return fmt.Errorf("Insufficient privileges to use devices")
+		return newLinterError("Insufficient privileges to use devices", yamlPath, false)
 	}
 	if len(c.ExtraHosts) != 0 {
-		return fmt.Errorf("Insufficient privileges to use extra_hosts")
+		return newLinterError("Insufficient privileges to use extra_hosts", yamlPath, false)
 	}
 	if len(c.NetworkMode) != 0 {
-		return fmt.Errorf("Insufficient privileges to use network_mode")
+		return newLinterError("Insufficient privileges to use network_mode", yamlPath, false)
 	}
 	if len(c.IpcMode) != 0 {
-		return fmt.Errorf("Insufficient privileges to use ipc_mode")
+		return newLinterError("Insufficient privileges to use ipc_mode", yamlPath, false)
 	}
 	if len(c.Sysctls) != 0 {
-		return fmt.Errorf("Insufficient privileges to use sysctls")
+		return newLinterError("Insufficient privileges to use sysctls", yamlPath, false)
 	}
 	if c.Networks.Networks != nil && len(c.Networks.Networks) != 0 {
-		return fmt.Errorf("Insufficient privileges to use networks")
+		return newLinterError("Insufficient privileges to use networks", yamlPath, false)
 	}
 	if c.Volumes.Volumes != nil && len(c.Volumes.Volumes) != 0 {
-		return fmt.Errorf("Insufficient privileges to use volumes")
+		return newLinterError("Insufficient privileges to use volumes", yamlPath, false)
 	}
 	if len(c.Tmpfs) != 0 {
-		return fmt.Errorf("Insufficient privileges to use tmpfs")
+		return newLinterError("Insufficient privileges to use tmpfs", yamlPath, false)
 	}
+	return nil
+}
+
+func (l *Linter) lintSchema(rawConfig string) error {
+	var linterErr error
+	schemaErrors, err := schema.LintString(rawConfig)
+	if err != nil {
+		for _, schemaError := range schemaErrors {
+			linterErr = multierr.Append(linterErr, newLinterError(
+				schemaError.Description(),
+				schemaError.Field(),
+				true, // TODO: let pipelines fail if the schema is invalid
+			))
+		}
+	}
+	return linterErr
+}
+
+func (l *Linter) lintDeprecations(_ *types.Workflow) error {
+	// TODO: add deprecation warnings
+	return nil
+}
+
+func (l *Linter) lintBadHabits(_ *types.Workflow) error {
+	// TODO: add bad habit warnings
 	return nil
 }

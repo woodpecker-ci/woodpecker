@@ -25,17 +25,19 @@ import (
 	"github.com/woodpecker-ci/woodpecker/shared/constant"
 )
 
+var ErrUnsuportedVersion = errors.New("unsuported pipeline config version detected")
+
 // ParseBytes parses the configuration from bytes b.
 func ParseBytes(b []byte) (*types.Workflow, error) {
 	yamlVersion, err := checkVersion(b)
 	if err != nil {
-		return nil, &PipelineParseError{Err: err}
+		return nil, err
 	}
 
 	out := new(types.Workflow)
 	err = xyaml.Unmarshal(b, out)
 	if err != nil {
-		return nil, &PipelineParseError{Err: err}
+		return nil, err
 	}
 
 	// make sure detected version is set
