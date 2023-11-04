@@ -47,6 +47,17 @@ export function useVersion() {
       currentShort: usesNext ? 'next' : current,
       needsUpdate: false,
     };
+    return version;
+  }
+
+  if (current === 'dev') {
+    version.value = {
+      latest: undefined,
+      current,
+      currentShort: current,
+      needsUpdate: false,
+    };
+    return version;
   }
 
   onMounted(async () => {
@@ -54,9 +65,7 @@ export function useVersion() {
 
     let needsUpdate = false;
     if (versionInfo) {
-      if (current === 'dev') {
-        needsUpdate = false;
-      } else if (usesNext) {
+      if (usesNext) {
         needsUpdate = versionInfo.next !== current;
       } else {
         needsUpdate = versionInfo.latest !== current;
