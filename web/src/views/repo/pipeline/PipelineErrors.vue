@@ -4,12 +4,17 @@
       <template v-for="(error, i) in pipeline.errors" :key="i">
         <span>{{ error.is_warning ? '⚠️' : '❌' }}</span>
         <span>[{{ error.type }}]</span>
-        <span v-if="isLinterError(error)" class="underline">
-          <span v-if="error.data?.file">{{ error.data?.file }}</span>
+        <span v-if="isLinterError(error) || isDeprecationError(error)">
+          <span v-if="error.data?.file" class="font-bold">{{ error.data?.file }}: </span>
           <span>{{ error.data?.field }}</span>
         </span>
         <span v-else />
-        <span class="ml-4">{{ error.message }}</span>
+        <a v-if="isDeprecationError(error)" :href="error.data?.docs" target="_blank" class="underline ml-4">
+          {{ error.message }}
+        </a>
+        <span v-else class="ml-4">
+          {{ error.message }}
+        </span>
       </template>
     </div>
   </Panel>
@@ -26,13 +31,14 @@ if (!pipeline) {
   throw new Error('Unexpected: "pipeline" should be provided at this place');
 }
 
-type LinterError = PipelineError<{
-  file?: string;
-  field: string;
-}>;
-
-function isLinterError(error: PipelineError): error is LinterError {
+function isLinterError(error: PipelineError): error is PipelineError<{ file?: string; field: string }> {
   return error.type === 'linter';
+}
+
+function isDeprecationError(
+  error: PipelineError,
+): error is PipelineError<{ file: string; field: string; docs: string }> {
+  return error.type === 'deprecation';
 }
 </script>
 

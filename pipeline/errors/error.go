@@ -29,7 +29,9 @@ type LinterErrorData struct {
 }
 
 type DeprecationErrorData struct {
-	Docs string `json:"docs"`
+	File  string `json:"file"`
+	Field string `json:"field"`
+	Docs  string `json:"docs"`
 }
 
 func (e *PipelineError) Error() string {

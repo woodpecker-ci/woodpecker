@@ -198,8 +198,8 @@ func (l *Linter) lintSchema(config *WorkflowConfig) error {
 	if err != nil {
 		for _, schemaError := range schemaErrors {
 			linterErr = multierr.Append(linterErr, newLinterError(
-				config.File,
 				schemaError.Description(),
+				config.File,
 				schemaError.Field(),
 				true, // TODO: let pipelines fail if the schema is invalid
 			))
@@ -220,7 +220,9 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 			Type:    errors.PipelineErrorTypeDeprecation,
 			Message: "Please use 'steps:' instead of deprecated 'pipeline:' list",
 			Data: errors.DeprecationErrorData{
-				Docs: "https://woodpecker-ci.org/docs/next/migrations#next-200",
+				File:  config.File,
+				Field: "pipeline",
+				Docs:  "https://woodpecker-ci.org/docs/next/migrations#next-200",
 			},
 			IsWarning: true,
 		})
@@ -231,7 +233,9 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 			Type:    errors.PipelineErrorTypeDeprecation,
 			Message: "Please use labels instead of deprecated 'platform' filters",
 			Data: errors.DeprecationErrorData{
-				Docs: "https://woodpecker-ci.org/docs/next/migrations#next-200",
+				File:  config.File,
+				Field: "platform",
+				Docs:  "https://woodpecker-ci.org/docs/next/migrations#next-200",
 			},
 			IsWarning: true,
 		})
@@ -242,7 +246,9 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 			Type:    errors.PipelineErrorTypeDeprecation,
 			Message: "Please use global when instead of deprecated 'branches' filter",
 			Data: errors.DeprecationErrorData{
-				Docs: "https://woodpecker-ci.org/docs/next/migrations#next-200",
+				File:  config.File,
+				Field: "branches",
+				Docs:  "https://woodpecker-ci.org/docs/next/migrations#next-200",
 			},
 			IsWarning: true,
 		})
