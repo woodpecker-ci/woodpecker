@@ -229,6 +229,7 @@
         "restart_success": "Jalur pipa dimulai ulang"
       },
       "config": "Konfigurasi",
+      "errors": "Kesalahan ({count})",
       "event": {
         "cron": "Kron",
         "deploy": "Luncur",
@@ -257,6 +258,7 @@
         "declined": "Jalur pipa ini telah ditolak!",
         "review": "Tinjau perubahan"
       },
+      "show_errors": "Tampilkan kesalahan",
       "status": {
         "blocked": "diblokir",
         "declined": "ditolak",
@@ -271,7 +273,9 @@
         "success": "berhasil"
       },
       "step_not_started": "Langkah ini belum dijalankan.",
-      "tasks": "Tugas"
+      "tasks": "Tugas",
+      "warnings": "Peringatan ({count})",
+      "we_got_some_errors": "Aduh, kami mendapatkan beberapa kesalahan!"
     },
     "pull_requests": "Permintaan penarikan",
     "settings": {
