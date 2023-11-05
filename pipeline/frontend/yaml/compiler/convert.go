@@ -112,7 +112,7 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		if ok && secret.Available(container) {
 			environment[strings.ToUpper(requested.Target)] = secret.Value
 		} else {
-			return nil, fmt.Errorf("secret %q not found", requested.Source)
+			return nil, fmt.Errorf("secret %q not found or not allowed to be used", requested.Source)
 		}
 	}
 
