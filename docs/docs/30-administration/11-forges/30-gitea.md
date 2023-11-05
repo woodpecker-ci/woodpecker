@@ -20,6 +20,24 @@ services:
     [...]
 ```
 
+## Gitea on the same host
+
+If you have Gitea also running on the same host within a container, make sure the agent does have access to it.
+The agent try to clone by the Clone-URL Gitea reports via API. So you might want to specify a docker network for the agent too:
+
+```diff
+# docker-compose.yml
+version: '3'
+
+services:
+  [...]
+  woodpecker-agent:
+    [...]
+    environment:
+      - [...]
++     - WOODPECKER_BACKEND_DOCKER_NETWORK=gitea
+```
+
 ## Registration
 
 Register your application with Gitea to create your client id and secret. You can find the OAuth applications settings of Gitea at `https://gitea.<host>/user/settings/`. It is very import the authorization callback URL matches your http(s) scheme and hostname exactly with `https://<host>/authorize` as the path.
