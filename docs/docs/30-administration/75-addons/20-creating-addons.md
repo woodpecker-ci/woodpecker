@@ -11,7 +11,7 @@ An addon consists of two variables/functions in Go.
    This function takes two arguments:
     1. The zerolog logger you should use to log errors, warnings etc.
     2. A slice of strings with the environment variables used as configuration.
-   
+
    It returns two values:
     1. The actual addon. For type reference see [table below](#return-types).
     2. An error. If this error is not `nil`, Woodpecker exits.
