@@ -2,9 +2,9 @@
 
 ## [1.0.4](https://github.com/woodpecker-ci/woodpecker/releases/tag/v1.0.4) - 2023-11-05
 
-* BUGFIXES
-  *  Fix secret image filter regex (#2674) (#2686)
-  *  Fix error when closing logs (#2637) (#2640)
+- BUGFIXES
+  - Fix secret image filter regex (#2674) (#2686)
+  - Fix error when closing logs (#2637) (#2640)
 
 ## [1.0.3](https://github.com/woodpecker-ci/woodpecker/releases/tag/v1.0.3) - 2023-10-14
 
