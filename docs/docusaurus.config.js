@@ -139,7 +139,7 @@ module.exports = {
       prism: {
         theme: codeThemes.github,
         darkTheme: codeThemes.dracula,
-        additionalLanguages: ['diff', 'json', 'docker', 'javascript', 'css', 'bash', 'nginx'],
+        additionalLanguages: ['diff', 'json', 'docker', 'javascript', 'css', 'bash', 'nginx', 'apacheconf'],
       },
       announcementBar: {
         id: 'github-star',

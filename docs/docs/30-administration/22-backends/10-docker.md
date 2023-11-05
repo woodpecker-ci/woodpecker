@@ -51,12 +51,12 @@ The following commands **are destructive** and **irreversible** it is highly rec
 
 ### Remove all unused images
 
-```sh
+```bash
 docker image rm $(docker images --filter "dangling=true" -q --no-trunc)
 ```
 
 ### Remove Woodpecker Volumes
 
-```sh
+```bash
 docker volume rm $(docker volume ls --filter name=^wp_* --filter dangling=true  -q)
 ```
