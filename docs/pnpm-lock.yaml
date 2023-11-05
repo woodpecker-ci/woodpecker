@@ -58,6 +58,9 @@ importers:
       '@docusaurus/tsconfig':
         specifier: 3.0.0
         version: 3.0.0
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.8.10
       '@types/react':
         specifier: ^18.2.31
         version: 18.2.33
