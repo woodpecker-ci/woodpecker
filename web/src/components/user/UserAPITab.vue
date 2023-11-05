@@ -71,8 +71,8 @@ const usageWithCli = `# ${t('user.settings.api.shell_setup_before')}\nwoodpecker
 
 const cliDownload = 'https://github.com/woodpecker-ci/woodpecker/releases';
 
-const resetToken = async () => {
+async function resetToken() {
   token.value = await apiClient.resetToken();
-  window.location.href = `${address}/logout`;
-};
+  window.location.href = `${address}/auth/logout`;
+}
 </script>

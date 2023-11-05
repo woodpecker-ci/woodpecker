@@ -59,7 +59,7 @@ func Load(noRouteHandler http.HandlerFunc, middleware ...gin.HandlerFunc) http.H
 
 		auth := base.Group("/auth")
 		{
-			auth.GET("", api.Auth)
+			auth.GET("/login", api.Auth)
 			auth.GET("/logout", api.GetLogout)
 		}
 

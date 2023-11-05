@@ -17,7 +17,6 @@ package api
 import (
 	"encoding/base32"
 	"errors"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -36,24 +35,15 @@ import (
 
 // Start the authorization process by redirecting the user to the forge
 func Auth(c *gin.Context) {
-	_store := store.FromContext(c)
-
-	forgeID := int64(1) // TODO: hardcoded for now
-
-	_forge, err := _store.ForgeGet(forgeID)
-	if err != nil {
-		log.Error().Err(err).Msgf("cannot get forge %d. %s", forgeID, err)
-		_ = c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
+	_forge := server.Config.Services.Forge
 
 	state := "123"
 
+	authUrl := _forge.AuthUrl(state)
+
 	c.SetCookie("wp_oauth_state", state, 300, "/", "", false, true)
 
-	redirectURL := fmt.Sprintf("%s/authorize", server.Config.Server.RootPath)
-
-	_forge.AuthRedirect(c, c.Writer, c.Request, redirectURL)
+	c.Redirect(http.StatusTemporaryRedirect, authUrl)
 }
 
 // HandleCallback handles the authorization callback from the forge
@@ -65,12 +55,22 @@ func Callback(c *gin.Context) {
 	// cannot, however, remember why, so need to revisit this line.
 	c.Writer.Header().Del("Content-Type")
 
-	tmpuser, err := _forge.Login(c, c.Writer, c.Request)
+	// check the state parameter to prevent CSRF attacks.
+	state := c.Query("state")
+	cookie, err := c.Cookie("wp_oauth_state")
+	if err != nil || cookie != state {
+		log.Error().Msgf("invalid oauth state, expected '%s', got '%s'", state, cookie)
+		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=state_error")
+		return
+	}
+
+	forgeUser, err := _forge.Login(c, c.Writer, c.Request)
 	if err != nil {
 		log.Error().Msgf("cannot authenticate user. %s", err)
 		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=oauth_error")
 		return
 	}
+
 	// this will happen when the user is redirected by the forge as
 	// part of the authorization workflow.
 	if tmpuser == nil {
