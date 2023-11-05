@@ -142,6 +142,7 @@
   "errors": {
     "not_found": "Server tidak dapat mencari objek yang diminta"
   },
+  "info": "Info",
   "login": "Masuk",
   "logout": "Keluar",
   "not_found": {
@@ -436,6 +437,7 @@
   },
   "repos": "Repo",
   "repositories": "Repositori",
+  "running_version": "Anda sedang menjalankan Woodpecker {0}",
   "search": "Cari…",
   "time": {
     "days_short": "h",
@@ -447,6 +449,7 @@
     "weeks_short": "m"
   },
   "unknown_error": "Terjadi sebuah kesalahan yang tidak diketahui",
+  "update_woodpecker": "Mohon tingkatkan server Woodpecker Anda ke {0}",
   "url": "URL",
   "user": {
     "access_denied": "Anda tidak diperbolehkan untuk masuk",
