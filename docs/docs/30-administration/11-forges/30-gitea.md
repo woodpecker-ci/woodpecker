@@ -23,7 +23,7 @@ services:
 ## Gitea on the same host
 
 If you have Gitea also running on the same host within a container, make sure the agent does have access to it.
-The agent try to clone by the Clone-URL Gitea reports via API. So you might want to specify a docker network for the agent too:
+The agent try to clone by the clone URL Gitea reports via API. So you might want to specify a docker network for the agent too:
 
 ```diff
 # docker-compose.yml
