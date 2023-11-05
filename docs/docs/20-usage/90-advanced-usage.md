@@ -10,7 +10,7 @@ You can use [YAML anchors & aliases](https://yaml.org/spec/1.2.2/#3222-anchors-a
 
 To convert this:
 
-```yml
+```yaml
 steps:
   test:
     image: golang:1.18
@@ -103,7 +103,7 @@ steps:
 
 One can create a file containing environment variables, and then source it in each step that needs them.
 
-```yml
+```yaml
 steps:
   init:
     image: bash
@@ -122,7 +122,7 @@ steps:
 
 As described in [Global environment variables](./50-environment.md#global-environment-variables), one can define global variables:
 
-```yml
+```yaml
 services:
   woodpecker-server:
     # ...
