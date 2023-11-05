@@ -20,7 +20,7 @@ importers:
         version: 3.0.0(@algolia/client-search@4.20.0)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0)(search-insights@2.9.0)(typescript@5.2.2)
       '@easyops-cn/docusaurus-search-local':
         specifier: ^0.36.0
-        version: 0.36.0(react-dom@18.2.0)(react@18.2.0)(typescript@5.2.2)
+        version: 0.36.0(@docusaurus/types@3.0.0)(react-dom@18.2.0)(react@18.2.0)(typescript@5.2.2)
       '@mdx-js/react':
         specifier: ^3.0.0
         version: 3.0.0(@types/react@18.2.33)(react@18.2.0)
@@ -58,6 +58,9 @@ importers:
       '@docusaurus/tsconfig':
         specifier: 3.0.0
         version: 3.0.0
+      '@docusaurus/types':
+        specifier: ^3.0.0
+        version: 3.0.0(react-dom@18.2.0)(react@18.2.0)
       '@types/node':
         specifier: ^20.0.0
         version: 20.8.10
@@ -2525,6 +2528,19 @@ packages:
       tslib: 2.6.2
     dev: false
 
+  /@docusaurus/utils-common@2.4.3(@docusaurus/types@3.0.0):
+    resolution: {integrity: sha512-/jascp4GbLQCPVmcGkPzEQjNaAk3ADVfMtudk49Ggb+131B1WDD6HqlSmDf8MxGdy7Dja2gc+StHf01kiWoTDQ==}
+    engines: {node: '>=16.14'}
+    peerDependencies:
+      '@docusaurus/types': '*'
+    peerDependenciesMeta:
+      '@docusaurus/types':
+        optional: true
+    dependencies:
+      '@docusaurus/types': 3.0.0(react-dom@18.2.0)(react@18.2.0)
+      tslib: 2.6.2
+    dev: false
+
   /@docusaurus/utils-common@3.0.0(@docusaurus/types@3.0.0):
     resolution: {integrity: sha512-7iJWAtt4AHf4PFEPlEPXko9LZD/dbYnhLe0q8e3GRK1EXZyRASah2lznpMwB3lLmVjq/FR6ZAKF+E0wlmL5j0g==}
     engines: {node: '>=18.0'}
@@ -2543,6 +2559,24 @@ packages:
     dependencies:
       '@docusaurus/logger': 2.4.3
       '@docusaurus/utils': 2.4.3(@docusaurus/types@2.4.3)
+      joi: 17.11.0
+      js-yaml: 4.1.0
+      tslib: 2.6.2
+    transitivePeerDependencies:
+      - '@docusaurus/types'
+      - '@swc/core'
+      - esbuild
+      - supports-color
+      - uglify-js
+      - webpack-cli
+    dev: false
+
+  /@docusaurus/utils-validation@2.4.3(@docusaurus/types@3.0.0):
+    resolution: {integrity: sha512-G2+Vt3WR5E/9drAobP+hhZQMaswRwDlp6qOMi7o7ZypB+VO7N//DZWhZEwhcRGepMDJGQEwtPv7UxtYwPL9PBw==}
+    engines: {node: '>=16.14'}
+    dependencies:
+      '@docusaurus/logger': 2.4.3
+      '@docusaurus/utils': 2.4.3(@docusaurus/types@3.0.0)
       joi: 17.11.0
       js-yaml: 4.1.0
       tslib: 2.6.2
@@ -2583,6 +2617,40 @@ packages:
     dependencies:
       '@docusaurus/logger': 2.4.3
       '@docusaurus/types': 2.4.3(react-dom@18.2.0)(react@18.2.0)
+      '@svgr/webpack': 6.5.1
+      escape-string-regexp: 4.0.0
+      file-loader: 6.2.0(webpack@5.89.0)
+      fs-extra: 10.1.0
+      github-slugger: 1.5.0
+      globby: 11.1.0
+      gray-matter: 4.0.3
+      js-yaml: 4.1.0
+      lodash: 4.17.21
+      micromatch: 4.0.5
+      resolve-pathname: 3.0.0
+      shelljs: 0.8.5
+      tslib: 2.6.2
+      url-loader: 4.1.1(file-loader@6.2.0)(webpack@5.89.0)
+      webpack: 5.89.0
+    transitivePeerDependencies:
+      - '@swc/core'
+      - esbuild
+      - supports-color
+      - uglify-js
+      - webpack-cli
+    dev: false
+
+  /@docusaurus/utils@2.4.3(@docusaurus/types@3.0.0):
+    resolution: {integrity: sha512-fKcXsjrD86Smxv8Pt0TBFqYieZZCPh4cbf9oszUq/AMhZn3ujwpKaVYZACPX8mmjtYx0JOgNx52CREBfiGQB4A==}
+    engines: {node: '>=16.14'}
+    peerDependencies:
+      '@docusaurus/types': '*'
+    peerDependenciesMeta:
+      '@docusaurus/types':
+        optional: true
+    dependencies:
+      '@docusaurus/logger': 2.4.3
+      '@docusaurus/types': 3.0.0(react-dom@18.2.0)(react@18.2.0)
       '@svgr/webpack': 6.5.1
       escape-string-regexp: 4.0.0
       file-loader: 6.2.0(webpack@5.89.0)
@@ -2647,7 +2715,7 @@ packages:
       immediate: 3.3.0
     dev: false
 
-  /@easyops-cn/docusaurus-search-local@0.36.0(react-dom@18.2.0)(react@18.2.0)(typescript@5.2.2):
+  /@easyops-cn/docusaurus-search-local@0.36.0(@docusaurus/types@3.0.0)(react-dom@18.2.0)(react@18.2.0)(typescript@5.2.2):
     resolution: {integrity: sha512-4R8tLYQc1aLTJcqIYHd7Np/wh6/psfHmGbNuJMwAFW7bJ6KyStlagBdXzv3k3SCqpo5emW2IUNYmHmN+8xvB6A==}
     engines: {node: '>=12'}
     peerDependencies:
@@ -2657,9 +2725,9 @@ packages:
     dependencies:
       '@docusaurus/plugin-content-docs': 2.4.3(debug@4.3.4)(react-dom@18.2.0)(react@18.2.0)(typescript@5.2.2)
       '@docusaurus/theme-translations': 2.4.3
-      '@docusaurus/utils': 2.4.3(@docusaurus/types@2.4.3)
-      '@docusaurus/utils-common': 2.4.3(@docusaurus/types@2.4.3)
-      '@docusaurus/utils-validation': 2.4.3(@docusaurus/types@2.4.3)
+      '@docusaurus/utils': 2.4.3(@docusaurus/types@3.0.0)
+      '@docusaurus/utils-common': 2.4.3(@docusaurus/types@3.0.0)
+      '@docusaurus/utils-validation': 2.4.3(@docusaurus/types@3.0.0)
       '@easyops-cn/autocomplete.js': 0.38.1
       '@node-rs/jieba': 1.7.2
       cheerio: 1.0.0-rc.12
