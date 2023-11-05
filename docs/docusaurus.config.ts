@@ -1,8 +1,9 @@
-const codeThemes = require('prism-react-renderer').themes;
-const path = require('path');
+import { themes } from 'prism-react-renderer';
+import type {Config} from '@docusaurus/types';
+import type * as Preset from '@docusaurus/preset-classic';
+import * as path from 'path';
 
-/** @type {import('@docusaurus/types').Config} */
-module.exports = {
+const config: Config = {
   title: 'Woodpecker CI',
   tagline: 'Woodpecker is a simple CI engine with great extensibility.',
   url: 'https://woodpecker-ci.org',
@@ -14,7 +15,6 @@ module.exports = {
   projectName: 'woodpecker-ci.github.io',
   trailingSlash: false,
   themeConfig:
-    /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       navbar: {
         title: 'Woodpecker',
@@ -137,8 +137,9 @@ module.exports = {
         copyright: `Copyright © ${new Date().getFullYear()} Woodpecker CI. Built with Docusaurus.`,
       },
       prism: {
-        theme: codeThemes.github,
-        darkTheme: codeThemes.dracula,
+        theme: themes.github,
+        darkTheme: themes.dracula,
+        additionalLanguages: ['diff', 'json', 'docker', 'javascript', 'css', 'bash', 'nginx', 'apacheconf'],
       },
       announcementBar: {
         id: 'github-star',
@@ -153,7 +154,7 @@ module.exports = {
       colorMode: {
         respectPrefersColorScheme: true,
       },
-    }),
+    } satisfies Preset.ThemeConfig),
   plugins: [
     () => ({
       name: 'docusaurus-plugin-favicon',
@@ -205,7 +206,6 @@ module.exports = {
   presets: [
     [
       '@docusaurus/preset-classic',
-      /** @type {import('@docusaurus/preset-classic').Options} */
       ({
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
@@ -235,7 +235,7 @@ module.exports = {
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
         },
-      }),
+      } satisfies Preset.Options),
     ],
     [
       'redocusaurus',
@@ -264,4 +264,9 @@ module.exports = {
       },
     }),
   },
+  markdown: {
+    format: 'detect'
+  }
 };
+
+export default config;

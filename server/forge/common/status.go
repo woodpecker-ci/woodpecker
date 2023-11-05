@@ -34,6 +34,7 @@ func GetPipelineStatusContext(repo *model.Repo, pipeline *model.Pipeline, workfl
 
 	tmpl, err := template.New("context").Parse(server.Config.Server.StatusContextFormat)
 	if err != nil {
+		log.Error().Err(err).Msg("could not create status from template")
 		return ""
 	}
 	var ctx bytes.Buffer

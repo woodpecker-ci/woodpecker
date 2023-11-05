@@ -12,12 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package linter
+package linter_test
 
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/woodpecker-ci/woodpecker/pipeline/errors"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/linter"
 )
 
 func TestLint(t *testing.T) {
@@ -26,8 +29,6 @@ func TestLint(t *testing.T) {
 steps:
   build:
     image: docker
-    privileged: true
-    network_mode: host
     volumes:
       - /tmp:/tmp
     commands:
@@ -35,8 +36,8 @@ steps:
       - go test
   publish:
     image: plugins/docker
-    repo: foo/bar
     settings:
+      repo: foo/bar
       foo: bar
 services:
   redis:
@@ -47,8 +48,6 @@ services:
 steps:
   - name: build
     image: docker
-    privileged: true
-    network_mode: host
     volumes:
       - /tmp:/tmp
     commands:
@@ -56,8 +55,8 @@ steps:
       - go test
   - name: publish
     image: plugins/docker
-    repo: foo/bar
     settings:
+      repo: foo/bar
       foo: bar
 `,
 	}, {
@@ -81,9 +80,14 @@ steps:
 		t.Run(testd.Title, func(t *testing.T) {
 			conf, err := yaml.ParseString(testd.Data)
 			if err != nil {
-				t.Fatalf("Cannot unmarshal yaml %q. Error: %s", testd, err)
+				t.Fatalf("Cannot unmarshal yaml %q. Error: %s", testd.Title, err)
 			}
-			if err := New(WithTrusted(true)).Lint(conf); err != nil {
+
+			if err := linter.New(linter.WithTrusted(true)).Lint([]*linter.WorkflowConfig{{
+				File:      testd.Title,
+				RawConfig: testd.Data,
+				Workflow:  conf,
+			}}); err != nil {
 				t.Errorf("Expected lint returns no errors, got %q", err)
 			}
 		})
@@ -97,7 +101,7 @@ func TestLintErrors(t *testing.T) {
 	}{
 		{
 			from: "",
-			want: "Invalid or missing pipeline section",
+			want: "Invalid or missing steps section",
 		},
 		{
 			from: "steps: { build: { image: '' }  }",
@@ -156,11 +160,23 @@ func TestLintErrors(t *testing.T) {
 			t.Fatalf("Cannot unmarshal yaml %q. Error: %s", test.from, err)
 		}
 
-		lerr := New().Lint(conf)
+		lerr := linter.New().Lint([]*linter.WorkflowConfig{{
+			File:      test.from,
+			RawConfig: test.from,
+			Workflow:  conf,
+		}})
 		if lerr == nil {
 			t.Errorf("Expected lint error for configuration %q", test.from)
-		} else if lerr.Error() != test.want {
-			t.Errorf("Want error %q, got %q", test.want, lerr.Error())
 		}
+
+		lerrors := errors.GetPipelineErrors(lerr)
+		found := false
+		for _, lerr := range lerrors {
+			if lerr.Message == test.want {
+				found = true
+				break
+			}
+		}
+		assert.True(t, found, "Expected error %q, got %q", test.want, lerrors)
 	}
 }

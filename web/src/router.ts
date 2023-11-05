@@ -88,6 +88,12 @@ const routes: RouteRecordRaw[] = [
                 component: (): Component => import('~/views/repo/pipeline/PipelineConfig.vue'),
                 props: true,
               },
+              {
+                path: 'errors',
+                name: 'repo-pipeline-errors',
+                component: (): Component => import('~/views/repo/pipeline/PipelineErrors.vue'),
+                props: true,
+              },
             ],
           },
           {
