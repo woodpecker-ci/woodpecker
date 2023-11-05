@@ -86,6 +86,7 @@ func (l *log) Write(ctx context.Context, stepID int64, logEntry *model.LogEntry)
 		if err != nil {
 			return err
 		}
+		s = l.streams[stepID]
 	}
 
 	s.Lock()
