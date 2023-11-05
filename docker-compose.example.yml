@@ -21,7 +21,7 @@ services:
     depends_on:
       woodpecker-server:
         condition: service_healthy
-    image: woodpeckerci/woodpecker-agent:local
+    image: woodpeckerci/woodpecker-agent:latest
     networks:
       - woodpecker
     volumes:
