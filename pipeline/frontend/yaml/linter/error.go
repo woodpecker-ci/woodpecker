@@ -18,11 +18,11 @@ import (
 	"github.com/woodpecker-ci/woodpecker/pipeline/errors"
 )
 
-func newLinterError(message, field string, isWarning bool) *errors.PipelineError {
+func newLinterError(message, file, field string, isWarning bool) *errors.PipelineError {
 	return &errors.PipelineError{
 		Type:      errors.PipelineErrorTypeLinter,
 		Message:   message,
-		Data:      &errors.LinterErrorData{Field: field},
+		Data:      &errors.LinterErrorData{File: file, Field: field},
 		IsWarning: isWarning,
 	}
 }

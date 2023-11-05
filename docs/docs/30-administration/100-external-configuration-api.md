@@ -13,7 +13,7 @@ You need to trust the external config service as it is getting secret informatio
 
 ## Config
 
-```shell
+```bash
 # Server
 # ...
 WOODPECKER_CONFIG_SERVICE_ENDPOINT=https://example.com/ciconfig
