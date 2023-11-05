@@ -39,7 +39,7 @@
               @click="cancelPipeline"
             />
             <Button
-              v-if="pipeline.status !== 'error' && pipeline.status !== 'blocked'"
+              v-if="pipeline.status !== 'error'"
               class="flex-shrink-0"
               :text="$t('repo.pipeline.actions.restart')"
               :is-loading="isRestartingPipeline"
