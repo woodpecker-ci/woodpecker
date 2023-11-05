@@ -2,7 +2,7 @@ version: '3'
 
 services:
   woodpecker-server:
-    image: woodpeckerci/woodpecker-server:local
+    image: woodpeckerci/woodpecker-server:latest
     ports:
       - 8000:8000
     networks:
