@@ -12,7 +12,7 @@ The kubernetes backend executes steps inside standalone pods. A temporary PVC is
 These env vars can be set in the `env:` sections of both `server` and `agent`.
 They do not need to be set for both but only for the part to which it is relevant to.
 
-```yml
+```yaml
 server:
   env:
     WOODPECKER_SESSION_EXPIRES: "300h"
@@ -56,7 +56,7 @@ We recommend to add a `resources` definition to all steps to ensure efficient sc
 
 Here is an example definition with an arbitrary `resources` definition below the `backend_options` section:
 
-```yml
+```yaml
 steps:
   'My kubernetes step':
     image: alpine
@@ -90,7 +90,7 @@ To overwrite this, one needs to set the label in the `nodeSelector` section of t
 A practical example for this is when running a matrix-build and delegating specific elements of the matrix to run on a specific architecture.
 In this case, one must define an arbitrary key in the matrix section of the respective matrix element:
 
-```yml
+```yaml
 matrix:
   include:
     - NAME: runner1
@@ -99,7 +99,7 @@ matrix:
 
 And then overwrite the `nodeSelector` in the `backend_options` section of the step(s) using the name of the respective env var:
 
-```yml
+```yaml
 [...]
     backend_options:
       kubernetes:
@@ -164,7 +164,7 @@ steps:
 
 CRI-O users currently need to configure the workspace for all workflows in order for them to run correctly. Add the following at the beginning of your configuration:
 
-```yml
+```yaml
 workspace:
   base: '/woodpecker'
   path: '/'

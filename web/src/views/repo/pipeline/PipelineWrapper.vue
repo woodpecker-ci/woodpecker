@@ -3,12 +3,22 @@
     v-if="pipeline && repo"
     v-model:activeTab="activeTab"
     enable-tabs
-    disable-hash-mode
+    disable-tab-url-hash-mode
     :go-back="goBack"
     :fluid-content="activeTab === 'tasks'"
     full-width-header
   >
-    <template #title>{{ repo.full_name }}</template>
+    <template #title>
+      <span>
+        <router-link :to="{ name: 'org', params: { orgId: repo.org_id } }" class="hover:underline">
+          {{ repo.owner }}
+        </router-link>
+        /
+        <router-link :to="{ name: 'repo' }" class="hover:underline">
+          {{ repo.name }}
+        </router-link>
+      </span>
+    </template>
 
     <template #titleActions>
       <div class="flex md:items-center flex-col gap-2 md:flex-row md:justify-between min-w-0">
@@ -139,6 +149,14 @@ const pipeline = pipelineStore.getPipeline(repositoryId, pipelineId);
 const { since, duration, created, message, title } = usePipeline(pipeline);
 provide('pipeline', pipeline);
 
+watch(
+  pipeline,
+  () => {
+    favicon.updateStatus(pipeline.value?.status);
+  },
+  { immediate: true },
+);
+
 const showDeployPipelinePopup = ref(false);
 
 async function loadPipeline(): Promise<void> {
@@ -147,8 +165,6 @@ async function loadPipeline(): Promise<void> {
   }
 
   await pipelineStore.loadPipeline(repo.value.id, parseInt(pipelineId.value, 10));
-
-  favicon.updateStatus(pipeline.value?.status);
 }
 
 const { doSubmit: cancelPipeline, isLoading: isCancelingPipeline } = useAsyncAction(async () => {
