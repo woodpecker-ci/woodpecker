@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@anbraten, @qwerty287, @renovate[bot], @riczescaran, @J-Ha, @Janik-Haag, @6543, @jbiblio, @runephilosof-karnovgroup, @zc-devs, @pat-s, @bitethecode, @xoxys, @HamburgerJungeJr, @nitram509, @JohnWalkerx, @OskarsPakers, @Exar04, @dominic-p, @categulario, @mzampetakis, @Timshel, @Denperidge, @tomix1024, @lonix1, @s3lph, @math3vz, @LTek-online, @testwill, @klinux, @pinpox, @hpidcock, @lafriks, @ChewingBever, @azdle, @praneeth-ovckd
+@qwerty287, @anbraten, @renovate[bot], @riczescaran, @J-Ha, @Janik-Haag, @6543, @jbiblio, @runephilosof-karnovgroup, @zc-devs, @pat-s, @bitethecode, @xoxys, @HamburgerJungeJr, @nitram509, @JohnWalkerx, @OskarsPakers, @Exar04, @dominic-p, @categulario, @mzampetakis, @Timshel, @Denperidge, @tomix1024, @lonix1, @s3lph, @math3vz, @LTek-online, @testwill, @klinux, @pinpox, @hpidcock, @lafriks, @ChewingBever, @azdle, @praneeth-ovckd
 
 ### 💥 Breaking changes
 
@@ -41,6 +41,7 @@
 
 ### 📈 Enhancement
 
+- UI enhancements/fixes [[#2754](https://github.com/woodpecker-ci/woodpecker/pull/2754)]
 - Fail on missing secrets [[#2749](https://github.com/woodpecker-ci/woodpecker/pull/2749)]
 - Add deprecation warnings [[#2725](https://github.com/woodpecker-ci/woodpecker/pull/2725)]
 - Enhance linter and errors [[#1572](https://github.com/woodpecker-ci/woodpecker/pull/1572)]
