@@ -1,3 +1,5 @@
+version: 1
+
 when:
   - event: [pull_request, cron]
   - event: push

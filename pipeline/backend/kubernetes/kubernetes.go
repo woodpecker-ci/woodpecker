@@ -164,7 +164,7 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID s
 					return err
 				}
 				log.Trace().Str("pod-name", stepName).Msgf("Creating service: %s", step.Name)
-				svc, err := Service(e.config.Namespace, step.Name, step.Alias, step.Ports)
+				svc, err := Service(e.config.Namespace, step.Name, step.Ports)
 				if err != nil {
 					return err
 				}
@@ -391,7 +391,7 @@ func (e *kube) DestroyWorkflow(_ context.Context, conf *types.Config, taskUUID s
 		if stage.Alias == "services" {
 			for _, step := range stage.Steps {
 				log.Trace().Msgf("Deleting service: %s", step.Name)
-				svc, err := Service(e.config.Namespace, step.Name, step.Alias, step.Ports)
+				svc, err := Service(e.config.Namespace, step.Name, step.Ports)
 				if err != nil {
 					return err
 				}

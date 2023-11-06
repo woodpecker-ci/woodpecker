@@ -1,3 +1,5 @@
+version: 1
+
 workspace:
   base: /go
   path: src/github.com/octocat/hello-world

@@ -15,15 +15,20 @@
 package lint
 
 import (
+	"errors"
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 
+	"github.com/muesli/termenv"
 	"github.com/urfave/cli/v2"
 
-	"go.woodpecker-ci.org/woodpecker/cli/common"
-	"go.woodpecker-ci.org/woodpecker/pipeline/schema"
+	"github.com/woodpecker-ci/woodpecker/cli/common"
+	pipeline_errors "github.com/woodpecker-ci/woodpecker/pipeline/errors"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/linter"
 )
 
 // Command exports the info command.
@@ -68,19 +73,63 @@ func lintDir(c *cli.Context, dir string) error {
 }
 
 func lintFile(_ *cli.Context, file string) error {
+	output := termenv.NewOutput(os.Stdout)
+
 	fi, err := os.Open(file)
 	if err != nil {
 		return err
 	}
 	defer fi.Close()
 
-	configErrors, err := schema.Lint(fi)
+	buf, err := os.ReadFile(file)
 	if err != nil {
-		fmt.Println("❌ Config is invalid")
-		for _, configError := range configErrors {
-			fmt.Println("In", configError.Field()+":", configError.Description())
-		}
 		return err
+	}
+
+	rawConfig := string(buf)
+
+	c, err := yaml.ParseString(rawConfig)
+	if err != nil {
+		return err
+	}
+
+	config := &linter.WorkflowConfig{
+		File:      path.Base(file),
+		RawConfig: rawConfig,
+		Workflow:  c,
+	}
+
+	// TODO: lint multiple files at once to allow checks for sth like "depends_on" to work
+	err = linter.New(linter.WithTrusted(true)).Lint([]*linter.WorkflowConfig{config})
+	if err != nil {
+		fmt.Printf("🔥 %s has errors:\n", output.String(config.File).Underline())
+
+		hasErrors := true
+		for _, err := range pipeline_errors.GetPipelineErrors(err) {
+			line := "  "
+
+			if err.IsWarning {
+				line = fmt.Sprintf("%s ⚠️ ", line)
+			} else {
+				line = fmt.Sprintf("%s ❌", line)
+				hasErrors = true
+			}
+
+			if data := err.GetLinterData(); data != nil {
+				line = fmt.Sprintf("%s %s\t%s", line, output.String(data.Field).Bold(), err.Message)
+			} else {
+				line = fmt.Sprintf("%s %s", line, err.Message)
+			}
+
+			// TODO: use table output
+			fmt.Printf("%s\n", line)
+		}
+
+		if hasErrors {
+			return errors.New("config has errors")
+		}
+
+		return nil
 	}
 
 	fmt.Println("✅ Config is valid")

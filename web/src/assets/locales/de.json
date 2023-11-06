@@ -229,6 +229,7 @@
         "restart_success": "Pipeline neu gestartet"
       },
       "config": "Konfiguration",
+      "errors": "Fehler ({count})",
       "event": {
         "cron": "Cron",
         "deploy": "Deploy",
@@ -237,7 +238,6 @@
         "push": "Push",
         "tag": "Tag"
       },
-      "execution_error": "Ausführungsfehler",
       "exit_code": "Exit-Code {exitCode}",
       "files": "Geänderte Dateien ({files})",
       "loading": "Laden…",
@@ -258,6 +258,7 @@
         "declined": "Diese Pipeline ist abgelehnt worden!",
         "review": "Änderungen überprüfen"
       },
+      "show_errors": "Fehler anzeigen",
       "status": {
         "blocked": "blockiert",
         "declined": "abgelehnt",
@@ -272,7 +273,9 @@
         "success": "erfolgreich"
       },
       "step_not_started": "Dieser Schritt hat noch nicht begonnen.",
-      "tasks": "Vorgänge"
+      "tasks": "Vorgänge",
+      "warnings": "Warnungen ({count})",
+      "we_got_some_errors": "Oh nein, wir haben einige Fehler!"
     },
     "pull_requests": "Pull-Requests",
     "settings": {
@@ -464,7 +467,13 @@
       },
       "general": {
         "general": "Allgemein",
-        "language": "Sprache"
+        "language": "Sprache",
+        "theme": {
+          "auto": "Automatisch",
+          "dark": "Dunkel",
+          "light": "Hell",
+          "theme": "Thema"
+        }
       },
       "secrets": {
         "add": "Geheimnis hinzufügen",

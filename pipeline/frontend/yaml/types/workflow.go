@@ -31,11 +31,19 @@ type (
 		DependsOn []string        `yaml:"depends_on,omitempty"`
 		RunsOn    []string        `yaml:"runs_on,omitempty"`
 		SkipClone bool            `yaml:"skip_clone"`
+		Version   int             `yaml:"version"`
 
 		// Undocumented
 		Cache    base.StringOrSlice `yaml:"cache,omitempty"`
 		Networks WorkflowNetworks   `yaml:"networks,omitempty"`
 		Volumes  WorkflowVolumes    `yaml:"volumes,omitempty"`
+
+		// Deprecated
+		PlatformDontUseIt string `yaml:"platform,omitempty"` // TODO: remove in next major version
+		// Deprecated
+		BranchesDontUseIt *constraint.List `yaml:"branches,omitempty"` // TODO: remove in next major version
+		// Deprecated
+		PipelineDontUseIt ContainerList `yaml:"pipeline,omitempty"` // TODO: remove in next major version
 	}
 
 	// Workspace defines a pipeline workspace.

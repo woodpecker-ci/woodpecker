@@ -1,7 +1,6 @@
-labels:
-  location: europe
-  weather: sun
-  hostname: ''
+version: 1
+
+platform: linux/amd64
 
 steps:
   build:

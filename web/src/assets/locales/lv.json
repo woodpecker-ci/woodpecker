@@ -220,7 +220,6 @@
         "push": "Iesūtīšana",
         "tag": "Tags"
       },
-      "execution_error": "Uzdevuma izpildes kļūda",
       "exit_code": "iziešanas kods {exitCode}",
       "files": "Izmainītie faili ({files})",
       "loading": "Notiek ielāde…",

@@ -1,4 +1,6 @@
-branches: main
+version: 1
+
+branches: [main, pages]
 
 steps:
   build:

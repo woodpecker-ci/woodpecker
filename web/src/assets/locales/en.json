@@ -230,7 +230,6 @@
       "config": "Config",
       "files": "Changed files ({files})",
       "no_files": "No files have been changed.",
-      "execution_error": "Execution error",
       "no_pipelines": "No pipelines have been started yet.",
       "no_pipeline_steps": "No pipeline steps available!",
       "step_not_started": "This step hasn't started yet.",
@@ -281,7 +280,11 @@
         "error": "error",
         "failure": "failure",
         "killed": "killed"
-      }
+      },
+      "errors": "Errors ({count})",
+      "warnings": "Warnings ({count})",
+      "show_errors": "Show errors",
+      "we_got_some_errors": "Oh no, we got some errors!"
     }
   },
   "org": {
@@ -498,5 +501,8 @@
     "internal_error": "Some internal error occurred",
     "access_denied": "You are not allowed to login"
   },
-  "default": "default"
+  "default": "default",
+  "info": "Info",
+  "running_version": "You are running Woodpecker {0}",
+  "update_woodpecker": "Please update your Woodpecker instance to {0}"
 }

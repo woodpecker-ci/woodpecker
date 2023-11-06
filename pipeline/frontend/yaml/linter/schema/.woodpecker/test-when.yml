@@ -1,3 +1,5 @@
+version: 1
+
 steps:
   when-branch:
     image: alpine

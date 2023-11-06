@@ -1,7 +1,9 @@
-branches: [main, pages]
+version: 1
 
 steps:
   build:
     image: golang
     commands:
       - go test
+
+runs_on: [success, failure]

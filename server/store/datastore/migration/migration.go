@@ -58,6 +58,7 @@ var migrationTasks = []*task{
 	&alterTableTasksUpdateColumnTaskDataType,
 	&alterTableConfigUpdateColumnConfigDataType,
 	&removePluginOnlyOptionFromSecretsTable,
+	&convertToNewPipelineErrorFormat,
 }
 
 var allBeans = []interface{}{

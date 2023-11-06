@@ -1,5 +1,12 @@
 import { WebhookEvents } from './webhook';
 
+export type PipelineError<D = unknown> = {
+  type: string;
+  message: string;
+  data?: D;
+  is_warning: boolean;
+};
+
 // A pipeline for a repository.
 export type Pipeline = {
   id: number;
@@ -15,7 +22,7 @@ export type Pipeline = {
   //  The current status of the pipeline.
   status: PipelineStatus;
 
-  error: string;
+  errors?: PipelineError[];
 
   // When the pipeline request was received.
   created_at: number;

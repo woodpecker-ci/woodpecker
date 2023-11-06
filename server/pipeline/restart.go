@@ -22,11 +22,10 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml"
-	"go.woodpecker-ci.org/woodpecker/server"
-	forge_types "go.woodpecker-ci.org/woodpecker/server/forge/types"
-	"go.woodpecker-ci.org/woodpecker/server/model"
-	"go.woodpecker-ci.org/woodpecker/server/store"
+	"github.com/woodpecker-ci/woodpecker/server"
+	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
+	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/server/store"
 )
 
 // Restart a pipeline by creating a new one out of the old and start it
@@ -96,10 +95,7 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 
 	newPipeline, pipelineItems, err := createPipelineItems(ctx, store, newPipeline, user, repo, pipelineFiles, envs)
 	if err != nil {
-		if errors.Is(err, &yaml.PipelineParseError{}) {
-			return newPipeline, nil
-		}
-		msg := fmt.Sprintf("failure to createBuildItems for %s", repo.FullName)
+		msg := fmt.Sprintf("failure to createPipelineItems for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
 		return nil, fmt.Errorf(msg)
 	}
@@ -136,6 +132,6 @@ func createNewOutOfOld(old *model.Pipeline) *model.Pipeline {
 	newPipeline.Started = 0
 	newPipeline.Finished = 0
 	newPipeline.Enqueued = time.Now().UTC().Unix()
-	newPipeline.Error = ""
+	newPipeline.Errors = nil
 	return &newPipeline
 }

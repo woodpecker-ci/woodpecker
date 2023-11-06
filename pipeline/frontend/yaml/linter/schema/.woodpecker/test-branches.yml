@@ -1,7 +1,9 @@
-platform: linux/amd64
+version: 1
+
+branches: main
 
 steps:
   build:
-    image: golang:latest
+    image: golang
     commands:
       - go test

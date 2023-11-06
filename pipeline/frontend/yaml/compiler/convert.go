@@ -21,7 +21,6 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/rs/zerolog/log"
 
 	backend_types "go.woodpecker-ci.org/woodpecker/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/metadata"
@@ -30,7 +29,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/utils"
 )
 
-func (c *Compiler) createProcess(name string, container *yaml_types.Container, stepType backend_types.StepType) *backend_types.Step {
+func (c *Compiler) createProcess(name string, container *yaml_types.Container, stepType backend_types.StepType) (*backend_types.Step, error) {
 	var (
 		uuid = uuid.New()
 
@@ -90,7 +89,7 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		}
 
 		if err := settings.ParamsToEnv(container.Settings, environment, pluginSecrets.toStringMap()); err != nil {
-			log.Error().Err(err).Msg("paramsToEnv")
+			return nil, err
 		}
 	}
 
@@ -112,6 +111,8 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		secret, ok := c.secrets[strings.ToLower(requested.Source)]
 		if ok && secret.Available(container) {
 			environment[strings.ToUpper(requested.Target)] = secret.Value
+		} else {
+			return nil, fmt.Errorf("secret %q not found or not allowed to be used", requested.Source)
 		}
 	}
 
@@ -213,7 +214,7 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		IpcMode:        ipcMode,
 		Ports:          ports,
 		BackendOptions: backendOptions,
-	}
+	}, nil
 }
 
 func (c *Compiler) stepWorkdir(container *yaml_types.Container) string {
