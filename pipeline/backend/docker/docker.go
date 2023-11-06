@@ -318,10 +318,10 @@ func (e *docker) DestroyWorkflow(_ context.Context, conf *backend.Config, taskUU
 		for _, step := range stage.Steps {
 			containerName := toContainerName(step)
 			if err := e.client.ContainerKill(noContext, containerName, "9"); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
-				log.Error().Err(err).Msgf("could not kill container '%s'", stage.Name)
+				log.Error().Err(err).Msgf("could not kill container '%s'", step.Name)
 			}
 			if err := e.client.ContainerRemove(noContext, containerName, removeOpts); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
-				log.Error().Err(err).Msgf("could not remove container '%s'", stage.Name)
+				log.Error().Err(err).Msgf("could not remove container '%s'", step.Name)
 			}
 		}
 	}
