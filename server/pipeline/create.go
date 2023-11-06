@@ -82,7 +82,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	err = _store.CreatePipeline(pipeline)
 	if err != nil {
 		msg := fmt.Errorf("failed to save pipeline for %s", repo.FullName)
-		log.Error().Err(err).Msg(msg.Error())
+		log.Error().Str("repo", repo.FullName).Err(err).Msg(msg.Error())
 		return nil, msg
 	}
 
