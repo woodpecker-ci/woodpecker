@@ -31,6 +31,7 @@ type (
 		DependsOn []string        `yaml:"depends_on,omitempty"`
 		RunsOn    []string        `yaml:"runs_on,omitempty"`
 		SkipClone bool            `yaml:"skip_clone"`
+		Version   int             `yaml:"version"`
 
 		// Undocumented
 		Cache    base.StringOrSlice `yaml:"cache,omitempty"`
