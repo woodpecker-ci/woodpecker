@@ -30,6 +30,7 @@ declare module 'vue' {
     Header: typeof import('./src/components/layout/scaffold/Header.vue')['default']
     IBiCheckCircleFill: typeof import('~icons/bi/check-circle-fill')['default']
     IBiCircle: typeof import('~icons/bi/circle')['default']
+    IBiExclamationTriangleFill: typeof import('~icons/bi/exclamation-triangle-fill')['default']
     IBiPlayCircleFill: typeof import('~icons/bi/play-circle-fill')['default']
     IBiSlashCircleFill: typeof import('~icons/bi/slash-circle-fill')['default']
     IBiStopCircleFill: typeof import('~icons/bi/stop-circle-fill')['default']
