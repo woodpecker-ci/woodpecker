@@ -1,0 +1,5 @@
+version: 1
+
+steps:
+  prettier:
+    image: docker.io/woodpeckerci/plugin-prettier:next
