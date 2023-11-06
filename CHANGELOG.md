@@ -1,10 +1,10 @@
 # Changelog
 
-## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-11-05
+## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-11-06
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@qwerty287, @anbraten, @renovate[bot], @riczescaran, @J-Ha, @Janik-Haag, @6543, @jbiblio, @runephilosof-karnovgroup, @zc-devs, @pat-s, @bitethecode, @xoxys, @HamburgerJungeJr, @nitram509, @JohnWalkerx, @OskarsPakers, @Exar04, @dominic-p, @categulario, @mzampetakis, @Timshel, @Denperidge, @tomix1024, @lonix1, @s3lph, @math3vz, @LTek-online, @testwill, @klinux, @pinpox, @hpidcock, @lafriks, @ChewingBever, @azdle, @praneeth-ovckd
+@renovate[bot], @qwerty287, @anbraten, @riczescaran, @J-Ha, @Janik-Haag, @6543, @jbiblio, @runephilosof-karnovgroup, @zc-devs, @pat-s, @bitethecode, @xoxys, @HamburgerJungeJr, @nitram509, @JohnWalkerx, @OskarsPakers, @Exar04, @dominic-p, @categulario, @mzampetakis, @Timshel, @Denperidge, @tomix1024, @lonix1, @s3lph, @math3vz, @LTek-online, @testwill, @klinux, @pinpox, @hpidcock, @lafriks, @ChewingBever, @azdle, @praneeth-ovckd
 
 ### 💥 Breaking changes
 
@@ -212,6 +212,7 @@
 
 ### Misc
 
+- Lock file maintenance [[#2755](https://github.com/woodpecker-ci/woodpecker/pull/2755)]
 - Update golang (packages) [[#2742](https://github.com/woodpecker-ci/woodpecker/pull/2742)]
 - Update woodpeckerci/plugin-ready-release-go Docker tag to v0.7.0 [[#2728](https://github.com/woodpecker-ci/woodpecker/pull/2728)]
 - Add grafana dashobard to awesome [[#2710](https://github.com/woodpecker-ci/woodpecker/pull/2710)]
