@@ -90,6 +90,11 @@ type Compiler struct {
 	netrcOnlyTrusted  bool
 }
 
+type stepWithDependsOn struct {
+	step      *backend_types.Step
+	dependsOn []string
+}
+
 // New creates a new Compiler with options.
 func New(opts ...Option) *Compiler {
 	compiler := &Compiler{
@@ -234,8 +239,11 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 	}
 
 	// add pipeline steps. 1 pipeline step per stage, at the moment
+	stepStages := make([]*backend_types.Stage, 0)
 	var stage *backend_types.Stage
 	var group string
+	steps := make(map[string]*stepWithDependsOn)
+	useDag := false
 	for i, container := range conf.Steps.ContainerList {
 		// Skip if local and should not run local
 		if c.local && !container.When.IsLocal() {
@@ -254,7 +262,11 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			stage = new(backend_types.Stage)
 			stage.Name = fmt.Sprintf("%s_stage_%v", c.prefix, i)
 			stage.Alias = container.Name
-			config.Stages = append(config.Stages, stage)
+			stepStages = append(config.Stages, stage)
+		}
+
+		if len(container.DependsOn) > 0 {
+			useDag = true
 		}
 
 		name := fmt.Sprintf("%s_step_%d", c.prefix, i)
@@ -274,7 +286,18 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			}
 		}
 
+		steps[container.Name] = &stepWithDependsOn{
+			step:      step,
+			dependsOn: container.DependsOn,
+		}
 		stage.Steps = append(stage.Steps, step)
+	}
+
+	// dag is used if one or more steps have a depends_on
+	if useDag {
+		config.Stages = convertToStages(steps)
+	} else {
+		config.Stages = append(config.Stages, stepStages...)
 	}
 
 	err = c.setupCacheRebuild(conf, config)
@@ -327,4 +350,44 @@ func (c *Compiler) setupCacheRebuild(conf *yaml_types.Workflow, ir *backend_type
 	ir.Stages = append(ir.Stages, stage)
 
 	return nil
+}
+
+func convertToStages(steps map[string]*stepWithDependsOn) []*backend_types.Stage {
+	// Initialize the levels map
+	addedNodes := make(map[string]struct{})
+	stages := make([]*backend_types.Stage, 0)
+
+	for len(steps) > 0 {
+		addedNodesThisLevel := make(map[string]struct{})
+		stage := &backend_types.Stage{
+			Name:  fmt.Sprintf("stage_%d", len(stages)),
+			Alias: fmt.Sprintf("stage_%d", len(stages)),
+		}
+
+		for name, step := range steps {
+			if allDependenciesSatisfied(step, addedNodes) {
+				stage.Steps = append(stage.Steps, step.step)
+				addedNodesThisLevel[step.step.Name] = struct{}{}
+				delete(steps, name)
+			}
+		}
+
+		for name := range addedNodesThisLevel {
+			addedNodes[name] = struct{}{}
+		}
+
+		stages = append(stages, stage)
+	}
+
+	return stages
+}
+
+func allDependenciesSatisfied(node *stepWithDependsOn, addedNodes map[string]struct{}) bool {
+	for _, childName := range node.dependsOn {
+		_, ok := addedNodes[childName]
+		if !ok {
+			return false
+		}
+	}
+	return true
 }
