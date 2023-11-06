@@ -6,7 +6,7 @@ The below configuration composes database and cache containers.
 Services are accessed using custom hostnames.
 In the example below, the MySQL service is assigned the hostname `database` and is available at `database:3306`.
 
-```diff
+```yaml
 steps:
   build:
     image: golang
@@ -82,7 +82,7 @@ services:
 
 ## Complete Pipeline Example
 
-```yml
+```yaml
 services:
   database:
     image: mysql

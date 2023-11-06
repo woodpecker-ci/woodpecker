@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package linter
+package linter_test
 
 import (
 	"testing"
@@ -20,11 +20,13 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/woodpecker-ci/woodpecker/pipeline/errors"
 	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
+	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/linter"
 )
 
 func TestLint(t *testing.T) {
 	testdatas := []struct{ Title, Data string }{{
 		Title: "map", Data: `
+version: 1
 steps:
   build:
     image: docker
@@ -44,6 +46,7 @@ services:
 `,
 	}, {
 		Title: "list", Data: `
+version: 1
 steps:
   - name: build
     image: docker
@@ -60,6 +63,7 @@ steps:
 `,
 	}, {
 		Title: "merge maps", Data: `
+version: 1
 variables:
   step_template: &base-step
     image: golang:1.19
@@ -82,7 +86,11 @@ steps:
 				t.Fatalf("Cannot unmarshal yaml %q. Error: %s", testd.Title, err)
 			}
 
-			if err := New(WithTrusted(true)).Lint(testd.Data, conf); err != nil {
+			if err := linter.New(linter.WithTrusted(true)).Lint([]*linter.WorkflowConfig{{
+				File:      testd.Title,
+				RawConfig: testd.Data,
+				Workflow:  conf,
+			}}); err != nil {
 				t.Errorf("Expected lint returns no errors, got %q", err)
 			}
 		})
@@ -150,12 +158,16 @@ func TestLintErrors(t *testing.T) {
 	}
 
 	for _, test := range testdata {
-		conf, err := yaml.ParseString(test.from)
+		conf, err := yaml.ParseString("version: 1\n" + test.from)
 		if err != nil {
 			t.Fatalf("Cannot unmarshal yaml %q. Error: %s", test.from, err)
 		}
 
-		lerr := New().Lint(test.from, conf)
+		lerr := linter.New().Lint([]*linter.WorkflowConfig{{
+			File:      test.from,
+			RawConfig: test.from,
+			Workflow:  conf,
+		}})
 		if lerr == nil {
 			t.Errorf("Expected lint error for configuration %q", test.from)
 		}

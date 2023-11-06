@@ -167,7 +167,11 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 	}
 
 	// lint the yaml file
-	if lerr := linter.New(linter.WithTrusted(true)).Lint(confstr, conf); lerr != nil {
+	if lerr := linter.New(linter.WithTrusted(true)).Lint([]*linter.WorkflowConfig{{
+		File:      path.Base(file),
+		RawConfig: confstr,
+		Workflow:  conf,
+	}}); lerr != nil {
 		return lerr
 	}
 
