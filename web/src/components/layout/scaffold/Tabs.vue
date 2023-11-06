@@ -14,6 +14,7 @@
       <Icon v-if="activeTab === tab.id" name="chevron-right" class="md:hidden" />
       <Icon v-else name="blank" class="md:hidden" />
       <span>{{ tab.title }}</span>
+      <Icon v-if="tab.icon" :name="tab.icon" :class="tab.iconClass" />
     </button>
   </div>
 </template>
