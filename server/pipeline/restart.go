@@ -22,6 +22,7 @@ import (
 
 	"github.com/rs/zerolog/log"
 
+	pipeline_errors "github.com/woodpecker-ci/woodpecker/pipeline/errors"
 	"github.com/woodpecker-ci/woodpecker/server"
 	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
 	"github.com/woodpecker-ci/woodpecker/server/model"
@@ -94,6 +95,14 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 	}
 
 	newPipeline, pipelineItems, err := createPipelineItems(ctx, store, newPipeline, user, repo, pipelineFiles, envs)
+	if pipeline_errors.HasBlockingErrors(err) {
+		msg := fmt.Sprintf("failure to createPipelineItems for %s", repo.FullName)
+		log.Error().Err(err).Msg(msg)
+		return nil, err
+	} else if err != nil {
+		newPipeline.Errors = pipeline_errors.GetPipelineErrors(err)
+	}
+
 	if err != nil {
 		msg := fmt.Sprintf("failure to createPipelineItems for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
