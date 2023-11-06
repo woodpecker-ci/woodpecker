@@ -77,12 +77,12 @@
     <Tab
       v-if="pipeline.errors && pipeline.errors.length > 0"
       id="errors"
+      icon="linter-issue"
       :title="
         pipeline.errors.some((e) => !e.is_warning)
           ? $t('repo.pipeline.errors', { count: pipeline.errors?.length })
           : $t('repo.pipeline.warnings', { count: pipeline.errors?.length })
       "
-      :icon="pipeline.errors.some((e) => !e.is_warning) ? 'linter-error' : 'linter-warn'"
       :icon-class="pipeline.errors.some((e) => !e.is_warning) ? 'text-wp-state-error-100' : 'text-wp-state-warn-100'"
     />
     <Tab id="config" :title="$t('repo.pipeline.config')" />
