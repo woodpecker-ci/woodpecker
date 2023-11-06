@@ -20,10 +20,10 @@ import (
 
 	"codeberg.org/6543/xyaml"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/constraint"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types/base"
-	"github.com/woodpecker-ci/woodpecker/shared/constant"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/constraint"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/types"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/types/base"
+	"go.woodpecker-ci.org/woodpecker/shared/constant"
 )
 
 var ErrUnsuportedVersion = errors.New("unsuported pipeline config version detected")
