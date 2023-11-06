@@ -40,3 +40,5 @@ var TrustedCloneImages = []string{
 	DefaultCloneImage,
 	"quay.io/woodpeckerci/plugin-git",
 }
+
+const DefaultPipelineVersion = 1
