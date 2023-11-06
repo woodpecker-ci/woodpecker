@@ -1,3 +1,5 @@
+version: 1
+
 branches:
   include: main
   exclude: [develop, feature/*]

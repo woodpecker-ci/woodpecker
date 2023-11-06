@@ -1,3 +1,5 @@
+version: 1
+
 when:
   - branch: [main, deploy]
     event: push
