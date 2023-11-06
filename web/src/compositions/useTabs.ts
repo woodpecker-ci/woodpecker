@@ -1,4 +1,4 @@
-import { computed, inject, onMounted, provide, Ref, ref } from 'vue';
+import { inject, onMounted, provide, Ref, ref } from 'vue';
 import { useRoute } from 'vue-router';
 
 export type Tab = {
@@ -7,58 +7,39 @@ export type Tab = {
 };
 
 export function useTabsProvider({
-  activeTabProp,
-  disableHashMode,
-  updateActiveTabProp,
+  activeTab,
+  disableUrlHashMode,
 }: {
-  activeTabProp: Ref<string | undefined>;
-  updateActiveTabProp: (tab: string) => void;
-  disableHashMode: Ref<boolean>;
+  activeTab: Ref<string | undefined>;
+  disableUrlHashMode: Ref<boolean>;
 }) {
   const route = useRoute();
 
   const tabs = ref<Tab[]>([]);
-  const activeTab = ref<string>('');
 
   provide('tabs', tabs);
-  provide(
-    'disable-hash-mode',
-    computed(() => disableHashMode.value),
-  );
-  provide(
-    'active-tab',
-    computed({
-      get: () => activeTab.value,
-      set: (value) => {
-        activeTab.value = value;
-        updateActiveTabProp(value);
-      },
-    }),
-  );
+  provide('disable-url-hash-mode', disableUrlHashMode);
+  provide('active-tab', activeTab);
 
   onMounted(() => {
-    if (activeTabProp.value) {
-      activeTab.value = activeTabProp.value;
+    if (activeTab.value !== undefined) {
       return;
     }
 
     const hashTab = route.hash.replace(/^#/, '');
-    if (hashTab) {
-      activeTab.value = hashTab;
-      return;
-    }
-    activeTab.value = tabs.value[0].id;
+    // eslint-disable-next-line no-param-reassign
+    activeTab.value = hashTab || tabs.value[0].id;
   });
 }
 
 export function useTabsClient() {
   const tabs = inject<Ref<Tab[]>>('tabs');
-  const disableHashMode = inject<Ref<boolean>>('disable-hash-mode');
+  const disableUrlHashMode = inject<Ref<boolean>>('disable-url-hash-mode');
   const activeTab = inject<Ref<string>>('active-tab');
 
-  if (activeTab === undefined || tabs === undefined || disableHashMode === undefined) {
+  if (activeTab === undefined || tabs === undefined || disableUrlHashMode === undefined) {
     throw new Error('Please use this "useTabsClient" composition inside a component running "useTabsProvider".');
   }
 
-  return { activeTab, tabs, disableHashMode };
+  return { activeTab, tabs, disableUrlHashMode };
 }
