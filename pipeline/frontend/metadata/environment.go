@@ -19,6 +19,8 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/Masterminds/semver/v3"
 )
 
 var pullRegexp = regexp.MustCompile(`\d+`)
@@ -64,6 +66,14 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_COMMIT_TAG":                 "", // will be set if event is tag
 		"CI_COMMIT_PULL_REQUEST":        "", // will be set if event is pr
 		"CI_COMMIT_PULL_REQUEST_LABELS": "", // will be set if event is pr
+
+		"CI_COMMIT_TAG_SEMVER":            "", //will be set if tag is a valid semver
+		"CI_COMMIT_TAG_IS_SEMVER":         "", //will be set if tag is a valid semver
+		"CI_COMMIT_TAG_SEMVER_MAJOR":      "", //will be set if tag is a valid semver
+		"CI_COMMIT_TAG_SEMVER_MINOR":      "", //will be set if tag is a valid semver
+		"CI_COMMIT_TAG_SEMVER_PATCH":      "", //will be set if tag is a valid semver
+		"CI_COMMIT_TAG_SEMVER_PRERELEASE": "", //will be set if tag is a valid semver
+		"CI_COMMIT_TAG_IS_PRERELEASE":     "", //will be set if tag is a valid semver
 
 		"CI_PIPELINE_NUMBER":        strconv.FormatInt(m.Curr.Number, 10),
 		"CI_PIPELINE_PARENT":        strconv.FormatInt(m.Curr.Parent, 10),
@@ -115,7 +125,21 @@ func (m *Metadata) Environ() map[string]string {
 	}
 	if m.Curr.Event == EventTag {
 		params["CI_COMMIT_TAG"] = strings.TrimPrefix(m.Curr.Commit.Ref, "refs/tags/")
+
+		v, err := semver.NewVersion(params["CI_COMMIT_TAG"])
+		if err != nil {
+			params["CI_COMMIT_TAG_IS_SEMVER"] = "false"
+		}
+		params["CI_COMMIT_TAG_SEMVER"] = v.String()
+		params["CI_COMMIT_TAG_SEMVER_MAJOR"] = strconv.FormatUint(v.Major(), 10)
+		params["CI_COMMIT_TAG_SEMVER_MINOR"] = strconv.FormatUint(v.Minor(), 10)
+		params["CI_COMMIT_TAG_SEMVER_PATCH"] = strconv.FormatUint(v.Patch(), 10)
+		if v.Prerelease() != "" {
+			params["CI_COMMIT_TAG_SEMVER_PRERELEASE"] = v.Prerelease()
+			params["CI_COMMIT_TAG_IS_PRERELEASE"] = "true"
+		}
 	}
+
 	if m.Curr.Event == EventPull {
 		params["CI_COMMIT_PULL_REQUEST"] = pullRegexp.FindString(m.Curr.Commit.Ref)
 		params["CI_COMMIT_PULL_REQUEST_LABELS"] = strings.Join(m.Curr.Commit.PullRequestLabels, ",")
