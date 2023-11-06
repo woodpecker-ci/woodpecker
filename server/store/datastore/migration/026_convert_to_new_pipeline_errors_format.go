@@ -22,7 +22,7 @@ import (
 	"xorm.io/xorm"
 )
 
-// perPage019 set the size of the slice to read per page
+// perPage026 set the size of the slice to read per page
 var perPage026 = 100
 
 type oldPipeline026 struct {
@@ -65,13 +65,12 @@ var convertToNewPipelineErrorFormat = task{
 		}
 
 		page := 0
-		offset := 0
 		oldPipelines := make([]*oldPipeline026, 0, perPage026)
 
 		for {
 			oldPipelines = oldPipelines[:0]
 
-			err := sess.Limit(perPage019, offset).Where("pipeline_error != null").Find(&oldPipelines)
+			err := sess.Limit(perPage019, page*perPage019).Where("pipeline_error != null").Find(&oldPipelines)
 			if err != nil {
 				return err
 			}
