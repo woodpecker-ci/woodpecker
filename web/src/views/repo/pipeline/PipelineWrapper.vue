@@ -77,7 +77,7 @@
     <Tab
       v-if="pipeline.errors && pipeline.errors.length > 0"
       id="errors"
-      icon="linter-issue"
+      icon="attention"
       :title="
         pipeline.errors.some((e) => !e.is_warning)
           ? $t('repo.pipeline.errors', { count: pipeline.errors?.length })

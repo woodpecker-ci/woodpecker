@@ -31,6 +31,7 @@ declare module 'vue' {
     IBiCheckCircleFill: typeof import('~icons/bi/check-circle-fill')['default']
     IBiCircle: typeof import('~icons/bi/circle')['default']
     IBiExclamationCircleFill: typeof import('~icons/bi/exclamation-circle-fill')['default']
+    IBiExclamationTriangle: typeof import('~icons/bi/exclamation-triangle')['default']
     IBiExclamationTriangleFill: typeof import('~icons/bi/exclamation-triangle-fill')['default']
     IBiPlayCircleFill: typeof import('~icons/bi/play-circle-fill')['default']
     IBiSlashCircleFill: typeof import('~icons/bi/slash-circle-fill')['default']

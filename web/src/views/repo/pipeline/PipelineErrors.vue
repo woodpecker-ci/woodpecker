@@ -3,7 +3,7 @@
     <div class="grid justify-center gap-x-4 text-left grid-3-1">
       <template v-for="(error, i) in pipeline.errors" :key="i">
         <Icon
-          name="linter-issue"
+          name="attention"
           class="flex-shrink-0 my-1"
           :class="{
             'text-wp-state-warn-100': error.is_warning,
