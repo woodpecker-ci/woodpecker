@@ -39,6 +39,20 @@ func Decline(ctx context.Context, store store.Store, pipeline *model.Pipeline, u
 		log.Error().Err(err).Msg("can not build tree from step list")
 	}
 
+	for _, wf := range pipeline.Workflows {
+		wf.State = model.StatusDeclined
+		if err := store.WorkflowUpdate(wf); err != nil {
+			return nil, fmt.Errorf("error updating workflow. %w", err)
+		}
+
+		for _, step := range wf.Children {
+			step.State = model.StatusDeclined
+			if err := store.StepUpdate(step); err != nil {
+				return nil, fmt.Errorf("error updating step. %w", err)
+			}
+		}
+	}
+
 	updatePipelineStatus(ctx, pipeline, repo, user)
 
 	publishToTopic(pipeline, repo)

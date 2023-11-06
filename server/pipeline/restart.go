@@ -100,6 +100,12 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 		return nil, fmt.Errorf(msg)
 	}
 
+	if err := prepareStart(ctx, store, newPipeline, user, repo); err != nil {
+		msg := fmt.Sprintf("failure to prepare pipeline for %s", repo.FullName)
+		log.Error().Err(err).Msg(msg)
+		return nil, fmt.Errorf(msg)
+	}
+
 	newPipeline, err = start(ctx, store, newPipeline, user, repo, pipelineItems)
 	if err != nil {
 		msg := fmt.Sprintf("failure to start pipeline for %s", repo.FullName)

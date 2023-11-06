@@ -106,8 +106,12 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		return nil, fmt.Errorf(msg)
 	}
 
+	if err := prepareStart(ctx, _store, pipeline, repoUser, repo); err != nil {
+		log.Error().Err(err).Str("repo", repo.FullName).Msgf("error preparing pipeline for %s#%d", repo.FullName, pipeline.Number)
+		return nil, err
+	}
+
 	if pipeline.Status == model.StatusBlocked {
-		publishPipeline(ctx, pipeline, repo, repoUser)
 		return pipeline, nil
 	}
 

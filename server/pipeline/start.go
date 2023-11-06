@@ -32,19 +32,22 @@ func start(ctx context.Context, store store.Store, activePipeline *model.Pipelin
 		log.Error().Err(err).Msg("Failed to cancel previous pipelines")
 	}
 
-	if err := store.WorkflowsCreate(activePipeline.Workflows); err != nil {
-		log.Error().Err(err).Str("repo", repo.FullName).Msgf("error persisting steps for %s#%d", repo.FullName, activePipeline.Number)
-		return nil, err
-	}
-
-	publishPipeline(ctx, activePipeline, repo, user)
-
 	if err := queuePipeline(repo, pipelineItems); err != nil {
 		log.Error().Err(err).Msg("queuePipeline")
 		return nil, err
 	}
 
 	return activePipeline, nil
+}
+
+func prepareStart(ctx context.Context, store store.Store, activePipeline *model.Pipeline, user *model.User, repo *model.Repo) error {
+	if err := store.WorkflowsCreate(activePipeline.Workflows); err != nil {
+		log.Error().Err(err).Str("repo", repo.FullName).Msgf("error persisting steps for %s#%d", repo.FullName, activePipeline.Number)
+		return err
+	}
+
+	publishPipeline(ctx, activePipeline, repo, user)
+	return nil
 }
 
 func publishPipeline(ctx context.Context, pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User) {
