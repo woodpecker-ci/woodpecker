@@ -1,3 +1,5 @@
+version: 1
+
 clone:
   git:
     image: plugins/git:next
