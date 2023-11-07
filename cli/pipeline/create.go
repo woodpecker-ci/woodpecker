@@ -19,12 +19,12 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
+	"go.woodpecker-ci.org/woodpecker/woodpecker-go/woodpecker"
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/cli/common"
+	"go.woodpecker-ci.org/woodpecker/cli/internal"
 )
 
 var pipelineCreateCmd = &cli.Command{

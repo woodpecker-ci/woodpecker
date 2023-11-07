@@ -19,7 +19,7 @@ import (
 	"path"
 	"strings"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/metadata"
 )
 
 // Option configures a compiler option.

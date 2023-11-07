@@ -19,9 +19,9 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/woodpecker-ci/woodpecker/server/forge/bitbucket/internal"
-	"github.com/woodpecker-ci/woodpecker/server/forge/types"
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/server/forge/bitbucket/internal"
+	"go.woodpecker-ci.org/woodpecker/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/server/model"
 )
 
 const (

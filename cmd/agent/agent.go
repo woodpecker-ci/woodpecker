@@ -37,14 +37,14 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
-	"github.com/woodpecker-ci/woodpecker/agent"
-	agentRpc "github.com/woodpecker-ci/woodpecker/agent/rpc"
-	"github.com/woodpecker-ci/woodpecker/cmd/common"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
-	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
-	"github.com/woodpecker-ci/woodpecker/shared/utils"
-	"github.com/woodpecker-ci/woodpecker/version"
+	"go.woodpecker-ci.org/woodpecker/agent"
+	agentRpc "go.woodpecker-ci.org/woodpecker/agent/rpc"
+	"go.woodpecker-ci.org/woodpecker/cmd/common"
+	"go.woodpecker-ci.org/woodpecker/pipeline/backend"
+	"go.woodpecker-ci.org/woodpecker/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/version"
 )
 
 func run(c *cli.Context) error {
