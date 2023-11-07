@@ -15,8 +15,8 @@
 package pipeline
 
 import (
-	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/server/model"
 )
 
 func UpdateWorkflowToStatusStarted(store model.UpdateWorkflowStore, workflow model.Workflow, state rpc.State) (*model.Workflow, error) {

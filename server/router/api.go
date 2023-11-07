@@ -18,9 +18,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
 
-	"github.com/woodpecker-ci/woodpecker/server/api"
-	"github.com/woodpecker-ci/woodpecker/server/api/debug"
-	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
+	"go.woodpecker-ci.org/woodpecker/server/api"
+	"go.woodpecker-ci.org/woodpecker/server/api/debug"
+	"go.woodpecker-ci.org/woodpecker/server/router/middleware/session"
 )
 
 func apiRoutes(e *gin.RouterGroup) {

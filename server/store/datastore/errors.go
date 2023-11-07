@@ -17,7 +17,7 @@ package datastore
 import (
 	"fmt"
 
-	"github.com/woodpecker-ci/woodpecker/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/server/store/types"
 )
 
 type ErrorRepoNotExist struct {

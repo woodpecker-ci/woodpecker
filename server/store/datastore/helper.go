@@ -21,8 +21,8 @@ import (
 
 	"xorm.io/xorm"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/server/store/types"
 )
 
 // wrapGet return error if err not nil or if requested entry do not exist

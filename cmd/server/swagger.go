@@ -15,8 +15,8 @@
 package main
 
 import (
-	"github.com/woodpecker-ci/woodpecker/cmd/server/docs"
-	"github.com/woodpecker-ci/woodpecker/version"
+	"go.woodpecker-ci.org/woodpecker/cmd/server/docs"
+	"go.woodpecker-ci.org/woodpecker/version"
 )
 
 // generate docs/swagger.json via:
