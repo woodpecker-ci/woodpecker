@@ -21,12 +21,12 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/urfave/cli/v2"
 
-	"github.com/woodpecker-ci/woodpecker/cmd/common"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/docker"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/kubernetes"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/local"
-	"github.com/woodpecker-ci/woodpecker/shared/utils"
-	"github.com/woodpecker-ci/woodpecker/version"
+	"go.woodpecker-ci.org/woodpecker/cmd/common"
+	"go.woodpecker-ci.org/woodpecker/pipeline/backend/docker"
+	"go.woodpecker-ci.org/woodpecker/pipeline/backend/kubernetes"
+	"go.woodpecker-ci.org/woodpecker/pipeline/backend/local"
+	"go.woodpecker-ci.org/woodpecker/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/version"
 )
 
 func main() {

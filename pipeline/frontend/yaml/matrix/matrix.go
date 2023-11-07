@@ -17,7 +17,7 @@ package matrix
 import (
 	"strings"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/errors"
+	"go.woodpecker-ci.org/woodpecker/pipeline/errors"
 
 	"codeberg.org/6543/xyaml"
 )

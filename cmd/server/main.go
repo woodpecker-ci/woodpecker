@@ -20,9 +20,9 @@ import (
 
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/urfave/cli/v2"
-	_ "github.com/woodpecker-ci/woodpecker/cmd/server/docs"
+	_ "go.woodpecker-ci.org/woodpecker/cmd/server/docs"
 
-	"github.com/woodpecker-ci/woodpecker/version"
+	"go.woodpecker-ci.org/woodpecker/version"
 )
 
 func main() {

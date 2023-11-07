@@ -20,8 +20,8 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/woodpecker-ci/woodpecker/cmd/common"
-	"github.com/woodpecker-ci/woodpecker/shared/constant"
+	"go.woodpecker-ci.org/woodpecker/cmd/common"
+	"go.woodpecker-ci.org/woodpecker/shared/constant"
 )
 
 var flags = append([]cli.Flag{

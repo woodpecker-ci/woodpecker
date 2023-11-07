@@ -1,4 +1,4 @@
-// Copyright 2022 Woodpecker Authors
+// Copyright 2023 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,20 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package log
+package yaml
 
-import (
-	"github.com/urfave/cli/v2"
-
-	"go.woodpecker-ci.org/woodpecker/cli/common"
-)
-
-// Command exports the log command set.
-var Command = &cli.Command{
-	Name:  "log",
-	Usage: "manage logs",
-	Flags: common.GlobalFlags,
-	Subcommands: []*cli.Command{
-		logPurgeCmd,
-	},
-}
+// Version of this package and it's subpackages
+const Version = 1

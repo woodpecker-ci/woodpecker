@@ -10,7 +10,7 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/shared/addon/types"
+	"go.woodpecker-ci.org/woodpecker/shared/addon/types"
 )
 
 var pluginCache = map[string]*plugin.Plugin{}
