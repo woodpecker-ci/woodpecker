@@ -14,7 +14,7 @@
 
 package encryption
 
-import "github.com/woodpecker-ci/woodpecker/server/model"
+import "go.woodpecker-ci.org/woodpecker/server/model"
 
 type noEncryptionBuilder struct {
 	clients []model.EncryptionClient

@@ -16,8 +16,8 @@ package datastore
 
 import (
 	"github.com/rs/zerolog"
-	"github.com/woodpecker-ci/woodpecker/server/store"
-	"github.com/woodpecker-ci/woodpecker/server/store/datastore/migration"
+	"go.woodpecker-ci.org/woodpecker/server/store"
+	"go.woodpecker-ci.org/woodpecker/server/store/datastore/migration"
 
 	"xorm.io/xorm"
 	xlog "xorm.io/xorm/log"

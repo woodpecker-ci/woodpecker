@@ -23,8 +23,8 @@ import (
 	"github.com/franela/goblin"
 	"github.com/gin-gonic/gin"
 
-	"github.com/woodpecker-ci/woodpecker/server/forge/github/fixtures"
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/server/forge/github/fixtures"
+	"go.woodpecker-ci.org/woodpecker/server/model"
 )
 
 func Test_github(t *testing.T) {

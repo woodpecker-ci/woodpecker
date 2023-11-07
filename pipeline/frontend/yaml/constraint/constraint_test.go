@@ -20,8 +20,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/metadata"
 )
 
 func TestConstraint(t *testing.T) {

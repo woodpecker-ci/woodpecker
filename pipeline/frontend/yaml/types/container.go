@@ -19,10 +19,10 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/constraint"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types/base"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/utils"
-	"github.com/woodpecker-ci/woodpecker/shared/constant"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/constraint"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/types/base"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/utils"
+	"go.woodpecker-ci.org/woodpecker/shared/constant"
 )
 
 type (
