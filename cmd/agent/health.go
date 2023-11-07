@@ -23,8 +23,8 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
 
-	"github.com/woodpecker-ci/woodpecker/agent"
-	"github.com/woodpecker-ci/woodpecker/version"
+	"go.woodpecker-ci.org/woodpecker/agent"
+	"go.woodpecker-ci.org/woodpecker/version"
 )
 
 // the file implements some basic healthcheck logic based on the

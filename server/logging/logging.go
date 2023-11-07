@@ -18,7 +18,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/server/model"
 )
 
 // ErrNotFound is returned when the log does not exist.

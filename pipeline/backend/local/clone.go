@@ -26,7 +26,7 @@ import (
 	"strings"
 
 	"github.com/rs/zerolog/log"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/pipeline/backend/types"
 )
 
 // checkGitCloneCap check if we have the git binary on hand

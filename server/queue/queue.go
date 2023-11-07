@@ -19,7 +19,7 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/server/model"
 )
 
 var (
