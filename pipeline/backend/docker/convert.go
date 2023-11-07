@@ -22,8 +22,8 @@ import (
 
 	"github.com/docker/docker/api/types/container"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/common"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/pipeline/backend/common"
+	"go.woodpecker-ci.org/woodpecker/pipeline/backend/types"
 )
 
 // returns a container configuration.

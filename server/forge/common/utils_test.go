@@ -17,7 +17,7 @@ package common_test
 import (
 	"testing"
 
-	"github.com/woodpecker-ci/woodpecker/server/forge/common"
+	"go.woodpecker-ci.org/woodpecker/server/forge/common"
 )
 
 func Test_Netrc(t *testing.T) {

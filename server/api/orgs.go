@@ -20,8 +20,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
-	"github.com/woodpecker-ci/woodpecker/server/store"
+	"go.woodpecker-ci.org/woodpecker/server/router/middleware/session"
+	"go.woodpecker-ci.org/woodpecker/server/store"
 )
 
 // GetOrgs
