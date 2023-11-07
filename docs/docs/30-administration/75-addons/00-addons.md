@@ -10,6 +10,7 @@ Addons can be used for:
 ## Restrictions
 
 Addons are restricted by how Go plugins work. This includes the following restrictions:
+
 - only supported on Linux, FreeBSD and macOS
 - addons must have been built for the correct Woodpecker version. If an addon is not provided specifically for this version, you likely won't be able to use it.
 
