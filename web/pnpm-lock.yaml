@@ -18,7 +18,7 @@ dependencies:
     specifier: ^10.4.0
     version: 10.5.0(vue@3.3.7)
   '@vueuse/core':
-    specifier: ^10.0.0
+    specifier: ^10.5.0
     version: 10.5.0(vue@3.3.7)
   ansi_up:
     specifier: ^6.0.0
