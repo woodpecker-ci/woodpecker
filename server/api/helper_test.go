@@ -20,7 +20,7 @@ func TestHandlePipelineError(t *testing.T) {
 			code: http.StatusNoContent,
 		},
 		{
-			err:  &pipeline.ErrNotFound{Msg: "pipeline not found"},
+			err:  &pipeline.ErrConfigNotFound{Msg: "pipeline not found"},
 			code: http.StatusNotFound,
 		},
 		{

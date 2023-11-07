@@ -189,10 +189,12 @@ func (c *Constraint) Match(m metadata.Metadata, global bool, env map[string]stri
 		}
 		out, err := expr.Compile(c.Evaluate, expr.Env(env), expr.AllowUndefinedVariables(), expr.AsBool())
 		if err != nil {
+			// TODO: use a specific error type
 			return false, err
 		}
 		result, err := expr.Run(out, env)
 		if err != nil {
+			// TODO: use a specific error type
 			return false, err
 		}
 		match = match && result.(bool)

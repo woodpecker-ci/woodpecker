@@ -89,6 +89,7 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		}
 
 		if err := settings.ParamsToEnv(container.Settings, environment, pluginSecrets.toStringMap()); err != nil {
+			// TODO: use a specific error type
 			return nil, err
 		}
 	}
@@ -112,6 +113,7 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		if ok && secret.Available(container) {
 			environment[strings.ToUpper(requested.Target)] = secret.Value
 		} else {
+			// TODO: use a specific error type
 			return nil, fmt.Errorf("secret %q not found or not allowed to be used", requested.Source)
 		}
 	}

@@ -82,3 +82,38 @@ func HasBlockingErrors(err error) bool {
 
 	return false
 }
+
+var (
+	// ErrSkip is used as a return value when container execution should be
+	// skipped at runtime. It is not returned as an error by any function.
+	ErrSkip = errors.New("Skipped")
+
+	// ErrCancel is used as a return value when the container execution receives
+	// a cancellation signal from the context.
+	ErrCancel = errors.New("Canceled")
+
+	// ErrFiltered is used as a when all steps  are filtered out or the pipeline is skipped by skip-ci in the commit message
+	ErrFiltered = errors.New("Filtered as no steps matched or skipped by commit message")
+)
+
+// An ExitError reports an unsuccessful exit.
+type ExitError struct {
+	Name string
+	Code int
+}
+
+// Error returns the error message in string format.
+func (e *ExitError) Error() string {
+	return fmt.Sprintf("%s : exit code %d", e.Name, e.Code)
+}
+
+// An OomError reports the process received an OOMKill from the kernel.
+type OomError struct {
+	Name string
+	Code int
+}
+
+// Error returns the error message in string format.
+func (e *OomError) Error() string {
+	return fmt.Sprintf("%s : received oom kill", e.Name)
+}

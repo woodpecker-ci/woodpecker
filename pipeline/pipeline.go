@@ -27,6 +27,7 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	backend "go.woodpecker-ci.org/woodpecker/pipeline/backend/types"
+	pipeline_errors "go.woodpecker-ci.org/woodpecker/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/pipeline/multipart"
 )
@@ -119,7 +120,7 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 	for _, stage := range r.spec.Stages {
 		select {
 		case <-r.ctx.Done():
-			return ErrCancel
+			return pipeline_errors.ErrCancel
 		case err := <-r.execAll(stage.Steps):
 			if err != nil {
 				r.err = err
@@ -211,7 +212,7 @@ func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 
 			// if we got a nil process but an error state
 			// then we need to log the internal error to the step.
-			if r.logger != nil && err != nil && !errors.Is(err, ErrCancel) && processState == nil {
+			if r.logger != nil && err != nil && !errors.Is(err, pipeline_errors.ErrCancel) && processState == nil {
 				_ = r.logger.Log(step, multipart.New(strings.NewReader(
 					"Backend engine error while running step: "+err.Error(),
 				)))
@@ -269,7 +270,7 @@ func (r *Runtime) exec(step *backend.Step) (*backend.State, error) {
 	waitState, err := r.engine.WaitStep(r.ctx, step, r.taskUUID)
 	if err != nil {
 		if errors.Is(err, context.Canceled) {
-			return waitState, ErrCancel
+			return waitState, pipeline_errors.ErrCancel
 		}
 		return nil, err
 	}
@@ -279,12 +280,12 @@ func (r *Runtime) exec(step *backend.Step) (*backend.State, error) {
 	}
 
 	if waitState.OOMKilled {
-		return waitState, &OomError{
+		return waitState, &pipeline_errors.OomError{
 			Name: step.Name,
 			Code: waitState.ExitCode,
 		}
 	} else if waitState.ExitCode != 0 {
-		return waitState, &ExitError{
+		return waitState, &pipeline_errors.ExitError{
 			Name: step.Name,
 			Code: waitState.ExitCode,
 		}

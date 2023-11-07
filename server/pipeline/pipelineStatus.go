@@ -50,9 +50,11 @@ func UpdateStatusToDone(store model.UpdatePipelineStore, pipeline model.Pipeline
 
 func UpdateToStatusError(store model.UpdatePipelineStore, pipeline model.Pipeline, err error) (*model.Pipeline, error) {
 	pipeline.Errors = errors.GetPipelineErrors(err)
-	pipeline.Status = model.StatusError
-	pipeline.Started = time.Now().Unix()
-	pipeline.Finished = pipeline.Started
+	if errors.HasBlockingErrors(err) {
+		pipeline.Status = model.StatusError
+		pipeline.Started = time.Now().Unix()
+		pipeline.Finished = pipeline.Started
+	}
 	return &pipeline, store.UpdatePipeline(&pipeline)
 }
 

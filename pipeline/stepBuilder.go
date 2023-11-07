@@ -110,7 +110,7 @@ func (b *StepBuilder) Build() (items []*Item, errorsAndWarnings error) {
 
 	// check if at least one step can start if slice is not empty
 	if len(items) > 0 && !stepListContainsItemsToRun(items) {
-		return nil, fmt.Errorf("pipeline has no steps to run")
+		return nil, pipeline_errors.ErrFiltered
 	}
 
 	return items, errorsAndWarnings
@@ -132,6 +132,7 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 	// substitute vars
 	substituted, err := frontend.EnvVarSubst(data, environ)
 	if err != nil {
+		// TODO: add error type
 		return nil, multierr.Append(errorsAndWarnings, err)
 	}
 

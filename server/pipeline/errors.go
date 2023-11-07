@@ -14,8 +14,6 @@
 
 package pipeline
 
-import "errors"
-
 type ErrConfigNotFound struct {
 	Msg string
 }
@@ -47,5 +45,3 @@ func (e ErrBadRequest) Is(target error) bool {
 	}
 	return ok
 }
-
-var ErrFiltered = errors.New("ignoring hook: 'when' filters filtered out all steps")

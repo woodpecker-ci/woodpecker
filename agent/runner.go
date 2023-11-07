@@ -28,6 +28,7 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/pipeline"
 	backend "go.woodpecker-ci.org/woodpecker/pipeline/backend/types"
+	pipeline_errors "go.woodpecker-ci.org/woodpecker/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/pipeline/rpc"
 	"go.woodpecker-ci.org/woodpecker/shared/utils"
 )
@@ -159,10 +160,10 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 		state.Error = ""
 		state.ExitCode = 137
 	} else if err != nil {
-		pExitError := &pipeline.ExitError{}
+		pExitError := &pipeline_errors.ExitError{}
 		if errors.As(err, &pExitError) {
 			state.ExitCode = pExitError.Code
-		} else if errors.Is(err, pipeline.ErrCancel) {
+		} else if errors.Is(err, pipeline_errors.ErrCancel) {
 			state.Error = ""
 			state.ExitCode = 137
 			canceled.SetTo(true)

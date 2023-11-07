@@ -43,7 +43,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	skipMatch := skipPipelineRegex.FindString(pipeline.Message)
 	if len(skipMatch) > 0 {
 		log.Debug().Str("repo", repo.FullName).Msgf("ignoring pipeline as skip-ci was found in the commit (%s) message '%s'", pipeline.Commit, pipeline.Message)
-		return nil, ErrFiltered
+		return nil, errors.ErrFiltered
 	}
 
 	// If the forge has a refresh token, the current access token
@@ -73,8 +73,8 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	}
 
 	if len(pipelineItems) == 0 {
-		log.Debug().Str("repo", repo.FullName).Msg(ErrFiltered.Error())
-		return nil, ErrFiltered
+		log.Debug().Str("repo", repo.FullName).Msg(errors.ErrFiltered.Error())
+		return nil, errors.ErrFiltered
 	}
 
 	setGatedState(repo, pipeline)

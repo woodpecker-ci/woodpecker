@@ -21,7 +21,6 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	pipeline_errors "go.woodpecker-ci.org/woodpecker/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/server"
 	forge_types "go.woodpecker-ci.org/woodpecker/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/server/model"
@@ -90,11 +89,7 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 	}
 
 	pipelineItems, err := parsePipeline(store, newPipeline, user, repo, pipelineFiles, envs)
-	if !pipeline_errors.HasBlockingErrors(err) {
-		newPipeline.Errors = pipeline_errors.GetPipelineErrors(err)
-	} else if err != nil {
-		// TODO: only apply expected pipeline errors
-
+	if err != nil {
 		currentPipeline, uerr := UpdateToStatusError(store, *newPipeline, err)
 		if uerr != nil {
 			log.Error().Err(uerr).Msgf("Error setting error status of pipeline for %s#%d", repo.FullName, currentPipeline.Number)
@@ -102,7 +97,9 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 
 		updatePipelineStatus(ctx, currentPipeline, repo, user)
 
-		return newPipeline, err
+		msg := fmt.Sprintf("failure to parsePipeline for %s", repo.FullName)
+		log.Error().Err(err).Msg(msg)
+		return currentPipeline, fmt.Errorf(msg)
 	}
 
 	newPipeline = setPipelineStepsOnPipeline(newPipeline, pipelineItems)

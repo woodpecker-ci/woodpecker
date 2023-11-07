@@ -20,6 +20,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	pipeline_errors "go.woodpecker-ci.org/woodpecker/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/server"
 	"go.woodpecker-ci.org/woodpecker/server/forge"
 	"go.woodpecker-ci.org/woodpecker/server/model"
@@ -34,7 +35,7 @@ func handlePipelineErr(c *gin.Context, err error) {
 		c.String(http.StatusNotFound, "%s", err)
 	} else if errors.Is(err, &pipeline.ErrBadRequest{}) {
 		c.String(http.StatusBadRequest, "%s", err)
-	} else if errors.Is(err, pipeline.ErrFiltered) {
+	} else if errors.Is(err, pipeline_errors.ErrFiltered) {
 		c.Status(http.StatusNoContent)
 	} else {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
