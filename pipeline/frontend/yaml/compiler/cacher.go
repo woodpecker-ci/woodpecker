@@ -18,7 +18,7 @@ import (
 	"path"
 	"strings"
 
-	yaml_types "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
+	yaml_types "go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/types"
 )
 
 // Cacher defines a compiler transform that can be used

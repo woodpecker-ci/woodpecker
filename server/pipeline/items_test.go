@@ -3,9 +3,9 @@ package pipeline
 import (
 	"testing"
 
-	sharedPipeline "github.com/woodpecker-ci/woodpecker/pipeline"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	sharedPipeline "go.woodpecker-ci.org/woodpecker/pipeline"
+	"go.woodpecker-ci.org/woodpecker/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/server/model"
 )
 
 func TestSetPipelineStepsOnPipeline(t *testing.T) {

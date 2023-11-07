@@ -23,7 +23,7 @@ import (
 	"net/http"
 	"net/url"
 
-	shared_utils "github.com/woodpecker-ci/woodpecker/shared/utils"
+	shared_utils "go.woodpecker-ci.org/woodpecker/shared/utils"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/bitbucket"
