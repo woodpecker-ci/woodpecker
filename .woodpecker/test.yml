@@ -78,6 +78,11 @@ steps:
       - 'addlicense -check -ignore "vendor/**" **/*.go'
     when: *when
 
+  prettier:
+    image: docker.io/woodpeckerci/plugin-prettier:next
+    group: test
+    when: *when
+
   test:
     image: *golang_image
     group: test
