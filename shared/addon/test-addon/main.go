@@ -5,10 +5,10 @@ import (
 	"net/http"
 
 	"github.com/rs/zerolog"
-	"github.com/woodpecker-ci/woodpecker/server/forge"
-	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	addon_types "github.com/woodpecker-ci/woodpecker/shared/addon/types"
+	"go.woodpecker-ci.org/woodpecker/server/forge"
+	forge_types "go.woodpecker-ci.org/woodpecker/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/server/model"
+	addon_types "go.woodpecker-ci.org/woodpecker/shared/addon/types"
 )
 
 var Type = addon_types.TypeForge
