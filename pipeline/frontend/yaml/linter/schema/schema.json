@@ -34,7 +34,8 @@
       "type": "array",
       "minLength": 1,
       "items": { "type": "string" }
-    }
+    },
+    "version": { "type": "number", "default": 1 }
   },
   "definitions": {
     "clone": {

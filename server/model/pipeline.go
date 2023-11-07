@@ -16,7 +16,7 @@
 package model
 
 import (
-	"github.com/woodpecker-ci/woodpecker/pipeline/errors"
+	"go.woodpecker-ci.org/woodpecker/pipeline/errors"
 )
 
 type Pipeline struct {

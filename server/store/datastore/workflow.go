@@ -17,7 +17,7 @@ package datastore
 import (
 	"xorm.io/xorm"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/server/model"
 )
 
 func (s storage) WorkflowGetTree(pipeline *model.Pipeline) ([]*model.Workflow, error) {

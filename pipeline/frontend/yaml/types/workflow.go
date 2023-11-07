@@ -15,8 +15,8 @@
 package types
 
 import (
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/constraint"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types/base"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/constraint"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/types/base"
 )
 
 type (
@@ -31,6 +31,7 @@ type (
 		DependsOn []string        `yaml:"depends_on,omitempty"`
 		RunsOn    []string        `yaml:"runs_on,omitempty"`
 		SkipClone bool            `yaml:"skip_clone"`
+		Version   int             `yaml:"version"`
 
 		// Undocumented
 		Cache    base.StringOrSlice `yaml:"cache,omitempty"`

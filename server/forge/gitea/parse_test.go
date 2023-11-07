@@ -23,10 +23,10 @@ import (
 	"github.com/franela/goblin"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/woodpecker-ci/woodpecker/server/forge/gitea/fixtures"
-	"github.com/woodpecker-ci/woodpecker/server/forge/types"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/server/forge/gitea/fixtures"
+	"go.woodpecker-ci.org/woodpecker/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/shared/utils"
 )
 
 func Test_parser(t *testing.T) {
