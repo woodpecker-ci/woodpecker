@@ -57,25 +57,25 @@ As long as there were no changes to Woodpecker's interfaces or they are backward
 package main
 
 import (
-	"context"
-	"net/http"
+  "context"
+  "net/http"
 
-	"github.com/rs/zerolog"
-	"go.woodpecker-ci.org/woodpecker/woodpecker/server/forge"
-	forge_types "go.woodpecker-ci.org/woodpecker/woodpecker/server/forge/types"
-	"go.woodpecker-ci.org/woodpecker/woodpecker/server/model"
-	addon_types "go.woodpecker-ci.org/woodpecker/woodpecker/shared/addon/types"
+  "github.com/rs/zerolog"
+  "go.woodpecker-ci.org/woodpecker/woodpecker/server/forge"
+  forge_types "go.woodpecker-ci.org/woodpecker/woodpecker/server/forge/types"
+  "go.woodpecker-ci.org/woodpecker/woodpecker/server/model"
+  addon_types "go.woodpecker-ci.org/woodpecker/woodpecker/shared/addon/types"
 )
 
 var Type = addon_types.TypeForge
 
 func Addon(logger zerolog.Logger, env []string) (forge.Forge, error) {
-	logger.Info().Msg("hello world from addon")
-	return &config{l: logger}, nil
+  logger.Info().Msg("hello world from addon")
+  return &config{l: logger}, nil
 }
 
 type config struct {
-	l zerolog.Logger
+  l zerolog.Logger
 }
 
 // ... in this case, `config` must implement `forge.Forge`. You must directly use Woodpecker's packages - see imports above.
