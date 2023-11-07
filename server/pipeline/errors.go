@@ -16,18 +16,18 @@ package pipeline
 
 import "errors"
 
-type ErrNotFound struct {
+type ErrConfigNotFound struct {
 	Msg string
 }
 
-func (e ErrNotFound) Error() string {
+func (e ErrConfigNotFound) Error() string {
 	return e.Msg
 }
 
-func (e ErrNotFound) Is(target error) bool {
-	_, ok := target.(ErrNotFound) //nolint:errorlint
+func (e ErrConfigNotFound) Is(target error) bool {
+	_, ok := target.(ErrConfigNotFound) //nolint:errorlint
 	if !ok {
-		_, ok = target.(*ErrNotFound) //nolint:errorlint
+		_, ok = target.(*ErrConfigNotFound) //nolint:errorlint
 	}
 	return ok
 }

@@ -16,7 +16,6 @@ package pipeline
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
@@ -44,7 +43,12 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 	if err != nil {
 		msg := fmt.Sprintf("failure to get pipeline config for %s. %s", repo.FullName, err)
 		log.Error().Msgf(msg)
-		return nil, &ErrNotFound{Msg: msg}
+		return nil, &ErrConfigNotFound{Msg: msg}
+	}
+
+	// TODO: is this check necessary?
+	if len(configs) == 0 {
+		return nil, ErrConfigNotFound{Msg: "no config found"}
 	}
 
 	for _, y := range configs {
@@ -79,35 +83,29 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 		return nil, fmt.Errorf(msg)
 	}
 
-	if len(configs) == 0 {
-		newPipeline, uerr := UpdateToStatusError(store, *newPipeline, errors.New("pipeline definition not found"))
-		if uerr != nil {
-			log.Debug().Err(uerr).Msg("failure to update pipeline status")
-		} else {
-			updatePipelineStatus(ctx, newPipeline, repo, user)
-		}
-		return newPipeline, nil
-	}
 	if err := linkPipelineConfigs(store, configs, newPipeline.ID); err != nil {
 		msg := fmt.Sprintf("failure to persist pipeline config for %s.", repo.FullName)
 		log.Error().Err(err).Msg(msg)
 		return nil, fmt.Errorf(msg)
 	}
 
-	newPipeline, pipelineItems, err := createPipelineItems(ctx, store, newPipeline, user, repo, pipelineFiles, envs)
-	if pipeline_errors.HasBlockingErrors(err) {
-		msg := fmt.Sprintf("failure to createPipelineItems for %s", repo.FullName)
-		log.Error().Err(err).Msg(msg)
-		return nil, err
-	} else if err != nil {
+	pipelineItems, err := parsePipeline(store, newPipeline, user, repo, pipelineFiles, envs)
+	if !pipeline_errors.HasBlockingErrors(err) {
 		newPipeline.Errors = pipeline_errors.GetPipelineErrors(err)
+	} else if err != nil {
+		// TODO: only apply expected pipeline errors
+
+		currentPipeline, uerr := UpdateToStatusError(store, *newPipeline, err)
+		if uerr != nil {
+			log.Error().Err(uerr).Msgf("Error setting error status of pipeline for %s#%d", repo.FullName, currentPipeline.Number)
+		}
+
+		updatePipelineStatus(ctx, currentPipeline, repo, user)
+
+		return newPipeline, err
 	}
 
-	if err != nil {
-		msg := fmt.Sprintf("failure to createPipelineItems for %s", repo.FullName)
-		log.Error().Err(err).Msg(msg)
-		return nil, fmt.Errorf(msg)
-	}
+	newPipeline = setPipelineStepsOnPipeline(newPipeline, pipelineItems)
 
 	newPipeline, err = start(ctx, store, newPipeline, user, repo, pipelineItems)
 	if err != nil {

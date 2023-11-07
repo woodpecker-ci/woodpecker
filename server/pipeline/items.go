@@ -15,14 +15,12 @@
 package pipeline
 
 import (
-	"context"
 	"database/sql"
 	"errors"
 
 	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/pipeline"
-	pipeline_errors "go.woodpecker-ci.org/woodpecker/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/compiler"
 	"go.woodpecker-ci.org/woodpecker/server"
 	forge_types "go.woodpecker-ci.org/woodpecker/server/forge/types"
@@ -86,29 +84,6 @@ func parsePipeline(store store.Store, currentPipeline *model.Pipeline, user *mod
 	return b.Build()
 }
 
-func createPipelineItems(c context.Context, store store.Store,
-	currentPipeline *model.Pipeline, user *model.User, repo *model.Repo,
-	yamls []*forge_types.FileMeta, envs map[string]string,
-) (*model.Pipeline, []*pipeline.Item, error) {
-	pipelineItems, err := parsePipeline(store, currentPipeline, user, repo, yamls, envs)
-	if err != nil {
-		currentPipeline, uerr := UpdateToStatusError(store, *currentPipeline, err)
-		if uerr != nil {
-			log.Error().Err(uerr).Msgf("Error setting error status of pipeline for %s#%d", repo.FullName, currentPipeline.Number)
-		} else {
-			updatePipelineStatus(c, currentPipeline, repo, user)
-		}
-
-		if pipeline_errors.HasBlockingErrors(err) {
-			return currentPipeline, nil, err
-		}
-	}
-
-	currentPipeline = setPipelineStepsOnPipeline(currentPipeline, pipelineItems)
-
-	return currentPipeline, pipelineItems, err
-}
-
 // setPipelineStepsOnPipeline is the link between pipeline representation in "pipeline package" and server
 // to be specific this func currently is used to convert the pipeline.Item list (crafted by StepBuilder.Build()) into
 // a pipeline that can be stored in the database by the server
@@ -122,12 +97,8 @@ func setPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*pipel
 
 	for _, item := range pipelineItems {
 		for _, stage := range item.Config.Stages {
-			var gid int
 			for _, step := range stage.Steps {
 				pidSequence++
-				if gid == 0 {
-					gid = pidSequence
-				}
 				step := &model.Step{
 					Name:       step.Alias,
 					UUID:       step.UUID,

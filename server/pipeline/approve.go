@@ -38,7 +38,7 @@ func Approve(ctx context.Context, store store.Store, currentPipeline *model.Pipe
 	if err != nil {
 		msg := fmt.Sprintf("failure to get pipeline config for %s. %s", repo.FullName, err)
 		log.Error().Msg(msg)
-		return nil, ErrNotFound{Msg: msg}
+		return nil, ErrConfigNotFound{Msg: msg}
 	}
 
 	if currentPipeline, err = UpdateToStatusPending(store, *currentPipeline, user.Login); err != nil {
@@ -50,14 +50,25 @@ func Approve(ctx context.Context, store store.Store, currentPipeline *model.Pipe
 		yamls = append(yamls, &forge_types.FileMeta{Data: y.Data, Name: y.Name})
 	}
 
-	currentPipeline, pipelineItems, err := createPipelineItems(ctx, store, currentPipeline, user, repo, yamls, nil)
-	if errors.HasBlockingErrors(err) {
+	pipelineItems, err := parsePipeline(store, currentPipeline, user, repo, yamls, nil)
+	if !errors.HasBlockingErrors(err) {
+		currentPipeline.Errors = errors.GetPipelineErrors(err)
+	} else if err != nil {
+		// TODO: only apply expected pipeline errors
+
+		currentPipeline, uerr := UpdateToStatusError(store, *currentPipeline, err)
+		if uerr != nil {
+			log.Error().Err(uerr).Msgf("Error setting error status of pipeline for %s#%d", repo.FullName, currentPipeline.Number)
+		}
+
+		updatePipelineStatus(ctx, currentPipeline, repo, user)
+
 		msg := fmt.Sprintf("failure to createPipelineItems for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
 		return nil, err
-	} else if err != nil {
-		currentPipeline.Errors = errors.GetPipelineErrors(err)
 	}
+
+	currentPipeline = setPipelineStepsOnPipeline(currentPipeline, pipelineItems)
 
 	currentPipeline, err = start(ctx, store, currentPipeline, user, repo, pipelineItems)
 	if err != nil {

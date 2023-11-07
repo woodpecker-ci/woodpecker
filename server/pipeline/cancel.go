@@ -34,7 +34,7 @@ func Cancel(ctx context.Context, store store.Store, repo *model.Repo, user *mode
 
 	workflows, err := store.WorkflowGetTree(pipeline)
 	if err != nil {
-		return &ErrNotFound{Msg: err.Error()}
+		return &ErrConfigNotFound{Msg: err.Error()}
 	}
 
 	// First cancel/evict steps in the queue in one go
