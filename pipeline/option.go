@@ -3,7 +3,7 @@ package pipeline
 import (
 	"context"
 
-	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
+	backend "go.woodpecker-ci.org/woodpecker/pipeline/backend/types"
 )
 
 // Option configures a runtime option.

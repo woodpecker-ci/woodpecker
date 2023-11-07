@@ -27,16 +27,16 @@ import (
 	"github.com/drone/envsubst"
 	"github.com/urfave/cli/v2"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/pipeline"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
-	backendTypes "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/compiler"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/linter"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/matrix"
-	"github.com/woodpecker-ci/woodpecker/pipeline/multipart"
-	"github.com/woodpecker-ci/woodpecker/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/cli/common"
+	"go.woodpecker-ci.org/woodpecker/pipeline"
+	"go.woodpecker-ci.org/woodpecker/pipeline/backend"
+	backendTypes "go.woodpecker-ci.org/woodpecker/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/compiler"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/linter"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/matrix"
+	"go.woodpecker-ci.org/woodpecker/pipeline/multipart"
+	"go.woodpecker-ci.org/woodpecker/shared/utils"
 )
 
 // Command exports the exec command.

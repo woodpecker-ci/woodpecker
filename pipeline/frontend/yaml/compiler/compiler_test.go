@@ -5,8 +5,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	yaml_types "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
-	yaml_base_types "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types/base"
+	yaml_types "go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/types"
+	yaml_base_types "go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/types/base"
 )
 
 func TestSecretAvailable(t *testing.T) {

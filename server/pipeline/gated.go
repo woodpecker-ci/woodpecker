@@ -14,7 +14,7 @@
 
 package pipeline
 
-import "github.com/woodpecker-ci/woodpecker/server/model"
+import "go.woodpecker-ci.org/woodpecker/server/model"
 
 func setGatedState(repo *model.Repo, pipe *model.Pipeline) {
 	// TODO(336): extend gated feature with an allow/block List
