@@ -18,7 +18,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/metadata"
 )
 
 func TestWithWorkspace(t *testing.T) {

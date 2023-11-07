@@ -20,9 +20,9 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/matrix"
-	"github.com/woodpecker-ci/woodpecker/version"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/matrix"
+	"go.woodpecker-ci.org/woodpecker/version"
 )
 
 // return the metadata from the cli context.
