@@ -21,7 +21,7 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/woodpecker-ci/woodpecker/shared/constant"
+	"go.woodpecker-ci.org/woodpecker/shared/constant"
 )
 
 func DetectPipelineConfig() (isDir bool, config string, _ error) {

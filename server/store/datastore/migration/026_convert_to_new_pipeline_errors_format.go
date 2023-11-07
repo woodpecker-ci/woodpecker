@@ -15,8 +15,9 @@
 package migration
 
 import (
-	"github.com/woodpecker-ci/woodpecker/pipeline/errors"
 	"xorm.io/xorm"
+
+	"go.woodpecker-ci.org/woodpecker/pipeline/errors"
 )
 
 // perPage026 set the size of the slice to read per page
