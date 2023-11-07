@@ -26,10 +26,10 @@ import (
 	"github.com/tevino/abool/v2"
 	"google.golang.org/grpc/metadata"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline"
-	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
-	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
-	"github.com/woodpecker-ci/woodpecker/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/pipeline"
+	backend "go.woodpecker-ci.org/woodpecker/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/shared/utils"
 )
 
 type Runner struct {
