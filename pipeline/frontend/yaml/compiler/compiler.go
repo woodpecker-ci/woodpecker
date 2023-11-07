@@ -262,7 +262,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			stage = new(backend_types.Stage)
 			stage.Name = fmt.Sprintf("%s_stage_%v", c.prefix, i)
 			stage.Alias = container.Name
-			stepStages = append(config.Stages, stage)
+			stepStages = append(stepStages, stage)
 		}
 
 		if len(container.DependsOn) > 0 {
@@ -295,6 +295,14 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 
 	// dag is used if one or more steps have a depends_on
 	if useDag {
+		for _, stage := range steps {
+			for _, dep := range stage.dependsOn {
+				if _, ok := steps[dep]; !ok {
+					return nil, fmt.Errorf("step %s depends on unknown step %s", stage.step.Name, dep)
+				}
+			}
+		}
+
 		config.Stages = convertToStages(steps)
 	} else {
 		config.Stages = append(config.Stages, stepStages...)
@@ -367,7 +375,7 @@ func convertToStages(steps map[string]*stepWithDependsOn) []*backend_types.Stage
 		for name, step := range steps {
 			if allDependenciesSatisfied(step, addedNodes) {
 				stage.Steps = append(stage.Steps, step.step)
-				addedNodesThisLevel[step.step.Name] = struct{}{}
+				addedNodesThisLevel[name] = struct{}{}
 				delete(steps, name)
 			}
 		}
