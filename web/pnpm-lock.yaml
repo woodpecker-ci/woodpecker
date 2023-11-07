@@ -14,11 +14,8 @@ dependencies:
   '@kyvg/vue3-notification':
     specifier: ^3.0.0
     version: 3.0.2(vue@3.3.7)
-  '@vueuse/components':
-    specifier: ^10.4.0
-    version: 10.5.0(vue@3.3.7)
   '@vueuse/core':
-    specifier: ^10.0.0
+    specifier: ^10.5.0
     version: 10.5.0(vue@3.3.7)
   ansi_up:
     specifier: ^6.0.0
@@ -1124,17 +1121,6 @@ packages:
 
   /@vue/shared@3.3.7:
     resolution: {integrity: sha512-N/tbkINRUDExgcPTBvxNkvHGu504k8lzlNQRITVnm6YjOjwa4r0nnbd4Jb01sNpur5hAllyRJzSK5PvB9PPwRg==}
-
-  /@vueuse/components@10.5.0(vue@3.3.7):
-    resolution: {integrity: sha512-zWQZ8zkNBvX++VHfyiUaQ4otb+4PWI8679GR8FvdrNnj+01LXnqvrkyKd8yTCMJ9nHqwRRTJikS5fu4Zspn9DQ==}
-    dependencies:
-      '@vueuse/core': 10.5.0(vue@3.3.7)
-      '@vueuse/shared': 10.5.0(vue@3.3.7)
-      vue-demi: 0.14.6(vue@3.3.7)
-    transitivePeerDependencies:
-      - '@vue/composition-api'
-      - vue
-    dev: false
 
   /@vueuse/core@10.5.0(vue@3.3.7):
     resolution: {integrity: sha512-z/tI2eSvxwLRjOhDm0h/SXAjNm8N5ld6/SC/JQs6o6kpJ6Ya50LnEL8g5hoYu005i28L0zqB5L5yAl8Jl26K3A==}
