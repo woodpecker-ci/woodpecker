@@ -25,10 +25,10 @@ import (
 	"github.com/muesli/termenv"
 	"github.com/urfave/cli/v2"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	pipeline_errors "github.com/woodpecker-ci/woodpecker/pipeline/errors"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/linter"
+	"go.woodpecker-ci.org/woodpecker/cli/common"
+	pipeline_errors "go.woodpecker-ci.org/woodpecker/pipeline/errors"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/linter"
 )
 
 // Command exports the info command.
@@ -93,9 +93,16 @@ func lintFile(_ *cli.Context, file string) error {
 		return err
 	}
 
-	err = linter.New(linter.WithTrusted(true)).Lint(string(buf), c)
+	config := &linter.WorkflowConfig{
+		File:      path.Base(file),
+		RawConfig: rawConfig,
+		Workflow:  c,
+	}
+
+	// TODO: lint multiple files at once to allow checks for sth like "depends_on" to work
+	err = linter.New(linter.WithTrusted(true)).Lint([]*linter.WorkflowConfig{config})
 	if err != nil {
-		fmt.Printf("🔥 %s has errors:\n", output.String(path.Base(file)).Underline())
+		fmt.Printf("🔥 %s has errors:\n", output.String(config.File).Underline())
 
 		hasErrors := true
 		for _, err := range pipeline_errors.GetPipelineErrors(err) {

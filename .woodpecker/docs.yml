@@ -1,4 +1,7 @@
+version: 1
+
 when:
+  - event: tag
   - event: pull_request
   - event: push
     path: &when_path
@@ -59,7 +62,7 @@ steps:
     secrets:
       - BOT_PRIVATE_KEY
     commands:
-      - apk add openssh-client git rsync
+      - apk add openssh-client git rsync jq
       - mkdir -p $HOME/.ssh
       - ssh-keyscan -t rsa github.com >> $HOME/.ssh/known_hosts
       - echo "$BOT_PRIVATE_KEY" > $HOME/.ssh/id_rsa
@@ -67,8 +70,11 @@ steps:
       - git config --global user.email "woodpecker-bot@obermui.de"
       - git config --global user.name "woodpecker-bot"
       - git clone --depth 1 --single-branch git@github.com:woodpecker-ci/woodpecker-ci.github.io.git /repo
+      # update latest and next version
+      - if [ "$CI_PIPELINE_EVENT" == "tag" ] ; then jq '.latest = ${CI_COMMIT_TAG}' repo/version.json > repo/version.json.tmp && mv repo/version.json.tmp repo/version.json ; fi
+      - if [ "$CI_PIPELINE_EVENT" == "push" ] ; then jq "next-" '.next = ${CI_COMMIT_SHA:0:10}' repo/version.json > repo/version.json.tmp && mv repo/version.json.tmp repo/version.json ; fi
       # copy all docs files and delete all old ones, but leave CNAME and index.yaml untouched
-      - rsync -r --exclude .git --exclude CNAME --exclude index.yaml --exclude README.md --delete docs/build/ /repo
+      - rsync -r --exclude .git --exclude CNAME --exclude index.yaml --exclude README.md --exclude version.json --delete docs/build/ /repo
       - cd /repo
       - git add .
       # exit successfully if nothing changed
@@ -76,5 +82,6 @@ steps:
       - git commit -m "Deploy website - based on ${CI_COMMIT_SHA}"
       - git push
     when:
-      event: [push, cron]
-      path: *when_path
+      - event: [push, cron]
+        path: *when_path
+      - event: tag

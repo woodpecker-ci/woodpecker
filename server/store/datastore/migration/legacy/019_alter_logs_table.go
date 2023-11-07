@@ -24,8 +24,8 @@ import (
 	"github.com/tevino/abool/v2"
 	"xorm.io/xorm"
 
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/server"
+	"go.woodpecker-ci.org/woodpecker/shared/utils"
 )
 
 // maxDefaultSqliteItems set the threshold at witch point the migration will fail by default

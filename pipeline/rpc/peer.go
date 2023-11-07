@@ -18,7 +18,7 @@ package rpc
 import (
 	"context"
 
-	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
+	backend "go.woodpecker-ci.org/woodpecker/pipeline/backend/types"
 )
 
 type (

@@ -7,7 +7,7 @@ import (
 	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
 
-	"github.com/woodpecker-ci/woodpecker/server/store/datastore/migration/legacy"
+	"go.woodpecker-ci.org/woodpecker/server/store/datastore/migration/legacy"
 )
 
 type v000Migrations struct {

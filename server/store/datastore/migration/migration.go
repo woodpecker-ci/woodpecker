@@ -21,7 +21,7 @@ import (
 	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/server/model"
 )
 
 // APPEND NEW MIGRATIONS
