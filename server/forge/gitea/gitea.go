@@ -259,7 +259,7 @@ func (c *Gitea) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error)
 		return nil, err
 	}
 
-	return shared_utils.Paginate(func(page int) ([]*model.Repo, error) {
+	repos, err := shared_utils.Paginate(func(page int) ([]*gitea.Repository, error) {
 		repos, _, err := client.ListMyRepos(
 			gitea.ListReposOptions{
 				ListOptions: gitea.ListOptions{
@@ -268,15 +268,17 @@ func (c *Gitea) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error)
 				},
 			},
 		)
-		result := make([]*model.Repo, 0, len(repos))
-		for _, repo := range repos {
-			if repo.Archived {
-				continue
-			}
-			result = append(result, toRepo(repo))
-		}
-		return result, err
+		return repos, err
 	})
+
+	result := make([]*model.Repo, 0, len(repos))
+	for _, repo := range repos {
+		if repo.Archived {
+			continue
+		}
+		result = append(result, toRepo(repo))
+	}
+	return result, err
 }
 
 // File fetches the file from the Gitea repository and returns its contents.
