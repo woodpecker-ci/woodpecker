@@ -23,6 +23,8 @@ import (
 	"net/http"
 	"net/url"
 
+	shared_utils "go.woodpecker-ci.org/woodpecker/shared/utils"
+
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/bitbucket"
 )
@@ -110,21 +112,13 @@ func (c *Client) ListRepos(workspace string, opts *ListOpts) (*RepoResp, error) 
 }
 
 func (c *Client) ListReposAll(workspace string) ([]*Repo, error) {
-	page := 1
-	var repos []*Repo
-
-	for {
+	return shared_utils.Paginate(func(page int) ([]*Repo, error) {
 		resp, err := c.ListRepos(workspace, &ListOpts{Page: page, PageLen: 100})
 		if err != nil {
-			return repos, err
+			return nil, err
 		}
-		repos = append(repos, resp.Values...)
-		if len(resp.Next) == 0 {
-			break
-		}
-		page = resp.Page + 1
-	}
-	return repos, nil
+		return resp.Values, nil
+	})
 }
 
 func (c *Client) FindHook(owner, name, id string) (*Hook, error) {

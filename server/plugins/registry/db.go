@@ -15,7 +15,7 @@
 package registry
 
 import (
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/server/model"
 )
 
 type db struct {

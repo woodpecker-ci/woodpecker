@@ -21,13 +21,13 @@ import (
 	"crypto"
 	"time"
 
-	"github.com/woodpecker-ci/woodpecker/server/cache"
-	"github.com/woodpecker-ci/woodpecker/server/forge"
-	"github.com/woodpecker-ci/woodpecker/server/logging"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/plugins/config"
-	"github.com/woodpecker-ci/woodpecker/server/pubsub"
-	"github.com/woodpecker-ci/woodpecker/server/queue"
+	"go.woodpecker-ci.org/woodpecker/server/cache"
+	"go.woodpecker-ci.org/woodpecker/server/forge"
+	"go.woodpecker-ci.org/woodpecker/server/logging"
+	"go.woodpecker-ci.org/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/server/plugins/config"
+	"go.woodpecker-ci.org/woodpecker/server/pubsub"
+	"go.woodpecker-ci.org/woodpecker/server/queue"
 )
 
 var Config = struct {
@@ -63,7 +63,6 @@ var Config = struct {
 		Port                string
 		PortTLS             string
 		AgentToken          string
-		Docs                string
 		StatusContext       string
 		StatusContextFormat string
 		SessionExpires      time.Duration

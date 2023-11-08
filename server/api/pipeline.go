@@ -28,11 +28,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/pipeline"
-	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
-	"github.com/woodpecker-ci/woodpecker/server/store"
+	"go.woodpecker-ci.org/woodpecker/server"
+	"go.woodpecker-ci.org/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/server/pipeline"
+	"go.woodpecker-ci.org/woodpecker/server/router/middleware/session"
+	"go.woodpecker-ci.org/woodpecker/server/store"
 )
 
 // CreatePipeline
@@ -453,7 +453,7 @@ func PostPipeline(c *gin.Context) {
 // DeletePipelineLogs
 //
 //	@Summary	Deletes log
-//	@Router		/repos/{repo_id}/logs/{number} [post]
+//	@Router		/repos/{repo_id}/logs/{number} [delete]
 //	@Produce	plain
 //	@Success	204
 //	@Tags		Pipeline logs

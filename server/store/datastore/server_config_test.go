@@ -17,7 +17,7 @@ package datastore
 import (
 	"testing"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/server/model"
 )
 
 func TestServerConfigGetSet(t *testing.T) {
@@ -41,6 +41,33 @@ func TestServerConfigGetSet(t *testing.T) {
 
 	if value != serverConfig.Value {
 		t.Errorf("Want server-config value %s, got %s", serverConfig.Value, value)
+		return
+	}
+
+	serverConfig.Value = "new-wonderland"
+	if err := store.ServerConfigSet(serverConfig.Key, serverConfig.Value); err != nil {
+		t.Errorf("Unexpected error: insert secret: %s", err)
+		return
+	}
+
+	value, err = store.ServerConfigGet(serverConfig.Key)
+	if err != nil {
+		t.Errorf("Unexpected error: delete secret: %s", err)
+		return
+	}
+
+	if value != serverConfig.Value {
+		t.Errorf("Want server-config value %s, got %s", serverConfig.Value, value)
+		return
+	}
+
+	value, err = store.ServerConfigGet("config_not_exist")
+	if err == nil {
+		t.Errorf("Unexpected: no error on missing config: %v", err)
+		return
+	}
+	if value != "" {
+		t.Errorf("Unexpected: got value on missing config: %s", value)
 		return
 	}
 }

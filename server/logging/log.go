@@ -18,7 +18,7 @@ import (
 	"context"
 	"sync"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/server/model"
 )
 
 // TODO (bradrydzewski) writing to subscribers is currently a blocking
@@ -79,9 +79,16 @@ func (l *log) Write(ctx context.Context, stepID int64, logEntry *model.LogEntry)
 	l.Lock()
 	s, ok := l.streams[stepID]
 	l.Unlock()
+
+	// auto open the stream if it does not exist
 	if !ok {
-		return l.Open(ctx, stepID)
+		err := l.Open(ctx, stepID)
+		if err != nil {
+			return err
+		}
+		s = l.streams[stepID]
 	}
+
 	s.Lock()
 	s.list = append(s.list, logEntry)
 	for sub := range s.subs {

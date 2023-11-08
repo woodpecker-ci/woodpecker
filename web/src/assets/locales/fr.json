@@ -77,6 +77,10 @@
         "desc": "Dépôts actifs ou anciennement actifs sur ce serveur",
         "disabled": "Désactivé",
         "none": "Il n'y a pas encore de dépôts.",
+        "repair": {
+          "repair": "Tout réparer",
+          "success": "Dépôts réparés"
+        },
         "repos": "Dépôts",
         "settings": "Réglages du dépôt",
         "view": "Voir le dépôt"
@@ -132,14 +136,13 @@
   "api": "API",
   "back": "Revenir en arrière",
   "cancel": "Annuler",
-  "color_scheme_dark": "Basculer en couleurs claires",
-  "color_scheme_light": "Basculer en couleurs sombres",
   "default": "défaut",
   "docs": "Docs",
   "documentation_for": "Documentation sur \"{topic}\"",
   "errors": {
     "not_found": "Le serveur n'a pas pu trouver l'objet demandé"
   },
+  "info": "Information",
   "login": "Connexion",
   "logout": "Déconnexion",
   "not_found": {
@@ -227,6 +230,7 @@
         "restart_success": "Pipeline redémarré"
       },
       "config": "Configuration",
+      "errors": "Erreurs ({count})",
       "event": {
         "cron": "Tâche périodique",
         "deploy": "Déploiement",
@@ -235,7 +239,6 @@
         "push": "Push",
         "tag": "Tag"
       },
-      "execution_error": "Erreur d'execution",
       "exit_code": "Code de retour {exitCode}",
       "files": "Fichiers changés ({files})",
       "loading": "Chargement…",
@@ -256,6 +259,7 @@
         "declined": "Le pipeline a été refusé !",
         "review": "Vérifier les changements"
       },
+      "show_errors": "Afficher les erreurs",
       "status": {
         "blocked": "bloqué",
         "declined": "refusé",
@@ -270,7 +274,9 @@
         "success": "réussi"
       },
       "step_not_started": "L'étape n'a pas démarré encore.",
-      "tasks": "Tâches"
+      "tasks": "Tâches",
+      "warnings": "Avertissements ({count})",
+      "we_got_some_errors": "Oh non, il y a des erreurs !"
     },
     "pull_requests": "Pull requests",
     "settings": {
@@ -431,6 +437,7 @@
   },
   "repos": "Dépôt",
   "repositories": "Dépôts",
+  "running_version": "Vous utilisez Woodpecker {0}",
   "search": "Rechercher…",
   "time": {
     "days_short": "j",
@@ -442,6 +449,7 @@
     "weeks_short": "s"
   },
   "unknown_error": "Une erreur inconnue est survenue",
+  "update_woodpecker": "Merci de mettre à jour votre instance Woodpecker vers la version {0}",
   "url": "URL",
   "user": {
     "access_denied": "Vous n'êtes pas autorisé à vous connecter",
@@ -462,7 +470,13 @@
       },
       "general": {
         "general": "Général",
-        "language": "Langue"
+        "language": "Langue",
+        "theme": {
+          "auto": "Automatique",
+          "dark": "Sombre",
+          "light": "Clair",
+          "theme": "Thème"
+        }
       },
       "secrets": {
         "add": "Ajouter un secret",

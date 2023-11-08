@@ -18,8 +18,8 @@ package pipeline
 import (
 	"time"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/server/model"
 )
 
 func UpdateStepStatus(store model.UpdateStepStore, step *model.Step, state rpc.State, started int64) error {

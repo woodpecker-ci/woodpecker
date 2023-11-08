@@ -23,7 +23,6 @@ type StepStore interface {
 	StepList(*Pipeline) ([]*Step, error)
 	StepCreate([]*Step) error
 	StepUpdate(*Step) error
-	StepClear(*Pipeline) error
 }
 
 // Different ways to handle failure states

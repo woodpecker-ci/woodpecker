@@ -26,9 +26,9 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
-	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
-	"github.com/woodpecker-ci/woodpecker/pipeline/rpc/proto"
+	backend "go.woodpecker-ci.org/woodpecker/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/pipeline/rpc/proto"
 )
 
 // set grpc version on compile time to compare against server version response
@@ -364,6 +364,11 @@ func (c *client) RegisterAgent(ctx context.Context, platform, backend, version s
 
 	res, err := c.client.RegisterAgent(ctx, req)
 	return res.GetAgentId(), err
+}
+
+func (c *client) UnregisterAgent(ctx context.Context) error {
+	_, err := c.client.UnregisterAgent(ctx, &proto.Empty{})
+	return err
 }
 
 func (c *client) ReportHealth(ctx context.Context) (err error) {

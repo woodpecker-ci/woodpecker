@@ -20,7 +20,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/server/model"
 )
 
 type mockUpdatePipelineStore struct{}
@@ -90,10 +90,12 @@ func TestUpdateToStatusError(t *testing.T) {
 
 	now := time.Now().Unix()
 
-	pipeline, _ := UpdateToStatusError(&mockUpdatePipelineStore{}, model.Pipeline{}, errors.New("error"))
+	pipeline, _ := UpdateToStatusError(&mockUpdatePipelineStore{}, model.Pipeline{}, errors.New("this is an error"))
 
-	if pipeline.Error != "error" {
-		t.Errorf("Pipeline error not equals 'error' != '%s'", pipeline.Error)
+	if len(pipeline.Errors) != 1 {
+		t.Errorf("Expected one error, got %d", len(pipeline.Errors))
+	} else if pipeline.Errors[0].Error() != "[generic] this is an error" {
+		t.Errorf("Pipeline error not equals '[generic] this is an error' != '%s'", pipeline.Errors[0].Error())
 	} else if model.StatusError != pipeline.Status {
 		t.Errorf("Pipeline status not equals '%s' != '%s'", model.StatusError, pipeline.Status)
 	} else if now > pipeline.Started {

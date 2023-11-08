@@ -19,42 +19,37 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	backend_types "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
-	yaml_types "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
-	yaml_base_types "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types/base"
-	"github.com/woodpecker-ci/woodpecker/shared/constant"
+	backend_types "go.woodpecker-ci.org/woodpecker/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/metadata"
+	yaml_types "go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/types"
+	yaml_base_types "go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/types/base"
+	"go.woodpecker-ci.org/woodpecker/shared/constant"
 )
 
 func TestSecretAvailable(t *testing.T) {
 	secret := Secret{
-		Match:      []string{"golang"},
-		PluginOnly: false,
+		AllowedPlugins: []string{},
 	}
 	assert.True(t, secret.Available(&yaml_types.Container{
 		Image:    "golang",
 		Commands: yaml_base_types.StringOrSlice{"echo 'this is not a plugin'"},
 	}))
-	assert.False(t, secret.Available(&yaml_types.Container{
-		Image:    "not-golang",
-		Commands: yaml_base_types.StringOrSlice{"echo 'this is not a plugin'"},
-	}))
+
 	// secret only available for "golang" plugin
 	secret = Secret{
-		Match:      []string{"golang"},
-		PluginOnly: true,
+		AllowedPlugins: []string{"golang"},
 	}
 	assert.True(t, secret.Available(&yaml_types.Container{
 		Image:    "golang",
 		Commands: yaml_base_types.StringOrSlice{},
 	}))
 	assert.False(t, secret.Available(&yaml_types.Container{
-		Image:    "not-golang",
-		Commands: yaml_base_types.StringOrSlice{},
+		Image:    "golang",
+		Commands: yaml_base_types.StringOrSlice{"echo 'this is not a plugin'"},
 	}))
 	assert.False(t, secret.Available(&yaml_types.Container{
 		Image:    "not-golang",
-		Commands: yaml_base_types.StringOrSlice{"echo 'this is not a plugin'"},
+		Commands: yaml_base_types.StringOrSlice{},
 	}))
 }
 
@@ -99,10 +94,10 @@ func TestCompilerCompile(t *testing.T) {
 	}
 
 	tests := []struct {
-		name     string
-		fronConf *yaml_types.Workflow
-		backConf *backend_types.Config
-		expErr   bool
+		name        string
+		fronConf    *yaml_types.Workflow
+		backConf    *backend_types.Config
+		expectedErr string
 	}{{
 		name:     "empty workflow, no clone",
 		fronConf: &yaml_types.Workflow{SkipClone: true},
@@ -202,13 +197,24 @@ func TestCompilerCompile(t *testing.T) {
 				}},
 			}},
 		},
+	}, {
+		name: "workflow with missing secret",
+		fronConf: &yaml_types.Workflow{Steps: yaml_types.ContainerList{ContainerList: []*yaml_types.Container{{
+			Name:     "step",
+			Image:    "bash",
+			Commands: []string{"env"},
+			Secrets:  yaml_types.Secrets{Secrets: []*yaml_types.Secret{{Source: "missing", Target: "missing"}}},
+		}}}},
+		backConf:    nil,
+		expectedErr: "secret \"missing\" not found or not allowed to be used",
 	}}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			backConf, err := compiler.Compile(test.fronConf)
-			if test.expErr {
+			if test.expectedErr != "" {
 				assert.Error(t, err)
+				assert.Equal(t, err.Error(), test.expectedErr)
 			} else {
 				// we ignore uuids in steps and only check if global env got set ...
 				for _, st := range backConf.Stages {

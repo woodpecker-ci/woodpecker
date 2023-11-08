@@ -18,7 +18,7 @@ import (
 	"xorm.io/builder"
 	"xorm.io/xorm"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/server/model"
 )
 
 func (s storage) StepLoad(id int64) (*model.Step, error) {
@@ -81,24 +81,6 @@ func (s storage) stepCreate(sess *xorm.Session, steps []*model.Step) error {
 func (s storage) StepUpdate(step *model.Step) error {
 	_, err := s.engine.ID(step.ID).AllCols().Update(step)
 	return err
-}
-
-func (s storage) StepClear(pipeline *model.Pipeline) error {
-	sess := s.engine.NewSession()
-	defer sess.Close()
-	if err := sess.Begin(); err != nil {
-		return err
-	}
-
-	if _, err := sess.Where("step_pipeline_id = ?", pipeline.ID).Delete(new(model.Step)); err != nil {
-		return err
-	}
-
-	if _, err := sess.Where("workflow_pipeline_id = ?", pipeline.ID).Delete(new(model.Workflow)); err != nil {
-		return err
-	}
-
-	return sess.Commit()
 }
 
 func deleteStep(sess *xorm.Session, stepID int64) error {

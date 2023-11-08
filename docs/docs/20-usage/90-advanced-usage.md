@@ -9,7 +9,8 @@ YAML has some advanced syntax features that can be used like variables to reduce
 You can use [YAML anchors & aliases](https://yaml.org/spec/1.2.2/#3222-anchors-and-aliases) as variables in your pipeline config.
 
 To convert this:
-```yml
+
+```yaml
 steps:
   test:
     image: golang:1.18
@@ -71,26 +72,26 @@ steps:
 ```yaml
 variables:
   pre_cmds: &pre_cmds
-   - echo start
-   - whoami
+    - echo start
+    - whoami
   post_cmds: &post_cmds
-   - echo stop
+    - echo stop
   hello_cmd: &hello_cmd
-   - echo hello
+    - echo hello
 
 steps:
   step1:
     image: debian
     commands:
-     - <<: *pre_cmds # prepend a sequence
-     - echo exec step now do dedicated things
-     - <<: *post_cmds # append a sequence
+      - <<: *pre_cmds # prepend a sequence
+      - echo exec step now do dedicated things
+      - <<: *post_cmds # append a sequence
   step2:
     image: debian
     commands:
-     - <<: [*pre_cmds, *hello_cmd] # prepend two sequences
-     - echo echo from second step
-     - <<: *post_cmds
+      - <<: [*pre_cmds, *hello_cmd] # prepend two sequences
+      - echo echo from second step
+      - <<: *post_cmds
 ```
 
 ### References
@@ -102,13 +103,13 @@ steps:
 
 One can create a file containing environment variables, and then source it in each step that needs them.
 
-```yml
+```yaml
 steps:
   init:
     image: bash
     commands:
-      echo "FOO=hello" >> envvars
-      echo "BAR=world" >> envvars
+      - echo "FOO=hello" >> envvars
+      - echo "BAR=world" >> envvars
 
   debug:
     image: bash
@@ -121,7 +122,7 @@ steps:
 
 As described in [Global environment variables](./50-environment.md#global-environment-variables), one can define global variables:
 
-```yml
+```yaml
 services:
   woodpecker-server:
     # ...

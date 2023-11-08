@@ -18,11 +18,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/docker"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/kubernetes"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/local"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/ssh"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/pipeline/backend/docker"
+	"go.woodpecker-ci.org/woodpecker/pipeline/backend/kubernetes"
+	"go.woodpecker-ci.org/woodpecker/pipeline/backend/local"
+	"go.woodpecker-ci.org/woodpecker/pipeline/backend/types"
 )
 
 var (
@@ -34,7 +33,6 @@ func Init(ctx context.Context) {
 	engines = []types.Engine{
 		docker.New(),
 		local.New(),
-		ssh.New(),
 		kubernetes.New(ctx),
 	}
 

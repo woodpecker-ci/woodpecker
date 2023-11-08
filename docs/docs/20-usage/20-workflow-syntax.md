@@ -40,11 +40,11 @@ steps:
 
 Keep in mind the name is optional, if not added the steps will be numerated.
 
-### Skip Commits
+## Skip Commits
 
 Woodpecker gives the ability to skip individual commits by adding `[SKIP CI]` or `[CI SKIP]` to the commit message. Note this is case-insensitive.
 
-```sh
+```bash
 git commit -m "updated README [CI SKIP]"
 ```
 
@@ -139,7 +139,7 @@ Commands of every step are executed serially as if you would enter them into you
 
 There is no magic here. The above commands are converted to a simple shell script. The commands in the above example are roughly converted to the below script:
 
-```sh
+```bash
 #!/bin/sh
 set -e
 
@@ -149,7 +149,7 @@ go test
 
 The above shell script is then executed as the container entrypoint. The below docker command is an (incomplete) example of how the script is executed:
 
-```sh
+```bash
 docker run --entrypoint=build.sh golang
 ```
 
@@ -258,8 +258,8 @@ Execute a step using custom include and exclude logic:
 ```yaml
 when:
   - branch:
-      include: [ main, release/* ]
-      exclude: [ release/1.0.0, release/1.1.* ]
+      include: [main, release/*]
+      exclude: [release/1.0.0, release/1.1.*]
 ```
 
 #### `event`
@@ -344,7 +344,7 @@ Execute a step for a specific platform using wildcards:
 
 ```yaml
 when:
-  - platform:  [ linux/*, windows/amd64 ]
+  - platform: [linux/*, windows/amd64]
 ```
 
 #### `environment`
@@ -388,7 +388,7 @@ Execute a step only on a pipeline with certain files being changed:
 
 ```yaml
 when:
-  - path: "src/*"
+  - path: 'src/*'
 ```
 
 You can use [glob patterns](https://github.com/bmatcuk/doublestar#patterns) to match the changed files and specify if the step should run if a file matching that pattern has been changed `include` or if some files have **not** been changed `exclude`.
@@ -396,9 +396,9 @@ You can use [glob patterns](https://github.com/bmatcuk/doublestar#patterns) to m
 ```yaml
 when:
   - path:
-      include: [ '.woodpecker/*.yml', '*.ini' ]
-      exclude: [ '*.md', 'docs/**' ]
-      ignore_message: "[ALL]"
+      include: ['.woodpecker/*.yml', '*.ini']
+      exclude: ['*.md', 'docs/**']
+      ignore_message: '[ALL]'
 ```
 
 **Hint:** Passing a defined ignore-message like `[ALL]` inside the commit message will ignore all path conditions.
@@ -538,7 +538,7 @@ The base attribute defines a shared base volume available to all steps. This ens
 
 This would be equivalent to the following docker commands:
 
-```sh
+```bash
 docker volume create my-named-volume
 
 docker run --volume=my-named-volume:/go golang:latest

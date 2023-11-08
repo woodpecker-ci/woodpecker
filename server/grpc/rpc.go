@@ -30,14 +30,14 @@ import (
 	"github.com/rs/zerolog/log"
 	grpcMetadata "google.golang.org/grpc/metadata"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
-	"github.com/woodpecker-ci/woodpecker/server/forge"
-	"github.com/woodpecker-ci/woodpecker/server/logging"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/pipeline"
-	"github.com/woodpecker-ci/woodpecker/server/pubsub"
-	"github.com/woodpecker-ci/woodpecker/server/queue"
-	"github.com/woodpecker-ci/woodpecker/server/store"
+	"go.woodpecker-ci.org/woodpecker/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/server/forge"
+	"go.woodpecker-ci.org/woodpecker/server/logging"
+	"go.woodpecker-ci.org/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/server/pipeline"
+	"go.woodpecker-ci.org/woodpecker/server/pubsub"
+	"go.woodpecker-ci.org/woodpecker/server/queue"
+	"go.woodpecker-ci.org/woodpecker/server/store"
 )
 
 type RPC struct {
@@ -284,11 +284,9 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 
 	// make sure writes to pubsub are non blocking (https://github.com/woodpecker-ci/woodpecker/blob/c919f32e0b6432a95e1a6d3d0ad662f591adf73f/server/logging/log.go#L9)
 	go func() {
-		for _, wf := range currentPipeline.Workflows {
-			for _, step := range wf.Children {
-				if err := s.logger.Close(c, step.ID); err != nil {
-					logger.Error().Err(err).Msgf("done: cannot close log stream for step %d", step.ID)
-				}
+		for _, step := range workflow.Children {
+			if err := s.logger.Close(c, step.ID); err != nil {
+				logger.Error().Err(err).Msgf("done: cannot close log stream for step %d", step.ID)
 			}
 		}
 	}()
@@ -350,6 +348,18 @@ func (s *RPC) RegisterAgent(ctx context.Context, platform, backend, version stri
 	}
 
 	return agent.ID, nil
+}
+
+func (s *RPC) UnregisterAgent(ctx context.Context) error {
+	agent, err := s.getAgentFromContext(ctx)
+	log.Debug().Msgf("unregistering agent with ID %d", agent.ID)
+	if err != nil {
+		return err
+	}
+
+	err = s.store.AgentDelete(agent)
+
+	return err
 }
 
 func (s *RPC) ReportHealth(ctx context.Context, status string) error {

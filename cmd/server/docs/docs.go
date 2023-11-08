@@ -743,45 +743,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/logs/{repo_id}/{pipeline}/{stepID}": {
-            "get": {
-                "produces": [
-                    "text/plain"
-                ],
-                "tags": [
-                    "Pipeline logs"
-                ],
-                "summary": "Log stream",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "the repository id",
-                        "name": "repo_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "the number of the pipeline",
-                        "name": "pipeline",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "the step id",
-                        "name": "stepID",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                }
-            }
-        },
         "/org/lookup/{org_full_name}": {
             "get": {
                 "produces": [
@@ -1291,8 +1252,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK"
+                    "204": {
+                        "description": "No Content"
                     }
                 }
             }
@@ -1317,8 +1278,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK"
+                    "204": {
+                        "description": "No Content"
                     }
                 }
             }
@@ -1343,8 +1304,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK"
+                    "204": {
+                        "description": "No Content"
                     }
                 }
             }
@@ -1467,6 +1428,32 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/Repo"
                         }
+                    }
+                }
+            }
+        },
+        "/repos/repair": {
+            "post": {
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Repositories"
+                ],
+                "summary": "Repair all repositories on the server. Requires admin rights.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
                     }
                 }
             }
@@ -1942,7 +1929,7 @@ const docTemplate = `{
             }
         },
         "/repos/{repo_id}/logs/{number}": {
-            "post": {
+            "delete": {
                 "produces": [
                     "text/plain"
                 ],
@@ -2068,8 +2055,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK"
+                    "204": {
+                        "description": "No Content"
                     }
                 }
             }
@@ -2797,8 +2784,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK"
+                    "204": {
+                        "description": "No Content"
                     }
                 }
             }
@@ -3238,6 +3225,62 @@ const docTemplate = `{
                         "description": "Insert your personal access token",
                         "name": "Authorization",
                         "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/stream/events": {
+            "get": {
+                "description": "event source streaming for compatibility with quic and http2",
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Events"
+                ],
+                "summary": "Event stream",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/stream/logs/{repo_id}/{pipeline}/{stepID}": {
+            "get": {
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Pipeline logs"
+                ],
+                "summary": "Log stream",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the number of the pipeline",
+                        "name": "pipeline",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the step id",
+                        "name": "stepID",
+                        "in": "path",
                         "required": true
                     }
                 ],
@@ -3908,8 +3951,11 @@ const docTemplate = `{
                 "enqueued_at": {
                     "type": "integer"
                 },
-                "error": {
-                    "type": "string"
+                "errors": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/errors.PipelineError"
+                    }
                 },
                 "event": {
                     "$ref": "#/definitions/WebhookEvent"
@@ -4169,7 +4215,7 @@ const docTemplate = `{
         "Secret": {
             "type": "object",
             "properties": {
-                "event": {
+                "events": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/WebhookEvent"
@@ -4178,7 +4224,7 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "image": {
+                "images": {
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -4186,9 +4232,6 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
-                },
-                "plugins_only": {
-                    "type": "boolean"
                 },
                 "value": {
                     "type": "string"
@@ -4208,6 +4251,17 @@ const docTemplate = `{
                 "blocked",
                 "declined"
             ],
+            "x-enum-comments": {
+                "StatusBlocked": "waiting for approval",
+                "StatusDeclined": "blocked and declined",
+                "StatusError": "error with the config / while parsing / some other system problem",
+                "StatusFailure": "failed to finish (exit code != 0)",
+                "StatusKilled": "killed by user",
+                "StatusPending": "pending to be executed",
+                "StatusRunning": "currently running",
+                "StatusSkipped": "skipped as another step failed",
+                "StatusSuccess": "successfully finished"
+            },
             "x-enum-varnames": [
                 "StatusSkipped",
                 "StatusPending",
@@ -4365,6 +4419,42 @@ const docTemplate = `{
                 "EventDeploy",
                 "EventCron",
                 "EventManual"
+            ]
+        },
+        "errors.PipelineError": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "is_warning": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/errors.PipelineErrorType"
+                }
+            }
+        },
+        "errors.PipelineErrorType": {
+            "type": "string",
+            "enum": [
+                "linter",
+                "deprecation",
+                "compiler",
+                "generic"
+            ],
+            "x-enum-comments": {
+                "PipelineErrorTypeCompiler": "some error with the config semantics",
+                "PipelineErrorTypeDeprecation": "using some deprecated feature",
+                "PipelineErrorTypeGeneric": "some generic error",
+                "PipelineErrorTypeLinter": "some error with the config syntax"
+            },
+            "x-enum-varnames": [
+                "PipelineErrorTypeLinter",
+                "PipelineErrorTypeDeprecation",
+                "PipelineErrorTypeCompiler",
+                "PipelineErrorTypeGeneric"
             ]
         },
         "model.Workflow": {

@@ -24,12 +24,13 @@ Install Golang (>=1.20) as described by [this guide](https://go.dev/doc/install)
 
 ### Install make
 
-> GNU Make is a tool which controls the generation of executables and other non-source files of a program from the program's source files. (https://www.gnu.org/software/make/)
+> GNU Make is a tool which controls the generation of executables and other non-source files of a program from the program's source files (<https://www.gnu.org/software/make/>).
 
 Install make on:
-  - Ubuntu: `apt install make` - [Docs](https://wiki.ubuntuusers.de/Makefile/)
-  - [Windows](https://stackoverflow.com/a/32127632/8461267)
-  - Mac OS: `brew install make`
+
+- Ubuntu: `apt install make` - [Docs](https://wiki.ubuntuusers.de/Makefile/)
+- [Windows](https://stackoverflow.com/a/32127632/8461267)
+- Mac OS: `brew install make`
 
 ### Install Node.js & pnpm
 
@@ -122,7 +123,7 @@ make test-frontend
 If you want to test a specific go file you can also use:
 
 ```bash
-go test -race -timeout 30s github.com/woodpecker-ci/woodpecker/<path-to-the-package-or-file-to-test>
+go test -race -timeout 30s go.woodpecker-ci.org/woodpecker/<path-to-the-package-or-file-to-test>
 ```
 
 Or you can open the test-file inside [VS-Code](#developing-with-vs-code) and run or debug the test by clicking on the inline commands:

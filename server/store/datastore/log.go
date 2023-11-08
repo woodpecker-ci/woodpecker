@@ -17,7 +17,7 @@ package datastore
 import (
 	"fmt"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/server/model"
 )
 
 func (s storage) LogFind(step *model.Step) ([]*model.LogEntry, error) {

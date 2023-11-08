@@ -1,0 +1,9 @@
+version: 1
+
+branches: main
+
+steps:
+  build:
+    image: golang
+    commands:
+      - go test

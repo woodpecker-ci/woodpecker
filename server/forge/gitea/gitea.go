@@ -35,19 +35,19 @@ import (
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/forge"
-	"github.com/woodpecker-ci/woodpecker/server/forge/common"
-	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/store"
-	shared_utils "github.com/woodpecker-ci/woodpecker/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/server"
+	"go.woodpecker-ci.org/woodpecker/server/forge"
+	"go.woodpecker-ci.org/woodpecker/server/forge/common"
+	forge_types "go.woodpecker-ci.org/woodpecker/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/server/store"
+	shared_utils "go.woodpecker-ci.org/woodpecker/shared/utils"
 )
 
 const (
 	authorizeTokenURL = "%s/login/oauth/authorize"
 	accessTokenURL    = "%s/login/oauth/access_token"
-	perPage           = 50
+	defaultPageSize   = 50
 	giteaDevVersion   = "v1.18.0"
 )
 
@@ -56,6 +56,7 @@ type Gitea struct {
 	ClientID     string
 	ClientSecret string
 	SkipVerify   bool
+	pageSize     int
 }
 
 // Opts defines configuration options.
@@ -207,7 +208,7 @@ func (c *Gitea) Teams(ctx context.Context, u *model.User) ([]*model.Team, error)
 			gitea.ListOrgsOptions{
 				ListOptions: gitea.ListOptions{
 					Page:     page,
-					PageSize: perPage,
+					PageSize: c.perPage(ctx),
 				},
 			},
 		)
@@ -258,24 +259,26 @@ func (c *Gitea) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error)
 		return nil, err
 	}
 
-	return shared_utils.Paginate(func(page int) ([]*model.Repo, error) {
+	repos, err := shared_utils.Paginate(func(page int) ([]*gitea.Repository, error) {
 		repos, _, err := client.ListMyRepos(
 			gitea.ListReposOptions{
 				ListOptions: gitea.ListOptions{
 					Page:     page,
-					PageSize: perPage,
+					PageSize: c.perPage(ctx),
 				},
 			},
 		)
-		result := make([]*model.Repo, 0, len(repos))
-		for _, repo := range repos {
-			if repo.Archived {
-				continue
-			}
-			result = append(result, toRepo(repo))
-		}
-		return result, err
+		return repos, err
 	})
+
+	result := make([]*model.Repo, 0, len(repos))
+	for _, repo := range repos {
+		if repo.Archived {
+			continue
+		}
+		result = append(result, toRepo(repo))
+	}
+	return result, err
 }
 
 // File fetches the file from the Gitea repository and returns its contents.
@@ -410,7 +413,15 @@ func (c *Gitea) Deactivate(ctx context.Context, u *model.User, r *model.Repo, li
 		return err
 	}
 
-	hooks, _, err := client.ListRepoHooks(r.Owner, r.Name, gitea.ListHooksOptions{})
+	hooks, err := shared_utils.Paginate(func(page int) ([]*gitea.Hook, error) {
+		hooks, _, err := client.ListRepoHooks(r.Owner, r.Name, gitea.ListHooksOptions{
+			ListOptions: gitea.ListOptions{
+				Page:     page,
+				PageSize: c.perPage(ctx),
+			},
+		})
+		return hooks, err
+	})
 	if err != nil {
 		return err
 	}
@@ -621,12 +632,6 @@ func (c *Gitea) getChangedFilesForPR(ctx context.Context, repo *model.Repo, inde
 		return nil, err
 	}
 
-	if client.CheckServerVersionConstraint(">= 1.18.0") != nil {
-		// version too low
-		log.Debug().Msg("Gitea version does not support getting changed files for PRs")
-		return []string{}, nil
-	}
-
 	return shared_utils.Paginate(func(page int) ([]string, error) {
 		giteaFiles, _, err := client.ListPullRequestFiles(repo.Owner, repo.Name, index,
 			gitea.ListPullRequestFilesOptions{ListOptions: gitea.ListOptions{Page: page}})
@@ -640,4 +645,20 @@ func (c *Gitea) getChangedFilesForPR(ctx context.Context, repo *model.Repo, inde
 		}
 		return files, nil
 	})
+}
+
+func (c *Gitea) perPage(ctx context.Context) int {
+	if c.pageSize == 0 {
+		client, err := c.newClientToken(ctx, "")
+		if err != nil {
+			return defaultPageSize
+		}
+
+		api, _, err := client.GetGlobalAPISettings()
+		if err != nil {
+			return defaultPageSize
+		}
+		c.pageSize = api.MaxResponseItems
+	}
+	return c.pageSize
 }

@@ -19,8 +19,10 @@ import (
 	"fmt"
 	"text/template"
 
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/rs/zerolog/log"
+
+	"go.woodpecker-ci.org/woodpecker/server"
+	"go.woodpecker-ci.org/woodpecker/server/model"
 )
 
 func GetPipelineStatusContext(repo *model.Repo, pipeline *model.Pipeline, workflow *model.Workflow) string {
@@ -32,6 +34,7 @@ func GetPipelineStatusContext(repo *model.Repo, pipeline *model.Pipeline, workfl
 
 	tmpl, err := template.New("context").Parse(server.Config.Server.StatusContextFormat)
 	if err != nil {
+		log.Error().Err(err).Msg("could not create status from template")
 		return ""
 	}
 	var ctx bytes.Buffer
@@ -41,8 +44,10 @@ func GetPipelineStatusContext(repo *model.Repo, pipeline *model.Pipeline, workfl
 		"workflow": workflow.Name,
 		"owner":    repo.Owner,
 		"repo":     repo.Name,
+		"axis_id":  workflow.AxisID,
 	})
 	if err != nil {
+		log.Error().Err(err).Msg("could not create status context")
 		return ""
 	}
 

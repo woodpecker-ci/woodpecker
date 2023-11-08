@@ -17,20 +17,20 @@ package main
 import (
 	"github.com/urfave/cli/v2"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/cron"
-	"github.com/woodpecker-ci/woodpecker/cli/deploy"
-	"github.com/woodpecker-ci/woodpecker/cli/exec"
-	"github.com/woodpecker-ci/woodpecker/cli/info"
-	"github.com/woodpecker-ci/woodpecker/cli/lint"
-	"github.com/woodpecker-ci/woodpecker/cli/log"
-	"github.com/woodpecker-ci/woodpecker/cli/loglevel"
-	"github.com/woodpecker-ci/woodpecker/cli/pipeline"
-	"github.com/woodpecker-ci/woodpecker/cli/registry"
-	"github.com/woodpecker-ci/woodpecker/cli/repo"
-	"github.com/woodpecker-ci/woodpecker/cli/secret"
-	"github.com/woodpecker-ci/woodpecker/cli/user"
-	"github.com/woodpecker-ci/woodpecker/version"
+	"go.woodpecker-ci.org/woodpecker/cli/common"
+	"go.woodpecker-ci.org/woodpecker/cli/cron"
+	"go.woodpecker-ci.org/woodpecker/cli/deploy"
+	"go.woodpecker-ci.org/woodpecker/cli/exec"
+	"go.woodpecker-ci.org/woodpecker/cli/info"
+	"go.woodpecker-ci.org/woodpecker/cli/lint"
+	"go.woodpecker-ci.org/woodpecker/cli/log"
+	"go.woodpecker-ci.org/woodpecker/cli/loglevel"
+	"go.woodpecker-ci.org/woodpecker/cli/pipeline"
+	"go.woodpecker-ci.org/woodpecker/cli/registry"
+	"go.woodpecker-ci.org/woodpecker/cli/repo"
+	"go.woodpecker-ci.org/woodpecker/cli/secret"
+	"go.woodpecker-ci.org/woodpecker/cli/user"
+	"go.woodpecker-ci.org/woodpecker/version"
 )
 
 //go:generate go run docs.go app.go
@@ -41,6 +41,7 @@ func newApp() *cli.App {
 	app.Usage = "command line utility"
 	app.EnableBashCompletion = true
 	app.Flags = common.GlobalFlags
+	app.Before = common.SetupGlobalLogger
 	app.Commands = []*cli.Command{
 		pipeline.Command,
 		log.Command,
@@ -54,10 +55,6 @@ func newApp() *cli.App {
 		lint.Command,
 		loglevel.Command,
 		cron.Command,
-	}
-
-	for _, command := range app.Commands {
-		command.Before = common.SetupGlobalLogger
 	}
 
 	return app
