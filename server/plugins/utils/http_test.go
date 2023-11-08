@@ -10,7 +10,7 @@ import (
 
 	"github.com/go-ap/httpsig"
 	"github.com/stretchr/testify/assert"
-	"github.com/woodpecker-ci/woodpecker/server/plugins/utils"
+	"go.woodpecker-ci.org/woodpecker/server/plugins/utils"
 )
 
 func TestSign(t *testing.T) {

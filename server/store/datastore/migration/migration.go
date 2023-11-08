@@ -24,7 +24,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"xorm.io/xorm"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/server/model"
 )
 
 // APPEND NEW MIGRATIONS

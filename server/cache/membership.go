@@ -19,8 +19,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/woodpecker-ci/woodpecker/server/forge"
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/server/forge"
+	"go.woodpecker-ci.org/woodpecker/server/model"
 
 	"github.com/lafriks/ttlcache/v3"
 )

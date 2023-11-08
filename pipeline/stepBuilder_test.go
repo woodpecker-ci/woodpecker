@@ -21,10 +21,10 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/woodpecker-ci/woodpecker/server/forge"
-	"github.com/woodpecker-ci/woodpecker/server/forge/mocks"
-	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/server/forge"
+	"go.woodpecker-ci.org/woodpecker/server/forge/mocks"
+	forge_types "go.woodpecker-ci.org/woodpecker/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/server/model"
 )
 
 func TestGlobalEnvsubst(t *testing.T) {

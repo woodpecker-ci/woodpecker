@@ -1,6 +1,6 @@
 package datastore
 
-import "github.com/woodpecker-ci/woodpecker/server/model"
+import "go.woodpecker-ci.org/woodpecker/server/model"
 
 func (s storage) ServerConfigGet(key string) (string, error) {
 	config := new(model.ServerConfig)

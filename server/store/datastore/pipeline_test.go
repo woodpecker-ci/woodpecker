@@ -22,7 +22,7 @@ import (
 	"github.com/franela/goblin"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/server/model"
 )
 
 func TestPipelines(t *testing.T) {

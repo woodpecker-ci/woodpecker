@@ -27,12 +27,12 @@ import (
 	"github.com/gorilla/securecookie"
 	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
-	"github.com/woodpecker-ci/woodpecker/server/store"
-	"github.com/woodpecker-ci/woodpecker/server/store/types"
-	"github.com/woodpecker-ci/woodpecker/shared/token"
+	"go.woodpecker-ci.org/woodpecker/server"
+	"go.woodpecker-ci.org/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/server/router/middleware/session"
+	"go.woodpecker-ci.org/woodpecker/server/store"
+	"go.woodpecker-ci.org/woodpecker/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/shared/token"
 )
 
 // PostRepo

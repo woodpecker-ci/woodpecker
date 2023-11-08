@@ -5,8 +5,8 @@ import (
 
 	"codeberg.org/6543/xyaml"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/constraint"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/constraint"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/types"
 )
 
 // ParseBytes parses the configuration from bytes b.

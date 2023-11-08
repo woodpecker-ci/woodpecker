@@ -28,8 +28,8 @@ import (
 	"github.com/rs/zerolog/log"
 	"golang.org/x/exp/slices"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
-	"github.com/woodpecker-ci/woodpecker/shared/constant"
+	"go.woodpecker-ci.org/woodpecker/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/shared/constant"
 )
 
 // notAllowedEnvVarOverwrites are all env vars that can not be overwritten by step config

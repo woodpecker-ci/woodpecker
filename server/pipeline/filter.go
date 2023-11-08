@@ -19,12 +19,12 @@ package pipeline
 import (
 	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
-	"github.com/woodpecker-ci/woodpecker/server"
-	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/pipeline"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml"
+	"go.woodpecker-ci.org/woodpecker/server"
+	forge_types "go.woodpecker-ci.org/woodpecker/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/server/model"
 )
 
 func zeroSteps(currentPipeline *model.Pipeline, forgeYamlConfigs []*forge_types.FileMeta) bool {

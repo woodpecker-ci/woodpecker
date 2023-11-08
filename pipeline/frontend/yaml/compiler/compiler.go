@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"path"
 
-	backend_types "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
-	yaml_types "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/utils"
-	"github.com/woodpecker-ci/woodpecker/shared/constant"
+	backend_types "go.woodpecker-ci.org/woodpecker/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/metadata"
+	yaml_types "go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/types"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/utils"
+	"go.woodpecker-ci.org/woodpecker/shared/constant"
 )
 
 const (

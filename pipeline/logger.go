@@ -1,8 +1,8 @@
 package pipeline
 
 import (
-	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
-	"github.com/woodpecker-ci/woodpecker/pipeline/multipart"
+	backend "go.woodpecker-ci.org/woodpecker/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/pipeline/multipart"
 )
 
 // Logger handles the process logging.

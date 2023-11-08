@@ -13,7 +13,7 @@ import (
 	"golang.org/x/net/proxy"
 	"golang.org/x/oauth2"
 
-	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
+	"go.woodpecker-ci.org/woodpecker/woodpecker-go/woodpecker"
 )
 
 // NewClient returns a new client from the CLI context.
