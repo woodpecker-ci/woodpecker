@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@silverwind, @6543, @pre-commit-ci[bot], @qwerty287, @renovate[bot], @anbraten, @riczescaran, @J-Ha, @Janik-Haag, @jbiblio, @runephilosof-karnovgroup, @zc-devs, @pat-s, @bitethecode, @xoxys, @HamburgerJungeJr, @nitram509, @JohnWalkerx, @OskarsPakers, @Exar04, @dominic-p, @categulario, @mzampetakis, @Timshel, @Denperidge, @tomix1024, @lonix1, @s3lph, @math3vz, @LTek-online, @testwill, @klinux, @pinpox, @hpidcock, @lafriks, @ChewingBever, @azdle, @praneeth-ovckd
+@xoxys, @silverwind, @6543, @pre-commit-ci[bot], @qwerty287, @renovate[bot], @anbraten, @riczescaran, @J-Ha, @Janik-Haag, @jbiblio, @runephilosof-karnovgroup, @zc-devs, @pat-s, @bitethecode, @HamburgerJungeJr, @nitram509, @JohnWalkerx, @OskarsPakers, @Exar04, @dominic-p, @categulario, @mzampetakis, @Timshel, @Denperidge, @tomix1024, @lonix1, @s3lph, @math3vz, @LTek-online, @testwill, @klinux, @pinpox, @hpidcock, @lafriks, @ChewingBever, @azdle, @praneeth-ovckd
 
 ### 💥 Breaking changes
 
@@ -41,6 +41,7 @@
 
 ### 📈 Enhancement
 
+- Replace linter icons to match theme [[#2765](https://github.com/woodpecker-ci/woodpecker/pull/2765)]
 - Switch to go vanity urls [[#2706](https://github.com/woodpecker-ci/woodpecker/pull/2706)]
 - Add workflow version [[#2476](https://github.com/woodpecker-ci/woodpecker/pull/2476)]
 - UI enhancements/fixes [[#2754](https://github.com/woodpecker-ci/woodpecker/pull/2754)]
