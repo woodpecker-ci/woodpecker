@@ -101,56 +101,67 @@ Please use http://woodpecker.mycompany.com/authorize as the Authorization callba
 This is a full list of configuration options. Please note that many of these options use default configuration values that should work for the majority of installations.
 
 ### `WOODPECKER_BITBUCKET_DC`
+
 > Default: `false`
 
 Enables the Bitbucket Server driver.
 
 ### `WOODPECKER_BITBUCKET_DC_URL`
+
 > Default: empty
 
 Configures the Bitbucket Server address.
 
 ### `WOODPECKER_BITBUCKET_DC_CONSUMER_KEY`
+
 > Default: empty
 
 Configures your Bitbucket Server consumer key.
 
 ### `WOODPECKER_BITBUCKET_DC_CONSUMER_KEY_FILE`
+
 > Default: empty
 
 Read the value for `WOODPECKER_BITBUCKET_DC_CONSUMER_KEY` from the specified filepath
 
 ### `WOODPECKER_BITBUCKET_DC_CONSUMER_RSA`
+
 > Default: empty
 
 Configures the path to your Bitbucket Server private key file.
 
 ### `WOODPECKER_BITBUCKET_DC_CONSUMER_RSA_STRING`
+
 > Default: empty
 
 Configures your Bitbucket Server private key.
 
 ### `WOODPECKER_BITBUCKET_DC_GIT_USERNAME`
+
 > Default: empty
 
 This username is used to authenticate and clone all private repositories.
 
 ### `WOODPECKER_BITBUCKET_DC_GIT_USERNAME_FILE`
+
 > Default: empty
 
 Read the value for `WOODPECKER_BITBUCKET_DC_GIT_USERNAME` from the specified filepath
 
 ### `WOODPECKER_BITBUCKET_DC_GIT_PASSWORD`
+
 > Default: empty
 
 The password is used to authenticate and clone all private repositories.
 
 ### `WOODPECKER_BITBUCKET_DC_GIT_PASSWORD_FILE`
+
 > Default: empty
 
 Read the value for `WOODPECKER_BITBUCKET_DC_GIT_PASSWORD` from the specified filepath
 
 ### `WOODPECKER_BITBUCKET_DC_SKIP_VERIFY`
+
 > Default: `false`
 
 Configure if SSL verification should be skipped.
