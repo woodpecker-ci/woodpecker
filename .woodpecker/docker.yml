@@ -22,14 +22,12 @@ variables:
   - publish_logins: &publish_logins
       # Default DockerHub login
       - registry: https://index.docker.io/v1/
-        username:
-          from_secret: docker_username
+        username: woodpeckerbot
         password:
           from_secret: docker_password
       # Additional Quay.IO login
       - registry: https://quay.io
-        username:
-          from_secret: QUAY_IO_USER
+        username: 'woodpeckerci+wp_ci'
         password:
           from_secret: QUAY_IO_TOKEN
   - &publish_repos_server 'woodpeckerci/woodpecker-server,quay.io/woodpeckerci/woodpecker-server'
@@ -70,9 +68,10 @@ steps:
 
   publish-server-preview:
     image: woodpeckerci/plugin-docker-buildx
-    secrets: [ docker_username, docker_password ]
+    secrets: [ docker_password ]
     group: docker
     settings:
+      username: woodpeckerbot
       repo: woodpeckerci/woodpecker-server
       dockerfile: docker/Dockerfile.server.multiarch
       platforms: *platforms_preview
@@ -82,9 +81,10 @@ steps:
 
   publish-server-alpine-preview:
     image: woodpeckerci/plugin-docker-buildx
-    secrets: [ docker_username, docker_password ]
+    secrets: [ docker_password ]
     group: docker
     settings:
+      username: woodpeckerbot
       repo: woodpeckerci/woodpecker-server
       dockerfile: docker/Dockerfile.server.alpine.multiarch
       platforms: *platforms_preview
@@ -194,8 +194,9 @@ steps:
   publish-agent-preview:
     group: docker
     image: woodpeckerci/plugin-docker-buildx
-    secrets: [ docker_username, docker_password ]
+    secrets: [ docker_password ]
     settings:
+      username: woodpeckerbot
       repo: woodpeckerci/woodpecker-agent
       dockerfile: docker/Dockerfile.agent.multiarch
       platforms: *platforms_preview
@@ -295,8 +296,9 @@ steps:
   publish-cli-preview:
     group: docker
     image: woodpeckerci/plugin-docker-buildx
-    secrets: [ docker_username, docker_password ]
+    secrets: [ docker_password ]
     settings:
+      username: woodpeckerbot
       repo: woodpeckerci/woodpecker-cli
       dockerfile: docker/Dockerfile.cli.multiarch
       platforms: *platforms_preview
