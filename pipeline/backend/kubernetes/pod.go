@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	"github.com/rs/zerolog/log"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/common"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/pipeline/backend/common"
+	"go.woodpecker-ci.org/woodpecker/pipeline/backend/types"
 	"golang.org/x/exp/maps"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"

@@ -3,7 +3,7 @@ package user
 import (
 	"github.com/urfave/cli/v2"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
+	"go.woodpecker-ci.org/woodpecker/cli/common"
 )
 
 // Command exports the user command set.

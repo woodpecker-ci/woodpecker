@@ -20,12 +20,12 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/woodpecker-ci/woodpecker/server"
-	cronScheduler "github.com/woodpecker-ci/woodpecker/server/cron"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/pipeline"
-	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
-	"github.com/woodpecker-ci/woodpecker/server/store"
+	"go.woodpecker-ci.org/woodpecker/server"
+	cronScheduler "go.woodpecker-ci.org/woodpecker/server/cron"
+	"go.woodpecker-ci.org/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/server/pipeline"
+	"go.woodpecker-ci.org/woodpecker/server/router/middleware/session"
+	"go.woodpecker-ci.org/woodpecker/server/store"
 )
 
 // GetCron

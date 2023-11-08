@@ -17,7 +17,7 @@ package datastore
 import (
 	"xorm.io/builder"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/server/model"
 )
 
 var feedItemSelect = `repos.repo_id as feed_repo_id,

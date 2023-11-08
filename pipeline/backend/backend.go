@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/docker"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/kubernetes"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/local"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/ssh"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/pipeline/backend/docker"
+	"go.woodpecker-ci.org/woodpecker/pipeline/backend/kubernetes"
+	"go.woodpecker-ci.org/woodpecker/pipeline/backend/local"
+	"go.woodpecker-ci.org/woodpecker/pipeline/backend/ssh"
+	"go.woodpecker-ci.org/woodpecker/pipeline/backend/types"
 )
 
 var (

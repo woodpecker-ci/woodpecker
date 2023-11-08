@@ -17,7 +17,7 @@ package datastore
 import (
 	"xorm.io/builder"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/server/model"
 )
 
 func (s storage) RegistryFind(repo *model.Repo, addr string) (*model.Registry, error) {

@@ -1,4 +1,4 @@
-module github.com/woodpecker-ci/woodpecker
+module go.woodpecker-ci.org/woodpecker
 
 go 1.20
 

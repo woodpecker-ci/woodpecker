@@ -23,8 +23,8 @@ import (
 
 	"golang.org/x/oauth2"
 
-	"github.com/woodpecker-ci/woodpecker/server/forge/bitbucket/internal"
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/server/forge/bitbucket/internal"
+	"go.woodpecker-ci.org/woodpecker/server/model"
 )
 
 const (
