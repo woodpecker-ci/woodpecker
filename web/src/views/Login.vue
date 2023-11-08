@@ -3,7 +3,7 @@
     <!-- TODO: Should use vue notifications. -->
     <div
       v-if="errorMessage"
-      class="bg-wp-control-error-100 border-l-6 border-l-wp-control-error-300 text-white p-4 rounded-md"
+      class="bg-wp-control-error-100 border-l-6 border-l-wp-control-error-300 text-white dark:text-dark-300 p-4 rounded-md"
     >
       {{ errorMessage }}
     </div>
