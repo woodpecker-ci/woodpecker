@@ -1,10 +1,10 @@
 # Changelog
 
-## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-11-07
+## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-11-08
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @pre-commit-ci[bot], @qwerty287, @renovate[bot], @anbraten, @riczescaran, @J-Ha, @Janik-Haag, @jbiblio, @runephilosof-karnovgroup, @zc-devs, @pat-s, @bitethecode, @xoxys, @HamburgerJungeJr, @nitram509, @JohnWalkerx, @OskarsPakers, @Exar04, @dominic-p, @categulario, @mzampetakis, @Timshel, @Denperidge, @tomix1024, @lonix1, @s3lph, @math3vz, @LTek-online, @testwill, @klinux, @pinpox, @hpidcock, @lafriks, @ChewingBever, @azdle, @praneeth-ovckd
+@silverwind, @6543, @pre-commit-ci[bot], @qwerty287, @renovate[bot], @anbraten, @riczescaran, @J-Ha, @Janik-Haag, @jbiblio, @runephilosof-karnovgroup, @zc-devs, @pat-s, @bitethecode, @xoxys, @HamburgerJungeJr, @nitram509, @JohnWalkerx, @OskarsPakers, @Exar04, @dominic-p, @categulario, @mzampetakis, @Timshel, @Denperidge, @tomix1024, @lonix1, @s3lph, @math3vz, @LTek-online, @testwill, @klinux, @pinpox, @hpidcock, @lafriks, @ChewingBever, @azdle, @praneeth-ovckd
 
 ### 💥 Breaking changes
 
@@ -215,6 +215,7 @@
 
 ### Misc
 
+- Remove go versions from .golangci.yml [[#2775](https://github.com/woodpecker-ci/woodpecker/pull/2775)]
 - [pre-commit.ci] pre-commit autoupdate [[#2767](https://github.com/woodpecker-ci/woodpecker/pull/2767)]
 - Lock file maintenance [[#2755](https://github.com/woodpecker-ci/woodpecker/pull/2755)]
 - Update golang (packages) [[#2742](https://github.com/woodpecker-ci/woodpecker/pull/2742)]
