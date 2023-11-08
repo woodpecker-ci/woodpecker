@@ -212,6 +212,12 @@
         "image": {
           "$ref": "#/definitions/step_image"
         },
+        "privileged": {
+          "description": "Run the step in privileged mode. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#privileged",
+          "type": "boolean",
+          "default": false,
+          "$ref": "#/definitions/step_privileged"
+        },
         "pull": {
           "$ref": "#/definitions/step_pull"
         },
@@ -560,6 +566,12 @@
       "properties": {
         "image": {
           "$ref": "#/definitions/step_image"
+        },
+        "privileged": {
+          "description": "Run the step in privileged mode. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#privileged",
+          "type": "boolean",
+          "default": false,
+          "$ref": "#/definitions/step_privileged"
         },
         "pull": {
           "$ref": "#/definitions/step_pull"
