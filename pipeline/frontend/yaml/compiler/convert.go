@@ -18,20 +18,18 @@ import (
 	"fmt"
 	"maps"
 	"path"
-	"path/filepath"
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/rs/zerolog/log"
 
-	backend_types "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/compiler/settings"
-	yaml_types "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/utils"
+	backend_types "go.woodpecker-ci.org/woodpecker/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/compiler/settings"
+	yaml_types "go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/types"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/utils"
 )
 
-func (c *Compiler) createProcess(name string, container *yaml_types.Container, stepType backend_types.StepType) *backend_types.Step {
+func (c *Compiler) createProcess(name string, container *yaml_types.Container, stepType backend_types.StepType) (*backend_types.Step, error) {
 	var (
 		uuid = uuid.New()
 
@@ -91,7 +89,7 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		}
 
 		if err := settings.ParamsToEnv(container.Settings, environment, pluginSecrets.toStringMap()); err != nil {
-			log.Error().Err(err).Msg("paramsToEnv")
+			return nil, err
 		}
 	}
 
@@ -113,6 +111,8 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		secret, ok := c.secrets[strings.ToLower(requested.Source)]
 		if ok && secret.Available(container) {
 			environment[strings.ToUpper(requested.Target)] = secret.Value
+		} else {
+			return nil, fmt.Errorf("secret %q not found or not allowed to be used", requested.Source)
 		}
 	}
 
@@ -165,6 +165,11 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		cpuSet = c.reslimit.CPUSet
 	}
 
+	var ports []uint16
+	for _, port := range container.Ports {
+		ports = append(ports, uint16(port))
+	}
+
 	// at least one constraint contain status success, or all constraints have no status set
 	onSuccess := container.When.IncludesStatusSuccess()
 	// at least one constraint must include the status failure.
@@ -207,13 +212,14 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		Failure:        failure,
 		NetworkMode:    networkMode,
 		IpcMode:        ipcMode,
+		Ports:          ports,
 		BackendOptions: backendOptions,
-	}
+	}, nil
 }
 
 func (c *Compiler) stepWorkdir(container *yaml_types.Container) string {
-	if filepath.IsAbs(container.Directory) {
+	if path.IsAbs(container.Directory) {
 		return container.Directory
 	}
-	return filepath.Join(c.base, c.path, container.Directory)
+	return path.Join(c.base, c.path, container.Directory)
 }

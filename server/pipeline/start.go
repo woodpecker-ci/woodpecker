@@ -19,10 +19,9 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline"
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/store"
+	"go.woodpecker-ci.org/woodpecker/pipeline"
+	"go.woodpecker-ci.org/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/server/store"
 )
 
 // start a pipeline, make sure it was stored persistent in the store before
@@ -43,18 +42,6 @@ func start(ctx context.Context, store store.Store, activePipeline *model.Pipelin
 	if err := queuePipeline(repo, pipelineItems); err != nil {
 		log.Error().Err(err).Msg("queuePipeline")
 		return nil, err
-	}
-
-	// open logs streamer for each step
-	for _, wf := range activePipeline.Workflows {
-		for _, step := range wf.Children {
-			stepID := step.ID
-			go func() {
-				if err := server.Config.Services.Logs.Open(context.Background(), stepID); err != nil {
-					log.Error().Err(err).Msgf("could not open log stream for step %d", stepID)
-				}
-			}()
-		}
 	}
 
 	return activePipeline, nil

@@ -22,7 +22,7 @@ import (
 
 	bb "github.com/neticdk/go-bitbucket/bitbucket"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/server/model"
 )
 
 func convertStatus(status model.StatusValue) bb.BuildStatusState {

@@ -16,11 +16,11 @@ package main
 
 import (
 	"crypto/tls"
+	"errors"
 	"net"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"os"
 	"strings"
 	"time"
 
@@ -34,24 +34,24 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
 
-	"github.com/woodpecker-ci/woodpecker/cmd/common"
-	"github.com/woodpecker-ci/woodpecker/pipeline/rpc/proto"
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/cron"
-	"github.com/woodpecker-ci/woodpecker/server/forge"
-	woodpeckerGrpcServer "github.com/woodpecker-ci/woodpecker/server/grpc"
-	"github.com/woodpecker-ci/woodpecker/server/logging"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/plugins/config"
-	"github.com/woodpecker-ci/woodpecker/server/pubsub"
-	"github.com/woodpecker-ci/woodpecker/server/router"
-	"github.com/woodpecker-ci/woodpecker/server/router/middleware"
-	"github.com/woodpecker-ci/woodpecker/server/store"
-	"github.com/woodpecker-ci/woodpecker/server/web"
-	"github.com/woodpecker-ci/woodpecker/shared/constant"
-	"github.com/woodpecker-ci/woodpecker/version"
-	// "github.com/woodpecker-ci/woodpecker/server/plugins/encryption"
-	// encryptedStore "github.com/woodpecker-ci/woodpecker/server/plugins/encryption/wrapper/store"
+	"go.woodpecker-ci.org/woodpecker/cmd/common"
+	"go.woodpecker-ci.org/woodpecker/pipeline/rpc/proto"
+	"go.woodpecker-ci.org/woodpecker/server"
+	"go.woodpecker-ci.org/woodpecker/server/cron"
+	"go.woodpecker-ci.org/woodpecker/server/forge"
+	woodpeckerGrpcServer "go.woodpecker-ci.org/woodpecker/server/grpc"
+	"go.woodpecker-ci.org/woodpecker/server/logging"
+	"go.woodpecker-ci.org/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/server/plugins/config"
+	"go.woodpecker-ci.org/woodpecker/server/pubsub"
+	"go.woodpecker-ci.org/woodpecker/server/router"
+	"go.woodpecker-ci.org/woodpecker/server/router/middleware"
+	"go.woodpecker-ci.org/woodpecker/server/store"
+	"go.woodpecker-ci.org/woodpecker/server/web"
+	"go.woodpecker-ci.org/woodpecker/shared/constant"
+	"go.woodpecker-ci.org/woodpecker/version"
+	// "go.woodpecker-ci.org/woodpecker/server/plugins/encryption"
+	// encryptedStore "go.woodpecker-ci.org/woodpecker/server/plugins/encryption/wrapper/store"
 )
 
 func run(c *cli.Context) error {
@@ -84,12 +84,12 @@ func run(c *cli.Context) error {
 
 	_forge, err := setupForge(c)
 	if err != nil {
-		log.Fatal().Err(err).Msg("")
+		log.Fatal().Err(err).Msg("can't setup forge")
 	}
 
 	_store, err := setupStore(c)
 	if err != nil {
-		log.Fatal().Err(err).Msg("")
+		log.Fatal().Err(err).Msg("cant't setup database store")
 	}
 	defer func() {
 		if err := _store.Close(); err != nil {
@@ -111,8 +111,7 @@ func run(c *cli.Context) error {
 	g.Go(func() error {
 		lis, err := net.Listen("tcp", c.String("grpc-addr"))
 		if err != nil {
-			log.Error().Err(err).Msg("failed to listen on grpc-addr")
-			return err
+			log.Fatal().Err(err).Msg("failed to listen on grpc-addr")
 		}
 
 		jwtSecret := c.String("grpc-secret")
@@ -145,8 +144,7 @@ func run(c *cli.Context) error {
 
 		err = grpcServer.Serve(lis)
 		if err != nil {
-			log.Error().Err(err).Msg("failed to serve grpc server")
-			return err
+			log.Fatal().Err(err).Msg("failed to serve grpc server")
 		}
 		return nil
 	})
@@ -157,8 +155,7 @@ func run(c *cli.Context) error {
 	if proxyWebUI == "" {
 		webEngine, err := web.New()
 		if err != nil {
-			log.Error().Err(err).Msg("failed to create web engine")
-			return err
+			log.Fatal().Err(err).Msg("failed to create web engine")
 		}
 		webUIServe = webEngine.ServeHTTP
 	} else {
@@ -194,10 +191,14 @@ func run(c *cli.Context) error {
 					NextProtos: []string{"h2", "http/1.1"},
 				},
 			}
-			return serve.ListenAndServeTLS(
+			err = serve.ListenAndServeTLS(
 				c.String("server-cert"),
 				c.String("server-key"),
 			)
+			if err != nil && !errors.Is(err, http.ErrServerClosed) {
+				log.Fatal().Err(err).Msg("failed to start server with tls")
+			}
+			return err
 		})
 
 		// http to https redirect
@@ -212,7 +213,11 @@ func run(c *cli.Context) error {
 		}
 
 		g.Go(func() error {
-			return http.ListenAndServe(server.Config.Server.Port, http.HandlerFunc(redirect))
+			err := http.ListenAndServe(server.Config.Server.Port, http.HandlerFunc(redirect))
+			if err != nil && !errors.Is(err, http.ErrServerClosed) {
+				log.Fatal().Err(err).Msg("unable to start server to redirect from http to https")
+			}
+			return err
 		})
 	} else if c.Bool("lets-encrypt") {
 		// start the server with lets-encrypt
@@ -226,18 +231,21 @@ func run(c *cli.Context) error {
 
 		g.Go(func() error {
 			if err := certmagic.HTTPS([]string{address.Host}, handler); err != nil {
-				log.Err(err).Msg("certmagic does not work")
-				os.Exit(1)
+				log.Fatal().Err(err).Msg("certmagic does not work")
 			}
 			return nil
 		})
 	} else {
 		// start the server without tls
 		g.Go(func() error {
-			return http.ListenAndServe(
+			err := http.ListenAndServe(
 				c.String("server-addr"),
 				handler,
 			)
+			if err != nil && !errors.Is(err, http.ErrServerClosed) {
+				log.Fatal().Err(err).Msg("could not start server")
+			}
+			return err
 		})
 	}
 
@@ -245,7 +253,11 @@ func run(c *cli.Context) error {
 		g.Go(func() error {
 			metricsRouter := gin.New()
 			metricsRouter.GET("/metrics", gin.WrapH(promhttp.Handler()))
-			return http.ListenAndServe(metricsServerAddr, metricsRouter)
+			err := http.ListenAndServe(metricsServerAddr, metricsRouter)
+			if err != nil && !errors.Is(err, http.ErrServerClosed) {
+				log.Fatal().Err(err).Msg("could not start metrics server")
+			}
+			return err
 		})
 	}
 

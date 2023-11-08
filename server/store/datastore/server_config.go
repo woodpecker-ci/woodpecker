@@ -14,7 +14,7 @@
 
 package datastore
 
-import "github.com/woodpecker-ci/woodpecker/server/model"
+import "go.woodpecker-ci.org/woodpecker/server/model"
 
 func (s storage) ServerConfigGet(key string) (string, error) {
 	config := new(model.ServerConfig)
@@ -43,7 +43,7 @@ func (s storage) ServerConfigSet(key, value string) error {
 		return err
 	}
 
-	_, err = s.engine.Where("key = ?", config.Key).AllCols().Update(config)
+	_, err = s.engine.Where("`key` = ?", config.Key).Cols("value").Update(config)
 	return err
 }
 

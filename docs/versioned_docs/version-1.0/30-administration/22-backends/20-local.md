@@ -90,9 +90,8 @@ steps:
 
 ### Using labels to filter tasks
 
-You can use the [agent configuration
-options](../15-agent-config.md#woodpecker_filter_labels) and the
-[pipeline syntax](../../20-usage/20-pipeline-syntax.md#labels) to only run certain
+You can use the [agent configuration options](../15-agent-config.md#woodpecker_filter_labels)
+and the [pipeline syntax](../../20-usage/20-pipeline-syntax.md#labels) to only run certain
 pipelines on certain agents. Example:
 
 Define a `label` `type` with value `exec` for a particular agent:
@@ -115,4 +114,3 @@ labels:
 steps:
   [...]
 ```
-

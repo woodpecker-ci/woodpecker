@@ -21,8 +21,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/constraint"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types/base"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/constraint"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/types/base"
 )
 
 var containerYaml = []byte(`
@@ -68,6 +68,8 @@ when:
 settings:
   foo: bar
   baz: false
+ports:
+  - 8080
 `)
 
 func TestUnmarshalContainer(t *testing.T) {
@@ -126,6 +128,7 @@ func TestUnmarshalContainer(t *testing.T) {
 			"foo": "bar",
 			"baz": false,
 		},
+		Ports: []base.StringOrInt{8080},
 	}
 	got := Container{}
 	err := yaml.Unmarshal(containerYaml, &got)

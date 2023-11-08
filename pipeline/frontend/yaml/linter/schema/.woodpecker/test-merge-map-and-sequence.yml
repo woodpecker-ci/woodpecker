@@ -1,0 +1,20 @@
+version: 1
+
+variables:
+  step_template: &base-step
+    image: golang:1.19
+    commands: &base-cmds
+      - go version
+      - whoami
+
+steps:
+  test-base-step:
+    <<: *base-step
+  test base step with latest image:
+    <<: *base-step
+    image: golang:latest
+  test list overwrite:
+    <<: *base-step
+    commands:
+      - <<: *base-cmds
+      - hostname

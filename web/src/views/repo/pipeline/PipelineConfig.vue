@@ -3,8 +3,9 @@
     <Panel
       v-for="pipelineConfig in pipelineConfigs || []"
       :key="pipelineConfig.hash"
-      collapsable
-      :title="pipelineConfig.name"
+      :collapsable="pipelineConfigs && pipelineConfigs.length > 1"
+      collapsed-by-default
+      :title="pipelineConfigs && pipelineConfigs.length > 1 ? pipelineConfig.name : ''"
     >
       <SyntaxHighlight class="font-mono whitespace-pre overflow-auto" language="yaml" :code="pipelineConfig.data" />
     </Panel>

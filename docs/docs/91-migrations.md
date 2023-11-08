@@ -5,8 +5,6 @@ Some versions need some changes to the server configuration or the pipeline conf
 ## next (2.0.0)
 
 - Dropped deprecated `CI_BUILD_*`, `CI_PREV_BUILD_*`, `CI_JOB_*`, `*_LINK`, `CI_SYSTEM_ARCH`, `CI_REPO_REMOTE` built-in environment variables
-- Dropped deprecated `pipeline:` keyword in favor of `steps:` in pipeline config
-- Dropped deprecated `branches:` filter in favor of global [`when.branch`](./20-usage/20-workflow-syntax.md#branch-1) filter
 - Deprecated `platform:` filter in favor of `labels:`, [read more](./20-usage/20-workflow-syntax.md#filter-by-platform)
 - Secrets `event` property was renamed to `events` and `image` to `images` as both are lists. The new property `events` / `images` has to be used in the api and as cli argument. The old properties `event` and `image` were removed.
 - The secrets `plugin_only` option was removed. Secrets with images are now always only available for plugins using listed by the `images` property. Existing secrets with a list of `images` will now only be available to the listed images if they are used as a plugin.

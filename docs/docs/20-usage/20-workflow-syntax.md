@@ -40,11 +40,11 @@ steps:
 
 Keep in mind the name is optional, if not added the steps will be numerated.
 
-### Skip Commits
+## Skip Commits
 
 Woodpecker gives the ability to skip individual commits by adding `[SKIP CI]` or `[CI SKIP]` to the commit message. Note this is case-insensitive.
 
-```sh
+```bash
 git commit -m "updated README [CI SKIP]"
 ```
 
@@ -139,7 +139,7 @@ Commands of every step are executed serially as if you would enter them into you
 
 There is no magic here. The above commands are converted to a simple shell script. The commands in the above example are roughly converted to the below script:
 
-```sh
+```bash
 #!/bin/sh
 set -e
 
@@ -149,7 +149,7 @@ go test
 
 The above shell script is then executed as the container entrypoint. The below docker command is an (incomplete) example of how the script is executed:
 
-```sh
+```bash
 docker run --entrypoint=build.sh golang
 ```
 
@@ -538,7 +538,7 @@ The base attribute defines a shared base volume available to all steps. This ens
 
 This would be equivalent to the following docker commands:
 
-```sh
+```bash
 docker volume create my-named-volume
 
 docker run --volume=my-named-volume:/go golang:latest

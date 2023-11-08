@@ -22,9 +22,9 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
-	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
+	"go.woodpecker-ci.org/woodpecker/cli/common"
+	"go.woodpecker-ci.org/woodpecker/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/woodpecker-go/woodpecker"
 )
 
 // Command exports the deploy command.
@@ -75,7 +75,7 @@ func deploy(c *cli.Context) error {
 	status := c.String("status")
 
 	pipelineArg := c.Args().Get(1)
-	var number int
+	var number int64
 	if pipelineArg == "last" {
 		// Fetch the pipeline number from the last pipeline
 		pipelines, berr := client.PipelineList(repoID)
@@ -100,7 +100,7 @@ func deploy(c *cli.Context) error {
 			return fmt.Errorf("Cannot deploy failure pipeline")
 		}
 	} else {
-		number, err = strconv.Atoi(pipelineArg)
+		number, err = strconv.ParseInt(pipelineArg, 10, 64)
 		if err != nil {
 			return err
 		}

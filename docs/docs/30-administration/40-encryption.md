@@ -5,8 +5,8 @@ Secrets encryption is currently broken and therefore disabled by default. It wil
 
 Check:
 
-- https://github.com/woodpecker-ci/woodpecker/issues/1541 and
-- https://github.com/woodpecker-ci/woodpecker/pull/2300
+- <https://github.com/woodpecker-ci/woodpecker/issues/1541> and
+- <https://github.com/woodpecker-ci/woodpecker/pull/2300>
 
 :::
 
@@ -66,7 +66,7 @@ to use while encrypting new data.
 
 Keyset generation example:
 
-```shell
+```bash
 tinkey create-keyset --key-template AES256_GCM --out-format json --out keyset.json
 ```
 
@@ -74,7 +74,7 @@ tinkey create-keyset --key-template AES256_GCM --out-format json --out keyset.js
 
 Use `tinkey` to rotate encryption keys in your existing keyset:
 
-```shell
+```bash
 tinkey rotate-keyset --in keyset_v1.json --out keyset_v2.json --key-template AES256_GCM
 ```
 

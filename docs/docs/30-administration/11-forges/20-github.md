@@ -3,7 +3,7 @@
 Woodpecker comes with built-in support for GitHub and GitHub Enterprise.
 To use Woodpecker with GitHub the following environment variables should be set for the server component:
 
-```sh
+```bash
 WOODPECKER_GITHUB=true
 WOODPECKER_GITHUB_CLIENT=YOUR_GITHUB_CLIENT_ID
 WOODPECKER_GITHUB_SECRET=YOUR_GITHUB_CLIENT_SECRET
@@ -21,7 +21,7 @@ Do not use a "GitHub App" instead of an Oauth2 app as the former will not work c
 - Name: An arbitrary name for your App
 - Homepage URL: The URL of your Woodpecker instance
 - Callback URL: `https://<your-woodpecker-instance>/authorize`
-- (optional) Upload the Woodpecker Logo: https://avatars.githubusercontent.com/u/84780935?s=200&v=4
+- (optional) Upload the Woodpecker Logo: <https://avatars.githubusercontent.com/u/84780935?s=200&v=4>
 
 ## Client Secret Creation
 

@@ -1,0 +1,17 @@
+version: 1
+
+branches: main
+
+matri:
+  GO_VERSION:
+    - 1.14
+    - 1.13
+
+steps:
+  test:
+    image: golang:${GO_VERSION}
+    commands:
+      - echo "test ${DATABAS}"
+
+  build:
+    commands: go build

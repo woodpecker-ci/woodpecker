@@ -1,0 +1,19 @@
+version: 1
+
+steps:
+  build:
+    image: golang
+    commands:
+      - go build
+      - go test
+
+  publish:
+    image: plugins/docker
+    settings:
+      repo: foo/bar
+      tags: latest
+
+  notify:
+    image: plugins/slack
+    settings:
+      channel: dev
