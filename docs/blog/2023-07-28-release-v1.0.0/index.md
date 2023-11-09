@@ -1,7 +1,7 @@
 ---
 title: Presenting Woodpecker 1.0.0
 description: Introducing Woodpecker 1.0.0 and its new features.
-slug: release-v1.0.0
+slug: release-v100
 authors:
   - name: 6543
     title: Maintainer of Woodpecker
