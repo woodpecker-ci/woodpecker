@@ -19,7 +19,21 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"go.woodpecker-ci.org/woodpecker/pipeline/backend/types"
 )
+
+func TestServiceName(t *testing.T) {
+	name, err := ServiceName(&types.Step{Name: "wp_01he8bebctabr3kgk0qj36d2me_0_services_0"})
+	assert.NoError(t, err)
+	assert.Equal(t, "wp-01he8bebctabr3kgk0qj36d2me-0-services-0", name)
+
+	name, err = ServiceName(&types.Step{Name: "wp-01he8bebctabr3kgk0qj36d2me-0\\services-0"})
+	assert.NoError(t, err)
+	assert.Equal(t, "wp-01he8bebctabr3kgk0qj36d2me-0\\services-0", name)
+
+	_, err = ServiceName(&types.Step{Name: "wp-01he8bebctabr3kgk0qj36d2me-0-services-0.woodpecker-runtime.svc.cluster.local"})
+	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
+}
 
 func TestService(t *testing.T) {
 	expected := `
