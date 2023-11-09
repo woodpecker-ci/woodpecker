@@ -4,7 +4,7 @@
 
 - ENHANCEMENTS
   - Switch to go vanity urls (#2706) (#2773)
--  MISC
+- MISC
   - Fix release pipeline for 1.x.x (#2774)
 
 ## [1.0.4](https://github.com/woodpecker-ci/woodpecker/releases/tag/v1.0.4) - 2023-11-05
