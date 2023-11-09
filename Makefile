@@ -27,7 +27,7 @@ else
 	endif
 endif
 
-LDFLAGS := -s -w -extldflags "-static" -X go.woodpecker-ci.org/woodpecker/version.Version=${VERSION}
+LDFLAGS := -s -w -extldflags -X go.woodpecker-ci.org/woodpecker/version.Version=${VERSION}
 CGO_ENABLED ?= 1 # only used to compile server
 
 HAS_GO = $(shell hash go > /dev/null 2>&1 && echo "GO" || echo "NOGO" )
