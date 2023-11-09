@@ -3,7 +3,6 @@
     <div class="flex flex-wrap items-center">
       <Button
         class="mr-4 my-1"
-        color="blue"
         start-icon="heal"
         :is-loading="isRepairingRepo"
         :text="$t('repo.settings.actions.repair.repair')"
@@ -13,7 +12,6 @@
       <Button
         v-if="isActive"
         class="mr-4 my-1"
-        color="blue"
         start-icon="turn-off"
         :is-loading="isDeactivatingRepo"
         :text="$t('repo.settings.actions.disable.disable')"
