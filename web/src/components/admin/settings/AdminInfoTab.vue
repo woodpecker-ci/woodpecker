@@ -7,7 +7,12 @@
         <span class="font-bold">{{ version?.current }}</span>
       </i18n-t>
 
-      <i18n-t v-if="version?.needsUpdate" keypath="update_woodpecker" tag="span" class="text-int-wp-state-error-100">
+      <i18n-t
+        v-if="version?.needsUpdate"
+        keypath="update_woodpecker"
+        tag="span"
+        class="bg-wp-control-error-100 border-l-6 border-l-wp-control-error-300 text-white p-2 rounded-md"
+      >
         <a
           :href="`https://github.com/woodpecker-ci/woodpecker/releases/tag/${version.latest}`"
           target="_blank"
