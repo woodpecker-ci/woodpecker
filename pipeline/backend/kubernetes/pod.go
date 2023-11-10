@@ -65,7 +65,7 @@ func Pod(namespace, name, image, workDir, goos, serviceAccountName string,
 	return pod, nil
 }
 
-func PodName(step *types.Step) (string, error) {
+func podName(step *types.Step) (string, error) {
 	return dnsName(step.Name)
 }
 
@@ -143,7 +143,7 @@ func volumes(volumes []string) ([]v1.Volume, error) {
 	var vols []v1.Volume
 
 	for _, v := range volumes {
-		volumeName, err := VolumeName(v)
+		volumeName, err := volumeName(v)
 		if err != nil {
 			return nil, err
 		}
@@ -170,12 +170,12 @@ func volumeMounts(volumes []string) ([]v1.VolumeMount, error) {
 	var mounts []v1.VolumeMount
 
 	for _, v := range volumes {
-		volumeName, err := VolumeName(v)
+		volumeName, err := volumeName(v)
 		if err != nil {
 			return nil, err
 		}
 
-		mount := volumeMount(volumeName, VolumeMountPath(v))
+		mount := volumeMount(volumeName, volumeMountPath(v))
 		mounts = append(mounts, mount)
 	}
 	return mounts, nil
@@ -295,7 +295,7 @@ func mapToEnvVars(m map[string]string) []v1.EnvVar {
 }
 
 func StartPod(ctx context.Context, engine *kube, step *types.Step) (*v1.Pod, error) {
-	podName, err := PodName(step)
+	podName, err := podName(step)
 	if err != nil {
 		return nil, err
 	}
@@ -314,7 +314,7 @@ func StartPod(ctx context.Context, engine *kube, step *types.Step) (*v1.Pod, err
 }
 
 func StopPod(ctx context.Context, engine *kube, step *types.Step, deleteOpts metav1.DeleteOptions) error {
-	podName, err := PodName(step)
+	podName, err := podName(step)
 	if err != nil {
 		return err
 	}

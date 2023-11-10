@@ -22,23 +22,23 @@ import (
 )
 
 func TestPvcName(t *testing.T) {
-	name, err := VolumeName("woodpecker_cache:/woodpecker/src/cache")
+	name, err := volumeName("woodpecker_cache:/woodpecker/src/cache")
 	assert.NoError(t, err)
 	assert.Equal(t, "woodpecker-cache", name)
 
-	name, err = VolumeName("woodpecker\\cache")
+	name, err = volumeName("woodpecker\\cache")
 	assert.NoError(t, err)
 	assert.Equal(t, "woodpecker\\cache", name)
 
-	_, err = VolumeName("-woodpecker.cache:/woodpecker/src/cache")
+	_, err = volumeName("-woodpecker.cache:/woodpecker/src/cache")
 	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
 }
 
 func TestPvcMount(t *testing.T) {
-	mount := VolumeMountPath("woodpecker-cache:/woodpecker/src/cache")
+	mount := volumeMountPath("woodpecker-cache:/woodpecker/src/cache")
 	assert.Equal(t, "/woodpecker/src/cache", mount)
 
-	mount = VolumeMountPath("/woodpecker/src/cache")
+	mount = volumeMountPath("/woodpecker/src/cache")
 	assert.Equal(t, "/woodpecker/src/cache", mount)
 }
 

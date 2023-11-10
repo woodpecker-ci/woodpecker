@@ -23,15 +23,15 @@ import (
 )
 
 func TestPodName(t *testing.T) {
-	name, err := PodName(&types.Step{Name: "wp_01he8bebctabr3kgk0qj36d2me_0"})
+	name, err := podName(&types.Step{Name: "wp_01he8bebctabr3kgk0qj36d2me_0"})
 	assert.NoError(t, err)
 	assert.Equal(t, "wp-01he8bebctabr3kgk0qj36d2me-0", name)
 
-	name, err = PodName(&types.Step{Name: "wp\\01he8bebctabr3kgk0qj36d2me-0"})
+	name, err = podName(&types.Step{Name: "wp\\01he8bebctabr3kgk0qj36d2me-0"})
 	assert.NoError(t, err)
 	assert.Equal(t, "wp\\01he8bebctabr3kgk0qj36d2me-0", name)
 
-	_, err = PodName(&types.Step{Name: "wp-01he8bebctabr3kgk0qj36d2me-0-services-0.woodpecker-runtime.svc.cluster.local"})
+	_, err = podName(&types.Step{Name: "wp-01he8bebctabr3kgk0qj36d2me-0-services-0.woodpecker-runtime.svc.cluster.local"})
 	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
 }
 

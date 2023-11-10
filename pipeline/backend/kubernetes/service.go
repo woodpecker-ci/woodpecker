@@ -49,16 +49,16 @@ func Service(namespace, name string, ports []uint16, selector map[string]string)
 	}, nil
 }
 
-func ServiceName(step *types.Step) (string, error) {
+func serviceName(step *types.Step) (string, error) {
 	return dnsName(step.Name)
 }
 
 func StartService(ctx context.Context, engine *kube, step *types.Step) (*v1.Service, error) {
-	name, err := ServiceName(step)
+	name, err := serviceName(step)
 	if err != nil {
 		return nil, err
 	}
-	podName, err := PodName(step)
+	podName, err := podName(step)
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +76,7 @@ func StartService(ctx context.Context, engine *kube, step *types.Step) (*v1.Serv
 }
 
 func StopService(ctx context.Context, engine *kube, step *types.Step, deleteOpts metav1.DeleteOptions) error {
-	svcName, err := ServiceName(step)
+	svcName, err := serviceName(step)
 	if err != nil {
 		return err
 	}

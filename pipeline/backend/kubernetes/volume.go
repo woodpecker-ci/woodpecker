@@ -39,7 +39,7 @@ func PersistentVolumeClaim(namespace, name, storageClass, size string, storageRw
 		accessMode = v1.ReadWriteOnce
 	}
 
-	volumeName, err := VolumeName(name)
+	volumeName, err := volumeName(name)
 	if err != nil {
 		return nil, err
 	}
@@ -63,11 +63,11 @@ func PersistentVolumeClaim(namespace, name, storageClass, size string, storageRw
 	return pvc, nil
 }
 
-func VolumeName(name string) (string, error) {
+func volumeName(name string) (string, error) {
 	return dnsName(strings.Split(name, ":")[0])
 }
 
-func VolumeMountPath(name string) string {
+func volumeMountPath(name string) string {
 	s := strings.Split(name, ":")
 	if len(s) > 1 {
 		return s[1]
@@ -86,7 +86,7 @@ func StartVolume(ctx context.Context, engine *kube, name string) (*v1.Persistent
 }
 
 func StopVolume(ctx context.Context, engine *kube, name string, deleteOpts metav1.DeleteOptions) error {
-	pvcName, err := VolumeName(name)
+	pvcName, err := volumeName(name)
 	if err != nil {
 		return err
 	}
