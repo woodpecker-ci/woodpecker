@@ -120,7 +120,8 @@ matrix:
     - linux/amd64
     - linux/arm64
 
-platform: ${platform}
+labels:
+  platform: ${platform}
 
 steps:
   test:
