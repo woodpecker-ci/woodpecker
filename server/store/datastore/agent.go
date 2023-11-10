@@ -24,7 +24,7 @@ var ErrNoTokenProvided = errors.New("Please provide a token")
 
 func (s storage) AgentList(p *model.ListOptions) ([]*model.Agent, error) {
 	var agents []*model.Agent
-	return agents, s.paginate(p).Find(&agents)
+	return agents, s.paginate(p).OrderBy("id").Find(&agents)
 }
 
 func (s storage) AgentFind(id int64) (*model.Agent, error) {
