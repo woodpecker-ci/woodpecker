@@ -23,7 +23,7 @@ services:
 ## Gitea on the same host
 
 If you have Gitea also running on the same host within a container, make sure the agent does have access to it.
-The agent tries to clone by the clone URL Gitea reports via API. So you might want to specify a docker network for the agent too:
+The agent tries to clone using the URL which Gitea reports through its API. For simplified connectivity, it helps to add the woodpecker agent to the same docker network as Gitea is in:
 
 ```diff
 # docker-compose.yml
