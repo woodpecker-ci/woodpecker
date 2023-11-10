@@ -18,6 +18,7 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/kinbiko/jsonassert"
 	"github.com/stretchr/testify/assert"
 	"go.woodpecker-ci.org/woodpecker/pipeline/backend/types"
 )
@@ -68,6 +69,7 @@ func TestTinyPod(t *testing.T) {
 					],
 					"workingDir": "/woodpecker/src",
 					"env": [
+						"<<UNORDERED>>",
 						{
 							"name": "CI",
 							"value": "woodpecker"
@@ -115,9 +117,12 @@ func TestTinyPod(t *testing.T) {
 		types.Resources{Requests: nil, Limits: nil},
 	)
 	assert.NoError(t, err)
+
 	json, err := json.Marshal(pod)
 	assert.NoError(t, err)
-	assert.JSONEq(t, expected, string(json))
+
+	ja := jsonassert.New(t)
+	ja.Assertf(string(json), expected)
 }
 
 func TestFullPod(t *testing.T) {
@@ -157,6 +162,7 @@ func TestFullPod(t *testing.T) {
 					],
 					"workingDir": "/woodpecker/src",
 					"env": [
+						"<<UNORDERED>>",
 						{
 							"name": "CGO",
 							"value": "0"
@@ -233,7 +239,10 @@ func TestFullPod(t *testing.T) {
 		types.Resources{Requests: map[string]string{"memory": "128Mi", "cpu": "1000m"}, Limits: map[string]string{"memory": "256Mi", "cpu": "2"}},
 	)
 	assert.NoError(t, err)
+
 	json, err := json.Marshal(pod)
 	assert.NoError(t, err)
-	assert.JSONEq(t, expected, string(json))
+
+	ja := jsonassert.New(t)
+	ja.Assertf(string(json), expected)
 }
