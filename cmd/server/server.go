@@ -43,6 +43,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/server/logging"
 	"go.woodpecker-ci.org/woodpecker/server/model"
 	"go.woodpecker-ci.org/woodpecker/server/plugins/config"
+	"go.woodpecker-ci.org/woodpecker/server/plugins/permissions"
 	"go.woodpecker-ci.org/woodpecker/server/pubsub"
 	"go.woodpecker-ci.org/woodpecker/server/router"
 	"go.woodpecker-ci.org/woodpecker/server/router/middleware"
@@ -177,7 +178,6 @@ func run(c *cli.Context) error {
 		webUIServe,
 		middleware.Logger(time.RFC3339, true),
 		middleware.Version,
-		middleware.Config(c),
 		middleware.Store(c, _store),
 	)
 
@@ -367,4 +367,10 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 
 	// prometheus
 	server.Config.Prometheus.AuthToken = c.String("prometheus-auth-token")
+
+	// permissions
+	server.Config.Permissions.Open = c.Bool("open")
+	server.Config.Permissions.Admins = permissions.NewAdmins(c.StringSlice("admin"))
+	server.Config.Permissions.Orgs = permissions.NewOrgs(c.StringSlice("orgs"))
+	server.Config.Permissions.OwnersWhitelist = permissions.NewOwnersWhitelist(c.StringSlice("repo-owners"))
 }

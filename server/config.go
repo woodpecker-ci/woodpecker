@@ -26,6 +26,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/server/logging"
 	"go.woodpecker-ci.org/woodpecker/server/model"
 	"go.woodpecker-ci.org/woodpecker/server/plugins/config"
+	"go.woodpecker-ci.org/woodpecker/server/plugins/permissions"
 	"go.woodpecker-ci.org/woodpecker/server/pubsub"
 	"go.woodpecker-ci.org/woodpecker/server/queue"
 )
@@ -95,5 +96,11 @@ var Config = struct {
 			HTTP  string
 			HTTPS string
 		}
+	}
+	Permissions struct {
+		Open            bool
+		Admins          *permissions.Admins
+		Orgs            *permissions.Orgs
+		OwnersWhitelist *permissions.OwnersWhitelist
 	}
 }{}
