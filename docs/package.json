@@ -55,11 +55,5 @@
       "trim": "^0.0.3",
       "got": "^11.8.5"
     }
-  },
-  "overrides": {
-    "@easyops-cn/docusaurus-search-local": {
-      "@docusaurus/core": "^3.0.0",
-      "@docusaurus/theme-common": "^3.0.0"
-    }
   }
 }
