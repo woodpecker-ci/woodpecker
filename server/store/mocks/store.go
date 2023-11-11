@@ -238,11 +238,11 @@ func (_m *Store) ConfigsForPipeline(pipelineID int64) ([]*model.Config, error) {
 
 // CreatePipeline provides a mock function with given fields: _a0, _a1
 func (_m *Store) CreatePipeline(_a0 *model.Pipeline, _a1 ...*model.Step) error {
-	_va := make([]interface{}, len(_a1))
+	_va := make([]any, len(_a1))
 	for _i := range _a1 {
 		_va[_i] = _a1[_i]
 	}
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, _a0)
 	_ca = append(_ca, _va...)
 	ret := _m.Called(_ca...)
