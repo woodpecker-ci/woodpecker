@@ -12,9 +12,13 @@ when:
       - 'cmd/cli/**'
       # api docs
       - 'server/api/**'
-    branch: ${CI_REPO_DEFAULT_BRANCH}
+    branch:
+      - ${CI_REPO_DEFAULT_BRANCH}
+      - renovate/*
   - cron: update_docs
     event: cron
+  - event: manual
+    evaluate: 'TASK == "docs"'
 
 variables:
   - &golang_image 'docker.io/golang:1.21.3'
@@ -27,7 +31,7 @@ steps:
       - make docs
     when:
       - path: *when_path
-      - event: cron
+      - event: [cron, manual]
 
   build:
     image: *node_image
@@ -38,7 +42,7 @@ steps:
       - pnpm build
     when:
       - path: *when_path
-      - event: cron
+      - event: [cron, manual]
 
   deploy-preview:
     image: docker.io/woodpeckerci/plugin-surge-preview:1.2.2
@@ -82,6 +86,6 @@ steps:
       - git commit -m "Deploy website - based on ${CI_COMMIT_SHA}"
       - git push
     when:
-      - event: [push, cron]
+      - event: push
         path: *when_path
-      - event: tag
+      - event: [cron, manual, tag]
