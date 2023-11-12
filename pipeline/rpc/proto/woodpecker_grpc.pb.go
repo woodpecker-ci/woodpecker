@@ -239,7 +239,7 @@ func RegisterWoodpeckerServer(s grpc.ServiceRegistrar, srv WoodpeckerServer) {
 	s.RegisterService(&Woodpecker_ServiceDesc, srv)
 }
 
-func _Woodpecker_Version_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
+func _Woodpecker_Version_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Empty)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -251,13 +251,13 @@ func _Woodpecker_Version_Handler(srv any, ctx context.Context, dec func(any) err
 		Server:     srv,
 		FullMethod: Woodpecker_Version_FullMethodName,
 	}
-	handler := func(ctx context.Context, req any) (any, error) {
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(WoodpeckerServer).Version(ctx, req.(*Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Woodpecker_Next_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
+func _Woodpecker_Next_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(NextRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -269,13 +269,13 @@ func _Woodpecker_Next_Handler(srv any, ctx context.Context, dec func(any) error,
 		Server:     srv,
 		FullMethod: Woodpecker_Next_FullMethodName,
 	}
-	handler := func(ctx context.Context, req any) (any, error) {
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(WoodpeckerServer).Next(ctx, req.(*NextRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Woodpecker_Init_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
+func _Woodpecker_Init_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(InitRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -287,13 +287,13 @@ func _Woodpecker_Init_Handler(srv any, ctx context.Context, dec func(any) error,
 		Server:     srv,
 		FullMethod: Woodpecker_Init_FullMethodName,
 	}
-	handler := func(ctx context.Context, req any) (any, error) {
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(WoodpeckerServer).Init(ctx, req.(*InitRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Woodpecker_Wait_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
+func _Woodpecker_Wait_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(WaitRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -305,13 +305,13 @@ func _Woodpecker_Wait_Handler(srv any, ctx context.Context, dec func(any) error,
 		Server:     srv,
 		FullMethod: Woodpecker_Wait_FullMethodName,
 	}
-	handler := func(ctx context.Context, req any) (any, error) {
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(WoodpeckerServer).Wait(ctx, req.(*WaitRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Woodpecker_Done_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
+func _Woodpecker_Done_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DoneRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -323,13 +323,13 @@ func _Woodpecker_Done_Handler(srv any, ctx context.Context, dec func(any) error,
 		Server:     srv,
 		FullMethod: Woodpecker_Done_FullMethodName,
 	}
-	handler := func(ctx context.Context, req any) (any, error) {
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(WoodpeckerServer).Done(ctx, req.(*DoneRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Woodpecker_Extend_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
+func _Woodpecker_Extend_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ExtendRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -341,13 +341,13 @@ func _Woodpecker_Extend_Handler(srv any, ctx context.Context, dec func(any) erro
 		Server:     srv,
 		FullMethod: Woodpecker_Extend_FullMethodName,
 	}
-	handler := func(ctx context.Context, req any) (any, error) {
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(WoodpeckerServer).Extend(ctx, req.(*ExtendRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Woodpecker_Update_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
+func _Woodpecker_Update_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdateRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -359,13 +359,13 @@ func _Woodpecker_Update_Handler(srv any, ctx context.Context, dec func(any) erro
 		Server:     srv,
 		FullMethod: Woodpecker_Update_FullMethodName,
 	}
-	handler := func(ctx context.Context, req any) (any, error) {
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(WoodpeckerServer).Update(ctx, req.(*UpdateRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Woodpecker_Log_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
+func _Woodpecker_Log_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(LogRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -377,13 +377,13 @@ func _Woodpecker_Log_Handler(srv any, ctx context.Context, dec func(any) error, 
 		Server:     srv,
 		FullMethod: Woodpecker_Log_FullMethodName,
 	}
-	handler := func(ctx context.Context, req any) (any, error) {
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(WoodpeckerServer).Log(ctx, req.(*LogRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Woodpecker_RegisterAgent_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
+func _Woodpecker_RegisterAgent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(RegisterAgentRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -395,13 +395,13 @@ func _Woodpecker_RegisterAgent_Handler(srv any, ctx context.Context, dec func(an
 		Server:     srv,
 		FullMethod: Woodpecker_RegisterAgent_FullMethodName,
 	}
-	handler := func(ctx context.Context, req any) (any, error) {
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(WoodpeckerServer).RegisterAgent(ctx, req.(*RegisterAgentRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Woodpecker_UnregisterAgent_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
+func _Woodpecker_UnregisterAgent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Empty)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -413,13 +413,13 @@ func _Woodpecker_UnregisterAgent_Handler(srv any, ctx context.Context, dec func(
 		Server:     srv,
 		FullMethod: Woodpecker_UnregisterAgent_FullMethodName,
 	}
-	handler := func(ctx context.Context, req any) (any, error) {
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(WoodpeckerServer).UnregisterAgent(ctx, req.(*Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Woodpecker_ReportHealth_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
+func _Woodpecker_ReportHealth_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ReportHealthRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -431,7 +431,7 @@ func _Woodpecker_ReportHealth_Handler(srv any, ctx context.Context, dec func(any
 		Server:     srv,
 		FullMethod: Woodpecker_ReportHealth_FullMethodName,
 	}
-	handler := func(ctx context.Context, req any) (any, error) {
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(WoodpeckerServer).ReportHealth(ctx, req.(*ReportHealthRequest))
 	}
 	return interceptor(ctx, in, info, handler)
@@ -549,7 +549,7 @@ func RegisterWoodpeckerAuthServer(s grpc.ServiceRegistrar, srv WoodpeckerAuthSer
 	s.RegisterService(&WoodpeckerAuth_ServiceDesc, srv)
 }
 
-func _WoodpeckerAuth_Auth_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
+func _WoodpeckerAuth_Auth_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(AuthRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -561,7 +561,7 @@ func _WoodpeckerAuth_Auth_Handler(srv any, ctx context.Context, dec func(any) er
 		Server:     srv,
 		FullMethod: WoodpeckerAuth_Auth_FullMethodName,
 	}
-	handler := func(ctx context.Context, req any) (any, error) {
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(WoodpeckerAuthServer).Auth(ctx, req.(*AuthRequest))
 	}
 	return interceptor(ctx, in, info, handler)
