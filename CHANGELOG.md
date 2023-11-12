@@ -1,10 +1,14 @@
 # Changelog
 
-## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-11-11
+## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-11-12
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@qwerty287
+@pat-s, @qwerty287
+
+### 🔒 Security
+
+- Update docs npm deps non-major [[#2799](https://github.com/woodpecker-ci/woodpecker/pull/2799)]
 
 ### 📚 Documentation
 
