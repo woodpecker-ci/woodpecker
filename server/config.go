@@ -101,6 +101,6 @@ var Config = struct {
 		Open            bool
 		Admins          *permissions.Admins
 		Orgs            *permissions.Orgs
-		OwnersWhitelist *permissions.OwnersWhitelist
+		OwnersAllowlist *permissions.OwnersAllowlist
 	}
 }{}

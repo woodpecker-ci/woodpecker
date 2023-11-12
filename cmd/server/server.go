@@ -372,5 +372,5 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 	server.Config.Permissions.Open = c.Bool("open")
 	server.Config.Permissions.Admins = permissions.NewAdmins(c.StringSlice("admin"))
 	server.Config.Permissions.Orgs = permissions.NewOrgs(c.StringSlice("orgs"))
-	server.Config.Permissions.OwnersWhitelist = permissions.NewOwnersWhitelist(c.StringSlice("repo-owners"))
+	server.Config.Permissions.OwnersAllowlist = permissions.NewOwnersAllowlist(c.StringSlice("repo-owners"))
 }

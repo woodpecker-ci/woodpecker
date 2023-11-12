@@ -5,14 +5,14 @@ import (
 	"go.woodpecker-ci.org/woodpecker/shared/utils"
 )
 
-func NewOwnersWhitelist(owners []string) *OwnersWhitelist {
-	return &OwnersWhitelist{owners: utils.SliceToBoolMap(owners)}
+func NewOwnersAllowlist(owners []string) *OwnersAllowlist {
+	return &OwnersAllowlist{owners: utils.SliceToBoolMap(owners)}
 }
 
-type OwnersWhitelist struct {
+type OwnersAllowlist struct {
 	owners map[string]bool
 }
 
-func (o *OwnersWhitelist) IsAllowed(repo *model.Repo) bool {
+func (o *OwnersAllowlist) IsAllowed(repo *model.Repo) bool {
 	return len(o.owners) > 0 && o.owners[repo.Owner]
 }

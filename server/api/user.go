@@ -111,7 +111,7 @@ func GetRepos(c *gin.Context) {
 
 		var repos []*model.Repo
 		for _, r := range _repos {
-			if r.Perm.Push && server.Config.Permissions.OwnersWhitelist.IsAllowed(r) {
+			if r.Perm.Push && server.Config.Permissions.OwnersAllowlist.IsAllowed(r) {
 				if active[r.ForgeRemoteID] != nil {
 					existingRepo := active[r.ForgeRemoteID]
 					existingRepo.Update(r)
