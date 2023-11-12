@@ -4,16 +4,17 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@pat-s, @qwerty287
-
-### 🔒 Security
-
-- Update docs npm deps non-major [[#2799](https://github.com/woodpecker-ci/woodpecker/pull/2799)]
+@renovate[bot], @pat-s, @qwerty287
 
 ### 📚 Documentation
 
+- Update docs npm deps non-major [[#2799](https://github.com/woodpecker-ci/woodpecker/pull/2799)]
 - Add docs about Gitea on same host and update docker-compose example [[#2752](https://github.com/woodpecker-ci/woodpecker/pull/2752)]
 - Update docusaurus plugin [[#2804](https://github.com/woodpecker-ci/woodpecker/pull/2804)]
+
+### Misc
+
+- Update dependency marked to v10 [[#2810](https://github.com/woodpecker-ci/woodpecker/pull/2810)]
 
 ## [2.0.0-rc.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0-rc.0) - 2023-11-11
 
