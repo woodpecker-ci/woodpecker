@@ -77,7 +77,7 @@ func GetPipelineStatusDescription(status model.StatusValue) string {
 	}
 }
 
-func GetPipelineStatusLink(repo *model.Repo, pipeline *model.Pipeline, workflow *model.Workflow) string {
+func GetPipelineStatusURL(repo *model.Repo, pipeline *model.Pipeline, workflow *model.Workflow) string {
 	if workflow == nil {
 		return fmt.Sprintf("%s/repos/%d/pipeline/%d", server.Config.Server.Host, repo.ID, pipeline.Number)
 	}

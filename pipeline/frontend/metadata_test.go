@@ -62,7 +62,7 @@ func TestMetadataFromStruct(t *testing.T) {
 		repo             *model.Repo
 		pipeline, last   *model.Pipeline
 		workflow         *model.Workflow
-		link             string
+		sysURL             string
 		expectedMetadata metadata.Metadata
 		expectedEnviron  map[string]string
 	}{
@@ -92,7 +92,7 @@ func TestMetadataFromStruct(t *testing.T) {
 			pipeline: &model.Pipeline{Number: 3},
 			last:     &model.Pipeline{Number: 2},
 			workflow: &model.Workflow{Name: "hello"},
-			link:     "https://example.com",
+			sysURL:     "https://example.com",
 			expectedMetadata: metadata.Metadata{
 				Forge:    metadata.Forge{Type: "gitea", URL: "https://gitea.com"},
 				Sys:      metadata.System{Name: "woodpecker", Host: "example.com", URL: "https://example.com"},
@@ -122,7 +122,7 @@ func TestMetadataFromStruct(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			result := frontend.MetadataFromStruct(testCase.forge, testCase.repo, testCase.pipeline, testCase.last, testCase.workflow, testCase.link)
+			result := frontend.MetadataFromStruct(testCase.forge, testCase.repo, testCase.pipeline, testCase.last, testCase.workflow, testCase.sysURL)
 			assert.EqualValues(t, testCase.expectedMetadata, result)
 			assert.EqualValues(t, testCase.expectedEnviron, result.Environ())
 		})

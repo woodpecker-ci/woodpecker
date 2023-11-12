@@ -60,7 +60,7 @@ func repoInfo(c *cli.Context) error {
 // template for repo information
 var tmplRepoInfo = `Owner: {{ .Owner }}
 Repo: {{ .Name }}
-Link: {{ .Link }}
+URL: {{ .URL }}
 Config path: {{ .Config }}
 Visibility: {{ .Visibility }}
 Private: {{ .IsSCMPrivate }}

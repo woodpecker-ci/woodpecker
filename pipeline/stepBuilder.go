@@ -48,7 +48,7 @@ type StepBuilder struct {
 	Netrc     *model.Netrc
 	Secs      []*model.Secret
 	Regs      []*model.Registry
-	Link      string
+	Host      string
 	Yamls     []*forge_types.FileMeta
 	Envs      map[string]string
 	Forge     metadata.ServerForge
@@ -117,7 +117,7 @@ func (b *StepBuilder) Build() (items []*Item, errorsAndWarnings error) {
 }
 
 func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.Axis, data string) (item *Item, errorsAndWarnings error) {
-	workflowMetadata := frontend.MetadataFromStruct(b.Forge, b.Repo, b.Curr, b.Last, workflow, b.Link)
+	workflowMetadata := frontend.MetadataFromStruct(b.Forge, b.Repo, b.Curr, b.Last, workflow, b.Host)
 	environ := b.environmentVariables(workflowMetadata, axis)
 
 	// add global environment variables for substituting
