@@ -3963,6 +3963,9 @@ const docTemplate = `{
                 "finished_at": {
                     "type": "integer"
                 },
+                "forge_url": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -4011,9 +4014,6 @@ const docTemplate = `{
                 },
                 "updated_at": {
                     "type": "integer"
-                },
-                "url": {
-                    "type": "string"
                 },
                 "variables": {
                     "type": "object",
@@ -4111,6 +4111,9 @@ const docTemplate = `{
                     "description": "ForgeRemoteID is the unique identifier for the repository on the forge.",
                     "type": "string"
                 },
+                "forge_url": {
+                    "type": "string"
+                },
                 "full_name": {
                     "type": "string"
                 },
@@ -4143,9 +4146,6 @@ const docTemplate = `{
                 },
                 "trusted": {
                     "type": "boolean"
-                },
-                "url": {
-                    "type": "string"
                 },
                 "visibility": {
                     "$ref": "#/definitions/RepoVisibility"
