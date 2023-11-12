@@ -101,7 +101,7 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_PREV_PIPELINE_PARENT":        strconv.FormatInt(m.Prev.Parent, 10),
 		"CI_PREV_PIPELINE_EVENT":         m.Prev.Event,
 		"CI_PREV_PIPELINE_URL":           m.getPipelineStatusLink(m.Prev, 0),
-		"CI_PREV_PIPELINE_FORGE_URL":     m.Curr.Link,
+		"CI_PREV_PIPELINE_FORGE_URL":     m.Prev.Link,
 		"CI_PREV_PIPELINE_DEPLOY_TARGET": m.Prev.Target,
 		"CI_PREV_PIPELINE_STATUS":        m.Prev.Status,
 		"CI_PREV_PIPELINE_CREATED":       strconv.FormatInt(m.Prev.Created, 10),
