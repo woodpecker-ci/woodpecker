@@ -125,7 +125,7 @@ func getUserRepos(c *gin.Context) {
 }
 
 func getVersion(c *gin.Context) {
-	c.JSON(200, map[string]interface{}{"version": "1.18.0"})
+	c.JSON(200, map[string]any{"version": "1.18.0"})
 }
 
 func getPRFiles(c *gin.Context) {
