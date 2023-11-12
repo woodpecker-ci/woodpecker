@@ -6,6 +6,7 @@ when:
     branch:
       - ${CI_REPO_DEFAULT_BRANCH}
       - release/*
+      - renovate/*
 
 variables:
   - &golang_image 'docker.io/golang:1.21.3'
