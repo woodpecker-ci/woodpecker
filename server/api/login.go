@@ -75,7 +75,7 @@ func HandleAuth(c *gin.Context) {
 			return
 		}
 
-		// if self-registration is enabled for whitelisted organizations we need to
+		// if self-registration is enabled for allowed organizations we need to
 		// check the user's organization membership.
 		if server.Config.Permissions.Orgs.IsConfigured {
 			teams, terr := _forge.Teams(c, tmpuser)
@@ -125,7 +125,7 @@ func HandleAuth(c *gin.Context) {
 	u.Login = tmpuser.Login
 	u.Admin = u.Admin || server.Config.Permissions.Admins.IsAdmin(tmpuser)
 
-	// if self-registration is enabled for whitelisted organizations we need to
+	// if self-registration is enabled for allowed organizations we need to
 	// check the user's organization membership.
 	if server.Config.Permissions.Orgs.IsConfigured {
 		teams, terr := _forge.Teams(c, u)
