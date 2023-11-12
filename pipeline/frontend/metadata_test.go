@@ -62,7 +62,7 @@ func TestMetadataFromStruct(t *testing.T) {
 		repo             *model.Repo
 		pipeline, last   *model.Pipeline
 		workflow         *model.Workflow
-		sysURL             string
+		sysURL           string
 		expectedMetadata metadata.Metadata
 		expectedEnviron  map[string]string
 	}{
@@ -88,15 +88,15 @@ func TestMetadataFromStruct(t *testing.T) {
 		{
 			name:     "Test with forge",
 			forge:    forge,
-			repo:     &model.Repo{FullName: "testUser/testRepo", URL: "https://gitea.com/testUser/testRepo", Clone: "https://gitea.com/testUser/testRepo.git", CloneSSH: "git@gitea.com:testUser/testRepo.git", Branch: "main", IsSCMPrivate: true},
+			repo:     &model.Repo{FullName: "testUser/testRepo", ForgeURL: "https://gitea.com/testUser/testRepo", Clone: "https://gitea.com/testUser/testRepo.git", CloneSSH: "git@gitea.com:testUser/testRepo.git", Branch: "main", IsSCMPrivate: true},
 			pipeline: &model.Pipeline{Number: 3},
 			last:     &model.Pipeline{Number: 2},
 			workflow: &model.Workflow{Name: "hello"},
-			sysURL:     "https://example.com",
+			sysURL:   "https://example.com",
 			expectedMetadata: metadata.Metadata{
 				Forge:    metadata.Forge{Type: "gitea", URL: "https://gitea.com"},
 				Sys:      metadata.System{Name: "woodpecker", Host: "example.com", URL: "https://example.com"},
-				Repo:     metadata.Repo{Owner: "testUser", Name: "testRepo", URL: "https://gitea.com/testUser/testRepo", CloneURL: "https://gitea.com/testUser/testRepo.git", CloneSSHURL: "git@gitea.com:testUser/testRepo.git", Branch: "main", Private: true},
+				Repo:     metadata.Repo{Owner: "testUser", Name: "testRepo", ForgeURL: "https://gitea.com/testUser/testRepo", CloneURL: "https://gitea.com/testUser/testRepo.git", CloneSSHURL: "git@gitea.com:testUser/testRepo.git", Branch: "main", Private: true},
 				Curr:     metadata.Pipeline{Number: 3},
 				Prev:     metadata.Pipeline{Number: 2},
 				Workflow: metadata.Workflow{Name: "hello"},

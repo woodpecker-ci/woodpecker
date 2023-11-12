@@ -22,10 +22,10 @@ var renameLinkToURL = task{
 	name:     "rename-link-to-url",
 	required: true,
 	fn: func(sess *xorm.Session) (err error) {
-		if err := renameColumn(sess, "pipelines", "pipeline_link", "pipeline_url"); err != nil {
+		if err := renameColumn(sess, "pipelines", "pipeline_link", "pipeline_forge_url"); err != nil {
 			return err
 		}
 
-		return renameColumn(sess, "repos", "repo_link", "repo_url")
+		return renameColumn(sess, "repos", "repo_link", "repo_forge_url")
 	},
 }

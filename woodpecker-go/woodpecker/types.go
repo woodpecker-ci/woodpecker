@@ -33,7 +33,7 @@ type (
 		Name                         string   `json:"name"`
 		FullName                     string   `json:"full_name"`
 		Avatar                       string   `json:"avatar_url,omitempty"`
-		URL                          string   `json:"url,omitempty"`
+		ForgeURL                     string   `json:"forge_url,omitempty"`
 		Clone                        string   `json:"clone_url,omitempty"`
 		DefaultBranch                string   `json:"default_branch,omitempty"`
 		SCMKind                      string   `json:"scm,omitempty"`
@@ -93,7 +93,7 @@ type (
 		Author    string        `json:"author"`
 		Avatar    string        `json:"author_avatar"`
 		Email     string        `json:"author_email"`
-		URL       string        `json:"url"`
+		ForgeURL  string        `json:"forge_url"`
 		Reviewer  string        `json:"reviewed_by"`
 		Reviewed  int64         `json:"reviewed_at"`
 		Workflows []*Workflow   `json:"workflows,omitempty"`

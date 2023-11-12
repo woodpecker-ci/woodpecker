@@ -39,7 +39,7 @@
                   color="blue"
                   :start-icon="forge ?? 'repo'"
                   :text="$t('repo.pipeline.protected.review')"
-                  :to="pipeline.link_url"
+                  :to="pipeline.forge_url"
                   :title="message"
                 />
                 <Button

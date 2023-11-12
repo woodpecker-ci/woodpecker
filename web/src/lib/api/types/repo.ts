@@ -30,7 +30,7 @@ export type Repo = {
   avatar_url: string;
 
   // The url to view the repository.
-  url: string;
+  forge_url: string;
 
   // The url used to clone the repository.
   clone_url: string;

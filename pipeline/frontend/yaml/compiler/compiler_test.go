@@ -60,7 +60,7 @@ func TestCompilerCompile(t *testing.T) {
 				Owner:    "octacat",
 				Name:     "hello-world",
 				Private:  true,
-				URL:      "https://github.com/octocat/hello-world",
+				ForgeURL: "https://github.com/octocat/hello-world",
 				CloneURL: "https://github.com/octocat/hello-world.git",
 			},
 		}),

@@ -77,7 +77,7 @@ export type Pipeline = {
   author_email: string;
 
   // This url will point to the repository state associated with the pipeline's commit.
-  url: string;
+  forge_url: string;
 
   signed: boolean;
 

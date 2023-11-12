@@ -82,7 +82,7 @@ func parsePushHook(hook *github.PushEvent) (*model.Repo, *model.Pipeline, error)
 		Event:        model.EventPush,
 		Commit:       hook.GetHeadCommit().GetID(),
 		Ref:          hook.GetRef(),
-		URL:          hook.GetHeadCommit().GetURL(),
+		ForgeURL:     hook.GetHeadCommit().GetURL(),
 		Branch:       strings.Replace(hook.GetRef(), "refs/heads/", "", -1),
 		Message:      hook.GetHeadCommit().GetMessage(),
 		Email:        hook.GetHeadCommit().GetAuthor().GetEmail(),
@@ -115,16 +115,16 @@ func parsePushHook(hook *github.PushEvent) (*model.Repo, *model.Pipeline, error)
 // If the commit type is unsupported nil values are returned.
 func parseDeployHook(hook *github.DeploymentEvent) (*model.Repo, *model.Pipeline, error) {
 	pipeline := &model.Pipeline{
-		Event:   model.EventDeploy,
-		Commit:  hook.GetDeployment().GetSHA(),
-		URL:     hook.GetDeployment().GetURL(),
-		Message: hook.GetDeployment().GetDescription(),
-		Ref:     hook.GetDeployment().GetRef(),
-		Branch:  hook.GetDeployment().GetRef(),
-		Deploy:  hook.GetDeployment().GetEnvironment(),
-		Avatar:  hook.GetSender().GetAvatarURL(),
-		Author:  hook.GetSender().GetLogin(),
-		Sender:  hook.GetSender().GetLogin(),
+		Event:    model.EventDeploy,
+		Commit:   hook.GetDeployment().GetSHA(),
+		ForgeURL: hook.GetDeployment().GetURL(),
+		Message:  hook.GetDeployment().GetDescription(),
+		Ref:      hook.GetDeployment().GetRef(),
+		Branch:   hook.GetDeployment().GetRef(),
+		Deploy:   hook.GetDeployment().GetEnvironment(),
+		Avatar:   hook.GetSender().GetAvatarURL(),
+		Author:   hook.GetSender().GetLogin(),
+		Sender:   hook.GetSender().GetLogin(),
 	}
 	// if the ref is a sha or short sha we need to manually construct the ref.
 	if strings.HasPrefix(pipeline.Commit, pipeline.Ref) || pipeline.Commit == pipeline.Ref {
@@ -153,7 +153,7 @@ func parsePullHook(hook *github.PullRequestEvent, merge bool) (*github.PullReque
 	pipeline := &model.Pipeline{
 		Event:    model.EventPull,
 		Commit:   hook.GetPullRequest().GetHead().GetSHA(),
-		URL:      hook.GetPullRequest().GetHTMLURL(),
+		ForgeURL: hook.GetPullRequest().GetHTMLURL(),
 		Ref:      fmt.Sprintf(headRefs, hook.GetPullRequest().GetNumber()),
 		Branch:   hook.GetPullRequest().GetBase().GetRef(),
 		Message:  hook.GetPullRequest().GetTitle(),

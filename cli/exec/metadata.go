@@ -45,7 +45,7 @@ func metadataFromContext(c *cli.Context, axis matrix.Axis) metadata.Metadata {
 			Name:        repoName,
 			Owner:       repoOwner,
 			RemoteID:    c.String("repo-remote-id"),
-			URL:         c.String("repo-url"),
+			ForgeURL:    c.String("repo-url"),
 			CloneURL:    c.String("repo-clone-url"),
 			CloneSSHURL: c.String("repo-clone-ssh-url"),
 			Private:     c.Bool("repo-private"),
@@ -59,7 +59,7 @@ func metadataFromContext(c *cli.Context, axis matrix.Axis) metadata.Metadata {
 			Finished: c.Int64("pipeline-finished"),
 			Status:   c.String("pipeline-status"),
 			Event:    c.String("pipeline-event"),
-			URL:      c.String("pipeline-url"),
+			ForgeURL: c.String("pipeline-url"),
 			Target:   c.String("pipeline-target"),
 			Commit: metadata.Commit{
 				Sha:     c.String("commit-sha"),
@@ -81,7 +81,7 @@ func metadataFromContext(c *cli.Context, axis matrix.Axis) metadata.Metadata {
 			Finished: c.Int64("prev-pipeline-finished"),
 			Status:   c.String("prev-pipeline-status"),
 			Event:    c.String("prev-pipeline-event"),
-			URL:      c.String("prev-pipeline-url"),
+			ForgeURL: c.String("prev-pipeline-url"),
 			Commit: metadata.Commit{
 				Sha:     c.String("prev-commit-sha"),
 				Ref:     c.String("prev-commit-ref"),

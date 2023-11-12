@@ -33,7 +33,7 @@ type (
 		Name        string
 		Owner       string
 		RemoteID    string
-		URL         string
+		ForgeURL    string
 		CloneURL    string
 		CloneSSHURL string
 		Private     bool
@@ -51,7 +51,7 @@ type (
 		Timeout  int64
 		Status   string
 		Event    string
-		URL      string
+		ForgeURL string
 		Target   string
 		Trusted  bool
 		Commit   Commit
