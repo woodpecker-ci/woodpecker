@@ -56,7 +56,7 @@ func convertRepo(from *internal.Repo, perm *internal.RepoPerm) *model.Repo {
 		Owner:         strings.Split(from.FullName, "/")[0],
 		Name:          strings.Split(from.FullName, "/")[1],
 		FullName:      from.FullName,
-		URL:          from.Links.HTML.Href,
+		URL:           from.Links.HTML.Href,
 		IsSCMPrivate:  from.IsPrivate,
 		Avatar:        from.Owner.Links.Avatar.Href,
 		SCMKind:       model.SCMKind(from.Scm),
@@ -171,7 +171,7 @@ func convertPullHook(from *internal.PullRequestHook) *model.Pipeline {
 			from.PullRequest.Dest.Branch.Name,
 		),
 		CloneURL:  fmt.Sprintf("https://bitbucket.org/%s", from.PullRequest.Source.Repo.FullName),
-		URL:      from.PullRequest.Links.HTML.Href,
+		URL:       from.PullRequest.Links.HTML.Href,
 		Branch:    from.PullRequest.Dest.Branch.Name,
 		Message:   from.PullRequest.Desc,
 		Avatar:    from.Actor.Links.Avatar.Href,
@@ -186,7 +186,7 @@ func convertPullHook(from *internal.PullRequestHook) *model.Pipeline {
 func convertPushHook(hook *internal.PushHook, change *internal.Change) *model.Pipeline {
 	pipeline := &model.Pipeline{
 		Commit:    change.New.Target.Hash,
-		URL:      change.New.Target.Links.HTML.Href,
+		URL:       change.New.Target.Links.HTML.Href,
 		Branch:    change.New.Name,
 		Message:   change.New.Target.Message,
 		Avatar:    hook.Actor.Links.Avatar.Href,

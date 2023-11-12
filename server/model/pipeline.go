@@ -46,7 +46,7 @@ type Pipeline struct {
 	Sender              string                  `json:"sender"                  xorm:"pipeline_sender"` // uses reported user for webhooks and name of cron for cron pipelines
 	Avatar              string                  `json:"author_avatar"           xorm:"pipeline_avatar"`
 	Email               string                  `json:"author_email"            xorm:"pipeline_email"`
-	URL                string                   `json:"url"                xorm:"pipeline_url"`
+	URL                 string                  `json:"url"                xorm:"pipeline_url"`
 	Reviewer            string                  `json:"reviewed_by"             xorm:"pipeline_reviewer"`
 	Reviewed            int64                   `json:"reviewed_at"             xorm:"pipeline_reviewed"`
 	Workflows           []*Workflow             `json:"workflows,omitempty"     xorm:"-"`

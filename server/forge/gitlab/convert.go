@@ -41,7 +41,7 @@ func (g *GitLab) convertGitLabRepo(_repo *gitlab.Project) (*model.Repo, error) {
 		Name:          name,
 		FullName:      _repo.PathWithNamespace,
 		Avatar:        _repo.AvatarURL,
-		URL:          _repo.WebURL,
+		URL:           _repo.WebURL,
 		Clone:         _repo.HTTPURLToRepo,
 		CloneSSH:      _repo.SSHURLToRepo,
 		Branch:        _repo.DefaultBranch,

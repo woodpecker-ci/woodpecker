@@ -124,7 +124,7 @@ var (
 		Name:          "Hello-World",
 		FullName:      "octocat/Hello-World",
 		Avatar:        "https://github.com/images/error/octocat_happy.gif",
-		URL:          "https://github.com/octocat/Hello-World",
+		URL:           "https://github.com/octocat/Hello-World",
 		Clone:         "https://github.com/octocat/Hello-World.git",
 		IsSCMPrivate:  true,
 	}

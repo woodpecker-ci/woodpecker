@@ -17,101 +17,101 @@ package metadata
 type (
 	// Metadata defines runtime m.
 	Metadata struct {
-		ID       string   `json:"id,omitempty"`
-		Repo     Repo     `json:"repo,omitempty"`
-		Curr     Pipeline `json:"curr,omitempty"`
-		Prev     Pipeline `json:"prev,omitempty"`
-		Workflow Workflow `json:"workflow,omitempty"`
-		Step     Step     `json:"step,omitempty"`
-		Sys      System   `json:"sys,omitempty"`
-		Forge    Forge    `json:"forge,omitempty"`
+		ID       string
+		Repo     Repo
+		Curr     Pipeline
+		Prev     Pipeline
+		Workflow Workflow
+		Step     Step
+		Sys      System
+		Forge    Forge
 	}
 
 	// Repo defines runtime metadata for a repository.
 	Repo struct {
-		ID          int64    `json:"id,omitempty"`
-		Name        string   `json:"name,omitempty"`
-		Owner       string   `json:"owner,omitempty"`
-		RemoteID    string   `json:"remote_id,omitempty"`
-		URL         string   `json:"link,omitempty"`
-		CloneURL    string   `json:"clone_url,omitempty"`
-		CloneSSHURL string   `json:"clone_url_ssh,omitempty"`
-		Private     bool     `json:"private,omitempty"`
-		Secrets     []Secret `json:"secrets,omitempty"`
-		Branch      string   `json:"default_branch,omitempty"`
-		Trusted     bool     `json:"trusted,omitempty"`
+		ID          int64
+		Name        string
+		Owner       string
+		RemoteID    string
+		URL         string
+		CloneURL    string
+		CloneSSHURL string
+		Private     bool
+		Secrets     []Secret
+		Branch      string
+		Trusted     bool
 	}
 
 	// Pipeline defines runtime metadata for a pipeline.
 	Pipeline struct {
-		Number   int64  `json:"number,omitempty"`
-		Created  int64  `json:"created,omitempty"`
-		Started  int64  `json:"started,omitempty"`
-		Finished int64  `json:"finished,omitempty"`
-		Timeout  int64  `json:"timeout,omitempty"`
-		Status   string `json:"status,omitempty"`
-		Event    string `json:"event,omitempty"`
-		URL      string `json:"link,omitempty"`
-		Target   string `json:"target,omitempty"`
-		Trusted  bool   `json:"trusted,omitempty"`
-		Commit   Commit `json:"commit,omitempty"`
-		Parent   int64  `json:"parent,omitempty"`
-		Cron     string `json:"cron,omitempty"`
+		Number   int64
+		Created  int64
+		Started  int64
+		Finished int64
+		Timeout  int64
+		Status   string
+		Event    string
+		URL      string
+		Target   string
+		Trusted  bool
+		Commit   Commit
+		Parent   int64
+		Cron     string
 	}
 
 	// Commit defines runtime metadata for a commit.
 	Commit struct {
-		Sha               string   `json:"sha,omitempty"`
-		Ref               string   `json:"ref,omitempty"`
-		Refspec           string   `json:"refspec,omitempty"`
-		Branch            string   `json:"branch,omitempty"`
-		Message           string   `json:"message,omitempty"`
-		Author            Author   `json:"author,omitempty"`
-		ChangedFiles      []string `json:"changed_files,omitempty"`
-		PullRequestLabels []string `json:"labels,omitempty"`
+		Sha               string
+		Ref               string
+		Refspec           string
+		Branch            string
+		Message           string
+		Author            Author
+		ChangedFiles      []string
+		PullRequestLabels []string
 	}
 
 	// Author defines runtime metadata for a commit author.
 	Author struct {
-		Name   string `json:"name,omitempty"`
-		Email  string `json:"email,omitempty"`
-		Avatar string `json:"avatar,omitempty"`
+		Name   string
+		Email  string
+		Avatar string
 	}
 
 	// Workflow defines runtime metadata for a workflow.
 	Workflow struct {
-		Name   string            `json:"name,omitempty"`
-		Number int               `json:"number,omitempty"`
-		Matrix map[string]string `json:"matrix,omitempty"`
+		Name   string
+		Number int
+		Matrix map[string]string
 	}
 
 	// Step defines runtime metadata for a step.
 	Step struct {
-		Name   string `json:"name,omitempty"`
-		Number int    `json:"number,omitempty"`
+		Name   string
+		Number int
 	}
 
 	// Secret defines a runtime secret
 	Secret struct {
-		Name  string `json:"name,omitempty"`
-		Value string `json:"value,omitempty"`
-		Mount string `json:"mount,omitempty"`
-		Mask  bool   `json:"mask,omitempty"`
+		Name  string
+		Value string
+		Mount string
+		Mask  bool
 	}
 
 	// System defines runtime metadata for a ci/cd system.
 	System struct {
-		Name     string `json:"name,omitempty"`
-		Host     string `json:"host,omitempty"`
-		URL      string `json:"link,omitempty"`
-		Platform string `json:"arch,omitempty"`
-		Version  string `json:"version,omitempty"`
+		Name     string
+		Host     string
+		URL      string
+		Platform string
+		Version  string
 	}
 
 	// Forge defines runtime metadata about the forge that host the repo
 	Forge struct {
-		Type string `json:"type,omitempty"`
-		URL  string `json:"url,omitempty"`
+		Type string
+		URL  string
 	}
 
 	// ServerForge represent the needed func of a server forge to get its metadata
