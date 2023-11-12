@@ -3966,9 +3966,6 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "link_url": {
-                    "type": "string"
-                },
                 "message": {
                     "type": "string"
                 },
@@ -4014,6 +4011,9 @@ const docTemplate = `{
                 },
                 "updated_at": {
                     "type": "integer"
+                },
+                "url": {
+                    "type": "string"
                 },
                 "variables": {
                     "type": "object",
@@ -4120,9 +4120,6 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "link_url": {
-                    "type": "string"
-                },
                 "name": {
                     "type": "string"
                 },
@@ -4146,6 +4143,9 @@ const docTemplate = `{
                 },
                 "trusted": {
                     "type": "boolean"
+                },
+                "url": {
+                    "type": "string"
                 },
                 "visibility": {
                     "$ref": "#/definitions/RepoVisibility"

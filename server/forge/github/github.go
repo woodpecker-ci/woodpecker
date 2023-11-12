@@ -488,7 +488,7 @@ func (c *client) Status(ctx context.Context, user *model.User, repo *model.Repo,
 	client := c.newClientToken(ctx, user.Token)
 
 	if pipeline.Event == model.EventDeploy {
-		matches := reDeploy.FindStringSubmatch(pipeline.Link)
+		matches := reDeploy.FindStringSubmatch(pipeline.URL)
 		if len(matches) != 2 {
 			return nil
 		}

@@ -82,7 +82,7 @@ func parsePushHook(hook *github.PushEvent) (*model.Repo, *model.Pipeline, error)
 		Event:        model.EventPush,
 		Commit:       hook.GetHeadCommit().GetID(),
 		Ref:          hook.GetRef(),
-		Link:         hook.GetHeadCommit().GetURL(),
+		URL:         hook.GetHeadCommit().GetURL(),
 		Branch:       strings.Replace(hook.GetRef(), "refs/heads/", "", -1),
 		Message:      hook.GetHeadCommit().GetMessage(),
 		Email:        hook.GetHeadCommit().GetAuthor().GetEmail(),
@@ -117,7 +117,7 @@ func parseDeployHook(hook *github.DeploymentEvent) (*model.Repo, *model.Pipeline
 	pipeline := &model.Pipeline{
 		Event:   model.EventDeploy,
 		Commit:  hook.GetDeployment().GetSHA(),
-		Link:    hook.GetDeployment().GetURL(),
+		URL:    hook.GetDeployment().GetURL(),
 		Message: hook.GetDeployment().GetDescription(),
 		Ref:     hook.GetDeployment().GetRef(),
 		Branch:  hook.GetDeployment().GetRef(),
@@ -153,7 +153,7 @@ func parsePullHook(hook *github.PullRequestEvent, merge bool) (*github.PullReque
 	pipeline := &model.Pipeline{
 		Event:    model.EventPull,
 		Commit:   hook.GetPullRequest().GetHead().GetSHA(),
-		Link:     hook.GetPullRequest().GetHTMLURL(),
+		URL:     hook.GetPullRequest().GetHTMLURL(),
 		Ref:      fmt.Sprintf(headRefs, hook.GetPullRequest().GetNumber()),
 		Branch:   hook.GetPullRequest().GetBase().GetRef(),
 		Message:  hook.GetPullRequest().GetTitle(),
