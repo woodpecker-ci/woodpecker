@@ -34,10 +34,10 @@ func (pipeline026) TableName() string {
 }
 
 type PipelineError026 struct {
-	Type      string      `json:"type"`
-	Message   string      `json:"message"`
-	IsWarning bool        `json:"is_warning"`
-	Data      interface{} `json:"data"`
+	Type      string `json:"type"`
+	Message   string `json:"message"`
+	IsWarning bool   `json:"is_warning"`
+	Data      any    `json:"data"`
 }
 
 var convertToNewPipelineErrorFormat = task{

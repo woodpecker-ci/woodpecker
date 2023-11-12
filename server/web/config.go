@@ -39,7 +39,7 @@ func Config(c *gin.Context) {
 		).Sign(user.Hash)
 	}
 
-	configData := map[string]interface{}{
+	configData := map[string]any{
 		"user":           user,
 		"csrf":           csrf,
 		"version":        version.String(),
@@ -50,7 +50,7 @@ func Config(c *gin.Context) {
 
 	// default func map with json parser.
 	funcMap := template.FuncMap{
-		"json": func(v interface{}) string {
+		"json": func(v any) string {
 			a, _ := json.Marshal(v)
 			return string(a)
 		},
