@@ -12,7 +12,9 @@ when:
       - 'cmd/cli/**'
       # api docs
       - 'server/api/**'
-    branch: ${CI_REPO_DEFAULT_BRANCH}
+    branch:
+      - ${CI_REPO_DEFAULT_BRANCH}
+      - renovate/*
   - cron: update_docs
     event: cron
   - event: manual

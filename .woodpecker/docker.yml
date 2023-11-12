@@ -6,6 +6,7 @@ when:
     branch:
       - ${CI_REPO_DEFAULT_BRANCH}
       - release/*
+      - renovate/*
 
 depends_on:
   - test
