@@ -4,7 +4,12 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@renovate[bot], @pat-s, @qwerty287
+@qwerty287, @renovate[bot], @pat-s
+
+### 📈 Enhancement
+
+- Replace `interface{}` with `any` [[#2807](https://github.com/woodpecker-ci/woodpecker/pull/2807)]
+- Fix repo owner filter [[#2808](https://github.com/woodpecker-ci/woodpecker/pull/2808)]
 
 ### 📚 Documentation
 
