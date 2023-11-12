@@ -1,11 +1,14 @@
 package permissions
 
-import "go.woodpecker-ci.org/woodpecker/server/model"
+import (
+	"go.woodpecker-ci.org/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/shared/utils"
+)
 
 func NewOrgs(orgs []string) *Orgs {
 	return &Orgs{
 		IsConfigured: len(orgs) > 0,
-		orgs:         sliceToMap(orgs),
+		orgs:         utils.SliceToBoolMap(orgs),
 	}
 }
 

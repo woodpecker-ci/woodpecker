@@ -1,9 +1,12 @@
 package permissions
 
-import "go.woodpecker-ci.org/woodpecker/server/model"
+import (
+	"go.woodpecker-ci.org/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/shared/utils"
+)
 
 func NewOwnersWhitelist(owners []string) *OwnersWhitelist {
-	return &OwnersWhitelist{owners: sliceToMap(owners)}
+	return &OwnersWhitelist{owners: utils.SliceToBoolMap(owners)}
 }
 
 type OwnersWhitelist struct {
