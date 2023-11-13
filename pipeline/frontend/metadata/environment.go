@@ -132,8 +132,8 @@ func (m *Metadata) Environ() map[string]string {
 
 func (m *Metadata) getPipelineWebURL(pipeline Pipeline, stepNumber int) string {
 	if stepNumber == 0 {
-		return fmt.Sprintf("%s/repos/%d/pipeline/%d", m.Sys.Link, m.Repo.ID, pipeline.Number)
+		return fmt.Sprintf("%s/repos/%d/pipeline/%d", m.Sys.URL, m.Repo.ID, pipeline.Number)
 	}
 
-	return fmt.Sprintf("%s/repos/%d/pipeline/%d/%d", m.Sys.Link, m.Repo.ID, pipeline.Number, stepNumber)
+	return fmt.Sprintf("%s/repos/%d/pipeline/%d/%d", m.Sys.URL, m.Repo.ID, pipeline.Number, stepNumber)
 }
