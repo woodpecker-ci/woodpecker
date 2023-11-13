@@ -12,6 +12,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Removed `ssh` backend. Use an agent directly on the SSH machine using the `local` backend.
 - Removed `/hook` and `/stream` API paths in favor of `/api/(hook|stream)`. You may need to use the "Repair repository" button in the repo settings or "Repair all" in the admin settings to recreate the forge hook.
 - Removed `WOODPECKER_DOCS` config variable
+- Deprecated `CI_COMMIT_URL` env var, use `CI_PIPELINE_FORGE_URL`
 
 ## 1.0.0
 
