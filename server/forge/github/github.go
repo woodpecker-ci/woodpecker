@@ -525,7 +525,7 @@ func (c *client) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 			"pull_request",
 			"deployment",
 		},
-		Config: map[string]interface{}{
+		Config: map[string]any{
 			"url":          link,
 			"content_type": "form",
 		},

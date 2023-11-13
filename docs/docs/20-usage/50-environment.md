@@ -71,7 +71,6 @@ This is the reference list of all environment variables available to your pipeli
 | `CI_COMMIT_TAG`                  | commit tag name (empty if event is not `tag`)                                                |
 | `CI_COMMIT_PULL_REQUEST`         | commit pull request number (empty if event is not `pull_request`)                            |
 | `CI_COMMIT_PULL_REQUEST_LABELS`  | labels assigned to pull request (empty if event is not `pull_request`)                       |
-| `CI_COMMIT_URL`                  | commit link in forge                                                                         |
 | `CI_COMMIT_MESSAGE`              | commit message                                                                               |
 | `CI_COMMIT_AUTHOR`               | commit author username                                                                       |
 | `CI_COMMIT_AUTHOR_EMAIL`         | commit author email address                                                                  |

@@ -61,10 +61,10 @@ type (
 	}
 
 	PipelineError struct {
-		Type      string      `json:"type"`
-		Message   string      `json:"message"`
-		IsWarning bool        `json:"is_warning"`
-		Data      interface{} `json:"data"`
+		Type      string `json:"type"`
+		Message   string `json:"message"`
+		IsWarning bool   `json:"is_warning"`
+		Data      any    `json:"data"`
 	}
 
 	// Pipeline defines a pipeline object.
