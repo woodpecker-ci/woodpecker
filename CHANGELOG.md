@@ -4,7 +4,12 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@renovate[bot], @qwerty287, @pat-s
+@qwerty287, @renovate[bot], @pat-s
+
+### 🐛 Bug Fixes
+
+- Fix env vars and add UI url [[#2811](https://github.com/woodpecker-ci/woodpecker/pull/2811)]
+- Fix paths for version check [[#2816](https://github.com/woodpecker-ci/woodpecker/pull/2816)]
 
 ### 📈 Enhancement
 
