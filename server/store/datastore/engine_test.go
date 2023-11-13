@@ -39,7 +39,7 @@ func testDriverConfig() (driver, config string) {
 // newTestStore creates a new database connection for testing purposes.
 // The database driver and connection string are provided by
 // environment variables, with fallback to in-memory sqlite.
-func newTestStore(t *testing.T, tables ...interface{}) (*storage, func()) {
+func newTestStore(t *testing.T, tables ...any) (*storage, func()) {
 	engine, err := xorm.NewEngine(testDriverConfig())
 	if !assert.NoError(t, err) {
 		t.FailNow()
