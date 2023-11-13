@@ -57,7 +57,6 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_COMMIT_BRANCH":              m.Curr.Commit.Branch,
 		"CI_COMMIT_SOURCE_BRANCH":       sourceBranch,
 		"CI_COMMIT_TARGET_BRANCH":       targetBranch,
-		"CI_COMMIT_URL":                 m.Curr.Link,
 		"CI_COMMIT_MESSAGE":             m.Curr.Commit.Message,
 		"CI_COMMIT_AUTHOR":              m.Curr.Commit.Author.Name,
 		"CI_COMMIT_AUTHOR_EMAIL":        m.Curr.Commit.Author.Email,
@@ -116,6 +115,9 @@ func (m *Metadata) Environ() map[string]string {
 
 		"CI_FORGE_TYPE": m.Forge.Type,
 		"CI_FORGE_URL":  m.Forge.URL,
+
+		// TODO Deprecated, remove in 3.x
+		"CI_COMMIT_URL": m.Curr.Link,
 	}
 	if m.Curr.Event == EventTag {
 		params["CI_COMMIT_TAG"] = strings.TrimPrefix(m.Curr.Commit.Ref, "refs/tags/")

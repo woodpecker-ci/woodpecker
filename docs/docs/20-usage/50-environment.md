@@ -71,7 +71,6 @@ This is the reference list of all environment variables available to your pipeli
 | `CI_COMMIT_TAG`                  | commit tag name (empty if event is not `tag`)                                                |
 | `CI_COMMIT_PULL_REQUEST`         | commit pull request number (empty if event is not `pull_request`)                            |
 | `CI_COMMIT_PULL_REQUEST_LABELS`  | labels assigned to pull request (empty if event is not `pull_request`)                       |
-| `CI_COMMIT_URL`                  | commit link in forge                                                                         |
 | `CI_COMMIT_MESSAGE`              | commit message                                                                               |
 | `CI_COMMIT_AUTHOR`               | commit author username                                                                       |
 | `CI_COMMIT_AUTHOR_EMAIL`         | commit author email address                                                                  |
@@ -80,7 +79,6 @@ This is the reference list of all environment variables available to your pipeli
 | `CI_PIPELINE_NUMBER`             | pipeline number                                                                              |
 | `CI_PIPELINE_PARENT`             | number of parent pipeline                                                                    |
 | `CI_PIPELINE_EVENT`              | pipeline event (push, pull_request, tag, deployment)                                         |
-| `CI_PIPELINE_URL`                | link to the web UI for the pipeline                                                          |
 | `CI_PIPELINE_FORGE_URL`          | link to the forge's web UI for the commit(s) or tag that triggered the pipeline              |
 | `CI_PIPELINE_DEPLOY_TARGET`      | pipeline deploy target for `deployment` events (ie production)                               |
 | `CI_PIPELINE_STATUS`             | pipeline status (success, failure)                                                           |
