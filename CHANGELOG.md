@@ -1,10 +1,10 @@
 # Changelog
 
-## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-11-12
+## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-11-13
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@qwerty287, @renovate[bot], @pat-s
+@renovate[bot], @qwerty287, @pat-s
 
 ### 📈 Enhancement
 
@@ -19,6 +19,7 @@
 
 ### Misc
 
+- Update golang (packages) [[#2815](https://github.com/woodpecker-ci/woodpecker/pull/2815)]
 - Update dependency marked to v10 [[#2810](https://github.com/woodpecker-ci/woodpecker/pull/2810)]
 
 ## [2.0.0-rc.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0-rc.0) - 2023-11-11
