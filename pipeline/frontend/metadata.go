@@ -55,6 +55,7 @@ func MetadataFromStruct(forge metadata.ServerForge, repo *model.Repo, pipeline, 
 	fRepo := metadata.Repo{}
 	if repo != nil {
 		fRepo = metadata.Repo{
+			ID:          repo.ID,
 			Name:        repo.Name,
 			Owner:       repo.Owner,
 			RemoteID:    fmt.Sprint(repo.ForgeRemoteID),

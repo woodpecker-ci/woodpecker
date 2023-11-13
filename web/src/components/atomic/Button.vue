@@ -8,8 +8,7 @@
         color === 'gray',
       'bg-wp-control-ok-100 hover:bg-wp-control-ok-200 border-wp-control-ok-300 text-white': color === 'green',
       'bg-wp-control-info-100 hover:bg-wp-control-info-200 border-wp-control-info-300 text-white': color === 'blue',
-      'bg-wp-control-error-100 hover:bg-wp-control-error-200 border-wp-control-error-300 text-white dark:text-dark-300':
-        color === 'red',
+      'bg-wp-control-error-100 hover:bg-wp-control-error-200 border-wp-control-error-300 text-white': color === 'red',
       ...passedClasses,
     }"
     :title="title"

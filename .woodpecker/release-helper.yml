@@ -2,7 +2,7 @@ version: 1
 
 steps:
   release-helper:
-    image: woodpeckerci/plugin-ready-release-go:0.7.0
+    image: woodpeckerci/plugin-ready-release-go:1.0.0
     pull: true
     settings:
       release_branch: ${CI_REPO_DEFAULT_BRANCH}
@@ -12,5 +12,7 @@ steps:
         from_secret: GITHUB_TOKEN
 
 when:
-  event: push
-  branch: ${CI_REPO_DEFAULT_BRANCH}
+  - event: push
+    branch: ${CI_REPO_DEFAULT_BRANCH}
+  - event: manual
+    evaluate: 'TASK == "release-helper"'
