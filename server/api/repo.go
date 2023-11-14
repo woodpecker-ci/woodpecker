@@ -117,7 +117,7 @@ func PostRepo(c *gin.Context) {
 		return
 	}
 
-	link := fmt.Sprintf(
+	hookURL := fmt.Sprintf(
 		"%s/api/hook?access_token=%s",
 		server.Config.Server.WebhookHost,
 		sig,
@@ -148,7 +148,7 @@ func PostRepo(c *gin.Context) {
 
 	repo.OrgID = org.ID
 
-	err = forge.Activate(c, user, repo, link)
+	err = forge.Activate(c, user, repo, hookURL)
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
@@ -483,9 +483,9 @@ func MoveRepo(c *gin.Context) {
 		return
 	}
 
-	// reconstruct the link
+	// reconstruct the hook url
 	host := server.Config.Server.WebhookHost
-	link := fmt.Sprintf(
+	hookURL := fmt.Sprintf(
 		"%s/api/hook?access_token=%s",
 		host,
 		sig,
@@ -494,7 +494,7 @@ func MoveRepo(c *gin.Context) {
 	if err := forge.Deactivate(c, user, repo, host); err != nil {
 		log.Trace().Err(err).Msgf("deactivate repo '%s' for move to activate later, got an error", repo.FullName)
 	}
-	if err := forge.Activate(c, user, repo, link); err != nil {
+	if err := forge.Activate(c, user, repo, hookURL); err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -571,9 +571,9 @@ func repairRepo(c *gin.Context, repo *model.Repo, withPerms bool) {
 		return
 	}
 
-	// reconstruct the link
+	// reconstruct the hook url
 	host := server.Config.Server.WebhookHost
-	link := fmt.Sprintf(
+	hookURL := fmt.Sprintf(
 		"%s/api/hook?access_token=%s",
 		host,
 		sig,
@@ -613,7 +613,7 @@ func repairRepo(c *gin.Context, repo *model.Repo, withPerms bool) {
 	if err := forge.Deactivate(c, user, repo, host); err != nil {
 		log.Trace().Err(err).Msgf("deactivate repo '%s' to repair failed", repo.FullName)
 	}
-	if err := forge.Activate(c, user, repo, link); err != nil {
+	if err := forge.Activate(c, user, repo, hookURL); err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}

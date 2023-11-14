@@ -92,7 +92,7 @@ func Test_gitea(t *testing.T) {
 				g.Assert(repo.FullName).Equal(fakeRepo.Owner + "/" + fakeRepo.Name)
 				g.Assert(repo.IsSCMPrivate).IsTrue()
 				g.Assert(repo.Clone).Equal("http://localhost/test_name/repo_name.git")
-				g.Assert(repo.Link).Equal("http://localhost/test_name/repo_name")
+				g.Assert(repo.ForgeURL).Equal("http://localhost/test_name/repo_name")
 			})
 			g.It("Should handle a not found error", func() {
 				_, err := c.Repo(ctx, fakeUser, "0", fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
