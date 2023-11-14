@@ -1,10 +1,17 @@
 # Changelog
 
-## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-11-13
+## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-11-14
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@qwerty287, @renovate[bot], @pat-s
+@6543, @qwerty287, @renovate[bot], @pat-s
+
+### 📚 Documentation
+
+- mark v1.0.x as unmaintained [[#2818](https://github.com/woodpecker-ci/woodpecker/pull/2818)]
+- Update docs npm deps non-major [[#2799](https://github.com/woodpecker-ci/woodpecker/pull/2799)]
+- Add docs about Gitea on same host and update docker-compose example [[#2752](https://github.com/woodpecker-ci/woodpecker/pull/2752)]
+- Update docusaurus plugin [[#2804](https://github.com/woodpecker-ci/woodpecker/pull/2804)]
 
 ### 🐛 Bug Fixes
 
@@ -15,12 +22,6 @@
 
 - Replace `interface{}` with `any` [[#2807](https://github.com/woodpecker-ci/woodpecker/pull/2807)]
 - Fix repo owner filter [[#2808](https://github.com/woodpecker-ci/woodpecker/pull/2808)]
-
-### 📚 Documentation
-
-- Update docs npm deps non-major [[#2799](https://github.com/woodpecker-ci/woodpecker/pull/2799)]
-- Add docs about Gitea on same host and update docker-compose example [[#2752](https://github.com/woodpecker-ci/woodpecker/pull/2752)]
-- Update docusaurus plugin [[#2804](https://github.com/woodpecker-ci/woodpecker/pull/2804)]
 
 ### Misc
 
