@@ -33,7 +33,7 @@ type (
 		Name        string   `json:"name,omitempty"`
 		Owner       string   `json:"owner,omitempty"`
 		RemoteID    string   `json:"remote_id,omitempty"`
-		Link        string   `json:"link,omitempty"`
+		ForgeURL    string   `json:"forge_url,omitempty"`
 		CloneURL    string   `json:"clone_url,omitempty"`
 		CloneSSHURL string   `json:"clone_url_ssh,omitempty"`
 		Private     bool     `json:"private,omitempty"`
@@ -51,7 +51,7 @@ type (
 		Timeout  int64  `json:"timeout,omitempty"`
 		Status   string `json:"status,omitempty"`
 		Event    string `json:"event,omitempty"`
-		Link     string `json:"link,omitempty"`
+		ForgeURL string `json:"forge_url,omitempty"`
 		Target   string `json:"target,omitempty"`
 		Trusted  bool   `json:"trusted,omitempty"`
 		Commit   Commit `json:"commit,omitempty"`
@@ -103,7 +103,7 @@ type (
 	System struct {
 		Name     string `json:"name,omitempty"`
 		Host     string `json:"host,omitempty"`
-		Link     string `json:"link,omitempty"`
+		URL      string `json:"url,omitempty"`
 		Platform string `json:"arch,omitempty"`
 		Version  string `json:"version,omitempty"`
 	}

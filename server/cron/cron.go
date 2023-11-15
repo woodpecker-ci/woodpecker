@@ -139,6 +139,6 @@ func CreatePipeline(ctx context.Context, store store.Store, f forge.Forge, cron 
 		Message:   cron.Name,
 		Timestamp: cron.NextExec,
 		Sender:    cron.Name,
-		Link:      repo.Link,
+		ForgeURL:  repo.ForgeURL,
 	}, nil
 }
