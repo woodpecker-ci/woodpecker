@@ -1,10 +1,15 @@
 # Changelog
 
-## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-11-14
+## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-11-15
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @qwerty287, @renovate[bot], @pat-s
+@qwerty287, @6543, @renovate[bot], @pat-s
+
+### 💥 Breaking changes
+
+- Rename `link` to `url` [[#2812](https://github.com/woodpecker-ci/woodpecker/pull/2812)]
+- Revert to singular CLI args [[#2820](https://github.com/woodpecker-ci/woodpecker/pull/2820)]
 
 ### 📚 Documentation
 
