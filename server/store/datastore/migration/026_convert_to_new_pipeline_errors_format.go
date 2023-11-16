@@ -15,8 +15,9 @@
 package migration
 
 import (
-	"github.com/woodpecker-ci/woodpecker/pipeline/errors"
 	"xorm.io/xorm"
+
+	"go.woodpecker-ci.org/woodpecker/pipeline/errors"
 )
 
 // perPage026 set the size of the slice to read per page
@@ -33,10 +34,10 @@ func (pipeline026) TableName() string {
 }
 
 type PipelineError026 struct {
-	Type      string      `json:"type"`
-	Message   string      `json:"message"`
-	IsWarning bool        `json:"is_warning"`
-	Data      interface{} `json:"data"`
+	Type      string `json:"type"`
+	Message   string `json:"message"`
+	IsWarning bool   `json:"is_warning"`
+	Data      any    `json:"data"`
 }
 
 var convertToNewPipelineErrorFormat = task{

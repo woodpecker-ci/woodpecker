@@ -35,13 +35,13 @@ import (
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/forge"
-	"github.com/woodpecker-ci/woodpecker/server/forge/common"
-	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/store"
-	shared_utils "github.com/woodpecker-ci/woodpecker/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/server"
+	"go.woodpecker-ci.org/woodpecker/server/forge"
+	"go.woodpecker-ci.org/woodpecker/server/forge/common"
+	forge_types "go.woodpecker-ci.org/woodpecker/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/server/store"
+	shared_utils "go.woodpecker-ci.org/woodpecker/shared/utils"
 )
 
 const (
@@ -259,7 +259,7 @@ func (c *Gitea) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error)
 		return nil, err
 	}
 
-	return shared_utils.Paginate(func(page int) ([]*model.Repo, error) {
+	repos, err := shared_utils.Paginate(func(page int) ([]*gitea.Repository, error) {
 		repos, _, err := client.ListMyRepos(
 			gitea.ListReposOptions{
 				ListOptions: gitea.ListOptions{
@@ -268,15 +268,17 @@ func (c *Gitea) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error)
 				},
 			},
 		)
-		result := make([]*model.Repo, 0, len(repos))
-		for _, repo := range repos {
-			if repo.Archived {
-				continue
-			}
-			result = append(result, toRepo(repo))
-		}
-		return result, err
+		return repos, err
 	})
+
+	result := make([]*model.Repo, 0, len(repos))
+	for _, repo := range repos {
+		if repo.Archived {
+			continue
+		}
+		result = append(result, toRepo(repo))
+	}
+	return result, err
 }
 
 // File fetches the file from the Gitea repository and returns its contents.
@@ -337,7 +339,7 @@ func (c *Gitea) Status(ctx context.Context, user *model.User, repo *model.Repo, 
 		pipeline.Commit,
 		gitea.CreateStatusOption{
 			State:       getStatus(workflow.State),
-			TargetURL:   common.GetPipelineStatusLink(repo, pipeline, workflow),
+			TargetURL:   common.GetPipelineStatusURL(repo, pipeline, workflow),
 			Description: common.GetPipelineStatusDescription(workflow.State),
 			Context:     common.GetPipelineStatusContext(repo, pipeline, workflow),
 		},

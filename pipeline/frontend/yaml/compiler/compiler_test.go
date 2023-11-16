@@ -19,11 +19,11 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	backend_types "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
-	yaml_types "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
-	yaml_base_types "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types/base"
-	"github.com/woodpecker-ci/woodpecker/shared/constant"
+	backend_types "go.woodpecker-ci.org/woodpecker/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/metadata"
+	yaml_types "go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/types"
+	yaml_base_types "go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/types/base"
+	"go.woodpecker-ci.org/woodpecker/shared/constant"
 )
 
 func TestSecretAvailable(t *testing.T) {
@@ -60,7 +60,7 @@ func TestCompilerCompile(t *testing.T) {
 				Owner:    "octacat",
 				Name:     "hello-world",
 				Private:  true,
-				Link:     "https://github.com/octocat/hello-world",
+				ForgeURL: "https://github.com/octocat/hello-world",
 				CloneURL: "https://github.com/octocat/hello-world.git",
 			},
 		}),

@@ -24,13 +24,12 @@ import (
 	"github.com/gorilla/securecookie"
 	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/router/middleware"
-	"github.com/woodpecker-ci/woodpecker/server/store"
-	"github.com/woodpecker-ci/woodpecker/server/store/types"
-	"github.com/woodpecker-ci/woodpecker/shared/httputil"
-	"github.com/woodpecker-ci/woodpecker/shared/token"
+	"go.woodpecker-ci.org/woodpecker/server"
+	"go.woodpecker-ci.org/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/server/store"
+	"go.woodpecker-ci.org/woodpecker/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/shared/httputil"
+	"go.woodpecker-ci.org/woodpecker/shared/token"
 )
 
 func HandleLogin(c *gin.Context) {
@@ -60,7 +59,6 @@ func HandleAuth(c *gin.Context) {
 	if tmpuser == nil {
 		return
 	}
-	config := middleware.GetConfig(c)
 
 	// get the user from the database
 	u, err := _store.GetUserRemoteID(tmpuser.ForgeRemoteID, tmpuser.Login)
@@ -71,17 +69,17 @@ func HandleAuth(c *gin.Context) {
 		}
 
 		// if self-registration is disabled we should return a not authorized error
-		if !config.Open && !config.IsAdmin(tmpuser) {
+		if !server.Config.Permissions.Open && !server.Config.Permissions.Admins.IsAdmin(tmpuser) {
 			log.Error().Msgf("cannot register %s. registration closed", tmpuser.Login)
 			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=access_denied")
 			return
 		}
 
-		// if self-registration is enabled for whitelisted organizations we need to
+		// if self-registration is enabled for allowed organizations we need to
 		// check the user's organization membership.
-		if len(config.Orgs) != 0 {
+		if server.Config.Permissions.Orgs.IsConfigured {
 			teams, terr := _forge.Teams(c, tmpuser)
-			if terr != nil || !config.IsMember(teams) {
+			if terr != nil || !server.Config.Permissions.Orgs.IsMember(teams) {
 				log.Error().Err(terr).Msgf("cannot verify team membership for %s.", u.Login)
 				c.Redirect(303, server.Config.Server.RootPath+"/login?error=access_denied")
 				return
@@ -125,13 +123,13 @@ func HandleAuth(c *gin.Context) {
 	u.Avatar = tmpuser.Avatar
 	u.ForgeRemoteID = tmpuser.ForgeRemoteID
 	u.Login = tmpuser.Login
-	u.Admin = u.Admin || config.IsAdmin(tmpuser)
+	u.Admin = u.Admin || server.Config.Permissions.Admins.IsAdmin(tmpuser)
 
-	// if self-registration is enabled for whitelisted organizations we need to
+	// if self-registration is enabled for allowed organizations we need to
 	// check the user's organization membership.
-	if len(config.Orgs) != 0 {
+	if server.Config.Permissions.Orgs.IsConfigured {
 		teams, terr := _forge.Teams(c, u)
-		if terr != nil || !config.IsMember(teams) {
+		if terr != nil || !server.Config.Permissions.Orgs.IsMember(teams) {
 			log.Error().Err(terr).Msgf("cannot verify team membership for %s.", u.Login)
 			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=access_denied")
 			return

@@ -21,10 +21,10 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/woodpecker-ci/woodpecker/server/forge"
-	"github.com/woodpecker-ci/woodpecker/server/forge/mocks"
-	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/server/forge"
+	"go.woodpecker-ci.org/woodpecker/server/forge/mocks"
+	forge_types "go.woodpecker-ci.org/woodpecker/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/server/model"
 )
 
 func TestGlobalEnvsubst(t *testing.T) {
@@ -44,7 +44,7 @@ func TestGlobalEnvsubst(t *testing.T) {
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
-		Link:  "",
+		Host:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 version: 1
@@ -81,7 +81,7 @@ func TestMissingGlobalEnvsubst(t *testing.T) {
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
-		Link:  "",
+		Host:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 version: 1
@@ -115,7 +115,7 @@ bbb`,
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
-		Link:  "",
+		Host:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 version: 1
@@ -154,7 +154,7 @@ func TestMultiPipeline(t *testing.T) {
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
-		Link:  "",
+		Host:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 version: 1
@@ -191,7 +191,7 @@ func TestDependsOn(t *testing.T) {
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
-		Link:  "",
+		Host:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Name: "lint", Data: []byte(`
 version: 1
@@ -241,7 +241,7 @@ func TestRunsOn(t *testing.T) {
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
-		Link:  "",
+		Host:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 version: 1
@@ -279,7 +279,7 @@ func TestPipelineName(t *testing.T) {
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
-		Link:  "",
+		Host:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Name: ".woodpecker/lint.yml", Data: []byte(`
 version: 1
@@ -317,7 +317,7 @@ func TestBranchFilter(t *testing.T) {
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
-		Link:  "",
+		Host:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 version: 1
@@ -358,7 +358,7 @@ func TestRootWhenFilter(t *testing.T) {
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
-		Link:  "",
+		Host:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 version: 1
@@ -410,7 +410,7 @@ func TestZeroSteps(t *testing.T) {
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
-		Link:  "",
+		Host:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 version: 1
@@ -446,7 +446,7 @@ func TestZeroStepsAsMultiPipelineDeps(t *testing.T) {
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
-		Link:  "",
+		Host:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Name: "zerostep", Data: []byte(`
 version: 1
@@ -498,7 +498,7 @@ func TestZeroStepsAsMultiPipelineTransitiveDeps(t *testing.T) {
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
-		Link:  "",
+		Host:  "",
 		Yamls: []*forge_types.FileMeta{
 			{Name: "zerostep", Data: []byte(`
 version: 1

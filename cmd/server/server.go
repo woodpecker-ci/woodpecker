@@ -34,24 +34,25 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
 
-	"github.com/woodpecker-ci/woodpecker/cmd/common"
-	"github.com/woodpecker-ci/woodpecker/pipeline/rpc/proto"
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/cron"
-	"github.com/woodpecker-ci/woodpecker/server/forge"
-	woodpeckerGrpcServer "github.com/woodpecker-ci/woodpecker/server/grpc"
-	"github.com/woodpecker-ci/woodpecker/server/logging"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/plugins/config"
-	"github.com/woodpecker-ci/woodpecker/server/pubsub"
-	"github.com/woodpecker-ci/woodpecker/server/router"
-	"github.com/woodpecker-ci/woodpecker/server/router/middleware"
-	"github.com/woodpecker-ci/woodpecker/server/store"
-	"github.com/woodpecker-ci/woodpecker/server/web"
-	"github.com/woodpecker-ci/woodpecker/shared/constant"
-	"github.com/woodpecker-ci/woodpecker/version"
-	// "github.com/woodpecker-ci/woodpecker/server/plugins/encryption"
-	// encryptedStore "github.com/woodpecker-ci/woodpecker/server/plugins/encryption/wrapper/store"
+	"go.woodpecker-ci.org/woodpecker/cmd/common"
+	"go.woodpecker-ci.org/woodpecker/pipeline/rpc/proto"
+	"go.woodpecker-ci.org/woodpecker/server"
+	"go.woodpecker-ci.org/woodpecker/server/cron"
+	"go.woodpecker-ci.org/woodpecker/server/forge"
+	woodpeckerGrpcServer "go.woodpecker-ci.org/woodpecker/server/grpc"
+	"go.woodpecker-ci.org/woodpecker/server/logging"
+	"go.woodpecker-ci.org/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/server/plugins/config"
+	"go.woodpecker-ci.org/woodpecker/server/plugins/permissions"
+	"go.woodpecker-ci.org/woodpecker/server/pubsub"
+	"go.woodpecker-ci.org/woodpecker/server/router"
+	"go.woodpecker-ci.org/woodpecker/server/router/middleware"
+	"go.woodpecker-ci.org/woodpecker/server/store"
+	"go.woodpecker-ci.org/woodpecker/server/web"
+	"go.woodpecker-ci.org/woodpecker/shared/constant"
+	"go.woodpecker-ci.org/woodpecker/version"
+	// "go.woodpecker-ci.org/woodpecker/server/plugins/encryption"
+	// encryptedStore "go.woodpecker-ci.org/woodpecker/server/plugins/encryption/wrapper/store"
 )
 
 func run(c *cli.Context) error {
@@ -177,7 +178,6 @@ func run(c *cli.Context) error {
 		webUIServe,
 		middleware.Logger(time.RFC3339, true),
 		middleware.Version,
-		middleware.Config(c),
 		middleware.Store(c, _store),
 	)
 
@@ -367,4 +367,10 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 
 	// prometheus
 	server.Config.Prometheus.AuthToken = c.String("prometheus-auth-token")
+
+	// permissions
+	server.Config.Permissions.Open = c.Bool("open")
+	server.Config.Permissions.Admins = permissions.NewAdmins(c.StringSlice("admin"))
+	server.Config.Permissions.Orgs = permissions.NewOrgs(c.StringSlice("orgs"))
+	server.Config.Permissions.OwnersAllowlist = permissions.NewOwnersAllowlist(c.StringSlice("repo-owners"))
 }

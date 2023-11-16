@@ -18,11 +18,11 @@ import (
 	"fmt"
 	"path"
 
-	backend_types "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
-	yaml_types "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/utils"
-	"github.com/woodpecker-ci/woodpecker/shared/constant"
+	backend_types "go.woodpecker-ci.org/woodpecker/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/metadata"
+	yaml_types "go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/types"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/utils"
+	"go.woodpecker-ci.org/woodpecker/shared/constant"
 )
 
 const (
@@ -151,7 +151,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 
 	// add default clone step
 	if !c.local && len(conf.Clone.ContainerList) == 0 && !conf.SkipClone {
-		cloneSettings := map[string]interface{}{"depth": "0"}
+		cloneSettings := map[string]any{"depth": "0"}
 		if c.metadata.Curr.Event == metadata.EventTag {
 			cloneSettings["tags"] = "true"
 		}
