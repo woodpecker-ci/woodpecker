@@ -8,6 +8,7 @@ declare global {
     WOODPECKER_FORGE: 'github' | 'gitlab' | 'gitea' | 'bitbucket' | undefined;
     WOODPECKER_ROOT_PATH: string | undefined;
     WOODPECKER_ENABLE_SWAGGER: boolean | undefined;
+    WOODPECKER_CRON_ENABLED: boolean | undefined;
   }
 }
 
@@ -18,4 +19,5 @@ export default () => ({
   forge: window.WOODPECKER_FORGE || null,
   rootPath: window.WOODPECKER_ROOT_PATH || '',
   enableSwagger: window.WOODPECKER_ENABLE_SWAGGER || false,
+  cronEnabled: window.WOODPECKER_CRON_ENABLED || true,
 });

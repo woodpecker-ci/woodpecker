@@ -46,6 +46,7 @@ func Config(c *gin.Context) {
 		"forge":          server.Config.Services.Forge.Name(),
 		"root_path":      server.Config.Server.RootPath,
 		"enable_swagger": server.Config.Server.EnableSwagger,
+		"cron_enabled":   server.Config.Cron.Enabled,
 	}
 
 	// default func map with json parser.
@@ -75,4 +76,5 @@ window.WOODPECKER_VERSION = "{{ .version }}";
 window.WOODPECKER_FORGE = "{{ .forge }}";
 window.WOODPECKER_ROOT_PATH = "{{ .root_path }}";
 window.WOODPECKER_ENABLE_SWAGGER = {{ .enable_swagger }};
+window.WOODPECKER_CRON_ENABLED = {{ .cron_enabled }};
 `

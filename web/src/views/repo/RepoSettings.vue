@@ -23,7 +23,7 @@
     <Tab id="registries" :title="$t('repo.settings.registries.registries')">
       <RegistriesTab />
     </Tab>
-    <Tab id="crons" :title="$t('repo.settings.crons.crons')">
+    <Tab  v-if="cronEnabled" id="crons" :title="$t('repo.settings.crons.crons')">
       <CronTab />
     </Tab>
     <Tab id="badge" :title="$t('repo.settings.badge.badge')">
