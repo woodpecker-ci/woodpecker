@@ -11,7 +11,7 @@ when:
 variables:
   - &golang_image 'docker.io/golang:1.21.3'
   - &node_image 'docker.io/node:21-alpine'
-  - &xgo_image 'docker.io/techknowlogick/xgo:go-1.21.3'
+  - &xgo_image 'docker.io/techknowlogick/xgo:go-1.21.4'
   - &xgo_version 'go-1.21.2'
 
 steps:
