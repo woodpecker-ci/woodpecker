@@ -23,7 +23,7 @@
     <Tab id="registries" :title="$t('repo.settings.registries.registries')">
       <RegistriesTab />
     </Tab>
-    <Tab  v-if="cronEnabled" id="crons" :title="$t('repo.settings.crons.crons')">
+    <Tab v-if="cronEnabled" id="crons" :title="$t('repo.settings.crons.crons')">
       <CronTab />
     </Tab>
     <Tab id="badge" :title="$t('repo.settings.badge.badge')">
@@ -48,6 +48,7 @@ import CronTab from '~/components/repo/settings/CronTab.vue';
 import GeneralTab from '~/components/repo/settings/GeneralTab.vue';
 import RegistriesTab from '~/components/repo/settings/RegistriesTab.vue';
 import SecretsTab from '~/components/repo/settings/SecretsTab.vue';
+import useConfig from '~/compositions/useConfig';
 import useNotifications from '~/compositions/useNotifications';
 import { useRouteBack } from '~/compositions/useRouteBack';
 import { Repo, RepoPermissions } from '~/lib/api/types';
@@ -55,6 +56,7 @@ import { Repo, RepoPermissions } from '~/lib/api/types';
 const notifications = useNotifications();
 const router = useRouter();
 const i18n = useI18n();
+const config = useConfig();
 
 const repoPermissions = inject<Ref<RepoPermissions>>('repo-permissions');
 if (!repoPermissions) {
@@ -74,4 +76,5 @@ onMounted(async () => {
 });
 
 const goBack = useRouteBack({ name: 'repo' });
+const { cronEnabled } = config;
 </script>
