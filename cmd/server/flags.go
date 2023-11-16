@@ -256,6 +256,11 @@ var flags = append([]cli.Flag{
 		Name:    "enable-swagger",
 		Value:   true,
 	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_CRON_ENABLE"},
+		Name:    "cron",
+		Value:   true,
+	},
 	//
 	// backend options for pipeline compiler
 	//

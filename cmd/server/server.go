@@ -104,9 +104,11 @@ func run(c *cli.Context) error {
 
 	setupMetrics(&g, _store)
 
-	g.Go(func() error {
-		return cron.Start(c.Context, _store, _forge)
-	})
+	if server.Config.Cron.Enabled {
+		g.Go(func() error {
+			return cron.Start(c.Context, _store, _forge)
+		})
+	}
 
 	// start the grpc server
 	g.Go(func() error {
@@ -373,4 +375,7 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 	server.Config.Permissions.Admins = permissions.NewAdmins(c.StringSlice("admin"))
 	server.Config.Permissions.Orgs = permissions.NewOrgs(c.StringSlice("orgs"))
 	server.Config.Permissions.OwnersAllowlist = permissions.NewOwnersAllowlist(c.StringSlice("repo-owners"))
+
+	// cron
+	server.Config.Cron.Enabled = c.Bool("cron")
 }

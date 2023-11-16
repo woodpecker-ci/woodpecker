@@ -103,4 +103,7 @@ var Config = struct {
 		Orgs            *permissions.Orgs
 		OwnersAllowlist *permissions.OwnersAllowlist
 	}
+	Cron struct {
+		Enabled bool
+	}
 }{}
