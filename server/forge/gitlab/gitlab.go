@@ -326,7 +326,7 @@ func (g *GitLab) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 	result := make([]*model.PullRequest, len(pullRequests))
 	for i := range pullRequests {
 		result[i] = &model.PullRequest{
-			Index: model.ForgeRemoteID(strconv.Itoa((pullRequests[i].ID))),
+			Index: model.ForgeRemoteID(strconv.Itoa(pullRequests[i].ID)),
 			Title: pullRequests[i].Title,
 		}
 	}
