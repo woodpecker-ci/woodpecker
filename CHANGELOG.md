@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-11-16
+## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-11-19
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -30,6 +30,7 @@
 
 ### Misc
 
+- Update docker.io/golang Docker tag to v1.21.4 [[#2828](https://github.com/woodpecker-ci/woodpecker/pull/2828)]
 - Update docker.io/techknowlogick/xgo Docker tag to go-1.21.4 [[#2829](https://github.com/woodpecker-ci/woodpecker/pull/2829)]
 - Update golang (packages) [[#2815](https://github.com/woodpecker-ci/woodpecker/pull/2815)]
 - Update dependency marked to v10 [[#2810](https://github.com/woodpecker-ci/woodpecker/pull/2810)]
