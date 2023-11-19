@@ -115,7 +115,7 @@ func TestWithMetadata(t *testing.T) {
 			Owner:    "octacat",
 			Name:     "hello-world",
 			Private:  true,
-			Link:     "https://github.com/octocat/hello-world",
+			ForgeURL: "https://github.com/octocat/hello-world",
 			CloneURL: "https://github.com/octocat/hello-world.git",
 		},
 	}
@@ -129,7 +129,7 @@ func TestWithMetadata(t *testing.T) {
 	if compiler.env["CI_REPO_NAME"] != metadata.Repo.Name {
 		t.Errorf("WithMetadata must set CI_REPO_NAME")
 	}
-	if compiler.env["CI_REPO_URL"] != metadata.Repo.Link {
+	if compiler.env["CI_REPO_URL"] != metadata.Repo.ForgeURL {
 		t.Errorf("WithMetadata must set CI_REPO_URL")
 	}
 	if compiler.env["CI_REPO_CLONE_URL"] != metadata.Repo.CloneURL {

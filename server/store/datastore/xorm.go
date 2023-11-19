@@ -37,56 +37,56 @@ type xormLogger struct {
 }
 
 // Error implement ILogger
-func (x *xormLogger) Error(v ...interface{}) {
+func (x *xormLogger) Error(v ...any) {
 	if x.level <= xlog.LOG_ERR {
 		x.logger.Error().Msg(fmt.Sprintln(v...))
 	}
 }
 
 // Errorf implement ILogger
-func (x *xormLogger) Errorf(format string, v ...interface{}) {
+func (x *xormLogger) Errorf(format string, v ...any) {
 	if x.level <= xlog.LOG_ERR {
 		x.logger.Error().Msg(fmt.Sprintf(format, v...))
 	}
 }
 
 // Debug implement ILogger
-func (x *xormLogger) Debug(v ...interface{}) {
+func (x *xormLogger) Debug(v ...any) {
 	if x.level <= xlog.LOG_DEBUG {
 		x.logger.Debug().Msg(fmt.Sprintln(v...))
 	}
 }
 
 // Debugf implement ILogger
-func (x *xormLogger) Debugf(format string, v ...interface{}) {
+func (x *xormLogger) Debugf(format string, v ...any) {
 	if x.level <= xlog.LOG_DEBUG {
 		x.logger.Debug().Msg(fmt.Sprintf(format, v...))
 	}
 }
 
 // Info implement ILogger
-func (x *xormLogger) Info(v ...interface{}) {
+func (x *xormLogger) Info(v ...any) {
 	if x.level <= xlog.LOG_INFO {
 		x.logger.Info().Msg(fmt.Sprintln(v...))
 	}
 }
 
 // Infof implement ILogger
-func (x *xormLogger) Infof(format string, v ...interface{}) {
+func (x *xormLogger) Infof(format string, v ...any) {
 	if x.level <= xlog.LOG_INFO {
 		x.logger.Info().Msg(fmt.Sprintf(format, v...))
 	}
 }
 
 // Warn implement ILogger
-func (x *xormLogger) Warn(v ...interface{}) {
+func (x *xormLogger) Warn(v ...any) {
 	if x.level <= xlog.LOG_WARNING {
 		x.logger.Warn().Msg(fmt.Sprintln(v...))
 	}
 }
 
 // Warnf implement ILogger
-func (x *xormLogger) Warnf(format string, v ...interface{}) {
+func (x *xormLogger) Warnf(format string, v ...any) {
 	if x.level <= xlog.LOG_WARNING {
 		x.logger.Warn().Msg(fmt.Sprintf(format, v...))
 	}

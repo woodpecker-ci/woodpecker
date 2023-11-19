@@ -24,8 +24,8 @@ import (
 type SliceOrMap map[string]string
 
 // UnmarshalYAML implements the Unmarshaler interface.
-func (s *SliceOrMap) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var sliceType []interface{}
+func (s *SliceOrMap) UnmarshalYAML(unmarshal func(any) error) error {
+	var sliceType []any
 	if err := unmarshal(&sliceType); err == nil {
 		parts := map[string]string{}
 		for _, s := range sliceType {
@@ -47,7 +47,7 @@ func (s *SliceOrMap) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		return nil
 	}
 
-	var mapType map[interface{}]interface{}
+	var mapType map[any]any
 	if err := unmarshal(&mapType); err == nil {
 		parts := map[string]string{}
 		for k, v := range mapType {
