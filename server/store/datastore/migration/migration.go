@@ -59,9 +59,10 @@ var migrationTasks = []*task{
 	&alterTableConfigUpdateColumnConfigDataType,
 	&removePluginOnlyOptionFromSecretsTable,
 	&convertToNewPipelineErrorFormat,
+	&renameLinkToURL,
 }
 
-var allBeans = []interface{}{
+var allBeans = []any{
 	new(model.Agent),
 	new(model.Pipeline),
 	new(model.PipelineConfig),
@@ -220,7 +221,7 @@ func runTasks(e *xorm.Engine, tasks []*task) error {
 }
 
 type syncEngine interface {
-	Sync(beans ...interface{}) error
+	Sync(beans ...any) error
 }
 
 func syncAll(sess syncEngine) error {

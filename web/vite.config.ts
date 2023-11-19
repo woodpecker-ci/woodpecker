@@ -25,6 +25,24 @@ function woodpeckerInfoPlugin() {
   };
 }
 
+function externalCSSPlugin() {
+  return {
+    name: 'external-css',
+    transformIndexHtml: {
+      enforce: 'post',
+      transform() {
+        return [
+          {
+            tag: 'link',
+            attrs: { rel: 'stylesheet', type: 'text/css', href: '/assets/custom.css' },
+            injectTo: 'head',
+          },
+        ];
+      },
+    },
+  };
+}
+
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
@@ -93,6 +111,7 @@ export default defineConfig({
     Components({
       resolvers: [IconsResolver()],
     }),
+    externalCSSPlugin(),
     woodpeckerInfoPlugin(),
     prismjs({
       languages: ['yaml'],
