@@ -44,7 +44,7 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_REPO_OWNER":          m.Repo.Owner,
 		"CI_REPO_REMOTE_ID":      m.Repo.RemoteID,
 		"CI_REPO_SCM":            "git",
-		"CI_REPO_URL":            m.Repo.Link,
+		"CI_REPO_URL":            m.Repo.ForgeURL,
 		"CI_REPO_CLONE_URL":      m.Repo.CloneURL,
 		"CI_REPO_CLONE_SSH_URL":  m.Repo.CloneSSHURL,
 		"CI_REPO_DEFAULT_BRANCH": m.Repo.Branch,
@@ -69,7 +69,7 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_PIPELINE_PARENT":        strconv.FormatInt(m.Curr.Parent, 10),
 		"CI_PIPELINE_EVENT":         m.Curr.Event,
 		"CI_PIPELINE_URL":           m.getPipelineWebURL(m.Curr, 0),
-		"CI_PIPELINE_FORGE_URL":     m.Curr.Link,
+		"CI_PIPELINE_FORGE_URL":     m.Curr.ForgeURL,
 		"CI_PIPELINE_DEPLOY_TARGET": m.Curr.Target,
 		"CI_PIPELINE_STATUS":        m.Curr.Status,
 		"CI_PIPELINE_CREATED":       strconv.FormatInt(m.Curr.Created, 10),
@@ -90,7 +90,7 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_PREV_COMMIT_REF":           m.Prev.Commit.Ref,
 		"CI_PREV_COMMIT_REFSPEC":       m.Prev.Commit.Refspec,
 		"CI_PREV_COMMIT_BRANCH":        m.Prev.Commit.Branch,
-		"CI_PREV_COMMIT_URL":           m.Prev.Link,
+		"CI_PREV_COMMIT_URL":           m.Prev.ForgeURL,
 		"CI_PREV_COMMIT_MESSAGE":       m.Prev.Commit.Message,
 		"CI_PREV_COMMIT_AUTHOR":        m.Prev.Commit.Author.Name,
 		"CI_PREV_COMMIT_AUTHOR_EMAIL":  m.Prev.Commit.Author.Email,
@@ -100,7 +100,7 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_PREV_PIPELINE_PARENT":        strconv.FormatInt(m.Prev.Parent, 10),
 		"CI_PREV_PIPELINE_EVENT":         m.Prev.Event,
 		"CI_PREV_PIPELINE_URL":           m.getPipelineWebURL(m.Prev, 0),
-		"CI_PREV_PIPELINE_FORGE_URL":     m.Prev.Link,
+		"CI_PREV_PIPELINE_FORGE_URL":     m.Prev.ForgeURL,
 		"CI_PREV_PIPELINE_DEPLOY_TARGET": m.Prev.Target,
 		"CI_PREV_PIPELINE_STATUS":        m.Prev.Status,
 		"CI_PREV_PIPELINE_CREATED":       strconv.FormatInt(m.Prev.Created, 10),
@@ -108,7 +108,7 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_PREV_PIPELINE_FINISHED":      strconv.FormatInt(m.Prev.Finished, 10),
 
 		"CI_SYSTEM_NAME":     m.Sys.Name,
-		"CI_SYSTEM_URL":      m.Sys.Link,
+		"CI_SYSTEM_URL":      m.Sys.URL,
 		"CI_SYSTEM_HOST":     m.Sys.Host,
 		"CI_SYSTEM_PLATFORM": m.Sys.Platform, // will be set by pipeline platform option or by agent
 		"CI_SYSTEM_VERSION":  m.Sys.Version,
@@ -117,7 +117,7 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_FORGE_URL":  m.Forge.URL,
 
 		// TODO Deprecated, remove in 3.x
-		"CI_COMMIT_URL": m.Curr.Link,
+		"CI_COMMIT_URL": m.Curr.ForgeURL,
 	}
 	if m.Curr.Event == EventTag {
 		params["CI_COMMIT_TAG"] = strings.TrimPrefix(m.Curr.Commit.Ref, "refs/tags/")
@@ -132,8 +132,8 @@ func (m *Metadata) Environ() map[string]string {
 
 func (m *Metadata) getPipelineWebURL(pipeline Pipeline, stepNumber int) string {
 	if stepNumber == 0 {
-		return fmt.Sprintf("%s/repos/%d/pipeline/%d", m.Sys.Link, m.Repo.ID, pipeline.Number)
+		return fmt.Sprintf("%s/repos/%d/pipeline/%d", m.Sys.URL, m.Repo.ID, pipeline.Number)
 	}
 
-	return fmt.Sprintf("%s/repos/%d/pipeline/%d/%d", m.Sys.Link, m.Repo.ID, pipeline.Number, stepNumber)
+	return fmt.Sprintf("%s/repos/%d/pipeline/%d/%d", m.Sys.URL, m.Repo.ID, pipeline.Number, stepNumber)
 }

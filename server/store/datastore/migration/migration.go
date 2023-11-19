@@ -59,6 +59,7 @@ var migrationTasks = []*task{
 	&alterTableConfigUpdateColumnConfigDataType,
 	&removePluginOnlyOptionFromSecretsTable,
 	&convertToNewPipelineErrorFormat,
+	&renameLinkToURL,
 }
 
 var allBeans = []any{

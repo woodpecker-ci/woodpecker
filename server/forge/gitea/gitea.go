@@ -339,7 +339,7 @@ func (c *Gitea) Status(ctx context.Context, user *model.User, repo *model.Repo, 
 		pipeline.Commit,
 		gitea.CreateStatusOption{
 			State:       getStatus(workflow.State),
-			TargetURL:   common.GetPipelineStatusLink(repo, pipeline, workflow),
+			TargetURL:   common.GetPipelineStatusURL(repo, pipeline, workflow),
 			Description: common.GetPipelineStatusDescription(workflow.State),
 			Context:     common.GetPipelineStatusContext(repo, pipeline, workflow),
 		},

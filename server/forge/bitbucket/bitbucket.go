@@ -284,7 +284,7 @@ func (c *config) Status(ctx context.Context, user *model.User, repo *model.Repo,
 		State: convertStatus(pipeline.Status),
 		Desc:  common.GetPipelineStatusDescription(pipeline.Status),
 		Key:   "Woodpecker",
-		URL:   common.GetPipelineStatusLink(repo, pipeline, nil),
+		URL:   common.GetPipelineStatusURL(repo, pipeline, nil),
 	}
 	return c.newClient(ctx, user).CreateStatus(repo.Owner, repo.Name, pipeline.Commit, &status)
 }

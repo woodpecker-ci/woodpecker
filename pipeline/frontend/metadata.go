@@ -37,9 +37,9 @@ func EnvVarSubst(yaml string, environ map[string]string) (string, error) {
 }
 
 // MetadataFromStruct return the metadata from a pipeline will run with.
-func MetadataFromStruct(forge metadata.ServerForge, repo *model.Repo, pipeline, last *model.Pipeline, workflow *model.Workflow, link string) metadata.Metadata {
-	host := link
-	uri, err := url.Parse(link)
+func MetadataFromStruct(forge metadata.ServerForge, repo *model.Repo, pipeline, last *model.Pipeline, workflow *model.Workflow, sysURL string) metadata.Metadata {
+	host := sysURL
+	uri, err := url.Parse(sysURL)
 	if err == nil {
 		host = uri.Host
 	}
@@ -59,7 +59,7 @@ func MetadataFromStruct(forge metadata.ServerForge, repo *model.Repo, pipeline, 
 			Name:        repo.Name,
 			Owner:       repo.Owner,
 			RemoteID:    fmt.Sprint(repo.ForgeRemoteID),
-			Link:        repo.Link,
+			ForgeURL:    repo.ForgeURL,
 			CloneURL:    repo.Clone,
 			CloneSSHURL: repo.CloneSSH,
 			Private:     repo.IsSCMPrivate,
@@ -94,7 +94,7 @@ func MetadataFromStruct(forge metadata.ServerForge, repo *model.Repo, pipeline, 
 		Step:     metadata.Step{},
 		Sys: metadata.System{
 			Name:     "woodpecker",
-			Link:     link,
+			URL:      sysURL,
 			Host:     host,
 			Platform: "", // will be set by pipeline platform option or by agent
 			Version:  version.Version,
@@ -126,7 +126,7 @@ func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent b
 		Finished: pipeline.Finished,
 		Status:   string(pipeline.Status),
 		Event:    string(pipeline.Event),
-		Link:     pipeline.Link,
+		ForgeURL: pipeline.ForgeURL,
 		Target:   pipeline.Deploy,
 		Commit: metadata.Commit{
 			Sha:     pipeline.Commit,

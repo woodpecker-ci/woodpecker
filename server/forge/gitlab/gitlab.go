@@ -410,7 +410,7 @@ func (g *GitLab) Status(ctx context.Context, user *model.User, repo *model.Repo,
 	_, _, err = client.Commits.SetCommitStatus(_repo.ID, pipeline.Commit, &gitlab.SetCommitStatusOptions{
 		State:       getStatus(workflow.State),
 		Description: gitlab.String(common.GetPipelineStatusDescription(workflow.State)),
-		TargetURL:   gitlab.String(common.GetPipelineStatusLink(repo, pipeline, workflow)),
+		TargetURL:   gitlab.String(common.GetPipelineStatusURL(repo, pipeline, workflow)),
 		Context:     gitlab.String(common.GetPipelineStatusContext(repo, pipeline, workflow)),
 	}, gitlab.WithContext(ctx))
 
