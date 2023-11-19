@@ -15,6 +15,8 @@
 package router
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
 
@@ -224,4 +226,12 @@ func apiRoutes(e *gin.RouterGroup) {
 			}
 		}
 	}
+
+	// TODO: remove with 3.x
+	e.Any("/hook", func(c *gin.Context) {
+		c.String(http.StatusGone, "use /api/hook")
+	})
+	e.Any("/stream/events", func(c *gin.Context) {
+		c.String(http.StatusGone, "use /api/stream/events")
+	})
 }
