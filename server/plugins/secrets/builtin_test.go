@@ -20,9 +20,9 @@ import (
 
 	"github.com/franela/goblin"
 	"github.com/stretchr/testify/mock"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/plugins/secrets"
-	mocks_store "github.com/woodpecker-ci/woodpecker/server/store/mocks"
+	"go.woodpecker-ci.org/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/server/plugins/secrets"
+	mocks_store "go.woodpecker-ci.org/woodpecker/server/store/mocks"
 )
 
 func TestSecretListPipeline(t *testing.T) {

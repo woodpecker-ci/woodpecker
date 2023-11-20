@@ -6,6 +6,7 @@ when:
     branch:
       - ${CI_REPO_DEFAULT_BRANCH}
       - release/*
+      - renovate/*
 
 variables:
   - &node_image 'docker.io/node:21-alpine'

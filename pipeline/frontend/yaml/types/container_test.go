@@ -21,8 +21,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/constraint"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types/base"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/constraint"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/types/base"
 )
 
 var containerYaml = []byte(`
@@ -124,7 +124,7 @@ func TestUnmarshalContainer(t *testing.T) {
 				},
 			},
 		},
-		Settings: map[string]interface{}{
+		Settings: map[string]any{
 			"foo": "bar",
 			"baz": false,
 		},
@@ -159,7 +159,7 @@ func TestUnmarshalContainers(t *testing.T) {
 				{
 					Name:  "unit_test",
 					Image: "node",
-					Settings: map[string]interface{}{
+					Settings: map[string]any{
 						"normal_setting": true,
 					},
 				},
@@ -190,7 +190,7 @@ func TestUnmarshalContainers(t *testing.T) {
 						Source: "docker_password",
 						Target: "docker_password",
 					}}},
-					Settings: map[string]interface{}{
+					Settings: map[string]any{
 						"repo":       "woodpeckerci/woodpecker-agent",
 						"dockerfile": "docker/Dockerfile.agent",
 						"tag":        stringsToInterface("next", "latest"),
@@ -223,7 +223,7 @@ func TestUnmarshalContainers(t *testing.T) {
 					Name:  "publish-cli",
 					Image: "print/env",
 					Group: "docker",
-					Settings: map[string]interface{}{
+					Settings: map[string]any{
 						"repo":       "woodpeckerci/woodpecker-cli",
 						"dockerfile": "docker/Dockerfile.cli",
 						"tag":        stringsToInterface("next"),
@@ -289,8 +289,8 @@ func TestUnmarshalContainersErr(t *testing.T) {
 	}
 }
 
-func stringsToInterface(val ...string) []interface{} {
-	res := make([]interface{}, len(val))
+func stringsToInterface(val ...string) []any {
+	res := make([]any, len(val))
 	for i := range val {
 		res[i] = val[i]
 	}
