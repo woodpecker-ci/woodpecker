@@ -78,18 +78,6 @@
     },
     {
       "// todo": true,
-      "name": "Docker",
-      "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-docker/master/docs.md",
-      "verified": true
-    },
-    {
-      "// todo": true,
-      "name": "GitHub release",
-      "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-github-release/master/docs.md",
-      "verified": true
-    },
-    {
-      "// todo": true,
       "name": "Chart releaser",
       "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-chart-releaser/master/docs.md",
       "verified": true
@@ -161,12 +149,12 @@
     },
     {
       "name": "Release Helper",
-      "docs": "https://raw.githubusercontent.com/woodpeckerci/plugin-ready-release-go/main/docs.md",
+      "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-ready-release-go/main/docs.md",
       "verified": true
     },
     {
       "name": "GitHub Release",
-      "docs": "https://raw.githubusercontent.com/woodpeckerci/plugin-github-release/main/docs.md",
+      "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-github-release/main/docs.md",
       "verified": true
     }
   ]
