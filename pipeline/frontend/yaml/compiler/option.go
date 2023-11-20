@@ -104,9 +104,9 @@ func WithWorkspace(base, path string) Option {
 
 // WithWorkspaceFromURL configures the compiler with the workspace
 // base and path based on the repository url.
-func WithWorkspaceFromURL(base, link string) Option {
+func WithWorkspaceFromURL(base, u string) Option {
 	srcPath := "src"
-	parsed, err := url.Parse(link)
+	parsed, err := url.Parse(u)
 	if err == nil {
 		srcPath = path.Join(srcPath, parsed.Hostname(), parsed.Path)
 	}

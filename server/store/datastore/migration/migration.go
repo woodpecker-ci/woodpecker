@@ -30,7 +30,7 @@ var migrationTasks = []*xormigrate.Migration{
 	&legacyToXormigrate,
 }
 
-var allBeans = []interface{}{
+var allBeans = []any{
 	new(model.Agent),
 	new(model.Pipeline),
 	new(model.PipelineConfig),

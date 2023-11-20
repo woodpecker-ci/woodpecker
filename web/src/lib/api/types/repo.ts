@@ -29,8 +29,8 @@ export type Repo = {
   // The url for the avatar image.
   avatar_url: string;
 
-  // The link to view the repository.
-  link_url: string;
+  // The url to view the repository.
+  forge_url: string;
 
   // The url used to clone the repository.
   clone_url: string;
