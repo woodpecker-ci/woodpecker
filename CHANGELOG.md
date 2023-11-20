@@ -1,35 +1,42 @@
 # Changelog
 
-## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-11-19
+## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-11-20
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@renovate[bot], @qwerty287, @6543, @pat-s
+@qwerty287, @renovate[bot], @6543, @pat-s
 
 ### 💥 Breaking changes
 
 - Rename `link` to `url` [[#2812](https://github.com/woodpecker-ci/woodpecker/pull/2812)]
 - Revert to singular CLI args [[#2820](https://github.com/woodpecker-ci/woodpecker/pull/2820)]
 
+### 🐛 Bug Fixes
+
+- Fix plugin URLs [[#2850](https://github.com/woodpecker-ci/woodpecker/pull/2850)]
+- Fix env vars and add UI url [[#2811](https://github.com/woodpecker-ci/woodpecker/pull/2811)]
+- Fix paths for version check [[#2816](https://github.com/woodpecker-ci/woodpecker/pull/2816)]
+
 ### 📚 Documentation
 
+- Add extend env plugin [[#2847](https://github.com/woodpecker-ci/woodpecker/pull/2847)]
 - mark v1.0.x as unmaintained [[#2818](https://github.com/woodpecker-ci/woodpecker/pull/2818)]
 - Update docs npm deps non-major [[#2799](https://github.com/woodpecker-ci/woodpecker/pull/2799)]
 - Add docs about Gitea on same host and update docker-compose example [[#2752](https://github.com/woodpecker-ci/woodpecker/pull/2752)]
 - Update docusaurus plugin [[#2804](https://github.com/woodpecker-ci/woodpecker/pull/2804)]
 
-### 🐛 Bug Fixes
-
-- Fix env vars and add UI url [[#2811](https://github.com/woodpecker-ci/woodpecker/pull/2811)]
-- Fix paths for version check [[#2816](https://github.com/woodpecker-ci/woodpecker/pull/2816)]
-
 ### 📈 Enhancement
 
+- Signal to clients the hook and event routes where removed [[#2826](https://github.com/woodpecker-ci/woodpecker/pull/2826)]
 - Replace `interface{}` with `any` [[#2807](https://github.com/woodpecker-ci/woodpecker/pull/2807)]
 - Fix repo owner filter [[#2808](https://github.com/woodpecker-ci/woodpecker/pull/2808)]
 
 ### Misc
 
+- Update golang (packages) [[#2839](https://github.com/woodpecker-ci/woodpecker/pull/2839)]
+- Update dependency vite to v5 [[#2836](https://github.com/woodpecker-ci/woodpecker/pull/2836)]
+- Lock file maintenance [[#2840](https://github.com/woodpecker-ci/woodpecker/pull/2840)]
+- Update postgres Docker tag to v16.1 [[#2842](https://github.com/woodpecker-ci/woodpecker/pull/2842)]
 - Update docker.io/golang Docker tag to v1.21.4 [[#2828](https://github.com/woodpecker-ci/woodpecker/pull/2828)]
 - Update docker.io/techknowlogick/xgo Docker tag to go-1.21.4 [[#2829](https://github.com/woodpecker-ci/woodpecker/pull/2829)]
 - Update golang (packages) [[#2815](https://github.com/woodpecker-ci/woodpecker/pull/2815)]
