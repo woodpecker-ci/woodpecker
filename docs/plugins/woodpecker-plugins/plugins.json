@@ -36,7 +36,7 @@
       "verified": true
     },
     {
-      "name": "Extend env plugin",
+      "name": "Extend env",
       "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-extend-env/main/docs.md",
       "verified": true
     },
