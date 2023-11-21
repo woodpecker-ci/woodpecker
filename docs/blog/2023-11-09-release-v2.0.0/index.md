@@ -28,7 +28,7 @@ We are proud to present you Woodpecker v2.0.0 with more than 300 changes from ou
 - Remove SSH backend [#2635]
 - Remove deprecated build command [#2602]
 - Deprecate "platform" filter in favour of "labels" [#2181]
-- Remove useless "sync" option from RepoListOpts from the client lib [#2090]
+- Remove unused "sync" option from RepoListOpts from the client lib [#2090]
 - Drop deprecated built-in environment variables [#2048]
 
 ### How we plan to handle releases in the future
