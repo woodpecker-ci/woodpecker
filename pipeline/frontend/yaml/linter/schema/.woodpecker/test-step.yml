@@ -17,6 +17,7 @@ steps:
     commands: go test
 
   commands:
+    privileged: true
     image: golang
     commands:
       - go get

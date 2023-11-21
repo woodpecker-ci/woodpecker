@@ -7,15 +7,17 @@
         <span class="font-bold">{{ version?.current }}</span>
       </i18n-t>
 
-      <i18n-t v-if="version?.needsUpdate" keypath="update_woodpecker" tag="span" class="text-int-wp-state-error-100">
-        <a
-          :href="`https://github.com/woodpecker-ci/woodpecker/releases/tag/${version.latest}`"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="underline"
-          >{{ version.latest }}</a
-        >
-      </i18n-t>
+      <Error v-if="version?.needsUpdate">
+        <i18n-t keypath="update_woodpecker" tag="span">
+          <a
+            :href="`https://github.com/woodpecker-ci/woodpecker/releases/tag/${version.latest}`"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="underline"
+            >{{ version.latest }}</a
+          >
+        </i18n-t>
+      </Error>
     </div>
   </Settings>
 </template>

@@ -33,7 +33,7 @@ type (
 		Name                         string   `json:"name"`
 		FullName                     string   `json:"full_name"`
 		Avatar                       string   `json:"avatar_url,omitempty"`
-		Link                         string   `json:"link_url,omitempty"`
+		ForgeURL                     string   `json:"forge_url,omitempty"`
 		Clone                        string   `json:"clone_url,omitempty"`
 		DefaultBranch                string   `json:"default_branch,omitempty"`
 		SCMKind                      string   `json:"scm,omitempty"`
@@ -61,10 +61,10 @@ type (
 	}
 
 	PipelineError struct {
-		Type      string      `json:"type"`
-		Message   string      `json:"message"`
-		IsWarning bool        `json:"is_warning"`
-		Data      interface{} `json:"data"`
+		Type      string `json:"type"`
+		Message   string `json:"message"`
+		IsWarning bool   `json:"is_warning"`
+		Data      any    `json:"data"`
 	}
 
 	// Pipeline defines a pipeline object.
@@ -93,7 +93,7 @@ type (
 		Author    string        `json:"author"`
 		Avatar    string        `json:"author_avatar"`
 		Email     string        `json:"author_email"`
-		Link      string        `json:"link_url"`
+		ForgeURL  string        `json:"forge_url"`
 		Reviewer  string        `json:"reviewed_by"`
 		Reviewed  int64         `json:"reviewed_at"`
 		Workflows []*Workflow   `json:"workflows,omitempty"`

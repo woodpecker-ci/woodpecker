@@ -24,6 +24,7 @@
   <i-bi-check-circle-fill v-else-if="name === 'status-success'" class="h-6 w-6" />
   <i-bi-exclamation-triangle-fill v-else-if="name === 'attention'" class="h-5 w-5" />
   <i-bi-exclamation-triangle v-else-if="name === 'warning'" class="h-5 w-5" />
+  <i-mdi-error-outline v-else-if="name === 'error'" class="h-5 w-5" />
   <i-simple-icons-gitea v-else-if="name === 'gitea'" class="h-8 w-8" />
   <i-ph-gitlab-logo-simple-fill v-else-if="name === 'gitlab'" class="h-8 w-8" />
   <i-mdi-bitbucket v-else-if="name === 'bitbucket'" class="h-8 w-8" />
@@ -98,7 +99,8 @@ export type IconNames =
   | 'play'
   | 'pause'
   | 'warning'
-  | 'attention';
+  | 'attention'
+  | 'error';
 
 defineProps<{
   name: IconNames;
