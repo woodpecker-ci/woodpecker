@@ -1,15 +1,22 @@
 # Changelog
 
-## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-11-20
+## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-11-21
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@qwerty287, @renovate[bot], @6543, @pat-s
+@6543, @qwerty287, @renovate[bot], @pat-s
 
 ### 💥 Breaking changes
 
 - Rename `link` to `url` [[#2812](https://github.com/woodpecker-ci/woodpecker/pull/2812)]
 - Revert to singular CLI args [[#2820](https://github.com/woodpecker-ci/woodpecker/pull/2820)]
+
+### 📈 Enhancement
+
+- Bump default clone image version to 2.4.0 [[#2852](https://github.com/woodpecker-ci/woodpecker/pull/2852)]
+- Signal to clients the hook and event routes where removed [[#2826](https://github.com/woodpecker-ci/woodpecker/pull/2826)]
+- Replace `interface{}` with `any` [[#2807](https://github.com/woodpecker-ci/woodpecker/pull/2807)]
+- Fix repo owner filter [[#2808](https://github.com/woodpecker-ci/woodpecker/pull/2808)]
 
 ### 🐛 Bug Fixes
 
@@ -24,12 +31,6 @@
 - Update docs npm deps non-major [[#2799](https://github.com/woodpecker-ci/woodpecker/pull/2799)]
 - Add docs about Gitea on same host and update docker-compose example [[#2752](https://github.com/woodpecker-ci/woodpecker/pull/2752)]
 - Update docusaurus plugin [[#2804](https://github.com/woodpecker-ci/woodpecker/pull/2804)]
-
-### 📈 Enhancement
-
-- Signal to clients the hook and event routes where removed [[#2826](https://github.com/woodpecker-ci/woodpecker/pull/2826)]
-- Replace `interface{}` with `any` [[#2807](https://github.com/woodpecker-ci/woodpecker/pull/2807)]
-- Fix repo owner filter [[#2808](https://github.com/woodpecker-ci/woodpecker/pull/2808)]
 
 ### Misc
 
