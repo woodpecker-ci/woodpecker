@@ -2,7 +2,6 @@
 title: It's time for some changes - Woodpecker 2.0.0
 description: Introducing Woodpecker 2.0.0 with > 300 changes
 slug: release-v200
-draft: true
 authors:
   - name: Anbraten
     title: Maintainer of Woodpecker
