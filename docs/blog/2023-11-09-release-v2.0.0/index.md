@@ -41,8 +41,8 @@ We are proud to present you Woodpecker v2.0.0 with more than 300 changes from ou
 
 ### Reposiotry & organization lists in the admin UI
 
-https://github.com/woodpecker-ci/woodpecker/pull/2338
-https://github.com/woodpecker-ci/woodpecker/pull/2347
+<https://github.com/woodpecker-ci/woodpecker/pull/2338>
+<https://github.com/woodpecker-ci/woodpecker/pull/2347>
 
 ### Support for user secrets
 
