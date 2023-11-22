@@ -35,6 +35,7 @@
 
 ### Misc
 
+- Add repo owner test [[#2857](https://github.com/woodpecker-ci/woodpecker/pull/2857)]
 - Update woodpeckerci/plugin-ready-release-go Docker tag to v1.0.2 [[#2853](https://github.com/woodpecker-ci/woodpecker/pull/2853)]
 - Update golang (packages) [[#2839](https://github.com/woodpecker-ci/woodpecker/pull/2839)]
 - Update dependency vite to v5 [[#2836](https://github.com/woodpecker-ci/woodpecker/pull/2836)]
