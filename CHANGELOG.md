@@ -1,10 +1,10 @@
 # Changelog
 
-## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-11-21
+## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-11-22
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @qwerty287, @renovate[bot], @pat-s
+@qwerty287, @6543, @renovate[bot], @pat-s
 
 ### 💥 Breaking changes
 
@@ -13,6 +13,7 @@
 
 ### 📈 Enhancement
 
+- Cleanup plugins plugins [[#2856](https://github.com/woodpecker-ci/woodpecker/pull/2856)]
 - Bump default clone image version to 2.4.0 [[#2852](https://github.com/woodpecker-ci/woodpecker/pull/2852)]
 - Signal to clients the hook and event routes where removed [[#2826](https://github.com/woodpecker-ci/woodpecker/pull/2826)]
 - Replace `interface{}` with `any` [[#2807](https://github.com/woodpecker-ci/woodpecker/pull/2807)]
