@@ -10,7 +10,6 @@ export type WoodpeckerPluginHeader = {
 };
 
 export type WoodpeckerPluginIndexEntry = {
-  '// todo'?: boolean;
   name: string; // name of the plugin
   docs: string; // http url to the docs.md file
   verified?: boolean; // plugins maintained by trusted parties
