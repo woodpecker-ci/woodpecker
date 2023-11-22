@@ -87,8 +87,8 @@ func createTmpPipeline(event model.WebhookEvent, commitSHA string, repo *model.R
 		Author: user.Login,
 		Email:  user.Email,
 
-		// TODO: Generate proper link to commit
-		Link: repo.Link,
+		// TODO: Generate proper URL to commit
+		ForgeURL: repo.ForgeURL,
 	}
 }
 

@@ -74,7 +74,7 @@ func parsePipeline(store store.Store, currentPipeline *model.Pipeline, user *mod
 		Secs:  secs,
 		Regs:  regs,
 		Envs:  envs,
-		Link:  server.Config.Server.Host,
+		Host:  server.Config.Server.Host,
 		Yamls: yamls,
 		Forge: server.Config.Services.Forge,
 		ProxyOpts: compiler.ProxyOptions{
