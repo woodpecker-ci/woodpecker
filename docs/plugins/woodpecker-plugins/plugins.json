@@ -71,13 +71,6 @@
       "verified": false
     },
     {
-      "// todo": true,
-      "name": "Email",
-      "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-email/master/docs.md",
-      "verified": true
-    },
-    {
-      "// todo": true,
       "name": "Chart releaser",
       "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-chart-releaser/master/docs.md",
       "verified": true
