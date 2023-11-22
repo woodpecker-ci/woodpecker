@@ -2,7 +2,7 @@ version: '3'
 
 services:
   gitea-database:
-    image: postgres:16.0-alpine
+    image: postgres:16.1-alpine
     environment:
       POSTGRES_USER: gitea
       POSTGRES_PASSWORD: 123456

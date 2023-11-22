@@ -488,7 +488,7 @@ func (c *client) Status(ctx context.Context, user *model.User, repo *model.Repo,
 	client := c.newClientToken(ctx, user.Token)
 
 	if pipeline.Event == model.EventDeploy {
-		matches := reDeploy.FindStringSubmatch(pipeline.Link)
+		matches := reDeploy.FindStringSubmatch(pipeline.ForgeURL)
 		if len(matches) != 2 {
 			return nil
 		}
@@ -497,7 +497,7 @@ func (c *client) Status(ctx context.Context, user *model.User, repo *model.Repo,
 		_, _, err := client.Repositories.CreateDeploymentStatus(ctx, repo.Owner, repo.Name, int64(id), &github.DeploymentStatusRequest{
 			State:       github.String(convertStatus(pipeline.Status)),
 			Description: github.String(common.GetPipelineStatusDescription(pipeline.Status)),
-			LogURL:      github.String(common.GetPipelineStatusLink(repo, pipeline, nil)),
+			LogURL:      github.String(common.GetPipelineStatusURL(repo, pipeline, nil)),
 		})
 		return err
 	}
@@ -506,7 +506,7 @@ func (c *client) Status(ctx context.Context, user *model.User, repo *model.Repo,
 		Context:     github.String(common.GetPipelineStatusContext(repo, pipeline, workflow)),
 		State:       github.String(convertStatus(workflow.State)),
 		Description: github.String(common.GetPipelineStatusDescription(workflow.State)),
-		TargetURL:   github.String(common.GetPipelineStatusLink(repo, pipeline, workflow)),
+		TargetURL:   github.String(common.GetPipelineStatusURL(repo, pipeline, workflow)),
 	})
 	return err
 }
@@ -525,7 +525,7 @@ func (c *client) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 			"pull_request",
 			"deployment",
 		},
-		Config: map[string]interface{}{
+		Config: map[string]any{
 			"url":          link,
 			"content_type": "form",
 		},
