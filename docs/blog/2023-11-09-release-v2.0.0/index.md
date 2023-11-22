@@ -38,7 +38,7 @@ We are proud to present you Woodpecker v2.0.0 with more than 300 changes from ou
 
 ### Improved error and linter in the UI
 
-### Reposiotry & organization lists in the admin UI
+### Repository & organization overview lists for admins
 
 <https://github.com/woodpecker-ci/woodpecker/pull/2338>
 <https://github.com/woodpecker-ci/woodpecker/pull/2347>
