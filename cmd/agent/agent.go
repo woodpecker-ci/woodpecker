@@ -43,9 +43,9 @@ import (
 	"go.woodpecker-ci.org/woodpecker/pipeline/backend"
 	"go.woodpecker-ci.org/woodpecker/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/pipeline/rpc"
-	"go.woodpecker-ci.org/woodpecker/shared/utils"
 	"go.woodpecker-ci.org/woodpecker/shared/addon"
 	addonTypes "go.woodpecker-ci.org/woodpecker/shared/addon/types"
+	"go.woodpecker-ci.org/woodpecker/shared/utils"
 	"go.woodpecker-ci.org/woodpecker/version"
 )
 
@@ -247,7 +247,7 @@ func run(c *cli.Context) error {
 }
 
 func getEngine(c *cli.Context, backendCtx context.Context) (types.Engine, error) {
-	addonEngine, err := addon.Load[types.Engine](c.StringSlice("addons"), addonTypes.TypeForge)
+	addonEngine, err := addon.Load[types.Engine](c.StringSlice("addons"), addonTypes.TypeEngine)
 	if err != nil {
 		log.Error().Err(err).Msg("cannot load addon")
 		return nil, err

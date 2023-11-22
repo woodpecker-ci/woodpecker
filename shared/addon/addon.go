@@ -2,18 +2,14 @@ package addon
 
 import (
 	"errors"
-	"fmt"
 	"os"
-	"plugin"
-	"reflect"
+	"os/exec"
 
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
+	"github.com/hashicorp/go-plugin"
 
+	"go.woodpecker-ci.org/woodpecker/shared/addon/rpc"
 	"go.woodpecker-ci.org/woodpecker/shared/addon/types"
 )
-
-var pluginCache = map[string]*plugin.Plugin{}
 
 type Addon[T any] struct {
 	Type  types.Type
@@ -21,44 +17,51 @@ type Addon[T any] struct {
 }
 
 func Load[T any](files []string, t types.Type) (*Addon[T], error) {
-	for _, file := range files {
-		if _, has := pluginCache[file]; !has {
-			p, err := plugin.Open(file)
-			if err != nil {
-				return nil, err
-			}
-			pluginCache[file] = p
-		}
+	//for _, file := range files {
+	c := plugin.NewClient(&plugin.ClientConfig{
+		HandshakeConfig: rpc.HandshakeConfig,
+		Plugins: plugin.PluginSet{
+			string(t): &rpc.AddonPlugin[T]{},
+		},
+		Cmd:    exec.Command(files[0]),
+		Logger: nil, // TODO zerolog wrapper
+	})
 
-		typeLookup, err := pluginCache[file].Lookup("Type")
-		if err != nil {
-			return nil, err
-		}
-		if addonType, is := typeLookup.(*types.Type); !is {
-			return nil, errors.New("addon type has incorrect type")
-		} else if *addonType != t {
-			continue
-		}
-
-		mainLookup, err := pluginCache[file].Lookup("Addon")
-		if err != nil {
-			return nil, err
-		}
-		fmt.Println(reflect.TypeOf(mainLookup))
-		main, is := mainLookup.(func(zerolog.Logger, []string) (T, error))
-		if !is {
-			return nil, errors.New("addon main has incorrect type")
-		}
-
-		mainOut, err := main(log.Logger, os.Environ())
-		if err != nil {
-			return nil, err
-		}
-		return &Addon[T]{
-			Type:  t,
-			Value: mainOut,
-		}, nil
+	rpcClient, err := c.Client()
+	if err != nil {
+		return nil, err
 	}
+
+	raw, err := rpcClient.Dispense(string(t))
+	if err != nil {
+		return nil, err
+	}
+
+	addon, ok := raw.(types.Addon[T])
+	if !ok {
+		return nil, errors.New("addon has bad type")
+	}
+
+	if addon.Type() != t {
+		//continue
+		return nil, nil
+	}
+
+	mainOut, err := addon.Addon(os.Environ())
+	if err != nil {
+		return nil, err
+	}
+
+	//mainOutTyped, is := mainOut.(T)
+	//if !is {
+	//return nil, errors.New("main output has bad type")
+	//}
+
+	return &Addon[T]{
+		Type:  t,
+		Value: mainOut,
+	}, nil
+	//}
 
 	return nil, nil
 }
