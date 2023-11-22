@@ -9,21 +9,23 @@ An addon consists of two variables/functions in Go.
 1. The `Type` variable. Specifies the type of the addon and must be directly accessed from `shared/addons/types/types.go`.
 2. The `Addon` function which is the main point of your addon.
    This function takes two arguments:
-    1. The zerolog logger you should use to log errors, warnings etc.
-    2. A slice of strings with the environment variables used as configuration.
+
+   1. The zerolog logger you should use to log errors, warnings etc.
+   2. A slice of strings with the environment variables used as configuration.
 
    It returns two values:
-    1. The actual addon. For type reference see [table below](#return-types).
-    2. An error. If this error is not `nil`, Woodpecker exits.
+
+   1. The actual addon. For type reference see [table below](#return-types).
+   2. An error. If this error is not `nil`, Woodpecker exits.
 
 Directly import Woodpecker's Go package (`go.woodpecker-ci.org/woodpecker/woodpecker`) and use the interfaces and types defined there.
 
 ### Return types
 
-| Addon type | Return type |
-| --- | --- |
-| `Forge` | `"go.woodpecker-ci.org/woodpecker/woodpecker/server/forge".Forge` |
-| `Engine` | `"go.woodpecker-ci.org/woodpecker/woodpecker/pipeline/backend/types".Engine` |
+| Addon type | Return type                                                                  |
+| ---------- | ---------------------------------------------------------------------------- |
+| `Forge`    | `"go.woodpecker-ci.org/woodpecker/woodpecker/server/forge".Forge`            |
+| `Engine`   | `"go.woodpecker-ci.org/woodpecker/woodpecker/pipeline/backend/types".Engine` |
 
 ## Compiling
 
