@@ -14,5 +14,5 @@ type OwnersAllowlist struct {
 }
 
 func (o *OwnersAllowlist) IsAllowed(repo *model.Repo) bool {
-	return len(o.owners) > 0 && o.owners[repo.Owner]
+	return len(o.owners) < 1 || o.owners[repo.Owner]
 }
