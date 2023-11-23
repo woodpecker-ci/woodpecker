@@ -7,7 +7,7 @@ authors:
     title: Maintainer of Woodpecker
     url: https://github.com/6543
     image_url: https://github.com/6543.png
-tags: [release, stable]
+tags: [release, major]
 hide_table_of_contents: false
 ---
 

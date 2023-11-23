@@ -11,7 +11,7 @@ authors:
     title: Maintainer of Woodpecker
     url: https://github.com/qwerty287
     image_url: https://github.com/qwerty287.png
-tags: [release, stable]
+tags: [release, major]
 hide_table_of_contents: false
 ---
 
@@ -19,11 +19,9 @@ We are proud to present you Woodpecker v2.0.0 with more than 350 changes from ou
 
 <!--truncate-->
 
-It has been almost 4 months since the last major release and we collected quite some changes in the meantime. We decided to release a new major version instead of a minor one, because there are a few breaking changes and we want to make sure that everyone is aware of them.
-
 ## How we plan to handle releases in the future
 
-In future, there won't be backports anymore as they require quite an amount of maintenance. Instead, we'll release our current state of the `main` branch with the correct version (according to semver) every few weeks. Of course, critical bug and security fixes are released as soon as possible. To not release new major versions too often, we'll try to hold back breaking changes for a longer time and release them all together in a new major version.
+In the future, there won't be backports anymore as they require quite an amount of maintenance. Instead, we'll release our current state of the `main` branch with the correct version (according to semver) every few weeks. Of course, critical bug and security fixes are released as soon as possible. To not release new major version too often, we'll try to hold back breaking changes pull-request for a longer time and release them all together in a new major version.
 
 ## Breaking changes
 
@@ -61,11 +59,11 @@ There have been a few more breaking changes. [Read more about what you need to d
 
 But that's enough about breaking changes. Let's talk about the new features!
 
-### Config errors and warnings in the UI
+### Config warnings and errors in the UI
 
 You ever wondered why a secret was not working and after hours of debugging you found out that you misspelled the secret name? Or you used a wrong key in your YAML config? Woodpecker now shows errors and linter warnings directly in it's UI, notifying you about missing secrets, incorrect configuration or deprecated settings!
 
-![Image of warnings and errors in UI](./linter_warnings_errors.png)
+![Image of warnings and errors in the UI](./linter_warnings_errors.png)
 
 ### Repository and organization overview for admins
 
