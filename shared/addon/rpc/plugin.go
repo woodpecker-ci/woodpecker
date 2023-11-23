@@ -18,10 +18,10 @@ type AddonPlugin[T any] struct {
 	Impl types.Addon[T]
 }
 
-func (a *AddonPlugin[T]) Server(_ *plugin.MuxBroker) (interface{}, error) {
-	return &AddonRPCServer[T]{Impl: a.Impl}, nil
+func (a *AddonPlugin[T]) Server(broker *plugin.MuxBroker) (interface{}, error) {
+	return &AddonRPCServer[T]{Impl: a.Impl, broker: broker}, nil
 }
 
-func (*AddonPlugin[T]) Client(_ *plugin.MuxBroker, c *rpc.Client) (interface{}, error) {
-	return &AddonRPCClient[T]{client: c}, nil
+func (*AddonPlugin[T]) Client(broker *plugin.MuxBroker, c *rpc.Client) (interface{}, error) {
+	return &AddonRPCClient[T]{broker: broker, client: c}, nil
 }

@@ -63,5 +63,5 @@ func Load[T any](files []string, t types.Type) (*Addon[T], error) {
 	}, nil
 	//}
 
-	return nil, nil
+	//return nil, nil
 }
