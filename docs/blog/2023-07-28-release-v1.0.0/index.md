@@ -27,14 +27,14 @@ empowering you to automate and optimize workflows like never before.
 
 Automate recurring tasks with ease using Woodpecker's new cron jobs feature.
 Schedule pipelines to run at specified intervals or times, optimizing repetitive workflows.
-[Read more](/docs/usage/cron)
+[Read more](/docs/1.0/usage/cron)
 
 ### YAML Map Merge, Overrides, and Sequence Merge Support
 
 With enhanced YAML support, managing complex configurations becomes a breeze.
 Merge maps, apply overrides, and sequence merging—all within your YAML files.
 This is providing more flexibility and control over your pipelines.
-[Read more](/docs/usage/advanced-yaml-syntax)
+[Read more](/docs/1.0/usage/advanced-yaml-syntax)
 
 ### Web-UI for Admins
 
@@ -53,7 +53,7 @@ If your language is not available or only partially translated, consider contrib
 
 Enhance pipeline flexibility with the new "when evaluate" filter, enabling or disabling steps based on custom conditions.
 Customize your workflows to dynamically respond to specific triggers and events.
-[Read more](/docs/usage/pipeline-syntax#evaluate)
+[Read more](/docs/1.0/usage/pipeline-syntax#evaluate)
 
 ### Global- and Organization-Secrets
 
