@@ -4,7 +4,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 
 ## `next`
 
-No breaking changes
+No breaking changes yet
 
 ## 2.0.0
 
