@@ -70,6 +70,18 @@ It is possible to add secrets for all repos owned by yourself, similar to organi
 
 We enhanced support for Bitbucket, allowing you to use multiple workflows just as it's possible with the other forges already.
 
+### Full support for Kubernetes backend
+
+The Kubernetes backend now supports all features.
+
+### Auto theme
+
+The UI now supports automatically adapting the theme to your browser config.
+
+### Update notification
+
+Admins now get a notification in the UI if there's an update for Woodpecker available.
+
 ## Changelog
 
 The full changelog can be viewed in our project source folder at [CHANGELOG.md](https://github.com/woodpecker-ci/woodpecker/blob/v2.0.0/CHANGELOG.md)
