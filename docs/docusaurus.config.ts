@@ -216,6 +216,10 @@ const config: Config = {
               label: 'Next',
               banner: 'unreleased',
             },
+            '2.0': {
+              label: '2.0.x',
+              banner: 'unreleased',
+            },
             '1.0': {
               label: '1.0.x',
               banner: 'unmaintained',
