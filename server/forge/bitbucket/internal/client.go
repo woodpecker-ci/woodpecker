@@ -23,7 +23,7 @@ import (
 	"net/http"
 	"net/url"
 
-	shared_utils "github.com/woodpecker-ci/woodpecker/shared/utils"
+	shared_utils "go.woodpecker-ci.org/woodpecker/shared/utils"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/bitbucket"
@@ -238,7 +238,7 @@ func (c *Client) GetRepoFiles(owner, name, revision, path string, page *string) 
 	return out, err
 }
 
-func (c *Client) do(rawurl, method string, in, out interface{}) (*string, error) {
+func (c *Client) do(rawurl, method string, in, out any) (*string, error) {
 	uri, err := url.Parse(rawurl)
 	if err != nil {
 		return nil, err

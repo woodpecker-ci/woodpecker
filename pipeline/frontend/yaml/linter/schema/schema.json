@@ -34,7 +34,8 @@
       "type": "array",
       "minLength": 1,
       "items": { "type": "string" }
-    }
+    },
+    "version": { "type": "number", "default": 1 }
   },
   "definitions": {
     "clone": {
@@ -210,6 +211,9 @@
         },
         "image": {
           "$ref": "#/definitions/step_image"
+        },
+        "privileged": {
+          "$ref": "#/definitions/step_privileged"
         },
         "pull": {
           "$ref": "#/definitions/step_pull"
@@ -422,6 +426,11 @@
       "description": "Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#image",
       "type": "string"
     },
+    "step_privileged": {
+      "description": "Run the step in privileged mode. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#privileged",
+      "type": "boolean",
+      "default": false
+    },
     "step_pull": {
       "description": "Always pull the latest image on pipeline execution Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#image",
       "type": "boolean"
@@ -559,6 +568,9 @@
       "properties": {
         "image": {
           "$ref": "#/definitions/step_image"
+        },
+        "privileged": {
+          "$ref": "#/definitions/step_privileged"
         },
         "pull": {
           "$ref": "#/definitions/step_pull"

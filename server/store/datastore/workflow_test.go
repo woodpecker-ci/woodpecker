@@ -18,7 +18,7 @@ package datastore
 import (
 	"testing"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/server/model"
 )
 
 func TestWorkflowLoad(t *testing.T) {

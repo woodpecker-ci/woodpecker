@@ -1,9 +1,12 @@
+version: 1
+
 when:
   - event: [pull_request, cron]
   - event: push
     branch:
       - ${CI_REPO_DEFAULT_BRANCH}
       - release/*
+      - renovate/*
 
 variables:
   - &trivy_image aquasec/trivy:0.46.1

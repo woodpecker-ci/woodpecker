@@ -1,4 +1,4 @@
-module github.com/woodpecker-ci/woodpecker
+module go.woodpecker-ci.org/woodpecker
 
 go 1.21
 
@@ -8,7 +8,7 @@ require (
 	codeberg.org/6543/xyaml v1.1.0
 	github.com/6543/logfile-open v1.2.1
 	github.com/alessio/shellescape v1.4.2
-	github.com/antonmedv/expr v1.15.3
+	github.com/antonmedv/expr v1.15.4
 	github.com/bmatcuk/doublestar/v4 v4.6.1
 	github.com/caddyserver/certmagic v0.19.2
 	github.com/cenkalti/backoff/v4 v4.2.1
@@ -23,15 +23,15 @@ require (
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-ap/httpsig v0.0.0-20221203064646-3647b4d88fdf
 	github.com/go-sql-driver/mysql v1.7.1
-	github.com/golang-jwt/jwt/v5 v5.0.0
+	github.com/golang-jwt/jwt/v5 v5.1.0
 	github.com/google/go-github/v56 v56.0.0
 	github.com/google/tink/go v1.7.0
 	github.com/google/uuid v1.4.0
-	github.com/gorilla/securecookie v1.1.1
+	github.com/gorilla/securecookie v1.1.2
 	github.com/jellydator/ttlcache/v3 v3.1.0
 	github.com/joho/godotenv v1.5.1
 	github.com/lib/pq v1.10.9
-	github.com/mattn/go-sqlite3 v1.14.17
+	github.com/mattn/go-sqlite3 v1.14.18
 	github.com/moby/moby v24.0.7+incompatible
 	github.com/moby/term v0.5.0
 	github.com/muesli/termenv v0.15.2
@@ -46,21 +46,21 @@ require (
 	github.com/swaggo/swag v1.16.2
 	github.com/tevino/abool/v2 v2.1.0
 	github.com/urfave/cli/v2 v2.25.7
-	github.com/xanzy/go-gitlab v0.93.2
+	github.com/xanzy/go-gitlab v0.94.0
 	github.com/xeipuuv/gojsonschema v1.2.0
 	go.uber.org/multierr v1.11.0
-	golang.org/x/crypto v0.14.0
-	golang.org/x/net v0.17.0
-	golang.org/x/oauth2 v0.13.0
-	golang.org/x/sync v0.4.0
-	golang.org/x/term v0.13.0
-	golang.org/x/text v0.13.0
+	golang.org/x/crypto v0.15.0
+	golang.org/x/net v0.18.0
+	golang.org/x/oauth2 v0.14.0
+	golang.org/x/sync v0.5.0
+	golang.org/x/term v0.14.0
+	golang.org/x/text v0.14.0
 	google.golang.org/grpc v1.59.0
 	google.golang.org/protobuf v1.31.0
 	gopkg.in/yaml.v3 v3.0.1
-	k8s.io/api v0.28.3
-	k8s.io/apimachinery v0.28.3
-	k8s.io/client-go v0.28.3
+	k8s.io/api v0.28.4
+	k8s.io/apimachinery v0.28.4
+	k8s.io/client-go v0.28.4
 	xorm.io/builder v0.3.13
 	xorm.io/xorm v1.3.4
 )
@@ -145,7 +145,7 @@ require (
 	go.uber.org/zap v1.24.0 // indirect
 	golang.org/x/arch v0.3.0 // indirect
 	golang.org/x/mod v0.13.0 // indirect
-	golang.org/x/sys v0.13.0 // indirect
+	golang.org/x/sys v0.14.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	golang.org/x/tools v0.14.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect

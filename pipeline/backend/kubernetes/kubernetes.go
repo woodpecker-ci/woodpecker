@@ -24,7 +24,7 @@ import (
 	"time"
 
 	"github.com/rs/zerolog/log"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/pipeline/backend/types"
 	"gopkg.in/yaml.v3"
 
 	"github.com/urfave/cli/v2"
@@ -164,7 +164,7 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID s
 					return err
 				}
 				log.Trace().Str("pod-name", stepName).Msgf("Creating service: %s", step.Name)
-				svc, err := Service(e.config.Namespace, step.Name, step.Alias, step.Ports)
+				svc, err := Service(e.config.Namespace, step.Name, step.Ports)
 				if err != nil {
 					return err
 				}
@@ -213,7 +213,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 
 	finished := make(chan bool)
 
-	podUpdated := func(old, new interface{}) {
+	podUpdated := func(old, new any) {
 		pod := new.(*v1.Pod)
 		if pod.Name == podName {
 			if isImagePullBackOffState(pod) {
@@ -273,7 +273,7 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 
 	up := make(chan bool)
 
-	podUpdated := func(old, new interface{}) {
+	podUpdated := func(old, new any) {
 		pod := new.(*v1.Pod)
 		if pod.Name == podName {
 			switch pod.Status.Phase {
@@ -391,7 +391,7 @@ func (e *kube) DestroyWorkflow(_ context.Context, conf *types.Config, taskUUID s
 		if stage.Alias == "services" {
 			for _, step := range stage.Steps {
 				log.Trace().Msgf("Deleting service: %s", step.Name)
-				svc, err := Service(e.config.Namespace, step.Name, step.Alias, step.Ports)
+				svc, err := Service(e.config.Namespace, step.Name, step.Ports)
 				if err != nil {
 					return err
 				}

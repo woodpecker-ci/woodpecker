@@ -1,3 +1,5 @@
+version: 1
+
 steps:
   image:
     image: golang
@@ -15,6 +17,7 @@ steps:
     commands: go test
 
   commands:
+    privileged: true
     image: golang
     commands:
       - go get

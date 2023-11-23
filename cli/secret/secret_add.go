@@ -20,9 +20,9 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
-	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
+	"go.woodpecker-ci.org/woodpecker/cli/common"
+	"go.woodpecker-ci.org/woodpecker/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/woodpecker-go/woodpecker"
 )
 
 var secretCreateCmd = &cli.Command{
@@ -46,11 +46,11 @@ var secretCreateCmd = &cli.Command{
 			Usage: "secret value",
 		},
 		&cli.StringSliceFlag{
-			Name:  "events",
+			Name:  "event",
 			Usage: "secret limited to these events",
 		},
 		&cli.StringSliceFlag{
-			Name:  "images",
+			Name:  "image",
 			Usage: "secret limited to these images",
 		},
 	),
@@ -65,8 +65,8 @@ func secretCreate(c *cli.Context) error {
 	secret := &woodpecker.Secret{
 		Name:   strings.ToLower(c.String("name")),
 		Value:  c.String("value"),
-		Images: c.StringSlice("images"),
-		Events: c.StringSlice("events"),
+		Images: c.StringSlice("image"),
+		Events: c.StringSlice("event"),
 	}
 	if len(secret.Events) == 0 {
 		secret.Events = defaultSecretEvents

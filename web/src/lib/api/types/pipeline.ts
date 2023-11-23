@@ -1,9 +1,9 @@
 import { WebhookEvents } from './webhook';
 
-export type PipelineError = {
+export type PipelineError<D = unknown> = {
   type: string;
   message: string;
-  data?: unknown;
+  data?: D;
   is_warning: boolean;
 };
 
@@ -76,9 +76,8 @@ export type Pipeline = {
   //  email for the author of the commit.
   author_email: string;
 
-  // The link to view the repository.
-  // This link will point to the repository state associated with the pipeline's commit.
-  link_url: string;
+  // This url will point to the repository state associated with the pipeline's commit.
+  forge_url: string;
 
   signed: boolean;
 

@@ -14,18 +14,18 @@
     "write-heading-ids": "docusaurus write-heading-ids"
   },
   "dependencies": {
-    "@docusaurus/core": "^2.4.1",
-    "@docusaurus/preset-classic": "^2.4.1",
-    "@easyops-cn/docusaurus-search-local": "^0.36.0",
-    "@mdx-js/react": "^1.6.22",
-    "@svgr/webpack": "^8.0.0",
+    "@docusaurus/core": "^3.0.0",
+    "@docusaurus/preset-classic": "^3.0.0",
+    "@easyops-cn/docusaurus-search-local": "^0.37.2",
+    "@mdx-js/react": "^3.0.0",
+    "@svgr/webpack": "^8.1.0",
     "clsx": "^2.0.0",
-    "esbuild-loader": "^4.0.0",
+    "esbuild-loader": "^4.0.2",
     "file-loader": "^6.2.0",
-    "prism-react-renderer": "^2.0.0",
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0",
-    "redocusaurus": "^1.6.3",
+    "prism-react-renderer": "^2.1.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "redocusaurus": "^2.0.0",
     "url-loader": "^4.1.1"
   },
   "browserslist": {
@@ -41,12 +41,14 @@
     ]
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "^2.4.1",
-    "@tsconfig/docusaurus": "^2.0.0",
-    "@types/react": "^18.2.31",
-    "@types/react-helmet": "^6.1.6",
+    "@docusaurus/module-type-aliases": "^3.0.0",
+    "@docusaurus/tsconfig": "3.0.0",
+    "@docusaurus/types": "^3.0.0",
+    "@types/node": "^20.9.0",
+    "@types/react": "^18.2.37",
+    "@types/react-helmet": "^6.1.9",
     "@types/react-router-dom": "^5.3.3",
-    "typescript": "^5.0.0"
+    "typescript": "^5.2.2"
   },
   "pnpm": {
     "overrides": {

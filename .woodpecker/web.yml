@@ -1,9 +1,12 @@
+version: 1
+
 when:
   - event: [pull_request, tag]
   - event: push
     branch:
       - ${CI_REPO_DEFAULT_BRANCH}
       - release/*
+      - renovate/*
 
 variables:
   - &node_image 'docker.io/node:21-alpine'

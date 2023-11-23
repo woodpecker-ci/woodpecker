@@ -18,10 +18,10 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/store"
-	"github.com/woodpecker-ci/woodpecker/shared/token"
+	"go.woodpecker-ci.org/woodpecker/server"
+	"go.woodpecker-ci.org/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/server/store"
+	"go.woodpecker-ci.org/woodpecker/shared/token"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"

@@ -4,6 +4,8 @@ import { useRoute } from 'vue-router';
 export type Tab = {
   id: string;
   title: string;
+  icon?: string;
+  iconClass?: string;
 };
 
 export function useTabsProvider({
@@ -28,7 +30,7 @@ export function useTabsProvider({
 
     const hashTab = route.hash.replace(/^#/, '');
     // eslint-disable-next-line no-param-reassign
-    activeTab.value = hashTab ?? tabs.value[0].id;
+    activeTab.value = hashTab || tabs.value[0].id;
   });
 }
 

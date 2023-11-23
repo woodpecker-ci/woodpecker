@@ -30,6 +30,7 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
+	"go.woodpecker-ci.org/woodpecker/server/plugins/permissions"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
@@ -176,7 +177,6 @@ func run(c *cli.Context) error {
 		webUIServe,
 		middleware.Logger(time.RFC3339, true),
 		middleware.Version,
-		middleware.Config(c),
 		middleware.Store(c, _store),
 	)
 
@@ -366,4 +366,10 @@ func setupEvilGlobals(c *cli.Context, store store.Store) {
 
 	// prometheus
 	server.Config.Prometheus.AuthToken = c.String("prometheus-auth-token")
+
+	// permissions
+	server.Config.Permissions.Open = c.Bool("open")
+	server.Config.Permissions.Admins = permissions.NewAdmins(c.StringSlice("admin"))
+	server.Config.Permissions.Orgs = permissions.NewOrgs(c.StringSlice("orgs"))
+	server.Config.Permissions.OwnersAllowlist = permissions.NewOwnersAllowlist(c.StringSlice("repo-owners"))
 }

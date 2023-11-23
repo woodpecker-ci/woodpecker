@@ -20,7 +20,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/pipeline/rpc"
 )
 
 // LineWriter sends logs to the client.

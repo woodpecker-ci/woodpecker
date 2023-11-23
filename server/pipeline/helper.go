@@ -19,8 +19,8 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/server/forge"
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/server/forge"
+	"go.woodpecker-ci.org/woodpecker/server/model"
 )
 
 func updatePipelineStatus(ctx context.Context, forge forge.Forge, pipeline *model.Pipeline, repo *model.Repo, user *model.User) {

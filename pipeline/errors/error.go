@@ -20,11 +20,18 @@ type PipelineError struct {
 	Type      PipelineErrorType `json:"type"`
 	Message   string            `json:"message"`
 	IsWarning bool              `json:"is_warning"`
-	Data      interface{}       `json:"data"`
+	Data      any               `json:"data"`
 }
 
 type LinterErrorData struct {
+	File  string `json:"file"`
 	Field string `json:"field"`
+}
+
+type DeprecationErrorData struct {
+	File  string `json:"file"`
+	Field string `json:"field"`
+	Docs  string `json:"docs"`
 }
 
 func (e *PipelineError) Error() string {
