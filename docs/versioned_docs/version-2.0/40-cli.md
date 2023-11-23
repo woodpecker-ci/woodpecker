@@ -390,31 +390,31 @@ execute a local pipeline
 
 **--backend-no-proxy**="": if set, pass the environment variable down as "NO_PROXY" to steps
 
-**--commit-author-avatar**="":
+**--commit-author-avatar**="": 
 
-**--commit-author-email**="":
+**--commit-author-email**="": 
 
-**--commit-author-name**="":
+**--commit-author-name**="": 
 
-**--commit-branch**="":
+**--commit-branch**="": 
 
-**--commit-message**="":
+**--commit-message**="": 
 
-**--commit-ref**="":
+**--commit-ref**="": 
 
-**--commit-refspec**="":
+**--commit-refspec**="": 
 
-**--commit-sha**="":
+**--commit-sha**="": 
 
 **--connect-retry-count**="": number of times to retry connecting to the server (default: 0)
 
 **--connect-retry-delay**="": duration to wait before retrying to connect to the server (default: 0s)
 
-**--env**="":
+**--env**="": 
 
-**--forge-type**="":
+**--forge-type**="": 
 
-**--forge-url**="":
+**--forge-url**="": 
 
 **--local**: run from local directory
 
@@ -422,11 +422,11 @@ execute a local pipeline
 
 **--log-level**="": set logging level (default: info)
 
-**--netrc-machine**="":
+**--netrc-machine**="": 
 
-**--netrc-password**="":
+**--netrc-password**="": 
 
-**--netrc-username**="":
+**--netrc-username**="": 
 
 **--network**="": external networks
 
@@ -444,33 +444,33 @@ execute a local pipeline
 
 **--pipeline-started**="":  (default: 0)
 
-**--pipeline-status**="":
+**--pipeline-status**="": 
 
-**--pipeline-target**="":
+**--pipeline-target**="": 
 
-**--pipeline-url**="":
+**--pipeline-url**="": 
 
 **--pretty**: enable pretty-printed debug output
 
-**--prev-commit-author-avatar**="":
+**--prev-commit-author-avatar**="": 
 
-**--prev-commit-author-email**="":
+**--prev-commit-author-email**="": 
 
-**--prev-commit-author-name**="":
+**--prev-commit-author-name**="": 
 
-**--prev-commit-branch**="":
+**--prev-commit-branch**="": 
 
-**--prev-commit-message**="":
+**--prev-commit-message**="": 
 
-**--prev-commit-ref**="":
+**--prev-commit-ref**="": 
 
-**--prev-commit-refspec**="":
+**--prev-commit-refspec**="": 
 
-**--prev-commit-sha**="":
+**--prev-commit-sha**="": 
 
 **--prev-pipeline-created**="":  (default: 0)
 
-**--prev-pipeline-event**="":
+**--prev-pipeline-event**="": 
 
 **--prev-pipeline-finished**="":  (default: 0)
 
@@ -478,25 +478,25 @@ execute a local pipeline
 
 **--prev-pipeline-started**="":  (default: 0)
 
-**--prev-pipeline-status**="":
+**--prev-pipeline-status**="": 
 
-**--prev-pipeline-url**="":
+**--prev-pipeline-url**="": 
 
 **--privileged**="": privileged plugins (default: "plugins/docker", "plugins/gcr", "plugins/ecr", "woodpeckerci/plugin-docker-buildx", "codeberg.org/woodpecker-plugins/docker-buildx")
 
 **--repo**="": full repo name
 
-**--repo-clone-ssh-url**="":
+**--repo-clone-ssh-url**="": 
 
-**--repo-clone-url**="":
+**--repo-clone-url**="": 
 
-**--repo-private**="":
+**--repo-private**="": 
 
-**--repo-remote-id**="":
+**--repo-remote-id**="": 
 
-**--repo-trusted**:
+**--repo-trusted**: 
 
-**--repo-url**="":
+**--repo-url**="": 
 
 **--server, -s**="": server address
 
@@ -504,7 +504,7 @@ execute a local pipeline
 
 **--system-name**="":  (default: woodpecker)
 
-**--system-platform**="":
+**--system-platform**="": 
 
 **--system-url**="":  (default: https://github.com/woodpecker-ci/woodpecker)
 
@@ -682,11 +682,11 @@ manage secrets
 
 adds a secret
 
-**--events**="": secret limited to these events
+**--event**="": secret limited to these events
 
 **--global**: global secret
 
-**--images**="": secret limited to these images
+**--image**="": secret limited to these images
 
 **--log-file**="": where logs are written to. 'stdout' and 'stderr' can be used as special keywords (default: stderr)
 
@@ -736,11 +736,11 @@ remove a secret
 
 update a secret
 
-**--events**="": secret limited to these events
+**--event**="": secret limited to these events
 
 **--global**: global secret
 
-**--images**="": secret limited to these images
+**--image**="": secret limited to these images
 
 **--log-file**="": where logs are written to. 'stdout' and 'stderr' can be used as special keywords (default: stderr)
 
