@@ -90,7 +90,7 @@ const config: Config = {
             },
             {
               label: 'Server setup',
-              to: '/docs/administration/setup',
+              to: '/docs/administration/deployment/overview',
             },
             {
               label: 'FAQ',
