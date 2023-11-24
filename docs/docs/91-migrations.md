@@ -4,7 +4,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 
 ## `next`
 
-No breaking changes yet
+- Deprecated `steps.[name].group` in favor of `steps.[name].depends_on` (see [workflow syntax](./20-usage/20-workflow-syntax.md#depends_on) to learn how to set dependencies)
 
 ## 2.0.0
 
