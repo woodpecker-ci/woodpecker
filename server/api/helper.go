@@ -29,9 +29,9 @@ import (
 )
 
 func handlePipelineErr(c *gin.Context, err error) {
-	if errors.Is(err, &pipeline.ErrNotFound{}) {
+	if errors.As(err, &pipeline.ErrNotFound{}) {
 		c.String(http.StatusNotFound, "%s", err)
-	} else if errors.Is(err, &pipeline.ErrBadRequest{}) {
+	} else if errors.As(err, &pipeline.ErrBadRequest{}) {
 		c.String(http.StatusBadRequest, "%s", err)
 	} else if errors.Is(err, pipeline.ErrFiltered) {
 		c.Status(http.StatusNoContent)

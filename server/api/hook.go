@@ -111,7 +111,8 @@ func PostHook(c *gin.Context) {
 
 	tmpRepo, tmpPipeline, err := forge.Hook(c, c.Request)
 	if err != nil {
-		if errors.Is(err, &types.ErrIgnoreEvent{}) {
+		var ierr *types.ErrIgnoreEvent
+		if errors.As(err, &ierr) {
 			msg := fmt.Sprintf("forge driver: %s", err)
 			log.Debug().Err(err).Msg(msg)
 			c.String(http.StatusOK, msg)
