@@ -28,7 +28,7 @@ Do not use a "GitHub App" instead of an Oauth2 app as the former will not work c
 After your App has been created, you can generate a client secret.
 Use this one for the `WOODPECKER_GITHUB_SECRET` environment variable.
 
-## All GitHub Configuration Options
+## Configuration
 
 This is a full list of configuration options. Please note that many of these options use default configuration values that should work for the majority of installations.
 
