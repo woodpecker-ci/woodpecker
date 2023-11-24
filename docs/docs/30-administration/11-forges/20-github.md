@@ -50,7 +50,6 @@ Configures the GitHub server address.
 
 Configures the GitHub OAuth client id to authorize access.
 
-
 ### `WOODPECKER_GITHUB_CLIENT_FILE`
 
 > Default: empty
