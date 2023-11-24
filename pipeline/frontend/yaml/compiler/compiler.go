@@ -295,15 +295,10 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 
 	// dag is used if one or more steps have a depends_on
 	if useDag {
-		for _, stage := range steps {
-			for _, dep := range stage.dependsOn {
-				if _, ok := steps[dep]; !ok {
-					return nil, fmt.Errorf("step %s depends on unknown step %s", stage.step.Name, dep)
-				}
-			}
+		config.Stages, err = convertDAGToStages(steps)
+		if err != nil {
+			return nil, err
 		}
-
-		config.Stages = convertToStages(steps)
 	} else {
 		config.Stages = append(config.Stages, stepStages...)
 	}
@@ -360,10 +355,42 @@ func (c *Compiler) setupCacheRebuild(conf *yaml_types.Workflow, ir *backend_type
 	return nil
 }
 
-func convertToStages(steps map[string]*stepWithDependsOn) []*backend_types.Stage {
+func dfsVisit(steps map[string]*stepWithDependsOn, name string, visited map[string]struct{}, path []string) error {
+	if _, ok := visited[name]; ok {
+		return fmt.Errorf("cycle detected: %v", path)
+	}
+
+	visited[name] = struct{}{}
+	path = append(path, name)
+
+	for _, dep := range steps[name].dependsOn {
+		if err := dfsVisit(steps, dep, visited, path); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func convertDAGToStages(steps map[string]*stepWithDependsOn) ([]*backend_types.Stage, error) {
 	// Initialize the levels map
-	addedNodes := make(map[string]struct{})
+	addedSteps := make(map[string]struct{})
 	stages := make([]*backend_types.Stage, 0)
+
+	for name, step := range steps {
+		// check if all depends_on are valid
+		for _, dep := range step.dependsOn {
+			if _, ok := steps[dep]; !ok {
+				return nil, fmt.Errorf("step %s depends on unknown step %s", name, dep)
+			}
+		}
+
+		// check if there are cycles
+		visited := make(map[string]struct{})
+		if err := dfsVisit(steps, name, visited, []string{}); err != nil {
+			return nil, err
+		}
+	}
 
 	for len(steps) > 0 {
 		addedNodesThisLevel := make(map[string]struct{})
@@ -373,7 +400,7 @@ func convertToStages(steps map[string]*stepWithDependsOn) []*backend_types.Stage
 		}
 
 		for name, step := range steps {
-			if allDependenciesSatisfied(step, addedNodes) {
+			if allDependenciesSatisfied(step, addedSteps) {
 				stage.Steps = append(stage.Steps, step.step)
 				addedNodesThisLevel[name] = struct{}{}
 				delete(steps, name)
@@ -381,18 +408,18 @@ func convertToStages(steps map[string]*stepWithDependsOn) []*backend_types.Stage
 		}
 
 		for name := range addedNodesThisLevel {
-			addedNodes[name] = struct{}{}
+			addedSteps[name] = struct{}{}
 		}
 
 		stages = append(stages, stage)
 	}
 
-	return stages
+	return stages, nil
 }
 
-func allDependenciesSatisfied(node *stepWithDependsOn, addedNodes map[string]struct{}) bool {
-	for _, childName := range node.dependsOn {
-		_, ok := addedNodes[childName]
+func allDependenciesSatisfied(step *stepWithDependsOn, addedSteps map[string]struct{}) bool {
+	for _, childName := range step.dependsOn {
+		_, ok := addedSteps[childName]
 		if !ok {
 			return false
 		}

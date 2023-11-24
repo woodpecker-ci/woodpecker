@@ -297,3 +297,24 @@ func TestCompilerCompile(t *testing.T) {
 		})
 	}
 }
+
+func TestConvertDAGToStages(t *testing.T) {
+	steps := map[string]*stepWithDependsOn{
+		"step1": {
+			step:      &backend_types.Step{},
+			dependsOn: []string{"step3"},
+		},
+		"step2": {
+			step:      &backend_types.Step{},
+			dependsOn: []string{"step1"},
+		},
+		"step3": {
+			step:      &backend_types.Step{},
+			dependsOn: []string{"step2"},
+		},
+	}
+
+	_, err := convertDAGToStages(steps)
+
+	assert.ErrorContains(t, err, "cycle detected:")
+}
