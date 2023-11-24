@@ -444,7 +444,7 @@ when:
   - evaluate: 'SKIP != "true"'
 ```
 
-### `depends_on` - Flow control
+### `depends_on`
 
 Normally steps of a workflow are executed serially in the order in which they are defined. As soon as you set `depends_on` for a step a [directed acyclic graph](https://en.wikipedia.org/wiki/Directed_acyclic_graph), all steps of the workflow will be executed in parallel besides the steps that have a dependency set to another step using `depends_on`:
 
