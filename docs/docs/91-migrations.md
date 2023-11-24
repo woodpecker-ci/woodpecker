@@ -2,7 +2,11 @@
 
 Some versions need some changes to the server configuration or the pipeline configuration files.
 
-## next (2.0.0)
+## `next`
+
+No breaking changes yet
+
+## 2.0.0
 
 - Dropped deprecated `CI_BUILD_*`, `CI_PREV_BUILD_*`, `CI_JOB_*`, `*_LINK`, `CI_SYSTEM_ARCH`, `CI_REPO_REMOTE` built-in environment variables
 - Deprecated `platform:` filter in favor of `labels:`, [read more](./20-usage/20-workflow-syntax.md#filter-by-platform)

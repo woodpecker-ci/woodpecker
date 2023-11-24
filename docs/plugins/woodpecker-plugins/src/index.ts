@@ -13,10 +13,6 @@ async function loadContent(): Promise<Content> {
   const plugins = (
     await Promise.all(
       pluginsIndex.plugins.map(async (i) => {
-        if (i['// todo']) {
-          return undefined;
-        }
-
         let docsContent: string;
         try {
           const response = await axios(i.docs);
