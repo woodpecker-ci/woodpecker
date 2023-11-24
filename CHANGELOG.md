@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.0.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.1) - 2023-11-24
+
+### ❤️ Thanks to all contributors! ❤️
+
+@micash545
+
+### 📚 Documentation
+
+- Docs: Make Github docs same format as other forges [[#2866](https://github.com/woodpecker-ci/woodpecker/pull/2866)]
+
 ## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-11-23
 
 ### ❤️ Thanks to all contributors! ❤️
