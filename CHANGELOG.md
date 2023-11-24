@@ -4,7 +4,11 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@micash545
+@qwerty287, @micash545
+
+### 🐛 Bug Fixes
+
+- Fix unregistering agents used with agent tokens [[#2870](https://github.com/woodpecker-ci/woodpecker/pull/2870)]
 
 ### 📚 Documentation
 
