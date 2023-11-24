@@ -30,14 +30,14 @@ import (
 	"github.com/rs/zerolog/log"
 	grpcMetadata "google.golang.org/grpc/metadata"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
-	"github.com/woodpecker-ci/woodpecker/server/forge"
-	"github.com/woodpecker-ci/woodpecker/server/logging"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/pipeline"
-	"github.com/woodpecker-ci/woodpecker/server/pubsub"
-	"github.com/woodpecker-ci/woodpecker/server/queue"
-	"github.com/woodpecker-ci/woodpecker/server/store"
+	"go.woodpecker-ci.org/woodpecker/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/server/forge"
+	"go.woodpecker-ci.org/woodpecker/server/logging"
+	"go.woodpecker-ci.org/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/server/pipeline"
+	"go.woodpecker-ci.org/woodpecker/server/pubsub"
+	"go.woodpecker-ci.org/woodpecker/server/queue"
+	"go.woodpecker-ci.org/woodpecker/server/store"
 )
 
 type RPC struct {
@@ -352,6 +352,10 @@ func (s *RPC) RegisterAgent(ctx context.Context, platform, backend, version stri
 
 func (s *RPC) UnregisterAgent(ctx context.Context) error {
 	agent, err := s.getAgentFromContext(ctx)
+	if agent.OwnerID > 0 {
+		// registered with individual agent token -> do not unregister
+		return nil
+	}
 	log.Debug().Msgf("unregistering agent with ID %d", agent.ID)
 	if err != nil {
 		return err

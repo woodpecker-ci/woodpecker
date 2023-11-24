@@ -142,6 +142,7 @@
   "errors": {
     "not_found": "Le serveur n'a pas pu trouver l'objet demandé"
   },
+  "info": "Information",
   "login": "Connexion",
   "logout": "Déconnexion",
   "not_found": {
@@ -229,6 +230,7 @@
         "restart_success": "Pipeline redémarré"
       },
       "config": "Configuration",
+      "errors": "Erreurs ({count})",
       "event": {
         "cron": "Tâche périodique",
         "deploy": "Déploiement",
@@ -257,6 +259,7 @@
         "declined": "Le pipeline a été refusé !",
         "review": "Vérifier les changements"
       },
+      "show_errors": "Afficher les erreurs",
       "status": {
         "blocked": "bloqué",
         "declined": "refusé",
@@ -271,7 +274,9 @@
         "success": "réussi"
       },
       "step_not_started": "L'étape n'a pas démarré encore.",
-      "tasks": "Tâches"
+      "tasks": "Tâches",
+      "warnings": "Avertissements ({count})",
+      "we_got_some_errors": "Oh non, il y a des erreurs !"
     },
     "pull_requests": "Pull requests",
     "settings": {
@@ -432,6 +437,7 @@
   },
   "repos": "Dépôt",
   "repositories": "Dépôts",
+  "running_version": "Vous utilisez Woodpecker {0}",
   "search": "Rechercher…",
   "time": {
     "days_short": "j",
@@ -443,6 +449,7 @@
     "weeks_short": "s"
   },
   "unknown_error": "Une erreur inconnue est survenue",
+  "update_woodpecker": "Merci de mettre à jour votre instance Woodpecker vers la version {0}",
   "url": "URL",
   "user": {
     "access_denied": "Vous n'êtes pas autorisé à vous connecter",
@@ -463,7 +470,13 @@
       },
       "general": {
         "general": "Général",
-        "language": "Langue"
+        "language": "Langue",
+        "theme": {
+          "auto": "Automatique",
+          "dark": "Sombre",
+          "light": "Clair",
+          "theme": "Thème"
+        }
       },
       "secrets": {
         "add": "Ajouter un secret",

@@ -9,7 +9,7 @@
       />
 
       <div class="flex items-start justify-center flex-grow relative">
-        <Container v-if="selectedStep?.error" class="py-0">
+        <Container v-if="selectedStep?.error" fill-width class="py-0">
           <Panel>
             <div class="flex flex-col items-center gap-4">
               <Icon name="status-error" class="w-16 h-16 text-wp-state-error-100" />
@@ -19,7 +19,7 @@
           </Panel>
         </Container>
 
-        <Container v-else-if="pipeline.errors?.some((e) => !e.is_warning)" class="py-0">
+        <Container v-else-if="pipeline.errors?.some((e) => !e.is_warning)" fill-width class="py-0">
           <Panel>
             <div class="flex flex-col items-center gap-4">
               <Icon name="status-error" class="w-16 h-16 text-wp-state-error-100" />
@@ -29,7 +29,7 @@
           </Panel>
         </Container>
 
-        <Container v-else-if="pipeline.status === 'blocked'" class="py-0">
+        <Container v-else-if="pipeline.status === 'blocked'" fill-width class="py-0">
           <Panel>
             <div class="flex flex-col items-center gap-4">
               <Icon name="status-blocked" class="w-16 h-16" />
@@ -39,7 +39,7 @@
                   color="blue"
                   :start-icon="forge ?? 'repo'"
                   :text="$t('repo.pipeline.protected.review')"
-                  :to="pipeline.link_url"
+                  :to="pipeline.forge_url"
                   :title="message"
                 />
                 <Button
@@ -59,7 +59,7 @@
           </Panel>
         </Container>
 
-        <Container v-else-if="pipeline.status === 'declined'" class="py-0">
+        <Container v-else-if="pipeline.status === 'declined'" fill-width class="py-0">
           <Panel>
             <div class="flex flex-col items-center gap-4">
               <Icon name="status-declined" class="w-16 h-16 text-wp-state-error-100" />

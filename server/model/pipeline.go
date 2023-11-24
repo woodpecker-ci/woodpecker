@@ -16,7 +16,7 @@
 package model
 
 import (
-	"github.com/woodpecker-ci/woodpecker/pipeline/errors"
+	"go.woodpecker-ci.org/woodpecker/pipeline/errors"
 )
 
 type Pipeline struct {
@@ -46,7 +46,7 @@ type Pipeline struct {
 	Sender              string                  `json:"sender"                  xorm:"pipeline_sender"` // uses reported user for webhooks and name of cron for cron pipelines
 	Avatar              string                  `json:"author_avatar"           xorm:"pipeline_avatar"`
 	Email               string                  `json:"author_email"            xorm:"pipeline_email"`
-	Link                string                  `json:"link_url"                xorm:"pipeline_link"`
+	ForgeURL            string                  `json:"forge_url"                xorm:"pipeline_forge_url"`
 	Reviewer            string                  `json:"reviewed_by"             xorm:"pipeline_reviewer"`
 	Reviewed            int64                   `json:"reviewed_at"             xorm:"pipeline_reviewed"`
 	Workflows           []*Workflow             `json:"workflows,omitempty"     xorm:"-"`

@@ -13,7 +13,10 @@
     >
       <Icon v-if="activeTab === tab.id" name="chevron-right" class="md:hidden" />
       <Icon v-else name="blank" class="md:hidden" />
-      <span>{{ tab.title }}</span>
+      <span class="flex gap-2 items-center flex-row-reverse md:flex-row">
+        <Icon v-if="tab.icon" :name="tab.icon" :class="tab.iconClass" />
+        <span>{{ tab.title }}</span>
+      </span>
     </button>
   </div>
 </template>

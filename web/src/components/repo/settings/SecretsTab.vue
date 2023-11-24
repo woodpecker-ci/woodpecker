@@ -49,7 +49,7 @@ import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
 import { Repo, Secret, WebhookEvents } from '~/lib/api/types';
 
-const emptySecret = {
+const emptySecret: Partial<Secret> = {
   name: '',
   value: '',
   images: [],
