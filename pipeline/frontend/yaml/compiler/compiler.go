@@ -295,10 +295,11 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 
 	// dag is used if one or more steps have a depends_on
 	if useDag {
-		config.Stages, err = convertDAGToStages(steps)
+		stages, err := convertDAGToStages(steps)
 		if err != nil {
 			return nil, err
 		}
+		config.Stages = append(config.Stages, stages...)
 	} else {
 		config.Stages = append(config.Stages, stepStages...)
 	}
