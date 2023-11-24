@@ -36,19 +36,19 @@ This is a full list of configuration options. Please note that many of these opt
 
 > Default: `false`
 
-Enables the GitHub driver
+Enables the GitHub driver.
 
 ### `WOODPECKER_GITHUB_URL`
 
 > Default: `https://github.com`
 
-Configures the GitHub server address
+Configures the GitHub server address.
 
 ### `WOODPECKER_GITHUB_CLIENT`
 
 > Default: empty
 
-Configures the GitHub OAuth client id to authorize access
+Configures the GitHub OAuth client id to authorize access.
 
 
 ### `WOODPECKER_GITHUB_CLIENT_FILE`
@@ -69,12 +69,12 @@ Configures the GitHub OAuth client secret. This is used to authorize access.
 
 Read the value for `WOODPECKER_GITHUB_SECRET` from the specified filepath.
 
-### `WOODPECKER_GITHUB_MERGE_REF` - (Default: `true`)
+### `WOODPECKER_GITHUB_MERGE_REF`
 
 > Default: `true`
 
-### `WOODPECKER_GITHUB_SKIP_VERIFY` - 
+### `WOODPECKER_GITHUB_SKIP_VERIFY`
 
 > Default: `false`
 
-Configure if SSL verification should be skipped
+Configure if SSL verification should be skipped.
