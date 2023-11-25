@@ -28,22 +28,52 @@ Do not use a "GitHub App" instead of an Oauth2 app as the former will not work c
 After your App has been created, you can generate a client secret.
 Use this one for the `WOODPECKER_GITHUB_SECRET` environment variable.
 
-## All GitHub Configuration Options
+## Configuration
 
 This is a full list of configuration options. Please note that many of these options use default configuration values that should work for the majority of installations.
 
-- `WOODPECKER_GITHUB` - Enables the GitHub driver (Default: `false`)
+### `WOODPECKER_GITHUB`
 
-- `WOODPECKER_GITHUB_URL` - Configures the GitHub server address (Default: `https://github.com`)
+> Default: `false`
 
-- `WOODPECKER_GITHUB_CLIENT` - Configures the GitHub OAuth client id to authorize access (Default: empty)
+Enables the GitHub driver.
 
-- `WOODPECKER_GITHUB_CLIENT_FILE` - Read the value for `WOODPECKER_GITHUB_CLIENT` from the specified filepath (Default: empty)
+### `WOODPECKER_GITHUB_URL`
 
-- `WOODPECKER_GITHUB_SECRET` - Configures the GitHub OAuth client secret. This is used to authorize access. (Default: empty)
+> Default: `https://github.com`
 
-- `WOODPECKER_GITHUB_SECRET_FILE` - Read the value for `WOODPECKER_GITHUB_SECRET` from the specified filepath (Default: empty)
+Configures the GitHub server address.
 
-  `WOODPECKER_GITHUB_MERGE_REF` - (Default: `true`)
+### `WOODPECKER_GITHUB_CLIENT`
 
-- `WOODPECKER_GITHUB_SKIP_VERIFY` - Configure if SSL verification should be skipped (Default: `false`)
+> Default: empty
+
+Configures the GitHub OAuth client id to authorize access.
+
+### `WOODPECKER_GITHUB_CLIENT_FILE`
+
+> Default: empty
+
+Read the value for `WOODPECKER_GITHUB_CLIENT` from the specified filepath.
+
+### `WOODPECKER_GITHUB_SECRET`
+
+> Default: empty
+
+Configures the GitHub OAuth client secret. This is used to authorize access.
+
+### `WOODPECKER_GITHUB_SECRET_FILE`
+
+> Default: empty
+
+Read the value for `WOODPECKER_GITHUB_SECRET` from the specified filepath.
+
+### `WOODPECKER_GITHUB_MERGE_REF`
+
+> Default: `true`
+
+### `WOODPECKER_GITHUB_SKIP_VERIFY`
+
+> Default: `false`
+
+Configure if SSL verification should be skipped.
