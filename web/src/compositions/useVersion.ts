@@ -82,7 +82,7 @@ export function useVersion() {
       latest,
       current,
       currentShort: usesNext ? 'next' : current,
-      needsUpdate: latest !== current,
+      needsUpdate: latest !== undefined && latest !== current,
       usesNext,
     };
   });
