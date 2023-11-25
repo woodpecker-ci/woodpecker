@@ -67,7 +67,7 @@ export function useVersion() {
   onMounted(async () => {
     const versionInfo = await fetchVersion();
 
-    let latest = undefined;
+    let latest;
     if (versionInfo) {
       if (usesNext) {
         latest = versionInfo.next;
