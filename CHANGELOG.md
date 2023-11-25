@@ -1,18 +1,19 @@
 # Changelog
 
-## [2.0.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.1) - 2023-11-24
+## [2.0.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.1) - 2023-11-25
 
 ### ❤️ Thanks to all contributors! ❤️
 
 @qwerty287, @micash545
 
+### 📚 Documentation
+
+- Add default page to categories [[#2869](https://github.com/woodpecker-ci/woodpecker/pull/2869)]
+- Docs: Make Github docs same format as other forges [[#2866](https://github.com/woodpecker-ci/woodpecker/pull/2866)]
+
 ### 🐛 Bug Fixes
 
 - Fix unregistering agents used with agent tokens [[#2870](https://github.com/woodpecker-ci/woodpecker/pull/2870)]
-
-### 📚 Documentation
-
-- Docs: Make Github docs same format as other forges [[#2866](https://github.com/woodpecker-ci/woodpecker/pull/2866)]
 
 ## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-11-23
 
