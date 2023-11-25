@@ -13,6 +13,7 @@ const version = ref<{
   current: string;
   currentShort: string;
   needsUpdate: boolean;
+  usesNext: boolean;
 }>();
 
 async function fetchVersion(): Promise<VersionInfo | undefined> {
@@ -37,7 +38,7 @@ export function useVersion() {
 
   const config = useConfig();
   const current = config.version as string;
-  const usesNext = config.version?.startsWith('next');
+  const usesNext = config.version?.startsWith('next') ?? false;
 
   const { user } = useAuthentication();
   if (!user?.admin) {
@@ -46,6 +47,7 @@ export function useVersion() {
       current,
       currentShort: usesNext ? 'next' : current,
       needsUpdate: false,
+      usesNext,
     };
     return version;
   }
@@ -56,6 +58,7 @@ export function useVersion() {
       current,
       currentShort: current,
       needsUpdate: false,
+      usesNext,
     };
     return version;
   }
@@ -77,6 +80,7 @@ export function useVersion() {
       current,
       currentShort: usesNext ? 'next' : current,
       needsUpdate,
+      usesNext,
     };
   });
 
