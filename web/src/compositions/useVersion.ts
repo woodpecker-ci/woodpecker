@@ -5,6 +5,7 @@ import useConfig from './useConfig';
 
 type VersionInfo = {
   latest: string;
+  rc: string;
   next: string;
 };
 
@@ -38,7 +39,7 @@ export function useVersion() {
 
   const config = useConfig();
   const current = config.version as string;
-  const usesNext = config.version?.startsWith('next') ?? false;
+  const usesNext = current.startsWith('next');
 
   const { user } = useAuthentication();
   if (!user?.admin) {
@@ -66,20 +67,22 @@ export function useVersion() {
   onMounted(async () => {
     const versionInfo = await fetchVersion();
 
-    let needsUpdate = false;
+    let latest = undefined;
     if (versionInfo) {
       if (usesNext) {
-        needsUpdate = versionInfo.next !== current;
+        latest = versionInfo.next;
+      } else if (current.includes('rc')) {
+        latest = versionInfo.rc;
       } else {
-        needsUpdate = versionInfo.latest !== current;
+        latest = versionInfo.latest;
       }
     }
 
     version.value = {
-      latest: usesNext ? versionInfo?.next : versionInfo?.latest,
+      latest,
       current,
       currentShort: usesNext ? 'next' : current,
-      needsUpdate,
+      needsUpdate: latest !== current,
       usesNext,
     };
   });
