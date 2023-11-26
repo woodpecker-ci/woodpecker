@@ -42,6 +42,10 @@ agent:
 
   Additional annotations to apply to worker pods. Must be a YAML object, e.g. `{"example.com/test-annotation":"test-value"}`.
 
+- `WOODPECKER_BACKEND_K8S_SECCTX_NONROOT` (default: `false`)
+
+  Determines if containers must be required to run as non-root users.
+
 ## Job specific configuration
 
 ### Resources
@@ -152,6 +156,45 @@ steps:
         - "woodpecker-cache"
     [...]
 ```
+
+### `securityContext`
+
+Use the following configuration to set the `securityContext` for the pod/container running a given pipeline step:
+
+```yaml
+steps:
+  test:
+    image: alpine
+    commands:
+      - echo Hello world
+    backend_options:
+      kubernetes:
+        securityContext:
+          runAsUser: 999
+          runAsGroup: 999
+          privileged: true
+    [...]
+```
+
+Note that the `backend_options.kubernetes.securityContext` object allows you to set both pod and container level security context options in one object.
+By default, the properties will be set at the pod level. Properties that are only supported on the container level will be set there instead. So, the
+configuration shown above will result in something like the following pod spec:
+
+```yaml
+kind: Pod
+spec:
+  securityContext:
+    runAsUser: 999
+    runAsGroup: 999
+  containers:
+    - name: wp-01hcd83q7be5ymh89k5accn3k6-0-step-0
+      image: alpine
+      securityContext:
+        privileged: true
+  [...]
+```
+
+See the [kubernetes documentation](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/) for more information on using `securityContext`.
 
 ## Tips and tricks
 
