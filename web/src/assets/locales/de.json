@@ -136,14 +136,13 @@
   "api": "API",
   "back": "Zurück",
   "cancel": "Abbrechen",
-  "color_scheme_dark": "Wechsle zu hellem Modus",
-  "color_scheme_light": "Wechsle zu dunklem Modus",
   "default": "Standard",
   "docs": "Docs",
   "documentation_for": "Dokumentation für „{topic}“",
   "errors": {
     "not_found": "Angefragtes Objekt wurde nicht gefunden"
   },
+  "info": "Info",
   "login": "Anmelden",
   "logout": "Abmelden",
   "not_found": {
@@ -231,6 +230,7 @@
         "restart_success": "Pipeline neu gestartet"
       },
       "config": "Konfiguration",
+      "errors": "Fehler ({count})",
       "event": {
         "cron": "Cron",
         "deploy": "Deploy",
@@ -239,7 +239,6 @@
         "push": "Push",
         "tag": "Tag"
       },
-      "execution_error": "Ausführungsfehler",
       "exit_code": "Exit-Code {exitCode}",
       "files": "Geänderte Dateien ({files})",
       "loading": "Laden…",
@@ -260,6 +259,7 @@
         "declined": "Diese Pipeline ist abgelehnt worden!",
         "review": "Änderungen überprüfen"
       },
+      "show_errors": "Fehler anzeigen",
       "status": {
         "blocked": "blockiert",
         "declined": "abgelehnt",
@@ -274,7 +274,9 @@
         "success": "erfolgreich"
       },
       "step_not_started": "Dieser Schritt hat noch nicht begonnen.",
-      "tasks": "Vorgänge"
+      "tasks": "Vorgänge",
+      "warnings": "Warnungen ({count})",
+      "we_got_some_errors": "Oh nein, es gab einige Fehler!"
     },
     "pull_requests": "Pull-Requests",
     "settings": {
@@ -435,6 +437,7 @@
   },
   "repos": "Repos",
   "repositories": "Repositories",
+  "running_version": "Du verwendest Woodpecker {0}",
   "search": "Suche…",
   "time": {
     "days_short": "t",
@@ -446,6 +449,7 @@
     "weeks_short": "w"
   },
   "unknown_error": "Ein unbekannter Fehler ist aufgetreten",
+  "update_woodpecker": "Du solltest deine Woodpecker-Instanz auf {0} aktualisieren",
   "url": "URL",
   "user": {
     "access_denied": "Du bist nicht berechtigt, dich anzumelden",
@@ -466,7 +470,13 @@
       },
       "general": {
         "general": "Allgemein",
-        "language": "Sprache"
+        "language": "Sprache",
+        "theme": {
+          "auto": "Automatisch",
+          "dark": "Dunkel",
+          "light": "Hell",
+          "theme": "Thema"
+        }
       },
       "secrets": {
         "add": "Geheimnis hinzufügen",

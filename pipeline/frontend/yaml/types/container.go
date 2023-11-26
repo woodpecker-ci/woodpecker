@@ -19,10 +19,10 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/constraint"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types/base"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/utils"
-	"github.com/woodpecker-ci/woodpecker/shared/constant"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/constraint"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/types/base"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/utils"
+	"go.woodpecker-ci.org/woodpecker/shared/constant"
 )
 
 type (
@@ -33,20 +33,21 @@ type (
 
 	// Container defines a container.
 	Container struct {
-		BackendOptions BackendOptions         `yaml:"backend_options,omitempty"`
-		Commands       base.StringOrSlice     `yaml:"commands,omitempty"`
-		Detached       bool                   `yaml:"detach,omitempty"`
-		Directory      string                 `yaml:"directory,omitempty"`
-		Environment    base.SliceOrMap        `yaml:"environment,omitempty"`
-		Failure        string                 `yaml:"failure,omitempty"`
-		Group          string                 `yaml:"group,omitempty"`
-		Image          string                 `yaml:"image,omitempty"`
-		Name           string                 `yaml:"name,omitempty"`
-		Pull           bool                   `yaml:"pull,omitempty"`
-		Secrets        Secrets                `yaml:"secrets,omitempty"`
-		Settings       map[string]interface{} `yaml:"settings"`
-		Volumes        Volumes                `yaml:"volumes,omitempty"`
-		When           constraint.When        `yaml:"when,omitempty"`
+		BackendOptions BackendOptions     `yaml:"backend_options,omitempty"`
+		Commands       base.StringOrSlice `yaml:"commands,omitempty"`
+		Detached       bool               `yaml:"detach,omitempty"`
+		Directory      string             `yaml:"directory,omitempty"`
+		Environment    base.SliceOrMap    `yaml:"environment,omitempty"`
+		Failure        string             `yaml:"failure,omitempty"`
+		Group          string             `yaml:"group,omitempty"`
+		Image          string             `yaml:"image,omitempty"`
+		Name           string             `yaml:"name,omitempty"`
+		Pull           bool               `yaml:"pull,omitempty"`
+		Secrets        Secrets            `yaml:"secrets,omitempty"`
+		Settings       map[string]any     `yaml:"settings"`
+		Volumes        Volumes            `yaml:"volumes,omitempty"`
+		When           constraint.When    `yaml:"when,omitempty"`
+		Ports          []base.StringOrInt `yaml:"ports,omitempty"`
 
 		// Docker Specific
 		Privileged bool `yaml:"privileged,omitempty"`

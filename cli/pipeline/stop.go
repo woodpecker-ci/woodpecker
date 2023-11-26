@@ -20,8 +20,8 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/cli/common"
+	"go.woodpecker-ci.org/woodpecker/cli/internal"
 )
 
 var pipelineStopCmd = &cli.Command{
@@ -42,7 +42,7 @@ func pipelineStop(c *cli.Context) (err error) {
 	if err != nil {
 		return err
 	}
-	number, err := strconv.Atoi(c.Args().Get(1))
+	number, err := strconv.ParseInt(c.Args().Get(1), 10, 64)
 	if err != nil {
 		return err
 	}

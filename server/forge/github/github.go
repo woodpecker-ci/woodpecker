@@ -29,13 +29,13 @@ import (
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/forge"
-	"github.com/woodpecker-ci/woodpecker/server/forge/common"
-	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/store"
-	"github.com/woodpecker-ci/woodpecker/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/server"
+	"go.woodpecker-ci.org/woodpecker/server/forge"
+	"go.woodpecker-ci.org/woodpecker/server/forge/common"
+	forge_types "go.woodpecker-ci.org/woodpecker/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/server/store"
+	"go.woodpecker-ci.org/woodpecker/shared/utils"
 )
 
 const (
@@ -296,7 +296,7 @@ func (c *client) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 	result := make([]*model.PullRequest, len(pullRequests))
 	for i := range pullRequests {
 		result[i] = &model.PullRequest{
-			Index: int64(pullRequests[i].GetNumber()),
+			Index: model.ForgeRemoteID(strconv.Itoa(pullRequests[i].GetNumber())),
 			Title: pullRequests[i].GetTitle(),
 		}
 	}
@@ -488,7 +488,7 @@ func (c *client) Status(ctx context.Context, user *model.User, repo *model.Repo,
 	client := c.newClientToken(ctx, user.Token)
 
 	if pipeline.Event == model.EventDeploy {
-		matches := reDeploy.FindStringSubmatch(pipeline.Link)
+		matches := reDeploy.FindStringSubmatch(pipeline.ForgeURL)
 		if len(matches) != 2 {
 			return nil
 		}
@@ -497,7 +497,7 @@ func (c *client) Status(ctx context.Context, user *model.User, repo *model.Repo,
 		_, _, err := client.Repositories.CreateDeploymentStatus(ctx, repo.Owner, repo.Name, int64(id), &github.DeploymentStatusRequest{
 			State:       github.String(convertStatus(pipeline.Status)),
 			Description: github.String(common.GetPipelineStatusDescription(pipeline.Status)),
-			LogURL:      github.String(common.GetPipelineStatusLink(repo, pipeline, nil)),
+			LogURL:      github.String(common.GetPipelineStatusURL(repo, pipeline, nil)),
 		})
 		return err
 	}
@@ -506,7 +506,7 @@ func (c *client) Status(ctx context.Context, user *model.User, repo *model.Repo,
 		Context:     github.String(common.GetPipelineStatusContext(repo, pipeline, workflow)),
 		State:       github.String(convertStatus(workflow.State)),
 		Description: github.String(common.GetPipelineStatusDescription(workflow.State)),
-		TargetURL:   github.String(common.GetPipelineStatusLink(repo, pipeline, workflow)),
+		TargetURL:   github.String(common.GetPipelineStatusURL(repo, pipeline, workflow)),
 	})
 	return err
 }
@@ -525,7 +525,7 @@ func (c *client) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 			"pull_request",
 			"deployment",
 		},
-		Config: map[string]interface{}{
+		Config: map[string]any{
 			"url":          link,
 			"content_type": "form",
 		},

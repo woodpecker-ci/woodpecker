@@ -20,9 +20,9 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/matrix"
-	"github.com/woodpecker-ci/woodpecker/version"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/matrix"
+	"go.woodpecker-ci.org/woodpecker/version"
 )
 
 // return the metadata from the cli context.
@@ -45,7 +45,7 @@ func metadataFromContext(c *cli.Context, axis matrix.Axis) metadata.Metadata {
 			Name:        repoName,
 			Owner:       repoOwner,
 			RemoteID:    c.String("repo-remote-id"),
-			Link:        c.String("repo-link"),
+			ForgeURL:    c.String("repo-url"),
 			CloneURL:    c.String("repo-clone-url"),
 			CloneSSHURL: c.String("repo-clone-ssh-url"),
 			Private:     c.Bool("repo-private"),
@@ -59,7 +59,7 @@ func metadataFromContext(c *cli.Context, axis matrix.Axis) metadata.Metadata {
 			Finished: c.Int64("pipeline-finished"),
 			Status:   c.String("pipeline-status"),
 			Event:    c.String("pipeline-event"),
-			Link:     c.String("pipeline-link"),
+			ForgeURL: c.String("pipeline-url"),
 			Target:   c.String("pipeline-target"),
 			Commit: metadata.Commit{
 				Sha:     c.String("commit-sha"),
@@ -81,7 +81,7 @@ func metadataFromContext(c *cli.Context, axis matrix.Axis) metadata.Metadata {
 			Finished: c.Int64("prev-pipeline-finished"),
 			Status:   c.String("prev-pipeline-status"),
 			Event:    c.String("prev-pipeline-event"),
-			Link:     c.String("prev-pipeline-link"),
+			ForgeURL: c.String("prev-pipeline-url"),
 			Commit: metadata.Commit{
 				Sha:     c.String("prev-commit-sha"),
 				Ref:     c.String("prev-commit-ref"),
@@ -106,7 +106,7 @@ func metadataFromContext(c *cli.Context, axis matrix.Axis) metadata.Metadata {
 		},
 		Sys: metadata.System{
 			Name:     c.String("system-name"),
-			Link:     c.String("system-link"),
+			URL:      c.String("system-url"),
 			Platform: platform,
 			Version:  version.Version,
 		},

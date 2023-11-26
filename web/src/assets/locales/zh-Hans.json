@@ -136,14 +136,13 @@
   "api": "API",
   "back": "返回",
   "cancel": "取消",
-  "color_scheme_dark": "切换到浅色模式",
-  "color_scheme_light": "切换到深色模式",
   "default": "默认",
   "docs": "文档",
   "documentation_for": "\"{topic}\"的文档",
   "errors": {
     "not_found": "服务器找不到请求的对象"
   },
+  "info": "信息",
   "login": "登录",
   "logout": "退出登录",
   "not_found": {
@@ -231,6 +230,7 @@
         "restart_success": "流水线已重启"
       },
       "config": "配置",
+      "errors": "错误 ({count})",
       "event": {
         "cron": "计划任务",
         "deploy": "部署",
@@ -239,7 +239,6 @@
         "push": "推送",
         "tag": "标签"
       },
-      "execution_error": "执行错误",
       "exit_code": "退出代码 {exitCode}",
       "files": "修改的文件（{files}）",
       "loading": "载入中…",
@@ -260,6 +259,7 @@
         "declined": "该流水线已被拒绝！",
         "review": "审查变更"
       },
+      "show_errors": "显示错误",
       "status": {
         "blocked": "已屏蔽",
         "declined": "已拒绝",
@@ -274,7 +274,9 @@
         "success": "成功"
       },
       "step_not_started": "该步骤尚未启动。",
-      "tasks": "任务"
+      "tasks": "任务",
+      "warnings": "警告 ({count})",
+      "we_got_some_errors": "哦不，我们遇到了一些错误！"
     },
     "pull_requests": "合并请求",
     "settings": {
@@ -435,6 +437,7 @@
   },
   "repos": "仓库",
   "repositories": "仓库",
+  "running_version": "你正在运行 Woodpecker {0}",
   "search": "查找仓库…",
   "time": {
     "days_short": "天",
@@ -446,6 +449,7 @@
     "weeks_short": "周"
   },
   "unknown_error": "发生了未知错误",
+  "update_woodpecker": "请更新你的 Woodpecker 实例到 {0}",
   "url": "URL",
   "user": {
     "access_denied": "你没有登陆的权限",
@@ -466,7 +470,13 @@
       },
       "general": {
         "general": "基本设置",
-        "language": "语言"
+        "language": "语言",
+        "theme": {
+          "auto": "自动",
+          "dark": "暗色",
+          "light": "亮色",
+          "theme": "主题"
+        }
       },
       "secrets": {
         "add": "添加密钥",

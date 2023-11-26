@@ -7,14 +7,15 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 
+import { IconNames } from '~/components/atomic/Icon.vue';
 import { Tab, useTabsClient } from '~/compositions/useTabs';
 
-export interface Props {
+const props = defineProps<{
   id?: string;
   title: string;
-}
-
-const props = defineProps<Props>();
+  icon?: IconNames;
+  iconClass?: string;
+}>();
 
 const { tabs, activeTab } = useTabsClient();
 const tab = ref<Tab>();
@@ -23,6 +24,8 @@ onMounted(() => {
   tab.value = {
     id: props.id || props.title.toLocaleLowerCase().replace(' ', '-') || tabs.value.length.toString(),
     title: props.title,
+    icon: props.icon,
+    iconClass: props.iconClass,
   };
 
   // don't add tab if tab id is already present

@@ -21,7 +21,7 @@ import (
 	"xorm.io/builder"
 	"xorm.io/xorm"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/server/model"
 )
 
 type oldSecret021 struct {
@@ -36,6 +36,26 @@ func (oldSecret021) TableName() string {
 	return "secrets"
 }
 
+type syncRepo021 struct {
+	OrgID int64 `json:"org_id" xorm:"repo_org_id"`
+}
+
+// TableName return database table name for xorm
+func (syncRepo021) TableName() string {
+	return "repos"
+}
+
+type repo021 struct {
+	ID    int64  `json:"id,omitempty" xorm:"pk autoincr 'repo_id'"`
+	OrgID int64  `json:"org_id"       xorm:"repo_org_id"`
+	Owner string `json:"owner"        xorm:"UNIQUE(name) 'repo_owner'"`
+}
+
+// TableName return database table name for xorm
+func (repo021) TableName() string {
+	return "repos"
+}
+
 var addOrgs = task{
 	name:     "add-orgs",
 	required: true,
@@ -46,7 +66,7 @@ var addOrgs = task{
 			}
 		}
 
-		if err := sess.Sync(new(model.Org), new(model.Repo), new(model.User)); err != nil {
+		if err := sess.Sync(new(model.Org), new(syncRepo021), new(model.User)); err != nil {
 			return fmt.Errorf("sync new models failed: %w", err)
 		}
 
@@ -56,7 +76,7 @@ var addOrgs = task{
 		}
 
 		// get all org names from repos
-		var repos []*model.Repo
+		var repos []*repo021
 		if err := sess.Find(&repos); err != nil {
 			return fmt.Errorf("find all repos failed: %w", err)
 		}

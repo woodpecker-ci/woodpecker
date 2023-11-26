@@ -25,9 +25,9 @@ import (
 	"github.com/franela/goblin"
 	"github.com/gin-gonic/gin"
 
-	"github.com/woodpecker-ci/woodpecker/server/forge/bitbucket/fixtures"
-	"github.com/woodpecker-ci/woodpecker/server/forge/bitbucket/internal"
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/server/forge/bitbucket/fixtures"
+	"go.woodpecker-ci.org/woodpecker/server/forge/bitbucket/internal"
+	"go.woodpecker-ci.org/woodpecker/server/model"
 )
 
 func Test_bitbucket(t *testing.T) {
@@ -200,7 +200,7 @@ func Test_bitbucket(t *testing.T) {
 				repoPRs, err := c.PullRequests(ctx, fakeUser, fakeRepo, &listOpts)
 				g.Assert(err).IsNil()
 				g.Assert(repoPRs[0].Title).Equal("PRs title")
-				g.Assert(repoPRs[0].Index).Equal(int64(123))
+				g.Assert(repoPRs[0].Index).Equal(model.ForgeRemoteID("123"))
 			})
 			g.It("Should handle not found errors", func() {
 				_, err := c.PullRequests(ctx, fakeUser, fakeRepoNotFound, &listOpts)

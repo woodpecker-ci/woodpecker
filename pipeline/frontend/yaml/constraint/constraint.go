@@ -15,7 +15,6 @@
 package constraint
 
 import (
-	"errors"
 	"fmt"
 	"maps"
 	"path"
@@ -23,10 +22,11 @@ import (
 
 	"github.com/antonmedv/expr"
 	"github.com/bmatcuk/doublestar/v4"
+	"go.uber.org/multierr"
 	"gopkg.in/yaml.v3"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
-	yamlBaseTypes "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types/base"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/metadata"
+	yamlBaseTypes "go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/types/base"
 )
 
 type (
@@ -261,7 +261,7 @@ func (c *List) UnmarshalYAML(value *yaml.Node) error {
 
 	if err1 != nil && err2 != nil {
 		y, _ := yaml.Marshal(value)
-		return fmt.Errorf("Could not parse condition: %s: %w", y, errors.Join(err1, err2))
+		return fmt.Errorf("Could not parse condition: %s: %w", y, multierr.Append(err1, err2))
 	}
 
 	return nil
@@ -298,7 +298,7 @@ func (c *Map) Match(params map[string]string) bool {
 }
 
 // UnmarshalYAML unmarshal the constraint map.
-func (c *Map) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (c *Map) UnmarshalYAML(unmarshal func(any) error) error {
 	out1 := struct {
 		Include map[string]string
 		Exclude map[string]string

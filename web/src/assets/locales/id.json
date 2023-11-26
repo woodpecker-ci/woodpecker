@@ -136,14 +136,13 @@
   "api": "API",
   "back": "Kembali",
   "cancel": "Batal",
-  "color_scheme_dark": "Ubah ke mode terang",
-  "color_scheme_light": "Ubah ke mode gelap",
   "default": "bawaan",
   "docs": "Dokumentasi",
   "documentation_for": "Dokumentasi untuk \"{topic}\"",
   "errors": {
     "not_found": "Server tidak dapat mencari objek yang diminta"
   },
+  "info": "Info",
   "login": "Masuk",
   "logout": "Keluar",
   "not_found": {
@@ -231,6 +230,7 @@
         "restart_success": "Jalur pipa dimulai ulang"
       },
       "config": "Konfigurasi",
+      "errors": "Kesalahan ({count})",
       "event": {
         "cron": "Kron",
         "deploy": "Luncur",
@@ -239,7 +239,6 @@
         "push": "Dorongan",
         "tag": "Tag"
       },
-      "execution_error": "Kesalahan eksekusi",
       "exit_code": "kode keluar {exitCode}",
       "files": "Berkas yang diubah ({files})",
       "loading": "Memuat…",
@@ -260,6 +259,7 @@
         "declined": "Jalur pipa ini telah ditolak!",
         "review": "Tinjau perubahan"
       },
+      "show_errors": "Tampilkan kesalahan",
       "status": {
         "blocked": "diblokir",
         "declined": "ditolak",
@@ -274,7 +274,9 @@
         "success": "berhasil"
       },
       "step_not_started": "Langkah ini belum dijalankan.",
-      "tasks": "Tugas"
+      "tasks": "Tugas",
+      "warnings": "Peringatan ({count})",
+      "we_got_some_errors": "Aduh, kami mendapatkan beberapa kesalahan!"
     },
     "pull_requests": "Permintaan penarikan",
     "settings": {
@@ -435,6 +437,7 @@
   },
   "repos": "Repo",
   "repositories": "Repositori",
+  "running_version": "Anda sedang menjalankan Woodpecker {0}",
   "search": "Cari…",
   "time": {
     "days_short": "h",
@@ -446,6 +449,7 @@
     "weeks_short": "m"
   },
   "unknown_error": "Terjadi sebuah kesalahan yang tidak diketahui",
+  "update_woodpecker": "Mohon tingkatkan server Woodpecker Anda ke {0}",
   "url": "URL",
   "user": {
     "access_denied": "Anda tidak diperbolehkan untuk masuk",
@@ -466,7 +470,13 @@
       },
       "general": {
         "general": "Umum",
-        "language": "Bahasa"
+        "language": "Bahasa",
+        "theme": {
+          "auto": "Otomatis",
+          "dark": "Gelap",
+          "light": "Terang",
+          "theme": "Tema"
+        }
       },
       "secrets": {
         "add": "Tambahkan rahasia",

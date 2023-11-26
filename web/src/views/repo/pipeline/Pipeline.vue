@@ -2,54 +2,74 @@
   <Container full-width class="flex flex-col flex-grow md:min-h-xs">
     <div class="flex w-full min-h-0 flex-grow">
       <PipelineStepList
-        v-if="pipeline?.workflows?.length || 0 > 0"
+        v-if="pipeline?.workflows && pipeline?.workflows?.length > 0"
         v-model:selected-step-id="selectedStepId"
         :class="{ 'hidden md:flex': pipeline.status === 'blocked' }"
         :pipeline="pipeline"
       />
 
-      <div class="flex flex-grow relative">
-        <PipelineInfo v-if="error">
-          <Icon name="status-error" class="w-16 h-16 text-wp-state-error-100" />
-          <div class="flex flex-wrap items-center justify-center gap-2 text-xl">
-            <span class="capitalize">{{ $t('repo.pipeline.execution_error') }}:</span>
-            <span>{{ error }}</span>
-          </div>
-        </PipelineInfo>
+      <div class="flex items-start justify-center flex-grow relative">
+        <Container v-if="selectedStep?.error" fill-width class="py-0">
+          <Panel>
+            <div class="flex flex-col items-center gap-4">
+              <Icon name="status-error" class="w-16 h-16 text-wp-state-error-100" />
+              <span class="text-xl">{{ $t('repo.pipeline.we_got_some_errors') }}</span>
+              <span class="whitespace-pre">{{ selectedStep?.error }}</span>
+            </div>
+          </Panel>
+        </Container>
 
-        <PipelineInfo v-else-if="pipeline.status === 'blocked'">
-          <Icon name="status-blocked" class="w-16 h-16" />
-          <span class="text-xl">{{ $t('repo.pipeline.protected.awaits') }}</span>
-          <div v-if="repoPermissions.push" class="flex gap-2 flex-wrap items-center justify-center">
-            <Button
-              color="blue"
-              :start-icon="forge ?? 'repo'"
-              :text="$t('repo.pipeline.protected.review')"
-              :to="pipeline.link_url"
-              :title="message"
-            />
-            <Button
-              color="green"
-              :text="$t('repo.pipeline.protected.approve')"
-              :is-loading="isApprovingPipeline"
-              @click="approvePipeline"
-            />
-            <Button
-              color="red"
-              :text="$t('repo.pipeline.protected.decline')"
-              :is-loading="isDecliningPipeline"
-              @click="declinePipeline"
-            />
-          </div>
-        </PipelineInfo>
+        <Container v-else-if="pipeline.errors?.some((e) => !e.is_warning)" fill-width class="py-0">
+          <Panel>
+            <div class="flex flex-col items-center gap-4">
+              <Icon name="status-error" class="w-16 h-16 text-wp-state-error-100" />
+              <span class="text-xl">{{ $t('repo.pipeline.we_got_some_errors') }}</span>
+              <Button color="red" :text="$t('repo.pipeline.show_errors')" :to="{ name: 'repo-pipeline-errors' }" />
+            </div>
+          </Panel>
+        </Container>
 
-        <PipelineInfo v-else-if="pipeline.status === 'declined'">
-          <Icon name="status-blocked" class="w-16 h-16" />
-          <p class="text-xl">{{ $t('repo.pipeline.protected.declined') }}</p>
-        </PipelineInfo>
+        <Container v-else-if="pipeline.status === 'blocked'" fill-width class="py-0">
+          <Panel>
+            <div class="flex flex-col items-center gap-4">
+              <Icon name="status-blocked" class="w-16 h-16" />
+              <span class="text-xl">{{ $t('repo.pipeline.protected.awaits') }}</span>
+              <div v-if="repoPermissions.push" class="flex gap-2 flex-wrap items-center justify-center">
+                <Button
+                  color="blue"
+                  :start-icon="forge ?? 'repo'"
+                  :text="$t('repo.pipeline.protected.review')"
+                  :to="pipeline.forge_url"
+                  :title="message"
+                />
+                <Button
+                  color="green"
+                  :text="$t('repo.pipeline.protected.approve')"
+                  :is-loading="isApprovingPipeline"
+                  @click="approvePipeline"
+                />
+                <Button
+                  color="red"
+                  :text="$t('repo.pipeline.protected.decline')"
+                  :is-loading="isDecliningPipeline"
+                  @click="declinePipeline"
+                />
+              </div>
+            </div>
+          </Panel>
+        </Container>
+
+        <Container v-else-if="pipeline.status === 'declined'" fill-width class="py-0">
+          <Panel>
+            <div class="flex flex-col items-center gap-4">
+              <Icon name="status-declined" class="w-16 h-16 text-wp-state-error-100" />
+              <p class="text-xl">{{ $t('repo.pipeline.protected.declined') }}</p>
+            </div>
+          </Panel>
+        </Container>
 
         <PipelineLog
-          v-else-if="selectedStepId"
+          v-else-if="selectedStepId !== null"
           v-model:step-id="selectedStepId"
           :pipeline="pipeline"
           class="fixed top-0 left-0 w-full h-full md:absolute"
@@ -96,13 +116,7 @@ if (!repo || !repoPermissions || !pipeline) {
 
 const stepId = toRef(props, 'stepId');
 
-const defaultStepId = computed(() => {
-  if (!pipeline.value || !pipeline.value.workflows || !pipeline.value.workflows[0].children) {
-    return null;
-  }
-
-  return pipeline.value.workflows[0].children[0].pid;
-});
+const defaultStepId = computed(() => pipeline.value?.workflows?.[0].children?.[0].pid ?? null);
 
 const selectedStepId = computed({
   get() {
@@ -128,7 +142,7 @@ const selectedStepId = computed({
     return null;
   },
   set(_selectedStepId: number | null) {
-    if (!_selectedStepId) {
+    if (_selectedStepId === null) {
       router.replace({ params: { ...route.params, stepId: '' } });
       return;
     }
@@ -141,7 +155,6 @@ const { forge } = useConfig();
 const { message } = usePipeline(pipeline);
 
 const selectedStep = computed(() => findStep(pipeline.value.workflows || [], selectedStepId.value || -1));
-const error = computed(() => pipeline.value?.error || selectedStep.value?.error);
 
 const { doSubmit: approvePipeline, isLoading: isApprovingPipeline } = useAsyncAction(async () => {
   if (!repo) {

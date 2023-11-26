@@ -3951,8 +3951,11 @@ const docTemplate = `{
                 "enqueued_at": {
                     "type": "integer"
                 },
-                "error": {
-                    "type": "string"
+                "errors": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/errors.PipelineError"
+                    }
                 },
                 "event": {
                     "$ref": "#/definitions/WebhookEvent"
@@ -3960,11 +3963,11 @@ const docTemplate = `{
                 "finished_at": {
                     "type": "integer"
                 },
+                "forge_url": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
-                },
-                "link_url": {
-                    "type": "string"
                 },
                 "message": {
                     "type": "string"
@@ -4044,7 +4047,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "index": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "title": {
                     "type": "string"
@@ -4108,6 +4111,9 @@ const docTemplate = `{
                     "description": "ForgeRemoteID is the unique identifier for the repository on the forge.",
                     "type": "string"
                 },
+                "forge_url": {
+                    "type": "string"
+                },
                 "full_name": {
                     "type": "string"
                 },
@@ -4116,9 +4122,6 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "integer"
-                },
-                "link_url": {
-                    "type": "string"
                 },
                 "name": {
                     "type": "string"
@@ -4248,6 +4251,17 @@ const docTemplate = `{
                 "blocked",
                 "declined"
             ],
+            "x-enum-comments": {
+                "StatusBlocked": "waiting for approval",
+                "StatusDeclined": "blocked and declined",
+                "StatusError": "error with the config / while parsing / some other system problem",
+                "StatusFailure": "failed to finish (exit code != 0)",
+                "StatusKilled": "killed by user",
+                "StatusPending": "pending to be executed",
+                "StatusRunning": "currently running",
+                "StatusSkipped": "skipped as another step failed",
+                "StatusSuccess": "successfully finished"
+            },
             "x-enum-varnames": [
                 "StatusSkipped",
                 "StatusPending",
@@ -4405,6 +4419,42 @@ const docTemplate = `{
                 "EventDeploy",
                 "EventCron",
                 "EventManual"
+            ]
+        },
+        "errors.PipelineError": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "is_warning": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/errors.PipelineErrorType"
+                }
+            }
+        },
+        "errors.PipelineErrorType": {
+            "type": "string",
+            "enum": [
+                "linter",
+                "deprecation",
+                "compiler",
+                "generic"
+            ],
+            "x-enum-comments": {
+                "PipelineErrorTypeCompiler": "some error with the config semantics",
+                "PipelineErrorTypeDeprecation": "using some deprecated feature",
+                "PipelineErrorTypeGeneric": "some generic error",
+                "PipelineErrorTypeLinter": "some error with the config syntax"
+            },
+            "x-enum-varnames": [
+                "PipelineErrorTypeLinter",
+                "PipelineErrorTypeDeprecation",
+                "PipelineErrorTypeCompiler",
+                "PipelineErrorTypeGeneric"
             ]
         },
         "model.Workflow": {

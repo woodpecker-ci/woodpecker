@@ -21,8 +21,8 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/cli/common"
+	"go.woodpecker-ci.org/woodpecker/cli/internal"
 )
 
 var pipelineInfoCmd = &cli.Command{
@@ -47,7 +47,7 @@ func pipelineInfo(c *cli.Context) error {
 	}
 	pipelineArg := c.Args().Get(1)
 
-	var number int
+	var number int64
 	if pipelineArg == "last" || len(pipelineArg) == 0 {
 		// Fetch the pipeline number from the last pipeline
 		pipeline, err := client.PipelineLast(repoID, "")
@@ -56,7 +56,7 @@ func pipelineInfo(c *cli.Context) error {
 		}
 		number = pipeline.Number
 	} else {
-		number, err = strconv.Atoi(pipelineArg)
+		number, err = strconv.ParseInt(pipelineArg, 10, 64)
 		if err != nil {
 			return err
 		}

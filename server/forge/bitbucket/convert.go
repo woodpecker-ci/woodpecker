@@ -23,8 +23,8 @@ import (
 
 	"golang.org/x/oauth2"
 
-	"github.com/woodpecker-ci/woodpecker/server/forge/bitbucket/internal"
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/server/forge/bitbucket/internal"
+	"go.woodpecker-ci.org/woodpecker/server/model"
 )
 
 const (
@@ -56,7 +56,7 @@ func convertRepo(from *internal.Repo, perm *internal.RepoPerm) *model.Repo {
 		Owner:         strings.Split(from.FullName, "/")[0],
 		Name:          strings.Split(from.FullName, "/")[1],
 		FullName:      from.FullName,
-		Link:          from.Links.HTML.Href,
+		ForgeURL:      from.Links.HTML.Href,
 		IsSCMPrivate:  from.IsPrivate,
 		Avatar:        from.Owner.Links.Avatar.Href,
 		SCMKind:       model.SCMKind(from.Scm),
@@ -171,7 +171,7 @@ func convertPullHook(from *internal.PullRequestHook) *model.Pipeline {
 			from.PullRequest.Dest.Branch.Name,
 		),
 		CloneURL:  fmt.Sprintf("https://bitbucket.org/%s", from.PullRequest.Source.Repo.FullName),
-		Link:      from.PullRequest.Links.HTML.Href,
+		ForgeURL:  from.PullRequest.Links.HTML.Href,
 		Branch:    from.PullRequest.Dest.Branch.Name,
 		Message:   from.PullRequest.Desc,
 		Avatar:    from.Actor.Links.Avatar.Href,
@@ -186,7 +186,7 @@ func convertPullHook(from *internal.PullRequestHook) *model.Pipeline {
 func convertPushHook(hook *internal.PushHook, change *internal.Change) *model.Pipeline {
 	pipeline := &model.Pipeline{
 		Commit:    change.New.Target.Hash,
-		Link:      change.New.Target.Links.HTML.Href,
+		ForgeURL:  change.New.Target.Links.HTML.Href,
 		Branch:    change.New.Name,
 		Message:   change.New.Target.Message,
 		Avatar:    hook.Actor.Links.Avatar.Href,

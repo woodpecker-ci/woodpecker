@@ -17,7 +17,7 @@ package migration
 import (
 	"xorm.io/xorm"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/server/model"
 )
 
 type oldStep020 struct {

@@ -17,13 +17,12 @@ package linter
 import (
 	"fmt"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
-)
+	"codeberg.org/6543/xyaml"
+	"go.uber.org/multierr"
 
-const (
-	blockClone uint8 = iota
-	blockPipeline
-	blockServices
+	"go.woodpecker-ci.org/woodpecker/pipeline/errors"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/linter/schema"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/types"
 )
 
 // A Linter lints a pipeline configuration.
@@ -40,45 +39,99 @@ func New(opts ...Option) *Linter {
 	return linter
 }
 
-// Lint lints the configuration.
-func (l *Linter) Lint(c *types.Workflow) error {
-	if len(c.Steps.ContainerList) == 0 {
-		return fmt.Errorf("Invalid or missing pipeline section")
-	}
-	if err := l.lint(c.Clone.ContainerList, blockClone); err != nil {
-		return err
-	}
-	if err := l.lint(c.Steps.ContainerList, blockPipeline); err != nil {
-		return err
-	}
-	return l.lint(c.Services.ContainerList, blockServices)
+type WorkflowConfig struct {
+	// File is the path to the configuration file.
+	File string
+
+	// RawConfig is the raw configuration.
+	RawConfig string
+
+	// Config is the parsed configuration.
+	Workflow *types.Workflow
 }
 
-func (l *Linter) lint(containers []*types.Container, _ uint8) error {
+// Lint lints the configuration.
+func (l *Linter) Lint(configs []*WorkflowConfig) error {
+	var linterErr error
+
+	for _, config := range configs {
+		if err := l.lintFile(config); err != nil {
+			linterErr = multierr.Append(linterErr, err)
+		}
+	}
+
+	return linterErr
+}
+
+func (l *Linter) lintFile(config *WorkflowConfig) error {
+	var linterErr error
+
+	if len(config.Workflow.Steps.ContainerList) == 0 {
+		linterErr = multierr.Append(linterErr, newLinterError("Invalid or missing steps section", config.File, "steps", false))
+	}
+
+	if err := l.lintContainers(config, "clone"); err != nil {
+		linterErr = multierr.Append(linterErr, err)
+	}
+	if err := l.lintContainers(config, "steps"); err != nil {
+		linterErr = multierr.Append(linterErr, err)
+	}
+	if err := l.lintContainers(config, "services"); err != nil {
+		linterErr = multierr.Append(linterErr, err)
+	}
+
+	if err := l.lintSchema(config); err != nil {
+		linterErr = multierr.Append(linterErr, err)
+	}
+	if err := l.lintDeprecations(config); err != nil {
+		linterErr = multierr.Append(linterErr, err)
+	}
+	if err := l.lintBadHabits(config); err != nil {
+		linterErr = multierr.Append(linterErr, err)
+	}
+
+	return linterErr
+}
+
+func (l *Linter) lintContainers(config *WorkflowConfig, area string) error {
+	var linterErr error
+
+	var containers []*types.Container
+
+	switch area {
+	case "clone":
+		containers = config.Workflow.Clone.ContainerList
+	case "steps":
+		containers = config.Workflow.Steps.ContainerList
+	case "services":
+		containers = config.Workflow.Services.ContainerList
+	}
+
 	for _, container := range containers {
-		if err := l.lintImage(container); err != nil {
-			return err
+		if err := l.lintImage(config, container, area); err != nil {
+			linterErr = multierr.Append(linterErr, err)
 		}
 		if !l.trusted {
-			if err := l.lintTrusted(container); err != nil {
-				return err
+			if err := l.lintTrusted(config, container, area); err != nil {
+				linterErr = multierr.Append(linterErr, err)
 			}
 		}
-		if err := l.lintCommands(container); err != nil {
-			return err
+		if err := l.lintCommands(config, container, area); err != nil {
+			linterErr = multierr.Append(linterErr, err)
 		}
 	}
-	return nil
+
+	return linterErr
 }
 
-func (l *Linter) lintImage(c *types.Container) error {
+func (l *Linter) lintImage(config *WorkflowConfig, c *types.Container, area string) error {
 	if len(c.Image) == 0 {
-		return fmt.Errorf("Invalid or missing image")
+		return newLinterError("Invalid or missing image", config.File, fmt.Sprintf("%s.%s", area, c.Name), false)
 	}
 	return nil
 }
 
-func (l *Linter) lintCommands(c *types.Container) error {
+func (l *Linter) lintCommands(config *WorkflowConfig, c *types.Container, field string) error {
 	if len(c.Commands) == 0 {
 		return nil
 	}
@@ -87,47 +140,124 @@ func (l *Linter) lintCommands(c *types.Container) error {
 		for key := range c.Settings {
 			keys = append(keys, key)
 		}
-		return fmt.Errorf("Cannot configure both commands and custom attributes %v", keys)
+		return newLinterError(fmt.Sprintf("Cannot configure both commands and custom attributes %v", keys), config.File, fmt.Sprintf("%s.%s", field, c.Name), false)
 	}
 	return nil
 }
 
-func (l *Linter) lintTrusted(c *types.Container) error {
+func (l *Linter) lintTrusted(config *WorkflowConfig, c *types.Container, area string) error {
+	yamlPath := fmt.Sprintf("%s.%s", area, c.Name)
+	err := ""
 	if c.Privileged {
-		return fmt.Errorf("Insufficient privileges to use privileged mode")
+		err = "Insufficient privileges to use privileged mode"
 	}
 	if c.ShmSize != 0 {
-		return fmt.Errorf("Insufficient privileges to override shm_size")
+		err = "Insufficient privileges to override shm_size"
 	}
 	if len(c.DNS) != 0 {
-		return fmt.Errorf("Insufficient privileges to use custom dns")
+		err = "Insufficient privileges to use custom dns"
 	}
 	if len(c.DNSSearch) != 0 {
-		return fmt.Errorf("Insufficient privileges to use dns_search")
+		err = "Insufficient privileges to use dns_search"
 	}
 	if len(c.Devices) != 0 {
-		return fmt.Errorf("Insufficient privileges to use devices")
+		err = "Insufficient privileges to use devices"
 	}
 	if len(c.ExtraHosts) != 0 {
-		return fmt.Errorf("Insufficient privileges to use extra_hosts")
+		err = "Insufficient privileges to use extra_hosts"
 	}
 	if len(c.NetworkMode) != 0 {
-		return fmt.Errorf("Insufficient privileges to use network_mode")
+		err = "Insufficient privileges to use network_mode"
 	}
 	if len(c.IpcMode) != 0 {
-		return fmt.Errorf("Insufficient privileges to use ipc_mode")
+		err = "Insufficient privileges to use ipc_mode"
 	}
 	if len(c.Sysctls) != 0 {
-		return fmt.Errorf("Insufficient privileges to use sysctls")
+		err = "Insufficient privileges to use sysctls"
 	}
 	if c.Networks.Networks != nil && len(c.Networks.Networks) != 0 {
-		return fmt.Errorf("Insufficient privileges to use networks")
+		err = "Insufficient privileges to use networks"
 	}
 	if c.Volumes.Volumes != nil && len(c.Volumes.Volumes) != 0 {
-		return fmt.Errorf("Insufficient privileges to use volumes")
+		err = "Insufficient privileges to use volumes"
 	}
 	if len(c.Tmpfs) != 0 {
-		return fmt.Errorf("Insufficient privileges to use tmpfs")
+		err = "Insufficient privileges to use tmpfs"
 	}
+
+	if len(err) != 0 {
+		return newLinterError(err, config.File, yamlPath, false)
+	}
+
+	return nil
+}
+
+func (l *Linter) lintSchema(config *WorkflowConfig) error {
+	var linterErr error
+	schemaErrors, err := schema.LintString(config.RawConfig)
+	if err != nil {
+		for _, schemaError := range schemaErrors {
+			linterErr = multierr.Append(linterErr, newLinterError(
+				schemaError.Description(),
+				config.File,
+				schemaError.Field(),
+				true, // TODO: let pipelines fail if the schema is invalid
+			))
+		}
+	}
+	return linterErr
+}
+
+func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
+	parsed := new(types.Workflow)
+	err = xyaml.Unmarshal([]byte(config.RawConfig), parsed)
+	if err != nil {
+		return err
+	}
+
+	if parsed.PipelineDontUseIt.ContainerList != nil {
+		err = multierr.Append(err, &errors.PipelineError{
+			Type:    errors.PipelineErrorTypeDeprecation,
+			Message: "Please use 'steps:' instead of deprecated 'pipeline:' list",
+			Data: errors.DeprecationErrorData{
+				File:  config.File,
+				Field: "pipeline",
+				Docs:  "https://woodpecker-ci.org/docs/next/migrations#next-200",
+			},
+			IsWarning: true,
+		})
+	}
+
+	if parsed.PlatformDontUseIt != "" {
+		err = multierr.Append(err, &errors.PipelineError{
+			Type:    errors.PipelineErrorTypeDeprecation,
+			Message: "Please use labels instead of deprecated 'platform' filters",
+			Data: errors.DeprecationErrorData{
+				File:  config.File,
+				Field: "platform",
+				Docs:  "https://woodpecker-ci.org/docs/next/migrations#next-200",
+			},
+			IsWarning: true,
+		})
+	}
+
+	if parsed.BranchesDontUseIt != nil {
+		err = multierr.Append(err, &errors.PipelineError{
+			Type:    errors.PipelineErrorTypeDeprecation,
+			Message: "Please use global when instead of deprecated 'branches' filter",
+			Data: errors.DeprecationErrorData{
+				File:  config.File,
+				Field: "branches",
+				Docs:  "https://woodpecker-ci.org/docs/next/migrations#next-200",
+			},
+			IsWarning: true,
+		})
+	}
+
+	return err
+}
+
+func (l *Linter) lintBadHabits(_ *WorkflowConfig) error {
+	// TODO: add bad habit warnings
 	return nil
 }

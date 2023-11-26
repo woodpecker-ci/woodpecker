@@ -24,11 +24,11 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/common"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/pipeline/backend/common"
+	"go.woodpecker-ci.org/woodpecker/pipeline/backend/types"
 )
 
-func Pod(namespace string, step *types.Step, labels, annotations map[string]string) (*v1.Pod, error) {
+func Pod(namespace string, step *types.Step, labels, annotations map[string]string, goos string) (*v1.Pod, error) {
 	var (
 		vols       []v1.Volume
 		volMounts  []v1.VolumeMount
@@ -66,7 +66,7 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 	}
 
 	if len(step.Commands) != 0 {
-		scriptEnv, entry, cmds := common.GenerateContainerConf(step.Commands)
+		scriptEnv, entry, cmds := common.GenerateContainerConf(step.Commands, goos)
 		for k, v := range scriptEnv {
 			step.Environment[k] = v
 		}

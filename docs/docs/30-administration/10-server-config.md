@@ -517,7 +517,7 @@ Context prefix Woodpecker will use to publish status messages to SCM. You probab
 
 ### `WOODPECKER_STATUS_CONTEXT_FORMAT`
 
-> Default: `{{ .context }}/{{ .event }}/{{ .workflow }}`
+> Default: `{{ .context }}/{{ .event }}/{{ .workflow }}{{if not (eq .axis_id 0)}}/{{.axis_id}}{{end}}`
 
 Template for the status messages published to forges, uses [Go templates](https://pkg.go.dev/text/template) as template language.
 Supported variables:
@@ -570,7 +570,7 @@ Example: `WOODPECKER_LIMIT_CPU_SET=1,2`
 
 ### `WOODPECKER_CONFIG_SERVICE_ENDPOINT`
 
-> Default: ``
+> Default: empty
 
 Specify a configuration service endpoint, see [Configuration Extension](./100-external-configuration-api.md)
 

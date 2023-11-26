@@ -18,7 +18,7 @@ package store
 //go:generate mockery --name Store --output mocks --case underscore
 
 import (
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/server/model"
 )
 
 // TODO: CreateX func should return new object to not indirect let storage change an existing object (alter ID etc...)

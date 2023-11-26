@@ -21,12 +21,13 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/compiler"
-	"github.com/woodpecker-ci/woodpecker/server"
-	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/store"
+	"go.woodpecker-ci.org/woodpecker/pipeline"
+	pipeline_errors "go.woodpecker-ci.org/woodpecker/pipeline/errors"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/compiler"
+	"go.woodpecker-ci.org/woodpecker/server"
+	forge_types "go.woodpecker-ci.org/woodpecker/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/server/store"
 )
 
 func parsePipeline(store store.Store, currentPipeline *model.Pipeline, user *model.User, repo *model.Repo, yamls []*forge_types.FileMeta, envs map[string]string) ([]*pipeline.Item, error) {
@@ -73,7 +74,7 @@ func parsePipeline(store store.Store, currentPipeline *model.Pipeline, user *mod
 		Secs:  secs,
 		Regs:  regs,
 		Envs:  envs,
-		Link:  server.Config.Server.Host,
+		Host:  server.Config.Server.Host,
 		Yamls: yamls,
 		Forge: server.Config.Services.Forge,
 		ProxyOpts: compiler.ProxyOptions{
@@ -82,12 +83,7 @@ func parsePipeline(store store.Store, currentPipeline *model.Pipeline, user *mod
 			HTTPSProxy: server.Config.Pipeline.Proxy.HTTPS,
 		},
 	}
-	pipelineItems, err := b.Build()
-	if err != nil {
-		return nil, err
-	}
-
-	return pipelineItems, nil
+	return b.Build()
 }
 
 func createPipelineItems(c context.Context, store store.Store,
@@ -102,12 +98,15 @@ func createPipelineItems(c context.Context, store store.Store,
 		} else {
 			updatePipelineStatus(c, currentPipeline, repo, user)
 		}
-		return currentPipeline, nil, err
+
+		if pipeline_errors.HasBlockingErrors(err) {
+			return currentPipeline, nil, err
+		}
 	}
 
 	currentPipeline = setPipelineStepsOnPipeline(currentPipeline, pipelineItems)
 
-	return currentPipeline, pipelineItems, nil
+	return currentPipeline, pipelineItems, err
 }
 
 // setPipelineStepsOnPipeline is the link between pipeline representation in "pipeline package" and server

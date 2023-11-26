@@ -18,9 +18,10 @@ import (
 	"testing"
 
 	"github.com/franela/goblin"
+	"github.com/stretchr/testify/assert"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
-	yaml_base_types "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types/base"
+	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/metadata"
+	yaml_base_types "go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/types/base"
 )
 
 func TestParse(t *testing.T) {
@@ -87,6 +88,16 @@ func TestParse(t *testing.T) {
 				g.Assert(out.Steps.ContainerList[1].When.Constraints[0].Event.Include).Equal([]string{"success"})
 			})
 
+			g.It("Should unmarshal with default version", func() {
+				out, err := ParseString(sampleYamlDefaultVersion)
+				if err != nil {
+					g.Fail(err)
+				}
+				g.Assert(len(out.Steps.ContainerList)).Equal(1)
+				g.Assert(out.Steps.ContainerList[0].Name).Equal("notify_success")
+				g.Assert(out.Steps.ContainerList[0].Image).Equal("xyz")
+			})
+
 			matchConfig, err := ParseString(sampleYaml)
 			if err != nil {
 				g.Fail(err)
@@ -137,7 +148,49 @@ func TestParse(t *testing.T) {
 	})
 }
 
+func TestParseLegacy(t *testing.T) {
+	sampleYamlPipelineLegacy := `
+platform: linux/amd64
+
+pipeline:
+  say hello:
+    image: bash
+    commands: echo hello
+`
+
+	sampleYamlPipelineLegacyIgnore := `
+platform: windows/amd64
+labels:
+  platform: linux/amd64
+
+steps:
+  say hello:
+    image: bash
+    commands: echo hello
+
+pipeline:
+  old crap:
+    image: bash
+    commands: meh!
+`
+
+	workflow1, err := ParseString(sampleYamlPipelineLegacy)
+	if !assert.NoError(t, err) {
+		t.Fail()
+	}
+
+	workflow2, err := ParseString(sampleYamlPipelineLegacyIgnore)
+	if !assert.NoError(t, err) {
+		t.Fail()
+	}
+
+	assert.EqualValues(t, workflow1, workflow2)
+	assert.Len(t, workflow1.Steps.ContainerList, 1)
+	assert.EqualValues(t, "say hello", workflow1.Steps.ContainerList[0].Name)
+}
+
 var sampleYaml = `
+version: 1
 image: hello-world
 when:
   - event:
@@ -189,7 +242,14 @@ runs_on:
   - failure
 `
 
+var sampleYamlDefaultVersion = `
+steps:
+  - name: notify_success
+    image: xyz
+`
+
 var simpleYamlAnchors = `
+version: 1
 vars:
   image: &image plugins/slack
 steps:
@@ -198,6 +258,7 @@ steps:
 `
 
 var sampleVarYaml = `
+version: 1
 _slack: &SLACK
   image: plugins/slack
 steps:

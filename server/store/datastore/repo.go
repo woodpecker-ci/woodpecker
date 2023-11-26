@@ -21,8 +21,8 @@ import (
 	"xorm.io/builder"
 	"xorm.io/xorm"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/server/store/types"
 )
 
 func (s storage) GetRepo(id int64) (*model.Repo, error) {

@@ -216,7 +216,7 @@ func (c *client) RepoMove(repoID int64, newFullName string) error {
 }
 
 // Pipeline returns a repository pipeline by pipeline-id.
-func (c *client) Pipeline(repoID int64, pipeline int) (*Pipeline, error) {
+func (c *client) Pipeline(repoID, pipeline int64) (*Pipeline, error) {
 	out := new(Pipeline)
 	uri := fmt.Sprintf(pathPipeline, c.addr, repoID, pipeline)
 	err := c.get(uri, out)
@@ -251,15 +251,15 @@ func (c *client) PipelineCreate(repoID int64, options *PipelineOptions) (*Pipeli
 }
 
 // PipelineQueue returns a list of enqueued pipelines.
-func (c *client) PipelineQueue() ([]*Activity, error) {
-	var out []*Activity
+func (c *client) PipelineQueue() ([]*Feed, error) {
+	var out []*Feed
 	uri := fmt.Sprintf(pathPipelineQueue, c.addr)
 	err := c.get(uri, &out)
 	return out, err
 }
 
 // PipelineStart re-starts a stopped pipeline.
-func (c *client) PipelineStart(repoID int64, pipeline int, params map[string]string) (*Pipeline, error) {
+func (c *client) PipelineStart(repoID, pipeline int64, params map[string]string) (*Pipeline, error) {
 	out := new(Pipeline)
 	val := mapValues(params)
 	uri := fmt.Sprintf(pathPipeline, c.addr, repoID, pipeline)
@@ -268,14 +268,14 @@ func (c *client) PipelineStart(repoID int64, pipeline int, params map[string]str
 }
 
 // PipelineStop cancels the running step.
-func (c *client) PipelineStop(repoID int64, pipeline int) error {
+func (c *client) PipelineStop(repoID, pipeline int64) error {
 	uri := fmt.Sprintf(pathStop, c.addr, repoID, pipeline)
 	err := c.post(uri, nil, nil)
 	return err
 }
 
 // PipelineApprove approves a blocked pipeline.
-func (c *client) PipelineApprove(repoID int64, pipeline int) (*Pipeline, error) {
+func (c *client) PipelineApprove(repoID, pipeline int64) (*Pipeline, error) {
 	out := new(Pipeline)
 	uri := fmt.Sprintf(pathApprove, c.addr, repoID, pipeline)
 	err := c.post(uri, nil, out)
@@ -283,7 +283,7 @@ func (c *client) PipelineApprove(repoID int64, pipeline int) (*Pipeline, error) 
 }
 
 // PipelineDecline declines a blocked pipeline.
-func (c *client) PipelineDecline(repoID int64, pipeline int) (*Pipeline, error) {
+func (c *client) PipelineDecline(repoID, pipeline int64) (*Pipeline, error) {
 	out := new(Pipeline)
 	uri := fmt.Sprintf(pathDecline, c.addr, repoID, pipeline)
 	err := c.post(uri, nil, out)
@@ -291,14 +291,14 @@ func (c *client) PipelineDecline(repoID int64, pipeline int) (*Pipeline, error) 
 }
 
 // PipelineKill force kills the running pipeline.
-func (c *client) PipelineKill(repoID int64, pipeline int) error {
+func (c *client) PipelineKill(repoID, pipeline int64) error {
 	uri := fmt.Sprintf(pathPipeline, c.addr, repoID, pipeline)
 	err := c.delete(uri)
 	return err
 }
 
 // PipelineLogs returns the pipeline logs for the specified step.
-func (c *client) StepLogEntries(repoID int64, num, step int) ([]*LogEntry, error) {
+func (c *client) StepLogEntries(repoID, num, step int64) ([]*LogEntry, error) {
 	uri := fmt.Sprintf(pathLogs, c.addr, repoID, num, step)
 	var out []*LogEntry
 	err := c.get(uri, &out)
@@ -307,7 +307,7 @@ func (c *client) StepLogEntries(repoID int64, num, step int) ([]*LogEntry, error
 
 // Deploy triggers a deployment for an existing pipeline using the
 // specified target environment.
-func (c *client) Deploy(repoID int64, pipeline int, env string, params map[string]string) (*Pipeline, error) {
+func (c *client) Deploy(repoID, pipeline int64, env string, params map[string]string) (*Pipeline, error) {
 	out := new(Pipeline)
 	val := mapValues(params)
 	val.Set("event", EventDeploy)
@@ -318,7 +318,7 @@ func (c *client) Deploy(repoID int64, pipeline int, env string, params map[strin
 }
 
 // LogsPurge purges the pipeline logs for the specified pipeline.
-func (c *client) LogsPurge(repoID int64, pipeline int) error {
+func (c *client) LogsPurge(repoID, pipeline int64) error {
 	uri := fmt.Sprintf(pathLogPurge, c.addr, repoID, pipeline)
 	err := c.delete(uri)
 	return err
@@ -586,17 +586,17 @@ func (c *client) AgentTasksList(agentID int64) ([]*Task, error) {
 //
 
 // helper function for making an http GET request.
-func (c *client) get(rawurl string, out interface{}) error {
+func (c *client) get(rawurl string, out any) error {
 	return c.do(rawurl, http.MethodGet, nil, out)
 }
 
 // helper function for making an http POST request.
-func (c *client) post(rawurl string, in, out interface{}) error {
+func (c *client) post(rawurl string, in, out any) error {
 	return c.do(rawurl, http.MethodPost, in, out)
 }
 
 // helper function for making an http PATCH request.
-func (c *client) patch(rawurl string, in, out interface{}) error {
+func (c *client) patch(rawurl string, in, out any) error {
 	return c.do(rawurl, http.MethodPatch, in, out)
 }
 
@@ -606,7 +606,7 @@ func (c *client) delete(rawurl string) error {
 }
 
 // helper function to make an http request
-func (c *client) do(rawurl, method string, in, out interface{}) error {
+func (c *client) do(rawurl, method string, in, out any) error {
 	body, err := c.open(rawurl, method, in)
 	if err != nil {
 		return err
@@ -619,7 +619,7 @@ func (c *client) do(rawurl, method string, in, out interface{}) error {
 }
 
 // helper function to open an http request
-func (c *client) open(rawurl, method string, in interface{}) (io.ReadCloser, error) {
+func (c *client) open(rawurl, method string, in any) (io.ReadCloser, error) {
 	uri, err := url.Parse(rawurl)
 	if err != nil {
 		return nil, err
