@@ -4,11 +4,17 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@micash545, @qwerty287, @dominic-p, @zc-devs, @mzampetakis
+@qwerty287, @micash545, @dominic-p, @zc-devs, @mzampetakis
+
+### 🐛 Bug Fixes
+
+- Fix pipeline-related environment [[#2876](https://github.com/woodpecker-ci/woodpecker/pull/2876)]
+- Fix version check partially [[#2871](https://github.com/woodpecker-ci/woodpecker/pull/2871)]
+- Fix unregistering agents used with agent tokens [[#2870](https://github.com/woodpecker-ci/woodpecker/pull/2870)]
 
 ### 📚 Documentation
 
-- Improve code blocks in docu [[#2879](https://github.com/woodpecker-ci/woodpecker/pull/2879)]
+- Improve code blocks in docs [[#2879](https://github.com/woodpecker-ci/woodpecker/pull/2879)]
 - Add a blog post [[#2877](https://github.com/woodpecker-ci/woodpecker/pull/2877)]
 - Add documentation on Kubernetes securityContext [[#2822](https://github.com/woodpecker-ci/woodpecker/pull/2822)]
 - Add default page to categories [[#2869](https://github.com/woodpecker-ci/woodpecker/pull/2869)]
@@ -18,11 +24,6 @@
 
 - Simple security context options (Kubernetes) [[#2550](https://github.com/woodpecker-ci/woodpecker/pull/2550)]
 - Changes PullRequest Index to ForgeRemoteID type [[#2823](https://github.com/woodpecker-ci/woodpecker/pull/2823)]
-
-### 🐛 Bug Fixes
-
-- Fix version check partially [[#2871](https://github.com/woodpecker-ci/woodpecker/pull/2871)]
-- Fix unregistering agents used with agent tokens [[#2870](https://github.com/woodpecker-ci/woodpecker/pull/2870)]
 
 ## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-11-23
 
