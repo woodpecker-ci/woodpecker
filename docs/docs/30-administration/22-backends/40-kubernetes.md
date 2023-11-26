@@ -153,7 +153,7 @@ steps:
     [...]
 ```
 
-### securityContext
+### `securityContext`
 
 Use the following configuration to set the `securityContext` for the pod/container running a given pipeline step:
 
