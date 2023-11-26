@@ -33,7 +33,6 @@ If you still need to pass artifacts between the workflows you need use some stor
 └── .test.yml
 ```
 
-
 ```yaml title=".woodpecker/.build.yml"
 steps:
   build:
@@ -42,7 +41,6 @@ steps:
       - echo building
       - sleep 5
 ```
-
 
 ```yaml title=".woodpecker/.deploy.yml"
 steps:

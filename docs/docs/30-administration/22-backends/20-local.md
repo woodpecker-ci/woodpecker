@@ -77,7 +77,6 @@ The `image` entry is used to specify the shell, such as Bash or Fish, that is
 used to run the commands.
 
 ```yaml title=".woodpecker.yml"
-
 steps:
   build:
     image: bash
@@ -113,7 +112,6 @@ Then, use this `label` `type` with value `exec` in the pipeline definition, to
 only run on this agent:
 
 ```yaml title=".woodpecker.yml"
-
 labels:
   type: exec
 
