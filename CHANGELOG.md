@@ -4,10 +4,11 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@dominic-p, @zc-devs, @qwerty287, @mzampetakis, @micash545
+@qwerty287, @dominic-p, @zc-devs, @mzampetakis, @micash545
 
 ### 📚 Documentation
 
+- Add a blog post [[#2877](https://github.com/woodpecker-ci/woodpecker/pull/2877)]
 - Add documentation on Kubernetes securityContext [[#2822](https://github.com/woodpecker-ci/woodpecker/pull/2822)]
 - Add default page to categories [[#2869](https://github.com/woodpecker-ci/woodpecker/pull/2869)]
 - Docs: Make Github docs same format as other forges [[#2866](https://github.com/woodpecker-ci/woodpecker/pull/2866)]
