@@ -14,28 +14,58 @@
     "variables": {
       "description": "Use yaml aliases to define variables. Read more: https://woodpecker-ci.org/docs/usage/advanced-yaml-syntax"
     },
-    "clone": { "$ref": "#/definitions/clone" },
-    "skip_clone": { "type": "boolean" },
-    "branches": { "$ref": "#/definitions/branches" },
-    "when": { "$ref": "#/definitions/pipeline_when" },
-    "steps": { "$ref": "#/definitions/step_list" },
-    "pipeline": { "$ref": "#/definitions/step_list", "description": "deprecated, use steps" },
-    "services": { "$ref": "#/definitions/services" },
-    "workspace": { "$ref": "#/definitions/workspace" },
-    "matrix": { "$ref": "#/definitions/matrix" },
-    "platform": { "$ref": "#/definitions/platform" },
-    "labels": { "$ref": "#/definitions/labels" },
+    "clone": {
+      "$ref": "#/definitions/clone"
+    },
+    "skip_clone": {
+      "type": "boolean"
+    },
+    "branches": {
+      "$ref": "#/definitions/branches"
+    },
+    "when": {
+      "$ref": "#/definitions/pipeline_when"
+    },
+    "steps": {
+      "$ref": "#/definitions/step_list"
+    },
+    "pipeline": {
+      "$ref": "#/definitions/step_list",
+      "description": "deprecated, use steps"
+    },
+    "services": {
+      "$ref": "#/definitions/services"
+    },
+    "workspace": {
+      "$ref": "#/definitions/workspace"
+    },
+    "matrix": {
+      "$ref": "#/definitions/matrix"
+    },
+    "platform": {
+      "$ref": "#/definitions/platform"
+    },
+    "labels": {
+      "$ref": "#/definitions/labels"
+    },
     "depends_on": {
       "type": "array",
       "minLength": 1,
-      "items": { "type": "string" }
+      "items": {
+        "type": "string"
+      }
     },
     "runs_on": {
       "type": "array",
       "minLength": 1,
-      "items": { "type": "string" }
+      "items": {
+        "type": "string"
+      }
     },
-    "version": { "type": "number", "default": 1 }
+    "version": {
+      "type": "number",
+      "default": 1
+    }
   },
   "definitions": {
     "clone": {
@@ -74,20 +104,28 @@
               "oneOf": [
                 {
                   "type": "array",
-                  "items": { "type": "string" },
+                  "items": {
+                    "type": "string"
+                  },
                   "minLength": 1
                 },
-                { "type": "string" }
+                {
+                  "type": "string"
+                }
               ]
             },
             "include": {
               "oneOf": [
                 {
                   "type": "array",
-                  "items": { "type": "string" },
+                  "items": {
+                    "type": "string"
+                  },
                   "minLength": 1
                 },
-                { "type": "string" }
+                {
+                  "type": "string"
+                }
               ]
             }
           }
@@ -97,8 +135,20 @@
     "step_list": {
       "description": "The steps section defines a list of steps which will be executed serially, in the order in which they are defined. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax",
       "oneOf": [
-        { "type": "object", "additionalProperties": { "$ref": "#/definitions/step" }, "minProperties": 1 },
-        { "type": "array", "items": { "$ref": "#/definitions/step" }, "minLength": 1 }
+        {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/step"
+          },
+          "minProperties": 1
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/step"
+          },
+          "minLength": 1
+        }
       ]
     },
     "pipeline_when": {
@@ -107,7 +157,9 @@
         {
           "type": "array",
           "minLength": 1,
-          "items": { "$ref": "#/definitions/pipeline_when_condition" }
+          "items": {
+            "$ref": "#/definitions/pipeline_when_condition"
+          }
         },
         {
           "$ref": "#/definitions/pipeline_when_condition"
@@ -133,7 +185,9 @@
             {
               "type": "array",
               "minLength": 1,
-              "items": { "$ref": "#/definitions/event_enum" }
+              "items": {
+                "$ref": "#/definitions/event_enum"
+              }
             },
             {
               "$ref": "#/definitions/event_enum"
@@ -163,7 +217,9 @@
         "path": {
           "description": "Execute a step only on commit with certain files added/removed/modified. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#path",
           "oneOf": [
-            { "type": "string" },
+            {
+              "type": "string"
+            },
             {
               "type": "array",
               "items": {
@@ -264,7 +320,9 @@
         {
           "type": "array",
           "minLength": 1,
-          "items": { "$ref": "#/definitions/step_when_condition" }
+          "items": {
+            "$ref": "#/definitions/step_when_condition"
+          }
         },
         {
           "$ref": "#/definitions/step_when_condition"
@@ -289,7 +347,9 @@
             {
               "type": "array",
               "minLength": 1,
-              "items": { "$ref": "#/definitions/event_enum" }
+              "items": {
+                "$ref": "#/definitions/event_enum"
+              }
             },
             {
               "$ref": "#/definitions/event_enum"
@@ -310,7 +370,10 @@
             {
               "type": "array",
               "minLength": 1,
-              "items": { "type": "string", "enum": ["success", "failure"] }
+              "items": {
+                "type": "string",
+                "enum": ["success", "failure"]
+              }
             },
             {
               "type": "string",
@@ -340,7 +403,9 @@
         "path": {
           "description": "Execute a step only on commit with certain files added/removed/modified. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#path",
           "oneOf": [
-            { "type": "string" },
+            {
+              "type": "string"
+            },
             {
               "type": "array",
               "items": {
@@ -387,7 +452,9 @@
         {
           "type": "array",
           "minLength": 1,
-          "items": { "type": "string" }
+          "items": {
+            "type": "string"
+          }
         },
         {
           "type": "object",
@@ -401,7 +468,9 @@
                 {
                   "type": "array",
                   "minLength": 1,
-                  "items": { "type": "string" }
+                  "items": {
+                    "type": "string"
+                  }
                 }
               ]
             },
@@ -413,7 +482,9 @@
                 {
                   "type": "array",
                   "minLength": 1,
-                  "items": { "type": "string" }
+                  "items": {
+                    "type": "string"
+                  }
                 }
               ]
             }
@@ -439,10 +510,14 @@
       "oneOf": [
         {
           "type": "array",
-          "items": { "type": "string" },
+          "items": {
+            "type": "string"
+          },
           "minLength": 1
         },
-        { "type": "string" }
+        {
+          "type": "string"
+        }
       ]
     },
     "step_environment": {
@@ -450,7 +525,9 @@
       "oneOf": [
         {
           "type": "array",
-          "items": { "type": "string" },
+          "items": {
+            "type": "string"
+          },
           "minLength": 1
         },
         {
@@ -466,13 +543,19 @@
       "type": "array",
       "items": {
         "oneOf": [
-          { "type": "string" },
+          {
+            "type": "string"
+          },
           {
             "type": "object",
             "required": ["source", "target"],
             "properties": {
-              "source": { "type": "string" },
-              "target": { "type": "string" }
+              "source": {
+                "type": "string"
+              },
+              "target": {
+                "type": "string"
+              }
             }
           }
         ]
@@ -489,7 +572,9 @@
     "step_volumes": {
       "description": "Mount files or folders from the host machine into your step container. Read more: https://woodpecker-ci.org/docs/usage/volumes",
       "type": "array",
-      "items": { "type": "string" },
+      "items": {
+        "type": "string"
+      },
       "minLength": 1
     },
     "step_directory": {
@@ -501,7 +586,7 @@
       "type": "object",
       "properties": {
         "kubernetes": {
-          "$ref": "#/definitions/step_backend_kubernetes_resources"
+          "$ref": "#/definitions/step_backend_kubernetes"
         }
       }
     },
@@ -511,6 +596,9 @@
       "properties": {
         "resources": {
           "$ref": "#/definitions/step_backend_kubernetes_resources"
+        },
+        "securityContext": {
+          "$ref": "#/definitions/step_backend_kubernetes_security_context"
         }
       }
     },
@@ -523,6 +611,27 @@
         },
         "limits": {
           "$ref": "#/definitions/step_kubernetes_resources_object"
+        }
+      }
+    },
+    "step_backend_kubernetes_security_context": {
+      "description": "Pods / containers security context. Read more: https://woodpecker-ci.org/docs/administration/backends/kubernetes",
+      "type": "object",
+      "properties": {
+        "privileged": {
+          "type": "boolean"
+        },
+        "runAsNonRoot": {
+          "type": "boolean"
+        },
+        "runAsUser": {
+          "type": "number"
+        },
+        "runAsGroup": {
+          "type": "number"
+        },
+        "fsGroup": {
+          "type": "number"
         }
       }
     },
@@ -555,7 +664,9 @@
     "services": {
       "description": "Read more: https://woodpecker-ci.org/docs/usage/services",
       "type": "object",
-      "additionalProperties": { "$ref": "#/definitions/service" },
+      "additionalProperties": {
+        "$ref": "#/definitions/service"
+      },
       "minProperties": 1
     },
     "service": {
@@ -596,7 +707,14 @@
           "description": "expose ports to which other steps can connect to",
           "type": "array",
           "items": {
-            "oneOf": [{ "type": "number" }, { "type": "string" }]
+            "oneOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ]
           },
           "minLength": 1
         }
