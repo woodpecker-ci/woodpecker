@@ -1,19 +1,24 @@
 # Changelog
 
-## [2.0.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.1) - 2023-11-25
+## [2.1.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.1.0) - 2023-11-26
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@qwerty287, @micash545
+@qwerty287, @mzampetakis, @micash545
+
+### 🐛 Bug Fixes
+
+- Fix version check partially [[#2871](https://github.com/woodpecker-ci/woodpecker/pull/2871)]
+- Fix unregistering agents used with agent tokens [[#2870](https://github.com/woodpecker-ci/woodpecker/pull/2870)]
+
+### 📈 Enhancement
+
+- Changes PullRequest Index to ForgeRemoteID type [[#2823](https://github.com/woodpecker-ci/woodpecker/pull/2823)]
 
 ### 📚 Documentation
 
 - Add default page to categories [[#2869](https://github.com/woodpecker-ci/woodpecker/pull/2869)]
 - Docs: Make Github docs same format as other forges [[#2866](https://github.com/woodpecker-ci/woodpecker/pull/2866)]
-
-### 🐛 Bug Fixes
-
-- Fix unregistering agents used with agent tokens [[#2870](https://github.com/woodpecker-ci/woodpecker/pull/2870)]
 
 ## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-11-23
 
