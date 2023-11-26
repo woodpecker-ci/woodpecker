@@ -570,7 +570,7 @@ Example: `WOODPECKER_LIMIT_CPU_SET=1,2`
 
 ### `WOODPECKER_CONFIG_SERVICE_ENDPOINT`
 
-> Default: ``
+> Default: empty
 
 Specify a configuration service endpoint, see [Configuration Extension](./100-external-configuration-api.md)
 
