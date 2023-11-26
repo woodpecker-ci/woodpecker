@@ -63,7 +63,7 @@ steps:
 - And make the yaml declarative
 - Plugins are Docker images with your script as an entrypoint
 
-```yaml title="Dockerfile"
+```dockerfile title="Dockerfile"
 FROM laszlocloud/kubectl
 COPY deploy /usr/local/deploy
 ENTRYPOINT ["/usr/local/deploy"]
