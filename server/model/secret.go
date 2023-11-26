@@ -70,8 +70,8 @@ type SecretStore interface {
 // Secret represents a secret variable, such as a password or token.
 type Secret struct {
 	ID     int64          `json:"id"              xorm:"pk autoincr 'secret_id'"`
-	OrgID  int64          `json:"-"               xorm:"NOT NULL DEFAULT 0 UNIQUE(s) INDEX 'secret_org_id'"`
-	RepoID int64          `json:"-"               xorm:"NOT NULL DEFAULT 0 UNIQUE(s) INDEX 'secret_repo_id'"`
+	OrgID  int64          `json:"org_id"          xorm:"NOT NULL DEFAULT 0 UNIQUE(s) INDEX 'secret_org_id'"`
+	RepoID int64          `json:"repo_id"         xorm:"NOT NULL DEFAULT 0 UNIQUE(s) INDEX 'secret_repo_id'"`
 	Name   string         `json:"name"            xorm:"NOT NULL UNIQUE(s) INDEX 'secret_name'"`
 	Value  string         `json:"value,omitempty" xorm:"TEXT 'secret_value'"`
 	Images []string       `json:"images"          xorm:"json 'secret_images'"`

@@ -69,7 +69,25 @@ async function loadSecrets(page: number): Promise<Secret[] | null> {
     throw new Error("Unexpected: Can't load repo");
   }
 
-  return apiClient.getSecretList(repo.value.id, page);
+  const secrets: Record<string, Secret & { edit?: boolean }> = {};
+
+  // TODO: properly handle pagination
+  const globalSecrets = (await apiClient.getGlobalSecretList(page)) ?? [];
+  globalSecrets.forEach((secret) => {
+    secrets[secret.name] = { ...secret, edit: false };
+  });
+
+  const orgSecrets = (await apiClient.getOrgSecretList(repo.value.org_id, page)) ?? [];
+  orgSecrets.forEach((secret) => {
+    secrets[secret.name] = { ...secret, edit: false };
+  });
+
+  const repoSecrets = (await apiClient.getSecretList(repo.value.id, page)) ?? [];
+  repoSecrets.forEach((secret) => {
+    secrets[secret.name] = secret;
+  });
+
+  return Object.values(secrets);
 }
 
 const { resetPage, data: secrets } = usePagination(loadSecrets, () => !selectedSecret.value);
