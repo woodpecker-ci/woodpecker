@@ -2,8 +2,7 @@
 
 Woodpecker comes with built-in support for Bitbucket Cloud. To enable Bitbucket Cloud you should configure the Woodpecker container using the following environment variables:
 
-```diff
-# docker-compose.yml
+```yaml title="docker-compose.yml"
 version: '3'
 
 services:

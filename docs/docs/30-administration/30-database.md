@@ -6,8 +6,7 @@ The default database engine of Woodpecker is an embedded SQLite database which r
 
 By default Woodpecker uses a SQLite database stored under `/var/lib/woodpecker/`. You can mount a [data volume](https://docs.docker.com/storage/volumes/#create-and-manage-volumes) to persist the SQLite database.
 
-```diff
-# docker-compose.yml
+```yaml title="docker-compose.yml"
 version: '3'
 
 services:
@@ -22,8 +21,7 @@ services:
 The below example demonstrates MySQL database configuration. See the official driver [documentation](https://github.com/go-sql-driver/mysql#dsn-data-source-name) for configuration options and examples.
 The minimum version of MySQL/MariaDB required is determined by the `go-sql-driver/mysql` - see [it's README](https://github.com/go-sql-driver/mysql#requirements) for more information.
 
-```diff
-# docker-compose.yml
+```yaml title="docker-compose.yml"
 version: '3'
 
 services:
@@ -39,8 +37,7 @@ services:
 The below example demonstrates Postgres database configuration. See the official driver [documentation](https://www.postgresql.org/docs/current/static/libpq-connect.html#LIBPQ-CONNSTRING) for configuration options and examples.
 Please use Postgres versions equal or higher than **11**.
 
-```diff
-# docker-compose.yml
+```yaml title="docker-compose.yml"
 version: '3'
 
 services:
