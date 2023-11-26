@@ -67,8 +67,7 @@ The associated commit is checked out with git to a workspace which is mounted to
 - Woodpecker clones the source code in the beginning of the workflow
 - Changes to files are persisted through steps as the same volume is mounted to all steps
 
-```yaml
-# .woodpecker.yml
+```yaml title=".woodpecker.yml"
 steps:
   build:
     image: debian
