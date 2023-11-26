@@ -4,7 +4,7 @@
 
 This guide provides a brief overview for installing Woodpecker server behind the Apache2 web-server. This is an example configuration:
 
-```apacheconf
+```apacheconf title="woodpecker.example.com.conf"
 ProxyPreserveHost On
 
 RequestHeader set X-Forwarded-Proto "https"
@@ -15,14 +15,14 @@ ProxyPassReverse / http://127.0.0.1:8000/
 
 You must have the below Apache modules installed.
 
-```nohighlight
+```bash
 a2enmod proxy
 a2enmod proxy_http
 ```
 
 You must configure Apache to set `X-Forwarded-Proto` when using https.
 
-```diff
+```diff title="woodpecker.example.com.conf"
 ProxyPreserveHost On
 
 +RequestHeader set X-Forwarded-Proto "https"
@@ -37,7 +37,7 @@ This guide provides a basic overview for installing Woodpecker server behind the
 
 Example configuration:
 
-```nginx
+```nginx title="woodpecker.example.com.conf"
 server {
     listen 80;
     server_name woodpecker.example.com;
@@ -59,7 +59,7 @@ server {
 
 You must configure the proxy to set `X-Forwarded` proxy headers:
 
-```diff
+```diff title="woodpecker.example.com.conf"
 server {
     listen 80;
     server_name woodpecker.example.com;
@@ -82,7 +82,7 @@ server {
 
 This guide provides a brief overview for installing Woodpecker server behind the [Caddy web-server](https://caddyserver.com/). This is an example caddyfile proxy configuration:
 
-```caddy
+```toml title="Caddyfile"
 # expose WebUI and API
 woodpecker.example.com {
   reverse_proxy woodpecker-server:8000
@@ -112,7 +112,7 @@ Set `WOODPECKER_HOST` (for example in `docker-compose.yml`) to the ngrok URL (us
 
 To install the Woodpecker server behind a [Traefik](https://traefik.io/) load balancer, you must expose both the `http` and the `gRPC` ports. Here is a comprehensive example, considering you are running Traefik with docker swarm and want to do TLS termination and automatic redirection from http to https.
 
-```yaml
+```yaml title="docker-compose.yml"
 version: '3.8'
 
 services:

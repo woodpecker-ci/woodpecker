@@ -4,7 +4,7 @@ The workflow section defines a list of steps to build, test and deploy your code
 
 Example steps:
 
-```yaml
+```yaml .woodpecker.yml
 steps:
   backend:
     image: golang
@@ -23,7 +23,7 @@ In the above example we define two steps, `frontend` and `backend`. The names of
 
 Another way to name a step is by using the name keyword:
 
-```yaml
+```yaml title=".woodpecker.yml"
 steps:
   - name: backend
     image: golang
@@ -53,7 +53,7 @@ git commit -m "updated README [CI SKIP]"
 Every step of your workflow executes commands inside a specified container. The defined commands are executed serially.
 The associated commit is checked out with git to a workspace which is mounted to every step of the workflow as the working directory.
 
-```diff
+```diff title=".woodpecker.yml"
  steps:
    backend:
      image: golang
@@ -67,8 +67,7 @@ The associated commit is checked out with git to a workspace which is mounted to
 - Woodpecker clones the source code in the beginning of the workflow
 - Changes to files are persisted through steps as the same volume is mounted to all steps
 
-```yaml
-# .woodpecker.yml
+```yaml title=".woodpecker.yml"
 steps:
   build:
     image: debian
@@ -86,7 +85,7 @@ Woodpecker pulls the defined image and uses it as environment to execute the wor
 
 When using the `local` backend, the `image` entry is used to specify the shell, such as Bash or Fish, that is used to run the commands.
 
-```diff
+```diff title=".woodpecker.yml"
  steps:
    build:
 +    image: golang:1.6
@@ -115,7 +114,7 @@ image: index.docker.io/library/golang:1.7
 
 Woodpecker does not automatically upgrade container images. Example configuration to always pull the latest image when updates are available:
 
-```diff
+```diff title=".woodpecker.yml"
  steps:
    build:
      image: golang:latest
@@ -128,7 +127,7 @@ Learn more how you can use images from [different registries](./41-registries.md
 
 Commands of every step are executed serially as if you would enter them into your local shell.
 
-```diff
+```diff title=".woodpecker.yml"
  steps:
    backend:
      image: golang
@@ -139,7 +138,7 @@ Commands of every step are executed serially as if you would enter them into you
 
 There is no magic here. The above commands are converted to a simple shell script. The commands in the above example are roughly converted to the below script:
 
-```bash
+```bash title="build.sh"
 #!/bin/sh
 set -e
 
@@ -171,7 +170,7 @@ For more details check the [secrets docs](./40-secrets.md).
 
 Some of the steps may be allowed to fail without causing the whole workflow and therefore pipeline to report a failure (e.g., a step executing a linting check). To enable this, add `failure: ignore` to your step. If Woodpecker encounters an error while executing the step, it will report it as failed but still executes the next steps of the workflow, if any, without affecting the status of the workflow.
 
-```diff
+```diff title=".woodpecker.yml"
  steps:
    backend:
      image: golang
@@ -185,7 +184,7 @@ Some of the steps may be allowed to fail without causing the whole workflow and 
 
 Woodpecker supports defining a list of conditions for a step by using a `when` block. If at least one of the conditions in the `when` block evaluate to true the step is executed, otherwise it is skipped. A condition can be a check like:
 
-```diff
+```diff title=".woodpecker.yml"
  steps:
    slack:
      image: plugins/slack
@@ -202,7 +201,7 @@ Woodpecker supports defining a list of conditions for a step by using a `when` b
 
 Example conditional execution by repository:
 
-```diff
+```diff title=".woodpecker.yml"
  steps:
    slack:
      image: plugins/slack
@@ -220,7 +219,7 @@ Branch conditions are not applied to tags.
 
 Example conditional execution by branch:
 
-```diff
+```diff title=".woodpecker.yml"
 steps:
   slack:
     image: plugins/slack
@@ -234,14 +233,14 @@ steps:
 
 Execute a step if the branch is `main` or `develop`:
 
-```yaml
+```yaml title=".woodpecker.yml"
 when:
   - branch: [main, develop]
 ```
 
 Execute a step if the branch starts with `prefix/*`:
 
-```yaml
+```yaml title=".woodpecker.yml"
 when:
   - branch: prefix/*
 ```
@@ -255,7 +254,7 @@ The branch matching is done using [doublestar](https://github.com/bmatcuk/double
 
 Execute a step using custom include and exclude logic:
 
-```yaml
+```yaml title=".woodpecker.yml"
 when:
   - branch:
       include: [main, release/*]
@@ -268,14 +267,14 @@ Available events: `push`, `pull_request`, `tag`, `deployment`, `cron`, `manual`
 
 Execute a step if the build event is a `tag`:
 
-```yaml
+```yaml title=".woodpecker.yml"
 when:
   - event: tag
 ```
 
 Execute a step if the pipeline event is a `push` to a specified branch:
 
-```diff
+```diff title=".woodpecker.yml"
 when:
   - event: push
 +   branch: main
@@ -283,7 +282,7 @@ when:
 
 Execute a step for multiple events:
 
-```yaml
+```yaml title=".woodpecker.yml"
 when:
   - event: [push, tag, deployment]
 ```
@@ -294,7 +293,7 @@ This filter **only** applies to cron events and filters based on the name of a c
 
 Make sure to have a `event: cron` condition in the `when`-filters as well.
 
-```yaml
+```yaml title=".woodpecker.yml"
 when:
   - event: cron
     cron: sync_* # name of your cron job
@@ -307,7 +306,7 @@ when:
 The `ref` filter compares the git reference against which the workflow is executed.
 This allows you to filter, for example, tags that must start with **v**:
 
-```yaml
+```yaml title=".woodpecker.yml"
 when:
   - event: tag
     ref: refs/tags/v*
@@ -317,7 +316,7 @@ when:
 
 There are use cases for executing steps on failure, such as sending notifications for failed workflow / pipeline. Use the status constraint to execute steps even when the workflow fails:
 
-```diff
+```diff title=".woodpecker.yml"
 steps:
   slack:
     image: plugins/slack
@@ -335,14 +334,14 @@ This condition should be used in conjunction with a [matrix](./30-matrix-workflo
 
 Execute a step for a specific platform:
 
-```yaml
+```yaml title=".woodpecker.yml"
 when:
   - platform: linux/amd64
 ```
 
 Execute a step for a specific platform using wildcards:
 
-```yaml
+```yaml title=".woodpecker.yml"
 when:
   - platform: [linux/*, windows/amd64]
 ```
@@ -351,7 +350,7 @@ when:
 
 Execute a step for deployment events matching the target deployment environment:
 
-```yaml
+```yaml title=".woodpecker.yml"
 when:
   - environment: production
   - event: deployment
@@ -361,7 +360,7 @@ when:
 
 Execute a step for a single matrix permutation:
 
-```yaml
+```yaml title=".woodpecker.yml"
 when:
   - matrix:
       GO_VERSION: 1.5
@@ -372,7 +371,7 @@ when:
 
 Execute a step only on a certain Woodpecker instance matching the specified hostname:
 
-```yaml
+```yaml title=".woodpecker.yml"
 when:
   - instance: stage.woodpecker.company.com
 ```
@@ -386,14 +385,14 @@ It is currently **only available** for GitHub, GitLab and Gitea (version 1.18.0 
 
 Execute a step only on a pipeline with certain files being changed:
 
-```yaml
+```yaml title=".woodpecker.yml"
 when:
   - path: 'src/*'
 ```
 
 You can use [glob patterns](https://github.com/bmatcuk/doublestar#patterns) to match the changed files and specify if the step should run if a file matching that pattern has been changed `include` or if some files have **not** been changed `exclude`.
 
-```yaml
+```yaml title=".woodpecker.yml"
 when:
   - path:
       include: ['.woodpecker/*.yml', '*.ini']
@@ -411,35 +410,35 @@ The expression syntax can be found in [the docs](https://github.com/antonmedv/ex
 
 Run on pushes to the default branch for the repository `owner/repo`:
 
-```yaml
+```yaml title=".woodpecker.yml"
 when:
   - evaluate: 'CI_PIPELINE_EVENT == "push" && CI_REPO == "owner/repo" && CI_COMMIT_BRANCH == CI_REPO_DEFAULT_BRANCH'
 ```
 
 Run on commits created by user `woodpecker-ci`:
 
-```yaml
+```yaml title=".woodpecker.yml"
 when:
   - evaluate: 'CI_COMMIT_AUTHOR == "woodpecker-ci"'
 ```
 
 Skip all commits containing `please ignore me` in the commit message:
 
-```yaml
+```yaml title=".woodpecker.yml"
 when:
   - evaluate: 'not (CI_COMMIT_MESSAGE contains "please ignore me")'
 ```
 
 Run on pull requests with the label `deploy`:
 
-```yaml
+```yaml title=".woodpecker.yml"
 when:
   - evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "deploy"'
 ```
 
 Skip step only if `SKIP=true`, run otherwise or if undefined:
 
-```yaml
+```yaml title=".woodpecker.yml"
 when:
   - evaluate: 'SKIP != "true"'
 ```
@@ -450,7 +449,7 @@ Woodpecker supports parallel step execution for same-machine fan-in and fan-out.
 
 Example parallel configuration:
 
-```diff
+```diff title=".woodpecker.yml"
  steps:
    backend:
 +    group: build
@@ -504,7 +503,7 @@ The workspace defines the shared volume and working directory shared by all work
 
 The workspace can be customized using the workspace block in the YAML file:
 
-```diff
+```diff title=".woodpecker.yml"
 +workspace:
 +  base: /go
 +  path: src/github.com/octocat/hello-world
@@ -519,7 +518,7 @@ The workspace can be customized using the workspace block in the YAML file:
 
 The base attribute defines a shared base volume available to all steps. This ensures your source code, dependencies and compiled binaries are persisted and shared between steps.
 
-```diff
+```diff title=".woodpecker.yml"
  workspace:
 +  base: /go
    path: src/github.com/octocat/hello-world
@@ -547,7 +546,7 @@ docker run --volume=my-named-volume:/go node:latest
 
 The path attribute defines the working directory of your build. This is where your code is cloned and will be the default working directory of every step in your build process. The path must be relative and is combined with your base path.
 
-```diff
+```diff title=".woodpecker.yml"
  workspace:
    base: /go
 +  path: src/github.com/octocat/hello-world
@@ -575,7 +574,7 @@ By default each workflow has at least the `repo=your-user/your-repo-name` label.
 
 You can add additional labels as a key value map:
 
-```diff
+```diff title=".woodpecker.yml"
 +labels:
 +  location: europe # only agents with `location=europe` or `location=*` will be used
 +  weather: sun
@@ -598,7 +597,7 @@ Example:
 
 Assuming we have two agents, one `linux/arm` and one `linux/amd64`. Previously this workflow would have executed on **either agent**, as Woodpecker is not fussy about where it runs the workflows. By setting the following option it will only be executed on an agent with the platform `linux/arm64`.
 
-```diff
+```diff title=".woodpecker.yml"
 +labels:
 +  platform: linux/arm64
 
@@ -618,7 +617,7 @@ Woodpecker automatically configures a default clone step if not explicitly defin
 
 You can manually configure the clone step in your workflow for customization:
 
-```diff
+```diff title=".woodpecker.yml"
 +clone:
 +  git:
 +    image: woodpeckerci/plugin-git
@@ -633,7 +632,7 @@ You can manually configure the clone step in your workflow for customization:
 
 Example configuration to override depth:
 
-```diff
+```diff title=".woodpecker.yml"
  clone:
    git:
      image: woodpeckerci/plugin-git
@@ -644,7 +643,7 @@ Example configuration to override depth:
 
 Example configuration to use a custom clone plugin:
 
-```diff
+```diff title=".woodpecker.yml"
 clone:
   git:
 +   image: octocat/custom-git-plugin
@@ -652,7 +651,7 @@ clone:
 
 Example configuration to clone Mercurial repository:
 
-```diff
+```diff title=".woodpecker.yml"
  clone:
    hg:
 +    image: plugins/hg
@@ -664,7 +663,7 @@ Example configuration to clone Mercurial repository:
 
 To use the credentials that cloned the repository to clone it's submodules, update `.gitmodules` to use `https` instead of `git`:
 
-```diff
+```diff title=".woodpecker.yml"
  [submodule "my-module"]
  path = my-module
 -url = git@github.com:octocat/my-module.git
@@ -673,7 +672,7 @@ To use the credentials that cloned the repository to clone it's submodules, upda
 
 To use the ssh git url in `.gitmodules` for users cloning with ssh, and also use the https url in Woodpecker, add `submodule_override`:
 
-```diff
+```diff title=".woodpecker.yml"
  clone:
    git:
      image: woodpeckerci/plugin-git
@@ -690,7 +689,7 @@ steps:
 
 By default Woodpecker is automatically adding a clone step. This clone step can be configured by the [clone](#clone) property. If you do not need a `clone` step at all you can skip it using:
 
-```yaml
+```yaml title=".woodpecker.yml"
 skip_clone: true
 ```
 
@@ -702,7 +701,7 @@ Woodpecker gives the ability to skip whole workflows (not just steps #when---con
 
 Example conditional execution by repository:
 
-```diff
+```diff title=".woodpecker.yml"
 +when:
 +  repo: test/test
 +
@@ -721,7 +720,7 @@ Branch conditions are not applied to tags.
 
 Example conditional execution by branch:
 
-```diff
+```diff title=".woodpecker.yml"
 +when:
 +  branch: main
 +
@@ -736,21 +735,21 @@ Example conditional execution by branch:
 
 Execute a step if the branch is `main` or `develop`:
 
-```diff
+```diff title=".woodpecker.yml"
 when:
   branch: [main, develop]
 ```
 
 Execute a step if the branch starts with `prefix/*`:
 
-```diff
+```diff title=".woodpecker.yml"
 when:
   branch: prefix/*
 ```
 
 Execute a step using custom include and exclude logic:
 
-```diff
+```diff title=".woodpecker.yml"
 when:
   branch:
     include: [ main, release/* ]
@@ -761,14 +760,14 @@ when:
 
 Execute a step if the build event is a `tag`:
 
-```diff
+```diff title=".woodpecker.yml"
 when:
   event: tag
 ```
 
 Execute a step if the pipeline event is a `push` to a specified branch:
 
-```diff
+```diff title=".woodpecker.yml"
 when:
   event: push
 + branch: main
@@ -776,14 +775,14 @@ when:
 
 Execute a step for all non-pull request events:
 
-```diff
+```diff title=".woodpecker.yml"
 when:
   event: [push, tag, deployment]
 ```
 
 Execute a step for all build events:
 
-```diff
+```diff title=".woodpecker.yml"
 when:
   event: [push, pull_request, tag, deployment]
 ```
@@ -793,7 +792,7 @@ when:
 The `ref` filter compares the git reference against which the pipeline is executed.
 This allows you to filter, for example, tags that must start with **v**:
 
-```yaml
+```yaml title=".woodpecker.yml"
 when:
   event: tag
   ref: refs/tags/v*
@@ -803,7 +802,7 @@ when:
 
 Execute a step for deployment events matching the target deployment environment:
 
-```diff
+```diff title=".woodpecker.yml"
 when:
   environment: production
   event: deployment
@@ -813,7 +812,7 @@ when:
 
 Execute a step only on a certain Woodpecker instance matching the specified hostname:
 
-```diff
+```diff title=".woodpecker.yml"
 when:
   instance: stage.woodpecker.company.com
 ```
@@ -827,14 +826,14 @@ It is currently **only available** for GitHub, GitLab and Gitea (version 1.18.0 
 
 Execute a step only on a pipeline with certain files being changed:
 
-```diff
+```diff title=".woodpecker.yml"
 when:
   path: "src/*"
 ```
 
 You can use [glob patterns](https://github.com/bmatcuk/doublestar#patterns) to match the changed files and specify if the step should run if a file matching that pattern has been changed `include` or if some files have **not** been changed `exclude`.
 
-```diff
+```diff title=".woodpecker.yml"
 when:
   path:
     include: [ '.woodpecker/*.yml', '*.ini' ]
@@ -858,7 +857,7 @@ Woodpecker gives the ability to configure privileged mode in the YAML. You can u
 
 > Privileged mode is only available to trusted repositories and for security reasons should only be used in private environments. See [project settings](./71-project-settings.md#trusted) to enable trusted mode.
 
-```diff
+```diff title=".woodpecker.yml"
  steps:
    build:
      image: docker

@@ -8,8 +8,7 @@ Registration is closed by default (`WOODPECKER_OPEN=false`). If registration is 
 
 To open registration:
 
-```diff
-# docker-compose.yml
+```diff title="docker-compose.yml"
 version: '3'
 
 services:
@@ -27,8 +26,7 @@ by open registration and **filter by organization** membership through the `WOOD
 
 ### To close registration, but allow specific admin users
 
-```diff
-# docker-compose.yml
+```diff title="docker-compose.yml"
 version: '3'
 
 services:
@@ -42,8 +40,7 @@ services:
 
 ### To only allow registration of users, who are members of approved organizations
 
-```diff
-# docker-compose.yml
+```diff title="docker-compose.yml"
 version: '3'
 
 services:
@@ -59,8 +56,7 @@ services:
 
 Administrators should also be enumerated in your configuration.
 
-```diff
-# docker-compose.yml
+```diff title="docker-compose.yml"
 version: '3'
 
 services:
@@ -77,8 +73,7 @@ Woodpecker operates with the user's OAuth permission. Due to the coarse permissi
 
 Use the `WOODPECKER_REPO_OWNERS` variable to filter which GitHub user's repos should be synced only. You typically want to put here your company's GitHub name.
 
-```diff
-# docker-compose.yml
+```diff title="docker-compose.yml"
 version: '3'
 
 services:
@@ -94,8 +89,7 @@ services:
 If you want to make available a specific private registry to all pipelines, use the `WOODPECKER_DOCKER_CONFIG` server configuration.
 Point it to your server's docker config.
 
-```diff
-# docker-compose.yml
+```diff title="docker-compose.yml"
 version: '3'
 
 services:
@@ -117,8 +111,7 @@ For docker-compose you can use a .env file next to your compose configuration to
 
 Alternatively use docker-secrets. As it may be difficult to use docker secrets for environment variables woodpecker allows to read sensible data from files by providing a `*_FILE` option of all sensible configuration variables. Woodpecker will try to read the value directly from this file. Keep in mind that when the original environment variable gets specified at the same time it will override the value read from the file.
 
-```diff
-# docker-compose.yml
+```diff title="docker-compose.yml"
 version: '3'
 
 services:
@@ -149,7 +142,7 @@ These files must be present in the server's filesystem.
 They can be backed in a Docker image or mounted from a ConfigMap inside a Kubernetes environment.
 The configuration variables are independent of each other, which means it can be just one file present, or both.
 
-```text
+```ini title=".env"
 WOODPECKER_CUSTOM_CSS_FILE=/usr/local/www/woodpecker.css
 WOODPECKER_CUSTOM_CSS_FILE=/usr/local/www/woodpecker.js
 ```
@@ -158,7 +151,7 @@ The examples below show how to place a banner message in the top navigation bar 
 
 ### woodpecker.css
 
-```css
+```css title="woodpecker.css"
 .banner-message {
   position: absolute;
   width: 280px;
@@ -174,7 +167,7 @@ The examples below show how to place a banner message in the top navigation bar 
 
 ### woodpecker.js
 
-```javascript
+```javascript title="woodpecker.js"
 // place/copy a minified version of jQuery or ZeptoJS here ...
 !(function () {
   'use strict';
@@ -456,7 +449,7 @@ The database connection string. The default value is the path of the embedded SQ
 
 Example:
 
-```bash
+```ini title=".env"
 # MySQL
 # https://github.com/go-sql-driver/mysql#dsn-data-source-name
 WOODPECKER_DATABASE_DATASOURCE=root:password@tcp(1.2.3.4:3306)/woodpecker?parseTime=true

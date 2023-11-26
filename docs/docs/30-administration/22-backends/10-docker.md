@@ -29,7 +29,7 @@ Woodpecker supports [Docker credentials](https://github.com/docker/docker-creden
 
 To add your credential helper to the Woodpecker server container you could use the following code to build a custom image:
 
-```dockerfile
+```dockerfile title="Dockerfile"
 FROM woodpeckerci/woodpecker-server:latest-alpine
 
 RUN apk add -U --no-cache docker-credential-ecr-login

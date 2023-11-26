@@ -32,8 +32,7 @@ agent, configure it and run it on the host machine.
 Enable connection to the server from the outside of the docker environment by
 exposing the port 9000:
 
-```yaml
-# docker-compose.yml for the server
+```yaml title="docker-compose.yml"
 version: '3'
 
 services:
@@ -51,8 +50,7 @@ services:
 You can use the `.env` file to store environmental variables for configuration.
 At the minimum you need the following information:
 
-```ini
-# .env for the agent
+```ini title=".env"
 WOODPECKER_AGENT_SECRET=replace_with_your_server_secret
 WOODPECKER_SERVER=replace_with_your_server_address:9000
 ```

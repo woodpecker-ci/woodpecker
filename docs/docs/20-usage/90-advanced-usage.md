@@ -10,7 +10,7 @@ You can use [YAML anchors & aliases](https://yaml.org/spec/1.2.2/#3222-anchors-a
 
 To convert this:
 
-```yaml
+```yaml title=".woodpecker.yml"
 steps:
   test:
     image: golang:1.18
@@ -22,7 +22,7 @@ steps:
 
 Just add a new section called **variables** like this:
 
-```diff
+```diff title=".woodpecker.yml"
 +variables:
 +  - &golang_image 'golang:1.18'
 
@@ -39,7 +39,7 @@ Just add a new section called **variables** like this:
 
 ### Map merges and overwrites
 
-```yaml
+```yaml title=".woodpecker.yml"
 variables:
   - &base-plugin-settings
     target: dist
@@ -69,7 +69,7 @@ steps:
 
 ### Sequence merges
 
-```yaml
+```yaml title=".woodpecker.yml"
 variables:
   pre_cmds: &pre_cmds
     - echo start
@@ -103,7 +103,7 @@ steps:
 
 One can create a file containing environment variables, and then source it in each step that needs them.
 
-```yaml
+```yaml title=".woodpecker.yml"
 steps:
   init:
     image: bash
@@ -122,7 +122,7 @@ steps:
 
 As described in [Global environment variables](./50-environment.md#global-environment-variables), one can define global variables:
 
-```yaml
+```yaml title="docker-compose.yml"
 services:
   woodpecker-server:
     # ...

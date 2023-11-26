@@ -7,7 +7,7 @@ The kubernetes backend executes steps inside standalone pods. A temporary PVC is
 These env vars can be set in the `env:` sections of both `server` and `agent`.
 They do not need to be set for both but only for the part to which it is relevant to.
 
-```yaml
+```yaml title="woodpecker-stack.yml"
 server:
   env:
     WOODPECKER_SESSION_EXPIRES: "300h"
@@ -55,7 +55,7 @@ We recommend to add a `resources` definition to all steps to ensure efficient sc
 
 Here is an example definition with an arbitrary `resources` definition below the `backend_options` section:
 
-```yaml
+```yaml title=".woodpecker.yml"
 steps:
   'My kubernetes step':
     image: alpine
@@ -89,7 +89,7 @@ To overwrite this, one needs to set the label in the `nodeSelector` section of t
 A practical example for this is when running a matrix-build and delegating specific elements of the matrix to run on a specific architecture.
 In this case, one must define an arbitrary key in the matrix section of the respective matrix element:
 
-```yaml
+```yaml title=".woodpecker.yml"
 matrix:
   include:
     - NAME: runner1
@@ -98,7 +98,7 @@ matrix:
 
 And then overwrite the `nodeSelector` in the `backend_options` section of the step(s) using the name of the respective env var:
 
-```yaml
+```yaml title=".woodpecker.yml"
 [...]
     backend_options:
       kubernetes:
@@ -113,7 +113,7 @@ See the [kubernetes documentation](https://kubernetes.io/docs/concepts/schedulin
 
 Example pipeline configuration:
 
-```yaml
+```yaml title=".woodpecker.yml"
 steps:
   build:
     image: golang
@@ -145,7 +145,7 @@ steps:
 To mount volumes a persistent volume (PV) and persistent volume claim (PVC) are needed on the cluster which can be referenced in steps via the `volume:` option.
 Assuming a PVC named "woodpecker-cache" exists, it can be referenced as follows in a step:
 
-```yaml
+```yaml title=".woodpecker.yml"
 steps:
   "Restore Cache":
     image: meltwater/drone-cache
@@ -161,7 +161,7 @@ steps:
 
 Use the following configuration to set the `securityContext` for the pod/container running a given pipeline step:
 
-```yaml
+```yaml title=".woodpecker.yml"
 steps:
   test:
     image: alpine
@@ -180,7 +180,7 @@ Note that the `backend_options.kubernetes.securityContext` object allows you to 
 By default, the properties will be set at the pod level. Properties that are only supported on the container level will be set there instead. So, the
 configuration shown above will result in something like the following pod spec:
 
-```yaml
+```yaml title="woodpecker-stack.yml"
 kind: Pod
 spec:
   securityContext:
@@ -202,7 +202,7 @@ See the [kubernetes documentation](https://kubernetes.io/docs/tasks/configure-po
 
 CRI-O users currently need to configure the workspace for all workflows in order for them to run correctly. Add the following at the beginning of your configuration:
 
-```yaml
+```yaml title=".woodpecker.yml"
 workspace:
   base: '/woodpecker'
   path: '/'

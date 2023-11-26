@@ -2,7 +2,7 @@
 
 Woodpecker is compatible with Prometheus and exposes a `/metrics` endpoint if the environment variable `WOODPECKER_PROMETHEUS_AUTH_TOKEN` is set. Please note that access to the metrics endpoint is restricted and requires the authorization token from the environment variable mentioned above.
 
-```yaml
+```yaml title="prometheus.yml"
 global:
   scrape_interval: 60s
 
@@ -18,7 +18,7 @@ scrape_configs:
 
 An administrator will need to generate a user API token and configure in the Prometheus configuration file as a bearer token. Please see the following example:
 
-```diff
+```diff title="prometheus.yml"
 global:
   scrape_interval: 60s
 
@@ -32,7 +32,7 @@ scrape_configs:
 
 As an alternative, the token can also be read from a file:
 
-```diff
+```diff title="prometheus.yml"
 global:
   scrape_interval: 60s
 

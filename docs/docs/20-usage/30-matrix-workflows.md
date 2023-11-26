@@ -4,7 +4,7 @@ Woodpecker has integrated support for matrix workflows. Woodpecker executes a se
 
 Example matrix definition:
 
-```yaml
+```yaml title=".woodpecker.yml"
 matrix:
   GO_VERSION:
     - 1.4
@@ -17,7 +17,7 @@ matrix:
 
 Example matrix definition containing only specific combinations:
 
-```yaml
+```yaml title=".woodpecker.yml"
 matrix:
   include:
     - GO_VERSION: 1.4
@@ -32,7 +32,7 @@ matrix:
 
 Matrix variables are interpolated in the YAML using the `${VARIABLE}` syntax, before the YAML is parsed. This is an example YAML file before interpolating matrix parameters:
 
-```yaml
+```yaml title=".woodpecker.yml"
 matrix:
   GO_VERSION:
     - 1.4
@@ -57,7 +57,7 @@ services:
 
 Example YAML file after injecting the matrix parameters:
 
-```diff
+```diff title=".woodpecker.yml"
 steps:
   build:
 -   image: golang:${GO_VERSION}
@@ -80,7 +80,7 @@ services:
 
 ### Example matrix pipeline based on Docker image tag
 
-```yaml
+```yaml title=".woodpecker.yml"
 matrix:
   TAG:
     - 1.7
@@ -97,7 +97,7 @@ steps:
 
 ### Example matrix pipeline based on container image
 
-```yaml
+```yaml title=".woodpecker.yml"
 matrix:
   IMAGE:
     - golang:1.7
@@ -114,7 +114,7 @@ steps:
 
 ### Example matrix pipeline using multiple platforms
 
-```yaml
+```yaml title=".woodpecker.yml"
 matrix:
   platform:
     - linux/amd64

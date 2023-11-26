@@ -33,9 +33,7 @@ If you still need to pass artifacts between the workflows you need use some stor
 └── .test.yml
 ```
 
-.woodpecker/.build.yml
-
-```yaml
+```yaml title=".woodpecker/.build.yml"
 steps:
   build:
     image: debian:stable-slim
@@ -44,9 +42,7 @@ steps:
       - sleep 5
 ```
 
-.woodpecker/.deploy.yml
-
-```yaml
+```yaml title=".woodpecker/.deploy.yml"
 steps:
   deploy:
     image: debian:stable-slim
@@ -59,9 +55,7 @@ depends_on:
   - test
 ```
 
-.woodpecker/.test.yml
-
-```yaml
+```yaml title=".woodpecker/.test.yml"
 steps:
   test:
     image: debian:stable-slim
@@ -73,9 +67,7 @@ depends_on:
   - build
 ```
 
-.woodpecker/.lint.yml
-
-```yaml
+```yaml title=".woodpecker/.lint.yml"
 steps:
   lint:
     image: debian:stable-slim
@@ -96,7 +88,7 @@ Dependencies between workflows can be set with the `depends_on` element. A workf
 
 The name for a `depends_on` entry is the filename without the path, leading dots and without the file extension `.yml` or `.yaml`. If the project config for example uses `.woodpecker/` as path for CI files with a file named `.woodpecker/.lint.yml` the corresponding `depends_on` entry would be `lint`.
 
-```diff
+```diff title=".woodpecker/.deploy.yml"
 steps:
   deploy:
     image: debian:stable-slim
@@ -111,7 +103,7 @@ steps:
 
 Workflows that need to run even on failures should set the `runs_on` tag.
 
-```diff
+```diff title=".woodpecker/.notify.yml"
 steps:
   notify:
     image: debian:stable-slim

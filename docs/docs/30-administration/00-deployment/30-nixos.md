@@ -10,7 +10,7 @@ In practice, the settings are specified declaratively in the NixOS configuration
 
 ## General Configuration
 
-```nix
+```nix title="configuration.nix"
 { config
 , ...
 }:

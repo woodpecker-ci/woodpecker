@@ -52,21 +52,15 @@ More enhanced information you can find here <https://github.com/swaggo/swag/blob
 
 ### Manual code generation
 
-#### generate the server's Go code containing the Swagger
-
-```bash
+```bash title="generate the server's Go code containing the Swagger"
 make generate-swagger
 ```
 
-##### update the Markdown in the ./docs folder
-
-```bash
+```bash title="update the Markdown in the ./docs folder"
 make docs
 ```
 
-##### auto-format swagger related godoc
-
-```bash
+```bash title="auto-format swagger related godoc"
 go run github.com/swaggo/swag/cmd/swag@latest fmt -g server/api/z.go
 ```
 

@@ -10,7 +10,7 @@ These credentials are never exposed to your steps, which means they cannot be us
 
 Example configuration using a private image:
 
-```diff
+```diff title=".woodpecker.yml"
  steps:
    build:
 +    image: gcr.io/custom/golang
@@ -53,7 +53,7 @@ It's possible to build a local image by mounting the docker socket as a volume.
 
 With a `Dockerfile` at the root of the project:
 
-```diff
+```diff title=".woodpecker.yml"
 steps:
   build-image:
     image: docker

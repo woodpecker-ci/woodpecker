@@ -6,7 +6,7 @@ This provides a brief tutorial for creating a Woodpecker webhook plugin, using s
 
 The below example demonstrates how we might configure a webhook plugin in the YAML file:
 
-```yaml
+```yaml title=".woodpecker.yml"
 steps:
   webhook:
     image: foo/webhook
@@ -21,7 +21,7 @@ steps:
 
 Create a simple shell script that invokes curl using the YAML configuration parameters, which are passed to the script as environment variables in uppercase and prefixed with `PLUGIN_`.
 
-```bash
+```bash title="script.sh"
 #!/bin/sh
 
 curl \
@@ -34,7 +34,7 @@ curl \
 
 Create a Dockerfile that adds your shell script to the image, and configures the image to execute your shell script as the main entrypoint.
 
-```dockerfile
+```dockerfile title="Dockerfile"
 FROM alpine
 ADD script.sh /bin/
 RUN chmod +x /bin/script.sh
@@ -44,14 +44,14 @@ ENTRYPOINT /bin/script.sh
 
 Build and publish your plugin to the Docker registry. Once published your plugin can be shared with the broader Woodpecker community.
 
-```nohighlight
+```bash
 docker build -t foo/webhook .
 docker push foo/webhook
 ```
 
 Execute your plugin locally from the command line to verify it is working:
 
-```nohighlight
+```bash
 docker run --rm \
   -e PLUGIN_METHOD=post \
   -e PLUGIN_URL=http://example.com \

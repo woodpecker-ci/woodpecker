@@ -6,7 +6,7 @@ To configure cron jobs you need at least push access to the repository.
 
 1. To create a new cron job adjust your pipeline config(s) and add the event filter to all steps you would like to run by the cron job:
 
-   ```diff
+   ```diff title=".woodpecker.yml"
     steps:
       sync_locales:
         image: weblate_sync
