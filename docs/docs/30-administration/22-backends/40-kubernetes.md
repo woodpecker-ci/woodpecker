@@ -42,6 +42,10 @@ agent:
 
   Additional annotations to apply to worker pods. Must be a YAML object, e.g. `{"example.com/test-annotation":"test-value"}`.
 
+- `WOODPECKER_BACKEND_K8S_SECCTX_NONROOT` (default: `false`)
+
+  Determines if containers must be required to run as non-root users.
+
 ## Job specific configuration
 
 ### Resources
