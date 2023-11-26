@@ -2,7 +2,7 @@
 
 Agents are configured by the command line or environment variables. At the minimum you need the following information:
 
-```yaml title="docker-compose.yml"
+```diff title="docker-compose.yml"
 version: '3'
 
 services:
@@ -24,7 +24,7 @@ The following are automatically set and can be overridden:
 
 By default, the maximum workflows that are executed in parallel on an agent is 1. If required, you can add `WOODPECKER_MAX_WORKFLOWS` to increase your parallel processing for an agent.
 
-```yaml title="docker-compose.yml"
+```diff title="docker-compose.yml"
 version: '3'
 
 services:

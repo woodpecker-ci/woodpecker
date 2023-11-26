@@ -8,7 +8,7 @@ Registration is closed by default (`WOODPECKER_OPEN=false`). If registration is 
 
 To open registration:
 
-```yaml title="docker-compose.yml"
+```diff title="docker-compose.yml"
 version: '3'
 
 services:
@@ -26,7 +26,7 @@ by open registration and **filter by organization** membership through the `WOOD
 
 ### To close registration, but allow specific admin users
 
-```yaml title="docker-compose.yml"
+```diff title="docker-compose.yml"
 version: '3'
 
 services:
@@ -40,7 +40,7 @@ services:
 
 ### To only allow registration of users, who are members of approved organizations
 
-```yaml title="docker-compose.yml"
+```diff title="docker-compose.yml"
 version: '3'
 
 services:
@@ -56,7 +56,7 @@ services:
 
 Administrators should also be enumerated in your configuration.
 
-```yaml title="docker-compose.yml"
+```diff title="docker-compose.yml"
 version: '3'
 
 services:
@@ -73,7 +73,7 @@ Woodpecker operates with the user's OAuth permission. Due to the coarse permissi
 
 Use the `WOODPECKER_REPO_OWNERS` variable to filter which GitHub user's repos should be synced only. You typically want to put here your company's GitHub name.
 
-```yaml title="docker-compose.yml"
+```diff title="docker-compose.yml"
 version: '3'
 
 services:
@@ -89,7 +89,7 @@ services:
 If you want to make available a specific private registry to all pipelines, use the `WOODPECKER_DOCKER_CONFIG` server configuration.
 Point it to your server's docker config.
 
-```yaml title="docker-compose.yml"
+```diff title="docker-compose.yml"
 version: '3'
 
 services:
@@ -111,7 +111,7 @@ For docker-compose you can use a .env file next to your compose configuration to
 
 Alternatively use docker-secrets. As it may be difficult to use docker secrets for environment variables woodpecker allows to read sensible data from files by providing a `*_FILE` option of all sensible configuration variables. Woodpecker will try to read the value directly from this file. Keep in mind that when the original environment variable gets specified at the same time it will override the value read from the file.
 
-```yaml title="docker-compose.yml"
+```diff title="docker-compose.yml"
 version: '3'
 
 services:

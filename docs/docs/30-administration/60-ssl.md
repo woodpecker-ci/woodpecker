@@ -9,7 +9,7 @@ Woodpecker supports automated SSL configuration and updates using Let's Encrypt.
 
 You can enable Let's Encrypt by making the following modifications to your server configuration:
 
-```yaml title="docker-compose.yml"
+```diff title="docker-compose.yml"
 version: '3'
 
 services:
@@ -43,7 +43,7 @@ Woodpecker uses the official Go acme library which will handle certificate upgra
 
 Woodpecker supports SSL configuration by mounting certificates into your container.
 
-```yaml title="docker-compose.yml"
+```diff title="docker-compose.yml"
 version: '3'
 
 services:
@@ -64,7 +64,7 @@ services:
 
 Update your configuration to expose the following ports:
 
-```yaml title="docker-compose.yml"
+```diff title="docker-compose.yml"
 version: '3'
 
 services:
@@ -78,7 +78,7 @@ services:
 
 Update your configuration to mount your certificate and key:
 
-```yaml title="docker-compose.yml"
+```diff title="docker-compose.yml"
 version: '3'
 
 services:

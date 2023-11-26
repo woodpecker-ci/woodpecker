@@ -2,7 +2,7 @@
 
 Woodpecker comes with built-in support for Gitea and the "soft" fork Forgejo. To enable Gitea you should configure the Woodpecker container using the following environment variables:
 
-```yaml title="docker-compose.yml"
+```diff title="docker-compose.yml"
 version: '3'
 
 services:
@@ -27,7 +27,7 @@ Otherwise, the communication should go via the `docker0` gateway (usually 172.17
 
 To configure the Docker network if the network's name is `gitea`, configure it like this:
 
-```yaml title="docker-compose.yml"
+```diff title="docker-compose.yml"
 version: '3'
 
 services:

@@ -2,7 +2,7 @@
 
 Woodpecker comes with built-in support for the GitLab version 8.2 and higher. To enable GitLab you should configure the Woodpecker container using the following environment variables:
 
-```yaml title="docker-compose.yml"
+```diff title="docker-compose.yml"
 version: '3'
 
 services:
