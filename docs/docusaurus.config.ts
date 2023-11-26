@@ -138,7 +138,18 @@ const config: Config = {
     prism: {
       theme: themes.github,
       darkTheme: themes.dracula,
-      additionalLanguages: ['diff', 'json', 'docker', 'javascript', 'css', 'bash', 'nginx', 'apacheconf'],
+      additionalLanguages: [
+        'diff',
+        'json',
+        'docker',
+        'javascript',
+        'css',
+        'bash',
+        'nginx',
+        'apacheconf',
+        'nix',
+        'toml',
+      ],
     },
     announcementBar: {
       id: 'github-star',

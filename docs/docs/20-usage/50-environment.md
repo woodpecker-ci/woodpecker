@@ -2,7 +2,7 @@
 
 Woodpecker provides the ability to pass environment variables to individual pipeline steps. Note that these can't overwrite any existing, built-in variables. Example pipeline step with custom environment variables:
 
-```diff
+```diff title=".woodpecker.yml"
 steps:
   build:
     image: golang
@@ -17,7 +17,7 @@ steps:
 
 Please note that the environment section is not able to expand environment variables. If you need to expand variables they should be exported in the commands section.
 
-```diff
+```diff title=".woodpecker.yml"
 steps:
   build:
     image: golang
@@ -31,7 +31,7 @@ steps:
 
 > Please be warned that `${variable}` expressions are subject to pre-processing. If you do not want the pre-processor to evaluate your expression it must be escaped:
 
-```diff
+```diff title=".woodpecker.yml"
 steps:
   build:
     image: golang
@@ -138,7 +138,7 @@ This is the reference list of all environment variables available to your pipeli
 
 If you want specific environment variables to be available in all of your pipelines use the `WOODPECKER_ENVIRONMENT` setting on the Woodpecker server. Note that these can't overwrite any existing, built-in variables.
 
-```diff
+```diff title="docker-compose.yml"
 services:
   woodpecker-server:
     [...]
@@ -149,7 +149,7 @@ services:
 
 These can be used, for example, to manage the image tag used by multiple projects.
 
-```diff
+```diff title=".woodpecker.yml"
 steps:
   build:
 -   image: golang:1.18
@@ -167,7 +167,7 @@ Woodpecker provides the ability to substitute environment variables at runtime. 
 
 Example commit substitution:
 
-```diff
+```diff title=".woodpecker.yml"
 steps:
   docker:
     image: plugins/docker
@@ -177,7 +177,7 @@ steps:
 
 Example tag substitution:
 
-```diff
+```diff title=".woodpecker.yml"
 steps:
   docker:
     image: plugins/docker
@@ -205,7 +205,7 @@ Woodpecker also emulates bash string operations. This gives us the ability to ma
 
 Example variable substitution with substring:
 
-```diff
+```diff title=".woodpecker.yml"
 steps:
   docker:
     image: plugins/docker
@@ -215,7 +215,7 @@ steps:
 
 Example variable substitution strips `v` prefix from `v.1.0.0`:
 
-```diff
+```diff title=".woodpecker.yml"
 steps:
   docker:
     image: plugins/docker

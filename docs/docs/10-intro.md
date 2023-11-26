@@ -11,8 +11,7 @@ If you are already using containers in your daily workflow, you'll for sure love
 - Pipeline steps can be named as you like
 - Run any command in the commands section
 
-```yaml
-# .woodpecker.yml
+```yaml title=".woodpecker.yml"
 steps:
   build:
     image: debian
@@ -31,7 +30,7 @@ steps:
   - or search for available images that are already tailored for your needs in image registries like [Docker Hub](https://hub.docker.com/search?type=image)
 - List the commands that should be executed in the container
 
-```diff
+```diff title=".woodpecker.yml"
 steps:
   build:
 -   image: debian
@@ -45,8 +44,7 @@ steps:
 - Woodpecker clones the source code in the beginning
 - File changes are persisted throughout individual steps as the same volume is being mounted in all steps
 
-```yaml
-# .woodpecker.yml
+```yaml title=".woodpecker.yml"
 steps:
   build:
     image: debian
@@ -65,20 +63,17 @@ steps:
 - And make the yaml declarative
 - Plugins are Docker images with your script as an entrypoint
 
-```Dockerfile
-# Dockerfile
+```Dockerfile title="Dockerfile"
 FROM laszlocloud/kubectl
 COPY deploy /usr/local/deploy
 ENTRYPOINT ["/usr/local/deploy"]
 ```
 
-```bash
-# deploy
+```bash title="deploy"
 kubectl apply -f $PLUGIN_TEMPLATE
 ```
 
-```yaml
-# .woodpecker.yml
+```yaml title=".woodpecker.yml"
 steps:
   deploy-to-k8s:
     image: laszlocloud/my-k8s-plugin

@@ -28,7 +28,7 @@ Read more at: [https://github.com/go-yaml/yaml](https://github.com/go-yaml/yaml/
 
 Example pipeline configuration:
 
-```yaml
+```yaml title=".woodpecker.yml"
 steps:
   build:
     image: golang
@@ -46,7 +46,7 @@ services:
 
 Example pipeline configuration with multiple, serial steps:
 
-```yaml
+```yaml title=".woodpecker.yml"
 steps:
   backend:
     image: golang

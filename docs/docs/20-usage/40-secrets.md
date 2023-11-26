@@ -16,7 +16,7 @@ Woodpecker provides three different levels to add secrets to your pipeline. The 
 Secrets are exposed to your pipeline steps and plugins as uppercase environment variables and can therefore be referenced in the commands section of your pipeline,
 once their usage is declared in the `secrets` section:
 
-```diff
+```diff title=".woodpecker.yml"
 steps:
   docker:
     image: docker
@@ -33,7 +33,7 @@ In this example, the secret named `secret_token` would be passed to the setting 
 
 **NOTE:** the `from_secret` syntax only works with the newer `settings` block.
 
-```diff
+```diff title=".woodpecker.yml"
 steps:
   docker:
     image: my-plugin
@@ -46,7 +46,7 @@ steps:
 
 Please note parameter expressions are subject to pre-processing. When using secrets in parameter expressions they should be escaped.
 
-```diff
+```diff title=".woodpecker.yml"
 steps:
   docker:
     image: docker
@@ -62,7 +62,7 @@ steps:
 
 There may be scenarios where you are required to store secrets using alternate names. You can map the alternate secret name to the expected name using the below syntax:
 
-```diff
+```diff title=".woodpecker.yml"
 steps:
   docker:
     image: plugins/docker

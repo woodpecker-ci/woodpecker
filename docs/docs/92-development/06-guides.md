@@ -7,9 +7,9 @@ You can find its documentation at [gobook.io/read/gitea.com/xorm](https://gobook
 
 ## Add a new migration
 
-Woodpecker uses migrations to change the database schema if a database model has been changed. If for example a developer removes a property `Counter` from the model `Repo` in `server/model/` they would need to add a new migration task like the following example to a file like `server/store/datastore/migration/004_repos_drop_repo_counter.go`:
+Woodpecker uses migrations to change the database schema if a database model has been changed. If for example a developer removes a property `Counter` from the model `Repo` in `server/model/` they would need to add a new migration task like the following example to a file like:
 
-```go
+```go title="server/store/datastore/migration/004_repos_drop_repo_counter.go"
 package migration
 
 import (

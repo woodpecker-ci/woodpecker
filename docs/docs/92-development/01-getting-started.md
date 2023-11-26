@@ -44,7 +44,7 @@ Similar to the environment variables you can set for your production setup of Wo
 
 A common config for debugging would look like this:
 
-```ini
+```ini title=".env"
 WOODPECKER_OPEN=true
 WOODPECKER_ADMIN=your-username
 
@@ -97,26 +97,31 @@ The Woodpecker source code already includes launch configurations for the Woodpe
 
 To test or lint parts of Woodpecker you can run one of the following commands:
 
-```bash
-# test server code
+```bash title="Test server code"
 make test-server
+```
 
-# test agent code
+```bash title="Test agent code"
 make test-agent
+```
 
-# test cli code
+```bash title="Test cli code"
 make test-cli
+```
 
-# test datastore / database related code like migrations of the server
+```bash title="Test datastore / database related code like migrations of the server"
 make test-server-datastore
+```
 
-# lint go code
+```bash title="Lint go code"
 make lint
+```
 
-# lint UI code
+```bash title="Lint UI code"
 make lint-frontend
+```
 
-# test UI code
+```bash title="Test UI code"
 make test-frontend
 ```
 
@@ -134,14 +139,14 @@ Or you can open the test-file inside [VS-Code](#developing-with-vs-code) and run
 
 If you want to run a Woodpecker applications from your terminal you can use one of the following commands from the base of the Woodpecker project. They will execute Woodpecker in a similar way as described in [debugging Woodpecker](#debugging-woodpecker) without the ability to really debug it in your editor.
 
-```bash title="start server"
+```bash title="Start server"
 go run ./cmd/server
 ```
 
-```bash title="start agent"
+```bash title="Start agent"
 go run ./cmd/agent
 ```
 
-```bash title="execute cli command"
+```bash title="Execute cli command"
 go run ./cmd/cli [command]
 ```
