@@ -32,8 +32,9 @@ const (
 	hookCreated     = "create"
 	hookPullRequest = "pull_request"
 
-	actionOpen = "opened"
-	actionSync = "synchronized"
+	actionOpen  = "opened"
+	actionSync  = "synchronized"
+	actionClose = "closed"
 
 	stateOpen = "open"
 
@@ -110,13 +111,8 @@ func parsePullRequestHook(payload io.Reader) (*model.Repo, *model.Pipeline, erro
 	}
 
 	// Don't trigger pipelines for non-code changes ...
-	if pr.Action != actionOpen && pr.Action != actionSync {
+	if pr.Action != actionOpen && pr.Action != actionSync && pr.Action != actionClose {
 		log.Debug().Msgf("pull_request action is '%s' and no open or sync", pr.Action)
-		return nil, nil, nil
-	}
-	// ... or if PR is not open
-	if pr.PullRequest.State != stateOpen {
-		log.Debug().Msg("pull_request is closed")
 		return nil, nil, nil
 	}
 

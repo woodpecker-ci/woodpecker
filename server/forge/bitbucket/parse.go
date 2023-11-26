@@ -29,7 +29,9 @@ const (
 	hookPush        = "repo:push"
 	hookPullCreated = "pullrequest:created"
 	hookPullUpdated = "pullrequest:updated"
+	hookPullClosed  = "pullrequest:fulfilled"
 	stateOpen       = "OPEN"
+	stateClosed     = "MERGED"
 )
 
 // parseHook parses a Bitbucket hook from an http.Request request and returns
@@ -71,14 +73,14 @@ func parsePushHook(payload []byte) (*model.Repo, *model.Pipeline, error) {
 }
 
 // parsePullHook parses a pull request hook and returns the Repo and Pipeline
-// details. If the pull request is closed nil values are returned.
+// details.
 func parsePullHook(payload []byte) (*model.Repo, *model.Pipeline, error) {
 	hook := internal.PullRequestHook{}
 
 	if err := json.Unmarshal(payload, &hook); err != nil {
 		return nil, nil, err
 	}
-	if hook.PullRequest.State != stateOpen {
+	if hook.PullRequest.State != stateOpen && hook.PullRequest.State != stateClosed {
 		return nil, nil, nil
 	}
 	return convertRepo(&hook.Repo, &internal.RepoPerm{}), convertPullHook(&hook), nil
