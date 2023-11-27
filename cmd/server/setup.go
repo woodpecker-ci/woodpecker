@@ -52,8 +52,6 @@ import (
 )
 
 func setupStore(c *cli.Context) (store.Store, error) {
-	// TODO: find a better way than global var to pass down to allow long migrations -> remove for 3.x
-	server.Config.Server.Migrations.AllowLong = c.Bool("migrations-allow-long")
 	datasource := c.String("datasource")
 	driver := c.String("driver")
 	xorm := store.XORM{

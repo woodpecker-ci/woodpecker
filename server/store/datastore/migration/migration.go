@@ -25,9 +25,39 @@ import (
 )
 
 // APPEND NEW MIGRATIONS
-// they are executed in order and if one fails woodpecker will try to rollback that specific one and quits
+// they are executed in order and if one fails Xormigrate will try to rollback that specific one and quits
 var migrationTasks = []*xormigrate.Migration{
 	&legacyToXormigrate,
+	&legacy2Xorm,
+	&alterTableReposDropFallback,
+	&alterTableReposDropAllowDeploysAllowTags,
+	&fixPRSecretEventName,
+	&alterTableReposDropCounter,
+	&dropSenders,
+	&alterTableLogUpdateColumnLogDataType,
+	&alterTableSecretsAddUserCol,
+	&recreateAgentsTable,
+	&lowercaseSecretNames,
+	&renameBuildsToPipeline,
+	&renameColumnsBuildsToPipeline,
+	&renameTableProcsToSteps,
+	&renameRemoteToForge,
+	&renameForgeIDToForgeRemoteID,
+	&removeActiveFromUsers,
+	&removeInactiveRepos,
+	&dropFiles,
+	&removeMachineCol,
+	&dropOldCols,
+	&initLogsEntriesTable,
+	&migrateLogs2LogEntries,
+	&parentStepsToWorkflows,
+	&addOrgs,
+	&addOrgID,
+	&alterTableTasksUpdateColumnTaskDataType,
+	&alterTableConfigUpdateColumnConfigDataType,
+	&removePluginOnlyOptionFromSecretsTable,
+	&convertToNewPipelineErrorFormat,
+	&renameLinkToURL,
 }
 
 var allBeans = []any{
@@ -55,7 +85,6 @@ func Migrate(e *xorm.Engine, allowLong bool) error {
 
 	m := xormigrate.New(e, migrationTasks)
 	m.AllowLong(allowLong)
-	// TODO remove in 3.0
 	oldCount, err := e.Table("migrations").Count()
 	if oldCount < 1 || err != nil {
 		// allow new schema initialization if old migrations table is empty or it does not exist (err != nil)
