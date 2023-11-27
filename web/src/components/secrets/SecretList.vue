@@ -6,9 +6,11 @@
       class="items-center !bg-wp-background-200 !dark:bg-wp-background-100"
     >
       <span>{{ secret.name }}</span>
-      <span v-if="secret.edit === false" class="ml-2"
-        >({{ secret.org_id === 0 ? $t('global_level_secret') : $t('org_level_secret') }})</span
-      >
+      <Badge
+        v-if="secret.edit === false"
+        class="ml-2"
+        :label="secret.org_id === 0 ? $t('global_level_secret') : $t('org_level_secret')"
+      />
       <div class="ml-auto space-x-2 <md:hidden">
         <Badge v-for="event in secret.events" :key="event" :label="event" />
       </div>
@@ -37,6 +39,7 @@
 import { toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import Badge from '~/components/atomic/Badge.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import { Secret } from '~/lib/api/types';
