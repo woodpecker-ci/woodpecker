@@ -37,8 +37,8 @@ const (
 func Pod(namespace, name, image, workDir, goos, serviceAccountName string,
 	pool, privileged bool,
 	commands, vols, extraHosts []string,
-	labels, annotations, env, backendNodeSelector map[string]string,
-	backendTolerations []types.Toleration, resources types.Resources,
+	labels, annotations, env, nodeSelector map[string]string,
+	tolerations []types.Toleration, resources types.Resources,
 	securityContext *types.SecurityContext, securityContextConfig SecurityContextConfig,
 ) (*v1.Pod, error) {
 	var err error
@@ -46,7 +46,7 @@ func Pod(namespace, name, image, workDir, goos, serviceAccountName string,
 	meta := podMeta(name, namespace, labels, annotations)
 
 	spec, err := podSpec(serviceAccountName, vols, extraHosts, env,
-		backendNodeSelector, backendTolerations, securityContext, securityContextConfig)
+		nodeSelector, tolerations, securityContext, securityContextConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +87,8 @@ func podMeta(name, namespace string, labels, annotations map[string]string) meta
 }
 
 func podSpec(serviceAccountName string, vols, extraHosts []string, env, backendNodeSelector map[string]string, backendTolerations []types.Toleration,
-	securityContext *types.SecurityContext, securityContextConfig SecurityContextConfig) (v1.PodSpec, error) {
+	securityContext *types.SecurityContext, securityContextConfig SecurityContextConfig,
+) (v1.PodSpec, error) {
 	var err error
 	spec := v1.PodSpec{
 		RestartPolicy:      v1.RestartPolicyNever,
@@ -108,7 +109,8 @@ func podSpec(serviceAccountName string, vols, extraHosts []string, env, backendN
 }
 
 func podContainer(name, image, workDir, goos string, pull, privileged bool, commands, volumes []string, env map[string]string, resources types.Resources,
-	securityContext *types.SecurityContext) (v1.Container, error) {
+	securityContext *types.SecurityContext,
+) (v1.Container, error) {
 	var err error
 	container := v1.Container{
 		Name:       name,
@@ -307,12 +309,14 @@ func podSecurityContext(sc *types.SecurityContext, secCtxConf SecurityContextCon
 		return nil
 	}
 
-	return &v1.PodSecurityContext{
+	securityContext := &v1.PodSecurityContext{
 		RunAsNonRoot: nonRoot,
 		RunAsUser:    user,
 		RunAsGroup:   group,
 		FSGroup:      fsGroup,
 	}
+	log.Trace().Msgf("Pod security context that will be used: %v", securityContext)
+	return securityContext
 }
 
 func containerSecurityContext(sc *types.SecurityContext, stepPrivileged bool) *v1.SecurityContext {
@@ -328,9 +332,11 @@ func containerSecurityContext(sc *types.SecurityContext, stepPrivileged bool) *v
 		return nil
 	}
 
-	return &v1.SecurityContext{
+	securityContext := &v1.SecurityContext{
 		Privileged: privileged,
 	}
+	log.Trace().Msgf("Container security context that will be used: %v", securityContext)
+	return securityContext
 }
 
 func mapToEnvVars(m map[string]string) []v1.EnvVar {

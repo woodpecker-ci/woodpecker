@@ -93,10 +93,7 @@ func TestTinyPod(t *testing.T) {
 							"name": "workspace",
 							"mountPath": "/woodpecker/src"
 						}
-					],
-					"securityContext": {
-						"privileged": false
-					}
+					]
 				}
 			],
 			"restartPolicy": "Never",
@@ -114,7 +111,7 @@ func TestTinyPod(t *testing.T) {
 		[]string{"gradle build"}, []string{"workspace:/woodpecker/src"}, nil,
 		nil, nil, map[string]string{"CI": "woodpecker"}, nil,
 		nil,
-		types.Resources{Requests: nil, Limits: nil},
+		types.Resources{Requests: nil, Limits: nil}, nil, SecurityContextConfig{},
 	)
 	assert.NoError(t, err)
 
@@ -207,6 +204,12 @@ func TestFullPod(t *testing.T) {
 				"storage": "ssd"
 			},
 			"serviceAccountName": "wp-svc-acc",
+			"securityContext": {
+				"runAsUser": 101,
+				"runAsGroup": 101,
+				"runAsNonRoot": true,
+				"fsGroup": 101
+			},
 			"imagePullSecrets": [
 				{
 					"name": "regcred"
@@ -237,6 +240,8 @@ func TestFullPod(t *testing.T) {
 		map[string]string{"app": "test"}, map[string]string{"apparmor.security": "runtime/default"}, map[string]string{"CGO": "0"}, map[string]string{"storage": "ssd"},
 		[]types.Toleration{{Key: "net-port", Value: "100Mbit", Effect: types.TaintEffectNoSchedule}},
 		types.Resources{Requests: map[string]string{"memory": "128Mi", "cpu": "1000m"}, Limits: map[string]string{"memory": "256Mi", "cpu": "2"}},
+		&types.SecurityContext{Privileged: newBool(true), RunAsNonRoot: newBool(true), RunAsUser: newInt64(101), RunAsGroup: newInt64(101), FSGroup: newInt64(101)},
+		SecurityContextConfig{RunAsNonRoot: false},
 	)
 	assert.NoError(t, err)
 
