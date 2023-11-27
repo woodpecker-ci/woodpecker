@@ -49,6 +49,7 @@ If you have some missing resources, please feel free to [open a pull-request](ht
 - [Installing Woodpecker CI in your personal homelab](https://pwa.io/articles/installing-woodpecker-in-your-homelab/)
 - [Locally Cached Nix CI with Woodpecker](https://blog.kotatsu.dev/posts/2023-04-21-woodpecker-nix-caching/)
 - [How to run Cypress auto-tests on Woodpecker CI and report results to Slack](https://devforth.io/blog/how-to-run-cypress-auto-tests-on-woodpecker-ci-and-report-results-to-slack/)
+- [Quest For CICD - WoodpeckerCI](https://omaramin.me/posts/woodpecker/)
 
 ## Videos
 

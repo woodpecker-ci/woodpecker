@@ -130,7 +130,7 @@ var flags = []cli.Flag{
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"CI_SYSTEM_URL"},
-		Name:    "system-link",
+		Name:    "system-url",
 		Value:   "https://github.com/woodpecker-ci/woodpecker",
 	},
 	&cli.StringFlag{
@@ -144,7 +144,7 @@ var flags = []cli.Flag{
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"CI_REPO_URL"},
-		Name:    "repo-link",
+		Name:    "repo-url",
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"CI_REPO_CLONE_URL"},
@@ -193,7 +193,7 @@ var flags = []cli.Flag{
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"CI_PIPELINE_URL"},
-		Name:    "pipeline-link",
+		Name:    "pipeline-url",
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"CI_PIPELINE_TARGET"},
@@ -257,7 +257,7 @@ var flags = []cli.Flag{
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"CI_PREV_PIPELINE_URL"},
-		Name:    "prev-pipeline-link",
+		Name:    "prev-pipeline-url",
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"CI_PREV_COMMIT_SHA"},

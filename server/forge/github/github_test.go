@@ -86,7 +86,7 @@ func Test_github(t *testing.T) {
 				g.Assert(repo.FullName).Equal(fakeRepo.FullName)
 				g.Assert(repo.IsSCMPrivate).IsTrue()
 				g.Assert(repo.Clone).Equal(fakeRepo.Clone)
-				g.Assert(repo.Link).Equal(fakeRepo.Link)
+				g.Assert(repo.ForgeURL).Equal(fakeRepo.ForgeURL)
 			})
 			g.It("Should handle a not found error", func() {
 				_, err := c.Repo(ctx, fakeUser, "0", fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
@@ -124,7 +124,7 @@ var (
 		Name:          "Hello-World",
 		FullName:      "octocat/Hello-World",
 		Avatar:        "https://github.com/images/error/octocat_happy.gif",
-		Link:          "https://github.com/octocat/Hello-World",
+		ForgeURL:      "https://github.com/octocat/Hello-World",
 		Clone:         "https://github.com/octocat/Hello-World.git",
 		IsSCMPrivate:  true,
 	}

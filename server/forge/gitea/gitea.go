@@ -339,7 +339,7 @@ func (c *Gitea) Status(ctx context.Context, user *model.User, repo *model.Repo, 
 		pipeline.Commit,
 		gitea.CreateStatusOption{
 			State:       getStatus(workflow.State),
-			TargetURL:   common.GetPipelineStatusLink(repo, pipeline, workflow),
+			TargetURL:   common.GetPipelineStatusURL(repo, pipeline, workflow),
 			Description: common.GetPipelineStatusDescription(workflow.State),
 			Context:     common.GetPipelineStatusContext(repo, pipeline, workflow),
 		},
@@ -488,7 +488,7 @@ func (c *Gitea) PullRequests(ctx context.Context, u *model.User, r *model.Repo, 
 	result := make([]*model.PullRequest, len(pullRequests))
 	for i := range pullRequests {
 		result[i] = &model.PullRequest{
-			Index: pullRequests[i].Index,
+			Index: model.ForgeRemoteID(strconv.Itoa(int(pullRequests[i].Index))),
 			Title: pullRequests[i].Title,
 		}
 	}

@@ -39,19 +39,20 @@ func Pod(namespace, name, image, workDir, goos, serviceAccountName string,
 	commands, vols, extraHosts []string,
 	labels, annotations, env, backendNodeSelector map[string]string,
 	backendTolerations []types.Toleration, resources types.Resources,
+	securityContext *types.SecurityContext, securityContextConfig SecurityContextConfig,
 ) (*v1.Pod, error) {
 	var err error
 
 	meta := podMeta(name, namespace, labels, annotations)
 
 	spec, err := podSpec(serviceAccountName, vols, extraHosts, env,
-		backendNodeSelector, backendTolerations)
+		backendNodeSelector, backendTolerations, securityContext, securityContextConfig)
 	if err != nil {
 		return nil, err
 	}
 
-	container, err := podContainer(name, image, workDir, goos, pool, privileged,
-		commands, vols, env, resources)
+	container, err := podContainer(name, image, workDir, goos, pool, privileged, commands, vols, env,
+		resources, securityContext)
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +86,8 @@ func podMeta(name, namespace string, labels, annotations map[string]string) meta
 	return meta
 }
 
-func podSpec(serviceAccountName string, vols, extraHosts []string, env, backendNodeSelector map[string]string, backendTolerations []types.Toleration) (v1.PodSpec, error) {
+func podSpec(serviceAccountName string, vols, extraHosts []string, env, backendNodeSelector map[string]string, backendTolerations []types.Toleration,
+	securityContext *types.SecurityContext, securityContextConfig SecurityContextConfig) (v1.PodSpec, error) {
 	var err error
 	spec := v1.PodSpec{
 		RestartPolicy:      v1.RestartPolicyNever,
@@ -96,6 +98,7 @@ func podSpec(serviceAccountName string, vols, extraHosts []string, env, backendN
 	spec.HostAliases = hostAliases(extraHosts)
 	spec.NodeSelector = nodeSelector(backendNodeSelector, env["CI_SYSTEM_PLATFORM"])
 	spec.Tolerations = tolerations(backendTolerations)
+	spec.SecurityContext = podSecurityContext(securityContext, securityContextConfig)
 	spec.Volumes, err = volumes(vols)
 	if err != nil {
 		return spec, err
@@ -104,7 +107,8 @@ func podSpec(serviceAccountName string, vols, extraHosts []string, env, backendN
 	return spec, nil
 }
 
-func podContainer(name, image, workDir, goos string, pull, privileged bool, commands, volumes []string, env map[string]string, resources types.Resources) (v1.Container, error) {
+func podContainer(name, image, workDir, goos string, pull, privileged bool, commands, volumes []string, env map[string]string, resources types.Resources,
+	securityContext *types.SecurityContext) (v1.Container, error) {
 	var err error
 	container := v1.Container{
 		Name:       name,
@@ -124,7 +128,7 @@ func podContainer(name, image, workDir, goos string, pull, privileged bool, comm
 	}
 
 	container.Env = mapToEnvVars(env)
-	container.SecurityContext = securityContext(privileged)
+	container.SecurityContext = containerSecurityContext(securityContext, privileged)
 
 	container.Resources, err = resourceRequirements(resources)
 	if err != nil {
@@ -277,9 +281,55 @@ func toleration(backendToleration types.Toleration) v1.Toleration {
 	}
 }
 
-func securityContext(privileged bool) *v1.SecurityContext {
+func podSecurityContext(sc *types.SecurityContext, secCtxConf SecurityContextConfig) *v1.PodSecurityContext {
+	var (
+		nonRoot *bool
+		user    *int64
+		group   *int64
+		fsGroup *int64
+	)
+
+	if sc != nil && sc.RunAsNonRoot != nil {
+		if *sc.RunAsNonRoot {
+			nonRoot = sc.RunAsNonRoot // true
+		}
+	} else if secCtxConf.RunAsNonRoot {
+		nonRoot = &secCtxConf.RunAsNonRoot // true
+	}
+
+	if sc != nil {
+		user = sc.RunAsUser
+		group = sc.RunAsGroup
+		fsGroup = sc.FSGroup
+	}
+
+	if nonRoot == nil && user == nil && group == nil && fsGroup == nil {
+		return nil
+	}
+
+	return &v1.PodSecurityContext{
+		RunAsNonRoot: nonRoot,
+		RunAsUser:    user,
+		RunAsGroup:   group,
+		FSGroup:      fsGroup,
+	}
+}
+
+func containerSecurityContext(sc *types.SecurityContext, stepPrivileged bool) *v1.SecurityContext {
+	var privileged *bool
+
+	if sc != nil && sc.Privileged != nil && *sc.Privileged {
+		privileged = sc.Privileged // true
+	} else if stepPrivileged {
+		privileged = &stepPrivileged // true
+	}
+
+	if privileged == nil {
+		return nil
+	}
+
 	return &v1.SecurityContext{
-		Privileged: &privileged,
+		Privileged: privileged,
 	}
 }
 
@@ -304,7 +354,7 @@ func StartPod(ctx context.Context, engine *kube, step *types.Step) (*v1.Pod, err
 		step.Pull, step.Privileged,
 		step.Commands, step.Volumes, step.ExtraHosts,
 		engine.config.PodLabels, engine.config.PodAnnotations, step.Environment, step.BackendOptions.Kubernetes.NodeSelector,
-		step.BackendOptions.Kubernetes.Tolerations, step.BackendOptions.Kubernetes.Resources)
+		step.BackendOptions.Kubernetes.Tolerations, step.BackendOptions.Kubernetes.Resources, step.BackendOptions.Kubernetes.SecurityContext, engine.config.SecurityContext)
 	if err != nil {
 		return nil, err
 	}

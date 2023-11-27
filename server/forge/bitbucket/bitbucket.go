@@ -21,6 +21,7 @@ import (
 	"net/http"
 	"net/url"
 	"path/filepath"
+	"strconv"
 
 	"golang.org/x/oauth2"
 
@@ -283,7 +284,7 @@ func (c *config) Status(ctx context.Context, user *model.User, repo *model.Repo,
 		State: convertStatus(pipeline.Status),
 		Desc:  common.GetPipelineStatusDescription(pipeline.Status),
 		Key:   "Woodpecker",
-		URL:   common.GetPipelineStatusLink(repo, pipeline, nil),
+		URL:   common.GetPipelineStatusURL(repo, pipeline, nil),
 	}
 	return c.newClient(ctx, user).CreateStatus(repo.Owner, repo.Name, pipeline.Commit, &status)
 }
@@ -369,7 +370,7 @@ func (c *config) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 	result := []*model.PullRequest{}
 	for _, pullRequest := range pullRequests {
 		result = append(result, &model.PullRequest{
-			Index: int64(pullRequest.ID),
+			Index: model.ForgeRemoteID(strconv.Itoa(int(pullRequest.ID))),
 			Title: pullRequest.Title,
 		})
 	}
