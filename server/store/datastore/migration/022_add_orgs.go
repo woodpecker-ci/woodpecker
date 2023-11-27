@@ -25,7 +25,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/server/model"
 )
 
-type oldSecret021 struct {
+type oldSecret022 struct {
 	ID     int64  `xorm:"pk autoincr 'secret_id'"`
 	Owner  string `xorm:"'secret_owner'"`
 	OrgID  int64  `xorm:"NOT NULL DEFAULT 0 'secret_org_id'"`
@@ -33,27 +33,27 @@ type oldSecret021 struct {
 	Name   string `xorm:"NOT NULL INDEX 'secret_name'"`
 }
 
-func (oldSecret021) TableName() string {
+func (oldSecret022) TableName() string {
 	return "secrets"
 }
 
-type syncRepo021 struct {
+type syncRepo022 struct {
 	OrgID int64 `json:"org_id" xorm:"repo_org_id"`
 }
 
 // TableName return database table name for xorm
-func (syncRepo021) TableName() string {
+func (syncRepo022) TableName() string {
 	return "repos"
 }
 
-type repo021 struct {
+type repo022 struct {
 	ID    int64  `json:"id,omitempty" xorm:"pk autoincr 'repo_id'"`
 	OrgID int64  `json:"org_id"       xorm:"repo_org_id"`
 	Owner string `json:"owner"        xorm:"UNIQUE(name) 'repo_owner'"`
 }
 
 // TableName return database table name for xorm
-func (repo021) TableName() string {
+func (repo022) TableName() string {
 	return "repos"
 }
 
@@ -66,17 +66,17 @@ var addOrgs = xormigrate.Migration{
 			}
 		}
 
-		if err := sess.Sync(new(model.Org), new(syncRepo021), new(model.User)); err != nil {
+		if err := sess.Sync(new(model.Org), new(syncRepo022), new(model.User)); err != nil {
 			return fmt.Errorf("sync new models failed: %w", err)
 		}
 
 		// make sure the columns exist before removing them
-		if _, err := sess.SyncWithOptions(xorm.SyncOptions{IgnoreConstrains: true, IgnoreIndices: true}, new(oldSecret021)); err != nil {
+		if _, err := sess.SyncWithOptions(xorm.SyncOptions{IgnoreConstrains: true, IgnoreIndices: true}, new(oldSecret022)); err != nil {
 			return fmt.Errorf("sync old secrets models failed: %w", err)
 		}
 
 		// get all org names from repos
-		var repos []*repo021
+		var repos []*repo022
 		if err := sess.Find(&repos); err != nil {
 			return fmt.Errorf("find all repos failed: %w", err)
 		}
@@ -107,7 +107,7 @@ var addOrgs = xormigrate.Migration{
 				orgs[orgName] = org
 
 				// update org secrets
-				var secrets []*oldSecret021
+				var secrets []*oldSecret022
 				if err := sess.Where(builder.Eq{"secret_owner": orgName, "secret_repo_id": 0}).Find(&secrets); err != nil {
 					return fmt.Errorf("get org secrets failed: %w", err)
 				}

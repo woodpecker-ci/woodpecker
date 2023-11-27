@@ -19,12 +19,12 @@ import (
 	"xorm.io/xorm"
 )
 
-type oldRepo012 struct {
+type oldRepo013 struct {
 	ID       int64  `xorm:"pk autoincr 'repo_id'"`
 	RemoteID string `xorm:"remote_id"`
 }
 
-func (oldRepo012) TableName() string {
+func (oldRepo013) TableName() string {
 	return "repos"
 }
 
@@ -36,7 +36,7 @@ var renameRemoteToForge = xormigrate.Migration{
 		}
 
 		// make sure the column exist before rename it
-		if err := sess.Sync(new(oldRepo012)); err != nil {
+		if err := sess.Sync(new(oldRepo013)); err != nil {
 			return err
 		}
 

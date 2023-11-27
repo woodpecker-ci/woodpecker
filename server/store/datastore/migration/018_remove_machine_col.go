@@ -19,12 +19,12 @@ import (
 	"xorm.io/xorm"
 )
 
-type oldStep017 struct {
+type oldStep018 struct {
 	ID      int64  `xorm:"pk autoincr 'step_id'"`
 	Machine string `xorm:"step_machine"`
 }
 
-func (oldStep017) TableName() string {
+func (oldStep018) TableName() string {
 	return "steps"
 }
 
@@ -32,7 +32,7 @@ var removeMachineCol = xormigrate.Migration{
 	ID: "remove-machine-col",
 	MigrateSession: func(sess *xorm.Session) error {
 		// make sure step_machine column exists
-		if err := sess.Sync(new(oldStep017)); err != nil {
+		if err := sess.Sync(new(oldStep018)); err != nil {
 			return err
 		}
 		return dropTableColumns(sess, "steps", "step_machine")

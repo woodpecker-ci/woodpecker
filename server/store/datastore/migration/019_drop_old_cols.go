@@ -19,13 +19,13 @@ import (
 	"xorm.io/xorm"
 )
 
-type oldPipeline018 struct {
+type oldPipeline019 struct {
 	ID       int64 `xorm:"pk autoincr 'pipeline_id'"`
 	Signed   bool  `xorm:"pipeline_signed"`
 	Verified bool  `xorm:"pipeline_verified"`
 }
 
-func (oldPipeline018) TableName() string {
+func (oldPipeline019) TableName() string {
 	return "pipelines"
 }
 
@@ -33,7 +33,7 @@ var dropOldCols = xormigrate.Migration{
 	ID: "drop-old-col",
 	MigrateSession: func(sess *xorm.Session) error {
 		// make sure columns on pipelines exist
-		if err := sess.Sync(new(oldPipeline018)); err != nil {
+		if err := sess.Sync(new(oldPipeline019)); err != nil {
 			return err
 		}
 		if err := dropTableColumns(sess, "steps", "step_pgid"); err != nil {
