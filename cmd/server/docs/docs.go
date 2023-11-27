@@ -4047,7 +4047,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "index": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "title": {
                     "type": "string"

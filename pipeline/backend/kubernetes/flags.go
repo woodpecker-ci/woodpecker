@@ -57,6 +57,11 @@ var Flags = []cli.Flag{
 		Usage:   "backend k8s additional worker pod annotations",
 		Value:   "",
 	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_K8S_SECCTX_NONROOT"},
+		Name:    "backend-k8s-secctx-nonroot",
+		Usage:   "`run as non root` Kubernetes security context option",
+	},
 	&cli.IntFlag{
 		EnvVars: []string{"WOODPECKER_CONNECT_RETRY_COUNT"},
 		Name:    "connect-retry-count",
