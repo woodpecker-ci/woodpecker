@@ -102,9 +102,9 @@ Above configuration shows how to create reverse-proxies for web and agent commun
 
 [Tunnelmole](https://github.com/robbie-cahill/tunnelmole-client) is an open source tunneling tool. Install Tunnelmole with one of the following methods depending on your system:
 
-- NPM:  `npm install -g tunnelmole`
+- NPM: `npm install -g tunnelmole`
 - Linux: `curl -s https://tunnelmole.com/sh/install-linux.sh | sudo bash`
-- Mac:  `curl -s https://tunnelmole.com/sh/install-mac.sh --output install-mac.sh && sudo bash install-mac.sh`
+- Mac: `curl -s https://tunnelmole.com/sh/install-mac.sh --output install-mac.sh && sudo bash install-mac.sh`
 - Windows: Install with NPM, or if you don't have NodeJS installed, download the `exe` file for Windows [here](https://tunnelmole.com/downloads/tmole.exe) and put it somewhere in your PATH.
 
 After installation, run the following command:
@@ -114,13 +114,16 @@ tmole 8000
 ```
 
 It will start a tunnel and will give a response like this:
+
 ```bash
 ➜  ~ tmole 8000
 http://bvdo5f-ip-49-183-170-144.tunnelmole.net is forwarding to localhost:8000
 https://bvdo5f-ip-49-183-170-144.tunnelmole.net is forwarding to localhost:8000
 ```
+
 Set `WOODPECKER_HOST` (for example in `docker-compose.yml`) to the Tunnelmole URL (`xxx.tunnelmole.net`) and start the server.
-```
+
+````
 
 ## Ngrok
 
@@ -128,7 +131,7 @@ Set `WOODPECKER_HOST` (for example in `docker-compose.yml`) to the Tunnelmole UR
 
 ```bash
 ngrok http 8000
-```
+````
 
 Set `WOODPECKER_HOST` (for example in `docker-compose.yml`) to the ngrok URL (usually xxx.ngrok.io) and start the server.
 
