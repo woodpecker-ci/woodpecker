@@ -18,14 +18,14 @@ import (
 	"fmt"
 
 	"github.com/rs/zerolog/log"
+	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
 	"xorm.io/xorm/schemas"
 )
 
-var legacy2Xorm = task{
-	name:     "xorm",
-	required: true,
-	fn: func(sess *xorm.Session) error {
+var legacy2Xorm = xormigrate.Migration{
+	ID: "xorm",
+	MigrateSession: func(sess *xorm.Session) error {
 		// make sure we have required migrations - else fail and point to last major version
 		for _, mig := range []string{
 			// users
@@ -74,7 +74,7 @@ var legacy2Xorm = task{
 			"create-table-build-config",
 			"populate-build-config",
 		} {
-			exist, err := sess.Exist(&migrations{mig})
+			exist, err := sess.Exist(&xormigrate.Migration{ID: mig})
 			if err != nil {
 				return fmt.Errorf("test migration existence: %w", err)
 			}

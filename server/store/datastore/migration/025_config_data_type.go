@@ -15,17 +15,24 @@
 package migration
 
 import (
+	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
+	"xorm.io/xorm/schemas"
 )
 
-var renameLinkToURL = task{
-	name:     "rename-link-to-url",
-	required: true,
-	fn: func(sess *xorm.Session) (err error) {
-		if err := renameColumn(sess, "pipelines", "pipeline_link", "pipeline_forge_url"); err != nil {
-			return err
+var alterTableConfigUpdateColumnConfigDataType = xormigrate.Migration{
+	ID: "alter-table-config-update-type-of-config-data",
+	MigrateSession: func(sess *xorm.Session) (err error) {
+		dialect := sess.Engine().Dialect().URI().DBType
+
+		switch dialect {
+		case schemas.MYSQL:
+			_, err = sess.Exec("ALTER TABLE config MODIFY COLUMN config_data LONGBLOB")
+		default:
+			// xorm uses the same type for all blob sizes in sqlite and postgres
+			return nil
 		}
 
-		return renameColumn(sess, "repos", "repo_link", "repo_forge_url")
+		return err
 	},
 }
