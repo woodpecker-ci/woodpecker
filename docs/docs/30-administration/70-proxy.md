@@ -126,7 +126,7 @@ Set `WOODPECKER_HOST` (for example in `docker-compose.yml`) to the Tunnelmole UR
 
 ```bash
 ngrok http 8000
-````
+```
 
 Set `WOODPECKER_HOST` (for example in `docker-compose.yml`) to the ngrok URL (usually xxx.ngrok.io) and start the server.
 
