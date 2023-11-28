@@ -149,6 +149,11 @@
       "name": "GitHub Release",
       "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-github-release/main/docs.md",
       "verified": true
+    },
+    {
+      "name": "Nix + Attic client",
+      "docs": "https://git.vdx.hu/voidcontext/woodpecker-plugin-nix-attic/src/branch/main/README.md",
+      "verified": false
     }
   ]
 }
