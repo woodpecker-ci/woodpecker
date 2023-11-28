@@ -17,15 +17,15 @@ package migration
 import (
 	"fmt"
 
+	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
 
 	"go.woodpecker-ci.org/woodpecker/server/model"
 )
 
-var addOrgID = task{
-	name:     "add-org-id",
-	required: true,
-	fn: func(sess *xorm.Session) error {
+var addOrgID = xormigrate.Migration{
+	ID: "add-org-id",
+	MigrateSession: func(sess *xorm.Session) error {
 		if err := sess.Sync(new(model.User)); err != nil {
 			return fmt.Errorf("sync new models failed: %w", err)
 		}

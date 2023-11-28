@@ -15,24 +15,25 @@
 package migration
 
 import (
+	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
 )
 
-type SecretV007 struct {
+type SecretV008 struct {
 	Owner  string `json:"-"    xorm:"NOT NULL DEFAULT '' UNIQUE(s) INDEX 'secret_owner'"`
 	RepoID int64  `json:"-"    xorm:"NOT NULL DEFAULT 0 UNIQUE(s) INDEX 'secret_repo_id'"`
 	Name   string `json:"name" xorm:"NOT NULL UNIQUE(s) INDEX 'secret_name'"`
 }
 
 // TableName return database table name for xorm
-func (SecretV007) TableName() string {
+func (SecretV008) TableName() string {
 	return "secrets"
 }
 
-var alterTableSecretsAddUserCol = task{
-	name: "alter-table-add-secrets-user-id",
-	fn: func(sess *xorm.Session) error {
-		if err := sess.Sync(new(SecretV007)); err != nil {
+var alterTableSecretsAddUserCol = xormigrate.Migration{
+	ID: "alter-table-add-secrets-user-id",
+	MigrateSession: func(sess *xorm.Session) error {
+		if err := sess.Sync(new(SecretV008)); err != nil {
 			return err
 		}
 		if err := alterColumnDefault(sess, "secrets", "secret_repo_id", "0"); err != nil {

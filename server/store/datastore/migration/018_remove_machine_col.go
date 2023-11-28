@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,25 +15,26 @@
 package migration
 
 import (
+	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
-	"xorm.io/xorm/schemas"
 )
 
-var alterTableLogUpdateColumnLogDataType = task{
-	name: "alter-table-logs-update-type-of-data",
-	fn: func(sess *xorm.Session) (err error) {
-		dialect := sess.Engine().Dialect().URI().DBType
+type oldStep018 struct {
+	ID      int64  `xorm:"pk autoincr 'step_id'"`
+	Machine string `xorm:"step_machine"`
+}
 
-		switch dialect {
-		case schemas.POSTGRES:
-			_, err = sess.Exec("ALTER TABLE logs ALTER COLUMN log_data TYPE BYTEA")
-		case schemas.MYSQL:
-			_, err = sess.Exec("ALTER TABLE logs MODIFY COLUMN log_data LONGBLOB")
-		default:
-			// sqlite does only know BLOB in all cases
-			return nil
+func (oldStep018) TableName() string {
+	return "steps"
+}
+
+var removeMachineCol = xormigrate.Migration{
+	ID: "remove-machine-col",
+	MigrateSession: func(sess *xorm.Session) error {
+		// make sure step_machine column exists
+		if err := sess.Sync(new(oldStep018)); err != nil {
+			return err
 		}
-
-		return err
+		return dropTableColumns(sess, "steps", "step_machine")
 	},
 }
