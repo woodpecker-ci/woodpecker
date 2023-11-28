@@ -1,4 +1,4 @@
-// Copyright 2022 Woodpecker Authors
+// Copyright 2021 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,17 +15,13 @@
 package migration
 
 import (
+	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
-
-	"go.woodpecker-ci.org/woodpecker/server/model"
 )
 
-var recreateAgentsTable = task{
-	name: "recreate-agents-table",
-	fn: func(sess *xorm.Session) error {
-		if err := sess.DropTable("agents"); err != nil {
-			return err
-		}
-		return sess.Sync(new(model.Agent))
+var alterTableReposDropCounter = xormigrate.Migration{
+	ID: "alter-table-drop-counter",
+	MigrateSession: func(sess *xorm.Session) error {
+		return dropTableColumns(sess, "repos", "repo_counter")
 	},
 }

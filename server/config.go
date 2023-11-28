@@ -70,10 +70,7 @@ var Config = struct {
 		RootPath            string
 		CustomCSSFile       string
 		CustomJsFile        string
-		Migrations          struct {
-			AllowLong bool
-		}
-		EnableSwagger bool
+		EnableSwagger       bool
 		// Open bool
 		// Orgs map[string]struct{}
 		// Admins map[string]struct{}

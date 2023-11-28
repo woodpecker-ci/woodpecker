@@ -15,13 +15,14 @@
 package migration
 
 import (
+	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
 )
 
-var removeActiveFromUsers = task{
-	name:     "remove-active-from-users",
-	required: true,
-	fn: func(sess *xorm.Session) error {
-		return dropTableColumns(sess, "users", "user_active")
+var lowercaseSecretNames = xormigrate.Migration{
+	ID: "lowercase-secret-names",
+	MigrateSession: func(sess *xorm.Session) (err error) {
+		_, err = sess.Exec("UPDATE secrets SET secret_name = LOWER(secret_name);")
+		return err
 	},
 }

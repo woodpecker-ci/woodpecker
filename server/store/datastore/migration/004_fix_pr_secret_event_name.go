@@ -15,14 +15,15 @@
 package migration
 
 import (
+	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
 
 	"go.woodpecker-ci.org/woodpecker/server/model"
 )
 
-var fixPRSecretEventName = task{
-	name: "fix-pr-secret-event-name",
-	fn: func(sess *xorm.Session) error {
+var fixPRSecretEventName = xormigrate.Migration{
+	ID: "fix-pr-secret-event-name",
+	MigrateSession: func(sess *xorm.Session) error {
 		const batchSize = 100
 		for start := 0; ; start += batchSize {
 			secrets := make([]*model.Secret, 0, batchSize)

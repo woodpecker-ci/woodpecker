@@ -15,12 +15,16 @@
 package migration
 
 import (
+	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
 )
 
-var alterTableReposDropCounter = task{
-	name: "alter-table-drop-counter",
-	fn: func(sess *xorm.Session) error {
-		return dropTableColumns(sess, "repos", "repo_counter")
+var alterTableReposDropAllowDeploysAllowTags = xormigrate.Migration{
+	ID: "drop-allow-push-tags-deploys-columns",
+	MigrateSession: func(sess *xorm.Session) error {
+		return dropTableColumns(sess, "repos",
+			"repo_allow_deploys",
+			"repo_allow_tags",
+		)
 	},
 }
