@@ -1,4 +1,4 @@
-// Copyright 2022 Woodpecker Authors
+// Copyright 2021 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,19 +15,13 @@
 package migration
 
 import (
+	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
 )
 
-var removeInactiveRepos = task{
-	name:     "remove-inactive-repos",
-	required: true,
-	fn: func(sess *xorm.Session) error {
-		// If the timeout is 0, the repo was never activated, so we remove it.
-		_, err := sess.Table("repos").Where("repo_active = ?", false).And("repo_timeout = ?", 0).Delete()
-		if err != nil {
-			return err
-		}
-
-		return dropTableColumns(sess, "users", "user_synced")
+var alterTableReposDropFallback = xormigrate.Migration{
+	ID: "alter-table-drop-repo-fallback",
+	MigrateSession: func(sess *xorm.Session) error {
+		return dropTableColumns(sess, "repos", "repo_fallback")
 	},
 }
