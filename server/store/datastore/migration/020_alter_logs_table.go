@@ -28,7 +28,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/shared/utils"
 )
 
-// perPage020 set the size of the slice to read per page
+// perPage020 sets the size of the slice to read per page
 var perPage020 = 100
 
 type oldLogs020 struct {
