@@ -102,9 +102,9 @@ Above configuration shows how to create reverse-proxies for web and agent commun
 
 [Tunnelmole](https://github.com/robbie-cahill/tunnelmole-client) is an open source tunneling tool.
 
-First, [Install tunnelmole](https://github.com/robbie-cahill/tunnelmole-client#installation).
+Start by [installing tunnelmole](https://github.com/robbie-cahill/tunnelmole-client#installation).
 
-After installation, run the following command:
+After the installation, run the following command to start tunnelmole:
 
 ```bash
 tmole 8000
