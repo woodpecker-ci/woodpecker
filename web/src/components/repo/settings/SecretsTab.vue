@@ -69,28 +69,33 @@ async function loadSecrets(page: number): Promise<Secret[] | null> {
     throw new Error("Unexpected: Can't load repo");
   }
 
-  const secrets: Record<string, Secret & { edit?: boolean }> = {};
-
-  // TODO: properly handle pagination
   const globalSecrets = (await apiClient.getGlobalSecretList(page)) ?? [];
-  globalSecrets.forEach((secret) => {
-    secrets[secret.name] = { ...secret, edit: false };
-  });
-
   const orgSecrets = (await apiClient.getOrgSecretList(repo.value.org_id, page)) ?? [];
-  orgSecrets.forEach((secret) => {
-    secrets[secret.name] = { ...secret, edit: false };
-  });
-
   const repoSecrets = (await apiClient.getSecretList(repo.value.id, page)) ?? [];
-  repoSecrets.forEach((secret) => {
-    secrets[secret.name] = secret;
-  });
-
-  return Object.values(secrets);
+  return [...globalSecrets, ...orgSecrets, ...repoSecrets];
 }
 
-const { resetPage, data: secrets } = usePagination(loadSecrets, () => !selectedSecret.value);
+const { resetPage, data: _secrets } = usePagination(loadSecrets, () => !selectedSecret.value);
+const secrets = computed(() => {
+  const secretsList: Record<string, Secret & { edit?: boolean }> = {};
+
+  // eslint-disable-next-line no-restricted-syntax
+  for (const level of ['repo', 'org', 'global']) {
+    // eslint-disable-next-line no-restricted-syntax
+    for (const secret of _secrets.value) {
+      if (
+        ((level === 'repo' && secret.repo_id !== 0 && secret.org_id !== 0) ||
+          (level === 'org' && secret.repo_id === 0 && secret.org_id !== 0) ||
+          (level === 'global' && secret.repo_id === 0 && secret.org_id === 0)) &&
+        !secretsList[secret.name]
+      ) {
+        secretsList[secret.name] = { ...secret, edit: false };
+      }
+    }
+  }
+
+  return Object.values(secretsList);
+});
 
 const { doSubmit: createSecret, isLoading: isSaving } = useAsyncAction(async () => {
   if (!repo?.value) {
