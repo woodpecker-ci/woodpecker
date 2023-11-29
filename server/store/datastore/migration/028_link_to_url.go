@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,25 +15,17 @@
 package migration
 
 import (
+	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
 )
 
-type oldStep017 struct {
-	ID      int64  `xorm:"pk autoincr 'step_id'"`
-	Machine string `xorm:"step_machine"`
-}
-
-func (oldStep017) TableName() string {
-	return "steps"
-}
-
-var removeMachineCol = task{
-	name: "remove-machine-col",
-	fn: func(sess *xorm.Session) error {
-		// make sure step_machine column exists
-		if err := sess.Sync(new(oldStep017)); err != nil {
+var renameLinkToURL = xormigrate.Migration{
+	ID: "rename-link-to-url",
+	MigrateSession: func(sess *xorm.Session) (err error) {
+		if err := renameColumn(sess, "pipelines", "pipeline_link", "pipeline_forge_url"); err != nil {
 			return err
 		}
-		return dropTableColumns(sess, "steps", "step_machine")
+
+		return renameColumn(sess, "repos", "repo_link", "repo_forge_url")
 	},
 }
