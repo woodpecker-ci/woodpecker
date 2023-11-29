@@ -89,4 +89,5 @@ steps:
     when:
       - event: push
         path: *when_path
+        branch: ${CI_REPO_DEFAULT_BRANCH}
       - event: [cron, manual, tag]
