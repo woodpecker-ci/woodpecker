@@ -1,4 +1,4 @@
-// Copyright 2021 Woodpecker Authors
+// Copyright 2022 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,12 +15,13 @@
 package migration
 
 import (
+	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
 )
 
-var alterTableReposDropFallback = task{
-	name: "alter-table-drop-repo-fallback",
-	fn: func(sess *xorm.Session) error {
-		return dropTableColumns(sess, "repos", "repo_fallback")
+var renameForgeIDToForgeRemoteID = xormigrate.Migration{
+	ID: "rename-forge-id-to-forge-remote-id",
+	MigrateSession: func(sess *xorm.Session) error {
+		return renameColumn(sess, "repos", "forge_id", "forge_remote_id")
 	},
 }

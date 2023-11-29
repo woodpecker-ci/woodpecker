@@ -22,29 +22,26 @@ import (
 
 	"github.com/rs/zerolog/log"
 	"github.com/tevino/abool/v2"
+	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
 
-	"go.woodpecker-ci.org/woodpecker/server"
 	"go.woodpecker-ci.org/woodpecker/shared/utils"
 )
 
-// maxDefaultSqliteItems set the threshold at witch point the migration will fail by default
-var maxDefaultSqliteItems019 = 5000
+// perPage020 sets the size of the slice to read per page
+var perPage020 = 100
 
-// perPage019 set the size of the slice to read per page
-var perPage019 = 100
-
-type oldLogs019 struct {
+type oldLogs020 struct {
 	ID     int64  `xorm:"pk autoincr 'log_id'"`
 	StepID int64  `xorm:"UNIQUE 'log_step_id'"`
 	Data   []byte `xorm:"LONGBLOB 'log_data'"`
 }
 
-func (oldLogs019) TableName() string {
+func (oldLogs020) TableName() string {
 	return "logs"
 }
 
-type oldLogEntry019 struct {
+type oldLogEntry020 struct {
 	Step string `json:"step,omitempty"`
 	Time int64  `json:"time,omitempty"`
 	Type int    `json:"type,omitempty"`
@@ -52,7 +49,7 @@ type oldLogEntry019 struct {
 	Out  string `json:"out,omitempty"`
 }
 
-type newLogEntry019 struct {
+type newLogEntry020 struct {
 	ID      int64 `xorm:"pk autoincr 'id'"`
 	StepID  int64 `xorm:"'step_id'"`
 	Time    int64
@@ -62,38 +59,27 @@ type newLogEntry019 struct {
 	Type    int
 }
 
-func (newLogEntry019) TableName() string {
+func (newLogEntry020) TableName() string {
 	return "log_entries"
 }
 
-var initLogsEntriesTable = task{
-	name:     "init-log_entries",
-	required: true,
-	fn: func(sess *xorm.Session) error {
-		return sess.Sync(new(newLogEntry019))
+var initLogsEntriesTable = xormigrate.Migration{
+	ID: "init-log_entries",
+	MigrateSession: func(sess *xorm.Session) error {
+		return sess.Sync(new(newLogEntry020))
 	},
 }
 
-var migrateLogs2LogEntries = task{
-	name:     "migrate-logs-to-log_entries",
-	required: false,
-	engineFn: func(e *xorm.Engine) error {
+var migrateLogs2LogEntries = xormigrate.Migration{
+	ID:   "migrate-logs-to-log_entries",
+	Long: true,
+	Migrate: func(e *xorm.Engine) error {
 		// make sure old logs table exists
-		if exist, err := e.IsTableExist(new(oldLogs019)); !exist || err != nil {
+		if exist, err := e.IsTableExist(new(oldLogs020)); !exist || err != nil {
 			return err
 		}
 
-		// first we check if we have just 1000 entries to migrate
-		toMigrate, err := e.Count(new(oldLogs019))
-		if err != nil {
-			return err
-		}
-
-		if toMigrate > int64(maxDefaultSqliteItems019) && !server.Config.Server.Migrations.AllowLong {
-			return fmt.Errorf("Migrating logs to log_entries is skipped, as we have %d entries to convert. Set 'WOODPECKER_MIGRATIONS_ALLOW_LONG' to 'true' to migrate anyway", toMigrate)
-		}
-
-		if err := e.Sync(new(oldLogs019)); err != nil {
+		if err := e.Sync(new(oldLogs020)); err != nil {
 			return err
 		}
 
@@ -101,8 +87,8 @@ var migrateLogs2LogEntries = task{
 
 		page := 0
 		offset := 0
-		logs := make([]*oldLogs019, 0, perPage019)
-		logEntries := make([]*oldLogEntry019, 0, 50)
+		logs := make([]*oldLogs020, 0, perPage020)
+		logEntries := make([]*oldLogEntry020, 0, 50)
 
 		sigterm := abool.New()
 		ctx, cancelCtx := context.WithCancelCause(context.Background())
@@ -124,7 +110,7 @@ var migrateLogs2LogEntries = task{
 			}
 			logs = logs[:0]
 
-			err := sess.Limit(perPage019, offset).Find(&logs)
+			err := sess.Limit(perPage020, offset).Find(&logs)
 			if err != nil {
 				return err
 			}
@@ -146,7 +132,7 @@ var migrateLogs2LogEntries = task{
 						time = logEntry.Time
 					}
 
-					log := &newLogEntry019{
+					log := &newLogEntry020{
 						StepID: l.StepID,
 						Data:   []byte(logEntry.Out),
 						Line:   logEntry.Pos,
@@ -168,7 +154,7 @@ var migrateLogs2LogEntries = task{
 				return err
 			}
 
-			if len(logs) < perPage019 {
+			if len(logs) < perPage020 {
 				break
 			}
 

@@ -1,10 +1,10 @@
-// Copyright 2023 Woodpecker Authors
+// Copyright 2022 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,23 +15,21 @@
 package migration
 
 import (
+	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
-	"xorm.io/xorm/schemas"
 )
 
-var alterTableTasksUpdateColumnTaskDataType = task{
-	name: "alter-table-tasks-update-type-of-task-data",
-	fn: func(sess *xorm.Session) (err error) {
-		dialect := sess.Engine().Dialect().URI().DBType
-
-		switch dialect {
-		case schemas.MYSQL:
-			_, err = sess.Exec("ALTER TABLE tasks MODIFY COLUMN task_data LONGBLOB")
-		default:
-			// xorm uses the same type for all blob sizes in sqlite and postgres
-			return nil
+var renameBuildsToPipeline = xormigrate.Migration{
+	ID: "rename-builds-to-pipeline",
+	MigrateSession: func(sess *xorm.Session) error {
+		err := renameTable(sess, "builds", "pipelines")
+		if err != nil {
+			return err
 		}
-
-		return err
+		err = renameTable(sess, "build_config", "pipeline_config")
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 }
