@@ -15,12 +15,31 @@
 package migration
 
 import (
+	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
 )
 
-var dropSenders = task{
-	name: "drop-senders",
-	fn: func(sess *xorm.Session) error {
-		return sess.DropTable("senders")
+type oldRepo013 struct {
+	ID       int64  `xorm:"pk autoincr 'repo_id'"`
+	RemoteID string `xorm:"remote_id"`
+}
+
+func (oldRepo013) TableName() string {
+	return "repos"
+}
+
+var renameRemoteToForge = xormigrate.Migration{
+	ID: "rename-remote-to-forge",
+	MigrateSession: func(sess *xorm.Session) error {
+		if err := renameColumn(sess, "pipelines", "pipeline_remote", "pipeline_clone_url"); err != nil {
+			return err
+		}
+
+		// make sure the column exist before rename it
+		if err := sess.Sync(new(oldRepo013)); err != nil {
+			return err
+		}
+
+		return renameColumn(sess, "repos", "remote_id", "forge_id")
 	},
 }
