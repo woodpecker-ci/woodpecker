@@ -26,12 +26,6 @@ dependencies:
   fuse.js:
     specifier: ^7.0.0
     version: 7.0.0
-  humanize-duration:
-    specifier: ^3.28.0
-    version: 3.31.0
-  javascript-time-ago:
-    specifier: ^2.5.9
-    version: 2.5.9
   lodash:
     specifier: ^4.17.21
     version: 4.17.21
@@ -58,12 +52,6 @@ devDependencies:
   '@iconify/json':
     specifier: ^2.2.131
     version: 2.2.143
-  '@types/humanize-duration':
-    specifier: ^3.27.1
-    version: 3.27.3
-  '@types/javascript-time-ago':
-    specifier: ^2.0.3
-    version: 2.0.7
   '@types/lodash':
     specifier: ^4.14.195
     version: 4.14.201
@@ -914,14 +902,6 @@ packages:
 
   /@types/estree@1.0.5:
     resolution: {integrity: sha512-/kYRxGDLWzHOB7q+wtSUQlFrtcdUccpfy+X+9iMBpHK8QLLhx2wIPYuS5DYtR9Wa/YlZAbIovy7qVdB1Aq6Lyw==}
-
-  /@types/humanize-duration@3.27.3:
-    resolution: {integrity: sha512-wiiiFYjnrYDJE/ujU7wS/NShqp12IKrejozjDtcejP0zYi+cjyjVcfZHwcFUDKVJ7tHGsmgeW2ED92ABIIjfpg==}
-    dev: true
-
-  /@types/javascript-time-ago@2.0.7:
-    resolution: {integrity: sha512-+sZQnKxkGeDHtX7jJ/iVucZ8Gg8CTnJLpNwynHX+V/G6Z9n6V93+6DO/sv8QU6STAcq04xPw+btFf/OKjCkT0A==}
-    dev: true
 
   /@types/json-schema@7.0.15:
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
@@ -2482,10 +2462,6 @@ packages:
     engines: {node: '>=14.18.0'}
     dev: true
 
-  /humanize-duration@3.31.0:
-    resolution: {integrity: sha512-fRrehgBG26NNZysRlTq1S+HPtDpp3u+Jzdc/d5A4cEzOD86YLAkDaJyJg8krSdCi7CJ+s7ht3fwRj8Dl+Btd0w==}
-    dev: false
-
   /ignore@5.3.0:
     resolution: {integrity: sha512-g7dmpshy+gD7mh88OC9NwSGTKoc3kyLAZQRU1mt53Aw/vnvfXnbC+F/7F7QoYVKbV+KNvJx8wArewKy1vXMtlg==}
     engines: {node: '>= 4'}
@@ -2686,12 +2662,6 @@ packages:
   /isexe@2.0.0:
     resolution: {integrity: sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==}
     dev: true
-
-  /javascript-time-ago@2.5.9:
-    resolution: {integrity: sha512-pQ8mNco/9g9TqWXWWjP0EWl6i/lAQScOyEeXy5AB+f7MfLSdgyV9BJhiOD1zrIac/lrxPYOWNbyl/IW8CW5n0A==}
-    dependencies:
-      relative-time-format: 1.1.6
-    dev: false
 
   /jiti@1.21.0:
     resolution: {integrity: sha512-gFqAIbuKyyso/3G2qhiO2OM6shY6EPP/R0+mkDbyspxKazh8BXDC5FiFsUjlczgdNz/vfra0da2y+aHrusLG/Q==}
@@ -3211,10 +3181,6 @@ packages:
       define-properties: 1.2.1
       set-function-name: 2.0.1
     dev: true
-
-  /relative-time-format@1.1.6:
-    resolution: {integrity: sha512-aCv3juQw4hT1/P/OrVltKWLlp15eW1GRcwP1XdxHrPdZE9MtgqFpegjnTjLhi2m2WI9MT/hQQtE+tjEWG1hgkQ==}
-    dev: false
 
   /resolve-from@4.0.0:
     resolution: {integrity: sha512-pb/MYmXstAkysRFx8piNI1tGFNQIFA3vkE3Gq4EuA1dF6gHp/+vgZqsCGJapvy8N3Q+4o7FwvquPJcnZ7RYy4g==}

@@ -37,10 +37,16 @@ export function useDate() {
     dayjs.locale(locale);
   }
 
+  function durationAsNumber(durationMs: number): string {
+    const dur = dayjs.duration(durationMs);
+    return dur.format(dur.hours() > 1 ? 'HH:mm:ss' : 'mm:ss');
+  }
+
   return {
     toLocaleString,
     timeAgo,
     prettyDuration,
     setDayjsLocale,
+    durationAsNumber,
   };
 }
