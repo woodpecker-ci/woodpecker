@@ -1,10 +1,10 @@
 import dayjs from 'dayjs';
 import advancedFormat from 'dayjs/plugin/advancedFormat';
+import duration from 'dayjs/plugin/duration';
+import relativeTime from 'dayjs/plugin/relativeTime';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
-import relativeTime from 'dayjs/plugin/relativeTime';
 import { useI18n } from 'vue-i18n';
-import duration from 'dayjs/plugin/duration';
 
 dayjs.extend(timezone);
 dayjs.extend(utc);
@@ -24,8 +24,8 @@ export function useDate() {
     return dayjs().to(dayjs(date));
   }
 
-  function prettyDuration(duration: number) {
-    return dayjs.duration(duration).humanize();
+  function prettyDuration(durationMs: number) {
+    return dayjs.duration(durationMs).humanize();
   }
 
   const addedLocales = ['en'];
