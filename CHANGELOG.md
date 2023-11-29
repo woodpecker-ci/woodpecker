@@ -6,6 +6,13 @@
 
 @qwerty287, @robbie-cahill, @renovate[bot], @micash545, @dominic-p, @zc-devs, @mzampetakis
 
+### 🐛 Bug Fixes
+
+- Only deploy docs on `main` [[#2892](https://github.com/woodpecker-ci/woodpecker/pull/2892)]
+- Fix pipeline-related environment [[#2876](https://github.com/woodpecker-ci/woodpecker/pull/2876)]
+- Fix version check partially [[#2871](https://github.com/woodpecker-ci/woodpecker/pull/2871)]
+- Fix unregistering agents when using agent tokens [[#2870](https://github.com/woodpecker-ci/woodpecker/pull/2870)]
+
 ### 📈 Enhancement
 
 - Fix vite deprecations [[#2885](https://github.com/woodpecker-ci/woodpecker/pull/2885)]
@@ -21,12 +28,6 @@
 - Add documentation on Kubernetes securityContext [[#2822](https://github.com/woodpecker-ci/woodpecker/pull/2822)]
 - Add default page to categories [[#2869](https://github.com/woodpecker-ci/woodpecker/pull/2869)]
 - Use same format for Github docs as used for the other forges [[#2866](https://github.com/woodpecker-ci/woodpecker/pull/2866)]
-
-### 🐛 Bug Fixes
-
-- Fix pipeline-related environment [[#2876](https://github.com/woodpecker-ci/woodpecker/pull/2876)]
-- Fix version check partially [[#2871](https://github.com/woodpecker-ci/woodpecker/pull/2871)]
-- Fix unregistering agents when using agent tokens [[#2870](https://github.com/woodpecker-ci/woodpecker/pull/2870)]
 
 ### Misc
 
