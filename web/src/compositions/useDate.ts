@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import advancedFormat from 'dayjs/plugin/advancedFormat';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
-import relativeTime from 'dayjs/plugin/relativeTime'
+import relativeTime from 'dayjs/plugin/relativeTime';
 import { useI18n } from 'vue-i18n';
 import duration from 'dayjs/plugin/duration';
 
@@ -20,12 +20,12 @@ export function useDate() {
     return dayjs(date).format(useI18n().t('time.tmpl'));
   }
 
-  function timeAgo(date: Date|string|number) {
-    return dayjs().to(dayjs(date))
+  function timeAgo(date: Date | string | number) {
+    return dayjs().to(dayjs(date));
   }
 
   function prettyDuration(duration: number) {
-    return dayjs.duration(duration).humanize()
+    return dayjs.duration(duration).humanize();
   }
 
   const addedLocales = ['en'];
