@@ -56,17 +56,29 @@ export default defineConfig({
 
       const filenames = readdirSync('src/assets/locales/').map((filename) => filename.replace('.json', ''));
 
-      if (!existsSync('src/assets/timeAgoLocales')) {
-        mkdirSync('src/assets/timeAgoLocales');
+      if (!existsSync('src/assets/dayjsLocales')) {
+        mkdirSync('src/assets/dayjsLocales');
       }
 
       filenames.forEach((name) => {
-        // copy timeAgo language
+        // copy dayjs language
         if (name === 'zh-Hans') {
-          // zh-Hans is called zh in javascript-time-ago, so we need to rename this
+          // zh-Hans is called zh in dayjs, so we need to rename this
           copyFile(
-            'node_modules/javascript-time-ago/locale/zh.json.js',
-            'src/assets/timeAgoLocales/zh-Hans.js',
+            'node_modules/dayjs/locale/zh.js',
+            'src/assets/dayjsLocales/zh-Hans.js',
+            // eslint-disable-next-line promise/prefer-await-to-callbacks
+            (err) => {
+              if (err) {
+                throw err;
+              }
+            },
+          );
+        } else if (name === 'zh-Hant') {
+          // zh-Hans is called zh in dayjs, so we need to rename this
+          copyFile(
+            'node_modules/dayjs/locale/zh-cn.js',
+            'src/assets/dayjsLocales/zh-Hant.js',
             // eslint-disable-next-line promise/prefer-await-to-callbacks
             (err) => {
               if (err) {
@@ -77,8 +89,8 @@ export default defineConfig({
         } else if (name !== 'en') {
           // English is always directly loaded (compiled by Vite) and thus not copied
           copyFile(
-            `node_modules/javascript-time-ago/locale/${name}.json.js`,
-            `src/assets/timeAgoLocales/${name}.js`,
+            `node_modules/dayjs/locale/${name}.js`,
+            `src/assets/dayjsLocales/${name}.js`,
             // eslint-disable-next-line promise/prefer-await-to-callbacks
             (err) => {
               if (err) {
