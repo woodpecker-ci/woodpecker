@@ -151,8 +151,8 @@
       "verified": true
     },
     {
-      "name": "Nix + Attic client",
-      "docs": "https://git.vdx.hu/voidcontext/woodpecker-plugin-nix-attic/raw/branch/main/README.md",
+      "name": "Nix - Attic",
+      "docs": "https://git.vdx.hu/voidcontext/woodpecker-plugin-nix-attic/raw/branch/main/docs.md",
       "verified": false
     }
   ]
