@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@voidcontext, @qwerty287, @robbie-cahill, @renovate[bot], @micash545, @dominic-p, @zc-devs, @mzampetakis
+@renovate[bot], @voidcontext, @qwerty287, @robbie-cahill, @micash545, @dominic-p, @zc-devs, @mzampetakis
 
 ### 📚 Documentation
 
@@ -33,6 +33,8 @@
 
 ### Misc
 
+- Update golang (packages) [[#2894](https://github.com/woodpecker-ci/woodpecker/pull/2894)]
+- Update web npm deps non-major [[#2895](https://github.com/woodpecker-ci/woodpecker/pull/2895)]
 - Update web npm deps non-major [[#2884](https://github.com/woodpecker-ci/woodpecker/pull/2884)]
 - Update docker.io/woodpeckerci/plugin-docker-buildx Docker tag to v2.2.1 [[#2883](https://github.com/woodpecker-ci/woodpecker/pull/2883)]
 
