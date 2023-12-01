@@ -8,6 +8,7 @@ import Icons from 'unplugin-icons/vite';
 import Components from 'unplugin-vue-components/vite';
 import { defineConfig } from 'vite';
 import prismjs from 'vite-plugin-prismjs';
+import replace from 'replace-in-file';
 import WindiCSS from 'vite-plugin-windicss';
 import svgLoader from 'vite-svg-loader';
 
@@ -60,36 +61,24 @@ export default defineConfig({
         mkdirSync('src/assets/dayjsLocales');
       }
 
-      filenames.forEach((name) => {
+      filenames.forEach(async (name) => {
+        // English is always directly loaded (compiled by Vite) and thus not copied
+        if (name === "en") {
+          return
+        }
+        let langName = name;
+
         // copy dayjs language
         if (name === 'zh-Hans') {
-          // zh-Hans is called zh in dayjs, so we need to rename this
-          copyFile(
-            'node_modules/dayjs/locale/zh.js',
-            'src/assets/dayjsLocales/zh-Hans.js',
-            // eslint-disable-next-line promise/prefer-await-to-callbacks
-            (err) => {
-              if (err) {
-                throw err;
-              }
-            },
-          );
+          // zh-Hans is called zh in dayjs
+          langName = 'zh';
         } else if (name === 'zh-Hant') {
-          // zh-Hans is called zh in dayjs, so we need to rename this
-          copyFile(
-            'node_modules/dayjs/locale/zh-cn.js',
-            'src/assets/dayjsLocales/zh-Hant.js',
-            // eslint-disable-next-line promise/prefer-await-to-callbacks
-            (err) => {
-              if (err) {
-                throw err;
-              }
-            },
-          );
-        } else if (name !== 'en') {
-          // English is always directly loaded (compiled by Vite) and thus not copied
-          copyFile(
-            `node_modules/dayjs/locale/${name}.js`,
+          // zh-Hant is called zh-cn in dayjs
+          langName = 'zh-cn';
+        }
+
+        copyFile(
+            `node_modules/dayjs/esm/locale/${langName}.js`,
             `src/assets/dayjsLocales/${name}.js`,
             // eslint-disable-next-line promise/prefer-await-to-callbacks
             (err) => {
@@ -98,7 +87,12 @@ export default defineConfig({
               }
             },
           );
-        }
+      });
+      replace.sync({
+        files: 'src/assets/dayjsLocales/*.js',
+        // remove any dayjs import and any dayjs.locale call
+        from: new RegExp(`(?:import dayjs.*'|dayjs\.locale.*);`, 'g'),
+        to: '',
       });
 
       return {

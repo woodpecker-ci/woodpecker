@@ -12,9 +12,6 @@ dayjs.extend(advancedFormat);
 dayjs.extend(relativeTime);
 dayjs.extend(duration);
 
-// TODO improve
-window.dayjs = dayjs;
-
 export function useDate() {
   function toLocaleString(date: Date) {
     return dayjs(date).format(useI18n().t('time.tmpl'));
@@ -32,9 +29,11 @@ export function useDate() {
 
   async function setDayjsLocale(locale: string) {
     if (!addedLocales.includes(locale)) {
-      await import(`~/assets/dayjsLocales/${locale}.js`);
+      const l = await import(`~/assets/dayjsLocales/${locale}.js`);
+      dayjs.locale(l.default);
+    } else {
+      dayjs.locale(locale);
     }
-    dayjs.locale(locale);
   }
 
   function durationAsNumber(durationMs: number): string {
