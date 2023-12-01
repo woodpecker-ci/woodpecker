@@ -39,7 +39,8 @@ const (
 	pathUser          = "%s/2.0/user/"
 	pathEmails        = "%s/2.0/user/emails"
 	pathPermissions   = "%s/2.0/user/permissions/repositories?q=repository.full_name=%q"
-	pathWorkspace     = "%s/2.0/workspaces/?%s"
+	pathWorkspaces    = "%s/2.0/workspaces/?%s"
+	pathWorkspace     = "%s/2.0/workspaces/%s"
 	pathRepo          = "%s/2.0/repositories/%s/%s"
 	pathRepos         = "%s/2.0/repositories/%s?%s"
 	pathHook          = "%s/2.0/repositories/%s/%s/hooks/%s"
@@ -92,7 +93,7 @@ func (c *Client) ListEmail() (*EmailResp, error) {
 
 func (c *Client) ListWorkspaces(opts *ListWorkspacesOpts) (*WorkspacesResp, error) {
 	out := new(WorkspacesResp)
-	uri := fmt.Sprintf(pathWorkspace, c.base, opts.Encode())
+	uri := fmt.Sprintf(pathWorkspaces, c.base, opts.Encode())
 	_, err := c.do(uri, get, nil, out)
 	return out, err
 }
