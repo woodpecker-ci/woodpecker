@@ -29,8 +29,8 @@ function externalCSSPlugin() {
   return {
     name: 'external-css',
     transformIndexHtml: {
-      enforce: 'post',
-      transform() {
+      order: 'post',
+      handler() {
         return [
           {
             tag: 'link',
