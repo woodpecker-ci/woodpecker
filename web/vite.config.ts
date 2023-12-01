@@ -63,8 +63,8 @@ export default defineConfig({
 
       filenames.forEach(async (name) => {
         // English is always directly loaded (compiled by Vite) and thus not copied
-        if (name === "en") {
-          return
+        if (name === 'en') {
+          return;
         }
         let langName = name;
 
@@ -78,15 +78,15 @@ export default defineConfig({
         }
 
         copyFile(
-            `node_modules/dayjs/esm/locale/${langName}.js`,
-            `src/assets/dayjsLocales/${name}.js`,
-            // eslint-disable-next-line promise/prefer-await-to-callbacks
-            (err) => {
-              if (err) {
-                throw err;
-              }
-            },
-          );
+          `node_modules/dayjs/esm/locale/${langName}.js`,
+          `src/assets/dayjsLocales/${name}.js`,
+          // eslint-disable-next-line promise/prefer-await-to-callbacks
+          (err) => {
+            if (err) {
+              throw err;
+            }
+          },
+        );
       });
       replace.sync({
         files: 'src/assets/dayjsLocales/*.js',
