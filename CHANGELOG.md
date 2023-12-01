@@ -1,10 +1,20 @@
 # Changelog
 
-## [2.1.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.1.0) - 2023-11-30
+## [2.1.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.1.0) - 2023-12-01
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@qwerty287, @robbie-cahill, @renovate[bot], @micash545, @dominic-p, @zc-devs, @mzampetakis
+@voidcontext, @qwerty287, @robbie-cahill, @renovate[bot], @micash545, @dominic-p, @zc-devs, @mzampetakis
+
+### 📚 Documentation
+
+- Add nix-attic plugin to the index [[#2889](https://github.com/woodpecker-ci/woodpecker/pull/2889)]
+- Add usage with Tunnelmole to docs [[#2881](https://github.com/woodpecker-ci/woodpecker/pull/2881)]
+- Improve code blocks in docs [[#2879](https://github.com/woodpecker-ci/woodpecker/pull/2879)]
+- Add a blog post [[#2877](https://github.com/woodpecker-ci/woodpecker/pull/2877)]
+- Add documentation on Kubernetes securityContext [[#2822](https://github.com/woodpecker-ci/woodpecker/pull/2822)]
+- Add default page to categories [[#2869](https://github.com/woodpecker-ci/woodpecker/pull/2869)]
+- Use same format for Github docs as used for the other forges [[#2866](https://github.com/woodpecker-ci/woodpecker/pull/2866)]
 
 ### 📈 Enhancement
 
@@ -20,15 +30,6 @@
 - Fix pipeline-related environment [[#2876](https://github.com/woodpecker-ci/woodpecker/pull/2876)]
 - Fix version check partially [[#2871](https://github.com/woodpecker-ci/woodpecker/pull/2871)]
 - Fix unregistering agents when using agent tokens [[#2870](https://github.com/woodpecker-ci/woodpecker/pull/2870)]
-
-### 📚 Documentation
-
-- Add usage with Tunnelmole to docs [[#2881](https://github.com/woodpecker-ci/woodpecker/pull/2881)]
-- Improve code blocks in docs [[#2879](https://github.com/woodpecker-ci/woodpecker/pull/2879)]
-- Add a blog post [[#2877](https://github.com/woodpecker-ci/woodpecker/pull/2877)]
-- Add documentation on Kubernetes securityContext [[#2822](https://github.com/woodpecker-ci/woodpecker/pull/2822)]
-- Add default page to categories [[#2869](https://github.com/woodpecker-ci/woodpecker/pull/2869)]
-- Use same format for Github docs as used for the other forges [[#2866](https://github.com/woodpecker-ci/woodpecker/pull/2866)]
 
 ### Misc
 
