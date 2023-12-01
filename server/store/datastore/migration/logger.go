@@ -22,34 +22,34 @@ import (
 
 type xormigrateLogger struct{}
 
-func (l *xormigrateLogger) Debug(v ...interface{}) {
+func (l *xormigrateLogger) Debug(v ...any) {
 	log.Debug().Msg(fmt.Sprint(v...))
 }
 
-func (l *xormigrateLogger) Debugf(format string, v ...interface{}) {
+func (l *xormigrateLogger) Debugf(format string, v ...any) {
 	log.Debug().Msgf(format, v...)
 }
 
-func (l *xormigrateLogger) Info(v ...interface{}) {
+func (l *xormigrateLogger) Info(v ...any) {
 	log.Info().Msg(fmt.Sprint(v...))
 }
 
-func (l *xormigrateLogger) Infof(format string, v ...interface{}) {
+func (l *xormigrateLogger) Infof(format string, v ...any) {
 	log.Info().Msgf(format, v...)
 }
 
-func (l *xormigrateLogger) Warn(v ...interface{}) {
+func (l *xormigrateLogger) Warn(v ...any) {
 	log.Warn().Msg(fmt.Sprint(v...))
 }
 
-func (l *xormigrateLogger) Warnf(format string, v ...interface{}) {
+func (l *xormigrateLogger) Warnf(format string, v ...any) {
 	log.Warn().Msgf(format, v...)
 }
 
-func (l *xormigrateLogger) Error(v ...interface{}) {
+func (l *xormigrateLogger) Error(v ...any) {
 	log.Error().Msg(fmt.Sprint(v...))
 }
 
-func (l *xormigrateLogger) Errorf(format string, v ...interface{}) {
+func (l *xormigrateLogger) Errorf(format string, v ...any) {
 	log.Error().Msgf(format, v...)
 }
