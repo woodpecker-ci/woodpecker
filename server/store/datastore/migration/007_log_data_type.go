@@ -15,20 +15,23 @@
 package migration
 
 import (
+	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
 	"xorm.io/xorm/schemas"
 )
 
-var alterTableConfigUpdateColumnConfigDataType = task{
-	name: "alter-table-config-update-type-of-config-data",
-	fn: func(sess *xorm.Session) (err error) {
+var alterTableLogUpdateColumnLogDataType = xormigrate.Migration{
+	ID: "alter-table-logs-update-type-of-data",
+	MigrateSession: func(sess *xorm.Session) (err error) {
 		dialect := sess.Engine().Dialect().URI().DBType
 
 		switch dialect {
+		case schemas.POSTGRES:
+			_, err = sess.Exec("ALTER TABLE logs ALTER COLUMN log_data TYPE BYTEA")
 		case schemas.MYSQL:
-			_, err = sess.Exec("ALTER TABLE config MODIFY COLUMN config_data LONGBLOB")
+			_, err = sess.Exec("ALTER TABLE logs MODIFY COLUMN log_data LONGBLOB")
 		default:
-			// xorm uses the same type for all blob sizes in sqlite and postgres
+			// sqlite does only know BLOB in all cases
 			return nil
 		}
 

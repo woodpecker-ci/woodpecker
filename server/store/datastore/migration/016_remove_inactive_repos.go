@@ -15,13 +15,19 @@
 package migration
 
 import (
+	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
 )
 
-var renameForgeIDToForgeRemoteID = task{
-	name:     "rename-forge-id-to-forge-remote-id",
-	required: true,
-	fn: func(sess *xorm.Session) error {
-		return renameColumn(sess, "repos", "forge_id", "forge_remote_id")
+var removeInactiveRepos = xormigrate.Migration{
+	ID: "remove-inactive-repos",
+	MigrateSession: func(sess *xorm.Session) error {
+		// If the timeout is 0, the repo was never activated, so we remove it.
+		_, err := sess.Table("repos").Where("repo_active = ?", false).And("repo_timeout = ?", 0).Delete()
+		if err != nil {
+			return err
+		}
+
+		return dropTableColumns(sess, "users", "user_synced")
 	},
 }

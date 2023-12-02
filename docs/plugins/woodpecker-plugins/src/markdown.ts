@@ -23,5 +23,5 @@ export function getContent(data: string): string {
   if (!content) {
     throw new Error("Can't get the content");
   }
-  return marked(content);
+  return marked(content) as string;
 }
