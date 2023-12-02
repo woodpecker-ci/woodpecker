@@ -1,10 +1,22 @@
 # Changelog
 
-## [2.1.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.1.0) - 2023-12-01
+## [2.1.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.1.0) - 2023-12-02
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@renovate[bot], @voidcontext, @qwerty287, @robbie-cahill, @micash545, @dominic-p, @zc-devs, @mzampetakis
+@qwerty287, @renovate[bot], @voidcontext, @robbie-cahill, @micash545, @dominic-p, @zc-devs, @mzampetakis
+
+### 🔒 Security
+
+- Sanitize plugin docs content [[#2900](https://github.com/woodpecker-ci/woodpecker/pull/2900)]
+
+### 🐛 Bug Fixes
+
+- Fix bitbucket org fetching [[#2874](https://github.com/woodpecker-ci/woodpecker/pull/2874)]
+- Only deploy docs on `main` [[#2892](https://github.com/woodpecker-ci/woodpecker/pull/2892)]
+- Fix pipeline-related environment [[#2876](https://github.com/woodpecker-ci/woodpecker/pull/2876)]
+- Fix version check partially [[#2871](https://github.com/woodpecker-ci/woodpecker/pull/2871)]
+- Fix unregistering agents when using agent tokens [[#2870](https://github.com/woodpecker-ci/woodpecker/pull/2870)]
 
 ### 📚 Documentation
 
@@ -24,15 +36,10 @@
 - Simple security context options (Kubernetes) [[#2550](https://github.com/woodpecker-ci/woodpecker/pull/2550)]
 - Changes PullRequest Index to ForgeRemoteID type [[#2823](https://github.com/woodpecker-ci/woodpecker/pull/2823)]
 
-### 🐛 Bug Fixes
-
-- Only deploy docs on `main` [[#2892](https://github.com/woodpecker-ci/woodpecker/pull/2892)]
-- Fix pipeline-related environment [[#2876](https://github.com/woodpecker-ci/woodpecker/pull/2876)]
-- Fix version check partially [[#2871](https://github.com/woodpecker-ci/woodpecker/pull/2871)]
-- Fix unregistering agents when using agent tokens [[#2870](https://github.com/woodpecker-ci/woodpecker/pull/2870)]
-
 ### Misc
 
+- Update dependency marked to v11 [[#2898](https://github.com/woodpecker-ci/woodpecker/pull/2898)]
+- Update dependency vite-svg-loader to v5 [[#2837](https://github.com/woodpecker-ci/woodpecker/pull/2837)]
 - Update golang (packages) [[#2894](https://github.com/woodpecker-ci/woodpecker/pull/2894)]
 - Update web npm deps non-major [[#2895](https://github.com/woodpecker-ci/woodpecker/pull/2895)]
 - Update web npm deps non-major [[#2884](https://github.com/woodpecker-ci/woodpecker/pull/2884)]
