@@ -17,6 +17,7 @@ package migration
 import (
 	"strings"
 
+	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
 )
 
@@ -25,10 +26,9 @@ type oldTable struct {
 	columns []string
 }
 
-var renameColumnsBuildsToPipeline = task{
-	name:     "rename-columns-builds-to-pipeline",
-	required: true,
-	fn: func(sess *xorm.Session) error {
+var renameColumnsBuildsToPipeline = xormigrate.Migration{
+	ID: "rename-columns-builds-to-pipeline",
+	MigrateSession: func(sess *xorm.Session) error {
 		var oldColumns []*oldTable
 
 		oldColumns = append(oldColumns, &oldTable{

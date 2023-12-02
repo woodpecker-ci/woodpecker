@@ -15,12 +15,13 @@
 package migration
 
 import (
+	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
 )
 
-var dropFiles = task{
-	name: "drop-files",
-	fn: func(sess *xorm.Session) error {
+var dropFiles = xormigrate.Migration{
+	ID: "drop-files",
+	MigrateSession: func(sess *xorm.Session) error {
 		return sess.DropTable("files")
 	},
 }
