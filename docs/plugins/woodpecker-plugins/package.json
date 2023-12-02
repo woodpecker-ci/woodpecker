@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "fuse.js": "^7.0.0",
+    "isomorphic-dompurify": "^1.11.0",
     "yaml": "^2.3.1"
   }
 }

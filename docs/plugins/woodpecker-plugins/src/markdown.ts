@@ -1,3 +1,4 @@
+import DOMPurify from 'isomorphic-dompurify';
 import { marked } from 'marked';
 import { parse as YAMLParse } from 'yaml';
 
@@ -23,5 +24,5 @@ export function getContent(data: string): string {
   if (!content) {
     throw new Error("Can't get the content");
   }
-  return marked(content) as string;
+  return DOMPurify.sanitize(marked(content) as string);
 }
