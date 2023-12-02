@@ -34,12 +34,12 @@
 
 ## Pipeline events
 
-- **Push**: A push event is triggered when a commit is pushed to a branch.
-- **Pull request**: A pull request event is triggered when a pull request is opened or a new commit is pushed to it.
-- **Pull request closed**: A pull request closed event is triggered when a pull request is closed or merged.
-- **Tag**: A tag event is triggered when a tag is pushed.
-- **Manual**: A manual event is triggered when a user manually triggers a pipeline.
-- **Cron**: A cron event is triggered when a cron job is executed.
+- `push`: A push event is triggered when a commit is pushed to a branch.
+- `pull_request`: A pull request event is triggered when a pull request is opened or a new commit is pushed to it.
+- `pull_request_closed`: A pull request closed event is triggered when a pull request is closed or merged.
+- `tag`: A tag event is triggered when a tag is pushed.
+- `manual`: A manual event is triggered when a user manually triggers a pipeline.
+- `cron`: A cron event is triggered when a cron job is executed.
 
 ## Conventions
 
