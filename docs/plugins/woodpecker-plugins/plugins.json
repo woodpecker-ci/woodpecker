@@ -1,10 +1,5 @@
 {
   "plugins": [
-  	{
-  		"name": "escapetest",
-  		"docs": "https://codeberg.org/qwerty287/test/raw/branch/main/README.md",
-  		"verified": false
-  	},
     {
       "name": "Clone plugin",
       "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-git/main/docs.md",
