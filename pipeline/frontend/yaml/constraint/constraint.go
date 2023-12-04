@@ -20,7 +20,7 @@ import (
 	"path"
 	"strings"
 
-	"github.com/antonmedv/expr"
+	"github.com/expr-lang/expr"
 	"github.com/bmatcuk/doublestar/v4"
 	"go.uber.org/multierr"
 	"gopkg.in/yaml.v3"

@@ -8,7 +8,6 @@ require (
 	codeberg.org/6543/xyaml v1.1.0
 	github.com/6543/logfile-open v1.2.1
 	github.com/alessio/shellescape v1.4.2
-	github.com/antonmedv/expr v1.15.6
 	github.com/bmatcuk/doublestar/v4 v4.6.1
 	github.com/caddyserver/certmagic v0.19.2
 	github.com/cenkalti/backoff/v4 v4.2.1
@@ -18,6 +17,7 @@ require (
 	github.com/docker/go-connections v0.4.0
 	github.com/docker/go-units v0.5.0
 	github.com/drone/envsubst v1.0.3
+	github.com/expr-lang/expr v1.15.6
 	github.com/franela/goblin v0.0.0-20211003143422-0a4f594942bf
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/gin-gonic/gin v1.9.1
