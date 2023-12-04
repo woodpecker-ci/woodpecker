@@ -1,17 +1,27 @@
 # Changelog
 
-## [2.1.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.1.0) - 2023-12-02
+## [2.1.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.1.0) - 2023-12-04
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@renovate[bot], @qwerty287, @voidcontext, @robbie-cahill, @micash545, @dominic-p, @zc-devs, @mzampetakis
+@renovate[bot], @qwerty287, @kaylynb, @voidcontext, @robbie-cahill, @micash545, @dominic-p, @zc-devs, @mzampetakis
 
 ### 🔒 Security
 
 - Sanitize plugin docs content [[#2900](https://github.com/woodpecker-ci/woodpecker/pull/2900)]
 
+### 📈 Enhancement
+
+- Unify date/time dependencies [[#2891](https://github.com/woodpecker-ci/woodpecker/pull/2891)]
+- Add linting for `any` [[#2893](https://github.com/woodpecker-ci/woodpecker/pull/2893)]
+- Fix vite deprecations [[#2885](https://github.com/woodpecker-ci/woodpecker/pull/2885)]
+- Migrate to Xormigrate [[#2711](https://github.com/woodpecker-ci/woodpecker/pull/2711)]
+- Simple security context options (Kubernetes) [[#2550](https://github.com/woodpecker-ci/woodpecker/pull/2550)]
+- Changes PullRequest Index to ForgeRemoteID type [[#2823](https://github.com/woodpecker-ci/woodpecker/pull/2823)]
+
 ### 🐛 Bug Fixes
 
+- Fix podman agent container in v2 [[#2897](https://github.com/woodpecker-ci/woodpecker/pull/2897)]
 - Fix bitbucket org fetching [[#2874](https://github.com/woodpecker-ci/woodpecker/pull/2874)]
 - Only deploy docs on `main` [[#2892](https://github.com/woodpecker-ci/woodpecker/pull/2892)]
 - Fix pipeline-related environment [[#2876](https://github.com/woodpecker-ci/woodpecker/pull/2876)]
@@ -28,16 +38,9 @@
 - Add default page to categories [[#2869](https://github.com/woodpecker-ci/woodpecker/pull/2869)]
 - Use same format for Github docs as used for the other forges [[#2866](https://github.com/woodpecker-ci/woodpecker/pull/2866)]
 
-### 📈 Enhancement
-
-- Add linting for `any` [[#2893](https://github.com/woodpecker-ci/woodpecker/pull/2893)]
-- Fix vite deprecations [[#2885](https://github.com/woodpecker-ci/woodpecker/pull/2885)]
-- Migrate to Xormigrate [[#2711](https://github.com/woodpecker-ci/woodpecker/pull/2711)]
-- Simple security context options (Kubernetes) [[#2550](https://github.com/woodpecker-ci/woodpecker/pull/2550)]
-- Changes PullRequest Index to ForgeRemoteID type [[#2823](https://github.com/woodpecker-ci/woodpecker/pull/2823)]
-
 ### Misc
 
+- Update golang (packages) [[#2904](https://github.com/woodpecker-ci/woodpecker/pull/2904)]
 - Update module github.com/google/go-github/v56 to v57 [[#2899](https://github.com/woodpecker-ci/woodpecker/pull/2899)]
 - Update dependency marked to v11 [[#2898](https://github.com/woodpecker-ci/woodpecker/pull/2898)]
 - Update dependency vite-svg-loader to v5 [[#2837](https://github.com/woodpecker-ci/woodpecker/pull/2837)]
