@@ -22,9 +22,9 @@ import (
 	"code.gitea.io/sdk/gitea"
 	"github.com/franela/goblin"
 
-	"go.woodpecker-ci.org/woodpecker/server/forge/gitea/fixtures"
-	"go.woodpecker-ci.org/woodpecker/server/model"
-	"go.woodpecker-ci.org/woodpecker/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/gitea/fixtures"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
 func Test_parse(t *testing.T) {

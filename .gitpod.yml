@@ -24,7 +24,7 @@ tasks:
         || echo WOODPECKER_DEV_OAUTH_HOST=$(gp url 8000) >> .env
       gp sync-await gitea
       gp sync-done woodpecker-server
-      go run go.woodpecker-ci.org/woodpecker/cmd/server
+      go run go.woodpecker-ci.org/woodpecker/v2/cmd/server
   - name: Agent
     env:
       WOODPECKER_SERVER: localhost:9000
@@ -33,7 +33,7 @@ tasks:
       WOODPECKER_HEALTHCHECK: false
     command: |
       gp sync-await woodpecker-server
-      go run go.woodpecker-ci.org/woodpecker/cmd/agent
+      go run go.woodpecker-ci.org/woodpecker/v2/cmd/agent
   - name: Gitea
     command: |
       export DOCKER_COMPOSE_CMD="docker-compose -f docker-compose.gitpod.yml -p woodpecker"
