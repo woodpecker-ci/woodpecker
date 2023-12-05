@@ -525,7 +525,7 @@ Supported variables:
 
 > Default: empty
 
-List of addon files. See [addons](./75-addons/00-addons.md).
+List of addon files. See [addons](./75-addons/00-overview.md).
 
 ---
 
