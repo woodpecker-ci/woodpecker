@@ -67,8 +67,7 @@ The associated commit is checked out with git to a workspace which is mounted to
 - Woodpecker clones the source code in the beginning of the workflow
 - Changes to files are persisted through steps as the same volume is mounted to all steps
 
-```yaml
-# .woodpecker.yml
+```yaml title=".woodpecker.yml"
 steps:
   build:
     image: debian
@@ -407,7 +406,7 @@ when:
 
 Execute a step only if the provided evaluate expression is equal to true. Both built-in [`CI_`](./50-environment.md#built-in-environment-variables) and custom variables can be used inside the expression.
 
-The expression syntax can be found in [the docs](https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md) of the underlying library.
+The expression syntax can be found in [the docs](https://github.com/expr-lang/expr/blob/master/docs/Language-Definition.md) of the underlying library.
 
 Run on pushes to the default branch for the repository `owner/repo`:
 

@@ -1,6 +1,9 @@
 linters-settings:
   gofmt:
     simplify: true
+    rewrite-rules:
+      - pattern: interface{}
+        replacement: any
   misspell:
     locale: US
   gofumpt:

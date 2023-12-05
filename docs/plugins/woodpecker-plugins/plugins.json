@@ -71,13 +71,6 @@
       "verified": false
     },
     {
-      "// todo": true,
-      "name": "Email",
-      "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-email/master/docs.md",
-      "verified": true
-    },
-    {
-      "// todo": true,
       "name": "Chart releaser",
       "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-chart-releaser/master/docs.md",
       "verified": true
@@ -156,6 +149,11 @@
       "name": "GitHub Release",
       "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-github-release/main/docs.md",
       "verified": true
+    },
+    {
+      "name": "Nix - Attic",
+      "docs": "https://git.vdx.hu/voidcontext/woodpecker-plugin-nix-attic/raw/branch/main/docs.md",
+      "verified": false
     }
   ]
 }

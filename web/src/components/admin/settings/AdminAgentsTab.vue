@@ -24,7 +24,7 @@
             <Badge v-if="agent.capacity" :label="$t('admin.settings.agents.capacity.badge')" :value="agent.capacity" />
           </span>
           <span class="ml-2">{{
-            agent.last_contact ? timeAgo.format(agent.last_contact * 1000) : $t('admin.settings.agents.never')
+            agent.last_contact ? date.timeAgo(agent.last_contact * 1000) : $t('admin.settings.agents.never')
           }}</span>
         </span>
         <IconButton
@@ -98,7 +98,7 @@
             <TextField
               :model-value="
                 selectedAgent.last_contact
-                  ? timeAgo.format(selectedAgent.last_contact * 1000)
+                  ? date.timeAgo(selectedAgent.last_contact * 1000)
                   : $t('admin.settings.agents.never')
               "
               disabled
@@ -135,14 +135,14 @@ import TextField from '~/components/form/TextField.vue';
 import Settings from '~/components/layout/Settings.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
+import { useDate } from '~/compositions/useDate';
 import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
-import useTimeAgo from '~/compositions/useTimeAgo';
 import { Agent } from '~/lib/api/types';
 
 const apiClient = useApiClient();
 const notifications = useNotifications();
-const timeAgo = useTimeAgo();
+const date = useDate();
 const { t } = useI18n();
 
 const selectedAgent = ref<Partial<Agent>>();
