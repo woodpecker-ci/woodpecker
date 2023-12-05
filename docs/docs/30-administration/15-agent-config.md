@@ -182,7 +182,7 @@ Configures the backend engine to run pipelines on. Possible values are `auto-det
 
 > Default: empty
 
-List of addon files. See [addons](./75-addons/00-addons.md).
+List of addon files. See [addons](./75-addons/00-overview.md).
 
 ### `WOODPECKER_BACKEND_DOCKER_*`
 
