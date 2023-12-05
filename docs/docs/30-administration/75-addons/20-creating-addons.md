@@ -39,7 +39,7 @@ The output file is your addon which is now ready to use.
 
 ## Restrictions
 
-Addons must directly directly depend on Woodpecker's core (`go.woodpecker-ci.org/woodpecker/woodpecker`).
+Addons must directly depend on Woodpecker's core (`go.woodpecker-ci.org/woodpecker/woodpecker`).
 The addon must have been built with **excatly the same code** as the Woodpecker instance you'd like to use it on. This means: If you build your addon with a specific commit from Woodpecker `next`, you can likely only use it with the Woodpecker version compiled from this commit.
 Also, if you change something inside of Woodpecker without commiting, it might fail because you need to recompile your addon with this code.
 
