@@ -5,28 +5,15 @@ import (
 	"net/http"
 
 	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
-
 	"go.woodpecker-ci.org/woodpecker/server/forge"
 	forge_types "go.woodpecker-ci.org/woodpecker/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/server/model"
-	"go.woodpecker-ci.org/woodpecker/shared/addon/execute"
 	addon_types "go.woodpecker-ci.org/woodpecker/shared/addon/types"
 )
 
-func main() {
-	execute.Execute[forge.Forge](&TestAddon{})
-}
+var Type = addon_types.TypeForge
 
-type TestAddon struct {
-}
-
-func (a *TestAddon) Type() addon_types.Type {
-	return addon_types.TypeForge
-}
-
-func (a *TestAddon) Addon(env []string) (forge.Forge, error) {
-	logger := log.Logger // TODO send via rpc
+func Addon(logger zerolog.Logger, env []string) (forge.Forge, error) {
 	logger.Error().Msg("hello world from addon")
 	return &config{l: logger}, nil
 }
