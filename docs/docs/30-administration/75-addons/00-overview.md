@@ -36,3 +36,7 @@ services:
 You may need to [mount the addon file as volume](https://docs.docker.com/storage/volumes/#create-and-manage-volumes) to access it from inside the Docker container.
 
 You can list multiple addons, Woodpecker will automatically determine their type. If you specify multiple addons with the same type, only the first one will be used.
+
+### Bug reports
+
+If you experience bugs, please check which component has the issue. If it's the addon, **do not raise an issue in the main repository**, but rather use the separate addon repositories. To check which component is responsible for the bug, look at the logs. Logs from addons are marked with a special field `addon` containing their addon file name.

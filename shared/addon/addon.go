@@ -50,7 +50,9 @@ func Load[T any](files []string, t types.Type) (*Addon[T], error) {
 			return nil, errors.New("addon main has incorrect type")
 		}
 
-		mainOut, err := main(log.Logger, os.Environ())
+		logger := log.Logger.With().Str("addon", file).Logger()
+
+		mainOut, err := main(logger, os.Environ())
 		if err != nil {
 			return nil, err
 		}

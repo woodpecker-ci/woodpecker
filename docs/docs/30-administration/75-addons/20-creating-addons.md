@@ -53,6 +53,10 @@ It is recommended to at least support the latest released version of Woodpecker.
 
 As long as there were no changes to Woodpecker's interfaces or they are backwards-compatible, you can easily compile the addon for multiple version by changing the version of `go.woodpecker-ci.org/woodpecker/woodpecker` using `go get` before compiling.
 
+## Logging
+
+The entrypoint receives a `zerolog.Logger` as input. **Do not use any other logging solution.** This logger follows the configuration of the Woodpecker instance and adds a special field `addon` to the log entries which allows users to find out which component is writing the log messages.
+
 ## Example structure
 
 ```go
