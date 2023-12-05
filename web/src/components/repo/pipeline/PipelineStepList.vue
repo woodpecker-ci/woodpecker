@@ -15,7 +15,7 @@
         class="flex items-center space-x-1 text-wp-link-100 hover:text-wp-link-200 min-w-0"
         :href="pipeline.forge_url"
       >
-        <Icon name="pull_request" />
+        <Icon name="pull-request" />
         <span class="truncate">{{ prettyRef }}</span>
       </a>
       <router-link

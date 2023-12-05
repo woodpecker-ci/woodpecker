@@ -26,7 +26,7 @@ const pipelines = computed(
   () =>
     allPipelines?.value.filter(
       (b) =>
-        b.event === 'pull_request' &&
+        (b.event === 'pull_request' || b.event === 'pull_request_closed') &&
         b.ref
           .replaceAll('refs/pull/', '')
           .replaceAll('refs/merge-requests/', '')
