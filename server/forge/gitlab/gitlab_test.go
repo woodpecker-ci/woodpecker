@@ -137,7 +137,7 @@ func Test_GitLab(t *testing.T) {
 					req, _ := http.NewRequest(
 						testdata.ServiceHookMethod,
 						testdata.ServiceHookURL.String(),
-						bytes.NewReader(testdata.ServiceHookPushBody),
+						bytes.NewReader(testdata.HookPush),
 					)
 					req.Header = testdata.ServiceHookHeaders
 
@@ -160,7 +160,7 @@ func Test_GitLab(t *testing.T) {
 					req, _ := http.NewRequest(
 						testdata.ServiceHookMethod,
 						testdata.ServiceHookURL.String(),
-						bytes.NewReader(testdata.ServiceHookTagPushBody),
+						bytes.NewReader(testdata.HookTag),
 					)
 					req.Header = testdata.ServiceHookHeaders
 
@@ -182,7 +182,7 @@ func Test_GitLab(t *testing.T) {
 					req, _ := http.NewRequest(
 						testdata.ServiceHookMethod,
 						testdata.ServiceHookURL.String(),
-						bytes.NewReader(testdata.WebhookMergeRequestBody),
+						bytes.NewReader(testdata.HookPullRequest),
 					)
 					req.Header = testdata.ServiceHookHeaders
 

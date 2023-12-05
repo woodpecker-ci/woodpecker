@@ -54,7 +54,7 @@ func Test_parser(t *testing.T) {
 			})
 
 			g.It("Should return nil if not open", func() {
-				buf := bytes.NewBufferString(fixtures.HookMerged)
+				buf := bytes.NewBufferString(fixtures.HookPullRequestClosed)
 				req, _ := http.NewRequest("POST", "/hook", buf)
 				req.Header = http.Header{}
 				req.Header.Set(hookEvent, hookPullCreated)
