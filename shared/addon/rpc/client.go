@@ -3,7 +3,6 @@ package rpc
 import (
 	"net/rpc"
 
-	"github.com/hashicorp/go-plugin"
 	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/shared/addon/types"
@@ -11,7 +10,6 @@ import (
 
 type AddonRPCClient[T any] struct {
 	client *rpc.Client
-	broker *plugin.MuxBroker
 }
 
 func (a *AddonRPCClient[T]) Type() types.Type {
