@@ -122,8 +122,8 @@ devDependencies:
     specifier: ^0.18.0
     version: 0.18.0(@vue/compiler-sfc@3.3.8)
   unplugin-vue-components:
-    specifier: ^0.25.0
-    version: 0.25.2(vue@3.3.8)
+    specifier: ^0.26.0
+    version: 0.26.0(vue@3.3.8)
   vite:
     specifier: ^5.0.0
     version: 5.0.0(@types/node@20.9.2)
@@ -3753,8 +3753,8 @@ packages:
       - supports-color
     dev: true
 
-  /unplugin-vue-components@0.25.2(vue@3.3.8):
-    resolution: {integrity: sha512-OVmLFqILH6w+eM8fyt/d/eoJT9A6WO51NZLf1vC5c1FZ4rmq2bbGxTy8WP2Jm7xwFdukaIdv819+UI7RClPyCA==}
+  /unplugin-vue-components@0.26.0(vue@3.3.8):
+    resolution: {integrity: sha512-s7IdPDlnOvPamjunVxw8kNgKNK8A5KM1YpK5j/p97jEKTjlPNrA0nZBiSfAKKlK1gWZuyWXlKL5dk3EDw874LQ==}
     engines: {node: '>=14'}
     peerDependencies:
       '@babel/parser': ^7.15.8
