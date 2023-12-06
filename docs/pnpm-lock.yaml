@@ -19,8 +19,8 @@ importers:
         specifier: ^3.0.0
         version: 3.0.0(@algolia/client-search@4.20.0)(@types/react@18.2.37)(react-dom@18.2.0)(react@18.2.0)(search-insights@2.11.0)(typescript@5.2.2)
       '@easyops-cn/docusaurus-search-local':
-        specifier: ^0.37.2
-        version: 0.37.4(@docusaurus/theme-common@3.0.0)(@docusaurus/types@3.0.0)(react-dom@18.2.0)(react@18.2.0)(typescript@5.2.2)
+        specifier: ^0.38.0
+        version: 0.38.1(@docusaurus/theme-common@3.0.0)(@docusaurus/types@3.0.0)(react-dom@18.2.0)(react@18.2.0)(typescript@5.2.2)
       '@mdx-js/react':
         specifier: ^3.0.0
         version: 3.0.0(@types/react@18.2.37)(react@18.2.0)
@@ -56,8 +56,8 @@ importers:
         specifier: ^3.0.0
         version: 3.0.0(react-dom@18.2.0)(react@18.2.0)
       '@docusaurus/tsconfig':
-        specifier: 3.0.0
-        version: 3.0.0
+        specifier: 3.0.1
+        version: 3.0.1
       '@docusaurus/types':
         specifier: ^3.0.0
         version: 3.0.0(react-dom@18.2.0)(react@18.2.0)
@@ -2170,8 +2170,8 @@ packages:
       fs-extra: 11.1.1
       tslib: 2.6.2
 
-  /@docusaurus/tsconfig@3.0.0:
-    resolution: {integrity: sha512-yR9sng4izFudS+v1xV5yboNfc1hATMDpYp9iYfWggbBDwKSm0J1IdIgkygRnqC/AWs1ARUQUpG0gFotPCE/4Ew==}
+  /@docusaurus/tsconfig@3.0.1:
+    resolution: {integrity: sha512-hT2HCdNE3pWTzXV/7cSsowfmaOxXVOTFOXmkqaYjBWjaxjJ3FO0nHbdJ8rF6Da7PvWmIPbUekdP5gep1XCJ7Vg==}
     dev: true
 
   /@docusaurus/types@3.0.0(react-dom@18.2.0)(react@18.2.0):
@@ -2266,8 +2266,8 @@ packages:
       immediate: 3.3.0
     dev: false
 
-  /@easyops-cn/docusaurus-search-local@0.37.4(@docusaurus/theme-common@3.0.0)(@docusaurus/types@3.0.0)(react-dom@18.2.0)(react@18.2.0)(typescript@5.2.2):
-    resolution: {integrity: sha512-OVGx0LPdhEt/UIybkwKVelx/6yXJn24fOskJMyzUAR6HcjzeEMZM7hGI3AuGglnWzpQXMhT5T3WbMW/63mwQVA==}
+  /@easyops-cn/docusaurus-search-local@0.38.1(@docusaurus/theme-common@3.0.0)(@docusaurus/types@3.0.0)(react-dom@18.2.0)(react@18.2.0)(typescript@5.2.2):
+    resolution: {integrity: sha512-8CG/hRxkuk8dPuhjHIOLUHMWQGTsva1c6G3S/TYIH8y04Offzl9dPqLoss7289/VxpeX2VAhon0dFTu/QUPREA==}
     engines: {node: '>=12'}
     peerDependencies:
       '@docusaurus/theme-common': ^2 || ^3
