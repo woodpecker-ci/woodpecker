@@ -40,6 +40,8 @@
 
 ### Misc
 
+- Lock file maintenance [[#2910](https://github.com/woodpecker-ci/woodpecker/pull/2910)]
+- Update web npm deps non-major [[#2909](https://github.com/woodpecker-ci/woodpecker/pull/2909)]
 - Update docs npm deps non-major [[#2908](https://github.com/woodpecker-ci/woodpecker/pull/2908)]
 - Update golang (packages) [[#2904](https://github.com/woodpecker-ci/woodpecker/pull/2904)]
 - Update module github.com/google/go-github/v56 to v57 [[#2899](https://github.com/woodpecker-ci/woodpecker/pull/2899)]
