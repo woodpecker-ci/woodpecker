@@ -30,7 +30,7 @@ var userInfoCmd = &cli.Command{
 	Usage:     "show user details",
 	ArgsUsage: "<username>",
 	Action:    userInfo,
-	Flags: []cli.Flag{common.FormatFlag(tmplUserInfo)},
+	Flags:     []cli.Flag{common.FormatFlag(tmplUserInfo)},
 }
 
 func userInfo(c *cli.Context) error {

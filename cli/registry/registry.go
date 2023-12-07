@@ -16,7 +16,6 @@ package registry
 
 import (
 	"github.com/urfave/cli/v2"
-
 )
 
 // Command exports the registry command set.

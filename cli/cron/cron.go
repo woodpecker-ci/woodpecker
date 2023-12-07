@@ -16,7 +16,6 @@ package cron
 
 import (
 	"github.com/urfave/cli/v2"
-
 )
 
 // Command exports the cron command set.

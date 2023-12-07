@@ -16,7 +16,6 @@ package pipeline
 
 import (
 	"github.com/urfave/cli/v2"
-
 )
 
 // Command exports the pipeline command set.

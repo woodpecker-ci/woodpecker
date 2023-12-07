@@ -30,7 +30,7 @@ var pipelineInfoCmd = &cli.Command{
 	Usage:     "show pipeline details",
 	ArgsUsage: "<repo-id|repo-full-name> [pipeline]",
 	Action:    pipelineInfo,
-	Flags: []cli.Flag{common.FormatFlag(tmplPipelineInfo)},
+	Flags:     []cli.Flag{common.FormatFlag(tmplPipelineInfo)},
 }
 
 func pipelineInfo(c *cli.Context) error {
