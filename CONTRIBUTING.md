@@ -70,8 +70,8 @@ to communicate when admins have to do manual migration steps and when they can j
 
 As of semver guidelines, breaking changes will be released as a major version. We will hold back
 breaking changes to not release many majors each containing just a few breaking changes.
-Before a major version is released, a release candidate (RC) will be released to allow easy testing,
-the actual release will follow about a week later.
+Prior to the release of a major version, a release candidate (RC) will be published to allow easy testing,
+the actual release will be about a week later.
 
 ## Development
 
