@@ -101,6 +101,11 @@ func TestSchema(t *testing.T) {
 			testFile: ".woodpecker/test-broken.yml",
 			fail:     true,
 		},
+		{
+			name:     "New syntax",
+			testFile: ".woodpecker/test-new-syntax.yml",
+			fail:     false,
+		},
 	}
 
 	for _, tt := range testTable {
