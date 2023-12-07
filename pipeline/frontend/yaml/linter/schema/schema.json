@@ -117,7 +117,7 @@
         "lfs": {
           "type": "boolean",
           "default": true,
-          "description": "Set this to `false` to disable retrieval of LFS files"
+          "description": "Set this to false to disable retrieval of LFS files"
         },
         "tags": {
           "type": "boolean",
