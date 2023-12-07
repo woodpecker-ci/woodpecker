@@ -29,14 +29,14 @@ var pipelineLastCmd = &cli.Command{
 	Usage:     "show latest pipeline details",
 	ArgsUsage: "<repo-id|repo-full-name>",
 	Action:    pipelineLast,
-	Flags: append(common.GlobalFlags,
+	Flags: []cli.Flag{
 		common.FormatFlag(tmplPipelineInfo),
 		&cli.StringFlag{
 			Name:  "branch",
 			Usage: "branch name",
 			Value: "main",
 		},
-	),
+	},
 }
 
 func pipelineLast(c *cli.Context) error {

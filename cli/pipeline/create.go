@@ -32,7 +32,7 @@ var pipelineCreateCmd = &cli.Command{
 	Usage:     "create new pipeline",
 	ArgsUsage: "<repo-id|repo-full-name>",
 	Action:    pipelineCreate,
-	Flags: append(common.GlobalFlags,
+	Flags: []cli.Flag{
 		common.FormatFlag(tmplPipelineList),
 		&cli.StringFlag{
 			Name:     "branch",
@@ -43,7 +43,7 @@ var pipelineCreateCmd = &cli.Command{
 			Name:  "var",
 			Usage: "key=value",
 		},
-	),
+	},
 }
 
 func pipelineCreate(c *cli.Context) error {

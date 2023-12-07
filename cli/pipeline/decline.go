@@ -20,7 +20,6 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"go.woodpecker-ci.org/woodpecker/cli/common"
 	"go.woodpecker-ci.org/woodpecker/cli/internal"
 )
 
@@ -29,7 +28,6 @@ var pipelineDeclineCmd = &cli.Command{
 	Usage:     "decline a pipeline",
 	ArgsUsage: "<repo-id|repo-full-name> <pipeline>",
 	Action:    pipelineDecline,
-	Flags:     common.GlobalFlags,
 }
 
 func pipelineDecline(c *cli.Context) (err error) {

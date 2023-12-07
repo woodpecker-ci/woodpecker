@@ -29,10 +29,10 @@ var registryListCmd = &cli.Command{
 	Usage:     "list registries",
 	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    registryList,
-	Flags: append(common.GlobalFlags,
+	Flags: []cli.Flag{
 		common.RepoFlag,
 		common.FormatFlag(tmplRegistryList, true),
-	),
+	},
 }
 
 func registryList(c *cli.Context) error {

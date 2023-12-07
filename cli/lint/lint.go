@@ -37,7 +37,6 @@ var Command = &cli.Command{
 	Usage:     "lint a pipeline configuration file",
 	ArgsUsage: "[path/to/.woodpecker.yaml]",
 	Action:    lint,
-	Flags:     common.GlobalFlags,
 }
 
 func lint(c *cli.Context) error {

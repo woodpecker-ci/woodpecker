@@ -48,7 +48,7 @@ var Command = &cli.Command{
 	Usage:     "execute a local pipeline",
 	ArgsUsage: "[path/to/.woodpecker.yaml]",
 	Action:    run,
-	Flags:     utils.MergeSlices(common.GlobalFlags, flags, docker.Flags, kubernetes.Flags, local.Flags),
+	Flags:     utils.MergeSlices(flags, docker.Flags, kubernetes.Flags, local.Flags),
 }
 
 func run(c *cli.Context) error {

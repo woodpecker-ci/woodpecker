@@ -17,14 +17,12 @@ package log
 import (
 	"github.com/urfave/cli/v2"
 
-	"go.woodpecker-ci.org/woodpecker/cli/common"
 )
 
 // Command exports the log command set.
 var Command = &cli.Command{
 	Name:  "log",
 	Usage: "manage logs",
-	Flags: common.GlobalFlags,
 	Subcommands: []*cli.Command{
 		logPurgeCmd,
 	},

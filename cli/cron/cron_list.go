@@ -29,10 +29,10 @@ var cronListCmd = &cli.Command{
 	Usage:     "list cron jobs",
 	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    cronList,
-	Flags: append(common.GlobalFlags,
+	Flags: []cli.Flag{
 		common.RepoFlag,
 		common.FormatFlag(tmplCronList, true),
-	),
+	},
 }
 
 func cronList(c *cli.Context) error {

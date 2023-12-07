@@ -19,7 +19,6 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"go.woodpecker-ci.org/woodpecker/cli/common"
 	"go.woodpecker-ci.org/woodpecker/cli/internal"
 )
 
@@ -28,7 +27,6 @@ var repoChownCmd = &cli.Command{
 	Usage:     "assume ownership of a repository",
 	ArgsUsage: "<repo-id|repo-full-name>",
 	Action:    repoChown,
-	Flags:     common.GlobalFlags,
 }
 
 func repoChown(c *cli.Context) error {
