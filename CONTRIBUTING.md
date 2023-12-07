@@ -58,7 +58,7 @@ modifications). It is the maintainer team's responsibility from this point to ge
 ## Releases
 
 We release a new version every four weeks and will release the current state of the `main` branch.
-If there are security fixes of critical bug fixes, we'll release them directly.
+If there are security fixes or critical bug fixes, we'll release them directly.
 There are no backports or similar.
 
 ### Versioning
