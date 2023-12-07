@@ -15,13 +15,18 @@
 package migration
 
 import (
+	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
+
+	"go.woodpecker-ci.org/woodpecker/server/model"
 )
 
-var lowercaseSecretNames = task{
-	name: "lowercase-secret-names",
-	fn: func(sess *xorm.Session) (err error) {
-		_, err = sess.Exec("UPDATE secrets SET secret_name = LOWER(secret_name);")
-		return err
+var recreateAgentsTable = xormigrate.Migration{
+	ID: "recreate-agents-table",
+	MigrateSession: func(sess *xorm.Session) error {
+		if err := sess.DropTable("agents"); err != nil {
+			return err
+		}
+		return sess.Sync(new(model.Agent))
 	},
 }

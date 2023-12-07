@@ -17,13 +17,13 @@ package migration
 import (
 	"strings"
 
+	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
 )
 
-var renameTableProcsToSteps = task{
-	name:     "rename-procs-to-steps",
-	required: true,
-	fn: func(sess *xorm.Session) error {
+var renameTableProcsToSteps = xormigrate.Migration{
+	ID: "rename-procs-to-steps",
+	MigrateSession: func(sess *xorm.Session) error {
 		err := renameTable(sess, "procs", "steps")
 		if err != nil {
 			return err

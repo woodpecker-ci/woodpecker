@@ -197,5 +197,5 @@ type Store interface {
 	// Store operations
 	Ping() error
 	Close() error
-	Migrate() error
+	Migrate(bool) error
 }

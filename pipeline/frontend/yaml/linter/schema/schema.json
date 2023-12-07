@@ -70,17 +70,62 @@
   "definitions": {
     "clone": {
       "description": "Configures the clone step. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#clone",
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "git": {
+      "oneOf": [
+        {
           "type": "object",
+          "additionalProperties": false,
           "properties": {
-            "image": {
-              "type": "string"
+            "git": {
+              "type": "object",
+              "properties": {
+                "image": {
+                  "$ref": "#/definitions/step_image"
+                },
+                "settings": {
+                  "$ref": "#/definitions/clone_settings"
+                }
+              }
             }
           }
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/step"
+          },
+          "minLength": 1
         }
+      ]
+    },
+    "clone_settings": {
+      "description": "Change the settings of your clone plugin. Read more: https://woodpecker-ci.org/plugins/Git%20Clone",
+      "type": "object",
+      "properties": {
+        "depth": {
+          "type": "number",
+          "description": "If specified, uses git's --depth option to create a shallow clone with a limited number of commits, overwritten by partial"
+        },
+        "recursive": {
+          "type": "boolean",
+          "default": false,
+          "description": "Clones submodules recursively"
+        },
+        "partial": {
+          "type": "boolean",
+          "description": "Only fetch the one commit and it's blob objects to resolve all files, overwrite depth with 1"
+        },
+        "lfs": {
+          "type": "boolean",
+          "default": true,
+          "description": "Set this to false to disable retrieval of LFS files"
+        },
+        "tags": {
+          "type": "boolean",
+          "description": "Fetches tags when set to true, default is false if event is not tag else true"
+        }
+      },
+      "additionalProperties": {
+        "type": ["boolean", "string", "number", "array", "object"]
       }
     },
     "branches": {
@@ -664,11 +709,22 @@
     },
     "services": {
       "description": "Read more: https://woodpecker-ci.org/docs/usage/services",
-      "type": "object",
-      "additionalProperties": {
-        "$ref": "#/definitions/service"
-      },
-      "minProperties": 1
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/service"
+          },
+          "minProperties": 1
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/service"
+          },
+          "minLength": 1
+        }
+      ]
     },
     "service": {
       "description": "Read more: https://woodpecker-ci.org/docs/usage/services",
@@ -677,6 +733,10 @@
       "minProperties": 1,
       "required": ["image"],
       "properties": {
+        "name": {
+          "description": "The name of the service. Can be used if using the array style services list",
+          "type": "string"
+        },
         "image": {
           "$ref": "#/definitions/step_image"
         },
