@@ -103,7 +103,7 @@ func TestSchema(t *testing.T) {
 		},
 		{
 			name:     "New syntax",
-			testFile: ".woodpecker/test-new-syntax.yml",
+			testFile: ".woodpecker/test-array-syntax.yml",
 			fail:     false,
 		},
 	}
