@@ -20,7 +20,7 @@ For security reasons, Maintainers must use 2FA for their accounts and if possibl
 
 ## Owners
 
-Since Woodpecker is a pure community organization without any company support, to keep the development healthy we will elect two owners in the end of every year (December).\
+Since Woodpecker is a pure community organization without any company support, to keep the development healthy we will elect two owners at the end of every year (December).\
 This can also happen when an owner proposes a vote or the majority of the maintainers do so.\
 All maintainers may vote to elect up to two candidates. When the new owners have been elected, the old owners will give up ownership to the newly elected owners.
 If an owner is unable to do so, the other owner will assist in ceding ownership to the newly elected owners.
