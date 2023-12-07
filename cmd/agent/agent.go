@@ -247,7 +247,7 @@ func run(c *cli.Context) error {
 }
 
 func getEngine(c *cli.Context, backendCtx context.Context) (types.Engine, error) {
-	addonEngine, err := addon.Load[types.Engine](c.StringSlice("addons"), addonTypes.TypeForge)
+	addonEngine, err := addon.Load[types.Engine](c.StringSlice("addons"), addonTypes.TypeEngine)
 	if err != nil {
 		log.Error().Err(err).Msg("cannot load addon")
 		return nil, err
