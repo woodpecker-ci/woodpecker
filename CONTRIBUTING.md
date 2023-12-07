@@ -7,7 +7,7 @@ Every PR **MUST** be reviewed by at least **one** maintainer (or owner) before i
 A maintainer should be a contributor and contributed at least 4 accepted PRs.
 A contributor should apply as a maintainer in the [Discord #develop](https://discord.gg/fcMQqSMXJy) or [Matrix Develop](https://matrix.to/#/#WoodpeckerCI-Develop:obermui.de) channel.
 The owners or the team maintainers may invite the contributor.
-A maintainer must spend some time on code reviews.
+A maintainer should spend some time on code reviews.
 
 If a maintainer has no time to do that, they should apply to leave the maintainers team and we will give them the honor of being a member of the
 [advisors team](https://github.com/orgs/woodpecker-ci/teams/advisors/members).
