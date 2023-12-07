@@ -157,9 +157,14 @@ func run(c *cli.Context) error {
 
 	// new engine
 	backendCtx := context.WithValue(ctx, types.CliContext, c)
-	engine, err := getEngine(c, backendCtx)
+	engine, err := getEngine(backendCtx, c.String("backend-engine"), c.StringSlice("addons"))
 	if err != nil {
 		return err
+	}
+
+	if !engine.IsAvailable(backendCtx) {
+		log.Error().Str("engine", engine.Name()).Msg("selected backend engine unavailable")
+		return fmt.Errorf("selected backend engine %s unavailable", engine.Name())
 	}
 
 	// load engine (e.g. init api client)
@@ -246,8 +251,8 @@ func run(c *cli.Context) error {
 	return nil
 }
 
-func getEngine(c *cli.Context, backendCtx context.Context) (types.Engine, error) {
-	addonEngine, err := addon.Load[types.Engine](c.StringSlice("addons"), addonTypes.TypeEngine)
+func getEngine(backendCtx context.Context, engineName string, addons []string) (types.Engine, error) {
+	addonEngine, err := addon.Load[types.Engine](addons, addonTypes.TypeEngine)
 	if err != nil {
 		log.Error().Err(err).Msg("cannot load addon")
 		return nil, err
@@ -257,9 +262,9 @@ func getEngine(c *cli.Context, backendCtx context.Context) (types.Engine, error)
 	}
 
 	backend.Init(backendCtx)
-	engine, err := backend.FindEngine(backendCtx, c.String("backend-engine"))
+	engine, err := backend.FindEngine(backendCtx, engineName)
 	if err != nil {
-		log.Error().Err(err).Msgf("cannot find backend engine '%s'", c.String("backend-engine"))
+		log.Error().Err(err).Msgf("cannot find backend engine '%s'", engineName)
 		return nil, err
 	}
 	return engine, nil
