@@ -22,7 +22,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/google/go-github/v56/github"
+	"github.com/google/go-github/v57/github"
 
 	"go.woodpecker-ci.org/woodpecker/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/server/model"
