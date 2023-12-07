@@ -734,7 +734,7 @@
       "required": ["image"],
       "properties": {
         "name": {
-          "description": "The name of the service. Can be used if using the array style services list.",
+          "description": "The name of the service. Can be used if using the array style services list",
           "type": "string"
         },
         "image": {
