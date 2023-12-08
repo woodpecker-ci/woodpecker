@@ -18,7 +18,11 @@ export async function usePaginate<T>(getSingle: (page: number) => Promise<T[]>):
 export function usePagination<T, S = unknown>(
   _loadData: (page: number, args: S) => Promise<T[] | null>,
   isActive: () => boolean,
-  { scrollElement: _scrollElement, each: _each }: { scrollElement?: Ref<HTMLElement | null>; each?: S[] } = {},
+  {
+    scrollElement: _scrollElement,
+    each: _each,
+    name,
+  }: { scrollElement?: Ref<HTMLElement | null>; each?: S[]; name?: string } = {},
 ) {
   const scrollElement = _scrollElement ?? ref(document.getElementById('scroll-component'));
   const page = ref(1);
@@ -29,7 +33,12 @@ export function usePagination<T, S = unknown>(
   const each = ref<S[]>(_each || []);
 
   async function loadData() {
+    if (hasMore.value === false || loading.value === true) {
+      return;
+    }
+
     loading.value = true;
+    name === 'secrets' && console.log('loadData', page.value, each.value?.[0] as S);
     const newData = await _loadData(page.value, each.value?.[0] as S);
     hasMore.value = (newData !== null && newData.length >= pageSize.value) || each.value.length > 0;
     if (newData && newData.length > 0) {
@@ -41,6 +50,7 @@ export function usePagination<T, S = unknown>(
       page.value = 1;
       pageSize.value = 0;
       hasMore.value = each.value.length > 0;
+      name === 'secrets' && console.log('loadData', 'next', each.value?.[0] as S, hasMore.value);
     }
     loading.value = false;
   }
@@ -51,7 +61,7 @@ export function usePagination<T, S = unknown>(
   useInfiniteScroll(
     scrollElement,
     () => {
-      if (isActive() && !loading.value && hasMore.value) {
+      if (isActive() && hasMore.value && !loading.value) {
         // load more
         page.value += 1;
       }
@@ -60,6 +70,7 @@ export function usePagination<T, S = unknown>(
   );
 
   const resetPage = () => {
+    hasMore.value = true;
     if (page.value !== 1) {
       // just set page = 1, will be handled by watcher
       page.value = 1;
