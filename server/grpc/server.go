@@ -21,14 +21,14 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 
-	"go.woodpecker-ci.org/woodpecker/pipeline/rpc"
-	"go.woodpecker-ci.org/woodpecker/pipeline/rpc/proto"
-	"go.woodpecker-ci.org/woodpecker/server/forge"
-	"go.woodpecker-ci.org/woodpecker/server/logging"
-	"go.woodpecker-ci.org/woodpecker/server/pubsub"
-	"go.woodpecker-ci.org/woodpecker/server/queue"
-	"go.woodpecker-ci.org/woodpecker/server/store"
-	"go.woodpecker-ci.org/woodpecker/version"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc/proto"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v2/server/logging"
+	"go.woodpecker-ci.org/woodpecker/v2/server/pubsub"
+	"go.woodpecker-ci.org/woodpecker/v2/server/queue"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/version"
 )
 
 // WoodpeckerServer is a grpc server implementation.

@@ -25,7 +25,7 @@ import (
 	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
 
-	"go.woodpecker-ci.org/woodpecker/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
 // perPage020 sets the size of the slice to read per page

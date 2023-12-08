@@ -18,8 +18,8 @@ package pipeline
 import (
 	"time"
 
-	"go.woodpecker-ci.org/woodpecker/pipeline/errors"
-	"go.woodpecker-ci.org/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 func UpdateToStatusRunning(store model.UpdatePipelineStore, pipeline model.Pipeline, started int64) (*model.Pipeline, error) {

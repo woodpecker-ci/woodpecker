@@ -33,7 +33,7 @@ steps:
   lint-pipeline:
     image: *golang_image
     commands:
-      - go run go.woodpecker-ci.org/woodpecker/cmd/cli lint
+      - go run go.woodpecker-ci.org/woodpecker/v2/cmd/cli lint
     when:
       - <<: *when
       - path:

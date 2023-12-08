@@ -20,7 +20,7 @@ import (
 	"errors"
 	"fmt"
 
-	"go.woodpecker-ci.org/woodpecker/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
 	"golang.org/x/crypto/bcrypt"
 
 	"golang.org/x/crypto/sha3"
