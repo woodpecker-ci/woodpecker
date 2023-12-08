@@ -1,7 +1,7 @@
 # Addons
 
 :::warning
-Addons are still experimental. They implementation can change and break at any time.
+Addons are still experimental. Their implementation can change and break at any time.
 :::
 
 To adapt Woodpecker to your needs beyond the [configuration](../10-server-config.md), Woodpecker has its own **addon** system, built ontop of [Go's internal plugin system](https://go.dev/pkg/plugin).
