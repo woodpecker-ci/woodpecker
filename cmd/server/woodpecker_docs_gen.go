@@ -25,7 +25,7 @@ import (
 	"os"
 	"path"
 
-	"go.woodpecker-ci.org/woodpecker/cmd/server/docs"
+	"go.woodpecker-ci.org/woodpecker/v2/cmd/server/docs"
 )
 
 func main() {

@@ -27,19 +27,19 @@ import (
 	"github.com/drone/envsubst"
 	"github.com/urfave/cli/v2"
 
-	"go.woodpecker-ci.org/woodpecker/cli/common"
-	"go.woodpecker-ci.org/woodpecker/pipeline"
-	"go.woodpecker-ci.org/woodpecker/pipeline/backend"
-	"go.woodpecker-ci.org/woodpecker/pipeline/backend/docker"
-	"go.woodpecker-ci.org/woodpecker/pipeline/backend/kubernetes"
-	"go.woodpecker-ci.org/woodpecker/pipeline/backend/local"
-	backendTypes "go.woodpecker-ci.org/woodpecker/pipeline/backend/types"
-	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml"
-	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/compiler"
-	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/linter"
-	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/matrix"
-	"go.woodpecker-ci.org/woodpecker/pipeline/multipart"
-	"go.woodpecker-ci.org/woodpecker/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/docker"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/kubernetes"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/local"
+	backendTypes "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/compiler"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/matrix"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/multipart"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
 // Command exports the exec command.
@@ -48,7 +48,7 @@ var Command = &cli.Command{
 	Usage:     "execute a local pipeline",
 	ArgsUsage: "[path/to/.woodpecker.yaml]",
 	Action:    run,
-	Flags:     utils.MergeSlices(common.GlobalFlags, flags, docker.Flags, kubernetes.Flags, local.Flags),
+	Flags:     utils.MergeSlices(flags, docker.Flags, kubernetes.Flags, local.Flags),
 }
 
 func run(c *cli.Context) error {

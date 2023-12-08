@@ -21,8 +21,8 @@ import (
 
 	"github.com/google/tink/go/subtle/random"
 
-	"go.woodpecker-ci.org/woodpecker/server/model"
-	"go.woodpecker-ci.org/woodpecker/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
 type aesEncryptionService struct {

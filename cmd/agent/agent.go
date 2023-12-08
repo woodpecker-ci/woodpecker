@@ -37,16 +37,16 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
-	"go.woodpecker-ci.org/woodpecker/agent"
-	agentRpc "go.woodpecker-ci.org/woodpecker/agent/rpc"
-	"go.woodpecker-ci.org/woodpecker/cmd/common"
-	"go.woodpecker-ci.org/woodpecker/pipeline/backend"
-	"go.woodpecker-ci.org/woodpecker/pipeline/backend/types"
-	"go.woodpecker-ci.org/woodpecker/pipeline/rpc"
-	"go.woodpecker-ci.org/woodpecker/shared/addon"
-	addonTypes "go.woodpecker-ci.org/woodpecker/shared/addon/types"
-	"go.woodpecker-ci.org/woodpecker/shared/utils"
-	"go.woodpecker-ci.org/woodpecker/version"
+	"go.woodpecker-ci.org/woodpecker/v2/agent"
+	agentRpc "go.woodpecker-ci.org/woodpecker/v2/agent/rpc"
+	"go.woodpecker-ci.org/woodpecker/v2/cmd/common"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/addon"
+	addonTypes "go.woodpecker-ci.org/v2/woodpecker/shared/addon/types"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/v2/version"
 )
 
 func run(c *cli.Context) error {

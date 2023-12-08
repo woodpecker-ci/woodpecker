@@ -26,9 +26,9 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	backend "go.woodpecker-ci.org/woodpecker/pipeline/backend/types"
-	"go.woodpecker-ci.org/woodpecker/pipeline/rpc"
-	"go.woodpecker-ci.org/woodpecker/pipeline/rpc/proto"
+	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc/proto"
 )
 
 // set grpc version on compile time to compare against server version response

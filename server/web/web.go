@@ -28,8 +28,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/server"
-	"go.woodpecker-ci.org/woodpecker/web"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/web"
 )
 
 // etag is an identifier for a resource version
