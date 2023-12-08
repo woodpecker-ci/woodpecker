@@ -83,7 +83,7 @@ const { resetPage, data: _secrets } = usePagination(loadSecrets, () => !selected
   each: ['repo', 'org', 'global'],
 });
 const secrets = computed(() => {
-  const secretsList: Record<string, Secret & { edit?: boolean }> = {};
+  const secretsList: Record<string, Secret & { edit?: boolean; level: 'repo' | 'org' | 'global' }> = {};
 
   // eslint-disable-next-line no-restricted-syntax
   for (const level of ['repo', 'org', 'global']) {
@@ -95,12 +95,20 @@ const secrets = computed(() => {
           (level === 'global' && secret.repo_id === 0 && secret.org_id === 0)) &&
         !secretsList[secret.name]
       ) {
-        secretsList[secret.name] = { ...secret, edit: secret.repo_id !== 0 };
+        secretsList[secret.name] = { ...secret, edit: secret.repo_id !== 0, level };
       }
     }
   }
 
-  return Object.values(secretsList).toSorted((a, b) => a.name.localeCompare(b.name));
+  const levelsOrder = {
+    global: 0,
+    org: 1,
+    repo: 2,
+  };
+
+  return Object.values(secretsList)
+    .toSorted((a, b) => a.name.localeCompare(b.name))
+    .toSorted((a, b) => levelsOrder[b.level] - levelsOrder[a.level]);
 });
 
 const { doSubmit: createSecret, isLoading: isSaving } = useAsyncAction(async () => {
