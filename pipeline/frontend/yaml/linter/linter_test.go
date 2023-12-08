@@ -19,7 +19,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-  "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter"
 )
