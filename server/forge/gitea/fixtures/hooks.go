@@ -229,8 +229,8 @@ const HookPushBranch = `
 }
 `
 
-// HookPushTag is a sample Gitea tag hook
-const HookPushTag = `{
+// HookTag is a sample Gitea tag hook
+const HookTag = `{
   "sha": "ef98532add3b2feb7a137426bba1248724367df5",
   "secret": "l26Un7G7HXogLAvsyf2hOA4EMARSTsR3",
   "ref": "v1.0.0",
