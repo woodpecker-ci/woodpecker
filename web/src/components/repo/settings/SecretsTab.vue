@@ -84,17 +84,17 @@ const secrets = computed(() => {
     // eslint-disable-next-line no-restricted-syntax
     for (const secret of _secrets.value) {
       if (
-        ((level === 'repo' && secret.repo_id !== 0 && secret.org_id !== 0) ||
+        ((level === 'repo' && secret.repo_id !== 0 && secret.org_id === 0) ||
           (level === 'org' && secret.repo_id === 0 && secret.org_id !== 0) ||
           (level === 'global' && secret.repo_id === 0 && secret.org_id === 0)) &&
         !secretsList[secret.name]
       ) {
-        secretsList[secret.name] = { ...secret, edit: false };
+        secretsList[secret.name] = { ...secret, edit: secret.repo_id !== 0 };
       }
     }
   }
 
-  return Object.values(secretsList);
+  return Object.values(secretsList).toSorted((a, b) => a.name.localeCompare(b.name));
 });
 
 const { doSubmit: createSecret, isLoading: isSaving } = useAsyncAction(async () => {
