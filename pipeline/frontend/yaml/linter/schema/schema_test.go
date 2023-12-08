@@ -101,6 +101,11 @@ func TestSchema(t *testing.T) {
 			testFile: ".woodpecker/test-broken.yml",
 			fail:     true,
 		},
+		{
+			name:     "Array syntax",
+			testFile: ".woodpecker/test-array-syntax.yml",
+			fail:     false,
+		},
 	}
 
 	for _, tt := range testTable {
