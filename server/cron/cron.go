@@ -22,10 +22,10 @@ import (
 	"github.com/robfig/cron"
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/server/forge"
-	"go.woodpecker-ci.org/woodpecker/server/model"
-	"go.woodpecker-ci.org/woodpecker/server/pipeline"
-	"go.woodpecker-ci.org/woodpecker/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
 const (

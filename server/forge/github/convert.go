@@ -18,9 +18,9 @@ package github
 import (
 	"fmt"
 
-	"github.com/google/go-github/v56/github"
+	"github.com/google/go-github/v57/github"
 
-	"go.woodpecker-ci.org/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 const (
