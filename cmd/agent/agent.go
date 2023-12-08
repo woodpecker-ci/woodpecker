@@ -44,7 +44,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/addon"
-	addonTypes "go.woodpecker-ci.org/v2/woodpecker/shared/addon/types"
+	addonTypes "go.woodpecker-ci.org/woodpecker/v2/shared/addon/types"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 	"go.woodpecker-ci.org/woodpecker/v2/version"
 )
