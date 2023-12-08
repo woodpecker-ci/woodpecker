@@ -22,8 +22,8 @@ import (
 	"github.com/franela/goblin"
 	"golang.org/x/oauth2"
 
-	"go.woodpecker-ci.org/woodpecker/server/forge/bitbucket/internal"
-	"go.woodpecker-ci.org/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/bitbucket/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 func Test_helper(t *testing.T) {

@@ -20,9 +20,9 @@ import (
 	"codeberg.org/6543/xyaml"
 	"go.uber.org/multierr"
 
-	"go.woodpecker-ci.org/woodpecker/pipeline/errors"
-	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/linter/schema"
-	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter/schema"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types"
 )
 
 // A Linter lints a pipeline configuration.

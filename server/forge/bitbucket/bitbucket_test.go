@@ -25,9 +25,9 @@ import (
 	"github.com/franela/goblin"
 	"github.com/gin-gonic/gin"
 
-	"go.woodpecker-ci.org/woodpecker/server/forge/bitbucket/fixtures"
-	"go.woodpecker-ci.org/woodpecker/server/forge/bitbucket/internal"
-	"go.woodpecker-ci.org/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/bitbucket/fixtures"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/bitbucket/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 func Test_bitbucket(t *testing.T) {

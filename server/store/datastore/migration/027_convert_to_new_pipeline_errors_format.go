@@ -18,7 +18,7 @@ import (
 	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
 
-	"go.woodpecker-ci.org/woodpecker/pipeline/errors"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
 )
 
 // perPage027 set the size of the slice to read per page
