@@ -30,7 +30,7 @@ var registryUpdateCmd = &cli.Command{
 	Usage:     "update a registry",
 	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    registryUpdate,
-	Flags: append(common.GlobalFlags,
+	Flags: []cli.Flag{
 		common.RepoFlag,
 		&cli.StringFlag{
 			Name:  "hostname",
@@ -45,7 +45,7 @@ var registryUpdateCmd = &cli.Command{
 			Name:  "password",
 			Usage: "registry password",
 		},
-	),
+	},
 }
 
 func registryUpdate(c *cli.Context) error {

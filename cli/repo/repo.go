@@ -16,15 +16,12 @@ package repo
 
 import (
 	"github.com/urfave/cli/v2"
-
-	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
 )
 
 // Command exports the repository command.
 var Command = &cli.Command{
 	Name:  "repo",
 	Usage: "manage repositories",
-	Flags: common.GlobalFlags,
 	Subcommands: []*cli.Command{
 		repoListCmd,
 		repoInfoCmd,

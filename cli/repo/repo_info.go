@@ -29,9 +29,7 @@ var repoInfoCmd = &cli.Command{
 	Usage:     "show repository details",
 	ArgsUsage: "<repo-id|repo-full-name>",
 	Action:    repoInfo,
-	Flags: append(common.GlobalFlags,
-		common.FormatFlag(tmplRepoInfo),
-	),
+	Flags:     []cli.Flag{common.FormatFlag(tmplRepoInfo)},
 }
 
 func repoInfo(c *cli.Context) error {

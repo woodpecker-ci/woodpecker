@@ -30,7 +30,7 @@ var registryCreateCmd = &cli.Command{
 	Usage:     "adds a registry",
 	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    registryCreate,
-	Flags: append(common.GlobalFlags,
+	Flags: []cli.Flag{
 		common.RepoFlag,
 		&cli.StringFlag{
 			Name:  "hostname",
@@ -45,7 +45,7 @@ var registryCreateCmd = &cli.Command{
 			Name:  "password",
 			Usage: "registry password",
 		},
-	),
+	},
 }
 
 func registryCreate(c *cli.Context) error {

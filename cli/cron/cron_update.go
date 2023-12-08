@@ -30,7 +30,7 @@ var cronUpdateCmd = &cli.Command{
 	Usage:     "update a cron job",
 	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    cronUpdate,
-	Flags: append(common.GlobalFlags,
+	Flags: []cli.Flag{
 		common.RepoFlag,
 		&cli.StringFlag{
 			Name:     "id",
@@ -50,7 +50,7 @@ var cronUpdateCmd = &cli.Command{
 			Usage: "cron schedule",
 		},
 		common.FormatFlag(tmplCronList, true),
-	),
+	},
 }
 
 func cronUpdate(c *cli.Context) error {

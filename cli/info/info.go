@@ -30,9 +30,7 @@ var Command = &cli.Command{
 	Usage:     "show information about the current user",
 	ArgsUsage: " ",
 	Action:    info,
-	Flags: append(common.GlobalFlags,
-		common.FormatFlag(tmplInfo, true),
-	),
+	Flags:     []cli.Flag{common.FormatFlag(tmplInfo, true)},
 }
 
 func info(c *cli.Context) error {

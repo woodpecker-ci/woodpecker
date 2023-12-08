@@ -19,7 +19,6 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
@@ -29,7 +28,6 @@ var userAddCmd = &cli.Command{
 	Usage:     "adds a user",
 	ArgsUsage: "<username>",
 	Action:    userAdd,
-	Flags:     common.GlobalFlags,
 }
 
 func userAdd(c *cli.Context) error {
