@@ -25,10 +25,10 @@ import (
 	"github.com/muesli/termenv"
 	"github.com/urfave/cli/v2"
 
-	"go.woodpecker-ci.org/woodpecker/cli/common"
-	pipeline_errors "go.woodpecker-ci.org/woodpecker/pipeline/errors"
-	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml"
-	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/linter"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
+	pipeline_errors "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter"
 )
 
 // Command exports the info command.

@@ -18,9 +18,9 @@ import (
 	"fmt"
 	"strconv"
 
-	"go.woodpecker-ci.org/woodpecker/cli/internal"
-
 	"github.com/urfave/cli/v2"
+
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
 var pipelineLogsCmd = &cli.Command{

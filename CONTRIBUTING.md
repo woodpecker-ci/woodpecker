@@ -9,8 +9,8 @@ A contributor should apply as a maintainer in the [Discord #develop](https://dis
 The owners or the team maintainers may invite the contributor.
 A maintainer should spend some time on code reviews.
 
-If a maintainer has no time to do that, they should apply to leave the maintainers team and we will give them the honor of being a member of the [advisors
-team](https://github.com/orgs/woodpecker-ci/teams/advisors/members).
+If a maintainer has no time to do that, they should apply to leave the maintainers team and we will give them the honor of being a member of the
+[advisors team](https://github.com/orgs/woodpecker-ci/teams/advisors/members).
 Of course, if an advisor has time to code review, we will gladly welcome them back to the maintainers team.
 If a maintainer is inactive for more than 3 months and forgets to leave the maintainers team, the owners may move him or her from the maintainers team to the advisors team.
 
@@ -20,16 +20,15 @@ For security reasons, Maintainers must use 2FA for their accounts and if possibl
 
 ## Owners
 
-Since Woodpecker is a pure community organization without any company support, to keep the development healthy we will elect two owners every year.\
-This can also happen when a owner propose a vote or the majority of the maintainers do so.\
+Since Woodpecker is a pure community organization without any company support, to keep the development healthy we will elect two owners at the end of every year (December).\
+This can also happen when an owner proposes a vote or the majority of the maintainers do so.\
 All maintainers may vote to elect up to two candidates. When the new owners have been elected, the old owners will give up ownership to the newly elected owners.
-If an owner is unable to do so, the other owners will assist in ceding ownership to the newly elected owners.
+If an owner is unable to do so, the other owner will assist in ceding ownership to the newly elected owners.
 
 For security reasons, Owners must use 2FA.\
 ([Docs: Securing your account with two-factor authentication](https://docs.github.com/en/authentication/securing-your-account-with-two-factor-authentication-2fa))
 
-To honor the past owners, here's the history of the owners and the time
-they served:
+To honor the past owners, here's the history of the owners and the time they served:
 
 - 2023-01-01 ~ 2023-12-31 - <https://github.com/woodpecker-ci/woodpecker/issues/1467>
 
@@ -56,17 +55,25 @@ Once your PR gets approved, don't worry about keeping it up-to-date or breaking
 builds (unless there's a merge conflict or a request is made by a maintainer to make
 modifications). It is the maintainer team's responsibility from this point to get it merged.
 
-## Versioning
+## Releases
+
+We release a new version every four weeks and will release the current state of the `main` branch.
+If there are security fixes or critical bug fixes, we'll release them directly.
+There are no backports or similar.
+
+### Versioning
 
 We use [Semantic Versioning](https://semver.org/) to be able,
 to communicate when admins have to do manual migration steps and when they can just bump versions up.
 
+### Breaking changes
+
+As of semver guidelines, breaking changes will be released as a major version. We will hold back
+breaking changes to not release many majors each containing just a few breaking changes.
+Prior to the release of a major version, a release candidate (RC) will be published to allow easy testing,
+the actual release will be about a week later.
+
 ## Development
 
 [pre-commit](https://pre-commit.com/) is used in this repository.
-To apply it during local development, first
-
-1. Install `pre-commit` via your favorite option
-1. Enable it via `pre-commit install` in the repository root.
-1. (Run it manually via `pre-commit run --all-files` in the repository root.)
-1. Now `pre-commit` will exec on all modified files before every commit.
+To apply it during local development, take a look at [`pre-commit`s documentation](https://pre-commit.com/#usage)
