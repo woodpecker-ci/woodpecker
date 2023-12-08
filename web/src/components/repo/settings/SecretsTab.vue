@@ -64,18 +64,24 @@ const repo = inject<Ref<Repo>>('repo');
 const selectedSecret = ref<Partial<Secret>>();
 const isEditingSecret = computed(() => !!selectedSecret.value?.id);
 
-async function loadSecrets(page: number): Promise<Secret[] | null> {
+async function loadSecrets(page: number, level: 'repo' | 'org' | 'global'): Promise<Secret[] | null> {
   if (!repo?.value) {
     throw new Error("Unexpected: Can't load repo");
   }
 
-  const globalSecrets = (await apiClient.getGlobalSecretList(page)) ?? [];
-  const orgSecrets = (await apiClient.getOrgSecretList(repo.value.org_id, page)) ?? [];
-  const repoSecrets = (await apiClient.getSecretList(repo.value.id, page)) ?? [];
-  return [...globalSecrets, ...orgSecrets, ...repoSecrets];
+  switch (level) {
+    case 'org':
+      return apiClient.getOrgSecretList(repo.value.org_id, page);
+    case 'global':
+      return apiClient.getGlobalSecretList(page);
+    default:
+      return apiClient.getSecretList(repo.value.id, page);
+  }
 }
 
-const { resetPage, data: _secrets } = usePagination(loadSecrets, () => !selectedSecret.value);
+const { resetPage, data: _secrets } = usePagination(loadSecrets, () => !selectedSecret.value, {
+  each: ['repo', 'org', 'global'],
+});
 const secrets = computed(() => {
   const secretsList: Record<string, Secret & { edit?: boolean }> = {};
 
