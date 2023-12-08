@@ -21,9 +21,9 @@ import (
 
 	"github.com/drone/envsubst"
 
-	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/metadata"
-	"go.woodpecker-ci.org/woodpecker/server/model"
-	"go.woodpecker-ci.org/woodpecker/version"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/version"
 )
 
 func EnvVarSubst(yaml string, environ map[string]string) (string, error) {

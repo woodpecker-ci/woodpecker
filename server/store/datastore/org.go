@@ -19,7 +19,7 @@ import (
 
 	"xorm.io/xorm"
 
-	"go.woodpecker-ci.org/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 func (s storage) OrgCreate(org *model.Org) error {

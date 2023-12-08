@@ -18,10 +18,10 @@ import (
 	"context"
 	"fmt"
 
-	"go.woodpecker-ci.org/woodpecker/pipeline/backend/docker"
-	"go.woodpecker-ci.org/woodpecker/pipeline/backend/kubernetes"
-	"go.woodpecker-ci.org/woodpecker/pipeline/backend/local"
-	"go.woodpecker-ci.org/woodpecker/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/docker"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/kubernetes"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/local"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
 
 var (

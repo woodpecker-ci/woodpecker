@@ -1,4 +1,4 @@
-module go.woodpecker-ci.org/woodpecker
+module go.woodpecker-ci.org/woodpecker/v2
 
 go 1.21
 
