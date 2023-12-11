@@ -19,8 +19,8 @@ import (
 	"fmt"
 	"time"
 
-	"go.woodpecker-ci.org/woodpecker/server/forge"
-	"go.woodpecker-ci.org/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 
 	"github.com/jellydator/ttlcache/v3"
 )

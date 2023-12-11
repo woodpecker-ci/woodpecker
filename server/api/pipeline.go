@@ -28,11 +28,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"go.woodpecker-ci.org/woodpecker/server"
-	"go.woodpecker-ci.org/woodpecker/server/model"
-	"go.woodpecker-ci.org/woodpecker/server/pipeline"
-	"go.woodpecker-ci.org/woodpecker/server/router/middleware/session"
-	"go.woodpecker-ci.org/woodpecker/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
 // CreatePipeline

@@ -123,7 +123,7 @@ make test-frontend
 If you want to test a specific go file you can also use:
 
 ```bash
-go test -race -timeout 30s go.woodpecker-ci.org/woodpecker/<path-to-the-package-or-file-to-test>
+go test -race -timeout 30s go.woodpecker-ci.org/woodpecker/v2/<path-to-the-package-or-file-to-test>
 ```
 
 Or you can open the test-file inside [VS-Code](#developing-with-vs-code) and run or debug the test by clicking on the inline commands:

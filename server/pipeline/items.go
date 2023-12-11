@@ -21,13 +21,13 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/pipeline"
-	pipeline_errors "go.woodpecker-ci.org/woodpecker/pipeline/errors"
-	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/compiler"
-	"go.woodpecker-ci.org/woodpecker/server"
-	forge_types "go.woodpecker-ci.org/woodpecker/server/forge/types"
-	"go.woodpecker-ci.org/woodpecker/server/model"
-	"go.woodpecker-ci.org/woodpecker/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline"
+	pipeline_errors "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/compiler"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
 func parsePipeline(store store.Store, currentPipeline *model.Pipeline, user *model.User, repo *model.Repo, yamls []*forge_types.FileMeta, envs map[string]string) ([]*pipeline.Item, error) {
