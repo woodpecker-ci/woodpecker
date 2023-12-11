@@ -136,7 +136,11 @@ func (s storage) UpdatePipeline(pipeline *model.Pipeline) error {
 	return err
 }
 
-func deletePipeline(sess *xorm.Session, pipelineID int64) error {
+func (s storage) DeletePipeline(pipeline *model.Pipeline) error {
+	return s.deletePipeline(s.engine.NewSession(), pipeline.ID)
+}
+
+func (s storage) deletePipeline(sess *xorm.Session, pipelineID int64) error {
 	// delete related steps
 	for startSteps := 0; ; startSteps += perPage {
 		stepIDs := make([]int64, 0, perPage)

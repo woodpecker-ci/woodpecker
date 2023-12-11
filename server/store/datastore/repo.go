@@ -123,7 +123,7 @@ func (s storage) deleteRepo(sess *xorm.Session, repo *model.Repo) error {
 		}
 
 		for i := range pipelineIDs {
-			if err := deletePipeline(sess, pipelineIDs[i]); err != nil {
+			if err := s.deletePipeline(sess, pipelineIDs[i]); err != nil {
 				return err
 			}
 		}
