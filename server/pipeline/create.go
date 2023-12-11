@@ -54,13 +54,6 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	// update some pipeline fields
 	pipeline.RepoID = repo.ID
 	pipeline.Status = model.StatusPending
-	setGatedState(repo, pipeline)
-	err = _store.CreatePipeline(pipeline)
-	if err != nil {
-		msg := fmt.Errorf("failed to save pipeline for %s", repo.FullName)
-		log.Error().Str("repo", repo.FullName).Err(err).Msg(msg.Error())
-		return nil, msg
-	}
 
 	// fetch the pipeline file from the forge
 	configFetcher := forge.NewConfigFetcher(server.Config.Services.Forge, server.Config.Services.Timeout, server.Config.Services.ConfigService, repoUser, repo, pipeline)
@@ -84,7 +77,13 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		return nil, ErrFiltered
 	}
 
-	pipeline = setPipelineStepsOnPipeline(pipeline, pipelineItems)
+	setGatedState(repo, pipeline)
+	err = _store.CreatePipeline(pipeline)
+	if err != nil {
+		msg := fmt.Errorf("failed to save pipeline for %s", repo.FullName)
+		log.Error().Str("repo", repo.FullName).Err(err).Msg(msg.Error())
+		return nil, msg
+	}
 
 	// persist the pipeline config for historical correctness, restarts, etc
 	var configs []*model.Config
@@ -107,6 +106,14 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	if pipeline.Status == model.StatusBlocked {
 		publishPipeline(ctx, pipeline, repo, repoUser)
 		return pipeline, nil
+	}
+
+	pipeline, pipelineItems, err = createPipelineItems(ctx, _store, pipeline, repoUser, repo, forgeYamlConfigs, nil)
+	if errors.HasBlockingErrors(err) {
+		log.Debug().Str("repo", repo.FullName).Err(err).Msg("failed to parse yaml")
+		return nil, updatePipelineWithErr(ctx, _store, pipeline, repo, repoUser, err)
+	} else if err != nil {
+		pipeline.Errors = errors.GetPipelineErrors(err)
 	}
 
 	pipeline, err = start(ctx, _store, pipeline, repoUser, repo, pipelineItems)
