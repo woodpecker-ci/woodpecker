@@ -21,7 +21,7 @@ when:
     evaluate: 'TASK == "docs"'
 
 variables:
-  - &golang_image 'docker.io/golang:1.21.4'
+  - &golang_image 'docker.io/golang:1.21.5'
   - &node_image 'docker.io/node:21-alpine'
 
 steps:

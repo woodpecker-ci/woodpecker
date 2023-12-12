@@ -19,10 +19,10 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"go.woodpecker-ci.org/woodpecker/pipeline"
-	"go.woodpecker-ci.org/woodpecker/pipeline/rpc"
-	"go.woodpecker-ci.org/woodpecker/server"
-	"go.woodpecker-ci.org/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 func queuePipeline(repo *model.Repo, pipelineItems []*pipeline.Item) error {

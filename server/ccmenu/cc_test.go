@@ -21,7 +21,7 @@ import (
 
 	"github.com/franela/goblin"
 
-	"go.woodpecker-ci.org/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 func TestCC(t *testing.T) {

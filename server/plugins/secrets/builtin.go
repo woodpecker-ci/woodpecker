@@ -17,7 +17,7 @@ package secrets
 import (
 	"context"
 
-	"go.woodpecker-ci.org/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 type builtin struct {

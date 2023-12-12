@@ -19,8 +19,7 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"go.woodpecker-ci.org/woodpecker/cli/common"
-	"go.woodpecker-ci.org/woodpecker/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
 var repoRepairCmd = &cli.Command{
@@ -28,7 +27,6 @@ var repoRepairCmd = &cli.Command{
 	Usage:     "repair repository webhooks",
 	ArgsUsage: "<repo-id|repo-full-name>",
 	Action:    repoRepair,
-	Flags:     common.GlobalFlags,
 }
 
 func repoRepair(c *cli.Context) error {
