@@ -82,7 +82,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	if len(pipelineItems) == 0 {
 		log.Debug().Str("repo", repo.FullName).Msg(ErrFiltered.Error())
 		if err := _store.DeletePipeline(pipeline); err != nil {
-			return nil, err
+			log.Error().Str("repo", repo.FullName).Err(err).Msg("failed to delete empty pipeline")
 		}
 
 		return nil, ErrFiltered
