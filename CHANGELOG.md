@@ -1,27 +1,19 @@
 # Changelog
 
-## [2.1.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.1.0) - 2023-12-08
+## [2.1.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.1.0) - 2023-12-12
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@runephilosof-karnovgroup, @qwerty287, @lafriks, @renovate[bot], @kaylynb, @voidcontext, @robbie-cahill, @micash545, @dominic-p, @zc-devs, @mzampetakis
+@allanger, @mikhail-putilov, @renovate[bot], @qwerty287, @runephilosof-karnovgroup, @lafriks, @kaylynb, @voidcontext, @robbie-cahill, @micash545, @dominic-p, @zc-devs, @mzampetakis
 
 ### 🔒 Security
 
 - Sanitize plugin docs content [[#2900](https://github.com/woodpecker-ci/woodpecker/pull/2900)]
 
-### 📈 Enhancement
-
-- Update go module path for major version 2 [[#2905](https://github.com/woodpecker-ci/woodpecker/pull/2905)]
-- Unify date/time dependencies [[#2891](https://github.com/woodpecker-ci/woodpecker/pull/2891)]
-- Add linting for `any` [[#2893](https://github.com/woodpecker-ci/woodpecker/pull/2893)]
-- Fix vite deprecations [[#2885](https://github.com/woodpecker-ci/woodpecker/pull/2885)]
-- Migrate to Xormigrate [[#2711](https://github.com/woodpecker-ci/woodpecker/pull/2711)]
-- Simple security context options (Kubernetes) [[#2550](https://github.com/woodpecker-ci/woodpecker/pull/2550)]
-- Changes PullRequest Index to ForgeRemoteID type [[#2823](https://github.com/woodpecker-ci/woodpecker/pull/2823)]
-
 ### 🐛 Bug Fixes
 
+- fix: Add `backend_options` to service linter entry [[#2930](https://github.com/woodpecker-ci/woodpecker/pull/2930)]
+- Fix flags added multiple times [[#2914](https://github.com/woodpecker-ci/woodpecker/pull/2914)]
 - Fix schema validation with array syntax for clone and services [[#2920](https://github.com/woodpecker-ci/woodpecker/pull/2920)]
 - Fix prometheus docs [[#2919](https://github.com/woodpecker-ci/woodpecker/pull/2919)]
 - Fix podman agent container in v2 [[#2897](https://github.com/woodpecker-ci/woodpecker/pull/2897)]
@@ -33,6 +25,7 @@
 
 ### 📚 Documentation
 
+- Update 20-kubernetes.md [[#2927](https://github.com/woodpecker-ci/woodpecker/pull/2927)]
 - Add nix-attic plugin to the index [[#2889](https://github.com/woodpecker-ci/woodpecker/pull/2889)]
 - Add usage with Tunnelmole to docs [[#2881](https://github.com/woodpecker-ci/woodpecker/pull/2881)]
 - Improve code blocks in docs [[#2879](https://github.com/woodpecker-ci/woodpecker/pull/2879)]
@@ -41,8 +34,20 @@
 - Add default page to categories [[#2869](https://github.com/woodpecker-ci/woodpecker/pull/2869)]
 - Use same format for Github docs as used for the other forges [[#2866](https://github.com/woodpecker-ci/woodpecker/pull/2866)]
 
+### 📈 Enhancement
+
+- Update go module path for major version 2 [[#2905](https://github.com/woodpecker-ci/woodpecker/pull/2905)]
+- Unify date/time dependencies [[#2891](https://github.com/woodpecker-ci/woodpecker/pull/2891)]
+- Add linting for `any` [[#2893](https://github.com/woodpecker-ci/woodpecker/pull/2893)]
+- Fix vite deprecations [[#2885](https://github.com/woodpecker-ci/woodpecker/pull/2885)]
+- Migrate to Xormigrate [[#2711](https://github.com/woodpecker-ci/woodpecker/pull/2711)]
+- Simple security context options (Kubernetes) [[#2550](https://github.com/woodpecker-ci/woodpecker/pull/2550)]
+- Changes PullRequest Index to ForgeRemoteID type [[#2823](https://github.com/woodpecker-ci/woodpecker/pull/2823)]
+
 ### Misc
 
+- Update docker.io/techknowlogick/xgo Docker tag to go-1.21.5 [[#2926](https://github.com/woodpecker-ci/woodpecker/pull/2926)]
+- Update docker.io/golang Docker tag to v1.21.5 [[#2925](https://github.com/woodpecker-ci/woodpecker/pull/2925)]
 - Add release documentation to CONTRIBUTING [[#2917](https://github.com/woodpecker-ci/woodpecker/pull/2917)]
 - Lock file maintenance [[#2910](https://github.com/woodpecker-ci/woodpecker/pull/2910)]
 - Update web npm deps non-major [[#2909](https://github.com/woodpecker-ci/woodpecker/pull/2909)]
