@@ -26,14 +26,14 @@ var registryDeleteCmd = &cli.Command{
 	Usage:     "remove a registry",
 	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    registryDelete,
-	Flags: append(common.GlobalFlags,
+	Flags: []cli.Flag{
 		common.RepoFlag,
 		&cli.StringFlag{
 			Name:  "hostname",
 			Usage: "registry hostname",
 			Value: "docker.io",
 		},
-	),
+	},
 }
 
 func registryDelete(c *cli.Context) error {

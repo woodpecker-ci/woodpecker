@@ -30,7 +30,7 @@ var secretCreateCmd = &cli.Command{
 	Usage:     "adds a secret",
 	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    secretCreate,
-	Flags: append(common.GlobalFlags,
+	Flags: []cli.Flag{
 		&cli.BoolFlag{
 			Name:  "global",
 			Usage: "global secret",
@@ -53,7 +53,7 @@ var secretCreateCmd = &cli.Command{
 			Name:  "image",
 			Usage: "secret limited to these images",
 		},
-	),
+	},
 }
 
 func secretCreate(c *cli.Context) error {

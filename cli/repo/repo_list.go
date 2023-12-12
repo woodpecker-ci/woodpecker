@@ -29,13 +29,13 @@ var repoListCmd = &cli.Command{
 	Usage:     "list all repos",
 	ArgsUsage: " ",
 	Action:    repoList,
-	Flags: append(common.GlobalFlags,
+	Flags: []cli.Flag{
 		common.FormatFlag(tmplRepoList),
 		&cli.StringFlag{
 			Name:  "org",
 			Usage: "filter by organization",
 		},
-	),
+	},
 }
 
 func repoList(c *cli.Context) error {

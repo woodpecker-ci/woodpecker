@@ -30,7 +30,7 @@ var cronCreateCmd = &cli.Command{
 	Usage:     "add a cron job",
 	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    cronCreate,
-	Flags: append(common.GlobalFlags,
+	Flags: []cli.Flag{
 		common.RepoFlag,
 		&cli.StringFlag{
 			Name:     "name",
@@ -47,7 +47,7 @@ var cronCreateCmd = &cli.Command{
 			Required: true,
 		},
 		common.FormatFlag(tmplCronList, true),
-	),
+	},
 }
 
 func cronCreate(c *cli.Context) error {
