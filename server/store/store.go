@@ -93,7 +93,7 @@ type Store interface {
 	CreatePipeline(*model.Pipeline, ...*model.Step) error
 	// UpdatePipeline updates a pipeline.
 	UpdatePipeline(*model.Pipeline) error
-	// DeletePipeline updates a pipeline.
+	// DeletePipeline deletes a pipeline.
 	DeletePipeline(*model.Pipeline) error
 
 	// Feeds
