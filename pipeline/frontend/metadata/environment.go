@@ -119,7 +119,7 @@ func (m *Metadata) Environ() map[string]string {
 		// TODO Deprecated, remove in 3.x
 		"CI_COMMIT_URL": m.Curr.ForgeURL,
 	}
-	if m.Curr.Event == EventTag {
+	if strings.HasPrefix(m.Curr.Commit.Ref, "refs/tags/") {
 		params["CI_COMMIT_TAG"] = strings.TrimPrefix(m.Curr.Commit.Ref, "refs/tags/")
 	}
 	if m.Curr.Event == EventPull {
