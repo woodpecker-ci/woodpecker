@@ -4,11 +4,25 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@gapanyc, @allanger, @mikhail-putilov, @renovate[bot], @qwerty287, @runephilosof-karnovgroup, @lafriks, @kaylynb, @voidcontext, @robbie-cahill, @micash545, @dominic-p, @zc-devs, @mzampetakis
+@xoxys, @gapanyc, @allanger, @mikhail-putilov, @renovate[bot], @qwerty287, @runephilosof-karnovgroup, @lafriks, @kaylynb, @voidcontext, @robbie-cahill, @micash545, @dominic-p, @zc-devs, @mzampetakis
 
 ### 🔒 Security
 
 - Sanitize plugin docs content [[#2900](https://github.com/woodpecker-ci/woodpecker/pull/2900)]
+
+### 🐛 Bug Fixes
+
+- Fix skipped pipelines model [[#2923](https://github.com/woodpecker-ci/woodpecker/pull/2923)]
+- fix: Add `backend_options` to service linter entry [[#2930](https://github.com/woodpecker-ci/woodpecker/pull/2930)]
+- Fix flags added multiple times [[#2914](https://github.com/woodpecker-ci/woodpecker/pull/2914)]
+- Fix schema validation with array syntax for clone and services [[#2920](https://github.com/woodpecker-ci/woodpecker/pull/2920)]
+- Fix prometheus docs [[#2919](https://github.com/woodpecker-ci/woodpecker/pull/2919)]
+- Fix podman agent container in v2 [[#2897](https://github.com/woodpecker-ci/woodpecker/pull/2897)]
+- Fix bitbucket org fetching [[#2874](https://github.com/woodpecker-ci/woodpecker/pull/2874)]
+- Only deploy docs on `main` [[#2892](https://github.com/woodpecker-ci/woodpecker/pull/2892)]
+- Fix pipeline-related environment [[#2876](https://github.com/woodpecker-ci/woodpecker/pull/2876)]
+- Fix version check partially [[#2871](https://github.com/woodpecker-ci/woodpecker/pull/2871)]
+- Fix unregistering agents when using agent tokens [[#2870](https://github.com/woodpecker-ci/woodpecker/pull/2870)]
 
 ### 📈 Enhancement
 
@@ -20,19 +34,6 @@
 - Migrate to Xormigrate [[#2711](https://github.com/woodpecker-ci/woodpecker/pull/2711)]
 - Simple security context options (Kubernetes) [[#2550](https://github.com/woodpecker-ci/woodpecker/pull/2550)]
 - Changes PullRequest Index to ForgeRemoteID type [[#2823](https://github.com/woodpecker-ci/woodpecker/pull/2823)]
-
-### 🐛 Bug Fixes
-
-- fix: Add `backend_options` to service linter entry [[#2930](https://github.com/woodpecker-ci/woodpecker/pull/2930)]
-- Fix flags added multiple times [[#2914](https://github.com/woodpecker-ci/woodpecker/pull/2914)]
-- Fix schema validation with array syntax for clone and services [[#2920](https://github.com/woodpecker-ci/woodpecker/pull/2920)]
-- Fix prometheus docs [[#2919](https://github.com/woodpecker-ci/woodpecker/pull/2919)]
-- Fix podman agent container in v2 [[#2897](https://github.com/woodpecker-ci/woodpecker/pull/2897)]
-- Fix bitbucket org fetching [[#2874](https://github.com/woodpecker-ci/woodpecker/pull/2874)]
-- Only deploy docs on `main` [[#2892](https://github.com/woodpecker-ci/woodpecker/pull/2892)]
-- Fix pipeline-related environment [[#2876](https://github.com/woodpecker-ci/woodpecker/pull/2876)]
-- Fix version check partially [[#2871](https://github.com/woodpecker-ci/woodpecker/pull/2871)]
-- Fix unregistering agents when using agent tokens [[#2870](https://github.com/woodpecker-ci/woodpecker/pull/2870)]
 
 ### 📚 Documentation
 
