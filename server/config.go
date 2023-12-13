@@ -71,9 +71,6 @@ var Config = struct {
 		CustomCSSFile       string
 		CustomJsFile        string
 		EnableSwagger       bool
-		// Open bool
-		// Orgs map[string]struct{}
-		// Admins map[string]struct{}
 	}
 	Prometheus struct {
 		AuthToken string
