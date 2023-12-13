@@ -91,7 +91,7 @@ func createPipelineItems(c context.Context, store store.Store,
 	yamls []*forge_types.FileMeta, envs map[string]string,
 ) (*model.Pipeline, []*pipeline.Item, error) {
 	pipelineItems, err := parsePipeline(store, currentPipeline, user, repo, yamls, envs)
-	if err != nil {
+	if err != nil && pipeline_errors.HasBlockingErrors(err) {
 		currentPipeline, uerr := UpdateToStatusError(store, *currentPipeline, err)
 		if uerr != nil {
 			log.Error().Err(uerr).Msgf("Error setting error status of pipeline for %s#%d", repo.FullName, currentPipeline.Number)
@@ -99,9 +99,7 @@ func createPipelineItems(c context.Context, store store.Store,
 			updatePipelineStatus(c, currentPipeline, repo, user)
 		}
 
-		if pipeline_errors.HasBlockingErrors(err) {
-			return currentPipeline, nil, err
-		}
+		return currentPipeline, nil, err
 	}
 
 	currentPipeline = setPipelineStepsOnPipeline(currentPipeline, pipelineItems)
