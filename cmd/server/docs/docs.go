@@ -4255,10 +4255,12 @@ const docTemplate = `{
                 "killed",
                 "error",
                 "blocked",
-                "declined"
+                "declined",
+                "created"
             ],
             "x-enum-comments": {
                 "StatusBlocked": "waiting for approval",
+                "StatusCreated": "created / internal use only",
                 "StatusDeclined": "blocked and declined",
                 "StatusError": "error with the config / while parsing / some other system problem",
                 "StatusFailure": "failed to finish (exit code != 0)",
@@ -4277,7 +4279,8 @@ const docTemplate = `{
                 "StatusKilled",
                 "StatusError",
                 "StatusBlocked",
-                "StatusDeclined"
+                "StatusDeclined",
+                "StatusCreated"
             ]
         },
         "Step": {

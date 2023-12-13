@@ -19,7 +19,6 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
@@ -28,7 +27,6 @@ var repoRemoveCmd = &cli.Command{
 	Usage:     "remove a repository",
 	ArgsUsage: "<repo-id|repo-full-name>",
 	Action:    repoRemove,
-	Flags:     common.GlobalFlags,
 }
 
 func repoRemove(c *cli.Context) error {

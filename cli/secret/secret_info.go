@@ -30,7 +30,7 @@ var secretInfoCmd = &cli.Command{
 	Usage:     "display secret info",
 	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    secretInfo,
-	Flags: append(common.GlobalFlags,
+	Flags: []cli.Flag{
 		&cli.BoolFlag{
 			Name:  "global",
 			Usage: "global secret",
@@ -42,7 +42,7 @@ var secretInfoCmd = &cli.Command{
 			Usage: "secret name",
 		},
 		common.FormatFlag(tmplSecretList, true),
-	),
+	},
 }
 
 func secretInfo(c *cli.Context) error {

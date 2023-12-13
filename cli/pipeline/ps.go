@@ -30,9 +30,7 @@ var pipelinePsCmd = &cli.Command{
 	Usage:     "show pipeline steps",
 	ArgsUsage: "<repo-id|repo-full-name> [pipeline]",
 	Action:    pipelinePs,
-	Flags: append(common.GlobalFlags,
-		common.FormatFlag(tmplPipelinePs),
-	),
+	Flags:     []cli.Flag{common.FormatFlag(tmplPipelinePs)},
 }
 
 func pipelinePs(c *cli.Context) error {

@@ -29,9 +29,7 @@ var userListCmd = &cli.Command{
 	Usage:     "list all users",
 	ArgsUsage: " ",
 	Action:    userList,
-	Flags: append(common.GlobalFlags,
-		common.FormatFlag(tmplUserList),
-	),
+	Flags:     []cli.Flag{common.FormatFlag(tmplUserList)},
 }
 
 func userList(c *cli.Context) error {

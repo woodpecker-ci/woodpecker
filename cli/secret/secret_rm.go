@@ -26,7 +26,7 @@ var secretDeleteCmd = &cli.Command{
 	Usage:     "remove a secret",
 	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    secretDelete,
-	Flags: append(common.GlobalFlags,
+	Flags: []cli.Flag{
 		&cli.BoolFlag{
 			Name:  "global",
 			Usage: "global secret",
@@ -37,7 +37,7 @@ var secretDeleteCmd = &cli.Command{
 			Name:  "name",
 			Usage: "secret name",
 		},
-	),
+	},
 }
 
 func secretDelete(c *cli.Context) error {

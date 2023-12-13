@@ -29,7 +29,7 @@ var registryInfoCmd = &cli.Command{
 	Usage:     "display registry info",
 	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    registryInfo,
-	Flags: append(common.GlobalFlags,
+	Flags: []cli.Flag{
 		common.RepoFlag,
 		&cli.StringFlag{
 			Name:  "hostname",
@@ -37,7 +37,7 @@ var registryInfoCmd = &cli.Command{
 			Value: "docker.io",
 		},
 		common.FormatFlag(tmplRegistryList, true),
-	),
+	},
 }
 
 func registryInfo(c *cli.Context) error {

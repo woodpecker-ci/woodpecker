@@ -29,7 +29,7 @@ var cronInfoCmd = &cli.Command{
 	Usage:     "display info about a cron job",
 	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    cronInfo,
-	Flags: append(common.GlobalFlags,
+	Flags: []cli.Flag{
 		common.RepoFlag,
 		&cli.StringFlag{
 			Name:     "id",
@@ -37,7 +37,7 @@ var cronInfoCmd = &cli.Command{
 			Required: true,
 		},
 		common.FormatFlag(tmplCronList, true),
-	),
+	},
 }
 
 func cronInfo(c *cli.Context) error {

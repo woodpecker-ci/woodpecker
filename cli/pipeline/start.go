@@ -21,7 +21,6 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
@@ -30,13 +29,13 @@ var pipelineStartCmd = &cli.Command{
 	Usage:     "start a pipeline",
 	ArgsUsage: "<repo-id|repo-full-name> [pipeline]",
 	Action:    pipelineStart,
-	Flags: append(common.GlobalFlags,
+	Flags: []cli.Flag{
 		&cli.StringSliceFlag{
 			Name:    "param",
 			Aliases: []string{"p"},
 			Usage:   "custom parameters to be injected into the step environment. Format: KEY=value",
 		},
-	),
+	},
 }
 
 func pipelineStart(c *cli.Context) (err error) {

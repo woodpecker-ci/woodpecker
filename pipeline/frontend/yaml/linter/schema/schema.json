@@ -764,6 +764,9 @@
         "volumes": {
           "$ref": "#/definitions/step_volumes"
         },
+        "backend_options": {
+          "$ref": "#/definitions/step_backend_options"
+        },
         "ports": {
           "description": "expose ports to which other steps can connect to",
           "type": "array",

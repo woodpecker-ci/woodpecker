@@ -20,7 +20,6 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
@@ -30,7 +29,6 @@ var pipelineKillCmd = &cli.Command{
 	ArgsUsage: "<repo-id|repo-full-name> <pipeline>",
 	Action:    pipelineKill,
 	Hidden:    true,
-	Flags:     common.GlobalFlags,
 }
 
 func pipelineKill(c *cli.Context) (err error) {
