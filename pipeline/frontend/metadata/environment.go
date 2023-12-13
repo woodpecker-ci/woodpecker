@@ -15,6 +15,7 @@
 package metadata
 
 import (
+	"encoding/json"
 	"fmt"
 	"path"
 	"regexp"
@@ -29,7 +30,14 @@ func (m *Metadata) Environ() map[string]string {
 	var (
 		sourceBranch string
 		targetBranch string
+		changedFiles string
 	)
+
+	if len(m.Curr.Commit.ChangedFiles) != 0 {
+		// we have to use json, as other separators like ;, or space are valid filename chars
+		rawJSON, _ := json.Marshal(m.Curr.Commit.ChangedFiles)
+		changedFiles = string(rawJSON)
+	}
 
 	branchParts := strings.Split(m.Curr.Commit.Refspec, ":")
 	if len(branchParts) == 2 {
@@ -75,6 +83,7 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_PIPELINE_CREATED":       strconv.FormatInt(m.Curr.Created, 10),
 		"CI_PIPELINE_STARTED":       strconv.FormatInt(m.Curr.Started, 10),
 		"CI_PIPELINE_FINISHED":      strconv.FormatInt(m.Curr.Finished, 10),
+		"CI_PIPELINE_FILES":         changedFiles,
 
 		"CI_WORKFLOW_NAME":   m.Workflow.Name,
 		"CI_WORKFLOW_NUMBER": strconv.Itoa(m.Workflow.Number),
