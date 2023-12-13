@@ -24,11 +24,11 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"go.woodpecker-ci.org/woodpecker/pipeline/backend/common"
-	"go.woodpecker-ci.org/woodpecker/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/common"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
 
-func Pod(namespace string, step *types.Step, labels, annotations map[string]string, goos string) (*v1.Pod, error) {
+func Pod(namespace string, step *types.Step, labels, annotations map[string]string, goos string, secCtxConf SecurityContextConfig) (*v1.Pod, error) {
 	var (
 		vols       []v1.Volume
 		volMounts  []v1.VolumeMount
@@ -142,6 +142,11 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 		log.Trace().Msgf("Tolerations that will be used in the backend options: %v", beTolerations)
 	}
 
+	beSecurityContext := step.BackendOptions.Kubernetes.SecurityContext
+	log.Trace().Interface("Security context", beSecurityContext).Msg("Security context that will be used for pods/containers")
+	podSecCtx := podSecurityContext(beSecurityContext, secCtxConf)
+	containerSecCtx := containerSecurityContext(beSecurityContext, step.Privileged)
+
 	pod := &v1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        podName,
@@ -155,6 +160,7 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 			NodeSelector:       nodeSelector,
 			Tolerations:        tolerations,
 			ServiceAccountName: serviceAccountName,
+			SecurityContext:    podSecCtx,
 			Containers: []v1.Container{{
 				Name:            podName,
 				Image:           step.Image,
@@ -165,9 +171,7 @@ func Pod(namespace string, step *types.Step, labels, annotations map[string]stri
 				Env:             mapToEnvVars(step.Environment),
 				VolumeMounts:    volMounts,
 				Resources:       resourceRequirements,
-				SecurityContext: &v1.SecurityContext{
-					Privileged: &step.Privileged,
-				},
+				SecurityContext: containerSecCtx,
 			}},
 			ImagePullSecrets: []v1.LocalObjectReference{{Name: "regcred"}},
 			Volumes:          vols,
@@ -194,4 +198,56 @@ func volumeMountPath(i string) string {
 		return s[1]
 	}
 	return s[0]
+}
+
+func podSecurityContext(sc *types.SecurityContext, secCtxConf SecurityContextConfig) *v1.PodSecurityContext {
+	var (
+		nonRoot *bool
+		user    *int64
+		group   *int64
+		fsGroup *int64
+	)
+
+	if sc != nil && sc.RunAsNonRoot != nil {
+		if *sc.RunAsNonRoot {
+			nonRoot = sc.RunAsNonRoot // true
+		}
+	} else if secCtxConf.RunAsNonRoot {
+		nonRoot = &secCtxConf.RunAsNonRoot // true
+	}
+
+	if sc != nil {
+		user = sc.RunAsUser
+		group = sc.RunAsGroup
+		fsGroup = sc.FSGroup
+	}
+
+	if nonRoot == nil && user == nil && group == nil && fsGroup == nil {
+		return nil
+	}
+
+	return &v1.PodSecurityContext{
+		RunAsNonRoot: nonRoot,
+		RunAsUser:    user,
+		RunAsGroup:   group,
+		FSGroup:      fsGroup,
+	}
+}
+
+func containerSecurityContext(sc *types.SecurityContext, stepPrivileged bool) *v1.SecurityContext {
+	var privileged *bool
+
+	if sc != nil && sc.Privileged != nil && *sc.Privileged {
+		privileged = sc.Privileged // true
+	} else if stepPrivileged {
+		privileged = &stepPrivileged // true
+	}
+
+	if privileged == nil {
+		return nil
+	}
+
+	return &v1.SecurityContext{
+		Privileged: privileged,
+	}
 }

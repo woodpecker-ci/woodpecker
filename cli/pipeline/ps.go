@@ -21,8 +21,8 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"go.woodpecker-ci.org/woodpecker/cli/common"
-	"go.woodpecker-ci.org/woodpecker/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
 var pipelinePsCmd = &cli.Command{
@@ -30,9 +30,7 @@ var pipelinePsCmd = &cli.Command{
 	Usage:     "show pipeline steps",
 	ArgsUsage: "<repo-id|repo-full-name> [pipeline]",
 	Action:    pipelinePs,
-	Flags: append(common.GlobalFlags,
-		common.FormatFlag(tmplPipelinePs),
-	),
+	Flags:     []cli.Flag{common.FormatFlag(tmplPipelinePs)},
 }
 
 func pipelinePs(c *cli.Context) error {

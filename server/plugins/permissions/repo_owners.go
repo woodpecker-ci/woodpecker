@@ -1,8 +1,8 @@
 package permissions
 
 import (
-	"go.woodpecker-ci.org/woodpecker/server/model"
-	"go.woodpecker-ci.org/woodpecker/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
 func NewOwnersAllowlist(owners []string) *OwnersAllowlist {
@@ -14,5 +14,5 @@ type OwnersAllowlist struct {
 }
 
 func (o *OwnersAllowlist) IsAllowed(repo *model.Repo) bool {
-	return len(o.owners) > 0 && o.owners[repo.Owner]
+	return len(o.owners) < 1 || o.owners[repo.Owner]
 }
