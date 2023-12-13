@@ -86,7 +86,7 @@ This is the reference list of all environment variables available to your pipeli
 | `CI_PIPELINE_CREATED`            | pipeline created UNIX timestamp                                                              |
 | `CI_PIPELINE_STARTED`            | pipeline started UNIX timestamp                                                              |
 | `CI_PIPELINE_FINISHED`           | pipeline finished UNIX timestamp                                                             |
-| `CI_PIPELINE_FILES`              | changed files (empty if event is not `push` or `pull_request`) |
+| `CI_PIPELINE_FILES`              | changed files (empty if event is not `push` or `pull_request`)                               |
 |                                  | **Current workflow**                                                                         |
 | `CI_WORKFLOW_NAME`               | workflow name                                                                                |
 |                                  | **Current step**                                                                             |
