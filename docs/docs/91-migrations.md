@@ -4,7 +4,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 
 ## `next`
 
-No breaking changes yet
+- Remove `WOODPECKER_ROOT_PATH` and `WOODPECKER_ROOT_URL` config variables
 
 ## 2.0.0
 
