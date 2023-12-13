@@ -1,10 +1,10 @@
 # Changelog
 
-## [2.1.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.1.0) - 2023-12-12
+## [2.1.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.1.0) - 2023-12-13
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@xoxys, @gapanyc, @allanger, @mikhail-putilov, @renovate[bot], @qwerty287, @runephilosof-karnovgroup, @lafriks, @kaylynb, @voidcontext, @robbie-cahill, @micash545, @dominic-p, @zc-devs, @mzampetakis
+@lafriks, @xoxys, @gapanyc, @allanger, @mikhail-putilov, @renovate[bot], @qwerty287, @runephilosof-karnovgroup, @kaylynb, @voidcontext, @robbie-cahill, @micash545, @dominic-p, @zc-devs, @mzampetakis
 
 ### 🔒 Security
 
@@ -12,6 +12,7 @@
 
 ### 🐛 Bug Fixes
 
+- Allow to restart pipelines that has warnings [[#2939](https://github.com/woodpecker-ci/woodpecker/pull/2939)]
 - Fix skipped pipelines model [[#2923](https://github.com/woodpecker-ci/woodpecker/pull/2923)]
 - fix: Add `backend_options` to service linter entry [[#2930](https://github.com/woodpecker-ci/woodpecker/pull/2930)]
 - Fix flags added multiple times [[#2914](https://github.com/woodpecker-ci/woodpecker/pull/2914)]
