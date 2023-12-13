@@ -97,7 +97,7 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 	if err != nil {
 		msg := fmt.Sprintf("failure to createPipelineItems for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
-		return nil, err
+		return nil, fmt.Errorf(msg)
 	}
 
 	newPipeline, err = start(ctx, store, newPipeline, user, repo, pipelineItems)
