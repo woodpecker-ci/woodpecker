@@ -91,7 +91,7 @@ func createPipelineItems(c context.Context, store store.Store,
 	yamls []*forge_types.FileMeta, envs map[string]string,
 ) (*model.Pipeline, []*pipeline.Item, error) {
 	pipelineItems, err := parsePipeline(store, currentPipeline, user, repo, yamls, envs)
-	if err != nil && pipeline_errors.HasBlockingErrors(err) {
+	if pipeline_errors.HasBlockingErrors(err) {
 		currentPipeline, uerr := UpdateToStatusError(store, *currentPipeline, err)
 		if uerr != nil {
 			log.Error().Err(uerr).Msgf("Error setting error status of pipeline for %s#%d", repo.FullName, currentPipeline.Number)
@@ -100,11 +100,13 @@ func createPipelineItems(c context.Context, store store.Store,
 		}
 
 		return currentPipeline, nil, err
+	} else if err != nil {
+		currentPipeline.Errors = pipeline_errors.GetPipelineErrors(err)
 	}
 
 	currentPipeline = setPipelineStepsOnPipeline(currentPipeline, pipelineItems)
 
-	return currentPipeline, pipelineItems, err
+	return currentPipeline, pipelineItems, nil
 }
 
 // setPipelineStepsOnPipeline is the link between pipeline representation in "pipeline package" and server
