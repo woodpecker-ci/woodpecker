@@ -53,7 +53,7 @@ func Approve(ctx context.Context, store store.Store, currentPipeline *model.Pipe
 	if err != nil {
 		msg := fmt.Sprintf("failure to createPipelineItems for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
-		return nil, err
+		return nil, fmt.Errorf(msg)
 	}
 
 	currentPipeline, err = start(ctx, store, currentPipeline, user, repo, pipelineItems)
