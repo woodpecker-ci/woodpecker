@@ -102,11 +102,12 @@ func createPipelineItems(c context.Context, store store.Store,
 		return currentPipeline, nil, err
 	} else if err != nil {
 		currentPipeline.Errors = pipeline_errors.GetPipelineErrors(err)
+		err = updatePipelinePending(c, store, currentPipeline, repo, user)
 	}
 
 	currentPipeline = setPipelineStepsOnPipeline(currentPipeline, pipelineItems)
 
-	return currentPipeline, pipelineItems, nil
+	return currentPipeline, pipelineItems, err
 }
 
 // setPipelineStepsOnPipeline is the link between pipeline representation in "pipeline package" and server
