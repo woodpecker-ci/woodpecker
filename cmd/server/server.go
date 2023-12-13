@@ -347,13 +347,8 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 	server.Config.Server.StatusContext = c.String("status-context")
 	server.Config.Server.StatusContextFormat = c.String("status-context-format")
 	server.Config.Server.SessionExpires = c.Duration("session-expires")
-	rootPath := c.String("root-path")
-	if !c.IsSet("root-path") {
-		// Extract RootPath from Host...
-		u, _ := url.Parse(server.Config.Server.Host)
-		rootPath = u.Path
-	}
-	rootPath = strings.TrimSuffix(rootPath, "/")
+	u, _ := url.Parse(server.Config.Server.Host)
+	rootPath := strings.TrimSuffix(u.Path, "/")
 	if rootPath != "" && !strings.HasPrefix(rootPath, "/") {
 		rootPath = "/" + rootPath
 	}
