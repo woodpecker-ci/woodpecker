@@ -215,12 +215,12 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 	backendCtx := context.WithValue(c.Context, backendTypes.CliContext, c)
 	backend.Init(backendCtx)
 
-	engine, err := backend.FindEngine(backendCtx, c.String("backend-engine"))
+	backendEngine, err := backend.FindBackend(backendCtx, c.String("backend-engine"))
 	if err != nil {
 		return err
 	}
 
-	if _, err = engine.Load(backendCtx); err != nil {
+	if _, err = backendEngine.Load(backendCtx); err != nil {
 		return err
 	}
 
@@ -234,7 +234,7 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 		pipeline.WithContext(ctx),
 		pipeline.WithTracer(pipeline.DefaultTracer),
 		pipeline.WithLogger(defaultLogger),
-		pipeline.WithEngine(engine),
+		pipeline.WithBackend(backendEngine),
 		pipeline.WithDescription(map[string]string{
 			"CLI": "exec",
 		}),
