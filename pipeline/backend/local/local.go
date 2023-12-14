@@ -50,8 +50,8 @@ type local struct {
 	os, arch        string
 }
 
-// New returns a new local Engine.
-func New() types.Engine {
+// New returns a new local Backend.
+func New() types.Backend {
 	return &local{
 		os:   runtime.GOOS,
 		arch: runtime.GOARCH,

@@ -19,9 +19,9 @@ import (
 	"io"
 )
 
-// Engine defines a container orchestration backend and is used
+// Backend defines a container orchestration backend and is used
 // to create and manage container resources.
-type Engine interface {
+type Backend interface {
 	// Name returns the name of the backend.
 	Name() string
 

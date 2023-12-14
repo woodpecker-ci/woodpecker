@@ -24,8 +24,9 @@ import (
 	"time"
 
 	"github.com/rs/zerolog/log"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 	"gopkg.in/yaml.v3"
+
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 
 	"github.com/urfave/cli/v2"
 	v1 "k8s.io/api/core/v1"
@@ -101,8 +102,8 @@ func configFromCliContext(ctx context.Context) (*Config, error) {
 	return nil, types.ErrNoCliContextFound
 }
 
-// New returns a new Kubernetes Engine.
-func New(ctx context.Context) types.Engine {
+// New returns a new Kubernetes Backend.
+func New(ctx context.Context) types.Backend {
 	return &kube{
 		ctx: ctx,
 	}

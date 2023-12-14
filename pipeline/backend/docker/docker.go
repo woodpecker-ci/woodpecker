@@ -51,8 +51,8 @@ const (
 	volumeDriver        = "local"
 )
 
-// New returns a new Docker Engine.
-func New() backend.Engine {
+// New returns a new Docker Backend.
+func New() backend.Backend {
 	return &docker{
 		client: nil,
 	}
@@ -93,7 +93,7 @@ func httpClientOfOpts(dockerCertPath string, verifyTLS bool) *http.Client {
 	}
 }
 
-// Load new client for Docker Engine using environment variables.
+// Load new client for Docker Backend using environment variables.
 func (e *docker) Load(ctx context.Context) (*backend.EngineInfo, error) {
 	c, ok := ctx.Value(backend.CliContext).(*cli.Context)
 	if !ok {
