@@ -34,12 +34,11 @@ import (
 )
 
 //go:generate go run docs.go app.go
-func newApp() *cli.App {
-	app := cli.NewApp()
+func newApp() *cli.Command {
+	app := &cli.Command{}
 	app.Name = "woodpecker-cli"
 	app.Version = version.String()
 	app.Usage = "command line utility"
-	app.EnableBashCompletion = true
 	app.Flags = common.GlobalFlags
 	app.Before = common.SetupGlobalLogger
 	app.Commands = []*cli.Command{

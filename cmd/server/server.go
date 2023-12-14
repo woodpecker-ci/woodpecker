@@ -15,6 +15,7 @@
 package main
 
 import (
+	"context"
 	"crypto/tls"
 	"errors"
 	"net"
@@ -55,8 +56,8 @@ import (
 	// encryptedStore "go.woodpecker-ci.org/woodpecker/v2/server/plugins/encryption/wrapper/store"
 )
 
-func run(c *cli.Context) error {
-	common.SetupGlobalLogger(c, true)
+func run(ctx context.Context, c *cli.Command) error {
+	common.SetupGlobalLogger(ctx, c, true)
 
 	// set gin mode based on log level
 	if zerolog.GlobalLevel() > zerolog.DebugLevel {
@@ -105,7 +106,7 @@ func run(c *cli.Context) error {
 	setupMetrics(&g, _store)
 
 	g.Go(func() error {
-		return cron.Start(c.Context, _store, _forge)
+		return cron.Start(ctx, _store, _forge)
 	})
 
 	// start the grpc server
@@ -266,7 +267,7 @@ func run(c *cli.Context) error {
 	return g.Wait()
 }
 
-func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
+func setupEvilGlobals(c *cli.Command, v store.Store, f forge.Forge) {
 	// forge
 	server.Config.Services.Forge = f
 	server.Config.Services.Timeout = c.Duration("forge-timeout")
@@ -310,15 +311,15 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 		events = append(events, model.WebhookEvent(v))
 	}
 	server.Config.Pipeline.DefaultCancelPreviousPipelineEvents = events
-	server.Config.Pipeline.DefaultTimeout = c.Int64("default-pipeline-timeout")
-	server.Config.Pipeline.MaxTimeout = c.Int64("max-pipeline-timeout")
+	server.Config.Pipeline.DefaultTimeout = c.Int("default-pipeline-timeout")
+	server.Config.Pipeline.MaxTimeout = c.Int("max-pipeline-timeout")
 
 	// limits
-	server.Config.Pipeline.Limits.MemSwapLimit = c.Int64("limit-mem-swap")
-	server.Config.Pipeline.Limits.MemLimit = c.Int64("limit-mem")
-	server.Config.Pipeline.Limits.ShmSize = c.Int64("limit-shm-size")
-	server.Config.Pipeline.Limits.CPUQuota = c.Int64("limit-cpu-quota")
-	server.Config.Pipeline.Limits.CPUShares = c.Int64("limit-cpu-shares")
+	server.Config.Pipeline.Limits.MemSwapLimit = c.Int("limit-mem-swap")
+	server.Config.Pipeline.Limits.MemLimit = c.Int("limit-mem")
+	server.Config.Pipeline.Limits.ShmSize = c.Int("limit-shm-size")
+	server.Config.Pipeline.Limits.CPUQuota = c.Int("limit-cpu-quota")
+	server.Config.Pipeline.Limits.CPUShares = c.Int("limit-cpu-shares")
 	server.Config.Pipeline.Limits.CPUSet = c.String("limit-cpu-set")
 
 	// backend options for pipeline compiler

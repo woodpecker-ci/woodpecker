@@ -15,6 +15,7 @@
 package common
 
 import (
+	"context"
 	"io"
 	"os"
 
@@ -51,7 +52,7 @@ var GlobalLoggerFlags = []cli.Flag{
 	},
 }
 
-func SetupGlobalLogger(c *cli.Context, printLvl bool) {
+func SetupGlobalLogger(ctx context.Context, c *cli.Command, printLvl bool) {
 	logLevel := c.String("log-level")
 	pretty := c.Bool("pretty")
 	noColor := c.Bool("nocolor")
@@ -64,7 +65,7 @@ func SetupGlobalLogger(c *cli.Context, printLvl bool) {
 	case "stdout":
 		file = os.Stdout
 	default: // a file was set
-		openFile, err := logfile.OpenFileWithContext(c.Context, logFile, 0o660)
+		openFile, err := logfile.OpenFileWithContext(ctx, logFile, 0o660)
 		if err != nil {
 			log.Fatal().Err(err).Msgf("could not open log file '%s'", logFile)
 		}

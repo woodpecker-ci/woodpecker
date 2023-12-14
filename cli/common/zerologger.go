@@ -15,12 +15,14 @@
 package common
 
 import (
+	"context"
+
 	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cmd/common"
 )
 
-func SetupGlobalLogger(c *cli.Context) error {
-	common.SetupGlobalLogger(c, false)
+func SetupGlobalLogger(ctx context.Context, c *cli.Command) error {
+	common.SetupGlobalLogger(ctx, c, false)
 	return nil
 }

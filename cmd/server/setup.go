@@ -51,7 +51,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
 )
 
-func setupStore(c *cli.Context) (store.Store, error) {
+func setupStore(c *cli.Command) (store.Store, error) {
 	datasource := c.String("datasource")
 	driver := c.String("driver")
 	xorm := store.XORM{
@@ -104,15 +104,15 @@ func checkSqliteFileExist(path string) error {
 	return err
 }
 
-func setupQueue(c *cli.Context, s store.Store) queue.Queue {
-	return queue.WithTaskStore(queue.New(c.Context), s)
+func setupQueue(ctx context.Context, s store.Store) queue.Queue {
+	return queue.WithTaskStore(queue.New(ctx), s)
 }
 
-func setupSecretService(c *cli.Context, s model.SecretStore) model.SecretService {
-	return secrets.New(c.Context, s)
+func setupSecretService(ctx context.Context, s model.SecretStore) model.SecretService {
+	return secrets.New(ctx, s)
 }
 
-func setupRegistryService(c *cli.Context, s store.Store) model.RegistryService {
+func setupRegistryService(ctx context.Context, c *cli.Command, s store.Store) model.RegistryService {
 	if c.String("docker-config") != "" {
 		return registry.Combined(
 			registry.New(s),
@@ -122,16 +122,16 @@ func setupRegistryService(c *cli.Context, s store.Store) model.RegistryService {
 	return registry.New(s)
 }
 
-func setupEnvironService(c *cli.Context, _ store.Store) model.EnvironService {
+func setupEnvironService(c *cli.Command, _ store.Store) model.EnvironService {
 	return environments.Parse(c.StringSlice("environment"))
 }
 
-func setupMembershipService(_ *cli.Context, r forge.Forge) cache.MembershipService {
+func setupMembershipService(_ *cli.Command, r forge.Forge) cache.MembershipService {
 	return cache.NewMembershipService(r)
 }
 
 // setupForge helper function to setup the forge from the CLI arguments.
-func setupForge(c *cli.Context) (forge.Forge, error) {
+func setupForge(c *cli.Command) (forge.Forge, error) {
 	switch {
 	case c.Bool("github"):
 		return setupGitHub(c)
@@ -147,7 +147,7 @@ func setupForge(c *cli.Context) (forge.Forge, error) {
 }
 
 // setupBitbucket helper function to setup the Bitbucket forge from the CLI arguments.
-func setupBitbucket(c *cli.Context) (forge.Forge, error) {
+func setupBitbucket(c *cli.Command) (forge.Forge, error) {
 	opts := &bitbucket.Opts{
 		Client: c.String("bitbucket-client"),
 		Secret: c.String("bitbucket-secret"),
@@ -157,7 +157,7 @@ func setupBitbucket(c *cli.Context) (forge.Forge, error) {
 }
 
 // setupGitea helper function to setup the Gitea forge from the CLI arguments.
-func setupGitea(c *cli.Context) (forge.Forge, error) {
+func setupGitea(c *cli.Command) (forge.Forge, error) {
 	server, err := url.Parse(c.String("gitea-server"))
 	if err != nil {
 		return nil, err
@@ -176,7 +176,7 @@ func setupGitea(c *cli.Context) (forge.Forge, error) {
 }
 
 // setupGitLab helper function to setup the GitLab forge from the CLI arguments.
-func setupGitLab(c *cli.Context) (forge.Forge, error) {
+func setupGitLab(c *cli.Command) (forge.Forge, error) {
 	return gitlab.New(gitlab.Opts{
 		URL:          c.String("gitlab-server"),
 		ClientID:     c.String("gitlab-client"),
@@ -186,7 +186,7 @@ func setupGitLab(c *cli.Context) (forge.Forge, error) {
 }
 
 // setupGitHub helper function to setup the GitHub forge from the CLI arguments.
-func setupGitHub(c *cli.Context) (forge.Forge, error) {
+func setupGitHub(c *cli.Command) (forge.Forge, error) {
 	opts := github.Opts{
 		URL:        c.String("github-server"),
 		Client:     c.String("github-client"),

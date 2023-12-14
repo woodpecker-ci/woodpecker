@@ -55,7 +55,7 @@ var flags = []cli.Flag{
 	&cli.StringSliceFlag{
 		Name:  "privileged",
 		Usage: "privileged plugins",
-		Value: cli.NewStringSlice(constant.PrivilegedPlugins...),
+		Value: constant.PrivilegedPlugins,
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_BACKEND"),
