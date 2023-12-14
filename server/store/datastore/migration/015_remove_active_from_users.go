@@ -15,21 +15,13 @@
 package migration
 
 import (
+	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
 )
 
-var renameBuildsToPipeline = task{
-	name:     "rename-builds-to-pipeline",
-	required: true,
-	fn: func(sess *xorm.Session) error {
-		err := renameTable(sess, "builds", "pipelines")
-		if err != nil {
-			return err
-		}
-		err = renameTable(sess, "build_config", "pipeline_config")
-		if err != nil {
-			return err
-		}
-		return nil
+var removeActiveFromUsers = xormigrate.Migration{
+	ID: "remove-active-from-users",
+	MigrateSession: func(sess *xorm.Session) error {
+		return dropTableColumns(sess, "users", "user_active")
 	},
 }

@@ -15,13 +15,13 @@
 package migration
 
 import (
+	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
 )
 
-var removeActiveFromUsers = task{
-	name:     "remove-active-from-users",
-	required: true,
-	fn: func(sess *xorm.Session) error {
-		return dropTableColumns(sess, "users", "user_active")
+var renameForgeIDToForgeRemoteID = xormigrate.Migration{
+	ID: "rename-forge-id-to-forge-remote-id",
+	MigrateSession: func(sess *xorm.Session) error {
+		return renameColumn(sess, "repos", "forge_id", "forge_remote_id")
 	},
 }

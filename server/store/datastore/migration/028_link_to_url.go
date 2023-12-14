@@ -15,25 +15,17 @@
 package migration
 
 import (
+	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
-	"xorm.io/xorm/schemas"
 )
 
-var alterTableLogUpdateColumnLogDataType = task{
-	name: "alter-table-logs-update-type-of-data",
-	fn: func(sess *xorm.Session) (err error) {
-		dialect := sess.Engine().Dialect().URI().DBType
-
-		switch dialect {
-		case schemas.POSTGRES:
-			_, err = sess.Exec("ALTER TABLE logs ALTER COLUMN log_data TYPE BYTEA")
-		case schemas.MYSQL:
-			_, err = sess.Exec("ALTER TABLE logs MODIFY COLUMN log_data LONGBLOB")
-		default:
-			// sqlite does only know BLOB in all cases
-			return nil
+var renameLinkToURL = xormigrate.Migration{
+	ID: "rename-link-to-url",
+	MigrateSession: func(sess *xorm.Session) (err error) {
+		if err := renameColumn(sess, "pipelines", "pipeline_link", "pipeline_forge_url"); err != nil {
+			return err
 		}
 
-		return err
+		return renameColumn(sess, "repos", "repo_link", "repo_forge_url")
 	},
 }

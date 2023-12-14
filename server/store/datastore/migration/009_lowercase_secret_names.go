@@ -15,13 +15,14 @@
 package migration
 
 import (
+	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
 )
 
-var renameForgeIDToForgeRemoteID = task{
-	name:     "rename-forge-id-to-forge-remote-id",
-	required: true,
-	fn: func(sess *xorm.Session) error {
-		return renameColumn(sess, "repos", "forge_id", "forge_remote_id")
+var lowercaseSecretNames = xormigrate.Migration{
+	ID: "lowercase-secret-names",
+	MigrateSession: func(sess *xorm.Session) (err error) {
+		_, err = sess.Exec("UPDATE secrets SET secret_name = LOWER(secret_name);")
+		return err
 	},
 }

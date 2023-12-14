@@ -15,53 +15,54 @@
 package migration
 
 import (
+	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
 
-	"go.woodpecker-ci.org/woodpecker/pipeline/errors"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
 )
 
-// perPage026 set the size of the slice to read per page
-var perPage026 = 100
+// perPage027 set the size of the slice to read per page
+var perPage027 = 100
 
-type pipeline026 struct {
+type pipeline027 struct {
 	ID     int64                   `json:"id"              xorm:"pk autoincr 'pipeline_id'"`
 	Error  string                  `json:"error"           xorm:"LONGTEXT 'pipeline_error'"` // old error format
 	Errors []*errors.PipelineError `json:"errors"          xorm:"json 'pipeline_errors'"`    // new error format
 }
 
-func (pipeline026) TableName() string {
+func (pipeline027) TableName() string {
 	return "pipelines"
 }
 
-type PipelineError026 struct {
+type PipelineError027 struct {
 	Type      string `json:"type"`
 	Message   string `json:"message"`
 	IsWarning bool   `json:"is_warning"`
 	Data      any    `json:"data"`
 }
 
-var convertToNewPipelineErrorFormat = task{
-	name:     "convert-to-new-pipeline-error-format",
-	required: true,
-	fn: func(sess *xorm.Session) (err error) {
+var convertToNewPipelineErrorFormat = xormigrate.Migration{
+	ID:   "convert-to-new-pipeline-error-format",
+	Long: true,
+	MigrateSession: func(sess *xorm.Session) (err error) {
 		// make sure pipeline_error column exists
-		if err := sess.Sync(new(pipeline026)); err != nil {
+		if err := sess.Sync(new(pipeline027)); err != nil {
 			return err
 		}
 
 		page := 0
-		oldPipelines := make([]*pipeline026, 0, perPage026)
+		oldPipelines := make([]*pipeline027, 0, perPage027)
 
 		for {
 			oldPipelines = oldPipelines[:0]
 
-			err := sess.Limit(perPage026, page*perPage026).Cols("pipeline_id", "pipeline_error").Where("pipeline_error != ''").Find(&oldPipelines)
+			err := sess.Limit(perPage027, page*perPage027).Cols("pipeline_id", "pipeline_error").Where("pipeline_error != ''").Find(&oldPipelines)
 			if err != nil {
 				return err
 			}
 
 			for _, oldPipeline := range oldPipelines {
-				var newPipeline pipeline026
+				var newPipeline pipeline027
 				newPipeline.ID = oldPipeline.ID
 				newPipeline.Errors = []*errors.PipelineError{{
 					Type:    "generic",
@@ -73,7 +74,7 @@ var convertToNewPipelineErrorFormat = task{
 				}
 			}
 
-			if len(oldPipelines) < perPage026 {
+			if len(oldPipelines) < perPage027 {
 				break
 			}
 

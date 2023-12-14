@@ -1,4 +1,4 @@
-// Copyright 2021 Woodpecker Authors
+// Copyright 2023 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,12 +15,26 @@
 package migration
 
 import (
+	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
 )
 
-var alterTableReposDropFallback = task{
-	name: "alter-table-drop-repo-fallback",
-	fn: func(sess *xorm.Session) error {
-		return dropTableColumns(sess, "repos", "repo_fallback")
+type oldStep018 struct {
+	ID      int64  `xorm:"pk autoincr 'step_id'"`
+	Machine string `xorm:"step_machine"`
+}
+
+func (oldStep018) TableName() string {
+	return "steps"
+}
+
+var removeMachineCol = xormigrate.Migration{
+	ID: "remove-machine-col",
+	MigrateSession: func(sess *xorm.Session) error {
+		// make sure step_machine column exists
+		if err := sess.Sync(new(oldStep018)); err != nil {
+			return err
+		}
+		return dropTableColumns(sess, "steps", "step_machine")
 	},
 }

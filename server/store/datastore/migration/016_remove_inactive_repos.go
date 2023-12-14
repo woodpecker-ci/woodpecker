@@ -15,13 +15,19 @@
 package migration
 
 import (
+	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
 )
 
-var lowercaseSecretNames = task{
-	name: "lowercase-secret-names",
-	fn: func(sess *xorm.Session) (err error) {
-		_, err = sess.Exec("UPDATE secrets SET secret_name = LOWER(secret_name);")
-		return err
+var removeInactiveRepos = xormigrate.Migration{
+	ID: "remove-inactive-repos",
+	MigrateSession: func(sess *xorm.Session) error {
+		// If the timeout is 0, the repo was never activated, so we remove it.
+		_, err := sess.Table("repos").Where("repo_active = ?", false).And("repo_timeout = ?", 0).Delete()
+		if err != nil {
+			return err
+		}
+
+		return dropTableColumns(sess, "users", "user_synced")
 	},
 }
