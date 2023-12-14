@@ -15,14 +15,10 @@ export async function usePaginate<T>(getSingle: (page: number) => Promise<T[]>):
   return result;
 }
 
-export function usePagination<T, S = unknown>(
-  _loadData: (page: number, args: S) => Promise<T[] | null>,
+export function usePagination<T>(
+  _loadData: (page: number) => Promise<T[] | null>,
   isActive: () => boolean,
-  {
-    scrollElement: _scrollElement,
-    each: _each,
-    name,
-  }: { scrollElement?: Ref<HTMLElement | null>; each?: S[]; name?: string } = {},
+  { scrollElement: _scrollElement }: { scrollElement?: Ref<HTMLElement | null> } = {},
 ) {
   const scrollElement = _scrollElement ?? ref(document.getElementById('scroll-component'));
   const page = ref(1);
@@ -30,7 +26,6 @@ export function usePagination<T, S = unknown>(
   const hasMore = ref(true);
   const data = ref<T[]>([]) as Ref<T[]>;
   const loading = ref(false);
-  const each = ref<S[]>(_each || []);
 
   async function loadData() {
     if (hasMore.value === false || loading.value === true) {
@@ -38,19 +33,11 @@ export function usePagination<T, S = unknown>(
     }
 
     loading.value = true;
-    name === 'secrets' && console.log('loadData', page.value, each.value?.[0] as S);
-    const newData = await _loadData(page.value, each.value?.[0] as S);
-    hasMore.value = (newData !== null && newData.length >= pageSize.value) || each.value.length > 0;
+    const newData = await _loadData(page.value);
+    hasMore.value = newData !== null && newData.length >= pageSize.value;
     if (newData && newData.length > 0) {
       data.value.push(...newData);
       pageSize.value = newData.length;
-    } else if (each.value.length > 0) {
-      // use next each element
-      each.value.shift();
-      page.value = 1;
-      pageSize.value = 0;
-      hasMore.value = each.value.length > 0;
-      name === 'secrets' && console.log('loadData', 'next', each.value?.[0] as S, hasMore.value);
     }
     loading.value = false;
   }
@@ -69,16 +56,16 @@ export function usePagination<T, S = unknown>(
     { distance: 10 },
   );
 
-  const resetPage = () => {
+  async function resetPage() {
     hasMore.value = true;
     if (page.value !== 1) {
       // just set page = 1, will be handled by watcher
       page.value = 1;
     } else {
       // we need to reload, but page is already 1, so changing won't trigger watcher
-      loadData();
+      await loadData();
     }
-  };
+  }
 
   return { resetPage, data };
 }
