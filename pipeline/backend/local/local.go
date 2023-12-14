@@ -66,7 +66,7 @@ func (e *local) IsAvailable(context.Context) bool {
 	return true
 }
 
-func (e *local) Load(ctx context.Context) (*types.EngineInfo, error) {
+func (e *local) Load(ctx context.Context) (*types.BackendInfo, error) {
 	c, ok := ctx.Value(types.CliContext).(*cli.Context)
 	if ok {
 		e.tempDir = c.String("backend-local-temp-dir")
@@ -74,7 +74,7 @@ func (e *local) Load(ctx context.Context) (*types.EngineInfo, error) {
 
 	e.loadClone()
 
-	return &types.EngineInfo{
+	return &types.BackendInfo{
 		Platform: e.os + "/" + e.arch,
 	}, nil
 }

@@ -118,7 +118,7 @@ func (e *kube) IsAvailable(context.Context) bool {
 	return len(host) > 0
 }
 
-func (e *kube) Load(context.Context) (*types.EngineInfo, error) {
+func (e *kube) Load(context.Context) (*types.BackendInfo, error) {
 	config, err := configFromCliContext(e.ctx)
 	if err != nil {
 		return nil, err
@@ -141,7 +141,7 @@ func (e *kube) Load(context.Context) (*types.EngineInfo, error) {
 
 	// TODO(2693): use info resp of kubeClient to define platform var
 	e.goos = runtime.GOOS
-	return &types.EngineInfo{
+	return &types.BackendInfo{
 		Platform: runtime.GOOS + "/" + runtime.GOARCH,
 	}, nil
 }
