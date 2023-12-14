@@ -16,13 +16,14 @@ package pipeline
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"regexp"
 	"time"
 
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
+	pipelineErrors "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
@@ -65,18 +66,24 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	// fetch the pipeline file from the forge
 	configFetcher := forge.NewConfigFetcher(server.Config.Services.Forge, server.Config.Services.Timeout, server.Config.Services.ConfigService, repoUser, repo, pipeline)
 	forgeYamlConfigs, configFetchErr := configFetcher.Fetch(ctx)
-
-	if configFetchErr != nil {
+	if errors.Is(configFetchErr, &forge.ErrConfigNotFound{}) {
 		log.Debug().Str("repo", repo.FullName).Err(configFetchErr).Msgf("cannot find config '%s' in '%s' with user: '%s'", repo.Config, pipeline.Ref, repoUser.Login)
+		if err := _store.DeletePipeline(pipeline); err != nil {
+			log.Error().Str("repo", repo.FullName).Err(err).Msg("failed to delete pipeline without config")
+		}
+
+		return nil, ErrFiltered
+	} else if configFetchErr != nil {
+		log.Debug().Str("repo", repo.FullName).Err(configFetchErr).Msgf("error while fetching config '%s' in '%s' with user: '%s'", repo.Config, pipeline.Ref, repoUser.Login)
 		return nil, updatePipelineWithErr(ctx, _store, pipeline, repo, repoUser, fmt.Errorf("pipeline definition not found in %s", repo.FullName))
 	}
 
 	pipelineItems, parseErr := parsePipeline(_store, pipeline, repoUser, repo, forgeYamlConfigs, nil)
-	if errors.HasBlockingErrors(parseErr) {
+	if pipelineErrors.HasBlockingErrors(parseErr) {
 		log.Debug().Str("repo", repo.FullName).Err(parseErr).Msg("failed to parse yaml")
 		return nil, updatePipelineWithErr(ctx, _store, pipeline, repo, repoUser, parseErr)
 	} else if parseErr != nil {
-		pipeline.Errors = errors.GetPipelineErrors(parseErr)
+		pipeline.Errors = pipelineErrors.GetPipelineErrors(parseErr)
 	}
 
 	if len(pipelineItems) == 0 {
@@ -131,7 +138,7 @@ func updatePipelineWithErr(ctx context.Context, _store store.Store, pipeline *mo
 	pipeline.Started = time.Now().Unix()
 	pipeline.Finished = pipeline.Started
 	pipeline.Status = model.StatusError
-	pipeline.Errors = errors.GetPipelineErrors(err)
+	pipeline.Errors = pipelineErrors.GetPipelineErrors(err)
 	dbErr := _store.UpdatePipeline(pipeline)
 	if dbErr != nil {
 		msg := fmt.Errorf("failed to save pipeline for %s", repo.FullName)

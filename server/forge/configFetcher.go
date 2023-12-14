@@ -29,6 +29,14 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
 )
 
+type ErrConfigNotFound struct {
+	configs []string
+}
+
+func (m *ErrConfigNotFound) Error() string {
+	return fmt.Sprintf("configs not found: %s", strings.Join(m.configs, ", "))
+}
+
 type ConfigFetcher interface {
 	Fetch(ctx context.Context) (files []*types.FileMeta, err error)
 }
@@ -106,7 +114,7 @@ func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config 
 		// could be adapted to allow the user to supply a list like we do in the defaults
 		configs := []string{config}
 
-		fileMeta, err := cf.getFirstAvailableConfig(ctx, configs, true)
+		fileMeta, err := cf.getFirstAvailableConfig(ctx, configs)
 		if err == nil {
 			return fileMeta, err
 		}
@@ -116,7 +124,7 @@ func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config 
 
 	log.Trace().Msgf("ConfigFetch[%s]: user did not define own config, following default procedure", cf.repo.FullName)
 	// for the order see shared/constants/constants.go
-	fileMeta, err := cf.getFirstAvailableConfig(ctx, constant.DefaultConfigOrder[:], false)
+	fileMeta, err := cf.getFirstAvailableConfig(ctx, constant.DefaultConfigOrder[:])
 	if err == nil {
 		return fileMeta, err
 	}
@@ -156,12 +164,7 @@ func (cf *configFetcher) checkPipelineFile(c context.Context, config string) (fi
 	return nil, false
 }
 
-func (cf *configFetcher) getFirstAvailableConfig(c context.Context, configs []string, userDefined bool) ([]*types.FileMeta, error) {
-	userDefinedLog := ""
-	if userDefined {
-		userDefinedLog = "user defined"
-	}
-
+func (cf *configFetcher) getFirstAvailableConfig(c context.Context, configs []string) ([]*types.FileMeta, error) {
 	for _, fileOrFolder := range configs {
 		if strings.HasSuffix(fileOrFolder, "/") {
 			// config is a folder
@@ -172,18 +175,18 @@ func (cf *configFetcher) getFirstAvailableConfig(c context.Context, configs []st
 			}
 			files = filterPipelineFiles(files)
 			if err == nil && len(files) != 0 {
-				log.Trace().Msgf("ConfigFetch[%s]: found %d %s files in '%s'", cf.repo.FullName, len(files), userDefinedLog, fileOrFolder)
+				log.Trace().Msgf("ConfigFetch[%s]: found %d files in '%s'", cf.repo.FullName, len(files), fileOrFolder)
 				return files, nil
 			}
 		}
 
 		// config is a file
 		if fileMeta, found := cf.checkPipelineFile(c, fileOrFolder); found {
-			log.Trace().Msgf("ConfigFetch[%s]: found %s file: '%s'", cf.repo.FullName, userDefinedLog, fileOrFolder)
+			log.Trace().Msgf("ConfigFetch[%s]: found file: '%s'", cf.repo.FullName, fileOrFolder)
 			return fileMeta, nil
 		}
 	}
 
 	// nothing found
-	return nil, fmt.Errorf("%s configs not found searched: %s", userDefinedLog, strings.Join(configs, ", "))
+	return nil, &ErrConfigNotFound{configs: configs}
 }
