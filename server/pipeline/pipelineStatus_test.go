@@ -110,11 +110,33 @@ func TestUpdateToStatusKilled(t *testing.T) {
 
 	now := time.Now().Unix()
 
-	pipeline, _ := UpdateToStatusKilled(&mockUpdatePipelineStore{}, model.Pipeline{})
+	pipeline, _ := UpdateToStatusKilled(&mockUpdatePipelineStore{}, model.Pipeline{}, nil)
 
 	if model.StatusKilled != pipeline.Status {
 		t.Errorf("Pipeline status not equals '%s' != '%s'", model.StatusKilled, pipeline.Status)
 	} else if now > pipeline.Finished {
 		t.Errorf("Finished not updated %d !< %d", now, pipeline.Finished)
+	}
+}
+
+func TestUpdateToStatusKilledErr(t *testing.T) {
+	t.Parallel()
+
+	now := time.Now().Unix()
+	err := errors.New("error")
+	pipeline, _ := UpdateToStatusKilled(&mockUpdatePipelineStore{}, model.Pipeline{}, err)
+
+	if model.StatusKilled != pipeline.Status {
+		t.Errorf("Pipeline status not equals '%s' != '%s'", model.StatusKilled, pipeline.Status)
+	} else if now > pipeline.Finished {
+		t.Errorf("Finished not updated %d !< %d", now, pipeline.Finished)
+	}
+	errAmount := len(pipeline.Errors)
+	if errAmount != 1 {
+		t.Errorf("Unexpected amount of error: %d instead of 1", errAmount)
+	}
+
+	if errors.Is(pipeline.Errors[0], err) {
+		t.Errorf("Unexpected error: %v instead of error", pipeline.Errors[0])
 	}
 }
