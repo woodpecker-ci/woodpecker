@@ -4,6 +4,10 @@
 Addons are still experimental. Their implementation can change and break at any time.
 :::
 
+:::danger
+You need to trust the author of the addons you use. Depending on their type, addons can access forge authentication codes, your secrets or other sensitive information.
+:::
+
 To adapt Woodpecker to your needs beyond the [configuration](../10-server-config.md), Woodpecker has its own **addon** system, built ontop of [Go's internal plugin system](https://go.dev/pkg/plugin).
 
 Addons can be used for:
