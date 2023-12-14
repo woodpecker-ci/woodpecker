@@ -17,7 +17,7 @@ export async function usePaginate<T>(getSingle: (page: number) => Promise<T[]>):
 
 export function usePagination<T, S = unknown>(
   _loadData: (page: number, arg: S) => Promise<T[] | null>,
-  isActive: () => boolean,
+  isActive: () => boolean = () => true,
   { scrollElement: _scrollElement, each: _each }: { scrollElement?: Ref<HTMLElement | null>; each?: S[] } = {},
 ) {
   const scrollElement = _scrollElement ?? ref(document.getElementById('scroll-component'));
