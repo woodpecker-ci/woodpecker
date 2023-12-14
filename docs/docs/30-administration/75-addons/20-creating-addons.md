@@ -18,14 +18,14 @@ An addon consists of two variables/functions in Go.
    1. The actual addon. For type reference see [table below](#return-types).
    2. An error. If this error is not `nil`, Woodpecker exits.
 
-Directly import Woodpecker's Go package (`go.woodpecker-ci.org/woodpecker/woodpecker`) and use the interfaces and types defined there.
+Directly import Woodpecker's Go package (`go.woodpecker-ci.org/woodpecker/woodpecker/v2`) and use the interfaces and types defined there.
 
 ### Return types
 
 | Addon type | Return type                                                                  |
 | ---------- | ---------------------------------------------------------------------------- |
-| `Forge`    | `"go.woodpecker-ci.org/woodpecker/woodpecker/server/forge".Forge`            |
-| `Engine`   | `"go.woodpecker-ci.org/woodpecker/woodpecker/pipeline/backend/types".Engine` |
+| `Forge`    | `"go.woodpecker-ci.org/woodpecker/woodpecker/v2/server/forge".Forge`            |
+| `Engine`   | `"go.woodpecker-ci.org/woodpecker/woodpecker/v2/pipeline/backend/types".Engine` |
 
 ## Compiling
 
@@ -35,13 +35,13 @@ After you wrote your addon code, compile your addon:
 go build -buildmode plugin
 ```
 
-The output file is your addon which is now ready to use.
+The output file is your addon which is now ready to be used.
 
 ## Restrictions
 
-Addons must directly depend on Woodpecker's core (`go.woodpecker-ci.org/woodpecker/woodpecker`).
+Addons must directly depend on Woodpecker's core (`go.woodpecker-ci.org/woodpecker/woodpecker/v2`).
 The addon must have been built with **excatly the same code** as the Woodpecker instance you'd like to use it on. This means: If you build your addon with a specific commit from Woodpecker `next`, you can likely only use it with the Woodpecker version compiled from this commit.
-Also, if you change something inside of Woodpecker without commiting, it might fail because you need to recompile your addon with this code.
+Also, if you change something inside of Woodpecker without committing, it might fail because you need to recompile your addon with this code first.
 
 In addition to this, addons are only supported on Linux, FreeBSD and macOS.
 
@@ -51,7 +51,7 @@ It is recommended to at least support the latest released version of Woodpecker.
 
 ### Compile for different versions
 
-As long as there were no changes to Woodpecker's interfaces or they are backwards-compatible, you can easily compile the addon for multiple version by changing the version of `go.woodpecker-ci.org/woodpecker/woodpecker` using `go get` before compiling.
+As long as there were no changes to Woodpecker's interfaces or they are backwards-compatible, you can easily compile the addon for multiple version by changing the version of `go.woodpecker-ci.org/woodpecker/woodpecker/v2` using `go get` before compiling.
 
 ## Logging
 
@@ -67,10 +67,10 @@ import (
   "net/http"
 
   "github.com/rs/zerolog"
-  "go.woodpecker-ci.org/woodpecker/woodpecker/server/forge"
-  forge_types "go.woodpecker-ci.org/woodpecker/woodpecker/server/forge/types"
-  "go.woodpecker-ci.org/woodpecker/woodpecker/server/model"
-  addon_types "go.woodpecker-ci.org/woodpecker/woodpecker/shared/addon/types"
+  "go.woodpecker-ci.org/woodpecker/woodpecker/v2/server/forge"
+  forge_types "go.woodpecker-ci.org/woodpecker/woodpecker/v2/server/forge/types"
+  "go.woodpecker-ci.org/woodpecker/woodpecker/v2/server/model"
+  addon_types "go.woodpecker-ci.org/woodpecker/woodpecker/v2/shared/addon/types"
 )
 
 var Type = addon_types.TypeForge

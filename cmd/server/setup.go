@@ -134,12 +134,12 @@ func setupMembershipService(_ *cli.Context, r forge.Forge) cache.MembershipServi
 
 // setupForge helper function to set up the forge from the CLI arguments.
 func setupForge(c *cli.Context) (forge.Forge, error) {
-	add, err := addon.Load[forge.Forge](c.StringSlice("addons"), addonTypes.TypeForge)
+	addonForge, err := addon.Load[forge.Forge](c.StringSlice("addons"), addonTypes.TypeForge)
 	if err != nil {
 		return nil, err
 	}
-	if add != nil {
-		return add.Value, nil
+	if addonForge != nil {
+		return addonForge.Value, nil
 	}
 
 	switch {

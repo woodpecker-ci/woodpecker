@@ -163,8 +163,8 @@ func run(c *cli.Context) error {
 	}
 
 	if !engine.IsAvailable(backendCtx) {
-		log.Error().Str("engine", engine.Name()).Msg("selected backend engine unavailable")
-		return fmt.Errorf("selected backend engine %s unavailable", engine.Name())
+		log.Error().Str("engine", engine.Name()).Msg("selected backend engine is unavailable")
+		return fmt.Errorf("selected backend engine %s is unavailable", engine.Name())
 	}
 
 	// load engine (e.g. init api client)
@@ -254,7 +254,7 @@ func run(c *cli.Context) error {
 func getEngine(backendCtx context.Context, engineName string, addons []string) (types.Engine, error) {
 	addonEngine, err := addon.Load[types.Engine](addons, addonTypes.TypeEngine)
 	if err != nil {
-		log.Error().Err(err).Msg("cannot load addon")
+		log.Error().Err(err).Msg("cannot load backend addon")
 		return nil, err
 	}
 	if addonEngine != nil {
