@@ -48,7 +48,7 @@ type (
 		Volumes        Volumes            `yaml:"volumes,omitempty"`
 		When           constraint.When    `yaml:"when,omitempty"`
 		Ports          []base.StringOrInt `yaml:"ports,omitempty"`
-		DependsOn      []string           `yaml:"depends_on,omitempty"`
+		DependsOn      base.StringOrSlice `yaml:"depends_on,omitempty"`
 
 		// Docker Specific
 		Privileged bool `yaml:"privileged,omitempty"`
