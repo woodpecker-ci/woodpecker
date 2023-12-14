@@ -58,15 +58,17 @@ export function usePagination<T, S = unknown>(
     }
 
     // last page and each has more
-    if (newData.length < pageSize.value && each.value.length > 0) {
+    if (!hasMore.value && each.value.length > 0) {
       // use next each element
       each.value.shift();
       page.value = 1;
       pageSize.value = 0;
       hasMore.value = each.value.length > 0;
-      name === 'secrets' && console.log('next', each.value?.[0] as S);
-      loading.value = false;
-      await loadData();
+      if (hasMore.value) {
+        name === 'secrets' && console.log('next', each.value?.[0] as S);
+        loading.value = false;
+        await loadData();
+      }
     }
     pageSize.value = newData.length;
     loading.value = false;
@@ -75,32 +77,27 @@ export function usePagination<T, S = unknown>(
   onMounted(loadData);
   watch(page, loadData);
 
-  useInfiniteScroll(
-    scrollElement,
-    () => {
-      if (isActive() && !loading.value && hasMore.value) {
-        // load more
-        page.value += 1;
-      }
-    },
-    { distance: 10 },
-  );
-
-  async function resetPage() {
-    hasMore.value = true;
-    data.value = [];
-    each.value = (_each ?? []) as UnwrapRef<S[]>;
-    if (page.value !== 1) {
-      // just set page = 1, will be handled by watcher
-      page.value = 1;
-    } else {
-      // we need to reload, but page is already 1, so changing won't trigger watcher
-      await loadData();
+  function nextPage() {
+    if (isActive() && !loading.value && hasMore.value) {
+      console.log('load more', page.value + 1);
+      page.value += 1;
     }
   }
 
-  function nextPage() {
-    page.value += 1;
+  useInfiniteScroll(scrollElement, nextPage, { distance: 10 });
+
+  async function resetPage() {
+    const _page = page.value;
+
+    hasMore.value = true;
+    data.value = [];
+    each.value = (_each ?? []) as UnwrapRef<S[]>;
+    page.value = 1;
+
+    if (_page === 1) {
+      // we need to reload manually as the page is already 1, so changing won't trigger watcher
+      await loadData();
+    }
   }
 
   return { resetPage, nextPage, data, hasMore, loading };

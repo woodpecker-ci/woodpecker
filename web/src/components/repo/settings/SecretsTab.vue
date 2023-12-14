@@ -81,6 +81,7 @@ async function loadSecrets(page: number, level: 'repo' | 'org' | 'global'): Prom
 
 const { resetPage, data: _secrets } = usePagination(loadSecrets, () => !selectedSecret.value, {
   each: ['repo', 'org', 'global'],
+  name: 'secrets',
 });
 const secrets = computed(() => {
   const secretsList: Record<string, Secret & { edit?: boolean; level: 'repo' | 'org' | 'global' }> = {};
