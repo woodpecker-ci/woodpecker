@@ -254,6 +254,7 @@ var flags = append([]cli.Flag{
 	&cli.StringSliceFlag{
 		EnvVars: []string{"WOODPECKER_ADDONS"},
 		Name:    "addons",
+		Usage:   "list of addon files",
 	},
 	//
 	// backend options for pipeline compiler
