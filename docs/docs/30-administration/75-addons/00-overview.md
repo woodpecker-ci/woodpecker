@@ -30,7 +30,7 @@ services:
   woodpecker-server:
     [...]
     environment:
-+     - WOODPECKER_PLUGIN=/path/to/your/addon/file.so
++     - WOODPECKER_ADDONS=/path/to/your/addon/file.so
 ```
 
 You may need to [mount the addon file as volume](https://docs.docker.com/storage/volumes/#create-and-manage-volumes) to access it from inside the Docker container.
