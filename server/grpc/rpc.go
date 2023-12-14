@@ -273,14 +273,16 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 		return err
 	}
 	s.completeChildrenIfParentCompleted(workflow)
-
-			if currentPipeline, err = pipeline.UpdateToStatusKilled(s.store, *currentPipeline, errors.New(state.Error)); err != nil {
-				logger.Error().Err(err).Msgf("pipeline.UpdateStatusToDone: cannot update workflow final state")
-			}
 	if !model.IsThereRunningStage(currentPipeline.Workflows) {
+		if len(state.Error) > 0 {
+			if currentPipeline, err = pipeline.UpdateToStatusKilled(s.store, *currentPipeline, errors.New(state.Error)); err != nil {
+				logger.Error().Err(err).Msgf("pipeline.UpdateToStatusKilled: cannot update workflow final state")
+			}
+		} else {
 			if currentPipeline, err = pipeline.UpdateStatusToDone(s.store, *currentPipeline, model.PipelineStatus(currentPipeline.Workflows), workflow.Stopped); err != nil {
 				logger.Error().Err(err).Msgf("pipeline.UpdateStatusToDone: cannot update workflow final state")
 			}
+		}
 	}
 
 	s.updateForgeStatus(c, repo, currentPipeline, workflow)
