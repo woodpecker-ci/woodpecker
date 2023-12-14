@@ -374,7 +374,6 @@ func dfsVisit(steps map[string]*stepWithDependsOn, name string, visited map[stri
 }
 
 func convertDAGToStages(steps map[string]*stepWithDependsOn) ([]*backend_types.Stage, error) {
-	// Initialize the levels map
 	addedSteps := make(map[string]struct{})
 	stages := make([]*backend_types.Stage, 0)
 
