@@ -1,5 +1,5 @@
 import { useInfiniteScroll } from '@vueuse/core';
-import { onMounted, Ref, ref, watch, UnwrapRef } from 'vue';
+import { onMounted, Ref, ref, UnwrapRef, watch } from 'vue';
 
 export async function usePaginate<T>(getSingle: (page: number) => Promise<T[]>): Promise<T[]> {
   let hasMore = true;
@@ -61,7 +61,6 @@ export function usePagination<T, S = unknown>(
 
   function nextPage() {
     if (isActive() && !loading.value && hasMore.value) {
-      console.log('load more', page.value + 1);
       page.value += 1;
     }
   }

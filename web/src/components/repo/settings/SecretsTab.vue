@@ -76,6 +76,8 @@ async function loadSecrets(page: number, level: 'repo' | 'org' | 'global'): Prom
       return apiClient.getOrgSecretList(repo.value.org_id, page);
     case 'global':
       return apiClient.getGlobalSecretList(page);
+    default:
+      throw new Error(`Unexpected level: ${level}`);
   }
 }
 
