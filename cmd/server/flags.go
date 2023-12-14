@@ -1,3 +1,4 @@
+// Copyright 2023 Woodpecker Authors
 // Copyright 2019 Laszlo Fogas
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,7 +16,6 @@
 package main
 
 import (
-	"os"
 	"time"
 
 	"github.com/urfave/cli/v3"
@@ -94,11 +94,11 @@ var flags = append([]cli.Flag{
 		Value:   ":9000",
 	},
 	&cli.StringFlag{
-		Sources:  cli.EnvVars("WOODPECKER_GRPC_SECRET"),
-		Name:     "grpc-secret",
-		Usage:    "grpc jwt secret",
-		Value:    "secret",
-		FilePath: os.Getenv("WOODPECKER_GRPC_SECRET_FILE"),
+		Sources: cli.EnvVars("WOODPECKER_GRPC_SECRET"),
+		Name:    "grpc-secret",
+		Usage:   "grpc jwt secret",
+		Value:   "secret",
+		// TODO: FilePath: os.Getenv("WOODPECKER_GRPC_SECRET_FILE"),
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_METRICS_SERVER_ADDR"),
@@ -135,7 +135,7 @@ var flags = append([]cli.Flag{
 		Sources: cli.EnvVars("WOODPECKER_DEFAULT_CANCEL_PREVIOUS_PIPELINE_EVENTS"),
 		Name:    "default-cancel-previous-pipeline-events",
 		Usage:   "List of event names that will be canceled when a new pipeline for the same context (tag, branch) is created.",
-		Value:   cli.NewStringSlice("push", "pull_request"),
+		Value:   []string{"push", "pull_request"},
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_DEFAULT_CLONE_IMAGE"),
@@ -143,13 +143,13 @@ var flags = append([]cli.Flag{
 		Usage:   "The default docker image to be used when cloning the repo",
 		Value:   constant.DefaultCloneImage,
 	},
-	&cli.Int64Flag{
+	&cli.IntFlag{
 		Sources: cli.EnvVars("WOODPECKER_DEFAULT_PIPELINE_TIMEOUT"),
 		Name:    "default-pipeline-timeout",
 		Usage:   "The default time in minutes for a repo in minutes before a pipeline gets killed",
 		Value:   60,
 	},
-	&cli.Int64Flag{
+	&cli.IntFlag{
 		Sources: cli.EnvVars("WOODPECKER_MAX_PIPELINE_TIMEOUT"),
 		Name:    "max-pipeline-timeout",
 		Usage:   "The maximum time in minutes you can set in the repo settings before a pipeline gets killed",
@@ -165,7 +165,7 @@ var flags = append([]cli.Flag{
 		Sources: cli.EnvVars("WOODPECKER_ESCALATE"),
 		Name:    "escalate",
 		Usage:   "images to run in privileged mode",
-		Value:   cli.NewStringSlice(constant.PrivilegedPlugins...),
+		Value:   constant.PrivilegedPlugins,
 	},
 	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_VOLUME"),
@@ -184,10 +184,10 @@ var flags = append([]cli.Flag{
 		Name:    "network",
 	},
 	&cli.StringFlag{
-		Sources:  cli.EnvVars("WOODPECKER_AGENT_SECRET"),
-		Name:     "agent-secret",
-		Usage:    "server-agent shared password",
-		FilePath: os.Getenv("WOODPECKER_AGENT_SECRET_FILE"),
+		Sources: cli.EnvVars("WOODPECKER_AGENT_SECRET"),
+		Name:    "agent-secret",
+		Usage:   "server-agent shared password",
+		// TODO: FilePath: os.Getenv("WOODPECKER_AGENT_SECRET_FILE"),
 	},
 	&cli.DurationFlag{
 		Sources: cli.EnvVars("WOODPECKER_KEEPALIVE_MIN_TIME"),
@@ -216,18 +216,18 @@ var flags = append([]cli.Flag{
 		Value:   "sqlite3",
 	},
 	&cli.StringFlag{
-		Sources:  cli.EnvVars("WOODPECKER_DATABASE_DATASOURCE"),
-		Name:     "datasource",
-		Usage:    "database driver configuration string",
-		Value:    "woodpecker.sqlite",
-		FilePath: os.Getenv("WOODPECKER_DATABASE_DATASOURCE_FILE"),
+		Sources: cli.EnvVars("WOODPECKER_DATABASE_DATASOURCE"),
+		Name:    "datasource",
+		Usage:   "database driver configuration string",
+		Value:   "woodpecker.sqlite",
+		// TODO: FilePath: os.Getenv("WOODPECKER_DATABASE_DATASOURCE_FILE"),
 	},
 	&cli.StringFlag{
-		Sources:  cli.EnvVars("WOODPECKER_PROMETHEUS_AUTH_TOKEN"),
-		Name:     "prometheus-auth-token",
-		Usage:    "token to secure prometheus metrics endpoint",
-		Value:    "",
-		FilePath: os.Getenv("WOODPECKER_PROMETHEUS_AUTH_TOKEN_FILE"),
+		Sources: cli.EnvVars("WOODPECKER_PROMETHEUS_AUTH_TOKEN"),
+		Name:    "prometheus-auth-token",
+		Usage:   "token to secure prometheus metrics endpoint",
+		Value:   "",
+		// TODO: FilePath: os.Getenv("WOODPECKER_PROMETHEUS_AUTH_TOKEN_FILE"),
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_STATUS_CONTEXT", "WOODPECKER_GITHUB_CONTEXT", "WOODPECKER_GITEA_CONTEXT"),
@@ -278,27 +278,27 @@ var flags = append([]cli.Flag{
 		Usage:   "how many seconds before timeout when fetching the Woodpecker configuration from a Forge",
 		Value:   time.Second * 3,
 	},
-	&cli.Int64Flag{
+	&cli.IntFlag{
 		Sources: cli.EnvVars("WOODPECKER_LIMIT_MEM_SWAP"),
 		Name:    "limit-mem-swap",
 		Usage:   "maximum swappable memory allowed in bytes",
 	},
-	&cli.Int64Flag{
+	&cli.IntFlag{
 		Sources: cli.EnvVars("WOODPECKER_LIMIT_MEM"),
 		Name:    "limit-mem",
 		Usage:   "maximum memory allowed in bytes",
 	},
-	&cli.Int64Flag{
+	&cli.IntFlag{
 		Sources: cli.EnvVars("WOODPECKER_LIMIT_SHM_SIZE"),
 		Name:    "limit-shm-size",
 		Usage:   "docker compose /dev/shm allowed in bytes",
 	},
-	&cli.Int64Flag{
+	&cli.IntFlag{
 		Sources: cli.EnvVars("WOODPECKER_LIMIT_CPU_QUOTA"),
 		Name:    "limit-cpu-quota",
 		Usage:   "impose a cpu quota",
 	},
-	&cli.Int64Flag{
+	&cli.IntFlag{
 		Sources: cli.EnvVars("WOODPECKER_LIMIT_CPU_SHARES"),
 		Name:    "limit-cpu-shares",
 		Usage:   "change the cpu shares",
@@ -323,16 +323,16 @@ var flags = append([]cli.Flag{
 		Value:   "https://github.com",
 	},
 	&cli.StringFlag{
-		Sources:  cli.EnvVars("WOODPECKER_GITHUB_CLIENT"),
-		Name:     "github-client",
-		Usage:    "github oauth2 client id",
-		FilePath: os.Getenv("WOODPECKER_GITHUB_CLIENT_FILE"),
+		Sources: cli.EnvVars("WOODPECKER_GITHUB_CLIENT"),
+		Name:    "github-client",
+		Usage:   "github oauth2 client id",
+		// TODO: FilePath: os.Getenv("WOODPECKER_GITHUB_CLIENT_FILE"),
 	},
 	&cli.StringFlag{
-		Sources:  cli.EnvVars("WOODPECKER_GITHUB_SECRET"),
-		Name:     "github-secret",
-		Usage:    "github oauth2 client secret",
-		FilePath: os.Getenv("WOODPECKER_GITHUB_SECRET_FILE"),
+		Sources: cli.EnvVars("WOODPECKER_GITHUB_SECRET"),
+		Name:    "github-secret",
+		Usage:   "github oauth2 client secret",
+		// TODO: FilePath: os.Getenv("WOODPECKER_GITHUB_SECRET_FILE"),
 	},
 	&cli.BoolFlag{
 		Sources: cli.EnvVars("WOODPECKER_GITHUB_MERGE_REF"),
@@ -360,16 +360,16 @@ var flags = append([]cli.Flag{
 		Value:   "https://try.gitea.io",
 	},
 	&cli.StringFlag{
-		Sources:  cli.EnvVars("WOODPECKER_GITEA_CLIENT"),
-		Name:     "gitea-client",
-		Usage:    "gitea oauth2 client id",
-		FilePath: os.Getenv("WOODPECKER_GITEA_CLIENT_FILE"),
+		Sources: cli.EnvVars("WOODPECKER_GITEA_CLIENT"),
+		Name:    "gitea-client",
+		Usage:   "gitea oauth2 client id",
+		// TODO: FilePath: os.Getenv("WOODPECKER_GITEA_CLIENT_FILE"),
 	},
 	&cli.StringFlag{
-		Sources:  cli.EnvVars("WOODPECKER_GITEA_SECRET"),
-		Name:     "gitea-secret",
-		Usage:    "gitea oauth2 client secret",
-		FilePath: os.Getenv("WOODPECKER_GITEA_SECRET_FILE"),
+		Sources: cli.EnvVars("WOODPECKER_GITEA_SECRET"),
+		Name:    "gitea-secret",
+		Usage:   "gitea oauth2 client secret",
+		// TODO: FilePath: os.Getenv("WOODPECKER_GITEA_SECRET_FILE"),
 	},
 	&cli.BoolFlag{
 		Sources: cli.EnvVars("WOODPECKER_GITEA_SKIP_VERIFY"),
@@ -385,16 +385,16 @@ var flags = append([]cli.Flag{
 		Usage:   "bitbucket driver is enabled",
 	},
 	&cli.StringFlag{
-		Sources:  cli.EnvVars("WOODPECKER_BITBUCKET_CLIENT"),
-		Name:     "bitbucket-client",
-		Usage:    "bitbucket oauth2 client id",
-		FilePath: os.Getenv("WOODPECKER_BITBUCKET_CLIENT_FILE"),
+		Sources: cli.EnvVars("WOODPECKER_BITBUCKET_CLIENT"),
+		Name:    "bitbucket-client",
+		Usage:   "bitbucket oauth2 client id",
+		// TODO: FilePath: os.Getenv("WOODPECKER_BITBUCKET_CLIENT_FILE"),
 	},
 	&cli.StringFlag{
-		Sources:  cli.EnvVars("WOODPECKER_BITBUCKET_SECRET"),
-		Name:     "bitbucket-secret",
-		Usage:    "bitbucket oauth2 client secret",
-		FilePath: os.Getenv("WOODPECKER_BITBUCKET_SECRET_FILE"),
+		Sources: cli.EnvVars("WOODPECKER_BITBUCKET_SECRET"),
+		Name:    "bitbucket-secret",
+		Usage:   "bitbucket oauth2 client secret",
+		// TODO: FilePath: os.Getenv("WOODPECKER_BITBUCKET_SECRET_FILE"),
 	},
 	//
 	// Gitlab
@@ -411,16 +411,16 @@ var flags = append([]cli.Flag{
 		Value:   "https://gitlab.com",
 	},
 	&cli.StringFlag{
-		Sources:  cli.EnvVars("WOODPECKER_GITLAB_CLIENT"),
-		Name:     "gitlab-client",
-		Usage:    "gitlab oauth2 client id",
-		FilePath: os.Getenv("WOODPECKER_GITLAB_CLIENT_FILE"),
+		Sources: cli.EnvVars("WOODPECKER_GITLAB_CLIENT"),
+		Name:    "gitlab-client",
+		Usage:   "gitlab oauth2 client id",
+		// TODO: FilePath: os.Getenv("WOODPECKER_GITLAB_CLIENT_FILE"),
 	},
 	&cli.StringFlag{
-		Sources:  cli.EnvVars("WOODPECKER_GITLAB_SECRET"),
-		Name:     "gitlab-secret",
-		Usage:    "gitlab oauth2 client secret",
-		FilePath: os.Getenv("WOODPECKER_GITLAB_SECRET_FILE"),
+		Sources: cli.EnvVars("WOODPECKER_GITLAB_SECRET"),
+		Name:    "gitlab-secret",
+		Usage:   "gitlab oauth2 client secret",
+		// TODO: FilePath: os.Getenv("WOODPECKER_GITLAB_SECRET_FILE"),
 	},
 	&cli.BoolFlag{
 		Sources: cli.EnvVars("WOODPECKER_GITLAB_SKIP_VERIFY"),
@@ -447,10 +447,10 @@ var flags = append([]cli.Flag{
 	// secrets encryption in DB
 	//
 	&cli.StringFlag{
-		Sources:  cli.EnvVars("WOODPECKER_ENCRYPTION_KEY"),
-		Name:     "encryption-raw-key",
-		Usage:    "Raw encryption key",
-		FilePath: os.Getenv("WOODPECKER_ENCRYPTION_KEY_FILE"),
+		Sources: cli.EnvVars("WOODPECKER_ENCRYPTION_KEY"),
+		Name:    "encryption-raw-key",
+		Usage:   "Raw encryption key",
+		// TODO: FilePath: os.Getenv("WOODPECKER_ENCRYPTION_KEY_FILE"),
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_ENCRYPTION_TINK_KEYSET_FILE"),

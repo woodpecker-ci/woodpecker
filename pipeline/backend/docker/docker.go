@@ -95,7 +95,7 @@ func httpClientOfOpts(dockerCertPath string, verifyTLS bool) *http.Client {
 
 // Load new client for Docker Backend using environment variables.
 func (e *docker) Load(ctx context.Context) (*backend.BackendInfo, error) {
-	c, ok := ctx.Value(backend.CliContext).(*cli.Context)
+	c, ok := ctx.Value(backend.CliContext).(*cli.Command)
 	if !ok {
 		return nil, backend.ErrNoCliContextFound
 	}

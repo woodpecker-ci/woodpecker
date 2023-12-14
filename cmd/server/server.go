@@ -179,7 +179,7 @@ func run(ctx context.Context, c *cli.Command) error {
 		webUIServe,
 		middleware.Logger(time.RFC3339, true),
 		middleware.Version,
-		middleware.Store(c, _store),
+		middleware.Store(_store),
 	)
 
 	if c.String("server-cert") != "" {

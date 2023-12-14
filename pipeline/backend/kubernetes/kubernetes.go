@@ -70,7 +70,7 @@ type SecurityContextConfig struct {
 
 func configFromCliContext(ctx context.Context) (*Config, error) {
 	if ctx != nil {
-		if c, ok := ctx.Value(types.CliContext).(*cli.Context); ok {
+		if c, ok := ctx.Value(types.CliContext).(*cli.Command); ok {
 			config := Config{
 				Namespace:      c.String("backend-k8s-namespace"),
 				StorageClass:   c.String("backend-k8s-storage-class"),
