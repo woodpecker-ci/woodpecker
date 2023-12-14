@@ -37,7 +37,7 @@ services:
 +     - WOODPECKER_ADDONS=/path/to/your/addon/file.so
 ```
 
-You may need to [mount the addon file as volume](https://docs.docker.com/storage/volumes/#create-and-manage-volumes) to access it from inside the Docker container.
+In case you run Woodpecker as container, you probably want to mount the addon binaries to `/opt/addons/`.
 
 You can list multiple addons, Woodpecker will automatically determine their type. If you specify multiple addons with the same type, only the first one will be used.
 
