@@ -18,7 +18,7 @@ package store
 //go:generate mockery --name Store --output mocks --case underscore
 
 import (
-	"go.woodpecker-ci.org/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 // TODO: CreateX func should return new object to not indirect let storage change an existing object (alter ID etc...)
@@ -93,6 +93,8 @@ type Store interface {
 	CreatePipeline(*model.Pipeline, ...*model.Step) error
 	// UpdatePipeline updates a pipeline.
 	UpdatePipeline(*model.Pipeline) error
+	// DeletePipeline deletes a pipeline.
+	DeletePipeline(*model.Pipeline) error
 
 	// Feeds
 	UserFeed(*model.User) ([]*model.Feed, error)

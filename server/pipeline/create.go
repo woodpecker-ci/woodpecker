@@ -22,11 +22,11 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/pipeline/errors"
-	"go.woodpecker-ci.org/woodpecker/server"
-	"go.woodpecker-ci.org/woodpecker/server/forge"
-	"go.woodpecker-ci.org/woodpecker/server/model"
-	"go.woodpecker-ci.org/woodpecker/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
 var skipPipelineRegex = regexp.MustCompile(`\[(?i:ci *skip|skip *ci)\]`)
@@ -53,7 +53,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 
 	// update some pipeline fields
 	pipeline.RepoID = repo.ID
-	pipeline.Status = model.StatusPending
+	pipeline.Status = model.StatusCreated
 	setGatedState(repo, pipeline)
 	err = _store.CreatePipeline(pipeline)
 	if err != nil {
@@ -81,7 +81,15 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 
 	if len(pipelineItems) == 0 {
 		log.Debug().Str("repo", repo.FullName).Msg(ErrFiltered.Error())
+		if err := _store.DeletePipeline(pipeline); err != nil {
+			log.Error().Str("repo", repo.FullName).Err(err).Msg("failed to delete empty pipeline")
+		}
+
 		return nil, ErrFiltered
+	}
+
+	if err := updatePipelinePending(ctx, _store, pipeline, repo, repoUser); err != nil {
+		return nil, err
 	}
 
 	pipeline = setPipelineStepsOnPipeline(pipeline, pipelineItems)
@@ -124,6 +132,20 @@ func updatePipelineWithErr(ctx context.Context, _store store.Store, pipeline *mo
 	pipeline.Finished = pipeline.Started
 	pipeline.Status = model.StatusError
 	pipeline.Errors = errors.GetPipelineErrors(err)
+	dbErr := _store.UpdatePipeline(pipeline)
+	if dbErr != nil {
+		msg := fmt.Errorf("failed to save pipeline for %s", repo.FullName)
+		log.Error().Err(dbErr).Msg(msg.Error())
+		return msg
+	}
+
+	publishPipeline(ctx, pipeline, repo, repoUser)
+
+	return nil
+}
+
+func updatePipelinePending(ctx context.Context, _store store.Store, pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User) error {
+	pipeline.Status = model.StatusPending
 	dbErr := _store.UpdatePipeline(pipeline)
 	if dbErr != nil {
 		msg := fmt.Errorf("failed to save pipeline for %s", repo.FullName)

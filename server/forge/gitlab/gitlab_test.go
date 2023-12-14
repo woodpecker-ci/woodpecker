@@ -26,8 +26,8 @@ import (
 	"github.com/franela/goblin"
 	"github.com/stretchr/testify/assert"
 
-	"go.woodpecker-ci.org/woodpecker/server/forge/gitlab/testdata"
-	"go.woodpecker-ci.org/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/gitlab/testdata"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 func load(t *testing.T, config string) *GitLab {

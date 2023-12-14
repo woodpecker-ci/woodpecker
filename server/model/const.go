@@ -62,6 +62,7 @@ const (
 	StatusError    StatusValue = "error"    // error with the config / while parsing / some other system problem
 	StatusBlocked  StatusValue = "blocked"  // waiting for approval
 	StatusDeclined StatusValue = "declined" // blocked and declined
+	StatusCreated  StatusValue = "created"  // created / internal use only
 )
 
 // SCMKind represent different version control systems

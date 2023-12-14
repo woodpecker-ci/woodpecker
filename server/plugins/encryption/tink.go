@@ -21,8 +21,8 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/google/tink/go/tink"
 
-	"go.woodpecker-ci.org/woodpecker/server/model"
-	"go.woodpecker-ci.org/woodpecker/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
 type tinkEncryptionService struct {

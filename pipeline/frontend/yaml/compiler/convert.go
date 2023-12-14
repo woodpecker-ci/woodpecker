@@ -22,11 +22,11 @@ import (
 
 	"github.com/google/uuid"
 
-	backend_types "go.woodpecker-ci.org/woodpecker/pipeline/backend/types"
-	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/metadata"
-	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/compiler/settings"
-	yaml_types "go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/types"
-	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/utils"
+	backend_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/compiler/settings"
+	yaml_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/utils"
 )
 
 func (c *Compiler) createProcess(name string, container *yaml_types.Container, stepType backend_types.StepType) (*backend_types.Step, error) {

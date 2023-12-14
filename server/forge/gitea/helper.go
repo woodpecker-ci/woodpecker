@@ -25,8 +25,8 @@ import (
 
 	"code.gitea.io/sdk/gitea"
 
-	"go.woodpecker-ci.org/woodpecker/server/model"
-	"go.woodpecker-ci.org/woodpecker/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
 // helper function that converts a Gitea repository to a Woodpecker repository.
