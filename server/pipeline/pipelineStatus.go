@@ -56,7 +56,8 @@ func UpdateToStatusError(store model.UpdatePipelineStore, pipeline model.Pipelin
 	return &pipeline, store.UpdatePipeline(&pipeline)
 }
 
-func UpdateToStatusKilled(store model.UpdatePipelineStore, pipeline model.Pipeline) (*model.Pipeline, error) {
+func UpdateToStatusKilled(store model.UpdatePipelineStore, pipeline model.Pipeline, err error) (*model.Pipeline, error) {
+	pipeline.Errors = errors.GetPipelineErrors(err)
 	pipeline.Status = model.StatusKilled
 	pipeline.Finished = time.Now().Unix()
 	return &pipeline, store.UpdatePipeline(&pipeline)

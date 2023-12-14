@@ -82,7 +82,7 @@ func Cancel(ctx context.Context, store store.Store, repo *model.Repo, user *mode
 		}
 	}
 
-	killedPipeline, err := UpdateToStatusKilled(store, *pipeline)
+	killedPipeline, err := UpdateToStatusKilled(store, *pipeline, err)
 	if err != nil {
 		log.Error().Err(err).Msgf("UpdateToStatusKilled: %v", pipeline)
 		return err
