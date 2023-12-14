@@ -18,11 +18,7 @@ export async function usePaginate<T>(getSingle: (page: number) => Promise<T[]>):
 export function usePagination<T, S = unknown>(
   _loadData: (page: number, arg: S) => Promise<T[] | null>,
   isActive: () => boolean,
-  {
-    scrollElement: _scrollElement,
-    name,
-    each: _each,
-  }: { scrollElement?: Ref<HTMLElement | null>; name?: string; each?: S[] } = {},
+  { scrollElement: _scrollElement, each: _each }: { scrollElement?: Ref<HTMLElement | null>; each?: S[] } = {},
 ) {
   const scrollElement = _scrollElement ?? ref(document.getElementById('scroll-component'));
   const page = ref(1);
@@ -40,19 +36,6 @@ export function usePagination<T, S = unknown>(
     loading.value = true;
     const newData = (await _loadData(page.value, each.value?.[0] as S)) ?? [];
     hasMore.value = newData.length >= pageSize.value && newData.length > 0;
-    name === 'secrets' &&
-      console.log(
-        '>>',
-        'load',
-        each.value?.[0] as S,
-        page.value,
-        ':',
-        newData.length,
-        '>=',
-        pageSize.value,
-        '=>',
-        hasMore.value,
-      );
     if (newData.length > 0) {
       data.value.push(...newData);
     }
@@ -65,7 +48,6 @@ export function usePagination<T, S = unknown>(
       pageSize.value = 0;
       hasMore.value = each.value.length > 0;
       if (hasMore.value) {
-        name === 'secrets' && console.log('next', each.value?.[0] as S);
         loading.value = false;
         await loadData();
       }
