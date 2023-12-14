@@ -15,7 +15,7 @@
 package main
 
 import (
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/cron"

@@ -28,7 +28,7 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

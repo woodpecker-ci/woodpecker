@@ -27,7 +27,7 @@ import (
 	"sync"
 
 	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 	"golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/transform"
 

@@ -21,7 +21,7 @@ import (
 	"strings"
 
 	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/agent"
 	"go.woodpecker-ci.org/woodpecker/v2/version"

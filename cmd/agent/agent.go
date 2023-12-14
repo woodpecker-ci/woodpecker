@@ -28,7 +28,7 @@ import (
 
 	"github.com/rs/zerolog/log"
 	"github.com/tevino/abool/v2"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	grpccredentials "google.golang.org/grpc/credentials"

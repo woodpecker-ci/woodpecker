@@ -19,7 +19,7 @@ import (
 	"os"
 
 	_ "github.com/joho/godotenv/autoload"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cmd/common"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/docker"

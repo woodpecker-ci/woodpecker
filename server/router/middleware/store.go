@@ -16,7 +16,7 @@ package middleware
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )

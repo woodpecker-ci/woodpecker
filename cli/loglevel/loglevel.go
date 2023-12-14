@@ -17,7 +17,7 @@ package loglevel
 import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"

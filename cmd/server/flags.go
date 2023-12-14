@@ -18,7 +18,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cmd/common"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"

@@ -21,7 +21,7 @@ import (
 	"github.com/6543/logfile-open"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 var GlobalLoggerFlags = []cli.Flag{

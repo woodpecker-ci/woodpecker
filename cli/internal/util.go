@@ -23,7 +23,7 @@ import (
 	"strings"
 
 	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 	"golang.org/x/net/proxy"
 	"golang.org/x/oauth2"
 

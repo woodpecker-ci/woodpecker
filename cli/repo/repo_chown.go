@@ -17,7 +17,7 @@ package repo
 import (
 	"fmt"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )

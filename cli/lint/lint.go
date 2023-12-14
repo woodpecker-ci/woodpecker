@@ -23,7 +23,7 @@ import (
 	"strings"
 
 	"github.com/muesli/termenv"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
 	pipeline_errors "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"

@@ -22,7 +22,7 @@ import (
 	"time"
 
 	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 const pingTimeout = 1 * time.Second

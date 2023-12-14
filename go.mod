@@ -45,7 +45,7 @@ require (
 	github.com/swaggo/gin-swagger v1.6.0
 	github.com/swaggo/swag v1.16.2
 	github.com/tevino/abool/v2 v2.1.0
-	github.com/urfave/cli/v2 v2.26.0
+	github.com/urfave/cli/v3 v3.0.0-alpha7
 	github.com/xanzy/go-gitlab v0.94.0
 	github.com/xeipuuv/gojsonschema v1.2.0
 	go.uber.org/multierr v1.11.0
@@ -75,7 +75,6 @@ require (
 	github.com/bytedance/sonic v1.9.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
-	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/davidmz/go-pageant v1.0.2 // indirect
 	github.com/docker/distribution v2.8.3+incompatible // indirect
@@ -131,7 +130,6 @@ require (
 	github.com/prometheus/common v0.44.0 // indirect
 	github.com/prometheus/procfs v0.11.1 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
-	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/sirupsen/logrus v1.9.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/stretchr/objx v0.5.0 // indirect

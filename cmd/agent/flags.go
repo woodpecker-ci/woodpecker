@@ -19,7 +19,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 var flags = []cli.Flag{
