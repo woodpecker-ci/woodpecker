@@ -157,7 +157,7 @@ func run(c *cli.Context) error {
 
 	// new engine
 	backendCtx := context.WithValue(ctx, types.CliContext, c)
-	engine, err := getEngine(backendCtx, c.String("backend-engine"), c.StringSlice("addons"))
+	engine, err := getBackend(backendCtx, c.String("backend-engine"), c.StringSlice("addons"))
 	if err != nil {
 		return err
 	}
@@ -251,20 +251,20 @@ func run(c *cli.Context) error {
 	return nil
 }
 
-func getEngine(backendCtx context.Context, engineName string, addons []string) (types.Engine, error) {
-	addonEngine, err := addon.Load[types.Engine](addons, addonTypes.TypeEngine)
+func getBackend(backendCtx context.Context, backendName string, addons []string) (types.Engine, error) {
+	addonBackend, err := addon.Load[types.Engine](addons, addonTypes.TypeBackend)
 	if err != nil {
 		log.Error().Err(err).Msg("cannot load backend addon")
 		return nil, err
 	}
-	if addonEngine != nil {
-		return addonEngine.Value, nil
+	if addonBackend != nil {
+		return addonBackend.Value, nil
 	}
 
 	backend.Init(backendCtx)
-	engine, err := backend.FindEngine(backendCtx, engineName)
+	engine, err := backend.FindEngine(backendCtx, backendName)
 	if err != nil {
-		log.Error().Err(err).Msgf("cannot find backend engine '%s'", engineName)
+		log.Error().Err(err).Msgf("cannot find backend engine '%s'", backendName)
 		return nil, err
 	}
 	return engine, nil
