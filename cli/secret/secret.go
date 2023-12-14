@@ -29,7 +29,7 @@ import (
 var Command = &cli.Command{
 	Name:  "secret",
 	Usage: "manage secrets",
-	Subcommands: []*cli.Command{
+	Commands: []*cli.Command{
 		secretCreateCmd,
 		secretDeleteCmd,
 		secretUpdateCmd,

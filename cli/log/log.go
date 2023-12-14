@@ -22,7 +22,7 @@ import (
 var Command = &cli.Command{
 	Name:  "log",
 	Usage: "manage logs",
-	Subcommands: []*cli.Command{
+	Commands: []*cli.Command{
 		logPurgeCmd,
 	},
 }

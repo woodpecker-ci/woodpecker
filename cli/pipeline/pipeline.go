@@ -22,7 +22,7 @@ import (
 var Command = &cli.Command{
 	Name:  "pipeline",
 	Usage: "manage pipelines",
-	Subcommands: []*cli.Command{
+	Commands: []*cli.Command{
 		pipelineListCmd,
 		pipelineLastCmd,
 		pipelineLogsCmd,

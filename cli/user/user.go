@@ -22,7 +22,7 @@ import (
 var Command = &cli.Command{
 	Name:  "user",
 	Usage: "manage users",
-	Subcommands: []*cli.Command{
+	Commands: []*cli.Command{
 		userListCmd,
 		userInfoCmd,
 		userAddCmd,

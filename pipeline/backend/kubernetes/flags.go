@@ -22,54 +22,54 @@ import (
 
 var Flags = []cli.Flag{
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_K8S_NAMESPACE"},
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_NAMESPACE"),
 		Name:    "backend-k8s-namespace",
 		Usage:   "backend k8s namespace",
 		Value:   "woodpecker",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_K8S_VOLUME_SIZE"},
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_VOLUME_SIZE"),
 		Name:    "backend-k8s-volume-size",
 		Usage:   "backend k8s volume size (default 10G)",
 		Value:   "10G",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_K8S_STORAGE_CLASS"},
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_STORAGE_CLASS"),
 		Name:    "backend-k8s-storage-class",
 		Usage:   "backend k8s storage class",
 		Value:   "",
 	},
 	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_K8S_STORAGE_RWX"},
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_STORAGE_RWX"),
 		Name:    "backend-k8s-storage-rwx",
 		Usage:   "backend k8s storage access mode, should ReadWriteMany (RWX) instead of ReadWriteOnce (RWO) be used? (default: true)",
 		Value:   true,
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_K8S_POD_LABELS"},
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_POD_LABELS"),
 		Name:    "backend-k8s-pod-labels",
 		Usage:   "backend k8s additional worker pod labels",
 		Value:   "",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_K8S_POD_ANNOTATIONS"},
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_POD_ANNOTATIONS"),
 		Name:    "backend-k8s-pod-annotations",
 		Usage:   "backend k8s additional worker pod annotations",
 		Value:   "",
 	},
 	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_K8S_SECCTX_NONROOT"},
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_SECCTX_NONROOT"),
 		Name:    "backend-k8s-secctx-nonroot",
 		Usage:   "`run as non root` Kubernetes security context option",
 	},
 	&cli.IntFlag{
-		EnvVars: []string{"WOODPECKER_CONNECT_RETRY_COUNT"},
+		Sources: cli.EnvVars("WOODPECKER_CONNECT_RETRY_COUNT"),
 		Name:    "connect-retry-count",
 		Usage:   "number of times to retry connecting to the server",
 		Value:   5,
 	},
 	&cli.DurationFlag{
-		EnvVars: []string{"WOODPECKER_CONNECT_RETRY_DELAY"},
+		Sources: cli.EnvVars("WOODPECKER_CONNECT_RETRY_DELAY"),
 		Name:    "connect-retry-delay",
 		Usage:   "duration to wait before retrying to connect to the server",
 		Value:   time.Second * 2,

@@ -24,29 +24,29 @@ import (
 
 var flags = []cli.Flag{
 	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_LOCAL"},
+		Sources: cli.EnvVars("WOODPECKER_LOCAL"),
 		Name:    "local",
 		Usage:   "run from local directory",
 		Value:   true,
 	},
 	&cli.DurationFlag{
-		EnvVars: []string{"WOODPECKER_TIMEOUT"},
+		Sources: cli.EnvVars("WOODPECKER_TIMEOUT"),
 		Name:    "timeout",
 		Usage:   "pipeline timeout",
 		Value:   time.Hour,
 	},
 	&cli.StringSliceFlag{
-		EnvVars: []string{"WOODPECKER_VOLUMES"},
+		Sources: cli.EnvVars("WOODPECKER_VOLUMES"),
 		Name:    "volumes",
 		Usage:   "pipeline volumes",
 	},
 	&cli.StringSliceFlag{
-		EnvVars: []string{"WOODPECKER_NETWORKS"},
+		Sources: cli.EnvVars("WOODPECKER_NETWORKS"),
 		Name:    "network",
 		Usage:   "external networks",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_PREFIX"},
+		Sources: cli.EnvVars("WOODPECKER_PREFIX"),
 		Name:    "prefix",
 		Value:   "woodpecker",
 		Usage:   "prefix used for containers, volumes, networks, ... created by woodpecker",
@@ -58,7 +58,7 @@ var flags = []cli.Flag{
 		Value: cli.NewStringSlice(constant.PrivilegedPlugins...),
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND"},
+		Sources: cli.EnvVars("WOODPECKER_BACKEND"),
 		Name:    "backend-engine",
 		Usage:   "backend engine to run pipelines on",
 		Value:   "auto-detect",
@@ -68,17 +68,17 @@ var flags = []cli.Flag{
 	// backend options for pipeline compiler
 	//
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_NO_PROXY", "NO_PROXY", "no_proxy"},
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_NO_PROXY", "NO_PROXY", "no_proxy"),
 		Usage:   "if set, pass the environment variable down as \"NO_PROXY\" to steps",
 		Name:    "backend-no-proxy",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_HTTP_PROXY", "HTTP_PROXY", "http_proxy"},
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_HTTP_PROXY", "HTTP_PROXY", "http_proxy"),
 		Usage:   "if set, pass the environment variable down as \"HTTP_PROXY\" to steps",
 		Name:    "backend-http-proxy",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_HTTPS_PROXY", "HTTPS_PROXY", "https_proxy"},
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_HTTPS_PROXY", "HTTPS_PROXY", "https_proxy"),
 		Usage:   "if set, pass the environment variable down as \"HTTPS_PROXY\" to steps",
 		Name:    "backend-https-proxy",
 	},
@@ -92,12 +92,12 @@ var flags = []cli.Flag{
 	// workspace default
 	//
 	&cli.StringFlag{
-		EnvVars: []string{"CI_WORKSPACE_BASE"},
+		Sources: cli.EnvVars("CI_WORKSPACE_BASE"),
 		Name:    "workspace-base",
 		Value:   "/woodpecker",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_WORKSPACE_PATH"},
+		Sources: cli.EnvVars("CI_WORKSPACE_PATH"),
 		Name:    "workspace-path",
 		Value:   "src",
 	},
@@ -105,214 +105,214 @@ var flags = []cli.Flag{
 	// netrc parameters
 	//
 	&cli.StringFlag{
-		EnvVars: []string{"CI_NETRC_USERNAME"},
+		Sources: cli.EnvVars("CI_NETRC_USERNAME"),
 		Name:    "netrc-username",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_NETRC_PASSWORD"},
+		Sources: cli.EnvVars("CI_NETRC_PASSWORD"),
 		Name:    "netrc-password",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_NETRC_MACHINE"},
+		Sources: cli.EnvVars("CI_NETRC_MACHINE"),
 		Name:    "netrc-machine",
 	},
 	//
 	// metadata parameters
 	//
 	&cli.StringFlag{
-		EnvVars: []string{"CI_SYSTEM_PLATFORM"},
+		Sources: cli.EnvVars("CI_SYSTEM_PLATFORM"),
 		Name:    "system-platform",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_SYSTEM_NAME"},
+		Sources: cli.EnvVars("CI_SYSTEM_NAME"),
 		Name:    "system-name",
 		Value:   "woodpecker",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_SYSTEM_URL"},
+		Sources: cli.EnvVars("CI_SYSTEM_URL"),
 		Name:    "system-url",
 		Value:   "https://github.com/woodpecker-ci/woodpecker",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_REPO"},
+		Sources: cli.EnvVars("CI_REPO"),
 		Name:    "repo",
 		Usage:   "full repo name",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_REPO_REMOTE_ID"},
+		Sources: cli.EnvVars("CI_REPO_REMOTE_ID"),
 		Name:    "repo-remote-id",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_REPO_URL"},
+		Sources: cli.EnvVars("CI_REPO_URL"),
 		Name:    "repo-url",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_REPO_CLONE_URL"},
+		Sources: cli.EnvVars("CI_REPO_CLONE_URL"),
 		Name:    "repo-clone-url",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_REPO_CLONE_SSH_URL"},
+		Sources: cli.EnvVars("CI_REPO_CLONE_SSH_URL"),
 		Name:    "repo-clone-ssh-url",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_REPO_PRIVATE"},
+		Sources: cli.EnvVars("CI_REPO_PRIVATE"),
 		Name:    "repo-private",
 	},
 	&cli.BoolFlag{
-		EnvVars: []string{"CI_REPO_TRUSTED"},
+		Sources: cli.EnvVars("CI_REPO_TRUSTED"),
 		Name:    "repo-trusted",
 	},
 	&cli.IntFlag{
-		EnvVars: []string{"CI_PIPELINE_NUMBER"},
+		Sources: cli.EnvVars("CI_PIPELINE_NUMBER"),
 		Name:    "pipeline-number",
 	},
 	&cli.IntFlag{
-		EnvVars: []string{"CI_PIPELINE_PARENT"},
+		Sources: cli.EnvVars("CI_PIPELINE_PARENT"),
 		Name:    "pipeline-parent",
 	},
-	&cli.Int64Flag{
-		EnvVars: []string{"CI_PIPELINE_CREATED"},
+	&cli.IntFlag{
+		Sources: cli.EnvVars("CI_PIPELINE_CREATED"),
 		Name:    "pipeline-created",
 	},
-	&cli.Int64Flag{
-		EnvVars: []string{"CI_PIPELINE_STARTED"},
+	&cli.IntFlag{
+		Sources: cli.EnvVars("CI_PIPELINE_STARTED"),
 		Name:    "pipeline-started",
 	},
-	&cli.Int64Flag{
-		EnvVars: []string{"CI_PIPELINE_FINISHED"},
+	&cli.IntFlag{
+		Sources: cli.EnvVars("CI_PIPELINE_FINISHED"),
 		Name:    "pipeline-finished",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_PIPELINE_STATUS"},
+		Sources: cli.EnvVars("CI_PIPELINE_STATUS"),
 		Name:    "pipeline-status",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_PIPELINE_EVENT"},
+		Sources: cli.EnvVars("CI_PIPELINE_EVENT"),
 		Name:    "pipeline-event",
 		Value:   "manual",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_PIPELINE_URL"},
+		Sources: cli.EnvVars("CI_PIPELINE_URL"),
 		Name:    "pipeline-url",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_PIPELINE_TARGET"},
+		Sources: cli.EnvVars("CI_PIPELINE_TARGET"),
 		Name:    "pipeline-target",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_COMMIT_SHA"},
+		Sources: cli.EnvVars("CI_COMMIT_SHA"),
 		Name:    "commit-sha",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_COMMIT_REF"},
+		Sources: cli.EnvVars("CI_COMMIT_REF"),
 		Name:    "commit-ref",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_COMMIT_REFSPEC"},
+		Sources: cli.EnvVars("CI_COMMIT_REFSPEC"),
 		Name:    "commit-refspec",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_COMMIT_BRANCH"},
+		Sources: cli.EnvVars("CI_COMMIT_BRANCH"),
 		Name:    "commit-branch",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_COMMIT_MESSAGE"},
+		Sources: cli.EnvVars("CI_COMMIT_MESSAGE"),
 		Name:    "commit-message",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_COMMIT_AUTHOR_NAME"},
+		Sources: cli.EnvVars("CI_COMMIT_AUTHOR_NAME"),
 		Name:    "commit-author-name",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_COMMIT_AUTHOR_AVATAR"},
+		Sources: cli.EnvVars("CI_COMMIT_AUTHOR_AVATAR"),
 		Name:    "commit-author-avatar",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_COMMIT_AUTHOR_EMAIL"},
+		Sources: cli.EnvVars("CI_COMMIT_AUTHOR_EMAIL"),
 		Name:    "commit-author-email",
 	},
 	&cli.IntFlag{
-		EnvVars: []string{"CI_PREV_PIPELINE_NUMBER"},
+		Sources: cli.EnvVars("CI_PREV_PIPELINE_NUMBER"),
 		Name:    "prev-pipeline-number",
 	},
-	&cli.Int64Flag{
-		EnvVars: []string{"CI_PREV_PIPELINE_CREATED"},
+	&cli.IntFlag{
+		Sources: cli.EnvVars("CI_PREV_PIPELINE_CREATED"),
 		Name:    "prev-pipeline-created",
 	},
-	&cli.Int64Flag{
-		EnvVars: []string{"CI_PREV_PIPELINE_STARTED"},
+	&cli.IntFlag{
+		Sources: cli.EnvVars("CI_PREV_PIPELINE_STARTED"),
 		Name:    "prev-pipeline-started",
 	},
-	&cli.Int64Flag{
-		EnvVars: []string{"CI_PREV_PIPELINE_FINISHED"},
+	&cli.IntFlag{
+		Sources: cli.EnvVars("CI_PREV_PIPELINE_FINISHED"),
 		Name:    "prev-pipeline-finished",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_PREV_PIPELINE_STATUS"},
+		Sources: cli.EnvVars("CI_PREV_PIPELINE_STATUS"),
 		Name:    "prev-pipeline-status",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_PREV_PIPELINE_EVENT"},
+		Sources: cli.EnvVars("CI_PREV_PIPELINE_EVENT"),
 		Name:    "prev-pipeline-event",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_PREV_PIPELINE_URL"},
+		Sources: cli.EnvVars("CI_PREV_PIPELINE_URL"),
 		Name:    "prev-pipeline-url",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_PREV_COMMIT_SHA"},
+		Sources: cli.EnvVars("CI_PREV_COMMIT_SHA"),
 		Name:    "prev-commit-sha",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_PREV_COMMIT_REF"},
+		Sources: cli.EnvVars("CI_PREV_COMMIT_REF"),
 		Name:    "prev-commit-ref",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_PREV_COMMIT_REFSPEC"},
+		Sources: cli.EnvVars("CI_PREV_COMMIT_REFSPEC"),
 		Name:    "prev-commit-refspec",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_PREV_COMMIT_BRANCH"},
+		Sources: cli.EnvVars("CI_PREV_COMMIT_BRANCH"),
 		Name:    "prev-commit-branch",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_PREV_COMMIT_MESSAGE"},
+		Sources: cli.EnvVars("CI_PREV_COMMIT_MESSAGE"),
 		Name:    "prev-commit-message",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_PREV_COMMIT_AUTHOR_NAME"},
+		Sources: cli.EnvVars("CI_PREV_COMMIT_AUTHOR_NAME"),
 		Name:    "prev-commit-author-name",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_PREV_COMMIT_AUTHOR_AVATAR"},
+		Sources: cli.EnvVars("CI_PREV_COMMIT_AUTHOR_AVATAR"),
 		Name:    "prev-commit-author-avatar",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_PREV_COMMIT_AUTHOR_EMAIL"},
+		Sources: cli.EnvVars("CI_PREV_COMMIT_AUTHOR_EMAIL"),
 		Name:    "prev-commit-author-email",
 	},
 	&cli.IntFlag{
-		EnvVars: []string{"CI_WORKFLOW_NAME"},
+		Sources: cli.EnvVars("CI_WORKFLOW_NAME"),
 		Name:    "workflow-name",
 	},
 	&cli.IntFlag{
-		EnvVars: []string{"CI_WORKFLOW_NUMBER"},
+		Sources: cli.EnvVars("CI_WORKFLOW_NUMBER"),
 		Name:    "workflow-number",
 	},
 	&cli.IntFlag{
-		EnvVars: []string{"CI_STEP_NAME"},
+		Sources: cli.EnvVars("CI_STEP_NAME"),
 		Name:    "step-name",
 	},
 	&cli.StringSliceFlag{
-		EnvVars: []string{"CI_ENV"},
+		Sources: cli.EnvVars("CI_ENV"),
 		Name:    "env",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_FORGE_TYPE"},
+		Sources: cli.EnvVars("CI_FORGE_TYPE"),
 		Name:    "forge-type",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_FORGE_URL"},
+		Sources: cli.EnvVars("CI_FORGE_URL"),
 		Name:    "forge-url",
 	},
 }

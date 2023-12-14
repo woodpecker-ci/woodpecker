@@ -22,7 +22,7 @@ import (
 var Command = &cli.Command{
 	Name:  "cron",
 	Usage: "manage cron jobs",
-	Subcommands: []*cli.Command{
+	Commands: []*cli.Command{
 		cronCreateCmd,
 		cronDeleteCmd,
 		cronUpdateCmd,

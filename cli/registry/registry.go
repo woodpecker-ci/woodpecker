@@ -22,7 +22,7 @@ import (
 var Command = &cli.Command{
 	Name:  "registry",
 	Usage: "manage registries",
-	Subcommands: []*cli.Command{
+	Commands: []*cli.Command{
 		registryCreateCmd,
 		registryDeleteCmd,
 		registryUpdateCmd,

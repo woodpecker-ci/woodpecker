@@ -22,7 +22,7 @@ import (
 var Command = &cli.Command{
 	Name:  "repo",
 	Usage: "manage repositories",
-	Subcommands: []*cli.Command{
+	Commands: []*cli.Command{
 		repoListCmd,
 		repoInfoCmd,
 		repoAddCmd,
