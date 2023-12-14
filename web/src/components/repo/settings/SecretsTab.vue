@@ -16,7 +16,7 @@
 
     <SecretList
       v-if="!selectedSecret"
-      v-model="secrets"
+      :model-value="secrets"
       i18n-prefix="repo.settings.secrets."
       :is-deleting="isDeleting"
       @edit="editSecret"
@@ -64,19 +64,24 @@ const repo = inject<Ref<Repo>>('repo');
 const selectedSecret = ref<Partial<Secret>>();
 const isEditingSecret = computed(() => !!selectedSecret.value?.id);
 
-async function loadSecrets(page: number): Promise<Secret[] | null> {
+async function loadSecrets(page: number, level: 'repo' | 'org' | 'global'): Promise<Secret[] | null> {
   if (!repo?.value) {
     throw new Error("Unexpected: Can't load repo");
   }
 
-  return [
-    ...((await apiClient.getSecretList(repo.value.id, page)) ?? []),
-    ...((await apiClient.getOrgSecretList(repo.value.org_id, page)) ?? []),
-    ...((await apiClient.getGlobalSecretList(page)) ?? []),
-  ];
+  switch (level) {
+    case 'repo':
+      return apiClient.getSecretList(repo.value.id, page);
+    case 'org':
+      return apiClient.getOrgSecretList(repo.value.org_id, page);
+    case 'global':
+      return apiClient.getGlobalSecretList(page);
+  }
 }
 
-const { resetPage, data: _secrets } = usePagination(loadSecrets, () => !selectedSecret.value);
+const { resetPage, data: _secrets } = usePagination(loadSecrets, () => !selectedSecret.value, {
+  each: ['repo', 'org', 'global'],
+});
 const secrets = computed(() => {
   const secretsList: Record<string, Secret & { edit?: boolean; level: 'repo' | 'org' | 'global' }> = {};
 
@@ -125,7 +130,7 @@ const { doSubmit: createSecret, isLoading: isSaving } = useAsyncAction(async () 
     type: 'success',
   });
   selectedSecret.value = undefined;
-  resetPage();
+  await resetPage();
 });
 
 const { doSubmit: deleteSecret, isLoading: isDeleting } = useAsyncAction(async (_secret: Secret) => {
@@ -135,7 +140,7 @@ const { doSubmit: deleteSecret, isLoading: isDeleting } = useAsyncAction(async (
 
   await apiClient.deleteSecret(repo.value.id, _secret.name);
   notifications.notify({ title: i18n.t('repo.settings.secrets.deleted'), type: 'success' });
-  resetPage();
+  await resetPage();
 });
 
 function editSecret(secret: Secret) {
