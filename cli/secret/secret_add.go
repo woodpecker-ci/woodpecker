@@ -15,6 +15,7 @@
 package secret
 
 import (
+	"context"
 	"os"
 	"strings"
 
@@ -56,8 +57,8 @@ var secretCreateCmd = &cli.Command{
 	},
 }
 
-func secretCreate(c *cli.Context) error {
-	client, err := internal.NewClient(c)
+func secretCreate(ctx context.Context, c *cli.Command) error {
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}

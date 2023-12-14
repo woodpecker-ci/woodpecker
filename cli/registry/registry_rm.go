@@ -15,6 +15,8 @@
 package registry
 
 import (
+	"context"
+
 	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
@@ -36,7 +38,7 @@ var registryDeleteCmd = &cli.Command{
 	},
 }
 
-func registryDelete(c *cli.Context) error {
+func registryDelete(ctx context.Context, c *cli.Command) error {
 	var (
 		hostname         = c.String("hostname")
 		repoIDOrFullName = c.String("repository")
@@ -44,7 +46,7 @@ func registryDelete(c *cli.Context) error {
 	if repoIDOrFullName == "" {
 		repoIDOrFullName = c.Args().First()
 	}
-	client, err := internal.NewClient(c)
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}

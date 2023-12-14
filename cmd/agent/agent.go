@@ -47,8 +47,8 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/version"
 )
 
-func run(c *cli.Context) error {
-	common.SetupGlobalLogger(c, true)
+func run(cliCtx context.Context, c *cli.Command) error {
+	common.SetupGlobalLogger(cliCtx, c, true)
 
 	agentConfigPath := c.String("agent-config")
 	hostname := c.String("hostname")
@@ -56,7 +56,7 @@ func run(c *cli.Context) error {
 		hostname, _ = os.Hostname()
 	}
 
-	counter.Polling = c.Int("max-workflows")
+	counter.Polling = int(c.Int("max-workflows"))
 	counter.Running = 0
 
 	if c.Bool("healthcheck") {
@@ -153,7 +153,7 @@ func run(c *cli.Context) error {
 	backend.Init(backendCtx)
 
 	var wg sync.WaitGroup
-	parallel := c.Int("max-workflows")
+	parallel := int(c.Int("max-workflows"))
 	wg.Add(parallel)
 
 	// new backend
@@ -247,12 +247,12 @@ func run(c *cli.Context) error {
 	return nil
 }
 
-func runWithRetry(context *cli.Context) error {
-	retryCount := context.Int("connect-retry-count")
-	retryDelay := context.Duration("connect-retry-delay")
+func runWithRetry(ctx context.Context, c *cli.Command) error {
+	retryCount := int(c.Int("connect-retry-count"))
+	retryDelay := c.Duration("connect-retry-delay")
 	var err error
 	for i := 0; i < retryCount; i++ {
-		if err = run(context); status.Code(err) == codes.Unavailable {
+		if err = run(ctx, c); status.Code(err) == codes.Unavailable {
 			log.Warn().Err(err).Msg(fmt.Sprintf("cannot connect to server, retrying in %v", retryDelay))
 			time.Sleep(retryDelay)
 		} else {

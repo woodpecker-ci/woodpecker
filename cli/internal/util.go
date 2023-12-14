@@ -15,6 +15,7 @@
 package internal
 
 import (
+	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
@@ -31,7 +32,7 @@ import (
 )
 
 // NewClient returns a new client from the CLI context.
-func NewClient(c *cli.Context) (woodpecker.Client, error) {
+func NewClient(ctx context.Context, c *cli.Command) (woodpecker.Client, error) {
 	var (
 		skip     = c.Bool("skip-verify")
 		socks    = c.String("socks-proxy")
@@ -61,8 +62,7 @@ func NewClient(c *cli.Context) (woodpecker.Client, error) {
 	}
 
 	config := new(oauth2.Config)
-	client := config.Client(
-		c.Context,
+	client := config.Client(ctx,
 		&oauth2.Token{
 			AccessToken: token,
 		},

@@ -15,6 +15,7 @@
 package pipeline
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"text/template"
@@ -33,8 +34,8 @@ var pipelineQueueCmd = &cli.Command{
 	Flags:     []cli.Flag{common.FormatFlag(tmplPipelineQueue)},
 }
 
-func pipelineQueue(c *cli.Context) error {
-	client, err := internal.NewClient(c)
+func pipelineQueue(ctx context.Context, c *cli.Command) error {
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}

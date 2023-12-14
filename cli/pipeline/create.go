@@ -15,6 +15,7 @@
 package pipeline
 
 import (
+	"context"
 	"os"
 	"strings"
 	"text/template"
@@ -46,9 +47,9 @@ var pipelineCreateCmd = &cli.Command{
 	},
 }
 
-func pipelineCreate(c *cli.Context) error {
+func pipelineCreate(ctx context.Context, c *cli.Command) error {
 	repoIDOrFullName := c.Args().First()
-	client, err := internal.NewClient(c)
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}

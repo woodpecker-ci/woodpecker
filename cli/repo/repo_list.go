@@ -15,6 +15,7 @@
 package repo
 
 import (
+	"context"
 	"os"
 	"text/template"
 
@@ -38,8 +39,8 @@ var repoListCmd = &cli.Command{
 	},
 }
 
-func repoList(c *cli.Context) error {
-	client, err := internal.NewClient(c)
+func repoList(ctx context.Context, c *cli.Command) error {
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}

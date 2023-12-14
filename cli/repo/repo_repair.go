@@ -15,6 +15,7 @@
 package repo
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/urfave/cli/v3"
@@ -29,9 +30,9 @@ var repoRepairCmd = &cli.Command{
 	Action:    repoRepair,
 }
 
-func repoRepair(c *cli.Context) error {
+func repoRepair(ctx context.Context, c *cli.Command) error {
 	repoIDOrFullName := c.Args().First()
-	client, err := internal.NewClient(c)
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}

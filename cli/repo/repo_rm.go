@@ -15,6 +15,7 @@
 package repo
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/urfave/cli/v3"
@@ -29,9 +30,9 @@ var repoRemoveCmd = &cli.Command{
 	Action:    repoRemove,
 }
 
-func repoRemove(c *cli.Context) error {
+func repoRemove(ctx context.Context, c *cli.Command) error {
 	repoIDOrFullName := c.Args().First()
-	client, err := internal.NewClient(c)
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}

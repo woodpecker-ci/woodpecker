@@ -15,6 +15,7 @@
 package deploy
 
 import (
+	"context"
 	"fmt"
 	"html/template"
 	"os"
@@ -58,8 +59,8 @@ var Command = &cli.Command{
 	},
 }
 
-func deploy(c *cli.Context) error {
-	client, err := internal.NewClient(c)
+func deploy(ctx context.Context, c *cli.Command) error {
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}

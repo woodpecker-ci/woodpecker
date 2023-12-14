@@ -38,7 +38,7 @@ var Command = &cli.Command{
 	},
 }
 
-func parseTargetArgs(client woodpecker.Client, c *cli.Context) (global bool, orgID, repoID int64, err error) {
+func parseTargetArgs(client woodpecker.Client, c *cli.Command) (global bool, orgID, repoID int64, err error) {
 	if c.Bool("global") {
 		return true, -1, -1, nil
 	}

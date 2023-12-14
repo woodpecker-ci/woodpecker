@@ -15,6 +15,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 
@@ -30,7 +31,10 @@ import (
 )
 
 func main() {
-	app := cli.NewApp()
+	// TODO: test if we have to register signals for STRG-C ...
+	ctx := context.Background()
+
+	app := cli.Command{}
 	app.Name = "woodpecker-agent"
 	app.Version = version.String()
 	app.Usage = "woodpecker agent"
@@ -44,7 +48,7 @@ func main() {
 	}
 	app.Flags = utils.MergeSlices(flags, common.GlobalLoggerFlags, docker.Flags, kubernetes.Flags, local.Flags)
 
-	if err := app.Run(os.Args); err != nil {
+	if err := app.Run(ctx, os.Args); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}

@@ -15,6 +15,7 @@
 package exec
 
 import (
+	"context"
 	"runtime"
 	"strings"
 
@@ -26,7 +27,7 @@ import (
 )
 
 // return the metadata from the cli context.
-func metadataFromContext(c *cli.Context, axis matrix.Axis) metadata.Metadata {
+func metadataFromContext(ctx context.Context, c *cli.Command, axis matrix.Axis) metadata.Metadata {
 	platform := c.String("system-platform")
 	if platform == "" {
 		platform = runtime.GOOS + "/" + runtime.GOARCH
@@ -52,11 +53,11 @@ func metadataFromContext(c *cli.Context, axis matrix.Axis) metadata.Metadata {
 			Trusted:     c.Bool("repo-trusted"),
 		},
 		Curr: metadata.Pipeline{
-			Number:   c.Int64("pipeline-number"),
-			Parent:   c.Int64("pipeline-parent"),
-			Created:  c.Int64("pipeline-created"),
-			Started:  c.Int64("pipeline-started"),
-			Finished: c.Int64("pipeline-finished"),
+			Number:   c.Int("pipeline-number"),
+			Parent:   c.Int("pipeline-parent"),
+			Created:  c.Int("pipeline-created"),
+			Started:  c.Int("pipeline-started"),
+			Finished: c.Int("pipeline-finished"),
 			Status:   c.String("pipeline-status"),
 			Event:    c.String("pipeline-event"),
 			ForgeURL: c.String("pipeline-url"),
@@ -75,10 +76,10 @@ func metadataFromContext(c *cli.Context, axis matrix.Axis) metadata.Metadata {
 			},
 		},
 		Prev: metadata.Pipeline{
-			Number:   c.Int64("prev-pipeline-number"),
-			Created:  c.Int64("prev-pipeline-created"),
-			Started:  c.Int64("prev-pipeline-started"),
-			Finished: c.Int64("prev-pipeline-finished"),
+			Number:   c.Int("prev-pipeline-number"),
+			Created:  c.Int("prev-pipeline-created"),
+			Started:  c.Int("prev-pipeline-started"),
+			Finished: c.Int("prev-pipeline-finished"),
 			Status:   c.String("prev-pipeline-status"),
 			Event:    c.String("prev-pipeline-event"),
 			ForgeURL: c.String("prev-pipeline-url"),
@@ -97,12 +98,12 @@ func metadataFromContext(c *cli.Context, axis matrix.Axis) metadata.Metadata {
 		},
 		Workflow: metadata.Workflow{
 			Name:   c.String("workflow-name"),
-			Number: c.Int("workflow-number"),
+			Number: int(c.Int("workflow-number")),
 			Matrix: axis,
 		},
 		Step: metadata.Step{
 			Name:   c.String("step-name"),
-			Number: c.Int("step-number"),
+			Number: int(c.Int("step-number")),
 		},
 		Sys: metadata.System{
 			Name:     c.String("system-name"),

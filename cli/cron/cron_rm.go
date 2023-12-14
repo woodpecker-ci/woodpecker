@@ -15,6 +15,7 @@
 package cron
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/urfave/cli/v3"
@@ -38,15 +39,15 @@ var cronDeleteCmd = &cli.Command{
 	},
 }
 
-func cronDelete(c *cli.Context) error {
+func cronDelete(ctx context.Context, c *cli.Command) error {
 	var (
-		jobID            = c.Int64("id")
+		jobID            = c.Int("id")
 		repoIDOrFullName = c.String("repository")
 	)
 	if repoIDOrFullName == "" {
 		repoIDOrFullName = c.Args().First()
 	}
-	client, err := internal.NewClient(c)
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}

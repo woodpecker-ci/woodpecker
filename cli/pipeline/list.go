@@ -15,6 +15,7 @@
 package pipeline
 
 import (
+	"context"
 	"os"
 	"text/template"
 
@@ -51,9 +52,9 @@ var pipelineListCmd = &cli.Command{
 	},
 }
 
-func pipelineList(c *cli.Context) error {
+func pipelineList(ctx context.Context, c *cli.Command) error {
 	repoIDOrFullName := c.Args().First()
-	client, err := internal.NewClient(c)
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
@@ -75,7 +76,7 @@ func pipelineList(c *cli.Context) error {
 	branch := c.String("branch")
 	event := c.String("event")
 	status := c.String("status")
-	limit := c.Int("limit")
+	limit := int(c.Int("limit"))
 
 	var count int
 	for _, pipeline := range pipelines {

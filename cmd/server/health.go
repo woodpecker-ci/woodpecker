@@ -16,6 +16,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"strings"
@@ -29,7 +30,7 @@ const pingTimeout = 1 * time.Second
 
 // handles pinging the endpoint and returns an error if the
 // server is in an unhealthy state.
-func pinger(c *cli.Context) error {
+func pinger(_ context.Context, c *cli.Command) error {
 	scheme := "http"
 	serverAddr := c.String("server-addr")
 	if strings.HasPrefix(serverAddr, ":") {

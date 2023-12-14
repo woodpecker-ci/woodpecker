@@ -15,6 +15,7 @@
 package cron
 
 import (
+	"context"
 	"html/template"
 	"os"
 
@@ -53,10 +54,10 @@ var cronUpdateCmd = &cli.Command{
 	},
 }
 
-func cronUpdate(c *cli.Context) error {
+func cronUpdate(ctx context.Context, c *cli.Command) error {
 	var (
 		repoIDOrFullName = c.String("repository")
-		jobID            = c.Int64("id")
+		jobID            = c.Int("id")
 		jobName          = c.String("name")
 		branch           = c.String("branch")
 		schedule         = c.String("schedule")
@@ -65,7 +66,7 @@ func cronUpdate(c *cli.Context) error {
 	if repoIDOrFullName == "" {
 		repoIDOrFullName = c.Args().First()
 	}
-	client, err := internal.NewClient(c)
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}

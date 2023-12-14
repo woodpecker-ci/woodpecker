@@ -51,11 +51,11 @@ var Command = &cli.Command{
 	Flags:     utils.MergeSlices(flags, docker.Flags, kubernetes.Flags, local.Flags),
 }
 
-func run(c *cli.Context) error {
-	return common.RunPipelineFunc(c, execFile, execDir)
+func run(ctx context.Context, c *cli.Command) error {
+	return common.RunPipelineFunc(ctx, c, execFile, execDir)
 }
 
-func execDir(c *cli.Context, dir string) error {
+func execDir(ctx context.Context, c *cli.Command, dir string) error {
 	// TODO: respect pipeline dependency
 	repoPath, _ := filepath.Abs(filepath.Dir(dir))
 	if runtime.GOOS == "windows" {
@@ -69,7 +69,7 @@ func execDir(c *cli.Context, dir string) error {
 		// check if it is a regular file (not dir)
 		if info.Mode().IsRegular() && (strings.HasSuffix(info.Name(), ".yaml") || strings.HasSuffix(info.Name(), ".yml")) {
 			fmt.Println("#", info.Name())
-			_ = runExec(c, path, repoPath) // TODO: should we drop errors or store them and report back?
+			_ = runExec(ctx, c, path, repoPath) // TODO: should we drop errors or store them and report back?
 			fmt.Println("")
 			return nil
 		}
@@ -78,15 +78,15 @@ func execDir(c *cli.Context, dir string) error {
 	})
 }
 
-func execFile(c *cli.Context, file string) error {
+func execFile(ctx context.Context, c *cli.Command, file string) error {
 	repoPath, _ := filepath.Abs(filepath.Dir(file))
 	if runtime.GOOS == "windows" {
 		repoPath = convertPathForWindows(repoPath)
 	}
-	return runExec(c, file, repoPath)
+	return runExec(ctx, c, file, repoPath)
 }
 
-func runExec(c *cli.Context, file, repoPath string) error {
+func runExec(ctx context.Context, c *cli.Command, file, repoPath string) error {
 	dat, err := os.ReadFile(file)
 	if err != nil {
 		return err
@@ -101,7 +101,7 @@ func runExec(c *cli.Context, file, repoPath string) error {
 		axes = append(axes, matrix.Axis{})
 	}
 	for _, axis := range axes {
-		err := execWithAxis(c, file, repoPath, axis)
+		err := execWithAxis(ctx, c, file, repoPath, axis)
 		if err != nil {
 			return err
 		}
@@ -109,8 +109,8 @@ func runExec(c *cli.Context, file, repoPath string) error {
 	return nil
 }
 
-func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error {
-	metadata := metadataFromContext(c, axis)
+func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, axis matrix.Axis) error {
+	metadata := metadataFromContext(ctx, c, axis)
 	environ := metadata.Environ()
 	var secrets []compiler.Secret
 	for key, val := range metadata.Workflow.Matrix {
@@ -212,7 +212,7 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 		return err
 	}
 
-	backendCtx := context.WithValue(c.Context, backendTypes.CliContext, c)
+	backendCtx := context.WithValue(ctx, backendTypes.CliContext, c)
 	backend.Init(backendCtx)
 
 	backendEngine, err := backend.FindBackend(backendCtx, c.String("backend-engine"))
@@ -238,7 +238,7 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 		pipeline.WithDescription(map[string]string{
 			"CLI": "exec",
 		}),
-	).Run(c.Context)
+	).Run(ctx)
 }
 
 func convertPathForWindows(path string) string {

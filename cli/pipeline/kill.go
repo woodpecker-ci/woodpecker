@@ -15,6 +15,7 @@
 package pipeline
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 
@@ -31,14 +32,14 @@ var pipelineKillCmd = &cli.Command{
 	Hidden:    true,
 }
 
-func pipelineKill(c *cli.Context) (err error) {
+func pipelineKill(ctx context.Context, c *cli.Command) (err error) {
 	number, err := strconv.ParseInt(c.Args().Get(1), 10, 64)
 	if err != nil {
 		return err
 	}
 
 	repoIDOrFullName := c.Args().First()
-	client, err := internal.NewClient(c)
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}

@@ -15,6 +15,7 @@
 package registry
 
 import (
+	"context"
 	"os"
 	"strings"
 
@@ -48,7 +49,7 @@ var registryCreateCmd = &cli.Command{
 	},
 }
 
-func registryCreate(c *cli.Context) error {
+func registryCreate(ctx context.Context, c *cli.Command) error {
 	var (
 		hostname         = c.String("hostname")
 		username         = c.String("username")
@@ -58,7 +59,7 @@ func registryCreate(c *cli.Context) error {
 	if repoIDOrFullName == "" {
 		repoIDOrFullName = c.Args().First()
 	}
-	client, err := internal.NewClient(c)
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}

@@ -15,6 +15,7 @@
 package secret
 
 import (
+	"context"
 	"html/template"
 	"os"
 	"strings"
@@ -42,10 +43,10 @@ var secretListCmd = &cli.Command{
 	},
 }
 
-func secretList(c *cli.Context) error {
+func secretList(ctx context.Context, c *cli.Command) error {
 	format := c.String("format") + "\n"
 
-	client, err := internal.NewClient(c)
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}

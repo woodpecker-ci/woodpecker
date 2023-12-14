@@ -15,6 +15,7 @@
 package pipeline
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 
@@ -30,9 +31,9 @@ var pipelineStopCmd = &cli.Command{
 	Action:    pipelineStop,
 }
 
-func pipelineStop(c *cli.Context) (err error) {
+func pipelineStop(ctx context.Context, c *cli.Command) (err error) {
 	repoIDOrFullName := c.Args().First()
-	client, err := internal.NewClient(c)
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}

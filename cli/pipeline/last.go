@@ -15,6 +15,7 @@
 package pipeline
 
 import (
+	"context"
 	"os"
 	"text/template"
 
@@ -39,9 +40,9 @@ var pipelineLastCmd = &cli.Command{
 	},
 }
 
-func pipelineLast(c *cli.Context) error {
+func pipelineLast(ctx context.Context, c *cli.Command) error {
 	repoIDOrFullName := c.Args().First()
-	client, err := internal.NewClient(c)
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}

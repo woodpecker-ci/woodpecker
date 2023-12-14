@@ -15,6 +15,7 @@
 package lint
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -39,11 +40,11 @@ var Command = &cli.Command{
 	Action:    lint,
 }
 
-func lint(c *cli.Context) error {
-	return common.RunPipelineFunc(c, lintFile, lintDir)
+func lint(ctx context.Context, c *cli.Command) error {
+	return common.RunPipelineFunc(ctx, c, lintFile, lintDir)
 }
 
-func lintDir(c *cli.Context, dir string) error {
+func lintDir(ctx context.Context, c *cli.Command, dir string) error {
 	var errorStrings []string
 	if err := filepath.Walk(dir, func(path string, info os.FileInfo, e error) error {
 		if e != nil {
@@ -53,7 +54,7 @@ func lintDir(c *cli.Context, dir string) error {
 		// check if it is a regular file (not dir)
 		if info.Mode().IsRegular() && (strings.HasSuffix(info.Name(), ".yaml") || strings.HasSuffix(info.Name(), ".yml")) {
 			fmt.Println("#", info.Name())
-			if err := lintFile(c, path); err != nil {
+			if err := lintFile(ctx, c, path); err != nil {
 				errorStrings = append(errorStrings, err.Error())
 			}
 			fmt.Println("")
@@ -71,7 +72,7 @@ func lintDir(c *cli.Context, dir string) error {
 	return nil
 }
 
-func lintFile(_ *cli.Context, file string) error {
+func lintFile(_ context.Context, _ *cli.Command, file string) error {
 	output := termenv.NewOutput(os.Stdout)
 
 	fi, err := os.Open(file)

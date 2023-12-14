@@ -15,6 +15,7 @@
 package pipeline
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 
@@ -30,9 +31,9 @@ var pipelineLogsCmd = &cli.Command{
 	Action:    pipelineLogs,
 }
 
-func pipelineLogs(c *cli.Context) error {
+func pipelineLogs(ctx context.Context, c *cli.Command) error {
 	repoIDOrFullName := c.Args().First()
-	client, err := internal.NewClient(c)
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}

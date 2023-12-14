@@ -15,6 +15,7 @@
 package user
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"text/template"
@@ -33,8 +34,8 @@ var userInfoCmd = &cli.Command{
 	Flags:     []cli.Flag{common.FormatFlag(tmplUserInfo)},
 }
 
-func userInfo(c *cli.Context) error {
-	client, err := internal.NewClient(c)
+func userInfo(ctx context.Context, c *cli.Command) error {
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}

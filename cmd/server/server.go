@@ -99,7 +99,7 @@ func run(ctx context.Context, c *cli.Command) error {
 		}
 	}()
 
-	setupEvilGlobals(c, _store, _forge)
+	setupEvilGlobals(ctx, c, _store, _forge)
 
 	var g errgroup.Group
 
@@ -267,16 +267,16 @@ func run(ctx context.Context, c *cli.Command) error {
 	return g.Wait()
 }
 
-func setupEvilGlobals(c *cli.Command, v store.Store, f forge.Forge) {
+func setupEvilGlobals(ctx context.Context, c *cli.Command, v store.Store, f forge.Forge) {
 	// forge
 	server.Config.Services.Forge = f
 	server.Config.Services.Timeout = c.Duration("forge-timeout")
 
 	// services
-	server.Config.Services.Queue = setupQueue(c, v)
+	server.Config.Services.Queue = setupQueue(ctx, v)
 	server.Config.Services.Logs = logging.New()
 	server.Config.Services.Pubsub = pubsub.New()
-	server.Config.Services.Registries = setupRegistryService(c, v)
+	server.Config.Services.Registries = setupRegistryService(ctx, c, v)
 
 	// TODO(1544): fix encrypted store
 	// // encryption
@@ -286,7 +286,7 @@ func setupEvilGlobals(c *cli.Command, v store.Store, f forge.Forge) {
 	// 	log.Fatal().Err(err).Msg("could not create encryption service")
 	// }
 	// server.Config.Services.Secrets = setupSecretService(c, encryptedSecretStore)
-	server.Config.Services.Secrets = setupSecretService(c, v)
+	server.Config.Services.Secrets = setupSecretService(ctx, v)
 
 	server.Config.Services.Environ = setupEnvironService(c, v)
 	server.Config.Services.Membership = setupMembershipService(c, f)

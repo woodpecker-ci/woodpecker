@@ -15,6 +15,7 @@
 package log
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 
@@ -30,8 +31,8 @@ var logPurgeCmd = &cli.Command{
 	Action:    logPurge,
 }
 
-func logPurge(c *cli.Context) (err error) {
-	client, err := internal.NewClient(c)
+func logPurge(ctx context.Context, c *cli.Command) (err error) {
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}

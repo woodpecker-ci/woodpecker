@@ -32,7 +32,7 @@ var flags = []cli.Flag{
 	&cli.StringFlag{
 		Name:    "grpc-token",
 		Usage:   "server-agent shared token",
-		Sources: cli.ValueSourceChain{Chain: append(cli.Files(os.Getenv("WOODPECKER_AGENT_SECRET_FILE")).Chain, cli.EnvVars("WOODPECKER_AGENT_SECRET").Chain...)},
+		Sources: cli.ValueSourceChain{Chain: []cli.ValueSource{cli.Files(os.Getenv("WOODPECKER_AGENT_SECRET_FILE")).Chain[0], cli.EnvVars("WOODPECKER_AGENT_SECRET").Chain[0]}},
 	},
 	&cli.BoolFlag{
 		Sources: cli.EnvVars("WOODPECKER_GRPC_SECURE"),
@@ -62,7 +62,7 @@ var flags = []cli.Flag{
 		Usage:   "List of labels to filter tasks on. An agent must be assigned every tag listed in a task to be selected.",
 	},
 	&cli.IntFlag{
-		Sources: cli.EnvVars("WOODPECKER_MAX_WORKFLOWS") "WOODPECKER_MAX_PROCS"},
+		Sources: cli.EnvVars("WOODPECKER_MAX_WORKFLOWS", "WOODPECKER_MAX_PROCS"),
 		Name:    "max-workflows",
 		Usage:   "agent parallel workflows",
 		Value:   1,

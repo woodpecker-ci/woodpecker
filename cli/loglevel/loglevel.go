@@ -15,6 +15,8 @@
 package loglevel
 
 import (
+	"context"
+
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
@@ -31,8 +33,8 @@ var Command = &cli.Command{
 	Action:    logLevel,
 }
 
-func logLevel(c *cli.Context) error {
-	client, err := internal.NewClient(c)
+func logLevel(ctx context.Context, c *cli.Command) error {
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
