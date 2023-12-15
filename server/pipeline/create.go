@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"regexp"
 
+	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
@@ -53,6 +54,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	// update some pipeline fields
 	pipeline.RepoID = repo.ID
 	pipeline.Status = model.StatusCreated
+	pipeline.AccessToken = uuid.New().String()
 	setGatedState(repo, pipeline)
 	err = _store.CreatePipeline(pipeline)
 	if err != nil {

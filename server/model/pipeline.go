@@ -53,6 +53,7 @@ type Pipeline struct {
 	ChangedFiles        []string                `json:"changed_files,omitempty" xorm:"LONGTEXT 'changed_files'"`
 	AdditionalVariables map[string]string       `json:"variables,omitempty"     xorm:"json 'additional_variables'"`
 	PullRequestLabels   []string                `json:"pr_labels,omitempty"     xorm:"json 'pr_labels'"`
+	AccessToken         string                  `json:"-"                       xorm:"access_token"`
 } //	@name Pipeline
 
 // TableName return database table name for xorm
