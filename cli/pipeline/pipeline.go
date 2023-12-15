@@ -15,14 +15,14 @@
 package pipeline
 
 import (
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 // Command exports the pipeline command set.
 var Command = &cli.Command{
 	Name:  "pipeline",
 	Usage: "manage pipelines",
-	Subcommands: []*cli.Command{
+	Commands: []*cli.Command{
 		pipelineListCmd,
 		pipelineLastCmd,
 		pipelineLogsCmd,

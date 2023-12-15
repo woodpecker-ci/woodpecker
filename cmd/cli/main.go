@@ -15,6 +15,7 @@
 package main
 
 import (
+	"context"
 	"os"
 
 	_ "github.com/joho/godotenv/autoload"
@@ -22,8 +23,11 @@ import (
 )
 
 func main() {
+	// TODO: test if we have to register signals for STRG-C ...
+	ctx := context.Background()
+
 	app := newApp()
-	if err := app.Run(os.Args); err != nil {
+	if err := app.Run(ctx, os.Args); err != nil {
 		log.Fatal().Err(err).Msg("error running cli")
 	}
 }

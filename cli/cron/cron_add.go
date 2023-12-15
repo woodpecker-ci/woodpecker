@@ -15,10 +15,11 @@
 package cron
 
 import (
+	"context"
 	"html/template"
 	"os"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
@@ -50,7 +51,7 @@ var cronCreateCmd = &cli.Command{
 	},
 }
 
-func cronCreate(c *cli.Context) error {
+func cronCreate(ctx context.Context, c *cli.Command) error {
 	var (
 		jobName          = c.String("name")
 		branch           = c.String("branch")
@@ -62,7 +63,7 @@ func cronCreate(c *cli.Context) error {
 		repoIDOrFullName = c.Args().First()
 	}
 
-	client, err := internal.NewClient(c)
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}

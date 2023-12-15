@@ -15,13 +15,14 @@
 package pipeline
 
 import (
+	"context"
 	"os"
 	"strings"
 	"text/template"
 
 	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
@@ -46,9 +47,9 @@ var pipelineCreateCmd = &cli.Command{
 	},
 }
 
-func pipelineCreate(c *cli.Context) error {
+func pipelineCreate(ctx context.Context, c *cli.Command) error {
 	repoIDOrFullName := c.Args().First()
-	client, err := internal.NewClient(c)
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}

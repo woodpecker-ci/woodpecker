@@ -15,14 +15,14 @@
 package cron
 
 import (
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 // Command exports the cron command set.
 var Command = &cli.Command{
 	Name:  "cron",
 	Usage: "manage cron jobs",
-	Subcommands: []*cli.Command{
+	Commands: []*cli.Command{
 		cronCreateCmd,
 		cronDeleteCmd,
 		cronUpdateCmd,

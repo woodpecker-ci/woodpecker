@@ -15,7 +15,9 @@
 package secret
 
 import (
-	"github.com/urfave/cli/v2"
+	"context"
+
+	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
@@ -40,10 +42,10 @@ var secretDeleteCmd = &cli.Command{
 	},
 }
 
-func secretDelete(c *cli.Context) error {
+func secretDelete(ctx context.Context, c *cli.Command) error {
 	secretName := c.String("name")
 
-	client, err := internal.NewClient(c)
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}

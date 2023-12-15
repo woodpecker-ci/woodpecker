@@ -15,14 +15,14 @@
 package repo
 
 import (
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 // Command exports the repository command.
 var Command = &cli.Command{
 	Name:  "repo",
 	Usage: "manage repositories",
-	Subcommands: []*cli.Command{
+	Commands: []*cli.Command{
 		repoListCmd,
 		repoInfoCmd,
 		repoAddCmd,

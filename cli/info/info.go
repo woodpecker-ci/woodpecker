@@ -15,10 +15,11 @@
 package info
 
 import (
+	"context"
 	"os"
 	"text/template"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
@@ -33,8 +34,8 @@ var Command = &cli.Command{
 	Flags:     []cli.Flag{common.FormatFlag(tmplInfo, true)},
 }
 
-func info(c *cli.Context) error {
-	client, err := internal.NewClient(c)
+func info(ctx context.Context, c *cli.Command) error {
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}

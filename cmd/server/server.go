@@ -15,6 +15,7 @@
 package main
 
 import (
+	"context"
 	"crypto/tls"
 	"errors"
 	"net"
@@ -29,7 +30,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
@@ -55,8 +56,8 @@ import (
 	// encryptedStore "go.woodpecker-ci.org/woodpecker/v2/server/plugins/encryption/wrapper/store"
 )
 
-func run(c *cli.Context) error {
-	common.SetupGlobalLogger(c, true)
+func run(ctx context.Context, c *cli.Command) error {
+	common.SetupGlobalLogger(ctx, c, true)
 
 	// set gin mode based on log level
 	if zerolog.GlobalLevel() > zerolog.DebugLevel {
@@ -98,14 +99,14 @@ func run(c *cli.Context) error {
 		}
 	}()
 
-	setupEvilGlobals(c, _store, _forge)
+	setupEvilGlobals(ctx, c, _store, _forge)
 
 	var g errgroup.Group
 
 	setupMetrics(&g, _store)
 
 	g.Go(func() error {
-		return cron.Start(c.Context, _store, _forge)
+		return cron.Start(ctx, _store, _forge)
 	})
 
 	// start the grpc server
@@ -178,7 +179,7 @@ func run(c *cli.Context) error {
 		webUIServe,
 		middleware.Logger(time.RFC3339, true),
 		middleware.Version,
-		middleware.Store(c, _store),
+		middleware.Store(_store),
 	)
 
 	if c.String("server-cert") != "" {
@@ -266,16 +267,16 @@ func run(c *cli.Context) error {
 	return g.Wait()
 }
 
-func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
+func setupEvilGlobals(ctx context.Context, c *cli.Command, v store.Store, f forge.Forge) {
 	// forge
 	server.Config.Services.Forge = f
 	server.Config.Services.Timeout = c.Duration("forge-timeout")
 
 	// services
-	server.Config.Services.Queue = setupQueue(c, v)
+	server.Config.Services.Queue = setupQueue(ctx, v)
 	server.Config.Services.Logs = logging.New()
 	server.Config.Services.Pubsub = pubsub.New()
-	server.Config.Services.Registries = setupRegistryService(c, v)
+	server.Config.Services.Registries = setupRegistryService(ctx, c, v)
 
 	// TODO(1544): fix encrypted store
 	// // encryption
@@ -285,7 +286,7 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 	// 	log.Fatal().Err(err).Msg("could not create encryption service")
 	// }
 	// server.Config.Services.Secrets = setupSecretService(c, encryptedSecretStore)
-	server.Config.Services.Secrets = setupSecretService(c, v)
+	server.Config.Services.Secrets = setupSecretService(ctx, v)
 
 	server.Config.Services.Environ = setupEnvironService(c, v)
 	server.Config.Services.Membership = setupMembershipService(c, f)
@@ -310,15 +311,15 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 		events = append(events, model.WebhookEvent(v))
 	}
 	server.Config.Pipeline.DefaultCancelPreviousPipelineEvents = events
-	server.Config.Pipeline.DefaultTimeout = c.Int64("default-pipeline-timeout")
-	server.Config.Pipeline.MaxTimeout = c.Int64("max-pipeline-timeout")
+	server.Config.Pipeline.DefaultTimeout = c.Int("default-pipeline-timeout")
+	server.Config.Pipeline.MaxTimeout = c.Int("max-pipeline-timeout")
 
 	// limits
-	server.Config.Pipeline.Limits.MemSwapLimit = c.Int64("limit-mem-swap")
-	server.Config.Pipeline.Limits.MemLimit = c.Int64("limit-mem")
-	server.Config.Pipeline.Limits.ShmSize = c.Int64("limit-shm-size")
-	server.Config.Pipeline.Limits.CPUQuota = c.Int64("limit-cpu-quota")
-	server.Config.Pipeline.Limits.CPUShares = c.Int64("limit-cpu-shares")
+	server.Config.Pipeline.Limits.MemSwapLimit = c.Int("limit-mem-swap")
+	server.Config.Pipeline.Limits.MemLimit = c.Int("limit-mem")
+	server.Config.Pipeline.Limits.ShmSize = c.Int("limit-shm-size")
+	server.Config.Pipeline.Limits.CPUQuota = c.Int("limit-cpu-quota")
+	server.Config.Pipeline.Limits.CPUShares = c.Int("limit-cpu-shares")
 	server.Config.Pipeline.Limits.CPUSet = c.String("limit-cpu-set")
 
 	// backend options for pipeline compiler

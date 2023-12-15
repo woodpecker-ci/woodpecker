@@ -15,10 +15,11 @@
 package secret
 
 import (
+	"context"
 	"os"
 	"strings"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
@@ -56,8 +57,8 @@ var secretUpdateCmd = &cli.Command{
 	},
 }
 
-func secretUpdate(c *cli.Context) error {
-	client, err := internal.NewClient(c)
+func secretUpdate(ctx context.Context, c *cli.Command) error {
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
