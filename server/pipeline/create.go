@@ -126,26 +126,26 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	return pipeline, nil
 }
 
-func updatePipelineWithErr(ctx context.Context, _store store.Store, _pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User, err error) error {
-	pipeline, err := UpdateToStatusError(_store, *_pipeline, err)
+func updatePipelineWithErr(ctx context.Context, _store store.Store, pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User, err error) error {
+	_pipeline, err := UpdateToStatusError(_store, *pipeline, err)
 	if err != nil {
 		return err
 	}
 	// update value in ref
-	*_pipeline = *pipeline
+	*pipeline = *_pipeline
 
 	publishPipeline(ctx, pipeline, repo, repoUser)
 
 	return nil
 }
 
-func updatePipelinePending(ctx context.Context, _store store.Store, _pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User) error {
-	pipeline, err := UpdateToStatusPending(_store, *_pipeline, "")
+func updatePipelinePending(ctx context.Context, _store store.Store, pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User) error {
+	_pipeline, err := UpdateToStatusPending(_store, *pipeline, "")
 	if err != nil {
 		return err
 	}
 	// update value in ref
-	*_pipeline = *pipeline
+	*pipeline = *_pipeline
 
 	publishPipeline(ctx, pipeline, repo, repoUser)
 
