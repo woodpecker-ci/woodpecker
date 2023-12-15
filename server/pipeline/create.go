@@ -18,7 +18,6 @@ import (
 	"context"
 	"fmt"
 	"regexp"
-	"time"
 
 	"github.com/rs/zerolog/log"
 
@@ -127,31 +126,26 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	return pipeline, nil
 }
 
-func updatePipelineWithErr(ctx context.Context, _store store.Store, pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User, err error) error {
-	pipeline.Started = time.Now().Unix()
-	pipeline.Finished = pipeline.Started
-	pipeline.Status = model.StatusError
-	pipeline.Errors = errors.GetPipelineErrors(err)
-	dbErr := _store.UpdatePipeline(pipeline)
-	if dbErr != nil {
-		msg := fmt.Errorf("failed to save pipeline for %s", repo.FullName)
-		log.Error().Err(dbErr).Msg(msg.Error())
-		return msg
+func updatePipelineWithErr(ctx context.Context, _store store.Store, _pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User, err error) error {
+	pipeline, err := UpdateToStatusError(_store, *_pipeline, err)
+	if err != nil {
+		return err
 	}
+	// update value in ref
+	*_pipeline = *pipeline
 
 	publishPipeline(ctx, pipeline, repo, repoUser)
 
 	return nil
 }
 
-func updatePipelinePending(ctx context.Context, _store store.Store, pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User) error {
-	pipeline.Status = model.StatusPending
-	dbErr := _store.UpdatePipeline(pipeline)
-	if dbErr != nil {
-		msg := fmt.Errorf("failed to save pipeline for %s", repo.FullName)
-		log.Error().Err(dbErr).Msg(msg.Error())
-		return msg
+func updatePipelinePending(ctx context.Context, _store store.Store, _pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User) error {
+	pipeline, err := UpdateToStatusPending(_store, *_pipeline, "")
+	if err != nil {
+		return err
 	}
+	// update value in ref
+	*_pipeline = *pipeline
 
 	publishPipeline(ctx, pipeline, repo, repoUser)
 
