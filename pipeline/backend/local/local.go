@@ -40,6 +40,7 @@ type workflowState struct {
 	homeDir         string
 	workspaceDir    string
 	pluginGitBinary string
+	accessToken     string
 }
 
 type local struct {
@@ -48,6 +49,7 @@ type local struct {
 	output          io.ReadCloser
 	pluginGitBinary string
 	os, arch        string
+	callbackServer  string
 }
 
 // New returns a new local Backend.
@@ -74,13 +76,16 @@ func (e *local) Load(ctx context.Context) (*types.BackendInfo, error) {
 
 	e.loadClone()
 
+	// TODO: create callback server
+	e.callbackServer = "todo"
+
 	return &types.BackendInfo{
 		Platform: e.os + "/" + e.arch,
 	}, nil
 }
 
 // SetupWorkflow the pipeline environment.
-func (e *local) SetupWorkflow(_ context.Context, _ *types.Config, taskUUID string) error {
+func (e *local) SetupWorkflow(_ context.Context, conf *types.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msg("create workflow environment")
 
 	baseDir, err := os.MkdirTemp(e.tempDir, "woodpecker-local-*")
@@ -101,6 +106,10 @@ func (e *local) SetupWorkflow(_ context.Context, _ *types.Config, taskUUID strin
 
 	if err := os.Mkdir(state.workspaceDir, 0o700); err != nil {
 		return err
+	}
+
+	if conf.AccessToken != "" {
+		state.accessToken = conf.AccessToken
 	}
 
 	e.saveState(taskUUID, state)
@@ -125,6 +134,9 @@ func (e *local) StartStep(ctx context.Context, step *types.Step, taskUUID string
 			env = append(env, a+"="+b)
 		}
 	}
+
+	env = append(env, "CI_PIPELINE_CALLBACK_URL="+e.callbackServer)
+	env = append(env, "CI_PIPELINE_CALLBACK_TOKEN="+state.accessToken)
 
 	// Set HOME and CI_WORKSPACE
 	env = append(env, "HOME="+state.homeDir)

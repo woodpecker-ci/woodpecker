@@ -246,3 +246,9 @@ func WithProxy(opt ProxyOptions) Option {
 		},
 	)
 }
+
+func WithPipelineAccessToken(token string) Option {
+	return func(c *Compiler) {
+		c.pipelineAccessToken = token
+	}
+}
