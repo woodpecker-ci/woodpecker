@@ -84,4 +84,6 @@ type Peer interface {
 
 	// ReportHealth reports health status of the agent to the server
 	ReportHealth(c context.Context) error
+
+	// TODO: callback api to update pipeline etc...
 }
