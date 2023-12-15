@@ -173,6 +173,11 @@ func (e *docker) SetupWorkflow(_ context.Context, conf *backend.Config, taskUUID
 			return err
 		}
 	}
+
+	if conf.AccessToken != "" {
+		// TODO: setup callback socket
+	}
+
 	return nil
 }
 

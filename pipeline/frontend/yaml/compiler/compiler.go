@@ -71,23 +71,24 @@ type ResourceLimit struct {
 
 // Compiler compiles the yaml
 type Compiler struct {
-	local             bool
-	escalated         []string
-	prefix            string
-	volumes           []string
-	networks          []string
-	env               map[string]string
-	cloneEnv          map[string]string
-	base              string
-	path              string
-	metadata          metadata.Metadata
-	registries        []Registry
-	secrets           secretMap
-	cacher            Cacher
-	reslimit          ResourceLimit
-	defaultCloneImage string
-	trustedPipeline   bool
-	netrcOnlyTrusted  bool
+	local               bool
+	escalated           []string
+	prefix              string
+	volumes             []string
+	networks            []string
+	env                 map[string]string
+	cloneEnv            map[string]string
+	base                string
+	path                string
+	metadata            metadata.Metadata
+	registries          []Registry
+	secrets             secretMap
+	cacher              Cacher
+	reslimit            ResourceLimit
+	defaultCloneImage   string
+	trustedPipeline     bool
+	netrcOnlyTrusted    bool
+	pipelineAccessToken string
 }
 
 // New creates a new Compiler with options.
@@ -107,6 +108,8 @@ func New(opts ...Option) *Compiler {
 // representation configuration format.
 func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, error) {
 	config := new(backend_types.Config)
+
+	config.AccessToken = c.pipelineAccessToken
 
 	if match, err := conf.When.Match(c.metadata, true, c.env); !match && err == nil {
 		// This pipeline does not match the configured filter so return an empty config and stop further compilation.

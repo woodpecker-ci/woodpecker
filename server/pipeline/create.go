@@ -18,8 +18,8 @@ import (
 	"context"
 	"fmt"
 	"regexp"
-	"time"
 
+	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
@@ -54,6 +54,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	// update some pipeline fields
 	pipeline.RepoID = repo.ID
 	pipeline.Status = model.StatusCreated
+	pipeline.AccessToken = uuid.New().String()
 	setGatedState(repo, pipeline)
 	err = _store.CreatePipeline(pipeline)
 	if err != nil {
@@ -128,16 +129,12 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 }
 
 func updatePipelineWithErr(ctx context.Context, _store store.Store, pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User, err error) error {
-	pipeline.Started = time.Now().Unix()
-	pipeline.Finished = pipeline.Started
-	pipeline.Status = model.StatusError
-	pipeline.Errors = errors.GetPipelineErrors(err)
-	dbErr := _store.UpdatePipeline(pipeline)
-	if dbErr != nil {
-		msg := fmt.Errorf("failed to save pipeline for %s", repo.FullName)
-		log.Error().Err(dbErr).Msg(msg.Error())
-		return msg
+	_pipeline, err := UpdateToStatusError(_store, *pipeline, err)
+	if err != nil {
+		return err
 	}
+	// update value in ref
+	*pipeline = *_pipeline
 
 	publishPipeline(ctx, pipeline, repo, repoUser)
 
@@ -145,13 +142,12 @@ func updatePipelineWithErr(ctx context.Context, _store store.Store, pipeline *mo
 }
 
 func updatePipelinePending(ctx context.Context, _store store.Store, pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User) error {
-	pipeline.Status = model.StatusPending
-	dbErr := _store.UpdatePipeline(pipeline)
-	if dbErr != nil {
-		msg := fmt.Errorf("failed to save pipeline for %s", repo.FullName)
-		log.Error().Err(dbErr).Msg(msg.Error())
-		return msg
+	_pipeline, err := UpdateToStatusPending(_store, *pipeline, "")
+	if err != nil {
+		return err
 	}
+	// update value in ref
+	*pipeline = *_pipeline
 
 	publishPipeline(ctx, pipeline, repo, repoUser)
 

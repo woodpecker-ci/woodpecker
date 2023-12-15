@@ -29,9 +29,11 @@ func UpdateToStatusRunning(store model.UpdatePipelineStore, pipeline model.Pipel
 }
 
 func UpdateToStatusPending(store model.UpdatePipelineStore, pipeline model.Pipeline, reviewer string) (*model.Pipeline, error) {
-	pipeline.Reviewer = reviewer
+	if reviewer != "" {
+		pipeline.Reviewer = reviewer
+		pipeline.Reviewed = time.Now().Unix()
+	}
 	pipeline.Status = model.StatusPending
-	pipeline.Reviewed = time.Now().Unix()
 	return &pipeline, store.UpdatePipeline(&pipeline)
 }
 
@@ -39,12 +41,14 @@ func UpdateToStatusDeclined(store model.UpdatePipelineStore, pipeline model.Pipe
 	pipeline.Reviewer = reviewer
 	pipeline.Status = model.StatusDeclined
 	pipeline.Reviewed = time.Now().Unix()
+	pipeline.AccessToken = ""
 	return &pipeline, store.UpdatePipeline(&pipeline)
 }
 
 func UpdateStatusToDone(store model.UpdatePipelineStore, pipeline model.Pipeline, status model.StatusValue, stopped int64) (*model.Pipeline, error) {
 	pipeline.Status = status
 	pipeline.Finished = stopped
+	pipeline.AccessToken = ""
 	return &pipeline, store.UpdatePipeline(&pipeline)
 }
 
@@ -53,11 +57,13 @@ func UpdateToStatusError(store model.UpdatePipelineStore, pipeline model.Pipelin
 	pipeline.Status = model.StatusError
 	pipeline.Started = time.Now().Unix()
 	pipeline.Finished = pipeline.Started
+	pipeline.AccessToken = ""
 	return &pipeline, store.UpdatePipeline(&pipeline)
 }
 
 func UpdateToStatusKilled(store model.UpdatePipelineStore, pipeline model.Pipeline) (*model.Pipeline, error) {
 	pipeline.Status = model.StatusKilled
 	pipeline.Finished = time.Now().Unix()
+	pipeline.AccessToken = ""
 	return &pipeline, store.UpdatePipeline(&pipeline)
 }
