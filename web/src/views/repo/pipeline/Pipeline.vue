@@ -1,6 +1,6 @@
 <template>
-  <Container full-width class="flex flex-col flex-grow md:min-h-xs md:px-4">
-    <div class="flex w-full min-h-0 flex-grow gap-4">
+  <Container full-width class="flex flex-col flex-grow-0 md:flex-grow md:min-h-xs md:px-4">
+    <div class="flex w-full min-h-0 flex-grow gap-4 flex-wrap-reverse md:flex-nowrap">
       <PipelineStepList
         v-if="pipeline?.workflows && pipeline?.workflows?.length > 0"
         v-model:selected-step-id="selectedStepId"
@@ -8,7 +8,7 @@
         :pipeline="pipeline"
       />
 
-      <div class="flex items-start justify-center flex-grow relative">
+      <div class="flex items-start justify-center flex-grow relative basis-full md:basis-auto">
         <Container v-if="selectedStep?.error" fill-width class="p-0">
           <Panel>
             <div class="flex flex-col items-center text-center gap-4">
