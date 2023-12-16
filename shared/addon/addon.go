@@ -2,10 +2,8 @@ package addon
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"plugin"
-	"reflect"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"

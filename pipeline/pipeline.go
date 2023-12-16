@@ -55,7 +55,7 @@ type (
 type Runtime struct {
 	err     error
 	spec    *backend.Config
-	engine  backend.Engine
+	engine  backend.Backend
 	started int64
 
 	ctx    context.Context
