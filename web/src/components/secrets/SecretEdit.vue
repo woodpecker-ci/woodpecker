@@ -11,11 +11,27 @@
       </InputField>
 
       <InputField :label="$t(i18nPrefix + 'value')">
-        <TextField v-model="innerValue.value" :placeholder="$t(i18nPrefix + 'value')" :lines="5" />
+        <TextField
+          v-model="innerValue.value"
+          :placeholder="$t(i18nPrefix + 'value')"
+          :lines="5"
+          :required="!isEditingSecret"
+        />
       </InputField>
 
       <InputField :label="$t(i18nPrefix + 'images.images')">
-        <TextField v-model="images" :placeholder="$t(i18nPrefix + 'images.desc')" />
+        <span class="ml-1 mb-2 text-wp-text-alt-100">{{ $t(i18nPrefix + 'images.desc') }}</span>
+
+        <div class="flex flex-col gap-2">
+          <div v-for="image in innerValue.images" :key="image" class="flex gap-2">
+            <TextField :model-value="image" disabled />
+            <Button type="button" color="gray" start-icon="trash" @click="removeImage(image)" />
+          </div>
+          <div class="flex gap-2">
+            <TextField v-model="newImage" @keydown.enter.prevent="addNewImage" />
+            <Button type="button" color="gray" start-icon="plus" @click="addNewImage" />
+          </div>
+        </div>
       </InputField>
 
       <InputField :label="$t(i18nPrefix + 'events.events')">
@@ -36,7 +52,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, toRef } from 'vue';
+import { computed, ref, toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
@@ -67,20 +83,19 @@ const innerValue = computed({
     emit('update:modelValue', value);
   },
 });
-const images = computed<string>({
-  get() {
-    return innerValue.value?.images?.join(',') || '';
-  },
-  set(value) {
-    if (innerValue.value) {
-      innerValue.value.images = value
-        .split(',')
-        .map((s) => s.trim())
-        .filter((s) => s !== '');
-    }
-  },
-});
 const isEditingSecret = computed(() => !!innerValue.value?.id);
+
+const newImage = ref('');
+function addNewImage() {
+  if (!newImage.value) {
+    return;
+  }
+  innerValue.value.images?.push(newImage.value);
+  newImage.value = '';
+}
+function removeImage(image: string) {
+  innerValue.value.images = innerValue.value.images?.filter((i) => i !== image);
+}
 
 const secretEventsOptions: CheckboxOption[] = [
   { value: WebhookEvents.Push, text: i18n.t('repo.pipeline.event.push') },
@@ -99,6 +114,11 @@ function save() {
   if (!innerValue.value) {
     return;
   }
+
+  if (newImage.value) {
+    innerValue.value.images?.push(newImage.value);
+  }
+
   emit('save', innerValue.value);
 }
 </script>
