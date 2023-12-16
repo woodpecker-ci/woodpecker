@@ -4,41 +4,15 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@anbraten, @qwerty287, @6543, @lafriks, @xoxys, @gapanyc, @allanger, @mikhail-putilov, @renovate[bot], @runephilosof-karnovgroup, @kaylynb, @voidcontext, @robbie-cahill, @micash545, @dominic-p, @zc-devs, @mzampetakis
+@xoxys, @anbraten, @qwerty287, @6543, @lafriks, @gapanyc, @allanger, @mikhail-putilov, @renovate[bot], @runephilosof-karnovgroup, @kaylynb, @voidcontext, @robbie-cahill, @micash545, @dominic-p, @zc-devs, @mzampetakis
 
 ### 🔒 Security
 
 - Sanitize plugin docs content [[#2900](https://github.com/woodpecker-ci/woodpecker/pull/2900)]
 
-### 📈 Enhancement
-
-- Show secrets from org and global level [[#2873](https://github.com/woodpecker-ci/woodpecker/pull/2873)]
-- Only update pipelineStatus in one place [[#2952](https://github.com/woodpecker-ci/woodpecker/pull/2952)]
-- Rename `engine` to `backend` [[#2950](https://github.com/woodpecker-ci/woodpecker/pull/2950)]
-- Remove separate root path config [[#2943](https://github.com/woodpecker-ci/woodpecker/pull/2943)]
-- init CI_COMMIT_TAG if commit ref is a tag [[#2934](https://github.com/woodpecker-ci/woodpecker/pull/2934)]
-- Update go module path for major version 2 [[#2905](https://github.com/woodpecker-ci/woodpecker/pull/2905)]
-- Unify date/time dependencies [[#2891](https://github.com/woodpecker-ci/woodpecker/pull/2891)]
-- Add linting for `any` [[#2893](https://github.com/woodpecker-ci/woodpecker/pull/2893)]
-- Fix vite deprecations [[#2885](https://github.com/woodpecker-ci/woodpecker/pull/2885)]
-- Migrate to Xormigrate [[#2711](https://github.com/woodpecker-ci/woodpecker/pull/2711)]
-- Simple security context options (Kubernetes) [[#2550](https://github.com/woodpecker-ci/woodpecker/pull/2550)]
-- Changes PullRequest Index to ForgeRemoteID type [[#2823](https://github.com/woodpecker-ci/woodpecker/pull/2823)]
-
-### 📚 Documentation
-
-- Update README badges [[#2956](https://github.com/woodpecker-ci/woodpecker/pull/2956)]
-- Update 20-kubernetes.md [[#2927](https://github.com/woodpecker-ci/woodpecker/pull/2927)]
-- Add nix-attic plugin to the index [[#2889](https://github.com/woodpecker-ci/woodpecker/pull/2889)]
-- Add usage with Tunnelmole to docs [[#2881](https://github.com/woodpecker-ci/woodpecker/pull/2881)]
-- Improve code blocks in docs [[#2879](https://github.com/woodpecker-ci/woodpecker/pull/2879)]
-- Add a blog post [[#2877](https://github.com/woodpecker-ci/woodpecker/pull/2877)]
-- Add documentation on Kubernetes securityContext [[#2822](https://github.com/woodpecker-ci/woodpecker/pull/2822)]
-- Add default page to categories [[#2869](https://github.com/woodpecker-ci/woodpecker/pull/2869)]
-- Use same format for Github docs as used for the other forges [[#2866](https://github.com/woodpecker-ci/woodpecker/pull/2866)]
-
 ### 🐛 Bug Fixes
 
+- Fix error container overflow [[#2957](https://github.com/woodpecker-ci/woodpecker/pull/2957)]
 - ignore some errors on repairAllRepos [[#2792](https://github.com/woodpecker-ci/woodpecker/pull/2792)]
 - Allow to restart pipelines that has warnings [[#2939](https://github.com/woodpecker-ci/woodpecker/pull/2939)]
 - Fix skipped pipelines model [[#2923](https://github.com/woodpecker-ci/woodpecker/pull/2923)]
@@ -53,12 +27,39 @@
 - Fix version check partially [[#2871](https://github.com/woodpecker-ci/woodpecker/pull/2871)]
 - Fix unregistering agents when using agent tokens [[#2870](https://github.com/woodpecker-ci/woodpecker/pull/2870)]
 
+### 📈 Enhancement
+
+- Show secrets from org and global level [[#2873](https://github.com/woodpecker-ci/woodpecker/pull/2873)]
+- Only update pipelineStatus in one place [[#2952](https://github.com/woodpecker-ci/woodpecker/pull/2952)]
+- Rename `engine` to `backend` [[#2950](https://github.com/woodpecker-ci/woodpecker/pull/2950)]
+- Add linting for `log.Fatal()` [[#2946](https://github.com/woodpecker-ci/woodpecker/pull/2946)]
+- Remove separate root path config [[#2943](https://github.com/woodpecker-ci/woodpecker/pull/2943)]
+- init CI_COMMIT_TAG if commit ref is a tag [[#2934](https://github.com/woodpecker-ci/woodpecker/pull/2934)]
+- Update go module path for major version 2 [[#2905](https://github.com/woodpecker-ci/woodpecker/pull/2905)]
+- Unify date/time dependencies [[#2891](https://github.com/woodpecker-ci/woodpecker/pull/2891)]
+- Add linting for `any` [[#2893](https://github.com/woodpecker-ci/woodpecker/pull/2893)]
+- Fix vite deprecations [[#2885](https://github.com/woodpecker-ci/woodpecker/pull/2885)]
+- Migrate to Xormigrate [[#2711](https://github.com/woodpecker-ci/woodpecker/pull/2711)]
+- Simple security context options (Kubernetes) [[#2550](https://github.com/woodpecker-ci/woodpecker/pull/2550)]
+- Changes PullRequest Index to ForgeRemoteID type [[#2823](https://github.com/woodpecker-ci/woodpecker/pull/2823)]
+
+### 📚 Documentation
+
+- Update README badges [[#2956](https://github.com/woodpecker-ci/woodpecker/pull/2956)]
+- Update 20-kubernetes.md [[#2927](https://github.com/woodpecker-ci/woodpecker/pull/2927)]
+- Add release documentation to CONTRIBUTING [[#2917](https://github.com/woodpecker-ci/woodpecker/pull/2917)]
+- Add nix-attic plugin to the index [[#2889](https://github.com/woodpecker-ci/woodpecker/pull/2889)]
+- Add usage with Tunnelmole to docs [[#2881](https://github.com/woodpecker-ci/woodpecker/pull/2881)]
+- Improve code blocks in docs [[#2879](https://github.com/woodpecker-ci/woodpecker/pull/2879)]
+- Add a blog post [[#2877](https://github.com/woodpecker-ci/woodpecker/pull/2877)]
+- Add documentation on Kubernetes securityContext [[#2822](https://github.com/woodpecker-ci/woodpecker/pull/2822)]
+- Add default page to categories [[#2869](https://github.com/woodpecker-ci/woodpecker/pull/2869)]
+- Use same format for Github docs as used for the other forges [[#2866](https://github.com/woodpecker-ci/woodpecker/pull/2866)]
+
 ### Misc
 
-- Add linting for `log.Fatal()` [[#2946](https://github.com/woodpecker-ci/woodpecker/pull/2946)]
 - Update docker.io/techknowlogick/xgo Docker tag to go-1.21.5 [[#2926](https://github.com/woodpecker-ci/woodpecker/pull/2926)]
 - Update docker.io/golang Docker tag to v1.21.5 [[#2925](https://github.com/woodpecker-ci/woodpecker/pull/2925)]
-- Add release documentation to CONTRIBUTING [[#2917](https://github.com/woodpecker-ci/woodpecker/pull/2917)]
 - Lock file maintenance [[#2910](https://github.com/woodpecker-ci/woodpecker/pull/2910)]
 - Update web npm deps non-major [[#2909](https://github.com/woodpecker-ci/woodpecker/pull/2909)]
 - Update docs npm deps non-major [[#2908](https://github.com/woodpecker-ci/woodpecker/pull/2908)]
