@@ -89,17 +89,17 @@ func (s *Secret) BeforeInsert() {
 }
 
 // Global secret.
-func (s Secret) Global() bool {
+func (s Secret) IsGlobal() bool {
 	return s.RepoID == 0 && s.OrgID == 0
 }
 
 // Organization secret.
-func (s Secret) Organization() bool {
+func (s Secret) IsOrganization() bool {
 	return s.RepoID == 0 && s.OrgID != 0
 }
 
 // Repository secret.
-func (s Secret) Repository() bool {
+func (s Secret) IsRepository() bool {
 	return s.RepoID != 0 && s.OrgID == 0
 }
 
