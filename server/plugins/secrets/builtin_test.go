@@ -51,7 +51,7 @@ func TestSecretListPipeline(t *testing.T) {
 	// repo secret
 	repoSecret := &model.Secret{
 		ID:     3,
-		OrgID:  1,
+		OrgID:  0,
 		RepoID: 1,
 		Name:   "secret",
 		Value:  "value-repo",
