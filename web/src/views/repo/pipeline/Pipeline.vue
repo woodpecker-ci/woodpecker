@@ -14,7 +14,7 @@
             <div class="flex flex-col items-center text-center gap-4">
               <Icon name="status-error" class="w-16 h-16 text-wp-state-error-100" />
               <span class="text-xl">{{ $t('repo.pipeline.we_got_some_errors') }}</span>
-              <span class="whitespace-pre">{{ selectedStep?.error }}</span>
+              <span class="whitespace-pre-wrap">{{ selectedStep?.error }}</span>
             </div>
           </Panel>
         </Container>
