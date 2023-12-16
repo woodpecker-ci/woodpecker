@@ -9,7 +9,7 @@
       />
 
       <div class="flex items-start justify-center flex-grow relative">
-        <Container v-if="selectedStep?.error" fill-width class="py-0">
+        <Container v-if="selectedStep?.error" fill-width class="p-0">
           <Panel>
             <div class="flex flex-col items-center text-center gap-4">
               <Icon name="status-error" class="w-16 h-16 text-wp-state-error-100" />
