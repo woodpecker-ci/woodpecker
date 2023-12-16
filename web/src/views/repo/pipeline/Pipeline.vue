@@ -1,6 +1,6 @@
 <template>
-  <Container full-width class="flex flex-col flex-grow md:min-h-xs">
-    <div class="flex w-full min-h-0 flex-grow">
+  <Container full-width class="flex flex-col flex-grow md:min-h-xs md:px-4">
+    <div class="flex w-full min-h-0 flex-grow gap-4">
       <PipelineStepList
         v-if="pipeline?.workflows && pipeline?.workflows?.length > 0"
         v-model:selected-step-id="selectedStepId"
@@ -11,7 +11,7 @@
       <div class="flex items-start justify-center flex-grow relative">
         <Container v-if="selectedStep?.error" fill-width class="py-0">
           <Panel>
-            <div class="flex flex-col items-center gap-4">
+            <div class="flex flex-col items-center text-center gap-4">
               <Icon name="status-error" class="w-16 h-16 text-wp-state-error-100" />
               <span class="text-xl">{{ $t('repo.pipeline.we_got_some_errors') }}</span>
               <span class="whitespace-pre">{{ selectedStep?.error }}</span>
@@ -19,9 +19,9 @@
           </Panel>
         </Container>
 
-        <Container v-else-if="pipeline.errors?.some((e) => !e.is_warning)" fill-width class="py-0">
+        <Container v-else-if="pipeline.errors?.some((e) => !e.is_warning)" fill-width class="p-0">
           <Panel>
-            <div class="flex flex-col items-center gap-4">
+            <div class="flex flex-col items-center text-center gap-4">
               <Icon name="status-error" class="w-16 h-16 text-wp-state-error-100" />
               <span class="text-xl">{{ $t('repo.pipeline.we_got_some_errors') }}</span>
               <Button color="red" :text="$t('repo.pipeline.show_errors')" :to="{ name: 'repo-pipeline-errors' }" />
@@ -29,7 +29,7 @@
           </Panel>
         </Container>
 
-        <Container v-else-if="pipeline.status === 'blocked'" fill-width class="py-0">
+        <Container v-else-if="pipeline.status === 'blocked'" fill-width class="p-0">
           <Panel>
             <div class="flex flex-col items-center gap-4">
               <Icon name="status-blocked" class="w-16 h-16" />
@@ -59,7 +59,7 @@
           </Panel>
         </Container>
 
-        <Container v-else-if="pipeline.status === 'declined'" fill-width class="py-0">
+        <Container v-else-if="pipeline.status === 'declined'" fill-width class="p-0">
           <Panel>
             <div class="flex flex-col items-center gap-4">
               <Icon name="status-declined" class="w-16 h-16 text-wp-state-error-100" />
