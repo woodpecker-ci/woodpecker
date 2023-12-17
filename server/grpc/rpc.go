@@ -56,10 +56,7 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 		log.Debug().Msgf("agent connected: %s: polling", hostname)
 	}
 
-	fn, err := createFilterFunc(agentFilter)
-	if err != nil {
-		return nil, err
-	}
+	fn := createFilterFunc(agentFilter)
 	for {
 		agent, err := s.getAgentFromContext(c)
 		if err != nil {
@@ -142,10 +139,12 @@ func (s *RPC) Update(_ context.Context, id string, state rpc.State) error {
 			"private": strconv.FormatBool(repo.IsSCMPrivate),
 		},
 	}
-	message.Data, _ = json.Marshal(model.Event{
+	if message.Data, err = json.Marshal(model.Event{
 		Repo:     *repo,
 		Pipeline: *currentPipeline,
-	})
+	}); err != nil {
+		log.Error().Err(err).Msg("can not marshal json to publish to proc list")
+	}
 	s.pubsub.Publish(message)
 
 	return nil
@@ -198,10 +197,12 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 				"private": strconv.FormatBool(repo.IsSCMPrivate),
 			},
 		}
-		message.Data, _ = json.Marshal(model.Event{
+		if message.Data, err = json.Marshal(model.Event{
 			Repo:     *repo,
 			Pipeline: *currentPipeline,
-		})
+		}); err != nil {
+			log.Error().Err(err).Msg("can not marshal event to publish")
+		}
 		s.pubsub.Publish(message)
 	}()
 
@@ -256,7 +257,7 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 
 	var queueErr error
 	if workflow.Failing() {
-		queueErr = s.queue.Error(c, id, fmt.Errorf("Step finished with exit code %d, %s", state.ExitCode, state.Error))
+		queueErr = s.queue.Error(c, id, fmt.Errorf("step finished with exit code %d, %s", state.ExitCode, state.Error))
 	} else {
 		queueErr = s.queue.Done(c, id, workflow.State)
 	}
@@ -375,7 +376,7 @@ func (s *RPC) ReportHealth(ctx context.Context, status string) error {
 	}
 
 	if status != "I am alive!" {
-		return errors.New("Are you alive?")
+		return errors.New("are you alive?")
 	}
 
 	agent.LastContact = time.Now().Unix()
@@ -418,10 +419,12 @@ func (s *RPC) notify(repo *model.Repo, pipeline *model.Pipeline) (err error) {
 			"private": strconv.FormatBool(repo.IsSCMPrivate),
 		},
 	}
-	message.Data, _ = json.Marshal(model.Event{
+	if message.Data, err = json.Marshal(model.Event{
 		Repo:     *repo,
 		Pipeline: *pipeline,
-	})
+	}); err != nil {
+		log.Error().Err(err).Msg("grpc could not marshal event")
+	}
 	s.pubsub.Publish(message)
 	return nil
 }

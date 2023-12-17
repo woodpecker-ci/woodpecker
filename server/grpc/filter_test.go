@@ -84,10 +84,7 @@ func TestCreateFilterFunc(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			fn, err := createFilterFunc(rpc.Filter{Labels: test.agentLabels})
-			if !assert.NoError(t, err) {
-				t.Fail()
-			}
+			fn := createFilterFunc(rpc.Filter{Labels: test.agentLabels})
 
 			assert.EqualValues(t, test.exp, fn(&test.task))
 		})

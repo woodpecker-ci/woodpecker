@@ -41,7 +41,7 @@ func (s *StringOrSlice) UnmarshalYAML(unmarshal func(any) error) error {
 		return nil
 	}
 
-	return errors.New("Failed to unmarshal StringOrSlice")
+	return errors.New("failed to unmarshal StringOrSlice")
 }
 
 func toStrings(s []any) ([]string, error) {
@@ -53,7 +53,7 @@ func toStrings(s []any) ([]string, error) {
 		if sv, ok := v.(string); ok {
 			r[k] = sv
 		} else {
-			return nil, fmt.Errorf("Cannot unmarshal '%v' of type %T into a string value", v, v)
+			return nil, fmt.Errorf("cannot unmarshal '%v' of type %T into a string value", v, v)
 		}
 	}
 	return r, nil

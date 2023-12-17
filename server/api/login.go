@@ -208,7 +208,7 @@ func GetLoginToken(c *gin.Context) {
 
 	user, err := _store.GetUserLogin(login)
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 

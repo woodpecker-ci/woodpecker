@@ -65,13 +65,13 @@ func Send(ctx context.Context, method, path string, privateKey crypto.PrivateKey
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != 200 {
+	if resp.StatusCode != http.StatusOK {
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return resp.StatusCode, err
 		}
 
-		return resp.StatusCode, fmt.Errorf("Response: %s", string(body))
+		return resp.StatusCode, fmt.Errorf("response: %s", string(body))
 	}
 
 	// if no other errors parse and return the json response.

@@ -147,11 +147,11 @@ func (e *docker) Load(ctx context.Context) (*backend.BackendInfo, error) {
 	}, nil
 }
 
-func (e *docker) SetupWorkflow(_ context.Context, conf *backend.Config, taskUUID string) error {
+func (e *docker) SetupWorkflow(ctx context.Context, conf *backend.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msg("create workflow environment")
 
 	for _, vol := range conf.Volumes {
-		_, err := e.client.VolumeCreate(noContext, volume.CreateOptions{
+		_, err := e.client.VolumeCreate(ctx, volume.CreateOptions{
 			Name:   vol.Name,
 			Driver: volumeDriver,
 		})
@@ -165,7 +165,7 @@ func (e *docker) SetupWorkflow(_ context.Context, conf *backend.Config, taskUUID
 		networkDriver = networkDriverNAT
 	}
 	for _, n := range conf.Networks {
-		_, err := e.client.NetworkCreate(noContext, n.Name, types.NetworkCreate{
+		_, err := e.client.NetworkCreate(ctx, n.Name, types.NetworkCreate{
 			Driver:     networkDriver,
 			EnableIPv6: e.enableIPv6,
 		})
@@ -311,27 +311,27 @@ func (e *docker) DestroyStep(ctx context.Context, step *backend.Step, taskUUID s
 	return nil
 }
 
-func (e *docker) DestroyWorkflow(_ context.Context, conf *backend.Config, taskUUID string) error {
+func (e *docker) DestroyWorkflow(ctx context.Context, conf *backend.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("delete workflow environment")
 
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
 			containerName := toContainerName(step)
-			if err := e.client.ContainerKill(noContext, containerName, "9"); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
+			if err := e.client.ContainerKill(ctx, containerName, "9"); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
 				log.Error().Err(err).Msgf("could not kill container '%s'", stage.Name)
 			}
-			if err := e.client.ContainerRemove(noContext, containerName, removeOpts); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
+			if err := e.client.ContainerRemove(ctx, containerName, removeOpts); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
 				log.Error().Err(err).Msgf("could not remove container '%s'", stage.Name)
 			}
 		}
 	}
 	for _, v := range conf.Volumes {
-		if err := e.client.VolumeRemove(noContext, v.Name, true); err != nil {
+		if err := e.client.VolumeRemove(ctx, v.Name, true); err != nil {
 			log.Error().Err(err).Msgf("could not remove volume '%s'", v.Name)
 		}
 	}
 	for _, n := range conf.Networks {
-		if err := e.client.NetworkRemove(noContext, n.Name); err != nil {
+		if err := e.client.NetworkRemove(ctx, n.Name); err != nil {
 			log.Error().Err(err).Msgf("could not remove network '%s'", n.Name)
 		}
 	}
@@ -339,8 +339,6 @@ func (e *docker) DestroyWorkflow(_ context.Context, conf *backend.Config, taskUU
 }
 
 var (
-	noContext = context.Background()
-
 	startOpts = types.ContainerStartOptions{}
 
 	removeOpts = types.ContainerRemoveOptions{

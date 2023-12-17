@@ -36,29 +36,29 @@ func Lint(r io.Reader) ([]gojsonschema.ResultError, error) {
 	// read yaml config
 	rBytes, err := io.ReadAll(r)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to load yml file %w", err)
+		return nil, fmt.Errorf("failed to load yml file %w", err)
 	}
 
 	// resolve sequence merges
 	yamlDoc := new(yaml.Node)
 	if err := xyaml.Unmarshal(rBytes, yamlDoc); err != nil {
-		return nil, fmt.Errorf("Failed to parse yml file %w", err)
+		return nil, fmt.Errorf("failed to parse yml file %w", err)
 	}
 
 	// convert to json
 	jsonDoc, err := yaml2json.ConvertNode(yamlDoc)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to convert yaml %w", err)
+		return nil, fmt.Errorf("failed to convert yaml %w", err)
 	}
 
 	documentLoader := gojsonschema.NewBytesLoader(jsonDoc)
 	result, err := gojsonschema.Validate(schemaLoader, documentLoader)
 	if err != nil {
-		return nil, fmt.Errorf("Validation failed %w", err)
+		return nil, fmt.Errorf("validation failed %w", err)
 	}
 
 	if !result.Valid() {
-		return result.Errors(), fmt.Errorf("Config not valid")
+		return result.Errors(), fmt.Errorf("config not valid")
 	}
 
 	return nil, nil

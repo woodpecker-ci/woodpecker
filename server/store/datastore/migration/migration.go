@@ -113,7 +113,7 @@ func Migrate(e *xorm.Engine, allowLong bool) error {
 func syncAll(sess *xorm.Engine) error {
 	for _, bean := range allBeans {
 		if err := sess.Sync(bean); err != nil {
-			return fmt.Errorf("Sync error '%s': %w", reflect.TypeOf(bean), err)
+			return fmt.Errorf("sync error '%s': %w", reflect.TypeOf(bean), err)
 		}
 	}
 	return nil

@@ -65,7 +65,7 @@ func DeleteOrg(c *gin.Context) {
 
 	err = _store.OrgDelete(orgID)
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 

@@ -70,7 +70,7 @@ func TestFifo(t *testing.T) {
 func TestFifoExpire(t *testing.T) {
 	want := &model.Task{ID: "1"}
 
-	q := New(context.Background()).(*fifo)
+	q, _ := New(context.Background()).(*fifo)
 	q.extension = 0
 	assert.NoError(t, q.Push(noContext, want))
 	info := q.Info(noContext)
@@ -95,7 +95,7 @@ func TestFifoExpire(t *testing.T) {
 func TestFifoWait(t *testing.T) {
 	want := &model.Task{ID: "1"}
 
-	q := New(context.Background()).(*fifo)
+	q, _ := New(context.Background()).(*fifo)
 	assert.NoError(t, q.Push(noContext, want))
 
 	got, _ := q.Poll(noContext, 1, func(*model.Task) bool { return true })
@@ -148,7 +148,7 @@ func TestFifoDependencies(t *testing.T) {
 		DepStatus:    make(map[string]model.StatusValue),
 	}
 
-	q := New(context.Background()).(*fifo)
+	q, _ := New(context.Background()).(*fifo)
 	assert.NoError(t, q.PushAtOnce(noContext, []*model.Task{task2, task1}))
 
 	got, _ := q.Poll(noContext, 1, func(*model.Task) bool { return true })
@@ -184,7 +184,7 @@ func TestFifoErrors(t *testing.T) {
 		RunOn:        []string{"success", "failure"},
 	}
 
-	q := New(context.Background()).(*fifo)
+	q, _ := New(context.Background()).(*fifo)
 	assert.NoError(t, q.PushAtOnce(noContext, []*model.Task{task2, task3, task1}))
 
 	got, _ := q.Poll(noContext, 1, func(*model.Task) bool { return true })
@@ -233,7 +233,7 @@ func TestFifoErrors2(t *testing.T) {
 		DepStatus:    make(map[string]model.StatusValue),
 	}
 
-	q := New(context.Background()).(*fifo)
+	q, _ := New(context.Background()).(*fifo)
 	assert.NoError(t, q.PushAtOnce(noContext, []*model.Task{task2, task3, task1}))
 
 	for i := 0; i < 2; i++ {
@@ -280,7 +280,7 @@ func TestFifoErrorsMultiThread(t *testing.T) {
 		DepStatus:    make(map[string]model.StatusValue),
 	}
 
-	q := New(context.Background()).(*fifo)
+	q, _ := New(context.Background()).(*fifo)
 	assert.NoError(t, q.PushAtOnce(noContext, []*model.Task{task2, task3, task1}))
 
 	obtainedWorkCh := make(chan *model.Task)
@@ -303,7 +303,8 @@ func TestFifoErrorsMultiThread(t *testing.T) {
 		case got := <-obtainedWorkCh:
 			fmt.Println(got.ID)
 
-			if !task1Processed {
+			switch {
+			case !task1Processed:
 				if got != task1 {
 					t.Errorf("expect task1 returned from queue as task2 and task3 depends on it")
 					return
@@ -317,7 +318,7 @@ func TestFifoErrorsMultiThread(t *testing.T) {
 						obtainedWorkCh <- got
 					}
 				}()
-			} else if !task2Processed {
+			case !task2Processed:
 				if got != task2 {
 					t.Errorf("expect task2 returned from queue")
 					return
@@ -331,7 +332,7 @@ func TestFifoErrorsMultiThread(t *testing.T) {
 						obtainedWorkCh <- got
 					}
 				}()
-			} else {
+			default:
 				if got != task3 {
 					t.Errorf("expect task3 returned from queue")
 					return
@@ -370,7 +371,7 @@ func TestFifoTransitiveErrors(t *testing.T) {
 		DepStatus:    make(map[string]model.StatusValue),
 	}
 
-	q := New(context.Background()).(*fifo)
+	q, _ := New(context.Background()).(*fifo)
 	assert.NoError(t, q.PushAtOnce(noContext, []*model.Task{task2, task3, task1}))
 
 	got, _ := q.Poll(noContext, 1, func(*model.Task) bool { return true })
@@ -420,7 +421,7 @@ func TestFifoCancel(t *testing.T) {
 		RunOn:        []string{"success", "failure"},
 	}
 
-	q := New(context.Background()).(*fifo)
+	q, _ := New(context.Background()).(*fifo)
 	assert.NoError(t, q.PushAtOnce(noContext, []*model.Task{task2, task3, task1}))
 
 	_, _ = q.Poll(noContext, 1, func(*model.Task) bool { return true })
@@ -440,7 +441,7 @@ func TestFifoPause(t *testing.T) {
 		ID: "1",
 	}
 
-	q := New(context.Background()).(*fifo)
+	q, _ := New(context.Background()).(*fifo)
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go func() {
@@ -472,7 +473,7 @@ func TestFifoPauseResume(t *testing.T) {
 		ID: "1",
 	}
 
-	q := New(context.Background()).(*fifo)
+	q, _ := New(context.Background()).(*fifo)
 	q.Pause()
 	assert.NoError(t, q.Push(noContext, task1))
 	q.Resume()
@@ -498,7 +499,7 @@ func TestWaitingVsPending(t *testing.T) {
 		RunOn:        []string{"success", "failure"},
 	}
 
-	q := New(context.Background()).(*fifo)
+	q, _ := New(context.Background()).(*fifo)
 	assert.NoError(t, q.PushAtOnce(noContext, []*model.Task{task2, task3, task1}))
 
 	got, _ := q.Poll(noContext, 1, func(*model.Task) bool { return true })

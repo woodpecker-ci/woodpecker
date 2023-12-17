@@ -48,7 +48,6 @@ const (
 var defaultDeleteOptions = newDefaultDeleteOptions()
 
 type kube struct {
-	ctx    context.Context
 	client kubernetes.Interface
 	config *config
 	goos   string
@@ -112,10 +111,8 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 }
 
 // New returns a new Kubernetes Backend.
-func New(ctx context.Context) types.Backend {
-	return &kube{
-		ctx: ctx,
-	}
+func New() types.Backend {
+	return &kube{}
 }
 
 func (e *kube) Name() string {
@@ -127,8 +124,8 @@ func (e *kube) IsAvailable(context.Context) bool {
 	return len(host) > 0
 }
 
-func (e *kube) Load(context.Context) (*types.BackendInfo, error) {
-	config, err := configFromCliContext(e.ctx)
+func (e *kube) Load(ctx context.Context) (*types.BackendInfo, error) {
+	config, err := configFromCliContext(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -210,7 +207,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 	finished := make(chan bool)
 
 	podUpdated := func(old, new any) {
-		pod := new.(*v1.Pod)
+		pod, _ := new.(*v1.Pod)
 		if pod.Name == podName {
 			if isImagePullBackOffState(pod) {
 				finished <- true
@@ -246,7 +243,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 	}
 
 	if isImagePullBackOffState(pod) {
-		return nil, fmt.Errorf("Could not pull image for pod %s", pod.Name)
+		return nil, fmt.Errorf("could not pull image for pod %s", pod.Name)
 	}
 
 	bs := &types.State{
@@ -270,7 +267,7 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 	up := make(chan bool)
 
 	podUpdated := func(old, new any) {
-		pod := new.(*v1.Pod)
+		pod, _ := new.(*v1.Pod)
 		if pod.Name == podName {
 			switch pod.Status.Phase {
 			case v1.PodRunning, v1.PodSucceeded, v1.PodFailed:
@@ -329,26 +326,26 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 	// return rc, nil
 }
 
-func (e *kube) DestroyStep(_ context.Context, step *types.Step, taskUUID string) error {
+func (e *kube) DestroyStep(ctx context.Context, step *types.Step, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("Stopping step: %s", step.Name)
-	err := stopPod(e.ctx, e, step, defaultDeleteOptions)
+	err := stopPod(ctx, e, step, defaultDeleteOptions)
 	return err
 }
 
 // Destroy the pipeline environment.
-func (e *kube) DestroyWorkflow(_ context.Context, conf *types.Config, taskUUID string) error {
+func (e *kube) DestroyWorkflow(ctx context.Context, conf *types.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msg("Deleting Kubernetes primitives")
 
 	// Use noContext because the ctx sent to this function will be canceled/done in case of error or canceled by user.
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
-			err := stopPod(e.ctx, e, step, defaultDeleteOptions)
+			err := stopPod(ctx, e, step, defaultDeleteOptions)
 			if err != nil {
 				return err
 			}
 
 			if step.Type == types.StepTypeService {
-				err := stopService(e.ctx, e, step, defaultDeleteOptions)
+				err := stopService(ctx, e, step, defaultDeleteOptions)
 				if err != nil {
 					return err
 				}
@@ -357,7 +354,7 @@ func (e *kube) DestroyWorkflow(_ context.Context, conf *types.Config, taskUUID s
 	}
 
 	for _, vol := range conf.Volumes {
-		err := stopVolume(e.ctx, e, vol.Name, defaultDeleteOptions)
+		err := stopVolume(ctx, e, vol.Name, defaultDeleteOptions)
 		if err != nil {
 			return err
 		}

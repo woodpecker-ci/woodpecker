@@ -117,11 +117,9 @@ func GetRepos(c *gin.Context) {
 					existingRepo.Update(r)
 					existingRepo.IsActive = active[r.ForgeRemoteID].IsActive
 					repos = append(repos, existingRepo)
-				} else {
-					if r.Perm.Admin {
-						// you must be admin to enable the repo
-						repos = append(repos, r)
-					}
+				} else if r.Perm.Admin {
+					// you must be admin to enable the repo
+					repos = append(repos, r)
 				}
 			}
 		}

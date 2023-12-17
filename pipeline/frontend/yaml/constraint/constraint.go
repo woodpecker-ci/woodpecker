@@ -195,7 +195,8 @@ func (c *Constraint) Match(m metadata.Metadata, global bool, env map[string]stri
 		if err != nil {
 			return false, err
 		}
-		match = match && result.(bool)
+		bresult, _ := result.(bool)
+		match = match && bresult
 	}
 
 	return match, nil
@@ -261,7 +262,7 @@ func (c *List) UnmarshalYAML(value *yaml.Node) error {
 
 	if err1 != nil && err2 != nil {
 		y, _ := yaml.Marshal(value)
-		return fmt.Errorf("Could not parse condition: %s: %w", y, multierr.Append(err1, err2))
+		return fmt.Errorf("could not parse condition: %s: %w", y, multierr.Append(err1, err2))
 	}
 
 	return nil
@@ -342,7 +343,7 @@ func (c *Path) UnmarshalYAML(value *yaml.Node) error {
 
 	if err1 != nil && err2 != nil {
 		y, _ := yaml.Marshal(value)
-		return fmt.Errorf("Could not parse condition: %s", y)
+		return fmt.Errorf("could not parse condition: %s", y)
 	}
 
 	return nil

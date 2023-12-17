@@ -24,10 +24,10 @@ import (
 )
 
 var (
-	ErrSecretNameInvalid  = errors.New("Invalid Secret Name")
-	ErrSecretImageInvalid = errors.New("Invalid Secret Image")
-	ErrSecretValueInvalid = errors.New("Invalid Secret Value")
-	ErrSecretEventInvalid = errors.New("Invalid Secret Event")
+	ErrSecretNameInvalid  = errors.New("invalid secret name")
+	ErrSecretImageInvalid = errors.New("invalid secret image")
+	ErrSecretValueInvalid = errors.New("invalid secret value")
+	ErrSecretEventInvalid = errors.New("invalid secret event")
 )
 
 // SecretService defines a service for managing secrets.

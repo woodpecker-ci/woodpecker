@@ -29,11 +29,11 @@ var (
 	backends       []types.Backend
 )
 
-func Init(ctx context.Context) {
+func Init() {
 	backends = []types.Backend{
 		docker.New(),
 		local.New(),
-		kubernetes.New(ctx),
+		kubernetes.New(),
 	}
 
 	backendsByName = make(map[string]types.Backend)

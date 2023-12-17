@@ -24,7 +24,7 @@ import (
 )
 
 // publishToTopic publishes message to UI clients
-func publishToTopic(pipeline *model.Pipeline, repo *model.Repo) {
+func publishToTopic(pipeline *model.Pipeline, repo *model.Repo) (err error) {
 	message := pubsub.Message{
 		Labels: map[string]string{
 			"repo":    repo.FullName,
@@ -33,9 +33,13 @@ func publishToTopic(pipeline *model.Pipeline, repo *model.Repo) {
 	}
 	pipelineCopy := *pipeline
 
-	message.Data, _ = json.Marshal(model.Event{
+	if message.Data, err = json.Marshal(model.Event{
 		Repo:     *repo,
 		Pipeline: pipelineCopy,
-	})
+	}); err != nil {
+		return err
+	}
 	server.Config.Services.Pubsub.Publish(message)
+
+	return nil
 }

@@ -31,7 +31,7 @@ import (
 // following specification:
 //   https://github.com/mozilla-services/Dockerflow
 
-func init() {
+func initHealth() {
 	http.HandleFunc("/varz", handleStats)
 	http.HandleFunc("/healthz", handleHeartbeat)
 	http.HandleFunc("/version", handleVersion)
@@ -39,26 +39,28 @@ func init() {
 
 func handleHeartbeat(w http.ResponseWriter, _ *http.Request) {
 	if counter.Healthy() {
-		w.WriteHeader(200)
+		w.WriteHeader(http.StatusOK)
 	} else {
-		w.WriteHeader(500)
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
 
 func handleVersion(w http.ResponseWriter, _ *http.Request) {
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 	w.Header().Add("Content-Type", "text/json")
-	_ = json.NewEncoder(w).Encode(versionResp{
+	if err := json.NewEncoder(w).Encode(versionResp{
 		Source:  "https://github.com/woodpecker-ci/woodpecker",
 		Version: version.String(),
-	})
+	}); err != nil {
+		log.Err(err).Msg("handleVersion could not encode")
+	}
 }
 
 func handleStats(w http.ResponseWriter, _ *http.Request) {
 	if counter.Healthy() {
-		w.WriteHeader(200)
+		w.WriteHeader(http.StatusOK)
 	} else {
-		w.WriteHeader(500)
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 	w.Header().Add("Content-Type", "text/json")
 	if _, err := counter.WriteTo(w); err != nil {
@@ -89,7 +91,7 @@ func pinger(c *cli.Context) error {
 		return err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode != 200 {
+	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("agent returned non-200 status code")
 	}
 	return nil

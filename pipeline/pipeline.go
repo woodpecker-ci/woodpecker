@@ -112,7 +112,7 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 	}()
 
 	r.started = time.Now().Unix()
-	if err := r.engine.SetupWorkflow(r.ctx, r.spec, r.taskUUID); err != nil {
+	if err := r.engine.SetupWorkflow(runnerCtx, r.spec, r.taskUUID); err != nil {
 		return err
 	}
 

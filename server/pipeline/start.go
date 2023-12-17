@@ -37,9 +37,11 @@ func start(ctx context.Context, store store.Store, activePipeline *model.Pipelin
 		return nil, err
 	}
 
-	publishPipeline(ctx, activePipeline, repo, user)
+	if err := publishPipeline(ctx, activePipeline, repo, user); err != nil {
+		return nil, err
+	}
 
-	if err := queuePipeline(repo, pipelineItems); err != nil {
+	if err := queuePipeline(ctx, repo, pipelineItems); err != nil {
 		log.Error().Err(err).Msg("queuePipeline")
 		return nil, err
 	}
@@ -47,7 +49,12 @@ func start(ctx context.Context, store store.Store, activePipeline *model.Pipelin
 	return activePipeline, nil
 }
 
-func publishPipeline(ctx context.Context, pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User) {
-	publishToTopic(pipeline, repo)
+func publishPipeline(ctx context.Context, pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User) error {
+	if err := publishToTopic(pipeline, repo); err != nil {
+		return err
+	}
+
 	updatePipelineStatus(ctx, pipeline, repo, repoUser)
+
+	return nil
 }

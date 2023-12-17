@@ -20,7 +20,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
-var ErrNoTokenProvided = errors.New("Please provide a token")
+var ErrNoTokenProvided = errors.New("please provide a token")
 
 func (s storage) AgentList(p *model.ListOptions) ([]*model.Agent, error) {
 	var agents []*model.Agent

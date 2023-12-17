@@ -46,15 +46,16 @@ func TestUpdateStepStatusNotExited(t *testing.T) {
 	err := UpdateStepStatus(&mockUpdateStepStore{}, step, state, int64(1))
 	assert.NoError(t, err)
 
-	if step.State != model.StatusRunning {
+	switch {
+	case step.State != model.StatusRunning:
 		t.Errorf("Step status not equals '%s' != '%s'", model.StatusRunning, step.State)
-	} else if step.Started != int64(42) {
+	case step.Started != int64(42):
 		t.Errorf("Step started not equals 42 != %d", step.Started)
-	} else if step.Stopped != int64(0) {
+	case step.Stopped != int64(0):
 		t.Errorf("Step stopped not equals 0 != %d", step.Stopped)
-	} else if step.ExitCode != 0 {
+	case step.ExitCode != 0:
 		t.Errorf("Step exit code not equals 0 != %d", step.ExitCode)
-	} else if step.Error != "" {
+	case step.Error != "":
 		t.Errorf("Step error not equals '' != '%s'", step.Error)
 	}
 }
@@ -74,15 +75,16 @@ func TestUpdateStepStatusNotExitedButStopped(t *testing.T) {
 	err := UpdateStepStatus(&mockUpdateStepStore{}, step, state, int64(42))
 	assert.NoError(t, err)
 
-	if step.State != model.StatusRunning {
+	switch {
+	case step.State != model.StatusRunning:
 		t.Errorf("Step status not equals '%s' != '%s'", model.StatusRunning, step.State)
-	} else if step.Started != int64(42) {
+	case step.Started != int64(42):
 		t.Errorf("Step started not equals 42 != %d", step.Started)
-	} else if step.Stopped != int64(64) {
+	case step.Stopped != int64(64):
 		t.Errorf("Step stopped not equals 64 != %d", step.Stopped)
-	} else if step.ExitCode != 0 {
+	case step.ExitCode != 0:
 		t.Errorf("Step exit code not equals 0 != %d", step.ExitCode)
-	} else if step.Error != "" {
+	case step.Error != "":
 		t.Errorf("Step error not equals '' != '%s'", step.Error)
 	}
 }
@@ -102,15 +104,16 @@ func TestUpdateStepStatusExited(t *testing.T) {
 	err := UpdateStepStatus(&mockUpdateStepStore{}, step, state, int64(42))
 	assert.NoError(t, err)
 
-	if step.State != model.StatusKilled {
+	switch {
+	case step.State != model.StatusKilled:
 		t.Errorf("Step status not equals '%s' != '%s'", model.StatusKilled, step.State)
-	} else if step.Started != int64(42) {
+	case step.Started != int64(42):
 		t.Errorf("Step started not equals 42 != %d", step.Started)
-	} else if step.Stopped != int64(34) {
+	case step.Stopped != int64(34):
 		t.Errorf("Step stopped not equals 34 != %d", step.Stopped)
-	} else if step.ExitCode != 137 {
+	case step.ExitCode != 137:
 		t.Errorf("Step exit code not equals 137 != %d", step.ExitCode)
-	} else if step.Error != "an error" {
+	case step.Error != "an error":
 		t.Errorf("Step error not equals 'an error' != '%s'", step.Error)
 	}
 }
@@ -128,15 +131,16 @@ func TestUpdateStepStatusExitedButNot137(t *testing.T) {
 	err := UpdateStepStatus(&mockUpdateStepStore{}, step, state, int64(42))
 	assert.NoError(t, err)
 
-	if step.State != model.StatusFailure {
+	switch {
+	case step.State != model.StatusFailure:
 		t.Errorf("Step status not equals '%s' != '%s'", model.StatusFailure, step.State)
-	} else if step.Started != int64(42) {
+	case step.Started != int64(42):
 		t.Errorf("Step started not equals 42 != %d", step.Started)
-	} else if step.Stopped != int64(34) {
+	case step.Stopped != int64(34):
 		t.Errorf("Step stopped not equals 34 != %d", step.Stopped)
-	} else if step.ExitCode != 0 {
+	case step.ExitCode != 0:
 		t.Errorf("Step exit code not equals 0 != %d", step.ExitCode)
-	} else if step.Error != "an error" {
+	case step.Error != "an error":
 		t.Errorf("Step error not equals 'an error' != '%s'", step.Error)
 	}
 }
@@ -212,13 +216,14 @@ func TestUpdateStepStatusToDoneSkipped(t *testing.T) {
 
 	step, _ := UpdateStepStatusToDone(&mockUpdateStepStore{}, model.Step{}, state)
 
-	if step.State != model.StatusSkipped {
+	switch {
+	case step.State != model.StatusSkipped:
 		t.Errorf("Step status not equals '%s' != '%s'", model.StatusSkipped, step.State)
-	} else if step.Stopped != int64(34) {
+	case step.Stopped != int64(34):
 		t.Errorf("Step stopped not equals 34 != %d", step.Stopped)
-	} else if step.Error != "" {
+	case step.Error != "":
 		t.Errorf("Step error not equals '' != '%s'", step.Error)
-	} else if step.ExitCode != 0 {
+	case step.ExitCode != 0:
 		t.Errorf("Step exit code not equals 0 != %d", step.ExitCode)
 	}
 }
@@ -233,13 +238,14 @@ func TestUpdateStepStatusToDoneSuccess(t *testing.T) {
 
 	step, _ := UpdateStepStatusToDone(&mockUpdateStepStore{}, model.Step{}, state)
 
-	if step.State != model.StatusSuccess {
+	switch {
+	case step.State != model.StatusSuccess:
 		t.Errorf("Step status not equals '%s' != '%s'", model.StatusSuccess, step.State)
-	} else if step.Stopped != int64(34) {
+	case step.Stopped != int64(34):
 		t.Errorf("Step stopped not equals 34 != %d", step.Stopped)
-	} else if step.Error != "" {
+	case step.Error != "":
 		t.Errorf("Step error not equals '' != '%s'", step.Error)
-	} else if step.ExitCode != 0 {
+	case step.ExitCode != 0:
 		t.Errorf("Step exit code not equals 0 != %d", step.ExitCode)
 	}
 }
@@ -275,13 +281,14 @@ func TestUpdateStepToStatusKilledStarted(t *testing.T) {
 
 	step, _ := UpdateStepToStatusKilled(&mockUpdateStepStore{}, model.Step{})
 
-	if step.State != model.StatusKilled {
+	switch {
+	case step.State != model.StatusKilled:
 		t.Errorf("Step status not equals '%s' != '%s'", model.StatusKilled, step.State)
-	} else if step.Stopped < now {
+	case step.Stopped < now:
 		t.Errorf("Step stopped not equals %d < %d", now, step.Stopped)
-	} else if step.Started != step.Stopped {
+	case step.Started != step.Stopped:
 		t.Errorf("Step started not equals %d != %d", step.Stopped, step.Started)
-	} else if step.ExitCode != 137 {
+	case step.ExitCode != 137:
 		t.Errorf("Step exit code not equals 137 != %d", step.ExitCode)
 	}
 }

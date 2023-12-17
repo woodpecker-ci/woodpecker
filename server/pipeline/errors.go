@@ -25,9 +25,9 @@ func (e ErrNotFound) Error() string {
 }
 
 func (e ErrNotFound) Is(target error) bool {
-	_, ok := target.(ErrNotFound) //nolint:errorlint
+	_, ok := target.(ErrNotFound)
 	if !ok {
-		_, ok = target.(*ErrNotFound) //nolint:errorlint
+		_, ok = target.(*ErrNotFound)
 	}
 	return ok
 }
@@ -41,9 +41,9 @@ func (e ErrBadRequest) Error() string {
 }
 
 func (e ErrBadRequest) Is(target error) bool {
-	_, ok := target.(ErrBadRequest) //nolint:errorlint
+	_, ok := target.(ErrBadRequest)
 	if !ok {
-		_, ok = target.(*ErrBadRequest) //nolint:errorlint
+		_, ok = target.(*ErrBadRequest)
 	}
 	return ok
 }

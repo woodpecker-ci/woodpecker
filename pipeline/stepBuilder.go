@@ -26,7 +26,6 @@ import (
 
 	backend_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
-	pipeline_errors "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
 	yaml_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types"
 	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 
@@ -89,7 +88,7 @@ func (b *StepBuilder) Build() (items []*Item, errorsAndWarnings error) {
 				workflow.AxisID = i + 1
 			}
 			item, err := b.genItemForWorkflow(workflow, axis, string(y.Data))
-			if err != nil && pipeline_errors.HasBlockingErrors(err) {
+			if err != nil && errors.HasBlockingErrors(err) {
 				return nil, err
 			} else if err != nil {
 				errorsAndWarnings = multierr.Append(errorsAndWarnings, err)
@@ -149,7 +148,7 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 		File:      workflow.Name,
 		RawConfig: data,
 	}}))
-	if pipeline_errors.HasBlockingErrors(errorsAndWarnings) {
+	if errors.HasBlockingErrors(errorsAndWarnings) {
 		return nil, errorsAndWarnings
 	}
 

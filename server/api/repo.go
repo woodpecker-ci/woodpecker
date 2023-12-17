@@ -401,7 +401,7 @@ func DeleteRepo(c *gin.Context) {
 
 	if remove {
 		if err := _store.DeleteRepo(repo); err != nil {
-			handleDbError(c, err)
+			handleDBError(c, err)
 			return
 		}
 	}

@@ -41,7 +41,7 @@ func NewWoodpeckerAuthServer(jwtManager *JWTManager, agentMasterToken string, st
 func (s *WoodpeckerAuthServer) Auth(_ context.Context, req *proto.AuthRequest) (*proto.AuthResponse, error) {
 	agent, err := s.getAgent(req.AgentId, req.AgentToken)
 	if err != nil {
-		return nil, fmt.Errorf("Agent could not auth: %w", err)
+		return nil, fmt.Errorf("agent could not auth: %w", err)
 	}
 
 	accessToken, err := s.jwtManager.Generate(agent.ID)

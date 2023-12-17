@@ -59,11 +59,11 @@ func parseHook(r *http.Request, merge bool) (*github.PullRequest, *model.Repo, *
 
 	switch hook := payload.(type) {
 	case *github.PushEvent:
-		repo, pipeline, err := parsePushHook(hook)
-		return nil, repo, pipeline, err
+		repo, pipeline := parsePushHook(hook)
+		return nil, repo, pipeline, nil
 	case *github.DeploymentEvent:
-		repo, pipeline, err := parseDeployHook(hook)
-		return nil, repo, pipeline, err
+		repo, pipeline := parseDeployHook(hook)
+		return nil, repo, pipeline, nil
 	case *github.PullRequestEvent:
 		return parsePullHook(hook, merge)
 	default:
@@ -73,9 +73,9 @@ func parseHook(r *http.Request, merge bool) (*github.PullRequest, *model.Repo, *
 
 // parsePushHook parses a push hook and returns the Repo and Pipeline details.
 // If the commit type is unsupported nil values are returned.
-func parsePushHook(hook *github.PushEvent) (*model.Repo, *model.Pipeline, error) {
+func parsePushHook(hook *github.PushEvent) (*model.Repo, *model.Pipeline) {
 	if hook.Deleted != nil && *hook.Deleted {
-		return nil, nil, nil
+		return nil, nil
 	}
 
 	pipeline := &model.Pipeline{
@@ -83,7 +83,7 @@ func parsePushHook(hook *github.PushEvent) (*model.Repo, *model.Pipeline, error)
 		Commit:       hook.GetHeadCommit().GetID(),
 		Ref:          hook.GetRef(),
 		ForgeURL:     hook.GetHeadCommit().GetURL(),
-		Branch:       strings.Replace(hook.GetRef(), "refs/heads/", "", -1),
+		Branch:       strings.ReplaceAll(hook.GetRef(), "refs/heads/", ""),
 		Message:      hook.GetHeadCommit().GetMessage(),
 		Email:        hook.GetHeadCommit().GetAuthor().GetEmail(),
 		Avatar:       hook.GetSender().GetAvatarURL(),
@@ -104,16 +104,16 @@ func parsePushHook(hook *github.PushEvent) (*model.Repo, *model.Pipeline, error)
 		// For tags, if the base_ref (tag's base branch) is set, we're using it
 		// as pipeline's branch so that we can filter events base on it
 		if strings.HasPrefix(hook.GetBaseRef(), "refs/heads/") {
-			pipeline.Branch = strings.Replace(hook.GetBaseRef(), "refs/heads/", "", -1)
+			pipeline.Branch = strings.ReplaceAll(hook.GetBaseRef(), "refs/heads/", "")
 		}
 	}
 
-	return convertRepoHook(hook.GetRepo()), pipeline, nil
+	return convertRepoHook(hook.GetRepo()), pipeline
 }
 
 // parseDeployHook parses a deployment and returns the Repo and Pipeline details.
 // If the commit type is unsupported nil values are returned.
-func parseDeployHook(hook *github.DeploymentEvent) (*model.Repo, *model.Pipeline, error) {
+func parseDeployHook(hook *github.DeploymentEvent) (*model.Repo, *model.Pipeline) {
 	pipeline := &model.Pipeline{
 		Event:    model.EventDeploy,
 		Commit:   hook.GetDeployment().GetSHA(),
@@ -136,7 +136,7 @@ func parseDeployHook(hook *github.DeploymentEvent) (*model.Repo, *model.Pipeline
 		pipeline.Ref = fmt.Sprintf("refs/heads/%s", pipeline.Branch)
 	}
 
-	return convertRepo(hook.GetRepo()), pipeline, nil
+	return convertRepo(hook.GetRepo()), pipeline
 }
 
 // parsePullHook parses a pull request hook and returns the Repo and Pipeline

@@ -16,6 +16,11 @@ linters-settings:
       - ^log.Fatal().*$
   errorlint:
     errorf-multi: true
+  gci:
+    sections:
+      - standard
+      - default
+      - prefix(go.woodpecker-ci.org/woodpecker)
 
 linters:
   disable-all: true
@@ -37,6 +42,34 @@ linters:
     - errorlint
     - forbidigo
     - zerologlint
+    - asciicheck
+    - bodyclose
+    - contextcheck
+    # - depguard
+    - dogsled
+    - durationcheck
+    - errchkjson
+    - forcetypeassert
+    # - gci
+    - gochecknoinits
+    # - goconst
+    - gocritic
+    - goheader
+    - gomnd
+    - gomoddirectives
+    - gomodguard
+    - goprintffuncname
+    - importas
+    - makezero
+    - nolintlint
+    - rowserrcheck
+    - sqlclosecheck
+    - stylecheck
+    - tenv
+    - unconvert
+    - unparam
+    - wastedassign
+    - whitespace
 
 run:
   timeout: 5m
@@ -57,3 +90,16 @@ issues:
     - path: 'server/web/web.go|server/plugins/encryption/tink_keyset_watcher.go'
       linters:
         - forbidigo
+
+    - path: agent/runner.go
+      linters:
+        - contextcheck
+        - errorlint
+
+    - path: 'server/forge/bitbucket/bitbucket_test.go|server/forge/gitea/gitea_test.go|server/forge/github/github_test.go'
+      linters:
+        - forcetypeassert
+
+    - path: server/store/datastore/migration/common.go|pipeline/frontend/yaml/constraint/constraint.go
+      linters:
+        - gocritic

@@ -38,6 +38,7 @@ import (
 const (
 	DefaultAPI = "https://api.bitbucket.org"
 	DefaultURL = "https://bitbucket.org"
+	pageSize   = 100
 )
 
 // Opts are forge options for bitbucket
@@ -142,7 +143,7 @@ func (c *config) Refresh(ctx context.Context, user *model.User) (bool, error) {
 func (c *config) Teams(ctx context.Context, u *model.User) ([]*model.Team, error) {
 	return shared_utils.Paginate(func(page int) ([]*model.Team, error) {
 		opts := &internal.ListWorkspacesOpts{
-			PageLen: 100,
+			PageLen: pageSize,
 			Page:    page,
 			Role:    "member",
 		}
@@ -191,7 +192,7 @@ func (c *config) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 	workspaces, err := shared_utils.Paginate(func(page int) ([]*internal.Workspace, error) {
 		resp, err := client.ListWorkspaces(&internal.ListWorkspacesOpts{
 			Page:    page,
-			PageLen: 100,
+			PageLen: pageSize,
 			Role:    "member",
 		})
 		if err != nil {

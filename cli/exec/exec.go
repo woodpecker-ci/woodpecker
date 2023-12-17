@@ -94,7 +94,7 @@ func runExec(c *cli.Context, file, repoPath string) error {
 
 	axes, err := matrix.ParseString(string(dat))
 	if err != nil {
-		return fmt.Errorf("Parse matrix fail")
+		return fmt.Errorf("parse matrix fail")
 	}
 
 	if len(axes) == 0 {
@@ -213,7 +213,7 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 	}
 
 	backendCtx := context.WithValue(c.Context, backendTypes.CliContext, c)
-	backend.Init(backendCtx)
+	backend.Init()
 
 	backendEngine, err := backend.FindBackend(backendCtx, c.String("backend-engine"))
 	if err != nil {

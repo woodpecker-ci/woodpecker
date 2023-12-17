@@ -261,7 +261,6 @@ func getBackendEngine(backendCtx context.Context, backendName string, addons []s
 		return addonBackend.Value, nil
 	}
 
-	backend.Init(backendCtx)
 	engine, err := backend.FindBackend(backendCtx, backendName)
 	if err != nil {
 		log.Error().Err(err).Msgf("cannot find backend engine '%s'", backendName)

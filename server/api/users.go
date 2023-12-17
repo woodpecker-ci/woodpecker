@@ -59,7 +59,7 @@ func GetUsers(c *gin.Context) {
 func GetUser(c *gin.Context) {
 	user, err := store.FromContext(c).GetUserLogin(c.Param("login"))
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, user)
@@ -89,7 +89,7 @@ func PatchUser(c *gin.Context) {
 
 	user, err := _store.GetUserLogin(c.Param("login"))
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 
@@ -159,11 +159,11 @@ func DeleteUser(c *gin.Context) {
 
 	user, err := _store.GetUserLogin(c.Param("login"))
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 	if err = _store.DeleteUser(user); err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 	c.Status(http.StatusNoContent)

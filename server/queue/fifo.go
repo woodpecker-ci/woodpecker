@@ -204,10 +204,12 @@ func (q *fifo) Info(_ context.Context) InfoT {
 	stats.Stats.Complete = 0 // TODO: implement this
 
 	for e := q.pending.Front(); e != nil; e = e.Next() {
-		stats.Pending = append(stats.Pending, e.Value.(*model.Task))
+		task, _ := e.Value.(*model.Task)
+		stats.Pending = append(stats.Pending, task)
 	}
 	for e := q.waitingOnDeps.Front(); e != nil; e = e.Next() {
-		stats.WaitingOnDeps = append(stats.WaitingOnDeps, e.Value.(*model.Task))
+		task, _ := e.Value.(*model.Task)
+		stats.WaitingOnDeps = append(stats.WaitingOnDeps, task)
 	}
 	for _, entry := range q.running {
 		stats.Running = append(stats.Running, entry.item)
@@ -255,7 +257,7 @@ func (q *fifo) process() {
 	q.resubmitExpiredPipelines()
 	q.filterWaiting()
 	for pending, worker := q.assignToWorker(); pending != nil && worker != nil; pending, worker = q.assignToWorker() {
-		task := pending.Value.(*model.Task)
+		task, _ := pending.Value.(*model.Task)
 		task.AgentID = worker.agentID
 		delete(q.workers, worker)
 		q.pending.Remove(pending)
@@ -273,7 +275,7 @@ func (q *fifo) filterWaiting() {
 	var nextWaiting *list.Element
 	for e := q.waitingOnDeps.Front(); e != nil; e = nextWaiting {
 		nextWaiting = e.Next()
-		task := e.Value.(*model.Task)
+		task, _ := e.Value.(*model.Task)
 		q.pending.PushBack(task)
 	}
 
@@ -283,7 +285,7 @@ func (q *fifo) filterWaiting() {
 	var nextPending *list.Element
 	for e := q.pending.Front(); e != nil; e = nextPending {
 		nextPending = e.Next()
-		task := e.Value.(*model.Task)
+		task, _ := e.Value.(*model.Task)
 		if q.depsInQueue(task) {
 			log.Debug().Msgf("queue: waiting due to unmet dependencies %v", task.ID)
 			q.waitingOnDeps.PushBack(task)
@@ -301,7 +303,7 @@ func (q *fifo) assignToWorker() (*list.Element, *worker) {
 	var next *list.Element
 	for e := q.pending.Front(); e != nil; e = next {
 		next = e.Next()
-		task := e.Value.(*model.Task)
+		task, _ := e.Value.(*model.Task)
 		log.Debug().Msgf("queue: trying to assign task: %v with deps %v", task.ID, task.Dependencies)
 
 		for w := range q.workers {
@@ -384,7 +386,7 @@ func (q *fifo) removeFromPending(taskID string) {
 	var next *list.Element
 	for e := q.pending.Front(); e != nil; e = next {
 		next = e.Next()
-		task := e.Value.(*model.Task)
+		task, _ := e.Value.(*model.Task)
 		if task.ID == taskID {
 			log.Debug().Msgf("queue: %s is removed from pending", taskID)
 			q.pending.Remove(e)

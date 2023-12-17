@@ -19,6 +19,8 @@ import (
 	"crypto"
 	"fmt"
 
+	httpStatus "net/http"
+
 	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/utils"
@@ -66,11 +68,11 @@ func (cp *http) FetchConfig(ctx context.Context, repo *model.Repo, pipeline *mod
 
 	status, err := utils.Send(ctx, "POST", cp.endpoint, cp.privateKey, body, response)
 	if err != nil && status != 204 {
-		return nil, false, fmt.Errorf("Failed to fetch config via http (%d) %w", status, err)
+		return nil, false, fmt.Errorf("failed to fetch config via http (%d) %w", status, err)
 	}
 
 	var newFileMeta []*forge_types.FileMeta
-	if status != 200 {
+	if status != httpStatus.StatusOK {
 		newFileMeta = make([]*forge_types.FileMeta, 0)
 	} else {
 		newFileMeta = make([]*forge_types.FileMeta, len(response.Configs))
@@ -79,5 +81,5 @@ func (cp *http) FetchConfig(ctx context.Context, repo *model.Repo, pipeline *mod
 		}
 	}
 
-	return newFileMeta, status == 204, nil
+	return newFileMeta, status == httpStatus.StatusNoContent, nil
 }

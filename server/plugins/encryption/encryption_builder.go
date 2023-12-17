@@ -50,22 +50,24 @@ func (b builder) isEnabled() (bool, error) {
 func (b builder) detectKeyType() (string, error) {
 	rawKeyPresent := b.ctx.IsSet(rawKeyConfigFlag)
 	tinkKeysetPresent := b.ctx.IsSet(tinkKeysetFilepathConfigFlag)
-	if rawKeyPresent && tinkKeysetPresent {
+	switch {
+	case rawKeyPresent && tinkKeysetPresent:
 		return "", errors.New(errMessageCantUseBothServices)
-	} else if rawKeyPresent {
+	case rawKeyPresent:
 		return keyTypeRaw, nil
-	} else if tinkKeysetPresent {
+	case tinkKeysetPresent:
 		return keyTypeTink, nil
 	}
 	return keyTypeNone, nil
 }
 
 func (b builder) serviceBuilder(keyType string) (model.EncryptionServiceBuilder, error) {
-	if keyType == keyTypeTink {
+	switch {
+	case keyType == keyTypeTink:
 		return newTink(b.ctx, b.store), nil
-	} else if keyType == keyTypeRaw {
+	case keyType == keyTypeRaw:
 		return newAES(b.ctx, b.store), nil
-	} else if keyType == keyTypeNone {
+	case keyType == keyTypeNone:
 		return &noEncryptionBuilder{}, nil
 	}
 	return nil, fmt.Errorf(errMessageTemplateUnsupportedKeyType, keyType)

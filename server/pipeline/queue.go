@@ -25,7 +25,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
-func queuePipeline(repo *model.Repo, pipelineItems []*pipeline.Item) error {
+func queuePipeline(ctx context.Context, repo *model.Repo, pipelineItems []*pipeline.Item) error {
 	var tasks []*model.Task
 	for _, item := range pipelineItems {
 		if item.Workflow.State == model.StatusSkipped {
@@ -42,15 +42,19 @@ func queuePipeline(repo *model.Repo, pipelineItems []*pipeline.Item) error {
 		task.RunOn = item.RunsOn
 		task.DepStatus = make(map[string]model.StatusValue)
 
-		task.Data, _ = json.Marshal(rpc.Workflow{
+		var err error
+		task.Data, err = json.Marshal(rpc.Workflow{
 			ID:      fmt.Sprint(item.Workflow.ID),
 			Config:  item.Config,
 			Timeout: repo.Timeout,
 		})
+		if err != nil {
+			return err
+		}
 
 		tasks = append(tasks, task)
 	}
-	return server.Config.Services.Queue.PushAtOnce(context.Background(), tasks)
+	return server.Config.Services.Queue.PushAtOnce(ctx, tasks)
 }
 
 func taskIds(dependsOn []string, pipelineItems []*pipeline.Item) (taskIds []string) {

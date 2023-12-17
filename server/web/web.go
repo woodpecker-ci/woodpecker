@@ -72,11 +72,12 @@ func handleCustomFilesAndAssets(fs *prefixFS) func(ctx *gin.Context) {
 		}
 	}
 	return func(ctx *gin.Context) {
-		if strings.HasSuffix(ctx.Request.RequestURI, "/assets/custom.js") {
+		switch {
+		case strings.HasSuffix(ctx.Request.RequestURI, "/assets/custom.js"):
 			serveFileOrEmptyContent(ctx.Writer, ctx.Request, server.Config.Server.CustomJsFile, "file.js")
-		} else if strings.HasSuffix(ctx.Request.RequestURI, "/assets/custom.css") {
+		case strings.HasSuffix(ctx.Request.RequestURI, "/assets/custom.css"):
 			serveFileOrEmptyContent(ctx.Writer, ctx.Request, server.Config.Server.CustomCSSFile, "file.css")
-		} else {
+		default:
 			serveFile(fs)(ctx)
 		}
 	}

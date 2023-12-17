@@ -21,9 +21,9 @@ import (
 )
 
 var (
-	errRegistryAddressInvalid  = errors.New("Invalid Registry Address")
-	errRegistryUsernameInvalid = errors.New("Invalid Registry Username")
-	errRegistryPasswordInvalid = errors.New("Invalid Registry Password")
+	errRegistryAddressInvalid  = errors.New("invalid registry address")
+	errRegistryUsernameInvalid = errors.New("invalid registry username")
+	errRegistryPasswordInvalid = errors.New("invalid registry password")
 )
 
 // RegistryService defines a service for managing registries.

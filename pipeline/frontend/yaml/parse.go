@@ -46,11 +46,12 @@ func ParseBytes(b []byte) (*types.Workflow, error) {
 
 	// support deprecated branch filter
 	if out.BranchesDontUseIt != nil {
-		if out.When.Constraints == nil {
+		switch {
+		case out.When.Constraints == nil:
 			out.When.Constraints = []constraint.Constraint{{Branch: *out.BranchesDontUseIt}}
-		} else if len(out.When.Constraints) == 1 && out.When.Constraints[0].Branch.IsEmpty() {
+		case len(out.When.Constraints) == 1 && out.When.Constraints[0].Branch.IsEmpty():
 			out.When.Constraints[0].Branch = *out.BranchesDontUseIt
-		} else {
+		default:
 			return nil, fmt.Errorf("could not apply deprecated branches filter into global when filter")
 		}
 		out.BranchesDontUseIt = nil

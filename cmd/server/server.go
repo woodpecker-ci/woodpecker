@@ -88,10 +88,7 @@ func run(c *cli.Context) error {
 		log.Fatal().Err(err).Msg("can't setup forge")
 	}
 
-	_store, err := setupStore(c)
-	if err != nil {
-		log.Fatal().Err(err).Msg("cant't setup database store")
-	}
+	_store := setupStore(c)
 	defer func() {
 		if err := _store.Close(); err != nil {
 			log.Error().Err(err).Msg("could not close store")
@@ -181,7 +178,8 @@ func run(c *cli.Context) error {
 		middleware.Store(c, _store),
 	)
 
-	if c.String("server-cert") != "" {
+	switch {
+	case c.String("server-cert") != "":
 		// start the server with tls enabled
 		g.Go(func() error {
 			serve := &http.Server{
@@ -219,7 +217,7 @@ func run(c *cli.Context) error {
 			}
 			return err
 		})
-	} else if c.Bool("lets-encrypt") {
+	case c.Bool("lets-encrypt"):
 		// start the server with lets-encrypt
 		certmagic.DefaultACME.Email = c.String("lets-encrypt-email")
 		certmagic.DefaultACME.Agreed = true
@@ -235,7 +233,7 @@ func run(c *cli.Context) error {
 			}
 			return nil
 		})
-	} else {
+	default:
 		// start the server without tls
 		g.Go(func() error {
 			err := http.ListenAndServe(
@@ -305,7 +303,7 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 
 	// Execution
 	_events := c.StringSlice("default-cancel-previous-pipeline-events")
-	events := make([]model.WebhookEvent, len(_events))
+	events := make([]model.WebhookEvent, len(_events), 0)
 	for _, v := range _events {
 		events = append(events, model.WebhookEvent(v))
 	}
