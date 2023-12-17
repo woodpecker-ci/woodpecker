@@ -1,10 +1,10 @@
 # Changelog
 
-## [2.1.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.1.0) - 2023-12-16
+## [2.1.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.1.0) - 2023-12-17
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@xoxys, @anbraten, @qwerty287, @6543, @lafriks, @gapanyc, @allanger, @mikhail-putilov, @renovate[bot], @runephilosof-karnovgroup, @kaylynb, @voidcontext, @robbie-cahill, @micash545, @dominic-p, @zc-devs, @mzampetakis
+@renovate[bot], @xoxys, @anbraten, @qwerty287, @6543, @lafriks, @gapanyc, @allanger, @mikhail-putilov, @runephilosof-karnovgroup, @kaylynb, @voidcontext, @robbie-cahill, @micash545, @dominic-p, @zc-devs, @mzampetakis
 
 ### 🔒 Security
 
@@ -58,6 +58,7 @@
 
 ### Misc
 
+- fix(deps): update golang (packages) [[#2958](https://github.com/woodpecker-ci/woodpecker/pull/2958)]
 - Update docker.io/techknowlogick/xgo Docker tag to go-1.21.5 [[#2926](https://github.com/woodpecker-ci/woodpecker/pull/2926)]
 - Update docker.io/golang Docker tag to v1.21.5 [[#2925](https://github.com/woodpecker-ci/woodpecker/pull/2925)]
 - Lock file maintenance [[#2910](https://github.com/woodpecker-ci/woodpecker/pull/2910)]
