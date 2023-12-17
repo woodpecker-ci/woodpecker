@@ -22,11 +22,11 @@ import (
 
 	"github.com/google/uuid"
 
-	backend_types "go.woodpecker-ci.org/woodpecker/pipeline/backend/types"
-	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/metadata"
-	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/compiler/settings"
-	yaml_types "go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/types"
-	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/utils"
+	backend_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/compiler/settings"
+	yaml_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/utils"
 )
 
 func (c *Compiler) createProcess(name string, container *yaml_types.Container, stepType backend_types.StepType) (*backend_types.Step, error) {
@@ -116,28 +116,9 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		}
 	}
 
-	var tolerations []backend_types.Toleration
-	for _, t := range container.BackendOptions.Kubernetes.Tolerations {
-		tolerations = append(tolerations, backend_types.Toleration{
-			Key:               t.Key,
-			Operator:          backend_types.TolerationOperator(t.Operator),
-			Value:             t.Value,
-			Effect:            backend_types.TaintEffect(t.Effect),
-			TolerationSeconds: t.TolerationSeconds,
-		})
-	}
-
-	// Kubernetes advanced settings
+	// Advanced backend settings
 	backendOptions := backend_types.BackendOptions{
-		Kubernetes: backend_types.KubernetesBackendOptions{
-			Resources: backend_types.Resources{
-				Limits:   container.BackendOptions.Kubernetes.Resources.Limits,
-				Requests: container.BackendOptions.Kubernetes.Resources.Requests,
-			},
-			ServiceAccountName: container.BackendOptions.Kubernetes.ServiceAccountName,
-			NodeSelector:       container.BackendOptions.Kubernetes.NodeSelector,
-			Tolerations:        tolerations,
-		},
+		Kubernetes: convertKubernetesBackendOptions(&container.BackendOptions.Kubernetes),
 	}
 
 	memSwapLimit := int64(container.MemSwapLimit)
@@ -222,4 +203,41 @@ func (c *Compiler) stepWorkdir(container *yaml_types.Container) string {
 		return container.Directory
 	}
 	return path.Join(c.base, c.path, container.Directory)
+}
+
+func convertKubernetesBackendOptions(kubeOpt *yaml_types.KubernetesBackendOptions) backend_types.KubernetesBackendOptions {
+	resources := backend_types.Resources{
+		Limits:   kubeOpt.Resources.Limits,
+		Requests: kubeOpt.Resources.Requests,
+	}
+
+	var tolerations []backend_types.Toleration
+	for _, t := range kubeOpt.Tolerations {
+		tolerations = append(tolerations, backend_types.Toleration{
+			Key:               t.Key,
+			Operator:          backend_types.TolerationOperator(t.Operator),
+			Value:             t.Value,
+			Effect:            backend_types.TaintEffect(t.Effect),
+			TolerationSeconds: t.TolerationSeconds,
+		})
+	}
+
+	var securityContext *backend_types.SecurityContext
+	if kubeOpt.SecurityContext != nil {
+		securityContext = &backend_types.SecurityContext{
+			Privileged:   kubeOpt.SecurityContext.Privileged,
+			RunAsNonRoot: kubeOpt.SecurityContext.RunAsNonRoot,
+			RunAsUser:    kubeOpt.SecurityContext.RunAsUser,
+			RunAsGroup:   kubeOpt.SecurityContext.RunAsGroup,
+			FSGroup:      kubeOpt.SecurityContext.FSGroup,
+		}
+	}
+
+	return backend_types.KubernetesBackendOptions{
+		Resources:          resources,
+		ServiceAccountName: kubeOpt.ServiceAccountName,
+		NodeSelector:       kubeOpt.NodeSelector,
+		Tolerations:        tolerations,
+		SecurityContext:    securityContext,
+	}
 }

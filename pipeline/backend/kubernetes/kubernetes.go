@@ -24,8 +24,9 @@ import (
 	"time"
 
 	"github.com/rs/zerolog/log"
-	"go.woodpecker-ci.org/woodpecker/pipeline/backend/types"
 	"gopkg.in/yaml.v3"
+
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 
 	"github.com/urfave/cli/v2"
 	v1 "k8s.io/api/core/v1"
@@ -55,12 +56,16 @@ type kube struct {
 }
 
 type Config struct {
-	Namespace      string
-	StorageClass   string
-	VolumeSize     string
-	StorageRwx     bool
-	PodLabels      map[string]string
-	PodAnnotations map[string]string
+	Namespace       string
+	StorageClass    string
+	VolumeSize      string
+	StorageRwx      bool
+	PodLabels       map[string]string
+	PodAnnotations  map[string]string
+	SecurityContext SecurityContextConfig
+}
+type SecurityContextConfig struct {
+	RunAsNonRoot bool
 }
 
 func configFromCliContext(ctx context.Context) (*Config, error) {
@@ -73,6 +78,9 @@ func configFromCliContext(ctx context.Context) (*Config, error) {
 				StorageRwx:     c.Bool("backend-k8s-storage-rwx"),
 				PodLabels:      make(map[string]string), // just init empty map to prevent nil panic
 				PodAnnotations: make(map[string]string), // just init empty map to prevent nil panic
+				SecurityContext: SecurityContextConfig{
+					RunAsNonRoot: c.Bool("backend-k8s-secctx-nonroot"),
+				},
 			}
 			// Unmarshal label and annotation settings here to ensure they're valid on startup
 			if labels := c.String("backend-k8s-pod-labels"); labels != "" {
@@ -94,8 +102,8 @@ func configFromCliContext(ctx context.Context) (*Config, error) {
 	return nil, types.ErrNoCliContextFound
 }
 
-// New returns a new Kubernetes Engine.
-func New(ctx context.Context) types.Engine {
+// New returns a new Kubernetes Backend.
+func New(ctx context.Context) types.Backend {
 	return &kube{
 		ctx: ctx,
 	}
@@ -110,7 +118,7 @@ func (e *kube) IsAvailable(context.Context) bool {
 	return len(host) > 0
 }
 
-func (e *kube) Load(context.Context) (*types.EngineInfo, error) {
+func (e *kube) Load(context.Context) (*types.BackendInfo, error) {
 	config, err := configFromCliContext(e.ctx)
 	if err != nil {
 		return nil, err
@@ -133,7 +141,7 @@ func (e *kube) Load(context.Context) (*types.EngineInfo, error) {
 
 	// TODO(2693): use info resp of kubeClient to define platform var
 	e.goos = runtime.GOOS
-	return &types.EngineInfo{
+	return &types.BackendInfo{
 		Platform: runtime.GOOS + "/" + runtime.GOARCH,
 	}, nil
 }
@@ -191,7 +199,7 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID s
 
 // Start the pipeline step.
 func (e *kube) StartStep(ctx context.Context, step *types.Step, taskUUID string) error {
-	pod, err := Pod(e.config.Namespace, step, e.config.PodLabels, e.config.PodAnnotations, e.goos)
+	pod, err := Pod(e.config.Namespace, step, e.config.PodLabels, e.config.PodAnnotations, e.goos, e.config.SecurityContext)
 	if err != nil {
 		return err
 	}

@@ -26,9 +26,9 @@ import (
 	"github.com/rs/zerolog/log"
 	"golang.org/x/sync/errgroup"
 
-	backend "go.woodpecker-ci.org/woodpecker/pipeline/backend/types"
-	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/metadata"
-	"go.woodpecker-ci.org/woodpecker/pipeline/multipart"
+	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/multipart"
 )
 
 // TODO: move runtime into "runtime" subpackage
@@ -55,7 +55,7 @@ type (
 type Runtime struct {
 	err     error
 	spec    *backend.Config
-	engine  backend.Engine
+	engine  backend.Backend
 	started int64
 
 	ctx    context.Context

@@ -18,8 +18,6 @@
 
 <script lang="ts" setup>
 import { useLocalStorage } from '@vueuse/core';
-import dayjs from 'dayjs';
-import TimeAgo from 'javascript-time-ago';
 import { SUPPORTED_LOCALES } from 'virtual:vue-i18n-supported-locales';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -44,8 +42,6 @@ const selectedLocale = computed<string>({
   async set(_selectedLocale) {
     await setI18nLanguage(_selectedLocale);
     storedLocale.value = _selectedLocale;
-    dayjs.locale(_selectedLocale);
-    TimeAgo.setDefaultLocale(_selectedLocale);
   },
   get() {
     return storedLocale.value;

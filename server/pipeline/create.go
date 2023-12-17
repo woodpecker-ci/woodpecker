@@ -18,15 +18,14 @@ import (
 	"context"
 	"fmt"
 	"regexp"
-	"time"
 
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/pipeline/errors"
-	"go.woodpecker-ci.org/woodpecker/server"
-	"go.woodpecker-ci.org/woodpecker/server/forge"
-	"go.woodpecker-ci.org/woodpecker/server/model"
-	"go.woodpecker-ci.org/woodpecker/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
 var skipPipelineRegex = regexp.MustCompile(`\[(?i:ci *skip|skip *ci)\]`)
@@ -53,7 +52,14 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 
 	// update some pipeline fields
 	pipeline.RepoID = repo.ID
-	pipeline.Status = model.StatusPending
+	pipeline.Status = model.StatusCreated
+	setGatedState(repo, pipeline)
+	err = _store.CreatePipeline(pipeline)
+	if err != nil {
+		msg := fmt.Errorf("failed to save pipeline for %s", repo.FullName)
+		log.Error().Str("repo", repo.FullName).Err(err).Msg(msg.Error())
+		return nil, msg
+	}
 
 	// fetch the pipeline file from the forge
 	configFetcher := forge.NewConfigFetcher(server.Config.Services.Forge, server.Config.Services.Timeout, server.Config.Services.ConfigService, repoUser, repo, pipeline)
@@ -61,29 +67,24 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 
 	if configFetchErr != nil {
 		log.Debug().Str("repo", repo.FullName).Err(configFetchErr).Msgf("cannot find config '%s' in '%s' with user: '%s'", repo.Config, pipeline.Ref, repoUser.Login)
-		return nil, persistPipelineWithErr(ctx, _store, pipeline, repo, repoUser, fmt.Errorf("pipeline definition not found in %s", repo.FullName))
+		return nil, updatePipelineWithErr(ctx, _store, pipeline, repo, repoUser, fmt.Errorf("pipeline definition not found in %s", repo.FullName))
 	}
 
 	pipelineItems, parseErr := parsePipeline(_store, pipeline, repoUser, repo, forgeYamlConfigs, nil)
 	if errors.HasBlockingErrors(parseErr) {
 		log.Debug().Str("repo", repo.FullName).Err(parseErr).Msg("failed to parse yaml")
-		return nil, persistPipelineWithErr(ctx, _store, pipeline, repo, repoUser, parseErr)
+		return nil, updatePipelineWithErr(ctx, _store, pipeline, repo, repoUser, parseErr)
 	} else if parseErr != nil {
 		pipeline.Errors = errors.GetPipelineErrors(parseErr)
 	}
 
 	if len(pipelineItems) == 0 {
 		log.Debug().Str("repo", repo.FullName).Msg(ErrFiltered.Error())
+		if err := _store.DeletePipeline(pipeline); err != nil {
+			log.Error().Str("repo", repo.FullName).Err(err).Msg("failed to delete empty pipeline")
+		}
+
 		return nil, ErrFiltered
-	}
-
-	setGatedState(repo, pipeline)
-
-	err = _store.CreatePipeline(pipeline)
-	if err != nil {
-		msg := fmt.Errorf("failed to save pipeline for %s", repo.FullName)
-		log.Error().Str("repo", repo.FullName).Err(err).Msg(msg.Error())
-		return nil, msg
 	}
 
 	pipeline = setPipelineStepsOnPipeline(pipeline, pipelineItems)
@@ -111,6 +112,10 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		return pipeline, nil
 	}
 
+	if err := updatePipelinePending(ctx, _store, pipeline, repo, repoUser); err != nil {
+		return nil, err
+	}
+
 	pipeline, err = start(ctx, _store, pipeline, repoUser, repo, pipelineItems)
 	if err != nil {
 		msg := fmt.Sprintf("failed to start pipeline for %s", repo.FullName)
@@ -121,17 +126,26 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	return pipeline, nil
 }
 
-func persistPipelineWithErr(ctx context.Context, _store store.Store, pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User, err error) error {
-	pipeline.Started = time.Now().Unix()
-	pipeline.Finished = pipeline.Started
-	pipeline.Status = model.StatusError
-	pipeline.Errors = errors.GetPipelineErrors(err)
-	dbErr := _store.CreatePipeline(pipeline)
-	if dbErr != nil {
-		msg := fmt.Errorf("failed to save pipeline for %s", repo.FullName)
-		log.Error().Err(dbErr).Msg(msg.Error())
-		return msg
+func updatePipelineWithErr(ctx context.Context, _store store.Store, pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User, err error) error {
+	_pipeline, err := UpdateToStatusError(_store, *pipeline, err)
+	if err != nil {
+		return err
 	}
+	// update value in ref
+	*pipeline = *_pipeline
+
+	publishPipeline(ctx, pipeline, repo, repoUser)
+
+	return nil
+}
+
+func updatePipelinePending(ctx context.Context, _store store.Store, pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User) error {
+	_pipeline, err := UpdateToStatusPending(_store, *pipeline, "")
+	if err != nil {
+		return err
+	}
+	// update value in ref
+	*pipeline = *_pipeline
 
 	publishPipeline(ctx, pipeline, repo, repoUser)
 

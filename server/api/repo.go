@@ -27,12 +27,12 @@ import (
 	"github.com/gorilla/securecookie"
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/server"
-	"go.woodpecker-ci.org/woodpecker/server/model"
-	"go.woodpecker-ci.org/woodpecker/server/router/middleware/session"
-	"go.woodpecker-ci.org/woodpecker/server/store"
-	"go.woodpecker-ci.org/woodpecker/server/store/types"
-	"go.woodpecker-ci.org/woodpecker/shared/token"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/token"
 )
 
 // PostRepo
@@ -412,8 +412,10 @@ func DeleteRepo(c *gin.Context) {
 //	@Param		repo_id			path	int		true	"the repository id"
 func RepairRepo(c *gin.Context) {
 	repo := session.Repo(c)
-	repairRepo(c, repo, true)
-
+	repairRepo(c, repo, true, false)
+	if c.Writer.Written() {
+		return
+	}
 	c.Status(http.StatusNoContent)
 }
 
@@ -544,7 +546,7 @@ func RepairAllRepos(c *gin.Context) {
 	}
 
 	for _, r := range repos {
-		repairRepo(c, r, false)
+		repairRepo(c, r, false, true)
 		if c.Writer.Written() {
 			return
 		}
@@ -553,13 +555,20 @@ func RepairAllRepos(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
-func repairRepo(c *gin.Context, repo *model.Repo, withPerms bool) {
+func repairRepo(c *gin.Context, repo *model.Repo, withPerms, skipOnErr bool) {
 	forge := server.Config.Services.Forge
 	_store := store.FromContext(c)
 
 	user, err := _store.GetUser(repo.UserID)
 	if err != nil {
-		handleDbError(c, err)
+		if errors.Is(err, types.RecordNotExist) {
+			if !skipOnErr {
+				c.AbortWithStatus(http.StatusNotFound)
+			}
+			log.Error().Err(err).Msgf("could not get user on repo repair")
+		} else {
+			_ = c.AbortWithError(http.StatusInternalServerError, err)
+		}
 		return
 	}
 
@@ -582,7 +591,9 @@ func repairRepo(c *gin.Context, repo *model.Repo, withPerms bool) {
 	from, err := forge.Repo(c, user, repo.ForgeRemoteID, repo.Owner, repo.Name)
 	if err != nil {
 		log.Error().Err(err).Msgf("get repo '%s/%s' from forge", repo.Owner, repo.Name)
-		c.AbortWithStatus(http.StatusInternalServerError)
+		if !skipOnErr {
+			c.AbortWithStatus(http.StatusInternalServerError)
+		}
 		return
 	}
 

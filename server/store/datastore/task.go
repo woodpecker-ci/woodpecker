@@ -15,7 +15,7 @@
 package datastore
 
 import (
-	"go.woodpecker-ci.org/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 func (s storage) TaskList() ([]*model.Task, error) {
