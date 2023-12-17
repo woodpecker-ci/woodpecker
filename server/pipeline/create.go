@@ -87,10 +87,6 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		return nil, ErrFiltered
 	}
 
-	if err := updatePipelinePending(ctx, _store, pipeline, repo, repoUser); err != nil {
-		return nil, err
-	}
-
 	pipeline = setPipelineStepsOnPipeline(pipeline, pipelineItems)
 
 	// persist the pipeline config for historical correctness, restarts, etc
@@ -114,6 +110,10 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	if pipeline.Status == model.StatusBlocked {
 		publishPipeline(ctx, pipeline, repo, repoUser)
 		return pipeline, nil
+	}
+
+	if err := updatePipelinePending(ctx, _store, pipeline, repo, repoUser); err != nil {
+		return nil, err
 	}
 
 	pipeline, err = start(ctx, _store, pipeline, repoUser, repo, pipelineItems)
