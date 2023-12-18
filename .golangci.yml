@@ -21,6 +21,19 @@ linters-settings:
       - standard
       - default
       - prefix(go.woodpecker-ci.org/woodpecker)
+  gomnd:
+    ignored-numbers:
+      - '0o600'
+      - '0o660'
+      - '0o644'
+      - '0o755'
+      - '0o700'
+    ignored-functions:
+      - make
+      - time.*
+      - strings.Split
+      - callerName
+      - securecookie.GenerateRandomKey
 
 linters:
   disable-all: true
@@ -77,7 +90,7 @@ run:
 issues:
   exclude-rules:
     # gin force us to use string as context key
-    - path: server/store/context.go
+    - path: 'server/store/context.go'
       linters:
         - staticcheck
         - revive
@@ -91,7 +104,7 @@ issues:
       linters:
         - forbidigo
 
-    - path: agent/runner.go
+    - path: 'agent/runner.go'
       linters:
         - contextcheck
         - errorlint
@@ -100,6 +113,10 @@ issues:
       linters:
         - forcetypeassert
 
-    - path: server/store/datastore/migration/common.go|pipeline/frontend/yaml/constraint/constraint.go
+    - path: 'server/store/datastore/migration/common.go|pipeline/frontend/yaml/constraint/constraint.go'
       linters:
         - gocritic
+
+    - path: 'cmd/agent/flags.go|cmd/server/flags.go|pipeline/backend/kubernetes/flags.go|_test.go'
+      linters:
+        - gomnd

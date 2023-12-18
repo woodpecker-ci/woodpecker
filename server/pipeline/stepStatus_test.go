@@ -39,7 +39,7 @@ func TestUpdateStepStatusNotExited(t *testing.T) {
 		Exited:  false,
 		// Dummy data
 		Finished: int64(1),
-		ExitCode: 137,
+		ExitCode: model.ExitCodeKilled,
 		Error:    "not an error",
 	}
 	step := &model.Step{}
@@ -69,7 +69,7 @@ func TestUpdateStepStatusNotExitedButStopped(t *testing.T) {
 		Exited: false,
 		// Dummy data
 		Finished: int64(1),
-		ExitCode: 137,
+		ExitCode: model.ExitCodeKilled,
 		Error:    "not an error",
 	}
 	err := UpdateStepStatus(&mockUpdateStepStore{}, step, state, int64(42))
@@ -96,7 +96,7 @@ func TestUpdateStepStatusExited(t *testing.T) {
 		Started:  int64(42),
 		Exited:   true,
 		Finished: int64(34),
-		ExitCode: 137,
+		ExitCode: model.ExitCodeKilled,
 		Error:    "an error",
 	}
 
@@ -111,8 +111,8 @@ func TestUpdateStepStatusExited(t *testing.T) {
 		t.Errorf("Step started not equals 42 != %d", step.Started)
 	case step.Stopped != int64(34):
 		t.Errorf("Step stopped not equals 34 != %d", step.Stopped)
-	case step.ExitCode != 137:
-		t.Errorf("Step exit code not equals 137 != %d", step.ExitCode)
+	case step.ExitCode != model.ExitCodeKilled:
+		t.Errorf("Step exit code not equals %d != %d", model.ExitCodeKilled, step.ExitCode)
 	case step.Error != "an error":
 		t.Errorf("Step error not equals 'an error' != '%s'", step.Error)
 	}
@@ -288,8 +288,8 @@ func TestUpdateStepToStatusKilledStarted(t *testing.T) {
 		t.Errorf("Step stopped not equals %d < %d", now, step.Stopped)
 	case step.Started != step.Stopped:
 		t.Errorf("Step started not equals %d != %d", step.Stopped, step.Started)
-	case step.ExitCode != 137:
-		t.Errorf("Step exit code not equals 137 != %d", step.ExitCode)
+	case step.ExitCode != model.ExitCodeKilled:
+		t.Errorf("Step exit code not equals %d != %d", model.ExitCodeKilled, step.ExitCode)
 	}
 }
 

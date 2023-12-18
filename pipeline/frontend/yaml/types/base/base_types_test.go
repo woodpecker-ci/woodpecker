@@ -97,7 +97,7 @@ bars: []
 func TestUnmarshalSliceOrMap(t *testing.T) {
 	s := StructSliceorMap{}
 	err := yaml.Unmarshal([]byte(sampleStructSliceorMap), &s)
-	assert.Equal(t, fmt.Errorf("Cannot unmarshal 'true' of type bool into a string value"), err)
+	assert.Equal(t, fmt.Errorf("cannot unmarshal 'true' of type bool into a string value"), err)
 }
 
 func TestStr2SliceOrMapPtrMap(t *testing.T) {

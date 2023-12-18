@@ -114,7 +114,7 @@ func decodeAuth(authStr string) (string, string, error) {
 		return "", "", fmt.Errorf("something went wrong decoding auth config")
 	}
 	arr := strings.SplitN(string(decoded), ":", 2)
-	if len(arr) != 2 {
+	if len(arr) != 2 { //nolint:gomnd
 		return "", "", fmt.Errorf("invalid auth configuration file")
 	}
 	password := strings.Trim(arr[1], "\x00")

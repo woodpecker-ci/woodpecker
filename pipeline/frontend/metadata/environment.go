@@ -36,7 +36,7 @@ func (m *Metadata) Environ() map[string]string {
 	)
 
 	branchParts := strings.Split(m.Curr.Commit.Refspec, ":")
-	if len(branchParts) == 2 {
+	if len(branchParts) == 2 { //nolint: gomnd
 		sourceBranch = branchParts[0]
 		targetBranch = branchParts[1]
 	}

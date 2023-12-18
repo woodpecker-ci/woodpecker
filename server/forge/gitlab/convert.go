@@ -251,7 +251,7 @@ func getUserAvatar(email string) string {
 
 func extractFromPath(str string) (string, string, error) {
 	s := strings.Split(str, "/")
-	if len(s) < 2 {
+	if len(s) < 2 { //nolint: gomnd
 		return "", "", fmt.Errorf("minimum match not found")
 	}
 	return s[0], s[1], nil

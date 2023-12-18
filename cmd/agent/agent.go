@@ -93,7 +93,7 @@ func run(c *cli.Context) error {
 
 	agentToken := c.String("grpc-token")
 	authClient := agentRpc.NewAuthGrpcClient(authConn, agentToken, agentConfig.AgentID)
-	authInterceptor, err := agentRpc.NewAuthInterceptor(authClient, 30*time.Minute)
+	authInterceptor, err := agentRpc.NewAuthInterceptor(authClient, 30*time.Minute) //nolint: gomnd
 	if err != nil {
 		return err
 	}
@@ -288,6 +288,7 @@ func stringSliceAddToMap(sl []string, m map[string]string) error {
 	if m == nil {
 		m = make(map[string]string)
 	}
+	//nolint: gomnd
 	for _, v := range sl {
 		parts := strings.SplitN(v, "=", 2)
 		switch len(parts) {

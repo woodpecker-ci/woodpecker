@@ -35,7 +35,7 @@ func (s *SliceOrMap) UnmarshalYAML(unmarshal func(any) error) error {
 
 				key := keyValueSlice[0]
 				val := ""
-				if len(keyValueSlice) == 2 {
+				if len(keyValueSlice) == 2 { //nolint: gomnd
 					val = keyValueSlice[1]
 				}
 				parts[key] = val

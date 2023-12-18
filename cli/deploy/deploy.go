@@ -106,7 +106,8 @@ func deploy(c *cli.Context) error {
 		}
 	}
 
-	env := c.Args().Get(2)
+	envArgIndex := 2
+	env := c.Args().Get(envArgIndex)
 	if env == "" {
 		return fmt.Errorf("please specify the target environment (ie production)")
 	}

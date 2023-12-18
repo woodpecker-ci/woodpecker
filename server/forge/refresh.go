@@ -32,11 +32,13 @@ type Refresher interface {
 }
 
 func Refresh(c context.Context, forge Forge, _store store.Store, user *model.User) {
+	// Remaining ttl of 30 minutes (1800 seconds) until a token is refreshed.
+	const tokenMinTTL = 1800
+
 	if refresher, ok := forge.(Refresher); ok {
-		// Check to see if the user token is expired or
-		// will expire within the next 30 minutes (1800 seconds).
+		// Check to see if the user token is expired or will expire soon.
 		// If not, there is nothing we really need to do here.
-		if time.Now().UTC().Unix() < (user.Expiry - 1800) {
+		if time.Now().UTC().Unix() < (user.Expiry - tokenMinTTL) {
 			return
 		}
 

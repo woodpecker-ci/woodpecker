@@ -62,7 +62,7 @@ func pipelineCreate(c *cli.Context) error {
 
 	for _, vaz := range c.StringSlice("var") {
 		sp := strings.SplitN(vaz, "=", 2)
-		if len(sp) == 2 {
+		if len(sp) == 2 { //nolint:gomnd
 			variables[sp[0]] = sp[1]
 		}
 	}
