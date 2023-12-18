@@ -30,15 +30,8 @@ func (s *SliceOrMap) UnmarshalYAML(unmarshal func(any) error) error {
 		parts := map[string]string{}
 		for _, s := range sliceType {
 			if str, ok := s.(string); ok {
-				str := strings.TrimSpace(str)
-				keyValueSlice := strings.SplitN(str, "=", 2)
-
-				key := keyValueSlice[0]
-				val := ""
-				if len(keyValueSlice) == 2 { //nolint: gomnd
-					val = keyValueSlice[1]
-				}
-				parts[key] = val
+				before, after, _ := strings.Cut(strings.TrimSpace(str), "=")
+				parts[before] = after
 			} else {
 				return fmt.Errorf("cannot unmarshal '%v' of type %T into a string value", s, s)
 			}

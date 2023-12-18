@@ -123,13 +123,13 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 
 	droneEnv := make(map[string]string)
 	for _, env := range c.StringSlice("env") {
-		envs := strings.SplitN(env, "=", 2)
-		droneEnv[envs[0]] = envs[1]
-		if _, exists := environ[envs[0]]; exists {
+		before, after, _ := strings.Cut(env, "=")
+		droneEnv[before] = after
+		if _, exists := environ[before]; exists {
 			// don't override existing values
 			continue
 		}
-		environ[envs[0]] = envs[1]
+		environ[before] = before
 	}
 
 	tmpl, err := envsubst.ParseFile(file)

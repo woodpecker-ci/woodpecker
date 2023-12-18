@@ -107,11 +107,11 @@ func ParseRepo(client woodpecker.Client, str string) (repoID int64, err error) {
 func ParseKeyPair(p []string) map[string]string {
 	params := map[string]string{}
 	for _, i := range p {
-		parts := strings.SplitN(i, "=", 2)
-		if len(parts) != 2 { //nolint:gomnd
+		before, after, ok := strings.Cut(i, "=")
+		if !ok || before == "" {
 			continue
 		}
-		params[parts[0]] = parts[1]
+		params[before] = after
 	}
 	return params
 }

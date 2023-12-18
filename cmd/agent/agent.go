@@ -288,14 +288,13 @@ func stringSliceAddToMap(sl []string, m map[string]string) error {
 	if m == nil {
 		m = make(map[string]string)
 	}
-	//nolint: gomnd
 	for _, v := range sl {
-		parts := strings.SplitN(v, "=", 2)
-		switch len(parts) {
-		case 2:
-			m[parts[0]] = parts[1]
-		case 1:
-			return fmt.Errorf("key '%s' does not have a value assigned", parts[0])
+		before, after, _ := strings.Cut(v, "=")
+		switch {
+		case before != "" && after != "":
+			m[before] = after
+		case after != "":
+			return fmt.Errorf("key '%s' does not have a value assigned", before)
 		default:
 			return fmt.Errorf("empty string in slice")
 		}

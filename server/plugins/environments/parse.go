@@ -31,13 +31,13 @@ func Parse(params []string) model.EnvironService {
 	var globals []*model.Environ
 
 	for _, item := range params {
-		kvPair := strings.SplitN(item, ":", 2)
-		if len(kvPair) != 2 {
+		before, after, _ := strings.Cut(item, ":")
+		if after != "" {
 			// ignore items only containing a key and no value
-			log.Warn().Msgf("key '%s' has no value, will be ignored", kvPair[0])
+			log.Warn().Msgf("key '%s' has no value, will be ignored", before)
 			continue
 		}
-		globals = append(globals, &model.Environ{Name: kvPair[0], Value: kvPair[1]})
+		globals = append(globals, &model.Environ{Name: before, Value: after})
 	}
 	return &builtin{globals}
 }
