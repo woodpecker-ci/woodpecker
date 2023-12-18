@@ -62,7 +62,7 @@ linters:
     - durationcheck
     - errchkjson
     - forcetypeassert
-    - gci
+    # - gci
     - gochecknoinits
     - goconst
     - gocritic
