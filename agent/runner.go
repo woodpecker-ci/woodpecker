@@ -134,12 +134,13 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 	state := rpc.State{}
 	state.Started = time.Now().Unix()
 
-	err = r.client.Init(ctxmeta, work.ID, state)
+	err = r.client.Init(ctxmeta, work.ID, state) //nolint:contextcheck
 	if err != nil {
 		logger.Error().Err(err).Msg("pipeline initialization failed")
 	}
 
 	var uploads sync.WaitGroup
+	//nolint:contextcheck
 	err = pipeline.New(work.Config,
 		pipeline.WithContext(workflowCtx),
 		pipeline.WithTaskUUID(fmt.Sprint(work.ID)),
@@ -189,7 +190,7 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 		Int("exit_code", state.ExitCode).
 		Msg("updating pipeline status")
 
-	if err := r.client.Done(ctxmeta, work.ID, state); err != nil {
+	if err := r.client.Done(ctxmeta, work.ID, state); err != nil { //nolint:contextcheck
 		logger.Error().Err(err).Msg("updating pipeline status failed")
 	} else {
 		logger.Debug().Msg("updating pipeline status complete")

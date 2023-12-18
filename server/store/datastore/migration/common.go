@@ -85,7 +85,7 @@ func dropTableColumns(sess *xorm.Session, tableName string, columnNames ...strin
 		tableSQL := normalizeSQLiteTableSchema(string(res[0]["sql"]))
 
 		// Separate out the column definitions
-		tableSQL = tableSQL[strings.Index(tableSQL, "("):]
+		tableSQL = tableSQL[strings.Index(tableSQL, "("):] //nolint:gocritic
 
 		// Remove the required columnNames
 		tableSQL = removeColumnFromSQLITETableSchema(tableSQL, columnNames...)

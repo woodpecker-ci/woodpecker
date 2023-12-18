@@ -65,7 +65,7 @@ linters:
     - forcetypeassert
     # - gci
     - gochecknoinits
-    # - goconst
+    - goconst
     - gocritic
     - goheader
     - gomnd
@@ -104,19 +104,14 @@ issues:
       linters:
         - forbidigo
 
-    - path: 'agent/runner.go'
-      linters:
-        - contextcheck
-        - errorlint
-
-    - path: 'server/forge/bitbucket/bitbucket_test.go|server/forge/gitea/gitea_test.go|server/forge/github/github_test.go'
+    - path: '_test.go'
       linters:
         - forcetypeassert
-
-    - path: 'server/store/datastore/migration/common.go|pipeline/frontend/yaml/constraint/constraint.go'
-      linters:
-        - gocritic
 
     - path: 'cmd/agent/flags.go|cmd/server/flags.go|pipeline/backend/kubernetes/flags.go|_test.go'
       linters:
         - gomnd
+
+    - path: '_test.go'
+      linters:
+        - goconst

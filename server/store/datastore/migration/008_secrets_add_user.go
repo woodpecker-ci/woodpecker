@@ -19,6 +19,8 @@ import (
 	"xorm.io/xorm"
 )
 
+const secretsTableName = "secrets"
+
 type SecretV008 struct {
 	Owner  string `json:"-"    xorm:"NOT NULL DEFAULT '' UNIQUE(s) INDEX 'secret_owner'"`
 	RepoID int64  `json:"-"    xorm:"NOT NULL DEFAULT 0 UNIQUE(s) INDEX 'secret_repo_id'"`
@@ -27,7 +29,7 @@ type SecretV008 struct {
 
 // TableName return database table name for xorm
 func (SecretV008) TableName() string {
-	return "secrets"
+	return secretsTableName
 }
 
 var alterTableSecretsAddUserCol = xormigrate.Migration{
@@ -36,12 +38,12 @@ var alterTableSecretsAddUserCol = xormigrate.Migration{
 		if err := sess.Sync(new(SecretV008)); err != nil {
 			return err
 		}
-		if err := alterColumnDefault(sess, "secrets", "secret_repo_id", "0"); err != nil {
+		if err := alterColumnDefault(sess, secretsTableName, "secret_repo_id", "0"); err != nil {
 			return err
 		}
-		if err := alterColumnNull(sess, "secrets", "secret_repo_id", false); err != nil {
+		if err := alterColumnNull(sess, secretsTableName, "secret_repo_id", false); err != nil {
 			return err
 		}
-		return alterColumnNull(sess, "secrets", "secret_name", false)
+		return alterColumnNull(sess, secretsTableName, "secret_name", false)
 	},
 }

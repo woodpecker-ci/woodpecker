@@ -46,7 +46,7 @@ func pipelineInfo(c *cli.Context) error {
 	pipelineArg := c.Args().Get(1)
 
 	var number int64
-	if pipelineArg == "last" || len(pipelineArg) == 0 {
+	if pipelineArg == "last" || len(pipelineArg) == 0 { //nolint:goconst
 		// Fetch the pipeline number from the last pipeline
 		pipeline, err := client.PipelineLast(repoID, "")
 		if err != nil {
