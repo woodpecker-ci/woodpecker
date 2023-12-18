@@ -76,7 +76,7 @@ func (n *Networks) UnmarshalYAML(unmarshal func(any) error) error {
 		return nil
 	}
 
-	return errors.New("failed to unmarshal networks")
+	return errors.New("failed to unmarshal Networks")
 }
 
 func handleNetwork(name string, value any) (*Network, error) {
