@@ -58,7 +58,6 @@ linters:
     - asciicheck
     - bodyclose
     - contextcheck
-    # - depguard
     - dogsled
     - durationcheck
     - errchkjson
