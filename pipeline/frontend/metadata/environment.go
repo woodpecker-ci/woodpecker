@@ -132,7 +132,9 @@ func (m *Metadata) Environ() map[string]string {
 	}
 
 	// Only export changed files if maxChangedFiles is not exceeded
-	if len(m.Curr.Commit.ChangedFiles) <= maxChangedFiles {
+	if len(m.Curr.Commit.ChangedFiles) == 0 {
+		params["CI_PIPELINE_FILES"] = "[]"
+	} else if len(m.Curr.Commit.ChangedFiles) <= maxChangedFiles {
 		// we have to use json, as other separators like ;, or space are valid filename chars
 		changedFiles, _ := json.Marshal(m.Curr.Commit.ChangedFiles)
 		params["CI_PIPELINE_FILES"] = string(changedFiles)
