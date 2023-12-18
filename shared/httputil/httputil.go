@@ -48,7 +48,7 @@ func SetCookie(w http.ResponseWriter, r *http.Request, name, value string) {
 		Domain:   r.URL.Host,
 		HttpOnly: true,
 		Secure:   IsHTTPS(r),
-		MaxAge:   math.MaxInt32,
+		MaxAge:   math.MaxInt32, // the cookie value (token) is responsible for expiration
 	}
 
 	http.SetCookie(w, &cookie)
