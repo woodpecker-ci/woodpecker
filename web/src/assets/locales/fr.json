@@ -28,7 +28,7 @@
         "never": "Jamais",
         "no_schedule": {
           "name": "Désactiver l'agent",
-          "placeholder": "Bloquer l'assignation de nouvelles taches sur l'agent"
+          "placeholder": "Bloquer l'assignation de nouvelles tâches sur l'agent"
         },
         "none": "Il n'y a pas d'agent pour le moment.",
         "platform": {
@@ -54,7 +54,7 @@
       },
       "queue": {
         "agent": "agent",
-        "desc": "Taches en attente d’exécution par des agents",
+        "desc": "Tâches en attente d’exécution par des agents",
         "pause": "Mettre en pause",
         "paused": "La queue est en pause",
         "queue": "Queue",
@@ -159,7 +159,7 @@
         "desc": "Les secrets d'organisation sont transmis sous forme de variable d’environnement lors de l’exécution de chaque étape d'un pipeline de tout les dépôts de l'organisation.",
         "events": {
           "events": "Disponible pour les événements suivants",
-          "pr_warning": "Faites attention avec cette option car un acteur malicieux pourrait soumettre un pull request qui va afficher vos secrets."
+          "pr_warning": "Faites attention avec cette option car un acteur malicieux pourrait soumettre une pull request qui va afficher vos secrets."
         },
         "images": {
           "desc": "Liste séparée par des virgules des images pour lesquelles ce secret est accessible, laisser vide pour donner l’accès à toutes les images",
@@ -322,7 +322,7 @@
         "edit": "Modifier la tâche planifiée",
         "name": {
           "name": "Nom",
-          "placeholder": "Nom de la tache périodique"
+          "placeholder": "Nom de la tâche périodique"
         },
         "next_exec": "Prochaine exécution",
         "none": "Il n'y a pas de tâche planifié pour le moment.",
@@ -334,7 +334,7 @@
           "placeholder": "Horaire",
           "title": "Horaire (basé sur UTC)"
         },
-        "show": "Afficher les taches planifiées"
+        "show": "Afficher les tâches planifiées"
       },
       "general": {
         "allow_pr": {
@@ -394,16 +394,16 @@
           "address": "Adresse",
           "placeholder": "Adresse du registre (e.g. docker.io)"
         },
-        "created": "Authentifiant de registre crée",
-        "creds": "Authentifiants de connexion pour le registre",
+        "created": "Authentifiant de connexion à un registre crée",
+        "creds": "Authentifiants de connexion à un registre",
         "delete": "Effacer le registre",
-        "deleted": "Authentifiant de registre effacé",
-        "desc": "Des authentifiant de connexion pour les registres peuvent être ajouter pour permettre d'utiliser des images privés pour vos pipelines.",
+        "deleted": "Authentifiant de connexion à un registre effacé",
+        "desc": "Des authentifiants de connexion pour les registres peuvent être ajouté pour permettre d'utiliser des images privées pour vos pipelines.",
         "edit": "Modifier le registre",
-        "none": "Il n'y a pas d’authentifiant de connexion de registre pour le moment.",
+        "none": "Il n'y a pas d’authentifiant de connexion à un registre pour le moment.",
         "registries": "Registres",
         "save": "Enregistrer le registre",
-        "saved": "Authentifiant de registre enregistré",
+        "saved": "Authentifiant de connexion à un registre enregistré",
         "show": "Afficher les registres"
       },
       "secrets": {
@@ -416,7 +416,7 @@
         "edit": "Modifier le secret",
         "events": {
           "events": "Disponible pour les événements suivants",
-          "pr_warning": "Faites attention avec cette option car un acteur malicieux pourrait soumettre un pull request qui va afficher vos secrets."
+          "pr_warning": "Faites attention avec cette option car un acteur malicieux pourrait soumettre une pull request qui va afficher vos secrets."
         },
         "images": {
           "desc": "Liste séparée par des virgules des images pour lesquelles ce secret est accessible, laisser vide pour donner l’accès à toutes les images",
@@ -482,7 +482,7 @@
         "add": "Ajouter un secret",
         "created": "Secret d'utilisateur crée",
         "deleted": "Secret d'utilisateur effacé",
-        "desc": "Les secrets d'utilisateur peuvent être passés à toutes les étapes du pipeline des dépôtsde l'utilisateur sous forme de variables d'environnement.",
+        "desc": "Les secrets d'utilisateur peuvent être passés à toutes les étapes du pipeline des dépôts de l'utilisateur sous forme de variables d'environnement.",
         "events": {
           "events": "Disponible pour les événements suivants",
           "pr_warning": "Attention, si cette option est activé, un acteur malicieux peut proposer une pull request qui affiche vos secrets."
