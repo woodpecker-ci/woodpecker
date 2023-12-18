@@ -16,12 +16,11 @@ package datastore
 
 import (
 	"github.com/rs/zerolog"
+	"xorm.io/xorm"
+	xlog "xorm.io/xorm/log"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store/datastore/migration"
-
-	"xorm.io/xorm"
-	xlog "xorm.io/xorm/log"
 )
 
 type storage struct {

@@ -21,9 +21,9 @@ import (
 	"sync"
 	"time"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-
 	"github.com/rs/zerolog/log"
+
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 type entry struct {

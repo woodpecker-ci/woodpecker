@@ -18,7 +18,6 @@ import (
 	"context"
 	"crypto"
 	"fmt"
-
 	httpStatus "net/http"
 
 	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"

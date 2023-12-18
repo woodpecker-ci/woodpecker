@@ -18,6 +18,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 

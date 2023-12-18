@@ -26,16 +26,15 @@ import (
 
 	backend_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
-	yaml_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types"
-	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
-
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/compiler"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/matrix"
+	yaml_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server"
+	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 

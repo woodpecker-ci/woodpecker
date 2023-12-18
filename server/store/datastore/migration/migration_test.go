@@ -19,14 +19,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
-	"xorm.io/xorm"
-	"xorm.io/xorm/schemas"
-
 	// blank imports to register the sql drivers
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/stretchr/testify/assert"
+	"xorm.io/xorm"
+	"xorm.io/xorm/schemas"
 )
 
 const (

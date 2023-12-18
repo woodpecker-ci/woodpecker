@@ -22,6 +22,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
+
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 )
 

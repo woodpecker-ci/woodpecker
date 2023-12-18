@@ -26,6 +26,7 @@ import (
 	"strings"
 
 	"github.com/rs/zerolog/log"
+
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
 

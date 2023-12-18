@@ -23,10 +23,10 @@ import (
 	"net/http"
 	"net/url"
 
-	shared_utils "go.woodpecker-ci.org/woodpecker/v2/shared/utils"
-
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/bitbucket"
+
+	shared_utils "go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
 const (

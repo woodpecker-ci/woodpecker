@@ -51,8 +51,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/web"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
 	"go.woodpecker-ci.org/woodpecker/v2/version"
-	// "go.woodpecker-ci.org/woodpecker/v2/server/plugins/encryption"
-	// encryptedStore "go.woodpecker-ci.org/woodpecker/v2/server/plugins/encryption/wrapper/store"
 )
 
 func run(c *cli.Context) error {
