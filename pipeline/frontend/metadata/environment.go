@@ -23,21 +23,17 @@ import (
 	"strings"
 )
 
-var pullRegexp = regexp.MustCompile(`\d+`)
+var (
+	pullRegexp      = regexp.MustCompile(`\d+`)
+	maxChangedFiles = 500
+)
 
 // Environ returns the metadata as a map of environment variables.
 func (m *Metadata) Environ() map[string]string {
 	var (
 		sourceBranch string
 		targetBranch string
-		changedFiles string
 	)
-
-	if len(m.Curr.Commit.ChangedFiles) != 0 {
-		// we have to use json, as other separators like ;, or space are valid filename chars
-		rawJSON, _ := json.Marshal(m.Curr.Commit.ChangedFiles)
-		changedFiles = string(rawJSON)
-	}
 
 	branchParts := strings.Split(m.Curr.Commit.Refspec, ":")
 	if len(branchParts) == 2 {
@@ -83,7 +79,6 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_PIPELINE_CREATED":       strconv.FormatInt(m.Curr.Created, 10),
 		"CI_PIPELINE_STARTED":       strconv.FormatInt(m.Curr.Started, 10),
 		"CI_PIPELINE_FINISHED":      strconv.FormatInt(m.Curr.Finished, 10),
-		"CI_PIPELINE_FILES":         changedFiles,
 
 		"CI_WORKFLOW_NAME":   m.Workflow.Name,
 		"CI_WORKFLOW_NUMBER": strconv.Itoa(m.Workflow.Number),
@@ -134,6 +129,13 @@ func (m *Metadata) Environ() map[string]string {
 	if m.Curr.Event == EventPull {
 		params["CI_COMMIT_PULL_REQUEST"] = pullRegexp.FindString(m.Curr.Commit.Ref)
 		params["CI_COMMIT_PULL_REQUEST_LABELS"] = strings.Join(m.Curr.Commit.PullRequestLabels, ",")
+	}
+
+	// Only export changed files if maxChangedFiles is not exceeded
+	if len(m.Curr.Commit.ChangedFiles) <= maxChangedFiles {
+		// we have to use json, as other separators like ;, or space are valid filename chars
+		changedFiles, _ := json.Marshal(m.Curr.Commit.ChangedFiles)
+		params["CI_PIPELINE_FILES"] = string(changedFiles)
 	}
 
 	return params
