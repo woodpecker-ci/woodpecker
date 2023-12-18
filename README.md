@@ -46,7 +46,7 @@
 </p>
 <br/>
 
-Woodpecker is a community fork of the Drone CI system.
+Woodpecker is a simple CI engine with great extensibility.
 
 ![woodpecker](docs/docs/woodpecker.png)
 
