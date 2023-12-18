@@ -29,9 +29,11 @@ func UpdateToStatusRunning(store model.UpdatePipelineStore, pipeline model.Pipel
 }
 
 func UpdateToStatusPending(store model.UpdatePipelineStore, pipeline model.Pipeline, reviewer string) (*model.Pipeline, error) {
-	pipeline.Reviewer = reviewer
+	if reviewer != "" {
+		pipeline.Reviewer = reviewer
+		pipeline.Reviewed = time.Now().Unix()
+	}
 	pipeline.Status = model.StatusPending
-	pipeline.Reviewed = time.Now().Unix()
 	return &pipeline, store.UpdatePipeline(&pipeline)
 }
 

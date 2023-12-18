@@ -9,7 +9,7 @@ require (
 	github.com/6543/logfile-open v1.2.1
 	github.com/alessio/shellescape v1.4.2
 	github.com/bmatcuk/doublestar/v4 v4.6.1
-	github.com/caddyserver/certmagic v0.19.2
+	github.com/caddyserver/certmagic v0.20.0
 	github.com/cenkalti/backoff/v4 v4.2.1
 	github.com/distribution/reference v0.5.0
 	github.com/docker/cli v24.0.7+incompatible
@@ -17,7 +17,7 @@ require (
 	github.com/docker/go-connections v0.4.0
 	github.com/docker/go-units v0.5.0
 	github.com/drone/envsubst v1.0.3
-	github.com/expr-lang/expr v1.15.6
+	github.com/expr-lang/expr v1.15.7
 	github.com/franela/goblin v0.0.0-20211003143422-0a4f594942bf
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/gin-gonic/gin v1.9.1
@@ -26,12 +26,12 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.2.0
 	github.com/google/go-github/v57 v57.0.0
 	github.com/google/tink/go v1.7.0
-	github.com/google/uuid v1.4.0
+	github.com/google/uuid v1.5.0
 	github.com/gorilla/securecookie v1.1.2
-	github.com/jellydator/ttlcache/v3 v3.1.0
+	github.com/jellydator/ttlcache/v3 v3.1.1
 	github.com/joho/godotenv v1.5.1
 	github.com/lib/pq v1.10.9
-	github.com/mattn/go-sqlite3 v1.14.18
+	github.com/mattn/go-sqlite3 v1.14.19
 	github.com/moby/moby v24.0.7+incompatible
 	github.com/moby/term v0.5.0
 	github.com/muesli/termenv v0.15.2
@@ -46,7 +46,7 @@ require (
 	github.com/swaggo/swag v1.16.2
 	github.com/tevino/abool/v2 v2.1.0
 	github.com/urfave/cli/v2 v2.26.0
-	github.com/xanzy/go-gitlab v0.94.0
+	github.com/xanzy/go-gitlab v0.95.2
 	github.com/xeipuuv/gojsonschema v1.2.0
 	go.uber.org/multierr v1.11.0
 	golang.org/x/crypto v0.16.0
@@ -55,12 +55,12 @@ require (
 	golang.org/x/sync v0.5.0
 	golang.org/x/term v0.15.0
 	golang.org/x/text v0.14.0
-	google.golang.org/grpc v1.59.0
+	google.golang.org/grpc v1.60.0
 	google.golang.org/protobuf v1.31.0
 	gopkg.in/yaml.v3 v3.0.1
-	k8s.io/api v0.28.4
-	k8s.io/apimachinery v0.28.4
-	k8s.io/client-go v0.28.4
+	k8s.io/api v0.29.0
+	k8s.io/apimachinery v0.29.0
+	k8s.io/client-go v0.29.0
 	src.techknowlogick.com/xormigrate v1.7.1
 	xorm.io/builder v0.3.13
 	xorm.io/xorm v1.3.4
@@ -80,12 +80,12 @@ require (
 	github.com/davidmz/go-pageant v1.0.2 // indirect
 	github.com/docker/distribution v2.8.3+incompatible // indirect
 	github.com/docker/docker-credential-helpers v0.7.0 // indirect
-	github.com/emicklei/go-restful/v3 v3.9.0 // indirect
+	github.com/emicklei/go-restful/v3 v3.11.0 // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-fed/httpsig v1.1.0 // indirect
-	github.com/go-logr/logr v1.2.4 // indirect
+	github.com/go-logr/logr v1.3.0 // indirect
 	github.com/go-openapi/jsonpointer v0.19.6 // indirect
 	github.com/go-openapi/jsonreference v0.20.2 // indirect
 	github.com/go-openapi/spec v0.20.8 // indirect
@@ -150,14 +150,14 @@ require (
 	golang.org/x/time v0.3.0 // indirect
 	golang.org/x/tools v0.14.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20230822172742-b8732ec3820d // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20231002182017-d307bd883b97 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gotest.tools/v3 v3.4.0 // indirect
-	k8s.io/klog/v2 v2.100.1 // indirect
-	k8s.io/kube-openapi v0.0.0-20230717233707-2695361300d9 // indirect
-	k8s.io/utils v0.0.0-20230406110748-d93618cff8a2 // indirect
+	k8s.io/klog/v2 v2.110.1 // indirect
+	k8s.io/kube-openapi v0.0.0-20231010175941-2dd684a91f00 // indirect
+	k8s.io/utils v0.0.0-20230726121419-3b25d923346b // indirect
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd // indirect
-	sigs.k8s.io/structured-merge-diff/v4 v4.2.3 // indirect
+	sigs.k8s.io/structured-merge-diff/v4 v4.4.1 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )

@@ -16,7 +16,7 @@
 
     <SecretList
       v-if="!selectedSecret"
-      v-model="secrets"
+      :model-value="secrets"
       i18n-prefix="repo.settings.secrets."
       :is-deleting="isDeleting"
       @edit="editSecret"
@@ -64,15 +64,54 @@ const repo = inject<Ref<Repo>>('repo');
 const selectedSecret = ref<Partial<Secret>>();
 const isEditingSecret = computed(() => !!selectedSecret.value?.id);
 
-async function loadSecrets(page: number): Promise<Secret[] | null> {
+async function loadSecrets(page: number, level: 'repo' | 'org' | 'global'): Promise<Secret[] | null> {
   if (!repo?.value) {
     throw new Error("Unexpected: Can't load repo");
   }
 
-  return apiClient.getSecretList(repo.value.id, page);
+  switch (level) {
+    case 'repo':
+      return apiClient.getSecretList(repo.value.id, page);
+    case 'org':
+      return apiClient.getOrgSecretList(repo.value.org_id, page);
+    case 'global':
+      return apiClient.getGlobalSecretList(page);
+    default:
+      throw new Error(`Unexpected level: ${level}`);
+  }
 }
 
-const { resetPage, data: secrets } = usePagination(loadSecrets, () => !selectedSecret.value);
+const { resetPage, data: _secrets } = usePagination(loadSecrets, () => !selectedSecret.value, {
+  each: ['repo', 'org', 'global'],
+});
+const secrets = computed(() => {
+  const secretsList: Record<string, Secret & { edit?: boolean; level: 'repo' | 'org' | 'global' }> = {};
+
+  // eslint-disable-next-line no-restricted-syntax
+  for (const level of ['repo', 'org', 'global']) {
+    // eslint-disable-next-line no-restricted-syntax
+    for (const secret of _secrets.value) {
+      if (
+        ((level === 'repo' && secret.repo_id !== 0 && secret.org_id === 0) ||
+          (level === 'org' && secret.repo_id === 0 && secret.org_id !== 0) ||
+          (level === 'global' && secret.repo_id === 0 && secret.org_id === 0)) &&
+        !secretsList[secret.name]
+      ) {
+        secretsList[secret.name] = { ...secret, edit: secret.repo_id !== 0, level };
+      }
+    }
+  }
+
+  const levelsOrder = {
+    global: 0,
+    org: 1,
+    repo: 2,
+  };
+
+  return Object.values(secretsList)
+    .toSorted((a, b) => a.name.localeCompare(b.name))
+    .toSorted((a, b) => levelsOrder[b.level] - levelsOrder[a.level]);
+});
 
 const { doSubmit: createSecret, isLoading: isSaving } = useAsyncAction(async () => {
   if (!repo?.value) {
@@ -93,7 +132,7 @@ const { doSubmit: createSecret, isLoading: isSaving } = useAsyncAction(async () 
     type: 'success',
   });
   selectedSecret.value = undefined;
-  resetPage();
+  await resetPage();
 });
 
 const { doSubmit: deleteSecret, isLoading: isDeleting } = useAsyncAction(async (_secret: Secret) => {
@@ -103,7 +142,7 @@ const { doSubmit: deleteSecret, isLoading: isDeleting } = useAsyncAction(async (
 
   await apiClient.deleteSecret(repo.value.id, _secret.name);
   notifications.notify({ title: i18n.t('repo.settings.secrets.deleted'), type: 'success' });
-  resetPage();
+  await resetPage();
 });
 
 function editSecret(secret: Secret) {
