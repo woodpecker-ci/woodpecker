@@ -70,6 +70,27 @@ func TestRepos(t *testing.T) {
 			g.Assert(repo.ID != 0).IsTrue()
 		})
 
+		g.It("Should fail if repo has no name / owner / fullname", func() {
+			g.Assert(store.CreateRepo(&model.Repo{
+				UserID:   1,
+				FullName: "bradrydzewski/",
+				Owner:    "bradrydzewski",
+				Name:     "",
+			})).IsNotNil()
+			g.Assert(store.CreateRepo(&model.Repo{
+				UserID:   1,
+				FullName: "/test",
+				Owner:    "",
+				Name:     "test",
+			})).IsNotNil()
+			g.Assert(store.CreateRepo(&model.Repo{
+				UserID:   1,
+				FullName: "",
+				Owner:    "bradrydzewski",
+				Name:     "test",
+			})).IsNotNil()
+		})
+
 		g.It("Should Get a Repo by ID", func() {
 			repo := model.Repo{
 				UserID:   1,
