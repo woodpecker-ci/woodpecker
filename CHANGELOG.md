@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @anbraten, @zc-devs, @allanger, @xoxys, @renovate[bot], @qwerty287, @lafriks, @gapanyc, @mikhail-putilov, @runephilosof-karnovgroup, @kaylynb, @voidcontext, @robbie-cahill, @micash545, @dominic-p, @mzampetakis
+@renovate[bot], @6543, @anbraten, @zc-devs, @allanger, @xoxys, @qwerty287, @lafriks, @gapanyc, @mikhail-putilov, @runephilosof-karnovgroup, @kaylynb, @voidcontext, @robbie-cahill, @micash545, @dominic-p, @mzampetakis
 
 ### 🔒 Security
 
@@ -63,6 +63,7 @@
 
 ### Misc
 
+- chore(deps): update docker.io/alpine docker tag to v3.19 [[#2970](https://github.com/woodpecker-ci/woodpecker/pull/2970)]
 - Fix broken gated repos [[#2959](https://github.com/woodpecker-ci/woodpecker/pull/2959)]
 - fix(deps): update golang (packages) [[#2958](https://github.com/woodpecker-ci/woodpecker/pull/2958)]
 - Update docker.io/techknowlogick/xgo Docker tag to go-1.21.5 [[#2926](https://github.com/woodpecker-ci/woodpecker/pull/2926)]
