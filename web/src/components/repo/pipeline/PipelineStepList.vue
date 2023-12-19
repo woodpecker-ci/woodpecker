@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col w-full md:w-3/12 md:max-w-md md:min-w-xs md:ml-4 text-wp-text-100 gap-2 pb-2">
+  <div class="flex flex-col w-full md:w-3/12 md:max-w-md md:min-w-xs text-wp-text-100 gap-2 pb-2">
     <div
       class="flex flex-wrap p-4 gap-1 justify-between flex-shrink-0 rounded-md border bg-wp-background-100 border-wp-background-400 dark:bg-wp-background-200"
     >
