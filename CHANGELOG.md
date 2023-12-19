@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@renovate[bot], @6543, @anbraten, @zc-devs, @allanger, @xoxys, @qwerty287, @lafriks, @gapanyc, @mikhail-putilov, @runephilosof-karnovgroup, @kaylynb, @voidcontext, @robbie-cahill, @micash545, @dominic-p, @mzampetakis
+@6543, @renovate[bot], @anbraten, @zc-devs, @allanger, @xoxys, @qwerty287, @lafriks, @gapanyc, @mikhail-putilov, @runephilosof-karnovgroup, @kaylynb, @voidcontext, @robbie-cahill, @micash545, @dominic-p, @mzampetakis
 
 ### 🔒 Security
 
@@ -12,6 +12,7 @@
 
 ### 📈 Enhancement
 
+- Improve error handling when activating a repository [[#2965](https://github.com/woodpecker-ci/woodpecker/pull/2965)]
 - Add check for storage where repo/org name is empty [[#2968](https://github.com/woodpecker-ci/woodpecker/pull/2968)]
 - Update pipeline icons [[#2783](https://github.com/woodpecker-ci/woodpecker/pull/2783)]
 - Kubernetes refactor [[#2794](https://github.com/woodpecker-ci/woodpecker/pull/2794)]
@@ -63,6 +64,7 @@
 
 ### Misc
 
+- fix(deps): update module google.golang.org/grpc to v1.60.1 [[#2969](https://github.com/woodpecker-ci/woodpecker/pull/2969)]
 - chore(deps): update docker.io/alpine docker tag to v3.19 [[#2970](https://github.com/woodpecker-ci/woodpecker/pull/2970)]
 - Fix broken gated repos [[#2959](https://github.com/woodpecker-ci/woodpecker/pull/2959)]
 - fix(deps): update golang (packages) [[#2958](https://github.com/woodpecker-ci/woodpecker/pull/2958)]
