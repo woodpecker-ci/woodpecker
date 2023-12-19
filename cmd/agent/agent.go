@@ -156,22 +156,22 @@ func run(c *cli.Context) error {
 	parallel := c.Int("max-workflows")
 	wg.Add(parallel)
 
-	// new engine
-	engine, err := backend.FindEngine(backendCtx, c.String("backend-engine"))
+	// new backend
+	backendEngine, err := backend.FindBackend(backendCtx, c.String("backend-engine"))
 	if err != nil {
 		log.Error().Err(err).Msgf("cannot find backend engine '%s'", c.String("backend-engine"))
 		return err
 	}
 
-	// load engine (e.g. init api client)
-	engInfo, err := engine.Load(backendCtx)
+	// load backend (e.g. init api client)
+	engInfo, err := backendEngine.Load(backendCtx)
 	if err != nil {
 		log.Error().Err(err).Msg("cannot load backend engine")
 		return err
 	}
-	log.Debug().Msgf("loaded %s backend engine", engine.Name())
+	log.Debug().Msgf("loaded %s backend engine", backendEngine.Name())
 
-	agentConfig.AgentID, err = client.RegisterAgent(ctx, engInfo.Platform, engine.Name(), version.String(), parallel)
+	agentConfig.AgentID, err = client.RegisterAgent(ctx, engInfo.Platform, backendEngine.Name(), version.String(), parallel)
 	if err != nil {
 		return err
 	}
@@ -185,7 +185,7 @@ func run(c *cli.Context) error {
 	labels := map[string]string{
 		"hostname": hostname,
 		"platform": engInfo.Platform,
-		"backend":  engine.Name(),
+		"backend":  backendEngine.Name(),
 		"repo":     "*", // allow all repos by default
 	}
 
@@ -221,7 +221,7 @@ func run(c *cli.Context) error {
 		go func() {
 			defer wg.Done()
 
-			r := agent.NewRunner(client, filter, hostname, counter, &engine)
+			r := agent.NewRunner(client, filter, hostname, counter, &backendEngine)
 			log.Debug().Msgf("created new runner %d", i)
 
 			for {
@@ -241,7 +241,7 @@ func run(c *cli.Context) error {
 
 	log.Info().Msgf(
 		"Starting Woodpecker agent with version '%s' and backend '%s' using platform '%s' running up to %d pipelines in parallel",
-		version.String(), engine.Name(), engInfo.Platform, parallel)
+		version.String(), backendEngine.Name(), engInfo.Platform, parallel)
 
 	wg.Wait()
 	return nil

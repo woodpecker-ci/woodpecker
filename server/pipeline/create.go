@@ -18,7 +18,6 @@ import (
 	"context"
 	"fmt"
 	"regexp"
-	"time"
 
 	"github.com/rs/zerolog/log"
 
@@ -88,10 +87,6 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		return nil, ErrFiltered
 	}
 
-	if err := updatePipelinePending(ctx, _store, pipeline, repo, repoUser); err != nil {
-		return nil, err
-	}
-
 	pipeline = setPipelineStepsOnPipeline(pipeline, pipelineItems)
 
 	// persist the pipeline config for historical correctness, restarts, etc
@@ -117,6 +112,10 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		return pipeline, nil
 	}
 
+	if err := updatePipelinePending(ctx, _store, pipeline, repo, repoUser); err != nil {
+		return nil, err
+	}
+
 	pipeline, err = start(ctx, _store, pipeline, repoUser, repo, pipelineItems)
 	if err != nil {
 		msg := fmt.Sprintf("failed to start pipeline for %s", repo.FullName)
@@ -128,16 +127,12 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 }
 
 func updatePipelineWithErr(ctx context.Context, _store store.Store, pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User, err error) error {
-	pipeline.Started = time.Now().Unix()
-	pipeline.Finished = pipeline.Started
-	pipeline.Status = model.StatusError
-	pipeline.Errors = errors.GetPipelineErrors(err)
-	dbErr := _store.UpdatePipeline(pipeline)
-	if dbErr != nil {
-		msg := fmt.Errorf("failed to save pipeline for %s", repo.FullName)
-		log.Error().Err(dbErr).Msg(msg.Error())
-		return msg
+	_pipeline, err := UpdateToStatusError(_store, *pipeline, err)
+	if err != nil {
+		return err
 	}
+	// update value in ref
+	*pipeline = *_pipeline
 
 	publishPipeline(ctx, pipeline, repo, repoUser)
 
@@ -145,13 +140,12 @@ func updatePipelineWithErr(ctx context.Context, _store store.Store, pipeline *mo
 }
 
 func updatePipelinePending(ctx context.Context, _store store.Store, pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User) error {
-	pipeline.Status = model.StatusPending
-	dbErr := _store.UpdatePipeline(pipeline)
-	if dbErr != nil {
-		msg := fmt.Errorf("failed to save pipeline for %s", repo.FullName)
-		log.Error().Err(dbErr).Msg(msg.Error())
-		return msg
+	_pipeline, err := UpdateToStatusPending(_store, *pipeline, "")
+	if err != nil {
+		return err
 	}
+	// update value in ref
+	*pipeline = *_pipeline
 
 	publishPipeline(ctx, pipeline, repo, repoUser)
 

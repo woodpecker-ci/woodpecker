@@ -62,7 +62,7 @@ steps:
   # TODO: add step to remove preview again after PR is closed (waiting for #286)
 
   deploy:
-    image: docker.io/alpine:3.18
+    image: docker.io/alpine:3.19
     secrets:
       - BOT_PRIVATE_KEY
     commands:

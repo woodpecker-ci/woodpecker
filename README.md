@@ -7,8 +7,8 @@
 </p>
 <br/>
 <p align="center">
-  <a href="https://ci.woodpecker-ci.org/woodpecker-ci/woodpecker" title="Build Status">
-    <img src="https://ci.woodpecker-ci.org/api/badges/woodpecker-ci/woodpecker/status.svg">
+  <a href="https://ci.woodpecker-ci.org/repos/3780" title="Build Status">
+    <img src="https://ci.woodpecker-ci.org/api/badges/3780/status.svg">
   </a>
   <a href="https://codecov.io/gh/woodpecker-ci/woodpecker">
     <img src="https://codecov.io/gh/woodpecker-ci/woodpecker/branch/main/graph/badge.svg"/>
@@ -40,22 +40,19 @@
   <a href="https://bestpractices.coreinfrastructure.org/projects/5309">
     <img src="https://bestpractices.coreinfrastructure.org/projects/5309/badge">
   </a>
-  <a href="https://www.tickgit.com/browse?repo=github.com/woodpecker-ci/woodpecker" title="TODOs">
-    <img src="https://badgen.net/https/api.tickgit.com/badgen/github.com/woodpecker-ci/woodpecker">
-  </a>
-  <a href="https://github.com/pre-commit/pre-commit" title="TODOs">
-    <img src="https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit">
+  <a href="https://results.pre-commit.ci/repo/github/179344069" title="pre-commit.ci">
+    <img src="https://results.pre-commit.ci/badge/github/woodpecker-ci/woodpecker/main.svg">
   </a>
 </p>
 <br/>
 
-Woodpecker is a community fork of the Drone CI system.
+Woodpecker is a simple yet powerful CI/CD engine with great extensibility.
 
 ![woodpecker](docs/docs/woodpecker.png)
 
 ## 🫶 Support
 
-Please consider to donate and become a backer. 🙏 [[Become a backer](https://opencollective.com/woodpecker-ci#category-CONTRIBUTE)]
+Please consider donating and become a backer. 🙏 [[Become a backer](https://opencollective.com/woodpecker-ci#category-CONTRIBUTE)]
 
 <a href="https://opencollective.com/woodpecker-ci" target="_blank"><img src="https://opencollective.com/woodpecker-ci/backers.svg?width=890"></a>
 
