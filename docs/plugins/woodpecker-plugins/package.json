@@ -18,7 +18,8 @@
     "@types/node": "^20.0.0",
     "axios": "^1.6.0",
     "concurrently": "^8.0.0",
-    "marked": "^9.1.2",
+    "isomorphic-dompurify": "^1.11.0",
+    "marked": "^11.0.0",
     "tslib": "^2.6.1",
     "typescript": "^5.0.0"
   },

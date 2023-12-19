@@ -5,7 +5,7 @@ import * as path from 'path';
 
 const config: Config = {
   title: 'Woodpecker CI',
-  tagline: 'Woodpecker is a simple CI engine with great extensibility.',
+  tagline: 'Woodpecker is a simple yet powerful CI/CD engine with great extensibility.',
   url: 'https://woodpecker-ci.org',
   baseUrl: '/',
   onBrokenLinks: 'throw',
@@ -90,7 +90,7 @@ const config: Config = {
             },
             {
               label: 'Server setup',
-              to: '/docs/administration/setup',
+              to: '/docs/administration/deployment/overview',
             },
             {
               label: 'FAQ',
@@ -138,7 +138,7 @@ const config: Config = {
     prism: {
       theme: themes.github,
       darkTheme: themes.dracula,
-      additionalLanguages: ['diff', 'json', 'docker', 'javascript', 'css', 'bash', 'nginx', 'apacheconf'],
+      additionalLanguages: ['diff', 'json', 'docker', 'javascript', 'css', 'bash', 'nginx', 'apacheconf', 'ini', 'nix'],
     },
     announcementBar: {
       id: 'github-star',
@@ -210,14 +210,18 @@ const config: Config = {
           sidebarPath: require.resolve('./sidebars.js'),
           editUrl: 'https://github.com/woodpecker-ci/woodpecker/edit/main/docs/',
           includeCurrentVersion: true,
-          lastVersion: '1.0',
+          lastVersion: '2.0',
           versions: {
             current: {
               label: 'Next',
               banner: 'unreleased',
             },
+            '2.0': {
+              label: '2.0.x',
+            },
             '1.0': {
               label: '1.0.x',
+              banner: 'unmaintained',
             },
             0.15: {
               label: '0.15.x',

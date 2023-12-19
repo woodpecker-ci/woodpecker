@@ -23,8 +23,8 @@ import (
 
 	"github.com/xanzy/go-gitlab"
 
-	"go.woodpecker-ci.org/woodpecker/server/model"
-	"go.woodpecker-ci.org/woodpecker/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
 const (
@@ -41,7 +41,7 @@ func (g *GitLab) convertGitLabRepo(_repo *gitlab.Project) (*model.Repo, error) {
 		Name:          name,
 		FullName:      _repo.PathWithNamespace,
 		Avatar:        _repo.AvatarURL,
-		Link:          _repo.WebURL,
+		ForgeURL:      _repo.WebURL,
 		Clone:         _repo.HTTPURLToRepo,
 		CloneSSH:      _repo.SSHURLToRepo,
 		Branch:        _repo.DefaultBranch,
@@ -90,7 +90,7 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 	}
 
 	repo.ForgeRemoteID = model.ForgeRemoteID(fmt.Sprint(obj.TargetProjectID))
-	repo.Link = target.WebURL
+	repo.ForgeURL = target.WebURL
 
 	if target.GitHTTPURL != "" {
 		repo.Clone = target.GitHTTPURL
@@ -130,7 +130,7 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 	}
 
 	pipeline.Title = obj.Title
-	pipeline.Link = obj.URL
+	pipeline.ForgeURL = obj.URL
 	pipeline.PullRequestLabels = convertLabels(hook.Labels)
 
 	return obj.IID, repo, pipeline, nil
@@ -147,7 +147,7 @@ func convertPushHook(hook *gitlab.PushEvent) (*model.Repo, *model.Pipeline, erro
 
 	repo.ForgeRemoteID = model.ForgeRemoteID(fmt.Sprint(hook.ProjectID))
 	repo.Avatar = hook.Project.AvatarURL
-	repo.Link = hook.Project.WebURL
+	repo.ForgeURL = hook.Project.WebURL
 	repo.Clone = hook.Project.GitHTTPURL
 	repo.CloneSSH = hook.Project.GitSSHURL
 	repo.FullName = hook.Project.PathWithNamespace
@@ -200,7 +200,7 @@ func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Pipeline, error)
 
 	repo.ForgeRemoteID = model.ForgeRemoteID(fmt.Sprint(hook.ProjectID))
 	repo.Avatar = hook.Project.AvatarURL
-	repo.Link = hook.Project.WebURL
+	repo.ForgeURL = hook.Project.WebURL
 	repo.Clone = hook.Project.GitHTTPURL
 	repo.CloneSSH = hook.Project.GitSSHURL
 	repo.FullName = hook.Project.PathWithNamespace

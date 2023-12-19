@@ -15,7 +15,7 @@
 package linter
 
 import (
-	"go.woodpecker-ci.org/woodpecker/pipeline/errors"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
 )
 
 func newLinterError(message, file, field string, isWarning bool) *errors.PipelineError {

@@ -22,10 +22,10 @@ import (
 	"github.com/robfig/cron"
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/server/forge"
-	"go.woodpecker-ci.org/woodpecker/server/model"
-	"go.woodpecker-ci.org/woodpecker/server/pipeline"
-	"go.woodpecker-ci.org/woodpecker/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
 const (
@@ -139,6 +139,6 @@ func CreatePipeline(ctx context.Context, store store.Store, f forge.Forge, cron 
 		Message:   cron.Name,
 		Timestamp: cron.NextExec,
 		Sender:    cron.Name,
-		Link:      repo.Link,
+		ForgeURL:  repo.ForgeURL,
 	}, nil
 }

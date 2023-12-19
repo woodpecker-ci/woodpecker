@@ -6,9 +6,10 @@ when:
     branch:
       - ${CI_REPO_DEFAULT_BRANCH}
       - release/*
+      - renovate/*
 
 variables:
-  - &golang_image 'docker.io/golang:1.21.3'
+  - &golang_image 'docker.io/golang:1.21.5'
   - &when
     - path: &when_path # related config files
         - '.woodpecker/test.yml'
@@ -32,7 +33,7 @@ steps:
   lint-pipeline:
     image: *golang_image
     commands:
-      - go run go.woodpecker-ci.org/woodpecker/cmd/cli lint
+      - go run go.woodpecker-ci.org/woodpecker/v2/cmd/cli lint
     when:
       - <<: *when
       - path:

@@ -20,13 +20,13 @@ import (
 	"path"
 	"strings"
 
-	"github.com/antonmedv/expr"
 	"github.com/bmatcuk/doublestar/v4"
+	"github.com/expr-lang/expr"
 	"go.uber.org/multierr"
 	"gopkg.in/yaml.v3"
 
-	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/metadata"
-	yamlBaseTypes "go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/types/base"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
+	yamlBaseTypes "go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types/base"
 )
 
 type (
@@ -298,7 +298,7 @@ func (c *Map) Match(params map[string]string) bool {
 }
 
 // UnmarshalYAML unmarshal the constraint map.
-func (c *Map) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (c *Map) UnmarshalYAML(unmarshal func(any) error) error {
 	out1 := struct {
 		Include map[string]string
 		Exclude map[string]string

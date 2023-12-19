@@ -20,7 +20,7 @@ import (
 	"xorm.io/builder"
 	"xorm.io/xorm"
 
-	"go.woodpecker-ci.org/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 func (s storage) PermFind(user *model.User, repo *model.Repo) (*model.Perm, error) {

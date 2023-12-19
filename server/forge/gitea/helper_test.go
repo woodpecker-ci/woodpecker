@@ -22,9 +22,9 @@ import (
 	"code.gitea.io/sdk/gitea"
 	"github.com/franela/goblin"
 
-	"go.woodpecker-ci.org/woodpecker/server/forge/gitea/fixtures"
-	"go.woodpecker-ci.org/woodpecker/server/model"
-	"go.woodpecker-ci.org/woodpecker/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/gitea/fixtures"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
 func Test_parse(t *testing.T) {
@@ -99,7 +99,7 @@ func Test_parse(t *testing.T) {
 			g.Assert(pipeline.Event).Equal(model.EventPush)
 			g.Assert(pipeline.Commit).Equal(hook.After)
 			g.Assert(pipeline.Ref).Equal(hook.Ref)
-			g.Assert(pipeline.Link).Equal(hook.Commits[0].URL)
+			g.Assert(pipeline.ForgeURL).Equal(hook.Commits[0].URL)
 			g.Assert(pipeline.Branch).Equal("main")
 			g.Assert(pipeline.Message).Equal(hook.Commits[0].Message)
 			g.Assert(pipeline.Avatar).Equal("http://1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87")
@@ -114,7 +114,7 @@ func Test_parse(t *testing.T) {
 			g.Assert(repo.Name).Equal(hook.Repo.Name)
 			g.Assert(repo.Owner).Equal(hook.Repo.Owner.UserName)
 			g.Assert(repo.FullName).Equal("gordon/hello-world")
-			g.Assert(repo.Link).Equal(hook.Repo.HTMLURL)
+			g.Assert(repo.ForgeURL).Equal(hook.Repo.HTMLURL)
 		})
 
 		g.It("Should return a Pipeline struct from a tag hook", func() {
@@ -125,7 +125,7 @@ func Test_parse(t *testing.T) {
 			g.Assert(pipeline.Commit).Equal(hook.Sha)
 			g.Assert(pipeline.Ref).Equal("refs/tags/v1.0.0")
 			g.Assert(pipeline.Branch).Equal("refs/tags/v1.0.0")
-			g.Assert(pipeline.Link).Equal("http://gitea.golang.org/gordon/hello-world/src/tag/v1.0.0")
+			g.Assert(pipeline.ForgeURL).Equal("http://gitea.golang.org/gordon/hello-world/src/tag/v1.0.0")
 			g.Assert(pipeline.Message).Equal("created tag v1.0.0")
 		})
 
@@ -136,7 +136,7 @@ func Test_parse(t *testing.T) {
 			g.Assert(pipeline.Event).Equal(model.EventPull)
 			g.Assert(pipeline.Commit).Equal(hook.PullRequest.Head.Sha)
 			g.Assert(pipeline.Ref).Equal("refs/pull/1/head")
-			g.Assert(pipeline.Link).Equal(hook.PullRequest.URL)
+			g.Assert(pipeline.ForgeURL).Equal(hook.PullRequest.URL)
 			g.Assert(pipeline.Branch).Equal("main")
 			g.Assert(pipeline.Refspec).Equal("feature/changes:main")
 			g.Assert(pipeline.Message).Equal(hook.PullRequest.Title)
@@ -151,7 +151,7 @@ func Test_parse(t *testing.T) {
 			g.Assert(repo.Name).Equal(hook.Repo.Name)
 			g.Assert(repo.Owner).Equal(hook.Repo.Owner.UserName)
 			g.Assert(repo.FullName).Equal("gordon/hello-world")
-			g.Assert(repo.Link).Equal(hook.Repo.HTMLURL)
+			g.Assert(repo.ForgeURL).Equal(hook.Repo.HTMLURL)
 		})
 
 		g.It("Should return a Perm struct from a Gitea Perm", func() {
@@ -209,7 +209,7 @@ func Test_parse(t *testing.T) {
 			g.Assert(repo.Owner).Equal(from.Owner.UserName)
 			g.Assert(repo.Name).Equal("hello-world")
 			g.Assert(repo.Branch).Equal("main")
-			g.Assert(repo.Link).Equal(from.HTMLURL)
+			g.Assert(repo.ForgeURL).Equal(from.HTMLURL)
 			g.Assert(repo.Clone).Equal(from.CloneURL)
 			g.Assert(repo.Avatar).Equal(from.Owner.AvatarURL)
 			g.Assert(repo.IsSCMPrivate).Equal(from.Private)

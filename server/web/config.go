@@ -22,10 +22,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/server"
-	"go.woodpecker-ci.org/woodpecker/server/router/middleware/session"
-	"go.woodpecker-ci.org/woodpecker/shared/token"
-	"go.woodpecker-ci.org/woodpecker/version"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/token"
+	"go.woodpecker-ci.org/woodpecker/v2/version"
 )
 
 func Config(c *gin.Context) {
@@ -39,7 +39,7 @@ func Config(c *gin.Context) {
 		).Sign(user.Hash)
 	}
 
-	configData := map[string]interface{}{
+	configData := map[string]any{
 		"user":           user,
 		"csrf":           csrf,
 		"version":        version.String(),
@@ -50,7 +50,7 @@ func Config(c *gin.Context) {
 
 	// default func map with json parser.
 	funcMap := template.FuncMap{
-		"json": func(v interface{}) string {
+		"json": func(v any) string {
 			a, _ := json.Marshal(v)
 			return string(a)
 		},

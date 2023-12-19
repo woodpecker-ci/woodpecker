@@ -15,8 +15,8 @@
 package types
 
 import (
-	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/constraint"
-	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/types/base"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/constraint"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types/base"
 )
 
 type (

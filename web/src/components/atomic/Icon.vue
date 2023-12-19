@@ -12,18 +12,22 @@
   <i-teenyicons-git-solid v-else-if="name === 'repo'" class="h-8 w-8" />
   <i-clarity-settings-solid v-else-if="name === 'settings'" class="w-8 h-8" />
   <i-gg-trash v-else-if="name === 'trash'" class="h-6 w-6" />
-  <i-bi-play-circle-fill v-else-if="name === 'status-blocked'" class="h-6 w-6" />
-  <i-bi-stop-circle-fill v-else-if="name === 'status-declined'" class="h-6 w-6" />
-  <i-bi-x-circle-fill
+  <i-mdi-play v-else-if="name === 'status-blocked'" class="h-6 w-6" />
+  <i-mdi-stop v-else-if="name === 'status-declined'" class="h-6 w-6" />
+  <i-mdi-close-thick
     v-else-if="name === 'status-failure' || name === 'status-error' || name === 'status-killed'"
     class="h-6 w-6"
   />
-  <i-bi-circle v-else-if="name === 'status-pending'" class="h-6 w-6" />
-  <i-carbon-in-progress v-else-if="name === 'status-running' || name === 'status-started'" class="h-6 w-6" />
+  <i-mdi-radiobox-blank v-else-if="name === 'status-pending'" class="h-6 w-6" />
+  <i-mdi-radiobox-indeterminate-variant
+    v-else-if="name === 'status-running' || name === 'status-started'"
+    class="h-6 w-6"
+  />
   <i-bi-slash-circle-fill v-else-if="name === 'status-skipped'" class="h-6 w-6" />
   <i-bi-check-circle-fill v-else-if="name === 'status-success'" class="h-6 w-6" />
   <i-bi-exclamation-triangle-fill v-else-if="name === 'attention'" class="h-5 w-5" />
   <i-bi-exclamation-triangle v-else-if="name === 'warning'" class="h-5 w-5" />
+  <i-mdi-error-outline v-else-if="name === 'error'" class="h-5 w-5" />
   <i-simple-icons-gitea v-else-if="name === 'gitea'" class="h-8 w-8" />
   <i-ph-gitlab-logo-simple-fill v-else-if="name === 'gitlab'" class="h-8 w-8" />
   <i-mdi-bitbucket v-else-if="name === 'bitbucket'" class="h-8 w-8" />
@@ -98,7 +102,8 @@ export type IconNames =
   | 'play'
   | 'pause'
   | 'warning'
-  | 'attention';
+  | 'attention'
+  | 'error';
 
 defineProps<{
   name: IconNames;

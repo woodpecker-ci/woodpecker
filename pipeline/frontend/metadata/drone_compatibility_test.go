@@ -19,7 +19,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
 )
 
 func TestSetDroneEnviron(t *testing.T) {

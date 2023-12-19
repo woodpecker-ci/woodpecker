@@ -1,6 +1,6 @@
 # Welcome to Woodpecker
 
-Woodpecker is a simple CI engine with great extensibility. It focuses on executing pipelines inside [containers](https://opencontainers.org/).
+Woodpecker is a simple yet powerful CI/CD engine with great extensibility. It focuses on executing pipelines inside [containers](https://opencontainers.org/).
 If you are already using containers in your daily workflow, you'll for sure love Woodpecker.
 
 ![woodpecker](woodpecker.png)
@@ -11,8 +11,7 @@ If you are already using containers in your daily workflow, you'll for sure love
 - Pipeline steps can be named as you like
 - Run any command in the commands section
 
-```yaml
-# .woodpecker.yml
+```yaml title=".woodpecker.yml"
 steps:
   build:
     image: debian
@@ -45,8 +44,7 @@ steps:
 - Woodpecker clones the source code in the beginning
 - File changes are persisted throughout individual steps as the same volume is being mounted in all steps
 
-```yaml
-# .woodpecker.yml
+```yaml title=".woodpecker.yml"
 steps:
   build:
     image: debian
@@ -65,8 +63,7 @@ steps:
 - And make the yaml declarative
 - Plugins are Docker images with your script as an entrypoint
 
-```Dockerfile
-# Dockerfile
+```dockerfile title="Dockerfile"
 FROM laszlocloud/kubectl
 COPY deploy /usr/local/deploy
 ENTRYPOINT ["/usr/local/deploy"]
@@ -77,8 +74,7 @@ ENTRYPOINT ["/usr/local/deploy"]
 kubectl apply -f $PLUGIN_TEMPLATE
 ```
 
-```yaml
-# .woodpecker.yml
+```yaml title=".woodpecker.yml"
 steps:
   deploy-to-k8s:
     image: laszlocloud/my-k8s-plugin

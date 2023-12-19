@@ -26,10 +26,10 @@ import (
 	"github.com/tevino/abool/v2"
 	"google.golang.org/grpc/metadata"
 
-	"go.woodpecker-ci.org/woodpecker/pipeline"
-	backend "go.woodpecker-ci.org/woodpecker/pipeline/backend/types"
-	"go.woodpecker-ci.org/woodpecker/pipeline/rpc"
-	"go.woodpecker-ci.org/woodpecker/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline"
+	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
 type Runner struct {
@@ -37,16 +37,16 @@ type Runner struct {
 	filter   rpc.Filter
 	hostname string
 	counter  *State
-	engine   *backend.Engine
+	backend  *backend.Backend
 }
 
-func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, state *State, backend *backend.Engine) Runner {
+func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, state *State, backend *backend.Backend) Runner {
 	return Runner{
 		client:   workEngine,
 		filter:   f,
 		hostname: h,
 		counter:  state,
-		engine:   backend,
+		backend:  backend,
 	}
 }
 
@@ -144,7 +144,7 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 		pipeline.WithTaskUUID(fmt.Sprint(work.ID)),
 		pipeline.WithLogger(r.createLogger(logger, &uploads, work)),
 		pipeline.WithTracer(r.createTracer(ctxmeta, logger, work)),
-		pipeline.WithEngine(*r.engine),
+		pipeline.WithBackend(*r.backend),
 		pipeline.WithDescription(map[string]string{
 			"ID":       work.ID,
 			"Repo":     repoName,

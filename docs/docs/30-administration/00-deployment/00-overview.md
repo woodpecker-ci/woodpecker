@@ -1,12 +1,12 @@
-# Overview
+# Deployment
 
 A Woodpecker deployment consists of two parts:
 
 - A server which is the heart of Woodpecker and ships the web interface.
-- Next to one server you can deploy any number of agents which will run the pipelines.
+- Next to one server, you can deploy any number of agents which will run the pipelines.
 
 Each agent is able to process one pipeline step by default.
-If you have 4 agents installed and connected to the Woodpecker server, your system will process 4 workflows in parallel.
+If you have four agents installed and connected to the Woodpecker server, your system will process four workflows in parallel.
 
 :::tip
 You can add more agents to increase the number of parallel workflows or set the agent's `WOODPECKER_MAX_WORKFLOWS=1` environment variable to increase the number of parallel workflows for that agent.
@@ -61,7 +61,7 @@ A [Prometheus endpoint](../90-prometheus.md) is exposed.
 
 See the [proxy guide](../70-proxy.md) if you want to see a setup behind Apache, Nginx, Caddy or ngrok.
 
-In the case you need to use Woodpecker with a URL path prefix (like: <https://example.org/woodpecker/>), you can use the option [`WOODPECKER_ROOT_PATH`](../10-server-config.md#woodpecker_root_path).
+In the case you need to use Woodpecker with a URL path prefix (like: <https://example.org/woodpecker/>), add the root path to [`WOODPECKER_HOST`](../10-server-config.md#woodpecker_host).
 
 ## Third-party installation methods
 

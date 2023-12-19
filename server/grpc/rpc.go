@@ -30,14 +30,14 @@ import (
 	"github.com/rs/zerolog/log"
 	grpcMetadata "google.golang.org/grpc/metadata"
 
-	"go.woodpecker-ci.org/woodpecker/pipeline/rpc"
-	"go.woodpecker-ci.org/woodpecker/server/forge"
-	"go.woodpecker-ci.org/woodpecker/server/logging"
-	"go.woodpecker-ci.org/woodpecker/server/model"
-	"go.woodpecker-ci.org/woodpecker/server/pipeline"
-	"go.woodpecker-ci.org/woodpecker/server/pubsub"
-	"go.woodpecker-ci.org/woodpecker/server/queue"
-	"go.woodpecker-ci.org/woodpecker/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v2/server/logging"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v2/server/pubsub"
+	"go.woodpecker-ci.org/woodpecker/v2/server/queue"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
 type RPC struct {
@@ -52,12 +52,8 @@ type RPC struct {
 
 // Next implements the rpc.Next function
 func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, error) {
-	metadata, ok := grpcMetadata.FromIncomingContext(c)
-	if ok {
-		hostname, ok := metadata["hostname"]
-		if ok && len(hostname) != 0 {
-			log.Debug().Msgf("agent connected: %s: polling", hostname[0])
-		}
+	if hostname, err := s.getHostnameFromContext(c); err == nil {
+		log.Debug().Msgf("agent connected: %s: polling", hostname)
 	}
 
 	fn, err := createFilterFunc(agentFilter)
@@ -337,6 +333,12 @@ func (s *RPC) RegisterAgent(ctx context.Context, platform, backend, version stri
 		return -1, err
 	}
 
+	if agent.Name == "" {
+		if hostname, err := s.getHostnameFromContext(ctx); err == nil {
+			agent.Name = hostname
+		}
+	}
+
 	agent.Backend = backend
 	agent.Platform = platform
 	agent.Capacity = capacity
@@ -352,6 +354,10 @@ func (s *RPC) RegisterAgent(ctx context.Context, platform, backend, version stri
 
 func (s *RPC) UnregisterAgent(ctx context.Context) error {
 	agent, err := s.getAgentFromContext(ctx)
+	if agent.OwnerID > 0 {
+		// registered with individual agent token -> do not unregister
+		return nil
+	}
 	log.Debug().Msgf("unregistering agent with ID %d", agent.ID)
 	if err != nil {
 		return err
@@ -438,4 +444,15 @@ func (s *RPC) getAgentFromContext(ctx context.Context) (*model.Agent, error) {
 	}
 
 	return s.store.AgentFind(agentID)
+}
+
+func (s *RPC) getHostnameFromContext(ctx context.Context) (string, error) {
+	metadata, ok := grpcMetadata.FromIncomingContext(ctx)
+	if ok {
+		hostname, ok := metadata["hostname"]
+		if ok && len(hostname) != 0 {
+			return hostname[0], nil
+		}
+	}
+	return "", errors.New("no hostname in metadata")
 }
