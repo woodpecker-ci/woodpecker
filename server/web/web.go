@@ -143,6 +143,7 @@ func redirect(location string, status ...int) func(ctx *gin.Context) {
 func handleIndex(c *gin.Context) {
 	rw := c.Writer
 	rw.Header().Set("Content-Type", "text/html; charset=UTF-8")
+	rw.Header().Set("Cache-Control", "public, max-age=60")
 	rw.WriteHeader(http.StatusOK)
 	if _, err := rw.Write(indexHTML); err != nil {
 		log.Error().Err(err).Msg("can not write index.html")
