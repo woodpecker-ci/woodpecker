@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@anbraten, @zc-devs, @allanger, @6543, @xoxys, @renovate[bot], @qwerty287, @lafriks, @gapanyc, @mikhail-putilov, @runephilosof-karnovgroup, @kaylynb, @voidcontext, @robbie-cahill, @micash545, @dominic-p, @mzampetakis
+@6543, @anbraten, @zc-devs, @allanger, @xoxys, @renovate[bot], @qwerty287, @lafriks, @gapanyc, @mikhail-putilov, @runephilosof-karnovgroup, @kaylynb, @voidcontext, @robbie-cahill, @micash545, @dominic-p, @mzampetakis
 
 ### 🔒 Security
 
@@ -12,6 +12,7 @@
 
 ### 📈 Enhancement
 
+- Add check for storage where repo/org name is empty [[#2968](https://github.com/woodpecker-ci/woodpecker/pull/2968)]
 - Update pipeline icons [[#2783](https://github.com/woodpecker-ci/woodpecker/pull/2783)]
 - Kubernetes refactor [[#2794](https://github.com/woodpecker-ci/woodpecker/pull/2794)]
 - Export changed files via builtin environment variables [[#2935](https://github.com/woodpecker-ci/woodpecker/pull/2935)]
