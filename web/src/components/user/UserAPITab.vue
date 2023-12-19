@@ -1,17 +1,17 @@
 <template>
   <Settings :title="$t('user.settings.api.api')" :desc="$t('user.settings.api.desc')">
-    <InputField :label="$t('user.settings.api.token')">
+    <InputField v-slot="{ id }" :label="$t('user.settings.api.token')">
       <template #titleActions>
         <Button class="ml-auto" :text="$t('user.settings.api.reset_token')" @click="resetToken" />
       </template>
       <pre class="code-box">{{ token }}</pre>
     </InputField>
 
-    <InputField :label="$t('user.settings.api.shell_setup')">
+    <InputField v-slot="{ id }" :label="$t('user.settings.api.shell_setup')">
       <pre class="code-box">{{ usageWithShell }}</pre>
     </InputField>
 
-    <InputField :label="$t('user.settings.api.api_usage')">
+    <InputField v-slot="{ id }" :label="$t('user.settings.api.api_usage')">
       <template #titleActions>
         <a
           v-if="enableSwagger"
@@ -24,7 +24,7 @@
       <pre class="code-box">{{ usageWithCurl }}</pre>
     </InputField>
 
-    <InputField :label="$t('user.settings.api.cli_usage')">
+    <InputField v-slot="{ id }" :label="$t('user.settings.api.cli_usage')">
       <template #titleActions>
         <a :href="cliDownload" target="_blank" class="ml-4 text-wp-link-100 hover:text-wp-link-200">{{
           $t('user.settings.api.dl_cli')
