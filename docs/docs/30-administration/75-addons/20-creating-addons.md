@@ -29,7 +29,7 @@ Directly import Woodpecker's Go package (`go.woodpecker-ci.org/woodpecker/woodpe
 
 ## Compiling
 
-After you wrote your addon code, compile your addon:
+After you write your addon code, compile your addon:
 
 ```sh
 go build -buildmode plugin
@@ -51,7 +51,7 @@ It is recommended to at least support the latest released version of Woodpecker.
 
 ### Compile for different versions
 
-As long as there were no changes to Woodpecker's interfaces or they are backwards-compatible, you can easily compile the addon for multiple version by changing the version of `go.woodpecker-ci.org/woodpecker/woodpecker/v2` using `go get` before compiling.
+As long as there are no changes to Woodpecker's interfaces or they are backwards-compatible, you can easily compile the addon for multiple version by changing the version of `go.woodpecker-ci.org/woodpecker/woodpecker/v2` using `go get` before compiling.
 
 ## Logging
 
