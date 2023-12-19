@@ -100,6 +100,6 @@ var flags = []cli.Flag{
 	&cli.StringSliceFlag{
 		EnvVars: []string{"WOODPECKER_ADDONS"},
 		Name:    "addons",
-		Usage: "list of addon files",
+		Usage:   "list of addon files",
 	},
 }
