@@ -32,14 +32,17 @@ func TestService(t *testing.T) {
 	  "spec": {
 	    "ports": [
 	      {
+	        "name": "port-1",
 	        "port": 1,
 	        "targetPort": 1
 	      },
 	      {
+	        "name": "port-2",
 	        "port": 2,
 	        "targetPort": 2
 	      },
 	      {
+	        "name": "port-3",
 	        "port": 3,
 	        "targetPort": 3
 	      }
