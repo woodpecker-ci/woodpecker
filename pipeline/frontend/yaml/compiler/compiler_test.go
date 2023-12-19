@@ -19,11 +19,11 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	backend_types "go.woodpecker-ci.org/woodpecker/pipeline/backend/types"
-	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/metadata"
-	yaml_types "go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/types"
-	yaml_base_types "go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/types/base"
-	"go.woodpecker-ci.org/woodpecker/shared/constant"
+	backend_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
+	yaml_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types"
+	yaml_base_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types/base"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
 )
 
 func TestSecretAvailable(t *testing.T) {

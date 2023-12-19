@@ -17,8 +17,8 @@ package registry
 import (
 	"github.com/urfave/cli/v2"
 
-	"go.woodpecker-ci.org/woodpecker/cli/common"
-	"go.woodpecker-ci.org/woodpecker/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
 var registryDeleteCmd = &cli.Command{
@@ -26,14 +26,14 @@ var registryDeleteCmd = &cli.Command{
 	Usage:     "remove a registry",
 	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    registryDelete,
-	Flags: append(common.GlobalFlags,
+	Flags: []cli.Flag{
 		common.RepoFlag,
 		&cli.StringFlag{
 			Name:  "hostname",
 			Usage: "registry hostname",
 			Value: "docker.io",
 		},
-	),
+	},
 }
 
 func registryDelete(c *cli.Context) error {

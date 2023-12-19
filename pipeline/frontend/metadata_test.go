@@ -19,10 +19,10 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"go.woodpecker-ci.org/woodpecker/pipeline/frontend"
-	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/metadata"
-	"go.woodpecker-ci.org/woodpecker/server/forge/mocks"
-	"go.woodpecker-ci.org/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/mocks"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 func TestEnvVarSubst(t *testing.T) {
@@ -74,7 +74,7 @@ func TestMetadataFromStruct(t *testing.T) {
 				"CI_COMMIT_AUTHOR": "", "CI_COMMIT_AUTHOR_AVATAR": "", "CI_COMMIT_AUTHOR_EMAIL": "", "CI_COMMIT_BRANCH": "",
 				"CI_COMMIT_MESSAGE": "", "CI_COMMIT_PULL_REQUEST": "", "CI_COMMIT_PULL_REQUEST_LABELS": "", "CI_COMMIT_REF": "", "CI_COMMIT_REFSPEC": "", "CI_COMMIT_SHA": "", "CI_COMMIT_SOURCE_BRANCH": "",
 				"CI_COMMIT_TAG": "", "CI_COMMIT_TARGET_BRANCH": "", "CI_COMMIT_URL": "", "CI_FORGE_TYPE": "", "CI_FORGE_URL": "",
-				"CI_PIPELINE_CREATED": "0", "CI_PIPELINE_DEPLOY_TARGET": "", "CI_PIPELINE_EVENT": "", "CI_PIPELINE_FINISHED": "0", "CI_PIPELINE_NUMBER": "0",
+				"CI_PIPELINE_CREATED": "0", "CI_PIPELINE_DEPLOY_TARGET": "", "CI_PIPELINE_EVENT": "", "CI_PIPELINE_FINISHED": "0", "CI_PIPELINE_FILES": "[]", "CI_PIPELINE_NUMBER": "0",
 				"CI_PIPELINE_PARENT": "0", "CI_PIPELINE_STARTED": "0", "CI_PIPELINE_STATUS": "", "CI_PIPELINE_URL": "/repos/0/pipeline/0", "CI_PIPELINE_FORGE_URL": "",
 				"CI_PREV_COMMIT_AUTHOR": "", "CI_PREV_COMMIT_AUTHOR_AVATAR": "", "CI_PREV_COMMIT_AUTHOR_EMAIL": "", "CI_PREV_COMMIT_BRANCH": "",
 				"CI_PREV_COMMIT_MESSAGE": "", "CI_PREV_COMMIT_REF": "", "CI_PREV_COMMIT_REFSPEC": "", "CI_PREV_COMMIT_SHA": "", "CI_PREV_COMMIT_URL": "", "CI_PREV_PIPELINE_CREATED": "0",
@@ -89,15 +89,18 @@ func TestMetadataFromStruct(t *testing.T) {
 			name:     "Test with forge",
 			forge:    forge,
 			repo:     &model.Repo{FullName: "testUser/testRepo", ForgeURL: "https://gitea.com/testUser/testRepo", Clone: "https://gitea.com/testUser/testRepo.git", CloneSSH: "git@gitea.com:testUser/testRepo.git", Branch: "main", IsSCMPrivate: true},
-			pipeline: &model.Pipeline{Number: 3},
+			pipeline: &model.Pipeline{Number: 3, ChangedFiles: []string{"test.go", "markdown file.md"}},
 			last:     &model.Pipeline{Number: 2},
 			workflow: &model.Workflow{Name: "hello"},
 			sysURL:   "https://example.com",
 			expectedMetadata: metadata.Metadata{
-				Forge:    metadata.Forge{Type: "gitea", URL: "https://gitea.com"},
-				Sys:      metadata.System{Name: "woodpecker", Host: "example.com", URL: "https://example.com"},
-				Repo:     metadata.Repo{Owner: "testUser", Name: "testRepo", ForgeURL: "https://gitea.com/testUser/testRepo", CloneURL: "https://gitea.com/testUser/testRepo.git", CloneSSHURL: "git@gitea.com:testUser/testRepo.git", Branch: "main", Private: true},
-				Curr:     metadata.Pipeline{Number: 3},
+				Forge: metadata.Forge{Type: "gitea", URL: "https://gitea.com"},
+				Sys:   metadata.System{Name: "woodpecker", Host: "example.com", URL: "https://example.com"},
+				Repo:  metadata.Repo{Owner: "testUser", Name: "testRepo", ForgeURL: "https://gitea.com/testUser/testRepo", CloneURL: "https://gitea.com/testUser/testRepo.git", CloneSSHURL: "git@gitea.com:testUser/testRepo.git", Branch: "main", Private: true},
+				Curr: metadata.Pipeline{
+					Number: 3,
+					Commit: metadata.Commit{ChangedFiles: []string{"test.go", "markdown file.md"}},
+				},
 				Prev:     metadata.Pipeline{Number: 2},
 				Workflow: metadata.Workflow{Name: "hello"},
 			},
@@ -106,7 +109,7 @@ func TestMetadataFromStruct(t *testing.T) {
 				"CI_COMMIT_AUTHOR": "", "CI_COMMIT_AUTHOR_AVATAR": "", "CI_COMMIT_AUTHOR_EMAIL": "", "CI_COMMIT_BRANCH": "",
 				"CI_COMMIT_MESSAGE": "", "CI_COMMIT_PULL_REQUEST": "", "CI_COMMIT_PULL_REQUEST_LABELS": "", "CI_COMMIT_REF": "", "CI_COMMIT_REFSPEC": "", "CI_COMMIT_SHA": "", "CI_COMMIT_SOURCE_BRANCH": "",
 				"CI_COMMIT_TAG": "", "CI_COMMIT_TARGET_BRANCH": "", "CI_COMMIT_URL": "", "CI_FORGE_TYPE": "gitea", "CI_FORGE_URL": "https://gitea.com",
-				"CI_PIPELINE_CREATED": "0", "CI_PIPELINE_DEPLOY_TARGET": "", "CI_PIPELINE_EVENT": "", "CI_PIPELINE_FINISHED": "0",
+				"CI_PIPELINE_CREATED": "0", "CI_PIPELINE_DEPLOY_TARGET": "", "CI_PIPELINE_EVENT": "", "CI_PIPELINE_FINISHED": "0", "CI_PIPELINE_FILES": `["test.go","markdown file.md"]`,
 				"CI_PIPELINE_NUMBER": "3", "CI_PIPELINE_PARENT": "0", "CI_PIPELINE_STARTED": "0", "CI_PIPELINE_STATUS": "", "CI_PIPELINE_URL": "https://example.com/repos/0/pipeline/3", "CI_PIPELINE_FORGE_URL": "",
 				"CI_PREV_COMMIT_AUTHOR": "", "CI_PREV_COMMIT_AUTHOR_AVATAR": "", "CI_PREV_COMMIT_AUTHOR_EMAIL": "", "CI_PREV_COMMIT_BRANCH": "",
 				"CI_PREV_COMMIT_MESSAGE": "", "CI_PREV_COMMIT_REF": "", "CI_PREV_COMMIT_REFSPEC": "", "CI_PREV_COMMIT_SHA": "", "CI_PREV_COMMIT_URL": "", "CI_PREV_PIPELINE_CREATED": "0",

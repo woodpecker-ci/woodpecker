@@ -20,15 +20,13 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"go.woodpecker-ci.org/woodpecker/cli/common"
-	"go.woodpecker-ci.org/woodpecker/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
 var pipelineStopCmd = &cli.Command{
 	Name:      "stop",
 	Usage:     "stop a pipeline",
 	ArgsUsage: "<repo-id|repo-full-name> [pipeline]",
-	Flags:     common.GlobalFlags,
 	Action:    pipelineStop,
 }
 

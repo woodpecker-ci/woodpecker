@@ -15,6 +15,7 @@
 package metadata
 
 import (
+	"encoding/json"
 	"fmt"
 	"path"
 	"regexp"
@@ -22,7 +23,10 @@ import (
 	"strings"
 )
 
-var pullRegexp = regexp.MustCompile(`\d+`)
+var (
+	pullRegexp      = regexp.MustCompile(`\d+`)
+	maxChangedFiles = 500
+)
 
 // Environ returns the metadata as a map of environment variables.
 func (m *Metadata) Environ() map[string]string {
@@ -119,12 +123,21 @@ func (m *Metadata) Environ() map[string]string {
 		// TODO Deprecated, remove in 3.x
 		"CI_COMMIT_URL": m.Curr.ForgeURL,
 	}
-	if m.Curr.Event == EventTag {
+	if m.Curr.Event == EventTag || strings.HasPrefix(m.Curr.Commit.Ref, "refs/tags/") {
 		params["CI_COMMIT_TAG"] = strings.TrimPrefix(m.Curr.Commit.Ref, "refs/tags/")
 	}
 	if m.Curr.Event == EventPull {
 		params["CI_COMMIT_PULL_REQUEST"] = pullRegexp.FindString(m.Curr.Commit.Ref)
 		params["CI_COMMIT_PULL_REQUEST_LABELS"] = strings.Join(m.Curr.Commit.PullRequestLabels, ",")
+	}
+
+	// Only export changed files if maxChangedFiles is not exceeded
+	if len(m.Curr.Commit.ChangedFiles) == 0 {
+		params["CI_PIPELINE_FILES"] = "[]"
+	} else if len(m.Curr.Commit.ChangedFiles) <= maxChangedFiles {
+		// we have to use json, as other separators like ;, or space are valid filename chars
+		changedFiles, _ := json.Marshal(m.Curr.Commit.ChangedFiles)
+		params["CI_PIPELINE_FILES"] = string(changedFiles)
 	}
 
 	return params

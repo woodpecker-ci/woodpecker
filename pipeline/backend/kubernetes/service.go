@@ -15,6 +15,8 @@
 package kubernetes
 
 import (
+	"fmt"
+
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -24,6 +26,7 @@ func Service(namespace, name string, ports []uint16) (*v1.Service, error) {
 	var svcPorts []v1.ServicePort
 	for _, port := range ports {
 		svcPorts = append(svcPorts, v1.ServicePort{
+			Name:       fmt.Sprintf("port-%d", port),
 			Port:       int32(port),
 			TargetPort: intstr.IntOrString{IntVal: int32(port)},
 		})
