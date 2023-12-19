@@ -6,8 +6,9 @@
       </a>
     </template>
 
-    <InputField :label="$t('repo.settings.badge.type')">
+    <InputField v-slot="{ id }" :label="$t('repo.settings.badge.type')">
       <SelectField
+        :id="id"
         v-model="badgeType"
         :options="[
           {
@@ -26,8 +27,8 @@
         required
       />
     </InputField>
-    <InputField :label="$t('repo.settings.badge.branch')">
-      <SelectField v-model="branch" :options="branches" required />
+    <InputField v-slot="{ id }" :label="$t('repo.settings.badge.branch')">
+      <SelectField :id="id" v-model="branch" :options="branches" required />
     </InputField>
 
     <div v-if="badgeContent" class="flex flex-col space-y-4">

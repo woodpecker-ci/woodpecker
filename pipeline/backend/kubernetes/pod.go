@@ -15,12 +15,14 @@
 package kubernetes
 
 import (
+	"context"
 	"fmt"
 	"maps"
 	"strings"
 
 	"github.com/rs/zerolog/log"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -28,176 +30,257 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
 
-func Pod(namespace string, step *types.Step, labels, annotations map[string]string, goos string, secCtxConf SecurityContextConfig) (*v1.Pod, error) {
-	var (
-		vols       []v1.Volume
-		volMounts  []v1.VolumeMount
-		entrypoint []string
-		args       []string
-	)
+const (
+	StepLabel = "step"
+)
 
-	if step.WorkingDir != "" {
-		for _, vol := range step.Volumes {
-			volumeName, err := dnsName(strings.Split(vol, ":")[0])
-			if err != nil {
-				return nil, err
-			}
-
-			vols = append(vols, v1.Volume{
-				Name: volumeName,
-				VolumeSource: v1.VolumeSource{
-					PersistentVolumeClaim: &v1.PersistentVolumeClaimVolumeSource{
-						ClaimName: volumeName,
-						ReadOnly:  false,
-					},
-				},
-			})
-
-			volMounts = append(volMounts, v1.VolumeMount{
-				Name:      volumeName,
-				MountPath: volumeMountPath(vol),
-			})
-		}
-	}
-
-	var pullPolicy v1.PullPolicy
-	if step.Pull {
-		pullPolicy = v1.PullAlways
-	}
-
-	if len(step.Commands) != 0 {
-		scriptEnv, entry, cmds := common.GenerateContainerConf(step.Commands, goos)
-		for k, v := range scriptEnv {
-			step.Environment[k] = v
-		}
-		entrypoint = entry
-		args = cmds
-	}
-
-	hostAliases := []v1.HostAlias{}
-	for _, extraHost := range step.ExtraHosts {
-		host := strings.Split(extraHost, ":")
-		hostAliases = append(hostAliases, v1.HostAlias{IP: host[1], Hostnames: []string{host[0]}})
-	}
-
-	resourceRequirements := v1.ResourceRequirements{Requests: v1.ResourceList{}, Limits: v1.ResourceList{}}
+func mkPod(namespace, name, image, workDir, goos, serviceAccountName string,
+	pool, privileged bool,
+	commands, vols, extraHosts []string,
+	labels, annotations, env, nodeSelector map[string]string,
+	tolerations []types.Toleration, resources types.Resources,
+	securityContext *types.SecurityContext, securityContextConfig SecurityContextConfig,
+) (*v1.Pod, error) {
 	var err error
-	for key, val := range step.BackendOptions.Kubernetes.Resources.Requests {
-		resourceKey := v1.ResourceName(key)
-		resourceRequirements.Requests[resourceKey], err = resource.ParseQuantity(val)
-		if err != nil {
-			return nil, fmt.Errorf("resource request '%v' quantity '%v': %w", key, val, err)
-		}
-	}
-	for key, val := range step.BackendOptions.Kubernetes.Resources.Limits {
-		resourceKey := v1.ResourceName(key)
-		resourceRequirements.Limits[resourceKey], err = resource.ParseQuantity(val)
-		if err != nil {
-			return nil, fmt.Errorf("resource limit '%v' quantity '%v': %w", key, val, err)
-		}
-	}
 
-	var serviceAccountName string
-	if step.BackendOptions.Kubernetes.ServiceAccountName != "" {
-		serviceAccountName = step.BackendOptions.Kubernetes.ServiceAccountName
-	}
+	meta := podMeta(name, namespace, labels, annotations)
 
-	podName, err := dnsName(step.Name)
+	spec, err := podSpec(serviceAccountName, vols, extraHosts, env,
+		nodeSelector, tolerations, securityContext, securityContextConfig)
 	if err != nil {
 		return nil, err
 	}
 
-	labels["step"] = podName
-
-	var nodeSelector map[string]string
-	platform, exist := step.Environment["CI_SYSTEM_PLATFORM"]
-	if exist && platform != "" {
-		arch := strings.Split(platform, "/")[1]
-		nodeSelector = map[string]string{v1.LabelArchStable: arch}
-		log.Trace().Msgf("Using the node selector from the Agent's platform: %v", nodeSelector)
+	container, err := podContainer(name, image, workDir, goos, pool, privileged, commands, vols, env,
+		resources, securityContext)
+	if err != nil {
+		return nil, err
 	}
-	beOptNodeSelector := step.BackendOptions.Kubernetes.NodeSelector
-	if len(beOptNodeSelector) > 0 {
-		if len(nodeSelector) == 0 {
-			nodeSelector = beOptNodeSelector
-		} else {
-			log.Trace().Msgf("Appending labels to the node selector from the backend options: %v", beOptNodeSelector)
-			maps.Copy(nodeSelector, beOptNodeSelector)
-		}
-	}
-
-	var tolerations []v1.Toleration
-	beTolerations := step.BackendOptions.Kubernetes.Tolerations
-	if len(beTolerations) > 0 {
-		for _, t := range step.BackendOptions.Kubernetes.Tolerations {
-			toleration := v1.Toleration{
-				Key:               t.Key,
-				Operator:          v1.TolerationOperator(t.Operator),
-				Value:             t.Value,
-				Effect:            v1.TaintEffect(t.Effect),
-				TolerationSeconds: t.TolerationSeconds,
-			}
-			tolerations = append(tolerations, toleration)
-		}
-		log.Trace().Msgf("Tolerations that will be used in the backend options: %v", beTolerations)
-	}
-
-	beSecurityContext := step.BackendOptions.Kubernetes.SecurityContext
-	log.Trace().Interface("Security context", beSecurityContext).Msg("Security context that will be used for pods/containers")
-	podSecCtx := podSecurityContext(beSecurityContext, secCtxConf)
-	containerSecCtx := containerSecurityContext(beSecurityContext, step.Privileged)
+	spec.Containers = append(spec.Containers, container)
 
 	pod := &v1.Pod{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:        podName,
-			Namespace:   namespace,
-			Labels:      labels,
-			Annotations: annotations,
-		},
-		Spec: v1.PodSpec{
-			RestartPolicy:      v1.RestartPolicyNever,
-			HostAliases:        hostAliases,
-			NodeSelector:       nodeSelector,
-			Tolerations:        tolerations,
-			ServiceAccountName: serviceAccountName,
-			SecurityContext:    podSecCtx,
-			Containers: []v1.Container{{
-				Name:            podName,
-				Image:           step.Image,
-				ImagePullPolicy: pullPolicy,
-				Command:         entrypoint,
-				Args:            args,
-				WorkingDir:      step.WorkingDir,
-				Env:             mapToEnvVars(step.Environment),
-				VolumeMounts:    volMounts,
-				Resources:       resourceRequirements,
-				SecurityContext: containerSecCtx,
-			}},
-			ImagePullSecrets: []v1.LocalObjectReference{{Name: "regcred"}},
-			Volumes:          vols,
-		},
+		ObjectMeta: meta,
+		Spec:       spec,
 	}
 
 	return pod, nil
 }
 
-func mapToEnvVars(m map[string]string) []v1.EnvVar {
-	var ev []v1.EnvVar
-	for k, v := range m {
-		ev = append(ev, v1.EnvVar{
-			Name:  k,
-			Value: v,
-		})
-	}
-	return ev
+func podName(step *types.Step) (string, error) {
+	return dnsName(step.Name)
 }
 
-func volumeMountPath(i string) string {
-	s := strings.Split(i, ":")
-	if len(s) > 1 {
-		return s[1]
+func podMeta(name, namespace string, labels, annotations map[string]string) metav1.ObjectMeta {
+	meta := metav1.ObjectMeta{
+		Name:        name,
+		Namespace:   namespace,
+		Annotations: annotations,
 	}
-	return s[0]
+
+	if labels == nil {
+		labels = make(map[string]string, 1)
+	}
+	labels[StepLabel] = name
+	meta.Labels = labels
+
+	return meta
+}
+
+func podSpec(serviceAccountName string, vols, extraHosts []string, env, backendNodeSelector map[string]string, backendTolerations []types.Toleration,
+	securityContext *types.SecurityContext, securityContextConfig SecurityContextConfig,
+) (v1.PodSpec, error) {
+	var err error
+	spec := v1.PodSpec{
+		RestartPolicy:      v1.RestartPolicyNever,
+		ServiceAccountName: serviceAccountName,
+		ImagePullSecrets:   []v1.LocalObjectReference{{Name: "regcred"}},
+	}
+
+	spec.HostAliases = hostAliases(extraHosts)
+	spec.NodeSelector = nodeSelector(backendNodeSelector, env["CI_SYSTEM_PLATFORM"])
+	spec.Tolerations = tolerations(backendTolerations)
+	spec.SecurityContext = podSecurityContext(securityContext, securityContextConfig)
+	spec.Volumes, err = volumes(vols)
+	if err != nil {
+		return spec, err
+	}
+
+	return spec, nil
+}
+
+func podContainer(name, image, workDir, goos string, pull, privileged bool, commands, volumes []string, env map[string]string, resources types.Resources,
+	securityContext *types.SecurityContext,
+) (v1.Container, error) {
+	var err error
+	container := v1.Container{
+		Name:       name,
+		Image:      image,
+		WorkingDir: workDir,
+	}
+
+	if pull {
+		container.ImagePullPolicy = v1.PullAlways
+	}
+
+	if len(commands) != 0 {
+		scriptEnv, command, args := common.GenerateContainerConf(commands, goos)
+		container.Command = command
+		container.Args = args
+		maps.Copy(env, scriptEnv)
+	}
+
+	container.Env = mapToEnvVars(env)
+	container.SecurityContext = containerSecurityContext(securityContext, privileged)
+
+	container.Resources, err = resourceRequirements(resources)
+	if err != nil {
+		return container, err
+	}
+
+	container.VolumeMounts, err = volumeMounts(volumes)
+	if err != nil {
+		return container, err
+	}
+
+	return container, nil
+}
+
+func volumes(volumes []string) ([]v1.Volume, error) {
+	var vols []v1.Volume
+
+	for _, v := range volumes {
+		volumeName, err := volumeName(v)
+		if err != nil {
+			return nil, err
+		}
+		vols = append(vols, volume(volumeName))
+	}
+
+	return vols, nil
+}
+
+func volume(name string) v1.Volume {
+	pvcSource := v1.PersistentVolumeClaimVolumeSource{
+		ClaimName: name,
+		ReadOnly:  false,
+	}
+	return v1.Volume{
+		Name: name,
+		VolumeSource: v1.VolumeSource{
+			PersistentVolumeClaim: &pvcSource,
+		},
+	}
+}
+
+func volumeMounts(volumes []string) ([]v1.VolumeMount, error) {
+	var mounts []v1.VolumeMount
+
+	for _, v := range volumes {
+		volumeName, err := volumeName(v)
+		if err != nil {
+			return nil, err
+		}
+
+		mount := volumeMount(volumeName, volumeMountPath(v))
+		mounts = append(mounts, mount)
+	}
+	return mounts, nil
+}
+
+func volumeMount(name, path string) v1.VolumeMount {
+	return v1.VolumeMount{
+		Name:      name,
+		MountPath: path,
+	}
+}
+
+// Here is the service IPs (placed in /etc/hosts in the Pod)
+func hostAliases(extraHosts []string) []v1.HostAlias {
+	hostAliases := []v1.HostAlias{}
+	for _, extraHost := range extraHosts {
+		hostAlias := hostAlias(extraHost)
+		hostAliases = append(hostAliases, hostAlias)
+	}
+	return hostAliases
+}
+
+func hostAlias(extraHost string) v1.HostAlias {
+	host := strings.Split(extraHost, ":")
+	return v1.HostAlias{
+		IP:        host[1],
+		Hostnames: []string{host[0]},
+	}
+}
+
+func resourceRequirements(resources types.Resources) (v1.ResourceRequirements, error) {
+	var err error
+	requirements := v1.ResourceRequirements{}
+
+	requirements.Requests, err = resourceList(resources.Requests)
+	if err != nil {
+		return requirements, err
+	}
+
+	requirements.Limits, err = resourceList(resources.Limits)
+	if err != nil {
+		return requirements, err
+	}
+
+	return requirements, nil
+}
+
+func resourceList(resources map[string]string) (v1.ResourceList, error) {
+	requestResources := v1.ResourceList{}
+	for key, val := range resources {
+		resName := v1.ResourceName(key)
+		resVal, err := resource.ParseQuantity(val)
+		if err != nil {
+			return nil, fmt.Errorf("resource request '%v' quantity '%v': %w", key, val, err)
+		}
+		requestResources[resName] = resVal
+	}
+	return requestResources, nil
+}
+
+func nodeSelector(backendNodeSelector map[string]string, platform string) map[string]string {
+	nodeSelector := make(map[string]string)
+
+	if platform != "" {
+		arch := strings.Split(platform, "/")[1]
+		nodeSelector[v1.LabelArchStable] = arch
+		log.Trace().Msgf("Using the node selector from the Agent's platform: %v", nodeSelector)
+	}
+
+	if len(backendNodeSelector) > 0 {
+		log.Trace().Msgf("Appending labels to the node selector from the backend options: %v", backendNodeSelector)
+		maps.Copy(nodeSelector, backendNodeSelector)
+	}
+
+	return nodeSelector
+}
+
+func tolerations(backendTolerations []types.Toleration) []v1.Toleration {
+	var tolerations []v1.Toleration
+
+	if len(backendTolerations) > 0 {
+		log.Trace().Msgf("Tolerations that will be used in the backend options: %v", backendTolerations)
+		for _, backendToleration := range backendTolerations {
+			toleration := toleration(backendToleration)
+			tolerations = append(tolerations, toleration)
+		}
+	}
+
+	return tolerations
+}
+
+func toleration(backendToleration types.Toleration) v1.Toleration {
+	return v1.Toleration{
+		Key:               backendToleration.Key,
+		Operator:          v1.TolerationOperator(backendToleration.Operator),
+		Value:             backendToleration.Value,
+		Effect:            v1.TaintEffect(backendToleration.Effect),
+		TolerationSeconds: backendToleration.TolerationSeconds,
+	}
 }
 
 func podSecurityContext(sc *types.SecurityContext, secCtxConf SecurityContextConfig) *v1.PodSecurityContext {
@@ -226,12 +309,14 @@ func podSecurityContext(sc *types.SecurityContext, secCtxConf SecurityContextCon
 		return nil
 	}
 
-	return &v1.PodSecurityContext{
+	securityContext := &v1.PodSecurityContext{
 		RunAsNonRoot: nonRoot,
 		RunAsUser:    user,
 		RunAsGroup:   group,
 		FSGroup:      fsGroup,
 	}
+	log.Trace().Msgf("Pod security context that will be used: %v", securityContext)
+	return securityContext
 }
 
 func containerSecurityContext(sc *types.SecurityContext, stepPrivileged bool) *v1.SecurityContext {
@@ -247,7 +332,54 @@ func containerSecurityContext(sc *types.SecurityContext, stepPrivileged bool) *v
 		return nil
 	}
 
-	return &v1.SecurityContext{
+	securityContext := &v1.SecurityContext{
 		Privileged: privileged,
 	}
+	log.Trace().Msgf("Container security context that will be used: %v", securityContext)
+	return securityContext
+}
+
+func mapToEnvVars(m map[string]string) []v1.EnvVar {
+	var ev []v1.EnvVar
+	for k, v := range m {
+		ev = append(ev, v1.EnvVar{
+			Name:  k,
+			Value: v,
+		})
+	}
+	return ev
+}
+
+func startPod(ctx context.Context, engine *kube, step *types.Step) (*v1.Pod, error) {
+	podName, err := podName(step)
+	if err != nil {
+		return nil, err
+	}
+
+	pod, err := mkPod(engine.config.Namespace, podName, step.Image, step.WorkingDir, engine.goos, step.BackendOptions.Kubernetes.ServiceAccountName,
+		step.Pull, step.Privileged,
+		step.Commands, step.Volumes, step.ExtraHosts,
+		engine.config.PodLabels, engine.config.PodAnnotations, step.Environment, step.BackendOptions.Kubernetes.NodeSelector,
+		step.BackendOptions.Kubernetes.Tolerations, step.BackendOptions.Kubernetes.Resources, step.BackendOptions.Kubernetes.SecurityContext, engine.config.SecurityContext)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Trace().Msgf("Creating pod: %s", pod.Name)
+	return engine.client.CoreV1().Pods(engine.config.Namespace).Create(ctx, pod, metav1.CreateOptions{})
+}
+
+func stopPod(ctx context.Context, engine *kube, step *types.Step, deleteOpts metav1.DeleteOptions) error {
+	podName, err := podName(step)
+	if err != nil {
+		return err
+	}
+	log.Trace().Str("name", podName).Msg("Deleting pod")
+
+	err = engine.client.CoreV1().Pods(engine.config.Namespace).Delete(ctx, podName, deleteOpts)
+	if errors.IsNotFound(err) {
+		// Don't abort on 404 errors from k8s, they most likely mean that the pod hasn't been created yet, usually because pipeline was canceled before running all steps.
+		return nil
+	}
+	return err
 }

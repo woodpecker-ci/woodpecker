@@ -25,26 +25,26 @@ import (
 )
 
 var (
-	enginesByName map[string]types.Engine
-	engines       []types.Engine
+	backendsByName map[string]types.Backend
+	backends       []types.Backend
 )
 
 func Init(ctx context.Context) {
-	engines = []types.Engine{
+	backends = []types.Backend{
 		docker.New(),
 		local.New(),
 		kubernetes.New(ctx),
 	}
 
-	enginesByName = make(map[string]types.Engine)
-	for _, engine := range engines {
-		enginesByName[engine.Name()] = engine
+	backendsByName = make(map[string]types.Backend)
+	for _, engine := range backends {
+		backendsByName[engine.Name()] = engine
 	}
 }
 
-func FindEngine(ctx context.Context, engineName string) (types.Engine, error) {
-	if engineName == "auto-detect" {
-		for _, engine := range engines {
+func FindBackend(ctx context.Context, backendName string) (types.Backend, error) {
+	if backendName == "auto-detect" {
+		for _, engine := range backends {
 			if engine.IsAvailable(ctx) {
 				return engine, nil
 			}
@@ -53,9 +53,9 @@ func FindEngine(ctx context.Context, engineName string) (types.Engine, error) {
 		return nil, fmt.Errorf("can't detect an available backend engine")
 	}
 
-	engine, ok := enginesByName[engineName]
+	engine, ok := backendsByName[backendName]
 	if !ok {
-		return nil, fmt.Errorf("backend engine '%s' not found", engineName)
+		return nil, fmt.Errorf("backend engine '%s' not found", backendName)
 	}
 
 	return engine, nil
