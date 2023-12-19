@@ -21,6 +21,27 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestPvcName(t *testing.T) {
+	name, err := volumeName("woodpecker_cache:/woodpecker/src/cache")
+	assert.NoError(t, err)
+	assert.Equal(t, "woodpecker-cache", name)
+
+	name, err = volumeName("woodpecker\\cache")
+	assert.NoError(t, err)
+	assert.Equal(t, "woodpecker\\cache", name)
+
+	_, err = volumeName("-woodpecker.cache:/woodpecker/src/cache")
+	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
+}
+
+func TestPvcMount(t *testing.T) {
+	mount := volumeMountPath("woodpecker-cache:/woodpecker/src/cache")
+	assert.Equal(t, "/woodpecker/src/cache", mount)
+
+	mount = volumeMountPath("/woodpecker/src/cache")
+	assert.Equal(t, "/woodpecker/src/cache", mount)
+}
+
 func TestPersistentVolumeClaim(t *testing.T) {
 	expectedRwx := `
 	{
@@ -64,20 +85,20 @@ func TestPersistentVolumeClaim(t *testing.T) {
 	  "status": {}
 	}`
 
-	pvc, err := PersistentVolumeClaim("someNamespace", "somename", "local-storage", "1Gi", true)
+	pvc, err := mkPersistentVolumeClaim("someNamespace", "somename", "local-storage", "1Gi", true)
 	assert.NoError(t, err)
 
 	j, err := json.Marshal(pvc)
 	assert.NoError(t, err)
 	assert.JSONEq(t, expectedRwx, string(j))
 
-	pvc, err = PersistentVolumeClaim("someNamespace", "somename", "local-storage", "1Gi", false)
+	pvc, err = mkPersistentVolumeClaim("someNamespace", "somename", "local-storage", "1Gi", false)
 	assert.NoError(t, err)
 
 	j, err = json.Marshal(pvc)
 	assert.NoError(t, err)
 	assert.JSONEq(t, expectedRwo, string(j))
 
-	_, err = PersistentVolumeClaim("someNamespace", "some0INVALID3name", "local-storage", "1Gi", false)
+	_, err = mkPersistentVolumeClaim("someNamespace", "some0INVALID3name", "local-storage", "1Gi", false)
 	assert.Error(t, err)
 }
