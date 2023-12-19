@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@zc-devs, @allanger, @6543, @xoxys, @renovate[bot], @anbraten, @qwerty287, @lafriks, @gapanyc, @mikhail-putilov, @runephilosof-karnovgroup, @kaylynb, @voidcontext, @robbie-cahill, @micash545, @dominic-p, @mzampetakis
+@anbraten, @zc-devs, @allanger, @6543, @xoxys, @renovate[bot], @qwerty287, @lafriks, @gapanyc, @mikhail-putilov, @runephilosof-karnovgroup, @kaylynb, @voidcontext, @robbie-cahill, @micash545, @dominic-p, @mzampetakis
 
 ### 🔒 Security
 
@@ -12,6 +12,7 @@
 
 ### 📈 Enhancement
 
+- Update pipeline icons [[#2783](https://github.com/woodpecker-ci/woodpecker/pull/2783)]
 - Kubernetes refactor [[#2794](https://github.com/woodpecker-ci/woodpecker/pull/2794)]
 - Export changed files via builtin environment variables [[#2935](https://github.com/woodpecker-ci/woodpecker/pull/2935)]
 - Show secrets from org and global level [[#2873](https://github.com/woodpecker-ci/woodpecker/pull/2873)]
