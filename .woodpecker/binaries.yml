@@ -72,6 +72,7 @@ steps:
     commands:
       - ls -la dist/*.*
       - cat dist/checksums.txt
+
   release:
     image: docker.io/plugins/github-release
     secrets:
