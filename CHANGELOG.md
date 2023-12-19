@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @renovate[bot], @anbraten, @zc-devs, @allanger, @xoxys, @qwerty287, @lafriks, @gapanyc, @mikhail-putilov, @runephilosof-karnovgroup, @kaylynb, @voidcontext, @robbie-cahill, @micash545, @dominic-p, @mzampetakis
+@runephilosof-karnovgroup, @6543, @renovate[bot], @anbraten, @zc-devs, @allanger, @xoxys, @qwerty287, @lafriks, @gapanyc, @mikhail-putilov, @kaylynb, @voidcontext, @robbie-cahill, @micash545, @dominic-p, @mzampetakis
 
 ### 🔒 Security
 
@@ -12,6 +12,7 @@
 
 ### 📈 Enhancement
 
+- Register Agent with hostname [[#2936](https://github.com/woodpecker-ci/woodpecker/pull/2936)]
 - Update slogan & logo [[#2962](https://github.com/woodpecker-ci/woodpecker/pull/2962)]
 - Improve error handling when activating a repository [[#2965](https://github.com/woodpecker-ci/woodpecker/pull/2965)]
 - Add check for storage where repo/org name is empty [[#2968](https://github.com/woodpecker-ci/woodpecker/pull/2968)]
