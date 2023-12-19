@@ -21,8 +21,8 @@ import (
 	"xorm.io/builder"
 	"xorm.io/xorm"
 
-	"go.woodpecker-ci.org/woodpecker/server/model"
-	"go.woodpecker-ci.org/woodpecker/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
 )
 
 func (s storage) GetRepo(id int64) (*model.Repo, error) {
@@ -123,7 +123,7 @@ func (s storage) deleteRepo(sess *xorm.Session, repo *model.Repo) error {
 		}
 
 		for i := range pipelineIDs {
-			if err := deletePipeline(sess, pipelineIDs[i]); err != nil {
+			if err := s.deletePipeline(sess, pipelineIDs[i]); err != nil {
 				return err
 			}
 		}

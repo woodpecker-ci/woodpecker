@@ -26,8 +26,8 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"go.woodpecker-ci.org/woodpecker/pipeline/backend/common"
-	"go.woodpecker-ci.org/woodpecker/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/common"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
 
 const (

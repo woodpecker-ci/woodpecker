@@ -16,6 +16,7 @@ package kubernetes
 
 import (
 	"context"
+  "fmt"
 
 	"github.com/rs/zerolog/log"
 	"go.woodpecker-ci.org/woodpecker/pipeline/backend/types"
@@ -31,6 +32,7 @@ func Service(namespace, name string, ports []uint16, selector map[string]string)
 	var svcPorts []v1.ServicePort
 	for _, port := range ports {
 		svcPorts = append(svcPorts, v1.ServicePort{
+			Name:       fmt.Sprintf("port-%d", port),
 			Port:       int32(port),
 			TargetPort: intstr.IntOrString{IntVal: int32(port)},
 		})

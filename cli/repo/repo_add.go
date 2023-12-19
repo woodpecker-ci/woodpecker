@@ -20,8 +20,7 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"go.woodpecker-ci.org/woodpecker/cli/common"
-	"go.woodpecker-ci.org/woodpecker/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
 var repoAddCmd = &cli.Command{
@@ -29,7 +28,6 @@ var repoAddCmd = &cli.Command{
 	Usage:     "add a repository",
 	ArgsUsage: "<forge-remote-id>",
 	Action:    repoAdd,
-	Flags:     common.GlobalFlags,
 }
 
 func repoAdd(c *cli.Context) error {

@@ -20,8 +20,8 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"go.woodpecker-ci.org/woodpecker/cli/common"
-	"go.woodpecker-ci.org/woodpecker/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
 var repoInfoCmd = &cli.Command{
@@ -29,9 +29,7 @@ var repoInfoCmd = &cli.Command{
 	Usage:     "show repository details",
 	ArgsUsage: "<repo-id|repo-full-name>",
 	Action:    repoInfo,
-	Flags: append(common.GlobalFlags,
-		common.FormatFlag(tmplRepoInfo),
-	),
+	Flags:     []cli.Flag{common.FormatFlag(tmplRepoInfo)},
 }
 
 func repoInfo(c *cli.Context) error {

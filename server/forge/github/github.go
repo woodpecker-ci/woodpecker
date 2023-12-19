@@ -25,17 +25,17 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/google/go-github/v56/github"
+	"github.com/google/go-github/v57/github"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 
-	"go.woodpecker-ci.org/woodpecker/server"
-	"go.woodpecker-ci.org/woodpecker/server/forge"
-	"go.woodpecker-ci.org/woodpecker/server/forge/common"
-	forge_types "go.woodpecker-ci.org/woodpecker/server/forge/types"
-	"go.woodpecker-ci.org/woodpecker/server/model"
-	"go.woodpecker-ci.org/woodpecker/server/store"
-	"go.woodpecker-ci.org/woodpecker/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/common"
+	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
 const (
@@ -199,13 +199,13 @@ func (c *client) Repo(ctx context.Context, u *model.User, id model.ForgeRemoteID
 func (c *client) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {
 	client := c.newClientToken(ctx, u.Token)
 
-	opts := new(github.RepositoryListOptions)
+	opts := new(github.RepositoryListByAuthenticatedUserOptions)
 	opts.PerPage = 100
 	opts.Page = 1
 
 	var repos []*model.Repo
 	for opts.Page > 0 {
-		list, resp, err := client.Repositories.List(ctx, "", opts)
+		list, resp, err := client.Repositories.ListByAuthenticatedUser(ctx, opts)
 		if err != nil {
 			return nil, err
 		}

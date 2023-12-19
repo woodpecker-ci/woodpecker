@@ -24,8 +24,9 @@ import (
 	"time"
 
 	"github.com/rs/zerolog/log"
-	"go.woodpecker-ci.org/woodpecker/pipeline/backend/types"
 	"gopkg.in/yaml.v3"
+
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 
 	"github.com/urfave/cli/v2"
 	v1 "k8s.io/api/core/v1"
@@ -110,8 +111,8 @@ func configFromCliContext(ctx context.Context) (*Config, error) {
 	return nil, types.ErrNoCliContextFound
 }
 
-// New returns a new Kubernetes Engine.
-func New(ctx context.Context) types.Engine {
+// New returns a new Kubernetes Backend.
+func New(ctx context.Context) types.Backend {
 	return &kube{
 		ctx: ctx,
 	}
@@ -126,7 +127,7 @@ func (e *kube) IsAvailable(context.Context) bool {
 	return len(host) > 0
 }
 
-func (e *kube) Load(context.Context) (*types.EngineInfo, error) {
+func (e *kube) Load(context.Context) (*types.BackendInfo, error) {
 	config, err := configFromCliContext(e.ctx)
 	if err != nil {
 		return nil, err
@@ -149,7 +150,7 @@ func (e *kube) Load(context.Context) (*types.EngineInfo, error) {
 
 	// TODO(2693): use info resp of kubeClient to define platform var
 	e.goos = runtime.GOOS
-	return &types.EngineInfo{
+	return &types.BackendInfo{
 		Platform: runtime.GOOS + "/" + runtime.GOARCH,
 	}, nil
 }
