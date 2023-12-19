@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.1.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.1.0) - 2023-12-18
+## [2.1.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.1.0) - 2023-12-19
 
 ### ❤️ Thanks to all contributors! ❤️
 
