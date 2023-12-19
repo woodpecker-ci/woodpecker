@@ -61,7 +61,9 @@ func PostRepo(c *gin.Context) {
 		c.String(http.StatusConflict, "Repository is already active.")
 		return
 	} else if err != nil && !errors.Is(err, types.RecordNotExist) {
-		c.String(http.StatusInternalServerError, err.Error())
+		msg := "Could not get repo by remote id from store."
+		log.Error().Err(err).Msg(msg)
+		c.String(http.StatusInternalServerError, msg)
 		return
 	}
 
@@ -113,7 +115,9 @@ func PostRepo(c *gin.Context) {
 	t := token.New(token.HookToken, repo.FullName)
 	sig, err := t.Sign(repo.Hash)
 	if err != nil {
-		c.String(http.StatusInternalServerError, err.Error())
+		msg := "Could not generate new jwt token."
+		log.Error().Err(err).Msg(msg)
+		c.String(http.StatusInternalServerError, msg)
 		return
 	}
 
@@ -135,13 +139,17 @@ func PostRepo(c *gin.Context) {
 	if errors.Is(err, types.RecordNotExist) {
 		org, err = forge.Org(c, user, repo.Owner)
 		if err != nil {
-			c.String(http.StatusInternalServerError, "Could not fetch organization from forge.")
+			msg := "Could not fetch organization from forge."
+			log.Error().Err(err).Msg(msg)
+			c.String(http.StatusInternalServerError, msg)
 			return
 		}
 
 		err = _store.OrgCreate(org)
 		if err != nil {
-			c.String(http.StatusInternalServerError, err.Error())
+			msg := "Could not create organization in store."
+			log.Error().Err(err).Msg(msg)
+			c.String(http.StatusInternalServerError, msg)
 			return
 		}
 	}
@@ -150,7 +158,9 @@ func PostRepo(c *gin.Context) {
 
 	err = forge.Activate(c, user, repo, hookURL)
 	if err != nil {
-		c.String(http.StatusInternalServerError, err.Error())
+		msg := "Could not create webhook in forge."
+		log.Error().Err(err).Msg(msg)
+		c.String(http.StatusInternalServerError, msg)
 		return
 	}
 
@@ -160,7 +170,9 @@ func PostRepo(c *gin.Context) {
 		err = _store.CreateRepo(repo)
 	}
 	if err != nil {
-		c.String(http.StatusInternalServerError, err.Error())
+		msg := "Could not create/update repo in store."
+		log.Error().Err(err).Msg(msg)
+		c.String(http.StatusInternalServerError, msg)
 		return
 	}
 	repo.Perm = from.Perm
