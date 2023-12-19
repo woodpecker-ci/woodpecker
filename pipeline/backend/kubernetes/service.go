@@ -16,10 +16,10 @@ package kubernetes
 
 import (
 	"context"
-  "fmt"
+	"fmt"
 
 	"github.com/rs/zerolog/log"
-	"go.woodpecker-ci.org/woodpecker/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

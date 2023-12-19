@@ -20,7 +20,7 @@ import (
 
 	"github.com/kinbiko/jsonassert"
 	"github.com/stretchr/testify/assert"
-	"go.woodpecker-ci.org/woodpecker/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
 
 func TestPodName(t *testing.T) {
