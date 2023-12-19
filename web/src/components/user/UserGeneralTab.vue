@@ -1,10 +1,11 @@
 <template>
   <Settings :title="$t('user.settings.general.general')">
-    <InputField :label="$t('user.settings.general.language')">
-      <SelectField v-model="selectedLocale" :options="localeOptions" />
+    <InputField v-slot="{ id }" :label="$t('user.settings.general.language')">
+      <SelectField :id="id" v-model="selectedLocale" :options="localeOptions" />
     </InputField>
-    <InputField :label="$t('user.settings.general.theme.theme')">
+    <InputField v-slot="{ id }" :label="$t('user.settings.general.theme.theme')">
       <SelectField
+        :id="id"
         v-model="storeTheme"
         :options="[
           { value: 'auto', text: $t('user.settings.general.theme.auto') },
