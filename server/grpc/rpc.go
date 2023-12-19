@@ -52,12 +52,8 @@ type RPC struct {
 
 // Next implements the rpc.Next function
 func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, error) {
-	metadata, ok := grpcMetadata.FromIncomingContext(c)
-	if ok {
-		hostname, ok := metadata["hostname"]
-		if ok && len(hostname) != 0 {
-			log.Debug().Msgf("agent connected: %s: polling", hostname[0])
-		}
+	if hostname, err := s.getHostnameFromContext(c); err == nil {
+		log.Debug().Msgf("agent connected: %s: polling", hostname)
 	}
 
 	fn, err := createFilterFunc(agentFilter)
@@ -337,6 +333,12 @@ func (s *RPC) RegisterAgent(ctx context.Context, platform, backend, version stri
 		return -1, err
 	}
 
+	if agent.Name == "" {
+		if hostname, err := s.getHostnameFromContext(ctx); err == nil {
+			agent.Name = hostname
+		}
+	}
+
 	agent.Backend = backend
 	agent.Platform = platform
 	agent.Capacity = capacity
@@ -442,4 +444,15 @@ func (s *RPC) getAgentFromContext(ctx context.Context) (*model.Agent, error) {
 	}
 
 	return s.store.AgentFind(agentID)
+}
+
+func (s *RPC) getHostnameFromContext(ctx context.Context) (string, error) {
+	metadata, ok := grpcMetadata.FromIncomingContext(ctx)
+	if ok {
+		hostname, ok := metadata["hostname"]
+		if ok && len(hostname) != 0 {
+			return hostname[0], nil
+		}
+	}
+	return "", errors.New("no hostname in metadata")
 }
