@@ -46,7 +46,7 @@
 </p>
 <br/>
 
-Woodpecker is a simple CI engine with great extensibility.
+Woodpecker is a simple yet powerful CI/CD engine with great extensibility.
 
 ![woodpecker](docs/docs/woodpecker.png)
 
