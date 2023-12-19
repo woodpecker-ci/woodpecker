@@ -19,7 +19,21 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
+
+func TestServiceName(t *testing.T) {
+	name, err := serviceName(&types.Step{Name: "wp_01he8bebctabr3kgk0qj36d2me_0_services_0"})
+	assert.NoError(t, err)
+	assert.Equal(t, "wp-01he8bebctabr3kgk0qj36d2me-0-services-0", name)
+
+	name, err = serviceName(&types.Step{Name: "wp-01he8bebctabr3kgk0qj36d2me-0\\services-0"})
+	assert.NoError(t, err)
+	assert.Equal(t, "wp-01he8bebctabr3kgk0qj36d2me-0\\services-0", name)
+
+	_, err = serviceName(&types.Step{Name: "wp-01he8bebctabr3kgk0qj36d2me-0-services-0.woodpecker-runtime.svc.cluster.local"})
+	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
+}
 
 func TestService(t *testing.T) {
 	expected := `
@@ -48,7 +62,7 @@ func TestService(t *testing.T) {
 	      }
 	    ],
 	    "selector": {
-	      "step": "bar"
+	      "step": "baz"
 	    },
 	    "type": "ClusterIP"
 	  },
@@ -57,7 +71,7 @@ func TestService(t *testing.T) {
 	  }
 	}`
 
-	s, _ := Service("foo", "bar", []uint16{1, 2, 3})
+	s, _ := mkService("foo", "bar", []uint16{1, 2, 3}, map[string]string{"step": "baz"})
 	j, err := json.Marshal(s)
 	assert.NoError(t, err)
 	assert.JSONEq(t, expected, string(j))

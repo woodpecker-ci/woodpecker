@@ -15,14 +15,20 @@
 package kubernetes
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/rs/zerolog/log"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
-func Service(namespace, name string, ports []uint16) (*v1.Service, error) {
+func mkService(namespace, name string, ports []uint16, selector map[string]string) (*v1.Service, error) {
+	log.Trace().Str("name", name).Interface("selector", selector).Interface("ports", ports).Msg("Creating service")
+
 	var svcPorts []v1.ServicePort
 	for _, port := range ports {
 		svcPorts = append(svcPorts, v1.ServicePort{
@@ -32,22 +38,57 @@ func Service(namespace, name string, ports []uint16) (*v1.Service, error) {
 		})
 	}
 
-	dnsName, err := dnsName(name)
+	return &v1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+		},
+		Spec: v1.ServiceSpec{
+			Type:     v1.ServiceTypeClusterIP,
+			Selector: selector,
+			Ports:    svcPorts,
+		},
+	}, nil
+}
+
+func serviceName(step *types.Step) (string, error) {
+	return dnsName(step.Name)
+}
+
+func startService(ctx context.Context, engine *kube, step *types.Step) (*v1.Service, error) {
+	name, err := serviceName(step)
+	if err != nil {
+		return nil, err
+	}
+	podName, err := podName(step)
 	if err != nil {
 		return nil, err
 	}
 
-	return &v1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      dnsName,
-			Namespace: namespace,
-		},
-		Spec: v1.ServiceSpec{
-			Type: v1.ServiceTypeClusterIP,
-			Selector: map[string]string{
-				"step": dnsName,
-			},
-			Ports: svcPorts,
-		},
-	}, nil
+	selector := map[string]string{
+		StepLabel: podName,
+	}
+
+	svc, err := mkService(engine.config.Namespace, name, step.Ports, selector)
+	if err != nil {
+		return nil, err
+	}
+
+	return engine.client.CoreV1().Services(engine.config.Namespace).Create(ctx, svc, metav1.CreateOptions{})
+}
+
+func stopService(ctx context.Context, engine *kube, step *types.Step, deleteOpts metav1.DeleteOptions) error {
+	svcName, err := serviceName(step)
+	if err != nil {
+		return err
+	}
+	log.Trace().Str("name", svcName).Msg("Deleting service")
+
+	err = engine.client.CoreV1().Services(engine.config.Namespace).Delete(ctx, svcName, deleteOpts)
+	if errors.IsNotFound(err) {
+		// Don't abort on 404 errors from k8s, they most likely mean that the pod hasn't been created yet, usually because pipeline was canceled before running all steps.
+		log.Trace().Err(err).Msgf("Unable to delete service %s", svcName)
+		return nil
+	}
+	return err
 }
