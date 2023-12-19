@@ -71,7 +71,7 @@ func TestService(t *testing.T) {
 	  }
 	}`
 
-	s, _ := Service("foo", "bar", []uint16{1, 2, 3}, map[string]string{"step": "baz"})
+	s, _ := mkService("foo", "bar", []uint16{1, 2, 3}, map[string]string{"step": "baz"})
 	j, err := json.Marshal(s)
 	assert.NoError(t, err)
 	assert.JSONEq(t, expected, string(j))

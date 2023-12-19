@@ -25,7 +25,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func PersistentVolumeClaim(namespace, name, storageClass, size string, storageRwx bool) (*v1.PersistentVolumeClaim, error) {
+func mkPersistentVolumeClaim(namespace, name, storageClass, size string, storageRwx bool) (*v1.PersistentVolumeClaim, error) {
 	_storageClass := &storageClass
 	if storageClass == "" {
 		_storageClass = nil
@@ -75,8 +75,8 @@ func volumeMountPath(name string) string {
 	return s[0]
 }
 
-func StartVolume(ctx context.Context, engine *kube, name string) (*v1.PersistentVolumeClaim, error) {
-	pvc, err := PersistentVolumeClaim(engine.config.Namespace, name, engine.config.StorageClass, engine.config.VolumeSize, engine.config.StorageRwx)
+func startVolume(ctx context.Context, engine *kube, name string) (*v1.PersistentVolumeClaim, error) {
+	pvc, err := mkPersistentVolumeClaim(engine.config.Namespace, name, engine.config.StorageClass, engine.config.VolumeSize, engine.config.StorageRwx)
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +85,7 @@ func StartVolume(ctx context.Context, engine *kube, name string) (*v1.Persistent
 	return engine.client.CoreV1().PersistentVolumeClaims(engine.config.Namespace).Create(ctx, pvc, metav1.CreateOptions{})
 }
 
-func StopVolume(ctx context.Context, engine *kube, name string, deleteOpts metav1.DeleteOptions) error {
+func stopVolume(ctx context.Context, engine *kube, name string, deleteOpts metav1.DeleteOptions) error {
 	pvcName, err := volumeName(name)
 	if err != nil {
 		return err

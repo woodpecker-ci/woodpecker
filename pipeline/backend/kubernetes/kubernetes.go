@@ -50,11 +50,11 @@ var defaultDeleteOptions = newDefaultDeleteOptions()
 type kube struct {
 	ctx    context.Context
 	client kubernetes.Interface
-	config *Config
+	config *config
 	goos   string
 }
 
-type Config struct {
+type config struct {
 	Namespace       string
 	StorageClass    string
 	VolumeSize      string
@@ -77,10 +77,10 @@ func newDefaultDeleteOptions() metav1.DeleteOptions {
 	}
 }
 
-func configFromCliContext(ctx context.Context) (*Config, error) {
+func configFromCliContext(ctx context.Context) (*config, error) {
 	if ctx != nil {
 		if c, ok := ctx.Value(types.CliContext).(*cli.Context); ok {
-			config := Config{
+			config := config{
 				Namespace:      c.String("backend-k8s-namespace"),
 				StorageClass:   c.String("backend-k8s-storage-class"),
 				VolumeSize:     c.String("backend-k8s-volume-size"),
@@ -160,7 +160,7 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID s
 	log.Trace().Str("taskUUID", taskUUID).Msgf("Setting up Kubernetes primitives")
 
 	for _, vol := range conf.Volumes {
-		_, err := StartVolume(ctx, e, vol.Name)
+		_, err := startVolume(ctx, e, vol.Name)
 		if err != nil {
 			return err
 		}
@@ -171,7 +171,7 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID s
 	for _, stage := range conf.Stages {
 		if stage.Alias == "services" {
 			for _, step := range stage.Steps {
-				svc, err := StartService(ctx, e, step)
+				svc, err := startService(ctx, e, step)
 				if err != nil {
 					return err
 				}
@@ -193,7 +193,7 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID s
 // Start the pipeline step.
 func (e *kube) StartStep(ctx context.Context, step *types.Step, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("Starting step: %s", step.Name)
-	_, err := StartPod(ctx, e, step)
+	_, err := startPod(ctx, e, step)
 	return err
 }
 
@@ -331,7 +331,7 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 
 func (e *kube) DestroyStep(_ context.Context, step *types.Step, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("Stopping step: %s", step.Name)
-	err := StopPod(e.ctx, e, step, defaultDeleteOptions)
+	err := stopPod(e.ctx, e, step, defaultDeleteOptions)
 	return err
 }
 
@@ -342,13 +342,13 @@ func (e *kube) DestroyWorkflow(_ context.Context, conf *types.Config, taskUUID s
 	// Use noContext because the ctx sent to this function will be canceled/done in case of error or canceled by user.
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
-			err := StopPod(e.ctx, e, step, defaultDeleteOptions)
+			err := stopPod(e.ctx, e, step, defaultDeleteOptions)
 			if err != nil {
 				return err
 			}
 
 			if step.Type == types.StepTypeService {
-				err := StopService(e.ctx, e, step, defaultDeleteOptions)
+				err := stopService(e.ctx, e, step, defaultDeleteOptions)
 				if err != nil {
 					return err
 				}
@@ -357,7 +357,7 @@ func (e *kube) DestroyWorkflow(_ context.Context, conf *types.Config, taskUUID s
 	}
 
 	for _, vol := range conf.Volumes {
-		err := StopVolume(e.ctx, e, vol.Name, defaultDeleteOptions)
+		err := stopVolume(e.ctx, e, vol.Name, defaultDeleteOptions)
 		if err != nil {
 			return err
 		}

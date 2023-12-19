@@ -26,7 +26,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
-func Service(namespace, name string, ports []uint16, selector map[string]string) (*v1.Service, error) {
+func mkService(namespace, name string, ports []uint16, selector map[string]string) (*v1.Service, error) {
 	log.Trace().Str("name", name).Interface("selector", selector).Interface("ports", ports).Msg("Creating service")
 
 	var svcPorts []v1.ServicePort
@@ -55,7 +55,7 @@ func serviceName(step *types.Step) (string, error) {
 	return dnsName(step.Name)
 }
 
-func StartService(ctx context.Context, engine *kube, step *types.Step) (*v1.Service, error) {
+func startService(ctx context.Context, engine *kube, step *types.Step) (*v1.Service, error) {
 	name, err := serviceName(step)
 	if err != nil {
 		return nil, err
@@ -69,7 +69,7 @@ func StartService(ctx context.Context, engine *kube, step *types.Step) (*v1.Serv
 		StepLabel: podName,
 	}
 
-	svc, err := Service(engine.config.Namespace, name, step.Ports, selector)
+	svc, err := mkService(engine.config.Namespace, name, step.Ports, selector)
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +77,7 @@ func StartService(ctx context.Context, engine *kube, step *types.Step) (*v1.Serv
 	return engine.client.CoreV1().Services(engine.config.Namespace).Create(ctx, svc, metav1.CreateOptions{})
 }
 
-func StopService(ctx context.Context, engine *kube, step *types.Step, deleteOpts metav1.DeleteOptions) error {
+func stopService(ctx context.Context, engine *kube, step *types.Step, deleteOpts metav1.DeleteOptions) error {
 	svcName, err := serviceName(step)
 	if err != nil {
 		return err

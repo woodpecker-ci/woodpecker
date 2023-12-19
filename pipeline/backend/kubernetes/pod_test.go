@@ -106,7 +106,7 @@ func TestTinyPod(t *testing.T) {
 		"status": {}
 	}`
 
-	pod, err := Pod("woodpecker", "wp-01he8bebctabr3kgk0qj36d2me-0", "gradle:8.4.0-jdk21", "/woodpecker/src", "linux/amd64", "",
+	pod, err := mkPod("woodpecker", "wp-01he8bebctabr3kgk0qj36d2me-0", "gradle:8.4.0-jdk21", "/woodpecker/src", "linux/amd64", "",
 		false, false,
 		[]string{"gradle build"}, []string{"workspace:/woodpecker/src"}, nil,
 		nil, nil, map[string]string{"CI": "woodpecker"}, nil,
@@ -234,7 +234,7 @@ func TestFullPod(t *testing.T) {
 		"status": {}
 	}`
 
-	pod, err := Pod("woodpecker", "wp-01he8bebctabr3kgk0qj36d2me-0", "meltwater/drone-cache", "/woodpecker/src", "linux/amd64", "wp-svc-acc",
+	pod, err := mkPod("woodpecker", "wp-01he8bebctabr3kgk0qj36d2me-0", "meltwater/drone-cache", "/woodpecker/src", "linux/amd64", "wp-svc-acc",
 		true, true,
 		[]string{"go get", "go test"}, []string{"woodpecker-cache:/woodpecker/src/cache"}, []string{"cloudflare:1.1.1.1"},
 		map[string]string{"app": "test"}, map[string]string{"apparmor.security": "runtime/default"}, map[string]string{"CGO": "0"}, map[string]string{"storage": "ssd"},

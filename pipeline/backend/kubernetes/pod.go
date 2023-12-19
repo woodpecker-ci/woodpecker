@@ -34,7 +34,7 @@ const (
 	StepLabel = "step"
 )
 
-func Pod(namespace, name, image, workDir, goos, serviceAccountName string,
+func mkPod(namespace, name, image, workDir, goos, serviceAccountName string,
 	pool, privileged bool,
 	commands, vols, extraHosts []string,
 	labels, annotations, env, nodeSelector map[string]string,
@@ -350,13 +350,13 @@ func mapToEnvVars(m map[string]string) []v1.EnvVar {
 	return ev
 }
 
-func StartPod(ctx context.Context, engine *kube, step *types.Step) (*v1.Pod, error) {
+func startPod(ctx context.Context, engine *kube, step *types.Step) (*v1.Pod, error) {
 	podName, err := podName(step)
 	if err != nil {
 		return nil, err
 	}
 
-	pod, err := Pod(engine.config.Namespace, podName, step.Image, step.WorkingDir, engine.goos, step.BackendOptions.Kubernetes.ServiceAccountName,
+	pod, err := mkPod(engine.config.Namespace, podName, step.Image, step.WorkingDir, engine.goos, step.BackendOptions.Kubernetes.ServiceAccountName,
 		step.Pull, step.Privileged,
 		step.Commands, step.Volumes, step.ExtraHosts,
 		engine.config.PodLabels, engine.config.PodAnnotations, step.Environment, step.BackendOptions.Kubernetes.NodeSelector,
@@ -369,7 +369,7 @@ func StartPod(ctx context.Context, engine *kube, step *types.Step) (*v1.Pod, err
 	return engine.client.CoreV1().Pods(engine.config.Namespace).Create(ctx, pod, metav1.CreateOptions{})
 }
 
-func StopPod(ctx context.Context, engine *kube, step *types.Step, deleteOpts metav1.DeleteOptions) error {
+func stopPod(ctx context.Context, engine *kube, step *types.Step, deleteOpts metav1.DeleteOptions) error {
 	podName, err := podName(step)
 	if err != nil {
 		return err
