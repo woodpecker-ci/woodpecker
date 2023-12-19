@@ -21,6 +21,7 @@ package gitea
 import (
 	"context"
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"net"
 	"net/http"
@@ -548,10 +549,7 @@ func (c *Gitea) Org(ctx context.Context, u *model.User, owner string) (*model.Or
 		return nil, err
 	}
 
-	org, _, err := client.GetOrg(owner)
-	if err != nil {
-		return nil, err
-	}
+	org, _, orgErr := client.GetOrg(owner)
 	if org != nil {
 		return &model.Org{
 			Name:    org.UserName,
@@ -561,6 +559,9 @@ func (c *Gitea) Org(ctx context.Context, u *model.User, owner string) (*model.Or
 
 	user, _, err := client.GetUserInfo(owner)
 	if err != nil {
+		if orgErr != nil {
+			err = errors.Join(orgErr, err)
+		}
 		return nil, err
 	}
 	return &model.Org{
