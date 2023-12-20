@@ -68,7 +68,6 @@
               </div>
             </div>
             <button
-              v-if="pipeline.workflows && pipeline.workflows.length > 1"
               type="button"
               :title="workflow.name"
               class="flex items-center gap-2 py-2 px-1 hover-effect hover:bg-wp-background-300 dark:hover:bg-wp-background-400 rounded-md"
@@ -89,10 +88,9 @@
             </button>
           </div>
           <div
-            class="transition-height duration-150 overflow-hidden"
+            class="ml-6 transition-height duration-150 overflow-hidden"
             :class="{
               'max-h-0': workflowsCollapsed[workflow.id],
-              'ml-6': pipeline.workflows && pipeline.workflows.length > 1,
             }"
           >
             <button
@@ -103,9 +101,7 @@
               class="flex p-2 gap-2 border-2 border-transparent rounded-md items-center hover-effect hover:bg-wp-background-300 dark:hover:bg-wp-background-400 w-full"
               :class="{
                 'bg-wp-background-300 dark:bg-wp-background-400': selectedStepId && selectedStepId === step.pid,
-                'mt-1':
-                  (pipeline.workflows && pipeline.workflows.length > 1) ||
-                  (workflow.children && step.pid !== workflow.children[0].pid),
+                'mt-1': pipeline.workflows || (workflow.children && step.pid !== workflow.children[0].pid),
               }"
               @click="$emit('update:selected-step-id', step.pid)"
             >
@@ -143,14 +139,12 @@ const pipeline = toRef(props, 'pipeline');
 const { prettyRef } = usePipeline(pipeline);
 
 const workflowsCollapsed = ref<Record<PipelineStep['id'], boolean>>(
-  props.pipeline.workflows && props.pipeline.workflows.length > 1
-    ? (props.pipeline.workflows || []).reduce(
-        (collapsed, workflow) => ({
-          ...collapsed,
-          [workflow.id]: ['success', 'skipped', 'blocked'].includes(workflow.state),
-        }),
-        {},
-      )
-    : {},
+  props.pipeline.workflows.reduce(
+    (collapsed, workflow) => ({
+      ...collapsed,
+      [workflow.id]: ['success', 'skipped', 'blocked'].includes(workflow.state),
+    }),
+    {},
+  ),
 );
 </script>
