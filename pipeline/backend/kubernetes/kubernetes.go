@@ -209,7 +209,12 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 	finished := make(chan bool)
 
 	podUpdated := func(old, new any) {
-		pod, _ := new.(*v1.Pod)
+		pod, ok := new.(*v1.Pod)
+		if !ok {
+			log.Error().Msgf("Unexpected object while awaiting Pod: %+v", pod)
+			return
+		}
+
 		if pod.Name == podName {
 			if isImagePullBackOffState(pod) {
 				finished <- true
@@ -269,7 +274,12 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 	up := make(chan bool)
 
 	podUpdated := func(old, new any) {
-		pod, _ := new.(*v1.Pod)
+		pod, ok := new.(*v1.Pod)
+		if !ok {
+			log.Error().Msgf("Unexpected object while awaiting Pod: %+v", pod)
+			return
+		}
+
 		if pod.Name == podName {
 			switch pod.Status.Phase {
 			case v1.PodRunning, v1.PodSucceeded, v1.PodFailed:
