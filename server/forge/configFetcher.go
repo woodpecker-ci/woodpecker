@@ -141,7 +141,7 @@ func filterPipelineFiles(files []*types.FileMeta) []*types.FileMeta {
 	return res
 }
 
-func (cf *configFetcher) checkPipelineFile(c context.Context, config string) (fileMeta []*types.FileMeta, found bool) {
+func (cf *configFetcher) checkPipelineFile(c context.Context, config string) ([]*types.FileMeta, error) {
 	file, err := cf.forge.File(c, cf.user, cf.repo, cf.pipeline, config)
 
 	if err == nil && len(file) != 0 {
@@ -150,33 +150,45 @@ func (cf *configFetcher) checkPipelineFile(c context.Context, config string) (fi
 		return []*types.FileMeta{{
 			Name: config,
 			Data: file,
-		}}, true
+		}}, nil
 	}
 
-	return nil, false
+	return nil, &types.ErrConfigNotFound{Configs: []string{config}}
 }
 
 func (cf *configFetcher) getFirstAvailableConfig(c context.Context, configs []string) ([]*types.FileMeta, error) {
+	var forgeErr []error
 	for _, fileOrFolder := range configs {
 		if strings.HasSuffix(fileOrFolder, "/") {
 			// config is a folder
 			files, err := cf.forge.Dir(c, cf.user, cf.repo, cf.pipeline, strings.TrimSuffix(fileOrFolder, "/"))
 			// if folder is not supported we will get a "Not implemented" error and continue
-			if err != nil && !errors.Is(err, types.ErrNotImplemented) {
-				log.Error().Err(err).Str("repo", cf.repo.FullName).Str("user", cf.user.Login).Msg("could not get folder from forge")
+			if err != nil {
+				if !(errors.Is(err, types.ErrNotImplemented) || errors.Is(err, &types.ErrConfigNotFound{})) {
+					log.Error().Err(err).Str("repo", cf.repo.FullName).Str("user", cf.user.Login).Msg("could not get folder from forge")
+					forgeErr = append(forgeErr, err)
+				}
+				continue
 			}
 			files = filterPipelineFiles(files)
-			if err == nil && len(files) != 0 {
+			if len(files) != 0 {
 				log.Trace().Msgf("ConfigFetch[%s]: found %d files in '%s'", cf.repo.FullName, len(files), fileOrFolder)
 				return files, nil
 			}
 		}
 
 		// config is a file
-		if fileMeta, found := cf.checkPipelineFile(c, fileOrFolder); found {
+		if fileMeta, err := cf.checkPipelineFile(c, fileOrFolder); err == nil {
 			log.Trace().Msgf("ConfigFetch[%s]: found file: '%s'", cf.repo.FullName, fileOrFolder)
 			return fileMeta, nil
+		} else if !errors.Is(err, &types.ErrConfigNotFound{}) {
+			forgeErr = append(forgeErr, err)
 		}
+	}
+
+	// got unexpected errors
+	if len(forgeErr) != 0 {
+		return nil, errors.Join(forgeErr...)
 	}
 
 	// nothing found
