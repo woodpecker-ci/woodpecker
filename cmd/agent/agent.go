@@ -157,7 +157,7 @@ func run(c *cli.Context) error {
 
 	// new engine
 	backendCtx := context.WithValue(ctx, types.CliContext, c)
-	backendEngine, err := getBackend(backendCtx, c.String("backend-engine"), c.StringSlice("addons"))
+	backendEngine, err := getBackendEngine(backendCtx, c.String("backend-engine"), c.StringSlice("addons"))
 	if err != nil {
 		return err
 	}
@@ -251,7 +251,7 @@ func run(c *cli.Context) error {
 	return nil
 }
 
-func getBackend(backendCtx context.Context, backendName string, addons []string) (types.Backend, error) {
+func getBackendEngine(backendCtx context.Context, backendName string, addons []string) (types.Backend, error) {
 	addonBackend, err := addon.Load[types.Backend](addons, addonTypes.TypeBackend)
 	if err != nil {
 		log.Error().Err(err).Msg("cannot load backend addon")
