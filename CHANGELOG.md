@@ -4,11 +4,15 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@lafriks, @lukashass, @runephilosof-karnovgroup, @6543, @renovate[bot], @anbraten, @zc-devs, @allanger, @xoxys, @qwerty287, @gapanyc, @mikhail-putilov, @kaylynb, @voidcontext, @robbie-cahill, @micash545, @dominic-p, @mzampetakis
+@qwerty287, @lafriks, @lukashass, @runephilosof-karnovgroup, @6543, @renovate[bot], @anbraten, @zc-devs, @allanger, @xoxys, @gapanyc, @mikhail-putilov, @kaylynb, @voidcontext, @robbie-cahill, @micash545, @dominic-p, @mzampetakis
 
 ### 🔒 Security
 
 - Sanitize plugin docs content [[#2900](https://github.com/woodpecker-ci/woodpecker/pull/2900)]
+
+### ✨ Features
+
+- Support go plugins for forges and agent backends [[#2751](https://github.com/woodpecker-ci/woodpecker/pull/2751)]
 
 ### 🐛 Bug Fixes
 
