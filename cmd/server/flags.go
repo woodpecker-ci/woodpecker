@@ -251,6 +251,11 @@ var flags = append([]cli.Flag{
 		Name:    "enable-swagger",
 		Value:   true,
 	},
+	&cli.StringSliceFlag{
+		EnvVars: []string{"WOODPECKER_ADDONS"},
+		Name:    "addons",
+		Usage:   "list of addon files",
+	},
 	//
 	// backend options for pipeline compiler
 	//
