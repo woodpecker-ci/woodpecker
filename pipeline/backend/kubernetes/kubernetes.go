@@ -47,6 +47,7 @@ const (
 var defaultDeleteOptions = newDefaultDeleteOptions()
 
 type kube struct {
+	ctx    context.Context
 	client kubernetes.Interface
 	config *config
 	goos   string
@@ -110,8 +111,10 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 }
 
 // New returns a new Kubernetes Backend.
-func New() types.Backend {
-	return &kube{}
+func New(ctx context.Context) types.Backend {
+	return &kube{
+		ctx: ctx,
+	}
 }
 
 func (e *kube) Name() string {

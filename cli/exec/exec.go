@@ -213,7 +213,7 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 	}
 
 	backendCtx := context.WithValue(c.Context, backendTypes.CliContext, c)
-	backend.Init()
+	backend.Init(backendCtx)
 
 	backendEngine, err := backend.FindBackend(backendCtx, c.String("backend-engine"))
 	if err != nil {
