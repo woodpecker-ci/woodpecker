@@ -25,7 +25,7 @@ Directly import Woodpecker's Go package (`go.woodpecker-ci.org/woodpecker/woodpe
 | Addon type | Return type                                                                     |
 | ---------- | ------------------------------------------------------------------------------- |
 | `Forge`    | `"go.woodpecker-ci.org/woodpecker/woodpecker/v2/server/forge".Forge`            |
-| `Engine`   | `"go.woodpecker-ci.org/woodpecker/woodpecker/v2/pipeline/backend/types".Engine` |
+| `Backend`   | `"go.woodpecker-ci.org/woodpecker/woodpecker/v2/pipeline/backend/types".Backend` |
 
 ## Compiling
 
