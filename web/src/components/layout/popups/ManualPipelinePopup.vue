@@ -3,15 +3,15 @@
     <Panel v-if="!loading">
       <form @submit.prevent="triggerManualPipeline">
         <span class="text-xl text-wp-text-100">{{ $t('repo.manual_pipeline.title') }}</span>
-        <InputField :label="$t('repo.manual_pipeline.select_branch')">
-          <SelectField v-model="payload.branch" :options="branches" required />
+        <InputField v-slot="{ id }" :label="$t('repo.manual_pipeline.select_branch')">
+          <SelectField :id="id" v-model="payload.branch" :options="branches" required />
         </InputField>
-        <InputField :label="$t('repo.manual_pipeline.variables.title')">
+        <InputField v-slot="{ id }" :label="$t('repo.manual_pipeline.variables.title')">
           <span class="text-sm text-wp-text-alt-100 mb-2">{{ $t('repo.manual_pipeline.variables.desc') }}</span>
           <div class="flex flex-col gap-2">
             <div v-for="(value, name) in payload.variables" :key="name" class="flex gap-4">
-              <TextField :model-value="name" disabled />
-              <TextField :model-value="value" disabled />
+              <TextField :id="id" :model-value="name" disabled />
+              <TextField :id="id" :model-value="value" disabled />
               <div class="w-34 flex-shrink-0">
                 <Button color="red" class="ml-auto" @click="deleteVar(name)">
                   <i-la-times />
@@ -20,11 +20,13 @@
             </div>
             <form class="flex gap-4" @submit.prevent="addPipelineVariable">
               <TextField
+                :id="id"
                 v-model="newPipelineVariable.name"
                 :placeholder="$t('repo.manual_pipeline.variables.name')"
                 required
               />
               <TextField
+                :id="id"
                 v-model="newPipelineVariable.value"
                 :placeholder="$t('repo.manual_pipeline.variables.value')"
                 required

@@ -37,19 +37,30 @@
 
     <div v-else class="space-y-4">
       <form @submit.prevent="createCron">
-        <InputField :label="$t('repo.settings.crons.name.name')">
-          <TextField v-model="selectedCron.name" :placeholder="$t('repo.settings.crons.name.placeholder')" required />
+        <InputField v-slot="{ id }" :label="$t('repo.settings.crons.name.name')">
+          <TextField
+            :id="id"
+            v-model="selectedCron.name"
+            :placeholder="$t('repo.settings.crons.name.placeholder')"
+            required
+          />
         </InputField>
 
-        <InputField :label="$t('repo.settings.crons.branch.title')">
-          <TextField v-model="selectedCron.branch" :placeholder="$t('repo.settings.crons.branch.placeholder')" />
+        <InputField v-slot="{ id }" :label="$t('repo.settings.crons.branch.title')">
+          <TextField
+            :id="id"
+            v-model="selectedCron.branch"
+            :placeholder="$t('repo.settings.crons.branch.placeholder')"
+          />
         </InputField>
 
         <InputField
+          v-slot="{ id }"
           :label="$t('repo.settings.crons.schedule.title')"
           docs-url="https://pkg.go.dev/github.com/robfig/cron?utm_source=godoc#hdr-CRON_Expression_Format"
         >
           <TextField
+            :id="id"
             v-model="selectedCron.schedule"
             :placeholder="$t('repo.settings.crons.schedule.placeholder')"
             required
