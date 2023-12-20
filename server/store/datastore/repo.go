@@ -16,6 +16,7 @@ package datastore
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 
 	"xorm.io/builder"
@@ -80,6 +81,14 @@ func (s storage) GetRepoCount() (int64, error) {
 }
 
 func (s storage) CreateRepo(repo *model.Repo) error {
+	switch {
+	case repo.Name == "":
+		return fmt.Errorf("repo name is empty")
+	case repo.Owner == "":
+		return fmt.Errorf("repo owner is empty")
+	case repo.FullName == "":
+		return fmt.Errorf("repo full name is empty")
+	}
 	// only Insert set auto created ID back to object
 	_, err := s.engine.Insert(repo)
 	return err
