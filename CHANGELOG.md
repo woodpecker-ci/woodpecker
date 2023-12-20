@@ -1,10 +1,10 @@
 # Changelog
 
-## [2.1.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.1.0) - 2023-12-19
+## [2.1.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.1.0) - 2023-12-20
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@runephilosof-karnovgroup, @6543, @renovate[bot], @anbraten, @zc-devs, @allanger, @xoxys, @qwerty287, @lafriks, @gapanyc, @mikhail-putilov, @kaylynb, @voidcontext, @robbie-cahill, @micash545, @dominic-p, @mzampetakis
+@lukashass, @runephilosof-karnovgroup, @6543, @renovate[bot], @anbraten, @zc-devs, @allanger, @xoxys, @qwerty287, @lafriks, @gapanyc, @mikhail-putilov, @kaylynb, @voidcontext, @robbie-cahill, @micash545, @dominic-p, @mzampetakis
 
 ### 🔒 Security
 
@@ -12,6 +12,7 @@
 
 ### 📈 Enhancement
 
+- Link labels to input and select [[#2974](https://github.com/woodpecker-ci/woodpecker/pull/2974)]
 - Register Agent with hostname [[#2936](https://github.com/woodpecker-ci/woodpecker/pull/2936)]
 - Update slogan & logo [[#2962](https://github.com/woodpecker-ci/woodpecker/pull/2962)]
 - Improve error handling when activating a repository [[#2965](https://github.com/woodpecker-ci/woodpecker/pull/2965)]
@@ -67,6 +68,7 @@
 
 ### Misc
 
+- Fix go in gitpod [[#2973](https://github.com/woodpecker-ci/woodpecker/pull/2973)]
 - fix(deps): update module google.golang.org/grpc to v1.60.1 [[#2969](https://github.com/woodpecker-ci/woodpecker/pull/2969)]
 - chore(deps): update docker.io/alpine docker tag to v3.19 [[#2970](https://github.com/woodpecker-ci/woodpecker/pull/2970)]
 - Fix broken gated repos [[#2959](https://github.com/woodpecker-ci/woodpecker/pull/2959)]
