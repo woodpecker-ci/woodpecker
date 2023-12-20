@@ -25,7 +25,7 @@ import (
 	"go.uber.org/multierr"
 
 	backend_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
+	pipeline_errors "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml"
@@ -87,7 +87,7 @@ func (b *StepBuilder) Build() (items []*Item, errorsAndWarnings error) {
 				workflow.AxisID = i + 1
 			}
 			item, err := b.genItemForWorkflow(workflow, axis, string(y.Data))
-			if err != nil && errors.HasBlockingErrors(err) {
+			if err != nil && pipeline_errors.HasBlockingErrors(err) {
 				return nil, err
 			} else if err != nil {
 				errorsAndWarnings = multierr.Append(errorsAndWarnings, err)
@@ -136,7 +136,7 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 	// parse yaml pipeline
 	parsed, err := yaml.ParseString(substituted)
 	if err != nil {
-		return nil, &errors.PipelineError{Message: err.Error(), Type: errors.PipelineErrorTypeCompiler}
+		return nil, &pipeline_errors.PipelineError{Message: err.Error(), Type: pipeline_errors.PipelineErrorTypeCompiler}
 	}
 
 	// lint pipeline
@@ -147,7 +147,7 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 		File:      workflow.Name,
 		RawConfig: data,
 	}}))
-	if errors.HasBlockingErrors(errorsAndWarnings) {
+	if pipeline_errors.HasBlockingErrors(errorsAndWarnings) {
 		return nil, errorsAndWarnings
 	}
 
