@@ -29,14 +29,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
 )
 
-type ErrConfigNotFound struct {
-	configs []string
-}
-
-func (m *ErrConfigNotFound) Error() string {
-	return fmt.Sprintf("configs not found: %s", strings.Join(m.configs, ", "))
-}
-
 type ConfigFetcher interface {
 	Fetch(ctx context.Context) (files []*types.FileMeta, err error)
 }
@@ -188,5 +180,5 @@ func (cf *configFetcher) getFirstAvailableConfig(c context.Context, configs []st
 	}
 
 	// nothing found
-	return nil, &ErrConfigNotFound{configs: configs}
+	return nil, &types.ErrConfigNotFound{Configs: configs}
 }

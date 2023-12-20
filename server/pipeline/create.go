@@ -25,6 +25,7 @@ import (
 	pipelineErrors "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
+	forgeTypes "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
@@ -65,7 +66,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	// fetch the pipeline file from the forge
 	configFetcher := forge.NewConfigFetcher(server.Config.Services.Forge, server.Config.Services.Timeout, server.Config.Services.ConfigService, repoUser, repo, pipeline)
 	forgeYamlConfigs, configFetchErr := configFetcher.Fetch(ctx)
-	if errors.Is(configFetchErr, &forge.ErrConfigNotFound{}) {
+	if errors.Is(configFetchErr, &forgeTypes.ErrConfigNotFound{}) {
 		log.Debug().Str("repo", repo.FullName).Err(configFetchErr).Msgf("cannot find config '%s' in '%s' with user: '%s'", repo.Config, pipeline.Ref, repoUser.Login)
 		if err := _store.DeletePipeline(pipeline); err != nil {
 			log.Error().Str("repo", repo.FullName).Err(err).Msg("failed to delete pipeline without config")
