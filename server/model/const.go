@@ -62,8 +62,6 @@ const (
 	StatusBlocked  StatusValue = "blocked"  // waiting for approval
 	StatusDeclined StatusValue = "declined" // blocked and declined
 	StatusCreated  StatusValue = "created"  // created / internal use only
-
-	ExitCodeKilled int = 137
 )
 
 // SCMKind represent different version control systems
