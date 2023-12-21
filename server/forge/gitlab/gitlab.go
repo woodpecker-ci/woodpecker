@@ -18,6 +18,7 @@ package gitlab
 import (
 	"context"
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -33,6 +34,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/common"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
@@ -351,7 +353,10 @@ func (g *GitLab) File(ctx context.Context, user *model.User, repo *model.Repo, p
 	if err != nil {
 		return nil, err
 	}
-	file, _, err := client.RepositoryFiles.GetRawFile(_repo.ID, fileName, &gitlab.GetRawFileOptions{Ref: &pipeline.Commit}, gitlab.WithContext(ctx))
+	file, resp, err := client.RepositoryFiles.GetRawFile(_repo.ID, fileName, &gitlab.GetRawFileOptions{Ref: &pipeline.Commit}, gitlab.WithContext(ctx))
+	if resp != nil && resp.StatusCode == http.StatusNotFound {
+		return nil, errors.Join(err, &types.ErrConfigNotFound{Configs: []string{fileName}})
+	}
 	return file, err
 }
 
@@ -388,6 +393,9 @@ func (g *GitLab) Dir(ctx context.Context, user *model.User, repo *model.Repo, pi
 			}
 			data, err := g.File(ctx, user, repo, pipeline, batch[i].Path)
 			if err != nil {
+				if errors.Is(err, &types.ErrConfigNotFound{}) {
+					return nil, fmt.Errorf("git tree reported existence of file but we got: %s", err.Error())
+				}
 				return nil, err
 			}
 			files = append(files, &forge_types.FileMeta{

@@ -39,6 +39,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/common"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
@@ -289,7 +290,10 @@ func (c *Gitea) File(ctx context.Context, u *model.User, r *model.Repo, b *model
 		return nil, err
 	}
 
-	cfg, _, err := client.GetFile(r.Owner, r.Name, b.Commit, f)
+	cfg, resp, err := client.GetFile(r.Owner, r.Name, b.Commit, f)
+	if err != nil && resp != nil && resp.StatusCode == http.StatusNotFound {
+		return nil, errors.Join(err, &types.ErrConfigNotFound{Configs: []string{f}})
+	}
 	return cfg, err
 }
 
@@ -314,6 +318,9 @@ func (c *Gitea) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.
 		if m, _ := filepath.Match(f, e.Path); m && e.Type == "blob" {
 			data, err := c.File(ctx, u, r, b, e.Path)
 			if err != nil {
+				if errors.Is(err, &types.ErrConfigNotFound{}) {
+					return nil, fmt.Errorf("git tree reported existence of file but we got: %s", err.Error())
+				}
 				return nil, fmt.Errorf("multi-pipeline cannot get %s: %w", e.Path, err)
 			}
 
