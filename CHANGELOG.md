@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@anbraten, @6543, @qwerty287, @lafriks, @lukashass, @runephilosof-karnovgroup, @renovate[bot], @zc-devs, @allanger, @xoxys, @gapanyc, @mikhail-putilov, @kaylynb, @voidcontext, @robbie-cahill, @micash545, @dominic-p, @mzampetakis
+@qwerty287, @anbraten, @6543, @lafriks, @lukashass, @runephilosof-karnovgroup, @renovate[bot], @zc-devs, @allanger, @xoxys, @gapanyc, @mikhail-putilov, @kaylynb, @voidcontext, @robbie-cahill, @micash545, @dominic-p, @mzampetakis
 
 ### ✨ Features
 
@@ -13,6 +13,7 @@
 
 ### 📈 Enhancement
 
+- Switch to ULID [[#2986](https://github.com/woodpecker-ci/woodpecker/pull/2986)]
 - Ignore pipelines without config [[#2949](https://github.com/woodpecker-ci/woodpecker/pull/2949)]
 - Link labels to input and select [[#2974](https://github.com/woodpecker-ci/woodpecker/pull/2974)]
 - Register Agent with hostname [[#2936](https://github.com/woodpecker-ci/woodpecker/pull/2936)]
