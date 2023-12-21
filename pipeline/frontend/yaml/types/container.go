@@ -35,6 +35,7 @@ type (
 	Container struct {
 		BackendOptions BackendOptions     `yaml:"backend_options,omitempty"`
 		Commands       base.StringOrSlice `yaml:"commands,omitempty"`
+		Entrypoint     base.StringOrSlice `yaml:"entrypoint,omitempty"`
 		Detached       bool               `yaml:"detach,omitempty"`
 		Directory      string             `yaml:"directory,omitempty"`
 		Environment    base.SliceOrMap    `yaml:"environment,omitempty"`
@@ -49,7 +50,7 @@ type (
 		When           constraint.When    `yaml:"when,omitempty"`
 		Ports          []base.StringOrInt `yaml:"ports,omitempty"`
 
-		// Docker Specific
+		// Docker and Kubernetes Specific
 		Privileged bool `yaml:"privileged,omitempty"`
 
 		// Undocumented

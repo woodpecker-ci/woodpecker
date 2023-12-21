@@ -36,7 +36,7 @@ const (
 
 func mkPod(namespace, name, image, workDir, goos, serviceAccountName string,
 	pool, privileged bool,
-	commands, vols, extraHosts []string,
+	commands, vols, extraHosts, entrypoint []string,
 	labels, annotations, env, nodeSelector map[string]string,
 	tolerations []types.Toleration, resources types.Resources,
 	securityContext *types.SecurityContext, securityContextConfig SecurityContextConfig,
@@ -51,7 +51,7 @@ func mkPod(namespace, name, image, workDir, goos, serviceAccountName string,
 		return nil, err
 	}
 
-	container, err := podContainer(name, image, workDir, goos, pool, privileged, commands, vols, env,
+	container, err := podContainer(name, image, workDir, goos, pool, privileged, commands, vols, entrypoint, env,
 		resources, securityContext)
 	if err != nil {
 		return nil, err
@@ -108,7 +108,7 @@ func podSpec(serviceAccountName string, vols, extraHosts []string, env, backendN
 	return spec, nil
 }
 
-func podContainer(name, image, workDir, goos string, pull, privileged bool, commands, volumes []string, env map[string]string, resources types.Resources,
+func podContainer(name, image, workDir, goos string, pull, privileged bool, commands, volumes, entrypoint []string, env map[string]string, resources types.Resources,
 	securityContext *types.SecurityContext,
 ) (v1.Container, error) {
 	var err error
@@ -124,6 +124,9 @@ func podContainer(name, image, workDir, goos string, pull, privileged bool, comm
 
 	if len(commands) != 0 {
 		scriptEnv, command, args := common.GenerateContainerConf(commands, goos)
+		if len(entrypoint) > 0 {
+			command = entrypoint
+		}
 		container.Command = command
 		container.Args = args
 		maps.Copy(env, scriptEnv)
@@ -358,7 +361,7 @@ func startPod(ctx context.Context, engine *kube, step *types.Step) (*v1.Pod, err
 
 	pod, err := mkPod(engine.config.Namespace, podName, step.Image, step.WorkingDir, engine.goos, step.BackendOptions.Kubernetes.ServiceAccountName,
 		step.Pull, step.Privileged,
-		step.Commands, step.Volumes, step.ExtraHosts,
+		step.Commands, step.Volumes, step.ExtraHosts, step.Entrypoint,
 		engine.config.PodLabels, engine.config.PodAnnotations, step.Environment, step.BackendOptions.Kubernetes.NodeSelector,
 		step.BackendOptions.Kubernetes.Tolerations, step.BackendOptions.Kubernetes.Resources, step.BackendOptions.Kubernetes.SecurityContext, engine.config.SecurityContext)
 	if err != nil {

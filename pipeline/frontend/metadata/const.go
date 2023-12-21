@@ -14,7 +14,7 @@
 
 package metadata
 
-// Event types corresponding to scm hooks.
+// Event types corresponding to forge hooks.
 const (
 	EventPush   = "push"
 	EventPull   = "pull_request"

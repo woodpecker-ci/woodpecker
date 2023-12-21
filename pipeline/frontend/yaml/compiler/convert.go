@@ -173,6 +173,7 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		WorkingDir:     workingdir,
 		Environment:    environment,
 		Commands:       container.Commands,
+		Entrypoint:     container.Entrypoint,
 		ExtraHosts:     container.ExtraHosts,
 		Volumes:        volumes,
 		Tmpfs:          container.Tmpfs,

@@ -851,6 +851,10 @@ Woodpecker supports to define multiple workflows for a repository. Those workflo
 
 Workflows that should run even on failure should set the `runs_on` tag. See [here](./25-workflows.md#flow-control) for an example.
 
+## `entrypoint`
+
+Allows you to specify the entrypoint for Docker and Kubernetes. Note that this must include the full command as list, including arguments (e.g. `["/bin/sh", "-c"]`).
+
 ## Privileged mode
 
 Woodpecker gives the ability to configure privileged mode in the YAML. You can use this parameter to launch containers with escalated capabilities.

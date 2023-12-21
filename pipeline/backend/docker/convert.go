@@ -41,6 +41,9 @@ func (e *docker) toConfig(step *types.Step) *container.Config {
 		for k, v := range env {
 			step.Environment[k] = v
 		}
+		if len(step.Entrypoint) > 0 {
+			entry = step.Entrypoint
+		}
 		config.Entrypoint = entry
 		config.Cmd = cmd
 	}
