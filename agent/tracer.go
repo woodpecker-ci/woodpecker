@@ -68,7 +68,7 @@ func (r *Runner) createTracer(ctxmeta context.Context, logger zerolog.Logger, wo
 		// TODO: find better way to update this state and move it to pipeline to have the same env in cli-exec
 		state.Pipeline.Step.Environment["CI_MACHINE"] = r.hostname
 
-		state.Pipeline.Step.Environment["CI_PIPELINE_STATUS"] = "success"
+		state.Pipeline.Step.Environment["CI_PIPELINE_STATUS"] = string(pipeline.StatusSuccess)
 		state.Pipeline.Step.Environment["CI_PIPELINE_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
 		state.Pipeline.Step.Environment["CI_PIPELINE_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
 
@@ -79,8 +79,8 @@ func (r *Runner) createTracer(ctxmeta context.Context, logger zerolog.Logger, wo
 		state.Pipeline.Step.Environment["CI_SYSTEM_PLATFORM"] = runtime.GOOS + "/" + runtime.GOARCH
 
 		if state.Pipeline.Error != nil {
-			state.Pipeline.Step.Environment["CI_PIPELINE_STATUS"] = "failure"
-			state.Pipeline.Step.Environment["CI_STEP_STATUS"] = "failure"
+			state.Pipeline.Step.Environment["CI_PIPELINE_STATUS"] = string(pipeline.StatusFailure)
+			state.Pipeline.Step.Environment["CI_STEP_STATUS"] = string(pipeline.StatusFailure)
 		}
 
 		return nil
