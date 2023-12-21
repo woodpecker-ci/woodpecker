@@ -154,6 +154,10 @@ docker run --entrypoint=build.sh golang
 
 > Please note that only build steps can define commands. You cannot use commands with plugins or services.
 
+### `entrypoint`
+
+Allows you to specify the entrypoint for Docker and Kubernetes. Note that this must include the full command as list, including arguments (e.g. `["/bin/sh", "-c"]`).
+
 ### `environment`
 
 Woodpecker provides the ability to pass environment variables to individual steps.
@@ -850,10 +854,6 @@ Woodpecker supports to define multiple workflows for a repository. Those workflo
 ## `runs_on`
 
 Workflows that should run even on failure should set the `runs_on` tag. See [here](./25-workflows.md#flow-control) for an example.
-
-## `entrypoint`
-
-Allows you to specify the entrypoint for Docker and Kubernetes. Note that this must include the full command as list, including arguments (e.g. `["/bin/sh", "-c"]`).
 
 ## Privileged mode
 
