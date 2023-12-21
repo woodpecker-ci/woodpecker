@@ -46,8 +46,9 @@
     </div>
     <div v-else>
       <form @submit.prevent="saveAgent">
-        <InputField :label="$t('admin.settings.agents.name.name')">
+        <InputField v-slot="{ id }" :label="$t('admin.settings.agents.name.name')">
           <TextField
+            :id="id"
             v-model="selectedAgent.name"
             :placeholder="$t('admin.settings.agents.name.placeholder')"
             required
@@ -63,39 +64,47 @@
         </InputField>
 
         <template v-if="isEditingAgent">
-          <InputField :label="$t('admin.settings.agents.token')">
-            <TextField v-model="selectedAgent.token" :placeholder="$t('admin.settings.agents.token')" disabled />
+          <InputField v-slot="{ id }" :label="$t('admin.settings.agents.token')">
+            <TextField
+              :id="id"
+              v-model="selectedAgent.token"
+              :placeholder="$t('admin.settings.agents.token')"
+              disabled
+            />
           </InputField>
 
-          <InputField :label="$t('admin.settings.agents.id')">
-            <TextField :model-value="selectedAgent.id?.toString()" disabled />
+          <InputField v-slot="{ id }" :label="$t('admin.settings.agents.id')">
+            <TextField :id="id" :model-value="selectedAgent.id?.toString()" disabled />
           </InputField>
 
           <InputField
+            v-slot="{ id }"
             :label="$t('admin.settings.agents.backend.backend')"
             docs-url="docs/next/administration/backends/docker"
           >
-            <TextField v-model="selectedAgent.backend" disabled />
+            <TextField :id="id" v-model="selectedAgent.backend" disabled />
           </InputField>
 
-          <InputField :label="$t('admin.settings.agents.platform.platform')">
-            <TextField v-model="selectedAgent.platform" disabled />
+          <InputField v-slot="{ id }" :label="$t('admin.settings.agents.platform.platform')">
+            <TextField :id="id" v-model="selectedAgent.platform" disabled />
           </InputField>
 
           <InputField
+            v-slot="{ id }"
             :label="$t('admin.settings.agents.capacity.capacity')"
             docs-url="docs/next/administration/agent-config#woodpecker_max_procs"
           >
             <span class="text-wp-text-alt-100">{{ $t('admin.settings.agents.capacity.desc') }}</span>
-            <TextField :model-value="selectedAgent.capacity?.toString()" disabled />
+            <TextField :id="id" :model-value="selectedAgent.capacity?.toString()" disabled />
           </InputField>
 
-          <InputField :label="$t('admin.settings.agents.version')">
-            <TextField :model-value="selectedAgent.version" disabled />
+          <InputField v-slot="{ id }" :label="$t('admin.settings.agents.version')">
+            <TextField :id="id" :model-value="selectedAgent.version" disabled />
           </InputField>
 
-          <InputField :label="$t('admin.settings.agents.last_contact')">
+          <InputField v-slot="{ id }" :label="$t('admin.settings.agents.last_contact')">
             <TextField
+              :id="id"
               :model-value="
                 selectedAgent.last_contact
                   ? date.timeAgo(selectedAgent.last_contact * 1000)
