@@ -21,7 +21,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/google/uuid"
+	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/sync/errgroup"
@@ -74,7 +74,7 @@ func New(spec *backend.Config, opts ...Option) *Runtime {
 	r.Description = map[string]string{}
 	r.spec = spec
 	r.ctx = context.Background()
-	r.taskUUID = uuid.New().String()
+	r.taskUUID = ulid.Make().String()
 	for _, opts := range opts {
 		opts(r)
 	}
