@@ -31,8 +31,9 @@ var notAllowedEnvVarOverwrites = []string{
 }
 
 var (
-	ErrUnsupportedStepType   = errors.New("unsupported step type")
-	ErrWorkflowStateNotFound = errors.New("workflow state not found")
+	ErrUnsupportedStepType    = errors.New("unsupported step type")
+	ErrWorkflowStateNotFound  = errors.New("workflow state not found")
+	ErrWorkflowStateMalformed = errors.New("workflow state malformed")
 )
 
 const netrcFile = `

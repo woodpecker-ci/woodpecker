@@ -258,7 +258,10 @@ func (e *local) getState(taskUUID string) (*workflowState, error) {
 		return nil, ErrWorkflowStateNotFound
 	}
 
-	workflowState, _ := state.(*workflowState)
+	workflowState, ok := state.(*workflowState)
+	if !ok {
+		return nil, ErrWorkflowStateMalformed
+	}
 	return workflowState, nil
 }
 
