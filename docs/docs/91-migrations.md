@@ -5,6 +5,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 ## `next`
 
 - Removed `WOODPECKER_ROOT_PATH` and `WOODPECKER_ROOT_URL` config variables. Use `WOODPECKER_HOST` with a path instead
+- Pipelines without a config file will now be skipped instead of failing
 
 ## 2.0.0
 
