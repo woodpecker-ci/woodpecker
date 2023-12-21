@@ -22,10 +22,10 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	pipelineErrors "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
+	pipeline_errors "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
-	forgeTypes "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
+	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
@@ -66,7 +66,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	// fetch the pipeline file from the forge
 	configFetcher := forge.NewConfigFetcher(server.Config.Services.Forge, server.Config.Services.Timeout, server.Config.Services.ConfigService, repoUser, repo, pipeline)
 	forgeYamlConfigs, configFetchErr := configFetcher.Fetch(ctx)
-	if errors.Is(configFetchErr, &forgeTypes.ErrConfigNotFound{}) {
+	if errors.Is(configFetchErr, &forge_types.ErrConfigNotFound{}) {
 		log.Debug().Str("repo", repo.FullName).Err(configFetchErr).Msgf("cannot find config '%s' in '%s' with user: '%s'", repo.Config, pipeline.Ref, repoUser.Login)
 		if err := _store.DeletePipeline(pipeline); err != nil {
 			log.Error().Str("repo", repo.FullName).Err(err).Msg("failed to delete pipeline without config")
@@ -79,11 +79,11 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	}
 
 	pipelineItems, parseErr := parsePipeline(_store, pipeline, repoUser, repo, forgeYamlConfigs, nil)
-	if pipelineErrors.HasBlockingErrors(parseErr) {
+	if pipeline_errors.HasBlockingErrors(parseErr) {
 		log.Debug().Str("repo", repo.FullName).Err(parseErr).Msg("failed to parse yaml")
 		return nil, updatePipelineWithErr(ctx, _store, pipeline, repo, repoUser, parseErr)
 	} else if parseErr != nil {
-		pipeline.Errors = pipelineErrors.GetPipelineErrors(parseErr)
+		pipeline.Errors = pipeline_errors.GetPipelineErrors(parseErr)
 	}
 
 	if len(pipelineItems) == 0 {
