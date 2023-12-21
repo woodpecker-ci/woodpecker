@@ -1,13 +1,14 @@
 # Changelog
 
-## [2.1.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.1.0) - 2023-12-20
+## [2.1.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.1.0) - 2023-12-21
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@qwerty287, @lafriks, @lukashass, @runephilosof-karnovgroup, @6543, @renovate[bot], @anbraten, @zc-devs, @allanger, @xoxys, @gapanyc, @mikhail-putilov, @kaylynb, @voidcontext, @robbie-cahill, @micash545, @dominic-p, @mzampetakis
+@6543, @qwerty287, @lafriks, @lukashass, @runephilosof-karnovgroup, @renovate[bot], @anbraten, @zc-devs, @allanger, @xoxys, @gapanyc, @mikhail-putilov, @kaylynb, @voidcontext, @robbie-cahill, @micash545, @dominic-p, @mzampetakis
 
 ### ✨ Features
 
+- gitlab: support nested repos [[#2981](https://github.com/woodpecker-ci/woodpecker/pull/2981)]
 - Support go plugins for forges and agent backends [[#2751](https://github.com/woodpecker-ci/woodpecker/pull/2751)]
 
 ### 🐛 Bug Fixes
