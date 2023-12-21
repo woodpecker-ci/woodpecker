@@ -25,6 +25,7 @@
         <TextField
           v-if="searchBoxPresent"
           class="w-auto <md:w-full <md:order-3"
+          :aria-label="$t('search')"
           :placeholder="$t('search')"
           :model-value="search"
           @update:model-value="(value: string) => $emit('update:search', value)"

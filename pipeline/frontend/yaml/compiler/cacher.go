@@ -18,7 +18,7 @@ import (
 	"path"
 	"strings"
 
-	yaml_types "go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/types"
+	yaml_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types"
 )
 
 // Cacher defines a compiler transform that can be used
@@ -36,7 +36,7 @@ func (c *volumeCacher) Restore(repo, branch string, mounts []string) *yaml_types
 	return &yaml_types.Container{
 		Name:  "rebuild_cache",
 		Image: "plugins/volume-cache:1.0.0",
-		Settings: map[string]interface{}{
+		Settings: map[string]any{
 			"mount":       mounts,
 			"path":        "/cache",
 			"restore":     true,
@@ -59,7 +59,7 @@ func (c *volumeCacher) Rebuild(repo, branch string, mounts []string) *yaml_types
 	return &yaml_types.Container{
 		Name:  "rebuild_cache",
 		Image: "plugins/volume-cache:1.0.0",
-		Settings: map[string]interface{}{
+		Settings: map[string]any{
 			"mount":   mounts,
 			"path":    "/cache",
 			"rebuild": true,
@@ -89,7 +89,7 @@ func (c *s3Cacher) Restore(_, _ string, mounts []string) *yaml_types.Container {
 	return &yaml_types.Container{
 		Name:  "rebuild_cache",
 		Image: "plugins/s3-cache:latest",
-		Settings: map[string]interface{}{
+		Settings: map[string]any{
 			"mount":      mounts,
 			"access_key": c.access,
 			"secret_key": c.secret,
@@ -104,7 +104,7 @@ func (c *s3Cacher) Rebuild(_, _ string, mounts []string) *yaml_types.Container {
 	return &yaml_types.Container{
 		Name:  "rebuild_cache",
 		Image: "plugins/s3-cache:latest",
-		Settings: map[string]interface{}{
+		Settings: map[string]any{
 			"mount":      mounts,
 			"access_key": c.access,
 			"secret_key": c.secret,

@@ -21,6 +21,7 @@ package gitea
 import (
 	"context"
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"net"
 	"net/http"
@@ -35,13 +36,14 @@ import (
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 
-	"go.woodpecker-ci.org/woodpecker/server"
-	"go.woodpecker-ci.org/woodpecker/server/forge"
-	"go.woodpecker-ci.org/woodpecker/server/forge/common"
-	forge_types "go.woodpecker-ci.org/woodpecker/server/forge/types"
-	"go.woodpecker-ci.org/woodpecker/server/model"
-	"go.woodpecker-ci.org/woodpecker/server/store"
-	shared_utils "go.woodpecker-ci.org/woodpecker/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/common"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
+	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	shared_utils "go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
 const (
@@ -259,7 +261,7 @@ func (c *Gitea) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error)
 		return nil, err
 	}
 
-	return shared_utils.Paginate(func(page int) ([]*model.Repo, error) {
+	repos, err := shared_utils.Paginate(func(page int) ([]*gitea.Repository, error) {
 		repos, _, err := client.ListMyRepos(
 			gitea.ListReposOptions{
 				ListOptions: gitea.ListOptions{
@@ -268,15 +270,17 @@ func (c *Gitea) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error)
 				},
 			},
 		)
-		result := make([]*model.Repo, 0, len(repos))
-		for _, repo := range repos {
-			if repo.Archived {
-				continue
-			}
-			result = append(result, toRepo(repo))
-		}
-		return result, err
+		return repos, err
 	})
+
+	result := make([]*model.Repo, 0, len(repos))
+	for _, repo := range repos {
+		if repo.Archived {
+			continue
+		}
+		result = append(result, toRepo(repo))
+	}
+	return result, err
 }
 
 // File fetches the file from the Gitea repository and returns its contents.
@@ -286,7 +290,10 @@ func (c *Gitea) File(ctx context.Context, u *model.User, r *model.Repo, b *model
 		return nil, err
 	}
 
-	cfg, _, err := client.GetFile(r.Owner, r.Name, b.Commit, f)
+	cfg, resp, err := client.GetFile(r.Owner, r.Name, b.Commit, f)
+	if err != nil && resp != nil && resp.StatusCode == http.StatusNotFound {
+		return nil, errors.Join(err, &types.ErrConfigNotFound{Configs: []string{f}})
+	}
 	return cfg, err
 }
 
@@ -311,6 +318,9 @@ func (c *Gitea) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.
 		if m, _ := filepath.Match(f, e.Path); m && e.Type == "blob" {
 			data, err := c.File(ctx, u, r, b, e.Path)
 			if err != nil {
+				if errors.Is(err, &types.ErrConfigNotFound{}) {
+					return nil, fmt.Errorf("git tree reported existence of file but we got: %s", err.Error())
+				}
 				return nil, fmt.Errorf("multi-pipeline cannot get %s: %w", e.Path, err)
 			}
 
@@ -337,7 +347,7 @@ func (c *Gitea) Status(ctx context.Context, user *model.User, repo *model.Repo, 
 		pipeline.Commit,
 		gitea.CreateStatusOption{
 			State:       getStatus(workflow.State),
-			TargetURL:   common.GetPipelineStatusLink(repo, pipeline, workflow),
+			TargetURL:   common.GetPipelineStatusURL(repo, pipeline, workflow),
 			Description: common.GetPipelineStatusDescription(workflow.State),
 			Context:     common.GetPipelineStatusContext(repo, pipeline, workflow),
 		},
@@ -486,7 +496,7 @@ func (c *Gitea) PullRequests(ctx context.Context, u *model.User, r *model.Repo, 
 	result := make([]*model.PullRequest, len(pullRequests))
 	for i := range pullRequests {
 		result[i] = &model.PullRequest{
-			Index: pullRequests[i].Index,
+			Index: model.ForgeRemoteID(strconv.Itoa(int(pullRequests[i].Index))),
 			Title: pullRequests[i].Title,
 		}
 	}
@@ -546,11 +556,8 @@ func (c *Gitea) Org(ctx context.Context, u *model.User, owner string) (*model.Or
 		return nil, err
 	}
 
-	org, _, err := client.GetOrg(owner)
-	if err != nil {
-		return nil, err
-	}
-	if org != nil {
+	org, _, orgErr := client.GetOrg(owner)
+	if orgErr == nil && org != nil {
 		return &model.Org{
 			Name:    org.UserName,
 			Private: gitea.VisibleType(org.Visibility) != gitea.VisibleTypePublic,
@@ -559,6 +566,9 @@ func (c *Gitea) Org(ctx context.Context, u *model.User, owner string) (*model.Or
 
 	user, _, err := client.GetUserInfo(owner)
 	if err != nil {
+		if orgErr != nil {
+			err = errors.Join(orgErr, err)
+		}
 		return nil, err
 	}
 	return &model.Org{

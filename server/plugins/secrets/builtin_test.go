@@ -20,9 +20,9 @@ import (
 
 	"github.com/franela/goblin"
 	"github.com/stretchr/testify/mock"
-	"go.woodpecker-ci.org/woodpecker/server/model"
-	"go.woodpecker-ci.org/woodpecker/server/plugins/secrets"
-	mocks_store "go.woodpecker-ci.org/woodpecker/server/store/mocks"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/secrets"
+	mocks_store "go.woodpecker-ci.org/woodpecker/v2/server/store/mocks"
 )
 
 func TestSecretListPipeline(t *testing.T) {
@@ -51,7 +51,7 @@ func TestSecretListPipeline(t *testing.T) {
 	// repo secret
 	repoSecret := &model.Secret{
 		ID:     3,
-		OrgID:  1,
+		OrgID:  0,
 		RepoID: 1,
 		Name:   "secret",
 		Value:  "value-repo",

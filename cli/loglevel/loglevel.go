@@ -19,9 +19,8 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
 
-	"go.woodpecker-ci.org/woodpecker/cli/common"
-	"go.woodpecker-ci.org/woodpecker/cli/internal"
-	"go.woodpecker-ci.org/woodpecker/woodpecker-go/woodpecker"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
 // Command exports the log-level command used to change the servers log-level.
@@ -30,7 +29,6 @@ var Command = &cli.Command{
 	ArgsUsage: "[level]",
 	Usage:     "get the logging level of the server, or set it with [level]",
 	Action:    logLevel,
-	Flags:     common.GlobalFlags,
 }
 
 func logLevel(c *cli.Context) error {

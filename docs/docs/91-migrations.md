@@ -2,16 +2,23 @@
 
 Some versions need some changes to the server configuration or the pipeline configuration files.
 
-## next (2.0.0)
+## `next`
+
+- Removed `WOODPECKER_ROOT_PATH` and `WOODPECKER_ROOT_URL` config variables. Use `WOODPECKER_HOST` with a path instead
+- Pipelines without a config file will now be skipped instead of failing
+
+## 2.0.0
 
 - Dropped deprecated `CI_BUILD_*`, `CI_PREV_BUILD_*`, `CI_JOB_*`, `*_LINK`, `CI_SYSTEM_ARCH`, `CI_REPO_REMOTE` built-in environment variables
 - Deprecated `platform:` filter in favor of `labels:`, [read more](./20-usage/20-workflow-syntax.md#filter-by-platform)
-- Secrets `event` property was renamed to `events` and `image` to `images` as both are lists. The new property `events` / `images` has to be used in the api and as cli argument. The old properties `event` and `image` were removed.
+- Secrets `event` property was renamed to `events` and `image` to `images` as both are lists. The new property `events` / `images` has to be used in the api. The old properties `event` and `image` were removed.
 - The secrets `plugin_only` option was removed. Secrets with images are now always only available for plugins using listed by the `images` property. Existing secrets with a list of `images` will now only be available to the listed images if they are used as a plugin.
 - Removed `build` alias for `pipeline` command in CLI
 - Removed `ssh` backend. Use an agent directly on the SSH machine using the `local` backend.
 - Removed `/hook` and `/stream` API paths in favor of `/api/(hook|stream)`. You may need to use the "Repair repository" button in the repo settings or "Repair all" in the admin settings to recreate the forge hook.
 - Removed `WOODPECKER_DOCS` config variable
+- Renamed `link` to `url` (including all API fields)
+- Deprecated `CI_COMMIT_URL` env var, use `CI_PIPELINE_FORGE_URL`
 
 ## 1.0.0
 

@@ -21,13 +21,14 @@ import (
 	"crypto"
 	"time"
 
-	"go.woodpecker-ci.org/woodpecker/server/cache"
-	"go.woodpecker-ci.org/woodpecker/server/forge"
-	"go.woodpecker-ci.org/woodpecker/server/logging"
-	"go.woodpecker-ci.org/woodpecker/server/model"
-	"go.woodpecker-ci.org/woodpecker/server/plugins/config"
-	"go.woodpecker-ci.org/woodpecker/server/pubsub"
-	"go.woodpecker-ci.org/woodpecker/server/queue"
+	"go.woodpecker-ci.org/woodpecker/v2/server/cache"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v2/server/logging"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/config"
+	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/permissions"
+	"go.woodpecker-ci.org/woodpecker/v2/server/pubsub"
+	"go.woodpecker-ci.org/woodpecker/v2/server/queue"
 )
 
 var Config = struct {
@@ -69,13 +70,7 @@ var Config = struct {
 		RootPath            string
 		CustomCSSFile       string
 		CustomJsFile        string
-		Migrations          struct {
-			AllowLong bool
-		}
-		EnableSwagger bool
-		// Open bool
-		// Orgs map[string]struct{}
-		// Admins map[string]struct{}
+		EnableSwagger       bool
 	}
 	Prometheus struct {
 		AuthToken string
@@ -95,5 +90,11 @@ var Config = struct {
 			HTTP  string
 			HTTPS string
 		}
+	}
+	Permissions struct {
+		Open            bool
+		Admins          *permissions.Admins
+		Orgs            *permissions.Orgs
+		OwnersAllowlist *permissions.OwnersAllowlist
 	}
 }{}

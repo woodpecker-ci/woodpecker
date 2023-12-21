@@ -34,24 +34,25 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
 
-	"go.woodpecker-ci.org/woodpecker/cmd/common"
-	"go.woodpecker-ci.org/woodpecker/pipeline/rpc/proto"
-	"go.woodpecker-ci.org/woodpecker/server"
-	"go.woodpecker-ci.org/woodpecker/server/cron"
-	"go.woodpecker-ci.org/woodpecker/server/forge"
-	woodpeckerGrpcServer "go.woodpecker-ci.org/woodpecker/server/grpc"
-	"go.woodpecker-ci.org/woodpecker/server/logging"
-	"go.woodpecker-ci.org/woodpecker/server/model"
-	"go.woodpecker-ci.org/woodpecker/server/plugins/config"
-	"go.woodpecker-ci.org/woodpecker/server/pubsub"
-	"go.woodpecker-ci.org/woodpecker/server/router"
-	"go.woodpecker-ci.org/woodpecker/server/router/middleware"
-	"go.woodpecker-ci.org/woodpecker/server/store"
-	"go.woodpecker-ci.org/woodpecker/server/web"
-	"go.woodpecker-ci.org/woodpecker/shared/constant"
-	"go.woodpecker-ci.org/woodpecker/version"
-	// "go.woodpecker-ci.org/woodpecker/server/plugins/encryption"
-	// encryptedStore "go.woodpecker-ci.org/woodpecker/server/plugins/encryption/wrapper/store"
+	"go.woodpecker-ci.org/woodpecker/v2/cmd/common"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc/proto"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/cron"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
+	woodpeckerGrpcServer "go.woodpecker-ci.org/woodpecker/v2/server/grpc"
+	"go.woodpecker-ci.org/woodpecker/v2/server/logging"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/config"
+	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/permissions"
+	"go.woodpecker-ci.org/woodpecker/v2/server/pubsub"
+	"go.woodpecker-ci.org/woodpecker/v2/server/router"
+	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/server/web"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
+	"go.woodpecker-ci.org/woodpecker/v2/version"
+	// "go.woodpecker-ci.org/woodpecker/v2/server/plugins/encryption"
+	// encryptedStore "go.woodpecker-ci.org/woodpecker/v2/server/plugins/encryption/wrapper/store"
 )
 
 func run(c *cli.Context) error {
@@ -177,7 +178,6 @@ func run(c *cli.Context) error {
 		webUIServe,
 		middleware.Logger(time.RFC3339, true),
 		middleware.Version,
-		middleware.Config(c),
 		middleware.Store(c, _store),
 	)
 
@@ -347,13 +347,8 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 	server.Config.Server.StatusContext = c.String("status-context")
 	server.Config.Server.StatusContextFormat = c.String("status-context-format")
 	server.Config.Server.SessionExpires = c.Duration("session-expires")
-	rootPath := c.String("root-path")
-	if !c.IsSet("root-path") {
-		// Extract RootPath from Host...
-		u, _ := url.Parse(server.Config.Server.Host)
-		rootPath = u.Path
-	}
-	rootPath = strings.TrimSuffix(rootPath, "/")
+	u, _ := url.Parse(server.Config.Server.Host)
+	rootPath := strings.TrimSuffix(u.Path, "/")
 	if rootPath != "" && !strings.HasPrefix(rootPath, "/") {
 		rootPath = "/" + rootPath
 	}
@@ -367,4 +362,10 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 
 	// prometheus
 	server.Config.Prometheus.AuthToken = c.String("prometheus-auth-token")
+
+	// permissions
+	server.Config.Permissions.Open = c.Bool("open")
+	server.Config.Permissions.Admins = permissions.NewAdmins(c.StringSlice("admin"))
+	server.Config.Permissions.Orgs = permissions.NewOrgs(c.StringSlice("orgs"))
+	server.Config.Permissions.OwnersAllowlist = permissions.NewOwnersAllowlist(c.StringSlice("repo-owners"))
 }

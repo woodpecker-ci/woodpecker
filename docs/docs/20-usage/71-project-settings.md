@@ -39,7 +39,7 @@ Cloning pipeline step may need git credentials. They are injected via netrc. By 
 
 ## Project visibility
 
-You can change the visibility of your project by this setting. If a user has access to a project he can see all builds and their logs and artifacts. Settings, Secrets and Registries can only be accessed by owners.
+You can change the visibility of your project by this setting. If a user has access to a project they can see all builds and their logs and artifacts. Settings, Secrets and Registries can only be accessed by owners.
 
 - `Public` Every user can see your project without being logged in.
 - `Internal` Only authenticated users of the Woodpecker instance can see this project.

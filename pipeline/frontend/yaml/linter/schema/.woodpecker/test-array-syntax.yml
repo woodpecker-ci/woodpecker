@@ -1,0 +1,25 @@
+version: 1
+
+clone:
+  - name: git
+    image: woodpeckerci/plugin-git
+    settings:
+      partial: true
+  - name: testdata
+    image: woodpeckerci/plugin-git
+    settings:
+      remote: https://gitserver/owner/testdata.git
+      path: testdata
+
+steps:
+  - name: build
+    image: golang
+    commands:
+      - go build
+      - go test
+
+services:
+  - name: database
+    image: mysql
+  - name: cache
+    image: redis

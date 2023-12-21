@@ -20,10 +20,9 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/pipeline/errors"
-	forge_types "go.woodpecker-ci.org/woodpecker/server/forge/types"
-	"go.woodpecker-ci.org/woodpecker/server/model"
-	"go.woodpecker-ci.org/woodpecker/server/store"
+	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
 // Approve update the status to pending for a blocked pipeline because of a gated repo
@@ -73,11 +72,11 @@ func Approve(ctx context.Context, store store.Store, currentPipeline *model.Pipe
 		}
 	}
 
-	pipelineItems, err := parsePipeline(store, currentPipeline, user, repo, yamls, nil)
-	if errors.HasBlockingErrors(err) {
-		msg := fmt.Sprintf("failure to parsePipeline for %s", repo.FullName)
+	currentPipeline, pipelineItems, err := createPipelineItems(ctx, store, currentPipeline, user, repo, yamls, nil)
+	if err != nil {
+		msg := fmt.Sprintf("failure to createPipelineItems for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
-		return nil, err
+		return nil, fmt.Errorf(msg)
 	}
 
 	// TODO improve this

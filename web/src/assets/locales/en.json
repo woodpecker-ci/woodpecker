@@ -140,7 +140,7 @@
         "saved": "Secret saved",
         "images": {
           "images": "Available for following images",
-          "desc": "Comma separated list of images where this secret is available, leave empty to allow all images"
+          "desc": "List of images where this secret is available, leave empty to allow all images"
         },
         "events": {
           "events": "Available at following events",
@@ -305,7 +305,7 @@
         "saved": "Organization secret saved",
         "images": {
           "images": "Available for following images",
-          "desc": "Comma separated list of images where this secret is available, leave empty to allow all images"
+          "desc": "List of images where this secret is available, leave empty to allow all images"
         },
         "plugins_only": "Only available for plugins",
         "events": {
@@ -334,7 +334,7 @@
         "saved": "Global secret saved",
         "images": {
           "images": "Available for following images",
-          "desc": "Comma separated list of images where this secret is available, leave empty to allow all images"
+          "desc": "List of images where this secret is available, leave empty to allow all images"
         },
         "plugins_only": "Only available for plugins",
         "events": {
@@ -476,7 +476,7 @@
         "saved": "User secret saved",
         "images": {
           "images": "Available for following images",
-          "desc": "Comma separated list of images where this secret is available, leave empty to allow all images"
+          "desc": "List of images where this secret is available, leave empty to allow all images"
         },
         "plugins_only": "Only available for plugins",
         "events": {
@@ -504,5 +504,7 @@
   "default": "default",
   "info": "Info",
   "running_version": "You are running Woodpecker {0}",
-  "update_woodpecker": "Please update your Woodpecker instance to {0}"
+  "update_woodpecker": "Please update your Woodpecker instance to {0}",
+  "global_level_secret": "global secret",
+  "org_level_secret": "organization secret"
 }

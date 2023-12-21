@@ -34,26 +34,26 @@ import (
 	"github.com/urfave/cli/v2"
 	"golang.org/x/sync/errgroup"
 
-	"go.woodpecker-ci.org/woodpecker/server"
-	"go.woodpecker-ci.org/woodpecker/server/cache"
-	"go.woodpecker-ci.org/woodpecker/server/forge"
-	"go.woodpecker-ci.org/woodpecker/server/forge/bitbucket"
-	"go.woodpecker-ci.org/woodpecker/server/forge/gitea"
-	"go.woodpecker-ci.org/woodpecker/server/forge/github"
-	"go.woodpecker-ci.org/woodpecker/server/forge/gitlab"
-	"go.woodpecker-ci.org/woodpecker/server/model"
-	"go.woodpecker-ci.org/woodpecker/server/plugins/environments"
-	"go.woodpecker-ci.org/woodpecker/server/plugins/registry"
-	"go.woodpecker-ci.org/woodpecker/server/plugins/secrets"
-	"go.woodpecker-ci.org/woodpecker/server/queue"
-	"go.woodpecker-ci.org/woodpecker/server/store"
-	"go.woodpecker-ci.org/woodpecker/server/store/datastore"
-	"go.woodpecker-ci.org/woodpecker/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/cache"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/bitbucket"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/gitea"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/github"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/gitlab"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/environments"
+	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/registry"
+	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/secrets"
+	"go.woodpecker-ci.org/woodpecker/v2/server/queue"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store/datastore"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/addon"
+	addonTypes "go.woodpecker-ci.org/woodpecker/v2/shared/addon/types"
 )
 
 func setupStore(c *cli.Context) (store.Store, error) {
-	// TODO: find a better way than global var to pass down to allow long migrations
-	server.Config.Server.Migrations.AllowLong = c.Bool("migrations-allow-long")
 	datasource := c.String("datasource")
 	driver := c.String("driver")
 	xorm := store.XORM{
@@ -90,7 +90,7 @@ func setupStore(c *cli.Context) (store.Store, error) {
 		log.Fatal().Err(err).Msg("could not open datastore")
 	}
 
-	if err := store.Migrate(); err != nil {
+	if err := store.Migrate(c.Bool("migrations-allow-long")); err != nil {
 		log.Fatal().Err(err).Msg("could not migrate datastore")
 	}
 
@@ -132,8 +132,16 @@ func setupMembershipService(_ *cli.Context, r forge.Forge) cache.MembershipServi
 	return cache.NewMembershipService(r)
 }
 
-// setupForge helper function to setup the forge from the CLI arguments.
+// setupForge helper function to set up the forge from the CLI arguments.
 func setupForge(c *cli.Context) (forge.Forge, error) {
+	addonForge, err := addon.Load[forge.Forge](c.StringSlice("addons"), addonTypes.TypeForge)
+	if err != nil {
+		return nil, err
+	}
+	if addonForge != nil {
+		return addonForge.Value, nil
+	}
+
 	switch {
 	case c.Bool("github"):
 		return setupGitHub(c)
