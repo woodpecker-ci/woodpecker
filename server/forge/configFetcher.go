@@ -153,7 +153,7 @@ func (cf *configFetcher) checkPipelineFile(c context.Context, config string) ([]
 		}}, nil
 	}
 
-	return nil, &types.ErrConfigNotFound{Configs: []string{config}}
+	return nil, err
 }
 
 func (cf *configFetcher) getFirstAvailableConfig(c context.Context, configs []string) ([]*types.FileMeta, error) {
