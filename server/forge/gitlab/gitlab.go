@@ -228,8 +228,16 @@ func (g *GitLab) Teams(ctx context.Context, user *model.User) ([]*model.Team, er
 }
 
 // getProject fetches the named repository from the forge.
-func (g *GitLab) getProject(ctx context.Context, client *gitlab.Client, owner, name string) (*gitlab.Project, error) {
-	repo, _, err := client.Projects.GetProject(fmt.Sprintf("%s/%s", owner, name), nil, gitlab.WithContext(ctx))
+func (g *GitLab) getProject(ctx context.Context, client *gitlab.Client, mr *model.Repo, owner, name string) (*gitlab.Project, error) {
+	var (
+		repo *gitlab.Project
+		err  error
+	)
+	if mr != nil && mr.ForgeRemoteID.IsValid() {
+		repo, _, err = client.Projects.GetProject(mr.ForgeRemoteID, nil, gitlab.WithContext(ctx))
+	} else {
+		repo, _, err = client.Projects.GetProject(fmt.Sprintf("%s/%s", owner, name), nil, gitlab.WithContext(ctx))
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -256,7 +264,7 @@ func (g *GitLab) Repo(ctx context.Context, user *model.User, remoteID model.Forg
 		return g.convertGitLabRepo(_repo)
 	}
 
-	_repo, err := g.getProject(ctx, client, owner, name)
+	_repo, err := g.getProject(ctx, client, nil, owner, name)
 	if err != nil {
 		return nil, err
 	}
@@ -311,7 +319,7 @@ func (g *GitLab) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 		return nil, err
 	}
 
-	_repo, err := g.getProject(ctx, client, r.Owner, r.Name)
+	_repo, err := g.getProject(ctx, client, r, r.Owner, r.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -341,7 +349,7 @@ func (g *GitLab) File(ctx context.Context, user *model.User, repo *model.Repo, p
 	if err != nil {
 		return nil, err
 	}
-	_repo, err := g.getProject(ctx, client, repo.Owner, repo.Name)
+	_repo, err := g.getProject(ctx, client, repo, repo.Owner, repo.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -360,10 +368,11 @@ func (g *GitLab) Dir(ctx context.Context, user *model.User, repo *model.Repo, pi
 	}
 
 	files := make([]*forge_types.FileMeta, 0, perPage)
-	_repo, err := g.getProject(ctx, client, repo.Owner, repo.Name)
+	_repo, err := g.getProject(ctx, client, repo, repo.Owner, repo.Name)
 	if err != nil {
 		return nil, err
 	}
+
 	opts := &gitlab.ListTreeOptions{
 		ListOptions: gitlab.ListOptions{PerPage: perPage},
 		Path:        &path,
@@ -410,7 +419,7 @@ func (g *GitLab) Status(ctx context.Context, user *model.User, repo *model.Repo,
 		return err
 	}
 
-	_repo, err := g.getProject(ctx, client, repo.Owner, repo.Name)
+	_repo, err := g.getProject(ctx, client, repo, repo.Owner, repo.Name)
 	if err != nil {
 		return err
 	}
@@ -467,7 +476,7 @@ func (g *GitLab) Activate(ctx context.Context, user *model.User, repo *model.Rep
 		return err
 	}
 
-	_repo, err := g.getProject(ctx, client, repo.Owner, repo.Name)
+	_repo, err := g.getProject(ctx, client, repo, repo.Owner, repo.Name)
 	if err != nil {
 		return err
 	}
@@ -502,7 +511,7 @@ func (g *GitLab) Deactivate(ctx context.Context, user *model.User, repo *model.R
 		return err
 	}
 
-	_repo, err := g.getProject(ctx, client, repo.Owner, repo.Name)
+	_repo, err := g.getProject(ctx, client, repo, repo.Owner, repo.Name)
 	if err != nil {
 		return err
 	}
@@ -556,7 +565,7 @@ func (g *GitLab) Branches(ctx context.Context, user *model.User, repo *model.Rep
 		return nil, err
 	}
 
-	_repo, err := g.getProject(ctx, client, repo.Owner, repo.Name)
+	_repo, err := g.getProject(ctx, client, repo, repo.Owner, repo.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -583,7 +592,7 @@ func (g *GitLab) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 		return "", err
 	}
 
-	_repo, err := g.getProject(ctx, client, r.Owner, r.Name)
+	_repo, err := g.getProject(ctx, client, r, r.Owner, r.Name)
 	if err != nil {
 		return "", err
 	}
@@ -752,7 +761,7 @@ func (g *GitLab) loadChangedFilesFromMergeRequest(ctx context.Context, tmpRepo *
 		return nil, err
 	}
 
-	_repo, err := g.getProject(ctx, client, repo.Owner, repo.Name)
+	_repo, err := g.getProject(ctx, client, repo, repo.Owner, repo.Name)
 	if err != nil {
 		return nil, err
 	}
