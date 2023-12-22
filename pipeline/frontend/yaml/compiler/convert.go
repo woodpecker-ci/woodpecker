@@ -55,6 +55,16 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		})
 	}
 
+	extraHosts := []backend_types.HostAlias{}
+	for _, extraHost := range container.ExtraHosts {
+		splitArr := strings.SplitN(extraHost, ":", 2)
+		extraHost := backend_types.HostAlias{
+			Name: splitArr[0],
+			IP:   splitArr[1],
+		}
+		extraHosts = append(extraHosts, extraHost)
+	}
+
 	var volumes []string
 	if !c.local {
 		volumes = append(volumes, workspace)
@@ -173,7 +183,7 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		WorkingDir:     workingdir,
 		Environment:    environment,
 		Commands:       container.Commands,
-		ExtraHosts:     container.ExtraHosts,
+		ExtraHosts:     extraHosts,
 		Volumes:        volumes,
 		Tmpfs:          container.Tmpfs,
 		Devices:        container.Devices,
