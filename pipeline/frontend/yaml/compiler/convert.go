@@ -61,11 +61,10 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		if !ok {
 			return nil, fmt.Errorf("extra host %s is in wrong format", extraHost)
 		}
-		extraHost := backend_types.HostAlias{
+		extraHosts = append(extraHosts, backend_types.HostAlias{
 			Name: name,
 			IP:   ip,
-		}
-		extraHosts = append(extraHosts, extraHost)
+		})
 	}
 
 	var volumes []string
