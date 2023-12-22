@@ -234,7 +234,7 @@ func (g *GitLab) getProject(ctx context.Context, client *gitlab.Client, mr *mode
 		err  error
 	)
 	if mr != nil && mr.ForgeRemoteID.IsValid() {
-		repo, _, err = client.Projects.GetProject(mr.ForgeRemoteID, nil, gitlab.WithContext(ctx))
+		repo, _, err = client.Projects.GetProject(string(mr.ForgeRemoteID), nil, gitlab.WithContext(ctx))
 	} else {
 		repo, _, err = client.Projects.GetProject(fmt.Sprintf("%s/%s", owner, name), nil, gitlab.WithContext(ctx))
 	}
