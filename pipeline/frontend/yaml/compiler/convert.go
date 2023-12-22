@@ -57,10 +57,13 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 
 	extraHosts := []backend_types.HostAlias{}
 	for _, extraHost := range container.ExtraHosts {
-		splitArr := strings.SplitN(extraHost, ":", 2)
+		name, ip, ok := strings.Cut(extraHost, ":")
+		if !ok {
+			return nil, fmt.Errorf("extra host %s is in wrong format", extraHost)
+		}
 		extraHost := backend_types.HostAlias{
-			Name: splitArr[0],
-			IP:   splitArr[1],
+			Name: name,
+			IP:   ip,
 		}
 		extraHosts = append(extraHosts, extraHost)
 	}
