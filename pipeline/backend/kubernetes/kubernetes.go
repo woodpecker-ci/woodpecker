@@ -20,7 +20,6 @@ import (
 	"io"
 	"os"
 	"runtime"
-	"strings"
 	"time"
 
 	"github.com/rs/zerolog/log"
@@ -166,8 +165,7 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID s
 		}
 	}
 
-	extraHosts := []string{}
-
+	extraHosts := []types.HostAlias{}
 	for _, stage := range conf.Stages {
 		if stage.Alias == "services" {
 			for _, step := range stage.Steps {
@@ -175,12 +173,12 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID s
 				if err != nil {
 					return err
 				}
-				extraHosts = append(extraHosts, step.Networks[0].Aliases[0]+":"+svc.Spec.ClusterIP)
+				hostAlias := types.HostAlias{Name: step.Networks[0].Aliases[0], IP: svc.Spec.ClusterIP}
+				extraHosts = append(extraHosts, hostAlias)
 			}
 		}
 	}
-
-	log.Trace().Msgf("Adding extra hosts: %s", strings.Join(extraHosts, ", "))
+	log.Trace().Msgf("Adding extra hosts: %v", extraHosts)
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
 			step.ExtraHosts = extraHosts
