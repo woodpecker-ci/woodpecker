@@ -18,6 +18,7 @@ package github
 import (
 	"context"
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -32,6 +33,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/common"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
@@ -226,7 +228,10 @@ func (c *client) File(ctx context.Context, u *model.User, r *model.Repo, b *mode
 
 	opts := new(github.RepositoryContentGetOptions)
 	opts.Ref = b.Commit
-	content, _, _, err := client.Repositories.GetContents(ctx, r.Owner, r.Name, f, opts)
+	content, _, resp, err := client.Repositories.GetContents(ctx, r.Owner, r.Name, f, opts)
+	if resp != nil && resp.StatusCode == http.StatusNotFound {
+		return nil, errors.Join(err, &types.ErrConfigNotFound{Configs: []string{f}})
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -242,7 +247,10 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 
 	opts := new(github.RepositoryContentGetOptions)
 	opts.Ref = b.Commit
-	_, data, _, err := client.Repositories.GetContents(ctx, r.Owner, r.Name, f, opts)
+	_, data, resp, err := client.Repositories.GetContents(ctx, r.Owner, r.Name, f, opts)
+	if resp != nil && resp.StatusCode == http.StatusNotFound {
+		return nil, errors.Join(err, &types.ErrConfigNotFound{Configs: []string{f}})
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -254,6 +262,9 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 		go func(path string) {
 			content, err := c.File(ctx, u, r, b, path)
 			if err != nil {
+				if errors.Is(err, &types.ErrConfigNotFound{}) {
+					err = fmt.Errorf("git tree reported existence of file but we got: %s", err.Error())
+				}
 				errc <- err
 			} else {
 				fc <- &forge_types.FileMeta{

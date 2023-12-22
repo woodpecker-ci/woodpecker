@@ -6,6 +6,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 
 - Deprecated `steps.[name].group` in favor of `steps.[name].depends_on` (see [workflow syntax](./20-usage/20-workflow-syntax.md#depends_on) to learn how to set dependencies)
 - Removed `WOODPECKER_ROOT_PATH` and `WOODPECKER_ROOT_URL` config variables. Use `WOODPECKER_HOST` with a path instead
+- Pipelines without a config file will now be skipped instead of failing
 
 ## 2.0.0
 

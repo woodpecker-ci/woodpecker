@@ -1,8 +1,9 @@
 <template>
   <div v-if="innerValue" class="space-y-4">
     <form @submit.prevent="save">
-      <InputField :label="$t(i18nPrefix + 'name')">
+      <InputField v-slot="{ id }" :label="$t(i18nPrefix + 'name')">
         <TextField
+          :id="id"
           v-model="innerValue.name"
           :placeholder="$t(i18nPrefix + 'name')"
           required
@@ -10,8 +11,9 @@
         />
       </InputField>
 
-      <InputField :label="$t(i18nPrefix + 'value')">
+      <InputField v-slot="{ id }" :label="$t(i18nPrefix + 'value')">
         <TextField
+          :id="id"
           v-model="innerValue.value"
           :placeholder="$t(i18nPrefix + 'value')"
           :lines="5"
@@ -19,16 +21,16 @@
         />
       </InputField>
 
-      <InputField :label="$t(i18nPrefix + 'images.images')">
+      <InputField v-slot="{ id }" :label="$t(i18nPrefix + 'images.images')">
         <span class="ml-1 mb-2 text-wp-text-alt-100">{{ $t(i18nPrefix + 'images.desc') }}</span>
 
         <div class="flex flex-col gap-2">
           <div v-for="image in innerValue.images" :key="image" class="flex gap-2">
-            <TextField :model-value="image" disabled />
+            <TextField :id="id" :model-value="image" disabled />
             <Button type="button" color="gray" start-icon="trash" @click="removeImage(image)" />
           </div>
           <div class="flex gap-2">
-            <TextField v-model="newImage" @keydown.enter.prevent="addNewImage" />
+            <TextField :id="id" v-model="newImage" @keydown.enter.prevent="addNewImage" />
             <Button type="button" color="gray" start-icon="plus" @click="addNewImage" />
           </div>
         </div>

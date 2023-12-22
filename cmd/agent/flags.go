@@ -97,4 +97,9 @@ var flags = []cli.Flag{
 		Usage:   "backend to run pipelines on",
 		Value:   "auto-detect",
 	},
+	&cli.StringSliceFlag{
+		EnvVars: []string{"WOODPECKER_ADDONS"},
+		Name:    "addons",
+		Usage:   "list of addon files",
+	},
 }

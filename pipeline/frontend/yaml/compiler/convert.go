@@ -20,7 +20,7 @@ import (
 	"path"
 	"strings"
 
-	"github.com/google/uuid"
+	"github.com/oklog/ulid/v2"
 
 	backend_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
@@ -31,7 +31,7 @@ import (
 
 func (c *Compiler) createProcess(name string, container *yaml_types.Container, stepType backend_types.StepType) (*backend_types.Step, error) {
 	var (
-		uuid = uuid.New()
+		uuid = ulid.Make()
 
 		detached   bool
 		workingdir string
