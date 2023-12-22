@@ -55,7 +55,7 @@ func (*ErrStepMissingDependency) Is(target error) bool {
 }
 
 type ErrStepDependencyCycle struct {
-	path string
+	path []string
 }
 
 func (err *ErrStepDependencyCycle) Error() string {
@@ -116,7 +116,7 @@ func (c dagCompiler) compileByDependsOn() ([]*backend_types.Stage, error) {
 
 func dfsVisit(steps map[string]*dagCompilerStep, name string, visited map[string]struct{}, path []string) error {
 	if _, ok := visited[name]; ok {
-		return fmt.Errorf("cycle detected: %v", path)
+		return &ErrStepDependencyCycle{path: path}
 	}
 
 	visited[name] = struct{}{}
@@ -153,8 +153,8 @@ func convertDAGToStages(steps map[string]*dagCompilerStep, prefix string) ([]*ba
 	for len(steps) > 0 {
 		addedNodesThisLevel := make(map[string]struct{})
 		stage := &backend_types.Stage{
-			Name:  fmt.Sprintf("stage_%d", prefix, len(stages)),
-			Alias: fmt.Sprintf("stage_%d", prefix, len(stages)),
+			Name:  fmt.Sprintf("%s_stage_%d", prefix, len(stages)),
+			Alias: fmt.Sprintf("%s_stage_%d", prefix, len(stages)),
 		}
 
 		for name, step := range steps {

@@ -36,8 +36,27 @@ func TestConvertDAGToStages(t *testing.T) {
 			dependsOn: []string{"step2"},
 		},
 	}
+	_, err := convertDAGToStages(steps, "")
+	assert.ErrorIs(t, err, &ErrStepDependencyCycle{})
 
-	_, err := convertDAGToStages(steps, "test")
+	steps = map[string]*dagCompilerStep{
+		"step1": {
+			step:      &backend_types.Step{},
+			dependsOn: []string{"step2"},
+		},
+		"step2": {
+			step: &backend_types.Step{},
+		},
+	}
+	_, err = convertDAGToStages(steps, "")
+	assert.NoError(t, err)
 
-	assert.ErrorContains(t, err, "cycle detected:")
+	steps = map[string]*dagCompilerStep{
+		"step1": {
+			step:      &backend_types.Step{},
+			dependsOn: []string{"not-existing-step"},
+		},
+	}
+	_, err = convertDAGToStages(steps, "")
+	assert.ErrorIs(t, err, &ErrStepMissingDependency{})
 }
