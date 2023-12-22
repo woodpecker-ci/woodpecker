@@ -28,7 +28,17 @@ type dagCompilerStep struct {
 	dependsOn []string
 }
 
-type dagCompiler []*dagCompilerStep
+type dagCompiler struct {
+	dcs    []*dagCompilerStep
+	prefix string
+}
+
+func newDAGCompiler(dcs []*dagCompilerStep, prefix string) dagCompiler {
+	return dagCompiler{
+		dcs:    dcs,
+		prefix: prefix,
+	}
+}
 
 type ErrStepMissingDependency struct {
 	name,
@@ -57,8 +67,8 @@ func (*ErrStepDependencyCycle) Is(target error) bool {
 	return ok
 }
 
-func (dsc dagCompiler) isDAG() bool {
-	for _, v := range dsc {
+func (c dagCompiler) isDAG() bool {
+	for _, v := range c.dcs {
 		if len(v.dependsOn) != 0 {
 			return true
 		}
@@ -66,26 +76,26 @@ func (dsc dagCompiler) isDAG() bool {
 	return false
 }
 
-func (dsc dagCompiler) compile(prefix string) ([]*backend_types.Stage, error) {
+func (dsc dagCompiler) compile() ([]*backend_types.Stage, error) {
 	if dsc.isDAG() {
-		return dsc.compileByDependsOn(prefix)
+		return dsc.compileByDependsOn()
 	}
 
-	return dsc.compileByGroup(prefix)
+	return dsc.compileByGroup()
 }
 
-func (dsc dagCompiler) compileByGroup(prefix string) ([]*backend_types.Stage, error) {
-	stages := make([]*backend_types.Stage, 0, len(dsc))
+func (c dagCompiler) compileByGroup() ([]*backend_types.Stage, error) {
+	stages := make([]*backend_types.Stage, 0, len(c.dcs))
 	var curStage *backend_types.Stage
 	var curGroup string
 
-	for _, s := range dsc {
+	for _, s := range c.dcs {
 		// create a new stage if current step is in a new group compared to last one
 		if curStage == nil || curGroup != s.group || s.group == "" {
 			curGroup = s.group
 
 			curStage = new(backend_types.Stage)
-			curStage.Name = fmt.Sprintf("%s_stage_%v", prefix, s.position)
+			curStage.Name = fmt.Sprintf("%s_stage_%v", c.prefix, s.position)
 			stages = append(stages, curStage)
 		}
 
@@ -96,12 +106,12 @@ func (dsc dagCompiler) compileByGroup(prefix string) ([]*backend_types.Stage, er
 	return stages, nil
 }
 
-func (dsc dagCompiler) compileByDependsOn(prefix string) ([]*backend_types.Stage, error) {
-	stepMap := make(map[string]*dagCompilerStep, len(dsc))
-	for _, s := range dsc {
+func (c dagCompiler) compileByDependsOn() ([]*backend_types.Stage, error) {
+	stepMap := make(map[string]*dagCompilerStep, len(c.dcs))
+	for _, s := range c.dcs {
 		stepMap[s.name] = s
 	}
-	return convertDAGToStages(stepMap, prefix)
+	return convertDAGToStages(stepMap, c.prefix)
 }
 
 func dfsVisit(steps map[string]*dagCompilerStep, name string, visited map[string]struct{}, path []string) error {
