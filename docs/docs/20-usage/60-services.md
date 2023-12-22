@@ -22,6 +22,19 @@ services:
     image: redis
 ```
 
+You can define a port and a protocol explicitly:
+```yamlservices:
+  database:
+    image: mysql
+    ports:
+      - 3306
+
+  wireguard:
+    image: wg
+    ports:
+      - 51820/udp
+```
+
 ## Configuration
 
 Service containers generally expose environment variables to customize service startup such as default usernames, passwords and ports. Please see the official image documentation to learn more.

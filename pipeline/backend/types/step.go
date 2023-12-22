@@ -48,7 +48,7 @@ type Step struct {
 	NetworkMode    string            `json:"network_mode,omitempty"`
 	IpcMode        string            `json:"ipc_mode,omitempty"`
 	Sysctls        map[string]string `json:"sysctls,omitempty"`
-	Ports          []uint16          `json:"ports,omitempty"`
+	Ports          []Port            `json:"ports,omitempty"`
 	BackendOptions BackendOptions    `json:"backend_options,omitempty"`
 }
 

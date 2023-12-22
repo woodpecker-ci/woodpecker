@@ -771,14 +771,7 @@
           "description": "expose ports to which other steps can connect to",
           "type": "array",
           "items": {
-            "oneOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "string"
-              }
-            ]
+            "type": "string"
           },
           "minLength": 1
         }

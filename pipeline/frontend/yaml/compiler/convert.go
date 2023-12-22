@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"maps"
 	"path"
+	"strconv"
 	"strings"
 
 	"github.com/oklog/ulid/v2"
@@ -146,9 +147,13 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		cpuSet = c.reslimit.CPUSet
 	}
 
-	var ports []uint16
-	for _, port := range container.Ports {
-		ports = append(ports, uint16(port))
+	var ports []backend_types.Port
+	for _, portDef := range container.Ports {
+		port, err := convertPort(portDef)
+		if err != nil {
+			return nil, err
+		}
+		ports = append(ports, port)
 	}
 
 	// at least one constraint contain status success, or all constraints have no status set
@@ -203,6 +208,28 @@ func (c *Compiler) stepWorkdir(container *yaml_types.Container) string {
 		return container.Directory
 	}
 	return path.Join(c.base, c.path, container.Directory)
+}
+
+func convertPort(portDef string) (backend_types.Port, error) {
+	var err error
+	var port backend_types.Port
+
+	portArr := strings.Split(portDef, "/")
+
+	portNumber, err := strconv.ParseUint(portArr[0], 10, 16)
+	if err != nil {
+		return port, err
+	}
+
+	var proto string
+	if len(portArr) > 1 {
+		proto = portArr[1]
+	}
+
+	port.Number = uint16(portNumber)
+	port.Protocol = proto
+
+	return port, nil
 }
 
 func convertKubernetesBackendOptions(kubeOpt *yaml_types.KubernetesBackendOptions) backend_types.KubernetesBackendOptions {

@@ -17,6 +17,7 @@ package kubernetes
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/rs/zerolog/log"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
@@ -26,16 +27,12 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
-func mkService(namespace, name string, ports []uint16, selector map[string]string) (*v1.Service, error) {
+func mkService(namespace, name string, ports []types.Port, selector map[string]string) (*v1.Service, error) {
 	log.Trace().Str("name", name).Interface("selector", selector).Interface("ports", ports).Msg("Creating service")
 
 	var svcPorts []v1.ServicePort
 	for _, port := range ports {
-		svcPorts = append(svcPorts, v1.ServicePort{
-			Name:       fmt.Sprintf("port-%d", port),
-			Port:       int32(port),
-			TargetPort: intstr.IntOrString{IntVal: int32(port)},
-		})
+		svcPorts = append(svcPorts, servicePort(port))
 	}
 
 	return &v1.Service{
@@ -53,6 +50,17 @@ func mkService(namespace, name string, ports []uint16, selector map[string]strin
 
 func serviceName(step *types.Step) (string, error) {
 	return dnsName(step.Name)
+}
+
+func servicePort(port types.Port) v1.ServicePort {
+	portNumber := int32(port.Number)
+	portProtocol := strings.ToUpper(port.Protocol)
+	return v1.ServicePort{
+		Name:       fmt.Sprintf("port-%d", portNumber),
+		Port:       portNumber,
+		Protocol:   v1.Protocol(portProtocol),
+		TargetPort: intstr.IntOrString{IntVal: portNumber},
+	}
 }
 
 func startService(ctx context.Context, engine *kube, step *types.Step) (*v1.Service, error) {
