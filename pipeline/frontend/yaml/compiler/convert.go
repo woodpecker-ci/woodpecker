@@ -55,7 +55,7 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		})
 	}
 
-	var extraHosts []backend_types.HostAlias
+	extraHosts := make([]backend_types.HostAlias, 0, len(container.ExtraHosts))
 	for _, extraHost := range container.ExtraHosts {
 		name, ip, ok := strings.Cut(extraHost, ":")
 		if !ok {
