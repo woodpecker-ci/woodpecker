@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @johanvdw, @qwerty287, @anbraten, @lafriks, @lukashass, @runephilosof-karnovgroup, @renovate[bot], @zc-devs, @allanger, @xoxys, @gapanyc, @mikhail-putilov, @kaylynb, @voidcontext, @robbie-cahill, @micash545, @dominic-p, @mzampetakis
+@zc-devs, @6543, @johanvdw, @qwerty287, @anbraten, @lafriks, @lukashass, @runephilosof-karnovgroup, @renovate[bot], @allanger, @xoxys, @gapanyc, @mikhail-putilov, @kaylynb, @voidcontext, @robbie-cahill, @micash545, @dominic-p, @mzampetakis
 
 ### ✨ Features
 
@@ -13,6 +13,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fix IPv6 host aliases for kubernetes [[#2992](https://github.com/woodpecker-ci/woodpecker/pull/2992)]
 - Fix cli lint throwing error on warnings  [[#2995](https://github.com/woodpecker-ci/woodpecker/pull/2995)]
 - Fix static file caching [[#2975](https://github.com/woodpecker-ci/woodpecker/pull/2975)]
 - Gitea driver: ignore GetOrg error if we get a valid user. [[#2967](https://github.com/woodpecker-ci/woodpecker/pull/2967)]
