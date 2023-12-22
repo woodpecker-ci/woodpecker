@@ -238,8 +238,8 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 		config.Stages = append(config.Stages, stage)
 	}
 
-	// add pipeline steps. 1 pipeline step per stage, at the moment
-	stepStages := make([]*backend_types.Stage, 0)
+	// add pipeline steps
+	stepStages := make([]*backend_types.Stage, 0, 1)
 	var stage *backend_types.Stage
 	var group string
 	steps := make(map[string]*stepWithDependsOn)
@@ -256,6 +256,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			return nil, err
 		}
 
+		// create a new stage if current step is in a new group compared to last one
 		if stage == nil || group != container.Group || container.Group == "" {
 			group = container.Group
 
