@@ -29,7 +29,7 @@ const FeatureList = [
   },
   {
     title: 'Multi workflows',
-    Svg: require('../../static/img/feat-multipipelines.svg').default,
+    Svg: require('../../static/img/workflows.svg').default,
     description: (
       <>
         Woodpecker allows you to easily create multiple workflows for your project. They can even depend on each other.
