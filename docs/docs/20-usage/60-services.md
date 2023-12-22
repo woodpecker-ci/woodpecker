@@ -23,6 +23,7 @@ services:
 ```
 
 You can define a port and a protocol explicitly:
+
 ```yamlservices:
   database:
     image: mysql
