@@ -46,7 +46,7 @@ type ErrStepMissingDependency struct {
 }
 
 func (err *ErrStepMissingDependency) Error() string {
-	return fmt.Sprintf("step %s depends on unknown step %s", err.name, err.dep)
+	return fmt.Sprintf("step '%s' depends on unknown step '%s'", err.name, err.dep)
 }
 
 func (*ErrStepMissingDependency) Is(target error) bool {
@@ -96,6 +96,7 @@ func (c dagCompiler) compileByGroup() ([]*backend_types.Stage, error) {
 
 			curStage = new(backend_types.Stage)
 			curStage.Name = fmt.Sprintf("%s_stage_%v", c.prefix, s.position)
+			curStage.Alias = s.name
 			stages = append(stages, curStage)
 		}
 
