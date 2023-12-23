@@ -17,7 +17,7 @@
     "test": "echo 'No tests configured' && exit 0"
   },
   "dependencies": {
-    "@intlify/unplugin-vue-i18n": "^1.0.0",
+    "@intlify/unplugin-vue-i18n": "^2.0.0",
     "@kyvg/vue3-notification": "^3.0.0",
     "@vueuse/core": "^10.5.0",
     "ansi_up": "^6.0.0",
