@@ -1,18 +1,32 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package constraint
 
 import (
-	"errors"
 	"fmt"
+	"maps"
 	"path"
 	"strings"
 
-	"github.com/antonmedv/expr"
 	"github.com/bmatcuk/doublestar/v4"
-	"golang.org/x/exp/maps"
+	"github.com/expr-lang/expr"
+	"go.uber.org/multierr"
 	"gopkg.in/yaml.v3"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
-	yaml_base_types "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types/base"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
+	yamlBaseTypes "go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types/base"
 )
 
 type (
@@ -33,7 +47,7 @@ type (
 		Cron        List
 		Status      List
 		Matrix      Map
-		Local       yaml_base_types.BoolTrue
+		Local       yamlBaseTypes.BoolTrue
 		Path        Path
 		Evaluate    string `yaml:"evaluate,omitempty"`
 	}
@@ -230,11 +244,11 @@ func (c *List) Excludes(v string) bool {
 // UnmarshalYAML unmarshals the constraint.
 func (c *List) UnmarshalYAML(value *yaml.Node) error {
 	out1 := struct {
-		Include yaml_base_types.StringOrSlice
-		Exclude yaml_base_types.StringOrSlice
+		Include yamlBaseTypes.StringOrSlice
+		Exclude yamlBaseTypes.StringOrSlice
 	}{}
 
-	var out2 yaml_base_types.StringOrSlice
+	var out2 yamlBaseTypes.StringOrSlice
 
 	err1 := value.Decode(&out1)
 	err2 := value.Decode(&out2)
@@ -247,7 +261,7 @@ func (c *List) UnmarshalYAML(value *yaml.Node) error {
 
 	if err1 != nil && err2 != nil {
 		y, _ := yaml.Marshal(value)
-		return fmt.Errorf("Could not parse condition: %s: %w", y, errors.Join(err1, err2))
+		return fmt.Errorf("Could not parse condition: %s: %w", y, multierr.Append(err1, err2))
 	}
 
 	return nil
@@ -261,7 +275,7 @@ func (c *Map) Match(params map[string]string) bool {
 		return true
 	}
 
-	// exclusions are processed first. So we can include everything and then
+	// Exclusions are processed first. So we can include everything and then
 	// selectively include others.
 	if len(c.Exclude) != 0 {
 		var matches int
@@ -284,7 +298,7 @@ func (c *Map) Match(params map[string]string) bool {
 }
 
 // UnmarshalYAML unmarshal the constraint map.
-func (c *Map) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (c *Map) UnmarshalYAML(unmarshal func(any) error) error {
 	out1 := struct {
 		Include map[string]string
 		Exclude map[string]string
@@ -309,12 +323,12 @@ func (c *Map) UnmarshalYAML(unmarshal func(interface{}) error) error {
 // UnmarshalYAML unmarshal the constraint.
 func (c *Path) UnmarshalYAML(value *yaml.Node) error {
 	out1 := struct {
-		Include       yaml_base_types.StringOrSlice `yaml:"include,omitempty"`
-		Exclude       yaml_base_types.StringOrSlice `yaml:"exclude,omitempty"`
-		IgnoreMessage string                        `yaml:"ignore_message,omitempty"`
+		Include       yamlBaseTypes.StringOrSlice `yaml:"include,omitempty"`
+		Exclude       yamlBaseTypes.StringOrSlice `yaml:"exclude,omitempty"`
+		IgnoreMessage string                      `yaml:"ignore_message,omitempty"`
 	}{}
 
-	var out2 yaml_base_types.StringOrSlice
+	var out2 yamlBaseTypes.StringOrSlice
 
 	err1 := value.Decode(&out1)
 	err2 := value.Decode(&out2)

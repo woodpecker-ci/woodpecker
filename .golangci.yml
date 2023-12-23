@@ -1,16 +1,19 @@
 linters-settings:
   gofmt:
     simplify: true
+    rewrite-rules:
+      - pattern: interface{}
+        replacement: any
   misspell:
     locale: US
   gofumpt:
-    lang-version: "1.20"
     extra-rules: true
   forbidigo:
     forbid:
       - context\.WithCancel$
       - ^print.*$
       - panic
+      - ^log.Fatal().*$
   errorlint:
     errorf-multi: true
 
@@ -33,10 +36,10 @@ linters:
     - gofumpt
     - errorlint
     - forbidigo
+    - zerologlint
 
 run:
   timeout: 5m
-  go: '1.20'
 
 issues:
   exclude-rules:
@@ -46,7 +49,11 @@ issues:
         - staticcheck
         - revive
 
-    # let cli use print and panic
-    - path: "cmd/*|cli/*"
+    # let cli use print and panic and log.Fatal()
+    - path: 'cmd/*|cli/*'
+      linters:
+        - forbidigo
+    # allow some setup functions to use log.Fatal()
+    - path: 'server/web/web.go|server/plugins/encryption/tink_keyset_watcher.go'
       linters:
         - forbidigo

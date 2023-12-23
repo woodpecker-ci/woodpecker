@@ -1,3 +1,17 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package types
 
 import (
@@ -5,10 +19,10 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/constraint"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types/base"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/utils"
-	"github.com/woodpecker-ci/woodpecker/shared/constant"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/constraint"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types/base"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/utils"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
 )
 
 type (
@@ -19,20 +33,21 @@ type (
 
 	// Container defines a container.
 	Container struct {
-		BackendOptions BackendOptions         `yaml:"backend_options,omitempty"`
-		Commands       base.StringOrSlice     `yaml:"commands,omitempty"`
-		Detached       bool                   `yaml:"detach,omitempty"`
-		Directory      string                 `yaml:"directory,omitempty"`
-		Environment    base.SliceOrMap        `yaml:"environment,omitempty"`
-		Failure        string                 `yaml:"failure,omitempty"`
-		Group          string                 `yaml:"group,omitempty"`
-		Image          string                 `yaml:"image,omitempty"`
-		Name           string                 `yaml:"name,omitempty"`
-		Pull           bool                   `yaml:"pull,omitempty"`
-		Secrets        Secrets                `yaml:"secrets,omitempty"`
-		Settings       map[string]interface{} `yaml:"settings"`
-		Volumes        Volumes                `yaml:"volumes,omitempty"`
-		When           constraint.When        `yaml:"when,omitempty"`
+		BackendOptions BackendOptions     `yaml:"backend_options,omitempty"`
+		Commands       base.StringOrSlice `yaml:"commands,omitempty"`
+		Detached       bool               `yaml:"detach,omitempty"`
+		Directory      string             `yaml:"directory,omitempty"`
+		Environment    base.SliceOrMap    `yaml:"environment,omitempty"`
+		Failure        string             `yaml:"failure,omitempty"`
+		Group          string             `yaml:"group,omitempty"`
+		Image          string             `yaml:"image,omitempty"`
+		Name           string             `yaml:"name,omitempty"`
+		Pull           bool               `yaml:"pull,omitempty"`
+		Secrets        Secrets            `yaml:"secrets,omitempty"`
+		Settings       map[string]any     `yaml:"settings"`
+		Volumes        Volumes            `yaml:"volumes,omitempty"`
+		When           constraint.When    `yaml:"when,omitempty"`
+		Ports          []base.StringOrInt `yaml:"ports,omitempty"`
 
 		// Docker Specific
 		Privileged bool `yaml:"privileged,omitempty"`

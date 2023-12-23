@@ -23,6 +23,8 @@ import (
 	"net/http"
 	"net/url"
 
+	shared_utils "go.woodpecker-ci.org/woodpecker/v2/shared/utils"
+
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/bitbucket"
 )
@@ -37,14 +39,15 @@ const (
 	pathUser          = "%s/2.0/user/"
 	pathEmails        = "%s/2.0/user/emails"
 	pathPermissions   = "%s/2.0/user/permissions/repositories?q=repository.full_name=%q"
-	pathWorkspace     = "%s/2.0/workspaces/?%s"
+	pathWorkspaces    = "%s/2.0/workspaces/?%s"
+	pathWorkspace     = "%s/2.0/workspaces/%s"
 	pathRepo          = "%s/2.0/repositories/%s/%s"
 	pathRepos         = "%s/2.0/repositories/%s?%s"
 	pathHook          = "%s/2.0/repositories/%s/%s/hooks/%s"
 	pathHooks         = "%s/2.0/repositories/%s/%s/hooks?%s"
 	pathSource        = "%s/2.0/repositories/%s/%s/src/%s/%s"
 	pathStatus        = "%s/2.0/repositories/%s/%s/commit/%s/statuses/build"
-	pathBranches      = "%s/2.0/repositories/%s/%s/refs/branches"
+	pathBranches      = "%s/2.0/repositories/%s/%s/refs/branches?%s"
 	pathOrgPerms      = "%s/2.0/workspaces/%s/permissions?%s"
 	pathPullRequests  = "%s/2.0/repositories/%s/%s/pullrequests"
 	pathBranchCommits = "%s/2.0/repositories/%s/%s/commits/%s"
@@ -90,7 +93,7 @@ func (c *Client) ListEmail() (*EmailResp, error) {
 
 func (c *Client) ListWorkspaces(opts *ListWorkspacesOpts) (*WorkspacesResp, error) {
 	out := new(WorkspacesResp)
-	uri := fmt.Sprintf(pathWorkspace, c.base, opts.Encode())
+	uri := fmt.Sprintf(pathWorkspaces, c.base, opts.Encode())
 	_, err := c.do(uri, get, nil, out)
 	return out, err
 }
@@ -110,21 +113,13 @@ func (c *Client) ListRepos(workspace string, opts *ListOpts) (*RepoResp, error) 
 }
 
 func (c *Client) ListReposAll(workspace string) ([]*Repo, error) {
-	page := 1
-	var repos []*Repo
-
-	for {
+	return shared_utils.Paginate(func(page int) ([]*Repo, error) {
 		resp, err := c.ListRepos(workspace, &ListOpts{Page: page, PageLen: 100})
 		if err != nil {
-			return repos, err
+			return nil, err
 		}
-		repos = append(repos, resp.Values...)
-		if len(resp.Next) == 0 {
-			break
-		}
-		page = resp.Page + 1
-	}
-	return repos, nil
+		return resp.Values, nil
+	})
 }
 
 func (c *Client) FindHook(owner, name, id string) (*Hook, error) {
@@ -178,9 +173,9 @@ func (c *Client) GetPermission(fullName string) (*RepoPerm, error) {
 	return out.Values[0], nil
 }
 
-func (c *Client) ListBranches(owner, name string) ([]*Branch, error) {
+func (c *Client) ListBranches(owner, name string, opts *ListOpts) ([]*Branch, error) {
 	out := new(BranchResp)
-	uri := fmt.Sprintf(pathBranches, c.base, owner, name)
+	uri := fmt.Sprintf(pathBranches, c.base, owner, name, opts.Encode())
 	_, err := c.do(uri, get, nil, out)
 	return out.Values, err
 }
@@ -244,7 +239,7 @@ func (c *Client) GetRepoFiles(owner, name, revision, path string, page *string) 
 	return out, err
 }
 
-func (c *Client) do(rawurl, method string, in, out interface{}) (*string, error) {
+func (c *Client) do(rawurl, method string, in, out any) (*string, error) {
 	uri, err := url.Parse(rawurl)
 	if err != nil {
 		return nil, err

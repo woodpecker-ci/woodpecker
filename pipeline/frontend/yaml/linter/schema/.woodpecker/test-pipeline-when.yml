@@ -1,0 +1,20 @@
+version: 1
+
+when:
+  - branch: [main, deploy]
+    event: push
+    path:
+      - 'folder/**'
+      - '**/*.c'
+  - tag: 'v**'
+    event: tag
+  - event: cron
+    cron:
+      include:
+        - hello
+
+steps:
+  echo:
+    image: alpine
+    commands:
+      - echo "test"

@@ -1,3 +1,17 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package base
 
 import (
@@ -21,7 +35,7 @@ func TestStringorIntYaml(t *testing.T) {
 		assert.Equal(t, StringOrInt(10), s.Foo)
 
 		d, err := yaml.Marshal(&s)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 
 		s2 := StructStringorInt{}
 		assert.NoError(t, yaml.Unmarshal(d, &s2))
@@ -43,7 +57,7 @@ func TestStringOrSliceYaml(t *testing.T) {
 	assert.Equal(t, StringOrSlice{"bar", "baz"}, s.Foo)
 
 	d, err := yaml.Marshal(&s)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	s2 := StructStringOrSlice{}
 	assert.NoError(t, yaml.Unmarshal(d, &s2))
@@ -65,7 +79,7 @@ func TestSliceOrMapYaml(t *testing.T) {
 	assert.Equal(t, SliceOrMap{"bar": "baz", "far": "faz"}, s.Foos)
 
 	d, err := yaml.Marshal(&s)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	s2 := StructSliceorMap{}
 	assert.NoError(t, yaml.Unmarshal(d, &s2))
@@ -92,7 +106,7 @@ func TestStr2SliceOrMapPtrMap(t *testing.T) {
 		Bars: []string{},
 	}}
 	d, err := yaml.Marshal(&s)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	s2 := map[string]*StructSliceorMap{}
 	assert.NoError(t, yaml.Unmarshal(d, &s2))

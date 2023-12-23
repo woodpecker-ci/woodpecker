@@ -15,7 +15,7 @@
 package datastore
 
 import (
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 
 	"xorm.io/builder"
 )

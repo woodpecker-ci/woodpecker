@@ -1,8 +1,12 @@
 {
+  "api": "API",
   "back": "Terug",
-  "color_scheme_dark": "Wissel naar lichte modus",
-  "color_scheme_light": "Wissel naar donkere modus",
+  "cancel": "Annuleren",
+  "docs": "Documentatie",
   "documentation_for": "Documentatie voor \"{topic}\"",
+  "errors": {
+    "not_found": "Object kon niet op de server gevonden worden"
+  },
   "login": "Inloggen",
   "logout": "Uitloggen",
   "not_found": {
@@ -10,7 +14,23 @@
     "not_found": "Whoa 404, of wij hebben iets gesloopt of je hebt een typfoutje gemaakt :-/"
   },
   "password": "Wachtwoord",
+  "pipeline_feed": "Pipeline feed",
   "repo": {
+    "activity": "Activiteit",
+    "add": "Repository toevoegen",
+    "branches": "Branches",
+    "deploy_pipeline": {
+      "enter_target": "Doelomgeving deployment",
+      "title": "Voer deployment event uit voor de huidige pipeline #{pipelineId}",
+      "trigger": "Rol uit",
+      "variables": {
+        "add": "Voeg variabele toe",
+        "desc": "Specificeer additionele variabelen voor gebruik in je pipeline. Variabelen met een bestaande naam worden overschreven.",
+        "name": "Variabele naam",
+        "title": "Additionele pipeline variabelen",
+        "value": "Variabele waarde"
+      }
+    },
     "enable": {
       "enable": "Activeer",
       "enabled": "Al ingeschakeld",
@@ -21,9 +41,17 @@
     "manual_pipeline": {
       "select_branch": "Selecteer branch",
       "title": "Activeer een handmatige pipeline run",
-      "trigger": "Pipeline uitvoeren"
+      "trigger": "Pipeline uitvoeren",
+      "variables": {
+        "add": "Voeg variabele toe",
+        "desc": "Specificeer aanvullende variabelen om in je pipeline te gebruiken. Variabelen met dezelfde naam worden overschreven.",
+        "name": "Variabele naam",
+        "title": "Aanvullende variabelen",
+        "value": "Variabele waarde"
+      }
     },
     "not_allowed": "Je hebt geen toegang tot dit archief",
+    "pull_requests": "Pull verzoeken",
     "settings": {
       "general": {
         "general": "Algemeen",
@@ -66,9 +94,17 @@
     },
     "user_none": "Deze organisatie / gebruiker heeft nog geen projecten."
   },
+  "repos": "Repos",
+  "repositories": "Repositories",
   "search": "Zoeken…",
   "time": {
-    "not_started": "nog niet gestart"
+    "days_short": "d",
+    "hours_short": "u",
+    "min_short": "min",
+    "not_started": "nog niet gestart",
+    "sec_short": "sec",
+    "tmpl": "DD.MM.YYYY, HH:mm z",
+    "weeks_short": "w"
   },
   "unknown_error": "Er is een onbekende fout opgetreden",
   "url": "URL",

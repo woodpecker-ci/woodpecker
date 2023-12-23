@@ -1,28 +1,18 @@
 <template>
-  <Panel>
-    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-wp-background-100">
-      <div class="ml-2">
-        <h1 class="text-xl text-wp-text-100">{{ $t('repo.settings.registries.creds') }}</h1>
-        <p class="text-sm text-wp-text-alt-100">
-          {{ $t('repo.settings.registries.desc') }}
-          <DocsLink :topic="$t('repo.settings.registries.creds')" url="docs/usage/registries" />
-        </p>
-      </div>
+  <Settings
+    :title="$t('repo.settings.registries.creds')"
+    :desc="$t('repo.settings.registries.desc')"
+    docs-url="docs/usage/registries"
+  >
+    <template #titleActions>
       <Button
         v-if="selectedRegistry"
-        class="ml-auto"
         start-icon="back"
         :text="$t('repo.settings.registries.show')"
         @click="selectedRegistry = undefined"
       />
-      <Button
-        v-else
-        class="ml-auto"
-        start-icon="plus"
-        :text="$t('repo.settings.registries.add')"
-        @click="selectedRegistry = {}"
-      />
-    </div>
+      <Button v-else start-icon="plus" :text="$t('repo.settings.registries.add')" @click="selectedRegistry = {}" />
+    </template>
 
     <div v-if="!selectedRegistry" class="space-y-4 text-wp-text-100">
       <ListItem
@@ -51,9 +41,10 @@
 
     <div v-else class="space-y-4">
       <form @submit.prevent="createRegistry">
-        <InputField :label="$t('repo.settings.registries.address.address')">
+        <InputField v-slot="{ id }" :label="$t('repo.settings.registries.address.address')">
           <!-- TODO: check input field Address is a valid address -->
           <TextField
+            :id="id"
             v-model="selectedRegistry.address"
             :placeholder="$t('repo.settings.registries.address.placeholder')"
             required
@@ -61,12 +52,12 @@
           />
         </InputField>
 
-        <InputField :label="$t('username')">
-          <TextField v-model="selectedRegistry.username" :placeholder="$t('username')" required />
+        <InputField v-slot="{ id }" :label="$t('username')">
+          <TextField :id="id" v-model="selectedRegistry.username" :placeholder="$t('username')" required />
         </InputField>
 
-        <InputField :label="$t('password')">
-          <TextField v-model="selectedRegistry.password" :placeholder="$t('password')" required />
+        <InputField v-slot="{ id }" :label="$t('password')">
+          <TextField :id="id" v-model="selectedRegistry.password" :placeholder="$t('password')" required />
         </InputField>
 
         <div class="flex gap-2">
@@ -80,7 +71,7 @@
         </div>
       </form>
     </div>
-  </Panel>
+  </Settings>
 </template>
 
 <script lang="ts" setup>
@@ -88,12 +79,11 @@ import { computed, inject, Ref, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
-import DocsLink from '~/components/atomic/DocsLink.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import InputField from '~/components/form/InputField.vue';
 import TextField from '~/components/form/TextField.vue';
-import Panel from '~/components/layout/Panel.vue';
+import Settings from '~/components/layout/Settings.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';

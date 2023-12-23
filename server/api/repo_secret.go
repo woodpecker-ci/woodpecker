@@ -20,9 +20,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
 )
 
 // GetSecret
@@ -42,7 +42,7 @@ func GetSecret(c *gin.Context) {
 	)
 	secret, err := server.Config.Services.Secrets.SecretFind(repo, name)
 	if err != nil {
-		handleDbGetError(c, err)
+		handleDbError(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, secret.Copy())
@@ -67,12 +67,11 @@ func PostSecret(c *gin.Context) {
 		return
 	}
 	secret := &model.Secret{
-		RepoID:      repo.ID,
-		Name:        strings.ToLower(in.Name),
-		Value:       in.Value,
-		Events:      in.Events,
-		Images:      in.Images,
-		PluginsOnly: in.PluginsOnly,
+		RepoID: repo.ID,
+		Name:   strings.ToLower(in.Name),
+		Value:  in.Value,
+		Events: in.Events,
+		Images: in.Images,
 	}
 	if err := secret.Validate(); err != nil {
 		c.String(http.StatusUnprocessableEntity, "Error inserting secret. %s", err)
@@ -111,7 +110,7 @@ func PatchSecret(c *gin.Context) {
 
 	secret, err := server.Config.Services.Secrets.SecretFind(repo, name)
 	if err != nil {
-		handleDbGetError(c, err)
+		handleDbError(c, err)
 		return
 	}
 	if in.Value != "" {
@@ -123,7 +122,6 @@ func PatchSecret(c *gin.Context) {
 	if in.Images != nil {
 		secret.Images = in.Images
 	}
-	secret.PluginsOnly = in.PluginsOnly
 
 	if err := secret.Validate(); err != nil {
 		c.String(http.StatusUnprocessableEntity, "Error updating secret. %s", err)
@@ -178,8 +176,8 @@ func DeleteSecret(c *gin.Context) {
 		name = c.Param("secret")
 	)
 	if err := server.Config.Services.Secrets.SecretDelete(repo, name); err != nil {
-		handleDbGetError(c, err)
+		handleDbError(c, err)
 		return
 	}
-	c.String(http.StatusNoContent, "")
+	c.Status(http.StatusNoContent)
 }

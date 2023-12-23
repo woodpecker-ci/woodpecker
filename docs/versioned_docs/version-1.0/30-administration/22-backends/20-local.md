@@ -6,11 +6,7 @@ The local backend will execute the pipelines on the local system without any iso
 
 :::note
 This backend is still pretty new and can not be treated as stable. Its
-implementation and configuration can change at any time. Binary releases of the
-agent will be available with the release of the [1.0.0
-milestone](https://github.com/woodpecker-ci/woodpecker/milestone/4), so for now
-you must compile the agent by yourself, to get the local backend functionality.
-<!-- TODO: remove the self-compile note after the release of the agent -->
+implementation and configuration can change at any time.
 :::
 
 Since the code runs directly in the same context as the agent (same user, same
@@ -94,9 +90,8 @@ steps:
 
 ### Using labels to filter tasks
 
-You can use the [agent configuration
-options](../15-agent-config.md#woodpecker_filter_labels) and the
-[pipeline syntax](../../20-usage/20-pipeline-syntax.md#labels) to only run certain
+You can use the [agent configuration options](../15-agent-config.md#woodpecker_filter_labels)
+and the [pipeline syntax](../../20-usage/20-pipeline-syntax.md#labels) to only run certain
 pipelines on certain agents. Example:
 
 Define a `label` `type` with value `exec` for a particular agent:
@@ -119,4 +114,3 @@ labels:
 steps:
   [...]
 ```
-

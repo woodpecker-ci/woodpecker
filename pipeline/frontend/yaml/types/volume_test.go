@@ -1,3 +1,17 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package types
 
 import (
@@ -74,7 +88,7 @@ func TestMarshalVolumes(t *testing.T) {
 	}
 	for _, volume := range volumes {
 		bytes, err := yaml.Marshal(volume.volumes)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, volume.expected, string(bytes), "should be equal")
 	}
 }
@@ -137,7 +151,7 @@ func TestUnmarshalVolumes(t *testing.T) {
 	for _, volume := range volumes {
 		actual := &Volumes{}
 		err := yaml.Unmarshal([]byte(volume.yaml), actual)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, volume.expected, actual, "should be equal")
 	}
 }

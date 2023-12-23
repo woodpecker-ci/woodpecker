@@ -8,8 +8,11 @@ const FeatureList = [
     Svg: require('../../static/img/feat-opensource.svg').default,
     description: (
       <>
-        Woodpecker is and always will be totally free. As Woodpecker's <a href="https://github.com/woodpecker-ci/woodpecker" target="_blank">source code</a> is
-        open-source you can contribute to help evolving the project.
+        Woodpecker is and always will be totally free. As Woodpecker's{' '}
+        <a href="https://github.com/woodpecker-ci/woodpecker" target="_blank">
+          source code
+        </a>{' '}
+        is open-source you can contribute to help evolving the project.
       </>
     ),
   },
@@ -19,23 +22,24 @@ const FeatureList = [
     description: (
       <>
         Woodpecker uses docker containers to execute pipeline steps. If you need more than a normal docker image, you
-        can create plugins to extend the pipeline features. <a href="/docs/usage/plugins/plugins">How do plugins work?</a>
+        can create plugins to extend the pipeline features.{' '}
+        <a href="/docs/usage/plugins/plugins">How do plugins work?</a>
       </>
     ),
   },
   {
-    title: 'Multi pipelines',
-    Svg: require('../../static/img/feat-multipipelines.svg').default,
+    title: 'Multi workflows',
+    Svg: require('../../static/img/workflows.svg').default,
     description: (
       <>
-        Woodpecker allows you to easily create multiple pipelines for your project. They can even depend on each other.
-        Check out the <a href="/docs/usage/multi-pipeline">docs</a>
+        Woodpecker allows you to easily create multiple workflows for your project. They can even depend on each other.
+        Check out the <a href="/docs/usage/workflows">docs</a>
       </>
     ),
   },
 ];
 
-function Feature({Svg, title, description}) {
+function Feature({ Svg, title, description }) {
   return (
     <div className={clsx('col col--4')}>
       <div className="text--center">

@@ -15,19 +15,18 @@
 package api
 
 import (
-	"errors"
 	"net/http"
 	"strconv"
 	"strings"
 
 	"github.com/rs/zerolog/log"
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
-	"github.com/woodpecker-ci/woodpecker/server/store"
-	"github.com/woodpecker-ci/woodpecker/server/store/types"
 
 	"github.com/gin-gonic/gin"
+
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
 // GetOrg
@@ -50,11 +49,7 @@ func GetOrg(c *gin.Context) {
 
 	org, err := _store.OrgGet(orgID)
 	if err != nil {
-		if errors.Is(err, types.RecordNotExist) {
-			c.AbortWithStatus(http.StatusNotFound)
-			return
-		}
-		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		handleDbError(c, err)
 		return
 	}
 
@@ -91,11 +86,14 @@ func GetOrgPermissions(c *gin.Context) {
 		return
 	}
 
-	if (org.IsUser && org.Name == user.Login) || user.Admin {
+	if (org.IsUser && org.Name == user.Login) || (user.Admin && !org.IsUser) {
 		c.JSON(http.StatusOK, &model.OrgPerm{
 			Member: true,
 			Admin:  true,
 		})
+		return
+	} else if org.IsUser {
+		c.JSON(http.StatusOK, &model.OrgPerm{})
 		return
 	}
 
@@ -124,12 +122,7 @@ func LookupOrg(c *gin.Context) {
 
 	org, err := _store.OrgFindByName(orgFullName)
 	if err != nil {
-		if errors.Is(err, types.RecordNotExist) {
-			c.AbortWithStatus(http.StatusNotFound)
-			return
-		}
-
-		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		handleDbError(c, err)
 		return
 	}
 
@@ -148,7 +141,7 @@ func LookupOrg(c *gin.Context) {
 			perm, err := server.Config.Services.Membership.Get(c, user, org.Name)
 			if err != nil {
 				log.Error().Msgf("Failed to check membership: %v", err)
-				c.String(http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+				c.Status(http.StatusInternalServerError)
 				return
 			}
 

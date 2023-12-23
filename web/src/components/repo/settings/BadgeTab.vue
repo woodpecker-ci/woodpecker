@@ -1,14 +1,14 @@
 <template>
-  <Panel>
-    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-wp-background-100">
-      <h1 class="text-xl ml-2 text-wp-text-100">{{ $t('repo.settings.badge.badge') }}</h1>
-      <a v-if="badgeUrl" :href="badgeUrl" target="_blank" class="ml-auto">
+  <Settings :title="$t('repo.settings.badge.badge')">
+    <template #titleActions>
+      <a v-if="badgeUrl" :href="badgeUrl" target="_blank">
         <img :src="badgeUrl" />
       </a>
-    </div>
+    </template>
 
-    <InputField :label="$t('repo.settings.badge.type')">
+    <InputField v-slot="{ id }" :label="$t('repo.settings.badge.type')">
       <SelectField
+        :id="id"
         v-model="badgeType"
         :options="[
           {
@@ -27,8 +27,8 @@
         required
       />
     </InputField>
-    <InputField :label="$t('repo.settings.badge.branch')">
-      <SelectField v-model="branch" :options="branches" required />
+    <InputField v-slot="{ id }" :label="$t('repo.settings.badge.branch')">
+      <SelectField :id="id" v-model="branch" :options="branches" required />
     </InputField>
 
     <div v-if="badgeContent" class="flex flex-col space-y-4">
@@ -36,7 +36,7 @@
         <pre class="code-box">{{ badgeContent }}</pre>
       </div>
     </div>
-  </Panel>
+  </Settings>
 </template>
 
 <script lang="ts" setup>
@@ -46,7 +46,7 @@ import { computed, inject, onMounted, Ref, ref, watch } from 'vue';
 import { SelectOption } from '~/components/form/form.types';
 import InputField from '~/components/form/InputField.vue';
 import SelectField from '~/components/form/SelectField.vue';
-import Panel from '~/components/layout/Panel.vue';
+import Settings from '~/components/layout/Settings.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useConfig from '~/compositions/useConfig';
 import { usePaginate } from '~/compositions/usePaginate';

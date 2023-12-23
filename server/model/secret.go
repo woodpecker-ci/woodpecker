@@ -69,16 +69,13 @@ type SecretStore interface {
 
 // Secret represents a secret variable, such as a password or token.
 type Secret struct {
-	ID          int64          `json:"id"              xorm:"pk autoincr 'secret_id'"`
-	OrgID       int64          `json:"-"               xorm:"NOT NULL DEFAULT 0 UNIQUE(s) INDEX 'secret_org_id'"`
-	RepoID      int64          `json:"-"               xorm:"NOT NULL DEFAULT 0 UNIQUE(s) INDEX 'secret_repo_id'"`
-	Name        string         `json:"name"            xorm:"NOT NULL UNIQUE(s) INDEX 'secret_name'"`
-	Value       string         `json:"value,omitempty" xorm:"TEXT 'secret_value'"`
-	Images      []string       `json:"image"           xorm:"json 'secret_images'"`
-	PluginsOnly bool           `json:"plugins_only"    xorm:"secret_plugins_only"`
-	Events      []WebhookEvent `json:"event"           xorm:"json 'secret_events'"`
-	SkipVerify  bool           `json:"-"               xorm:"secret_skip_verify"`
-	Conceal     bool           `json:"-"               xorm:"secret_conceal"`
+	ID     int64          `json:"id"              xorm:"pk autoincr 'secret_id'"`
+	OrgID  int64          `json:"org_id"          xorm:"NOT NULL DEFAULT 0 UNIQUE(s) INDEX 'secret_org_id'"`
+	RepoID int64          `json:"repo_id"         xorm:"NOT NULL DEFAULT 0 UNIQUE(s) INDEX 'secret_repo_id'"`
+	Name   string         `json:"name"            xorm:"NOT NULL UNIQUE(s) INDEX 'secret_name'"`
+	Value  string         `json:"value,omitempty" xorm:"TEXT 'secret_value'"`
+	Images []string       `json:"images"          xorm:"json 'secret_images'"`
+	Events []WebhookEvent `json:"events"          xorm:"json 'secret_events'"`
 } //	@name Secret
 
 // TableName return database table name for xorm
@@ -92,13 +89,18 @@ func (s *Secret) BeforeInsert() {
 }
 
 // Global secret.
-func (s Secret) Global() bool {
+func (s Secret) IsGlobal() bool {
 	return s.RepoID == 0 && s.OrgID == 0
 }
 
 // Organization secret.
-func (s Secret) Organization() bool {
+func (s Secret) IsOrganization() bool {
 	return s.RepoID == 0 && s.OrgID != 0
+}
+
+// Repository secret.
+func (s Secret) IsRepository() bool {
+	return s.RepoID != 0 && s.OrgID == 0
 }
 
 // Match returns true if an image and event match the restricted list.
@@ -115,10 +117,14 @@ func (s *Secret) Match(event WebhookEvent) bool {
 }
 
 var validDockerImageString = regexp.MustCompile(
-	`^([\w\d\-_\.\/]*` + // optional url prefix
-		`[\w\d\-_]+` + // image name
-		`)+` +
-		`(:[\w\d\-_]+)?$`, // optional image tag
+	`^(` +
+		`[\w\d\-_\.]+` + // hostname
+		`(:\d+)?` + // optional port
+		`/)?` + // optional hostname + port
+		`([\w\d\-_\.][\w\d\-_\.\/]*/)?` + // optional url prefix
+		`([\w\d\-_]+)` + // image name
+		`(:[\w\d\-_]+)?` + // optional image tag
+		`$`,
 )
 
 // Validate validates the required fields and formats.
@@ -154,13 +160,12 @@ func (s *Secret) Validate() error {
 // Copy makes a copy of the secret without the value.
 func (s *Secret) Copy() *Secret {
 	return &Secret{
-		ID:          s.ID,
-		OrgID:       s.OrgID,
-		RepoID:      s.RepoID,
-		Name:        s.Name,
-		Images:      s.Images,
-		PluginsOnly: s.PluginsOnly,
-		Events:      sortEvents(s.Events),
+		ID:     s.ID,
+		OrgID:  s.OrgID,
+		RepoID: s.RepoID,
+		Name:   s.Name,
+		Images: s.Images,
+		Events: sortEvents(s.Events),
 	}
 }
 

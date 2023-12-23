@@ -3,7 +3,7 @@
     v-if="repo && repoPermissions && $route.meta.repoHeader"
     v-model:activeTab="activeTab"
     enable-tabs
-    disable-hash-mode
+    disable-tab-url-hash-mode
   >
     <template #title>
       <span class="flex">
@@ -14,10 +14,10 @@
       </span>
     </template>
     <template #titleActions>
-      <a v-if="badgeUrl" :href="badgeUrl" target="_blank" class="ml-2">
+      <a v-if="badgeUrl" :href="badgeUrl" target="_blank">
         <img :src="badgeUrl" />
       </a>
-      <IconButton :href="repo.link_url" :title="$t('repo.open_in_forge')" :icon="forge ?? 'repo'" />
+      <IconButton :href="repo.forge_url" :title="$t('repo.open_in_forge')" :icon="forge ?? 'repo'" />
       <IconButton
         v-if="repoPermissions.admin"
         :to="{ name: 'repo-settings' }"
@@ -37,11 +37,7 @@
 
     <Tab id="activity" :title="$t('repo.activity')" />
     <Tab id="branches" :title="$t('repo.branches')" />
-    <Tab
-      v-if="config.forge === 'gitea' || config.forge === 'github' || config.forge === 'gitlab'"
-      id="pull_requests"
-      :title="$t('repo.pull_requests')"
-    />
+    <Tab id="pull_requests" :title="$t('repo.pull_requests')" />
 
     <router-view />
   </Scaffold>

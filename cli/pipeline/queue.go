@@ -21,8 +21,8 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
 var pipelineQueueCmd = &cli.Command{
@@ -30,9 +30,7 @@ var pipelineQueueCmd = &cli.Command{
 	Usage:     "show pipeline queue",
 	ArgsUsage: " ",
 	Action:    pipelineQueue,
-	Flags: append(common.GlobalFlags,
-		common.FormatFlag(tmplPipelineQueue),
-	),
+	Flags:     []cli.Flag{common.FormatFlag(tmplPipelineQueue)},
 }
 
 func pipelineQueue(c *cli.Context) error {

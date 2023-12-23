@@ -19,7 +19,7 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/woodpecker-ci/woodpecker/shared/constant"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
 )
 
 var flags = []cli.Flag{
@@ -74,7 +74,7 @@ var flags = []cli.Flag{
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_BACKEND_HTTP_PROXY", "HTTP_PROXY", "http_proxy"},
-		Usage:   "if set, pass the environment variable down as \"NO_PROXY\" to steps",
+		Usage:   "if set, pass the environment variable down as \"HTTP_PROXY\" to steps",
 		Name:    "backend-http-proxy",
 	},
 	&cli.StringFlag{
@@ -130,7 +130,7 @@ var flags = []cli.Flag{
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"CI_SYSTEM_URL"},
-		Name:    "system-link",
+		Name:    "system-url",
 		Value:   "https://github.com/woodpecker-ci/woodpecker",
 	},
 	&cli.StringFlag{
@@ -144,11 +144,15 @@ var flags = []cli.Flag{
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"CI_REPO_URL"},
-		Name:    "repo-link",
+		Name:    "repo-url",
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"CI_REPO_CLONE_URL"},
 		Name:    "repo-clone-url",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"CI_REPO_CLONE_SSH_URL"},
+		Name:    "repo-clone-ssh-url",
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"CI_REPO_PRIVATE"},
@@ -189,7 +193,7 @@ var flags = []cli.Flag{
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"CI_PIPELINE_URL"},
-		Name:    "pipeline-link",
+		Name:    "pipeline-url",
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"CI_PIPELINE_TARGET"},
@@ -253,7 +257,7 @@ var flags = []cli.Flag{
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"CI_PREV_PIPELINE_URL"},
-		Name:    "prev-pipeline-link",
+		Name:    "prev-pipeline-url",
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"CI_PREV_COMMIT_SHA"},

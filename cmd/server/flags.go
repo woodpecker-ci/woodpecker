@@ -20,8 +20,8 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/woodpecker-ci/woodpecker/cmd/common"
-	"github.com/woodpecker-ci/woodpecker/shared/constant"
+	"go.woodpecker-ci.org/woodpecker/v2/cmd/common"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
 )
 
 var flags = append([]cli.Flag{
@@ -38,17 +38,12 @@ var flags = append([]cli.Flag{
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_HOST"},
 		Name:    "server-host",
-		Usage:   "server fully qualified url (<scheme>://<host>)",
+		Usage:   "server fully qualified url (<scheme>://<host>[/<prefixpath>])",
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_WEBHOOK_HOST"},
 		Name:    "server-webhook-host",
-		Usage:   "server fully qualified url for forge's Webhooks (<scheme>://<host>)",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_ROOT_PATH", "WOODPECKER_ROOT_URL"},
-		Name:    "root-path",
-		Usage:   "server url root (used for statics loading when having a url path prefix)",
+		Usage:   "server fully qualified url for forge's Webhooks (<scheme>://<host>[/<prefixpath>])",
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_SERVER_ADDR"},
@@ -160,12 +155,6 @@ var flags = append([]cli.Flag{
 		Usage:   "The maximum time in minutes you can set in the repo settings before a pipeline gets killed",
 		Value:   120,
 	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_DOCS"},
-		Name:    "docs",
-		Usage:   "link to user documentation",
-		Value:   "https://woodpecker-ci.org/",
-	},
 	&cli.DurationFlag{
 		EnvVars: []string{"WOODPECKER_SESSION_EXPIRES"},
 		Name:    "session-expires",
@@ -250,7 +239,7 @@ var flags = append([]cli.Flag{
 		EnvVars: []string{"WOODPECKER_STATUS_CONTEXT_FORMAT"},
 		Name:    "status-context-format",
 		Usage:   "status context format",
-		Value:   "{{ .context }}/{{ .event }}/{{ .workflow }}",
+		Value:   "{{ .context }}/{{ .event }}/{{ .workflow }}{{if not (eq .axis_id 0)}}/{{.axis_id}}{{end}}",
 	},
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_MIGRATIONS_ALLOW_LONG"},
@@ -262,6 +251,11 @@ var flags = append([]cli.Flag{
 		Name:    "enable-swagger",
 		Value:   true,
 	},
+	&cli.StringSliceFlag{
+		EnvVars: []string{"WOODPECKER_ADDONS"},
+		Name:    "addons",
+		Usage:   "list of addon files",
+	},
 	//
 	// backend options for pipeline compiler
 	//
@@ -272,7 +266,7 @@ var flags = append([]cli.Flag{
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_BACKEND_HTTP_PROXY", "HTTP_PROXY", "http_proxy"},
-		Usage:   "if set, pass the environment variable down as \"NO_PROXY\" to steps",
+		Usage:   "if set, pass the environment variable down as \"HTTP_PROXY\" to steps",
 		Name:    "backend-http-proxy",
 	},
 	&cli.StringFlag{
@@ -450,7 +444,7 @@ var flags = append([]cli.Flag{
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_DEV_OAUTH_HOST"},
 		Name:    "server-dev-oauth-host",
-		Usage:   "server fully qualified url (<scheme>://<host>) used for oauth redirect (used for development)",
+		Usage:   "server fully qualified url (<scheme>://<host>[/<prefixpath>]) used for oauth redirect (used for development)",
 		Value:   "",
 		Hidden:  true,
 	},

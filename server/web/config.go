@@ -22,10 +22,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
-	"github.com/woodpecker-ci/woodpecker/shared/token"
-	"github.com/woodpecker-ci/woodpecker/version"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/token"
+	"go.woodpecker-ci.org/woodpecker/v2/version"
 )
 
 func Config(c *gin.Context) {
@@ -39,10 +39,9 @@ func Config(c *gin.Context) {
 		).Sign(user.Hash)
 	}
 
-	configData := map[string]interface{}{
+	configData := map[string]any{
 		"user":           user,
 		"csrf":           csrf,
-		"docs":           server.Config.Server.Docs,
 		"version":        version.String(),
 		"forge":          server.Config.Services.Forge.Name(),
 		"root_path":      server.Config.Server.RootPath,
@@ -51,7 +50,7 @@ func Config(c *gin.Context) {
 
 	// default func map with json parser.
 	funcMap := template.FuncMap{
-		"json": func(v interface{}) string {
+		"json": func(v any) string {
 			a, _ := json.Marshal(v)
 			return string(a)
 		},
@@ -73,7 +72,6 @@ const configTemplate = `
 window.WOODPECKER_USER = {{ json .user }};
 window.WOODPECKER_CSRF = "{{ .csrf }}";
 window.WOODPECKER_VERSION = "{{ .version }}";
-window.WOODPECKER_DOCS = "{{ .docs }}";
 window.WOODPECKER_FORGE = "{{ .forge }}";
 window.WOODPECKER_ROOT_PATH = "{{ .root_path }}";
 window.WOODPECKER_ENABLE_SWAGGER = {{ .enable_swagger }};

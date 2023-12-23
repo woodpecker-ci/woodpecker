@@ -18,7 +18,7 @@ package store
 //go:generate mockery --name Store --output mocks --case underscore
 
 import (
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 // TODO: CreateX func should return new object to not indirect let storage change an existing object (alter ID etc...)
@@ -93,6 +93,8 @@ type Store interface {
 	CreatePipeline(*model.Pipeline, ...*model.Step) error
 	// UpdatePipeline updates a pipeline.
 	UpdatePipeline(*model.Pipeline) error
+	// DeletePipeline deletes a pipeline.
+	DeletePipeline(*model.Pipeline) error
 
 	// Feeds
 	UserFeed(*model.User) ([]*model.Feed, error)
@@ -100,6 +102,7 @@ type Store interface {
 	// Repositories
 	RepoList(user *model.User, owned, active bool) ([]*model.Repo, error)
 	RepoListLatest(*model.User) ([]*model.Feed, error)
+	RepoListAll(active bool, p *model.ListOptions) ([]*model.Repo, error)
 
 	// Permissions
 	PermFind(user *model.User, repo *model.Repo) (*model.Perm, error)
@@ -140,7 +143,6 @@ type Store interface {
 	StepChild(*model.Pipeline, int, string) (*model.Step, error)
 	StepList(*model.Pipeline) ([]*model.Step, error)
 	StepUpdate(*model.Step) error
-	StepClear(*model.Pipeline) error
 	StepListFromWorkflowFind(*model.Workflow) ([]*model.Step, error)
 
 	// Logs
@@ -189,6 +191,7 @@ type Store interface {
 	OrgFindByName(string) (*model.Org, error)
 	OrgUpdate(*model.Org) error
 	OrgDelete(int64) error
+	OrgList(*model.ListOptions) ([]*model.Org, error)
 
 	// Org repos
 	OrgRepoList(*model.Org, *model.ListOptions) ([]*model.Repo, error)
@@ -196,5 +199,5 @@ type Store interface {
 	// Store operations
 	Ping() error
 	Close() error
-	Migrate() error
+	Migrate(bool) error
 }

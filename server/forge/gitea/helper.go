@@ -25,8 +25,8 @@ import (
 
 	"code.gitea.io/sdk/gitea"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
 // helper function that converts a Gitea repository to a Woodpecker repository.
@@ -43,9 +43,10 @@ func toRepo(from *gitea.Repository) *model.Repo {
 		Owner:         from.Owner.UserName,
 		FullName:      from.FullName,
 		Avatar:        avatar,
-		Link:          from.HTMLURL,
+		ForgeURL:      from.HTMLURL,
 		IsSCMPrivate:  from.Private || from.Owner.Visibility != gitea.VisibleTypePublic,
 		Clone:         from.CloneURL,
+		CloneSSH:      from.SSHURL,
 		Branch:        from.DefaultBranch,
 		Perm:          toPerm(from.Permissions),
 	}
@@ -91,7 +92,7 @@ func pipelineFromPush(hook *pushHook) *model.Pipeline {
 		Event:        model.EventPush,
 		Commit:       hook.After,
 		Ref:          hook.Ref,
-		Link:         link,
+		ForgeURL:     link,
 		Branch:       strings.TrimPrefix(hook.Ref, "refs/heads/"),
 		Message:      message,
 		Avatar:       avatar,
@@ -130,7 +131,7 @@ func pipelineFromTag(hook *pushHook) *model.Pipeline {
 		Event:     model.EventTag,
 		Commit:    hook.Sha,
 		Ref:       fmt.Sprintf("refs/tags/%s", hook.Ref),
-		Link:      fmt.Sprintf("%s/src/tag/%s", hook.Repo.HTMLURL, hook.Ref),
+		ForgeURL:  fmt.Sprintf("%s/src/tag/%s", hook.Repo.HTMLURL, hook.Ref),
 		Branch:    fmt.Sprintf("refs/tags/%s", hook.Ref),
 		Message:   fmt.Sprintf("created tag %s", hook.Ref),
 		Avatar:    avatar,
@@ -147,16 +148,16 @@ func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 		fixMalformedAvatar(hook.PullRequest.Poster.AvatarURL),
 	)
 	pipeline := &model.Pipeline{
-		Event:   model.EventPull,
-		Commit:  hook.PullRequest.Head.Sha,
-		Link:    hook.PullRequest.URL,
-		Ref:     fmt.Sprintf("refs/pull/%d/head", hook.Number),
-		Branch:  hook.PullRequest.Base.Ref,
-		Message: hook.PullRequest.Title,
-		Author:  hook.PullRequest.Poster.UserName,
-		Avatar:  avatar,
-		Sender:  hook.Sender.UserName,
-		Title:   hook.PullRequest.Title,
+		Event:    model.EventPull,
+		Commit:   hook.PullRequest.Head.Sha,
+		ForgeURL: hook.PullRequest.URL,
+		Ref:      fmt.Sprintf("refs/pull/%d/head", hook.Number),
+		Branch:   hook.PullRequest.Base.Ref,
+		Message:  hook.PullRequest.Title,
+		Author:   hook.PullRequest.Poster.UserName,
+		Avatar:   avatar,
+		Sender:   hook.Sender.UserName,
+		Title:    hook.PullRequest.Title,
 		Refspec: fmt.Sprintf("%s:%s",
 			hook.PullRequest.Head.Ref,
 			hook.PullRequest.Base.Ref,

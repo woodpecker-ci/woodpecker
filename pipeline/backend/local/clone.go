@@ -23,12 +23,10 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"runtime"
 	"strings"
 
 	"github.com/rs/zerolog/log"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
-	"github.com/woodpecker-ci/woodpecker/shared/constant"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
 
 // checkGitCloneCap check if we have the git binary on hand
@@ -56,44 +54,51 @@ func (e *local) setupClone(state *workflowState) error {
 
 	log.Info().Msg("no global 'plugin-git' installed, try to download for current workflow")
 	state.pluginGitBinary = filepath.Join(state.homeDir, "plugin-git")
-	if runtime.GOOS == "windows" {
+	if e.os == "windows" {
 		state.pluginGitBinary += ".exe"
 	}
-	return downloadLatestGitPluginBinary(state.pluginGitBinary)
+	return e.downloadLatestGitPluginBinary(state.pluginGitBinary)
 }
 
 // execClone executes a clone-step locally
 func (e *local) execClone(ctx context.Context, step *types.Step, state *workflowState, env []string) error {
-	if err := e.setupClone(state); err != nil {
-		return fmt.Errorf("setup clone step failed: %w", err)
+	if scm := step.Environment["CI_REPO_SCM"]; scm != "git" {
+		return fmt.Errorf("local backend can only clone from git repos, but this repo use '%s'", scm)
 	}
 
 	if err := checkGitCloneCap(); err != nil {
 		return fmt.Errorf("check for git clone capabilities failed: %w", err)
 	}
 
-	if step.Image != constant.DefaultCloneImage {
-		// TODO: write message into log
-		log.Warn().Msgf("clone step image '%s' does not match default git clone image. We ignore it assume git.", step.Image)
+	if err := e.setupClone(state); err != nil {
+		return fmt.Errorf("setup clone step failed: %w", err)
 	}
 
-	rmCmd, err := writeNetRC(step, state)
+	if !strings.Contains(step.Image, "plugin-git") {
+		log.Warn().Msgf("clone step image '%s' does not match default git clone image. We ignore it and use our plugin-git anyway.", step.Image)
+	}
+
+	rmCmd, err := e.writeNetRC(step, state)
 	if err != nil {
 		return err
 	}
 
-	env = append(env, "CI_WORKSPACE="+state.workspaceDir)
-
 	// Prepare command
 	var cmd *exec.Cmd
-	if runtime.GOOS == "windows" {
-		pwsh, err := exec.LookPath("powershell.exe")
-		if err != nil {
-			return err
+	if rmCmd != "" {
+		// if we have a netrc injected we have to make sure it's deleted in any case after clone was attempted
+		if e.os == "windows" {
+			pwsh, err := exec.LookPath("powershell.exe")
+			if err != nil {
+				return err
+			}
+			cmd = exec.CommandContext(ctx, pwsh, "-Command", fmt.Sprintf("%s ; $code=$? ; %s ; if (!$code) {[Environment]::Exit(1)}", state.pluginGitBinary, rmCmd))
+		} else {
+			cmd = exec.CommandContext(ctx, "/bin/sh", "-c", fmt.Sprintf("%s ; export code=$? ; %s ; exit $code", state.pluginGitBinary, rmCmd))
 		}
-		cmd = exec.CommandContext(ctx, pwsh, "-Command", fmt.Sprintf("%s ; $code=$? ; %s ; if (!$code) {[Environment]::Exit(1)}", state.pluginGitBinary, rmCmd))
 	} else {
-		cmd = exec.CommandContext(ctx, "/bin/sh", "-c", fmt.Sprintf("%s ; $code=$? ; %s ; exit $code", state.pluginGitBinary, rmCmd))
+		// if we have NO netrc, we can just exec the clone directly
+		cmd = exec.CommandContext(ctx, state.pluginGitBinary)
 	}
 	cmd.Env = env
 	cmd.Dir = state.workspaceDir
@@ -108,29 +113,26 @@ func (e *local) execClone(ctx context.Context, step *types.Step, state *workflow
 }
 
 // writeNetRC write a netrc file into the home dir of a given workflow state
-func writeNetRC(step *types.Step, state *workflowState) (string, error) {
+func (e *local) writeNetRC(step *types.Step, state *workflowState) (string, error) {
 	if step.Environment["CI_NETRC_MACHINE"] == "" {
+		log.Trace().Msg("no netrc to write")
 		return "", nil
 	}
 
 	file := filepath.Join(state.homeDir, ".netrc")
 	rmCmd := fmt.Sprintf("rm \"%s\"", file)
-	if runtime.GOOS == "windows" {
+	if e.os == "windows" {
 		file = filepath.Join(state.homeDir, "_netrc")
 		rmCmd = fmt.Sprintf("del \"%s\"", file)
 	}
 
-	return rmCmd, os.WriteFile(file, []byte(fmt.Sprintf(
-		netrcFile,
-		step.Environment["CI_NETRC_MACHINE"],
-		step.Environment["CI_NETRC_USERNAME"],
-		step.Environment["CI_NETRC_PASSWORD"],
-	)), 0o600)
+	log.Trace().Msgf("try to write netrc to '%s'", file)
+	return rmCmd, os.WriteFile(file, []byte(genNetRC(step.Environment)), 0o600)
 }
 
 // downloadLatestGitPluginBinary download the latest plugin-git binary based on runtime OS and Arch
 // and saves it to dest
-func downloadLatestGitPluginBinary(dest string) error {
+func (e *local) downloadLatestGitPluginBinary(dest string) error {
 	type asset struct {
 		Name               string
 		BrowserDownloadURL string `json:"browser_download_url"`
@@ -156,7 +158,7 @@ func downloadLatestGitPluginBinary(dest string) error {
 	}
 
 	for _, at := range rel.Assets {
-		if strings.Contains(at.Name, runtime.GOOS) && strings.Contains(at.Name, runtime.GOARCH) {
+		if strings.Contains(at.Name, e.os) && strings.Contains(at.Name, e.arch) {
 			resp2, err := http.Get(at.BrowserDownloadURL)
 			if err != nil {
 				return fmt.Errorf("could not download plugin-git: %w", err)
@@ -177,6 +179,7 @@ func downloadLatestGitPluginBinary(dest string) error {
 			}
 
 			// download successful
+			log.Trace().Msgf("download of 'plugin-git' to '%s' successful", dest)
 			return nil
 		}
 	}

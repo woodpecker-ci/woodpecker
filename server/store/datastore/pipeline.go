@@ -20,7 +20,7 @@ import (
 	"xorm.io/builder"
 	"xorm.io/xorm"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 func (s storage) GetPipeline(id int64) (*model.Pipeline, error) {
@@ -136,7 +136,11 @@ func (s storage) UpdatePipeline(pipeline *model.Pipeline) error {
 	return err
 }
 
-func deletePipeline(sess *xorm.Session, pipelineID int64) error {
+func (s storage) DeletePipeline(pipeline *model.Pipeline) error {
+	return s.deletePipeline(s.engine.NewSession(), pipeline.ID)
+}
+
+func (s storage) deletePipeline(sess *xorm.Session, pipelineID int64) error {
 	// delete related steps
 	for startSteps := 0; ; startSteps += perPage {
 		stepIDs := make([]int64, 0, perPage)
@@ -156,6 +160,5 @@ func deletePipeline(sess *xorm.Session, pipelineID int64) error {
 	if _, err := sess.Where("pipeline_id = ?", pipelineID).Delete(new(model.PipelineConfig)); err != nil {
 		return err
 	}
-	_, err := sess.ID(pipelineID).Delete(new(model.Pipeline))
-	return err
+	return wrapDelete(sess.ID(pipelineID).Delete(new(model.Pipeline)))
 }

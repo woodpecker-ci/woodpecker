@@ -1,5 +1,5 @@
 import { useInfiniteScroll } from '@vueuse/core';
-import { onMounted, Ref, ref, watch } from 'vue';
+import { onMounted, Ref, ref, UnwrapRef, watch } from 'vue';
 
 export async function usePaginate<T>(getSingle: (page: number) => Promise<T[]>): Promise<T[]> {
   let hasMore = true;
@@ -15,59 +15,71 @@ export async function usePaginate<T>(getSingle: (page: number) => Promise<T[]>):
   return result;
 }
 
-export function usePagination<T>(
-  _loadData: (page: number) => Promise<T[] | null>,
+export function usePagination<T, S = unknown>(
+  _loadData: (page: number, arg: S) => Promise<T[] | null>,
   isActive: () => boolean = () => true,
-  scrollElement = ref(document.getElementById('scroll-component')),
+  { scrollElement: _scrollElement, each: _each }: { scrollElement?: Ref<HTMLElement | null>; each?: S[] } = {},
 ) {
+  const scrollElement = _scrollElement ?? ref(document.getElementById('scroll-component'));
   const page = ref(1);
   const pageSize = ref(0);
   const hasMore = ref(true);
   const data = ref<T[]>([]) as Ref<T[]>;
   const loading = ref(false);
+  const each = ref(_each ?? []);
 
   async function loadData() {
-    loading.value = true;
-    const newData = await _loadData(page.value);
-    hasMore.value = newData !== null && newData.length >= pageSize.value;
-    if (newData !== null && newData.length !== 0) {
-      if (page.value === 1) {
-        pageSize.value = newData.length;
-        data.value = newData;
-      } else {
-        data.value.push(...newData);
-      }
-    } else if (page.value === 1) {
-      data.value = [];
-    } else {
-      hasMore.value = false;
+    if (loading.value === true || hasMore.value === false) {
+      return;
     }
+
+    loading.value = true;
+    const newData = (await _loadData(page.value, each.value?.[0] as S)) ?? [];
+    hasMore.value = newData.length >= pageSize.value && newData.length > 0;
+    if (newData.length > 0) {
+      data.value.push(...newData);
+    }
+
+    // last page and each has more
+    if (!hasMore.value && each.value.length > 0) {
+      // use next each element
+      each.value.shift();
+      page.value = 1;
+      pageSize.value = 0;
+      hasMore.value = each.value.length > 0;
+      if (hasMore.value) {
+        loading.value = false;
+        await loadData();
+      }
+    }
+    pageSize.value = newData.length;
     loading.value = false;
   }
 
   onMounted(loadData);
   watch(page, loadData);
 
-  useInfiniteScroll(
-    scrollElement,
-    () => {
-      if (isActive() && !loading.value && hasMore.value) {
-        // load more
-        page.value += 1;
-      }
-    },
-    { distance: 10 },
-  );
-
-  const resetPage = () => {
-    if (page.value !== 1) {
-      // just set page = 1, will be handled by watcher
-      page.value = 1;
-    } else {
-      // we need to reload, but page is already 1, so changing won't trigger watcher
-      loadData();
+  function nextPage() {
+    if (isActive() && !loading.value && hasMore.value) {
+      page.value += 1;
     }
-  };
+  }
 
-  return { resetPage, data };
+  useInfiniteScroll(scrollElement, nextPage, { distance: 10 });
+
+  async function resetPage() {
+    const _page = page.value;
+
+    hasMore.value = true;
+    data.value = [];
+    each.value = (_each ?? []) as UnwrapRef<S[]>;
+    page.value = 1;
+
+    if (_page === 1) {
+      // we need to reload manually as the page is already 1, so changing won't trigger watcher
+      await loadData();
+    }
+  }
+
+  return { resetPage, nextPage, data, hasMore, loading };
 }

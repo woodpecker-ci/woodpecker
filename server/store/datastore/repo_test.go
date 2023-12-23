@@ -21,7 +21,7 @@ import (
 	"github.com/franela/goblin"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 func TestRepos(t *testing.T) {
@@ -68,6 +68,27 @@ func TestRepos(t *testing.T) {
 			err := store.CreateRepo(&repo)
 			g.Assert(err).IsNil()
 			g.Assert(repo.ID != 0).IsTrue()
+		})
+
+		g.It("Should fail if repo has no name / owner / fullname", func() {
+			g.Assert(store.CreateRepo(&model.Repo{
+				UserID:   1,
+				FullName: "bradrydzewski/",
+				Owner:    "bradrydzewski",
+				Name:     "",
+			})).IsNotNil()
+			g.Assert(store.CreateRepo(&model.Repo{
+				UserID:   1,
+				FullName: "/test",
+				Owner:    "",
+				Name:     "test",
+			})).IsNotNil()
+			g.Assert(store.CreateRepo(&model.Repo{
+				UserID:   1,
+				FullName: "",
+				Owner:    "bradrydzewski",
+				Name:     "test",
+			})).IsNotNil()
 		})
 
 		g.It("Should Get a Repo by ID", func() {
@@ -140,7 +161,7 @@ func TestRepos(t *testing.T) {
 }
 
 func TestRepoList(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm))
+	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm), new(model.Org))
 	defer closer()
 
 	user := &model.User{
@@ -196,7 +217,7 @@ func TestRepoList(t *testing.T) {
 }
 
 func TestOwnedRepoList(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm))
+	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm), new(model.Org))
 	defer closer()
 
 	user := &model.User{

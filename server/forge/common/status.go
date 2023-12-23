@@ -19,8 +19,10 @@ import (
 	"fmt"
 	"text/template"
 
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/rs/zerolog/log"
+
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 func GetPipelineStatusContext(repo *model.Repo, pipeline *model.Pipeline, workflow *model.Workflow) string {
@@ -32,17 +34,20 @@ func GetPipelineStatusContext(repo *model.Repo, pipeline *model.Pipeline, workfl
 
 	tmpl, err := template.New("context").Parse(server.Config.Server.StatusContextFormat)
 	if err != nil {
+		log.Error().Err(err).Msg("could not create status from template")
 		return ""
 	}
 	var ctx bytes.Buffer
-	err = tmpl.Execute(&ctx, map[string]interface{}{
+	err = tmpl.Execute(&ctx, map[string]any{
 		"context":  server.Config.Server.StatusContext,
 		"event":    event,
 		"workflow": workflow.Name,
 		"owner":    repo.Owner,
 		"repo":     repo.Name,
+		"axis_id":  workflow.AxisID,
 	})
 	if err != nil {
+		log.Error().Err(err).Msg("could not create status context")
 		return ""
 	}
 
@@ -72,7 +77,7 @@ func GetPipelineStatusDescription(status model.StatusValue) string {
 	}
 }
 
-func GetPipelineStatusLink(repo *model.Repo, pipeline *model.Pipeline, workflow *model.Workflow) string {
+func GetPipelineStatusURL(repo *model.Repo, pipeline *model.Pipeline, workflow *model.Workflow) string {
 	if workflow == nil {
 		return fmt.Sprintf("%s/repos/%d/pipeline/%d", server.Config.Server.Host, repo.ID, pipeline.Number)
 	}

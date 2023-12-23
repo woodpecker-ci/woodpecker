@@ -17,7 +17,7 @@ package secrets
 import (
 	"context"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 type builtin struct {
@@ -48,16 +48,17 @@ func (b *builtin) SecretListPipeline(repo *model.Repo, _ *model.Pipeline, p *mod
 	// Priority order in case of duplicate names are repository, user/organization, global
 	secrets := make([]*model.Secret, 0, len(s))
 	uniq := make(map[string]struct{})
-	for _, cond := range []struct {
-		Global       bool
-		Organization bool
+	for _, condition := range []struct {
+		IsRepository   bool
+		IsOrganization bool
+		IsGlobal       bool
 	}{
-		{},
-		{Organization: true},
-		{Global: true},
+		{IsRepository: true},
+		{IsOrganization: true},
+		{IsGlobal: true},
 	} {
 		for _, secret := range s {
-			if secret.Global() == cond.Global && secret.Organization() == cond.Organization {
+			if secret.IsRepository() != condition.IsRepository || secret.IsOrganization() != condition.IsOrganization || secret.IsGlobal() != condition.IsGlobal {
 				continue
 			}
 			if _, ok := uniq[secret.Name]; ok {

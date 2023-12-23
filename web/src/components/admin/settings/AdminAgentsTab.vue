@@ -1,19 +1,14 @@
 <template>
-  <Panel>
-    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-wp-background-100">
-      <div class="ml-2">
-        <h1 class="text-xl text-wp-text-100">{{ $t('admin.settings.agents.agents') }}</h1>
-        <p class="text-sm text-wp-text-alt-100">{{ $t('admin.settings.agents.desc') }}</p>
-      </div>
+  <Settings :title="$t('admin.settings.agents.agents')" :desc="$t('admin.settings.agents.desc')">
+    <template #titleActions>
       <Button
         v-if="selectedAgent"
-        class="ml-auto"
         :text="$t('admin.settings.agents.show')"
         start-icon="back"
         @click="selectedAgent = undefined"
       />
-      <Button v-else class="ml-auto" :text="$t('admin.settings.agents.add')" start-icon="plus" @click="showAddAgent" />
-    </div>
+      <Button v-else :text="$t('admin.settings.agents.add')" start-icon="plus" @click="showAddAgent" />
+    </template>
 
     <div v-if="!selectedAgent" class="space-y-4 text-wp-text-100">
       <ListItem
@@ -29,7 +24,7 @@
             <Badge v-if="agent.capacity" :label="$t('admin.settings.agents.capacity.badge')" :value="agent.capacity" />
           </span>
           <span class="ml-2">{{
-            agent.last_contact ? timeAgo.format(agent.last_contact * 1000) : $t('admin.settings.agents.never')
+            agent.last_contact ? date.timeAgo(agent.last_contact * 1000) : $t('admin.settings.agents.never')
           }}</span>
         </span>
         <IconButton
@@ -51,8 +46,9 @@
     </div>
     <div v-else>
       <form @submit.prevent="saveAgent">
-        <InputField :label="$t('admin.settings.agents.name.name')">
+        <InputField v-slot="{ id }" :label="$t('admin.settings.agents.name.name')">
           <TextField
+            :id="id"
             v-model="selectedAgent.name"
             :placeholder="$t('admin.settings.agents.name.placeholder')"
             required
@@ -68,42 +64,50 @@
         </InputField>
 
         <template v-if="isEditingAgent">
-          <InputField :label="$t('admin.settings.agents.token')">
-            <TextField v-model="selectedAgent.token" :placeholder="$t('admin.settings.agents.token')" disabled />
+          <InputField v-slot="{ id }" :label="$t('admin.settings.agents.token')">
+            <TextField
+              :id="id"
+              v-model="selectedAgent.token"
+              :placeholder="$t('admin.settings.agents.token')"
+              disabled
+            />
           </InputField>
 
-          <InputField :label="$t('admin.settings.agents.id')">
-            <TextField :model-value="selectedAgent.id?.toString()" disabled />
+          <InputField v-slot="{ id }" :label="$t('admin.settings.agents.id')">
+            <TextField :id="id" :model-value="selectedAgent.id?.toString()" disabled />
           </InputField>
 
           <InputField
+            v-slot="{ id }"
             :label="$t('admin.settings.agents.backend.backend')"
             docs-url="docs/next/administration/backends/docker"
           >
-            <TextField v-model="selectedAgent.backend" disabled />
+            <TextField :id="id" v-model="selectedAgent.backend" disabled />
           </InputField>
 
-          <InputField :label="$t('admin.settings.agents.platform.platform')">
-            <TextField v-model="selectedAgent.platform" disabled />
+          <InputField v-slot="{ id }" :label="$t('admin.settings.agents.platform.platform')">
+            <TextField :id="id" v-model="selectedAgent.platform" disabled />
           </InputField>
 
           <InputField
+            v-slot="{ id }"
             :label="$t('admin.settings.agents.capacity.capacity')"
             docs-url="docs/next/administration/agent-config#woodpecker_max_procs"
           >
             <span class="text-wp-text-alt-100">{{ $t('admin.settings.agents.capacity.desc') }}</span>
-            <TextField :model-value="selectedAgent.capacity?.toString()" disabled />
+            <TextField :id="id" :model-value="selectedAgent.capacity?.toString()" disabled />
           </InputField>
 
-          <InputField :label="$t('admin.settings.agents.version')">
-            <TextField :model-value="selectedAgent.version" disabled />
+          <InputField v-slot="{ id }" :label="$t('admin.settings.agents.version')">
+            <TextField :id="id" :model-value="selectedAgent.version" disabled />
           </InputField>
 
-          <InputField :label="$t('admin.settings.agents.last_contact')">
+          <InputField v-slot="{ id }" :label="$t('admin.settings.agents.last_contact')">
             <TextField
+              :id="id"
               :model-value="
                 selectedAgent.last_contact
-                  ? timeAgo.format(selectedAgent.last_contact * 1000)
+                  ? date.timeAgo(selectedAgent.last_contact * 1000)
                   : $t('admin.settings.agents.never')
               "
               disabled
@@ -122,7 +126,7 @@
         </div>
       </form>
     </div>
-  </Panel>
+  </Settings>
 </template>
 
 <script lang="ts" setup>
@@ -137,17 +141,17 @@ import ListItem from '~/components/atomic/ListItem.vue';
 import Checkbox from '~/components/form/Checkbox.vue';
 import InputField from '~/components/form/InputField.vue';
 import TextField from '~/components/form/TextField.vue';
-import Panel from '~/components/layout/Panel.vue';
+import Settings from '~/components/layout/Settings.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
+import { useDate } from '~/compositions/useDate';
 import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
-import useTimeAgo from '~/compositions/useTimeAgo';
 import { Agent } from '~/lib/api/types';
 
 const apiClient = useApiClient();
 const notifications = useNotifications();
-const timeAgo = useTimeAgo();
+const date = useDate();
 const { t } = useI18n();
 
 const selectedAgent = ref<Partial<Agent>>();

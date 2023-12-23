@@ -21,11 +21,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/securecookie"
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
-	"github.com/woodpecker-ci/woodpecker/server/store"
-	"github.com/woodpecker-ci/woodpecker/shared/token"
+
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/token"
 )
 
 // GetSelf
@@ -90,15 +91,15 @@ func GetRepos(c *gin.Context) {
 	user := session.User(c)
 	all, _ := strconv.ParseBool(c.Query("all"))
 
-	activeRepos, err := _store.RepoList(user, true, true)
-	if err != nil {
-		c.String(http.StatusInternalServerError, "Error fetching repository list. %s", err)
-		return
-	}
-
 	if all {
+		dbRepos, err := _store.RepoList(user, true, false)
+		if err != nil {
+			c.String(http.StatusInternalServerError, "Error fetching repository list. %s", err)
+			return
+		}
+
 		active := map[model.ForgeRemoteID]*model.Repo{}
-		for _, r := range activeRepos {
+		for _, r := range dbRepos {
 			active[r.ForgeRemoteID] = r
 		}
 
@@ -110,14 +111,17 @@ func GetRepos(c *gin.Context) {
 
 		var repos []*model.Repo
 		for _, r := range _repos {
-			if r.Perm.Push {
-				if active[r.ForgeRemoteID] != nil && active[r.ForgeRemoteID].IsActive {
+			if r.Perm.Push && server.Config.Permissions.OwnersAllowlist.IsAllowed(r) {
+				if active[r.ForgeRemoteID] != nil {
 					existingRepo := active[r.ForgeRemoteID]
 					existingRepo.Update(r)
-					existingRepo.IsActive = true
+					existingRepo.IsActive = active[r.ForgeRemoteID].IsActive
 					repos = append(repos, existingRepo)
 				} else {
-					repos = append(repos, r)
+					if r.Perm.Admin {
+						// you must be admin to enable the repo
+						repos = append(repos, r)
+					}
 				}
 			}
 		}
@@ -126,12 +130,18 @@ func GetRepos(c *gin.Context) {
 		return
 	}
 
+	activeRepos, err := _store.RepoList(user, true, true)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Error fetching repository list. %s", err)
+		return
+	}
+
 	c.JSON(http.StatusOK, activeRepos)
 }
 
 // PostToken
 //
-//	@Summary		Return the token of the current user as stringª
+//	@Summary		Return the token of the current user as string
 //	@Router			/user/token [post]
 //	@Produce		plain
 //	@Success		200

@@ -31,8 +31,9 @@ type Repo struct {
 	Name                         string         `json:"name"                            xorm:"UNIQUE(name) 'repo_name'"`
 	FullName                     string         `json:"full_name"                       xorm:"UNIQUE 'repo_full_name'"`
 	Avatar                       string         `json:"avatar_url,omitempty"            xorm:"varchar(500) 'repo_avatar'"`
-	Link                         string         `json:"link_url,omitempty"              xorm:"varchar(1000) 'repo_link'"`
+	ForgeURL                     string         `json:"forge_url,omitempty"             xorm:"varchar(1000) 'repo_forge_url'"`
 	Clone                        string         `json:"clone_url,omitempty"             xorm:"varchar(1000) 'repo_clone'"`
+	CloneSSH                     string         `json:"clone_url_ssh"                   xorm:"varchar(1000) 'repo_clone_ssh'"`
 	Branch                       string         `json:"default_branch,omitempty"        xorm:"varchar(500) 'repo_branch'"`
 	SCMKind                      SCMKind        `json:"scm,omitempty"                   xorm:"varchar(50) 'repo_scm'"`
 	Timeout                      int64          `json:"timeout,omitempty"               xorm:"repo_timeout"`
@@ -82,10 +83,13 @@ func (r *Repo) Update(from *Repo) {
 	r.Name = from.Name
 	r.FullName = from.FullName
 	r.Avatar = from.Avatar
-	r.Link = from.Link
+	r.ForgeURL = from.ForgeURL
 	r.SCMKind = from.SCMKind
 	if len(from.Clone) > 0 {
 		r.Clone = from.Clone
+	}
+	if len(from.CloneSSH) > 0 {
+		r.CloneSSH = from.CloneSSH
 	}
 	r.Branch = from.Branch
 	if from.IsSCMPrivate != r.IsSCMPrivate {

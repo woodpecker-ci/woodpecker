@@ -18,6 +18,7 @@ package gitlab
 import (
 	"context"
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -30,14 +31,14 @@ import (
 	"github.com/xanzy/go-gitlab"
 	"golang.org/x/oauth2"
 
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/forge"
-	"github.com/woodpecker-ci/woodpecker/server/forge/common"
-	"github.com/woodpecker-ci/woodpecker/server/forge/types"
-	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/store"
-	"github.com/woodpecker-ci/woodpecker/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/common"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
+	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
 const (
@@ -71,6 +72,7 @@ func New(opts Opts) (forge.Forge, error) {
 		ClientID:     opts.ClientID,
 		ClientSecret: opts.ClientSecret,
 		SkipVerify:   opts.SkipVerify,
+		HideArchives: true,
 	}, nil
 }
 
@@ -93,7 +95,7 @@ func (g *GitLab) oauth2Config(ctx context.Context) (*oauth2.Config, context.Cont
 				TokenURL: fmt.Sprintf("%s/oauth/token", g.url),
 			},
 			Scopes:      []string{defaultScope},
-			RedirectURL: fmt.Sprintf("%s%s/authorize", server.Config.Server.OAuthHost, server.Config.Server.RootPath),
+			RedirectURL: fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost),
 		},
 
 		context.WithValue(ctx, oauth2.HTTPClient, &http.Client{Transport: &http.Transport{
@@ -202,8 +204,8 @@ func (g *GitLab) Teams(ctx context.Context, user *model.User) ([]*model.Team, er
 	for i := 1; true; i++ {
 		batch, _, err := client.Groups.ListGroups(&gitlab.ListGroupsOptions{
 			ListOptions:    gitlab.ListOptions{Page: i, PerPage: perPage},
-			AllAvailable:   gitlab.Bool(false),
-			MinAccessLevel: gitlab.AccessLevel(gitlab.DeveloperPermissions), // TODO: check what's best here
+			AllAvailable:   gitlab.Ptr(false),
+			MinAccessLevel: gitlab.Ptr(gitlab.DeveloperPermissions), // TODO: check what's best here
 		}, gitlab.WithContext(ctx))
 		if err != nil {
 			return nil, err
@@ -226,13 +228,23 @@ func (g *GitLab) Teams(ctx context.Context, user *model.User) ([]*model.Team, er
 }
 
 // getProject fetches the named repository from the forge.
-func (g *GitLab) getProject(ctx context.Context, client *gitlab.Client, owner, name string) (*gitlab.Project, error) {
-	repo, _, err := client.Projects.GetProject(fmt.Sprintf("%s/%s", owner, name), nil, gitlab.WithContext(ctx))
-	if err != nil {
-		return nil, err
+func (g *GitLab) getProject(ctx context.Context, client *gitlab.Client, forgeRemoteID model.ForgeRemoteID, owner, name string) (*gitlab.Project, error) {
+	var (
+		repo *gitlab.Project
+		err  error
+	)
+
+	if forgeRemoteID.IsValid() {
+		intID, err := strconv.Atoi(string(forgeRemoteID))
+		if err != nil {
+			return nil, err
+		}
+		repo, _, err = client.Projects.GetProject(intID, nil, gitlab.WithContext(ctx))
+		return repo, err
 	}
 
-	return repo, nil
+	repo, _, err = client.Projects.GetProject(fmt.Sprintf("%s/%s", owner, name), nil, gitlab.WithContext(ctx))
+	return repo, err
 }
 
 // Repo fetches the repository from the forge.
@@ -242,19 +254,7 @@ func (g *GitLab) Repo(ctx context.Context, user *model.User, remoteID model.Forg
 		return nil, err
 	}
 
-	if remoteID.IsValid() {
-		intID, err := strconv.ParseInt(string(remoteID), 10, 64)
-		if err != nil {
-			return nil, err
-		}
-		_repo, _, err := client.Projects.GetProject(int(intID), nil, gitlab.WithContext(ctx))
-		if err != nil {
-			return nil, err
-		}
-		return g.convertGitLabRepo(_repo)
-	}
-
-	_repo, err := g.getProject(ctx, client, owner, name)
+	_repo, err := g.getProject(ctx, client, remoteID, owner, name)
 	if err != nil {
 		return nil, err
 	}
@@ -272,10 +272,10 @@ func (g *GitLab) Repos(ctx context.Context, user *model.User) ([]*model.Repo, er
 	repos := make([]*model.Repo, 0, perPage)
 	opts := &gitlab.ListProjectsOptions{
 		ListOptions:    gitlab.ListOptions{PerPage: perPage},
-		MinAccessLevel: gitlab.AccessLevel(gitlab.DeveloperPermissions), // TODO: check what's best here
+		MinAccessLevel: gitlab.Ptr(gitlab.DeveloperPermissions), // TODO: check what's best here
 	}
 	if g.HideArchives {
-		opts.Archived = gitlab.Bool(false)
+		opts.Archived = gitlab.Ptr(false)
 	}
 
 	for i := 1; true; i++ {
@@ -309,7 +309,7 @@ func (g *GitLab) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 		return nil, err
 	}
 
-	_repo, err := g.getProject(ctx, client, r.Owner, r.Name)
+	_repo, err := g.getProject(ctx, client, r.ForgeRemoteID, r.Owner, r.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -326,7 +326,7 @@ func (g *GitLab) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 	result := make([]*model.PullRequest, len(pullRequests))
 	for i := range pullRequests {
 		result[i] = &model.PullRequest{
-			Index: int64(pullRequests[i].ID),
+			Index: model.ForgeRemoteID(strconv.Itoa(pullRequests[i].ID)),
 			Title: pullRequests[i].Title,
 		}
 	}
@@ -339,11 +339,14 @@ func (g *GitLab) File(ctx context.Context, user *model.User, repo *model.Repo, p
 	if err != nil {
 		return nil, err
 	}
-	_repo, err := g.getProject(ctx, client, repo.Owner, repo.Name)
+	_repo, err := g.getProject(ctx, client, repo.ForgeRemoteID, repo.Owner, repo.Name)
 	if err != nil {
 		return nil, err
 	}
-	file, _, err := client.RepositoryFiles.GetRawFile(_repo.ID, fileName, &gitlab.GetRawFileOptions{Ref: &pipeline.Commit}, gitlab.WithContext(ctx))
+	file, resp, err := client.RepositoryFiles.GetRawFile(_repo.ID, fileName, &gitlab.GetRawFileOptions{Ref: &pipeline.Commit}, gitlab.WithContext(ctx))
+	if resp != nil && resp.StatusCode == http.StatusNotFound {
+		return nil, errors.Join(err, &types.ErrConfigNotFound{Configs: []string{fileName}})
+	}
 	return file, err
 }
 
@@ -355,15 +358,16 @@ func (g *GitLab) Dir(ctx context.Context, user *model.User, repo *model.Repo, pi
 	}
 
 	files := make([]*forge_types.FileMeta, 0, perPage)
-	_repo, err := g.getProject(ctx, client, repo.Owner, repo.Name)
+	_repo, err := g.getProject(ctx, client, repo.ForgeRemoteID, repo.Owner, repo.Name)
 	if err != nil {
 		return nil, err
 	}
+
 	opts := &gitlab.ListTreeOptions{
 		ListOptions: gitlab.ListOptions{PerPage: perPage},
 		Path:        &path,
 		Ref:         &pipeline.Commit,
-		Recursive:   gitlab.Bool(false),
+		Recursive:   gitlab.Ptr(false),
 	}
 
 	for i := 1; true; i++ {
@@ -379,6 +383,9 @@ func (g *GitLab) Dir(ctx context.Context, user *model.User, repo *model.Repo, pi
 			}
 			data, err := g.File(ctx, user, repo, pipeline, batch[i].Path)
 			if err != nil {
+				if errors.Is(err, &types.ErrConfigNotFound{}) {
+					return nil, fmt.Errorf("git tree reported existence of file but we got: %s", err.Error())
+				}
 				return nil, err
 			}
 			files = append(files, &forge_types.FileMeta{
@@ -402,16 +409,16 @@ func (g *GitLab) Status(ctx context.Context, user *model.User, repo *model.Repo,
 		return err
 	}
 
-	_repo, err := g.getProject(ctx, client, repo.Owner, repo.Name)
+	_repo, err := g.getProject(ctx, client, repo.ForgeRemoteID, repo.Owner, repo.Name)
 	if err != nil {
 		return err
 	}
 
 	_, _, err = client.Commits.SetCommitStatus(_repo.ID, pipeline.Commit, &gitlab.SetCommitStatusOptions{
 		State:       getStatus(workflow.State),
-		Description: gitlab.String(common.GetPipelineStatusDescription(workflow.State)),
-		TargetURL:   gitlab.String(common.GetPipelineStatusLink(repo, pipeline, workflow)),
-		Context:     gitlab.String(common.GetPipelineStatusContext(repo, pipeline, workflow)),
+		Description: gitlab.Ptr(common.GetPipelineStatusDescription(workflow.State)),
+		TargetURL:   gitlab.Ptr(common.GetPipelineStatusURL(repo, pipeline, workflow)),
+		Context:     gitlab.Ptr(common.GetPipelineStatusContext(repo, pipeline, workflow)),
 	}, gitlab.WithContext(ctx))
 
 	return err
@@ -447,7 +454,7 @@ func (g *GitLab) getTokenAndWebURL(link string) (token, webURL string, err error
 		return "", "", err
 	}
 	token = uri.Query().Get("access_token")
-	webURL = fmt.Sprintf("%s://%s/api/hook", uri.Scheme, uri.Host)
+	webURL = fmt.Sprintf("%s://%s/%s", uri.Scheme, uri.Host, strings.TrimPrefix(uri.Path, "/"))
 	return token, webURL, nil
 }
 
@@ -459,7 +466,7 @@ func (g *GitLab) Activate(ctx context.Context, user *model.User, repo *model.Rep
 		return err
 	}
 
-	_repo, err := g.getProject(ctx, client, repo.Owner, repo.Name)
+	_repo, err := g.getProject(ctx, client, repo.ForgeRemoteID, repo.Owner, repo.Name)
 	if err != nil {
 		return err
 	}
@@ -474,13 +481,13 @@ func (g *GitLab) Activate(ctx context.Context, user *model.User, repo *model.Rep
 	}
 
 	_, _, err = client.Projects.AddProjectHook(_repo.ID, &gitlab.AddProjectHookOptions{
-		URL:                   gitlab.String(webURL),
-		Token:                 gitlab.String(token),
-		PushEvents:            gitlab.Bool(true),
-		TagPushEvents:         gitlab.Bool(true),
-		MergeRequestsEvents:   gitlab.Bool(true),
-		DeploymentEvents:      gitlab.Bool(true),
-		EnableSSLVerification: gitlab.Bool(!g.SkipVerify),
+		URL:                   gitlab.Ptr(webURL),
+		Token:                 gitlab.Ptr(token),
+		PushEvents:            gitlab.Ptr(true),
+		TagPushEvents:         gitlab.Ptr(true),
+		MergeRequestsEvents:   gitlab.Ptr(true),
+		DeploymentEvents:      gitlab.Ptr(true),
+		EnableSSLVerification: gitlab.Ptr(!g.SkipVerify),
 	}, gitlab.WithContext(ctx))
 
 	return err
@@ -494,7 +501,7 @@ func (g *GitLab) Deactivate(ctx context.Context, user *model.User, repo *model.R
 		return err
 	}
 
-	_repo, err := g.getProject(ctx, client, repo.Owner, repo.Name)
+	_repo, err := g.getProject(ctx, client, repo.ForgeRemoteID, repo.Owner, repo.Name)
 	if err != nil {
 		return err
 	}
@@ -548,7 +555,7 @@ func (g *GitLab) Branches(ctx context.Context, user *model.User, repo *model.Rep
 		return nil, err
 	}
 
-	_repo, err := g.getProject(ctx, client, repo.Owner, repo.Name)
+	_repo, err := g.getProject(ctx, client, repo.ForgeRemoteID, repo.Owner, repo.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -575,7 +582,7 @@ func (g *GitLab) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 		return "", err
 	}
 
-	_repo, err := g.getProject(ctx, client, r.Owner, r.Name)
+	_repo, err := g.getProject(ctx, client, r.ForgeRemoteID, r.Owner, r.Name)
 	if err != nil {
 		return "", err
 	}
@@ -620,7 +627,7 @@ func (g *GitLab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 	case *gitlab.TagEvent:
 		return convertTagHook(event)
 	default:
-		return nil, nil, &types.ErrIgnoreEvent{Event: string(eventType)}
+		return nil, nil, &forge_types.ErrIgnoreEvent{Event: string(eventType)}
 	}
 }
 
@@ -637,7 +644,7 @@ func (g *GitLab) OrgMembership(ctx context.Context, u *model.User, owner string)
 			Page:    1,
 			PerPage: 100,
 		},
-		Search: gitlab.String(owner),
+		Search: gitlab.Ptr(owner),
 	}, gitlab.WithContext(ctx))
 	if err != nil {
 		return nil, err
@@ -691,7 +698,7 @@ func (g *GitLab) Org(ctx context.Context, u *model.User, owner string) (*model.O
 			Page:    1,
 			PerPage: 1,
 		},
-		Username: gitlab.String(owner),
+		Username: gitlab.Ptr(owner),
 	})
 	if len(users) == 1 && err == nil {
 		return &model.Org{
@@ -706,7 +713,7 @@ func (g *GitLab) Org(ctx context.Context, u *model.User, owner string) (*model.O
 			Page:    1,
 			PerPage: 1,
 		},
-		Search: gitlab.String(owner),
+		Search: gitlab.Ptr(owner),
 	}, gitlab.WithContext(ctx))
 	if err != nil {
 		return nil, err
@@ -744,18 +751,18 @@ func (g *GitLab) loadChangedFilesFromMergeRequest(ctx context.Context, tmpRepo *
 		return nil, err
 	}
 
-	_repo, err := g.getProject(ctx, client, repo.Owner, repo.Name)
+	_repo, err := g.getProject(ctx, client, repo.ForgeRemoteID, repo.Owner, repo.Name)
 	if err != nil {
 		return nil, err
 	}
 
-	changes, _, err := client.MergeRequests.GetMergeRequestChanges(_repo.ID, mergeIID, &gitlab.GetMergeRequestChangesOptions{}, gitlab.WithContext(ctx))
+	changes, _, err := client.MergeRequests.ListMergeRequestDiffs(_repo.ID, mergeIID, &gitlab.ListMergeRequestDiffsOptions{}, gitlab.WithContext(ctx))
 	if err != nil {
 		return nil, err
 	}
 
-	files := make([]string, 0, len(changes.Changes)*2)
-	for _, file := range changes.Changes {
+	files := make([]string, 0, len(changes)*2)
+	for _, file := range changes {
 		files = append(files, file.NewPath, file.OldPath)
 	}
 	pipeline.ChangedFiles = utils.DedupStrings(files)

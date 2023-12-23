@@ -22,19 +22,22 @@ import (
 
 	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog/log"
+	"go.uber.org/multierr"
 
-	backend_types "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
-	yaml_types "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
-	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
+	backend_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
+	pipeline_errors "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
+	yaml_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types"
+	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/compiler"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/linter"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/matrix"
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/compiler"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/matrix"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 // StepBuilder Takes the hook data and the yaml and returns in internal data model
@@ -45,7 +48,7 @@ type StepBuilder struct {
 	Netrc     *model.Netrc
 	Secs      []*model.Secret
 	Regs      []*model.Registry
-	Link      string
+	Host      string
 	Yamls     []*forge_types.FileMeta
 	Envs      map[string]string
 	Forge     metadata.ServerForge
@@ -54,16 +57,13 @@ type StepBuilder struct {
 
 type Item struct {
 	Workflow  *model.Workflow
-	Platform  string
 	Labels    map[string]string
 	DependsOn []string
 	RunsOn    []string
 	Config    *backend_types.Config
 }
 
-func (b *StepBuilder) Build() ([]*Item, error) {
-	var items []*Item
-
+func (b *StepBuilder) Build() (items []*Item, errorsAndWarnings error) {
 	b.Yamls = forge_types.SortByName(b.Yamls)
 
 	pidSequence := 1
@@ -78,18 +78,23 @@ func (b *StepBuilder) Build() ([]*Item, error) {
 			axes = append(axes, matrix.Axis{})
 		}
 
-		for _, axis := range axes {
+		for i, axis := range axes {
 			workflow := &model.Workflow{
-				PipelineID: b.Curr.ID,
-				PID:        pidSequence,
-				State:      model.StatusPending,
-				Environ:    axis,
-				Name:       SanitizePath(y.Name),
+				PID:     pidSequence,
+				State:   model.StatusPending,
+				Environ: axis,
+				Name:    SanitizePath(y.Name),
+			}
+			if len(axes) > 1 {
+				workflow.AxisID = i + 1
 			}
 			item, err := b.genItemForWorkflow(workflow, axis, string(y.Data))
-			if err != nil {
+			if err != nil && pipeline_errors.HasBlockingErrors(err) {
 				return nil, err
+			} else if err != nil {
+				errorsAndWarnings = multierr.Append(errorsAndWarnings, err)
 			}
+
 			if item == nil {
 				continue
 			}
@@ -103,16 +108,16 @@ func (b *StepBuilder) Build() ([]*Item, error) {
 
 	items = filterItemsWithMissingDependencies(items)
 
-	// check if at least one step can start, if list is not empty
+	// check if at least one step can start if slice is not empty
 	if len(items) > 0 && !stepListContainsItemsToRun(items) {
-		return nil, fmt.Errorf("pipeline has no startpoint")
+		return nil, fmt.Errorf("pipeline has no steps to run")
 	}
 
-	return items, nil
+	return items, errorsAndWarnings
 }
 
-func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.Axis, data string) (*Item, error) {
-	workflowMetadata := frontend.MetadataFromStruct(b.Forge, b.Repo, b.Curr, b.Last, workflow, b.Link)
+func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.Axis, data string) (item *Item, errorsAndWarnings error) {
+	workflowMetadata := frontend.MetadataFromStruct(b.Forge, b.Repo, b.Curr, b.Last, workflow, b.Host)
 	environ := b.environmentVariables(workflowMetadata, axis)
 
 	// add global environment variables for substituting
@@ -127,57 +132,61 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 	// substitute vars
 	substituted, err := frontend.EnvVarSubst(data, environ)
 	if err != nil {
-		return nil, err
+		return nil, multierr.Append(errorsAndWarnings, err)
 	}
 
 	// parse yaml pipeline
 	parsed, err := yaml.ParseString(substituted)
 	if err != nil {
-		return nil, &yaml.PipelineParseError{Err: err}
+		return nil, &errors.PipelineError{Message: err.Error(), Type: errors.PipelineErrorTypeCompiler}
 	}
 
 	// lint pipeline
-	if err := linter.New(
+	errorsAndWarnings = multierr.Append(errorsAndWarnings, linter.New(
 		linter.WithTrusted(b.Repo.IsTrusted),
-	).Lint(parsed); err != nil {
-		return nil, &yaml.PipelineParseError{Err: err}
+	).Lint([]*linter.WorkflowConfig{{
+		Workflow:  parsed,
+		File:      workflow.Name,
+		RawConfig: data,
+	}}))
+	if pipeline_errors.HasBlockingErrors(errorsAndWarnings) {
+		return nil, errorsAndWarnings
 	}
 
 	// checking if filtered.
 	if match, err := parsed.When.Match(workflowMetadata, true, environ); !match && err == nil {
 		log.Debug().Str("pipeline", workflow.Name).Msg(
-			"Marked as skipped, dose not match metadata",
+			"Marked as skipped, does not match metadata",
 		)
-		workflow.State = model.StatusSkipped
+		return nil, nil
 	} else if err != nil {
 		log.Debug().Str("pipeline", workflow.Name).Msg(
 			"Pipeline config could not be parsed",
 		)
-		return nil, err
+		return nil, multierr.Append(errorsAndWarnings, err)
 	}
 
 	ir, err := b.toInternalRepresentation(parsed, environ, workflowMetadata, workflow.ID)
 	if err != nil {
-		return nil, err
+		return nil, multierr.Append(errorsAndWarnings, err)
 	}
 
 	if len(ir.Stages) == 0 {
 		return nil, nil
 	}
 
-	item := &Item{
+	item = &Item{
 		Workflow:  workflow,
 		Config:    ir,
 		Labels:    parsed.Labels,
 		DependsOn: parsed.DependsOn,
 		RunsOn:    parsed.RunsOn,
-		Platform:  parsed.Platform,
 	}
 	if item.Labels == nil {
 		item.Labels = map[string]string{}
 	}
 
-	return item, nil
+	return item, errorsAndWarnings
 }
 
 func stepListContainsItemsToRun(items []*Item) bool {
@@ -238,10 +247,9 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, envi
 			continue
 		}
 		secrets = append(secrets, compiler.Secret{
-			Name:       sec.Name,
-			Value:      sec.Value,
-			Match:      sec.Images,
-			PluginOnly: sec.PluginsOnly,
+			Name:           sec.Name,
+			Value:          sec.Value,
+			AllowedPlugins: sec.Images,
 		})
 	}
 
@@ -283,52 +291,11 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, envi
 			),
 		),
 		compiler.WithProxy(b.ProxyOpts),
-		compiler.WithWorkspaceFromURL("/woodpecker", b.Repo.Link),
+		compiler.WithWorkspaceFromURL("/woodpecker", b.Repo.ForgeURL),
 		compiler.WithMetadata(metadata),
 		compiler.WithTrusted(b.Repo.IsTrusted),
 		compiler.WithNetrcOnlyTrusted(b.Repo.NetrcOnlyTrusted),
 	).Compile(parsed)
-}
-
-// SetPipelineStepsOnPipeline is the link between pipeline representation in "pipeline package" and server
-// to be specific this func currently is used to convert the pipeline.Item list (crafted by StepBuilder.Build()) into
-// a pipeline that can be stored in the database by the server
-func SetPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*Item) *model.Pipeline {
-	var pidSequence int
-	for _, item := range pipelineItems {
-		if pidSequence < item.Workflow.PID {
-			pidSequence = item.Workflow.PID
-		}
-	}
-
-	for _, item := range pipelineItems {
-		for _, stage := range item.Config.Stages {
-			var gid int
-			for _, step := range stage.Steps {
-				pidSequence++
-				if gid == 0 {
-					gid = pidSequence
-				}
-				step := &model.Step{
-					Name:       step.Alias,
-					UUID:       step.UUID,
-					PipelineID: pipeline.ID,
-					PID:        pidSequence,
-					PPID:       item.Workflow.PID,
-					State:      model.StatusPending,
-					Failure:    step.Failure,
-					Type:       model.StepType(step.Type),
-				}
-				if item.Workflow.State == model.StatusSkipped {
-					step.State = model.StatusSkipped
-				}
-				item.Workflow.Children = append(item.Workflow.Children, step)
-			}
-		}
-		pipeline.Workflows = append(pipeline.Workflows, item.Workflow)
-	}
-
-	return pipeline
 }
 
 func SanitizePath(path string) string {

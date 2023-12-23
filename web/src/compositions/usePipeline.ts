@@ -4,12 +4,9 @@ import { useI18n } from 'vue-i18n';
 import { useDate } from '~/compositions/useDate';
 import { useElapsedTime } from '~/compositions/useElapsedTime';
 import { Pipeline } from '~/lib/api/types';
-import { prettyDuration } from '~/utils/duration';
 import { convertEmojis } from '~/utils/emoji';
 
-import useTimeAgo from './useTimeAgo';
-
-const { toLocaleString } = useDate();
+const { toLocaleString, timeAgo, prettyDuration } = useDate();
 
 export default (pipeline: Ref<Pipeline | undefined>) => {
   const sinceRaw = computed(() => {
@@ -28,7 +25,6 @@ export default (pipeline: Ref<Pipeline | undefined>) => {
   const { time: sinceElapsed } = useElapsedTime(sinceUnderOneHour, sinceRaw);
 
   const i18n = useI18n();
-  const timeAgo = useTimeAgo();
   const since = computed(() => {
     if (sinceRaw.value === 0) {
       return i18n.t('time.not_started');
@@ -38,7 +34,8 @@ export default (pipeline: Ref<Pipeline | undefined>) => {
       return null;
     }
 
-    return timeAgo.format(sinceElapsed.value);
+    // TODO check whetehr elapsed works
+    return timeAgo(sinceElapsed.value);
   });
 
   const durationRaw = computed(() => {
@@ -84,8 +81,10 @@ export default (pipeline: Ref<Pipeline | undefined>) => {
     return convertEmojis(pipeline.value.message);
   });
 
+  const title = computed(() => message.value.split('\n')[0]);
+
   const prettyRef = computed(() => {
-    if (pipeline.value?.event === 'push') {
+    if (pipeline.value?.event === 'push' || pipeline.value?.event === 'deployment') {
       return pipeline.value.branch;
     }
 
@@ -118,5 +117,5 @@ export default (pipeline: Ref<Pipeline | undefined>) => {
     return toLocaleString(new Date(start * 1000));
   });
 
-  return { since, duration, message, prettyRef, created };
+  return { since, duration, message, title, prettyRef, created };
 };

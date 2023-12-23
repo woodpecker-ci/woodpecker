@@ -2,7 +2,7 @@ version: '3'
 
 services:
   gitea-database:
-    image: postgres:12.6-alpine
+    image: postgres:16.1-alpine
     environment:
       POSTGRES_USER: gitea
       POSTGRES_PASSWORD: 123456
@@ -31,11 +31,11 @@ services:
       GITEA__database__NAME: gitea
       GITEA__database__USER: gitea
       GITEA__database__PASSWD: 123456
-      GITEA__webhook__ALLOWED_HOST_LIST: "*"
-      GITEA__security__INSTALL_LOCK: "true"
-      GITEA__security__INTERNAL_TOKEN: "123456"
+      GITEA__webhook__ALLOWED_HOST_LIST: '*'
+      GITEA__security__INSTALL_LOCK: 'true'
+      GITEA__security__INTERNAL_TOKEN: '123456'
     extra_hosts:
-    - "host.docker.internal:host-gateway"
+      - 'host.docker.internal:host-gateway'
 
 volumes:
   gitea:

@@ -21,13 +21,13 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline"
-	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
-	"github.com/woodpecker-ci/woodpecker/pipeline/multipart"
-	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline"
+	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/multipart"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
 )
 
-func (r *Runner) createLogger(logger zerolog.Logger, uploads *sync.WaitGroup, work *rpc.Pipeline) pipeline.LogFunc {
+func (r *Runner) createLogger(logger zerolog.Logger, uploads *sync.WaitGroup, workflow *rpc.Workflow) pipeline.LogFunc {
 	return func(step *backend.Step, rc multipart.Reader) error {
 		loglogger := logger.With().
 			Str("image", step.Image).
@@ -41,7 +41,7 @@ func (r *Runner) createLogger(logger zerolog.Logger, uploads *sync.WaitGroup, wo
 		uploads.Add(1)
 
 		var secrets []string
-		for _, secret := range work.Config.Secrets {
+		for _, secret := range workflow.Config.Secrets {
 			if secret.Mask {
 				secrets = append(secrets, secret.Value)
 			}

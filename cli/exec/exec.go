@@ -27,20 +27,19 @@ import (
 	"github.com/drone/envsubst"
 	"github.com/urfave/cli/v2"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/pipeline"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/docker"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/kubernetes"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/local"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/ssh"
-	backendTypes "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/compiler"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/linter"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/matrix"
-	"github.com/woodpecker-ci/woodpecker/pipeline/multipart"
-	"github.com/woodpecker-ci/woodpecker/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/docker"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/kubernetes"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/local"
+	backendTypes "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/compiler"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/matrix"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/multipart"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
 // Command exports the exec command.
@@ -49,7 +48,7 @@ var Command = &cli.Command{
 	Usage:     "execute a local pipeline",
 	ArgsUsage: "[path/to/.woodpecker.yaml]",
 	Action:    run,
-	Flags:     utils.MergeSlices(common.GlobalFlags, flags, docker.Flags, ssh.Flags, kubernetes.Flags, local.Flags),
+	Flags:     utils.MergeSlices(flags, docker.Flags, kubernetes.Flags, local.Flags),
 }
 
 func run(c *cli.Context) error {
@@ -168,7 +167,11 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 	}
 
 	// lint the yaml file
-	if lerr := linter.New(linter.WithTrusted(true)).Lint(conf); lerr != nil {
+	if lerr := linter.New(linter.WithTrusted(true)).Lint([]*linter.WorkflowConfig{{
+		File:      path.Base(file),
+		RawConfig: confstr,
+		Workflow:  conf,
+	}}); lerr != nil {
 		return lerr
 	}
 
@@ -212,12 +215,12 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 	backendCtx := context.WithValue(c.Context, backendTypes.CliContext, c)
 	backend.Init(backendCtx)
 
-	engine, err := backend.FindEngine(backendCtx, c.String("backend-engine"))
+	backendEngine, err := backend.FindBackend(backendCtx, c.String("backend-engine"))
 	if err != nil {
 		return err
 	}
 
-	if err = engine.Load(backendCtx); err != nil {
+	if _, err = backendEngine.Load(backendCtx); err != nil {
 		return err
 	}
 
@@ -231,7 +234,7 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 		pipeline.WithContext(ctx),
 		pipeline.WithTracer(pipeline.DefaultTracer),
 		pipeline.WithLogger(defaultLogger),
-		pipeline.WithEngine(engine),
+		pipeline.WithBackend(backendEngine),
 		pipeline.WithDescription(map[string]string{
 			"CLI": "exec",
 		}),

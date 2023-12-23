@@ -21,7 +21,7 @@ You can also set some custom path like `.my-ci/pipelines/` instead of `.woodpeck
 ## Example workflow definition
 
 :::warning
-Please note that files are only shared between steps of the same workflow (see [File changes are incremental](./20-pipeline-syntax.md#file-changes-are-incremental)). That means you cannot access artifacts e.g. from the `build` workflow in the `deploy` workflow.
+Please note that files are only shared between steps of the same workflow (see [File changes are incremental](./20-workflow-syntax.md#file-changes-are-incremental)). That means you cannot access artifacts e.g. from the `build` workflow in the `deploy` workflow.
 If you still need to pass artifacts between the workflows you need use some storage [plugin](./51-plugins/10-plugins.md) (e.g. one which stores files in an Amazon S3 bucket).
 :::
 
@@ -33,9 +33,7 @@ If you still need to pass artifacts between the workflows you need use some stor
 └── .test.yml
 ```
 
-.woodpecker/.build.yml
-
-```yaml
+```yaml title=".woodpecker/.build.yml"
 steps:
   build:
     image: debian:stable-slim
@@ -44,9 +42,7 @@ steps:
       - sleep 5
 ```
 
-.woodpecker/.deploy.yml
-
-```yaml
+```yaml title=".woodpecker/.deploy.yml"
 steps:
   deploy:
     image: debian:stable-slim
@@ -59,9 +55,7 @@ depends_on:
   - test
 ```
 
-.woodpecker/.test.yml
-
-```yaml
+```yaml title=".woodpecker/.test.yml"
 steps:
   test:
     image: debian:stable-slim
@@ -73,9 +67,7 @@ depends_on:
   - build
 ```
 
-.woodpecker/.lint.yml
-
-```yaml
+```yaml title=".woodpecker/.lint.yml"
 steps:
   lint:
     image: debian:stable-slim
@@ -126,5 +118,5 @@ depends_on:
 
 :::info
 Some workflows don't need the source code, like creating a notification on failure.
-Read more about `skip_clone` at [pipeline syntax](./20-pipeline-syntax.md#skip_clone)
+Read more about `skip_clone` at [pipeline syntax](./20-workflow-syntax.md#skip_clone)
 :::

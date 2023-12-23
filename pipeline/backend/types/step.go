@@ -1,3 +1,17 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package types
 
 // Step defines a container process.
@@ -14,7 +28,7 @@ type Step struct {
 	Environment    map[string]string `json:"environment,omitempty"`
 	Entrypoint     []string          `json:"entrypoint,omitempty"`
 	Commands       []string          `json:"commands,omitempty"`
-	ExtraHosts     []string          `json:"extra_hosts,omitempty"`
+	ExtraHosts     []HostAlias       `json:"extra_hosts,omitempty"`
 	Volumes        []string          `json:"volumes,omitempty"`
 	Tmpfs          []string          `json:"tmpfs,omitempty"`
 	Devices        []string          `json:"devices,omitempty"`
@@ -34,6 +48,7 @@ type Step struct {
 	NetworkMode    string            `json:"network_mode,omitempty"`
 	IpcMode        string            `json:"ipc_mode,omitempty"`
 	Sysctls        map[string]string `json:"sysctls,omitempty"`
+	Ports          []uint16          `json:"ports,omitempty"`
 	BackendOptions BackendOptions    `json:"backend_options,omitempty"`
 }
 

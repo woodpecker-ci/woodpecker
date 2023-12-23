@@ -22,8 +22,8 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/woodpecker-ci/woodpecker/server/forge/types"
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 // TODO: use pagination
@@ -93,11 +93,4 @@ type Forge interface {
 
 	// Org fetches the organization from the forge by name. If the name is a user an org with type user is returned.
 	Org(ctx context.Context, u *model.User, org string) (*model.Org, error)
-}
-
-// Refresher refreshes an oauth token and expiration for the given user. It
-// returns true if the token was refreshed, false if the token was not refreshed,
-// and error if it failed to refresh.
-type Refresher interface {
-	Refresh(context.Context, *model.User) (bool, error)
 }

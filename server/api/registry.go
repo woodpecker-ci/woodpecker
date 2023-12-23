@@ -19,9 +19,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
 )
 
 // GetRegistry
@@ -41,7 +41,7 @@ func GetRegistry(c *gin.Context) {
 	)
 	registry, err := server.Config.Services.Registries.RegistryFind(repo, name)
 	if err != nil {
-		handleDbGetError(c, err)
+		handleDbError(c, err)
 		return
 	}
 	c.JSON(200, registry.Copy())
@@ -110,7 +110,7 @@ func PatchRegistry(c *gin.Context) {
 
 	registry, err := server.Config.Services.Registries.RegistryFind(repo, name)
 	if err != nil {
-		handleDbGetError(c, err)
+		handleDbError(c, err)
 		return
 	}
 	if in.Username != "" {
@@ -168,7 +168,7 @@ func GetRegistryList(c *gin.Context) {
 //	@Summary	Delete a named registry
 //	@Router		/repos/{repo_id}/registry/{registry} [delete]
 //	@Produce	plain
-//	@Success	200
+//	@Success	204
 //	@Tags		Repository registries
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		repo_id			path	int		true	"the repository id"
@@ -180,8 +180,8 @@ func DeleteRegistry(c *gin.Context) {
 	)
 	err := server.Config.Services.Registries.RegistryDelete(repo, name)
 	if err != nil {
-		handleDbGetError(c, err)
+		handleDbError(c, err)
 		return
 	}
-	c.String(http.StatusNoContent, "")
+	c.Status(http.StatusNoContent)
 }

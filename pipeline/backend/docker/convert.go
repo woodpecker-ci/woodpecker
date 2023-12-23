@@ -22,12 +22,12 @@ import (
 
 	"github.com/docker/docker/api/types/container"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/common"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/common"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
 
 // returns a container configuration.
-func toConfig(step *types.Step) *container.Config {
+func (e *docker) toConfig(step *types.Step) *container.Config {
 	config := &container.Config{
 		Image:        step.Image,
 		Labels:       map[string]string{"wp_uuid": step.UUID},
@@ -37,7 +37,7 @@ func toConfig(step *types.Step) *container.Config {
 	}
 
 	if len(step.Commands) != 0 {
-		env, entry, cmd := common.GenerateContainerConf(step.Commands)
+		env, entry, cmd := common.GenerateContainerConf(step.Commands, e.info.OSType)
 		for k, v := range env {
 			step.Environment[k] = v
 		}
@@ -76,9 +76,6 @@ func toHostConfig(step *types.Step) *container.HostConfig {
 		Sysctls:    step.Sysctls,
 	}
 
-	// if len(step.VolumesFrom) != 0 {
-	// 	config.VolumesFrom = step.VolumesFrom
-	// }
 	if len(step.NetworkMode) != 0 {
 		config.NetworkMode = container.NetworkMode(step.NetworkMode)
 	}
@@ -91,8 +88,12 @@ func toHostConfig(step *types.Step) *container.HostConfig {
 	if len(step.DNSSearch) != 0 {
 		config.DNSSearch = step.DNSSearch
 	}
+	extraHosts := []string{}
+	for _, hostAlias := range step.ExtraHosts {
+		extraHosts = append(extraHosts, hostAlias.Name+":"+hostAlias.IP)
+	}
 	if len(step.ExtraHosts) != 0 {
-		config.ExtraHosts = step.ExtraHosts
+		config.ExtraHosts = extraHosts
 	}
 	if len(step.Devices) != 0 {
 		config.Devices = toDev(step.Devices)

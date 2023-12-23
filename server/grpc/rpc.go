@@ -28,38 +28,32 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/rs/zerolog/log"
-	"google.golang.org/grpc/metadata"
 	grpcMetadata "google.golang.org/grpc/metadata"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
-	"github.com/woodpecker-ci/woodpecker/server/forge"
-	"github.com/woodpecker-ci/woodpecker/server/logging"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/pipeline"
-	"github.com/woodpecker-ci/woodpecker/server/pubsub"
-	"github.com/woodpecker-ci/woodpecker/server/queue"
-	"github.com/woodpecker-ci/woodpecker/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v2/server/logging"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v2/server/pubsub"
+	"go.woodpecker-ci.org/woodpecker/v2/server/queue"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
 type RPC struct {
 	forge         forge.Forge
 	queue         queue.Queue
-	pubsub        pubsub.Publisher
+	pubsub        *pubsub.Publisher
 	logger        logging.Log
 	store         store.Store
-	host          string
 	pipelineTime  *prometheus.GaugeVec
 	pipelineCount *prometheus.CounterVec
 }
 
 // Next implements the rpc.Next function
-func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Pipeline, error) {
-	metadata, ok := grpcMetadata.FromIncomingContext(c)
-	if ok {
-		hostname, ok := metadata["hostname"]
-		if ok && len(hostname) != 0 {
-			log.Debug().Msgf("agent connected: %s: polling", hostname[0])
-		}
+func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, error) {
+	if hostname, err := s.getHostnameFromContext(c); err == nil {
+		log.Debug().Msgf("agent connected: %s: polling", hostname)
 	}
 
 	fn, err := createFilterFunc(agentFilter)
@@ -82,9 +76,9 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Pipeline, er
 		}
 
 		if task.ShouldRun() {
-			pipeline := new(rpc.Pipeline)
-			err = json.Unmarshal(task.Data, pipeline)
-			return pipeline, err
+			workflow := new(rpc.Workflow)
+			err = json.Unmarshal(task.Data, workflow)
+			return workflow, err
 		}
 
 		if err := s.Done(c, task.ID, rpc.State{}); err != nil {
@@ -104,7 +98,7 @@ func (s *RPC) Extend(c context.Context, id string) error {
 }
 
 // Update implements the rpc.Update function
-func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
+func (s *RPC) Update(_ context.Context, id string, state rpc.State) error {
 	workflowID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		return err
@@ -152,9 +146,7 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 		Repo:     *repo,
 		Pipeline: *currentPipeline,
 	})
-	if err := s.pubsub.Publish(c, "topic/events", message); err != nil {
-		log.Error().Err(err).Msg("can not publish step list to")
-	}
+	s.pubsub.Publish(message)
 
 	return nil
 }
@@ -210,9 +202,7 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 			Repo:     *repo,
 			Pipeline: *currentPipeline,
 		})
-		if err := s.pubsub.Publish(c, "topic/events", message); err != nil {
-			log.Error().Err(err).Msg("can not publish step list to")
-		}
+		s.pubsub.Publish(message)
 	}()
 
 	workflow, err = pipeline.UpdateWorkflowToStatusStarted(s.store, *workflow, state)
@@ -290,16 +280,14 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 
 	// make sure writes to pubsub are non blocking (https://github.com/woodpecker-ci/woodpecker/blob/c919f32e0b6432a95e1a6d3d0ad662f591adf73f/server/logging/log.go#L9)
 	go func() {
-		for _, wf := range currentPipeline.Workflows {
-			for _, step := range wf.Children {
-				if err := s.logger.Close(c, step.ID); err != nil {
-					logger.Error().Err(err).Msgf("done: cannot close log stream for step %d", step.ID)
-				}
+		for _, step := range workflow.Children {
+			if err := s.logger.Close(c, step.ID); err != nil {
+				logger.Error().Err(err).Msgf("done: cannot close log stream for step %d", step.ID)
 			}
 		}
 	}()
 
-	if err := s.notify(c, repo, currentPipeline); err != nil {
+	if err := s.notify(repo, currentPipeline); err != nil {
 		return err
 	}
 
@@ -345,6 +333,12 @@ func (s *RPC) RegisterAgent(ctx context.Context, platform, backend, version stri
 		return -1, err
 	}
 
+	if agent.Name == "" {
+		if hostname, err := s.getHostnameFromContext(ctx); err == nil {
+			agent.Name = hostname
+		}
+	}
+
 	agent.Backend = backend
 	agent.Platform = platform
 	agent.Capacity = capacity
@@ -356,6 +350,22 @@ func (s *RPC) RegisterAgent(ctx context.Context, platform, backend, version stri
 	}
 
 	return agent.ID, nil
+}
+
+func (s *RPC) UnregisterAgent(ctx context.Context) error {
+	agent, err := s.getAgentFromContext(ctx)
+	if agent.OwnerID > 0 {
+		// registered with individual agent token -> do not unregister
+		return nil
+	}
+	log.Debug().Msgf("unregistering agent with ID %d", agent.ID)
+	if err != nil {
+		return err
+	}
+
+	err = s.store.AgentDelete(agent)
+
+	return err
 }
 
 func (s *RPC) ReportHealth(ctx context.Context, status string) error {
@@ -390,16 +400,7 @@ func (s *RPC) updateForgeStatus(ctx context.Context, repo *model.Repo, pipeline 
 		return
 	}
 
-	if refresher, ok := s.forge.(forge.Refresher); ok {
-		ok, err := refresher.Refresh(ctx, user)
-		if err != nil {
-			log.Error().Err(err).Msgf("grpc: refresh oauth token of user '%s' failed", user.Login)
-		} else if ok {
-			if err := s.store.UpdateUser(user); err != nil {
-				log.Error().Err(err).Msg("fail to save user to store after refresh oauth token")
-			}
-		}
-	}
+	forge.Refresh(ctx, s.forge, s.store, user)
 
 	// only do status updates for parent steps
 	if workflow != nil {
@@ -410,7 +411,7 @@ func (s *RPC) updateForgeStatus(ctx context.Context, repo *model.Repo, pipeline 
 	}
 }
 
-func (s *RPC) notify(c context.Context, repo *model.Repo, pipeline *model.Pipeline) (err error) {
+func (s *RPC) notify(repo *model.Repo, pipeline *model.Pipeline) (err error) {
 	message := pubsub.Message{
 		Labels: map[string]string{
 			"repo":    repo.FullName,
@@ -421,14 +422,12 @@ func (s *RPC) notify(c context.Context, repo *model.Repo, pipeline *model.Pipeli
 		Repo:     *repo,
 		Pipeline: *pipeline,
 	})
-	if err := s.pubsub.Publish(c, "topic/events", message); err != nil {
-		log.Error().Err(err).Msgf("grpc could not notify event: '%v'", message)
-	}
+	s.pubsub.Publish(message)
 	return nil
 }
 
 func (s *RPC) getAgentFromContext(ctx context.Context) (*model.Agent, error) {
-	md, ok := metadata.FromIncomingContext(ctx)
+	md, ok := grpcMetadata.FromIncomingContext(ctx)
 	if !ok {
 		return nil, errors.New("metadata is not provided")
 	}
@@ -445,4 +444,15 @@ func (s *RPC) getAgentFromContext(ctx context.Context) (*model.Agent, error) {
 	}
 
 	return s.store.AgentFind(agentID)
+}
+
+func (s *RPC) getHostnameFromContext(ctx context.Context) (string, error) {
+	metadata, ok := grpcMetadata.FromIncomingContext(ctx)
+	if ok {
+		hostname, ok := metadata["hostname"]
+		if ok && len(hostname) != 0 {
+			return hostname[0], nil
+		}
+	}
+	return "", errors.New("no hostname in metadata")
 }

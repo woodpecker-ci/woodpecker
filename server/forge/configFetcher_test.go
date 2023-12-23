@@ -31,11 +31,11 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	"github.com/woodpecker-ci/woodpecker/server/forge"
-	"github.com/woodpecker-ci/woodpecker/server/forge/mocks"
-	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/plugins/config"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/mocks"
+	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/config"
 )
 
 func TestFetch(t *testing.T) {
@@ -316,7 +316,7 @@ func TestFetch(t *testing.T) {
 			configFetcher := forge.NewConfigFetcher(
 				f,
 				time.Second*3,
-				config.NewHTTP("", ""),
+				nil,
 				&model.User{Token: "xxx"},
 				repo,
 				&model.Pipeline{Commit: "89ab7b2d6bfb347144ac7c557e638ab402848fee"},
@@ -518,6 +518,8 @@ func TestFetchFromConfigService(t *testing.T) {
 			// if the previous mocks do not match return not found errors
 			f.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("File not found"))
 			f.On("Dir", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("Directory not found"))
+
+			f.On("Netrc", mock.Anything, mock.Anything).Return(&model.Netrc{Machine: "mock", Login: "mock", Password: "mock"}, nil)
 
 			configFetcher := forge.NewConfigFetcher(
 				f,

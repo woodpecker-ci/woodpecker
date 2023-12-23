@@ -17,4 +17,7 @@ export type User = {
 
   active: boolean;
   // Whether the account is currently active.
+
+  org_id: number;
+  // The ID of the org assigned to the user.
 };

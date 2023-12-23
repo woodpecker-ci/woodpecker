@@ -1,22 +1,17 @@
 <template>
   <main class="flex flex-col w-full h-full justify-center items-center">
     <!-- TODO: Should use vue notifications. -->
-    <div
-      v-if="errorMessage"
-      class="bg-wp-control-error-100 border-l-6 border-l-wp-control-error-300 text-white p-4 rounded-md"
-    >
-      {{ errorMessage }}
-    </div>
+    <Error v-if="errorMessage" text-only :text="errorMessage" class="w-full md:w-3xl" />
 
     <div
-      class="flex flex-col w-full overflow-hidden md:m-8 md:rounded-md md:shadow md:border md:border-wp-background-400 md:bg-wp-background-100 md:dark:bg-wp-background-200 md:flex-row md:w-3xl md:h-sm justify-center"
+      class="flex flex-col w-full overflow-hidden bg-wp-background-100 shadow border border-wp-background-400 dark:bg-wp-background-200 md:m-8 md:rounded-md md:flex-row md:w-3xl md:h-sm"
     >
-      <div class="flex md:bg-wp-primary-200 md:dark:bg-wp-primary-300 md:w-3/5 justify-center items-center">
-        <WoodpeckerLogo class="w-48 h-48" />
+      <div class="flex justify-center items-center bg-wp-primary-200 dark:bg-wp-primary-300 min-h-48 md:w-3/5">
+        <WoodpeckerLogo preserveAspectRatio="xMinYMin slice" class="w-30 h-30 md:w-48 md:h-48" />
       </div>
-      <div class="flex flex-col my-8 md:w-2/5 p-4 items-center justify-center">
+      <div class="flex justify-center items-center flex-col md:w-2/5 min-h-48 gap-4 text-center">
         <h1 class="text-xl text-wp-text-100">{{ $t('welcome') }}</h1>
-        <Button class="mt-4" @click="doLogin">{{ $t('login') }}</Button>
+        <Button @click="doLogin">{{ $t('login') }}</Button>
       </div>
     </div>
   </main>

@@ -20,8 +20,7 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
 var pipelineApproveCmd = &cli.Command{
@@ -29,7 +28,6 @@ var pipelineApproveCmd = &cli.Command{
 	Usage:     "approve a pipeline",
 	ArgsUsage: "<repo-id|repo-full-name> <pipeline>",
 	Action:    pipelineApprove,
-	Flags:     common.GlobalFlags,
 }
 
 func pipelineApprove(c *cli.Context) (err error) {
@@ -42,7 +40,7 @@ func pipelineApprove(c *cli.Context) (err error) {
 	if err != nil {
 		return err
 	}
-	number, err := strconv.Atoi(c.Args().Get(1))
+	number, err := strconv.ParseInt(c.Args().Get(1), 10, 64)
 	if err != nil {
 		return err
 	}

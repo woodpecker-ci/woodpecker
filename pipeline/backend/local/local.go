@@ -22,14 +22,16 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
+	"runtime"
+	"slices"
 	"sync"
 
-	"github.com/alessio/shellescape"
 	"github.com/rs/zerolog/log"
-	"golang.org/x/exp/slices"
+	"github.com/urfave/cli/v2"
+	"golang.org/x/text/encoding/unicode"
+	"golang.org/x/text/transform"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
 
 type workflowState struct {
@@ -41,14 +43,19 @@ type workflowState struct {
 }
 
 type local struct {
+	tempDir         string
 	workflows       sync.Map
 	output          io.ReadCloser
 	pluginGitBinary string
+	os, arch        string
 }
 
-// New returns a new local Engine.
-func New() types.Engine {
-	return &local{}
+// New returns a new local Backend.
+func New() types.Backend {
+	return &local{
+		os:   runtime.GOOS,
+		arch: runtime.GOARCH,
+	}
 }
 
 func (e *local) Name() string {
@@ -59,17 +66,24 @@ func (e *local) IsAvailable(context.Context) bool {
 	return true
 }
 
-func (e *local) Load(context.Context) error {
+func (e *local) Load(ctx context.Context) (*types.BackendInfo, error) {
+	c, ok := ctx.Value(types.CliContext).(*cli.Context)
+	if ok {
+		e.tempDir = c.String("backend-local-temp-dir")
+	}
+
 	e.loadClone()
 
-	return nil
+	return &types.BackendInfo{
+		Platform: e.os + "/" + e.arch,
+	}, nil
 }
 
 // SetupWorkflow the pipeline environment.
 func (e *local) SetupWorkflow(_ context.Context, _ *types.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msg("create workflow environment")
 
-	baseDir, err := os.MkdirTemp("", "woodpecker-local-*")
+	baseDir, err := os.MkdirTemp(e.tempDir, "woodpecker-local-*")
 	if err != nil {
 		return err
 	}
@@ -112,30 +126,59 @@ func (e *local) StartStep(ctx context.Context, step *types.Step, taskUUID string
 		}
 	}
 
-	// Set HOME
+	// Set HOME and CI_WORKSPACE
 	env = append(env, "HOME="+state.homeDir)
+	env = append(env, "USERPROFILE="+state.homeDir)
+	env = append(env, "CI_WORKSPACE="+state.workspaceDir)
 
 	switch step.Type {
 	case types.StepTypeClone:
 		return e.execClone(ctx, step, state, env)
 	case types.StepTypeCommands:
 		return e.execCommands(ctx, step, state, env)
+	case types.StepTypePlugin:
+		return e.execPlugin(ctx, step, state, env)
 	default:
 		return ErrUnsupportedStepType
 	}
 }
 
+// execCommands use step.Image as shell and run the commands in it
 func (e *local) execCommands(ctx context.Context, step *types.Step, state *workflowState, env []string) error {
-	// TODO: use commands directly
-	script := ""
-	for _, cmd := range step.Commands {
-		script += fmt.Sprintf("echo + %s\n%s\n", strings.TrimSpace(shellescape.Quote(cmd)), cmd)
+	// Prepare commands
+	args, err := e.genCmdByShell(step.Image, step.Commands)
+	if err != nil {
+		return fmt.Errorf("could not convert commands into args: %w", err)
 	}
-	script = strings.TrimSpace(script)
 
-	// Prepare command
 	// Use "image name" as run command (indicate shell)
-	cmd := exec.CommandContext(ctx, step.Image, "-c", script)
+	cmd := exec.CommandContext(ctx, step.Image, args...)
+	cmd.Env = env
+	cmd.Dir = state.workspaceDir
+
+	// Get output and redirect Stderr to Stdout
+	e.output, _ = cmd.StdoutPipe()
+	cmd.Stderr = cmd.Stdout
+
+	if e.os == "windows" {
+		// we get non utf8 output from windows so just sanitize it
+		// TODO: remove hack
+		e.output = io.NopCloser(transform.NewReader(e.output, unicode.UTF8.NewDecoder().Transformer))
+	}
+
+	state.stepCMDs[step.Name] = cmd
+
+	return cmd.Start()
+}
+
+// execPlugin use step.Image as exec binary
+func (e *local) execPlugin(ctx context.Context, step *types.Step, state *workflowState, env []string) error {
+	binary, err := exec.LookPath(step.Image)
+	if err != nil {
+		return fmt.Errorf("lookup plugin binary: %w", err)
+	}
+
+	cmd := exec.CommandContext(ctx, binary)
 	cmd.Env = env
 	cmd.Dir = state.workspaceDir
 
@@ -183,6 +226,11 @@ func (e *local) WaitStep(_ context.Context, step *types.Step, taskUUID string) (
 func (e *local) TailStep(_ context.Context, step *types.Step, taskUUID string) (io.ReadCloser, error) {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("tail logs of step %s", step.Name)
 	return e.output, nil
+}
+
+func (e *local) DestroyStep(_ context.Context, _ *types.Step, _ string) error {
+	// WaitStep already waits for the command to finish, so there is nothing to do here.
+	return nil
 }
 
 // DestroyWorkflow the pipeline environment.

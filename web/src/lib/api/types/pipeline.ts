@@ -1,5 +1,12 @@
 import { WebhookEvents } from './webhook';
 
+export type PipelineError<D = unknown> = {
+  type: string;
+  message: string;
+  data?: D;
+  is_warning: boolean;
+};
+
 // A pipeline for a repository.
 export type Pipeline = {
   id: number;
@@ -15,7 +22,7 @@ export type Pipeline = {
   //  The current status of the pipeline.
   status: PipelineStatus;
 
-  error: string;
+  errors?: PipelineError[];
 
   // When the pipeline request was received.
   created_at: number;
@@ -69,9 +76,8 @@ export type Pipeline = {
   //  email for the author of the commit.
   author_email: string;
 
-  // The link to view the repository.
-  // This link will point to the repository state associated with the pipeline's commit.
-  link_url: string;
+  // This url will point to the repository state associated with the pipeline's commit.
+  forge_url: string;
 
   signed: boolean;
 

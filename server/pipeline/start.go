@@ -19,10 +19,9 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline"
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
 // start a pipeline, make sure it was stored persistent in the store before
@@ -38,28 +37,17 @@ func start(ctx context.Context, store store.Store, activePipeline *model.Pipelin
 		return nil, err
 	}
 
-	if err := publishToTopic(ctx, activePipeline, repo); err != nil {
-		log.Error().Err(err).Msg("publishToTopic")
-	}
+	publishPipeline(ctx, activePipeline, repo, user)
 
 	if err := queuePipeline(repo, pipelineItems); err != nil {
 		log.Error().Err(err).Msg("queuePipeline")
 		return nil, err
 	}
 
-	// open logs streamer for each step
-	for _, wf := range activePipeline.Workflows {
-		for _, step := range wf.Children {
-			stepID := step.ID
-			go func() {
-				if err := server.Config.Services.Logs.Open(context.Background(), stepID); err != nil {
-					log.Error().Err(err).Msgf("could not open log stream for step %d", stepID)
-				}
-			}()
-		}
-	}
-
-	updatePipelineStatus(ctx, activePipeline, repo, user)
-
 	return activePipeline, nil
+}
+
+func publishPipeline(ctx context.Context, pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User) {
+	publishToTopic(pipeline, repo)
+	updatePipelineStatus(ctx, pipeline, repo, repoUser)
 }

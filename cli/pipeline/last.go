@@ -20,8 +20,8 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
 var pipelineLastCmd = &cli.Command{
@@ -29,14 +29,14 @@ var pipelineLastCmd = &cli.Command{
 	Usage:     "show latest pipeline details",
 	ArgsUsage: "<repo-id|repo-full-name>",
 	Action:    pipelineLast,
-	Flags: append(common.GlobalFlags,
+	Flags: []cli.Flag{
 		common.FormatFlag(tmplPipelineInfo),
 		&cli.StringFlag{
 			Name:  "branch",
 			Usage: "branch name",
 			Value: "main",
 		},
-	),
+	},
 }
 
 func pipelineLast(c *cli.Context) error {

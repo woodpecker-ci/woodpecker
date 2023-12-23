@@ -1,38 +1,50 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package backend
 
 import (
 	"context"
 	"fmt"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/docker"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/kubernetes"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/local"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/ssh"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/docker"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/kubernetes"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/local"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
 
 var (
-	enginesByName map[string]types.Engine
-	engines       []types.Engine
+	backendsByName map[string]types.Backend
+	backends       []types.Backend
 )
 
 func Init(ctx context.Context) {
-	engines = []types.Engine{
+	backends = []types.Backend{
 		docker.New(),
 		local.New(),
-		ssh.New(),
 		kubernetes.New(ctx),
 	}
 
-	enginesByName = make(map[string]types.Engine)
-	for _, engine := range engines {
-		enginesByName[engine.Name()] = engine
+	backendsByName = make(map[string]types.Backend)
+	for _, engine := range backends {
+		backendsByName[engine.Name()] = engine
 	}
 }
 
-func FindEngine(ctx context.Context, engineName string) (types.Engine, error) {
-	if engineName == "auto-detect" {
-		for _, engine := range engines {
+func FindBackend(ctx context.Context, backendName string) (types.Backend, error) {
+	if backendName == "auto-detect" {
+		for _, engine := range backends {
 			if engine.IsAvailable(ctx) {
 				return engine, nil
 			}
@@ -41,9 +53,9 @@ func FindEngine(ctx context.Context, engineName string) (types.Engine, error) {
 		return nil, fmt.Errorf("can't detect an available backend engine")
 	}
 
-	engine, ok := enginesByName[engineName]
+	engine, ok := backendsByName[backendName]
 	if !ok {
-		return nil, fmt.Errorf("backend engine '%s' not found", engineName)
+		return nil, fmt.Errorf("backend engine '%s' not found", backendName)
 	}
 
 	return engine, nil

@@ -1,20 +1,23 @@
+version: 1
+
 when:
   - event: [pull_request, tag]
   - event: push
     branch:
       - ${CI_REPO_DEFAULT_BRANCH}
       - release/*
+      - renovate/*
 
 variables:
-  - &node_image 'node:18-alpine'
+  - &node_image 'docker.io/node:21-alpine'
   - &when
     path:
       # related config files
-      - ".woodpecker/web.yml"
+      - '.woodpecker/web.yml'
       # web source code
-      - "web/**"
+      - 'web/**'
       # api source code
-      - "server/api/**"
+      - 'server/api/**'
     event: [pull_request, tag, deployment]
 
 steps:

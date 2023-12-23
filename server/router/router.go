@@ -23,14 +23,14 @@ import (
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
-	"github.com/woodpecker-ci/woodpecker/cmd/server/docs"
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/api"
-	"github.com/woodpecker-ci/woodpecker/server/api/metrics"
-	"github.com/woodpecker-ci/woodpecker/server/router/middleware/header"
-	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
-	"github.com/woodpecker-ci/woodpecker/server/router/middleware/token"
-	"github.com/woodpecker-ci/woodpecker/server/web"
+	"go.woodpecker-ci.org/woodpecker/v2/cmd/server/docs"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/api"
+	"go.woodpecker-ci.org/woodpecker/v2/server/api/metrics"
+	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/header"
+	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
+	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/token"
+	"go.woodpecker-ci.org/woodpecker/v2/server/web"
 )
 
 // Load loads the router

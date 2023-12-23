@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,16 +19,16 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strings"
+	"runtime"
 	"time"
 
 	"github.com/rs/zerolog/log"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
 	"gopkg.in/yaml.v3"
+
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 
 	"github.com/urfave/cli/v2"
 	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
@@ -40,33 +40,55 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
-var noContext = context.Background()
+const (
+	EngineName = "kubernetes"
+)
+
+var defaultDeleteOptions = newDefaultDeleteOptions()
 
 type kube struct {
 	ctx    context.Context
 	client kubernetes.Interface
-	config *Config
+	config *config
+	goos   string
 }
 
-type Config struct {
-	Namespace      string
-	StorageClass   string
-	VolumeSize     string
-	StorageRwx     bool
-	PodLabels      map[string]string
-	PodAnnotations map[string]string
+type config struct {
+	Namespace       string
+	StorageClass    string
+	VolumeSize      string
+	StorageRwx      bool
+	PodLabels       map[string]string
+	PodAnnotations  map[string]string
+	SecurityContext SecurityContextConfig
+}
+type SecurityContextConfig struct {
+	RunAsNonRoot bool
 }
 
-func configFromCliContext(ctx context.Context) (*Config, error) {
+func newDefaultDeleteOptions() metav1.DeleteOptions {
+	gracePeriodSeconds := int64(0) // immediately
+	propagationPolicy := metav1.DeletePropagationBackground
+
+	return metav1.DeleteOptions{
+		GracePeriodSeconds: &gracePeriodSeconds,
+		PropagationPolicy:  &propagationPolicy,
+	}
+}
+
+func configFromCliContext(ctx context.Context) (*config, error) {
 	if ctx != nil {
 		if c, ok := ctx.Value(types.CliContext).(*cli.Context); ok {
-			config := Config{
+			config := config{
 				Namespace:      c.String("backend-k8s-namespace"),
 				StorageClass:   c.String("backend-k8s-storage-class"),
 				VolumeSize:     c.String("backend-k8s-volume-size"),
 				StorageRwx:     c.Bool("backend-k8s-storage-rwx"),
 				PodLabels:      make(map[string]string), // just init empty map to prevent nil panic
 				PodAnnotations: make(map[string]string), // just init empty map to prevent nil panic
+				SecurityContext: SecurityContextConfig{
+					RunAsNonRoot: c.Bool("backend-k8s-secctx-nonroot"),
+				},
 			}
 			// Unmarshal label and annotation settings here to ensure they're valid on startup
 			if labels := c.String("backend-k8s-pod-labels"); labels != "" {
@@ -88,15 +110,15 @@ func configFromCliContext(ctx context.Context) (*Config, error) {
 	return nil, types.ErrNoCliContextFound
 }
 
-// New returns a new Kubernetes Engine.
-func New(ctx context.Context) types.Engine {
+// New returns a new Kubernetes Backend.
+func New(ctx context.Context) types.Backend {
 	return &kube{
 		ctx: ctx,
 	}
 }
 
 func (e *kube) Name() string {
-	return "kubernetes"
+	return EngineName
 }
 
 func (e *kube) IsAvailable(context.Context) bool {
@@ -104,10 +126,10 @@ func (e *kube) IsAvailable(context.Context) bool {
 	return len(host) > 0
 }
 
-func (e *kube) Load(context.Context) error {
+func (e *kube) Load(context.Context) (*types.BackendInfo, error) {
 	config, err := configFromCliContext(e.ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	e.config = config
 
@@ -120,12 +142,16 @@ func (e *kube) Load(context.Context) error {
 	}
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	e.client = kubeClient
 
-	return nil
+	// TODO(2693): use info resp of kubeClient to define platform var
+	e.goos = runtime.GOOS
+	return &types.BackendInfo{
+		Platform: runtime.GOOS + "/" + runtime.GOARCH,
+	}, nil
 }
 
 // Setup the pipeline environment.
@@ -133,45 +159,26 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID s
 	log.Trace().Str("taskUUID", taskUUID).Msgf("Setting up Kubernetes primitives")
 
 	for _, vol := range conf.Volumes {
-		pvc, err := PersistentVolumeClaim(e.config.Namespace, vol.Name, e.config.StorageClass, e.config.VolumeSize, e.config.StorageRwx)
-		if err != nil {
-			return err
-		}
-
-		_, err = e.client.CoreV1().PersistentVolumeClaims(e.config.Namespace).Create(ctx, pvc, metav1.CreateOptions{})
+		_, err := startVolume(ctx, e, vol.Name)
 		if err != nil {
 			return err
 		}
 	}
 
-	extraHosts := []string{}
-
+	extraHosts := []types.HostAlias{}
 	for _, stage := range conf.Stages {
 		if stage.Alias == "services" {
 			for _, step := range stage.Steps {
-				stepName, err := dnsName(step.Name)
+				svc, err := startService(ctx, e, step)
 				if err != nil {
 					return err
 				}
-				log.Trace().Str("pod-name", stepName).Msgf("Creating service: %s", step.Name)
-				// TODO: support ports setting
-				// svc, err := Service(e.config.Namespace, step.Name, stepName, step.Ports)
-				svc, err := Service(e.config.Namespace, step.Name, stepName, []string{})
-				if err != nil {
-					return err
-				}
-
-				svc, err = e.client.CoreV1().Services(e.config.Namespace).Create(ctx, svc, metav1.CreateOptions{})
-				if err != nil {
-					return err
-				}
-
-				extraHosts = append(extraHosts, step.Networks[0].Aliases[0]+":"+svc.Spec.ClusterIP)
+				hostAlias := types.HostAlias{Name: step.Networks[0].Aliases[0], IP: svc.Spec.ClusterIP}
+				extraHosts = append(extraHosts, hostAlias)
 			}
 		}
 	}
-
-	log.Trace().Msgf("Adding extra hosts: %s", strings.Join(extraHosts, ", "))
+	log.Trace().Msgf("Adding extra hosts: %v", extraHosts)
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
 			step.ExtraHosts = extraHosts
@@ -183,13 +190,8 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID s
 
 // Start the pipeline step.
 func (e *kube) StartStep(ctx context.Context, step *types.Step, taskUUID string) error {
-	pod, err := Pod(e.config.Namespace, step, e.config.PodLabels, e.config.PodAnnotations)
-	if err != nil {
-		return err
-	}
-
-	log.Trace().Str("taskUUID", taskUUID).Msgf("Creating pod: %s", pod.Name)
-	_, err = e.client.CoreV1().Pods(e.config.Namespace).Create(ctx, pod, metav1.CreateOptions{})
+	log.Trace().Str("taskUUID", taskUUID).Msgf("Starting step: %s", step.Name)
+	_, err := startPod(ctx, e, step)
 	return err
 }
 
@@ -205,7 +207,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 
 	finished := make(chan bool)
 
-	podUpdated := func(old, new interface{}) {
+	podUpdated := func(old, new any) {
 		pod := new.(*v1.Pod)
 		if pod.Name == podName {
 			if isImagePullBackOffState(pod) {
@@ -265,7 +267,7 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 
 	up := make(chan bool)
 
-	podUpdated := func(old, new interface{}) {
+	podUpdated := func(old, new any) {
 		pod := new.(*v1.Pod)
 		if pod.Name == podName {
 			switch pod.Status.Phase {
@@ -325,72 +327,37 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 	// return rc, nil
 }
 
+func (e *kube) DestroyStep(_ context.Context, step *types.Step, taskUUID string) error {
+	log.Trace().Str("taskUUID", taskUUID).Msgf("Stopping step: %s", step.Name)
+	err := stopPod(e.ctx, e, step, defaultDeleteOptions)
+	return err
+}
+
 // Destroy the pipeline environment.
 func (e *kube) DestroyWorkflow(_ context.Context, conf *types.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msg("Deleting Kubernetes primitives")
 
-	gracePeriodSeconds := int64(0) // immediately
-	dpb := metav1.DeletePropagationBackground
-
-	deleteOpts := metav1.DeleteOptions{
-		GracePeriodSeconds: &gracePeriodSeconds,
-		PropagationPolicy:  &dpb,
-	}
-
 	// Use noContext because the ctx sent to this function will be canceled/done in case of error or canceled by user.
-	// Don't abort on 404 errors from k8s, they most likely mean that the pod hasn't been created yet, usually because pipeline was canceled before running all steps.
-	// Trace log them in case the info could be useful when troubleshooting.
-
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
-			stepName, err := dnsName(step.Name)
+			err := stopPod(e.ctx, e, step, defaultDeleteOptions)
 			if err != nil {
 				return err
 			}
-			log.Trace().Msgf("Deleting pod: %s", stepName)
-			if err := e.client.CoreV1().Pods(e.config.Namespace).Delete(noContext, stepName, deleteOpts); err != nil {
-				if errors.IsNotFound(err) {
-					log.Trace().Err(err).Msgf("Unable to delete pod %s", stepName)
-				} else {
-					return err
-				}
-			}
-		}
-	}
 
-	for _, stage := range conf.Stages {
-		if stage.Alias == "services" {
-			for _, step := range stage.Steps {
-				log.Trace().Msgf("Deleting service: %s", step.Name)
-				// TODO: support ports setting
-				// svc, err := Service(e.config.Namespace, step.Name, step.Alias, step.Ports)
-				svc, err := Service(e.config.Namespace, step.Name, step.Alias, []string{})
+			if step.Type == types.StepTypeService {
+				err := stopService(e.ctx, e, step, defaultDeleteOptions)
 				if err != nil {
 					return err
-				}
-				if err := e.client.CoreV1().Services(e.config.Namespace).Delete(noContext, svc.Name, deleteOpts); err != nil {
-					if errors.IsNotFound(err) {
-						log.Trace().Err(err).Msgf("Unable to delete service %s", svc.Name)
-					} else {
-						return err
-					}
 				}
 			}
 		}
 	}
 
 	for _, vol := range conf.Volumes {
-		pvc, err := PersistentVolumeClaim(e.config.Namespace, vol.Name, e.config.StorageClass, e.config.VolumeSize, e.config.StorageRwx)
+		err := stopVolume(e.ctx, e, vol.Name, defaultDeleteOptions)
 		if err != nil {
 			return err
-		}
-		err = e.client.CoreV1().PersistentVolumeClaims(e.config.Namespace).Delete(noContext, pvc.Name, deleteOpts)
-		if err != nil {
-			if errors.IsNotFound(err) {
-				log.Trace().Err(err).Msgf("Unable to delete pvc %s", pvc.Name)
-			} else {
-				return err
-			}
 		}
 	}
 

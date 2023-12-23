@@ -3,6 +3,7 @@
     :go-back="goBack"
     :enable-tabs="enableTabs"
     :search="search"
+    :full-width="fullWidthHeader"
     @update:search="(value) => $emit('update:search', value)"
   >
     <template #title><slot name="title" /></template>
@@ -10,53 +11,59 @@
     <template v-if="$slots.tabActions" #tabActions><slot name="tabActions" /></template>
   </Header>
 
-  <FluidContainer v-if="fluidContent">
+  <slot v-if="fluidContent" />
+  <Container v-else>
     <slot />
-  </FluidContainer>
-  <slot v-else />
+  </Container>
 </template>
 
 <script setup lang="ts">
-import { toRef } from 'vue';
+import { computed, ref, watch } from 'vue';
 
-import FluidContainer from '~/components/layout/FluidContainer.vue';
+import Container from '~/components/layout/Container.vue';
 import { useTabsProvider } from '~/compositions/useTabs';
 
 import Header from './Header.vue';
 
-export interface Props {
+const props = defineProps<{
   // Header
   goBack?: () => void;
   search?: string;
+  fullWidthHeader?: boolean;
 
   // Tabs
   enableTabs?: boolean;
-  disableHashMode?: boolean;
-  activeTab: string;
+  disableTabUrlHashMode?: boolean;
+  activeTab?: string;
 
   // Content
   fluidContent?: boolean;
-}
+}>();
 
-const props = withDefaults(defineProps<Props>(), {
-  goBack: undefined,
-  search: undefined,
-  // eslint-disable-next-line vue/no-boolean-default
-  disableHashMode: false,
-  // eslint-disable-next-line vue/no-boolean-default
-  enableTabs: false,
-  activeTab: '',
-  // eslint-disable-next-line vue/no-boolean-default
-  fluidContent: true,
-});
-
-const emit = defineEmits(['update:activeTab', 'update:search']);
+const emit = defineEmits<{
+  (event: 'update:activeTab', value: string | undefined): void;
+  (event: 'update:search', value: string): void;
+}>();
 
 if (props.enableTabs) {
+  const internalActiveTab = ref(props.activeTab);
+
+  watch(
+    () => props.activeTab,
+    (activeTab) => {
+      internalActiveTab.value = activeTab;
+    },
+  );
+
   useTabsProvider({
-    activeTabProp: toRef(props, 'activeTab'),
-    disableHashMode: toRef(props, 'disableHashMode'),
-    updateActiveTabProp: (value) => emit('update:activeTab', value),
+    activeTab: computed({
+      get: () => internalActiveTab.value,
+      set: (value) => {
+        internalActiveTab.value = value;
+        emit('update:activeTab', value);
+      },
+    }),
+    disableUrlHashMode: computed(() => props.disableTabUrlHashMode || false),
   });
 }
 </script>

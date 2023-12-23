@@ -1,8 +1,8 @@
-FROM --platform=$BUILDPLATFORM golang:1.20 AS build
+FROM --platform=$BUILDPLATFORM docker.io/golang:1.21 AS build
 
 WORKDIR /src
 COPY . .
-ARG TARGETOS TARGETARCH
+ARG TARGETOS TARGETARCH CI_COMMIT_SHA CI_COMMIT_TAG CI_COMMIT_BRANCH
 RUN --mount=type=cache,target=/root/.cache/go-build \
     --mount=type=cache,target=/go/pkg \
     make build-cli

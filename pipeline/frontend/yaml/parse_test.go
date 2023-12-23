@@ -1,3 +1,17 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package yaml
 
 import (
@@ -6,8 +20,8 @@ import (
 	"github.com/franela/goblin"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
-	yaml_base_types "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types/base"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
+	yaml_base_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types/base"
 )
 
 func TestParse(t *testing.T) {
@@ -74,6 +88,16 @@ func TestParse(t *testing.T) {
 				g.Assert(out.Steps.ContainerList[1].When.Constraints[0].Event.Include).Equal([]string{"success"})
 			})
 
+			g.It("Should unmarshal with default version", func() {
+				out, err := ParseString(sampleYamlDefaultVersion)
+				if err != nil {
+					g.Fail(err)
+				}
+				g.Assert(len(out.Steps.ContainerList)).Equal(1)
+				g.Assert(out.Steps.ContainerList[0].Name).Equal("notify_success")
+				g.Assert(out.Steps.ContainerList[0].Image).Equal("xyz")
+			})
+
 			matchConfig, err := ParseString(sampleYaml)
 			if err != nil {
 				g.Fail(err)
@@ -125,27 +149,29 @@ func TestParse(t *testing.T) {
 }
 
 func TestParseLegacy(t *testing.T) {
-	// adjust with https://github.com/woodpecker-ci/woodpecker/pull/2181
 	sampleYamlPipelineLegacy := `
 platform: linux/amd64
-labels:
-  platform: linux/arm64
 
-steps:
+pipeline:
   say hello:
     image: bash
     commands: echo hello
 `
 
 	sampleYamlPipelineLegacyIgnore := `
-platform: linux/amd64
+platform: windows/amd64
 labels:
-  platform: linux/arm64
+  platform: linux/amd64
 
 steps:
   say hello:
     image: bash
     commands: echo hello
+
+pipeline:
+  old crap:
+    image: bash
+    commands: meh!
 `
 
 	workflow1, err := ParseString(sampleYamlPipelineLegacy)
@@ -164,6 +190,7 @@ steps:
 }
 
 var sampleYaml = `
+version: 1
 image: hello-world
 when:
   - event:
@@ -215,7 +242,14 @@ runs_on:
   - failure
 `
 
+var sampleYamlDefaultVersion = `
+steps:
+  - name: notify_success
+    image: xyz
+`
+
 var simpleYamlAnchors = `
+version: 1
 vars:
   image: &image plugins/slack
 steps:
@@ -224,6 +258,7 @@ steps:
 `
 
 var sampleVarYaml = `
+version: 1
 _slack: &SLACK
   image: plugins/slack
 steps:

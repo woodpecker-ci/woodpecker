@@ -4,7 +4,7 @@
 
 This guide provides a brief overview for installing Woodpecker server behind the Apache2 web-server. This is an example configuration:
 
-```nohighlight
+```apacheconf
 ProxyPreserveHost On
 
 RequestHeader set X-Forwarded-Proto "https"
@@ -98,9 +98,31 @@ woodpeckeragent.example.com {
 Above configuration shows how to create reverse-proxies for web and agent communication. If your agent uses SSL do not forget to enable [WOODPECKER_GRPC_SECURE](./15-agent-config.md#woodpecker_grpc_secure).
 :::
 
+## Tunnelmole
+
+[Tunnelmole](https://github.com/robbie-cahill/tunnelmole-client) is an open source tunneling tool.
+
+Start by [installing tunnelmole](https://github.com/robbie-cahill/tunnelmole-client#installation).
+
+After the installation, run the following command to start tunnelmole:
+
+```bash
+tmole 8000
+```
+
+It will start a tunnel and will give a response like this:
+
+```bash
+➜  ~ tmole 8000
+http://bvdo5f-ip-49-183-170-144.tunnelmole.net is forwarding to localhost:8000
+https://bvdo5f-ip-49-183-170-144.tunnelmole.net is forwarding to localhost:8000
+```
+
+Set `WOODPECKER_HOST` (for example in `docker-compose.yml`) to the Tunnelmole URL (`xxx.tunnelmole.net`) and start the server.
+
 ## Ngrok
 
-After installing [ngrok](https://ngrok.com/), open a new console and run:
+[Ngrok](https://ngrok.com/) is a popular closed source tunnelling tool. After installing ngrok, open a new console and run the following command:
 
 ```bash
 ngrok http 8000
@@ -108,12 +130,11 @@ ngrok http 8000
 
 Set `WOODPECKER_HOST` (for example in `docker-compose.yml`) to the ngrok URL (usually xxx.ngrok.io) and start the server.
 
-
 ## Traefik
 
 To install the Woodpecker server behind a [Traefik](https://traefik.io/) load balancer, you must expose both the `http` and the `gRPC` ports. Here is a comprehensive example, considering you are running Traefik with docker swarm and want to do TLS termination and automatic redirection from http to https.
 
-```yml
+```yaml
 version: '3.8'
 
 services:
@@ -167,7 +188,6 @@ services:
         - traefik.http.middlewares.woodpecker-grpc-redirect.redirectscheme.scheme=https
         - traefik.http.middlewares.woodpecker-grpc-redirect.redirectscheme.permanent=true
         - traefik.http.routers.woodpecker-grpc.middlewares=woodpecker-grpc-redirect@docker
-
 
 volumes:
   woodpecker-server-data:

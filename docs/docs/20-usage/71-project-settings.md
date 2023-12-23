@@ -21,7 +21,7 @@ Enables handling webhook's pull request event. If disabled, then pipeline won't 
 ### Protected
 
 Every pipeline initiated by an webhook event needs to be approved by a project members with push permissions before being executed.
-The protected option can be used as an additional review process before running potentially harmful pipelines. Especially if pipelines can be executed by third-parties through pull-requests. 
+The protected option can be used as an additional review process before running potentially harmful pipelines. Especially if pipelines can be executed by third-parties through pull-requests.
 
 ### Trusted
 
@@ -39,7 +39,7 @@ Cloning pipeline step may need git credentials. They are injected via netrc. By 
 
 ## Project visibility
 
-You can change the visibility of your project by this setting. If a user has access to a project he can see all builds and their logs and artifacts. Settings, Secrets and Registries can only be accessed by owners.
+You can change the visibility of your project by this setting. If a user has access to a project they can see all builds and their logs and artifacts. Settings, Secrets and Registries can only be accessed by owners.
 
 - `Public` Every user can see your project without being logged in.
 - `Internal` Only authenticated users of the Woodpecker instance can see this project.

@@ -1,6 +1,6 @@
 .wp-plugins-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill,minmax(350px,1fr));
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   grid-gap: 2rem;
   margin-top: 2rem;
 }
@@ -17,7 +17,7 @@
   max-width: 32rem;
   color: var(--ifm-navbar-link-color);
   text-decoration: none;
-  padding: .5rem 0 1rem;
+  padding: 0.5rem 0 1rem;
   flex-grow: 1;
   margin: 0 auto;
   width: 100%;
@@ -27,7 +27,6 @@
   color: var(--ifm-navbar-link-color);
   text-decoration: none;
 }
-
 
 .wp-plugin-card:hover h3 {
   color: var(--ifm-link-color);
@@ -40,14 +39,14 @@
 
 .wp-plugin-verified {
   position: absolute;
-  top: .75rem;
+  top: 0.75rem;
   right: 1rem;
   color: #0369a1;
 }
 
 .wp-plugin-tags {
   display: flex;
-  gap: .5rem;
+  gap: 0.5rem;
   flex-wrap: wrap;
 }
 
@@ -58,8 +57,9 @@
   padding: 1rem 1rem 1rem 2.25rem;
   font-size: 1.1rem;
   appearance: none;
-  background: var(--ifm-navbar-search-input-background-color) var(--ifm-navbar-search-input-icon) no-repeat 0.75rem 1rem / 1.1rem 1.1rem;
-  border-radius: .5rem;
+  background: var(--ifm-navbar-search-input-background-color) var(--ifm-navbar-search-input-icon) no-repeat 0.75rem 1rem /
+    1.1rem 1.1rem;
+  border-radius: 0.5rem;
   border: 1px solid var(--ifm-card-background-color);
   color: var(--ifm-navbar-search-input-color);
 }

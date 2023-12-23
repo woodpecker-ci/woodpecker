@@ -1,0 +1,18 @@
+version: 1
+
+steps:
+  release-helper:
+    image: woodpeckerci/plugin-ready-release-go:1.0.3
+    pull: true
+    settings:
+      release_branch: ${CI_REPO_DEFAULT_BRANCH}
+      forge_type: github
+      git_email: woodpecker-bot@obermui.de
+      github_token:
+        from_secret: GITHUB_TOKEN
+
+when:
+  - event: push
+    branch: ${CI_REPO_DEFAULT_BRANCH}
+  - event: manual
+    evaluate: 'TASK == "release-helper"'

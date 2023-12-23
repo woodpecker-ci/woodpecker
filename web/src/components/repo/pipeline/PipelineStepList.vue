@@ -1,7 +1,7 @@
 <template>
-  <div class="flex flex-col w-full md:w-3/12 md:max-w-md md:min-w-xs md:ml-2 text-wp-text-100 gap-2 pb-2">
+  <div class="flex flex-col w-full md:w-3/12 md:max-w-md md:min-w-xs text-wp-text-100 gap-2 pb-2">
     <div
-      class="flex flex-wrap p-4 gap-1 justify-between flex-shrink-0 md:rounded-md border bg-wp-background-100 border-wp-background-400 dark:bg-wp-background-200"
+      class="flex flex-wrap p-4 gap-1 justify-between flex-shrink-0 rounded-md border bg-wp-background-100 border-wp-background-400 dark:bg-wp-background-200"
     >
       <div class="flex space-x-1 items-center flex-shrink-0">
         <div class="flex items-center">
@@ -10,21 +10,28 @@
         </div>
         <span>{{ pipeline.author }}</span>
       </div>
-      <div class="flex space-x-1 items-center min-w-0">
+      <a
+        v-if="pipeline.event === 'pull_request'"
+        class="flex items-center space-x-1 text-wp-link-100 hover:text-wp-link-200 min-w-0"
+        :href="pipeline.forge_url"
+      >
+        <Icon name="pull_request" />
+        <span class="truncate">{{ prettyRef }}</span>
+      </a>
+      <router-link
+        v-else-if="pipeline.event === 'push' || pipeline.event === 'manual' || pipeline.event === 'deployment'"
+        class="flex items-center space-x-1 text-wp-link-100 hover:text-wp-link-200 min-w-0"
+        :to="{ name: 'repo-branch', params: { branch: prettyRef } }"
+      >
         <Icon v-if="pipeline.event === 'manual'" name="manual-pipeline" />
-        <Icon v-if="pipeline.event === 'push'" name="push" />
-        <Icon v-if="pipeline.event === 'deployment'" name="deployment" />
-        <Icon v-else-if="pipeline.event === 'tag'" name="tag" />
-        <a
-          v-else-if="pipeline.event === 'pull_request'"
-          class="flex items-center space-x-1 text-wp-link-100 hover:text-wp-link-200 min-w-0"
-          :href="pipeline.link_url"
-          target="_blank"
-        >
-          <Icon name="pull_request" />
-          <span class="truncate">{{ prettyRef }}</span>
-        </a>
-        <span v-if="pipeline.event !== 'pull_request'" class="truncate">{{ pipeline.branch }}</span>
+        <Icon v-else-if="pipeline.event === 'push'" name="push" />
+        <Icon v-else-if="pipeline.event === 'deployment'" name="deployment" />
+        <span class="truncate">{{ prettyRef }}</span>
+      </router-link>
+      <div v-else class="flex space-x-1 items-center min-w-0">
+        <Icon v-if="pipeline.event === 'tag'" name="tag" />
+
+        <span class="truncate">{{ prettyRef }}</span>
       </div>
       <div class="flex items-center flex-shrink-0">
         <template v-if="pipeline.event === 'pull_request'">
@@ -34,7 +41,7 @@
         <a
           v-else
           class="text-wp-link-100 hover:text-wp-link-200 flex items-center"
-          :href="pipeline.link_url"
+          :href="pipeline.forge_url"
           target="_blank"
         >
           <Icon name="commit" />
@@ -48,11 +55,11 @@
     </div>
 
     <div class="flex-grow min-h-0 w-full relative">
-      <div class="absolute top-0 left-0 right-0 h-full flex flex-col overflow-y-scroll gap-y-2">
+      <div class="absolute top-0 left-0 right-0 h-full flex flex-col md:overflow-y-auto gap-y-2">
         <div
           v-for="workflow in pipeline.workflows"
           :key="workflow.id"
-          class="p-2 md:rounded-md shadow border bg-wp-background-100 border-wp-background-400 dark:bg-wp-background-200"
+          class="p-2 rounded-md shadow border bg-wp-background-100 border-wp-background-400 dark:bg-wp-background-200"
         >
           <div class="flex flex-col gap-2">
             <div v-if="workflow.environ" class="flex flex-wrap gap-x-1 gap-y-2 text-xs justify-end pt-1 pr-1">
@@ -84,7 +91,6 @@
           <div
             class="transition-height duration-150 overflow-hidden"
             :class="{
-              'max-h-screen': !workflowsCollapsed[workflow.id],
               'max-h-0': workflowsCollapsed[workflow.id],
               'ml-6': pipeline.workflows && pipeline.workflows.length > 1,
             }"

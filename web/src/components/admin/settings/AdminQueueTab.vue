@@ -1,35 +1,25 @@
 <template>
-  <Panel>
-    <div v-if="queueInfo" class="flex flex-row border-b mb-4 pb-4 items-center dark:border-wp-background-100">
-      <div class="ml-2">
-        <h1 class="text-xl text-wp-text-100">{{ $t('admin.settings.queue.queue') }}</h1>
-        <p class="text-sm text-wp-text-alt-100">{{ $t('admin.settings.queue.desc') }}</p>
+  <Settings :title="$t('admin.settings.queue.queue')" :desc="$t('admin.settings.queue.desc')">
+    <template #titleActions>
+      <div v-if="queueInfo">
+        <div class="flex items-center gap-2">
+          <Button
+            v-if="queueInfo.paused"
+            :text="$t('admin.settings.queue.resume')"
+            start-icon="play"
+            @click="resumeQueue"
+          />
+          <Button v-else :text="$t('admin.settings.queue.pause')" start-icon="pause" @click="pauseQueue" />
+          <Icon
+            :name="queueInfo.paused ? 'pause' : 'play'"
+            :class="{
+              'text-wp-state-error-100': queueInfo.paused,
+              'text-wp-state-ok-100': !queueInfo.paused,
+            }"
+          />
+        </div>
       </div>
-
-      <div class="ml-auto flex items-center gap-2">
-        <Button
-          v-if="queueInfo.paused"
-          class="ml-auto"
-          :text="$t('admin.settings.queue.resume')"
-          start-icon="play"
-          @click="resumeQueue"
-        />
-        <Button
-          v-else
-          class="ml-auto"
-          :text="$t('admin.settings.queue.pause')"
-          start-icon="pause"
-          @click="pauseQueue"
-        />
-        <Icon
-          :name="queueInfo.paused ? 'pause' : 'play'"
-          :class="{
-            'text-wp-state-error-100': queueInfo.paused,
-            'text-wp-state-ok-100': !queueInfo.paused,
-          }"
-        />
-      </div>
-    </div>
+    </template>
 
     <div class="flex flex-col">
       <AdminQueueStats :stats="queueInfo?.stats" />
@@ -47,8 +37,8 @@
               task.status === 'pending'
                 ? $t('admin.settings.queue.task_pending')
                 : task.status === 'running'
-                ? $t('admin.settings.queue.task_running')
-                : $t('admin.settings.queue.task_waiting_on_deps')
+                  ? $t('admin.settings.queue.task_running')
+                  : $t('admin.settings.queue.task_waiting_on_deps')
             "
           >
             <Icon
@@ -56,8 +46,8 @@
                 task.status === 'pending'
                   ? 'status-pending'
                   : task.status === 'running'
-                  ? 'status-running'
-                  : 'status-declined'
+                    ? 'status-running'
+                    : 'status-declined'
               "
               :class="{
                 'text-wp-state-error-100': task.status === 'waiting_on_deps',
@@ -81,7 +71,7 @@
         </ListItem>
       </div>
     </div>
-  </Panel>
+  </Settings>
 </template>
 
 <script lang="ts" setup>
@@ -92,7 +82,7 @@ import Badge from '~/components/atomic/Badge.vue';
 import Button from '~/components/atomic/Button.vue';
 import Icon from '~/components/atomic/Icon.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
-import Panel from '~/components/layout/Panel.vue';
+import Settings from '~/components/layout/Settings.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useNotifications from '~/compositions/useNotifications';
 import { QueueInfo } from '~/lib/api/types/queue';

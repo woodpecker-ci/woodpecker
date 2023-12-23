@@ -21,18 +21,19 @@ import (
 	"crypto"
 	"time"
 
-	"github.com/woodpecker-ci/woodpecker/server/cache"
-	"github.com/woodpecker-ci/woodpecker/server/forge"
-	"github.com/woodpecker-ci/woodpecker/server/logging"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/plugins/config"
-	"github.com/woodpecker-ci/woodpecker/server/pubsub"
-	"github.com/woodpecker-ci/woodpecker/server/queue"
+	"go.woodpecker-ci.org/woodpecker/v2/server/cache"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v2/server/logging"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/config"
+	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/permissions"
+	"go.woodpecker-ci.org/woodpecker/v2/server/pubsub"
+	"go.woodpecker-ci.org/woodpecker/v2/server/queue"
 )
 
 var Config = struct {
 	Services struct {
-		Pubsub              pubsub.Publisher
+		Pubsub              *pubsub.Publisher
 		Queue               queue.Queue
 		Logs                logging.Log
 		Secrets             model.SecretService
@@ -63,20 +64,13 @@ var Config = struct {
 		Port                string
 		PortTLS             string
 		AgentToken          string
-		Docs                string
 		StatusContext       string
 		StatusContextFormat string
 		SessionExpires      time.Duration
 		RootPath            string
 		CustomCSSFile       string
 		CustomJsFile        string
-		Migrations          struct {
-			AllowLong bool
-		}
-		EnableSwagger bool
-		// Open bool
-		// Orgs map[string]struct{}
-		// Admins map[string]struct{}
+		EnableSwagger       bool
 	}
 	Prometheus struct {
 		AuthToken string
@@ -96,5 +90,11 @@ var Config = struct {
 			HTTP  string
 			HTTPS string
 		}
+	}
+	Permissions struct {
+		Open            bool
+		Admins          *permissions.Admins
+		Orgs            *permissions.Orgs
+		OwnersAllowlist *permissions.OwnersAllowlist
 	}
 }{}

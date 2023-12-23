@@ -9,7 +9,8 @@ tasks:
       WOODPECKER_DEV_WWW_PROXY: http://localhost:8010
       WOODPECKER_BACKEND_DOCKER_NETWORK: ci_default
     init: |
-      GO_VERSION=1.20
+      GO_VERSION=1.21.5
+      rm -rf ~/go
       curl -fsSL https://dl.google.com/go/go$GO_VERSION.linux-amd64.tar.gz | tar xzs -C ~/
       go mod tidy
       mkdir -p web/dist
@@ -24,7 +25,7 @@ tasks:
         || echo WOODPECKER_DEV_OAUTH_HOST=$(gp url 8000) >> .env
       gp sync-await gitea
       gp sync-done woodpecker-server
-      go run github.com/woodpecker-ci/woodpecker/cmd/server
+      go run go.woodpecker-ci.org/woodpecker/v2/cmd/server
   - name: Agent
     env:
       WOODPECKER_SERVER: localhost:9000
@@ -33,7 +34,7 @@ tasks:
       WOODPECKER_HEALTHCHECK: false
     command: |
       gp sync-await woodpecker-server
-      go run github.com/woodpecker-ci/woodpecker/cmd/agent
+      go run go.woodpecker-ci.org/woodpecker/v2/cmd/agent
   - name: Gitea
     command: |
       export DOCKER_COMPOSE_CMD="docker-compose -f docker-compose.gitpod.yml -p woodpecker"

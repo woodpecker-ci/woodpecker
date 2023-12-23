@@ -34,21 +34,23 @@ import (
 	"github.com/urfave/cli/v2"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/cache"
-	"github.com/woodpecker-ci/woodpecker/server/forge"
-	"github.com/woodpecker-ci/woodpecker/server/forge/bitbucket"
-	"github.com/woodpecker-ci/woodpecker/server/forge/gitea"
-	"github.com/woodpecker-ci/woodpecker/server/forge/github"
-	"github.com/woodpecker-ci/woodpecker/server/forge/gitlab"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/plugins/environments"
-	"github.com/woodpecker-ci/woodpecker/server/plugins/registry"
-	"github.com/woodpecker-ci/woodpecker/server/plugins/secrets"
-	"github.com/woodpecker-ci/woodpecker/server/queue"
-	"github.com/woodpecker-ci/woodpecker/server/store"
-	"github.com/woodpecker-ci/woodpecker/server/store/datastore"
-	"github.com/woodpecker-ci/woodpecker/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/cache"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/bitbucket"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/gitea"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/github"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/gitlab"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/environments"
+	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/registry"
+	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/secrets"
+	"go.woodpecker-ci.org/woodpecker/v2/server/queue"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store/datastore"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/addon"
+	addonTypes "go.woodpecker-ci.org/woodpecker/v2/shared/addon/types"
 )
 
 func setupStore(c *cli.Context) (store.Store, error) {
@@ -88,7 +90,7 @@ func setupStore(c *cli.Context) (store.Store, error) {
 		log.Fatal().Err(err).Msg("could not open datastore")
 	}
 
-	if err := store.Migrate(); err != nil {
+	if err := store.Migrate(c.Bool("migrations-allow-long")); err != nil {
 		log.Fatal().Err(err).Msg("could not migrate datastore")
 	}
 
@@ -130,8 +132,16 @@ func setupMembershipService(_ *cli.Context, r forge.Forge) cache.MembershipServi
 	return cache.NewMembershipService(r)
 }
 
-// setupForge helper function to setup the forge from the CLI arguments.
+// setupForge helper function to set up the forge from the CLI arguments.
 func setupForge(c *cli.Context) (forge.Forge, error) {
+	addonForge, err := addon.Load[forge.Forge](c.StringSlice("addons"), addonTypes.TypeForge)
+	if err != nil {
+		return nil, err
+	}
+	if addonForge != nil {
+		return addonForge.Value, nil
+	}
+
 	switch {
 	case c.Bool("github"):
 		return setupGitHub(c)
@@ -279,13 +289,12 @@ func setupSignatureKeys(_store store.Store) (crypto.PrivateKey, crypto.PublicKey
 	} else if err != nil {
 		log.Fatal().Err(err).Msgf("Failed to load private key")
 		return nil, nil
-	} else {
-		privKeyStr, err := hex.DecodeString(privKey)
-		if err != nil {
-			log.Fatal().Err(err).Msgf("Failed to decode private key")
-			return nil, nil
-		}
-		privKey := ed25519.PrivateKey(privKeyStr)
-		return privKey, privKey.Public()
 	}
+	privKeyStr, err := hex.DecodeString(privKey)
+	if err != nil {
+		log.Fatal().Err(err).Msgf("Failed to decode private key")
+		return nil, nil
+	}
+	privateKey := ed25519.PrivateKey(privKeyStr)
+	return privateKey, privateKey.Public()
 }

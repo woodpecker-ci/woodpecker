@@ -23,10 +23,10 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/server/forge/types"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/plugins/config"
-	"github.com/woodpecker-ci/woodpecker/shared/constant"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/config"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
 )
 
 type ConfigFetcher interface {
@@ -69,15 +69,20 @@ func (cf *configFetcher) Fetch(ctx context.Context) (files []*types.FileMeta, er
 			continue
 		}
 
-		if cf.configExtension != nil && cf.configExtension.IsConfigured() {
+		if cf.configExtension != nil {
 			fetchCtx, cancel := context.WithTimeout(ctx, cf.timeout)
 			defer cancel() // ok here as we only try http fetching once, returning on fail and success
 
 			log.Trace().Msgf("ConfigFetch[%s]: getting config from external http service", cf.repo.FullName)
-			newConfigs, useOld, err := cf.configExtension.FetchConfig(fetchCtx, cf.repo, cf.pipeline, files)
+			netrc, err := cf.forge.Netrc(cf.user, cf.repo)
 			if err != nil {
-				log.Error().Msg("Got error " + err.Error())
-				return nil, fmt.Errorf("On Fetching config via http : %w", err)
+				return nil, fmt.Errorf("could not get Netrc data from forge: %w", err)
+			}
+
+			newConfigs, useOld, err := cf.configExtension.FetchConfig(fetchCtx, cf.repo, cf.pipeline, files, netrc)
+			if err != nil {
+				log.Error().Err(err).Msg("could not fetch config via http")
+				return nil, fmt.Errorf("could not fetch config via http: %w", err)
 			}
 
 			if !useOld {
@@ -101,7 +106,7 @@ func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config 
 		// could be adapted to allow the user to supply a list like we do in the defaults
 		configs := []string{config}
 
-		fileMeta, err := cf.getFirstAvailableConfig(ctx, configs, true)
+		fileMeta, err := cf.getFirstAvailableConfig(ctx, configs)
 		if err == nil {
 			return fileMeta, err
 		}
@@ -109,9 +114,9 @@ func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config 
 		return nil, fmt.Errorf("user defined config '%s' not found: %w", config, err)
 	}
 
-	log.Trace().Msgf("ConfigFetch[%s]: user did not defined own config, following default procedure", cf.repo.FullName)
+	log.Trace().Msgf("ConfigFetch[%s]: user did not define own config, following default procedure", cf.repo.FullName)
 	// for the order see shared/constants/constants.go
-	fileMeta, err := cf.getFirstAvailableConfig(ctx, constant.DefaultConfigOrder[:], false)
+	fileMeta, err := cf.getFirstAvailableConfig(ctx, constant.DefaultConfigOrder[:])
 	if err == nil {
 		return fileMeta, err
 	}
@@ -136,7 +141,7 @@ func filterPipelineFiles(files []*types.FileMeta) []*types.FileMeta {
 	return res
 }
 
-func (cf *configFetcher) checkPipelineFile(c context.Context, config string) (fileMeta []*types.FileMeta, found bool) {
+func (cf *configFetcher) checkPipelineFile(c context.Context, config string) ([]*types.FileMeta, error) {
 	file, err := cf.forge.File(c, cf.user, cf.repo, cf.pipeline, config)
 
 	if err == nil && len(file) != 0 {
@@ -145,40 +150,47 @@ func (cf *configFetcher) checkPipelineFile(c context.Context, config string) (fi
 		return []*types.FileMeta{{
 			Name: config,
 			Data: file,
-		}}, true
+		}}, nil
 	}
 
-	return nil, false
+	return nil, err
 }
 
-func (cf *configFetcher) getFirstAvailableConfig(c context.Context, configs []string, userDefined bool) ([]*types.FileMeta, error) {
-	userDefinedLog := ""
-	if userDefined {
-		userDefinedLog = "user defined"
-	}
-
+func (cf *configFetcher) getFirstAvailableConfig(c context.Context, configs []string) ([]*types.FileMeta, error) {
+	var forgeErr []error
 	for _, fileOrFolder := range configs {
 		if strings.HasSuffix(fileOrFolder, "/") {
 			// config is a folder
 			files, err := cf.forge.Dir(c, cf.user, cf.repo, cf.pipeline, strings.TrimSuffix(fileOrFolder, "/"))
 			// if folder is not supported we will get a "Not implemented" error and continue
-			if err != nil && !errors.Is(err, types.ErrNotImplemented) {
-				log.Error().Err(err).Str("repo", cf.repo.FullName).Str("user", cf.user.Login).Msg("could not get folder from forge")
+			if err != nil {
+				if !(errors.Is(err, types.ErrNotImplemented) || errors.Is(err, &types.ErrConfigNotFound{})) {
+					log.Error().Err(err).Str("repo", cf.repo.FullName).Str("user", cf.user.Login).Msg("could not get folder from forge")
+					forgeErr = append(forgeErr, err)
+				}
+				continue
 			}
 			files = filterPipelineFiles(files)
-			if err == nil && len(files) != 0 {
-				log.Trace().Msgf("ConfigFetch[%s]: found %d %s files in '%s'", cf.repo.FullName, len(files), userDefinedLog, fileOrFolder)
+			if len(files) != 0 {
+				log.Trace().Msgf("ConfigFetch[%s]: found %d files in '%s'", cf.repo.FullName, len(files), fileOrFolder)
 				return files, nil
 			}
 		}
 
 		// config is a file
-		if fileMeta, found := cf.checkPipelineFile(c, fileOrFolder); found {
-			log.Trace().Msgf("ConfigFetch[%s]: found %s file: '%s'", cf.repo.FullName, userDefinedLog, fileOrFolder)
+		if fileMeta, err := cf.checkPipelineFile(c, fileOrFolder); err == nil {
+			log.Trace().Msgf("ConfigFetch[%s]: found file: '%s'", cf.repo.FullName, fileOrFolder)
 			return fileMeta, nil
+		} else if !errors.Is(err, &types.ErrConfigNotFound{}) {
+			forgeErr = append(forgeErr, err)
 		}
 	}
 
+	// got unexpected errors
+	if len(forgeErr) != 0 {
+		return nil, errors.Join(forgeErr...)
+	}
+
 	// nothing found
-	return nil, fmt.Errorf("%s configs not found searched: %s", userDefinedLog, strings.Join(configs, ", "))
+	return nil, &types.ErrConfigNotFound{Configs: configs}
 }

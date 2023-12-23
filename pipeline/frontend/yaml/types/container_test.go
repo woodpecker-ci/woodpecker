@@ -1,3 +1,17 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package types
 
 import (
@@ -7,8 +21,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/constraint"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types/base"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/constraint"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types/base"
 )
 
 var containerYaml = []byte(`
@@ -31,6 +45,7 @@ environment:
 extra_hosts:
  - somehost:162.242.195.82
  - otherhost:50.31.209.229
+ - ipv6:2001:db8::10
 name: my-build-container
 network_mode: bridge
 networks:
@@ -54,6 +69,8 @@ when:
 settings:
   foo: bar
   baz: false
+ports:
+  - 8080
 `)
 
 func TestUnmarshalContainer(t *testing.T) {
@@ -68,7 +85,7 @@ func TestUnmarshalContainer(t *testing.T) {
 		DNS:          base.StringOrSlice{"8.8.8.8"},
 		DNSSearch:    base.StringOrSlice{"example.com"},
 		Environment:  base.SliceOrMap{"RACK_ENV": "development", "SHOW": "true"},
-		ExtraHosts:   []string{"somehost:162.242.195.82", "otherhost:50.31.209.229"},
+		ExtraHosts:   []string{"somehost:162.242.195.82", "otherhost:50.31.209.229", "ipv6:2001:db8::10"},
 		Image:        "golang:latest",
 		MemLimit:     base.MemStringOrInt(1024),
 		MemSwapLimit: base.MemStringOrInt(1024),
@@ -108,10 +125,11 @@ func TestUnmarshalContainer(t *testing.T) {
 				},
 			},
 		},
-		Settings: map[string]interface{}{
+		Settings: map[string]any{
 			"foo": "bar",
 			"baz": false,
 		},
+		Ports: []base.StringOrInt{8080},
 	}
 	got := Container{}
 	err := yaml.Unmarshal(containerYaml, &got)
@@ -142,7 +160,7 @@ func TestUnmarshalContainers(t *testing.T) {
 				{
 					Name:  "unit_test",
 					Image: "node",
-					Settings: map[string]interface{}{
+					Settings: map[string]any{
 						"normal_setting": true,
 					},
 				},
@@ -173,7 +191,7 @@ func TestUnmarshalContainers(t *testing.T) {
 						Source: "docker_password",
 						Target: "docker_password",
 					}}},
-					Settings: map[string]interface{}{
+					Settings: map[string]any{
 						"repo":       "woodpeckerci/woodpecker-agent",
 						"dockerfile": "docker/Dockerfile.agent",
 						"tag":        stringsToInterface("next", "latest"),
@@ -206,7 +224,7 @@ func TestUnmarshalContainers(t *testing.T) {
 					Name:  "publish-cli",
 					Image: "print/env",
 					Group: "docker",
-					Settings: map[string]interface{}{
+					Settings: map[string]any{
 						"repo":       "woodpeckerci/woodpecker-cli",
 						"dockerfile": "docker/Dockerfile.cli",
 						"tag":        stringsToInterface("next"),
@@ -272,8 +290,8 @@ func TestUnmarshalContainersErr(t *testing.T) {
 	}
 }
 
-func stringsToInterface(val ...string) []interface{} {
-	res := make([]interface{}, len(val))
+func stringsToInterface(val ...string) []any {
+	res := make([]any, len(val))
 	for i := range val {
 		res[i] = val[i]
 	}

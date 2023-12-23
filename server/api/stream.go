@@ -27,17 +27,21 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/pubsub"
-	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
-	"github.com/woodpecker-ci/woodpecker/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/pubsub"
+	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
+// EventStreamSSE
 //
-// event source streaming for compatibility with quic and http2
-//
-
+//	@Summary	Event stream
+//	@Description	event source streaming for compatibility with quic and http2
+//	@Router		/stream/events [get]
+//	@Produce	plain
+//	@Success	200
+//	@Tags			Events
 func EventStreamSSE(c *gin.Context) {
 	c.Header("Content-Type", "text/event-stream")
 	c.Header("Cache-Control", "no-cache")
@@ -79,7 +83,7 @@ func EventStreamSSE(c *gin.Context) {
 	}()
 
 	go func() {
-		err := server.Config.Services.Pubsub.Subscribe(ctx, "topic/events", func(m pubsub.Message) {
+		server.Config.Services.Pubsub.Subscribe(ctx, func(m pubsub.Message) {
 			defer func() {
 				obj := recover() // fix #2480 // TODO: check if it's still needed
 				log.Trace().Msgf("pubsub subscribe recover return: %v", obj)
@@ -95,10 +99,7 @@ func EventStreamSSE(c *gin.Context) {
 				}
 			}
 		})
-		if err != nil {
-			log.Error().Err(err).Msg("Subscribe failed")
-		}
-		cancel(err)
+		cancel(nil)
 	}()
 
 	for {
@@ -121,10 +122,10 @@ func EventStreamSSE(c *gin.Context) {
 	}
 }
 
-// LogStream
+// LogStreamSSE
 //
 //	@Summary	Log stream
-//	@Router		/logs/{repo_id}/{pipeline}/{stepID} [get]
+//	@Router		/stream/logs/{repo_id}/{pipeline}/{stepID} [get]
 //	@Produce	plain
 //	@Success	200
 //	@Tags			Pipeline logs

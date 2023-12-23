@@ -41,7 +41,12 @@ func Handler() http.Handler {
 }
 
 func listRepoHooks(c *gin.Context) {
-	c.String(200, listRepoHookPayloads)
+	page := c.Query("page")
+	if page != "" && page != "1" {
+		c.String(200, "[]")
+	} else {
+		c.String(200, listRepoHookPayloads)
+	}
 }
 
 func getRepo(c *gin.Context) {
@@ -120,7 +125,7 @@ func getUserRepos(c *gin.Context) {
 }
 
 func getVersion(c *gin.Context) {
-	c.JSON(200, map[string]interface{}{"version": "1.18.0"})
+	c.JSON(200, map[string]any{"version": "1.18.0"})
 }
 
 func getPRFiles(c *gin.Context) {

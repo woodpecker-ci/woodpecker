@@ -19,11 +19,11 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 func TestGetPipelineQueue(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm), new(model.Pipeline))
+	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm), new(model.Pipeline), new(model.Org))
 	defer closer()
 
 	user := &model.User{
@@ -64,7 +64,7 @@ func TestGetPipelineQueue(t *testing.T) {
 }
 
 func TestUserFeed(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm), new(model.Pipeline))
+	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm), new(model.Pipeline), new(model.Org))
 	defer closer()
 
 	user := &model.User{
@@ -115,7 +115,7 @@ func TestUserFeed(t *testing.T) {
 }
 
 func TestRepoListLatest(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm), new(model.Pipeline))
+	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm), new(model.Pipeline), new(model.Org))
 	defer closer()
 
 	user := &model.User{

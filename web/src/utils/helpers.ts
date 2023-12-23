@@ -1,20 +1,26 @@
 import { Pipeline, PipelineStep, PipelineWorkflow, Repo } from '~/lib/api/types';
 
 export function findStep(workflows: PipelineWorkflow[], pid: number): PipelineStep | undefined {
-  return workflows.reduce((prev, workflow) => {
-    const result = workflow.children.reduce((prevChild, step) => {
-      if (step.pid === pid) {
-        return step;
+  return workflows.reduce(
+    (prev, workflow) => {
+      const result = workflow.children.reduce(
+        (prevChild, step) => {
+          if (step.pid === pid) {
+            return step;
+          }
+
+          return prevChild;
+        },
+        undefined as PipelineStep | undefined,
+      );
+      if (result) {
+        return result;
       }
 
-      return prevChild;
-    }, undefined as PipelineStep | undefined);
-    if (result) {
-      return result;
-    }
-
-    return prev;
-  }, undefined as PipelineStep | undefined);
+      return prev;
+    },
+    undefined as PipelineStep | undefined,
+  );
 }
 
 /**
@@ -45,6 +51,19 @@ export function isStepRunning(step: PipelineStep): boolean {
  */
 export function comparePipelines(a: Pipeline, b: Pipeline): number {
   return (b.created_at || -1) - (a.created_at || -1);
+}
+
+/**
+ * Compare two pipelines by the status.
+ * Giving pending, running, or started higher priority than other status
+ * @param {Object} a - A pipeline.
+ * @param {Object} b - A pipeline.
+ * @returns {number}
+ */
+export function comparePipelinesWithStatus(a: Pipeline, b: Pipeline): number {
+  const bPriority = ['pending', 'running', 'started'].includes(b.status) ? 1 : 0;
+  const aPriority = ['pending', 'running', 'started'].includes(a.status) ? 1 : 0;
+  return bPriority - aPriority;
 }
 
 export function isPipelineActive(pipeline: Pipeline): boolean {

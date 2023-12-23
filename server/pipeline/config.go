@@ -18,10 +18,10 @@ import (
 	"crypto/sha256"
 	"fmt"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline"
-	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline"
+	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
 func findOrPersistPipelineConfig(store store.Store, currentPipeline *model.Pipeline, forgeYamlConfig *forge_types.FileMeta) (*model.Config, error) {
@@ -42,14 +42,6 @@ func findOrPersistPipelineConfig(store store.Store, currentPipeline *model.Pipel
 				return nil, err
 			}
 		}
-	}
-
-	pipelineConfig := &model.PipelineConfig{
-		ConfigID:   conf.ID,
-		PipelineID: currentPipeline.ID,
-	}
-	if err := store.PipelineConfigCreate(pipelineConfig); err != nil {
-		return nil, err
 	}
 
 	return conf, nil

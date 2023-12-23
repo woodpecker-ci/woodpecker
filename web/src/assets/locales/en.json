@@ -12,8 +12,6 @@
   "password": "Password",
   "url": "URL",
   "back": "Back",
-  "color_scheme_light": "Switch to dark mode",
-  "color_scheme_dark": "Switch to light mode",
   "unknown_error": "An unknown error occurred",
   "documentation_for": "Documentation for \"{topic}\"",
   "pipeline_feed": "Pipeline feed",
@@ -68,6 +66,7 @@
       "reload": "Reload repositories",
       "enable": "Enable",
       "enabled": "Already enabled",
+      "disabled": "Disabled",
       "success": "Repository enabled",
       "list_reloaded": "Repository list reloaded"
     },
@@ -141,7 +140,7 @@
         "saved": "Secret saved",
         "images": {
           "images": "Available for following images",
-          "desc": "Comma separated list of images where this secret is available, leave empty to allow all images"
+          "desc": "List of images where this secret is available, leave empty to allow all images"
         },
         "events": {
           "events": "Available at following events",
@@ -227,12 +226,10 @@
       }
     },
     "pipeline": {
-      "created": "Created",
       "tasks": "Tasks",
       "config": "Config",
       "files": "Changed files ({files})",
       "no_files": "No files have been changed.",
-      "execution_error": "Execution error",
       "no_pipelines": "No pipelines have been started yet.",
       "no_pipeline_steps": "No pipeline steps available!",
       "step_not_started": "This step hasn't started yet.",
@@ -255,7 +252,8 @@
         "log_auto_scroll_off": "Turn off automatic scrolling"
       },
       "protected": {
-        "awaits": "This pipeline is awaiting approval by some maintainer!",
+        "review": "Review changes",
+        "awaits": "This pipeline is awaiting approval by a maintainer!",
         "approve": "Approve",
         "decline": "Decline",
         "declined": "This pipeline has been declined!",
@@ -282,7 +280,11 @@
         "error": "error",
         "failure": "failure",
         "killed": "killed"
-      }
+      },
+      "errors": "Errors ({count})",
+      "warnings": "Warnings ({count})",
+      "show_errors": "Show errors",
+      "we_got_some_errors": "Oh no, we got some errors!"
     }
   },
   "org": {
@@ -303,7 +305,7 @@
         "saved": "Organization secret saved",
         "images": {
           "images": "Available for following images",
-          "desc": "Comma separated list of images where this secret is available, leave empty to allow all images"
+          "desc": "List of images where this secret is available, leave empty to allow all images"
         },
         "plugins_only": "Only available for plugins",
         "events": {
@@ -332,7 +334,7 @@
         "saved": "Global secret saved",
         "images": {
           "images": "Available for following images",
-          "desc": "Comma separated list of images where this secret is available, leave empty to allow all images"
+          "desc": "List of images where this secret is available, leave empty to allow all images"
         },
         "plugins_only": "Only available for plugins",
         "events": {
@@ -412,7 +414,7 @@
         "show": "Show users",
         "add": "Add user",
         "none": "There are no users yet.",
-        "delete_confirm": "Do you really want to delete this user?",
+        "delete_confirm": "Do you really want to delete this user? This will also delete all repositories owned by this user.",
         "deleted": "User deleted",
         "created": "User created",
         "saved": "User saved",
@@ -422,6 +424,28 @@
         },
         "delete_user": "Delete user",
         "edit_user": "Edit user"
+      },
+      "orgs": {
+        "orgs": "Organizations",
+        "desc": "Organizations owning repositories on this server",
+        "none": "There are no organizations yet.",
+        "org_settings": "Organization settings",
+        "delete_org": "Delete organization",
+        "deleted": "Organization deleted",
+        "delete_confirm": "Do you really want to delete this organization? This will also delete all repositories owned by this organization.",
+        "view": "View organization"
+      },
+      "repos": {
+        "repos": "Repositories",
+        "desc": "Repositories that are or were enabled on this server",
+        "none": "There are no repositories yet.",
+        "view": "View repository",
+        "settings": "Repository settings",
+        "disabled": "Disabled",
+        "repair": {
+          "repair": "Repair all",
+          "success": "Repositories repaired"
+        }
       }
     }
   },
@@ -430,7 +454,35 @@
       "settings": "User Settings",
       "general": {
         "general": "General",
-        "language": "Language"
+        "language": "Language",
+        "theme": {
+          "theme": "Theme",
+          "light": "Light",
+          "dark": "Dark",
+          "auto": "Auto"
+        }
+      },
+      "secrets": {
+        "secrets": "Secrets",
+        "desc": "User secrets can be passed to all user's repository individual pipeline steps at runtime as environmental variables.",
+        "none": "There are no user secrets yet.",
+        "add": "Add secret",
+        "save": "Save secret",
+        "show": "Show secrets",
+        "name": "Name",
+        "value": "Value",
+        "deleted": "User secret deleted",
+        "created": "User secret created",
+        "saved": "User secret saved",
+        "images": {
+          "images": "Available for following images",
+          "desc": "List of images where this secret is available, leave empty to allow all images"
+        },
+        "plugins_only": "Only available for plugins",
+        "events": {
+          "events": "Available at following events",
+          "pr_warning": "Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets."
+        }
       },
       "api": {
         "api": "API",
@@ -448,5 +500,11 @@
     "oauth_error": "Error while authenticating against OAuth provider",
     "internal_error": "Some internal error occurred",
     "access_denied": "You are not allowed to login"
-  }
+  },
+  "default": "default",
+  "info": "Info",
+  "running_version": "You are running Woodpecker {0}",
+  "update_woodpecker": "Please update your Woodpecker instance to {0}",
+  "global_level_secret": "global secret",
+  "org_level_secret": "organization secret"
 }
