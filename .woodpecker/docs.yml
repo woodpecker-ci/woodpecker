@@ -44,6 +44,16 @@ steps:
       - path: *when_path
       - event: [cron, manual]
 
+  lint swagger:
+    image: codeberg.org/6543/docker-images/check-jsonschema
+    commands: >
+      check-jsonschema
+      --schemafile https://raw.githubusercontent.com/OAI/OpenAPI-Specification/main/schemas/v2.0/schema.json
+      docs/swagger.json
+    when:
+      - path: *when_path
+      - event: [cron, manual]
+
   deploy-preview:
     image: docker.io/woodpeckerci/plugin-surge-preview:1.2.2
     settings:
