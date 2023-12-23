@@ -62,6 +62,7 @@ func convertRepo(from *internal.Repo, perm *internal.RepoPerm) *model.Repo {
 		SCMKind:       model.SCMKind(from.Scm),
 		Branch:        from.Mainbranch.Name,
 		Perm:          convertPerm(perm),
+		PREnabled:     true,
 	}
 	if repo.SCMKind == model.RepoHg {
 		repo.Branch = "default"

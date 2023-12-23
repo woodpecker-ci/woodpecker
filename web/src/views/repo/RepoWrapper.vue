@@ -37,7 +37,7 @@
 
     <Tab id="activity" :title="$t('repo.activity')" />
     <Tab id="branches" :title="$t('repo.branches')" />
-    <Tab id="pull_requests" :title="$t('repo.pull_requests')" />
+    <Tab id="pull_requests" v-if="repo.pr_enabled && repo.allow_pr" :title="$t('repo.pull_requests')" />
 
     <router-view />
   </Scaffold>
