@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@zc-devs, @6543, @johanvdw, @qwerty287, @anbraten, @lafriks, @lukashass, @runephilosof-karnovgroup, @renovate[bot], @allanger, @xoxys, @gapanyc, @mikhail-putilov, @kaylynb, @voidcontext, @robbie-cahill, @micash545, @dominic-p, @mzampetakis
+@renovate[bot], @zc-devs, @6543, @johanvdw, @qwerty287, @anbraten, @lafriks, @lukashass, @runephilosof-karnovgroup, @allanger, @xoxys, @gapanyc, @mikhail-putilov, @kaylynb, @voidcontext, @robbie-cahill, @micash545, @dominic-p, @mzampetakis
 
 ### ✨ Features
 
@@ -75,6 +75,7 @@
 
 ### Misc
 
+- fix(deps): update dependency @intlify/unplugin-vue-i18n to v2 [[#2998](https://github.com/woodpecker-ci/woodpecker/pull/2998)]
 - Fix go in gitpod [[#2973](https://github.com/woodpecker-ci/woodpecker/pull/2973)]
 - fix(deps): update module google.golang.org/grpc to v1.60.1 [[#2969](https://github.com/woodpecker-ci/woodpecker/pull/2969)]
 - chore(deps): update docker.io/alpine docker tag to v3.19 [[#2970](https://github.com/woodpecker-ci/woodpecker/pull/2970)]
