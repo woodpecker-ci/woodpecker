@@ -88,8 +88,12 @@ func toHostConfig(step *types.Step) *container.HostConfig {
 	if len(step.DNSSearch) != 0 {
 		config.DNSSearch = step.DNSSearch
 	}
+	extraHosts := []string{}
+	for _, hostAlias := range step.ExtraHosts {
+		extraHosts = append(extraHosts, hostAlias.Name+":"+hostAlias.IP)
+	}
 	if len(step.ExtraHosts) != 0 {
-		config.ExtraHosts = step.ExtraHosts
+		config.ExtraHosts = extraHosts
 	}
 	if len(step.Devices) != 0 {
 		config.Devices = toDev(step.Devices)

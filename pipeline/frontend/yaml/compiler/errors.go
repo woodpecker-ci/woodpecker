@@ -12,19 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package types
+package compiler
 
-// Network defines a container network.
-type Network struct {
-	Name string `json:"name,omitempty"`
+import "fmt"
+
+type ErrExtraHostFormat struct {
+	host string
 }
 
-type Port struct {
-	Number   uint16 `json:"number,omitempty"`
-	Protocol string `json:"protocol,omitempty"`
+func (err *ErrExtraHostFormat) Error() string {
+	return fmt.Sprintf("extra host %s is in wrong format", err.host)
 }
 
-type HostAlias struct {
-	Name string `json:"name,omitempty"`
-	IP   string `json:"ip,omitempty"`
+func (*ErrExtraHostFormat) Is(target error) bool {
+	_, ok := target.(*ErrExtraHostFormat) //nolint:errorlint
+	return ok
 }
