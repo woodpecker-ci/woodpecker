@@ -19,8 +19,8 @@ importers:
         specifier: ^3.0.0
         version: 3.0.1(@algolia/client-search@4.20.0)(@types/react@18.2.42)(react-dom@18.2.0)(react@18.2.0)(search-insights@2.11.0)(typescript@5.3.2)
       '@easyops-cn/docusaurus-search-local':
-        specifier: ^0.38.0
-        version: 0.38.1(@docusaurus/theme-common@3.0.1)(@docusaurus/types@3.0.1)(react-dom@18.2.0)(react@18.2.0)(typescript@5.3.2)
+        specifier: ^0.40.0
+        version: 0.40.0(@docusaurus/theme-common@3.0.1)(@docusaurus/types@3.0.1)(react-dom@18.2.0)(react@18.2.0)(typescript@5.3.2)
       '@mdx-js/react':
         specifier: ^3.0.0
         version: 3.0.0(@types/react@18.2.42)(react@18.2.0)
@@ -117,8 +117,8 @@ importers:
         specifier: ^8.0.0
         version: 8.2.2
       isomorphic-dompurify:
-        specifier: ^1.11.0
-        version: 1.11.0
+        specifier: ^2.0.0
+        version: 2.0.0
       marked:
         specifier: ^11.0.0
         version: 11.0.0
@@ -2262,8 +2262,8 @@ packages:
       immediate: 3.3.0
     dev: false
 
-  /@easyops-cn/docusaurus-search-local@0.38.1(@docusaurus/theme-common@3.0.1)(@docusaurus/types@3.0.1)(react-dom@18.2.0)(react@18.2.0)(typescript@5.3.2):
-    resolution: {integrity: sha512-8CG/hRxkuk8dPuhjHIOLUHMWQGTsva1c6G3S/TYIH8y04Offzl9dPqLoss7289/VxpeX2VAhon0dFTu/QUPREA==}
+  /@easyops-cn/docusaurus-search-local@0.40.0(@docusaurus/theme-common@3.0.1)(@docusaurus/types@3.0.1)(react-dom@18.2.0)(react@18.2.0)(typescript@5.3.2):
+    resolution: {integrity: sha512-lJMLr95/k7Kz31gNe2PiMSOVe7fMyLy99/U+ttLb/8WCLyCCdrRyYv/hXmTLSb60upaGF/YpdOc02kEpXIqRIw==}
     engines: {node: '>=12'}
     peerDependencies:
       '@docusaurus/theme-common': ^2 || ^3
@@ -6107,8 +6107,8 @@ packages:
     resolution: {integrity: sha512-WhB9zCku7EGTj/HQQRz5aUQEUeoQZH2bWcltRErOpymJ4boYE6wL9Tbr23krRPSZ+C5zqNSrSw+Cc7sZZ4b7vg==}
     engines: {node: '>=0.10.0'}
 
-  /isomorphic-dompurify@1.11.0:
-    resolution: {integrity: sha512-1Z8C9oPnbNGajiL9zAdf265aDWr8/PY8wvHR435uLxH8mnfurM9YklzmOZm6gH5XQkmIxIfAONq35eASx2xmKQ==}
+  /isomorphic-dompurify@2.0.0:
+    resolution: {integrity: sha512-BJvrSQzg7jleSaySaWyhzGqH9/QxYc3sflm5fvjcXWAQcHQvQPQdCN0ORyqvMqnQDbwFuZXvqh2IcuVa3dG/DA==}
     engines: {node: '>=18'}
     dependencies:
       '@types/dompurify': 3.0.5
