@@ -1,7 +1,7 @@
 # Security
 
 We take security seriously.
-If you discover a security issue, please bring it to their attention right away!
+If you discover a security issue, please bring it to our attention right away!
 
 ## Reporting a Vulnerability
 
