@@ -95,7 +95,7 @@
           "pr_warning": "Faites attention avec cette option car un acteur malicieux peut soumettre une pull request qui révélerait vos secrets."
         },
         "images": {
-          "desc": "Liste séparée par des virgules des images pour lesquelles ce secret est accessible, laisser vide pour donner l’accès à toutes les images",
+          "desc": "Liste des images pour lesquelles ce secret est accessible, laisser vide pour donner l’accès à toutes les images",
           "images": "Disponible pour les images suivantes"
         },
         "name": "Nom",
@@ -142,6 +142,7 @@
   "errors": {
     "not_found": "Le serveur n'a pas pu trouver l'objet demandé"
   },
+  "global_level_secret": "Secret global",
   "info": "Information",
   "login": "Connexion",
   "logout": "Déconnexion",
@@ -162,7 +163,7 @@
           "pr_warning": "Faites attention avec cette option car un acteur malicieux pourrait soumettre une pull request qui va afficher vos secrets."
         },
         "images": {
-          "desc": "Liste séparée par des virgules des images pour lesquelles ce secret est accessible, laisser vide pour donner l’accès à toutes les images",
+          "desc": "Liste des images pour lesquelles ce secret est accessible, laisser vide pour donner l’accès à toutes les images",
           "images": "Disponible pour les images suivantes"
         },
         "name": "Nom",
@@ -177,6 +178,7 @@
       "settings": "Réglages"
     }
   },
+  "org_level_secret": "Secret d'organisation",
   "password": "Mot de passe",
   "pipeline_feed": "Fil du pipeline",
   "repo": {
@@ -419,7 +421,7 @@
           "pr_warning": "Faites attention avec cette option car un acteur malicieux pourrait soumettre une pull request qui va afficher vos secrets."
         },
         "images": {
-          "desc": "Liste séparée par des virgules des images pour lesquelles ce secret est accessible, laisser vide pour donner l’accès à toutes les images",
+          "desc": "Liste des images pour lesquelles ce secret est accessible, laisser vide pour donner l’accès à toutes les images",
           "images": "Disponible pour les images suivantes"
         },
         "name": "Nom",
@@ -485,10 +487,10 @@
         "desc": "Les secrets d'utilisateur peuvent être passés à toutes les étapes du pipeline des dépôts de l'utilisateur sous forme de variables d'environnement.",
         "events": {
           "events": "Disponible pour les événements suivants",
-          "pr_warning": "Attention, si cette option est activé, un acteur malicieux peut proposer une pull request qui affiche vos secrets."
+          "pr_warning": "Attention, si cette option est activée, un acteur malveillant peut proposer une pull request qui affiche vos secrets."
         },
         "images": {
-          "desc": "Liste d'images séparé par des virgules où ce secret sera utilisable, laisser vide pour autoriser toutes les images",
+          "desc": "Liste des où ce secret sera utilisable, laisser vide pour autoriser toutes les images",
           "images": "Disponible pour les images suivantes"
         },
         "name": "Nom",
