@@ -55,6 +55,16 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		})
 	}
 
+	extraHosts := make([]backend_types.HostAlias, len(container.ExtraHosts))
+	for i, extraHost := range container.ExtraHosts {
+		name, ip, ok := strings.Cut(extraHost, ":")
+		if !ok {
+			return nil, &ErrExtraHostFormat{host: extraHost}
+		}
+		extraHosts[i].Name = name
+		extraHosts[i].IP = ip
+	}
+
 	var volumes []string
 	if !c.local {
 		volumes = append(volumes, workspace)
@@ -174,7 +184,7 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		Environment:    environment,
 		Commands:       container.Commands,
 		Entrypoint:     container.Entrypoint,
-		ExtraHosts:     container.ExtraHosts,
+		ExtraHosts:     extraHosts,
 		Volumes:        volumes,
 		Tmpfs:          container.Tmpfs,
 		Devices:        container.Devices,

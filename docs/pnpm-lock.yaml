@@ -19,8 +19,8 @@ importers:
         specifier: ^3.0.0
         version: 3.0.1(@algolia/client-search@4.20.0)(@types/react@18.2.42)(react-dom@18.2.0)(react@18.2.0)(search-insights@2.11.0)(typescript@5.3.2)
       '@easyops-cn/docusaurus-search-local':
-        specifier: ^0.38.0
-        version: 0.38.1(@docusaurus/theme-common@3.0.1)(@docusaurus/types@3.0.1)(react-dom@18.2.0)(react@18.2.0)(typescript@5.3.2)
+        specifier: ^0.40.0
+        version: 0.40.0(@docusaurus/theme-common@3.0.1)(@docusaurus/types@3.0.1)(react-dom@18.2.0)(react@18.2.0)(typescript@5.3.2)
       '@mdx-js/react':
         specifier: ^3.0.0
         version: 3.0.0(@types/react@18.2.42)(react@18.2.0)
@@ -2262,8 +2262,8 @@ packages:
       immediate: 3.3.0
     dev: false
 
-  /@easyops-cn/docusaurus-search-local@0.38.1(@docusaurus/theme-common@3.0.1)(@docusaurus/types@3.0.1)(react-dom@18.2.0)(react@18.2.0)(typescript@5.3.2):
-    resolution: {integrity: sha512-8CG/hRxkuk8dPuhjHIOLUHMWQGTsva1c6G3S/TYIH8y04Offzl9dPqLoss7289/VxpeX2VAhon0dFTu/QUPREA==}
+  /@easyops-cn/docusaurus-search-local@0.40.0(@docusaurus/theme-common@3.0.1)(@docusaurus/types@3.0.1)(react-dom@18.2.0)(react@18.2.0)(typescript@5.3.2):
+    resolution: {integrity: sha512-lJMLr95/k7Kz31gNe2PiMSOVe7fMyLy99/U+ttLb/8WCLyCCdrRyYv/hXmTLSb60upaGF/YpdOc02kEpXIqRIw==}
     engines: {node: '>=12'}
     peerDependencies:
       '@docusaurus/theme-common': ^2 || ^3
