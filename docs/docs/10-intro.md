@@ -69,8 +69,7 @@ COPY deploy /usr/local/deploy
 ENTRYPOINT ["/usr/local/deploy"]
 ```
 
-```bash
-# deploy
+```bash title="deploy"
 kubectl apply -f $PLUGIN_TEMPLATE
 ```
 

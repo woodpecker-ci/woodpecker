@@ -57,6 +57,7 @@ const config: Config = {
           label: 'API',
         },
         { to: 'blog', label: 'Blog', position: 'left' },
+        { to: 'cookbook', label: 'Cookbook', position: 'left' },
         {
           type: 'docsVersionDropdown',
           position: 'right',
@@ -192,6 +193,21 @@ const config: Config = {
         };
       },
     }),
+    [
+      '@docusaurus/plugin-content-blog',
+      {
+        id: 'cookbook-blog',
+        /**
+         * URL route for the blog section of your site.
+         * *DO NOT* include a trailing slash.
+         */
+        routeBasePath: 'cookbook',
+        /**
+         * Path to data on filesystem relative to site dir.
+         */
+        path: './cookbook',
+      },
+    ],
   ],
   themes: [
     path.resolve(__dirname, 'plugins', 'woodpecker-plugins', 'dist'),
