@@ -1,8 +1,8 @@
 # Continuous Deployment
 
-A typical CI pipeline contains steps such as: *clone*, *build*, *test*, *package* and *push*. The final build product may be binaries pushed to a git repository or a docker container pushed to a container registry.
+A typical CI pipeline contains steps such as: _clone_, _build_, _test_, _package_ and _push_. The final build product may be binaries pushed to a git repository or a docker container pushed to a container registry.
 
-When these should be deployed on an app server, the pipeline should include a *deploy* step, which represents the "CD" in CI/CD - the automatic deployment of a pipeline's final product.
+When these should be deployed on an app server, the pipeline should include a _deploy_ step, which represents the "CD" in CI/CD - the automatic deployment of a pipeline's final product.
 
 There are various ways to accomplish CD with Woodpecker, depending on your project's specific needs.
 
