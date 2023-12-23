@@ -52,13 +52,13 @@ func TestService(t *testing.T) {
 	      },
 	      {
 	        "name": "port-2",
-					"protocol": "TCP",
+	        "protocol": "TCP",
 	        "port": 2,
 	        "targetPort": 2
 	      },
 	      {
 	        "name": "port-3",
-					"protocol": "UDP",
+	        "protocol": "UDP",
 	        "port": 3,
 	        "targetPort": 3
 	      }
