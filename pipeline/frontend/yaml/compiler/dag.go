@@ -41,7 +41,7 @@ func newDAGCompiler(steps []*dagCompilerStep, prefix string) dagCompiler {
 }
 
 func (dsc dagCompiler) isDAG() bool {
-	for _, v := range c.steps {
+	for _, v := range dsc.steps {
 		if len(v.dependsOn) != 0 {
 			return true
 		}
