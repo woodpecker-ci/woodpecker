@@ -16,7 +16,6 @@ variables:
 
 steps:
   build-web:
-    group: prepare
     image: *node_image
     directory: web/
     commands:
@@ -25,13 +24,14 @@ steps:
       - pnpm build
 
   vendor:
-    group: prepare
     image: *golang_image
     commands:
       - go mod vendor
 
   cross-compile-server:
-    group: build
+    depends_on:
+      - vendor
+      - build-web
     image: *xgo_image
     pull: true
     commands:
@@ -45,35 +45,49 @@ steps:
       TARGZ: '1'
 
   build-agent:
-    group: build
+    depends_on:
+      - vendor
     image: *golang_image
     commands:
       - make release-agent
 
   build-cli:
-    group: build
+    depends_on:
+      - vendor
     image: *golang_image
     commands:
       - make release-cli
 
   build-deb-rpm:
-    group: bundle
+    depends_on:
+      - cross-compile-server
+      - build-agent
+      - build-cli
     image: *golang_image
     commands:
       - make bundle
 
   checksums:
+    depends_on:
+      - cross-compile-server
+      - build-agent
+      - build-cli
+      - build-deb-rpm
     image: *golang_image
     commands:
       - make release-checksums
 
   release-dryrun:
+    depends_on:
+      - checksums
     image: *golang_image
     commands:
       - ls -la dist/*.*
       - cat dist/checksums.txt
 
   release:
+    depends_on:
+      - checksums
     image: docker.io/plugins/github-release
     secrets:
       - source: github_token
