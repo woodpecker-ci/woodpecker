@@ -95,6 +95,7 @@ func convertRepo(from *github.Repository) *model.Repo {
 		Avatar:        from.GetOwner().GetAvatarURL(),
 		Perm:          convertPerm(from.GetPermissions()),
 		SCMKind:       model.RepoGit,
+		PREnabled:     true,
 	}
 	return repo
 }
@@ -152,6 +153,7 @@ func convertRepoHook(eventRepo *github.PushEventRepository) *model.Repo {
 		CloneSSH:      eventRepo.GetSSHURL(),
 		Branch:        eventRepo.GetDefaultBranch(),
 		SCMKind:       model.RepoGit,
+		PREnabled:     true,
 	}
 	if repo.FullName == "" {
 		repo.FullName = repo.Owner + "/" + repo.Name
