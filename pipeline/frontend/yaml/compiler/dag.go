@@ -86,22 +86,22 @@ func (dsc dagCompiler) compile() ([]*backend_types.Stage, error) {
 
 func (c dagCompiler) compileByGroup() ([]*backend_types.Stage, error) {
 	stages := make([]*backend_types.Stage, 0, len(c.steps))
-	var curStage *backend_types.Stage
-	var curGroup string
+	var currentStage *backend_types.Stage
+	var currentGroup string
 
 	for _, s := range c.steps {
 		// create a new stage if current step is in a new group compared to last one
-		if curStage == nil || curGroup != s.group || s.group == "" {
-			curGroup = s.group
+		if currentStage == nil || currentGroup != s.group || s.group == "" {
+			currentGroup = s.group
 
-			curStage = new(backend_types.Stage)
-			curStage.Name = fmt.Sprintf("%s_stage_%v", c.prefix, s.position)
-			curStage.Alias = s.name
-			stages = append(stages, curStage)
+			currentStage = new(backend_types.Stage)
+			currentStage.Name = fmt.Sprintf("%s_stage_%v", c.prefix, s.position)
+			currentStage.Alias = s.name
+			stages = append(stages, currentStage)
 		}
 
-		// add step to curStage
-		curStage.Steps = append(curStage.Steps, s.step)
+		// add step to current stage
+		currentStage.Steps = append(currentStage.Steps, s.step)
 	}
 
 	return stages, nil
