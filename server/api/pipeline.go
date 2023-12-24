@@ -378,9 +378,8 @@ func GetPipelineQueue(c *gin.Context) {
 //	@Success		200	{object}	Pipeline
 //	@Tags			Pipelines
 //	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param			owner			path	string	true	"the repository owner's name"
-//	@Param			name			path	string	true	"the repository name"
-//	@Param			number			path	int		true	"the number of the pipeline"
+//	@Param			repo_id			path	int	true	"the repository id"
+//	@Param			number			path	int	true	"the number of the pipeline"
 //	@Param			event			query	string	false	"override the event type"
 //	@Param			deploy_to		query	string	false	"override the target deploy value"
 func PostPipeline(c *gin.Context) {

@@ -97,8 +97,7 @@ func GetBadge(c *gin.Context) {
 //	@Produce		xml
 //	@Success		200
 //	@Tags			Badges
-//	@Param			owner	path	string	true	"the repository owner's name"
-//	@Param			name	path	string	true	"the repository name"
+//	@Param			repo_id	path	int	true	"the repository id"
 func GetCC(c *gin.Context) {
 	_store := store.FromContext(c)
 	var repo *model.Repo

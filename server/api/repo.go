@@ -318,8 +318,7 @@ func GetRepo(c *gin.Context) {
 //	@Success		200	{object}	Perm
 //	@Tags			Repositories
 //	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param			owner			path	string	true	"the repository owner's name"
-//	@Param			name			path	string	true	"the repository name"
+//	@Param			repo_id			path	int	true	"the repository id"
 func GetRepoPermissions(c *gin.Context) {
 	perm := session.Perm(c)
 	c.JSON(http.StatusOK, perm)

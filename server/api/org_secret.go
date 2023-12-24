@@ -87,7 +87,7 @@ func GetOrgSecretList(c *gin.Context) {
 // PostOrgSecret
 //
 //	@Summary	Persist/create an organization secret
-//	@Router		/orgs/{owner}/secrets [post]
+//	@Router		/orgs/{org_id}/secrets [post]
 //	@Produce	json
 //	@Success	200	{object}	Secret
 //	@Tags			Organization secrets
