@@ -38,7 +38,7 @@ func mkPod(namespace, name, image, workDir, goos, serviceAccountName string,
 	pool, privileged bool,
 	commands, vols []string,
 	labels, annotations, env, nodeSelector map[string]string,
-	extraHosts []types.HostAlias, tolerations []types.Toleration, resources types.Resources,
+	ports []types.Port, extraHosts []types.HostAlias, tolerations []types.Toleration, resources types.Resources,
 	securityContext *types.SecurityContext, securityContextConfig SecurityContextConfig,
 ) (*v1.Pod, error) {
 	var err error
@@ -51,7 +51,7 @@ func mkPod(namespace, name, image, workDir, goos, serviceAccountName string,
 	}
 
 	container, err := podContainer(name, image, workDir, goos, pool, privileged, commands, vols, env,
-		resources, securityContext)
+		ports, resources, securityContext)
 	if err != nil {
 		return nil, err
 	}
@@ -108,7 +108,8 @@ func podSpec(serviceAccountName string, vols []string, env, backendNodeSelector 
 	return spec, nil
 }
 
-func podContainer(name, image, workDir, goos string, pull, privileged bool, commands, volumes []string, env map[string]string, resources types.Resources,
+func podContainer(name, image, workDir, goos string, pull, privileged bool, commands, volumes []string, env map[string]string,
+	ports []types.Port, resources types.Resources,
 	securityContext *types.SecurityContext,
 ) (v1.Container, error) {
 	var err error
@@ -130,6 +131,7 @@ func podContainer(name, image, workDir, goos string, pull, privileged bool, comm
 	}
 
 	container.Env = mapToEnvVars(env)
+	container.Ports = containerPorts(ports)
 	container.SecurityContext = containerSecurityContext(securityContext, privileged)
 
 	container.Resources, err = resourceRequirements(resources)
@@ -191,6 +193,21 @@ func volumeMount(name, path string) v1.VolumeMount {
 	return v1.VolumeMount{
 		Name:      name,
 		MountPath: path,
+	}
+}
+
+func containerPorts(ports []types.Port) []v1.ContainerPort {
+	containerPorts := make([]v1.ContainerPort, len(ports))
+	for i, port := range ports {
+		containerPorts[i] = containerPort(port)
+	}
+	return containerPorts
+}
+
+func containerPort(port types.Port) v1.ContainerPort {
+	return v1.ContainerPort{
+		ContainerPort: int32(port.Number),
+		Protocol:      v1.Protocol(strings.ToUpper(port.Protocol)),
 	}
 }
 
@@ -359,7 +376,8 @@ func startPod(ctx context.Context, engine *kube, step *types.Step) (*v1.Pod, err
 		step.Pull, step.Privileged,
 		step.Commands, step.Volumes,
 		engine.config.PodLabels, engine.config.PodAnnotations, step.Environment, step.BackendOptions.Kubernetes.NodeSelector,
-		step.ExtraHosts, step.BackendOptions.Kubernetes.Tolerations, step.BackendOptions.Kubernetes.Resources, step.BackendOptions.Kubernetes.SecurityContext, engine.config.SecurityContext)
+		step.Ports, step.ExtraHosts, step.BackendOptions.Kubernetes.Tolerations, step.BackendOptions.Kubernetes.Resources,
+		step.BackendOptions.Kubernetes.SecurityContext, engine.config.SecurityContext)
 	if err != nil {
 		return nil, err
 	}

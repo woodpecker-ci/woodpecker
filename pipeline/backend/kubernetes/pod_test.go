@@ -110,7 +110,7 @@ func TestTinyPod(t *testing.T) {
 		false, false,
 		[]string{"gradle build"}, []string{"workspace:/woodpecker/src"},
 		nil, nil, map[string]string{"CI": "woodpecker"}, nil,
-		nil, nil,
+		nil, nil, nil,
 		types.Resources{Requests: nil, Limits: nil}, nil, SecurityContextConfig{},
 	)
 	assert.NoError(t, err)
@@ -158,6 +158,19 @@ func TestFullPod(t *testing.T) {
 						"echo $CI_SCRIPT | base64 -d | /bin/sh -e"
 					],
 					"workingDir": "/woodpecker/src",
+					"ports": [
+						{
+							"containerPort": 1234
+						},
+						{
+							"containerPort": 2345,
+							"protocol": "TCP"
+						},
+						{
+							"containerPort": 3456,
+							"protocol": "UDP"
+						}
+					],
 					"env": [
 						"<<UNORDERED>>",
 						{
@@ -244,11 +257,16 @@ func TestFullPod(t *testing.T) {
 		{Name: "cloudflare", IP: "1.1.1.1"},
 		{Name: "cf.v6", IP: "2606:4700:4700::64"},
 	}
+	ports := []types.Port{
+		{Number: 1234},
+		{Number: 2345, Protocol: "tcp"},
+		{Number: 3456, Protocol: "udp"},
+	}
 	pod, err := mkPod("woodpecker", "wp-01he8bebctabr3kgk0qj36d2me-0", "meltwater/drone-cache", "/woodpecker/src", "linux/amd64", "wp-svc-acc",
 		true, true,
 		[]string{"go get", "go test"}, []string{"woodpecker-cache:/woodpecker/src/cache"},
 		map[string]string{"app": "test"}, map[string]string{"apparmor.security": "runtime/default"}, map[string]string{"CGO": "0"}, map[string]string{"storage": "ssd"},
-		hostAliases, []types.Toleration{{Key: "net-port", Value: "100Mbit", Effect: types.TaintEffectNoSchedule}},
+		ports, hostAliases, []types.Toleration{{Key: "net-port", Value: "100Mbit", Effect: types.TaintEffectNoSchedule}},
 		types.Resources{Requests: map[string]string{"memory": "128Mi", "cpu": "1000m"}, Limits: map[string]string{"memory": "256Mi", "cpu": "2"}},
 		&types.SecurityContext{Privileged: newBool(true), RunAsNonRoot: newBool(true), RunAsUser: newInt64(101), RunAsGroup: newInt64(101), FSGroup: newInt64(101)},
 		SecurityContextConfig{RunAsNonRoot: false},
@@ -257,6 +275,7 @@ func TestFullPod(t *testing.T) {
 
 	json, err := json.Marshal(pod)
 	assert.NoError(t, err)
+	t.Log(string(json))
 
 	ja := jsonassert.New(t)
 	ja.Assertf(string(json), expected)
