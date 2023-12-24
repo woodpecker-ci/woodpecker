@@ -42,8 +42,8 @@ import (
 //	@Produce	json
 //	@Success	200	{object}	Repo
 //	@Tags		Repositories
-//	@Param		Authorization			header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		forge_remote_id		query		string	true	"the id of a repository at the forge"
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		forge_remote_id	query	string	true	"the id of a repository at the forge"
 func PostRepo(c *gin.Context) {
 	forge := server.Config.Services.Forge
 	_store := store.FromContext(c)
@@ -196,8 +196,8 @@ func PostRepo(c *gin.Context) {
 //	@Produce	json
 //	@Success	200	{object}	Repo
 //	@Tags		Repositories
-//	@Param		Authorization	header	string			true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		Authorization	header	string		true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id			path	int			true	"the repository id"
 //	@Param		repo			body	RepoPatch	true	"the repository's information"
 func PatchRepo(c *gin.Context) {
 	_store := store.FromContext(c)
@@ -318,7 +318,7 @@ func GetRepo(c *gin.Context) {
 //	@Success		200	{object}	Perm
 //	@Tags			Repositories
 //	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param			repo_id			path	int	true	"the repository id"
+//	@Param			repo_id			path	int		true	"the repository id"
 func GetRepoPermissions(c *gin.Context) {
 	perm := session.Perm(c)
 	c.JSON(http.StatusOK, perm)
@@ -522,7 +522,7 @@ func MoveRepo(c *gin.Context) {
 //	@Success	200	{array}	Repo
 //	@Tags		Repositories
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		active				query	bool	false	"only list active repos"
+//	@Param		active			query	bool	false	"only list active repos"
 //	@Param		page			query	int		false	"for response pagination, page offset number"	default(1)
 //	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
 func GetAllRepos(c *gin.Context) {
