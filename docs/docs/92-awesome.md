@@ -30,6 +30,7 @@ If you have some missing resources, please feel free to [open a pull-request](ht
 - [Hetzner cloud](https://www.hetzner.com/cloud) based [Woodpecker compatible autoscaler](https://git.ljoonal.xyz/ljoonal/hetzner-ci-autoscaler) - Creates and destroys VPS instances based on the count of pending & running jobs.
 - [woodpecker-lint](https://git.schmidl.dev/schtobia/woodpecker-lint) - A repository for linting a woodpecker config file via pre-commit hook
 - [Grafana Dashboard](https://github.com/Janik-Haag/woodpecker-grafana-dashboard) - A dashboard visualizing information exposed by the woodpecker prometheus endpoint.
+- [woodpecker-autoscaler](https://github.com/Lerentis/woodpecker-autoscaler) - Yet another woodpecker autoscaler currently targeting [Hetzner cloud](https://www.hetzner.com/cloud) that works in parallel to other autoscaler implementations.
 
 ## Configuration Services
 
