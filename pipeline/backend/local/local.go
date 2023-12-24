@@ -146,7 +146,7 @@ func (e *local) StartStep(ctx context.Context, step *types.Step, taskUUID string
 // execCommands use step.Image as shell and run the commands in it
 func (e *local) execCommands(ctx context.Context, step *types.Step, state *workflowState, env []string) error {
 	// Prepare commands
-	// TODO use `entrypoint` from yaml
+	// TODO support `entrypoint` from pipeline config
 	args, err := e.genCmdByShell(step.Image, step.Commands)
 	if err != nil {
 		return fmt.Errorf("could not convert commands into args: %w", err)
