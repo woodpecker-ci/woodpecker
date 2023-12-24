@@ -111,8 +111,8 @@ func GetAgentTasks(c *gin.Context) {
 //	@Produce	json
 //	@Success	200	{object}	Agent
 //	@Tags		Agents
-//	@Param		Authorization	header	string		true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		agent			path	int			true	"the agent's id"
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		agent			path	int		true	"the agent's id"
 //	@Param		agentData		body	Agent	true	"the agent's data"
 func PatchAgent(c *gin.Context) {
 	_store := store.FromContext(c)
@@ -154,7 +154,7 @@ func PatchAgent(c *gin.Context) {
 //	@Produce	json
 //	@Success	200	{object}	Agent
 //	@Tags		Agents
-//	@Param		Authorization	header	string		true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		agent			body	Agent	true	"the agent's data (only 'name' and 'no_schedule' are read)"
 func PostAgent(c *gin.Context) {
 	in := &model.Agent{}

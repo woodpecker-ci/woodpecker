@@ -102,7 +102,7 @@ func RunCron(c *gin.Context) {
 //	@Produce	json
 //	@Success	200	{object}	Cron
 //	@Tags		Repository cron jobs
-//	@Param		Authorization	header	string		true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		repo_id			path	int		true	"the repository id"
 //	@Param		cronJob			body	Cron	true	"the new cron job"
 func PostCron(c *gin.Context) {
@@ -158,9 +158,9 @@ func PostCron(c *gin.Context) {
 //	@Produce	json
 //	@Success	200	{object}	Cron
 //	@Tags		Repository cron jobs
-//	@Param		Authorization	header	string		true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		repo_id			path	int		true	"the repository id"
-//	@Param		cron			path	string		true	"the cron job id"
+//	@Param		cron			path	string	true	"the cron job id"
 //	@Param		cronJob			body	Cron	true	"the cron job data"
 func PatchCron(c *gin.Context) {
 	repo := session.Repo(c)
