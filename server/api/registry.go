@@ -54,8 +54,8 @@ func GetRegistry(c *gin.Context) {
 //	@Produce	json
 //	@Success	200	{object}	Registry
 //	@Tags		Repository registries
-//	@Param		Authorization	header	string			true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		Authorization	header	string		true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id			path	int			true	"the repository id"
 //	@Param		registry		body	Registry	true	"the new registry data"
 func PostRegistry(c *gin.Context) {
 	repo := session.Repo(c)
@@ -91,9 +91,9 @@ func PostRegistry(c *gin.Context) {
 //	@Produce	json
 //	@Success	200	{object}	Registry
 //	@Tags		Repository registries
-//	@Param		Authorization	header	string			true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		repo_id			path	int		true	"the repository id"
-//	@Param		registry		path	string			true	"the registry name"
+//	@Param		Authorization	header	string		true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id			path	int			true	"the repository id"
+//	@Param		registry		path	string		true	"the registry name"
 //	@Param		registryData	body	Registry	true	"the attributes for the registry"
 func PatchRegistry(c *gin.Context) {
 	var (
