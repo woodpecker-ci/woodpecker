@@ -95,7 +95,7 @@
           "pr_warning": "Bitte sei vorsichtig mit dieser Option, da eine böswillige Person über einen Pull-Request deine Geheimnisse erhalten könnte."
         },
         "images": {
-          "desc": "Komma getrennte Liste aller Images, für die dieses Geheimnis verwendet werden kann. Freilassen, um alle Images zu erlauben",
+          "desc": "Liste aller Images, für die dieses Geheimnis verwendet werden kann. Freilassen, um alle Images zu erlauben",
           "images": "Verfügbar für folgende Images"
         },
         "name": "Name",
@@ -142,6 +142,7 @@
   "errors": {
     "not_found": "Angefragtes Objekt wurde nicht gefunden"
   },
+  "global_level_secret": "globales Geheimnis",
   "info": "Info",
   "login": "Anmelden",
   "logout": "Abmelden",
@@ -162,7 +163,7 @@
           "pr_warning": "Bitte sei vorsichtig mit dieser Option, da eine böswillige Person über einen Pull-Request deine Geheimnisse erhalten könnte."
         },
         "images": {
-          "desc": "Komma getrennte Liste aller Images, für die dieses Geheimnis verwendet werden kann. Freilassen, um alle Images zu erlauben",
+          "desc": "Liste aller Images, für die dieses Geheimnis verwendet werden kann. Freilassen, um alle Images zu erlauben",
           "images": "Verfügbar für die folgenden Images"
         },
         "name": "Name",
@@ -177,6 +178,7 @@
       "settings": "Einstellungen"
     }
   },
+  "org_level_secret": "Organisationsgeheimnis",
   "password": "Passwort",
   "pipeline_feed": "Pipeline-Feed",
   "repo": {
@@ -419,7 +421,7 @@
           "pr_warning": "Bitte sei vorsichtig mit dieser Option, da eine böswillige Person über einen Pull-Request deine Geheimnisse erhalten könnte."
         },
         "images": {
-          "desc": "Durch Kommata getrennte Liste der Images, für die dieses Geheimnis verfügbar ist; leer lassen, um alle Images zuzulassen",
+          "desc": "Liste der Images, für die dieses Geheimnis verfügbar ist; leer lassen, um alle Images zuzulassen",
           "images": "Verfügbar für folgende Images"
         },
         "name": "Name",

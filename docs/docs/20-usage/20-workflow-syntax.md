@@ -443,33 +443,28 @@ when:
   - evaluate: 'SKIP != "true"'
 ```
 
-### `group` - Parallel execution
+### `depends_on`
 
-Woodpecker supports parallel step execution for same-machine fan-in and fan-out. Parallel steps are configured using the `group` attribute. This instructs the agent to execute the named group in parallel.
-
-Example parallel configuration:
+Normally steps of a workflow are executed serially in the order in which they are defined. As soon as you set `depends_on` for a step a [directed acyclic graph](https://en.wikipedia.org/wiki/Directed_acyclic_graph) will be used and all steps of the workflow will be executed in parallel besides the steps that have a dependency set to another step using `depends_on`:
 
 ```diff
  steps:
-   backend:
-+    group: build
-     image: golang
-     commands:
-       - go build
-       - go test
-   frontend:
-+    group: build
-     image: node
-     commands:
-       - npm install
-       - npm run test
-       - npm run build
-   publish:
-     image: plugins/docker
-     repo: octocat/hello-world
-```
+  build: # build will be executed immediately
+    image: golang
+    commands:
+      - go build
 
-In the above example, the `frontend` and `backend` steps are executed in parallel. The agent will not execute the `publish` step until the group completes.
+  deploy:
+    image: plugins/docker
+    settings:
+      repo: foo/bar
++    depends_on: [build, test] # deploy will be executed after build and test finished
+
+  test: # test will be executed immediately as no dependencies are set
+    image: golang
+    commands:
+      - go test
+```
 
 ### `volumes`
 
