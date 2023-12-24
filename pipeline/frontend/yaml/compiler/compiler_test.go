@@ -227,8 +227,8 @@ func TestCompilerCompile(t *testing.T) {
 				Networks: defaultNetworks,
 				Volumes:  defaultVolumes,
 				Stages: []*backend_types.Stage{defaultCloneStage, {
-					Name:  "stage_0",
-					Alias: "stage_0",
+					Name:  "test_stage_0",
+					Alias: "test_stage_0",
 					Steps: []*backend_types.Step{{
 						Name:       "test_step_0",
 						Alias:      "echo env",
@@ -253,8 +253,8 @@ func TestCompilerCompile(t *testing.T) {
 						ExtraHosts: []backend_types.HostAlias{},
 					}},
 				}, {
-					Name:  "stage_1",
-					Alias: "stage_1",
+					Name:  "test_stage_1",
+					Alias: "test_stage_1",
 					Steps: []*backend_types.Step{{
 						Name:       "test_step_1",
 						Alias:      "echo 1",
@@ -281,6 +281,16 @@ func TestCompilerCompile(t *testing.T) {
 			backConf:    nil,
 			expectedErr: "secret \"missing\" not found or not allowed to be used",
 		},
+		{
+			name: "workflow with broken step dependency",
+			fronConf: &yaml_types.Workflow{Steps: yaml_types.ContainerList{ContainerList: []*yaml_types.Container{{
+				Name:      "dummy",
+				Image:     "dummy_img",
+				DependsOn: []string{"not exist"},
+			}}}},
+			backConf:    nil,
+			expectedErr: "step 'dummy' depends on unknown step 'not exist'",
+		},
 	}
 
 	for _, test := range tests {
@@ -304,25 +314,4 @@ func TestCompilerCompile(t *testing.T) {
 			}
 		})
 	}
-}
-
-func TestConvertDAGToStages(t *testing.T) {
-	steps := map[string]*stepWithDependsOn{
-		"step1": {
-			step:      &backend_types.Step{},
-			dependsOn: []string{"step3"},
-		},
-		"step2": {
-			step:      &backend_types.Step{},
-			dependsOn: []string{"step1"},
-		},
-		"step3": {
-			step:      &backend_types.Step{},
-			dependsOn: []string{"step2"},
-		},
-	}
-
-	_, err := convertDAGToStages(steps)
-
-	assert.ErrorContains(t, err, "cycle detected:")
 }
