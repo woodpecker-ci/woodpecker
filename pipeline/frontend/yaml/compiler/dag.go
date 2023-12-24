@@ -40,8 +40,8 @@ func newDAGCompiler(steps []*dagCompilerStep, prefix string) dagCompiler {
 	}
 }
 
-func (dsc dagCompiler) isDAG() bool {
-	for _, v := range dsc.steps {
+func (c dagCompiler) isDAG() bool {
+	for _, v := range c.steps {
 		if len(v.dependsOn) != 0 {
 			return true
 		}
@@ -49,11 +49,11 @@ func (dsc dagCompiler) isDAG() bool {
 	return false
 }
 
-func (dsc dagCompiler) compile() ([]*backend_types.Stage, error) {
-	if dsc.isDAG() {
-		return dsc.compileByDependsOn()
+func (c dagCompiler) compile() ([]*backend_types.Stage, error) {
+	if c.isDAG() {
+		return c.compileByDependsOn()
 	}
-	return dsc.compileByGroup()
+	return c.compileByGroup()
 }
 
 func (c dagCompiler) compileByGroup() ([]*backend_types.Stage, error) {
