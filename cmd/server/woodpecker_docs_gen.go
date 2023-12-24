@@ -27,8 +27,6 @@ import (
 	"path"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cmd/server/docs"
-
-	"github.com/tidwall/pretty"
 )
 
 func main() {
@@ -59,5 +57,5 @@ func removeHost(jsonIn string) string {
 	if err != nil {
 		panic(err)
 	}
-	return string(pretty.Pretty(raw))
+	return string(raw)
 }
