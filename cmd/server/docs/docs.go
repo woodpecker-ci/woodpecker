@@ -4112,6 +4112,9 @@ const docTemplate = `{
                 "owner": {
                     "type": "string"
                 },
+                "pr_enabled": {
+                    "type": "boolean"
+                },
                 "private": {
                     "type": "boolean"
                 },
