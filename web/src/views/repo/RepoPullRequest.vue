@@ -20,6 +20,9 @@ const repoPermissions = inject<Ref<RepoPermissions>>('repo-permissions');
 if (!repo || !repoPermissions) {
   throw new Error('Unexpected: "repo" and "repoPermissions" should be provided at this place');
 }
+if (!repo.value.pr_enabled || !repo.value.allow_pr) {
+  throw new Error('Unexpected: pull requests are disabled for repo');
+}
 
 const allPipelines = inject<Ref<Pipeline[]>>('pipelines');
 const pipelines = computed(
