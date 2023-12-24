@@ -156,7 +156,7 @@ docker run --entrypoint=build.sh golang
 
 ### `entrypoint`
 
-Allows you to specify the entrypoint for Docker and Kubernetes. Note that this must include the full command as list, including arguments (e.g. `["/bin/sh", "-c"]`).
+Allows you to specify the entrypoint for containers. Note that this must be a list of the command and its arguments (e.g. `["/bin/sh", "-c"]`).
 
 ### `environment`
 
