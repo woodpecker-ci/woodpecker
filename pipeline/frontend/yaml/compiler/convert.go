@@ -224,20 +224,14 @@ func convertPort(portDef string) (backend_types.Port, error) {
 	var err error
 	var port backend_types.Port
 
-	portArr := strings.Split(portDef, "/")
+	number, protocol, _ := strings.Cut(portDef, "/")
+	port.Protocol = protocol
 
-	portNumber, err := strconv.ParseUint(portArr[0], 10, 16)
+	portNumber, err := strconv.ParseUint(number, 10, 16)
 	if err != nil {
 		return port, err
 	}
-
-	var proto string
-	if len(portArr) > 1 {
-		proto = portArr[1]
-	}
-
 	port.Number = uint16(portNumber)
-	port.Protocol = proto
 
 	return port, nil
 }
