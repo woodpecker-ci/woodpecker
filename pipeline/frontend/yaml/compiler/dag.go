@@ -40,34 +40,7 @@ func newDAGCompiler(steps []*dagCompilerStep, prefix string) dagCompiler {
 	}
 }
 
-type ErrStepMissingDependency struct {
-	name,
-	dep string
-}
-
-func (err *ErrStepMissingDependency) Error() string {
-	return fmt.Sprintf("step '%s' depends on unknown step '%s'", err.name, err.dep)
-}
-
-func (*ErrStepMissingDependency) Is(target error) bool {
-	_, ok := target.(*ErrStepMissingDependency) //nolint:errorlint
-	return ok
-}
-
-type ErrStepDependencyCycle struct {
-	path []string
-}
-
-func (err *ErrStepDependencyCycle) Error() string {
-	return fmt.Sprintf("cycle detected: %v", err.path)
-}
-
-func (*ErrStepDependencyCycle) Is(target error) bool {
-	_, ok := target.(*ErrStepDependencyCycle) //nolint:errorlint
-	return ok
-}
-
-func (c dagCompiler) isDAG() bool {
+func (dsc dagCompiler) isDAG() bool {
 	for _, v := range c.steps {
 		if len(v.dependsOn) != 0 {
 			return true
@@ -80,7 +53,6 @@ func (dsc dagCompiler) compile() ([]*backend_types.Stage, error) {
 	if dsc.isDAG() {
 		return dsc.compileByDependsOn()
 	}
-
 	return dsc.compileByGroup()
 }
 
