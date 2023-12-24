@@ -32,7 +32,7 @@ import (
 //	@Router		/orgs/{org_id}/secrets/{secret} [get]
 //	@Produce	json
 //	@Success	200	{object}	Secret
-//	@Tags			Organization secrets
+//	@Tags		Organization secrets
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		org_id			path	string	true	"the org's id"
 //	@Param		secret			path	string	true	"the secret's name"
@@ -59,11 +59,11 @@ func GetOrgSecret(c *gin.Context) {
 //	@Router		/orgs/{org_id}/secrets [get]
 //	@Produce	json
 //	@Success	200	{array}	Secret
-//	@Tags			Organization secrets
+//	@Tags		Organization secrets
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		org_id		path	string	true	"the org's id"
+//	@Param		org_id			path	string	true	"the org's id"
 //	@Param		page			query	int		false	"for response pagination, page offset number"	default(1)
-//	@Param		perPage		query	int		false	"for response pagination, max items per page"	default(50)
+//	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
 func GetOrgSecretList(c *gin.Context) {
 	orgID, err := strconv.ParseInt(c.Param("org_id"), 10, 64)
 	if err != nil {
@@ -90,9 +90,9 @@ func GetOrgSecretList(c *gin.Context) {
 //	@Router		/orgs/{org_id}/secrets [post]
 //	@Produce	json
 //	@Success	200	{object}	Secret
-//	@Tags			Organization secrets
-//	@Param		Authorization	header	string			true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		org_id				path	string	true	"the org's id"
+//	@Tags		Organization secrets
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		org_id			path	string	true	"the org's id"
 //	@Param		secretData		body	Secret	true	"the new secret"
 func PostOrgSecret(c *gin.Context) {
 	orgID, err := strconv.ParseInt(c.Param("org_id"), 10, 64)
@@ -131,10 +131,10 @@ func PostOrgSecret(c *gin.Context) {
 //	@Produce	json
 //	@Success	200	{object}	Secret
 //	@Tags		Organization secrets
-//	@Param		Authorization	header	string			true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		org_id			path	string			true	"the org's id"
-//	@Param		secret			path	string			true	"the secret's name"
-//	@Param		secretData	body	Secret	true	"the update secret data"
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		org_id			path	string	true	"the org's id"
+//	@Param		secret			path	string	true	"the secret's name"
+//	@Param		secretData		body	Secret	true	"the update secret data"
 func PatchOrgSecret(c *gin.Context) {
 	name := c.Param("secret")
 	orgID, err := strconv.ParseInt(c.Param("org_id"), 10, 64)
@@ -184,8 +184,8 @@ func PatchOrgSecret(c *gin.Context) {
 //	@Success	204
 //	@Tags		Organization secrets
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		org_id	path	string	true	"the org's id"
-//	@Param		secret	path	string	true	"the secret's name"
+//	@Param		org_id			path	string	true	"the org's id"
+//	@Param		secret			path	string	true	"the secret's name"
 func DeleteOrgSecret(c *gin.Context) {
 	name := c.Param("secret")
 	orgID, err := strconv.ParseInt(c.Param("org_id"), 10, 64)

@@ -42,7 +42,7 @@ import (
 //	@Produce	image/svg+xml
 //	@Success	200
 //	@Tags		Badges
-//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		repo_id	path	int	true	"the repository id"
 func GetBadge(c *gin.Context) {
 	_store := store.FromContext(c)
 

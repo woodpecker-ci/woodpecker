@@ -83,7 +83,7 @@ func GetFeed(c *gin.Context) {
 //	@Success		200	{array}	Repo
 //	@Tags			User
 //	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param			all		query	bool	false	"query all repos, including inactive ones"
+//	@Param			all				query	bool	false	"query all repos, including inactive ones"
 func GetRepos(c *gin.Context) {
 	_store := store.FromContext(c)
 	_forge := server.Config.Services.Forge
@@ -141,12 +141,12 @@ func GetRepos(c *gin.Context) {
 
 // PostToken
 //
-//	@Summary		Return the token of the current user as string
-//	@Router			/user/token [post]
-//	@Produce		plain
-//	@Success		200
-//	@Tags			User
-//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Summary	Return the token of the current user as string
+//	@Router		/user/token [post]
+//	@Produce	plain
+//	@Success	200
+//	@Tags		User
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 func PostToken(c *gin.Context) {
 	user := session.User(c)
 	tokenString, err := token.New(token.UserToken, user.Login).Sign(user.Hash)
