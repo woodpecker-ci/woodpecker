@@ -42,7 +42,6 @@ import (
 	woodpeckerGrpcServer "go.woodpecker-ci.org/woodpecker/v2/server/grpc"
 	"go.woodpecker-ci.org/woodpecker/v2/server/logging"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/config"
 	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/permissions"
 	"go.woodpecker-ci.org/woodpecker/v2/server/pubsub"
 	"go.woodpecker-ci.org/woodpecker/v2/server/router"
@@ -90,7 +89,7 @@ func run(c *cli.Context) error {
 
 	_store, err := setupStore(c)
 	if err != nil {
-		log.Fatal().Err(err).Msg("cant't setup database store")
+		log.Fatal().Err(err).Msg("can't setup database store")
 	}
 	defer func() {
 		if err := _store.Close(); err != nil {
@@ -98,7 +97,10 @@ func run(c *cli.Context) error {
 		}
 	}()
 
-	setupEvilGlobals(c, _store, _forge)
+	err = setupEvilGlobals(c, _store, _forge)
+	if err != nil {
+		log.Fatal().Err(err).Msg("can't setup globals")
+	}
 
 	var g errgroup.Group
 
@@ -266,7 +268,7 @@ func run(c *cli.Context) error {
 	return g.Wait()
 }
 
-func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
+func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) error {
 	// forge
 	server.Config.Services.Forge = f
 	server.Config.Services.Timeout = c.Duration("forge-timeout")
@@ -275,7 +277,11 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 	server.Config.Services.Queue = setupQueue(c, v)
 	server.Config.Services.Logs = logging.New()
 	server.Config.Services.Pubsub = pubsub.New()
-	server.Config.Services.Registries = setupRegistryService(c, v)
+	var err error
+	server.Config.Services.Registries, err = setupRegistryService(c, v)
+	if err != nil {
+		return err
+	}
 
 	// TODO(1544): fix encrypted store
 	// // encryption
@@ -285,15 +291,21 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 	// 	log.Fatal().Err(err).Msg("could not create encryption service")
 	// }
 	// server.Config.Services.Secrets = setupSecretService(c, encryptedSecretStore)
-	server.Config.Services.Secrets = setupSecretService(c, v)
-
-	server.Config.Services.Environ = setupEnvironService(c, v)
+	server.Config.Services.Secrets, err = setupSecretService(c, v)
+	if err != nil {
+		return err
+	}
+	server.Config.Services.Environ, err = setupEnvironService(c, v)
+	if err != nil {
+		return err
+	}
 	server.Config.Services.Membership = setupMembershipService(c, f)
 
 	server.Config.Services.SignaturePrivateKey, server.Config.Services.SignaturePublicKey = setupSignatureKeys(v)
 
-	if endpoint := c.String("config-service-endpoint"); endpoint != "" {
-		server.Config.Services.ConfigService = config.NewHTTP(endpoint, server.Config.Services.SignaturePrivateKey)
+	server.Config.Services.ConfigService, err = setupConfigService(c)
+	if err != nil {
+		return err
 	}
 
 	// authentication
@@ -368,4 +380,5 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) {
 	server.Config.Permissions.Admins = permissions.NewAdmins(c.StringSlice("admin"))
 	server.Config.Permissions.Orgs = permissions.NewOrgs(c.StringSlice("orgs"))
 	server.Config.Permissions.OwnersAllowlist = permissions.NewOwnersAllowlist(c.StringSlice("repo-owners"))
+	return nil
 }
