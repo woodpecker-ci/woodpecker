@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@anbraten, @qwerty287, @renovate[bot], @zc-devs, @6543, @johanvdw, @lafriks, @lukashass, @runephilosof-karnovgroup, @allanger, @xoxys, @gapanyc, @mikhail-putilov, @kaylynb, @voidcontext, @robbie-cahill, @micash545, @dominic-p, @mzampetakis
+@qwerty287, @anbraten, @renovate[bot], @zc-devs, @6543, @johanvdw, @lafriks, @lukashass, @runephilosof-karnovgroup, @allanger, @xoxys, @gapanyc, @mikhail-putilov, @kaylynb, @voidcontext, @robbie-cahill, @micash545, @dominic-p, @mzampetakis
 
 ### ✨ Features
 
@@ -14,6 +14,7 @@
 
 ### 📈 Enhancement
 
+- Support more addon types [[#2984](https://github.com/woodpecker-ci/woodpecker/pull/2984)]
 - Hide PR tab if PRs are disabled [[#3004](https://github.com/woodpecker-ci/woodpecker/pull/3004)]
 - Switch to ULID [[#2986](https://github.com/woodpecker-ci/woodpecker/pull/2986)]
 - Ignore pipelines without config [[#2949](https://github.com/woodpecker-ci/woodpecker/pull/2949)]
