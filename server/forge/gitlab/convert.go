@@ -52,6 +52,7 @@ func (g *GitLab) convertGitLabRepo(_repo *gitlab.Project) (*model.Repo, error) {
 			Push:  isWrite(_repo),
 			Admin: isAdmin(_repo),
 		},
+		PREnabled: _repo.MergeRequestsEnabled,
 	}
 
 	if len(repo.Avatar) != 0 && !strings.HasPrefix(repo.Avatar, "http") {

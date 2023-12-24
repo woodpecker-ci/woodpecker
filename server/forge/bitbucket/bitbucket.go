@@ -367,7 +367,7 @@ func (c *config) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 	if err != nil {
 		return nil, err
 	}
-	result := []*model.PullRequest{}
+	var result []*model.PullRequest
 	for _, pullRequest := range pullRequests {
 		result = append(result, &model.PullRequest{
 			Index: model.ForgeRemoteID(strconv.Itoa(int(pullRequest.ID))),
