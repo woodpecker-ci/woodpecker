@@ -4,13 +4,29 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@qwerty287, @anbraten, @renovate[bot], @zc-devs, @6543, @johanvdw, @lafriks, @lukashass, @runephilosof-karnovgroup, @allanger, @xoxys, @gapanyc, @mikhail-putilov, @kaylynb, @voidcontext, @robbie-cahill, @micash545, @dominic-p, @mzampetakis
+@Lerentis, @qwerty287, @anbraten, @renovate[bot], @zc-devs, @6543, @johanvdw, @lafriks, @lukashass, @runephilosof-karnovgroup, @allanger, @xoxys, @gapanyc, @mikhail-putilov, @kaylynb, @voidcontext, @robbie-cahill, @micash545, @dominic-p, @mzampetakis
 
 ### ✨ Features
 
 - Add depends_on support for steps [[#2771](https://github.com/woodpecker-ci/woodpecker/pull/2771)]
 - gitlab: support nested repos [[#2981](https://github.com/woodpecker-ci/woodpecker/pull/2981)]
 - Support go plugins for forges and agent backends [[#2751](https://github.com/woodpecker-ci/woodpecker/pull/2751)]
+
+### 📚 Documentation
+
+- [Awesome Woodpecker] added yet another autoscaler [[#3011](https://github.com/woodpecker-ci/woodpecker/pull/3011)]
+- Add cookbook blog and improve docs [[#3002](https://github.com/woodpecker-ci/woodpecker/pull/3002)]
+- Replace multi-pipelines with workflows on docs frontpage [[#2990](https://github.com/woodpecker-ci/woodpecker/pull/2990)]
+- Update README badges [[#2956](https://github.com/woodpecker-ci/woodpecker/pull/2956)]
+- Update 20-kubernetes.md [[#2927](https://github.com/woodpecker-ci/woodpecker/pull/2927)]
+- Add release documentation to CONTRIBUTING [[#2917](https://github.com/woodpecker-ci/woodpecker/pull/2917)]
+- Add nix-attic plugin to the index [[#2889](https://github.com/woodpecker-ci/woodpecker/pull/2889)]
+- Add usage with Tunnelmole to docs [[#2881](https://github.com/woodpecker-ci/woodpecker/pull/2881)]
+- Improve code blocks in docs [[#2879](https://github.com/woodpecker-ci/woodpecker/pull/2879)]
+- Add a blog post [[#2877](https://github.com/woodpecker-ci/woodpecker/pull/2877)]
+- Add documentation on Kubernetes securityContext [[#2822](https://github.com/woodpecker-ci/woodpecker/pull/2822)]
+- Add default page to categories [[#2869](https://github.com/woodpecker-ci/woodpecker/pull/2869)]
+- Use same format for Github docs as used for the other forges [[#2866](https://github.com/woodpecker-ci/woodpecker/pull/2866)]
 
 ### 📈 Enhancement
 
@@ -39,21 +55,6 @@
 - Migrate to Xormigrate [[#2711](https://github.com/woodpecker-ci/woodpecker/pull/2711)]
 - Simple security context options (Kubernetes) [[#2550](https://github.com/woodpecker-ci/woodpecker/pull/2550)]
 - Changes PullRequest Index to ForgeRemoteID type [[#2823](https://github.com/woodpecker-ci/woodpecker/pull/2823)]
-
-### 📚 Documentation
-
-- Add cookbook blog and improve docs [[#3002](https://github.com/woodpecker-ci/woodpecker/pull/3002)]
-- Replace multi-pipelines with workflows on docs frontpage [[#2990](https://github.com/woodpecker-ci/woodpecker/pull/2990)]
-- Update README badges [[#2956](https://github.com/woodpecker-ci/woodpecker/pull/2956)]
-- Update 20-kubernetes.md [[#2927](https://github.com/woodpecker-ci/woodpecker/pull/2927)]
-- Add release documentation to CONTRIBUTING [[#2917](https://github.com/woodpecker-ci/woodpecker/pull/2917)]
-- Add nix-attic plugin to the index [[#2889](https://github.com/woodpecker-ci/woodpecker/pull/2889)]
-- Add usage with Tunnelmole to docs [[#2881](https://github.com/woodpecker-ci/woodpecker/pull/2881)]
-- Improve code blocks in docs [[#2879](https://github.com/woodpecker-ci/woodpecker/pull/2879)]
-- Add a blog post [[#2877](https://github.com/woodpecker-ci/woodpecker/pull/2877)]
-- Add documentation on Kubernetes securityContext [[#2822](https://github.com/woodpecker-ci/woodpecker/pull/2822)]
-- Add default page to categories [[#2869](https://github.com/woodpecker-ci/woodpecker/pull/2869)]
-- Use same format for Github docs as used for the other forges [[#2866](https://github.com/woodpecker-ci/woodpecker/pull/2866)]
 
 ### 🐛 Bug Fixes
 
