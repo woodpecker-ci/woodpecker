@@ -45,6 +45,7 @@ require (
 	github.com/swaggo/gin-swagger v1.6.0
 	github.com/swaggo/swag v1.16.2
 	github.com/tevino/abool/v2 v2.1.0
+	github.com/tidwall/pretty v1.2.1
 	github.com/urfave/cli/v2 v2.26.0
 	github.com/xanzy/go-gitlab v0.95.2
 	github.com/xeipuuv/gojsonschema v1.2.0
