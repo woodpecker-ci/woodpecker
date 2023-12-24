@@ -14,6 +14,10 @@ Addons can be used for:
 
 - Forges
 - Agent backends
+- Config services
+- Secret services
+- Environment services
+- Registry services
 
 ## Restrictions
 
