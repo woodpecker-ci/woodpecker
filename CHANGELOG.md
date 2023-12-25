@@ -1,10 +1,10 @@
 # Changelog
 
-## [2.1.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.1.0) - 2023-12-24
+## [2.1.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.1.0) - 2023-12-25
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @Lerentis, @qwerty287, @anbraten, @renovate[bot], @zc-devs, @johanvdw, @lafriks, @lukashass, @runephilosof-karnovgroup, @allanger, @xoxys, @gapanyc, @mikhail-putilov, @kaylynb, @voidcontext, @robbie-cahill, @micash545, @dominic-p, @mzampetakis
+@qwerty287, @6543, @Lerentis, @anbraten, @renovate[bot], @zc-devs, @johanvdw, @lafriks, @lukashass, @runephilosof-karnovgroup, @allanger, @xoxys, @gapanyc, @mikhail-putilov, @kaylynb, @voidcontext, @robbie-cahill, @micash545, @dominic-p, @mzampetakis
 
 ### ✨ Features
 
@@ -14,6 +14,7 @@
 
 ### 🐛 Bug Fixes
 
+- Hide queue visualization if nothing to show [[#3003](https://github.com/woodpecker-ci/woodpecker/pull/3003)]
 - fix and lint swagger file [[#3007](https://github.com/woodpecker-ci/woodpecker/pull/3007)]
 - Fix IPv6 host aliases for kubernetes [[#2992](https://github.com/woodpecker-ci/woodpecker/pull/2992)]
 - Fix cli lint throwing error on warnings  [[#2995](https://github.com/woodpecker-ci/woodpecker/pull/2995)]
