@@ -15,7 +15,7 @@
               {{ stats.completed_count }}
             </h4>
           </div>
-          <div class="pb-4 lg:pb-6">
+          <div v-if="total > 0" class="pb-4 lg:pb-6">
             <div class="overflow-hidden rounded-full h-3 flex transition-all duration-500">
               <div
                 v-for="item in data"
