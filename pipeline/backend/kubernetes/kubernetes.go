@@ -54,13 +54,14 @@ type kube struct {
 }
 
 type config struct {
-	Namespace       string
-	StorageClass    string
-	VolumeSize      string
-	StorageRwx      bool
-	PodLabels       map[string]string
-	PodAnnotations  map[string]string
-	SecurityContext SecurityContextConfig
+	Namespace            string
+	StorageClass         string
+	VolumeSize           string
+	StorageRwx           bool
+	PodLabels            map[string]string
+	PodAnnotations       map[string]string
+	ImagePullSecretNames []string
+	SecurityContext      SecurityContextConfig
 }
 type SecurityContextConfig struct {
 	RunAsNonRoot bool
@@ -80,12 +81,13 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 	if ctx != nil {
 		if c, ok := ctx.Value(types.CliContext).(*cli.Context); ok {
 			config := config{
-				Namespace:      c.String("backend-k8s-namespace"),
-				StorageClass:   c.String("backend-k8s-storage-class"),
-				VolumeSize:     c.String("backend-k8s-volume-size"),
-				StorageRwx:     c.Bool("backend-k8s-storage-rwx"),
-				PodLabels:      make(map[string]string), // just init empty map to prevent nil panic
-				PodAnnotations: make(map[string]string), // just init empty map to prevent nil panic
+				Namespace:            c.String("backend-k8s-namespace"),
+				StorageClass:         c.String("backend-k8s-storage-class"),
+				VolumeSize:           c.String("backend-k8s-volume-size"),
+				StorageRwx:           c.Bool("backend-k8s-storage-rwx"),
+				PodLabels:            make(map[string]string), // just init empty map to prevent nil panic
+				PodAnnotations:       make(map[string]string), // just init empty map to prevent nil panic
+				ImagePullSecretNames: c.StringSlice("backend-k8s-pod-image-pull-secret-names"),
 				SecurityContext: SecurityContextConfig{
 					RunAsNonRoot: c.Bool("backend-k8s-secctx-nonroot"),
 				},

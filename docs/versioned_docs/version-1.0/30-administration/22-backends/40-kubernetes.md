@@ -40,6 +40,12 @@ Additional labels to apply to worker pods. Must be a YAML object, e.g. `{"exampl
 
 Additional annotations to apply to worker pods. Must be a YAML object, e.g. `{"example.com/test-annotation":"test-value"}`.
 
+### `WOODPECKER_BACKEND_K8S_PULL_SECRET_NAMES`
+> Default: `regcred`
+
+By default, in order to pull images from private repositories Kubernetes backend uses a secret named "regcred".
+You can override it and also set many secret names.
+
 ## Job specific configuration
 
 ### Resources
