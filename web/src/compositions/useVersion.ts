@@ -29,13 +29,13 @@ async function fetchVersion(): Promise<VersionInfo | undefined> {
   }
 }
 
-const isInitialised = ref(false);
+const isInitialized = ref(false);
 
 export function useVersion() {
-  if (isInitialised.value) {
+  if (isInitialized.value) {
     return version;
   }
-  isInitialised.value = true;
+  isInitialized.value = true;
 
   const config = useConfig();
   const current = config.version as string;

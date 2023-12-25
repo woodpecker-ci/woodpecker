@@ -312,11 +312,11 @@ func PostApproval(c *gin.Context) {
 		return
 	}
 
-	newpipeline, err := pipeline.Approve(c, _store, pl, user, repo)
+	newPipeline, err := pipeline.Approve(c, _store, pl, user, repo)
 	if err != nil {
 		handlePipelineErr(c, err)
 	} else {
-		c.JSON(http.StatusOK, newpipeline)
+		c.JSON(http.StatusOK, newPipeline)
 	}
 }
 

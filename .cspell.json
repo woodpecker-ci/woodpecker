@@ -1,0 +1,39 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "words": [
+    "ciphertext",
+    "evenodd",
+    "gitea",
+    "gonic",
+    "Netrc",
+    "prismjs",
+    "rawurl",
+    "Refspec",
+    "securecookie",
+    "sess",
+    "techknowlogick",
+    "vueuse",
+    "windicss",
+    "xorm",
+    "xormigrate",
+    "zerolog",
+    "Msgf"
+  ],
+  "ignorePaths": [
+    "**/node_modules/**/*",
+    "pnpm-lock.yaml",
+    ".cspell.json",
+    "web/src/assets/locales/**/*",
+    "server/store/datastore/migration/testfiles/sqlite.db",
+    "go.mod",
+    "go.sum"
+  ]
+  // "overrides": [
+  //   {
+  //     "filename": "{**/locales/de.json,**/*.de.ts}",
+  //     "language": "de,en",
+  //     "words": ["Anfragedetails", "upgraden", "Spacebetreiber"]
+  //   }
+  // ]
+}

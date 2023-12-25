@@ -74,7 +74,7 @@ const (
 	RepoPerforce SCMKind = "perforce"
 )
 
-// RepoVisibility represent to wat state a repo in woodpecker is visible to others
+// RepoVisibility represent to what state a repo in woodpecker is visible to others
 type RepoVisibility string //	@name RepoVisibility
 
 const (

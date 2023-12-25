@@ -408,7 +408,7 @@ func (c *client) Org(orgID int64) (*Org, error) {
 	return out, err
 }
 
-// OrgLookup returns a organsization by its name.
+// OrgLookup returns a organization by its name.
 func (c *client) OrgLookup(name string) (*Org, error) {
 	out := new(Org)
 	uri := fmt.Sprintf(pathOrgLookup, c.addr, name)
