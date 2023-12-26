@@ -191,7 +191,7 @@ Configures the logging level. Possible values are `trace`, `debug`, `info`, `war
 
 ### `WOODPECKER_LOG_FILE`
 
-> Default: stderr
+> Default: `stderr`
 
 Output destination for logs.
 'stdout' and 'stderr' can be used as special keywords.
