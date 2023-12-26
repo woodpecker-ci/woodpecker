@@ -25,7 +25,7 @@ woodpecker-cli [GLOBAL OPTIONS] command [COMMAND OPTIONS] [ARGUMENTS...]
 
 # GLOBAL OPTIONS
 
-**--log-file**="": where logs are written to. 'stdout' and 'stderr' can be used as special keywords (default: "stderr")
+**--log-file**="": Output destination for logs. 'stdout' and 'stderr' can be used as special keywords. (default: "stderr")
 
 **--log-level**="": set logging level (default: "info")
 
