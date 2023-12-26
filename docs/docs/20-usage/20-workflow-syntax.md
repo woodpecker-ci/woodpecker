@@ -263,7 +263,7 @@ when:
 
 #### `event`
 
-Available events: `push`, `pull_request`, `tag`, `deployment`, `cron`, `manual`
+Available events: `push`, `pull_request`, `pull_request_closed`, `tag`, `deployment`, `cron`, `manual`
 
 Execute a step if the build event is a `tag`:
 

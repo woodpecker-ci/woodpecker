@@ -37,7 +37,8 @@
         class="grid grid-rows-2 grid-flow-col w-full md:ml-auto md:w-96 py-2 gap-x-4 gap-y-2 flex-shrink-0 text-wp-text-100"
       >
         <div class="flex space-x-2 items-center min-w-0">
-          <Icon v-if="pipeline.event === 'pull_request'" name="pull_request" />
+          <Icon v-if="pipeline.event === 'pull_request'" name="pull-request" />
+          <Icon v-if="pipeline.event === 'pull_request_closed'" name="pull-request-closed" />
           <Icon v-else-if="pipeline.event === 'deployment'" name="deployment" />
           <Icon v-else-if="pipeline.event === 'tag'" name="tag" />
           <Icon v-else-if="pipeline.event === 'cron'" name="push" />
