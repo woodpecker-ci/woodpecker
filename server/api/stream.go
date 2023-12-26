@@ -36,15 +36,15 @@ import (
 
 // EventStreamSSE
 //
-//	@Summary	Event stream
+//	@Summary		Event stream
 //	@Description	event source streaming for compatibility with quic and http2
-//	@Router		/stream/events [get]
-//	@Produce	plain
-//	@Success	200
+//	@Router			/stream/events [get]
+//	@Produce		plain
+//	@Success		200
 //	@Tags			Events
 func EventStreamSSE(c *gin.Context) {
 	c.Header("Content-Type", "text/event-stream")
-	c.Header("Cache-Control", "no-cache")
+	c.Header("Cache-Control", "no-store")
 	c.Header("Connection", "keep-alive")
 	c.Header("X-Accel-Buffering", "no")
 
@@ -128,10 +128,10 @@ func EventStreamSSE(c *gin.Context) {
 //	@Router		/stream/logs/{repo_id}/{pipeline}/{stepID} [get]
 //	@Produce	plain
 //	@Success	200
-//	@Tags			Pipeline logs
-//	@Param		repo_id			path	int		true	"the repository id"
-//	@Param		pipeline	path	int		true		"the number of the pipeline"
-//	@Param		stepID		path	int		true		"the step id"
+//	@Tags		Pipeline logs
+//	@Param		repo_id		path	int	true	"the repository id"
+//	@Param		pipeline	path	int	true	"the number of the pipeline"
+//	@Param		stepID		path	int	true	"the step id"
 func LogStreamSSE(c *gin.Context) {
 	c.Header("Content-Type", "text/event-stream")
 	c.Header("Cache-Control", "no-cache")

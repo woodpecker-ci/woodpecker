@@ -66,11 +66,11 @@ This is the reference list of all environment variables available to your pipeli
 | `CI_COMMIT_REF`                  | commit ref                                                                                                         |
 | `CI_COMMIT_REFSPEC`              | commit ref spec                                                                                                    |
 | `CI_COMMIT_BRANCH`               | commit branch (equals target branch for pull requests)                                                             |
-| `CI_COMMIT_SOURCE_BRANCH`        | commit source branch (empty if event is not `pull_request`)                                                        |
-| `CI_COMMIT_TARGET_BRANCH`        | commit target branch (empty if event is not `pull_request`)                                                        |
+| `CI_COMMIT_SOURCE_BRANCH`        | commit source branch (empty if event is not `pull_request` or `pull_request_closed`)                               |
+| `CI_COMMIT_TARGET_BRANCH`        | commit target branch (empty if event is not `pull_request` or `pull_request_closed`)                               |
 | `CI_COMMIT_TAG`                  | commit tag name (empty if event is not `tag`)                                                                      |
-| `CI_COMMIT_PULL_REQUEST`         | commit pull request number (empty if event is not `pull_request`)                                                  |
-| `CI_COMMIT_PULL_REQUEST_LABELS`  | labels assigned to pull request (empty if event is not `pull_request`)                                             |
+| `CI_COMMIT_PULL_REQUEST`         | commit pull request number (empty if event is not `pull_request` or `pull_request_closed`)                         |
+| `CI_COMMIT_PULL_REQUEST_LABELS`  | labels assigned to pull request (empty if event is not `pull_request` or `pull_request_closed`)                    |
 | `CI_COMMIT_MESSAGE`              | commit message                                                                                                     |
 | `CI_COMMIT_AUTHOR`               | commit author username                                                                                             |
 | `CI_COMMIT_AUTHOR_EMAIL`         | commit author email address                                                                                        |
@@ -78,10 +78,10 @@ This is the reference list of all environment variables available to your pipeli
 |                                  | **Current pipeline**                                                                                               |
 | `CI_PIPELINE_NUMBER`             | pipeline number                                                                                                    |
 | `CI_PIPELINE_PARENT`             | number of parent pipeline                                                                                          |
-| `CI_PIPELINE_EVENT`              | pipeline event (push, pull_request, tag, deployment, cron, manual)                                                 |
+| `CI_PIPELINE_EVENT`              | pipeline event (see [pipeline events](../20-usage/15-terminiology/index.md#pipeline-events))                       |
 | `CI_PIPELINE_URL`                | link to the web UI for the pipeline                                                                                |
 | `CI_PIPELINE_FORGE_URL`          | link to the forge's web UI for the commit(s) or tag that triggered the pipeline                                    |
-| `CI_PIPELINE_DEPLOY_TARGET`      | pipeline deploy target for `deployment` events (ie production)                                                     |
+| `CI_PIPELINE_DEPLOY_TARGET`      | pipeline deploy target for `deployment` events (i.e. production)                                                   |
 | `CI_PIPELINE_STATUS`             | pipeline status (success, failure)                                                                                 |
 | `CI_PIPELINE_CREATED`            | pipeline created UNIX timestamp                                                                                    |
 | `CI_PIPELINE_STARTED`            | pipeline started UNIX timestamp                                                                                    |
@@ -111,7 +111,7 @@ This is the reference list of all environment variables available to your pipeli
 |                                  | **Previous pipeline**                                                                                              |
 | `CI_PREV_PIPELINE_NUMBER`        | previous pipeline number                                                                                           |
 | `CI_PREV_PIPELINE_PARENT`        | previous pipeline number of parent pipeline                                                                        |
-| `CI_PREV_PIPELINE_EVENT`         | previous pipeline event (push, pull_request, tag, deployment)                                                      |
+| `CI_PREV_PIPELINE_EVENT`         | previous pipeline event (see [pipeline events](../20-usage/15-terminiology/index.md#pipeline-events))              |
 | `CI_PREV_PIPELINE_URL`           | previous pipeline link in CI                                                                                       |
 | `CI_PREV_PIPELINE_FORGE_URL`     | previous pipeline link to event in forge                                                                           |
 | `CI_PREV_PIPELINE_DEPLOY_TARGET` | previous pipeline deploy target for `deployment` events (ie production)                                            |
