@@ -84,6 +84,14 @@ steps:
     group: test
     when: *when
 
+  spellcheck:
+    image: docker.io/node:21-alpine
+    group: test
+    commands:
+      - corepack enable
+      - pnpx cspell lint --gitignore '{**,.*}/{*,.*}'
+    when: *when
+
   test:
     image: *golang_image
     group: test
