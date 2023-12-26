@@ -32,6 +32,15 @@
 - **Dependency**: [Workflows][Workflow] can depend on each other, and if possible, they are executed in parallel.
 - **Status**: Status refers to the outcome of a step or [workflow][Workflow] after it has been executed, determined by the internal command exit code. At the end of a [workflow][Workflow], its status is sent to the [forge][Forge].
 
+## Pipeline events
+
+- `push`: A push event is triggered when a commit is pushed to a branch.
+- `pull_request`: A pull request event is triggered when a pull request is opened or a new commit is pushed to it.
+- `pull_request_closed`: A pull request closed event is triggered when a pull request is closed or merged.
+- `tag`: A tag event is triggered when a tag is pushed.
+- `manual`: A manual event is triggered when a user manually triggers a pipeline.
+- `cron`: A cron event is triggered when a cron job is executed.
+
 ## Conventions
 
 Sometimes there are multiple terms that can be used to describe something. This section lists the preferred terms to use in Woodpecker:
