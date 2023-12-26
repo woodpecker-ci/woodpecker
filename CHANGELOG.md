@@ -1,16 +1,45 @@
 # Changelog
 
-## [2.1.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.1.0) - 2023-12-25
+## [2.1.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.1.0) - 2023-12-26
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@qwerty287, @6543, @Lerentis, @anbraten, @renovate[bot], @zc-devs, @johanvdw, @lafriks, @lukashass, @runephilosof-karnovgroup, @allanger, @xoxys, @gapanyc, @mikhail-putilov, @kaylynb, @voidcontext, @robbie-cahill, @micash545, @dominic-p, @mzampetakis
+@lukashass, @qwerty287, @6543, @Lerentis, @anbraten, @renovate[bot], @zc-devs, @johanvdw, @lafriks, @runephilosof-karnovgroup, @allanger, @xoxys, @gapanyc, @mikhail-putilov, @kaylynb, @voidcontext, @robbie-cahill, @micash545, @dominic-p, @mzampetakis
 
 ### ✨ Features
 
 - Add depends_on support for steps [[#2771](https://github.com/woodpecker-ci/woodpecker/pull/2771)]
 - gitlab: support nested repos [[#2981](https://github.com/woodpecker-ci/woodpecker/pull/2981)]
 - Support go plugins for forges and agent backends [[#2751](https://github.com/woodpecker-ci/woodpecker/pull/2751)]
+
+### 📈 Enhancement
+
+- Show default branch on top [[#3019](https://github.com/woodpecker-ci/woodpecker/pull/3019)]
+- Support more addon types [[#2984](https://github.com/woodpecker-ci/woodpecker/pull/2984)]
+- Hide PR tab if PRs are disabled [[#3004](https://github.com/woodpecker-ci/woodpecker/pull/3004)]
+- Switch to ULID [[#2986](https://github.com/woodpecker-ci/woodpecker/pull/2986)]
+- Ignore pipelines without config [[#2949](https://github.com/woodpecker-ci/woodpecker/pull/2949)]
+- Link labels to input and select [[#2974](https://github.com/woodpecker-ci/woodpecker/pull/2974)]
+- Register Agent with hostname [[#2936](https://github.com/woodpecker-ci/woodpecker/pull/2936)]
+- Update slogan & logo [[#2962](https://github.com/woodpecker-ci/woodpecker/pull/2962)]
+- Improve error handling when activating a repository [[#2965](https://github.com/woodpecker-ci/woodpecker/pull/2965)]
+- Add check for storage where repo/org name is empty [[#2968](https://github.com/woodpecker-ci/woodpecker/pull/2968)]
+- Update pipeline icons [[#2783](https://github.com/woodpecker-ci/woodpecker/pull/2783)]
+- Kubernetes refactor [[#2794](https://github.com/woodpecker-ci/woodpecker/pull/2794)]
+- Export changed files via builtin environment variables [[#2935](https://github.com/woodpecker-ci/woodpecker/pull/2935)]
+- Show secrets from org and global level [[#2873](https://github.com/woodpecker-ci/woodpecker/pull/2873)]
+- Only update pipelineStatus in one place [[#2952](https://github.com/woodpecker-ci/woodpecker/pull/2952)]
+- Rename `engine` to `backend` [[#2950](https://github.com/woodpecker-ci/woodpecker/pull/2950)]
+- Add linting for `log.Fatal()` [[#2946](https://github.com/woodpecker-ci/woodpecker/pull/2946)]
+- Remove separate root path config [[#2943](https://github.com/woodpecker-ci/woodpecker/pull/2943)]
+- init CI_COMMIT_TAG if commit ref is a tag [[#2934](https://github.com/woodpecker-ci/woodpecker/pull/2934)]
+- Update go module path for major version 2 [[#2905](https://github.com/woodpecker-ci/woodpecker/pull/2905)]
+- Unify date/time dependencies [[#2891](https://github.com/woodpecker-ci/woodpecker/pull/2891)]
+- Add linting for `any` [[#2893](https://github.com/woodpecker-ci/woodpecker/pull/2893)]
+- Fix vite deprecations [[#2885](https://github.com/woodpecker-ci/woodpecker/pull/2885)]
+- Migrate to Xormigrate [[#2711](https://github.com/woodpecker-ci/woodpecker/pull/2711)]
+- Simple security context options (Kubernetes) [[#2550](https://github.com/woodpecker-ci/woodpecker/pull/2550)]
+- Changes PullRequest Index to ForgeRemoteID type [[#2823](https://github.com/woodpecker-ci/woodpecker/pull/2823)]
 
 ### 🐛 Bug Fixes
 
@@ -51,34 +80,6 @@
 - Add documentation on Kubernetes securityContext [[#2822](https://github.com/woodpecker-ci/woodpecker/pull/2822)]
 - Add default page to categories [[#2869](https://github.com/woodpecker-ci/woodpecker/pull/2869)]
 - Use same format for Github docs as used for the other forges [[#2866](https://github.com/woodpecker-ci/woodpecker/pull/2866)]
-
-### 📈 Enhancement
-
-- Support more addon types [[#2984](https://github.com/woodpecker-ci/woodpecker/pull/2984)]
-- Hide PR tab if PRs are disabled [[#3004](https://github.com/woodpecker-ci/woodpecker/pull/3004)]
-- Switch to ULID [[#2986](https://github.com/woodpecker-ci/woodpecker/pull/2986)]
-- Ignore pipelines without config [[#2949](https://github.com/woodpecker-ci/woodpecker/pull/2949)]
-- Link labels to input and select [[#2974](https://github.com/woodpecker-ci/woodpecker/pull/2974)]
-- Register Agent with hostname [[#2936](https://github.com/woodpecker-ci/woodpecker/pull/2936)]
-- Update slogan & logo [[#2962](https://github.com/woodpecker-ci/woodpecker/pull/2962)]
-- Improve error handling when activating a repository [[#2965](https://github.com/woodpecker-ci/woodpecker/pull/2965)]
-- Add check for storage where repo/org name is empty [[#2968](https://github.com/woodpecker-ci/woodpecker/pull/2968)]
-- Update pipeline icons [[#2783](https://github.com/woodpecker-ci/woodpecker/pull/2783)]
-- Kubernetes refactor [[#2794](https://github.com/woodpecker-ci/woodpecker/pull/2794)]
-- Export changed files via builtin environment variables [[#2935](https://github.com/woodpecker-ci/woodpecker/pull/2935)]
-- Show secrets from org and global level [[#2873](https://github.com/woodpecker-ci/woodpecker/pull/2873)]
-- Only update pipelineStatus in one place [[#2952](https://github.com/woodpecker-ci/woodpecker/pull/2952)]
-- Rename `engine` to `backend` [[#2950](https://github.com/woodpecker-ci/woodpecker/pull/2950)]
-- Add linting for `log.Fatal()` [[#2946](https://github.com/woodpecker-ci/woodpecker/pull/2946)]
-- Remove separate root path config [[#2943](https://github.com/woodpecker-ci/woodpecker/pull/2943)]
-- init CI_COMMIT_TAG if commit ref is a tag [[#2934](https://github.com/woodpecker-ci/woodpecker/pull/2934)]
-- Update go module path for major version 2 [[#2905](https://github.com/woodpecker-ci/woodpecker/pull/2905)]
-- Unify date/time dependencies [[#2891](https://github.com/woodpecker-ci/woodpecker/pull/2891)]
-- Add linting for `any` [[#2893](https://github.com/woodpecker-ci/woodpecker/pull/2893)]
-- Fix vite deprecations [[#2885](https://github.com/woodpecker-ci/woodpecker/pull/2885)]
-- Migrate to Xormigrate [[#2711](https://github.com/woodpecker-ci/woodpecker/pull/2711)]
-- Simple security context options (Kubernetes) [[#2550](https://github.com/woodpecker-ci/woodpecker/pull/2550)]
-- Changes PullRequest Index to ForgeRemoteID type [[#2823](https://github.com/woodpecker-ci/woodpecker/pull/2823)]
 
 ### Misc
 
