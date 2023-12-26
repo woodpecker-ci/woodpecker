@@ -36,8 +36,6 @@ const (
 	actionSync  = "synchronized"
 	actionClose = "closed"
 
-	stateOpen = "open"
-
 	refBranch = "branch"
 	refTag    = "tag"
 )
@@ -54,7 +52,7 @@ func parseHook(r *http.Request) (*model.Repo, *model.Pipeline, error) {
 	case hookPullRequest:
 		return parsePullRequestHook(r.Body)
 	}
-	log.Debug().Msgf("unsuported hook type: '%s'", hookType)
+	log.Debug().Msgf("unsupported hook type: '%s'", hookType)
 	return nil, nil, &types.ErrIgnoreEvent{Event: hookType}
 }
 

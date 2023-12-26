@@ -77,6 +77,22 @@ func Test_parser(t *testing.T) {
 				buf := bytes.NewBufferString(fixtures.HookTag)
 				req, _ := http.NewRequest("POST", "/hook", buf)
 				req.Header = http.Header{}
+				req.Header.Set(hookEvent, hookCreated)
+				r, b, err := parseHook(req)
+				g.Assert(r).IsNotNil()
+				g.Assert(b).IsNotNil()
+				g.Assert(err).IsNil()
+				g.Assert(b.Event).Equal(model.EventTag)
+			})
+		})
+
+		g.Describe("pull-request events", func() {
+			// g.It("should handle a PR hook when PR got created")
+
+			g.It("should handle a PR hook when PR got updated", func() {
+				buf := bytes.NewBufferString(fixtures.HookPullRequest)
+				req, _ := http.NewRequest("POST", "/hook", buf)
+				req.Header = http.Header{}
 				req.Header.Set(hookEvent, hookPullRequest)
 				r, b, err := parseHook(req)
 				g.Assert(r).IsNotNil()
@@ -84,43 +100,30 @@ func Test_parser(t *testing.T) {
 				g.Assert(err).IsNil()
 				g.Assert(b.Event).Equal(model.EventPull)
 			})
-		})
 
-		g.It("should handle a PR hook", func() {
-			buf := bytes.NewBufferString(fixtures.HookPullRequest)
-			req, _ := http.NewRequest("POST", "/hook", buf)
-			req.Header = http.Header{}
-			req.Header.Set(hookEvent, hookPullRequest)
-			r, b, err := parseHook(req)
-			g.Assert(r).IsNotNil()
-			g.Assert(b).IsNotNil()
-			g.Assert(err).IsNil()
-			g.Assert(b.Event).Equal(model.EventPull)
-		})
+			g.It("should handle a PR closed hook when PR got closed", func() {
+				buf := bytes.NewBufferString(fixtures.HookPullRequestClosed)
+				req, _ := http.NewRequest("POST", "/hook", buf)
+				req.Header = http.Header{}
+				req.Header.Set(hookEvent, hookPullRequest)
+				r, b, err := parseHook(req)
+				g.Assert(r).IsNotNil()
+				g.Assert(b).IsNotNil()
+				g.Assert(err).IsNil()
+				g.Assert(b.Event).Equal(model.EventPullClosed)
+			})
 
-		g.It("should handle a PR closed hook when PR got closed", func() {
-			buf := bytes.NewBufferString(fixtures.HookPullRequestClosed)
-			req, _ := http.NewRequest("POST", "/hook", buf)
-			req.Header = http.Header{}
-			req.Header.Set(hookEvent, hookPullRequest)
-			r, b, err := parseHook(req)
-			g.Assert(r).IsNotNil()
-			g.Assert(b).IsNotNil()
-			g.Assert(err).IsNil()
-			g.Assert(b.Event).Equal(model.EventPullClosed)
+			g.It("should handle a PR closed hook when PR was merged", func() {
+				buf := bytes.NewBufferString(fixtures.HookPullRequestMerged)
+				req, _ := http.NewRequest("POST", "/hook", buf)
+				req.Header = http.Header{}
+				req.Header.Set(hookEvent, hookPullRequest)
+				r, b, err := parseHook(req)
+				g.Assert(r).IsNotNil()
+				g.Assert(b).IsNotNil()
+				g.Assert(err).IsNil()
+				g.Assert(b.Event).Equal(model.EventPullClosed)
+			})
 		})
-
-		g.It("should handle a PR closed hook when PR was merged", func() {
-			buf := bytes.NewBufferString(fixtures.HookPullRequestMerged)
-			req, _ := http.NewRequest("POST", "/hook", buf)
-			req.Header = http.Header{}
-			req.Header.Set(hookEvent, hookPullRequest)
-			r, b, err := parseHook(req)
-			g.Assert(r).IsNotNil()
-			g.Assert(b).IsNotNil()
-			g.Assert(err).IsNil()
-			g.Assert(b.Event).Equal(model.EventPullClosed)
-		})
-
 	})
 }

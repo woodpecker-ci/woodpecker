@@ -198,6 +198,46 @@ func Test_GitLab(t *testing.T) {
 						assert.Len(t, pipeline.ChangedFiles, 0) // see L217
 					}
 				})
+
+				g.It("Should parse merge request hook when MR closed", func() {
+					req, _ := http.NewRequest(
+						testdata.ServiceHookMethod,
+						testdata.ServiceHookURL.String(),
+						bytes.NewReader(testdata.HookPullRequestClosed),
+					)
+					req.Header = testdata.ServiceHookHeaders
+
+					// TODO: insert fake store into context to retrieve user & repo, this will activate fetching of ChangedFiles
+					hookRepo, pipeline, err := client.Hook(ctx, req)
+					assert.NoError(t, err)
+					if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
+						assert.Equal(t, "main", hookRepo.Branch)
+						assert.Equal(t, "anbraten", hookRepo.Owner)
+						assert.Equal(t, "woodpecker-test", hookRepo.Name)
+						assert.Equal(t, "Add new file", pipeline.Title)
+						assert.Len(t, pipeline.ChangedFiles, 0) // see L217
+					}
+				})
+
+				g.It("Should parse merge request hook when merged", func() {
+					req, _ := http.NewRequest(
+						testdata.ServiceHookMethod,
+						testdata.ServiceHookURL.String(),
+						bytes.NewReader(testdata.HookPullRequestMerged),
+					)
+					req.Header = testdata.ServiceHookHeaders
+
+					// TODO: insert fake store into context to retrieve user & repo, this will activate fetching of ChangedFiles
+					hookRepo, pipeline, err := client.Hook(ctx, req)
+					assert.NoError(t, err)
+					if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
+						assert.Equal(t, "main", hookRepo.Branch)
+						assert.Equal(t, "anbraten", hookRepo.Owner)
+						assert.Equal(t, "woodpecker-test", hookRepo.Name)
+						assert.Equal(t, "Add new file", pipeline.Title)
+						assert.Len(t, pipeline.ChangedFiles, 0) // see L217
+					}
+				})
 			})
 		})
 	})
