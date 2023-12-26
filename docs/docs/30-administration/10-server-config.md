@@ -189,6 +189,13 @@ The following list describes all available server configuration options.
 
 Configures the logging level. Possible values are `trace`, `debug`, `info`, `warn`, `error`, `fatal`, `panic`, `disabled` and empty.
 
+### `WOODPECKER_LOG_FILE`
+
+> Default: stderr
+
+Output destination for logs.
+'stdout' and 'stderr' can be used as special keywords.
+
 ### `WOODPECKER_LOG_XORM`
 
 > Default: `false`
