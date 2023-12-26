@@ -25,8 +25,8 @@
   <a href="https://goreportcard.com/report/github.com/woodpecker-ci/woodpecker" title="Go Report Card">
     <img src="https://goreportcard.com/badge/github.com/woodpecker-ci/woodpecker">
   </a>
-  <a href="https://godoc.org/github.com/woodpecker-ci/woodpecker" title="GoDoc">
-    <img src="https://godoc.org/github.com/woodpecker-ci/woodpecker?status.svg">
+  <a href="https://pkg.go.dev/go.woodpecker-ci.org/woodpecker/v2" title="go reference">
+    <img src="https://pkg.go.dev/badge/go.woodpecker-ci.org/woodpecker/v2">
   </a>
   <a href="https://github.com/woodpecker-ci/woodpecker/releases/latest" title="GitHub release">
     <img src="https://img.shields.io/github/v/release/woodpecker-ci/woodpecker?sort=semver">
