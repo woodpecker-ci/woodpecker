@@ -53,18 +53,6 @@ func Test_parser(t *testing.T) {
 				g.Assert(err).IsNotNil()
 			})
 
-			g.It("should return nil if not open", func() {
-				buf := bytes.NewBufferString(fixtures.HookPullRequestClosed)
-				req, _ := http.NewRequest("POST", "/hook", buf)
-				req.Header = http.Header{}
-				req.Header.Set(hookEvent, hookPullCreated)
-
-				r, b, err := parseHook(req)
-				g.Assert(r).IsNil()
-				g.Assert(b).IsNil()
-				g.Assert(err).IsNil()
-			})
-
 			g.It("should return pull-request details", func() {
 				buf := bytes.NewBufferString(fixtures.HookPull)
 				req, _ := http.NewRequest("POST", "/hook", buf)
@@ -74,33 +62,34 @@ func Test_parser(t *testing.T) {
 				r, b, err := parseHook(req)
 				g.Assert(err).IsNil()
 				g.Assert(r.FullName).Equal("user_name/repo_name")
+				g.Assert(b.Event).Equal(model.EventPull)
 				g.Assert(b.Commit).Equal("ce5965ddd289")
 			})
-		})
 
-		g.Describe("Given a pull-request closed or merged hook payload", func() {
 			g.It("should return pull-request details for a pull-request merged payload", func() {
 				buf := bytes.NewBufferString(fixtures.HookPullRequestMerged)
 				req, _ := http.NewRequest("POST", "/hook", buf)
 				req.Header = http.Header{}
-				req.Header.Set(hookEvent, hookPullClosed)
+				req.Header.Set(hookEvent, hookPullMerged)
 
 				r, b, err := parseHook(req)
 				g.Assert(err).IsNil()
-				g.Assert(r.FullName).Equal("user_name/repo_name")
-				g.Assert(b.Commit).Equal("ce5965ddd289")
+				g.Assert(r.FullName).Equal("anbraten/test-2")
+				g.Assert(b.Event).Equal(model.EventPullClosed)
+				g.Assert(b.Commit).Equal("6c5f0bc9b2aa")
 			})
 
 			g.It("should return pull-request details for a pull-request closed payload", func() {
-				buf := bytes.NewBufferString(fixtures.HookPullRequestClosed)
+				buf := bytes.NewBufferString(fixtures.HookPullRequestDeclined)
 				req, _ := http.NewRequest("POST", "/hook", buf)
 				req.Header = http.Header{}
-				req.Header.Set(hookEvent, hookPullClosed)
+				req.Header.Set(hookEvent, hookPullDeclined)
 
 				r, b, err := parseHook(req)
 				g.Assert(err).IsNil()
-				g.Assert(r.FullName).Equal("user_name/repo_name")
-				g.Assert(b.Commit).Equal("ce5965ddd289")
+				g.Assert(r.FullName).Equal("anbraten/test-2")
+				g.Assert(b.Event).Equal(model.EventPullClosed)
+				g.Assert(b.Commit).Equal("006704dbeab2")
 			})
 		})
 

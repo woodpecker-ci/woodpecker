@@ -25,13 +25,15 @@ import (
 )
 
 const (
-	hookEvent       = "X-Event-Key"
-	hookPush        = "repo:push"
-	hookPullCreated = "pullrequest:created"
-	hookPullUpdated = "pullrequest:updated"
-	hookPullClosed  = "pullrequest:fulfilled"
-	stateOpen       = "OPEN"
-	stateClosed     = "MERGED"
+	hookEvent        = "X-Event-Key"
+	hookPush         = "repo:push"
+	hookPullCreated  = "pullrequest:created"
+	hookPullUpdated  = "pullrequest:updated"
+	hookPullMerged   = "pullrequest:fulfilled"
+	hookPullDeclined = "pullrequest:rejected"
+	stateOpen        = "OPEN"
+	stateClosed      = "MERGED"
+	stateDeclined    = "DECLINED"
 )
 
 // parseHook parses a Bitbucket hook from an http.Request request and returns
@@ -46,7 +48,7 @@ func parseHook(r *http.Request) (*model.Repo, *model.Pipeline, error) {
 	switch hookType {
 	case hookPush:
 		return parsePushHook(payload)
-	case hookPullCreated, hookPullUpdated:
+	case hookPullCreated, hookPullUpdated, hookPullMerged, hookPullDeclined:
 		return parsePullHook(payload)
 	default:
 		return nil, nil, &types.ErrIgnoreEvent{Event: hookType}
@@ -80,8 +82,6 @@ func parsePullHook(payload []byte) (*model.Repo, *model.Pipeline, error) {
 	if err := json.Unmarshal(payload, &hook); err != nil {
 		return nil, nil, err
 	}
-	if hook.PullRequest.State != stateOpen && hook.PullRequest.State != stateClosed {
-		return nil, nil, nil
-	}
+
 	return convertRepo(&hook.Repo, &internal.RepoPerm{}), convertPullHook(&hook), nil
 }

@@ -767,7 +767,7 @@ const HookPullRequestMerged = `
 }
 `
 
-const HookPullRequestClosed = `
+const HookPullRequestDeclined = `
 {
   "repository": {
     "type": "repository",

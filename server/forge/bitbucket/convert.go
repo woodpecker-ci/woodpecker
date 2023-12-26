@@ -164,7 +164,7 @@ func convertWorkspace(from *internal.Workspace) *model.Team {
 // hook to the Woodpecker pipeline struct holding commit information.
 func convertPullHook(from *internal.PullRequestHook) *model.Pipeline {
 	event := model.EventPull
-	if from.PullRequest.State == stateClosed {
+	if from.PullRequest.State == stateClosed || from.PullRequest.State == stateDeclined {
 		event = model.EventPullClosed
 	}
 
