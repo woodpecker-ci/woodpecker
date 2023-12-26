@@ -22,6 +22,7 @@
 package main
 
 import (
+	"encoding/json"
 	"os"
 	"path"
 
@@ -38,8 +39,23 @@ func main() {
 		panic(err)
 	}
 	defer f.Close()
-	_, err = f.WriteString(docs.SwaggerInfo.ReadDoc())
+	doc := docs.SwaggerInfo.ReadDoc()
+	doc = removeHost(doc)
+	_, err = f.WriteString(doc)
 	if err != nil {
 		panic(err)
 	}
+}
+
+func removeHost(jsonIn string) string {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal([]byte(jsonIn), &m); err != nil {
+		panic(err)
+	}
+	delete(m, "host")
+	raw, err := json.Marshal(m)
+	if err != nil {
+		panic(err)
+	}
+	return string(raw)
 }

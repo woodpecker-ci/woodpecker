@@ -354,7 +354,7 @@ func (s *RPC) RegisterAgent(ctx context.Context, platform, backend, version stri
 
 func (s *RPC) UnregisterAgent(ctx context.Context) error {
 	agent, err := s.getAgentFromContext(ctx)
-	if agent.OwnerID > 0 {
+	if !agent.IsSystemAgent() {
 		// registered with individual agent token -> do not unregister
 		return nil
 	}

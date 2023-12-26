@@ -95,7 +95,7 @@
           "pr_warning": "Mohon berhati-hati dengan pilihan ini karena seseorang dapat membuat sebuah permintaan penarikan yang dapat mengekspos rahasia Anda."
         },
         "images": {
-          "desc": "Daftar citra yang dipisahkan dengan koma di mana rahasia ini tersedia, kosongkan untuk memperbolehkan semua citra",
+          "desc": "Daftar citra di mana rahasia ini tersedia, kosongkan untuk memperbolehkan semua citra",
           "images": "Tersedia untuk citra berikut"
         },
         "name": "Nama",
@@ -142,6 +142,7 @@
   "errors": {
     "not_found": "Server tidak dapat mencari objek yang diminta"
   },
+  "global_level_secret": "rahasia global",
   "info": "Info",
   "login": "Masuk",
   "logout": "Keluar",
@@ -162,7 +163,7 @@
           "pr_warning": "Mohon berhati-hati dengan pilihan ini karena seseorang dapat membuat sebuah permintaan penarikan yang dapat mengekspos rahasia Anda."
         },
         "images": {
-          "desc": "Daftar citra yang dipisahkan dengan koma di mana rahasia ini tersedia, kosongkan untuk memperbolehkan semua citra",
+          "desc": "Daftar citra di mana rahasia ini tersedia, kosongkan untuk memperbolehkan semua citra",
           "images": "Tersedia untuk citra berikut"
         },
         "name": "Nama",
@@ -177,6 +178,7 @@
       "settings": "Pengaturan"
     }
   },
+  "org_level_secret": "rahasia organisasi",
   "password": "Kata sandi",
   "pipeline_feed": "Umpan jalur pipa",
   "repo": {
@@ -419,7 +421,7 @@
           "pr_warning": "Mohon berhati-hati dengan pilihan ini karena seseorang dapat membuat sebuah permintaan penarikan yang dapat mengekspos rahasia Anda."
         },
         "images": {
-          "desc": "Daftar citra yang dipisahkan dengan koma di mana rahasia ini tersedia, kosongkan untuk memperbolehkan semua citra",
+          "desc": "Daftar citra di mana rahasia ini tersedia, kosongkan untuk memperbolehkan semua citra",
           "images": "Tersedia untuk citra berikut"
         },
         "name": "Nama",
@@ -488,7 +490,7 @@
           "pr_warning": "Harap berhati-hati dengan opsi ini karena seseorang dapat mengirimkan permintaan penarikan berbahaya yang dapat mengekspos rahasia Anda."
         },
         "images": {
-          "desc": "Daftar citra di mana rahasia ini tersedia yang dipisahkan oleh koma, tinggalkan kosong untuk memperbolehkan semua citra",
+          "desc": "Daftar citra di mana rahasia ini tersedia, tinggalkan kosong untuk memperbolehkan semua citra",
           "images": "Tersedia untuk citra berikut"
         },
         "name": "Nama",
