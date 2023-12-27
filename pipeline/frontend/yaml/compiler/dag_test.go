@@ -59,4 +59,24 @@ func TestConvertDAGToStages(t *testing.T) {
 	}
 	_, err = convertDAGToStages(steps, "")
 	assert.ErrorIs(t, err, &ErrStepMissingDependency{})
+
+	steps = map[string]*dagCompilerStep{
+		"step1": {
+			step: &backend_types.Step{},
+		},
+		"step2": {
+			step:      &backend_types.Step{},
+			dependsOn: []string{"step1"},
+		},
+		"step3": {
+			step:      &backend_types.Step{},
+			dependsOn: []string{"step1"},
+		},
+		"step4": {
+			step:      &backend_types.Step{},
+			dependsOn: []string{"step2", "step3"},
+		},
+	}
+	_, err = convertDAGToStages(steps, "")
+	assert.NoError(t, err)
 }
