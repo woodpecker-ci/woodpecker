@@ -43,7 +43,7 @@ func Config(c *gin.Context) {
 		"user":             user,
 		"csrf":             csrf,
 		"version":          version.String(),
-		"skipVersionCheck": server.Config.WebUI.SkipVersionCheck,
+		"skip_version_check": server.Config.WebUI.SkipVersionCheck,
 		"forge":            server.Config.Services.Forge.Name(),
 		"root_path":        server.Config.Server.RootPath,
 		"enable_swagger":   server.Config.WebUI.EnableSwagger,
@@ -76,5 +76,5 @@ window.WOODPECKER_VERSION = "{{ .version }}";
 window.WOODPECKER_FORGE = "{{ .forge }}";
 window.WOODPECKER_ROOT_PATH = "{{ .root_path }}";
 window.WOODPECKER_ENABLE_SWAGGER = {{ .enable_swagger }};
-window.WOODPECKER_SKIP_VERSION_CHECK = {{ .skipVersionCheck }}
+window.WOODPECKER_SKIP_VERSION_CHECK = {{ .skip_version_check }}
 `
