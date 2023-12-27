@@ -1,5 +1,26 @@
 # Changelog
 
+## [2.1.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.1.1) - 2023-12-27
+
+### ❤️ Thanks to all contributors! ❤️
+
+@6543, @andyhan, @qwerty287
+
+### 🐛 Bug Fixes
+
+- trim v on version check [[#3039](https://github.com/woodpecker-ci/woodpecker/pull/3039)]
+- make backend step dag generation deterministic [[#3037](https://github.com/woodpecker-ci/woodpecker/pull/3037)]
+- Fix showing wrong badge url when root path is set [[#3033](https://github.com/woodpecker-ci/woodpecker/pull/3033)]
+- Fix docs label [[#3028](https://github.com/woodpecker-ci/woodpecker/pull/3028)]
+
+### 📚 Documentation
+
+- Update go report card badge [[#3029](https://github.com/woodpecker-ci/woodpecker/pull/3029)]
+
+### Misc
+
+- Add some tests [[#3030](https://github.com/woodpecker-ci/woodpecker/pull/3030)]
+
 ## [2.1.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.1.0) - 2023-12-26
 
 ### ❤️ Thanks to all contributors! ❤️
