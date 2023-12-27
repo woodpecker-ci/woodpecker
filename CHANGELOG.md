@@ -8,6 +8,7 @@
 
 ### 🐛 Bug Fixes
 
+- trim v on version check [[#3039](https://github.com/woodpecker-ci/woodpecker/pull/3039)]
 - make backend step dag generation deterministic [[#3037](https://github.com/woodpecker-ci/woodpecker/pull/3037)]
 - Fix showing wrong badge url when root path is set [[#3033](https://github.com/woodpecker-ci/woodpecker/pull/3033)]
 - Fix docs label [[#3028](https://github.com/woodpecker-ci/woodpecker/pull/3028)]
