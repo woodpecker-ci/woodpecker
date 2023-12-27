@@ -232,8 +232,8 @@ const config: Config = {
               label: 'Next',
               banner: 'unreleased',
             },
-            '2.0': {
-              label: '2.0.x',
+            '2.1': {
+              label: '2.1.x',
             },
             '2.0': {
               label: '2.0.x',
