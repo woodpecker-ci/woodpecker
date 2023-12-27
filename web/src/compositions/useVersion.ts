@@ -1,4 +1,5 @@
 import { onMounted, ref } from 'vue';
+import semver from 'semver';
 
 import useAuthentication from './useAuthentication';
 import useConfig from './useConfig';
@@ -82,7 +83,7 @@ export function useVersion() {
       latest,
       current,
       currentShort: usesNext ? 'next' : current,
-      needsUpdate: latest !== undefined && latest !== current,
+      needsUpdate: semver.gt(latest, current),
       usesNext,
     };
   });

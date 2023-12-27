@@ -38,6 +38,9 @@ dependencies:
   prismjs:
     specifier: ^1.29.0
     version: 1.29.0
+  semver:
+    specifier: ^7.5.4
+    version: 7.5.4
   vue:
     specifier: ^3.3.4
     version: 3.3.10(typescript@5.3.3)
