@@ -38,6 +38,7 @@
     "@types/node": "^20.0.0",
     "@types/node-emoji": "^1.8.2",
     "@types/prismjs": "^1.26.0",
+    "@types/semver": "^7.5.6",
     "@typescript-eslint/eslint-plugin": "^6.8.0",
     "@typescript-eslint/parser": "^6.8.0",
     "@vitejs/plugin-vue": "^4.2.3",
