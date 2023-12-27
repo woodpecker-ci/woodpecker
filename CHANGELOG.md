@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.1.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.1.2) - 2023-12-27
+
+### ❤️ Thanks to all contributors! ❤️
+
+@qwerty287
+
+### 🐛 Bug Fixes
+
+- Fix duplicated icons [[#3045](https://github.com/woodpecker-ci/woodpecker/pull/3045)]
+
 ## [2.1.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.1.1) - 2023-12-27
 
 ### ❤️ Thanks to all contributors! ❤️
