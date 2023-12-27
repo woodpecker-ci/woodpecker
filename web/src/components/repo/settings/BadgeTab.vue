@@ -1,8 +1,8 @@
 <template>
   <Settings :title="$t('repo.settings.badge.badge')">
     <template #titleActions>
-      <a v-if="badgeUrl" :href="useConfig().rootPath + badgeUrl" target="_blank">
-        <img :src="useConfig().rootPath + badgeUrl" />
+      <a v-if="badgeUrl" :href="badgeUrl" target="_blank">
+        <img :src="badgeUrl" />
       </a>
     </template>
 
@@ -84,9 +84,10 @@ async function loadBranches() {
 
 const baseUrl = `${window.location.protocol}//${window.location.hostname}${
   window.location.port ? `:${window.location.port}` : ''
-}${useConfig().rootPath}`;
+}`;
+const { rootPath } = useConfig();
 const badgeUrl = computed(
-  () => `/api/badges/${repo.value.id}/status.svg${branch.value !== '' ? `?branch=${branch.value}` : ''}`,
+  () => `${rootPath}/api/badges/${repo.value.id}/status.svg${branch.value !== '' ? `?branch=${branch.value}` : ''}`,
 );
 const repoUrl = computed(
   () => `/repos/${repo.value.id}${branch.value !== '' ? `/branches/${encodeURIComponent(branch.value)}` : ''}`,
