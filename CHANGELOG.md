@@ -1,17 +1,14 @@
 # Changelog
 
-## [2.2.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.2.0) - 2023-12-27
+## [2.1.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.1.1) - 2023-12-27
 
 ### ❤️ Thanks to all contributors! ❤️
 
 @6543, @andyhan, @qwerty287
 
-### 📈 Enhancement
-
-- make backend step dag generation deterministic [[#3037](https://github.com/woodpecker-ci/woodpecker/pull/3037)]
-
 ### 🐛 Bug Fixes
 
+- make backend step dag generation deterministic [[#3037](https://github.com/woodpecker-ci/woodpecker/pull/3037)]
 - Fix showing wrong badge url when root path is set [[#3033](https://github.com/woodpecker-ci/woodpecker/pull/3033)]
 - Fix docs label [[#3028](https://github.com/woodpecker-ci/woodpecker/pull/3028)]
 
