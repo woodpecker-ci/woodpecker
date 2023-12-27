@@ -84,9 +84,10 @@ async function loadBranches() {
 
 const baseUrl = `${window.location.protocol}//${window.location.hostname}${
   window.location.port ? `:${window.location.port}` : ''
-}${useConfig().rootPath}`;
+}`;
+const { rootPath } = useConfig();
 const badgeUrl = computed(
-  () => `/api/badges/${repo.value.id}/status.svg${branch.value !== '' ? `?branch=${branch.value}` : ''}`,
+  () => `${rootPath}/api/badges/${repo.value.id}/status.svg${branch.value !== '' ? `?branch=${branch.value}` : ''}`,
 );
 const repoUrl = computed(
   () => `/repos/${repo.value.id}${branch.value !== '' ? `/branches/${encodeURIComponent(branch.value)}` : ''}`,
