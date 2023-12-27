@@ -27,7 +27,11 @@ else
 	endif
 endif
 
-LDFLAGS := -s -w -extldflags "-static" -X go.woodpecker-ci.org/woodpecker/v2/version.Version=${VERSION}
+LDFLAGS := -X go.woodpecker-ci.org/woodpecker/v2/version.Version=${VERSION}
+STATIC_BUILD ?= true
+ifeq ($(STATIC_BUILD),true)
+	LDFLAGS := -s -w -extldflags "-static" $(LDFLAGS)
+endif
 CGO_ENABLED ?= 1 # only used to compile server
 
 HAS_GO = $(shell hash go > /dev/null 2>&1 && echo "GO" || echo "NOGO" )
@@ -105,6 +109,7 @@ generate: generate-swagger ## Run all code generations
 
 generate-swagger: install-tools ## Run swagger code generation
 	swag init -g server/api/ -g cmd/server/swagger.go --outputTypes go -output cmd/server/docs
+	go generate cmd/server/swagger.go
 
 generate-license-header: install-tools
 	addlicense -c "Woodpecker Authors" -ignore "vendor/**" **/*.go

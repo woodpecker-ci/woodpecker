@@ -51,7 +51,7 @@ func Test_parse(t *testing.T) {
 		})
 
 		g.It("Should parse tag hook payload", func() {
-			buf := bytes.NewBufferString(fixtures.HookPushTag)
+			buf := bytes.NewBufferString(fixtures.HookTag)
 			hook, err := parsePush(buf)
 			g.Assert(err).IsNil()
 			g.Assert(hook.Ref).Equal("v1.0.0")
@@ -118,7 +118,7 @@ func Test_parse(t *testing.T) {
 		})
 
 		g.It("Should return a Pipeline struct from a tag hook", func() {
-			buf := bytes.NewBufferString(fixtures.HookPushTag)
+			buf := bytes.NewBufferString(fixtures.HookTag)
 			hook, _ := parsePush(buf)
 			pipeline := pipelineFromTag(hook)
 			g.Assert(pipeline.Event).Equal(model.EventTag)
