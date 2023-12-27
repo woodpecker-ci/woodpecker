@@ -1,5 +1,24 @@
 # Changelog
 
+## [2.1.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.1.1) - 2023-12-27
+
+### ❤️ Thanks to all contributors! ❤️
+
+@andyhan, @qwerty287
+
+### 🐛 Bug Fixes
+
+- Fix Wrong badgeUrl  repo badge tab when rootPath is not empty [[#3033](https://github.com/woodpecker-ci/woodpecker/pull/3033)]
+- Fix docs label [[#3028](https://github.com/woodpecker-ci/woodpecker/pull/3028)]
+
+### 📚 Documentation
+
+- Update go report card badge [[#3029](https://github.com/woodpecker-ci/woodpecker/pull/3029)]
+
+### Misc
+
+- Add some tests [[#3030](https://github.com/woodpecker-ci/woodpecker/pull/3030)]
+
 ## [2.1.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.1.0) - 2023-12-26
 
 ### ❤️ Thanks to all contributors! ❤️
