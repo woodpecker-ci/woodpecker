@@ -1,8 +1,8 @@
 <template>
   <Settings :title="$t('repo.settings.badge.badge')">
     <template #titleActions>
-      <a v-if="badgeUrl" :href="badgeUrl" target="_blank">
-        <img :src="badgeUrl" />
+      <a v-if="badgeUrl" :href="useConfig().rootPath + badgeUrl" target="_blank">
+        <img :src="useConfig().rootPath + badgeUrl" />
       </a>
     </template>
 
