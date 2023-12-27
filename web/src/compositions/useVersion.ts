@@ -73,9 +73,9 @@ export function useVersion() {
       if (usesNext) {
         latest = versionInfo.next;
       } else if (current.includes('rc')) {
-        latest = versionInfo.rc;
+        latest = versionInfo.rc.replace(/^v/, '');
       } else {
-        latest = versionInfo.latest;
+        latest = versionInfo.latest.replace(/^v/, '');
       }
     }
 
