@@ -23,4 +23,9 @@ func TestParse(t *testing.T) {
 	env, err = service.EnvironList(nil)
 	assert.NoError(t, err)
 	assert.Len(t, env, 2)
+
+	service = Parse([]string{"ENV:value", "ENV2:value2", "ENV3_WITHOUT_VALUE"})
+	env, err = service.EnvironList(nil)
+	assert.NoError(t, err)
+	assert.Len(t, env, 2)
 }
