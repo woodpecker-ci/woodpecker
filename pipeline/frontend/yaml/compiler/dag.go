@@ -142,7 +142,7 @@ func convertDAGToStages(steps map[string]*dagCompilerStep, prefix string) ([]*ba
 		// as steps are from a map that has no deterministic order,
 		// we sort the steps by name to make the order similar between pipelines
 		sort.Slice(stage.Steps, func(i, j int) bool {
-			return stage.Steps[i].Name > stage.Steps[j].Name
+			return stage.Steps[i].Name < stage.Steps[j].Name
 		})
 
 		for name := range addedNodesThisLevel {
