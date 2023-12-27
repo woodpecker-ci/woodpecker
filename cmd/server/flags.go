@@ -251,6 +251,11 @@ var flags = append([]cli.Flag{
 		Name:    "enable-swagger",
 		Value:   true,
 	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_DISABLE_VERSION_CHECK"},
+		Usage:   "Disable version check in admin web ui.",
+		Name:    "skip-version-check",
+	},
 	&cli.StringSliceFlag{
 		EnvVars: []string{"WOODPECKER_ADDONS"},
 		Name:    "addons",
