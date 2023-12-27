@@ -123,12 +123,12 @@ func podContainer(name, image, workDir, goos string, pull, privileged bool, comm
 	}
 
 	if len(commands) != 0 {
-		scriptEnv, command, args := common.GenerateContainerConf(commands, goos)
+		scriptEnv, entry, cmd := common.GenerateContainerConf(commands, goos)
 		if len(entrypoint) > 0 {
-			command = entrypoint
+			entry = entrypoint
 		}
-		container.Command = command
-		container.Args = args
+		container.Command = entry
+		container.Args = []string{cmd}
 		maps.Copy(env, scriptEnv)
 	}
 
