@@ -21,6 +21,7 @@ import (
 
 // generate docs/swagger.json via:
 //go:generate go run woodpecker_docs_gen.go swagger.go
+//go:generate go run github.com/go-swagger/go-swagger/cmd/swagger@latest validate ../../docs/swagger.json
 
 // setupSwaggerStaticConfig initializes static content only (contacts, title and description)
 // for dynamic configuration of e.g. hostname, etc. see router.setupSwaggerConfigAndRoutes

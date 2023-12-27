@@ -62,6 +62,7 @@ func convertRepo(from *internal.Repo, perm *internal.RepoPerm) *model.Repo {
 		SCMKind:       model.SCMKind(from.Scm),
 		Branch:        from.Mainbranch.Name,
 		Perm:          convertPerm(perm),
+		PREnabled:     true,
 	}
 	if repo.SCMKind == model.RepoHg {
 		repo.Branch = "default"
@@ -162,8 +163,13 @@ func convertWorkspace(from *internal.Workspace) *model.Team {
 // convertPullHook is a helper function used to convert a Bitbucket pull request
 // hook to the Woodpecker pipeline struct holding commit information.
 func convertPullHook(from *internal.PullRequestHook) *model.Pipeline {
+	event := model.EventPull
+	if from.PullRequest.State == stateClosed || from.PullRequest.State == stateDeclined {
+		event = model.EventPullClosed
+	}
+
 	return &model.Pipeline{
-		Event:  model.EventPull,
+		Event:  event,
 		Commit: from.PullRequest.Dest.Commit.Hash,
 		Ref:    fmt.Sprintf("refs/heads/%s", from.PullRequest.Dest.Branch.Name),
 		Refspec: fmt.Sprintf("%s:%s",

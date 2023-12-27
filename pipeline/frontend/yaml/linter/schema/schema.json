@@ -344,6 +344,12 @@
           "description": "Execute multiple steps with the same group key in parallel. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#step-group---parallel-execution",
           "type": "string"
         },
+        "depends_on": {
+          "description": "Execute a step after another step has finished.",
+          "type": "array",
+          "items": { "type": "string" },
+          "minLength": 1
+        },
         "detach": {
           "description": "Detach a step to run in background until pipeline finishes. Read more: https://woodpecker-ci.org/docs/usage/services#detachment",
           "type": "boolean"
@@ -388,7 +394,6 @@
         },
         "event": {
           "description": "Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#event",
-          "default": ["push", "pull_request", "tag", "deployment"],
           "oneOf": [
             {
               "type": "array",
@@ -488,7 +493,7 @@
       }
     },
     "event_enum": {
-      "enum": ["push", "pull_request", "tag", "deployment", "cron", "manual"]
+      "enum": ["push", "pull_request", "pull_request_closed", "tag", "deployment", "cron", "manual"]
     },
     "constraint_list": {
       "oneOf": [
