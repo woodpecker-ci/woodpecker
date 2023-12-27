@@ -4,15 +4,16 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @qwerty287
+@xfix, @6543, @qwerty287
+
+### 🐛 Bug Fixes
+
+- Fix DAG cycle detection [[#3049](https://github.com/woodpecker-ci/woodpecker/pull/3049)]
+- Fix duplicated icons [[#3045](https://github.com/woodpecker-ci/woodpecker/pull/3045)]
 
 ### 📈 Enhancement
 
 - Add option to disable version check in admin web UI [[#3040](https://github.com/woodpecker-ci/woodpecker/pull/3040)]
-
-### 🐛 Bug Fixes
-
-- Fix duplicated icons [[#3045](https://github.com/woodpecker-ci/woodpecker/pull/3045)]
 
 ## [2.1.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.1.1) - 2023-12-27
 
