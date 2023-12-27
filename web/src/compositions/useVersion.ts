@@ -83,7 +83,7 @@ export function useVersion() {
       latest,
       current,
       currentShort: usesNext ? 'next' : current,
-      needsUpdate: semver.gt(latest, semver.coerce(current)),
+      needsUpdate: latest !== undefined && semver.gt(latest, semver.coerce(current)),
       usesNext,
     };
   });
