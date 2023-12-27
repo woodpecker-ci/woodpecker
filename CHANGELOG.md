@@ -1,10 +1,14 @@
 # Changelog
 
-## [2.1.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.1.2) - 2023-12-27
+## [2.2.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.2.0) - 2023-12-27
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@qwerty287
+@6543, @qwerty287
+
+### 📈 Enhancement
+
+- Add option to disable version check in admin web UI [[#3040](https://github.com/woodpecker-ci/woodpecker/pull/3040)]
 
 ### 🐛 Bug Fixes
 
