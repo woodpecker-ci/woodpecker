@@ -40,13 +40,13 @@ func Config(c *gin.Context) {
 	}
 
 	configData := map[string]any{
-		"user":             user,
-		"csrf":             csrf,
-		"version":          version.String(),
+		"user":               user,
+		"csrf":               csrf,
+		"version":            version.String(),
 		"skip_version_check": server.Config.WebUI.SkipVersionCheck,
-		"forge":            server.Config.Services.Forge.Name(),
-		"root_path":        server.Config.Server.RootPath,
-		"enable_swagger":   server.Config.WebUI.EnableSwagger,
+		"forge":              server.Config.Services.Forge.Name(),
+		"root_path":          server.Config.Server.RootPath,
+		"enable_swagger":     server.Config.WebUI.EnableSwagger,
 	}
 
 	// default func map with json parser.
