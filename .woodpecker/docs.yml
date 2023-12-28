@@ -10,18 +10,17 @@ variables:
       - 'cmd/cli/**'
       # api docs
       - 'server/api/**'
-  - path: &docker_path
-        # web source code
-        - 'web/**'
-        # api source code
-        - 'server/api/**'
-        # go source code
-        - '**/*.go'
-        - 'go.*'
-        # schema changes
-        - 'pipeline/schema/**'
-        # Dockerfile changes
-        - 'docker/**'
+  - path: &docker_path # web source code
+      - 'web/**'
+      # api source code
+      - 'server/api/**'
+      # go source code
+      - '**/*.go'
+      - 'go.*'
+      # schema changes
+      - 'pipeline/schema/**'
+      # Dockerfile changes
+      - 'docker/**'
 
 when:
   - event: tag
@@ -90,7 +89,7 @@ steps:
           - <<: *when_path
           - <<: *docker_path
         branch: ${CI_REPO_DEFAULT_BRANCH}
-      - event: [ manual, tag ]
+      - event: [manual, tag]
 
   # update latest and next version
   version-next:
