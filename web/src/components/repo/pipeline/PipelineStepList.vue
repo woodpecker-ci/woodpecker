@@ -11,11 +11,11 @@
         <span>{{ pipeline.author }}</span>
       </div>
       <a
-        v-if="pipeline.event === 'pull_request'"
+        v-if="pipeline.event === 'pull_request' || pipeline.event === 'pull_request_closed'"
         class="flex items-center space-x-1 text-wp-link-100 hover:text-wp-link-200 min-w-0"
         :href="pipeline.forge_url"
       >
-        <Icon name="pull_request" />
+        <Icon name="pull-request" />
         <span class="truncate">{{ prettyRef }}</span>
       </a>
       <router-link

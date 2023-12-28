@@ -42,7 +42,7 @@ export function useVersion() {
   const usesNext = current.startsWith('next');
 
   const { user } = useAuthentication();
-  if (!user?.admin) {
+  if (config.skipVersionCheck || !user?.admin) {
     version.value = {
       latest: undefined,
       current,
@@ -72,9 +72,9 @@ export function useVersion() {
       if (usesNext) {
         latest = versionInfo.next;
       } else if (current.includes('rc')) {
-        latest = versionInfo.rc;
+        latest = versionInfo.rc.replace(/^v/, '');
       } else {
-        latest = versionInfo.latest;
+        latest = versionInfo.latest.replace(/^v/, '');
       }
     }
 

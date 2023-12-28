@@ -23,12 +23,13 @@ import (
 type WebhookEvent string //	@name WebhookEvent
 
 const (
-	EventPush   WebhookEvent = "push"
-	EventPull   WebhookEvent = "pull_request"
-	EventTag    WebhookEvent = "tag"
-	EventDeploy WebhookEvent = "deployment"
-	EventCron   WebhookEvent = "cron"
-	EventManual WebhookEvent = "manual"
+	EventPush       WebhookEvent = "push"
+	EventPull       WebhookEvent = "pull_request"
+	EventPullClosed WebhookEvent = "pull_request_closed"
+	EventTag        WebhookEvent = "tag"
+	EventDeploy     WebhookEvent = "deployment"
+	EventCron       WebhookEvent = "cron"
+	EventManual     WebhookEvent = "manual"
 )
 
 type WebhookEventList []WebhookEvent
