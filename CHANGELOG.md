@@ -1,19 +1,28 @@
 # Changelog
 
-## [2.2.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.2.0) - 2023-12-27
+## [2.2.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.2.0) - 2023-12-28
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@xfix, @6543, @qwerty287
+@xfix, @anbraten, @qwerty287, @6543
+
+### 📚 Documentation
+
+- Add Codeberg Pages Deploy plugin to plugins list [[#3054](https://github.com/woodpecker-ci/woodpecker/pull/3054)]
+
+### 📈 Enhancement
+
+- Remove workflow version again [[#3052](https://github.com/woodpecker-ci/woodpecker/pull/3052)]
+- Add option to disable version check in admin web UI [[#3040](https://github.com/woodpecker-ci/woodpecker/pull/3040)]
 
 ### 🐛 Bug Fixes
 
 - Fix DAG cycle detection [[#3049](https://github.com/woodpecker-ci/woodpecker/pull/3049)]
 - Fix duplicated icons [[#3045](https://github.com/woodpecker-ci/woodpecker/pull/3045)]
 
-### 📈 Enhancement
+### Misc
 
-- Add option to disable version check in admin web UI [[#3040](https://github.com/woodpecker-ci/woodpecker/pull/3040)]
+- Use dag in ci config [[#3010](https://github.com/woodpecker-ci/woodpecker/pull/3010)]
 
 ## [2.1.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.1.1) - 2023-12-27
 
