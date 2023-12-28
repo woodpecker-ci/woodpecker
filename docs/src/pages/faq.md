@@ -16,7 +16,7 @@ The Drone CI license was changed after the 0.8 release from Apache 2 to a propri
 
 Woodpecker is having two different kinds of releases: **stable** and **next**.
 
-The **stable** releases (currently version 2.0) are long-term supported (LTS) stable versions. The stable releases are only getting bugfixes.
+The **stable** releases (currently version 2.1) are long-term supported (LTS) stable versions. The stable releases are only getting bugfixes.
 
 The **next** release contains all bugfixes and features from `main` branch. Normally it should be pretty stable, but as its frequently updated, it might contain some bugs from time to time. There are no binaries for this version.
 

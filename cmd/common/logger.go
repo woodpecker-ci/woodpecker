@@ -34,7 +34,7 @@ var GlobalLoggerFlags = []cli.Flag{
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_LOG_FILE"},
 		Name:    "log-file",
-		Usage:   "where logs are written to. 'stdout' and 'stderr' can be used as special keywords",
+		Usage:   "Output destination for logs. 'stdout' and 'stderr' can be used as special keywords.",
 		Value:   "stderr",
 	},
 	&cli.BoolFlag{
