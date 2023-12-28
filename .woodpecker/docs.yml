@@ -1,5 +1,3 @@
-version: 1
-
 when:
   - event: tag
   - event: pull_request
