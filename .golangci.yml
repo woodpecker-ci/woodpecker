@@ -17,15 +17,69 @@ linters-settings:
   errorlint:
     errorf-multi: true
   depguard:
-    additional-guards:
-      # deny server imports in pipeline
-      - list-type: denylist
-        include-go-root: true
-        packages:
-         - "github.com/woodpecker-ci/woodpecker/server"
-        ignore-file-rules:
-          - "server/**/*.go"
-          - "cmd/server/*.go"
+    rules:
+      pipeline:
+        list-mode: lax
+        files:
+          - "**/pipeline/**/*.go"
+          #- "**/pipeline/**/*.go"
+        deny:
+          - pkg: "go.woodpecker-ci.org/woodpecker/v2/agent"
+          - pkg: "go.woodpecker-ci.org/woodpecker/v2/cli"
+          - pkg: "go.woodpecker-ci.org/woodpecker/v2/cmd"
+          - pkg: "go.woodpecker-ci.org/woodpecker/v2/server"
+          - pkg: "go.woodpecker-ci.org/woodpecker/v2/web"
+      shared:
+        list-mode: lax
+        files:
+          - "**/shared/**/*.go"
+        deny:
+          - pkg: "go.woodpecker-ci.org/woodpecker/v2/agent"
+          - pkg: "go.woodpecker-ci.org/woodpecker/v2/cli"
+          - pkg: "go.woodpecker-ci.org/woodpecker/v2/cmd"
+          - pkg: "go.woodpecker-ci.org/woodpecker/v2/pipeline"
+          - pkg: "go.woodpecker-ci.org/woodpecker/v2/server"
+          - pkg: "go.woodpecker-ci.org/woodpecker/v2/web"
+      woodpecker-go:
+        list-mode: lax
+        files:
+          - "**/woodpecker-go/woodpecker/**/*.go"
+        deny:
+          - pkg: "go.woodpecker-ci.org/woodpecker/v2/agent"
+          - pkg: "go.woodpecker-ci.org/woodpecker/v2/cli"
+          - pkg: "go.woodpecker-ci.org/woodpecker/v2/cmd"
+          - pkg: "go.woodpecker-ci.org/woodpecker/v2/pipeline"
+          - pkg: "go.woodpecker-ci.org/woodpecker/v2/server"
+          - pkg: "go.woodpecker-ci.org/woodpecker/v2/shared"
+          - pkg: "go.woodpecker-ci.org/woodpecker/v2/web"
+      agent:
+        list-mode: lax
+        files:
+          - "**/agent/**/*.go"
+          - "**/cmd/agent/**/*.go"
+        deny:
+          - pkg: "go.woodpecker-ci.org/woodpecker/v2/cli"
+          - pkg: "go.woodpecker-ci.org/woodpecker/v2/server"
+          - pkg: "go.woodpecker-ci.org/woodpecker/v2/web"
+          - pkg: "go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
+      cli:
+        list-mode: lax
+        files:
+          - "**/cli/**/*.go"
+          - "**/cmd/cli/**/*.go"
+        deny:
+          - pkg: "go.woodpecker-ci.org/woodpecker/v2/agent"
+          - pkg: "go.woodpecker-ci.org/woodpecker/v2/server"
+          - pkg: "go.woodpecker-ci.org/woodpecker/v2/web"
+      server:
+        list-mode: lax
+        files:
+          - "**/server/**/*.go"
+          - "**/cmd/server/**/*.go"
+        deny:
+          - pkg: "go.woodpecker-ci.org/woodpecker/v2/agent"
+          - pkg: "go.woodpecker-ci.org/woodpecker/v2/cli"
+          - pkg: "go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 
 linters:
   disable-all: true
