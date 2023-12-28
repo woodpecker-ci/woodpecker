@@ -38,7 +38,7 @@
       >
         <div class="flex space-x-2 items-center min-w-0">
           <Icon v-if="pipeline.event === 'pull_request'" name="pull-request" />
-          <Icon v-if="pipeline.event === 'pull_request_closed'" name="pull-request-closed" />
+          <Icon v-else-if="pipeline.event === 'pull_request_closed'" name="pull-request-closed" />
           <Icon v-else-if="pipeline.event === 'deployment'" name="deployment" />
           <Icon v-else-if="pipeline.event === 'tag'" name="tag" />
           <Icon v-else-if="pipeline.event === 'cron'" name="push" />
