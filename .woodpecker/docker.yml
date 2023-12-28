@@ -1,5 +1,3 @@
-version: 1
-
 when:
   - event: [pull_request, tag]
   - event: push
@@ -89,6 +87,9 @@ steps:
         path: *when_path
 
   cross-compile-server-preview:
+    depends_on:
+      - vendor
+      - build-web
     image: *xgo_image
     pull: true
     commands:
@@ -105,61 +106,10 @@ steps:
       - event: pull_request
         path: *when_path
 
-  publish-server-preview:
-    image: *buildx_plugin
-    group: docker
-    settings:
-      repo: woodpeckerci/woodpecker-server
-      dockerfile: docker/Dockerfile.server.multiarch
-      platforms: *platforms_preview
-      tag: pull_${CI_COMMIT_PULL_REQUEST}
-      logins: *publish_logins
-    when:
-      evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
-      event: pull_request
-
-  publish-server-alpine-preview:
-    image: *buildx_plugin
-    group: docker
-    settings:
-      repo: woodpeckerci/woodpecker-server
-      dockerfile: docker/Dockerfile.server.alpine.multiarch
-      platforms: *platforms_preview
-      tag: pull_${CI_COMMIT_PULL_REQUEST}-alpine
-      logins: *publish_logins
-    when:
-      evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
-      event: pull_request
-
-  build-server:
-    image: *buildx_plugin
-    group: docker
-    settings:
-      dry_run: true
-      repo: woodpeckerci/woodpecker-server
-      dockerfile: docker/Dockerfile.server.multiarch
-      platforms: *platforms_preview
-      tag: pull_${CI_COMMIT_PULL_REQUEST}
-    when:
-      evaluate: 'not (CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images")'
-      event: pull_request
-      path: *when_path
-
-  build-server-alpine:
-    image: *buildx_plugin
-    group: docker
-    settings:
-      dry_run: true
-      repo: woodpeckerci/woodpecker-server
-      dockerfile: docker/Dockerfile.server.alpine.multiarch
-      platforms: *platforms_preview
-      tag: pull_${CI_COMMIT_PULL_REQUEST}-alpine
-    when:
-      evaluate: 'not (CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images")'
-      event: pull_request
-      path: *when_path
-
   cross-compile-server:
+    depends_on:
+      - vendor
+      - build-web
     image: *xgo_image
     pull: true
     commands:
@@ -177,9 +127,70 @@ steps:
       event: [push, tag]
       path: *when_path
 
-  publish-next-server:
+  publish-server-preview:
+    depends_on:
+      - cross-compile-server-preview
     image: *buildx_plugin
-    group: docker
+    settings:
+      repo: woodpeckerci/woodpecker-server
+      dockerfile: docker/Dockerfile.server.multiarch
+      platforms: *platforms_preview
+      tag: pull_${CI_COMMIT_PULL_REQUEST}
+      logins: *publish_logins
+    when:
+      evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
+      event: pull_request
+
+  publish-server-alpine-preview:
+    depends_on:
+      - cross-compile-server-preview
+    image: *buildx_plugin
+    settings:
+      repo: woodpeckerci/woodpecker-server
+      dockerfile: docker/Dockerfile.server.alpine.multiarch
+      platforms: *platforms_preview
+      tag: pull_${CI_COMMIT_PULL_REQUEST}-alpine
+      logins: *publish_logins
+    when:
+      evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
+      event: pull_request
+
+  build-server:
+    depends_on:
+      - vendor
+      - build-web
+    image: *buildx_plugin
+    settings:
+      dry_run: true
+      repo: woodpeckerci/woodpecker-server
+      dockerfile: docker/Dockerfile.server.multiarch
+      platforms: *platforms_preview
+      tag: pull_${CI_COMMIT_PULL_REQUEST}
+    when:
+      evaluate: 'not (CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images")'
+      event: pull_request
+      path: *when_path
+
+  build-server-alpine:
+    depends_on:
+      - vendor
+      - build-web
+    image: *buildx_plugin
+    settings:
+      dry_run: true
+      repo: woodpeckerci/woodpecker-server
+      dockerfile: docker/Dockerfile.server.alpine.multiarch
+      platforms: *platforms_preview
+      tag: pull_${CI_COMMIT_PULL_REQUEST}-alpine
+    when:
+      evaluate: 'not (CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images")'
+      event: pull_request
+      path: *when_path
+
+  publish-next-server:
+    depends_on:
+      - cross-compile-server
+    image: *buildx_plugin
     settings:
       repo: *publish_repos_server
       dockerfile: docker/Dockerfile.server.multiarch
@@ -192,8 +203,9 @@ steps:
       path: *when_path
 
   publish-next-server-alpine:
+    depends_on:
+      - cross-compile-server
     image: *buildx_plugin
-    group: docker
     settings:
       repo: *publish_repos_server
       dockerfile: docker/Dockerfile.server.alpine.multiarch
@@ -206,8 +218,9 @@ steps:
       path: *when_path
 
   publish-release-branch-server:
+    depends_on:
+      - cross-compile-server
     image: *buildx_plugin
-    group: docker
     settings:
       repo: *publish_repos_server
       dockerfile: docker/Dockerfile.server.multiarch
@@ -220,8 +233,9 @@ steps:
       path: *when_path
 
   publish-release-branch-server-alpine:
+    depends_on:
+      - cross-compile-server
     image: *buildx_plugin
-    group: docker
     settings:
       repo: *publish_repos_server
       dockerfile: docker/Dockerfile.server.alpine.multiarch
@@ -234,7 +248,8 @@ steps:
       path: *when_path
 
   release-server:
-    group: docker
+    depends_on:
+      - cross-compile-server
     image: *buildx_plugin
     settings:
       repo: *publish_repos_server
@@ -247,7 +262,8 @@ steps:
       event: tag
 
   release-server-alpine:
-    group: docker
+    depends_on:
+      - cross-compile-server
     image: *buildx_plugin
     settings:
       repo: *publish_repos_server
@@ -264,7 +280,8 @@ steps:
   #############
 
   publish-agent-preview:
-    group: docker
+    depends_on:
+      - vendor
     image: *buildx_plugin
     settings:
       repo: woodpeckerci/woodpecker-agent
@@ -278,7 +295,8 @@ steps:
       event: pull_request
 
   build-agent:
-    group: docker
+    depends_on:
+      - vendor
     image: *buildx_plugin
     settings:
       dry_run: true
@@ -293,7 +311,8 @@ steps:
       path: *when_path
 
   publish-next-agent:
-    group: docker
+    depends_on:
+      - vendor
     image: *buildx_plugin
     settings:
       repo: *publish_repos_agent
@@ -308,7 +327,8 @@ steps:
       path: *when_path
 
   publish-next-agent-alpine:
-    group: docker
+    depends_on:
+      - vendor
     image: *buildx_plugin
     settings:
       repo: *publish_repos_agent
@@ -323,7 +343,8 @@ steps:
       path: *when_path
 
   publish-release-branch-agent:
-    group: docker
+    depends_on:
+      - vendor
     image: *buildx_plugin
     settings:
       repo: *publish_repos_agent
@@ -338,7 +359,8 @@ steps:
       path: *when_path
 
   publish-release-branch-agent-alpine:
-    group: docker
+    depends_on:
+      - vendor
     image: *buildx_plugin
     settings:
       repo: *publish_repos_agent
@@ -353,7 +375,8 @@ steps:
       path: *when_path
 
   release-agent:
-    group: docker
+    depends_on:
+      - vendor
     image: *buildx_plugin
     settings:
       repo: *publish_repos_agent
@@ -367,7 +390,8 @@ steps:
       event: tag
 
   release-agent-alpine:
-    group: docker
+    depends_on:
+      - vendor
     image: *buildx_plugin
     settings:
       repo: *publish_repos_agent
@@ -385,7 +409,8 @@ steps:
   #########
 
   publish-cli-preview:
-    group: docker
+    depends_on:
+      - vendor
     image: *buildx_plugin
     settings:
       repo: woodpeckerci/woodpecker-cli
@@ -399,7 +424,8 @@ steps:
       event: pull_request
 
   build-cli:
-    group: docker
+    depends_on:
+      - vendor
     image: *buildx_plugin
     settings:
       dry_run: true
@@ -414,7 +440,8 @@ steps:
       path: *when_path
 
   publish-next-cli:
-    group: docker
+    depends_on:
+      - vendor
     image: *buildx_plugin
     settings:
       repo: *publish_repos_cli
@@ -429,7 +456,8 @@ steps:
       path: *when_path
 
   publish-next-cli-alpine:
-    group: docker
+    depends_on:
+      - vendor
     image: *buildx_plugin
     settings:
       repo: *publish_repos_cli
@@ -444,7 +472,8 @@ steps:
       path: *when_path
 
   publish-release-branch-cli:
-    group: docker
+    depends_on:
+      - vendor
     image: *buildx_plugin
     settings:
       repo: *publish_repos_cli
@@ -459,7 +488,8 @@ steps:
       path: *when_path
 
   publish-release-branch-cli-alpine:
-    group: docker
+    depends_on:
+      - vendor
     image: *buildx_plugin
     settings:
       repo: *publish_repos_cli
@@ -474,7 +504,8 @@ steps:
       path: *when_path
 
   release-cli:
-    group: docker
+    depends_on:
+      - vendor
     image: *buildx_plugin
     settings:
       repo: *publish_repos_cli
@@ -488,7 +519,8 @@ steps:
       event: tag
 
   release-cli-alpine:
-    group: docker
+    depends_on:
+      - vendor
     image: *buildx_plugin
     settings:
       repo: *publish_repos_cli
