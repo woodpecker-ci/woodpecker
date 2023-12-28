@@ -88,16 +88,6 @@ func TestParse(t *testing.T) {
 				g.Assert(out.Steps.ContainerList[1].When.Constraints[0].Event.Include).Equal([]string{"success"})
 			})
 
-			g.It("Should unmarshal with default version", func() {
-				out, err := ParseString(sampleYamlDefaultVersion)
-				if err != nil {
-					g.Fail(err)
-				}
-				g.Assert(len(out.Steps.ContainerList)).Equal(1)
-				g.Assert(out.Steps.ContainerList[0].Name).Equal("notify_success")
-				g.Assert(out.Steps.ContainerList[0].Image).Equal("xyz")
-			})
-
 			matchConfig, err := ParseString(sampleYaml)
 			if err != nil {
 				g.Fail(err)
@@ -190,7 +180,6 @@ pipeline:
 }
 
 var sampleYaml = `
-version: 1
 image: hello-world
 when:
   - event:
@@ -242,14 +231,7 @@ runs_on:
   - failure
 `
 
-var sampleYamlDefaultVersion = `
-steps:
-  - name: notify_success
-    image: xyz
-`
-
 var simpleYamlAnchors = `
-version: 1
 vars:
   image: &image plugins/slack
 steps:
@@ -258,7 +240,6 @@ steps:
 `
 
 var sampleVarYaml = `
-version: 1
 _slack: &SLACK
   image: plugins/slack
 steps:
