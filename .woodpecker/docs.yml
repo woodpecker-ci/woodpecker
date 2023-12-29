@@ -52,7 +52,7 @@ steps:
         from_secret: GITHUB_TOKEN_SURGE
     failure: ignore
     when:
-      event: [ pull_request, pull_request_closed ]
+      event: [pull_request, pull_request_closed]
       path: *when_path
 
   # TODO: add step to remove preview again after PR is closed (waiting for #286)
