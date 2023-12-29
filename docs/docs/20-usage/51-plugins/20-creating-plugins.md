@@ -1,13 +1,13 @@
 # Creating plugins
 
-Creating a new plugin is simple: Build a Docker container which uses your plugin logic as entrypoint.
+Creating a new plugin is simple: Build a Docker container which uses your plugin logic as the ENTRYPOINT.
 
 ## Settings
 
-To allow users to configure the behavior of your plugin, you should use settings.
+To allow users to configure the behavior of your plugin, you should use `settings:`.
 
-These are passed to your plugin as uppercase env vars with `PLUGIN_` prefix.
-Using a setting like `url` results in `PLUGIN_URL` as env var.
+These are passed to your plugin as uppercase env vars with a `PLUGIN_` prefix.
+Using a setting like `url` results in an env var named `PLUGIN_URL`.
 
 Characters like `-` are converted to an underscore (`_`). `some_String` gets `PLUGIN_SOME_STRING`.
 CamelCase is not respected, `anInt` get `PLUGIN_ANINT`.
@@ -85,6 +85,7 @@ curl \
 Create a Dockerfile that adds your shell script to the image, and configures the image to execute your shell script as the main entrypoint.
 
 ```dockerfile
+# please pin the version, e.g. alpine:3.19
 FROM alpine
 ADD script.sh /bin/
 RUN chmod +x /bin/script.sh
