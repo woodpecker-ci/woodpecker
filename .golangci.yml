@@ -22,11 +22,11 @@ linters-settings:
         list-mode: lax
         files:
           - '**/pipeline/**/*.go'
-          - "**/pipeline/*.go"
-          - "!**/cli/pipeline/*.go"
-          - "!**/cli/pipeline/**/*.go"
-          - "!**/server/pipeline/*.go"
-          - "!**/server/pipeline/**/*.go"
+          - '**/pipeline/*.go'
+          - '!**/cli/pipeline/*.go'
+          - '!**/cli/pipeline/**/*.go'
+          - '!**/server/pipeline/*.go'
+          - '!**/server/pipeline/**/*.go'
         deny:
           - pkg: 'go.woodpecker-ci.org/woodpecker/v2/agent'
           - pkg: 'go.woodpecker-ci.org/woodpecker/v2/cli'
@@ -38,8 +38,8 @@ linters-settings:
         files:
           - '**/shared/**/*.go'
           - '**/shared/*.go'
-          - "!**/pipeline/shared/*.go"
-          - "!**/pipeline/shared/**/*.go"
+          - '!**/pipeline/shared/*.go'
+          - '!**/pipeline/shared/**/*.go'
         deny:
           - pkg: 'go.woodpecker-ci.org/woodpecker/v2/agent'
           - pkg: 'go.woodpecker-ci.org/woodpecker/v2/cli'
