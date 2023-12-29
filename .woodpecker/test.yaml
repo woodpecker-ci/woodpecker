@@ -38,9 +38,9 @@ steps:
     commands:
       - go run go.woodpecker-ci.org/woodpecker/v2/cmd/cli lint
     when:
-      <<: *when
-      path:
-        - '.woodpecker/**'
+      - event: pull_request
+        path:
+          - '.woodpecker/**'
 
   dummy-web:
     image: *golang_image
