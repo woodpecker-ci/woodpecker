@@ -29,20 +29,6 @@ func (*ErrExtraHostFormat) Is(target error) bool {
 	return ok
 }
 
-type ErrStepMissingDependency struct {
-	name,
-	dep string
-}
-
-func (err *ErrStepMissingDependency) Error() string {
-	return fmt.Sprintf("step '%s' depends on unknown step '%s'", err.name, err.dep)
-}
-
-func (*ErrStepMissingDependency) Is(target error) bool {
-	_, ok := target.(*ErrStepMissingDependency) //nolint:errorlint
-	return ok
-}
-
 type ErrStepDependencyCycle struct {
 	path []string
 }

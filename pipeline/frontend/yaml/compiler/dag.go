@@ -112,12 +112,14 @@ func convertDAGToStages(steps map[string]*dagCompilerStep, prefix string) ([]*ba
 	stages := make([]*backend_types.Stage, 0)
 
 	for name, step := range steps {
-		// check if all depends_on are valid
+		// filter out invalid depends_on
+		var dependsOn []string
 		for _, dep := range step.dependsOn {
-			if _, ok := steps[dep]; !ok {
-				return nil, &ErrStepMissingDependency{name: name, dep: dep}
+			if _, ok := steps[dep]; ok {
+				dependsOn = append(dependsOn, dep)
 			}
 		}
+		step.dependsOn = dependsOn
 
 		// check if there are cycles
 		visited := make(map[string]struct{})

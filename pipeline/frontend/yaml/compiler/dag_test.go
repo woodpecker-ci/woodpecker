@@ -78,5 +78,5 @@ func TestConvertDAGToStages(t *testing.T) {
 		},
 	}
 	_, err = convertDAGToStages(steps, "")
-	assert.ErrorIs(t, err, &ErrStepMissingDependency{})
+	assert.NoError(t, err)
 }
