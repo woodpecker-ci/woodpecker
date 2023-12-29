@@ -13,6 +13,8 @@ when:
     branch:
       - ${CI_REPO_DEFAULT_BRANCH}
       - renovate/*
+  - event: pull_request_closed
+    path: *when_path
   - cron: update_docs
     event: cron
   - event: manual
