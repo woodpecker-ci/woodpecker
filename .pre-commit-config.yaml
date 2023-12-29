@@ -37,6 +37,7 @@ repos:
     hooks:
       - id: yamllint
         args: [--strict, -c=.yamllint]
+
 ci:
   autofix_commit_msg: |
     [pre-commit.ci] auto fixes from pre-commit.com hooks [CI SKIP]
