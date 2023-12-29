@@ -443,7 +443,7 @@ steps:
   build:
     image: scratch
 `)},
-			{Name: "shouldbefiltered", Data: []byte(`
+			{Name: "shouldnotbefiltered", Data: []byte(`
 steps:
   build:
     image: scratch
@@ -456,11 +456,8 @@ depends_on: [ zerostep ]
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(pipelineItems) != 1 {
-		t.Fatal("Zerostep and the step that depends on it should not generate a pipeline item")
-	}
-	if pipelineItems[0].Workflow.Name != "justastep" {
-		t.Fatal("justastep should have been generated")
+	if len(pipelineItems) != 2 {
+		t.Fatal("Zerostep should not generate a pipeline item")
 	}
 }
 
@@ -492,13 +489,13 @@ steps:
   build:
     image: scratch
 `)},
-			{Name: "shouldbefiltered", Data: []byte(`
+			{Name: "shouldnotbefiltered", Data: []byte(`
 steps:
   build:
     image: scratch
 depends_on: [ zerostep ]
 `)},
-			{Name: "shouldbefilteredtoo", Data: []byte(`
+			{Name: "shouldnotbefilteredtoo", Data: []byte(`
 steps:
   build:
     image: scratch
@@ -511,11 +508,8 @@ depends_on: [ shouldbefiltered ]
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(pipelineItems) != 1 {
-		t.Fatal("Zerostep and the step that depends on it, and the one depending on it should not generate a pipeline item")
-	}
-	if pipelineItems[0].Workflow.Name != "justastep" {
-		t.Fatal("justastep should have been generated")
+	if len(pipelineItems) != 3 {
+		t.Fatal("Zerostep should not generate a pipeline item")
 	}
 }
 

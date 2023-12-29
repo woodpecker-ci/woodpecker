@@ -288,8 +288,26 @@ func TestCompilerCompile(t *testing.T) {
 				Image:     "dummy_img",
 				DependsOn: []string{"not exist"},
 			}}}},
-			backConf:    nil,
-			expectedErr: "step 'dummy' depends on unknown step 'not exist'",
+			backConf:    &backend_types.Config{
+				Networks: defaultNetworks,
+				Volumes:  defaultVolumes,
+				Stages: []*backend_types.Stage{defaultCloneStage, {
+					Name:  "test_stage_0",
+					Alias: "test_stage_0",
+					Steps: []*backend_types.Step{{
+						Name:       "test_step_0",
+						Alias:      "dummy",
+						Type:       backend_types.StepTypePlugin,
+						Image:      "dummy_img",
+						Commands:   nil,
+						OnSuccess:  true,
+						Failure:    "fail",
+						Volumes:    []string{defaultVolumes[0].Name + ":"},
+						Networks:   []backend_types.Conn{{Name: "test_default", Aliases: []string{"dummy"}}},
+						ExtraHosts: []backend_types.HostAlias{},
+					}},
+				}},
+			},
 		},
 	}
 

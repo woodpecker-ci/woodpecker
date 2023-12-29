@@ -199,25 +199,14 @@ func stepListContainsItemsToRun(items []*Item) bool {
 }
 
 func filterItemsWithMissingDependencies(items []*Item) []*Item {
-	itemsToRemove := make([]*Item, 0)
-
 	for _, item := range items {
+		var dependsOn []string
 		for _, dep := range item.DependsOn {
-			if !containsItemWithName(dep, items) {
-				itemsToRemove = append(itemsToRemove, item)
+			if containsItemWithName(dep, items) {
+				dependsOn = append(dependsOn, dep)
 			}
 		}
-	}
-
-	if len(itemsToRemove) > 0 {
-		filtered := make([]*Item, 0)
-		for _, item := range items {
-			if !containsItemWithName(item.Workflow.Name, itemsToRemove) {
-				filtered = append(filtered, item)
-			}
-		}
-		// Recursive to handle transitive deps
-		return filterItemsWithMissingDependencies(filtered)
+		item.DependsOn = dependsOn
 	}
 
 	return items
