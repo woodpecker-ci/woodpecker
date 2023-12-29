@@ -8,6 +8,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fix build output paths [[#3065](https://github.com/woodpecker-ci/woodpecker/pull/3065)]
 - Fix `when` and `depends_on` [[#3063](https://github.com/woodpecker-ci/woodpecker/pull/3063)]
 - Fix DAG cycle detection [[#3049](https://github.com/woodpecker-ci/woodpecker/pull/3049)]
 - Fix duplicated icons [[#3045](https://github.com/woodpecker-ci/woodpecker/pull/3045)]
