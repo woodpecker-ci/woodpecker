@@ -6,6 +6,12 @@
 
 @qwerty287, @xfix, @anbraten, @6543
 
+### 📈 Enhancement
+
+- Add imports checks to linter [[#3056](https://github.com/woodpecker-ci/woodpecker/pull/3056)]
+- Remove workflow version again [[#3052](https://github.com/woodpecker-ci/woodpecker/pull/3052)]
+- Add option to disable version check in admin web UI [[#3040](https://github.com/woodpecker-ci/woodpecker/pull/3040)]
+
 ### 🐛 Bug Fixes
 
 - Fix build output paths [[#3065](https://github.com/woodpecker-ci/woodpecker/pull/3065)]
@@ -16,11 +22,6 @@
 ### 📚 Documentation
 
 - Add Codeberg Pages Deploy plugin to plugins list [[#3054](https://github.com/woodpecker-ci/woodpecker/pull/3054)]
-
-### 📈 Enhancement
-
-- Remove workflow version again [[#3052](https://github.com/woodpecker-ci/woodpecker/pull/3052)]
-- Add option to disable version check in admin web UI [[#3040](https://github.com/woodpecker-ci/woodpecker/pull/3040)]
 
 ### Misc
 
