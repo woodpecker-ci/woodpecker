@@ -49,8 +49,6 @@ SSL support is provided using the [ListenAndServeTLS](https://golang.org/pkg/net
 
 ### Running in containers
 
-### Running in containers
-
 Update your configuration to expose the following ports:
 
 ```diff title="docker-compose.yaml"
