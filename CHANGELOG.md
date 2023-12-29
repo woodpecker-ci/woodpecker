@@ -1,10 +1,16 @@
 # Changelog
 
-## [2.2.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.2.0) - 2023-12-28
+## [2.2.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.2.0) - 2023-12-29
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@xfix, @anbraten, @qwerty287, @6543
+@qwerty287, @xfix, @anbraten, @6543
+
+### 🐛 Bug Fixes
+
+- Fix `when` and `depends_on` [[#3063](https://github.com/woodpecker-ci/woodpecker/pull/3063)]
+- Fix DAG cycle detection [[#3049](https://github.com/woodpecker-ci/woodpecker/pull/3049)]
+- Fix duplicated icons [[#3045](https://github.com/woodpecker-ci/woodpecker/pull/3045)]
 
 ### 📚 Documentation
 
@@ -15,13 +21,9 @@
 - Remove workflow version again [[#3052](https://github.com/woodpecker-ci/woodpecker/pull/3052)]
 - Add option to disable version check in admin web UI [[#3040](https://github.com/woodpecker-ci/woodpecker/pull/3040)]
 
-### 🐛 Bug Fixes
-
-- Fix DAG cycle detection [[#3049](https://github.com/woodpecker-ci/woodpecker/pull/3049)]
-- Fix duplicated icons [[#3045](https://github.com/woodpecker-ci/woodpecker/pull/3045)]
-
 ### Misc
 
+- Use `yamllint` [[#3066](https://github.com/woodpecker-ci/woodpecker/pull/3066)]
 - Use dag in ci config [[#3010](https://github.com/woodpecker-ci/woodpecker/pull/3010)]
 
 ## [2.1.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.1.1) - 2023-12-27
