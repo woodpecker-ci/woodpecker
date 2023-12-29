@@ -2,24 +2,14 @@
 
 Woodpecker comes with built-in support for Gitea and the "soft" fork Forgejo. To enable Gitea you should configure the Woodpecker container using the following environment variables:
 
-```diff title="docker-compose.yml"
-version: '3'
-
-services:
-  woodpecker-server:
-    [...]
-    environment:
-      - [...]
-+     - WOODPECKER_GITEA=true
-+     - WOODPECKER_GITEA_URL=${WOODPECKER_GITEA_URL}
-+     - WOODPECKER_GITEA_CLIENT=${WOODPECKER_GITEA_CLIENT}
-+     - WOODPECKER_GITEA_SECRET=${WOODPECKER_GITEA_SECRET}
-
-  woodpecker-agent:
-    [...]
+```ini
+WOODPECKER_GITEA=true
+WOODPECKER_GITEA_URL=YOUR_GITEA_URL
+WOODPECKER_GITEA_CLIENT=YOUR_GITEA_CLIENT
+WOODPECKER_GITEA_SECRET=YOUR_GITEA_CLIENT_SECRET
 ```
 
-## Gitea on the same host
+## Gitea on the same host with containers
 
 If you have Gitea also running on the same host within a container, make sure the agent does have access to it.
 The agent tries to clone using the URL which Gitea reports through its API. For simplified connectivity, you should add the woodpecker agent to the same docker network as Gitea is in.
@@ -27,7 +17,7 @@ Otherwise, the communication should go via the `docker0` gateway (usually 172.17
 
 To configure the Docker network if the network's name is `gitea`, configure it like this:
 
-```diff title="docker-compose.yml"
+```diff title="docker-compose.yaml"
 version: '3'
 
 services:
@@ -46,7 +36,6 @@ Register your application with Gitea to create your client id and secret. You ca
 If you run the Woodpecker CI server on the same host as the Gitea instance, you might also need to allow local connections in Gitea, since version `v1.16`. Otherwise webhooks will fail. Add the following lines to your Gitea configuration (usually at `/etc/gitea/conf/app.ini`).
 
 ```ini
-...
 [webhook]
 ALLOWED_HOST_LIST=external,loopback
 ```

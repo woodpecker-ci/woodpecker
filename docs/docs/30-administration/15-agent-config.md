@@ -2,38 +2,24 @@
 
 Agents are configured by the command line or environment variables. At the minimum you need the following information:
 
-```diff title="docker-compose.yml"
-version: '3'
-
-services:
-  woodpecker-agent:
-    [...]
-    volumes:
-      - woodpecker-agent-config:/etc/woodpecker
-    environment:
-+     - WOODPECKER_SERVER=localhost:9000
-+     - WOODPECKER_AGENT_SECRET="your-shared-secret-goes-here"
+```ini
+WOODPECKER_SERVER=localhost:9000
+WOODPECKER_AGENT_SECRET="your-shared-secret-goes-here"
 ```
 
 The following are automatically set and can be overridden:
 
-- WOODPECKER_HOSTNAME if not set, becomes the OS' hostname
-- WOODPECKER_MAX_WORKFLOWS if not set, defaults to 1
+- `WOODPECKER_HOSTNAME` if not set, becomes the OS' hostname
+- `WOODPECKER_MAX_WORKFLOWS` if not set, defaults to 1
 
 ## Workflows per agent
 
 By default, the maximum workflows that are executed in parallel on an agent is 1. If required, you can add `WOODPECKER_MAX_WORKFLOWS` to increase your parallel processing for an agent.
 
-```diff title="docker-compose.yml"
-version: '3'
-
-services:
-  woodpecker-agent:
-  [...]
-  environment:
-    - WOODPECKER_SERVER=localhost:9000
-    - WOODPECKER_AGENT_SECRET="your-shared-secret-goes-here"
-+   - WOODPECKER_MAX_WORKFLOWS=4
+```ini
+WOODPECKER_SERVER=localhost:9000
+WOODPECKER_AGENT_SECRET="your-shared-secret-goes-here"
+WOODPECKER_MAX_WORKFLOWS=4
 ```
 
 ## Agent registration

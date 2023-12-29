@@ -4,7 +4,7 @@ The below [docker-compose](https://docs.docker.com/compose/) configuration can b
 
 It relies on a number of environment variables that you must set before running `docker-compose up`. The variables are described below.
 
-```yaml title="docker-compose.yml"
+```yaml title="docker-compose.yaml"
 version: '3'
 
 services:
@@ -42,7 +42,7 @@ volumes:
 
 Woodpecker needs to know its own address. You must therefore provide the public address of it in `<scheme>://<hostname>` format. Please omit trailing slashes:
 
-```diff title="docker-compose.yml"
+```diff title="docker-compose.yaml"
 version: '3'
 
 services:
@@ -54,9 +54,9 @@ services:
 ```
 
 Woodpecker can also have its port's configured. It uses a separate port for gRPC and for HTTP. The agent performs gRPC calls and connects to the gRPC port.
-They can be configured with ADDR variables:
+They can be configured with `*_ADDR` variables:
 
-```diff title="docker-compose.yml"
+```diff title="docker-compose.yaml"
 version: '3'
 services:
   woodpecker-server:
@@ -69,7 +69,7 @@ services:
 
 Reverse proxying can also be [configured for gRPC](../proxy#caddy). If the agents are connecting over the internet, it should also be SSL encrypted. The agent then needs to be configured to be secure:
 
-```diff title="docker-compose.yml"
+```diff title="docker-compose.yaml"
 version: '3'
 services:
   woodpecker-server:
@@ -82,7 +82,7 @@ services:
 
 As agents run pipeline steps as docker containers they require access to the host machine's Docker daemon:
 
-```diff title="docker-compose.yml"
+```diff title="docker-compose.yaml"
 version: '3'
 
 services:
@@ -95,7 +95,7 @@ services:
 
 Agents require the server address for agent-to-server communication. The agent connects to the server's gRPC port:
 
-```diff title="docker-compose.yml"
+```diff title="docker-compose.yaml"
 version: '3'
 
 services:
@@ -107,7 +107,7 @@ services:
 
 The server and agents use a shared secret to authenticate communication. This should be a random string of your choosing and should be kept private. You can generate such string with `openssl rand -hex 32`:
 
-```diff title="docker-compose.yml"
+```diff title="docker-compose.yaml"
 version: '3'
 
 services:

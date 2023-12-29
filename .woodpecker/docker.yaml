@@ -3,7 +3,6 @@ when:
   - event: push
     branch:
       - ${CI_REPO_DEFAULT_BRANCH}
-      - release/*
       - renovate/*
 
 depends_on:
@@ -61,7 +60,7 @@ steps:
         path: *when_path
       - branch:
           - ${CI_REPO_DEFAULT_BRANCH}
-          - release/*
+          - renovate/*
         event: [push, tag]
         path: *when_path
 
@@ -82,7 +81,7 @@ steps:
         path: *when_path
       - branch:
           - ${CI_REPO_DEFAULT_BRANCH}
-          - release/*
+          - renovate/*
         event: [push, tag]
         path: *when_path
 
@@ -105,6 +104,9 @@ steps:
         evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
       - event: pull_request
         path: *when_path
+      - event: push
+        branch: renovate/*
+        path: *when_path
 
   cross-compile-server:
     depends_on:
@@ -123,7 +125,6 @@ steps:
     when:
       branch:
         - ${CI_REPO_DEFAULT_BRANCH}
-        - release/*
       event: [push, tag]
       path: *when_path
 
@@ -167,25 +168,12 @@ steps:
       platforms: *platforms_preview
       tag: pull_${CI_COMMIT_PULL_REQUEST}
     when:
-      evaluate: 'not (CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images")'
-      event: pull_request
-      path: *when_path
-
-  build-server-alpine:
-    depends_on:
-      - vendor
-      - build-web
-    image: *buildx_plugin
-    settings:
-      dry_run: true
-      repo: woodpeckerci/woodpecker-server
-      dockerfile: docker/Dockerfile.server.alpine.multiarch
-      platforms: *platforms_preview
-      tag: pull_${CI_COMMIT_PULL_REQUEST}-alpine
-    when:
-      evaluate: 'not (CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images")'
-      event: pull_request
-      path: *when_path
+      - evaluate: 'not (CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images")'
+        event: pull_request
+        path: *when_path
+      - event: push
+        branch: renovate/*
+        path: *when_path
 
   publish-next-server:
     depends_on:
@@ -214,36 +202,6 @@ steps:
       logins: *publish_logins
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
-      event: push
-      path: *when_path
-
-  publish-release-branch-server:
-    depends_on:
-      - cross-compile-server
-    image: *buildx_plugin
-    settings:
-      repo: *publish_repos_server
-      dockerfile: docker/Dockerfile.server.multiarch
-      platforms: *platforms_server
-      tag: ${CI_COMMIT_BRANCH##release/}
-      logins: *publish_logins
-    when:
-      branch: release/*
-      event: push
-      path: *when_path
-
-  publish-release-branch-server-alpine:
-    depends_on:
-      - cross-compile-server
-    image: *buildx_plugin
-    settings:
-      repo: *publish_repos_server
-      dockerfile: docker/Dockerfile.server.alpine.multiarch
-      platforms: *platforms_alpine
-      tag: ${CI_COMMIT_BRANCH##release/}
-      logins: *publish_logins
-    when:
-      branch: release/*
       event: push
       path: *when_path
 
@@ -306,9 +264,12 @@ steps:
       tag: pull_${CI_COMMIT_PULL_REQUEST}
       build_args: *build_args
     when:
-      evaluate: 'not (CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images")'
-      event: pull_request
-      path: *when_path
+      - evaluate: 'not (CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images")'
+        event: pull_request
+        path: *when_path
+      - event: push
+        branch: renovate/*
+        path: *when_path
 
   publish-next-agent:
     depends_on:
@@ -339,38 +300,6 @@ steps:
       build_args: *build_args
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
-      event: push
-      path: *when_path
-
-  publish-release-branch-agent:
-    depends_on:
-      - vendor
-    image: *buildx_plugin
-    settings:
-      repo: *publish_repos_agent
-      dockerfile: docker/Dockerfile.agent.multiarch
-      platforms: *platforms_release
-      tag: ${CI_COMMIT_BRANCH##release/}
-      logins: *publish_logins
-      build_args: *build_args
-    when:
-      branch: release/*
-      event: push
-      path: *when_path
-
-  publish-release-branch-agent-alpine:
-    depends_on:
-      - vendor
-    image: *buildx_plugin
-    settings:
-      repo: *publish_repos_agent
-      dockerfile: docker/Dockerfile.agent.alpine.multiarch
-      platforms: *platforms_alpine
-      tag: ${CI_COMMIT_BRANCH##release/}
-      logins: *publish_logins
-      build_args: *build_args
-    when:
-      branch: release/*
       event: push
       path: *when_path
 
@@ -435,9 +364,12 @@ steps:
       tag: pull_${CI_COMMIT_PULL_REQUEST}
       build_args: *build_args
     when:
-      evaluate: 'not (CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images")'
-      event: pull_request
-      path: *when_path
+      - evaluate: 'not (CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images")'
+        event: pull_request
+        path: *when_path
+      - event: push
+        branch: renovate/*
+        path: *when_path
 
   publish-next-cli:
     depends_on:
@@ -468,38 +400,6 @@ steps:
       build_args: *build_args
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
-      event: push
-      path: *when_path
-
-  publish-release-branch-cli:
-    depends_on:
-      - vendor
-    image: *buildx_plugin
-    settings:
-      repo: *publish_repos_cli
-      dockerfile: docker/Dockerfile.cli.multiarch
-      platforms: *platforms_release
-      tag: ${CI_COMMIT_BRANCH##release/}
-      logins: *publish_logins
-      build_args: *build_args
-    when:
-      branch: release/*
-      event: push
-      path: *when_path
-
-  publish-release-branch-cli-alpine:
-    depends_on:
-      - vendor
-    image: *buildx_plugin
-    settings:
-      repo: *publish_repos_cli
-      dockerfile: docker/Dockerfile.cli.alpine.multiarch
-      platforms: *platforms_alpine
-      tag: ${CI_COMMIT_BRANCH##release/}
-      logins: *publish_logins
-      build_args: *build_args
-    when:
-      branch: release/*
       event: push
       path: *when_path
 

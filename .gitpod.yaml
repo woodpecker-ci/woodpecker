@@ -37,7 +37,7 @@ tasks:
       go run go.woodpecker-ci.org/woodpecker/v2/cmd/agent
   - name: Gitea
     command: |
-      export DOCKER_COMPOSE_CMD="docker-compose -f docker-compose.gitpod.yml -p woodpecker"
+      export DOCKER_COMPOSE_CMD="docker-compose -f docker-compose.gitpod.yaml -p woodpecker"
       export GITEA_CLI_CMD="$DOCKER_COMPOSE_CMD exec -u git gitea gitea"
       $DOCKER_COMPOSE_CMD up -d
       until curl --output /dev/null --silent --head --fail http://localhost:3000; do printf '.'; sleep 1; done

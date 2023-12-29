@@ -8,7 +8,7 @@ Please note that the autoscaler is not feature-complete yet. You can follow the 
 
 ### docker-compose
 
-If you are using docker-compose you can add the following to your docker-compose.yml file:
+If you are using docker-compose you can add the following to your `docker-compose.yaml` file:
 
 ```yaml
 version: '3'

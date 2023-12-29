@@ -67,7 +67,7 @@ The associated commit is checked out with git to a workspace which is mounted to
 - Woodpecker clones the source code in the beginning of the workflow
 - Changes to files are persisted through steps as the same volume is mounted to all steps
 
-```yaml title=".woodpecker.yml"
+```yaml title=".woodpecker.yaml"
 steps:
   build:
     image: debian
@@ -395,7 +395,7 @@ You can use [glob patterns](https://github.com/bmatcuk/doublestar#patterns) to m
 ```yaml
 when:
   - path:
-      include: ['.woodpecker/*.yml', '*.ini']
+      include: ['.woodpecker/*.yaml', '*.ini']
       exclude: ['*.md', 'docs/**']
       ignore_message: '[ALL]'
 ```
@@ -831,7 +831,7 @@ You can use [glob patterns](https://github.com/bmatcuk/doublestar#patterns) to m
 ```diff
 when:
   path:
-    include: [ '.woodpecker/*.yml', '*.ini' ]
+    include: [ '.woodpecker/*.yaml', '*.ini' ]
     exclude: [ '*.md', 'docs/**' ]
     ignore_message: "[ALL]"
 ```

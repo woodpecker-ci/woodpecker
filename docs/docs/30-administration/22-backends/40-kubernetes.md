@@ -4,20 +4,6 @@ The kubernetes backend executes steps inside standalone pods. A temporary PVC is
 
 ## General Configuration
 
-These env vars can be set in the `env:` sections of both `server` and `agent`.
-They do not need to be set for both but only for the part to which it is relevant to.
-
-```yaml
-server:
-  env:
-    WOODPECKER_SESSION_EXPIRES: "300h"
-    [...]
-
-agent:
-  env:
-    [...]
-```
-
 - `WOODPECKER_BACKEND_K8S_NAMESPACE` (default: `woodpecker`)
 
   The namespace to create worker pods in.
@@ -72,12 +58,12 @@ steps:
             cpu: 1000m
 ```
 
-### serviceAccountName
+### `serviceAccountName`
 
 Specify the name of the ServiceAccount which the build pod will mount. This serviceAccount must be created externally.
 See the [kubernetes documentation](https://kubernetes.io/docs/concepts/security/service-accounts/) for more information on using serviceAccounts.
 
-### nodeSelector
+### `nodeSelector`
 
 Specifies the label which is used to select the node on which the job will be executed.
 
@@ -106,7 +92,7 @@ And then overwrite the `nodeSelector` in the `backend_options` section of the st
           kubernetes.io/arch: "${ARCH}"
 ```
 
-### tolerations
+### `tolerations`
 
 When you use nodeSelector and the node pool is configured with Taints, you need to specify the Tolerations. Tolerations allow the scheduler to schedule pods with matching taints.
 See the [kubernetes documentation](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/) for more information on using tolerations.

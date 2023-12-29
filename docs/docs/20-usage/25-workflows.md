@@ -1,14 +1,10 @@
 # Workflows
 
-:::info
-This Feature is only available for GitHub, Gitea & GitLab repositories. Follow [this](https://github.com/woodpecker-ci/woodpecker/issues/1138) issue to support further development.
-:::
-
 A pipeline has at least one workflow. A workflow is a set of steps that are executed in sequence using the same workspace which is a shared folder containing the repository and all the generated data from previous steps.
 
-Incase there is a single configuration in `.woodpecker.yml` Woodpecker will create a pipeline with a single workflow.
+Incase there is a single configuration in `.woodpecker.yaml` Woodpecker will create a pipeline with a single workflow.
 
-By placing the configurations in a folder which is by default named `.woodpecker/` Woodpecker will create a pipeline with multiple workflows each named by the file they are defined in. Only `.yml` and `.yaml` files will be used and files in any subfolders like `.woodpecker/sub-folder/test.yml` will be ignored.
+By placing the configurations in a folder which is by default named `.woodpecker/` Woodpecker will create a pipeline with multiple workflows each named by the file they are defined in. Only `.yml` and `.yaml` files will be used and files in any subfolders like `.woodpecker/sub-folder/test.yaml` will be ignored.
 
 You can also set some custom path like `.my-ci/pipelines/` instead of `.woodpecker/` in the [project settings](./71-project-settings.md).
 
@@ -27,13 +23,13 @@ If you still need to pass artifacts between the workflows you need use some stor
 
 ```bash
 .woodpecker/
-├── .build.yml
-├── .deploy.yml
-├── .lint.yml
-└── .test.yml
+├── .build.yaml
+├── .deploy.yaml
+├── .lint.yaml
+└── .test.yaml
 ```
 
-```yaml title=".woodpecker/.build.yml"
+```yaml title=".woodpecker/.build.yaml"
 steps:
   build:
     image: debian:stable-slim
@@ -42,7 +38,7 @@ steps:
       - sleep 5
 ```
 
-```yaml title=".woodpecker/.deploy.yml"
+```yaml title=".woodpecker/.deploy.yaml"
 steps:
   deploy:
     image: debian:stable-slim
@@ -55,7 +51,7 @@ depends_on:
   - test
 ```
 
-```yaml title=".woodpecker/.test.yml"
+```yaml title=".woodpecker/.test.yaml"
 steps:
   test:
     image: debian:stable-slim
@@ -67,7 +63,7 @@ depends_on:
   - build
 ```
 
-```yaml title=".woodpecker/.lint.yml"
+```yaml title=".woodpecker/.lint.yaml"
 steps:
   lint:
     image: debian:stable-slim
@@ -86,7 +82,7 @@ The workflows run in parallel on separate agents and share nothing.
 
 Dependencies between workflows can be set with the `depends_on` element. A workflow doesn't execute until all of its dependencies finished successfully.
 
-The name for a `depends_on` entry is the filename without the path, leading dots and without the file extension `.yml` or `.yaml`. If the project config for example uses `.woodpecker/` as path for CI files with a file named `.woodpecker/.lint.yml` the corresponding `depends_on` entry would be `lint`.
+The name for a `depends_on` entry is the filename without the path, leading dots and without the file extension `.yml` or `.yaml`. If the project config for example uses `.woodpecker/` as path for CI files with a file named `.woodpecker/.lint.yaml` the corresponding `depends_on` entry would be `lint`.
 
 ```diff
 steps:

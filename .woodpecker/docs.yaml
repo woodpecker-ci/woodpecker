@@ -4,7 +4,7 @@ when:
   - event: push
     path: &when_path
       - 'docs/**'
-      - '.woodpecker/docs.yml'
+      - '.woodpecker/docs.yaml'
       # since we generate docs for cli tool we have to watch this too
       - 'cli/**'
       - 'cmd/cli/**'

@@ -30,15 +30,8 @@ Addons are restricted by how Go plugins work. This includes the following restri
 
 To use an addon, download the addon version built for your Woodpecker version. Then, you can add the following to your configuration:
 
-```diff
-# docker-compose.yml
-version: '3'
-
-services:
-  woodpecker-server:
-    [...]
-    environment:
-+     - WOODPECKER_ADDONS=/path/to/your/addon/file.so
+```ini
+WOODPECKER_ADDONS=/path/to/your/addon/file.so
 ```
 
 In case you run Woodpecker as container, you probably want to mount the addon binaries to `/opt/addons/`.

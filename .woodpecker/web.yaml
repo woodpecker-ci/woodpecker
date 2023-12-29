@@ -1,25 +1,21 @@
 when:
-  - event: [pull_request, tag]
+  - event: pull_request
   - event: push
-    branch:
-      - ${CI_REPO_DEFAULT_BRANCH}
-      - release/*
-      - renovate/*
+    branch: renovate/*
 
 variables:
   - &node_image 'docker.io/node:21-alpine'
   - &when
     path:
       # related config files
-      - '.woodpecker/web.yml'
+      - '.woodpecker/web.yaml'
       # web source code
       - 'web/**'
       # api source code
       - 'server/api/**'
-    event: [pull_request, tag, deployment]
 
 steps:
-  install_dependencies:
+  install-dependencies:
     image: *node_image
     directory: web/
     commands:
