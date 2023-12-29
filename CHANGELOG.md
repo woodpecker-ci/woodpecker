@@ -23,6 +23,7 @@
 
 ### Misc
 
+- Use CI vars for plugin [[#3061](https://github.com/woodpecker-ci/woodpecker/pull/3061)]
 - Use `yamllint` [[#3066](https://github.com/woodpecker-ci/woodpecker/pull/3066)]
 - Use dag in ci config [[#3010](https://github.com/woodpecker-ci/woodpecker/pull/3010)]
 
