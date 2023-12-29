@@ -34,7 +34,7 @@ repos:
     rev: v1.32.0
     hooks:
       - id: yamllint
-        args: [--strict, -c=.yamllint]
+        args: [--strict, -c=.yamllint.yaml]
 
 ci:
   autofix_commit_msg: |
