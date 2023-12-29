@@ -69,6 +69,8 @@ linters-settings:
           - '**/cmd/agent/*.go'
         deny:
           - pkg: 'go.woodpecker-ci.org/woodpecker/v2/cli'
+          - pkg: 'go.woodpecker-ci.org/woodpecker/v2/cmd/cli'
+          - pkg: 'go.woodpecker-ci.org/woodpecker/v2/cmd/server'
           - pkg: 'go.woodpecker-ci.org/woodpecker/v2/server'
           - pkg: 'go.woodpecker-ci.org/woodpecker/v2/web'
           - pkg: 'go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker'
@@ -82,6 +84,8 @@ linters-settings:
         deny:
           - pkg: 'go.woodpecker-ci.org/woodpecker/v2/agent'
           - pkg: 'go.woodpecker-ci.org/woodpecker/v2/server'
+          - pkg: 'go.woodpecker-ci.org/woodpecker/v2/cmd/agent'
+          - pkg: 'go.woodpecker-ci.org/woodpecker/v2/cmd/server'
           - pkg: 'go.woodpecker-ci.org/woodpecker/v2/web'
       server:
         list-mode: lax
@@ -90,9 +94,13 @@ linters-settings:
           - '**/server/*.go'
           - '**/cmd/server/**/*.go'
           - '**/cmd/server/*.go'
+          - '**/web/**/*.go'
+          - '**/web/*.go'
         deny:
           - pkg: 'go.woodpecker-ci.org/woodpecker/v2/agent'
           - pkg: 'go.woodpecker-ci.org/woodpecker/v2/cli'
+          - pkg: 'go.woodpecker-ci.org/woodpecker/v2/cmd/agent'
+          - pkg: 'go.woodpecker-ci.org/woodpecker/v2/cmd/cli'
           - pkg: 'go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker'
 
 linters:
