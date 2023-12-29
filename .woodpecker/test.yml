@@ -26,8 +26,8 @@ steps:
       - go mod vendor
     when:
       - path:
-        - <<: *when_path
-        - '.woodpecker/**'
+          - <<: *when_path
+          - '.woodpecker/**'
 
   lint-pipeline:
     depends_on:
