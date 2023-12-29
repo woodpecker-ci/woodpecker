@@ -13,6 +13,7 @@ WOODPECKER_OPEN=true
 ```
 
 You can **also restrict** registration, by keep registration closed and:
+
 - **adding** new **users manually** via the CLI: `woodpecker-cli user add`
 - allowing specific **admin users** via the `WOODPECKER_ADMIN` setting
 - by open registration and **filter by organization** membership through the `WOODPECKER_ORGS` setting
