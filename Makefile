@@ -213,8 +213,8 @@ release-server-xgo: check-xgo ## Create server binaries for release using xgo
 
 	CGO_CFLAGS="$(CGO_CFLAGS)" xgo -go $(XGO_VERSION) -dest ./dist/server/$(TARGETOS)-$(TARGETARCH_XGO) -tags 'netgo osusergo $(TAGS)' -ldflags '-linkmode external $(LDFLAGS)' -targets '$(TARGETOS)/$(TARGETARCH_XGO)' -out woodpecker-server -pkg cmd/server .
 	mkdir -p ./dist/server/$(TARGETOS)/$(TARGETARCH_BUILDX)
-	mv /build/woodpecker-server-$(TARGETOS)*-$(TARGETARCH_XGO)$(BIN_SUFFIX) ./dist/server/$(TARGETOS)/$(TARGETARCH_BUILDX)/woodpecker-server$(BIN_SUFFIX)
-	[ "${TARGZ}" -eq "1" ] && tar -cvzf dist/woodpecker-server_$(TARGETOS)_$(TARGETARCH_BUILDX).tar.gz -C dist/server/$(TARGETOS)/$(TARGETARCH_BUILDX) woodpecker-server$(BIN_SUFFIX) || echo "skip tar.gz binary"
+	mv /build/woodpecker-server-$(TARGETOS)*-$(TARGETARCH_XGO)$(BIN_SUFFIX) ./dist/server/$(TARGETOS)_$(TARGETARCH_BUILDX)/woodpecker-server$(BIN_SUFFIX)
+	[ "${TARGZ}" -eq "1" ] && tar -cvzf dist/woodpecker-server_$(TARGETOS)_$(TARGETARCH_BUILDX).tar.gz -C dist/server/$(TARGETOS)_$(TARGETARCH_BUILDX) woodpecker-server$(BIN_SUFFIX) || echo "skip tar.gz binary"
 
 release-server: ## Create server binaries for release
 	# compile
