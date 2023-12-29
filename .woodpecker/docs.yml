@@ -26,7 +26,7 @@ when:
   - event: tag
   - event: pull_request
   - event: push
-    path: [ *when_path, *docker_path ]
+    path: <<: [ *when_path, *docker_path ]
     branch:
       - ${CI_REPO_DEFAULT_BRANCH}
       - renovate/*
