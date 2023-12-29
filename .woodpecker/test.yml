@@ -25,7 +25,9 @@ steps:
     commands:
       - go mod vendor
     when:
-      - path: *when_path
+      - path:
+          - <<: *when_path
+          - '.woodpecker/**'
 
   lint-pipeline:
     depends_on:
@@ -130,8 +132,6 @@ steps:
     depends_on:
       - test
       - sqlite
-      - postgres
-      - mysql
     pull: true
     image: docker.io/woodpeckerci/plugin-codecov:2.1.2
     settings:
