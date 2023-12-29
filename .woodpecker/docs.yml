@@ -48,8 +48,6 @@ steps:
       path: 'docs/build/'
       surge_token:
         from_secret: SURGE_TOKEN
-      forge_type: github
-      forge_url: 'https://github.com'
       forge_repo_token:
         from_secret: GITHUB_TOKEN_SURGE
     failure: ignore
