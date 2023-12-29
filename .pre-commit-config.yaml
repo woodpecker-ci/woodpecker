@@ -6,8 +6,6 @@ repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0
     hooks:
-      - id: check-yaml
-        exclude: 'pipeline/frontend/yaml/linter/schema/.woodpecker/test-merge-map-and-sequence.yml'
       - id: end-of-file-fixer
       - id: trailing-whitespace
   - repo: https://github.com/golangci/golangci-lint
