@@ -13,6 +13,8 @@ when:
     branch:
       - ${CI_REPO_DEFAULT_BRANCH}
       - renovate/*
+  - event: pull_request_closed
+    path: *when_path
   - cron: update_docs
     event: cron
   - event: manual
@@ -43,21 +45,17 @@ steps:
       - event: [cron, manual]
 
   deploy-preview:
-    image: docker.io/woodpeckerci/plugin-surge-preview:1.2.2
+    image: docker.io/woodpeckerci/plugin-surge-preview:1.3.0
     settings:
       path: 'docs/build/'
       surge_token:
         from_secret: SURGE_TOKEN
-      forge_type: github
-      forge_url: 'https://github.com'
       forge_repo_token:
         from_secret: GITHUB_TOKEN_SURGE
     failure: ignore
     when:
-      event: pull_request
+      event: [pull_request, pull_request_closed]
       path: *when_path
-
-  # TODO: add step to remove preview again after PR is closed (waiting for #286)
 
   deploy:
     image: docker.io/alpine:3.19
