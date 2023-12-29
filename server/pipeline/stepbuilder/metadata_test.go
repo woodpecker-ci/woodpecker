@@ -12,44 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package frontend_test
+package stepbuilder
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/mocks"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
-
-func TestEnvVarSubst(t *testing.T) {
-	testCases := []struct {
-		name    string
-		yaml    string
-		environ map[string]string
-		want    string
-	}{{
-		name: "simple substitution",
-		yaml: `steps:
-		step1:
-			image: ${HELLO_IMAGE}`,
-		environ: map[string]string{"HELLO_IMAGE": "hello-world"},
-		want: `steps:
-		step1:
-			image: hello-world`,
-	}}
-
-	for _, testCase := range testCases {
-		t.Run(testCase.name, func(t *testing.T) {
-			result, err := frontend.EnvVarSubst(testCase.yaml, testCase.environ)
-			assert.NoError(t, err)
-			assert.EqualValues(t, testCase.want, result)
-		})
-	}
-}
 
 func TestMetadataFromStruct(t *testing.T) {
 	forge := mocks.NewForge(t)
@@ -125,7 +98,7 @@ func TestMetadataFromStruct(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			result := frontend.MetadataFromStruct(testCase.forge, testCase.repo, testCase.pipeline, testCase.last, testCase.workflow, testCase.sysURL)
+			result := MetadataFromStruct(testCase.forge, testCase.repo, testCase.pipeline, testCase.last, testCase.workflow, testCase.sysURL)
 			assert.EqualValues(t, testCase.expectedMetadata, result)
 			assert.EqualValues(t, testCase.expectedEnviron, result.Environ())
 		})

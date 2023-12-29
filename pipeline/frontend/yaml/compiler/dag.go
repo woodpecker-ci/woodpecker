@@ -105,6 +105,8 @@ func dfsVisit(steps map[string]*dagCompilerStep, name string, visited map[string
 		}
 	}
 
+	delete(visited, name)
+
 	return nil
 }
 
