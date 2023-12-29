@@ -22,7 +22,11 @@ linters-settings:
         list-mode: lax
         files:
           - '**/pipeline/**/*.go'
-          #- "**/pipeline/**/*.go"
+          - "**/pipeline/*.go"
+          - "!**/cli/pipeline/*.go"
+          - "!**/cli/pipeline/**/*.go"
+          - "!**/server/pipeline/*.go"
+          - "!**/server/pipeline/**/*.go"
         deny:
           - pkg: 'go.woodpecker-ci.org/woodpecker/v2/agent'
           - pkg: 'go.woodpecker-ci.org/woodpecker/v2/cli'
@@ -33,6 +37,9 @@ linters-settings:
         list-mode: lax
         files:
           - '**/shared/**/*.go'
+          - '**/shared/*.go'
+          - "!**/pipeline/shared/*.go"
+          - "!**/pipeline/shared/**/*.go"
         deny:
           - pkg: 'go.woodpecker-ci.org/woodpecker/v2/agent'
           - pkg: 'go.woodpecker-ci.org/woodpecker/v2/cli'
@@ -44,6 +51,7 @@ linters-settings:
         list-mode: lax
         files:
           - '**/woodpecker-go/woodpecker/**/*.go'
+          - '**/woodpecker-go/woodpecker/*.go'
         deny:
           - pkg: 'go.woodpecker-ci.org/woodpecker/v2/agent'
           - pkg: 'go.woodpecker-ci.org/woodpecker/v2/cli'
@@ -56,7 +64,9 @@ linters-settings:
         list-mode: lax
         files:
           - '**/agent/**/*.go'
+          - '**/agent/*.go'
           - '**/cmd/agent/**/*.go'
+          - '**/cmd/agent/*.go'
         deny:
           - pkg: 'go.woodpecker-ci.org/woodpecker/v2/cli'
           - pkg: 'go.woodpecker-ci.org/woodpecker/v2/server'
@@ -66,7 +76,9 @@ linters-settings:
         list-mode: lax
         files:
           - '**/cli/**/*.go'
+          - '**/cli/*.go'
           - '**/cmd/cli/**/*.go'
+          - '**/cmd/cli/*.go'
         deny:
           - pkg: 'go.woodpecker-ci.org/woodpecker/v2/agent'
           - pkg: 'go.woodpecker-ci.org/woodpecker/v2/server'
@@ -75,7 +87,9 @@ linters-settings:
         list-mode: lax
         files:
           - '**/server/**/*.go'
+          - '**/server/*.go'
           - '**/cmd/server/**/*.go'
+          - '**/cmd/server/*.go'
         deny:
           - pkg: 'go.woodpecker-ci.org/woodpecker/v2/agent'
           - pkg: 'go.woodpecker-ci.org/woodpecker/v2/cli'
@@ -104,7 +118,7 @@ linters:
     - depguard
 
 run:
-  timeout: 5m
+  timeout: 15m
 
 issues:
   exclude-rules:
