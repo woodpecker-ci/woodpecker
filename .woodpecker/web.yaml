@@ -25,7 +25,7 @@ steps:
 
   lint:
     depends_on:
-      - install_dependencies
+      - install-dependencies
     image: *node_image
     directory: web/
     commands:
@@ -35,7 +35,7 @@ steps:
 
   formatcheck:
     depends_on:
-      - install_dependencies
+      - install-dependencies
     image: *node_image
     directory: web/
     commands:
@@ -45,7 +45,7 @@ steps:
 
   typecheck:
     depends_on:
-      - install_dependencies
+      - install-dependencies
     image: *node_image
     directory: web/
     commands:
@@ -55,7 +55,7 @@ steps:
 
   test:
     depends_on:
-      - install_dependencies
+      - install-dependencies
     image: *node_image
     directory: web/
     commands:
