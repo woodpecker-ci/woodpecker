@@ -141,7 +141,7 @@ ui-dependencies: ## Install UI dependencies
 .PHONY: lint
 lint: install-tools ## Lint code
 	@echo "Running golangci-lint"
-	golangci-lint run --timeout 15m
+	golangci-lint run
 
 lint-ui: ## Lint UI code
 	(cd web/; pnpm install)
