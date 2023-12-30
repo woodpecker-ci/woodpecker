@@ -18,33 +18,40 @@ agent:
     [...]
 ```
 
-- `WOODPECKER_BACKEND_K8S_NAMESPACE` (default: `woodpecker`)
+### `WOODPECKER_BACKEND_K8S_NAMESPACE`
+> Default: `woodpecker`
 
-  The namespace to create worker pods in.
+The namespace to create worker pods in.
 
-- `WOODPECKER_BACKEND_K8S_VOLUME_SIZE` (default: `10G`)
+### `WOODPECKER_BACKEND_K8S_VOLUME_SIZE` 
+> Default: `10G`
 
-  The volume size of the pipeline volume.
+The volume size of the pipeline volume.
 
-- `WOODPECKER_BACKEND_K8S_STORAGE_CLASS` (default: empty)
+### `WOODPECKER_BACKEND_K8S_STORAGE_CLASS` 
+> Default: empty
 
-  The storage class to use for the pipeline volume.
+The storage class to use for the pipeline volume.
 
-- `WOODPECKER_BACKEND_K8S_STORAGE_RWX` (default: `true`)
+### `WOODPECKER_BACKEND_K8S_STORAGE_RWX` 
+> Default: `true`
 
-  Determines if `RWX` should be used for the pipeline volume's [access mode](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes). If false, `RWO` is used instead.
+Determines if `RWX` should be used for the pipeline volume's [access mode](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes). If false, `RWO` is used instead.
 
-- `WOODPECKER_BACKEND_K8S_POD_LABELS` (default: empty)
+### `WOODPECKER_BACKEND_K8S_POD_LABELS` 
+> Default: empty
 
-  Additional labels to apply to worker pods. Must be a YAML object, e.g. `{"example.com/test-label":"test-value"}`.
+Additional labels to apply to worker pods. Must be a YAML object, e.g. `{"example.com/test-label":"test-value"}`.
 
-- `WOODPECKER_BACKEND_K8S_POD_ANNOTATIONS` (default: empty)
+### `WOODPECKER_BACKEND_K8S_POD_ANNOTATIONS`  
+> Default: empty
 
-  Additional annotations to apply to worker pods. Must be a YAML object, e.g. `{"example.com/test-annotation":"test-value"}`.
+Additional annotations to apply to worker pods. Must be a YAML object, e.g. `{"example.com/test-annotation":"test-value"}`.
 
-- `WOODPECKER_BACKEND_K8S_SECCTX_NONROOT` (default: `false`)
+### `WOODPECKER_BACKEND_K8S_SECCTX_NONROOT` 
+Default: `false`
 
-  Determines if containers must be required to run as non-root users.
+Determines if containers must be required to run as non-root users.
 
 ## Job specific configuration
 
