@@ -4,10 +4,11 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@qwerty287, @andyhan, @renovate[bot], @xfix, @anbraten, @6543
+@6543, @qwerty287, @andyhan, @renovate[bot], @xfix, @anbraten
 
 ### 📚 Documentation
 
+- Update Owners 2024 [[#3075](https://github.com/woodpecker-ci/woodpecker/pull/3075)]
 - Add reviewdog golangci plugin [[#3080](https://github.com/woodpecker-ci/woodpecker/pull/3080)]
 - Add Codeberg Pages Deploy plugin to plugins list [[#3054](https://github.com/woodpecker-ci/woodpecker/pull/3054)]
 
