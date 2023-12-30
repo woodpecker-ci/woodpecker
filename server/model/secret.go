@@ -18,7 +18,6 @@ package model
 import (
 	"errors"
 	"fmt"
-	"path/filepath"
 	"regexp"
 	"sort"
 )
@@ -105,11 +104,11 @@ func (s Secret) IsRepository() bool {
 
 // Match returns true if an image and event match the restricted list.
 func (s *Secret) Match(event WebhookEvent) bool {
-	if len(s.Events) == 0 {
-		return true
+	if event == EventPullClosed {
+		event = EventPull
 	}
-	for _, pattern := range s.Events {
-		if match, _ := filepath.Match(string(pattern), string(event)); match {
+	for _, e := range s.Events {
+		if e == event {
 			return true
 		}
 	}
