@@ -494,7 +494,7 @@ Supported variables:
 - `owner`: the repo's owner
 - `repo`: the repo's name
 
-### WOODPECKER_ADDONS
+### `WOODPECKER_ADDONS`
 
 > Default: empty
 
