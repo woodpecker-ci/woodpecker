@@ -1,13 +1,14 @@
 # Changelog
 
-## [2.2.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.2.0) - 2023-12-29
+## [2.2.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.2.0) - 2023-12-30
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@qwerty287, @xfix, @anbraten, @6543
+@andyhan, @renovate[bot], @qwerty287, @xfix, @anbraten, @6543
 
 ### 🐛 Bug Fixes
 
+- Fix badge's repoUrl with rootpath [[#3076](https://github.com/woodpecker-ci/woodpecker/pull/3076)]
 - Load changed files for closed PR [[#3067](https://github.com/woodpecker-ci/woodpecker/pull/3067)]
 - Fix build output paths [[#3065](https://github.com/woodpecker-ci/woodpecker/pull/3065)]
 - Fix `when` and `depends_on` [[#3063](https://github.com/woodpecker-ci/woodpecker/pull/3063)]
@@ -26,6 +27,7 @@
 
 ### Misc
 
+- Update dependency @vitejs/plugin-vue to v5 [[#3074](https://github.com/woodpecker-ci/woodpecker/pull/3074)]
 - Use CI vars for plugin [[#3061](https://github.com/woodpecker-ci/woodpecker/pull/3061)]
 - Use `yamllint` [[#3066](https://github.com/woodpecker-ci/woodpecker/pull/3066)]
 - Use dag in ci config [[#3010](https://github.com/woodpecker-ci/woodpecker/pull/3010)]
