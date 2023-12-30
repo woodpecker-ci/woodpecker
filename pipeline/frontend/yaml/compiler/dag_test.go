@@ -82,9 +82,9 @@ func TestConvertDAGToStages(t *testing.T) {
 
 	steps = map[string]*dagCompilerStep{
 		"echo env": {
-			position:  0,
-			name:      "echo env",
-			group:     "",
+			position: 0,
+			name:     "echo env",
+			group:    "",
 			step: &backend_types.Step{
 				Name:  "test_step_0",
 				UUID:  "01HJDPEW6R7J0JBE3F1T7Q0TYX",
