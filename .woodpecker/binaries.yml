@@ -4,12 +4,12 @@ depends_on:
 
 # TODO: upload build artifacts for pushes to ${CI_REPO_DEFAULT_BRANCH}
 when:
-  event: tag
+  event: pull_request
 
 variables:
   - &golang_image 'docker.io/golang:1.21.5'
   - &node_image 'docker.io/node:21-alpine'
-  - &xgo_image 'docker.io/techknowlogick/xgo:arm-1.21.5'
+  - &xgo_image 'docker.io/pats22/xgo:go-1.21.4'
   - &xgo_version 'go-1.21.2'
 
 steps:
@@ -75,25 +75,25 @@ steps:
     commands:
       - make release-checksums
 
-  release-dryrun:
-    depends_on:
-      - checksums
-    image: *golang_image
-    commands:
-      - ls -la dist/*.*
-      - cat dist/checksums.txt
+  # release-dryrun:
+  #   depends_on:
+  #     - checksums
+  #   image: *golang_image
+  #   commands:
+  #     - ls -la dist/*.*
+  #     - cat dist/checksums.txt
 
-  release:
-    depends_on:
-      - checksums
-    image: docker.io/plugins/github-release
-    secrets:
-      - source: github_token
-        target: github_release_api_key
-    settings:
-      files:
-        - dist/*.tar.gz
-        - dist/*.deb
-        - dist/*.rpm
-        - dist/checksums.txt
-      title: ${CI_COMMIT_TAG##v}
+  # release:
+  #   depends_on:
+  #     - checksums
+  #   image: docker.io/plugins/github-release
+  #   secrets:
+  #     - source: github_token
+  #       target: github_release_api_key
+  #   settings:
+  #     files:
+  #       - dist/*.tar.gz
+  #       - dist/*.deb
+  #       - dist/*.rpm
+  #       - dist/checksums.txt
+  #     title: ${CI_COMMIT_TAG##v}
