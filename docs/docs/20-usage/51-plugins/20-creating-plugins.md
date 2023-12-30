@@ -38,7 +38,7 @@ steps:
           - 3
 ```
 
-Values like this are converted to JSON and then passed to your plugin. In the example above, the env value would be `{"abc": "2", "list": [ "2", "3" ]}`.
+Values like this are converted to JSON and then passed to your plugin. In the example above, the environment variable `PLUGIN_COMPLEX` would contain `{"abc": "2", "list": [ "2", "3" ]}`.
 
 ### Secrets
 
