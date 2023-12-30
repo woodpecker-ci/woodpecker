@@ -1,4 +1,5 @@
-import semver from 'semver';
+import semverGt from 'semver/functions/gt';
+import semverCoerce from 'semver/functions/coerce';
 import { onMounted, ref } from 'vue';
 
 import useAuthentication from './useAuthentication';
@@ -83,7 +84,7 @@ export function useVersion() {
       latest,
       current,
       currentShort: usesNext ? 'next' : current,
-      needsUpdate: latest !== undefined && latest !== null && semver.gt(latest, semver.coerce(current)),
+      needsUpdate: latest !== undefined && currentSemver !== null && semver.gt(latest, currentSemver),
       usesNext,
     };
   });
