@@ -24,6 +24,6 @@ import { pipelineStatusColors } from './pipeline-status';
 
 defineProps<{
   status: PipelineStatus;
-  service: boolean;
+  service?: boolean;
 }>();
 </script>
