@@ -12,7 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package yaml
+package metadata
 
-// Version of this package and it's subpackages
-const Version = 1
+import (
+	"fmt"
+	"strings"
+
+	"github.com/drone/envsubst"
+)
+
+func EnvVarSubst(yaml string, environ map[string]string) (string, error) {
+	return envsubst.Eval(yaml, func(name string) string {
+		env := environ[name]
+		if strings.Contains(env, "\n") {
+			env = fmt.Sprintf("%q", env)
+		}
+		return env
+	})
+}
