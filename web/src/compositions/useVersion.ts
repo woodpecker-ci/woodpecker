@@ -1,5 +1,5 @@
-import semverGt from 'semver/functions/gt';
 import semverCoerce from 'semver/functions/coerce';
+import semverGt from 'semver/functions/gt';
 import { onMounted, ref } from 'vue';
 
 import useAuthentication from './useAuthentication';
