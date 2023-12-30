@@ -4,10 +4,11 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@qwerty287, @6543, @andyhan, @renovate[bot], @xfix, @anbraten
+@6543, @qwerty287, @andyhan, @renovate[bot], @xfix, @anbraten
 
 ### 📈 Enhancement
 
+- use semver for version comparsion [[#3042](https://github.com/woodpecker-ci/woodpecker/pull/3042)]
 - Extend create plugin docs [[#3062](https://github.com/woodpecker-ci/woodpecker/pull/3062)]
 - Remove old files [[#3077](https://github.com/woodpecker-ci/woodpecker/pull/3077)]
 - Indicate if step is service [[#3078](https://github.com/woodpecker-ci/woodpecker/pull/3078)]
