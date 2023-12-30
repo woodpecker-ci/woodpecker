@@ -85,7 +85,6 @@ func TestConvertDAGToStages(t *testing.T) {
 			position:  0,
 			name:      "echo env",
 			group:     "",
-			dependsOn: []string{""},
 			step: &backend_types.Step{
 				Name:  "test_step_0",
 				UUID:  "01HJDPEW6R7J0JBE3F1T7Q0TYX",

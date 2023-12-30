@@ -97,9 +97,6 @@ func dfsVisit(steps map[string]*dagCompilerStep, name string, visited map[string
 	path = append(path, name)
 
 	for _, dep := range steps[name].dependsOn {
-		if dep == "" {
-			continue
-		}
 		if err := dfsVisit(steps, dep, visited, path); err != nil {
 			return err
 		}
@@ -117,9 +114,6 @@ func convertDAGToStages(steps map[string]*dagCompilerStep, prefix string) ([]*ba
 	for name, step := range steps {
 		// check if all depends_on are valid
 		for _, dep := range step.dependsOn {
-			if dep == "" {
-				continue
-			}
 			if _, ok := steps[dep]; !ok {
 				return nil, &ErrStepMissingDependency{name: name, dep: dep}
 			}
@@ -170,9 +164,6 @@ func convertDAGToStages(steps map[string]*dagCompilerStep, prefix string) ([]*ba
 
 func allDependenciesSatisfied(step *dagCompilerStep, addedSteps map[string]struct{}) bool {
 	for _, childName := range step.dependsOn {
-		if childName == "" {
-			continue
-		}
 		_, ok := addedSteps[childName]
 		if !ok {
 			return false
