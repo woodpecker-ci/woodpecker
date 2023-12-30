@@ -20,7 +20,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
 )
 
@@ -543,7 +542,7 @@ func TestConstraints(t *testing.T) {
 
 	for _, test := range testdata {
 		t.Run(test.desc, func(t *testing.T) {
-			conf, err := frontend.EnvVarSubst(test.conf, test.with.Environ())
+			conf, err := metadata.EnvVarSubst(test.conf, test.with.Environ())
 			assert.NoError(t, err)
 			c := parseConstraints(t, conf)
 			got, err := c.Match(test.with, false, test.env)
