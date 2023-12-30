@@ -36,6 +36,9 @@ var alterTableSecretsAddUserCol = xormigrate.Migration{
 		if err := sess.Sync(new(SecretV008)); err != nil {
 			return err
 		}
+		if _, err := sess.SQL(`UPDATE secrets SET secret_repo_id=0 WHERE secret_repo_id=NULL;`).Exec(); err != nil {
+			return err
+		}
 		if err := alterColumnDefault(sess, "secrets", "secret_repo_id", "0"); err != nil {
 			return err
 		}
