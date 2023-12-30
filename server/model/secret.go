@@ -103,6 +103,7 @@ func (s Secret) IsRepository() bool {
 }
 
 // Match returns true if an image and event match the restricted list.
+// Note that EventPullClosed are treated as EventPull.
 func (s *Secret) Match(event WebhookEvent) bool {
 	if event == EventPullClosed {
 		event = EventPull
