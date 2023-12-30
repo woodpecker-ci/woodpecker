@@ -159,6 +159,7 @@ steps:
     depends_on:
       - vendor
       - build-web
+      - cross-compile-server-preview
     image: *buildx_plugin
     settings:
       dry_run: true
@@ -175,6 +176,7 @@ steps:
     depends_on:
       - vendor
       - build-web
+      - cross-compile-server-preview
     image: *buildx_plugin
     settings:
       dry_run: true

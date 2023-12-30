@@ -12,29 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package frontend
+package stepbuilder
 
 import (
 	"fmt"
 	"net/url"
 	"strings"
 
-	"github.com/drone/envsubst"
-
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/version"
 )
-
-func EnvVarSubst(yaml string, environ map[string]string) (string, error) {
-	return envsubst.Eval(yaml, func(name string) string {
-		env := environ[name]
-		if strings.Contains(env, "\n") {
-			env = fmt.Sprintf("%q", env)
-		}
-		return env
-	})
-}
 
 // MetadataFromStruct return the metadata from a pipeline will run with.
 func MetadataFromStruct(forge metadata.ServerForge, repo *model.Repo, pipeline, last *model.Pipeline, workflow *model.Workflow, sysURL string) metadata.Metadata {
