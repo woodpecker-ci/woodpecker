@@ -20,7 +20,7 @@ import (
 	"path"
 	"strings"
 
-	"github.com/google/uuid"
+	"github.com/oklog/ulid/v2"
 
 	backend_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
@@ -31,7 +31,7 @@ import (
 
 func (c *Compiler) createProcess(name string, container *yaml_types.Container, stepType backend_types.StepType) (*backend_types.Step, error) {
 	var (
-		uuid = uuid.New()
+		uuid = ulid.Make()
 
 		detached   bool
 		workingdir string
@@ -53,6 +53,16 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		networks = append(networks, backend_types.Conn{
 			Name: network,
 		})
+	}
+
+	extraHosts := make([]backend_types.HostAlias, len(container.ExtraHosts))
+	for i, extraHost := range container.ExtraHosts {
+		name, ip, ok := strings.Cut(extraHost, ":")
+		if !ok {
+			return nil, &ErrExtraHostFormat{host: extraHost}
+		}
+		extraHosts[i].Name = name
+		extraHosts[i].IP = ip
 	}
 
 	var volumes []string
@@ -173,7 +183,7 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		WorkingDir:     workingdir,
 		Environment:    environment,
 		Commands:       container.Commands,
-		ExtraHosts:     container.ExtraHosts,
+		ExtraHosts:     extraHosts,
 		Volumes:        volumes,
 		Tmpfs:          container.Tmpfs,
 		Devices:        container.Devices,

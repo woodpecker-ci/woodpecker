@@ -1,7 +1,7 @@
 <template>
   <div v-if="branches" class="space-y-4">
     <ListItem
-      v-for="branch in branches"
+      v-for="branch in branchesWithDefaultBranchFirst"
       :key="branch"
       class="text-wp-text-100"
       :to="{ name: 'repo-branch', params: { branch } }"
@@ -13,7 +13,7 @@
 </template>
 
 <script lang="ts" setup>
-import { inject, Ref, watch } from 'vue';
+import { computed, inject, Ref, watch } from 'vue';
 
 import Badge from '~/components/atomic/Badge.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
@@ -37,6 +37,20 @@ async function loadBranches(page: number): Promise<string[]> {
 }
 
 const { resetPage, data: branches } = usePagination(loadBranches);
+
+const branchesWithDefaultBranchFirst = computed(() =>
+  branches.value.toSorted((a, b) => {
+    if (a === repo.value.default_branch) {
+      return -1;
+    }
+
+    if (b === repo.value.default_branch) {
+      return 1;
+    }
+
+    return 0;
+  }),
+);
 
 watch(repo, resetPage);
 </script>
