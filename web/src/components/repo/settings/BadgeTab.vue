@@ -90,7 +90,8 @@ const badgeUrl = computed(
   () => `${rootPath}/api/badges/${repo.value.id}/status.svg${branch.value !== '' ? `?branch=${branch.value}` : ''}`,
 );
 const repoUrl = computed(
-  () => `/repos/${repo.value.id}${branch.value !== '' ? `/branches/${encodeURIComponent(branch.value)}` : ''}`,
+  () =>
+    `${rootPath}/repos/${repo.value.id}${branch.value !== '' ? `/branches/${encodeURIComponent(branch.value)}` : ''}`,
 );
 
 const badgeContent = computed(() => {
