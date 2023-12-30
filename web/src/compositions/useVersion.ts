@@ -41,6 +41,7 @@ export function useVersion() {
 
   const config = useConfig();
   const current = config.version as string;
+  const currentSemver = semverCoerce(current);
   const usesNext = current.startsWith('next');
 
   const { user } = useAuthentication();
@@ -84,7 +85,7 @@ export function useVersion() {
       latest,
       current,
       currentShort: usesNext ? 'next' : current,
-      needsUpdate: latest !== undefined && currentSemver !== null && semver.gt(latest, currentSemver),
+      needsUpdate: latest !== undefined && currentSemver !== null && semverGt(latest, currentSemver),
       usesNext,
     };
   });
