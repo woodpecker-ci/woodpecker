@@ -1,0 +1,116 @@
+tasks:
+  - name: Server
+    env:
+      WOODPECKER_OPEN: true
+      WOODPECKER_ADMIN: woodpecker
+      WOODPECKER_HOST: http://host.docker.internal:8000
+      WOODPECKER_SECRET: '1234'
+      WOODPECKER_GITEA: true
+      WOODPECKER_DEV_WWW_PROXY: http://localhost:8010
+      WOODPECKER_BACKEND_DOCKER_NETWORK: ci_default
+    init: |
+      GO_VERSION=1.21.5
+      rm -rf ~/go
+      curl -fsSL https://dl.google.com/go/go$GO_VERSION.linux-amd64.tar.gz | tar xzs -C ~/
+      go mod tidy
+      mkdir -p web/dist
+      touch web/dist/index.html
+      make build-server
+    command: |
+      grep "WOODPECKER_GITEA_URL=" .env \
+        && sed "s,^WOODPECKER_GITEA_URL=.*,WOODPECKER_GITEA_URL=$(gp url 3000)," .env \
+        || echo WOODPECKER_GITEA_URL=$(gp url 3000) >> .env
+      grep "WOODPECKER_DEV_OAUTH_HOST=" .env \
+        && sed "s,^WOODPECKER_DEV_OAUTH_HOST=.*,WOODPECKER_DEV_OAUTH_HOST=$(gp url 8000)," .env \
+        || echo WOODPECKER_DEV_OAUTH_HOST=$(gp url 8000) >> .env
+      gp sync-await gitea
+      gp sync-done woodpecker-server
+      go run go.woodpecker-ci.org/woodpecker/v2/cmd/server
+  - name: Agent
+    env:
+      WOODPECKER_SERVER: localhost:9000
+      WOODPECKER_SECRET: '1234'
+      WOODPECKER_MAX_WORKFLOWS: 1
+      WOODPECKER_HEALTHCHECK: false
+    command: |
+      gp sync-await woodpecker-server
+      go run go.woodpecker-ci.org/woodpecker/v2/cmd/agent
+  - name: Gitea
+    command: |
+      export DOCKER_COMPOSE_CMD="docker-compose -f docker-compose.gitpod.yml -p woodpecker"
+      export GITEA_CLI_CMD="$DOCKER_COMPOSE_CMD exec -u git gitea gitea"
+      $DOCKER_COMPOSE_CMD up -d
+      until curl --output /dev/null --silent --head --fail http://localhost:3000; do printf '.'; sleep 1; done
+      $GITEA_CLI_CMD admin user create --username woodpecker --password password --email woodpecker@localhost --admin
+      export GITEA_TOKEN=$($GITEA_CLI_CMD admin user generate-access-token -u woodpecker --scopes repo,write:application --raw)
+      GITEA_OAUTH_APP=$(curl -X 'POST' 'http://localhost:3000/api/v1/user/applications/oauth2' \
+        -H 'accept: application/json' -H 'Content-Type: application/json' -H "Authorization: token ${GITEA_TOKEN}" \
+        -d "{ \"name\": \"Woodpecker CI\", \"confidential_client\": true, \"redirect_uris\": [ \"https://8000-${GITPOD_WORKSPACE_ID}.${GITPOD_WORKSPACE_CLUSTER_HOST}/authorize\" ] }")
+      grep "WOODPECKER_GITEA_CLIENT=" .env \
+        && sed "s,^WOODPECKER_GITEA_CLIENT=.*,WOODPECKER_GITEA_CLIENT=$(echo $GITEA_OAUTH_APP | jq -r .client_id)," .env \
+        || echo WOODPECKER_GITEA_CLIENT=$(echo $GITEA_OAUTH_APP | jq -r .client_id) >> .env
+      grep "WOODPECKER_GITEA_SECRET=" .env \
+        && sed "s,^WOODPECKER_GITEA_SECRET=.*,WOODPECKER_GITEA_SECRET=$(echo $GITEA_OAUTH_APP | jq -r .client_secret)," .env \
+        || echo WOODPECKER_GITEA_SECRET=$(echo $GITEA_OAUTH_APP | jq -r .client_secret) >> .env
+      curl -X 'POST' \
+        'http://localhost:3000/api/v1/user/repos' \
+        -H 'accept: application/json' \
+        -H 'Content-Type: application/json' \
+        -H "Authorization: token ${GITEA_TOKEN}" \
+        -d '{ "auto_init": false, "name": "woodpecker-test", "private": true, "template": false, "trust_model": "default" }'
+      cd contrib/woodpecker-test-repo
+      git init
+      git checkout -b main
+      git remote add origin http://woodpecker:${GITEA_TOKEN}@localhost:3000/woodpecker/woodpecker-test.git
+      git add .
+      git commit -m ":tada: Initial commit"
+      git push -u origin main
+      cd ../..
+      gp sync-done gitea
+      $DOCKER_COMPOSE_CMD logs -f
+  - name: App
+    before: |
+      cd web/
+    init: |
+      pnpm install
+    command: |
+      pnpm start
+  - name: Docs
+    before: |
+      cd docs/
+    init: |
+      pnpm install
+      pnpm build:woodpecker-plugins
+    command: |
+      pnpm start --port 4000
+
+ports:
+  - port: 3000
+    name: Gitea
+    onOpen: ignore
+    visibility: public # TODO: https://github.com/woodpecker-ci/woodpecker/issues/856
+  - port: 8000
+    name: Woodpecker
+    onOpen: notify
+    visibility: public # TODO: https://github.com/woodpecker-ci/woodpecker/issues/856
+  - port: 9000
+    name: Woodpecker GRPC
+    onOpen: ignore
+  - port: 8010
+    description: Do not use! Access woodpecker on port 8000
+    onOpen: ignore
+  - port: 4000
+    name: Docs
+    onOpen: notify
+
+vscode:
+  extensions:
+    - 'golang.go'
+    - 'EditorConfig.EditorConfig'
+    - 'dbaeumer.vscode-eslint'
+    - 'esbenp.prettier-vscode'
+    - 'voorjaar.windicss-intellisense'
+    - 'Vue.volar'
+    - 'redhat.vscode-yaml'
+    - 'davidanson.vscode-markdownlint'
+    - 'streetsidesoftware.code-spell-checker'
