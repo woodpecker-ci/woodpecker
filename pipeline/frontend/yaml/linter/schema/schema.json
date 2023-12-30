@@ -225,19 +225,7 @@
         },
         "event": {
           "description": "Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#event",
-          "default": [],
-          "oneOf": [
-            {
-              "type": "array",
-              "minLength": 1,
-              "items": {
-                "$ref": "#/definitions/event_enum"
-              }
-            },
-            {
-              "$ref": "#/definitions/event_enum"
-            }
-          ]
+          "$ref": "#/definitions/constraint_list"
         },
         "ref": {
           "description": "Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#ref",
