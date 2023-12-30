@@ -8,6 +8,7 @@
 
 ### 📈 Enhancement
 
+- Extend create plugin docs [[#3062](https://github.com/woodpecker-ci/woodpecker/pull/3062)]
 - Remove old files [[#3077](https://github.com/woodpecker-ci/woodpecker/pull/3077)]
 - Indicate if step is service [[#3078](https://github.com/woodpecker-ci/woodpecker/pull/3078)]
 - Add imports checks to linter [[#3056](https://github.com/woodpecker-ci/woodpecker/pull/3056)]
