@@ -225,7 +225,19 @@
         },
         "event": {
           "description": "Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#event",
-          "$ref": "#/definitions/constraint_list"
+          "default": [],
+          "oneOf": [
+            {
+              "type": "array",
+              "minLength": 1,
+              "items": {
+                "$ref": "#/definitions/event_enum"
+              }
+            },
+            {
+              "$ref": "#/definitions/event_enum"
+            }
+          ]
         },
         "ref": {
           "description": "Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#ref",
@@ -382,18 +394,7 @@
         },
         "event": {
           "description": "Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#event",
-          "oneOf": [
-            {
-              "type": "array",
-              "minLength": 1,
-              "items": {
-                "$ref": "#/definitions/event_enum"
-              }
-            },
-            {
-              "$ref": "#/definitions/event_enum"
-            }
-          ]
+          "$ref": "#/definitions/event_constraint_list"
         },
         "ref": {
           "description": "Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#ref",
@@ -482,6 +483,54 @@
     },
     "event_enum": {
       "enum": ["push", "pull_request", "pull_request_closed", "tag", "deployment", "cron", "manual"]
+    },
+    "event_constraint_list": {
+      "oneOf": [
+        {
+          "$ref": "#/definitions/event_enum"
+        },
+        {
+          "type": "array",
+          "minLength": 1,
+          "items": {
+            "$ref": "#/definitions/event_enum"
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "include": {
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/event_enum"
+                },
+                {
+                  "type": "array",
+                  "minLength": 1,
+                  "items": {
+                    "$ref": "#/definitions/event_enum"
+                  }
+                }
+              ]
+            },
+            "exclude": {
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/event_enum"
+                },
+                {
+                  "type": "array",
+                  "minLength": 1,
+                  "items": {
+                    "$ref": "#/definitions/event_enum"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ]
     },
     "constraint_list": {
       "oneOf": [
