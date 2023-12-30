@@ -112,7 +112,7 @@ steps:
     image: *golang_image
     environment:
       - WOODPECKER_DATABASE_DRIVER=postgres
-      - WOODPECKER_DATABASE_DATASOURCE=host=service-postgres user=postgres dbname=postgres sslmode=disable
+      - WOODPECKER_DATABASE_DATASOURCE=host=postgres user=postgres dbname=postgres sslmode=disable
     commands:
       - make test-server-datastore
     when: *when
@@ -123,7 +123,7 @@ steps:
     image: *golang_image
     environment:
       - WOODPECKER_DATABASE_DRIVER=mysql
-      - WOODPECKER_DATABASE_DATASOURCE=root@tcp(service-mysql:3306)/test?parseTime=true
+      - WOODPECKER_DATABASE_DATASOURCE=root@tcp(mysql:3306)/test?parseTime=true
     commands:
       - make test-server-datastore
     when: *when
@@ -148,7 +148,7 @@ steps:
     failure: ignore
 
 services:
-  service-postgres:
+  postgres:
     image: docker.io/postgres:16
     ports: ['5432']
     environment:
@@ -156,7 +156,7 @@ services:
       - POSTGRES_HOST_AUTH_METHOD=trust
     when: *when
 
-  service-mysql:
+  mysql:
     image: docker.io/mysql:8.2.0
     ports: ['3306']
     environment:
