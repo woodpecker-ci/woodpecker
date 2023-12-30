@@ -4,20 +4,21 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @qwerty287, @andyhan, @renovate[bot], @xfix, @anbraten
+@qwerty287, @6543, @andyhan, @renovate[bot], @xfix, @anbraten
+
+### 📈 Enhancement
+
+- Remove old files [[#3077](https://github.com/woodpecker-ci/woodpecker/pull/3077)]
+- Indicate if step is service [[#3078](https://github.com/woodpecker-ci/woodpecker/pull/3078)]
+- Add imports checks to linter [[#3056](https://github.com/woodpecker-ci/woodpecker/pull/3056)]
+- Remove workflow version again [[#3052](https://github.com/woodpecker-ci/woodpecker/pull/3052)]
+- Add option to disable version check in admin web UI [[#3040](https://github.com/woodpecker-ci/woodpecker/pull/3040)]
 
 ### 📚 Documentation
 
 - Update Owners 2024 [[#3075](https://github.com/woodpecker-ci/woodpecker/pull/3075)]
 - Add reviewdog golangci plugin [[#3080](https://github.com/woodpecker-ci/woodpecker/pull/3080)]
 - Add Codeberg Pages Deploy plugin to plugins list [[#3054](https://github.com/woodpecker-ci/woodpecker/pull/3054)]
-
-### 📈 Enhancement
-
-- Indicate if step is service [[#3078](https://github.com/woodpecker-ci/woodpecker/pull/3078)]
-- Add imports checks to linter [[#3056](https://github.com/woodpecker-ci/woodpecker/pull/3056)]
-- Remove workflow version again [[#3052](https://github.com/woodpecker-ci/woodpecker/pull/3052)]
-- Add option to disable version check in admin web UI [[#3040](https://github.com/woodpecker-ci/woodpecker/pull/3040)]
 
 ### 🐛 Bug Fixes
 
