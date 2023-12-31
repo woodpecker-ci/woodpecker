@@ -4,6 +4,11 @@
 The local backend will execute the pipelines on the local system without any isolation of any kind.
 :::
 
+:::note
+Currently we do not support services for this backend.
+[Read more here](https://github.com/woodpecker-ci/woodpecker/issues/3095).
+:::
+
 Since the code runs directly in the same context as the agent (same user, same
 filesystem), a malicious pipeline could be used to access the agent
 configuration especially the `WOODPECKER_AGENT_SECRET` variable.
