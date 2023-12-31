@@ -18,14 +18,14 @@ You can **also restrict** registration, by keep registration closed and:
 - allowing specific **admin users** via the `WOODPECKER_ADMIN` setting
 - by open registration and **filter by organization** membership through the `WOODPECKER_ORGS` setting
 
-### To close registration, but allow specific admin users
+### Close registration, but allow specific admin users
 
 ```ini
 WOODPECKER_OPEN=false
 WOODPECKER_ADMIN=johnsmith,janedoe
 ```
 
-### To only allow registration of users, who are members of approved organizations
+### Only allow registration of users, who are members of approved organizations
 
 ```ini
 WOODPECKER_OPEN=true
