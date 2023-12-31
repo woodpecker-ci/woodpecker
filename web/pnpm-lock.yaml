@@ -38,6 +38,9 @@ dependencies:
   prismjs:
     specifier: ^1.29.0
     version: 1.29.0
+  semver:
+    specifier: ^7.5.4
+    version: 7.5.4
   vue:
     specifier: ^3.3.4
     version: 3.3.10(typescript@5.3.3)
@@ -64,6 +67,9 @@ devDependencies:
   '@types/prismjs':
     specifier: ^1.26.0
     version: 1.26.3
+  '@types/semver':
+    specifier: ^7.5.6
+    version: 7.5.6
   '@typescript-eslint/eslint-plugin':
     specifier: ^6.8.0
     version: 6.13.2(@typescript-eslint/parser@6.13.2)(eslint@8.55.0)(typescript@5.3.3)
