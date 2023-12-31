@@ -34,7 +34,6 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cmd/common"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc/proto"
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/cron"
@@ -49,13 +48,14 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 	"go.woodpecker-ci.org/woodpecker/v2/server/web"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/logger"
 	"go.woodpecker-ci.org/woodpecker/v2/version"
 	// "go.woodpecker-ci.org/woodpecker/v2/server/plugins/encryption"
 	// encryptedStore "go.woodpecker-ci.org/woodpecker/v2/server/plugins/encryption/wrapper/store"
 )
 
 func run(c *cli.Context) error {
-	common.SetupGlobalLogger(c, true)
+	logger.SetupGlobalLogger(c, true)
 
 	// set gin mode based on log level
 	if zerolog.GlobalLevel() > zerolog.DebugLevel {
