@@ -27,6 +27,14 @@ steps:
     when:
       event: [push, pull_request, tag, deployment]
 
+  when-event-exclude-pull_request_closed:
+    image: alpine
+    commands:
+      - echo "test"
+    when:
+      event:
+        exclude: pull_request_closed
+
   when-ref:
     image: alpine
     commands:
