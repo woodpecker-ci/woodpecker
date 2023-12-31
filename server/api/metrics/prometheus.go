@@ -26,7 +26,7 @@ import (
 )
 
 // errInvalidToken is returned when the api request token is invalid.
-var errInvalidToken = errors.New("invalid or missing token")
+var errInvalidToken = errors.New("Invalid or missing token")
 
 // PromHandler will pass the call from /api/metrics/prometheus to prometheus
 func PromHandler() gin.HandlerFunc {
