@@ -9,6 +9,8 @@ authors:
 hide_table_of_contents: false
 ---
 
+<!--truncate-->
+
 A typical CI pipeline contains steps such as: _clone_, _build_, _test_, _package_ and _push_. The final build product may be artifacts pushed to a git repository or a docker container pushed to a container registry.
 
 When these should be deployed on an app server, the pipeline should include a _deploy_ step, which represents the "CD" in CI/CD - the automatic deployment of a pipeline's final product.
