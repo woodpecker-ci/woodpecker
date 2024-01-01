@@ -4,10 +4,11 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@anbraten, @qwerty287, @6543, @andyhan, @renovate[bot], @xfix
+@qwerty287, @anbraten, @6543, @andyhan, @renovate[bot], @xfix
 
 ### 🐛 Bug Fixes
 
+- Fix step `depends_on` as string in schema [[#3099](https://github.com/woodpecker-ci/woodpecker/pull/3099)]
 - Fix slice unmarshaling [[#3097](https://github.com/woodpecker-ci/woodpecker/pull/3097)]
 - Allow PR secrets to be used on close [[#3084](https://github.com/woodpecker-ci/woodpecker/pull/3084)]
 - make event in pipeline schema also a constraint_list [[#3082](https://github.com/woodpecker-ci/woodpecker/pull/3082)]
