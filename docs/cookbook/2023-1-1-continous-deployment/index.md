@@ -21,7 +21,7 @@ The final step in your pipeline could SSH into the app server and run a deployme
 
 One of the benefits would be that the deployment script's output could be included in the pipeline's log. However in general, this is a complicated option as it tightly couples the CI and app servers.
 
-An SSH step could be written by using an plugin, like [ssh](https://plugins.drone.io/plugins/ssh) or [git push](https://woodpecker-ci.org/plugins/Git%20Push).
+An SSH step could be written by using a plugin, like [ssh](https://plugins.drone.io/plugins/ssh) or [git push](https://woodpecker-ci.org/plugins/Git%20Push).
 
 ## Polling for asset changes
 
