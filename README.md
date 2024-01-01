@@ -54,7 +54,7 @@ Woodpecker is a simple yet powerful CI/CD engine with great extensibility.
 
 Please consider donating and become a backer. 🙏 [[Become a backer](https://opencollective.com/woodpecker-ci#category-CONTRIBUTE)]
 
-<a href="https://opencollective.com/woodpecker-ci" target="_blank"><img src="https://opencollective.com/woodpecker-ci/backers.svg?width=890"></a>
+<a href="https://opencollective.com/woodpecker-ci" target="_blank"><img src="https://opencollective.com/woodpecker-ci/backers.svg?width=890" alt="Open Collective backers"></a>
 
 ## 📖 Documentation
 
