@@ -351,11 +351,11 @@
               "type": "array",
               "minLength": 1,
               "items": {
-                "type": "string",
+                "type": "string"
               }
             },
             {
-              "type": "string",
+              "type": "string"
             }
           ]
         },
