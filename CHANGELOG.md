@@ -4,7 +4,19 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@qwerty287, @6543, @andyhan, @renovate[bot], @xfix, @anbraten
+@anbraten, @qwerty287, @6543, @andyhan, @renovate[bot], @xfix
+
+### 🐛 Bug Fixes
+
+- Fix slice unmarshaling [[#3097](https://github.com/woodpecker-ci/woodpecker/pull/3097)]
+- Allow PR secrets to be used on close [[#3084](https://github.com/woodpecker-ci/woodpecker/pull/3084)]
+- make event in pipeline schema also a constraint_list [[#3082](https://github.com/woodpecker-ci/woodpecker/pull/3082)]
+- Fix badge's repoUrl with rootpath [[#3076](https://github.com/woodpecker-ci/woodpecker/pull/3076)]
+- Load changed files for closed PR [[#3067](https://github.com/woodpecker-ci/woodpecker/pull/3067)]
+- Fix build output paths [[#3065](https://github.com/woodpecker-ci/woodpecker/pull/3065)]
+- Fix `when` and `depends_on` [[#3063](https://github.com/woodpecker-ci/woodpecker/pull/3063)]
+- Fix DAG cycle detection [[#3049](https://github.com/woodpecker-ci/woodpecker/pull/3049)]
+- Fix duplicated icons [[#3045](https://github.com/woodpecker-ci/woodpecker/pull/3045)]
 
 ### 📈 Enhancement
 
@@ -16,17 +28,6 @@
 - Add imports checks to linter [[#3056](https://github.com/woodpecker-ci/woodpecker/pull/3056)]
 - Remove workflow version again [[#3052](https://github.com/woodpecker-ci/woodpecker/pull/3052)]
 - Add option to disable version check in admin web UI [[#3040](https://github.com/woodpecker-ci/woodpecker/pull/3040)]
-
-### 🐛 Bug Fixes
-
-- Allow PR secrets to be used on close [[#3084](https://github.com/woodpecker-ci/woodpecker/pull/3084)]
-- make event in pipeline schema also a constraint_list [[#3082](https://github.com/woodpecker-ci/woodpecker/pull/3082)]
-- Fix badge's repoUrl with rootpath [[#3076](https://github.com/woodpecker-ci/woodpecker/pull/3076)]
-- Load changed files for closed PR [[#3067](https://github.com/woodpecker-ci/woodpecker/pull/3067)]
-- Fix build output paths [[#3065](https://github.com/woodpecker-ci/woodpecker/pull/3065)]
-- Fix `when` and `depends_on` [[#3063](https://github.com/woodpecker-ci/woodpecker/pull/3063)]
-- Fix DAG cycle detection [[#3049](https://github.com/woodpecker-ci/woodpecker/pull/3049)]
-- Fix duplicated icons [[#3045](https://github.com/woodpecker-ci/woodpecker/pull/3045)]
 
 ### 📚 Documentation
 
