@@ -13,7 +13,7 @@ repos:
     hooks:
       - id: golangci-lint
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.37.0
+    rev: v0.38.0
     hooks:
       - id: markdownlint
         exclude: '^docs/versioned_docs/.*$'
@@ -31,7 +31,7 @@ repos:
     hooks:
       - id: prettier
   - repo: https://github.com/adrienverge/yamllint.git
-    rev: v1.32.0
+    rev: v1.33.0
     hooks:
       - id: yamllint
         args: [--strict, -c=.yamllint.yaml]
