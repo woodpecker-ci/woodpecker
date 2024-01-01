@@ -1,6 +1,15 @@
-# Continuous Deployment
+---
+title: Continuous Deployment
+description: Deploy your artifacts to an app server
+slug: continuous-deployment
+authors:
+  - name: lonix1
+    url: https://github.com/lonix1
+    image_url: https://github.com/lonix1.png
+hide_table_of_contents: false
+---
 
-A typical CI pipeline contains steps such as: _clone_, _build_, _test_, _package_ and _push_. The final build product may be binaries pushed to a git repository or a docker container pushed to a container registry.
+A typical CI pipeline contains steps such as: _clone_, _build_, _test_, _package_ and _push_. The final build product may be artifacts pushed to a git repository or a docker container pushed to a container registry.
 
 When these should be deployed on an app server, the pipeline should include a _deploy_ step, which represents the "CD" in CI/CD - the automatic deployment of a pipeline's final product.
 
@@ -32,7 +41,7 @@ This option is complex and only suitable in an environment in which you're alrea
 
 ## Using webhooks (recommended)
 
-If your forge (Github, Gitlab, Gitea, etc.) supports webhooks, then you could create a separate listening app that receives a webhook when new assets are available and redeploys your app.
+If your forge (GitHub, GitLab, Gitea, etc.) supports webhooks, then you could create a separate listening app that receives a webhook when new assets are available and redeploys your app.
 
 The listening "app" can be something as simple as a PHP script.
 
