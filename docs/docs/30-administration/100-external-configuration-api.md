@@ -13,9 +13,7 @@ You need to trust the external config service as it is getting secret informatio
 
 ## Config
 
-```ini
-# Server
-# ...
+```ini title="Server"
 WOODPECKER_CONFIG_SERVICE_ENDPOINT=https://example.com/ciconfig
 ```
 
