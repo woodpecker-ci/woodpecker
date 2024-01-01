@@ -76,7 +76,7 @@ import (
 
 var Type = addon_types.TypeForge
 
-func Addon(logger zerolog.Logger, env []string) (forge.Forge, error) {
+func Addon(logger zerolog.Logger) (forge.Forge, error) {
   logger.Info().Msg("hello world from addon")
   return &config{l: logger}, nil
 }
