@@ -52,6 +52,7 @@ func (g *GitLab) convertGitLabRepo(_repo *gitlab.Project) (*model.Repo, error) {
 			Push:  isWrite(_repo),
 			Admin: isAdmin(_repo),
 		},
+		PREnabled: _repo.MergeRequestsEnabled,
 	}
 
 	if len(repo.Avatar) != 0 && !strings.HasPrefix(repo.Avatar, "http") {
@@ -110,6 +111,9 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 	}
 
 	pipeline.Event = model.EventPull
+	if obj.State == "closed" {
+		pipeline.Event = model.EventPullClosed
+	}
 
 	lastCommit := obj.LastCommit
 

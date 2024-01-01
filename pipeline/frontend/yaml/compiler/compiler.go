@@ -233,10 +233,9 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 		config.Stages = append(config.Stages, stage)
 	}
 
-	// add pipeline steps. 1 pipeline step per stage, at the moment
-	var stage *backend_types.Stage
-	var group string
-	for i, container := range conf.Steps.ContainerList {
+	// add pipeline steps
+	steps := make([]*dagCompilerStep, 0, len(conf.Steps.ContainerList))
+	for pos, container := range conf.Steps.ContainerList {
 		// Skip if local and should not run local
 		if c.local && !container.When.IsLocal() {
 			continue
@@ -248,16 +247,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			return nil, err
 		}
 
-		if stage == nil || group != container.Group || container.Group == "" {
-			group = container.Group
-
-			stage = new(backend_types.Stage)
-			stage.Name = fmt.Sprintf("%s_stage_%v", c.prefix, i)
-			stage.Alias = container.Name
-			config.Stages = append(config.Stages, stage)
-		}
-
-		name := fmt.Sprintf("%s_step_%d", c.prefix, i)
+		name := fmt.Sprintf("%s_step_%d", c.prefix, pos)
 		stepType := backend_types.StepTypeCommands
 		if container.IsPlugin() {
 			stepType = backend_types.StepTypePlugin
@@ -274,8 +264,22 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			}
 		}
 
-		stage.Steps = append(stage.Steps, step)
+		steps = append(steps, &dagCompilerStep{
+			step:      step,
+			position:  pos,
+			name:      container.Name,
+			group:     container.Group,
+			dependsOn: container.DependsOn,
+		})
 	}
+
+	// generate stages out of steps
+	stepStages, err := newDAGCompiler(steps, c.prefix).compile()
+	if err != nil {
+		return nil, err
+	}
+
+	config.Stages = append(config.Stages, stepStages...)
 
 	err = c.setupCacheRebuild(conf, config)
 	if err != nil {

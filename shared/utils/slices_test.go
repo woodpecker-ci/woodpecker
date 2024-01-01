@@ -58,3 +58,13 @@ func TestEqualSliceValues(t *testing.T) {
 	assert.True(t, EqualSliceValues([]bool{true, false, false}, []bool{false, false, true}))
 	assert.False(t, EqualSliceValues([]bool{true, false, false}, []bool{true, false, true}))
 }
+
+func TestSliceToBoolMap(t *testing.T) {
+	assert.Equal(t, map[string]bool{
+		"a": true,
+		"b": true,
+		"c": true,
+	}, SliceToBoolMap([]string{"a", "b", "c"}))
+	assert.Equal(t, map[string]bool{}, SliceToBoolMap([]string{}))
+	assert.Equal(t, map[string]bool{}, SliceToBoolMap([]string{""}))
+}
