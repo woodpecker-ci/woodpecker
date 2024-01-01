@@ -149,3 +149,22 @@ func TestConvertDAGToStages(t *testing.T) {
 		}},
 	}}, stages)
 }
+
+func TestIsDag(t *testing.T) {
+	steps := []*dagCompilerStep{
+		{
+			step: &backend_types.Step{},
+		},
+	}
+	c := newDAGCompiler(steps, "")
+	assert.False(t, c.isDAG())
+
+	steps = []*dagCompilerStep{
+		{
+			step:      &backend_types.Step{},
+			dependsOn: []string{},
+		},
+	}
+	c = newDAGCompiler(steps, "")
+	assert.True(t, c.isDAG())
+}
