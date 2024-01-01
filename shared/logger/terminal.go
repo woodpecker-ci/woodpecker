@@ -12,7 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package yaml
+package logger
 
-// Version of this package and it's subpackages
-const Version = 1
+import (
+	"os"
+
+	"golang.org/x/term"
+)
+
+// isInteractiveTerminal checks if the output is piped, but NOT if the session is run interactively.
+func isInteractiveTerminal() bool {
+	return term.IsTerminal(int(os.Stdout.Fd()))
+}

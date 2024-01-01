@@ -12,7 +12,7 @@ ENV XDG_CACHE_HOME=/var/lib/woodpecker
 ENV XDG_DATA_HOME=/var/lib/woodpecker
 EXPOSE 8000 9000 80 443
 
-COPY dist/server/${TARGETOS}/${TARGETARCH}/woodpecker-server /bin/
+COPY dist/server/${TARGETOS}_${TARGETARCH}/woodpecker-server /bin/
 
 HEALTHCHECK CMD ["/bin/woodpecker-server", "ping"]
 ENTRYPOINT ["/bin/woodpecker-server"]
