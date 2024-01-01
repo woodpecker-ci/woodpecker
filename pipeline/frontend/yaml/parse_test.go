@@ -268,3 +268,38 @@ steps:
     when:
       event: success
 `
+
+var sampleSliceYaml = `
+steps:
+  nil_slice:
+    image: plugins/slack
+  empty_slice:
+    image: plugins/slack
+    depends_on: []
+`
+
+func TestSlice(t *testing.T) {
+	g := goblin.Goblin(t)
+
+	g.Describe("Parser", func() {
+		g.It("should marshal a not set slice to nil", func() {
+			out, err := ParseString(sampleSliceYaml)
+			if err != nil {
+				g.Fail(err)
+			}
+
+			g.Assert(out.Steps.ContainerList[0].DependsOn).IsNil()
+			g.Assert(len(out.Steps.ContainerList[0].DependsOn)).Equal(0)
+		})
+
+		g.It("should marshal an empty slice", func() {
+			out, err := ParseString(sampleSliceYaml)
+			if err != nil {
+				g.Fail(err)
+			}
+
+			g.Assert(out.Steps.ContainerList[1].DependsOn).IsNotNil()
+			g.Assert(len(out.Steps.ContainerList[1].DependsOn)).Equal(0)
+		})
+	})
+}
