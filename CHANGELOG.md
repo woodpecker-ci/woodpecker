@@ -1,10 +1,10 @@
 # Changelog
 
-## [2.2.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.2.0) - 2024-01-01
+## [2.2.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.2.0) - 2024-01-02
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@qwerty287, @anbraten, @6543, @andyhan, @renovate[bot], @xfix
+@pre-commit-ci[bot], @qwerty287, @anbraten, @6543, @andyhan, @renovate[bot], @xfix
 
 ### 🐛 Bug Fixes
 
@@ -39,6 +39,7 @@
 
 ### Misc
 
+- [pre-commit.ci] pre-commit autoupdate [[#3101](https://github.com/woodpecker-ci/woodpecker/pull/3101)]
 - Update dependency @vitejs/plugin-vue to v5 [[#3074](https://github.com/woodpecker-ci/woodpecker/pull/3074)]
 - Use CI vars for plugin [[#3061](https://github.com/woodpecker-ci/woodpecker/pull/3061)]
 - Use `yamllint` [[#3066](https://github.com/woodpecker-ci/woodpecker/pull/3066)]
