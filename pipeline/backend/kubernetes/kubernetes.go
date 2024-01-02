@@ -92,6 +92,11 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 					RunAsNonRoot: c.Bool("backend-k8s-secctx-nonroot"),
 				},
 			}
+			// TODO: remove in next major
+			if len(config.ImagePullSecretNames) == 0 {
+				log.Warn().Msgf("WOODPECKER_BACKEND_K8S_PULL_SECRET_NAMES is not set, using 'regcred'. It will be removed in next major. Set it explicitly before.")
+				config.ImagePullSecretNames = []string{"regcred"}
+			}
 			// Unmarshal label and annotation settings here to ensure they're valid on startup
 			if labels := c.String("backend-k8s-pod-labels"); labels != "" {
 				if err := yaml.Unmarshal([]byte(labels), &config.PodLabels); err != nil {
