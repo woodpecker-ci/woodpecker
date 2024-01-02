@@ -4,7 +4,15 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@pre-commit-ci[bot], @qwerty287, @anbraten, @6543, @andyhan, @renovate[bot], @xfix
+@lafriks, @pre-commit-ci[bot], @qwerty287, @anbraten, @6543, @andyhan, @renovate[bot], @xfix
+
+### 📚 Documentation
+
+- Add Reviewdog ESLint plugin [[#3102](https://github.com/woodpecker-ci/woodpecker/pull/3102)]
+- Mark local backend as stable [[#3088](https://github.com/woodpecker-ci/woodpecker/pull/3088)]
+- Update Owners 2024 [[#3075](https://github.com/woodpecker-ci/woodpecker/pull/3075)]
+- Add reviewdog golangci plugin [[#3080](https://github.com/woodpecker-ci/woodpecker/pull/3080)]
+- Add Codeberg Pages Deploy plugin to plugins list [[#3054](https://github.com/woodpecker-ci/woodpecker/pull/3054)]
 
 ### 🐛 Bug Fixes
 
@@ -29,13 +37,6 @@
 - Add imports checks to linter [[#3056](https://github.com/woodpecker-ci/woodpecker/pull/3056)]
 - Remove workflow version again [[#3052](https://github.com/woodpecker-ci/woodpecker/pull/3052)]
 - Add option to disable version check in admin web UI [[#3040](https://github.com/woodpecker-ci/woodpecker/pull/3040)]
-
-### 📚 Documentation
-
-- Mark local backend as stable [[#3088](https://github.com/woodpecker-ci/woodpecker/pull/3088)]
-- Update Owners 2024 [[#3075](https://github.com/woodpecker-ci/woodpecker/pull/3075)]
-- Add reviewdog golangci plugin [[#3080](https://github.com/woodpecker-ci/woodpecker/pull/3080)]
-- Add Codeberg Pages Deploy plugin to plugins list [[#3054](https://github.com/woodpecker-ci/woodpecker/pull/3054)]
 
 ### Misc
 
