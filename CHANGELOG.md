@@ -4,10 +4,23 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@lafriks, @pre-commit-ci[bot], @qwerty287, @anbraten, @6543, @andyhan, @renovate[bot], @xfix
+@qwerty287, @lukashass, @lafriks, @pre-commit-ci[bot], @anbraten, @6543, @andyhan, @renovate[bot], @xfix
+
+### 📈 Enhancement
+
+- Remove env argument of addons [[#3100](https://github.com/woodpecker-ci/woodpecker/pull/3100)]
+- Move `cmd/common` to `shared` [[#3092](https://github.com/woodpecker-ci/woodpecker/pull/3092)]
+- use semver for version comparsion [[#3042](https://github.com/woodpecker-ci/woodpecker/pull/3042)]
+- Extend create plugin docs [[#3062](https://github.com/woodpecker-ci/woodpecker/pull/3062)]
+- Remove old files [[#3077](https://github.com/woodpecker-ci/woodpecker/pull/3077)]
+- Indicate if step is service [[#3078](https://github.com/woodpecker-ci/woodpecker/pull/3078)]
+- Add imports checks to linter [[#3056](https://github.com/woodpecker-ci/woodpecker/pull/3056)]
+- Remove workflow version again [[#3052](https://github.com/woodpecker-ci/woodpecker/pull/3052)]
+- Add option to disable version check in admin web UI [[#3040](https://github.com/woodpecker-ci/woodpecker/pull/3040)]
 
 ### 📚 Documentation
 
+- Use WOODPECKER_AGENT_SECRET instead of deprecated alternative [[#3103](https://github.com/woodpecker-ci/woodpecker/pull/3103)]
 - Add Reviewdog ESLint plugin [[#3102](https://github.com/woodpecker-ci/woodpecker/pull/3102)]
 - Mark local backend as stable [[#3088](https://github.com/woodpecker-ci/woodpecker/pull/3088)]
 - Update Owners 2024 [[#3075](https://github.com/woodpecker-ci/woodpecker/pull/3075)]
@@ -16,6 +29,7 @@
 
 ### 🐛 Bug Fixes
 
+- Pin Gitea version [[#3104](https://github.com/woodpecker-ci/woodpecker/pull/3104)]
 - Fix step `depends_on` as string in schema [[#3099](https://github.com/woodpecker-ci/woodpecker/pull/3099)]
 - Fix slice unmarshaling [[#3097](https://github.com/woodpecker-ci/woodpecker/pull/3097)]
 - Allow PR secrets to be used on close [[#3084](https://github.com/woodpecker-ci/woodpecker/pull/3084)]
@@ -26,17 +40,6 @@
 - Fix `when` and `depends_on` [[#3063](https://github.com/woodpecker-ci/woodpecker/pull/3063)]
 - Fix DAG cycle detection [[#3049](https://github.com/woodpecker-ci/woodpecker/pull/3049)]
 - Fix duplicated icons [[#3045](https://github.com/woodpecker-ci/woodpecker/pull/3045)]
-
-### 📈 Enhancement
-
-- Move `cmd/common` to `shared` [[#3092](https://github.com/woodpecker-ci/woodpecker/pull/3092)]
-- use semver for version comparsion [[#3042](https://github.com/woodpecker-ci/woodpecker/pull/3042)]
-- Extend create plugin docs [[#3062](https://github.com/woodpecker-ci/woodpecker/pull/3062)]
-- Remove old files [[#3077](https://github.com/woodpecker-ci/woodpecker/pull/3077)]
-- Indicate if step is service [[#3078](https://github.com/woodpecker-ci/woodpecker/pull/3078)]
-- Add imports checks to linter [[#3056](https://github.com/woodpecker-ci/woodpecker/pull/3056)]
-- Remove workflow version again [[#3052](https://github.com/woodpecker-ci/woodpecker/pull/3052)]
-- Add option to disable version check in admin web UI [[#3040](https://github.com/woodpecker-ci/woodpecker/pull/3040)]
 
 ### Misc
 
