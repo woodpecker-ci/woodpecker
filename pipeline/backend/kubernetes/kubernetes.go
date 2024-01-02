@@ -93,9 +93,8 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 				},
 			}
 			// TODO: remove in next major
-			if len(config.ImagePullSecretNames) == 0 {
-				log.Warn().Msgf("WOODPECKER_BACKEND_K8S_PULL_SECRET_NAMES is not set, using 'regcred'. It will be removed in next major. Set it explicitly before.")
-				config.ImagePullSecretNames = []string{"regcred"}
+			if len(config.ImagePullSecretNames) == 1 && config.ImagePullSecretNames[0] == "regcred" {
+				log.Warn().Msg("WOODPECKER_BACKEND_K8S_PULL_SECRET_NAMES is set to the default ('regcred'). It will default to empty in Woodpecker 3.0. Set it explicitly before then.")
 			}
 			// Unmarshal label and annotation settings here to ensure they're valid on startup
 			if labels := c.String("backend-k8s-pod-labels"); labels != "" {
