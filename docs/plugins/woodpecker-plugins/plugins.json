@@ -154,6 +154,21 @@
       "name": "Nix - Attic",
       "docs": "https://git.vdx.hu/voidcontext/woodpecker-plugin-nix-attic/raw/branch/main/docs.md",
       "verified": false
+    },
+    {
+      "name": "Codeberg Pages Deploy",
+      "docs": "https://codeberg.org/xfix/plugin-codeberg-pages-deploy/raw/branch/master/README.md",
+      "verified": false
+    },
+    {
+      "name": "Reviewdog golangci-lint",
+      "docs": "https://codeberg.org/woodpecker-plugins/reviewdog-golangci-lint/raw/branch/main/docs.md",
+      "verified": true
+    },
+    {
+      "name": "Reviewdog ESLint",
+      "docs": "https://codeberg.org/woodpecker-plugins/reviewdog-eslint/raw/branch/main/docs.md",
+      "verified": true
     }
   ]
 }

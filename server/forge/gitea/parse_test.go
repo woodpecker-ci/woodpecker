@@ -42,18 +42,22 @@ func Test_parser(t *testing.T) {
 			g.Assert(b).IsNil()
 			assert.ErrorIs(t, err, &types.ErrIgnoreEvent{})
 		})
-		g.It("given a PR hook", func() {
-			buf := bytes.NewBufferString(fixtures.HookPullRequest)
-			req, _ := http.NewRequest("POST", "/hook", buf)
-			req.Header = http.Header{}
-			req.Header.Set(hookEvent, hookPullRequest)
-			r, b, err := parseHook(req)
-			g.Assert(r).IsNotNil()
-			g.Assert(b).IsNotNil()
-			g.Assert(err).IsNil()
-			g.Assert(b.Event).Equal(model.EventPull)
-		})
-		g.Describe("given a push hook", func() {
+
+		g.Describe("push event", func() {
+			g.It("should handle a push hook", func() {
+				buf := bytes.NewBufferString(fixtures.HookPushBranch)
+				req, _ := http.NewRequest("POST", "/hook", buf)
+				req.Header = http.Header{}
+				req.Header.Set(hookEvent, hookPush)
+				r, b, err := parseHook(req)
+				g.Assert(err).IsNil()
+				g.Assert(r).IsNotNil()
+				g.Assert(b).IsNotNil()
+				g.Assert(b.Event).Equal(model.EventPush)
+				g.Assert(b.Message).Equal("Delete '.woodpecker/.check.yml'\n")
+				g.Assert(b.ChangedFiles).Equal([]string{".woodpecker/.check.yml"})
+			})
+
 			g.It("should extract repository and pipeline details", func() {
 				buf := bytes.NewBufferString(fixtures.HookPush)
 				req, _ := http.NewRequest("POST", "/hook", buf)
@@ -67,19 +71,58 @@ func Test_parser(t *testing.T) {
 				g.Assert(utils.EqualSliceValues(b.ChangedFiles, []string{"CHANGELOG.md", "app/controller/application.rb"})).IsTrue()
 			})
 		})
-		g.Describe("given a push hook from an branch creation", func() {
-			g.It("should extract repository and pipeline details", func() {
-				buf := bytes.NewBufferString(fixtures.HookPushBranch)
+
+		g.Describe("tag event", func() {
+			g.It("should handle a tag hook", func() {
+				buf := bytes.NewBufferString(fixtures.HookTag)
 				req, _ := http.NewRequest("POST", "/hook", buf)
 				req.Header = http.Header{}
-				req.Header.Set(hookEvent, hookPush)
+				req.Header.Set(hookEvent, hookCreated)
 				r, b, err := parseHook(req)
-				g.Assert(err).IsNil()
 				g.Assert(r).IsNotNil()
 				g.Assert(b).IsNotNil()
-				g.Assert(b.Event).Equal(model.EventPush)
-				g.Assert(b.Message).Equal("Delete '.woodpecker/.check.yml'\n")
-				g.Assert(b.ChangedFiles).Equal([]string{".woodpecker/.check.yml"})
+				g.Assert(err).IsNil()
+				g.Assert(b.Event).Equal(model.EventTag)
+			})
+		})
+
+		g.Describe("pull-request events", func() {
+			// g.It("should handle a PR hook when PR got created")
+
+			g.It("should handle a PR hook when PR got updated", func() {
+				buf := bytes.NewBufferString(fixtures.HookPullRequest)
+				req, _ := http.NewRequest("POST", "/hook", buf)
+				req.Header = http.Header{}
+				req.Header.Set(hookEvent, hookPullRequest)
+				r, b, err := parseHook(req)
+				g.Assert(r).IsNotNil()
+				g.Assert(b).IsNotNil()
+				g.Assert(err).IsNil()
+				g.Assert(b.Event).Equal(model.EventPull)
+			})
+
+			g.It("should handle a PR closed hook when PR got closed", func() {
+				buf := bytes.NewBufferString(fixtures.HookPullRequestClosed)
+				req, _ := http.NewRequest("POST", "/hook", buf)
+				req.Header = http.Header{}
+				req.Header.Set(hookEvent, hookPullRequest)
+				r, b, err := parseHook(req)
+				g.Assert(r).IsNotNil()
+				g.Assert(b).IsNotNil()
+				g.Assert(err).IsNil()
+				g.Assert(b.Event).Equal(model.EventPullClosed)
+			})
+
+			g.It("should handle a PR closed hook when PR was merged", func() {
+				buf := bytes.NewBufferString(fixtures.HookPullRequestMerged)
+				req, _ := http.NewRequest("POST", "/hook", buf)
+				req.Header = http.Header{}
+				req.Header.Set(hookEvent, hookPullRequest)
+				r, b, err := parseHook(req)
+				g.Assert(r).IsNotNil()
+				g.Assert(b).IsNotNil()
+				g.Assert(err).IsNil()
+				g.Assert(b.Event).Equal(model.EventPullClosed)
 			})
 		})
 	})

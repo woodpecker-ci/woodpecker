@@ -20,8 +20,8 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cmd/common"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/logger"
 )
 
 var flags = append([]cli.Flag{
@@ -251,6 +251,11 @@ var flags = append([]cli.Flag{
 		Name:    "enable-swagger",
 		Value:   true,
 	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_DISABLE_VERSION_CHECK"},
+		Usage:   "Disable version check in admin web ui.",
+		Name:    "skip-version-check",
+	},
 	&cli.StringSliceFlag{
 		EnvVars: []string{"WOODPECKER_ADDONS"},
 		Name:    "addons",
@@ -467,4 +472,4 @@ var flags = append([]cli.Flag{
 		Name:    "encryption-disable-flag",
 		Usage:   "Flag to decrypt all encrypted data and disable encryption on server",
 	},
-}, common.GlobalLoggerFlags...)
+}, logger.GlobalLoggerFlags...)

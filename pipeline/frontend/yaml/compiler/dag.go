@@ -16,6 +16,7 @@ package compiler
 
 import (
 	"fmt"
+	"sort"
 
 	backend_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
@@ -42,7 +43,7 @@ func newDAGCompiler(steps []*dagCompilerStep, prefix string) dagCompiler {
 
 func (c dagCompiler) isDAG() bool {
 	for _, v := range c.steps {
-		if len(v.dependsOn) != 0 {
+		if v.dependsOn != nil {
 			return true
 		}
 	}
@@ -101,6 +102,8 @@ func dfsVisit(steps map[string]*dagCompilerStep, name string, visited map[string
 		}
 	}
 
+	delete(visited, name)
+
 	return nil
 }
 
@@ -130,12 +133,23 @@ func convertDAGToStages(steps map[string]*dagCompilerStep, prefix string) ([]*ba
 			Alias: fmt.Sprintf("%s_stage_%d", prefix, len(stages)),
 		}
 
+		var stepsToAdd []*dagCompilerStep
 		for name, step := range steps {
 			if allDependenciesSatisfied(step, addedSteps) {
-				stage.Steps = append(stage.Steps, step.step)
+				stepsToAdd = append(stepsToAdd, step)
 				addedNodesThisLevel[name] = struct{}{}
 				delete(steps, name)
 			}
+		}
+
+		// as steps are from a map that has no deterministic order,
+		// we sort the steps by original config position to make the order similar between pipelines
+		sort.Slice(stepsToAdd, func(i, j int) bool {
+			return stepsToAdd[i].position < stepsToAdd[j].position
+		})
+
+		for i := range stepsToAdd {
+			stage.Steps = append(stage.Steps, stepsToAdd[i].step)
 		}
 
 		for name := range addedNodesThisLevel {
