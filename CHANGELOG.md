@@ -1,13 +1,29 @@
 # Changelog
 
-## [2.2.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.2.0) - 2024-01-02
+## [2.2.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.2.0) - 2024-01-03
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@qwerty287, @lukashass, @lafriks, @pre-commit-ci[bot], @anbraten, @6543, @andyhan, @renovate[bot], @xfix
+@lukashass, @qwerty287, @lafriks, @pre-commit-ci[bot], @anbraten, @6543, @andyhan, @renovate[bot], @xfix
+
+### 🐛 Bug Fixes
+
+- Fix config base64 parsing to utf-8 [[#3110](https://github.com/woodpecker-ci/woodpecker/pull/3110)]
+- Pin Gitea version [[#3104](https://github.com/woodpecker-ci/woodpecker/pull/3104)]
+- Fix step `depends_on` as string in schema [[#3099](https://github.com/woodpecker-ci/woodpecker/pull/3099)]
+- Fix slice unmarshaling [[#3097](https://github.com/woodpecker-ci/woodpecker/pull/3097)]
+- Allow PR secrets to be used on close [[#3084](https://github.com/woodpecker-ci/woodpecker/pull/3084)]
+- make event in pipeline schema also a constraint_list [[#3082](https://github.com/woodpecker-ci/woodpecker/pull/3082)]
+- Fix badge's repoUrl with rootpath [[#3076](https://github.com/woodpecker-ci/woodpecker/pull/3076)]
+- Load changed files for closed PR [[#3067](https://github.com/woodpecker-ci/woodpecker/pull/3067)]
+- Fix build output paths [[#3065](https://github.com/woodpecker-ci/woodpecker/pull/3065)]
+- Fix `when` and `depends_on` [[#3063](https://github.com/woodpecker-ci/woodpecker/pull/3063)]
+- Fix DAG cycle detection [[#3049](https://github.com/woodpecker-ci/woodpecker/pull/3049)]
+- Fix duplicated icons [[#3045](https://github.com/woodpecker-ci/woodpecker/pull/3045)]
 
 ### 📈 Enhancement
 
+- Unfold workflow when opening via URL [[#3106](https://github.com/woodpecker-ci/woodpecker/pull/3106)]
 - Remove env argument of addons [[#3100](https://github.com/woodpecker-ci/woodpecker/pull/3100)]
 - Move `cmd/common` to `shared` [[#3092](https://github.com/woodpecker-ci/woodpecker/pull/3092)]
 - use semver for version comparsion [[#3042](https://github.com/woodpecker-ci/woodpecker/pull/3042)]
@@ -27,22 +43,9 @@
 - Add reviewdog golangci plugin [[#3080](https://github.com/woodpecker-ci/woodpecker/pull/3080)]
 - Add Codeberg Pages Deploy plugin to plugins list [[#3054](https://github.com/woodpecker-ci/woodpecker/pull/3054)]
 
-### 🐛 Bug Fixes
-
-- Pin Gitea version [[#3104](https://github.com/woodpecker-ci/woodpecker/pull/3104)]
-- Fix step `depends_on` as string in schema [[#3099](https://github.com/woodpecker-ci/woodpecker/pull/3099)]
-- Fix slice unmarshaling [[#3097](https://github.com/woodpecker-ci/woodpecker/pull/3097)]
-- Allow PR secrets to be used on close [[#3084](https://github.com/woodpecker-ci/woodpecker/pull/3084)]
-- make event in pipeline schema also a constraint_list [[#3082](https://github.com/woodpecker-ci/woodpecker/pull/3082)]
-- Fix badge's repoUrl with rootpath [[#3076](https://github.com/woodpecker-ci/woodpecker/pull/3076)]
-- Load changed files for closed PR [[#3067](https://github.com/woodpecker-ci/woodpecker/pull/3067)]
-- Fix build output paths [[#3065](https://github.com/woodpecker-ci/woodpecker/pull/3065)]
-- Fix `when` and `depends_on` [[#3063](https://github.com/woodpecker-ci/woodpecker/pull/3063)]
-- Fix DAG cycle detection [[#3049](https://github.com/woodpecker-ci/woodpecker/pull/3049)]
-- Fix duplicated icons [[#3045](https://github.com/woodpecker-ci/woodpecker/pull/3045)]
-
 ### Misc
 
+- Fix `version.json` updates [[#3057](https://github.com/woodpecker-ci/woodpecker/pull/3057)]
 - [pre-commit.ci] pre-commit autoupdate [[#3101](https://github.com/woodpecker-ci/woodpecker/pull/3101)]
 - Update dependency @vitejs/plugin-vue to v5 [[#3074](https://github.com/woodpecker-ci/woodpecker/pull/3074)]
 - Use CI vars for plugin [[#3061](https://github.com/woodpecker-ci/woodpecker/pull/3061)]
