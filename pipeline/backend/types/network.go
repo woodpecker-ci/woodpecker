@@ -18,3 +18,8 @@ package types
 type Network struct {
 	Name string `json:"name,omitempty"`
 }
+
+type HostAlias struct {
+	Name string `json:"name,omitempty"`
+	IP   string `json:"ip,omitempty"`
+}

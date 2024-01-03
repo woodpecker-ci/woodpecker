@@ -20,12 +20,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"go.woodpecker-ci.org/woodpecker/server"
-	"go.woodpecker-ci.org/woodpecker/server/forge"
-	"go.woodpecker-ci.org/woodpecker/server/model"
-	"go.woodpecker-ci.org/woodpecker/server/pipeline"
-	"go.woodpecker-ci.org/woodpecker/server/store"
-	"go.woodpecker-ci.org/woodpecker/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
 )
 
 func handlePipelineErr(c *gin.Context, err error) {
@@ -34,6 +34,8 @@ func handlePipelineErr(c *gin.Context, err error) {
 	} else if errors.Is(err, &pipeline.ErrBadRequest{}) {
 		c.String(http.StatusBadRequest, "%s", err)
 	} else if errors.Is(err, pipeline.ErrFiltered) {
+		// for debugging purpose we add a header
+		c.Writer.Header().Add("Pipeline-Filtered", "true")
 		c.Status(http.StatusNoContent)
 	} else {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)

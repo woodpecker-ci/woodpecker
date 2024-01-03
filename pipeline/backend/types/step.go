@@ -28,7 +28,7 @@ type Step struct {
 	Environment    map[string]string `json:"environment,omitempty"`
 	Entrypoint     []string          `json:"entrypoint,omitempty"`
 	Commands       []string          `json:"commands,omitempty"`
-	ExtraHosts     []string          `json:"extra_hosts,omitempty"`
+	ExtraHosts     []HostAlias       `json:"extra_hosts,omitempty"`
 	Volumes        []string          `json:"volumes,omitempty"`
 	Tmpfs          []string          `json:"tmpfs,omitempty"`
 	Devices        []string          `json:"devices,omitempty"`

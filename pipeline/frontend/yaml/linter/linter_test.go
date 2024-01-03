@@ -18,15 +18,15 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"go.woodpecker-ci.org/woodpecker/pipeline/errors"
-	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml"
-	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/linter"
+
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter"
 )
 
 func TestLint(t *testing.T) {
 	testdatas := []struct{ Title, Data string }{{
 		Title: "map", Data: `
-version: 1
 steps:
   build:
     image: docker
@@ -46,7 +46,6 @@ services:
 `,
 	}, {
 		Title: "list", Data: `
-version: 1
 steps:
   - name: build
     image: docker
@@ -60,10 +59,12 @@ steps:
     settings:
       repo: foo/bar
       foo: bar
+services:
+  - name: redis
+    image: redis
 `,
 	}, {
 		Title: "merge maps", Data: `
-version: 1
 variables:
   step_template: &base-step
     image: golang:1.19
@@ -158,7 +159,7 @@ func TestLintErrors(t *testing.T) {
 	}
 
 	for _, test := range testdata {
-		conf, err := yaml.ParseString("version: 1\n" + test.from)
+		conf, err := yaml.ParseString(test.from)
 		if err != nil {
 			t.Fatalf("Cannot unmarshal yaml %q. Error: %s", test.from, err)
 		}

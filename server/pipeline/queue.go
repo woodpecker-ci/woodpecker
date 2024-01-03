@@ -19,13 +19,13 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"go.woodpecker-ci.org/woodpecker/pipeline"
-	"go.woodpecker-ci.org/woodpecker/pipeline/rpc"
-	"go.woodpecker-ci.org/woodpecker/server"
-	"go.woodpecker-ci.org/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/pipeline/stepbuilder"
 )
 
-func queuePipeline(repo *model.Repo, pipelineItems []*pipeline.Item) error {
+func queuePipeline(repo *model.Repo, pipelineItems []*stepbuilder.Item) error {
 	var tasks []*model.Task
 	for _, item := range pipelineItems {
 		if item.Workflow.State == model.StatusSkipped {
@@ -53,7 +53,7 @@ func queuePipeline(repo *model.Repo, pipelineItems []*pipeline.Item) error {
 	return server.Config.Services.Queue.PushAtOnce(context.Background(), tasks)
 }
 
-func taskIds(dependsOn []string, pipelineItems []*pipeline.Item) (taskIds []string) {
+func taskIds(dependsOn []string, pipelineItems []*stepbuilder.Item) (taskIds []string) {
 	for _, dep := range dependsOn {
 		for _, pipelineItem := range pipelineItems {
 			if pipelineItem.Workflow.Name == dep {

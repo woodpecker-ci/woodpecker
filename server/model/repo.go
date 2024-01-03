@@ -31,11 +31,12 @@ type Repo struct {
 	Name                         string         `json:"name"                            xorm:"UNIQUE(name) 'repo_name'"`
 	FullName                     string         `json:"full_name"                       xorm:"UNIQUE 'repo_full_name'"`
 	Avatar                       string         `json:"avatar_url,omitempty"            xorm:"varchar(500) 'repo_avatar'"`
-	Link                         string         `json:"link_url,omitempty"              xorm:"varchar(1000) 'repo_link'"`
+	ForgeURL                     string         `json:"forge_url,omitempty"             xorm:"varchar(1000) 'repo_forge_url'"`
 	Clone                        string         `json:"clone_url,omitempty"             xorm:"varchar(1000) 'repo_clone'"`
 	CloneSSH                     string         `json:"clone_url_ssh"                   xorm:"varchar(1000) 'repo_clone_ssh'"`
 	Branch                       string         `json:"default_branch,omitempty"        xorm:"varchar(500) 'repo_branch'"`
 	SCMKind                      SCMKind        `json:"scm,omitempty"                   xorm:"varchar(50) 'repo_scm'"`
+	PREnabled                    bool           `json:"pr_enabled"                      xorm:"DEFAULT TRUE 'repo_pr_enabled'"`
 	Timeout                      int64          `json:"timeout,omitempty"               xorm:"repo_timeout"`
 	Visibility                   RepoVisibility `json:"visibility"                      xorm:"varchar(10) 'repo_visibility'"`
 	IsSCMPrivate                 bool           `json:"private"                         xorm:"repo_private"`
@@ -66,7 +67,7 @@ func (r *Repo) ResetVisibility() {
 func ParseRepo(str string) (user, repo string, err error) {
 	parts := strings.Split(str, "/")
 	if len(parts) != 2 {
-		err = fmt.Errorf("Error: Invalid or missing repository. eg octocat/hello-world")
+		err = fmt.Errorf("error: Invalid or missing repository. eg octocat/hello-world")
 		return
 	}
 	user = parts[0]
@@ -83,8 +84,9 @@ func (r *Repo) Update(from *Repo) {
 	r.Name = from.Name
 	r.FullName = from.FullName
 	r.Avatar = from.Avatar
-	r.Link = from.Link
+	r.ForgeURL = from.ForgeURL
 	r.SCMKind = from.SCMKind
+	r.PREnabled = from.PREnabled
 	if len(from.Clone) > 0 {
 		r.Clone = from.Clone
 	}

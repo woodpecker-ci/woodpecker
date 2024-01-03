@@ -24,8 +24,8 @@ import (
 
 	"github.com/franela/goblin"
 	"github.com/gin-gonic/gin"
-	"go.woodpecker-ci.org/woodpecker/server/forge/bitbucketdatacenter/fixtures"
-	"go.woodpecker-ci.org/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/bitbucketdatacenter/fixtures"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 func TestBitbucketDC(t *testing.T) {

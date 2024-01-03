@@ -18,7 +18,6 @@ package model
 import (
 	"errors"
 	"fmt"
-	"path/filepath"
 	"regexp"
 	"sort"
 )
@@ -70,8 +69,8 @@ type SecretStore interface {
 // Secret represents a secret variable, such as a password or token.
 type Secret struct {
 	ID     int64          `json:"id"              xorm:"pk autoincr 'secret_id'"`
-	OrgID  int64          `json:"-"               xorm:"NOT NULL DEFAULT 0 UNIQUE(s) INDEX 'secret_org_id'"`
-	RepoID int64          `json:"-"               xorm:"NOT NULL DEFAULT 0 UNIQUE(s) INDEX 'secret_repo_id'"`
+	OrgID  int64          `json:"org_id"          xorm:"NOT NULL DEFAULT 0 UNIQUE(s) INDEX 'secret_org_id'"`
+	RepoID int64          `json:"repo_id"         xorm:"NOT NULL DEFAULT 0 UNIQUE(s) INDEX 'secret_repo_id'"`
 	Name   string         `json:"name"            xorm:"NOT NULL UNIQUE(s) INDEX 'secret_name'"`
 	Value  string         `json:"value,omitempty" xorm:"TEXT 'secret_value'"`
 	Images []string       `json:"images"          xorm:"json 'secret_images'"`
@@ -89,25 +88,38 @@ func (s *Secret) BeforeInsert() {
 }
 
 // Global secret.
-func (s Secret) Global() bool {
+func (s Secret) IsGlobal() bool {
 	return s.RepoID == 0 && s.OrgID == 0
 }
 
 // Organization secret.
-func (s Secret) Organization() bool {
+func (s Secret) IsOrganization() bool {
 	return s.RepoID == 0 && s.OrgID != 0
 }
 
+// Repository secret.
+func (s Secret) IsRepository() bool {
+	return s.RepoID != 0 && s.OrgID == 0
+}
+
 // Match returns true if an image and event match the restricted list.
+// Note that EventPullClosed are treated as EventPull.
 func (s *Secret) Match(event WebhookEvent) bool {
+	// if there is no filter set secret matches all webhook events
 	if len(s.Events) == 0 {
 		return true
 	}
-	for _, pattern := range s.Events {
-		if match, _ := filepath.Match(string(pattern), string(event)); match {
+	// tread all pull events the same way
+	if event == EventPullClosed {
+		event = EventPull
+	}
+	// one match is enough
+	for _, e := range s.Events {
+		if e == event {
 			return true
 		}
 	}
+	// a filter is set but the webhook did not match it
 	return false
 }
 

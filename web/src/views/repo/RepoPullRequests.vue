@@ -29,6 +29,9 @@ const repo = inject<Ref<Repo>>('repo');
 if (!repo) {
   throw new Error('Unexpected: "repo" should be provided at this place');
 }
+if (!repo.value.pr_enabled || !repo.value.allow_pr) {
+  throw new Error('Unexpected: pull requests are disabled for repo');
+}
 
 async function loadPullRequests(page: number): Promise<PullRequest[]> {
   if (!repo) {

@@ -17,7 +17,7 @@
       <a v-if="badgeUrl" :href="badgeUrl" target="_blank">
         <img :src="badgeUrl" />
       </a>
-      <IconButton :href="repo.link_url" :title="$t('repo.open_in_forge')" :icon="forge ?? 'repo'" />
+      <IconButton :href="repo.forge_url" :title="$t('repo.open_in_forge')" :icon="forge ?? 'repo'" />
       <IconButton
         v-if="repoPermissions.admin"
         :to="{ name: 'repo-settings' }"
@@ -37,7 +37,7 @@
 
     <Tab id="activity" :title="$t('repo.activity')" />
     <Tab id="branches" :title="$t('repo.branches')" />
-    <Tab id="pull_requests" :title="$t('repo.pull_requests')" />
+    <Tab v-if="repo.pr_enabled && repo.allow_pr" id="pull_requests" :title="$t('repo.pull_requests')" />
 
     <router-view />
   </Scaffold>

@@ -22,11 +22,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/securecookie"
 
-	"go.woodpecker-ci.org/woodpecker/server"
-	"go.woodpecker-ci.org/woodpecker/server/model"
-	"go.woodpecker-ci.org/woodpecker/server/router/middleware/session"
-	"go.woodpecker-ci.org/woodpecker/server/store"
-	"go.woodpecker-ci.org/woodpecker/shared/token"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/token"
 )
 
 // GetSelf
@@ -83,7 +83,7 @@ func GetFeed(c *gin.Context) {
 //	@Success		200	{array}	Repo
 //	@Tags			User
 //	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param			all		query	bool	false	"query all repos, including inactive ones"
+//	@Param			all				query	bool	false	"query all repos, including inactive ones"
 func GetRepos(c *gin.Context) {
 	_store := store.FromContext(c)
 	_forge := server.Config.Services.Forge
@@ -111,14 +111,17 @@ func GetRepos(c *gin.Context) {
 
 		var repos []*model.Repo
 		for _, r := range _repos {
-			if r.Perm.Push {
+			if r.Perm.Push && server.Config.Permissions.OwnersAllowlist.IsAllowed(r) {
 				if active[r.ForgeRemoteID] != nil {
 					existingRepo := active[r.ForgeRemoteID]
 					existingRepo.Update(r)
 					existingRepo.IsActive = active[r.ForgeRemoteID].IsActive
 					repos = append(repos, existingRepo)
 				} else {
-					repos = append(repos, r)
+					if r.Perm.Admin {
+						// you must be admin to enable the repo
+						repos = append(repos, r)
+					}
 				}
 			}
 		}
@@ -138,12 +141,12 @@ func GetRepos(c *gin.Context) {
 
 // PostToken
 //
-//	@Summary		Return the token of the current user as string
-//	@Router			/user/token [post]
-//	@Produce		plain
-//	@Success		200
-//	@Tags			User
-//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Summary	Return the token of the current user as string
+//	@Router		/user/token [post]
+//	@Produce	plain
+//	@Success	200
+//	@Tags		User
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 func PostToken(c *gin.Context) {
 	user := session.User(c)
 	tokenString, err := token.New(token.UserToken, user.Login).Sign(user.Hash)

@@ -22,20 +22,22 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/google/go-github/v56/github"
+	"github.com/google/go-github/v57/github"
 
-	"go.woodpecker-ci.org/woodpecker/server/forge/types"
-	"go.woodpecker-ci.org/woodpecker/server/model"
-	"go.woodpecker-ci.org/woodpecker/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
 const (
 	hookField = "payload"
 
-	actionOpen = "opened"
-	actionSync = "synchronize"
+	actionOpen  = "opened"
+	actionClose = "closed"
+	actionSync  = "synchronize"
 
-	stateOpen = "open"
+	stateOpen  = "open"
+	stateClose = "closed"
 )
 
 // parseHook parses a GitHub hook from an http.Request request and returns
@@ -82,7 +84,7 @@ func parsePushHook(hook *github.PushEvent) (*model.Repo, *model.Pipeline, error)
 		Event:        model.EventPush,
 		Commit:       hook.GetHeadCommit().GetID(),
 		Ref:          hook.GetRef(),
-		Link:         hook.GetHeadCommit().GetURL(),
+		ForgeURL:     hook.GetHeadCommit().GetURL(),
 		Branch:       strings.Replace(hook.GetRef(), "refs/heads/", "", -1),
 		Message:      hook.GetHeadCommit().GetMessage(),
 		Email:        hook.GetHeadCommit().GetAuthor().GetEmail(),
@@ -115,16 +117,16 @@ func parsePushHook(hook *github.PushEvent) (*model.Repo, *model.Pipeline, error)
 // If the commit type is unsupported nil values are returned.
 func parseDeployHook(hook *github.DeploymentEvent) (*model.Repo, *model.Pipeline, error) {
 	pipeline := &model.Pipeline{
-		Event:   model.EventDeploy,
-		Commit:  hook.GetDeployment().GetSHA(),
-		Link:    hook.GetDeployment().GetURL(),
-		Message: hook.GetDeployment().GetDescription(),
-		Ref:     hook.GetDeployment().GetRef(),
-		Branch:  hook.GetDeployment().GetRef(),
-		Deploy:  hook.GetDeployment().GetEnvironment(),
-		Avatar:  hook.GetSender().GetAvatarURL(),
-		Author:  hook.GetSender().GetLogin(),
-		Sender:  hook.GetSender().GetLogin(),
+		Event:    model.EventDeploy,
+		Commit:   hook.GetDeployment().GetSHA(),
+		ForgeURL: hook.GetDeployment().GetURL(),
+		Message:  hook.GetDeployment().GetDescription(),
+		Ref:      hook.GetDeployment().GetRef(),
+		Branch:   hook.GetDeployment().GetRef(),
+		Deploy:   hook.GetDeployment().GetEnvironment(),
+		Avatar:   hook.GetSender().GetAvatarURL(),
+		Author:   hook.GetSender().GetLogin(),
+		Sender:   hook.GetSender().GetLogin(),
 	}
 	// if the ref is a sha or short sha we need to manually construct the ref.
 	if strings.HasPrefix(pipeline.Commit, pipeline.Ref) || pipeline.Commit == pipeline.Ref {
@@ -140,20 +142,21 @@ func parseDeployHook(hook *github.DeploymentEvent) (*model.Repo, *model.Pipeline
 }
 
 // parsePullHook parses a pull request hook and returns the Repo and Pipeline
-// details. If the pull request is closed nil values are returned.
+// details.
 func parsePullHook(hook *github.PullRequestEvent, merge bool) (*github.PullRequest, *model.Repo, *model.Pipeline, error) {
-	// only listen to new merge-requests and pushes to open ones
-	if hook.GetAction() != actionOpen && hook.GetAction() != actionSync {
-		return nil, nil, nil, nil
-	}
-	if hook.GetPullRequest().GetState() != stateOpen {
+	if hook.GetAction() != actionOpen && hook.GetAction() != actionSync && hook.GetAction() != actionClose {
 		return nil, nil, nil, nil
 	}
 
+	event := model.EventPull
+	if hook.GetPullRequest().GetState() == stateClose {
+		event = model.EventPullClosed
+	}
+
 	pipeline := &model.Pipeline{
-		Event:    model.EventPull,
+		Event:    event,
 		Commit:   hook.GetPullRequest().GetHead().GetSHA(),
-		Link:     hook.GetPullRequest().GetHTMLURL(),
+		ForgeURL: hook.GetPullRequest().GetHTMLURL(),
 		Ref:      fmt.Sprintf(headRefs, hook.GetPullRequest().GetNumber()),
 		Branch:   hook.GetPullRequest().GetBase().GetRef(),
 		Message:  hook.GetPullRequest().GetTitle(),

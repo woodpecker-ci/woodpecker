@@ -20,9 +20,9 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"go.woodpecker-ci.org/woodpecker/cli/common"
-	"go.woodpecker-ci.org/woodpecker/cli/internal"
-	"go.woodpecker-ci.org/woodpecker/woodpecker-go/woodpecker"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
 var secretInfoCmd = &cli.Command{
@@ -30,7 +30,7 @@ var secretInfoCmd = &cli.Command{
 	Usage:     "display secret info",
 	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    secretInfo,
-	Flags: append(common.GlobalFlags,
+	Flags: []cli.Flag{
 		&cli.BoolFlag{
 			Name:  "global",
 			Usage: "global secret",
@@ -42,7 +42,7 @@ var secretInfoCmd = &cli.Command{
 			Usage: "secret name",
 		},
 		common.FormatFlag(tmplSecretList, true),
-	),
+	},
 }
 
 func secretInfo(c *cli.Context) error {

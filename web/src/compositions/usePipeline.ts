@@ -4,12 +4,9 @@ import { useI18n } from 'vue-i18n';
 import { useDate } from '~/compositions/useDate';
 import { useElapsedTime } from '~/compositions/useElapsedTime';
 import { Pipeline } from '~/lib/api/types';
-import { prettyDuration } from '~/utils/duration';
 import { convertEmojis } from '~/utils/emoji';
 
-import useTimeAgo from './useTimeAgo';
-
-const { toLocaleString } = useDate();
+const { toLocaleString, timeAgo, prettyDuration } = useDate();
 
 export default (pipeline: Ref<Pipeline | undefined>) => {
   const sinceRaw = computed(() => {
@@ -28,7 +25,6 @@ export default (pipeline: Ref<Pipeline | undefined>) => {
   const { time: sinceElapsed } = useElapsedTime(sinceUnderOneHour, sinceRaw);
 
   const i18n = useI18n();
-  const timeAgo = useTimeAgo();
   const since = computed(() => {
     if (sinceRaw.value === 0) {
       return i18n.t('time.not_started');
@@ -38,7 +34,8 @@ export default (pipeline: Ref<Pipeline | undefined>) => {
       return null;
     }
 
-    return timeAgo.format(sinceElapsed.value);
+    // TODO check whetehr elapsed works
+    return timeAgo(sinceElapsed.value);
   });
 
   const durationRaw = computed(() => {
@@ -99,7 +96,7 @@ export default (pipeline: Ref<Pipeline | undefined>) => {
       return pipeline.value.ref.replaceAll('refs/tags/', '');
     }
 
-    if (pipeline.value?.event === 'pull_request') {
+    if (pipeline.value?.event === 'pull_request' || pipeline.value?.event === 'pull_request_closed') {
       return `#${pipeline.value.ref
         .replaceAll('refs/pull/', '')
         .replaceAll('refs/merge-requests/', '')

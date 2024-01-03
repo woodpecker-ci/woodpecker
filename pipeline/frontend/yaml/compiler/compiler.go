@@ -18,11 +18,11 @@ import (
 	"fmt"
 	"path"
 
-	backend_types "go.woodpecker-ci.org/woodpecker/pipeline/backend/types"
-	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/metadata"
-	yaml_types "go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/types"
-	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/utils"
-	"go.woodpecker-ci.org/woodpecker/shared/constant"
+	backend_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
+	yaml_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/utils"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
 )
 
 const (
@@ -151,7 +151,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 
 	// add default clone step
 	if !c.local && len(conf.Clone.ContainerList) == 0 && !conf.SkipClone {
-		cloneSettings := map[string]interface{}{"depth": "0"}
+		cloneSettings := map[string]any{"depth": "0"}
 		if c.metadata.Curr.Event == metadata.EventTag {
 			cloneSettings["tags"] = "true"
 		}
@@ -233,10 +233,9 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 		config.Stages = append(config.Stages, stage)
 	}
 
-	// add pipeline steps. 1 pipeline step per stage, at the moment
-	var stage *backend_types.Stage
-	var group string
-	for i, container := range conf.Steps.ContainerList {
+	// add pipeline steps
+	steps := make([]*dagCompilerStep, 0, len(conf.Steps.ContainerList))
+	for pos, container := range conf.Steps.ContainerList {
 		// Skip if local and should not run local
 		if c.local && !container.When.IsLocal() {
 			continue
@@ -248,16 +247,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			return nil, err
 		}
 
-		if stage == nil || group != container.Group || container.Group == "" {
-			group = container.Group
-
-			stage = new(backend_types.Stage)
-			stage.Name = fmt.Sprintf("%s_stage_%v", c.prefix, i)
-			stage.Alias = container.Name
-			config.Stages = append(config.Stages, stage)
-		}
-
-		name := fmt.Sprintf("%s_step_%d", c.prefix, i)
+		name := fmt.Sprintf("%s_step_%d", c.prefix, pos)
 		stepType := backend_types.StepTypeCommands
 		if container.IsPlugin() {
 			stepType = backend_types.StepTypePlugin
@@ -274,8 +264,22 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			}
 		}
 
-		stage.Steps = append(stage.Steps, step)
+		steps = append(steps, &dagCompilerStep{
+			step:      step,
+			position:  pos,
+			name:      container.Name,
+			group:     container.Group,
+			dependsOn: container.DependsOn,
+		})
 	}
+
+	// generate stages out of steps
+	stepStages, err := newDAGCompiler(steps, c.prefix).compile()
+	if err != nil {
+		return nil, err
+	}
+
+	config.Stages = append(config.Stages, stepStages...)
 
 	err = c.setupCacheRebuild(conf, config)
 	if err != nil {

@@ -23,14 +23,14 @@ import (
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
-	"go.woodpecker-ci.org/woodpecker/cmd/server/docs"
-	"go.woodpecker-ci.org/woodpecker/server"
-	"go.woodpecker-ci.org/woodpecker/server/api"
-	"go.woodpecker-ci.org/woodpecker/server/api/metrics"
-	"go.woodpecker-ci.org/woodpecker/server/router/middleware/header"
-	"go.woodpecker-ci.org/woodpecker/server/router/middleware/session"
-	"go.woodpecker-ci.org/woodpecker/server/router/middleware/token"
-	"go.woodpecker-ci.org/woodpecker/server/web"
+	"go.woodpecker-ci.org/woodpecker/v2/cmd/server/docs"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/api"
+	"go.woodpecker-ci.org/woodpecker/v2/server/api/metrics"
+	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/header"
+	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
+	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/token"
+	"go.woodpecker-ci.org/woodpecker/v2/server/web"
 )
 
 // Load loads the router
@@ -72,7 +72,7 @@ func Load(noRouteHandler http.HandlerFunc, middleware ...gin.HandlerFunc) http.H
 	}
 
 	apiRoutes(base)
-	if server.Config.Server.EnableSwagger {
+	if server.Config.WebUI.EnableSwagger {
 		setupSwaggerConfigAndRoutes(e)
 	}
 

@@ -77,22 +77,18 @@
     <Tab
       v-if="pipeline.errors && pipeline.errors.length > 0"
       id="errors"
+      icon="attention"
       :title="
         pipeline.errors.some((e) => !e.is_warning)
-          ? '❌ ' +
-            $t('repo.pipeline.errors', {
-              count: pipeline.errors?.length,
-            })
-          : '⚠️ ' +
-            $t('repo.pipeline.warnings', {
-              count: pipeline.errors?.length,
-            })
+          ? $t('repo.pipeline.errors', { count: pipeline.errors?.length })
+          : $t('repo.pipeline.warnings', { count: pipeline.errors?.length })
       "
+      :icon-class="pipeline.errors.some((e) => !e.is_warning) ? 'text-wp-state-error-100' : 'text-wp-state-warn-100'"
     />
     <Tab id="config" :title="$t('repo.pipeline.config')" />
     <Tab
       v-if="
-        (pipeline.event === 'push' || pipeline.event === 'pull_request') &&
+        (pipeline.event === 'push' || pipeline.event === 'pull_request' || pipeline.event === 'pull_request_closed') &&
         pipeline.changed_files &&
         pipeline.changed_files.length > 0
       "

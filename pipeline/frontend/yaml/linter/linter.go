@@ -20,9 +20,9 @@ import (
 	"codeberg.org/6543/xyaml"
 	"go.uber.org/multierr"
 
-	"go.woodpecker-ci.org/woodpecker/pipeline/errors"
-	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/linter/schema"
-	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter/schema"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types"
 )
 
 // A Linter lints a pipeline configuration.
@@ -252,6 +252,21 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 			},
 			IsWarning: true,
 		})
+	}
+
+	for _, step := range parsed.Steps.ContainerList {
+		if step.Group != "" {
+			err = multierr.Append(err, &errors.PipelineError{
+				Type:    errors.PipelineErrorTypeDeprecation,
+				Message: "Please use depends_on instead of deprecated 'group' setting",
+				Data: errors.DeprecationErrorData{
+					File:  config.File,
+					Field: "steps." + step.Name + ".group",
+					Docs:  "https://woodpecker-ci.org/docs/next/usage/workflow-syntax#depends_on",
+				},
+				IsWarning: true,
+			})
+		}
 	}
 
 	return err

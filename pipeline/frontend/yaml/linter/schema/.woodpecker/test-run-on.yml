@@ -1,5 +1,3 @@
-version: 1
-
 steps:
   build:
     image: golang

@@ -1,14 +1,13 @@
-version: 1
-
 when:
   - event: [pull_request, tag]
   - event: push
     branch:
       - ${CI_REPO_DEFAULT_BRANCH}
       - release/*
+      - renovate/*
 
 variables:
-  - &golang_image 'docker.io/golang:1.21.3'
+  - &golang_image 'docker.io/golang:1.21.5'
   - &when
     - path: &when_path # related config files
         - '.woodpecker/test.yml'
@@ -23,16 +22,19 @@ variables:
 steps:
   vendor:
     image: *golang_image
-    group: prepare
     commands:
       - go mod vendor
     when:
-      - path: *when_path
+      - path:
+          - <<: *when_path
+          - '.woodpecker/**'
 
   lint-pipeline:
+    depends_on:
+      - vendor
     image: *golang_image
     commands:
-      - go run go.woodpecker-ci.org/woodpecker/cmd/cli lint
+      - go run go.woodpecker-ci.org/woodpecker/v2/cmd/cli lint
     when:
       - <<: *when
       - path:
@@ -41,7 +43,6 @@ steps:
 
   dummy-web:
     image: *golang_image
-    group: prepare
     commands:
       - mkdir -p web/dist/
       - echo "test" > web/dist/index.html
@@ -49,15 +50,17 @@ steps:
       - path: *when_path
 
   lint:
+    depends_on:
+      - vendor
     image: *golang_image
-    group: test
     commands:
       - make lint
     when: *when
 
   check_swagger:
+    depends_on:
+      - vendor
     image: *golang_image
-    group: test
     commands:
       - 'make generate-swagger'
       - 'DIFF=$(git diff | head)'
@@ -66,13 +69,11 @@ steps:
 
   lint-editorconfig:
     image: docker.io/mstruebing/editorconfig-checker:2.7.2
-    group: test
     when:
       - event: [pull_request, tag]
 
   lint-license-header:
     image: *golang_image
-    group: test
     commands:
       - go install github.com/google/addlicense@latest
       - 'addlicense -check -ignore "vendor/**" **/*.go'
@@ -80,12 +81,12 @@ steps:
 
   prettier:
     image: docker.io/woodpeckerci/plugin-prettier:next
-    group: test
     when: *when
 
   test:
+    depends_on:
+      - vendor
     image: *golang_image
-    group: test
     commands:
       - make test-agent
       - make test-server
@@ -95,8 +96,9 @@ steps:
       - path: *when_path
 
   sqlite:
+    depends_on:
+      - vendor
     image: *golang_image
-    group: test
     environment:
       - WOODPECKER_DATABASE_DRIVER=sqlite3
     commands:
@@ -105,8 +107,9 @@ steps:
       - path: *when_path
 
   postgres:
+    depends_on:
+      - vendor
     image: *golang_image
-    group: test
     environment:
       - WOODPECKER_DATABASE_DRIVER=postgres
       - WOODPECKER_DATABASE_DATASOURCE=host=service-postgres user=postgres dbname=postgres sslmode=disable
@@ -115,8 +118,9 @@ steps:
     when: *when
 
   mysql:
+    depends_on:
+      - vendor
     image: *golang_image
-    group: test
     environment:
       - WOODPECKER_DATABASE_DRIVER=mysql
       - WOODPECKER_DATABASE_DATASOURCE=root@tcp(service-mysql:3306)/test?parseTime=true
@@ -125,6 +129,9 @@ steps:
     when: *when
 
   codecov:
+    depends_on:
+      - test
+      - sqlite
     pull: true
     image: docker.io/woodpeckerci/plugin-codecov:2.1.2
     settings:

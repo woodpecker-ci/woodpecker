@@ -24,14 +24,14 @@ import (
 type StringOrSlice []string
 
 // UnmarshalYAML implements the Unmarshaler interface.
-func (s *StringOrSlice) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (s *StringOrSlice) UnmarshalYAML(unmarshal func(any) error) error {
 	var stringType string
 	if err := unmarshal(&stringType); err == nil {
 		*s = []string{stringType}
 		return nil
 	}
 
-	var sliceType []interface{}
+	var sliceType []any
 	if err := unmarshal(&sliceType); err == nil {
 		parts, err := toStrings(sliceType)
 		if err != nil {
@@ -44,8 +44,8 @@ func (s *StringOrSlice) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return errors.New("Failed to unmarshal StringOrSlice")
 }
 
-func toStrings(s []interface{}) ([]string, error) {
-	if len(s) == 0 {
+func toStrings(s []any) ([]string, error) {
+	if s == nil {
 		return nil, nil
 	}
 	r := make([]string, len(s))

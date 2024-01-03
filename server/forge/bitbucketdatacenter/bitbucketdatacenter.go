@@ -31,12 +31,12 @@ import (
 	bb "github.com/neticdk/go-bitbucket/bitbucket"
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/server/forge"
-	"go.woodpecker-ci.org/woodpecker/server/forge/bitbucketdatacenter/internal"
-	"go.woodpecker-ci.org/woodpecker/server/forge/common"
-	forge_types "go.woodpecker-ci.org/woodpecker/server/forge/types"
-	"go.woodpecker-ci.org/woodpecker/server/model"
-	"go.woodpecker-ci.org/woodpecker/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/bitbucketdatacenter/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/common"
+	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
 const (
@@ -309,7 +309,7 @@ func (c *client) Status(ctx context.Context, u *model.User, repo *model.Repo, pi
 	}
 	status := &bb.BuildStatus{
 		State:       convertStatus(pipeline.Status),
-		URL:         common.GetPipelineStatusLink(repo, pipeline, workflow),
+		URL:         common.GetPipelineStatusURL(repo, pipeline, workflow),
 		Key:         common.GetPipelineStatusContext(repo, pipeline, workflow),
 		Description: common.GetPipelineStatusDescription(pipeline.Status),
 	}
@@ -390,7 +390,7 @@ func (c *client) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 			return nil, fmt.Errorf("unable to list pull-requests: %w", err)
 		}
 		for _, pr := range prs {
-			all = append(all, &model.PullRequest{Index: int64(pr.ID), Title: pr.Title})
+			all = append(all, &model.PullRequest{Index: model.ForgeRemoteID(fmt.Sprint(pr.ID)), Title: pr.Title})
 		}
 		if !p.All || resp.LastPage {
 			break

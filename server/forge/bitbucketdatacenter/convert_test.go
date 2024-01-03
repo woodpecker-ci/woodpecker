@@ -22,7 +22,7 @@ import (
 	"github.com/franela/goblin"
 	bb "github.com/neticdk/go-bitbucket/bitbucket"
 
-	"go.woodpecker-ci.org/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 //nolint:misspell
@@ -158,7 +158,7 @@ func TestHelper(t *testing.T) {
 						Email:     "john.doe@mail.com",
 						Timestamp: now.UTC().Unix(),
 						Ref:       "refs/head/branch",
-						Link:      "https://base.url/projects/PRJ/repos/REPO/commits/1234567890abcdef",
+						ForgeURL:  "https://base.url/projects/PRJ/repos/REPO/commits/1234567890abcdef",
 						Event:     model.EventPush,
 					},
 				},
@@ -215,7 +215,7 @@ func TestHelper(t *testing.T) {
 			g.Assert(to.Email).Equal("john.doe@mail.com")
 			g.Assert(to.Timestamp).Equal(now.UTC().Unix())
 			g.Assert(to.Ref).Equal("refs/pull-requests/123/from")
-			g.Assert(to.Link).Equal("https://base.url/projects/PRJ/repos/REPO/commits/1234567890abcdef")
+			g.Assert(to.ForgeURL).Equal("https://base.url/projects/PRJ/repos/REPO/commits/1234567890abcdef")
 			g.Assert(to.Event).Equal(model.EventPull)
 			g.Assert(to.Refspec).Equal("branch:main")
 		})

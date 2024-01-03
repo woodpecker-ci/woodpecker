@@ -20,7 +20,7 @@ type PipelineError struct {
 	Type      PipelineErrorType `json:"type"`
 	Message   string            `json:"message"`
 	IsWarning bool              `json:"is_warning"`
-	Data      interface{}       `json:"data"`
+	Data      any               `json:"data"`
 }
 
 type LinterErrorData struct {

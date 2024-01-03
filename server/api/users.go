@@ -21,9 +21,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/securecookie"
 
-	"go.woodpecker-ci.org/woodpecker/server/model"
-	"go.woodpecker-ci.org/woodpecker/server/router/middleware/session"
-	"go.woodpecker-ci.org/woodpecker/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
 // GetUsers
@@ -74,8 +74,8 @@ func GetUser(c *gin.Context) {
 //	@Accept			json
 //	@Success		200	{object}	User
 //	@Tags			Users
-//	@Param			Authorization	header	string		true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param			login			path	string		true	"the user's login name"
+//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param			login			path	string	true	"the user's login name"
 //	@Param			user			body	User	true	"the user's data"
 func PatchUser(c *gin.Context) {
 	_store := store.FromContext(c)
@@ -116,7 +116,7 @@ func PatchUser(c *gin.Context) {
 //	@Produce		json
 //	@Success		200	{object}	User
 //	@Tags			Users
-//	@Param			Authorization	header	string		true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param			user			body	User	true	"the user's data"
 func PostUser(c *gin.Context) {
 	in := &model.User{}

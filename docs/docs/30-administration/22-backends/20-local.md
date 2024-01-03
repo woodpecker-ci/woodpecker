@@ -5,8 +5,8 @@ The local backend will execute the pipelines on the local system without any iso
 :::
 
 :::note
-This backend is still pretty new and can not be treated as stable. Its
-implementation and configuration can change at any time.
+Currently we do not support services for this backend.
+[Read more here](https://github.com/woodpecker-ci/woodpecker/issues/3095).
 :::
 
 Since the code runs directly in the same context as the agent (same user, same
@@ -32,8 +32,7 @@ agent, configure it and run it on the host machine.
 Enable connection to the server from the outside of the docker environment by
 exposing the port 9000:
 
-```yaml
-# docker-compose.yml for the server
+```yaml title="docker-compose.yml" for the server
 version: '3'
 
 services:
@@ -77,9 +76,7 @@ manual clone step.
 The `image` entry is used to specify the shell, such as Bash or Fish, that is
 used to run the commands.
 
-```yaml
-# .woodpecker.yml
-
+```yaml title=".woodpecker.yml"
 steps:
   build:
     image: bash
@@ -114,9 +111,7 @@ WOODPECKER_FILTER_LABELS=type=exec
 Then, use this `label` `type` with value `exec` in the pipeline definition, to
 only run on this agent:
 
-```yaml
-# .woodpecker.yml
-
+```yaml title=".woodpecker.yml"
 labels:
   type: exec
 

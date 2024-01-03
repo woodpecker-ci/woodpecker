@@ -21,16 +21,17 @@ import (
 	"net/http"
 	"net/url"
 	"path/filepath"
+	"strconv"
 
 	"golang.org/x/oauth2"
 
-	"go.woodpecker-ci.org/woodpecker/server"
-	"go.woodpecker-ci.org/woodpecker/server/forge"
-	"go.woodpecker-ci.org/woodpecker/server/forge/bitbucket/internal"
-	"go.woodpecker-ci.org/woodpecker/server/forge/common"
-	forge_types "go.woodpecker-ci.org/woodpecker/server/forge/types"
-	"go.woodpecker-ci.org/woodpecker/server/model"
-	shared_utils "go.woodpecker-ci.org/woodpecker/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/bitbucket/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/common"
+	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	shared_utils "go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
 // Bitbucket cloud endpoints.
@@ -283,7 +284,7 @@ func (c *config) Status(ctx context.Context, user *model.User, repo *model.Repo,
 		State: convertStatus(pipeline.Status),
 		Desc:  common.GetPipelineStatusDescription(pipeline.Status),
 		Key:   "Woodpecker",
-		URL:   common.GetPipelineStatusLink(repo, pipeline, nil),
+		URL:   common.GetPipelineStatusURL(repo, pipeline, nil),
 	}
 	return c.newClient(ctx, user).CreateStatus(repo.Owner, repo.Name, pipeline.Commit, &status)
 }
@@ -366,10 +367,10 @@ func (c *config) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 	if err != nil {
 		return nil, err
 	}
-	result := []*model.PullRequest{}
+	var result []*model.PullRequest
 	for _, pullRequest := range pullRequests {
 		result = append(result, &model.PullRequest{
-			Index: int64(pullRequest.ID),
+			Index: model.ForgeRemoteID(strconv.Itoa(int(pullRequest.ID))),
 			Title: pullRequest.Title,
 		})
 	}

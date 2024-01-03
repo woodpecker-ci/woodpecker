@@ -27,12 +27,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/server"
-	"go.woodpecker-ci.org/woodpecker/server/badges"
-	"go.woodpecker-ci.org/woodpecker/server/ccmenu"
-	"go.woodpecker-ci.org/woodpecker/server/model"
-	"go.woodpecker-ci.org/woodpecker/server/store"
-	"go.woodpecker-ci.org/woodpecker/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/badges"
+	"go.woodpecker-ci.org/woodpecker/v2/server/ccmenu"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
 )
 
 // GetBadge
@@ -42,7 +42,7 @@ import (
 //	@Produce	image/svg+xml
 //	@Success	200
 //	@Tags		Badges
-//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		repo_id	path	int	true	"the repository id"
 func GetBadge(c *gin.Context) {
 	_store := store.FromContext(c)
 
@@ -97,8 +97,7 @@ func GetBadge(c *gin.Context) {
 //	@Produce		xml
 //	@Success		200
 //	@Tags			Badges
-//	@Param			owner	path	string	true	"the repository owner's name"
-//	@Param			name	path	string	true	"the repository name"
+//	@Param			repo_id	path	int	true	"the repository id"
 func GetCC(c *gin.Context) {
 	_store := store.FromContext(c)
 	var repo *model.Repo

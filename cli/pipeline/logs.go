@@ -18,10 +18,9 @@ import (
 	"fmt"
 	"strconv"
 
-	"go.woodpecker-ci.org/woodpecker/cli/common"
-	"go.woodpecker-ci.org/woodpecker/cli/internal"
-
 	"github.com/urfave/cli/v2"
+
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
 var pipelineLogsCmd = &cli.Command{
@@ -29,7 +28,6 @@ var pipelineLogsCmd = &cli.Command{
 	Usage:     "show pipeline logs",
 	ArgsUsage: "<repo-id|repo-full-name> [pipeline] [stepID]",
 	Action:    pipelineLogs,
-	Flags:     common.GlobalFlags,
 }
 
 func pipelineLogs(c *cli.Context) error {

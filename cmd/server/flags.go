@@ -20,8 +20,8 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"go.woodpecker-ci.org/woodpecker/cmd/common"
-	"go.woodpecker-ci.org/woodpecker/shared/constant"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/logger"
 )
 
 var flags = append([]cli.Flag{
@@ -44,11 +44,6 @@ var flags = append([]cli.Flag{
 		EnvVars: []string{"WOODPECKER_WEBHOOK_HOST"},
 		Name:    "server-webhook-host",
 		Usage:   "server fully qualified url for forge's Webhooks (<scheme>://<host>[/<prefixpath>])",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_ROOT_PATH", "WOODPECKER_ROOT_URL"},
-		Name:    "root-path",
-		Usage:   "server url root (used for statics loading when having a url path prefix)",
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_SERVER_ADDR"},
@@ -255,6 +250,16 @@ var flags = append([]cli.Flag{
 		EnvVars: []string{"WOODPECKER_ENABLE_SWAGGER"},
 		Name:    "enable-swagger",
 		Value:   true,
+	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_DISABLE_VERSION_CHECK"},
+		Usage:   "Disable version check in admin web ui.",
+		Name:    "skip-version-check",
+	},
+	&cli.StringSliceFlag{
+		EnvVars: []string{"WOODPECKER_ADDONS"},
+		Name:    "addons",
+		Usage:   "list of addon files",
 	},
 	//
 	// backend options for pipeline compiler
@@ -513,4 +518,4 @@ var flags = append([]cli.Flag{
 		Name:    "encryption-disable-flag",
 		Usage:   "Flag to decrypt all encrypted data and disable encryption on server",
 	},
-}, common.GlobalLoggerFlags...)
+}, logger.GlobalLoggerFlags...)

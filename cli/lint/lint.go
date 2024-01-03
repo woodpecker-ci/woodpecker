@@ -25,10 +25,10 @@ import (
 	"github.com/muesli/termenv"
 	"github.com/urfave/cli/v2"
 
-	"go.woodpecker-ci.org/woodpecker/cli/common"
-	pipeline_errors "go.woodpecker-ci.org/woodpecker/pipeline/errors"
-	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml"
-	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/linter"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
+	pipeline_errors "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter"
 )
 
 // Command exports the info command.
@@ -37,7 +37,6 @@ var Command = &cli.Command{
 	Usage:     "lint a pipeline configuration file",
 	ArgsUsage: "[path/to/.woodpecker.yaml]",
 	Action:    lint,
-	Flags:     common.GlobalFlags,
 }
 
 func lint(c *cli.Context) error {
@@ -102,9 +101,9 @@ func lintFile(_ *cli.Context, file string) error {
 	// TODO: lint multiple files at once to allow checks for sth like "depends_on" to work
 	err = linter.New(linter.WithTrusted(true)).Lint([]*linter.WorkflowConfig{config})
 	if err != nil {
-		fmt.Printf("🔥 %s has errors:\n", output.String(config.File).Underline())
+		fmt.Printf("🔥 %s has warnings / errors:\n", output.String(config.File).Underline())
 
-		hasErrors := true
+		hasErrors := false
 		for _, err := range pipeline_errors.GetPipelineErrors(err) {
 			line := "  "
 
