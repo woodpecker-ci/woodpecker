@@ -101,15 +101,15 @@ steps:
         path: *docker_path
         branch: ${CI_REPO_DEFAULT_BRANCH}
 
-    version-release:
-      image: *alpine_image
-      commands:
-        - apk add jq
-        - if [[ "${CI_COMMIT_TAG}" != *"rc"* ]] ; then jq '.latest = "${CI_COMMIT_TAG}"' ./docs_repo/version.json > ./docs_repo/version.json.tmp && mv ./docs_repo/version.json.tmp ./docs_repo/version.json ; fi
-        - jq '.rc = "${CI_COMMIT_TAG}"' ./docs_repo/version.json > ./docs_repo/version.json.tmp
-        - mv ./docs_repo/version.json.tmp ./docs_repo/version.json
-      when:
-        - event: tag
+  version-release:
+    image: *alpine_image
+    commands:
+      - apk add jq
+      - if [[ "${CI_COMMIT_TAG}" != *"rc"* ]] ; then jq '.latest = "${CI_COMMIT_TAG}"' ./docs_repo/version.json > ./docs_repo/version.json.tmp && mv ./docs_repo/version.json.tmp ./docs_repo/version.json ; fi
+      - jq '.rc = "${CI_COMMIT_TAG}"' ./docs_repo/version.json > ./docs_repo/version.json.tmp
+      - mv ./docs_repo/version.json.tmp ./docs_repo/version.json
+    when:
+      - event: tag
 
   copy-files:
     image: *alpine_image
