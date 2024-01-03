@@ -35,7 +35,7 @@ func TestBitbucketDC(t *testing.T) {
 	k, _ := rsa.GenerateKey(rand.Reader, 2048)
 	c := &client{
 		URLApi:   s.URL,
-		Consumer: CreateConsumer(s.URL, "somelongsecretkey", k),
+		Consumer: createConsumer(s.URL, "somelongsecretkey", k),
 	}
 
 	ctx := context.Background()

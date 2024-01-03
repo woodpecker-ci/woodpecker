@@ -101,12 +101,12 @@ func New(opts Opts) (forge.Forge, error) {
 	}
 
 	block, _ := pem.Decode(keyFileBytes)
-	PrivateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+	privateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
 	if err != nil {
 		return nil, err
 	}
 
-	config.Consumer = CreateConsumer(opts.URL, opts.ConsumerKey, PrivateKey)
+	config.Consumer = createConsumer(opts.URL, opts.ConsumerKey, privateKey)
 	return config, nil
 }
 
@@ -617,7 +617,7 @@ func (c *client) newClient(u *model.User) (*bb.Client, error) {
 	return bb.NewClient(c.URLApi, cl)
 }
 
-func CreateConsumer(URL, ConsumerKey string, PrivateKey *rsa.PrivateKey) *oauth.Consumer {
+func createConsumer(URL, ConsumerKey string, PrivateKey *rsa.PrivateKey) *oauth.Consumer {
 	consumer := oauth.NewRSAConsumer(
 		ConsumerKey,
 		PrivateKey,

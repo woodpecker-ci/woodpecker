@@ -1,6 +1,6 @@
-# Bitbucket Server
+# Bitbucket Datacenter / Server
 
-Woodpecker comes with experimental support for Bitbucket Server, formerly known as Atlassian Stash. To enable Bitbucket Server you should configure the Woodpecker container using the following environment variables:
+Woodpecker comes with experimental support for Bitbucket Datacenter / Server, formerly known as Atlassian Stash. To enable Bitbucket Server you should configure the Woodpecker container using the following environment variables:
 
 ```diff
 # docker-compose.yml
@@ -40,7 +40,7 @@ openssl rsa -in /etc/bitbucket/key.pem -pubout >> /etc/bitbucket/key.pub
 
 Please note that the private key file can be mounted into your Woodpecker container at runtime or as an environment variable
 
-Private key file mounted into your Woodpecker container at runtime as a volume.
+### Private key file mounted into your Woodpecker container at runtime as a volume
 
 ```diff
 # docker-compose.yml
@@ -64,7 +64,7 @@ services:
     [...]
 ```
 
-Private key as environment variable
+### Private key as environment variable
 
 ```diff
 # docker-compose.yml
@@ -88,11 +88,11 @@ services:
 
 ## Service Account
 
-Woodpecker uses `git+https` to clone repositories, however, Bitbucket Server does not currently support cloning repositories with OAuth token. To work around this limitation, you must create a service account and provide the username and password to Woodpecker. This service account will be used to authenticate and clone private repositories.
+Woodpecker uses `git+https` to clone repositories, however, Bitbucket Server does not currently support cloning repositories with an OAuth token. To work around this limitation, you must create a service account and provide the username and password to Woodpecker. This service account will be used to authenticate and clone private repositories.
 
 ## Registration
 
-You must register your application with Bitbucket Server in order to generate a consumer key. Navigate to your account settings and choose Applications from the menu, and click Register new application. Now copy & paste the text value from `/etc/bitbucket/key.pub` into the `Public Key` in the incoming link part of the application registration.
+You must register your application with Bitbucket Datacenter / Server in order to generate a consumer key. Navigate to your account settings and choose Applications from the menu, and click Register new application. Now copy & paste the text value from `/etc/bitbucket/key.pub` into the `Public Key` in the incoming link part of the application registration.
 
 Please use the following as the Authorization callback URL:
 
