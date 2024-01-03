@@ -140,14 +140,17 @@ defineEmits<{
 }>();
 
 const pipeline = toRef(props, 'pipeline');
+const selectedStepId = toRef(props, 'selectedStepId');
 const { prettyRef } = usePipeline(pipeline);
 
 const workflowsCollapsed = ref<Record<PipelineStep['id'], boolean>>(
-  props.pipeline.workflows && props.pipeline.workflows.length > 1
-    ? (props.pipeline.workflows || []).reduce(
+  pipeline.value.workflows && pipeline.value.workflows.length > 1
+    ? (pipeline.value.workflows || []).reduce(
         (collapsed, workflow) => ({
           ...collapsed,
-          [workflow.id]: ['success', 'skipped', 'blocked'].includes(workflow.state),
+          [workflow.id]:
+            ['success', 'skipped', 'blocked'].includes(workflow.state) &&
+            !workflow.children.some((child) => child.pid === selectedStepId.value),
         }),
         {},
       )
