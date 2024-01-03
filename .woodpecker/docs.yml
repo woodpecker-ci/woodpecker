@@ -133,6 +133,8 @@ steps:
       - ssh-keyscan -t rsa github.com >> $HOME/.ssh/known_hosts
       - echo "$BOT_PRIVATE_KEY" > $HOME/.ssh/id_rsa
       - chmod 0600 $HOME/.ssh/id_rsa
+      - git config --global user.email "woodpecker-bot@obermui.de"
+      - git config --global user.name "woodpecker-bot"
       - cd ./docs_repo
       - git add .
       # exit successfully if nothing changed
