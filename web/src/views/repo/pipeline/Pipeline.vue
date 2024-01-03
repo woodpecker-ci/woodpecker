@@ -122,7 +122,13 @@ const selectedStepId = computed({
   get() {
     if (stepId.value !== '' && stepId.value !== null && stepId.value !== undefined) {
       const id = parseInt(stepId.value, 10);
-      const step = pipeline.value?.workflows?.reduce(
+
+      let step = pipeline.value.workflows?.find((workflow) => workflow.pid === id)?.children[0];
+      if (step) {
+        return step.pid;
+      }
+
+      step = pipeline.value?.workflows?.reduce(
         (prev, p) => prev || p.children?.find((c) => c.pid === id),
         undefined as PipelineStep | undefined,
       );
