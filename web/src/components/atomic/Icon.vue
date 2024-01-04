@@ -2,7 +2,8 @@
   <i-ic-sharp-timelapse v-if="name === 'duration'" class="h-6 w-6" />
   <i-mdi-clock-time-eight-outline v-else-if="name === 'since'" class="h-6 w-6" />
   <i-mdi-source-branch v-else-if="name === 'push'" class="h-6 w-6" />
-  <i-mdi-source-pull v-else-if="name === 'pull_request'" class="h-6 w-6" />
+  <i-mdi-source-pull v-else-if="name === 'pull-request'" class="h-6 w-6" />
+  <i-mdi-source-merge v-else-if="name === 'pull-request-closed'" class="h-6 w-6" />
   <i-mdi-gesture-tap v-else-if="name === 'manual-pipeline'" class="h-6 w-6" />
   <i-mdi-tag-outline v-else-if="name === 'tag'" class="h-6 w-6" />
   <i-clarity-deploy-line v-else-if="name === 'deployment'" class="h-6 w-6" />
@@ -50,6 +51,7 @@
   <i-teenyicons-refresh-outline v-else-if="name === 'refresh'" class="h-6 w-6" />
   <i-ic-baseline-play-arrow v-else-if="name === 'play'" class="h-6 w-6" />
   <i-ic-baseline-pause v-else-if="name === 'pause'" class="h-6 w-6" />
+  <i-svg-spinners-180-ring-with-bg v-else-if="name === 'spinner'" class="h-6 w-6" />
   <div v-else-if="name === 'blank'" class="h-6 w-6" />
 </template>
 
@@ -58,7 +60,8 @@ export type IconNames =
   | 'duration'
   | 'since'
   | 'push'
-  | 'pull_request'
+  | 'pull-request'
+  | 'pull-request-closed'
   | 'manual-pipeline'
   | 'tag'
   | 'deployment'
@@ -103,6 +106,7 @@ export type IconNames =
   | 'pause'
   | 'warning'
   | 'attention'
+  | 'spinner'
   | 'error';
 
 defineProps<{

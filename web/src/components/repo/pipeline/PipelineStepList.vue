@@ -11,11 +11,11 @@
         <span>{{ pipeline.author }}</span>
       </div>
       <a
-        v-if="pipeline.event === 'pull_request'"
+        v-if="pipeline.event === 'pull_request' || pipeline.event === 'pull_request_closed'"
         class="flex items-center space-x-1 text-wp-link-100 hover:text-wp-link-200 min-w-0"
         :href="pipeline.forge_url"
       >
-        <Icon name="pull_request" />
+        <Icon name="pull-request" />
         <span class="truncate">{{ prettyRef }}</span>
       </a>
       <router-link
@@ -50,9 +50,9 @@
       </div>
     </div>
 
-    <div v-if="pipeline.workflows === undefined || pipeline.workflows.length === 0" class="m-auto mt-4">
+    <Panel v-if="pipeline.workflows === undefined || pipeline.workflows.length === 0">
       <span>{{ $t('repo.pipeline.no_pipeline_steps') }}</span>
-    </div>
+    </Panel>
 
     <div class="flex-grow min-h-0 w-full relative">
       <div class="absolute top-0 left-0 right-0 h-full flex flex-col md:overflow-y-auto gap-y-2">
@@ -109,7 +109,7 @@
               }"
               @click="$emit('update:selected-step-id', step.pid)"
             >
-              <PipelineStatusIcon :status="step.state" class="!h-4 !w-4" />
+              <PipelineStatusIcon :service="step.type == StepType.Service" :status="step.state" class="!h-4 !w-4" />
               <span class="truncate">{{ step.name }}</span>
               <PipelineStepDuration :step="step" />
             </button>
@@ -125,10 +125,11 @@ import { ref, toRef } from 'vue';
 
 import Badge from '~/components/atomic/Badge.vue';
 import Icon from '~/components/atomic/Icon.vue';
+import Panel from '~/components/layout/Panel.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import PipelineStepDuration from '~/components/repo/pipeline/PipelineStepDuration.vue';
 import usePipeline from '~/compositions/usePipeline';
-import { Pipeline, PipelineStep } from '~/lib/api/types';
+import { Pipeline, PipelineStep, StepType } from '~/lib/api/types';
 
 const props = defineProps<{
   pipeline: Pipeline;
@@ -140,14 +141,17 @@ defineEmits<{
 }>();
 
 const pipeline = toRef(props, 'pipeline');
+const selectedStepId = toRef(props, 'selectedStepId');
 const { prettyRef } = usePipeline(pipeline);
 
 const workflowsCollapsed = ref<Record<PipelineStep['id'], boolean>>(
-  props.pipeline.workflows && props.pipeline.workflows.length > 1
-    ? (props.pipeline.workflows || []).reduce(
+  pipeline.value.workflows && pipeline.value.workflows.length > 1
+    ? (pipeline.value.workflows || []).reduce(
         (collapsed, workflow) => ({
           ...collapsed,
-          [workflow.id]: ['success', 'skipped', 'blocked'].includes(workflow.state),
+          [workflow.id]:
+            ['success', 'skipped', 'blocked'].includes(workflow.state) &&
+            !workflow.children.some((child) => child.pid === selectedStepId.value),
         }),
         {},
       )

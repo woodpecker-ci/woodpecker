@@ -88,16 +88,6 @@ func TestParse(t *testing.T) {
 				g.Assert(out.Steps.ContainerList[1].When.Constraints[0].Event.Include).Equal([]string{"success"})
 			})
 
-			g.It("Should unmarshal with default version", func() {
-				out, err := ParseString(sampleYamlDefaultVersion)
-				if err != nil {
-					g.Fail(err)
-				}
-				g.Assert(len(out.Steps.ContainerList)).Equal(1)
-				g.Assert(out.Steps.ContainerList[0].Name).Equal("notify_success")
-				g.Assert(out.Steps.ContainerList[0].Image).Equal("xyz")
-			})
-
 			matchConfig, err := ParseString(sampleYaml)
 			if err != nil {
 				g.Fail(err)
@@ -190,7 +180,6 @@ pipeline:
 }
 
 var sampleYaml = `
-version: 1
 image: hello-world
 when:
   - event:
@@ -242,14 +231,7 @@ runs_on:
   - failure
 `
 
-var sampleYamlDefaultVersion = `
-steps:
-  - name: notify_success
-    image: xyz
-`
-
 var simpleYamlAnchors = `
-version: 1
 vars:
   image: &image plugins/slack
 steps:
@@ -258,7 +240,6 @@ steps:
 `
 
 var sampleVarYaml = `
-version: 1
 _slack: &SLACK
   image: plugins/slack
 steps:
@@ -268,3 +249,38 @@ steps:
     when:
       event: success
 `
+
+var sampleSliceYaml = `
+steps:
+  nil_slice:
+    image: plugins/slack
+  empty_slice:
+    image: plugins/slack
+    depends_on: []
+`
+
+func TestSlice(t *testing.T) {
+	g := goblin.Goblin(t)
+
+	g.Describe("Parser", func() {
+		g.It("should marshal a not set slice to nil", func() {
+			out, err := ParseString(sampleSliceYaml)
+			if err != nil {
+				g.Fail(err)
+			}
+
+			g.Assert(out.Steps.ContainerList[0].DependsOn).IsNil()
+			g.Assert(len(out.Steps.ContainerList[0].DependsOn)).Equal(0)
+		})
+
+		g.It("should marshal an empty slice", func() {
+			out, err := ParseString(sampleSliceYaml)
+			if err != nil {
+				g.Fail(err)
+			}
+
+			g.Assert(out.Steps.ContainerList[1].DependsOn).IsNotNil()
+			g.Assert(len(out.Steps.ContainerList[1].DependsOn)).Equal(0)
+		})
+	})
+}

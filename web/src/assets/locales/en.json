@@ -15,6 +15,7 @@
   "unknown_error": "An unknown error occurred",
   "documentation_for": "Documentation for \"{topic}\"",
   "pipeline_feed": "Pipeline feed",
+  "empty_list": "No {entity} found!",
   "not_found": {
     "not_found": "Whoa 404, either we broke something or you had a typing mishap :-/",
     "back_home": "Back to home"

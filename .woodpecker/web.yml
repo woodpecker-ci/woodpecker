@@ -1,5 +1,3 @@
-version: 1
-
 when:
   - event: [pull_request, tag]
   - event: push
@@ -21,7 +19,7 @@ variables:
     event: [pull_request, tag, deployment]
 
 steps:
-  deps:
+  install_dependencies:
     image: *node_image
     directory: web/
     commands:
@@ -30,7 +28,8 @@ steps:
     when: *when
 
   lint:
-    group: test
+    depends_on:
+      - install_dependencies
     image: *node_image
     directory: web/
     commands:
@@ -39,7 +38,8 @@ steps:
     when: *when
 
   formatcheck:
-    group: test
+    depends_on:
+      - install_dependencies
     image: *node_image
     directory: web/
     commands:
@@ -48,7 +48,8 @@ steps:
     when: *when
 
   typecheck:
-    group: test
+    depends_on:
+      - install_dependencies
     image: *node_image
     directory: web/
     commands:
@@ -57,7 +58,8 @@ steps:
     when: *when
 
   test:
-    group: test
+    depends_on:
+      - install_dependencies
     image: *node_image
     directory: web/
     commands:
