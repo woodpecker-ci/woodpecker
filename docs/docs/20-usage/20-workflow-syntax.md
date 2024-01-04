@@ -449,21 +449,21 @@ Normally steps of a workflow are executed serially in the order in which they ar
 
 ```diff
  steps:
-  build: # build will be executed immediately
-    image: golang
-    commands:
-      - go build
-
-  deploy:
-    image: plugins/docker
-    settings:
-      repo: foo/bar
+   build: # build will be executed immediately
+     image: golang
+     commands:
+       - go build
+ 
+   deploy:
+     image: plugins/docker
+     settings:
+       repo: foo/bar
 +    depends_on: [build, test] # deploy will be executed after build and test finished
-
-  test: # test will be executed immediately as no dependencies are set
-    image: golang
-    commands:
-      - go test
+ 
+   test: # test will be executed immediately as no dependencies are set
+     image: golang
+     commands:
+       - go test
 ```
 
 ### `volumes`
