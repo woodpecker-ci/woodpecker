@@ -8,15 +8,16 @@ when:
 
 variables:
   - &node_image 'docker.io/node:21-alpine'
+  - &reviewdog_eslint_image 'docker.io/woodpeckerci/plugin-reviewdog-eslint:alpine'
   - &when
-    path:
-      # related config files
-      - '.woodpecker/web.yml'
-      # web source code
-      - 'web/**'
-      # api source code
-      - 'server/api/**'
-    event: [pull_request, tag, deployment]
+    - path: &when_path
+        # related config files
+        - '.woodpecker/web.yml'
+        # web source code
+        - 'web/**'
+        # api source code
+        - 'server/api/**'
+      event: [pull_request, tag, deployment]
 
 steps:
   install_dependencies:
@@ -30,12 +31,19 @@ steps:
   lint:
     depends_on:
       - install_dependencies
-    image: *node_image
-    directory: web/
-    commands:
-      - corepack enable
-      - pnpm lint
-    when: *when
+    image: *reviewdog_eslint_image
+    settings:
+      path: web/
+      token:
+        from_secret: reviewdog_token
+      extensions:
+        - .js
+        - .ts
+        - .vue
+        - .json
+    when:
+      path: *when_path
+      event: pull_request
 
   formatcheck:
     depends_on:
