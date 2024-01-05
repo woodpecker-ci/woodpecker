@@ -84,8 +84,12 @@ steps:
     when: *when
 
   prettier:
+    depends_on:
+      - lint
     image: docker.io/woodpeckerci/plugin-prettier:next
-    when: *when
+    when:
+      path: *when_path
+      event: pull_request
 
   test:
     depends_on:
