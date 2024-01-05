@@ -32,6 +32,7 @@ steps:
     depends_on:
       - install_dependencies
     image: *reviewdog_eslint_image
+    pull: true
     directory: web/
     settings:
       token:
