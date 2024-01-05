@@ -8,7 +8,7 @@ when:
 
 variables:
   - &golang_image 'docker.io/golang:1.21.5'
-  - &reviewdog_golangci_lint_image 'docker.io/woodpeckerci/plugin-reviewdog-golangci-lint:alpine'
+  - &reviewdog_golangci_lint_image 'docker.io/woodpeckerci/plugin-reviewdog-golangci-lint:latest'
   - &when
     - path: &when_path # related config files
         - '.woodpecker/test.yml'
