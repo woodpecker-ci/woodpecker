@@ -56,9 +56,15 @@ const (
 )
 
 type SecurityContext struct {
-	Privileged   *bool  `yaml:"privileged,omitempty"`
-	RunAsNonRoot *bool  `yaml:"runAsNonRoot,omitempty"`
-	RunAsUser    *int64 `yaml:"runAsUser,omitempty"`
-	RunAsGroup   *int64 `yaml:"runAsGroup,omitempty"`
-	FSGroup      *int64 `yaml:"fsGroup,omitempty"`
+	Privileged     *bool           `yaml:"privileged,omitempty"`
+	RunAsNonRoot   *bool           `yaml:"runAsNonRoot,omitempty"`
+	RunAsUser      *int64          `yaml:"runAsUser,omitempty"`
+	RunAsGroup     *int64          `yaml:"runAsGroup,omitempty"`
+	FSGroup        *int64          `yaml:"fsGroup,omitempty"`
+	SeccompProfile *SeccompProfile `yaml:"seccompProfile,omitempty"`
+}
+
+type SeccompProfile struct {
+	Type             string `yaml:"type,omitempty"`
+	LocalhostProfile string `yaml:"localhostProfile,omitempty"`
 }

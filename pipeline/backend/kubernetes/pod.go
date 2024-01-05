@@ -305,6 +305,7 @@ func podSecurityContext(sc *types.SecurityContext, secCtxConf SecurityContextCon
 		user    *int64
 		group   *int64
 		fsGroup *int64
+		seccomp *v1.SeccompProfile
 	)
 
 	if sc != nil && sc.RunAsNonRoot != nil {
@@ -321,18 +322,38 @@ func podSecurityContext(sc *types.SecurityContext, secCtxConf SecurityContextCon
 		fsGroup = sc.FSGroup
 	}
 
-	if nonRoot == nil && user == nil && group == nil && fsGroup == nil {
+	if sc != nil {
+		seccomp = seccompProfile(sc.SeccompProfile)
+	}
+
+	if nonRoot == nil && user == nil && group == nil && fsGroup == nil && seccomp == nil {
 		return nil
 	}
 
 	securityContext := &v1.PodSecurityContext{
-		RunAsNonRoot: nonRoot,
-		RunAsUser:    user,
-		RunAsGroup:   group,
-		FSGroup:      fsGroup,
+		RunAsNonRoot:   nonRoot,
+		RunAsUser:      user,
+		RunAsGroup:     group,
+		FSGroup:        fsGroup,
+		SeccompProfile: seccomp,
 	}
 	log.Trace().Msgf("Pod security context that will be used: %v", securityContext)
 	return securityContext
+}
+
+func seccompProfile(scp *types.SeccompProfile) *v1.SeccompProfile {
+	if scp == nil || len(scp.Type) == 0 {
+		return nil
+	}
+
+	seccompProfile := &v1.SeccompProfile{
+		Type: v1.SeccompProfileType(scp.Type),
+	}
+	if len(scp.LocalhostProfile) > 0 {
+		seccompProfile.LocalhostProfile = &scp.LocalhostProfile
+	}
+
+	return seccompProfile
 }
 
 func containerSecurityContext(sc *types.SecurityContext, stepPrivileged bool) *v1.SecurityContext {
