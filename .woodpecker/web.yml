@@ -32,8 +32,8 @@ steps:
     depends_on:
       - install_dependencies
     image: *reviewdog_eslint_image
+    directory: web/
     settings:
-      path: web/
       token:
         from_secret: github_token
       extensions:
