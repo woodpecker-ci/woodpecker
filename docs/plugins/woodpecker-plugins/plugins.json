@@ -164,6 +164,16 @@
       "name": "Reviewdog golangci-lint",
       "docs": "https://codeberg.org/woodpecker-plugins/reviewdog-golangci-lint/raw/branch/main/docs.md",
       "verified": true
+    },
+    {
+      "name": "Reviewdog ESLint",
+      "docs": "https://codeberg.org/woodpecker-plugins/reviewdog-eslint/raw/branch/main/docs.md",
+      "verified": true
+    },
+    {
+      "name": "Ansible",
+      "docs": "https://codeberg.org/woodpecker-plugins/ansible/raw/branch/main/docs.md",
+      "verified": true
     }
   ]
 }

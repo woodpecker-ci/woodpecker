@@ -45,7 +45,7 @@ func (s *StringOrSlice) UnmarshalYAML(unmarshal func(any) error) error {
 }
 
 func toStrings(s []any) ([]string, error) {
-	if len(s) == 0 {
+	if s == nil {
 		return nil, nil
 	}
 	r := make([]string, len(s))

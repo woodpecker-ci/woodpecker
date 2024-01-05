@@ -5,8 +5,8 @@ The local backend will execute the pipelines on the local system without any iso
 :::
 
 :::note
-This backend is still pretty new and can not be treated as stable. Its
-implementation and configuration can change at any time.
+Currently we do not support services for this backend.
+[Read more here](https://github.com/woodpecker-ci/woodpecker/issues/3095).
 :::
 
 Since the code runs directly in the same context as the agent (same user, same
