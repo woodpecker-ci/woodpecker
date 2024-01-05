@@ -15,8 +15,6 @@
 package docker
 
 import (
-	"encoding/base64"
-	"encoding/json"
 	"regexp"
 	"strings"
 
@@ -166,16 +164,6 @@ func toDev(paths []string) []container.DeviceMapping {
 		})
 	}
 	return devices
-}
-
-// helper function that serializes the auth configuration as JSON
-// base64 payload.
-func encodeAuthToBase64(authConfig types.Auth) (string, error) {
-	buf, err := json.Marshal(authConfig)
-	if err != nil {
-		return "", err
-	}
-	return base64.URLEncoding.EncodeToString(buf), nil
 }
 
 // helper function that split volume path

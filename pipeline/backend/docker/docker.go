@@ -186,7 +186,7 @@ func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID str
 	// create pull options with encoded authorization credentials.
 	pullopts := types.ImagePullOptions{}
 	if step.AuthConfig.Username != "" && step.AuthConfig.Password != "" {
-		pullopts.RegistryAuth, _ = encodeAuthToBase64(step.AuthConfig)
+		pullopts.RegistryAuth, _ = step.AuthConfig.EncodeToBase64()
 	}
 
 	// automatically pull the latest version of the image if requested

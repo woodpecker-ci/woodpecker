@@ -135,6 +135,17 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 		})
 	}
 
+	// create registries
+	for _, reg := range c.registries {
+		config.Registries = append(config.Registries, &backend_types.Registry{
+			Hostname: reg.Hostname,
+			Username: reg.Username,
+			Password: reg.Password,
+			Email:    reg.Email,
+			Token:    reg.Token,
+		})
+	}
+
 	// overrides the default workspace paths when specified
 	// in the YAML file.
 	if len(conf.Workspace.Base) != 0 {

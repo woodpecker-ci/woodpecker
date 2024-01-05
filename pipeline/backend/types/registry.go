@@ -14,24 +14,11 @@
 
 package types
 
-import (
-	"encoding/base64"
-	"encoding/json"
-)
-
-// Auth defines registry authentication credentials.
-type Auth struct {
+// Registry defines a registry authorization
+type Registry struct {
+	Hostname string `json:"hostname,omitempty"`
 	Username string `json:"username,omitempty"`
 	Password string `json:"password,omitempty"`
 	Email    string `json:"email,omitempty"`
-}
-
-// helper function that serializes the auth configuration as JSON
-// base64 payload.
-func (a Auth) EncodeToBase64() (string, error) {
-	buf, err := json.Marshal(a)
-	if err != nil {
-		return "", err
-	}
-	return base64.URLEncoding.EncodeToString(buf), nil
+	Token    string `json:"token,omitempty"`
 }

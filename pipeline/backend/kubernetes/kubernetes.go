@@ -185,6 +185,11 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID s
 		}
 	}
 
+	_, err := startRegistriesAuth(ctx, e, conf.Registries, taskUUID)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -359,6 +364,11 @@ func (e *kube) DestroyWorkflow(_ context.Context, conf *types.Config, taskUUID s
 		if err != nil {
 			return err
 		}
+	}
+
+	err := stopRegistriesAuth(e.ctx, e, taskUUID, defaultDeleteOptions)
+	if err != nil {
+		return err
 	}
 
 	return nil
