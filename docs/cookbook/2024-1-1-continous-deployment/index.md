@@ -37,7 +37,7 @@ This option is easy to maintain, but the downside is a short delay (one minute) 
 
 If you are using a configuration management tool (e.g. Ansible, Chef, Puppet), then you could setup the last pipeline step to call that tool to perform the redeployment.
 
-A plugin for [Ansible](https://plugins.drone.io/plugins/ansible) exists and could be adapted accordingly.
+A plugin for [Ansible](https://woodpecker-ci.org/plugins/Ansible) exists and could be adapted accordingly.
 
 This option is complex and only suitable in an environment in which you're already using configuration management.
 
