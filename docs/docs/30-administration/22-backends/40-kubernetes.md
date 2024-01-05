@@ -18,6 +18,8 @@ agent:
     [...]
 ```
 
+### Options
+
 #### `WOODPECKER_BACKEND_K8S_NAMESPACE`
 
 > Default: `woodpecker`
@@ -56,7 +58,7 @@ Additional annotations to apply to worker pods. Must be a YAML object, e.g. `{"e
 
 #### `WOODPECKER_BACKEND_K8S_SECCTX_NONROOT`
 
-Default: `false`
+> Default: `false`
 
 Determines if containers must be required to run as non-root users.
 
