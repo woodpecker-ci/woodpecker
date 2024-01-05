@@ -129,7 +129,8 @@ func TestFullPod(t *testing.T) {
 				"step": "wp-01he8bebctabr3kgk0qj36d2me-0"
 			},
 			"annotations": {
-				"apparmor.security": "runtime/default"
+				"apps.kubernetes.io/pod-index": "0",
+				"container.apparmor.security.beta.kubernetes.io/wp-01he8bebctabr3kgk0qj36d2me-0": "localhost/k8s-apparmor-example-deny-write"
 			}
 		},
 		"spec": {
@@ -252,15 +253,19 @@ func TestFullPod(t *testing.T) {
 		RunAsUser:    newInt64(101),
 		RunAsGroup:   newInt64(101),
 		FSGroup:      newInt64(101),
-		SeccompProfile: &types.SeccompProfile{
+		SeccompProfile: &types.SecProfile{
 			Type:             "Localhost",
 			LocalhostProfile: "profiles/audit.json",
+		},
+		ApparmorProfile: &types.SecProfile{
+			Type:             "Localhost",
+			LocalhostProfile: "k8s-apparmor-example-deny-write",
 		},
 	}
 	pod, err := mkPod("woodpecker", "wp-01he8bebctabr3kgk0qj36d2me-0", "meltwater/drone-cache", "/woodpecker/src", "linux/amd64", "wp-svc-acc",
 		true, true,
 		[]string{"go get", "go test"}, []string{"woodpecker-cache:/woodpecker/src/cache"}, []string{"regcred", "another-pull-secret"},
-		map[string]string{"app": "test"}, map[string]string{"apparmor.security": "runtime/default"}, map[string]string{"CGO": "0"}, map[string]string{"storage": "ssd"},
+		map[string]string{"app": "test"}, map[string]string{"apps.kubernetes.io/pod-index": "0"}, map[string]string{"CGO": "0"}, map[string]string{"storage": "ssd"},
 		hostAliases, []types.Toleration{{Key: "net-port", Value: "100Mbit", Effect: types.TaintEffectNoSchedule}},
 		types.Resources{Requests: map[string]string{"memory": "128Mi", "cpu": "1000m"}, Limits: map[string]string{"memory": "256Mi", "cpu": "2"}},
 		&secCtx, SecurityContextConfig{RunAsNonRoot: false},

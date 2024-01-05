@@ -43,7 +43,7 @@ func mkPod(namespace, name, image, workDir, goos, serviceAccountName string,
 ) (*v1.Pod, error) {
 	var err error
 
-	meta := podMeta(name, namespace, labels, annotations)
+	meta := podMeta(name, namespace, labels, annotations, securityContext)
 
 	spec, err := podSpec(serviceAccountName, vols, pullSecretNames, env, nodeSelector, extraHosts, tolerations,
 		securityContext, securityContextConfig)
@@ -70,11 +70,18 @@ func podName(step *types.Step) (string, error) {
 	return dnsName(step.Name)
 }
 
-func podMeta(name, namespace string, labels, annotations map[string]string) metav1.ObjectMeta {
+func podMeta(name, namespace string, labels, annotations map[string]string, securityContext *types.SecurityContext) metav1.ObjectMeta {
 	meta := metav1.ObjectMeta{
 		Name:        name,
 		Namespace:   namespace,
 		Annotations: annotations,
+	}
+
+	if securityContext != nil {
+		key, value := apparmorAnnotation(name, securityContext.ApparmorProfile)
+		if key != nil && value != nil {
+			meta.Annotations[*key] = *value
+		}
 	}
 
 	if labels == nil {
@@ -341,7 +348,7 @@ func podSecurityContext(sc *types.SecurityContext, secCtxConf SecurityContextCon
 	return securityContext
 }
 
-func seccompProfile(scp *types.SeccompProfile) *v1.SeccompProfile {
+func seccompProfile(scp *types.SecProfile) *v1.SeccompProfile {
 	if scp == nil || len(scp.Type) == 0 {
 		return nil
 	}
@@ -374,6 +381,35 @@ func containerSecurityContext(sc *types.SecurityContext, stepPrivileged bool) *v
 	}
 	log.Trace().Msgf("Container security context that will be used: %v", securityContext)
 	return securityContext
+}
+
+func apparmorAnnotation(containerName string, scp *types.SecProfile) (*string, *string) {
+	if scp == nil {
+		return nil, nil
+	}
+
+	var (
+		profileType string
+		profilePath string
+	)
+
+	if scp.Type == "RuntimeDefault" {
+		profileType = "runtime"
+		profilePath = "default"
+	}
+
+	if scp.Type == "Localhost" {
+		profileType = "localhost"
+		profilePath = scp.LocalhostProfile
+	}
+
+	if len(profileType) == 0 {
+		return nil, nil
+	}
+
+	key := "container.apparmor.security.beta.kubernetes.io/" + containerName
+	value := profileType + "/" + profilePath
+	return &key, &value
 }
 
 func mapToEnvVars(m map[string]string) []v1.EnvVar {

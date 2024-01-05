@@ -242,7 +242,13 @@ func convertKubernetesBackendOptions(kubeOpt *yaml_types.KubernetesBackendOption
 			FSGroup:      kubeOpt.SecurityContext.FSGroup,
 		}
 		if kubeOpt.SecurityContext.SeccompProfile != nil {
-			securityContext.SeccompProfile = &backend_types.SeccompProfile{
+			securityContext.SeccompProfile = &backend_types.SecProfile{
+				Type:             kubeOpt.SecurityContext.SeccompProfile.Type,
+				LocalhostProfile: kubeOpt.SecurityContext.SeccompProfile.LocalhostProfile,
+			}
+		}
+		if kubeOpt.SecurityContext.ApparmorProfile != nil {
+			securityContext.ApparmorProfile = &backend_types.SecProfile{
 				Type:             kubeOpt.SecurityContext.SeccompProfile.Type,
 				LocalhostProfile: kubeOpt.SecurityContext.SeccompProfile.LocalhostProfile,
 			}

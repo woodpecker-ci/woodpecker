@@ -731,12 +731,15 @@
           "type": "number"
         },
         "seccompProfile": {
-          "$ref": "#/definitions/step_backend_kubernetes_seccomp"
+          "$ref": "#/definitions/step_backend_kubernetes_secprofile"
+        },
+        "apparmorProfile": {
+          "$ref": "#/definitions/step_backend_kubernetes_secprofile"
         }
       }
     },
-    "step_backend_kubernetes_seccomp": {
-      "description": "Pods seccomp profile. Read more: https://woodpecker-ci.org/docs/administration/backends/kubernetes",
+    "step_backend_kubernetes_secprofile": {
+      "description": "Pods / containers security profile. Read more: https://woodpecker-ci.org/docs/administration/backends/kubernetes",
       "type": "object",
       "properties": {
         "type": {
