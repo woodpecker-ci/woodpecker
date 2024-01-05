@@ -35,7 +35,7 @@ steps:
     settings:
       path: web/
       token:
-        from_secret: reviewdog_token
+        from_secret: github_token
       extensions:
         - .js
         - .ts

@@ -56,7 +56,7 @@ steps:
     image: *reviewdog_golangci_lint_image
     settings:
       token:
-        from_secret: reviewdog_token
+        from_secret: github_token
     when:
       path: *when_path
       event: pull_request
