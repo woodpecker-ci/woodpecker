@@ -57,6 +57,7 @@ steps:
     settings:
       token:
         from_secret: github_token
+      timeout: 3m
     when:
       path: *when_path
       event: pull_request
