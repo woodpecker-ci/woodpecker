@@ -2,7 +2,6 @@
   <Container full-width class="flex flex-col flex-grow-0 md:flex-grow md:min-h-xs md:px-4">
     <div class="flex w-full min-h-0 flex-grow gap-4 flex-wrap-reverse md:flex-nowrap">
       <PipelineStepList
-        v-if="pipeline?.workflows && pipeline?.workflows?.length > 0"
         v-model:selected-step-id="selectedStepId"
         :class="{ 'hidden md:flex': pipeline.status === 'blocked' }"
         :pipeline="pipeline"
