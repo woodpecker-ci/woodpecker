@@ -64,6 +64,13 @@ type SecurityContext struct {
 }
 
 type SecProfile struct {
-	Type             string `json:"type,omitempty"`
-	LocalhostProfile string `json:"localhostProfile,omitempty"`
+	Type             SecProfileType `json:"type,omitempty"`
+	LocalhostProfile string         `json:"localhostProfile,omitempty"`
 }
+
+type SecProfileType string
+
+const (
+	SecProfileTypeRuntimeDefault SecProfileType = "RuntimeDefault"
+	SecProfileTypeLocalhost      SecProfileType = "Localhost"
+)

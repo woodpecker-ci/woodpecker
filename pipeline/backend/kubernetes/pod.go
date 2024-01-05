@@ -393,12 +393,12 @@ func apparmorAnnotation(containerName string, scp *types.SecProfile) (*string, *
 		profilePath string
 	)
 
-	if scp.Type == "RuntimeDefault" {
+	if scp.Type == types.SecProfileTypeRuntimeDefault {
 		profileType = "runtime"
 		profilePath = "default"
 	}
 
-	if scp.Type == "Localhost" {
+	if scp.Type == types.SecProfileTypeLocalhost {
 		profileType = "localhost"
 		profilePath = scp.LocalhostProfile
 	}
@@ -407,7 +407,7 @@ func apparmorAnnotation(containerName string, scp *types.SecProfile) (*string, *
 		return nil, nil
 	}
 
-	key := "container.apparmor.security.beta.kubernetes.io/" + containerName
+	key := v1.AppArmorBetaContainerAnnotationKeyPrefix + containerName
 	value := profileType + "/" + profilePath
 	return &key, &value
 }
