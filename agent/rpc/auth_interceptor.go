@@ -79,10 +79,7 @@ func (interceptor *AuthInterceptor) attachToken(ctx context.Context) context.Con
 }
 
 func (interceptor *AuthInterceptor) scheduleRefreshToken(refreshDuration time.Duration) error {
-	err := interceptor.refreshToken()
-	if err != nil {
-		return err
-	}
+	interceptor.refreshToken()
 
 	go func() {
 		wait := refreshDuration
