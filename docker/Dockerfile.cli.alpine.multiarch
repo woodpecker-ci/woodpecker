@@ -13,8 +13,6 @@ ENV CA_CERTIFICATES_VERSION="20230506-r0"
 RUN apk add -U --no-cache ca-certificates=${CA_CERTIFICATES_VERSION}
 ENV GODEBUG=netdns=go
 
-# dmmy change
-
 COPY --from=build /src/dist/woodpecker-cli /bin/
 
 HEALTHCHECK CMD ["/bin/woodpecker-cli", "ping"]
