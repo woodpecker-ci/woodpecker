@@ -46,6 +46,10 @@ agent:
 
   Determines if containers must be required to run as non-root users.
 
+- `WOODPECKER_BACKEND_K8S_PULL_SECRET_NAMES` (default: empty)
+
+  Secret names to pull images from private repositories.
+
 ## Job specific configuration
 
 ### Resources

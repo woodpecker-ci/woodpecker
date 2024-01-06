@@ -139,6 +139,7 @@
   "default": "bawaan",
   "docs": "Dokumentasi",
   "documentation_for": "Dokumentasi untuk \"{topic}\"",
+  "empty_list": "{entity} tidak ditemukan!",
   "errors": {
     "not_found": "Server tidak dapat mencari objek yang diminta"
   },

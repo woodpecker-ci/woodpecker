@@ -1,14 +1,19 @@
 <template>
-  <div v-if="branches" class="space-y-4">
-    <ListItem
-      v-for="branch in branchesWithDefaultBranchFirst"
-      :key="branch"
-      class="text-wp-text-100"
-      :to="{ name: 'repo-branch', params: { branch } }"
-    >
-      {{ branch }}
-      <Badge v-if="branch === repo?.default_branch" :label="$t('default')" class="ml-auto" />
-    </ListItem>
+  <div class="space-y-4">
+    <template v-if="branches.length > 0">
+      <ListItem
+        v-for="branch in branchesWithDefaultBranchFirst"
+        :key="branch"
+        class="text-wp-text-100"
+        :to="{ name: 'repo-branch', params: { branch } }"
+      >
+        {{ branch }}
+        <Badge v-if="branch === repo?.default_branch" :label="$t('default')" class="ml-auto" />
+      </ListItem>
+    </template>
+    <div v-else-if="loading" class="flex justify-center text-wp-text-100">
+      <Icon name="spinner" />
+    </div>
   </div>
 </template>
 
@@ -36,7 +41,7 @@ async function loadBranches(page: number): Promise<string[]> {
   return apiClient.getRepoBranches(repo.value.id, page);
 }
 
-const { resetPage, data: branches } = usePagination(loadBranches);
+const { resetPage, data: branches, loading } = usePagination(loadBranches);
 
 const branchesWithDefaultBranchFirst = computed(() =>
   branches.value.toSorted((a, b) => {
