@@ -85,11 +85,11 @@ Dependencies between workflows can be set with the `depends_on` element. A workf
 The name for a `depends_on` entry is the filename without the path, leading dots and without the file extension `.yml` or `.yaml`. If the project config for example uses `.woodpecker/` as path for CI files with a file named `.woodpecker/.lint.yaml` the corresponding `depends_on` entry would be `lint`.
 
 ```diff
-steps:
-  deploy:
-    image: debian:stable-slim
-    commands:
-      - echo deploying
+ steps:
+   deploy:
+     image: debian:stable-slim
+     commands:
+       - echo deploying
 
 +depends_on:
 +  - lint
@@ -100,14 +100,14 @@ steps:
 Workflows that need to run even on failures should set the `runs_on` tag.
 
 ```diff
-steps:
-  notify:
-    image: debian:stable-slim
-    commands:
-      - echo notifying
+ steps:
+   notify:
+     image: debian:stable-slim
+     commands:
+       - echo notifying
 
-depends_on:
-  - deploy
+ depends_on:
+   - deploy
 
 +runs_on: [ success, failure ]
 ```

@@ -68,28 +68,33 @@ For docker-compose you can use a `.env` file next to your compose configuration 
 Alternatively use docker-secrets. As it may be difficult to use docker secrets for environment variables woodpecker allows to read sensible data from files by providing a `*_FILE` option of all sensible configuration variables. Woodpecker will try to read the value directly from this file. Keep in mind that when the original environment variable gets specified at the same time it will override the value read from the file.
 
 ```diff title="docker-compose.yaml"
-version: '3'
+ version: '3'
 
-services:
-  woodpecker-server:
-    [...]
-    environment:
-      - [...]
-+     - WOODPECKER_AGENT_SECRET_FILE=/run/secrets/woodpecker-agent-secret
-+   secrets:
-+     - woodpecker-agent-secret
+ services:
+   woodpecker-server:
+     [...]
+     environment:
+       - [...]
++      - WOODPECKER_AGENT_SECRET_FILE=/run/secrets/woodpecker-agent-secret
++    secrets:
++      - woodpecker-agent-secret
 +
-+secrets:
-+  woodpecker-agent-secret:
-+    external: true
++ secrets:
++   woodpecker-agent-secret:
++     external: true
 ```
 
 Store a value to a docker secret like this:
-`echo "my_agent_secret_key" | docker secret create woodpecker-agent-secret -`
+
+```bash
+echo "my_agent_secret_key" | docker secret create woodpecker-agent-secret -
+```
 
 or generate a random one like this:
 
-`openssl rand -hex 32 | docker secret create woodpecker-agent-secret -`
+```bash
+openssl rand -hex 32 | docker secret create woodpecker-agent-secret -
+```
 
 ## Custom JavaScript and CSS
 

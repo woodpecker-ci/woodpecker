@@ -52,39 +52,39 @@ SSL support is provided using the [ListenAndServeTLS](https://golang.org/pkg/net
 Update your configuration to expose the following ports:
 
 ```diff title="docker-compose.yaml"
-version: '3'
+ version: '3'
 
-services:
-  woodpecker-server:
-    [...]
-    ports:
-+     - 80:80
-+     - 443:443
-      - 9000:9000
+ services:
+   woodpecker-server:
+     [...]
+     ports:
++      - 80:80
++      - 443:443
+       - 9000:9000
 ```
 
 Update your configuration to mount your certificate and key:
 
 ```diff title="docker-compose.yaml"
-version: '3'
+ version: '3'
 
-services:
-  woodpecker-server:
-    [...]
-    volumes:
-+     - /etc/certs/woodpecker.example.com/server.crt:/etc/certs/woodpecker.example.com/server.crt
-+     - /etc/certs/woodpecker.example.com/server.key:/etc/certs/woodpecker.example.com/server.key
+ services:
+   woodpecker-server:
+     [...]
+     volumes:
++      - /etc/certs/woodpecker.example.com/server.crt:/etc/certs/woodpecker.example.com/server.crt
++      - /etc/certs/woodpecker.example.com/server.key:/etc/certs/woodpecker.example.com/server.key
 ```
 
 Update your configuration to provide the paths of your certificate and key:
 
 ```yaml title="docker-compose.yaml"
-version: '3'
+ version: '3'
 
-services:
-  woodpecker-server:
-    [...]
-    environment:
-+     - WOODPECKER_SERVER_CERT=/etc/certs/woodpecker.example.com/server.crt
-+     - WOODPECKER_SERVER_KEY=/etc/certs/woodpecker.example.com/server.key
+ services:
+   woodpecker-server:
+     [...]
+     environment:
++      - WOODPECKER_SERVER_CERT=/etc/certs/woodpecker.example.com/server.crt
++      - WOODPECKER_SERVER_KEY=/etc/certs/woodpecker.example.com/server.key
 ```

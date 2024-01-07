@@ -58,22 +58,22 @@ services:
 Example YAML file after injecting the matrix parameters:
 
 ```diff
-steps:
-  build:
--   image: golang:${GO_VERSION}
-+   image: golang:1.4
-    commands:
-      - go get
-      - go build
-      - go test
-+   environment:
-+     - GO_VERSION=1.4
-+     - DATABASE=mysql:8
+ steps:
+   build:
+-    image: golang:${GO_VERSION}
++    image: golang:1.4
+     commands:
+       - go get
+       - go build
+       - go test
++    environment:
++      - GO_VERSION=1.4
++      - DATABASE=mysql:8
 
-services:
-  database:
--   image: ${DATABASE}
-+   image: mysql:8
+ services:
+   database:
+-    image: ${DATABASE}
++    image: mysql:8
 ```
 
 ## Examples

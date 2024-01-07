@@ -19,29 +19,29 @@ scrape_configs:
 An administrator will need to generate a user API token and configure in the Prometheus configuration file as a bearer token. Please see the following example:
 
 ```diff
-global:
-  scrape_interval: 60s
+ global:
+   scrape_interval: 60s
 
-scrape_configs:
-  - job_name: 'woodpecker'
-+   bearer_token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ scrape_configs:
+   - job_name: 'woodpecker'
++    bearer_token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
-    static_configs:
-       - targets: ['woodpecker.domain.com']
+     static_configs:
+        - targets: ['woodpecker.domain.com']
 ```
 
 As an alternative, the token can also be read from a file:
 
 ```diff
-global:
-  scrape_interval: 60s
+ global:
+   scrape_interval: 60s
 
-scrape_configs:
-  - job_name: 'woodpecker'
-+   bearer_token_file: /etc/secrets/woodpecker-monitoring-token
+ scrape_configs:
+   - job_name: 'woodpecker'
++    bearer_token_file: /etc/secrets/woodpecker-monitoring-token
 
-    static_configs:
-       - targets: ['woodpecker.domain.com']
+     static_configs:
+        - targets: ['woodpecker.domain.com']
 ```
 
 ## Metric Reference

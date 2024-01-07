@@ -31,12 +31,12 @@ steps:
 - List the commands that should be executed in the container
 
 ```diff
-steps:
-  build:
--   image: debian
-+   image: mycompany/image-with-awscli
-    commands:
-      - aws help
+ steps:
+   build:
+-    image: debian
++    image: mycompany/image-with-awscli
+     commands:
+       - aws help
 ```
 
 ### File changes are incremental

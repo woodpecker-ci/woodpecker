@@ -18,15 +18,15 @@ Otherwise, the communication should go via the `docker0` gateway (usually 172.17
 To configure the Docker network if the network's name is `gitea`, configure it like this:
 
 ```diff title="docker-compose.yaml"
-version: '3'
+ version: '3'
 
-services:
-  [...]
-  woodpecker-agent:
-    [...]
-    environment:
-      - [...]
-+     - WOODPECKER_BACKEND_DOCKER_NETWORK=gitea
+ services:
+   [...]
+   woodpecker-agent:
+     [...]
+     environment:
+       - [...]
++      - WOODPECKER_BACKEND_DOCKER_NETWORK=gitea
 ```
 
 ## Registration
