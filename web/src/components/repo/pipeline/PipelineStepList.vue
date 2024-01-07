@@ -50,9 +50,9 @@
       </div>
     </div>
 
-    <div v-if="pipeline.workflows === undefined || pipeline.workflows.length === 0" class="m-auto mt-4">
+    <Panel v-if="pipeline.workflows === undefined || pipeline.workflows.length === 0">
       <span>{{ $t('repo.pipeline.no_pipeline_steps') }}</span>
-    </div>
+    </Panel>
 
     <div class="flex-grow min-h-0 w-full relative">
       <div class="absolute top-0 left-0 right-0 h-full flex flex-col md:overflow-y-auto gap-y-2">
@@ -125,6 +125,7 @@ import { ref, toRef } from 'vue';
 
 import Badge from '~/components/atomic/Badge.vue';
 import Icon from '~/components/atomic/Icon.vue';
+import Panel from '~/components/layout/Panel.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import PipelineStepDuration from '~/components/repo/pipeline/PipelineStepDuration.vue';
 import usePipeline from '~/compositions/usePipeline';
@@ -140,14 +141,17 @@ defineEmits<{
 }>();
 
 const pipeline = toRef(props, 'pipeline');
+const selectedStepId = toRef(props, 'selectedStepId');
 const { prettyRef } = usePipeline(pipeline);
 
 const workflowsCollapsed = ref<Record<PipelineStep['id'], boolean>>(
-  props.pipeline.workflows && props.pipeline.workflows.length > 1
-    ? (props.pipeline.workflows || []).reduce(
+  pipeline.value.workflows && pipeline.value.workflows.length > 1
+    ? (pipeline.value.workflows || []).reduce(
         (collapsed, workflow) => ({
           ...collapsed,
-          [workflow.id]: ['success', 'skipped', 'blocked'].includes(workflow.state),
+          [workflow.id]:
+            ['success', 'skipped', 'blocked'].includes(workflow.state) &&
+            !workflow.children.some((child) => child.pid === selectedStepId.value),
         }),
         {},
       )

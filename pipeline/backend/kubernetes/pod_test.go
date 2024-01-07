@@ -96,19 +96,14 @@ func TestTinyPod(t *testing.T) {
 					]
 				}
 			],
-			"restartPolicy": "Never",
-			"imagePullSecrets": [
-				{
-					"name": "regcred"
-				}
-			]
+			"restartPolicy": "Never"
 		},
 		"status": {}
 	}`
 
 	pod, err := mkPod("woodpecker", "wp-01he8bebctabr3kgk0qj36d2me-0", "gradle:8.4.0-jdk21", "/woodpecker/src", "linux/amd64", "",
 		false, false,
-		[]string{"gradle build"}, []string{"workspace:/woodpecker/src"},
+		[]string{"gradle build"}, []string{"workspace:/woodpecker/src"}, nil,
 		nil, nil, map[string]string{"CI": "woodpecker"}, nil,
 		nil, nil,
 		types.Resources{Requests: nil, Limits: nil}, nil, SecurityContextConfig{},
@@ -213,6 +208,9 @@ func TestFullPod(t *testing.T) {
 			"imagePullSecrets": [
 				{
 					"name": "regcred"
+				},
+				{
+					"name": "another-pull-secret"
 				}
 			],
 			"tolerations": [
@@ -246,7 +244,7 @@ func TestFullPod(t *testing.T) {
 	}
 	pod, err := mkPod("woodpecker", "wp-01he8bebctabr3kgk0qj36d2me-0", "meltwater/drone-cache", "/woodpecker/src", "linux/amd64", "wp-svc-acc",
 		true, true,
-		[]string{"go get", "go test"}, []string{"woodpecker-cache:/woodpecker/src/cache"},
+		[]string{"go get", "go test"}, []string{"woodpecker-cache:/woodpecker/src/cache"}, []string{"regcred", "another-pull-secret"},
 		map[string]string{"app": "test"}, map[string]string{"apparmor.security": "runtime/default"}, map[string]string{"CGO": "0"}, map[string]string{"storage": "ssd"},
 		hostAliases, []types.Toleration{{Key: "net-port", Value: "100Mbit", Effect: types.TaintEffectNoSchedule}},
 		types.Resources{Requests: map[string]string{"memory": "128Mi", "cpu": "1000m"}, Limits: map[string]string{"memory": "256Mi", "cpu": "2"}},
