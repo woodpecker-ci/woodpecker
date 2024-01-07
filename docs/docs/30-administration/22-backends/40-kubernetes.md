@@ -1,3 +1,7 @@
+---
+toc_max_heading_level: 3
+---
+
 # Kubernetes backend
 
 The kubernetes backend executes steps inside standalone pods. A temporary PVC is created for the lifetime of the pipeline to transfer files between steps.

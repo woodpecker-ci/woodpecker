@@ -1,27 +1,10 @@
+---
+toc_max_heading_level: 2
+---
+
 # Docker backend
 
 This is the original backend used with Woodpecker. The docker backend executes each step inside a separate container started on the agent.
-
-## Configuration
-
-### `WOODPECKER_BACKEND_DOCKER_NETWORK`
-
-> Default: empty
-
-Set to the name of an existing network which will be attached to all your pipeline containers (steps). Please be careful as this allows the containers of different pipelines to access each other!
-
-### `WOODPECKER_BACKEND_DOCKER_ENABLE_IPV6`
-
-> Default: `false`
-
-Enable IPv6 for the networks used by pipeline containers (steps). Make sure you configured your docker daemon to support IPv6.
-
-### `WOODPECKER_BACKEND_DOCKER_VOLUMES`
-
-> Default: empty
-
-List of default volumes separated by comma to be mounted to all pipeline containers (steps). For example to use custom CA
-certificates installed on host and host timezone use `/etc/ssl/certs:/etc/ssl/certs:ro,/etc/timezone:/etc/timezone`.
 
 ## Docker credentials
 
@@ -60,3 +43,25 @@ docker image rm $(docker images --filter "dangling=true" -q --no-trunc)
 ```bash
 docker volume rm $(docker volume ls --filter name=^wp_* --filter dangling=true  -q)
 ```
+
+## Configuration
+
+### `WOODPECKER_BACKEND_DOCKER_NETWORK`
+
+> Default: empty
+
+Set to the name of an existing network which will be attached to all your pipeline containers (steps). Please be careful as this allows the containers of different pipelines to access each other!
+
+### `WOODPECKER_BACKEND_DOCKER_ENABLE_IPV6`
+
+> Default: `false`
+
+Enable IPv6 for the networks used by pipeline containers (steps). Make sure you configured your docker daemon to support IPv6.
+
+### `WOODPECKER_BACKEND_DOCKER_VOLUMES`
+
+> Default: empty
+
+List of default volumes separated by comma to be mounted to all pipeline containers (steps). For example to use custom CA
+certificates installed on host and host timezone use `/etc/ssl/certs:/etc/ssl/certs:ro,/etc/timezone:/etc/timezone`.
+
