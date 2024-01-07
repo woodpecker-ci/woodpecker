@@ -1,8 +1,9 @@
 when:
-  - event: pull_request
+  - event: [pull_request, tag]
   - event: push
     branch:
       - ${CI_REPO_DEFAULT_BRANCH}
+      - release/*
       - renovate/*
 
 variables:
@@ -10,16 +11,13 @@ variables:
   - &when
     - path: &when_path # related config files
         - '.woodpecker/test.yaml'
-        - '.golangci.yaml'
+        - '.golangci.yml'
         # go source code
         - '**/*.go'
         - 'go.*'
         # schema changes
         - 'pipeline/schema/**'
-      event: pull_request
-    - event: push
-      branch: renovate/*
-      path: *when_path
+      event: [pull_request, tag]
 
 steps:
   vendor:
@@ -27,9 +25,9 @@ steps:
     commands:
       - go mod vendor
     when:
-      path:
-        - <<: *when_path
-        - '.woodpecker/**'
+      - path:
+          - <<: *when_path
+          - '.woodpecker/**'
 
   lint-pipeline:
     depends_on:
@@ -38,9 +36,10 @@ steps:
     commands:
       - go run go.woodpecker-ci.org/woodpecker/v2/cmd/cli lint
     when:
-      - event: pull_request
-        path:
+      - <<: *when
+      - path:
           - '.woodpecker/**'
+          - 'pipeline/schema/**'
 
   dummy-web:
     image: *golang_image
@@ -58,7 +57,7 @@ steps:
       - make lint
     when: *when
 
-  check-swagger:
+  check_swagger:
     depends_on:
       - vendor
     image: *golang_image
@@ -71,7 +70,7 @@ steps:
   lint-editorconfig:
     image: docker.io/mstruebing/editorconfig-checker:2.7.2
     when:
-      event: pull_request
+      - event: [pull_request, tag]
 
   lint-license-header:
     image: *golang_image
