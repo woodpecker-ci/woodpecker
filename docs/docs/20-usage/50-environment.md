@@ -139,16 +139,15 @@ This is the reference list of all environment variables available to your pipeli
 
 If you want specific environment variables to be available in all of your pipelines use the `WOODPECKER_ENVIRONMENT` setting on the Woodpecker server. Note that these can't overwrite any existing, built-in variables.
 
-```diff
-services:
-  woodpecker-server:
-    [...]
-    environment:
-      - [...]
-+     - WOODPECKER_ENVIRONMENT=first_var:value1,second_var:value2
+```ini
+WOODPECKER_ENVIRONMENT=first_var:value1,second_var:value2
 ```
 
 These can be used, for example, to manage the image tag used by multiple projects.
+
+```ini
+WOODPECKER_ENVIRONMENT=GOLANG_VERSION:1.18
+```
 
 ```diff
 steps:
@@ -157,9 +156,6 @@ steps:
 +   image: golang:${GOLANG_VERSION}
     commands:
       - [...]
-    environment:
-      - [...]
-+     - WOODPECKER_ENVIRONMENT=GOLANG_VERSION:1.18
 ```
 
 ## String Substitution

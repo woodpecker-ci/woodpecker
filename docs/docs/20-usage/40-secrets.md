@@ -91,7 +91,7 @@ Secrets are added to the Woodpecker in the UI or with the CLI.
 
 Create the secret using default settings. The secret will be available to all images in your pipeline, and will be available to all push, tag, and deployment events (not pull request events).
 
-```diff
+```bash
 woodpecker-cli secret add \
   -repository octocat/hello-world \
   -name aws_access_key_id \
