@@ -14,6 +14,7 @@ ProxyPassReverse / http://127.0.0.1:8000/
 ```
 
 You must have these Apache modules installed:
+
 - `proxy`
 - `proxy_http`
 

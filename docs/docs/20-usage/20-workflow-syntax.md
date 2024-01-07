@@ -751,8 +751,8 @@ Execute a step using custom include and exclude logic:
 ```yaml
 when:
   branch:
-    include: [ main, release/* ]
-    exclude: [ release/1.0.0, release/1.1.* ]
+    include: [main, release/*]
+    exclude: [release/1.0.0, release/1.1.*]
 ```
 
 ### `event`
@@ -827,7 +827,7 @@ Execute a step only on a pipeline with certain files being changed:
 
 ```yaml
 when:
-  path: "src/*"
+  path: 'src/*'
 ```
 
 You can use [glob patterns](https://github.com/bmatcuk/doublestar#patterns) to match the changed files and specify if the step should run if a file matching that pattern has been changed `include` or if some files have **not** been changed `exclude`.
@@ -835,9 +835,9 @@ You can use [glob patterns](https://github.com/bmatcuk/doublestar#patterns) to m
 ```yaml
 when:
   path:
-    include: [ '.woodpecker/*.yaml', '*.ini' ]
-    exclude: [ '*.md', 'docs/**' ]
-    ignore_message: "[ALL]"
+    include: ['.woodpecker/*.yaml', '*.ini']
+    exclude: ['*.md', 'docs/**']
+    ignore_message: '[ALL]'
 ```
 
 :::info
