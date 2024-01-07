@@ -4,10 +4,11 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@pat-s, @miry, @zc-devs, @lukashass, @qwerty287, @lafriks, @pre-commit-ci[bot], @anbraten, @6543, @andyhan, @renovate[bot], @xfix
+@qwerty287, @pat-s, @miry, @zc-devs, @lukashass, @lafriks, @pre-commit-ci[bot], @anbraten, @6543, @andyhan, @renovate[bot], @xfix
 
 ### 📚 Documentation
 
+- Add X/Twitter account [[#3127](https://github.com/woodpecker-ci/woodpecker/pull/3127)]
 - Add ansible plugin [[#3115](https://github.com/woodpecker-ci/woodpecker/pull/3115)]
 - Format depends_on example [[#3118](https://github.com/woodpecker-ci/woodpecker/pull/3118)]
 - Use WOODPECKER_AGENT_SECRET instead of deprecated alternative [[#3103](https://github.com/woodpecker-ci/woodpecker/pull/3103)]
