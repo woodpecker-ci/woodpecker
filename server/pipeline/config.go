@@ -18,9 +18,9 @@ import (
 	"crypto/sha256"
 	"fmt"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline"
 	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/pipeline/stepbuilder"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
@@ -32,7 +32,7 @@ func findOrPersistPipelineConfig(store store.Store, currentPipeline *model.Pipel
 			RepoID: currentPipeline.RepoID,
 			Data:   forgeYamlConfig.Data,
 			Hash:   sha,
-			Name:   pipeline.SanitizePath(forgeYamlConfig.Name),
+			Name:   stepbuilder.SanitizePath(forgeYamlConfig.Name),
 		}
 		err = store.ConfigCreate(conf)
 		if err != nil {

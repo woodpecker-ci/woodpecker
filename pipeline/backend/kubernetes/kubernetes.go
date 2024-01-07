@@ -54,13 +54,14 @@ type kube struct {
 }
 
 type config struct {
-	Namespace       string
-	StorageClass    string
-	VolumeSize      string
-	StorageRwx      bool
-	PodLabels       map[string]string
-	PodAnnotations  map[string]string
-	SecurityContext SecurityContextConfig
+	Namespace            string
+	StorageClass         string
+	VolumeSize           string
+	StorageRwx           bool
+	PodLabels            map[string]string
+	PodAnnotations       map[string]string
+	ImagePullSecretNames []string
+	SecurityContext      SecurityContextConfig
 }
 type SecurityContextConfig struct {
 	RunAsNonRoot bool
@@ -80,15 +81,20 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 	if ctx != nil {
 		if c, ok := ctx.Value(types.CliContext).(*cli.Context); ok {
 			config := config{
-				Namespace:      c.String("backend-k8s-namespace"),
-				StorageClass:   c.String("backend-k8s-storage-class"),
-				VolumeSize:     c.String("backend-k8s-volume-size"),
-				StorageRwx:     c.Bool("backend-k8s-storage-rwx"),
-				PodLabels:      make(map[string]string), // just init empty map to prevent nil panic
-				PodAnnotations: make(map[string]string), // just init empty map to prevent nil panic
+				Namespace:            c.String("backend-k8s-namespace"),
+				StorageClass:         c.String("backend-k8s-storage-class"),
+				VolumeSize:           c.String("backend-k8s-volume-size"),
+				StorageRwx:           c.Bool("backend-k8s-storage-rwx"),
+				PodLabels:            make(map[string]string), // just init empty map to prevent nil panic
+				PodAnnotations:       make(map[string]string), // just init empty map to prevent nil panic
+				ImagePullSecretNames: c.StringSlice("backend-k8s-pod-image-pull-secret-names"),
 				SecurityContext: SecurityContextConfig{
 					RunAsNonRoot: c.Bool("backend-k8s-secctx-nonroot"),
 				},
+			}
+			// TODO: remove in next major
+			if len(config.ImagePullSecretNames) == 1 && config.ImagePullSecretNames[0] == "regcred" {
+				log.Warn().Msg("WOODPECKER_BACKEND_K8S_PULL_SECRET_NAMES is set to the default ('regcred'). It will default to empty in Woodpecker 3.0. Set it explicitly before then.")
 			}
 			// Unmarshal label and annotation settings here to ensure they're valid on startup
 			if labels := c.String("backend-k8s-pod-labels"); labels != "" {

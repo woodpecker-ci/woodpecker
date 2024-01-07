@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package common
+package logger
 
 import (
 	"io"
@@ -41,13 +41,13 @@ var GlobalLoggerFlags = []cli.Flag{
 		EnvVars: []string{"WOODPECKER_DEBUG_PRETTY"},
 		Name:    "pretty",
 		Usage:   "enable pretty-printed debug output",
-		Value:   IsInteractive(), // make pretty on interactive terminal by default
+		Value:   isInteractiveTerminal(), // make pretty on interactive terminal by default
 	},
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_DEBUG_NOCOLOR"},
 		Name:    "nocolor",
 		Usage:   "disable colored debug output, only has effect if pretty output is set too",
-		Value:   !IsInteractive(), // do color on interactive terminal by default
+		Value:   !isInteractiveTerminal(), // do color on interactive terminal by default
 	},
 }
 

@@ -1,5 +1,3 @@
-version: 1
-
 steps:
   test:
     image: golang:${GO_VERSION}

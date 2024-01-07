@@ -12,15 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package common
+package metadata
 
 import (
-	"os"
+	"fmt"
+	"strings"
 
-	"golang.org/x/term"
+	"github.com/drone/envsubst"
 )
 
-// IsInteractive checks if the output is piped, but NOT if the session is run interactively.
-func IsInteractive() bool {
-	return term.IsTerminal(int(os.Stdout.Fd()))
+func EnvVarSubst(yaml string, environ map[string]string) (string, error) {
+	return envsubst.Eval(yaml, func(name string) string {
+		env := environ[name]
+		if strings.Contains(env, "\n") {
+			env = fmt.Sprintf("%q", env)
+		}
+		return env
+	})
 }

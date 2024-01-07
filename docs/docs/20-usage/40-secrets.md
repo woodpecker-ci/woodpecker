@@ -29,7 +29,7 @@ steps:
 ### Use secrets in settings
 
 Alternatively, you can get a `setting` from secrets using the `from_secret` syntax.
-In this example, the secret named `secret_token` would be passed to the setting named `token`, which will be available in the plugin as environment variable named `PLUGIN_TOKEN`. See [Plugins](./plugins/sample-plugin#write-the-logic) for details.
+In this example, the secret named `secret_token` would be passed to the setting named `token`, which will be available in the plugin as environment variable named `PLUGIN_TOKEN`. See [Plugins](./51-plugins/20-creating-plugins.md#settings) for details.
 
 **NOTE:** the `from_secret` syntax only works with the newer `settings` block.
 

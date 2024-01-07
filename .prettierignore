@@ -5,3 +5,4 @@ docs/.docusaurus/
 dist/
 web/components.d.ts
 CHANGELOG.md
+web/src/assets/dayjsLocales/

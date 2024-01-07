@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package pipeline
+package stepbuilder
 
 import (
 	"fmt"
@@ -30,7 +30,6 @@ import (
 	yaml_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types"
 	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/compiler"
@@ -117,7 +116,7 @@ func (b *StepBuilder) Build() (items []*Item, errorsAndWarnings error) {
 }
 
 func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.Axis, data string) (item *Item, errorsAndWarnings error) {
-	workflowMetadata := frontend.MetadataFromStruct(b.Forge, b.Repo, b.Curr, b.Last, workflow, b.Host)
+	workflowMetadata := MetadataFromStruct(b.Forge, b.Repo, b.Curr, b.Last, workflow, b.Host)
 	environ := b.environmentVariables(workflowMetadata, axis)
 
 	// add global environment variables for substituting
@@ -130,7 +129,7 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 	}
 
 	// substitute vars
-	substituted, err := frontend.EnvVarSubst(data, environ)
+	substituted, err := metadata.EnvVarSubst(data, environ)
 	if err != nil {
 		return nil, multierr.Append(errorsAndWarnings, err)
 	}

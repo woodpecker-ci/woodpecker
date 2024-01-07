@@ -592,6 +592,12 @@ Specify how many seconds before timeout when fetching the Woodpecker configurati
 
 Enable the Swagger UI for API documentation.
 
+### `WOODPECKER_DISABLE_VERSION_CHECK`
+
+> Default: false
+
+Disable version check in admin web UI.
+
 ---
 
 ### `WOODPECKER_GITHUB_...`
