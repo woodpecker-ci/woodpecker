@@ -1,10 +1,7 @@
 when:
-  - event: [pull_request, tag]
+  - event: pull_request
   - event: push
-    branch:
-      - ${CI_REPO_DEFAULT_BRANCH}
-      - release/*
-      - renovate/*
+    branch: renovate/*
 
 variables:
   - &node_image 'docker.io/node:21-alpine'
@@ -16,10 +13,9 @@ variables:
       - 'web/**'
       # api source code
       - 'server/api/**'
-    event: [pull_request, tag, deployment]
 
 steps:
-  install_dependencies:
+  install-dependencies:
     image: *node_image
     directory: web/
     commands:
@@ -29,7 +25,7 @@ steps:
 
   lint:
     depends_on:
-      - install_dependencies
+      - install-dependencies
     image: *node_image
     directory: web/
     commands:
@@ -39,7 +35,7 @@ steps:
 
   formatcheck:
     depends_on:
-      - install_dependencies
+      - install-dependencies
     image: *node_image
     directory: web/
     commands:
@@ -49,7 +45,7 @@ steps:
 
   typecheck:
     depends_on:
-      - install_dependencies
+      - install-dependencies
     image: *node_image
     directory: web/
     commands:
@@ -59,7 +55,7 @@ steps:
 
   test:
     depends_on:
-      - install_dependencies
+      - install-dependencies
     image: *node_image
     directory: web/
     commands:

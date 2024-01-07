@@ -44,6 +44,7 @@ steps:
       - make docs
     when:
       - path: *when_path
+        event: [tag, pull_request, push]
       - event: manual
 
   build:
@@ -55,6 +56,7 @@ steps:
       - pnpm build
     when:
       - path: *when_path
+        event: [tag, pull_request, push]
       - event: manual
 
   deploy-preview:
