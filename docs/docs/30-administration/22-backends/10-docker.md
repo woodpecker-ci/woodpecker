@@ -39,14 +39,12 @@ RUN apk add -U --no-cache docker-credential-ecr-login
 
 While the agent was developed with Docker/Moby, Podman can also be used by setting the environment variable `DOCKER_HOST` to point to the Podman socket. In order to work without workarounds, Podman 4.0 (or above) is required.
 
-## Image Cleanup
+## Image cleanup
 
 The agent **will not** automatically remove images from the host. This task should be managed by the host system. For example, you can use a cron job to periodically do clean-up tasks for the CI runner.
 
 :::danger
-
 The following commands **are destructive** and **irreversible** it is highly recommended that you test these commands on your system before running them in production via a cron job or other automation.
-
 :::
 
 ### Remove all unused images
@@ -55,7 +53,7 @@ The following commands **are destructive** and **irreversible** it is highly rec
 docker image rm $(docker images --filter "dangling=true" -q --no-trunc)
 ```
 
-### Remove Woodpecker Volumes
+### Remove Woodpecker volumes
 
 ```bash
 docker volume rm $(docker volume ls --filter name=^wp_* --filter dangling=true  -q)

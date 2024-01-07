@@ -25,7 +25,7 @@ In order to use this backend, you need to download (or build) the
 [binary](https://github.com/woodpecker-ci/woodpecker/releases/latest) of the
 agent, configure it and run it on the host machine.
 
-## Enabling
+## Usage
 
 To enable the local backend, add this to your configuration:
 
@@ -33,9 +33,7 @@ To enable the local backend, add this to your configuration:
 WOODPECKER_BACKEND=local
 ```
 
-## Further configuration
-
-### Specify the shell to be used for a pipeline step
+### Shell
 
 The `image` entry is used to specify the shell, such as Bash or Fish, that is
 used to run the commands.
@@ -47,7 +45,9 @@ steps:
     commands: [...]
 ```
 
-### Plugins as Executable Binaries
+### Plugins
+
+Plugins are just executable binaries:
 
 ```yaml
 steps:
@@ -58,11 +58,10 @@ steps:
 If no commands are provided, we treat them as plugins in the usual manner.
 In the context of the local backend, plugins are simply executable binaries, which can be located using their name if they are listed in `$PATH`, or through an absolute path.
 
-### Change temporary directory
+### Options
 
-We use the default temp directory to create folders for workflows.
-This directory can be changed by:
+#### `WOODPECKER_BACKEND_LOCAL_TEMP_DIR`
 
-```env
-WOODPECKER_BACKEND_LOCAL_TEMP_DIR=/some/other/dir
-```
+> Default: default temp directory
+
+Directory to create folders for workflows.
