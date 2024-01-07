@@ -64,4 +64,3 @@ Enable IPv6 for the networks used by pipeline containers (steps). Make sure you 
 
 List of default volumes separated by comma to be mounted to all pipeline containers (steps). For example to use custom CA
 certificates installed on host and host timezone use `/etc/ssl/certs:/etc/ssl/certs:ro,/etc/timezone:/etc/timezone`.
-
