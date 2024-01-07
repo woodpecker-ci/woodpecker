@@ -74,17 +74,14 @@ func (s *WoodpeckerServer) Next(c context.Context, req *proto.NextRequest) (*pro
 
 	res := new(proto.NextResponse)
 	pipeline, err := s.peer.Next(c, filter)
-	if err != nil {
-		return res, err
-	}
-	if pipeline == nil {
+	if err != nil || pipeline == nil {
 		return res, err
 	}
 
 	res.Workflow = new(proto.Workflow)
 	res.Workflow.Id = pipeline.ID
 	res.Workflow.Timeout = pipeline.Timeout
-	res.Workflow.Payload, _ = json.Marshal(pipeline.Config)
+	res.Workflow.Payload, err = json.Marshal(pipeline.Config)
 
 	return res, err
 }

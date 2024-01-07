@@ -582,9 +582,9 @@ Specify a configuration service endpoint, see [Configuration Extension](./100-ex
 
 ### `WOODPECKER_FORGE_TIMEOUT`
 
-> Default: 3sec
+> Default: 3s
 
-Specify how many seconds before timeout when fetching the Woodpecker configuration from a Forge
+Specify timeout when fetching the Woodpecker configuration from forge. See <https://pkg.go.dev/time#ParseDuration> for syntax reference.
 
 ### `WOODPECKER_ENABLE_SWAGGER`
 

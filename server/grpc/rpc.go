@@ -56,10 +56,7 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 		log.Debug().Msgf("agent connected: %s: polling", hostname)
 	}
 
-	fn, err := createFilterFunc(agentFilter)
-	if err != nil {
-		return nil, err
-	}
+	fn := createFilterFunc(agentFilter)
 	for {
 		agent, err := s.getAgentFromContext(c)
 		if err != nil {
@@ -142,10 +139,13 @@ func (s *RPC) Update(_ context.Context, id string, state rpc.State) error {
 			"private": strconv.FormatBool(repo.IsSCMPrivate),
 		},
 	}
-	message.Data, _ = json.Marshal(model.Event{
+	message.Data, err = json.Marshal(model.Event{
 		Repo:     *repo,
 		Pipeline: *currentPipeline,
 	})
+	if err != nil {
+		return err
+	}
 	s.pubsub.Publish(message)
 
 	return nil
@@ -198,10 +198,14 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 				"private": strconv.FormatBool(repo.IsSCMPrivate),
 			},
 		}
-		message.Data, _ = json.Marshal(model.Event{
+		message.Data, err = json.Marshal(model.Event{
 			Repo:     *repo,
 			Pipeline: *currentPipeline,
 		})
+		if err != nil {
+			log.Error().Err(err).Msgf("could not marshal JSON")
+			return
+		}
 		s.pubsub.Publish(message)
 	}()
 
@@ -418,10 +422,13 @@ func (s *RPC) notify(repo *model.Repo, pipeline *model.Pipeline) (err error) {
 			"private": strconv.FormatBool(repo.IsSCMPrivate),
 		},
 	}
-	message.Data, _ = json.Marshal(model.Event{
+	message.Data, err = json.Marshal(model.Event{
 		Repo:     *repo,
 		Pipeline: *pipeline,
 	})
+	if err != nil {
+		return err
+	}
 	s.pubsub.Publish(message)
 	return nil
 }

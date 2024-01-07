@@ -102,6 +102,24 @@ linters-settings:
           - pkg: 'go.woodpecker-ci.org/woodpecker/v2/cmd/agent'
           - pkg: 'go.woodpecker-ci.org/woodpecker/v2/cmd/cli'
           - pkg: 'go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker'
+  gci:
+    sections:
+      - standard
+      - default
+      - prefix(go.woodpecker-ci.org/woodpecker)
+  gomnd:
+    ignored-numbers:
+      - '0o600'
+      - '0o660'
+      - '0o644'
+      - '0o755'
+      - '0o700'
+    ignored-functions:
+      - make
+      - time.*
+      - strings.Split
+      - callerName
+      - securecookie.GenerateRandomKey
 
 linters:
   disable-all: true
@@ -124,6 +142,25 @@ linters:
     - forbidigo
     - zerologlint
     - depguard
+    - asciicheck
+    - bodyclose
+    - dogsled
+    - durationcheck
+    - errchkjson
+    - gochecknoinits
+    - goheader
+    - gomoddirectives
+    - gomodguard
+    - goprintffuncname
+    - importas
+    - makezero
+    - rowserrcheck
+    - sqlclosecheck
+    - tenv
+    - unconvert
+    - unparam
+    - wastedassign
+    - whitespace
 
 run:
   timeout: 15m
@@ -140,7 +177,13 @@ issues:
     - path: 'cmd/*|cli/*'
       linters:
         - forbidigo
+
     # allow some setup functions to use log.Fatal()
     - path: 'server/web/web.go|server/plugins/encryption/tink_keyset_watcher.go|shared/logger/logger.go'
       linters:
         - forbidigo
+
+    - path: '_test.go'
+      linters:
+        - forcetypeassert
+

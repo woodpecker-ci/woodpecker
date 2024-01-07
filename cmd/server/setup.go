@@ -54,7 +54,7 @@ import (
 	addonTypes "go.woodpecker-ci.org/woodpecker/v2/shared/addon/types"
 )
 
-func setupStore(c *cli.Context) (store.Store, error) {
+func setupStore(c *cli.Context) store.Store {
 	datasource := c.String("datasource")
 	driver := c.String("driver")
 	xorm := store.XORM{
@@ -95,7 +95,7 @@ func setupStore(c *cli.Context) (store.Store, error) {
 		log.Fatal().Err(err).Msg("could not migrate datastore")
 	}
 
-	return store, nil
+	return store
 }
 
 func checkSqliteFileExist(path string) error {
