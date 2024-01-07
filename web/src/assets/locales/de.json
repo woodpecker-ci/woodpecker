@@ -139,6 +139,7 @@
   "default": "Standard",
   "docs": "Docs",
   "documentation_for": "Dokumentation für „{topic}“",
+  "empty_list": "Keine {entity} gefunden!",
   "errors": {
     "not_found": "Angefragtes Objekt wurde nicht gefunden"
   },
