@@ -130,7 +130,7 @@ Image variants:
 - The `latest` image is the latest stable release
 - The `vX.X.X` images are stable releases
 - The `vX.X` images are based on the current release branch (e.g. `release/v1.0`) and can be used to get bugfixes asap
-- The `next` images are based on the current `main` branch and should not be used for production environments
+- The `next` images are based on the current `main` branch
 
 ```bash
 # server
