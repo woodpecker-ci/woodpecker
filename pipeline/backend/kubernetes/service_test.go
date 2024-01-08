@@ -22,6 +22,19 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
 
+func TestServiceName(t *testing.T) {
+	name, err := serviceName(&types.Step{Name: "database"})
+	assert.NoError(t, err)
+	assert.Equal(t, "database", name)
+
+	name, err = serviceName(&types.Step{Name: "awesome_service"})
+	assert.NoError(t, err)
+	assert.Equal(t, "awesome-service", name)
+
+	_, err = serviceName(&types.Step{Name: "wp-01he8bebctabr3kgk0qj36d2me-0-services-0.woodpecker-runtime.svc.cluster.local"})
+	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
+}
+
 func TestService(t *testing.T) {
 	expected := `
 	{
