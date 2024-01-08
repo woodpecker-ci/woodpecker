@@ -26,6 +26,10 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
+const (
+	ServiceLabel = "service"
+)
+
 func mkService(namespace, name string, ports []uint16, selector map[string]string) (*v1.Service, error) {
 	log.Trace().Str("name", name).Interface("selector", selector).Interface("ports", ports).Msg("Creating service")
 
@@ -74,7 +78,7 @@ func startService(ctx context.Context, engine *kube, step *types.Step) (*v1.Serv
 }
 
 func stopService(ctx context.Context, engine *kube, step *types.Step, deleteOpts metav1.DeleteOptions) error {
-	svcName, err := dnsName(step.Name)
+	svcName, err := serviceName(step)
 	if err != nil {
 		return err
 	}

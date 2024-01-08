@@ -275,7 +275,7 @@ func TestFullPod(t *testing.T) {
 		"woodpecker", "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64",
 		[]string{"regcred", "another-pull-secret"},
 		map[string]string{"app": "test"}, map[string]string{"apparmor.security": "runtime/default"},
-		, Limits: map[string]string{"memory": "256Mi", "cpu": "2"},
+		 Limits: map[string]string{"memory": "256Mi", "cpu": "2"},
 	)
 	assert.NoError(t, err)
 

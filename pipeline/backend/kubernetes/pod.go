@@ -34,22 +34,23 @@ const (
 	StepLabel = "step"
 )
 
-func mkPod(step *types.Step, backendOptions *types.KubernetesBackendOptions, namespace, name, goos string,
+func mkPod(step *types.Step, backendOptions *types.KubernetesBackendOptions, namespace, podName, goos string,
 	pullSecretNames []string,
 	labels, annotations map[string]string,
-	securityContextConfig SecurityContextConfig) (*v1.Pod, error) {
-	var err error
+	securityContextConfig SecurityContextConfig,
+) (*v1.Pod, error) {
 	if backendOptions == nil {
 		backendOptions = &types.KubernetesBackendOptions{}
 	}
-	meta := podMeta(step, namespace, labels, annotations)
+
+	meta := podMeta(step, namespace, podName, labels, annotations)
 
 	spec, err := podSpec(step, backendOptions, pullSecretNames, backendOptions.SecurityContext, securityContextConfig)
 	if err != nil {
 		return nil, err
 	}
 
-	container, err := podContainer(name, step, goos, backendOptions.Resources, backendOptions.SecurityContext)
+	container, err := podContainer(step, podName, goos, backendOptions.Resources, backendOptions.SecurityContext)
 	if err != nil {
 		return nil, err
 	}
@@ -64,12 +65,12 @@ func mkPod(step *types.Step, backendOptions *types.KubernetesBackendOptions, nam
 }
 
 func podName(step *types.Step) (string, error) {
-	return dnsName(step.Name)
+	return dnsName(step.UUID)
 }
 
-func podMeta(step *types.Step, namespace string, labels, annotations map[string]string) metav1.ObjectMeta {
+func podMeta(step *types.Step, namespace, podName string, labels, annotations map[string]string) metav1.ObjectMeta {
 	meta := metav1.ObjectMeta{
-		Name:        step.UUID,
+		Name:        podName,
 		Namespace:   namespace,
 		Annotations: annotations,
 	}
@@ -105,12 +106,10 @@ func podSpec(step *types.Step, backendOptions *types.KubernetesBackendOptions,
 	return spec, nil
 }
 
-func podContainer(name string, step *types.Step, goos string, resources types.Resources,
-	securityContext *types.SecurityContext,
-) (v1.Container, error) {
+func podContainer(step *types.Step, podName, goos string, resources types.Resources, securityContext *types.SecurityContext) (v1.Container, error) {
 	var err error
 	container := v1.Container{
-		Name:       name,
+		Name:       podName,
 		Image:      step.Image,
 		WorkingDir: step.WorkingDir,
 	}
@@ -367,7 +366,6 @@ func startPod(ctx context.Context, engine *kube, step *types.Step) (*v1.Pod, err
 	if err != nil {
 		return nil, err
 	}
-
 	pod, err := mkPod(step, &step.BackendOptions.Kubernetes, engine.config.Namespace, podName, engine.goos,
 		engine.config.ImagePullSecretNames,
 		engine.config.PodLabels, engine.config.PodAnnotations,
