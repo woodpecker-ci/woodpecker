@@ -14,7 +14,7 @@ You must register an OAuth application at Bitbucket in order to get a key and se
 
 Please set a name and set the `Callback URL` like this:
 
-```nohighlight
+```uri
 https://<your-woodpecker-address>/authorize
 ```
 
