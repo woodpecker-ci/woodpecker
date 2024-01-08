@@ -1,10 +1,26 @@
 # Changelog
 
-## [2.2.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.2.0) - 2024-01-07
+## [2.2.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.2.0) - 2024-01-08
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@qwerty287, @pat-s, @miry, @zc-devs, @lukashass, @lafriks, @pre-commit-ci[bot], @anbraten, @6543, @andyhan, @renovate[bot], @xfix
+@qwerty287, @pat-s, @miry, @zc-devs, @lukashass, @lafriks, @pre-commit-ci[bot], @anbraten, @6543, @andyhan, @renovate[bot], @KamilaBorowska
+
+### 🐛 Bug Fixes
+
+- Make config linking non-unique [[#3128](https://github.com/woodpecker-ci/woodpecker/pull/3128)]
+- Fix config base64 parsing to utf-8 [[#3110](https://github.com/woodpecker-ci/woodpecker/pull/3110)]
+- Pin Gitea version [[#3104](https://github.com/woodpecker-ci/woodpecker/pull/3104)]
+- Fix step `depends_on` as string in schema [[#3099](https://github.com/woodpecker-ci/woodpecker/pull/3099)]
+- Fix slice unmarshaling [[#3097](https://github.com/woodpecker-ci/woodpecker/pull/3097)]
+- Allow PR secrets to be used on close [[#3084](https://github.com/woodpecker-ci/woodpecker/pull/3084)]
+- make event in pipeline schema also a constraint_list [[#3082](https://github.com/woodpecker-ci/woodpecker/pull/3082)]
+- Fix badge's repoUrl with rootpath [[#3076](https://github.com/woodpecker-ci/woodpecker/pull/3076)]
+- Load changed files for closed PR [[#3067](https://github.com/woodpecker-ci/woodpecker/pull/3067)]
+- Fix build output paths [[#3065](https://github.com/woodpecker-ci/woodpecker/pull/3065)]
+- Fix `when` and `depends_on` [[#3063](https://github.com/woodpecker-ci/woodpecker/pull/3063)]
+- Fix DAG cycle detection [[#3049](https://github.com/woodpecker-ci/woodpecker/pull/3049)]
+- Fix duplicated icons [[#3045](https://github.com/woodpecker-ci/woodpecker/pull/3045)]
 
 ### 📚 Documentation
 
@@ -34,21 +50,6 @@
 - Add imports checks to linter [[#3056](https://github.com/woodpecker-ci/woodpecker/pull/3056)]
 - Remove workflow version again [[#3052](https://github.com/woodpecker-ci/woodpecker/pull/3052)]
 - Add option to disable version check in admin web UI [[#3040](https://github.com/woodpecker-ci/woodpecker/pull/3040)]
-
-### 🐛 Bug Fixes
-
-- Fix config base64 parsing to utf-8 [[#3110](https://github.com/woodpecker-ci/woodpecker/pull/3110)]
-- Pin Gitea version [[#3104](https://github.com/woodpecker-ci/woodpecker/pull/3104)]
-- Fix step `depends_on` as string in schema [[#3099](https://github.com/woodpecker-ci/woodpecker/pull/3099)]
-- Fix slice unmarshaling [[#3097](https://github.com/woodpecker-ci/woodpecker/pull/3097)]
-- Allow PR secrets to be used on close [[#3084](https://github.com/woodpecker-ci/woodpecker/pull/3084)]
-- make event in pipeline schema also a constraint_list [[#3082](https://github.com/woodpecker-ci/woodpecker/pull/3082)]
-- Fix badge's repoUrl with rootpath [[#3076](https://github.com/woodpecker-ci/woodpecker/pull/3076)]
-- Load changed files for closed PR [[#3067](https://github.com/woodpecker-ci/woodpecker/pull/3067)]
-- Fix build output paths [[#3065](https://github.com/woodpecker-ci/woodpecker/pull/3065)]
-- Fix `when` and `depends_on` [[#3063](https://github.com/woodpecker-ci/woodpecker/pull/3063)]
-- Fix DAG cycle detection [[#3049](https://github.com/woodpecker-ci/woodpecker/pull/3049)]
-- Fix duplicated icons [[#3045](https://github.com/woodpecker-ci/woodpecker/pull/3045)]
 
 ### Misc
 
