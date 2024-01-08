@@ -114,6 +114,10 @@ const config: Config = {
               label: 'Mastodon',
               href: 'https://floss.social/@WoodpeckerCI',
             },
+            {
+              label: 'X',
+              href: 'https://twitter.com/woodpeckerci',
+            },
           ],
         },
         {
