@@ -29,8 +29,11 @@ import (
 // returns a container configuration.
 func (e *docker) toConfig(step *types.Step) *container.Config {
 	config := &container.Config{
-		Image:        step.Image,
-		Labels:       map[string]string{"wp_uuid": step.UUID},
+		Image: step.Image,
+		Labels: map[string]string{
+			"wp_uuid": step.UUID,
+			"wp_step": step.Name,
+		},
 		WorkingDir:   step.WorkingDir,
 		AttachStdout: true,
 		AttachStderr: true,
