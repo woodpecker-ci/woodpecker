@@ -31,7 +31,8 @@ import (
 )
 
 const (
-	StepLabel = "step"
+	StepLabel    = "step"
+	ServiceLabel = "service"
 )
 
 func mkPod(namespace, name, image, workDir, goos, serviceAccountName string,
@@ -67,7 +68,7 @@ func mkPod(namespace, name, image, workDir, goos, serviceAccountName string,
 }
 
 func podName(step *types.Step) (string, error) {
-	return dnsName(step.Name)
+	return dnsName(podPrefix + step.UUID)
 }
 
 func podMeta(name, namespace string, labels, annotations map[string]string) metav1.ObjectMeta {

@@ -51,12 +51,8 @@ func mkService(namespace, name string, ports []uint16, selector map[string]strin
 	}, nil
 }
 
-func serviceName(step *types.Step) (string, error) {
-	return dnsName(step.Name)
-}
-
 func startService(ctx context.Context, engine *kube, step *types.Step) (*v1.Service, error) {
-	name, err := serviceName(step)
+	name, err := dnsName(step.Name)
 	if err != nil {
 		return nil, err
 	}
