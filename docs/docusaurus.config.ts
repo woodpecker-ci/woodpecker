@@ -132,7 +132,7 @@ const config: Config = {
               href: 'https://github.com/woodpecker-ci/woodpecker',
             },
             {
-              href: 'https://ci.woodpecker-ci.org/woodpecker-ci/woodpecker',
+              href: 'https://ci.woodpecker-ci.org/repos/3780',
               label: 'CI',
             },
           ],
