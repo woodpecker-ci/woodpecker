@@ -17,6 +17,7 @@ package docker
 import (
 	"encoding/base64"
 	"encoding/json"
+	"maps"
 	"regexp"
 	"strings"
 
@@ -38,10 +39,8 @@ func (e *docker) toConfig(step *types.Step) *container.Config {
 		AttachStdout: true,
 		AttachStderr: true,
 	}
-	env := step.Environment
-	if env == nil {
-		env = make(map[string]string)
-	}
+	env := make(map[string]string)
+	maps.Copy(env, step.Environment)
 
 	if len(step.Commands) != 0 {
 		env, entry, cmd := common.GenerateContainerConf(step.Commands, e.info.OSType)
