@@ -20,7 +20,7 @@ import (
 
 func TestExitError(t *testing.T) {
 	err := ExitError{
-		Name: "build",
+		UUID: "14534321",
 		Code: 255,
 	}
 	got, want := err.Error(), "build : exit code 255"
@@ -31,7 +31,7 @@ func TestExitError(t *testing.T) {
 
 func TestOomError(t *testing.T) {
 	err := OomError{
-		Name: "build",
+		UUID: "14534321",
 	}
 	got, want := err.Error(), "build : received oom kill"
 	if got != want {
