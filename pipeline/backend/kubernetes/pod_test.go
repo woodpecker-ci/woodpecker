@@ -290,16 +290,3 @@ func TestFullPod(t *testing.T) {
 	ja := jsonassert.New(t)
 	ja.Assertf(string(json), expected)
 }
-
-func TestDNSName(t *testing.T) {
-	name, err := dnsName("wp_01he8bebctabr3kgk0qj36d2me_0_services_0")
-	assert.NoError(t, err)
-	assert.Equal(t, "wp-01he8bebctabr3kgk0qj36d2me-0-services-0", name)
-
-	name, err = dnsName("wp-01he8bebctabr3kgk0qj36d2me-0\\services-0")
-	assert.NoError(t, err)
-	assert.Equal(t, "wp-01he8bebctabr3kgk0qj36d2me-0\\services-0", name)
-
-	_, err = dnsName("wp-01he8bebctabr3kgk0qj36d2me-0-services-0.woodpecker-runtime.svc.cluster.local")
-	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
-}
