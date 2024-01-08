@@ -34,25 +34,22 @@ const (
 	StepLabel = "step"
 )
 
-func mkPod(namespace, name, image, workDir, goos, serviceAccountName string,
-	pool, privileged bool,
-	commands, vols, pullSecretNames []string,
-	labels, annotations, env, nodeSelector map[string]string,
-	extraHosts []types.HostAlias, tolerations []types.Toleration, resources types.Resources,
-	securityContext *types.SecurityContext, securityContextConfig SecurityContextConfig,
-) (*v1.Pod, error) {
+func mkPod(step *types.Step, backendOptions *types.KubernetesBackendOptions, namespace, name, goos string,
+	pullSecretNames []string,
+	labels, annotations map[string]string,
+	securityContextConfig SecurityContextConfig) (*v1.Pod, error) {
 	var err error
+	if backendOptions == nil {
+		backendOptions = &types.KubernetesBackendOptions{}
+	}
+	meta := podMeta(step, namespace, labels, annotations)
 
-	meta := podMeta(name, namespace, labels, annotations)
-
-	spec, err := podSpec(serviceAccountName, vols, pullSecretNames, env, nodeSelector, extraHosts, tolerations,
-		securityContext, securityContextConfig)
+	spec, err := podSpec(step, backendOptions, pullSecretNames, backendOptions.SecurityContext, securityContextConfig)
 	if err != nil {
 		return nil, err
 	}
 
-	container, err := podContainer(name, image, workDir, goos, pool, privileged, commands, vols, env,
-		resources, securityContext)
+	container, err := podContainer(name, step, goos, backendOptions.Resources, backendOptions.SecurityContext)
 	if err != nil {
 		return nil, err
 	}
@@ -70,9 +67,9 @@ func podName(step *types.Step) (string, error) {
 	return dnsName(step.Name)
 }
 
-func podMeta(name, namespace string, labels, annotations map[string]string) metav1.ObjectMeta {
+func podMeta(step *types.Step, namespace string, labels, annotations map[string]string) metav1.ObjectMeta {
 	meta := metav1.ObjectMeta{
-		Name:        name,
+		Name:        step.UUID,
 		Namespace:   namespace,
 		Annotations: annotations,
 	}
@@ -80,28 +77,27 @@ func podMeta(name, namespace string, labels, annotations map[string]string) meta
 	if labels == nil {
 		labels = make(map[string]string, 1)
 	}
-	labels[StepLabel] = name
+	labels[StepLabel] = step.Name
 	meta.Labels = labels
 
 	return meta
 }
 
-func podSpec(serviceAccountName string, vols, pullSecretNames []string, env, backendNodeSelector map[string]string,
-	extraHosts []types.HostAlias, backendTolerations []types.Toleration,
+func podSpec(step *types.Step, backendOptions *types.KubernetesBackendOptions,
+	pullSecretNames []string,
 	securityContext *types.SecurityContext, securityContextConfig SecurityContextConfig,
 ) (v1.PodSpec, error) {
 	var err error
 	spec := v1.PodSpec{
 		RestartPolicy:      v1.RestartPolicyNever,
-		ServiceAccountName: serviceAccountName,
+		ServiceAccountName: backendOptions.ServiceAccountName,
 		ImagePullSecrets:   imagePullSecretsReferences(pullSecretNames),
+		HostAliases:        hostAliases(step.ExtraHosts),
+		NodeSelector:       nodeSelector(backendOptions.NodeSelector, step.Environment["CI_SYSTEM_PLATFORM"]),
+		Tolerations:        tolerations(backendOptions.Tolerations),
+		SecurityContext:    podSecurityContext(securityContext, securityContextConfig),
 	}
-
-	spec.HostAliases = hostAliases(extraHosts)
-	spec.NodeSelector = nodeSelector(backendNodeSelector, env["CI_SYSTEM_PLATFORM"])
-	spec.Tolerations = tolerations(backendTolerations)
-	spec.SecurityContext = podSecurityContext(securityContext, securityContextConfig)
-	spec.Volumes, err = volumes(vols)
+	spec.Volumes, err = volumes(step.Volumes)
 	if err != nil {
 		return spec, err
 	}
@@ -109,36 +105,36 @@ func podSpec(serviceAccountName string, vols, pullSecretNames []string, env, bac
 	return spec, nil
 }
 
-func podContainer(name, image, workDir, goos string, pull, privileged bool, commands, volumes []string, env map[string]string, resources types.Resources,
+func podContainer(name string, step *types.Step, goos string, resources types.Resources,
 	securityContext *types.SecurityContext,
 ) (v1.Container, error) {
 	var err error
 	container := v1.Container{
 		Name:       name,
-		Image:      image,
-		WorkingDir: workDir,
+		Image:      step.Image,
+		WorkingDir: step.WorkingDir,
 	}
 
-	if pull {
+	if step.Pull {
 		container.ImagePullPolicy = v1.PullAlways
 	}
 
-	if len(commands) != 0 {
-		scriptEnv, command, args := common.GenerateContainerConf(commands, goos)
+	if len(step.Commands) != 0 {
+		scriptEnv, command, args := common.GenerateContainerConf(step.Commands, goos)
 		container.Command = command
 		container.Args = args
-		maps.Copy(env, scriptEnv)
+		maps.Copy(step.Environment, scriptEnv)
 	}
 
-	container.Env = mapToEnvVars(env)
-	container.SecurityContext = containerSecurityContext(securityContext, privileged)
+	container.Env = mapToEnvVars(step.Environment)
+	container.SecurityContext = containerSecurityContext(securityContext, step.Privileged)
 
 	container.Resources, err = resourceRequirements(resources)
 	if err != nil {
 		return container, err
 	}
 
-	container.VolumeMounts, err = volumeMounts(volumes)
+	container.VolumeMounts, err = volumeMounts(step.Volumes)
 	if err != nil {
 		return container, err
 	}
@@ -372,11 +368,10 @@ func startPod(ctx context.Context, engine *kube, step *types.Step) (*v1.Pod, err
 		return nil, err
 	}
 
-	pod, err := mkPod(engine.config.Namespace, podName, step.Image, step.WorkingDir, engine.goos, step.BackendOptions.Kubernetes.ServiceAccountName,
-		step.Pull, step.Privileged,
-		step.Commands, step.Volumes, engine.config.ImagePullSecretNames,
-		engine.config.PodLabels, engine.config.PodAnnotations, step.Environment, step.BackendOptions.Kubernetes.NodeSelector,
-		step.ExtraHosts, step.BackendOptions.Kubernetes.Tolerations, step.BackendOptions.Kubernetes.Resources, step.BackendOptions.Kubernetes.SecurityContext, engine.config.SecurityContext)
+	pod, err := mkPod(step, &step.BackendOptions.Kubernetes, engine.config.Namespace, podName, engine.goos,
+		engine.config.ImagePullSecretNames,
+		engine.config.PodLabels, engine.config.PodAnnotations,
+		engine.config.SecurityContext)
 	if err != nil {
 		return nil, err
 	}

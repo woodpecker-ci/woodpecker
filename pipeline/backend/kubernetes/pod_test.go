@@ -101,12 +101,19 @@ func TestTinyPod(t *testing.T) {
 		"status": {}
 	}`
 
-	pod, err := mkPod("woodpecker", "wp-01he8bebctabr3kgk0qj36d2me-0", "gradle:8.4.0-jdk21", "/woodpecker/src", "linux/amd64", "",
-		false, false,
-		[]string{"gradle build"}, []string{"workspace:/woodpecker/src"}, nil,
-		nil, nil, map[string]string{"CI": "woodpecker"}, nil,
-		nil, nil,
-		types.Resources{Requests: nil, Limits: nil}, nil, SecurityContextConfig{},
+	pod, err := mkPod(&types.Step{
+		Image:       "gradle:8.4.0-jdk21",
+		WorkingDir:  "/woodpecker/src",
+		Pull:        false,
+		Privileged:  false,
+		Commands:    []string{"gradle build"},
+		Volumes:     []string{"workspace:/woodpecker/src"},
+		Environment: map[string]string{"CI": "woodpecker"},
+	},
+		nil,
+		"woodpecker", "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64",
+		nil, nil, nil,
+		nil, SecurityContextConfig{},
 	)
 	assert.NoError(t, err)
 
@@ -242,14 +249,33 @@ func TestFullPod(t *testing.T) {
 		{Name: "cloudflare", IP: "1.1.1.1"},
 		{Name: "cf.v6", IP: "2606:4700:4700::64"},
 	}
-	pod, err := mkPod("woodpecker", "wp-01he8bebctabr3kgk0qj36d2me-0", "meltwater/drone-cache", "/woodpecker/src", "linux/amd64", "wp-svc-acc",
-		true, true,
-		[]string{"go get", "go test"}, []string{"woodpecker-cache:/woodpecker/src/cache"}, []string{"regcred", "another-pull-secret"},
-		map[string]string{"app": "test"}, map[string]string{"apparmor.security": "runtime/default"}, map[string]string{"CGO": "0"}, map[string]string{"storage": "ssd"},
-		hostAliases, []types.Toleration{{Key: "net-port", Value: "100Mbit", Effect: types.TaintEffectNoSchedule}},
-		types.Resources{Requests: map[string]string{"memory": "128Mi", "cpu": "1000m"}, Limits: map[string]string{"memory": "256Mi", "cpu": "2"}},
-		&types.SecurityContext{Privileged: newBool(true), RunAsNonRoot: newBool(true), RunAsUser: newInt64(101), RunAsGroup: newInt64(101), FSGroup: newInt64(101)},
-		SecurityContextConfig{RunAsNonRoot: false},
+	pod, err := mkPod(&types.Step{
+		Image:       "meltwater/drone-cache",
+		WorkingDir:  "/woodpecker/src",
+		Pull:        true,
+		Privileged:  true,
+		Commands:    []string{"go get", "go test"},
+		Volumes:     []string{"woodpecker-cache:/woodpecker/src/cache"},
+		Environment: map[string]string{"CGO": "0"},
+		ExtraHosts:  hostAliases,
+	},
+		&types.KubernetesBackendOptions{
+			NodeSelector:       map[string]string{"storage": "ssd"},
+			ServiceAccountName: "wp-svc-acc",
+			Tolerations: []types.Toleration{{Key: "net-port", Value: "100Mbit", Effect: types.TaintEffectNoSchedule}},
+			Resources: types.Resources{Requests: map[string]string{"memory": "128Mi", "cpu": "1000m"}},
+			SecurityContext: &types.SecurityContext{
+				Privileged: newBool(true),
+				 RunAsNonRoot: newBool(true),
+				  RunAsUser: newInt64(101),
+					 RunAsGroup: newInt64(101),
+					  FSGroup: newInt64(101)},
+			SecurityContextConfig{RunAsNonRoot: false},
+		},
+		"woodpecker", "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64",
+		[]string{"regcred", "another-pull-secret"},
+		map[string]string{"app": "test"}, map[string]string{"apparmor.security": "runtime/default"},
+		, Limits: map[string]string{"memory": "256Mi", "cpu": "2"},
 	)
 	assert.NoError(t, err)
 
@@ -258,4 +284,17 @@ func TestFullPod(t *testing.T) {
 
 	ja := jsonassert.New(t)
 	ja.Assertf(string(json), expected)
+}
+
+func TestDNSName(t *testing.T) {
+	name, err := dnsName(&types.Step{Name: "wp_01he8bebctabr3kgk0qj36d2me_0_services_0"})
+	assert.NoError(t, err)
+	assert.Equal(t, "wp-01he8bebctabr3kgk0qj36d2me-0-services-0", name)
+
+	name, err = dnsName(&types.Step{Name: "wp-01he8bebctabr3kgk0qj36d2me-0\\services-0"})
+	assert.NoError(t, err)
+	assert.Equal(t, "wp-01he8bebctabr3kgk0qj36d2me-0\\services-0", name)
+
+	_, err = dnsName(&types.Step{Name: "wp-01he8bebctabr3kgk0qj36d2me-0-services-0.woodpecker-runtime.svc.cluster.local"})
+	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
 }

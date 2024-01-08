@@ -60,13 +60,9 @@ func startService(ctx context.Context, engine *kube, step *types.Step) (*v1.Serv
 	if err != nil {
 		return nil, err
 	}
-	podName, err := podName(step)
-	if err != nil {
-		return nil, err
-	}
 
 	selector := map[string]string{
-		StepLabel: podName,
+		ServiceLabel: name,
 	}
 
 	svc, err := mkService(engine.config.Namespace, name, step.Ports, selector)
@@ -78,7 +74,7 @@ func startService(ctx context.Context, engine *kube, step *types.Step) (*v1.Serv
 }
 
 func stopService(ctx context.Context, engine *kube, step *types.Step, deleteOpts metav1.DeleteOptions) error {
-	svcName, err := serviceName(step)
+	svcName, err := dnsName(step.Name)
 	if err != nil {
 		return err
 	}
