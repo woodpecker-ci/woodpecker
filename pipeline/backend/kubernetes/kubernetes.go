@@ -42,7 +42,6 @@ import (
 
 const (
 	EngineName = "kubernetes"
-	podPrefix  = "wp-"
 )
 
 var defaultDeleteOptions = newDefaultDeleteOptions()
@@ -205,7 +204,7 @@ func (e *kube) StartStep(ctx context.Context, step *types.Step, taskUUID string)
 // Wait for the pipeline step to complete and returns
 // the completion results.
 func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) (*types.State, error) {
-	podName, err := podName(step)
+	podName, err := dnsName(step.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -265,7 +264,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 
 // Tail the pipeline step logs.
 func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) (io.ReadCloser, error) {
-	podName, err := podName(step)
+	podName, err := dnsName(step.Name)
 	if err != nil {
 		return nil, err
 	}
