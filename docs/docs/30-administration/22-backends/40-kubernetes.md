@@ -170,7 +170,6 @@ workspace:
 
 See [this issue](https://github.com/woodpecker-ci/woodpecker/issues/2510) for more details.
 
-
 ## Configuration
 
 These env vars can be set in the `env:` sections of the agent.
