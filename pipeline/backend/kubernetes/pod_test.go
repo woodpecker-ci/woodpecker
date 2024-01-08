@@ -262,20 +262,23 @@ func TestFullPod(t *testing.T) {
 		&types.KubernetesBackendOptions{
 			NodeSelector:       map[string]string{"storage": "ssd"},
 			ServiceAccountName: "wp-svc-acc",
-			Tolerations: []types.Toleration{{Key: "net-port", Value: "100Mbit", Effect: types.TaintEffectNoSchedule}},
-			Resources: types.Resources{Requests: map[string]string{"memory": "128Mi", "cpu": "1000m"}},
+			Tolerations:        []types.Toleration{{Key: "net-port", Value: "100Mbit", Effect: types.TaintEffectNoSchedule}},
+			Resources: types.Resources{
+				Requests: map[string]string{"memory": "128Mi", "cpu": "1000m"},
+				Limits:   map[string]string{"memory": "256Mi", "cpu": "2"},
+			},
 			SecurityContext: &types.SecurityContext{
-				Privileged: newBool(true),
-				 RunAsNonRoot: newBool(true),
-				  RunAsUser: newInt64(101),
-					 RunAsGroup: newInt64(101),
-					  FSGroup: newInt64(101)},
-			SecurityContextConfig{RunAsNonRoot: false},
+				Privileged:   newBool(true),
+				RunAsNonRoot: newBool(true),
+				RunAsUser:    newInt64(101),
+				RunAsGroup:   newInt64(101),
+				FSGroup:      newInt64(101),
+			},
 		},
 		"woodpecker", "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64",
 		[]string{"regcred", "another-pull-secret"},
 		map[string]string{"app": "test"}, map[string]string{"apparmor.security": "runtime/default"},
-		 Limits: map[string]string{"memory": "256Mi", "cpu": "2"},
+		SecurityContextConfig{RunAsNonRoot: false},
 	)
 	assert.NoError(t, err)
 
