@@ -37,7 +37,7 @@ type ExitError struct {
 
 // Error returns the error message in string format.
 func (e *ExitError) Error() string {
-	return fmt.Sprintf("%s : exit code %d", e.UUID, e.Code)
+	return fmt.Sprintf("uuid=%s: exit code %d", e.UUID, e.Code)
 }
 
 // An OomError reports the process received an OOMKill from the kernel.
@@ -48,5 +48,5 @@ type OomError struct {
 
 // Error returns the error message in string format.
 func (e *OomError) Error() string {
-	return fmt.Sprintf("%s : received oom kill", e.UUID)
+	return fmt.Sprintf("uuid=%s: received oom kill", e.UUID)
 }
