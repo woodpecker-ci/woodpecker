@@ -30,11 +30,18 @@ const (
 	ServiceLabel = "service"
 )
 
-func mkService(namespace, name string, ports []uint16, selector map[string]string) (*v1.Service, error) {
-	log.Trace().Str("name", name).Interface("selector", selector).Interface("ports", ports).Msg("Creating service")
+func mkService(step *types.Step, namespace string) (*v1.Service, error) {
+	name, err := serviceName(step)
+	if err != nil {
+		return nil, err
+	}
+
+	selector := map[string]string{
+		ServiceLabel: name,
+	}
 
 	var svcPorts []v1.ServicePort
-	for _, port := range ports {
+	for _, port := range step.Ports {
 		svcPorts = append(svcPorts, v1.ServicePort{
 			Name:       fmt.Sprintf("port-%d", port),
 			Port:       int32(port),
@@ -60,20 +67,12 @@ func serviceName(step *types.Step) (string, error) {
 }
 
 func startService(ctx context.Context, engine *kube, step *types.Step) (*v1.Service, error) {
-	name, err := serviceName(step)
+	svc, err := mkService(step, engine.config.Namespace)
 	if err != nil {
 		return nil, err
 	}
 
-	selector := map[string]string{
-		ServiceLabel: name,
-	}
-
-	svc, err := mkService(engine.config.Namespace, name, step.Ports, selector)
-	if err != nil {
-		return nil, err
-	}
-
+	log.Trace().Str("name", svc.Name).Interface("selector", svc.Spec.Selector).Interface("ports", svc.Spec.Ports).Msg("Creating service")
 	return engine.client.CoreV1().Services(engine.config.Namespace).Create(ctx, svc, metav1.CreateOptions{})
 }
 

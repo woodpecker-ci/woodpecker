@@ -19,6 +19,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
 
 func TestService(t *testing.T) {
@@ -48,7 +49,7 @@ func TestService(t *testing.T) {
 	      }
 	    ],
 	    "selector": {
-	      "step": "baz"
+	      "service": "bar"
 	    },
 	    "type": "ClusterIP"
 	  },
@@ -57,7 +58,10 @@ func TestService(t *testing.T) {
 	  }
 	}`
 
-	s, _ := mkService("foo", "bar", []uint16{1, 2, 3}, map[string]string{"step": "baz"})
+	s, _ := mkService(&types.Step{
+		Name:  "bar",
+		Ports: []uint16{1, 2, 3},
+	}, "foo")
 	j, err := json.Marshal(s)
 	assert.NoError(t, err)
 	assert.JSONEq(t, expected, string(j))

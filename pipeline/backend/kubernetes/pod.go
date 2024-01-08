@@ -32,6 +32,7 @@ import (
 
 const (
 	StepLabel = "step"
+	podPrefix = "wp-"
 )
 
 func mkPod(step *types.Step, backendOptions *types.KubernetesBackendOptions, namespace, podName, goos string,
@@ -65,7 +66,7 @@ func mkPod(step *types.Step, backendOptions *types.KubernetesBackendOptions, nam
 }
 
 func podName(step *types.Step) (string, error) {
-	return dnsName(step.UUID)
+	return dnsName(podPrefix + step.UUID)
 }
 
 func podMeta(step *types.Step, namespace, podName string, labels, annotations map[string]string) metav1.ObjectMeta {

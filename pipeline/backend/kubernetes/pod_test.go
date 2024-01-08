@@ -24,15 +24,15 @@ import (
 )
 
 func TestPodName(t *testing.T) {
-	name, err := podName(&types.Step{Name: "wp_01he8bebctabr3kgk0qj36d2me_0"})
+	name, err := podName(&types.Step{UUID: "01he8bebctabr3kgk0qj36d2me-0"})
 	assert.NoError(t, err)
 	assert.Equal(t, "wp-01he8bebctabr3kgk0qj36d2me-0", name)
 
-	name, err = podName(&types.Step{Name: "wp\\01he8bebctabr3kgk0qj36d2me-0"})
+	name, err = podName(&types.Step{UUID: "01he8bebctabr3kgk0qj36d2me\\0a"})
 	assert.NoError(t, err)
-	assert.Equal(t, "wp\\01he8bebctabr3kgk0qj36d2me-0", name)
+	assert.Equal(t, "wp-01he8bebctabr3kgk0qj36d2me\\0a", name)
 
-	_, err = podName(&types.Step{Name: "wp-01he8bebctabr3kgk0qj36d2me-0-services-0.woodpecker-runtime.svc.cluster.local"})
+	_, err = podName(&types.Step{UUID: "01he8bebctabr3kgk0qj36d2me-0-services-0.woodpecker-runtime.svc.cluster.local"})
 	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
 }
 
@@ -44,7 +44,7 @@ func TestTinyPod(t *testing.T) {
 			"namespace": "woodpecker",
 			"creationTimestamp": null,
 			"labels": {
-				"step": "wp-01he8bebctabr3kgk0qj36d2me-0"
+				"step": "build-via-gradle"
 			}
 		},
 		"spec": {
@@ -102,6 +102,7 @@ func TestTinyPod(t *testing.T) {
 	}`
 
 	pod, err := mkPod(&types.Step{
+		Name:        "build-via-gradle",
 		Image:       "gradle:8.4.0-jdk21",
 		WorkingDir:  "/woodpecker/src",
 		Pull:        false,
@@ -113,7 +114,7 @@ func TestTinyPod(t *testing.T) {
 		nil,
 		"woodpecker", "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64",
 		nil, nil, nil,
-		nil, SecurityContextConfig{},
+		SecurityContextConfig{},
 	)
 	assert.NoError(t, err)
 
@@ -133,7 +134,7 @@ func TestFullPod(t *testing.T) {
 			"creationTimestamp": null,
 			"labels": {
 				"app": "test",
-				"step": "wp-01he8bebctabr3kgk0qj36d2me-0"
+				"step": "go-test"
 			},
 			"annotations": {
 				"apparmor.security": "runtime/default"
@@ -250,6 +251,7 @@ func TestFullPod(t *testing.T) {
 		{Name: "cf.v6", IP: "2606:4700:4700::64"},
 	}
 	pod, err := mkPod(&types.Step{
+		Name:        "go-test",
 		Image:       "meltwater/drone-cache",
 		WorkingDir:  "/woodpecker/src",
 		Pull:        true,
@@ -290,14 +292,14 @@ func TestFullPod(t *testing.T) {
 }
 
 func TestDNSName(t *testing.T) {
-	name, err := dnsName(&types.Step{Name: "wp_01he8bebctabr3kgk0qj36d2me_0_services_0"})
+	name, err := dnsName("wp_01he8bebctabr3kgk0qj36d2me_0_services_0")
 	assert.NoError(t, err)
 	assert.Equal(t, "wp-01he8bebctabr3kgk0qj36d2me-0-services-0", name)
 
-	name, err = dnsName(&types.Step{Name: "wp-01he8bebctabr3kgk0qj36d2me-0\\services-0"})
+	name, err = dnsName("wp-01he8bebctabr3kgk0qj36d2me-0\\services-0")
 	assert.NoError(t, err)
 	assert.Equal(t, "wp-01he8bebctabr3kgk0qj36d2me-0\\services-0", name)
 
-	_, err = dnsName(&types.Step{Name: "wp-01he8bebctabr3kgk0qj36d2me-0-services-0.woodpecker-runtime.svc.cluster.local"})
+	_, err = dnsName("wp-01he8bebctabr3kgk0qj36d2me-0-services-0.woodpecker-runtime.svc.cluster.local")
 	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
 }
