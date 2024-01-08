@@ -129,7 +129,7 @@ Image variants:
 
 - The `latest` image is the latest stable release
 - The `vX.X.X` images are stable releases
-- The `next` images are based on the current `main` branch
+- The `next` images are based on the current `main` branch, might contain bugs as these are not tested as heavily as releases
 
 ```bash
 # server
