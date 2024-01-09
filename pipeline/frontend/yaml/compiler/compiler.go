@@ -262,7 +262,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 	}
 
 	// generate stages out of steps
-	stepStages, err := dagCompiler(steps).compile()
+	stepStages, err := newDAGCompiler(steps).compile()
 	if err != nil {
 		return nil, err
 	}

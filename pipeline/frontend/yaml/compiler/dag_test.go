@@ -146,7 +146,7 @@ func TestIsDag(t *testing.T) {
 			step: &backend_types.Step{},
 		},
 	}
-	c := dagCompiler(steps)
+	c := newDAGCompiler(steps)
 	assert.False(t, c.isDAG())
 
 	steps = []*dagCompilerStep{
@@ -155,6 +155,6 @@ func TestIsDag(t *testing.T) {
 			dependsOn: []string{},
 		},
 	}
-	c = dagCompiler(steps)
+	c = newDAGCompiler(steps)
 	assert.True(t, c.isDAG())
 }

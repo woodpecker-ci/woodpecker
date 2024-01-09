@@ -28,10 +28,18 @@ type dagCompilerStep struct {
 	dependsOn []string
 }
 
-type dagCompiler []*dagCompilerStep
+type dagCompiler struct {
+	steps []*dagCompilerStep
+}
 
-func (steps dagCompiler) isDAG() bool {
-	for _, v := range steps {
+func newDAGCompiler(steps []*dagCompilerStep) dagCompiler {
+	return dagCompiler{
+		steps: steps,
+	}
+}
+
+func (c dagCompiler) isDAG() bool {
+	for _, v := range c.steps {
 		if v.dependsOn != nil {
 			return true
 		}
@@ -39,19 +47,19 @@ func (steps dagCompiler) isDAG() bool {
 	return false
 }
 
-func (steps dagCompiler) compile() ([]*backend_types.Stage, error) {
-	if steps.isDAG() {
-		return steps.compileByDependsOn()
+func (c dagCompiler) compile() ([]*backend_types.Stage, error) {
+	if c.isDAG() {
+		return c.compileByDependsOn()
 	}
-	return steps.compileByGroup()
+	return c.compileByGroup()
 }
 
-func (steps dagCompiler) compileByGroup() ([]*backend_types.Stage, error) {
-	stages := make([]*backend_types.Stage, 0, len(steps))
+func (c dagCompiler) compileByGroup() ([]*backend_types.Stage, error) {
+	stages := make([]*backend_types.Stage, 0, len(c.steps))
 	var currentStage *backend_types.Stage
 	var currentGroup string
 
-	for _, s := range steps {
+	for _, s := range c.steps {
 		// create a new stage if current step is in a new group compared to last one
 		if currentStage == nil || currentGroup != s.group || s.group == "" {
 			currentGroup = s.group
@@ -67,9 +75,9 @@ func (steps dagCompiler) compileByGroup() ([]*backend_types.Stage, error) {
 	return stages, nil
 }
 
-func (steps dagCompiler) compileByDependsOn() ([]*backend_types.Stage, error) {
-	stepMap := make(map[string]*dagCompilerStep, len(steps))
-	for _, s := range steps {
+func (c dagCompiler) compileByDependsOn() ([]*backend_types.Stage, error) {
+	stepMap := make(map[string]*dagCompilerStep, len(c.steps))
+	for _, s := range c.steps {
 		stepMap[s.name] = s
 	}
 	return convertDAGToStages(stepMap)
