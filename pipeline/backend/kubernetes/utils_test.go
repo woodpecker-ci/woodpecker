@@ -25,10 +25,32 @@ func TestDNSName(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "wp-01he8bebctabr3kgk0qj36d2me-0-services-0", name)
 
-	name, err = dnsName("wp-01he8bebctabr3kgk0qj36d2me-0\\services-0")
+	name, err = dnsName("a.0-AA")
 	assert.NoError(t, err)
-	assert.Equal(t, "wp-01he8bebctabr3kgk0qj36d2me-0\\services-0", name)
+	assert.Equal(t, "a.0-aa", name)
 
-	_, err = dnsName("wp-01he8bebctabr3kgk0qj36d2me-0-services-0.woodpecker-runtime.svc.cluster.local")
+	name, err = dnsName("wp-01he8bebctabr3kgk0qj36d2me-0-services-0.woodpecker-runtime.svc.cluster.local")
+	assert.NoError(t, err)
+	assert.Equal(t, "wp-01he8bebctabr3kgk0qj36d2me-0-services-0.woodpecker-runtime.svc.cluster.local", name)
+
+	_, err = dnsName(".0-a")
+	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
+
+	_, err = dnsName("ABC..DEF")
+	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
+
+	_, err = dnsName("0.-a")
+	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
+
+	_, err = dnsName("test-")
+	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
+
+	_, err = dnsName("-test")
+	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
+
+	_, err = dnsName("0-a.")
+	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
+
+	_, err = dnsName("abc\\def")
 	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
 }
