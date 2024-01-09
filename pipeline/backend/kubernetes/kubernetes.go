@@ -173,8 +173,8 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID s
 
 	extraHosts := []types.HostAlias{}
 	for _, stage := range conf.Stages {
-		if stage.Alias == "services" {
-			for _, step := range stage.Steps {
+		for _, step := range stage.Steps {
+			if step.Type == types.StepTypeService {
 				svc, err := startService(ctx, e, step)
 				if err != nil {
 					return err
@@ -196,6 +196,11 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID s
 
 // Start the pipeline step.
 func (e *kube) StartStep(ctx context.Context, step *types.Step, taskUUID string) error {
+	if step.Type == types.StepTypeService {
+		// this one should be started by SetupWorkflow so we can ignore it
+		log.Trace().Msgf("StartStep got service '%s', ignoring it.", step.Name)
+		return nil
+	}
 	log.Trace().Str("taskUUID", taskUUID).Msgf("Starting step: %s", step.Name)
 	_, err := startPod(ctx, e, step)
 	return err
@@ -204,7 +209,7 @@ func (e *kube) StartStep(ctx context.Context, step *types.Step, taskUUID string)
 // Wait for the pipeline step to complete and returns
 // the completion results.
 func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) (*types.State, error) {
-	podName, err := dnsName(step.Name)
+	podName, err := stepToPodName(step)
 	if err != nil {
 		return nil, err
 	}
