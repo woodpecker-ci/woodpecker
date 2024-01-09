@@ -1,0 +1,13 @@
+extends: default
+
+ignore-from-file:
+  - docs/.gitignore
+  - docs/plugins/woodpecker-plugins/.gitignore
+  - .gitignore
+  - server/store/datastore/migration/testfiles/.gitignore
+  - web/.gitignore
+
+rules:
+  line-length: disable
+  document-start: disable
+  comments: disable

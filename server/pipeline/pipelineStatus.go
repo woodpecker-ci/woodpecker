@@ -18,8 +18,8 @@ package pipeline
 import (
 	"time"
 
-	"go.woodpecker-ci.org/woodpecker/pipeline/errors"
-	"go.woodpecker-ci.org/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 func UpdateToStatusRunning(store model.UpdatePipelineStore, pipeline model.Pipeline, started int64) (*model.Pipeline, error) {
@@ -29,9 +29,11 @@ func UpdateToStatusRunning(store model.UpdatePipelineStore, pipeline model.Pipel
 }
 
 func UpdateToStatusPending(store model.UpdatePipelineStore, pipeline model.Pipeline, reviewer string) (*model.Pipeline, error) {
-	pipeline.Reviewer = reviewer
+	if reviewer != "" {
+		pipeline.Reviewer = reviewer
+		pipeline.Reviewed = time.Now().Unix()
+	}
 	pipeline.Status = model.StatusPending
-	pipeline.Reviewed = time.Now().Unix()
 	return &pipeline, store.UpdatePipeline(&pipeline)
 }
 

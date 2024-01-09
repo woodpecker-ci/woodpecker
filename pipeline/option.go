@@ -17,16 +17,16 @@ package pipeline
 import (
 	"context"
 
-	backend "go.woodpecker-ci.org/woodpecker/pipeline/backend/types"
+	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
 
 // Option configures a runtime option.
 type Option func(*Runtime)
 
-// WithEngine returns an option configured with a runtime engine.
-func WithEngine(engine backend.Engine) Option {
+// WithBackend returns an option configured with a runtime engine.
+func WithBackend(backend backend.Backend) Option {
 	return func(r *Runtime) {
-		r.engine = engine
+		r.engine = backend
 	}
 }
 

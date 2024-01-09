@@ -14,6 +14,48 @@
 
 package types
 
+import (
+	"context"
+	"io"
+)
+
+// Backend defines a container orchestration backend and is used
+// to create and manage container resources.
+type Backend interface {
+	// Name returns the name of the backend.
+	Name() string
+
+	// IsAvailable check if the backend is available.
+	IsAvailable(ctx context.Context) bool
+
+	// Load loads the backend engine.
+	Load(ctx context.Context) (*BackendInfo, error)
+
+	// SetupWorkflow sets up the workflow environment.
+	SetupWorkflow(ctx context.Context, conf *Config, taskUUID string) error
+
+	// StartStep starts the workflow step.
+	StartStep(ctx context.Context, step *Step, taskUUID string) error
+
+	// WaitStep waits for the workflow step to complete and returns
+	// the completion results.
+	WaitStep(ctx context.Context, step *Step, taskUUID string) (*State, error)
+
+	// TailStep tails the workflow step logs.
+	TailStep(ctx context.Context, step *Step, taskUUID string) (io.ReadCloser, error)
+
+	// DestroyStep destroys the workflow step.
+	DestroyStep(ctx context.Context, step *Step, taskUUID string) error
+
+	// DestroyWorkflow destroys the workflow environment.
+	DestroyWorkflow(ctx context.Context, conf *Config, taskUUID string) error
+}
+
+// BackendInfo represents the reported information of a loaded backend
+type BackendInfo struct {
+	Platform string
+}
+
 // BackendOptions defines advanced options for specific backends
 type BackendOptions struct {
 	Kubernetes KubernetesBackendOptions `json:"kubernetes,omitempty"`

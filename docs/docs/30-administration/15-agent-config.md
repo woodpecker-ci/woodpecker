@@ -1,9 +1,12 @@
+---
+toc_max_heading_level: 2
+---
+
 # Agent configuration
 
 Agents are configured by the command line or environment variables. At the minimum you need the following information:
 
-```diff
-# docker-compose.yml
+```diff title="docker-compose.yml"
 version: '3'
 
 services:
@@ -25,8 +28,7 @@ The following are automatically set and can be overridden:
 
 By default, the maximum workflows that are executed in parallel on an agent is 1. If required, you can add `WOODPECKER_MAX_WORKFLOWS` to increase your parallel processing for an agent.
 
-```diff
-# docker-compose.yml
+```diff title="docker-compose.yml"
 version: '3'
 
 services:
@@ -179,6 +181,12 @@ Configures if the gRPC server certificate should be verified, only valid when `W
 > Default: `auto-detect`
 
 Configures the backend engine to run pipelines on. Possible values are `auto-detect`, `docker`, `local` or `kubernetes`.
+
+### WOODPECKER_ADDONS
+
+> Default: empty
+
+List of addon files. See [addons](./75-addons/00-overview.md).
 
 ### `WOODPECKER_BACKEND_DOCKER_*`
 

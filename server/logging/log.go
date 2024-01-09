@@ -18,7 +18,7 @@ import (
 	"context"
 	"sync"
 
-	"go.woodpecker-ci.org/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 // TODO (bradrydzewski) writing to subscribers is currently a blocking

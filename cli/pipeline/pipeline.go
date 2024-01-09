@@ -16,15 +16,12 @@ package pipeline
 
 import (
 	"github.com/urfave/cli/v2"
-
-	"go.woodpecker-ci.org/woodpecker/cli/common"
 )
 
 // Command exports the pipeline command set.
 var Command = &cli.Command{
 	Name:  "pipeline",
 	Usage: "manage pipelines",
-	Flags: common.GlobalFlags,
 	Subcommands: []*cli.Command{
 		pipelineListCmd,
 		pipelineLastCmd,

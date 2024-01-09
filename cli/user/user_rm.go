@@ -19,8 +19,7 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"go.woodpecker-ci.org/woodpecker/cli/common"
-	"go.woodpecker-ci.org/woodpecker/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
 var userRemoveCmd = &cli.Command{
@@ -28,7 +27,6 @@ var userRemoveCmd = &cli.Command{
 	Usage:     "remove a user",
 	ArgsUsage: "<username>",
 	Action:    userRemove,
-	Flags:     common.GlobalFlags,
 }
 
 func userRemove(c *cli.Context) error {

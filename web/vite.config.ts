@@ -3,6 +3,7 @@ import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite';
 import vue from '@vitejs/plugin-vue';
 import { copyFile, existsSync, mkdirSync, readdirSync } from 'fs';
 import path from 'path';
+import replace from 'replace-in-file';
 import IconsResolver from 'unplugin-icons/resolver';
 import Icons from 'unplugin-icons/vite';
 import Components from 'unplugin-vue-components/vite';
@@ -29,8 +30,8 @@ function externalCSSPlugin() {
   return {
     name: 'external-css',
     transformIndexHtml: {
-      enforce: 'post',
-      transform() {
+      order: 'post',
+      handler() {
         return [
           {
             tag: 'link',
@@ -56,37 +57,42 @@ export default defineConfig({
 
       const filenames = readdirSync('src/assets/locales/').map((filename) => filename.replace('.json', ''));
 
-      if (!existsSync('src/assets/timeAgoLocales')) {
-        mkdirSync('src/assets/timeAgoLocales');
+      if (!existsSync('src/assets/dayjsLocales')) {
+        mkdirSync('src/assets/dayjsLocales');
       }
 
-      filenames.forEach((name) => {
-        // copy timeAgo language
-        if (name === 'zh-Hans') {
-          // zh-Hans is called zh in javascript-time-ago, so we need to rename this
-          copyFile(
-            'node_modules/javascript-time-ago/locale/zh.json.js',
-            'src/assets/timeAgoLocales/zh-Hans.js',
-            // eslint-disable-next-line promise/prefer-await-to-callbacks
-            (err) => {
-              if (err) {
-                throw err;
-              }
-            },
-          );
-        } else if (name !== 'en') {
-          // English is always directly loaded (compiled by Vite) and thus not copied
-          copyFile(
-            `node_modules/javascript-time-ago/locale/${name}.json.js`,
-            `src/assets/timeAgoLocales/${name}.js`,
-            // eslint-disable-next-line promise/prefer-await-to-callbacks
-            (err) => {
-              if (err) {
-                throw err;
-              }
-            },
-          );
+      filenames.forEach(async (name) => {
+        // English is always directly loaded (compiled by Vite) and thus not copied
+        if (name === 'en') {
+          return;
         }
+        let langName = name;
+
+        // copy dayjs language
+        if (name === 'zh-Hans') {
+          // zh-Hans is called zh in dayjs
+          langName = 'zh';
+        } else if (name === 'zh-Hant') {
+          // zh-Hant is called zh-cn in dayjs
+          langName = 'zh-cn';
+        }
+
+        copyFile(
+          `node_modules/dayjs/esm/locale/${langName}.js`,
+          `src/assets/dayjsLocales/${name}.js`,
+          // eslint-disable-next-line promise/prefer-await-to-callbacks
+          (err) => {
+            if (err) {
+              throw err;
+            }
+          },
+        );
+      });
+      replace.sync({
+        files: 'src/assets/dayjsLocales/*.js',
+        // remove any dayjs import and any dayjs.locale call
+        from: /(?:import dayjs.*'|dayjs\.locale.*);/g,
+        to: '',
       });
 
       return {

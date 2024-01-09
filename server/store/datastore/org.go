@@ -15,11 +15,12 @@
 package datastore
 
 import (
+	"fmt"
 	"strings"
 
 	"xorm.io/xorm"
 
-	"go.woodpecker-ci.org/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 func (s storage) OrgCreate(org *model.Org) error {
@@ -29,6 +30,9 @@ func (s storage) OrgCreate(org *model.Org) error {
 func (s storage) orgCreate(org *model.Org, sess *xorm.Session) error {
 	// sanitize
 	org.Name = strings.ToLower(org.Name)
+	if org.Name == "" {
+		return fmt.Errorf("org name is empty")
+	}
 	// insert
 	_, err := sess.Insert(org)
 	return err

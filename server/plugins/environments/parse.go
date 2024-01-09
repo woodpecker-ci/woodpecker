@@ -19,14 +19,14 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 type builtin struct {
 	globals []*model.Environ
 }
 
-// Parse returns a EnvironService based on a string slice where key and value are separated by a ":" delimiter.
+// Parse returns a model.EnvironService based on a string slice where key and value are separated by a ":" delimiter.
 func Parse(params []string) model.EnvironService {
 	var globals []*model.Environ
 

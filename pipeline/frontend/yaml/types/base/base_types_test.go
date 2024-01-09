@@ -49,20 +49,27 @@ type StructStringOrSlice struct {
 }
 
 func TestStringOrSliceYaml(t *testing.T) {
-	str := `{foo: [bar, baz]}`
-
+	str := `{foo: [bar, "baz"]}`
 	s := StructStringOrSlice{}
 	assert.NoError(t, yaml.Unmarshal([]byte(str), &s))
-
 	assert.Equal(t, StringOrSlice{"bar", "baz"}, s.Foo)
 
 	d, err := yaml.Marshal(&s)
 	assert.NoError(t, err)
 
-	s2 := StructStringOrSlice{}
-	assert.NoError(t, yaml.Unmarshal(d, &s2))
+	s = StructStringOrSlice{}
+	assert.NoError(t, yaml.Unmarshal(d, &s))
+	assert.Equal(t, StringOrSlice{"bar", "baz"}, s.Foo)
 
-	assert.Equal(t, StringOrSlice{"bar", "baz"}, s2.Foo)
+	str = `{foo: []}`
+	s = StructStringOrSlice{}
+	assert.NoError(t, yaml.Unmarshal([]byte(str), &s))
+	assert.Equal(t, StringOrSlice{}, s.Foo)
+
+	str = `{}`
+	s = StructStringOrSlice{}
+	assert.NoError(t, yaml.Unmarshal([]byte(str), &s))
+	assert.Nil(t, s.Foo)
 }
 
 type StructSliceorMap struct {

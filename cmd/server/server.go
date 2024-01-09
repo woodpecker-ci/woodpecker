@@ -34,28 +34,27 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
 
-	"go.woodpecker-ci.org/woodpecker/cmd/common"
-	"go.woodpecker-ci.org/woodpecker/pipeline/rpc/proto"
-	"go.woodpecker-ci.org/woodpecker/server"
-	"go.woodpecker-ci.org/woodpecker/server/cron"
-	woodpeckerGrpcServer "go.woodpecker-ci.org/woodpecker/server/grpc"
-	"go.woodpecker-ci.org/woodpecker/server/logging"
-	"go.woodpecker-ci.org/woodpecker/server/model"
-	"go.woodpecker-ci.org/woodpecker/server/plugins/config"
-	"go.woodpecker-ci.org/woodpecker/server/plugins/permissions"
-	"go.woodpecker-ci.org/woodpecker/server/pubsub"
-	"go.woodpecker-ci.org/woodpecker/server/router"
-	"go.woodpecker-ci.org/woodpecker/server/router/middleware"
-	"go.woodpecker-ci.org/woodpecker/server/store"
-	"go.woodpecker-ci.org/woodpecker/server/web"
-	"go.woodpecker-ci.org/woodpecker/shared/constant"
-	"go.woodpecker-ci.org/woodpecker/version"
-	// "go.woodpecker-ci.org/woodpecker/server/plugins/encryption"
-	// encryptedStore "go.woodpecker-ci.org/woodpecker/server/plugins/encryption/wrapper/store"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc/proto"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/cron"
+	woodpeckerGrpcServer "go.woodpecker-ci.org/woodpecker/v2/server/grpc"
+	"go.woodpecker-ci.org/woodpecker/v2/server/logging"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/permissions"
+	"go.woodpecker-ci.org/woodpecker/v2/server/pubsub"
+	"go.woodpecker-ci.org/woodpecker/v2/server/router"
+	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/server/web"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/logger"
+	"go.woodpecker-ci.org/woodpecker/v2/version"
+	// "go.woodpecker-ci.org/woodpecker/v2/server/plugins/encryption"
+	// encryptedStore "go.woodpecker-ci.org/woodpecker/v2/server/plugins/encryption/wrapper/store"
 )
 
 func run(c *cli.Context) error {
-	common.SetupGlobalLogger(c, true)
+	logger.SetupGlobalLogger(c, true)
 
 	// set gin mode based on log level
 	if zerolog.GlobalLevel() > zerolog.DebugLevel {
@@ -90,7 +89,7 @@ func run(c *cli.Context) error {
 
 	_store, err := setupStore(c)
 	if err != nil {
-		log.Fatal().Err(err).Msg("cant't setup database store")
+		log.Fatal().Err(err).Msg("can't setup database store")
 	}
 	defer func() {
 		if err := _store.Close(); err != nil {
@@ -98,7 +97,10 @@ func run(c *cli.Context) error {
 		}
 	}()
 
-	setupEvilGlobals(c, _store)
+	err = setupEvilGlobals(c, _store)
+	if err != nil {
+		log.Fatal().Err(err).Msg("can't setup globals")
+	}
 
 	var g errgroup.Group
 
@@ -195,7 +197,7 @@ func run(c *cli.Context) error {
 				c.String("server-key"),
 			)
 			if err != nil && !errors.Is(err, http.ErrServerClosed) {
-				log.Fatal().Err(err).Msg("failed to start server with tls")
+				log.Fatal().Err(err).Msg("failed to_forge start server with tls")
 			}
 			return err
 		})
@@ -265,16 +267,19 @@ func run(c *cli.Context) error {
 	return g.Wait()
 }
 
-func setupEvilGlobals(c *cli.Context, store store.Store) {
+func setupEvilGlobals(c *cli.Context, s store.Store) error {
 	// forge
 	server.Config.Services.Timeout = c.Duration("forge-timeout")
 
 	// services
-	server.Config.Services.Queue = setupQueue(c, store)
+	server.Config.Services.Queue = setupQueue(c, s)
 	server.Config.Services.Logs = logging.New()
 	server.Config.Services.Pubsub = pubsub.New()
-	server.Config.Services.Registries = setupRegistryService(c, store)
-	server.Config.Services.Forge = setupForgeService(c, store)
+	var err error
+	server.Config.Services.Registries, err = setupRegistryService(c, s)
+	if err != nil {
+		return err
+	}
 
 	// TODO(1544): fix encrypted store
 	// // encryption
@@ -284,15 +289,21 @@ func setupEvilGlobals(c *cli.Context, store store.Store) {
 	// 	log.Fatal().Err(err).Msg("could not create encryption service")
 	// }
 	// server.Config.Services.Secrets = setupSecretService(c, encryptedSecretStore)
-	server.Config.Services.Secrets = setupSecretService(c, store)
+	server.Config.Services.Secrets, err = setupSecretService(c, s)
+	if err != nil {
+		return err
+	}
+	server.Config.Services.Environ, err = setupEnvironService(c, s)
+	if err != nil {
+		return err
+	}
+	server.Config.Services.Membership = setupMembershipService(c, s)
 
-	server.Config.Services.Environ = setupEnvironService(c, store)
-	server.Config.Services.Membership = setupMembershipService(c, store)
+	server.Config.Services.SignaturePrivateKey, server.Config.Services.SignaturePublicKey = setupSignatureKeys(s)
 
-	server.Config.Services.SignaturePrivateKey, server.Config.Services.SignaturePublicKey = setupSignatureKeys(store)
-
-	if endpoint := c.String("config-service-endpoint"); endpoint != "" {
-		server.Config.Services.ConfigService = config.NewHTTP(endpoint, server.Config.Services.SignaturePrivateKey)
+	server.Config.Services.ConfigService, err = setupConfigService(c)
+	if err != nil {
+		return err
 	}
 
 	// authentication
@@ -346,13 +357,8 @@ func setupEvilGlobals(c *cli.Context, store store.Store) {
 	server.Config.Server.StatusContext = c.String("status-context")
 	server.Config.Server.StatusContextFormat = c.String("status-context-format")
 	server.Config.Server.SessionExpires = c.Duration("session-expires")
-	rootPath := c.String("root-path")
-	if !c.IsSet("root-path") {
-		// Extract RootPath from Host...
-		u, _ := url.Parse(server.Config.Server.Host)
-		rootPath = u.Path
-	}
-	rootPath = strings.TrimSuffix(rootPath, "/")
+	u, _ := url.Parse(server.Config.Server.Host)
+	rootPath := strings.TrimSuffix(u.Path, "/")
 	if rootPath != "" && !strings.HasPrefix(rootPath, "/") {
 		rootPath = "/" + rootPath
 	}
@@ -362,7 +368,8 @@ func setupEvilGlobals(c *cli.Context, store store.Store) {
 	server.Config.Pipeline.Networks = c.StringSlice("network")
 	server.Config.Pipeline.Volumes = c.StringSlice("volume")
 	server.Config.Pipeline.Privileged = c.StringSlice("escalate")
-	server.Config.Server.EnableSwagger = c.Bool("enable-swagger")
+	server.Config.WebUI.EnableSwagger = c.Bool("enable-swagger")
+	server.Config.WebUI.SkipVersionCheck = c.Bool("skip-version-check")
 
 	// prometheus
 	server.Config.Prometheus.AuthToken = c.String("prometheus-auth-token")
@@ -372,4 +379,5 @@ func setupEvilGlobals(c *cli.Context, store store.Store) {
 	server.Config.Permissions.Admins = permissions.NewAdmins(c.StringSlice("admin"))
 	server.Config.Permissions.Orgs = permissions.NewOrgs(c.StringSlice("orgs"))
 	server.Config.Permissions.OwnersAllowlist = permissions.NewOwnersAllowlist(c.StringSlice("repo-owners"))
+	return nil
 }

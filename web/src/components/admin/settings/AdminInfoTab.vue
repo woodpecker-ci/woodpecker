@@ -10,12 +10,16 @@
       <Error v-if="version?.needsUpdate">
         <i18n-t keypath="update_woodpecker" tag="span">
           <a
+            v-if="!version.usesNext"
             :href="`https://github.com/woodpecker-ci/woodpecker/releases/tag/${version.latest}`"
             target="_blank"
             rel="noopener noreferrer"
             class="underline"
             >{{ version.latest }}</a
           >
+          <span v-else>
+            {{ version.latest }}
+          </span>
         </i18n-t>
       </Error>
     </div>

@@ -21,8 +21,8 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"go.woodpecker-ci.org/woodpecker/cli/common"
-	"go.woodpecker-ci.org/woodpecker/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
 var userInfoCmd = &cli.Command{
@@ -30,9 +30,7 @@ var userInfoCmd = &cli.Command{
 	Usage:     "show user details",
 	ArgsUsage: "<username>",
 	Action:    userInfo,
-	Flags: append(common.GlobalFlags,
-		common.FormatFlag(tmplUserInfo),
-	),
+	Flags:     []cli.Flag{common.FormatFlag(tmplUserInfo)},
 }
 
 func userInfo(c *cli.Context) error {

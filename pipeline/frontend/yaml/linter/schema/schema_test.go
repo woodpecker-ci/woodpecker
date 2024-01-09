@@ -21,7 +21,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/linter/schema"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter/schema"
 )
 
 func TestSchema(t *testing.T) {
@@ -100,6 +100,11 @@ func TestSchema(t *testing.T) {
 			name:     "Broken Config",
 			testFile: ".woodpecker/test-broken.yml",
 			fail:     true,
+		},
+		{
+			name:     "Array syntax",
+			testFile: ".woodpecker/test-array-syntax.yml",
+			fail:     false,
 		},
 	}
 

@@ -20,7 +20,7 @@ import (
 	"testing"
 	"time"
 
-	"go.woodpecker-ci.org/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 type mockUpdatePipelineStore struct{}

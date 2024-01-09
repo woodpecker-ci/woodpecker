@@ -26,7 +26,7 @@ import (
 	"strings"
 
 	"github.com/rs/zerolog/log"
-	"go.woodpecker-ci.org/woodpecker/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
 
 // checkGitCloneCap check if we have the git binary on hand
@@ -107,7 +107,7 @@ func (e *local) execClone(ctx context.Context, step *types.Step, state *workflow
 	e.output, _ = cmd.StdoutPipe()
 	cmd.Stderr = cmd.Stdout
 
-	state.stepCMDs[step.Name] = cmd
+	state.stepCMDs[step.UUID] = cmd
 
 	return cmd.Start()
 }

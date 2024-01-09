@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/multierr"
 
-	pipeline_errors "go.woodpecker-ci.org/woodpecker/pipeline/errors"
+	pipeline_errors "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
 )
 
 func TestGetPipelineErrors(t *testing.T) {

@@ -23,7 +23,7 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/pipeline/shared"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/shared"
 )
 
 // Identifies the type of line in the logs.

@@ -7,57 +7,54 @@
 </p>
 <br/>
 <p align="center">
-  <a href="https://ci.woodpecker-ci.org/woodpecker-ci/woodpecker" title="Build Status">
-    <img src="https://ci.woodpecker-ci.org/api/badges/woodpecker-ci/woodpecker/status.svg">
+  <a href="https://ci.woodpecker-ci.org/repos/3780" title="Build Status">
+    <img src="https://ci.woodpecker-ci.org/api/badges/3780/status.svg" alt="Build Status">
   </a>
   <a href="https://codecov.io/gh/woodpecker-ci/woodpecker">
-    <img src="https://codecov.io/gh/woodpecker-ci/woodpecker/branch/main/graph/badge.svg"/>
+    <img src="https://codecov.io/gh/woodpecker-ci/woodpecker/branch/main/graph/badge.svg" alt="Code coverage">
   </a>
   <a href="https://translate.woodpecker-ci.org/engage/woodpecker-ci/">
     <img src="https://translate.woodpecker-ci.org/widgets/woodpecker-ci/-/ui/svg-badge.svg" alt="Translation status" />
   </a>
   <a href="https://discord.gg/fcMQqSMXJy" title="Join the Discord chat at https://discord.gg/fcMQqSMXJy">
-    <img src="https://img.shields.io/discord/838698813463724034.svg?label=discord">
+    <img src="https://img.shields.io/discord/838698813463724034.svg?label=discord" alt="Discord chat">
   </a>
   <a href="https://matrix.to/#/#woodpecker:matrix.org" title="Join the Matrix space at https://matrix.to/#/#woodpecker:matrix.org">
-    <img src="https://img.shields.io/matrix/woodpecker:matrix.org?label=matrix">
+    <img src="https://img.shields.io/matrix/woodpecker:matrix.org?label=matrix" alt="Matrix space">
   </a>
-  <a href="https://goreportcard.com/report/github.com/woodpecker-ci/woodpecker" title="Go Report Card">
-    <img src="https://goreportcard.com/badge/github.com/woodpecker-ci/woodpecker">
+  <a href="https://goreportcard.com/report/go.woodpecker-ci.org/woodpecker/v2" title="Go Report Card">
+    <img src="https://goreportcard.com/badge/go.woodpecker-ci.org/woodpecker/v2" alt="Go Report Card">
   </a>
-  <a href="https://godoc.org/github.com/woodpecker-ci/woodpecker" title="GoDoc">
-    <img src="https://godoc.org/github.com/woodpecker-ci/woodpecker?status.svg">
+  <a href="https://pkg.go.dev/go.woodpecker-ci.org/woodpecker/v2" title="go reference">
+    <img src="https://pkg.go.dev/badge/go.woodpecker-ci.org/woodpecker/v2" alt="go reference">
   </a>
   <a href="https://github.com/woodpecker-ci/woodpecker/releases/latest" title="GitHub release">
-    <img src="https://img.shields.io/github/v/release/woodpecker-ci/woodpecker?sort=semver">
+    <img src="https://img.shields.io/github/v/release/woodpecker-ci/woodpecker?sort=semver" alt="GitHub release">
   </a>
   <a href="https://hub.docker.com/r/woodpeckerci/woodpecker-server" title="Docker pulls">
-    <img src="https://img.shields.io/docker/pulls/woodpeckerci/woodpecker-server">
+    <img src="https://img.shields.io/docker/pulls/woodpeckerci/woodpecker-server" alt="Docker pulls">
   </a>
   <a href="https://opensource.org/licenses/Apache-2.0" title="License: Apache-2.0">
-    <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg">
+    <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="License: Apache-2.0">
   </a>
   <a href="https://bestpractices.coreinfrastructure.org/projects/5309">
-    <img src="https://bestpractices.coreinfrastructure.org/projects/5309/badge">
+    <img src="https://bestpractices.coreinfrastructure.org/projects/5309/badge" alt="openssf best practices">
   </a>
-  <a href="https://www.tickgit.com/browse?repo=github.com/woodpecker-ci/woodpecker" title="TODOs">
-    <img src="https://badgen.net/https/api.tickgit.com/badgen/github.com/woodpecker-ci/woodpecker">
-  </a>
-  <a href="https://github.com/pre-commit/pre-commit" title="TODOs">
-    <img src="https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit">
+  <a href="https://results.pre-commit.ci/repo/github/179344069" title="pre-commit.ci">
+    <img src="https://results.pre-commit.ci/badge/github/woodpecker-ci/woodpecker/main.svg" alt="pre-commit.ci">
   </a>
 </p>
 <br/>
 
-Woodpecker is a community fork of the Drone CI system.
+Woodpecker is a simple yet powerful CI/CD engine with great extensibility.
 
 ![woodpecker](docs/docs/woodpecker.png)
 
 ## 🫶 Support
 
-Please consider to donate and become a backer. 🙏 [[Become a backer](https://opencollective.com/woodpecker-ci#category-CONTRIBUTE)]
+Please consider donating and become a backer. 🙏 [[Become a backer](https://opencollective.com/woodpecker-ci#category-CONTRIBUTE)]
 
-<a href="https://opencollective.com/woodpecker-ci" target="_blank"><img src="https://opencollective.com/woodpecker-ci/backers.svg?width=890"></a>
+<a href="https://opencollective.com/woodpecker-ci" target="_blank"><img src="https://opencollective.com/woodpecker-ci/backers.svg?width=890" alt="Open Collective backers"></a>
 
 ## 📖 Documentation
 

@@ -37,18 +37,20 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
-	"go.woodpecker-ci.org/woodpecker/agent"
-	agentRpc "go.woodpecker-ci.org/woodpecker/agent/rpc"
-	"go.woodpecker-ci.org/woodpecker/cmd/common"
-	"go.woodpecker-ci.org/woodpecker/pipeline/backend"
-	"go.woodpecker-ci.org/woodpecker/pipeline/backend/types"
-	"go.woodpecker-ci.org/woodpecker/pipeline/rpc"
-	"go.woodpecker-ci.org/woodpecker/shared/utils"
-	"go.woodpecker-ci.org/woodpecker/version"
+	"go.woodpecker-ci.org/woodpecker/v2/agent"
+	agentRpc "go.woodpecker-ci.org/woodpecker/v2/agent/rpc"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/addon"
+	addonTypes "go.woodpecker-ci.org/woodpecker/v2/shared/addon/types"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/logger"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/v2/version"
 )
 
 func run(c *cli.Context) error {
-	common.SetupGlobalLogger(c, true)
+	logger.SetupGlobalLogger(c, true)
 
 	agentConfigPath := c.String("agent-config")
 	hostname := c.String("hostname")
@@ -149,29 +151,31 @@ func run(c *cli.Context) error {
 		return err
 	}
 
-	backendCtx := context.WithValue(ctx, types.CliContext, c)
-	backend.Init(backendCtx)
-
 	var wg sync.WaitGroup
 	parallel := c.Int("max-workflows")
 	wg.Add(parallel)
 
 	// new engine
-	engine, err := backend.FindEngine(backendCtx, c.String("backend-engine"))
+	backendCtx := context.WithValue(ctx, types.CliContext, c)
+	backendEngine, err := getBackendEngine(backendCtx, c.String("backend-engine"), c.StringSlice("addons"))
 	if err != nil {
-		log.Error().Err(err).Msgf("cannot find backend engine '%s'", c.String("backend-engine"))
 		return err
 	}
 
+	if !backendEngine.IsAvailable(backendCtx) {
+		log.Error().Str("engine", backendEngine.Name()).Msg("selected backend engine is unavailable")
+		return fmt.Errorf("selected backend engine %s is unavailable", backendEngine.Name())
+	}
+
 	// load engine (e.g. init api client)
-	engInfo, err := engine.Load(backendCtx)
+	engInfo, err := backendEngine.Load(backendCtx)
 	if err != nil {
 		log.Error().Err(err).Msg("cannot load backend engine")
 		return err
 	}
-	log.Debug().Msgf("loaded %s backend engine", engine.Name())
+	log.Debug().Msgf("loaded %s backend engine", backendEngine.Name())
 
-	agentConfig.AgentID, err = client.RegisterAgent(ctx, engInfo.Platform, engine.Name(), version.String(), parallel)
+	agentConfig.AgentID, err = client.RegisterAgent(ctx, engInfo.Platform, backendEngine.Name(), version.String(), parallel)
 	if err != nil {
 		return err
 	}
@@ -185,7 +189,7 @@ func run(c *cli.Context) error {
 	labels := map[string]string{
 		"hostname": hostname,
 		"platform": engInfo.Platform,
-		"backend":  engine.Name(),
+		"backend":  backendEngine.Name(),
 		"repo":     "*", // allow all repos by default
 	}
 
@@ -221,7 +225,7 @@ func run(c *cli.Context) error {
 		go func() {
 			defer wg.Done()
 
-			r := agent.NewRunner(client, filter, hostname, counter, &engine)
+			r := agent.NewRunner(client, filter, hostname, counter, &backendEngine)
 			log.Debug().Msgf("created new runner %d", i)
 
 			for {
@@ -241,10 +245,29 @@ func run(c *cli.Context) error {
 
 	log.Info().Msgf(
 		"Starting Woodpecker agent with version '%s' and backend '%s' using platform '%s' running up to %d pipelines in parallel",
-		version.String(), engine.Name(), engInfo.Platform, parallel)
+		version.String(), backendEngine.Name(), engInfo.Platform, parallel)
 
 	wg.Wait()
 	return nil
+}
+
+func getBackendEngine(backendCtx context.Context, backendName string, addons []string) (types.Backend, error) {
+	addonBackend, err := addon.Load[types.Backend](addons, addonTypes.TypeBackend)
+	if err != nil {
+		log.Error().Err(err).Msg("cannot load backend addon")
+		return nil, err
+	}
+	if addonBackend != nil {
+		return addonBackend.Value, nil
+	}
+
+	backend.Init(backendCtx)
+	engine, err := backend.FindBackend(backendCtx, backendName)
+	if err != nil {
+		log.Error().Err(err).Msgf("cannot find backend engine '%s'", backendName)
+		return nil, err
+	}
+	return engine, nil
 }
 
 func runWithRetry(context *cli.Context) error {

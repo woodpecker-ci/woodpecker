@@ -20,9 +20,9 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"go.woodpecker-ci.org/woodpecker/cli/common"
-	"go.woodpecker-ci.org/woodpecker/cli/internal"
-	"go.woodpecker-ci.org/woodpecker/woodpecker-go/woodpecker"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
 var cronUpdateCmd = &cli.Command{
@@ -30,7 +30,7 @@ var cronUpdateCmd = &cli.Command{
 	Usage:     "update a cron job",
 	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    cronUpdate,
-	Flags: append(common.GlobalFlags,
+	Flags: []cli.Flag{
 		common.RepoFlag,
 		&cli.StringFlag{
 			Name:     "id",
@@ -50,7 +50,7 @@ var cronUpdateCmd = &cli.Command{
 			Usage: "cron schedule",
 		},
 		common.FormatFlag(tmplCronList, true),
-	),
+	},
 }
 
 func cronUpdate(c *cli.Context) error {

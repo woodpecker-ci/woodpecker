@@ -7,7 +7,7 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
     --mount=type=cache,target=/go/pkg \
     make build-agent
 
-FROM docker.io/alpine:3.18
+FROM docker.io/alpine:3.19
 # renovate: datasource=repology depName=alpine_3_18/ca-certificates versioning=loose
 ENV CA_CERTIFICATES_VERSION="20230506-r0"
 RUN apk add -U --no-cache ca-certificates=${CA_CERTIFICATES_VERSION}

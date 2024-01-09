@@ -18,7 +18,7 @@ import (
 	"testing"
 	"time"
 
-	"go.woodpecker-ci.org/woodpecker/agent"
+	"go.woodpecker-ci.org/woodpecker/v2/agent"
 )
 
 func TestHealthy(t *testing.T) {

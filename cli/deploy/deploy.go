@@ -22,9 +22,9 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"go.woodpecker-ci.org/woodpecker/cli/common"
-	"go.woodpecker-ci.org/woodpecker/cli/internal"
-	"go.woodpecker-ci.org/woodpecker/woodpecker-go/woodpecker"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
 // Command exports the deploy command.
@@ -33,7 +33,7 @@ var Command = &cli.Command{
 	Usage:     "deploy code",
 	ArgsUsage: "<repo-id|repo-full-name> <pipeline> <environment>",
 	Action:    deploy,
-	Flags: append(common.GlobalFlags,
+	Flags: []cli.Flag{
 		common.FormatFlag(tmplDeployInfo),
 		&cli.StringFlag{
 			Name:  "branch",
@@ -55,7 +55,7 @@ var Command = &cli.Command{
 			Aliases: []string{"p"},
 			Usage:   "custom parameters to be injected into the step environment. Format: KEY=value",
 		},
-	),
+	},
 }
 
 func deploy(c *cli.Context) error {

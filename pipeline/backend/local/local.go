@@ -31,7 +31,7 @@ import (
 	"golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/transform"
 
-	"go.woodpecker-ci.org/woodpecker/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
 
 type workflowState struct {
@@ -50,8 +50,8 @@ type local struct {
 	os, arch        string
 }
 
-// New returns a new local Engine.
-func New() types.Engine {
+// New returns a new local Backend.
+func New() types.Backend {
 	return &local{
 		os:   runtime.GOOS,
 		arch: runtime.GOARCH,
@@ -66,7 +66,7 @@ func (e *local) IsAvailable(context.Context) bool {
 	return true
 }
 
-func (e *local) Load(ctx context.Context) (*types.EngineInfo, error) {
+func (e *local) Load(ctx context.Context) (*types.BackendInfo, error) {
 	c, ok := ctx.Value(types.CliContext).(*cli.Context)
 	if ok {
 		e.tempDir = c.String("backend-local-temp-dir")
@@ -74,7 +74,7 @@ func (e *local) Load(ctx context.Context) (*types.EngineInfo, error) {
 
 	e.loadClone()
 
-	return &types.EngineInfo{
+	return &types.BackendInfo{
 		Platform: e.os + "/" + e.arch,
 	}, nil
 }
@@ -166,7 +166,7 @@ func (e *local) execCommands(ctx context.Context, step *types.Step, state *workf
 		e.output = io.NopCloser(transform.NewReader(e.output, unicode.UTF8.NewDecoder().Transformer))
 	}
 
-	state.stepCMDs[step.Name] = cmd
+	state.stepCMDs[step.UUID] = cmd
 
 	return cmd.Start()
 }
@@ -186,7 +186,7 @@ func (e *local) execPlugin(ctx context.Context, step *types.Step, state *workflo
 	e.output, _ = cmd.StdoutPipe()
 	cmd.Stderr = cmd.Stdout
 
-	state.stepCMDs[step.Name] = cmd
+	state.stepCMDs[step.UUID] = cmd
 
 	return cmd.Start()
 }
@@ -201,9 +201,9 @@ func (e *local) WaitStep(_ context.Context, step *types.Step, taskUUID string) (
 		return nil, err
 	}
 
-	cmd, ok := state.stepCMDs[step.Name]
+	cmd, ok := state.stepCMDs[step.UUID]
 	if !ok {
-		return nil, fmt.Errorf("step cmd %s not found", step.Name)
+		return nil, fmt.Errorf("step cmd for %s not found", step.UUID)
 	}
 
 	err = cmd.Wait()

@@ -20,8 +20,8 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"go.woodpecker-ci.org/woodpecker/cli/common"
-	"go.woodpecker-ci.org/woodpecker/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
 var cronInfoCmd = &cli.Command{
@@ -29,7 +29,7 @@ var cronInfoCmd = &cli.Command{
 	Usage:     "display info about a cron job",
 	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    cronInfo,
-	Flags: append(common.GlobalFlags,
+	Flags: []cli.Flag{
 		common.RepoFlag,
 		&cli.StringFlag{
 			Name:     "id",
@@ -37,7 +37,7 @@ var cronInfoCmd = &cli.Command{
 			Required: true,
 		},
 		common.FormatFlag(tmplCronList, true),
-	),
+	},
 }
 
 func cronInfo(c *cli.Context) error {

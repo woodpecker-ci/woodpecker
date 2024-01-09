@@ -18,9 +18,9 @@ package github
 import (
 	"fmt"
 
-	"github.com/google/go-github/v56/github"
+	"github.com/google/go-github/v57/github"
 
-	"go.woodpecker-ci.org/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 const (
@@ -95,6 +95,7 @@ func convertRepo(from *github.Repository) *model.Repo {
 		Avatar:        from.GetOwner().GetAvatarURL(),
 		Perm:          convertPerm(from.GetPermissions()),
 		SCMKind:       model.RepoGit,
+		PREnabled:     true,
 	}
 	return repo
 }
@@ -152,6 +153,7 @@ func convertRepoHook(eventRepo *github.PushEventRepository) *model.Repo {
 		CloneSSH:      eventRepo.GetSSHURL(),
 		Branch:        eventRepo.GetDefaultBranch(),
 		SCMKind:       model.RepoGit,
+		PREnabled:     true,
 	}
 	if repo.FullName == "" {
 		repo.FullName = repo.Owner + "/" + repo.Name

@@ -16,13 +16,14 @@ package datastore
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 
 	"xorm.io/builder"
 	"xorm.io/xorm"
 
-	"go.woodpecker-ci.org/woodpecker/server/model"
-	"go.woodpecker-ci.org/woodpecker/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
 )
 
 func (s storage) GetRepo(id int64) (*model.Repo, error) {
@@ -80,6 +81,14 @@ func (s storage) GetRepoCount() (int64, error) {
 }
 
 func (s storage) CreateRepo(repo *model.Repo) error {
+	switch {
+	case repo.Name == "":
+		return fmt.Errorf("repo name is empty")
+	case repo.Owner == "":
+		return fmt.Errorf("repo owner is empty")
+	case repo.FullName == "":
+		return fmt.Errorf("repo full name is empty")
+	}
 	// only Insert set auto created ID back to object
 	_, err := s.engine.Insert(repo)
 	return err
@@ -123,7 +132,7 @@ func (s storage) deleteRepo(sess *xorm.Session, repo *model.Repo) error {
 		}
 
 		for i := range pipelineIDs {
-			if err := deletePipeline(sess, pipelineIDs[i]); err != nil {
+			if err := s.deletePipeline(sess, pipelineIDs[i]); err != nil {
 				return err
 			}
 		}

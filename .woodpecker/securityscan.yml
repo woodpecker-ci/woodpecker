@@ -1,5 +1,3 @@
-version: 1
-
 when:
   - event: [pull_request, cron]
   - event: push
@@ -14,13 +12,13 @@ variables:
 
 steps:
   check backend:
-    group: check
+    depends_on: []
     image: *trivy_plugin
     settings:
       skip-dirs: web/,docs/
 
   check docs:
-    group: check
+    depends_on: []
     image: *trivy_plugin
     settings:
       skip-dirs: node_modules/,plugins/woodpecker-plugins/node_modules/
@@ -30,7 +28,7 @@ steps:
       branch: ${CI_REPO_DEFAULT_BRANCH}
 
   check web:
-    group: check
+    depends_on: []
     image: *trivy_plugin
     settings:
       skip-dirs: node_modules/

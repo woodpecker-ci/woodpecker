@@ -20,9 +20,9 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"go.woodpecker-ci.org/woodpecker/cli/common"
-	"go.woodpecker-ci.org/woodpecker/cli/internal"
-	"go.woodpecker-ci.org/woodpecker/woodpecker-go/woodpecker"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
 var registryUpdateCmd = &cli.Command{
@@ -30,7 +30,7 @@ var registryUpdateCmd = &cli.Command{
 	Usage:     "update a registry",
 	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    registryUpdate,
-	Flags: append(common.GlobalFlags,
+	Flags: []cli.Flag{
 		common.RepoFlag,
 		&cli.StringFlag{
 			Name:  "hostname",
@@ -45,7 +45,7 @@ var registryUpdateCmd = &cli.Command{
 			Name:  "password",
 			Usage: "registry password",
 		},
-	),
+	},
 }
 
 func registryUpdate(c *cli.Context) error {

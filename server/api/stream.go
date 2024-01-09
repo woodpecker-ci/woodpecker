@@ -27,24 +27,24 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/server"
-	"go.woodpecker-ci.org/woodpecker/server/model"
-	"go.woodpecker-ci.org/woodpecker/server/pubsub"
-	"go.woodpecker-ci.org/woodpecker/server/router/middleware/session"
-	"go.woodpecker-ci.org/woodpecker/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/pubsub"
+	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
 // EventStreamSSE
 //
-//	@Summary	Event stream
+//	@Summary		Event stream
 //	@Description	event source streaming for compatibility with quic and http2
-//	@Router		/stream/events [get]
-//	@Produce	plain
-//	@Success	200
+//	@Router			/stream/events [get]
+//	@Produce		plain
+//	@Success		200
 //	@Tags			Events
 func EventStreamSSE(c *gin.Context) {
 	c.Header("Content-Type", "text/event-stream")
-	c.Header("Cache-Control", "no-cache")
+	c.Header("Cache-Control", "no-store")
 	c.Header("Connection", "keep-alive")
 	c.Header("X-Accel-Buffering", "no")
 
@@ -128,10 +128,10 @@ func EventStreamSSE(c *gin.Context) {
 //	@Router		/stream/logs/{repo_id}/{pipeline}/{stepID} [get]
 //	@Produce	plain
 //	@Success	200
-//	@Tags			Pipeline logs
-//	@Param		repo_id			path	int		true	"the repository id"
-//	@Param		pipeline	path	int		true		"the number of the pipeline"
-//	@Param		stepID		path	int		true		"the step id"
+//	@Tags		Pipeline logs
+//	@Param		repo_id		path	int	true	"the repository id"
+//	@Param		pipeline	path	int	true	"the number of the pipeline"
+//	@Param		stepID		path	int	true	"the step id"
 func LogStreamSSE(c *gin.Context) {
 	c.Header("Content-Type", "text/event-stream")
 	c.Header("Cache-Control", "no-cache")

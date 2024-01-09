@@ -261,16 +261,9 @@ const docTemplate = `{
                 "summary": "Provide pipeline status information to the CCMenu tool",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "the repository owner's name",
-                        "name": "owner",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository name",
-                        "name": "name",
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
                         "in": "path",
                         "required": true
                     }
@@ -989,6 +982,49 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Organization secrets"
+                ],
+                "summary": "Persist/create an organization secret",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "the org's id",
+                        "name": "org_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "the new secret",
+                        "name": "secretData",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Secret"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Secret"
+                        }
+                    }
+                }
             }
         },
         "/orgs/{org_id}/secrets/{secret}": {
@@ -1104,51 +1140,6 @@ const docTemplate = `{
                     },
                     {
                         "description": "the update secret data",
-                        "name": "secretData",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/Secret"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/Secret"
-                        }
-                    }
-                }
-            }
-        },
-        "/orgs/{owner}/secrets": {
-            "post": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Organization secrets"
-                ],
-                "summary": "Persist/create an organization secret",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "default": "Bearer \u003cpersonal access token\u003e",
-                        "description": "Insert your personal access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the org's id",
-                        "name": "org_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "the new secret",
                         "name": "secretData",
                         "in": "body",
                         "required": true,
@@ -2081,16 +2072,9 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "the repository owner's name",
-                        "name": "owner",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository name",
-                        "name": "name",
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
                         "in": "path",
                         "required": true
                     }
@@ -2262,16 +2246,9 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "the repository owner's name",
-                        "name": "owner",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository name",
-                        "name": "name",
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
                         "in": "path",
                         "required": true
                     },
@@ -4047,7 +4024,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "index": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "title": {
                     "type": "string"
@@ -4137,6 +4114,9 @@ const docTemplate = `{
                 },
                 "owner": {
                     "type": "string"
+                },
+                "pr_enabled": {
+                    "type": "boolean"
                 },
                 "private": {
                     "type": "boolean"
@@ -4236,6 +4216,12 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "org_id": {
+                    "type": "integer"
+                },
+                "repo_id": {
+                    "type": "integer"
+                },
                 "value": {
                     "type": "string"
                 }
@@ -4252,10 +4238,12 @@ const docTemplate = `{
                 "killed",
                 "error",
                 "blocked",
-                "declined"
+                "declined",
+                "created"
             ],
             "x-enum-comments": {
                 "StatusBlocked": "waiting for approval",
+                "StatusCreated": "created / internal use only",
                 "StatusDeclined": "blocked and declined",
                 "StatusError": "error with the config / while parsing / some other system problem",
                 "StatusFailure": "failed to finish (exit code != 0)",
@@ -4274,7 +4262,8 @@ const docTemplate = `{
                 "StatusKilled",
                 "StatusError",
                 "StatusBlocked",
-                "StatusDeclined"
+                "StatusDeclined",
+                "StatusCreated"
             ]
         },
         "Step": {
@@ -4413,6 +4402,7 @@ const docTemplate = `{
             "enum": [
                 "push",
                 "pull_request",
+                "pull_request_closed",
                 "tag",
                 "deployment",
                 "cron",
@@ -4421,6 +4411,7 @@ const docTemplate = `{
             "x-enum-varnames": [
                 "EventPush",
                 "EventPull",
+                "EventPullClosed",
                 "EventTag",
                 "EventDeploy",
                 "EventCron",

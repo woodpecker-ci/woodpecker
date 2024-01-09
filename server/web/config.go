@@ -22,10 +22,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/server"
-	"go.woodpecker-ci.org/woodpecker/server/router/middleware/session"
-	"go.woodpecker-ci.org/woodpecker/shared/token"
-	"go.woodpecker-ci.org/woodpecker/version"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/token"
+	"go.woodpecker-ci.org/woodpecker/v2/version"
 )
 
 func Config(c *gin.Context) {
@@ -40,12 +40,13 @@ func Config(c *gin.Context) {
 	}
 
 	configData := map[string]any{
-		"user":           user,
-		"csrf":           csrf,
-		"version":        version.String(),
-		"forge":          "deprecated", // TODO: remove this and use the forge type from the corresponding repo
-		"root_path":      server.Config.Server.RootPath,
-		"enable_swagger": server.Config.Server.EnableSwagger,
+		"user":               user,
+		"csrf":               csrf,
+		"version":            version.String(),
+		"skip_version_check": server.Config.WebUI.SkipVersionCheck,
+		"forge":              "deprecated", // TODO: remove this and use the forge type from the corresponding repo
+		"root_path":          server.Config.Server.RootPath,
+		"enable_swagger":     server.Config.WebUI.EnableSwagger,
 	}
 
 	// default func map with json parser.
@@ -75,4 +76,5 @@ window.WOODPECKER_VERSION = "{{ .version }}";
 window.WOODPECKER_FORGE = "{{ .forge }}";
 window.WOODPECKER_ROOT_PATH = "{{ .root_path }}";
 window.WOODPECKER_ENABLE_SWAGGER = {{ .enable_swagger }};
+window.WOODPECKER_SKIP_VERSION_CHECK = {{ .skip_version_check }}
 `

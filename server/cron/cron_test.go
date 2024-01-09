@@ -22,9 +22,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	mocks_forge "go.woodpecker-ci.org/woodpecker/server/forge/mocks"
-	"go.woodpecker-ci.org/woodpecker/server/model"
-	mocks_store "go.woodpecker-ci.org/woodpecker/server/store/mocks"
+	mocks_forge "go.woodpecker-ci.org/woodpecker/v2/server/forge/mocks"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	mocks_store "go.woodpecker-ci.org/woodpecker/v2/server/store/mocks"
 )
 
 func TestCreateBuild(t *testing.T) {

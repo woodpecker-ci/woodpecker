@@ -20,7 +20,7 @@ import (
 	"strconv"
 	"time"
 
-	"go.woodpecker-ci.org/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 // CCMenu displays the pipeline status of projects on a ci server as an item in the Mac's menu bar.

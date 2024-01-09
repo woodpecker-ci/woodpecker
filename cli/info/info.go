@@ -20,8 +20,8 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"go.woodpecker-ci.org/woodpecker/cli/common"
-	"go.woodpecker-ci.org/woodpecker/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
 // Command exports the info command.
@@ -30,9 +30,7 @@ var Command = &cli.Command{
 	Usage:     "show information about the current user",
 	ArgsUsage: " ",
 	Action:    info,
-	Flags: append(common.GlobalFlags,
-		common.FormatFlag(tmplInfo, true),
-	),
+	Flags:     []cli.Flag{common.FormatFlag(tmplInfo, true)},
 }
 
 func info(c *cli.Context) error {

@@ -19,10 +19,10 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/constraint"
-	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/types/base"
-	"go.woodpecker-ci.org/woodpecker/pipeline/frontend/yaml/utils"
-	"go.woodpecker-ci.org/woodpecker/shared/constant"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/constraint"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types/base"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/utils"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
 )
 
 type (
@@ -48,6 +48,7 @@ type (
 		Volumes        Volumes            `yaml:"volumes,omitempty"`
 		When           constraint.When    `yaml:"when,omitempty"`
 		Ports          []base.StringOrInt `yaml:"ports,omitempty"`
+		DependsOn      base.StringOrSlice `yaml:"depends_on,omitempty"`
 
 		// Docker Specific
 		Privileged bool `yaml:"privileged,omitempty"`

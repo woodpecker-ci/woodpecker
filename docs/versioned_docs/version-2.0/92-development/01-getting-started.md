@@ -58,7 +58,7 @@ WOODPECKER_GITHUB_SECRET=<redacted>
 
 # agent
 WOODPECKER_SERVER=localhost:9000
-WOODPECKER_SECRET=a-long-and-secure-password-used-for-the-local-development-system
+WOODPECKER_AGENT_SECRET=a-long-and-secure-password-used-for-the-local-development-system
 WOODPECKER_MAX_WORKFLOWS=1
 
 # enable if you want to develop the UI
@@ -123,7 +123,7 @@ make test-frontend
 If you want to test a specific go file you can also use:
 
 ```bash
-go test -race -timeout 30s go.woodpecker-ci.org/woodpecker/<path-to-the-package-or-file-to-test>
+go test -race -timeout 30s go.woodpecker-ci.org/woodpecker/v2/<path-to-the-package-or-file-to-test>
 ```
 
 Or you can open the test-file inside [VS-Code](#developing-with-vs-code) and run or debug the test by clicking on the inline commands:
