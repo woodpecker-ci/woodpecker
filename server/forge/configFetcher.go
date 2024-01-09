@@ -61,7 +61,7 @@ func (cf *configFetcher) Fetch(ctx context.Context) (files []*types.FileMeta, er
 
 	// try to fetch 3 times
 	for i := 0; i < 3; i++ {
-		files, err = cf.fetch(ctx, time.Second*cf.timeout, strings.TrimSpace(cf.configPath))
+		files, err = cf.fetch(ctx, cf.timeout, strings.TrimSpace(cf.configPath))
 		if err != nil {
 			log.Trace().Err(err).Msgf("%d. try failed", i+1)
 		}
