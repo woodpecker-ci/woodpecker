@@ -1,9 +1,0 @@
-cache:
-  - node_modules
-
-steps:
-  build:
-    image: node
-    commands:
-      - npm install
-      - npm test

@@ -1,5 +1,3 @@
-version: 1
-
 steps:
   release-helper:
     image: woodpeckerci/plugin-ready-release-go:1.0.3

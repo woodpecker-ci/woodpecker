@@ -70,7 +70,10 @@ var Config = struct {
 		RootPath            string
 		CustomCSSFile       string
 		CustomJsFile        string
-		EnableSwagger       bool
+	}
+	WebUI struct {
+		EnableSwagger    bool
+		SkipVersionCheck bool
 	}
 	Prometheus struct {
 		AuthToken string

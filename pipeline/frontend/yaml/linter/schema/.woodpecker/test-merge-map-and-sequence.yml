@@ -1,5 +1,3 @@
-version: 1
-
 variables:
   step_template: &base-step
     image: golang:1.19

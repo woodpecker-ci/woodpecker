@@ -4,7 +4,7 @@ tasks:
       WOODPECKER_OPEN: true
       WOODPECKER_ADMIN: woodpecker
       WOODPECKER_HOST: http://host.docker.internal:8000
-      WOODPECKER_SECRET: '1234'
+      WOODPECKER_AGENT_SECRET: '1234'
       WOODPECKER_GITEA: true
       WOODPECKER_DEV_WWW_PROXY: http://localhost:8010
       WOODPECKER_BACKEND_DOCKER_NETWORK: ci_default
@@ -29,7 +29,7 @@ tasks:
   - name: Agent
     env:
       WOODPECKER_SERVER: localhost:9000
-      WOODPECKER_SECRET: '1234'
+      WOODPECKER_AGENT_SECRET: '1234'
       WOODPECKER_MAX_WORKFLOWS: 1
       WOODPECKER_HEALTHCHECK: false
     command: |

@@ -15,7 +15,7 @@
 package compiler
 
 import (
-	"fmt"
+	"sort"
 
 	backend_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
@@ -29,20 +29,18 @@ type dagCompilerStep struct {
 }
 
 type dagCompiler struct {
-	steps  []*dagCompilerStep
-	prefix string
+	steps []*dagCompilerStep
 }
 
-func newDAGCompiler(steps []*dagCompilerStep, prefix string) dagCompiler {
+func newDAGCompiler(steps []*dagCompilerStep) dagCompiler {
 	return dagCompiler{
-		steps:  steps,
-		prefix: prefix,
+		steps: steps,
 	}
 }
 
 func (c dagCompiler) isDAG() bool {
 	for _, v := range c.steps {
-		if len(v.dependsOn) != 0 {
+		if v.dependsOn != nil {
 			return true
 		}
 	}
@@ -67,8 +65,6 @@ func (c dagCompiler) compileByGroup() ([]*backend_types.Stage, error) {
 			currentGroup = s.group
 
 			currentStage = new(backend_types.Stage)
-			currentStage.Name = fmt.Sprintf("%s_stage_%v", c.prefix, s.position)
-			currentStage.Alias = s.name
 			stages = append(stages, currentStage)
 		}
 
@@ -84,7 +80,7 @@ func (c dagCompiler) compileByDependsOn() ([]*backend_types.Stage, error) {
 	for _, s := range c.steps {
 		stepMap[s.name] = s
 	}
-	return convertDAGToStages(stepMap, c.prefix)
+	return convertDAGToStages(stepMap)
 }
 
 func dfsVisit(steps map[string]*dagCompilerStep, name string, visited map[string]struct{}, path []string) error {
@@ -101,10 +97,12 @@ func dfsVisit(steps map[string]*dagCompilerStep, name string, visited map[string
 		}
 	}
 
+	delete(visited, name)
+
 	return nil
 }
 
-func convertDAGToStages(steps map[string]*dagCompilerStep, prefix string) ([]*backend_types.Stage, error) {
+func convertDAGToStages(steps map[string]*dagCompilerStep) ([]*backend_types.Stage, error) {
 	addedSteps := make(map[string]struct{})
 	stages := make([]*backend_types.Stage, 0)
 
@@ -125,17 +123,25 @@ func convertDAGToStages(steps map[string]*dagCompilerStep, prefix string) ([]*ba
 
 	for len(steps) > 0 {
 		addedNodesThisLevel := make(map[string]struct{})
-		stage := &backend_types.Stage{
-			Name:  fmt.Sprintf("%s_stage_%d", prefix, len(stages)),
-			Alias: fmt.Sprintf("%s_stage_%d", prefix, len(stages)),
-		}
+		stage := new(backend_types.Stage)
 
+		var stepsToAdd []*dagCompilerStep
 		for name, step := range steps {
 			if allDependenciesSatisfied(step, addedSteps) {
-				stage.Steps = append(stage.Steps, step.step)
+				stepsToAdd = append(stepsToAdd, step)
 				addedNodesThisLevel[name] = struct{}{}
 				delete(steps, name)
 			}
+		}
+
+		// as steps are from a map that has no deterministic order,
+		// we sort the steps by original config position to make the order similar between pipelines
+		sort.Slice(stepsToAdd, func(i, j int) bool {
+			return stepsToAdd[i].position < stepsToAdd[j].position
+		})
+
+		for i := range stepsToAdd {
+			stage.Steps = append(stage.Steps, stepsToAdd[i].step)
 		}
 
 		for name := range addedNodesThisLevel {

@@ -36,7 +36,7 @@ const (
 
 func mkPod(namespace, name, image, workDir, goos, serviceAccountName string,
 	pool, privileged bool,
-	commands, vols []string,
+	commands, vols, pullSecretNames []string,
 	labels, annotations, env, nodeSelector map[string]string,
 	ports []types.Port, extraHosts []types.HostAlias, tolerations []types.Toleration, resources types.Resources,
 	securityContext *types.SecurityContext, securityContextConfig SecurityContextConfig,
@@ -45,7 +45,8 @@ func mkPod(namespace, name, image, workDir, goos, serviceAccountName string,
 
 	meta := podMeta(name, namespace, labels, annotations)
 
-	spec, err := podSpec(serviceAccountName, vols, env, nodeSelector, extraHosts, tolerations, securityContext, securityContextConfig)
+	spec, err := podSpec(serviceAccountName, vols, pullSecretNames, env, nodeSelector, extraHosts, tolerations,
+		securityContext, securityContextConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -63,6 +64,13 @@ func mkPod(namespace, name, image, workDir, goos, serviceAccountName string,
 	}
 
 	return pod, nil
+}
+
+func stepToPodName(step *types.Step) (name string, err error) {
+	if step.Type == types.StepTypeService {
+		return serviceName(step)
+	}
+	return podName(step)
 }
 
 func podName(step *types.Step) (string, error) {
@@ -85,7 +93,7 @@ func podMeta(name, namespace string, labels, annotations map[string]string) meta
 	return meta
 }
 
-func podSpec(serviceAccountName string, vols []string, env, backendNodeSelector map[string]string,
+func podSpec(serviceAccountName string, vols, pullSecretNames []string, env, backendNodeSelector map[string]string,
 	extraHosts []types.HostAlias, backendTolerations []types.Toleration,
 	securityContext *types.SecurityContext, securityContextConfig SecurityContextConfig,
 ) (v1.PodSpec, error) {
@@ -93,7 +101,7 @@ func podSpec(serviceAccountName string, vols []string, env, backendNodeSelector 
 	spec := v1.PodSpec{
 		RestartPolicy:      v1.RestartPolicyNever,
 		ServiceAccountName: serviceAccountName,
-		ImagePullSecrets:   []v1.LocalObjectReference{{Name: "regcred"}},
+		ImagePullSecrets:   imagePullSecretsReferences(pullSecretNames),
 	}
 
 	spec.HostAliases = hostAliases(extraHosts)
@@ -225,6 +233,22 @@ func hostAlias(extraHost types.HostAlias) v1.HostAlias {
 	return v1.HostAlias{
 		IP:        extraHost.IP,
 		Hostnames: []string{extraHost.Name},
+	}
+}
+
+func imagePullSecretsReferences(imagePullSecretNames []string) []v1.LocalObjectReference {
+	log.Trace().Msgf("Using the image pull secrets: %v", imagePullSecretNames)
+
+	secretReferences := make([]v1.LocalObjectReference, len(imagePullSecretNames))
+	for i, imagePullSecretName := range imagePullSecretNames {
+		secretReferences[i] = imagePullSecretsReference(imagePullSecretName)
+	}
+	return secretReferences
+}
+
+func imagePullSecretsReference(imagePullSecretName string) v1.LocalObjectReference {
+	return v1.LocalObjectReference{
+		Name: imagePullSecretName,
 	}
 }
 
@@ -374,7 +398,7 @@ func startPod(ctx context.Context, engine *kube, step *types.Step) (*v1.Pod, err
 
 	pod, err := mkPod(engine.config.Namespace, podName, step.Image, step.WorkingDir, engine.goos, step.BackendOptions.Kubernetes.ServiceAccountName,
 		step.Pull, step.Privileged,
-		step.Commands, step.Volumes,
+		step.Commands, step.Volumes, engine.config.ImagePullSecretNames,
 		engine.config.PodLabels, engine.config.PodAnnotations, step.Environment, step.BackendOptions.Kubernetes.NodeSelector,
 		step.Ports, step.ExtraHosts, step.BackendOptions.Kubernetes.Tolerations, step.BackendOptions.Kubernetes.Resources,
 		step.BackendOptions.Kubernetes.SecurityContext, engine.config.SecurityContext)

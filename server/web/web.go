@@ -109,7 +109,7 @@ func serveFile(f *prefixFS) func(ctx *gin.Context) {
 		case strings.HasSuffix(ctx.Request.URL.Path, ".png"):
 			mime = "image/png"
 		case strings.HasSuffix(ctx.Request.URL.Path, ".svg"):
-			mime = "image/svg"
+			mime = "image/svg+xml"
 		}
 		ctx.Status(http.StatusOK)
 		ctx.Writer.Header().Set("Cache-Control", "public, max-age=31536000")

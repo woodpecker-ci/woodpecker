@@ -8,10 +8,7 @@ An addon consists of two variables/functions in Go.
 
 1. The `Type` variable. Specifies the type of the addon and must be directly accessed from `shared/addons/types/types.go`.
 2. The `Addon` function which is the main point of your addon.
-   This function takes two arguments:
-
-   1. The zerolog logger you should use to log errors, warnings etc.
-   2. A slice of strings with the environment variables used as configuration.
+   This function takes the zerolog logger you should use to log errors, warnings etc. as argument.
 
    It returns two values:
 
@@ -79,7 +76,7 @@ import (
 
 var Type = addon_types.TypeForge
 
-func Addon(logger zerolog.Logger, env []string) (forge.Forge, error) {
+func Addon(logger zerolog.Logger) (forge.Forge, error) {
   logger.Info().Msg("hello world from addon")
   return &config{l: logger}, nil
 }
