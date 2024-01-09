@@ -27,7 +27,7 @@ type (
 		Labels map[string]string `json:"labels"`
 	}
 
-	// State defines the workflow state.
+	// State defines the step state.
 	State struct {
 		StepUUID string `json:"step_uuid"`
 		Exited   bool   `json:"exited"`
