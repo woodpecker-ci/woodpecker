@@ -109,7 +109,7 @@
               }"
               @click="$emit('update:selected-step-id', step.pid)"
             >
-              <PipelineStatusIcon :service="step.type === StepType.Service" :status="step.state" class="!h-4 !w-4" />
+              <PipelineStatusIcon :service="step.type == StepType.Service" :status="step.state" class="!h-4 !w-4" />
               <span class="truncate">{{ step.name }}</span>
               <PipelineStepDuration :step="step" />
             </button>
