@@ -150,16 +150,3 @@ body,
 .code-box-inline {
   @apply bg-wp-code-200 rounded-md text-wp-code-text-100;
 }
-
-/* TODO(2194): https://tailwindcss.com/docs/animation */
-@keyframes rotate-kf {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-.rotate-animation {
-  animation: rotate-kf 2s linear infinite;
-}
