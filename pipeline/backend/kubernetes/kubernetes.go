@@ -197,7 +197,7 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID s
 // Start the pipeline step.
 func (e *kube) StartStep(ctx context.Context, step *types.Step, taskUUID string) error {
 	if step.Type == types.StepTypeService {
-		// this one should be started by SetupWorkflow so we can ignore it
+		// a service should be started by SetupWorkflow so we can ignore it
 		log.Trace().Msgf("StartStep got service '%s', ignoring it.", step.Name)
 		return nil
 	}
@@ -336,7 +336,11 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 
 func (e *kube) DestroyStep(_ context.Context, step *types.Step, taskUUID string) error {
 	if step.Type == types.StepTypeService {
+<<<<<<< HEAD
 		// this one should be stopped by DestroyWorkflow so we can ignore it
+=======
+		// a service should be stopped by DestroyWorkflow so we can ignore it
+>>>>>>> main
 		log.Trace().Msgf("DestroyStep got service '%s', ignoring it.", step.Name)
 		return nil
 	}
