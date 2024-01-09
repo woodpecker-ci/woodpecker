@@ -34,7 +34,7 @@ func UpdateStepStatus(store model.UpdateStepStore, step *model.Step, state rpc.S
 		if state.ExitCode == 137 {
 			step.State = model.StatusKilled
 		}
-	} else {
+	} else if step.Stopped == 0 {
 		step.Started = state.Started
 		step.State = model.StatusRunning
 	}
