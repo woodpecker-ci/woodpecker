@@ -71,10 +71,11 @@ func TestService(t *testing.T) {
 	  }
 	}`
 
-	s, _ := mkService(&types.Step{
+	s, err := mkService(&types.Step{
 		Name:  "bar",
 		Ports: []uint16{1, 2, 3},
 	}, "foo")
+	assert.NoError(t, err)
 	j, err := json.Marshal(s)
 	assert.NoError(t, err)
 	assert.JSONEq(t, expected, string(j))
