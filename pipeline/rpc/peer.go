@@ -61,16 +61,16 @@ type Peer interface {
 	// Wait blocks until the workflow is complete
 	Wait(c context.Context, id string) error
 
-	// Init signals the workflow is initialized
+	// Init signals the step is initialized
 	Init(c context.Context, id string, state State) error
 
-	// Done signals the workflow is complete
+	// Done signals the step is complete
 	Done(c context.Context, id string, state State) error
 
 	// Extend extends the workflow deadline
 	Extend(c context.Context, id string) error
 
-	// Update updates the workflow state
+	// Update updates step state
 	Update(c context.Context, id string, state State) error
 
 	// Log writes the workflow log entry

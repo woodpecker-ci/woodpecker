@@ -43,7 +43,7 @@ func TestUpdateStepStatusNotExited(t *testing.T) {
 		Error:    "not an error",
 	}
 	step := &model.Step{}
-	err := UpdateStepStatus(&mockUpdateStepStore{}, step, state, int64(1))
+	err := UpdateStepStatus(&mockUpdateStepStore{}, step, state)
 	assert.NoError(t, err)
 
 	if step.State != model.StatusRunning {
@@ -71,7 +71,7 @@ func TestUpdateStepStatusNotExitedButStopped(t *testing.T) {
 		ExitCode: 137,
 		Error:    "not an error",
 	}
-	err := UpdateStepStatus(&mockUpdateStepStore{}, step, state, int64(42))
+	err := UpdateStepStatus(&mockUpdateStepStore{}, step, state)
 	assert.NoError(t, err)
 
 	if step.State != model.StatusRunning {
@@ -99,7 +99,7 @@ func TestUpdateStepStatusExited(t *testing.T) {
 	}
 
 	step := &model.Step{}
-	err := UpdateStepStatus(&mockUpdateStepStore{}, step, state, int64(42))
+	err := UpdateStepStatus(&mockUpdateStepStore{}, step, state)
 	assert.NoError(t, err)
 
 	if step.State != model.StatusKilled {
@@ -125,7 +125,7 @@ func TestUpdateStepStatusExitedButNot137(t *testing.T) {
 		Error:    "an error",
 	}
 	step := &model.Step{}
-	err := UpdateStepStatus(&mockUpdateStepStore{}, step, state, int64(42))
+	err := UpdateStepStatus(&mockUpdateStepStore{}, step, state)
 	assert.NoError(t, err)
 
 	if step.State != model.StatusFailure {
@@ -152,7 +152,7 @@ func TestUpdateStepStatusExitedWithCode(t *testing.T) {
 		Error:    "an error",
 	}
 	step := &model.Step{}
-	err := UpdateStepStatus(&mockUpdateStepStore{}, step, state, int64(42))
+	err := UpdateStepStatus(&mockUpdateStepStore{}, step, state)
 	assert.NoError(t, err)
 
 	if step.State != model.StatusFailure {

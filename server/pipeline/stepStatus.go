@@ -22,7 +22,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
-func UpdateStepStatus(store model.UpdateStepStore, step *model.Step, state rpc.State, started int64) error {
+func UpdateStepStatus(store model.UpdateStepStore, step *model.Step, state rpc.State) error {
 	if state.Exited {
 		step.Stopped = state.Finished
 		step.ExitCode = state.ExitCode
@@ -40,7 +40,7 @@ func UpdateStepStatus(store model.UpdateStepStore, step *model.Step, state rpc.S
 	}
 
 	if step.Started == 0 && step.Stopped != 0 {
-		step.Started = started
+		step.Started = time.Now().Unix()
 	}
 	return store.StepUpdate(step)
 }
