@@ -38,10 +38,6 @@ func UpdateStepStatus(store model.UpdateStepStore, step *model.Step, state rpc.S
 		step.Started = state.Started
 		step.State = model.StatusRunning
 	}
-
-	if step.Started == 0 && step.Stopped != 0 {
-		step.Started = time.Now().Unix()
-	}
 	return store.StepUpdate(step)
 }
 
