@@ -25,7 +25,7 @@
     "pnpm-lock.yaml",
     ".cspell.json",
     "web/src/assets/locales/**/*",
-    "server/store/datastore/migration/testfiles/sqlite.db",
+    "server/store/datastore/migration/**/*",
     "go.mod",
     "go.sum"
   ]
