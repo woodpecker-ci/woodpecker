@@ -72,7 +72,7 @@ func startService(ctx context.Context, engine *kube, step *types.Step) (*v1.Serv
 		return nil, err
 	}
 
-	log.Trace().Str("name", svc.Name).Interface("selector", svc.Spec.Selector).Interface("ports", svc.Spec.Ports).Msg("Creating service")
+	log.Trace().Str("name", svc.Name).Interface("selector", svc.Spec.Selector).Interface("ports", svc.Spec.Ports).Msg("creating service")
 	return engine.client.CoreV1().Services(engine.config.Namespace).Create(ctx, svc, metav1.CreateOptions{})
 }
 
