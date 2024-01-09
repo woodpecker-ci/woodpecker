@@ -42,11 +42,15 @@ func queuePipeline(repo *model.Repo, pipelineItems []*stepbuilder.Item) error {
 		task.RunOn = item.RunsOn
 		task.DepStatus = make(map[string]model.StatusValue)
 
-		task.Data, _ = json.Marshal(rpc.Workflow{
+		var err error
+		task.Data, err = json.Marshal(rpc.Workflow{
 			ID:      fmt.Sprint(item.Workflow.ID),
 			Config:  item.Config,
 			Timeout: repo.Timeout,
 		})
+		if err != nil {
+			return err
+		}
 
 		tasks = append(tasks, task)
 	}

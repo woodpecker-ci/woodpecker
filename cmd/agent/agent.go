@@ -271,6 +271,8 @@ func getBackendEngine(backendCtx context.Context, backendName string, addons []s
 }
 
 func runWithRetry(context *cli.Context) error {
+	initHealth()
+
 	retryCount := context.Int("connect-retry-count")
 	retryDelay := context.Duration("connect-retry-delay")
 	var err error
