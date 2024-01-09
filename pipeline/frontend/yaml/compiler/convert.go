@@ -80,7 +80,6 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 	maps.Copy(environment, c.env)
 
 	environment["CI_WORKSPACE"] = path.Join(c.base, c.path)
-	environment["CI_STEP_NAME"] = container.Name
 
 	if stepType == backend_types.StepTypeService || container.Detached {
 		detached = true
