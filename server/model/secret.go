@@ -18,7 +18,6 @@ package model
 import (
 	"errors"
 	"fmt"
-	"path/filepath"
 	"regexp"
 	"sort"
 )
@@ -104,15 +103,23 @@ func (s Secret) IsRepository() bool {
 }
 
 // Match returns true if an image and event match the restricted list.
+// Note that EventPullClosed are treated as EventPull.
 func (s *Secret) Match(event WebhookEvent) bool {
+	// if there is no filter set secret matches all webhook events
 	if len(s.Events) == 0 {
 		return true
 	}
-	for _, pattern := range s.Events {
-		if match, _ := filepath.Match(string(pattern), string(event)); match {
+	// tread all pull events the same way
+	if event == EventPullClosed {
+		event = EventPull
+	}
+	// one match is enough
+	for _, e := range s.Events {
+		if e == event {
 			return true
 		}
 	}
+	// a filter is set but the webhook did not match it
 	return false
 }
 

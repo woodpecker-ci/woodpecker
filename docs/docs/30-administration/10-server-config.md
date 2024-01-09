@@ -1,3 +1,7 @@
+---
+toc_max_heading_level: 2
+---
+
 # Server configuration
 
 ## User registration
@@ -188,6 +192,13 @@ The following list describes all available server configuration options.
 > Default: empty
 
 Configures the logging level. Possible values are `trace`, `debug`, `info`, `warn`, `error`, `fatal`, `panic`, `disabled` and empty.
+
+### `WOODPECKER_LOG_FILE`
+
+> Default: `stderr`
+
+Output destination for logs.
+'stdout' and 'stderr' can be used as special keywords.
 
 ### `WOODPECKER_LOG_XORM`
 
@@ -575,15 +586,21 @@ Specify a configuration service endpoint, see [Configuration Extension](./100-ex
 
 ### `WOODPECKER_FORGE_TIMEOUT`
 
-> Default: 3sec
+> Default: 3s
 
-Specify how many seconds before timeout when fetching the Woodpecker configuration from a Forge
+Specify timeout when fetching the Woodpecker configuration from forge. See <https://pkg.go.dev/time#ParseDuration> for syntax reference.
 
 ### `WOODPECKER_ENABLE_SWAGGER`
 
 > Default: true
 
 Enable the Swagger UI for API documentation.
+
+### `WOODPECKER_DISABLE_VERSION_CHECK`
+
+> Default: false
+
+Disable version check in admin web UI.
 
 ---
 

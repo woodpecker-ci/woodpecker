@@ -4396,6 +4396,7 @@ const docTemplate = `{
             "enum": [
                 "push",
                 "pull_request",
+                "pull_request_closed",
                 "tag",
                 "deployment",
                 "cron",
@@ -4404,6 +4405,7 @@ const docTemplate = `{
             "x-enum-varnames": [
                 "EventPush",
                 "EventPull",
+                "EventPullClosed",
                 "EventTag",
                 "EventDeploy",
                 "EventCron",

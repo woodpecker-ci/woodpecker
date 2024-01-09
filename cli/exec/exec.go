@@ -94,7 +94,7 @@ func runExec(c *cli.Context, file, repoPath string) error {
 
 	axes, err := matrix.ParseString(string(dat))
 	if err != nil {
-		return fmt.Errorf("Parse matrix fail")
+		return fmt.Errorf("parse matrix fail")
 	}
 
 	if len(axes) == 0 {
@@ -258,7 +258,7 @@ var defaultLogger = pipeline.LogFunc(func(step *backendTypes.Step, rc multipart.
 		return err
 	}
 
-	logStream := NewLineWriter(step.Alias, step.UUID)
+	logStream := NewLineWriter(step.Name, step.UUID)
 	_, err = io.Copy(logStream, part)
 	return err
 })

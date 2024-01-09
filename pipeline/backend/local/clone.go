@@ -107,7 +107,7 @@ func (e *local) execClone(ctx context.Context, step *types.Step, state *workflow
 	e.output, _ = cmd.StdoutPipe()
 	cmd.Stderr = cmd.Stdout
 
-	state.stepCMDs[step.Name] = cmd
+	state.stepCMDs[step.UUID] = cmd
 
 	return cmd.Start()
 }
