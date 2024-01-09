@@ -16,6 +16,7 @@ package docker
 
 import (
 	"reflect"
+	"sort"
 	"testing"
 
 	"github.com/docker/docker/api/types"
@@ -102,6 +103,7 @@ func TestToConfigSmall(t *testing.T) {
 	})
 
 	assert.NotNil(t, conf)
+	sort.Strings(conf.Env)
 	assert.EqualValues(t, &container.Config{
 		AttachStdout: true,
 		AttachStderr: true,
