@@ -75,10 +75,10 @@ func (s *State) Healthy() bool {
 func (s *State) WriteTo(w io.Writer) (int64, error) {
 	s.Lock()
 	out, err := json.Marshal(s)
+	s.Unlock()
 	if err != nil {
 		return 0, err
 	}
-	s.Unlock()
 	ret, err := w.Write(out)
 	return int64(ret), err
 }
