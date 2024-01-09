@@ -4,7 +4,25 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@qwerty287, @pat-s, @miry, @zc-devs, @lukashass, @lafriks, @pre-commit-ci[bot], @anbraten, @6543, @andyhan, @renovate[bot], @KamilaBorowska
+@6543, @qwerty287, @pat-s, @miry, @zc-devs, @lukashass, @lafriks, @pre-commit-ci[bot], @anbraten, @andyhan, @renovate[bot], @KamilaBorowska
+
+### 📈 Enhancement
+
+- Use js-base64 on pipeline log page [[#3146](https://github.com/woodpecker-ci/woodpecker/pull/3146)]
+- Flexible image pull secret reference [[#3016](https://github.com/woodpecker-ci/woodpecker/pull/3016)]
+- Always show pipeline step list [[#3114](https://github.com/woodpecker-ci/woodpecker/pull/3114)]
+- Add loading spinner and no pull request text [[#3113](https://github.com/woodpecker-ci/woodpecker/pull/3113)]
+- Fix timeout settings contrast [[#3112](https://github.com/woodpecker-ci/woodpecker/pull/3112)]
+- Unfold workflow when opening via URL [[#3106](https://github.com/woodpecker-ci/woodpecker/pull/3106)]
+- Remove env argument of addons [[#3100](https://github.com/woodpecker-ci/woodpecker/pull/3100)]
+- Move `cmd/common` to `shared` [[#3092](https://github.com/woodpecker-ci/woodpecker/pull/3092)]
+- use semver for version comparsion [[#3042](https://github.com/woodpecker-ci/woodpecker/pull/3042)]
+- Extend create plugin docs [[#3062](https://github.com/woodpecker-ci/woodpecker/pull/3062)]
+- Remove old files [[#3077](https://github.com/woodpecker-ci/woodpecker/pull/3077)]
+- Indicate if step is service [[#3078](https://github.com/woodpecker-ci/woodpecker/pull/3078)]
+- Add imports checks to linter [[#3056](https://github.com/woodpecker-ci/woodpecker/pull/3056)]
+- Remove workflow version again [[#3052](https://github.com/woodpecker-ci/woodpecker/pull/3052)]
+- Add option to disable version check in admin web UI [[#3040](https://github.com/woodpecker-ci/woodpecker/pull/3040)]
 
 ### 📚 Documentation
 
@@ -34,23 +52,6 @@
 - Fix `when` and `depends_on` [[#3063](https://github.com/woodpecker-ci/woodpecker/pull/3063)]
 - Fix DAG cycle detection [[#3049](https://github.com/woodpecker-ci/woodpecker/pull/3049)]
 - Fix duplicated icons [[#3045](https://github.com/woodpecker-ci/woodpecker/pull/3045)]
-
-### 📈 Enhancement
-
-- Flexible image pull secret reference [[#3016](https://github.com/woodpecker-ci/woodpecker/pull/3016)]
-- Always show pipeline step list [[#3114](https://github.com/woodpecker-ci/woodpecker/pull/3114)]
-- Add loading spinner and no pull request text [[#3113](https://github.com/woodpecker-ci/woodpecker/pull/3113)]
-- Fix timeout settings contrast [[#3112](https://github.com/woodpecker-ci/woodpecker/pull/3112)]
-- Unfold workflow when opening via URL [[#3106](https://github.com/woodpecker-ci/woodpecker/pull/3106)]
-- Remove env argument of addons [[#3100](https://github.com/woodpecker-ci/woodpecker/pull/3100)]
-- Move `cmd/common` to `shared` [[#3092](https://github.com/woodpecker-ci/woodpecker/pull/3092)]
-- use semver for version comparsion [[#3042](https://github.com/woodpecker-ci/woodpecker/pull/3042)]
-- Extend create plugin docs [[#3062](https://github.com/woodpecker-ci/woodpecker/pull/3062)]
-- Remove old files [[#3077](https://github.com/woodpecker-ci/woodpecker/pull/3077)]
-- Indicate if step is service [[#3078](https://github.com/woodpecker-ci/woodpecker/pull/3078)]
-- Add imports checks to linter [[#3056](https://github.com/woodpecker-ci/woodpecker/pull/3056)]
-- Remove workflow version again [[#3052](https://github.com/woodpecker-ci/woodpecker/pull/3052)]
-- Add option to disable version check in admin web UI [[#3040](https://github.com/woodpecker-ci/woodpecker/pull/3040)]
 
 ### Misc
 
