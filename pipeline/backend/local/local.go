@@ -203,7 +203,7 @@ func (e *local) WaitStep(_ context.Context, step *types.Step, taskUUID string) (
 
 	cmd, ok := state.stepCMDs[step.UUID]
 	if !ok {
-		return nil, fmt.Errorf("step cmd %s not found", step.UUID)
+		return nil, fmt.Errorf("step cmd for %s not found", step.UUID)
 	}
 
 	err = cmd.Wait()
