@@ -87,10 +87,7 @@ func run(c *cli.Context) error {
 		log.Fatal().Err(err).Msg("can't setup forge")
 	}
 
-	_store, err := setupStore(c)
-	if err != nil {
-		log.Fatal().Err(err).Msg("can't setup database store")
-	}
+	_store := setupStore(c)
 	defer func() {
 		if err := _store.Close(); err != nil {
 			log.Error().Err(err).Msg("could not close store")
@@ -317,7 +314,7 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) error {
 
 	// Execution
 	_events := c.StringSlice("default-cancel-previous-pipeline-events")
-	events := make([]model.WebhookEvent, len(_events))
+	events := make([]model.WebhookEvent, len(_events), 0)
 	for _, v := range _events {
 		events = append(events, model.WebhookEvent(v))
 	}
