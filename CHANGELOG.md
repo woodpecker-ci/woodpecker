@@ -8,6 +8,7 @@
 
 ### 📈 Enhancement
 
+- Add step name as label to docker containers [[#3137](https://github.com/woodpecker-ci/woodpecker/pull/3137)]
 - Use js-base64 on pipeline log page [[#3146](https://github.com/woodpecker-ci/woodpecker/pull/3146)]
 - Flexible image pull secret reference [[#3016](https://github.com/woodpecker-ci/woodpecker/pull/3016)]
 - Always show pipeline step list [[#3114](https://github.com/woodpecker-ci/woodpecker/pull/3114)]
@@ -24,21 +25,10 @@
 - Remove workflow version again [[#3052](https://github.com/woodpecker-ci/woodpecker/pull/3052)]
 - Add option to disable version check in admin web UI [[#3040](https://github.com/woodpecker-ci/woodpecker/pull/3040)]
 
-### 📚 Documentation
-
-- Hide backend config options from TOC [[#3126](https://github.com/woodpecker-ci/woodpecker/pull/3126)]
-- Add X/Twitter account [[#3127](https://github.com/woodpecker-ci/woodpecker/pull/3127)]
-- Add ansible plugin [[#3115](https://github.com/woodpecker-ci/woodpecker/pull/3115)]
-- Format depends_on example [[#3118](https://github.com/woodpecker-ci/woodpecker/pull/3118)]
-- Use WOODPECKER_AGENT_SECRET instead of deprecated alternative [[#3103](https://github.com/woodpecker-ci/woodpecker/pull/3103)]
-- Add Reviewdog ESLint plugin [[#3102](https://github.com/woodpecker-ci/woodpecker/pull/3102)]
-- Mark local backend as stable [[#3088](https://github.com/woodpecker-ci/woodpecker/pull/3088)]
-- Update Owners 2024 [[#3075](https://github.com/woodpecker-ci/woodpecker/pull/3075)]
-- Add reviewdog golangci plugin [[#3080](https://github.com/woodpecker-ci/woodpecker/pull/3080)]
-- Add Codeberg Pages Deploy plugin to plugins list [[#3054](https://github.com/woodpecker-ci/woodpecker/pull/3054)]
-
 ### 🐛 Bug Fixes
 
+- Use UUID instead of step name where possible [[#3136](https://github.com/woodpecker-ci/woodpecker/pull/3136)]
+- Use step type to detect services in Kubernetes backend [[#3141](https://github.com/woodpecker-ci/woodpecker/pull/3141)]
 - Make config linking non-unique [[#3128](https://github.com/woodpecker-ci/woodpecker/pull/3128)]
 - Fix config base64 parsing to utf-8 [[#3110](https://github.com/woodpecker-ci/woodpecker/pull/3110)]
 - Pin Gitea version [[#3104](https://github.com/woodpecker-ci/woodpecker/pull/3104)]
@@ -52,6 +42,19 @@
 - Fix `when` and `depends_on` [[#3063](https://github.com/woodpecker-ci/woodpecker/pull/3063)]
 - Fix DAG cycle detection [[#3049](https://github.com/woodpecker-ci/woodpecker/pull/3049)]
 - Fix duplicated icons [[#3045](https://github.com/woodpecker-ci/woodpecker/pull/3045)]
+
+### 📚 Documentation
+
+- Hide backend config options from TOC [[#3126](https://github.com/woodpecker-ci/woodpecker/pull/3126)]
+- Add X/Twitter account [[#3127](https://github.com/woodpecker-ci/woodpecker/pull/3127)]
+- Add ansible plugin [[#3115](https://github.com/woodpecker-ci/woodpecker/pull/3115)]
+- Format depends_on example [[#3118](https://github.com/woodpecker-ci/woodpecker/pull/3118)]
+- Use WOODPECKER_AGENT_SECRET instead of deprecated alternative [[#3103](https://github.com/woodpecker-ci/woodpecker/pull/3103)]
+- Add Reviewdog ESLint plugin [[#3102](https://github.com/woodpecker-ci/woodpecker/pull/3102)]
+- Mark local backend as stable [[#3088](https://github.com/woodpecker-ci/woodpecker/pull/3088)]
+- Update Owners 2024 [[#3075](https://github.com/woodpecker-ci/woodpecker/pull/3075)]
+- Add reviewdog golangci plugin [[#3080](https://github.com/woodpecker-ci/woodpecker/pull/3080)]
+- Add Codeberg Pages Deploy plugin to plugins list [[#3054](https://github.com/woodpecker-ci/woodpecker/pull/3054)]
 
 ### Misc
 
