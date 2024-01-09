@@ -39,7 +39,6 @@ type membershipCache struct {
 
 // NewMembershipService creates a new membership service.
 func NewMembershipService(f forge.Forge) MembershipService {
-	//nolint: gomnd
 	return &membershipCache{
 		ttl:   10 * time.Minute,
 		forge: f,

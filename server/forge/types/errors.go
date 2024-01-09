@@ -54,7 +54,7 @@ func (err *ErrIgnoreEvent) Error() string {
 }
 
 func (*ErrIgnoreEvent) Is(target error) bool {
-	_, ok := target.(*ErrIgnoreEvent)
+	_, ok := target.(*ErrIgnoreEvent) //nolint:errorlint
 	return ok
 }
 

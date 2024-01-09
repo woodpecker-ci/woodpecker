@@ -25,7 +25,7 @@ import (
 )
 
 // publishToTopic publishes message to UI clients
-func publishToTopic(pipeline *model.Pipeline, repo *model.Repo) error {
+func publishToTopic(pipeline *model.Pipeline, repo *model.Repo) {
 	message := pubsub.Message{
 		Labels: map[string]string{
 			"repo":    repo.FullName,
@@ -41,9 +41,7 @@ func publishToTopic(pipeline *model.Pipeline, repo *model.Repo) error {
 	})
 	if err != nil {
 		log.Error().Err(err).Msg("can't marshal JSON")
-		return err
+		return
 	}
 	server.Config.Services.Pubsub.Publish(message)
-
-	return nil
 }

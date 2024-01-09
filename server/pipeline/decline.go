@@ -41,9 +41,7 @@ func Decline(ctx context.Context, store store.Store, pipeline *model.Pipeline, u
 
 	updatePipelineStatus(ctx, pipeline, repo, user)
 
-	if err := publishToTopic(pipeline, repo); err != nil {
-		return nil, err
-	}
+	publishToTopic(pipeline, repo)
 
 	return pipeline, nil
 }
