@@ -28,12 +28,29 @@ func TestPodName(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "wp-01he8bebctabr3kgk0qj36d2me-0", name)
 
-	name, err = podName(&types.Step{UUID: "01he8bebctabr3kgk0qj36d2me\\0a"})
-	assert.NoError(t, err)
-	assert.Equal(t, "wp-01he8bebctabr3kgk0qj36d2me\\0a", name)
-
-	_, err = podName(&types.Step{UUID: "01he8bebctabr3kgk0qj36d2me-0-services-0.woodpecker-runtime.svc.cluster.local"})
+	_, err = podName(&types.Step{UUID: "01he8bebctabr3kgk0qj36d2me\\0a"})
 	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
+
+	_, err = podName(&types.Step{UUID: "01he8bebctabr3kgk0qj36d2me-0-services-0..woodpecker-runtime.svc.cluster.local"})
+	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
+}
+
+func TestStepToPodName(t *testing.T) {
+	name, err := stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "clone", Type: types.StepTypeClone})
+	assert.NoError(t, err)
+	assert.EqualValues(t, "wp-01he8bebctabr3kg", name)
+	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "clone", Type: types.StepTypeCache})
+	assert.NoError(t, err)
+	assert.EqualValues(t, "wp-01he8bebctabr3kg", name)
+	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "clone", Type: types.StepTypePlugin})
+	assert.NoError(t, err)
+	assert.EqualValues(t, "wp-01he8bebctabr3kg", name)
+	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "clone", Type: types.StepTypeCommands})
+	assert.NoError(t, err)
+	assert.EqualValues(t, "wp-01he8bebctabr3kg", name)
+	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "clone", Type: types.StepTypeService})
+	assert.NoError(t, err)
+	assert.EqualValues(t, "clone", name)
 }
 
 func TestTinyPod(t *testing.T) {
