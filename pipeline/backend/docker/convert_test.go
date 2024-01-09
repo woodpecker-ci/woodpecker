@@ -17,6 +17,12 @@ package docker
 import (
 	"reflect"
 	"testing"
+
+	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
+	"github.com/stretchr/testify/assert"
+
+	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
 
 func TestSplitVolumeParts(t *testing.T) {
@@ -84,4 +90,31 @@ func TestSplitVolumeParts(t *testing.T) {
 			}
 		}
 	}
+}
+
+func TestToConfigSmall(t *testing.T) {
+	engine := docker{info: types.Info{OSType: "linux/riscv64"}}
+
+	conf := engine.toConfig(&backend.Step{
+		Name:     "test",
+		UUID:     "09238932",
+		Commands: []string{"go test"},
+	})
+
+	assert.NotNil(t, conf)
+	assert.EqualValues(t, &container.Config{
+		AttachStdout: true,
+		AttachStderr: true,
+		Cmd:          []string{"echo $CI_SCRIPT | base64 -d | /bin/sh -e"},
+		Entrypoint:   []string{"/bin/sh", "-c"},
+		Labels: map[string]string{
+			"wp_step": "test",
+			"wp_uuid": "09238932",
+		},
+		Env: []string{
+			"CI_SCRIPT=CmlmIFsgLW4gIiRDSV9ORVRSQ19NQUNISU5FIiBdOyB0aGVuCmNhdCA8PEVPRiA+ICRIT01FLy5uZXRyYwptYWNoaW5lICRDSV9ORVRSQ19NQUNISU5FCmxvZ2luICRDSV9ORVRSQ19VU0VSTkFNRQpwYXNzd29yZCAkQ0lfTkVUUkNfUEFTU1dPUkQKRU9GCmNobW9kIDA2MDAgJEhPTUUvLm5ldHJjCmZpCnVuc2V0IENJX05FVFJDX1VTRVJOQU1FCnVuc2V0IENJX05FVFJDX1BBU1NXT1JECnVuc2V0IENJX1NDUklQVAoKZWNobyArICdnbyB0ZXN0JwpnbyB0ZXN0Cg==",
+			"HOME=/root",
+			"SHELL=/bin/sh",
+		},
+	}, conf)
 }
