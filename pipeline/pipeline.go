@@ -106,7 +106,10 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 	}
 
 	defer func() {
-		if err := r.engine.DestroyWorkflow(runnerCtx, r.spec, r.taskUUID); err != nil {
+		// Use deferCtx because the runnerCtx will be canceled/done in case of error or canceled by user.
+		deferCtx := context.Background()
+
+		if err := r.engine.DestroyWorkflow(deferCtx, r.spec, r.taskUUID); err != nil {
 			logger.Error().Err(err).Msg("could not destroy engine")
 		}
 	}()

@@ -349,7 +349,6 @@ func (e *kube) DestroyStep(_ context.Context, step *types.Step, taskUUID string)
 func (e *kube) DestroyWorkflow(_ context.Context, conf *types.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msg("Deleting Kubernetes primitives")
 
-	// Use noContext because the ctx sent to this function will be canceled/done in case of error or canceled by user.
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
 			err := stopPod(e.ctx, e, step, defaultDeleteOptions)
