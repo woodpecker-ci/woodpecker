@@ -387,9 +387,9 @@ steps:
   publish-next-cli:
     depends_on:
       - vendor
-      # we also depend on cross-compile-server as we would have to hight
+      # we also depend on publish-next-agent as we would have to hight
       # ram usage otherwise
-      - cross-compile-server
+      - publish-next-agent
     image: *buildx_plugin
     settings:
       repo: *publish_repos_cli
@@ -406,9 +406,9 @@ steps:
   publish-next-cli-alpine:
     depends_on:
       - vendor
-      # we also depend on cross-compile-server as we would have to hight
+      # we also depend on publish-next-agent as we would have to hight
       # ram usage otherwise
-      - cross-compile-server
+      - publish-next-agent
     image: *buildx_plugin
     settings:
       repo: *publish_repos_cli
@@ -425,9 +425,9 @@ steps:
   release-cli:
     depends_on:
       - vendor
-      # we also depend on cross-compile-server as we would have to hight
+      # we also depend on release-agent as we would have to hight
       # ram usage otherwise
-      - cross-compile-server
+      - release-agent
     image: *buildx_plugin
     settings:
       repo: *publish_repos_cli
@@ -443,9 +443,9 @@ steps:
   release-cli-alpine:
     depends_on:
       - vendor
-      # we also depend on cross-compile-server as we would have to hight
+      # we also depend on release-agent as we would have to hight
       # ram usage otherwise
-      - cross-compile-server
+      - release-agent
     image: *buildx_plugin
     settings:
       repo: *publish_repos_cli
