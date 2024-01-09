@@ -15,7 +15,6 @@
 package compiler
 
 import (
-	"fmt"
 	"sort"
 
 	backend_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
@@ -68,8 +67,6 @@ func (c dagCompiler) compileByGroup() ([]*backend_types.Stage, error) {
 			currentGroup = s.group
 
 			currentStage = new(backend_types.Stage)
-			currentStage.Name = fmt.Sprintf("%s_stage_%v", c.prefix, s.position)
-			currentStage.Alias = s.name
 			stages = append(stages, currentStage)
 		}
 
@@ -128,10 +125,7 @@ func convertDAGToStages(steps map[string]*dagCompilerStep, prefix string) ([]*ba
 
 	for len(steps) > 0 {
 		addedNodesThisLevel := make(map[string]struct{})
-		stage := &backend_types.Stage{
-			Name:  fmt.Sprintf("%s_stage_%d", prefix, len(stages)),
-			Alias: fmt.Sprintf("%s_stage_%d", prefix, len(stages)),
-		}
+		stage := new(backend_types.Stage)
 
 		var stepsToAdd []*dagCompilerStep
 		for name, step := range steps {

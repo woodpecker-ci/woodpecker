@@ -93,15 +93,15 @@ func (r *Runtime) MakeLogger() zerolog.Logger {
 func (r *Runtime) Run(runnerCtx context.Context) error {
 	logger := r.MakeLogger()
 	logger.Debug().Msgf("Executing %d stages, in order of:", len(r.spec.Stages))
-	for _, stage := range r.spec.Stages {
-		steps := []string{}
+	for stagePos, stage := range r.spec.Stages {
+		stepNames := []string{}
 		for _, step := range stage.Steps {
-			steps = append(steps, step.Name)
+			stepNames = append(stepNames, step.Name)
 		}
 
 		logger.Debug().
-			Str("Stage", stage.Name).
-			Str("Steps", strings.Join(steps, ",")).
+			Int("StagePos", stagePos).
+			Str("Steps", strings.Join(stepNames, ",")).
 			Msg("stage")
 	}
 

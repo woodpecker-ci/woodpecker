@@ -27,8 +27,6 @@ import (
 
 const (
 	defaultCloneName = "clone"
-
-	nameServices = "services"
 )
 
 // Registry represents registry credentials
@@ -161,20 +159,17 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			Settings:    cloneSettings,
 			Environment: c.cloneEnv,
 		}
-		name := fmt.Sprintf("%s_clone", c.prefix)
-		step, err := c.createProcess(name, container, backend_types.StepTypeClone)
+		step, err := c.createProcess(container, backend_types.StepTypeClone)
 		if err != nil {
 			return nil, err
 		}
 
 		stage := new(backend_types.Stage)
-		stage.Name = name
-		stage.Alias = defaultCloneName
 		stage.Steps = append(stage.Steps, step)
 
 		config.Stages = append(config.Stages, stage)
 	} else if !c.local && !conf.SkipClone {
-		for i, container := range conf.Clone.ContainerList {
+		for _, container := range conf.Clone.ContainerList {
 			if match, err := container.When.Match(c.metadata, false, c.env); !match && err == nil {
 				continue
 			} else if err != nil {
@@ -182,11 +177,8 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			}
 
 			stage := new(backend_types.Stage)
-			stage.Name = fmt.Sprintf("%s_clone_%v", c.prefix, i)
-			stage.Alias = container.Name
 
-			name := fmt.Sprintf("%s_clone_%d", c.prefix, i)
-			step, err := c.createProcess(name, container, backend_types.StepTypeClone)
+			step, err := c.createProcess(container, backend_types.StepTypeClone)
 			if err != nil {
 				return nil, err
 			}
@@ -212,18 +204,15 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 	// add services steps
 	if len(conf.Services.ContainerList) != 0 {
 		stage := new(backend_types.Stage)
-		stage.Name = fmt.Sprintf("%s_%s", c.prefix, nameServices)
-		stage.Alias = nameServices
 
-		for i, container := range conf.Services.ContainerList {
+		for _, container := range conf.Services.ContainerList {
 			if match, err := container.When.Match(c.metadata, false, c.env); !match && err == nil {
 				continue
 			} else if err != nil {
 				return nil, err
 			}
 
-			name := fmt.Sprintf("%s_%s_%d", c.prefix, nameServices, i)
-			step, err := c.createProcess(name, container, backend_types.StepTypeService)
+			step, err := c.createProcess(container, backend_types.StepTypeService)
 			if err != nil {
 				return nil, err
 			}
@@ -247,12 +236,11 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			return nil, err
 		}
 
-		name := fmt.Sprintf("%s_step_%d", c.prefix, pos)
 		stepType := backend_types.StepTypeCommands
 		if container.IsPlugin() {
 			stepType = backend_types.StepTypePlugin
 		}
-		step, err := c.createProcess(name, container, stepType)
+		step, err := c.createProcess(container, stepType)
 		if err != nil {
 			return nil, err
 		}
@@ -295,15 +283,12 @@ func (c *Compiler) setupCache(conf *yaml_types.Workflow, ir *backend_types.Confi
 	}
 
 	container := c.cacher.Restore(path.Join(c.metadata.Repo.Owner, c.metadata.Repo.Name), c.metadata.Curr.Commit.Branch, conf.Cache)
-	name := fmt.Sprintf("%s_restore_cache", c.prefix)
-	step, err := c.createProcess(name, container, backend_types.StepTypeCache)
+	step, err := c.createProcess(container, backend_types.StepTypeCache)
 	if err != nil {
 		return err
 	}
 
 	stage := new(backend_types.Stage)
-	stage.Name = name
-	stage.Alias = "restore_cache"
 	stage.Steps = append(stage.Steps, step)
 
 	ir.Stages = append(ir.Stages, stage)
@@ -317,15 +302,12 @@ func (c *Compiler) setupCacheRebuild(conf *yaml_types.Workflow, ir *backend_type
 	}
 	container := c.cacher.Rebuild(path.Join(c.metadata.Repo.Owner, c.metadata.Repo.Name), c.metadata.Curr.Commit.Branch, conf.Cache)
 
-	name := fmt.Sprintf("%s_rebuild_cache", c.prefix)
-	step, err := c.createProcess(name, container, backend_types.StepTypeCache)
+	step, err := c.createProcess(container, backend_types.StepTypeCache)
 	if err != nil {
 		return err
 	}
 
 	stage := new(backend_types.Stage)
-	stage.Name = name
-	stage.Alias = "rebuild_cache"
 	stage.Steps = append(stage.Steps, step)
 
 	ir.Stages = append(ir.Stages, stage)
