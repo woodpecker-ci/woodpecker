@@ -332,13 +332,14 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 		}
 	}()
 	return rc, nil
-
-	// rc := io.NopCloser(bytes.NewReader(e.logs.Bytes()))
-	// e.logs.Reset()
-	// return rc, nil
 }
 
 func (e *kube) DestroyStep(_ context.Context, step *types.Step, taskUUID string) error {
+	if step.Type == types.StepTypeService {
+		// this one should be stopped by DestroyWorkflow so we can ignore it
+		log.Trace().Msgf("DestroyStep got service '%s', ignoring it.", step.Name)
+		return nil
+	}
 	log.Trace().Str("taskUUID", taskUUID).Msgf("Stopping step: %s", step.Name)
 	err := stopPod(e.ctx, e, step, defaultDeleteOptions)
 	return err
