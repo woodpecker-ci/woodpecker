@@ -17,8 +17,9 @@ package types
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMarshalNetworks(t *testing.T) {

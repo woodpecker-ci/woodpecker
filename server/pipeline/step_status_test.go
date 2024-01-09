@@ -199,14 +199,13 @@ func TestUpdateStepStatusToDoneSkipped(t *testing.T) {
 
 	step, _ := UpdateStepStatusToDone(&mockUpdateStepStore{}, model.Step{}, state)
 
-	switch {
-	case step.State != model.StatusSkipped:
+	if step.State != model.StatusSkipped {
 		t.Errorf("Step status not equals '%s' != '%s'", model.StatusSkipped, step.State)
-	case step.Stopped != int64(34):
+	} else if step.Stopped != int64(34) {
 		t.Errorf("Step stopped not equals 34 != %d", step.Stopped)
-	case step.Error != "":
+	} else if step.Error != "" {
 		t.Errorf("Step error not equals '' != '%s'", step.Error)
-	case step.ExitCode != 0:
+	} else if step.ExitCode != 0 {
 		t.Errorf("Step exit code not equals 0 != %d", step.ExitCode)
 	}
 }
@@ -221,14 +220,13 @@ func TestUpdateStepStatusToDoneSuccess(t *testing.T) {
 
 	step, _ := UpdateStepStatusToDone(&mockUpdateStepStore{}, model.Step{}, state)
 
-	switch {
-	case step.State != model.StatusSuccess:
+	if step.State != model.StatusSuccess {
 		t.Errorf("Step status not equals '%s' != '%s'", model.StatusSuccess, step.State)
-	case step.Stopped != int64(34):
+	} else if step.Stopped != int64(34) {
 		t.Errorf("Step stopped not equals 34 != %d", step.Stopped)
-	case step.Error != "":
+	} else if step.Error != "" {
 		t.Errorf("Step error not equals '' != '%s'", step.Error)
-	case step.ExitCode != 0:
+	} else if step.ExitCode != 0 {
 		t.Errorf("Step exit code not equals 0 != %d", step.ExitCode)
 	}
 }
@@ -264,15 +262,14 @@ func TestUpdateStepToStatusKilledStarted(t *testing.T) {
 
 	step, _ := UpdateStepToStatusKilled(&mockUpdateStepStore{}, model.Step{})
 
-	switch {
-	case step.State != model.StatusKilled:
+	if step.State != model.StatusKilled {
 		t.Errorf("Step status not equals '%s' != '%s'", model.StatusKilled, step.State)
-	case step.Stopped < now:
+	} else if step.Stopped < now {
 		t.Errorf("Step stopped not equals %d < %d", now, step.Stopped)
-	case step.Started != step.Stopped:
+	} else if step.Started != step.Stopped {
 		t.Errorf("Step started not equals %d != %d", step.Stopped, step.Started)
-	case step.ExitCode != pipeline.ExitCodeKilled:
-		t.Errorf("Step exit code not equals %d != %d", pipeline.ExitCodeKilled, step.ExitCode)
+	} else if step.ExitCode != 137 {
+		t.Errorf("Step exit code not equals 137 != %d", step.ExitCode)
 	}
 }
 

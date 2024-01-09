@@ -113,11 +113,11 @@ DRONE_TARGET_BRANCH=main`
 func convertListToEnvMap(t *testing.T, list string) map[string]string {
 	result := make(map[string]string)
 	for _, s := range strings.Split(list, "\n") {
-		before, after, _ := strings.Cut(strings.TrimSpace(s), "=")
-		if before == "" || after == "" {
+		ss := strings.SplitN(strings.TrimSpace(s), "=", 2)
+		if len(ss) != 2 {
 			t.Fatal("helper function got invalid test data")
 		}
-		result[before] = after
+		result[ss[0]] = ss[1]
 	}
 	return result
 }
