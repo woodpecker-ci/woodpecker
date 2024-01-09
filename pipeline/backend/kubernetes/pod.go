@@ -65,6 +65,13 @@ func mkPod(step *types.Step, backendOptions *types.KubernetesBackendOptions, nam
 	return pod, nil
 }
 
+func stepToPodName(step *types.Step) (name string, err error) {
+	if step.Type == types.StepTypeService {
+		return serviceName(step)
+	}
+	return podName(step)
+}
+
 func podName(step *types.Step) (string, error) {
 	return dnsName(podPrefix + step.UUID)
 }

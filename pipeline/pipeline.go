@@ -280,12 +280,12 @@ func (r *Runtime) exec(step *backend.Step) (*backend.State, error) {
 
 	if waitState.OOMKilled {
 		return waitState, &OomError{
-			Name: step.Name,
+			UUID: step.UUID,
 			Code: waitState.ExitCode,
 		}
 	} else if waitState.ExitCode != 0 {
 		return waitState, &ExitError{
-			Name: step.Name,
+			UUID: step.UUID,
 			Code: waitState.ExitCode,
 		}
 	}
