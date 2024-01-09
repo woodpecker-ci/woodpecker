@@ -29,7 +29,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/utils"
 )
 
-func (c *Compiler) createProcess(name string, container *yaml_types.Container, stepType backend_types.StepType) (*backend_types.Step, error) {
+func (c *Compiler) createProcess(container *yaml_types.Container, stepType backend_types.StepType) (*backend_types.Step, error) {
 	var (
 		uuid = ulid.Make()
 
@@ -171,10 +171,9 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 	}
 
 	return &backend_types.Step{
-		Name:           name,
+		Name:           container.Name,
 		UUID:           uuid.String(),
 		Type:           stepType,
-		Alias:          container.Name,
 		Image:          container.Image,
 		Pull:           container.Pull,
 		Detached:       detached,
