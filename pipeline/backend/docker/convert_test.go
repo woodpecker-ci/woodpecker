@@ -16,6 +16,7 @@ package docker
 
 import (
 	"reflect"
+	"sort"
 	"testing"
 
 	"github.com/docker/docker/api/types"
@@ -102,6 +103,7 @@ func TestToConfigSmall(t *testing.T) {
 	})
 
 	assert.NotNil(t, conf)
+	sort.Strings(conf.Env)
 	assert.EqualValues(t, &container.Config{
 		AttachStdout: true,
 		AttachStderr: true,
@@ -110,6 +112,11 @@ func TestToConfigSmall(t *testing.T) {
 		Labels: map[string]string{
 			"wp_step": "test",
 			"wp_uuid": "09238932",
+		},
+		Env: []string{
+			"CI_SCRIPT=CmlmIFsgLW4gIiRDSV9ORVRSQ19NQUNISU5FIiBdOyB0aGVuCmNhdCA8PEVPRiA+ICRIT01FLy5uZXRyYwptYWNoaW5lICRDSV9ORVRSQ19NQUNISU5FCmxvZ2luICRDSV9ORVRSQ19VU0VSTkFNRQpwYXNzd29yZCAkQ0lfTkVUUkNfUEFTU1dPUkQKRU9GCmNobW9kIDA2MDAgJEhPTUUvLm5ldHJjCmZpCnVuc2V0IENJX05FVFJDX1VTRVJOQU1FCnVuc2V0IENJX05FVFJDX1BBU1NXT1JECnVuc2V0IENJX1NDUklQVAoKZWNobyArICdnbyB0ZXN0JwpnbyB0ZXN0Cg==",
+			"HOME=/root",
+			"SHELL=/bin/sh",
 		},
 	}, conf)
 }

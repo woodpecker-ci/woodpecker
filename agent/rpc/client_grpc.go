@@ -170,7 +170,7 @@ func (c *client) Init(ctx context.Context, id string, state rpc.State) (err erro
 	req.State.Exited = state.Exited
 	req.State.Finished = state.Finished
 	req.State.Started = state.Started
-	req.State.Name = state.Step
+	req.State.StepUuid = state.StepUUID
 	for {
 		_, err = c.client.Init(ctx, req)
 		if err == nil {
@@ -211,7 +211,7 @@ func (c *client) Done(ctx context.Context, id string, state rpc.State) (err erro
 	req.State.Exited = state.Exited
 	req.State.Finished = state.Finished
 	req.State.Started = state.Started
-	req.State.Name = state.Step
+	req.State.StepUuid = state.StepUUID
 	for {
 		_, err = c.client.Done(ctx, req)
 		if err == nil {
@@ -286,7 +286,7 @@ func (c *client) Update(ctx context.Context, id string, state rpc.State) (err er
 	req.State.Exited = state.Exited
 	req.State.Finished = state.Finished
 	req.State.Started = state.Started
-	req.State.Name = state.Step
+	req.State.StepUuid = state.StepUUID
 	for {
 		_, err = c.client.Update(ctx, req)
 		if err == nil {

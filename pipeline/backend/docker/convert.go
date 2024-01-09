@@ -39,20 +39,20 @@ func (e *docker) toConfig(step *types.Step) *container.Config {
 		AttachStdout: true,
 		AttachStderr: true,
 	}
-	env := make(map[string]string)
-	maps.Copy(env, step.Environment)
+	configEnv := make(map[string]string)
+	maps.Copy(configEnv, step.Environment)
 
 	if len(step.Commands) != 0 {
 		env, entry, cmd := common.GenerateContainerConf(step.Commands, e.info.OSType)
 		for k, v := range env {
-			env[k] = v
+			configEnv[k] = v
 		}
 		config.Entrypoint = entry
 		config.Cmd = cmd
 	}
 
-	if len(env) != 0 {
-		config.Env = toEnv(env)
+	if len(configEnv) != 0 {
+		config.Env = toEnv(configEnv)
 	}
 	if len(step.Volumes) != 0 {
 		config.Volumes = toVol(step.Volumes)
