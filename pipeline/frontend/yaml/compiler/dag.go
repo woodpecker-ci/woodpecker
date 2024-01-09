@@ -28,20 +28,10 @@ type dagCompilerStep struct {
 	dependsOn []string
 }
 
-type dagCompiler struct {
-	steps  []*dagCompilerStep
-	prefix string
-}
+type dagCompiler []*dagCompilerStep
 
-func newDAGCompiler(steps []*dagCompilerStep, prefix string) dagCompiler {
-	return dagCompiler{
-		steps:  steps,
-		prefix: prefix,
-	}
-}
-
-func (c dagCompiler) isDAG() bool {
-	for _, v := range c.steps {
+func (steps dagCompiler) isDAG() bool {
+	for _, v := range steps {
 		if v.dependsOn != nil {
 			return true
 		}
@@ -49,19 +39,19 @@ func (c dagCompiler) isDAG() bool {
 	return false
 }
 
-func (c dagCompiler) compile() ([]*backend_types.Stage, error) {
-	if c.isDAG() {
-		return c.compileByDependsOn()
+func (steps dagCompiler) compile() ([]*backend_types.Stage, error) {
+	if steps.isDAG() {
+		return steps.compileByDependsOn()
 	}
-	return c.compileByGroup()
+	return steps.compileByGroup()
 }
 
-func (c dagCompiler) compileByGroup() ([]*backend_types.Stage, error) {
-	stages := make([]*backend_types.Stage, 0, len(c.steps))
+func (steps dagCompiler) compileByGroup() ([]*backend_types.Stage, error) {
+	stages := make([]*backend_types.Stage, 0, len(steps))
 	var currentStage *backend_types.Stage
 	var currentGroup string
 
-	for _, s := range c.steps {
+	for _, s := range steps {
 		// create a new stage if current step is in a new group compared to last one
 		if currentStage == nil || currentGroup != s.group || s.group == "" {
 			currentGroup = s.group
@@ -77,12 +67,12 @@ func (c dagCompiler) compileByGroup() ([]*backend_types.Stage, error) {
 	return stages, nil
 }
 
-func (c dagCompiler) compileByDependsOn() ([]*backend_types.Stage, error) {
-	stepMap := make(map[string]*dagCompilerStep, len(c.steps))
-	for _, s := range c.steps {
+func (steps dagCompiler) compileByDependsOn() ([]*backend_types.Stage, error) {
+	stepMap := make(map[string]*dagCompilerStep, len(steps))
+	for _, s := range steps {
 		stepMap[s.name] = s
 	}
-	return convertDAGToStages(stepMap, c.prefix)
+	return convertDAGToStages(stepMap)
 }
 
 func dfsVisit(steps map[string]*dagCompilerStep, name string, visited map[string]struct{}, path []string) error {
@@ -104,7 +94,7 @@ func dfsVisit(steps map[string]*dagCompilerStep, name string, visited map[string
 	return nil
 }
 
-func convertDAGToStages(steps map[string]*dagCompilerStep, prefix string) ([]*backend_types.Stage, error) {
+func convertDAGToStages(steps map[string]*dagCompilerStep) ([]*backend_types.Stage, error) {
 	addedSteps := make(map[string]struct{})
 	stages := make([]*backend_types.Stage, 0)
 

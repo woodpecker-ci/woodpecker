@@ -36,7 +36,7 @@ func TestConvertDAGToStages(t *testing.T) {
 			dependsOn: []string{"step2"},
 		},
 	}
-	_, err := convertDAGToStages(steps, "")
+	_, err := convertDAGToStages(steps)
 	assert.ErrorIs(t, err, &ErrStepDependencyCycle{})
 
 	steps = map[string]*dagCompilerStep{
@@ -48,7 +48,7 @@ func TestConvertDAGToStages(t *testing.T) {
 			step: &backend_types.Step{},
 		},
 	}
-	_, err = convertDAGToStages(steps, "")
+	_, err = convertDAGToStages(steps)
 	assert.NoError(t, err)
 
 	steps = map[string]*dagCompilerStep{
@@ -68,7 +68,7 @@ func TestConvertDAGToStages(t *testing.T) {
 			dependsOn: []string{"b", "c"},
 		},
 	}
-	_, err = convertDAGToStages(steps, "")
+	_, err = convertDAGToStages(steps)
 	assert.NoError(t, err)
 
 	steps = map[string]*dagCompilerStep{
@@ -77,7 +77,7 @@ func TestConvertDAGToStages(t *testing.T) {
 			dependsOn: []string{"not-existing-step"},
 		},
 	}
-	_, err = convertDAGToStages(steps, "")
+	_, err = convertDAGToStages(steps)
 	assert.ErrorIs(t, err, &ErrStepMissingDependency{})
 
 	steps = map[string]*dagCompilerStep{
@@ -86,10 +86,9 @@ func TestConvertDAGToStages(t *testing.T) {
 			name:     "echo env",
 			group:    "",
 			step: &backend_types.Step{
-				Name:  "test_step_0",
 				UUID:  "01HJDPEW6R7J0JBE3F1T7Q0TYX",
 				Type:  "commands",
-				Alias: "echo env",
+				Name:  "echo env",
 				Image: "bash",
 			},
 		},
@@ -99,10 +98,9 @@ func TestConvertDAGToStages(t *testing.T) {
 			group:     "",
 			dependsOn: []string{"echo env", "echo 2"},
 			step: &backend_types.Step{
-				Name:  "test_step_1",
 				UUID:  "01HJDPF770QGRZER8RF79XVS4M",
 				Type:  "commands",
-				Alias: "echo 1",
+				Name:  "echo 1",
 				Image: "bash",
 			},
 		},
@@ -111,40 +109,32 @@ func TestConvertDAGToStages(t *testing.T) {
 			name:     "echo 2",
 			group:    "",
 			step: &backend_types.Step{
-				Name:  "test_step_2",
 				UUID:  "01HJDPFF5RMEYZW0YTGR1Y1ZR0",
 				Type:  "commands",
-				Alias: "echo 2",
+				Name:  "echo 2",
 				Image: "bash",
 			},
 		},
 	}
-	stages, err := convertDAGToStages(steps, "test")
+	stages, err := convertDAGToStages(steps)
 	assert.NoError(t, err)
 	assert.EqualValues(t, []*backend_types.Stage{{
-		Name:  "test_stage_0",
-		Alias: "test_stage_0",
 		Steps: []*backend_types.Step{{
-			Name:  "test_step_0",
 			UUID:  "01HJDPEW6R7J0JBE3F1T7Q0TYX",
 			Type:  "commands",
-			Alias: "echo env",
+			Name:  "echo env",
 			Image: "bash",
 		}, {
-			Name:  "test_step_2",
 			UUID:  "01HJDPFF5RMEYZW0YTGR1Y1ZR0",
 			Type:  "commands",
-			Alias: "echo 2",
+			Name:  "echo 2",
 			Image: "bash",
 		}},
 	}, {
-		Name:  "test_stage_1",
-		Alias: "test_stage_1",
 		Steps: []*backend_types.Step{{
-			Name:  "test_step_1",
 			UUID:  "01HJDPF770QGRZER8RF79XVS4M",
 			Type:  "commands",
-			Alias: "echo 1",
+			Name:  "echo 1",
 			Image: "bash",
 		}},
 	}}, stages)
@@ -156,7 +146,7 @@ func TestIsDag(t *testing.T) {
 			step: &backend_types.Step{},
 		},
 	}
-	c := newDAGCompiler(steps, "")
+	c := dagCompiler(steps)
 	assert.False(t, c.isDAG())
 
 	steps = []*dagCompilerStep{
@@ -165,6 +155,6 @@ func TestIsDag(t *testing.T) {
 			dependsOn: []string{},
 		},
 	}
-	c = newDAGCompiler(steps, "")
+	c = dagCompiler(steps)
 	assert.True(t, c.isDAG())
 }
