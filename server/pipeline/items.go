@@ -130,7 +130,7 @@ func setPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*stepb
 					gid = pidSequence
 				}
 				step := &model.Step{
-					Name:       step.Alias,
+					Name:       step.Name,
 					UUID:       step.UUID,
 					PipelineID: pipeline.ID,
 					PID:        pidSequence,
