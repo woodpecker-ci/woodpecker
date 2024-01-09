@@ -1,3 +1,7 @@
+---
+toc_max_heading_level: 2
+---
+
 # Server configuration
 
 ## User registration

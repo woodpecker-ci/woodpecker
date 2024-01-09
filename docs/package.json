@@ -43,7 +43,7 @@
   },
   "devDependencies": {
     "@docusaurus/module-type-aliases": "^3.0.0",
-    "@docusaurus/tsconfig": "3.0.1",
+    "@docusaurus/tsconfig": "3.1.0",
     "@docusaurus/types": "^3.0.0",
     "@types/node": "^20.9.0",
     "@types/react": "^18.2.37",
@@ -54,7 +54,8 @@
   "pnpm": {
     "overrides": {
       "trim": "^0.0.3",
-      "got": "^11.8.5"
+      "got": "^11.8.5",
+      "follow-redirects@<1.15.4": ">=1.15.4"
     }
   }
 }

@@ -92,7 +92,7 @@ func (s *WoodpeckerServer) Init(c context.Context, req *proto.InitRequest) (*pro
 		ExitCode: int(req.GetState().GetExitCode()),
 		Finished: req.GetState().GetFinished(),
 		Started:  req.GetState().GetStarted(),
-		Step:     req.GetState().GetName(),
+		StepUUID: req.GetState().GetStepUuid(),
 		Exited:   req.GetState().GetExited(),
 	}
 	res := new(proto.Empty)
@@ -106,7 +106,7 @@ func (s *WoodpeckerServer) Update(c context.Context, req *proto.UpdateRequest) (
 		ExitCode: int(req.GetState().GetExitCode()),
 		Finished: req.GetState().GetFinished(),
 		Started:  req.GetState().GetStarted(),
-		Step:     req.GetState().GetName(),
+		StepUUID: req.GetState().GetStepUuid(),
 		Exited:   req.GetState().GetExited(),
 	}
 	res := new(proto.Empty)
@@ -120,7 +120,7 @@ func (s *WoodpeckerServer) Done(c context.Context, req *proto.DoneRequest) (*pro
 		ExitCode: int(req.GetState().GetExitCode()),
 		Finished: req.GetState().GetFinished(),
 		Started:  req.GetState().GetStarted(),
-		Step:     req.GetState().GetName(),
+		StepUUID: req.GetState().GetStepUuid(),
 		Exited:   req.GetState().GetExited(),
 	}
 	res := new(proto.Empty)
