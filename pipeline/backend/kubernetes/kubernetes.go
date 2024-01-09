@@ -269,7 +269,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 
 // Tail the pipeline step logs.
 func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) (io.ReadCloser, error) {
-	podName, err := dnsName(step.Name)
+	podName, err := stepToPodName(step)
 	if err != nil {
 		return nil, err
 	}
