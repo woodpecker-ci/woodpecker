@@ -104,7 +104,7 @@ clean: ## Clean build artifacts
 	@[ "1" != "$(shell docker image ls woodpecker/make:local -a | wc -l)" ] && docker image rm woodpecker/make:local || echo no docker image to clean
 
 .PHONY: clean-all
-clean-all: clean## Clean all artifacts
+clean-all: clean ## Clean all artifacts
 	rm -rf dist web/dist docs/build docs/node_modules web/node_modules
 	# delete generated
 	rm -rf docs/docs/40-cli.md docs/swagger.json
