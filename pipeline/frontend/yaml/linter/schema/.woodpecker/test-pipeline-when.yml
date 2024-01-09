@@ -10,6 +10,9 @@ when:
     cron:
       include:
         - hello
+  - event:
+      exclude: pull_request_closed
+    evaluate: 'CI_COMMIT_AUTHOR == "woodpecker-ci"'
 
 steps:
   echo:

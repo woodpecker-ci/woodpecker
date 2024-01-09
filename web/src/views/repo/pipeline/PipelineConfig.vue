@@ -13,6 +13,7 @@
 </template>
 
 <script lang="ts" setup>
+import { decode } from 'js-base64';
 import { inject, onMounted, Ref, ref, watch } from 'vue';
 
 import SyntaxHighlight from '~/components/atomic/SyntaxHighlight';
@@ -35,7 +36,7 @@ async function loadPipelineConfig() {
 
   pipelineConfigs.value = (await apiClient.getPipelineConfig(repo.value.id, pipeline.value.number)).map((i) => ({
     ...i,
-    data: atob(i.data),
+    data: decode(i.data),
   }));
 }
 

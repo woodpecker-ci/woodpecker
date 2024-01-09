@@ -76,6 +76,7 @@ declare module 'vue' {
     InputField: typeof import('./src/components/form/InputField.vue')['default']
     IPhGitlabLogoSimpleFill: typeof import('~icons/ph/gitlab-logo-simple-fill')['default']
     ISimpleIconsGitea: typeof import('~icons/simple-icons/gitea')['default']
+    ISvgSpinners180RingWithBg: typeof import('~icons/svg-spinners/180-ring-with-bg')['default']
     ITeenyiconsGitSolid: typeof import('~icons/teenyicons/git-solid')['default']
     ITeenyiconsRefreshOutline: typeof import('~icons/teenyicons/refresh-outline')['default']
     IVaadinQuestionCircleO: typeof import('~icons/vaadin/question-circle-o')['default']

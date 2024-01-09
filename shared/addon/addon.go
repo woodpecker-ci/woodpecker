@@ -2,7 +2,6 @@ package addon
 
 import (
 	"errors"
-	"os"
 	"plugin"
 
 	"github.com/rs/zerolog"
@@ -42,14 +41,14 @@ func Load[T any](files []string, t types.Type) (*Addon[T], error) {
 		if err != nil {
 			return nil, err
 		}
-		main, is := mainLookup.(func(zerolog.Logger, []string) (T, error))
+		main, is := mainLookup.(func(zerolog.Logger) (T, error))
 		if !is {
 			return nil, errors.New("addon main function has incorrect type")
 		}
 
 		logger := log.Logger.With().Str("addon", file).Logger()
 
-		mainOut, err := main(logger, os.Environ())
+		mainOut, err := main(logger)
 		if err != nil {
 			return nil, err
 		}

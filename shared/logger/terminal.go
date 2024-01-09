@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package common
+package logger
 
 import (
 	"os"
@@ -20,7 +20,7 @@ import (
 	"golang.org/x/term"
 )
 
-// IsInteractive checks if the output is piped, but NOT if the session is run interactively.
-func IsInteractive() bool {
+// isInteractiveTerminal checks if the output is piped, but NOT if the session is run interactively.
+func isInteractiveTerminal() bool {
 	return term.IsTerminal(int(os.Stdout.Fd()))
 }

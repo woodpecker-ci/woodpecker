@@ -149,9 +149,9 @@ export type PipelineFeed = Pipeline & {
 };
 
 export enum StepType {
-  Clone = 1,
-  Service,
-  Plugin,
-  Commands,
-  Cache,
+  Clone = 'clone',
+  Service = 'service',
+  Plugin = 'plugin',
+  Commands = 'commands',
+  Cache = 'cache',
 }

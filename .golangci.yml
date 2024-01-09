@@ -141,6 +141,6 @@ issues:
       linters:
         - forbidigo
     # allow some setup functions to use log.Fatal()
-    - path: 'server/web/web.go|server/plugins/encryption/tink_keyset_watcher.go'
+    - path: 'server/web/web.go|server/plugins/encryption/tink_keyset_watcher.go|shared/logger/logger.go'
       linters:
         - forbidigo
