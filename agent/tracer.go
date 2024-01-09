@@ -37,7 +37,7 @@ func (r *Runner) createTracer(ctxmeta context.Context, logger zerolog.Logger, wo
 			Logger()
 
 		stepState := rpc.State{
-			Step:     state.Pipeline.Step.Alias,
+			StepUUID: state.Pipeline.Step.UUID,
 			Exited:   state.Process.Exited,
 			ExitCode: state.Process.ExitCode,
 			Started:  time.Now().Unix(), // TODO do not do this

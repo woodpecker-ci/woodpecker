@@ -106,25 +106,34 @@ func (s *RPC) Update(_ context.Context, id string, state rpc.State) error {
 
 	workflow, err := s.store.WorkflowLoad(workflowID)
 	if err != nil {
-		log.Error().Msgf("error: rpc.update: cannot find workflow with id %d: %s", workflowID, err)
+		log.Error().Msgf("rpc.update: cannot find workflow with id %d: %s", workflowID, err)
 		return err
 	}
 
 	currentPipeline, err := s.store.GetPipeline(workflow.PipelineID)
 	if err != nil {
-		log.Error().Msgf("error: cannot find pipeline with id %d: %s", workflow.PipelineID, err)
+		log.Error().Msgf("cannot find pipeline with id %d: %s", workflow.PipelineID, err)
 		return err
 	}
 
-	step, err := s.store.StepChild(currentPipeline, workflow.PID, state.Step)
+	step, err := s.store.StepByUUID(state.StepUUID)
 	if err != nil {
-		log.Error().Msgf("error: cannot find step with name %s: %s", state.Step, err)
+		log.Error().Msgf("cannot find step with uuid %s: %s", state.StepUUID, err)
 		return err
+	}
+
+	if step.PipelineID != currentPipeline.ID {
+		msg := fmt.Sprintf("agent return status with step uuid '%s' of step, witch does not belonging to current pipeline", state.StepUUID)
+		log.Error().
+			Int64("stepPipelineID", step.PipelineID).
+			Int64("currentPipelineID", currentPipeline.ID).
+			Msg(msg)
+		return fmt.Errorf(msg)
 	}
 
 	repo, err := s.store.GetRepo(currentPipeline.RepoID)
 	if err != nil {
-		log.Error().Msgf("error: cannot find repo with id %d: %s", currentPipeline.RepoID, err)
+		log.Error().Msgf("cannot find repo with id %d: %s", currentPipeline.RepoID, err)
 		return err
 	}
 

@@ -29,7 +29,7 @@ type (
 
 	// State defines the workflow state.
 	State struct {
-		Step     string `json:"step"`
+		StepUUID string `json:"step_uuid"`
 		Exited   bool   `json:"exited"`
 		ExitCode int    `json:"exit_code"`
 		Started  int64  `json:"started"`
