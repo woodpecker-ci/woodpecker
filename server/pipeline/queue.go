@@ -15,6 +15,7 @@
 package pipeline
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -24,7 +25,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/pipeline/stepbuilder"
 )
 
-func queuePipeline(repo *model.Repo, pipelineItems []*stepbuilder.Item) error {
+func queuePipeline(ctx context.Context, repo *model.Repo, pipelineItems []*stepbuilder.Item) error {
 	var tasks []*model.Task
 	for _, item := range pipelineItems {
 		if item.Workflow.State == model.StatusSkipped {

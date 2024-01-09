@@ -79,7 +79,6 @@ func toHostConfig(step *types.Step) *container.HostConfig {
 		},
 		Privileged: step.Privileged,
 		ShmSize:    step.ShmSize,
-		Sysctls:    step.Sysctls,
 	}
 
 	if len(step.NetworkMode) != 0 {

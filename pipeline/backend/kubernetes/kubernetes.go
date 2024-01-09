@@ -343,7 +343,7 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 	return rc, nil
 }
 
-func (e *kube) DestroyStep(_ context.Context, step *types.Step, taskUUID string) error {
+func (e *kube) DestroyStep(ctx context.Context, step *types.Step, taskUUID string) error {
 	if step.Type == types.StepTypeService {
 		// a service should be stopped by DestroyWorkflow so we can ignore it
 		log.Trace().Msgf("DestroyStep got service '%s', ignoring it.", step.Name)
