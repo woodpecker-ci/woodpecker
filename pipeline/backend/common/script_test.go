@@ -1,4 +1,4 @@
-// Copyright 2023 Woodpecker Authors
+// Copyright 2024 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ const (
 	posixScriptBase64   = "CmlmIFsgLW4gIiRDSV9ORVRSQ19NQUNISU5FIiBdOyB0aGVuCmNhdCA8PEVPRiA+ICRIT01FLy5uZXRyYwptYWNoaW5lICRDSV9ORVRSQ19NQUNISU5FCmxvZ2luICRDSV9ORVRSQ19VU0VSTkFNRQpwYXNzd29yZCAkQ0lfTkVUUkNfUEFTU1dPUkQKRU9GCmNobW9kIDA2MDAgJEhPTUUvLm5ldHJjCmZpCnVuc2V0IENJX05FVFJDX1VTRVJOQU1FCnVuc2V0IENJX05FVFJDX1BBU1NXT1JECnVuc2V0IENJX1NDUklQVAoKZWNobyArICdlY2hvIGhlbGxvIHdvcmxkJwplY2hvIGhlbGxvIHdvcmxkCg=="
 )
 
-func TestGenerateContainerConf2(t *testing.T) {
+func TestGenerateContainerConf(t *testing.T) {
 	gotEnv, gotEntry, gotCmd := GenerateContainerConf([]string{"echo hello world"}, "windows")
 	assert.Equal(t, windowsScriptBase64, gotEnv["CI_SCRIPT"])
 	assert.Equal(t, "c:\\root", gotEnv["HOME"])
