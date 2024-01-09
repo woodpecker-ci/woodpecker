@@ -6,23 +6,9 @@
 
 @qwerty287, @6543, @micash545, @pat-s, @miry, @zc-devs, @lukashass, @lafriks, @pre-commit-ci[bot], @anbraten, @andyhan, @renovate[bot], @KamilaBorowska
 
-### 📚 Documentation
-
-- Add continous deployment cookbook [[#3098](https://github.com/woodpecker-ci/woodpecker/pull/3098)]
-- Make k8s backend configuration docs in the same format as others [[#3081](https://github.com/woodpecker-ci/woodpecker/pull/3081)]
-- Hide backend config options from TOC [[#3126](https://github.com/woodpecker-ci/woodpecker/pull/3126)]
-- Add X/Twitter account [[#3127](https://github.com/woodpecker-ci/woodpecker/pull/3127)]
-- Add ansible plugin [[#3115](https://github.com/woodpecker-ci/woodpecker/pull/3115)]
-- Format depends_on example [[#3118](https://github.com/woodpecker-ci/woodpecker/pull/3118)]
-- Use WOODPECKER_AGENT_SECRET instead of deprecated alternative [[#3103](https://github.com/woodpecker-ci/woodpecker/pull/3103)]
-- Add Reviewdog ESLint plugin [[#3102](https://github.com/woodpecker-ci/woodpecker/pull/3102)]
-- Mark local backend as stable [[#3088](https://github.com/woodpecker-ci/woodpecker/pull/3088)]
-- Update Owners 2024 [[#3075](https://github.com/woodpecker-ci/woodpecker/pull/3075)]
-- Add reviewdog golangci plugin [[#3080](https://github.com/woodpecker-ci/woodpecker/pull/3080)]
-- Add Codeberg Pages Deploy plugin to plugins list [[#3054](https://github.com/woodpecker-ci/woodpecker/pull/3054)]
-
 ### 🐛 Bug Fixes
 
+- Fix feed sorting [[#3155](https://github.com/woodpecker-ci/woodpecker/pull/3155)]
 - Step status update dont set to running again once it got stoped [[#3151](https://github.com/woodpecker-ci/woodpecker/pull/3151)]
 - Use step uuid instead of name in GRPC status calls [[#3143](https://github.com/woodpecker-ci/woodpecker/pull/3143)]
 - Use UUID instead of step name where possible [[#3136](https://github.com/woodpecker-ci/woodpecker/pull/3136)]
@@ -40,6 +26,21 @@
 - Fix `when` and `depends_on` [[#3063](https://github.com/woodpecker-ci/woodpecker/pull/3063)]
 - Fix DAG cycle detection [[#3049](https://github.com/woodpecker-ci/woodpecker/pull/3049)]
 - Fix duplicated icons [[#3045](https://github.com/woodpecker-ci/woodpecker/pull/3045)]
+
+### 📚 Documentation
+
+- Add continous deployment cookbook [[#3098](https://github.com/woodpecker-ci/woodpecker/pull/3098)]
+- Make k8s backend configuration docs in the same format as others [[#3081](https://github.com/woodpecker-ci/woodpecker/pull/3081)]
+- Hide backend config options from TOC [[#3126](https://github.com/woodpecker-ci/woodpecker/pull/3126)]
+- Add X/Twitter account [[#3127](https://github.com/woodpecker-ci/woodpecker/pull/3127)]
+- Add ansible plugin [[#3115](https://github.com/woodpecker-ci/woodpecker/pull/3115)]
+- Format depends_on example [[#3118](https://github.com/woodpecker-ci/woodpecker/pull/3118)]
+- Use WOODPECKER_AGENT_SECRET instead of deprecated alternative [[#3103](https://github.com/woodpecker-ci/woodpecker/pull/3103)]
+- Add Reviewdog ESLint plugin [[#3102](https://github.com/woodpecker-ci/woodpecker/pull/3102)]
+- Mark local backend as stable [[#3088](https://github.com/woodpecker-ci/woodpecker/pull/3088)]
+- Update Owners 2024 [[#3075](https://github.com/woodpecker-ci/woodpecker/pull/3075)]
+- Add reviewdog golangci plugin [[#3080](https://github.com/woodpecker-ci/woodpecker/pull/3080)]
+- Add Codeberg Pages Deploy plugin to plugins list [[#3054](https://github.com/woodpecker-ci/woodpecker/pull/3054)]
 
 ### 📈 Enhancement
 
