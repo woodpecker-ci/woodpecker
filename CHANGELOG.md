@@ -4,7 +4,22 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @micash545, @qwerty287, @pat-s, @miry, @zc-devs, @lukashass, @lafriks, @pre-commit-ci[bot], @anbraten, @andyhan, @renovate[bot], @KamilaBorowska
+@qwerty287, @6543, @micash545, @pat-s, @miry, @zc-devs, @lukashass, @lafriks, @pre-commit-ci[bot], @anbraten, @andyhan, @renovate[bot], @KamilaBorowska
+
+### 📚 Documentation
+
+- Add continous deployment cookbook [[#3098](https://github.com/woodpecker-ci/woodpecker/pull/3098)]
+- Make k8s backend configuration docs in the same format as others [[#3081](https://github.com/woodpecker-ci/woodpecker/pull/3081)]
+- Hide backend config options from TOC [[#3126](https://github.com/woodpecker-ci/woodpecker/pull/3126)]
+- Add X/Twitter account [[#3127](https://github.com/woodpecker-ci/woodpecker/pull/3127)]
+- Add ansible plugin [[#3115](https://github.com/woodpecker-ci/woodpecker/pull/3115)]
+- Format depends_on example [[#3118](https://github.com/woodpecker-ci/woodpecker/pull/3118)]
+- Use WOODPECKER_AGENT_SECRET instead of deprecated alternative [[#3103](https://github.com/woodpecker-ci/woodpecker/pull/3103)]
+- Add Reviewdog ESLint plugin [[#3102](https://github.com/woodpecker-ci/woodpecker/pull/3102)]
+- Mark local backend as stable [[#3088](https://github.com/woodpecker-ci/woodpecker/pull/3088)]
+- Update Owners 2024 [[#3075](https://github.com/woodpecker-ci/woodpecker/pull/3075)]
+- Add reviewdog golangci plugin [[#3080](https://github.com/woodpecker-ci/woodpecker/pull/3080)]
+- Add Codeberg Pages Deploy plugin to plugins list [[#3054](https://github.com/woodpecker-ci/woodpecker/pull/3054)]
 
 ### 🐛 Bug Fixes
 
@@ -46,20 +61,6 @@
 - Add imports checks to linter [[#3056](https://github.com/woodpecker-ci/woodpecker/pull/3056)]
 - Remove workflow version again [[#3052](https://github.com/woodpecker-ci/woodpecker/pull/3052)]
 - Add option to disable version check in admin web UI [[#3040](https://github.com/woodpecker-ci/woodpecker/pull/3040)]
-
-### 📚 Documentation
-
-- Make k8s backend configuration docs in the same format as others [[#3081](https://github.com/woodpecker-ci/woodpecker/pull/3081)]
-- Hide backend config options from TOC [[#3126](https://github.com/woodpecker-ci/woodpecker/pull/3126)]
-- Add X/Twitter account [[#3127](https://github.com/woodpecker-ci/woodpecker/pull/3127)]
-- Add ansible plugin [[#3115](https://github.com/woodpecker-ci/woodpecker/pull/3115)]
-- Format depends_on example [[#3118](https://github.com/woodpecker-ci/woodpecker/pull/3118)]
-- Use WOODPECKER_AGENT_SECRET instead of deprecated alternative [[#3103](https://github.com/woodpecker-ci/woodpecker/pull/3103)]
-- Add Reviewdog ESLint plugin [[#3102](https://github.com/woodpecker-ci/woodpecker/pull/3102)]
-- Mark local backend as stable [[#3088](https://github.com/woodpecker-ci/woodpecker/pull/3088)]
-- Update Owners 2024 [[#3075](https://github.com/woodpecker-ci/woodpecker/pull/3075)]
-- Add reviewdog golangci plugin [[#3080](https://github.com/woodpecker-ci/woodpecker/pull/3080)]
-- Add Codeberg Pages Deploy plugin to plugins list [[#3054](https://github.com/woodpecker-ci/woodpecker/pull/3054)]
 
 ### Misc
 
