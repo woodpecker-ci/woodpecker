@@ -8,6 +8,7 @@
 
 ### 🐛 Bug Fixes
 
+- Step status update dont set to running again once it got stoped [[#3151](https://github.com/woodpecker-ci/woodpecker/pull/3151)]
 - Use step uuid instead of name in GRPC status calls [[#3143](https://github.com/woodpecker-ci/woodpecker/pull/3143)]
 - Use UUID instead of step name where possible [[#3136](https://github.com/woodpecker-ci/woodpecker/pull/3136)]
 - Use step type to detect services in Kubernetes backend [[#3141](https://github.com/woodpecker-ci/woodpecker/pull/3141)]
@@ -62,6 +63,7 @@
 
 ### Misc
 
+- Add `make clean-all` [[#3152](https://github.com/woodpecker-ci/woodpecker/pull/3152)]
 - Fix `version.json` updates [[#3057](https://github.com/woodpecker-ci/woodpecker/pull/3057)]
 - [pre-commit.ci] pre-commit autoupdate [[#3101](https://github.com/woodpecker-ci/woodpecker/pull/3101)]
 - Update dependency @vitejs/plugin-vue to v5 [[#3074](https://github.com/woodpecker-ci/woodpecker/pull/3074)]
