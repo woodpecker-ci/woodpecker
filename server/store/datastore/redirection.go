@@ -18,7 +18,7 @@ import (
 	"xorm.io/builder"
 	"xorm.io/xorm"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 func (s storage) GetRedirection(fullName string) (*model.Redirection, error) {

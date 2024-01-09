@@ -49,11 +49,11 @@ import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
 import { Org, Secret, WebhookEvents } from '~/lib/api/types';
 
-const emptySecret = {
+const emptySecret: Partial<Secret> = {
   name: '',
   value: '',
-  image: [],
-  event: [WebhookEvents.Push],
+  images: [],
+  events: [WebhookEvents.Push],
 };
 
 const apiClient = useApiClient();

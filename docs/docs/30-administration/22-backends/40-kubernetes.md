@@ -1,9 +1,8 @@
-# Kubernetes backend
+---
+toc_max_heading_level: 3
+---
 
-:::info
-Not all pipeline features are fully supported yet for this backend.
-Check [the Kubernetes overview issue](https://github.com/woodpecker-ci/woodpecker/issues/1513) for a summary.
-:::
+# Kubernetes backend
 
 The kubernetes backend executes steps inside standalone pods. A temporary PVC is created for the lifetime of the pipeline to transfer files between steps.
 
@@ -12,7 +11,7 @@ The kubernetes backend executes steps inside standalone pods. A temporary PVC is
 These env vars can be set in the `env:` sections of both `server` and `agent`.
 They do not need to be set for both but only for the part to which it is relevant to.
 
-```yml
+```yaml
 server:
   env:
     WOODPECKER_SESSION_EXPIRES: "300h"
@@ -47,6 +46,10 @@ agent:
 
   Additional annotations to apply to worker pods. Must be a YAML object, e.g. `{"example.com/test-annotation":"test-value"}`.
 
+- `WOODPECKER_BACKEND_K8S_SECCTX_NONROOT` (default: `false`)
+
+  Determines if containers must be required to run as non-root users.
+
 ## Job specific configuration
 
 ### Resources
@@ -56,7 +59,7 @@ We recommend to add a `resources` definition to all steps to ensure efficient sc
 
 Here is an example definition with an arbitrary `resources` definition below the `backend_options` section:
 
-```yml
+```yaml
 steps:
   'My kubernetes step':
     image: alpine
@@ -90,7 +93,7 @@ To overwrite this, one needs to set the label in the `nodeSelector` section of t
 A practical example for this is when running a matrix-build and delegating specific elements of the matrix to run on a specific architecture.
 In this case, one must define an arbitrary key in the matrix section of the respective matrix element:
 
-```yml
+```yaml
 matrix:
   include:
     - NAME: runner1
@@ -99,7 +102,7 @@ matrix:
 
 And then overwrite the `nodeSelector` in the `backend_options` section of the step(s) using the name of the respective env var:
 
-```yml
+```yaml
 [...]
     backend_options:
       kubernetes:
@@ -158,13 +161,52 @@ steps:
     [...]
 ```
 
+### `securityContext`
+
+Use the following configuration to set the `securityContext` for the pod/container running a given pipeline step:
+
+```yaml
+steps:
+  test:
+    image: alpine
+    commands:
+      - echo Hello world
+    backend_options:
+      kubernetes:
+        securityContext:
+          runAsUser: 999
+          runAsGroup: 999
+          privileged: true
+    [...]
+```
+
+Note that the `backend_options.kubernetes.securityContext` object allows you to set both pod and container level security context options in one object.
+By default, the properties will be set at the pod level. Properties that are only supported on the container level will be set there instead. So, the
+configuration shown above will result in something like the following pod spec:
+
+```yaml
+kind: Pod
+spec:
+  securityContext:
+    runAsUser: 999
+    runAsGroup: 999
+  containers:
+    - name: wp-01hcd83q7be5ymh89k5accn3k6-0-step-0
+      image: alpine
+      securityContext:
+        privileged: true
+  [...]
+```
+
+See the [kubernetes documentation](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/) for more information on using `securityContext`.
+
 ## Tips and tricks
 
 ### CRI-O
 
 CRI-O users currently need to configure the workspace for all workflows in order for them to run correctly. Add the following at the beginning of your configuration:
 
-```yml
+```yaml
 workspace:
   base: '/woodpecker'
   path: '/'

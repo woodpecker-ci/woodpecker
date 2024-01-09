@@ -44,7 +44,7 @@ Keep in mind the name is optional, if not added the steps will be numerated.
 
 Woodpecker gives the ability to skip individual commits by adding `[SKIP CI]` or `[CI SKIP]` to the commit message. Note this is case-insensitive.
 
-```sh
+```bash
 git commit -m "updated README [CI SKIP]"
 ```
 
@@ -67,8 +67,7 @@ The associated commit is checked out with git to a workspace which is mounted to
 - Woodpecker clones the source code in the beginning of the workflow
 - Changes to files are persisted through steps as the same volume is mounted to all steps
 
-```yaml
-# .woodpecker.yml
+```yaml title=".woodpecker.yml"
 steps:
   build:
     image: debian
@@ -139,7 +138,7 @@ Commands of every step are executed serially as if you would enter them into you
 
 There is no magic here. The above commands are converted to a simple shell script. The commands in the above example are roughly converted to the below script:
 
-```sh
+```bash
 #!/bin/sh
 set -e
 
@@ -149,7 +148,7 @@ go test
 
 The above shell script is then executed as the container entrypoint. The below docker command is an (incomplete) example of how the script is executed:
 
-```sh
+```bash
 docker run --entrypoint=build.sh golang
 ```
 
@@ -264,7 +263,7 @@ when:
 
 #### `event`
 
-Available events: `push`, `pull_request`, `tag`, `deployment`, `cron`, `manual`
+Available events: `push`, `pull_request`, `pull_request_closed`, `tag`, `deployment`, `cron`, `manual`
 
 Execute a step if the build event is a `tag`:
 
@@ -407,7 +406,7 @@ when:
 
 Execute a step only if the provided evaluate expression is equal to true. Both built-in [`CI_`](./50-environment.md#built-in-environment-variables) and custom variables can be used inside the expression.
 
-The expression syntax can be found in [the docs](https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md) of the underlying library.
+The expression syntax can be found in [the docs](https://github.com/expr-lang/expr/blob/master/docs/Language-Definition.md) of the underlying library.
 
 Run on pushes to the default branch for the repository `owner/repo`:
 
@@ -444,33 +443,28 @@ when:
   - evaluate: 'SKIP != "true"'
 ```
 
-### `group` - Parallel execution
+### `depends_on`
 
-Woodpecker supports parallel step execution for same-machine fan-in and fan-out. Parallel steps are configured using the `group` attribute. This instructs the agent to execute the named group in parallel.
-
-Example parallel configuration:
+Normally steps of a workflow are executed serially in the order in which they are defined. As soon as you set `depends_on` for a step a [directed acyclic graph](https://en.wikipedia.org/wiki/Directed_acyclic_graph) will be used and all steps of the workflow will be executed in parallel besides the steps that have a dependency set to another step using `depends_on`:
 
 ```diff
  steps:
-   backend:
-+    group: build
+   build: # build will be executed immediately
      image: golang
      commands:
        - go build
-       - go test
-   frontend:
-+    group: build
-     image: node
-     commands:
-       - npm install
-       - npm run test
-       - npm run build
-   publish:
-     image: plugins/docker
-     repo: octocat/hello-world
-```
 
-In the above example, the `frontend` and `backend` steps are executed in parallel. The agent will not execute the `publish` step until the group completes.
+   deploy:
+     image: plugins/docker
+     settings:
+       repo: foo/bar
++    depends_on: [build, test] # deploy will be executed after build and test finished
+
+   test: # test will be executed immediately as no dependencies are set
+     image: golang
+     commands:
+       - go test
+```
 
 ### `volumes`
 
@@ -538,7 +532,7 @@ The base attribute defines a shared base volume available to all steps. This ens
 
 This would be equivalent to the following docker commands:
 
-```sh
+```bash
 docker volume create my-named-volume
 
 docker run --volume=my-named-volume:/go golang:latest

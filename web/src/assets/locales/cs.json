@@ -232,7 +232,6 @@
         "push": "Push",
         "tag": "Tag"
       },
-      "execution_error": "Chyba provedení",
       "exit_code": "Kód ukončení {exitCode}",
       "files": "Změněné soubory ({files})",
       "loading": "Načítání…",

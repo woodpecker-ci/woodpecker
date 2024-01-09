@@ -21,7 +21,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 
 	"github.com/rs/zerolog/log"
 )

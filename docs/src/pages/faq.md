@@ -5,7 +5,7 @@
 Apart from Woodpecker staying free and OpenSource forever, the growing community already introduced some nifty features like:
 
 - [Multiple workflows](/docs/next/usage/workflows)
-- [Conditional step execution on file changes](/docs/usage/pipeline-syntax#path)
+- [Conditional step execution on file changes](/docs/next/usage/workflow-syntax#path)
 - [More features are already in the pipeline :wink:](https://github.com/woodpecker-ci/woodpecker/pulls) ...
 
 ## Why is Woodpecker a fork of Drone version 0.8?
@@ -16,7 +16,7 @@ The Drone CI license was changed after the 0.8 release from Apache 2 to a propri
 
 Woodpecker is having two different kinds of releases: **stable** and **next**.
 
-The **stable** releases (currently version 1.0) are long-term supported (LTS) stable versions. The stable releases are only getting bugfixes.
+The **stable** releases (currently version 2.1) are long-term supported (LTS) stable versions. The stable releases are only getting bugfixes.
 
 The **next** release contains all bugfixes and features from `main` branch. Normally it should be pretty stable, but as its frequently updated, it might contain some bugs from time to time. There are no binaries for this version.
 

@@ -18,7 +18,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/rpc/proto"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc/proto"
 
 	"google.golang.org/grpc"
 )

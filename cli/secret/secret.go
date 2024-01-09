@@ -21,16 +21,14 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
-	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
 // Command exports the secret command.
 var Command = &cli.Command{
 	Name:  "secret",
 	Usage: "manage secrets",
-	Flags: common.GlobalFlags,
 	Subcommands: []*cli.Command{
 		secretCreateCmd,
 		secretDeleteCmd,

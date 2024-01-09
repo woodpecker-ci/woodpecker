@@ -17,8 +17,8 @@ package config
 import (
 	"context"
 
-	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 type Extension interface {

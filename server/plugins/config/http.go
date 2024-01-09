@@ -19,9 +19,9 @@ import (
 	"crypto"
 	"fmt"
 
-	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/plugins/utils"
+	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/utils"
 )
 
 type http struct {

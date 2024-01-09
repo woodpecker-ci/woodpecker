@@ -20,8 +20,7 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
 var logPurgeCmd = &cli.Command{
@@ -29,7 +28,6 @@ var logPurgeCmd = &cli.Command{
 	Usage:     "purge a log",
 	ArgsUsage: "<repo-id|repo-full-name> <pipeline>",
 	Action:    logPurge,
-	Flags:     common.GlobalFlags,
 }
 
 func logPurge(c *cli.Context) (err error) {

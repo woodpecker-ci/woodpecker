@@ -1,7 +1,7 @@
 <template>
   <div v-if="pipeline" class="flex flex-col pt-10 md:pt-0">
     <div
-      class="flex flex-grow flex-col code-box shadow !p-0 !rounded-none md:m-4 md:mt-0 !md:rounded-md overflow-hidden"
+      class="flex flex-grow flex-col code-box shadow !p-0 !rounded-none md:mt-0 !md:rounded-md overflow-hidden"
       @mouseover="showActions = true"
       @mouseleave="showActions = false"
     >
@@ -101,6 +101,7 @@ import '~/style/console.css';
 
 import { useStorage } from '@vueuse/core';
 import { AnsiUp } from 'ansi_up';
+import { decode } from 'js-base64';
 import { debounce } from 'lodash';
 import { computed, inject, nextTick, onMounted, Ref, ref, toRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -178,17 +179,6 @@ function writeLog(line: Partial<LogLine>) {
   });
 }
 
-// SOURCE: https://stackoverflow.com/questions/30106476/using-javascripts-atob-to-decode-base64-doesnt-properly-decode-utf-8-strings
-function b64DecodeUnicode(str: string) {
-  return decodeURIComponent(
-    window
-      .atob(str)
-      .split('')
-      .map((c) => `%${`00${c.charCodeAt(0).toString(16)}`.slice(-2)}`)
-      .join(''),
-  );
-}
-
 function scrollDown() {
   nextTick(() => {
     if (!consoleElement.value) {
@@ -253,7 +243,7 @@ async function download() {
     downloadInProgress.value = false;
   }
   const fileURL = window.URL.createObjectURL(
-    new Blob([logs.map((line) => b64DecodeUnicode(line.data)).join('')], {
+    new Blob([logs.map((line) => decode(line.data)).join('')], {
       type: 'text/plain',
     }),
   );
@@ -296,12 +286,12 @@ async function loadLogs() {
   if (isStepFinished(step.value)) {
     loadedStepSlug.value = stepSlug.value;
     const logs = await apiClient.getLogs(repo.value.id, pipeline.value.number, step.value.id);
-    logs?.forEach((line) => writeLog({ index: line.line, text: b64DecodeUnicode(line.data), time: line.time }));
+    logs?.forEach((line) => writeLog({ index: line.line, text: decode(line.data), time: line.time }));
     flushLogs(false);
   } else if (isStepRunning(step.value)) {
     loadedStepSlug.value = stepSlug.value;
     stream.value = apiClient.streamLogs(repo.value.id, pipeline.value.number, step.value.id, (line) => {
-      writeLog({ index: line.line, text: b64DecodeUnicode(line.data), time: line.time });
+      writeLog({ index: line.line, text: decode(line.data), time: line.time });
       flushLogs(true);
     });
   }

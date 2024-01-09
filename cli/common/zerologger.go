@@ -17,10 +17,10 @@ package common
 import (
 	"github.com/urfave/cli/v2"
 
-	"github.com/woodpecker-ci/woodpecker/cmd/common"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/logger"
 )
 
 func SetupGlobalLogger(c *cli.Context) error {
-	common.SetupGlobalLogger(c, false)
+	logger.SetupGlobalLogger(c, false)
 	return nil
 }

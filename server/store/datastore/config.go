@@ -17,7 +17,7 @@ package datastore
 import (
 	"xorm.io/builder"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 func (s storage) ConfigsForPipeline(pipelineID int64) ([]*model.Config, error) {

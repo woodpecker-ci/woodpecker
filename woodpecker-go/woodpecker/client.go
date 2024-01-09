@@ -586,17 +586,17 @@ func (c *client) AgentTasksList(agentID int64) ([]*Task, error) {
 //
 
 // helper function for making an http GET request.
-func (c *client) get(rawurl string, out interface{}) error {
+func (c *client) get(rawurl string, out any) error {
 	return c.do(rawurl, http.MethodGet, nil, out)
 }
 
 // helper function for making an http POST request.
-func (c *client) post(rawurl string, in, out interface{}) error {
+func (c *client) post(rawurl string, in, out any) error {
 	return c.do(rawurl, http.MethodPost, in, out)
 }
 
 // helper function for making an http PATCH request.
-func (c *client) patch(rawurl string, in, out interface{}) error {
+func (c *client) patch(rawurl string, in, out any) error {
 	return c.do(rawurl, http.MethodPatch, in, out)
 }
 
@@ -606,7 +606,7 @@ func (c *client) delete(rawurl string) error {
 }
 
 // helper function to make an http request
-func (c *client) do(rawurl, method string, in, out interface{}) error {
+func (c *client) do(rawurl, method string, in, out any) error {
 	body, err := c.open(rawurl, method, in)
 	if err != nil {
 		return err
@@ -619,7 +619,7 @@ func (c *client) do(rawurl, method string, in, out interface{}) error {
 }
 
 // helper function to open an http request
-func (c *client) open(rawurl, method string, in interface{}) (io.ReadCloser, error) {
+func (c *client) open(rawurl, method string, in any) (io.ReadCloser, error) {
 	uri, err := url.Parse(rawurl)
 	if err != nil {
 		return nil, err

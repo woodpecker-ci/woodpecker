@@ -21,15 +21,16 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/compiler"
-	"github.com/woodpecker-ci/woodpecker/server"
-	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/store"
+	pipeline_errors "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/compiler"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/pipeline/stepbuilder"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
-func parsePipeline(store store.Store, currentPipeline *model.Pipeline, user *model.User, repo *model.Repo, yamls []*forge_types.FileMeta, envs map[string]string) ([]*pipeline.Item, error) {
+func parsePipeline(store store.Store, currentPipeline *model.Pipeline, user *model.User, repo *model.Repo, yamls []*forge_types.FileMeta, envs map[string]string) ([]*stepbuilder.Item, error) {
 	netrc, err := server.Config.Services.Forge.Netrc(user, repo)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to generate netrc file")
@@ -65,7 +66,7 @@ func parsePipeline(store store.Store, currentPipeline *model.Pipeline, user *mod
 		envs[k] = v
 	}
 
-	b := pipeline.StepBuilder{
+	b := stepbuilder.StepBuilder{
 		Repo:  repo,
 		Curr:  currentPipeline,
 		Last:  last,
@@ -73,7 +74,7 @@ func parsePipeline(store store.Store, currentPipeline *model.Pipeline, user *mod
 		Secs:  secs,
 		Regs:  regs,
 		Envs:  envs,
-		Link:  server.Config.Server.Host,
+		Host:  server.Config.Server.Host,
 		Yamls: yamls,
 		Forge: server.Config.Services.Forge,
 		ProxyOpts: compiler.ProxyOptions{
@@ -82,38 +83,37 @@ func parsePipeline(store store.Store, currentPipeline *model.Pipeline, user *mod
 			HTTPSProxy: server.Config.Pipeline.Proxy.HTTPS,
 		},
 	}
-	pipelineItems, err := b.Build()
-	if err != nil {
-		return nil, err
-	}
-
-	return pipelineItems, nil
+	return b.Build()
 }
 
 func createPipelineItems(c context.Context, store store.Store,
 	currentPipeline *model.Pipeline, user *model.User, repo *model.Repo,
 	yamls []*forge_types.FileMeta, envs map[string]string,
-) (*model.Pipeline, []*pipeline.Item, error) {
+) (*model.Pipeline, []*stepbuilder.Item, error) {
 	pipelineItems, err := parsePipeline(store, currentPipeline, user, repo, yamls, envs)
-	if err != nil {
+	if pipeline_errors.HasBlockingErrors(err) {
 		currentPipeline, uerr := UpdateToStatusError(store, *currentPipeline, err)
 		if uerr != nil {
 			log.Error().Err(uerr).Msgf("Error setting error status of pipeline for %s#%d", repo.FullName, currentPipeline.Number)
 		} else {
 			updatePipelineStatus(c, currentPipeline, repo, user)
 		}
+
 		return currentPipeline, nil, err
+	} else if err != nil {
+		currentPipeline.Errors = pipeline_errors.GetPipelineErrors(err)
+		err = updatePipelinePending(c, store, currentPipeline, repo, user)
 	}
 
 	currentPipeline = setPipelineStepsOnPipeline(currentPipeline, pipelineItems)
 
-	return currentPipeline, pipelineItems, nil
+	return currentPipeline, pipelineItems, err
 }
 
 // setPipelineStepsOnPipeline is the link between pipeline representation in "pipeline package" and server
 // to be specific this func currently is used to convert the pipeline.Item list (crafted by StepBuilder.Build()) into
 // a pipeline that can be stored in the database by the server
-func setPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*pipeline.Item) *model.Pipeline {
+func setPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*stepbuilder.Item) *model.Pipeline {
 	var pidSequence int
 	for _, item := range pipelineItems {
 		if pidSequence < item.Workflow.PID {

@@ -5,15 +5,15 @@
         <span class="text-xl text-wp-text-100">{{
           $t('repo.deploy_pipeline.title', { pipelineId: pipelineNumber })
         }}</span>
-        <InputField :label="$t('repo.deploy_pipeline.enter_target')">
-          <TextField v-model="payload.environment" required />
+        <InputField v-slot="{ id }" :label="$t('repo.deploy_pipeline.enter_target')">
+          <TextField :id="id" v-model="payload.environment" required />
         </InputField>
-        <InputField :label="$t('repo.deploy_pipeline.variables.title')">
+        <InputField v-slot="{ id }" :label="$t('repo.deploy_pipeline.variables.title')">
           <span class="text-sm text-wp-text-alt-100 mb-2">{{ $t('repo.deploy_pipeline.variables.desc') }}</span>
           <div class="flex flex-col gap-2">
             <div v-for="(value, name) in payload.variables" :key="name" class="flex gap-4">
-              <TextField :model-value="name" disabled />
-              <TextField :model-value="value" disabled />
+              <TextField :id="id" :model-value="name" disabled />
+              <TextField :id="id" :model-value="value" disabled />
               <div class="w-34 flex-shrink-0">
                 <Button color="red" class="ml-auto" @click="deleteVar(name)">
                   <i-la-times />
@@ -22,11 +22,13 @@
             </div>
             <form class="flex gap-4" @submit.prevent="addPipelineVariable">
               <TextField
+                :id="id"
                 v-model="newPipelineVariable.name"
                 :placeholder="$t('repo.deploy_pipeline.variables.name')"
                 required
               />
               <TextField
+                :id="id"
                 v-model="newPipelineVariable.value"
                 :placeholder="$t('repo.deploy_pipeline.variables.value')"
                 required

@@ -34,26 +34,27 @@ import (
 	"github.com/urfave/cli/v2"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/cache"
-	"github.com/woodpecker-ci/woodpecker/server/forge"
-	"github.com/woodpecker-ci/woodpecker/server/forge/bitbucket"
-	"github.com/woodpecker-ci/woodpecker/server/forge/gitea"
-	"github.com/woodpecker-ci/woodpecker/server/forge/github"
-	"github.com/woodpecker-ci/woodpecker/server/forge/gitlab"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/plugins/environments"
-	"github.com/woodpecker-ci/woodpecker/server/plugins/registry"
-	"github.com/woodpecker-ci/woodpecker/server/plugins/secrets"
-	"github.com/woodpecker-ci/woodpecker/server/queue"
-	"github.com/woodpecker-ci/woodpecker/server/store"
-	"github.com/woodpecker-ci/woodpecker/server/store/datastore"
-	"github.com/woodpecker-ci/woodpecker/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/cache"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/bitbucket"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/gitea"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/github"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/gitlab"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/config"
+	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/environments"
+	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/registry"
+	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/secrets"
+	"go.woodpecker-ci.org/woodpecker/v2/server/queue"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store/datastore"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/addon"
+	addonTypes "go.woodpecker-ci.org/woodpecker/v2/shared/addon/types"
 )
 
 func setupStore(c *cli.Context) (store.Store, error) {
-	// TODO: find a better way than global var to pass down to allow long migrations
-	server.Config.Server.Migrations.AllowLong = c.Bool("migrations-allow-long")
 	datasource := c.String("datasource")
 	driver := c.String("driver")
 	xorm := store.XORM{
@@ -90,7 +91,7 @@ func setupStore(c *cli.Context) (store.Store, error) {
 		log.Fatal().Err(err).Msg("could not open datastore")
 	}
 
-	if err := store.Migrate(); err != nil {
+	if err := store.Migrate(c.Bool("migrations-allow-long")); err != nil {
 		log.Fatal().Err(err).Msg("could not migrate datastore")
 	}
 
@@ -110,30 +111,62 @@ func setupQueue(c *cli.Context, s store.Store) queue.Queue {
 	return queue.WithTaskStore(queue.New(c.Context), s)
 }
 
-func setupSecretService(c *cli.Context, s model.SecretStore) model.SecretService {
-	return secrets.New(c.Context, s)
+func setupSecretService(c *cli.Context, s model.SecretStore) (model.SecretService, error) {
+	addonService, err := addon.Load[model.SecretService](c.StringSlice("addons"), addonTypes.TypeSecretService)
+	if err != nil {
+		return nil, err
+	}
+	if addonService != nil {
+		return addonService.Value, nil
+	}
+
+	return secrets.New(c.Context, s), nil
 }
 
-func setupRegistryService(c *cli.Context, s store.Store) model.RegistryService {
+func setupRegistryService(c *cli.Context, s store.Store) (model.RegistryService, error) {
+	addonService, err := addon.Load[model.RegistryService](c.StringSlice("addons"), addonTypes.TypeRegistryService)
+	if err != nil {
+		return nil, err
+	}
+	if addonService != nil {
+		return addonService.Value, nil
+	}
+
 	if c.String("docker-config") != "" {
 		return registry.Combined(
 			registry.New(s),
 			registry.Filesystem(c.String("docker-config")),
-		)
+		), nil
 	}
-	return registry.New(s)
+	return registry.New(s), nil
 }
 
-func setupEnvironService(c *cli.Context, _ store.Store) model.EnvironService {
-	return environments.Parse(c.StringSlice("environment"))
+func setupEnvironService(c *cli.Context, _ store.Store) (model.EnvironService, error) {
+	addonService, err := addon.Load[model.EnvironService](c.StringSlice("addons"), addonTypes.TypeEnvironmentService)
+	if err != nil {
+		return nil, err
+	}
+	if addonService != nil {
+		return addonService.Value, nil
+	}
+
+	return environments.Parse(c.StringSlice("environment")), nil
 }
 
 func setupMembershipService(_ *cli.Context, r forge.Forge) cache.MembershipService {
 	return cache.NewMembershipService(r)
 }
 
-// setupForge helper function to setup the forge from the CLI arguments.
+// setupForge helper function to set up the forge from the CLI arguments.
 func setupForge(c *cli.Context) (forge.Forge, error) {
+	addonForge, err := addon.Load[forge.Forge](c.StringSlice("addons"), addonTypes.TypeForge)
+	if err != nil {
+		return nil, err
+	}
+	if addonForge != nil {
+		return addonForge.Value, nil
+	}
+
 	switch {
 	case c.Bool("github"):
 		return setupGitHub(c)
@@ -289,4 +322,20 @@ func setupSignatureKeys(_store store.Store) (crypto.PrivateKey, crypto.PublicKey
 	}
 	privateKey := ed25519.PrivateKey(privKeyStr)
 	return privateKey, privateKey.Public()
+}
+
+func setupConfigService(c *cli.Context) (config.Extension, error) {
+	addonExt, err := addon.Load[config.Extension](c.StringSlice("addons"), addonTypes.TypeConfigService)
+	if err != nil {
+		return nil, err
+	}
+	if addonExt != nil {
+		return addonExt.Value, nil
+	}
+
+	if endpoint := c.String("config-service-endpoint"); endpoint != "" {
+		return config.NewHTTP(endpoint, server.Config.Services.SignaturePrivateKey), nil
+	}
+
+	return nil, nil
 }

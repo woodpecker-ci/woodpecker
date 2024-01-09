@@ -37,8 +37,8 @@
               task.status === 'pending'
                 ? $t('admin.settings.queue.task_pending')
                 : task.status === 'running'
-                ? $t('admin.settings.queue.task_running')
-                : $t('admin.settings.queue.task_waiting_on_deps')
+                  ? $t('admin.settings.queue.task_running')
+                  : $t('admin.settings.queue.task_waiting_on_deps')
             "
           >
             <Icon
@@ -46,8 +46,8 @@
                 task.status === 'pending'
                   ? 'status-pending'
                   : task.status === 'running'
-                  ? 'status-running'
-                  : 'status-declined'
+                    ? 'status-running'
+                    : 'status-declined'
               "
               :class="{
                 'text-wp-state-error-100': task.status === 'waiting_on_deps',

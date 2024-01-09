@@ -23,11 +23,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
-	"github.com/woodpecker-ci/woodpecker/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/store"
-	"github.com/woodpecker-ci/woodpecker/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
 )
 
 func Repo(c *gin.Context) *model.Repo {

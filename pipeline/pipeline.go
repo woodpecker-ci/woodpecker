@@ -21,14 +21,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/google/uuid"
+	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/sync/errgroup"
 
-	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
-	"github.com/woodpecker-ci/woodpecker/pipeline/multipart"
+	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/multipart"
 )
 
 // TODO: move runtime into "runtime" subpackage
@@ -55,7 +55,7 @@ type (
 type Runtime struct {
 	err     error
 	spec    *backend.Config
-	engine  backend.Engine
+	engine  backend.Backend
 	started int64
 
 	ctx    context.Context
@@ -74,7 +74,7 @@ func New(spec *backend.Config, opts ...Option) *Runtime {
 	r.Description = map[string]string{}
 	r.spec = spec
 	r.ctx = context.Background()
-	r.taskUUID = uuid.New().String()
+	r.taskUUID = ulid.Make().String()
 	for _, opts := range opts {
 		opts(r)
 	}
@@ -283,12 +283,12 @@ func (r *Runtime) exec(step *backend.Step) (*backend.State, error) {
 
 	if waitState.OOMKilled {
 		return waitState, &OomError{
-			Name: step.Name,
+			UUID: step.UUID,
 			Code: waitState.ExitCode,
 		}
 	} else if waitState.ExitCode != 0 {
 		return waitState, &ExitError{
-			Name: step.Name,
+			UUID: step.UUID,
 			Code: waitState.ExitCode,
 		}
 	}

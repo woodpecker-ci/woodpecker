@@ -25,7 +25,7 @@ import (
 type StringOrInt int64
 
 // UnmarshalYAML implements the Unmarshaler interface.
-func (s *StringOrInt) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (s *StringOrInt) UnmarshalYAML(unmarshal func(any) error) error {
 	var intType int64
 	if err := unmarshal(&intType); err == nil {
 		*s = StringOrInt(intType)
@@ -50,7 +50,7 @@ func (s *StringOrInt) UnmarshalYAML(unmarshal func(interface{}) error) error {
 type MemStringOrInt int64
 
 // UnmarshalYAML implements the Unmarshaler interface.
-func (s *MemStringOrInt) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (s *MemStringOrInt) UnmarshalYAML(unmarshal func(any) error) error {
 	var intType int64
 	if err := unmarshal(&intType); err == nil {
 		*s = MemStringOrInt(intType)

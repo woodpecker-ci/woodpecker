@@ -22,8 +22,8 @@ import (
 
 	"github.com/docker/docker/api/types/container"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/common"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/common"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
 
 // returns a container configuration.
@@ -86,8 +86,12 @@ func toHostConfig(step *types.Step) *container.HostConfig {
 	if len(step.DNSSearch) != 0 {
 		config.DNSSearch = step.DNSSearch
 	}
+	extraHosts := []string{}
+	for _, hostAlias := range step.ExtraHosts {
+		extraHosts = append(extraHosts, hostAlias.Name+":"+hostAlias.IP)
+	}
 	if len(step.ExtraHosts) != 0 {
-		config.ExtraHosts = step.ExtraHosts
+		config.ExtraHosts = extraHosts
 	}
 	if len(step.Devices) != 0 {
 		config.Devices = toDev(step.Devices)

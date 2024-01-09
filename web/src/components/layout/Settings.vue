@@ -7,7 +7,7 @@
           {{ desc }}
           <DocsLink v-if="docsUrl" :topic="title" :url="docsUrl" />
         </p>
-        <Warning v-if="warning" class="mt-1" :text="warning" />
+        <Warning v-if="warning" class="text-sm mt-1" :text="warning" />
       </div>
 
       <div class="ml-auto">

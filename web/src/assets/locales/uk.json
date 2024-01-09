@@ -122,7 +122,6 @@
         "push": "Натисни",
         "tag": "Тег"
       },
-      "execution_error": "Помилка виконання",
       "exit_code": "код виходу {exitCode}",
       "files": "Змінені файли ({files})",
       "loading": "Загрузка…",

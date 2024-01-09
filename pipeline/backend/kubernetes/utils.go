@@ -78,3 +78,15 @@ func getClientInsideOfCluster() (kubernetes.Interface, error) {
 
 	return kubernetes.NewForConfig(config)
 }
+
+func newBool(val bool) *bool {
+	ptr := new(bool)
+	*ptr = val
+	return ptr
+}
+
+func newInt64(val int64) *int64 {
+	ptr := new(int64)
+	*ptr = val
+	return ptr
+}

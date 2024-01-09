@@ -65,7 +65,7 @@ func (manager *JWTManager) Verify(accessToken string) (*AgentTokenClaims, error)
 	token, err := jwt.ParseWithClaims(
 		accessToken,
 		&AgentTokenClaims{},
-		func(token *jwt.Token) (interface{}, error) {
+		func(token *jwt.Token) (any, error) {
 			_, ok := token.Method.(*jwt.SigningMethodHMAC)
 			if !ok {
 				return nil, errors.New("unexpected token signing method")

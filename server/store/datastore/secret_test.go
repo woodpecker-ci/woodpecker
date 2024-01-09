@@ -20,7 +20,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 func TestSecretFind(t *testing.T) {
@@ -253,7 +253,7 @@ func TestOrgSecretList(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, list, 1)
 
-	assert.True(t, list[0].Organization())
+	assert.True(t, list[0].IsOrganization())
 }
 
 func TestGlobalSecretFind(t *testing.T) {
@@ -306,5 +306,5 @@ func TestGlobalSecretList(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, list, 1)
 
-	assert.True(t, list[0].Global())
+	assert.True(t, list[0].IsGlobal())
 }

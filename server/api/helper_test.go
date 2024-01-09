@@ -7,7 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/woodpecker-ci/woodpecker/server/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v2/server/pipeline"
 )
 
 func TestHandlePipelineError(t *testing.T) {

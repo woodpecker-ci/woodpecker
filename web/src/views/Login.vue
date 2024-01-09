@@ -1,12 +1,7 @@
 <template>
   <main class="flex flex-col w-full h-full justify-center items-center">
     <!-- TODO: Should use vue notifications. -->
-    <div
-      v-if="errorMessage"
-      class="bg-wp-control-error-100 border-l-6 border-l-wp-control-error-300 text-white p-4 rounded-md"
-    >
-      {{ errorMessage }}
-    </div>
+    <Error v-if="errorMessage" text-only :text="errorMessage" class="w-full md:w-3xl" />
 
     <div
       class="flex flex-col w-full overflow-hidden bg-wp-background-100 shadow border border-wp-background-400 dark:bg-wp-background-200 md:m-8 md:rounded-md md:flex-row md:w-3xl md:h-sm"

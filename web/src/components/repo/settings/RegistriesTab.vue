@@ -41,9 +41,10 @@
 
     <div v-else class="space-y-4">
       <form @submit.prevent="createRegistry">
-        <InputField :label="$t('repo.settings.registries.address.address')">
+        <InputField v-slot="{ id }" :label="$t('repo.settings.registries.address.address')">
           <!-- TODO: check input field Address is a valid address -->
           <TextField
+            :id="id"
             v-model="selectedRegistry.address"
             :placeholder="$t('repo.settings.registries.address.placeholder')"
             required
@@ -51,12 +52,12 @@
           />
         </InputField>
 
-        <InputField :label="$t('username')">
-          <TextField v-model="selectedRegistry.username" :placeholder="$t('username')" required />
+        <InputField v-slot="{ id }" :label="$t('username')">
+          <TextField :id="id" v-model="selectedRegistry.username" :placeholder="$t('username')" required />
         </InputField>
 
-        <InputField :label="$t('password')">
-          <TextField v-model="selectedRegistry.password" :placeholder="$t('password')" required />
+        <InputField v-slot="{ id }" :label="$t('password')">
+          <TextField :id="id" v-model="selectedRegistry.password" :placeholder="$t('password')" required />
         </InputField>
 
         <div class="flex gap-2">

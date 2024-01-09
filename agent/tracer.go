@@ -22,8 +22,8 @@ import (
 
 	"github.com/rs/zerolog"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline"
-	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
 )
 
 func (r *Runner) createTracer(ctxmeta context.Context, logger zerolog.Logger, workflow *rpc.Workflow) pipeline.TraceFunc {

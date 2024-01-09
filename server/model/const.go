@@ -23,12 +23,13 @@ import (
 type WebhookEvent string //	@name WebhookEvent
 
 const (
-	EventPush   WebhookEvent = "push"
-	EventPull   WebhookEvent = "pull_request"
-	EventTag    WebhookEvent = "tag"
-	EventDeploy WebhookEvent = "deployment"
-	EventCron   WebhookEvent = "cron"
-	EventManual WebhookEvent = "manual"
+	EventPush       WebhookEvent = "push"
+	EventPull       WebhookEvent = "pull_request"
+	EventPullClosed WebhookEvent = "pull_request_closed"
+	EventTag        WebhookEvent = "tag"
+	EventDeploy     WebhookEvent = "deployment"
+	EventCron       WebhookEvent = "cron"
+	EventManual     WebhookEvent = "manual"
 )
 
 type WebhookEventList []WebhookEvent
@@ -52,15 +53,16 @@ func ValidateWebhookEvent(s WebhookEvent) error {
 type StatusValue string //	@name StatusValue
 
 const (
-	StatusSkipped  StatusValue = "skipped"
-	StatusPending  StatusValue = "pending"
-	StatusRunning  StatusValue = "running"
-	StatusSuccess  StatusValue = "success"
-	StatusFailure  StatusValue = "failure"
-	StatusKilled   StatusValue = "killed"
-	StatusError    StatusValue = "error"
-	StatusBlocked  StatusValue = "blocked"
-	StatusDeclined StatusValue = "declined"
+	StatusSkipped  StatusValue = "skipped"  // skipped as another step failed
+	StatusPending  StatusValue = "pending"  // pending to be executed
+	StatusRunning  StatusValue = "running"  // currently running
+	StatusSuccess  StatusValue = "success"  // successfully finished
+	StatusFailure  StatusValue = "failure"  // failed to finish (exit code != 0)
+	StatusKilled   StatusValue = "killed"   // killed by user
+	StatusError    StatusValue = "error"    // error with the config / while parsing / some other system problem
+	StatusBlocked  StatusValue = "blocked"  // waiting for approval
+	StatusDeclined StatusValue = "declined" // blocked and declined
+	StatusCreated  StatusValue = "created"  // created / internal use only
 )
 
 // SCMKind represent different version control systems

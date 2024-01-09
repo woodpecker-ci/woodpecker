@@ -211,7 +211,6 @@
         "push": "Push",
         "tag": "Tag"
       },
-      "execution_error": "Błąd wykonania",
       "exit_code": "kod wyjścia {exitCode}",
       "files": "Zmodyfikowane pliki ({files})",
       "loading": "Ładowanie…",

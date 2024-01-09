@@ -19,12 +19,12 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
+	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
 var pipelineCreateCmd = &cli.Command{
@@ -32,7 +32,7 @@ var pipelineCreateCmd = &cli.Command{
 	Usage:     "create new pipeline",
 	ArgsUsage: "<repo-id|repo-full-name>",
 	Action:    pipelineCreate,
-	Flags: append(common.GlobalFlags,
+	Flags: []cli.Flag{
 		common.FormatFlag(tmplPipelineList),
 		&cli.StringFlag{
 			Name:     "branch",
@@ -43,7 +43,7 @@ var pipelineCreateCmd = &cli.Command{
 			Name:  "var",
 			Usage: "key=value",
 		},
-	),
+	},
 }
 
 func pipelineCreate(c *cli.Context) error {

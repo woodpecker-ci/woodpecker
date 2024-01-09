@@ -18,9 +18,9 @@ import (
 	"encoding/json"
 	"strconv"
 
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/pubsub"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/pubsub"
 )
 
 // publishToTopic publishes message to UI clients
