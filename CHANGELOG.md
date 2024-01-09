@@ -8,6 +8,7 @@
 
 ### 📈 Enhancement
 
+- Make service icon rotate [[#3149](https://github.com/woodpecker-ci/woodpecker/pull/3149)]
 - Add step name as label to docker containers [[#3137](https://github.com/woodpecker-ci/woodpecker/pull/3137)]
 - Use js-base64 on pipeline log page [[#3146](https://github.com/woodpecker-ci/woodpecker/pull/3146)]
 - Flexible image pull secret reference [[#3016](https://github.com/woodpecker-ci/woodpecker/pull/3016)]
