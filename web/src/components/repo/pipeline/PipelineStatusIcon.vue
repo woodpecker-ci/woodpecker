@@ -11,6 +11,7 @@
         'text-wp-state-ok-100': pipelineStatusColors[status] === 'green',
         'text-wp-state-info-100': pipelineStatusColors[status] === 'blue',
         'text-wp-state-warn-100': pipelineStatusColors[status] === 'orange',
+        'rotate-animation': service && pipelineStatusColors[status] === 'blue',
       }"
     />
   </div>
