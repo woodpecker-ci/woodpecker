@@ -127,8 +127,8 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 		envs := strings.SplitN(env, "=", 2)
 		pipelineEnv[envs[0]] = envs[1]
 		if oldVar, exists := environ[envs[0]]; exists {
-			// let override existing values but print a warning
-			log.Warn().Msgf("environment variable '%s' had '%s' but got manually overwritten", envs[0], oldVar)
+			// override existing values, but print a warning
+			log.Warn().Msgf("environment variable '%s' had value '%s', but got overwritten", envs[0], oldVar)
 		}
 		environ[envs[0]] = envs[1]
 	}
