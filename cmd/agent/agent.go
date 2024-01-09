@@ -39,18 +39,18 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v2/agent"
 	agentRpc "go.woodpecker-ci.org/woodpecker/v2/agent/rpc"
-	"go.woodpecker-ci.org/woodpecker/v2/cmd/common"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/addon"
 	addonTypes "go.woodpecker-ci.org/woodpecker/v2/shared/addon/types"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/logger"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 	"go.woodpecker-ci.org/woodpecker/v2/version"
 )
 
 func run(c *cli.Context) error {
-	common.SetupGlobalLogger(c, true)
+	logger.SetupGlobalLogger(c, true)
 
 	agentConfigPath := c.String("agent-config")
 	hostname := c.String("hostname")
@@ -271,6 +271,8 @@ func getBackendEngine(backendCtx context.Context, backendName string, addons []s
 }
 
 func runWithRetry(context *cli.Context) error {
+	initHealth()
+
 	retryCount := context.Int("connect-retry-count")
 	retryDelay := context.Duration("connect-retry-delay")
 	var err error

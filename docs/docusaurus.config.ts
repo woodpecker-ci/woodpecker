@@ -57,6 +57,7 @@ const config: Config = {
           label: 'API',
         },
         { to: 'blog', label: 'Blog', position: 'left' },
+        { to: 'cookbook', label: 'Cookbook', position: 'left' },
         {
           type: 'docsVersionDropdown',
           position: 'right',
@@ -112,6 +113,10 @@ const config: Config = {
             {
               label: 'Mastodon',
               href: 'https://floss.social/@WoodpeckerCI',
+            },
+            {
+              label: 'X',
+              href: 'https://twitter.com/woodpeckerci',
             },
           ],
         },
@@ -192,6 +197,21 @@ const config: Config = {
         };
       },
     }),
+    [
+      '@docusaurus/plugin-content-blog',
+      {
+        id: 'cookbook-blog',
+        /**
+         * URL route for the blog section of your site.
+         * *DO NOT* include a trailing slash.
+         */
+        routeBasePath: 'cookbook',
+        /**
+         * Path to data on filesystem relative to site dir.
+         */
+        path: './cookbook',
+      },
+    ],
   ],
   themes: [
     path.resolve(__dirname, 'plugins', 'woodpecker-plugins', 'dist'),
@@ -210,14 +230,18 @@ const config: Config = {
           sidebarPath: require.resolve('./sidebars.js'),
           editUrl: 'https://github.com/woodpecker-ci/woodpecker/edit/main/docs/',
           includeCurrentVersion: true,
-          lastVersion: '2.0',
+          lastVersion: '2.1',
           versions: {
             current: {
               label: 'Next',
               banner: 'unreleased',
             },
+            '2.1': {
+              label: '2.1.x',
+            },
             '2.0': {
               label: '2.0.x',
+              banner: 'unmaintained',
             },
             '1.0': {
               label: '1.0.x',

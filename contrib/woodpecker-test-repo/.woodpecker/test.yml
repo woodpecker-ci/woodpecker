@@ -1,4 +1,3 @@
-version: 1
 steps:
   test_1:
     image: 'alpine'

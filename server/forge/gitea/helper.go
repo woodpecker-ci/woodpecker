@@ -49,6 +49,7 @@ func toRepo(from *gitea.Repository) *model.Repo {
 		CloneSSH:      from.SSHURL,
 		Branch:        from.DefaultBranch,
 		Perm:          toPerm(from.Permissions),
+		PREnabled:     from.HasPullRequests,
 	}
 }
 
@@ -147,8 +148,14 @@ func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 		hook.Repo.HTMLURL,
 		fixMalformedAvatar(hook.PullRequest.Poster.AvatarURL),
 	)
+
+	event := model.EventPull
+	if hook.Action == actionClose {
+		event = model.EventPullClosed
+	}
+
 	pipeline := &model.Pipeline{
-		Event:    model.EventPull,
+		Event:    event,
 		Commit:   hook.PullRequest.Head.Sha,
 		ForgeURL: hook.PullRequest.URL,
 		Ref:      fmt.Sprintf("refs/pull/%d/head", hook.Number),
@@ -164,6 +171,7 @@ func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 		),
 		PullRequestLabels: convertLabels(hook.PullRequest.Labels),
 	}
+
 	return pipeline
 }
 

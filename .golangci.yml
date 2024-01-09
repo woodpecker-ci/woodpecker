@@ -16,6 +16,92 @@ linters-settings:
       - ^log.Fatal().*$
   errorlint:
     errorf-multi: true
+  depguard:
+    rules:
+      pipeline:
+        list-mode: lax
+        files:
+          - '**/pipeline/**/*.go'
+          - '**/pipeline/*.go'
+          - '!**/cli/pipeline/*.go'
+          - '!**/cli/pipeline/**/*.go'
+          - '!**/server/pipeline/*.go'
+          - '!**/server/pipeline/**/*.go'
+        deny:
+          - pkg: 'go.woodpecker-ci.org/woodpecker/v2/agent'
+          - pkg: 'go.woodpecker-ci.org/woodpecker/v2/cli'
+          - pkg: 'go.woodpecker-ci.org/woodpecker/v2/cmd'
+          - pkg: 'go.woodpecker-ci.org/woodpecker/v2/server'
+          - pkg: 'go.woodpecker-ci.org/woodpecker/v2/web'
+      shared:
+        list-mode: lax
+        files:
+          - '**/shared/**/*.go'
+          - '**/shared/*.go'
+          - '!**/pipeline/shared/*.go'
+          - '!**/pipeline/shared/**/*.go'
+        deny:
+          - pkg: 'go.woodpecker-ci.org/woodpecker/v2/agent'
+          - pkg: 'go.woodpecker-ci.org/woodpecker/v2/cli'
+          - pkg: 'go.woodpecker-ci.org/woodpecker/v2/cmd'
+          - pkg: 'go.woodpecker-ci.org/woodpecker/v2/pipeline'
+          - pkg: 'go.woodpecker-ci.org/woodpecker/v2/server'
+          - pkg: 'go.woodpecker-ci.org/woodpecker/v2/web'
+      woodpecker-go:
+        list-mode: lax
+        files:
+          - '**/woodpecker-go/woodpecker/**/*.go'
+          - '**/woodpecker-go/woodpecker/*.go'
+        deny:
+          - pkg: 'go.woodpecker-ci.org/woodpecker/v2/agent'
+          - pkg: 'go.woodpecker-ci.org/woodpecker/v2/cli'
+          - pkg: 'go.woodpecker-ci.org/woodpecker/v2/cmd'
+          - pkg: 'go.woodpecker-ci.org/woodpecker/v2/pipeline'
+          - pkg: 'go.woodpecker-ci.org/woodpecker/v2/server'
+          - pkg: 'go.woodpecker-ci.org/woodpecker/v2/shared'
+          - pkg: 'go.woodpecker-ci.org/woodpecker/v2/web'
+      agent:
+        list-mode: lax
+        files:
+          - '**/agent/**/*.go'
+          - '**/agent/*.go'
+          - '**/cmd/agent/**/*.go'
+          - '**/cmd/agent/*.go'
+        deny:
+          - pkg: 'go.woodpecker-ci.org/woodpecker/v2/cli'
+          - pkg: 'go.woodpecker-ci.org/woodpecker/v2/cmd/cli'
+          - pkg: 'go.woodpecker-ci.org/woodpecker/v2/cmd/server'
+          - pkg: 'go.woodpecker-ci.org/woodpecker/v2/server'
+          - pkg: 'go.woodpecker-ci.org/woodpecker/v2/web'
+          - pkg: 'go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker'
+      cli:
+        list-mode: lax
+        files:
+          - '**/cli/**/*.go'
+          - '**/cli/*.go'
+          - '**/cmd/cli/**/*.go'
+          - '**/cmd/cli/*.go'
+        deny:
+          - pkg: 'go.woodpecker-ci.org/woodpecker/v2/agent'
+          - pkg: 'go.woodpecker-ci.org/woodpecker/v2/server'
+          - pkg: 'go.woodpecker-ci.org/woodpecker/v2/cmd/agent'
+          - pkg: 'go.woodpecker-ci.org/woodpecker/v2/cmd/server'
+          - pkg: 'go.woodpecker-ci.org/woodpecker/v2/web'
+      server:
+        list-mode: lax
+        files:
+          - '**/server/**/*.go'
+          - '**/server/*.go'
+          - '**/cmd/server/**/*.go'
+          - '**/cmd/server/*.go'
+          - '**/web/**/*.go'
+          - '**/web/*.go'
+        deny:
+          - pkg: 'go.woodpecker-ci.org/woodpecker/v2/agent'
+          - pkg: 'go.woodpecker-ci.org/woodpecker/v2/cli'
+          - pkg: 'go.woodpecker-ci.org/woodpecker/v2/cmd/agent'
+          - pkg: 'go.woodpecker-ci.org/woodpecker/v2/cmd/cli'
+          - pkg: 'go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker'
   gci:
     sections:
       - standard
@@ -38,53 +124,52 @@ linters-settings:
 linters:
   disable-all: true
   enable:
-    - bidichk
-    - errcheck
-    - gofmt
-    - goimports
-    - gosimple
-    - govet
-    - ineffassign
-    - misspell
-    - revive
-    - staticcheck
-    - typecheck
-    - unused
-    - whitespace
-    - gofumpt
-    - errorlint
-    - forbidigo
-    - zerologlint
     - asciicheck
+    - bidichk
     - bodyclose
     - contextcheck
+    - depguard
     - dogsled
     - durationcheck
+    - errcheck
     - errchkjson
+    - errorlint
+    - forbidigo
     - forcetypeassert
-    # - gci
     - gochecknoinits
     - goconst
     - gocritic
+    - gofmt
+    - gofumpt
     - goheader
+    - goimports
     - gomnd
     - gomoddirectives
     - gomodguard
     - goprintffuncname
+    - gosimple
+    - govet
     - importas
+    - ineffassign
     - makezero
+    - misspell
     - nolintlint
+    - revive
     - rowserrcheck
     - sqlclosecheck
+    - staticcheck
     - stylecheck
     - tenv
+    - typecheck
     - unconvert
     - unparam
+    - unused
     - wastedassign
     - whitespace
+    - zerologlint
 
 run:
-  timeout: 5m
+  timeout: 15m
 
 issues:
   exclude-rules:
@@ -98,8 +183,9 @@ issues:
     - path: 'cmd/*|cli/*'
       linters:
         - forbidigo
+
     # allow some setup functions to use log.Fatal()
-    - path: 'server/web/web.go|server/plugins/encryption/tink_keyset_watcher.go'
+    - path: 'server/web/web.go|server/plugins/encryption/tink_keyset_watcher.go|shared/logger/logger.go'
       linters:
         - forbidigo
 

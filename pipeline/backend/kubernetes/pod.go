@@ -36,17 +36,17 @@ const (
 
 func mkPod(namespace, name, image, workDir, goos, serviceAccountName string,
 	pool, privileged bool,
-	commands, vols, extraHosts []string,
+	commands, vols, pullSecretNames []string,
 	labels, annotations, env, nodeSelector map[string]string,
-	tolerations []types.Toleration, resources types.Resources,
+	extraHosts []types.HostAlias, tolerations []types.Toleration, resources types.Resources,
 	securityContext *types.SecurityContext, securityContextConfig SecurityContextConfig,
 ) (*v1.Pod, error) {
 	var err error
 
 	meta := podMeta(name, namespace, labels, annotations)
 
-	spec, err := podSpec(serviceAccountName, vols, extraHosts, env,
-		nodeSelector, tolerations, securityContext, securityContextConfig)
+	spec, err := podSpec(serviceAccountName, vols, pullSecretNames, env, nodeSelector, extraHosts, tolerations,
+		securityContext, securityContextConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -64,6 +64,13 @@ func mkPod(namespace, name, image, workDir, goos, serviceAccountName string,
 	}
 
 	return pod, nil
+}
+
+func stepToPodName(step *types.Step) (name string, err error) {
+	if step.Type == types.StepTypeService {
+		return serviceName(step)
+	}
+	return podName(step)
 }
 
 func podName(step *types.Step) (string, error) {
@@ -86,14 +93,15 @@ func podMeta(name, namespace string, labels, annotations map[string]string) meta
 	return meta
 }
 
-func podSpec(serviceAccountName string, vols, extraHosts []string, env, backendNodeSelector map[string]string, backendTolerations []types.Toleration,
+func podSpec(serviceAccountName string, vols, pullSecretNames []string, env, backendNodeSelector map[string]string,
+	extraHosts []types.HostAlias, backendTolerations []types.Toleration,
 	securityContext *types.SecurityContext, securityContextConfig SecurityContextConfig,
 ) (v1.PodSpec, error) {
 	var err error
 	spec := v1.PodSpec{
 		RestartPolicy:      v1.RestartPolicyNever,
 		ServiceAccountName: serviceAccountName,
-		ImagePullSecrets:   []v1.LocalObjectReference{{Name: "regcred"}},
+		ImagePullSecrets:   imagePullSecretsReferences(pullSecretNames),
 	}
 
 	spec.HostAliases = hostAliases(extraHosts)
@@ -195,7 +203,7 @@ func volumeMount(name, path string) v1.VolumeMount {
 }
 
 // Here is the service IPs (placed in /etc/hosts in the Pod)
-func hostAliases(extraHosts []string) []v1.HostAlias {
+func hostAliases(extraHosts []types.HostAlias) []v1.HostAlias {
 	hostAliases := []v1.HostAlias{}
 	for _, extraHost := range extraHosts {
 		hostAlias := hostAlias(extraHost)
@@ -204,11 +212,26 @@ func hostAliases(extraHosts []string) []v1.HostAlias {
 	return hostAliases
 }
 
-func hostAlias(extraHost string) v1.HostAlias {
-	host := strings.Split(extraHost, ":")
+func hostAlias(extraHost types.HostAlias) v1.HostAlias {
 	return v1.HostAlias{
-		IP:        host[1],
-		Hostnames: []string{host[0]},
+		IP:        extraHost.IP,
+		Hostnames: []string{extraHost.Name},
+	}
+}
+
+func imagePullSecretsReferences(imagePullSecretNames []string) []v1.LocalObjectReference {
+	log.Trace().Msgf("Using the image pull secrets: %v", imagePullSecretNames)
+
+	secretReferences := make([]v1.LocalObjectReference, len(imagePullSecretNames))
+	for i, imagePullSecretName := range imagePullSecretNames {
+		secretReferences[i] = imagePullSecretsReference(imagePullSecretName)
+	}
+	return secretReferences
+}
+
+func imagePullSecretsReference(imagePullSecretName string) v1.LocalObjectReference {
+	return v1.LocalObjectReference{
+		Name: imagePullSecretName,
 	}
 }
 
@@ -358,9 +381,9 @@ func startPod(ctx context.Context, engine *kube, step *types.Step) (*v1.Pod, err
 
 	pod, err := mkPod(engine.config.Namespace, podName, step.Image, step.WorkingDir, engine.goos, step.BackendOptions.Kubernetes.ServiceAccountName,
 		step.Pull, step.Privileged,
-		step.Commands, step.Volumes, step.ExtraHosts,
+		step.Commands, step.Volumes, engine.config.ImagePullSecretNames,
 		engine.config.PodLabels, engine.config.PodAnnotations, step.Environment, step.BackendOptions.Kubernetes.NodeSelector,
-		step.BackendOptions.Kubernetes.Tolerations, step.BackendOptions.Kubernetes.Resources, step.BackendOptions.Kubernetes.SecurityContext, engine.config.SecurityContext)
+		step.ExtraHosts, step.BackendOptions.Kubernetes.Tolerations, step.BackendOptions.Kubernetes.Resources, step.BackendOptions.Kubernetes.SecurityContext, engine.config.SecurityContext)
 	if err != nil {
 		return nil, err
 	}

@@ -103,29 +103,38 @@ func (s *RPC) Update(_ context.Context, id string, state rpc.State) error {
 
 	workflow, err := s.store.WorkflowLoad(workflowID)
 	if err != nil {
-		log.Error().Msgf("error: rpc.update: cannot find workflow with id %d: %s", workflowID, err)
+		log.Error().Err(err).Msgf("rpc.update: cannot find workflow with id %d", workflowID)
 		return err
 	}
 
 	currentPipeline, err := s.store.GetPipeline(workflow.PipelineID)
 	if err != nil {
-		log.Error().Msgf("error: cannot find pipeline with id %d: %s", workflow.PipelineID, err)
+		log.Error().Err(err).Msgf("cannot find pipeline with id %d", workflow.PipelineID)
 		return err
 	}
 
-	step, err := s.store.StepChild(currentPipeline, workflow.PID, state.Step)
+	step, err := s.store.StepByUUID(state.StepUUID)
 	if err != nil {
-		log.Error().Msgf("error: cannot find step with name %s: %s", state.Step, err)
+		log.Error().Err(err).Msgf("cannot find step with uuid %s", state.StepUUID)
 		return err
+	}
+
+	if step.PipelineID != currentPipeline.ID {
+		msg := fmt.Sprintf("agent returned status with step uuid '%s' which does not belong to current pipeline", state.StepUUID)
+		log.Error().
+			Int64("stepPipelineID", step.PipelineID).
+			Int64("currentPipelineID", currentPipeline.ID).
+			Msg(msg)
+		return fmt.Errorf(msg)
 	}
 
 	repo, err := s.store.GetRepo(currentPipeline.RepoID)
 	if err != nil {
-		log.Error().Msgf("error: cannot find repo with id %d: %s", currentPipeline.RepoID, err)
+		log.Error().Err(err).Msgf("cannot find repo with id %d", currentPipeline.RepoID)
 		return err
 	}
 
-	if err := pipeline.UpdateStepStatus(s.store, step, state, currentPipeline.Started); err != nil {
+	if err := pipeline.UpdateStepStatus(s.store, step, state); err != nil {
 		log.Error().Err(err).Msg("rpc.update: cannot update step")
 	}
 
@@ -139,11 +148,12 @@ func (s *RPC) Update(_ context.Context, id string, state rpc.State) error {
 			"private": strconv.FormatBool(repo.IsSCMPrivate),
 		},
 	}
-	if message.Data, err = json.Marshal(model.Event{
+	message.Data, err = json.Marshal(model.Event{
 		Repo:     *repo,
 		Pipeline: *currentPipeline,
-	}); err != nil {
-		log.Error().Err(err).Msg("can not marshal json to publish to proc list")
+	})
+	if err != nil {
+		return err
 	}
 	s.pubsub.Publish(message)
 
@@ -197,11 +207,13 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 				"private": strconv.FormatBool(repo.IsSCMPrivate),
 			},
 		}
-		if message.Data, err = json.Marshal(model.Event{
+		message.Data, err = json.Marshal(model.Event{
 			Repo:     *repo,
 			Pipeline: *currentPipeline,
-		}); err != nil {
-			log.Error().Err(err).Msg("can not marshal event to publish")
+		})
+		if err != nil {
+			log.Error().Err(err).Msgf("could not marshal JSON")
+			return
 		}
 		s.pubsub.Publish(message)
 	}()
@@ -355,7 +367,7 @@ func (s *RPC) RegisterAgent(ctx context.Context, platform, backend, version stri
 
 func (s *RPC) UnregisterAgent(ctx context.Context) error {
 	agent, err := s.getAgentFromContext(ctx)
-	if agent.OwnerID > 0 {
+	if !agent.IsSystemAgent() {
 		// registered with individual agent token -> do not unregister
 		return nil
 	}
@@ -419,11 +431,12 @@ func (s *RPC) notify(repo *model.Repo, pipeline *model.Pipeline) (err error) {
 			"private": strconv.FormatBool(repo.IsSCMPrivate),
 		},
 	}
-	if message.Data, err = json.Marshal(model.Event{
+	message.Data, err = json.Marshal(model.Event{
 		Repo:     *repo,
 		Pipeline: *pipeline,
-	}); err != nil {
-		log.Error().Err(err).Msg("grpc could not marshal event")
+	})
+	if err != nil {
+		return err
 	}
 	s.pubsub.Publish(message)
 	return nil

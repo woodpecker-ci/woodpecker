@@ -17,7 +17,7 @@ package common
 import (
 	"github.com/urfave/cli/v2"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cmd/common"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/logger"
 )
 
 var GlobalFlags = append([]cli.Flag{
@@ -51,7 +51,7 @@ var GlobalFlags = append([]cli.Flag{
 		Usage:   "socks proxy ignored",
 		Hidden:  true,
 	},
-}, common.GlobalLoggerFlags...)
+}, logger.GlobalLoggerFlags...)
 
 // FormatFlag return format flag with value set based on template
 // if hidden value is set, flag will be hidden

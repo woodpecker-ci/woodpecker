@@ -15,17 +15,16 @@
 package pipeline
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/pipeline/stepbuilder"
 )
 
-func queuePipeline(ctx context.Context, repo *model.Repo, pipelineItems []*pipeline.Item) error {
+func queuePipeline(repo *model.Repo, pipelineItems []*stepbuilder.Item) error {
 	var tasks []*model.Task
 	for _, item := range pipelineItems {
 		if item.Workflow.State == model.StatusSkipped {
@@ -57,7 +56,7 @@ func queuePipeline(ctx context.Context, repo *model.Repo, pipelineItems []*pipel
 	return server.Config.Services.Queue.PushAtOnce(ctx, tasks)
 }
 
-func taskIds(dependsOn []string, pipelineItems []*pipeline.Item) (taskIds []string) {
+func taskIds(dependsOn []string, pipelineItems []*stepbuilder.Item) (taskIds []string) {
 	for _, dep := range dependsOn {
 		for _, pipelineItem := range pipelineItems {
 			if pipelineItem.Workflow.Name == dep {

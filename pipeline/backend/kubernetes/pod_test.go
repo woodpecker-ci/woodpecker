@@ -96,12 +96,7 @@ func TestTinyPod(t *testing.T) {
 					]
 				}
 			],
-			"restartPolicy": "Never",
-			"imagePullSecrets": [
-				{
-					"name": "regcred"
-				}
-			]
+			"restartPolicy": "Never"
 		},
 		"status": {}
 	}`
@@ -110,7 +105,7 @@ func TestTinyPod(t *testing.T) {
 		false, false,
 		[]string{"gradle build"}, []string{"workspace:/woodpecker/src"}, nil,
 		nil, nil, map[string]string{"CI": "woodpecker"}, nil,
-		nil,
+		nil, nil,
 		types.Resources{Requests: nil, Limits: nil}, nil, SecurityContextConfig{},
 	)
 	assert.NoError(t, err)
@@ -213,6 +208,9 @@ func TestFullPod(t *testing.T) {
 			"imagePullSecrets": [
 				{
 					"name": "regcred"
+				},
+				{
+					"name": "another-pull-secret"
 				}
 			],
 			"tolerations": [
@@ -228,17 +226,27 @@ func TestFullPod(t *testing.T) {
 					"hostnames": [
 						"cloudflare"
 					]
+				},
+				{
+					"ip": "2606:4700:4700::64",
+					"hostnames": [
+						"cf.v6"
+					]
 				}
 			]
 		},
 		"status": {}
 	}`
 
+	hostAliases := []types.HostAlias{
+		{Name: "cloudflare", IP: "1.1.1.1"},
+		{Name: "cf.v6", IP: "2606:4700:4700::64"},
+	}
 	pod, err := mkPod("woodpecker", "wp-01he8bebctabr3kgk0qj36d2me-0", "meltwater/drone-cache", "/woodpecker/src", "linux/amd64", "wp-svc-acc",
 		true, true,
-		[]string{"go get", "go test"}, []string{"woodpecker-cache:/woodpecker/src/cache"}, []string{"cloudflare:1.1.1.1"},
+		[]string{"go get", "go test"}, []string{"woodpecker-cache:/woodpecker/src/cache"}, []string{"regcred", "another-pull-secret"},
 		map[string]string{"app": "test"}, map[string]string{"apparmor.security": "runtime/default"}, map[string]string{"CGO": "0"}, map[string]string{"storage": "ssd"},
-		[]types.Toleration{{Key: "net-port", Value: "100Mbit", Effect: types.TaintEffectNoSchedule}},
+		hostAliases, []types.Toleration{{Key: "net-port", Value: "100Mbit", Effect: types.TaintEffectNoSchedule}},
 		types.Resources{Requests: map[string]string{"memory": "128Mi", "cpu": "1000m"}, Limits: map[string]string{"memory": "256Mi", "cpu": "2"}},
 		&types.SecurityContext{Privileged: newBool(true), RunAsNonRoot: newBool(true), RunAsUser: newInt64(101), RunAsGroup: newInt64(101), FSGroup: newInt64(101)},
 		SecurityContextConfig{RunAsNonRoot: false},

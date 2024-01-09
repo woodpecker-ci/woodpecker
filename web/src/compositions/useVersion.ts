@@ -1,3 +1,5 @@
+import semverCoerce from 'semver/functions/coerce';
+import semverGt from 'semver/functions/gt';
 import { onMounted, ref } from 'vue';
 
 import useAuthentication from './useAuthentication';
@@ -39,10 +41,11 @@ export function useVersion() {
 
   const config = useConfig();
   const current = config.version as string;
+  const currentSemver = semverCoerce(current);
   const usesNext = current.startsWith('next');
 
   const { user } = useAuthentication();
-  if (!user?.admin) {
+  if (config.skipVersionCheck || !user?.admin) {
     version.value = {
       latest: undefined,
       current,
@@ -82,7 +85,7 @@ export function useVersion() {
       latest,
       current,
       currentShort: usesNext ? 'next' : current,
-      needsUpdate: latest !== undefined && latest !== current,
+      needsUpdate: latest !== undefined && currentSemver !== null && semverGt(latest, currentSemver),
       usesNext,
     };
   });

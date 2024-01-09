@@ -48,11 +48,12 @@ func handleHeartbeat(w http.ResponseWriter, _ *http.Request) {
 func handleVersion(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Header().Add("Content-Type", "text/json")
-	if err := json.NewEncoder(w).Encode(versionResp{
+	err := json.NewEncoder(w).Encode(versionResp{
 		Source:  "https://github.com/woodpecker-ci/woodpecker",
 		Version: version.String(),
-	}); err != nil {
-		log.Err(err).Msg("handleVersion could not encode")
+	})
+	if err != nil {
+		log.Error().Err(err).Msg("handleVersion")
 	}
 }
 

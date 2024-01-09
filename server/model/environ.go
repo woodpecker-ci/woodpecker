@@ -20,8 +20,8 @@ import (
 )
 
 var (
-	errEnvironNameInvalid  = errors.New("invalid environment variable name")
-	errEnvironValueInvalid = errors.New("invalid environment variable value")
+	errEnvironNameInvalid  = errors.New("invalid Environment Variable Name")
+	errEnvironValueInvalid = errors.New("invalid Environment Variable Value")
 )
 
 // EnvironService defines a service for managing environment variables.

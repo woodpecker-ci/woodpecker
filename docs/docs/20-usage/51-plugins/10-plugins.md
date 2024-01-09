@@ -43,7 +43,3 @@ There are also other plugin lists with additional plugins. Keep in mind that [Dr
 - [Geeklab Woodpecker Plugins](https://woodpecker-plugins.geekdocs.de/)
 
 :::
-
-## Creating a plugin
-
-See a [detailed plugin example](./20-sample-plugin.md).
