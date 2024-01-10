@@ -64,9 +64,9 @@ func setupStore(c *cli.Context) store.Store {
 
 	if driver == "sqlite3" {
 		if datastore.SupportedDriver("sqlite3") {
-			log.Debug().Msgf("server has sqlite3 support")
+			log.Debug().Msg("server has sqlite3 support")
 		} else {
-			log.Debug().Msgf("server was built without sqlite3 support!")
+			log.Debug().Msg("server was built without sqlite3 support!")
 		}
 	}
 
@@ -301,23 +301,23 @@ func setupSignatureKeys(_store store.Store) (crypto.PrivateKey, crypto.PublicKey
 	if errors.Is(err, types.RecordNotExist) {
 		_, privKey, err := ed25519.GenerateKey(rand.Reader)
 		if err != nil {
-			log.Fatal().Err(err).Msgf("Failed to generate private key")
+			log.Fatal().Err(err).Msg("Failed to generate private key")
 			return nil, nil
 		}
 		err = _store.ServerConfigSet(privKeyID, hex.EncodeToString(privKey))
 		if err != nil {
-			log.Fatal().Err(err).Msgf("Failed to generate private key")
+			log.Fatal().Err(err).Msg("Failed to generate private key")
 			return nil, nil
 		}
 		log.Debug().Msg("Created private key")
 		return privKey, privKey.Public()
 	} else if err != nil {
-		log.Fatal().Err(err).Msgf("Failed to load private key")
+		log.Fatal().Err(err).Msg("Failed to load private key")
 		return nil, nil
 	}
 	privKeyStr, err := hex.DecodeString(privKey)
 	if err != nil {
-		log.Fatal().Err(err).Msgf("Failed to decode private key")
+		log.Fatal().Err(err).Msg("Failed to decode private key")
 		return nil, nil
 	}
 	privateKey := ed25519.PrivateKey(privKeyStr)

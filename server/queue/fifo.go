@@ -17,7 +17,6 @@ package queue
 import (
 	"container/list"
 	"context"
-	"runtime"
 	"sync"
 	"time"
 
@@ -240,17 +239,6 @@ func (q *fifo) process() {
 	if q.paused {
 		return
 	}
-
-	defer func() {
-		// the risk of panic is low. This code can probably be removed
-		// once the code has been used in real world installs without issue.
-		if err := recover(); err != nil {
-			const size = 64 << 10
-			buf := make([]byte, size)
-			buf = buf[:runtime.Stack(buf, false)]
-			log.Error().Msgf("queue: unexpected panic: %v\n%s", err, buf)
-		}
-	}()
 
 	q.resubmitExpiredPipelines()
 	q.filterWaiting()

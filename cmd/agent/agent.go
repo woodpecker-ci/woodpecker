@@ -64,7 +64,7 @@ func run(c *cli.Context) error {
 	if c.Bool("healthcheck") {
 		go func() {
 			if err := http.ListenAndServe(c.String("healthcheck-addr"), nil); err != nil {
-				log.Error().Msgf("cannot listen on address %s: %v", c.String("healthcheck-addr"), err)
+				log.Error().Err(err).Msgf("cannot listen on address %s", c.String("healthcheck-addr"))
 			}
 		}()
 	}
@@ -212,7 +212,7 @@ func run(c *cli.Context) error {
 
 			err := client.ReportHealth(ctx)
 			if err != nil {
-				log.Err(err).Msgf("Failed to report health")
+				log.Err(err).Msg("Failed to report health")
 				return
 			}
 
