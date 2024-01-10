@@ -162,6 +162,7 @@ linters:
     - wastedassign
     - whitespace
     - gocritic
+    - nolintlint
 
 run:
   timeout: 15m
