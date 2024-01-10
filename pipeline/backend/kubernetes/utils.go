@@ -32,7 +32,7 @@ var (
 )
 
 func dnsName(i string) (string, error) {
-	res := strings.Replace(i, "_", "-", -1)
+	res := strings.ReplaceAll(i, "_", "-")
 
 	if found := dnsPattern.FindStringIndex(res); found == nil {
 		return "", ErrDNSPatternInvalid

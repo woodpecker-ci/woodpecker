@@ -43,5 +43,5 @@ func ToContext(c Setter, store Store) {
 }
 
 func InjectToContext(ctx context.Context, store Store) context.Context {
-	return context.WithValue(ctx, key, store)
+	return context.WithValue(ctx, key, store) //nolint:revive,staticcheck
 }
