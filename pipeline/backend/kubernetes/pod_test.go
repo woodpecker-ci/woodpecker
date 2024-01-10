@@ -128,11 +128,8 @@ func TestTinyPod(t *testing.T) {
 		Volumes:     []string{"workspace:/woodpecker/src"},
 		Environment: map[string]string{"CI": "woodpecker"},
 	},
-		nil,
 		"woodpecker", "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64",
-		nil, nil, nil,
-		SecurityContextConfig{},
-	)
+		nil, nil, nil, SecurityContextConfig{})
 	assert.NoError(t, err)
 
 	json, err := json.Marshal(pod)
@@ -277,23 +274,26 @@ func TestFullPod(t *testing.T) {
 		Volumes:     []string{"woodpecker-cache:/woodpecker/src/cache"},
 		Environment: map[string]string{"CGO": "0"},
 		ExtraHosts:  hostAliases,
-	},
-		&types.KubernetesBackendOptions{
-			NodeSelector:       map[string]string{"storage": "ssd"},
-			ServiceAccountName: "wp-svc-acc",
-			Tolerations:        []types.Toleration{{Key: "net-port", Value: "100Mbit", Effect: types.TaintEffectNoSchedule}},
-			Resources: types.Resources{
-				Requests: map[string]string{"memory": "128Mi", "cpu": "1000m"},
-				Limits:   map[string]string{"memory": "256Mi", "cpu": "2"},
-			},
-			SecurityContext: &types.SecurityContext{
-				Privileged:   newBool(true),
-				RunAsNonRoot: newBool(true),
-				RunAsUser:    newInt64(101),
-				RunAsGroup:   newInt64(101),
-				FSGroup:      newInt64(101),
+		BackendOptions: types.BackendOptions{
+			Kubernetes: types.KubernetesBackendOptions{
+				NodeSelector:       map[string]string{"storage": "ssd"},
+				ServiceAccountName: "wp-svc-acc",
+				Tolerations:        []types.Toleration{{Key: "net-port", Value: "100Mbit", Effect: types.TaintEffectNoSchedule}},
+				Resources: types.Resources{
+					Requests: map[string]string{"memory": "128Mi", "cpu": "1000m"},
+					Limits:   map[string]string{"memory": "256Mi", "cpu": "2"},
+				},
+				SecurityContext: &types.SecurityContext{
+					Privileged:   newBool(true),
+					RunAsNonRoot: newBool(true),
+					RunAsUser:    newInt64(101),
+					RunAsGroup:   newInt64(101),
+					FSGroup:      newInt64(101),
+				},
 			},
 		},
+	},
+
 		"woodpecker", "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64",
 		[]string{"regcred", "another-pull-secret"},
 		map[string]string{"app": "test"}, map[string]string{"apparmor.security": "runtime/default"},

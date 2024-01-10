@@ -35,23 +35,19 @@ const (
 	podPrefix = "wp-"
 )
 
-func mkPod(step *types.Step, backendOptions *types.KubernetesBackendOptions, namespace, podName, goos string,
+func mkPod(step *types.Step, namespace, podName, goos string,
 	pullSecretNames []string,
 	labels, annotations map[string]string,
 	securityContextConfig SecurityContextConfig,
 ) (*v1.Pod, error) {
-	if backendOptions == nil {
-		backendOptions = &types.KubernetesBackendOptions{}
-	}
-
 	meta := podMeta(step, namespace, podName, labels, annotations)
 
-	spec, err := podSpec(step, backendOptions, pullSecretNames, backendOptions.SecurityContext, securityContextConfig)
+	spec, err := podSpec(step, pullSecretNames, securityContextConfig)
 	if err != nil {
 		return nil, err
 	}
 
-	container, err := podContainer(step, podName, goos, backendOptions.Resources, backendOptions.SecurityContext)
+	container, err := podContainer(step, podName, goos)
 	if err != nil {
 		return nil, err
 	}
@@ -92,19 +88,16 @@ func podMeta(step *types.Step, namespace, podName string, labels, annotations ma
 	return meta
 }
 
-func podSpec(step *types.Step, backendOptions *types.KubernetesBackendOptions,
-	pullSecretNames []string,
-	securityContext *types.SecurityContext, securityContextConfig SecurityContextConfig,
-) (v1.PodSpec, error) {
+func podSpec(step *types.Step, pullSecretNames []string, securityContextConfig SecurityContextConfig) (v1.PodSpec, error) {
 	var err error
 	spec := v1.PodSpec{
 		RestartPolicy:      v1.RestartPolicyNever,
-		ServiceAccountName: backendOptions.ServiceAccountName,
+		ServiceAccountName: step.BackendOptions.Kubernetes.ServiceAccountName,
 		ImagePullSecrets:   imagePullSecretsReferences(pullSecretNames),
 		HostAliases:        hostAliases(step.ExtraHosts),
-		NodeSelector:       nodeSelector(backendOptions.NodeSelector, step.Environment["CI_SYSTEM_PLATFORM"]),
-		Tolerations:        tolerations(backendOptions.Tolerations),
-		SecurityContext:    podSecurityContext(securityContext, securityContextConfig),
+		NodeSelector:       nodeSelector(step.BackendOptions.Kubernetes.NodeSelector, step.Environment["CI_SYSTEM_PLATFORM"]),
+		Tolerations:        tolerations(step.BackendOptions.Kubernetes.Tolerations),
+		SecurityContext:    podSecurityContext(step.BackendOptions.Kubernetes.SecurityContext, securityContextConfig),
 	}
 	spec.Volumes, err = volumes(step.Volumes)
 	if err != nil {
@@ -114,7 +107,7 @@ func podSpec(step *types.Step, backendOptions *types.KubernetesBackendOptions,
 	return spec, nil
 }
 
-func podContainer(step *types.Step, podName, goos string, resources types.Resources, securityContext *types.SecurityContext) (v1.Container, error) {
+func podContainer(step *types.Step, podName, goos string) (v1.Container, error) {
 	var err error
 	container := v1.Container{
 		Name:       podName,
@@ -134,9 +127,9 @@ func podContainer(step *types.Step, podName, goos string, resources types.Resour
 	}
 
 	container.Env = mapToEnvVars(step.Environment)
-	container.SecurityContext = containerSecurityContext(securityContext, step.Privileged)
+	container.SecurityContext = containerSecurityContext(step.BackendOptions.Kubernetes.SecurityContext, step.Privileged)
 
-	container.Resources, err = resourceRequirements(resources)
+	container.Resources, err = resourceRequirements(step.BackendOptions.Kubernetes.Resources)
 	if err != nil {
 		return container, err
 	}
