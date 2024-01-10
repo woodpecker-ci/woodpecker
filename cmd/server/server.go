@@ -323,7 +323,7 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) error {
 
 	// Execution
 	_events := c.StringSlice("default-cancel-previous-pipeline-events")
-	events := make([]model.WebhookEvent, len(_events), 0)
+	events := make([]model.WebhookEvent, 0, len(_events))
 	for _, v := range _events {
 		events = append(events, model.WebhookEvent(v))
 	}
