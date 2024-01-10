@@ -50,7 +50,7 @@ func (n *Networks) UnmarshalYAML(unmarshal func(any) error) error {
 		for _, network := range sliceType {
 			name, ok := network.(string)
 			if !ok {
-				return fmt.Errorf("Cannot unmarshal '%v' to type %T into a string value", name, name)
+				return fmt.Errorf("cannot unmarshal '%v' to type %T into a string value", name, name)
 			}
 			n.Networks = append(n.Networks, &Network{
 				Name: name,
@@ -65,7 +65,7 @@ func (n *Networks) UnmarshalYAML(unmarshal func(any) error) error {
 		for mapKey, mapValue := range mapType {
 			name, ok := mapKey.(string)
 			if !ok {
-				return fmt.Errorf("Cannot unmarshal '%v' to type %T into a string value", name, name)
+				return fmt.Errorf("cannot unmarshal '%v' to type %T into a string value", name, name)
 			}
 			network, err := handleNetwork(name, mapValue)
 			if err != nil {
@@ -76,7 +76,7 @@ func (n *Networks) UnmarshalYAML(unmarshal func(any) error) error {
 		return nil
 	}
 
-	return errors.New("Failed to unmarshal Networks")
+	return errors.New("failed to unmarshal Networks")
 }
 
 func handleNetwork(name string, value any) (*Network, error) {
@@ -95,7 +95,7 @@ func handleNetwork(name string, value any) (*Network, error) {
 			case "aliases":
 				aliases, ok := mapValue.([]any)
 				if !ok {
-					return &Network{}, fmt.Errorf("Cannot unmarshal '%v' to type %T into a string value", aliases, aliases)
+					return &Network{}, fmt.Errorf("cannot unmarshal '%v' to type %T into a string value", aliases, aliases)
 				}
 				network.Aliases = []string{}
 				for _, alias := range aliases {
@@ -112,6 +112,6 @@ func handleNetwork(name string, value any) (*Network, error) {
 		}
 		return network, nil
 	default:
-		return &Network{}, fmt.Errorf("Failed to unmarshal Network: %#v", value)
+		return &Network{}, fmt.Errorf("failed to unmarshal Network: %#v", value)
 	}
 }

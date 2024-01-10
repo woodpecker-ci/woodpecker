@@ -163,6 +163,7 @@ linters:
     - whitespace
     - gocritic
     - nolintlint
+    - stylecheck
 
 run:
   timeout: 15m
