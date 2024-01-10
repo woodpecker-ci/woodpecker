@@ -17,6 +17,7 @@ package main
 import (
 	"crypto/tls"
 	"errors"
+	"fmt"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -55,7 +56,9 @@ import (
 )
 
 func run(c *cli.Context) error {
-	logger.SetupGlobalLogger(c, true)
+	if err := logger.SetupGlobalLogger(c, true); err != nil {
+		return err
+	}
 
 	// set gin mode based on log level
 	if zerolog.GlobalLevel() > zerolog.DebugLevel {
@@ -63,17 +66,15 @@ func run(c *cli.Context) error {
 	}
 
 	if c.String("server-host") == "" {
-		log.Fatal().Msg("WOODPECKER_HOST is not properly configured") //nolint:forbidigo
+		return fmt.Errorf("WOODPECKER_HOST is not properly configured")
 	}
 
 	if !strings.Contains(c.String("server-host"), "://") {
-		log.Fatal().Msg( //nolint:forbidigo
-			"WOODPECKER_HOST must be <scheme>://<hostname> format",
-		)
+		return fmt.Errorf("WOODPECKER_HOST must be <scheme>://<hostname> format")
 	}
 
 	if _, err := url.Parse(c.String("server-host")); err != nil {
-		log.Fatal().Err(err).Msg("could not parse WOODPECKER_HOST") //nolint:forbidigo
+		return fmt.Errorf("could not parse WOODPECKER_HOST: %w", err)
 	}
 
 	if strings.Contains(c.String("server-host"), "://localhost") {
@@ -84,10 +85,13 @@ func run(c *cli.Context) error {
 
 	_forge, err := setupForge(c)
 	if err != nil {
-		log.Fatal().Err(err).Msg("can't setup forge") //nolint:forbidigo
+		return fmt.Errorf("can't setup forge: %w", err)
 	}
 
-	_store := setupStore(c)
+	_store, err := setupStore(c)
+	if err != nil {
+		return fmt.Errorf("can't setup store: %w", err)
+	}
 	defer func() {
 		if err := _store.Close(); err != nil {
 			log.Error().Err(err).Msg("could not close store")
@@ -96,8 +100,7 @@ func run(c *cli.Context) error {
 
 	err = setupEvilGlobals(c, _store, _forge)
 	if err != nil {
-		log.Error().Err(err).Msg("can't setup globals")
-		return err
+		return fmt.Errorf("can't setup globals: %w", err)
 	}
 
 	var g errgroup.Group
@@ -301,7 +304,10 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) error {
 	}
 	server.Config.Services.Membership = setupMembershipService(c, f)
 
-	server.Config.Services.SignaturePrivateKey, server.Config.Services.SignaturePublicKey = setupSignatureKeys(v)
+	server.Config.Services.SignaturePrivateKey, server.Config.Services.SignaturePublicKey, err = setupSignatureKeys(v)
+	if err != nil {
+		return err
+	}
 
 	server.Config.Services.ConfigService, err = setupConfigService(c)
 	if err != nil {

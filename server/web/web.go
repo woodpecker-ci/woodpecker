@@ -17,6 +17,7 @@ package web
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"io"
 	"io/fs"
 	"net/http"
@@ -44,7 +45,11 @@ func (f *prefixFS) Open(name string) (http.File, error) {
 // New returns a gin engine to serve the web frontend.
 func New() (*gin.Engine, error) {
 	e := gin.New()
-	indexHTML = parseIndex()
+	var err error
+	indexHTML, err = parseIndex()
+	if err != nil {
+		return nil, err
+	}
 
 	rootPath := server.Config.Server.RootPath
 
@@ -156,13 +161,13 @@ func replaceBytes(data []byte) []byte {
 	return bytes.ReplaceAll(data, []byte("/BASE_PATH"), []byte(server.Config.Server.RootPath))
 }
 
-func parseIndex() []byte {
+func parseIndex() ([]byte, error) {
 	data, err := loadFile("index.html")
 	if err != nil {
-		log.Fatal().Err(err).Msg("can not find index.html") //nolint:forbidigo
+		return nil, fmt.Errorf("can not find index.html: %w", err)
 	}
 	data = bytes.ReplaceAll(data, []byte("/web-config.js"), []byte(server.Config.Server.RootPath+"/web-config.js"))
 	data = bytes.ReplaceAll(data, []byte("/assets/custom.css"), []byte(server.Config.Server.RootPath+"/assets/custom.css"))
 	data = bytes.ReplaceAll(data, []byte("/assets/custom.js"), []byte(server.Config.Server.RootPath+"/assets/custom.js"))
-	return data
+	return data, nil
 }
