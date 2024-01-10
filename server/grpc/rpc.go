@@ -212,7 +212,7 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 			Pipeline: *currentPipeline,
 		})
 		if err != nil {
-			log.Error().Err(err).Msgf("could not marshal JSON")
+			log.Error().Err(err).Msg("could not marshal JSON")
 			return
 		}
 		s.pubsub.Publish(message)

@@ -23,6 +23,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
+
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
@@ -73,7 +74,7 @@ func SetRepo() gin.HandlerFunc {
 		}
 
 		// debugging
-		log.Debug().Err(err).Msgf("Cannot find repository %s.", fullName)
+		log.Debug().Err(err).Msgf("Cannot find repository %s", fullName)
 
 		if user == nil {
 			c.AbortWithStatus(http.StatusUnauthorized)
@@ -112,8 +113,8 @@ func SetPerm() gin.HandlerFunc {
 			var err error
 			perm, err = _store.PermFind(user, repo)
 			if err != nil {
-				log.Error().Msgf("Error fetching permission for %s %s. %s",
-					user.Login, repo.FullName, err)
+				log.Error().Err(err).Msgf("Error fetching permission for %s %s",
+					user.Login, repo.FullName)
 			}
 			if time.Unix(perm.Synced, 0).Add(time.Hour).Before(time.Now()) {
 				_repo, err := server.Config.Services.Forge.Repo(c, user, repo.ForgeRemoteID, repo.Owner, repo.Name)
