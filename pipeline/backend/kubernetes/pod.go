@@ -38,7 +38,7 @@ const (
 func mkPod(step *types.Step, config *config, podName, goos string) (*v1.Pod, error) {
 	meta := podMeta(step, config, podName)
 
-	spec, err := podSpec(step, config.ImagePullSecretNames, config.SecurityContext)
+	spec, err := podSpec(step, config)
 	if err != nil {
 		return nil, err
 	}
@@ -84,16 +84,16 @@ func podMeta(step *types.Step, config *config, podName string) metav1.ObjectMeta
 	return meta
 }
 
-func podSpec(step *types.Step, pullSecretNames []string, securityContextConfig SecurityContextConfig) (v1.PodSpec, error) {
+func podSpec(step *types.Step, config *config) (v1.PodSpec, error) {
 	var err error
 	spec := v1.PodSpec{
 		RestartPolicy:      v1.RestartPolicyNever,
 		ServiceAccountName: step.BackendOptions.Kubernetes.ServiceAccountName,
-		ImagePullSecrets:   imagePullSecretsReferences(pullSecretNames),
+		ImagePullSecrets:   imagePullSecretsReferences(config.ImagePullSecretNames),
 		HostAliases:        hostAliases(step.ExtraHosts),
 		NodeSelector:       nodeSelector(step.BackendOptions.Kubernetes.NodeSelector, step.Environment["CI_SYSTEM_PLATFORM"]),
 		Tolerations:        tolerations(step.BackendOptions.Kubernetes.Tolerations),
-		SecurityContext:    podSecurityContext(step.BackendOptions.Kubernetes.SecurityContext, securityContextConfig),
+		SecurityContext:    podSecurityContext(step.BackendOptions.Kubernetes.SecurityContext, config.SecurityContext),
 	}
 	spec.Volumes, err = volumes(step.Volumes)
 	if err != nil {
