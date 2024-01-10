@@ -243,7 +243,7 @@ func resourceList(resources map[string]string) (v1.ResourceList, error) {
 		resName := v1.ResourceName(key)
 		resVal, err := resource.ParseQuantity(val)
 		if err != nil {
-			return nil, fmt.Errorf("resource request '%v' quantity '%v': %w", key, val, err)
+			return nil, fmt.Errorf("resource request '%s' quantity '%s': %w", key, val, err)
 		}
 		requestResources[resName] = resVal
 	}

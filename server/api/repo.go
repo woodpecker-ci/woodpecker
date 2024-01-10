@@ -576,7 +576,7 @@ func repairRepo(c *gin.Context, repo *model.Repo, withPerms, skipOnErr bool) {
 			if !skipOnErr {
 				c.AbortWithStatus(http.StatusNotFound)
 			}
-			log.Error().Err(err).Msgf("could not get user on repo repair")
+			log.Error().Err(err).Msg("could not get user on repo repair")
 		} else {
 			_ = c.AbortWithError(http.StatusInternalServerError, err)
 		}

@@ -99,13 +99,13 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 			// Unmarshal label and annotation settings here to ensure they're valid on startup
 			if labels := c.String("backend-k8s-pod-labels"); labels != "" {
 				if err := yaml.Unmarshal([]byte(labels), &config.PodLabels); err != nil {
-					log.Error().Msgf("could not unmarshal pod labels '%s': %s", c.String("backend-k8s-pod-labels"), err)
+					log.Error().Err(err).Msgf("could not unmarshal pod labels '%s'", c.String("backend-k8s-pod-labels"))
 					return nil, err
 				}
 			}
 			if annotations := c.String("backend-k8s-pod-annotations"); annotations != "" {
 				if err := yaml.Unmarshal([]byte(c.String("backend-k8s-pod-annotations")), &config.PodAnnotations); err != nil {
-					log.Error().Msgf("could not unmarshal pod annotations '%s': %s", c.String("backend-k8s-pod-annotations"), err)
+					log.Error().Err(err).Msgf("could not unmarshal pod annotations '%s'", c.String("backend-k8s-pod-annotations"))
 					return nil, err
 				}
 			}

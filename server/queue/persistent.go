@@ -78,7 +78,7 @@ func (q *persistentQueue) Poll(c context.Context, agentID int64, f FilterFn) (*m
 	if task != nil {
 		log.Debug().Msgf("pull queue item: %s: remove from backup", task.ID)
 		if derr := q.store.TaskDelete(task.ID); derr != nil {
-			log.Error().Msgf("pull queue item: %s: failed to remove from backup: %s", task.ID, derr)
+			log.Error().Err(derr).Msgf("pull queue item: %s: failed to remove from backup", task.ID)
 		} else {
 			log.Debug().Msgf("pull queue item: %s: successfully removed from backup", task.ID)
 		}
