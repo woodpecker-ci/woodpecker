@@ -50,8 +50,6 @@ import (
 )
 
 func run(c *cli.Context) error {
-	logger.SetupGlobalLogger(c, true)
-
 	agentConfigPath := c.String("agent-config")
 	hostname := c.String("hostname")
 	if len(hostname) == 0 {
@@ -271,6 +269,10 @@ func getBackendEngine(backendCtx context.Context, backendName string, addons []s
 }
 
 func runWithRetry(context *cli.Context) error {
+	if err := logger.SetupGlobalLogger(context, true); err != nil {
+		return err
+	}
+
 	initHealth()
 
 	retryCount := context.Int("connect-retry-count")

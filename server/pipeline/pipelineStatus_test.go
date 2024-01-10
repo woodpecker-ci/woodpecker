@@ -48,11 +48,12 @@ func TestUpdateToStatusPending(t *testing.T) {
 
 	pipeline, _ := UpdateToStatusPending(&mockUpdatePipelineStore{}, model.Pipeline{}, "Reviewer")
 
-	if model.StatusPending != pipeline.Status {
+	switch {
+	case model.StatusPending != pipeline.Status:
 		t.Errorf("Pipeline status not equals '%s' != '%s'", model.StatusPending, pipeline.Status)
-	} else if pipeline.Reviewer != "Reviewer" {
+	case pipeline.Reviewer != "Reviewer":
 		t.Errorf("Reviewer not equals 'Reviewer' != '%s'", pipeline.Reviewer)
-	} else if now > pipeline.Reviewed {
+	case now > pipeline.Reviewed:
 		t.Errorf("Reviewed not updated %d !< %d", now, pipeline.Reviewed)
 	}
 }
@@ -64,11 +65,12 @@ func TestUpdateToStatusDeclined(t *testing.T) {
 
 	pipeline, _ := UpdateToStatusDeclined(&mockUpdatePipelineStore{}, model.Pipeline{}, "Reviewer")
 
-	if model.StatusDeclined != pipeline.Status {
+	switch {
+	case model.StatusDeclined != pipeline.Status:
 		t.Errorf("Pipeline status not equals '%s' != '%s'", model.StatusDeclined, pipeline.Status)
-	} else if pipeline.Reviewer != "Reviewer" {
+	case pipeline.Reviewer != "Reviewer":
 		t.Errorf("Reviewer not equals 'Reviewer' != '%s'", pipeline.Reviewer)
-	} else if now > pipeline.Reviewed {
+	case now > pipeline.Reviewed:
 		t.Errorf("Reviewed not updated %d !< %d", now, pipeline.Reviewed)
 	}
 }
@@ -92,15 +94,16 @@ func TestUpdateToStatusError(t *testing.T) {
 
 	pipeline, _ := UpdateToStatusError(&mockUpdatePipelineStore{}, model.Pipeline{}, errors.New("this is an error"))
 
-	if len(pipeline.Errors) != 1 {
+	switch {
+	case len(pipeline.Errors) != 1:
 		t.Errorf("Expected one error, got %d", len(pipeline.Errors))
-	} else if pipeline.Errors[0].Error() != "[generic] this is an error" {
+	case pipeline.Errors[0].Error() != "[generic] this is an error":
 		t.Errorf("Pipeline error not equals '[generic] this is an error' != '%s'", pipeline.Errors[0].Error())
-	} else if model.StatusError != pipeline.Status {
+	case model.StatusError != pipeline.Status:
 		t.Errorf("Pipeline status not equals '%s' != '%s'", model.StatusError, pipeline.Status)
-	} else if now > pipeline.Started {
+	case now > pipeline.Started:
 		t.Errorf("Started not updated %d !< %d", now, pipeline.Started)
-	} else if pipeline.Started != pipeline.Finished {
+	case pipeline.Started != pipeline.Finished:
 		t.Errorf("Pipeline started and finished not equals %d != %d", pipeline.Started, pipeline.Finished)
 	}
 }
