@@ -26,7 +26,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
-func mkService(namespace, name string, ports []uint16, selector map[string]string) (*v1.Service, error) {
+func mkService(namespace, name string, ports []uint16, selector map[string]string) *v1.Service {
 	log.Trace().Str("name", name).Interface("selector", selector).Interface("ports", ports).Msg("Creating service")
 
 	var svcPorts []v1.ServicePort
@@ -48,7 +48,7 @@ func mkService(namespace, name string, ports []uint16, selector map[string]strin
 			Selector: selector,
 			Ports:    svcPorts,
 		},
-	}, nil
+	}
 }
 
 func serviceName(step *types.Step) (string, error) {
@@ -69,10 +69,7 @@ func startService(ctx context.Context, engine *kube, step *types.Step) (*v1.Serv
 		StepLabel: podName,
 	}
 
-	svc, err := mkService(engine.config.Namespace, name, step.Ports, selector)
-	if err != nil {
-		return nil, err
-	}
+	svc := mkService(engine.config.Namespace, name, step.Ports, selector)
 
 	return engine.client.CoreV1().Services(engine.config.Namespace).Create(ctx, svc, metav1.CreateOptions{})
 }
