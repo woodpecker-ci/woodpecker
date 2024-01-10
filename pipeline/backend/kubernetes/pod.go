@@ -35,14 +35,10 @@ const (
 	podPrefix = "wp-"
 )
 
-func mkPod(step *types.Step, namespace, podName, goos string,
-	pullSecretNames []string,
-	labels, annotations map[string]string,
-	securityContextConfig SecurityContextConfig,
-) (*v1.Pod, error) {
-	meta := podMeta(step, namespace, podName, labels, annotations)
+func mkPod(step *types.Step, config *config, podName, goos string) (*v1.Pod, error) {
+	meta := podMeta(step, config, podName)
 
-	spec, err := podSpec(step, pullSecretNames, securityContextConfig)
+	spec, err := podSpec(step, config.ImagePullSecretNames, config.SecurityContext)
 	if err != nil {
 		return nil, err
 	}
@@ -72,16 +68,16 @@ func podName(step *types.Step) (string, error) {
 	return dnsName(podPrefix + step.UUID)
 }
 
-func podMeta(step *types.Step, namespace, podName string, labels, annotations map[string]string) metav1.ObjectMeta {
+func podMeta(step *types.Step, config *config, podName string) metav1.ObjectMeta {
 	meta := metav1.ObjectMeta{
 		Name:        podName,
-		Namespace:   namespace,
-		Annotations: annotations,
+		Namespace:   config.Namespace,
+		Annotations: config.PodAnnotations,
 	}
 
-	if labels == nil {
-		labels = make(map[string]string, 1)
-	}
+	labels := make(map[string]string, len(config.PodLabels)+1)
+	// copy to not alter the engine config
+	maps.Copy(labels, config.PodLabels)
 	labels[StepLabel] = step.Name
 	meta.Labels = labels
 
@@ -367,10 +363,7 @@ func startPod(ctx context.Context, engine *kube, step *types.Step) (*v1.Pod, err
 	if err != nil {
 		return nil, err
 	}
-	pod, err := mkPod(step, &step.BackendOptions.Kubernetes, engine.config.Namespace, podName, engine.goos,
-		engine.config.ImagePullSecretNames,
-		engine.config.PodLabels, engine.config.PodAnnotations,
-		engine.config.SecurityContext)
+	pod, err := mkPod(step, engine.config, podName, engine.goos)
 	if err != nil {
 		return nil, err
 	}

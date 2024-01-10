@@ -127,9 +127,9 @@ func TestTinyPod(t *testing.T) {
 		Commands:    []string{"gradle build"},
 		Volumes:     []string{"workspace:/woodpecker/src"},
 		Environment: map[string]string{"CI": "woodpecker"},
-	},
-		"woodpecker", "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64",
-		nil, nil, nil, SecurityContextConfig{})
+	}, &config{
+		Namespace: "woodpecker",
+	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64")
 	assert.NoError(t, err)
 
 	json, err := json.Marshal(pod)
@@ -292,13 +292,13 @@ func TestFullPod(t *testing.T) {
 				},
 			},
 		},
-	},
-
-		"woodpecker", "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64",
-		[]string{"regcred", "another-pull-secret"},
-		map[string]string{"app": "test"}, map[string]string{"apparmor.security": "runtime/default"},
-		SecurityContextConfig{RunAsNonRoot: false},
-	)
+	}, &config{
+		Namespace:            "woodpecker",
+		ImagePullSecretNames: []string{"regcred", "another-pull-secret"},
+		PodLabels:            map[string]string{"app": "test"},
+		PodAnnotations:       map[string]string{"apparmor.security": "runtime/default"},
+		SecurityContext:      SecurityContextConfig{RunAsNonRoot: false},
+	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64")
 	assert.NoError(t, err)
 
 	json, err := json.Marshal(pod)
