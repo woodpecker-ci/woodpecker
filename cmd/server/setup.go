@@ -71,12 +71,12 @@ func setupStore(c *cli.Context) store.Store {
 	}
 
 	if !datastore.SupportedDriver(driver) {
-		log.Fatal().Msgf("database driver '%s' not supported", driver)
+		log.Fatal().Msgf("database driver '%s' not supported", driver) //nolint:forbidigo
 	}
 
 	if driver == "sqlite3" {
 		if err := checkSqliteFileExist(datasource); err != nil {
-			log.Fatal().Err(err).Msg("check sqlite file")
+			log.Fatal().Err(err).Msg("check sqlite file") //nolint:forbidigo
 		}
 	}
 
@@ -88,11 +88,11 @@ func setupStore(c *cli.Context) store.Store {
 	log.Trace().Msgf("setup datastore: %#v", *opts)
 	store, err := datastore.NewEngine(opts)
 	if err != nil {
-		log.Fatal().Err(err).Msg("could not open datastore")
+		log.Fatal().Err(err).Msg("could not open datastore") //nolint:forbidigo
 	}
 
 	if err := store.Migrate(c.Bool("migrations-allow-long")); err != nil {
-		log.Fatal().Err(err).Msg("could not migrate datastore")
+		log.Fatal().Err(err).Msg("could not migrate datastore") //nolint:forbidigo
 	}
 
 	return store
@@ -204,7 +204,7 @@ func setupGitea(c *cli.Context) (forge.Forge, error) {
 		SkipVerify: c.Bool("gitea-skip-verify"),
 	}
 	if len(opts.URL) == 0 {
-		log.Fatal().Msg("WOODPECKER_GITEA_URL must be set")
+		log.Fatal().Msg("WOODPECKER_GITEA_URL must be set") //nolint:forbidigo
 	}
 	log.Trace().Msgf("Forge (gitea) opts: %#v", opts)
 	return gitea.New(opts)
@@ -301,23 +301,23 @@ func setupSignatureKeys(_store store.Store) (crypto.PrivateKey, crypto.PublicKey
 	if errors.Is(err, types.RecordNotExist) {
 		_, privKey, err := ed25519.GenerateKey(rand.Reader)
 		if err != nil {
-			log.Fatal().Err(err).Msgf("Failed to generate private key")
+			log.Fatal().Err(err).Msgf("Failed to generate private key") //nolint:forbidigo
 			return nil, nil
 		}
 		err = _store.ServerConfigSet(privKeyID, hex.EncodeToString(privKey))
 		if err != nil {
-			log.Fatal().Err(err).Msgf("Failed to generate private key")
+			log.Fatal().Err(err).Msgf("Failed to generate private key") //nolint:forbidigo
 			return nil, nil
 		}
 		log.Debug().Msg("Created private key")
 		return privKey, privKey.Public()
 	} else if err != nil {
-		log.Fatal().Err(err).Msgf("Failed to load private key")
+		log.Fatal().Err(err).Msgf("Failed to load private key") //nolint:forbidigo
 		return nil, nil
 	}
 	privKeyStr, err := hex.DecodeString(privKey)
 	if err != nil {
-		log.Fatal().Err(err).Msgf("Failed to decode private key")
+		log.Fatal().Err(err).Msgf("Failed to decode private key") //nolint:forbidigo
 		return nil, nil
 	}
 	privateKey := ed25519.PrivateKey(privKeyStr)

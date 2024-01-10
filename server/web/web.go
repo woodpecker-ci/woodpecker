@@ -72,11 +72,12 @@ func handleCustomFilesAndAssets(fs *prefixFS) func(ctx *gin.Context) {
 		}
 	}
 	return func(ctx *gin.Context) {
-		if strings.HasSuffix(ctx.Request.RequestURI, "/assets/custom.js") {
+		switch {
+		case strings.HasSuffix(ctx.Request.RequestURI, "/assets/custom.js"):
 			serveFileOrEmptyContent(ctx.Writer, ctx.Request, server.Config.Server.CustomJsFile, "file.js")
-		} else if strings.HasSuffix(ctx.Request.RequestURI, "/assets/custom.css") {
+		case strings.HasSuffix(ctx.Request.RequestURI, "/assets/custom.css"):
 			serveFileOrEmptyContent(ctx.Writer, ctx.Request, server.Config.Server.CustomCSSFile, "file.css")
-		} else {
+		default:
 			serveFile(fs)(ctx)
 		}
 	}
@@ -158,7 +159,7 @@ func replaceBytes(data []byte) []byte {
 func parseIndex() []byte {
 	data, err := loadFile("index.html")
 	if err != nil {
-		log.Fatal().Err(err).Msg("can not find index.html")
+		log.Fatal().Err(err).Msg("can not find index.html") //nolint:forbidigo
 	}
 	data = bytes.ReplaceAll(data, []byte("/web-config.js"), []byte(server.Config.Server.RootPath+"/web-config.js"))
 	data = bytes.ReplaceAll(data, []byte("/assets/custom.css"), []byte(server.Config.Server.RootPath+"/assets/custom.css"))

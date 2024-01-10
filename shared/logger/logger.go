@@ -51,7 +51,7 @@ var GlobalLoggerFlags = []cli.Flag{
 	},
 }
 
-func SetupGlobalLogger(c *cli.Context, printLvl bool) {
+func SetupGlobalLogger(c *cli.Context, outputLvl bool) {
 	logLevel := c.String("log-level")
 	pretty := c.Bool("pretty")
 	noColor := c.Bool("nocolor")
@@ -66,7 +66,7 @@ func SetupGlobalLogger(c *cli.Context, printLvl bool) {
 	default: // a file was set
 		openFile, err := logfile.OpenFileWithContext(c.Context, logFile, 0o660)
 		if err != nil {
-			log.Fatal().Err(err).Msgf("could not open log file '%s'", logFile)
+			log.Fatal().Err(err).Msgf("could not open log file '%s'", logFile) //nolint:forbidigo
 		}
 		file = openFile
 		noColor = true
@@ -87,7 +87,7 @@ func SetupGlobalLogger(c *cli.Context, printLvl bool) {
 
 	lvl, err := zerolog.ParseLevel(logLevel)
 	if err != nil {
-		log.Fatal().Msgf("unknown logging level: %s", logLevel)
+		log.Fatal().Msgf("unknown logging level: %s", logLevel) //nolint:forbidigo
 	}
 	zerolog.SetGlobalLevel(lvl)
 
@@ -96,7 +96,7 @@ func SetupGlobalLogger(c *cli.Context, printLvl bool) {
 		log.Logger = log.With().Caller().Logger()
 	}
 
-	if printLvl {
+	if outputLvl {
 		log.Info().Msgf("LogLevel = %s", zerolog.GlobalLevel().String())
 	}
 }

@@ -56,17 +56,18 @@ func secretList(c *cli.Context) error {
 	}
 
 	var list []*woodpecker.Secret
-	if global {
+	switch {
+	case global:
 		list, err = client.GlobalSecretList()
 		if err != nil {
 			return err
 		}
-	} else if orgID != -1 {
+	case orgID != -1:
 		list, err = client.OrgSecretList(orgID)
 		if err != nil {
 			return err
 		}
-	} else {
+	default:
 		list, err = client.SecretList(repoID)
 		if err != nil {
 			return err

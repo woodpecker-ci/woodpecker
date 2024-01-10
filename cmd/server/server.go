@@ -63,17 +63,17 @@ func run(c *cli.Context) error {
 	}
 
 	if c.String("server-host") == "" {
-		log.Fatal().Msg("WOODPECKER_HOST is not properly configured")
+		log.Fatal().Msg("WOODPECKER_HOST is not properly configured") //nolint:forbidigo
 	}
 
 	if !strings.Contains(c.String("server-host"), "://") {
-		log.Fatal().Msg(
+		log.Fatal().Msg( //nolint:forbidigo
 			"WOODPECKER_HOST must be <scheme>://<hostname> format",
 		)
 	}
 
 	if _, err := url.Parse(c.String("server-host")); err != nil {
-		log.Fatal().Err(err).Msg("could not parse WOODPECKER_HOST")
+		log.Fatal().Err(err).Msg("could not parse WOODPECKER_HOST") //nolint:forbidigo
 	}
 
 	if strings.Contains(c.String("server-host"), "://localhost") {
@@ -84,7 +84,7 @@ func run(c *cli.Context) error {
 
 	_forge, err := setupForge(c)
 	if err != nil {
-		log.Fatal().Err(err).Msg("can't setup forge")
+		log.Fatal().Err(err).Msg("can't setup forge") //nolint:forbidigo
 	}
 
 	_store := setupStore(c)
@@ -96,7 +96,8 @@ func run(c *cli.Context) error {
 
 	err = setupEvilGlobals(c, _store, _forge)
 	if err != nil {
-		log.Fatal().Err(err).Msg("can't setup globals")
+		log.Error().Err(err).Msg("can't setup globals")
+		return err
 	}
 
 	var g errgroup.Group
@@ -111,7 +112,7 @@ func run(c *cli.Context) error {
 	g.Go(func() error {
 		lis, err := net.Listen("tcp", c.String("grpc-addr"))
 		if err != nil {
-			log.Fatal().Err(err).Msg("failed to listen on grpc-addr")
+			log.Fatal().Err(err).Msg("failed to listen on grpc-addr") //nolint:forbidigo
 		}
 
 		jwtSecret := c.String("grpc-secret")
@@ -144,7 +145,7 @@ func run(c *cli.Context) error {
 
 		err = grpcServer.Serve(lis)
 		if err != nil {
-			log.Fatal().Err(err).Msg("failed to serve grpc server")
+			log.Fatal().Err(err).Msg("failed to serve grpc server") //nolint:forbidigo
 		}
 		return nil
 	})
@@ -155,7 +156,8 @@ func run(c *cli.Context) error {
 	if proxyWebUI == "" {
 		webEngine, err := web.New()
 		if err != nil {
-			log.Fatal().Err(err).Msg("failed to create web engine")
+			log.Error().Err(err).Msg("failed to create web engine")
+			return err
 		}
 		webUIServe = webEngine.ServeHTTP
 	} else {
@@ -180,7 +182,8 @@ func run(c *cli.Context) error {
 		middleware.Store(c, _store),
 	)
 
-	if c.String("server-cert") != "" {
+	switch {
+	case c.String("server-cert") != "":
 		// start the server with tls enabled
 		g.Go(func() error {
 			serve := &http.Server{
@@ -195,7 +198,7 @@ func run(c *cli.Context) error {
 				c.String("server-key"),
 			)
 			if err != nil && !errors.Is(err, http.ErrServerClosed) {
-				log.Fatal().Err(err).Msg("failed to start server with tls")
+				log.Fatal().Err(err).Msg("failed to start server with tls") //nolint:forbidigo
 			}
 			return err
 		})
@@ -214,11 +217,11 @@ func run(c *cli.Context) error {
 		g.Go(func() error {
 			err := http.ListenAndServe(server.Config.Server.Port, http.HandlerFunc(redirect))
 			if err != nil && !errors.Is(err, http.ErrServerClosed) {
-				log.Fatal().Err(err).Msg("unable to start server to redirect from http to https")
+				log.Fatal().Err(err).Msg("unable to start server to redirect from http to https") //nolint:forbidigo
 			}
 			return err
 		})
-	} else if c.Bool("lets-encrypt") {
+	case c.Bool("lets-encrypt"):
 		// start the server with lets-encrypt
 		certmagic.DefaultACME.Email = c.String("lets-encrypt-email")
 		certmagic.DefaultACME.Agreed = true
@@ -230,11 +233,11 @@ func run(c *cli.Context) error {
 
 		g.Go(func() error {
 			if err := certmagic.HTTPS([]string{address.Host}, handler); err != nil {
-				log.Fatal().Err(err).Msg("certmagic does not work")
+				log.Fatal().Err(err).Msg("certmagic does not work") //nolint:forbidigo
 			}
 			return nil
 		})
-	} else {
+	default:
 		// start the server without tls
 		g.Go(func() error {
 			err := http.ListenAndServe(
@@ -242,7 +245,7 @@ func run(c *cli.Context) error {
 				handler,
 			)
 			if err != nil && !errors.Is(err, http.ErrServerClosed) {
-				log.Fatal().Err(err).Msg("could not start server")
+				log.Fatal().Err(err).Msg("could not start server") //nolint:forbidigo
 			}
 			return err
 		})
@@ -254,7 +257,7 @@ func run(c *cli.Context) error {
 			metricsRouter.GET("/metrics", gin.WrapH(promhttp.Handler()))
 			err := http.ListenAndServe(metricsServerAddr, metricsRouter)
 			if err != nil && !errors.Is(err, http.ErrServerClosed) {
-				log.Fatal().Err(err).Msg("could not start metrics server")
+				log.Fatal().Err(err).Msg("could not start metrics server") //nolint:forbidigo
 			}
 			return err
 		})

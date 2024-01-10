@@ -254,7 +254,7 @@ func (c *List) UnmarshalYAML(value *yaml.Node) error {
 	err2 := value.Decode(&out2)
 
 	c.Exclude = out1.Exclude
-	c.Include = append(
+	c.Include = append( //nolint:gocritic
 		out1.Include,
 		out2...,
 	)
@@ -335,7 +335,7 @@ func (c *Path) UnmarshalYAML(value *yaml.Node) error {
 
 	c.Exclude = out1.Exclude
 	c.IgnoreMessage = out1.IgnoreMessage
-	c.Include = append(
+	c.Include = append( //nolint:gocritic
 		out1.Include,
 		out2...,
 	)
