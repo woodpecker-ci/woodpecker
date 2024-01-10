@@ -66,6 +66,13 @@ func mkPod(namespace, name, image, workDir, goos, serviceAccountName string,
 	return pod, nil
 }
 
+func stepToPodName(step *types.Step) (name string, err error) {
+	if step.Type == types.StepTypeService {
+		return serviceName(step)
+	}
+	return podName(step)
+}
+
 func podName(step *types.Step) (string, error) {
 	return dnsName(step.Name)
 }

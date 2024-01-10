@@ -18,6 +18,7 @@ import (
 	"encoding/json"
 	"strconv"
 
+	"github.com/rs/zerolog/log"
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/pubsub"
@@ -33,9 +34,14 @@ func publishToTopic(pipeline *model.Pipeline, repo *model.Repo) {
 	}
 	pipelineCopy := *pipeline
 
-	message.Data, _ = json.Marshal(model.Event{
+	var err error
+	message.Data, err = json.Marshal(model.Event{
 		Repo:     *repo,
 		Pipeline: pipelineCopy,
 	})
+	if err != nil {
+		log.Error().Err(err).Msg("can't marshal JSON")
+		return
+	}
 	server.Config.Services.Pubsub.Publish(message)
 }
