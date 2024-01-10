@@ -303,7 +303,8 @@ func TestFifoErrorsMultiThread(t *testing.T) {
 		case got := <-obtainedWorkCh:
 			fmt.Println(got.ID)
 
-			if !task1Processed {
+			switch {
+			case !task1Processed:
 				if got != task1 {
 					t.Errorf("expect task1 returned from queue as task2 and task3 depends on it")
 					return
@@ -317,7 +318,7 @@ func TestFifoErrorsMultiThread(t *testing.T) {
 						obtainedWorkCh <- got
 					}
 				}()
-			} else if !task2Processed {
+			case !task2Processed:
 				if got != task2 {
 					t.Errorf("expect task2 returned from queue")
 					return
@@ -331,7 +332,7 @@ func TestFifoErrorsMultiThread(t *testing.T) {
 						obtainedWorkCh <- got
 					}
 				}()
-			} else {
+			default:
 				if got != task3 {
 					t.Errorf("expect task3 returned from queue")
 					return

@@ -161,28 +161,8 @@ linters:
     - unparam
     - wastedassign
     - whitespace
+    - gocritic
+    - nolintlint
 
 run:
   timeout: 15m
-
-issues:
-  exclude-rules:
-    # gin force us to use string as context key
-    - path: server/store/context.go
-      linters:
-        - staticcheck
-        - revive
-
-    # let cli use print and panic and log.Fatal()
-    - path: 'cmd/*|cli/*'
-      linters:
-        - forbidigo
-
-    # allow some setup functions to use log.Fatal()
-    - path: 'server/web/web.go|server/plugins/encryption/tink_keyset_watcher.go|shared/logger/logger.go'
-      linters:
-        - forbidigo
-
-    - path: '_test.go'
-      linters:
-        - forcetypeassert
