@@ -726,7 +726,7 @@ Example conditional execution by branch:
        channel: dev
 ```
 
-The step now triggers on main, but also if the target branch of a pull request is `main`. Add an event condition to limit it further to pushes on main only.
+The step now triggers on `main`, but also if the target branch of a pull request is `main`. Add an event condition to limit it further to pushes on main only.
 
 Execute a step if the branch is `main` or `develop`:
 
