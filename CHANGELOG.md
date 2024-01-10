@@ -8,6 +8,7 @@
 
 ### 📈 Enhancement
 
+- Enable `nolintlint` [[#3158](https://github.com/woodpecker-ci/woodpecker/pull/3158)]
 - Enable some linters [[#3129](https://github.com/woodpecker-ci/woodpecker/pull/3129)]
 - Use name in backend types instead of alias [[#3142](https://github.com/woodpecker-ci/woodpecker/pull/3142)]
 - Make service icon rotate [[#3149](https://github.com/woodpecker-ci/woodpecker/pull/3149)]
