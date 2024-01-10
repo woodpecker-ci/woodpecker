@@ -69,7 +69,7 @@ func (s *WoodpeckerAuthServer) getAgent(agentID int64, agentToken string) (*mode
 			agent.Capacity = -1
 			err := s.store.AgentCreate(agent)
 			if err != nil {
-				log.Err(err).Msgf("Error creating system agent: %s", err)
+				log.Error().Err(err).Msg("Error creating system agent")
 				return nil, err
 			}
 			return agent, nil

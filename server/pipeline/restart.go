@@ -41,9 +41,8 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 	// fetch the old pipeline config from the database
 	configs, err := store.ConfigsForPipeline(lastPipeline.ID)
 	if err != nil {
-		msg := fmt.Sprintf("failure to get pipeline config for %s. %s", repo.FullName, err)
-		log.Error().Msgf(msg)
-		return nil, &ErrNotFound{Msg: msg}
+		log.Error().Err(err).Msgf("failure to get pipeline config for %s", repo.FullName)
+		return nil, &ErrNotFound{Msg: fmt.Sprintf("failure to get pipeline config for %s. %s", repo.FullName, err)}
 	}
 
 	for _, y := range configs {
