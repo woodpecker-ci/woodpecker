@@ -8,6 +8,7 @@
 
 ### 📈 Enhancement
 
+- Clean up logging [[#3161](https://github.com/woodpecker-ci/woodpecker/pull/3161)]
 - Enable `gocritic` and don't ignore globally [[#3159](https://github.com/woodpecker-ci/woodpecker/pull/3159)]
 - Remove steps for publishing release branches [[#3125](https://github.com/woodpecker-ci/woodpecker/pull/3125)]
 - Enable `nolintlint` [[#3158](https://github.com/woodpecker-ci/woodpecker/pull/3158)]
