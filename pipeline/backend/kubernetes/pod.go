@@ -72,10 +72,12 @@ func podName(step *types.Step) (string, error) {
 
 func podMeta(name, namespace string, labels, annotations map[string]string, securityContext *types.SecurityContext) metav1.ObjectMeta {
 	meta := metav1.ObjectMeta{
-		Name:        name,
-		Namespace:   namespace,
-		Annotations: annotations,
+		Name:      name,
+		Namespace: namespace,
 	}
+
+	meta.Annotations = make(map[string]string)
+	maps.Copy(meta.Annotations, annotations)
 
 	if securityContext != nil {
 		key, value := apparmorAnnotation(name, securityContext.ApparmorProfile)
@@ -352,6 +354,7 @@ func seccompProfile(scp *types.SecProfile) *v1.SeccompProfile {
 	if scp == nil || len(scp.Type) == 0 {
 		return nil
 	}
+	log.Trace().Msgf("Using seccomp profile: %v", scp)
 
 	seccompProfile := &v1.SeccompProfile{
 		Type: v1.SeccompProfileType(scp.Type),
@@ -387,6 +390,7 @@ func apparmorAnnotation(containerName string, scp *types.SecProfile) (*string, *
 	if scp == nil {
 		return nil, nil
 	}
+	log.Trace().Msgf("Using AppArmor profile: %v", scp)
 
 	var (
 		profileType string
