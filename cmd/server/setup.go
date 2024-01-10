@@ -54,7 +54,7 @@ import (
 	addonTypes "go.woodpecker-ci.org/woodpecker/v2/shared/addon/types"
 )
 
-func setupStore(c *cli.Context) store.Store {
+func setupStore(c *cli.Context) (store.Store, error) {
 	datasource := c.String("datasource")
 	driver := c.String("driver")
 	xorm := store.XORM{
@@ -71,12 +71,12 @@ func setupStore(c *cli.Context) store.Store {
 	}
 
 	if !datastore.SupportedDriver(driver) {
-		log.Fatal().Msgf("database driver '%s' not supported", driver)
+		return nil, fmt.Errorf("database driver '%s' not supported", driver)
 	}
 
 	if driver == "sqlite3" {
 		if err := checkSqliteFileExist(datasource); err != nil {
-			log.Fatal().Err(err).Msg("check sqlite file")
+			return nil, fmt.Errorf("check sqlite file: %w", err)
 		}
 	}
 
@@ -88,14 +88,14 @@ func setupStore(c *cli.Context) store.Store {
 	log.Trace().Msgf("setup datastore: %#v", *opts)
 	store, err := datastore.NewEngine(opts)
 	if err != nil {
-		log.Fatal().Err(err).Msg("could not open datastore")
+		return nil, fmt.Errorf("could not open datastore: %w", err)
 	}
 
 	if err := store.Migrate(c.Bool("migrations-allow-long")); err != nil {
-		log.Fatal().Err(err).Msg("could not migrate datastore")
+		return nil, fmt.Errorf("could not migrate datastore: %w", err)
 	}
 
-	return store
+	return store, nil
 }
 
 func checkSqliteFileExist(path string) error {
@@ -204,7 +204,7 @@ func setupGitea(c *cli.Context) (forge.Forge, error) {
 		SkipVerify: c.Bool("gitea-skip-verify"),
 	}
 	if len(opts.URL) == 0 {
-		log.Fatal().Msg("WOODPECKER_GITEA_URL must be set")
+		return nil, fmt.Errorf("WOODPECKER_GITEA_URL must be set")
 	}
 	log.Trace().Msgf("Forge (gitea) opts: %#v", opts)
 	return gitea.New(opts)
@@ -294,34 +294,30 @@ func setupMetrics(g *errgroup.Group, _store store.Store) {
 }
 
 // setupSignatureKeys generate or load key pair to sign webhooks requests (i.e. used for extensions)
-func setupSignatureKeys(_store store.Store) (crypto.PrivateKey, crypto.PublicKey) {
+func setupSignatureKeys(_store store.Store) (crypto.PrivateKey, crypto.PublicKey, error) {
 	privKeyID := "signature-private-key"
 
 	privKey, err := _store.ServerConfigGet(privKeyID)
 	if errors.Is(err, types.RecordNotExist) {
 		_, privKey, err := ed25519.GenerateKey(rand.Reader)
 		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to generate private key")
-			return nil, nil
+			return nil, nil, fmt.Errorf("failed to generate private key: %w", err)
 		}
 		err = _store.ServerConfigSet(privKeyID, hex.EncodeToString(privKey))
 		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to generate private key")
-			return nil, nil
+			return nil, nil, fmt.Errorf("failed to store private key: %w", err)
 		}
 		log.Debug().Msg("Created private key")
-		return privKey, privKey.Public()
+		return privKey, privKey.Public(), nil
 	} else if err != nil {
-		log.Fatal().Err(err).Msg("Failed to load private key")
-		return nil, nil
+		return nil, nil, fmt.Errorf("failed to load private key: %w", err)
 	}
 	privKeyStr, err := hex.DecodeString(privKey)
 	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to decode private key")
-		return nil, nil
+		return nil, nil, fmt.Errorf("failed to decode private key: %w", err)
 	}
 	privateKey := ed25519.PrivateKey(privKeyStr)
-	return privateKey, privateKey.Public()
+	return privateKey, privateKey.Public(), nil
 }
 
 func setupConfigService(c *cli.Context) (config.Extension, error) {
