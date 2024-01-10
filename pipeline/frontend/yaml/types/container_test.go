@@ -308,4 +308,10 @@ func TestIsPlugin(t *testing.T) {
 	assert.False(t, (&Container{
 		Commands: base.StringOrSlice(strslice.StrSlice{"echo 'this is not a plugin'"}),
 	}).IsPlugin())
+	assert.True(t, (&Container{
+		Entrypoint: base.StringOrSlice(strslice.StrSlice{}),
+	}).IsPlugin())
+	assert.False(t, (&Container{
+		Entrypoint: base.StringOrSlice(strslice.StrSlice{"echo 'this is not a plugin'"}),
+	}).IsPlugin())
 }
