@@ -49,7 +49,7 @@ func GetCron(c *gin.Context) {
 
 	cron, err := store.FromContext(c).CronFind(repo, id)
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, cron)
@@ -76,7 +76,7 @@ func RunCron(c *gin.Context) {
 
 	cron, err := _store.CronFind(repo, id)
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 
@@ -183,7 +183,7 @@ func PatchCron(c *gin.Context) {
 
 	cron, err := _store.CronFind(repo, id)
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 	if in.Branch != "" {
@@ -259,7 +259,7 @@ func DeleteCron(c *gin.Context) {
 		return
 	}
 	if err := store.FromContext(c).CronDelete(repo, id); err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 	c.Status(http.StatusNoContent)

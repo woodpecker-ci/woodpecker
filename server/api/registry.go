@@ -41,7 +41,7 @@ func GetRegistry(c *gin.Context) {
 	)
 	registry, err := server.Config.Services.Registries.RegistryFind(repo, name)
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 	c.JSON(200, registry.Copy())
@@ -110,7 +110,7 @@ func PatchRegistry(c *gin.Context) {
 
 	registry, err := server.Config.Services.Registries.RegistryFind(repo, name)
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 	if in.Username != "" {
@@ -180,7 +180,7 @@ func DeleteRegistry(c *gin.Context) {
 	)
 	err := server.Config.Services.Registries.RegistryDelete(repo, name)
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 	c.Status(http.StatusNoContent)

@@ -34,7 +34,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/common"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
@@ -127,7 +126,7 @@ func (g *GitLab) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 
 	token, err := config.Exchange(oauth2Ctx, code)
 	if err != nil {
-		return nil, fmt.Errorf("Error exchanging token. %w", err)
+		return nil, fmt.Errorf("error exchanging token: %w", err)
 	}
 
 	client, err := newClient(g.url, token.AccessToken, g.SkipVerify)
@@ -345,7 +344,7 @@ func (g *GitLab) File(ctx context.Context, user *model.User, repo *model.Repo, p
 	}
 	file, resp, err := client.RepositoryFiles.GetRawFile(_repo.ID, fileName, &gitlab.GetRawFileOptions{Ref: &pipeline.Commit}, gitlab.WithContext(ctx))
 	if resp != nil && resp.StatusCode == http.StatusNotFound {
-		return nil, errors.Join(err, &types.ErrConfigNotFound{Configs: []string{fileName}})
+		return nil, errors.Join(err, &forge_types.ErrConfigNotFound{Configs: []string{fileName}})
 	}
 	return file, err
 }
@@ -383,7 +382,7 @@ func (g *GitLab) Dir(ctx context.Context, user *model.User, repo *model.Repo, pi
 			}
 			data, err := g.File(ctx, user, repo, pipeline, batch[i].Path)
 			if err != nil {
-				if errors.Is(err, &types.ErrConfigNotFound{}) {
+				if errors.Is(err, &forge_types.ErrConfigNotFound{}) {
 					return nil, fmt.Errorf("git tree reported existence of file but we got: %s", err.Error())
 				}
 				return nil, err

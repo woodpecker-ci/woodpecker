@@ -401,7 +401,7 @@ func (c *config) Org(ctx context.Context, u *model.User, owner string) (*model.O
 
 	return &model.Org{
 		Name:   workspace.Slug,
-		IsUser: false, // bitbucket uses workspaces (similar to orgs) for teams and single users so we can not distinguish between them
+		IsUser: false, // bitbucket uses workspaces (similar to orgs) for teams and single users so we cannot distinguish between them
 	}, nil
 }
 

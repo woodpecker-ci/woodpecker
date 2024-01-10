@@ -42,7 +42,7 @@ func (s *StringOrInt) UnmarshalYAML(unmarshal func(any) error) error {
 		return nil
 	}
 
-	return errors.New("Failed to unmarshal StringOrInt")
+	return errors.New("failed to unmarshal StringOrInt")
 }
 
 // MemStringOrInt represents a string or an integer
@@ -67,5 +67,5 @@ func (s *MemStringOrInt) UnmarshalYAML(unmarshal func(any) error) error {
 		return nil
 	}
 
-	return errors.New("Failed to unmarshal MemStringOrInt")
+	return errors.New("failed to unmarshal MemStringOrInt")
 }
