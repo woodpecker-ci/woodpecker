@@ -147,7 +147,7 @@ func MustOrgMember(admin bool) gin.HandlerFunc {
 
 		perm, err := server.Config.Services.Membership.Get(c, user, org.Name)
 		if err != nil {
-			log.Error().Msgf("Failed to check membership: %v", err)
+			log.Error().Err(err).Msg("Failed to check membership")
 			c.String(http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			c.Abort()
 			return
