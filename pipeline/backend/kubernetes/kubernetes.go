@@ -255,7 +255,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 	}
 
 	if isImagePullBackOffState(pod) {
-		return nil, fmt.Errorf("Could not pull image for pod %s", pod.Name)
+		return nil, fmt.Errorf("could not pull image for pod %s", pod.Name)
 	}
 
 	bs := &types.State{
