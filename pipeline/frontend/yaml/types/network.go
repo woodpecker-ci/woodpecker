@@ -90,6 +90,8 @@ func handleNetwork(name string, value any) (*Network, error) {
 		network := &Network{
 			Name: name,
 		}
+
+		var ok bool
 		for mapKey, mapValue := range v {
 			switch mapKey {
 			case "aliases":
@@ -99,13 +101,22 @@ func handleNetwork(name string, value any) (*Network, error) {
 				}
 				network.Aliases = []string{}
 				for _, alias := range aliases {
-					a, _ := alias.(string)
+					a, ok := alias.(string)
+					if !ok {
+						return &Network{}, fmt.Errorf("cannot unmarshal '%v' to type %T into a string value", aliases, aliases)
+					}
 					network.Aliases = append(network.Aliases, a)
 				}
 			case "ipv4_address":
-				network.IPv4Address, _ = mapValue.(string)
+				network.IPv4Address, ok = mapValue.(string)
+				if !ok {
+					return &Network{}, fmt.Errorf("cannot unmarshal '%v' to type %T into a string value", network, network)
+				}
 			case "ipv6_address":
-				network.IPv6Address, _ = mapValue.(string)
+				network.IPv6Address, ok = mapValue.(string)
+				if !ok {
+					return &Network{}, fmt.Errorf("cannot unmarshal '%v' to type %T into a string value", network, network)
+				}
 			default:
 				// Ignorer unknown keys ?
 				continue
