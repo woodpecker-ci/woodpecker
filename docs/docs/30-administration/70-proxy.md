@@ -13,22 +13,20 @@ ProxyPass / http://127.0.0.1:8000/
 ProxyPassReverse / http://127.0.0.1:8000/
 ```
 
-You must have the below Apache modules installed.
+You must have these Apache modules installed:
 
-```nohighlight
-a2enmod proxy
-a2enmod proxy_http
-```
+- `proxy`
+- `proxy_http`
 
 You must configure Apache to set `X-Forwarded-Proto` when using https.
 
 ```diff
-ProxyPreserveHost On
+ ProxyPreserveHost On
 
 +RequestHeader set X-Forwarded-Proto "https"
 
-ProxyPass / http://127.0.0.1:8000/
-ProxyPassReverse / http://127.0.0.1:8000/
+ ProxyPass / http://127.0.0.1:8000/
+ ProxyPassReverse / http://127.0.0.1:8000/
 ```
 
 ## Nginx
@@ -60,22 +58,22 @@ server {
 You must configure the proxy to set `X-Forwarded` proxy headers:
 
 ```diff
-server {
-    listen 80;
-    server_name woodpecker.example.com;
+ server {
+     listen 80;
+     server_name woodpecker.example.com;
 
-    location / {
-+       proxy_set_header X-Forwarded-For $remote_addr;
-+       proxy_set_header X-Forwarded-Proto $scheme;
+     location / {
++        proxy_set_header X-Forwarded-For $remote_addr;
++        proxy_set_header X-Forwarded-Proto $scheme;
 
-        proxy_pass http://127.0.0.1:8000;
-        proxy_redirect off;
-        proxy_http_version 1.1;
-        proxy_buffering off;
+         proxy_pass http://127.0.0.1:8000;
+         proxy_redirect off;
+         proxy_http_version 1.1;
+         proxy_buffering off;
 
-        chunked_transfer_encoding off;
-    }
-}
+         chunked_transfer_encoding off;
+     }
+ }
 ```
 
 ## Caddy
@@ -95,7 +93,7 @@ woodpeckeragent.example.com {
 ```
 
 :::note
-Above configuration shows how to create reverse-proxies for web and agent communication. If your agent uses SSL do not forget to enable [WOODPECKER_GRPC_SECURE](./15-agent-config.md#woodpecker_grpc_secure).
+Above configuration shows how to create reverse-proxies for web and agent communication. If your agent uses SSL do not forget to enable [`WOODPECKER_GRPC_SECURE`](./15-agent-config.md#woodpecker_grpc_secure).
 :::
 
 ## Tunnelmole
@@ -118,7 +116,7 @@ http://bvdo5f-ip-49-183-170-144.tunnelmole.net is forwarding to localhost:8000
 https://bvdo5f-ip-49-183-170-144.tunnelmole.net is forwarding to localhost:8000
 ```
 
-Set `WOODPECKER_HOST` (for example in `docker-compose.yml`) to the Tunnelmole URL (`xxx.tunnelmole.net`) and start the server.
+Set `WOODPECKER_HOST` to the Tunnelmole URL (`xxx.tunnelmole.net`) and start the server.
 
 ## Ngrok
 
@@ -128,7 +126,7 @@ Set `WOODPECKER_HOST` (for example in `docker-compose.yml`) to the Tunnelmole UR
 ngrok http 8000
 ```
 
-Set `WOODPECKER_HOST` (for example in `docker-compose.yml`) to the ngrok URL (usually xxx.ngrok.io) and start the server.
+Set `WOODPECKER_HOST` to the ngrok URL (usually xxx.ngrok.io) and start the server.
 
 ## Traefik
 
