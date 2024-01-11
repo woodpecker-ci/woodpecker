@@ -235,7 +235,7 @@ func (e *local) DestroyStep(_ context.Context, _ *types.Step, _ string) error {
 
 // DestroyWorkflow the pipeline environment.
 func (e *local) DestroyWorkflow(_ context.Context, _ *types.Config, taskUUID string) error {
-	log.Trace().Str("taskUUID", taskUUID).Msgf("delete workflow environment")
+	log.Trace().Str("taskUUID", taskUUID).Msg("delete workflow environment")
 
 	state, err := e.getState(taskUUID)
 	if err != nil {

@@ -64,9 +64,9 @@ func setupStore(c *cli.Context) (store.Store, error) {
 
 	if driver == "sqlite3" {
 		if datastore.SupportedDriver("sqlite3") {
-			log.Debug().Msgf("server has sqlite3 support")
+			log.Debug().Msg("server has sqlite3 support")
 		} else {
-			log.Debug().Msgf("server was built without sqlite3 support!")
+			log.Debug().Msg("server was built without sqlite3 support!")
 		}
 	}
 

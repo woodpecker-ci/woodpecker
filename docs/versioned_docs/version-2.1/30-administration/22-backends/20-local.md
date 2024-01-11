@@ -5,7 +5,7 @@ The local backend will execute the pipelines on the local system without any iso
 :::
 
 :::note
-This backend is still pretty new and can not be treated as stable. Its
+This backend is still pretty new and cannot be treated as stable. Its
 implementation and configuration can change at any time.
 :::
 
