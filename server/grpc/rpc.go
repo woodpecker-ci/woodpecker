@@ -139,7 +139,7 @@ func (s *RPC) Update(_ context.Context, id string, state rpc.State) error {
 	}
 
 	if currentPipeline.Workflows, err = s.store.WorkflowGetTree(currentPipeline); err != nil {
-		log.Error().Err(err).Msg("can not build tree from step list")
+		log.Error().Err(err).Msg("cannot build tree from step list")
 		return err
 	}
 	message := pubsub.Message{
@@ -269,7 +269,7 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 
 	var queueErr error
 	if workflow.Failing() {
-		queueErr = s.queue.Error(c, id, fmt.Errorf("Step finished with exit code %d, %s", state.ExitCode, state.Error))
+		queueErr = s.queue.Error(c, id, fmt.Errorf("step finished with exit code %d, %s", state.ExitCode, state.Error))
 	} else {
 		queueErr = s.queue.Done(c, id, workflow.State)
 	}
@@ -388,6 +388,7 @@ func (s *RPC) ReportHealth(ctx context.Context, status string) error {
 	}
 
 	if status != "I am alive!" {
+		//nolint:stylecheck
 		return errors.New("Are you alive?")
 	}
 
@@ -409,7 +410,7 @@ func (s *RPC) completeChildrenIfParentCompleted(completedWorkflow *model.Workflo
 func (s *RPC) updateForgeStatus(ctx context.Context, repo *model.Repo, pipeline *model.Pipeline, workflow *model.Workflow) {
 	user, err := s.store.GetUser(repo.UserID)
 	if err != nil {
-		log.Error().Err(err).Msgf("can not get user with id '%d'", repo.UserID)
+		log.Error().Err(err).Msgf("cannot get user with id '%d'", repo.UserID)
 		return
 	}
 
