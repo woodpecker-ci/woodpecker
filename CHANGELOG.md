@@ -4,10 +4,11 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@xoxys, @6543, @qwerty287, @micash545, @pat-s, @miry, @zc-devs, @lukashass, @lafriks, @pre-commit-ci[bot], @anbraten, @andyhan, @renovate[bot], @KamilaBorowska
+@qwerty287, @6543, @xoxys, @micash545, @pat-s, @miry, @zc-devs, @lukashass, @lafriks, @pre-commit-ci[bot], @anbraten, @andyhan, @renovate[bot], @KamilaBorowska
 
 ### 📈 Enhancement
 
+- Cleanups + prefer .yaml [[#3069](https://github.com/woodpecker-ci/woodpecker/pull/3069)]
 - Use UUID as podName and cleanup arguments for Kubernetes backend [[#3135](https://github.com/woodpecker-ci/woodpecker/pull/3135)]
 - Enable golangci linter stylecheck [[#3167](https://github.com/woodpecker-ci/woodpecker/pull/3167)]
 - Clean up logging [[#3161](https://github.com/woodpecker-ci/woodpecker/pull/3161)]
@@ -72,7 +73,6 @@
 
 ### Misc
 
-- Remove duplicate golangci linter [[#3172](https://github.com/woodpecker-ci/woodpecker/pull/3172)]
 - Add `make clean-all` [[#3152](https://github.com/woodpecker-ci/woodpecker/pull/3152)]
 - Fix `version.json` updates [[#3057](https://github.com/woodpecker-ci/woodpecker/pull/3057)]
 - [pre-commit.ci] pre-commit autoupdate [[#3101](https://github.com/woodpecker-ci/woodpecker/pull/3101)]
