@@ -26,9 +26,8 @@ func TestPvcName(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "woodpecker-cache", name)
 
-	name, err = volumeName("woodpecker\\cache")
-	assert.NoError(t, err)
-	assert.Equal(t, "woodpecker\\cache", name)
+	_, err = volumeName("woodpecker\\cache")
+	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
 
 	_, err = volumeName("-woodpecker.cache:/woodpecker/src/cache")
 	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
@@ -99,6 +98,6 @@ func TestPersistentVolumeClaim(t *testing.T) {
 	assert.NoError(t, err)
 	assert.JSONEq(t, expectedRwo, string(j))
 
-	_, err = mkPersistentVolumeClaim("someNamespace", "some0INVALID3name", "local-storage", "1Gi", false)
+	_, err = mkPersistentVolumeClaim("someNamespace", "some0..INVALID3name", "local-storage", "1Gi", false)
 	assert.Error(t, err)
 }
