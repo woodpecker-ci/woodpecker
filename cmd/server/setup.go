@@ -187,7 +187,7 @@ func setupBitbucket(c *cli.Context) (forge.Forge, error) {
 		Client: c.String("bitbucket-client"),
 		Secret: c.String("bitbucket-secret"),
 	}
-	log.Trace().Msgf("Forge (bitbucket) opts: %#v", opts)
+	log.Trace().Msgf("forge (bitbucket) opts: %#v", opts)
 	return bitbucket.New(opts)
 }
 
@@ -206,7 +206,7 @@ func setupGitea(c *cli.Context) (forge.Forge, error) {
 	if len(opts.URL) == 0 {
 		return nil, fmt.Errorf("WOODPECKER_GITEA_URL must be set")
 	}
-	log.Trace().Msgf("Forge (gitea) opts: %#v", opts)
+	log.Trace().Msgf("forge (gitea) opts: %#v", opts)
 	return gitea.New(opts)
 }
 
@@ -229,7 +229,7 @@ func setupGitHub(c *cli.Context) (forge.Forge, error) {
 		SkipVerify: c.Bool("github-skip-verify"),
 		MergeRef:   c.Bool("github-merge-ref"),
 	}
-	log.Trace().Msgf("Forge (github) opts: %#v", opts)
+	log.Trace().Msgf("forge (github) opts: %#v", opts)
 	return github.New(opts)
 }
 
@@ -307,7 +307,7 @@ func setupSignatureKeys(_store store.Store) (crypto.PrivateKey, crypto.PublicKey
 		if err != nil {
 			return nil, nil, fmt.Errorf("failed to store private key: %w", err)
 		}
-		log.Debug().Msg("Created private key")
+		log.Debug().Msg("created private key")
 		return privKey, privKey.Public(), nil
 	} else if err != nil {
 		return nil, nil, fmt.Errorf("failed to load private key: %w", err)

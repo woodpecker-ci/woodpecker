@@ -179,7 +179,7 @@ func LogStreamSSE(c *gin.Context) {
 	}
 
 	if step.PipelineID != pl.ID {
-		// make sure we can not read arbitrary logs by id
+		// make sure we cannot read arbitrary logs by id
 		err = fmt.Errorf("step with id %d is not part of repo %s", stepID, repo.FullName)
 		log.Debug().Err(err).Msg("event error")
 		logWriteStringErr(io.WriteString(rw, "event: error\ndata: "+err.Error()+"\n\n"))

@@ -136,7 +136,6 @@ linters:
     - staticcheck
     - typecheck
     - unused
-    - whitespace
     - gofumpt
     - errorlint
     - forbidigo
@@ -163,6 +162,7 @@ linters:
     - whitespace
     - gocritic
     - nolintlint
+    - stylecheck
 
 run:
   timeout: 15m

@@ -122,7 +122,7 @@ func serveFile(f *prefixFS) func(ctx *gin.Context) {
 		ctx.Writer.Header().Del("Expires")
 		ctx.Writer.Header().Set("Content-Type", mime)
 		if _, err := ctx.Writer.Write(replaceBytes(data)); err != nil {
-			log.Error().Err(err).Msgf("can not write %s", ctx.Request.URL.Path)
+			log.Error().Err(err).Msgf("cannot write %s", ctx.Request.URL.Path)
 		}
 	}
 }
@@ -145,7 +145,7 @@ func handleIndex(c *gin.Context) {
 	rw.Header().Set("Content-Type", "text/html; charset=UTF-8")
 	rw.WriteHeader(http.StatusOK)
 	if _, err := rw.Write(indexHTML); err != nil {
-		log.Error().Err(err).Msg("can not write index.html")
+		log.Error().Err(err).Msg("cannot write index.html")
 	}
 }
 
@@ -164,7 +164,7 @@ func replaceBytes(data []byte) []byte {
 func parseIndex() ([]byte, error) {
 	data, err := loadFile("index.html")
 	if err != nil {
-		return nil, fmt.Errorf("can not find index.html: %w", err)
+		return nil, fmt.Errorf("cannot find index.html: %w", err)
 	}
 	data = bytes.ReplaceAll(data, []byte("/web-config.js"), []byte(server.Config.Server.RootPath+"/web-config.js"))
 	data = bytes.ReplaceAll(data, []byte("/assets/custom.css"), []byte(server.Config.Server.RootPath+"/assets/custom.css"))

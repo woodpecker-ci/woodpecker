@@ -4,7 +4,7 @@ variables:
   - &alpine_image 'docker.io/alpine:3.19'
   - path: &when_path
       - 'docs/**'
-      - '.woodpecker/docs.yml'
+      - '.woodpecker/docs.yaml'
       # since we generate docs for cli tool we have to watch this too
       - 'cli/**'
       - 'cmd/cli/**'

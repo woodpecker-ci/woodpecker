@@ -61,7 +61,7 @@ func PostRepo(c *gin.Context) {
 		c.String(http.StatusConflict, "Repository is already active.")
 		return
 	} else if err != nil && !errors.Is(err, types.RecordNotExist) {
-		msg := "Could not get repo by remote id from store."
+		msg := "could not get repo by remote id from store."
 		log.Error().Err(err).Msg(msg)
 		c.String(http.StatusInternalServerError, msg)
 		return
@@ -115,7 +115,7 @@ func PostRepo(c *gin.Context) {
 	t := token.New(token.HookToken, repo.FullName)
 	sig, err := t.Sign(repo.Hash)
 	if err != nil {
-		msg := "Could not generate new jwt token."
+		msg := "could not generate new jwt token."
 		log.Error().Err(err).Msg(msg)
 		c.String(http.StatusInternalServerError, msg)
 		return
@@ -139,7 +139,7 @@ func PostRepo(c *gin.Context) {
 	if errors.Is(err, types.RecordNotExist) {
 		org, err = forge.Org(c, user, repo.Owner)
 		if err != nil {
-			msg := "Could not fetch organization from forge."
+			msg := "could not fetch organization from forge."
 			log.Error().Err(err).Msg(msg)
 			c.String(http.StatusInternalServerError, msg)
 			return
@@ -147,7 +147,7 @@ func PostRepo(c *gin.Context) {
 
 		err = _store.OrgCreate(org)
 		if err != nil {
-			msg := "Could not create organization in store."
+			msg := "could not create organization in store."
 			log.Error().Err(err).Msg(msg)
 			c.String(http.StatusInternalServerError, msg)
 			return
@@ -158,7 +158,7 @@ func PostRepo(c *gin.Context) {
 
 	err = forge.Activate(c, user, repo, hookURL)
 	if err != nil {
-		msg := "Could not create webhook in forge."
+		msg := "could not create webhook in forge."
 		log.Error().Err(err).Msg(msg)
 		c.String(http.StatusInternalServerError, msg)
 		return
@@ -170,7 +170,7 @@ func PostRepo(c *gin.Context) {
 		err = _store.CreateRepo(repo)
 	}
 	if err != nil {
-		msg := "Could not create/update repo in store."
+		msg := "could not create/update repo in store."
 		log.Error().Err(err).Msg(msg)
 		c.String(http.StatusInternalServerError, msg)
 		return
@@ -400,7 +400,7 @@ func DeleteRepo(c *gin.Context) {
 
 	if remove {
 		if err := _store.DeleteRepo(repo); err != nil {
-			handleDbError(c, err)
+			handleDBError(c, err)
 			return
 		}
 	}

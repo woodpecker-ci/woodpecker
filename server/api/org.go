@@ -49,7 +49,7 @@ func GetOrg(c *gin.Context) {
 
 	org, err := _store.OrgGet(orgID)
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 
@@ -122,7 +122,7 @@ func LookupOrg(c *gin.Context) {
 
 	org, err := _store.OrgFindByName(orgFullName)
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 
@@ -140,7 +140,7 @@ func LookupOrg(c *gin.Context) {
 		} else if !user.Admin {
 			perm, err := server.Config.Services.Membership.Get(c, user, org.Name)
 			if err != nil {
-				log.Error().Err(err).Msg("Failed to check membership")
+				log.Error().Err(err).Msg("failed to check membership")
 				c.Status(http.StatusInternalServerError)
 				return
 			}

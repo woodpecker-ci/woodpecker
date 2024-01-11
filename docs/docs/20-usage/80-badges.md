@@ -4,7 +4,7 @@ Woodpecker has integrated support for repository status badges. These badges can
 
 ## Badge endpoint
 
-```text
+```uri
 <scheme>://<hostname>/api/badges/<repo-id>/status.svg
 ```
 

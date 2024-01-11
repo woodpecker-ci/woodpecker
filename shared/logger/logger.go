@@ -98,7 +98,7 @@ func SetupGlobalLogger(c *cli.Context, outputLvl bool) error {
 	}
 
 	if outputLvl {
-		log.Info().Msgf("LogLevel = %s", zerolog.GlobalLevel().String())
+		log.Info().Msgf("log level: %s", zerolog.GlobalLevel().String())
 	}
 
 	return nil

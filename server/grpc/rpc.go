@@ -139,7 +139,7 @@ func (s *RPC) Update(_ context.Context, id string, state rpc.State) error {
 	}
 
 	if currentPipeline.Workflows, err = s.store.WorkflowGetTree(currentPipeline); err != nil {
-		log.Error().Err(err).Msg("can not build tree from step list")
+		log.Error().Err(err).Msg("cannot build tree from step list")
 		return err
 	}
 	message := pubsub.Message{
@@ -169,7 +169,7 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 
 	workflow, err := s.store.WorkflowLoad(stepID)
 	if err != nil {
-		log.Error().Msgf("error: cannot find step with id %d: %s", stepID, err)
+		log.Error().Err(err).Msgf("cannot find step with id %d", stepID)
 		return err
 	}
 
@@ -181,19 +181,19 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 
 	currentPipeline, err := s.store.GetPipeline(workflow.PipelineID)
 	if err != nil {
-		log.Error().Msgf("error: cannot find pipeline with id %d: %s", workflow.PipelineID, err)
+		log.Error().Err(err).Msgf("cannot find pipeline with id %d", workflow.PipelineID)
 		return err
 	}
 
 	repo, err := s.store.GetRepo(currentPipeline.RepoID)
 	if err != nil {
-		log.Error().Msgf("error: cannot find repo with id %d: %s", currentPipeline.RepoID, err)
+		log.Error().Err(err).Msgf("cannot find repo with id %d", currentPipeline.RepoID)
 		return err
 	}
 
 	if currentPipeline.Status == model.StatusPending {
 		if currentPipeline, err = pipeline.UpdateToStatusRunning(s.store, *currentPipeline, state.Started); err != nil {
-			log.Error().Msgf("error: init: cannot update build_id %d state: %s", currentPipeline.ID, err)
+			log.Error().Err(err).Msgf("init: cannot update build_id %d state", currentPipeline.ID)
 		}
 	}
 
@@ -269,7 +269,7 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 
 	var queueErr error
 	if workflow.Failing() {
-		queueErr = s.queue.Error(c, id, fmt.Errorf("Step finished with exit code %d, %s", state.ExitCode, state.Error))
+		queueErr = s.queue.Error(c, id, fmt.Errorf("step finished with exit code %d, %s", state.ExitCode, state.Error))
 	} else {
 		queueErr = s.queue.Done(c, id, workflow.State)
 	}
@@ -388,6 +388,7 @@ func (s *RPC) ReportHealth(ctx context.Context, status string) error {
 	}
 
 	if status != "I am alive!" {
+		//nolint:stylecheck
 		return errors.New("Are you alive?")
 	}
 
@@ -400,7 +401,7 @@ func (s *RPC) completeChildrenIfParentCompleted(completedWorkflow *model.Workflo
 	for _, c := range completedWorkflow.Children {
 		if c.Running() {
 			if _, err := pipeline.UpdateStepToStatusSkipped(s.store, *c, completedWorkflow.Stopped); err != nil {
-				log.Error().Msgf("error: done: cannot update step_id %d child state: %s", c.ID, err)
+				log.Error().Err(err).Msgf("done: cannot update step_id %d child state", c.ID)
 			}
 		}
 	}
@@ -409,7 +410,7 @@ func (s *RPC) completeChildrenIfParentCompleted(completedWorkflow *model.Workflo
 func (s *RPC) updateForgeStatus(ctx context.Context, repo *model.Repo, pipeline *model.Pipeline, workflow *model.Workflow) {
 	user, err := s.store.GetUser(repo.UserID)
 	if err != nil {
-		log.Error().Err(err).Msgf("can not get user with id '%d'", repo.UserID)
+		log.Error().Err(err).Msgf("cannot get user with id '%d'", repo.UserID)
 		return
 	}
 
