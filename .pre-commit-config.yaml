@@ -42,7 +42,8 @@ repos:
         entry: YAML filenames must have .yaml extension.
         language: fail
         files: .yml$
-        exclude: '^.gitpod.yml$'
+        #exclude: '^.gitpod.yml$'
+
 ci:
   autofix_commit_msg: |
     [pre-commit.ci] auto fixes from pre-commit.com hooks [CI SKIP]
