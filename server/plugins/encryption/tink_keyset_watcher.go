@@ -48,13 +48,13 @@ func (svc *tinkEncryptionService) handleFileEvents() {
 				log.Warn().Msgf(logTemplateTinkKeysetFileChanged, event.Name)
 				err := svc.rotate()
 				if err != nil {
-					log.Fatal().Err(err).Msgf(errMessageFailedRotatingEncryption) //nolint:forbidigo
+					log.Fatal().Err(err).Msg(errMessageFailedRotatingEncryption) //nolint:forbidigo
 				}
 				return
 			}
 		case err, ok := <-svc.keysetFileWatcher.Errors:
 			if !ok {
-				log.Fatal().Err(err).Msgf(errMessageTinkKeysetFileWatchFailed) //nolint:forbidigo
+				log.Fatal().Err(err).Msg(errMessageTinkKeysetFileWatchFailed) //nolint:forbidigo
 			}
 		}
 	}

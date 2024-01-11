@@ -44,16 +44,16 @@ func NewClient(c *cli.Context) (woodpecker.Client, error) {
 	// if no server url is provided we can default
 	// to the hosted Woodpecker service.
 	if len(server) == 0 {
-		return nil, fmt.Errorf("Error: you must provide the Woodpecker server address")
+		return nil, fmt.Errorf("you must provide the Woodpecker server address")
 	}
 	if len(token) == 0 {
-		return nil, fmt.Errorf("Error: you must provide your Woodpecker access token")
+		return nil, fmt.Errorf("you must provide your Woodpecker access token")
 	}
 
 	// attempt to find system CA certs
 	certs, err := x509.SystemCertPool()
 	if err != nil {
-		log.Error().Msgf("failed to find system CA certs: %v", err)
+		log.Error().Err(err).Msg("failed to find system CA certs")
 	}
 	tlsConfig := &tls.Config{
 		RootCAs:            certs,

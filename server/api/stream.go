@@ -160,7 +160,7 @@ func LogStreamSSE(c *gin.Context) {
 	}
 	pl, err := _store.GetPipelineNumber(repo, pipeline)
 	if err != nil {
-		log.Debug().Msgf("stream cannot get pipeline number: %v", err)
+		log.Debug().Err(err).Msg("stream cannot get pipeline number")
 		logWriteStringErr(io.WriteString(rw, "event: error\ndata: pipeline not found\n\n"))
 		return
 	}
@@ -173,13 +173,13 @@ func LogStreamSSE(c *gin.Context) {
 	}
 	step, err := _store.StepLoad(stepID)
 	if err != nil {
-		log.Debug().Msgf("stream cannot get step number: %v", err)
+		log.Debug().Err(err).Msg("stream cannot get step number")
 		logWriteStringErr(io.WriteString(rw, "event: error\ndata: process not found\n\n"))
 		return
 	}
 
 	if step.PipelineID != pl.ID {
-		// make sure we can not read arbitrary logs by id
+		// make sure we cannot read arbitrary logs by id
 		err = fmt.Errorf("step with id %d is not part of repo %s", stepID, repo.FullName)
 		log.Debug().Err(err).Msg("event error")
 		logWriteStringErr(io.WriteString(rw, "event: error\ndata: "+err.Error()+"\n\n"))
@@ -197,12 +197,12 @@ func LogStreamSSE(c *gin.Context) {
 		context.Background(),
 	)
 
-	log.Debug().Msgf("log stream: connection opened")
+	log.Debug().Msg("log stream: connection opened")
 
 	defer func() {
 		cancel(nil)
 		close(logc)
-		log.Debug().Msgf("log stream: connection closed")
+		log.Debug().Msg("log stream: connection closed")
 	}()
 
 	go func() {
