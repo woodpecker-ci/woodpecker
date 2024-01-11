@@ -27,12 +27,15 @@ import (
 )
 
 var (
-	dnsPattern           = regexp.MustCompile(`^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$`)
+	dnsPattern = regexp.MustCompile(`^[a-z0-9]` + // must start with
+		`([-a-z0-9]*[a-z0-9])?` + // inside can als contain -
+		`(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$`, // allow the same pattern as before with dots in between but only one dot
+	)
 	ErrDNSPatternInvalid = errors.New("name is not a valid kubernetes DNS name")
 )
 
 func dnsName(i string) (string, error) {
-	res := strings.ReplaceAll(i, "_", "-")
+	res := strings.ToLower(strings.ReplaceAll(i, "_", "-"))
 
 	if found := dnsPattern.FindStringIndex(res); found == nil {
 		return "", ErrDNSPatternInvalid
