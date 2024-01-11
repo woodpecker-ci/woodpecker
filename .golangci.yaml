@@ -163,6 +163,7 @@ linters:
     - gocritic
     - nolintlint
     - stylecheck
+    - contextcheck
 
 run:
   timeout: 15m
