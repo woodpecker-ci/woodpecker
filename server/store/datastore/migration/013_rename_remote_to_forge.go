@@ -19,13 +19,15 @@ import (
 	"xorm.io/xorm"
 )
 
+const reposTableName = "repos"
+
 type oldRepo013 struct {
 	ID       int64  `xorm:"pk autoincr 'repo_id'"`
 	RemoteID string `xorm:"remote_id"`
 }
 
 func (oldRepo013) TableName() string {
-	return "repos"
+	return reposTableName
 }
 
 var renameRemoteToForge = xormigrate.Migration{
@@ -40,6 +42,6 @@ var renameRemoteToForge = xormigrate.Migration{
 			return err
 		}
 
-		return renameColumn(sess, "repos", "remote_id", "forge_id")
+		return renameColumn(sess, reposTableName, "remote_id", "forge_id")
 	},
 }

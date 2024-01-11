@@ -29,6 +29,8 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
 
+const osWindows = "windows"
+
 // checkGitCloneCap check if we have the git binary on hand
 func checkGitCloneCap() error {
 	_, err := exec.LookPath("git")
@@ -54,7 +56,7 @@ func (e *local) setupClone(state *workflowState) error {
 
 	log.Info().Msg("no global 'plugin-git' installed, try to download for current workflow")
 	state.pluginGitBinary = filepath.Join(state.homeDir, "plugin-git")
-	if e.os == "windows" {
+	if e.os == osWindows {
 		state.pluginGitBinary += ".exe"
 	}
 	return e.downloadLatestGitPluginBinary(state.pluginGitBinary)
@@ -87,7 +89,7 @@ func (e *local) execClone(ctx context.Context, step *types.Step, state *workflow
 	var cmd *exec.Cmd
 	if rmCmd != "" {
 		// if we have a netrc injected we have to make sure it's deleted in any case after clone was attempted
-		if e.os == "windows" {
+		if e.os == osWindows {
 			pwsh, err := exec.LookPath("powershell.exe")
 			if err != nil {
 				return err
@@ -121,7 +123,7 @@ func (e *local) writeNetRC(step *types.Step, state *workflowState) (string, erro
 
 	file := filepath.Join(state.homeDir, ".netrc")
 	rmCmd := fmt.Sprintf("rm \"%s\"", file)
-	if e.os == "windows" {
+	if e.os == osWindows {
 		file = filepath.Join(state.homeDir, "_netrc")
 		rmCmd = fmt.Sprintf("del \"%s\"", file)
 	}
