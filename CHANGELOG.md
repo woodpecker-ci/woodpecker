@@ -4,10 +4,11 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@qwerty287, @6543, @xoxys, @micash545, @pat-s, @miry, @zc-devs, @lukashass, @lafriks, @pre-commit-ci[bot], @anbraten, @andyhan, @renovate[bot], @KamilaBorowska
+@xoxys, @qwerty287, @6543, @micash545, @pat-s, @miry, @zc-devs, @lukashass, @lafriks, @pre-commit-ci[bot], @anbraten, @andyhan, @renovate[bot], @KamilaBorowska
 
 ### 📈 Enhancement
 
+- Enable golangci linter contextcheck [[#3170](https://github.com/woodpecker-ci/woodpecker/pull/3170)]
 - Remove panic recovering [[#3162](https://github.com/woodpecker-ci/woodpecker/pull/3162)]
 - More docker backend test remove more undocumented [[#3156](https://github.com/woodpecker-ci/woodpecker/pull/3156)]
 - Lowercase all log strings [[#3173](https://github.com/woodpecker-ci/woodpecker/pull/3173)]
