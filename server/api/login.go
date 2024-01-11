@@ -32,6 +32,11 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/shared/token"
 )
 
+const (
+	accessDeniedRoute  = "/login?error=access_denied"
+	internalErrorRoute = "/login?error=internal_error"
+)
+
 func HandleLogin(c *gin.Context) {
 	if err := c.Request.FormValue("error"); err != "" {
 		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login/error?code="+err)
@@ -71,7 +76,7 @@ func HandleAuth(c *gin.Context) {
 		// if self-registration is disabled we should return a not authorized error
 		if !server.Config.Permissions.Open && !server.Config.Permissions.Admins.IsAdmin(tmpuser) {
 			log.Error().Msgf("cannot register %s. registration closed", tmpuser.Login)
-			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=access_denied")
+			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+accessDeniedRoute)
 			return
 		}
 
@@ -81,7 +86,7 @@ func HandleAuth(c *gin.Context) {
 			teams, terr := _forge.Teams(c, tmpuser)
 			if terr != nil || !server.Config.Permissions.Orgs.IsMember(teams) {
 				log.Error().Err(terr).Msgf("cannot verify team membership for %s.", u.Login)
-				c.Redirect(303, server.Config.Server.RootPath+"/login?error=access_denied")
+				c.Redirect(303, server.Config.Server.RootPath+accessDeniedRoute)
 				return
 			}
 		}
@@ -102,7 +107,7 @@ func HandleAuth(c *gin.Context) {
 		// insert the user into the database
 		if err := _store.CreateUser(u); err != nil {
 			log.Error().Err(err).Msgf("cannot insert %s", u.Login)
-			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
+			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+internalErrorRoute)
 			return
 		}
 
@@ -131,14 +136,14 @@ func HandleAuth(c *gin.Context) {
 		teams, terr := _forge.Teams(c, u)
 		if terr != nil || !server.Config.Permissions.Orgs.IsMember(teams) {
 			log.Error().Err(terr).Msgf("cannot verify team membership for %s.", u.Login)
-			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=access_denied")
+			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+accessDeniedRoute)
 			return
 		}
 	}
 
 	if err := _store.UpdateUser(u); err != nil {
 		log.Error().Err(err).Msgf("cannot update %s", u.Login)
-		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
+		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+internalErrorRoute)
 		return
 	}
 
@@ -146,7 +151,7 @@ func HandleAuth(c *gin.Context) {
 	tokenString, err := token.New(token.SessToken, u.Login).SignExpires(u.Hash, exp)
 	if err != nil {
 		log.Error().Msgf("cannot create token for %s", u.Login)
-		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
+		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+internalErrorRoute)
 		return
 	}
 
@@ -158,7 +163,7 @@ func HandleAuth(c *gin.Context) {
 		}
 		if err != nil {
 			log.Error().Err(err).Msgf("cannot list repos for %s", u.Login)
-			c.Redirect(http.StatusSeeOther, "/login?error=internal_error")
+			c.Redirect(http.StatusSeeOther, internalErrorRoute)
 			return
 		}
 
@@ -174,7 +179,7 @@ func HandleAuth(c *gin.Context) {
 		perm.Synced = time.Now().Unix()
 		if err := _store.PermUpsert(perm); err != nil {
 			log.Error().Err(err).Msgf("cannot update permissions for %s", u.Login)
-			c.Redirect(http.StatusSeeOther, "/login?error=internal_error")
+			c.Redirect(http.StatusSeeOther, internalErrorRoute)
 			return
 		}
 	}
