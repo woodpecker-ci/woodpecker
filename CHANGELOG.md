@@ -8,6 +8,7 @@
 
 ### 📈 Enhancement
 
+- Lowercase all log strings [[#3173](https://github.com/woodpecker-ci/woodpecker/pull/3173)]
 - Cleanups + prefer .yaml [[#3069](https://github.com/woodpecker-ci/woodpecker/pull/3069)]
 - Use UUID as podName and cleanup arguments for Kubernetes backend [[#3135](https://github.com/woodpecker-ci/woodpecker/pull/3135)]
 - Enable golangci linter stylecheck [[#3167](https://github.com/woodpecker-ci/woodpecker/pull/3167)]
