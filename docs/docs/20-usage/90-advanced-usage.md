@@ -118,17 +118,12 @@ steps:
       - echo $FOO
 ```
 
-## Declaring global variables in `docker-compose.yml`
+## Declaring global variables
 
-As described in [Global environment variables](./50-environment.md#global-environment-variables), one can define global variables:
+As described in [Global environment variables](./50-environment.md#global-environment-variables), you can define global variables:
 
-```yaml
-services:
-  woodpecker-server:
-    # ...
-    environment:
-      - WOODPECKER_ENVIRONMENT=first_var:value1,second_var:value2
-      # ...
+```ini
+WOODPECKER_ENVIRONMENT=first_var:value1,second_var:value2
 ```
 
 Note that this tightly couples the server and app configurations (where the app is a completely separate application). But this is a good option for truly global variables which should apply to all steps in all pipelines for all apps.

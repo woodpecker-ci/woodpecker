@@ -8,7 +8,7 @@ variables:
   - &when
     path:
       # related config files
-      - '.woodpecker/web.yml'
+      - '.woodpecker/web.yaml'
       # web source code
       - 'web/**'
       # api source code

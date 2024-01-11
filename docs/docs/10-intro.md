@@ -5,13 +5,13 @@ If you are already using containers in your daily workflow, you'll for sure love
 
 ![woodpecker](woodpecker.png)
 
-## .woodpecker.yml
+## `.woodpecker.yaml`
 
-- Place your pipeline in a file named `.woodpecker.yml` in your repository
+- Place your pipeline in a file named `.woodpecker.yaml` in your repository
 - Pipeline steps can be named as you like
 - Run any command in the commands section
 
-```yaml title=".woodpecker.yml"
+```yaml title=".woodpecker.yaml"
 steps:
   build:
     image: debian
@@ -31,12 +31,12 @@ steps:
 - List the commands that should be executed in the container
 
 ```diff
-steps:
-  build:
--   image: debian
-+   image: mycompany/image-with-awscli
-    commands:
-      - aws help
+ steps:
+   build:
+-    image: debian
++    image: mycompany/image-with-awscli
+     commands:
+       - aws help
 ```
 
 ### File changes are incremental
@@ -44,7 +44,7 @@ steps:
 - Woodpecker clones the source code in the beginning
 - File changes are persisted throughout individual steps as the same volume is being mounted in all steps
 
-```yaml title=".woodpecker.yml"
+```yaml title=".woodpecker.yaml"
 steps:
   build:
     image: debian
@@ -73,15 +73,15 @@ ENTRYPOINT ["/usr/local/deploy"]
 kubectl apply -f $PLUGIN_TEMPLATE
 ```
 
-```yaml title=".woodpecker.yml"
+```yaml title=".woodpecker.yaml"
 steps:
   deploy-to-k8s:
     image: laszlocloud/my-k8s-plugin
     settings:
-      template: config/k8s/service.yml
+      template: config/k8s/service.yaml
 ```
 
-See [plugin docs](./20-usage/51-plugins/10-plugins.md).
+See [plugin docs](./20-usage/51-plugins/10-overview.md).
 
 ## Continue reading
 
