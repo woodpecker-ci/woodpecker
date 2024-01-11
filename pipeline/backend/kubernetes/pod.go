@@ -205,7 +205,7 @@ func hostAlias(extraHost types.HostAlias) v1.HostAlias {
 }
 
 func imagePullSecretsReferences(imagePullSecretNames []string) []v1.LocalObjectReference {
-	log.Trace().Msgf("Using the image pull secrets: %v", imagePullSecretNames)
+	log.Trace().Msgf("using the image pull secrets: %v", imagePullSecretNames)
 
 	secretReferences := make([]v1.LocalObjectReference, len(imagePullSecretNames))
 	for i, imagePullSecretName := range imagePullSecretNames {
