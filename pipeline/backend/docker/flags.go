@@ -72,7 +72,7 @@ var Flags = []cli.Flag{
 	&cli.Int64Flag{
 		EnvVars: []string{"WOODPECKER_BACKEND_DOCKER_LIMIT_SHM_SIZE", "WOODPECKER_LIMIT_SHM_SIZE"},
 		Name:    "backend-docker-limit-shm-size",
-		Usage:   "docker compose /dev/shm allowed in bytes",
+		Usage:   "docker /dev/shm allowed in bytes",
 	},
 	&cli.Int64Flag{
 		EnvVars: []string{"WOODPECKER_BACKEND_DOCKER_LIMIT_CPU_QUOTA", "WOODPECKER_LIMIT_CPU_QUOTA"},
