@@ -221,7 +221,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 	podUpdated := func(old, new any) {
 		pod, ok := new.(*v1.Pod)
 		if !ok {
-			log.Warn().Msgf("could not parse pod: %v", new)
+			log.Error().Msgf("could not parse pod: %v", new)
 			return
 		}
 
@@ -286,7 +286,7 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 	podUpdated := func(old, new any) {
 		pod, ok := new.(*v1.Pod)
 		if !ok {
-			log.Warn().Msgf("could not parse pod: %v", new)
+			log.Error().Msgf("could not parse pod: %v", new)
 			return
 		}
 
