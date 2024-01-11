@@ -135,7 +135,7 @@ const selectedStepId = computed({
         return step.pid;
       }
 
-      // return fallback if step-id is provided, but step can not be found
+      // return fallback if step-id is provided, but step cannot be found
       return defaultStepId.value;
     }
 

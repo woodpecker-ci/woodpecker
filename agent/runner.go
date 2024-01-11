@@ -160,13 +160,14 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 		state.ExitCode = 137
 	} else if err != nil {
 		pExitError := &pipeline.ExitError{}
-		if errors.As(err, &pExitError) {
+		switch {
+		case errors.As(err, &pExitError):
 			state.ExitCode = pExitError.Code
-		} else if errors.Is(err, pipeline.ErrCancel) {
+		case errors.Is(err, pipeline.ErrCancel):
 			state.Error = ""
 			state.ExitCode = 137
 			canceled.SetTo(true)
-		} else {
+		default:
 			state.ExitCode = 1
 			state.Error = err.Error()
 		}

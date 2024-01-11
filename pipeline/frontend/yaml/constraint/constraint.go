@@ -254,14 +254,14 @@ func (c *List) UnmarshalYAML(value *yaml.Node) error {
 	err2 := value.Decode(&out2)
 
 	c.Exclude = out1.Exclude
-	c.Include = append(
+	c.Include = append( //nolint:gocritic
 		out1.Include,
 		out2...,
 	)
 
 	if err1 != nil && err2 != nil {
 		y, _ := yaml.Marshal(value)
-		return fmt.Errorf("Could not parse condition: %s: %w", y, multierr.Append(err1, err2))
+		return fmt.Errorf("could not parse condition: %s: %w", y, multierr.Append(err1, err2))
 	}
 
 	return nil
@@ -335,14 +335,14 @@ func (c *Path) UnmarshalYAML(value *yaml.Node) error {
 
 	c.Exclude = out1.Exclude
 	c.IgnoreMessage = out1.IgnoreMessage
-	c.Include = append(
+	c.Include = append( //nolint:gocritic
 		out1.Include,
 		out2...,
 	)
 
 	if err1 != nil && err2 != nil {
 		y, _ := yaml.Marshal(value)
-		return fmt.Errorf("Could not parse condition: %s", y)
+		return fmt.Errorf("could not parse condition: %s", y)
 	}
 
 	return nil

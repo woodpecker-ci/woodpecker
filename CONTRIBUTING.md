@@ -77,8 +77,3 @@ As of semver guidelines, breaking changes will be released as a major version. W
 breaking changes to not release many majors each containing just a few breaking changes.
 Prior to the release of a major version, a release candidate (RC) will be published to allow easy testing,
 the actual release will be about a week later.
-
-## Development
-
-[pre-commit](https://pre-commit.com/) is used in this repository.
-To apply it during local development, take a look at [`pre-commit`s documentation](https://pre-commit.com/#usage)

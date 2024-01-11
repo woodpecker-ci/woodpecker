@@ -99,13 +99,13 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 			// Unmarshal label and annotation settings here to ensure they're valid on startup
 			if labels := c.String("backend-k8s-pod-labels"); labels != "" {
 				if err := yaml.Unmarshal([]byte(labels), &config.PodLabels); err != nil {
-					log.Error().Msgf("could not unmarshal pod labels '%s': %s", c.String("backend-k8s-pod-labels"), err)
+					log.Error().Err(err).Msgf("could not unmarshal pod labels '%s'", c.String("backend-k8s-pod-labels"))
 					return nil, err
 				}
 			}
 			if annotations := c.String("backend-k8s-pod-annotations"); annotations != "" {
 				if err := yaml.Unmarshal([]byte(c.String("backend-k8s-pod-annotations")), &config.PodAnnotations); err != nil {
-					log.Error().Msgf("could not unmarshal pod annotations '%s': %s", c.String("backend-k8s-pod-annotations"), err)
+					log.Error().Err(err).Msgf("could not unmarshal pod annotations '%s'", c.String("backend-k8s-pod-annotations"))
 					return nil, err
 				}
 			}
@@ -184,7 +184,7 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID s
 			}
 		}
 	}
-	log.Trace().Msgf("Adding extra hosts: %v", extraHosts)
+	log.Trace().Msgf("adding extra hosts: %v", extraHosts)
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
 			step.ExtraHosts = extraHosts
@@ -201,7 +201,7 @@ func (e *kube) StartStep(ctx context.Context, step *types.Step, taskUUID string)
 		log.Trace().Msgf("StartStep got service '%s', ignoring it.", step.Name)
 		return nil
 	}
-	log.Trace().Str("taskUUID", taskUUID).Msgf("Starting step: %s", step.Name)
+	log.Trace().Str("taskUUID", taskUUID).Msgf("starting step: %s", step.Name)
 	_, err := startPod(ctx, e, step)
 	return err
 }
@@ -214,7 +214,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 		return nil, err
 	}
 
-	log.Trace().Str("taskUUID", taskUUID).Msgf("Waiting for pod: %s", podName)
+	log.Trace().Str("taskUUID", taskUUID).Msgf("waiting for pod: %s", podName)
 
 	finished := make(chan bool)
 
@@ -255,7 +255,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 	}
 
 	if isImagePullBackOffState(pod) {
-		return nil, fmt.Errorf("Could not pull image for pod %s", pod.Name)
+		return nil, fmt.Errorf("could not pull image for pod %s", pod.Name)
 	}
 
 	bs := &types.State{
@@ -274,7 +274,7 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 		return nil, err
 	}
 
-	log.Trace().Str("taskUUID", taskUUID).Msgf("Tail logs of pod: %s", podName)
+	log.Trace().Str("taskUUID", taskUUID).Msgf("tail logs of pod: %s", podName)
 
 	up := make(chan bool)
 
@@ -340,14 +340,14 @@ func (e *kube) DestroyStep(_ context.Context, step *types.Step, taskUUID string)
 		log.Trace().Msgf("DestroyStep got service '%s', ignoring it.", step.Name)
 		return nil
 	}
-	log.Trace().Str("taskUUID", taskUUID).Msgf("Stopping step: %s", step.Name)
+	log.Trace().Str("taskUUID", taskUUID).Msgf("stopping step: %s", step.Name)
 	err := stopPod(e.ctx, e, step, defaultDeleteOptions)
 	return err
 }
 
 // Destroy the pipeline environment.
 func (e *kube) DestroyWorkflow(_ context.Context, conf *types.Config, taskUUID string) error {
-	log.Trace().Str("taskUUID", taskUUID).Msg("Deleting Kubernetes primitives")
+	log.Trace().Str("taskUUID", taskUUID).Msg("deleting Kubernetes primitives")
 
 	// Use noContext because the ctx sent to this function will be canceled/done in case of error or canceled by user.
 	for _, stage := range conf.Stages {

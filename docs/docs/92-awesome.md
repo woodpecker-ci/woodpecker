@@ -7,11 +7,10 @@ If you have some missing resources, please feel free to [open a pull-request](ht
 ## Official Resources
 
 - [Woodpecker CI pipeline configs](https://github.com/woodpecker-ci/woodpecker/tree/main/.woodpecker) - Complex setup containing different kind of pipelines
-  - [Golang tests](https://github.com/woodpecker-ci/woodpecker/blob/main/.woodpecker/test.yml)
-  - [Typescript, eslint & Vue](https://github.com/woodpecker-ci/woodpecker/blob/main/.woodpecker/web.yml)
-  - [Docusaurus & publishing to GitHub Pages](https://github.com/woodpecker-ci/woodpecker/blob/main/.woodpecker/docs.yml)
-  - [Docker container building](https://github.com/woodpecker-ci/woodpecker/blob/main/.woodpecker/docker.yml)
-  - [Helm chart linting & releasing](https://github.com/woodpecker-ci/woodpecker/blob/main/.woodpecker/helm.yml)
+  - [Golang tests](https://github.com/woodpecker-ci/woodpecker/blob/main/.woodpecker/test.yaml)
+  - [Typescript, eslint & Vue](https://github.com/woodpecker-ci/woodpecker/blob/main/.woodpecker/web.yaml)
+  - [Docusaurus & publishing to GitHub Pages](https://github.com/woodpecker-ci/woodpecker/blob/main/.woodpecker/docs.yaml)
+  - [Docker container building](https://github.com/woodpecker-ci/woodpecker/blob/main/.woodpecker/docker.yaml)
 
 ## Projects using Woodpecker
 
