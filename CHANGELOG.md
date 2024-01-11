@@ -8,6 +8,8 @@
 
 ### 📈 Enhancement
 
+- Remove panic recovering [[#3162](https://github.com/woodpecker-ci/woodpecker/pull/3162)]
+- More docker backend test remove more undocumented [[#3156](https://github.com/woodpecker-ci/woodpecker/pull/3156)]
 - Lowercase all log strings [[#3173](https://github.com/woodpecker-ci/woodpecker/pull/3173)]
 - Cleanups + prefer .yaml [[#3069](https://github.com/woodpecker-ci/woodpecker/pull/3069)]
 - Use UUID as podName and cleanup arguments for Kubernetes backend [[#3135](https://github.com/woodpecker-ci/woodpecker/pull/3135)]
