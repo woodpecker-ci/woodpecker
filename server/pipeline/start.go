@@ -29,7 +29,7 @@ func start(ctx context.Context, store store.Store, activePipeline *model.Pipelin
 	// call to cancel previous pipelines if needed
 	if err := cancelPreviousPipelines(ctx, store, activePipeline, repo, user); err != nil {
 		// should be not breaking
-		log.Error().Err(err).Msg("Failed to cancel previous pipelines")
+		log.Error().Err(err).Msg("failed to cancel previous pipelines")
 	}
 
 	if err := store.WorkflowsCreate(activePipeline.Workflows); err != nil {

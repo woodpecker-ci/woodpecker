@@ -121,15 +121,15 @@ func run(c *cli.Context) error {
 
 	agentConfigPersisted := abool.New()
 	ctx = utils.WithContextSigtermCallback(ctx, func() {
-		log.Info().Msg("Termination signal is received, shutting down")
+		log.Info().Msg("termination signal is received, shutting down")
 		sigterm.Set()
 
 		// Remove stateless agents from server
 		if agentConfigPersisted.IsNotSet() {
-			log.Debug().Msg("Unregistering agent from server")
+			log.Debug().Msg("unregistering agent from server")
 			err := client.UnregisterAgent(ctx)
 			if err != nil {
-				log.Err(err).Msg("Failed to unregister agent from server")
+				log.Err(err).Msg("failed to unregister agent from server")
 			}
 		}
 	})
@@ -142,7 +142,7 @@ func run(c *cli.Context) error {
 	}
 	if grpcServerVersion.GrpcVersion != agentRpc.ClientGrpcVersion {
 		err := errors.New("GRPC version mismatch")
-		log.Error().Err(err).Msgf("Server version %s does report grpc version %d but we only understand %d",
+		log.Error().Err(err).Msgf("server version %s does report grpc version %d but we only understand %d",
 			grpcServerVersion.ServerVersion,
 			grpcServerVersion.GrpcVersion,
 			agentRpc.ClientGrpcVersion)
@@ -199,18 +199,18 @@ func run(c *cli.Context) error {
 		Labels: labels,
 	}
 
-	log.Debug().Msgf("Agent registered with ID %d", agentConfig.AgentID)
+	log.Debug().Msgf("agent registered with ID %d", agentConfig.AgentID)
 
 	go func() {
 		for {
 			if sigterm.IsSet() {
-				log.Debug().Msg("Terminating health reporting")
+				log.Debug().Msg("terminating health reporting")
 				return
 			}
 
 			err := client.ReportHealth(ctx)
 			if err != nil {
-				log.Err(err).Msg("Failed to report health")
+				log.Err(err).Msg("failed to report health")
 				return
 			}
 
@@ -242,7 +242,7 @@ func run(c *cli.Context) error {
 	}
 
 	log.Info().Msgf(
-		"Starting Woodpecker agent with version '%s' and backend '%s' using platform '%s' running up to %d pipelines in parallel",
+		"starting Woodpecker agent with version '%s' and backend '%s' using platform '%s' running up to %d pipelines in parallel",
 		version.String(), backendEngine.Name(), engInfo.Platform, parallel)
 
 	wg.Wait()
