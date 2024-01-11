@@ -34,12 +34,6 @@ type Step struct {
 	Networks       []Conn            `json:"networks,omitempty"`
 	DNS            []string          `json:"dns,omitempty"`
 	DNSSearch      []string          `json:"dns_search,omitempty"`
-	MemSwapLimit   int64             `json:"memswap_limit,omitempty"`
-	MemLimit       int64             `json:"mem_limit,omitempty"`
-	ShmSize        int64             `json:"shm_size,omitempty"`
-	CPUQuota       int64             `json:"cpu_quota,omitempty"`
-	CPUShares      int64             `json:"cpu_shares,omitempty"`
-	CPUSet         string            `json:"cpu_set,omitempty"`
 	OnFailure      bool              `json:"on_failure,omitempty"`
 	OnSuccess      bool              `json:"on_success,omitempty"`
 	Failure        string            `json:"failure,omitempty"`

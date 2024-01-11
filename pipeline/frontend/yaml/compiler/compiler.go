@@ -58,15 +58,6 @@ func (sm secretMap) toStringMap() map[string]string {
 	return m
 }
 
-type ResourceLimit struct {
-	MemSwapLimit int64
-	MemLimit     int64
-	ShmSize      int64
-	CPUQuota     int64
-	CPUShares    int64
-	CPUSet       string
-}
-
 // Compiler compiles the yaml
 type Compiler struct {
 	local             bool
@@ -82,7 +73,6 @@ type Compiler struct {
 	registries        []Registry
 	secrets           secretMap
 	cacher            Cacher
-	reslimit          ResourceLimit
 	defaultCloneImage string
 	trustedPipeline   bool
 	netrcOnlyTrusted  bool

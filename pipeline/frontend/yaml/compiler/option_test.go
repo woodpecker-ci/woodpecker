@@ -72,37 +72,6 @@ func TestWithNetworks(t *testing.T) {
 	}
 }
 
-func TestWithResourceLimit(t *testing.T) {
-	compiler := New(
-		WithResourceLimit(
-			1,
-			2,
-			3,
-			4,
-			5,
-			"0,2-5",
-		),
-	)
-	if compiler.reslimit.MemSwapLimit != 1 {
-		t.Errorf("TestWithResourceLimit must set MemSwapLimit from parameters")
-	}
-	if compiler.reslimit.MemLimit != 2 {
-		t.Errorf("TestWithResourceLimit must set MemLimit from parameters")
-	}
-	if compiler.reslimit.ShmSize != 3 {
-		t.Errorf("TestWithResourceLimit must set ShmSize from parameters")
-	}
-	if compiler.reslimit.CPUQuota != 4 {
-		t.Errorf("TestWithResourceLimit must set CPUQuota from parameters")
-	}
-	if compiler.reslimit.CPUShares != 5 {
-		t.Errorf("TestWithResourceLimit must set CPUShares from parameters")
-	}
-	if compiler.reslimit.CPUSet != "0,2-5" {
-		t.Errorf("TestWithResourceLimit must set CPUSet from parameters")
-	}
-}
-
 func TestWithPrefix(t *testing.T) {
 	if New(WithPrefix("someprefix_")).prefix != "someprefix_" {
 		t.Errorf("WithPrefix must set the prefix")

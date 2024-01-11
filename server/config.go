@@ -82,7 +82,6 @@ var Config = struct {
 		AuthenticatePublicRepos             bool
 		DefaultCancelPreviousPipelineEvents []model.WebhookEvent
 		DefaultCloneImage                   string
-		Limits                              model.ResourceLimit
 		Volumes                             []string
 		Networks                            []string
 		Privileged                          []string
