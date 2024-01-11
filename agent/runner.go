@@ -133,7 +133,7 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 	state := rpc.State{}
 	state.Started = time.Now().Unix()
 
-	err = r.client.Init(ctxmeta, work.ID, state) //nolint:contextcheck
+	err = r.client.Init(runnerCtx, work.ID, state)
 	if err != nil {
 		logger.Error().Err(err).Msg("pipeline initialization failed")
 	}
