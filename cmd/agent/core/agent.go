@@ -89,7 +89,7 @@ func run(c *cli.Context, backends []types.Backend) error {
 
 	agentToken := c.String("grpc-token")
 	authClient := agentRpc.NewAuthGrpcClient(authConn, agentToken, agentConfig.AgentID)
-	authInterceptor, err := agentRpc.NewAuthInterceptor(authClient, 30*time.Minute)
+	authInterceptor, err := agentRpc.NewAuthInterceptor(authClient, 30*time.Minute) //nolint: gomnd
 	if err != nil {
 		return err
 	}

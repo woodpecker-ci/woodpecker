@@ -123,13 +123,13 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 
 	pipelineEnv := make(map[string]string)
 	for _, env := range c.StringSlice("env") {
-		envs := strings.SplitN(env, "=", 2)
-		pipelineEnv[envs[0]] = envs[1]
-		if oldVar, exists := environ[envs[0]]; exists {
+		before, after, _ := strings.Cut(env, "=")
+		pipelineEnv[before] = after
+		if oldVar, exists := environ[before]; exists {
 			// override existing values, but print a warning
-			log.Warn().Msgf("environment variable '%s' had value '%s', but got overwritten", envs[0], oldVar)
+			log.Warn().Msgf("environment variable '%s' had value '%s', but got overwritten", before, oldVar)
 		}
-		environ[envs[0]] = envs[1]
+		environ[before] = after
 	}
 
 	tmpl, err := envsubst.ParseFile(file)
