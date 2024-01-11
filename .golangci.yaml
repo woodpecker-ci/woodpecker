@@ -163,6 +163,7 @@ linters:
     - gocritic
     - nolintlint
     - stylecheck
+    - forcetypeassert
 
 run:
   timeout: 15m
