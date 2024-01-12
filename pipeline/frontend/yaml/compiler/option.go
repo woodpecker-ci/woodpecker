@@ -185,21 +185,6 @@ func WithNetworks(networks ...string) Option {
 	}
 }
 
-// WithResourceLimit configures the compiler with default resource limits that
-// are applied each container in the pipeline.
-func WithResourceLimit(swap, mem, shmsize, cpuQuota, cpuShares int64, cpuSet string) Option {
-	return func(compiler *Compiler) {
-		compiler.reslimit = ResourceLimit{
-			MemSwapLimit: swap,
-			MemLimit:     mem,
-			ShmSize:      shmsize,
-			CPUQuota:     cpuQuota,
-			CPUShares:    cpuShares,
-			CPUSet:       cpuSet,
-		}
-	}
-}
-
 func WithDefaultCloneImage(cloneImage string) Option {
 	return func(compiler *Compiler) {
 		compiler.defaultCloneImage = cloneImage

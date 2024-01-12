@@ -30,9 +30,6 @@ image: golang:latest
 commands:
   - go build
   - go test
-cpu_quota: 11
-cpuset: 1,2
-cpu_shares: 99
 detach: true
 devices:
   - /dev/ttyUSB0:/dev/ttyUSB0
@@ -53,9 +50,6 @@ networks:
   - other-network
 pull: true
 privileged: true
-shm_size: 1kb
-mem_limit: 1kb
-memswap_limit: 1kb
 volumes:
   - /var/lib/mysql
   - /opt/data:/var/lib/mysql
@@ -75,21 +69,16 @@ ports:
 
 func TestUnmarshalContainer(t *testing.T) {
 	want := Container{
-		Commands:     base.StringOrSlice{"go build", "go test"},
-		CPUQuota:     base.StringOrInt(11),
-		CPUSet:       "1,2",
-		CPUShares:    base.StringOrInt(99),
-		Detached:     true,
-		Devices:      []string{"/dev/ttyUSB0:/dev/ttyUSB0"},
-		Directory:    "example/",
-		DNS:          base.StringOrSlice{"8.8.8.8"},
-		DNSSearch:    base.StringOrSlice{"example.com"},
-		Environment:  base.SliceOrMap{"RACK_ENV": "development", "SHOW": "true"},
-		ExtraHosts:   []string{"somehost:162.242.195.82", "otherhost:50.31.209.229", "ipv6:2001:db8::10"},
-		Image:        "golang:latest",
-		MemLimit:     base.MemStringOrInt(1024),
-		MemSwapLimit: base.MemStringOrInt(1024),
-		Name:         "my-build-container",
+		Commands:    base.StringOrSlice{"go build", "go test"},
+		Detached:    true,
+		Devices:     []string{"/dev/ttyUSB0:/dev/ttyUSB0"},
+		Directory:   "example/",
+		DNS:         base.StringOrSlice{"8.8.8.8"},
+		DNSSearch:   base.StringOrSlice{"example.com"},
+		Environment: base.SliceOrMap{"RACK_ENV": "development", "SHOW": "true"},
+		ExtraHosts:  []string{"somehost:162.242.195.82", "otherhost:50.31.209.229", "ipv6:2001:db8::10"},
+		Image:       "golang:latest",
+		Name:        "my-build-container",
 		Networks: Networks{
 			Networks: []*Network{
 				{Name: "some-network"},
@@ -99,7 +88,6 @@ func TestUnmarshalContainer(t *testing.T) {
 		NetworkMode: "bridge",
 		Pull:        true,
 		Privileged:  true,
-		ShmSize:     base.MemStringOrInt(1024),
 		Tmpfs:       base.StringOrSlice{"/var/lib/test"},
 		Volumes: Volumes{
 			Volumes: []*Volume{

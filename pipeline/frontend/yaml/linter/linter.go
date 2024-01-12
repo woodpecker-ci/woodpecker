@@ -151,9 +151,6 @@ func (l *Linter) lintTrusted(config *WorkflowConfig, c *types.Container, area st
 	if c.Privileged {
 		err = "Insufficient privileges to use privileged mode"
 	}
-	if c.ShmSize != 0 {
-		err = "Insufficient privileges to override shm_size"
-	}
 	if len(c.DNS) != 0 {
 		err = "Insufficient privileges to use custom dns"
 	}

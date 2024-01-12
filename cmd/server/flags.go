@@ -288,36 +288,6 @@ var flags = append([]cli.Flag{
 		Usage:   "how many seconds before timeout when fetching the Woodpecker configuration from a Forge",
 		Value:   time.Second * 3,
 	},
-	&cli.Int64Flag{
-		EnvVars: []string{"WOODPECKER_LIMIT_MEM_SWAP"},
-		Name:    "limit-mem-swap",
-		Usage:   "maximum swappable memory allowed in bytes",
-	},
-	&cli.Int64Flag{
-		EnvVars: []string{"WOODPECKER_LIMIT_MEM"},
-		Name:    "limit-mem",
-		Usage:   "maximum memory allowed in bytes",
-	},
-	&cli.Int64Flag{
-		EnvVars: []string{"WOODPECKER_LIMIT_SHM_SIZE"},
-		Name:    "limit-shm-size",
-		Usage:   "docker compose /dev/shm allowed in bytes",
-	},
-	&cli.Int64Flag{
-		EnvVars: []string{"WOODPECKER_LIMIT_CPU_QUOTA"},
-		Name:    "limit-cpu-quota",
-		Usage:   "impose a cpu quota",
-	},
-	&cli.Int64Flag{
-		EnvVars: []string{"WOODPECKER_LIMIT_CPU_SHARES"},
-		Name:    "limit-cpu-shares",
-		Usage:   "change the cpu shares",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_LIMIT_CPU_SET"},
-		Name:    "limit-cpu-set",
-		Usage:   "set the cpus allowed to execute containers",
-	},
 	//
 	// GitHub
 	//

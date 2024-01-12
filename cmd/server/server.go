@@ -331,14 +331,6 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) error {
 	server.Config.Pipeline.DefaultTimeout = c.Int64("default-pipeline-timeout")
 	server.Config.Pipeline.MaxTimeout = c.Int64("max-pipeline-timeout")
 
-	// limits
-	server.Config.Pipeline.Limits.MemSwapLimit = c.Int64("limit-mem-swap")
-	server.Config.Pipeline.Limits.MemLimit = c.Int64("limit-mem")
-	server.Config.Pipeline.Limits.ShmSize = c.Int64("limit-shm-size")
-	server.Config.Pipeline.Limits.CPUQuota = c.Int64("limit-cpu-quota")
-	server.Config.Pipeline.Limits.CPUShares = c.Int64("limit-cpu-shares")
-	server.Config.Pipeline.Limits.CPUSet = c.String("limit-cpu-set")
-
 	// backend options for pipeline compiler
 	server.Config.Pipeline.Proxy.No = c.String("backend-no-proxy")
 	server.Config.Pipeline.Proxy.HTTP = c.String("backend-http-proxy")
