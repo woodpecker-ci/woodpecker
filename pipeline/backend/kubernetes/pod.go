@@ -70,9 +70,8 @@ func podName(step *types.Step) (string, error) {
 
 func podMeta(step *types.Step, config *config, podName string) metav1.ObjectMeta {
 	meta := metav1.ObjectMeta{
-		Name:        podName,
-		Namespace:   config.Namespace,
-		Annotations: config.PodAnnotations,
+		Name:      podName,
+		Namespace: config.Namespace,
 	}
 
 	labels := make(map[string]string, len(config.PodLabels)+1)
@@ -80,6 +79,18 @@ func podMeta(step *types.Step, config *config, podName string) metav1.ObjectMeta
 	maps.Copy(labels, config.PodLabels)
 	labels[StepLabel] = step.Name
 	meta.Labels = labels
+
+	// copy to not alter the engine config
+	meta.Annotations = make(map[string]string, len(config.PodAnnotations))
+	maps.Copy(meta.Annotations, config.PodAnnotations)
+
+	securityContext := step.BackendOptions.Kubernetes.SecurityContext
+	if securityContext != nil {
+		key, value := apparmorAnnotation(podName, securityContext.ApparmorProfile)
+		if key != nil && value != nil {
+			meta.Annotations[*key] = *value
+		}
+	}
 
 	return meta
 }
@@ -313,6 +324,7 @@ func podSecurityContext(sc *types.SecurityContext, secCtxConf SecurityContextCon
 		user    *int64
 		group   *int64
 		fsGroup *int64
+		seccomp *v1.SeccompProfile
 	)
 
 	if sc != nil && sc.RunAsNonRoot != nil {
@@ -329,18 +341,39 @@ func podSecurityContext(sc *types.SecurityContext, secCtxConf SecurityContextCon
 		fsGroup = sc.FSGroup
 	}
 
-	if nonRoot == nil && user == nil && group == nil && fsGroup == nil {
+	if sc != nil {
+		seccomp = seccompProfile(sc.SeccompProfile)
+	}
+
+	if nonRoot == nil && user == nil && group == nil && fsGroup == nil && seccomp == nil {
 		return nil
 	}
 
 	securityContext := &v1.PodSecurityContext{
-		RunAsNonRoot: nonRoot,
-		RunAsUser:    user,
-		RunAsGroup:   group,
-		FSGroup:      fsGroup,
+		RunAsNonRoot:   nonRoot,
+		RunAsUser:      user,
+		RunAsGroup:     group,
+		FSGroup:        fsGroup,
+		SeccompProfile: seccomp,
 	}
 	log.Trace().Msgf("pod security context that will be used: %v", securityContext)
 	return securityContext
+}
+
+func seccompProfile(scp *types.SecProfile) *v1.SeccompProfile {
+	if scp == nil || len(scp.Type) == 0 {
+		return nil
+	}
+	log.Trace().Msgf("using seccomp profile: %v", scp)
+
+	seccompProfile := &v1.SeccompProfile{
+		Type: v1.SeccompProfileType(scp.Type),
+	}
+	if len(scp.LocalhostProfile) > 0 {
+		seccompProfile.LocalhostProfile = &scp.LocalhostProfile
+	}
+
+	return seccompProfile
 }
 
 func containerSecurityContext(sc *types.SecurityContext, stepPrivileged bool) *v1.SecurityContext {
@@ -361,6 +394,36 @@ func containerSecurityContext(sc *types.SecurityContext, stepPrivileged bool) *v
 	}
 	log.Trace().Msgf("container security context that will be used: %v", securityContext)
 	return securityContext
+}
+
+func apparmorAnnotation(containerName string, scp *types.SecProfile) (*string, *string) {
+	if scp == nil {
+		return nil, nil
+	}
+	log.Trace().Msgf("using AppArmor profile: %v", scp)
+
+	var (
+		profileType string
+		profilePath string
+	)
+
+	if scp.Type == types.SecProfileTypeRuntimeDefault {
+		profileType = "runtime"
+		profilePath = "default"
+	}
+
+	if scp.Type == types.SecProfileTypeLocalhost {
+		profileType = "localhost"
+		profilePath = scp.LocalhostProfile
+	}
+
+	if len(profileType) == 0 {
+		return nil, nil
+	}
+
+	key := v1.AppArmorBetaContainerAnnotationKeyPrefix + containerName
+	value := profileType + "/" + profilePath
+	return &key, &value
 }
 
 func mapToEnvVars(m map[string]string) []v1.EnvVar {
