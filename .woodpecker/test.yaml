@@ -1,23 +1,25 @@
 when:
-  - event: [pull_request, tag]
+  - event: pull_request
   - event: push
     branch:
       - ${CI_REPO_DEFAULT_BRANCH}
-      - release/*
       - renovate/*
 
 variables:
   - &golang_image 'docker.io/golang:1.21.5'
   - &when
     - path: &when_path # related config files
-        - '.woodpecker/test.yml'
-        - '.golangci.yml'
+        - '.woodpecker/test.yaml'
+        - '.golangci.yaml'
         # go source code
         - '**/*.go'
         - 'go.*'
         # schema changes
         - 'pipeline/schema/**'
-      event: [pull_request, tag]
+      event: pull_request
+    - event: push
+      branch: renovate/*
+      path: *when_path
 
 steps:
   vendor:
@@ -25,9 +27,9 @@ steps:
     commands:
       - go mod vendor
     when:
-      - path:
-          - <<: *when_path
-          - '.woodpecker/**'
+      path:
+        - <<: *when_path
+        - '.woodpecker/**'
 
   lint-pipeline:
     depends_on:
@@ -36,10 +38,9 @@ steps:
     commands:
       - go run go.woodpecker-ci.org/woodpecker/v2/cmd/cli lint
     when:
-      - <<: *when
-      - path:
+      - event: pull_request
+        path:
           - '.woodpecker/**'
-          - 'pipeline/schema/**'
 
   dummy-web:
     image: *golang_image
@@ -57,7 +58,7 @@ steps:
       - make lint
     when: *when
 
-  check_swagger:
+  check-swagger:
     depends_on:
       - vendor
     image: *golang_image
@@ -70,7 +71,7 @@ steps:
   lint-editorconfig:
     image: docker.io/mstruebing/editorconfig-checker:2.7.2
     when:
-      - event: [pull_request, tag]
+      event: pull_request
 
   lint-license-header:
     image: *golang_image
@@ -112,7 +113,7 @@ steps:
     image: *golang_image
     environment:
       - WOODPECKER_DATABASE_DRIVER=postgres
-      - WOODPECKER_DATABASE_DATASOURCE=host=service-postgres user=postgres dbname=postgres sslmode=disable
+      - WOODPECKER_DATABASE_DATASOURCE=host=postgres user=postgres dbname=postgres sslmode=disable
     commands:
       - make test-server-datastore
     when: *when
@@ -123,7 +124,7 @@ steps:
     image: *golang_image
     environment:
       - WOODPECKER_DATABASE_DRIVER=mysql
-      - WOODPECKER_DATABASE_DATASOURCE=root@tcp(service-mysql:3306)/test?parseTime=true
+      - WOODPECKER_DATABASE_DATASOURCE=root@tcp(mysql:3306)/test?parseTime=true
     commands:
       - make test-server-datastore
     when: *when
@@ -148,7 +149,7 @@ steps:
     failure: ignore
 
 services:
-  service-postgres:
+  postgres:
     image: docker.io/postgres:16
     ports: ['5432']
     environment:
@@ -156,7 +157,7 @@ services:
       - POSTGRES_HOST_AUTH_METHOD=trust
     when: *when
 
-  service-mysql:
+  mysql:
     image: docker.io/mysql:8.2.0
     ports: ['3306']
     environment:

@@ -47,6 +47,8 @@ variables:
       - 'pipeline/schema/**'
       # Dockerfile changes
       - 'docker/**'
+      # pipeline config changes
+      - '.woodpecker/docker.yaml'
 
 steps:
   vendor:
@@ -62,6 +64,7 @@ steps:
       - branch:
           - ${CI_REPO_DEFAULT_BRANCH}
           - release/*
+          - renovate/*
         event: [push, tag]
         path: *when_path
 
@@ -83,6 +86,7 @@ steps:
       - branch:
           - ${CI_REPO_DEFAULT_BRANCH}
           - release/*
+          - renovate/*
         event: [push, tag]
         path: *when_path
 
@@ -105,6 +109,11 @@ steps:
         evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
       - event: pull_request
         path: *when_path
+      - event: push
+        path: *when_path
+        branch:
+          - release/*
+          - renovate/*
 
   cross-compile-server:
     depends_on:
@@ -123,7 +132,6 @@ steps:
     when:
       branch:
         - ${CI_REPO_DEFAULT_BRANCH}
-        - release/*
       event: [push, tag]
       path: *when_path
 
@@ -137,7 +145,7 @@ steps:
       platforms: *platforms_preview
       tag: pull_${CI_COMMIT_PULL_REQUEST}
       logins: *publish_logins
-    when:
+    when: &when-preview
       evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
       event: pull_request
 
@@ -151,11 +159,9 @@ steps:
       platforms: *platforms_preview
       tag: pull_${CI_COMMIT_PULL_REQUEST}-alpine
       logins: *publish_logins
-    when:
-      evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
-      event: pull_request
+    when: *when-preview
 
-  build-server:
+  build-server-dryrun:
     depends_on:
       - vendor
       - build-web
@@ -167,27 +173,15 @@ steps:
       dockerfile: docker/Dockerfile.server.multiarch
       platforms: *platforms_preview
       tag: pull_${CI_COMMIT_PULL_REQUEST}
-    when:
-      evaluate: 'not (CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images")'
-      event: pull_request
-      path: *when_path
-
-  build-server-alpine:
-    depends_on:
-      - vendor
-      - build-web
-      - cross-compile-server-preview
-    image: *buildx_plugin
-    settings:
-      dry_run: true
-      repo: woodpeckerci/woodpecker-server
-      dockerfile: docker/Dockerfile.server.alpine.multiarch
-      platforms: *platforms_preview
-      tag: pull_${CI_COMMIT_PULL_REQUEST}-alpine
-    when:
-      evaluate: 'not (CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images")'
-      event: pull_request
-      path: *when_path
+    when: &when-dryrun
+      - evaluate: 'not (CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images")'
+        event: pull_request
+        path: *when_path
+      - event: push
+        path: *when_path
+        branch:
+          - release/*
+          - renovate/*
 
   publish-next-server:
     depends_on:
@@ -199,7 +193,7 @@ steps:
       platforms: *platforms_server
       tag: [next, 'next-${CI_COMMIT_SHA:0:10}']
       logins: *publish_logins
-    when:
+    when: &when-publish-next
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
       path: *when_path
@@ -214,40 +208,7 @@ steps:
       platforms: *platforms_alpine
       tag: [next-alpine, 'next-${CI_COMMIT_SHA:0:10}-alpine']
       logins: *publish_logins
-    when:
-      branch: ${CI_REPO_DEFAULT_BRANCH}
-      event: push
-      path: *when_path
-
-  publish-release-branch-server:
-    depends_on:
-      - cross-compile-server
-    image: *buildx_plugin
-    settings:
-      repo: *publish_repos_server
-      dockerfile: docker/Dockerfile.server.multiarch
-      platforms: *platforms_server
-      tag: ${CI_COMMIT_BRANCH##release/}
-      logins: *publish_logins
-    when:
-      branch: release/*
-      event: push
-      path: *when_path
-
-  publish-release-branch-server-alpine:
-    depends_on:
-      - cross-compile-server
-    image: *buildx_plugin
-    settings:
-      repo: *publish_repos_server
-      dockerfile: docker/Dockerfile.server.alpine.multiarch
-      platforms: *platforms_alpine
-      tag: ${CI_COMMIT_BRANCH##release/}
-      logins: *publish_logins
-    when:
-      branch: release/*
-      event: push
-      path: *when_path
+    when: *when-publish-next
 
   release-server:
     depends_on:
@@ -260,7 +221,7 @@ steps:
       # remove 'latest' on older version branches to avoid accidental downgrade
       tag: [latest, '${CI_COMMIT_TAG}']
       logins: *publish_logins
-    when:
+    when: &when-release
       event: tag
 
   release-server-alpine:
@@ -274,8 +235,7 @@ steps:
       # remove 'latest-alpine' on older version branches to avoid accidental downgrade
       tag: [latest-alpine, '${CI_COMMIT_TAG}-alpine']
       logins: *publish_logins
-    when:
-      event: tag
+    when: *when-release
 
   #############
   # A g e n t #
@@ -292,11 +252,9 @@ steps:
       tag: pull_${CI_COMMIT_PULL_REQUEST}
       build_args: *build_args
       logins: *publish_logins
-    when:
-      evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
-      event: pull_request
+    when: *when-preview
 
-  build-agent:
+  build-agent-dryrun:
     depends_on:
       - vendor
     image: *buildx_plugin
@@ -307,10 +265,7 @@ steps:
       platforms: *platforms_preview
       tag: pull_${CI_COMMIT_PULL_REQUEST}
       build_args: *build_args
-    when:
-      evaluate: 'not (CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images")'
-      event: pull_request
-      path: *when_path
+    when: *when-dryrun
 
   publish-next-agent:
     depends_on:
@@ -345,42 +300,7 @@ steps:
       tag: [next-alpine, 'next-${CI_COMMIT_SHA:0:10}-alpine']
       logins: *publish_logins
       build_args: *build_args
-    when:
-      branch: ${CI_REPO_DEFAULT_BRANCH}
-      event: push
-      path: *when_path
-
-  publish-release-branch-agent:
-    depends_on:
-      - vendor
-    image: *buildx_plugin
-    settings:
-      repo: *publish_repos_agent
-      dockerfile: docker/Dockerfile.agent.multiarch
-      platforms: *platforms_release
-      tag: ${CI_COMMIT_BRANCH##release/}
-      logins: *publish_logins
-      build_args: *build_args
-    when:
-      branch: release/*
-      event: push
-      path: *when_path
-
-  publish-release-branch-agent-alpine:
-    depends_on:
-      - vendor
-    image: *buildx_plugin
-    settings:
-      repo: *publish_repos_agent
-      dockerfile: docker/Dockerfile.agent.alpine.multiarch
-      platforms: *platforms_alpine
-      tag: ${CI_COMMIT_BRANCH##release/}
-      logins: *publish_logins
-      build_args: *build_args
-    when:
-      branch: release/*
-      event: push
-      path: *when_path
+    when: *when-publish-next
 
   release-agent:
     depends_on:
@@ -397,8 +317,7 @@ steps:
       tag: [latest, '${CI_COMMIT_TAG}']
       logins: *publish_logins
       build_args: *build_args
-    when:
-      event: tag
+    when: *when-release
 
   release-agent-alpine:
     depends_on:
@@ -415,8 +334,7 @@ steps:
       tag: [latest-alpine, '${CI_COMMIT_TAG}-alpine']
       logins: *publish_logins
       build_args: *build_args
-    when:
-      event: tag
+    when: *when-release
 
   #########
   # C L I #
@@ -433,11 +351,9 @@ steps:
       tag: pull_${CI_COMMIT_PULL_REQUEST}
       build_args: *build_args
       logins: *publish_logins
-    when:
-      evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
-      event: pull_request
+    when: *when-preview
 
-  build-cli:
+  build-cli-dryrun:
     depends_on:
       - vendor
     image: *buildx_plugin
@@ -448,17 +364,14 @@ steps:
       platforms: *platforms_preview
       tag: pull_${CI_COMMIT_PULL_REQUEST}
       build_args: *build_args
-    when:
-      evaluate: 'not (CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images")'
-      event: pull_request
-      path: *when_path
+    when: *when-dryrun
 
   publish-next-cli:
     depends_on:
       - vendor
-      # we also depend on cross-compile-server as we would have to hight
+      # we also depend on publish-next-agent as we would have to hight
       # ram usage otherwise
-      - cross-compile-server
+      - publish-next-agent
     image: *buildx_plugin
     settings:
       repo: *publish_repos_cli
@@ -467,17 +380,14 @@ steps:
       tag: [next, 'next-${CI_COMMIT_SHA:0:10}']
       logins: *publish_logins
       build_args: *build_args
-    when:
-      branch: ${CI_REPO_DEFAULT_BRANCH}
-      event: push
-      path: *when_path
+    when: *when-publish-next
 
   publish-next-cli-alpine:
     depends_on:
       - vendor
-      # we also depend on cross-compile-server as we would have to hight
+      # we also depend on publish-next-agent as we would have to hight
       # ram usage otherwise
-      - cross-compile-server
+      - publish-next-agent
     image: *buildx_plugin
     settings:
       repo: *publish_repos_cli
@@ -486,49 +396,14 @@ steps:
       tag: [next-alpine, 'next-${CI_COMMIT_SHA:0:10}-alpine']
       logins: *publish_logins
       build_args: *build_args
-    when:
-      branch: ${CI_REPO_DEFAULT_BRANCH}
-      event: push
-      path: *when_path
-
-  publish-release-branch-cli:
-    depends_on:
-      - vendor
-    image: *buildx_plugin
-    settings:
-      repo: *publish_repos_cli
-      dockerfile: docker/Dockerfile.cli.multiarch
-      platforms: *platforms_release
-      tag: ${CI_COMMIT_BRANCH##release/}
-      logins: *publish_logins
-      build_args: *build_args
-    when:
-      branch: release/*
-      event: push
-      path: *when_path
-
-  publish-release-branch-cli-alpine:
-    depends_on:
-      - vendor
-    image: *buildx_plugin
-    settings:
-      repo: *publish_repos_cli
-      dockerfile: docker/Dockerfile.cli.alpine.multiarch
-      platforms: *platforms_alpine
-      tag: ${CI_COMMIT_BRANCH##release/}
-      logins: *publish_logins
-      build_args: *build_args
-    when:
-      branch: release/*
-      event: push
-      path: *when_path
+    when: *when-publish-next
 
   release-cli:
     depends_on:
       - vendor
-      # we also depend on cross-compile-server as we would have to hight
+      # we also depend on release-agent as we would have to hight
       # ram usage otherwise
-      - cross-compile-server
+      - release-agent
     image: *buildx_plugin
     settings:
       repo: *publish_repos_cli
@@ -538,15 +413,14 @@ steps:
       tag: [latest, '${CI_COMMIT_TAG}']
       logins: *publish_logins
       build_args: *build_args
-    when:
-      event: tag
+    when: *when-release
 
   release-cli-alpine:
     depends_on:
       - vendor
-      # we also depend on cross-compile-server as we would have to hight
+      # we also depend on release-agent as we would have to hight
       # ram usage otherwise
-      - cross-compile-server
+      - release-agent
     image: *buildx_plugin
     settings:
       repo: *publish_repos_cli
@@ -556,5 +430,4 @@ steps:
       tag: [latest-alpine, '${CI_COMMIT_TAG}-alpine']
       logins: *publish_logins
       build_args: *build_args
-    when:
-      event: tag
+    when: *when-release

@@ -103,6 +103,12 @@ clean: ## Clean build artifacts
 	rm -rf build
 	@[ "1" != "$(shell docker image ls woodpecker/make:local -a | wc -l)" ] && docker image rm woodpecker/make:local || echo no docker image to clean
 
+.PHONY: clean-all
+clean-all: clean ## Clean all artifacts
+	rm -rf dist web/dist docs/build docs/node_modules web/node_modules
+	# delete generated
+	rm -rf docs/docs/40-cli.md docs/swagger.json
+
 .PHONY: generate
 generate: generate-swagger ## Run all code generations
 	go generate ./...
@@ -270,16 +276,16 @@ bundle-prepare: ## Prepare the bundles
 	go install github.com/goreleaser/nfpm/v2/cmd/nfpm@v2.6.0
 
 bundle-agent: bundle-prepare ## Create bundles for agent
-	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/nfpm-agent.yml --target ./dist --packager deb
-	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/nfpm-agent.yml --target ./dist --packager rpm
+	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/agent.yaml --target ./dist --packager deb
+	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/agent.yaml --target ./dist --packager rpm
 
 bundle-server: bundle-prepare ## Create bundles for server
-	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/nfpm-server.yml --target ./dist --packager deb
-	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/nfpm-server.yml --target ./dist --packager rpm
+	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/server.yaml --target ./dist --packager deb
+	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/server.yaml --target ./dist --packager rpm
 
 bundle-cli: bundle-prepare ## Create bundles for cli
-	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/nfpm-cli.yml --target ./dist --packager deb
-	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/nfpm-cli.yml --target ./dist --packager rpm
+	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/cli.yaml --target ./dist --packager deb
+	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/cli.yaml --target ./dist --packager rpm
 
 .PHONY: bundle
 bundle: bundle-agent bundle-server bundle-cli ## Create all bundles

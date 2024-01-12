@@ -79,11 +79,8 @@ func TestCompilerCompile(t *testing.T) {
 	}}
 
 	defaultCloneStage := &backend_types.Stage{
-		Name:  "test_clone",
-		Alias: "clone",
 		Steps: []*backend_types.Step{{
-			Name:       "test_clone",
-			Alias:      "clone",
+			Name:       "clone",
 			Type:       backend_types.StepTypeClone,
 			Image:      constant.DefaultCloneImage,
 			OnSuccess:  true,
@@ -127,11 +124,8 @@ func TestCompilerCompile(t *testing.T) {
 				Networks: defaultNetworks,
 				Volumes:  defaultVolumes,
 				Stages: []*backend_types.Stage{defaultCloneStage, {
-					Name:  "test_stage_0",
-					Alias: "dummy",
 					Steps: []*backend_types.Step{{
-						Name:       "test_step_0",
-						Alias:      "dummy",
+						Name:       "dummy",
 						Type:       backend_types.StepTypePlugin,
 						Image:      "dummy_img",
 						OnSuccess:  true,
@@ -164,11 +158,8 @@ func TestCompilerCompile(t *testing.T) {
 				Networks: defaultNetworks,
 				Volumes:  defaultVolumes,
 				Stages: []*backend_types.Stage{defaultCloneStage, {
-					Name:  "test_stage_0",
-					Alias: "echo env",
 					Steps: []*backend_types.Step{{
-						Name:       "test_step_0",
-						Alias:      "echo env",
+						Name:       "echo env",
 						Type:       backend_types.StepTypeCommands,
 						Image:      "bash",
 						Commands:   []string{"env"},
@@ -179,11 +170,8 @@ func TestCompilerCompile(t *testing.T) {
 						ExtraHosts: []backend_types.HostAlias{},
 					}},
 				}, {
-					Name:  "test_stage_1",
-					Alias: "parallel echo 1",
 					Steps: []*backend_types.Step{{
-						Name:       "test_step_1",
-						Alias:      "parallel echo 1",
+						Name:       "parallel echo 1",
 						Type:       backend_types.StepTypeCommands,
 						Image:      "bash",
 						Commands:   []string{"echo 1"},
@@ -193,8 +181,7 @@ func TestCompilerCompile(t *testing.T) {
 						Networks:   []backend_types.Conn{{Name: "test_default", Aliases: []string{"parallel echo 1"}}},
 						ExtraHosts: []backend_types.HostAlias{},
 					}, {
-						Name:       "test_step_2",
-						Alias:      "parallel echo 2",
+						Name:       "parallel echo 2",
 						Type:       backend_types.StepTypeCommands,
 						Image:      "bash",
 						Commands:   []string{"echo 2"},
@@ -227,11 +214,8 @@ func TestCompilerCompile(t *testing.T) {
 				Networks: defaultNetworks,
 				Volumes:  defaultVolumes,
 				Stages: []*backend_types.Stage{defaultCloneStage, {
-					Name:  "test_stage_0",
-					Alias: "test_stage_0",
 					Steps: []*backend_types.Step{{
-						Name:       "test_step_0",
-						Alias:      "echo env",
+						Name:       "echo env",
 						Type:       backend_types.StepTypeCommands,
 						Image:      "bash",
 						Commands:   []string{"env"},
@@ -241,8 +225,7 @@ func TestCompilerCompile(t *testing.T) {
 						Networks:   []backend_types.Conn{{Name: "test_default", Aliases: []string{"echo env"}}},
 						ExtraHosts: []backend_types.HostAlias{},
 					}, {
-						Name:       "test_step_2",
-						Alias:      "echo 2",
+						Name:       "echo 2",
 						Type:       backend_types.StepTypeCommands,
 						Image:      "bash",
 						Commands:   []string{"echo 2"},
@@ -253,11 +236,8 @@ func TestCompilerCompile(t *testing.T) {
 						ExtraHosts: []backend_types.HostAlias{},
 					}},
 				}, {
-					Name:  "test_stage_1",
-					Alias: "test_stage_1",
 					Steps: []*backend_types.Step{{
-						Name:       "test_step_1",
-						Alias:      "echo 1",
+						Name:       "echo 1",
 						Type:       backend_types.StepTypeCommands,
 						Image:      "bash",
 						Commands:   []string{"echo 1"},

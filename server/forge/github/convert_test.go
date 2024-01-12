@@ -232,8 +232,7 @@ func Test_helper(t *testing.T) {
 			from.Sender.Login = github.String("octocat")
 			from.Sender.AvatarURL = github.String("https://avatars1.githubusercontent.com/u/583231")
 
-			_, pipeline, err := parseDeployHook(from)
-			g.Assert(err).IsNil()
+			_, pipeline := parseDeployHook(from)
 			g.Assert(pipeline.Event).Equal(model.EventDeploy)
 			g.Assert(pipeline.Branch).Equal("main")
 			g.Assert(pipeline.Ref).Equal("refs/heads/main")
@@ -255,8 +254,7 @@ func Test_helper(t *testing.T) {
 			from.HeadCommit.ID = github.String("f72fc19")
 			from.Ref = github.String("refs/heads/main")
 
-			_, pipeline, err := parsePushHook(from)
-			g.Assert(err).IsNil()
+			_, pipeline := parsePushHook(from)
 			g.Assert(pipeline.Event).Equal(model.EventPush)
 			g.Assert(pipeline.Branch).Equal("main")
 			g.Assert(pipeline.Ref).Equal("refs/heads/main")
@@ -273,8 +271,7 @@ func Test_helper(t *testing.T) {
 			from := &github.PushEvent{}
 			from.Ref = github.String("refs/tags/v1.0.0")
 
-			_, pipeline, err := parsePushHook(from)
-			g.Assert(err).IsNil()
+			_, pipeline := parsePushHook(from)
 			g.Assert(pipeline.Event).Equal(model.EventTag)
 			g.Assert(pipeline.Ref).Equal("refs/tags/v1.0.0")
 		})
@@ -284,8 +281,7 @@ func Test_helper(t *testing.T) {
 			from.Ref = github.String("refs/tags/v1.0.0")
 			from.BaseRef = github.String("refs/heads/main")
 
-			_, pipeline, err := parsePushHook(from)
-			g.Assert(err).IsNil()
+			_, pipeline := parsePushHook(from)
 			g.Assert(pipeline.Event).Equal(model.EventTag)
 			g.Assert(pipeline.Branch).Equal("main")
 		})
@@ -295,8 +291,7 @@ func Test_helper(t *testing.T) {
 			from.Ref = github.String("refs/tags/v1.0.0")
 			from.BaseRef = github.String("refs/refs/main")
 
-			_, pipeline, err := parsePushHook(from)
-			g.Assert(err).IsNil()
+			_, pipeline := parsePushHook(from)
 			g.Assert(pipeline.Event).Equal(model.EventTag)
 			g.Assert(pipeline.Branch).Equal("refs/tags/v1.0.0")
 		})

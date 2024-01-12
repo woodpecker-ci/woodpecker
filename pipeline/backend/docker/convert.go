@@ -17,6 +17,7 @@ package docker
 import (
 	"encoding/base64"
 	"encoding/json"
+	"maps"
 	"regexp"
 	"strings"
 
@@ -29,24 +30,29 @@ import (
 // returns a container configuration.
 func (e *docker) toConfig(step *types.Step) *container.Config {
 	config := &container.Config{
-		Image:        step.Image,
-		Labels:       map[string]string{"wp_uuid": step.UUID},
+		Image: step.Image,
+		Labels: map[string]string{
+			"wp_uuid": step.UUID,
+			"wp_step": step.Name,
+		},
 		WorkingDir:   step.WorkingDir,
 		AttachStdout: true,
 		AttachStderr: true,
 	}
+	configEnv := make(map[string]string)
+	maps.Copy(configEnv, step.Environment)
 
 	if len(step.Commands) != 0 {
 		env, entry, cmd := common.GenerateContainerConf(step.Commands, e.info.OSType)
 		for k, v := range env {
-			step.Environment[k] = v
+			configEnv[k] = v
 		}
 		config.Entrypoint = entry
 		config.Cmd = cmd
 	}
 
-	if len(step.Environment) != 0 {
-		config.Env = toEnv(step.Environment)
+	if len(configEnv) != 0 {
+		config.Env = toEnv(configEnv)
 	}
 	if len(step.Volumes) != 0 {
 		config.Volumes = toVol(step.Volumes)
@@ -73,14 +79,10 @@ func toHostConfig(step *types.Step) *container.HostConfig {
 		},
 		Privileged: step.Privileged,
 		ShmSize:    step.ShmSize,
-		Sysctls:    step.Sysctls,
 	}
 
 	if len(step.NetworkMode) != 0 {
 		config.NetworkMode = container.NetworkMode(step.NetworkMode)
-	}
-	if len(step.IpcMode) != 0 {
-		config.IpcMode = container.IpcMode(step.IpcMode)
 	}
 	if len(step.DNS) != 0 {
 		config.DNS = step.DNS

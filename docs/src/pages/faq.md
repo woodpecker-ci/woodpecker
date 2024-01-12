@@ -28,13 +28,8 @@ If you want all (new) features of Woodpecker and are willing to accept some poss
 
 This error can have multiple causes. If you use internal repositories you might have to enable `WOODPECKER_AUTHENTICATE_PUBLIC_REPOS`:
 
-```yaml
-services:
-  woodpecker-server:
-    [...]
-    environment:
-      - [...]
-      - WOODPECKER_AUTHENTICATE_PUBLIC_REPOS=true
+```ini
+WOODPECKER_AUTHENTICATE_PUBLIC_REPOS=true
 ```
 
 If that does not work, try to make sure the container can reach your git server. In order to do that disable git checkout and make the container "hang":

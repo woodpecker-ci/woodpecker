@@ -29,7 +29,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/utils"
 )
 
-func (c *Compiler) createProcess(name string, container *yaml_types.Container, stepType backend_types.StepType) (*backend_types.Step, error) {
+func (c *Compiler) createProcess(container *yaml_types.Container, stepType backend_types.StepType) (*backend_types.Step, error) {
 	var (
 		uuid = ulid.Make()
 
@@ -39,7 +39,6 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		workspace   = fmt.Sprintf("%s_default:%s", c.prefix, c.base)
 		privileged  = container.Privileged
 		networkMode = container.NetworkMode
-		ipcMode     = container.IpcMode
 		// network    = container.Network
 	)
 
@@ -80,7 +79,6 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 	maps.Copy(environment, c.env)
 
 	environment["CI_WORKSPACE"] = path.Join(c.base, c.path)
-	environment["CI_STEP_NAME"] = name
 
 	if stepType == backend_types.StepTypeService || container.Detached {
 		detached = true
@@ -172,10 +170,9 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 	}
 
 	return &backend_types.Step{
-		Name:           name,
+		Name:           container.Name,
 		UUID:           uuid.String(),
 		Type:           stepType,
-		Alias:          container.Name,
 		Image:          container.Image,
 		Pull:           container.Pull,
 		Detached:       detached,
@@ -193,7 +190,6 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		MemSwapLimit:   memSwapLimit,
 		MemLimit:       memLimit,
 		ShmSize:        shmSize,
-		Sysctls:        container.Sysctls,
 		CPUQuota:       cpuQuota,
 		CPUShares:      cpuShares,
 		CPUSet:         cpuSet,
@@ -202,7 +198,6 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		OnFailure:      onFailure,
 		Failure:        failure,
 		NetworkMode:    networkMode,
-		IpcMode:        ipcMode,
 		Ports:          ports,
 		BackendOptions: backendOptions,
 	}, nil

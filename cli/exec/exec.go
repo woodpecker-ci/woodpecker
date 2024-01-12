@@ -213,7 +213,7 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 	}
 
 	backendCtx := context.WithValue(c.Context, backendTypes.CliContext, c)
-	backend.Init(backendCtx)
+	backend.Init()
 
 	backendEngine, err := backend.FindBackend(backendCtx, c.String("backend-engine"))
 	if err != nil {
@@ -258,7 +258,7 @@ var defaultLogger = pipeline.LogFunc(func(step *backendTypes.Step, rc multipart.
 		return err
 	}
 
-	logStream := NewLineWriter(step.Alias, step.UUID)
+	logStream := NewLineWriter(step.Name, step.UUID)
 	_, err = io.Copy(logStream, part)
 	return err
 })
