@@ -322,7 +322,6 @@ func TestFullPod(t *testing.T) {
 
 	json, err := json.Marshal(pod)
 	assert.NoError(t, err)
-	t.Log(string(json))
 
 	ja := jsonassert.New(t)
 	ja.Assertf(string(json), expected)

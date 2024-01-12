@@ -82,6 +82,7 @@ func TestService(t *testing.T) {
 		Name:  "bar",
 		Ports: ports,
 	}, "foo")
+	assert.NoError(t, err)
 	j, err := json.Marshal(s)
 	assert.NoError(t, err)
 	assert.JSONEq(t, expected, string(j))
