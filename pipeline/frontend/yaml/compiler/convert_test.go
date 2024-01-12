@@ -15,9 +15,10 @@
 package compiler
 
 import (
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	backend_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
-	"testing"
 )
 
 func TestConvertPortNumber(t *testing.T) {
