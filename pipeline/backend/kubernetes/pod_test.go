@@ -151,7 +151,8 @@ func TestFullPod(t *testing.T) {
 				"step": "go-test"
 			},
 			"annotations": {
-				"apparmor.security": "runtime/default"
+				"apps.kubernetes.io/pod-index": "0",
+				"container.apparmor.security.beta.kubernetes.io/wp-01he8bebctabr3kgk0qj36d2me-0": "localhost/k8s-apparmor-example-deny-write"
 			}
 		},
 		"spec": {
@@ -225,7 +226,11 @@ func TestFullPod(t *testing.T) {
 				"runAsUser": 101,
 				"runAsGroup": 101,
 				"runAsNonRoot": true,
-				"fsGroup": 101
+				"fsGroup": 101,
+				"seccompProfile": {
+        	"type": "Localhost",
+          "localhostProfile": "profiles/audit.json"
+				}
 			},
 			"imagePullSecrets": [
 				{
@@ -264,6 +269,21 @@ func TestFullPod(t *testing.T) {
 		{Name: "cloudflare", IP: "1.1.1.1"},
 		{Name: "cf.v6", IP: "2606:4700:4700::64"},
 	}
+	secCtx := types.SecurityContext{
+		Privileged:   newBool(true),
+		RunAsNonRoot: newBool(true),
+		RunAsUser:    newInt64(101),
+		RunAsGroup:   newInt64(101),
+		FSGroup:      newInt64(101),
+		SeccompProfile: &types.SecProfile{
+			Type:             "Localhost",
+			LocalhostProfile: "profiles/audit.json",
+		},
+		ApparmorProfile: &types.SecProfile{
+			Type:             "Localhost",
+			LocalhostProfile: "k8s-apparmor-example-deny-write",
+		},
+	}
 	pod, err := mkPod(&types.Step{
 		Name:        "go-test",
 		Image:       "meltwater/drone-cache",
@@ -283,20 +303,14 @@ func TestFullPod(t *testing.T) {
 					Requests: map[string]string{"memory": "128Mi", "cpu": "1000m"},
 					Limits:   map[string]string{"memory": "256Mi", "cpu": "2"},
 				},
-				SecurityContext: &types.SecurityContext{
-					Privileged:   newBool(true),
-					RunAsNonRoot: newBool(true),
-					RunAsUser:    newInt64(101),
-					RunAsGroup:   newInt64(101),
-					FSGroup:      newInt64(101),
-				},
+				SecurityContext: &secCtx,
 			},
 		},
 	}, &config{
 		Namespace:            "woodpecker",
 		ImagePullSecretNames: []string{"regcred", "another-pull-secret"},
 		PodLabels:            map[string]string{"app": "test"},
-		PodAnnotations:       map[string]string{"apparmor.security": "runtime/default"},
+		PodAnnotations:       map[string]string{"apps.kubernetes.io/pod-index": "0"},
 		SecurityContext:      SecurityContextConfig{RunAsNonRoot: false},
 	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64")
 	assert.NoError(t, err)
