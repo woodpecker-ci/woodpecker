@@ -47,7 +47,7 @@ type (
 		Settings       map[string]any     `yaml:"settings"`
 		Volumes        Volumes            `yaml:"volumes,omitempty"`
 		When           constraint.When    `yaml:"when,omitempty"`
-		Ports          []base.StringOrInt `yaml:"ports,omitempty"`
+		Ports          []string           `yaml:"ports,omitempty"`
 		DependsOn      base.StringOrSlice `yaml:"depends_on,omitempty"`
 
 		// Docker Specific

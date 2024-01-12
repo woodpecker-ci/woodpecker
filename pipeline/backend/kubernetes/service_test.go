@@ -53,11 +53,13 @@ func TestService(t *testing.T) {
 	      },
 	      {
 	        "name": "port-2",
+	        "protocol": "TCP",
 	        "port": 2,
 	        "targetPort": 2
 	      },
 	      {
 	        "name": "port-3",
+	        "protocol": "UDP",
 	        "port": 3,
 	        "targetPort": 3
 	      }
@@ -71,10 +73,14 @@ func TestService(t *testing.T) {
 	    "loadBalancer": {}
 	  }
 	}`
-
+	ports := []types.Port{
+		{Number: 1},
+		{Number: 2, Protocol: "tcp"},
+		{Number: 3, Protocol: "udp"},
+	}
 	s, err := mkService(&types.Step{
 		Name:  "bar",
-		Ports: []uint16{1, 2, 3},
+		Ports: ports,
 	}, "foo")
 	assert.NoError(t, err)
 	j, err := json.Marshal(s)

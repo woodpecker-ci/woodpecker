@@ -134,6 +134,7 @@ func podContainer(step *types.Step, podName, goos string) (v1.Container, error) 
 	}
 
 	container.Env = mapToEnvVars(step.Environment)
+	container.Ports = containerPorts(step.Ports)
 	container.SecurityContext = containerSecurityContext(step.BackendOptions.Kubernetes.SecurityContext, step.Privileged)
 
 	container.Resources, err = resourceRequirements(step.BackendOptions.Kubernetes.Resources)
@@ -195,6 +196,21 @@ func volumeMount(name, path string) v1.VolumeMount {
 	return v1.VolumeMount{
 		Name:      name,
 		MountPath: path,
+	}
+}
+
+func containerPorts(ports []types.Port) []v1.ContainerPort {
+	containerPorts := make([]v1.ContainerPort, len(ports))
+	for i, port := range ports {
+		containerPorts[i] = containerPort(port)
+	}
+	return containerPorts
+}
+
+func containerPort(port types.Port) v1.ContainerPort {
+	return v1.ContainerPort{
+		ContainerPort: int32(port.Number),
+		Protocol:      v1.Protocol(strings.ToUpper(port.Protocol)),
 	}
 }
 

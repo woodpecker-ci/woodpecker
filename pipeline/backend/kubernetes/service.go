@@ -17,6 +17,7 @@ package kubernetes
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/rs/zerolog/log"
 	v1 "k8s.io/api/core/v1"
@@ -43,13 +44,10 @@ func mkService(step *types.Step, namespace string) (*v1.Service, error) {
 
 	var svcPorts []v1.ServicePort
 	for _, port := range step.Ports {
-		svcPorts = append(svcPorts, v1.ServicePort{
-			Name:       fmt.Sprintf("port-%d", port),
-			Port:       int32(port),
-			TargetPort: intstr.IntOrString{IntVal: int32(port)},
-		})
+		svcPorts = append(svcPorts, servicePort(port))
 	}
 
+	log.Trace().Str("name", name).Interface("selector", selector).Interface("ports", svcPorts).Msg("creating service")
 	return &v1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
@@ -65,6 +63,17 @@ func mkService(step *types.Step, namespace string) (*v1.Service, error) {
 
 func serviceName(step *types.Step) (string, error) {
 	return dnsName(step.Name)
+}
+
+func servicePort(port types.Port) v1.ServicePort {
+	portNumber := int32(port.Number)
+	portProtocol := strings.ToUpper(port.Protocol)
+	return v1.ServicePort{
+		Name:       fmt.Sprintf("port-%d", portNumber),
+		Port:       portNumber,
+		Protocol:   v1.Protocol(portProtocol),
+		TargetPort: intstr.IntOrString{IntVal: portNumber},
+	}
 }
 
 func startService(ctx context.Context, engine *kube, step *types.Step) (*v1.Service, error) {
