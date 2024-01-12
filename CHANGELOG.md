@@ -8,6 +8,7 @@
 
 ### 📈 Enhancement
 
+- Added protocol in port configuration [[#2993](https://github.com/woodpecker-ci/woodpecker/pull/2993)]
 - Kubernetes AppArmor and seccomp [[#3123](https://github.com/woodpecker-ci/woodpecker/pull/3123)]
 - `cli exec`: let override existing environment values but print a warning [[#3140](https://github.com/woodpecker-ci/woodpecker/pull/3140)]
 - Enable golangci linter forcetypeassert [[#3168](https://github.com/woodpecker-ci/woodpecker/pull/3168)]
