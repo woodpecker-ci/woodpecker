@@ -27,7 +27,8 @@ type Setter interface {
 
 // FromContext returns the Store associated with this context.
 func FromContext(c context.Context) Store {
-	return c.Value(key).(Store)
+	store, _ := c.Value(key).(Store)
+	return store
 }
 
 // TryFromContext try to return the Store associated with this context.

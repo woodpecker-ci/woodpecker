@@ -257,7 +257,13 @@ func (e *local) getState(taskUUID string) (*workflowState, error) {
 	if !ok {
 		return nil, ErrWorkflowStateNotFound
 	}
-	return state.(*workflowState), nil
+
+	s, ok := state.(*workflowState)
+	if !ok {
+		return nil, fmt.Errorf("could not parse state: %v", state)
+	}
+
+	return s, nil
 }
 
 func (e *local) saveState(taskUUID string, state *workflowState) {

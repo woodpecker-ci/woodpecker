@@ -51,11 +51,12 @@ func Test_github(t *testing.T) {
 					Secret:     "I1NiIsInR5",
 					SkipVerify: true,
 				})
-				g.Assert(forge.(*client).url).Equal("http://localhost:8080")
-				g.Assert(forge.(*client).API).Equal("http://localhost:8080/api/v3/")
-				g.Assert(forge.(*client).Client).Equal("0ZXh0IjoiI")
-				g.Assert(forge.(*client).Secret).Equal("I1NiIsInR5")
-				g.Assert(forge.(*client).SkipVerify).Equal(true)
+				f, _ := forge.(*client)
+				g.Assert(f.url).Equal("http://localhost:8080")
+				g.Assert(f.API).Equal("http://localhost:8080/api/v3/")
+				g.Assert(f.Client).Equal("0ZXh0IjoiI")
+				g.Assert(f.Secret).Equal("I1NiIsInR5")
+				g.Assert(f.SkipVerify).Equal(true)
 			})
 		})
 
