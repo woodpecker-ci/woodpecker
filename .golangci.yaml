@@ -163,6 +163,7 @@ linters:
     - gocritic
     - nolintlint
     - stylecheck
+    - contextcheck
     - forcetypeassert
 
 run:
