@@ -8,6 +8,7 @@
 
 ### 📈 Enhancement
 
+- `cli exec`: let override existing environment values but print a warning [[#3140](https://github.com/woodpecker-ci/woodpecker/pull/3140)]
 - Enable golangci linter forcetypeassert [[#3168](https://github.com/woodpecker-ci/woodpecker/pull/3168)]
 - Enable golangci linter contextcheck [[#3170](https://github.com/woodpecker-ci/woodpecker/pull/3170)]
 - Remove panic recovering [[#3162](https://github.com/woodpecker-ci/woodpecker/pull/3162)]
