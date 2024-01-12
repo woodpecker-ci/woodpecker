@@ -1,7 +1,7 @@
 # External Configuration API
 
 :::warning
-The HTTP config service is deprecated. Migrate to [addons](../75-addons/00-overview.md) instead.
+The HTTP config service is deprecated. Migrate to [addons](./75-addons/00-overview.md) instead.
 :::
 
 To provide additional management and preprocessing capabilities for pipeline configurations Woodpecker supports an HTTP API which can be enabled to call an external config service.
