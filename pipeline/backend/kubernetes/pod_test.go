@@ -176,6 +176,19 @@ func TestFullPod(t *testing.T) {
 						"echo $CI_SCRIPT | base64 -d | /bin/sh -e"
 					],
 					"workingDir": "/woodpecker/src",
+					"ports": [
+						{
+							"containerPort": 1234
+						},
+						{
+							"containerPort": 2345,
+							"protocol": "TCP"
+						},
+						{
+							"containerPort": 3456,
+							"protocol": "UDP"
+						}
+					],
 					"env": [
 						"<<UNORDERED>>",
 						{
@@ -269,6 +282,11 @@ func TestFullPod(t *testing.T) {
 		{Name: "cloudflare", IP: "1.1.1.1"},
 		{Name: "cf.v6", IP: "2606:4700:4700::64"},
 	}
+	ports := []types.Port{
+		{Number: 1234},
+		{Number: 2345, Protocol: "tcp"},
+		{Number: 3456, Protocol: "udp"},
+	}
 	secCtx := types.SecurityContext{
 		Privileged:   newBool(true),
 		RunAsNonRoot: newBool(true),
@@ -294,6 +312,7 @@ func TestFullPod(t *testing.T) {
 		Volumes:     []string{"woodpecker-cache:/woodpecker/src/cache"},
 		Environment: map[string]string{"CGO": "0"},
 		ExtraHosts:  hostAliases,
+		Ports:       ports,
 		BackendOptions: types.BackendOptions{
 			Kubernetes: types.KubernetesBackendOptions{
 				NodeSelector:       map[string]string{"storage": "ssd"},

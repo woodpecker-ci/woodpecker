@@ -45,7 +45,7 @@ type Step struct {
 	Failure        string            `json:"failure,omitempty"`
 	AuthConfig     Auth              `json:"auth_config,omitempty"`
 	NetworkMode    string            `json:"network_mode,omitempty"`
-	Ports          []uint16          `json:"ports,omitempty"`
+	Ports          []Port            `json:"ports,omitempty"`
 	BackendOptions BackendOptions    `json:"backend_options,omitempty"`
 }
 
