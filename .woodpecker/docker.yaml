@@ -47,6 +47,8 @@ variables:
       - 'pipeline/schema/**'
       # Dockerfile changes
       - 'docker/**'
+      # pipeline config changes
+      - '.woodpecker/docker.yaml'
 
 steps:
   vendor:
