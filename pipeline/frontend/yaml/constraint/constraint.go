@@ -195,7 +195,11 @@ func (c *Constraint) Match(m metadata.Metadata, global bool, env map[string]stri
 		if err != nil {
 			return false, err
 		}
-		match = match && result.(bool)
+		bresult, ok := result.(bool)
+		if !ok {
+			return false, fmt.Errorf("could not parse result: %v", result)
+		}
+		match = match && bresult
 	}
 
 	return match, nil

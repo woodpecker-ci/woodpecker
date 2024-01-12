@@ -80,7 +80,7 @@ func HandleAuth(c *gin.Context) {
 		if server.Config.Permissions.Orgs.IsConfigured {
 			teams, terr := _forge.Teams(c, tmpuser)
 			if terr != nil || !server.Config.Permissions.Orgs.IsMember(teams) {
-				log.Error().Err(terr).Msgf("cannot verify team membership for %s.", u.Login)
+				log.Error().Err(terr).Msgf("cannot verify team membership for %s", u.Login)
 				c.Redirect(303, server.Config.Server.RootPath+"/login?error=access_denied")
 				return
 			}
@@ -130,7 +130,7 @@ func HandleAuth(c *gin.Context) {
 	if server.Config.Permissions.Orgs.IsConfigured {
 		teams, terr := _forge.Teams(c, u)
 		if terr != nil || !server.Config.Permissions.Orgs.IsMember(teams) {
-			log.Error().Err(terr).Msgf("cannot verify team membership for %s.", u.Login)
+			log.Error().Err(terr).Msgf("cannot verify team membership for %s", u.Login)
 			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=access_denied")
 			return
 		}
@@ -166,7 +166,7 @@ func HandleAuth(c *gin.Context) {
 			continue
 		}
 
-		log.Debug().Msgf("Synced user permission for %s %s", u.Login, dbRepo.FullName)
+		log.Debug().Msgf("synced user permission for %s %s", u.Login, dbRepo.FullName)
 		perm := forgeRepo.Perm
 		perm.Repo = dbRepo
 		perm.RepoID = dbRepo.ID

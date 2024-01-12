@@ -39,7 +39,6 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		workspace   = fmt.Sprintf("%s_default:%s", c.prefix, c.base)
 		privileged  = container.Privileged
 		networkMode = container.NetworkMode
-		ipcMode     = container.IpcMode
 		// network    = container.Network
 	)
 
@@ -191,7 +190,6 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		MemSwapLimit:   memSwapLimit,
 		MemLimit:       memLimit,
 		ShmSize:        shmSize,
-		Sysctls:        container.Sysctls,
 		CPUQuota:       cpuQuota,
 		CPUShares:      cpuShares,
 		CPUSet:         cpuSet,
@@ -200,7 +198,6 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		OnFailure:      onFailure,
 		Failure:        failure,
 		NetworkMode:    networkMode,
-		IpcMode:        ipcMode,
 		Ports:          ports,
 		BackendOptions: backendOptions,
 	}, nil

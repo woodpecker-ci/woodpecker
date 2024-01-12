@@ -140,7 +140,7 @@ func LookupOrg(c *gin.Context) {
 		} else if !user.Admin {
 			perm, err := server.Config.Services.Membership.Get(c, user, org.Name)
 			if err != nil {
-				log.Error().Err(err).Msg("Failed to check membership")
+				log.Error().Err(err).Msg("failed to check membership")
 				c.Status(http.StatusInternalServerError)
 				return
 			}

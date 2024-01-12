@@ -205,7 +205,7 @@ func hostAlias(extraHost types.HostAlias) v1.HostAlias {
 }
 
 func imagePullSecretsReferences(imagePullSecretNames []string) []v1.LocalObjectReference {
-	log.Trace().Msgf("Using the image pull secrets: %v", imagePullSecretNames)
+	log.Trace().Msgf("using the image pull secrets: %v", imagePullSecretNames)
 
 	secretReferences := make([]v1.LocalObjectReference, len(imagePullSecretNames))
 	for i, imagePullSecretName := range imagePullSecretNames {
@@ -256,11 +256,11 @@ func nodeSelector(backendNodeSelector map[string]string, platform string) map[st
 	if platform != "" {
 		arch := strings.Split(platform, "/")[1]
 		nodeSelector[v1.LabelArchStable] = arch
-		log.Trace().Msgf("Using the node selector from the Agent's platform: %v", nodeSelector)
+		log.Trace().Msgf("using the node selector from the Agent's platform: %v", nodeSelector)
 	}
 
 	if len(backendNodeSelector) > 0 {
-		log.Trace().Msgf("Appending labels to the node selector from the backend options: %v", backendNodeSelector)
+		log.Trace().Msgf("appending labels to the node selector from the backend options: %v", backendNodeSelector)
 		maps.Copy(nodeSelector, backendNodeSelector)
 	}
 
@@ -271,7 +271,7 @@ func tolerations(backendTolerations []types.Toleration) []v1.Toleration {
 	var tolerations []v1.Toleration
 
 	if len(backendTolerations) > 0 {
-		log.Trace().Msgf("Tolerations that will be used in the backend options: %v", backendTolerations)
+		log.Trace().Msgf("tolerations that will be used in the backend options: %v", backendTolerations)
 		for _, backendToleration := range backendTolerations {
 			toleration := toleration(backendToleration)
 			tolerations = append(tolerations, toleration)
@@ -323,7 +323,7 @@ func podSecurityContext(sc *types.SecurityContext, secCtxConf SecurityContextCon
 		RunAsGroup:   group,
 		FSGroup:      fsGroup,
 	}
-	log.Trace().Msgf("Pod security context that will be used: %v", securityContext)
+	log.Trace().Msgf("pod security context that will be used: %v", securityContext)
 	return securityContext
 }
 
@@ -343,7 +343,7 @@ func containerSecurityContext(sc *types.SecurityContext, stepPrivileged bool) *v
 	securityContext := &v1.SecurityContext{
 		Privileged: privileged,
 	}
-	log.Trace().Msgf("Container security context that will be used: %v", securityContext)
+	log.Trace().Msgf("container security context that will be used: %v", securityContext)
 	return securityContext
 }
 
@@ -368,7 +368,7 @@ func startPod(ctx context.Context, engine *kube, step *types.Step) (*v1.Pod, err
 		return nil, err
 	}
 
-	log.Trace().Msgf("Creating pod: %s", pod.Name)
+	log.Trace().Msgf("creating pod: %s", pod.Name)
 	return engine.client.CoreV1().Pods(engine.config.Namespace).Create(ctx, pod, metav1.CreateOptions{})
 }
 
@@ -377,7 +377,7 @@ func stopPod(ctx context.Context, engine *kube, step *types.Step, deleteOpts met
 	if err != nil {
 		return err
 	}
-	log.Trace().Str("name", podName).Msg("Deleting pod")
+	log.Trace().Str("name", podName).Msg("deleting pod")
 
 	err = engine.client.CoreV1().Pods(engine.config.Namespace).Delete(ctx, podName, deleteOpts)
 	if errors.IsNotFound(err) {

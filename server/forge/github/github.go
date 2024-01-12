@@ -369,7 +369,7 @@ func (c *client) Org(ctx context.Context, u *model.User, owner string) (*model.O
 	client := c.newClientToken(ctx, u.Token)
 
 	user, _, err := client.Users.Get(ctx, owner)
-	log.Trace().Msgf("Github user for owner %s = %v", owner, user)
+	log.Trace().Msgf("GitHub user for owner %s = %v", owner, user)
 	if user != nil && err == nil {
 		return &model.Org{
 			Name:   user.GetLogin(),
@@ -378,7 +378,7 @@ func (c *client) Org(ctx context.Context, u *model.User, owner string) (*model.O
 	}
 
 	org, _, err := client.Organizations.Get(ctx, owner)
-	log.Trace().Msgf("Github organization for owner %s = %v", owner, org)
+	log.Trace().Msgf("GitHub organization for owner %s = %v", owner, org)
 	if err != nil {
 		return nil, err
 	}
@@ -434,7 +434,8 @@ func (c *client) newClientToken(ctx context.Context, token string) *github.Clien
 	)
 	tc := oauth2.NewClient(ctx, ts)
 	if c.SkipVerify {
-		tc.Transport.(*oauth2.Transport).Base = &http.Transport{
+		tp, _ := tc.Transport.(*oauth2.Transport)
+		tp.Base = &http.Transport{
 			Proxy: http.ProxyFromEnvironment,
 			TLSClientConfig: &tls.Config{
 				InsecureSkipVerify: true,

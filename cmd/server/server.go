@@ -266,7 +266,7 @@ func run(c *cli.Context) error {
 		})
 	}
 
-	log.Info().Msgf("Starting Woodpecker server with version '%s'", version.String())
+	log.Info().Msgf("starting Woodpecker server with version '%s'", version.String())
 
 	return g.Wait()
 }

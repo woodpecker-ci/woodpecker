@@ -19,11 +19,12 @@ import (
 	"fmt"
 
 	"github.com/rs/zerolog/log"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
+
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
 
 const (
@@ -81,12 +82,12 @@ func stopService(ctx context.Context, engine *kube, step *types.Step, deleteOpts
 	if err != nil {
 		return err
 	}
-	log.Trace().Str("name", svcName).Msg("Deleting service")
+	log.Trace().Str("name", svcName).Msg("deleting service")
 
 	err = engine.client.CoreV1().Services(engine.config.Namespace).Delete(ctx, svcName, deleteOpts)
 	if errors.IsNotFound(err) {
 		// Don't abort on 404 errors from k8s, they most likely mean that the pod hasn't been created yet, usually because pipeline was canceled before running all steps.
-		log.Trace().Err(err).Msgf("Unable to delete service %s", svcName)
+		log.Trace().Err(err).Msgf("unable to delete service %s", svcName)
 		return nil
 	}
 	return err
