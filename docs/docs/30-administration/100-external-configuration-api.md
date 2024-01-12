@@ -1,5 +1,9 @@
 # External Configuration API
 
+:::warning
+The HTTP config service is deprecated. Migrate to [addons](../75-addons/00-overview.md) instead.
+:::
+
 To provide additional management and preprocessing capabilities for pipeline configurations Woodpecker supports an HTTP API which can be enabled to call an external config service.
 Before the run or restart of any pipeline Woodpecker will make a POST request to an external HTTP API sending the current repository, build information and all current config files retrieved from the repository. The external API can then send back new pipeline configurations that will be used immediately or respond with `HTTP 204` to tell the system to use the existing configuration.
 

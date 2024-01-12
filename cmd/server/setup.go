@@ -330,6 +330,7 @@ func setupConfigService(c *cli.Context) (config.Extension, error) {
 	}
 
 	if endpoint := c.String("config-service-endpoint"); endpoint != "" {
+		log.Warn().Msg("the HTTP config service is deprecated, use addons instead")
 		return config.NewHTTP(endpoint, server.Config.Services.SignaturePrivateKey), nil
 	}
 
