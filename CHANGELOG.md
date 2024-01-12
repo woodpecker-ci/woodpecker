@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@xoxys, @qwerty287, @6543, @micash545, @pat-s, @miry, @zc-devs, @lukashass, @lafriks, @pre-commit-ci[bot], @anbraten, @andyhan, @renovate[bot], @KamilaBorowska
+@6543, @xoxys, @qwerty287, @micash545, @pat-s, @miry, @zc-devs, @lukashass, @lafriks, @pre-commit-ci[bot], @anbraten, @andyhan, @renovate[bot], @KamilaBorowska
 
 ### 📈 Enhancement
 
@@ -78,6 +78,7 @@
 
 ### Misc
 
+- declare different when statements once and reuse them [[#3176](https://github.com/woodpecker-ci/woodpecker/pull/3176)]
 - Add `make clean-all` [[#3152](https://github.com/woodpecker-ci/woodpecker/pull/3152)]
 - Fix `version.json` updates [[#3057](https://github.com/woodpecker-ci/woodpecker/pull/3057)]
 - [pre-commit.ci] pre-commit autoupdate [[#3101](https://github.com/woodpecker-ci/woodpecker/pull/3101)]
