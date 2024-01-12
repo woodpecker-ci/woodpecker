@@ -45,7 +45,7 @@ func Start(ctx context.Context, store store.Store, forge forge.Forge) error {
 		case <-time.After(checkTime):
 			go func() {
 				now := time.Now()
-				log.Trace().Msg("Cron: fetch next crons")
+				log.Trace().Msg("cron: fetch next crons")
 
 				crons, err := store.CronListNextExecute(now.Unix(), checkItems)
 				if err != nil {
@@ -78,7 +78,7 @@ func CalcNewNext(schedule string, now time.Time) (time.Time, error) {
 }
 
 func runCron(store store.Store, forge forge.Forge, cron *model.Cron, now time.Time) error {
-	log.Trace().Msgf("Cron: run id[%d]", cron.ID)
+	log.Trace().Msgf("cron: run id[%d]", cron.ID)
 	ctx := context.Background()
 
 	newNext, err := CalcNewNext(cron.Schedule, now)

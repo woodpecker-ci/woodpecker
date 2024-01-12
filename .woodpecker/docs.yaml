@@ -4,7 +4,7 @@ variables:
   - &alpine_image 'docker.io/alpine:3.19'
   - path: &when_path
       - 'docs/**'
-      - '.woodpecker/docs.yml'
+      - '.woodpecker/docs.yaml'
       # since we generate docs for cli tool we have to watch this too
       - 'cli/**'
       - 'cmd/cli/**'
@@ -44,6 +44,7 @@ steps:
       - make docs
     when:
       - path: *when_path
+        event: [tag, pull_request, push]
       - event: manual
 
   build:
@@ -55,6 +56,7 @@ steps:
       - pnpm build
     when:
       - path: *when_path
+        event: [tag, pull_request, push]
       - event: manual
 
   deploy-preview:

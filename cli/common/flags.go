@@ -64,7 +64,6 @@ func FormatFlag(tmpl string, hidden ...bool) *cli.StringFlag {
 	}
 }
 
-// specify repository
 var RepoFlag = &cli.StringFlag{
 	Name:    "repository",
 	Aliases: []string{"repo"},

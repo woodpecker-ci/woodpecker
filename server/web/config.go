@@ -52,7 +52,11 @@ func Config(c *gin.Context) {
 	// default func map with json parser.
 	funcMap := template.FuncMap{
 		"json": func(v any) string {
-			a, _ := json.Marshal(v)
+			a, err := json.Marshal(v)
+			if err != nil {
+				log.Error().Err(err).Msg("could not marshal JSON")
+				return ""
+			}
 			return string(a)
 		},
 	}
@@ -61,7 +65,7 @@ func Config(c *gin.Context) {
 	tmpl := template.Must(template.New("").Funcs(funcMap).Parse(configTemplate))
 
 	if err := tmpl.Execute(c.Writer, configData); err != nil {
-		log.Error().Err(err).Msgf("could not execute template")
+		log.Error().Err(err).Msg("could not execute template")
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}

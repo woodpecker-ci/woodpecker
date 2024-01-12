@@ -40,7 +40,7 @@ func (s *SliceOrMap) UnmarshalYAML(unmarshal func(any) error) error {
 				}
 				parts[key] = val
 			} else {
-				return fmt.Errorf("Cannot unmarshal '%v' of type %T into a string value", s, s)
+				return fmt.Errorf("cannot unmarshal '%v' of type %T into a string value", s, s)
 			}
 		}
 		*s = parts
@@ -55,15 +55,15 @@ func (s *SliceOrMap) UnmarshalYAML(unmarshal func(any) error) error {
 				if sv, ok := v.(string); ok {
 					parts[sk] = sv
 				} else {
-					return fmt.Errorf("Cannot unmarshal '%v' of type %T into a string value", v, v)
+					return fmt.Errorf("cannot unmarshal '%v' of type %T into a string value", v, v)
 				}
 			} else {
-				return fmt.Errorf("Cannot unmarshal '%v' of type %T into a string value", k, k)
+				return fmt.Errorf("cannot unmarshal '%v' of type %T into a string value", k, k)
 			}
 		}
 		*s = parts
 		return nil
 	}
 
-	return errors.New("Failed to unmarshal SliceOrMap")
+	return errors.New("failed to unmarshal SliceOrMap")
 }

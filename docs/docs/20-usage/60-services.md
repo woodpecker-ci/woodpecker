@@ -41,15 +41,15 @@ You can define a port and a protocol explicitly:
 Service containers generally expose environment variables to customize service startup such as default usernames, passwords and ports. Please see the official image documentation to learn more.
 
 ```diff
-services:
-  database:
-    image: mysql
-+   environment:
-+     - MYSQL_DATABASE=test
-+     - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+ services:
+   database:
+     image: mysql
++    environment:
++      - MYSQL_DATABASE=test
++      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
 
-  cache:
-    image: redis
+   cache:
+     image: redis
 ```
 
 ## Detachment
@@ -57,21 +57,21 @@ services:
 Service and long running containers can also be included in the pipeline section of the configuration using the detach parameter without blocking other steps. This should be used when explicit control over startup order is required.
 
 ```diff
-steps:
-  build:
-    image: golang
-    commands:
-      - go build
-      - go test
+ steps:
+   build:
+     image: golang
+     commands:
+       - go build
+       - go test
 
-  database:
-    image: redis
-+   detach: true
+   database:
+     image: redis
++    detach: true
 
-  test:
-    image: golang
-    commands:
-      - go test
+   test:
+     image: golang
+     commands:
+       - go test
 ```
 
 Containers from detached steps will terminate when the pipeline ends.
@@ -81,17 +81,17 @@ Containers from detached steps will terminate when the pipeline ends.
 Service containers require time to initialize and begin to accept connections. If you are unable to connect to a service you may need to wait a few seconds or implement a backoff.
 
 ```diff
-steps:
-  test:
-    image: golang
-    commands:
-+     - sleep 15
-      - go get
-      - go test
+ steps:
+   test:
+     image: golang
+     commands:
++      - sleep 15
+       - go get
+       - go test
 
-services:
-  database:
-    image: mysql
+ services:
+   database:
+     image: mysql
 ```
 
 ## Complete Pipeline Example

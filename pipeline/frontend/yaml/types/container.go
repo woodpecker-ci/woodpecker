@@ -61,13 +61,11 @@ type (
 		DNSSearch    base.StringOrSlice  `yaml:"dns_search,omitempty"`
 		DNS          base.StringOrSlice  `yaml:"dns,omitempty"`
 		ExtraHosts   []string            `yaml:"extra_hosts,omitempty"`
-		IpcMode      string              `yaml:"ipc_mode,omitempty"`
 		MemLimit     base.MemStringOrInt `yaml:"mem_limit,omitempty"`
 		MemSwapLimit base.MemStringOrInt `yaml:"memswap_limit,omitempty"`
 		NetworkMode  string              `yaml:"network_mode,omitempty"`
 		Networks     Networks            `yaml:"networks,omitempty"`
 		ShmSize      base.MemStringOrInt `yaml:"shm_size,omitempty"`
-		Sysctls      base.SliceOrMap     `yaml:"sysctls,omitempty"`
 		Tmpfs        []string            `yaml:"tmpfs,omitempty"`
 	}
 )
