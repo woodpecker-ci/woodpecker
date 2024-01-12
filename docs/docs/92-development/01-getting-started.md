@@ -2,7 +2,7 @@
 
 ## Core ideas
 
-- A configuration should never be [turing complete](https://en.wikipedia.org/wiki/Turing_completeness) (We have agents to exec things 🙂).
+- A (e.g. pipeline) configuration should never be [turing complete](https://en.wikipedia.org/wiki/Turing_completeness) (We have agents to exec things 🙂).
 - If possible follow the [KISS principle](https://en.wikipedia.org/wiki/KISS_principle).
 - What is used most should be default.
 - Keep different topics separated, so you can write plugins, port new ideas ... more easily, see [Architecture](./05-architecture.md).
