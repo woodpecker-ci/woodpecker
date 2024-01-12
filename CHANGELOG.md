@@ -4,10 +4,11 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @xoxys, @qwerty287, @micash545, @pat-s, @miry, @zc-devs, @lukashass, @lafriks, @pre-commit-ci[bot], @anbraten, @andyhan, @renovate[bot], @KamilaBorowska
+@zc-devs, @6543, @xoxys, @qwerty287, @micash545, @pat-s, @miry, @lukashass, @lafriks, @pre-commit-ci[bot], @anbraten, @andyhan, @renovate[bot], @KamilaBorowska
 
 ### 📈 Enhancement
 
+- Kubernetes AppArmor and seccomp [[#3123](https://github.com/woodpecker-ci/woodpecker/pull/3123)]
 - `cli exec`: let override existing environment values but print a warning [[#3140](https://github.com/woodpecker-ci/woodpecker/pull/3140)]
 - Enable golangci linter forcetypeassert [[#3168](https://github.com/woodpecker-ci/woodpecker/pull/3168)]
 - Enable golangci linter contextcheck [[#3170](https://github.com/woodpecker-ci/woodpecker/pull/3170)]
