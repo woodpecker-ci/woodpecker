@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.2.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.2.0) - 2024-01-11
+## [2.2.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.2.0) - 2024-01-12
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -8,6 +8,7 @@
 
 ### 📈 Enhancement
 
+- Enable golangci linter forcetypeassert [[#3168](https://github.com/woodpecker-ci/woodpecker/pull/3168)]
 - Enable golangci linter contextcheck [[#3170](https://github.com/woodpecker-ci/woodpecker/pull/3170)]
 - Remove panic recovering [[#3162](https://github.com/woodpecker-ci/woodpecker/pull/3162)]
 - More docker backend test remove more undocumented [[#3156](https://github.com/woodpecker-ci/woodpecker/pull/3156)]
