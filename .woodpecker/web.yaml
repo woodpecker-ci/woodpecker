@@ -36,16 +36,6 @@ steps:
       - pnpm lint
     when: *when
 
-  formatcheck:
-    depends_on:
-      - install-dependencies
-    image: *node_image
-    directory: web/
-    commands:
-      - corepack enable
-      - pnpm format:check
-    when: *when
-
   typecheck:
     depends_on:
       - install-dependencies

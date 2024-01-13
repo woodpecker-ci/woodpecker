@@ -1,8 +1,5 @@
-pnpm-lock.yaml
 build/
 docs/versioned_docs/
 docs/.docusaurus/
 dist/
-web/components.d.ts
 CHANGELOG.md
-web/src/assets/dayjsLocales/
