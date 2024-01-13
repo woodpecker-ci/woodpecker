@@ -26,7 +26,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/google/go-github/v57/github"
+	"github.com/google/go-github/v58/github"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 
