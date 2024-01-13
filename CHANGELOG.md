@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.2.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.2.0) - 2024-01-12
+## [2.2.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.2.0) - 2024-01-13
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -82,6 +82,7 @@
 
 ### Misc
 
+- chore(deps): update docker.io/woodpeckerci/plugin-docker-buildx [[#3186](https://github.com/woodpecker-ci/woodpecker/pull/3186)]
 - fix(deps): update golang (packages) [[#3185](https://github.com/woodpecker-ci/woodpecker/pull/3185)]
 - declare different when statements once and reuse them [[#3176](https://github.com/woodpecker-ci/woodpecker/pull/3176)]
 - Add `make clean-all` [[#3152](https://github.com/woodpecker-ci/woodpecker/pull/3152)]
