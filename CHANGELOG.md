@@ -4,10 +4,12 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @zc-devs, @xoxys, @qwerty287, @micash545, @pat-s, @miry, @lukashass, @lafriks, @pre-commit-ci[bot], @anbraten, @andyhan, @renovate[bot], @KamilaBorowska
+@qwerty287, @renovate[bot], @6543, @zc-devs, @xoxys, @micash545, @pat-s, @miry, @lukashass, @lafriks, @pre-commit-ci[bot], @anbraten, @andyhan, @KamilaBorowska
 
 ### 📚 Documentation
 
+- Remove contributing/security to use globally defined [[#3192](https://github.com/woodpecker-ci/woodpecker/pull/3192)]
+- Add "Kaniko" Plugin [[#3183](https://github.com/woodpecker-ci/woodpecker/pull/3183)]
 - Document core development ideas [[#3184](https://github.com/woodpecker-ci/woodpecker/pull/3184)]
 - Add continous deployment cookbook [[#3098](https://github.com/woodpecker-ci/woodpecker/pull/3098)]
 - Make k8s backend configuration docs in the same format as others [[#3081](https://github.com/woodpecker-ci/woodpecker/pull/3081)]
@@ -82,6 +84,8 @@
 
 ### Misc
 
+- fix(deps): update module github.com/google/go-github/v57 to v58 [[#3187](https://github.com/woodpecker-ci/woodpecker/pull/3187)]
+- chore(deps): update docker.io/golang docker tag to v1.21.6 [[#3189](https://github.com/woodpecker-ci/woodpecker/pull/3189)]
 - chore(deps): update docker.io/woodpeckerci/plugin-docker-buildx [[#3186](https://github.com/woodpecker-ci/woodpecker/pull/3186)]
 - fix(deps): update golang (packages) [[#3185](https://github.com/woodpecker-ci/woodpecker/pull/3185)]
 - declare different when statements once and reuse them [[#3176](https://github.com/woodpecker-ci/woodpecker/pull/3176)]
