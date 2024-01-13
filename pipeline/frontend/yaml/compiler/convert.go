@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"maps"
 	"path"
+	"strconv"
 	"strings"
 
 	"github.com/oklog/ulid/v2"
@@ -154,9 +155,13 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		cpuSet = c.reslimit.CPUSet
 	}
 
-	var ports []uint16
-	for _, port := range container.Ports {
-		ports = append(ports, uint16(port))
+	var ports []backend_types.Port
+	for _, portDef := range container.Ports {
+		port, err := convertPort(portDef)
+		if err != nil {
+			return nil, err
+		}
+		ports = append(ports, port)
 	}
 
 	// at least one constraint contain status success, or all constraints have no status set
@@ -210,6 +215,22 @@ func (c *Compiler) stepWorkdir(container *yaml_types.Container) string {
 	return path.Join(c.base, c.path, container.Directory)
 }
 
+func convertPort(portDef string) (backend_types.Port, error) {
+	var err error
+	var port backend_types.Port
+
+	number, protocol, _ := strings.Cut(portDef, "/")
+	port.Protocol = protocol
+
+	portNumber, err := strconv.ParseUint(number, 10, 16)
+	if err != nil {
+		return port, err
+	}
+	port.Number = uint16(portNumber)
+
+	return port, nil
+}
+
 func convertKubernetesBackendOptions(kubeOpt *yaml_types.KubernetesBackendOptions) backend_types.KubernetesBackendOptions {
 	resources := backend_types.Resources{
 		Limits:   kubeOpt.Resources.Limits,
@@ -235,6 +256,18 @@ func convertKubernetesBackendOptions(kubeOpt *yaml_types.KubernetesBackendOption
 			RunAsUser:    kubeOpt.SecurityContext.RunAsUser,
 			RunAsGroup:   kubeOpt.SecurityContext.RunAsGroup,
 			FSGroup:      kubeOpt.SecurityContext.FSGroup,
+		}
+		if kubeOpt.SecurityContext.SeccompProfile != nil {
+			securityContext.SeccompProfile = &backend_types.SecProfile{
+				Type:             backend_types.SecProfileType(kubeOpt.SecurityContext.SeccompProfile.Type),
+				LocalhostProfile: kubeOpt.SecurityContext.SeccompProfile.LocalhostProfile,
+			}
+		}
+		if kubeOpt.SecurityContext.ApparmorProfile != nil {
+			securityContext.ApparmorProfile = &backend_types.SecProfile{
+				Type:             backend_types.SecProfileType(kubeOpt.SecurityContext.ApparmorProfile.Type),
+				LocalhostProfile: kubeOpt.SecurityContext.ApparmorProfile.LocalhostProfile,
+			}
 		}
 	}
 
