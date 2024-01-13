@@ -169,12 +169,6 @@ func (l *Linter) lintTrusted(config *WorkflowConfig, c *types.Container, area st
 	if len(c.NetworkMode) != 0 {
 		err = "Insufficient privileges to use network_mode"
 	}
-	if len(c.IpcMode) != 0 {
-		err = "Insufficient privileges to use ipc_mode"
-	}
-	if len(c.Sysctls) != 0 {
-		err = "Insufficient privileges to use sysctls"
-	}
 	if c.Networks.Networks != nil && len(c.Networks.Networks) != 0 {
 		err = "Insufficient privileges to use networks"
 	}

@@ -31,7 +31,7 @@ import (
 // following specification:
 //   https://github.com/mozilla-services/Dockerflow
 
-func init() {
+func initHealth() {
 	http.HandleFunc("/varz", handleStats)
 	http.HandleFunc("/healthz", handleHeartbeat)
 	http.HandleFunc("/version", handleVersion)
@@ -48,10 +48,13 @@ func handleHeartbeat(w http.ResponseWriter, _ *http.Request) {
 func handleVersion(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(200)
 	w.Header().Add("Content-Type", "text/json")
-	_ = json.NewEncoder(w).Encode(versionResp{
+	err := json.NewEncoder(w).Encode(versionResp{
 		Source:  "https://github.com/woodpecker-ci/woodpecker",
 		Version: version.String(),
 	})
+	if err != nil {
+		log.Error().Err(err).Msg("handleVersion")
+	}
 }
 
 func handleStats(w http.ResponseWriter, _ *http.Request) {

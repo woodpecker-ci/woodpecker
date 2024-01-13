@@ -3,7 +3,6 @@ when:
   - event: push
     branch:
       - ${CI_REPO_DEFAULT_BRANCH}
-      - release/*
       - renovate/*
 
 variables:
@@ -11,23 +10,20 @@ variables:
   - &trivy_plugin woodpeckerci/plugin-trivy:1.0.1
 
 steps:
-  check backend:
+  backend:
     depends_on: []
     image: *trivy_plugin
     settings:
       skip-dirs: web/,docs/
 
-  check docs:
+  docs:
     depends_on: []
     image: *trivy_plugin
     settings:
       skip-dirs: node_modules/,plugins/woodpecker-plugins/node_modules/
       dir: docs/
-    when:
-      event: [pull_request, push, cron]
-      branch: ${CI_REPO_DEFAULT_BRANCH}
 
-  check web:
+  web:
     depends_on: []
     image: *trivy_plugin
     settings:

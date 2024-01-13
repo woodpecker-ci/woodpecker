@@ -132,7 +132,7 @@ const config: Config = {
               href: 'https://github.com/woodpecker-ci/woodpecker',
             },
             {
-              href: 'https://ci.woodpecker-ci.org/woodpecker-ci/woodpecker',
+              href: 'https://ci.woodpecker-ci.org/repos/3780',
               label: 'CI',
             },
           ],
@@ -143,7 +143,19 @@ const config: Config = {
     prism: {
       theme: themes.github,
       darkTheme: themes.dracula,
-      additionalLanguages: ['diff', 'json', 'docker', 'javascript', 'css', 'bash', 'nginx', 'apacheconf', 'ini', 'nix'],
+      additionalLanguages: [
+        'diff',
+        'json',
+        'docker',
+        'javascript',
+        'css',
+        'bash',
+        'nginx',
+        'apacheconf',
+        'ini',
+        'nix',
+        'uri',
+      ],
     },
     announcementBar: {
       id: 'github-star',

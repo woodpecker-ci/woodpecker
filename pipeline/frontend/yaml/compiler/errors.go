@@ -25,7 +25,7 @@ func (err *ErrExtraHostFormat) Error() string {
 }
 
 func (*ErrExtraHostFormat) Is(target error) bool {
-	_, ok := target.(*ErrExtraHostFormat) //nolint:errorlint
+	_, ok := target.(*ErrExtraHostFormat)
 	return ok
 }
 
@@ -39,7 +39,7 @@ func (err *ErrStepMissingDependency) Error() string {
 }
 
 func (*ErrStepMissingDependency) Is(target error) bool {
-	_, ok := target.(*ErrStepMissingDependency) //nolint:errorlint
+	_, ok := target.(*ErrStepMissingDependency)
 	return ok
 }
 
@@ -52,6 +52,6 @@ func (err *ErrStepDependencyCycle) Error() string {
 }
 
 func (*ErrStepDependencyCycle) Is(target error) bool {
-	_, ok := target.(*ErrStepDependencyCycle) //nolint:errorlint
+	_, ok := target.(*ErrStepDependencyCycle)
 	return ok
 }

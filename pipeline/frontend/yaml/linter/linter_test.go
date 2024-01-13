@@ -152,10 +152,6 @@ func TestLintErrors(t *testing.T) {
 			from: "steps: { build: { image: golang, network_mode: 'container:name' }  }",
 			want: "Insufficient privileges to use network_mode",
 		},
-		{
-			from: "steps: { build: { image: golang, sysctls: [ net.core.somaxconn=1024 ] }  }",
-			want: "Insufficient privileges to use sysctls",
-		},
 	}
 
 	for _, test := range testdata {

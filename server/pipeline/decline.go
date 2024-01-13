@@ -44,7 +44,7 @@ func Decline(ctx context.Context, store store.Store, pipeline *model.Pipeline, u
 	}
 
 	if pipeline.Workflows, err = store.WorkflowGetTree(pipeline); err != nil {
-		log.Error().Err(err).Msg("can not build tree from step list")
+		log.Error().Err(err).Msg("cannot build tree from step list")
 	}
 
 	updatePipelineStatus(ctx, forge, pipeline, repo, user)

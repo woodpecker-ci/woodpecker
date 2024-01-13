@@ -32,27 +32,18 @@ import (
 
 const (
 	StepLabel = "step"
+	podPrefix = "wp-"
 )
 
-func mkPod(namespace, name, image, workDir, goos, serviceAccountName string,
-	pool, privileged bool,
-	commands, vols, pullSecretNames []string,
-	labels, annotations, env, nodeSelector map[string]string,
-	extraHosts []types.HostAlias, tolerations []types.Toleration, resources types.Resources,
-	securityContext *types.SecurityContext, securityContextConfig SecurityContextConfig,
-) (*v1.Pod, error) {
-	var err error
+func mkPod(step *types.Step, config *config, podName, goos string) (*v1.Pod, error) {
+	meta := podMeta(step, config, podName)
 
-	meta := podMeta(name, namespace, labels, annotations)
-
-	spec, err := podSpec(serviceAccountName, vols, pullSecretNames, env, nodeSelector, extraHosts, tolerations,
-		securityContext, securityContextConfig)
+	spec, err := podSpec(step, config)
 	if err != nil {
 		return nil, err
 	}
 
-	container, err := podContainer(name, image, workDir, goos, pool, privileged, commands, vols, env,
-		resources, securityContext)
+	container, err := podContainer(step, podName, goos)
 	if err != nil {
 		return nil, err
 	}
@@ -74,41 +65,48 @@ func stepToPodName(step *types.Step) (name string, err error) {
 }
 
 func podName(step *types.Step) (string, error) {
-	return dnsName(step.Name)
+	return dnsName(podPrefix + step.UUID)
 }
 
-func podMeta(name, namespace string, labels, annotations map[string]string) metav1.ObjectMeta {
+func podMeta(step *types.Step, config *config, podName string) metav1.ObjectMeta {
 	meta := metav1.ObjectMeta{
-		Name:        name,
-		Namespace:   namespace,
-		Annotations: annotations,
+		Name:      podName,
+		Namespace: config.Namespace,
 	}
 
-	if labels == nil {
-		labels = make(map[string]string, 1)
-	}
-	labels[StepLabel] = name
+	labels := make(map[string]string, len(config.PodLabels)+1)
+	// copy to not alter the engine config
+	maps.Copy(labels, config.PodLabels)
+	labels[StepLabel] = step.Name
 	meta.Labels = labels
+
+	// copy to not alter the engine config
+	meta.Annotations = make(map[string]string, len(config.PodAnnotations))
+	maps.Copy(meta.Annotations, config.PodAnnotations)
+
+	securityContext := step.BackendOptions.Kubernetes.SecurityContext
+	if securityContext != nil {
+		key, value := apparmorAnnotation(podName, securityContext.ApparmorProfile)
+		if key != nil && value != nil {
+			meta.Annotations[*key] = *value
+		}
+	}
 
 	return meta
 }
 
-func podSpec(serviceAccountName string, vols, pullSecretNames []string, env, backendNodeSelector map[string]string,
-	extraHosts []types.HostAlias, backendTolerations []types.Toleration,
-	securityContext *types.SecurityContext, securityContextConfig SecurityContextConfig,
-) (v1.PodSpec, error) {
+func podSpec(step *types.Step, config *config) (v1.PodSpec, error) {
 	var err error
 	spec := v1.PodSpec{
 		RestartPolicy:      v1.RestartPolicyNever,
-		ServiceAccountName: serviceAccountName,
-		ImagePullSecrets:   imagePullSecretsReferences(pullSecretNames),
+		ServiceAccountName: step.BackendOptions.Kubernetes.ServiceAccountName,
+		ImagePullSecrets:   imagePullSecretsReferences(config.ImagePullSecretNames),
+		HostAliases:        hostAliases(step.ExtraHosts),
+		NodeSelector:       nodeSelector(step.BackendOptions.Kubernetes.NodeSelector, step.Environment["CI_SYSTEM_PLATFORM"]),
+		Tolerations:        tolerations(step.BackendOptions.Kubernetes.Tolerations),
+		SecurityContext:    podSecurityContext(step.BackendOptions.Kubernetes.SecurityContext, config.SecurityContext),
 	}
-
-	spec.HostAliases = hostAliases(extraHosts)
-	spec.NodeSelector = nodeSelector(backendNodeSelector, env["CI_SYSTEM_PLATFORM"])
-	spec.Tolerations = tolerations(backendTolerations)
-	spec.SecurityContext = podSecurityContext(securityContext, securityContextConfig)
-	spec.Volumes, err = volumes(vols)
+	spec.Volumes, err = volumes(step.Volumes)
 	if err != nil {
 		return spec, err
 	}
@@ -116,36 +114,35 @@ func podSpec(serviceAccountName string, vols, pullSecretNames []string, env, bac
 	return spec, nil
 }
 
-func podContainer(name, image, workDir, goos string, pull, privileged bool, commands, volumes []string, env map[string]string, resources types.Resources,
-	securityContext *types.SecurityContext,
-) (v1.Container, error) {
+func podContainer(step *types.Step, podName, goos string) (v1.Container, error) {
 	var err error
 	container := v1.Container{
-		Name:       name,
-		Image:      image,
-		WorkingDir: workDir,
+		Name:       podName,
+		Image:      step.Image,
+		WorkingDir: step.WorkingDir,
 	}
 
-	if pull {
+	if step.Pull {
 		container.ImagePullPolicy = v1.PullAlways
 	}
 
-	if len(commands) != 0 {
-		scriptEnv, command, args := common.GenerateContainerConf(commands, goos)
+	if len(step.Commands) != 0 {
+		scriptEnv, command, args := common.GenerateContainerConf(step.Commands, goos)
 		container.Command = command
 		container.Args = args
-		maps.Copy(env, scriptEnv)
+		maps.Copy(step.Environment, scriptEnv)
 	}
 
-	container.Env = mapToEnvVars(env)
-	container.SecurityContext = containerSecurityContext(securityContext, privileged)
+	container.Env = mapToEnvVars(step.Environment)
+	container.Ports = containerPorts(step.Ports)
+	container.SecurityContext = containerSecurityContext(step.BackendOptions.Kubernetes.SecurityContext, step.Privileged)
 
-	container.Resources, err = resourceRequirements(resources)
+	container.Resources, err = resourceRequirements(step.BackendOptions.Kubernetes.Resources)
 	if err != nil {
 		return container, err
 	}
 
-	container.VolumeMounts, err = volumeMounts(volumes)
+	container.VolumeMounts, err = volumeMounts(step.Volumes)
 	if err != nil {
 		return container, err
 	}
@@ -202,6 +199,21 @@ func volumeMount(name, path string) v1.VolumeMount {
 	}
 }
 
+func containerPorts(ports []types.Port) []v1.ContainerPort {
+	containerPorts := make([]v1.ContainerPort, len(ports))
+	for i, port := range ports {
+		containerPorts[i] = containerPort(port)
+	}
+	return containerPorts
+}
+
+func containerPort(port types.Port) v1.ContainerPort {
+	return v1.ContainerPort{
+		ContainerPort: int32(port.Number),
+		Protocol:      v1.Protocol(strings.ToUpper(port.Protocol)),
+	}
+}
+
 // Here is the service IPs (placed in /etc/hosts in the Pod)
 func hostAliases(extraHosts []types.HostAlias) []v1.HostAlias {
 	hostAliases := []v1.HostAlias{}
@@ -220,7 +232,7 @@ func hostAlias(extraHost types.HostAlias) v1.HostAlias {
 }
 
 func imagePullSecretsReferences(imagePullSecretNames []string) []v1.LocalObjectReference {
-	log.Trace().Msgf("Using the image pull secrets: %v", imagePullSecretNames)
+	log.Trace().Msgf("using the image pull secrets: %v", imagePullSecretNames)
 
 	secretReferences := make([]v1.LocalObjectReference, len(imagePullSecretNames))
 	for i, imagePullSecretName := range imagePullSecretNames {
@@ -258,7 +270,7 @@ func resourceList(resources map[string]string) (v1.ResourceList, error) {
 		resName := v1.ResourceName(key)
 		resVal, err := resource.ParseQuantity(val)
 		if err != nil {
-			return nil, fmt.Errorf("resource request '%v' quantity '%v': %w", key, val, err)
+			return nil, fmt.Errorf("resource request '%s' quantity '%s': %w", key, val, err)
 		}
 		requestResources[resName] = resVal
 	}
@@ -271,11 +283,11 @@ func nodeSelector(backendNodeSelector map[string]string, platform string) map[st
 	if platform != "" {
 		arch := strings.Split(platform, "/")[1]
 		nodeSelector[v1.LabelArchStable] = arch
-		log.Trace().Msgf("Using the node selector from the Agent's platform: %v", nodeSelector)
+		log.Trace().Msgf("using the node selector from the Agent's platform: %v", nodeSelector)
 	}
 
 	if len(backendNodeSelector) > 0 {
-		log.Trace().Msgf("Appending labels to the node selector from the backend options: %v", backendNodeSelector)
+		log.Trace().Msgf("appending labels to the node selector from the backend options: %v", backendNodeSelector)
 		maps.Copy(nodeSelector, backendNodeSelector)
 	}
 
@@ -286,7 +298,7 @@ func tolerations(backendTolerations []types.Toleration) []v1.Toleration {
 	var tolerations []v1.Toleration
 
 	if len(backendTolerations) > 0 {
-		log.Trace().Msgf("Tolerations that will be used in the backend options: %v", backendTolerations)
+		log.Trace().Msgf("tolerations that will be used in the backend options: %v", backendTolerations)
 		for _, backendToleration := range backendTolerations {
 			toleration := toleration(backendToleration)
 			tolerations = append(tolerations, toleration)
@@ -312,6 +324,7 @@ func podSecurityContext(sc *types.SecurityContext, secCtxConf SecurityContextCon
 		user    *int64
 		group   *int64
 		fsGroup *int64
+		seccomp *v1.SeccompProfile
 	)
 
 	if sc != nil && sc.RunAsNonRoot != nil {
@@ -328,18 +341,39 @@ func podSecurityContext(sc *types.SecurityContext, secCtxConf SecurityContextCon
 		fsGroup = sc.FSGroup
 	}
 
-	if nonRoot == nil && user == nil && group == nil && fsGroup == nil {
+	if sc != nil {
+		seccomp = seccompProfile(sc.SeccompProfile)
+	}
+
+	if nonRoot == nil && user == nil && group == nil && fsGroup == nil && seccomp == nil {
 		return nil
 	}
 
 	securityContext := &v1.PodSecurityContext{
-		RunAsNonRoot: nonRoot,
-		RunAsUser:    user,
-		RunAsGroup:   group,
-		FSGroup:      fsGroup,
+		RunAsNonRoot:   nonRoot,
+		RunAsUser:      user,
+		RunAsGroup:     group,
+		FSGroup:        fsGroup,
+		SeccompProfile: seccomp,
 	}
-	log.Trace().Msgf("Pod security context that will be used: %v", securityContext)
+	log.Trace().Msgf("pod security context that will be used: %v", securityContext)
 	return securityContext
+}
+
+func seccompProfile(scp *types.SecProfile) *v1.SeccompProfile {
+	if scp == nil || len(scp.Type) == 0 {
+		return nil
+	}
+	log.Trace().Msgf("using seccomp profile: %v", scp)
+
+	seccompProfile := &v1.SeccompProfile{
+		Type: v1.SeccompProfileType(scp.Type),
+	}
+	if len(scp.LocalhostProfile) > 0 {
+		seccompProfile.LocalhostProfile = &scp.LocalhostProfile
+	}
+
+	return seccompProfile
 }
 
 func containerSecurityContext(sc *types.SecurityContext, stepPrivileged bool) *v1.SecurityContext {
@@ -358,8 +392,38 @@ func containerSecurityContext(sc *types.SecurityContext, stepPrivileged bool) *v
 	securityContext := &v1.SecurityContext{
 		Privileged: privileged,
 	}
-	log.Trace().Msgf("Container security context that will be used: %v", securityContext)
+	log.Trace().Msgf("container security context that will be used: %v", securityContext)
 	return securityContext
+}
+
+func apparmorAnnotation(containerName string, scp *types.SecProfile) (*string, *string) {
+	if scp == nil {
+		return nil, nil
+	}
+	log.Trace().Msgf("using AppArmor profile: %v", scp)
+
+	var (
+		profileType string
+		profilePath string
+	)
+
+	if scp.Type == types.SecProfileTypeRuntimeDefault {
+		profileType = "runtime"
+		profilePath = "default"
+	}
+
+	if scp.Type == types.SecProfileTypeLocalhost {
+		profileType = "localhost"
+		profilePath = scp.LocalhostProfile
+	}
+
+	if len(profileType) == 0 {
+		return nil, nil
+	}
+
+	key := v1.AppArmorBetaContainerAnnotationKeyPrefix + containerName
+	value := profileType + "/" + profilePath
+	return &key, &value
 }
 
 func mapToEnvVars(m map[string]string) []v1.EnvVar {
@@ -378,17 +442,12 @@ func startPod(ctx context.Context, engine *kube, step *types.Step) (*v1.Pod, err
 	if err != nil {
 		return nil, err
 	}
-
-	pod, err := mkPod(engine.config.Namespace, podName, step.Image, step.WorkingDir, engine.goos, step.BackendOptions.Kubernetes.ServiceAccountName,
-		step.Pull, step.Privileged,
-		step.Commands, step.Volumes, engine.config.ImagePullSecretNames,
-		engine.config.PodLabels, engine.config.PodAnnotations, step.Environment, step.BackendOptions.Kubernetes.NodeSelector,
-		step.ExtraHosts, step.BackendOptions.Kubernetes.Tolerations, step.BackendOptions.Kubernetes.Resources, step.BackendOptions.Kubernetes.SecurityContext, engine.config.SecurityContext)
+	pod, err := mkPod(step, engine.config, podName, engine.goos)
 	if err != nil {
 		return nil, err
 	}
 
-	log.Trace().Msgf("Creating pod: %s", pod.Name)
+	log.Trace().Msgf("creating pod: %s", pod.Name)
 	return engine.client.CoreV1().Pods(engine.config.Namespace).Create(ctx, pod, metav1.CreateOptions{})
 }
 
@@ -397,7 +456,7 @@ func stopPod(ctx context.Context, engine *kube, step *types.Step, deleteOpts met
 	if err != nil {
 		return err
 	}
-	log.Trace().Str("name", podName).Msg("Deleting pod")
+	log.Trace().Str("name", podName).Msg("deleting pod")
 
 	err = engine.client.CoreV1().Pods(engine.config.Namespace).Delete(ctx, podName, deleteOpts)
 	if errors.IsNotFound(err) {

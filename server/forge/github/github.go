@@ -33,7 +33,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/common"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
@@ -132,7 +131,7 @@ func (c *client) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 	}
 	email := matchingEmail(emails, c.API)
 	if email == nil {
-		return nil, fmt.Errorf("No verified Email address for GitHub account")
+		return nil, fmt.Errorf("no verified Email address for GitHub account")
 	}
 
 	return &model.User{
@@ -230,7 +229,7 @@ func (c *client) File(ctx context.Context, u *model.User, r *model.Repo, b *mode
 	opts.Ref = b.Commit
 	content, _, resp, err := client.Repositories.GetContents(ctx, r.Owner, r.Name, f, opts)
 	if resp != nil && resp.StatusCode == http.StatusNotFound {
-		return nil, errors.Join(err, &types.ErrConfigNotFound{Configs: []string{f}})
+		return nil, errors.Join(err, &forge_types.ErrConfigNotFound{Configs: []string{f}})
 	}
 	if err != nil {
 		return nil, err
@@ -249,7 +248,7 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 	opts.Ref = b.Commit
 	_, data, resp, err := client.Repositories.GetContents(ctx, r.Owner, r.Name, f, opts)
 	if resp != nil && resp.StatusCode == http.StatusNotFound {
-		return nil, errors.Join(err, &types.ErrConfigNotFound{Configs: []string{f}})
+		return nil, errors.Join(err, &forge_types.ErrConfigNotFound{Configs: []string{f}})
 	}
 	if err != nil {
 		return nil, err
@@ -262,7 +261,7 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 		go func(path string) {
 			content, err := c.File(ctx, u, r, b, path)
 			if err != nil {
-				if errors.Is(err, &types.ErrConfigNotFound{}) {
+				if errors.Is(err, &forge_types.ErrConfigNotFound{}) {
 					err = fmt.Errorf("git tree reported existence of file but we got: %s", err.Error())
 				}
 				errc <- err
@@ -370,7 +369,7 @@ func (c *client) Org(ctx context.Context, u *model.User, owner string) (*model.O
 	client := c.newClientToken(ctx, u.Token)
 
 	user, _, err := client.Users.Get(ctx, owner)
-	log.Trace().Msgf("Github user for owner %s = %v", owner, user)
+	log.Trace().Msgf("GitHub user for owner %s = %v", owner, user)
 	if user != nil && err == nil {
 		return &model.Org{
 			Name:   user.GetLogin(),
@@ -379,7 +378,7 @@ func (c *client) Org(ctx context.Context, u *model.User, owner string) (*model.O
 	}
 
 	org, _, err := client.Organizations.Get(ctx, owner)
-	log.Trace().Msgf("Github organization for owner %s = %v", owner, org)
+	log.Trace().Msgf("GitHub organization for owner %s = %v", owner, org)
 	if err != nil {
 		return nil, err
 	}
@@ -435,7 +434,8 @@ func (c *client) newClientToken(ctx context.Context, token string) *github.Clien
 	)
 	tc := oauth2.NewClient(ctx, ts)
 	if c.SkipVerify {
-		tc.Transport.(*oauth2.Transport).Base = &http.Transport{
+		tp, _ := tc.Transport.(*oauth2.Transport)
+		tp.Base = &http.Transport{
 			Proxy: http.ProxyFromEnvironment,
 			TLSClientConfig: &tls.Config{
 				InsecureSkipVerify: true,

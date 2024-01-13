@@ -42,7 +42,7 @@ service Woodpecker {
 //
 
 message State {
-  string name = 1;
+  string step_uuid = 1;
   bool   exited = 2;
   int32  exit_code = 3;
   int64  started = 4;

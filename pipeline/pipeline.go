@@ -92,16 +92,16 @@ func (r *Runtime) MakeLogger() zerolog.Logger {
 // Starts the execution of an workflow and waits for it to complete
 func (r *Runtime) Run(runnerCtx context.Context) error {
 	logger := r.MakeLogger()
-	logger.Debug().Msgf("Executing %d stages, in order of:", len(r.spec.Stages))
-	for _, stage := range r.spec.Stages {
-		steps := []string{}
+	logger.Debug().Msgf("executing %d stages, in order of:", len(r.spec.Stages))
+	for stagePos, stage := range r.spec.Stages {
+		stepNames := []string{}
 		for _, step := range stage.Steps {
-			steps = append(steps, step.Name)
+			stepNames = append(stepNames, step.Name)
 		}
 
 		logger.Debug().
-			Str("Stage", stage.Name).
-			Str("Steps", strings.Join(steps, ",")).
+			Int("StagePos", stagePos).
+			Str("Steps", strings.Join(stepNames, ",")).
 			Msg("stage")
 	}
 
@@ -112,7 +112,7 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 	}()
 
 	r.started = time.Now().Unix()
-	if err := r.engine.SetupWorkflow(r.ctx, r.spec, r.taskUUID); err != nil {
+	if err := r.engine.SetupWorkflow(runnerCtx, r.spec, r.taskUUID); err != nil {
 		return err
 	}
 

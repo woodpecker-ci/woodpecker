@@ -77,7 +77,7 @@ func pipelineFromPush(hook *pushHook) *model.Pipeline {
 		fixMalformedAvatar(hook.Sender.AvatarURL),
 	)
 
-	message := ""
+	var message string
 	link := hook.Compare
 	if len(hook.Commits) > 0 {
 		message = hook.Commits[0].Message
@@ -197,7 +197,7 @@ func fixMalformedAvatar(url string) string {
 	}
 	index = strings.Index(url, "//avatars/")
 	if index != -1 {
-		return strings.Replace(url, "//avatars/", "/avatars/", -1)
+		return strings.ReplaceAll(url, "//avatars/", "/avatars/")
 	}
 	return url
 }
