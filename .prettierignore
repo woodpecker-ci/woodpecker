@@ -1,5 +1,16 @@
 build/
 docs/versioned_docs/
 docs/.docusaurus/
+docs/pnpm-lock.yaml
 dist/
 CHANGELOG.md
+
+# from web/
+web/pnpm-lock.yaml
+web/dist/
+web/coverage/
+web/LICENSE
+web/components.d.ts
+web/src/assets/locales/*.json
+web/src/assets/dayjsLocales/
+!web/src/assets/locales/en.json
