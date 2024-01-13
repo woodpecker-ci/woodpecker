@@ -28,7 +28,6 @@ import (
 
 	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/multipart"
 )
 
 // TODO: move runtime into "runtime" subpackage
@@ -243,7 +242,7 @@ func (r *Runtime) exec(step *backend.Step) (*backend.State, error) {
 			defer wg.Done()
 			logger := r.MakeLogger()
 
-			if err := r.logger.Log(step, multipart.New(rc)); err != nil {
+			if err := r.logger(step, rc); err != nil {
 				logger.Error().Err(err).Msg("process logging failed")
 			}
 			_ = rc.Close()
