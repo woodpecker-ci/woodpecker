@@ -8,6 +8,7 @@
 
 ### 📚 Documentation
 
+- Delete `FUNDING.yaml` [[#3193](https://github.com/woodpecker-ci/woodpecker/pull/3193)]
 - Remove contributing/security to use globally defined [[#3192](https://github.com/woodpecker-ci/woodpecker/pull/3192)]
 - Add "Kaniko" Plugin [[#3183](https://github.com/woodpecker-ci/woodpecker/pull/3183)]
 - Document core development ideas [[#3184](https://github.com/woodpecker-ci/woodpecker/pull/3184)]
