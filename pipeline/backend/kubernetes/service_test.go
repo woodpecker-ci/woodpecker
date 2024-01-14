@@ -82,7 +82,7 @@ func TestService(t *testing.T) {
 	s, err := mkService(&types.Step{
 		Name:  "bar",
 		Ports: ports,
-	}, "foo")
+	}, &config{Namespace: "foo"})
 	assert.NoError(t, err)
 	j, err := json.Marshal(s)
 	assert.NoError(t, err)
