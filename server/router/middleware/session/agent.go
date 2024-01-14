@@ -23,7 +23,7 @@ import (
 
 // AuthorizeAgent authorizes requests from agent to access the queue.
 func AuthorizeAgent(c *gin.Context) {
-	secret := c.MustGet("agent").(string)
+	secret, _ := c.MustGet("agent").(string)
 	if secret == "" {
 		c.String(401, "invalid or empty token.")
 		return
@@ -32,13 +32,14 @@ func AuthorizeAgent(c *gin.Context) {
 	parsed, err := token.ParseRequest(c.Request, func(t *token.Token) (string, error) {
 		return secret, nil
 	})
-	if err != nil {
+	switch {
+	case err != nil:
 		c.String(500, "invalid or empty token. %s", err)
 		c.Abort()
-	} else if parsed.Kind != token.AgentToken {
+	case parsed.Kind != token.AgentToken:
 		c.String(403, "invalid token. please use an agent token")
 		c.Abort()
-	} else {
+	default:
 		c.Next()
 	}
 }

@@ -81,7 +81,7 @@ func startVolume(ctx context.Context, engine *kube, name string) (*v1.Persistent
 		return nil, err
 	}
 
-	log.Trace().Msgf("Creating volume: %s", pvc.Name)
+	log.Trace().Msgf("creating volume: %s", pvc.Name)
 	return engine.client.CoreV1().PersistentVolumeClaims(engine.config.Namespace).Create(ctx, pvc, metav1.CreateOptions{})
 }
 
@@ -90,12 +90,12 @@ func stopVolume(ctx context.Context, engine *kube, name string, deleteOpts metav
 	if err != nil {
 		return err
 	}
-	log.Trace().Str("name", pvcName).Msg("Deleting volume")
+	log.Trace().Str("name", pvcName).Msg("deleting volume")
 
 	err = engine.client.CoreV1().PersistentVolumeClaims(engine.config.Namespace).Delete(ctx, pvcName, deleteOpts)
 	if errors.IsNotFound(err) {
 		// Don't abort on 404 errors from k8s, they most likely mean that the pod hasn't been created yet, usually because pipeline was canceled before running all steps.
-		log.Trace().Err(err).Msgf("Unable to delete service %s", pvcName)
+		log.Trace().Err(err).Msgf("unable to delete service %s", pvcName)
 		return nil
 	}
 	return err

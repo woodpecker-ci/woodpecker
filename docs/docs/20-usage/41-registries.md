@@ -53,7 +53,7 @@ It's possible to build a local image by mounting the docker socket as a volume.
 
 With a `Dockerfile` at the root of the project:
 
-```diff
+```yaml
 steps:
   build-image:
     image: docker

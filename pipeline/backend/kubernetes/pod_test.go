@@ -25,16 +25,33 @@ import (
 )
 
 func TestPodName(t *testing.T) {
-	name, err := podName(&types.Step{Name: "wp_01he8bebctabr3kgk0qj36d2me_0"})
+	name, err := podName(&types.Step{UUID: "01he8bebctabr3kgk0qj36d2me-0"})
 	assert.NoError(t, err)
 	assert.Equal(t, "wp-01he8bebctabr3kgk0qj36d2me-0", name)
 
-	name, err = podName(&types.Step{Name: "wp\\01he8bebctabr3kgk0qj36d2me-0"})
-	assert.NoError(t, err)
-	assert.Equal(t, "wp\\01he8bebctabr3kgk0qj36d2me-0", name)
-
-	_, err = podName(&types.Step{Name: "wp-01he8bebctabr3kgk0qj36d2me-0-services-0.woodpecker-runtime.svc.cluster.local"})
+	_, err = podName(&types.Step{UUID: "01he8bebctabr3kgk0qj36d2me\\0a"})
 	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
+
+	_, err = podName(&types.Step{UUID: "01he8bebctabr3kgk0qj36d2me-0-services-0..woodpecker-runtime.svc.cluster.local"})
+	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
+}
+
+func TestStepToPodName(t *testing.T) {
+	name, err := stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "clone", Type: types.StepTypeClone})
+	assert.NoError(t, err)
+	assert.EqualValues(t, "wp-01he8bebctabr3kg", name)
+	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "clone", Type: types.StepTypeCache})
+	assert.NoError(t, err)
+	assert.EqualValues(t, "wp-01he8bebctabr3kg", name)
+	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "clone", Type: types.StepTypePlugin})
+	assert.NoError(t, err)
+	assert.EqualValues(t, "wp-01he8bebctabr3kg", name)
+	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "clone", Type: types.StepTypeCommands})
+	assert.NoError(t, err)
+	assert.EqualValues(t, "wp-01he8bebctabr3kg", name)
+	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "clone", Type: types.StepTypeService})
+	assert.NoError(t, err)
+	assert.EqualValues(t, "clone", name)
 }
 
 func TestTinyPod(t *testing.T) {
@@ -45,7 +62,7 @@ func TestTinyPod(t *testing.T) {
 			"namespace": "woodpecker",
 			"creationTimestamp": null,
 			"labels": {
-				"step": "wp-01he8bebctabr3kgk0qj36d2me-0"
+				"step": "build-via-gradle"
 			}
 		},
 		"spec": {
@@ -102,13 +119,18 @@ func TestTinyPod(t *testing.T) {
 		"status": {}
 	}`
 
-	pod, err := mkPod("woodpecker", "wp-01he8bebctabr3kgk0qj36d2me-0", "gradle:8.4.0-jdk21", "/woodpecker/src", "linux/amd64", "",
-		false, false,
-		[]string{"gradle build"}, []string{"workspace:/woodpecker/src"}, nil,
-		nil, nil, map[string]string{"CI": "woodpecker"}, nil,
-		nil, nil,
-		types.Resources{Requests: nil, Limits: nil}, nil, SecurityContextConfig{},
-	)
+	pod, err := mkPod(&types.Step{
+		Name:        "build-via-gradle",
+		Image:       "gradle:8.4.0-jdk21",
+		WorkingDir:  "/woodpecker/src",
+		Pull:        false,
+		Privileged:  false,
+		Commands:    []string{"gradle build"},
+		Volumes:     []string{"workspace:/woodpecker/src"},
+		Environment: map[string]string{"CI": "woodpecker"},
+	}, &config{
+		Namespace: "woodpecker",
+	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64")
 	assert.NoError(t, err)
 
 	json, err := json.Marshal(pod)
@@ -127,10 +149,11 @@ func TestFullPod(t *testing.T) {
 			"creationTimestamp": null,
 			"labels": {
 				"app": "test",
-				"step": "wp-01he8bebctabr3kgk0qj36d2me-0"
+				"step": "go-test"
 			},
 			"annotations": {
-				"apparmor.security": "runtime/default"
+				"apps.kubernetes.io/pod-index": "0",
+				"container.apparmor.security.beta.kubernetes.io/wp-01he8bebctabr3kgk0qj36d2me-0": "localhost/k8s-apparmor-example-deny-write"
 			}
 		},
 		"spec": {
@@ -154,6 +177,19 @@ func TestFullPod(t *testing.T) {
 						"echo $CI_SCRIPT | base64 -d | /bin/sh -e"
 					],
 					"workingDir": "/woodpecker/src",
+					"ports": [
+						{
+							"containerPort": 1234
+						},
+						{
+							"containerPort": 2345,
+							"protocol": "TCP"
+						},
+						{
+							"containerPort": 3456,
+							"protocol": "UDP"
+						}
+					],
 					"env": [
 						"<<UNORDERED>>",
 						{
@@ -204,7 +240,11 @@ func TestFullPod(t *testing.T) {
 				"runAsUser": 101,
 				"runAsGroup": 101,
 				"runAsNonRoot": true,
-				"fsGroup": 101
+				"fsGroup": 101,
+				"seccompProfile": {
+        	"type": "Localhost",
+          "localhostProfile": "profiles/audit.json"
+				}
 			},
 			"imagePullSecrets": [
 				{
@@ -243,15 +283,57 @@ func TestFullPod(t *testing.T) {
 		{Name: "cloudflare", IP: "1.1.1.1"},
 		{Name: "cf.v6", IP: "2606:4700:4700::64"},
 	}
-	pod, err := mkPod("woodpecker", "wp-01he8bebctabr3kgk0qj36d2me-0", "meltwater/drone-cache", "/woodpecker/src", "linux/amd64", "wp-svc-acc",
-		true, true,
-		[]string{"go get", "go test"}, []string{"woodpecker-cache:/woodpecker/src/cache"}, []string{"regcred", "another-pull-secret"}, []string{"/bin/sh", "-c"},
-		map[string]string{"app": "test"}, map[string]string{"apparmor.security": "runtime/default"}, map[string]string{"CGO": "0"}, map[string]string{"storage": "ssd"},
-		hostAliases, []types.Toleration{{Key: "net-port", Value: "100Mbit", Effect: types.TaintEffectNoSchedule}},
-		types.Resources{Requests: map[string]string{"memory": "128Mi", "cpu": "1000m"}, Limits: map[string]string{"memory": "256Mi", "cpu": "2"}},
-		&types.SecurityContext{Privileged: newBool(true), RunAsNonRoot: newBool(true), RunAsUser: newInt64(101), RunAsGroup: newInt64(101), FSGroup: newInt64(101)},
-		SecurityContextConfig{RunAsNonRoot: false},
-	)
+	ports := []types.Port{
+		{Number: 1234},
+		{Number: 2345, Protocol: "tcp"},
+		{Number: 3456, Protocol: "udp"},
+	}
+	secCtx := types.SecurityContext{
+		Privileged:   newBool(true),
+		RunAsNonRoot: newBool(true),
+		RunAsUser:    newInt64(101),
+		RunAsGroup:   newInt64(101),
+		FSGroup:      newInt64(101),
+		SeccompProfile: &types.SecProfile{
+			Type:             "Localhost",
+			LocalhostProfile: "profiles/audit.json",
+		},
+		ApparmorProfile: &types.SecProfile{
+			Type:             "Localhost",
+			LocalhostProfile: "k8s-apparmor-example-deny-write",
+		},
+	}
+	pod, err := mkPod(&types.Step{
+		Name:        "go-test",
+		Image:       "meltwater/drone-cache",
+		WorkingDir:  "/woodpecker/src",
+		Pull:        true,
+		Privileged:  true,
+		Commands:    []string{"go get", "go test"},
+		Entrypoint:  []string{"/bin/sh", "-c"},
+		Volumes:     []string{"woodpecker-cache:/woodpecker/src/cache"},
+		Environment: map[string]string{"CGO": "0"},
+		ExtraHosts:  hostAliases,
+		Ports:       ports,
+		BackendOptions: types.BackendOptions{
+			Kubernetes: types.KubernetesBackendOptions{
+				NodeSelector:       map[string]string{"storage": "ssd"},
+				ServiceAccountName: "wp-svc-acc",
+				Tolerations:        []types.Toleration{{Key: "net-port", Value: "100Mbit", Effect: types.TaintEffectNoSchedule}},
+				Resources: types.Resources{
+					Requests: map[string]string{"memory": "128Mi", "cpu": "1000m"},
+					Limits:   map[string]string{"memory": "256Mi", "cpu": "2"},
+				},
+				SecurityContext: &secCtx,
+			},
+		},
+	}, &config{
+		Namespace:            "woodpecker",
+		ImagePullSecretNames: []string{"regcred", "another-pull-secret"},
+		PodLabels:            map[string]string{"app": "test"},
+		PodAnnotations:       map[string]string{"apps.kubernetes.io/pod-index": "0"},
+		SecurityContext:      SecurityContextConfig{RunAsNonRoot: false},
+	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64")
 	assert.NoError(t, err)
 
 	json, err := json.Marshal(pod)

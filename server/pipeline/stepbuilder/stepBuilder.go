@@ -25,7 +25,6 @@ import (
 	"go.uber.org/multierr"
 
 	backend_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
 	pipeline_errors "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
 	yaml_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types"
 	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
@@ -137,7 +136,7 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 	// parse yaml pipeline
 	parsed, err := yaml.ParseString(substituted)
 	if err != nil {
-		return nil, &errors.PipelineError{Message: err.Error(), Type: errors.PipelineErrorTypeCompiler}
+		return nil, &pipeline_errors.PipelineError{Message: err.Error(), Type: pipeline_errors.PipelineErrorTypeCompiler}
 	}
 
 	// lint pipeline
@@ -155,12 +154,12 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 	// checking if filtered.
 	if match, err := parsed.When.Match(workflowMetadata, true, environ); !match && err == nil {
 		log.Debug().Str("pipeline", workflow.Name).Msg(
-			"Marked as skipped, does not match metadata",
+			"marked as skipped, does not match metadata",
 		)
 		return nil, nil
 	} else if err != nil {
 		log.Debug().Str("pipeline", workflow.Name).Msg(
-			"Pipeline config could not be parsed",
+			"pipeline config could not be parsed",
 		)
 		return nil, multierr.Append(errorsAndWarnings, err)
 	}

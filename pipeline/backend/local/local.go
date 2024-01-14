@@ -236,7 +236,7 @@ func (e *local) DestroyStep(_ context.Context, _ *types.Step, _ string) error {
 
 // DestroyWorkflow the pipeline environment.
 func (e *local) DestroyWorkflow(_ context.Context, _ *types.Config, taskUUID string) error {
-	log.Trace().Str("taskUUID", taskUUID).Msgf("delete workflow environment")
+	log.Trace().Str("taskUUID", taskUUID).Msg("delete workflow environment")
 
 	state, err := e.getState(taskUUID)
 	if err != nil {
@@ -258,7 +258,13 @@ func (e *local) getState(taskUUID string) (*workflowState, error) {
 	if !ok {
 		return nil, ErrWorkflowStateNotFound
 	}
-	return state.(*workflowState), nil
+
+	s, ok := state.(*workflowState)
+	if !ok {
+		return nil, fmt.Errorf("could not parse state: %v", state)
+	}
+
+	return s, nil
 }
 
 func (e *local) saveState(taskUUID string, state *workflowState) {

@@ -25,6 +25,7 @@ import (
 	"strings"
 
 	"github.com/drone/envsubst"
+	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
@@ -121,13 +122,13 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 		})
 	}
 
-	droneEnv := make(map[string]string)
+	pipelineEnv := make(map[string]string)
 	for _, env := range c.StringSlice("env") {
 		envs := strings.SplitN(env, "=", 2)
-		droneEnv[envs[0]] = envs[1]
-		if _, exists := environ[envs[0]]; exists {
-			// don't override existing values
-			continue
+		pipelineEnv[envs[0]] = envs[1]
+		if oldVar, exists := environ[envs[0]]; exists {
+			// override existing values, but print a warning
+			log.Warn().Msgf("environment variable '%s' had value '%s', but got overwritten", envs[0], oldVar)
 		}
 		environ[envs[0]] = envs[1]
 	}
@@ -206,14 +207,14 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 		),
 		compiler.WithMetadata(metadata),
 		compiler.WithSecret(secrets...),
-		compiler.WithEnviron(droneEnv),
+		compiler.WithEnviron(pipelineEnv),
 	).Compile(conf)
 	if err != nil {
 		return err
 	}
 
 	backendCtx := context.WithValue(c.Context, backendTypes.CliContext, c)
-	backend.Init(backendCtx)
+	backend.Init()
 
 	backendEngine, err := backend.FindBackend(backendCtx, c.String("backend-engine"))
 	if err != nil {

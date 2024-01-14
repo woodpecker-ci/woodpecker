@@ -54,7 +54,7 @@ Sometimes there are multiple terms that can be used to describe something. This 
 [Pipeline]: ../20-workflow-syntax.md
 [Workflow]: ../25-workflows.md
 [Forge]: ../../30-administration/11-forges/10-overview.md
-[Plugin]: ../51-plugins/10-plugins.md
+[Plugin]: ../51-plugins/10-overview.md
 [Workspace]: ../20-workflow-syntax.md#workspace
 [Matrix]: ../30-matrix-workflows.md
 [Docker]: ../../30-administration/22-backends/10-docker.md

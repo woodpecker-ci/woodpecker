@@ -67,7 +67,7 @@ The associated commit is checked out with git to a workspace which is mounted to
 - Woodpecker clones the source code in the beginning of the workflow
 - Changes to files are persisted through steps as the same volume is mounted to all steps
 
-```yaml title=".woodpecker.yml"
+```yaml title=".woodpecker.yaml"
 steps:
   build:
     image: debian
@@ -104,7 +104,7 @@ When using the `local` backend, the `image` entry is used to specify the shell, 
 
 Woodpecker supports any valid Docker image from any Docker registry:
 
-```text
+```yaml
 image: golang
 image: golang:1.7
 image: library/golang:1.7
@@ -152,7 +152,9 @@ The above shell script is then executed as the container entrypoint. The below d
 docker run --entrypoint=build.sh golang
 ```
 
-> Please note that only build steps can define commands. You cannot use commands with plugins or services.
+:::note
+Only build steps can define commands. You cannot use commands with plugins or services.
+:::
 
 ### `entrypoint`
 
@@ -224,13 +226,13 @@ Branch conditions are not applied to tags.
 Example conditional execution by branch:
 
 ```diff
-steps:
-  slack:
-    image: plugins/slack
-    settings:
-      channel: dev
-+   when:
-+     - branch: main
+ steps:
+   slack:
+     image: plugins/slack
+     settings:
+       channel: dev
++    when:
++      - branch: main
 ```
 
 > The step now triggers on main branch, but also if the target branch of a pull request is `main`. Add an event condition to limit it further to pushes on main only.
@@ -321,13 +323,13 @@ when:
 There are use cases for executing steps on failure, such as sending notifications for failed workflow / pipeline. Use the status constraint to execute steps even when the workflow fails:
 
 ```diff
-steps:
-  slack:
-    image: plugins/slack
-    settings:
-      channel: dev
-+   when:
-+     - status: [ success, failure ]
+ steps:
+   slack:
+     image: plugins/slack
+     settings:
+       channel: dev
++    when:
++      - status: [ success, failure ]
 ```
 
 #### `platform`
@@ -399,12 +401,14 @@ You can use [glob patterns](https://github.com/bmatcuk/doublestar#patterns) to m
 ```yaml
 when:
   - path:
-      include: ['.woodpecker/*.yml', '*.ini']
+      include: ['.woodpecker/*.yaml', '*.ini']
       exclude: ['*.md', 'docs/**']
       ignore_message: '[ALL]'
 ```
 
-**Hint:** Passing a defined ignore-message like `[ALL]` inside the commit message will ignore all path conditions.
+:::info
+Passing a defined ignore-message like `[ALL]` inside the commit message will ignore all path conditions.
+:::
 
 #### `evaluate`
 
@@ -494,11 +498,7 @@ For more details check the [services docs](./60-services.md).
 
 ## `workspace`
 
-The workspace defines the shared volume and working directory shared by all workflow steps. The default workspace matches the below pattern, based on your repository URL.
-
-```txt
-/woodpecker/src/github.com/octocat/hello-world
-```
+The workspace defines the shared volume and working directory shared by all workflow steps. The default workspace matches the pattern `/woodpecker/src/github.com/octocat/hello-world`, based on your repository URL.
 
 The workspace can be customized using the workspace block in the YAML file:
 
@@ -551,7 +551,7 @@ The path attribute defines the working directory of your build. This is where yo
 +  path: src/github.com/octocat/hello-world
 ```
 
-```text
+```bash
 git clone https://github.com/octocat/hello-world \
   /go/src/github.com/octocat/hello-world
 ```
@@ -579,12 +579,12 @@ You can add additional labels as a key value map:
 +  weather: sun
 +  hostname: "" # this label will be ignored as it is empty
 
-steps:
-  build:
-    image: golang
-    commands:
-      - go build
-      - go test
+ steps:
+   build:
+     image: golang
+     commands:
+       - go build
+       - go test
 ```
 
 ### Filter by platform
@@ -600,8 +600,8 @@ Assuming we have two agents, one `linux/arm` and one `linux/amd64`. Previously t
 +labels:
 +  platform: linux/arm64
 
-steps:
-  [...]
+ steps:
+   [...]
 ```
 
 ## `variables`
@@ -643,9 +643,9 @@ Example configuration to override depth:
 Example configuration to use a custom clone plugin:
 
 ```diff
-clone:
-  git:
-+   image: octocat/custom-git-plugin
+ clone:
+   git:
++    image: octocat/custom-git-plugin
 ```
 
 Example configuration to clone Mercurial repository:
@@ -730,36 +730,36 @@ Example conditional execution by branch:
        channel: dev
 ```
 
-> The step now triggers on main, but also if the target branch of a pull request is `main`. Add an event condition to limit it further to pushes on main only.
+The step now triggers on `main`, but also if the target branch of a pull request is `main`. Add an event condition to limit it further to pushes on main only.
 
 Execute a step if the branch is `main` or `develop`:
 
-```diff
+```yaml
 when:
   branch: [main, develop]
 ```
 
 Execute a step if the branch starts with `prefix/*`:
 
-```diff
+```yaml
 when:
   branch: prefix/*
 ```
 
 Execute a step using custom include and exclude logic:
 
-```diff
+```yaml
 when:
   branch:
-    include: [ main, release/* ]
-    exclude: [ release/1.0.0, release/1.1.* ]
+    include: [main, release/*]
+    exclude: [release/1.0.0, release/1.1.*]
 ```
 
 ### `event`
 
 Execute a step if the build event is a `tag`:
 
-```diff
+```yaml
 when:
   event: tag
 ```
@@ -767,21 +767,21 @@ when:
 Execute a step if the pipeline event is a `push` to a specified branch:
 
 ```diff
-when:
-  event: push
-+ branch: main
+ when:
+   event: push
++  branch: main
 ```
 
 Execute a step for all non-pull request events:
 
-```diff
+```yaml
 when:
   event: [push, tag, deployment]
 ```
 
 Execute a step for all build events:
 
-```diff
+```yaml
 when:
   event: [push, pull_request, tag, deployment]
 ```
@@ -801,7 +801,7 @@ when:
 
 Execute a step for deployment events matching the target deployment environment:
 
-```diff
+```yaml
 when:
   environment: production
   event: deployment
@@ -811,7 +811,7 @@ when:
 
 Execute a step only on a certain Woodpecker instance matching the specified hostname:
 
-```diff
+```yaml
 when:
   instance: stage.woodpecker.company.com
 ```
@@ -825,22 +825,24 @@ It is currently **only available** for GitHub, GitLab and Gitea (version 1.18.0 
 
 Execute a step only on a pipeline with certain files being changed:
 
-```diff
+```yaml
 when:
-  path: "src/*"
+  path: 'src/*'
 ```
 
 You can use [glob patterns](https://github.com/bmatcuk/doublestar#patterns) to match the changed files and specify if the step should run if a file matching that pattern has been changed `include` or if some files have **not** been changed `exclude`.
 
-```diff
+```yaml
 when:
   path:
-    include: [ '.woodpecker/*.yml', '*.ini' ]
-    exclude: [ '*.md', 'docs/**' ]
-    ignore_message: "[ALL]"
+    include: ['.woodpecker/*.yaml', '*.ini']
+    exclude: ['*.md', 'docs/**']
+    ignore_message: '[ALL]'
 ```
 
-**Hint:** Passing a defined ignore-message like `[ALL]` inside the commit message will ignore all path conditions.
+:::info
+Passing a defined ignore-message like `[ALL]` inside the commit message will ignore all path conditions.
+:::
 
 ## `depends_on`
 
@@ -854,7 +856,9 @@ Workflows that should run even on failure should set the `runs_on` tag. See [her
 
 Woodpecker gives the ability to configure privileged mode in the YAML. You can use this parameter to launch containers with escalated capabilities.
 
-> Privileged mode is only available to trusted repositories and for security reasons should only be used in private environments. See [project settings](./71-project-settings.md#trusted) to enable trusted mode.
+:::info
+Privileged mode is only available to trusted repositories and for security reasons should only be used in private environments. See [project settings](./71-project-settings.md#trusted) to enable trusted mode.
+:::
 
 ```diff
  steps:

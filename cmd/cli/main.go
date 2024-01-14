@@ -24,6 +24,6 @@ import (
 func main() {
 	app := newApp()
 	if err := app.Run(os.Args); err != nil {
-		log.Fatal().Err(err).Msg("error running cli")
+		log.Fatal().Err(err).Msg("error running cli") //nolint:forbidigo
 	}
 }

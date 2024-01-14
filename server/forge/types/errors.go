@@ -54,7 +54,7 @@ func (err *ErrIgnoreEvent) Error() string {
 }
 
 func (*ErrIgnoreEvent) Is(target error) bool {
-	_, ok := target.(*ErrIgnoreEvent) //nolint:errorlint
+	_, ok := target.(*ErrIgnoreEvent)
 	return ok
 }
 
@@ -67,6 +67,6 @@ func (m *ErrConfigNotFound) Error() string {
 }
 
 func (*ErrConfigNotFound) Is(target error) bool {
-	_, ok := target.(*ErrConfigNotFound) //nolint:errorlint
+	_, ok := target.(*ErrConfigNotFound)
 	return ok
 }

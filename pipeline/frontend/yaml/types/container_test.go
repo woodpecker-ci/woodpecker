@@ -72,6 +72,8 @@ settings:
   baz: false
 ports:
   - 8080
+  - 4443/tcp
+  - 51820/udp
 `)
 
 func TestUnmarshalContainer(t *testing.T) {
@@ -131,7 +133,7 @@ func TestUnmarshalContainer(t *testing.T) {
 			"foo": "bar",
 			"baz": false,
 		},
-		Ports: []base.StringOrInt{8080},
+		Ports: []string{"8080", "4443/tcp", "51820/udp"},
 	}
 	got := Container{}
 	err := yaml.Unmarshal(containerYaml, &got)

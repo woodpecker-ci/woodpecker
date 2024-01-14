@@ -147,14 +147,14 @@ func MustOrgMember(admin bool) gin.HandlerFunc {
 
 		perm, err := server.Config.Services.Membership.Get(c, user, org.Name)
 		if err != nil {
-			log.Error().Msgf("Failed to check membership: %v", err)
+			log.Error().Err(err).Msg("failed to check membership")
 			c.String(http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			c.Abort()
 			return
 		}
 
 		if perm == nil || (!admin && !perm.Member) || (admin && !perm.Admin) {
-			c.String(http.StatusForbidden, "User not authorized")
+			c.String(http.StatusForbidden, "user not authorized")
 			c.Abort()
 			return
 		}

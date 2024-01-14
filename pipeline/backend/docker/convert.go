@@ -82,14 +82,10 @@ func toHostConfig(step *types.Step) *container.HostConfig {
 		},
 		Privileged: step.Privileged,
 		ShmSize:    step.ShmSize,
-		Sysctls:    step.Sysctls,
 	}
 
 	if len(step.NetworkMode) != 0 {
 		config.NetworkMode = container.NetworkMode(step.NetworkMode)
-	}
-	if len(step.IpcMode) != 0 {
-		config.IpcMode = container.IpcMode(step.IpcMode)
 	}
 	if len(step.DNS) != 0 {
 		config.DNS = step.DNS

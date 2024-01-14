@@ -64,7 +64,7 @@ func (v *Volumes) UnmarshalYAML(unmarshal func(any) error) error {
 		for _, volume := range sliceType {
 			name, ok := volume.(string)
 			if !ok {
-				return fmt.Errorf("Cannot unmarshal '%v' to type %T into a string value", name, name)
+				return fmt.Errorf("cannot unmarshal '%v' to type %T into a string value", name, name)
 			}
 			elts := strings.SplitN(name, ":", 3)
 			var vol *Volume
@@ -93,5 +93,5 @@ func (v *Volumes) UnmarshalYAML(unmarshal func(any) error) error {
 		return nil
 	}
 
-	return errors.New("Failed to unmarshal Volumes")
+	return errors.New("failed to unmarshal Volumes")
 }
