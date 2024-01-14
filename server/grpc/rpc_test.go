@@ -60,7 +60,7 @@ func TestRegisterAgent(t *testing.T) {
 			capacity := int32(2)
 			agentID, err := rpc.RegisterAgent(ctx, "platform", "backend", "version", capacity)
 			if !assert.NoError(t, err) {
-				t.Fail()
+				return
 			}
 
 			assert.EqualValues(t, 1337, agentID)
@@ -100,7 +100,7 @@ func TestRegisterAgent(t *testing.T) {
 			capacity := int32(2)
 			agentID, err := rpc.RegisterAgent(ctx, "platform", "backend", "version", capacity)
 			if !assert.NoError(t, err) {
-				t.Fail()
+				return
 			}
 
 			assert.EqualValues(t, 1337, agentID)

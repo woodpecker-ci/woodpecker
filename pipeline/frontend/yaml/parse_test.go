@@ -166,12 +166,12 @@ pipeline:
 
 	workflow1, err := ParseString(sampleYamlPipelineLegacy)
 	if !assert.NoError(t, err) {
-		t.Fail()
+		return
 	}
 
 	workflow2, err := ParseString(sampleYamlPipelineLegacyIgnore)
 	if !assert.NoError(t, err) {
-		t.Fail()
+		return
 	}
 
 	assert.EqualValues(t, workflow1, workflow2)

@@ -151,8 +151,6 @@ func TestHasBlockingErrors(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		if pipeline_errors.HasBlockingErrors(test.err) != test.expected {
-			t.Error("Should only return true if there are blocking errors")
-		}
+		assert.Equal(t, test.expected, pipeline_errors.HasBlockingErrors(test.err))
 	}
 }
