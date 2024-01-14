@@ -153,9 +153,9 @@ func cancelPreviousPipelines(
 		if err = Cancel(ctx, _store, repo, user, active); err != nil {
 			log.Error().
 				Err(err).
-				Str("Ref", active.Ref).
-				Int64("ID", active.ID).
-				Msg("Failed to cancel pipeline")
+				Str("ref", active.Ref).
+				Int64("id", active.ID).
+				Msg("failed to cancel pipeline")
 		}
 	}
 

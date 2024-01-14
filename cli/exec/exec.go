@@ -39,7 +39,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/compiler"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/matrix"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/multipart"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
@@ -253,13 +252,8 @@ func convertPathForWindows(path string) string {
 	return filepath.ToSlash(path)
 }
 
-var defaultLogger = pipeline.LogFunc(func(step *backendTypes.Step, rc multipart.Reader) error {
-	part, err := rc.NextPart()
-	if err != nil {
-		return err
-	}
-
+var defaultLogger = pipeline.Logger(func(step *backendTypes.Step, rc io.Reader) error {
 	logStream := NewLineWriter(step.Name, step.UUID)
-	_, err = io.Copy(logStream, part)
+	_, err := io.Copy(logStream, rc)
 	return err
 })
