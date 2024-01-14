@@ -18,6 +18,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
+
 	"go.woodpecker-ci.org/woodpecker/v2/agent"
 )
 
@@ -27,35 +29,23 @@ func TestHealthy(t *testing.T) {
 
 	s.Add("1", time.Hour, "octocat/hello-world", "42")
 
-	if got, want := s.Metadata["1"].ID, "1"; got != want {
-		t.Errorf("got ID %s, want %s", got, want)
-	}
-	if got, want := s.Metadata["1"].Timeout, time.Hour; got != want {
-		t.Errorf("got duration %v, want %v", got, want)
-	}
-	if got, want := s.Metadata["1"].Repo, "octocat/hello-world"; got != want {
-		t.Errorf("got repository name %s, want %s", got, want)
-	}
+	assert.Equal(t, "1", s.Metadata["1"].ID)
+	assert.Equal(t, time.Hour, s.Metadata["1"].Timeout)
+	assert.Equal(t, "octocat/hello-world", s.Metadata["1"].Repo)
 
 	s.Metadata["1"] = agent.Info{
 		Timeout: time.Hour,
 		Started: time.Now().UTC(),
 	}
-	if s.Healthy() == false {
-		t.Error("want healthy status when timeout not exceeded, got false")
-	}
+	assert.True(t, s.Healthy(), "want healthy status when timeout not exceeded, got false")
 
 	s.Metadata["1"] = agent.Info{
 		Started: time.Now().UTC().Add(-(time.Minute * 30)),
 	}
-	if s.Healthy() == false {
-		t.Error("want healthy status when timeout+buffer not exceeded, got false")
-	}
+	assert.True(t, s.Healthy(), "want healthy status when timeout+buffer not exceeded, got false")
 
 	s.Metadata["1"] = agent.Info{
 		Started: time.Now().UTC().Add(-(time.Hour + time.Minute)),
 	}
-	if s.Healthy() == true {
-		t.Error("want unhealthy status when timeout+buffer not exceeded, got true")
-	}
+	assert.False(t, s.Healthy(), "want unhealthy status when timeout+buffer not exceeded, got true")
 }

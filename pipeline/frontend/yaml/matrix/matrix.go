@@ -17,9 +17,9 @@ package matrix
 import (
 	"strings"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
-
 	"codeberg.org/6543/xyaml"
+
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
 )
 
 const (

@@ -23,21 +23,16 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline"
 	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/multipart"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
 )
 
-func (r *Runner) createLogger(logger zerolog.Logger, uploads *sync.WaitGroup, workflow *rpc.Workflow) pipeline.LogFunc {
-	return func(step *backend.Step, rc multipart.Reader) error {
+func (r *Runner) createLogger(logger zerolog.Logger, uploads *sync.WaitGroup, workflow *rpc.Workflow) pipeline.Logger {
+	return func(step *backend.Step, rc io.Reader) error {
 		loglogger := logger.With().
 			Str("image", step.Image).
 			Str("workflowID", workflow.ID).
 			Logger()
 
-		part, rerr := rc.NextPart()
-		if rerr != nil {
-			return rerr
-		}
 		uploads.Add(1)
 
 		var secrets []string
@@ -50,7 +45,7 @@ func (r *Runner) createLogger(logger zerolog.Logger, uploads *sync.WaitGroup, wo
 		loglogger.Debug().Msg("log stream opened")
 
 		logStream := rpc.NewLineWriter(r.client, step.UUID, secrets...)
-		if _, err := io.Copy(logStream, part); err != nil {
+		if _, err := io.Copy(logStream, rc); err != nil {
 			log.Error().Err(err).Msg("copy limited logStream part")
 		}
 
