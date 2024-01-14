@@ -28,14 +28,14 @@ func TestReadAgentIDFileNotExists(t *testing.T) {
 func TestReadAgentIDFileExists(t *testing.T) {
 	tmpF, errTmpF := os.CreateTemp("", "tmp_")
 	if !assert.NoError(t, errTmpF) {
-		t.FailNow()
+		return
 	}
 	defer os.Remove(tmpF.Name())
 
 	// there is an existing config
 	errWrite := os.WriteFile(tmpF.Name(), []byte(`{"agent_id":3}`), 0o644)
 	if !assert.NoError(t, errWrite) {
-		t.FailNow()
+		return
 	}
 
 	// read existing config
@@ -50,7 +50,7 @@ func TestReadAgentIDFileExists(t *testing.T) {
 
 	tmpF2, errTmpF := os.CreateTemp("", "tmp_")
 	if !assert.NoError(t, errTmpF) {
-		t.FailNow()
+		return
 	}
 	defer os.Remove(tmpF2.Name())
 

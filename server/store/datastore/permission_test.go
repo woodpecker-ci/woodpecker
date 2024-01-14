@@ -46,25 +46,13 @@ func TestPermFind(t *testing.T) {
 			Admin:  false,
 		},
 	)
-	if err != nil {
-		t.Error(err)
-		return
-	}
+	assert.NoError(t, err)
 
 	perm, err := store.PermFind(user, repo)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	if got, want := perm.Pull, true; got != want {
-		t.Errorf("Wanted pull %v, got %v", want, got)
-	}
-	if got, want := perm.Push, false; got != want {
-		t.Errorf("Wanted push %v, got %v", want, got)
-	}
-	if got, want := perm.Admin, false; got != want {
-		t.Errorf("Wanted admin %v, got %v", want, got)
-	}
+	assert.NoError(t, err)
+	assert.True(t, perm.Pull)
+	assert.False(t, perm.Push)
+	assert.False(t, perm.Admin)
 }
 
 func TestPermUpsert(t *testing.T) {
@@ -91,25 +79,13 @@ func TestPermUpsert(t *testing.T) {
 			Admin:  false,
 		},
 	)
-	if err != nil {
-		t.Error(err)
-		return
-	}
+	assert.NoError(t, err)
 
 	perm, err := store.PermFind(user, repo)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	if got, want := perm.Pull, true; got != want {
-		t.Errorf("Wanted pull %v, got %v", want, got)
-	}
-	if got, want := perm.Push, false; got != want {
-		t.Errorf("Wanted push %v, got %v", want, got)
-	}
-	if got, want := perm.Admin, false; got != want {
-		t.Errorf("Wanted admin %v, got %v", want, got)
-	}
+	assert.NoError(t, err)
+	assert.True(t, perm.Pull)
+	assert.False(t, perm.Push)
+	assert.False(t, perm.Admin)
 
 	//
 	// this will attempt to replace the existing permissions
@@ -126,25 +102,13 @@ func TestPermUpsert(t *testing.T) {
 			Admin:  true,
 		},
 	)
-	if err != nil {
-		t.Error(err)
-		return
-	}
+	assert.NoError(t, err)
 
 	perm, err = store.PermFind(user, repo)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	if got, want := perm.Pull, true; got != want {
-		t.Errorf("Wanted pull %v, got %v", want, got)
-	}
-	if got, want := perm.Push, true; got != want {
-		t.Errorf("Wanted push %v, got %v", want, got)
-	}
-	if got, want := perm.Admin, true; got != want {
-		t.Errorf("Wanted admin %v, got %v", want, got)
-	}
+	assert.NoError(t, err)
+	assert.True(t, perm.Pull)
+	assert.True(t, perm.Push)
+	assert.True(t, perm.Admin)
 }
 
 func TestPermDelete(t *testing.T) {
@@ -171,24 +135,12 @@ func TestPermDelete(t *testing.T) {
 			Admin:  false,
 		},
 	)
-	if err != nil {
-		t.Errorf("Unexpected error: insert perm: %s", err)
-		return
-	}
+	assert.NoError(t, err)
 
 	perm, err := store.PermFind(user, repo)
-	if err != nil {
-		t.Errorf("Unexpected error: select perm: %s", err)
-		return
-	}
+	assert.NoError(t, err)
 	err = store.PermDelete(perm)
-	if err != nil {
-		t.Errorf("Unexpected error: delete perm: %s", err)
-		return
-	}
+	assert.NoError(t, err)
 	_, err = store.PermFind(user, repo)
-	if err == nil {
-		t.Errorf("Expect error: sql.ErrNoRows")
-		return
-	}
+	assert.Error(t, err)
 }
