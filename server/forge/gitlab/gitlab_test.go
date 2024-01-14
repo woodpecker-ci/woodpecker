@@ -31,10 +31,7 @@ import (
 )
 
 func load(t *testing.T, config string) *GitLab {
-	_url, err := url.Parse(config)
-	if err != nil {
-		t.FailNow()
-	}
+	_url, _ := url.Parse(config)
 	params := _url.Query()
 	_url.RawQuery = ""
 

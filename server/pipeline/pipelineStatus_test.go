@@ -20,6 +20,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
+
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
@@ -33,12 +35,8 @@ func TestUpdateToStatusRunning(t *testing.T) {
 	t.Parallel()
 
 	pipeline, _ := UpdateToStatusRunning(&mockUpdatePipelineStore{}, model.Pipeline{}, int64(1))
-
-	if model.StatusRunning != pipeline.Status {
-		t.Errorf("Pipeline status not equals '%s' != '%s'", model.StatusRunning, pipeline.Status)
-	} else if int64(1) != pipeline.Started {
-		t.Errorf("Pipeline started not equals 1 != %d", pipeline.Started)
-	}
+	assert.Equal(t, model.StatusRunning, pipeline.Status)
+	assert.EqualValues(t, 1, pipeline.Started)
 }
 
 func TestUpdateToStatusPending(t *testing.T) {
@@ -48,14 +46,9 @@ func TestUpdateToStatusPending(t *testing.T) {
 
 	pipeline, _ := UpdateToStatusPending(&mockUpdatePipelineStore{}, model.Pipeline{}, "Reviewer")
 
-	switch {
-	case model.StatusPending != pipeline.Status:
-		t.Errorf("Pipeline status not equals '%s' != '%s'", model.StatusPending, pipeline.Status)
-	case pipeline.Reviewer != "Reviewer":
-		t.Errorf("Reviewer not equals 'Reviewer' != '%s'", pipeline.Reviewer)
-	case now > pipeline.Reviewed:
-		t.Errorf("Reviewed not updated %d !< %d", now, pipeline.Reviewed)
-	}
+	assert.Equal(t, model.StatusPending, pipeline.Status)
+	assert.Equal(t, "Reviewer", pipeline.Reviewer)
+	assert.LessOrEqual(t, now, pipeline.Reviewed)
 }
 
 func TestUpdateToStatusDeclined(t *testing.T) {
@@ -65,14 +58,9 @@ func TestUpdateToStatusDeclined(t *testing.T) {
 
 	pipeline, _ := UpdateToStatusDeclined(&mockUpdatePipelineStore{}, model.Pipeline{}, "Reviewer")
 
-	switch {
-	case model.StatusDeclined != pipeline.Status:
-		t.Errorf("Pipeline status not equals '%s' != '%s'", model.StatusDeclined, pipeline.Status)
-	case pipeline.Reviewer != "Reviewer":
-		t.Errorf("Reviewer not equals 'Reviewer' != '%s'", pipeline.Reviewer)
-	case now > pipeline.Reviewed:
-		t.Errorf("Reviewed not updated %d !< %d", now, pipeline.Reviewed)
-	}
+	assert.Equal(t, model.StatusDeclined, pipeline.Status)
+	assert.Equal(t, "Reviewer", pipeline.Reviewer)
+	assert.LessOrEqual(t, now, pipeline.Reviewed)
 }
 
 func TestUpdateToStatusToDone(t *testing.T) {
@@ -80,11 +68,8 @@ func TestUpdateToStatusToDone(t *testing.T) {
 
 	pipeline, _ := UpdateStatusToDone(&mockUpdatePipelineStore{}, model.Pipeline{}, "status", int64(1))
 
-	if pipeline.Status != "status" {
-		t.Errorf("Pipeline status not equals 'status' != '%s'", pipeline.Status)
-	} else if int64(1) != pipeline.Finished {
-		t.Errorf("Pipeline finished not equals 1 != %d", pipeline.Finished)
-	}
+	assert.Equal(t, model.StatusValue("status"), pipeline.Status)
+	assert.EqualValues(t, 1, pipeline.Finished)
 }
 
 func TestUpdateToStatusError(t *testing.T) {
@@ -94,18 +79,12 @@ func TestUpdateToStatusError(t *testing.T) {
 
 	pipeline, _ := UpdateToStatusError(&mockUpdatePipelineStore{}, model.Pipeline{}, errors.New("this is an error"))
 
-	switch {
-	case len(pipeline.Errors) != 1:
-		t.Errorf("Expected one error, got %d", len(pipeline.Errors))
-	case pipeline.Errors[0].Error() != "[generic] this is an error":
-		t.Errorf("Pipeline error not equals '[generic] this is an error' != '%s'", pipeline.Errors[0].Error())
-	case model.StatusError != pipeline.Status:
-		t.Errorf("Pipeline status not equals '%s' != '%s'", model.StatusError, pipeline.Status)
-	case now > pipeline.Started:
-		t.Errorf("Started not updated %d !< %d", now, pipeline.Started)
-	case pipeline.Started != pipeline.Finished:
-		t.Errorf("Pipeline started and finished not equals %d != %d", pipeline.Started, pipeline.Finished)
-	}
+	assert.Len(t, pipeline.Errors, 1)
+	assert.Equal(t, "[generic] this is an error", pipeline.Errors[0].Error())
+	assert.Equal(t, model.StatusError, pipeline.Status)
+	assert.Equal(t, pipeline.Started, pipeline.Finished)
+	assert.LessOrEqual(t, now, pipeline.Started)
+	assert.Equal(t, pipeline.Started, pipeline.Finished)
 }
 
 func TestUpdateToStatusKilled(t *testing.T) {
@@ -115,9 +94,6 @@ func TestUpdateToStatusKilled(t *testing.T) {
 
 	pipeline, _ := UpdateToStatusKilled(&mockUpdatePipelineStore{}, model.Pipeline{})
 
-	if model.StatusKilled != pipeline.Status {
-		t.Errorf("Pipeline status not equals '%s' != '%s'", model.StatusKilled, pipeline.Status)
-	} else if now > pipeline.Finished {
-		t.Errorf("Finished not updated %d !< %d", now, pipeline.Finished)
-	}
+	assert.Equal(t, model.StatusKilled, pipeline.Status)
+	assert.LessOrEqual(t, now, pipeline.Finished)
 }

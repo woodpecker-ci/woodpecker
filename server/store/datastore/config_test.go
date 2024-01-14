@@ -37,10 +37,7 @@ func TestConfig(t *testing.T) {
 		Owner:    "bradrydzewski",
 		Name:     "test",
 	}
-	if err := store.CreateRepo(repo); err != nil {
-		t.Errorf("Unexpected error: insert repo: %s", err)
-		return
-	}
+	assert.NoError(t, store.CreateRepo(repo))
 
 	config := &model.Config{
 		RepoID: repo.ID,
@@ -48,60 +45,33 @@ func TestConfig(t *testing.T) {
 		Hash:   hash,
 		Name:   "default",
 	}
-	if err := store.ConfigCreate(config); err != nil {
-		t.Errorf("Unexpected error: insert config: %s", err)
-		return
-	}
+	assert.NoError(t, store.ConfigCreate(config))
 
 	pipeline := &model.Pipeline{
 		RepoID: repo.ID,
 		Status: model.StatusRunning,
 		Commit: "85f8c029b902ed9400bc600bac301a0aadb144ac",
 	}
-	if err := store.CreatePipeline(pipeline); err != nil {
-		t.Errorf("Unexpected error: insert pipeline: %s", err)
-		return
-	}
+	assert.NoError(t, store.CreatePipeline(pipeline))
 
-	if err := store.PipelineConfigCreate(
+	assert.NoError(t, store.PipelineConfigCreate(
 		&model.PipelineConfig{
 			ConfigID:   config.ID,
 			PipelineID: pipeline.ID,
 		},
-	); err != nil {
-		t.Errorf("Unexpected error: insert pipeline config: %s", err)
-		return
-	}
+	))
 
 	config, err := store.ConfigFindIdentical(repo.ID, hash)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	if got, want := config.ID, int64(1); got != want {
-		t.Errorf("Want config id %d, got %d", want, got)
-	}
-	if got, want := config.RepoID, repo.ID; got != want {
-		t.Errorf("Want config repo id %d, got %d", want, got)
-	}
-	if got, want := string(config.Data), data; got != want {
-		t.Errorf("Want config data %s, got %s", want, got)
-	}
-	if got, want := config.Hash, hash; got != want {
-		t.Errorf("Want config hash %s, got %s", want, got)
-	}
-	if got, want := config.Name, "default"; got != want {
-		t.Errorf("Want config name %s, got %s", want, got)
-	}
+	assert.NoError(t, err)
+	assert.EqualValues(t, 1, config.ID)
+	assert.Equal(t, repo.ID, config.RepoID)
+	assert.Equal(t, data, string(config.Data))
+	assert.Equal(t, hash, config.Hash)
+	assert.Equal(t, "default", config.Name)
 
 	loaded, err := store.ConfigsForPipeline(pipeline.ID)
-	if err != nil {
-		t.Errorf("Want config by id, got error %q", err)
-		return
-	}
-	if got, want := loaded[0].ID, config.ID; got != want {
-		t.Errorf("Want config by id %d, got %d", want, got)
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, config.ID, loaded[0].ID)
 }
 
 func TestConfigApproved(t *testing.T) {
@@ -114,10 +84,7 @@ func TestConfigApproved(t *testing.T) {
 		Owner:    "bradrydzewski",
 		Name:     "test",
 	}
-	if err := store.CreateRepo(repo); err != nil {
-		t.Errorf("Unexpected error: insert repo: %s", err)
-		return
-	}
+	assert.NoError(t, store.CreateRepo(repo))
 
 	var (
 		data            = "pipeline: [ { image: golang, commands: [ go build, go test ] } ]"
@@ -139,40 +106,25 @@ func TestConfigApproved(t *testing.T) {
 		}
 	)
 
-	if err := store.CreatePipeline(pipelineBlocked); err != nil {
-		t.Errorf("Unexpected error: insert pipeline: %s", err)
-		return
-	}
-	if err := store.CreatePipeline(pipelinePending); err != nil {
-		t.Errorf("Unexpected error: insert pipeline: %s", err)
-		return
-	}
+	assert.NoError(t, store.CreatePipeline(pipelineBlocked))
+	assert.NoError(t, store.CreatePipeline(pipelinePending))
 	conf := &model.Config{
 		RepoID: repo.ID,
 		Data:   []byte(data),
 		Hash:   hash,
 	}
-	if err := store.ConfigCreate(conf); err != nil {
-		t.Errorf("Unexpected error: insert config: %s", err)
-		return
-	}
+	assert.NoError(t, store.ConfigCreate(conf))
 	pipelineConfig := &model.PipelineConfig{
 		ConfigID:   conf.ID,
 		PipelineID: pipelineBlocked.ID,
 	}
-	if err := store.PipelineConfigCreate(pipelineConfig); err != nil {
-		t.Errorf("Unexpected error: insert pipeline_config: %s", err)
-		return
-	}
+	assert.NoError(t, store.PipelineConfigCreate(pipelineConfig))
 
 	approved, err := store.ConfigFindApproved(conf)
 	if !assert.NoError(t, err) {
 		return
 	}
-	if approved != false {
-		t.Errorf("Want config not approved, when blocked or pending.")
-		return
-	}
+	assert.False(t, approved, "want config not approved when blocked or pending.")
 
 	assert.NoError(t, store.CreatePipeline(pipelineRunning))
 	conf2 := &model.Config{
@@ -180,23 +132,16 @@ func TestConfigApproved(t *testing.T) {
 		Data:   []byte(data),
 		Hash:   "xxx",
 	}
-	if err := store.ConfigCreate(conf2); err != nil {
-		t.Errorf("Unexpected error: insert config: %s", err)
-		return
-	}
+	assert.NoError(t, store.ConfigCreate(conf2))
 	pipelineConfig2 := &model.PipelineConfig{
 		ConfigID:   conf2.ID,
 		PipelineID: pipelineRunning.ID,
 	}
-	if err := store.PipelineConfigCreate(pipelineConfig2); err != nil {
-		t.Errorf("Unexpected error: insert config: %s", err)
-		return
-	}
+	assert.NoError(t, store.PipelineConfigCreate(pipelineConfig2))
 
-	if approved, err := store.ConfigFindApproved(conf2); approved != true || err != nil {
-		t.Errorf("Want config approved, when running. %v", err)
-		return
-	}
+	approved, err = store.ConfigFindApproved(conf2)
+	assert.NoError(t, err)
+	assert.True(t, approved)
 }
 
 func TestConfigIndexes(t *testing.T) {
@@ -208,25 +153,20 @@ func TestConfigIndexes(t *testing.T) {
 		hash = "8d8647c9aa90d893bfb79dddbe901f03e258588121e5202632f8ae5738590b26"
 	)
 
-	if err := store.ConfigCreate(
+	assert.NoError(t, store.ConfigCreate(
 		&model.Config{
 			RepoID: 2,
 			Data:   []byte(data),
 			Hash:   hash,
 		},
-	); err != nil {
-		t.Errorf("Unexpected error: insert config: %s", err)
-		return
-	}
+	))
 
 	// fail due to duplicate sha
-	if err := store.ConfigCreate(
+	assert.Error(t, store.ConfigCreate(
 		&model.Config{
 			RepoID: 2,
 			Data:   []byte(data),
 			Hash:   hash,
 		},
-	); err == nil {
-		t.Errorf("Unexpected error: duplicate sha")
-	}
+	))
 }
