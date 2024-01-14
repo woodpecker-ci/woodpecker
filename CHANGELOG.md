@@ -8,6 +8,8 @@
 
 ### 📈 Enhancement
 
+- Use `assert` for tests [[#3201](https://github.com/woodpecker-ci/woodpecker/pull/3201)]
+- Replace `goimports` with `gci` [[#3202](https://github.com/woodpecker-ci/woodpecker/pull/3202)]
 - Remove multipart logger [[#3200](https://github.com/woodpecker-ci/woodpecker/pull/3200)]
 - Added protocol in port configuration [[#2993](https://github.com/woodpecker-ci/woodpecker/pull/2993)]
 - Kubernetes AppArmor and seccomp [[#3123](https://github.com/woodpecker-ci/woodpecker/pull/3123)]
