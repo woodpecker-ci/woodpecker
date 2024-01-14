@@ -20,9 +20,10 @@ import (
 
 	"github.com/franela/goblin"
 	"github.com/stretchr/testify/assert"
+	"google.golang.org/grpc/metadata"
+
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	mocks_store "go.woodpecker-ci.org/woodpecker/v2/server/store/mocks"
-	"google.golang.org/grpc/metadata"
 )
 
 func TestRegisterAgent(t *testing.T) {
