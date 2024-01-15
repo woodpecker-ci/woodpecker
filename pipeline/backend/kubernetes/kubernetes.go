@@ -18,8 +18,10 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"maps"
 	"os"
 	"runtime"
+	"slices"
 	"time"
 
 	"github.com/rs/zerolog/log"
@@ -153,6 +155,17 @@ func (e *kube) Load(ctx context.Context) (*types.BackendInfo, error) {
 	return &types.BackendInfo{
 		Platform: runtime.GOOS + "/" + runtime.GOARCH,
 	}, nil
+}
+
+func (e *kube) getConfig() *config {
+	if e.config == nil {
+		return nil
+	}
+	c := *e.config
+	c.PodLabels = maps.Clone(e.config.PodLabels)
+	c.PodAnnotations = maps.Clone(e.config.PodLabels)
+	c.ImagePullSecretNames = slices.Clone(e.config.ImagePullSecretNames)
+	return &c
 }
 
 // Setup the pipeline environment.
