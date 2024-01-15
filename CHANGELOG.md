@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.2.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.2.0) - 2024-01-14
+## [2.2.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.2.0) - 2024-01-15
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -88,6 +88,7 @@
 
 ### Misc
 
+- Do not run prettier with pre-commit [[#3196](https://github.com/woodpecker-ci/woodpecker/pull/3196)]
 - fix(deps): update module github.com/google/go-github/v57 to v58 [[#3187](https://github.com/woodpecker-ci/woodpecker/pull/3187)]
 - chore(deps): update docker.io/golang docker tag to v1.21.6 [[#3189](https://github.com/woodpecker-ci/woodpecker/pull/3189)]
 - chore(deps): update docker.io/woodpeckerci/plugin-docker-buildx [[#3186](https://github.com/woodpecker-ci/woodpecker/pull/3186)]
