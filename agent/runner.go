@@ -82,6 +82,7 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 				return err
 			}
 			if gotTask {
+				log.Debug().Msg("reset retry time, last task fetch got me work")
 				retry.Reset()
 			}
 		}
