@@ -4,10 +4,11 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@qwerty287, @renovate[bot], @6543, @zc-devs, @xoxys, @micash545, @pat-s, @miry, @lukashass, @lafriks, @pre-commit-ci[bot], @anbraten, @andyhan, @KamilaBorowska
+@zc-devs, @qwerty287, @renovate[bot], @6543, @xoxys, @micash545, @pat-s, @miry, @lukashass, @lafriks, @pre-commit-ci[bot], @anbraten, @andyhan, @KamilaBorowska
 
 ### 📈 Enhancement
 
+- Secured kubernetes backend configuration [[#3204](https://github.com/woodpecker-ci/woodpecker/pull/3204)]
 - Use `assert` for tests [[#3201](https://github.com/woodpecker-ci/woodpecker/pull/3201)]
 - Replace `goimports` with `gci` [[#3202](https://github.com/woodpecker-ci/woodpecker/pull/3202)]
 - Remove multipart logger [[#3200](https://github.com/woodpecker-ci/woodpecker/pull/3200)]
