@@ -61,16 +61,16 @@ func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, state *State, backen
 		counter:  state,
 		backend:  backend,
 		backOff: backOff{
-			pollInitialInterval: 10 * time.Millisecond,
-			pollMaxInterval:     10 * time.Second,
+			pollInitialInterval: backOffInit,
+			pollMaxInterval:     backOffMax,
 		},
 	}
 }
 
 func (r *Runner) Run(runnerCtx context.Context) error {
 	retry := backoff.NewExponentialBackOff()
-	retry.MaxInterval = backOffMax
-	retry.InitialInterval = backOffInit
+	retry.MaxInterval = r.backOff.pollInitialInterval
+	retry.InitialInterval = r.backOff.pollMaxInterval
 
 	for {
 		select {
