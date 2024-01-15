@@ -24,7 +24,6 @@ import (
 
 	"github.com/cenkalti/backoff/v4"
 	"github.com/rs/zerolog/log"
-	"github.com/tevino/abool/v2"
 	"google.golang.org/grpc/metadata"
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline"
