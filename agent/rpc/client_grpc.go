@@ -65,8 +65,8 @@ func (c *client) Close() error {
 
 func (c *client) newBackOff() backoff.BackOff {
 	b := backoff.NewExponentialBackOff()
-	b.MaxInterval = 10 * time.Second
-	b.InitialInterval = 10 * time.Millisecond
+	b.MaxInterval = c.pollMaxInterval
+	b.InitialInterval = c.pollInitialInterval
 	return b
 }
 
