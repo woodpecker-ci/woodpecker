@@ -32,7 +32,7 @@ const (
 	ServiceLabel = "service"
 )
 
-func mkService(step *types.Step, namespace string) (*v1.Service, error) {
+func mkService(step *types.Step, config *config) (*v1.Service, error) {
 	name, err := serviceName(step)
 	if err != nil {
 		return nil, err
@@ -51,7 +51,7 @@ func mkService(step *types.Step, namespace string) (*v1.Service, error) {
 	return &v1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
-			Namespace: namespace,
+			Namespace: config.Namespace,
 		},
 		Spec: v1.ServiceSpec{
 			Type:     v1.ServiceTypeClusterIP,
@@ -77,13 +77,14 @@ func servicePort(port types.Port) v1.ServicePort {
 }
 
 func startService(ctx context.Context, engine *kube, step *types.Step) (*v1.Service, error) {
-	svc, err := mkService(step, engine.config.Namespace)
+	engineConfig := engine.getConfig()
+	svc, err := mkService(step, engineConfig)
 	if err != nil {
 		return nil, err
 	}
 
 	log.Trace().Str("name", svc.Name).Interface("selector", svc.Spec.Selector).Interface("ports", svc.Spec.Ports).Msg("creating service")
-	return engine.client.CoreV1().Services(engine.config.Namespace).Create(ctx, svc, metav1.CreateOptions{})
+	return engine.client.CoreV1().Services(engineConfig.Namespace).Create(ctx, svc, metav1.CreateOptions{})
 }
 
 func stopService(ctx context.Context, engine *kube, step *types.Step, deleteOpts metav1.DeleteOptions) error {
