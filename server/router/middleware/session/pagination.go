@@ -18,6 +18,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 

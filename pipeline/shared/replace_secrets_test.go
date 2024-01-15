@@ -42,12 +42,12 @@ func TestNewSecretsReplacer(t *testing.T) {
 		secrets: []string{"an\nmulti line secret!!"},
 		expect:  "start log\ndone\nnow\n********\n******** ;)",
 	}, {
-		name:    "secret with multible lines with no match",
+		name:    "secret with multiple lines with no match",
 		log:     "start log\ndone\nnow\nan\nmulti line secret!! ;)",
 		secrets: []string{"Test\nwith\n\ntwo new lines"},
 		expect:  "start log\ndone\nnow\nan\nmulti line secret!! ;)",
 	}, {
-		name:    "secret with multible lines with match",
+		name:    "secret with multiple lines with match",
 		log:     "start log\ndone\nnow\nan\nmulti line secret!! ;)\nwith\ntwo\n\nnewlines",
 		secrets: []string{"an\nmulti line secret!!", "two\n\nnewlines"},
 		expect:  "start log\ndone\nnow\n********\n******** ;)\nwith\n********\n\n********",

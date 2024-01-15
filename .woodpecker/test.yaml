@@ -71,7 +71,9 @@ steps:
   lint-editorconfig:
     image: docker.io/mstruebing/editorconfig-checker:2.7.2
     when:
-      event: pull_request
+      - event: pull_request
+      - event: push
+        branch: renovate/*
 
   lint-license-header:
     image: *golang_image
@@ -82,7 +84,10 @@ steps:
 
   prettier:
     image: docker.io/woodpeckerci/plugin-prettier:next
-    when: *when
+    when:
+      - event: pull_request
+      - event: push
+        branch: renovate/*
 
   test:
     depends_on:

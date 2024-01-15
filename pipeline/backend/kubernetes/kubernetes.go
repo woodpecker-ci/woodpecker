@@ -18,26 +18,26 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"maps"
 	"os"
 	"runtime"
+	"slices"
 	"time"
 
 	"github.com/rs/zerolog/log"
-	"gopkg.in/yaml.v3"
-
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
-
 	"github.com/urfave/cli/v2"
+	"gopkg.in/yaml.v3"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
+	// To authenticate to GCP K8s clusters
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 
-	// To authenticate to GCP K8s clusters
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
 
 const (
@@ -155,6 +155,17 @@ func (e *kube) Load(ctx context.Context) (*types.BackendInfo, error) {
 	return &types.BackendInfo{
 		Platform: runtime.GOOS + "/" + runtime.GOARCH,
 	}, nil
+}
+
+func (e *kube) getConfig() *config {
+	if e.config == nil {
+		return nil
+	}
+	c := *e.config
+	c.PodLabels = maps.Clone(e.config.PodLabels)
+	c.PodAnnotations = maps.Clone(e.config.PodLabels)
+	c.ImagePullSecretNames = slices.Clone(e.config.ImagePullSecretNames)
+	return &c
 }
 
 // Setup the pipeline environment.

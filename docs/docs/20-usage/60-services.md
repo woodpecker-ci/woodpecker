@@ -24,7 +24,8 @@ services:
 
 You can define a port and a protocol explicitly:
 
-```yamlservices:
+```yaml
+services:
   database:
     image: mysql
     ports:

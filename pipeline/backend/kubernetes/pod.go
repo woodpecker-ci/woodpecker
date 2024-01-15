@@ -74,15 +74,16 @@ func podMeta(step *types.Step, config *config, podName string) metav1.ObjectMeta
 		Namespace: config.Namespace,
 	}
 
-	labels := make(map[string]string, len(config.PodLabels)+1)
-	// copy to not alter the engine config
-	maps.Copy(labels, config.PodLabels)
-	labels[StepLabel] = step.Name
-	meta.Labels = labels
+	meta.Labels = config.PodLabels
+	if meta.Labels == nil {
+		meta.Labels = make(map[string]string, 1)
+	}
+	meta.Labels[StepLabel] = step.Name
 
-	// copy to not alter the engine config
-	meta.Annotations = make(map[string]string, len(config.PodAnnotations))
-	maps.Copy(meta.Annotations, config.PodAnnotations)
+	meta.Annotations = config.PodAnnotations
+	if meta.Annotations == nil {
+		meta.Annotations = make(map[string]string)
+	}
 
 	securityContext := step.BackendOptions.Kubernetes.SecurityContext
 	if securityContext != nil {
@@ -442,13 +443,14 @@ func startPod(ctx context.Context, engine *kube, step *types.Step) (*v1.Pod, err
 	if err != nil {
 		return nil, err
 	}
-	pod, err := mkPod(step, engine.config, podName, engine.goos)
+	engineConfig := engine.getConfig()
+	pod, err := mkPod(step, engineConfig, podName, engine.goos)
 	if err != nil {
 		return nil, err
 	}
 
 	log.Trace().Msgf("creating pod: %s", pod.Name)
-	return engine.client.CoreV1().Pods(engine.config.Namespace).Create(ctx, pod, metav1.CreateOptions{})
+	return engine.client.CoreV1().Pods(engineConfig.Namespace).Create(ctx, pod, metav1.CreateOptions{})
 }
 
 func stopPod(ctx context.Context, engine *kube, step *types.Step, deleteOpts metav1.DeleteOptions) error {
