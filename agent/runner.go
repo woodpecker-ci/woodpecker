@@ -128,8 +128,8 @@ func (r *Runner) runNextTask(runnerCtx context.Context) (bool, error) {
 
 	logger.Debug().Msg("received execution")
 
-	workflowCtx, cancel := context.WithTimeout(ctxmeta, timeout)
-	defer cancel()
+	workflowCtx, cancelWorkflowCtx := context.WithTimeout(ctxmeta, timeout)
+	defer cancelWorkflowCtx()
 
 	// Add sigterm support for internal context.
 	// Required when the pipeline is terminated by external signals
@@ -138,15 +138,11 @@ func (r *Runner) runNextTask(runnerCtx context.Context) (bool, error) {
 		logger.Error().Msg("Received sigterm termination signal")
 	})
 
-	canceled := abool.New()
 	go func() {
 		logger.Debug().Msg("listen for cancel signal")
 
 		if werr := r.client.Wait(workflowCtx, work.ID); werr != nil {
-			canceled.SetTo(true)
-			logger.Warn().Err(werr).Msg("cancel signal received")
-
-			cancel()
+			cancelWorkflowCtx()
 		} else {
 			logger.Debug().Msg("stop listening for cancel signal")
 		}
@@ -195,7 +191,7 @@ func (r *Runner) runNextTask(runnerCtx context.Context) (bool, error) {
 	state.Finished = time.Now().Unix()
 	state.Exited = true
 
-	if canceled.IsSet() {
+	if workflowCtx.Err() != nil {
 		state.Error = ""
 		state.ExitCode = 137
 	} else if err != nil {
@@ -206,7 +202,7 @@ func (r *Runner) runNextTask(runnerCtx context.Context) (bool, error) {
 		case errors.Is(err, pipeline.ErrCancel):
 			state.Error = ""
 			state.ExitCode = 137
-			canceled.SetTo(true)
+			cancelWorkflowCtx()
 		default:
 			state.ExitCode = 1
 			state.Error = err.Error()
@@ -216,7 +212,7 @@ func (r *Runner) runNextTask(runnerCtx context.Context) (bool, error) {
 	logger.Debug().
 		Str("error", state.Error).
 		Int("exit_code", state.ExitCode).
-		Bool("canceled", canceled.IsSet()).
+		Bool("canceled", workflowCtx.Err() != nil).
 		Msg("pipeline complete")
 
 	logger.Debug().Msg("uploading logs")
