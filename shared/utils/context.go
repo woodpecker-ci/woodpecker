@@ -22,6 +22,19 @@ import (
 	"syscall"
 )
 
+type ErrSignalReceived struct {
+	signal string
+}
+
+func (err *ErrSignalReceived) Error() string {
+	return fmt.Sprintf("received signal: %s", err.signal)
+}
+
+func (*ErrSignalReceived) Is(target error) bool {
+	_, ok := target.(*ErrSignalReceived) //nolint:errorlint
+	return ok
+}
+
 // Returns a copy of parent context that is canceled when
 // an os interrupt signal is received.
 func WithContextSigtermCallback(ctx context.Context, f func()) context.Context {
@@ -37,7 +50,7 @@ func WithContextSigtermCallback(ctx context.Context, f func()) context.Context {
 			if f != nil {
 				f()
 			}
-			cancel(fmt.Errorf("received signal: %v", receivedSignal))
+			cancel(&ErrSignalReceived{signal: fmt.Sprint(receivedSignal)})
 		}
 	}()
 

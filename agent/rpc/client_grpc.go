@@ -34,9 +34,17 @@ import (
 // set grpc version on compile time to compare against server version response
 const ClientGrpcVersion int32 = proto.Version
 
+// config for exponential backoff on grpc errors
+const (
+	backOffInit = 10 * time.Millisecond
+	backOffMax  = 10 * time.Second
+)
+
 type client struct {
-	client proto.WoodpeckerClient
-	conn   *grpc.ClientConn
+	client              proto.WoodpeckerClient
+	conn                *grpc.ClientConn
+	pollMaxInterval     time.Duration
+	pollInitialInterval time.Duration
 }
 
 // NewGrpcClient returns a new grpc Client.
@@ -44,6 +52,10 @@ func NewGrpcClient(conn *grpc.ClientConn) rpc.Peer {
 	client := new(client)
 	client.client = proto.NewWoodpeckerClient(conn)
 	client.conn = conn
+
+	client.pollInitialInterval = backOffInit
+	client.pollMaxInterval = backOffMax
+
 	return client
 }
 

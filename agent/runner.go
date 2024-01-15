@@ -22,6 +22,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cenkalti/backoff/v4"
 	"github.com/rs/zerolog/log"
 	"github.com/tevino/abool/v2"
 	"google.golang.org/grpc/metadata"
@@ -32,12 +33,24 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
+// config for exponential backoff on next task fetch
+const (
+	backOffInit = 10 * time.Millisecond
+	backOffMax  = 10 * time.Second
+)
+
 type Runner struct {
 	client   rpc.Peer
 	filter   rpc.Filter
 	hostname string
 	counter  *State
 	backend  *backend.Backend
+	backOff  backOff
+}
+
+type backOff struct {
+	pollMaxInterval     time.Duration
+	pollInitialInterval time.Duration
 }
 
 func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, state *State, backend *backend.Backend) Runner {
@@ -47,10 +60,36 @@ func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, state *State, backen
 		hostname: h,
 		counter:  state,
 		backend:  backend,
+		backOff: backOff{
+			pollInitialInterval: 10 * time.Millisecond,
+			pollMaxInterval:     10 * time.Second,
+		},
 	}
 }
 
 func (r *Runner) Run(runnerCtx context.Context) error {
+	retry := backoff.NewExponentialBackOff()
+	retry.MaxInterval = backOffMax
+	retry.InitialInterval = backOffInit
+
+	for {
+		select {
+		case <-runnerCtx.Done():
+			return runnerCtx.Err()
+		case <-time.After(retry.NextBackOff()):
+			log.Debug().Msg("polling new steps")
+			gotTask, err := r.runNextTask(runnerCtx)
+			if err != nil {
+				return err
+			}
+			if gotTask {
+				retry.Reset()
+			}
+		}
+	}
+}
+
+func (r *Runner) runNextTask(runnerCtx context.Context) (bool, error) {
 	log.Debug().Msg("request next execution")
 
 	meta, _ := metadata.FromOutgoingContext(runnerCtx)
@@ -59,10 +98,10 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 	// get the next workflow from the queue
 	work, err := r.client.Next(runnerCtx, r.filter)
 	if err != nil {
-		return err
+		return false, err
 	}
 	if work == nil {
-		return nil
+		return false, nil
 	}
 
 	timeout := time.Hour
@@ -195,7 +234,7 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 		logger.Debug().Msg("updating pipeline status complete")
 	}
 
-	return nil
+	return true, nil
 }
 
 // extract repository name from the configuration

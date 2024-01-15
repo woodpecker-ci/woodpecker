@@ -49,6 +49,8 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/version"
 )
 
+const healthReportTimes = time.Second * 10
+
 func run(c *cli.Context) error {
 	agentConfigPath := c.String("agent-config")
 	hostname := c.String("hostname")
@@ -113,7 +115,6 @@ func run(c *cli.Context) error {
 
 	client := agentRpc.NewGrpcClient(conn)
 
-	sigterm := abool.New()
 	ctx := metadata.NewOutgoingContext(
 		context.Background(),
 		metadata.Pairs("hostname", hostname),
@@ -122,7 +123,6 @@ func run(c *cli.Context) error {
 	agentConfigPersisted := abool.New()
 	ctx = utils.WithContextSigtermCallback(ctx, func() {
 		log.Info().Msg("termination signal is received, shutting down")
-		sigterm.Set()
 
 		// Remove stateless agents from server
 		if agentConfigPersisted.IsNotSet() {
@@ -203,18 +203,23 @@ func run(c *cli.Context) error {
 
 	go func() {
 		for {
-			if sigterm.IsSet() {
-				log.Debug().Msg("terminating health reporting")
+			select {
+			case <-ctx.Done():
+				if err := ctx.Err(); err != nil && !errors.Is(err, &utils.ErrSignalReceived{}) {
+					log.Error().Err(err).Msgf("context closed with unexpected error")
+				} else {
+					log.Debug().Msg("terminating health reporting")
+				}
 				return
-			}
 
-			err := client.ReportHealth(ctx)
-			if err != nil {
-				log.Err(err).Msg("failed to report health")
-				return
-			}
+			default:
+				if err := client.ReportHealth(ctx); err != nil {
+					log.Err(err).Msg("failed to report health")
+					return
+				}
 
-			<-time.After(time.Second * 10)
+				<-time.After(healthReportTimes)
+			}
 		}
 	}()
 
@@ -226,17 +231,9 @@ func run(c *cli.Context) error {
 			r := agent.NewRunner(client, filter, hostname, counter, &backendEngine)
 			log.Debug().Msgf("created new runner %d", i)
 
-			for {
-				if sigterm.IsSet() {
-					log.Debug().Msgf("terminating runner %d", i)
-					return
-				}
-
-				log.Debug().Msg("polling new steps")
-				if err := r.Run(ctx); err != nil {
-					log.Error().Err(err).Msg("pipeline done with error")
-					return
-				}
+			if err := r.Run(ctx); err != nil && !errors.Is(err, &utils.ErrSignalReceived{}) {
+				log.Error().Err(err).Msg("runner done with error")
+				return
 			}
 		}()
 	}
