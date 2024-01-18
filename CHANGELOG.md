@@ -1,10 +1,10 @@
 # Changelog
 
-## [2.2.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.2.0) - 2024-01-15
+## [2.2.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.2.0) - 2024-01-18
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @renovate[bot], @zc-devs, @qwerty287, @xoxys, @micash545, @pat-s, @miry, @lukashass, @lafriks, @pre-commit-ci[bot], @anbraten, @andyhan, @KamilaBorowska
+@micash545, @6543, @renovate[bot], @zc-devs, @qwerty287, @xoxys, @pat-s, @miry, @lukashass, @lafriks, @pre-commit-ci[bot], @anbraten, @andyhan, @KamilaBorowska
 
 ### 📈 Enhancement
 
@@ -89,6 +89,7 @@
 
 ### Misc
 
+- Docs: Fix expression syntax docs url [[#3208](https://github.com/woodpecker-ci/woodpecker/pull/3208)]
 - Add schema test for depends_on [[#3205](https://github.com/woodpecker-ci/woodpecker/pull/3205)]
 - chore(deps): lock file maintenance [[#3190](https://github.com/woodpecker-ci/woodpecker/pull/3190)]
 - Do not run prettier with pre-commit [[#3196](https://github.com/woodpecker-ci/woodpecker/pull/3196)]
