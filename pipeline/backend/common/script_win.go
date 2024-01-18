@@ -20,6 +20,10 @@ import (
 	"strings"
 )
 
+const DefaultWindowsShell = "powershell.exe"
+
+var DefaultWindowsEntry = []string{DefaultWindowsShell, "-noprofile", "-noninteractive", "-command"}
+
 func generateScriptWindows(commands []string) string {
 	var buf bytes.Buffer
 	for _, command := range commands {
@@ -31,15 +35,14 @@ func generateScriptWindows(commands []string) string {
 			command,
 		))
 	}
-	script := fmt.Sprintf(
+
+	return fmt.Sprintf("%s\n%s",
 		setupScriptWin,
 		buf.String(),
 	)
-	return script
 }
 
-const setupScriptWin = `
-$ErrorActionPreference = 'Stop';
+const setupScriptWin = `$ErrorActionPreference = 'Stop';
 &cmd /c "mkdir c:\root";
 if ($Env:CI_NETRC_MACHINE) {
 $netrc=[string]::Format("{0}\_netrc",$Env:HOME);
@@ -48,9 +51,7 @@ $netrc=[string]::Format("{0}\_netrc",$Env:HOME);
 "password $Env:CI_NETRC_PASSWORD" >> $netrc;
 };
 [Environment]::SetEnvironmentVariable("CI_NETRC_PASSWORD",$null);
-[Environment]::SetEnvironmentVariable("CI_SCRIPT",$null);
-%s
-`
+[Environment]::SetEnvironmentVariable("CI_SCRIPT",$null);`
 
 // traceScript is a helper script that is added to the step script
 // to trace a command.

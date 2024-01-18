@@ -20,6 +20,7 @@ import (
 	"maps"
 	"strings"
 
+	"github.com/alessio/shellescape"
 	"github.com/rs/zerolog/log"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -115,6 +116,27 @@ func podSpec(step *types.Step, config *config) (v1.PodSpec, error) {
 	return spec, nil
 }
 
+func podContainerCommands(step *types.Step, goos string) (entry, cmd []string) {
+	entry = common.DefaultPosixEntry
+	if goos == "windows" {
+		entry = common.DefaultWindowsEntry
+	}
+
+	// TODO: https://github.com/woodpecker-ci/woodpecker/pull/2985
+
+	if step.Type == types.StepTypeClone {
+		cmd = common.GenerateNetRCCommand(entry)
+	}
+
+	for i := range step.Commands {
+		// trace
+		cmd = append(cmd, fmt.Sprintf("echo + %s", shellescape.Quote(step.Commands[i])))
+		cmd = append(cmd, step.Commands[i])
+	}
+
+	return entry, cmd
+}
+
 func podContainer(step *types.Step, podName, goos string) (v1.Container, error) {
 	var err error
 	container := v1.Container{
@@ -128,10 +150,10 @@ func podContainer(step *types.Step, podName, goos string) (v1.Container, error) 
 	}
 
 	if len(step.Commands) != 0 {
-		scriptEnv, command, args := common.GenerateContainerConf(step.Commands, goos)
+		command, args := podContainerCommands(step, goos)
 		container.Command = command
 		container.Args = args
-		maps.Copy(step.Environment, scriptEnv)
+		step.Environment["SHELL"] = command[0]
 	}
 
 	container.Env = mapToEnvVars(step.Environment)

@@ -21,6 +21,10 @@ import (
 	"github.com/alessio/shellescape"
 )
 
+const DefaultPosixShell = "/bin/sh"
+
+var DefaultPosixEntry = []string{DefaultPosixShell, "-c"}
+
 // generateScriptPosix is a helper function that generates a step script
 // for a linux container using the given
 func generateScriptPosix(commands []string) string {

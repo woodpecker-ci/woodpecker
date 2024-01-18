@@ -16,6 +16,8 @@ package common
 
 import (
 	"encoding/base64"
+	"fmt"
+	"slices"
 )
 
 func GenerateContainerConf(commands []string, goos string) (env map[string]string, entry, cmd []string) {
@@ -23,16 +25,28 @@ func GenerateContainerConf(commands []string, goos string) (env map[string]strin
 	if goos == "windows" {
 		env["CI_SCRIPT"] = base64.StdEncoding.EncodeToString([]byte(generateScriptWindows(commands)))
 		env["HOME"] = "c:\\root"
-		env["SHELL"] = "powershell.exe"
-		entry = []string{"powershell", "-noprofile", "-noninteractive", "-command"}
+		env["SHELL"] = DefaultWindowsShell
+		entry = DefaultWindowsEntry
 		cmd = []string{"[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($Env:CI_SCRIPT)) | iex"}
 	} else {
 		env["CI_SCRIPT"] = base64.StdEncoding.EncodeToString([]byte(generateScriptPosix(commands)))
 		env["HOME"] = "/root"
-		env["SHELL"] = "/bin/sh"
-		entry = []string{"/bin/sh", "-c"}
+		env["SHELL"] = DefaultPosixShell
+		entry = DefaultPosixEntry
 		cmd = []string{"echo $CI_SCRIPT | base64 -d | /bin/sh -e"}
 	}
 
 	return env, entry, cmd
+}
+
+func GenerateNetRCCommand(entrypoint []string) []string {
+	if slices.Equal(entrypoint, DefaultPosixEntry) {
+		encoded := base64.StdEncoding.EncodeToString([]byte(setupScript))
+		return []string{fmt.Sprintf("echo %s | base64 -d | /bin/sh -e", encoded)}
+	}
+	if slices.Equal(entrypoint, DefaultWindowsEntry) {
+		encoded := base64.StdEncoding.EncodeToString([]byte(setupScriptWin))
+		return []string{fmt.Sprintf(`[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String("%s")) | iex`, encoded)}
+	}
+	return nil
 }

@@ -27,8 +27,7 @@ func TestGenerateScriptWin(t *testing.T) {
 	}{
 		{
 			from: []string{"echo %PATH%", "go build", "go test"},
-			want: `
-$ErrorActionPreference = 'Stop';
+			want: `$ErrorActionPreference = 'Stop';
 &cmd /c "mkdir c:\root";
 if ($Env:CI_NETRC_MACHINE) {
 $netrc=[string]::Format("{0}\_netrc",$Env:HOME);
@@ -47,7 +46,6 @@ Write-Output ('+ "go build"');
 
 Write-Output ('+ "go test"');
 & go test; if ($LASTEXITCODE -ne 0) {exit $LASTEXITCODE}
-
 `,
 		},
 	}
