@@ -21,6 +21,8 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/rs/zerolog/log"
 )
 
 var (
@@ -136,7 +138,10 @@ func (m *Metadata) Environ() map[string]string {
 		params["CI_PIPELINE_FILES"] = "[]"
 	} else if len(m.Curr.Commit.ChangedFiles) <= maxChangedFiles {
 		// we have to use json, as other separators like ;, or space are valid filename chars
-		changedFiles, _ := json.Marshal(m.Curr.Commit.ChangedFiles)
+		changedFiles, err := json.Marshal(m.Curr.Commit.ChangedFiles)
+		if err != nil {
+			log.Error().Err(err).Msg("marshal changed files")
+		}
 		params["CI_PIPELINE_FILES"] = string(changedFiles)
 	}
 

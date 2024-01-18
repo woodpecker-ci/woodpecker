@@ -1,3 +1,7 @@
+---
+toc_max_heading_level: 2
+---
+
 # Agent configuration
 
 Agents are configured by the command line or environment variables. At the minimum you need the following information:

@@ -52,7 +52,11 @@ func Config(c *gin.Context) {
 	// default func map with json parser.
 	funcMap := template.FuncMap{
 		"json": func(v any) string {
-			a, _ := json.Marshal(v)
+			a, err := json.Marshal(v)
+			if err != nil {
+				log.Error().Err(err).Msgf("could not marshal JSON")
+				return ""
+			}
 			return string(a)
 		},
 	}
