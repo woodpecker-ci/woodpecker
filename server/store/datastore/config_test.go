@@ -111,6 +111,7 @@ func TestConfigApproved(t *testing.T) {
 		RepoID: repo.ID,
 		Data:   data,
 		Hash:   hash,
+		Name:   name,
 	}
 	assert.NoError(t, store.ConfigCreate(conf))
 	pipelineConfig := &model.PipelineConfig{
@@ -130,6 +131,7 @@ func TestConfigApproved(t *testing.T) {
 		RepoID: repo.ID,
 		Data:   data,
 		Hash:   "xxx",
+		Name:   "xxx",
 	}
 	assert.NoError(t, store.ConfigCreate(conf2))
 	pipelineConfig2 := &model.PipelineConfig{
