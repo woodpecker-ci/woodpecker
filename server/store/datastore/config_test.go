@@ -22,14 +22,15 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
+var (
+	data = []byte("pipeline: [ { image: golang, commands: [ go build, go test ] } ]")
+	hash = "8d8647c9aa90d893bfb79dddbe901f03e258588121e5202632f8ae5738590b26"
+	name = "test"
+)
+
 func TestConfig(t *testing.T) {
 	store, closer := newTestStore(t, new(model.Config), new(model.PipelineConfig), new(model.Pipeline), new(model.Repo))
 	defer closer()
-
-	var (
-		data = "pipeline: [ { image: golang, commands: [ go build, go test ] } ]"
-		hash = "8d8647c9aa90d893bfb79dddbe901f03e258588121e5202632f8ae5738590b26"
-	)
 
 	repo := &model.Repo{
 		UserID:   1,
@@ -41,9 +42,9 @@ func TestConfig(t *testing.T) {
 
 	config := &model.Config{
 		RepoID: repo.ID,
-		Data:   []byte(data),
+		Data:   data,
 		Hash:   hash,
-		Name:   "default",
+		Name:   name,
 	}
 	assert.NoError(t, store.ConfigCreate(config))
 
@@ -61,13 +62,13 @@ func TestConfig(t *testing.T) {
 		},
 	))
 
-	config, err := store.ConfigFindIdentical(repo.ID, hash)
+	config, err := store.configFindIdentical(store.engine.NewSession(), repo.ID, hash, name)
 	assert.NoError(t, err)
 	assert.EqualValues(t, 1, config.ID)
 	assert.Equal(t, repo.ID, config.RepoID)
 	assert.Equal(t, data, string(config.Data))
 	assert.Equal(t, hash, config.Hash)
-	assert.Equal(t, "default", config.Name)
+	assert.Equal(t, name, config.Name)
 
 	loaded, err := store.ConfigsForPipeline(pipeline.ID)
 	assert.NoError(t, err)
@@ -87,8 +88,6 @@ func TestConfigApproved(t *testing.T) {
 	assert.NoError(t, store.CreateRepo(repo))
 
 	var (
-		data            = "pipeline: [ { image: golang, commands: [ go build, go test ] } ]"
-		hash            = "8d8647c9aa90d893bfb79dddbe901f03e258588121e5202632f8ae5738590b26"
 		pipelineBlocked = &model.Pipeline{
 			RepoID: repo.ID,
 			Status: model.StatusBlocked,
@@ -110,7 +109,7 @@ func TestConfigApproved(t *testing.T) {
 	assert.NoError(t, store.CreatePipeline(pipelinePending))
 	conf := &model.Config{
 		RepoID: repo.ID,
-		Data:   []byte(data),
+		Data:   data,
 		Hash:   hash,
 	}
 	assert.NoError(t, store.ConfigCreate(conf))
@@ -129,7 +128,7 @@ func TestConfigApproved(t *testing.T) {
 	assert.NoError(t, store.CreatePipeline(pipelineRunning))
 	conf2 := &model.Config{
 		RepoID: repo.ID,
-		Data:   []byte(data),
+		Data:   data,
 		Hash:   "xxx",
 	}
 	assert.NoError(t, store.ConfigCreate(conf2))
@@ -144,20 +143,34 @@ func TestConfigApproved(t *testing.T) {
 	assert.True(t, approved)
 }
 
-func TestConfigIndexes(t *testing.T) {
+func TestConfigCreate(t *testing.T) {
 	store, closer := newTestStore(t, new(model.Config), new(model.Step), new(model.Pipeline), new(model.Repo))
 	defer closer()
 
-	var (
-		data = "pipeline: [ { image: golang, commands: [ go build, go test ] } ]"
-		hash = "8d8647c9aa90d893bfb79dddbe901f03e258588121e5202632f8ae5738590b26"
-	)
+	// fail due to missing name
+	assert.Error(t, store.ConfigCreate(
+		&model.Config{
+			RepoID: 2,
+			Data:   data,
+			Hash:   hash,
+		},
+	))
+
+	// fail due to missing hash
+	assert.Error(t, store.ConfigCreate(
+		&model.Config{
+			RepoID: 2,
+			Data:   data,
+			Name:   name,
+		},
+	))
 
 	assert.NoError(t, store.ConfigCreate(
 		&model.Config{
 			RepoID: 2,
-			Data:   []byte(data),
+			Data:   data,
 			Hash:   hash,
+			Name:   name,
 		},
 	))
 
@@ -165,8 +178,43 @@ func TestConfigIndexes(t *testing.T) {
 	assert.Error(t, store.ConfigCreate(
 		&model.Config{
 			RepoID: 2,
-			Data:   []byte(data),
+			Data:   data,
 			Hash:   hash,
+			Name:   name,
 		},
 	))
+}
+
+func TestConfigPersist(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Config))
+	defer closer()
+
+	conf1 := &model.Config{
+		RepoID: 2,
+		Data:   data,
+		Hash:   hash,
+		Name:   name,
+	}
+	conf2 := &model.Config{
+		RepoID: 2,
+		Data:   []byte("steps: [ { image: golang, commands: [ go generate ] } ]"),
+		Name:   "generate",
+	}
+
+	conf1, err := store.ConfigPersist(conf1)
+	assert.NoError(t, err)
+	assert.EqualValues(t, hash, conf1.Hash)
+	conf1secondInsert, err := store.ConfigPersist(conf1)
+	assert.NoError(t, err)
+	assert.EqualValues(t, conf1, conf1secondInsert)
+	count, err := store.engine.Count(new(model.Config))
+	assert.NoError(t, err)
+	assert.EqualValues(t, 1, count)
+
+	newConf2, err := store.ConfigPersist(conf2)
+	assert.NoError(t, err)
+	assert.EqualValues(t, "66f28f8d487a48aacf29d9feea13b0ab5dbb5025296b77a6addde93efcc4d82b", newConf2.Hash)
+	count, err = store.engine.Count(new(model.Config))
+	assert.NoError(t, err)
+	assert.EqualValues(t, 2, count)
 }
