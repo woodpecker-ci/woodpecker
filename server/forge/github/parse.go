@@ -22,7 +22,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/google/go-github/v57/github"
+	"github.com/google/go-github/v58/github"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
@@ -85,7 +85,7 @@ func parsePushHook(hook *github.PushEvent) (*model.Repo, *model.Pipeline) {
 		Commit:       hook.GetHeadCommit().GetID(),
 		Ref:          hook.GetRef(),
 		ForgeURL:     hook.GetHeadCommit().GetURL(),
-		Branch:       strings.Replace(hook.GetRef(), "refs/heads/", "", -1),
+		Branch:       strings.ReplaceAll(hook.GetRef(), "refs/heads/", ""),
 		Message:      hook.GetHeadCommit().GetMessage(),
 		Email:        hook.GetHeadCommit().GetAuthor().GetEmail(),
 		Avatar:       hook.GetSender().GetAvatarURL(),
@@ -106,7 +106,7 @@ func parsePushHook(hook *github.PushEvent) (*model.Repo, *model.Pipeline) {
 		// For tags, if the base_ref (tag's base branch) is set, we're using it
 		// as pipeline's branch so that we can filter events base on it
 		if strings.HasPrefix(hook.GetBaseRef(), "refs/heads/") {
-			pipeline.Branch = strings.Replace(hook.GetBaseRef(), "refs/heads/", "", -1)
+			pipeline.Branch = strings.ReplaceAll(hook.GetBaseRef(), "refs/heads/", "")
 		}
 	}
 

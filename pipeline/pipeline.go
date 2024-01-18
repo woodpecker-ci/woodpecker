@@ -28,7 +28,6 @@ import (
 
 	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/multipart"
 )
 
 // TODO: move runtime into "runtime" subpackage
@@ -89,10 +88,10 @@ func (r *Runtime) MakeLogger() zerolog.Logger {
 	return logCtx.Logger()
 }
 
-// Starts the execution of an workflow and waits for it to complete
+// Run starts the execution of a workflow and waits for it to complete
 func (r *Runtime) Run(runnerCtx context.Context) error {
 	logger := r.MakeLogger()
-	logger.Debug().Msgf("Executing %d stages, in order of:", len(r.spec.Stages))
+	logger.Debug().Msgf("executing %d stages, in order of:", len(r.spec.Stages))
 	for stagePos, stage := range r.spec.Stages {
 		stepNames := []string{}
 		for _, step := range stage.Steps {
@@ -112,7 +111,7 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 	}()
 
 	r.started = time.Now().Unix()
-	if err := r.engine.SetupWorkflow(r.ctx, r.spec, r.taskUUID); err != nil {
+	if err := r.engine.SetupWorkflow(runnerCtx, r.spec, r.taskUUID); err != nil {
 		return err
 	}
 
@@ -166,27 +165,27 @@ func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 	logger := r.MakeLogger()
 
 	for _, step := range steps {
-		// required since otherwise the loop variable
+		// Required since otherwise the loop variable
 		// will be captured by the function. This will
 		// recreate the step "variable"
 		step := step
 		g.Go(func() error {
 			// Case the pipeline was already complete.
 			logger.Debug().
-				Str("Step", step.Name).
-				Msg("Prepare")
+				Str("step", step.Name).
+				Msg("prepare")
 
 			switch {
 			case r.err != nil && !step.OnFailure:
 				logger.Debug().
-					Str("Step", step.Name).
+					Str("step", step.Name).
 					Err(r.err).
-					Msgf("Skipped due to OnFailure=%t", step.OnFailure)
+					Msgf("skipped due to OnFailure=%t", step.OnFailure)
 				return nil
 			case r.err == nil && !step.OnSuccess:
 				logger.Debug().
-					Str("Step", step.Name).
-					Msgf("Skipped due to OnSuccess=%t", step.OnSuccess)
+					Str("step", step.Name).
+					Msgf("skipped due to OnSuccess=%t", step.OnSuccess)
 				return nil
 			}
 
@@ -200,22 +199,14 @@ func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 			metadata.SetDroneEnviron(step.Environment)
 
 			logger.Debug().
-				Str("Step", step.Name).
-				Msg("Executing")
+				Str("step", step.Name).
+				Msg("executing")
 
 			processState, err := r.exec(step)
 
 			logger.Debug().
-				Str("Step", step.Name).
-				Msg("Complete")
-
-			// if we got a nil process but an error state
-			// then we need to log the internal error to the step.
-			if r.logger != nil && err != nil && !errors.Is(err, ErrCancel) && processState == nil {
-				_ = r.logger.Log(step, multipart.New(strings.NewReader(
-					"Backend engine error while running step: "+err.Error(),
-				)))
-			}
+				Str("step", step.Name).
+				Msg("complete")
 
 			// Return the error after tracing it.
 			err = r.traceStep(processState, err, step)
@@ -251,7 +242,7 @@ func (r *Runtime) exec(step *backend.Step) (*backend.State, error) {
 			defer wg.Done()
 			logger := r.MakeLogger()
 
-			if err := r.logger.Log(step, multipart.New(rc)); err != nil {
+			if err := r.logger(step, rc); err != nil {
 				logger.Error().Err(err).Msg("process logging failed")
 			}
 			_ = rc.Close()

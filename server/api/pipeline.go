@@ -140,7 +140,7 @@ func GetPipeline(c *gin.Context) {
 
 	pl, err := _store.GetPipelineNumber(repo, num)
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 	if pl.Workflows, err = _store.WorkflowGetTree(pl); err != nil {
@@ -158,7 +158,7 @@ func GetPipelineLast(c *gin.Context) {
 
 	pl, err := _store.GetPipelineLast(repo, branch)
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 
@@ -194,7 +194,7 @@ func GetStepLogs(c *gin.Context) {
 
 	pl, err := _store.GetPipelineNumber(repo, num)
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 
@@ -206,19 +206,19 @@ func GetStepLogs(c *gin.Context) {
 
 	step, err := _store.StepLoad(stepID)
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 
 	if step.PipelineID != pl.ID {
-		// make sure we can not read arbitrary logs by id
+		// make sure we cannot read arbitrary logs by id
 		_ = c.AbortWithError(http.StatusBadRequest, fmt.Errorf("step with id %d is not part of repo %s", stepID, repo.FullName))
 		return
 	}
 
 	logs, err := _store.LogFind(step)
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 
@@ -246,7 +246,7 @@ func GetPipelineConfig(c *gin.Context) {
 
 	pl, err := _store.GetPipelineNumber(repo, num)
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 
@@ -277,7 +277,7 @@ func CancelPipeline(c *gin.Context) {
 
 	pl, err := _store.GetPipelineNumber(repo, num)
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 
@@ -308,7 +308,7 @@ func PostApproval(c *gin.Context) {
 
 	pl, err := _store.GetPipelineNumber(repo, num)
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 
@@ -340,7 +340,7 @@ func PostDecline(c *gin.Context) {
 
 	pl, err := _store.GetPipelineNumber(repo, num)
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 
@@ -394,13 +394,13 @@ func PostPipeline(c *gin.Context) {
 
 	user, err := _store.GetUser(repo.UserID)
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 
 	pl, err := _store.GetPipelineNumber(repo, num)
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 
@@ -467,7 +467,7 @@ func DeletePipelineLogs(c *gin.Context) {
 
 	pl, err := _store.GetPipelineNumber(repo, num)
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 

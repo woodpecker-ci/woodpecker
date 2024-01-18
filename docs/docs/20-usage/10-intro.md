@@ -19,7 +19,7 @@ This is because webhooks are signed using a per-repository secret key which is n
 
 ## Configuration
 
-To configure your pipeline you must create a `.woodpecker.yml` file in the root of your repository. The `.woodpecker.yml` file is used to define your pipeline steps.
+To configure your pipeline you must create a `.woodpecker.yaml` file in the root of your repository. The `.woodpecker.yaml` file is used to define your pipeline steps.
 
 :::note
 We support most of YAML 1.2, but preserve some behavior from 1.1 for backward compatibility.

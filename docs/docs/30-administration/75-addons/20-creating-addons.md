@@ -8,7 +8,7 @@ An addon consists of two variables/functions in Go.
 
 1. The `Type` variable. Specifies the type of the addon and must be directly accessed from `shared/addons/types/types.go`.
 2. The `Addon` function which is the main point of your addon.
-   This function takes the zerolog logger you should use to log errors, warnings etc. as argument.
+   This function takes the `zerolog` logger you should use to log errors, warnings, etc. as argument.
 
    It returns two values:
 
@@ -23,10 +23,21 @@ Directly import Woodpecker's Go package (`go.woodpecker-ci.org/woodpecker/woodpe
 | -------------------- | -------------------------------------------------------------------------------- |
 | `Forge`              | `"go.woodpecker-ci.org/woodpecker/woodpecker/v2/server/forge".Forge`             |
 | `Backend`            | `"go.woodpecker-ci.org/woodpecker/woodpecker/v2/pipeline/backend/types".Backend` |
-| `ConfigService`      | `"go.woodpecker-ci.org/woodpecker/v2/server/plugins/config".ConfigService`       |
+| `ConfigService`      | `"go.woodpecker-ci.org/woodpecker/v2/server/plugins/config".Extension`           |
 | `SecretService`      | `"go.woodpecker-ci.org/woodpecker/v2/server/model".SecretService`                |
 | `EnvironmentService` | `"go.woodpecker-ci.org/woodpecker/v2/server/model".EnvironmentService`           |
 | `RegistryService`    | `"go.woodpecker-ci.org/woodpecker/v2/server/model".RegistryService`              |
+
+### Using configurations
+
+If you write a plugin for the server (`Forge` and the services), you can access the server config.
+
+Therefore, use the `"go.woodpecker-ci.org/woodpecker/v2/server".Config` variable.
+
+:::warning
+The config is not available when your addon is initialized, i.e., the `Addon` function is called.
+Only use the config in the interface methods.
+:::
 
 ## Compiling
 
@@ -36,23 +47,25 @@ After you write your addon code, compile your addon:
 go build -buildmode plugin
 ```
 
-The output file is your addon which is now ready to be used.
+The output file is your addon that is now ready to be used.
 
 ## Restrictions
 
 Addons must directly depend on Woodpecker's core (`go.woodpecker-ci.org/woodpecker/woodpecker/v2`).
-The addon must have been built with **excatly the same code** as the Woodpecker instance you'd like to use it on. This means: If you build your addon with a specific commit from Woodpecker `next`, you can likely only use it with the Woodpecker version compiled from this commit.
-Also, if you change something inside of Woodpecker without committing, it might fail because you need to recompile your addon with this code first.
+The addon must have been built with **exactly the same code** as the Woodpecker instance you'd like to use it on. This means: If you build your addon with a specific commit from Woodpecker `next`, you can likely only use it with the Woodpecker version compiled from this commit.
+Also, if you change something inside Woodpecker without committing, it might fail because you need to recompile your addon with this code first.
 
-In addition to this, addons are only supported on Linux, FreeBSD and macOS.
+In addition to this, addons are only supported on Linux, FreeBSD, and macOS.
 
 :::info
-It is recommended to at least support the latest released version of Woodpecker.
+It is recommended to at least support the latest version of Woodpecker.
 :::
 
 ### Compile for different versions
 
-As long as there are no changes to Woodpecker's interfaces or they are backwards-compatible, you can easily compile the addon for multiple version by changing the version of `go.woodpecker-ci.org/woodpecker/woodpecker/v2` using `go get` before compiling.
+As long as there are no changes to Woodpecker's interfaces,
+or they are backwards-compatible, you can compile the addon for multiple versions
+by changing the version of `go.woodpecker-ci.org/woodpecker/woodpecker/v2` using `go get` before compiling.
 
 ## Logging
 
@@ -68,10 +81,10 @@ import (
   "net/http"
 
   "github.com/rs/zerolog"
-  "go.woodpecker-ci.org/woodpecker/woodpecker/v2/server/forge"
-  forge_types "go.woodpecker-ci.org/woodpecker/woodpecker/v2/server/forge/types"
-  "go.woodpecker-ci.org/woodpecker/woodpecker/v2/server/model"
-  addon_types "go.woodpecker-ci.org/woodpecker/woodpecker/v2/shared/addon/types"
+  "go.woodpecker-ci.org/woodpecker/v2/server/forge"
+  forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
+  "go.woodpecker-ci.org/woodpecker/v2/server/model"
+  addon_types "go.woodpecker-ci.org/woodpecker/v2/shared/addon/types"
 )
 
 var Type = addon_types.TypeForge
@@ -85,5 +98,5 @@ type config struct {
   l zerolog.Logger
 }
 
-// ... in this case, `config` must implement `forge.Forge`. You must directly use Woodpecker's packages - see imports above.
+// In this case, `config` must implement `forge.Forge`. You must directly use Woodpecker's packages - see imports above.
 ```

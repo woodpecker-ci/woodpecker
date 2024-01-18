@@ -15,10 +15,10 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
 	_ "github.com/joho/godotenv/autoload"
+	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/docker"
@@ -45,7 +45,6 @@ func main() {
 	app.Flags = utils.MergeSlices(flags, logger.GlobalLoggerFlags, docker.Flags, kubernetes.Flags, local.Flags)
 
 	if err := app.Run(os.Args); err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		log.Fatal().Err(err).Msg("error running agent") //nolint:forbidigo
 	}
 }

@@ -37,7 +37,7 @@ func (svc *tinkEncryptionService) loadKeyset() error {
 	defer func(file *os.File) {
 		err = file.Close()
 		if err != nil {
-			log.Err(err).Msgf(logTemplateTinkFailedClosingKeysetFile, svc.keysetFilePath)
+			log.Error().Err(err).Msgf(logTemplateTinkFailedClosingKeysetFile, svc.keysetFilePath)
 		}
 	}(file)
 

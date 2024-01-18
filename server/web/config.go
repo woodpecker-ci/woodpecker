@@ -54,7 +54,7 @@ func Config(c *gin.Context) {
 		"json": func(v any) string {
 			a, err := json.Marshal(v)
 			if err != nil {
-				log.Error().Err(err).Msgf("could not marshal JSON")
+				log.Error().Err(err).Msg("could not marshal JSON")
 				return ""
 			}
 			return string(a)
@@ -65,7 +65,7 @@ func Config(c *gin.Context) {
 	tmpl := template.Must(template.New("").Funcs(funcMap).Parse(configTemplate))
 
 	if err := tmpl.Execute(c.Writer, configData); err != nil {
-		log.Error().Err(err).Msgf("could not execute template")
+		log.Error().Err(err).Msg("could not execute template")
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}

@@ -103,6 +103,7 @@ linters-settings:
           - pkg: 'go.woodpecker-ci.org/woodpecker/v2/cmd/cli'
           - pkg: 'go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker'
   gci:
+    custom-order: true
     sections:
       - standard
       - default
@@ -127,7 +128,6 @@ linters:
     - bidichk
     - errcheck
     - gofmt
-    - goimports
     - gosimple
     - govet
     - ineffassign
@@ -136,7 +136,6 @@ linters:
     - staticcheck
     - typecheck
     - unused
-    - whitespace
     - gofumpt
     - errorlint
     - forbidigo
@@ -161,28 +160,12 @@ linters:
     - unparam
     - wastedassign
     - whitespace
+    - gocritic
+    - nolintlint
+    - stylecheck
+    - contextcheck
+    - forcetypeassert
+    - gci
 
 run:
   timeout: 15m
-
-issues:
-  exclude-rules:
-    # gin force us to use string as context key
-    - path: server/store/context.go
-      linters:
-        - staticcheck
-        - revive
-
-    # let cli use print and panic and log.Fatal()
-    - path: 'cmd/*|cli/*'
-      linters:
-        - forbidigo
-
-    # allow some setup functions to use log.Fatal()
-    - path: 'server/web/web.go|server/plugins/encryption/tink_keyset_watcher.go|shared/logger/logger.go'
-      linters:
-        - forbidigo
-
-    - path: '_test.go'
-      linters:
-        - forcetypeassert

@@ -54,9 +54,23 @@ const (
 )
 
 type SecurityContext struct {
-	Privileged   *bool  `json:"privileged,omitempty"`
-	RunAsNonRoot *bool  `json:"runAsNonRoot,omitempty"`
-	RunAsUser    *int64 `json:"runAsUser,omitempty"`
-	RunAsGroup   *int64 `json:"runAsGroup,omitempty"`
-	FSGroup      *int64 `json:"fsGroup,omitempty"`
+	Privileged      *bool       `json:"privileged,omitempty"`
+	RunAsNonRoot    *bool       `json:"runAsNonRoot,omitempty"`
+	RunAsUser       *int64      `json:"runAsUser,omitempty"`
+	RunAsGroup      *int64      `json:"runAsGroup,omitempty"`
+	FSGroup         *int64      `json:"fsGroup,omitempty"`
+	SeccompProfile  *SecProfile `json:"seccompProfile,omitempty"`
+	ApparmorProfile *SecProfile `json:"apparmorProfile,omitempty"`
 }
+
+type SecProfile struct {
+	Type             SecProfileType `json:"type,omitempty"`
+	LocalhostProfile string         `json:"localhostProfile,omitempty"`
+}
+
+type SecProfileType string
+
+const (
+	SecProfileTypeRuntimeDefault SecProfileType = "RuntimeDefault"
+	SecProfileTypeLocalhost      SecProfileType = "Localhost"
+)

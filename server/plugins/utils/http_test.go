@@ -24,6 +24,7 @@ import (
 
 	"github.com/go-ap/httpsig"
 	"github.com/stretchr/testify/assert"
+
 	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/utils"
 )
 
@@ -32,7 +33,7 @@ func TestSign(t *testing.T) {
 
 	pubEd25519Key, privEd25519Key, err := ed25519.GenerateKey(rand.Reader)
 	if !assert.NoError(t, err) {
-		t.FailNow()
+		return
 	}
 
 	body := []byte("{\"foo\":\"bar\"}")
@@ -49,7 +50,7 @@ func TestSign(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	VerifyHandler := func(w http.ResponseWriter, r *http.Request) {
+	verifyHandler := func(w http.ResponseWriter, r *http.Request) {
 		keystore := httpsig.NewMemoryKeyStore()
 		keystore.SetKey(pubKeyID, pubEd25519Key)
 
@@ -57,24 +58,16 @@ func TestSign(t *testing.T) {
 		verifier.SetRequiredHeaders([]string{"(request-target)", "date"})
 
 		keyID, err := verifier.Verify(r)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		if keyID != pubKeyID {
-			t.Fatalf("expected key ID %q, got %q", pubKeyID, keyID)
-		}
+		assert.NoError(t, err)
+		assert.Equal(t, pubKeyID, keyID)
 
 		w.WriteHeader(http.StatusOK)
 	}
 
 	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(VerifyHandler)
+	handler := http.HandlerFunc(verifyHandler)
 
 	handler.ServeHTTP(rr, req)
 
-	if status := rr.Code; status != http.StatusOK {
-		t.Errorf("handler returned wrong status code: got %v want %v",
-			status, http.StatusOK)
-	}
+	assert.Equal(t, http.StatusOK, rr.Code)
 }

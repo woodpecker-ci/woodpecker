@@ -20,9 +20,10 @@ import (
 
 	"github.com/franela/goblin"
 	"github.com/stretchr/testify/assert"
+	"google.golang.org/grpc/metadata"
+
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	mocks_store "go.woodpecker-ci.org/woodpecker/v2/server/store/mocks"
-	"google.golang.org/grpc/metadata"
 )
 
 func TestRegisterAgent(t *testing.T) {
@@ -59,7 +60,7 @@ func TestRegisterAgent(t *testing.T) {
 			capacity := int32(2)
 			agentID, err := rpc.RegisterAgent(ctx, "platform", "backend", "version", capacity)
 			if !assert.NoError(t, err) {
-				t.Fail()
+				return
 			}
 
 			assert.EqualValues(t, 1337, agentID)
@@ -99,7 +100,7 @@ func TestRegisterAgent(t *testing.T) {
 			capacity := int32(2)
 			agentID, err := rpc.RegisterAgent(ctx, "platform", "backend", "version", capacity)
 			if !assert.NoError(t, err) {
-				t.Fail()
+				return
 			}
 
 			assert.EqualValues(t, 1337, agentID)

@@ -18,13 +18,13 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
+
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/token"
-
-	"github.com/gin-gonic/gin"
-	"github.com/rs/zerolog/log"
 )
 
 func User(c *gin.Context) *model.User {
@@ -147,14 +147,14 @@ func MustOrgMember(admin bool) gin.HandlerFunc {
 
 		perm, err := server.Config.Services.Membership.Get(c, user, org.Name)
 		if err != nil {
-			log.Error().Msgf("Failed to check membership: %v", err)
+			log.Error().Err(err).Msg("failed to check membership")
 			c.String(http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			c.Abort()
 			return
 		}
 
 		if perm == nil || (!admin && !perm.Member) || (admin && !perm.Admin) {
-			c.String(http.StatusForbidden, "User not authorized")
+			c.String(http.StatusForbidden, "user not authorized")
 			c.Abort()
 			return
 		}
