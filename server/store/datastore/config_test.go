@@ -62,13 +62,9 @@ func TestConfig(t *testing.T) {
 		},
 	))
 
-	config, err := store.configFindIdentical(store.engine.NewSession(), repo.ID, hash, name)
+	foundConfig, err := store.configFindIdentical(store.engine.NewSession(), repo.ID, hash, name)
 	assert.NoError(t, err)
-	assert.EqualValues(t, 1, config.ID)
-	assert.Equal(t, repo.ID, config.RepoID)
-	assert.Equal(t, data, string(config.Data))
-	assert.Equal(t, hash, config.Hash)
-	assert.Equal(t, name, config.Name)
+	assert.EqualValues(t, config, foundConfig)
 
 	loaded, err := store.ConfigsForPipeline(pipeline.ID)
 	assert.NoError(t, err)
