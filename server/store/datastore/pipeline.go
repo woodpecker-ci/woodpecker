@@ -157,6 +157,28 @@ func (s storage) deletePipeline(sess *xorm.Session, pipelineID int64) error {
 			}
 		}
 	}
+
+	if _, err := sess.Where("workflow_pipeline_id = ?", pipelineID).Delete(new(model.Workflow)); err != nil {
+		return err
+	}
+
+	var confIDs []int64
+	if err := sess.Table(new(model.PipelineConfig)).Select("config_id").Where("pipeline_id = ?", pipelineID).Find(&confIDs); err != nil {
+		return err
+	}
+	for _, confID := range confIDs {
+		exist, err := sess.Where(builder.Eq{"config_id": confID}.And(builder.Neq{"pipeline_id": pipelineID})).Exist(new(model.PipelineConfig))
+		if err != nil {
+			return err
+		}
+		if !exist {
+			// this config is only used for this pipeline. so delete it
+			if _, err := sess.Where(builder.Eq{"config_id": confID}).Delete(new(model.Config)); err != nil {
+				return err
+			}
+		}
+	}
+
 	if _, err := sess.Where("pipeline_id = ?", pipelineID).Delete(new(model.PipelineConfig)); err != nil {
 		return err
 	}
