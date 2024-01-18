@@ -217,4 +217,16 @@ func TestConfigPersist(t *testing.T) {
 	count, err = store.engine.Count(new(model.Config))
 	assert.NoError(t, err)
 	assert.EqualValues(t, 2, count)
+
+	// test for https://github.com/woodpecker-ci/woodpecker/issues/3093
+	_, err = store.ConfigPersist(&model.Config{
+		RepoID: 2,
+		Data:   data,
+		Hash:   hash,
+		Name:   "some other",
+	})
+	assert.NoError(t, err)
+	count, err = store.engine.Count(new(model.Config))
+	assert.NoError(t, err)
+	assert.EqualValues(t, 3, count)
 }
