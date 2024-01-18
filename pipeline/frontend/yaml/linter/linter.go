@@ -215,7 +215,7 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 		return err
 	}
 
-	if parsed.PipelineDontUseIt.ContainerList != nil {
+	if parsed.PipelineDoNotUseIt.ContainerList != nil {
 		err = multierr.Append(err, &errors.PipelineError{
 			Type:    errors.PipelineErrorTypeDeprecation,
 			Message: "Please use 'steps:' instead of deprecated 'pipeline:' list",
@@ -228,7 +228,7 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 		})
 	}
 
-	if parsed.PlatformDontUseIt != "" {
+	if parsed.PlatformDoNotUseIt != "" {
 		err = multierr.Append(err, &errors.PipelineError{
 			Type:    errors.PipelineErrorTypeDeprecation,
 			Message: "Please use labels instead of deprecated 'platform' filters",
@@ -241,7 +241,7 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 		})
 	}
 
-	if parsed.BranchesDontUseIt != nil {
+	if parsed.BranchesDoNotUseIt != nil {
 		err = multierr.Append(err, &errors.PipelineError{
 			Type:    errors.PipelineErrorTypeDeprecation,
 			Message: "Please use global when instead of deprecated 'branches' filter",

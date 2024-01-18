@@ -395,7 +395,7 @@
           "placeholder": "Reģistra adrese, piemēram, docker.io"
         },
         "created": "Reģistra autorizācijas dati pievienoti",
-        "creds": "Reģistru autorizācijas dati",
+        "credentials": "Reģistru autorizācijas dati",
         "delete": "Dzēst reģistra autorizācijas datus",
         "deleted": "Reģistra autorizācijas dati dzēsti",
         "desc": "Reģistru autorizācijas dati var tikt izmantoti, lai izmantotu attēlos no privātiem reģistriem, konvjerdarbu soļos.",
@@ -445,7 +445,7 @@
     "min_short": "min.",
     "not_started": "nav uzsākts",
     "sec_short": "sek.",
-    "tmpl": "YYYY. [gada] D. MMMM, HH:mm z",
+    "template": "YYYY. [gada] D. MMMM, HH:mm z",
     "weeks_short": "ned."
   },
   "unknown_error": "Notika neparedzēta kļūda",

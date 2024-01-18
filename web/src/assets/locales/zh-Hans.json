@@ -395,7 +395,7 @@
           "placeholder": "Registry 地址（如 docker.io）"
         },
         "created": "Registry 密码已创建",
-        "creds": "注册表凭据",
+        "credentials": "注册表凭据",
         "delete": "删除 registry",
         "deleted": "Registry 密码已删除",
         "desc": "可以添加 Registry 密码，以在流水线中使用私有镜像。",
@@ -445,7 +445,7 @@
     "min_short": "分钟",
     "not_started": "还没有运行过",
     "sec_short": "秒",
-    "tmpl": "YYYY 年 MM 月 D 日 HH:mm z",
+    "template": "YYYY 年 MM 月 D 日 HH:mm z",
     "weeks_short": "周"
   },
   "unknown_error": "发生了未知错误",

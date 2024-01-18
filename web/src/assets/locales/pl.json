@@ -362,7 +362,7 @@
           "placeholder": "Adres rejestru (np. docker.io)"
         },
         "created": "Utworzono dane rejestru",
-        "creds": "Dane rejestrów",
+        "credentials": "Dane rejestrów",
         "delete": "Usuń rejestr",
         "deleted": "Usunięto dane rejestru",
         "desc": "Możesz dodać dane rejestrów aby używać prywatnych obrazów w twoim potoku.",
@@ -411,7 +411,7 @@
     "min_short": "min",
     "not_started": "jeszcze nie rozpoczęto",
     "sec_short": "sek",
-    "tmpl": "DD.MM.YYYY, HH:mm z",
+    "template": "DD.MM.YYYY, HH:mm z",
     "weeks_short": "tyg"
   },
   "unknown_error": "Wystąpił nieznany błąd",
