@@ -18,12 +18,12 @@ package rpc
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"strings"
 	"time"
 
-	"github.com/rs/zerolog/log"
-
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/shared"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/logger/errorattr"
 )
 
 // Identifies the type of line in the logs.
@@ -79,7 +79,7 @@ func (w *LineWriter) Write(p []byte) (n int, err error) {
 	if w.rep != nil {
 		data = w.rep.Replace(data)
 	}
-	log.Trace().Str("step-uuid", w.stepUUID).Msgf("grpc write line: %s", data)
+	slog.Debug("gRPC write line", "step-uuid", w.stepUUID)
 
 	line := &LogEntry{
 		Data:     data,
@@ -89,7 +89,7 @@ func (w *LineWriter) Write(p []byte) (n int, err error) {
 		Line:     w.num,
 	}
 	if err := w.peer.Log(context.Background(), line); err != nil {
-		log.Error().Err(err).Str("step-uuid", w.stepUUID).Msg("fail to write pipeline log to peer")
+		slog.Error("fail to write pipeline log to peer", errorattr.Default(err), slog.String("step-uuid", w.stepUUID))
 	}
 	w.num++
 
@@ -97,7 +97,7 @@ func (w *LineWriter) Write(p []byte) (n int, err error) {
 	return len(p), nil
 }
 
-// Lines returns the line history
+// Lines return the line history
 func (w *LineWriter) Lines() []*LogEntry {
 	return w.lines
 }

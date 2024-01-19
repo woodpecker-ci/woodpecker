@@ -18,15 +18,16 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strconv"
 	"strings"
 
-	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
 	"golang.org/x/net/proxy"
 	"golang.org/x/oauth2"
 
+	"go.woodpecker-ci.org/woodpecker/v2/shared/logger/errorattr"
 	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
@@ -41,7 +42,7 @@ func NewClient(c *cli.Context) (woodpecker.Client, error) {
 	)
 	server = strings.TrimRight(server, "/")
 
-	// if no server url is provided we can default
+	// if no server url is provided, we can default
 	// to the hosted Woodpecker service.
 	if len(server) == 0 {
 		return nil, fmt.Errorf("you must provide the Woodpecker server address")
@@ -53,7 +54,7 @@ func NewClient(c *cli.Context) (woodpecker.Client, error) {
 	// attempt to find system CA certs
 	certs, err := x509.SystemCertPool()
 	if err != nil {
-		log.Error().Err(err).Msg("failed to find system CA certs")
+		slog.Error("failed to find system CA certs", errorattr.Default(err))
 	}
 	tlsConfig := &tls.Config{
 		RootCAs:            certs,

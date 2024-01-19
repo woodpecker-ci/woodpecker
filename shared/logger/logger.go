@@ -17,11 +17,10 @@ package logger
 import (
 	"fmt"
 	"io"
+	"log/slog"
 	"os"
 
 	"github.com/6543/logfile-open"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
 )
 
@@ -55,7 +54,7 @@ var GlobalLoggerFlags = []cli.Flag{
 func SetupGlobalLogger(c *cli.Context, outputLvl bool) error {
 	logLevel := c.String("log-level")
 	pretty := c.Bool("pretty")
-	noColor := c.Bool("nocolor")
+	//noColor := c.Bool("nocolor")
 	logFile := c.String("log-file")
 
 	var file io.ReadWriteCloser
@@ -70,35 +69,36 @@ func SetupGlobalLogger(c *cli.Context, outputLvl bool) error {
 			return fmt.Errorf("could not open log file '%s': %w", logFile, err)
 		}
 		file = openFile
-		noColor = true
+		//noColor = true
 	}
 
-	log.Logger = zerolog.New(file).With().Timestamp().Logger()
+	level, err := parseLevel(logLevel)
+	if err != nil {
+		return err
+	}
+
+	addSource := level <= slog.LevelDebug
+
+	var handler slog.Handler = slog.NewJSONHandler(file, &slog.HandlerOptions{
+		AddSource:   addSource,
+		Level:       level,
+		ReplaceAttr: nil,
+	})
 
 	if pretty {
-		log.Logger = log.Output(
-			zerolog.ConsoleWriter{
-				Out:     file,
-				NoColor: noColor,
-			},
-		)
+		handler = slog.NewTextHandler(file, &slog.HandlerOptions{
+			AddSource:   addSource,
+			Level:       level,
+			ReplaceAttr: nil,
+		})
 	}
+
+	slog.SetDefault(slog.New(handler))
 
 	// TODO: format output & options to switch to json aka. option to add channels to send logs to
 
-	lvl, err := zerolog.ParseLevel(logLevel)
-	if err != nil {
-		return fmt.Errorf("unknown logging level: %s", logLevel)
-	}
-	zerolog.SetGlobalLevel(lvl)
-
-	// if debug or trace also log the caller
-	if zerolog.GlobalLevel() <= zerolog.DebugLevel {
-		log.Logger = log.With().Caller().Logger()
-	}
-
 	if outputLvl {
-		log.Info().Msgf("log level: %s", zerolog.GlobalLevel().String())
+		slog.Info(fmt.Sprintf("log level: %s", level.String()))
 	}
 
 	return nil

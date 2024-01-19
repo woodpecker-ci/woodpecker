@@ -19,16 +19,17 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"sync"
 	"time"
 
-	"github.com/rs/zerolog/log"
 	"github.com/tevino/abool/v2"
 	"google.golang.org/grpc/metadata"
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline"
 	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/logger/errorattr"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
@@ -51,7 +52,7 @@ func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, state *State, backen
 }
 
 func (r *Runner) Run(runnerCtx context.Context) error {
-	log.Debug().Msg("request next execution")
+	slog.Debug("request next execution")
 
 	meta, _ := metadata.FromOutgoingContext(runnerCtx)
 	ctxmeta := metadata.NewOutgoingContext(context.Background(), meta)
@@ -81,13 +82,12 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 	)
 	defer r.counter.Done(work.ID)
 
-	logger := log.With().
-		Str("repo", repoName).
-		Str("pipeline", pipelineNumber).
-		Str("id", work.ID).
-		Logger()
+	logger := slog.With(
+		slog.String("repo", repoName),
+		slog.String("pipeline", pipelineNumber),
+		slog.String("id", work.ID))
 
-	logger.Debug().Msg("received execution")
+	logger.Debug("received execution")
 
 	workflowCtx, cancel := context.WithTimeout(ctxmeta, timeout)
 	defer cancel()
@@ -96,20 +96,20 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 	// Required when the pipeline is terminated by external signals
 	// like kubernetes.
 	workflowCtx = utils.WithContextSigtermCallback(workflowCtx, func() {
-		logger.Error().Msg("Received sigterm termination signal")
+		logger.Error("Received sigterm termination signal")
 	})
 
 	canceled := abool.New()
 	go func() {
-		logger.Debug().Msg("listen for cancel signal")
+		logger.Debug("listen for cancel signal")
 
 		if werr := r.client.Wait(workflowCtx, work.ID); werr != nil {
 			canceled.SetTo(true)
-			logger.Warn().Err(werr).Msg("cancel signal received")
+			slog.Warn("cancel signal received", errorattr.Default(werr))
 
 			cancel()
 		} else {
-			logger.Debug().Msg("stop listening for cancel signal")
+			slog.Debug("stop listening for cancel signal")
 		}
 	}()
 
@@ -117,14 +117,14 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 		for {
 			select {
 			case <-workflowCtx.Done():
-				logger.Debug().Msg("pipeline done")
+				logger.Debug("pipeline done")
 
 				return
 			case <-time.After(time.Minute):
-				logger.Debug().Msg("pipeline lease renewed")
+				logger.Debug("pipeline lease renewed")
 
 				if err := r.client.Extend(workflowCtx, work.ID); err != nil {
-					log.Error().Err(err).Msg("extending pipeline deadline failed")
+					slog.Error("extending pipeline deadline failed", errorattr.Default(err))
 				}
 			}
 		}
@@ -135,7 +135,7 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 
 	err = r.client.Init(runnerCtx, work.ID, state)
 	if err != nil {
-		logger.Error().Err(err).Msg("pipeline initialization failed")
+		slog.Error("pipeline initialization failed", errorattr.Default(err))
 	}
 
 	var uploads sync.WaitGroup
@@ -174,25 +174,18 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 		}
 	}
 
-	logger.Debug().
-		Str("error", state.Error).
-		Int("exit_code", state.ExitCode).
-		Bool("canceled", canceled.IsSet()).
-		Msg("pipeline complete")
+	slog.Debug("pipeline complete", slog.String("error", state.Error), slog.Int("exit_code", state.ExitCode), slog.Bool("canceled", canceled.IsSet()))
 
-	logger.Debug().Msg("uploading logs")
+	slog.Debug("uploading logs")
 	uploads.Wait()
-	logger.Debug().Msg("uploading logs complete")
+	slog.Debug("uploading logs complete")
 
-	logger.Debug().
-		Str("error", state.Error).
-		Int("exit_code", state.ExitCode).
-		Msg("updating pipeline status")
+	slog.Debug("updating pipeline status", slog.String("error", state.Error), slog.Int("exit_code", state.ExitCode))
 
 	if err := r.client.Done(runnerCtx, work.ID, state); err != nil {
-		logger.Error().Err(err).Msg("updating pipeline status failed")
+		slog.Error("updating pipeline status failed", errorattr.Default(err))
 	} else {
-		logger.Debug().Msg("updating pipeline status complete")
+		slog.Debug("updating pipeline status complete")
 	}
 
 	return nil

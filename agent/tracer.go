@@ -16,25 +16,24 @@ package agent
 
 import (
 	"context"
+	"log/slog"
 	"runtime"
 	"strconv"
 	"time"
 
-	"github.com/rs/zerolog"
-
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/logger/errorattr"
 )
 
-func (r *Runner) createTracer(ctxmeta context.Context, logger zerolog.Logger, workflow *rpc.Workflow) pipeline.TraceFunc {
+func (r *Runner) createTracer(ctxmeta context.Context, logger *slog.Logger, workflow *rpc.Workflow) pipeline.TraceFunc {
 	return func(state *pipeline.State) error {
-		steplogger := logger.With().
-			Str("image", state.Pipeline.Step.Image).
-			Str("workflowID", workflow.ID).
-			Err(state.Process.Error).
-			Int("exit_code", state.Process.ExitCode).
-			Bool("exited", state.Process.Exited).
-			Logger()
+		steplogger := logger.With(
+			slog.String("image", state.Pipeline.Step.Image),
+			slog.String("workflowID", workflow.ID),
+			errorattr.Default(state.Process.Error),
+			slog.Int("exit_code", state.Process.ExitCode),
+			slog.Bool("exited", state.Process.Exited))
 
 		stepState := rpc.State{
 			StepUUID: state.Pipeline.Step.UUID,
@@ -48,15 +47,13 @@ func (r *Runner) createTracer(ctxmeta context.Context, logger zerolog.Logger, wo
 		}
 
 		defer func() {
-			steplogger.Debug().Msg("update step status")
+			steplogger.Debug("update step status")
 
 			if uerr := r.client.Update(ctxmeta, workflow.ID, stepState); uerr != nil {
-				steplogger.Debug().
-					Err(uerr).
-					Msg("update step status error")
+				steplogger.Debug("update step status error", errorattr.Default(uerr))
 			}
 
-			steplogger.Debug().Msg("update step status complete")
+			steplogger.Debug("update step status complete")
 		}()
 		if state.Process.Exited {
 			return nil

@@ -16,9 +16,9 @@ package rpc
 
 import (
 	"context"
+	"log/slog"
 	"time"
 
-	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 )
@@ -107,7 +107,7 @@ func (interceptor *AuthInterceptor) refreshToken() error {
 	}
 
 	interceptor.accessToken = accessToken
-	log.Trace().Msg("token refreshed")
+	slog.Debug("token refreshed")
 
 	return nil
 }

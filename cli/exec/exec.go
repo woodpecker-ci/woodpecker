@@ -18,6 +18,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log/slog"
 	"os"
 	"path"
 	"path/filepath"
@@ -25,7 +26,6 @@ import (
 	"strings"
 
 	"github.com/drone/envsubst"
-	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
@@ -127,7 +127,7 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 		pipelineEnv[envs[0]] = envs[1]
 		if oldVar, exists := environ[envs[0]]; exists {
 			// override existing values, but print a warning
-			log.Warn().Msgf("environment variable '%s' had value '%s', but got overwritten", envs[0], oldVar)
+			slog.Warn("environment variable got overwritten", slog.String("env var", envs[0]), slog.String("old value", oldVar))
 		}
 		environ[envs[0]] = envs[1]
 	}

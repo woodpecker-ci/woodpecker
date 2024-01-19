@@ -16,22 +16,18 @@ package agent
 
 import (
 	"io"
+	"log/slog"
 	"sync"
-
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline"
 	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/logger/errorattr"
 )
 
-func (r *Runner) createLogger(logger zerolog.Logger, uploads *sync.WaitGroup, workflow *rpc.Workflow) pipeline.Logger {
+func (r *Runner) createLogger(logger *slog.Logger, uploads *sync.WaitGroup, workflow *rpc.Workflow) pipeline.Logger {
 	return func(step *backend.Step, rc io.Reader) error {
-		loglogger := logger.With().
-			Str("image", step.Image).
-			Str("workflowID", workflow.ID).
-			Logger()
+		loglogger := logger.With(slog.String("image", step.Image), slog.String("workflowID", workflow.ID))
 
 		uploads.Add(1)
 
@@ -42,14 +38,14 @@ func (r *Runner) createLogger(logger zerolog.Logger, uploads *sync.WaitGroup, wo
 			}
 		}
 
-		loglogger.Debug().Msg("log stream opened")
+		loglogger.Debug("log stream opened")
 
 		logStream := rpc.NewLineWriter(r.client, step.UUID, secrets...)
 		if _, err := io.Copy(logStream, rc); err != nil {
-			log.Error().Err(err).Msg("copy limited logStream part")
+			slog.Error("copy limited logStream part", errorattr.Default(err))
 		}
 
-		loglogger.Debug().Msg("log stream copied, close ...")
+		loglogger.Debug("log stream copied, close ...")
 		uploads.Done()
 
 		return nil
