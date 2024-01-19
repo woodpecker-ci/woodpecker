@@ -35,6 +35,7 @@ type (
 	Container struct {
 		BackendOptions BackendOptions     `yaml:"backend_options,omitempty"`
 		Commands       base.StringOrSlice `yaml:"commands,omitempty"`
+		Entrypoint     base.StringOrSlice `yaml:"entrypoint,omitempty"`
 		Detached       bool               `yaml:"detach,omitempty"`
 		Directory      string             `yaml:"directory,omitempty"`
 		Environment    base.SliceOrMap    `yaml:"environment,omitempty"`
@@ -50,7 +51,7 @@ type (
 		Ports          []string           `yaml:"ports,omitempty"`
 		DependsOn      base.StringOrSlice `yaml:"depends_on,omitempty"`
 
-		// Docker Specific
+		// Docker and Kubernetes Specific
 		Privileged bool `yaml:"privileged,omitempty"`
 
 		// Undocumented
@@ -119,7 +120,7 @@ func (c *ContainerList) UnmarshalYAML(value *yaml.Node) error {
 }
 
 func (c *Container) IsPlugin() bool {
-	return len(c.Commands) == 0
+	return len(c.Commands) == 0 && len(c.Entrypoint) == 0
 }
 
 func (c *Container) IsTrustedCloneImage() bool {
