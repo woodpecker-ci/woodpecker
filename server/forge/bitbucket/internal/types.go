@@ -254,6 +254,7 @@ type RepoPermResp struct {
 
 type RepoPerm struct {
 	Permission string `json:"permission"`
+	Repo       Repo   `json:"repository"`
 }
 
 type BranchResp struct {

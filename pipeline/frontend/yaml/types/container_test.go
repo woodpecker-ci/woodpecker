@@ -39,6 +39,7 @@ devices:
 directory: example/
 dns: 8.8.8.8
 dns_search: example.com
+entrypoint: [/bin/sh, -c]
 environment:
   - RACK_ENV=development
   - SHOW=true
@@ -86,6 +87,7 @@ func TestUnmarshalContainer(t *testing.T) {
 		Directory:    "example/",
 		DNS:          base.StringOrSlice{"8.8.8.8"},
 		DNSSearch:    base.StringOrSlice{"example.com"},
+		Entrypoint:   []string{"/bin/sh", "-c"},
 		Environment:  base.SliceOrMap{"RACK_ENV": "development", "SHOW": "true"},
 		ExtraHosts:   []string{"somehost:162.242.195.82", "otherhost:50.31.209.229", "ipv6:2001:db8::10"},
 		Image:        "golang:latest",
@@ -307,5 +309,11 @@ func TestIsPlugin(t *testing.T) {
 	}).IsPlugin())
 	assert.False(t, (&Container{
 		Commands: base.StringOrSlice(strslice.StrSlice{"echo 'this is not a plugin'"}),
+	}).IsPlugin())
+	assert.True(t, (&Container{
+		Entrypoint: base.StringOrSlice(strslice.StrSlice{}),
+	}).IsPlugin())
+	assert.False(t, (&Container{
+		Entrypoint: base.StringOrSlice(strslice.StrSlice{"echo 'this is not a plugin'"}),
 	}).IsPlugin())
 }
