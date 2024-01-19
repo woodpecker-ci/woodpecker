@@ -1,35 +1,14 @@
 # Changelog
 
-## [2.2.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.2.0) - 2024-01-18
+## [2.2.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.2.0) - 2024-01-19
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @micash545, @renovate[bot], @zc-devs, @qwerty287, @xoxys, @pat-s, @miry, @lukashass, @lafriks, @pre-commit-ci[bot], @anbraten, @andyhan, @KamilaBorowska
-
-### 🐛 Bug Fixes
-
-- Make PipelineConfig unique again [[#3215](https://github.com/woodpecker-ci/woodpecker/pull/3215)]
-- Fix feed sorting [[#3155](https://github.com/woodpecker-ci/woodpecker/pull/3155)]
-- Step status update dont set to running again once it got stoped [[#3151](https://github.com/woodpecker-ci/woodpecker/pull/3151)]
-- Use step uuid instead of name in GRPC status calls [[#3143](https://github.com/woodpecker-ci/woodpecker/pull/3143)]
-- Use UUID instead of step name where possible [[#3136](https://github.com/woodpecker-ci/woodpecker/pull/3136)]
-- Use step type to detect services in Kubernetes backend [[#3141](https://github.com/woodpecker-ci/woodpecker/pull/3141)]
-- Make config linking non-unique [[#3128](https://github.com/woodpecker-ci/woodpecker/pull/3128)]
-- Fix config base64 parsing to utf-8 [[#3110](https://github.com/woodpecker-ci/woodpecker/pull/3110)]
-- Pin Gitea version [[#3104](https://github.com/woodpecker-ci/woodpecker/pull/3104)]
-- Fix step `depends_on` as string in schema [[#3099](https://github.com/woodpecker-ci/woodpecker/pull/3099)]
-- Fix slice unmarshaling [[#3097](https://github.com/woodpecker-ci/woodpecker/pull/3097)]
-- Allow PR secrets to be used on close [[#3084](https://github.com/woodpecker-ci/woodpecker/pull/3084)]
-- make event in pipeline schema also a constraint_list [[#3082](https://github.com/woodpecker-ci/woodpecker/pull/3082)]
-- Fix badge's repoUrl with rootpath [[#3076](https://github.com/woodpecker-ci/woodpecker/pull/3076)]
-- Load changed files for closed PR [[#3067](https://github.com/woodpecker-ci/woodpecker/pull/3067)]
-- Fix build output paths [[#3065](https://github.com/woodpecker-ci/woodpecker/pull/3065)]
-- Fix `when` and `depends_on` [[#3063](https://github.com/woodpecker-ci/woodpecker/pull/3063)]
-- Fix DAG cycle detection [[#3049](https://github.com/woodpecker-ci/woodpecker/pull/3049)]
-- Fix duplicated icons [[#3045](https://github.com/woodpecker-ci/woodpecker/pull/3045)]
+@renovate[bot], @healdropper, @6543, @micash545, @zc-devs, @qwerty287, @xoxys, @pat-s, @miry, @lukashass, @lafriks, @pre-commit-ci[bot], @anbraten, @andyhan, @KamilaBorowska
 
 ### 📈 Enhancement
 
+- Retrieve all user repo perms with a single API call [[#3211](https://github.com/woodpecker-ci/woodpecker/pull/3211)]
 - Secured kubernetes backend configuration [[#3204](https://github.com/woodpecker-ci/woodpecker/pull/3204)]
 - Use `assert` for tests [[#3201](https://github.com/woodpecker-ci/woodpecker/pull/3201)]
 - Replace `goimports` with `gci` [[#3202](https://github.com/woodpecker-ci/woodpecker/pull/3202)]
@@ -69,6 +48,27 @@
 - Remove workflow version again [[#3052](https://github.com/woodpecker-ci/woodpecker/pull/3052)]
 - Add option to disable version check in admin web UI [[#3040](https://github.com/woodpecker-ci/woodpecker/pull/3040)]
 
+### 🐛 Bug Fixes
+
+- Make PipelineConfig unique again [[#3215](https://github.com/woodpecker-ci/woodpecker/pull/3215)]
+- Fix feed sorting [[#3155](https://github.com/woodpecker-ci/woodpecker/pull/3155)]
+- Step status update dont set to running again once it got stoped [[#3151](https://github.com/woodpecker-ci/woodpecker/pull/3151)]
+- Use step uuid instead of name in GRPC status calls [[#3143](https://github.com/woodpecker-ci/woodpecker/pull/3143)]
+- Use UUID instead of step name where possible [[#3136](https://github.com/woodpecker-ci/woodpecker/pull/3136)]
+- Use step type to detect services in Kubernetes backend [[#3141](https://github.com/woodpecker-ci/woodpecker/pull/3141)]
+- Fix config base64 parsing to utf-8 [[#3110](https://github.com/woodpecker-ci/woodpecker/pull/3110)]
+- Pin Gitea version [[#3104](https://github.com/woodpecker-ci/woodpecker/pull/3104)]
+- Fix step `depends_on` as string in schema [[#3099](https://github.com/woodpecker-ci/woodpecker/pull/3099)]
+- Fix slice unmarshaling [[#3097](https://github.com/woodpecker-ci/woodpecker/pull/3097)]
+- Allow PR secrets to be used on close [[#3084](https://github.com/woodpecker-ci/woodpecker/pull/3084)]
+- make event in pipeline schema also a constraint_list [[#3082](https://github.com/woodpecker-ci/woodpecker/pull/3082)]
+- Fix badge's repoUrl with rootpath [[#3076](https://github.com/woodpecker-ci/woodpecker/pull/3076)]
+- Load changed files for closed PR [[#3067](https://github.com/woodpecker-ci/woodpecker/pull/3067)]
+- Fix build output paths [[#3065](https://github.com/woodpecker-ci/woodpecker/pull/3065)]
+- Fix `when` and `depends_on` [[#3063](https://github.com/woodpecker-ci/woodpecker/pull/3063)]
+- Fix DAG cycle detection [[#3049](https://github.com/woodpecker-ci/woodpecker/pull/3049)]
+- Fix duplicated icons [[#3045](https://github.com/woodpecker-ci/woodpecker/pull/3045)]
+
 ### 📚 Documentation
 
 - Delete `FUNDING.yaml` [[#3193](https://github.com/woodpecker-ci/woodpecker/pull/3193)]
@@ -90,6 +90,7 @@
 
 ### Misc
 
+- fix(deps): update golang (packages) [[#3218](https://github.com/woodpecker-ci/woodpecker/pull/3218)]
 - Docs: Fix expression syntax docs url [[#3208](https://github.com/woodpecker-ci/woodpecker/pull/3208)]
 - Add schema test for depends_on [[#3205](https://github.com/woodpecker-ci/woodpecker/pull/3205)]
 - chore(deps): lock file maintenance [[#3190](https://github.com/woodpecker-ci/woodpecker/pull/3190)]
