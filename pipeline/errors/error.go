@@ -14,6 +14,7 @@ const (
 	PipelineErrorTypeDeprecation PipelineErrorType = "deprecation" // using some deprecated feature
 	PipelineErrorTypeCompiler    PipelineErrorType = "compiler"    // some error with the config semantics
 	PipelineErrorTypeGeneric     PipelineErrorType = "generic"     // some generic error
+	PipelineErrorTypeBadHabit    PipelineErrorType = "bad_habit"   // some generic error
 )
 
 type PipelineError struct {
