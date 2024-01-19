@@ -42,7 +42,7 @@ type (
 		Instance    List
 		Platform    List
 		Environment List
-		// TODO change to []string in 3.x
+		// TODO change to StringOrSlice in 3.x
 		Event    List
 		Branch   List
 		Cron     List

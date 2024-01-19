@@ -305,7 +305,7 @@ func (l *Linter) lintBadHabits(config *WorkflowConfig) (err error) {
 		return err
 	}
 
-	rootEventFilters := true
+	rootEventFilters := len(parsed.When.Constraints) > 0
 	for _, c := range parsed.When.Constraints {
 		if len(c.Event.Include) == 0 {
 			rootEventFilters = false
@@ -315,20 +315,28 @@ func (l *Linter) lintBadHabits(config *WorkflowConfig) (err error) {
 	if !rootEventFilters {
 		// root whens do not necessarily have an event filter, check steps
 		for _, step := range parsed.Steps.ContainerList {
-			stepEventIndex := -1
-			for i, c := range step.When.Constraints {
-				if len(c.Event.Include) == 0 {
-					stepEventIndex = i
-					break
+			var field string
+			if len(step.When.Constraints) == 0 {
+				field = fmt.Sprintf("steps.%s", step.Name)
+			} else {
+				stepEventIndex := -1
+				for i, c := range step.When.Constraints {
+					if len(c.Event.Include) == 0 {
+						stepEventIndex = i
+						break
+					}
+				}
+				if stepEventIndex > -1 {
+					field = fmt.Sprintf("steps.%s.when[%d]", step.Name, stepEventIndex)
 				}
 			}
-			if stepEventIndex > -1 {
+			if field != "" {
 				err = multierr.Append(err, &errors.PipelineError{
 					Type:    errors.PipelineErrorTypeBadHabit,
 					Message: "Please set an event filter",
 					Data: errors.LinterErrorData{
 						File:  config.File,
-						Field: fmt.Sprintf("steps.%s.when[%d]", step.Name, stepEventIndex),
+						Field: field,
 					},
 					IsWarning: true,
 				})
