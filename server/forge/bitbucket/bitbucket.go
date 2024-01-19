@@ -203,6 +203,16 @@ func (c *config) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 		return nil, err
 	}
 
+	userPermisions, err := client.ListPermissionsAll()
+	if err != nil {
+		return nil, err
+	}
+
+	userPermissionsByRepo := make(map[string]*internal.RepoPerm)
+	for _, permission := range userPermisions {
+		userPermissionsByRepo[permission.Repo.FullName] = permission
+	}
+
 	var all []*model.Repo
 	for _, workspace := range workspaces {
 		repos, err := client.ListReposAll(workspace.Slug)
@@ -210,12 +220,9 @@ func (c *config) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 			return nil, err
 		}
 		for _, repo := range repos {
-			perm, err := client.GetPermission(repo.FullName)
-			if err != nil {
-				return nil, err
+			if perm, ok := userPermissionsByRepo[repo.FullName]; ok {
+				all = append(all, convertRepo(repo, perm))
 			}
-
-			all = append(all, convertRepo(repo, perm))
 		}
 	}
 	return all, nil

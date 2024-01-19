@@ -117,12 +117,14 @@ func podSpec(step *types.Step, config *config) (v1.PodSpec, error) {
 }
 
 func podContainerCommands(step *types.Step, goos string) (entry, cmd []string) {
-	entry = common.DefaultPosixEntry
-	if goos == "windows" {
+	switch {
+	case len(step.Entrypoint) > 0:
+		entry = step.Entrypoint
+	case goos == "windows":
 		entry = common.DefaultWindowsEntry
+	default:
+		entry = common.DefaultPosixEntry
 	}
-
-	// TODO: https://github.com/woodpecker-ci/woodpecker/pull/2985
 
 	if step.Type == types.StepTypeClone {
 		cmd = common.GenerateNetRCCommand(entry)

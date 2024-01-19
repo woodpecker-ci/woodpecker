@@ -298,6 +298,7 @@ func TestFullPod(t *testing.T) {
 		Pull:        true,
 		Privileged:  true,
 		Commands:    []string{"go get", "go test"},
+		Entrypoint:  []string{"/bin/sh", "-c"},
 		Volumes:     []string{"woodpecker-cache:/woodpecker/src/cache"},
 		Environment: map[string]string{"CGO": "0"},
 		ExtraHosts:  hostAliases,

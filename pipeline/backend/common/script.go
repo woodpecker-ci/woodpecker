@@ -20,20 +20,20 @@ import (
 	"slices"
 )
 
-func GenerateContainerConf(commands []string, goos string) (env map[string]string, entry, cmd []string) {
+func GenerateContainerConf(commands []string, goos string) (env map[string]string, entry []string, cmd string) {
 	env = make(map[string]string)
 	if goos == "windows" {
 		env["CI_SCRIPT"] = base64.StdEncoding.EncodeToString([]byte(generateScriptWindows(commands)))
 		env["HOME"] = "c:\\root"
 		env["SHELL"] = DefaultWindowsShell
 		entry = DefaultWindowsEntry
-		cmd = []string{"[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($Env:CI_SCRIPT)) | iex"}
+		cmd = "[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($Env:CI_SCRIPT)) | iex"
 	} else {
 		env["CI_SCRIPT"] = base64.StdEncoding.EncodeToString([]byte(generateScriptPosix(commands)))
 		env["HOME"] = "/root"
 		env["SHELL"] = DefaultPosixShell
 		entry = DefaultPosixEntry
-		cmd = []string{"echo $CI_SCRIPT | base64 -d | /bin/sh -e"}
+		cmd = "echo $CI_SCRIPT | base64 -d | /bin/sh -e"
 	}
 
 	return env, entry, cmd

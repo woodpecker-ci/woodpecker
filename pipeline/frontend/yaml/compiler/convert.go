@@ -185,6 +185,7 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		WorkingDir:     workingdir,
 		Environment:    environment,
 		Commands:       container.Commands,
+		Entrypoint:     container.Entrypoint,
 		ExtraHosts:     extraHosts,
 		Volumes:        volumes,
 		Tmpfs:          container.Tmpfs,
