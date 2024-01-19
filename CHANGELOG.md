@@ -4,7 +4,11 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@renovate[bot], @healdropper, @6543, @micash545, @zc-devs, @qwerty287, @xoxys, @pat-s, @miry, @lukashass, @lafriks, @pre-commit-ci[bot], @anbraten, @andyhan, @KamilaBorowska
+@qwerty287, @renovate[bot], @healdropper, @6543, @micash545, @zc-devs, @xoxys, @pat-s, @miry, @lukashass, @lafriks, @pre-commit-ci[bot], @anbraten, @andyhan, @KamilaBorowska
+
+### ✨ Features
+
+- Support custom steps entrypoint [[#2985](https://github.com/woodpecker-ci/woodpecker/pull/2985)]
 
 ### 📈 Enhancement
 
