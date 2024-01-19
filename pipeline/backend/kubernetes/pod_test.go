@@ -83,7 +83,8 @@ func TestTinyPod(t *testing.T) {
 						"-c"
 					],
 					"args": [
-						"echo $CI_SCRIPT | base64 -d | /bin/sh -e"
+						"echo + 'gradle build'",
+						"gradle build"
 					],
 					"workingDir": "/woodpecker/src",
 					"env": [
@@ -93,16 +94,8 @@ func TestTinyPod(t *testing.T) {
 							"value": "woodpecker"
 						},
 						{
-							"name": "HOME",
-							"value": "/root"
-						},
-						{
 							"name": "SHELL",
 							"value": "/bin/sh"
-						},
-						{
-							"name": "CI_SCRIPT",
-							"value": "CmlmIFsgLW4gIiRDSV9ORVRSQ19NQUNISU5FIiBdOyB0aGVuCmNhdCA8PEVPRiA+ICRIT01FLy5uZXRyYwptYWNoaW5lICRDSV9ORVRSQ19NQUNISU5FCmxvZ2luICRDSV9ORVRSQ19VU0VSTkFNRQpwYXNzd29yZCAkQ0lfTkVUUkNfUEFTU1dPUkQKRU9GCmNobW9kIDA2MDAgJEhPTUUvLm5ldHJjCmZpCnVuc2V0IENJX05FVFJDX1VTRVJOQU1FCnVuc2V0IENJX05FVFJDX1BBU1NXT1JECnVuc2V0IENJX1NDUklQVAoKZWNobyArICdncmFkbGUgYnVpbGQnCmdyYWRsZSBidWlsZAo="
 						}
 					],
 					"resources": {},
@@ -174,7 +167,10 @@ func TestFullPod(t *testing.T) {
 						"-c"
 					],
 					"args": [
-						"echo $CI_SCRIPT | base64 -d | /bin/sh -e"
+						"echo + 'go get'",
+						"go get",
+						"echo + 'go test'",
+						"go test"
 					],
 					"workingDir": "/woodpecker/src",
 					"ports": [
@@ -195,14 +191,6 @@ func TestFullPod(t *testing.T) {
 						{
 							"name": "CGO",
 							"value": "0"
-						},
-						{
-							"name": "CI_SCRIPT",
-							"value": "CmlmIFsgLW4gIiRDSV9ORVRSQ19NQUNISU5FIiBdOyB0aGVuCmNhdCA8PEVPRiA+ICRIT01FLy5uZXRyYwptYWNoaW5lICRDSV9ORVRSQ19NQUNISU5FCmxvZ2luICRDSV9ORVRSQ19VU0VSTkFNRQpwYXNzd29yZCAkQ0lfTkVUUkNfUEFTU1dPUkQKRU9GCmNobW9kIDA2MDAgJEhPTUUvLm5ldHJjCmZpCnVuc2V0IENJX05FVFJDX1VTRVJOQU1FCnVuc2V0IENJX05FVFJDX1BBU1NXT1JECnVuc2V0IENJX1NDUklQVAoKZWNobyArICdnbyBnZXQnCmdvIGdldAoKZWNobyArICdnbyB0ZXN0JwpnbyB0ZXN0Cg=="
-						},
-						{
-							"name": "HOME",
-							"value": "/root"
 						},
 						{
 							"name": "SHELL",
