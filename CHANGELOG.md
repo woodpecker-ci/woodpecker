@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@mzampetakis, @qwerty287, @healdropper, @6543, @micash545, @renovate[bot], @zc-devs, @xoxys, @pat-s, @miry, @lukashass, @lafriks, @pre-commit-ci[bot], @anbraten, @andyhan, @KamilaBorowska
+@renovate[bot], @mzampetakis, @qwerty287, @healdropper, @6543, @micash545, @zc-devs, @xoxys, @pat-s, @miry, @lukashass, @lafriks, @pre-commit-ci[bot], @anbraten, @andyhan, @KamilaBorowska
 
 ### 🔒 Security
 
@@ -100,6 +100,7 @@
 
 ### Misc
 
+- chore(deps): update docker.io/woodpeckerci/plugin-docker-buildx docker tag to v3 [[#3229](https://github.com/woodpecker-ci/woodpecker/pull/3229)]
 - Docs: Fix expression syntax docs url [[#3208](https://github.com/woodpecker-ci/woodpecker/pull/3208)]
 - Add schema test for depends_on [[#3205](https://github.com/woodpecker-ci/woodpecker/pull/3205)]
 - chore(deps): lock file maintenance [[#3190](https://github.com/woodpecker-ci/woodpecker/pull/3190)]
