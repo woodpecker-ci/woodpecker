@@ -209,8 +209,14 @@ func (e *kube) StartStep(ctx context.Context, step *types.Step, taskUUID string)
 		log.Trace().Msgf("StartStep got service '%s', ignoring it.", step.Name)
 		return nil
 	}
+
+	options, err := parseBackendOptions(step)
+	if err != nil {
+		log.Error().Err(err).Msg("could not parse backend options")
+	}
+
 	log.Trace().Str("taskUUID", taskUUID).Msgf("starting step: %s", step.Name)
-	_, err := startPod(ctx, e, step)
+	_, err = startPod(ctx, e, step, options)
 	return err
 }
 

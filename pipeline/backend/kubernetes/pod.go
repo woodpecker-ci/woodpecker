@@ -35,11 +35,7 @@ const (
 	podPrefix = "wp-"
 )
 
-func mkPod(step *types.Step, config *config, podName, goos string) (*v1.Pod, error) {
-	options, err := parseBackendOptions(step)
-	if err != nil {
-		log.Error().Err(err).Msg("could not parse backend options")
-	}
+func mkPod(step *types.Step, config *config, podName, goos string, options BackendOptions) (*v1.Pod, error) {
 	meta := podMeta(step, config, options, podName)
 
 	spec, err := podSpec(step, config, options)
@@ -445,13 +441,13 @@ func mapToEnvVars(m map[string]string) []v1.EnvVar {
 	return ev
 }
 
-func startPod(ctx context.Context, engine *kube, step *types.Step) (*v1.Pod, error) {
+func startPod(ctx context.Context, engine *kube, step *types.Step, options BackendOptions) (*v1.Pod, error) {
 	podName, err := podName(step)
 	if err != nil {
 		return nil, err
 	}
 	engineConfig := engine.getConfig()
-	pod, err := mkPod(step, engineConfig, podName, engine.goos)
+	pod, err := mkPod(step, engineConfig, podName, engine.goos, options)
 	if err != nil {
 		return nil, err
 	}
