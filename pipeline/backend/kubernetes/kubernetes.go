@@ -168,7 +168,7 @@ func (e *kube) getConfig() *config {
 	return &c
 }
 
-// Setup the pipeline environment.
+// SetupWorkflow sets up the pipeline environment.
 func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("Setting up Kubernetes primitives")
 
@@ -179,7 +179,7 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID s
 		}
 	}
 
-	extraHosts := []types.HostAlias{}
+	var extraHosts []types.HostAlias
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
 			if step.Type == types.StepTypeService {
@@ -202,7 +202,7 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID s
 	return nil
 }
 
-// Start the pipeline step.
+// StartStep starts the pipeline step.
 func (e *kube) StartStep(ctx context.Context, step *types.Step, taskUUID string) error {
 	if step.Type == types.StepTypeService {
 		// a service should be started by SetupWorkflow so we can ignore it
@@ -214,7 +214,7 @@ func (e *kube) StartStep(ctx context.Context, step *types.Step, taskUUID string)
 	return err
 }
 
-// Wait for the pipeline step to complete and returns
+// WaitStep waits for the pipeline step to complete and returns
 // the completion results.
 func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) (*types.State, error) {
 	podName, err := stepToPodName(step)
@@ -280,7 +280,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 	return bs, nil
 }
 
-// Tail the pipeline step logs.
+// TailStep tails the pipeline step logs.
 func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) (io.ReadCloser, error) {
 	podName, err := stepToPodName(step)
 	if err != nil {
@@ -363,7 +363,7 @@ func (e *kube) DestroyStep(ctx context.Context, step *types.Step, taskUUID strin
 	return err
 }
 
-// Destroy the pipeline environment.
+// DestroyWorkflow destroys the pipeline environment.
 func (e *kube) DestroyWorkflow(ctx context.Context, conf *types.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msg("deleting Kubernetes primitives")
 

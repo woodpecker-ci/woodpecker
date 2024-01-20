@@ -288,21 +288,6 @@ func TestFullPod(t *testing.T) {
 		{Number: 2345, Protocol: "tcp"},
 		{Number: 3456, Protocol: "udp"},
 	}
-	secCtx := types.SecurityContext{
-		Privileged:   newBool(true),
-		RunAsNonRoot: newBool(true),
-		RunAsUser:    newInt64(101),
-		RunAsGroup:   newInt64(101),
-		FSGroup:      newInt64(101),
-		SeccompProfile: &types.SecProfile{
-			Type:             "Localhost",
-			LocalhostProfile: "profiles/audit.json",
-		},
-		ApparmorProfile: &types.SecProfile{
-			Type:             "Localhost",
-			LocalhostProfile: "k8s-apparmor-example-deny-write",
-		},
-	}
 	pod, err := mkPod(&types.Step{
 		Name:        "go-test",
 		Image:       "meltwater/drone-cache",
@@ -315,16 +300,32 @@ func TestFullPod(t *testing.T) {
 		Environment: map[string]string{"CGO": "0"},
 		ExtraHosts:  hostAliases,
 		Ports:       ports,
-		BackendOptions: types.BackendOptions{
-			Kubernetes: types.KubernetesBackendOptions{
-				NodeSelector:       map[string]string{"storage": "ssd"},
-				ServiceAccountName: "wp-svc-acc",
-				Tolerations:        []types.Toleration{{Key: "net-port", Value: "100Mbit", Effect: types.TaintEffectNoSchedule}},
-				Resources: types.Resources{
-					Requests: map[string]string{"memory": "128Mi", "cpu": "1000m"},
-					Limits:   map[string]string{"memory": "256Mi", "cpu": "2"},
+		BackendOptions: map[string]any{
+			"kubernetes": map[string]any{
+				"nodeSelector":       map[string]string{"storage": "ssd"},
+				"serviceAccountName": "wp-svc-acc",
+				"tolerations": []map[string]any{
+					{"key": "net-port", "value": "100Mbit", "effect": TaintEffectNoSchedule},
 				},
-				SecurityContext: &secCtx,
+				"resources": map[string]any{
+					"requests": map[string]string{"memory": "128Mi", "cpu": "1000m"},
+					"limits":   map[string]string{"memory": "256Mi", "cpu": "2"},
+				},
+				"securityContext": map[string]any{
+					"privileged":   newBool(true),
+					"runAsNonRoot": newBool(true),
+					"runAsUser":    newInt64(101),
+					"runAsGroup":   newInt64(101),
+					"fsGroup":      newInt64(101),
+					"seccompProfile": map[string]any{
+						"type":             "Localhost",
+						"localhostProfile": "profiles/audit.json",
+					},
+					"apparmorProfile": map[string]any{
+						"type":             "Localhost",
+						"localhostProfile": "k8s-apparmor-example-deny-write",
+					},
+				},
 			},
 		},
 	}, &config{

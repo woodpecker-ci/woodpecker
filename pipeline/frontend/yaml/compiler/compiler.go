@@ -34,7 +34,6 @@ type Registry struct {
 	Hostname string
 	Username string
 	Password string
-	Email    string
 	Token    string
 }
 

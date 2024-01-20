@@ -111,7 +111,6 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		if utils.MatchHostname(container.Image, registry.Hostname) {
 			authConfig.Username = registry.Username
 			authConfig.Password = registry.Password
-			authConfig.Email = registry.Email
 			break
 		}
 	}
@@ -123,11 +122,6 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		} else {
 			return nil, fmt.Errorf("secret %q not found or not allowed to be used", requested.Source)
 		}
-	}
-
-	// Advanced backend settings
-	backendOptions := backend_types.BackendOptions{
-		Kubernetes: convertKubernetesBackendOptions(&container.BackendOptions.Kubernetes),
 	}
 
 	memSwapLimit := int64(container.MemSwapLimit)
@@ -205,7 +199,7 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		Failure:        failure,
 		NetworkMode:    networkMode,
 		Ports:          ports,
-		BackendOptions: backendOptions,
+		BackendOptions: container.BackendOptions,
 	}, nil
 }
 
@@ -230,53 +224,4 @@ func convertPort(portDef string) (backend_types.Port, error) {
 	port.Number = uint16(portNumber)
 
 	return port, nil
-}
-
-func convertKubernetesBackendOptions(kubeOpt *yaml_types.KubernetesBackendOptions) backend_types.KubernetesBackendOptions {
-	resources := backend_types.Resources{
-		Limits:   kubeOpt.Resources.Limits,
-		Requests: kubeOpt.Resources.Requests,
-	}
-
-	var tolerations []backend_types.Toleration
-	for _, t := range kubeOpt.Tolerations {
-		tolerations = append(tolerations, backend_types.Toleration{
-			Key:               t.Key,
-			Operator:          backend_types.TolerationOperator(t.Operator),
-			Value:             t.Value,
-			Effect:            backend_types.TaintEffect(t.Effect),
-			TolerationSeconds: t.TolerationSeconds,
-		})
-	}
-
-	var securityContext *backend_types.SecurityContext
-	if kubeOpt.SecurityContext != nil {
-		securityContext = &backend_types.SecurityContext{
-			Privileged:   kubeOpt.SecurityContext.Privileged,
-			RunAsNonRoot: kubeOpt.SecurityContext.RunAsNonRoot,
-			RunAsUser:    kubeOpt.SecurityContext.RunAsUser,
-			RunAsGroup:   kubeOpt.SecurityContext.RunAsGroup,
-			FSGroup:      kubeOpt.SecurityContext.FSGroup,
-		}
-		if kubeOpt.SecurityContext.SeccompProfile != nil {
-			securityContext.SeccompProfile = &backend_types.SecProfile{
-				Type:             backend_types.SecProfileType(kubeOpt.SecurityContext.SeccompProfile.Type),
-				LocalhostProfile: kubeOpt.SecurityContext.SeccompProfile.LocalhostProfile,
-			}
-		}
-		if kubeOpt.SecurityContext.ApparmorProfile != nil {
-			securityContext.ApparmorProfile = &backend_types.SecProfile{
-				Type:             backend_types.SecProfileType(kubeOpt.SecurityContext.ApparmorProfile.Type),
-				LocalhostProfile: kubeOpt.SecurityContext.ApparmorProfile.LocalhostProfile,
-			}
-		}
-	}
-
-	return backend_types.KubernetesBackendOptions{
-		Resources:          resources,
-		ServiceAccountName: kubeOpt.ServiceAccountName,
-		NodeSelector:       kubeOpt.NodeSelector,
-		Tolerations:        tolerations,
-		SecurityContext:    securityContext,
-	}
 }
