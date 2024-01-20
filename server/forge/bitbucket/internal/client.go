@@ -50,7 +50,7 @@ const (
 	pathStatus        = "%s/2.0/repositories/%s/%s/commit/%s/statuses/build"
 	pathBranches      = "%s/2.0/repositories/%s/%s/refs/branches?%s"
 	pathOrgPerms      = "%s/2.0/workspaces/%s/permissions?%s"
-	pathPullRequests  = "%s/2.0/repositories/%s/%s/pullrequests"
+	pathPullRequests  = "%s/2.0/repositories/%s/%s/pullrequests?%s"
 	pathBranchCommits = "%s/2.0/repositories/%s/%s/commits/%s"
 	pathDir           = "%s/2.0/repositories/%s/%s/src/%s%s"
 )
@@ -235,8 +235,8 @@ func (c *Client) GetUserWorkspaceMembership(workspace, user string) (string, err
 
 func (c *Client) ListPullRequests(owner, name string, opts *ListOpts) ([]*PullRequest, error) {
 	out := new(PullRequestResp)
-	uri := fmt.Sprintf(pathPullRequests, c.base, owner, name)
-	_, err := c.do(uri, get, opts.Encode(), out)
+	uri := fmt.Sprintf(pathPullRequests, c.base, owner, name, opts.Encode())
+	_, err := c.do(uri, get, nil, out)
 	return out.Values, err
 }
 
