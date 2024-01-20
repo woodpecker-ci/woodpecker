@@ -120,7 +120,6 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 
 	pipeline.Message = lastCommit.Message
 	pipeline.Commit = lastCommit.ID
-	pipeline.CloneURL = obj.Source.HTTPURL
 
 	pipeline.Ref = fmt.Sprintf(mergeRefs, obj.IID)
 	pipeline.Branch = obj.SourceBranch
