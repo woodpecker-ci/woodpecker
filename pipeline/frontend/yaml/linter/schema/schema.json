@@ -680,7 +680,101 @@
     },
     "step_backend_options": {
       "description": "Advanced options for the different agent backends",
-      "type": "object"
+      "type": "object",
+      "properties": {
+        "kubernetes": {
+          "$ref": "#/definitions/step_backend_kubernetes"
+        }
+      }
+    },
+    "step_backend_kubernetes": {
+      "description": "Advanced options for the kubernetes agent backends",
+      "type": "object",
+      "properties": {
+        "resources": {
+          "$ref": "#/definitions/step_backend_kubernetes_resources"
+        },
+        "securityContext": {
+          "$ref": "#/definitions/step_backend_kubernetes_security_context"
+        }
+      }
+    },
+    "step_backend_kubernetes_resources": {
+      "description": "Resources for the kubernetes backend. Read more: https://woodpecker-ci.org/docs/administration/backends/kubernetes",
+      "type": "object",
+      "properties": {
+        "requests": {
+          "$ref": "#/definitions/step_kubernetes_resources_object"
+        },
+        "limits": {
+          "$ref": "#/definitions/step_kubernetes_resources_object"
+        }
+      }
+    },
+    "step_backend_kubernetes_security_context": {
+      "description": "Pods / containers security context. Read more: https://woodpecker-ci.org/docs/administration/backends/kubernetes",
+      "type": "object",
+      "properties": {
+        "privileged": {
+          "type": "boolean"
+        },
+        "runAsNonRoot": {
+          "type": "boolean"
+        },
+        "runAsUser": {
+          "type": "number"
+        },
+        "runAsGroup": {
+          "type": "number"
+        },
+        "fsGroup": {
+          "type": "number"
+        },
+        "seccompProfile": {
+          "$ref": "#/definitions/step_backend_kubernetes_secprofile"
+        },
+        "apparmorProfile": {
+          "$ref": "#/definitions/step_backend_kubernetes_secprofile"
+        }
+      }
+    },
+    "step_backend_kubernetes_secprofile": {
+      "description": "Pods / containers security profile. Read more: https://woodpecker-ci.org/docs/administration/backends/kubernetes",
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "localhostProfile": {
+          "type": "string"
+        }
+      }
+    },
+    "step_kubernetes_resources_object": {
+      "description": "A list of kubernetes resource mappings",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "step_backend_kubernetes_service_account": {
+      "description": "serviceAccountName to be use by job. Read more: https://woodpecker-ci.org/docs/administration/backends/kubernetes",
+      "type": "object",
+      "properties": {
+        "requests": {
+          "$ref": "#/definitions/step_kubernetes_service_account_object"
+        },
+        "limits": {
+          "$ref": "#/definitions/step_kubernetes_service_account_object"
+        }
+      }
+    },
+    "step_kubernetes_service_account_object": {
+      "description": "A list of kubernetes resource mappings",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
     },
     "services": {
       "description": "Read more: https://woodpecker-ci.org/docs/usage/services",
