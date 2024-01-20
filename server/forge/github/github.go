@@ -582,6 +582,15 @@ func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model
 		return nil, nil, err
 	}
 
+	if pipeline != nil && pipeline.Event == model.EventRelease && pipeline.Commit == "" {
+		tagName := strings.Split(pipeline.Ref, "/")[2]
+		sha, err := c.getTagCommitSHA(ctx, repo, tagName)
+		if err != nil {
+			return nil, nil, err
+		}
+		pipeline.Commit = sha
+	}
+
 	if pull != nil && len(pipeline.ChangedFiles) == 0 {
 		pipeline, err = c.loadChangedFilesFromPullRequest(ctx, pull, repo, pipeline)
 		if err != nil {
@@ -628,4 +637,50 @@ func (c *client) loadChangedFilesFromPullRequest(ctx context.Context, pull *gith
 	})
 
 	return pipeline, err
+}
+
+func (c *client) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName string) (string, error) {
+	_store, ok := store.TryFromContext(ctx)
+	if !ok {
+		log.Error().Msg("could not get store from context")
+		return "", nil
+	}
+
+	repo, err := _store.GetRepoNameFallback(repo.ForgeRemoteID, repo.FullName)
+	if err != nil {
+		return "", err
+	}
+
+	user, err := _store.GetUser(repo.UserID)
+	if err != nil {
+		return "", err
+	}
+
+	gh := c.newClientToken(ctx, user.Token)
+	if err != nil {
+		return "", err
+	}
+
+	page := 1
+	var tag *github.RepositoryTag
+	for {
+		tags, _, err := gh.Repositories.ListTags(ctx, repo.Owner, repo.Name, &github.ListOptions{Page: page})
+		if err != nil {
+			return "", err
+		}
+
+		for _, t := range tags {
+			if t.GetName() == tagName {
+				tag = t
+				break
+			}
+		}
+		if tag != nil {
+			break
+		}
+	}
+	if tag == nil {
+		return "", fmt.Errorf("could not find tag %s", tagName)
+	}
+	return tag.GetCommit().GetSHA(), nil
 }

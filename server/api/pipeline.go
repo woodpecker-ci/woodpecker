@@ -414,7 +414,7 @@ func PostPipeline(c *gin.Context) {
 	if event, ok := c.GetQuery("event"); ok {
 		pl.Event = model.WebhookEvent(event)
 
-		if err := model.ValidateWebhookEvent(pl.Event); err != nil {
+		if err := pl.Event.Validate(); err != nil {
 			_ = c.AbortWithError(http.StatusBadRequest, err)
 			return
 		}
