@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@zc-devs, @renovate[bot], @mzampetakis, @qwerty287, @healdropper, @6543, @micash545, @xoxys, @pat-s, @miry, @lukashass, @lafriks, @pre-commit-ci[bot], @anbraten, @andyhan, @KamilaBorowska
+@qwerty287, @zc-devs, @renovate[bot], @mzampetakis, @healdropper, @6543, @micash545, @xoxys, @pat-s, @miry, @lukashass, @lafriks, @pre-commit-ci[bot], @anbraten, @andyhan, @KamilaBorowska
 
 ### 🔒 Security
 
@@ -13,6 +13,27 @@
 ### ✨ Features
 
 - Support custom steps entrypoint [[#2985](https://github.com/woodpecker-ci/woodpecker/pull/2985)]
+
+### 📚 Documentation
+
+- Add 2.2 docs [[#3237](https://github.com/woodpecker-ci/woodpecker/pull/3237)]
+- Fix/improve issue templates [[#3232](https://github.com/woodpecker-ci/woodpecker/pull/3232)]
+- Delete `FUNDING.yaml` [[#3193](https://github.com/woodpecker-ci/woodpecker/pull/3193)]
+- Remove contributing/security to use globally defined [[#3192](https://github.com/woodpecker-ci/woodpecker/pull/3192)]
+- Add "Kaniko" Plugin [[#3183](https://github.com/woodpecker-ci/woodpecker/pull/3183)]
+- Document core development ideas [[#3184](https://github.com/woodpecker-ci/woodpecker/pull/3184)]
+- Add continous deployment cookbook [[#3098](https://github.com/woodpecker-ci/woodpecker/pull/3098)]
+- Make k8s backend configuration docs in the same format as others [[#3081](https://github.com/woodpecker-ci/woodpecker/pull/3081)]
+- Hide backend config options from TOC [[#3126](https://github.com/woodpecker-ci/woodpecker/pull/3126)]
+- Add X/Twitter account [[#3127](https://github.com/woodpecker-ci/woodpecker/pull/3127)]
+- Add ansible plugin [[#3115](https://github.com/woodpecker-ci/woodpecker/pull/3115)]
+- Format depends_on example [[#3118](https://github.com/woodpecker-ci/woodpecker/pull/3118)]
+- Use WOODPECKER_AGENT_SECRET instead of deprecated alternative [[#3103](https://github.com/woodpecker-ci/woodpecker/pull/3103)]
+- Add Reviewdog ESLint plugin [[#3102](https://github.com/woodpecker-ci/woodpecker/pull/3102)]
+- Mark local backend as stable [[#3088](https://github.com/woodpecker-ci/woodpecker/pull/3088)]
+- Update Owners 2024 [[#3075](https://github.com/woodpecker-ci/woodpecker/pull/3075)]
+- Add reviewdog golangci plugin [[#3080](https://github.com/woodpecker-ci/woodpecker/pull/3080)]
+- Add Codeberg Pages Deploy plugin to plugins list [[#3054](https://github.com/woodpecker-ci/woodpecker/pull/3054)]
 
 ### 🐛 Bug Fixes
 
@@ -36,26 +57,6 @@
 - Fix `when` and `depends_on` [[#3063](https://github.com/woodpecker-ci/woodpecker/pull/3063)]
 - Fix DAG cycle detection [[#3049](https://github.com/woodpecker-ci/woodpecker/pull/3049)]
 - Fix duplicated icons [[#3045](https://github.com/woodpecker-ci/woodpecker/pull/3045)]
-
-### 📚 Documentation
-
-- Fix/improve issue templates [[#3232](https://github.com/woodpecker-ci/woodpecker/pull/3232)]
-- Delete `FUNDING.yaml` [[#3193](https://github.com/woodpecker-ci/woodpecker/pull/3193)]
-- Remove contributing/security to use globally defined [[#3192](https://github.com/woodpecker-ci/woodpecker/pull/3192)]
-- Add "Kaniko" Plugin [[#3183](https://github.com/woodpecker-ci/woodpecker/pull/3183)]
-- Document core development ideas [[#3184](https://github.com/woodpecker-ci/woodpecker/pull/3184)]
-- Add continous deployment cookbook [[#3098](https://github.com/woodpecker-ci/woodpecker/pull/3098)]
-- Make k8s backend configuration docs in the same format as others [[#3081](https://github.com/woodpecker-ci/woodpecker/pull/3081)]
-- Hide backend config options from TOC [[#3126](https://github.com/woodpecker-ci/woodpecker/pull/3126)]
-- Add X/Twitter account [[#3127](https://github.com/woodpecker-ci/woodpecker/pull/3127)]
-- Add ansible plugin [[#3115](https://github.com/woodpecker-ci/woodpecker/pull/3115)]
-- Format depends_on example [[#3118](https://github.com/woodpecker-ci/woodpecker/pull/3118)]
-- Use WOODPECKER_AGENT_SECRET instead of deprecated alternative [[#3103](https://github.com/woodpecker-ci/woodpecker/pull/3103)]
-- Add Reviewdog ESLint plugin [[#3102](https://github.com/woodpecker-ci/woodpecker/pull/3102)]
-- Mark local backend as stable [[#3088](https://github.com/woodpecker-ci/woodpecker/pull/3088)]
-- Update Owners 2024 [[#3075](https://github.com/woodpecker-ci/woodpecker/pull/3075)]
-- Add reviewdog golangci plugin [[#3080](https://github.com/woodpecker-ci/woodpecker/pull/3080)]
-- Add Codeberg Pages Deploy plugin to plugins list [[#3054](https://github.com/woodpecker-ci/woodpecker/pull/3054)]
 
 ### 📈 Enhancement
 
