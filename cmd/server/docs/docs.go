@@ -3946,6 +3946,9 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
+                "is_prerelease": {
+                    "type": "boolean"
+                },
                 "message": {
                     "type": "string"
                 },
@@ -4398,6 +4401,7 @@ const docTemplate = `{
                 "pull_request",
                 "pull_request_closed",
                 "tag",
+                "release",
                 "deployment",
                 "cron",
                 "manual"
@@ -4407,6 +4411,7 @@ const docTemplate = `{
                 "EventPull",
                 "EventPullClosed",
                 "EventTag",
+                "EventRelease",
                 "EventDeploy",
                 "EventCron",
                 "EventManual"
