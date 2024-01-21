@@ -3892,108 +3892,14 @@ const docTemplate = `{
         "Pipeline": {
             "type": "object",
             "properties": {
-                "author": {
+                "clone_url": {
                     "type": "string"
                 },
-                "author_avatar": {
-                    "type": "string"
-                },
-                "author_email": {
-                    "type": "string"
-                },
-                "branch": {
-                    "type": "string"
-                },
-                "changed_files": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "commit": {
-                    "type": "string"
-                },
-                "created_at": {
+                "enqueued_at": {
                     "type": "integer"
-                },
-                "deploy_to": {
-                    "type": "string"
-                },
-                "errors": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/errors.PipelineError"
-                    }
-                },
-                "event": {
-                    "$ref": "#/definitions/WebhookEvent"
-                },
-                "finished_at": {
-                    "type": "integer"
-                },
-                "forge_url": {
-                    "type": "string"
                 },
                 "id": {
                     "type": "integer"
-                },
-                "message": {
-                    "type": "string"
-                },
-                "number": {
-                    "type": "integer"
-                },
-                "parent": {
-                    "type": "integer"
-                },
-                "pr_labels": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "ref": {
-                    "type": "string"
-                },
-                "refspec": {
-                    "type": "string"
-                },
-                "reviewed_at": {
-                    "type": "integer"
-                },
-                "reviewed_by": {
-                    "type": "string"
-                },
-                "sender": {
-                    "description": "uses reported user for webhooks and name of cron for cron pipelines",
-                    "type": "string"
-                },
-                "started_at": {
-                    "type": "integer"
-                },
-                "status": {
-                    "$ref": "#/definitions/StatusValue"
-                },
-                "timestamp": {
-                    "type": "integer"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "updated_at": {
-                    "type": "integer"
-                },
-                "variables": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "workflows": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/model.Workflow"
-                    }
                 }
             }
         },
@@ -4248,64 +4154,6 @@ const docTemplate = `{
                 "StatusCreated"
             ]
         },
-        "Step": {
-            "type": "object",
-            "properties": {
-                "end_time": {
-                    "type": "integer"
-                },
-                "error": {
-                    "type": "string"
-                },
-                "exit_code": {
-                    "type": "integer"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "pid": {
-                    "type": "integer"
-                },
-                "pipeline_id": {
-                    "type": "integer"
-                },
-                "ppid": {
-                    "type": "integer"
-                },
-                "start_time": {
-                    "type": "integer"
-                },
-                "state": {
-                    "$ref": "#/definitions/StatusValue"
-                },
-                "type": {
-                    "$ref": "#/definitions/StepType"
-                },
-                "uuid": {
-                    "type": "string"
-                }
-            }
-        },
-        "StepType": {
-            "type": "string",
-            "enum": [
-                "clone",
-                "service",
-                "plugin",
-                "commands",
-                "cache"
-            ],
-            "x-enum-varnames": [
-                "StepTypeClone",
-                "StepTypeService",
-                "StepTypePlugin",
-                "StepTypeCommands",
-                "StepTypeCache"
-            ]
-        },
         "Task": {
             "type": "object",
             "properties": {
@@ -4396,89 +4244,6 @@ const docTemplate = `{
                 "EventCron",
                 "EventManual"
             ]
-        },
-        "errors.PipelineError": {
-            "type": "object",
-            "properties": {
-                "data": {},
-                "is_warning": {
-                    "type": "boolean"
-                },
-                "message": {
-                    "type": "string"
-                },
-                "type": {
-                    "$ref": "#/definitions/errors.PipelineErrorType"
-                }
-            }
-        },
-        "errors.PipelineErrorType": {
-            "type": "string",
-            "enum": [
-                "linter",
-                "deprecation",
-                "compiler",
-                "generic"
-            ],
-            "x-enum-comments": {
-                "PipelineErrorTypeCompiler": "some error with the config semantics",
-                "PipelineErrorTypeDeprecation": "using some deprecated feature",
-                "PipelineErrorTypeGeneric": "some generic error",
-                "PipelineErrorTypeLinter": "some error with the config syntax"
-            },
-            "x-enum-varnames": [
-                "PipelineErrorTypeLinter",
-                "PipelineErrorTypeDeprecation",
-                "PipelineErrorTypeCompiler",
-                "PipelineErrorTypeGeneric"
-            ]
-        },
-        "model.Workflow": {
-            "type": "object",
-            "properties": {
-                "agent_id": {
-                    "type": "integer"
-                },
-                "children": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Step"
-                    }
-                },
-                "end_time": {
-                    "type": "integer"
-                },
-                "environ": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "error": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "pid": {
-                    "type": "integer"
-                },
-                "pipeline_id": {
-                    "type": "integer"
-                },
-                "platform": {
-                    "type": "string"
-                },
-                "start_time": {
-                    "type": "integer"
-                },
-                "state": {
-                    "$ref": "#/definitions/StatusValue"
-                }
-            }
         }
     }
 }`
