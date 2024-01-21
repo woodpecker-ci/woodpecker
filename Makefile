@@ -207,7 +207,6 @@ build-tarball: ## Build tar archive
 	  --exclude="./.git" \
 	  .
 
-
 .PHONY: build
 build: build-agent build-server build-cli ## Build all binaries
 
