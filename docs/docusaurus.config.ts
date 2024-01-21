@@ -242,7 +242,7 @@ const config: Config = {
           sidebarPath: require.resolve('./sidebars.js'),
           editUrl: 'https://github.com/woodpecker-ci/woodpecker/edit/main/docs/',
           includeCurrentVersion: true,
-          lastVersion: '2.1',
+          lastVersion: '2.2',
           versions: {
             current: {
               label: 'Next',
