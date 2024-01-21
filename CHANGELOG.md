@@ -1,10 +1,10 @@
 # Changelog
 
-## [2.2.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.2.0) - 2024-01-20
+## [2.2.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.2.0) - 2024-01-21
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@renovate[bot], @mzampetakis, @qwerty287, @healdropper, @6543, @micash545, @zc-devs, @xoxys, @pat-s, @miry, @lukashass, @lafriks, @pre-commit-ci[bot], @anbraten, @andyhan, @KamilaBorowska
+@zc-devs, @renovate[bot], @mzampetakis, @qwerty287, @healdropper, @6543, @micash545, @xoxys, @pat-s, @miry, @lukashass, @lafriks, @pre-commit-ci[bot], @anbraten, @andyhan, @KamilaBorowska
 
 ### 🔒 Security
 
@@ -16,6 +16,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fixed Pods creation of WP services [[#3236](https://github.com/woodpecker-ci/woodpecker/pull/3236)]
 - Fix Bitbucket get pull requests that ignores pagination [[#3235](https://github.com/woodpecker-ci/woodpecker/pull/3235)]
 - Make PipelineConfig unique again [[#3215](https://github.com/woodpecker-ci/woodpecker/pull/3215)]
 - Fix feed sorting [[#3155](https://github.com/woodpecker-ci/woodpecker/pull/3155)]
