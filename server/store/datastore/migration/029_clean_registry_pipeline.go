@@ -34,7 +34,7 @@ type oldPipeline029 struct {
 	ConfigID int64  `json:"-"                       xorm:"pipeline_config_id"`
 	Enqueued int64  `json:"enqueued_at"             xorm:"pipeline_enqueued"`
 	CloneURL string `json:"clone_url"               xorm:"pipeline_clone_url"`
-} //	@name Pipeline
+}
 
 // TableName return database table name for xorm
 func (oldPipeline029) TableName() string {
