@@ -81,6 +81,7 @@ steps:
       - build-agent
       - build-cli
       - build-deb-rpm
+      - build-tarball
     image: *golang_image
     commands:
       - make release-checksums
