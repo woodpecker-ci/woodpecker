@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.2.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.2.2) - 2024-01-21
+
+### ❤️ Thanks to all contributors! ❤️
+
+@6543
+
+### Misc
+
+- build: fix nfpm path for server binary [[#3246](https://github.com/woodpecker-ci/woodpecker/pull/3246)]
+
 ## [2.2.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.2.1) - 2024-01-21
 
 ### ❤️ Thanks to all contributors! ❤️
