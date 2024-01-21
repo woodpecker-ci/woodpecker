@@ -21,13 +21,6 @@ steps:
     commands:
       - go mod vendor
 
-  code-gen:
-    image: *golang_image
-    depends_on:
-      - vendor
-    commands:
-      - make generate
-
   cross-compile-server:
     depends_on:
       - vendor
@@ -46,7 +39,7 @@ steps:
 
   build-tarball:
     depends_on:
-      - code-gen
+      - vendor
       - build-web
     image: *golang_image
     commands:
