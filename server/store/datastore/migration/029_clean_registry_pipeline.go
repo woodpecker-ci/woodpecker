@@ -48,10 +48,10 @@ var cleanRegistryPipeline = xormigrate.Migration{
 			return err
 		}
 
-		if err := dropTableColumns(sess, "pipelines", "pipeline_clone_url", "pipeline_config_id"); err != nil {
+		if err := dropTableColumns(sess, "pipelines", "pipeline_clone_url", "pipeline_config_id", "pipeline_enqueued"); err != nil {
 			return err
 		}
 
-		return dropTableColumns(sess, "secrets", "registry_email", "registry_token")
+		return dropTableColumns(sess, "registry", "registry_email", "registry_token")
 	},
 }
