@@ -6,10 +6,6 @@ when:
       - release/*
       - renovate/*
 
-depends_on:
-  - test
-  - web
-
 variables:
   - &golang_image 'docker.io/golang:1.21.6'
   - &node_image 'docker.io/node:21-alpine'
