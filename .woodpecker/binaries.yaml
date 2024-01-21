@@ -26,6 +26,13 @@ steps:
     commands:
       - go mod vendor
 
+  code-gen:
+    image: *golang_image
+    depends_on:
+      - vendor
+    commands:
+      - make generate
+
   cross-compile-server:
     depends_on:
       - vendor
@@ -41,6 +48,14 @@ steps:
       TAGS: bindata sqlite sqlite_unlock_notify netgo
       XGO_VERSION: *xgo_version
       TARGZ: '1'
+
+  build-tarball:
+    depends_on:
+      - code-gen
+      - build-web
+    image: *golang_image
+    commands:
+      - make build-tarball
 
   build-agent:
     depends_on:
