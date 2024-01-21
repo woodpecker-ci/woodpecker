@@ -204,12 +204,6 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID s
 
 // StartStep starts the pipeline step.
 func (e *kube) StartStep(ctx context.Context, step *types.Step, taskUUID string) error {
-	if step.Type == types.StepTypeService {
-		// a service should be started by SetupWorkflow so we can ignore it
-		log.Trace().Msgf("StartStep got service '%s', ignoring it.", step.Name)
-		return nil
-	}
-
 	options, err := parseBackendOptions(step)
 	if err != nil {
 		log.Error().Err(err).Msg("could not parse backend options")
@@ -359,11 +353,6 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 }
 
 func (e *kube) DestroyStep(ctx context.Context, step *types.Step, taskUUID string) error {
-	if step.Type == types.StepTypeService {
-		// a service should be stopped by DestroyWorkflow so we can ignore it
-		log.Trace().Msgf("destroyStep got service '%s', ignoring it.", step.Name)
-		return nil
-	}
 	log.Trace().Str("taskUUID", taskUUID).Msgf("Stopping step: %s", step.Name)
 	err := stopPod(ctx, e, step, defaultDeleteOptions)
 	return err
