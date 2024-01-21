@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.2.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.2.1) - 2024-01-21
+
+### ❤️ Thanks to all contributors! ❤️
+
+@6543
+
+### 🐛 Bug Fixes
+
+- Add gitea/forgejo driver check, to handle ErrUnknownVersion error [[#3243](https://github.com/woodpecker-ci/woodpecker/pull/3243)]
+
+### Misc
+
+- Build tarball for distribution packages [[#3244](https://github.com/woodpecker-ci/woodpecker/pull/3244)]
+
 ## [2.2.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.2.0) - 2024-01-21
 
 ### ❤️ Thanks to all contributors! ❤️
