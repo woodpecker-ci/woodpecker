@@ -248,8 +248,12 @@ const config: Config = {
               label: 'Next',
               banner: 'unreleased',
             },
+            '2.2': {
+              label: '2.2.x',
+            },
             '2.1': {
               label: '2.1.x',
+              banner: 'unmaintained',
             },
             '2.0': {
               label: '2.0.x',
@@ -259,7 +263,7 @@ const config: Config = {
               label: '1.0.x',
               banner: 'unmaintained',
             },
-            0.15: {
+            '0.15': {
               label: '0.15.x',
               banner: 'unmaintained',
             },
