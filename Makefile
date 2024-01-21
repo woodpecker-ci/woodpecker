@@ -196,6 +196,17 @@ build-agent: ## Build agent
 build-cli: ## Build cli
 	CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -ldflags '${LDFLAGS}' -o dist/woodpecker-cli${BIN_SUFFIX} go.woodpecker-ci.org/woodpecker/v2/cmd/cli
 
+build-tarball: ## Build tar archive
+	mkdir -p dist && tar chzvf dist/woodpecker-src.tar.gz \
+	  --exclude="*.exe" \
+	  --exclude="./.pnpm-store" \
+	  --exclude="node_modules" \
+	  --exclude="./dist" \
+	  --exclude="./data" \
+	  --exclude="./build" \
+	  --exclude="./.git" \
+	  .
+
 .PHONY: build
 build: build-agent build-server build-cli ## Build all binaries
 

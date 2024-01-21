@@ -1,8 +1,3 @@
-depends_on:
-  - test
-  - web
-
-# TODO: upload build artifacts for pushes to ${CI_REPO_DEFAULT_BRANCH}
 when:
   event: tag
 
@@ -26,6 +21,13 @@ steps:
     commands:
       - go mod vendor
 
+  code-gen:
+    image: *golang_image
+    depends_on:
+      - vendor
+    commands:
+      - make generate
+
   cross-compile-server:
     depends_on:
       - vendor
@@ -41,6 +43,14 @@ steps:
       TAGS: bindata sqlite sqlite_unlock_notify netgo
       XGO_VERSION: *xgo_version
       TARGZ: '1'
+
+  build-tarball:
+    depends_on:
+      - code-gen
+      - build-web
+    image: *golang_image
+    commands:
+      - make build-tarball
 
   build-agent:
     depends_on:
@@ -71,6 +81,7 @@ steps:
       - build-agent
       - build-cli
       - build-deb-rpm
+      - build-tarball
     image: *golang_image
     commands:
       - make release-checksums
