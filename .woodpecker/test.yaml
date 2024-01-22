@@ -83,7 +83,9 @@ steps:
     when: *when
 
   prettier:
-    image: docker.io/woodpeckerci/plugin-prettier:next
+    image: docker.io/woodpeckerci/plugin-prettier:0.1.0
+    settings:
+      version: 3.1.1
     when:
       - event: pull_request
       - event: push
