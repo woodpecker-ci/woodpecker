@@ -1,8 +1,3 @@
-depends_on:
-  - test
-  - web
-
-# TODO: upload build artifacts for pushes to ${CI_REPO_DEFAULT_BRANCH}
 when:
   event: tag
 
@@ -42,6 +37,14 @@ steps:
       XGO_VERSION: *xgo_version
       TARGZ: '1'
 
+  build-tarball:
+    depends_on:
+      - vendor
+      - build-web
+    image: *golang_image
+    commands:
+      - make build-tarball
+
   build-agent:
     depends_on:
       - vendor
@@ -71,6 +74,7 @@ steps:
       - build-agent
       - build-cli
       - build-deb-rpm
+      - build-tarball
     image: *golang_image
     commands:
       - make release-checksums
