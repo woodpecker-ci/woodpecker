@@ -28,7 +28,7 @@ It's also possible to use complex settings like this:
 
 ```yaml
 steps:
-  plugin:
+  - name: plugin
     image: foo/plugin
     settings:
       complex:
@@ -58,7 +58,7 @@ The below example demonstrates how we might configure a webhook plugin in the YA
 
 ```yaml
 steps:
-  webhook:
+  - name: webhook
     image: foo/webhook
     settings:
       url: https://example.com

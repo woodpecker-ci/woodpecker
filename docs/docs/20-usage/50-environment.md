@@ -4,7 +4,7 @@ Woodpecker provides the ability to pass environment variables to individual pipe
 
 ```diff
  steps:
-   build:
+   - name: build
      image: golang
 +    environment:
 +      - CGO=0
@@ -19,7 +19,7 @@ Please note that the environment section is not able to expand environment varia
 
 ```diff
  steps:
-   build:
+   - name: build
      image: golang
 -    environment:
 -      - PATH=$PATH:/go
@@ -35,7 +35,7 @@ Please note that the environment section is not able to expand environment varia
 
 ```diff
  steps:
-   build:
+   - name: build
      image: golang
      commands:
 -      - export PATH=${PATH}:/go
@@ -153,7 +153,7 @@ WOODPECKER_ENVIRONMENT=GOLANG_VERSION:1.18
 
 ```diff
  steps:
-   build:
+   - name: build
 -    image: golang:1.18
 +    image: golang:${GOLANG_VERSION}
      commands:
@@ -168,7 +168,7 @@ Example commit substitution:
 
 ```diff
  steps:
-   docker:
+   - name: docker
      image: plugins/docker
      settings:
 +      tags: ${CI_COMMIT_SHA}
@@ -178,7 +178,7 @@ Example tag substitution:
 
 ```diff
  steps:
-   docker:
+   - name: docker
      image: plugins/docker
      settings:
 +      tags: ${CI_COMMIT_TAG}
@@ -206,7 +206,7 @@ Example variable substitution with substring:
 
 ```diff
  steps:
-   docker:
+   - name: docker
      image: plugins/docker
      settings:
 +      tags: ${CI_COMMIT_SHA:0:8}
@@ -216,7 +216,7 @@ Example variable substitution strips `v` prefix from `v.1.0.0`:
 
 ```diff
  steps:
-   docker:
+   - name: docker
      image: plugins/docker
      settings:
 +      tags: ${CI_COMMIT_TAG##v}
