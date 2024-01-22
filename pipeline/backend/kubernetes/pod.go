@@ -108,7 +108,7 @@ func podSpec(step *types.Step, config *config) (v1.PodSpec, error) {
 		SecurityContext:    podSecurityContext(step.BackendOptions.Kubernetes.SecurityContext, config.SecurityContext),
 	}
 
-	if (step.Type == types.StepTypeService) && (config.StorageRwx == false) {
+	if (step.Type == types.StepTypeService) && (!config.StorageRwx) {
 		return spec, nil
 	}
 	spec.Volumes, err = volumes(step.Volumes)
@@ -150,7 +150,7 @@ func podContainer(step *types.Step, podName, goos string, storageRwx bool) (v1.C
 		return container, err
 	}
 
-	if (step.Type == types.StepTypeService) && (storageRwx == false) {
+	if (step.Type == types.StepTypeService) && (!storageRwx) {
 		return container, nil
 	}
 	container.VolumeMounts, err = volumeMounts(step.Volumes)
