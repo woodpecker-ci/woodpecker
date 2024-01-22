@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@qwerty287, @runephilosof-karnovgroup
+@eliasscosta, @qwerty287, @runephilosof-karnovgroup
 
 ### 📚 Documentation
 
@@ -17,6 +17,7 @@
 
 ### Misc
 
+- fix: bug annotations [[#3255](https://github.com/woodpecker-ci/woodpecker/pull/3255)]
 - Update UI building in Makefile [[#3250](https://github.com/woodpecker-ci/woodpecker/pull/3250)]
 
 ## [2.2.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.2.2) - 2024-01-21
