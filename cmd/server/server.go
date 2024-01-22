@@ -182,7 +182,7 @@ func run(c *cli.Context) error {
 		webUIServe,
 		middleware.Logger(time.RFC3339, true),
 		middleware.Version,
-		middleware.Store(c, _store),
+		middleware.Store(_store),
 	)
 
 	switch {

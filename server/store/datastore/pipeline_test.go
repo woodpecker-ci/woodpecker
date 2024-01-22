@@ -23,6 +23,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
 )
 
 func TestPipelines(t *testing.T) {
@@ -322,4 +323,68 @@ func TestPipelineIncrement(t *testing.T) {
 	pipelineC := &model.Pipeline{RepoID: 2}
 	assert.NoError(t, store.CreatePipeline(pipelineC))
 	assert.EqualValues(t, 1, pipelineC.Number)
+}
+
+func TestDeletePipeline(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Pipeline), new(model.Repo), new(model.Workflow),
+		new(model.Step), new(model.LogEntry), new(model.PipelineConfig), new(model.Config))
+	defer closer()
+
+	_, err := store.engine.Insert(
+		&model.Pipeline{
+			ID:     2,
+			Number: 2,
+			RepoID: 7,
+		},
+		&model.Pipeline{
+			ID:     5,
+			Number: 3,
+			RepoID: 7,
+		},
+		&model.Pipeline{
+			ID:     8,
+			Number: 4,
+			RepoID: 7,
+		},
+		&model.Config{
+			ID:     23,
+			Hash:   "1234",
+			Name:   "test",
+			RepoID: 7,
+		},
+		&model.Config{
+			ID:     25,
+			Hash:   "6789",
+			Name:   "test",
+			RepoID: 7,
+		},
+		&model.PipelineConfig{
+			PipelineID: 2,
+			ConfigID:   23,
+		},
+		&model.PipelineConfig{
+			PipelineID: 5,
+			ConfigID:   23,
+		},
+		&model.PipelineConfig{
+			PipelineID: 8,
+			ConfigID:   25,
+		},
+	)
+	assert.NoError(t, err)
+
+	// delete non existing pipeline
+	assert.ErrorIs(t, types.RecordNotExist, store.DeletePipeline(&model.Pipeline{ID: 1}))
+
+	// delete pipeline with shares config
+	assert.NoError(t, store.DeletePipeline(&model.Pipeline{ID: 2}))
+	count, err := store.engine.Count(new(model.Config))
+	assert.NoError(t, err)
+	assert.EqualValues(t, 2, count)
+
+	// delete pipeline with unique config
+	assert.NoError(t, store.DeletePipeline(&model.Pipeline{ID: 8}))
+	count, err = store.engine.Count(new(model.Config))
+	assert.NoError(t, err)
+	assert.EqualValues(t, 1, count)
 }
