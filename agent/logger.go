@@ -37,9 +37,7 @@ func (r *Runner) createLogger(logger zerolog.Logger, uploads *sync.WaitGroup, wo
 
 		var secrets []string
 		for _, secret := range workflow.Config.Secrets {
-			if secret.Mask {
-				secrets = append(secrets, secret.Value)
-			}
+			secrets = append(secrets, secret.Value)
 		}
 
 		loglogger.Debug().Msg("log stream opened")

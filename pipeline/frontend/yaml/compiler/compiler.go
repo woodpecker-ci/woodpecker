@@ -128,7 +128,6 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 		config.Secrets = append(config.Secrets, &backend_types.Secret{
 			Name:  sec.Name,
 			Value: sec.Value,
-			Mask:  true,
 		})
 	}
 
