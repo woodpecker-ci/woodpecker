@@ -107,6 +107,10 @@ func podSpec(step *types.Step, config *config) (v1.PodSpec, error) {
 		Tolerations:        tolerations(step.BackendOptions.Kubernetes.Tolerations),
 		SecurityContext:    podSecurityContext(step.BackendOptions.Kubernetes.SecurityContext, config.SecurityContext),
 	}
+
+	if step.Type == types.StepTypeService {
+		return spec, nil
+	}
 	spec.Volumes, err = volumes(step.Volumes)
 	if err != nil {
 		return spec, err
@@ -146,6 +150,9 @@ func podContainer(step *types.Step, podName, goos string) (v1.Container, error) 
 		return container, err
 	}
 
+	if step.Type == types.StepTypeService {
+		return container, nil
+	}
 	container.VolumeMounts, err = volumeMounts(step.Volumes)
 	if err != nil {
 		return container, err
