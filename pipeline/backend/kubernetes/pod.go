@@ -80,6 +80,10 @@ func podMeta(step *types.Step, config *config, podName string) metav1.ObjectMeta
 	}
 	meta.Labels[StepLabel] = step.Name
 
+	if step.Type == types.StepTypeService {
+		meta.Labels[ServiceLabel] = step.Name
+	}
+
 	meta.Annotations = config.PodAnnotations
 	if meta.Annotations == nil {
 		meta.Annotations = make(map[string]string)
