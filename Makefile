@@ -149,9 +149,7 @@ lint: install-tools ## Lint code
 	@echo "Running golangci-lint"
 	golangci-lint run
 
-lint-ui: ## Lint UI code
-	(cd web/; pnpm install)
-	(cd web/; pnpm lesshint)
+lint-ui: ui-dependencies ## Lint UI code
 	(cd web/; pnpm lint --quiet)
 
 test-agent: ## Test agent code
@@ -180,7 +178,7 @@ test-lib: ## Test lib code
 	go test -race -cover -coverprofile coverage.out -timeout 30s $(shell go list ./... | grep -v '/cmd\|/agent\|/cli\|/server')
 
 .PHONY: test
-test: test-agent test-server test-server-datastore test-cli test-lib test-ui ## Run all tests
+test: test-agent test-server test-server-datastore test-cli test-lib ## Run all tests
 
 ##@ Build
 
