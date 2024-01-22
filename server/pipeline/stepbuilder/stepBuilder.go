@@ -256,7 +256,6 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, envi
 			Hostname: reg.Address,
 			Username: reg.Username,
 			Password: reg.Password,
-			Email:    reg.Email,
 		})
 	}
 

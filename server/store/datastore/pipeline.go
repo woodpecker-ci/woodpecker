@@ -114,7 +114,6 @@ func (s storage) CreatePipeline(pipeline *model.Pipeline, stepList ...*model.Ste
 	pipeline.Number = number + 1
 
 	pipeline.Created = time.Now().UTC().Unix()
-	pipeline.Enqueued = pipeline.Created
 	// only Insert set auto created ID back to object
 	if _, err := sess.Insert(pipeline); err != nil {
 		return err
