@@ -8,19 +8,19 @@ Example pipeline using the Docker and Slack plugins:
 
 ```yaml
 steps:
-  build:
+  - name: build
     image: golang
     commands:
       - go build
       - go test
 
-  publish:
+  - name: publish
     image: plugins/docker
     settings:
       repo: foo/bar
       tags: latest
 
-  notify:
+  - name: notify
     image: plugins/slack
     settings:
       channel: dev

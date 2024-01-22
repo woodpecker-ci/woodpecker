@@ -30,7 +30,7 @@ Example pipeline configuration:
 
 ```yaml
 steps:
-  build:
+  - name: build
     image: golang
     commands:
       - go get
@@ -38,7 +38,7 @@ steps:
       - go test
 
 services:
-  postgres:
+  - name: postgres
     image: postgres:9.4.5
     environment:
       - POSTGRES_USER=myapp
@@ -48,20 +48,20 @@ Example pipeline configuration with multiple, serial steps:
 
 ```yaml
 steps:
-  backend:
+  - name: backend
     image: golang
     commands:
       - go get
       - go build
       - go test
 
-  frontend:
+  - name: frontend
     image: node:6
     commands:
       - npm install
       - npm test
 
-  notify:
+  - name: notify
     image: plugins/slack
     channel: developers
     username: woodpecker
