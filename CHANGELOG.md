@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.3.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.3.0) - 2024-01-22
+
+### ❤️ Thanks to all contributors! ❤️
+
+@qwerty287
+
+### 📈 Enhancement
+
+- Clean up models [[#3228](https://github.com/woodpecker-ci/woodpecker/pull/3228)]
+
 ## [2.2.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.2.2) - 2024-01-21
 
 ### ❤️ Thanks to all contributors! ❤️
