@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@eliasscosta, @qwerty287, @runephilosof-karnovgroup
+@qwerty287, @eliasscosta, @runephilosof-karnovgroup
 
 ### 📚 Documentation
 
@@ -17,6 +17,7 @@
 
 ### Misc
 
+- Fix prettier [[#3259](https://github.com/woodpecker-ci/woodpecker/pull/3259)]
 - fix: bug annotations [[#3255](https://github.com/woodpecker-ci/woodpecker/pull/3255)]
 - Update UI building in Makefile [[#3250](https://github.com/woodpecker-ci/woodpecker/pull/3250)]
 
