@@ -4,11 +4,20 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@qwerty287
+@qwerty287, @runephilosof-karnovgroup
+
+### 📚 Documentation
+
+- Use array syntax in docs [[#3242](https://github.com/woodpecker-ci/woodpecker/pull/3242)]
 
 ### 📈 Enhancement
 
+- Load more pipeline log lines (500 => 5000) [[#3212](https://github.com/woodpecker-ci/woodpecker/pull/3212)]
 - Clean up models [[#3228](https://github.com/woodpecker-ci/woodpecker/pull/3228)]
+
+### Misc
+
+- Update UI building in Makefile [[#3250](https://github.com/woodpecker-ci/woodpecker/pull/3250)]
 
 ## [2.2.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.2.2) - 2024-01-21
 
