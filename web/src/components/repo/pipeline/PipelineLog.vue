@@ -159,7 +159,7 @@ const ansiUp = ref(new AnsiUp());
 ansiUp.value.use_classes = true;
 const logBuffer = ref<LogLine[]>([]);
 
-const maxLineCount = 5000; // TODO: think about way to support lazy-loading more than last 5000 logs (#776)
+const maxLineCount = 5000; // TODO(2653): set back to 500 and implement lazy-loading support
 
 function isSelected(line: LogLine): boolean {
   return route.hash === `#L${line.number}`;
