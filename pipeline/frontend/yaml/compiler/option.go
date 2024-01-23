@@ -220,6 +220,13 @@ func WithNetrcOnlyTrusted(only bool) Option {
 	}
 }
 
+// WithUUID configures the compiler with the withUUID option
+func WithUUID(uuid bool) Option {
+	return func(compiler *Compiler) {
+		compiler.withUUID = uuid
+	}
+}
+
 type ProxyOptions struct {
 	NoProxy    string
 	HTTPProxy  string

@@ -32,7 +32,7 @@ import (
 
 func (c *Compiler) createProcess(container *yaml_types.Container, stepType backend_types.StepType) (*backend_types.Step, error) {
 	var (
-		uuid = ulid.Make()
+		uuid string
 
 		detached   bool
 		workingdir string
@@ -42,6 +42,10 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		networkMode = container.NetworkMode
 		// network    = container.Network
 	)
+
+	if c.withUUID {
+		uuid = ulid.Make().String()
+	}
 
 	networks := []backend_types.Conn{
 		{
@@ -175,7 +179,7 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 
 	return &backend_types.Step{
 		Name:           container.Name,
-		UUID:           uuid.String(),
+		UUID:           uuid,
 		Type:           stepType,
 		Image:          container.Image,
 		Pull:           container.Pull,
