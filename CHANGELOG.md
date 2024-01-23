@@ -1,10 +1,16 @@
 # Changelog
 
-## [2.3.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.3.0) - 2024-01-22
+## [2.3.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.3.0) - 2024-01-23
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@qwerty287, @eliasscosta, @runephilosof-karnovgroup
+@eliasscosta, @qwerty287, @runephilosof-karnovgroup
+
+### 🐛 Bug Fixes
+
+- fix: bug pod service without label service [[#3256](https://github.com/woodpecker-ci/woodpecker/pull/3256)]
+- Fix disabling PRs [[#3258](https://github.com/woodpecker-ci/woodpecker/pull/3258)]
+- fix: bug annotations [[#3255](https://github.com/woodpecker-ci/woodpecker/pull/3255)]
 
 ### 📚 Documentation
 
@@ -17,8 +23,8 @@
 
 ### Misc
 
+- Pin prettier version [[#3260](https://github.com/woodpecker-ci/woodpecker/pull/3260)]
 - Fix prettier [[#3259](https://github.com/woodpecker-ci/woodpecker/pull/3259)]
-- fix: bug annotations [[#3255](https://github.com/woodpecker-ci/woodpecker/pull/3255)]
 - Update UI building in Makefile [[#3250](https://github.com/woodpecker-ci/woodpecker/pull/3250)]
 
 ## [2.2.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.2.2) - 2024-01-21
