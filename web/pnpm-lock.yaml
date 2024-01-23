@@ -137,8 +137,8 @@ devDependencies:
     specifier: ^5.0.12
     version: 5.0.12(@types/node@20.11.5)
   vite-plugin-prismjs:
-    specifier: ^0.0.8
-    version: 0.0.8(prismjs@1.29.0)
+    specifier: ^0.0.11
+    version: 0.0.11(prismjs@1.29.0)
   vite-plugin-windicss:
     specifier: ^1.9.3
     version: 1.9.3(vite@5.0.12)
@@ -3676,8 +3676,8 @@ packages:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
     dev: true
 
-  /vite-plugin-prismjs@0.0.8(prismjs@1.29.0):
-    resolution: {integrity: sha512-mBPPMS/hwVUArdqCtp/oajZT7iq1qwJDDCciNZ3R5+Q5tQUuUHXtDKuZHYnklPLElNbENf2FyuOtC4FrgxQRAA==}
+  /vite-plugin-prismjs@0.0.11(prismjs@1.29.0):
+    resolution: {integrity: sha512-20NBQxg/zH+3FTrlU6BQTob720xkuXNYtrx7psAQ4E6pMcRDeLEK77QU9kXURU587+f2To7ASH1JVTGbXVV/vQ==}
     engines: {node: '>=12.0.0'}
     dependencies:
       '@babel/core': 7.23.7
