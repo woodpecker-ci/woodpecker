@@ -29,7 +29,7 @@ import (
 	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc/proto"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/logger/errorattr"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/logger"
 )
 
 // set grpc version on compile time to compare against server version response
@@ -90,7 +90,7 @@ func (c *client) Next(ctx context.Context, f rpc.Filter) (*rpc.Workflow, error) 
 			// https://github.com/woodpecker-ci/woodpecker/issues/717#issuecomment-1049365104
 			slog.Debug("gRPC: to many keepalive pings without sending data")
 		} else {
-			slog.Error("grpc error: done()", slog.Int("code", int(status.Code(err))), errorattr.Default(err))
+			slog.Error("grpc error: done()", slog.Int("code", int(status.Code(err))), logger.Error(err))
 		}
 
 		switch status.Code(err) {
@@ -121,7 +121,7 @@ func (c *client) Next(ctx context.Context, f rpc.Filter) (*rpc.Workflow, error) 
 	w.Timeout = res.GetWorkflow().GetTimeout()
 	w.Config = new(backend.Config)
 	if err := json.Unmarshal(res.GetWorkflow().GetPayload(), w.Config); err != nil {
-		slog.Error("could not unmarshal workflow config of '%s'", slog.String("workflow id", w.ID), errorattr.Default(err))
+		slog.Error("could not unmarshal workflow config of '%s'", slog.String("workflow id", w.ID), logger.Error(err))
 	}
 	return w, nil
 }
@@ -137,7 +137,7 @@ func (c *client) Wait(ctx context.Context, id string) (err error) {
 			break
 		}
 
-		slog.Error("grpc error: wait()", slog.Int("code", int(status.Code(err))), errorattr.Default(err))
+		slog.Error("grpc error: wait()", slog.Int("code", int(status.Code(err))), logger.Error(err))
 
 		switch status.Code(err) {
 		case
@@ -178,7 +178,7 @@ func (c *client) Init(ctx context.Context, id string, state rpc.State) (err erro
 			break
 		}
 
-		slog.Error("grpc error: init()", slog.Int("code", int(status.Code(err))), errorattr.Default(err))
+		slog.Error("grpc error: init()", slog.Int("code", int(status.Code(err))), logger.Error(err))
 
 		switch status.Code(err) {
 		case
@@ -219,7 +219,7 @@ func (c *client) Done(ctx context.Context, id string, state rpc.State) (err erro
 			break
 		}
 
-		slog.Error("grpc error: done()", slog.Int("code", int(status.Code(err))), errorattr.Default(err))
+		slog.Error("grpc error: done()", slog.Int("code", int(status.Code(err))), logger.Error(err))
 
 		switch status.Code(err) {
 		case
@@ -253,7 +253,7 @@ func (c *client) Extend(ctx context.Context, id string) (err error) {
 			break
 		}
 
-		slog.Error("grpc error: extend()", slog.Int("code", int(status.Code(err))), errorattr.Default(err))
+		slog.Error("grpc error: extend()", slog.Int("code", int(status.Code(err))), logger.Error(err))
 
 		switch status.Code(err) {
 		case
@@ -294,7 +294,7 @@ func (c *client) Update(ctx context.Context, id string, state rpc.State) (err er
 			break
 		}
 
-		slog.Error("grpc error: update()", slog.Int("code", int(status.Code(err))), errorattr.Default(err))
+		slog.Error("grpc error: update()", slog.Int("code", int(status.Code(err))), logger.Error(err))
 
 		switch status.Code(err) {
 		case
@@ -333,7 +333,7 @@ func (c *client) Log(ctx context.Context, logEntry *rpc.LogEntry) (err error) {
 			break
 		}
 
-		slog.Error("grpc error: log()", slog.Int("code", int(status.Code(err))), errorattr.Default(err))
+		slog.Error("grpc error: log()", slog.Int("code", int(status.Code(err))), logger.Error(err))
 
 		switch status.Code(err) {
 		case

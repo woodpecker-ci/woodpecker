@@ -21,6 +21,7 @@ import (
 	"os"
 
 	"github.com/6543/logfile-open"
+	"github.com/lmittmann/tint"
 	"github.com/urfave/cli/v2"
 )
 
@@ -54,7 +55,7 @@ var GlobalLoggerFlags = []cli.Flag{
 func SetupGlobalLogger(c *cli.Context, outputLvl bool) error {
 	logLevel := c.String("log-level")
 	pretty := c.Bool("pretty")
-	//noColor := c.Bool("nocolor")
+	noColor := c.Bool("nocolor")
 	logFile := c.String("log-file")
 
 	var file io.ReadWriteCloser
@@ -69,9 +70,14 @@ func SetupGlobalLogger(c *cli.Context, outputLvl bool) error {
 			return fmt.Errorf("could not open log file '%s': %w", logFile, err)
 		}
 		file = openFile
-		//noColor = true
+		noColor = true
 	}
 
+	// TODO remove in 3.x
+	if logLevel == "trace" {
+		logLevel = "debug"
+		slog.Warn("trace log level is deprecated")
+	}
 	level, err := parseLevel(logLevel)
 	if err != nil {
 		return err
@@ -86,10 +92,11 @@ func SetupGlobalLogger(c *cli.Context, outputLvl bool) error {
 	})
 
 	if pretty {
-		handler = slog.NewTextHandler(file, &slog.HandlerOptions{
+		handler = tint.NewHandler(file, &tint.Options{
 			AddSource:   addSource,
 			Level:       level,
 			ReplaceAttr: nil,
+			NoColor:     noColor,
 		})
 	}
 

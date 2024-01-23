@@ -27,7 +27,7 @@ import (
 	"golang.org/x/net/proxy"
 	"golang.org/x/oauth2"
 
-	"go.woodpecker-ci.org/woodpecker/v2/shared/logger/errorattr"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/logger"
 	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
@@ -54,7 +54,7 @@ func NewClient(c *cli.Context) (woodpecker.Client, error) {
 	// attempt to find system CA certs
 	certs, err := x509.SystemCertPool()
 	if err != nil {
-		slog.Error("failed to find system CA certs", errorattr.Default(err))
+		slog.Error("failed to find system CA certs", logger.Error(err))
 	}
 	tlsConfig := &tls.Config{
 		RootCAs:            certs,

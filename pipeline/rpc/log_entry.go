@@ -23,7 +23,7 @@ import (
 	"time"
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/shared"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/logger/errorattr"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/logger"
 )
 
 // Identifies the type of line in the logs.
@@ -89,7 +89,7 @@ func (w *LineWriter) Write(p []byte) (n int, err error) {
 		Line:     w.num,
 	}
 	if err := w.peer.Log(context.Background(), line); err != nil {
-		slog.Error("fail to write pipeline log to peer", errorattr.Default(err), slog.String("step-uuid", w.stepUUID))
+		slog.Error("fail to write pipeline log to peer", logger.Error(err), slog.String("step-uuid", w.stepUUID))
 	}
 	w.num++
 

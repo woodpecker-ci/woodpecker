@@ -31,6 +31,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/kinbiko/jsonassert v1.1.1
 	github.com/lib/pq v1.10.9
+	github.com/lmittmann/tint v1.0.4
 	github.com/mattn/go-sqlite3 v1.14.19
 	github.com/moby/moby v24.0.7+incompatible
 	github.com/moby/term v0.5.0

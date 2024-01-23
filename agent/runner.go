@@ -29,7 +29,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline"
 	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/logger/errorattr"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
@@ -105,7 +104,7 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 
 		if werr := r.client.Wait(workflowCtx, work.ID); werr != nil {
 			canceled.SetTo(true)
-			slog.Warn("cancel signal received", errorattr.Default(werr))
+			slog.Warn("cancel signal received", logger.Error(werr))
 
 			cancel()
 		} else {
@@ -124,7 +123,7 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 				logger.Debug("pipeline lease renewed")
 
 				if err := r.client.Extend(workflowCtx, work.ID); err != nil {
-					slog.Error("extending pipeline deadline failed", errorattr.Default(err))
+					slog.Error("extending pipeline deadline failed", logger.Error(err))
 				}
 			}
 		}
@@ -135,7 +134,7 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 
 	err = r.client.Init(runnerCtx, work.ID, state)
 	if err != nil {
-		slog.Error("pipeline initialization failed", errorattr.Default(err))
+		slog.Error("pipeline initialization failed", logger.Error(err))
 	}
 
 	var uploads sync.WaitGroup
@@ -183,7 +182,7 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 	slog.Debug("updating pipeline status", slog.String("error", state.Error), slog.Int("exit_code", state.ExitCode))
 
 	if err := r.client.Done(runnerCtx, work.ID, state); err != nil {
-		slog.Error("updating pipeline status failed", errorattr.Default(err))
+		slog.Error("updating pipeline status failed", logger.Error(err))
 	} else {
 		slog.Debug("updating pipeline status complete")
 	}

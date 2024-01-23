@@ -22,7 +22,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline"
 	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/logger/errorattr"
 )
 
 func (r *Runner) createLogger(logger *slog.Logger, uploads *sync.WaitGroup, workflow *rpc.Workflow) pipeline.Logger {
@@ -40,7 +39,7 @@ func (r *Runner) createLogger(logger *slog.Logger, uploads *sync.WaitGroup, work
 
 		logStream := rpc.NewLineWriter(r.client, step.UUID, secrets...)
 		if _, err := io.Copy(logStream, rc); err != nil {
-			slog.Error("copy limited logStream part", errorattr.Default(err))
+			slog.Error("copy limited logStream part", logger.Error(err))
 		}
 
 		loglogger.Debug("log stream copied, close ...")

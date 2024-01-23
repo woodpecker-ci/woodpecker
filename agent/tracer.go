@@ -23,7 +23,6 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/logger/errorattr"
 )
 
 func (r *Runner) createTracer(ctxmeta context.Context, logger *slog.Logger, workflow *rpc.Workflow) pipeline.TraceFunc {
@@ -31,7 +30,7 @@ func (r *Runner) createTracer(ctxmeta context.Context, logger *slog.Logger, work
 		steplogger := logger.With(
 			slog.String("image", state.Pipeline.Step.Image),
 			slog.String("workflowID", workflow.ID),
-			errorattr.Default(state.Process.Error),
+			logger.Error(state.Process.Error),
 			slog.Int("exit_code", state.Process.ExitCode),
 			slog.Bool("exited", state.Process.Exited))
 
@@ -50,7 +49,7 @@ func (r *Runner) createTracer(ctxmeta context.Context, logger *slog.Logger, work
 			steplogger.Debug("update step status")
 
 			if uerr := r.client.Update(ctxmeta, workflow.ID, stepState); uerr != nil {
-				steplogger.Debug("update step status error", errorattr.Default(uerr))
+				steplogger.Debug("update step status error", logger.Error(uerr))
 			}
 
 			steplogger.Debug("update step status complete")
