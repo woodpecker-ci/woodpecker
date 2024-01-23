@@ -8,7 +8,7 @@ Volumes are only available to trusted repositories and for security reasons shou
 
 ```diff
  steps:
-   build:
+   - name: build
      image: docker
      commands:
        - docker build --rm -t octocat/hello-world .

@@ -70,8 +70,6 @@ func PostRegistry(c *gin.Context) {
 		Address:  in.Address,
 		Username: in.Username,
 		Password: in.Password,
-		Token:    in.Token,
-		Email:    in.Email,
 	}
 	if err := registry.Validate(); err != nil {
 		c.String(http.StatusBadRequest, "Error inserting registry. %s", err)
@@ -118,12 +116,6 @@ func PatchRegistry(c *gin.Context) {
 	}
 	if in.Password != "" {
 		registry.Password = in.Password
-	}
-	if in.Token != "" {
-		registry.Token = in.Token
-	}
-	if in.Email != "" {
-		registry.Email = in.Email
 	}
 
 	if err := registry.Validate(); err != nil {

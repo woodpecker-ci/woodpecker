@@ -41,8 +41,6 @@ body:
         #   required: true
         - label: Checked that the feature isn't part of the `next` version already [https://woodpecker-ci.org/faq#which-version-of-woodpecker-should-i-use]
           required: true
-        - label: Read the [Contributing Guidelines](https://github.com/woodpecker-ci/woodpecker/blob/main/CONTRIBUTING.md).
-          required: true
         - label: Read the [docs](https://woodpecker-ci.org/docs/intro).
           required: true
         - label: Check that there isn't already an [issue](https://github.com/woodpecker-ci/woodpecker/issues) that request the same feature to avoid creating a duplicate.

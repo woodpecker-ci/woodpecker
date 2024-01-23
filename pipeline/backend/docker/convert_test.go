@@ -151,7 +151,7 @@ func TestToConfigFull(t *testing.T) {
 		OnFailure:    true,
 		OnSuccess:    true,
 		Failure:      "fail",
-		AuthConfig:   backend.Auth{Username: "user", Password: "123456", Email: "user@example.com"},
+		AuthConfig:   backend.Auth{Username: "user", Password: "123456"},
 		NetworkMode:  "bridge",
 		Ports:        []backend.Port{{Number: 21}, {Number: 22}},
 	})

@@ -18,7 +18,7 @@ once their usage is declared in the `secrets` section:
 
 ```diff
  steps:
-   docker:
+   - name: docker
      image: docker
      commands:
 +      - echo $DOCKER_USERNAME
@@ -35,7 +35,7 @@ In this example, the secret named `secret_token` would be passed to the setting 
 
 ```diff
  steps:
-   docker:
+   - name: docker
      image: my-plugin
      settings:
 +      token:
@@ -48,7 +48,7 @@ Please note parameter expressions are subject to pre-processing. When using secr
 
 ```diff
  steps:
-   docker:
+   - name: docker
      image: docker
      commands:
 -      - echo ${DOCKER_USERNAME}
@@ -64,7 +64,7 @@ There may be scenarios where you are required to store secrets using alternate n
 
 ```diff
  steps:
-   docker:
+   - name: docker
      image: plugins/docker
      repo: octocat/hello-world
      tags: latest

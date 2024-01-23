@@ -8,17 +8,17 @@ In the example below, the MySQL service is assigned the hostname `database` and 
 
 ```yaml
 steps:
-  build:
+  - name: build
     image: golang
     commands:
       - go build
       - go test
 
 services:
-  database:
+  - name: database
     image: mysql
 
-  cache:
+  - name: cache
     image: redis
 ```
 
@@ -26,12 +26,12 @@ You can define a port and a protocol explicitly:
 
 ```yaml
 services:
-  database:
+  - name: database
     image: mysql
     ports:
       - 3306
 
-  wireguard:
+  - name: wireguard
     image: wg
     ports:
       - 51820/udp
@@ -43,13 +43,13 @@ Service containers generally expose environment variables to customize service s
 
 ```diff
  services:
-   database:
+   - name: database
      image: mysql
 +    environment:
 +      - MYSQL_DATABASE=test
 +      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
 
-   cache:
+   - name: cache
      image: redis
 ```
 
@@ -59,17 +59,17 @@ Service and long running containers can also be included in the pipeline section
 
 ```diff
  steps:
-   build:
+   - name: build
      image: golang
      commands:
        - go build
        - go test
 
-   database:
+   - name: database
      image: redis
 +    detach: true
 
-   test:
+   - name: test
      image: golang
      commands:
        - go test
@@ -83,7 +83,7 @@ Service containers require time to initialize and begin to accept connections. I
 
 ```diff
  steps:
-   test:
+   - name: test
      image: golang
      commands:
 +      - sleep 15
@@ -91,7 +91,7 @@ Service containers require time to initialize and begin to accept connections. I
        - go test
 
  services:
-   database:
+   - name: database
      image: mysql
 ```
 
@@ -99,13 +99,13 @@ Service containers require time to initialize and begin to accept connections. I
 
 ```yaml
 services:
-  database:
+  - name: database
     image: mysql
     environment:
       - MYSQL_DATABASE=test
       - MYSQL_ROOT_PASSWORD=example
 steps:
-  get-version:
+  - name: get-version
     image: ubuntu
     commands:
       - ( apt update && apt dist-upgrade -y && apt install -y mysql-client 2>&1 )> /dev/null
