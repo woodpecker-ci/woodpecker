@@ -49,6 +49,7 @@ func toRepo(from *gitea.Repository) *model.Repo {
 		CloneSSH:      from.SSHURL,
 		Branch:        from.DefaultBranch,
 		Perm:          toPerm(from.Permissions),
+		PREnabled:     from.HasPullRequests,
 	}
 }
 
@@ -76,7 +77,7 @@ func pipelineFromPush(hook *pushHook) *model.Pipeline {
 		fixMalformedAvatar(hook.Sender.AvatarURL),
 	)
 
-	message := ""
+	var message string
 	link := hook.Compare
 	if len(hook.Commits) > 0 {
 		message = hook.Commits[0].Message
@@ -147,8 +148,14 @@ func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 		hook.Repo.HTMLURL,
 		fixMalformedAvatar(hook.PullRequest.Poster.AvatarURL),
 	)
+
+	event := model.EventPull
+	if hook.Action == actionClose {
+		event = model.EventPullClosed
+	}
+
 	pipeline := &model.Pipeline{
-		Event:    model.EventPull,
+		Event:    event,
 		Commit:   hook.PullRequest.Head.Sha,
 		ForgeURL: hook.PullRequest.URL,
 		Ref:      fmt.Sprintf("refs/pull/%d/head", hook.Number),
@@ -164,6 +171,7 @@ func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 		),
 		PullRequestLabels: convertLabels(hook.PullRequest.Labels),
 	}
+
 	return pipeline
 }
 
@@ -189,7 +197,7 @@ func fixMalformedAvatar(url string) string {
 	}
 	index = strings.Index(url, "//avatars/")
 	if index != -1 {
-		return strings.Replace(url, "//avatars/", "/avatars/", -1)
+		return strings.ReplaceAll(url, "//avatars/", "/avatars/")
 	}
 	return url
 }

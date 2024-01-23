@@ -35,11 +35,8 @@ func TestAgentFindByToken(t *testing.T) {
 	assert.NoError(t, err)
 
 	_agent, err := store.AgentFindByToken(agent.Token)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	assert.Equal(t, int64(1), _agent.ID)
+	assert.NoError(t, err)
+	assert.EqualValues(t, 1, _agent.ID)
 
 	_agent, err = store.AgentFindByToken("")
 	assert.ErrorIs(t, err, ErrNoTokenProvided)

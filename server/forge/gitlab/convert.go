@@ -52,6 +52,7 @@ func (g *GitLab) convertGitLabRepo(_repo *gitlab.Project) (*model.Repo, error) {
 			Push:  isWrite(_repo),
 			Admin: isAdmin(_repo),
 		},
+		PREnabled: _repo.MergeRequestsEnabled,
 	}
 
 	if len(repo.Avatar) != 0 && !strings.HasPrefix(repo.Avatar, "http") {
@@ -69,11 +70,12 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 	source := hook.ObjectAttributes.Source
 	obj := hook.ObjectAttributes
 
-	if target == nil && source == nil {
+	switch {
+	case target == nil && source == nil:
 		return 0, nil, nil, fmt.Errorf("target and source keys expected in merge request hook")
-	} else if target == nil {
+	case target == nil:
 		return 0, nil, nil, fmt.Errorf("target key expected in merge request hook")
-	} else if source == nil {
+	case source == nil:
 		return 0, nil, nil, fmt.Errorf("source key expected in merge request hook")
 	}
 
@@ -110,12 +112,14 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 	}
 
 	pipeline.Event = model.EventPull
+	if obj.State == "closed" {
+		pipeline.Event = model.EventPullClosed
+	}
 
 	lastCommit := obj.LastCommit
 
 	pipeline.Message = lastCommit.Message
 	pipeline.Commit = lastCommit.ID
-	pipeline.CloneURL = obj.Source.HTTPURL
 
 	pipeline.Ref = fmt.Sprintf(mergeRefs, obj.IID)
 	pipeline.Branch = obj.SourceBranch
@@ -251,7 +255,7 @@ func getUserAvatar(email string) string {
 func extractFromPath(str string) (string, string, error) {
 	s := strings.Split(str, "/")
 	if len(s) < 2 {
-		return "", "", fmt.Errorf("Minimum match not found")
+		return "", "", fmt.Errorf("minimum match not found")
 	}
 	return s[0], s[1], nil
 }

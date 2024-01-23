@@ -42,8 +42,8 @@ import (
 //	@Produce	json
 //	@Success	200	{object}	Repo
 //	@Tags		Repositories
-//	@Param		Authorization			header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		forge_remote_id		query		string	true	"the id of a repository at the forge"
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		forge_remote_id	query	string	true	"the id of a repository at the forge"
 func PostRepo(c *gin.Context) {
 	forge := server.Config.Services.Forge
 	_store := store.FromContext(c)
@@ -61,7 +61,7 @@ func PostRepo(c *gin.Context) {
 		c.String(http.StatusConflict, "Repository is already active.")
 		return
 	} else if err != nil && !errors.Is(err, types.RecordNotExist) {
-		msg := "Could not get repo by remote id from store."
+		msg := "could not get repo by remote id from store."
 		log.Error().Err(err).Msg(msg)
 		c.String(http.StatusInternalServerError, msg)
 		return
@@ -115,7 +115,7 @@ func PostRepo(c *gin.Context) {
 	t := token.New(token.HookToken, repo.FullName)
 	sig, err := t.Sign(repo.Hash)
 	if err != nil {
-		msg := "Could not generate new jwt token."
+		msg := "could not generate new jwt token."
 		log.Error().Err(err).Msg(msg)
 		c.String(http.StatusInternalServerError, msg)
 		return
@@ -139,7 +139,7 @@ func PostRepo(c *gin.Context) {
 	if errors.Is(err, types.RecordNotExist) {
 		org, err = forge.Org(c, user, repo.Owner)
 		if err != nil {
-			msg := "Could not fetch organization from forge."
+			msg := "could not fetch organization from forge."
 			log.Error().Err(err).Msg(msg)
 			c.String(http.StatusInternalServerError, msg)
 			return
@@ -147,7 +147,7 @@ func PostRepo(c *gin.Context) {
 
 		err = _store.OrgCreate(org)
 		if err != nil {
-			msg := "Could not create organization in store."
+			msg := "could not create organization in store."
 			log.Error().Err(err).Msg(msg)
 			c.String(http.StatusInternalServerError, msg)
 			return
@@ -158,7 +158,7 @@ func PostRepo(c *gin.Context) {
 
 	err = forge.Activate(c, user, repo, hookURL)
 	if err != nil {
-		msg := "Could not create webhook in forge."
+		msg := "could not create webhook in forge."
 		log.Error().Err(err).Msg(msg)
 		c.String(http.StatusInternalServerError, msg)
 		return
@@ -170,7 +170,7 @@ func PostRepo(c *gin.Context) {
 		err = _store.CreateRepo(repo)
 	}
 	if err != nil {
-		msg := "Could not create/update repo in store."
+		msg := "could not create/update repo in store."
 		log.Error().Err(err).Msg(msg)
 		c.String(http.StatusInternalServerError, msg)
 		return
@@ -196,8 +196,8 @@ func PostRepo(c *gin.Context) {
 //	@Produce	json
 //	@Success	200	{object}	Repo
 //	@Tags		Repositories
-//	@Param		Authorization	header	string			true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		Authorization	header	string		true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id			path	int			true	"the repository id"
 //	@Param		repo			body	RepoPatch	true	"the repository's information"
 func PatchRepo(c *gin.Context) {
 	_store := store.FromContext(c)
@@ -318,8 +318,7 @@ func GetRepo(c *gin.Context) {
 //	@Success		200	{object}	Perm
 //	@Tags			Repositories
 //	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param			owner			path	string	true	"the repository owner's name"
-//	@Param			name			path	string	true	"the repository name"
+//	@Param			repo_id			path	int		true	"the repository id"
 func GetRepoPermissions(c *gin.Context) {
 	perm := session.Perm(c)
 	c.JSON(http.StatusOK, perm)
@@ -401,7 +400,7 @@ func DeleteRepo(c *gin.Context) {
 
 	if remove {
 		if err := _store.DeleteRepo(repo); err != nil {
-			handleDbError(c, err)
+			handleDBError(c, err)
 			return
 		}
 	}
@@ -523,7 +522,7 @@ func MoveRepo(c *gin.Context) {
 //	@Success	200	{array}	Repo
 //	@Tags		Repositories
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		active				query	bool	false	"only list active repos"
+//	@Param		active			query	bool	false	"only list active repos"
 //	@Param		page			query	int		false	"for response pagination, page offset number"	default(1)
 //	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
 func GetAllRepos(c *gin.Context) {
@@ -577,7 +576,7 @@ func repairRepo(c *gin.Context, repo *model.Repo, withPerms, skipOnErr bool) {
 			if !skipOnErr {
 				c.AbortWithStatus(http.StatusNotFound)
 			}
-			log.Error().Err(err).Msgf("could not get user on repo repair")
+			log.Error().Err(err).Msg("could not get user on repo repair")
 		} else {
 			_ = c.AbortWithError(http.StatusInternalServerError, err)
 		}

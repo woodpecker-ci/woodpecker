@@ -74,4 +74,10 @@ var Flags = []cli.Flag{
 		Usage:   "duration to wait before retrying to connect to the server",
 		Value:   time.Second * 2,
 	},
+	&cli.StringSliceFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_K8S_PULL_SECRET_NAMES"},
+		Name:    "backend-k8s-pod-image-pull-secret-names",
+		Usage:   "backend k8s pull secret names for private registries",
+		Value:   cli.NewStringSlice("regcred"),
+	},
 }

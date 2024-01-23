@@ -30,9 +30,6 @@ export type Pipeline = {
   // When the pipeline was updated last time in database.
   updated_at: number;
 
-  // When the pipeline was enqueued.
-  enqueued_at: number;
-
   // When the pipeline began execution.
   started_at: number;
 
@@ -149,9 +146,9 @@ export type PipelineFeed = Pipeline & {
 };
 
 export enum StepType {
-  Clone = 1,
-  Service,
-  Plugin,
-  Commands,
-  Cache,
+  Clone = 'clone',
+  Service = 'service',
+  Plugin = 'plugin',
+  Commands = 'commands',
+  Cache = 'cache',
 }

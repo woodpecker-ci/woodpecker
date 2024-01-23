@@ -23,7 +23,9 @@ if (!repo || !repoPermissions) {
 }
 
 const allPipelines = inject<Ref<Pipeline[]>>('pipelines');
-const pipelines = computed(
-  () => allPipelines?.value.filter((b) => b.branch === branch.value && b.event !== 'pull_request'),
+const pipelines = computed(() =>
+  allPipelines?.value.filter(
+    (b) => b.branch === branch.value && b.event !== 'pull_request' && b.event !== 'pull_request_closed',
+  ),
 );
 </script>

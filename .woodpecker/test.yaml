@@ -1,0 +1,173 @@
+when:
+  - event: pull_request
+  - event: push
+    branch:
+      - ${CI_REPO_DEFAULT_BRANCH}
+      - renovate/*
+
+variables:
+  - &golang_image 'docker.io/golang:1.21.5'
+  - &when
+    - path: &when_path # related config files
+        - '.woodpecker/test.yaml'
+        - '.golangci.yaml'
+        # go source code
+        - '**/*.go'
+        - 'go.*'
+        # schema changes
+        - 'pipeline/schema/**'
+      event: pull_request
+    - event: push
+      branch: renovate/*
+      path: *when_path
+
+steps:
+  vendor:
+    image: *golang_image
+    commands:
+      - go mod vendor
+    when:
+      path:
+        - <<: *when_path
+        - '.woodpecker/**'
+
+  lint-pipeline:
+    depends_on:
+      - vendor
+    image: *golang_image
+    commands:
+      - go run go.woodpecker-ci.org/woodpecker/v2/cmd/cli lint
+    when:
+      - event: pull_request
+        path:
+          - '.woodpecker/**'
+
+  dummy-web:
+    image: *golang_image
+    commands:
+      - mkdir -p web/dist/
+      - echo "test" > web/dist/index.html
+    when:
+      - path: *when_path
+
+  lint:
+    depends_on:
+      - vendor
+    image: *golang_image
+    commands:
+      - make lint
+    when: *when
+
+  check-swagger:
+    depends_on:
+      - vendor
+    image: *golang_image
+    commands:
+      - 'make generate-swagger'
+      - 'DIFF=$(git diff | head)'
+      - '[ -n "$DIFF" ] && { echo "swagger not up to date, exec `make generate-swagger` and commit"; exit 1; } || true'
+    when: *when
+
+  lint-editorconfig:
+    image: docker.io/mstruebing/editorconfig-checker:2.7.2
+    when:
+      - event: pull_request
+      - event: push
+        branch: renovate/*
+
+  lint-license-header:
+    image: *golang_image
+    commands:
+      - go install github.com/google/addlicense@latest
+      - 'addlicense -check -ignore "vendor/**" **/*.go'
+    when: *when
+
+  prettier:
+    image: docker.io/woodpeckerci/plugin-prettier:0.1.0
+    settings:
+      version: 3.2.4
+    when:
+      - event: pull_request
+      - event: push
+        branch: renovate/*
+
+  test:
+    depends_on:
+      - vendor
+    image: *golang_image
+    commands:
+      - make test-agent
+      - make test-server
+      - make test-cli
+      - make test-lib
+    when:
+      - path: *when_path
+
+  sqlite:
+    depends_on:
+      - vendor
+    image: *golang_image
+    environment:
+      - WOODPECKER_DATABASE_DRIVER=sqlite3
+    commands:
+      - make test-server-datastore-coverage
+    when:
+      - path: *when_path
+
+  postgres:
+    depends_on:
+      - vendor
+    image: *golang_image
+    environment:
+      - WOODPECKER_DATABASE_DRIVER=postgres
+      - WOODPECKER_DATABASE_DATASOURCE=host=postgres user=postgres dbname=postgres sslmode=disable
+    commands:
+      - make test-server-datastore
+    when: *when
+
+  mysql:
+    depends_on:
+      - vendor
+    image: *golang_image
+    environment:
+      - WOODPECKER_DATABASE_DRIVER=mysql
+      - WOODPECKER_DATABASE_DATASOURCE=root@tcp(mysql:3306)/test?parseTime=true
+    commands:
+      - make test-server-datastore
+    when: *when
+
+  codecov:
+    depends_on:
+      - test
+      - sqlite
+    pull: true
+    image: docker.io/woodpeckerci/plugin-codecov:2.1.2
+    settings:
+      files:
+        - agent-coverage.out
+        - cli-coverage.out
+        - coverage.out
+        - server-coverage.out
+        - datastore-coverage.out
+      token:
+        from_secret: codecov_token
+    when:
+      - path: *when_path
+    failure: ignore
+
+services:
+  postgres:
+    image: docker.io/postgres:16
+    ports: ['5432']
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    when: *when
+
+  mysql:
+    image: docker.io/mysql:8.2.0
+    ports: ['3306']
+    environment:
+      - MYSQL_DATABASE=test
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+    when: *when

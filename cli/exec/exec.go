@@ -25,6 +25,7 @@ import (
 	"strings"
 
 	"github.com/drone/envsubst"
+	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
@@ -38,7 +39,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/compiler"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/matrix"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/multipart"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
@@ -94,7 +94,7 @@ func runExec(c *cli.Context, file, repoPath string) error {
 
 	axes, err := matrix.ParseString(string(dat))
 	if err != nil {
-		return fmt.Errorf("Parse matrix fail")
+		return fmt.Errorf("parse matrix fail")
 	}
 
 	if len(axes) == 0 {
@@ -121,13 +121,13 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 		})
 	}
 
-	droneEnv := make(map[string]string)
+	pipelineEnv := make(map[string]string)
 	for _, env := range c.StringSlice("env") {
 		envs := strings.SplitN(env, "=", 2)
-		droneEnv[envs[0]] = envs[1]
-		if _, exists := environ[envs[0]]; exists {
-			// don't override existing values
-			continue
+		pipelineEnv[envs[0]] = envs[1]
+		if oldVar, exists := environ[envs[0]]; exists {
+			// override existing values, but print a warning
+			log.Warn().Msgf("environment variable '%s' had value '%s', but got overwritten", envs[0], oldVar)
 		}
 		environ[envs[0]] = envs[1]
 	}
@@ -206,14 +206,14 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 		),
 		compiler.WithMetadata(metadata),
 		compiler.WithSecret(secrets...),
-		compiler.WithEnviron(droneEnv),
+		compiler.WithEnviron(pipelineEnv),
 	).Compile(conf)
 	if err != nil {
 		return err
 	}
 
 	backendCtx := context.WithValue(c.Context, backendTypes.CliContext, c)
-	backend.Init(backendCtx)
+	backend.Init()
 
 	backendEngine, err := backend.FindBackend(backendCtx, c.String("backend-engine"))
 	if err != nil {
@@ -252,13 +252,8 @@ func convertPathForWindows(path string) string {
 	return filepath.ToSlash(path)
 }
 
-var defaultLogger = pipeline.LogFunc(func(step *backendTypes.Step, rc multipart.Reader) error {
-	part, err := rc.NextPart()
-	if err != nil {
-		return err
-	}
-
-	logStream := NewLineWriter(step.Alias, step.UUID)
-	_, err = io.Copy(logStream, part)
+var defaultLogger = pipeline.Logger(func(step *backendTypes.Step, rc io.Reader) error {
+	logStream := NewLineWriter(step.Name, step.UUID)
+	_, err := io.Copy(logStream, rc)
 	return err
 })

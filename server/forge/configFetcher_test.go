@@ -310,8 +310,8 @@ func TestFetch(t *testing.T) {
 			}
 
 			// if the previous mocks do not match return not found errors
-			f.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("File not found"))
-			f.On("Dir", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("Directory not found"))
+			f.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("file not found"))
+			f.On("Dir", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("directory not found"))
 
 			configFetcher := forge.NewConfigFetcher(
 				f,
@@ -516,8 +516,8 @@ func TestFetchFromConfigService(t *testing.T) {
 			}
 
 			// if the previous mocks do not match return not found errors
-			f.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("File not found"))
-			f.On("Dir", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("Directory not found"))
+			f.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("file not found"))
+			f.On("Dir", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("directory not found"))
 
 			f.On("Netrc", mock.Anything, mock.Anything).Return(&model.Netrc{Machine: "mock", Login: "mock", Password: "mock"}, nil)
 

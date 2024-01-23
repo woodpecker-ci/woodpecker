@@ -34,7 +34,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/common"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
@@ -127,7 +126,7 @@ func (g *GitLab) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 
 	token, err := config.Exchange(oauth2Ctx, code)
 	if err != nil {
-		return nil, fmt.Errorf("Error exchanging token. %w", err)
+		return nil, fmt.Errorf("error exchanging token: %w", err)
 	}
 
 	client, err := newClient(g.url, token.AccessToken, g.SkipVerify)
@@ -228,21 +227,23 @@ func (g *GitLab) Teams(ctx context.Context, user *model.User) ([]*model.Team, er
 }
 
 // getProject fetches the named repository from the forge.
-func (g *GitLab) getProject(ctx context.Context, client *gitlab.Client, mr *model.Repo, owner, name string) (*gitlab.Project, error) {
+func (g *GitLab) getProject(ctx context.Context, client *gitlab.Client, forgeRemoteID model.ForgeRemoteID, owner, name string) (*gitlab.Project, error) {
 	var (
 		repo *gitlab.Project
 		err  error
 	)
-	if mr != nil && mr.ForgeRemoteID.IsValid() {
-		repo, _, err = client.Projects.GetProject(mr.ForgeRemoteID, nil, gitlab.WithContext(ctx))
-	} else {
-		repo, _, err = client.Projects.GetProject(fmt.Sprintf("%s/%s", owner, name), nil, gitlab.WithContext(ctx))
-	}
-	if err != nil {
-		return nil, err
+
+	if forgeRemoteID.IsValid() {
+		intID, err := strconv.Atoi(string(forgeRemoteID))
+		if err != nil {
+			return nil, err
+		}
+		repo, _, err = client.Projects.GetProject(intID, nil, gitlab.WithContext(ctx))
+		return repo, err
 	}
 
-	return repo, nil
+	repo, _, err = client.Projects.GetProject(fmt.Sprintf("%s/%s", owner, name), nil, gitlab.WithContext(ctx))
+	return repo, err
 }
 
 // Repo fetches the repository from the forge.
@@ -252,19 +253,7 @@ func (g *GitLab) Repo(ctx context.Context, user *model.User, remoteID model.Forg
 		return nil, err
 	}
 
-	if remoteID.IsValid() {
-		intID, err := strconv.ParseInt(string(remoteID), 10, 64)
-		if err != nil {
-			return nil, err
-		}
-		_repo, _, err := client.Projects.GetProject(int(intID), nil, gitlab.WithContext(ctx))
-		if err != nil {
-			return nil, err
-		}
-		return g.convertGitLabRepo(_repo)
-	}
-
-	_repo, err := g.getProject(ctx, client, nil, owner, name)
+	_repo, err := g.getProject(ctx, client, remoteID, owner, name)
 	if err != nil {
 		return nil, err
 	}
@@ -319,7 +308,7 @@ func (g *GitLab) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 		return nil, err
 	}
 
-	_repo, err := g.getProject(ctx, client, r, r.Owner, r.Name)
+	_repo, err := g.getProject(ctx, client, r.ForgeRemoteID, r.Owner, r.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -349,13 +338,13 @@ func (g *GitLab) File(ctx context.Context, user *model.User, repo *model.Repo, p
 	if err != nil {
 		return nil, err
 	}
-	_repo, err := g.getProject(ctx, client, repo, repo.Owner, repo.Name)
+	_repo, err := g.getProject(ctx, client, repo.ForgeRemoteID, repo.Owner, repo.Name)
 	if err != nil {
 		return nil, err
 	}
 	file, resp, err := client.RepositoryFiles.GetRawFile(_repo.ID, fileName, &gitlab.GetRawFileOptions{Ref: &pipeline.Commit}, gitlab.WithContext(ctx))
 	if resp != nil && resp.StatusCode == http.StatusNotFound {
-		return nil, errors.Join(err, &types.ErrConfigNotFound{Configs: []string{fileName}})
+		return nil, errors.Join(err, &forge_types.ErrConfigNotFound{Configs: []string{fileName}})
 	}
 	return file, err
 }
@@ -368,7 +357,7 @@ func (g *GitLab) Dir(ctx context.Context, user *model.User, repo *model.Repo, pi
 	}
 
 	files := make([]*forge_types.FileMeta, 0, perPage)
-	_repo, err := g.getProject(ctx, client, repo, repo.Owner, repo.Name)
+	_repo, err := g.getProject(ctx, client, repo.ForgeRemoteID, repo.Owner, repo.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -393,7 +382,7 @@ func (g *GitLab) Dir(ctx context.Context, user *model.User, repo *model.Repo, pi
 			}
 			data, err := g.File(ctx, user, repo, pipeline, batch[i].Path)
 			if err != nil {
-				if errors.Is(err, &types.ErrConfigNotFound{}) {
+				if errors.Is(err, &forge_types.ErrConfigNotFound{}) {
 					return nil, fmt.Errorf("git tree reported existence of file but we got: %s", err.Error())
 				}
 				return nil, err
@@ -419,7 +408,7 @@ func (g *GitLab) Status(ctx context.Context, user *model.User, repo *model.Repo,
 		return err
 	}
 
-	_repo, err := g.getProject(ctx, client, repo, repo.Owner, repo.Name)
+	_repo, err := g.getProject(ctx, client, repo.ForgeRemoteID, repo.Owner, repo.Name)
 	if err != nil {
 		return err
 	}
@@ -476,7 +465,7 @@ func (g *GitLab) Activate(ctx context.Context, user *model.User, repo *model.Rep
 		return err
 	}
 
-	_repo, err := g.getProject(ctx, client, repo, repo.Owner, repo.Name)
+	_repo, err := g.getProject(ctx, client, repo.ForgeRemoteID, repo.Owner, repo.Name)
 	if err != nil {
 		return err
 	}
@@ -511,7 +500,7 @@ func (g *GitLab) Deactivate(ctx context.Context, user *model.User, repo *model.R
 		return err
 	}
 
-	_repo, err := g.getProject(ctx, client, repo, repo.Owner, repo.Name)
+	_repo, err := g.getProject(ctx, client, repo.ForgeRemoteID, repo.Owner, repo.Name)
 	if err != nil {
 		return err
 	}
@@ -565,7 +554,7 @@ func (g *GitLab) Branches(ctx context.Context, user *model.User, repo *model.Rep
 		return nil, err
 	}
 
-	_repo, err := g.getProject(ctx, client, repo, repo.Owner, repo.Name)
+	_repo, err := g.getProject(ctx, client, repo.ForgeRemoteID, repo.Owner, repo.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -592,7 +581,7 @@ func (g *GitLab) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 		return "", err
 	}
 
-	_repo, err := g.getProject(ctx, client, r, r.Owner, r.Name)
+	_repo, err := g.getProject(ctx, client, r.ForgeRemoteID, r.Owner, r.Name)
 	if err != nil {
 		return "", err
 	}
@@ -761,7 +750,7 @@ func (g *GitLab) loadChangedFilesFromMergeRequest(ctx context.Context, tmpRepo *
 		return nil, err
 	}
 
-	_repo, err := g.getProject(ctx, client, repo, repo.Owner, repo.Name)
+	_repo, err := g.getProject(ctx, client, repo.ForgeRemoteID, repo.Owner, repo.Name)
 	if err != nil {
 		return nil, err
 	}

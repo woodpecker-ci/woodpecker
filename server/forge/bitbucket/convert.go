@@ -62,6 +62,7 @@ func convertRepo(from *internal.Repo, perm *internal.RepoPerm) *model.Repo {
 		SCMKind:       model.SCMKind(from.Scm),
 		Branch:        from.Mainbranch.Name,
 		Perm:          convertPerm(perm),
+		PREnabled:     true,
 	}
 	if repo.SCMKind == model.RepoHg {
 		repo.Branch = "default"
@@ -136,7 +137,7 @@ func convertUser(from *internal.Account, token *oauth2.Token) *model.User {
 		Secret:        token.RefreshToken,
 		Expiry:        token.Expiry.UTC().Unix(),
 		Avatar:        from.Links.Avatar.Href,
-		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(from.ID)),
+		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(from.UUID)),
 	}
 }
 
@@ -162,15 +163,19 @@ func convertWorkspace(from *internal.Workspace) *model.Team {
 // convertPullHook is a helper function used to convert a Bitbucket pull request
 // hook to the Woodpecker pipeline struct holding commit information.
 func convertPullHook(from *internal.PullRequestHook) *model.Pipeline {
+	event := model.EventPull
+	if from.PullRequest.State == stateClosed || from.PullRequest.State == stateDeclined {
+		event = model.EventPullClosed
+	}
+
 	return &model.Pipeline{
-		Event:  model.EventPull,
+		Event:  event,
 		Commit: from.PullRequest.Dest.Commit.Hash,
 		Ref:    fmt.Sprintf("refs/heads/%s", from.PullRequest.Dest.Branch.Name),
 		Refspec: fmt.Sprintf("%s:%s",
 			from.PullRequest.Source.Branch.Name,
 			from.PullRequest.Dest.Branch.Name,
 		),
-		CloneURL:  fmt.Sprintf("https://bitbucket.org/%s", from.PullRequest.Source.Repo.FullName),
 		ForgeURL:  from.PullRequest.Links.HTML.Href,
 		Branch:    from.PullRequest.Dest.Branch.Name,
 		Message:   from.PullRequest.Desc,

@@ -18,7 +18,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/rs/zerolog/log"
 
@@ -41,9 +40,8 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 	// fetch the old pipeline config from the database
 	configs, err := store.ConfigsForPipeline(lastPipeline.ID)
 	if err != nil {
-		msg := fmt.Sprintf("failure to get pipeline config for %s. %s", repo.FullName, err)
-		log.Error().Msgf(msg)
-		return nil, &ErrNotFound{Msg: msg}
+		log.Error().Err(err).Msgf("failure to get pipeline config for %s", repo.FullName)
+		return nil, &ErrNotFound{Msg: fmt.Sprintf("failure to get pipeline config for %s. %s", repo.FullName, err)}
 	}
 
 	for _, y := range configs {
@@ -137,7 +135,6 @@ func createNewOutOfOld(old *model.Pipeline) *model.Pipeline {
 	newPipeline.Status = model.StatusPending
 	newPipeline.Started = 0
 	newPipeline.Finished = 0
-	newPipeline.Enqueued = time.Now().UTC().Unix()
 	newPipeline.Errors = nil
 	return &newPipeline
 }

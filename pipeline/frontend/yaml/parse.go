@@ -15,7 +15,6 @@
 package yaml
 
 import (
-	"errors"
 	"fmt"
 
 	"codeberg.org/6543/xyaml"
@@ -23,34 +22,24 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/constraint"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types/base"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
 )
-
-var ErrUnsuportedVersion = errors.New("unsuported pipeline config version detected")
 
 // ParseBytes parses the configuration from bytes b.
 func ParseBytes(b []byte) (*types.Workflow, error) {
-	yamlVersion, err := checkVersion(b)
-	if err != nil {
-		return nil, err
-	}
-
 	out := new(types.Workflow)
-	err = xyaml.Unmarshal(b, out)
+	err := xyaml.Unmarshal(b, out)
 	if err != nil {
 		return nil, err
 	}
-
-	// make sure detected version is set
-	out.Version = yamlVersion
 
 	// support deprecated branch filter
 	if out.BranchesDontUseIt != nil {
-		if out.When.Constraints == nil {
+		switch {
+		case out.When.Constraints == nil:
 			out.When.Constraints = []constraint.Constraint{{Branch: *out.BranchesDontUseIt}}
-		} else if len(out.When.Constraints) == 1 && out.When.Constraints[0].Branch.IsEmpty() {
+		case len(out.When.Constraints) == 1 && out.When.Constraints[0].Branch.IsEmpty():
 			out.When.Constraints[0].Branch = *out.BranchesDontUseIt
-		} else {
+		default:
 			return nil, fmt.Errorf("could not apply deprecated branches filter into global when filter")
 		}
 		out.BranchesDontUseIt = nil
@@ -81,20 +70,4 @@ func ParseString(s string) (*types.Workflow, error) {
 	return ParseBytes(
 		[]byte(s),
 	)
-}
-
-func checkVersion(b []byte) (int, error) {
-	ver := struct {
-		Version int `yaml:"version"`
-	}{}
-	_ = xyaml.Unmarshal(b, &ver)
-	if ver.Version == 0 {
-		// default: version 1
-		return constant.DefaultPipelineVersion, nil
-	}
-
-	if ver.Version != Version {
-		return 0, ErrUnsuportedVersion
-	}
-	return ver.Version, nil
 }

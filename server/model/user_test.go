@@ -15,8 +15,9 @@
 package model
 
 import (
-	"errors"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestUserValidate(t *testing.T) {
@@ -60,8 +61,6 @@ func TestUserValidate(t *testing.T) {
 
 	for _, test := range tests {
 		err := test.user.Validate()
-		if !errors.Is(err, test.err) {
-			t.Errorf("Want user validation error %s, got %s", test.err, err)
-		}
+		assert.ErrorIs(t, err, test.err)
 	}
 }

@@ -20,7 +20,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/queue"
 )
 
-func createFilterFunc(agentFilter rpc.Filter) (queue.FilterFn, error) {
+func createFilterFunc(agentFilter rpc.Filter) queue.FilterFn {
 	return func(task *model.Task) bool {
 		for taskLabel, taskLabelValue := range task.Labels {
 			// if a task label is empty it will be ignored
@@ -44,5 +44,5 @@ func createFilterFunc(agentFilter rpc.Filter) (queue.FilterFn, error) {
 			}
 		}
 		return true
-	}, nil
+	}
 }

@@ -19,10 +19,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
-
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
 )
 
 // GetGlobalSecretList
@@ -62,7 +61,7 @@ func GetGlobalSecret(c *gin.Context) {
 	name := c.Param("secret")
 	secret, err := server.Config.Services.Secrets.GlobalSecretFind(name)
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, secret.Copy())
@@ -75,7 +74,7 @@ func GetGlobalSecret(c *gin.Context) {
 //	@Produce	json
 //	@Success	200	{object}	Secret
 //	@Tags		Secrets
-//	@Param		Authorization	header	string			true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		secret			body	Secret	true	"the secret object data"
 func PostGlobalSecret(c *gin.Context) {
 	in := new(model.Secret)
@@ -107,8 +106,8 @@ func PostGlobalSecret(c *gin.Context) {
 //	@Produce	json
 //	@Success	200	{object}	Secret
 //	@Tags		Secrets
-//	@Param		Authorization	header	string			true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		secret			path	string			true	"the secret's name"
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		secret			path	string	true	"the secret's name"
 //	@Param		secretData		body	Secret	true	"the secret's data"
 func PatchGlobalSecret(c *gin.Context) {
 	name := c.Param("secret")
@@ -122,7 +121,7 @@ func PatchGlobalSecret(c *gin.Context) {
 
 	secret, err := server.Config.Services.Secrets.GlobalSecretFind(name)
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 	if in.Value != "" {
@@ -158,7 +157,7 @@ func PatchGlobalSecret(c *gin.Context) {
 func DeleteGlobalSecret(c *gin.Context) {
 	name := c.Param("secret")
 	if err := server.Config.Services.Secrets.GlobalSecretDelete(name); err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 	c.Status(http.StatusNoContent)

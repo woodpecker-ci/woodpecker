@@ -41,7 +41,7 @@ func GetRegistry(c *gin.Context) {
 	)
 	registry, err := server.Config.Services.Registries.RegistryFind(repo, name)
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 	c.JSON(200, registry.Copy())
@@ -54,8 +54,8 @@ func GetRegistry(c *gin.Context) {
 //	@Produce	json
 //	@Success	200	{object}	Registry
 //	@Tags		Repository registries
-//	@Param		Authorization	header	string			true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		Authorization	header	string		true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id			path	int			true	"the repository id"
 //	@Param		registry		body	Registry	true	"the new registry data"
 func PostRegistry(c *gin.Context) {
 	repo := session.Repo(c)
@@ -70,8 +70,6 @@ func PostRegistry(c *gin.Context) {
 		Address:  in.Address,
 		Username: in.Username,
 		Password: in.Password,
-		Token:    in.Token,
-		Email:    in.Email,
 	}
 	if err := registry.Validate(); err != nil {
 		c.String(http.StatusBadRequest, "Error inserting registry. %s", err)
@@ -91,9 +89,9 @@ func PostRegistry(c *gin.Context) {
 //	@Produce	json
 //	@Success	200	{object}	Registry
 //	@Tags		Repository registries
-//	@Param		Authorization	header	string			true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		repo_id			path	int		true	"the repository id"
-//	@Param		registry		path	string			true	"the registry name"
+//	@Param		Authorization	header	string		true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id			path	int			true	"the repository id"
+//	@Param		registry		path	string		true	"the registry name"
 //	@Param		registryData	body	Registry	true	"the attributes for the registry"
 func PatchRegistry(c *gin.Context) {
 	var (
@@ -110,7 +108,7 @@ func PatchRegistry(c *gin.Context) {
 
 	registry, err := server.Config.Services.Registries.RegistryFind(repo, name)
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 	if in.Username != "" {
@@ -118,12 +116,6 @@ func PatchRegistry(c *gin.Context) {
 	}
 	if in.Password != "" {
 		registry.Password = in.Password
-	}
-	if in.Token != "" {
-		registry.Token = in.Token
-	}
-	if in.Email != "" {
-		registry.Email = in.Email
 	}
 
 	if err := registry.Validate(); err != nil {
@@ -180,7 +172,7 @@ func DeleteRegistry(c *gin.Context) {
 	)
 	err := server.Config.Services.Registries.RegistryDelete(repo, name)
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 	c.Status(http.StatusNoContent)

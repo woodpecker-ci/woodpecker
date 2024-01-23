@@ -12,10 +12,10 @@ To convert this:
 
 ```yaml
 steps:
-  test:
+  - name: test
     image: golang:1.18
     commands: go test ./...
-  build:
+  - name: build
     image: golang:1.18
     commands: build
 ```
@@ -27,11 +27,11 @@ Just add a new section called **variables** like this:
 +  - &golang_image 'golang:1.18'
 
  steps:
-   test:
+   - name: test
 -    image: golang:1.18
 +    image: *golang_image
      commands: go test ./...
-   build:
+   - name: build
 -    image: golang:1.18
 +    image: *golang_image
      commands: build
@@ -50,14 +50,14 @@ variables:
   - &some-plugin codeberg.org/6543/docker-images/print_env
 
 steps:
-  develop:
+  - name: develop
     image: *some-plugin
     settings:
       <<: [*base-plugin-settings, *special-setting] # merge two maps into an empty map
     when:
       branch: develop
 
-  main:
+  - name: main
     image: *some-plugin
     settings:
       <<: *base-plugin-settings # merge one map and ...
@@ -80,13 +80,13 @@ variables:
     - echo hello
 
 steps:
-  step1:
+  - name: step1
     image: debian
     commands:
       - <<: *pre_cmds # prepend a sequence
       - echo exec step now do dedicated things
       - <<: *post_cmds # append a sequence
-  step2:
+  - name: step2
     image: debian
     commands:
       - <<: [*pre_cmds, *hello_cmd] # prepend two sequences
@@ -105,30 +105,25 @@ One can create a file containing environment variables, and then source it in ea
 
 ```yaml
 steps:
-  init:
+  - name: init
     image: bash
     commands:
       - echo "FOO=hello" >> envvars
       - echo "BAR=world" >> envvars
 
-  debug:
+  - name: debug
     image: bash
     commands:
       - source envvars
       - echo $FOO
 ```
 
-## Declaring global variables in `docker-compose.yml`
+## Declaring global variables
 
-As described in [Global environment variables](./50-environment.md#global-environment-variables), one can define global variables:
+As described in [Global environment variables](./50-environment.md#global-environment-variables), you can define global variables:
 
-```yaml
-services:
-  woodpecker-server:
-    # ...
-    environment:
-      - WOODPECKER_ENVIRONMENT=first_var:value1,second_var:value2
-      # ...
+```ini
+WOODPECKER_ENVIRONMENT=first_var:value1,second_var:value2
 ```
 
 Note that this tightly couples the server and app configurations (where the app is a completely separate application). But this is a good option for truly global variables which should apply to all steps in all pipelines for all apps.

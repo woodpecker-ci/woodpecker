@@ -4,7 +4,7 @@ tasks:
       WOODPECKER_OPEN: true
       WOODPECKER_ADMIN: woodpecker
       WOODPECKER_HOST: http://host.docker.internal:8000
-      WOODPECKER_SECRET: '1234'
+      WOODPECKER_AGENT_SECRET: '1234'
       WOODPECKER_GITEA: true
       WOODPECKER_DEV_WWW_PROXY: http://localhost:8010
       WOODPECKER_BACKEND_DOCKER_NETWORK: ci_default
@@ -29,7 +29,7 @@ tasks:
   - name: Agent
     env:
       WOODPECKER_SERVER: localhost:9000
-      WOODPECKER_SECRET: '1234'
+      WOODPECKER_AGENT_SECRET: '1234'
       WOODPECKER_MAX_WORKFLOWS: 1
       WOODPECKER_HEALTHCHECK: false
     command: |
@@ -37,7 +37,7 @@ tasks:
       go run go.woodpecker-ci.org/woodpecker/v2/cmd/agent
   - name: Gitea
     command: |
-      export DOCKER_COMPOSE_CMD="docker-compose -f docker-compose.gitpod.yml -p woodpecker"
+      export DOCKER_COMPOSE_CMD="docker-compose -f docker-compose.gitpod.yaml -p woodpecker"
       export GITEA_CLI_CMD="$DOCKER_COMPOSE_CMD exec -u git gitea gitea"
       $DOCKER_COMPOSE_CMD up -d
       until curl --output /dev/null --silent --head --fail http://localhost:3000; do printf '.'; sleep 1; done

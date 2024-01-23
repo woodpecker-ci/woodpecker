@@ -14,14 +14,15 @@
 
 package metadata
 
-// Event types corresponding to scm hooks.
+// Event types corresponding to forge hooks.
 const (
-	EventPush   = "push"
-	EventPull   = "pull_request"
-	EventTag    = "tag"
-	EventDeploy = "deployment"
-	EventCron   = "cron"
-	EventManual = "manual"
+	EventPush       = "push"
+	EventPull       = "pull_request"
+	EventPullClosed = "pull_request_closed"
+	EventTag        = "tag"
+	EventDeploy     = "deployment"
+	EventCron       = "cron"
+	EventManual     = "manual"
 )
 
 // Different ways to handle failure states

@@ -13,9 +13,7 @@ You need to trust the external config service as it is getting secret informatio
 
 ## Config
 
-```bash
-# Server
-# ...
+```ini title="Server"
 WOODPECKER_CONFIG_SERVICE_ENDPOINT=https://example.com/ciconfig
 ```
 
@@ -85,8 +83,8 @@ WOODPECKER_CONFIG_SERVICE_ENDPOINT=https://example.com/ciconfig
   },
   "configs": [
     {
-      "name": ".woodpecker.yml",
-      "data": "steps:\n  backend:\n    image: alpine\n    commands:\n      - echo \"Hello there from Repo (.woodpecker.yml)\"\n"
+      "name": ".woodpecker.yaml",
+      "data": "steps:\n  - name: backend\n    image: alpine\n    commands:\n      - echo \"Hello there from Repo (.woodpecker.yaml)\"\n"
     }
   ]
 }
@@ -99,7 +97,7 @@ WOODPECKER_CONFIG_SERVICE_ENDPOINT=https://example.com/ciconfig
   "configs": [
     {
       "name": "central-override",
-      "data": "steps:\n  backend:\n    image: alpine\n    commands:\n      - echo \"Hello there from ConfigAPI\"\n"
+      "data": "steps:\n  - name: backend\n    image: alpine\n    commands:\n      - echo \"Hello there from ConfigAPI\"\n"
     }
   ]
 }
