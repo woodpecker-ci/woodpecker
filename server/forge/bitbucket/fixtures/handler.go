@@ -300,6 +300,7 @@ const pullRequestsPayload = `
 
 const userPayload = `
 {
+	"uuid": "{4d8c0f46-cd62-4b77-b0cf-faa3e4d932c6}",
   "username": "superman",
   "links": {
     "avatar": {

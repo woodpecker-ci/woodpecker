@@ -31,7 +31,7 @@ If you still need to pass artifacts between the workflows you need use some stor
 
 ```yaml title=".woodpecker/.build.yaml"
 steps:
-  build:
+  - name: build
     image: debian:stable-slim
     commands:
       - echo building
@@ -40,7 +40,7 @@ steps:
 
 ```yaml title=".woodpecker/.deploy.yaml"
 steps:
-  deploy:
+  - name: deploy
     image: debian:stable-slim
     commands:
       - echo deploying
@@ -53,7 +53,7 @@ depends_on:
 
 ```yaml title=".woodpecker/.test.yaml"
 steps:
-  test:
+  - name: test
     image: debian:stable-slim
     commands:
       - echo testing
@@ -65,7 +65,7 @@ depends_on:
 
 ```yaml title=".woodpecker/.lint.yaml"
 steps:
-  lint:
+  - name: lint
     image: debian:stable-slim
     commands:
       - echo linting
@@ -86,7 +86,7 @@ The name for a `depends_on` entry is the filename without the path, leading dots
 
 ```diff
  steps:
-   deploy:
+   - name: deploy
      image: debian:stable-slim
      commands:
        - echo deploying
@@ -101,7 +101,7 @@ Workflows that need to run even on failures should set the `runs_on` tag.
 
 ```diff
  steps:
-   notify:
+   - name: notify
      image: debian:stable-slim
      commands:
        - echo notifying
