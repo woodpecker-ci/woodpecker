@@ -15,12 +15,12 @@
 package config
 
 import (
-	"context"
+	"time"
 
-	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
+	forgetypes "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 type Extension interface {
-	FetchConfig(ctx context.Context, repo *model.Repo, pipeline *model.Pipeline, currentFileMeta []*forge_types.FileMeta, netrc *model.Netrc) (configData []*forge_types.FileMeta, useOld bool, err error)
+	FetchConfig(repo *model.Repo, pipeline *model.Pipeline, currentFileMeta []*forgetypes.FileMeta, netrc *model.Netrc, timeout time.Duration) (configData []*forgetypes.FileMeta, useOld bool, err error)
 }

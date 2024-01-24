@@ -51,6 +51,8 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/store/datastore"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/addon"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/addon/hashicorp"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/addon/hashicorp/configservice"
 	addonTypes "go.woodpecker-ci.org/woodpecker/v2/shared/addon/types"
 )
 
@@ -321,12 +323,14 @@ func setupSignatureKeys(_store store.Store) (crypto.PrivateKey, crypto.PublicKey
 }
 
 func setupConfigService(c *cli.Context) (config.Extension, error) {
-	addonExt, err := addon.Load[config.Extension](c.StringSlice("addons"), addonTypes.TypeConfigService)
-	if err != nil {
-		return nil, err
-	}
-	if addonExt != nil {
-		return addonExt.Value, nil
+	if addon := c.String("addons-config-service"); addon != "" {
+		addonExt, err := hashicorp.Load(addon, configservice.Addon)
+		if err != nil {
+			return nil, err
+		}
+		if addonExt != nil {
+			return addonExt.Value, nil
+		}
 	}
 
 	if endpoint := c.String("config-service-endpoint"); endpoint != "" {

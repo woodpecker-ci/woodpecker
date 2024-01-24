@@ -18,6 +18,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/rs/zerolog/log"
 
@@ -55,7 +56,7 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 			currentFileMeta[i] = &forge_types.FileMeta{Name: cfg.Name, Data: cfg.Data}
 		}
 
-		newConfig, useOld, err := server.Config.Services.ConfigService.FetchConfig(ctx, repo, lastPipeline, currentFileMeta, netrc)
+		newConfig, useOld, err := server.Config.Services.ConfigService.FetchConfig(repo, lastPipeline, currentFileMeta, netrc, time.Minute /*TODO use config*/)
 		if err != nil {
 			return nil, &ErrBadRequest{
 				Msg: fmt.Sprintf("On fetching external pipeline config: %s", err),

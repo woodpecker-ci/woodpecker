@@ -18,6 +18,7 @@ import (
 	"context"
 	"crypto"
 	"fmt"
+	"time"
 
 	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
@@ -50,7 +51,10 @@ func NewHTTP(endpoint string, privateKey crypto.PrivateKey) Extension {
 	return &http{endpoint, privateKey}
 }
 
-func (cp *http) FetchConfig(ctx context.Context, repo *model.Repo, pipeline *model.Pipeline, currentFileMeta []*forge_types.FileMeta, netrc *model.Netrc) (configData []*forge_types.FileMeta, useOld bool, err error) {
+func (cp *http) FetchConfig(repo *model.Repo, pipeline *model.Pipeline, currentFileMeta []*forge_types.FileMeta, netrc *model.Netrc, timeout time.Duration) (configData []*forge_types.FileMeta, useOld bool, err error) {
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
 	currentConfigs := make([]*config, len(currentFileMeta))
 	for i, pipe := range currentFileMeta {
 		currentConfigs[i] = &config{Name: pipe.Name, Data: string(pipe.Data)}

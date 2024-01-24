@@ -64,16 +64,13 @@ func (cf *ConfigFetcher) Fetch(ctx context.Context) (files []*types.FileMeta, er
 		}
 
 		if cf.configExtension != nil {
-			fetchCtx, cancel := context.WithTimeout(ctx, cf.timeout)
-			defer cancel() // ok here as we only try http fetching once, returning on fail and success
-
 			log.Trace().Msgf("configFetcher[%s]: getting config from external http service", cf.repo.FullName)
 			netrc, err := cf.forge.Netrc(cf.user, cf.repo)
 			if err != nil {
 				return nil, fmt.Errorf("could not get Netrc data from forge: %w", err)
 			}
 
-			newConfigs, useOld, err := cf.configExtension.FetchConfig(fetchCtx, cf.repo, cf.pipeline, files, netrc)
+			newConfigs, useOld, err := cf.configExtension.FetchConfig(cf.repo, cf.pipeline, files, netrc, cf.timeout)
 			if err != nil {
 				log.Error().Err(err).Msg("could not fetch config via http")
 				return nil, fmt.Errorf("could not fetch config via http: %w", err)
