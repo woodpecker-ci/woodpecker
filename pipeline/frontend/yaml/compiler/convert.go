@@ -89,6 +89,7 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		workingdir = c.stepWorkdir(container)
 	}
 
+	// TODO: why only if not detached?
 	if !detached {
 		pluginSecrets := secretMap{}
 		for name, secret := range c.secrets {
@@ -102,6 +103,15 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		}
 	}
 
+	for _, requested := range container.Secrets.Secrets {
+		secret, ok := c.secrets[strings.ToLower(requested.Source)]
+		if ok && secret.Available(container) {
+			environment[strings.ToUpper(requested.Target)] = secret.Value
+		} else {
+			return nil, fmt.Errorf("secret %q not found or not allowed to be used", requested.Source)
+		}
+	}
+
 	if utils.MatchImage(container.Image, c.escalated...) && container.IsPlugin() {
 		privileged = true
 	}
@@ -112,15 +122,6 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 			authConfig.Username = registry.Username
 			authConfig.Password = registry.Password
 			break
-		}
-	}
-
-	for _, requested := range container.Secrets.Secrets {
-		secret, ok := c.secrets[strings.ToLower(requested.Source)]
-		if ok && secret.Available(container) {
-			environment[strings.ToUpper(requested.Target)] = secret.Value
-		} else {
-			return nil, fmt.Errorf("secret %q not found or not allowed to be used", requested.Source)
 		}
 	}
 

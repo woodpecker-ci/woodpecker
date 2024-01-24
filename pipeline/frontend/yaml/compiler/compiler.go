@@ -45,7 +45,7 @@ type Secret struct {
 }
 
 func (s *Secret) Available(container *yaml_types.Container) bool {
-	return (len(s.AllowedPlugins) == 0 || utils.MatchImage(container.Image, s.AllowedPlugins...)) && (len(s.AllowedPlugins) == 0 || container.IsPlugin())
+	return len(s.AllowedPlugins) == 0 || (utils.MatchImage(container.Image, s.AllowedPlugins...) && container.IsPlugin())
 }
 
 type secretMap map[string]Secret
