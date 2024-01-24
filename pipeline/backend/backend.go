@@ -29,7 +29,7 @@ var (
 	backends       []types.Backend
 )
 
-func Init() {
+func Init(backends []types.Backend) {
 	backends = []types.Backend{
 		docker.New(),
 		local.New(),

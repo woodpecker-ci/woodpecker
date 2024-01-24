@@ -30,7 +30,6 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/docker"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/kubernetes"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/local"
@@ -213,11 +212,15 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 	}
 
 	backendCtx := context.WithValue(c.Context, backendTypes.CliContext, c)
-	backend.Init()
+	backendsByName := map[string]backendTypes.Backend{
+		"docker":              docker.New(),
+		"local":               local.New(),
+		kubernetes.EngineName: kubernetes.New(),
+	}
 
-	backendEngine, err := backend.FindBackend(backendCtx, c.String("backend-engine"))
-	if err != nil {
-		return err
+	backendEngine, ok := backendsByName[c.String("backend-engine")]
+	if !ok {
+		return fmt.Errorf("backend engine '%s' not found", c.String("backend-engine"))
 	}
 
 	if _, err = backendEngine.Load(backendCtx); err != nil {

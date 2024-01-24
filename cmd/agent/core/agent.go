@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package core
 
 import (
 	"context"
@@ -39,17 +39,14 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v2/agent"
 	agentRpc "go.woodpecker-ci.org/woodpecker/v2/agent/rpc"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/addon"
-	addonTypes "go.woodpecker-ci.org/woodpecker/v2/shared/addon/types"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/logger"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 	"go.woodpecker-ci.org/woodpecker/v2/version"
 )
 
-func run(c *cli.Context) error {
+func run(c *cli.Context, backendEngine types.Backend) error {
 	agentConfigPath := c.String("agent-config")
 	hostname := c.String("hostname")
 	if len(hostname) == 0 {
@@ -155,11 +152,6 @@ func run(c *cli.Context) error {
 
 	// new engine
 	backendCtx := context.WithValue(ctx, types.CliContext, c)
-	backendEngine, err := getBackendEngine(backendCtx, c.String("backend-engine"), c.StringSlice("addons"))
-	if err != nil {
-		return err
-	}
-
 	if !backendEngine.IsAvailable(backendCtx) {
 		log.Error().Str("engine", backendEngine.Name()).Msg("selected backend engine is unavailable")
 		return fmt.Errorf("selected backend engine %s is unavailable", backendEngine.Name())
@@ -249,44 +241,27 @@ func run(c *cli.Context) error {
 	return nil
 }
 
-func getBackendEngine(backendCtx context.Context, backendName string, addons []string) (types.Backend, error) {
-	addonBackend, err := addon.Load[types.Backend](addons, addonTypes.TypeBackend)
-	if err != nil {
-		log.Error().Err(err).Msg("cannot load backend addon")
-		return nil, err
-	}
-	if addonBackend != nil {
-		return addonBackend.Value, nil
-	}
+func runWithRetry(backendEngine types.Backend) func(context *cli.Context) error {
+	return func(context *cli.Context) error {
+		if err := logger.SetupGlobalLogger(context, true); err != nil {
+			return err
+		}
 
-	backend.Init()
-	engine, err := backend.FindBackend(backendCtx, backendName)
-	if err != nil {
-		log.Error().Err(err).Msgf("cannot find backend engine '%s'", backendName)
-		return nil, err
-	}
-	return engine, nil
-}
+		initHealth()
 
-func runWithRetry(context *cli.Context) error {
-	if err := logger.SetupGlobalLogger(context, true); err != nil {
+		retryCount := context.Int("connect-retry-count")
+		retryDelay := context.Duration("connect-retry-delay")
+		var err error
+		for i := 0; i < retryCount; i++ {
+			if err = run(context, backendEngine); status.Code(err) == codes.Unavailable {
+				log.Warn().Err(err).Msg(fmt.Sprintf("cannot connect to server, retrying in %v", retryDelay))
+				time.Sleep(retryDelay)
+			} else {
+				break
+			}
+		}
 		return err
 	}
-
-	initHealth()
-
-	retryCount := context.Int("connect-retry-count")
-	retryDelay := context.Duration("connect-retry-delay")
-	var err error
-	for i := 0; i < retryCount; i++ {
-		if err = run(context); status.Code(err) == codes.Unavailable {
-			log.Warn().Err(err).Msg(fmt.Sprintf("cannot connect to server, retrying in %v", retryDelay))
-			time.Sleep(retryDelay)
-		} else {
-			break
-		}
-	}
-	return err
 }
 
 func stringSliceAddToMap(sl []string, m map[string]string) error {

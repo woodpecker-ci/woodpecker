@@ -129,6 +129,10 @@ func (e *kube) IsAvailable(context.Context) bool {
 	return len(host) > 0
 }
 
+func (e *kube) Flags() []cli.Flag {
+	return Flags
+}
+
 func (e *kube) Load(ctx context.Context) (*types.BackendInfo, error) {
 	config, err := configFromCliContext(ctx)
 	if err != nil {
