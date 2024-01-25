@@ -1,13 +1,15 @@
 # Changelog
 
-## [2.3.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.3.0) - 2024-01-23
+## [2.3.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.3.0) - 2024-01-25
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@eliasscosta, @qwerty287, @runephilosof-karnovgroup
+@healdropper, @renovate[bot], @eliasscosta, @qwerty287, @runephilosof-karnovgroup
 
 ### 🐛 Bug Fixes
 
+- Pipeline errors must be an array [[#3276](https://github.com/woodpecker-ci/woodpecker/pull/3276)]
+- fix bitbucket SSO using UUID from bitbucket api response as ForgeRemoteID [[#3265](https://github.com/woodpecker-ci/woodpecker/pull/3265)]
 - fix: bug pod service without label service [[#3256](https://github.com/woodpecker-ci/woodpecker/pull/3256)]
 - Fix disabling PRs [[#3258](https://github.com/woodpecker-ci/woodpecker/pull/3258)]
 - fix: bug annotations [[#3255](https://github.com/woodpecker-ci/woodpecker/pull/3255)]
@@ -23,6 +25,8 @@
 
 ### Misc
 
+- chore(deps): lock file maintenance [[#3274](https://github.com/woodpecker-ci/woodpecker/pull/3274)]
+- chore(deps): update web npm deps non-major [[#3273](https://github.com/woodpecker-ci/woodpecker/pull/3273)]
 - Pin prettier version [[#3260](https://github.com/woodpecker-ci/woodpecker/pull/3260)]
 - Fix prettier [[#3259](https://github.com/woodpecker-ci/woodpecker/pull/3259)]
 - Update UI building in Makefile [[#3250](https://github.com/woodpecker-ci/woodpecker/pull/3250)]
