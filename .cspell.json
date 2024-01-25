@@ -109,7 +109,5 @@
     "shared/",
     "server/"
   ],
-  "enableFiletypes": [
-    "dockercompose"
-  ]
+  "enableFiletypes": ["dockercompose"]
 }
