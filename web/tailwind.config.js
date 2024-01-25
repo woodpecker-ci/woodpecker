@@ -1,8 +1,8 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable import/no-extraneous-dependencies */
-import tinycolor from 'tinycolor2';
-import colors from 'windicss/colors';
-import { defineConfig } from 'windicss/helpers';
-import typography from 'windicss/plugin/typography';
+const colors = require('tailwindcss/colors');
+const tinycolor = require('tinycolor2');
+const typography = require('@tailwindcss/typography');
 
 const customColors = {
   'wp-primary': {
@@ -24,9 +24,22 @@ const customColors = {
   },
 };
 
-export default defineConfig({
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{vue,js,ts,jsx,tsx}",
+  ],
   darkMode: 'class',
   theme: {
+    borderWidth: {
+      DEFAULT: '1px',
+      '0': '0',
+      '2': '2px',
+      '4': '4px',
+      '6': '6px',
+      '8': '8px',
+    },
     extend: {
       colors: {
         // Internals to keep a single source for color definitions
@@ -222,9 +235,5 @@ export default defineConfig({
       ],
     },
   },
-  shortcuts: {
-    'hover-effect':
-      'hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-5 transition-colors duration-100',
-  },
-  plugins: [typography()],
-});
+  plugins: [typography],
+};
