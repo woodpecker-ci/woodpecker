@@ -69,12 +69,12 @@ type (
 
 	// Pipeline defines a pipeline object.
 	Pipeline struct {
-		ID     int64         `json:"id"`
-		Number int64         `json:"number"`
-		Parent int64         `json:"parent"`
-		Event  string        `json:"event"`
-		Status string        `json:"status"`
-		Errors PipelineError `json:"errors"`
+		ID     int64            `json:"id"`
+		Number int64            `json:"number"`
+		Parent int64            `json:"parent"`
+		Event  string           `json:"event"`
+		Status string           `json:"status"`
+		Errors []*PipelineError `json:"errors"`
 		// Deprecated TODO remove in 3.x
 		Enqueued  int64       `json:"enqueued_at"`
 		Created   int64       `json:"created_at"`
