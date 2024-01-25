@@ -15,9 +15,6 @@
 package pipeline
 
 import (
-	"crypto/sha256"
-	"fmt"
-
 	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/pipeline/stepbuilder"
@@ -25,24 +22,9 @@ import (
 )
 
 func findOrPersistPipelineConfig(store store.Store, currentPipeline *model.Pipeline, forgeYamlConfig *forge_types.FileMeta) (*model.Config, error) {
-	sha := fmt.Sprintf("%x", sha256.Sum256(forgeYamlConfig.Data))
-	conf, err := store.ConfigFindIdentical(currentPipeline.RepoID, sha)
-	if err != nil {
-		conf = &model.Config{
-			RepoID: currentPipeline.RepoID,
-			Data:   forgeYamlConfig.Data,
-			Hash:   sha,
-			Name:   stepbuilder.SanitizePath(forgeYamlConfig.Name),
-		}
-		err = store.ConfigCreate(conf)
-		if err != nil {
-			// retry in case we receive two hooks at the same time
-			conf, err = store.ConfigFindIdentical(currentPipeline.RepoID, sha)
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-
-	return conf, nil
+	return store.ConfigPersist(&model.Config{
+		RepoID: currentPipeline.RepoID,
+		Name:   stepbuilder.SanitizePath(forgeYamlConfig.Name),
+		Data:   forgeYamlConfig.Data,
+	})
 }

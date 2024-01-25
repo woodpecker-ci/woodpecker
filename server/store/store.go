@@ -112,7 +112,7 @@ type Store interface {
 
 	// Configs
 	ConfigsForPipeline(pipelineID int64) ([]*model.Config, error)
-	ConfigFindIdentical(repoID int64, hash string) (*model.Config, error)
+	ConfigPersist(*model.Config) (*model.Config, error)
 	ConfigFindApproved(*model.Config) (bool, error)
 	ConfigCreate(*model.Config) error
 	PipelineConfigCreate(*model.PipelineConfig) error

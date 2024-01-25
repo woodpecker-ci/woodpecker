@@ -163,7 +163,7 @@ func (e *kube) getConfig() *config {
 	}
 	c := *e.config
 	c.PodLabels = maps.Clone(e.config.PodLabels)
-	c.PodAnnotations = maps.Clone(e.config.PodLabels)
+	c.PodAnnotations = maps.Clone(e.config.PodAnnotations)
 	c.ImagePullSecretNames = slices.Clone(e.config.ImagePullSecretNames)
 	return &c
 }
@@ -204,11 +204,6 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID s
 
 // Start the pipeline step.
 func (e *kube) StartStep(ctx context.Context, step *types.Step, taskUUID string) error {
-	if step.Type == types.StepTypeService {
-		// a service should be started by SetupWorkflow so we can ignore it
-		log.Trace().Msgf("StartStep got service '%s', ignoring it.", step.Name)
-		return nil
-	}
 	log.Trace().Str("taskUUID", taskUUID).Msgf("starting step: %s", step.Name)
 	_, err := startPod(ctx, e, step)
 	return err
@@ -353,11 +348,6 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 }
 
 func (e *kube) DestroyStep(ctx context.Context, step *types.Step, taskUUID string) error {
-	if step.Type == types.StepTypeService {
-		// a service should be stopped by DestroyWorkflow so we can ignore it
-		log.Trace().Msgf("destroyStep got service '%s', ignoring it.", step.Name)
-		return nil
-	}
 	log.Trace().Str("taskUUID", taskUUID).Msgf("Stopping step: %s", step.Name)
 	err := stopPod(ctx, e, step, defaultDeleteOptions)
 	return err

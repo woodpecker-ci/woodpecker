@@ -80,6 +80,10 @@ func podMeta(step *types.Step, config *config, podName string) metav1.ObjectMeta
 	}
 	meta.Labels[StepLabel] = step.Name
 
+	if step.Type == types.StepTypeService {
+		meta.Labels[ServiceLabel] = step.Name
+	}
+
 	meta.Annotations = config.PodAnnotations
 	if meta.Annotations == nil {
 		meta.Annotations = make(map[string]string)
@@ -129,8 +133,11 @@ func podContainer(step *types.Step, podName, goos string) (v1.Container, error) 
 
 	if len(step.Commands) != 0 {
 		scriptEnv, command, args := common.GenerateContainerConf(step.Commands, goos)
+		if len(step.Entrypoint) > 0 {
+			command = step.Entrypoint
+		}
 		container.Command = command
-		container.Args = args
+		container.Args = []string{args}
 		maps.Copy(step.Environment, scriptEnv)
 	}
 
@@ -439,7 +446,7 @@ func mapToEnvVars(m map[string]string) []v1.EnvVar {
 }
 
 func startPod(ctx context.Context, engine *kube, step *types.Step) (*v1.Pod, error) {
-	podName, err := podName(step)
+	podName, err := stepToPodName(step)
 	if err != nil {
 		return nil, err
 	}
@@ -454,7 +461,7 @@ func startPod(ctx context.Context, engine *kube, step *types.Step) (*v1.Pod, err
 }
 
 func stopPod(ctx context.Context, engine *kube, step *types.Step, deleteOpts metav1.DeleteOptions) error {
-	podName, err := podName(step)
+	podName, err := stepToPodName(step)
 	if err != nil {
 		return err
 	}

@@ -38,7 +38,8 @@ const (
 const (
 	pathUser          = "%s/2.0/user/"
 	pathEmails        = "%s/2.0/user/emails"
-	pathPermissions   = "%s/2.0/user/permissions/repositories?q=repository.full_name=%q"
+	pathPermission    = "%s/2.0/user/permissions/repositories?q=repository.full_name=%q"
+	pathPermissions   = "%s/2.0/user/permissions/repositories?%s"
 	pathWorkspaces    = "%s/2.0/workspaces/?%s"
 	pathWorkspace     = "%s/2.0/workspaces/%s"
 	pathRepo          = "%s/2.0/repositories/%s/%s"
@@ -49,7 +50,7 @@ const (
 	pathStatus        = "%s/2.0/repositories/%s/%s/commit/%s/statuses/build"
 	pathBranches      = "%s/2.0/repositories/%s/%s/refs/branches?%s"
 	pathOrgPerms      = "%s/2.0/workspaces/%s/permissions?%s"
-	pathPullRequests  = "%s/2.0/repositories/%s/%s/pullrequests"
+	pathPullRequests  = "%s/2.0/repositories/%s/%s/pullrequests?%s"
 	pathBranchCommits = "%s/2.0/repositories/%s/%s/commits/%s"
 	pathDir           = "%s/2.0/repositories/%s/%s/src/%s%s"
 )
@@ -161,7 +162,7 @@ func (c *Client) CreateStatus(owner, name, revision string, status *PipelineStat
 
 func (c *Client) GetPermission(fullName string) (*RepoPerm, error) {
 	out := new(RepoPermResp)
-	uri := fmt.Sprintf(pathPermissions, c.base, fullName)
+	uri := fmt.Sprintf(pathPermission, c.base, fullName)
 	_, err := c.do(uri, get, nil, out)
 	if err != nil {
 		return nil, err
@@ -171,6 +172,23 @@ func (c *Client) GetPermission(fullName string) (*RepoPerm, error) {
 		return nil, fmt.Errorf("no permissions in repository %s", fullName)
 	}
 	return out.Values[0], nil
+}
+
+func (c *Client) ListPermissions(opts *ListOpts) (*RepoPermResp, error) {
+	out := new(RepoPermResp)
+	uri := fmt.Sprintf(pathPermissions, c.base, opts.Encode())
+	_, err := c.do(uri, get, nil, out)
+	return out, err
+}
+
+func (c *Client) ListPermissionsAll() ([]*RepoPerm, error) {
+	return shared_utils.Paginate(func(page int) ([]*RepoPerm, error) {
+		resp, err := c.ListPermissions(&ListOpts{Page: page, PageLen: 100})
+		if err != nil {
+			return nil, err
+		}
+		return resp.Values, nil
+	})
 }
 
 func (c *Client) ListBranches(owner, name string, opts *ListOpts) ([]*Branch, error) {
@@ -217,8 +235,8 @@ func (c *Client) GetUserWorkspaceMembership(workspace, user string) (string, err
 
 func (c *Client) ListPullRequests(owner, name string, opts *ListOpts) ([]*PullRequest, error) {
 	out := new(PullRequestResp)
-	uri := fmt.Sprintf(pathPullRequests, c.base, owner, name)
-	_, err := c.do(uri, get, opts.Encode(), out)
+	uri := fmt.Sprintf(pathPullRequests, c.base, owner, name, opts.Encode())
+	_, err := c.do(uri, get, nil, out)
 	return out.Values, err
 }
 

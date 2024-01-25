@@ -13,11 +13,11 @@ If you are already using containers in your daily workflow, you'll for sure love
 
 ```yaml title=".woodpecker.yaml"
 steps:
-  build:
+  - name: build
     image: debian
     commands:
       - echo "This is the build step"
-  a-test-step:
+  - name: a-test-step
     image: debian
     commands:
       - echo "Testing.."
@@ -32,7 +32,7 @@ steps:
 
 ```diff
  steps:
-   build:
+   - name: build
 -    image: debian
 +    image: mycompany/image-with-awscli
      commands:
@@ -46,11 +46,11 @@ steps:
 
 ```yaml title=".woodpecker.yaml"
 steps:
-  build:
+  - name: build
     image: debian
     commands:
       - touch myfile
-  a-test-step:
+  - name: a-test-step
     image: debian
     commands:
       - cat myfile

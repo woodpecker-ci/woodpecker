@@ -44,7 +44,7 @@ used to run the commands.
 
 ```yaml title=".woodpecker.yaml"
 steps:
-  build:
+  - name: build
     image: bash
     commands: [...]
 ```
@@ -55,7 +55,7 @@ Plugins are just executable binaries:
 
 ```yaml
 steps:
-  build:
+  - name: build
     image: /usr/bin/tree
 ```
 

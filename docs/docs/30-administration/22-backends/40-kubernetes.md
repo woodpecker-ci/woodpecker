@@ -17,7 +17,7 @@ Here is an example definition with an arbitrary `resources` definition below the
 
 ```yaml
 steps:
-  'My kubernetes step':
+  - name: 'My kubernetes step'
     image: alpine
     commands:
       - echo "Hello world"
@@ -75,7 +75,7 @@ Example pipeline configuration:
 
 ```yaml
 steps:
-  build:
+  - name: build
     image: golang
     commands:
       - go get
@@ -107,7 +107,7 @@ Assuming a PVC named "woodpecker-cache" exists, it can be referenced as follows 
 
 ```yaml
 steps:
-  "Restore Cache":
+  - name: "Restore Cache"
     image: meltwater/drone-cache
     volumes:
       - woodpecker-cache:/woodpecker/src/cache
@@ -123,7 +123,7 @@ Use the following configuration to set the `securityContext` for the pod/contain
 
 ```yaml
 steps:
-  test:
+  - name: test
     image: alpine
     commands:
       - echo Hello world

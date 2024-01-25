@@ -189,9 +189,13 @@ Disable colored debug output.
 
 > Default: empty
 
-Server fully qualified URL of the user-facing hostname and path prefix.
+Server fully qualified URL of the user-facing hostname, port (if not default for HTTP/HTTPS) and path prefix.
 
-Example: `WOODPECKER_HOST=http://woodpecker.example.org` or `WOODPECKER_HOST=http://example.org/woodpecker`
+Examples:
+
+- `WOODPECKER_HOST=http://woodpecker.example.org`
+- `WOODPECKER_HOST=http://example.org/woodpecker`
+- `WOODPECKER_HOST=http://example.org:1234/woodpecker`
 
 ### `WOODPECKER_WEBHOOK_HOST`
 

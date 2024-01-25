@@ -6,25 +6,6 @@ Example steps:
 
 ```yaml
 steps:
-  backend:
-    image: golang
-    commands:
-      - go build
-      - go test
-  frontend:
-    image: node
-    commands:
-      - npm install
-      - npm run test
-      - npm run build
-```
-
-In the above example we define two steps, `frontend` and `backend`. The names of these steps are completely arbitrary.
-
-Another way to name a step is by using the name keyword:
-
-```yaml
-steps:
   - name: backend
     image: golang
     commands:
@@ -38,7 +19,26 @@ steps:
       - npm run build
 ```
 
-Keep in mind the name is optional, if not added the steps will be numerated.
+In the above example we define two steps, `frontend` and `backend`. The names of these steps are completely arbitrary.
+
+The name is optional, if not added the steps will be numerated.
+
+Another way to name a step is by using dictionaries:
+
+```yaml
+steps:
+  backend:
+    image: golang
+    commands:
+      - go build
+      - go test
+  frontend:
+    image: node
+    commands:
+      - npm install
+      - npm run test
+      - npm run build
+```
 
 ## Skip Commits
 
@@ -55,7 +55,7 @@ The associated commit is checked out with git to a workspace which is mounted to
 
 ```diff
  steps:
-   backend:
+   - name: backend
      image: golang
      commands:
 +      - go build
@@ -69,11 +69,11 @@ The associated commit is checked out with git to a workspace which is mounted to
 
 ```yaml title=".woodpecker.yaml"
 steps:
-  build:
+  - name: build
     image: debian
     commands:
       - echo "test content" > myfile
-  a-test-step:
+  - name: a-test-step
     image: debian
     commands:
       - cat myfile
@@ -87,18 +87,18 @@ When using the `local` backend, the `image` entry is used to specify the shell, 
 
 ```diff
  steps:
-   build:
+   - name: build
 +    image: golang:1.6
      commands:
        - go build
        - go test
 
-   publish:
+   - name: publish
 +    image: plugins/docker
      repo: foo/bar
 
  services:
-   database:
+   - name: database
 +    image: mysql
 ```
 
@@ -116,7 +116,7 @@ Woodpecker does not automatically upgrade container images. Example configuratio
 
 ```diff
  steps:
-   build:
+   - name: build
      image: golang:latest
 +    pull: true
 ```
@@ -129,7 +129,7 @@ Commands of every step are executed serially as if you would enter them into you
 
 ```diff
  steps:
-   backend:
+   - name: backend
      image: golang
      commands:
 +      - go build
@@ -156,6 +156,10 @@ docker run --entrypoint=build.sh golang
 Only build steps can define commands. You cannot use commands with plugins or services.
 :::
 
+### `entrypoint`
+
+Allows you to specify the entrypoint for containers. Note that this must be a list of the command and its arguments (e.g. `["/bin/sh", "-c"]`).
+
 ### `environment`
 
 Woodpecker provides the ability to pass environment variables to individual steps.
@@ -174,7 +178,7 @@ Some of the steps may be allowed to fail without causing the whole workflow and 
 
 ```diff
  steps:
-   backend:
+   - name: backend
      image: golang
      commands:
        - go build
@@ -188,7 +192,7 @@ Woodpecker supports defining a list of conditions for a step by using a `when` b
 
 ```diff
  steps:
-   slack:
+   - name: slack
      image: plugins/slack
      settings:
        channel: dev
@@ -205,7 +209,7 @@ Example conditional execution by repository:
 
 ```diff
  steps:
-   slack:
+   - name: slack
      image: plugins/slack
      settings:
        channel: dev
@@ -223,7 +227,7 @@ Example conditional execution by branch:
 
 ```diff
  steps:
-   slack:
+   - name: slack
      image: plugins/slack
      settings:
        channel: dev
@@ -320,7 +324,7 @@ There are use cases for executing steps on failure, such as sending notification
 
 ```diff
  steps:
-   slack:
+   - name: slack
      image: plugins/slack
      settings:
        channel: dev
@@ -453,18 +457,18 @@ Normally steps of a workflow are executed serially in the order in which they ar
 
 ```diff
  steps:
-   build: # build will be executed immediately
+   - name: build # build will be executed immediately
      image: golang
      commands:
        - go build
 
-   deploy:
+   - name: deploy
      image: plugins/docker
      settings:
        repo: foo/bar
 +    depends_on: [build, test] # deploy will be executed after build and test finished
 
-   test: # test will be executed immediately as no dependencies are set
+   - name: test # test will be executed immediately as no dependencies are set
      image: golang
      commands:
        - go test
@@ -504,7 +508,7 @@ The workspace can be customized using the workspace block in the YAML file:
 +  path: src/github.com/octocat/hello-world
 
  steps:
-   build:
+   - name: build
      image: golang:latest
      commands:
        - go get
@@ -519,12 +523,12 @@ The base attribute defines a shared base volume available to all steps. This ens
    path: src/github.com/octocat/hello-world
 
  steps:
-   deps:
+   - name: deps
      image: golang:latest
      commands:
        - go get
        - go test
-   build:
+   - name: build
      image: node:latest
      commands:
        - go build
@@ -576,7 +580,7 @@ You can add additional labels as a key value map:
 +  hostname: "" # this label will be ignored as it is empty
 
  steps:
-   build:
+   - name: build
      image: golang
      commands:
        - go build
@@ -618,7 +622,7 @@ You can manually configure the clone step in your workflow for customization:
 +    image: woodpeckerci/plugin-git
 
  steps:
-   build:
+   - name: build
      image: golang
      commands:
        - go build
@@ -629,7 +633,7 @@ Example configuration to override depth:
 
 ```diff
  clone:
-   git:
+   - name: git
      image: woodpeckerci/plugin-git
 +    settings:
 +      partial: false
@@ -648,7 +652,7 @@ Example configuration to clone Mercurial repository:
 
 ```diff
  clone:
-   hg:
+   - name: hg
 +    image: plugins/hg
 +    settings:
 +      path: bitbucket.org/foo/bar
@@ -669,7 +673,7 @@ To use the ssh git url in `.gitmodules` for users cloning with ssh, and also use
 
 ```diff
  clone:
-   git:
+   - name: git
      image: woodpeckerci/plugin-git
      settings:
        recursive: true
@@ -701,7 +705,7 @@ Example conditional execution by repository:
 +  repo: test/test
 +
  steps:
-   slack:
+   - name: slack
      image: plugins/slack
      settings:
        channel: dev
@@ -720,7 +724,7 @@ Example conditional execution by branch:
 +  branch: main
 +
  steps:
-   slack:
+   - name: slack
      image: plugins/slack
      settings:
        channel: dev
@@ -858,14 +862,14 @@ Privileged mode is only available to trusted repositories and for security reaso
 
 ```diff
  steps:
-   build:
+   - name: build
      image: docker
      environment:
        - DOCKER_HOST=tcp://docker:2375
      commands:
        - docker --tls=false ps
 
- services:
+ - name: services
    docker:
      image: docker:dind
      commands: dockerd-entrypoint.sh --storage-driver=vfs --tls=false

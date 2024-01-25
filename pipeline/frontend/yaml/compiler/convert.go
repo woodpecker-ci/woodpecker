@@ -111,7 +111,6 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		if utils.MatchHostname(container.Image, registry.Hostname) {
 			authConfig.Username = registry.Username
 			authConfig.Password = registry.Password
-			authConfig.Email = registry.Email
 			break
 		}
 	}
@@ -185,6 +184,7 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		WorkingDir:     workingdir,
 		Environment:    environment,
 		Commands:       container.Commands,
+		Entrypoint:     container.Entrypoint,
 		ExtraHosts:     extraHosts,
 		Volumes:        volumes,
 		Tmpfs:          container.Tmpfs,

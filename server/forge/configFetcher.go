@@ -29,39 +29,33 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
 )
 
-type ConfigFetcher interface {
-	Fetch(ctx context.Context) (files []*types.FileMeta, err error)
-}
-
-type configFetcher struct {
+type ConfigFetcher struct {
 	forge           Forge
 	user            *model.User
 	repo            *model.Repo
 	pipeline        *model.Pipeline
 	configExtension config.Extension
-	configPath      string
 	timeout         time.Duration
 }
 
-func NewConfigFetcher(forge Forge, timeout time.Duration, configExtension config.Extension, user *model.User, repo *model.Repo, pipeline *model.Pipeline) ConfigFetcher {
-	return &configFetcher{
+func NewConfigFetcher(forge Forge, timeout time.Duration, configExtension config.Extension, user *model.User, repo *model.Repo, pipeline *model.Pipeline) *ConfigFetcher {
+	return &ConfigFetcher{
 		forge:           forge,
 		user:            user,
 		repo:            repo,
 		pipeline:        pipeline,
 		configExtension: configExtension,
-		configPath:      repo.Config,
 		timeout:         timeout,
 	}
 }
 
 // Fetch pipeline config from source forge
-func (cf *configFetcher) Fetch(ctx context.Context) (files []*types.FileMeta, err error) {
+func (cf *ConfigFetcher) Fetch(ctx context.Context) (files []*types.FileMeta, err error) {
 	log.Trace().Msgf("start fetching config for '%s'", cf.repo.FullName)
 
 	// try to fetch 3 times
 	for i := 0; i < 3; i++ {
-		files, err = cf.fetch(ctx, cf.timeout, strings.TrimSpace(cf.configPath))
+		files, err = cf.fetch(ctx, strings.TrimSpace(cf.repo.Config))
 		if err != nil {
 			log.Trace().Err(err).Msgf("%d. try failed", i+1)
 		}
@@ -96,8 +90,8 @@ func (cf *configFetcher) Fetch(ctx context.Context) (files []*types.FileMeta, er
 }
 
 // fetch config by timeout
-func (cf *configFetcher) fetch(c context.Context, timeout time.Duration, config string) ([]*types.FileMeta, error) {
-	ctx, cancel := context.WithTimeout(c, timeout)
+func (cf *ConfigFetcher) fetch(c context.Context, config string) ([]*types.FileMeta, error) {
+	ctx, cancel := context.WithTimeout(c, cf.timeout)
 	defer cancel()
 
 	if len(config) > 0 {
@@ -141,7 +135,7 @@ func filterPipelineFiles(files []*types.FileMeta) []*types.FileMeta {
 	return res
 }
 
-func (cf *configFetcher) checkPipelineFile(c context.Context, config string) ([]*types.FileMeta, error) {
+func (cf *ConfigFetcher) checkPipelineFile(c context.Context, config string) ([]*types.FileMeta, error) {
 	file, err := cf.forge.File(c, cf.user, cf.repo, cf.pipeline, config)
 
 	if err == nil && len(file) != 0 {
@@ -156,7 +150,7 @@ func (cf *configFetcher) checkPipelineFile(c context.Context, config string) ([]
 	return nil, err
 }
 
-func (cf *configFetcher) getFirstAvailableConfig(c context.Context, configs []string) ([]*types.FileMeta, error) {
+func (cf *ConfigFetcher) getFirstAvailableConfig(c context.Context, configs []string) ([]*types.FileMeta, error) {
 	var forgeErr []error
 	for _, fileOrFolder := range configs {
 		if strings.HasSuffix(fileOrFolder, "/") {
