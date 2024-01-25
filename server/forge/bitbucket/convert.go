@@ -137,7 +137,7 @@ func convertUser(from *internal.Account, token *oauth2.Token) *model.User {
 		Secret:        token.RefreshToken,
 		Expiry:        token.Expiry.UTC().Unix(),
 		Avatar:        from.Links.Avatar.Href,
-		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(from.ID)),
+		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(from.UUID)),
 	}
 }
 
