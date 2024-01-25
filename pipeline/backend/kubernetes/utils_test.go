@@ -67,4 +67,7 @@ func TestToDnsName(t *testing.T) {
 	name, err = toDNSName("build & deploy")
 	assert.NoError(t, err)
 	assert.Equal(t, "build--deploy", name)
+
+	name, err = toDNSName("-build-and-deploy")
+	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
 }

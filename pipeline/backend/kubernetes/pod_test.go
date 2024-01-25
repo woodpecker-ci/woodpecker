@@ -58,6 +58,9 @@ func TestStepLabel(t *testing.T) {
 	name, err := stepLabel(&types.Step{Name: "Build image"})
 	assert.NoError(t, err)
 	assert.EqualValues(t, "build-image", name)
+
+	name, err = stepLabel(&types.Step{Name: ".build.image"})
+	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
 }
 
 func TestTinyPod(t *testing.T) {
