@@ -96,7 +96,7 @@ steps:
     group: test
     commands:
       - corepack enable
-      - pnpx cspell lint --gitignore '{**,.*}/{*,.*}'
+      - pnpx cspell lint --no-progress --gitignore '{**,.*}/{*,.*}'
     when: *when
 
   test:
