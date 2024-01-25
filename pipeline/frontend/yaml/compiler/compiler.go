@@ -44,19 +44,20 @@ type Secret struct {
 	AllowedPlugins []string
 }
 
-func (s *Secret) Available(container *yaml_types.Container) bool {
-	return len(s.AllowedPlugins) == 0 || (utils.MatchImage(container.Image, s.AllowedPlugins...) && container.IsPlugin())
+func (s *Secret) Available(container *yaml_types.Container) error {
+	onlyAllowSecretForPlugins := len(s.AllowedPlugins) > 0
+	if onlyAllowSecretForPlugins && !container.IsPlugin() {
+		return fmt.Errorf("secret %q only allowed to be used by plugins by step %q", s.Name, container.Name)
+	}
+
+	if onlyAllowSecretForPlugins && !utils.MatchImage(container.Image, s.AllowedPlugins...) {
+		return fmt.Errorf("secret %q not allowed to be used with image %q by step %q", s.Name, container.Image, container.Name)
+	}
+
+	return nil
 }
 
 type secretMap map[string]Secret
-
-func (sm secretMap) toStringMap() map[string]string {
-	m := make(map[string]string, len(sm))
-	for k, v := range sm {
-		m[k] = v.Value
-	}
-	return m
-}
 
 type ResourceLimit struct {
 	MemSwapLimit int64

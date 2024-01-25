@@ -30,27 +30,29 @@ func TestSecretAvailable(t *testing.T) {
 	secret := Secret{
 		AllowedPlugins: []string{},
 	}
-	assert.True(t, secret.Available(&yaml_types.Container{
+	assert.NoError(t, secret.Available(&yaml_types.Container{
 		Image:    "golang",
 		Commands: yaml_base_types.StringOrSlice{"echo 'this is not a plugin'"},
 	}))
 
 	// secret only available for "golang" plugin
 	secret = Secret{
+		Name:           "foo",
 		AllowedPlugins: []string{"golang"},
 	}
-	assert.True(t, secret.Available(&yaml_types.Container{
+	assert.NoError(t, secret.Available(&yaml_types.Container{
+		Name:     "step",
 		Image:    "golang",
 		Commands: yaml_base_types.StringOrSlice{},
 	}))
-	assert.False(t, secret.Available(&yaml_types.Container{
+	assert.ErrorContains(t, secret.Available(&yaml_types.Container{
 		Image:    "golang",
 		Commands: yaml_base_types.StringOrSlice{"echo 'this is not a plugin'"},
-	}))
-	assert.False(t, secret.Available(&yaml_types.Container{
+	}), "only allowed to be used by plugins by step")
+	assert.ErrorContains(t, secret.Available(&yaml_types.Container{
 		Image:    "not-golang",
 		Commands: yaml_base_types.StringOrSlice{},
-	}))
+	}), "not allowed to be used with image ")
 }
 
 func TestCompilerCompile(t *testing.T) {
@@ -259,7 +261,7 @@ func TestCompilerCompile(t *testing.T) {
 				Secrets:  yaml_types.Secrets{Secrets: []*yaml_types.Secret{{Source: "missing", Target: "missing"}}},
 			}}}},
 			backConf:    nil,
-			expectedErr: "secret \"missing\" not found or not allowed to be used",
+			expectedErr: "secret \"missing\" not found or not available for this event",
 		},
 		{
 			name: "workflow with broken step dependency",

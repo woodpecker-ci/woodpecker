@@ -92,15 +92,16 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 	getSecretValue := func(name string) (string, error) {
 		name = strings.ToLower(name)
 		secret, ok := c.secrets[name]
-		// TODO: be more specific about the error
-		// - secret image not allowed
-		// - container is not used as plugin
-		// - secret not found (secret event not allowed)
-		if ok && secret.Available(container) {
-			return secret.Value, nil
+		if !ok {
+			return "", fmt.Errorf("secret %q not found or not available for this event", name)
 		}
 
-		return "", fmt.Errorf("secret %q not found or not allowed to be used", name)
+		err := secret.Available(container)
+		if err != nil {
+			return "", err
+		}
+
+		return secret.Value, nil
 	}
 
 	// TODO: why don't we pass secrets to detached steps?
