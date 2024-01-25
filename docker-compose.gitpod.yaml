@@ -1,3 +1,4 @@
+# cSpell:ignore pgdata pgsql localtime
 version: '3'
 
 services:

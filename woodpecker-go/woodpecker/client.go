@@ -629,9 +629,9 @@ func (c *client) open(rawurl, method string, in any) (io.ReadCloser, error) {
 		return nil, err
 	}
 	if in != nil {
-		decoded, derr := json.Marshal(in)
-		if derr != nil {
-			return nil, derr
+		decoded, decodeErr := json.Marshal(in)
+		if decodeErr != nil {
+			return nil, decodeErr
 		}
 		buf := bytes.NewBuffer(decoded)
 		req.Body = io.NopCloser(buf)
