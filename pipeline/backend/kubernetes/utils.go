@@ -45,12 +45,12 @@ func dnsName(i string) (string, error) {
 	return res, nil
 }
 
-func toDnsName(in string) (string, error) {
+func toDNSName(in string) (string, error) {
 	lower := strings.ToLower(in)
 	withoutUnderscores := strings.ReplaceAll(lower, "_", "-")
 	withoutSpaces := strings.ReplaceAll(withoutUnderscores, " ", "-")
-	almostDns := dnsDisallowedCharacters.ReplaceAllString(withoutSpaces, "")
-	return dnsName(almostDns)
+	almostDNS := dnsDisallowedCharacters.ReplaceAllString(withoutSpaces, "")
+	return dnsName(almostDNS)
 }
 
 func isImagePullBackOffState(pod *v1.Pod) bool {

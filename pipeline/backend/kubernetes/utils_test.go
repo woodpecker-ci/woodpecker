@@ -56,15 +56,15 @@ func TestDNSName(t *testing.T) {
 }
 
 func TestToDnsName(t *testing.T) {
-	name, err := toDnsName("BUILD_AND_DEPLOY_0")
+	name, err := toDNSName("BUILD_AND_DEPLOY_0")
 	assert.NoError(t, err)
 	assert.Equal(t, "build-and-deploy-0", name)
 
-	name, err = toDnsName("build and deploy")
+	name, err = toDNSName("build and deploy")
 	assert.NoError(t, err)
 	assert.Equal(t, "build-and-deploy", name)
 
-	name, err = toDnsName("build & deploy")
+	name, err = toDNSName("build & deploy")
 	assert.NoError(t, err)
 	assert.Equal(t, "build--deploy", name)
 }

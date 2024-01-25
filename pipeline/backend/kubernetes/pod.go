@@ -110,7 +110,7 @@ func podMeta(step *types.Step, config *config, podName string) (metav1.ObjectMet
 }
 
 func stepLabel(step *types.Step) (string, error) {
-	return toDnsName(step.Name)
+	return toDNSName(step.Name)
 }
 
 func podSpec(step *types.Step, config *config) (v1.PodSpec, error) {

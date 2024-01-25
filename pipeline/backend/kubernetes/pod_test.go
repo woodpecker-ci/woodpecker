@@ -139,11 +139,11 @@ func TestTinyPod(t *testing.T) {
 	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64")
 	assert.NoError(t, err)
 
-	podJson, err := json.Marshal(pod)
+	podJSON, err := json.Marshal(pod)
 	assert.NoError(t, err)
 
 	ja := jsonassert.New(t)
-	ja.Assertf(string(podJson), expected)
+	ja.Assertf(string(podJSON), expected)
 }
 
 func TestFullPod(t *testing.T) {
@@ -342,9 +342,9 @@ func TestFullPod(t *testing.T) {
 	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64")
 	assert.NoError(t, err)
 
-	podJson, err := json.Marshal(pod)
+	podJSON, err := json.Marshal(pod)
 	assert.NoError(t, err)
 
 	ja := jsonassert.New(t)
-	ja.Assertf(string(podJson), expected)
+	ja.Assertf(string(podJSON), expected)
 }
