@@ -78,11 +78,11 @@ func New(opts Opts) (forge.Forge, error) {
 
 	switch {
 	case opts.Username == "":
-		return nil, fmt.Errorf("Must have a git machine account username")
+		return nil, fmt.Errorf("must have a git machine account username")
 	case opts.Password == "":
-		return nil, fmt.Errorf("Must have a git machine account password")
+		return nil, fmt.Errorf("must have a git machine account password")
 	case opts.ConsumerKey == "":
-		return nil, fmt.Errorf("Must have a oauth1 consumer key")
+		return nil, fmt.Errorf("must have a oauth1 consumer key")
 	}
 
 	if opts.ConsumerRSA == "" && opts.ConsumerRSAString == "" {
@@ -158,7 +158,7 @@ func (c *client) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 
 // Auth is not supported.
 func (*client) Auth(_ context.Context, _, _ string) (string, error) {
-	return "", fmt.Errorf("Not Implemented")
+	return "", fmt.Errorf("not Implemented")
 }
 
 func (c *client) Repo(ctx context.Context, u *model.User, rID model.ForgeRemoteID, owner, name string) (*model.Repo, error) {
@@ -617,14 +617,14 @@ func (c *client) newClient(u *model.User) (*bb.Client, error) {
 	return bb.NewClient(c.URLApi, cl)
 }
 
-func createConsumer(URL, ConsumerKey string, PrivateKey *rsa.PrivateKey) *oauth.Consumer {
+func createConsumer(url, consumerKey string, privateKey *rsa.PrivateKey) *oauth.Consumer {
 	consumer := oauth.NewRSAConsumer(
-		ConsumerKey,
-		PrivateKey,
+		consumerKey,
+		privateKey,
 		oauth.ServiceProvider{
-			RequestTokenUrl:   fmt.Sprintf(requestTokenURL, URL),
-			AuthorizeTokenUrl: fmt.Sprintf(authorizeTokenURL, URL),
-			AccessTokenUrl:    fmt.Sprintf(accessTokenURL, URL),
+			RequestTokenUrl:   fmt.Sprintf(requestTokenURL, url),
+			AuthorizeTokenUrl: fmt.Sprintf(authorizeTokenURL, url),
+			AccessTokenUrl:    fmt.Sprintf(accessTokenURL, url),
 			HttpMethod:        "POST",
 		})
 	consumer.HttpClient = &http.Client{

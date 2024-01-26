@@ -36,9 +36,9 @@ type Client struct {
 	ctx         context.Context
 }
 
-func NewClientWithToken(ctx context.Context, url string, consumer *oauth.Consumer, AccessToken string) *Client {
+func NewClientWithToken(ctx context.Context, url string, consumer *oauth.Consumer, accessToken string) *Client {
 	var token oauth.AccessToken
-	token.Token = AccessToken
+	token.Token = accessToken
 	client, err := consumer.MakeHttpClient(&token)
 	if err != nil {
 		log.Err(err).Msg("")
@@ -47,7 +47,7 @@ func NewClientWithToken(ctx context.Context, url string, consumer *oauth.Consume
 	return &Client{
 		client:      client,
 		base:        url,
-		accessToken: AccessToken,
+		accessToken: accessToken,
 		ctx:         ctx,
 	}
 }

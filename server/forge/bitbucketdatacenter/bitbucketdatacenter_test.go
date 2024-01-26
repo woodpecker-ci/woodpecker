@@ -24,6 +24,7 @@ import (
 
 	"github.com/franela/goblin"
 	"github.com/gin-gonic/gin"
+
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/bitbucketdatacenter/fixtures"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
@@ -58,10 +59,12 @@ func TestBitbucketDC(t *testing.T) {
 				})
 				g.Assert(err).IsNil()
 				g.Assert(forge).IsNotNil()
-				g.Assert(forge.(*client).url).Equal("http://localhost:8080")
-				g.Assert(forge.(*client).Username).Equal("0ZXh0IjoiI")
-				g.Assert(forge.(*client).Password).Equal("I1NiIsInR5")
-				g.Assert(forge.(*client).SkipVerify).Equal(true)
+				cl, ok := forge.(*client)
+				g.Assert(ok).IsTrue()
+				g.Assert(cl.url).Equal("http://localhost:8080")
+				g.Assert(cl.Username).Equal("0ZXh0IjoiI")
+				g.Assert(cl.Password).Equal("I1NiIsInR5")
+				g.Assert(cl.SkipVerify).Equal(true)
 			})
 		})
 
