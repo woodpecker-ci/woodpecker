@@ -135,6 +135,10 @@ const config: Config = {
               href: 'https://ci.woodpecker-ci.org/repos/3780',
               label: 'CI',
             },
+            {
+              href: 'https://opencollective.com/woodpecker-ci',
+              label: 'Open Collective',
+            },
           ],
         },
       ],
