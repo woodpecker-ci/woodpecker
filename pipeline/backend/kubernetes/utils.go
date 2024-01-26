@@ -31,7 +31,8 @@ var (
 		`([-a-z0-9]*[a-z0-9])?` + // inside can als contain -
 		`(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$`, // allow the same pattern as before with dots in between but only one dot
 	)
-	ErrDNSPatternInvalid = errors.New("name is not a valid kubernetes DNS name")
+	dnsDisallowedCharacters = regexp.MustCompile(`[^-^.a-z0-9]+`)
+	ErrDNSPatternInvalid    = errors.New("name is not a valid kubernetes DNS name")
 )
 
 func dnsName(i string) (string, error) {
@@ -42,6 +43,14 @@ func dnsName(i string) (string, error) {
 	}
 
 	return res, nil
+}
+
+func toDNSName(in string) (string, error) {
+	lower := strings.ToLower(in)
+	withoutUnderscores := strings.ReplaceAll(lower, "_", "-")
+	withoutSpaces := strings.ReplaceAll(withoutUnderscores, " ", "-")
+	almostDNS := dnsDisallowedCharacters.ReplaceAllString(withoutSpaces, "")
+	return dnsName(almostDNS)
 }
 
 func isImagePullBackOffState(pod *v1.Pod) bool {
