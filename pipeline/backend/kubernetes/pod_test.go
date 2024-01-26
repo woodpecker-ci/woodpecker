@@ -59,7 +59,7 @@ func TestStepLabel(t *testing.T) {
 	assert.NoError(t, err)
 	assert.EqualValues(t, "build-image", name)
 
-	name, err = stepLabel(&types.Step{Name: ".build.image"})
+	_, err = stepLabel(&types.Step{Name: ".build.image"})
 	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
 }
 
