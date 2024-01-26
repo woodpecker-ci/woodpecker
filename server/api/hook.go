@@ -144,7 +144,7 @@ func PostHook(c *gin.Context) {
 	repo, err := _store.GetRepoNameFallback(tmpRepo.ForgeRemoteID, tmpRepo.FullName)
 	if err != nil {
 		log.Error().Err(err).Msgf("failure to get repo %s from store", tmpRepo.FullName)
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 	if !repo.IsActive {
@@ -216,7 +216,7 @@ func PostHook(c *gin.Context) {
 	// 5. Check if pull requests are allowed for this repo
 	//
 
-	if tmpPipeline.Event == model.EventPull && !repo.AllowPull {
+	if (tmpPipeline.Event == model.EventPull || tmpPipeline.Event == model.EventPullClosed) && !repo.AllowPull {
 		log.Debug().Str("repo", repo.FullName).Msg("ignoring hook: pull requests are disabled for this repo in woodpecker")
 		c.Status(http.StatusNoContent)
 		return

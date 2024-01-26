@@ -1,50 +1,10 @@
+---
+toc_max_heading_level: 2
+---
+
 # Kubernetes backend
 
 The kubernetes backend executes steps inside standalone pods. A temporary PVC is created for the lifetime of the pipeline to transfer files between steps.
-
-## General Configuration
-
-These env vars can be set in the `env:` sections of both `server` and `agent`.
-They do not need to be set for both but only for the part to which it is relevant to.
-
-```yaml
-server:
-  env:
-    WOODPECKER_SESSION_EXPIRES: "300h"
-    [...]
-
-agent:
-  env:
-    [...]
-```
-
-- `WOODPECKER_BACKEND_K8S_NAMESPACE` (default: `woodpecker`)
-
-  The namespace to create worker pods in.
-
-- `WOODPECKER_BACKEND_K8S_VOLUME_SIZE` (default: `10G`)
-
-  The volume size of the pipeline volume.
-
-- `WOODPECKER_BACKEND_K8S_STORAGE_CLASS` (default: empty)
-
-  The storage class to use for the pipeline volume.
-
-- `WOODPECKER_BACKEND_K8S_STORAGE_RWX` (default: `true`)
-
-  Determines if `RWX` should be used for the pipeline volume's [access mode](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes). If false, `RWO` is used instead.
-
-- `WOODPECKER_BACKEND_K8S_POD_LABELS` (default: empty)
-
-  Additional labels to apply to worker pods. Must be a YAML object, e.g. `{"example.com/test-label":"test-value"}`.
-
-- `WOODPECKER_BACKEND_K8S_POD_ANNOTATIONS` (default: empty)
-
-  Additional annotations to apply to worker pods. Must be a YAML object, e.g. `{"example.com/test-annotation":"test-value"}`.
-
-- `WOODPECKER_BACKEND_K8S_SECCTX_NONROOT` (default: `false`)
-
-  Determines if containers must be required to run as non-root users.
 
 ## Job specific configuration
 
@@ -57,7 +17,7 @@ Here is an example definition with an arbitrary `resources` definition below the
 
 ```yaml
 steps:
-  'My kubernetes step':
+  - name: 'My kubernetes step'
     image: alpine
     commands:
       - echo "Hello world"
@@ -72,12 +32,12 @@ steps:
             cpu: 1000m
 ```
 
-### serviceAccountName
+### `serviceAccountName`
 
 Specify the name of the ServiceAccount which the build pod will mount. This serviceAccount must be created externally.
 See the [kubernetes documentation](https://kubernetes.io/docs/concepts/security/service-accounts/) for more information on using serviceAccounts.
 
-### nodeSelector
+### `nodeSelector`
 
 Specifies the label which is used to select the node on which the job will be executed.
 
@@ -106,7 +66,7 @@ And then overwrite the `nodeSelector` in the `backend_options` section of the st
           kubernetes.io/arch: "${ARCH}"
 ```
 
-### tolerations
+### `tolerations`
 
 When you use nodeSelector and the node pool is configured with Taints, you need to specify the Tolerations. Tolerations allow the scheduler to schedule pods with matching taints.
 See the [kubernetes documentation](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/) for more information on using tolerations.
@@ -115,7 +75,7 @@ Example pipeline configuration:
 
 ```yaml
 steps:
-  build:
+  - name: build
     image: golang
     commands:
       - go get
@@ -147,7 +107,7 @@ Assuming a PVC named "woodpecker-cache" exists, it can be referenced as follows 
 
 ```yaml
 steps:
-  "Restore Cache":
+  - name: "Restore Cache"
     image: meltwater/drone-cache
     volumes:
       - woodpecker-cache:/woodpecker/src/cache
@@ -163,7 +123,7 @@ Use the following configuration to set the `securityContext` for the pod/contain
 
 ```yaml
 steps:
-  test:
+  - name: test
     image: alpine
     commands:
       - echo Hello world
@@ -209,3 +169,49 @@ workspace:
 ```
 
 See [this issue](https://github.com/woodpecker-ci/woodpecker/issues/2510) for more details.
+
+## Configuration
+
+These env vars can be set in the `env:` sections of the agent.
+
+### `WOODPECKER_BACKEND_K8S_NAMESPACE`
+
+> Default: `woodpecker`
+
+The namespace to create worker pods in.
+
+### `WOODPECKER_BACKEND_K8S_VOLUME_SIZE`
+
+> Default: `10G`
+
+The volume size of the pipeline volume.
+
+### `WOODPECKER_BACKEND_K8S_STORAGE_CLASS`
+
+> Default: empty
+
+The storage class to use for the pipeline volume.
+
+### `WOODPECKER_BACKEND_K8S_STORAGE_RWX`
+
+> Default: `true`
+
+Determines if `RWX` should be used for the pipeline volume's [access mode](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes). If false, `RWO` is used instead.
+
+### `WOODPECKER_BACKEND_K8S_POD_LABELS`
+
+> Default: empty
+
+Additional labels to apply to worker pods. Must be a YAML object, e.g. `{"example.com/test-label":"test-value"}`.
+
+### `WOODPECKER_BACKEND_K8S_POD_ANNOTATIONS`
+
+> Default: empty
+
+Additional annotations to apply to worker pods. Must be a YAML object, e.g. `{"example.com/test-annotation":"test-value"}`.
+
+### `WOODPECKER_BACKEND_K8S_SECCTX_NONROOT`
+
+> Default: `false`
+
+Determines if containers must be required to run as non-root users.

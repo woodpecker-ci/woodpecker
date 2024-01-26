@@ -19,7 +19,7 @@ This is because webhooks are signed using a per-repository secret key which is n
 
 ## Configuration
 
-To configure your pipeline you must create a `.woodpecker.yml` file in the root of your repository. The `.woodpecker.yml` file is used to define your pipeline steps.
+To configure your pipeline you must create a `.woodpecker.yaml` file in the root of your repository. The `.woodpecker.yaml` file is used to define your pipeline steps.
 
 :::note
 We support most of YAML 1.2, but preserve some behavior from 1.1 for backward compatibility.
@@ -30,7 +30,7 @@ Example pipeline configuration:
 
 ```yaml
 steps:
-  build:
+  - name: build
     image: golang
     commands:
       - go get
@@ -38,7 +38,7 @@ steps:
       - go test
 
 services:
-  postgres:
+  - name: postgres
     image: postgres:9.4.5
     environment:
       - POSTGRES_USER=myapp
@@ -48,20 +48,20 @@ Example pipeline configuration with multiple, serial steps:
 
 ```yaml
 steps:
-  backend:
+  - name: backend
     image: golang
     commands:
       - go get
       - go build
       - go test
 
-  frontend:
+  - name: frontend
     image: node:6
     commands:
       - npm install
       - npm test
 
-  notify:
+  - name: notify
     image: plugins/slack
     channel: developers
     username: woodpecker

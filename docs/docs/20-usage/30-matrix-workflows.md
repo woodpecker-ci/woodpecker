@@ -43,7 +43,7 @@ matrix:
     - mariadb:10.1
 
 steps:
-  build:
+  - name: build
     image: golang:${GO_VERSION}
     commands:
       - go get
@@ -51,29 +51,29 @@ steps:
       - go test
 
 services:
-  database:
+  - name: database
     image: ${DATABASE}
 ```
 
 Example YAML file after injecting the matrix parameters:
 
 ```diff
-steps:
-  build:
--   image: golang:${GO_VERSION}
-+   image: golang:1.4
-    commands:
-      - go get
-      - go build
-      - go test
-+   environment:
-+     - GO_VERSION=1.4
-+     - DATABASE=mysql:8
+ steps:
+   - name: build
+-    image: golang:${GO_VERSION}
++    image: golang:1.4
+     commands:
+       - go get
+       - go build
+       - go test
++    environment:
++      - GO_VERSION=1.4
++      - DATABASE=mysql:8
 
-services:
-  database:
--   image: ${DATABASE}
-+   image: mysql:8
+ services:
+   - name: database
+-    image: ${DATABASE}
++    image: mysql:8
 ```
 
 ## Examples
@@ -88,7 +88,7 @@ matrix:
     - latest
 
 steps:
-  build:
+  - name: build
     image: golang:${TAG}
     commands:
       - go build
@@ -105,7 +105,7 @@ matrix:
     - golang:latest
 
 steps:
-  build:
+  - name: build
     image: ${IMAGE}
     commands:
       - go build
@@ -124,12 +124,12 @@ labels:
   platform: ${platform}
 
 steps:
-  test:
+  - name: test
     image: alpine
     commands:
       - echo "I am running on ${platform}"
 
-  test-arm-only:
+  - name: test-arm-only
     image: alpine
     commands:
       - echo "I am running on ${platform}"

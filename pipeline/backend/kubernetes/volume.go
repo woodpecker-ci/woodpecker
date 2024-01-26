@@ -25,15 +25,15 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func mkPersistentVolumeClaim(namespace, name, storageClass, size string, storageRwx bool) (*v1.PersistentVolumeClaim, error) {
-	_storageClass := &storageClass
-	if storageClass == "" {
+func mkPersistentVolumeClaim(config *config, name string) (*v1.PersistentVolumeClaim, error) {
+	_storageClass := &config.StorageClass
+	if config.StorageClass == "" {
 		_storageClass = nil
 	}
 
 	var accessMode v1.PersistentVolumeAccessMode
 
-	if storageRwx {
+	if config.StorageRwx {
 		accessMode = v1.ReadWriteMany
 	} else {
 		accessMode = v1.ReadWriteOnce
@@ -47,14 +47,14 @@ func mkPersistentVolumeClaim(namespace, name, storageClass, size string, storage
 	pvc := &v1.PersistentVolumeClaim{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      volumeName,
-			Namespace: namespace,
+			Namespace: config.Namespace,
 		},
 		Spec: v1.PersistentVolumeClaimSpec{
 			AccessModes:      []v1.PersistentVolumeAccessMode{accessMode},
 			StorageClassName: _storageClass,
 			Resources: v1.VolumeResourceRequirements{
 				Requests: v1.ResourceList{
-					v1.ResourceStorage: resource.MustParse(size),
+					v1.ResourceStorage: resource.MustParse(config.VolumeSize),
 				},
 			},
 		},
@@ -76,13 +76,14 @@ func volumeMountPath(name string) string {
 }
 
 func startVolume(ctx context.Context, engine *kube, name string) (*v1.PersistentVolumeClaim, error) {
-	pvc, err := mkPersistentVolumeClaim(engine.config.Namespace, name, engine.config.StorageClass, engine.config.VolumeSize, engine.config.StorageRwx)
+	engineConfig := engine.getConfig()
+	pvc, err := mkPersistentVolumeClaim(engineConfig, name)
 	if err != nil {
 		return nil, err
 	}
 
-	log.Trace().Msgf("Creating volume: %s", pvc.Name)
-	return engine.client.CoreV1().PersistentVolumeClaims(engine.config.Namespace).Create(ctx, pvc, metav1.CreateOptions{})
+	log.Trace().Msgf("creating volume: %s", pvc.Name)
+	return engine.client.CoreV1().PersistentVolumeClaims(engineConfig.Namespace).Create(ctx, pvc, metav1.CreateOptions{})
 }
 
 func stopVolume(ctx context.Context, engine *kube, name string, deleteOpts metav1.DeleteOptions) error {
@@ -90,12 +91,12 @@ func stopVolume(ctx context.Context, engine *kube, name string, deleteOpts metav
 	if err != nil {
 		return err
 	}
-	log.Trace().Str("name", pvcName).Msg("Deleting volume")
+	log.Trace().Str("name", pvcName).Msg("deleting volume")
 
 	err = engine.client.CoreV1().PersistentVolumeClaims(engine.config.Namespace).Delete(ctx, pvcName, deleteOpts)
 	if errors.IsNotFound(err) {
 		// Don't abort on 404 errors from k8s, they most likely mean that the pod hasn't been created yet, usually because pipeline was canceled before running all steps.
-		log.Trace().Err(err).Msgf("Unable to delete service %s", pvcName)
+		log.Trace().Err(err).Msgf("unable to delete service %s", pvcName)
 		return nil
 	}
 	return err

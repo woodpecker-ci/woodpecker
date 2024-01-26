@@ -12,7 +12,7 @@ Example configuration using a private image:
 
 ```diff
  steps:
-   build:
+   - name: build
 +    image: gcr.io/custom/golang
      commands:
        - go build
@@ -53,16 +53,16 @@ It's possible to build a local image by mounting the docker socket as a volume.
 
 With a `Dockerfile` at the root of the project:
 
-```diff
+```yaml
 steps:
-  build-image:
+  - name: build-image
     image: docker
     commands:
       - docker build --rm -t local/project-image .
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
-  build-project:
+  - name: build-project
     image: local/project-image
     commands:
       - ./build.sh

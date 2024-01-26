@@ -21,9 +21,9 @@ import (
 )
 
 var (
-	errRegistryAddressInvalid  = errors.New("Invalid Registry Address")
-	errRegistryUsernameInvalid = errors.New("Invalid Registry Username")
-	errRegistryPasswordInvalid = errors.New("Invalid Registry Password")
+	errRegistryAddressInvalid  = errors.New("invalid registry address")
+	errRegistryUsernameInvalid = errors.New("invalid registry username")
+	errRegistryPasswordInvalid = errors.New("invalid registry password")
 )
 
 // RegistryService defines a service for managing registries.
@@ -57,8 +57,6 @@ type Registry struct {
 	Address  string `json:"address"  xorm:"UNIQUE(s) INDEX 'registry_addr'"`
 	Username string `json:"username" xorm:"varchar(2000) 'registry_username'"`
 	Password string `json:"password" xorm:"TEXT 'registry_password'"`
-	Token    string `json:"token"    xorm:"TEXT 'registry_token'"`
-	Email    string `json:"email"    xorm:"varchar(500) 'registry_email'"`
 } //	@name Registry
 
 // Validate validates the registry information.
@@ -83,7 +81,5 @@ func (r *Registry) Copy() *Registry {
 		RepoID:   r.RepoID,
 		Address:  r.Address,
 		Username: r.Username,
-		Email:    r.Email,
-		Token:    r.Token,
 	}
 }

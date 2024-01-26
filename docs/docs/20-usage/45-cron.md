@@ -8,7 +8,7 @@ To configure cron jobs you need at least push access to the repository.
 
    ```diff
     steps:
-      sync_locales:
+      - name: sync_locales
         image: weblate_sync
         settings:
           url: example.com

@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"maps"
 	"path"
+	"strconv"
 	"strings"
 
 	"github.com/oklog/ulid/v2"
@@ -29,7 +30,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/utils"
 )
 
-func (c *Compiler) createProcess(name string, container *yaml_types.Container, stepType backend_types.StepType) (*backend_types.Step, error) {
+func (c *Compiler) createProcess(container *yaml_types.Container, stepType backend_types.StepType) (*backend_types.Step, error) {
 	var (
 		uuid = ulid.Make()
 
@@ -39,7 +40,6 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		workspace   = fmt.Sprintf("%s_default:%s", c.prefix, c.base)
 		privileged  = container.Privileged
 		networkMode = container.NetworkMode
-		ipcMode     = container.IpcMode
 		// network    = container.Network
 	)
 
@@ -80,7 +80,6 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 	maps.Copy(environment, c.env)
 
 	environment["CI_WORKSPACE"] = path.Join(c.base, c.path)
-	environment["CI_STEP_NAME"] = name
 
 	if stepType == backend_types.StepTypeService || container.Detached {
 		detached = true
@@ -112,7 +111,6 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		if utils.MatchHostname(container.Image, registry.Hostname) {
 			authConfig.Username = registry.Username
 			authConfig.Password = registry.Password
-			authConfig.Email = registry.Email
 			break
 		}
 	}
@@ -156,9 +154,13 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		cpuSet = c.reslimit.CPUSet
 	}
 
-	var ports []uint16
-	for _, port := range container.Ports {
-		ports = append(ports, uint16(port))
+	var ports []backend_types.Port
+	for _, portDef := range container.Ports {
+		port, err := convertPort(portDef)
+		if err != nil {
+			return nil, err
+		}
+		ports = append(ports, port)
 	}
 
 	// at least one constraint contain status success, or all constraints have no status set
@@ -172,10 +174,9 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 	}
 
 	return &backend_types.Step{
-		Name:           name,
+		Name:           container.Name,
 		UUID:           uuid.String(),
 		Type:           stepType,
-		Alias:          container.Name,
 		Image:          container.Image,
 		Pull:           container.Pull,
 		Detached:       detached,
@@ -183,6 +184,7 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		WorkingDir:     workingdir,
 		Environment:    environment,
 		Commands:       container.Commands,
+		Entrypoint:     container.Entrypoint,
 		ExtraHosts:     extraHosts,
 		Volumes:        volumes,
 		Tmpfs:          container.Tmpfs,
@@ -193,7 +195,6 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		MemSwapLimit:   memSwapLimit,
 		MemLimit:       memLimit,
 		ShmSize:        shmSize,
-		Sysctls:        container.Sysctls,
 		CPUQuota:       cpuQuota,
 		CPUShares:      cpuShares,
 		CPUSet:         cpuSet,
@@ -202,7 +203,6 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		OnFailure:      onFailure,
 		Failure:        failure,
 		NetworkMode:    networkMode,
-		IpcMode:        ipcMode,
 		Ports:          ports,
 		BackendOptions: backendOptions,
 	}, nil
@@ -213,6 +213,22 @@ func (c *Compiler) stepWorkdir(container *yaml_types.Container) string {
 		return container.Directory
 	}
 	return path.Join(c.base, c.path, container.Directory)
+}
+
+func convertPort(portDef string) (backend_types.Port, error) {
+	var err error
+	var port backend_types.Port
+
+	number, protocol, _ := strings.Cut(portDef, "/")
+	port.Protocol = protocol
+
+	portNumber, err := strconv.ParseUint(number, 10, 16)
+	if err != nil {
+		return port, err
+	}
+	port.Number = uint16(portNumber)
+
+	return port, nil
 }
 
 func convertKubernetesBackendOptions(kubeOpt *yaml_types.KubernetesBackendOptions) backend_types.KubernetesBackendOptions {
@@ -240,6 +256,18 @@ func convertKubernetesBackendOptions(kubeOpt *yaml_types.KubernetesBackendOption
 			RunAsUser:    kubeOpt.SecurityContext.RunAsUser,
 			RunAsGroup:   kubeOpt.SecurityContext.RunAsGroup,
 			FSGroup:      kubeOpt.SecurityContext.FSGroup,
+		}
+		if kubeOpt.SecurityContext.SeccompProfile != nil {
+			securityContext.SeccompProfile = &backend_types.SecProfile{
+				Type:             backend_types.SecProfileType(kubeOpt.SecurityContext.SeccompProfile.Type),
+				LocalhostProfile: kubeOpt.SecurityContext.SeccompProfile.LocalhostProfile,
+			}
+		}
+		if kubeOpt.SecurityContext.ApparmorProfile != nil {
+			securityContext.ApparmorProfile = &backend_types.SecProfile{
+				Type:             backend_types.SecProfileType(kubeOpt.SecurityContext.ApparmorProfile.Type),
+				LocalhostProfile: kubeOpt.SecurityContext.ApparmorProfile.LocalhostProfile,
+			}
 		}
 	}
 

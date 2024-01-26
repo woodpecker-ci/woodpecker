@@ -1,0 +1,31 @@
+when:
+  - event: [pull_request, cron]
+  - event: push
+    branch:
+      - ${CI_REPO_DEFAULT_BRANCH}
+      - renovate/*
+
+variables:
+  - &trivy_image aquasec/trivy:0.46.1
+  - &trivy_plugin woodpeckerci/plugin-trivy:1.0.1
+
+steps:
+  backend:
+    depends_on: []
+    image: *trivy_plugin
+    settings:
+      skip-dirs: web/,docs/
+
+  docs:
+    depends_on: []
+    image: *trivy_plugin
+    settings:
+      skip-dirs: node_modules/,plugins/woodpecker-plugins/node_modules/
+      dir: docs/
+
+  web:
+    depends_on: []
+    image: *trivy_plugin
+    settings:
+      skip-dirs: node_modules/
+      dir: web/
