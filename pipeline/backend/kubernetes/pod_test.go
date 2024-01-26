@@ -40,18 +40,27 @@ func TestStepToPodName(t *testing.T) {
 	name, err := stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "clone", Type: types.StepTypeClone})
 	assert.NoError(t, err)
 	assert.EqualValues(t, "wp-01he8bebctabr3kg", name)
-	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "clone", Type: types.StepTypeCache})
+	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "cache", Type: types.StepTypeCache})
 	assert.NoError(t, err)
 	assert.EqualValues(t, "wp-01he8bebctabr3kg", name)
-	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "clone", Type: types.StepTypePlugin})
+	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "release", Type: types.StepTypePlugin})
 	assert.NoError(t, err)
 	assert.EqualValues(t, "wp-01he8bebctabr3kg", name)
-	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "clone", Type: types.StepTypeCommands})
+	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "prepare-env", Type: types.StepTypeCommands})
 	assert.NoError(t, err)
 	assert.EqualValues(t, "wp-01he8bebctabr3kg", name)
-	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "clone", Type: types.StepTypeService})
+	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "postgres", Type: types.StepTypeService})
 	assert.NoError(t, err)
-	assert.EqualValues(t, "clone", name)
+	assert.EqualValues(t, "postgres", name)
+}
+
+func TestStepLabel(t *testing.T) {
+	name, err := stepLabel(&types.Step{Name: "Build image"})
+	assert.NoError(t, err)
+	assert.EqualValues(t, "build-image", name)
+
+	_, err = stepLabel(&types.Step{Name: ".build.image"})
+	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
 }
 
 func TestTinyPod(t *testing.T) {
@@ -133,11 +142,11 @@ func TestTinyPod(t *testing.T) {
 	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{})
 	assert.NoError(t, err)
 
-	json, err := json.Marshal(pod)
+	podJSON, err := json.Marshal(pod)
 	assert.NoError(t, err)
 
 	ja := jsonassert.New(t)
-	ja.Assertf(string(json), expected)
+	ja.Assertf(string(podJSON), expected)
 }
 
 func TestFullPod(t *testing.T) {
@@ -333,9 +342,9 @@ func TestFullPod(t *testing.T) {
 	})
 	assert.NoError(t, err)
 
-	json, err := json.Marshal(pod)
+	podJSON, err := json.Marshal(pod)
 	assert.NoError(t, err)
 
 	ja := jsonassert.New(t)
-	ja.Assertf(string(json), expected)
+	ja.Assertf(string(podJSON), expected)
 }
