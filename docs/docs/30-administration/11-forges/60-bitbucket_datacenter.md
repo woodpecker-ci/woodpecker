@@ -15,7 +15,7 @@ services:
 +     - WOODPECKER_BITBUCKET_DC_GIT_USERNAME=foo
 +     - WOODPECKER_BITBUCKET_DC_GIT_PASSWORD=bar
 +     - WOODPECKER_BITBUCKET_DC_CONSUMER_KEY=95c0282573633eb25e82
-+     - WOODPECKER_BITBUCKET_DC_CONSUMER_RSA=/etc/bitbucket/key.pem
++     - WOODPECKER_BITBUCKET_DC_CONSUMER_RSA_FILE=/etc/bitbucket/key.pem
 +     - WOODPECKER_BITBUCKET_DC_URL=http://stash.mycompany.com
     volumes:
 +     - /path/to/key.pem:/path/to/key.pem
@@ -55,7 +55,7 @@ services:
       - WOODPECKER_BITBUCKET_DC_GIT_USERNAME=foo
       - WOODPECKER_BITBUCKET_DC_GIT_PASSWORD=bar
       - WOODPECKER_BITBUCKET_DC_CONSUMER_KEY=95c0282573633eb25e82
-+     - WOODPECKER_BITBUCKET_DC_CONSUMER_RSA=/etc/bitbucket/key.pem
++     - WOODPECKER_BITBUCKET_DC_CONSUMER_RSA_FILE=/etc/bitbucket/key.pem
       - WOODPECKER_BITBUCKET_DC_URL=http://stash.mycompany.com
 +  volumes:
 +     - /etc/bitbucket/key.pem:/etc/bitbucket/key.pem
@@ -79,7 +79,7 @@ services:
       - WOODPECKER_BITBUCKET_DC_GIT_USERNAME=foo
       - WOODPECKER_BITBUCKET_DC_GIT_PASSWORD=bar
       - WOODPECKER_BITBUCKET_DC_CONSUMER_KEY=95c0282573633eb25e82
-+     - WOODPECKER_BITBUCKET_DC_CONSUMER_RSA_STRING=contentOfPemKeyAsString
++     - WOODPECKER_BITBUCKET_DC_CONSUMER_RSA=contentOfPemKeyAsString
       - WOODPECKER_BITBUCKET_DC_URL=http://stash.mycompany.com
 
   woodpecker-agent:
@@ -132,13 +132,13 @@ Read the value for `WOODPECKER_BITBUCKET_DC_CONSUMER_KEY` from the specified fil
 
 > Default: empty
 
-Configures the path to your Bitbucket Server private key file.
+Configures your Bitbucket Server private key.
 
-### `WOODPECKER_BITBUCKET_DC_CONSUMER_RSA_STRING`
+### `WOODPECKER_BITBUCKET_DC_CONSUMER_RSA_FILE`
 
 > Default: empty
 
-Configures your Bitbucket Server private key.
+Configures the path to your Bitbucket Server private key file.
 
 ### `WOODPECKER_BITBUCKET_DC_GIT_USERNAME`
 

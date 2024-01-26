@@ -457,14 +457,10 @@ var flags = append([]cli.Flag{
 		FilePath: os.Getenv("WOODPECKER_BITBUCKET_DC_CONSUMER_KEY_FILE"),
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BITBUCKET_DC_CONSUMER_RSA"},
-		Name:    "bitbucket-dc-consumer-rsa",
-		Usage:   "Bitbucket DataCenter/Server oauth1 private key file",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BITBUCKET_DC_CONSUMER_RSA_STRING"},
-		Name:    "bitbucket-dc-consumer-rsa-string",
-		Usage:   "Bitbucket DataCenter/Server oauth1 private key string",
+		EnvVars:  []string{"WOODPECKER_BITBUCKET_DC_CONSUMER_RSA"},
+		Name:     "bitbucket-dc-consumer-rsa",
+		Usage:    "Bitbucket DataCenter/Server oauth1 private key string",
+		FilePath: os.Getenv("WOODPECKER_BITBUCKET_DC_CONSUMER_RSA_FILE"),
 	},
 	&cli.StringFlag{
 		EnvVars:  []string{"WOODPECKER_BITBUCKET_DC_GIT_USERNAME"},

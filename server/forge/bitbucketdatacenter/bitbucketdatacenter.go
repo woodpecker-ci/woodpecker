@@ -24,7 +24,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"os"
 	"strings"
 
 	"github.com/mrjones/oauth"
@@ -47,13 +46,12 @@ const (
 
 // Opts defines configuration options.
 type Opts struct {
-	URL               string // Bitbucket server url for API access.
-	Username          string // Git machine account username.
-	Password          string // Git machine account password.
-	ConsumerKey       string // Oauth1 consumer key.
-	ConsumerRSA       string // Oauth1 consumer key file.
-	ConsumerRSAString string
-	SkipVerify        bool // Skip ssl verification.
+	URL         string // Bitbucket server url for API access.
+	Username    string // Git machine account username.
+	Password    string // Git machine account password.
+	ConsumerKey string // Bitbucket consumer key.
+	ConsumerRSA string // Oauth1 RSA key.
+	SkipVerify  bool   // Skip ssl verification.
 }
 
 type client struct {
@@ -83,23 +81,11 @@ func New(opts Opts) (forge.Forge, error) {
 		return nil, fmt.Errorf("must have a git machine account password")
 	case opts.ConsumerKey == "":
 		return nil, fmt.Errorf("must have a oauth1 consumer key")
+	case opts.ConsumerRSA == "":
+		return nil, fmt.Errorf("must have CONSUMER_RSA_KEY set to the value of a oauth1 consumer key")
 	}
 
-	if opts.ConsumerRSA == "" && opts.ConsumerRSAString == "" {
-		return nil, fmt.Errorf("must have CONSUMER_RSA_KEY set to the path of a oauth1 consumer key file or CONSUMER_RSA_KEY_STRING set to the value of a oauth1 consumer key")
-	}
-
-	var keyFileBytes []byte
-	if opts.ConsumerRSA != "" {
-		var err error
-		keyFileBytes, err = os.ReadFile(opts.ConsumerRSA)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		keyFileBytes = []byte(opts.ConsumerRSAString)
-	}
-
+	keyFileBytes := []byte(opts.ConsumerRSA)
 	block, _ := pem.Decode(keyFileBytes)
 	privateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
 	if err != nil {

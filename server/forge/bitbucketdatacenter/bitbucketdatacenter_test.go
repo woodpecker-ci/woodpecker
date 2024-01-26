@@ -49,13 +49,12 @@ func TestBitbucketDC(t *testing.T) {
 		g.Describe("Creating a forge", func() {
 			g.It("Should return client with specified options", func() {
 				forge, err := New(Opts{
-					URL:               "http://localhost:8080",
-					Username:          "0ZXh0IjoiI",
-					Password:          "I1NiIsInR5",
-					ConsumerKey:       "somelongsecretkey",
-					ConsumerRSA:       "",
-					ConsumerRSAString: generatePrivateKey(),
-					SkipVerify:        true,
+					URL:         "http://localhost:8080",
+					Username:    "0ZXh0IjoiI",
+					Password:    "I1NiIsInR5",
+					ConsumerKey: "somelongsecretkey",
+					ConsumerRSA: generatePrivateKey(),
+					SkipVerify:  true,
 				})
 				g.Assert(err).IsNil()
 				g.Assert(forge).IsNotNil()
