@@ -4,20 +4,21 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@Alonsohhl, @healdropper, @renovate[bot], @eliasscosta, @qwerty287, @runephilosof-karnovgroup
-
-### 📚 Documentation
-
-- Add opencollective footer [[#3281](https://github.com/woodpecker-ci/woodpecker/pull/3281)]
-- Use array syntax in docs [[#3242](https://github.com/woodpecker-ci/woodpecker/pull/3242)]
+@zc-devs, @Alonsohhl, @healdropper, @renovate[bot], @eliasscosta, @qwerty287, @runephilosof-karnovgroup
 
 ### 🐛 Bug Fixes
 
+- Sanitize pod's step label [[#3275](https://github.com/woodpecker-ci/woodpecker/pull/3275)]
 - Pipeline errors must be an array [[#3276](https://github.com/woodpecker-ci/woodpecker/pull/3276)]
 - fix bitbucket SSO using UUID from bitbucket api response as ForgeRemoteID [[#3265](https://github.com/woodpecker-ci/woodpecker/pull/3265)]
 - fix: bug pod service without label service [[#3256](https://github.com/woodpecker-ci/woodpecker/pull/3256)]
 - Fix disabling PRs [[#3258](https://github.com/woodpecker-ci/woodpecker/pull/3258)]
 - fix: bug annotations [[#3255](https://github.com/woodpecker-ci/woodpecker/pull/3255)]
+
+### 📚 Documentation
+
+- Add opencollective footer [[#3281](https://github.com/woodpecker-ci/woodpecker/pull/3281)]
+- Use array syntax in docs [[#3242](https://github.com/woodpecker-ci/woodpecker/pull/3242)]
 
 ### 📈 Enhancement
 
