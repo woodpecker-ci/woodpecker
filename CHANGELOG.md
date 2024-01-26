@@ -1,10 +1,15 @@
 # Changelog
 
-## [2.3.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.3.0) - 2024-01-25
+## [2.3.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.3.0) - 2024-01-26
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@healdropper, @renovate[bot], @eliasscosta, @qwerty287, @runephilosof-karnovgroup
+@Alonsohhl, @healdropper, @renovate[bot], @eliasscosta, @qwerty287, @runephilosof-karnovgroup
+
+### 📚 Documentation
+
+- Add opencollective footer [[#3281](https://github.com/woodpecker-ci/woodpecker/pull/3281)]
+- Use array syntax in docs [[#3242](https://github.com/woodpecker-ci/woodpecker/pull/3242)]
 
 ### 🐛 Bug Fixes
 
@@ -13,10 +18,6 @@
 - fix: bug pod service without label service [[#3256](https://github.com/woodpecker-ci/woodpecker/pull/3256)]
 - Fix disabling PRs [[#3258](https://github.com/woodpecker-ci/woodpecker/pull/3258)]
 - fix: bug annotations [[#3255](https://github.com/woodpecker-ci/woodpecker/pull/3255)]
-
-### 📚 Documentation
-
-- Use array syntax in docs [[#3242](https://github.com/woodpecker-ci/woodpecker/pull/3242)]
 
 ### 📈 Enhancement
 
