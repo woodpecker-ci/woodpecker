@@ -29,28 +29,35 @@ import (
 func TestSecretAvailable(t *testing.T) {
 	secret := Secret{
 		AllowedPlugins: []string{},
+		Events:         []string{"push"},
 	}
-	assert.True(t, secret.Available(&yaml_types.Container{
+	assert.NoError(t, secret.Available("push", &yaml_types.Container{
 		Image:    "golang",
 		Commands: yaml_base_types.StringOrSlice{"echo 'this is not a plugin'"},
 	}))
 
 	// secret only available for "golang" plugin
 	secret = Secret{
+		Name:           "foo",
 		AllowedPlugins: []string{"golang"},
+		Events:         []string{"push"},
 	}
-	assert.True(t, secret.Available(&yaml_types.Container{
+	assert.NoError(t, secret.Available("push", &yaml_types.Container{
+		Name:     "step",
 		Image:    "golang",
 		Commands: yaml_base_types.StringOrSlice{},
 	}))
-	assert.False(t, secret.Available(&yaml_types.Container{
+	assert.ErrorContains(t, secret.Available("push", &yaml_types.Container{
 		Image:    "golang",
 		Commands: yaml_base_types.StringOrSlice{"echo 'this is not a plugin'"},
-	}))
-	assert.False(t, secret.Available(&yaml_types.Container{
+	}), "only allowed to be used by plugins by step")
+	assert.ErrorContains(t, secret.Available("push", &yaml_types.Container{
 		Image:    "not-golang",
 		Commands: yaml_base_types.StringOrSlice{},
-	}))
+	}), "not allowed to be used with image ")
+	assert.ErrorContains(t, secret.Available("pull_request", &yaml_types.Container{
+		Image: "golang",
+	}), "not allowed to be used with pipeline event ")
 }
 
 func TestCompilerCompile(t *testing.T) {
@@ -259,7 +266,7 @@ func TestCompilerCompile(t *testing.T) {
 				Secrets:  yaml_types.Secrets{Secrets: []*yaml_types.Secret{{Source: "missing", Target: "missing"}}},
 			}}}},
 			backConf:    nil,
-			expectedErr: "secret \"missing\" not found or not allowed to be used",
+			expectedErr: "secret \"missing\" not found",
 		},
 		{
 			name: "workflow with broken step dependency",
@@ -292,6 +299,46 @@ func TestCompilerCompile(t *testing.T) {
 				// check if we get an expected backend config based on a frontend config
 				assert.EqualValues(t, *test.backConf, *backConf)
 			}
+		})
+	}
+}
+
+func TestSecretMatch(t *testing.T) {
+	tcl := []*struct {
+		name   string
+		secret Secret
+		event  string
+		match  bool
+	}{
+		{
+			name:   "should match event",
+			secret: Secret{Events: []string{"pull_request"}},
+			event:  "pull_request",
+			match:  true,
+		},
+		{
+			name:   "should not match event",
+			secret: Secret{Events: []string{"pull_request"}},
+			event:  "push",
+			match:  false,
+		},
+		{
+			name:   "should match when no event filters defined",
+			secret: Secret{},
+			event:  "pull_request",
+			match:  true,
+		},
+		{
+			name:   "pull close should match pull",
+			secret: Secret{Events: []string{"pull_request"}},
+			event:  "pull_request_closed",
+			match:  true,
+		},
+	}
+
+	for _, tc := range tcl {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Equal(t, tc.match, tc.secret.Match(tc.event))
 		})
 	}
 }
