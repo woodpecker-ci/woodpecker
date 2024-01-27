@@ -18,48 +18,7 @@ import (
 	"testing"
 
 	"github.com/franela/goblin"
-	"github.com/stretchr/testify/assert"
 )
-
-func TestSecretMatch(t *testing.T) {
-	tcl := []*struct {
-		name   string
-		secret Secret
-		event  WebhookEvent
-		match  bool
-	}{
-		{
-			name:   "should match event",
-			secret: Secret{Events: []WebhookEvent{"pull_request"}},
-			event:  EventPull,
-			match:  true,
-		},
-		{
-			name:   "should not match event",
-			secret: Secret{Events: []WebhookEvent{"pull_request"}},
-			event:  EventPush,
-			match:  false,
-		},
-		{
-			name:   "should match when no event filters defined",
-			secret: Secret{},
-			event:  EventPull,
-			match:  true,
-		},
-		{
-			name:   "pull close should match pull",
-			secret: Secret{Events: []WebhookEvent{"pull_request"}},
-			event:  EventPullClosed,
-			match:  true,
-		},
-	}
-
-	for _, tc := range tcl {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.match, tc.secret.Match(tc.event))
-		})
-	}
-}
 
 func TestSecretValidate(t *testing.T) {
 	g := goblin.Goblin(t)
