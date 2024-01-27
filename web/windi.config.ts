@@ -1,3 +1,4 @@
+// cSpell:ignore Segoe Roboto Neue Noto
 /* eslint-disable import/no-extraneous-dependencies */
 import tinycolor from 'tinycolor2';
 import colors from 'windicss/colors';

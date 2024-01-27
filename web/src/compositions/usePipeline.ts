@@ -34,7 +34,7 @@ export default (pipeline: Ref<Pipeline | undefined>) => {
       return null;
     }
 
-    // TODO check whetehr elapsed works
+    // TODO check whether elapsed works
     return timeAgo(sinceElapsed.value);
   });
 

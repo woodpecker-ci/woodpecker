@@ -22,7 +22,7 @@ import (
 var (
 	ServiceHookMethod = http.MethodPost
 	ServiceHookURL, _ = url.Parse(
-		"http://10.40.8.5:8000/hook?owner=test&name=woodpecker&access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." +
+		"http://10.40.8.5:8000/hook?owner=test&name=woodpecker&access_token=dummyToken." +
 			"eyJ0ZXh0IjoidGVzdC93b29kcGVja2VyIiwidHlwZSI6Imhvb2sifQ.x3kPnmZtxZQ_9_eMhfQ1HSmj_SLhdT_Lu2hMczWjKh0")
 	ServiceHookHeaders = http.Header{
 		"Content-Type":   []string{"application/json"},
