@@ -266,7 +266,7 @@ func TestCompilerCompile(t *testing.T) {
 				Secrets:  yaml_types.Secrets{Secrets: []*yaml_types.Secret{{Source: "missing", Target: "missing"}}},
 			}}}},
 			backConf:    nil,
-			expectedErr: "secret \"missing\" not found or not available for this event",
+			expectedErr: "secret \"missing\" not found",
 		},
 		{
 			name: "workflow with broken step dependency",
