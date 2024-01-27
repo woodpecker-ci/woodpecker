@@ -1,10 +1,10 @@
 # Changelog
 
-## [2.3.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.3.0) - 2024-01-26
+## [2.3.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.3.0) - 2024-01-27
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@zc-devs, @Alonsohhl, @healdropper, @renovate[bot], @eliasscosta, @qwerty287, @runephilosof-karnovgroup
+@renovate[bot], @zc-devs, @Alonsohhl, @healdropper, @eliasscosta, @qwerty287, @runephilosof-karnovgroup
 
 ### 🐛 Bug Fixes
 
@@ -27,6 +27,7 @@
 
 ### Misc
 
+- fix(deps): update golang (packages) [[#3284](https://github.com/woodpecker-ci/woodpecker/pull/3284)]
 - chore(deps): lock file maintenance [[#3274](https://github.com/woodpecker-ci/woodpecker/pull/3274)]
 - chore(deps): update web npm deps non-major [[#3273](https://github.com/woodpecker-ci/woodpecker/pull/3273)]
 - Pin prettier version [[#3260](https://github.com/woodpecker-ci/woodpecker/pull/3260)]
