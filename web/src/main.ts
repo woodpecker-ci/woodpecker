@@ -1,4 +1,3 @@
-import 'windi.css';
 import '~/compositions/useFavicon';
 import '~/style.css';
 

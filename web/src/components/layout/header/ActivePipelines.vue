@@ -36,7 +36,7 @@ onMounted(async () => {
 .spinner .spinner-ring {
   animation: spinner 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
   border-color: #fff transparent transparent transparent;
-  @apply border-3 rounded-full absolute top-1.5 bottom-1.5 left-1.5 right-1.5;
+  @apply border-4 rounded-full absolute top-1.5 bottom-1.5 left-1.5 right-1.5;
 }
 .spinner .ring1 {
   animation-delay: -0.45s;
