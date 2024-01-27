@@ -4,7 +4,13 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@renovate[bot], @zc-devs, @Alonsohhl, @healdropper, @eliasscosta, @qwerty287, @runephilosof-karnovgroup
+@anbraten, @renovate[bot], @zc-devs, @Alonsohhl, @healdropper, @eliasscosta, @qwerty287, @runephilosof-karnovgroup
+
+### 📈 Enhancement
+
+- Improve secrets availability checks [[#3271](https://github.com/woodpecker-ci/woodpecker/pull/3271)]
+- Load more pipeline log lines (500 => 5000) [[#3212](https://github.com/woodpecker-ci/woodpecker/pull/3212)]
+- Clean up models [[#3228](https://github.com/woodpecker-ci/woodpecker/pull/3228)]
 
 ### 🐛 Bug Fixes
 
@@ -19,11 +25,6 @@
 
 - Add opencollective footer [[#3281](https://github.com/woodpecker-ci/woodpecker/pull/3281)]
 - Use array syntax in docs [[#3242](https://github.com/woodpecker-ci/woodpecker/pull/3242)]
-
-### 📈 Enhancement
-
-- Load more pipeline log lines (500 => 5000) [[#3212](https://github.com/woodpecker-ci/woodpecker/pull/3212)]
-- Clean up models [[#3228](https://github.com/woodpecker-ci/woodpecker/pull/3228)]
 
 ### Misc
 
