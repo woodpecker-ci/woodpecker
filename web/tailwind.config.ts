@@ -1,8 +1,8 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable import/no-extraneous-dependencies */
-const colors = require('tailwindcss/colors');
-const tinycolor = require('tinycolor2');
-const typography = require('@tailwindcss/typography');
+import typography from '@tailwindcss/typography';
+import type { Config } from 'tailwindcss';
+import colors from 'tailwindcss/colors';
+import tinycolor from 'tinycolor2';
 
 const customColors = {
   'wp-primary': {
@@ -24,12 +24,8 @@ const customColors = {
   },
 };
 
-/** @type {import('tailwindcss').Config} */
 export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{vue,js,ts,jsx,tsx}",
-  ],
+  content: ['./index.html', './src/**/*.{vue,js,ts,jsx,tsx}'],
   darkMode: 'class',
   theme: {
     borderWidth: {
@@ -236,4 +232,4 @@ export default {
     },
   },
   plugins: [typography],
-};
+} satisfies Config;
