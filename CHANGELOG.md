@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@anbraten, @renovate[bot], @zc-devs, @Alonsohhl, @healdropper, @eliasscosta, @qwerty287, @runephilosof-karnovgroup
+@lukashass, @anbraten, @renovate[bot], @zc-devs, @Alonsohhl, @healdropper, @eliasscosta, @qwerty287, @runephilosof-karnovgroup
 
 ### 📈 Enhancement
 
@@ -28,6 +28,7 @@
 
 ### Misc
 
+- Add spellcheck config [[#3018](https://github.com/woodpecker-ci/woodpecker/pull/3018)]
 - fix(deps): update golang (packages) [[#3284](https://github.com/woodpecker-ci/woodpecker/pull/3284)]
 - chore(deps): lock file maintenance [[#3274](https://github.com/woodpecker-ci/woodpecker/pull/3274)]
 - chore(deps): update web npm deps non-major [[#3273](https://github.com/woodpecker-ci/woodpecker/pull/3273)]
