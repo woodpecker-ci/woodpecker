@@ -93,7 +93,12 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		name = strings.ToLower(name)
 		secret, ok := c.secrets[name]
 		if !ok {
-			return "", fmt.Errorf("secret %q not found or not available for this event", name)
+			return "", fmt.Errorf("secret %q not found", name)
+		}
+
+		event := c.metadata.Curr.Event
+		if !secret.Match(event) {
+			return "", fmt.Errorf("secret %q is not available for current pipeline event", name)
 		}
 
 		err := secret.Available(container)

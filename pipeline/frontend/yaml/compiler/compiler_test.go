@@ -297,3 +297,43 @@ func TestCompilerCompile(t *testing.T) {
 		})
 	}
 }
+
+func TestSecretMatch(t *testing.T) {
+	tcl := []*struct {
+		name   string
+		secret Secret
+		event  string
+		match  bool
+	}{
+		{
+			name:   "should match event",
+			secret: Secret{Events: []string{"pull_request"}},
+			event:  "pull_request",
+			match:  true,
+		},
+		{
+			name:   "should not match event",
+			secret: Secret{Events: []string{"pull_request"}},
+			event:  "push",
+			match:  false,
+		},
+		{
+			name:   "should match when no event filters defined",
+			secret: Secret{},
+			event:  "pull_request",
+			match:  true,
+		},
+		{
+			name:   "pull close should match pull",
+			secret: Secret{Events: []string{"pull_request"}},
+			event:  "pull_request_closed",
+			match:  true,
+		},
+	}
+
+	for _, tc := range tcl {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Equal(t, tc.match, tc.secret.Match(tc.event))
+		})
+	}
+}

@@ -42,6 +42,7 @@ type Secret struct {
 	Name           string
 	Value          string
 	AllowedPlugins []string
+	Events         []string
 }
 
 func (s *Secret) Available(container *yaml_types.Container) error {
@@ -55,6 +56,27 @@ func (s *Secret) Available(container *yaml_types.Container) error {
 	}
 
 	return nil
+}
+
+// Match returns true if an image and event match the restricted list.
+// Note that EventPullClosed are treated as EventPull.
+func (s *Secret) Match(event string) bool {
+	// if there is no filter set secret matches all webhook events
+	if len(s.Events) == 0 {
+		return true
+	}
+	// tread all pull events the same way
+	if event == "pull_request_closed" {
+		event = "pull_request"
+	}
+	// one match is enough
+	for _, e := range s.Events {
+		if e == event {
+			return true
+		}
+	}
+	// a filter is set but the webhook did not match it
+	return false
 }
 
 type secretMap map[string]Secret
