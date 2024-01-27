@@ -95,10 +95,10 @@
     "go.mod",
     "go.sum",
     "*.excalidraw",
-    "CHANGELOG.md",
     "*.svg",
     "Makefile",
     // TODO: remove the following
+    "CHANGELOG.md",
     ".woodpecker/",
     "agent/",
     "cli/",
