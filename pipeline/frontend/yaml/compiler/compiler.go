@@ -45,14 +45,18 @@ type Secret struct {
 	Events         []string
 }
 
-func (s *Secret) Available(container *yaml_types.Container) error {
+func (s *Secret) Available(event string, container *yaml_types.Container) error {
 	onlyAllowSecretForPlugins := len(s.AllowedPlugins) > 0
 	if onlyAllowSecretForPlugins && !container.IsPlugin() {
 		return fmt.Errorf("secret %q only allowed to be used by plugins by step %q", s.Name, container.Name)
 	}
 
 	if onlyAllowSecretForPlugins && !utils.MatchImage(container.Image, s.AllowedPlugins...) {
-		return fmt.Errorf("secret %q not allowed to be used with image %q by step %q", s.Name, container.Image, container.Name)
+		return fmt.Errorf("secret %q is not allowed to be used with image %q by step %q", s.Name, container.Image, container.Name)
+	}
+
+	if !s.Match(event) {
+		return fmt.Errorf("secret %q is not allowed to be used with pipeline event %q", s.Name, event)
 	}
 
 	return nil

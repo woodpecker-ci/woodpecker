@@ -29,8 +29,9 @@ import (
 func TestSecretAvailable(t *testing.T) {
 	secret := Secret{
 		AllowedPlugins: []string{},
+		Events:         []string{"push"},
 	}
-	assert.NoError(t, secret.Available(&yaml_types.Container{
+	assert.NoError(t, secret.Available("push", &yaml_types.Container{
 		Image:    "golang",
 		Commands: yaml_base_types.StringOrSlice{"echo 'this is not a plugin'"},
 	}))
@@ -39,20 +40,24 @@ func TestSecretAvailable(t *testing.T) {
 	secret = Secret{
 		Name:           "foo",
 		AllowedPlugins: []string{"golang"},
+		Events:         []string{"push"},
 	}
-	assert.NoError(t, secret.Available(&yaml_types.Container{
+	assert.NoError(t, secret.Available("push", &yaml_types.Container{
 		Name:     "step",
 		Image:    "golang",
 		Commands: yaml_base_types.StringOrSlice{},
 	}))
-	assert.ErrorContains(t, secret.Available(&yaml_types.Container{
+	assert.ErrorContains(t, secret.Available("push", &yaml_types.Container{
 		Image:    "golang",
 		Commands: yaml_base_types.StringOrSlice{"echo 'this is not a plugin'"},
 	}), "only allowed to be used by plugins by step")
-	assert.ErrorContains(t, secret.Available(&yaml_types.Container{
+	assert.ErrorContains(t, secret.Available("push", &yaml_types.Container{
 		Image:    "not-golang",
 		Commands: yaml_base_types.StringOrSlice{},
 	}), "not allowed to be used with image ")
+	assert.ErrorContains(t, secret.Available("pull_request", &yaml_types.Container{
+		Image: "golang",
+	}), "not allowed to be used with pipeline event ")
 }
 
 func TestCompilerCompile(t *testing.T) {
