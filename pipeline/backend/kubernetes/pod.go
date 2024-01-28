@@ -36,7 +36,12 @@ const (
 )
 
 func mkPod(step *types.Step, config *config, podName, goos string) (*v1.Pod, error) {
-	meta := podMeta(step, config, podName)
+	var err error
+
+	meta, err := podMeta(step, config, podName)
+	if err != nil {
+		return nil, err
+	}
 
 	spec, err := podSpec(step, config)
 	if err != nil {
@@ -68,7 +73,8 @@ func podName(step *types.Step) (string, error) {
 	return dnsName(podPrefix + step.UUID)
 }
 
-func podMeta(step *types.Step, config *config, podName string) metav1.ObjectMeta {
+func podMeta(step *types.Step, config *config, podName string) (metav1.ObjectMeta, error) {
+	var err error
 	meta := metav1.ObjectMeta{
 		Name:      podName,
 		Namespace: config.Namespace,
@@ -78,7 +84,10 @@ func podMeta(step *types.Step, config *config, podName string) metav1.ObjectMeta
 	if meta.Labels == nil {
 		meta.Labels = make(map[string]string, 1)
 	}
-	meta.Labels[StepLabel] = step.Name
+	meta.Labels[StepLabel], err = stepLabel(step)
+	if err != nil {
+		return meta, err
+	}
 
 	if step.Type == types.StepTypeService {
 		meta.Labels[ServiceLabel] = step.Name
@@ -97,7 +106,11 @@ func podMeta(step *types.Step, config *config, podName string) metav1.ObjectMeta
 		}
 	}
 
-	return meta
+	return meta, nil
+}
+
+func stepLabel(step *types.Step) (string, error) {
+	return toDNSName(step.Name)
 }
 
 func podSpec(step *types.Step, config *config) (v1.PodSpec, error) {
@@ -224,7 +237,7 @@ func containerPort(port types.Port) v1.ContainerPort {
 
 // Here is the service IPs (placed in /etc/hosts in the Pod)
 func hostAliases(extraHosts []types.HostAlias) []v1.HostAlias {
-	hostAliases := []v1.HostAlias{}
+	var hostAliases []v1.HostAlias
 	for _, extraHost := range extraHosts {
 		hostAlias := hostAlias(extraHost)
 		hostAliases = append(hostAliases, hostAlias)

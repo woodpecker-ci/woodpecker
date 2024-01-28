@@ -397,7 +397,7 @@
           "placeholder": "Adresse du registre (e.g. docker.io)"
         },
         "created": "Authentifiant de connexion à un registre crée",
-        "creds": "Authentifiants de connexion à un registre",
+        "credentials": "Authentifiants de connexion à un registre",
         "delete": "Effacer le registre",
         "deleted": "Authentifiant de connexion à un registre effacé",
         "desc": "Des authentifiants de connexion pour les registres peuvent être ajouté pour permettre d'utiliser des images privées pour vos pipelines.",
@@ -447,7 +447,7 @@
     "min_short": "min",
     "not_started": "pas encore démarré",
     "sec_short": "sec",
-    "tmpl": "D MMM, YYYY, HH:mm z",
+    "template": "D MMM, YYYY, HH:mm z",
     "weeks_short": "s"
   },
   "unknown_error": "Une erreur inconnue est survenue",

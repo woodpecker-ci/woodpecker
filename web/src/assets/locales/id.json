@@ -398,7 +398,7 @@
           "placeholder": "Alamat registri (mis. docker.io)"
         },
         "created": "Kredensial registri dibuat",
-        "creds": "Kredensial registri",
+        "credentials": "Kredensial registri",
         "delete": "Hapus registri",
         "deleted": "Kredensial registri dihapus",
         "desc": "Kredensial registri dapat ditambahkan untuk menggunakan citra pribadi untuk jalur pipa Anda.",
@@ -448,7 +448,7 @@
     "min_short": "mnt",
     "not_started": "belum dimulai",
     "sec_short": "dtk",
-    "tmpl": "BBB H, TTTT, JJ:mm z",
+    "template": "BBB H, TTTT, JJ:mm z",
     "weeks_short": "m"
   },
   "unknown_error": "Terjadi sebuah kesalahan yang tidak diketahui",

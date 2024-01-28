@@ -4,7 +4,7 @@ ignore-from-file:
   - docs/.gitignore
   - docs/plugins/woodpecker-plugins/.gitignore
   - .gitignore
-  - server/store/datastore/migration/testfiles/.gitignore
+  - server/store/datastore/migration/test-files/.gitignore
   - web/.gitignore
 
 rules:

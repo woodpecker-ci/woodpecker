@@ -12,12 +12,12 @@ require (
 	github.com/caddyserver/certmagic v0.20.0
 	github.com/cenkalti/backoff/v4 v4.2.1
 	github.com/distribution/reference v0.5.0
-	github.com/docker/cli v24.0.7+incompatible
-	github.com/docker/docker v24.0.7+incompatible
+	github.com/docker/cli v24.0.8+incompatible
+	github.com/docker/docker v24.0.8+incompatible
 	github.com/docker/go-connections v0.5.0
 	github.com/docker/go-units v0.5.0
 	github.com/drone/envsubst v1.0.3
-	github.com/expr-lang/expr v1.15.8
+	github.com/expr-lang/expr v1.16.0
 	github.com/franela/goblin v0.0.0-20211003143422-0a4f594942bf
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/gin-gonic/gin v1.9.1
@@ -32,8 +32,8 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/kinbiko/jsonassert v1.1.1
 	github.com/lib/pq v1.10.9
-	github.com/mattn/go-sqlite3 v1.14.19
-	github.com/moby/moby v24.0.7+incompatible
+	github.com/mattn/go-sqlite3 v1.14.20
+	github.com/moby/moby v24.0.8+incompatible
 	github.com/moby/term v0.5.0
 	github.com/muesli/termenv v0.15.2
 	github.com/oklog/ulid/v2 v2.1.0
@@ -56,7 +56,7 @@ require (
 	golang.org/x/sync v0.6.0
 	golang.org/x/term v0.16.0
 	golang.org/x/text v0.14.0
-	google.golang.org/grpc v1.60.1
+	google.golang.org/grpc v1.61.0
 	google.golang.org/protobuf v1.32.0
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.29.1
@@ -64,7 +64,7 @@ require (
 	k8s.io/client-go v0.29.1
 	src.techknowlogick.com/xormigrate v1.7.1
 	xorm.io/builder v0.3.13
-	xorm.io/xorm v1.3.6
+	xorm.io/xorm v1.3.7
 )
 
 require (
