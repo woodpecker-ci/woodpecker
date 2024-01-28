@@ -42,7 +42,7 @@ func (g *RPC) RegistryList(repo *model.Repo, listOptions *model.ListOptions) ([]
 	}
 
 	var resp []*model.Registry
-	return resp, json.Unmarshal(jsonResp, resp)
+	return resp, json.Unmarshal(jsonResp, &resp)
 }
 
 func (g *RPC) RegistryDelete(repo *model.Repo, name string) error {

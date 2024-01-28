@@ -53,6 +53,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/shared/addon"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/addon/hashicorp"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/addon/hashicorp/configservice"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/addon/hashicorp/environservice"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/addon/hashicorp/registryservice"
 	addonTypes "go.woodpecker-ci.org/woodpecker/v2/shared/addon/types"
 )
@@ -147,12 +148,14 @@ func setupRegistryService(c *cli.Context, s store.Store) (model.RegistryService,
 }
 
 func setupEnvironService(c *cli.Context, _ store.Store) (model.EnvironService, error) {
-	addonService, err := addon.Load[model.EnvironService](c.StringSlice("addons"), addonTypes.TypeEnvironmentService)
-	if err != nil {
-		return nil, err
-	}
-	if addonService != nil {
-		return addonService.Value, nil
+	if a := c.String("addons-environ-service"); a != "" {
+		addonExt, err := hashicorp.Load(a, environservice.Addon)
+		if err != nil {
+			return nil, err
+		}
+		if addonExt != nil {
+			return addonExt.Value, nil
+		}
 	}
 
 	return environments.Parse(c.StringSlice("environment")), nil
