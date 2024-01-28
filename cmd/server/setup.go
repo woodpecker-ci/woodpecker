@@ -55,6 +55,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/shared/addon/hashicorp/configservice"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/addon/hashicorp/environservice"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/addon/hashicorp/registryservice"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/addon/hashicorp/secretservice"
 	addonTypes "go.woodpecker-ci.org/woodpecker/v2/shared/addon/types"
 )
 
@@ -116,12 +117,14 @@ func setupQueue(c *cli.Context, s store.Store) queue.Queue {
 }
 
 func setupSecretService(c *cli.Context, s model.SecretStore) (model.SecretService, error) {
-	addonService, err := addon.Load[model.SecretService](c.StringSlice("addons"), addonTypes.TypeSecretService)
-	if err != nil {
-		return nil, err
-	}
-	if addonService != nil {
-		return addonService.Value, nil
+	if a := c.String("addons-secret-service"); a != "" {
+		addonExt, err := hashicorp.Load(a, secretservice.Addon)
+		if err != nil {
+			return nil, err
+		}
+		if addonExt != nil {
+			return addonExt.Value, nil
+		}
 	}
 
 	return secrets.New(c.Context, s), nil

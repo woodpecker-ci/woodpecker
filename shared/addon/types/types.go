@@ -3,7 +3,6 @@ package types
 type Type string
 
 const (
-	TypeForge         Type = "forge"
-	TypeBackend       Type = "backend"
-	TypeSecretService Type = "secret_service"
+	TypeForge   Type = "forge"
+	TypeBackend Type = "backend"
 )
