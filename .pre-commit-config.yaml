@@ -1,3 +1,4 @@
+# cSpell:ignore checkmake hadolint autofix autoupdate
 repos:
   - repo: meta
     hooks:

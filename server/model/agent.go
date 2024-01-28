@@ -25,7 +25,7 @@ type Agent struct {
 	Platform    string `json:"platform"      xorm:"VARCHAR(100) 'platform'"`
 	Backend     string `json:"backend"       xorm:"VARCHAR(100) 'backend'"`
 	Capacity    int32  `json:"capacity"      xorm:"capacity"`
-	Version     string `json:"version"       xorm:"version"`
+	Version     string `json:"version"       xorm:"'version'"`
 	NoSchedule  bool   `json:"no_schedule"   xorm:"no_schedule"`
 } //	@name Agent
 

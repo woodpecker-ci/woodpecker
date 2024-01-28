@@ -1,3 +1,4 @@
+// cSpell:ignore TSES
 // @ts-check
 /** @type {import('@typescript-eslint/experimental-utils').TSESLint.Linter.Config} */
 
