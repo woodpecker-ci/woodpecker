@@ -60,8 +60,8 @@ importers:
         specifier: ^3.1.0
         version: 3.1.0(react-dom@18.2.0)(react@18.2.0)
       '@docusaurus/tsconfig':
-        specifier: 3.1.0
-        version: 3.1.0
+        specifier: 3.1.1
+        version: 3.1.1
       '@docusaurus/types':
         specifier: ^3.1.0
         version: 3.1.0(react-dom@18.2.0)(react@18.2.0)
@@ -2198,8 +2198,8 @@ packages:
       fs-extra: 11.2.0
       tslib: 2.6.2
 
-  /@docusaurus/tsconfig@3.1.0:
-    resolution: {integrity: sha512-PE6fSuj5gJy5sNC1OO+bYAU1/xZH5YqddGjhrNu3/T7OAUroqkMZfVl13Tz70CjYB8no4OWcraqSkObAeNdIcQ==}
+  /@docusaurus/tsconfig@3.1.1:
+    resolution: {integrity: sha512-FTBuY3KvaHfMVBgvlPmDQ+KS9Q/bYtVftq2ugou3PgBDJoQmw2aUZ4Sg15HKqLGbfIkxoy9t6cqE4Yw1Ta8Q1A==}
     dev: true
 
   /@docusaurus/types@3.1.0(react-dom@18.2.0)(react@18.2.0):
