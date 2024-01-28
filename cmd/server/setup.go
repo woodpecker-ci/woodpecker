@@ -53,6 +53,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/shared/addon"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/addon/hashicorp"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/addon/hashicorp/configservice"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/addon/hashicorp/registryservice"
 	addonTypes "go.woodpecker-ci.org/woodpecker/v2/shared/addon/types"
 )
 
@@ -126,12 +127,14 @@ func setupSecretService(c *cli.Context, s model.SecretStore) (model.SecretServic
 }
 
 func setupRegistryService(c *cli.Context, s store.Store) (model.RegistryService, error) {
-	addonService, err := addon.Load[model.RegistryService](c.StringSlice("addons"), addonTypes.TypeRegistryService)
-	if err != nil {
-		return nil, err
-	}
-	if addonService != nil {
-		return addonService.Value, nil
+	if a := c.String("addons-registry-service"); a != "" {
+		addonExt, err := hashicorp.Load(a, registryservice.Addon)
+		if err != nil {
+			return nil, err
+		}
+		if addonExt != nil {
+			return addonExt.Value, nil
+		}
 	}
 
 	if c.String("docker-config") != "" {
@@ -323,8 +326,8 @@ func setupSignatureKeys(_store store.Store) (crypto.PrivateKey, crypto.PublicKey
 }
 
 func setupConfigService(c *cli.Context) (config.Extension, error) {
-	if addon := c.String("addons-config-service"); addon != "" {
-		addonExt, err := hashicorp.Load(addon, configservice.Addon)
+	if a := c.String("addons-config-service"); a != "" {
+		addonExt, err := hashicorp.Load(a, configservice.Addon)
 		if err != nil {
 			return nil, err
 		}
