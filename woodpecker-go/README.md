@@ -7,7 +7,7 @@ import (
 )
 
 const (
-  token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
+  token = "dummyToken"
   host  = "http://woodpecker.company.tld"
 )
 

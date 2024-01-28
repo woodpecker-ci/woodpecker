@@ -103,7 +103,7 @@
     "min_short": "min",
     "not_started": "nog niet gestart",
     "sec_short": "sec",
-    "tmpl": "DD.MM.YYYY, HH:mm z",
+    "template": "DD.MM.YYYY, HH:mm z",
     "weeks_short": "w"
   },
   "unknown_error": "Er is een onbekende fout opgetreden",

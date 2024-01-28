@@ -139,5 +139,5 @@ MD046:
 
 # MD048/code-fence-style - Code fence style
 MD048:
-  # Code fence syle
+  # Code fence style
   style: 'backtick'
