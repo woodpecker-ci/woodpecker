@@ -30,7 +30,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
-func parsePipeline(store store.Store, currentPipeline *model.Pipeline, user *model.User, repo *model.Repo, yamls []*forge_types.FileMeta, envs map[string]string, withUUID bool) ([]*stepbuilder.Item, error) {
+func parsePipeline(store store.Store, currentPipeline *model.Pipeline, user *model.User, repo *model.Repo, yamls []*forge_types.FileMeta, envs map[string]string) ([]*stepbuilder.Item, error) {
 	netrc, err := server.Config.Services.Forge.Netrc(user, repo)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to generate netrc file")
@@ -82,7 +82,6 @@ func parsePipeline(store store.Store, currentPipeline *model.Pipeline, user *mod
 			HTTPProxy:  server.Config.Pipeline.Proxy.HTTP,
 			HTTPSProxy: server.Config.Pipeline.Proxy.HTTPS,
 		},
-		WithUUID: withUUID,
 	}
 	return b.Build()
 }
@@ -91,7 +90,7 @@ func createPipelineItems(c context.Context, store store.Store,
 	currentPipeline *model.Pipeline, user *model.User, repo *model.Repo,
 	yamls []*forge_types.FileMeta, envs map[string]string,
 ) (*model.Pipeline, []*stepbuilder.Item, error) {
-	pipelineItems, err := parsePipeline(store, currentPipeline, user, repo, yamls, envs, true)
+	pipelineItems, err := parsePipeline(store, currentPipeline, user, repo, yamls, envs)
 	if pipeline_errors.HasBlockingErrors(err) {
 		currentPipeline, uerr := UpdateToStatusError(store, *currentPipeline, err)
 		if uerr != nil {

@@ -50,7 +50,6 @@ type StepBuilder struct {
 	Envs      map[string]string
 	Forge     metadata.ServerForge
 	ProxyOpts compiler.ProxyOptions
-	WithUUID  bool
 }
 
 type Item struct {
@@ -292,7 +291,7 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, envi
 		compiler.WithMetadata(metadata),
 		compiler.WithTrusted(b.Repo.IsTrusted),
 		compiler.WithNetrcOnlyTrusted(b.Repo.NetrcOnlyTrusted),
-		compiler.WithUUID(b.WithUUID),
+		compiler.WithUUID(),
 	).Compile(parsed)
 }
 
