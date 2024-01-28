@@ -9,14 +9,14 @@ build a custom agent using your backend with this `main.go`:
 package main
 
 import (
-	"go.woodpecker-ci.org/woodpecker/v2/cmd/agent/core"
-	backendTypes "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+  "go.woodpecker-ci.org/woodpecker/v2/cmd/agent/core"
+  backendTypes "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
 
 func main() {
-	core.RunAgent([]backendTypes.Backend{
-		yourBackend,
-	})
+  core.RunAgent([]backendTypes.Backend{
+    yourBackend,
+  })
 }
 ```
 
