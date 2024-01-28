@@ -16,8 +16,16 @@ package main
 
 import (
 	"go.woodpecker-ci.org/woodpecker/v2/cmd/agent/core"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/docker"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/kubernetes"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/local"
+	backendTypes "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
 
 func main() {
-	core.RunAgent(backend) // TODO allow compiler option
+	core.RunAgent([]backendTypes.Backend{
+		docker.New(),
+		local.New(),
+		kubernetes.New(),
+	})
 }

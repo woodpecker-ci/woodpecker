@@ -27,12 +27,12 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/version"
 )
 
-func RunAgent(backend backend.Backend) {
+func RunAgent(backends []backend.Backend) {
 	app := cli.NewApp()
 	app.Name = "woodpecker-agent"
 	app.Version = version.String()
 	app.Usage = "woodpecker agent"
-	app.Action = runWithRetry(backend)
+	app.Action = runWithRetry(backends)
 	app.Commands = []*cli.Command{
 		{
 			Name:   "ping",
@@ -40,7 +40,11 @@ func RunAgent(backend backend.Backend) {
 			Action: pinger,
 		},
 	}
-	app.Flags = utils.MergeSlices(flags, logger.GlobalLoggerFlags, backend.Flags())
+	agentFlags := utils.MergeSlices(flags, logger.GlobalLoggerFlags)
+	for _, b := range backends {
+		agentFlags = utils.MergeSlices(agentFlags, b.Flags())
+	}
+	app.Flags = agentFlags
 
 	if err := app.Run(os.Args); err != nil {
 		log.Fatal().Err(err).Msg("error running agent") //nolint:forbidigo

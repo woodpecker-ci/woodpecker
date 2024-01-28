@@ -39,6 +39,7 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v2/agent"
 	agentRpc "go.woodpecker-ci.org/woodpecker/v2/agent/rpc"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/logger"
@@ -46,7 +47,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/version"
 )
 
-func run(c *cli.Context, backendEngine types.Backend) error {
+func run(c *cli.Context, backendEngines []types.Backend) error {
 	agentConfigPath := c.String("agent-config")
 	hostname := c.String("hostname")
 	if len(hostname) == 0 {
@@ -152,6 +153,13 @@ func run(c *cli.Context, backendEngine types.Backend) error {
 
 	// new engine
 	backendCtx := context.WithValue(ctx, types.CliContext, c)
+	backend.Init(backendEngines)
+	backendName := c.String("backend-engine")
+	backendEngine, err := backend.FindBackend(backendCtx, backendName)
+	if err != nil {
+		log.Error().Err(err).Msgf("cannot find backend engine '%s'", backendName)
+		return err
+	}
 	if !backendEngine.IsAvailable(backendCtx) {
 		log.Error().Str("engine", backendEngine.Name()).Msg("selected backend engine is unavailable")
 		return fmt.Errorf("selected backend engine %s is unavailable", backendEngine.Name())
@@ -241,7 +249,7 @@ func run(c *cli.Context, backendEngine types.Backend) error {
 	return nil
 }
 
-func runWithRetry(backendEngine types.Backend) func(context *cli.Context) error {
+func runWithRetry(backendEngines []types.Backend) func(context *cli.Context) error {
 	return func(context *cli.Context) error {
 		if err := logger.SetupGlobalLogger(context, true); err != nil {
 			return err
@@ -253,7 +261,7 @@ func runWithRetry(backendEngine types.Backend) func(context *cli.Context) error 
 		retryDelay := context.Duration("connect-retry-delay")
 		var err error
 		for i := 0; i < retryCount; i++ {
-			if err = run(context, backendEngine); status.Code(err) == codes.Unavailable {
+			if err = run(context, backendEngines); status.Code(err) == codes.Unavailable {
 				log.Warn().Err(err).Msg(fmt.Sprintf("cannot connect to server, retrying in %v", retryDelay))
 				time.Sleep(retryDelay)
 			} else {
