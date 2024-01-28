@@ -294,7 +294,6 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, envi
 		compiler.WithMetadata(metadata),
 		compiler.WithTrusted(b.Repo.IsTrusted),
 		compiler.WithNetrcOnlyTrusted(b.Repo.NetrcOnlyTrusted),
-		compiler.WithUUID(),
 	).Compile(parsed)
 }
 

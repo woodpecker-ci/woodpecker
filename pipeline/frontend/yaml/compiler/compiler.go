@@ -113,7 +113,6 @@ type Compiler struct {
 	defaultCloneImage string
 	trustedPipeline   bool
 	netrcOnlyTrusted  bool
-	withUUID          bool
 }
 
 // New creates a new Compiler with options.
