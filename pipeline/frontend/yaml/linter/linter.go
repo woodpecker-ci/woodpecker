@@ -21,6 +21,7 @@ import (
 	"go.uber.org/multierr"
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
+	errorTypes "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors/types"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter/schema"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types"
 )
@@ -210,8 +211,8 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 	}
 
 	if parsed.PipelineDoNotUseIt.ContainerList != nil {
-		err = multierr.Append(err, &errors.PipelineError{
-			Type:    errors.PipelineErrorTypeDeprecation,
+		err = multierr.Append(err, &errorTypes.PipelineError{
+			Type:    errorTypes.PipelineErrorTypeDeprecation,
 			Message: "Please use 'steps:' instead of deprecated 'pipeline:' list",
 			Data: errors.DeprecationErrorData{
 				File:  config.File,
@@ -223,8 +224,8 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 	}
 
 	if parsed.PlatformDoNotUseIt != "" {
-		err = multierr.Append(err, &errors.PipelineError{
-			Type:    errors.PipelineErrorTypeDeprecation,
+		err = multierr.Append(err, &errorTypes.PipelineError{
+			Type:    errorTypes.PipelineErrorTypeDeprecation,
 			Message: "Please use labels instead of deprecated 'platform' filters",
 			Data: errors.DeprecationErrorData{
 				File:  config.File,
@@ -236,8 +237,8 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 	}
 
 	if parsed.BranchesDoNotUseIt != nil {
-		err = multierr.Append(err, &errors.PipelineError{
-			Type:    errors.PipelineErrorTypeDeprecation,
+		err = multierr.Append(err, &errorTypes.PipelineError{
+			Type:    errorTypes.PipelineErrorTypeDeprecation,
 			Message: "Please use global when instead of deprecated 'branches' filter",
 			Data: errors.DeprecationErrorData{
 				File:  config.File,
@@ -250,8 +251,8 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 
 	for _, step := range parsed.Steps.ContainerList {
 		if step.Group != "" {
-			err = multierr.Append(err, &errors.PipelineError{
-				Type:    errors.PipelineErrorTypeDeprecation,
+			err = multierr.Append(err, &errorTypes.PipelineError{
+				Type:    errorTypes.PipelineErrorTypeDeprecation,
 				Message: "Please use depends_on instead of deprecated 'group' setting",
 				Data: errors.DeprecationErrorData{
 					File:  config.File,

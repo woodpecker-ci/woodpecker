@@ -26,6 +26,7 @@ import (
 
 	backend_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 	pipeline_errors "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
+	errorTypes "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors/types"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/compiler"
@@ -135,7 +136,7 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 	// parse yaml pipeline
 	parsed, err := yaml.ParseString(substituted)
 	if err != nil {
-		return nil, &pipeline_errors.PipelineError{Message: err.Error(), Type: pipeline_errors.PipelineErrorTypeCompiler}
+		return nil, &errorTypes.PipelineError{Message: err.Error(), Type: errorTypes.PipelineErrorTypeCompiler}
 	}
 
 	// lint pipeline
