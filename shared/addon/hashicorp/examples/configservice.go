@@ -11,8 +11,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/shared/addon/hashicorp/configservice"
 )
 
-type ExtensionImpl struct {
-}
+type ExtensionImpl struct{}
 
 func (g *ExtensionImpl) FetchConfig(repo *model.Repo, pipeline *model.Pipeline, currentFileMeta []*forgetypes.FileMeta, netrc *model.Netrc, timeout time.Duration) (configData []*forgetypes.FileMeta, useOld bool, err error) {
 	fmt.Println("hello world from hashicorp addon")
