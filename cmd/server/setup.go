@@ -131,8 +131,8 @@ func setupSecretService(c *cli.Context, s model.SecretStore) (model.SecretServic
 }
 
 func setupRegistryService(c *cli.Context, s store.Store) (model.RegistryService, error) {
-	if a := c.String("addons-registry-service"); a != "" {
-		addonExt, err := hashicorp.Load(a, registryservice.Addon)
+	if add := c.String("addons-registry-service"); add != "" {
+		addonExt, err := hashicorp.Load(add, registryservice.Addon)
 		if err != nil {
 			return nil, err
 		}

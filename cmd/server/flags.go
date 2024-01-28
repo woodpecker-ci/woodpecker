@@ -261,22 +261,22 @@ var flags = append([]cli.Flag{
 		Name:    "addons",
 		Usage:   "list of addon files",
 	},
-	&cli.StringSliceFlag{
+	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_ADDON_CONFIG_SERVICE"},
 		Name:    "addons-config-service",
 		Usage:   "config service addon",
 	},
-	&cli.StringSliceFlag{
+	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_ADDON_REGISTRY_SERVICE"},
 		Name:    "addons-registry-service",
 		Usage:   "registry service addon",
 	},
-	&cli.StringSliceFlag{
+	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_ADDON_ENVIRONMENT_SERVICE"},
 		Name:    "addons-environ-service",
 		Usage:   "environment service addon",
 	},
-	&cli.StringSliceFlag{
+	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_ADDON_SECRET_SERVICE"},
 		Name:    "addons-secret-service",
 		Usage:   "secret service addon",
