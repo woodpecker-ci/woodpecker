@@ -17,6 +17,7 @@ package core
 import (
 	"os"
 
+	// Load config from .env
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
