@@ -29,7 +29,7 @@ import (
 )
 
 const (
-	sqliteDB = "./testfiles/sqlite.db"
+	sqliteDB = "./test-files/sqlite.db"
 )
 
 func testDriver() string {
@@ -41,7 +41,7 @@ func testDriver() string {
 }
 
 func createSQLiteDB(t *testing.T) string {
-	tmpF, err := os.CreateTemp("./testfiles", "tmp_")
+	tmpF, err := os.CreateTemp("./test-files", "tmp_")
 	if !assert.NoError(t, err) {
 		t.FailNow()
 	}

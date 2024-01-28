@@ -26,7 +26,7 @@ import (
 
 // ParamsToEnv uses reflection to convert a map[string]interface to a list
 // of environment variables.
-func ParamsToEnv(from map[string]any, to, secrets map[string]string) (err error) {
+func ParamsToEnv(from map[string]any, to map[string]string, getSecretValue func(name string) (string, error)) (err error) {
 	if to == nil {
 		return fmt.Errorf("no map to write to")
 	}
@@ -34,7 +34,7 @@ func ParamsToEnv(from map[string]any, to, secrets map[string]string) (err error)
 		if v == nil || len(k) == 0 {
 			continue
 		}
-		to[sanitizeParamKey(k)], err = sanitizeParamValue(v, secrets)
+		to[sanitizeParamKey(k)], err = sanitizeParamValue(v, getSecretValue)
 		if err != nil {
 			return err
 		}
@@ -62,7 +62,7 @@ func isComplex(t reflect.Kind) bool {
 }
 
 // sanitizeParamValue returns the value of a setting as string prepared to be injected as environment variable
-func sanitizeParamValue(v any, secrets map[string]string) (string, error) {
+func sanitizeParamValue(v any, getSecretValue func(name string) (string, error)) (string, error) {
 	t := reflect.TypeOf(v)
 	vv := reflect.ValueOf(v)
 
@@ -84,7 +84,7 @@ func sanitizeParamValue(v any, secrets map[string]string) (string, error) {
 		// gopkg.in/yaml.v3 only emits this map interface
 		case map[string]any:
 			// check if it's a secret and return value if it's the case
-			value, isSecret, err := injectSecret(v, secrets)
+			value, isSecret, err := injectSecret(v, getSecretValue)
 			if err != nil {
 				return "", err
 			} else if isSecret {
@@ -94,7 +94,7 @@ func sanitizeParamValue(v any, secrets map[string]string) (string, error) {
 			return "", fmt.Errorf("could not handle: %#v", v)
 		}
 
-		return handleComplex(vv.Interface(), secrets)
+		return handleComplex(vv.Interface(), getSecretValue)
 
 	case reflect.Slice, reflect.Array:
 		if vv.Len() == 0 {
@@ -123,7 +123,7 @@ func sanitizeParamValue(v any, secrets map[string]string) (string, error) {
 				}
 
 				var err error
-				if in[i], err = sanitizeParamValue(v, secrets); err != nil {
+				if in[i], err = sanitizeParamValue(v, getSecretValue); err != nil {
 					return "", err
 				}
 			}
@@ -135,12 +135,12 @@ func sanitizeParamValue(v any, secrets map[string]string) (string, error) {
 	}
 
 	// handle all elements which are not primitives, string-maps containing secrets or arrays
-	return handleComplex(vv.Interface(), secrets)
+	return handleComplex(vv.Interface(), getSecretValue)
 }
 
 // handleComplex uses yaml2json to get json strings as values for environment variables
-func handleComplex(v any, secrets map[string]string) (string, error) {
-	v, err := injectSecretRecursive(v, secrets)
+func handleComplex(v any, getSecretValue func(name string) (string, error)) (string, error) {
+	v, err := injectSecretRecursive(v, getSecretValue)
 	if err != nil {
 		return "", err
 	}
@@ -159,13 +159,15 @@ func handleComplex(v any, secrets map[string]string) (string, error) {
 // injectSecret probes if a map is a from_secret request.
 // If it's a from_secret request it either  returns the secret value or an error if the secret was not found
 // else it just indicates to progress normally using the provided map as is
-func injectSecret(v map[string]any, secrets map[string]string) (string, bool, error) {
+func injectSecret(v map[string]any, getSecretValue func(name string) (string, error)) (string, bool, error) {
 	if secretNameI, ok := v["from_secret"]; ok {
 		if secretName, ok := secretNameI.(string); ok {
-			if secret, ok := secrets[strings.ToLower(secretName)]; ok {
-				return secret, true, nil
+			secret, err := getSecretValue(secretName)
+			if err != nil {
+				return "", false, err
 			}
-			return "", false, fmt.Errorf("no secret found for %q", secretName)
+
+			return secret, true, nil
 		}
 		return "", false, fmt.Errorf("from_secret has to be a string")
 	}
@@ -174,7 +176,7 @@ func injectSecret(v map[string]any, secrets map[string]string) (string, bool, er
 
 // injectSecretRecursive iterates over all types and if they contain elements
 // it iterates recursively over them too, using injectSecret internally
-func injectSecretRecursive(v any, secrets map[string]string) (any, error) {
+func injectSecretRecursive(v any, getSecretValue func(name string) (string, error)) (any, error) {
 	t := reflect.TypeOf(v)
 
 	if !isComplex(t.Kind()) {
@@ -187,7 +189,7 @@ func injectSecretRecursive(v any, secrets map[string]string) (any, error) {
 		// gopkg.in/yaml.v3 only emits this map interface
 		case map[string]any:
 			// handle secrets
-			value, isSecret, err := injectSecret(v, secrets)
+			value, isSecret, err := injectSecret(v, getSecretValue)
 			if err != nil {
 				return nil, err
 			} else if isSecret {
@@ -195,7 +197,7 @@ func injectSecretRecursive(v any, secrets map[string]string) (any, error) {
 			}
 
 			for key, val := range v {
-				v[key], err = injectSecretRecursive(val, secrets)
+				v[key], err = injectSecretRecursive(val, getSecretValue)
 				if err != nil {
 					return nil, err
 				}
@@ -210,7 +212,7 @@ func injectSecretRecursive(v any, secrets map[string]string) (any, error) {
 		vl := make([]any, vv.Len())
 
 		for i := 0; i < vv.Len(); i++ {
-			v, err := injectSecretRecursive(vv.Index(i).Interface(), secrets)
+			v, err := injectSecretRecursive(vv.Index(i).Interface(), getSecretValue)
 			if err != nil {
 				return nil, err
 			}

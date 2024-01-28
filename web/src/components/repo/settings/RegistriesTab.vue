@@ -1,6 +1,6 @@
 <template>
   <Settings
-    :title="$t('repo.settings.registries.creds')"
+    :title="$t('repo.settings.registries.credentials')"
     :desc="$t('repo.settings.registries.desc')"
     docs-url="docs/usage/registries"
   >

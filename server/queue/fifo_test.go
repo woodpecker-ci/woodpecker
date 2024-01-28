@@ -154,7 +154,7 @@ func TestFifoErrors(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, task1, got)
 
-	assert.NoError(t, q.Error(noContext, got.ID, fmt.Errorf("exitcode 1, there was an error")))
+	assert.NoError(t, q.Error(noContext, got.ID, fmt.Errorf("exit code 1, there was an error")))
 
 	got, err = q.Poll(noContext, 1, func(*model.Task) bool { return true })
 	assert.NoError(t, err)
@@ -194,7 +194,7 @@ func TestFifoErrors2(t *testing.T) {
 			assert.NoError(t, q.Done(noContext, got.ID, model.StatusSuccess))
 		}
 		if got != task2 {
-			assert.NoError(t, q.Error(noContext, got.ID, fmt.Errorf("exitcode 1, there was an error")))
+			assert.NoError(t, q.Error(noContext, got.ID, fmt.Errorf("exit code 1, there was an error")))
 		}
 	}
 
@@ -249,7 +249,7 @@ func TestFifoErrorsMultiThread(t *testing.T) {
 			case !task1Processed:
 				assert.Equal(t, task1, got)
 				task1Processed = true
-				assert.NoError(t, q.Error(noContext, got.ID, fmt.Errorf("exitcode 1, there was an error")))
+				assert.NoError(t, q.Error(noContext, got.ID, fmt.Errorf("exit code 1, there was an error")))
 				go func() {
 					for {
 						fmt.Printf("Worker spawned\n")
@@ -306,7 +306,7 @@ func TestFifoTransitiveErrors(t *testing.T) {
 	got, err := q.Poll(noContext, 1, func(*model.Task) bool { return true })
 	assert.NoError(t, err)
 	assert.Equal(t, task1, got)
-	assert.NoError(t, q.Error(noContext, got.ID, fmt.Errorf("exitcode 1, there was an error")))
+	assert.NoError(t, q.Error(noContext, got.ID, fmt.Errorf("exit code 1, there was an error")))
 
 	got, err = q.Poll(noContext, 1, func(*model.Task) bool { return true })
 	assert.NoError(t, err)
@@ -419,7 +419,7 @@ func TestWaitingVsPending(t *testing.T) {
 	info := q.Info(noContext)
 	assert.Equal(t, 2, info.Stats.WaitingOnDeps)
 
-	assert.NoError(t, q.Error(noContext, got.ID, fmt.Errorf("exitcode 1, there was an error")))
+	assert.NoError(t, q.Error(noContext, got.ID, fmt.Errorf("exit code 1, there was an error")))
 	got, err := q.Poll(noContext, 1, func(*model.Task) bool { return true })
 	assert.NoError(t, err)
 	assert.EqualValues(t, task2, got)

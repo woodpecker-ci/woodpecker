@@ -39,9 +39,9 @@ func Send(ctx context.Context, method, path string, privateKey crypto.PrivateKey
 	var buf io.ReadWriter
 	if in != nil {
 		buf = new(bytes.Buffer)
-		jsonerr := json.NewEncoder(buf).Encode(in)
-		if jsonerr != nil {
-			return 0, jsonerr
+		jsonErr := json.NewEncoder(buf).Encode(in)
+		if jsonErr != nil {
+			return 0, jsonErr
 		}
 	}
 
