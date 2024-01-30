@@ -19,7 +19,7 @@ function updateTheme() {
   }
 }
 
-watch([storeTheme, systemTheme], updateTheme);
+watch([storeTheme, systemTheme], updateTheme, { immediate: true });
 
 export function useTheme() {
   return {
