@@ -1,25 +1,32 @@
 # Changelog
 
-## [2.3.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.3.0) - 2024-01-27
+## [2.3.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.3.0) - 2024-01-30
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@lukashass, @anbraten, @renovate[bot], @zc-devs, @Alonsohhl, @healdropper, @eliasscosta, @qwerty287, @runephilosof-karnovgroup
+@HerHde, @qwerty287, @pat-s, @renovate[bot], @lukashass, @anbraten, @zc-devs, @Alonsohhl, @healdropper, @eliasscosta, @runephilosof-karnovgroup
 
-### 📈 Enhancement
+### ✨ Features
 
-- Improve secrets availability checks [[#3271](https://github.com/woodpecker-ci/woodpecker/pull/3271)]
-- Load more pipeline log lines (500 => 5000) [[#3212](https://github.com/woodpecker-ci/woodpecker/pull/3212)]
-- Clean up models [[#3228](https://github.com/woodpecker-ci/woodpecker/pull/3228)]
+- Add release event [[#3226](https://github.com/woodpecker-ci/woodpecker/pull/3226)]
 
 ### 🐛 Bug Fixes
 
+- Fix Gitpod: Gitea auth token creation [[#3299](https://github.com/woodpecker-ci/woodpecker/pull/3299)]
+- Fix agent updating [[#3287](https://github.com/woodpecker-ci/woodpecker/pull/3287)]
 - Sanitize pod's step label [[#3275](https://github.com/woodpecker-ci/woodpecker/pull/3275)]
 - Pipeline errors must be an array [[#3276](https://github.com/woodpecker-ci/woodpecker/pull/3276)]
 - fix bitbucket SSO using UUID from bitbucket api response as ForgeRemoteID [[#3265](https://github.com/woodpecker-ci/woodpecker/pull/3265)]
 - fix: bug pod service without label service [[#3256](https://github.com/woodpecker-ci/woodpecker/pull/3256)]
 - Fix disabling PRs [[#3258](https://github.com/woodpecker-ci/woodpecker/pull/3258)]
 - fix: bug annotations [[#3255](https://github.com/woodpecker-ci/woodpecker/pull/3255)]
+
+### 📈 Enhancement
+
+- Update theme on system color mode change [[#3296](https://github.com/woodpecker-ci/woodpecker/pull/3296)]
+- Improve secrets availability checks [[#3271](https://github.com/woodpecker-ci/woodpecker/pull/3271)]
+- Load more pipeline log lines (500 => 5000) [[#3212](https://github.com/woodpecker-ci/woodpecker/pull/3212)]
+- Clean up models [[#3228](https://github.com/woodpecker-ci/woodpecker/pull/3228)]
 
 ### 📚 Documentation
 
@@ -28,6 +35,9 @@
 
 ### Misc
 
+- chore(deps): update docker.io/techknowlogick/xgo docker tag to go-1.21.6 [[#3294](https://github.com/woodpecker-ci/woodpecker/pull/3294)]
+- fix(deps): update docs npm deps non-major [[#3295](https://github.com/woodpecker-ci/woodpecker/pull/3295)]
+- Remove deprecated `group` from config [[#3289](https://github.com/woodpecker-ci/woodpecker/pull/3289)]
 - Add spellcheck config [[#3018](https://github.com/woodpecker-ci/woodpecker/pull/3018)]
 - fix(deps): update golang (packages) [[#3284](https://github.com/woodpecker-ci/woodpecker/pull/3284)]
 - chore(deps): lock file maintenance [[#3274](https://github.com/woodpecker-ci/woodpecker/pull/3274)]
