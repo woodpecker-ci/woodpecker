@@ -35,7 +35,7 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		uuid = ulid.Make()
 
 		detached   bool
-		workingdir string
+		workingDir string
 
 		workspace   = fmt.Sprintf("%s_default:%s", c.prefix, c.base)
 		privileged  = container.Privileged
@@ -86,20 +86,39 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 	}
 
 	if !detached || len(container.Commands) != 0 {
-		workingdir = c.stepWorkdir(container)
+		workingDir = c.stepWorkingDir(container)
 	}
 
-	if !detached {
-		pluginSecrets := secretMap{}
-		for name, secret := range c.secrets {
-			if secret.Available(container) {
-				pluginSecrets[name] = secret
-			}
+	getSecretValue := func(name string) (string, error) {
+		name = strings.ToLower(name)
+		secret, ok := c.secrets[name]
+		if !ok {
+			return "", fmt.Errorf("secret %q not found", name)
 		}
 
-		if err := settings.ParamsToEnv(container.Settings, environment, pluginSecrets.toStringMap()); err != nil {
+		event := c.metadata.Curr.Event
+		err := secret.Available(event, container)
+		if err != nil {
+			return "", err
+		}
+
+		return secret.Value, nil
+	}
+
+	// TODO: why don't we pass secrets to detached steps?
+	if !detached {
+		if err := settings.ParamsToEnv(container.Settings, environment, getSecretValue); err != nil {
 			return nil, err
 		}
+	}
+
+	for _, requested := range container.Secrets.Secrets {
+		secretValue, err := getSecretValue(requested.Source)
+		if err != nil {
+			return nil, err
+		}
+
+		environment[strings.ToUpper(requested.Target)] = secretValue
 	}
 
 	if utils.MatchImage(container.Image, c.escalated...) && container.IsPlugin() {
@@ -111,17 +130,7 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		if utils.MatchHostname(container.Image, registry.Hostname) {
 			authConfig.Username = registry.Username
 			authConfig.Password = registry.Password
-			authConfig.Email = registry.Email
 			break
-		}
-	}
-
-	for _, requested := range container.Secrets.Secrets {
-		secret, ok := c.secrets[strings.ToLower(requested.Source)]
-		if ok && secret.Available(container) {
-			environment[strings.ToUpper(requested.Target)] = secret.Value
-		} else {
-			return nil, fmt.Errorf("secret %q not found or not allowed to be used", requested.Source)
 		}
 	}
 
@@ -182,7 +191,7 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		Pull:           container.Pull,
 		Detached:       detached,
 		Privileged:     privileged,
-		WorkingDir:     workingdir,
+		WorkingDir:     workingDir,
 		Environment:    environment,
 		Commands:       container.Commands,
 		Entrypoint:     container.Entrypoint,
@@ -209,7 +218,7 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 	}, nil
 }
 
-func (c *Compiler) stepWorkdir(container *yaml_types.Container) string {
+func (c *Compiler) stepWorkingDir(container *yaml_types.Container) string {
 	if path.IsAbs(container.Directory) {
 		return container.Directory
 	}

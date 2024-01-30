@@ -1,3 +1,4 @@
+<!-- cSpell:ignore teenyicons radiobox vaadin twotone iconoir timelapse -->
 <template>
   <i-ic-sharp-timelapse v-if="name === 'duration'" class="h-6 w-6" />
   <i-mdi-clock-time-eight-outline v-else-if="name === 'since'" class="h-6 w-6" />
@@ -7,7 +8,7 @@
   <i-mdi-gesture-tap v-else-if="name === 'manual-pipeline'" class="h-6 w-6" />
   <i-mdi-tag-outline v-else-if="name === 'tag'" class="h-6 w-6" />
   <i-clarity-deploy-line v-else-if="name === 'deployment'" class="h-6 w-6" />
-  <i-mdisource-commit v-else-if="name === 'commit'" class="h-6 w-6" />
+  <i-mdi-source-commit v-else-if="name === 'commit'" class="h-6 w-6" />
   <i-iconoir-arrow-left v-else-if="name === 'back'" class="w-8 h-8" />
   <i-mdi-github v-else-if="name === 'github'" class="h-8 w-8" />
   <i-teenyicons-git-solid v-else-if="name === 'repo'" class="h-8 w-8" />

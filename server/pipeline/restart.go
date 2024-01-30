@@ -18,7 +18,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/rs/zerolog/log"
 
@@ -130,7 +129,6 @@ func createNewOutOfOld(old *model.Pipeline) *model.Pipeline {
 	newPipeline.Status = model.StatusPending
 	newPipeline.Started = 0
 	newPipeline.Finished = 0
-	newPipeline.Enqueued = time.Now().UTC().Unix()
 	newPipeline.Errors = nil
 	return &newPipeline
 }

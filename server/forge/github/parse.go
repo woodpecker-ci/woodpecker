@@ -94,7 +94,6 @@ func parsePushHook(hook *github.PushEvent) (*model.Repo, *model.Pipeline) {
 		Email:        hook.GetHeadCommit().GetAuthor().GetEmail(),
 		Avatar:       hook.GetSender().GetAvatarURL(),
 		Author:       hook.GetSender().GetLogin(),
-		CloneURL:     hook.GetRepo().GetCloneURL(),
 		Sender:       hook.GetSender().GetLogin(),
 		ChangedFiles: getChangedFilesFromCommits(hook.Commits),
 	}
@@ -168,7 +167,6 @@ func parsePullHook(hook *github.PullRequestEvent, merge bool) (*github.PullReque
 		Avatar:   hook.GetPullRequest().GetUser().GetAvatarURL(),
 		Title:    hook.GetPullRequest().GetTitle(),
 		Sender:   hook.GetSender().GetLogin(),
-		CloneURL: hook.GetPullRequest().GetHead().GetRepo().GetCloneURL(),
 		Refspec: fmt.Sprintf(refSpec,
 			hook.GetPullRequest().GetHead().GetRef(),
 			hook.GetPullRequest().GetBase().GetRef(),

@@ -395,7 +395,7 @@
           "placeholder": "Dirección del registry (por ejemplo, docker.io)"
         },
         "created": "Credenciales del registry creadas",
-        "creds": "Credenciales del registry",
+        "credentials": "Credenciales del registry",
         "delete": "Eliminar registry",
         "deleted": "Credenciales del registry eliminadas",
         "desc": "Se pueden añadir credenciales de registries para utilizar imágenes privadas para su pipeline.",
@@ -445,7 +445,7 @@
     "min_short": "min",
     "not_started": "no iniciado aún",
     "sec_short": "s",
-    "tmpl": "MMM D, YYYY, HH:mm z",
+    "template": "MMM D, YYYY, HH:mm z",
     "weeks_short": "w"
   },
   "unknown_error": "Se ha producido un error desconocido",

@@ -149,9 +149,7 @@ lint: install-tools ## Lint code
 	@echo "Running golangci-lint"
 	golangci-lint run
 
-lint-ui: ## Lint UI code
-	(cd web/; pnpm install)
-	(cd web/; pnpm lesshint)
+lint-ui: ui-dependencies ## Lint UI code
 	(cd web/; pnpm lint --quiet)
 
 test-agent: ## Test agent code
@@ -180,7 +178,7 @@ test-lib: ## Test lib code
 	go test -race -cover -coverprofile coverage.out -timeout 30s $(shell go list ./... | grep -v '/cmd\|/agent\|/cli\|/server')
 
 .PHONY: test
-test: test-agent test-server test-server-datastore test-cli test-lib test-ui ## Run all tests
+test: test-agent test-server test-server-datastore test-cli test-lib ## Run all tests
 
 ##@ Build
 
@@ -195,6 +193,17 @@ build-agent: ## Build agent
 
 build-cli: ## Build cli
 	CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -ldflags '${LDFLAGS}' -o dist/woodpecker-cli${BIN_SUFFIX} go.woodpecker-ci.org/woodpecker/v2/cmd/cli
+
+build-tarball: ## Build tar archive
+	mkdir -p dist && tar chzvf dist/woodpecker-src.tar.gz \
+	  --exclude="*.exe" \
+	  --exclude="./.pnpm-store" \
+	  --exclude="node_modules" \
+	  --exclude="./dist" \
+	  --exclude="./data" \
+	  --exclude="./build" \
+	  --exclude="./.git" \
+	  .
 
 .PHONY: build
 build: build-agent build-server build-cli ## Build all binaries

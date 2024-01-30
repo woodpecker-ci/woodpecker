@@ -1,3 +1,7 @@
+---
+toc_max_heading_level: 2
+---
+
 # Gitea / Forgejo
 
 Woodpecker comes with built-in support for Gitea and the "soft" fork Forgejo. To enable Gitea you should configure the Woodpecker container using the following environment variables:

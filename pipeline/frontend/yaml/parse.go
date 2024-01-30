@@ -33,34 +33,34 @@ func ParseBytes(b []byte) (*types.Workflow, error) {
 	}
 
 	// support deprecated branch filter
-	if out.BranchesDontUseIt != nil {
+	if out.BranchesDoNotUseIt != nil {
 		switch {
 		case out.When.Constraints == nil:
-			out.When.Constraints = []constraint.Constraint{{Branch: *out.BranchesDontUseIt}}
+			out.When.Constraints = []constraint.Constraint{{Branch: *out.BranchesDoNotUseIt}}
 		case len(out.When.Constraints) == 1 && out.When.Constraints[0].Branch.IsEmpty():
-			out.When.Constraints[0].Branch = *out.BranchesDontUseIt
+			out.When.Constraints[0].Branch = *out.BranchesDoNotUseIt
 		default:
 			return nil, fmt.Errorf("could not apply deprecated branches filter into global when filter")
 		}
-		out.BranchesDontUseIt = nil
+		out.BranchesDoNotUseIt = nil
 	}
 
 	// support deprecated pipeline keyword
-	if len(out.PipelineDontUseIt.ContainerList) != 0 && len(out.Steps.ContainerList) == 0 {
-		out.Steps.ContainerList = out.PipelineDontUseIt.ContainerList
+	if len(out.PipelineDoNotUseIt.ContainerList) != 0 && len(out.Steps.ContainerList) == 0 {
+		out.Steps.ContainerList = out.PipelineDoNotUseIt.ContainerList
 	}
 
 	// support deprecated platform filter
-	if out.PlatformDontUseIt != "" {
+	if out.PlatformDoNotUseIt != "" {
 		if out.Labels == nil {
 			out.Labels = make(base.SliceOrMap)
 		}
 		if _, set := out.Labels["platform"]; !set {
-			out.Labels["platform"] = out.PlatformDontUseIt
+			out.Labels["platform"] = out.PlatformDoNotUseIt
 		}
-		out.PlatformDontUseIt = ""
+		out.PlatformDoNotUseIt = ""
 	}
-	out.PipelineDontUseIt.ContainerList = nil
+	out.PipelineDoNotUseIt.ContainerList = nil
 
 	return out, nil
 }

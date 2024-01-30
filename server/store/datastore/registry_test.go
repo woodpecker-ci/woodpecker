@@ -32,8 +32,6 @@ func TestRegistryFind(t *testing.T) {
 		Address:  "index.docker.io",
 		Username: "foo",
 		Password: "bar",
-		Email:    "foo@bar.com",
-		Token:    "12345",
 	})
 	assert.NoError(t, err)
 
@@ -43,8 +41,6 @@ func TestRegistryFind(t *testing.T) {
 	assert.Equal(t, "index.docker.io", registry.Address)
 	assert.Equal(t, "foo", registry.Username)
 	assert.Equal(t, "bar", registry.Password)
-	assert.Equal(t, "foo@bar.com", registry.Email)
-	assert.Equal(t, "12345", registry.Token)
 }
 
 func TestRegistryList(t *testing.T) {

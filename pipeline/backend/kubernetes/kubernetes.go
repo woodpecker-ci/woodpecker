@@ -163,7 +163,7 @@ func (e *kube) getConfig() *config {
 	}
 	c := *e.config
 	c.PodLabels = maps.Clone(e.config.PodLabels)
-	c.PodAnnotations = maps.Clone(e.config.PodLabels)
+	c.PodAnnotations = maps.Clone(e.config.PodAnnotations)
 	c.ImagePullSecretNames = slices.Clone(e.config.ImagePullSecretNames)
 	return &c
 }

@@ -12,10 +12,10 @@ To convert this:
 
 ```yaml
 steps:
-  test:
+  - name: test
     image: golang:1.18
     commands: go test ./...
-  build:
+  - name: build
     image: golang:1.18
     commands: build
 ```
@@ -27,11 +27,11 @@ Just add a new section called **variables** like this:
 +  - &golang_image 'golang:1.18'
 
  steps:
-   test:
+   - name: test
 -    image: golang:1.18
 +    image: *golang_image
      commands: go test ./...
-   build:
+   - name: build
 -    image: golang:1.18
 +    image: *golang_image
      commands: build
@@ -50,14 +50,14 @@ variables:
   - &some-plugin codeberg.org/6543/docker-images/print_env
 
 steps:
-  develop:
+  - name: develop
     image: *some-plugin
     settings:
       <<: [*base-plugin-settings, *special-setting] # merge two maps into an empty map
     when:
       branch: develop
 
-  main:
+  - name: main
     image: *some-plugin
     settings:
       <<: *base-plugin-settings # merge one map and ...
@@ -80,13 +80,13 @@ variables:
     - echo hello
 
 steps:
-  step1:
+  - name: step1
     image: debian
     commands:
       - <<: *pre_cmds # prepend a sequence
       - echo exec step now do dedicated things
       - <<: *post_cmds # append a sequence
-  step2:
+  - name: step2
     image: debian
     commands:
       - <<: [*pre_cmds, *hello_cmd] # prepend two sequences
@@ -105,13 +105,13 @@ One can create a file containing environment variables, and then source it in ea
 
 ```yaml
 steps:
-  init:
+  - name: init
     image: bash
     commands:
       - echo "FOO=hello" >> envvars
       - echo "BAR=world" >> envvars
 
-  debug:
+  - name: debug
     image: bash
     commands:
       - source envvars

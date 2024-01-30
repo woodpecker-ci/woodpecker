@@ -58,6 +58,7 @@ var migrationTasks = []*xormigrate.Migration{
 	&removePluginOnlyOptionFromSecretsTable,
 	&convertToNewPipelineErrorFormat,
 	&renameLinkToURL,
+	&cleanRegistryPipeline,
 }
 
 var allBeans = []any{
