@@ -1,6 +1,5 @@
-import { onMounted, onUnmounted } from 'vue';
 import { useColorMode } from '@vueuse/core';
-import { watch } from 'vue';
+import { onMounted, onUnmounted, watch } from 'vue';
 
 const { store: storeTheme, state: resolvedTheme } = useColorMode({
   storageKey: 'woodpecker:theme',
