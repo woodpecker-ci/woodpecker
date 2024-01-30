@@ -247,8 +247,18 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 		return nil, fmt.Errorf("Could not pull image for pod %s", pod.Name)
 	}
 
+	if len(pod.Status.ContainerStatuses) == 0 {
+		return nil, fmt.Errorf("No container statuses found for pod %s", pod.Name)
+	}
+
+	cs := pod.Status.ContainerStatuses[0]
+
+	if cs.State.Terminated == nil {
+		return nil, fmt.Errorf("No terminated state found for container %s/%s", pod.Name, cs.Name)
+	}
+
 	bs := &types.State{
-		ExitCode:  int(pod.Status.ContainerStatuses[0].State.Terminated.ExitCode),
+		ExitCode:  int(cs.State.Terminated.ExitCode),
 		Exited:    true,
 		OOMKilled: false,
 	}
