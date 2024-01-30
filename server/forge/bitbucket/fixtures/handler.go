@@ -44,8 +44,7 @@ func Handler() http.Handler {
 }
 
 func getOauth(c *gin.Context) {
-	switch c.PostForm("error") {
-	case "invalid_scope":
+	if c.PostForm("error") == "invalid_scope" {
 		c.String(500, "")
 	}
 
@@ -186,21 +185,11 @@ func getUserRepos(c *gin.Context) {
 	}
 }
 
-func permission(p string) string {
-	return fmt.Sprintf(permissionPayload, p)
-}
-
 func getPermissions(c *gin.Context) {
-	query := c.Request.URL.Query()["q"][0]
-	switch query {
-	case `repository.full_name="test_name/permission_read"`:
-		c.String(200, permission("read"))
-	case `repository.full_name="test_name/permission_write"`:
-		c.String(200, permission("write"))
-	case `repository.full_name="test_name/permission_admin"`:
-		c.String(200, permission("admin"))
-	default:
-		c.String(200, permission("read"))
+	if c.Query("page") == "" || c.Query("page") == "1" {
+		c.String(200, permissionsPayLoad)
+	} else {
+		c.String(200, "{\"values\":[]}")
 	}
 }
 
@@ -311,6 +300,7 @@ const pullRequestsPayload = `
 
 const userPayload = `
 {
+	"uuid": "{4d8c0f46-cd62-4b77-b0cf-faa3e4d932c6}",
   "username": "superman",
   "links": {
     "avatar": {
@@ -368,14 +358,35 @@ const workspacesPayload = `
 }
 `
 
-const permissionPayload = `
+const permissionsPayLoad = `
 {
-  "pagelen": 1,
+  "pagelen": 100,
+	"page": 1,
   "values": [
     {
-      "permission": "%s"
+      "repository": {
+        "full_name": "test_name/repo_name"
+      },
+      "permission": "read"
+    },
+		{
+      "repository": {
+        "full_name": "test_name/permission_read"
+      },
+      "permission": "read"
+    },
+		{
+      "repository": {
+        "full_name": "test_name/permission_write"
+      },
+      "permission": "write"
+    },
+		{
+      "repository": {
+        "full_name": "test_name/permission_admin"
+      },
+      "permission": "admin"
     }
-  ],
-  "page": 1
+  ]
 }
 `

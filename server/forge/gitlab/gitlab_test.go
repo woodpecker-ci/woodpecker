@@ -30,11 +30,8 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
-func load(t *testing.T, config string) *GitLab {
-	_url, err := url.Parse(config)
-	if err != nil {
-		t.FailNow()
-	}
+func load(config string) *GitLab {
+	_url, _ := url.Parse(config)
 	params := _url.Query()
 	_url.RawQuery = ""
 
@@ -58,7 +55,7 @@ func Test_GitLab(t *testing.T) {
 
 	env := server.URL + "?client_id=test&client_secret=test"
 
-	client := load(t, env)
+	client := load(env)
 
 	user := model.User{
 		Login: "test_user",
@@ -236,6 +233,23 @@ func Test_GitLab(t *testing.T) {
 						assert.Equal(t, "woodpecker-test", hookRepo.Name)
 						assert.Equal(t, "Add new file", pipeline.Title)
 						assert.Len(t, pipeline.ChangedFiles, 0) // see L217
+					}
+				})
+
+				g.It("Should parse release request hook", func() {
+					req, _ := http.NewRequest(
+						testdata.ServiceHookMethod,
+						testdata.ServiceHookURL.String(),
+						bytes.NewReader(testdata.WebhookReleaseBody),
+					)
+					req.Header = testdata.ReleaseHookHeaders
+
+					hookRepo, build, err := client.Hook(ctx, req)
+					assert.NoError(t, err)
+					if assert.NotNil(t, hookRepo) && assert.NotNil(t, build) {
+						assert.Equal(t, "refs/tags/0.0.2", build.Ref)
+						assert.Equal(t, "ci", hookRepo.Name)
+						assert.Equal(t, "created release Awesome version 0.0.2", build.Message)
 					}
 				})
 			})

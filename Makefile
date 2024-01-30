@@ -103,6 +103,12 @@ clean: ## Clean build artifacts
 	rm -rf build
 	@[ "1" != "$(shell docker image ls woodpecker/make:local -a | wc -l)" ] && docker image rm woodpecker/make:local || echo no docker image to clean
 
+.PHONY: clean-all
+clean-all: clean ## Clean all artifacts
+	rm -rf dist web/dist docs/build docs/node_modules web/node_modules
+	# delete generated
+	rm -rf docs/docs/40-cli.md docs/swagger.json
+
 .PHONY: generate
 generate: generate-swagger ## Run all code generations
 	go generate ./...
@@ -143,9 +149,7 @@ lint: install-tools ## Lint code
 	@echo "Running golangci-lint"
 	golangci-lint run
 
-lint-ui: ## Lint UI code
-	(cd web/; pnpm install)
-	(cd web/; pnpm lesshint)
+lint-ui: ui-dependencies ## Lint UI code
 	(cd web/; pnpm lint --quiet)
 
 test-agent: ## Test agent code
@@ -174,7 +178,7 @@ test-lib: ## Test lib code
 	go test -race -cover -coverprofile coverage.out -timeout 30s $(shell go list ./... | grep -v '/cmd\|/agent\|/cli\|/server')
 
 .PHONY: test
-test: test-agent test-server test-server-datastore test-cli test-lib test-ui ## Run all tests
+test: test-agent test-server test-server-datastore test-cli test-lib ## Run all tests
 
 ##@ Build
 
@@ -189,6 +193,17 @@ build-agent: ## Build agent
 
 build-cli: ## Build cli
 	CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -ldflags '${LDFLAGS}' -o dist/woodpecker-cli${BIN_SUFFIX} go.woodpecker-ci.org/woodpecker/v2/cmd/cli
+
+build-tarball: ## Build tar archive
+	mkdir -p dist && tar chzvf dist/woodpecker-src.tar.gz \
+	  --exclude="*.exe" \
+	  --exclude="./.pnpm-store" \
+	  --exclude="node_modules" \
+	  --exclude="./dist" \
+	  --exclude="./data" \
+	  --exclude="./build" \
+	  --exclude="./.git" \
+	  .
 
 .PHONY: build
 build: build-agent build-server build-cli ## Build all binaries
@@ -270,16 +285,16 @@ bundle-prepare: ## Prepare the bundles
 	go install github.com/goreleaser/nfpm/v2/cmd/nfpm@v2.6.0
 
 bundle-agent: bundle-prepare ## Create bundles for agent
-	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/nfpm-agent.yml --target ./dist --packager deb
-	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/nfpm-agent.yml --target ./dist --packager rpm
+	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/agent.yaml --target ./dist --packager deb
+	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/agent.yaml --target ./dist --packager rpm
 
 bundle-server: bundle-prepare ## Create bundles for server
-	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/nfpm-server.yml --target ./dist --packager deb
-	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/nfpm-server.yml --target ./dist --packager rpm
+	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/server.yaml --target ./dist --packager deb
+	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/server.yaml --target ./dist --packager rpm
 
 bundle-cli: bundle-prepare ## Create bundles for cli
-	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/nfpm-cli.yml --target ./dist --packager deb
-	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/nfpm-cli.yml --target ./dist --packager rpm
+	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/cli.yaml --target ./dist --packager deb
+	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/cli.yaml --target ./dist --packager rpm
 
 .PHONY: bundle
 bundle: bundle-agent bundle-server bundle-cli ## Create all bundles

@@ -102,6 +102,7 @@ function removeImage(image: string) {
 const secretEventsOptions: CheckboxOption[] = [
   { value: WebhookEvents.Push, text: i18n.t('repo.pipeline.event.push') },
   { value: WebhookEvents.Tag, text: i18n.t('repo.pipeline.event.tag') },
+  { value: WebhookEvents.Release, text: i18n.t('repo.pipeline.event.release') },
   {
     value: WebhookEvents.PullRequest,
     text: i18n.t('repo.pipeline.event.pr'),

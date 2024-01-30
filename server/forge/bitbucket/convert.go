@@ -137,7 +137,7 @@ func convertUser(from *internal.Account, token *oauth2.Token) *model.User {
 		Secret:        token.RefreshToken,
 		Expiry:        token.Expiry.UTC().Unix(),
 		Avatar:        from.Links.Avatar.Href,
-		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(from.ID)),
+		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(from.UUID)),
 	}
 }
 
@@ -176,7 +176,6 @@ func convertPullHook(from *internal.PullRequestHook) *model.Pipeline {
 			from.PullRequest.Source.Branch.Name,
 			from.PullRequest.Dest.Branch.Name,
 		),
-		CloneURL:  fmt.Sprintf("https://bitbucket.org/%s", from.PullRequest.Source.Repo.FullName),
 		ForgeURL:  from.PullRequest.Links.HTML.Href,
 		Branch:    from.PullRequest.Dest.Branch.Name,
 		Message:   from.PullRequest.Desc,

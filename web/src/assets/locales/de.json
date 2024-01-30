@@ -139,6 +139,7 @@
   "default": "Standard",
   "docs": "Docs",
   "documentation_for": "Dokumentation für „{topic}“",
+  "empty_list": "Keine {entity} gefunden!",
   "errors": {
     "not_found": "Angefragtes Objekt wurde nicht gefunden"
   },
@@ -397,7 +398,7 @@
           "placeholder": "Registry-Adresse (z. B. docker.io)"
         },
         "created": "Registry-Zugangsdaten erstellt",
-        "creds": "Zugangsdaten für die Registry",
+        "credentials": "Zugangsdaten für die Registry",
         "delete": "Registry löschen",
         "deleted": "Registry-Zugangsdaten gelöscht",
         "desc": "Zugangsdaten für die Registries können hinzugefügt werden, um private Images für deine Pipelines zu verwenden.",
@@ -447,7 +448,7 @@
     "min_short": "min",
     "not_started": "noch nicht gestartet",
     "sec_short": "sek",
-    "tmpl": "DD.MM.YYYY, HH:mm z",
+    "template": "DD.MM.YYYY, HH:mm z",
     "weeks_short": "w"
   },
   "unknown_error": "Ein unbekannter Fehler ist aufgetreten",

@@ -21,6 +21,8 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_QueueInfo(t *testing.T) {
@@ -57,9 +59,8 @@ func Test_QueueInfo(t *testing.T) {
 	client := NewClient(ts.URL, http.DefaultClient)
 
 	info, err := client.QueueInfo()
-	if info.Stats.Workers != 3 {
-		t.Errorf("Unexpected worker count: %v, %v", info, err)
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, 3, info.Stats.Workers)
 }
 
 func Test_LogLevel(t *testing.T) {
@@ -67,16 +68,16 @@ func Test_LogLevel(t *testing.T) {
 	fixtureHandler := func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPost {
 			var ll LogLevel
-			if err := json.NewDecoder(r.Body).Decode(&ll); err != nil {
-				t.Logf("could not decode json: %v\n", err)
-				t.FailNow()
+			if !assert.NoError(t, json.NewDecoder(r.Body).Decode(&ll)) {
+				return
 			}
 			logLevel = ll.Level
 		}
 
-		fmt.Fprintf(w, `{
+		_, err := fmt.Fprintf(w, `{
 			"log-level": "%s"
 	}`, logLevel)
+		assert.NoError(t, err)
 	}
 
 	ts := httptest.NewServer(http.HandlerFunc(fixtureHandler))
@@ -85,24 +86,10 @@ func Test_LogLevel(t *testing.T) {
 	client := NewClient(ts.URL, http.DefaultClient)
 
 	curLvl, err := client.LogLevel()
-	if err != nil {
-		t.Logf("could not get current log level: %v", err)
-		t.FailNow()
-	}
-
-	if !strings.EqualFold(curLvl.Level, logLevel) {
-		t.Logf("log level is not correct\n\tExpected: %s\n\t     Got: %s\n", logLevel, curLvl.Level)
-		t.FailNow()
-	}
+	assert.NoError(t, err)
+	assert.True(t, strings.EqualFold(curLvl.Level, logLevel))
 
 	newLvl, err := client.SetLogLevel(&LogLevel{Level: "trace"})
-	if err != nil {
-		t.Logf("could not set log level: %v", err)
-		t.FailNow()
-	}
-
-	if !strings.EqualFold(newLvl.Level, logLevel) {
-		t.Logf("log level is not correct\n\tExpected: %s\n\t     Got: %s\n", logLevel, newLvl.Level)
-		t.FailNow()
-	}
+	assert.NoError(t, err)
+	assert.True(t, strings.EqualFold(newLvl.Level, logLevel))
 }

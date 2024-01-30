@@ -169,12 +169,6 @@ func (l *Linter) lintTrusted(config *WorkflowConfig, c *types.Container, area st
 	if len(c.NetworkMode) != 0 {
 		err = "Insufficient privileges to use network_mode"
 	}
-	if len(c.IpcMode) != 0 {
-		err = "Insufficient privileges to use ipc_mode"
-	}
-	if len(c.Sysctls) != 0 {
-		err = "Insufficient privileges to use sysctls"
-	}
 	if c.Networks.Networks != nil && len(c.Networks.Networks) != 0 {
 		err = "Insufficient privileges to use networks"
 	}
@@ -215,7 +209,7 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 		return err
 	}
 
-	if parsed.PipelineDontUseIt.ContainerList != nil {
+	if parsed.PipelineDoNotUseIt.ContainerList != nil {
 		err = multierr.Append(err, &errors.PipelineError{
 			Type:    errors.PipelineErrorTypeDeprecation,
 			Message: "Please use 'steps:' instead of deprecated 'pipeline:' list",
@@ -228,7 +222,7 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 		})
 	}
 
-	if parsed.PlatformDontUseIt != "" {
+	if parsed.PlatformDoNotUseIt != "" {
 		err = multierr.Append(err, &errors.PipelineError{
 			Type:    errors.PipelineErrorTypeDeprecation,
 			Message: "Please use labels instead of deprecated 'platform' filters",
@@ -241,7 +235,7 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 		})
 	}
 
-	if parsed.BranchesDontUseIt != nil {
+	if parsed.BranchesDoNotUseIt != nil {
 		err = multierr.Append(err, &errors.PipelineError{
 			Type:    errors.PipelineErrorTypeDeprecation,
 			Message: "Please use global when instead of deprecated 'branches' filter",

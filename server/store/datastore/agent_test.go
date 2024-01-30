@@ -35,11 +35,8 @@ func TestAgentFindByToken(t *testing.T) {
 	assert.NoError(t, err)
 
 	_agent, err := store.AgentFindByToken(agent.Token)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	assert.Equal(t, int64(1), _agent.ID)
+	assert.NoError(t, err)
+	assert.EqualValues(t, 1, _agent.ID)
 
 	_agent, err = store.AgentFindByToken("")
 	assert.ErrorIs(t, err, ErrNoTokenProvided)
@@ -89,4 +86,23 @@ func TestAgentList(t *testing.T) {
 	agents, err = store.AgentList(&model.ListOptions{Page: 1, PerPage: 1})
 	assert.NoError(t, err)
 	assert.Equal(t, 1, len(agents))
+}
+
+func TestAgentUpdate(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Agent))
+	defer closer()
+
+	agent := &model.Agent{
+		ID:    int64(1),
+		Name:  "test",
+		Token: "secret-token",
+	}
+	err := store.AgentCreate(agent)
+	assert.NoError(t, err)
+
+	agent.Backend = "local"
+	agent.Capacity = 2
+	agent.Version = "next-abcdef"
+	err = store.AgentUpdate(agent)
+	assert.NoError(t, err)
 }

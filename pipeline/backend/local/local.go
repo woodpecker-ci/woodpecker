@@ -146,6 +146,7 @@ func (e *local) StartStep(ctx context.Context, step *types.Step, taskUUID string
 // execCommands use step.Image as shell and run the commands in it
 func (e *local) execCommands(ctx context.Context, step *types.Step, state *workflowState, env []string) error {
 	// Prepare commands
+	// TODO support `entrypoint` from pipeline config
 	args, err := e.genCmdByShell(step.Image, step.Commands)
 	if err != nil {
 		return fmt.Errorf("could not convert commands into args: %w", err)
@@ -166,7 +167,7 @@ func (e *local) execCommands(ctx context.Context, step *types.Step, state *workf
 		e.output = io.NopCloser(transform.NewReader(e.output, unicode.UTF8.NewDecoder().Transformer))
 	}
 
-	state.stepCMDs[step.Name] = cmd
+	state.stepCMDs[step.UUID] = cmd
 
 	return cmd.Start()
 }
@@ -186,7 +187,7 @@ func (e *local) execPlugin(ctx context.Context, step *types.Step, state *workflo
 	e.output, _ = cmd.StdoutPipe()
 	cmd.Stderr = cmd.Stdout
 
-	state.stepCMDs[step.Name] = cmd
+	state.stepCMDs[step.UUID] = cmd
 
 	return cmd.Start()
 }
@@ -201,9 +202,9 @@ func (e *local) WaitStep(_ context.Context, step *types.Step, taskUUID string) (
 		return nil, err
 	}
 
-	cmd, ok := state.stepCMDs[step.Name]
+	cmd, ok := state.stepCMDs[step.UUID]
 	if !ok {
-		return nil, fmt.Errorf("step cmd %s not found", step.Name)
+		return nil, fmt.Errorf("step cmd for %s not found", step.UUID)
 	}
 
 	err = cmd.Wait()
@@ -235,7 +236,7 @@ func (e *local) DestroyStep(_ context.Context, _ *types.Step, _ string) error {
 
 // DestroyWorkflow the pipeline environment.
 func (e *local) DestroyWorkflow(_ context.Context, _ *types.Config, taskUUID string) error {
-	log.Trace().Str("taskUUID", taskUUID).Msgf("delete workflow environment")
+	log.Trace().Str("taskUUID", taskUUID).Msg("delete workflow environment")
 
 	state, err := e.getState(taskUUID)
 	if err != nil {
@@ -257,7 +258,13 @@ func (e *local) getState(taskUUID string) (*workflowState, error) {
 	if !ok {
 		return nil, ErrWorkflowStateNotFound
 	}
-	return state.(*workflowState), nil
+
+	s, ok := state.(*workflowState)
+	if !ok {
+		return nil, fmt.Errorf("could not parse state: %v", state)
+	}
+
+	return s, nil
 }
 
 func (e *local) saveState(taskUUID string, state *workflowState) {

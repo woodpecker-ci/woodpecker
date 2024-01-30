@@ -19,9 +19,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/rs/zerolog/log"
-
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
@@ -49,7 +48,7 @@ func GetOrg(c *gin.Context) {
 
 	org, err := _store.OrgGet(orgID)
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 
@@ -122,7 +121,7 @@ func LookupOrg(c *gin.Context) {
 
 	org, err := _store.OrgFindByName(orgFullName)
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 
@@ -140,7 +139,7 @@ func LookupOrg(c *gin.Context) {
 		} else if !user.Admin {
 			perm, err := server.Config.Services.Membership.Get(c, user, org.Name)
 			if err != nil {
-				log.Error().Msgf("Failed to check membership: %v", err)
+				log.Error().Err(err).Msg("failed to check membership")
 				c.Status(http.StatusInternalServerError)
 				return
 			}

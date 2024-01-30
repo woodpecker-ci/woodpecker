@@ -62,7 +62,7 @@ func GetBadge(c *gin.Context) {
 	}
 
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 
@@ -116,7 +116,7 @@ func GetCC(c *gin.Context) {
 	}
 
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 

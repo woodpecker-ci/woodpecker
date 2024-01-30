@@ -29,28 +29,35 @@ import (
 func TestSecretAvailable(t *testing.T) {
 	secret := Secret{
 		AllowedPlugins: []string{},
+		Events:         []string{"push"},
 	}
-	assert.True(t, secret.Available(&yaml_types.Container{
+	assert.NoError(t, secret.Available("push", &yaml_types.Container{
 		Image:    "golang",
 		Commands: yaml_base_types.StringOrSlice{"echo 'this is not a plugin'"},
 	}))
 
 	// secret only available for "golang" plugin
 	secret = Secret{
+		Name:           "foo",
 		AllowedPlugins: []string{"golang"},
+		Events:         []string{"push"},
 	}
-	assert.True(t, secret.Available(&yaml_types.Container{
+	assert.NoError(t, secret.Available("push", &yaml_types.Container{
+		Name:     "step",
 		Image:    "golang",
 		Commands: yaml_base_types.StringOrSlice{},
 	}))
-	assert.False(t, secret.Available(&yaml_types.Container{
+	assert.ErrorContains(t, secret.Available("push", &yaml_types.Container{
 		Image:    "golang",
 		Commands: yaml_base_types.StringOrSlice{"echo 'this is not a plugin'"},
-	}))
-	assert.False(t, secret.Available(&yaml_types.Container{
+	}), "only allowed to be used by plugins by step")
+	assert.ErrorContains(t, secret.Available("push", &yaml_types.Container{
 		Image:    "not-golang",
 		Commands: yaml_base_types.StringOrSlice{},
-	}))
+	}), "not allowed to be used with image ")
+	assert.ErrorContains(t, secret.Available("pull_request", &yaml_types.Container{
+		Image: "golang",
+	}), "not allowed to be used with pipeline event ")
 }
 
 func TestCompilerCompile(t *testing.T) {
@@ -79,11 +86,8 @@ func TestCompilerCompile(t *testing.T) {
 	}}
 
 	defaultCloneStage := &backend_types.Stage{
-		Name:  "test_clone",
-		Alias: "clone",
 		Steps: []*backend_types.Step{{
-			Name:       "test_clone",
-			Alias:      "clone",
+			Name:       "clone",
 			Type:       backend_types.StepTypeClone,
 			Image:      constant.DefaultCloneImage,
 			OnSuccess:  true,
@@ -127,11 +131,8 @@ func TestCompilerCompile(t *testing.T) {
 				Networks: defaultNetworks,
 				Volumes:  defaultVolumes,
 				Stages: []*backend_types.Stage{defaultCloneStage, {
-					Name:  "test_stage_0",
-					Alias: "dummy",
 					Steps: []*backend_types.Step{{
-						Name:       "test_step_0",
-						Alias:      "dummy",
+						Name:       "dummy",
 						Type:       backend_types.StepTypePlugin,
 						Image:      "dummy_img",
 						OnSuccess:  true,
@@ -164,11 +165,8 @@ func TestCompilerCompile(t *testing.T) {
 				Networks: defaultNetworks,
 				Volumes:  defaultVolumes,
 				Stages: []*backend_types.Stage{defaultCloneStage, {
-					Name:  "test_stage_0",
-					Alias: "echo env",
 					Steps: []*backend_types.Step{{
-						Name:       "test_step_0",
-						Alias:      "echo env",
+						Name:       "echo env",
 						Type:       backend_types.StepTypeCommands,
 						Image:      "bash",
 						Commands:   []string{"env"},
@@ -179,11 +177,8 @@ func TestCompilerCompile(t *testing.T) {
 						ExtraHosts: []backend_types.HostAlias{},
 					}},
 				}, {
-					Name:  "test_stage_1",
-					Alias: "parallel echo 1",
 					Steps: []*backend_types.Step{{
-						Name:       "test_step_1",
-						Alias:      "parallel echo 1",
+						Name:       "parallel echo 1",
 						Type:       backend_types.StepTypeCommands,
 						Image:      "bash",
 						Commands:   []string{"echo 1"},
@@ -193,8 +188,7 @@ func TestCompilerCompile(t *testing.T) {
 						Networks:   []backend_types.Conn{{Name: "test_default", Aliases: []string{"parallel echo 1"}}},
 						ExtraHosts: []backend_types.HostAlias{},
 					}, {
-						Name:       "test_step_2",
-						Alias:      "parallel echo 2",
+						Name:       "parallel echo 2",
 						Type:       backend_types.StepTypeCommands,
 						Image:      "bash",
 						Commands:   []string{"echo 2"},
@@ -227,11 +221,8 @@ func TestCompilerCompile(t *testing.T) {
 				Networks: defaultNetworks,
 				Volumes:  defaultVolumes,
 				Stages: []*backend_types.Stage{defaultCloneStage, {
-					Name:  "test_stage_0",
-					Alias: "test_stage_0",
 					Steps: []*backend_types.Step{{
-						Name:       "test_step_0",
-						Alias:      "echo env",
+						Name:       "echo env",
 						Type:       backend_types.StepTypeCommands,
 						Image:      "bash",
 						Commands:   []string{"env"},
@@ -241,8 +232,7 @@ func TestCompilerCompile(t *testing.T) {
 						Networks:   []backend_types.Conn{{Name: "test_default", Aliases: []string{"echo env"}}},
 						ExtraHosts: []backend_types.HostAlias{},
 					}, {
-						Name:       "test_step_2",
-						Alias:      "echo 2",
+						Name:       "echo 2",
 						Type:       backend_types.StepTypeCommands,
 						Image:      "bash",
 						Commands:   []string{"echo 2"},
@@ -253,11 +243,8 @@ func TestCompilerCompile(t *testing.T) {
 						ExtraHosts: []backend_types.HostAlias{},
 					}},
 				}, {
-					Name:  "test_stage_1",
-					Alias: "test_stage_1",
 					Steps: []*backend_types.Step{{
-						Name:       "test_step_1",
-						Alias:      "echo 1",
+						Name:       "echo 1",
 						Type:       backend_types.StepTypeCommands,
 						Image:      "bash",
 						Commands:   []string{"echo 1"},
@@ -279,7 +266,7 @@ func TestCompilerCompile(t *testing.T) {
 				Secrets:  yaml_types.Secrets{Secrets: []*yaml_types.Secret{{Source: "missing", Target: "missing"}}},
 			}}}},
 			backConf:    nil,
-			expectedErr: "secret \"missing\" not found or not allowed to be used",
+			expectedErr: "secret \"missing\" not found",
 		},
 		{
 			name: "workflow with broken step dependency",
@@ -312,6 +299,46 @@ func TestCompilerCompile(t *testing.T) {
 				// check if we get an expected backend config based on a frontend config
 				assert.EqualValues(t, *test.backConf, *backConf)
 			}
+		})
+	}
+}
+
+func TestSecretMatch(t *testing.T) {
+	tcl := []*struct {
+		name   string
+		secret Secret
+		event  string
+		match  bool
+	}{
+		{
+			name:   "should match event",
+			secret: Secret{Events: []string{"pull_request"}},
+			event:  "pull_request",
+			match:  true,
+		},
+		{
+			name:   "should not match event",
+			secret: Secret{Events: []string{"pull_request"}},
+			event:  "push",
+			match:  false,
+		},
+		{
+			name:   "should match when no event filters defined",
+			secret: Secret{},
+			event:  "pull_request",
+			match:  true,
+		},
+		{
+			name:   "pull close should match pull",
+			secret: Secret{Events: []string{"pull_request"}},
+			event:  "pull_request_closed",
+			match:  true,
+		},
+	}
+
+	for _, tc := range tcl {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Equal(t, tc.match, tc.secret.Match(tc.event))
 		})
 	}
 }

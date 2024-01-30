@@ -124,6 +124,17 @@ func Test_parser(t *testing.T) {
 				g.Assert(err).IsNil()
 				g.Assert(b.Event).Equal(model.EventPullClosed)
 			})
+			g.It("should handle release hook", func() {
+				buf := bytes.NewBufferString(fixtures.HookRelease)
+				req, _ := http.NewRequest("POST", "/hook", buf)
+				req.Header = http.Header{}
+				req.Header.Set(hookEvent, hookRelease)
+				r, b, err := parseHook(req)
+				g.Assert(err).IsNil()
+				g.Assert(r).IsNotNil()
+				g.Assert(b).IsNotNil()
+				g.Assert(b.Event).Equal(model.EventRelease)
+			})
 		})
 	})
 }

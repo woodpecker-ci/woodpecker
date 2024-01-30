@@ -385,7 +385,7 @@
           "placeholder": "Adresa registru (např. docker.io)"
         },
         "created": "Vytvořená pověření k registru",
-        "creds": "Pověření k registraci",
+        "credentials": "Pověření k registraci",
         "delete": "Odstranění registru",
         "deleted": "Odstranění pověření registru",
         "desc": "Lze přidat pověření k registrům a používat soukromé obrazy pro potrubí.",
@@ -434,7 +434,7 @@
     "min_short": "min",
     "not_started": "zatím nezačal",
     "sec_short": "sek",
-    "tmpl": "MMM D, RRRR, HH:mm z",
+    "template": "MMM D, RRRR, HH:mm z",
     "weeks_short": "t"
   },
   "unknown_error": "Došlo k neznámé chybě",

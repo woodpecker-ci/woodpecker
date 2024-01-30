@@ -38,6 +38,7 @@
 - `pull_request`: A pull request event is triggered when a pull request is opened or a new commit is pushed to it.
 - `pull_request_closed`: A pull request closed event is triggered when a pull request is closed or merged.
 - `tag`: A tag event is triggered when a tag is pushed.
+- `release`: A release event is triggered when a release is created.
 - `manual`: A manual event is triggered when a user manually triggers a pipeline.
 - `cron`: A cron event is triggered when a cron job is executed.
 
@@ -54,7 +55,7 @@ Sometimes there are multiple terms that can be used to describe something. This 
 [Pipeline]: ../20-workflow-syntax.md
 [Workflow]: ../25-workflows.md
 [Forge]: ../../30-administration/11-forges/10-overview.md
-[Plugin]: ../51-plugins/10-plugins.md
+[Plugin]: ../51-plugins/10-overview.md
 [Workspace]: ../20-workflow-syntax.md#workspace
 [Matrix]: ../30-matrix-workflows.md
 [Docker]: ../../30-administration/22-backends/10-docker.md

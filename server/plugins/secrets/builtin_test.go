@@ -20,6 +20,7 @@ import (
 
 	"github.com/franela/goblin"
 	"github.com/stretchr/testify/mock"
+
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/secrets"
 	mocks_store "go.woodpecker-ci.org/woodpecker/v2/server/store/mocks"
