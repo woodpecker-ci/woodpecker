@@ -201,7 +201,6 @@ func parseReleaseHook(hook *github.ReleaseEvent) (*model.Repo, *model.Pipeline) 
 		Author:       hook.GetRelease().GetAuthor().GetLogin(),
 		Avatar:       hook.GetRelease().GetAuthor().GetAvatarURL(),
 		Sender:       hook.GetSender().GetLogin(),
-		CloneURL:     hook.GetRepo().GetCloneURL(),
 		IsPrerelease: hook.GetRelease().GetPrerelease(),
 	}
 
