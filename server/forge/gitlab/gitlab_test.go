@@ -235,6 +235,23 @@ func Test_GitLab(t *testing.T) {
 						assert.Len(t, pipeline.ChangedFiles, 0) // see L217
 					}
 				})
+
+				g.It("Should parse release request hook", func() {
+					req, _ := http.NewRequest(
+						testdata.ServiceHookMethod,
+						testdata.ServiceHookURL.String(),
+						bytes.NewReader(testdata.WebhookReleaseBody),
+					)
+					req.Header = testdata.ReleaseHookHeaders
+
+					hookRepo, build, err := client.Hook(ctx, req)
+					assert.NoError(t, err)
+					if assert.NotNil(t, hookRepo) && assert.NotNil(t, build) {
+						assert.Equal(t, "refs/tags/0.0.2", build.Ref)
+						assert.Equal(t, "ci", hookRepo.Name)
+						assert.Equal(t, "created release Awesome version 0.0.2", build.Message)
+					}
+				})
 			})
 		})
 	})

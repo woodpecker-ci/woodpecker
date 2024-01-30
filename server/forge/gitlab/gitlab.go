@@ -625,6 +625,8 @@ func (g *GitLab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 		return convertPushHook(event)
 	case *gitlab.TagEvent:
 		return convertTagHook(event)
+	case *gitlab.ReleaseEvent:
+		return convertReleaseHook(event)
 	default:
 		return nil, nil, &forge_types.ErrIgnoreEvent{Event: string(eventType)}
 	}
