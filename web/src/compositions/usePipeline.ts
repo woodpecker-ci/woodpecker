@@ -27,14 +27,15 @@ export default (pipeline: Ref<Pipeline | undefined>) => {
   const i18n = useI18n();
   const since = computed(() => {
     if (sinceRaw.value === 0) {
-      return i18n.t('time.not_started');
+      // return i18n.t('time.not_started');
+      return '-';
     }
 
     if (sinceElapsed.value === undefined) {
       return null;
     }
 
-    // TODO check whetehr elapsed works
+    // TODO check whether elapsed works
     return timeAgo(sinceElapsed.value);
   });
 
@@ -67,7 +68,8 @@ export default (pipeline: Ref<Pipeline | undefined>) => {
     }
 
     if (durationRaw.value === 0) {
-      return i18n.t('time.not_started');
+      return '-';
+      // return i18n.t('time.not_started');
     }
 
     return prettyDuration(durationElapsed.value);
