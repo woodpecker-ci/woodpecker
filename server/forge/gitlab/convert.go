@@ -240,6 +240,46 @@ func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Pipeline, error)
 	return repo, pipeline, nil
 }
 
+func convertReleaseHook(hook *gitlab.ReleaseEvent) (*model.Repo, *model.Pipeline, error) {
+	repo := &model.Repo{}
+
+	var err error
+	if repo.Owner, repo.Name, err = extractFromPath(hook.Project.PathWithNamespace); err != nil {
+		return nil, nil, err
+	}
+
+	repo.ForgeRemoteID = model.ForgeRemoteID(fmt.Sprint(hook.Project.ID))
+	repo.Avatar = ""
+	if hook.Project.AvatarURL != nil {
+		repo.Avatar = *hook.Project.AvatarURL
+	}
+	repo.ForgeURL = hook.Project.WebURL
+	repo.Clone = hook.Project.GitHTTPURL
+	repo.CloneSSH = hook.Project.GitSSHURL
+	repo.FullName = hook.Project.PathWithNamespace
+	repo.Branch = hook.Project.DefaultBranch
+	repo.IsSCMPrivate = hook.Project.VisibilityLevel > 10
+
+	pipeline := &model.Pipeline{
+		Event:    model.EventRelease,
+		Commit:   hook.Commit.ID,
+		ForgeURL: hook.URL,
+		Message:  fmt.Sprintf("created release %s", hook.Name),
+		Sender:   hook.Commit.Author.Name,
+		Author:   hook.Commit.Author.Name,
+		Email:    hook.Commit.Author.Email,
+
+		// Tag name here is the ref. We should add the refs/tags, so
+		// it is known it's a tag (git-plugin looks for it)
+		Ref: "refs/tags/" + hook.Tag,
+	}
+	if len(pipeline.Email) != 0 {
+		pipeline.Avatar = getUserAvatar(pipeline.Email)
+	}
+
+	return repo, pipeline, nil
+}
+
 func getUserAvatar(email string) string {
 	hasher := md5.New()
 	hasher.Write([]byte(email))
