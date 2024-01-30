@@ -77,6 +77,7 @@ This is the reference list of all environment variables available to your pipeli
 | `CI_COMMIT_AUTHOR`               | commit author username                                                                                             |
 | `CI_COMMIT_AUTHOR_EMAIL`         | commit author email address                                                                                        |
 | `CI_COMMIT_AUTHOR_AVATAR`        | commit author avatar                                                                                               |
+| `CI_COMMIT_PRERELEASE`           | release is a pre-release (empty if event is not `release`)                                                         |
 |                                  | **Current pipeline**                                                                                               |
 | `CI_PIPELINE_NUMBER`             | pipeline number                                                                                                    |
 | `CI_PIPELINE_PARENT`             | number of parent pipeline                                                                                          |
