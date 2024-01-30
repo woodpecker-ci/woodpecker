@@ -27,5 +27,3 @@ export function useTheme() {
     storeTheme,
   };
 }
-
-updateTheme();
