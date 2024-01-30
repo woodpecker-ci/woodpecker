@@ -1,3 +1,4 @@
+import { onMounted, onUnmounted } from 'vue';
 import { useColorMode } from '@vueuse/core';
 import { watch } from 'vue';
 
@@ -21,11 +22,22 @@ function updateTheme() {
 
 watch(storeTheme, updateTheme);
 
-updateTheme();
-
 export function useTheme() {
+  let mql: MediaQueryList;
+
+  onMounted(() => {
+    mql = window.matchMedia('(prefers-color-scheme: dark)');
+    mql.addEventListener('change', updateTheme);
+  });
+
+  onUnmounted(() => {
+    mql.removeEventListener('change', updateTheme);
+  });
+
   return {
     theme: resolvedTheme,
     storeTheme,
   };
 }
+
+updateTheme();
