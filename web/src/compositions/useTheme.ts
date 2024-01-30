@@ -19,7 +19,7 @@ function updateTheme() {
   }
 }
 
-watch(storeTheme, updateTheme);
+watch([storeTheme, systemTheme], updateTheme);
 
 export function useTheme() {
   let mql: MediaQueryList;
