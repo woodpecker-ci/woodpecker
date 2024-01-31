@@ -254,23 +254,17 @@ func (c *Gitea) Repo(ctx context.Context, u *model.User, remoteID model.ForgeRem
 
 // Repos returns a list of all repositories for the Gitea account, including
 // organization repositories.
-func (c *Gitea) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {
+func (c *Gitea) Repos(ctx context.Context, u *model.User, p *model.ListOptions) ([]*model.Repo, error) {
 	client, err := c.newClientToken(ctx, u.Token)
 	if err != nil {
 		return nil, err
 	}
 
-	repos, err := shared_utils.Paginate(func(page int) ([]*gitea.Repository, error) {
-		repos, _, err := client.ListMyRepos(
-			gitea.ListReposOptions{
-				ListOptions: gitea.ListOptions{
-					Page:     page,
-					PageSize: c.perPage(ctx),
-				},
-			},
-		)
-		return repos, err
-	})
+	repos, _, err := client.ListMyRepos(
+		gitea.ListReposOptions{
+			ListOptions: gitea.ListOptions{Page: p.Page, PageSize: p.PerPage},
+		},
+	)
 
 	result := make([]*model.Repo, 0, len(repos))
 	for _, repo := range repos {

@@ -5,29 +5,34 @@
     </template>
 
     <div class="space-y-4">
-      <ListItem
-        v-for="repo in searchedRepos"
-        :key="repo.id"
-        class="items-center"
-        :to="repo.active ? { name: 'repo', params: { repoId: repo.id } } : undefined"
-      >
-        <span class="text-wp-text-100">{{ repo.full_name }}</span>
-        <span v-if="repo.active" class="ml-auto text-wp-text-alt-100">{{ $t('repo.enable.enabled') }}</span>
-        <div v-else class="ml-auto flex items-center">
-          <Badge v-if="repo.id" class="<md:hidden mr-2" :label="$t('repo.enable.disabled')" />
-          <Button
-            :text="$t('repo.enable.enable')"
-            :is-loading="isActivatingRepo && repoToActivate?.forge_remote_id === repo.forge_remote_id"
-            @click="activateRepo(repo)"
-          />
-        </div>
-      </ListItem>
+      <template v-if="repos.length > 0">
+        <ListItem
+          v-for="repo in searchedRepos"
+          :key="repo.id"
+          class="items-center"
+          :to="repo.active ? { name: 'repo', params: { repoId: repo.id } } : undefined"
+        >
+          <span class="text-wp-text-100">{{ repo.full_name }}</span>
+          <span v-if="repo.active" class="ml-auto text-wp-text-alt-100">{{ $t('repo.enable.enabled') }}</span>
+          <div v-else class="ml-auto flex items-center">
+            <Badge v-if="repo.id" class="<md:hidden mr-2" :label="$t('repo.enable.disabled')" />
+            <Button
+              :text="$t('repo.enable.enable')"
+              :is-loading="isActivatingRepo && repoToActivate?.forge_remote_id === repo.forge_remote_id"
+              @click="activateRepo(repo)"
+            />
+          </div>
+        </ListItem>
+      </template>
+      <div v-else-if="loading" class="flex justify-center text-wp-text-100">
+        <Icon name="spinner" />
+      </div>
     </div>
   </Scaffold>
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue';
+import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
@@ -38,6 +43,7 @@ import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
+import { usePagination } from '~/compositions/usePaginate';
 import { useRepoSearch } from '~/compositions/useRepoSearch';
 import { useRouteBack } from '~/compositions/useRouteBack';
 import { Repo } from '~/lib/api/types';
@@ -45,16 +51,17 @@ import { Repo } from '~/lib/api/types';
 const router = useRouter();
 const apiClient = useApiClient();
 const notifications = useNotifications();
-const repos = ref<Repo[]>();
 const repoToActivate = ref<Repo>();
 const search = ref('');
 const i18n = useI18n();
 
-const { searchedRepos } = useRepoSearch(repos, search);
+async function loadRepos() {
+  return apiClient.getRepoList({ all: true });
+}
 
-onMounted(async () => {
-  repos.value = await apiClient.getRepoList({ all: true });
-});
+const { data: repos, loading } = usePagination(loadRepos);
+
+const { searchedRepos } = useRepoSearch(repos, search);
 
 const { doSubmit: activateRepo, isLoading: isActivatingRepo } = useAsyncAction(async (repo: Repo) => {
   repoToActivate.value = repo;

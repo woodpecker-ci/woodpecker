@@ -160,7 +160,7 @@ func (c *config) Repo(ctx context.Context, u *model.User, remoteID model.ForgeRe
 		name = string(remoteID)
 	}
 	if owner == "" {
-		repos, err := c.Repos(ctx, u)
+		repos, err := c.Repos(ctx, u, &model.ListOptions{PerPage: 100})
 		if err != nil {
 			return nil, err
 		}
@@ -185,19 +185,13 @@ func (c *config) Repo(ctx context.Context, u *model.User, remoteID model.ForgeRe
 
 // Repos returns a list of all repositories for Bitbucket account, including
 // organization repositories.
-func (c *config) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {
+func (c *config) Repos(ctx context.Context, u *model.User, p *model.ListOptions) ([]*model.Repo, error) {
 	client := c.newClient(ctx, u)
 
-	workspaces, err := shared_utils.Paginate(func(page int) ([]*internal.Workspace, error) {
-		resp, err := client.ListWorkspaces(&internal.ListWorkspacesOpts{
-			Page:    page,
-			PageLen: 100,
-			Role:    "member",
-		})
-		if err != nil {
-			return nil, err
-		}
-		return resp.Values, nil
+	workspaces, err := client.ListWorkspaces(&internal.ListWorkspacesOpts{
+		Page:    p.Page,
+		PageLen: p.PerPage,
+		Role:    "member",
 	})
 	if err != nil {
 		return nil, err
@@ -214,7 +208,7 @@ func (c *config) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 	}
 
 	var all []*model.Repo
-	for _, workspace := range workspaces {
+	for _, workspace := range workspaces.Values {
 		repos, err := client.ListReposAll(workspace.Slug)
 		if err != nil {
 			return nil, err

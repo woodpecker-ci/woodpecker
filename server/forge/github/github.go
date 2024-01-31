@@ -197,26 +197,22 @@ func (c *client) Repo(ctx context.Context, u *model.User, id model.ForgeRemoteID
 
 // Repos returns a list of all repositories for GitHub account, including
 // organization repositories.
-func (c *client) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {
+func (c *client) Repos(ctx context.Context, u *model.User, p *model.ListOptions) ([]*model.Repo, error) {
 	client := c.newClientToken(ctx, u.Token)
 
 	opts := new(github.RepositoryListByAuthenticatedUserOptions)
-	opts.PerPage = 100
-	opts.Page = 1
+	opts.ListOptions = github.ListOptions{Page: p.Page, PerPage: p.PerPage}
 
 	var repos []*model.Repo
-	for opts.Page > 0 {
-		list, resp, err := client.Repositories.ListByAuthenticatedUser(ctx, opts)
-		if err != nil {
-			return nil, err
+	list, _, err := client.Repositories.ListByAuthenticatedUser(ctx, opts)
+	if err != nil {
+		return nil, err
+	}
+	for _, repo := range list {
+		if repo.GetArchived() {
+			continue
 		}
-		for _, repo := range list {
-			if repo.GetArchived() {
-				continue
-			}
-			repos = append(repos, convertRepo(repo))
-		}
-		opts.Page = resp.NextPage
+		repos = append(repos, convertRepo(repo))
 	}
 	return repos, nil
 }

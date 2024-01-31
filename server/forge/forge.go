@@ -50,7 +50,7 @@ type Forge interface {
 	Repo(ctx context.Context, u *model.User, remoteID model.ForgeRemoteID, owner, name string) (*model.Repo, error)
 
 	// Repos fetches a list of repos from the forge.
-	Repos(ctx context.Context, u *model.User) ([]*model.Repo, error)
+	Repos(ctx context.Context, u *model.User, p *model.ListOptions) ([]*model.Repo, error)
 
 	// File fetches a file from the forge repository and returns it in string
 	// format.

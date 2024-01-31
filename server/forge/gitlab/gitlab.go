@@ -262,7 +262,7 @@ func (g *GitLab) Repo(ctx context.Context, user *model.User, remoteID model.Forg
 }
 
 // Repos fetches a list of repos from the forge.
-func (g *GitLab) Repos(ctx context.Context, user *model.User) ([]*model.Repo, error) {
+func (g *GitLab) Repos(ctx context.Context, user *model.User, p *model.ListOptions) ([]*model.Repo, error) {
 	client, err := newClient(g.url, user.Token, g.SkipVerify)
 	if err != nil {
 		return nil, err
@@ -270,7 +270,7 @@ func (g *GitLab) Repos(ctx context.Context, user *model.User) ([]*model.Repo, er
 
 	repos := make([]*model.Repo, 0, perPage)
 	opts := &gitlab.ListProjectsOptions{
-		ListOptions:    gitlab.ListOptions{PerPage: perPage},
+		ListOptions:    gitlab.ListOptions{Page: p.Page, PerPage: p.PerPage},
 		MinAccessLevel: gitlab.Ptr(gitlab.DeveloperPermissions), // TODO: check what's best here
 	}
 	if g.HideArchives {
