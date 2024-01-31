@@ -757,6 +757,10 @@ when:
 
 ### `event`
 
+:::warning
+Some events like the release event will be triggered for multiple actions like: releases, pre-releases and drafts. If you want to apply further filters checkout the [evaluate](#evaluate) filter and the available [environment variables](./50-environment.md#built-in-environment-variables).
+:::
+
 Execute a step if the build event is a `tag`:
 
 ```yaml
@@ -783,7 +787,7 @@ Execute a step for all build events:
 
 ```yaml
 when:
-  event: [push, pull_request, tag, deployment]
+  event: [push, pull_request, pull_request_closed, tag, deployment, release]
 ```
 
 ### `ref`
