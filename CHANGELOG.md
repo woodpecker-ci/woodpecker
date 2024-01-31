@@ -1,14 +1,20 @@
 # Changelog
 
-## [2.3.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.3.0) - 2024-01-30
+## [2.3.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.3.0) - 2024-01-31
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@HerHde, @qwerty287, @pat-s, @renovate[bot], @lukashass, @anbraten, @zc-devs, @Alonsohhl, @healdropper, @eliasscosta, @runephilosof-karnovgroup
+@anbraten, @HerHde, @qwerty287, @pat-s, @renovate[bot], @lukashass, @zc-devs, @Alonsohhl, @healdropper, @eliasscosta, @runephilosof-karnovgroup
 
 ### ✨ Features
 
 - Add release event [[#3226](https://github.com/woodpecker-ci/woodpecker/pull/3226)]
+
+### 📚 Documentation
+
+- Add release types [[#3303](https://github.com/woodpecker-ci/woodpecker/pull/3303)]
+- Add opencollective footer [[#3281](https://github.com/woodpecker-ci/woodpecker/pull/3281)]
+- Use array syntax in docs [[#3242](https://github.com/woodpecker-ci/woodpecker/pull/3242)]
 
 ### 🐛 Bug Fixes
 
@@ -27,11 +33,6 @@
 - Improve secrets availability checks [[#3271](https://github.com/woodpecker-ci/woodpecker/pull/3271)]
 - Load more pipeline log lines (500 => 5000) [[#3212](https://github.com/woodpecker-ci/woodpecker/pull/3212)]
 - Clean up models [[#3228](https://github.com/woodpecker-ci/woodpecker/pull/3228)]
-
-### 📚 Documentation
-
-- Add opencollective footer [[#3281](https://github.com/woodpecker-ci/woodpecker/pull/3281)]
-- Use array syntax in docs [[#3242](https://github.com/woodpecker-ci/woodpecker/pull/3242)]
 
 ### Misc
 
