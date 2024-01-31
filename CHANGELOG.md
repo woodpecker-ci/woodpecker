@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.3.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.3.1) - 2024-01-31
+
+### ❤️ Thanks to all contributors! ❤️
+
+@pat-s
+
+### Misc
+
+- Add 2.3 docs [[#3306](https://github.com/woodpecker-ci/woodpecker/pull/3306)]
+
 ## [2.3.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.3.0) - 2024-01-31
 
 ### ❤️ Thanks to all contributors! ❤️
