@@ -329,7 +329,7 @@ var project6PayloadMembers = []byte(`
   "locked": false,
   "avatar_url": "https://example.com/uploads/-/system/user/avatar/3/avatar.png",
   "web_url": "https://example.com/some_user",
-  "access_level": 10,
+  "access_level": 30,
   "created_at": "2024-01-16T12:39:58.912Z",
   "expires_at": null
 }
