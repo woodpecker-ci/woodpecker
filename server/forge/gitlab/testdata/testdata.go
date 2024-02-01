@@ -60,6 +60,15 @@ func NewServer(t *testing.T) *httptest.Server {
 		case "/api/v4/projects/4/hooks/10717088":
 			w.WriteHeader(201)
 			return
+		case "/api/v4/projects/4/members/all/3":
+			w.Write(project4PayloadMembers)
+			return
+		case "/api/v4/projects/diaspora/diaspora-client/members/all/3":
+			w.Write(project4PayloadMembers)
+			return
+		case "/api/v4/projects/6/members/all/3":
+			w.Write(project6PayloadMembers)
+			return
 		case "/oauth/token":
 			w.Write(accessTokenPayload)
 			return
