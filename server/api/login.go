@@ -26,6 +26,7 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/httputil"
@@ -150,7 +151,7 @@ func HandleAuth(c *gin.Context) {
 		return
 	}
 
-	repos, _ := _forge.Repos(c, u)
+	repos, _ := _forge.Repos(c, u, session.Pagination(c))
 	for _, forgeRepo := range repos {
 		dbRepo, err := _store.GetRepoForgeID(forgeRepo.ForgeRemoteID)
 		if err != nil && errors.Is(err, types.RecordNotExist) {

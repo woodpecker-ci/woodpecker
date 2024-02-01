@@ -103,7 +103,7 @@ func GetRepos(c *gin.Context) {
 			active[r.ForgeRemoteID] = r
 		}
 
-		_repos, err := _forge.Repos(c, user)
+		_repos, err := _forge.Repos(c, user, session.Pagination(c))
 		if err != nil {
 			c.String(http.StatusInternalServerError, "Error fetching repository list. %s", err)
 			return
