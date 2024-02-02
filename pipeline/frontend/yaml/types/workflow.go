@@ -38,11 +38,11 @@ type (
 		Volumes  WorkflowVolumes    `yaml:"volumes,omitempty"`
 
 		// Deprecated
-		PlatformDontUseIt string `yaml:"platform,omitempty"` // TODO: remove in next major version
+		PlatformDoNotUseIt string `yaml:"platform,omitempty"` // TODO: remove in next major version
 		// Deprecated
-		BranchesDontUseIt *constraint.List `yaml:"branches,omitempty"` // TODO: remove in next major version
+		BranchesDoNotUseIt *constraint.List `yaml:"branches,omitempty"` // TODO: remove in next major version
 		// Deprecated
-		PipelineDontUseIt ContainerList `yaml:"pipeline,omitempty"` // TODO: remove in next major version
+		PipelineDoNotUseIt ContainerList `yaml:"pipeline,omitempty"` // TODO: remove in next major version
 	}
 
 	// Workspace defines a pipeline workspace.

@@ -1,7 +1,11 @@
 import { useColorMode } from '@vueuse/core';
 import { watch } from 'vue';
 
-const { store: storeTheme, state: resolvedTheme } = useColorMode({
+const {
+  store: storeTheme,
+  state: resolvedTheme,
+  system: systemTheme,
+} = useColorMode({
   storageKey: 'woodpecker:theme',
 });
 
@@ -19,9 +23,7 @@ function updateTheme() {
   }
 }
 
-watch(storeTheme, updateTheme);
-
-updateTheme();
+watch([storeTheme, systemTheme], updateTheme, { immediate: true });
 
 export function useTheme() {
   return {

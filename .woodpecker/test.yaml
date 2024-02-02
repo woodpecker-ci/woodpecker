@@ -91,6 +91,13 @@ steps:
       - event: push
         branch: renovate/*
 
+  spellcheck:
+    image: docker.io/node:21-alpine
+    commands:
+      - corepack enable
+      - pnpx cspell lint --no-progress --gitignore '{**,.*}/{*,.*}'
+    when: *when
+
   test:
     depends_on:
       - vendor
