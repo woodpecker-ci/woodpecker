@@ -93,7 +93,12 @@ func podMeta(step *types.Step, config *config, podName string) (metav1.ObjectMet
 		meta.Labels[ServiceLabel] = step.Name
 	}
 
-	maps.Copy(meta.Labels, mapEnvToLabels(step.Environment))
+	if val, ok := step.Environment["CI_REPO_NAME"]; ok {
+		meta.Labels["repository"] = val
+	}
+	if val, ok := step.Environment["CI_PIPELINE_NUMBER"]; ok {
+		meta.Labels["pipeline_number"] = val
+	}
 
 	meta.Annotations = config.PodAnnotations
 	if meta.Annotations == nil {
@@ -113,17 +118,6 @@ func podMeta(step *types.Step, config *config, podName string) (metav1.ObjectMet
 
 func stepLabel(step *types.Step) (string, error) {
 	return toDNSName(step.Name)
-}
-
-func mapEnvToLabels(m map[string]string) map[string]string {
-	labels := make(map[string]string)
-  if val, ok := m["CI_REPO_NAME"]; ok {
-    labels["repository"] = val
-  }
-  if val, ok := m["CI_PIPELINE_NUMBER"]; ok {
-    labels["pipeline_number"] = val
-  }
-	return labels
 }
 
 func podSpec(step *types.Step, config *config, labels map[string]string) (v1.PodSpec, error) {
