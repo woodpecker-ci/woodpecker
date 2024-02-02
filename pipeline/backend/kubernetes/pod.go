@@ -117,14 +117,12 @@ func stepLabel(step *types.Step) (string, error) {
 
 func makeEnvtoLabels(m map[string]string) map[string]string {
 	labels := make(map[string]string)
-	for k, v := range m {
-		if strings.Contains(k, "CI_REPO_NAME") {
-			labels["repository"] = v
-		}
-		if strings.Contains(k, "CI_PIPELINE_NUMBER") {
-			labels["pipeline_number"] = v
-		}
-	}
+  if val, ok := m["CI_REPO_NAME"]; ok {
+    labels["repository"] = val
+  }
+  if val, ok := m["CI_PIPELINE_NUMBER"]; ok {
+    labels["pipeline_number"] = val
+  }
 	return labels
 }
 
