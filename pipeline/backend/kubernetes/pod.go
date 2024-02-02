@@ -93,7 +93,7 @@ func podMeta(step *types.Step, config *config, podName string) (metav1.ObjectMet
 		meta.Labels[ServiceLabel] = step.Name
 	}
 
-	maps.Copy(meta.Labels, makeEnvtoLabels(step.Environment))
+	maps.Copy(meta.Labels, mapEnvToLabels(step.Environment))
 
 	meta.Annotations = config.PodAnnotations
 	if meta.Annotations == nil {
