@@ -166,7 +166,7 @@ func podSpec(step *types.Step, config *config, labels map[string]string) (v1.Pod
 	spec.Tolerations = tolerations(step.BackendOptions.Kubernetes.Tolerations)
 	spec.SecurityContext = podSecurityContext(step.BackendOptions.Kubernetes.SecurityContext, config.SecurityContext)
 
-	spec.Volumes, err = volumes(step, config.StorageRwx)
+	spec.Volumes, err = volumes(step.Volumes)
 	if err != nil {
 		return spec, err
 	}
@@ -213,36 +213,24 @@ func podContainer(step *types.Step, podName, goos string) (v1.Container, error) 
 	return container, nil
 }
 
-func volumes(step *types.Step, storageRWX bool) ([]v1.Volume, error) {
+func volumes(volumes []string) ([]v1.Volume, error) {
 	var vols []v1.Volume
 
-	for _, v := range step.Volumes {
+	for _, v := range volumes {
 		volumeName, err := volumeName(v)
 		if err != nil {
 			return nil, err
 		}
-		if strings.HasPrefix(volumeName, "wp-") && step.Type == types.StepTypeService && !storageRWX {
-			vols = append(vols, volume(volumeName, true))
-		} else {
-			vols = append(vols, volume(volumeName, false))
-		}
+		vols = append(vols, volume(volumeName))
 	}
 
 	return vols, nil
 }
 
-func volume(name string, emptyDir bool) v1.Volume {
+func volume(name string) v1.Volume {
 	pvcSource := v1.PersistentVolumeClaimVolumeSource{
 		ClaimName: name,
 		ReadOnly:  false,
-	}
-	if emptyDir {
-		return v1.Volume{
-			Name: name,
-			VolumeSource: v1.VolumeSource{
-				EmptyDir: &v1.EmptyDirVolumeSource{},
-			},
-		}
 	}
 
 	return v1.Volume{
