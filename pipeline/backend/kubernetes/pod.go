@@ -136,24 +136,26 @@ func podSpec(step *types.Step, config *config, labels map[string]string) (v1.Pod
 	// maybe in the future get theses values from backend configuration
 	if !config.StorageRwx {
 		spec.Affinity = &v1.Affinity{
-			PodAffinity: &v1.PodAffinity{RequiredDuringSchedulingIgnoredDuringExecution: []v1.PodAffinityTerm{
-				{
-					LabelSelector: &metav1.LabelSelector{
-						MatchExpressions: []metav1.LabelSelectorRequirement{
-							{
-								Key:      "repository",
-								Operator: metav1.LabelSelectorOpIn,
-								Values:   []string{labels["repository"]},
-							},
-							{
-								Key:      "pipeline_number",
-								Operator: metav1.LabelSelectorOpIn,
-								Values:   []string{labels["pipeline_number"]},
+			PodAffinity: &v1.PodAffinity{
+				RequiredDuringSchedulingIgnoredDuringExecution: []v1.PodAffinityTerm{
+					{
+						LabelSelector: &metav1.LabelSelector{
+							MatchExpressions: []metav1.LabelSelectorRequirement{
+								{
+									Key:      "repository",
+									Operator: metav1.LabelSelectorOpIn,
+									Values:   []string{labels["repository"]},
+								},
+								{
+									Key:      "pipeline_number",
+									Operator: metav1.LabelSelectorOpIn,
+									Values:   []string{labels["pipeline_number"]},
+								},
 							},
 						},
+						TopologyKey: "kubernetes.io/hostname",
 					},
-					TopologyKey: "kubernetes.io/hostname"},
-			},
+				},
 			},
 		}
 	}
