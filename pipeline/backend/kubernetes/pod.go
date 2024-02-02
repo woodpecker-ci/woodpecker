@@ -124,9 +124,12 @@ func podSpec(step *types.Step, config *config, labels map[string]string) (v1.Pod
 	var err error
 	spec := v1.PodSpec{}
 
+	repoLabel, hasLabelRepo := labels["repository"]
+	pipelineNumberLabel, hasLabelPipelineNumber := labels["pipeline_number"]
+
 	// force service and steps to run in the same node when rwx is false
 	// maybe in the future get theses values from backend configuration
-	if !config.StorageRwx {
+	if !config.StorageRwx && hasLabelRepo && hasLabelPipelineNumber {
 		spec.Affinity = &v1.Affinity{
 			PodAffinity: &v1.PodAffinity{
 				RequiredDuringSchedulingIgnoredDuringExecution: []v1.PodAffinityTerm{
@@ -136,12 +139,12 @@ func podSpec(step *types.Step, config *config, labels map[string]string) (v1.Pod
 								{
 									Key:      "repository",
 									Operator: metav1.LabelSelectorOpIn,
-									Values:   []string{labels["repository"]},
+									Values:   []string{repoLabel},
 								},
 								{
 									Key:      "pipeline_number",
 									Operator: metav1.LabelSelectorOpIn,
-									Values:   []string{labels["pipeline_number"]},
+									Values:   []string{pipelineNumberLabel},
 								},
 							},
 						},
