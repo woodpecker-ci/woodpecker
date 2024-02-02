@@ -115,7 +115,7 @@ func stepLabel(step *types.Step) (string, error) {
 	return toDNSName(step.Name)
 }
 
-func makeEnvtoLabels(m map[string]string) map[string]string {
+func mapEnvToLabels(m map[string]string) map[string]string {
 	labels := make(map[string]string)
   if val, ok := m["CI_REPO_NAME"]; ok {
     labels["repository"] = val
