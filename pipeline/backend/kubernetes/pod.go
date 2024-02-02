@@ -43,7 +43,7 @@ func mkPod(step *types.Step, config *config, podName, goos string) (*v1.Pod, err
 		return nil, err
 	}
 
-	spec, err := podSpec(step, config)
+	spec, err := podSpec(step, config, meta.Labels)
 	if err != nil {
 		return nil, err
 	}
@@ -93,6 +93,8 @@ func podMeta(step *types.Step, config *config, podName string) (metav1.ObjectMet
 		meta.Labels[ServiceLabel] = step.Name
 	}
 
+	maps.Copy(meta.Labels, makeEnvtoLabels(step.Environment))
+
 	meta.Annotations = config.PodAnnotations
 	if meta.Annotations == nil {
 		meta.Annotations = make(map[string]string)
@@ -113,18 +115,58 @@ func stepLabel(step *types.Step) (string, error) {
 	return toDNSName(step.Name)
 }
 
-func podSpec(step *types.Step, config *config) (v1.PodSpec, error) {
-	var err error
-	spec := v1.PodSpec{
-		RestartPolicy:      v1.RestartPolicyNever,
-		ServiceAccountName: step.BackendOptions.Kubernetes.ServiceAccountName,
-		ImagePullSecrets:   imagePullSecretsReferences(config.ImagePullSecretNames),
-		HostAliases:        hostAliases(step.ExtraHosts),
-		NodeSelector:       nodeSelector(step.BackendOptions.Kubernetes.NodeSelector, step.Environment["CI_SYSTEM_PLATFORM"]),
-		Tolerations:        tolerations(step.BackendOptions.Kubernetes.Tolerations),
-		SecurityContext:    podSecurityContext(step.BackendOptions.Kubernetes.SecurityContext, config.SecurityContext),
+func makeEnvtoLabels(m map[string]string) map[string]string {
+	labels := make(map[string]string)
+	for k, v := range m {
+		if strings.Contains(k, "CI_REPO_NAME") {
+			labels["repository"] = v
+		}
+		if strings.Contains(k, "CI_PIPELINE_NUMBER") {
+			labels["pipeline_number"] = v
+		}
 	}
-	spec.Volumes, err = volumes(step.Volumes)
+	return labels
+}
+
+func podSpec(step *types.Step, config *config, labels map[string]string) (v1.PodSpec, error) {
+	var err error
+	spec := v1.PodSpec{}
+
+	// force service and steps run in the same node, when rwx is false
+	// maybe in the future get theses values from backend configuration
+	if !config.StorageRwx {
+		spec.Affinity = &v1.Affinity{
+			PodAffinity: &v1.PodAffinity{RequiredDuringSchedulingIgnoredDuringExecution: []v1.PodAffinityTerm{
+				{
+					LabelSelector: &metav1.LabelSelector{
+						MatchExpressions: []metav1.LabelSelectorRequirement{
+							{
+								Key:      "repository",
+								Operator: metav1.LabelSelectorOpIn,
+								Values:   []string{labels["repository"]},
+							},
+							{
+								Key:      "pipeline_number",
+								Operator: metav1.LabelSelectorOpIn,
+								Values:   []string{labels["pipeline_number"]},
+							},
+						},
+					},
+					TopologyKey: "kubernetes.io/hostname"},
+			},
+			},
+		}
+	}
+
+	spec.RestartPolicy = v1.RestartPolicyNever
+	spec.ServiceAccountName = step.BackendOptions.Kubernetes.ServiceAccountName
+	spec.ImagePullSecrets = imagePullSecretsReferences(config.ImagePullSecretNames)
+	spec.HostAliases = hostAliases(step.ExtraHosts)
+	spec.NodeSelector = nodeSelector(step.BackendOptions.Kubernetes.NodeSelector, step.Environment["CI_SYSTEM_PLATFORM"])
+	spec.Tolerations = tolerations(step.BackendOptions.Kubernetes.Tolerations)
+	spec.SecurityContext = podSecurityContext(step.BackendOptions.Kubernetes.SecurityContext, config.SecurityContext)
+
+	spec.Volumes, err = volumes(step, config.StorageRwx)
 	if err != nil {
 		return spec, err
 	}
@@ -171,25 +213,38 @@ func podContainer(step *types.Step, podName, goos string) (v1.Container, error) 
 	return container, nil
 }
 
-func volumes(volumes []string) ([]v1.Volume, error) {
+func volumes(step *types.Step, storageRWX bool) ([]v1.Volume, error) {
 	var vols []v1.Volume
 
-	for _, v := range volumes {
+	for _, v := range step.Volumes {
 		volumeName, err := volumeName(v)
 		if err != nil {
 			return nil, err
 		}
-		vols = append(vols, volume(volumeName))
+		if strings.HasPrefix(volumeName, "wp-") && step.Type == types.StepTypeService && !storageRWX {
+			vols = append(vols, volume(volumeName, true))
+		} else {
+			vols = append(vols, volume(volumeName, false))
+		}
 	}
 
 	return vols, nil
 }
 
-func volume(name string) v1.Volume {
+func volume(name string, emptyDir bool) v1.Volume {
 	pvcSource := v1.PersistentVolumeClaimVolumeSource{
 		ClaimName: name,
 		ReadOnly:  false,
 	}
+	if emptyDir {
+		return v1.Volume{
+			Name: name,
+			VolumeSource: v1.VolumeSource{
+				EmptyDir: &v1.EmptyDirVolumeSource{},
+			},
+		}
+	}
+
 	return v1.Volume{
 		Name: name,
 		VolumeSource: v1.VolumeSource{
