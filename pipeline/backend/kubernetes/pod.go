@@ -130,7 +130,7 @@ func podSpec(step *types.Step, config *config, labels map[string]string) (v1.Pod
 	var err error
 	spec := v1.PodSpec{}
 
-	// force service and steps run in the same node, when rwx is false
+	// force service and steps to run in the same node when rwx is false
 	// maybe in the future get theses values from backend configuration
 	if !config.StorageRwx {
 		spec.Affinity = &v1.Affinity{
