@@ -21,7 +21,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/mrjones/oauth"
+	"github.com/mrjones/oauth" // Bitbucket is based on OAuth 1.0 hence an OAuth 1.0 library is needed
 	"github.com/rs/zerolog/log"
 )
 
