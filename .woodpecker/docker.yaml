@@ -187,7 +187,7 @@ steps:
       - cross-compile-server
     image: *buildx_plugin
     settings:
-      cache_images: woodpeckerci/woodpecker-server:cache
+      cache_images: woodpeckerci/woodpecker-server:cache_next
       repo: *publish_repos_server
       dockerfile: docker/Dockerfile.server.multiarch
       platforms: *platforms_server
@@ -203,7 +203,7 @@ steps:
       - cross-compile-server
     image: *buildx_plugin
     settings:
-      cache_images: woodpeckerci/woodpecker-server:cache-alpine
+      cache_images: woodpeckerci/woodpecker-server:cache-alpine_next
       repo: *publish_repos_server
       dockerfile: docker/Dockerfile.server.alpine.multiarch
       platforms: *platforms_alpine
@@ -238,4 +238,211 @@ steps:
       # remove 'latest-alpine' on older version branches to avoid accidental downgrade
       tag: [latest-alpine, '${CI_COMMIT_TAG}-alpine']
       logins: *publish_logins
+    when: *when-release
+
+  #############
+  # A g e n t #
+  #############
+
+  publish-agent-preview:
+    depends_on:
+      - vendor
+    image: *buildx_plugin
+    settings:
+      cache_images: woodpeckerci/woodpecker-agent:cache-alpine_${CI_COMMIT_PULL_REQUEST}
+      repo: woodpeckerci/woodpecker-agent
+      dockerfile: docker/Dockerfile.agent.multiarch
+      platforms: *platforms_preview
+      tag: pull_${CI_COMMIT_PULL_REQUEST}
+      build_args: *build_args
+      logins: *publish_logins
+    when: *when-preview
+
+  build-agent-dryrun:
+    depends_on:
+      - vendor
+    image: *buildx_plugin
+    settings:
+      cache_images: woodpeckerci/woodpecker-agent:cache_${CI_COMMIT_PULL_REQUEST}
+      dry_run: true
+      repo: woodpeckerci/woodpecker-agent
+      dockerfile: docker/Dockerfile.agent.multiarch
+      platforms: *platforms_preview
+      tag: pull_${CI_COMMIT_PULL_REQUEST}
+      build_args: *build_args
+    when: *when-dryrun
+
+  publish-next-agent:
+    depends_on:
+      - vendor
+      # we also depend on cross-compile-server as we would have to hight
+      # ram usage otherwise
+      - cross-compile-server
+    image: *buildx_plugin
+    settings:
+      cache_images: woodpeckerci/woodpecker-agent:cache_next
+      repo: *publish_repos_agent
+      dockerfile: docker/Dockerfile.agent.multiarch
+      platforms: *platforms_release
+      tag: [next, 'next-${CI_COMMIT_SHA:0:10}']
+      logins: *publish_logins
+      build_args: *build_args
+    when:
+      branch: ${CI_REPO_DEFAULT_BRANCH}
+      event: push
+      path: *when_path
+
+  publish-next-agent-alpine:
+    depends_on:
+      - vendor
+      # we also depend on cross-compile-server as we would have to hight
+      # ram usage otherwise
+      - cross-compile-server
+    image: *buildx_plugin
+    settings:
+      cache_images: woodpeckerci/woodpecker-agent:cache-alpine_next
+      repo: *publish_repos_agent
+      dockerfile: docker/Dockerfile.agent.alpine.multiarch
+      platforms: *platforms_alpine
+      tag: [next-alpine, 'next-${CI_COMMIT_SHA:0:10}-alpine']
+      logins: *publish_logins
+      build_args: *build_args
+    when: *when-publish-next
+
+  release-agent:
+    depends_on:
+      - vendor
+      # we also depend on cross-compile-server as we would have to hight
+      # ram usage otherwise
+      - cross-compile-server
+    image: *buildx_plugin
+    settings:
+      cache_images: woodpeckerci/woodpecker-agent:cache
+      repo: *publish_repos_agent
+      dockerfile: docker/Dockerfile.agent.multiarch
+      platforms: *platforms_release
+      # remove 'latest' on older version branches to avoid accidental downgrade
+      tag: [latest, '${CI_COMMIT_TAG}']
+      logins: *publish_logins
+      build_args: *build_args
+    when: *when-release
+
+  release-agent-alpine:
+    depends_on:
+      - vendor
+      # we also depend on cross-compile-server as we would have to hight
+      # ram usage otherwise
+      - cross-compile-server
+    image: *buildx_plugin
+    settings:
+      cache_images: woodpeckerci/woodpecker-agent:cache-alpine
+      repo: *publish_repos_agent
+      dockerfile: docker/Dockerfile.agent.alpine.multiarch
+      platforms: *platforms_alpine
+      # remove 'latest-alpine' on older version branches to avoid accidental downgrade
+      tag: [latest-alpine, '${CI_COMMIT_TAG}-alpine']
+      logins: *publish_logins
+      build_args: *build_args
+    when: *when-release
+
+  #########
+  # C L I #
+  #########
+
+  publish-cli-preview:
+    depends_on:
+      - vendor
+    image: *buildx_plugin
+    settings:
+      cache_images: woodpeckerci/woodpecker-cli:cache_${CI_COMMIT_PULL_REQUEST}
+      repo: woodpeckerci/woodpecker-cli
+      dockerfile: docker/Dockerfile.cli.multiarch
+      platforms: *platforms_preview
+      tag: pull_${CI_COMMIT_PULL_REQUEST}
+      build_args: *build_args
+      logins: *publish_logins
+    when: *when-preview
+
+  build-cli-dryrun:
+    depends_on:
+      - vendor
+    image: *buildx_plugin
+    settings:
+      cache_images: woodpeckerci/woodpecker-cli:cache_${CI_COMMIT_PULL_REQUEST}
+      dry_run: true
+      repo: woodpeckerci/woodpecker-cli
+      dockerfile: docker/Dockerfile.cli.multiarch
+      platforms: *platforms_preview
+      tag: pull_${CI_COMMIT_PULL_REQUEST}
+      build_args: *build_args
+    when: *when-dryrun
+
+  publish-next-cli:
+    depends_on:
+      - vendor
+      # we also depend on publish-next-agent as we would have to hight
+      # ram usage otherwise
+      - publish-next-agent
+    image: *buildx_plugin
+    settings:
+      cache_images: woodpeckerci/woodpecker-cli:cache_next
+      repo: *publish_repos_cli
+      dockerfile: docker/Dockerfile.cli.multiarch
+      platforms: *platforms_release
+      tag: [next, 'next-${CI_COMMIT_SHA:0:10}']
+      logins: *publish_logins
+      build_args: *build_args
+    when: *when-publish-next
+
+  publish-next-cli-alpine:
+    depends_on:
+      - vendor
+      # we also depend on publish-next-agent as we would have to hight
+      # ram usage otherwise
+      - publish-next-agent
+    image: *buildx_plugin
+    settings:
+      cache_images: woodpeckerci/woodpecker-cli:cache-alpine_next
+      repo: *publish_repos_cli
+      dockerfile: docker/Dockerfile.cli.alpine.multiarch
+      platforms: *platforms_alpine
+      tag: [next-alpine, 'next-${CI_COMMIT_SHA:0:10}-alpine']
+      logins: *publish_logins
+      build_args: *build_args
+    when: *when-publish-next
+
+  release-cli:
+    depends_on:
+      - vendor
+      # we also depend on release-agent as we would have to hight
+      # ram usage otherwise
+      - release-agent
+    image: *buildx_plugin
+    settings:
+      cache_images: woodpeckerci/woodpecker-cli:cache
+      repo: *publish_repos_cli
+      dockerfile: docker/Dockerfile.cli.multiarch
+      platforms: *platforms_release
+      # remove 'latest' on older version branches to avoid accidental downgrade
+      tag: [latest, '${CI_COMMIT_TAG}']
+      logins: *publish_logins
+      build_args: *build_args
+    when: *when-release
+
+  release-cli-alpine:
+    depends_on:
+      - vendor
+      # we also depend on release-agent as we would have to hight
+      # ram usage otherwise
+      - release-agent
+    image: *buildx_plugin
+    settings:
+      cache_images: woodpeckerci/woodpecker-cli:cache-alpine
+      repo: *publish_repos_cli
+      dockerfile: docker/Dockerfile.cli.alpine.multiarch
+      platforms: *platforms_alpine
+      # remove 'latest-alpine' on older version branches to avoid accidental downgrade
+      tag: [latest-alpine, '${CI_COMMIT_TAG}-alpine']
+      logins: *publish_logins
+      build_args: *build_args
     when: *when-release
