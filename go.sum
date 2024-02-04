@@ -320,6 +320,8 @@ github.com/moby/moby v24.0.7+incompatible h1:RrVT5IXBn85mRtFKP+gFwVLCcnNPZIgN3NV
 github.com/moby/moby v24.0.7+incompatible/go.mod h1:fDXVQ6+S340veQPv35CzDahGBmHsiclFwfEygB/TWMc=
 github.com/moby/moby v24.0.8+incompatible h1:lTOrmnT/ZwYrhTbcmkWMTd2Pk65vV+4YuEdIG04shac=
 github.com/moby/moby v24.0.8+incompatible/go.mod h1:fDXVQ6+S340veQPv35CzDahGBmHsiclFwfEygB/TWMc=
+github.com/moby/moby v24.0.9+incompatible h1:Z/hFbZJqC5Fmuf6jesMLdHU71CMAgdiSJ1ZYey+bFmg=
+github.com/moby/moby v24.0.9+incompatible/go.mod h1:fDXVQ6+S340veQPv35CzDahGBmHsiclFwfEygB/TWMc=
 github.com/moby/term v0.5.0 h1:xt8Q1nalod/v7BqbG21f8mQPqH+xAaC9C3N3wfWbVP0=
 github.com/moby/term v0.5.0/go.mod h1:8FzsFHVUBGZdbDsJw/ot+X+d5HLUbvklYLJ9uGfcI3Y=
 github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421/go.mod h1:6dJC0mAP4ikYIbvyc7fijjWJddQyLn8Ig3JB5CqoB9Q=
