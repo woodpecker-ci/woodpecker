@@ -32,6 +32,7 @@ import (
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
+
 	// To authenticate to GCP K8s clusters
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"k8s.io/client-go/rest"
@@ -267,13 +268,13 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 	}
 
 	if len(pod.Status.ContainerStatuses) == 0 {
-		return nil, fmt.Errorf("No container statuses found for pod %s", pod.Name)
+		return nil, fmt.Errorf("no container statuses found for pod %s", pod.Name)
 	}
 
 	cs := pod.Status.ContainerStatuses[0]
 
 	if cs.State.Terminated == nil {
-		return nil, fmt.Errorf("No terminated state found for container %s/%s", pod.Name, cs.Name)
+		return nil, fmt.Errorf("no terminated state found for container %s/%s", pod.Name, cs.Name)
 	}
 
 	bs := &types.State{
