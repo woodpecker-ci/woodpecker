@@ -1,14 +1,28 @@
 # Changelog
 
-## [2.3.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.3.1) - 2024-01-31
+## [2.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.4.0) - 2024-02-05
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@pat-s
+@fernandrone, @renovate[bot], @lukashass
+
+### 🐛 Bug Fixes
+
+- fix: agent panic when node is terminated during step execution [[#3331](https://github.com/woodpecker-ci/woodpecker/pull/3331)]
+
+### 📚 Documentation
+
+- chore(deps): update dependency marked to v12 [[#3325](https://github.com/woodpecker-ci/woodpecker/pull/3325)]
+
+### 📈 Enhancement
+
+- Add no branches text [[#3312](https://github.com/woodpecker-ci/woodpecker/pull/3312)]
+- Add loading spinner to repo list [[#3310](https://github.com/woodpecker-ci/woodpecker/pull/3310)]
 
 ### Misc
 
-- Add 2.3 docs [[#3306](https://github.com/woodpecker-ci/woodpecker/pull/3306)]
+- fix(deps): update module github.com/moby/moby to v24.0.9+incompatible [security] [[#3323](https://github.com/woodpecker-ci/woodpecker/pull/3323)]
+- chore(deps): update docker.io/woodpeckerci/plugin-docker-buildx docker tag to v3.0.1 [[#3324](https://github.com/woodpecker-ci/woodpecker/pull/3324)]
 
 ## [2.3.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.3.0) - 2024-01-31
 
