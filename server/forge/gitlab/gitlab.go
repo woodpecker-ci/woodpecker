@@ -646,7 +646,7 @@ func (g *GitLab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 	case *gitlab.MergeEvent:
 		// https://docs.gitlab.com/ee/user/project/integrations/webhook_events.html#merge-request-events
 		if event.ObjectAttributes.OldRev == "" && event.ObjectAttributes.Action != "open" {
-			return nil, nil, &forge_types.ErrIgnoreEvent{Event: string(eventType) + " without code changes"}
+			return nil, nil, &forge_types.ErrIgnoreEvent{Event: string(eventType), Reason: "no code changes"}
 		}
 		mergeIID, repo, pipeline, err := convertMergeRequestHook(event, req)
 		if err != nil {
