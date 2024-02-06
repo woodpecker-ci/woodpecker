@@ -655,6 +655,9 @@ func (g *GitLab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 
 		return repo, pipeline, nil
 	case *gitlab.PushEvent:
+		if event.TotalCommitsCount == 0 {
+			return nil, nil, &forge_types.ErrIgnoreEvent{Event: string(eventType), Reason: "no commits"}
+		}
 		return convertPushHook(event)
 	case *gitlab.TagEvent:
 		return convertTagHook(event)
