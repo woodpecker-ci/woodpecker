@@ -32,7 +32,7 @@ require (
 	github.com/kinbiko/jsonassert v1.1.1
 	github.com/lib/pq v1.10.9
 	github.com/mattn/go-sqlite3 v1.14.20
-	github.com/moby/moby v24.0.8+incompatible
+	github.com/moby/moby v24.0.9+incompatible
 	github.com/moby/term v0.5.0
 	github.com/mrjones/oauth v0.0.0-20190623134757-126b35219450
 	github.com/muesli/termenv v0.15.2

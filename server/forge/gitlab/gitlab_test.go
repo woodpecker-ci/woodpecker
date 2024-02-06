@@ -58,8 +58,9 @@ func Test_GitLab(t *testing.T) {
 	client := load(env)
 
 	user := model.User{
-		Login: "test_user",
-		Token: "e3b0c44298fc1c149afbf4c8996fb",
+		Login:         "test_user",
+		Token:         "e3b0c44298fc1c149afbf4c8996fb",
+		ForgeRemoteID: "3",
 	}
 
 	repo := model.Repo{
@@ -101,6 +102,12 @@ func Test_GitLab(t *testing.T) {
 			g.It("Should return error, when repo not exist", func() {
 				_, err := client.Repo(ctx, &user, "0", "not-existed", "not-existed")
 				assert.Error(t, err)
+			})
+
+			g.It("Should return repo with push access, when user inherits membership from namespace", func() {
+				_repo, err := client.Repo(ctx, &user, "6", "brightbox", "puppet")
+				assert.NoError(t, err)
+				assert.True(t, _repo.Perm.Push)
 			})
 		})
 
