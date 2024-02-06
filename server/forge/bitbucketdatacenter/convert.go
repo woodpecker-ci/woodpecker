@@ -50,6 +50,7 @@ func convertRepo(from *bb.Repository, perm *model.Perm, branch string) *model.Re
 		IsSCMPrivate:  true, // Since we have to use Netrc it has to always be private :/ TODO: Is this really true?
 		FullName:      fmt.Sprintf("%s/%s", from.Project.Key, from.Slug),
 		Perm:          perm,
+		PREnabled:     true,
 	}
 
 	for _, l := range from.Links["clone"] {
