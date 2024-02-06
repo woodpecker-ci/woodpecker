@@ -1,13 +1,14 @@
 # Changelog
 
-## [2.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.4.0) - 2024-02-05
+## [2.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.4.0) - 2024-02-06
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@fernandrone, @renovate[bot], @lukashass
+@lukashass, @fernandrone, @renovate[bot]
 
 ### 🐛 Bug Fixes
 
+- Consider gitlab inherited permissions [[#3308](https://github.com/woodpecker-ci/woodpecker/pull/3308)]
 - fix: agent panic when node is terminated during step execution [[#3331](https://github.com/woodpecker-ci/woodpecker/pull/3331)]
 
 ### 📚 Documentation
