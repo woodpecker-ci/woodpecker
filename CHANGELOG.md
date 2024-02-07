@@ -8,6 +8,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fix version check on next [[#3340](https://github.com/woodpecker-ci/woodpecker/pull/3340)]
 - Ignore gitlab merge request events without code changes [[#3338](https://github.com/woodpecker-ci/woodpecker/pull/3338)]
 - Ignore gitlab push events without commits [[#3339](https://github.com/woodpecker-ci/woodpecker/pull/3339)]
 - Consider gitlab inherited permissions [[#3308](https://github.com/woodpecker-ci/woodpecker/pull/3308)]
