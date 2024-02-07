@@ -49,9 +49,6 @@ type Repo struct {
 	Perm                         *Perm          `json:"-"                               xorm:"-"`
 	CancelPreviousPipelineEvents []WebhookEvent `json:"cancel_previous_pipeline_events" xorm:"json 'cancel_previous_pipeline_events'"`
 	NetrcOnlyTrusted             bool           `json:"netrc_only_trusted"              xorm:"NOT NULL DEFAULT true 'netrc_only_trusted'"`
-	SecretEndpoint               string         `json:"secret_endpoint"                 xorm:"varchar(500) 'secret_endpoint'"`
-	RegistryEndpoint             string         `json:"registry_endpoint"               xorm:"varchar(500) 'registry_endpoint'"`
-	ConfigEndpoint               string         `json:"config_endpoint"                 xorm:"varchar(500) 'config_endpoint'"`
 } //	@name Repo
 
 // TableName return database table name for xorm
@@ -117,9 +114,6 @@ type RepoPatch struct {
 	AllowPull                    *bool           `json:"allow_pr,omitempty"`
 	CancelPreviousPipelineEvents *[]WebhookEvent `json:"cancel_previous_pipeline_events"`
 	NetrcOnlyTrusted             *bool           `json:"netrc_only_trusted"`
-	ConfigEndpoint               *string         `json:"config_endpoint,omitempty"`
-	SecretEndpoint               *string         `json:"secret_endpoint,omitempty"`
-	RegistryEndpoint             *string         `json:"registry_endpoint,omitempty"`
 } //	@name RepoPatch
 
 type ForgeRemoteID string
