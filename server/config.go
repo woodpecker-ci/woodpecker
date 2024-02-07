@@ -36,7 +36,6 @@ var Config = struct {
 		Queue      queue.Queue
 		Logs       logging.Log
 		Forge      forge.Forge
-		Timeout    time.Duration
 		Membership cache.MembershipService
 		Manager    *plugins.Manager
 	}

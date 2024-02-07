@@ -1,4 +1,4 @@
-// Copyright 2022 Woodpecker Authors
+// Copyright 2024 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,19 +29,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
 )
 
-type forgeFetcher struct {
-}
-
-func NewForge() Service {
-	return &forgeFetcher{}
-}
-
-func (f *forgeFetcher) Fetch(ctx context.Context, forge forge.Forge, user *model.User, repo *model.Repo, pipeline *model.Pipeline) ([]*types.FileMeta, error) {
-	configFetcher := NewConfigFetcher(forge, 5*time.Second, user, repo, pipeline)
-	return configFetcher.Fetch(ctx)
-}
-
-type ConfigFetcher struct {
+type forgeFetcherContext struct {
 	forge    forge.Forge
 	user     *model.User
 	repo     *model.Repo
@@ -49,67 +37,18 @@ type ConfigFetcher struct {
 	timeout  time.Duration
 }
 
-func NewConfigFetcher(forge forge.Forge, timeout time.Duration, user *model.User, repo *model.Repo, pipeline *model.Pipeline) *ConfigFetcher {
-	return &ConfigFetcher{
-		forge:    forge,
-		user:     user,
-		repo:     repo,
-		pipeline: pipeline,
-		timeout:  timeout,
-	}
-}
-
-// Fetch pipeline config from source forge
-func (cf *ConfigFetcher) Fetch(ctx context.Context) (files []*types.FileMeta, err error) {
-	log.Trace().Msgf("start fetching config for '%s'", cf.repo.FullName)
-
-	// try to fetch 3 times
-	for i := 0; i < 3; i++ {
-		files, err = cf.fetch(ctx, strings.TrimSpace(cf.repo.Config))
-		if err != nil {
-			log.Trace().Err(err).Msgf("%d. try failed", i+1)
-		}
-		if errors.Is(err, context.DeadlineExceeded) {
-			continue
-		}
-
-		// if cf.configExtension != nil {
-		// 	fetchCtx, cancel := context.WithTimeout(ctx, cf.timeout)
-		// 	defer cancel() // ok here as we only try http fetching once, returning on fail and success
-
-		// 	log.Trace().Msgf("configFetcher[%s]: getting config from external http service", cf.repo.FullName)
-		// 	netrc, err := cf.forge.Netrc(cf.user, cf.repo)
-		// 	if err != nil {
-		// 		return nil, fmt.Errorf("could not get Netrc data from forge: %w", err)
-		// 	}
-
-		// 	newConfigs, useOld, err := cf.configExtension.FetchConfig(fetchCtx, cf.repo, cf.pipeline, files, netrc)
-		// 	if err != nil {
-		// 		log.Error().Err(err).Msg("could not fetch config via http")
-		// 		return nil, fmt.Errorf("could not fetch config via http: %w", err)
-		// 	}
-
-		// 	if !useOld {
-		// 		return newConfigs, nil
-		// 	}
-		// }
-	}
-
-	return files, err
-}
-
 // fetch config by timeout
-func (cf *ConfigFetcher) fetch(c context.Context, config string) ([]*types.FileMeta, error) {
-	ctx, cancel := context.WithTimeout(c, cf.timeout)
+func (f *forgeFetcherContext) fetch(c context.Context, config string) ([]*types.FileMeta, error) {
+	ctx, cancel := context.WithTimeout(c, f.timeout)
 	defer cancel()
 
 	if len(config) > 0 {
-		log.Trace().Msgf("configFetcher[%s]: use user config '%s'", cf.repo.FullName, config)
+		log.Trace().Msgf("configFetcher[%s]: use user config '%s'", f.repo.FullName, config)
 
 		// could be adapted to allow the user to supply a list like we do in the defaults
 		configs := []string{config}
 
-		fileMetas, err := cf.getFirstAvailableConfig(ctx, configs)
+		fileMetas, err := f.getFirstAvailableConfig(ctx, configs)
 		if err == nil {
 			return fileMetas, err
 		}
@@ -117,9 +56,9 @@ func (cf *ConfigFetcher) fetch(c context.Context, config string) ([]*types.FileM
 		return nil, fmt.Errorf("user defined config '%s' not found: %w", config, err)
 	}
 
-	log.Trace().Msgf("configFetcher[%s]: user did not define own config, following default procedure", cf.repo.FullName)
+	log.Trace().Msgf("configFetcher[%s]: user did not define own config, following default procedure", f.repo.FullName)
 	// for the order see shared/constants/constants.go
-	fileMetas, err := cf.getFirstAvailableConfig(ctx, constant.DefaultConfigOrder[:])
+	fileMetas, err := f.getFirstAvailableConfig(ctx, constant.DefaultConfigOrder[:])
 	if err == nil {
 		return fileMetas, err
 	}
@@ -144,11 +83,11 @@ func filterPipelineFiles(files []*types.FileMeta) []*types.FileMeta {
 	return res
 }
 
-func (cf *ConfigFetcher) checkPipelineFile(c context.Context, config string) ([]*types.FileMeta, error) {
-	file, err := cf.forge.File(c, cf.user, cf.repo, cf.pipeline, config)
+func (f *forgeFetcherContext) checkPipelineFile(c context.Context, config string) ([]*types.FileMeta, error) {
+	file, err := f.forge.File(c, f.user, f.repo, f.pipeline, config)
 
 	if err == nil && len(file) != 0 {
-		log.Trace().Msgf("configFetcher[%s]: found file '%s'", cf.repo.FullName, config)
+		log.Trace().Msgf("configFetcher[%s]: found file '%s'", f.repo.FullName, config)
 
 		return []*types.FileMeta{{
 			Name: config,
@@ -159,30 +98,30 @@ func (cf *ConfigFetcher) checkPipelineFile(c context.Context, config string) ([]
 	return nil, err
 }
 
-func (cf *ConfigFetcher) getFirstAvailableConfig(c context.Context, configs []string) ([]*types.FileMeta, error) {
+func (f *forgeFetcherContext) getFirstAvailableConfig(c context.Context, configs []string) ([]*types.FileMeta, error) {
 	var forgeErr []error
 	for _, fileOrFolder := range configs {
 		if strings.HasSuffix(fileOrFolder, "/") {
 			// config is a folder
-			files, err := cf.forge.Dir(c, cf.user, cf.repo, cf.pipeline, strings.TrimSuffix(fileOrFolder, "/"))
+			files, err := f.forge.Dir(c, f.user, f.repo, f.pipeline, strings.TrimSuffix(fileOrFolder, "/"))
 			// if folder is not supported we will get a "Not implemented" error and continue
 			if err != nil {
 				if !(errors.Is(err, types.ErrNotImplemented) || errors.Is(err, &types.ErrConfigNotFound{})) {
-					log.Error().Err(err).Str("repo", cf.repo.FullName).Str("user", cf.user.Login).Msg("could not get folder from forge")
+					log.Error().Err(err).Str("repo", f.repo.FullName).Str("user", f.user.Login).Msg("could not get folder from forge")
 					forgeErr = append(forgeErr, err)
 				}
 				continue
 			}
 			files = filterPipelineFiles(files)
 			if len(files) != 0 {
-				log.Trace().Msgf("configFetcher[%s]: found %d files in '%s'", cf.repo.FullName, len(files), fileOrFolder)
+				log.Trace().Msgf("configFetcher[%s]: found %d files in '%s'", f.repo.FullName, len(files), fileOrFolder)
 				return files, nil
 			}
 		}
 
 		// config is a file
-		if fileMeta, err := cf.checkPipelineFile(c, fileOrFolder); err == nil {
-			log.Trace().Msgf("configFetcher[%s]: found file: '%s'", cf.repo.FullName, fileOrFolder)
+		if fileMeta, err := f.checkPipelineFile(c, fileOrFolder); err == nil {
+			log.Trace().Msgf("configFetcher[%s]: found file: '%s'", f.repo.FullName, fileOrFolder)
 			return fileMeta, nil
 		} else if !errors.Is(err, &types.ErrConfigNotFound{}) {
 			forgeErr = append(forgeErr, err)

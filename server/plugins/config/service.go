@@ -1,4 +1,4 @@
-// Copyright 2022 Woodpecker Authors
+// Copyright 2024 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,12 +21,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
-
-// ConfigData same as forge.FileMeta but with json tags and string data
-type ConfigData struct {
-	Name string `json:"name"`
-	Data string `json:"data"`
-}
 
 type Service interface {
 	Fetch(ctx context.Context, forge forge.Forge, user *model.User, repo *model.Repo, pipeline *model.Pipeline) (configData []*types.FileMeta, err error)

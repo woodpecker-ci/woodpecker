@@ -1,4 +1,4 @@
-// Copyright 2022 Woodpecker Authors
+// Copyright 2024 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import (
 	"fmt"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/utils"
 )
@@ -29,32 +30,43 @@ type http struct {
 	privateKey crypto.PrivateKey
 }
 
+// configData same as forge.FileMeta but with json tags and string data
+type configData struct {
+	Name string `json:"name"`
+	Data string `json:"data"`
+}
+
 type requestStructure struct {
-	Repo          *model.Repo     `json:"repo"`
-	Pipeline      *model.Pipeline `json:"pipeline"`
-	Configuration []*ConfigData   `json:"configs"`
-	Netrc         *model.Netrc    `json:"netrc"`
+	Repo     *model.Repo     `json:"repo"`
+	Pipeline *model.Pipeline `json:"pipeline"`
+	Netrc    *model.Netrc    `json:"netrc"`
+	// Configuration []*configData   `json:"configs"`
 }
 
 type responseStructure struct {
-	Configs []*ConfigData `json:"configs"`
+	Configs []*configData `json:"configs"`
 }
 
 func NewHTTP(endpoint string, privateKey crypto.PrivateKey) Service {
 	return &http{endpoint, privateKey}
 }
 
-func (h *http) Fetch(ctx context.Context, forge *forge.Forge, user *model.User, repo *model.Repo, pipeline *model.Pipeline, netrc *model.Netrc) ([]*ConfigData, error) {
+func (h *http) Fetch(ctx context.Context, forge forge.Forge, user *model.User, repo *model.Repo, pipeline *model.Pipeline) ([]*types.FileMeta, error) {
 	// currentConfigs := make([]*configData, len(currentFileMeta))
 	// for i, pipe := range currentFileMeta {
 	// 	currentConfigs[i] = &configData{Name: pipe.Name, Data: string(pipe.Data)}
 	// }
 
+	netrc, err := forge.Netrc(user, repo)
+	if err != nil {
+		return nil, fmt.Errorf("could not get Netrc data from forge: %w", err)
+	}
+
 	response := new(responseStructure)
 	body := requestStructure{
 		Repo:     repo,
 		Pipeline: pipeline,
-		// Configuration: currentConfigs,
+		// Configuration: currentConfigs, // TODO: provide the current config to the http service somehow
 		Netrc: netrc,
 	}
 
@@ -64,8 +76,13 @@ func (h *http) Fetch(ctx context.Context, forge *forge.Forge, user *model.User, 
 	}
 
 	if status != 200 {
-		return []*ConfigData{}, nil
+		return []*types.FileMeta{}, nil
 	}
 
-	return response.Configs, nil
+	fileMetas := make([]*types.FileMeta, len(response.Configs))
+	for i, config := range response.Configs {
+		fileMetas[i] = &types.FileMeta{Name: config.Name, Data: []byte(config.Data)}
+	}
+
+	return fileMetas, nil
 }

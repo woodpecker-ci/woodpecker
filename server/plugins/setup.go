@@ -1,3 +1,17 @@
+// Copyright 2024 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package plugins
 
 import (
@@ -10,6 +24,7 @@ import (
 
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
+
 	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/config"
 	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/registry"
 	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/secret"
@@ -43,7 +58,7 @@ func setupSecretExtension(store store.Store) secret.Service {
 	return secret.NewDB(store)
 }
 
-func setupConfigService(c *cli.Context, store store.Store, privateSignatureKey crypto.PrivateKey) (config.Service, error) {
+func setupConfigService(c *cli.Context, privateSignatureKey crypto.PrivateKey) (config.Service, error) {
 	addonExt, err := addon.Load[config.Service](c.StringSlice("addons"), addonTypes.TypeConfigService)
 	if err != nil {
 		return nil, err
@@ -56,7 +71,9 @@ func setupConfigService(c *cli.Context, store store.Store, privateSignatureKey c
 		return config.NewHTTP(endpoint, privateSignatureKey), nil
 	}
 
-	return nil, nil
+	timeout := c.Duration("forge-timeout")
+	config := config.NewForge(timeout)
+	return config, nil
 }
 
 // setupSignatureKeys generate or load key pair to sign webhooks requests (i.e. used for extensions)
