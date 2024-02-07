@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.4.0) - 2024-02-06
+## [2.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.4.0) - 2024-02-07
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -8,6 +8,8 @@
 
 ### 🐛 Bug Fixes
 
+- Ignore gitlab merge request events without code changes [[#3338](https://github.com/woodpecker-ci/woodpecker/pull/3338)]
+- Ignore gitlab push events without commits [[#3339](https://github.com/woodpecker-ci/woodpecker/pull/3339)]
 - Consider gitlab inherited permissions [[#3308](https://github.com/woodpecker-ci/woodpecker/pull/3308)]
 - fix: agent panic when node is terminated during step execution [[#3331](https://github.com/woodpecker-ci/woodpecker/pull/3331)]
 
