@@ -19,14 +19,14 @@ Directly import Woodpecker's Go package (`go.woodpecker-ci.org/woodpecker/woodpe
 
 ### Return types
 
-| Addon type           | Return type                                                                      |
-| -------------------- | -------------------------------------------------------------------------------- |
-| `Forge`              | `"go.woodpecker-ci.org/woodpecker/woodpecker/v2/server/forge".Forge`             |
-| `Backend`            | `"go.woodpecker-ci.org/woodpecker/woodpecker/v2/pipeline/backend/types".Backend` |
-| `ConfigService`      | `"go.woodpecker-ci.org/woodpecker/v2/server/services/config".Extension`           |
-| `SecretService`      | `"go.woodpecker-ci.org/woodpecker/v2/server/services/secret".SecretService`                |
-| `EnvironmentService` | `"go.woodpecker-ci.org/woodpecker/v2/server/services/environment".EnvironmentService`           |
-| `RegistryService`    | `"go.woodpecker-ci.org/woodpecker/v2/server/services/registry".RegistryService`              |
+| Addon type           | Return type                                                                           |
+| -------------------- | ------------------------------------------------------------------------------------- |
+| `Forge`              | `"go.woodpecker-ci.org/woodpecker/woodpecker/v2/server/forge".Forge`                  |
+| `Backend`            | `"go.woodpecker-ci.org/woodpecker/woodpecker/v2/pipeline/backend/types".Backend`      |
+| `ConfigService`      | `"go.woodpecker-ci.org/woodpecker/v2/server/services/config".Extension`               |
+| `SecretService`      | `"go.woodpecker-ci.org/woodpecker/v2/server/services/secret".SecretService`           |
+| `EnvironmentService` | `"go.woodpecker-ci.org/woodpecker/v2/server/services/environment".EnvironmentService` |
+| `RegistryService`    | `"go.woodpecker-ci.org/woodpecker/v2/server/services/registry".RegistryService`       |
 
 ### Using configurations
 
