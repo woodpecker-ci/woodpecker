@@ -43,9 +43,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/logging"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/plugins"
-
-	// "go.woodpecker-ci.org/woodpecker/v2/server/plugins/encryption"
-	// encryptedStore "go.woodpecker-ci.org/woodpecker/v2/server/plugins/encryption/wrapper/store"
 	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/permissions"
 	"go.woodpecker-ci.org/woodpecker/v2/server/pubsub"
 	"go.woodpecker-ci.org/woodpecker/v2/server/router"
@@ -283,7 +280,7 @@ func setupEvilGlobals(c *cli.Context, s store.Store, f forge.Forge) error {
 	server.Config.Services.Pubsub = pubsub.New()
 	server.Config.Services.Membership = setupMembershipService(c, f)
 
-	pluginManager, err := plugins.NewManager(c, s, f)
+	pluginManager, err := plugins.NewManager(c, s)
 	if err != nil {
 		return fmt.Errorf("could not setup plugin manager: %w", err)
 	}
