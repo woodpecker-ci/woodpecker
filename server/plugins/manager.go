@@ -1,4 +1,4 @@
-package extensions
+package plugins
 
 import (
 	"crypto"
@@ -17,12 +17,12 @@ type Manager struct {
 	secret              secret.Service
 	registry            registry.Service
 	config              config.Service
-	environ             environments.Service
+	environment         environments.Service
 	signaturePrivateKey crypto.PrivateKey
 	signaturePublicKey  crypto.PublicKey
 }
 
-func NewManager(store store.Store, forge forge.Forge, c *cli.Context) (*Manager, error) {
+func NewManager(c *cli.Context, store store.Store, forge forge.Forge) (*Manager, error) {
 	signaturePrivateKey, signaturePublicKey, err := setupSignatureKeys(store)
 	if err != nil {
 		return nil, err
@@ -39,7 +39,7 @@ func NewManager(store store.Store, forge forge.Forge, c *cli.Context) (*Manager,
 		secret:              setupSecretExtension(store),
 		registry:            setupRegistryExtension(store, c.String("docker-config")),
 		config:              config,
-		environ:             environments.Parse(c.StringSlice("environment")),
+		environment:         environments.Parse(c.StringSlice("environment")),
 	}, nil
 }
 
@@ -47,30 +47,26 @@ func (e *Manager) SignaturePublicKey() crypto.PublicKey {
 	return e.signaturePublicKey
 }
 
-func (e *Manager) SecretAddonFromRepo(repo *model.Repo) secret.Service {
-	// if repo.SecretEndpoint != "" {
-	// 	return secret.NewHTTP(repo.SecretEndpoint, e.signaturePrivateKey)
-	// }
-
+func (e *Manager) SecretServiceFromRepo(_ *model.Repo) secret.Service {
 	return e.secret
 }
 
-func (e *Manager) RegistryAddonFromRepo(repo *model.Repo) registry.Service {
-	// if repo.SecretEndpoint != "" {
-	// 	return registry.NewHTTP(repo.SecretEndpoint, e.signaturePrivateKey)
-	// }
+func (e *Manager) SecretService() secret.Service {
+	return e.secret
+}
 
+func (e *Manager) RegistryServiceFromRepo(_ *model.Repo) registry.Service {
 	return e.registry
 }
 
-func (e *Manager) ConfigAddonFromRepo(repo *model.Repo) config.Service {
-	// if repo.ConfigEndpoint != "" {
-	// 	return config.NewHTTP(repo.ConfigEndpoint, e.signaturePrivateKey)
-	// }
+func (e *Manager) RegistryService() registry.Service {
+	return e.registry
+}
 
+func (e *Manager) ConfigServiceFromRepo(_ *model.Repo) config.Service {
 	return e.config
 }
 
-func (e *Manager) EnvironAddonFromRepo(repo *model.Repo) environments.Service {
-	return e.environ
+func (e *Manager) EnvironmentService() environments.Service {
+	return e.environment
 }

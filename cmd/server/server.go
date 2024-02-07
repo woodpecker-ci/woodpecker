@@ -42,6 +42,7 @@ import (
 	woodpeckerGrpcServer "go.woodpecker-ci.org/woodpecker/v2/server/grpc"
 	"go.woodpecker-ci.org/woodpecker/v2/server/logging"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/plugins"
 
 	// "go.woodpecker-ci.org/woodpecker/v2/server/plugins/encryption"
 	// encryptedStore "go.woodpecker-ci.org/woodpecker/v2/server/plugins/encryption/wrapper/store"
@@ -272,17 +273,22 @@ func run(c *cli.Context) error {
 	return g.Wait()
 }
 
-func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) error {
+func setupEvilGlobals(c *cli.Context, s store.Store, f forge.Forge) error {
 	// forge
 	server.Config.Services.Forge = f
 	server.Config.Services.Timeout = c.Duration("forge-timeout")
 
 	// services
-	server.Config.Services.Queue = setupQueue(c, v)
+	server.Config.Services.Queue = setupQueue(c, s)
 	server.Config.Services.Logs = logging.New()
 	server.Config.Services.Pubsub = pubsub.New()
 	server.Config.Services.Membership = setupMembershipService(c, f)
-	// TODO: setup addon manager
+
+	pluginManager, err := plugins.NewManager(c, s, f)
+	if err != nil {
+		return fmt.Errorf("could not setup plugin manager: %w", err)
+	}
+	server.Config.Services.Manager = pluginManager
 
 	// authentication
 	server.Config.Pipeline.AuthenticatePublicRepos = c.Bool("authenticate-public-repos")

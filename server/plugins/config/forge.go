@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package forge
+package config
 
 import (
 	"context"
@@ -23,29 +23,39 @@ import (
 
 	"github.com/rs/zerolog/log"
 
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/config"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
 )
 
-type ConfigFetcher struct {
-	forge           Forge
-	user            *model.User
-	repo            *model.Repo
-	pipeline        *model.Pipeline
-	configExtension config.Extension
-	timeout         time.Duration
+type forgeFetcher struct {
 }
 
-func NewConfigFetcher(forge Forge, timeout time.Duration, configExtension config.Extension, user *model.User, repo *model.Repo, pipeline *model.Pipeline) *ConfigFetcher {
+func NewForge() Service {
+	return &forgeFetcher{}
+}
+
+func (f *forgeFetcher) Fetch(ctx context.Context, forge forge.Forge, user *model.User, repo *model.Repo, pipeline *model.Pipeline) ([]*types.FileMeta, error) {
+	configFetcher := NewConfigFetcher(forge, 5*time.Second, user, repo, pipeline)
+	return configFetcher.Fetch(ctx)
+}
+
+type ConfigFetcher struct {
+	forge    forge.Forge
+	user     *model.User
+	repo     *model.Repo
+	pipeline *model.Pipeline
+	timeout  time.Duration
+}
+
+func NewConfigFetcher(forge forge.Forge, timeout time.Duration, user *model.User, repo *model.Repo, pipeline *model.Pipeline) *ConfigFetcher {
 	return &ConfigFetcher{
-		forge:           forge,
-		user:            user,
-		repo:            repo,
-		pipeline:        pipeline,
-		configExtension: configExtension,
-		timeout:         timeout,
+		forge:    forge,
+		user:     user,
+		repo:     repo,
+		pipeline: pipeline,
+		timeout:  timeout,
 	}
 }
 
@@ -63,30 +73,29 @@ func (cf *ConfigFetcher) Fetch(ctx context.Context) (files []*types.FileMeta, er
 			continue
 		}
 
-		if cf.configExtension != nil {
-			fetchCtx, cancel := context.WithTimeout(ctx, cf.timeout)
-			defer cancel() // ok here as we only try http fetching once, returning on fail and success
+		// if cf.configExtension != nil {
+		// 	fetchCtx, cancel := context.WithTimeout(ctx, cf.timeout)
+		// 	defer cancel() // ok here as we only try http fetching once, returning on fail and success
 
-			log.Trace().Msgf("configFetcher[%s]: getting config from external http service", cf.repo.FullName)
-			netrc, err := cf.forge.Netrc(cf.user, cf.repo)
-			if err != nil {
-				return nil, fmt.Errorf("could not get Netrc data from forge: %w", err)
-			}
+		// 	log.Trace().Msgf("configFetcher[%s]: getting config from external http service", cf.repo.FullName)
+		// 	netrc, err := cf.forge.Netrc(cf.user, cf.repo)
+		// 	if err != nil {
+		// 		return nil, fmt.Errorf("could not get Netrc data from forge: %w", err)
+		// 	}
 
-			newConfigs, useOld, err := cf.configExtension.FetchConfig(fetchCtx, cf.repo, cf.pipeline, files, netrc)
-			if err != nil {
-				log.Error().Err(err).Msg("could not fetch config via http")
-				return nil, fmt.Errorf("could not fetch config via http: %w", err)
-			}
+		// 	newConfigs, useOld, err := cf.configExtension.FetchConfig(fetchCtx, cf.repo, cf.pipeline, files, netrc)
+		// 	if err != nil {
+		// 		log.Error().Err(err).Msg("could not fetch config via http")
+		// 		return nil, fmt.Errorf("could not fetch config via http: %w", err)
+		// 	}
 
-			if !useOld {
-				return newConfigs, nil
-			}
-		}
-
-		return
+		// 	if !useOld {
+		// 		return newConfigs, nil
+		// 	}
+		// }
 	}
-	return
+
+	return files, err
 }
 
 // fetch config by timeout
@@ -100,9 +109,9 @@ func (cf *ConfigFetcher) fetch(c context.Context, config string) ([]*types.FileM
 		// could be adapted to allow the user to supply a list like we do in the defaults
 		configs := []string{config}
 
-		fileMeta, err := cf.getFirstAvailableConfig(ctx, configs)
+		fileMetas, err := cf.getFirstAvailableConfig(ctx, configs)
 		if err == nil {
-			return fileMeta, err
+			return fileMetas, err
 		}
 
 		return nil, fmt.Errorf("user defined config '%s' not found: %w", config, err)
@@ -110,16 +119,16 @@ func (cf *ConfigFetcher) fetch(c context.Context, config string) ([]*types.FileM
 
 	log.Trace().Msgf("configFetcher[%s]: user did not define own config, following default procedure", cf.repo.FullName)
 	// for the order see shared/constants/constants.go
-	fileMeta, err := cf.getFirstAvailableConfig(ctx, constant.DefaultConfigOrder[:])
+	fileMetas, err := cf.getFirstAvailableConfig(ctx, constant.DefaultConfigOrder[:])
 	if err == nil {
-		return fileMeta, err
+		return fileMetas, err
 	}
 
 	select {
 	case <-ctx.Done():
 		return nil, ctx.Err()
 	default:
-		return []*types.FileMeta{}, fmt.Errorf("configFetcher: fallback did not find config: %w", err)
+		return nil, fmt.Errorf("configFetcher: fallback did not find config: %w", err)
 	}
 }
 

@@ -24,6 +24,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v2/server/logging"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/plugins"
 	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/permissions"
 	"go.woodpecker-ci.org/woodpecker/v2/server/pubsub"
 	"go.woodpecker-ci.org/woodpecker/v2/server/queue"
@@ -37,6 +38,7 @@ var Config = struct {
 		Forge      forge.Forge
 		Timeout    time.Duration
 		Membership cache.MembershipService
+		Manager    *plugins.Manager
 	}
 	Storage struct {
 		// Users  model.UserStore

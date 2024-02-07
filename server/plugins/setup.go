@@ -1,4 +1,4 @@
-package extensions
+package plugins
 
 import (
 	"crypto"

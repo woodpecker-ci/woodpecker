@@ -29,6 +29,7 @@ import (
 
 // Restart a pipeline by creating a new one out of the old and start it
 func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipeline, user *model.User, repo *model.Repo, envs map[string]string, netrc *model.Netrc) (*model.Pipeline, error) {
+	forge := server.Config.Services.Forge
 	switch lastPipeline.Status {
 	case model.StatusDeclined,
 		model.StatusBlocked:
@@ -49,20 +50,11 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 	}
 
 	// If the config extension is active we should refetch the config in case something changed
-	if server.Config.Services.ConfigService != nil {
-		currentFileMeta := make([]*forge_types.FileMeta, len(configs))
-		for i, cfg := range configs {
-			currentFileMeta[i] = &forge_types.FileMeta{Name: cfg.Name, Data: cfg.Data}
-		}
-
-		newConfig, useOld, err := server.Config.Services.ConfigService.FetchConfig(ctx, repo, lastPipeline, currentFileMeta, netrc)
-		if err != nil {
-			return nil, &ErrBadRequest{
-				Msg: fmt.Sprintf("On fetching external pipeline config: %s", err),
-			}
-		}
-		if !useOld {
-			pipelineFiles = newConfig
+	configService := server.Config.Services.Manager.ConfigServiceFromRepo(repo)
+	pipelineFiles, err = configService.Fetch(ctx, forge, user, repo, lastPipeline)
+	if err != nil {
+		return nil, &ErrBadRequest{
+			Msg: fmt.Sprintf("On fetching external pipeline config: %s", err),
 		}
 	}
 

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package forge_test
+package config_test
 
 import (
 	"context"
@@ -31,7 +31,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/mocks"
 	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
@@ -313,7 +312,7 @@ func TestFetch(t *testing.T) {
 			f.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("file not found"))
 			f.On("Dir", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("directory not found"))
 
-			configFetcher := forge.NewConfigFetcher(
+			configFetcher := config.NewConfigFetcher(
 				f,
 				time.Second*3,
 				nil,
@@ -521,7 +520,7 @@ func TestFetchFromConfigService(t *testing.T) {
 
 			f.On("Netrc", mock.Anything, mock.Anything).Return(&model.Netrc{Machine: "mock", Login: "mock", Password: "mock"}, nil)
 
-			configFetcher := forge.NewConfigFetcher(
+			configFetcher := config.NewConfigFetcher(
 				f,
 				time.Second*3,
 				configAPI,

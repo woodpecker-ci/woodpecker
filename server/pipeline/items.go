@@ -42,12 +42,14 @@ func parsePipeline(store store.Store, currentPipeline *model.Pipeline, user *mod
 		log.Error().Err(err).Str("repo", repo.FullName).Msgf("error getting last pipeline before pipeline number '%d'", currentPipeline.Number)
 	}
 
-	secs, err := server.Config.Services.Secrets.SecretListPipeline(repo, currentPipeline, &model.ListOptions{All: true})
+	secretService := server.Config.Services.Manager.SecretServiceFromRepo(repo)
+	secs, err := secretService.SecretListPipeline(repo, currentPipeline, &model.ListOptions{All: true})
 	if err != nil {
 		log.Error().Err(err).Msgf("error getting secrets for %s#%d", repo.FullName, currentPipeline.Number)
 	}
 
-	regs, err := server.Config.Services.Registries.RegistryList(repo, &model.ListOptions{All: true})
+	registryService := server.Config.Services.Manager.RegistryServiceFromRepo(repo)
+	regs, err := registryService.RegistryList(repo, &model.ListOptions{All: true})
 	if err != nil {
 		log.Error().Err(err).Msgf("error getting registry credentials for %s#%d", repo.FullName, currentPipeline.Number)
 	}
@@ -55,8 +57,10 @@ func parsePipeline(store store.Store, currentPipeline *model.Pipeline, user *mod
 	if envs == nil {
 		envs = map[string]string{}
 	}
-	if server.Config.Services.Environ != nil {
-		globals, _ := server.Config.Services.Environ.EnvironList(repo)
+
+	environmentService := server.Config.Services.Manager.EnvironmentService()
+	if environmentService != nil {
+		globals, _ := environmentService.EnvironList(repo)
 		for _, global := range globals {
 			envs[global.Name] = global.Value
 		}
