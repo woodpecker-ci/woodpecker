@@ -17,11 +17,6 @@ package main
 
 import (
 	"context"
-	"crypto"
-	"crypto/ed25519"
-	"crypto/rand"
-	"encoding/hex"
-	"errors"
 	"fmt"
 	"net/url"
 	"os"
@@ -49,7 +44,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/queue"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store/datastore"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/addon"
 	addonTypes "go.woodpecker-ci.org/woodpecker/v2/shared/addon/types"
 )
@@ -291,33 +285,6 @@ func setupMetrics(g *errgroup.Group, _store store.Store) {
 			time.Sleep(10 * time.Second)
 		}
 	})
-}
-
-// setupSignatureKeys generate or load key pair to sign webhooks requests (i.e. used for extensions)
-func setupSignatureKeys(_store store.Store) (crypto.PrivateKey, crypto.PublicKey, error) {
-	privKeyID := "signature-private-key"
-
-	privKey, err := _store.ServerConfigGet(privKeyID)
-	if errors.Is(err, types.RecordNotExist) {
-		_, privKey, err := ed25519.GenerateKey(rand.Reader)
-		if err != nil {
-			return nil, nil, fmt.Errorf("failed to generate private key: %w", err)
-		}
-		err = _store.ServerConfigSet(privKeyID, hex.EncodeToString(privKey))
-		if err != nil {
-			return nil, nil, fmt.Errorf("failed to store private key: %w", err)
-		}
-		log.Debug().Msg("created private key")
-		return privKey, privKey.Public(), nil
-	} else if err != nil {
-		return nil, nil, fmt.Errorf("failed to load private key: %w", err)
-	}
-	privKeyStr, err := hex.DecodeString(privKey)
-	if err != nil {
-		return nil, nil, fmt.Errorf("failed to decode private key: %w", err)
-	}
-	privateKey := ed25519.PrivateKey(privKeyStr)
-	return privateKey, privateKey.Public(), nil
 }
 
 func setupConfigService(c *cli.Context) (config.Extension, error) {

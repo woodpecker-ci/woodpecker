@@ -26,7 +26,7 @@ type builtin struct {
 }
 
 // New returns a new local secret service.
-func New(ctx context.Context, store model.SecretStore) model.SecretService {
+func New(ctx context.Context, store model.SecretStore) SecretService {
 	return &builtin{store: store, Context: ctx}
 }
 
