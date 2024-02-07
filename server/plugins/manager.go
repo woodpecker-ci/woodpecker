@@ -21,7 +21,7 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/config"
-	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/environments"
+	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/environment"
 	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/registry"
 	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/secret"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
@@ -31,7 +31,7 @@ type Manager struct {
 	secret              secret.Service
 	registry            registry.Service
 	config              config.Service
-	environment         environments.Service
+	environment         environment.Service
 	signaturePrivateKey crypto.PrivateKey
 	signaturePublicKey  crypto.PublicKey
 }
@@ -53,7 +53,7 @@ func NewManager(c *cli.Context, store store.Store) (*Manager, error) {
 		secret:              setupSecretExtension(store),
 		registry:            setupRegistryExtension(store, c.String("docker-config")),
 		config:              config,
-		environment:         environments.Parse(c.StringSlice("environment")),
+		environment:         environment.Parse(c.StringSlice("environment")),
 	}, nil
 }
 
@@ -81,6 +81,6 @@ func (e *Manager) ConfigServiceFromRepo(_ *model.Repo) config.Service {
 	return e.config
 }
 
-func (e *Manager) EnvironmentService() environments.Service {
+func (e *Manager) EnvironmentService() environment.Service {
 	return e.environment
 }

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package environments
+package environment
 
 import "go.woodpecker-ci.org/woodpecker/v2/server/model"
 
