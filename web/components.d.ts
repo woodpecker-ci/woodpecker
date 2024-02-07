@@ -67,7 +67,7 @@ declare module 'vue' {
     IMdiRadioboxBlank: typeof import('~icons/mdi/radiobox-blank')['default']
     IMdiRadioboxIndeterminateVariant: typeof import('~icons/mdi/radiobox-indeterminate-variant')['default']
     IMdiSourceBranch: typeof import('~icons/mdi/source-branch')['default']
-    IMdisourceCommit: typeof import('~icons/mdi/source-commit')['default']
+    IMdiSourceCommit: typeof import('~icons/mdi/source-commit')['default']
     IMdiSourceMerge: typeof import('~icons/mdi/source-merge')['default']
     IMdiSourcePull: typeof import('~icons/mdi/source-pull')['default']
     IMdiStop: typeof import('~icons/mdi/stop')['default']
