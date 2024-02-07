@@ -312,15 +312,16 @@ func TestFetch(t *testing.T) {
 			f.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("file not found"))
 			f.On("Dir", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("directory not found"))
 
-			configFetcher := config.NewConfigFetcher(
+			configFetcher := config.NewForge(
+				time.Second * 3,
+			)
+			files, err := configFetcher.Fetch(
+				context.Background(),
 				f,
-				time.Second*3,
-				nil,
 				&model.User{Token: "xxx"},
 				repo,
 				&model.Pipeline{Commit: "89ab7b2d6bfb347144ac7c557e638ab402848fee"},
 			)
-			files, err := configFetcher.Fetch(context.Background())
 			if tt.expectedError && err == nil {
 				t.Fatal("expected an error")
 			} else if !tt.expectedError && err != nil {
@@ -520,15 +521,14 @@ func TestFetchFromConfigService(t *testing.T) {
 
 			f.On("Netrc", mock.Anything, mock.Anything).Return(&model.Netrc{Machine: "mock", Login: "mock", Password: "mock"}, nil)
 
-			configFetcher := config.NewConfigFetcher(
+			configFetcher := config.NewForge(time.Second * 3)
+			files, err := configFetcher.Fetch(
+				context.Background(),
 				f,
-				time.Second*3,
-				configAPI,
 				&model.User{Token: "xxx"},
 				repo,
 				&model.Pipeline{Commit: "89ab7b2d6bfb347144ac7c557e638ab402848fee"},
 			)
-			files, err := configFetcher.Fetch(context.Background())
 			if tt.expectedError && err == nil {
 				t.Fatal("expected an error")
 			} else if !tt.expectedError && err != nil {
