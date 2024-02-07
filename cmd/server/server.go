@@ -42,11 +42,11 @@ import (
 	woodpeckerGrpcServer "go.woodpecker-ci.org/woodpecker/v2/server/grpc"
 	"go.woodpecker-ci.org/woodpecker/v2/server/logging"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/plugins"
-	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/permissions"
 	"go.woodpecker-ci.org/woodpecker/v2/server/pubsub"
 	"go.woodpecker-ci.org/woodpecker/v2/server/router"
 	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware"
+	"go.woodpecker-ci.org/woodpecker/v2/server/services"
+	"go.woodpecker-ci.org/woodpecker/v2/server/services/permissions"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 	"go.woodpecker-ci.org/woodpecker/v2/server/web"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
@@ -280,11 +280,11 @@ func setupEvilGlobals(c *cli.Context, s store.Store, f forge.Forge) error {
 	server.Config.Services.Pubsub = pubsub.New()
 	server.Config.Services.Membership = setupMembershipService(c, f)
 
-	pluginManager, err := plugins.NewManager(c, s)
+	servicesManager, err := services.NewManager(c, s)
 	if err != nil {
-		return fmt.Errorf("could not setup plugin manager: %w", err)
+		return fmt.Errorf("could not setup services manager: %w", err)
 	}
-	server.Config.Services.Manager = pluginManager
+	server.Config.Services.Manager = servicesManager
 
 	// authentication
 	server.Config.Pipeline.AuthenticatePublicRepos = c.Bool("authenticate-public-repos")

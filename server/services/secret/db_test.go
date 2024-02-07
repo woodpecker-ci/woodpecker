@@ -21,7 +21,7 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/secret"
+	"go.woodpecker-ci.org/woodpecker/v2/server/services/secret"
 	mocks_store "go.woodpecker-ci.org/woodpecker/v2/server/store/mocks"
 )
 

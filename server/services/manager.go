@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package plugins
+package services
 
 import (
 	"crypto"
@@ -20,10 +20,10 @@ import (
 	"github.com/urfave/cli/v2"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/config"
-	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/environment"
-	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/registry"
-	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/secret"
+	"go.woodpecker-ci.org/woodpecker/v2/server/services/config"
+	"go.woodpecker-ci.org/woodpecker/v2/server/services/environment"
+	"go.woodpecker-ci.org/woodpecker/v2/server/services/registry"
+	"go.woodpecker-ci.org/woodpecker/v2/server/services/secret"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 

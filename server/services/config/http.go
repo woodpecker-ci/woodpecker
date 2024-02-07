@@ -22,7 +22,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/utils"
+	"go.woodpecker-ci.org/woodpecker/v2/server/services/utils"
 )
 
 type http struct {
