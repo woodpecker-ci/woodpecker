@@ -27,6 +27,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/gitlab/testdata"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
@@ -201,6 +202,36 @@ func Test_GitLab(t *testing.T) {
 						assert.Equal(t, "Update client.go 🎉", pipeline.Title)
 						assert.Len(t, pipeline.ChangedFiles, 0) // see L217
 					}
+				})
+
+				g.It("Should ignore merge request hook without changes", func() {
+					req, _ := http.NewRequest(
+						testdata.ServiceHookMethod,
+						testdata.ServiceHookURL.String(),
+						bytes.NewReader(testdata.HookPullRequestWithoutChanges),
+					)
+					req.Header = testdata.ServiceHookHeaders
+
+					// TODO: insert fake store into context to retrieve user & repo, this will activate fetching of ChangedFiles
+					hookRepo, pipeline, err := client.Hook(ctx, req)
+					assert.Nil(t, hookRepo)
+					assert.Nil(t, pipeline)
+					assert.ErrorIs(t, err, &types.ErrIgnoreEvent{})
+				})
+
+				g.It("Should ignore merge request approval", func() {
+					req, _ := http.NewRequest(
+						testdata.ServiceHookMethod,
+						testdata.ServiceHookURL.String(),
+						bytes.NewReader(testdata.HookPullRequestApproved),
+					)
+					req.Header = testdata.ServiceHookHeaders
+
+					// TODO: insert fake store into context to retrieve user & repo, this will activate fetching of ChangedFiles
+					hookRepo, pipeline, err := client.Hook(ctx, req)
+					assert.Nil(t, hookRepo)
+					assert.Nil(t, pipeline)
+					assert.ErrorIs(t, err, &types.ErrIgnoreEvent{})
 				})
 
 				g.It("Should parse merge request hook when MR closed", func() {
