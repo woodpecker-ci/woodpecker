@@ -40,7 +40,7 @@ func NewForge(timeout time.Duration) Service {
 }
 
 func (f *forgeFetcher) Fetch(ctx context.Context, forge forge.Forge, user *model.User, repo *model.Repo, pipeline *model.Pipeline) (files []*types.FileMeta, err error) {
-	configFetcher := &forgeFetcherContext{
+	ffc := &forgeFetcherContext{
 		forge:    forge,
 		user:     user,
 		repo:     repo,
@@ -50,7 +50,7 @@ func (f *forgeFetcher) Fetch(ctx context.Context, forge forge.Forge, user *model
 
 	// try to fetch 3 times
 	for i := 0; i < 3; i++ {
-		files, err = configFetcher.fetch(ctx, strings.TrimSpace(repo.Config))
+		files, err = ffc.fetch(ctx, strings.TrimSpace(repo.Config))
 		if err != nil {
 			log.Trace().Err(err).Msgf("%d. try failed", i+1)
 		}

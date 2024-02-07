@@ -67,13 +67,15 @@ func setupConfigService(c *cli.Context, privateSignatureKey crypto.PrivateKey) (
 		return addonExt.Value, nil
 	}
 
+	timeout := c.Duration("forge-timeout")
+	configFetcher := config.NewForge(timeout)
+
 	if endpoint := c.String("config-service-endpoint"); endpoint != "" {
-		return config.NewHTTP(endpoint, privateSignatureKey), nil
+		httpFetcher := config.NewHTTP(endpoint, privateSignatureKey, nil)
+		return config.NewCombined(configFetcher, httpFetcher), nil
 	}
 
-	timeout := c.Duration("forge-timeout")
-	config := config.NewForge(timeout)
-	return config, nil
+	return configFetcher, nil
 }
 
 // setupSignatureKeys generate or load key pair to sign webhooks requests (i.e. used for extensions)

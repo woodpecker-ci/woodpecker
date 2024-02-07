@@ -26,8 +26,9 @@ import (
 )
 
 type http struct {
-	endpoint   string
-	privateKey crypto.PrivateKey
+	endpoint       string
+	privateKey     crypto.PrivateKey
+	currentConfigs []*types.FileMeta
 }
 
 // configData same as forge.FileMeta but with json tags and string data
@@ -40,22 +41,24 @@ type requestStructure struct {
 	Repo     *model.Repo     `json:"repo"`
 	Pipeline *model.Pipeline `json:"pipeline"`
 	Netrc    *model.Netrc    `json:"netrc"`
-	// Configuration []*configData   `json:"configs"`
+
+	// @deprecated use netrc data to fetch the config by yourself instead
+	DeprecatedConfiguration []*configData `json:"configs"` // TODO: remove at some point
 }
 
 type responseStructure struct {
 	Configs []*configData `json:"configs"`
 }
 
-func NewHTTP(endpoint string, privateKey crypto.PrivateKey) Service {
-	return &http{endpoint, privateKey}
+func NewHTTP(endpoint string, privateKey crypto.PrivateKey, currentConfigs []*types.FileMeta) Service {
+	return &http{endpoint, privateKey, currentConfigs}
 }
 
 func (h *http) Fetch(ctx context.Context, forge forge.Forge, user *model.User, repo *model.Repo, pipeline *model.Pipeline) ([]*types.FileMeta, error) {
-	// currentConfigs := make([]*configData, len(currentFileMeta))
-	// for i, pipe := range currentFileMeta {
-	// 	currentConfigs[i] = &configData{Name: pipe.Name, Data: string(pipe.Data)}
-	// }
+	currentConfigs := make([]*configData, len(h.currentConfigs))
+	for i, pipe := range h.currentConfigs {
+		currentConfigs[i] = &configData{Name: pipe.Name, Data: string(pipe.Data)}
+	}
 
 	netrc, err := forge.Netrc(user, repo)
 	if err != nil {
@@ -64,10 +67,10 @@ func (h *http) Fetch(ctx context.Context, forge forge.Forge, user *model.User, r
 
 	response := new(responseStructure)
 	body := requestStructure{
-		Repo:     repo,
-		Pipeline: pipeline,
-		// Configuration: currentConfigs, // TODO: provide the current config to the http service somehow
-		Netrc: netrc,
+		Repo:                    repo,
+		Pipeline:                pipeline,
+		DeprecatedConfiguration: currentConfigs,
+		Netrc:                   netrc,
 	}
 
 	status, err := utils.Send(ctx, "POST", h.endpoint, h.privateKey, body, response)

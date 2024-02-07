@@ -30,6 +30,7 @@ import (
 	"github.com/go-ap/httpsig"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/mocks"
 	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
@@ -191,7 +192,7 @@ func TestFetchFromConfigService(t *testing.T) {
 
 	ts := httptest.NewServer(http.HandlerFunc(fixtureHandler))
 	defer ts.Close()
-	configAPI := config.NewHTTP(ts.URL, privEd25519Key)
+	httpFetcher := config.NewHTTP(ts.URL, privEd25519Key, nil)
 
 	for _, tt := range testTable {
 		t.Run(tt.name, func(t *testing.T) {
@@ -220,7 +221,8 @@ func TestFetchFromConfigService(t *testing.T) {
 
 			f.On("Netrc", mock.Anything, mock.Anything).Return(&model.Netrc{Machine: "mock", Login: "mock", Password: "mock"}, nil)
 
-			configFetcher := config.NewForge(time.Second * 3)
+			forgeFetcher := config.NewForge(time.Second * 3)
+			configFetcher := config.NewCombined(forgeFetcher, httpFetcher)
 			files, err := configFetcher.Fetch(
 				context.Background(),
 				f,
