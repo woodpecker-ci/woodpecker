@@ -42,6 +42,7 @@ import (
 	woodpeckerGrpcServer "go.woodpecker-ci.org/woodpecker/v2/server/grpc"
 	"go.woodpecker-ci.org/woodpecker/v2/server/logging"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+
 	// "go.woodpecker-ci.org/woodpecker/v2/server/plugins/encryption"
 	// encryptedStore "go.woodpecker-ci.org/woodpecker/v2/server/plugins/encryption/wrapper/store"
 	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/permissions"
@@ -280,39 +281,8 @@ func setupEvilGlobals(c *cli.Context, v store.Store, f forge.Forge) error {
 	server.Config.Services.Queue = setupQueue(c, v)
 	server.Config.Services.Logs = logging.New()
 	server.Config.Services.Pubsub = pubsub.New()
-	var err error
-	server.Config.Services.Registries, err = setupRegistryService(c, v)
-	if err != nil {
-		return err
-	}
-
-	// TODO(1544): fix encrypted store
-	// // encryption
-	// encryptedSecretStore := encryptedStore.NewSecretStore(v)
-	// err := encryption.Encryption(c, v).WithClient(encryptedSecretStore).Build()
-	// if err != nil {
-	// 	log.Fatal().Err(err).Msg("could not create encryption service")
-	// }
-	// server.Config.Services.Secrets = setupSecretService(c, encryptedSecretStore)
-	server.Config.Services.Secrets, err = setupSecretService(c, v)
-	if err != nil {
-		return err
-	}
-	server.Config.Services.Environ, err = setupEnvironService(c, v)
-	if err != nil {
-		return err
-	}
 	server.Config.Services.Membership = setupMembershipService(c, f)
-
-	server.Config.Services.SignaturePrivateKey, server.Config.Services.SignaturePublicKey, err = setupSignatureKeys(v)
-	if err != nil {
-		return err
-	}
-
-	server.Config.Services.ConfigService, err = setupConfigService(c)
-	if err != nil {
-		return err
-	}
+	// TODO: setup addon manager
 
 	// authentication
 	server.Config.Pipeline.AuthenticatePublicRepos = c.Bool("authenticate-public-repos")

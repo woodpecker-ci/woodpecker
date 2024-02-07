@@ -12,23 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package secrets_test
+package secret_test
 
 import (
-	"context"
 	"testing"
 
 	"github.com/franela/goblin"
 	"github.com/stretchr/testify/mock"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/secrets"
+	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/secret"
 	mocks_store "go.woodpecker-ci.org/woodpecker/v2/server/store/mocks"
 )
 
 func TestSecretListPipeline(t *testing.T) {
 	g := goblin.Goblin(t)
-	ctx := context.Background()
 	mockStore := mocks_store.NewStore(t)
 
 	// global secret
@@ -66,7 +64,7 @@ func TestSecretListPipeline(t *testing.T) {
 				repoSecret,
 			}, nil)
 
-			s, err := secrets.New(ctx, mockStore).SecretListPipeline(&model.Repo{}, &model.Pipeline{}, &model.ListOptions{})
+			s, err := secret.NewDB(mockStore).SecretListPipeline(&model.Repo{}, &model.Pipeline{}, &model.ListOptions{})
 			g.Assert(err).IsNil()
 
 			g.Assert(len(s)).Equal(1)
@@ -79,7 +77,7 @@ func TestSecretListPipeline(t *testing.T) {
 				orgSecret,
 			}, nil)
 
-			s, err := secrets.New(ctx, mockStore).SecretListPipeline(&model.Repo{}, &model.Pipeline{}, &model.ListOptions{})
+			s, err := secret.NewDB(mockStore).SecretListPipeline(&model.Repo{}, &model.Pipeline{}, &model.ListOptions{})
 			g.Assert(err).IsNil()
 
 			g.Assert(len(s)).Equal(1)
@@ -91,7 +89,7 @@ func TestSecretListPipeline(t *testing.T) {
 				globalSecret,
 			}, nil)
 
-			s, err := secrets.New(ctx, mockStore).SecretListPipeline(&model.Repo{}, &model.Pipeline{}, &model.ListOptions{})
+			s, err := secret.NewDB(mockStore).SecretListPipeline(&model.Repo{}, &model.Pipeline{}, &model.ListOptions{})
 			g.Assert(err).IsNil()
 
 			g.Assert(len(s)).Equal(1)

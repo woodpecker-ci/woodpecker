@@ -19,11 +19,11 @@ import (
 )
 
 type combined struct {
-	registries []model.ReadOnlyRegistryService
-	dbRegistry model.RegistryService
+	registries []ReadOnlyService
+	dbRegistry Service
 }
 
-func Combined(dbRegistry model.RegistryService, registries ...model.ReadOnlyRegistryService) model.RegistryService {
+func NewCombined(dbRegistry Service, registries ...ReadOnlyService) Service {
 	registries = append(registries, dbRegistry)
 	return &combined{
 		registries: registries,
@@ -31,7 +31,7 @@ func Combined(dbRegistry model.RegistryService, registries ...model.ReadOnlyRegi
 	}
 }
 
-func (c combined) RegistryFind(repo *model.Repo, name string) (*model.Registry, error) {
+func (c *combined) RegistryFind(repo *model.Repo, name string) (*model.Registry, error) {
 	for _, registry := range c.registries {
 		res, err := registry.RegistryFind(repo, name)
 		if err != nil {
@@ -44,7 +44,7 @@ func (c combined) RegistryFind(repo *model.Repo, name string) (*model.Registry, 
 	return nil, nil
 }
 
-func (c combined) RegistryList(repo *model.Repo, p *model.ListOptions) ([]*model.Registry, error) {
+func (c *combined) RegistryList(repo *model.Repo, p *model.ListOptions) ([]*model.Registry, error) {
 	var registries []*model.Registry
 	for _, registry := range c.registries {
 		list, err := registry.RegistryList(repo, &model.ListOptions{All: true})
@@ -56,14 +56,14 @@ func (c combined) RegistryList(repo *model.Repo, p *model.ListOptions) ([]*model
 	return model.ApplyPagination(p, registries), nil
 }
 
-func (c combined) RegistryCreate(repo *model.Repo, registry *model.Registry) error {
+func (c *combined) RegistryCreate(repo *model.Repo, registry *model.Registry) error {
 	return c.dbRegistry.RegistryCreate(repo, registry)
 }
 
-func (c combined) RegistryUpdate(repo *model.Repo, registry *model.Registry) error {
+func (c *combined) RegistryUpdate(repo *model.Repo, registry *model.Registry) error {
 	return c.dbRegistry.RegistryUpdate(repo, registry)
 }
 
-func (c combined) RegistryDelete(repo *model.Repo, name string) error {
+func (c *combined) RegistryDelete(repo *model.Repo, name string) error {
 	return c.dbRegistry.RegistryDelete(repo, name)
 }

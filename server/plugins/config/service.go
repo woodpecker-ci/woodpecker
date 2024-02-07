@@ -21,6 +21,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
-type Extension interface {
+type Service interface {
 	FetchConfig(ctx context.Context, repo *model.Repo, pipeline *model.Pipeline, currentFileMeta []*forge_types.FileMeta, netrc *model.Netrc) (configData []*forge_types.FileMeta, useOld bool, err error)
 }

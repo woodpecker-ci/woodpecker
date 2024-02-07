@@ -1,9 +1,9 @@
-package secrets
+package secret
 
 import "go.woodpecker-ci.org/woodpecker/v2/server/model"
 
-// SecretService defines a service for managing secrets.
-type SecretService interface {
+// Service defines a service for managing secrets.
+type Service interface {
 	SecretListPipeline(*model.Repo, *model.Pipeline, *model.ListOptions) ([]*model.Secret, error)
 	// Repository secrets
 	SecretFind(*model.Repo, string) (*model.Secret, error)

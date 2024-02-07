@@ -31,7 +31,7 @@ type filesystem struct {
 	path string
 }
 
-func Filesystem(path string) model.ReadOnlyRegistryService {
+func NewFilesystem(path string) ReadOnlyService {
 	return &filesystem{path}
 }
 
@@ -85,12 +85,12 @@ func parseDockerConfig(path string) ([]*model.Registry, error) {
 	return auths, nil
 }
 
-func (b *filesystem) RegistryFind(*model.Repo, string) (*model.Registry, error) {
+func (f *filesystem) RegistryFind(*model.Repo, string) (*model.Registry, error) {
 	return nil, nil
 }
 
-func (b *filesystem) RegistryList(_ *model.Repo, p *model.ListOptions) ([]*model.Registry, error) {
-	regs, err := parseDockerConfig(b.path)
+func (f *filesystem) RegistryList(_ *model.Repo, p *model.ListOptions) ([]*model.Registry, error) {
+	regs, err := parseDockerConfig(f.path)
 	if err != nil {
 		return nil, err
 	}

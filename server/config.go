@@ -18,14 +18,12 @@
 package server
 
 import (
-	"crypto"
 	"time"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/cache"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v2/server/logging"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/config"
 	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/permissions"
 	"go.woodpecker-ci.org/woodpecker/v2/server/pubsub"
 	"go.woodpecker-ci.org/woodpecker/v2/server/queue"
@@ -33,18 +31,12 @@ import (
 
 var Config = struct {
 	Services struct {
-		Pubsub              *pubsub.Publisher
-		Queue               queue.Queue
-		Logs                logging.Log
-		Secrets             model.SecretService
-		Registries          model.RegistryService
-		Environ             model.EnvironService
-		Forge               forge.Forge
-		Timeout             time.Duration
-		Membership          cache.MembershipService
-		ConfigService       config.Extension
-		SignaturePrivateKey crypto.PrivateKey
-		SignaturePublicKey  crypto.PublicKey
+		Pubsub     *pubsub.Publisher
+		Queue      queue.Queue
+		Logs       logging.Log
+		Forge      forge.Forge
+		Timeout    time.Duration
+		Membership cache.MembershipService
 	}
 	Storage struct {
 		// Users  model.UserStore
