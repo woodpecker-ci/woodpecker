@@ -26,16 +26,42 @@ func TestEnvVarSubst(t *testing.T) {
 		yaml    string
 		environ map[string]string
 		want    string
-	}{{
-		name: "simple substitution",
-		yaml: `steps:
+	}{
+		{
+			name: "simple substitution",
+			yaml: `steps:
 		step1:
 			image: ${HELLO_IMAGE}`,
-		environ: map[string]string{"HELLO_IMAGE": "hello-world"},
-		want: `steps:
+			environ: map[string]string{"HELLO_IMAGE": "hello-world"},
+			want: `steps:
 		step1:
 			image: hello-world`,
-	}}
+		},
+		{
+			name: "skip substitution if not present",
+			yaml: `steps:
+		step1:
+			commands:
+				- echo $HELLO_IMAGE`,
+			environ: map[string]string{},
+			want: `steps:
+		step1:
+			commands:
+				- echo $HELLO_IMAGE`,
+		},
+		{
+			name: "allow escaping",
+			yaml: `steps:
+		step1:
+			commands:
+				- echo $$HELLO_IMAGE`,
+			environ: map[string]string{"HELLO_IMAGE": "hello-world"},
+			want: `steps:
+		step1:
+			commands:
+				- echo $HELLO_IMAGE`,
+		},
+	}
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {

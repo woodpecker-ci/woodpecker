@@ -17,6 +17,7 @@ package stepbuilder
 
 import (
 	"fmt"
+	"html/template"
 	"path/filepath"
 	"strings"
 
@@ -126,10 +127,31 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 		environ[k] = v
 	}
 
+	newPreprocessor := true
+
 	// substitute vars
-	substituted, err := metadata.EnvVarSubst(data, environ)
-	if err != nil {
-		return nil, multierr.Append(errorsAndWarnings, err)
+	var substituted string
+	if newPreprocessor {
+		var err error
+		tmpl, err := template.New("pipeline").Parse(data)
+		if err != nil {
+			return nil, multierr.Append(errorsAndWarnings, err)
+		}
+
+		var sb strings.Builder
+		ctx := map[string]any{
+			"env": environ,
+		}
+		err = tmpl.Execute(&sb, ctx)
+		if err != nil {
+			return nil, multierr.Append(errorsAndWarnings, err)
+		}
+	} else {
+		var err error
+		substituted, err = metadata.EnvVarSubst(data, environ)
+		if err != nil {
+			return nil, multierr.Append(errorsAndWarnings, err)
+		}
 	}
 
 	// parse yaml pipeline
