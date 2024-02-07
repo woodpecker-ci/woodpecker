@@ -25,40 +25,25 @@ import (
 )
 
 type combined struct {
-	forgeService Service
-	httpService  Service
+	serives []Service
 }
 
-func NewCombined(forgeService, httpService Service) Service {
-	return &combined{
-		forgeService: forgeService,
-		httpService:  httpService,
-	}
+func NewCombined(services ...Service) Service {
+	return &combined{serives: services}
 }
 
 func (c *combined) Fetch(ctx context.Context, forge forge.Forge, user *model.User, repo *model.Repo, pipeline *model.Pipeline) (files []*types.FileMeta, err error) {
-	files, err = c.forgeService.Fetch(ctx, forge, user, repo, pipeline)
-	if err != nil {
-		return nil, err
-	}
-
-	if c.httpService != nil {
+	for _, s := range c.serives {
 		// TODO(anbraten): This is a hack to get the current configs into the http service
-		_httpService, ok := c.httpService.(*http)
+		_s, ok := s.(*http)
 		if !ok {
 			log.Err(err).Msg("http service is not of type http")
-			return files, nil
-		}
-		_httpService.currentConfigs = files
-
-		httpFiles, err := c.httpService.Fetch(ctx, forge, user, repo, pipeline)
-		if err != nil {
-			log.Err(err).Msg("failed to fetch config from http service using forge config instead")
-			return files, nil
+		} else {
+			_s.currentConfigs = files
 		}
 
-		files = httpFiles
+		files, err = s.Fetch(ctx, forge, user, repo, pipeline)
 	}
 
-	return files, nil
+	return files, err
 }
