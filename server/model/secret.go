@@ -116,7 +116,7 @@ var validDockerImageString = regexp.MustCompile(
 // Validate validates the required fields and formats.
 func (s *Secret) Validate() error {
 	for _, event := range s.Events {
-		if err := ValidateWebhookEvent(event); err != nil {
+		if err := event.Validate(); err != nil {
 			return errors.Join(err, ErrSecretEventInvalid)
 		}
 	}
