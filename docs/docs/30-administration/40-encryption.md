@@ -48,7 +48,11 @@ You can manage encryption on server using these environment variables:
 
 TINK uses AEAD encryption instead of simple AES and supports key rotation.
 
+<!-- markdownlint-disable no-duplicate-heading -->
+
 ### Configuration
+
+<!-- markdownlint-enable no-duplicate-heading -->
 
 You can manage encryption on server using these two environment variables:
 

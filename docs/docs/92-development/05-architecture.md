@@ -34,8 +34,8 @@
 | `server/forge/**`    | forge lib for server to connect and handle forge specific stuff                     | `shared`, `server/model`                                                                                                                                                               |
 | `server/router/**`   | handle requests to REST API (and all middleware) and serve UI and WebUI config      | `shared`, `../api`, `../model`, `../forge`, `../store`, `../web`                                                                                                                       |
 | `server/store/**`    | handle database                                                                     | `server/model`                                                                                                                                                                         |
-| `server/shared/**`   | TODO: move and split [#974](https://github.com/woodpecker-ci/woodpecker/issues/974) |
-| `server/web/**`      | server SPA                                                                          |
+| `server/shared/**`   | TODO: move and split [#974](https://github.com/woodpecker-ci/woodpecker/issues/974) |                                                                                                                                                                                        |
+| `server/web/**`      | server SPA                                                                          |                                                                                                                                                                                        |
 
 - `../` = `server/`
 
