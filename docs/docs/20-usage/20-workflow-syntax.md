@@ -332,11 +332,7 @@ There are use cases for executing steps on failure, such as sending notification
 +      - status: [ success, failure ]
 ```
 
-<!-- markdownlint-disable no-duplicate-heading -->
-
 #### `platform`
-
-<!-- markdownlint-enable no-duplicate-heading -->
 
 :::note
 This condition should be used in conjunction with a [matrix](./30-matrix-workflows.md#example-matrix-pipeline-using-multiple-platforms) workflow as a regular workflow will only be executed by a single agent which only has one arch.
@@ -356,7 +352,11 @@ when:
   - platform: [linux/*, windows/amd64]
 ```
 
+<!-- markdownlint-disable no-duplicate-heading -->
+
 #### `environment`
+
+<!-- markdownlint-enable no-duplicate-heading -->
 
 Execute a step for deployment events matching the target deployment environment:
 
