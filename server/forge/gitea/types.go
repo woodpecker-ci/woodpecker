@@ -43,3 +43,10 @@ type pullRequestHook struct {
 	Repo        *gitea.Repository  `json:"repository"`
 	Sender      *gitea.User        `json:"sender"`
 }
+
+type releaseHook struct {
+	Action  string            `json:"action"`
+	Repo    *gitea.Repository `json:"repository"`
+	Sender  *gitea.User       `json:"sender"`
+	Release *gitea.Release
+}

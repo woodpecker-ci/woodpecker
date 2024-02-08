@@ -46,11 +46,12 @@ var _ error = new(AuthError)
 var ErrNotImplemented = errors.New("not implemented")
 
 type ErrIgnoreEvent struct {
-	Event string
+	Event  string
+	Reason string
 }
 
 func (err *ErrIgnoreEvent) Error() string {
-	return fmt.Sprintf("explicit ignored event '%s'", err.Event)
+	return fmt.Sprintf("explicit ignored event '%s', reason: %s", err.Event, err.Reason)
 }
 
 func (*ErrIgnoreEvent) Is(target error) bool {
