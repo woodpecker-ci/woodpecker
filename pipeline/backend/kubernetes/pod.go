@@ -31,8 +31,11 @@ import (
 )
 
 const (
-	StepLabel = "step"
-	podPrefix = "wp-"
+	StepLabel           = "step"
+	podPrefix           = "wp-"
+	PipelineNumberLabel = "pipeline_number"
+	RepositoryLabel     = "repository"
+	WorkflowNameLabel   = "workflow_name"
 )
 
 func mkPod(step *types.Step, config *config, podName, goos string, options BackendOptions) (*v1.Pod, error) {
@@ -43,7 +46,7 @@ func mkPod(step *types.Step, config *config, podName, goos string, options Backe
 		return nil, err
 	}
 
-	spec, err := podSpec(step, config, options)
+	spec, err := podSpec(step, config, affinityLabels(step.Environment), options)
 	if err != nil {
 		return nil, err
 	}
@@ -93,6 +96,14 @@ func podMeta(step *types.Step, config *config, options BackendOptions, podName s
 		meta.Labels[ServiceLabel] = step.Name
 	}
 
+	affinityLabels := affinityLabels(step.Environment)
+
+	if len(affinityLabels) > 0 && !config.StorageRwx {
+		meta.Labels[RepositoryLabel] = affinityLabels[RepositoryLabel]
+		meta.Labels[PipelineNumberLabel] = affinityLabels[PipelineNumberLabel]
+		meta.Labels[WorkflowNameLabel] = affinityLabels[WorkflowNameLabel]
+	}
+
 	meta.Annotations = config.PodAnnotations
 	if meta.Annotations == nil {
 		meta.Annotations = make(map[string]string)
@@ -113,7 +124,22 @@ func stepLabel(step *types.Step) (string, error) {
 	return toDNSName(step.Name)
 }
 
-func podSpec(step *types.Step, config *config, options BackendOptions) (v1.PodSpec, error) {
+func affinityLabels(env map[string]string) map[string]string {
+	affinityLabels := make(map[string]string)
+
+	if val, ok := env["CI_REPO_NAME"]; ok {
+		affinityLabels[RepositoryLabel] = val
+	}
+	if val, ok := env["CI_PIPELINE_NUMBER"]; ok {
+		affinityLabels[PipelineNumberLabel] = val
+	}
+	if val, ok := env["CI_WORKFLOW_NAME"]; ok {
+		affinityLabels[WorkflowNameLabel] = val
+	}
+	return affinityLabels
+}
+
+func podSpec(step *types.Step, config *config, affinityLabels map[string]string, options BackendOptions) (v1.PodSpec, error) {
 	var err error
 	spec := v1.PodSpec{
 		RestartPolicy:      v1.RestartPolicyNever,
@@ -124,6 +150,11 @@ func podSpec(step *types.Step, config *config, options BackendOptions) (v1.PodSp
 		Tolerations:        tolerations(options.Tolerations),
 		SecurityContext:    podSecurityContext(options.SecurityContext, config.SecurityContext),
 	}
+
+	if len(affinityLabels) > 0 && !config.StorageRwx {
+		spec.Affinity = podAffinity(affinityLabels)
+	}
+
 	spec.Volumes, err = volumes(step.Volumes)
 	if err != nil {
 		return spec, err
@@ -169,6 +200,37 @@ func podContainer(step *types.Step, podName, goos string, options BackendOptions
 	}
 
 	return container, nil
+}
+
+func podAffinity(affinityLabels map[string]string) *v1.Affinity {
+	return &v1.Affinity{
+		PodAffinity: &v1.PodAffinity{
+			RequiredDuringSchedulingIgnoredDuringExecution: []v1.PodAffinityTerm{
+				{
+					LabelSelector: &metav1.LabelSelector{
+						MatchExpressions: []metav1.LabelSelectorRequirement{
+							{
+								Key:      RepositoryLabel,
+								Operator: metav1.LabelSelectorOpIn,
+								Values:   []string{affinityLabels[RepositoryLabel]},
+							},
+							{
+								Key:      PipelineNumberLabel,
+								Operator: metav1.LabelSelectorOpIn,
+								Values:   []string{affinityLabels[PipelineNumberLabel]},
+							},
+							{
+								Key:      WorkflowNameLabel,
+								Operator: metav1.LabelSelectorOpIn,
+								Values:   []string{affinityLabels[WorkflowNameLabel]},
+							},
+						},
+					},
+					TopologyKey: v1.LabelHostname,
+				},
+			},
+		},
+	}
 }
 
 func volumes(volumes []string) ([]v1.Volume, error) {

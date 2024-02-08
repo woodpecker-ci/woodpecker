@@ -348,3 +348,357 @@ func TestFullPod(t *testing.T) {
 	ja := jsonassert.New(t)
 	ja.Assertf(string(podJSON), expected)
 }
+
+func TestTinyPodAffinity(t *testing.T) {
+	expected := `
+	{
+		"metadata": {
+			"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
+			"namespace": "woodpecker",
+			"creationTimestamp": null,
+			"labels": {
+				"step": "build-via-gradle",
+				"pipeline_number": "2323",
+				"repository": "woodpecker",
+				"workflow_name": "02-tests"
+			}
+		},
+		"spec": {
+			"affinity": {
+				"podAffinity": {
+						"requiredDuringSchedulingIgnoredDuringExecution": [
+								{
+										"labelSelector": {
+												"matchExpressions": [
+														{
+																"key": "repository",
+																"operator": "In",
+																"values": [
+																		"woodpecker"
+																]
+														},
+														{
+																"key": "pipeline_number",
+																"operator": "In",
+																"values": [
+																		"2323"
+																]
+														},
+														{
+															"key": "workflow_name",
+															"operator": "In",
+															"values": [
+																	"02-tests"
+															]
+														}
+												]
+										},
+										"topologyKey": "kubernetes.io/hostname"
+								}
+						]
+				}
+			},
+			"volumes": [
+				{
+					"name": "workspace",
+					"persistentVolumeClaim": {
+						"claimName": "workspace"
+					}
+				}
+			],
+			"containers": [
+				{
+					"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
+					"image": "gradle:8.4.0-jdk21",
+					"command": [
+						"/bin/sh",
+						"-c"
+					],
+					"args": [
+						"echo $CI_SCRIPT | base64 -d | /bin/sh -e"
+					],
+					"workingDir": "/woodpecker/src",
+					"env": [
+						"<<UNORDERED>>",
+						{
+							"name": "CI",
+							"value": "woodpecker"
+						},
+						{
+							"name": "HOME",
+							"value": "/root"
+						},
+						{
+							"name": "SHELL",
+							"value": "/bin/sh"
+						},
+						{
+							"name": "CI_SCRIPT",
+							"value": "CmlmIFsgLW4gIiRDSV9ORVRSQ19NQUNISU5FIiBdOyB0aGVuCmNhdCA8PEVPRiA+ICRIT01FLy5uZXRyYwptYWNoaW5lICRDSV9ORVRSQ19NQUNISU5FCmxvZ2luICRDSV9ORVRSQ19VU0VSTkFNRQpwYXNzd29yZCAkQ0lfTkVUUkNfUEFTU1dPUkQKRU9GCmNobW9kIDA2MDAgJEhPTUUvLm5ldHJjCmZpCnVuc2V0IENJX05FVFJDX1VTRVJOQU1FCnVuc2V0IENJX05FVFJDX1BBU1NXT1JECnVuc2V0IENJX1NDUklQVAoKZWNobyArICdncmFkbGUgYnVpbGQnCmdyYWRsZSBidWlsZAo="
+						},
+						{
+							"name": "CI_PIPELINE_NUMBER",
+							"value": "2323"
+						},
+						{
+							"name": "CI_REPO_NAME",
+							"value": "woodpecker"
+						},
+						{
+							"name": "CI_WORKFLOW_NAME",
+							"value": "02-tests"
+						}
+					],
+					"resources": {},
+					"volumeMounts": [
+						{
+							"name": "workspace",
+							"mountPath": "/woodpecker/src"
+						}
+					]
+				}
+			],
+			"restartPolicy": "Never"
+		},
+		"status": {}
+	}`
+
+	pod, err := mkPod(&types.Step{
+		Name:        "build-via-gradle",
+		Image:       "gradle:8.4.0-jdk21",
+		WorkingDir:  "/woodpecker/src",
+		Pull:        false,
+		Privileged:  false,
+		Commands:    []string{"gradle build"},
+		Volumes:     []string{"workspace:/woodpecker/src"},
+		Environment: map[string]string{"CI": "woodpecker", "CI_PIPELINE_NUMBER": "2323", "CI_REPO_NAME": "woodpecker", "CI_WORKFLOW_NAME": "02-tests"},
+	}, &config{
+		Namespace:  "woodpecker",
+		StorageRwx: false,
+	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{})
+	assert.NoError(t, err)
+
+	podJSON, err := json.Marshal(pod)
+	assert.NoError(t, err)
+
+	ja := jsonassert.New(t)
+	ja.Assertf(string(podJSON), expected)
+}
+
+func TestFullPodAffinity(t *testing.T) {
+	expected := `
+	{
+		"metadata": {
+			"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
+			"namespace": "woodpecker",
+			"creationTimestamp": null,
+			"labels": {
+				"app": "test",
+				"step": "go-test",
+				"pipeline_number": "2323",
+				"repository": "woodpecker",
+				"workflow_name": "02-tests"
+			},
+			"annotations": {
+				"apps.kubernetes.io/pod-index": "0"
+			}
+		},
+		"spec": {
+			"affinity": {
+				"podAffinity": {
+						"requiredDuringSchedulingIgnoredDuringExecution": [
+								{
+										"labelSelector": {
+												"matchExpressions": [
+														{
+																"key": "repository",
+																"operator": "In",
+																"values": [
+																		"woodpecker"
+																]
+														},
+														{
+																"key": "pipeline_number",
+																"operator": "In",
+																"values": [
+																		"2323"
+																]
+														},
+														{
+															"key": "workflow_name",
+															"operator": "In",
+															"values": [
+																	"02-tests"
+															]
+														}
+												]
+										},
+										"topologyKey": "kubernetes.io/hostname"
+								}
+						]
+				}
+			},
+			"volumes": [
+				{
+					"name": "woodpecker-cache",
+					"persistentVolumeClaim": {
+						"claimName": "woodpecker-cache"
+					}
+				}
+			],
+			"containers": [
+				{
+					"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
+					"image": "meltwater/drone-cache",
+					"command": [
+						"/bin/sh",
+						"-c"
+					],
+					"args": [
+						"echo $CI_SCRIPT | base64 -d | /bin/sh -e"
+					],
+					"workingDir": "/woodpecker/src",
+					"ports": [
+						{
+							"containerPort": 1234
+						},
+						{
+							"containerPort": 2345,
+							"protocol": "TCP"
+						},
+						{
+							"containerPort": 3456,
+							"protocol": "UDP"
+						}
+					],
+					"env": [
+						"<<UNORDERED>>",
+						{
+							"name": "CGO",
+							"value": "0"
+						},
+						{
+							"name": "CI_SCRIPT",
+							"value": "CmlmIFsgLW4gIiRDSV9ORVRSQ19NQUNISU5FIiBdOyB0aGVuCmNhdCA8PEVPRiA+ICRIT01FLy5uZXRyYwptYWNoaW5lICRDSV9ORVRSQ19NQUNISU5FCmxvZ2luICRDSV9ORVRSQ19VU0VSTkFNRQpwYXNzd29yZCAkQ0lfTkVUUkNfUEFTU1dPUkQKRU9GCmNobW9kIDA2MDAgJEhPTUUvLm5ldHJjCmZpCnVuc2V0IENJX05FVFJDX1VTRVJOQU1FCnVuc2V0IENJX05FVFJDX1BBU1NXT1JECnVuc2V0IENJX1NDUklQVAoKZWNobyArICdnbyBnZXQnCmdvIGdldAoKZWNobyArICdnbyB0ZXN0JwpnbyB0ZXN0Cg=="
+						},
+						{
+							"name": "HOME",
+							"value": "/root"
+						},
+						{
+							"name": "SHELL",
+							"value": "/bin/sh"
+						},
+						{
+							"name": "CI_PIPELINE_NUMBER",
+							"value": "2323"
+						},
+						{
+							"name": "CI_REPO_NAME",
+							"value": "woodpecker"
+						},
+						{
+							"name": "CI_WORKFLOW_NAME",
+							"value": "02-tests"
+						}
+					],
+					"resources": {
+						"limits": {
+							"cpu": "2",
+							"memory": "256Mi"
+						},
+						"requests": {
+							"cpu": "1",
+							"memory": "128Mi"
+						}
+					},
+					"volumeMounts": [
+						{
+							"name": "woodpecker-cache",
+							"mountPath": "/woodpecker/src/cache"
+						}
+					],
+					"imagePullPolicy": "Always"
+				}
+			],
+			"restartPolicy": "Never",
+			"nodeSelector": {
+				"storage": "ssd"
+			},
+			"serviceAccountName": "wp-svc-acc",
+			"imagePullSecrets": [
+				{
+					"name": "regcred"
+				},
+				{
+					"name": "another-pull-secret"
+				}
+			],
+			"tolerations": [
+				{
+					"key": "net-port",
+					"value": "100Mbit",
+					"effect": "NoSchedule"
+				}
+			],
+			"hostAliases": [
+				{
+					"ip": "1.1.1.1",
+					"hostnames": [
+						"cloudflare"
+					]
+				},
+				{
+					"ip": "2606:4700:4700::64",
+					"hostnames": [
+						"cf.v6"
+					]
+				}
+			]
+		},
+		"status": {}
+	}`
+
+	hostAliases := []types.HostAlias{
+		{Name: "cloudflare", IP: "1.1.1.1"},
+		{Name: "cf.v6", IP: "2606:4700:4700::64"},
+	}
+	ports := []types.Port{
+		{Number: 1234},
+		{Number: 2345, Protocol: "tcp"},
+		{Number: 3456, Protocol: "udp"},
+	}
+	pod, err := mkPod(&types.Step{
+		Name:        "go-test",
+		Image:       "meltwater/drone-cache",
+		WorkingDir:  "/woodpecker/src",
+		Pull:        true,
+		Commands:    []string{"go get", "go test"},
+		Entrypoint:  []string{"/bin/sh", "-c"},
+		Volumes:     []string{"woodpecker-cache:/woodpecker/src/cache"},
+		Environment: map[string]string{"CGO": "0", "CI_PIPELINE_NUMBER": "2323", "CI_REPO_NAME": "woodpecker", "CI_WORKFLOW_NAME": "02-tests"},
+		ExtraHosts:  hostAliases,
+		Ports:       ports,
+	}, &config{
+		Namespace:            "woodpecker",
+		StorageRwx:           false,
+		ImagePullSecretNames: []string{"regcred", "another-pull-secret"},
+		PodLabels:            map[string]string{"app": "test"},
+		PodAnnotations:       map[string]string{"apps.kubernetes.io/pod-index": "0"},
+	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
+		NodeSelector:       map[string]string{"storage": "ssd"},
+		ServiceAccountName: "wp-svc-acc",
+		Tolerations:        []Toleration{{Key: "net-port", Value: "100Mbit", Effect: TaintEffectNoSchedule}},
+		Resources: Resources{
+			Requests: map[string]string{"memory": "128Mi", "cpu": "1000m"},
+			Limits:   map[string]string{"memory": "256Mi", "cpu": "2"},
+		},
+	})
+	assert.NoError(t, err)
+
+	podJSON, err := json.Marshal(pod)
+	assert.NoError(t, err)
+
+	ja := jsonassert.New(t)
+	ja.Assertf(string(podJSON), expected)
+}
