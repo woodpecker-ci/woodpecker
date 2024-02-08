@@ -214,9 +214,9 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 
 	backendCtx := context.WithValue(c.Context, backendTypes.CliContext, c)
 	backends := []backendTypes.Backend{
+		kubernetes.New(),
 		docker.New(),
 		local.New(),
-		kubernetes.New(),
 	}
 	backendEngine, err := backend.FindBackend(backendCtx, backends, c.String("backend-engine"))
 	if err != nil {
