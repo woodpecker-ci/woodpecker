@@ -4,7 +4,16 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@renovate[bot], @qwerty287, @pre-commit-ci[bot], @lukashass, @fernandrone
+@anbraten, @renovate[bot], @qwerty287, @pre-commit-ci[bot], @lukashass, @fernandrone
+
+### 🐛 Bug Fixes
+
+- Fix backend detection [[#3353](https://github.com/woodpecker-ci/woodpecker/pull/3353)]
+- Fix version check on next [[#3340](https://github.com/woodpecker-ci/woodpecker/pull/3340)]
+- Ignore gitlab merge request events without code changes [[#3338](https://github.com/woodpecker-ci/woodpecker/pull/3338)]
+- Ignore gitlab push events without commits [[#3339](https://github.com/woodpecker-ci/woodpecker/pull/3339)]
+- Consider gitlab inherited permissions [[#3308](https://github.com/woodpecker-ci/woodpecker/pull/3308)]
+- fix: agent panic when node is terminated during step execution [[#3331](https://github.com/woodpecker-ci/woodpecker/pull/3331)]
 
 ### 📈 Enhancement
 
@@ -13,20 +22,13 @@
 - Add no branches text [[#3312](https://github.com/woodpecker-ci/woodpecker/pull/3312)]
 - Add loading spinner to repo list [[#3310](https://github.com/woodpecker-ci/woodpecker/pull/3310)]
 
-### 🐛 Bug Fixes
-
-- Fix version check on next [[#3340](https://github.com/woodpecker-ci/woodpecker/pull/3340)]
-- Ignore gitlab merge request events without code changes [[#3338](https://github.com/woodpecker-ci/woodpecker/pull/3338)]
-- Ignore gitlab push events without commits [[#3339](https://github.com/woodpecker-ci/woodpecker/pull/3339)]
-- Consider gitlab inherited permissions [[#3308](https://github.com/woodpecker-ci/woodpecker/pull/3308)]
-- fix: agent panic when node is terminated during step execution [[#3331](https://github.com/woodpecker-ci/woodpecker/pull/3331)]
-
 ### 📚 Documentation
 
 - chore(deps): update dependency marked to v12 [[#3325](https://github.com/woodpecker-ci/woodpecker/pull/3325)]
 
 ### Misc
 
+- Fix linter [[#3354](https://github.com/woodpecker-ci/woodpecker/pull/3354)]
 - chore(deps): lock file maintenance [[#3350](https://github.com/woodpecker-ci/woodpecker/pull/3350)]
 - [pre-commit.ci] pre-commit autoupdate [[#3329](https://github.com/woodpecker-ci/woodpecker/pull/3329)]
 - fix(deps): update module github.com/moby/moby to v24.0.9+incompatible [security] [[#3323](https://github.com/woodpecker-ci/woodpecker/pull/3323)]
