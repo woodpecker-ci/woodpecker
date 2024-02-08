@@ -18,9 +18,6 @@ import (
 	"context"
 	"fmt"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/docker"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/kubernetes"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/local"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
 
@@ -29,13 +26,7 @@ var (
 	backends       []types.Backend
 )
 
-func Init() {
-	backends = []types.Backend{
-		docker.New(),
-		local.New(),
-		kubernetes.New(),
-	}
-
+func Init(backends []types.Backend) {
 	backendsByName = make(map[string]types.Backend)
 	for _, engine := range backends {
 		backendsByName[engine.Name()] = engine
