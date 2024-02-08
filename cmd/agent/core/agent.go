@@ -47,7 +47,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/version"
 )
 
-func run(c *cli.Context, backendEngines []types.Backend) error {
+func run(c *cli.Context, backends []types.Backend) error {
 	agentConfigPath := c.String("agent-config")
 	hostname := c.String("hostname")
 	if len(hostname) == 0 {
@@ -153,9 +153,8 @@ func run(c *cli.Context, backendEngines []types.Backend) error {
 
 	// new engine
 	backendCtx := context.WithValue(ctx, types.CliContext, c)
-	backend.Init(backendEngines)
 	backendName := c.String("backend-engine")
-	backendEngine, err := backend.FindBackend(backendCtx, backendName)
+	backendEngine, err := backend.FindBackend(backendCtx, backends, backendName)
 	if err != nil {
 		log.Error().Err(err).Msgf("cannot find backend engine '%s'", backendName)
 		return err
