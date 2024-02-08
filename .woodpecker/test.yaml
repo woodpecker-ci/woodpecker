@@ -93,7 +93,6 @@ steps:
 
   spellcheck:
     image: docker.io/node:21-alpine
-    group: test
     commands:
       - corepack enable
       - pnpx cspell lint --no-progress --gitignore '{**,.*}/{*,.*}'

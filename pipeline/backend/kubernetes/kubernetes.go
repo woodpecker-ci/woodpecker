@@ -268,11 +268,23 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 	}
 
 	if isImagePullBackOffState(pod) {
-		return nil, fmt.Errorf("could not pull image for pod %s", pod.Name)
+		return nil, fmt.Errorf("could not pull image for pod %s", podName)
+	}
+
+	if len(pod.Status.ContainerStatuses) == 0 {
+		return nil, fmt.Errorf("no container statuses found for pod %s", podName)
+	}
+
+	cs := pod.Status.ContainerStatuses[0]
+
+	if cs.State.Terminated == nil {
+		err := fmt.Errorf("no terminated state found for container %s/%s", podName, cs.Name)
+		log.Error().Str("taskUUID", taskUUID).Str("pod", podName).Str("container", cs.Name).Interface("state", cs.State).Msg(err.Error())
+		return nil, err
 	}
 
 	bs := &types.State{
-		ExitCode:  int(pod.Status.ContainerStatuses[0].State.Terminated.ExitCode),
+		ExitCode:  int(cs.State.Terminated.ExitCode),
 		Exited:    true,
 		OOMKilled: false,
 	}
