@@ -66,6 +66,10 @@ func (e *local) IsAvailable(context.Context) bool {
 	return true
 }
 
+func (e *local) Flags() []cli.Flag {
+	return Flags
+}
+
 func (e *local) Load(ctx context.Context) (*types.BackendInfo, error) {
 	c, ok := ctx.Value(types.CliContext).(*cli.Context)
 	if ok {
