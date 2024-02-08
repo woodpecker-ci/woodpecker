@@ -55,7 +55,7 @@ func SetUser() gin.HandlerFunc {
 			// this means the user is accessing with a web browser,
 			// so we should implement CSRF protection measures.
 			if t.Kind == token.SessToken {
-				err = token.CheckCsrf(c.Request, func(t *token.Token) (string, error) {
+				err = token.CheckCsrf(c.Request, func(_ *token.Token) (string, error) {
 					return user.Hash, nil
 				})
 				// if csrf token validation fails, exit immediately
