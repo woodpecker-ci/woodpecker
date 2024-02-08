@@ -644,6 +644,10 @@ func (g *GitLab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 
 	switch event := parsed.(type) {
 	case *gitlab.MergeEvent:
+		// https://docs.gitlab.com/ee/user/project/integrations/webhook_events.html#merge-request-events
+		if event.ObjectAttributes.OldRev == "" && event.ObjectAttributes.Action != "open" && event.ObjectAttributes.Action != "close" && event.ObjectAttributes.Action != "merge" {
+			return nil, nil, &forge_types.ErrIgnoreEvent{Event: string(eventType), Reason: "no code changes"}
+		}
 		mergeIID, repo, pipeline, err := convertMergeRequestHook(event, req)
 		if err != nil {
 			return nil, nil, err
@@ -655,6 +659,9 @@ func (g *GitLab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 
 		return repo, pipeline, nil
 	case *gitlab.PushEvent:
+		if event.TotalCommitsCount == 0 {
+			return nil, nil, &forge_types.ErrIgnoreEvent{Event: string(eventType), Reason: "no commits"}
+		}
 		return convertPushHook(event)
 	case *gitlab.TagEvent:
 		return convertTagHook(event)
