@@ -25,7 +25,7 @@ import (
 	"github.com/go-ap/httpsig"
 	"github.com/stretchr/testify/assert"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/services/utils"
+	"go.woodpecker-ci.org/woodpecker/v2/server/extensions/utils"
 )
 
 func TestSign(t *testing.T) {

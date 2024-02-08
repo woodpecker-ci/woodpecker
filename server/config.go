@@ -21,13 +21,13 @@ import (
 	"time"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/cache"
+	"go.woodpecker-ci.org/woodpecker/v2/server/extensions"
+	"go.woodpecker-ci.org/woodpecker/v2/server/extensions/permissions"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v2/server/logging"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/pubsub"
 	"go.woodpecker-ci.org/woodpecker/v2/server/queue"
-	"go.woodpecker-ci.org/woodpecker/v2/server/services"
-	"go.woodpecker-ci.org/woodpecker/v2/server/services/permissions"
 )
 
 var Config = struct {
@@ -37,7 +37,7 @@ var Config = struct {
 		Logs       logging.Log
 		Forge      forge.Forge
 		Membership cache.MembershipService
-		Manager    *services.Manager
+		Manager    *extensions.Manager
 	}
 	Server struct {
 		Key                 string

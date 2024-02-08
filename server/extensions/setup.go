@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package services
+package extensions
 
 import (
 	"crypto"
@@ -25,9 +25,9 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/services/config"
-	"go.woodpecker-ci.org/woodpecker/v2/server/services/registry"
-	"go.woodpecker-ci.org/woodpecker/v2/server/services/secret"
+	"go.woodpecker-ci.org/woodpecker/v2/server/extensions/config"
+	"go.woodpecker-ci.org/woodpecker/v2/server/extensions/registry"
+	"go.woodpecker-ci.org/woodpecker/v2/server/extensions/secret"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
 )

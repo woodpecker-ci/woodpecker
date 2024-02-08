@@ -31,10 +31,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
+	"go.woodpecker-ci.org/woodpecker/v2/server/extensions/config"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/mocks"
 	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/services/config"
 )
 
 func TestFetchFromConfigService(t *testing.T) {
