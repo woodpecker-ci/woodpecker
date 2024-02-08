@@ -42,17 +42,12 @@ func NewManager(c *cli.Context, store store.Store) (*Manager, error) {
 		return nil, err
 	}
 
-	config, err := setupConfigService(c, signaturePrivateKey)
-	if err != nil {
-		return nil, err
-	}
-
 	return &Manager{
 		signaturePrivateKey: signaturePrivateKey,
 		signaturePublicKey:  signaturePublicKey,
 		secret:              setupSecretExtension(store),
 		registry:            setupRegistryExtension(store, c.String("docker-config")),
-		config:              config,
+		config:              setupConfigService(c, signaturePrivateKey),
 		environment:         environment.Parse(c.StringSlice("environment")),
 	}, nil
 }

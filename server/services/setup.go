@@ -30,8 +30,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/services/secret"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/addon"
-	addonTypes "go.woodpecker-ci.org/woodpecker/v2/shared/addon/types"
 )
 
 func setupRegistryExtension(store store.Store, dockerConfig string) registry.Service {
@@ -58,24 +56,16 @@ func setupSecretExtension(store store.Store) secret.Service {
 	return secret.NewDB(store)
 }
 
-func setupConfigService(c *cli.Context, privateSignatureKey crypto.PrivateKey) (config.Service, error) {
-	addonExt, err := addon.Load[config.Service](c.StringSlice("addons"), addonTypes.TypeConfigService)
-	if err != nil {
-		return nil, err
-	}
-	if addonExt != nil {
-		return addonExt.Value, nil
-	}
-
+func setupConfigService(c *cli.Context, privateSignatureKey crypto.PrivateKey) config.Service {
 	timeout := c.Duration("forge-timeout")
 	configFetcher := config.NewForge(timeout)
 
 	if endpoint := c.String("config-service-endpoint"); endpoint != "" {
 		httpFetcher := config.NewHTTP(endpoint, privateSignatureKey, nil)
-		return config.NewCombined(configFetcher, httpFetcher), nil
+		return config.NewCombined(configFetcher, httpFetcher)
 	}
 
-	return configFetcher, nil
+	return configFetcher
 }
 
 // setupSignatureKeys generate or load key pair to sign webhooks requests (i.e. used for extensions)
