@@ -19,9 +19,9 @@ Directly import Woodpecker's Go package (`go.woodpecker-ci.org/woodpecker/woodpe
 
 ### Return types
 
-| Addon type           | Return type                                                            |
-| -------------------- | ---------------------------------------------------------------------- |
-| `Forge`              | `"go.woodpecker-ci.org/woodpecker/woodpecker/v2/server/forge".Forge`   |
+| Addon type | Return type                                                          |
+| ---------- | -------------------------------------------------------------------- |
+| `Forge`    | `"go.woodpecker-ci.org/woodpecker/woodpecker/v2/server/forge".Forge` |
 
 ### Using configurations
 
