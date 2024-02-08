@@ -39,15 +39,6 @@ var Config = struct {
 		Membership cache.MembershipService
 		Manager    *services.Manager
 	}
-	Storage struct {
-		// Users  model.UserStore
-		// Repos  model.RepoStore
-		// Builds model.BuildStore
-		// Logs   model.LogStore
-		Steps model.StepStore
-		// Registries model.RegistryStore
-		// Secrets model.SecretStore
-	}
 	Server struct {
 		Key                 string
 		Cert                string
