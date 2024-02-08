@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package core
 
 import (
 	"os"
@@ -96,10 +96,5 @@ var flags = []cli.Flag{
 		Name:    "backend-engine",
 		Usage:   "backend to run pipelines on",
 		Value:   "auto-detect",
-	},
-	&cli.StringSliceFlag{
-		EnvVars: []string{"WOODPECKER_ADDONS"},
-		Name:    "addons",
-		Usage:   "list of addon files",
 	},
 }
