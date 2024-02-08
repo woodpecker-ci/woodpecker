@@ -17,6 +17,8 @@ package types
 import (
 	"context"
 	"io"
+
+	"github.com/urfave/cli/v2"
 )
 
 // Backend defines a container orchestration backend and is used
@@ -27,6 +29,9 @@ type Backend interface {
 
 	// IsAvailable check if the backend is available.
 	IsAvailable(ctx context.Context) bool
+
+	// Flags return the configuration flags of the backend.
+	Flags() []cli.Flag
 
 	// Load loads the backend engine.
 	Load(ctx context.Context) (*BackendInfo, error)
