@@ -1,10 +1,17 @@
 # Changelog
 
-## [2.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.4.0) - 2024-02-07
+## [2.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.4.0) - 2024-02-08
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@lukashass, @fernandrone, @renovate[bot]
+@renovate[bot], @qwerty287, @pre-commit-ci[bot], @lukashass, @fernandrone
+
+### 📈 Enhancement
+
+- Parse backend options in backend [[#3227](https://github.com/woodpecker-ci/woodpecker/pull/3227)]
+- Make agent usable for external backends [[#3270](https://github.com/woodpecker-ci/woodpecker/pull/3270)]
+- Add no branches text [[#3312](https://github.com/woodpecker-ci/woodpecker/pull/3312)]
+- Add loading spinner to repo list [[#3310](https://github.com/woodpecker-ci/woodpecker/pull/3310)]
 
 ### 🐛 Bug Fixes
 
@@ -18,13 +25,10 @@
 
 - chore(deps): update dependency marked to v12 [[#3325](https://github.com/woodpecker-ci/woodpecker/pull/3325)]
 
-### 📈 Enhancement
-
-- Add no branches text [[#3312](https://github.com/woodpecker-ci/woodpecker/pull/3312)]
-- Add loading spinner to repo list [[#3310](https://github.com/woodpecker-ci/woodpecker/pull/3310)]
-
 ### Misc
 
+- chore(deps): lock file maintenance [[#3350](https://github.com/woodpecker-ci/woodpecker/pull/3350)]
+- [pre-commit.ci] pre-commit autoupdate [[#3329](https://github.com/woodpecker-ci/woodpecker/pull/3329)]
 - fix(deps): update module github.com/moby/moby to v24.0.9+incompatible [security] [[#3323](https://github.com/woodpecker-ci/woodpecker/pull/3323)]
 - chore(deps): update docker.io/woodpeckerci/plugin-docker-buildx docker tag to v3.0.1 [[#3324](https://github.com/woodpecker-ci/woodpecker/pull/3324)]
 
