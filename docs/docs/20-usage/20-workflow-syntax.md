@@ -332,7 +332,11 @@ There are use cases for executing steps on failure, such as sending notification
 +      - status: [ success, failure ]
 ```
 
+<!-- markdownlint-disable no-duplicate-heading -->
+
 #### `platform`
+
+<!-- markdownlint-enable no-duplicate-heading -->
 
 :::note
 This condition should be used in conjunction with a [matrix](./30-matrix-workflows.md#example-matrix-pipeline-using-multiple-platforms) workflow as a regular workflow will only be executed by a single agent which only has one arch.
@@ -556,7 +560,11 @@ git clone https://github.com/octocat/hello-world \
   /go/src/github.com/octocat/hello-world
 ```
 
+<!-- markdownlint-disable no-duplicate-heading -->
+
 ## `matrix`
+
+<!-- markdownlint-enable no-duplicate-heading -->
 
 Woodpecker has integrated support for matrix builds. Woodpecker executes a separate build task for each combination in the matrix, allowing you to build and test a single commit against multiple configurations.
 
@@ -713,7 +721,11 @@ Example conditional execution by branch:
 
 The workflow now triggers on `main`, but also if the target branch of a pull request is `main`.
 
+<!-- markdownlint-disable no-duplicate-heading -->
+
 ## `depends_on`
+
+<!-- markdownlint-enable no-duplicate-heading -->
 
 Woodpecker supports to define multiple workflows for a repository. Those workflows will run independent from each other. To depend them on each other you can use the [`depends_on`](./25-workflows.md#flow-control) keyword.
 
