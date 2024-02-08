@@ -101,9 +101,9 @@ func lintFile(_ *cli.Context, file string) error {
 	// TODO: lint multiple files at once to allow checks for sth like "depends_on" to work
 	err = linter.New(linter.WithTrusted(true)).Lint([]*linter.WorkflowConfig{config})
 	if err != nil {
-		fmt.Printf("🔥 %s has errors:\n", output.String(config.File).Underline())
+		fmt.Printf("🔥 %s has warnings / errors:\n", output.String(config.File).Underline())
 
-		hasErrors := true
+		hasErrors := false
 		for _, err := range pipeline_errors.GetPipelineErrors(err) {
 			line := "  "
 

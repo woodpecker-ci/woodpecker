@@ -18,16 +18,15 @@ package model
 import (
 	"errors"
 	"fmt"
-	"path/filepath"
 	"regexp"
 	"sort"
 )
 
 var (
-	ErrSecretNameInvalid  = errors.New("Invalid Secret Name")
-	ErrSecretImageInvalid = errors.New("Invalid Secret Image")
-	ErrSecretValueInvalid = errors.New("Invalid Secret Value")
-	ErrSecretEventInvalid = errors.New("Invalid Secret Event")
+	ErrSecretNameInvalid  = errors.New("invalid secret name")
+	ErrSecretImageInvalid = errors.New("invalid secret image")
+	ErrSecretValueInvalid = errors.New("invalid secret value")
+	ErrSecretEventInvalid = errors.New("invalid secret event")
 )
 
 // SecretService defines a service for managing secrets.
@@ -103,19 +102,6 @@ func (s Secret) IsRepository() bool {
 	return s.RepoID != 0 && s.OrgID == 0
 }
 
-// Match returns true if an image and event match the restricted list.
-func (s *Secret) Match(event WebhookEvent) bool {
-	if len(s.Events) == 0 {
-		return true
-	}
-	for _, pattern := range s.Events {
-		if match, _ := filepath.Match(string(pattern), string(event)); match {
-			return true
-		}
-	}
-	return false
-}
-
 var validDockerImageString = regexp.MustCompile(
 	`^(` +
 		`[\w\d\-_\.]+` + // hostname
@@ -130,7 +116,7 @@ var validDockerImageString = regexp.MustCompile(
 // Validate validates the required fields and formats.
 func (s *Secret) Validate() error {
 	for _, event := range s.Events {
-		if err := ValidateWebhookEvent(event); err != nil {
+		if err := event.Validate(); err != nil {
 			return errors.Join(err, ErrSecretEventInvalid)
 		}
 	}

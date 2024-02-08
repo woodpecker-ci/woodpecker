@@ -18,9 +18,10 @@ import (
 	"fmt"
 	"maps"
 	"path"
+	"strconv"
 	"strings"
 
-	"github.com/google/uuid"
+	"github.com/oklog/ulid/v2"
 
 	backend_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
@@ -29,17 +30,16 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/utils"
 )
 
-func (c *Compiler) createProcess(name string, container *yaml_types.Container, stepType backend_types.StepType) (*backend_types.Step, error) {
+func (c *Compiler) createProcess(container *yaml_types.Container, stepType backend_types.StepType) (*backend_types.Step, error) {
 	var (
-		uuid = uuid.New()
+		uuid = ulid.Make()
 
 		detached   bool
-		workingdir string
+		workingDir string
 
 		workspace   = fmt.Sprintf("%s_default:%s", c.prefix, c.base)
 		privileged  = container.Privileged
 		networkMode = container.NetworkMode
-		ipcMode     = container.IpcMode
 		// network    = container.Network
 	)
 
@@ -53,6 +53,16 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		networks = append(networks, backend_types.Conn{
 			Name: network,
 		})
+	}
+
+	extraHosts := make([]backend_types.HostAlias, len(container.ExtraHosts))
+	for i, extraHost := range container.ExtraHosts {
+		name, ip, ok := strings.Cut(extraHost, ":")
+		if !ok {
+			return nil, &ErrExtraHostFormat{host: extraHost}
+		}
+		extraHosts[i].Name = name
+		extraHosts[i].IP = ip
 	}
 
 	var volumes []string
@@ -70,27 +80,45 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 	maps.Copy(environment, c.env)
 
 	environment["CI_WORKSPACE"] = path.Join(c.base, c.path)
-	environment["CI_STEP_NAME"] = name
 
 	if stepType == backend_types.StepTypeService || container.Detached {
 		detached = true
 	}
 
 	if !detached || len(container.Commands) != 0 {
-		workingdir = c.stepWorkdir(container)
+		workingDir = c.stepWorkingDir(container)
 	}
 
-	if !detached {
-		pluginSecrets := secretMap{}
-		for name, secret := range c.secrets {
-			if secret.Available(container) {
-				pluginSecrets[name] = secret
-			}
+	getSecretValue := func(name string) (string, error) {
+		name = strings.ToLower(name)
+		secret, ok := c.secrets[name]
+		if !ok {
+			return "", fmt.Errorf("secret %q not found", name)
 		}
 
-		if err := settings.ParamsToEnv(container.Settings, environment, pluginSecrets.toStringMap()); err != nil {
+		event := c.metadata.Curr.Event
+		err := secret.Available(event, container)
+		if err != nil {
+			return "", err
+		}
+
+		return secret.Value, nil
+	}
+
+	// TODO: why don't we pass secrets to detached steps?
+	if !detached {
+		if err := settings.ParamsToEnv(container.Settings, environment, getSecretValue); err != nil {
 			return nil, err
 		}
+	}
+
+	for _, requested := range container.Secrets.Secrets {
+		secretValue, err := getSecretValue(requested.Source)
+		if err != nil {
+			return nil, err
+		}
+
+		environment[strings.ToUpper(requested.Target)] = secretValue
 	}
 
 	if utils.MatchImage(container.Image, c.escalated...) && container.IsPlugin() {
@@ -102,17 +130,7 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		if utils.MatchHostname(container.Image, registry.Hostname) {
 			authConfig.Username = registry.Username
 			authConfig.Password = registry.Password
-			authConfig.Email = registry.Email
 			break
-		}
-	}
-
-	for _, requested := range container.Secrets.Secrets {
-		secret, ok := c.secrets[strings.ToLower(requested.Source)]
-		if ok && secret.Available(container) {
-			environment[strings.ToUpper(requested.Target)] = secret.Value
-		} else {
-			return nil, fmt.Errorf("secret %q not found or not allowed to be used", requested.Source)
 		}
 	}
 
@@ -146,9 +164,13 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		cpuSet = c.reslimit.CPUSet
 	}
 
-	var ports []uint16
-	for _, port := range container.Ports {
-		ports = append(ports, uint16(port))
+	var ports []backend_types.Port
+	for _, portDef := range container.Ports {
+		port, err := convertPort(portDef)
+		if err != nil {
+			return nil, err
+		}
+		ports = append(ports, port)
 	}
 
 	// at least one constraint contain status success, or all constraints have no status set
@@ -162,18 +184,18 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 	}
 
 	return &backend_types.Step{
-		Name:           name,
+		Name:           container.Name,
 		UUID:           uuid.String(),
 		Type:           stepType,
-		Alias:          container.Name,
 		Image:          container.Image,
 		Pull:           container.Pull,
 		Detached:       detached,
 		Privileged:     privileged,
-		WorkingDir:     workingdir,
+		WorkingDir:     workingDir,
 		Environment:    environment,
 		Commands:       container.Commands,
-		ExtraHosts:     container.ExtraHosts,
+		Entrypoint:     container.Entrypoint,
+		ExtraHosts:     extraHosts,
 		Volumes:        volumes,
 		Tmpfs:          container.Tmpfs,
 		Devices:        container.Devices,
@@ -183,7 +205,6 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		MemSwapLimit:   memSwapLimit,
 		MemLimit:       memLimit,
 		ShmSize:        shmSize,
-		Sysctls:        container.Sysctls,
 		CPUQuota:       cpuQuota,
 		CPUShares:      cpuShares,
 		CPUSet:         cpuSet,
@@ -192,17 +213,32 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		OnFailure:      onFailure,
 		Failure:        failure,
 		NetworkMode:    networkMode,
-		IpcMode:        ipcMode,
 		Ports:          ports,
 		BackendOptions: backendOptions,
 	}, nil
 }
 
-func (c *Compiler) stepWorkdir(container *yaml_types.Container) string {
+func (c *Compiler) stepWorkingDir(container *yaml_types.Container) string {
 	if path.IsAbs(container.Directory) {
 		return container.Directory
 	}
 	return path.Join(c.base, c.path, container.Directory)
+}
+
+func convertPort(portDef string) (backend_types.Port, error) {
+	var err error
+	var port backend_types.Port
+
+	number, protocol, _ := strings.Cut(portDef, "/")
+	port.Protocol = protocol
+
+	portNumber, err := strconv.ParseUint(number, 10, 16)
+	if err != nil {
+		return port, err
+	}
+	port.Number = uint16(portNumber)
+
+	return port, nil
 }
 
 func convertKubernetesBackendOptions(kubeOpt *yaml_types.KubernetesBackendOptions) backend_types.KubernetesBackendOptions {
@@ -230,6 +266,18 @@ func convertKubernetesBackendOptions(kubeOpt *yaml_types.KubernetesBackendOption
 			RunAsUser:    kubeOpt.SecurityContext.RunAsUser,
 			RunAsGroup:   kubeOpt.SecurityContext.RunAsGroup,
 			FSGroup:      kubeOpt.SecurityContext.FSGroup,
+		}
+		if kubeOpt.SecurityContext.SeccompProfile != nil {
+			securityContext.SeccompProfile = &backend_types.SecProfile{
+				Type:             backend_types.SecProfileType(kubeOpt.SecurityContext.SeccompProfile.Type),
+				LocalhostProfile: kubeOpt.SecurityContext.SeccompProfile.LocalhostProfile,
+			}
+		}
+		if kubeOpt.SecurityContext.ApparmorProfile != nil {
+			securityContext.ApparmorProfile = &backend_types.SecProfile{
+				Type:             backend_types.SecProfileType(kubeOpt.SecurityContext.ApparmorProfile.Type),
+				LocalhostProfile: kubeOpt.SecurityContext.ApparmorProfile.LocalhostProfile,
+			}
 		}
 	}
 

@@ -10,8 +10,11 @@ export type Repo = {
   forge_remote_id: string;
 
   // The source control management being used.
-  // Currently this is either 'git' or 'hg' (Mercurial).
+  // Currently, this is either 'git' or 'hg' (Mercurial).
   scm: string;
+
+  // Whether the forge repo has PRs enabled.
+  pr_enabled: boolean;
 
   // The id of the organization that owns the repository.
   org_id: number;

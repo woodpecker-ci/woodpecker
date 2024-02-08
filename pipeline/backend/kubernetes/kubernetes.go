@@ -18,27 +18,26 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"maps"
 	"os"
 	"runtime"
-	"strings"
+	"slices"
 	"time"
 
 	"github.com/rs/zerolog/log"
-	"gopkg.in/yaml.v3"
-
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
-
 	"github.com/urfave/cli/v2"
+	"gopkg.in/yaml.v3"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
+	// To authenticate to GCP K8s clusters
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 
-	// To authenticate to GCP K8s clusters
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
 
 const (
@@ -48,20 +47,20 @@ const (
 var defaultDeleteOptions = newDefaultDeleteOptions()
 
 type kube struct {
-	ctx    context.Context
 	client kubernetes.Interface
 	config *config
 	goos   string
 }
 
 type config struct {
-	Namespace       string
-	StorageClass    string
-	VolumeSize      string
-	StorageRwx      bool
-	PodLabels       map[string]string
-	PodAnnotations  map[string]string
-	SecurityContext SecurityContextConfig
+	Namespace            string
+	StorageClass         string
+	VolumeSize           string
+	StorageRwx           bool
+	PodLabels            map[string]string
+	PodAnnotations       map[string]string
+	ImagePullSecretNames []string
+	SecurityContext      SecurityContextConfig
 }
 type SecurityContextConfig struct {
 	RunAsNonRoot bool
@@ -81,26 +80,31 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 	if ctx != nil {
 		if c, ok := ctx.Value(types.CliContext).(*cli.Context); ok {
 			config := config{
-				Namespace:      c.String("backend-k8s-namespace"),
-				StorageClass:   c.String("backend-k8s-storage-class"),
-				VolumeSize:     c.String("backend-k8s-volume-size"),
-				StorageRwx:     c.Bool("backend-k8s-storage-rwx"),
-				PodLabels:      make(map[string]string), // just init empty map to prevent nil panic
-				PodAnnotations: make(map[string]string), // just init empty map to prevent nil panic
+				Namespace:            c.String("backend-k8s-namespace"),
+				StorageClass:         c.String("backend-k8s-storage-class"),
+				VolumeSize:           c.String("backend-k8s-volume-size"),
+				StorageRwx:           c.Bool("backend-k8s-storage-rwx"),
+				PodLabels:            make(map[string]string), // just init empty map to prevent nil panic
+				PodAnnotations:       make(map[string]string), // just init empty map to prevent nil panic
+				ImagePullSecretNames: c.StringSlice("backend-k8s-pod-image-pull-secret-names"),
 				SecurityContext: SecurityContextConfig{
 					RunAsNonRoot: c.Bool("backend-k8s-secctx-nonroot"),
 				},
 			}
+			// TODO: remove in next major
+			if len(config.ImagePullSecretNames) == 1 && config.ImagePullSecretNames[0] == "regcred" {
+				log.Warn().Msg("WOODPECKER_BACKEND_K8S_PULL_SECRET_NAMES is set to the default ('regcred'). It will default to empty in Woodpecker 3.0. Set it explicitly before then.")
+			}
 			// Unmarshal label and annotation settings here to ensure they're valid on startup
 			if labels := c.String("backend-k8s-pod-labels"); labels != "" {
 				if err := yaml.Unmarshal([]byte(labels), &config.PodLabels); err != nil {
-					log.Error().Msgf("could not unmarshal pod labels '%s': %s", c.String("backend-k8s-pod-labels"), err)
+					log.Error().Err(err).Msgf("could not unmarshal pod labels '%s'", c.String("backend-k8s-pod-labels"))
 					return nil, err
 				}
 			}
 			if annotations := c.String("backend-k8s-pod-annotations"); annotations != "" {
 				if err := yaml.Unmarshal([]byte(c.String("backend-k8s-pod-annotations")), &config.PodAnnotations); err != nil {
-					log.Error().Msgf("could not unmarshal pod annotations '%s': %s", c.String("backend-k8s-pod-annotations"), err)
+					log.Error().Err(err).Msgf("could not unmarshal pod annotations '%s'", c.String("backend-k8s-pod-annotations"))
 					return nil, err
 				}
 			}
@@ -112,10 +116,8 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 }
 
 // New returns a new Kubernetes Backend.
-func New(ctx context.Context) types.Backend {
-	return &kube{
-		ctx: ctx,
-	}
+func New() types.Backend {
+	return &kube{}
 }
 
 func (e *kube) Name() string {
@@ -127,8 +129,8 @@ func (e *kube) IsAvailable(context.Context) bool {
 	return len(host) > 0
 }
 
-func (e *kube) Load(context.Context) (*types.BackendInfo, error) {
-	config, err := configFromCliContext(e.ctx)
+func (e *kube) Load(ctx context.Context) (*types.BackendInfo, error) {
+	config, err := configFromCliContext(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -155,6 +157,17 @@ func (e *kube) Load(context.Context) (*types.BackendInfo, error) {
 	}, nil
 }
 
+func (e *kube) getConfig() *config {
+	if e.config == nil {
+		return nil
+	}
+	c := *e.config
+	c.PodLabels = maps.Clone(e.config.PodLabels)
+	c.PodAnnotations = maps.Clone(e.config.PodAnnotations)
+	c.ImagePullSecretNames = slices.Clone(e.config.ImagePullSecretNames)
+	return &c
+}
+
 // Setup the pipeline environment.
 func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("Setting up Kubernetes primitives")
@@ -166,21 +179,20 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID s
 		}
 	}
 
-	extraHosts := []string{}
-
+	extraHosts := []types.HostAlias{}
 	for _, stage := range conf.Stages {
-		if stage.Alias == "services" {
-			for _, step := range stage.Steps {
+		for _, step := range stage.Steps {
+			if step.Type == types.StepTypeService {
 				svc, err := startService(ctx, e, step)
 				if err != nil {
 					return err
 				}
-				extraHosts = append(extraHosts, step.Networks[0].Aliases[0]+":"+svc.Spec.ClusterIP)
+				hostAlias := types.HostAlias{Name: step.Networks[0].Aliases[0], IP: svc.Spec.ClusterIP}
+				extraHosts = append(extraHosts, hostAlias)
 			}
 		}
 	}
-
-	log.Trace().Msgf("Adding extra hosts: %s", strings.Join(extraHosts, ", "))
+	log.Trace().Msgf("adding extra hosts: %v", extraHosts)
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
 			step.ExtraHosts = extraHosts
@@ -192,7 +204,7 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID s
 
 // Start the pipeline step.
 func (e *kube) StartStep(ctx context.Context, step *types.Step, taskUUID string) error {
-	log.Trace().Str("taskUUID", taskUUID).Msgf("Starting step: %s", step.Name)
+	log.Trace().Str("taskUUID", taskUUID).Msgf("starting step: %s", step.Name)
 	_, err := startPod(ctx, e, step)
 	return err
 }
@@ -200,17 +212,22 @@ func (e *kube) StartStep(ctx context.Context, step *types.Step, taskUUID string)
 // Wait for the pipeline step to complete and returns
 // the completion results.
 func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) (*types.State, error) {
-	podName, err := dnsName(step.Name)
+	podName, err := stepToPodName(step)
 	if err != nil {
 		return nil, err
 	}
 
-	log.Trace().Str("taskUUID", taskUUID).Msgf("Waiting for pod: %s", podName)
+	log.Trace().Str("taskUUID", taskUUID).Msgf("waiting for pod: %s", podName)
 
 	finished := make(chan bool)
 
 	podUpdated := func(old, new any) {
-		pod := new.(*v1.Pod)
+		pod, ok := new.(*v1.Pod)
+		if !ok {
+			log.Error().Msgf("could not parse pod: %v", new)
+			return
+		}
+
 		if pod.Name == podName {
 			if isImagePullBackOffState(pod) {
 				finished <- true
@@ -246,11 +263,23 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 	}
 
 	if isImagePullBackOffState(pod) {
-		return nil, fmt.Errorf("Could not pull image for pod %s", pod.Name)
+		return nil, fmt.Errorf("could not pull image for pod %s", podName)
+	}
+
+	if len(pod.Status.ContainerStatuses) == 0 {
+		return nil, fmt.Errorf("no container statuses found for pod %s", podName)
+	}
+
+	cs := pod.Status.ContainerStatuses[0]
+
+	if cs.State.Terminated == nil {
+		err := fmt.Errorf("no terminated state found for container %s/%s", podName, cs.Name)
+		log.Error().Str("taskUUID", taskUUID).Str("pod", podName).Str("container", cs.Name).Interface("state", cs.State).Msg(err.Error())
+		return nil, err
 	}
 
 	bs := &types.State{
-		ExitCode:  int(pod.Status.ContainerStatuses[0].State.Terminated.ExitCode),
+		ExitCode:  int(cs.State.Terminated.ExitCode),
 		Exited:    true,
 		OOMKilled: false,
 	}
@@ -260,17 +289,22 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 
 // Tail the pipeline step logs.
 func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) (io.ReadCloser, error) {
-	podName, err := dnsName(step.Name)
+	podName, err := stepToPodName(step)
 	if err != nil {
 		return nil, err
 	}
 
-	log.Trace().Str("taskUUID", taskUUID).Msgf("Tail logs of pod: %s", podName)
+	log.Trace().Str("taskUUID", taskUUID).Msgf("tail logs of pod: %s", podName)
 
 	up := make(chan bool)
 
 	podUpdated := func(old, new any) {
-		pod := new.(*v1.Pod)
+		pod, ok := new.(*v1.Pod)
+		if !ok {
+			log.Error().Msgf("could not parse pod: %v", new)
+			return
+		}
+
 		if pod.Name == podName {
 			switch pod.Status.Phase {
 			case v1.PodRunning, v1.PodSucceeded, v1.PodFailed:
@@ -323,32 +357,28 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 		}
 	}()
 	return rc, nil
-
-	// rc := io.NopCloser(bytes.NewReader(e.logs.Bytes()))
-	// e.logs.Reset()
-	// return rc, nil
 }
 
-func (e *kube) DestroyStep(_ context.Context, step *types.Step, taskUUID string) error {
+func (e *kube) DestroyStep(ctx context.Context, step *types.Step, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("Stopping step: %s", step.Name)
-	err := stopPod(e.ctx, e, step, defaultDeleteOptions)
+	err := stopPod(ctx, e, step, defaultDeleteOptions)
 	return err
 }
 
 // Destroy the pipeline environment.
-func (e *kube) DestroyWorkflow(_ context.Context, conf *types.Config, taskUUID string) error {
-	log.Trace().Str("taskUUID", taskUUID).Msg("Deleting Kubernetes primitives")
+func (e *kube) DestroyWorkflow(ctx context.Context, conf *types.Config, taskUUID string) error {
+	log.Trace().Str("taskUUID", taskUUID).Msg("deleting Kubernetes primitives")
 
 	// Use noContext because the ctx sent to this function will be canceled/done in case of error or canceled by user.
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
-			err := stopPod(e.ctx, e, step, defaultDeleteOptions)
+			err := stopPod(ctx, e, step, defaultDeleteOptions)
 			if err != nil {
 				return err
 			}
 
 			if step.Type == types.StepTypeService {
-				err := stopService(e.ctx, e, step, defaultDeleteOptions)
+				err := stopService(ctx, e, step, defaultDeleteOptions)
 				if err != nil {
 					return err
 				}
@@ -357,7 +387,7 @@ func (e *kube) DestroyWorkflow(_ context.Context, conf *types.Config, taskUUID s
 	}
 
 	for _, vol := range conf.Volumes {
-		err := stopVolume(e.ctx, e, vol.Name, defaultDeleteOptions)
+		err := stopVolume(ctx, e, vol.Name, defaultDeleteOptions)
 		if err != nil {
 			return err
 		}

@@ -42,7 +42,7 @@ func GetSecret(c *gin.Context) {
 	)
 	secret, err := server.Config.Services.Secrets.SecretFind(repo, name)
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, secret.Copy())
@@ -55,7 +55,7 @@ func GetSecret(c *gin.Context) {
 //	@Produce	json
 //	@Success	200	{object}	Secret
 //	@Tags		Repository secrets
-//	@Param		Authorization	header	string			true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		repo_id			path	int		true	"the repository id"
 //	@Param		secret			body	Secret	true	"the new secret"
 func PostSecret(c *gin.Context) {
@@ -91,9 +91,9 @@ func PostSecret(c *gin.Context) {
 //	@Produce	json
 //	@Success	200	{object}	Secret
 //	@Tags		Repository secrets
-//	@Param		Authorization	header	string			true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		repo_id			path	int		true	"the repository id"
-//	@Param		secretName		path	string			true	"the secret name"
+//	@Param		secretName		path	string	true	"the secret name"
 //	@Param		secret			body	Secret	true	"the secret itself"
 func PatchSecret(c *gin.Context) {
 	var (
@@ -110,7 +110,7 @@ func PatchSecret(c *gin.Context) {
 
 	secret, err := server.Config.Services.Secrets.SecretFind(repo, name)
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 	if in.Value != "" {
@@ -176,7 +176,7 @@ func DeleteSecret(c *gin.Context) {
 		name = c.Param("secret")
 	)
 	if err := server.Config.Services.Secrets.SecretDelete(repo, name); err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 	c.Status(http.StatusNoContent)

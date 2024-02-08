@@ -29,28 +29,35 @@ import (
 func TestSecretAvailable(t *testing.T) {
 	secret := Secret{
 		AllowedPlugins: []string{},
+		Events:         []string{"push"},
 	}
-	assert.True(t, secret.Available(&yaml_types.Container{
+	assert.NoError(t, secret.Available("push", &yaml_types.Container{
 		Image:    "golang",
 		Commands: yaml_base_types.StringOrSlice{"echo 'this is not a plugin'"},
 	}))
 
 	// secret only available for "golang" plugin
 	secret = Secret{
+		Name:           "foo",
 		AllowedPlugins: []string{"golang"},
+		Events:         []string{"push"},
 	}
-	assert.True(t, secret.Available(&yaml_types.Container{
+	assert.NoError(t, secret.Available("push", &yaml_types.Container{
+		Name:     "step",
 		Image:    "golang",
 		Commands: yaml_base_types.StringOrSlice{},
 	}))
-	assert.False(t, secret.Available(&yaml_types.Container{
+	assert.ErrorContains(t, secret.Available("push", &yaml_types.Container{
 		Image:    "golang",
 		Commands: yaml_base_types.StringOrSlice{"echo 'this is not a plugin'"},
-	}))
-	assert.False(t, secret.Available(&yaml_types.Container{
+	}), "only allowed to be used by plugins by step")
+	assert.ErrorContains(t, secret.Available("push", &yaml_types.Container{
 		Image:    "not-golang",
 		Commands: yaml_base_types.StringOrSlice{},
-	}))
+	}), "not allowed to be used with image ")
+	assert.ErrorContains(t, secret.Available("pull_request", &yaml_types.Container{
+		Image: "golang",
+	}), "not allowed to be used with pipeline event ")
 }
 
 func TestCompilerCompile(t *testing.T) {
@@ -79,17 +86,15 @@ func TestCompilerCompile(t *testing.T) {
 	}}
 
 	defaultCloneStage := &backend_types.Stage{
-		Name:  "test_clone",
-		Alias: "clone",
 		Steps: []*backend_types.Step{{
-			Name:      "test_clone",
-			Alias:     "clone",
-			Type:      backend_types.StepTypeClone,
-			Image:     constant.DefaultCloneImage,
-			OnSuccess: true,
-			Failure:   "fail",
-			Volumes:   []string{defaultVolumes[0].Name + ":"},
-			Networks:  []backend_types.Conn{{Name: "test_default", Aliases: []string{"clone"}}},
+			Name:       "clone",
+			Type:       backend_types.StepTypeClone,
+			Image:      constant.DefaultCloneImage,
+			OnSuccess:  true,
+			Failure:    "fail",
+			Volumes:    []string{defaultVolumes[0].Name + ":"},
+			Networks:   []backend_types.Conn{{Name: "test_default", Aliases: []string{"clone"}}},
+			ExtraHosts: []backend_types.HostAlias{},
 		}},
 	}
 
@@ -98,116 +103,182 @@ func TestCompilerCompile(t *testing.T) {
 		fronConf    *yaml_types.Workflow
 		backConf    *backend_types.Config
 		expectedErr string
-	}{{
-		name:     "empty workflow, no clone",
-		fronConf: &yaml_types.Workflow{SkipClone: true},
-		backConf: &backend_types.Config{
-			Networks: defaultNetworks,
-			Volumes:  defaultVolumes,
+	}{
+		{
+			name:     "empty workflow, no clone",
+			fronConf: &yaml_types.Workflow{SkipClone: true},
+			backConf: &backend_types.Config{
+				Networks: defaultNetworks,
+				Volumes:  defaultVolumes,
+			},
 		},
-	}, {
-		name:     "empty workflow, default clone",
-		fronConf: &yaml_types.Workflow{},
-		backConf: &backend_types.Config{
-			Networks: defaultNetworks,
-			Volumes:  defaultVolumes,
-			Stages:   []*backend_types.Stage{defaultCloneStage},
+		{
+			name:     "empty workflow, default clone",
+			fronConf: &yaml_types.Workflow{},
+			backConf: &backend_types.Config{
+				Networks: defaultNetworks,
+				Volumes:  defaultVolumes,
+				Stages:   []*backend_types.Stage{defaultCloneStage},
+			},
 		},
-	}, {
-		name: "workflow with one dummy step",
-		fronConf: &yaml_types.Workflow{Steps: yaml_types.ContainerList{ContainerList: []*yaml_types.Container{{
-			Name:  "dummy",
-			Image: "dummy_img",
-		}}}},
-		backConf: &backend_types.Config{
-			Networks: defaultNetworks,
-			Volumes:  defaultVolumes,
-			Stages: []*backend_types.Stage{defaultCloneStage, {
-				Name:  "test_stage_0",
-				Alias: "dummy",
-				Steps: []*backend_types.Step{{
-					Name:      "test_step_0",
-					Alias:     "dummy",
-					Type:      backend_types.StepTypePlugin,
-					Image:     "dummy_img",
-					OnSuccess: true,
-					Failure:   "fail",
-					Volumes:   []string{defaultVolumes[0].Name + ":"},
-					Networks:  []backend_types.Conn{{Name: "test_default", Aliases: []string{"dummy"}}},
+		{
+			name: "workflow with one dummy step",
+			fronConf: &yaml_types.Workflow{Steps: yaml_types.ContainerList{ContainerList: []*yaml_types.Container{{
+				Name:  "dummy",
+				Image: "dummy_img",
+			}}}},
+			backConf: &backend_types.Config{
+				Networks: defaultNetworks,
+				Volumes:  defaultVolumes,
+				Stages: []*backend_types.Stage{defaultCloneStage, {
+					Steps: []*backend_types.Step{{
+						Name:       "dummy",
+						Type:       backend_types.StepTypePlugin,
+						Image:      "dummy_img",
+						OnSuccess:  true,
+						Failure:    "fail",
+						Volumes:    []string{defaultVolumes[0].Name + ":"},
+						Networks:   []backend_types.Conn{{Name: "test_default", Aliases: []string{"dummy"}}},
+						ExtraHosts: []backend_types.HostAlias{},
+					}},
 				}},
-			}},
+			},
 		},
-	}, {
-		name: "workflow with three steps and one group",
-		fronConf: &yaml_types.Workflow{Steps: yaml_types.ContainerList{ContainerList: []*yaml_types.Container{{
-			Name:     "echo env",
-			Image:    "bash",
-			Commands: []string{"env"},
-		}, {
-			Name:     "parallel echo 1",
-			Group:    "parallel",
-			Image:    "bash",
-			Commands: []string{"echo 1"},
-		}, {
-			Name:     "parallel echo 2",
-			Group:    "parallel",
-			Image:    "bash",
-			Commands: []string{"echo 2"},
-		}}}},
-		backConf: &backend_types.Config{
-			Networks: defaultNetworks,
-			Volumes:  defaultVolumes,
-			Stages: []*backend_types.Stage{defaultCloneStage, {
-				Name:  "test_stage_0",
-				Alias: "echo env",
-				Steps: []*backend_types.Step{{
-					Name:      "test_step_0",
-					Alias:     "echo env",
-					Type:      backend_types.StepTypeCommands,
-					Image:     "bash",
-					Commands:  []string{"env"},
-					OnSuccess: true,
-					Failure:   "fail",
-					Volumes:   []string{defaultVolumes[0].Name + ":"},
-					Networks:  []backend_types.Conn{{Name: "test_default", Aliases: []string{"echo env"}}},
-				}},
+		{
+			name: "workflow with three steps and one group",
+			fronConf: &yaml_types.Workflow{Steps: yaml_types.ContainerList{ContainerList: []*yaml_types.Container{{
+				Name:     "echo env",
+				Image:    "bash",
+				Commands: []string{"env"},
 			}, {
-				Name:  "test_stage_1",
-				Alias: "parallel echo 1",
-				Steps: []*backend_types.Step{{
-					Name:      "test_step_1",
-					Alias:     "parallel echo 1",
-					Type:      backend_types.StepTypeCommands,
-					Image:     "bash",
-					Commands:  []string{"echo 1"},
-					OnSuccess: true,
-					Failure:   "fail",
-					Volumes:   []string{defaultVolumes[0].Name + ":"},
-					Networks:  []backend_types.Conn{{Name: "test_default", Aliases: []string{"parallel echo 1"}}},
+				Name:     "parallel echo 1",
+				Group:    "parallel",
+				Image:    "bash",
+				Commands: []string{"echo 1"},
+			}, {
+				Name:     "parallel echo 2",
+				Group:    "parallel",
+				Image:    "bash",
+				Commands: []string{"echo 2"},
+			}}}},
+			backConf: &backend_types.Config{
+				Networks: defaultNetworks,
+				Volumes:  defaultVolumes,
+				Stages: []*backend_types.Stage{defaultCloneStage, {
+					Steps: []*backend_types.Step{{
+						Name:       "echo env",
+						Type:       backend_types.StepTypeCommands,
+						Image:      "bash",
+						Commands:   []string{"env"},
+						OnSuccess:  true,
+						Failure:    "fail",
+						Volumes:    []string{defaultVolumes[0].Name + ":"},
+						Networks:   []backend_types.Conn{{Name: "test_default", Aliases: []string{"echo env"}}},
+						ExtraHosts: []backend_types.HostAlias{},
+					}},
 				}, {
-					Name:      "test_step_2",
-					Alias:     "parallel echo 2",
-					Type:      backend_types.StepTypeCommands,
-					Image:     "bash",
-					Commands:  []string{"echo 2"},
-					OnSuccess: true,
-					Failure:   "fail",
-					Volumes:   []string{defaultVolumes[0].Name + ":"},
-					Networks:  []backend_types.Conn{{Name: "test_default", Aliases: []string{"parallel echo 2"}}},
+					Steps: []*backend_types.Step{{
+						Name:       "parallel echo 1",
+						Type:       backend_types.StepTypeCommands,
+						Image:      "bash",
+						Commands:   []string{"echo 1"},
+						OnSuccess:  true,
+						Failure:    "fail",
+						Volumes:    []string{defaultVolumes[0].Name + ":"},
+						Networks:   []backend_types.Conn{{Name: "test_default", Aliases: []string{"parallel echo 1"}}},
+						ExtraHosts: []backend_types.HostAlias{},
+					}, {
+						Name:       "parallel echo 2",
+						Type:       backend_types.StepTypeCommands,
+						Image:      "bash",
+						Commands:   []string{"echo 2"},
+						OnSuccess:  true,
+						Failure:    "fail",
+						Volumes:    []string{defaultVolumes[0].Name + ":"},
+						Networks:   []backend_types.Conn{{Name: "test_default", Aliases: []string{"parallel echo 2"}}},
+						ExtraHosts: []backend_types.HostAlias{},
+					}},
 				}},
-			}},
+			},
 		},
-	}, {
-		name: "workflow with missing secret",
-		fronConf: &yaml_types.Workflow{Steps: yaml_types.ContainerList{ContainerList: []*yaml_types.Container{{
-			Name:     "step",
-			Image:    "bash",
-			Commands: []string{"env"},
-			Secrets:  yaml_types.Secrets{Secrets: []*yaml_types.Secret{{Source: "missing", Target: "missing"}}},
-		}}}},
-		backConf:    nil,
-		expectedErr: "secret \"missing\" not found or not allowed to be used",
-	}}
+		{
+			name: "workflow with three steps and depends_on",
+			fronConf: &yaml_types.Workflow{Steps: yaml_types.ContainerList{ContainerList: []*yaml_types.Container{{
+				Name:     "echo env",
+				Image:    "bash",
+				Commands: []string{"env"},
+			}, {
+				Name:      "echo 1",
+				Image:     "bash",
+				Commands:  []string{"echo 1"},
+				DependsOn: []string{"echo env", "echo 2"},
+			}, {
+				Name:     "echo 2",
+				Image:    "bash",
+				Commands: []string{"echo 2"},
+			}}}},
+			backConf: &backend_types.Config{
+				Networks: defaultNetworks,
+				Volumes:  defaultVolumes,
+				Stages: []*backend_types.Stage{defaultCloneStage, {
+					Steps: []*backend_types.Step{{
+						Name:       "echo env",
+						Type:       backend_types.StepTypeCommands,
+						Image:      "bash",
+						Commands:   []string{"env"},
+						OnSuccess:  true,
+						Failure:    "fail",
+						Volumes:    []string{defaultVolumes[0].Name + ":"},
+						Networks:   []backend_types.Conn{{Name: "test_default", Aliases: []string{"echo env"}}},
+						ExtraHosts: []backend_types.HostAlias{},
+					}, {
+						Name:       "echo 2",
+						Type:       backend_types.StepTypeCommands,
+						Image:      "bash",
+						Commands:   []string{"echo 2"},
+						OnSuccess:  true,
+						Failure:    "fail",
+						Volumes:    []string{defaultVolumes[0].Name + ":"},
+						Networks:   []backend_types.Conn{{Name: "test_default", Aliases: []string{"echo 2"}}},
+						ExtraHosts: []backend_types.HostAlias{},
+					}},
+				}, {
+					Steps: []*backend_types.Step{{
+						Name:       "echo 1",
+						Type:       backend_types.StepTypeCommands,
+						Image:      "bash",
+						Commands:   []string{"echo 1"},
+						OnSuccess:  true,
+						Failure:    "fail",
+						Volumes:    []string{defaultVolumes[0].Name + ":"},
+						Networks:   []backend_types.Conn{{Name: "test_default", Aliases: []string{"echo 1"}}},
+						ExtraHosts: []backend_types.HostAlias{},
+					}},
+				}},
+			},
+		},
+		{
+			name: "workflow with missing secret",
+			fronConf: &yaml_types.Workflow{Steps: yaml_types.ContainerList{ContainerList: []*yaml_types.Container{{
+				Name:     "step",
+				Image:    "bash",
+				Commands: []string{"env"},
+				Secrets:  yaml_types.Secrets{Secrets: []*yaml_types.Secret{{Source: "missing", Target: "missing"}}},
+			}}}},
+			backConf:    nil,
+			expectedErr: "secret \"missing\" not found",
+		},
+		{
+			name: "workflow with broken step dependency",
+			fronConf: &yaml_types.Workflow{Steps: yaml_types.ContainerList{ContainerList: []*yaml_types.Container{{
+				Name:      "dummy",
+				Image:     "dummy_img",
+				DependsOn: []string{"not exist"},
+			}}}},
+			backConf:    nil,
+			expectedErr: "step 'dummy' depends on unknown step 'not exist'",
+		},
+	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -228,6 +299,46 @@ func TestCompilerCompile(t *testing.T) {
 				// check if we get an expected backend config based on a frontend config
 				assert.EqualValues(t, *test.backConf, *backConf)
 			}
+		})
+	}
+}
+
+func TestSecretMatch(t *testing.T) {
+	tcl := []*struct {
+		name   string
+		secret Secret
+		event  string
+		match  bool
+	}{
+		{
+			name:   "should match event",
+			secret: Secret{Events: []string{"pull_request"}},
+			event:  "pull_request",
+			match:  true,
+		},
+		{
+			name:   "should not match event",
+			secret: Secret{Events: []string{"pull_request"}},
+			event:  "push",
+			match:  false,
+		},
+		{
+			name:   "should match when no event filters defined",
+			secret: Secret{},
+			event:  "pull_request",
+			match:  true,
+		},
+		{
+			name:   "pull close should match pull",
+			secret: Secret{Events: []string{"pull_request"}},
+			event:  "pull_request_closed",
+			match:  true,
+		},
+	}
+
+	for _, tc := range tcl {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Equal(t, tc.match, tc.secret.Match(tc.event))
 		})
 	}
 }

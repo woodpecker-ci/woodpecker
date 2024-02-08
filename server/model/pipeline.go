@@ -24,12 +24,10 @@ type Pipeline struct {
 	RepoID              int64                   `json:"-"                       xorm:"UNIQUE(s) INDEX 'pipeline_repo_id'"`
 	Number              int64                   `json:"number"                  xorm:"UNIQUE(s) 'pipeline_number'"`
 	Author              string                  `json:"author"                  xorm:"INDEX 'pipeline_author'"`
-	ConfigID            int64                   `json:"-"                       xorm:"pipeline_config_id"`
 	Parent              int64                   `json:"parent"                  xorm:"pipeline_parent"`
 	Event               WebhookEvent            `json:"event"                   xorm:"pipeline_event"`
 	Status              StatusValue             `json:"status"                  xorm:"INDEX 'pipeline_status'"`
 	Errors              []*errors.PipelineError `json:"errors"                  xorm:"json 'pipeline_errors'"`
-	Enqueued            int64                   `json:"enqueued_at"             xorm:"pipeline_enqueued"`
 	Created             int64                   `json:"created_at"              xorm:"pipeline_created"`
 	Updated             int64                   `json:"updated_at"              xorm:"updated NOT NULL DEFAULT 0 'updated'"`
 	Started             int64                   `json:"started_at"              xorm:"pipeline_started"`
@@ -39,7 +37,6 @@ type Pipeline struct {
 	Branch              string                  `json:"branch"                  xorm:"pipeline_branch"`
 	Ref                 string                  `json:"ref"                     xorm:"pipeline_ref"`
 	Refspec             string                  `json:"refspec"                 xorm:"pipeline_refspec"`
-	CloneURL            string                  `json:"clone_url"               xorm:"pipeline_clone_url"`
 	Title               string                  `json:"title"                   xorm:"pipeline_title"`
 	Message             string                  `json:"message"                 xorm:"TEXT 'pipeline_message'"`
 	Timestamp           int64                   `json:"timestamp"               xorm:"pipeline_timestamp"`
@@ -53,6 +50,7 @@ type Pipeline struct {
 	ChangedFiles        []string                `json:"changed_files,omitempty" xorm:"LONGTEXT 'changed_files'"`
 	AdditionalVariables map[string]string       `json:"variables,omitempty"     xorm:"json 'additional_variables'"`
 	PullRequestLabels   []string                `json:"pr_labels,omitempty"     xorm:"json 'pr_labels'"`
+	IsPrerelease        bool                    `json:"is_prerelease,omitempty"     xorm:"is_prerelease"`
 } //	@name Pipeline
 
 // TableName return database table name for xorm

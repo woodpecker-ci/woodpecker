@@ -35,6 +35,7 @@ type (
 	Container struct {
 		BackendOptions BackendOptions     `yaml:"backend_options,omitempty"`
 		Commands       base.StringOrSlice `yaml:"commands,omitempty"`
+		Entrypoint     base.StringOrSlice `yaml:"entrypoint,omitempty"`
 		Detached       bool               `yaml:"detach,omitempty"`
 		Directory      string             `yaml:"directory,omitempty"`
 		Environment    base.SliceOrMap    `yaml:"environment,omitempty"`
@@ -47,9 +48,10 @@ type (
 		Settings       map[string]any     `yaml:"settings"`
 		Volumes        Volumes            `yaml:"volumes,omitempty"`
 		When           constraint.When    `yaml:"when,omitempty"`
-		Ports          []base.StringOrInt `yaml:"ports,omitempty"`
+		Ports          []string           `yaml:"ports,omitempty"`
+		DependsOn      base.StringOrSlice `yaml:"depends_on,omitempty"`
 
-		// Docker Specific
+		// Docker and Kubernetes Specific
 		Privileged bool `yaml:"privileged,omitempty"`
 
 		// Undocumented
@@ -60,13 +62,11 @@ type (
 		DNSSearch    base.StringOrSlice  `yaml:"dns_search,omitempty"`
 		DNS          base.StringOrSlice  `yaml:"dns,omitempty"`
 		ExtraHosts   []string            `yaml:"extra_hosts,omitempty"`
-		IpcMode      string              `yaml:"ipc_mode,omitempty"`
 		MemLimit     base.MemStringOrInt `yaml:"mem_limit,omitempty"`
 		MemSwapLimit base.MemStringOrInt `yaml:"memswap_limit,omitempty"`
 		NetworkMode  string              `yaml:"network_mode,omitempty"`
 		Networks     Networks            `yaml:"networks,omitempty"`
 		ShmSize      base.MemStringOrInt `yaml:"shm_size,omitempty"`
-		Sysctls      base.SliceOrMap     `yaml:"sysctls,omitempty"`
 		Tmpfs        []string            `yaml:"tmpfs,omitempty"`
 	}
 )
@@ -120,7 +120,7 @@ func (c *ContainerList) UnmarshalYAML(value *yaml.Node) error {
 }
 
 func (c *Container) IsPlugin() bool {
-	return len(c.Commands) == 0
+	return len(c.Commands) == 0 && len(c.Entrypoint) == 0
 }
 
 func (c *Container) IsTrustedCloneImage() bool {

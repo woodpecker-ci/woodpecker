@@ -19,6 +19,7 @@ import (
 	"bytes"
 	"net/http"
 	"sort"
+	"strings"
 	"testing"
 
 	"github.com/franela/goblin"
@@ -30,10 +31,11 @@ import (
 )
 
 const (
-	hookEvent  = "X-GitHub-Event"
-	hookDeploy = "deployment"
-	hookPush   = "push"
-	hookPull   = "pull_request"
+	hookEvent   = "X-GitHub-Event"
+	hookDeploy  = "deployment"
+	hookPush    = "push"
+	hookPull    = "pull_request"
+	hookRelease = "release"
 )
 
 func testHookRequest(payload []byte, event string) *http.Request {
@@ -79,23 +81,7 @@ func Test_parser(t *testing.T) {
 		})
 
 		g.Describe("given a pull request hook", func() {
-			g.It("should skip when action is not open or sync", func() {
-				req := testHookRequest([]byte(fixtures.HookPullRequestInvalidAction), hookPull)
-				p, r, b, err := parseHook(req, false)
-				g.Assert(r).IsNil()
-				g.Assert(b).IsNil()
-				g.Assert(err).IsNil()
-				g.Assert(p).IsNil()
-			})
-			g.It("should skip when state is not open", func() {
-				req := testHookRequest([]byte(fixtures.HookPullRequestInvalidState), hookPull)
-				p, r, b, err := parseHook(req, false)
-				g.Assert(r).IsNil()
-				g.Assert(b).IsNil()
-				g.Assert(err).IsNil()
-				g.Assert(p).IsNil()
-			})
-			g.It("should extract repository and pipeline details", func() {
+			g.It("should handle a PR hook when PR got opened or pushed to", func() {
 				req := testHookRequest([]byte(fixtures.HookPullRequest), hookPull)
 				p, r, b, err := parseHook(req, false)
 				g.Assert(err).IsNil()
@@ -103,6 +89,24 @@ func Test_parser(t *testing.T) {
 				g.Assert(b).IsNotNil()
 				g.Assert(p).IsNotNil()
 				g.Assert(b.Event).Equal(model.EventPull)
+			})
+			g.It("should handle a PR closed hook when PR got closed", func() {
+				req := testHookRequest([]byte(fixtures.HookPullRequestClosed), hookPull)
+				p, r, b, err := parseHook(req, false)
+				g.Assert(err).IsNil()
+				g.Assert(r).IsNotNil()
+				g.Assert(b).IsNotNil()
+				g.Assert(p).IsNotNil()
+				g.Assert(b.Event).Equal(model.EventPullClosed)
+			})
+			g.It("should handle a PR closed hook when PR got merged", func() {
+				req := testHookRequest([]byte(fixtures.HookPullRequestMerged), hookPull)
+				p, r, b, err := parseHook(req, false)
+				g.Assert(err).IsNil()
+				g.Assert(r).IsNotNil()
+				g.Assert(b).IsNotNil()
+				g.Assert(p).IsNotNil()
+				g.Assert(b.Event).Equal(model.EventPullClosed)
 			})
 		})
 
@@ -115,6 +119,20 @@ func Test_parser(t *testing.T) {
 				g.Assert(b).IsNotNil()
 				g.Assert(p).IsNil()
 				g.Assert(b.Event).Equal(model.EventDeploy)
+			})
+		})
+
+		g.Describe("given a release hook", func() {
+			g.It("should extract repository and build details", func() {
+				req := testHookRequest([]byte(fixtures.HookRelease), hookRelease)
+				p, r, b, err := parseHook(req, false)
+				g.Assert(err).IsNil()
+				g.Assert(r).IsNotNil()
+				g.Assert(b).IsNotNil()
+				g.Assert(p).IsNil()
+				g.Assert(b.Event).Equal(model.EventRelease)
+				g.Assert(len(strings.Split(b.Ref, "/")) == 3).IsTrue()
+				g.Assert(strings.HasPrefix(b.Ref, "refs/tags/")).IsTrue()
 			})
 		})
 	})

@@ -408,7 +408,7 @@ func (c *client) Org(orgID int64) (*Org, error) {
 	return out, err
 }
 
-// OrgLookup returns a organsization by its name.
+// OrgLookup returns a organization by its name.
 func (c *client) OrgLookup(name string) (*Org, error) {
 	out := new(Org)
 	uri := fmt.Sprintf(pathOrgLookup, c.addr, name)
@@ -629,9 +629,9 @@ func (c *client) open(rawurl, method string, in any) (io.ReadCloser, error) {
 		return nil, err
 	}
 	if in != nil {
-		decoded, derr := json.Marshal(in)
-		if derr != nil {
-			return nil, derr
+		decoded, decodeErr := json.Marshal(in)
+		if decodeErr != nil {
+			return nil, decodeErr
 		}
 		buf := bytes.NewBuffer(decoded)
 		req.Body = io.NopCloser(buf)

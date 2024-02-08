@@ -16,14 +16,16 @@ package pipeline
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"regexp"
 
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
+	pipeline_errors "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
+	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
@@ -41,7 +43,11 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 
 	skipMatch := skipPipelineRegex.FindString(pipeline.Message)
 	if len(skipMatch) > 0 {
-		log.Debug().Str("repo", repo.FullName).Msgf("ignoring pipeline as skip-ci was found in the commit (%s) message '%s'", pipeline.Commit, pipeline.Message)
+		ref := pipeline.Commit
+		if len(ref) == 0 {
+			ref = pipeline.Ref
+		}
+		log.Debug().Str("repo", repo.FullName).Msgf("ignoring pipeline as skip-ci was found in the commit (%s) message '%s'", ref, pipeline.Message)
 		return nil, ErrFiltered
 	}
 
@@ -64,18 +70,24 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	// fetch the pipeline file from the forge
 	configFetcher := forge.NewConfigFetcher(server.Config.Services.Forge, server.Config.Services.Timeout, server.Config.Services.ConfigService, repoUser, repo, pipeline)
 	forgeYamlConfigs, configFetchErr := configFetcher.Fetch(ctx)
-
-	if configFetchErr != nil {
+	if errors.Is(configFetchErr, &forge_types.ErrConfigNotFound{}) {
 		log.Debug().Str("repo", repo.FullName).Err(configFetchErr).Msgf("cannot find config '%s' in '%s' with user: '%s'", repo.Config, pipeline.Ref, repoUser.Login)
+		if err := _store.DeletePipeline(pipeline); err != nil {
+			log.Error().Str("repo", repo.FullName).Err(err).Msg("failed to delete pipeline without config")
+		}
+
+		return nil, ErrFiltered
+	} else if configFetchErr != nil {
+		log.Debug().Str("repo", repo.FullName).Err(configFetchErr).Msgf("error while fetching config '%s' in '%s' with user: '%s'", repo.Config, pipeline.Ref, repoUser.Login)
 		return nil, updatePipelineWithErr(ctx, _store, pipeline, repo, repoUser, fmt.Errorf("pipeline definition not found in %s", repo.FullName))
 	}
 
 	pipelineItems, parseErr := parsePipeline(_store, pipeline, repoUser, repo, forgeYamlConfigs, nil)
-	if errors.HasBlockingErrors(parseErr) {
+	if pipeline_errors.HasBlockingErrors(parseErr) {
 		log.Debug().Str("repo", repo.FullName).Err(parseErr).Msg("failed to parse yaml")
 		return nil, updatePipelineWithErr(ctx, _store, pipeline, repo, repoUser, parseErr)
 	} else if parseErr != nil {
-		pipeline.Errors = errors.GetPipelineErrors(parseErr)
+		pipeline.Errors = pipeline_errors.GetPipelineErrors(parseErr)
 	}
 
 	if len(pipelineItems) == 0 {

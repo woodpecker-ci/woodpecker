@@ -66,7 +66,7 @@ func (cp *http) FetchConfig(ctx context.Context, repo *model.Repo, pipeline *mod
 
 	status, err := utils.Send(ctx, "POST", cp.endpoint, cp.privateKey, body, response)
 	if err != nil && status != 204 {
-		return nil, false, fmt.Errorf("Failed to fetch config via http (%d) %w", status, err)
+		return nil, false, fmt.Errorf("failed to fetch config via http (%d) %w", status, err)
 	}
 
 	var newFileMeta []*forge_types.FileMeta

@@ -89,7 +89,7 @@ func (c *client) Next(ctx context.Context, f rpc.Filter) (*rpc.Workflow, error) 
 			// https://github.com/woodpecker-ci/woodpecker/issues/717#issuecomment-1049365104
 			log.Trace().Err(err).Msg("grpc: to many keepalive pings without sending data")
 		} else {
-			log.Err(err).Msgf("grpc error: done(): code: %v: %s", status.Code(err), err)
+			log.Error().Err(err).Msgf("grpc error: done(): code: %v", status.Code(err))
 		}
 
 		switch status.Code(err) {
@@ -136,7 +136,7 @@ func (c *client) Wait(ctx context.Context, id string) (err error) {
 			break
 		}
 
-		log.Err(err).Msgf("grpc error: wait(): code: %v: %s", status.Code(err), err)
+		log.Error().Err(err).Msgf("grpc error: wait(): code: %v", status.Code(err))
 
 		switch status.Code(err) {
 		case
@@ -170,14 +170,14 @@ func (c *client) Init(ctx context.Context, id string, state rpc.State) (err erro
 	req.State.Exited = state.Exited
 	req.State.Finished = state.Finished
 	req.State.Started = state.Started
-	req.State.Name = state.Step
+	req.State.StepUuid = state.StepUUID
 	for {
 		_, err = c.client.Init(ctx, req)
 		if err == nil {
 			break
 		}
 
-		log.Err(err).Msgf("grpc error: init(): code: %v: %s", status.Code(err), err)
+		log.Error().Err(err).Msgf("grpc error: init(): code: %v", status.Code(err))
 
 		switch status.Code(err) {
 		case
@@ -211,14 +211,14 @@ func (c *client) Done(ctx context.Context, id string, state rpc.State) (err erro
 	req.State.Exited = state.Exited
 	req.State.Finished = state.Finished
 	req.State.Started = state.Started
-	req.State.Name = state.Step
+	req.State.StepUuid = state.StepUUID
 	for {
 		_, err = c.client.Done(ctx, req)
 		if err == nil {
 			break
 		}
 
-		log.Err(err).Msgf("grpc error: done(): code: %v: %s", status.Code(err), err)
+		log.Error().Err(err).Msgf("grpc error: done(): code: %v", status.Code(err))
 
 		switch status.Code(err) {
 		case
@@ -252,7 +252,7 @@ func (c *client) Extend(ctx context.Context, id string) (err error) {
 			break
 		}
 
-		log.Err(err).Msgf("grpc error: extend(): code: %v: %s", status.Code(err), err)
+		log.Error().Err(err).Msgf("grpc error: extend(): code: %v", status.Code(err))
 
 		switch status.Code(err) {
 		case
@@ -286,14 +286,14 @@ func (c *client) Update(ctx context.Context, id string, state rpc.State) (err er
 	req.State.Exited = state.Exited
 	req.State.Finished = state.Finished
 	req.State.Started = state.Started
-	req.State.Name = state.Step
+	req.State.StepUuid = state.StepUUID
 	for {
 		_, err = c.client.Update(ctx, req)
 		if err == nil {
 			break
 		}
 
-		log.Err(err).Msgf("grpc error: update(): code: %v: %s", status.Code(err), err)
+		log.Error().Err(err).Msgf("grpc error: update(): code: %v", status.Code(err))
 
 		switch status.Code(err) {
 		case
@@ -332,7 +332,7 @@ func (c *client) Log(ctx context.Context, logEntry *rpc.LogEntry) (err error) {
 			break
 		}
 
-		log.Err(err).Msgf("grpc error: log(): code: %v: %s", status.Code(err), err)
+		log.Error().Err(err).Msgf("grpc error: log(): code: %v", status.Code(err))
 
 		switch status.Code(err) {
 		case

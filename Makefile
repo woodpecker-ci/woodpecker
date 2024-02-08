@@ -27,7 +27,11 @@ else
 	endif
 endif
 
-LDFLAGS := -s -w -extldflags "-static" -X go.woodpecker-ci.org/woodpecker/v2/version.Version=${VERSION}
+LDFLAGS := -X go.woodpecker-ci.org/woodpecker/v2/version.Version=${VERSION}
+STATIC_BUILD ?= true
+ifeq ($(STATIC_BUILD),true)
+	LDFLAGS := -s -w -extldflags "-static" $(LDFLAGS)
+endif
 CGO_ENABLED ?= 1 # only used to compile server
 
 HAS_GO = $(shell hash go > /dev/null 2>&1 && echo "GO" || echo "NOGO" )
@@ -99,12 +103,19 @@ clean: ## Clean build artifacts
 	rm -rf build
 	@[ "1" != "$(shell docker image ls woodpecker/make:local -a | wc -l)" ] && docker image rm woodpecker/make:local || echo no docker image to clean
 
+.PHONY: clean-all
+clean-all: clean ## Clean all artifacts
+	rm -rf dist web/dist docs/build docs/node_modules web/node_modules
+	# delete generated
+	rm -rf docs/docs/40-cli.md docs/swagger.json
+
 .PHONY: generate
 generate: generate-swagger ## Run all code generations
 	go generate ./...
 
 generate-swagger: install-tools ## Run swagger code generation
 	swag init -g server/api/ -g cmd/server/swagger.go --outputTypes go -output cmd/server/docs
+	go generate cmd/server/swagger.go
 
 generate-license-header: install-tools
 	addlicense -c "Woodpecker Authors" -ignore "vendor/**" **/*.go
@@ -136,11 +147,9 @@ ui-dependencies: ## Install UI dependencies
 .PHONY: lint
 lint: install-tools ## Lint code
 	@echo "Running golangci-lint"
-	golangci-lint run --timeout 15m
+	golangci-lint run
 
-lint-ui: ## Lint UI code
-	(cd web/; pnpm install)
-	(cd web/; pnpm lesshint)
+lint-ui: ui-dependencies ## Lint UI code
 	(cd web/; pnpm lint --quiet)
 
 test-agent: ## Test agent code
@@ -169,7 +178,7 @@ test-lib: ## Test lib code
 	go test -race -cover -coverprofile coverage.out -timeout 30s $(shell go list ./... | grep -v '/cmd\|/agent\|/cli\|/server')
 
 .PHONY: test
-test: test-agent test-server test-server-datastore test-cli test-lib test-ui ## Run all tests
+test: test-agent test-server test-server-datastore test-cli test-lib ## Run all tests
 
 ##@ Build
 
@@ -184,6 +193,17 @@ build-agent: ## Build agent
 
 build-cli: ## Build cli
 	CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -ldflags '${LDFLAGS}' -o dist/woodpecker-cli${BIN_SUFFIX} go.woodpecker-ci.org/woodpecker/v2/cmd/cli
+
+build-tarball: ## Build tar archive
+	mkdir -p dist && tar chzvf dist/woodpecker-src.tar.gz \
+	  --exclude="*.exe" \
+	  --exclude="./.pnpm-store" \
+	  --exclude="node_modules" \
+	  --exclude="./dist" \
+	  --exclude="./data" \
+	  --exclude="./build" \
+	  --exclude="./.git" \
+	  .
 
 .PHONY: build
 build: build-agent build-server build-cli ## Build all binaries
@@ -206,10 +226,15 @@ release-server-xgo: check-xgo ## Create server binaries for release using xgo
 	@echo "arch (xgo):$(TARGETARCH_XGO)"
 	@echo "arch (buildx):$(TARGETARCH_BUILDX)"
 
-	CGO_CFLAGS="$(CGO_CFLAGS)" xgo -go $(XGO_VERSION) -dest ./dist/server/$(TARGETOS)-$(TARGETARCH_XGO) -tags 'netgo osusergo $(TAGS)' -ldflags '-linkmode external $(LDFLAGS)' -targets '$(TARGETOS)/$(TARGETARCH_XGO)' -out woodpecker-server -pkg cmd/server .
-	mkdir -p ./dist/server/$(TARGETOS)/$(TARGETARCH_BUILDX)
-	mv /build/woodpecker-server-$(TARGETOS)*-$(TARGETARCH_XGO)$(BIN_SUFFIX) ./dist/server/$(TARGETOS)/$(TARGETARCH_BUILDX)/woodpecker-server$(BIN_SUFFIX)
-	[ "${TARGZ}" -eq "1" ] && tar -cvzf dist/woodpecker-server_$(TARGETOS)_$(TARGETARCH_BUILDX).tar.gz -C dist/server/$(TARGETOS)/$(TARGETARCH_BUILDX) woodpecker-server$(BIN_SUFFIX) || echo "skip tar.gz binary"
+	CGO_CFLAGS="$(CGO_CFLAGS)" xgo -go $(XGO_VERSION) -dest ./dist/server/$(TARGETOS)_$(TARGETARCH_BUILDX) -tags 'netgo osusergo $(TAGS)' -ldflags '-linkmode external $(LDFLAGS)' -targets '$(TARGETOS)/$(TARGETARCH_XGO)' -out woodpecker-server -pkg cmd/server .
+	@if [ "$${XGO_IN_XGO:-0}" -eq "1" ]; then echo "inside xgo image"; \
+	  mkdir -p ./dist/server/$(TARGETOS)_$(TARGETARCH_BUILDX); \
+	  mv -vf /build/woodpecker-server* ./dist/server/$(TARGETOS)_$(TARGETARCH_BUILDX)/woodpecker-server$(BIN_SUFFIX); \
+	else echo "outside xgo image"; \
+	  [ -f "./dist/server/$(TARGETOS)_$(TARGETARCH_BUILDX)/woodpecker-server$(BIN_SUFFIX)" ] && rm -v ./dist/server/$(TARGETOS)_$(TARGETARCH_BUILDX)/woodpecker-server$(BIN_SUFFIX); \
+	  mv -v ./dist/server/$(TARGETOS)_$(TARGETARCH_XGO)/woodpecker-server* ./dist/server/$(TARGETOS)_$(TARGETARCH_BUILDX)/woodpecker-server$(BIN_SUFFIX); \
+	fi
+	@[ "$${TARGZ:-0}" -eq "1" ] && tar -cvzf dist/woodpecker-server_$(TARGETOS)_$(TARGETARCH_BUILDX).tar.gz -C dist/server/$(TARGETOS)_$(TARGETARCH_BUILDX) woodpecker-server$(BIN_SUFFIX) || echo "skip creating 'dist/woodpecker-server_$(TARGETOS)_$(TARGETARCH_BUILDX).tar.gz'"
 
 release-server: ## Create server binaries for release
 	# compile
@@ -260,16 +285,16 @@ bundle-prepare: ## Prepare the bundles
 	go install github.com/goreleaser/nfpm/v2/cmd/nfpm@v2.6.0
 
 bundle-agent: bundle-prepare ## Create bundles for agent
-	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/nfpm-agent.yml --target ./dist --packager deb
-	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/nfpm-agent.yml --target ./dist --packager rpm
+	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/agent.yaml --target ./dist --packager deb
+	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/agent.yaml --target ./dist --packager rpm
 
 bundle-server: bundle-prepare ## Create bundles for server
-	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/nfpm-server.yml --target ./dist --packager deb
-	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/nfpm-server.yml --target ./dist --packager rpm
+	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/server.yaml --target ./dist --packager deb
+	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/server.yaml --target ./dist --packager rpm
 
 bundle-cli: bundle-prepare ## Create bundles for cli
-	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/nfpm-cli.yml --target ./dist --packager deb
-	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/nfpm-cli.yml --target ./dist --packager rpm
+	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/cli.yaml --target ./dist --packager deb
+	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/cli.yaml --target ./dist --packager rpm
 
 .PHONY: bundle
 bundle: bundle-agent bundle-server bundle-cli ## Create all bundles

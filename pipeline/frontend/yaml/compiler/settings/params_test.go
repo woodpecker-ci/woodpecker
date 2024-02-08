@@ -15,6 +15,8 @@
 package settings
 
 import (
+	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -57,7 +59,17 @@ func TestParamsToEnv(t *testing.T) {
 		"secret_token": "FooBar",
 	}
 	got := map[string]string{}
-	assert.NoError(t, ParamsToEnv(from, got, secrets))
+	getSecretValue := func(name string) (string, error) {
+		name = strings.ToLower(name)
+		secret, ok := secrets[name]
+		if ok {
+			return secret, nil
+		}
+
+		return "", fmt.Errorf("secret %q not found or not allowed to be used", name)
+	}
+
+	assert.NoError(t, ParamsToEnv(from, got, getSecretValue))
 	assert.EqualValues(t, want, got, "Problem converting plugin parameters to environment variables")
 
 	// handle edge cases (#1609)
@@ -114,7 +126,17 @@ list.map:
 		"cb_password":  "geheim",
 	}
 	got := map[string]string{}
-	assert.NoError(t, ParamsToEnv(from, got, secrets))
+	getSecretValue := func(name string) (string, error) {
+		name = strings.ToLower(name)
+		secret, ok := secrets[name]
+		if ok {
+			return secret, nil
+		}
+
+		return "", fmt.Errorf("secret %q not found or not allowed to be used", name)
+	}
+
+	assert.NoError(t, ParamsToEnv(from, got, getSecretValue))
 	assert.EqualValues(t, want, got, "Problem converting plugin parameters to environment variables")
 }
 
@@ -128,7 +150,17 @@ func TestYAMLToParamsToEnvError(t *testing.T) {
 	secrets := map[string]string{
 		"secret_token": "FooBar",
 	}
-	assert.Error(t, ParamsToEnv(from, make(map[string]string), secrets))
+	getSecretValue := func(name string) (string, error) {
+		name = strings.ToLower(name)
+		secret, ok := secrets[name]
+		if ok {
+			return secret, nil
+		}
+
+		return "", fmt.Errorf("secret %q not found or not allowed to be used", name)
+	}
+
+	assert.Error(t, ParamsToEnv(from, make(map[string]string), getSecretValue))
 }
 
 func stringsToInterface(val ...string) []any {
@@ -137,4 +169,28 @@ func stringsToInterface(val ...string) []any {
 		res[i] = val[i]
 	}
 	return res
+}
+
+func TestSecretNotFound(t *testing.T) {
+	from := map[string]any{
+		"map": map[string]any{"secret": map[string]any{"from_secret": "secret_token"}},
+	}
+
+	secrets := map[string]string{
+		"a_different_password": "secret",
+	}
+	getSecretValue := func(name string) (string, error) {
+		name = strings.ToLower(name)
+		secret, ok := secrets[name]
+		if ok {
+			return secret, nil
+		}
+
+		return "", fmt.Errorf("secret %q not found or not allowed to be used", name)
+	}
+	got := map[string]string{}
+
+	assert.ErrorContains(t,
+		ParamsToEnv(from, got, getSecretValue),
+		fmt.Sprintf("secret %q not found or not allowed to be used", "secret_token"))
 }

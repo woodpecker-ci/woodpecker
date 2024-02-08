@@ -15,6 +15,7 @@
   "unknown_error": "An unknown error occurred",
   "documentation_for": "Documentation for \"{topic}\"",
   "pipeline_feed": "Pipeline feed",
+  "empty_list": "No {entity} found!",
   "not_found": {
     "not_found": "Whoa 404, either we broke something or you had a typing mishap :-/",
     "back_home": "Back to home"
@@ -23,7 +24,7 @@
     "not_found": "Server could not find requested object"
   },
   "time": {
-    "tmpl": "MMM D, YYYY, HH:mm z",
+    "template": "MMM D, YYYY, HH:mm z",
     "weeks_short": "w",
     "days_short": "d",
     "hours_short": "h",
@@ -152,7 +153,7 @@
       },
       "registries": {
         "registries": "Registries",
-        "creds": "Registry credentials",
+        "credentials": "Registry credentials",
         "desc": "Registries credentials can be added to use private images for your pipeline.",
         "show": "Show registries",
         "add": "Add registry",
@@ -266,7 +267,8 @@
         "pr": "Pull Request",
         "deploy": "Deploy",
         "cron": "Cron",
-        "manual": "Manual"
+        "manual": "Manual",
+        "release": "Release"
       },
       "status": {
         "status": "Status: {status}",

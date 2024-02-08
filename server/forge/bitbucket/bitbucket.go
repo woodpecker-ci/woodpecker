@@ -203,6 +203,16 @@ func (c *config) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 		return nil, err
 	}
 
+	userPermisions, err := client.ListPermissionsAll()
+	if err != nil {
+		return nil, err
+	}
+
+	userPermissionsByRepo := make(map[string]*internal.RepoPerm)
+	for _, permission := range userPermisions {
+		userPermissionsByRepo[permission.Repo.FullName] = permission
+	}
+
 	var all []*model.Repo
 	for _, workspace := range workspaces {
 		repos, err := client.ListReposAll(workspace.Slug)
@@ -210,12 +220,9 @@ func (c *config) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 			return nil, err
 		}
 		for _, repo := range repos {
-			perm, err := client.GetPermission(repo.FullName)
-			if err != nil {
-				return nil, err
+			if perm, ok := userPermissionsByRepo[repo.FullName]; ok {
+				all = append(all, convertRepo(repo, perm))
 			}
-
-			all = append(all, convertRepo(repo, perm))
 		}
 	}
 	return all, nil
@@ -367,7 +374,7 @@ func (c *config) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 	if err != nil {
 		return nil, err
 	}
-	result := []*model.PullRequest{}
+	var result []*model.PullRequest
 	for _, pullRequest := range pullRequests {
 		result = append(result, &model.PullRequest{
 			Index: model.ForgeRemoteID(strconv.Itoa(int(pullRequest.ID))),
@@ -401,7 +408,7 @@ func (c *config) Org(ctx context.Context, u *model.User, owner string) (*model.O
 
 	return &model.Org{
 		Name:   workspace.Slug,
-		IsUser: false, // bitbucket uses workspaces (similar to orgs) for teams and single users so we can not distinguish between them
+		IsUser: false, // bitbucket uses workspaces (similar to orgs) for teams and single users so we cannot distinguish between them
 	}, nil
 }
 

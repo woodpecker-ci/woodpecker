@@ -39,12 +39,14 @@ devices:
 directory: example/
 dns: 8.8.8.8
 dns_search: example.com
+entrypoint: [/bin/sh, -c]
 environment:
   - RACK_ENV=development
   - SHOW=true
 extra_hosts:
  - somehost:162.242.195.82
  - otherhost:50.31.209.229
+ - ipv6:2001:db8::10
 name: my-build-container
 network_mode: bridge
 networks:
@@ -70,6 +72,8 @@ settings:
   baz: false
 ports:
   - 8080
+  - 4443/tcp
+  - 51820/udp
 `)
 
 func TestUnmarshalContainer(t *testing.T) {
@@ -83,8 +87,9 @@ func TestUnmarshalContainer(t *testing.T) {
 		Directory:    "example/",
 		DNS:          base.StringOrSlice{"8.8.8.8"},
 		DNSSearch:    base.StringOrSlice{"example.com"},
+		Entrypoint:   []string{"/bin/sh", "-c"},
 		Environment:  base.SliceOrMap{"RACK_ENV": "development", "SHOW": "true"},
-		ExtraHosts:   []string{"somehost:162.242.195.82", "otherhost:50.31.209.229"},
+		ExtraHosts:   []string{"somehost:162.242.195.82", "otherhost:50.31.209.229", "ipv6:2001:db8::10"},
 		Image:        "golang:latest",
 		MemLimit:     base.MemStringOrInt(1024),
 		MemSwapLimit: base.MemStringOrInt(1024),
@@ -128,7 +133,7 @@ func TestUnmarshalContainer(t *testing.T) {
 			"foo": "bar",
 			"baz": false,
 		},
-		Ports: []base.StringOrInt{8080},
+		Ports: []string{"8080", "4443/tcp", "51820/udp"},
 	}
 	got := Container{}
 	err := yaml.Unmarshal(containerYaml, &got)
@@ -304,5 +309,11 @@ func TestIsPlugin(t *testing.T) {
 	}).IsPlugin())
 	assert.False(t, (&Container{
 		Commands: base.StringOrSlice(strslice.StrSlice{"echo 'this is not a plugin'"}),
+	}).IsPlugin())
+	assert.True(t, (&Container{
+		Entrypoint: base.StringOrSlice(strslice.StrSlice{}),
+	}).IsPlugin())
+	assert.False(t, (&Container{
+		Entrypoint: base.StringOrSlice(strslice.StrSlice{"echo 'this is not a plugin'"}),
 	}).IsPlugin())
 }

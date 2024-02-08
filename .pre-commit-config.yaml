@@ -1,3 +1,4 @@
+# cSpell:ignore checkmake hadolint autofix autoupdate
 repos:
   - repo: meta
     hooks:
@@ -6,8 +7,6 @@ repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0
     hooks:
-      - id: check-yaml
-        exclude: 'pipeline/frontend/yaml/linter/schema/.woodpecker/test-merge-map-and-sequence.yml'
       - id: end-of-file-fixer
       - id: trailing-whitespace
   - repo: https://github.com/golangci/golangci-lint
@@ -15,7 +14,7 @@ repos:
     hooks:
       - id: golangci-lint
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.37.0
+    rev: v0.38.0
     hooks:
       - id: markdownlint
         exclude: '^docs/versioned_docs/.*$'
@@ -32,6 +31,19 @@ repos:
     rev: v3.1.0
     hooks:
       - id: prettier
+  - repo: https://github.com/adrienverge/yamllint.git
+    rev: v1.33.0
+    hooks:
+      - id: yamllint
+        args: [--strict, -c=.yamllint.yaml]
+  - repo: local
+    hooks:
+      - id: yaml-file-extension
+        name: Check if YAML files has *.yaml extension.
+        entry: YAML filenames must have .yaml extension.
+        language: fail
+        files: .yml$
+        exclude: '^(.gitpod.yml|.github/ISSUE_TEMPLATE/config.yml)$'
 
 ci:
   autofix_commit_msg: |
@@ -43,5 +55,5 @@ ci:
   autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
   autoupdate_schedule: monthly
   # NB: hadolint not included in pre-commit.ci
-  skip: [check-hooks-apply, check-useless-excludes, hadolint]
+  skip: [check-hooks-apply, check-useless-excludes, hadolint, prettier]
   submodules: false

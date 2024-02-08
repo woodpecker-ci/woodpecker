@@ -17,6 +17,7 @@ package web
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"io"
 	"io/fs"
 	"net/http"
@@ -44,7 +45,11 @@ func (f *prefixFS) Open(name string) (http.File, error) {
 // New returns a gin engine to serve the web frontend.
 func New() (*gin.Engine, error) {
 	e := gin.New()
-	indexHTML = parseIndex()
+	var err error
+	indexHTML, err = parseIndex()
+	if err != nil {
+		return nil, err
+	}
 
 	rootPath := server.Config.Server.RootPath
 
@@ -72,11 +77,12 @@ func handleCustomFilesAndAssets(fs *prefixFS) func(ctx *gin.Context) {
 		}
 	}
 	return func(ctx *gin.Context) {
-		if strings.HasSuffix(ctx.Request.RequestURI, "/assets/custom.js") {
+		switch {
+		case strings.HasSuffix(ctx.Request.RequestURI, "/assets/custom.js"):
 			serveFileOrEmptyContent(ctx.Writer, ctx.Request, server.Config.Server.CustomJsFile, "file.js")
-		} else if strings.HasSuffix(ctx.Request.RequestURI, "/assets/custom.css") {
+		case strings.HasSuffix(ctx.Request.RequestURI, "/assets/custom.css"):
 			serveFileOrEmptyContent(ctx.Writer, ctx.Request, server.Config.Server.CustomCSSFile, "file.css")
-		} else {
+		default:
 			serveFile(fs)(ctx)
 		}
 	}
@@ -109,14 +115,14 @@ func serveFile(f *prefixFS) func(ctx *gin.Context) {
 		case strings.HasSuffix(ctx.Request.URL.Path, ".png"):
 			mime = "image/png"
 		case strings.HasSuffix(ctx.Request.URL.Path, ".svg"):
-			mime = "image/svg"
+			mime = "image/svg+xml"
 		}
 		ctx.Status(http.StatusOK)
 		ctx.Writer.Header().Set("Cache-Control", "public, max-age=31536000")
 		ctx.Writer.Header().Del("Expires")
 		ctx.Writer.Header().Set("Content-Type", mime)
 		if _, err := ctx.Writer.Write(replaceBytes(data)); err != nil {
-			log.Error().Err(err).Msgf("can not write %s", ctx.Request.URL.Path)
+			log.Error().Err(err).Msgf("cannot write %s", ctx.Request.URL.Path)
 		}
 	}
 }
@@ -139,7 +145,7 @@ func handleIndex(c *gin.Context) {
 	rw.Header().Set("Content-Type", "text/html; charset=UTF-8")
 	rw.WriteHeader(http.StatusOK)
 	if _, err := rw.Write(indexHTML); err != nil {
-		log.Error().Err(err).Msg("can not write index.html")
+		log.Error().Err(err).Msg("cannot write index.html")
 	}
 }
 
@@ -155,13 +161,13 @@ func replaceBytes(data []byte) []byte {
 	return bytes.ReplaceAll(data, []byte("/BASE_PATH"), []byte(server.Config.Server.RootPath))
 }
 
-func parseIndex() []byte {
+func parseIndex() ([]byte, error) {
 	data, err := loadFile("index.html")
 	if err != nil {
-		log.Fatal().Err(err).Msg("can not find index.html")
+		return nil, fmt.Errorf("cannot find index.html: %w", err)
 	}
 	data = bytes.ReplaceAll(data, []byte("/web-config.js"), []byte(server.Config.Server.RootPath+"/web-config.js"))
 	data = bytes.ReplaceAll(data, []byte("/assets/custom.css"), []byte(server.Config.Server.RootPath+"/assets/custom.css"))
 	data = bytes.ReplaceAll(data, []byte("/assets/custom.js"), []byte(server.Config.Server.RootPath+"/assets/custom.js"))
-	return data
+	return data, nil
 }

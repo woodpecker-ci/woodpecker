@@ -18,6 +18,7 @@ package github
 import (
 	"context"
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -25,7 +26,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/google/go-github/v57/github"
+	"github.com/google/go-github/v58/github"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 
@@ -130,7 +131,7 @@ func (c *client) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 	}
 	email := matchingEmail(emails, c.API)
 	if email == nil {
-		return nil, fmt.Errorf("No verified Email address for GitHub account")
+		return nil, fmt.Errorf("no verified Email address for GitHub account")
 	}
 
 	return &model.User{
@@ -226,7 +227,10 @@ func (c *client) File(ctx context.Context, u *model.User, r *model.Repo, b *mode
 
 	opts := new(github.RepositoryContentGetOptions)
 	opts.Ref = b.Commit
-	content, _, _, err := client.Repositories.GetContents(ctx, r.Owner, r.Name, f, opts)
+	content, _, resp, err := client.Repositories.GetContents(ctx, r.Owner, r.Name, f, opts)
+	if resp != nil && resp.StatusCode == http.StatusNotFound {
+		return nil, errors.Join(err, &forge_types.ErrConfigNotFound{Configs: []string{f}})
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -242,7 +246,10 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 
 	opts := new(github.RepositoryContentGetOptions)
 	opts.Ref = b.Commit
-	_, data, _, err := client.Repositories.GetContents(ctx, r.Owner, r.Name, f, opts)
+	_, data, resp, err := client.Repositories.GetContents(ctx, r.Owner, r.Name, f, opts)
+	if resp != nil && resp.StatusCode == http.StatusNotFound {
+		return nil, errors.Join(err, &forge_types.ErrConfigNotFound{Configs: []string{f}})
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -254,6 +261,9 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 		go func(path string) {
 			content, err := c.File(ctx, u, r, b, path)
 			if err != nil {
+				if errors.Is(err, &forge_types.ErrConfigNotFound{}) {
+					err = fmt.Errorf("git tree reported existence of file but we got: %s", err.Error())
+				}
 				errc <- err
 			} else {
 				fc <- &forge_types.FileMeta{
@@ -359,7 +369,7 @@ func (c *client) Org(ctx context.Context, u *model.User, owner string) (*model.O
 	client := c.newClientToken(ctx, u.Token)
 
 	user, _, err := client.Users.Get(ctx, owner)
-	log.Trace().Msgf("Github user for owner %s = %v", owner, user)
+	log.Trace().Msgf("GitHub user for owner %s = %v", owner, user)
 	if user != nil && err == nil {
 		return &model.Org{
 			Name:   user.GetLogin(),
@@ -368,7 +378,7 @@ func (c *client) Org(ctx context.Context, u *model.User, owner string) (*model.O
 	}
 
 	org, _, err := client.Organizations.Get(ctx, owner)
-	log.Trace().Msgf("Github organization for owner %s = %v", owner, org)
+	log.Trace().Msgf("GitHub organization for owner %s = %v", owner, org)
 	if err != nil {
 		return nil, err
 	}
@@ -424,7 +434,8 @@ func (c *client) newClientToken(ctx context.Context, token string) *github.Clien
 	)
 	tc := oauth2.NewClient(ctx, ts)
 	if c.SkipVerify {
-		tc.Transport.(*oauth2.Transport).Base = &http.Transport{
+		tp, _ := tc.Transport.(*oauth2.Transport)
+		tp.Base = &http.Transport{
 			Proxy: http.ProxyFromEnvironment,
 			TLSClientConfig: &tls.Config{
 				InsecureSkipVerify: true,
@@ -571,6 +582,15 @@ func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model
 		return nil, nil, err
 	}
 
+	if pipeline != nil && pipeline.Event == model.EventRelease && pipeline.Commit == "" {
+		tagName := strings.Split(pipeline.Ref, "/")[2]
+		sha, err := c.getTagCommitSHA(ctx, repo, tagName)
+		if err != nil {
+			return nil, nil, err
+		}
+		pipeline.Commit = sha
+	}
+
 	if pull != nil && len(pipeline.ChangedFiles) == 0 {
 		pipeline, err = c.loadChangedFilesFromPullRequest(ctx, pull, repo, pipeline)
 		if err != nil {
@@ -617,4 +637,50 @@ func (c *client) loadChangedFilesFromPullRequest(ctx context.Context, pull *gith
 	})
 
 	return pipeline, err
+}
+
+func (c *client) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName string) (string, error) {
+	_store, ok := store.TryFromContext(ctx)
+	if !ok {
+		log.Error().Msg("could not get store from context")
+		return "", nil
+	}
+
+	repo, err := _store.GetRepoNameFallback(repo.ForgeRemoteID, repo.FullName)
+	if err != nil {
+		return "", err
+	}
+
+	user, err := _store.GetUser(repo.UserID)
+	if err != nil {
+		return "", err
+	}
+
+	gh := c.newClientToken(ctx, user.Token)
+	if err != nil {
+		return "", err
+	}
+
+	page := 1
+	var tag *github.RepositoryTag
+	for {
+		tags, _, err := gh.Repositories.ListTags(ctx, repo.Owner, repo.Name, &github.ListOptions{Page: page})
+		if err != nil {
+			return "", err
+		}
+
+		for _, t := range tags {
+			if t.GetName() == tagName {
+				tag = t
+				break
+			}
+		}
+		if tag != nil {
+			break
+		}
+	}
+	if tag == nil {
+		return "", fmt.Errorf("could not find tag %s", tagName)
+	}
+	return tag.GetCommit().GetSHA(), nil
 }

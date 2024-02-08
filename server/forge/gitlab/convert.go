@@ -31,7 +31,7 @@ const (
 	mergeRefs = "refs/merge-requests/%d/head" // merge request merged with base
 )
 
-func (g *GitLab) convertGitLabRepo(_repo *gitlab.Project) (*model.Repo, error) {
+func (g *GitLab) convertGitLabRepo(_repo *gitlab.Project, projectMember *gitlab.ProjectMember) (*model.Repo, error) {
 	parts := strings.Split(_repo.PathWithNamespace, "/")
 	owner := strings.Join(parts[:len(parts)-1], "/")
 	name := parts[len(parts)-1]
@@ -48,10 +48,11 @@ func (g *GitLab) convertGitLabRepo(_repo *gitlab.Project) (*model.Repo, error) {
 		Visibility:    model.RepoVisibility(_repo.Visibility),
 		IsSCMPrivate:  !_repo.Public,
 		Perm: &model.Perm{
-			Pull:  isRead(_repo),
-			Push:  isWrite(_repo),
-			Admin: isAdmin(_repo),
+			Pull:  isRead(_repo, projectMember),
+			Push:  isWrite(projectMember),
+			Admin: isAdmin(projectMember),
 		},
+		PREnabled: _repo.MergeRequestsEnabled,
 	}
 
 	if len(repo.Avatar) != 0 && !strings.HasPrefix(repo.Avatar, "http") {
@@ -69,11 +70,12 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 	source := hook.ObjectAttributes.Source
 	obj := hook.ObjectAttributes
 
-	if target == nil && source == nil {
+	switch {
+	case target == nil && source == nil:
 		return 0, nil, nil, fmt.Errorf("target and source keys expected in merge request hook")
-	} else if target == nil {
+	case target == nil:
 		return 0, nil, nil, fmt.Errorf("target key expected in merge request hook")
-	} else if source == nil {
+	case source == nil:
 		return 0, nil, nil, fmt.Errorf("source key expected in merge request hook")
 	}
 
@@ -110,12 +112,14 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 	}
 
 	pipeline.Event = model.EventPull
+	if obj.State == "closed" {
+		pipeline.Event = model.EventPullClosed
+	}
 
 	lastCommit := obj.LastCommit
 
 	pipeline.Message = lastCommit.Message
 	pipeline.Commit = lastCommit.ID
-	pipeline.CloneURL = obj.Source.HTTPURL
 
 	pipeline.Ref = fmt.Sprintf(mergeRefs, obj.IID)
 	pipeline.Branch = obj.SourceBranch
@@ -236,6 +240,46 @@ func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Pipeline, error)
 	return repo, pipeline, nil
 }
 
+func convertReleaseHook(hook *gitlab.ReleaseEvent) (*model.Repo, *model.Pipeline, error) {
+	repo := &model.Repo{}
+
+	var err error
+	if repo.Owner, repo.Name, err = extractFromPath(hook.Project.PathWithNamespace); err != nil {
+		return nil, nil, err
+	}
+
+	repo.ForgeRemoteID = model.ForgeRemoteID(fmt.Sprint(hook.Project.ID))
+	repo.Avatar = ""
+	if hook.Project.AvatarURL != nil {
+		repo.Avatar = *hook.Project.AvatarURL
+	}
+	repo.ForgeURL = hook.Project.WebURL
+	repo.Clone = hook.Project.GitHTTPURL
+	repo.CloneSSH = hook.Project.GitSSHURL
+	repo.FullName = hook.Project.PathWithNamespace
+	repo.Branch = hook.Project.DefaultBranch
+	repo.IsSCMPrivate = hook.Project.VisibilityLevel > 10
+
+	pipeline := &model.Pipeline{
+		Event:    model.EventRelease,
+		Commit:   hook.Commit.ID,
+		ForgeURL: hook.URL,
+		Message:  fmt.Sprintf("created release %s", hook.Name),
+		Sender:   hook.Commit.Author.Name,
+		Author:   hook.Commit.Author.Name,
+		Email:    hook.Commit.Author.Email,
+
+		// Tag name here is the ref. We should add the refs/tags, so
+		// it is known it's a tag (git-plugin looks for it)
+		Ref: "refs/tags/" + hook.Tag,
+	}
+	if len(pipeline.Email) != 0 {
+		pipeline.Avatar = getUserAvatar(pipeline.Email)
+	}
+
+	return repo, pipeline, nil
+}
+
 func getUserAvatar(email string) string {
 	hasher := md5.New()
 	hasher.Write([]byte(email))
@@ -251,7 +295,7 @@ func getUserAvatar(email string) string {
 func extractFromPath(str string) (string, string, error) {
 	s := strings.Split(str, "/")
 	if len(s) < 2 {
-		return "", "", fmt.Errorf("Minimum match not found")
+		return "", "", fmt.Errorf("minimum match not found")
 	}
 	return s[0], s[1], nil
 }

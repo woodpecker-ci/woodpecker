@@ -20,21 +20,9 @@ import (
 	"github.com/franela/goblin"
 )
 
-func TestSecret(t *testing.T) {
+func TestSecretValidate(t *testing.T) {
 	g := goblin.Goblin(t)
 	g.Describe("Secret", func() {
-		g.It("should match event", func() {
-			secret := Secret{Events: []WebhookEvent{"pull_request"}}
-			g.Assert(secret.Match("pull_request")).IsTrue()
-		})
-		g.It("should not match event", func() {
-			secret := Secret{Events: []WebhookEvent{"pull_request"}}
-			g.Assert(secret.Match("push")).IsFalse()
-		})
-		g.It("should match when no event filters defined", func() {
-			secret := Secret{}
-			g.Assert(secret.Match("pull_request")).IsTrue()
-		})
 		g.It("should pass validation", func() {
 			secret := Secret{
 				Name:   "secretname",
