@@ -22,12 +22,17 @@ import (
 var (
 	ServiceHookMethod = http.MethodPost
 	ServiceHookURL, _ = url.Parse(
-		"http://10.40.8.5:8000/hook?owner=test&name=woodpecker&access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." +
+		"http://10.40.8.5:8000/hook?owner=test&name=woodpecker&access_token=dummyToken." +
 			"eyJ0ZXh0IjoidGVzdC93b29kcGVja2VyIiwidHlwZSI6Imhvb2sifQ.x3kPnmZtxZQ_9_eMhfQ1HSmj_SLhdT_Lu2hMczWjKh0")
 	ServiceHookHeaders = http.Header{
 		"Content-Type":   []string{"application/json"},
 		"User-Agent":     []string{"GitLab/14.3.0"},
 		"X-Gitlab-Event": []string{"Service Hook"},
+	}
+	ReleaseHookHeaders = http.Header{
+		"Content-Type":   []string{"application/json"},
+		"User-Agent":     []string{"GitLab/14.3.0"},
+		"X-Gitlab-Event": []string{"Release Hook"},
 	}
 )
 
@@ -290,6 +295,296 @@ var HookPullRequest = []byte(`
     "blocking_discussions_resolved": true,
     "action": "update",
     "oldrev": "8b641937b7340066d882b9d8a8cc5b0573a207de"
+  },
+  "labels": [
+
+  ],
+  "changes": {
+    "updated_at": {
+      "previous": "2022-01-17 15:46:23 UTC",
+      "current": "2022-01-17 15:47:39 UTC"
+    }
+  },
+  "repository": {
+    "name": "woodpecker",
+    "url": "git@gitlab.com:anbraten/woodpecker.git",
+    "description": "",
+    "homepage": "https://gitlab.com/anbraten/woodpecker"
+  },
+  "assignees": [
+    {
+      "id": 2251488,
+      "name": "Anbraten",
+      "username": "anbraten",
+      "avatar_url": "https://secure.gravatar.com/avatar/fc9b6fe77c6b732a02925a62a81f05a0?s=80&d=identicon",
+      "email": "some@mail.info"
+    }
+  ]
+}
+`)
+
+var HookPullRequestWithoutChanges = []byte(`
+{
+  "object_kind": "merge_request",
+  "event_type": "merge_request",
+  "user": {
+    "id": 2251488,
+    "name": "Anbraten",
+    "username": "anbraten",
+    "avatar_url": "https://secure.gravatar.com/avatar/fc9b6fe77c6b732a02925a62a81f05a0?s=80&d=identicon",
+    "email": "some@mail.info"
+  },
+  "project": {
+    "id": 32059612,
+    "name": "woodpecker",
+    "description": "",
+    "web_url": "https://gitlab.com/anbraten/woodpecker",
+    "avatar_url": "http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg",
+    "git_ssh_url": "git@gitlab.com:anbraten/woodpecker.git",
+    "git_http_url": "https://gitlab.com/anbraten/woodpecker.git",
+    "namespace": "Anbraten",
+    "visibility_level": 20,
+    "path_with_namespace": "anbraten/woodpecker",
+    "default_branch": "main",
+    "ci_config_path": "",
+    "homepage": "https://gitlab.com/anbraten/woodpecker",
+    "url": "git@gitlab.com:anbraten/woodpecker.git",
+    "ssh_url": "git@gitlab.com:anbraten/woodpecker.git",
+    "http_url": "https://gitlab.com/anbraten/woodpecker.git"
+  },
+  "object_attributes": {
+    "assignee_id": 2251488,
+    "author_id": 2251488,
+    "created_at": "2022-01-10 15:23:41 UTC",
+    "description": "",
+    "head_pipeline_id": 449733536,
+    "id": 134400602,
+    "iid": 3,
+    "last_edited_at": "2022-01-17 15:46:23 UTC",
+    "last_edited_by_id": 2251488,
+    "merge_commit_sha": null,
+    "merge_error": null,
+    "merge_params": {
+      "force_remove_source_branch": "1"
+    },
+    "merge_status": "unchecked",
+    "merge_user_id": null,
+    "merge_when_pipeline_succeeds": false,
+    "milestone_id": null,
+    "source_branch": "anbraten-main-patch-05373",
+    "source_project_id": 32059612,
+    "state_id": 1,
+    "target_branch": "main",
+    "target_project_id": 32059612,
+    "time_estimate": 0,
+    "title": "Update client.go 🎉",
+    "updated_at": "2022-01-17 15:47:39 UTC",
+    "updated_by_id": 2251488,
+    "url": "https://gitlab.com/anbraten/woodpecker/-/merge_requests/3",
+    "source": {
+      "id": 32059612,
+      "name": "woodpecker",
+      "description": "",
+      "web_url": "https://gitlab.com/anbraten/woodpecker",
+      "avatar_url": null,
+      "git_ssh_url": "git@gitlab.com:anbraten/woodpecker.git",
+      "git_http_url": "https://gitlab.com/anbraten/woodpecker.git",
+      "namespace": "Anbraten",
+      "visibility_level": 20,
+      "path_with_namespace": "anbraten/woodpecker",
+      "default_branch": "main",
+      "ci_config_path": "",
+      "homepage": "https://gitlab.com/anbraten/woodpecker",
+      "url": "git@gitlab.com:anbraten/woodpecker.git",
+      "ssh_url": "git@gitlab.com:anbraten/woodpecker.git",
+      "http_url": "https://gitlab.com/anbraten/woodpecker.git"
+    },
+    "target": {
+      "id": 32059612,
+      "name": "woodpecker",
+      "description": "",
+      "web_url": "https://gitlab.com/anbraten/woodpecker",
+      "avatar_url": "http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg",
+      "git_ssh_url": "git@gitlab.com:anbraten/woodpecker.git",
+      "git_http_url": "https://gitlab.com/anbraten/woodpecker.git",
+      "namespace": "Anbraten",
+      "visibility_level": 20,
+      "path_with_namespace": "anbraten/woodpecker",
+      "default_branch": "main",
+      "ci_config_path": "",
+      "homepage": "https://gitlab.com/anbraten/woodpecker",
+      "url": "git@gitlab.com:anbraten/woodpecker.git",
+      "ssh_url": "git@gitlab.com:anbraten/woodpecker.git",
+      "http_url": "https://gitlab.com/anbraten/woodpecker.git"
+    },
+    "last_commit": {
+      "id": "c136499ec574e1034b24c5d306de9acda3005367",
+      "message": "Update folder/todo.txt",
+      "title": "Update folder/todo.txt",
+      "timestamp": "2022-01-17T15:47:38+00:00",
+      "url": "https://gitlab.com/anbraten/woodpecker/-/commit/c136499ec574e1034b24c5d306de9acda3005367",
+      "author": {
+        "name": "Anbraten",
+        "email": "some@mail.info"
+      }
+    },
+    "work_in_progress": false,
+    "total_time_spent": 0,
+    "time_change": 0,
+    "human_total_time_spent": null,
+    "human_time_change": null,
+    "human_time_estimate": null,
+    "assignee_ids": [
+      2251488
+    ],
+    "state": "opened",
+    "blocking_discussions_resolved": true,
+    "action": "update"
+  },
+  "labels": [
+
+  ],
+  "changes": {
+    "updated_at": {
+      "previous": "2022-01-17 15:46:23 UTC",
+      "current": "2022-01-17 15:47:39 UTC"
+    }
+  },
+  "repository": {
+    "name": "woodpecker",
+    "url": "git@gitlab.com:anbraten/woodpecker.git",
+    "description": "",
+    "homepage": "https://gitlab.com/anbraten/woodpecker"
+  },
+  "assignees": [
+    {
+      "id": 2251488,
+      "name": "Anbraten",
+      "username": "anbraten",
+      "avatar_url": "https://secure.gravatar.com/avatar/fc9b6fe77c6b732a02925a62a81f05a0?s=80&d=identicon",
+      "email": "some@mail.info"
+    }
+  ]
+}
+`)
+
+var HookPullRequestApproved = []byte(`
+{
+  "object_kind": "merge_request",
+  "event_type": "merge_request",
+  "user": {
+    "id": 2251488,
+    "name": "Anbraten",
+    "username": "anbraten",
+    "avatar_url": "https://secure.gravatar.com/avatar/fc9b6fe77c6b732a02925a62a81f05a0?s=80&d=identicon",
+    "email": "some@mail.info"
+  },
+  "project": {
+    "id": 32059612,
+    "name": "woodpecker",
+    "description": "",
+    "web_url": "https://gitlab.com/anbraten/woodpecker",
+    "avatar_url": "http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg",
+    "git_ssh_url": "git@gitlab.com:anbraten/woodpecker.git",
+    "git_http_url": "https://gitlab.com/anbraten/woodpecker.git",
+    "namespace": "Anbraten",
+    "visibility_level": 20,
+    "path_with_namespace": "anbraten/woodpecker",
+    "default_branch": "main",
+    "ci_config_path": "",
+    "homepage": "https://gitlab.com/anbraten/woodpecker",
+    "url": "git@gitlab.com:anbraten/woodpecker.git",
+    "ssh_url": "git@gitlab.com:anbraten/woodpecker.git",
+    "http_url": "https://gitlab.com/anbraten/woodpecker.git"
+  },
+  "object_attributes": {
+    "assignee_id": 2251488,
+    "author_id": 2251488,
+    "created_at": "2022-01-10 15:23:41 UTC",
+    "description": "",
+    "head_pipeline_id": 449733536,
+    "id": 134400602,
+    "iid": 3,
+    "last_edited_at": "2022-01-17 15:46:23 UTC",
+    "last_edited_by_id": 2251488,
+    "merge_commit_sha": null,
+    "merge_error": null,
+    "merge_params": {
+      "force_remove_source_branch": "1"
+    },
+    "merge_status": "unchecked",
+    "merge_user_id": null,
+    "merge_when_pipeline_succeeds": false,
+    "milestone_id": null,
+    "source_branch": "anbraten-main-patch-05373",
+    "source_project_id": 32059612,
+    "state_id": 1,
+    "target_branch": "main",
+    "target_project_id": 32059612,
+    "time_estimate": 0,
+    "title": "Update client.go 🎉",
+    "updated_at": "2022-01-17 15:47:39 UTC",
+    "updated_by_id": 2251488,
+    "url": "https://gitlab.com/anbraten/woodpecker/-/merge_requests/3",
+    "source": {
+      "id": 32059612,
+      "name": "woodpecker",
+      "description": "",
+      "web_url": "https://gitlab.com/anbraten/woodpecker",
+      "avatar_url": null,
+      "git_ssh_url": "git@gitlab.com:anbraten/woodpecker.git",
+      "git_http_url": "https://gitlab.com/anbraten/woodpecker.git",
+      "namespace": "Anbraten",
+      "visibility_level": 20,
+      "path_with_namespace": "anbraten/woodpecker",
+      "default_branch": "main",
+      "ci_config_path": "",
+      "homepage": "https://gitlab.com/anbraten/woodpecker",
+      "url": "git@gitlab.com:anbraten/woodpecker.git",
+      "ssh_url": "git@gitlab.com:anbraten/woodpecker.git",
+      "http_url": "https://gitlab.com/anbraten/woodpecker.git"
+    },
+    "target": {
+      "id": 32059612,
+      "name": "woodpecker",
+      "description": "",
+      "web_url": "https://gitlab.com/anbraten/woodpecker",
+      "avatar_url": "http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg",
+      "git_ssh_url": "git@gitlab.com:anbraten/woodpecker.git",
+      "git_http_url": "https://gitlab.com/anbraten/woodpecker.git",
+      "namespace": "Anbraten",
+      "visibility_level": 20,
+      "path_with_namespace": "anbraten/woodpecker",
+      "default_branch": "main",
+      "ci_config_path": "",
+      "homepage": "https://gitlab.com/anbraten/woodpecker",
+      "url": "git@gitlab.com:anbraten/woodpecker.git",
+      "ssh_url": "git@gitlab.com:anbraten/woodpecker.git",
+      "http_url": "https://gitlab.com/anbraten/woodpecker.git"
+    },
+    "last_commit": {
+      "id": "c136499ec574e1034b24c5d306de9acda3005367",
+      "message": "Update folder/todo.txt",
+      "title": "Update folder/todo.txt",
+      "timestamp": "2022-01-17T15:47:38+00:00",
+      "url": "https://gitlab.com/anbraten/woodpecker/-/commit/c136499ec574e1034b24c5d306de9acda3005367",
+      "author": {
+        "name": "Anbraten",
+        "email": "some@mail.info"
+      }
+    },
+    "work_in_progress": false,
+    "total_time_spent": 0,
+    "time_change": 0,
+    "human_total_time_spent": null,
+    "human_time_change": null,
+    "human_time_estimate": null,
+    "assignee_ids": [
+      2251488
+    ],
+    "state": "opened",
+    "blocking_discussions_resolved": true,
+    "action": "approved"
   },
   "labels": [
 
@@ -596,6 +891,72 @@ var HookPullRequestMerged = []byte(`
     "url": "git@gitlab.com:anbraten/woodpecker-test.git",
     "description": "",
     "homepage": "https://gitlab.com/anbraten/woodpecker-test"
+  }
+}
+`)
+
+var WebhookReleaseBody = []byte(`
+{
+  "id": 4268085,
+  "created_at": "2022-02-09 20:19:09 UTC",
+  "description": "new version desc",
+  "name": "Awesome version 0.0.2",
+  "released_at": "2022-02-09 20:19:09 UTC",
+  "tag": "0.0.2",
+  "object_kind": "release",
+  "project": {
+    "id": 32521798,
+    "name": "ci",
+    "description": "",
+    "web_url": "https://gitlab.com/anbratens-test/ci",
+    "avatar_url": null,
+    "git_ssh_url": "git@gitlab.com:anbratens-test/ci.git",
+    "git_http_url": "https://gitlab.com/anbratens-test/ci.git",
+    "namespace": "anbratens-test",
+    "visibility_level": 0,
+    "path_with_namespace": "anbratens-test/ci",
+    "default_branch": "main",
+    "ci_config_path": "",
+    "homepage": "https://gitlab.com/anbratens-test/ci",
+    "url": "git@gitlab.com:anbratens-test/ci.git",
+    "ssh_url": "git@gitlab.com:anbratens-test/ci.git",
+    "http_url": "https://gitlab.com/anbratens-test/ci.git"
+  },
+  "url": "https://gitlab.com/anbratens-test/ci/-/releases/0.0.2",
+  "action": "create",
+  "assets": {
+    "count": 4,
+    "links": [
+    ],
+    "sources": [
+      {
+        "format": "zip",
+        "url": "https://gitlab.com/anbratens-test/ci/-/archive/0.0.2/ci-0.0.2.zip"
+      },
+      {
+        "format": "tar.gz",
+        "url": "https://gitlab.com/anbratens-test/ci/-/archive/0.0.2/ci-0.0.2.tar.gz"
+      },
+      {
+        "format": "tar.bz2",
+        "url": "https://gitlab.com/anbratens-test/ci/-/archive/0.0.2/ci-0.0.2.tar.bz2"
+      },
+      {
+        "format": "tar",
+        "url": "https://gitlab.com/anbratens-test/ci/-/archive/0.0.2/ci-0.0.2.tar"
+      }
+    ]
+  },
+  "commit": {
+    "id": "0b8c02955ba445ea70d22824d9589678852e2b93",
+    "message": "Initial commit",
+    "title": "Initial commit",
+    "timestamp": "2022-01-03T10:39:51+00:00",
+    "url": "https://gitlab.com/anbratens-test/ci/-/commit/0b8c02955ba445ea70d22824d9589678852e2b93",
+    "author": {
+      "name": "Anbraten",
+      "email": "2251488-anbraten@users.noreply.gitlab.com"
+    }
   }
 }
 `)

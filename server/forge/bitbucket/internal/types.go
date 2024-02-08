@@ -21,7 +21,7 @@ import (
 )
 
 type Account struct {
-	ID    int64  `json:"id"`
+	UUID  string `json:"uuid"`
 	Login string `json:"username"`
 	Name  string `json:"display_name"`
 	Type  string `json:"type"`

@@ -3784,9 +3784,6 @@ const docTemplate = `{
                 "refspec": {
                     "type": "string"
                 },
-                "remote": {
-                    "type": "string"
-                },
                 "repo_id": {
                     "type": "integer"
                 },
@@ -3913,9 +3910,6 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
-                "clone_url": {
-                    "type": "string"
-                },
                 "commit": {
                     "type": "string"
                 },
@@ -3924,9 +3918,6 @@ const docTemplate = `{
                 },
                 "deploy_to": {
                     "type": "string"
-                },
-                "enqueued_at": {
-                    "type": "integer"
                 },
                 "errors": {
                     "type": "array",
@@ -3945,6 +3936,9 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "integer"
+                },
+                "is_prerelease": {
+                    "type": "boolean"
                 },
                 "message": {
                     "type": "string"
@@ -4037,16 +4031,10 @@ const docTemplate = `{
                 "address": {
                     "type": "string"
                 },
-                "email": {
-                    "type": "string"
-                },
                 "id": {
                     "type": "integer"
                 },
                 "password": {
-                    "type": "string"
-                },
-                "token": {
                     "type": "string"
                 },
                 "username": {
@@ -4398,6 +4386,7 @@ const docTemplate = `{
                 "pull_request",
                 "pull_request_closed",
                 "tag",
+                "release",
                 "deployment",
                 "cron",
                 "manual"
@@ -4407,6 +4396,7 @@ const docTemplate = `{
                 "EventPull",
                 "EventPullClosed",
                 "EventTag",
+                "EventRelease",
                 "EventDeploy",
                 "EventCron",
                 "EventManual"
