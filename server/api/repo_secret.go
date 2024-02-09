@@ -39,8 +39,8 @@ func GetSecret(c *gin.Context) {
 	repo := session.Repo(c)
 	name := c.Param("secret")
 
-	secretService := server.Config.Services.Manager.SecretServiceFromRepo(repo)
-	secret, err := secretService.SecretFind(repo, name)
+	secretExtension := server.Config.Services.Manager.SecretExtensionFromRepo(repo)
+	secret, err := secretExtension.SecretFind(repo, name)
 	if err != nil {
 		handleDBError(c, err)
 		return
@@ -78,8 +78,8 @@ func PostSecret(c *gin.Context) {
 		return
 	}
 
-	secretService := server.Config.Services.Manager.SecretServiceFromRepo(repo)
-	if err := secretService.SecretCreate(repo, secret); err != nil {
+	secretExtension := server.Config.Services.Manager.SecretExtensionFromRepo(repo)
+	if err := secretExtension.SecretCreate(repo, secret); err != nil {
 		c.String(http.StatusInternalServerError, "Error inserting secret %q. %s", in.Name, err)
 		return
 	}
@@ -110,8 +110,8 @@ func PatchSecret(c *gin.Context) {
 		return
 	}
 
-	secretService := server.Config.Services.Manager.SecretServiceFromRepo(repo)
-	secret, err := secretService.SecretFind(repo, name)
+	secretExtension := server.Config.Services.Manager.SecretExtensionFromRepo(repo)
+	secret, err := secretExtension.SecretFind(repo, name)
 	if err != nil {
 		handleDBError(c, err)
 		return
@@ -130,7 +130,7 @@ func PatchSecret(c *gin.Context) {
 		c.String(http.StatusUnprocessableEntity, "Error updating secret. %s", err)
 		return
 	}
-	if err := secretService.SecretUpdate(repo, secret); err != nil {
+	if err := secretExtension.SecretUpdate(repo, secret); err != nil {
 		c.String(http.StatusInternalServerError, "Error updating secret %q. %s", in.Name, err)
 		return
 	}
@@ -150,8 +150,8 @@ func PatchSecret(c *gin.Context) {
 //	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
 func GetSecretList(c *gin.Context) {
 	repo := session.Repo(c)
-	secretService := server.Config.Services.Manager.SecretServiceFromRepo(repo)
-	list, err := secretService.SecretList(repo, session.Pagination(c))
+	secretExtension := server.Config.Services.Manager.SecretExtensionFromRepo(repo)
+	list, err := secretExtension.SecretList(repo, session.Pagination(c))
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error getting secret list. %s", err)
 		return
@@ -178,8 +178,8 @@ func DeleteSecret(c *gin.Context) {
 	repo := session.Repo(c)
 	name := c.Param("secret")
 
-	secretService := server.Config.Services.Manager.SecretServiceFromRepo(repo)
-	if err := secretService.SecretDelete(repo, name); err != nil {
+	secretExtension := server.Config.Services.Manager.SecretExtensionFromRepo(repo)
+	if err := secretExtension.SecretDelete(repo, name); err != nil {
 		handleDBError(c, err)
 		return
 	}

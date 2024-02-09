@@ -21,12 +21,13 @@ import (
 
 	"github.com/rs/zerolog/log"
 
+	"go.woodpecker-ci.org/woodpecker/v2/server/extensions/encryption/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 type EncryptedSecretStore struct {
 	store      model.SecretStore
-	encryption model.EncryptionService
+	encryption types.EncryptionExtension
 }
 
 // ensure wrapper match interface
@@ -37,11 +38,11 @@ func NewSecretStore(secretStore model.SecretStore) *EncryptedSecretStore {
 	return &wrapper
 }
 
-func (wrapper *EncryptedSecretStore) SetEncryptionService(service model.EncryptionService) error {
+func (wrapper *EncryptedSecretStore) SetEncryptionExtension(extension types.EncryptionExtension) error {
 	if wrapper.encryption != nil {
 		return errors.New(errMessageInitSeveralTimes)
 	}
-	wrapper.encryption = service
+	wrapper.encryption = extension
 	return nil
 }
 
@@ -63,7 +64,7 @@ func (wrapper *EncryptedSecretStore) EnableEncryption() error {
 	return nil
 }
 
-func (wrapper *EncryptedSecretStore) MigrateEncryption(newEncryptionService model.EncryptionService) error {
+func (wrapper *EncryptedSecretStore) MigrateEncryption(newEncryptionExtension types.EncryptionExtension) error {
 	log.Warn().Msg(logMessageMigratingSecretsEncryption)
 	secrets, err := wrapper.store.SecretListAll()
 	if err != nil {
@@ -72,7 +73,7 @@ func (wrapper *EncryptedSecretStore) MigrateEncryption(newEncryptionService mode
 	if err := wrapper.decryptList(secrets); err != nil {
 		return err
 	}
-	wrapper.encryption = newEncryptionService
+	wrapper.encryption = newEncryptionExtension
 	for _, secret := range secrets {
 		if err := wrapper.encrypt(secret); err != nil {
 			return err

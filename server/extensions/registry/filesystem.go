@@ -31,7 +31,7 @@ type filesystem struct {
 	path string
 }
 
-func NewFilesystem(path string) ReadOnlyService {
+func NewFilesystem(path string) ReadOnlyExtension {
 	return &filesystem{path}
 }
 

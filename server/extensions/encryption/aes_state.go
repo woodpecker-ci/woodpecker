@@ -20,9 +20,9 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func (svc *aesEncryptionService) initClients() error {
+func (svc *aesEncryptionExtension) initClients() error {
 	for _, client := range svc.clients {
-		err := client.SetEncryptionService(svc)
+		err := client.SetEncryptionExtension(svc)
 		if err != nil {
 			return fmt.Errorf(errTemplateFailedInitializingClients, err)
 		}
@@ -31,7 +31,7 @@ func (svc *aesEncryptionService) initClients() error {
 	return nil
 }
 
-func (svc *aesEncryptionService) enable() error {
+func (svc *aesEncryptionExtension) enable() error {
 	err := svc.callbackOnEnable()
 	if err != nil {
 		return fmt.Errorf(errTemplateFailedEnablingEncryption, err)
@@ -44,7 +44,7 @@ func (svc *aesEncryptionService) enable() error {
 	return nil
 }
 
-func (svc *aesEncryptionService) disable() error {
+func (svc *aesEncryptionExtension) disable() error {
 	err := svc.callbackOnDisable()
 	if err != nil {
 		return fmt.Errorf(errTemplateFailedDisablingEncryption, err)
@@ -57,7 +57,7 @@ func (svc *aesEncryptionService) disable() error {
 	return nil
 }
 
-func (svc *aesEncryptionService) updateCiphertextSample() error {
+func (svc *aesEncryptionExtension) updateCiphertextSample() error {
 	ciphertext, err := svc.Encrypt(svc.keyID, keyIDAssociatedData)
 	if err != nil {
 		return fmt.Errorf(errTemplateFailedUpdatingServerConfig, err)
@@ -70,7 +70,7 @@ func (svc *aesEncryptionService) updateCiphertextSample() error {
 	return nil
 }
 
-func (svc *aesEncryptionService) deleteCiphertextSample() error {
+func (svc *aesEncryptionExtension) deleteCiphertextSample() error {
 	err := svc.store.ServerConfigDelete(ciphertextSampleConfigKey)
 	if err != nil {
 		err = fmt.Errorf(errTemplateFailedUpdatingServerConfig, err)
@@ -78,7 +78,7 @@ func (svc *aesEncryptionService) deleteCiphertextSample() error {
 	return err
 }
 
-func (svc *aesEncryptionService) callbackOnEnable() error {
+func (svc *aesEncryptionExtension) callbackOnEnable() error {
 	for _, client := range svc.clients {
 		err := client.EnableEncryption()
 		if err != nil {
@@ -89,7 +89,7 @@ func (svc *aesEncryptionService) callbackOnEnable() error {
 	return nil
 }
 
-func (svc *aesEncryptionService) callbackOnDisable() error {
+func (svc *aesEncryptionExtension) callbackOnDisable() error {
 	for _, client := range svc.clients {
 		err := client.MigrateEncryption(&noEncryption{})
 		if err != nil {

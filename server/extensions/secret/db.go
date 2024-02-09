@@ -22,8 +22,8 @@ type db struct {
 	store model.SecretStore
 }
 
-// NewDB returns a new local secret service.
-func NewDB(store model.SecretStore) Service {
+// NewDB returns a new local secret extension.
+func NewDB(store model.SecretStore) Extension {
 	return &db{store: store}
 }
 

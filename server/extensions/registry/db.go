@@ -22,8 +22,8 @@ type db struct {
 	store model.RegistryStore
 }
 
-// New returns a new local registry service.
-func NewDB(store model.RegistryStore) Service {
+// New returns a new local registry extension.
+func NewDB(store model.RegistryStore) Extension {
 	return &db{store}
 }
 

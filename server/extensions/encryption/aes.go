@@ -21,18 +21,18 @@ import (
 
 	"github.com/google/tink/go/subtle/random"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/extensions/encryption/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
-type aesEncryptionService struct {
+type aesEncryptionExtension struct {
 	cipher  cipher.AEAD
 	keyID   string
 	store   store.Store
-	clients []model.EncryptionClient
+	clients []types.EncryptionClient
 }
 
-func (svc *aesEncryptionService) Encrypt(plaintext, associatedData string) (string, error) {
+func (svc *aesEncryptionExtension) Encrypt(plaintext, associatedData string) (string, error) {
 	msg := []byte(plaintext)
 	aad := []byte(associatedData)
 
@@ -46,7 +46,7 @@ func (svc *aesEncryptionService) Encrypt(plaintext, associatedData string) (stri
 	return base64.StdEncoding.EncodeToString(result), nil
 }
 
-func (svc *aesEncryptionService) Decrypt(ciphertext, associatedData string) (string, error) {
+func (svc *aesEncryptionExtension) Decrypt(ciphertext, associatedData string) (string, error) {
 	bytes, err := base64.StdEncoding.DecodeString(ciphertext)
 	if err != nil {
 		return "", fmt.Errorf(errTemplateBase64DecryptionFailed, err)
@@ -62,6 +62,6 @@ func (svc *aesEncryptionService) Decrypt(ciphertext, associatedData string) (str
 	return string(plaintext), nil
 }
 
-func (svc *aesEncryptionService) Disable() error {
+func (svc *aesEncryptionExtension) Disable() error {
 	return svc.disable()
 }

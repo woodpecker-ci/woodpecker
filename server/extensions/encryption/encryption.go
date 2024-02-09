@@ -19,21 +19,21 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/extensions/encryption/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
 type builder struct {
 	store   store.Store
 	ctx     *cli.Context
-	clients []model.EncryptionClient
+	clients []types.EncryptionClient
 }
 
-func Encryption(ctx *cli.Context, s store.Store) model.EncryptionBuilder {
+func Encryption(ctx *cli.Context, s store.Store) types.EncryptionBuilder {
 	return &builder{store: s, ctx: ctx}
 }
 
-func (b builder) WithClient(client model.EncryptionClient) model.EncryptionBuilder {
+func (b builder) WithClient(client types.EncryptionClient) types.EncryptionBuilder {
 	b.clients = append(b.clients, client)
 	return b
 }
@@ -57,7 +57,7 @@ func (b builder) Build() error {
 			return fmt.Errorf(errTemplateFailedInitializingUnencrypted, err)
 		}
 	}
-	svc, err := b.getService(keyType)
+	svc, err := b.getExtension(keyType)
 	if err != nil {
 		return fmt.Errorf(errTemplateFailedInitializing, err)
 	}

@@ -29,11 +29,15 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
 )
 
+const (
+	forgeFetchingRetryCount = 3
+)
+
 type forgeFetcher struct {
 	timeout time.Duration
 }
 
-func NewForge(timeout time.Duration) Service {
+func NewForge(timeout time.Duration) Extension {
 	return &forgeFetcher{
 		timeout: timeout,
 	}
@@ -48,8 +52,8 @@ func (f *forgeFetcher) Fetch(ctx context.Context, forge forge.Forge, user *model
 		timeout:  f.timeout,
 	}
 
-	// try to fetch 3 times
-	for i := 0; i < 3; i++ {
+	// try to fetch multiple times
+	for i := 0; i < forgeFetchingRetryCount; i++ {
 		files, err = ffc.fetch(ctx, strings.TrimSpace(repo.Config))
 		if err != nil {
 			log.Trace().Err(err).Msgf("%d. try failed", i+1)

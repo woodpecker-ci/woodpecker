@@ -25,19 +25,19 @@ import (
 )
 
 type combined struct {
-	serives []Service
+	extensions []Extension
 }
 
-func NewCombined(services ...Service) Service {
-	return &combined{serives: services}
+func NewCombined(extensions ...Extension) Extension {
+	return &combined{extensions: extensions}
 }
 
 func (c *combined) Fetch(ctx context.Context, forge forge.Forge, user *model.User, repo *model.Repo, pipeline *model.Pipeline) (files []*types.FileMeta, err error) {
-	for _, s := range c.serives {
-		// TODO(anbraten): This is a hack to get the current configs into the http service
+	for _, s := range c.extensions {
+		// TODO(anbraten): This is a hack to get the current configs into the http extension
 		_s, ok := s.(*http)
 		if !ok {
-			log.Err(err).Msg("http service is not of type http")
+			log.Err(err).Msg("http extension is not of type http")
 		} else {
 			_s.currentConfigs = files
 		}

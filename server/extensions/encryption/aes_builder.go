@@ -20,28 +20,28 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/extensions/encryption/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
 type aesConfiguration struct {
 	password string
 	store    store.Store
-	clients  []model.EncryptionClient
+	clients  []types.EncryptionClient
 }
 
-func newAES(ctx *cli.Context, s store.Store) model.EncryptionServiceBuilder {
+func newAES(ctx *cli.Context, s store.Store) types.EncryptionExtensionBuilder {
 	key := ctx.String(rawKeyConfigFlag)
 	return &aesConfiguration{key, s, nil}
 }
 
-func (c aesConfiguration) WithClients(clients []model.EncryptionClient) model.EncryptionServiceBuilder {
+func (c aesConfiguration) WithClients(clients []types.EncryptionClient) types.EncryptionExtensionBuilder {
 	c.clients = clients
 	return c
 }
 
-func (c aesConfiguration) Build() (model.EncryptionService, error) {
-	svc := &aesEncryptionService{
+func (c aesConfiguration) Build() (types.EncryptionExtension, error) {
+	svc := &aesEncryptionExtension{
 		cipher:  nil,
 		store:   c.store,
 		clients: c.clients,

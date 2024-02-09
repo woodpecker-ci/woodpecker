@@ -50,7 +50,7 @@ type responseStructure struct {
 	Configs []*configData `json:"configs"`
 }
 
-func NewHTTP(endpoint string, privateKey crypto.PrivateKey, currentConfigs []*types.FileMeta) Service {
+func NewHTTP(endpoint string, privateKey crypto.PrivateKey, currentConfigs []*types.FileMeta) Extension {
 	return &http{endpoint, privateKey, currentConfigs}
 }
 

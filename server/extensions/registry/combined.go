@@ -19,11 +19,11 @@ import (
 )
 
 type combined struct {
-	registries []ReadOnlyService
-	dbRegistry Service
+	registries []ReadOnlyExtension
+	dbRegistry Extension
 }
 
-func NewCombined(dbRegistry Service, registries ...ReadOnlyService) Service {
+func NewCombined(dbRegistry Extension, registries ...ReadOnlyExtension) Extension {
 	registries = append(registries, dbRegistry)
 	return &combined{
 		registries: registries,

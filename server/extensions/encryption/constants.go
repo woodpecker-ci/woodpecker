@@ -41,7 +41,7 @@ var (
 const (
 	// error wrapping templates
 	errTemplateFailedInitializingUnencrypted = "failed initializing server in unencrypted mode: %w"
-	errTemplateFailedInitializing            = "failed initializing encryption service: %w"
+	errTemplateFailedInitializing            = "failed initializing encryption extension: %w"
 	errTemplateFailedEnablingEncryption      = "failed enabling encryption: %w"
 	errTemplateFailedRotatingEncryption      = "failed rotating encryption: %w"
 	errTemplateFailedDisablingEncryption     = "failed disabling encryption: %w"
@@ -55,7 +55,7 @@ const (
 
 	// error messages
 	errMessageTemplateUnsupportedKeyType = "unsupported encryption key type: %s"
-	errMessageCantUseBothServices        = "cannot use raw encryption key and tink keyset at the same time"
+	errMessageCantUseBothExtensions      = "cannot use raw encryption key and tink keyset at the same time"
 	errMessageNoKeysProvided             = "encryption enabled but no keys provided"
 	errMessageFailedRotatingEncryption   = "failed rotating encryption"
 
@@ -64,9 +64,9 @@ const (
 	logMessageEncryptionDisabled      = "encryption disabled"
 	logMessageEncryptionKeyRegistered = "registered new encryption key"
 	logMessageClientsInitialized      = "initialized encryption on registered clients"
-	logMessageClientsEnabled          = "enabled encryption on registered services"
-	logMessageClientsRotated          = "updated encryption key on registered services"
-	logMessageClientsDecrypted        = "disabled encryption on registered services"
+	logMessageClientsEnabled          = "enabled encryption on registered extension"
+	logMessageClientsRotated          = "updated encryption key on registered extension"
+	logMessageClientsDecrypted        = "disabled encryption on registered extension"
 )
 
 // tink
@@ -84,7 +84,7 @@ const (
 	errMessageTinkKeysetFileWatchFailed = "failed watching encryption keyset file changes"
 
 	// log message templates
-	logTemplateTinkKeysetFileChanged       = "changes detected in encryption keyset file: '%s'. Encryption service will be reloaded"
+	logTemplateTinkKeysetFileChanged       = "changes detected in encryption keyset file: '%s'. Encryption extension will be reloaded"
 	logTemplateTinkLoadingKeyset           = "loading encryption keyset from file: %s"
 	logTemplateTinkFailedClosingKeysetFile = "could not close keyset file: %s"
 )

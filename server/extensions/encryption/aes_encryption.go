@@ -26,7 +26,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
 )
 
-func (svc *aesEncryptionService) loadCipher(password string) error {
+func (svc *aesEncryptionExtension) loadCipher(password string) error {
 	key, err := svc.hash([]byte(password))
 	if err != nil {
 		return fmt.Errorf(errTemplateAesFailedGeneratingKey, err)
@@ -50,7 +50,7 @@ func (svc *aesEncryptionService) loadCipher(password string) error {
 	return nil
 }
 
-func (svc *aesEncryptionService) validateKey() error {
+func (svc *aesEncryptionExtension) validateKey() error {
 	ciphertextSample, err := svc.store.ServerConfigGet(ciphertextSampleConfigKey)
 	if errors.Is(err, types.RecordNotExist) {
 		return errEncryptionNotEnabled
@@ -67,7 +67,7 @@ func (svc *aesEncryptionService) validateKey() error {
 	return nil
 }
 
-func (svc *aesEncryptionService) hash(data []byte) ([]byte, error) {
+func (svc *aesEncryptionExtension) hash(data []byte) ([]byte, error) {
 	result := make([]byte, 32)
 	sha := sha3.NewShake256()
 

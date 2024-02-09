@@ -18,16 +18,16 @@ import (
 	"errors"
 	"fmt"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/v2/server/extensions/encryption/types"
+	storeTypes "go.woodpecker-ci.org/woodpecker/v2/server/store/types"
 )
 
-func (b builder) getService(keyType string) (model.EncryptionService, error) {
+func (b builder) getExtension(keyType string) (types.EncryptionExtension, error) {
 	if keyType == keyTypeNone {
 		return nil, errors.New(errMessageNoKeysProvided)
 	}
 
-	builder, err := b.serviceBuilder(keyType)
+	builder, err := b.extensionBuilder(keyType)
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +41,7 @@ func (b builder) getService(keyType string) (model.EncryptionService, error) {
 
 func (b builder) isEnabled() (bool, error) {
 	_, err := b.store.ServerConfigGet(ciphertextSampleConfigKey)
-	if err != nil && !errors.Is(err, types.RecordNotExist) {
+	if err != nil && !errors.Is(err, storeTypes.RecordNotExist) {
 		return false, fmt.Errorf(errTemplateFailedLoadingServerConfig, err)
 	}
 	return err == nil, nil
@@ -52,7 +52,7 @@ func (b builder) detectKeyType() (string, error) {
 	tinkKeysetPresent := b.ctx.IsSet(tinkKeysetFilepathConfigFlag)
 	switch {
 	case rawKeyPresent && tinkKeysetPresent:
-		return "", errors.New(errMessageCantUseBothServices)
+		return "", errors.New(errMessageCantUseBothExtensions)
 	case rawKeyPresent:
 		return keyTypeRaw, nil
 	case tinkKeysetPresent:
@@ -61,7 +61,7 @@ func (b builder) detectKeyType() (string, error) {
 	return keyTypeNone, nil
 }
 
-func (b builder) serviceBuilder(keyType string) (model.EncryptionServiceBuilder, error) {
+func (b builder) extensionBuilder(keyType string) (types.EncryptionExtensionBuilder, error) {
 	switch {
 	case keyType == keyTypeTink:
 		return newTink(b.ctx, b.store), nil

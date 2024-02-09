@@ -26,8 +26,8 @@ type builtin struct {
 	globals []*model.Environ
 }
 
-// Parse returns a model.EnvironService based on a string slice where key and value are separated by a ":" delimiter.
-func Parse(params []string) Service {
+// Parse returns a model.EnvironExtension based on a string slice where key and value are separated by a ":" delimiter.
+func Parse(params []string) Extension {
 	var globals []*model.Environ
 
 	for _, item := range params {

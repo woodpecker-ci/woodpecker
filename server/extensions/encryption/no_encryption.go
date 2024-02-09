@@ -14,21 +14,21 @@
 
 package encryption
 
-import "go.woodpecker-ci.org/woodpecker/v2/server/model"
+import "go.woodpecker-ci.org/woodpecker/v2/server/extensions/encryption/types"
 
 type noEncryptionBuilder struct {
-	clients []model.EncryptionClient
+	clients []types.EncryptionClient
 }
 
-func (b noEncryptionBuilder) WithClients(clients []model.EncryptionClient) model.EncryptionServiceBuilder {
+func (b noEncryptionBuilder) WithClients(clients []types.EncryptionClient) types.EncryptionExtensionBuilder {
 	b.clients = clients
 	return b
 }
 
-func (b noEncryptionBuilder) Build() (model.EncryptionService, error) {
+func (b noEncryptionBuilder) Build() (types.EncryptionExtension, error) {
 	svc := &noEncryption{}
 	for _, client := range b.clients {
-		err := client.SetEncryptionService(svc)
+		err := client.SetEncryptionExtension(svc)
 		if err != nil {
 			return nil, err
 		}

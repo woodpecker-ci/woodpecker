@@ -28,10 +28,10 @@ import (
 )
 
 type Manager struct {
-	secret              secret.Service
-	registry            registry.Service
-	config              config.Service
-	environment         environment.Service
+	secret              secret.Extension
+	registry            registry.Extension
+	config              config.Extension
+	environment         environment.Extension
 	signaturePrivateKey crypto.PrivateKey
 	signaturePublicKey  crypto.PublicKey
 }
@@ -47,7 +47,7 @@ func NewManager(c *cli.Context, store store.Store) (*Manager, error) {
 		signaturePublicKey:  signaturePublicKey,
 		secret:              setupSecretExtension(store),
 		registry:            setupRegistryExtension(store, c.String("docker-config")),
-		config:              setupConfigService(c, signaturePrivateKey),
+		config:              setupConfigExtension(c, signaturePrivateKey),
 		environment:         environment.Parse(c.StringSlice("environment")),
 	}, nil
 }
@@ -56,26 +56,26 @@ func (e *Manager) SignaturePublicKey() crypto.PublicKey {
 	return e.signaturePublicKey
 }
 
-func (e *Manager) SecretServiceFromRepo(_ *model.Repo) secret.Service {
+func (e *Manager) SecretExtensionFromRepo(_ *model.Repo) secret.Extension {
 	return e.secret
 }
 
-func (e *Manager) SecretService() secret.Service {
+func (e *Manager) SecretExtension() secret.Extension {
 	return e.secret
 }
 
-func (e *Manager) RegistryServiceFromRepo(_ *model.Repo) registry.Service {
+func (e *Manager) RegistryExtensionFromRepo(_ *model.Repo) registry.Extension {
 	return e.registry
 }
 
-func (e *Manager) RegistryService() registry.Service {
+func (e *Manager) RegistryExtension() registry.Extension {
 	return e.registry
 }
 
-func (e *Manager) ConfigServiceFromRepo(_ *model.Repo) config.Service {
+func (e *Manager) ConfigExtensionFromRepo(_ *model.Repo) config.Extension {
 	return e.config
 }
 
-func (e *Manager) EnvironmentService() environment.Service {
+func (e *Manager) EnvironmentExtension() environment.Extension {
 	return e.environment
 }

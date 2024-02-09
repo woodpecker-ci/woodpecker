@@ -32,7 +32,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
 )
 
-func setupRegistryExtension(store store.Store, dockerConfig string) registry.Service {
+func setupRegistryExtension(store store.Store, dockerConfig string) registry.Extension {
 	if dockerConfig != "" {
 		return registry.NewCombined(
 			registry.NewDB(store),
@@ -43,24 +43,24 @@ func setupRegistryExtension(store store.Store, dockerConfig string) registry.Ser
 	return registry.NewDB(store)
 }
 
-func setupSecretExtension(store store.Store) secret.Service {
+func setupSecretExtension(store store.Store) secret.Extension {
 	// TODO(1544): fix encrypted store
 	// // encryption
 	// encryptedSecretStore := encryptedStore.NewSecretStore(v)
 	// err := encryption.Encryption(c, v).WithClient(encryptedSecretStore).Build()
 	// if err != nil {
-	// 	log.Fatal().Err(err).Msg("could not create encryption service")
+	// 	log.Fatal().Err(err).Msg("could not create encryption extension")
 	// }
-	// server.Config.Services.Secrets = setupSecretService(c, encryptedSecretStore)
+	// server.Config.Extensions.Secrets = setupSecretExtension(c, encryptedSecretStore)
 
 	return secret.NewDB(store)
 }
 
-func setupConfigService(c *cli.Context, privateSignatureKey crypto.PrivateKey) config.Service {
+func setupConfigExtension(c *cli.Context, privateSignatureKey crypto.PrivateKey) config.Extension {
 	timeout := c.Duration("forge-timeout")
 	configFetcher := config.NewForge(timeout)
 
-	if endpoint := c.String("config-service-endpoint"); endpoint != "" {
+	if endpoint := c.String("config-extension-endpoint"); endpoint != "" {
 		httpFetcher := config.NewHTTP(endpoint, privateSignatureKey, nil)
 		return config.NewCombined(configFetcher, httpFetcher)
 	}

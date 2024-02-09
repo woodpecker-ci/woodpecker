@@ -20,28 +20,28 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/extensions/encryption/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
 type tinkConfiguration struct {
 	keysetFilePath string
 	store          store.Store
-	clients        []model.EncryptionClient
+	clients        []types.EncryptionClient
 }
 
-func newTink(ctx *cli.Context, s store.Store) model.EncryptionServiceBuilder {
+func newTink(ctx *cli.Context, s store.Store) types.EncryptionExtensionBuilder {
 	filepath := ctx.String(tinkKeysetFilepathConfigFlag)
 	return &tinkConfiguration{filepath, s, nil}
 }
 
-func (c tinkConfiguration) WithClients(clients []model.EncryptionClient) model.EncryptionServiceBuilder {
+func (c tinkConfiguration) WithClients(clients []types.EncryptionClient) types.EncryptionExtensionBuilder {
 	c.clients = clients
 	return c
 }
 
-func (c tinkConfiguration) Build() (model.EncryptionService, error) {
-	svc := &tinkEncryptionService{
+func (c tinkConfiguration) Build() (types.EncryptionExtension, error) {
+	svc := &tinkEncryptionExtension{
 		keysetFilePath:    c.keysetFilePath,
 		primaryKeyID:      "",
 		encryption:        nil,

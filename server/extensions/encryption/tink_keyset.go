@@ -28,7 +28,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
 )
 
-func (svc *tinkEncryptionService) loadKeyset() error {
+func (svc *tinkEncryptionExtension) loadKeyset() error {
 	log.Warn().Msgf(logTemplateTinkLoadingKeyset, svc.keysetFilePath)
 	file, err := os.Open(svc.keysetFilePath)
 	if err != nil {
@@ -56,7 +56,7 @@ func (svc *tinkEncryptionService) loadKeyset() error {
 	return nil
 }
 
-func (svc *tinkEncryptionService) validateKeyset() error {
+func (svc *tinkEncryptionExtension) validateKeyset() error {
 	ciphertextSample, err := svc.store.ServerConfigGet(ciphertextSampleConfigKey)
 	if errors.Is(err, types.RecordNotExist) {
 		return errEncryptionNotEnabled

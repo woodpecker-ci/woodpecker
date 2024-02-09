@@ -22,7 +22,7 @@ import (
 )
 
 // Watch keyset file events to detect key rotations and hot reload keys
-func (svc *tinkEncryptionService) initFileWatcher() error {
+func (svc *tinkEncryptionExtension) initFileWatcher() error {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		return fmt.Errorf(errTemplateTinkFailedSubscribeKeysetFileChanges, err)
@@ -37,7 +37,7 @@ func (svc *tinkEncryptionService) initFileWatcher() error {
 	return nil
 }
 
-func (svc *tinkEncryptionService) handleFileEvents() {
+func (svc *tinkEncryptionExtension) handleFileEvents() {
 	for {
 		select {
 		case event, ok := <-svc.keysetFileWatcher.Events:

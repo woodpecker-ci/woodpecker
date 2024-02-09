@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package model
+package types
 
 // EncryptionBuilder is user API to obtain correctly configured encryption
 type EncryptionBuilder interface {
@@ -20,22 +20,22 @@ type EncryptionBuilder interface {
 	Build() error
 }
 
-type EncryptionServiceBuilder interface {
-	WithClients(clients []EncryptionClient) EncryptionServiceBuilder
-	Build() (EncryptionService, error)
+type EncryptionExtensionBuilder interface {
+	WithClients(clients []EncryptionClient) EncryptionExtensionBuilder
+	Build() (EncryptionExtension, error)
 }
 
-type EncryptionService interface {
+type EncryptionExtension interface {
 	Encrypt(plaintext, associatedData string) (string, error)
 	Decrypt(ciphertext, associatedData string) (string, error)
 	Disable() error
 }
 
 type EncryptionClient interface {
-	// SetEncryptionService should be used only by EncryptionServiceBuilder
-	SetEncryptionService(encryption EncryptionService) error
-	// EnableEncryption should encrypt all service data
+	// SetEncryptionExtension should be used only by EncryptionExtensionBuilder
+	SetEncryptionExtension(encryption EncryptionExtension) error
+	// EnableEncryption should encrypt all extension data
 	EnableEncryption() error
-	// MigrateEncryption should decrypt all existing data and encrypt it with new encryption service
-	MigrateEncryption(newEncryption EncryptionService) error
+	// MigrateEncryption should decrypt all existing data and encrypt it with new encryption extension
+	MigrateEncryption(newEncryption EncryptionExtension) error
 }

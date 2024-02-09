@@ -21,20 +21,20 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/google/tink/go/tink"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/extensions/encryption/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
-type tinkEncryptionService struct {
+type tinkEncryptionExtension struct {
 	keysetFilePath    string
 	primaryKeyID      string
 	encryption        tink.AEAD
 	store             store.Store
 	keysetFileWatcher *fsnotify.Watcher
-	clients           []model.EncryptionClient
+	clients           []types.EncryptionClient
 }
 
-func (svc *tinkEncryptionService) Encrypt(plaintext, associatedData string) (string, error) {
+func (svc *tinkEncryptionExtension) Encrypt(plaintext, associatedData string) (string, error) {
 	msg := []byte(plaintext)
 	aad := []byte(associatedData)
 	ciphertext, err := svc.encryption.Encrypt(msg, aad)
@@ -44,7 +44,7 @@ func (svc *tinkEncryptionService) Encrypt(plaintext, associatedData string) (str
 	return base64.StdEncoding.EncodeToString(ciphertext), nil
 }
 
-func (svc *tinkEncryptionService) Decrypt(ciphertext, associatedData string) (string, error) {
+func (svc *tinkEncryptionExtension) Decrypt(ciphertext, associatedData string) (string, error) {
 	ct, err := base64.StdEncoding.DecodeString(ciphertext)
 	if err != nil {
 		return "", fmt.Errorf(errTemplateBase64DecryptionFailed, err)
@@ -57,6 +57,6 @@ func (svc *tinkEncryptionService) Decrypt(ciphertext, associatedData string) (st
 	return string(plaintext), nil
 }
 
-func (svc *tinkEncryptionService) Disable() error {
+func (svc *tinkEncryptionExtension) Disable() error {
 	return svc.disable()
 }
