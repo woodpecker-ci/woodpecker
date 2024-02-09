@@ -1,12 +1,11 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["github>woodpecker-ci/renovate-config"],
-  "prConcurrentLimit": 5,
   "packageRules": [
     {
       "matchManagers": ["docker-compose"],
       "matchFileNames": ["docker-compose.gitpod.yml"],
-      "labels": ["devx"]
+      "addLabels": ["devx"]
     },
     {
       "matchManagers": ["gomod", "npm", "dockerfile"],
@@ -30,13 +29,15 @@
       "groupName": "web npm deps non-major",
       "matchManagers": ["npm"],
       "matchUpdateTypes": ["minor", "patch"],
-      "matchFileNames": ["web/package.json"]
+      "matchFileNames": ["web/package.json"],
+      "addLabels": ["ui"]
     },
     {
       "groupName": "docs npm deps non-major",
       "matchManagers": ["npm"],
       "matchUpdateTypes": ["minor", "patch"],
-      "matchFileNames": ["docs/**/package.json"]
+      "matchFileNames": ["docs/**/package.json"],
+      "addLabels": ["documentation"]
     },
     {
       "matchDatasources": ["docker"],
