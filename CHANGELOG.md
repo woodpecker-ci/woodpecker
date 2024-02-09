@@ -1,14 +1,14 @@
 # Changelog
 
-## [2.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.4.0) - 2024-02-08
+## [2.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.4.0) - 2024-02-09
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@anbraten, @renovate[bot], @qwerty287, @pre-commit-ci[bot], @lukashass, @fernandrone
+@sinlov, @lukashass, @anbraten, @renovate[bot], @qwerty287, @pre-commit-ci[bot], @fernandrone
 
 ### 🐛 Bug Fixes
 
-- Fix backend detection [[#3353](https://github.com/woodpecker-ci/woodpecker/pull/3353)]
+- fix: update schema event_enum to remove error warning when.event [[#3357](https://github.com/woodpecker-ci/woodpecker/pull/3357)]
 - Fix version check on next [[#3340](https://github.com/woodpecker-ci/woodpecker/pull/3340)]
 - Ignore gitlab merge request events without code changes [[#3338](https://github.com/woodpecker-ci/woodpecker/pull/3338)]
 - Ignore gitlab push events without commits [[#3339](https://github.com/woodpecker-ci/woodpecker/pull/3339)]
@@ -17,6 +17,7 @@
 
 ### 📈 Enhancement
 
+- Allow editing all environment variables in pipeline popups [[#3314](https://github.com/woodpecker-ci/woodpecker/pull/3314)]
 - Parse backend options in backend [[#3227](https://github.com/woodpecker-ci/woodpecker/pull/3227)]
 - Make agent usable for external backends [[#3270](https://github.com/woodpecker-ci/woodpecker/pull/3270)]
 - Add no branches text [[#3312](https://github.com/woodpecker-ci/woodpecker/pull/3312)]
