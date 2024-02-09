@@ -13,7 +13,7 @@ type Plugin struct {
 }
 
 func (p *Plugin) Key() string {
-	return "configservice"
+	return "forge"
 }
 
 func (p *Plugin) WithImpl(t forge.Forge) plugin.Plugin {
