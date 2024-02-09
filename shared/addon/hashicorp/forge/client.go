@@ -1,4 +1,4 @@
-package configservice
+package forgeaddon
 
 import (
 	"context"

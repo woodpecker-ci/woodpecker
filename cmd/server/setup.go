@@ -50,13 +50,12 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store/datastore"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/addon"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/addon/hashicorp"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/addon/hashicorp/configservice"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/addon/hashicorp/environservice"
+	forgeaddon "go.woodpecker-ci.org/woodpecker/v2/shared/addon/hashicorp/forge"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/addon/hashicorp/registryservice"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/addon/hashicorp/secretservice"
-	addonTypes "go.woodpecker-ci.org/woodpecker/v2/shared/addon/types"
 )
 
 func setupStore(c *cli.Context) (store.Store, error) {
@@ -170,12 +169,14 @@ func setupMembershipService(_ *cli.Context, r forge.Forge) cache.MembershipServi
 
 // setupForge helper function to set up the forge from the CLI arguments.
 func setupForge(c *cli.Context) (forge.Forge, error) {
-	addonForge, err := addon.Load[forge.Forge](c.StringSlice("addons"), addonTypes.TypeForge)
-	if err != nil {
-		return nil, err
-	}
-	if addonForge != nil {
-		return addonForge.Value, nil
+	if a := c.String("addons-forge"); a != "" {
+		addonExt, err := hashicorp.Load(a, forgeaddon.Addon)
+		if err != nil {
+			return nil, err
+		}
+		if addonExt != nil {
+			return addonExt.Value, nil
+		}
 	}
 
 	switch {
