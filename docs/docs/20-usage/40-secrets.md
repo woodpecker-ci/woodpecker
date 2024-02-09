@@ -11,7 +11,7 @@ Woodpecker provides three different levels to add secrets to your pipeline. The 
 
 ## Usage
 
-### Use secretsagent in commands
+### Use secrets in commands
 
 Secrets are exposed to your pipeline steps and plugins as uppercase environment variables and can therefore be referenced in the commands section of your pipeline,
 once their usage is declared in the `secrets` section:
