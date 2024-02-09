@@ -24,8 +24,8 @@ import (
 
 func main() {
 	core.RunAgent([]backendTypes.Backend{
+		kubernetes.New(),
 		docker.New(),
 		local.New(),
-		kubernetes.New(),
 	})
 }
