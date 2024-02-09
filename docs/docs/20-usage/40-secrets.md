@@ -11,7 +11,7 @@ Woodpecker provides three different levels to add secrets to your pipeline. The 
 
 ## Usage
 
-### Use secrets in commands
+### Use secretsagent in commands
 
 Secrets are exposed to your pipeline steps and plugins as uppercase environment variables and can therefore be referenced in the commands section of your pipeline,
 once their usage is declared in the `secrets` section:
@@ -31,7 +31,9 @@ once their usage is declared in the `secrets` section:
 Alternatively, you can get a `setting` from secrets using the `from_secret` syntax.
 In this example, the secret named `secret_token` would be passed to the setting named `token`, which will be available in the plugin as environment variable named `PLUGIN_TOKEN`. See [Plugins](./51-plugins/20-creating-plugins.md#settings) for details.
 
-**NOTE:** the `from_secret` syntax only works with the newer `settings` block.
+:::note
+The `from_secret` syntax only works with the newer `settings` block.
+:::
 
 ```diff
  steps:
@@ -77,7 +79,9 @@ There may be scenarios where you are required to store secrets using alternate n
 
 Secrets are not exposed to pull requests by default. You can override this behavior by creating the secret and enabling the `pull_request` event type, either in UI or by CLI, see below.
 
-**NOTE:** Please be careful when exposing secrets to pull requests. If your repository is open source and accepts pull requests your secrets are not safe. A bad actor can submit a malicious pull request that exposes your secrets.
+:::note
+Please be careful when exposing secrets to pull requests. If your repository is open source and accepts pull requests your secrets are not safe. A bad actor can submit a malicious pull request that exposes your secrets.
+:::
 
 ## Image filter
 
