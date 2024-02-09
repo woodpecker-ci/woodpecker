@@ -78,7 +78,7 @@ Update your configuration to mount your certificate and key:
 
 Update your configuration to provide the paths of your certificate and key:
 
-```yaml title="docker-compose.yaml"
+```diff title="docker-compose.yaml"
  version: '3'
 
  services:
