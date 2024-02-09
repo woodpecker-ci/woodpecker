@@ -57,6 +57,7 @@ func (e *Manager) SignaturePublicKey() crypto.PublicKey {
 }
 
 func (e *Manager) SecretExtensionFromRepo(_ *model.Repo) secret.Extension {
+	// TODO: decied based on repo property which secret extension to use
 	return e.secret
 }
 
@@ -65,6 +66,7 @@ func (e *Manager) SecretExtension() secret.Extension {
 }
 
 func (e *Manager) RegistryExtensionFromRepo(_ *model.Repo) registry.Extension {
+	// TODO: decied based on repo property which registry extension to use
 	return e.registry
 }
 
@@ -73,6 +75,7 @@ func (e *Manager) RegistryExtension() registry.Extension {
 }
 
 func (e *Manager) ConfigExtensionFromRepo(_ *model.Repo) config.Extension {
+	// TODO: decied based on repo property which config extension to use
 	return e.config
 }
 
