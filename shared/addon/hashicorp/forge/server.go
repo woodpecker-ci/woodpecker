@@ -3,6 +3,7 @@ package configservice
 import (
 	"context"
 	"encoding/json"
+	"net/http"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
@@ -113,5 +114,124 @@ func (s *RPCServer) Netrc(args []byte, resp *[]byte) error {
 		return err
 	}
 	*resp, err = json.Marshal(netrc)
+	return err
+}
+
+func (s *RPCServer) Activate(args []byte, resp *[]byte) error {
+	var a argumentsActivateDeactivate
+	err := json.Unmarshal(args, &a)
+	if err != nil {
+		return err
+	}
+	*resp = []byte{}
+	return s.Impl.Activate(mkCtx(), a.U, a.R, a.Link)
+}
+
+func (s *RPCServer) Deactivate(args []byte, resp *[]byte) error {
+	var a argumentsActivateDeactivate
+	err := json.Unmarshal(args, &a)
+	if err != nil {
+		return err
+	}
+	*resp = []byte{}
+	return s.Impl.Deactivate(mkCtx(), a.U, a.R, a.Link)
+}
+
+func (s *RPCServer) Branches(args []byte, resp *[]byte) error {
+	var a argumentsBranchesPullRequests
+	err := json.Unmarshal(args, &a)
+	if err != nil {
+		return err
+	}
+	branches, err := s.Impl.Branches(mkCtx(), a.U, a.R, a.P)
+	if err != nil {
+		return err
+	}
+	*resp, err = json.Marshal(branches)
+	return err
+}
+
+func (s *RPCServer) BranchHead(args []byte, resp *string) error {
+	var a argumentsBranchHead
+	err := json.Unmarshal(args, &a)
+	if err != nil {
+		return err
+	}
+	*resp, err = s.Impl.BranchHead(mkCtx(), a.U, a.R, a.Branch)
+	return err
+}
+
+func (s *RPCServer) PullRequests(args []byte, resp *[]byte) error {
+	var a argumentsBranchesPullRequests
+	err := json.Unmarshal(args, &a)
+	if err != nil {
+		return err
+	}
+	prs, err := s.Impl.PullRequests(mkCtx(), a.U, a.R, a.P)
+	if err != nil {
+		return err
+	}
+	*resp, err = json.Marshal(prs)
+	return err
+}
+
+func (s *RPCServer) OrgMembership(args []byte, resp *[]byte) error {
+	var a argumentsOrgMembershipOrg
+	err := json.Unmarshal(args, &a)
+	if err != nil {
+		return err
+	}
+	org, err := s.Impl.OrgMembership(mkCtx(), a.U, a.Org)
+	if err != nil {
+		return err
+	}
+	*resp, err = json.Marshal(org)
+	return err
+}
+
+func (s *RPCServer) Org(args []byte, resp *[]byte) error {
+	var a argumentsOrgMembershipOrg
+	err := json.Unmarshal(args, &a)
+	if err != nil {
+		return err
+	}
+	org, err := s.Impl.Org(mkCtx(), a.U, a.Org)
+	if err != nil {
+		return err
+	}
+	*resp, err = json.Marshal(org)
+	return err
+}
+
+func (s *RPCServer) Hook(args []byte, resp *[]byte) error {
+	// TODO http.request json
+	var a *http.Request
+	err := json.Unmarshal(args, &a)
+	if err != nil {
+		return err
+	}
+	repo, pipeline, err := s.Impl.Hook(mkCtx(), a)
+	if err != nil {
+		return err
+	}
+	*resp, err = json.Marshal(&responseHook{
+		Repo:     repo,
+		Pipeline: pipeline,
+	})
+	return err
+}
+
+func (s *RPCServer) Login(args []byte, resp *[]byte) error {
+	// TODO http.request and iowriter json
+	var a *http.Request
+	err := json.Unmarshal(args, &a)
+	if err != nil {
+		return err
+	}
+	user, err := s.Impl.Login(mkCtx(), nil, a)
+	if err != nil {
+		return err
+	}
+	*resp, err = json.Marshal(user)
 	return err
 }

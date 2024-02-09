@@ -34,3 +34,31 @@ type argumentsNetrc struct {
 	U *model.User `json:"u"`
 	R *model.Repo `json:"r"`
 }
+
+type argumentsActivateDeactivate struct {
+	U    *model.User `json:"u"`
+	R    *model.Repo `json:"r"`
+	Link string      `json:"link"`
+}
+
+type argumentsBranchesPullRequests struct {
+	U *model.User        `json:"u"`
+	R *model.Repo        `json:"r"`
+	P *model.ListOptions `json:"p"`
+}
+
+type argumentsBranchHead struct {
+	U      *model.User `json:"u"`
+	R      *model.Repo `json:"r"`
+	Branch string      `json:"branch"`
+}
+
+type argumentsOrgMembershipOrg struct {
+	U   *model.User `json:"u"`
+	Org string      `json:"org"`
+}
+
+type responseHook struct {
+	Repo     *model.Repo     `json:"repo"`
+	Pipeline *model.Pipeline `json:"pipeline"`
+}

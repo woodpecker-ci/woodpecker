@@ -6,12 +6,9 @@ import (
 	"net/http"
 	"net/rpc"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
-
-var f forge.Forge = new(RPC)
 
 // TODO issue: user models are not sent with token/secret (token/secret is json:"-")
 // possible solution: two-way-communication with two funcs: 1. token/secret for user 2. token/secret for repo
@@ -178,41 +175,129 @@ func (g *RPC) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 }
 
 func (g *RPC) Activate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
-	//TODO implement me
-	panic("implement me")
+	args, err := json.Marshal(&argumentsActivateDeactivate{
+		U:    u,
+		R:    r,
+		Link: link,
+	})
+	if err != nil {
+		return err
+	}
+	var jsonResp []byte
+	return g.client.Call("Plugin.Activate", args, &jsonResp)
 }
 
 func (g *RPC) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
-	//TODO implement me
-	panic("implement me")
+	args, err := json.Marshal(&argumentsActivateDeactivate{
+		U:    u,
+		R:    r,
+		Link: link,
+	})
+	if err != nil {
+		return err
+	}
+	var jsonResp []byte
+	return g.client.Call("Plugin.Deactivate", args, &jsonResp)
 }
 
 func (g *RPC) Branches(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]string, error) {
-	//TODO implement me
-	panic("implement me")
+	args, err := json.Marshal(&argumentsBranchesPullRequests{
+		U: u,
+		R: r,
+		P: p,
+	})
+	if err != nil {
+		return nil, err
+	}
+	var jsonResp []byte
+	err = g.client.Call("Plugin.Branches", args, &jsonResp)
+	if err != nil {
+		return nil, err
+	}
+	var resp []string
+	return resp, json.Unmarshal(jsonResp, &resp)
 }
 
 func (g *RPC) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
-	//TODO implement me
-	panic("implement me")
+	args, err := json.Marshal(&argumentsBranchHead{
+		U:      u,
+		R:      r,
+		Branch: branch,
+	})
+	if err != nil {
+		return "", err
+	}
+	var resp string
+	return resp, g.client.Call("Plugin.BranchHead", args, &resp)
 }
 
 func (g *RPC) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error) {
-	//TODO implement me
-	panic("implement me")
+	args, err := json.Marshal(&argumentsBranchesPullRequests{
+		U: u,
+		R: r,
+		P: p,
+	})
+	if err != nil {
+		return nil, err
+	}
+	var jsonResp []byte
+	err = g.client.Call("Plugin.PullRequests", args, &jsonResp)
+	if err != nil {
+		return nil, err
+	}
+	var resp []*model.PullRequest
+	return resp, json.Unmarshal(jsonResp, &resp)
 }
 
-func (g *RPC) Hook(ctx context.Context, r *http.Request) (repo *model.Repo, pipeline *model.Pipeline, err error) {
-	//TODO implement me
-	panic("implement me")
+func (g *RPC) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error) {
+	// TODO marshalling http.request
+	args, err := json.Marshal(r)
+	if err != nil {
+		return nil, nil, err
+	}
+	var jsonResp []byte
+	err = g.client.Call("Plugin.Hook", args, &jsonResp)
+	if err != nil {
+		return nil, nil, err
+	}
+	var resp responseHook
+	err = json.Unmarshal(jsonResp, &resp)
+	if err != nil {
+		return nil, nil, err
+	}
+	return resp.Repo, resp.Pipeline, nil
 }
 
 func (g *RPC) OrgMembership(ctx context.Context, u *model.User, org string) (*model.OrgPerm, error) {
-	//TODO implement me
-	panic("implement me")
+	args, err := json.Marshal(&argumentsOrgMembershipOrg{
+		U:   u,
+		Org: org,
+	})
+	if err != nil {
+		return nil, err
+	}
+	var jsonResp []byte
+	err = g.client.Call("Plugin.OrgMembership", args, &jsonResp)
+	if err != nil {
+		return nil, err
+	}
+	var resp *model.OrgPerm
+	return resp, json.Unmarshal(jsonResp, &resp)
 }
 
 func (g *RPC) Org(ctx context.Context, u *model.User, org string) (*model.Org, error) {
-	//TODO implement me
-	panic("implement me")
+	args, err := json.Marshal(&argumentsOrgMembershipOrg{
+		U:   u,
+		Org: org,
+	})
+	if err != nil {
+		return nil, err
+	}
+	var jsonResp []byte
+	err = g.client.Call("Plugin.Org", args, &jsonResp)
+	if err != nil {
+		return nil, err
+	}
+	var resp *model.Org
+	return resp, json.Unmarshal(jsonResp, &resp)
 }
