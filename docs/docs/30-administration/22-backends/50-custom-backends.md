@@ -1,4 +1,4 @@
-# Custom agent backends
+# Custom backends
 
 If none of our backends fits your usecases, you can write your own.
 
