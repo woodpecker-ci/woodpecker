@@ -230,7 +230,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 
 	finished := make(chan bool)
 
-	podUpdated := func(old, new any) {
+	podUpdated := func(_, new any) {
 		pod, ok := new.(*v1.Pod)
 		if !ok {
 			log.Error().Msgf("could not parse pod: %v", new)
@@ -307,7 +307,7 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 
 	up := make(chan bool)
 
-	podUpdated := func(old, new any) {
+	podUpdated := func(_, new any) {
 		pod, ok := new.(*v1.Pod)
 		if !ok {
 			log.Error().Msgf("could not parse pod: %v", new)
