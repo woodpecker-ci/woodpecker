@@ -38,7 +38,7 @@ func GetRegistry(c *gin.Context) {
 	repo := session.Repo(c)
 	name := c.Param("registry")
 
-	registryExtension := server.Config.Services.Manager.RegistryExtensionFromRepo(repo)
+	registryExtension := server.Config.ExtensionsManager.RegistryExtensionFromRepo(repo)
 	registry, err := registryExtension.RegistryFind(repo, name)
 	if err != nil {
 		handleDBError(c, err)
@@ -76,7 +76,7 @@ func PostRegistry(c *gin.Context) {
 		return
 	}
 
-	registryExtension := server.Config.Services.Manager.RegistryExtensionFromRepo(repo)
+	registryExtension := server.Config.ExtensionsManager.RegistryExtensionFromRepo(repo)
 	if err := registryExtension.RegistryCreate(repo, registry); err != nil {
 		c.String(http.StatusInternalServerError, "Error inserting registry %q. %s", in.Address, err)
 		return
@@ -108,7 +108,7 @@ func PatchRegistry(c *gin.Context) {
 		return
 	}
 
-	registryExtension := server.Config.Services.Manager.RegistryExtensionFromRepo(repo)
+	registryExtension := server.Config.ExtensionsManager.RegistryExtensionFromRepo(repo)
 	registry, err := registryExtension.RegistryFind(repo, name)
 	if err != nil {
 		handleDBError(c, err)
@@ -145,7 +145,7 @@ func PatchRegistry(c *gin.Context) {
 //	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
 func GetRegistryList(c *gin.Context) {
 	repo := session.Repo(c)
-	registryExtension := server.Config.Services.Manager.RegistryExtensionFromRepo(repo)
+	registryExtension := server.Config.ExtensionsManager.RegistryExtensionFromRepo(repo)
 	list, err := registryExtension.RegistryList(repo, session.Pagination(c))
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error getting registry list. %s", err)
@@ -173,7 +173,7 @@ func DeleteRegistry(c *gin.Context) {
 	repo := session.Repo(c)
 	name := c.Param("registry")
 
-	registryExtension := server.Config.Services.Manager.RegistryExtensionFromRepo(repo)
+	registryExtension := server.Config.ExtensionsManager.RegistryExtensionFromRepo(repo)
 	err := registryExtension.RegistryDelete(repo, name)
 	if err != nil {
 		handleDBError(c, err)

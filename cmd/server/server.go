@@ -38,6 +38,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc/proto"
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/cron"
+	"go.woodpecker-ci.org/woodpecker/v2/server/extensions"
 	"go.woodpecker-ci.org/woodpecker/v2/server/extensions/permissions"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
 	woodpeckerGrpcServer "go.woodpecker-ci.org/woodpecker/v2/server/grpc"
@@ -279,11 +280,11 @@ func setupEvilGlobals(c *cli.Context, s store.Store, f forge.Forge) error {
 	server.Config.Services.Pubsub = pubsub.New()
 	server.Config.Services.Membership = setupMembershipService(c, f)
 
-	servicesManager, err := services.NewManager(c, s)
+	extensionsMangager, err := extensions.NewManager(c, s)
 	if err != nil {
-		return fmt.Errorf("could not setup services manager: %w", err)
+		return fmt.Errorf("could not setup extensions manager: %w", err)
 	}
-	server.Config.Services.Manager = servicesManager
+	server.Config.ExtensionsManager = extensionsMangager
 
 	// authentication
 	server.Config.Pipeline.AuthenticatePublicRepos = c.Bool("authenticate-public-repos")

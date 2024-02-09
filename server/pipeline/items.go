@@ -42,13 +42,13 @@ func parsePipeline(store store.Store, currentPipeline *model.Pipeline, user *mod
 		log.Error().Err(err).Str("repo", repo.FullName).Msgf("error getting last pipeline before pipeline number '%d'", currentPipeline.Number)
 	}
 
-	secretService := server.Config.Services.Manager.SecretExtensionFromRepo(repo)
+	secretService := server.Config.ExtensionsManager.SecretExtensionFromRepo(repo)
 	secs, err := secretService.SecretListPipeline(repo, currentPipeline, &model.ListOptions{All: true})
 	if err != nil {
 		log.Error().Err(err).Msgf("error getting secrets for %s#%d", repo.FullName, currentPipeline.Number)
 	}
 
-	registryService := server.Config.Services.Manager.RegistryExtensionFromRepo(repo)
+	registryService := server.Config.ExtensionsManager.RegistryExtensionFromRepo(repo)
 	regs, err := registryService.RegistryList(repo, &model.ListOptions{All: true})
 	if err != nil {
 		log.Error().Err(err).Msgf("error getting registry credentials for %s#%d", repo.FullName, currentPipeline.Number)
@@ -58,7 +58,7 @@ func parsePipeline(store store.Store, currentPipeline *model.Pipeline, user *mod
 		envs = map[string]string{}
 	}
 
-	environmentService := server.Config.Services.Manager.EnvironmentExtension()
+	environmentService := server.Config.ExtensionsManager.EnvironmentExtension()
 	if environmentService != nil {
 		globals, _ := environmentService.EnvironList(repo)
 		for _, global := range globals {

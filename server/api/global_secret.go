@@ -35,7 +35,7 @@ import (
 //	@Param		page			query	int		false	"for response pagination, page offset number"	default(1)
 //	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
 func GetGlobalSecretList(c *gin.Context) {
-	secretExtension := server.Config.Services.Manager.SecretExtension()
+	secretExtension := server.Config.ExtensionsManager.SecretExtension()
 	list, err := secretExtension.GlobalSecretList(session.Pagination(c))
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error getting global secret list. %s", err)
@@ -60,7 +60,7 @@ func GetGlobalSecretList(c *gin.Context) {
 //	@Param		secret			path	string	true	"the secret's name"
 func GetGlobalSecret(c *gin.Context) {
 	name := c.Param("secret")
-	secretExtension := server.Config.Services.Manager.SecretExtension()
+	secretExtension := server.Config.ExtensionsManager.SecretExtension()
 	secret, err := secretExtension.GlobalSecretFind(name)
 	if err != nil {
 		handleDBError(c, err)
@@ -95,7 +95,7 @@ func PostGlobalSecret(c *gin.Context) {
 		return
 	}
 
-	secretExtension := server.Config.Services.Manager.SecretExtension()
+	secretExtension := server.Config.ExtensionsManager.SecretExtension()
 	if err := secretExtension.GlobalSecretCreate(secret); err != nil {
 		c.String(http.StatusInternalServerError, "Error inserting global secret %q. %s", in.Name, err)
 		return
@@ -123,7 +123,7 @@ func PatchGlobalSecret(c *gin.Context) {
 		return
 	}
 
-	secretExtension := server.Config.Services.Manager.SecretExtension()
+	secretExtension := server.Config.ExtensionsManager.SecretExtension()
 	secret, err := secretExtension.GlobalSecretFind(name)
 	if err != nil {
 		handleDBError(c, err)
@@ -162,7 +162,7 @@ func PatchGlobalSecret(c *gin.Context) {
 //	@Param		secret			path	string	true	"the secret's name"
 func DeleteGlobalSecret(c *gin.Context) {
 	name := c.Param("secret")
-	secretExtension := server.Config.Services.Manager.SecretExtension()
+	secretExtension := server.Config.ExtensionsManager.SecretExtension()
 	if err := secretExtension.GlobalSecretDelete(name); err != nil {
 		handleDBError(c, err)
 		return

@@ -37,9 +37,9 @@ var Config = struct {
 		Logs       logging.Log
 		Forge      forge.Forge
 		Membership cache.MembershipService
-		Manager    *extensions.Manager
 	}
-	Server struct {
+	ExtensionsManager *extensions.Manager
+	Server            struct {
 		Key                 string
 		Cert                string
 		OAuthHost           string

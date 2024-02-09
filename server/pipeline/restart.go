@@ -50,7 +50,7 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 	}
 
 	// If the config extension is active we should refetch the config in case something changed
-	configService := server.Config.Services.Manager.ConfigExtensionFromRepo(repo)
+	configService := server.Config.ExtensionsManager.ConfigExtensionFromRepo(repo)
 	pipelineFiles, err = configService.Fetch(ctx, forge, user, repo, lastPipeline)
 	if err != nil {
 		return nil, &ErrBadRequest{

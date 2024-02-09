@@ -44,7 +44,7 @@ func GetOrgSecret(c *gin.Context) {
 		return
 	}
 
-	secretExtension := server.Config.Services.Manager.SecretExtension()
+	secretExtension := server.Config.ExtensionsManager.SecretExtension()
 	secret, err := secretExtension.OrgSecretFind(orgID, name)
 	if err != nil {
 		handleDBError(c, err)
@@ -71,7 +71,7 @@ func GetOrgSecretList(c *gin.Context) {
 		return
 	}
 
-	secretExtension := server.Config.Services.Manager.SecretExtension()
+	secretExtension := server.Config.ExtensionsManager.SecretExtension()
 	list, err := secretExtension.OrgSecretList(orgID, session.Pagination(c))
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error getting secret list for %q. %s", orgID, err)
@@ -119,7 +119,7 @@ func PostOrgSecret(c *gin.Context) {
 		return
 	}
 
-	secretExtension := server.Config.Services.Manager.SecretExtension()
+	secretExtension := server.Config.ExtensionsManager.SecretExtension()
 	if err := secretExtension.OrgSecretCreate(orgID, secret); err != nil {
 		c.String(http.StatusInternalServerError, "Error inserting org %q secret %q. %s", orgID, in.Name, err)
 		return
@@ -153,7 +153,7 @@ func PatchOrgSecret(c *gin.Context) {
 		return
 	}
 
-	secretExtension := server.Config.Services.Manager.SecretExtension()
+	secretExtension := server.Config.ExtensionsManager.SecretExtension()
 	secret, err := secretExtension.OrgSecretFind(orgID, name)
 	if err != nil {
 		handleDBError(c, err)
@@ -199,7 +199,7 @@ func DeleteOrgSecret(c *gin.Context) {
 		return
 	}
 
-	secretExtension := server.Config.Services.Manager.SecretExtension()
+	secretExtension := server.Config.ExtensionsManager.SecretExtension()
 	if err := secretExtension.OrgSecretDelete(orgID, name); err != nil {
 		handleDBError(c, err)
 		return
