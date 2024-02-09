@@ -26,9 +26,9 @@ import (
 )
 
 type http struct {
-	endpoint       string
-	privateKey     crypto.PrivateKey
-	currentConfigs []*types.FileMeta
+	endpoint                 string
+	privateKey               crypto.PrivateKey
+	deprecatedCurrentConfigs []*types.FileMeta
 }
 
 // configData same as forge.FileMeta but with json tags and string data
@@ -43,20 +43,20 @@ type requestStructure struct {
 	Netrc    *model.Netrc    `json:"netrc"`
 
 	// @deprecated use netrc data to fetch the config by yourself instead
-	DeprecatedConfiguration []*configData `json:"configs"` // TODO: remove at some point
+	DeprecatedConfiguration []*configData `json:"configs"` // TODO: remove in next major release
 }
 
 type responseStructure struct {
 	Configs []*configData `json:"configs"`
 }
 
-func NewHTTP(endpoint string, privateKey crypto.PrivateKey, currentConfigs []*types.FileMeta) Extension {
-	return &http{endpoint, privateKey, currentConfigs}
+func NewHTTP(endpoint string, privateKey crypto.PrivateKey, deprecatedCurrentConfigs []*types.FileMeta) Extension {
+	return &http{endpoint, privateKey, deprecatedCurrentConfigs}
 }
 
 func (h *http) Fetch(ctx context.Context, forge forge.Forge, user *model.User, repo *model.Repo, pipeline *model.Pipeline) ([]*types.FileMeta, error) {
-	currentConfigs := make([]*configData, len(h.currentConfigs))
-	for i, pipe := range h.currentConfigs {
+	currentConfigs := make([]*configData, len(h.deprecatedCurrentConfigs))
+	for i, pipe := range h.deprecatedCurrentConfigs {
 		currentConfigs[i] = &configData{Name: pipe.Name, Data: string(pipe.Data)}
 	}
 

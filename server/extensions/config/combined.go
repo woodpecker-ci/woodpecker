@@ -34,12 +34,12 @@ func NewCombined(extensions ...Extension) Extension {
 
 func (c *combined) Fetch(ctx context.Context, forge forge.Forge, user *model.User, repo *model.Repo, pipeline *model.Pipeline) (files []*types.FileMeta, err error) {
 	for _, s := range c.extensions {
-		// TODO(anbraten): This is a hack to get the current configs into the http extension
+		// TODO(anbraten): This is a hack to get the current configs into the http extension, will be  removed when removing deprecatedCurrentConfigs
 		_s, ok := s.(*http)
 		if !ok {
 			log.Err(err).Msg("http extension is not of type http")
 		} else {
-			_s.currentConfigs = files
+			_s.deprecatedCurrentConfigs = files
 		}
 
 		files, err = s.Fetch(ctx, forge, user, repo, pipeline)
