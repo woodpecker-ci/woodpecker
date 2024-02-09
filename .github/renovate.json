@@ -8,14 +8,6 @@
       "addLabels": ["devx"]
     },
     {
-      "matchManagers": ["gomod", "npm", "dockerfile"],
-      "labels": ["dependencies"]
-    },
-    {
-      "matchManagers": ["woodpecker"],
-      "labels": ["build"]
-    },
-    {
       "groupName": "golang (lang)",
       "matchPackagePatterns": ["^golang$", "xgo"],
       "matchUpdateTypes": ["minor", "patch"]
