@@ -35,20 +35,20 @@ const (
 	podPrefix = "wp-"
 )
 
-func mkPod(step *types.Step, config *config, podName, goos string) (*v1.Pod, error) {
+func mkPod(step *types.Step, config *config, podName, goos string, options BackendOptions) (*v1.Pod, error) {
 	var err error
 
-	meta, err := podMeta(step, config, podName)
+	meta, err := podMeta(step, config, options, podName)
 	if err != nil {
 		return nil, err
 	}
 
-	spec, err := podSpec(step, config)
+	spec, err := podSpec(step, config, options)
 	if err != nil {
 		return nil, err
 	}
 
-	container, err := podContainer(step, podName, goos)
+	container, err := podContainer(step, podName, goos, options)
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +73,7 @@ func podName(step *types.Step) (string, error) {
 	return dnsName(podPrefix + step.UUID)
 }
 
-func podMeta(step *types.Step, config *config, podName string) (metav1.ObjectMeta, error) {
+func podMeta(step *types.Step, config *config, options BackendOptions, podName string) (metav1.ObjectMeta, error) {
 	var err error
 	meta := metav1.ObjectMeta{
 		Name:      podName,
@@ -98,7 +98,7 @@ func podMeta(step *types.Step, config *config, podName string) (metav1.ObjectMet
 		meta.Annotations = make(map[string]string)
 	}
 
-	securityContext := step.BackendOptions.Kubernetes.SecurityContext
+	securityContext := options.SecurityContext
 	if securityContext != nil {
 		key, value := apparmorAnnotation(podName, securityContext.ApparmorProfile)
 		if key != nil && value != nil {
@@ -113,16 +113,16 @@ func stepLabel(step *types.Step) (string, error) {
 	return toDNSName(step.Name)
 }
 
-func podSpec(step *types.Step, config *config) (v1.PodSpec, error) {
+func podSpec(step *types.Step, config *config, options BackendOptions) (v1.PodSpec, error) {
 	var err error
 	spec := v1.PodSpec{
 		RestartPolicy:      v1.RestartPolicyNever,
-		ServiceAccountName: step.BackendOptions.Kubernetes.ServiceAccountName,
+		ServiceAccountName: options.ServiceAccountName,
 		ImagePullSecrets:   imagePullSecretsReferences(config.ImagePullSecretNames),
 		HostAliases:        hostAliases(step.ExtraHosts),
-		NodeSelector:       nodeSelector(step.BackendOptions.Kubernetes.NodeSelector, step.Environment["CI_SYSTEM_PLATFORM"]),
-		Tolerations:        tolerations(step.BackendOptions.Kubernetes.Tolerations),
-		SecurityContext:    podSecurityContext(step.BackendOptions.Kubernetes.SecurityContext, config.SecurityContext),
+		NodeSelector:       nodeSelector(options.NodeSelector, step.Environment["CI_SYSTEM_PLATFORM"]),
+		Tolerations:        tolerations(options.Tolerations),
+		SecurityContext:    podSecurityContext(options.SecurityContext, config.SecurityContext),
 	}
 	spec.Volumes, err = volumes(step.Volumes)
 	if err != nil {
@@ -132,7 +132,7 @@ func podSpec(step *types.Step, config *config) (v1.PodSpec, error) {
 	return spec, nil
 }
 
-func podContainer(step *types.Step, podName, goos string) (v1.Container, error) {
+func podContainer(step *types.Step, podName, goos string, options BackendOptions) (v1.Container, error) {
 	var err error
 	container := v1.Container{
 		Name:       podName,
@@ -156,9 +156,9 @@ func podContainer(step *types.Step, podName, goos string) (v1.Container, error) 
 
 	container.Env = mapToEnvVars(step.Environment)
 	container.Ports = containerPorts(step.Ports)
-	container.SecurityContext = containerSecurityContext(step.BackendOptions.Kubernetes.SecurityContext, step.Privileged)
+	container.SecurityContext = containerSecurityContext(options.SecurityContext, step.Privileged)
 
-	container.Resources, err = resourceRequirements(step.BackendOptions.Kubernetes.Resources)
+	container.Resources, err = resourceRequirements(options.Resources)
 	if err != nil {
 		return container, err
 	}
@@ -268,7 +268,7 @@ func imagePullSecretsReference(imagePullSecretName string) v1.LocalObjectReferen
 	}
 }
 
-func resourceRequirements(resources types.Resources) (v1.ResourceRequirements, error) {
+func resourceRequirements(resources Resources) (v1.ResourceRequirements, error) {
 	var err error
 	requirements := v1.ResourceRequirements{}
 
@@ -315,7 +315,7 @@ func nodeSelector(backendNodeSelector map[string]string, platform string) map[st
 	return nodeSelector
 }
 
-func tolerations(backendTolerations []types.Toleration) []v1.Toleration {
+func tolerations(backendTolerations []Toleration) []v1.Toleration {
 	var tolerations []v1.Toleration
 
 	if len(backendTolerations) > 0 {
@@ -329,7 +329,7 @@ func tolerations(backendTolerations []types.Toleration) []v1.Toleration {
 	return tolerations
 }
 
-func toleration(backendToleration types.Toleration) v1.Toleration {
+func toleration(backendToleration Toleration) v1.Toleration {
 	return v1.Toleration{
 		Key:               backendToleration.Key,
 		Operator:          v1.TolerationOperator(backendToleration.Operator),
@@ -339,7 +339,7 @@ func toleration(backendToleration types.Toleration) v1.Toleration {
 	}
 }
 
-func podSecurityContext(sc *types.SecurityContext, secCtxConf SecurityContextConfig) *v1.PodSecurityContext {
+func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig) *v1.PodSecurityContext {
 	var (
 		nonRoot *bool
 		user    *int64
@@ -381,7 +381,7 @@ func podSecurityContext(sc *types.SecurityContext, secCtxConf SecurityContextCon
 	return securityContext
 }
 
-func seccompProfile(scp *types.SecProfile) *v1.SeccompProfile {
+func seccompProfile(scp *SecProfile) *v1.SeccompProfile {
 	if scp == nil || len(scp.Type) == 0 {
 		return nil
 	}
@@ -397,7 +397,7 @@ func seccompProfile(scp *types.SecProfile) *v1.SeccompProfile {
 	return seccompProfile
 }
 
-func containerSecurityContext(sc *types.SecurityContext, stepPrivileged bool) *v1.SecurityContext {
+func containerSecurityContext(sc *SecurityContext, stepPrivileged bool) *v1.SecurityContext {
 	var privileged *bool
 
 	if sc != nil && sc.Privileged != nil && *sc.Privileged {
@@ -417,7 +417,7 @@ func containerSecurityContext(sc *types.SecurityContext, stepPrivileged bool) *v
 	return securityContext
 }
 
-func apparmorAnnotation(containerName string, scp *types.SecProfile) (*string, *string) {
+func apparmorAnnotation(containerName string, scp *SecProfile) (*string, *string) {
 	if scp == nil {
 		return nil, nil
 	}
@@ -428,12 +428,12 @@ func apparmorAnnotation(containerName string, scp *types.SecProfile) (*string, *
 		profilePath string
 	)
 
-	if scp.Type == types.SecProfileTypeRuntimeDefault {
+	if scp.Type == SecProfileTypeRuntimeDefault {
 		profileType = "runtime"
 		profilePath = "default"
 	}
 
-	if scp.Type == types.SecProfileTypeLocalhost {
+	if scp.Type == SecProfileTypeLocalhost {
 		profileType = "localhost"
 		profilePath = scp.LocalhostProfile
 	}
@@ -458,13 +458,13 @@ func mapToEnvVars(m map[string]string) []v1.EnvVar {
 	return ev
 }
 
-func startPod(ctx context.Context, engine *kube, step *types.Step) (*v1.Pod, error) {
+func startPod(ctx context.Context, engine *kube, step *types.Step, options BackendOptions) (*v1.Pod, error) {
 	podName, err := stepToPodName(step)
 	if err != nil {
 		return nil, err
 	}
 	engineConfig := engine.getConfig()
-	pod, err := mkPod(step, engineConfig, podName, engine.goos)
+	pod, err := mkPod(step, engineConfig, podName, engine.goos, options)
 	if err != nil {
 		return nil, err
 	}
