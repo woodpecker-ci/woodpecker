@@ -22,7 +22,7 @@ pipeline can be trusted. You shouldn't use it for a public facing CI where
 anyone can submit code or add new repositories. You shouldn't execute the agent
 as a privileged user (root).
 
-The local backend will use a random directory in $TMPDIR to store the cloned
+The local backend will use a random directory in `$TMPDIR` to store the cloned
 code and execute commands.
 
 In order to use this backend, you need to download (or build) the
