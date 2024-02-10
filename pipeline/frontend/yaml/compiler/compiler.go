@@ -34,7 +34,6 @@ type Registry struct {
 	Hostname string
 	Username string
 	Password string
-	Email    string
 	Token    string
 }
 
@@ -42,21 +41,48 @@ type Secret struct {
 	Name           string
 	Value          string
 	AllowedPlugins []string
+	Events         []string
 }
 
-func (s *Secret) Available(container *yaml_types.Container) bool {
-	return (len(s.AllowedPlugins) == 0 || utils.MatchImage(container.Image, s.AllowedPlugins...)) && (len(s.AllowedPlugins) == 0 || container.IsPlugin())
+func (s *Secret) Available(event string, container *yaml_types.Container) error {
+	onlyAllowSecretForPlugins := len(s.AllowedPlugins) > 0
+	if onlyAllowSecretForPlugins && !container.IsPlugin() {
+		return fmt.Errorf("secret %q only allowed to be used by plugins by step %q", s.Name, container.Name)
+	}
+
+	if onlyAllowSecretForPlugins && !utils.MatchImage(container.Image, s.AllowedPlugins...) {
+		return fmt.Errorf("secret %q is not allowed to be used with image %q by step %q", s.Name, container.Image, container.Name)
+	}
+
+	if !s.Match(event) {
+		return fmt.Errorf("secret %q is not allowed to be used with pipeline event %q", s.Name, event)
+	}
+
+	return nil
+}
+
+// Match returns true if an image and event match the restricted list.
+// Note that EventPullClosed are treated as EventPull.
+func (s *Secret) Match(event string) bool {
+	// if there is no filter set secret matches all webhook events
+	if len(s.Events) == 0 {
+		return true
+	}
+	// tread all pull events the same way
+	if event == "pull_request_closed" {
+		event = "pull_request"
+	}
+	// one match is enough
+	for _, e := range s.Events {
+		if e == event {
+			return true
+		}
+	}
+	// a filter is set but the webhook did not match it
+	return false
 }
 
 type secretMap map[string]Secret
-
-func (sm secretMap) toStringMap() map[string]string {
-	m := make(map[string]string, len(sm))
-	for k, v := range sm {
-		m[k] = v.Value
-	}
-	return m
-}
 
 type ResourceLimit struct {
 	MemSwapLimit int64

@@ -102,27 +102,6 @@ func (s Secret) IsRepository() bool {
 	return s.RepoID != 0 && s.OrgID == 0
 }
 
-// Match returns true if an image and event match the restricted list.
-// Note that EventPullClosed are treated as EventPull.
-func (s *Secret) Match(event WebhookEvent) bool {
-	// if there is no filter set secret matches all webhook events
-	if len(s.Events) == 0 {
-		return true
-	}
-	// tread all pull events the same way
-	if event == EventPullClosed {
-		event = EventPull
-	}
-	// one match is enough
-	for _, e := range s.Events {
-		if e == event {
-			return true
-		}
-	}
-	// a filter is set but the webhook did not match it
-	return false
-}
-
 var validDockerImageString = regexp.MustCompile(
 	`^(` +
 		`[\w\d\-_\.]+` + // hostname
@@ -137,7 +116,7 @@ var validDockerImageString = regexp.MustCompile(
 // Validate validates the required fields and formats.
 func (s *Secret) Validate() error {
 	for _, event := range s.Events {
-		if err := ValidateWebhookEvent(event); err != nil {
+		if err := event.Validate(); err != nil {
 			return errors.Join(err, ErrSecretEventInvalid)
 		}
 	}

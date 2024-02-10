@@ -31,13 +31,13 @@ async function fetchVersion(): Promise<VersionInfo | undefined> {
   }
 }
 
-const isInitialised = ref(false);
+const isInitialized = ref(false);
 
 export function useVersion() {
-  if (isInitialised.value) {
+  if (isInitialized.value) {
     return version;
   }
-  isInitialised.value = true;
+  isInitialized.value = true;
 
   const config = useConfig();
   const current = config.version as string;
@@ -81,11 +81,18 @@ export function useVersion() {
       }
     }
 
+    let needsUpdate = false;
+    if (usesNext) {
+      needsUpdate = latest !== current;
+    } else if (latest !== undefined && currentSemver !== null) {
+      needsUpdate = semverGt(latest, currentSemver);
+    }
+
     version.value = {
       latest,
       current,
       currentShort: usesNext ? 'next' : current,
-      needsUpdate: latest !== undefined && currentSemver !== null && semverGt(latest, currentSemver),
+      needsUpdate,
       usesNext,
     };
   });

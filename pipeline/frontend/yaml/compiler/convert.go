@@ -35,7 +35,7 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		uuid = ulid.Make()
 
 		detached   bool
-		workingdir string
+		workingDir string
 
 		workspace   = fmt.Sprintf("%s_default:%s", c.prefix, c.base)
 		privileged  = container.Privileged
@@ -86,20 +86,39 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 	}
 
 	if !detached || len(container.Commands) != 0 {
-		workingdir = c.stepWorkdir(container)
+		workingDir = c.stepWorkingDir(container)
 	}
 
-	if !detached {
-		pluginSecrets := secretMap{}
-		for name, secret := range c.secrets {
-			if secret.Available(container) {
-				pluginSecrets[name] = secret
-			}
+	getSecretValue := func(name string) (string, error) {
+		name = strings.ToLower(name)
+		secret, ok := c.secrets[name]
+		if !ok {
+			return "", fmt.Errorf("secret %q not found", name)
 		}
 
-		if err := settings.ParamsToEnv(container.Settings, environment, pluginSecrets.toStringMap()); err != nil {
+		event := c.metadata.Curr.Event
+		err := secret.Available(event, container)
+		if err != nil {
+			return "", err
+		}
+
+		return secret.Value, nil
+	}
+
+	// TODO: why don't we pass secrets to detached steps?
+	if !detached {
+		if err := settings.ParamsToEnv(container.Settings, environment, getSecretValue); err != nil {
 			return nil, err
 		}
+	}
+
+	for _, requested := range container.Secrets.Secrets {
+		secretValue, err := getSecretValue(requested.Source)
+		if err != nil {
+			return nil, err
+		}
+
+		environment[strings.ToUpper(requested.Target)] = secretValue
 	}
 
 	if utils.MatchImage(container.Image, c.escalated...) && container.IsPlugin() {
@@ -113,20 +132,6 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 			authConfig.Password = registry.Password
 			break
 		}
-	}
-
-	for _, requested := range container.Secrets.Secrets {
-		secret, ok := c.secrets[strings.ToLower(requested.Source)]
-		if ok && secret.Available(container) {
-			environment[strings.ToUpper(requested.Target)] = secret.Value
-		} else {
-			return nil, fmt.Errorf("secret %q not found or not allowed to be used", requested.Source)
-		}
-	}
-
-	// Advanced backend settings
-	backendOptions := backend_types.BackendOptions{
-		Kubernetes: convertKubernetesBackendOptions(&container.BackendOptions.Kubernetes),
 	}
 
 	memSwapLimit := int64(container.MemSwapLimit)
@@ -181,7 +186,7 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		Pull:           container.Pull,
 		Detached:       detached,
 		Privileged:     privileged,
-		WorkingDir:     workingdir,
+		WorkingDir:     workingDir,
 		Environment:    environment,
 		Commands:       container.Commands,
 		Entrypoint:     container.Entrypoint,
@@ -204,11 +209,11 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		Failure:        failure,
 		NetworkMode:    networkMode,
 		Ports:          ports,
-		BackendOptions: backendOptions,
+		BackendOptions: container.BackendOptions,
 	}, nil
 }
 
-func (c *Compiler) stepWorkdir(container *yaml_types.Container) string {
+func (c *Compiler) stepWorkingDir(container *yaml_types.Container) string {
 	if path.IsAbs(container.Directory) {
 		return container.Directory
 	}
@@ -229,53 +234,4 @@ func convertPort(portDef string) (backend_types.Port, error) {
 	port.Number = uint16(portNumber)
 
 	return port, nil
-}
-
-func convertKubernetesBackendOptions(kubeOpt *yaml_types.KubernetesBackendOptions) backend_types.KubernetesBackendOptions {
-	resources := backend_types.Resources{
-		Limits:   kubeOpt.Resources.Limits,
-		Requests: kubeOpt.Resources.Requests,
-	}
-
-	var tolerations []backend_types.Toleration
-	for _, t := range kubeOpt.Tolerations {
-		tolerations = append(tolerations, backend_types.Toleration{
-			Key:               t.Key,
-			Operator:          backend_types.TolerationOperator(t.Operator),
-			Value:             t.Value,
-			Effect:            backend_types.TaintEffect(t.Effect),
-			TolerationSeconds: t.TolerationSeconds,
-		})
-	}
-
-	var securityContext *backend_types.SecurityContext
-	if kubeOpt.SecurityContext != nil {
-		securityContext = &backend_types.SecurityContext{
-			Privileged:   kubeOpt.SecurityContext.Privileged,
-			RunAsNonRoot: kubeOpt.SecurityContext.RunAsNonRoot,
-			RunAsUser:    kubeOpt.SecurityContext.RunAsUser,
-			RunAsGroup:   kubeOpt.SecurityContext.RunAsGroup,
-			FSGroup:      kubeOpt.SecurityContext.FSGroup,
-		}
-		if kubeOpt.SecurityContext.SeccompProfile != nil {
-			securityContext.SeccompProfile = &backend_types.SecProfile{
-				Type:             backend_types.SecProfileType(kubeOpt.SecurityContext.SeccompProfile.Type),
-				LocalhostProfile: kubeOpt.SecurityContext.SeccompProfile.LocalhostProfile,
-			}
-		}
-		if kubeOpt.SecurityContext.ApparmorProfile != nil {
-			securityContext.ApparmorProfile = &backend_types.SecProfile{
-				Type:             backend_types.SecProfileType(kubeOpt.SecurityContext.ApparmorProfile.Type),
-				LocalhostProfile: kubeOpt.SecurityContext.ApparmorProfile.LocalhostProfile,
-			}
-		}
-	}
-
-	return backend_types.KubernetesBackendOptions{
-		Resources:          resources,
-		ServiceAccountName: kubeOpt.ServiceAccountName,
-		NodeSelector:       kubeOpt.NodeSelector,
-		Tolerations:        tolerations,
-		SecurityContext:    securityContext,
-	}
 }

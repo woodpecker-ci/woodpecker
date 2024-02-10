@@ -269,7 +269,7 @@ when:
 
 #### `event`
 
-Available events: `push`, `pull_request`, `pull_request_closed`, `tag`, `deployment`, `cron`, `manual`
+Available events: `push`, `pull_request`, `pull_request_closed`, `tag`, `release`, `deployment`, `cron`, `manual`
 
 Execute a step if the build event is a `tag`:
 
@@ -352,7 +352,11 @@ when:
   - platform: [linux/*, windows/amd64]
 ```
 
+<!-- markdownlint-disable no-duplicate-heading -->
+
 #### `environment`
+
+<!-- markdownlint-enable no-duplicate-heading -->
 
 Execute a step for deployment events matching the target deployment environment:
 
@@ -556,7 +560,11 @@ git clone https://github.com/octocat/hello-world \
   /go/src/github.com/octocat/hello-world
 ```
 
+<!-- markdownlint-disable no-duplicate-heading -->
+
 ## `matrix`
+
+<!-- markdownlint-enable no-duplicate-heading -->
 
 Woodpecker has integrated support for matrix builds. Woodpecker executes a separate build task for each combination in the matrix, allowing you to build and test a single commit against multiple configurations.
 
@@ -696,26 +704,7 @@ skip_clone: true
 
 Woodpecker gives the ability to skip whole workflows (not just steps #when---conditional-execution-1) based on certain conditions by a `when` block. If all conditions in the `when` block evaluate to true the workflow is executed, otherwise it is skipped, but treated as successful and other workflows depending on it will still continue.
 
-### `repo`
-
-Example conditional execution by repository:
-
-```diff
-+when:
-+  repo: test/test
-+
- steps:
-   - name: slack
-     image: plugins/slack
-     settings:
-       channel: dev
-```
-
-### `branch`
-
-:::note
-Branch conditions are not applied to tags.
-:::
+For more information about the specific filters, take a look at the [step-specific `when` filters](#when---conditional-execution).
 
 Example conditional execution by branch:
 
@@ -730,121 +719,13 @@ Example conditional execution by branch:
        channel: dev
 ```
 
-The step now triggers on `main`, but also if the target branch of a pull request is `main`. Add an event condition to limit it further to pushes on main only.
+The workflow now triggers on `main`, but also if the target branch of a pull request is `main`.
 
-Execute a step if the branch is `main` or `develop`:
-
-```yaml
-when:
-  branch: [main, develop]
-```
-
-Execute a step if the branch starts with `prefix/*`:
-
-```yaml
-when:
-  branch: prefix/*
-```
-
-Execute a step using custom include and exclude logic:
-
-```yaml
-when:
-  branch:
-    include: [main, release/*]
-    exclude: [release/1.0.0, release/1.1.*]
-```
-
-### `event`
-
-Execute a step if the build event is a `tag`:
-
-```yaml
-when:
-  event: tag
-```
-
-Execute a step if the pipeline event is a `push` to a specified branch:
-
-```diff
- when:
-   event: push
-+  branch: main
-```
-
-Execute a step for all non-pull request events:
-
-```yaml
-when:
-  event: [push, tag, deployment]
-```
-
-Execute a step for all build events:
-
-```yaml
-when:
-  event: [push, pull_request, tag, deployment]
-```
-
-### `ref`
-
-The `ref` filter compares the git reference against which the pipeline is executed.
-This allows you to filter, for example, tags that must start with **v**:
-
-```yaml
-when:
-  event: tag
-  ref: refs/tags/v*
-```
-
-### `environment`
-
-Execute a step for deployment events matching the target deployment environment:
-
-```yaml
-when:
-  environment: production
-  event: deployment
-```
-
-### `instance`
-
-Execute a step only on a certain Woodpecker instance matching the specified hostname:
-
-```yaml
-when:
-  instance: stage.woodpecker.company.com
-```
-
-### `path`
-
-:::info
-Path conditions are applied only to **push** and **pull_request** events.
-It is currently **only available** for GitHub, GitLab and Gitea (version 1.18.0 and newer)
-:::
-
-Execute a step only on a pipeline with certain files being changed:
-
-```yaml
-when:
-  path: 'src/*'
-```
-
-You can use [glob patterns](https://github.com/bmatcuk/doublestar#patterns) to match the changed files and specify if the step should run if a file matching that pattern has been changed `include` or if some files have **not** been changed `exclude`.
-
-```yaml
-when:
-  path:
-    include: ['.woodpecker/*.yaml', '*.ini']
-    exclude: ['*.md', 'docs/**']
-    ignore_message: '[ALL]'
-```
-
-:::info
-Passing a defined ignore-message like `[ALL]` inside the commit message will ignore all path conditions.
-:::
+<!-- markdownlint-disable no-duplicate-heading -->
 
 ## `depends_on`
+
+<!-- markdownlint-enable no-duplicate-heading -->
 
 Woodpecker supports to define multiple workflows for a repository. Those workflows will run independent from each other. To depend them on each other you can use the [`depends_on`](./25-workflows.md#flow-control) keyword.
 
