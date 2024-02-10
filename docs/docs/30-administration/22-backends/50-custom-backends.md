@@ -1,4 +1,4 @@
-# Custom agent backends
+# Custom backends
 
 If none of our backends fits your usecases, you can write your own.
 
@@ -20,4 +20,4 @@ func main() {
 }
 ```
 
-It is also possible to use multiple backends, you can select with [`WOODPECKER_BACKEND`](../30-administration/15-agent-config.md#woodpecker_backend) between them.
+It is also possible to use multiple backends, you can select with [`WOODPECKER_BACKEND`](../15-agent-config.md#woodpecker_backend) between them.

@@ -112,7 +112,7 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 	}
 
 	pipeline.Event = model.EventPull
-	if obj.State == "closed" {
+	if obj.State == "closed" || obj.State == "merged" {
 		pipeline.Event = model.EventPullClosed
 	}
 
