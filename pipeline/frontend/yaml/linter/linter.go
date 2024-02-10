@@ -271,7 +271,7 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 				Data: errors.DeprecationErrorData{
 					File:  config.File,
 					Field: fmt.Sprintf("when[%d].event", i),
-					Docs:  "https://woodpecker-ci.org/docs/next/usage/workflow-syntax#event-1",
+					Docs:  "https://woodpecker-ci.org/docs/usage/workflow-syntax#event-1",
 				},
 				IsWarning: true,
 			})
@@ -287,7 +287,7 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 					Data: errors.DeprecationErrorData{
 						File:  config.File,
 						Field: fmt.Sprintf("steps.%s.when[%d].event", step.Name, i),
-						Docs:  "https://woodpecker-ci.org/docs/next/usage/workflow-syntax#event",
+						Docs:  "https://woodpecker-ci.org/docs/usage/workflow-syntax#event",
 					},
 					IsWarning: true,
 				})
