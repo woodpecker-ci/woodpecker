@@ -34,6 +34,7 @@ var skipPipelineRegex = regexp.MustCompile(`\[(?i:ci *skip|skip *ci)\]`)
 
 // Create a new pipeline and start it
 func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline *model.Pipeline) (*model.Pipeline, error) {
+	_forge := server.Config.Services.Forge
 	repoUser, err := _store.GetUser(repo.UserID)
 	if err != nil {
 		msg := fmt.Sprintf("failure to find repo owner via id '%d'", repo.UserID)
@@ -54,7 +55,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	// If the forge has a refresh token, the current access token
 	// may be stale. Therefore, we should refresh prior to dispatching
 	// the pipeline.
-	forge.Refresh(ctx, server.Config.Services.Forge, _store, repoUser)
+	forge.Refresh(ctx, _forge, _store, repoUser)
 
 	// update some pipeline fields
 	pipeline.RepoID = repo.ID
@@ -68,8 +69,8 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	}
 
 	// fetch the pipeline file from the forge
-	configFetcher := forge.NewConfigFetcher(server.Config.Services.Forge, server.Config.Services.Timeout, server.Config.Services.ConfigService, repoUser, repo, pipeline)
-	forgeYamlConfigs, configFetchErr := configFetcher.Fetch(ctx)
+	configService := server.Config.Services.Manager.ConfigServiceFromRepo(repo)
+	forgeYamlConfigs, configFetchErr := configService.Fetch(ctx, _forge, repoUser, repo, pipeline, nil, false)
 	if errors.Is(configFetchErr, &forge_types.ErrConfigNotFound{}) {
 		log.Debug().Str("repo", repo.FullName).Err(configFetchErr).Msgf("cannot find config '%s' in '%s' with user: '%s'", repo.Config, pipeline.Ref, repoUser.Login)
 		if err := _store.DeletePipeline(pipeline); err != nil {
