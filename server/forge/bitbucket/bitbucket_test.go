@@ -184,7 +184,8 @@ func Test_bitbucket(t *testing.T) {
 			g.It("Should return the details", func() {
 				branchHead, err := c.BranchHead(ctx, fakeUser, fakeRepo, "branch_name")
 				g.Assert(err).IsNil()
-				g.Assert(branchHead).Equal("branch_head_name")
+				g.Assert(branchHead.SHA).Equal("branch_head_name")
+				g.Assert(branchHead.ForgeURL).Equal("https://bitbucket.org/commitlink")
 			})
 			g.It("Should handle not found errors", func() {
 				_, err := c.BranchHead(ctx, fakeUser, fakeRepo, "branch_not_found")

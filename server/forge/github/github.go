@@ -565,13 +565,16 @@ func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo, p *
 }
 
 // BranchHead returns the sha of the head (latest commit) of the specified branch
-func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
+func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (*model.Commit, error) {
 	token := common.UserToken(ctx, r, u)
 	b, _, err := c.newClientToken(ctx, token).Repositories.GetBranch(ctx, r.Owner, r.Name, branch, 1)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return b.GetCommit().GetSHA(), nil
+	return &model.Commit{
+		SHA:      b.GetCommit().GetSHA(),
+		ForgeURL: b.GetCommit().GetHTMLURL(),
+	}, nil
 }
 
 // Hook parses the post-commit hook from the Request body
