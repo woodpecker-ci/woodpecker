@@ -48,9 +48,8 @@ type Repo struct {
 	Hash                         string         `json:"-"                               xorm:"varchar(500) 'repo_hash'"`
 	Perm                         *Perm          `json:"-"                               xorm:"-"`
 	CancelPreviousPipelineEvents []WebhookEvent `json:"cancel_previous_pipeline_events" xorm:"json 'cancel_previous_pipeline_events'"`
-	SecretEndpoint               string         `json:"secret_endpoint"                xorm:"varchar(500) 'secret_endpoint'"`
-	RegistryEndpoint             string         `json:"registry_endpoint"               xorm:"varchar(500) 'registry_endpoint'"`
-	ConfigEndpoint               string         `json:"config_endpoint"                 xorm:"varchar(500) 'config_endpoint'"`
+	SecretExtensionEndpoint      string         `json:"secret_extension_endpoint"       xorm:"varchar(500) 'secret_extension_endpoint'"`
+	ConfigExtensionEndpoint      string         `json:"config_extension_endpoint"       xorm:"varchar(500) 'config_extension_endpoint'"`
 	NetrcOnlyTrusted             bool           `json:"netrc_only_trusted"              xorm:"NOT NULL DEFAULT true 'netrc_only_trusted'"`
 } //	@name Repo
 
@@ -116,9 +115,8 @@ type RepoPatch struct {
 	Visibility                   *string         `json:"visibility,omitempty"`
 	AllowPull                    *bool           `json:"allow_pr,omitempty"`
 	CancelPreviousPipelineEvents *[]WebhookEvent `json:"cancel_previous_pipeline_events"`
-	ConfigEndpoint               *string         `json:"config_endpoint,omitempty"`
-	SecretEndpoint               *string         `json:"secret_endpoint,omitempty"`
-	RegistryEndpoint             *string         `json:"registry_endpoint,omitempty"`
+	ConfigExtensionEndpoint      *string         `json:"config_extension_endpoint,omitempty"`
+	SecretExtensionEndpoint      *string         `json:"secret_extension_endpoint,omitempty"`
 	NetrcOnlyTrusted             *bool           `json:"netrc_only_trusted"`
 } //	@name RepoPatch
 

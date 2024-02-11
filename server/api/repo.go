@@ -250,14 +250,11 @@ func PatchRepo(c *gin.Context) {
 			return
 		}
 	}
-	if in.ConfigEndpoint != nil {
-		repo.ConfigEndpoint = *in.ConfigEndpoint
+	if in.ConfigExtensionEndpoint != nil {
+		repo.ConfigExtensionEndpoint = *in.ConfigExtensionEndpoint
 	}
-	if in.SecretEndpoint != nil {
-		repo.SecretEndpoint = *in.SecretEndpoint
-	}
-	if in.RegistryEndpoint != nil {
-		repo.RegistryEndpoint = *in.RegistryEndpoint
+	if in.SecretExtensionEndpoint != nil {
+		repo.SecretExtensionEndpoint = *in.SecretExtensionEndpoint
 	}
 
 	err := _store.UpdateRepo(repo)

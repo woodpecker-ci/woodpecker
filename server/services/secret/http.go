@@ -5,8 +5,8 @@ import (
 	"crypto"
 	"fmt"
 
-	"github.com/woodpecker-ci/woodpecker/server/extensions/utils"
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/services/utils"
 )
 
 type http struct {
@@ -15,7 +15,7 @@ type http struct {
 }
 
 // New returns a new local secret service.
-func NewHTTP(endpoint string, privateKey crypto.PrivateKey) SecretExtension {
+func NewHTTP(endpoint string, privateKey crypto.PrivateKey) Service {
 	return &http{endpoint, privateKey}
 }
 
