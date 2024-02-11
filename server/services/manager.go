@@ -56,7 +56,11 @@ func (e *Manager) SignaturePublicKey() crypto.PublicKey {
 	return e.signaturePublicKey
 }
 
-func (e *Manager) SecretServiceFromRepo(_ *model.Repo) secret.Service {
+func (e *Manager) SecretServiceFromRepo(repo *model.Repo) secret.Service {
+	if repo.SecretExtensionEndpoint != "" {
+		return secret.NewHTTP(repo.SecretExtensionEndpoint, e.signaturePrivateKey)
+	}
+
 	return e.SecretService()
 }
 
@@ -72,8 +76,11 @@ func (e *Manager) RegistryService() registry.Service {
 	return e.registry
 }
 
-func (e *Manager) ConfigServiceFromRepo(_ *model.Repo) config.Service {
-	// TODO: decied based on repo property which config service to use
+func (e *Manager) ConfigServiceFromRepo(repo *model.Repo) config.Service {
+	if repo.ConfigExtensionEndpoint != "" {
+		return config.NewHTTP(repo.ConfigExtensionEndpoint, e.signaturePrivateKey)
+	}
+
 	return e.config
 }
 
