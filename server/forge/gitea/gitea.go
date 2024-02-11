@@ -463,18 +463,21 @@ func (c *Gitea) Branches(ctx context.Context, u *model.User, r *model.Repo, p *m
 }
 
 // BranchHead returns the sha of the head (latest commit) of the specified branch
-func (c *Gitea) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
+func (c *Gitea) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (*model.Commit, error) {
 	token := common.UserToken(ctx, r, u)
 	client, err := c.newClientToken(ctx, token)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	b, _, err := client.GetRepoBranch(r.Owner, r.Name, branch)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return b.Commit.ID, nil
+	return &model.Commit{
+		SHA:      b.Commit.ID,
+		ForgeURL: b.Commit.URL,
+	}, nil
 }
 
 func (c *Gitea) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error) {

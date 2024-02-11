@@ -61,9 +61,9 @@ func CreatePipeline(c *gin.Context) {
 
 	lastCommit, _ := server.Config.Services.Forge.BranchHead(c, user, repo, opts.Branch)
 
-	tmpBuild := createTmpPipeline(model.EventManual, lastCommit, repo, user, &opts)
+	tmpPipeline := createTmpPipeline(model.EventManual, lastCommit, user, &opts)
 
-	pl, err := pipeline.Create(c, _store, repo, tmpBuild)
+	pl, err := pipeline.Create(c, _store, repo, tmpPipeline)
 	if err != nil {
 		handlePipelineErr(c, err)
 	} else {
@@ -71,10 +71,10 @@ func CreatePipeline(c *gin.Context) {
 	}
 }
 
-func createTmpPipeline(event model.WebhookEvent, commitSHA string, repo *model.Repo, user *model.User, opts *model.PipelineOptions) *model.Pipeline {
+func createTmpPipeline(event model.WebhookEvent, commit *model.Commit, user *model.User, opts *model.PipelineOptions) *model.Pipeline {
 	return &model.Pipeline{
 		Event:     event,
-		Commit:    commitSHA,
+		Commit:    commit.SHA,
 		Branch:    opts.Branch,
 		Timestamp: time.Now().UTC().Unix(),
 
@@ -87,8 +87,7 @@ func createTmpPipeline(event model.WebhookEvent, commitSHA string, repo *model.R
 		Author: user.Login,
 		Email:  user.Email,
 
-		// TODO: Generate proper URL to commit
-		ForgeURL: repo.ForgeURL,
+		ForgeURL: commit.ForgeURL,
 	}
 }
 
