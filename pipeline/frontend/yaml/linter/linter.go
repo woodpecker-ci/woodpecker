@@ -266,8 +266,8 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 
 	for i, c := range parsed.When.Constraints {
 		if len(c.Event.Exclude) != 0 {
-			err = multierr.Append(err, &errors.PipelineError{
-				Type:    errors.PipelineErrorTypeDeprecation,
+			err = multierr.Append(err, &errorTypes.PipelineError{
+				Type:    errorTypes.PipelineErrorTypeDeprecation,
 				Message: "Please only use allow lists for events",
 				Data: errors.DeprecationErrorData{
 					File:  config.File,
@@ -282,8 +282,8 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 	for _, step := range parsed.Steps.ContainerList {
 		for i, c := range step.When.Constraints {
 			if len(c.Event.Exclude) != 0 {
-				err = multierr.Append(err, &errors.PipelineError{
-					Type:    errors.PipelineErrorTypeDeprecation,
+				err = multierr.Append(err, &errorTypes.PipelineError{
+					Type:    errorTypes.PipelineErrorTypeDeprecation,
 					Message: "Please only use allow lists for events",
 					Data: errors.DeprecationErrorData{
 						File:  config.File,
@@ -332,8 +332,8 @@ func (l *Linter) lintBadHabits(config *WorkflowConfig) (err error) {
 				}
 			}
 			if field != "" {
-				err = multierr.Append(err, &errors.PipelineError{
-					Type:    errors.PipelineErrorTypeBadHabit,
+				err = multierr.Append(err, &errorTypes.PipelineError{
+					Type:    errorTypes.PipelineErrorTypeBadHabit,
 					Message: "Please set an event filter on all when branches",
 					Data: errors.LinterErrorData{
 						File:  config.File,
