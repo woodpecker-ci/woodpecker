@@ -58,7 +58,7 @@ func (e *Manager) SignaturePublicKey() crypto.PublicKey {
 
 func (e *Manager) SecretServiceFromRepo(repo *model.Repo) secret.Service {
 	if repo.SecretExtensionEndpoint != "" {
-		return secret.NewHTTP(repo.SecretExtensionEndpoint, e.signaturePrivateKey)
+		return secret.NewHTTP(e.SecretService(), repo.SecretExtensionEndpoint, e.signaturePrivateKey)
 	}
 
 	return e.SecretService()

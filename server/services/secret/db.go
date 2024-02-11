@@ -15,6 +15,8 @@
 package secret
 
 import (
+	"context"
+
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
@@ -27,15 +29,15 @@ func NewDB(store model.SecretStore) Service {
 	return &db{store: store}
 }
 
-func (d *db) SecretFind(repo *model.Repo, name string) (*model.Secret, error) {
+func (d *db) SecretFind(_ context.Context, repo *model.Repo, name string) (*model.Secret, error) {
 	return d.store.SecretFind(repo, name)
 }
 
-func (d *db) SecretList(repo *model.Repo, p *model.ListOptions) ([]*model.Secret, error) {
+func (d *db) SecretList(_ context.Context, repo *model.Repo, p *model.ListOptions) ([]*model.Secret, error) {
 	return d.store.SecretList(repo, false, p)
 }
 
-func (d *db) SecretListPipeline(repo *model.Repo, _ *model.Pipeline, p *model.ListOptions) ([]*model.Secret, error) {
+func (d *db) SecretListPipeline(_ context.Context, repo *model.Repo, _ *model.Pipeline, p *model.ListOptions) ([]*model.Secret, error) {
 	s, err := d.store.SecretList(repo, true, p)
 	if err != nil {
 		return nil, err
@@ -68,15 +70,15 @@ func (d *db) SecretListPipeline(repo *model.Repo, _ *model.Pipeline, p *model.Li
 	return secrets, nil
 }
 
-func (d *db) SecretCreate(_ *model.Repo, in *model.Secret) error {
+func (d *db) SecretCreate(_ context.Context, _ *model.Repo, in *model.Secret) error {
 	return d.store.SecretCreate(in)
 }
 
-func (d *db) SecretUpdate(_ *model.Repo, in *model.Secret) error {
+func (d *db) SecretUpdate(_ context.Context, _ *model.Repo, in *model.Secret) error {
 	return d.store.SecretUpdate(in)
 }
 
-func (d *db) SecretDelete(repo *model.Repo, name string) error {
+func (d *db) SecretDelete(_ context.Context, repo *model.Repo, name string) error {
 	secret, err := d.store.SecretFind(repo, name)
 	if err != nil {
 		return err
@@ -84,23 +86,23 @@ func (d *db) SecretDelete(repo *model.Repo, name string) error {
 	return d.store.SecretDelete(secret)
 }
 
-func (d *db) OrgSecretFind(owner int64, name string) (*model.Secret, error) {
+func (d *db) OrgSecretFind(_ context.Context, owner int64, name string) (*model.Secret, error) {
 	return d.store.OrgSecretFind(owner, name)
 }
 
-func (d *db) OrgSecretList(owner int64, p *model.ListOptions) ([]*model.Secret, error) {
+func (d *db) OrgSecretList(_ context.Context, owner int64, p *model.ListOptions) ([]*model.Secret, error) {
 	return d.store.OrgSecretList(owner, p)
 }
 
-func (d *db) OrgSecretCreate(_ int64, in *model.Secret) error {
+func (d *db) OrgSecretCreate(_ context.Context, _ int64, in *model.Secret) error {
 	return d.store.SecretCreate(in)
 }
 
-func (d *db) OrgSecretUpdate(_ int64, in *model.Secret) error {
+func (d *db) OrgSecretUpdate(_ context.Context, _ int64, in *model.Secret) error {
 	return d.store.SecretUpdate(in)
 }
 
-func (d *db) OrgSecretDelete(owner int64, name string) error {
+func (d *db) OrgSecretDelete(_ context.Context, owner int64, name string) error {
 	secret, err := d.store.OrgSecretFind(owner, name)
 	if err != nil {
 		return err
@@ -108,23 +110,23 @@ func (d *db) OrgSecretDelete(owner int64, name string) error {
 	return d.store.SecretDelete(secret)
 }
 
-func (d *db) GlobalSecretFind(owner string) (*model.Secret, error) {
+func (d *db) GlobalSecretFind(_ context.Context, owner string) (*model.Secret, error) {
 	return d.store.GlobalSecretFind(owner)
 }
 
-func (d *db) GlobalSecretList(p *model.ListOptions) ([]*model.Secret, error) {
+func (d *db) GlobalSecretList(_ context.Context, p *model.ListOptions) ([]*model.Secret, error) {
 	return d.store.GlobalSecretList(p)
 }
 
-func (d *db) GlobalSecretCreate(in *model.Secret) error {
+func (d *db) GlobalSecretCreate(_ context.Context, in *model.Secret) error {
 	return d.store.SecretCreate(in)
 }
 
-func (d *db) GlobalSecretUpdate(in *model.Secret) error {
+func (d *db) GlobalSecretUpdate(_ context.Context, in *model.Secret) error {
 	return d.store.SecretUpdate(in)
 }
 
-func (d *db) GlobalSecretDelete(name string) error {
+func (d *db) GlobalSecretDelete(_ context.Context, name string) error {
 	secret, err := d.store.GlobalSecretFind(name)
 	if err != nil {
 		return err

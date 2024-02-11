@@ -36,7 +36,7 @@ import (
 //	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
 func GetGlobalSecretList(c *gin.Context) {
 	secretService := server.Config.Services.Manager.SecretService()
-	list, err := secretService.GlobalSecretList(session.Pagination(c))
+	list, err := secretService.GlobalSecretList(c, session.Pagination(c))
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error getting global secret list. %s", err)
 		return
@@ -61,7 +61,7 @@ func GetGlobalSecretList(c *gin.Context) {
 func GetGlobalSecret(c *gin.Context) {
 	name := c.Param("secret")
 	secretService := server.Config.Services.Manager.SecretService()
-	secret, err := secretService.GlobalSecretFind(name)
+	secret, err := secretService.GlobalSecretFind(c, name)
 	if err != nil {
 		handleDBError(c, err)
 		return
@@ -96,7 +96,7 @@ func PostGlobalSecret(c *gin.Context) {
 	}
 
 	secretService := server.Config.Services.Manager.SecretService()
-	if err := secretService.GlobalSecretCreate(secret); err != nil {
+	if err := secretService.GlobalSecretCreate(c, secret); err != nil {
 		c.String(http.StatusInternalServerError, "Error inserting global secret %q. %s", in.Name, err)
 		return
 	}
@@ -124,7 +124,7 @@ func PatchGlobalSecret(c *gin.Context) {
 	}
 
 	secretService := server.Config.Services.Manager.SecretService()
-	secret, err := secretService.GlobalSecretFind(name)
+	secret, err := secretService.GlobalSecretFind(c, name)
 	if err != nil {
 		handleDBError(c, err)
 		return
@@ -144,7 +144,7 @@ func PatchGlobalSecret(c *gin.Context) {
 		return
 	}
 
-	if err := secretService.GlobalSecretUpdate(secret); err != nil {
+	if err := secretService.GlobalSecretUpdate(c, secret); err != nil {
 		c.String(http.StatusInternalServerError, "Error updating global secret %q. %s", in.Name, err)
 		return
 	}
@@ -163,7 +163,7 @@ func PatchGlobalSecret(c *gin.Context) {
 func DeleteGlobalSecret(c *gin.Context) {
 	name := c.Param("secret")
 	secretService := server.Config.Services.Manager.SecretService()
-	if err := secretService.GlobalSecretDelete(name); err != nil {
+	if err := secretService.GlobalSecretDelete(c, name); err != nil {
 		handleDBError(c, err)
 		return
 	}
