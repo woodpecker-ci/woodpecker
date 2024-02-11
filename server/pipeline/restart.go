@@ -28,7 +28,7 @@ import (
 )
 
 // Restart a pipeline by creating a new one out of the old and start it
-func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipeline, user *model.User, repo *model.Repo, envs map[string]string, netrc *model.Netrc) (*model.Pipeline, error) {
+func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipeline, user *model.User, repo *model.Repo, envs map[string]string) (*model.Pipeline, error) {
 	forge := server.Config.Services.Forge
 	switch lastPipeline.Status {
 	case model.StatusDeclined,
