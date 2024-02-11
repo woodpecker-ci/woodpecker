@@ -105,38 +105,37 @@ func (g *GitLab) oauth2Config(ctx context.Context) (*oauth2.Config, context.Cont
 
 // Login authenticates the session and returns the
 // forge user details.
-func (g *GitLab) Login(ctx context.Context, res http.ResponseWriter, req *http.Request) (*model.User, error) {
+func (g *GitLab) Login(ctx context.Context, req *forge_types.OAuthRequest) (*model.User, string, error) {
 	config, oauth2Ctx := g.oauth2Config(ctx)
+	redirectURL := config.AuthCodeURL("woodpecker")
 
-	// get the OAuth errors
-	if err := req.FormValue("error"); err != "" {
-		return nil, &forge_types.AuthError{
-			Err:         err,
-			Description: req.FormValue("error_description"),
-			URI:         req.FormValue("error_uri"),
+	// check the OAuth errors
+	if req.Error != "" {
+		return nil, redirectURL, &forge_types.AuthError{
+			Err:         req.Error,
+			Description: req.ErrorDescription,
+			URI:         req.ErrorURI,
 		}
 	}
 
-	// get the OAuth code
-	code := req.FormValue("code")
-	if len(code) == 0 {
-		http.Redirect(res, req, config.AuthCodeURL("woodpecker"), http.StatusSeeOther)
-		return nil, nil
+	// check the OAuth code
+	if len(req.Code) == 0 {
+		return nil, redirectURL, nil
 	}
 
-	token, err := config.Exchange(oauth2Ctx, code)
+	token, err := config.Exchange(oauth2Ctx, req.Code)
 	if err != nil {
-		return nil, fmt.Errorf("error exchanging token: %w", err)
+		return nil, redirectURL, fmt.Errorf("error exchanging token: %w", err)
 	}
 
 	client, err := newClient(g.url, token.AccessToken, g.SkipVerify)
 	if err != nil {
-		return nil, err
+		return nil, redirectURL, err
 	}
 
 	login, _, err := client.Users.CurrentUser(gitlab.WithContext(ctx))
 	if err != nil {
-		return nil, err
+		return nil, redirectURL, err
 	}
 
 	user := &model.User{
@@ -151,7 +150,7 @@ func (g *GitLab) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 		user.Avatar = g.url + "/" + login.AvatarURL
 	}
 
-	return user, nil
+	return user, redirectURL, nil
 }
 
 // Refresh refreshes the Gitlab oauth2 access token. If the token is
