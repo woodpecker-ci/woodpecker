@@ -26,9 +26,8 @@ import (
 )
 
 type http struct {
-	endpoint                 string
-	privateKey               crypto.PrivateKey
-	deprecatedCurrentConfigs []*types.FileMeta
+	endpoint   string
+	privateKey crypto.PrivateKey
 }
 
 // configData same as forge.FileMeta but with json tags and string data
@@ -38,25 +37,23 @@ type configData struct {
 }
 
 type requestStructure struct {
-	Repo     *model.Repo     `json:"repo"`
-	Pipeline *model.Pipeline `json:"pipeline"`
-	Netrc    *model.Netrc    `json:"netrc"`
-
-	// @deprecated use netrc data to fetch the config by yourself instead
-	DeprecatedConfiguration []*configData `json:"configs"` // TODO: remove in next major release
+	Repo          *model.Repo     `json:"repo"`
+	Pipeline      *model.Pipeline `json:"pipeline"`
+	Netrc         *model.Netrc    `json:"netrc"`
+	Configuration []*configData   `json:"configs"` // TODO: deprecate in favor of netrc and remove in next major release
 }
 
 type responseStructure struct {
 	Configs []*configData `json:"configs"`
 }
 
-func NewHTTP(endpoint string, privateKey crypto.PrivateKey, deprecatedCurrentConfigs []*types.FileMeta) Service {
-	return &http{endpoint, privateKey, deprecatedCurrentConfigs}
+func NewHTTP(endpoint string, privateKey crypto.PrivateKey) Service {
+	return &http{endpoint, privateKey}
 }
 
-func (h *http) Fetch(ctx context.Context, forge forge.Forge, user *model.User, repo *model.Repo, pipeline *model.Pipeline) ([]*types.FileMeta, error) {
-	currentConfigs := make([]*configData, len(h.deprecatedCurrentConfigs))
-	for i, pipe := range h.deprecatedCurrentConfigs {
+func (h *http) Fetch(ctx context.Context, forge forge.Forge, user *model.User, repo *model.Repo, pipeline *model.Pipeline, oldConfigData []*types.FileMeta, _ bool) ([]*types.FileMeta, error) {
+	currentConfigs := make([]*configData, len(oldConfigData))
+	for i, pipe := range oldConfigData {
 		currentConfigs[i] = &configData{Name: pipe.Name, Data: string(pipe.Data)}
 	}
 
@@ -67,10 +64,10 @@ func (h *http) Fetch(ctx context.Context, forge forge.Forge, user *model.User, r
 
 	response := new(responseStructure)
 	body := requestStructure{
-		Repo:                    repo,
-		Pipeline:                pipeline,
-		DeprecatedConfiguration: currentConfigs,
-		Netrc:                   netrc,
+		Repo:          repo,
+		Pipeline:      pipeline,
+		Configuration: currentConfigs,
+		Netrc:         netrc,
 	}
 
 	status, err := utils.Send(ctx, "POST", h.endpoint, h.privateKey, body, response)
@@ -79,7 +76,7 @@ func (h *http) Fetch(ctx context.Context, forge forge.Forge, user *model.User, r
 	}
 
 	if status != 200 {
-		return []*types.FileMeta{}, nil
+		return oldConfigData, nil
 	}
 
 	fileMetas := make([]*types.FileMeta, len(response.Configs))

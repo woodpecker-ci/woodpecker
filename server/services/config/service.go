@@ -23,5 +23,5 @@ import (
 )
 
 type Service interface {
-	Fetch(ctx context.Context, forge forge.Forge, user *model.User, repo *model.Repo, pipeline *model.Pipeline) (configData []*types.FileMeta, err error)
+	Fetch(ctx context.Context, forge forge.Forge, user *model.User, repo *model.Repo, pipeline *model.Pipeline, oldConfigData []*types.FileMeta, restart bool) (configData []*types.FileMeta, err error)
 }

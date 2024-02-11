@@ -192,7 +192,7 @@ func TestFetchFromConfigService(t *testing.T) {
 
 	ts := httptest.NewServer(http.HandlerFunc(fixtureHandler))
 	defer ts.Close()
-	httpFetcher := config.NewHTTP(ts.URL, privEd25519Key, nil)
+	httpFetcher := config.NewHTTP(ts.URL, privEd25519Key)
 
 	for _, tt := range testTable {
 		t.Run(tt.name, func(t *testing.T) {
@@ -229,6 +229,8 @@ func TestFetchFromConfigService(t *testing.T) {
 				&model.User{Token: "xxx"},
 				repo,
 				&model.Pipeline{Commit: "89ab7b2d6bfb347144ac7c557e638ab402848fee"},
+				[]*forge_types.FileMeta{},
+				false,
 			)
 			if tt.expectedError && err == nil {
 				t.Fatal("expected an error")

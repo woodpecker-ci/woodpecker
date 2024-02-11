@@ -17,8 +17,6 @@ package config
 import (
 	"context"
 
-	"github.com/rs/zerolog/log"
-
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
@@ -32,17 +30,10 @@ func NewCombined(services ...Service) Service {
 	return &combined{services: services}
 }
 
-func (c *combined) Fetch(ctx context.Context, forge forge.Forge, user *model.User, repo *model.Repo, pipeline *model.Pipeline) (files []*types.FileMeta, err error) {
+func (c *combined) Fetch(ctx context.Context, forge forge.Forge, user *model.User, repo *model.Repo, pipeline *model.Pipeline, oldConfigData []*types.FileMeta, restart bool) (files []*types.FileMeta, err error) {
+	files = oldConfigData
 	for _, s := range c.services {
-		// TODO(anbraten): This is a hack to get the current configs into the http service, will be  removed when removing deprecatedCurrentConfigs
-		_s, ok := s.(*http)
-		if !ok {
-			log.Err(err).Msg("http service is not of type http")
-		} else {
-			_s.deprecatedCurrentConfigs = files
-		}
-
-		files, err = s.Fetch(ctx, forge, user, repo, pipeline)
+		files, err = s.Fetch(ctx, forge, user, repo, pipeline, files, restart)
 	}
 
 	return files, err

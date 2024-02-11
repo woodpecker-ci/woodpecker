@@ -36,8 +36,6 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 		return nil, &ErrBadRequest{Msg: fmt.Sprintf("cannot restart a pipeline with status %s", lastPipeline.Status)}
 	}
 
-	var pipelineFiles []*forge_types.FileMeta
-
 	// fetch the old pipeline config from the database
 	configs, err := store.ConfigsForPipeline(lastPipeline.ID)
 	if err != nil {
@@ -45,13 +43,14 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 		return nil, &ErrNotFound{Msg: fmt.Sprintf("failure to get pipeline config for %s. %s", repo.FullName, err)}
 	}
 
+	var pipelineFiles []*forge_types.FileMeta
 	for _, y := range configs {
 		pipelineFiles = append(pipelineFiles, &forge_types.FileMeta{Data: y.Data, Name: y.Name})
 	}
 
 	// If the config service is active we should refetch the config in case something changed
 	configService := server.Config.Services.Manager.ConfigServiceFromRepo(repo)
-	pipelineFiles, err = configService.Fetch(ctx, forge, user, repo, lastPipeline)
+	pipelineFiles, err = configService.Fetch(ctx, forge, user, repo, lastPipeline, pipelineFiles, true)
 	if err != nil {
 		return nil, &ErrBadRequest{
 			Msg: fmt.Sprintf("On fetching external pipeline config: %s", err),
