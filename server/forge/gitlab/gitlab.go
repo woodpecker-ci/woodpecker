@@ -607,24 +607,27 @@ func (g *GitLab) Branches(ctx context.Context, user *model.User, repo *model.Rep
 }
 
 // BranchHead returns the sha of the head (latest commit) of the specified branch
-func (g *GitLab) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
+func (g *GitLab) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (*model.Commit, error) {
 	token := common.UserToken(ctx, r, u)
 	client, err := newClient(g.url, token, g.SkipVerify)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	_repo, err := g.getProject(ctx, client, r.ForgeRemoteID, r.Owner, r.Name)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	b, _, err := client.Branches.GetBranch(_repo.ID, branch, gitlab.WithContext(ctx))
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return b.Commit.ID, nil
+	return &model.Commit{
+		SHA:      b.Commit.ID,
+		ForgeURL: b.Commit.WebURL,
+	}, nil
 }
 
 // Hook parses the post-commit hook from the Request body
