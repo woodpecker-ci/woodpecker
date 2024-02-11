@@ -48,8 +48,8 @@ func TestCreateBuild(t *testing.T) {
 	store.On("GetRepo", mock.Anything).Return(repo1, nil)
 	store.On("GetUser", mock.Anything).Return(creator, nil)
 	forge.On("BranchHead", mock.Anything, creator, repo1, "default").Return(&model.Commit{
-		SHA: "sha1",
 		ForgeURL: "https://example.com/sha1",
+		SHA:      "sha1",
 	}, nil)
 
 	_, pipeline, err := CreatePipeline(ctx, store, forge, &model.Cron{
@@ -57,13 +57,13 @@ func TestCreateBuild(t *testing.T) {
 	})
 	assert.NoError(t, err)
 	assert.EqualValues(t, &model.Pipeline{
-		Event:   "cron",
-		Commit:  "sha1",
-		Branch:  "default",
-		Ref:     "refs/heads/default",
-		Message: "test",
-		Sender:  "test",
+		Branch:   "default",
+		Commit:   "sha1",
+		Event:    "cron",
 		ForgeURL: "https://example.com/sha1",
+		Message:  "test",
+		Ref:      "refs/heads/default",
+		Sender:   "test",
 	}, pipeline)
 }
 
