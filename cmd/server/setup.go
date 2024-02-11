@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,179 +29,117 @@ import (
 	"github.com/urfave/cli/v2"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/queue"
-	"github.com/woodpecker-ci/woodpecker/server/remote"
-	"github.com/woodpecker-ci/woodpecker/server/remote/bitbucket"
-	"github.com/woodpecker-ci/woodpecker/server/remote/bitbucketserver"
-	"github.com/woodpecker-ci/woodpecker/server/remote/coding"
-	"github.com/woodpecker-ci/woodpecker/server/remote/gitea"
-	"github.com/woodpecker-ci/woodpecker/server/remote/github"
-	"github.com/woodpecker-ci/woodpecker/server/remote/gitlab"
-	"github.com/woodpecker-ci/woodpecker/server/remote/gogs"
-	"github.com/woodpecker-ci/woodpecker/server/store"
-	"github.com/woodpecker-ci/woodpecker/server/store/datastore"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/cache"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/bitbucket"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/gitea"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/github"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/gitlab"
+	"go.woodpecker-ci.org/woodpecker/v2/server/queue"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store/datastore"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/addon"
+	addonTypes "go.woodpecker-ci.org/woodpecker/v2/shared/addon/types"
 )
 
 func setupStore(c *cli.Context) (store.Store, error) {
 	datasource := c.String("datasource")
 	driver := c.String("driver")
+	xorm := store.XORM{
+		Log:     c.Bool("log-xorm"),
+		ShowSQL: c.Bool("log-xorm-sql"),
+	}
 
 	if driver == "sqlite3" {
 		if datastore.SupportedDriver("sqlite3") {
-			log.Debug().Msgf("server has sqlite3 support")
+			log.Debug().Msg("server has sqlite3 support")
 		} else {
-			log.Debug().Msgf("server was build with no sqlite3 support!")
+			log.Debug().Msg("server was built without sqlite3 support!")
 		}
 	}
 
 	if !datastore.SupportedDriver(driver) {
-		log.Fatal().Msgf("database driver '%s' not supported", driver)
+		return nil, fmt.Errorf("database driver '%s' not supported", driver)
 	}
 
 	if driver == "sqlite3" {
-		if new, err := fallbackSqlite3File(datasource); err != nil {
-			log.Fatal().Err(err).Msg("fallback to old sqlite3 file failed")
-		} else {
-			datasource = new
+		if err := checkSqliteFileExist(datasource); err != nil {
+			return nil, fmt.Errorf("check sqlite file: %w", err)
 		}
 	}
 
 	opts := &store.Opts{
 		Driver: driver,
 		Config: datasource,
+		XORM:   xorm,
 	}
 	log.Trace().Msgf("setup datastore: %#v", *opts)
 	store, err := datastore.NewEngine(opts)
 	if err != nil {
-		log.Fatal().Err(err).Msg("could not open datastore")
+		return nil, fmt.Errorf("could not open datastore: %w", err)
 	}
 
-	if err := store.Migrate(); err != nil {
-		log.Fatal().Err(err).Msg("could not migrate datastore")
+	if err := store.Migrate(c.Bool("migrations-allow-long")); err != nil {
+		return nil, fmt.Errorf("could not migrate datastore: %w", err)
 	}
 
 	return store, nil
 }
 
-// TODO: convert it to a check and fail hard only function in v0.16.0 to be able to remove it in v0.17.0
-// TODO: add it to the "how to migrate from drone docs"
-func fallbackSqlite3File(path string) (string, error) {
-	const dockerDefaultPath = "/var/lib/woodpecker/woodpecker.sqlite"
-	const dockerDefaultDir = "/var/lib/woodpecker/drone.sqlite"
-	const dockerOldPath = "/var/lib/drone/drone.sqlite"
-	const standaloneDefault = "woodpecker.sqlite"
-	const standaloneOld = "drone.sqlite"
-
-	// custom location was set, use that one
-	if path != dockerDefaultPath && path != standaloneDefault {
-		return path, nil
+func checkSqliteFileExist(path string) error {
+	_, err := os.Stat(path)
+	if err != nil && os.IsNotExist(err) {
+		log.Warn().Msgf("no sqlite3 file found, will create one at '%s'", path)
+		return nil
 	}
-
-	// file is at new default("/var/lib/woodpecker/woodpecker.sqlite")
-	_, err := os.Stat(dockerDefaultPath)
-	if err != nil && !os.IsNotExist(err) {
-		return "", err
-	}
-	if err == nil {
-		return dockerDefaultPath, nil
-	}
-
-	// file is at new default("woodpecker.sqlite")
-	_, err = os.Stat(standaloneDefault)
-	if err != nil && !os.IsNotExist(err) {
-		return "", err
-	}
-	if err == nil {
-		return standaloneDefault, nil
-	}
-
-	// woodpecker run in standalone mode, file is in same folder but not renamed
-	_, err = os.Stat(standaloneOld)
-	if err != nil && !os.IsNotExist(err) {
-		return "", err
-	}
-	if err == nil {
-		// rename in same folder should be fine as it should be same docker volume
-		log.Warn().Msgf("found sqlite3 file at '%s' and moved to '%s'", standaloneOld, standaloneDefault)
-		return standaloneDefault, os.Rename(standaloneOld, standaloneDefault)
-	}
-
-	// file is in new folder but not renamed
-	_, err = os.Stat(dockerDefaultDir)
-	if err != nil && !os.IsNotExist(err) {
-		return "", err
-	}
-	if err == nil {
-		// rename in same folder should be fine as it should be same docker volume
-		log.Warn().Msgf("found sqlite3 file at '%s' and moved to '%s'", dockerDefaultDir, dockerDefaultPath)
-		return dockerDefaultPath, os.Rename(dockerDefaultDir, dockerDefaultPath)
-	}
-
-	// file is still at old location
-	_, err = os.Stat(dockerOldPath)
-	if err == nil {
-		// TODO: use log.Fatal()... in next version
-		log.Error().Msgf("found sqlite3 file at deprecated path '%s', please move it to '%s' and update your volume path if necessary", dockerOldPath, dockerDefaultPath)
-		return dockerOldPath, nil
-	}
-
-	// file does not exist at all
-	log.Warn().Msgf("no sqlite3 file found, will create one at '%s'", path)
-	return path, nil
+	return err
 }
 
 func setupQueue(c *cli.Context, s store.Store) queue.Queue {
 	return queue.WithTaskStore(queue.New(c.Context), s)
 }
 
-// setupRemote helper function to setup the remote from the CLI arguments.
-func setupRemote(c *cli.Context) (remote.Remote, error) {
+func setupMembershipService(_ *cli.Context, r forge.Forge) cache.MembershipService {
+	return cache.NewMembershipService(r)
+}
+
+// setupForge helper function to set up the forge from the CLI arguments.
+func setupForge(c *cli.Context) (forge.Forge, error) {
+	addonForge, err := addon.Load[forge.Forge](c.StringSlice("addons"), addonTypes.TypeForge)
+	if err != nil {
+		return nil, err
+	}
+	if addonForge != nil {
+		return addonForge.Value, nil
+	}
+
 	switch {
 	case c.Bool("github"):
-		return setupGithub(c)
+		return setupGitHub(c)
 	case c.Bool("gitlab"):
-		return setupGitlab(c)
+		return setupGitLab(c)
 	case c.Bool("bitbucket"):
 		return setupBitbucket(c)
-	case c.Bool("stash"):
-		return setupStash(c)
-	case c.Bool("gogs"):
-		return setupGogs(c)
 	case c.Bool("gitea"):
 		return setupGitea(c)
-	case c.Bool("coding"):
-		return setupCoding(c)
 	default:
 		return nil, fmt.Errorf("version control system not configured")
 	}
 }
 
-// helper function to setup the Bitbucket remote from the CLI arguments.
-func setupBitbucket(c *cli.Context) (remote.Remote, error) {
+// setupBitbucket helper function to setup the Bitbucket forge from the CLI arguments.
+func setupBitbucket(c *cli.Context) (forge.Forge, error) {
 	opts := &bitbucket.Opts{
 		Client: c.String("bitbucket-client"),
 		Secret: c.String("bitbucket-secret"),
 	}
-	log.Trace().Msgf("Remote (bitbucket) opts: %#v", opts)
+	log.Trace().Msgf("forge (bitbucket) opts: %#v", opts)
 	return bitbucket.New(opts)
 }
 
-// helper function to setup the Gogs remote from the CLI arguments.
-func setupGogs(c *cli.Context) (remote.Remote, error) {
-	opts := gogs.Opts{
-		URL:         c.String("gogs-server"),
-		Username:    c.String("gogs-git-username"),
-		Password:    c.String("gogs-git-password"),
-		PrivateMode: c.Bool("gogs-private-mode"),
-		SkipVerify:  c.Bool("gogs-skip-verify"),
-	}
-	log.Trace().Msgf("Remote (gogs) opts: %#v", opts)
-	return gogs.New(opts)
-}
-
-// helper function to setup the Gitea remote from the CLI arguments.
-func setupGitea(c *cli.Context) (remote.Remote, error) {
+// setupGitea helper function to setup the Gitea forge from the CLI arguments.
+func setupGitea(c *cli.Context) (forge.Forge, error) {
 	server, err := url.Parse(c.String("gitea-server"))
 	if err != nil {
 		return nil, err
@@ -212,29 +151,14 @@ func setupGitea(c *cli.Context) (remote.Remote, error) {
 		SkipVerify: c.Bool("gitea-skip-verify"),
 	}
 	if len(opts.URL) == 0 {
-		log.Fatal().Msg("WOODPECKER_GITEA_URL must be set")
+		return nil, fmt.Errorf("WOODPECKER_GITEA_URL must be set")
 	}
-	log.Trace().Msgf("Remote (gitea) opts: %#v", opts)
+	log.Trace().Msgf("forge (gitea) opts: %#v", opts)
 	return gitea.New(opts)
 }
 
-// helper function to setup the Stash remote from the CLI arguments.
-func setupStash(c *cli.Context) (remote.Remote, error) {
-	opts := bitbucketserver.Opts{
-		URL:               c.String("stash-server"),
-		Username:          c.String("stash-git-username"),
-		Password:          c.String("stash-git-password"),
-		ConsumerKey:       c.String("stash-consumer-key"),
-		ConsumerRSA:       c.String("stash-consumer-rsa"),
-		ConsumerRSAString: c.String("stash-consumer-rsa-string"),
-		SkipVerify:        c.Bool("stash-skip-verify"),
-	}
-	log.Trace().Msgf("Remote (bitbucketserver) opts: %#v", opts)
-	return bitbucketserver.New(opts)
-}
-
-// helper function to setup the Gitlab remote from the CLI arguments.
-func setupGitlab(c *cli.Context) (remote.Remote, error) {
+// setupGitLab helper function to setup the GitLab forge from the CLI arguments.
+func setupGitLab(c *cli.Context) (forge.Forge, error) {
 	return gitlab.New(gitlab.Opts{
 		URL:          c.String("gitlab-server"),
 		ClientID:     c.String("gitlab-client"),
@@ -243,8 +167,8 @@ func setupGitlab(c *cli.Context) (remote.Remote, error) {
 	})
 }
 
-// helper function to setup the GitHub remote from the CLI arguments.
-func setupGithub(c *cli.Context) (remote.Remote, error) {
+// setupGitHub helper function to setup the GitHub forge from the CLI arguments.
+func setupGitHub(c *cli.Context) (forge.Forge, error) {
 	opts := github.Opts{
 		URL:        c.String("github-server"),
 		Client:     c.String("github-client"),
@@ -252,50 +176,35 @@ func setupGithub(c *cli.Context) (remote.Remote, error) {
 		SkipVerify: c.Bool("github-skip-verify"),
 		MergeRef:   c.Bool("github-merge-ref"),
 	}
-	log.Trace().Msgf("Remote (github) opts: %#v", opts)
+	log.Trace().Msgf("forge (github) opts: %#v", opts)
 	return github.New(opts)
 }
 
-// helper function to setup the Coding remote from the CLI arguments.
-func setupCoding(c *cli.Context) (remote.Remote, error) {
-	opts := coding.Opts{
-		URL:        c.String("coding-server"),
-		Client:     c.String("coding-client"),
-		Secret:     c.String("coding-secret"),
-		Scopes:     c.StringSlice("coding-scope"),
-		Username:   c.String("coding-git-username"),
-		Password:   c.String("coding-git-password"),
-		SkipVerify: c.Bool("coding-skip-verify"),
-	}
-	log.Trace().Msgf("Remote (coding) opts: %#v", opts)
-	return coding.New(opts)
-}
-
 func setupMetrics(g *errgroup.Group, _store store.Store) {
-	pendingJobs := promauto.NewGauge(prometheus.GaugeOpts{
+	pendingSteps := promauto.NewGauge(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
-		Name:      "pending_jobs",
-		Help:      "Total number of pending build processes.",
+		Name:      "pending_steps",
+		Help:      "Total number of pending pipeline steps.",
 	})
-	waitingJobs := promauto.NewGauge(prometheus.GaugeOpts{
+	waitingSteps := promauto.NewGauge(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
-		Name:      "waiting_jobs",
-		Help:      "Total number of builds waiting on deps.",
+		Name:      "waiting_steps",
+		Help:      "Total number of pipeline waiting on deps.",
 	})
-	runningJobs := promauto.NewGauge(prometheus.GaugeOpts{
+	runningSteps := promauto.NewGauge(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
-		Name:      "running_jobs",
-		Help:      "Total number of running build processes.",
+		Name:      "running_steps",
+		Help:      "Total number of running pipeline steps.",
 	})
 	workers := promauto.NewGauge(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
 		Name:      "worker_count",
 		Help:      "Total number of workers.",
 	})
-	builds := promauto.NewGauge(prometheus.GaugeOpts{
+	pipelines := promauto.NewGauge(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
-		Name:      "build_total_count",
-		Help:      "Total number of builds.",
+		Name:      "pipeline_total_count",
+		Help:      "Total number of pipelines.",
 	})
 	users := promauto.NewGauge(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
@@ -311,9 +220,9 @@ func setupMetrics(g *errgroup.Group, _store store.Store) {
 	g.Go(func() error {
 		for {
 			stats := server.Config.Services.Queue.Info(context.TODO())
-			pendingJobs.Set(float64(stats.Stats.Pending))
-			waitingJobs.Set(float64(stats.Stats.WaitingOnDeps))
-			runningJobs.Set(float64(stats.Stats.Running))
+			pendingSteps.Set(float64(stats.Stats.Pending))
+			waitingSteps.Set(float64(stats.Stats.WaitingOnDeps))
+			runningSteps.Set(float64(stats.Stats.Running))
 			workers.Set(float64(stats.Stats.Workers))
 			time.Sleep(500 * time.Millisecond)
 		}
@@ -322,8 +231,8 @@ func setupMetrics(g *errgroup.Group, _store store.Store) {
 		for {
 			repoCount, _ := _store.GetRepoCount()
 			userCount, _ := _store.GetUserCount()
-			buildCount, _ := _store.GetBuildCount()
-			builds.Set(float64(buildCount))
+			pipelineCount, _ := _store.GetPipelineCount()
+			pipelines.Set(float64(pipelineCount))
 			users.Set(float64(userCount))
 			repos.Set(float64(repoCount))
 			time.Sleep(10 * time.Second)

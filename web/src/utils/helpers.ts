@@ -1,54 +1,73 @@
-import { Build, BuildProc, Repo } from '~/lib/api/types';
+import { Pipeline, PipelineStep, PipelineWorkflow, Repo } from '~/lib/api/types';
 
-export function findProc(procs: BuildProc[], pid: number): BuildProc | undefined {
-  return procs.reduce((prev, proc) => {
-    if (proc.pid === pid) {
-      return proc;
-    }
+export function findStep(workflows: PipelineWorkflow[], pid: number): PipelineStep | undefined {
+  return workflows.reduce(
+    (prev, workflow) => {
+      const result = workflow.children.reduce(
+        (prevChild, step) => {
+          if (step.pid === pid) {
+            return step;
+          }
 
-    if (proc.children) {
-      const result = findProc(proc.children, pid);
+          return prevChild;
+        },
+        undefined as PipelineStep | undefined,
+      );
       if (result) {
         return result;
       }
-    }
 
-    return prev;
-  }, undefined as BuildProc | undefined);
+      return prev;
+    },
+    undefined as PipelineStep | undefined,
+  );
 }
 
 /**
  * Returns true if the process is in a completed state.
  *
- * @param {Object} proc - The process object.
+ * @param {Object} step - The process object.
  * @returns {boolean}
  */
-export function isProcFinished(proc: BuildProc): boolean {
-  return proc.state !== 'running' && proc.state !== 'pending';
+export function isStepFinished(step: PipelineStep): boolean {
+  return step.state !== 'running' && step.state !== 'pending';
 }
 
 /**
  * Returns true if the process is running.
  *
- * @param {Object} proc - The process object.
+ * @param {Object} step - The process object.
  * @returns {boolean}
  */
-export function isProcRunning(proc: BuildProc): boolean {
-  return proc.state === 'running';
+export function isStepRunning(step: PipelineStep): boolean {
+  return step.state === 'running';
 }
 
 /**
- * Compare two builds by name.
- * @param {Object} a - A build.
- * @param {Object} b - A build.
+ * Compare two pipelines by creation timestamp.
+ * @param {Object} a - A pipeline.
+ * @param {Object} b - A pipeline.
  * @returns {number}
  */
-export function compareBuilds(a: Build, b: Build): number {
-  return (b.started_at || b.created_at || -1) - (a.started_at || a.created_at || -1);
+export function comparePipelines(a: Pipeline, b: Pipeline): number {
+  return (b.created_at || -1) - (a.created_at || -1);
 }
 
-export function isBuildActive(build: Build): boolean {
-  return ['pending', 'running', 'started'].includes(build.status);
+/**
+ * Compare two pipelines by the status.
+ * Giving pending, running, or started higher priority than other status
+ * @param {Object} a - A pipeline.
+ * @param {Object} b - A pipeline.
+ * @returns {number}
+ */
+export function comparePipelinesWithStatus(a: Pipeline, b: Pipeline): number {
+  const bPriority = ['pending', 'running', 'started'].includes(b.status) ? 1 : 0;
+  const aPriority = ['pending', 'running', 'started'].includes(a.status) ? 1 : 0;
+  return bPriority - aPriority || comparePipelines(a, b);
+}
+
+export function isPipelineActive(pipeline: Pipeline): boolean {
+  return ['pending', 'running', 'started'].includes(pipeline.status);
 }
 
 export function repoSlug(ownerOrRepo: Repo): string;

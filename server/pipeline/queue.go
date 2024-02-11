@@ -19,50 +19,49 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/queue"
-	"github.com/woodpecker-ci/woodpecker/server/shared"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/pipeline/stepbuilder"
 )
 
-func queueBuild(build *model.Build, repo *model.Repo, buildItems []*shared.BuildItem) error {
-	var tasks []*queue.Task
-	for _, item := range buildItems {
-		if item.Proc.State == model.StatusSkipped {
+func queuePipeline(ctx context.Context, repo *model.Repo, pipelineItems []*stepbuilder.Item) error {
+	var tasks []*model.Task
+	for _, item := range pipelineItems {
+		if item.Workflow.State == model.StatusSkipped {
 			continue
 		}
-		task := new(queue.Task)
-		task.ID = fmt.Sprint(item.Proc.ID)
+		task := new(model.Task)
+		task.ID = fmt.Sprint(item.Workflow.ID)
 		task.Labels = map[string]string{}
 		for k, v := range item.Labels {
 			task.Labels[k] = v
 		}
-		task.Labels["platform"] = item.Platform
 		task.Labels["repo"] = repo.FullName
-		task.Dependencies = taskIds(item.DependsOn, buildItems)
+		task.Dependencies = taskIDs(item.DependsOn, pipelineItems)
 		task.RunOn = item.RunsOn
-		task.DepStatus = make(map[string]string)
+		task.DepStatus = make(map[string]model.StatusValue)
 
-		task.Data, _ = json.Marshal(rpc.Pipeline{
-			ID:      fmt.Sprint(item.Proc.ID),
+		var err error
+		task.Data, err = json.Marshal(rpc.Workflow{
+			ID:      fmt.Sprint(item.Workflow.ID),
 			Config:  item.Config,
 			Timeout: repo.Timeout,
 		})
-
-		if err := server.Config.Services.Logs.Open(context.Background(), task.ID); err != nil {
+		if err != nil {
 			return err
 		}
+
 		tasks = append(tasks, task)
 	}
-	return server.Config.Services.Queue.PushAtOnce(context.Background(), tasks)
+	return server.Config.Services.Queue.PushAtOnce(ctx, tasks)
 }
 
-func taskIds(dependsOn []string, buildItems []*shared.BuildItem) (taskIds []string) {
+func taskIDs(dependsOn []string, pipelineItems []*stepbuilder.Item) (taskIDs []string) {
 	for _, dep := range dependsOn {
-		for _, buildItem := range buildItems {
-			if buildItem.Proc.Name == dep {
-				taskIds = append(taskIds, fmt.Sprint(buildItem.Proc.ID))
+		for _, pipelineItem := range pipelineItems {
+			if pipelineItem.Workflow.Name == dep {
+				taskIDs = append(taskIDs, fmt.Sprint(pipelineItem.Workflow.ID))
 			}
 		}
 	}

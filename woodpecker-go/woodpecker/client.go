@@ -1,12 +1,24 @@
+// Copyright 2022 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package woodpecker
 
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -16,27 +28,40 @@ import (
 const (
 	pathSelf           = "%s/api/user"
 	pathRepos          = "%s/api/user/repos"
-	pathRepo           = "%s/api/repos/%s/%s"
-	pathRepoMove       = "%s/api/repos/%s/%s/move?to=%s"
-	pathChown          = "%s/api/repos/%s/%s/chown"
-	pathRepair         = "%s/api/repos/%s/%s/repair"
-	pathBuilds         = "%s/api/repos/%s/%s/builds"
-	pathBuild          = "%s/api/repos/%s/%s/builds/%v"
-	pathApprove        = "%s/api/repos/%s/%s/builds/%d/approve"
-	pathDecline        = "%s/api/repos/%s/%s/builds/%d/decline"
-	pathJob            = "%s/api/repos/%s/%s/builds/%d/%d"
-	pathLogPurge       = "%s/api/repos/%s/%s/logs/%d"
-	pathRepoSecrets    = "%s/api/repos/%s/%s/secrets"
-	pathRepoSecret     = "%s/api/repos/%s/%s/secrets/%s"
-	pathRepoRegistries = "%s/api/repos/%s/%s/registry"
-	pathRepoRegistry   = "%s/api/repos/%s/%s/registry/%s"
+	pathRepoPost       = "%s/api/repos?forge_remote_id=%d"
+	pathRepo           = "%s/api/repos/%d"
+	pathRepoLookup     = "%s/api/repos/lookup/%s"
+	pathRepoMove       = "%s/api/repos/%d/move?to=%s"
+	pathChown          = "%s/api/repos/%d/chown"
+	pathRepair         = "%s/api/repos/%d/repair"
+	pathPipelines      = "%s/api/repos/%d/pipelines"
+	pathPipeline       = "%s/api/repos/%d/pipelines/%v"
+	pathLogs           = "%s/api/repos/%d/logs/%d/%d"
+	pathApprove        = "%s/api/repos/%d/pipelines/%d/approve"
+	pathDecline        = "%s/api/repos/%d/pipelines/%d/decline"
+	pathStop           = "%s/api/repos/%d/pipelines/%d/cancel"
+	pathLogPurge       = "%s/api/repos/%d/logs/%d"
+	pathRepoSecrets    = "%s/api/repos/%d/secrets"
+	pathRepoSecret     = "%s/api/repos/%d/secrets/%s"
+	pathRepoRegistries = "%s/api/repos/%d/registry"
+	pathRepoRegistry   = "%s/api/repos/%d/registry/%s"
+	pathRepoCrons      = "%s/api/repos/%d/cron"
+	pathRepoCron       = "%s/api/repos/%d/cron/%d"
+	pathOrg            = "%s/api/orgs/%d"
+	pathOrgLookup      = "%s/api/orgs/lookup/%s"
+	pathOrgSecrets     = "%s/api/orgs/%d/secrets"
+	pathOrgSecret      = "%s/api/orgs/%d/secrets/%s"
+	pathGlobalSecrets  = "%s/api/secrets"
+	pathGlobalSecret   = "%s/api/secrets/%s"
 	pathUsers          = "%s/api/users"
 	pathUser           = "%s/api/users/%s"
-	pathBuildQueue     = "%s/api/builds"
+	pathPipelineQueue  = "%s/api/pipelines"
 	pathQueue          = "%s/api/queue"
 	pathLogLevel       = "%s/api/log-level"
+	pathAgents         = "%s/api/agents"
+	pathAgent          = "%s/api/agents/%d"
+	pathAgentTasks     = "%s/api/agents/%d/tasks"
 	// TODO: implement endpoints
-	// pathLog            = "%s/api/repos/%s/%s/logs/%d/%d"
 	// pathFeed           = "%s/api/user/feed"
 	// pathVersion        = "%s/version"
 )
@@ -113,10 +138,18 @@ func (c *client) UserDel(login string) error {
 	return err
 }
 
-// Repo returns a repository by name.
-func (c *client) Repo(owner, name string) (*Repo, error) {
+// Repo returns a repository by id.
+func (c *client) Repo(repoID int64) (*Repo, error) {
 	out := new(Repo)
-	uri := fmt.Sprintf(pathRepo, c.addr, owner, name)
+	uri := fmt.Sprintf(pathRepo, c.addr, repoID)
+	err := c.get(uri, out)
+	return out, err
+}
+
+// RepoLookup returns a repository by name.
+func (c *client) RepoLookup(fullName string) (*Repo, error) {
+	out := new(Repo)
+	uri := fmt.Sprintf(pathRepoLookup, c.addr, fullName)
 	err := c.get(uri, out)
 	return out, err
 }
@@ -132,68 +165,68 @@ func (c *client) RepoList() ([]*Repo, error) {
 
 // RepoListOpts returns a list of all repositories to which
 // the user has explicit access in the host system.
-func (c *client) RepoListOpts(sync, all bool) ([]*Repo, error) {
+func (c *client) RepoListOpts(all bool) ([]*Repo, error) {
 	var out []*Repo
-	uri := fmt.Sprintf(pathRepos+"?flush=%v&all=%v", c.addr, sync, all)
+	uri := fmt.Sprintf(pathRepos+"?all=%v", c.addr, all)
 	err := c.get(uri, &out)
 	return out, err
 }
 
 // RepoPost activates a repository.
-func (c *client) RepoPost(owner, name string) (*Repo, error) {
+func (c *client) RepoPost(forgeRemoteID int64) (*Repo, error) {
 	out := new(Repo)
-	uri := fmt.Sprintf(pathRepo, c.addr, owner, name)
+	uri := fmt.Sprintf(pathRepoPost, c.addr, forgeRemoteID)
 	err := c.post(uri, nil, out)
 	return out, err
 }
 
 // RepoChown updates a repository owner.
-func (c *client) RepoChown(owner, name string) (*Repo, error) {
+func (c *client) RepoChown(repoID int64) (*Repo, error) {
 	out := new(Repo)
-	uri := fmt.Sprintf(pathChown, c.addr, owner, name)
+	uri := fmt.Sprintf(pathChown, c.addr, repoID)
 	err := c.post(uri, nil, out)
 	return out, err
 }
 
 // RepoRepair repairs the repository hooks.
-func (c *client) RepoRepair(owner, name string) error {
-	uri := fmt.Sprintf(pathRepair, c.addr, owner, name)
+func (c *client) RepoRepair(repoID int64) error {
+	uri := fmt.Sprintf(pathRepair, c.addr, repoID)
 	return c.post(uri, nil, nil)
 }
 
 // RepoPatch updates a repository.
-func (c *client) RepoPatch(owner, name string, in *RepoPatch) (*Repo, error) {
+func (c *client) RepoPatch(repoID int64, in *RepoPatch) (*Repo, error) {
 	out := new(Repo)
-	uri := fmt.Sprintf(pathRepo, c.addr, owner, name)
+	uri := fmt.Sprintf(pathRepo, c.addr, repoID)
 	err := c.patch(uri, in, out)
 	return out, err
 }
 
 // RepoDel deletes a repository.
-func (c *client) RepoDel(owner, name string) error {
-	uri := fmt.Sprintf(pathRepo, c.addr, owner, name)
+func (c *client) RepoDel(repoID int64) error {
+	uri := fmt.Sprintf(pathRepo, c.addr, repoID)
 	err := c.delete(uri)
 	return err
 }
 
 // RepoMove moves a repository
-func (c *client) RepoMove(owner, name, newFullName string) error {
-	uri := fmt.Sprintf(pathRepoMove, c.addr, owner, name, newFullName)
+func (c *client) RepoMove(repoID int64, newFullName string) error {
+	uri := fmt.Sprintf(pathRepoMove, c.addr, repoID, newFullName)
 	return c.post(uri, nil, nil)
 }
 
-// Build returns a repository build by number.
-func (c *client) Build(owner, name string, num int) (*Build, error) {
-	out := new(Build)
-	uri := fmt.Sprintf(pathBuild, c.addr, owner, name, num)
+// Pipeline returns a repository pipeline by pipeline-id.
+func (c *client) Pipeline(repoID, pipeline int64) (*Pipeline, error) {
+	out := new(Pipeline)
+	uri := fmt.Sprintf(pathPipeline, c.addr, repoID, pipeline)
 	err := c.get(uri, out)
 	return out, err
 }
 
-// Build returns the latest repository build by branch.
-func (c *client) BuildLast(owner, name, branch string) (*Build, error) {
-	out := new(Build)
-	uri := fmt.Sprintf(pathBuild, c.addr, owner, name, "latest")
+// Pipeline returns the latest repository pipeline by branch.
+func (c *client) PipelineLast(repoID int64, branch string) (*Pipeline, error) {
+	out := new(Pipeline)
+	uri := fmt.Sprintf(pathPipeline, c.addr, repoID, "latest")
 	if len(branch) != 0 {
 		uri += "?branch=" + branch
 	}
@@ -201,159 +234,261 @@ func (c *client) BuildLast(owner, name, branch string) (*Build, error) {
 	return out, err
 }
 
-// BuildList returns a list of recent builds for the
+// PipelineList returns a list of recent pipelines for the
 // the specified repository.
-func (c *client) BuildList(owner, name string) ([]*Build, error) {
-	var out []*Build
-	uri := fmt.Sprintf(pathBuilds, c.addr, owner, name)
+func (c *client) PipelineList(repoID int64) ([]*Pipeline, error) {
+	var out []*Pipeline
+	uri := fmt.Sprintf(pathPipelines, c.addr, repoID)
 	err := c.get(uri, &out)
 	return out, err
 }
 
-// BuildQueue returns a list of enqueued builds.
-func (c *client) BuildQueue() ([]*Activity, error) {
-	var out []*Activity
-	uri := fmt.Sprintf(pathBuildQueue, c.addr)
+func (c *client) PipelineCreate(repoID int64, options *PipelineOptions) (*Pipeline, error) {
+	var out *Pipeline
+	uri := fmt.Sprintf(pathPipelines, c.addr, repoID)
+	err := c.post(uri, options, &out)
+	return out, err
+}
+
+// PipelineQueue returns a list of enqueued pipelines.
+func (c *client) PipelineQueue() ([]*Feed, error) {
+	var out []*Feed
+	uri := fmt.Sprintf(pathPipelineQueue, c.addr)
 	err := c.get(uri, &out)
 	return out, err
 }
 
-// BuildStart re-starts a stopped build.
-func (c *client) BuildStart(owner, name string, num int, params map[string]string) (*Build, error) {
-	out := new(Build)
+// PipelineStart re-starts a stopped pipeline.
+func (c *client) PipelineStart(repoID, pipeline int64, params map[string]string) (*Pipeline, error) {
+	out := new(Pipeline)
 	val := mapValues(params)
-	uri := fmt.Sprintf(pathBuild, c.addr, owner, name, num)
+	uri := fmt.Sprintf(pathPipeline, c.addr, repoID, pipeline)
 	err := c.post(uri+"?"+val.Encode(), nil, out)
 	return out, err
 }
 
-// BuildStop cancels the running job.
-func (c *client) BuildStop(owner, name string, num, job int) error {
-	uri := fmt.Sprintf(pathJob, c.addr, owner, name, num, job)
-	err := c.delete(uri)
+// PipelineStop cancels the running step.
+func (c *client) PipelineStop(repoID, pipeline int64) error {
+	uri := fmt.Sprintf(pathStop, c.addr, repoID, pipeline)
+	err := c.post(uri, nil, nil)
 	return err
 }
 
-// BuildApprove approves a blocked build.
-func (c *client) BuildApprove(owner, name string, num int) (*Build, error) {
-	out := new(Build)
-	uri := fmt.Sprintf(pathApprove, c.addr, owner, name, num)
+// PipelineApprove approves a blocked pipeline.
+func (c *client) PipelineApprove(repoID, pipeline int64) (*Pipeline, error) {
+	out := new(Pipeline)
+	uri := fmt.Sprintf(pathApprove, c.addr, repoID, pipeline)
 	err := c.post(uri, nil, out)
 	return out, err
 }
 
-// BuildDecline declines a blocked build.
-func (c *client) BuildDecline(owner, name string, num int) (*Build, error) {
-	out := new(Build)
-	uri := fmt.Sprintf(pathDecline, c.addr, owner, name, num)
+// PipelineDecline declines a blocked pipeline.
+func (c *client) PipelineDecline(repoID, pipeline int64) (*Pipeline, error) {
+	out := new(Pipeline)
+	uri := fmt.Sprintf(pathDecline, c.addr, repoID, pipeline)
 	err := c.post(uri, nil, out)
 	return out, err
 }
 
-// BuildKill force kills the running build.
-func (c *client) BuildKill(owner, name string, num int) error {
-	uri := fmt.Sprintf(pathBuild, c.addr, owner, name, num)
+// PipelineKill force kills the running pipeline.
+func (c *client) PipelineKill(repoID, pipeline int64) error {
+	uri := fmt.Sprintf(pathPipeline, c.addr, repoID, pipeline)
 	err := c.delete(uri)
 	return err
 }
 
-// BuildLogs returns the build logs for the specified job.
-func (c *client) BuildLogs(owner, name string, num, job int) (io.ReadCloser, error) {
-	return nil, errors.New("Method not implemented")
+// PipelineLogs returns the pipeline logs for the specified step.
+func (c *client) StepLogEntries(repoID, num, step int64) ([]*LogEntry, error) {
+	uri := fmt.Sprintf(pathLogs, c.addr, repoID, num, step)
+	var out []*LogEntry
+	err := c.get(uri, &out)
+	return out, err
 }
 
-// Deploy triggers a deployment for an existing build using the
+// Deploy triggers a deployment for an existing pipeline using the
 // specified target environment.
-func (c *client) Deploy(owner, name string, num int, env string, params map[string]string) (*Build, error) {
-	out := new(Build)
+func (c *client) Deploy(repoID, pipeline int64, env string, params map[string]string) (*Pipeline, error) {
+	out := new(Pipeline)
 	val := mapValues(params)
-	val.Set("event", "deployment")
+	val.Set("event", EventDeploy)
 	val.Set("deploy_to", env)
-	uri := fmt.Sprintf(pathBuild, c.addr, owner, name, num)
+	uri := fmt.Sprintf(pathPipeline, c.addr, repoID, pipeline)
 	err := c.post(uri+"?"+val.Encode(), nil, out)
 	return out, err
 }
 
-// LogsPurge purges the build logs for the specified build.
-func (c *client) LogsPurge(owner, name string, num int) error {
-	uri := fmt.Sprintf(pathLogPurge, c.addr, owner, name, num)
+// LogsPurge purges the pipeline logs for the specified pipeline.
+func (c *client) LogsPurge(repoID, pipeline int64) error {
+	uri := fmt.Sprintf(pathLogPurge, c.addr, repoID, pipeline)
 	err := c.delete(uri)
 	return err
 }
 
 // Registry returns a registry by hostname.
-func (c *client) Registry(owner, name, hostname string) (*Registry, error) {
+func (c *client) Registry(repoID int64, hostname string) (*Registry, error) {
 	out := new(Registry)
-	uri := fmt.Sprintf(pathRepoRegistry, c.addr, owner, name, hostname)
+	uri := fmt.Sprintf(pathRepoRegistry, c.addr, repoID, hostname)
 	err := c.get(uri, out)
 	return out, err
 }
 
 // RegistryList returns a list of all repository registries.
-func (c *client) RegistryList(owner, name string) ([]*Registry, error) {
+func (c *client) RegistryList(repoID int64) ([]*Registry, error) {
 	var out []*Registry
-	uri := fmt.Sprintf(pathRepoRegistries, c.addr, owner, name)
+	uri := fmt.Sprintf(pathRepoRegistries, c.addr, repoID)
 	err := c.get(uri, &out)
 	return out, err
 }
 
 // RegistryCreate creates a registry.
-func (c *client) RegistryCreate(owner, name string, in *Registry) (*Registry, error) {
+func (c *client) RegistryCreate(repoID int64, in *Registry) (*Registry, error) {
 	out := new(Registry)
-	uri := fmt.Sprintf(pathRepoRegistries, c.addr, owner, name)
+	uri := fmt.Sprintf(pathRepoRegistries, c.addr, repoID)
 	err := c.post(uri, in, out)
 	return out, err
 }
 
 // RegistryUpdate updates a registry.
-func (c *client) RegistryUpdate(owner, name string, in *Registry) (*Registry, error) {
+func (c *client) RegistryUpdate(repoID int64, in *Registry) (*Registry, error) {
 	out := new(Registry)
-	uri := fmt.Sprintf(pathRepoRegistry, c.addr, owner, name, in.Address)
+	uri := fmt.Sprintf(pathRepoRegistry, c.addr, repoID, in.Address)
 	err := c.patch(uri, in, out)
 	return out, err
 }
 
 // RegistryDelete deletes a registry.
-func (c *client) RegistryDelete(owner, name, hostname string) error {
-	uri := fmt.Sprintf(pathRepoRegistry, c.addr, owner, name, hostname)
+func (c *client) RegistryDelete(repoID int64, hostname string) error {
+	uri := fmt.Sprintf(pathRepoRegistry, c.addr, repoID, hostname)
 	return c.delete(uri)
 }
 
 // Secret returns a secret by name.
-func (c *client) Secret(owner, name, secret string) (*Secret, error) {
+func (c *client) Secret(repoID int64, secret string) (*Secret, error) {
 	out := new(Secret)
-	uri := fmt.Sprintf(pathRepoSecret, c.addr, owner, name, secret)
+	uri := fmt.Sprintf(pathRepoSecret, c.addr, repoID, secret)
 	err := c.get(uri, out)
 	return out, err
 }
 
 // SecretList returns a list of all repository secrets.
-func (c *client) SecretList(owner, name string) ([]*Secret, error) {
+func (c *client) SecretList(repoID int64) ([]*Secret, error) {
 	var out []*Secret
-	uri := fmt.Sprintf(pathRepoSecrets, c.addr, owner, name)
+	uri := fmt.Sprintf(pathRepoSecrets, c.addr, repoID)
 	err := c.get(uri, &out)
 	return out, err
 }
 
 // SecretCreate creates a secret.
-func (c *client) SecretCreate(owner, name string, in *Secret) (*Secret, error) {
+func (c *client) SecretCreate(repoID int64, in *Secret) (*Secret, error) {
 	out := new(Secret)
-	uri := fmt.Sprintf(pathRepoSecrets, c.addr, owner, name)
+	uri := fmt.Sprintf(pathRepoSecrets, c.addr, repoID)
 	err := c.post(uri, in, out)
 	return out, err
 }
 
 // SecretUpdate updates a secret.
-func (c *client) SecretUpdate(owner, name string, in *Secret) (*Secret, error) {
+func (c *client) SecretUpdate(repoID int64, in *Secret) (*Secret, error) {
 	out := new(Secret)
-	uri := fmt.Sprintf(pathRepoSecret, c.addr, owner, name, in.Name)
+	uri := fmt.Sprintf(pathRepoSecret, c.addr, repoID, in.Name)
 	err := c.patch(uri, in, out)
 	return out, err
 }
 
 // SecretDelete deletes a secret.
-func (c *client) SecretDelete(owner, name, secret string) error {
-	uri := fmt.Sprintf(pathRepoSecret, c.addr, owner, name, secret)
+func (c *client) SecretDelete(repoID int64, secret string) error {
+	uri := fmt.Sprintf(pathRepoSecret, c.addr, repoID, secret)
+	return c.delete(uri)
+}
+
+// Org returns an organization by id.
+func (c *client) Org(orgID int64) (*Org, error) {
+	out := new(Org)
+	uri := fmt.Sprintf(pathOrg, c.addr, orgID)
+	err := c.get(uri, out)
+	return out, err
+}
+
+// OrgLookup returns a organization by its name.
+func (c *client) OrgLookup(name string) (*Org, error) {
+	out := new(Org)
+	uri := fmt.Sprintf(pathOrgLookup, c.addr, name)
+	err := c.get(uri, out)
+	return out, err
+}
+
+// OrgSecret returns an organization secret by name.
+func (c *client) OrgSecret(orgID int64, secret string) (*Secret, error) {
+	out := new(Secret)
+	uri := fmt.Sprintf(pathOrgSecret, c.addr, orgID, secret)
+	err := c.get(uri, out)
+	return out, err
+}
+
+// OrgSecretList returns a list of all organization secrets.
+func (c *client) OrgSecretList(orgID int64) ([]*Secret, error) {
+	var out []*Secret
+	uri := fmt.Sprintf(pathOrgSecrets, c.addr, orgID)
+	err := c.get(uri, &out)
+	return out, err
+}
+
+// OrgSecretCreate creates an organization secret.
+func (c *client) OrgSecretCreate(orgID int64, in *Secret) (*Secret, error) {
+	out := new(Secret)
+	uri := fmt.Sprintf(pathOrgSecrets, c.addr, orgID)
+	err := c.post(uri, in, out)
+	return out, err
+}
+
+// OrgSecretUpdate updates an organization secret.
+func (c *client) OrgSecretUpdate(orgID int64, in *Secret) (*Secret, error) {
+	out := new(Secret)
+	uri := fmt.Sprintf(pathOrgSecret, c.addr, orgID, in.Name)
+	err := c.patch(uri, in, out)
+	return out, err
+}
+
+// OrgSecretDelete deletes an organization secret.
+func (c *client) OrgSecretDelete(orgID int64, secret string) error {
+	uri := fmt.Sprintf(pathOrgSecret, c.addr, orgID, secret)
+	return c.delete(uri)
+}
+
+// GlobalOrgSecret returns an global secret by name.
+func (c *client) GlobalSecret(secret string) (*Secret, error) {
+	out := new(Secret)
+	uri := fmt.Sprintf(pathGlobalSecret, c.addr, secret)
+	err := c.get(uri, out)
+	return out, err
+}
+
+// GlobalSecretList returns a list of all global secrets.
+func (c *client) GlobalSecretList() ([]*Secret, error) {
+	var out []*Secret
+	uri := fmt.Sprintf(pathGlobalSecrets, c.addr)
+	err := c.get(uri, &out)
+	return out, err
+}
+
+// GlobalSecretCreate creates a global secret.
+func (c *client) GlobalSecretCreate(in *Secret) (*Secret, error) {
+	out := new(Secret)
+	uri := fmt.Sprintf(pathGlobalSecrets, c.addr)
+	err := c.post(uri, in, out)
+	return out, err
+}
+
+// GlobalSecretUpdate updates a global secret.
+func (c *client) GlobalSecretUpdate(in *Secret) (*Secret, error) {
+	out := new(Secret)
+	uri := fmt.Sprintf(pathGlobalSecret, c.addr, in.Name)
+	err := c.patch(uri, in, out)
+	return out, err
+}
+
+// GlobalSecretDelete deletes a global secret.
+func (c *client) GlobalSecretDelete(secret string) error {
+	uri := fmt.Sprintf(pathGlobalSecret, c.addr, secret)
 	return c.delete(uri)
 }
 
@@ -381,38 +516,98 @@ func (c *client) SetLogLevel(in *LogLevel) (*LogLevel, error) {
 	return out, err
 }
 
+func (c *client) CronList(repoID int64) ([]*Cron, error) {
+	out := make([]*Cron, 0, 5)
+	uri := fmt.Sprintf(pathRepoCrons, c.addr, repoID)
+	return out, c.get(uri, &out)
+}
+
+func (c *client) CronCreate(repoID int64, in *Cron) (*Cron, error) {
+	out := new(Cron)
+	uri := fmt.Sprintf(pathRepoCrons, c.addr, repoID)
+	return out, c.post(uri, in, out)
+}
+
+func (c *client) CronUpdate(repoID int64, in *Cron) (*Cron, error) {
+	out := new(Cron)
+	uri := fmt.Sprintf(pathRepoCron, c.addr, repoID, in.ID)
+	err := c.patch(uri, in, out)
+	return out, err
+}
+
+func (c *client) CronDelete(repoID, cronID int64) error {
+	uri := fmt.Sprintf(pathRepoCron, c.addr, repoID, cronID)
+	return c.delete(uri)
+}
+
+func (c *client) CronGet(repoID, cronID int64) (*Cron, error) {
+	out := new(Cron)
+	uri := fmt.Sprintf(pathRepoCron, c.addr, repoID, cronID)
+	return out, c.get(uri, out)
+}
+
+func (c *client) AgentList() ([]*Agent, error) {
+	out := make([]*Agent, 0, 5)
+	uri := fmt.Sprintf(pathAgents, c.addr)
+	return out, c.get(uri, &out)
+}
+
+func (c *client) Agent(agentID int64) (*Agent, error) {
+	out := new(Agent)
+	uri := fmt.Sprintf(pathAgent, c.addr, agentID)
+	return out, c.get(uri, out)
+}
+
+func (c *client) AgentCreate(in *Agent) (*Agent, error) {
+	out := new(Agent)
+	uri := fmt.Sprintf(pathAgents, c.addr)
+	return out, c.post(uri, in, out)
+}
+
+func (c *client) AgentUpdate(in *Agent) (*Agent, error) {
+	out := new(Agent)
+	uri := fmt.Sprintf(pathAgent, c.addr, in.ID)
+	return out, c.patch(uri, in, out)
+}
+
+func (c *client) AgentDelete(agentID int64) error {
+	uri := fmt.Sprintf(pathAgent, c.addr, agentID)
+	return c.delete(uri)
+}
+
+func (c *client) AgentTasksList(agentID int64) ([]*Task, error) {
+	out := make([]*Task, 0, 5)
+	uri := fmt.Sprintf(pathAgentTasks, c.addr, agentID)
+	return out, c.get(uri, &out)
+}
+
 //
 // http request helper functions
 //
 
 // helper function for making an http GET request.
-func (c *client) get(rawurl string, out interface{}) error {
-	return c.do(rawurl, "GET", nil, out)
+func (c *client) get(rawurl string, out any) error {
+	return c.do(rawurl, http.MethodGet, nil, out)
 }
 
 // helper function for making an http POST request.
-func (c *client) post(rawurl string, in, out interface{}) error {
-	return c.do(rawurl, "POST", in, out)
-}
-
-// helper function for making an http PUT request.
-func (c *client) put(rawurl string, in, out interface{}) error {
-	return c.do(rawurl, "PUT", in, out)
+func (c *client) post(rawurl string, in, out any) error {
+	return c.do(rawurl, http.MethodPost, in, out)
 }
 
 // helper function for making an http PATCH request.
-func (c *client) patch(rawurl string, in, out interface{}) error {
-	return c.do(rawurl, "PATCH", in, out)
+func (c *client) patch(rawurl string, in, out any) error {
+	return c.do(rawurl, http.MethodPatch, in, out)
 }
 
 // helper function for making an http DELETE request.
 func (c *client) delete(rawurl string) error {
-	return c.do(rawurl, "DELETE", nil, nil)
+	return c.do(rawurl, http.MethodDelete, nil, nil)
 }
 
 // helper function to make an http request
-func (c *client) do(rawurl, method string, in, out interface{}) error {
-	body, err := c.open(rawurl, method, in, out)
+func (c *client) do(rawurl, method string, in, out any) error {
+	body, err := c.open(rawurl, method, in)
 	if err != nil {
 		return err
 	}
@@ -424,7 +619,7 @@ func (c *client) do(rawurl, method string, in, out interface{}) error {
 }
 
 // helper function to open an http request
-func (c *client) open(rawurl, method string, in, out interface{}) (io.ReadCloser, error) {
+func (c *client) open(rawurl, method string, in any) (io.ReadCloser, error) {
 	uri, err := url.Parse(rawurl)
 	if err != nil {
 		return nil, err
@@ -434,12 +629,12 @@ func (c *client) open(rawurl, method string, in, out interface{}) (io.ReadCloser
 		return nil, err
 	}
 	if in != nil {
-		decoded, derr := json.Marshal(in)
-		if derr != nil {
-			return nil, derr
+		decoded, decodeErr := json.Marshal(in)
+		if decodeErr != nil {
+			return nil, decodeErr
 		}
 		buf := bytes.NewBuffer(decoded)
-		req.Body = ioutil.NopCloser(buf)
+		req.Body = io.NopCloser(buf)
 		req.ContentLength = int64(len(decoded))
 		req.Header.Set("Content-Length", strconv.Itoa(len(decoded)))
 		req.Header.Set("Content-Type", "application/json")
@@ -450,7 +645,7 @@ func (c *client) open(rawurl, method string, in, out interface{}) (io.ReadCloser
 	}
 	if resp.StatusCode > http.StatusPartialContent {
 		defer resp.Body.Close()
-		out, _ := ioutil.ReadAll(resp.Body)
+		out, _ := io.ReadAll(resp.Body)
 		return nil, fmt.Errorf("client error %d: %s", resp.StatusCode, string(out))
 	}
 	return resp.Body, nil

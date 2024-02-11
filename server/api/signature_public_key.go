@@ -21,11 +21,20 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
-	"github.com/woodpecker-ci/woodpecker/server"
+
+	"go.woodpecker-ci.org/woodpecker/v2/server"
 )
 
+// GetSignaturePublicKey
+//
+//	@Summary	Get server's signature public key
+//	@Router		/signature/public-key [get]
+//	@Produce	plain
+//	@Success	200
+//	@Tags		System
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 func GetSignaturePublicKey(c *gin.Context) {
-	b, err := x509.MarshalPKIXPublicKey(server.Config.Extensions.SignaturePublicKey())
+	b, err := x509.MarshalPKIXPublicKey(server.Config.Services.Manager.SignaturePublicKey())
 	if err != nil {
 		log.Error().Err(err).Msg("can't marshal public key")
 		c.AbortWithStatus(http.StatusInternalServerError)
@@ -37,5 +46,5 @@ func GetSignaturePublicKey(c *gin.Context) {
 		Bytes: b,
 	}
 
-	c.String(200, "%s", pem.EncodeToMemory(block))
+	c.String(http.StatusOK, "%s", pem.EncodeToMemory(block))
 }

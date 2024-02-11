@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,27 +18,28 @@ package session
 import (
 	"github.com/gin-gonic/gin"
 
-	"github.com/woodpecker-ci/woodpecker/shared/token"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/token"
 )
 
-// AuthorizeAgent authorizes requests from build agents to access the queue.
+// AuthorizeAgent authorizes requests from agent to access the queue.
 func AuthorizeAgent(c *gin.Context) {
-	secret := c.MustGet("agent").(string)
+	secret, _ := c.MustGet("agent").(string)
 	if secret == "" {
 		c.String(401, "invalid or empty token.")
 		return
 	}
 
-	parsed, err := token.ParseRequest(c.Request, func(t *token.Token) (string, error) {
+	parsed, err := token.ParseRequest(c.Request, func(_ *token.Token) (string, error) {
 		return secret, nil
 	})
-	if err != nil {
+	switch {
+	case err != nil:
 		c.String(500, "invalid or empty token. %s", err)
 		c.Abort()
-	} else if parsed.Kind != token.AgentToken {
+	case parsed.Kind != token.AgentToken:
 		c.String(403, "invalid token. please use an agent token")
 		c.Abort()
-	} else {
+	default:
 		c.Next()
 	}
 }

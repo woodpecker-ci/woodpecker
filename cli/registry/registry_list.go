@@ -1,3 +1,17 @@
+// Copyright 2022 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package registry
 
 import (
@@ -6,41 +20,38 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
 var registryListCmd = &cli.Command{
 	Name:      "ls",
 	Usage:     "list registries",
-	ArgsUsage: "[repo/name]",
+	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    registryList,
-	Flags: append(common.GlobalFlags,
-		&cli.StringFlag{
-			Name:  "repository",
-			Usage: "repository name (e.g. octocat/hello-world)",
-		},
+	Flags: []cli.Flag{
+		common.RepoFlag,
 		common.FormatFlag(tmplRegistryList, true),
-	),
+	},
 }
 
 func registryList(c *cli.Context) error {
 	var (
-		format   = c.String("format") + "\n"
-		reponame = c.String("repository")
+		format           = c.String("format") + "\n"
+		repoIDOrFullName = c.String("repository")
 	)
-	if reponame == "" {
-		reponame = c.Args().First()
-	}
-	owner, name, err := internal.ParseRepo(reponame)
-	if err != nil {
-		return err
+	if repoIDOrFullName == "" {
+		repoIDOrFullName = c.Args().First()
 	}
 	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
 	}
-	list, err := client.RegistryList(owner, name)
+	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
+	if err != nil {
+		return err
+	}
+	list, err := client.RegistryList(repoID)
 	if err != nil {
 		return err
 	}
@@ -56,7 +67,7 @@ func registryList(c *cli.Context) error {
 	return nil
 }
 
-// template for build list information
+// template for registry list information
 var tmplRegistryList = "\x1b[33m{{ .Address }} \x1b[0m" + `
 Username: {{ .Username }}
 Email: {{ .Email }}

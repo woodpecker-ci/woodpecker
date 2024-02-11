@@ -1,120 +1,280 @@
+// Copyright 2022 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package local
 
 import (
 	"context"
-	"encoding/base64"
+	"errors"
+	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/exec"
-	"strings"
+	"path/filepath"
+	"runtime"
+	"slices"
+	"sync"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
-	"github.com/woodpecker-ci/woodpecker/shared/constant"
+	"github.com/rs/zerolog/log"
+	"github.com/urfave/cli/v2"
+	"golang.org/x/text/encoding/unicode"
+	"golang.org/x/text/transform"
+
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
 
-type local struct {
-	cmd        *exec.Cmd
-	output     io.ReadCloser
-	workingdir string
+type workflowState struct {
+	stepCMDs        map[string]*exec.Cmd
+	baseDir         string
+	homeDir         string
+	workspaceDir    string
+	pluginGitBinary string
 }
 
-// make sure local implements Engine
-var _ types.Engine = &local{}
+type local struct {
+	tempDir         string
+	workflows       sync.Map
+	output          io.ReadCloser
+	pluginGitBinary string
+	os, arch        string
+}
 
-// New returns a new local Engine.
-func New() types.Engine {
-	return &local{}
+// New returns a new local Backend.
+func New() types.Backend {
+	return &local{
+		os:   runtime.GOOS,
+		arch: runtime.GOARCH,
+	}
 }
 
 func (e *local) Name() string {
 	return "local"
 }
 
-func (e *local) IsAvailable() bool {
+func (e *local) IsAvailable(context.Context) bool {
 	return true
 }
 
-func (e *local) Load() error {
-	dir, err := ioutil.TempDir("", "woodpecker-local-*")
-	e.workingdir = dir
-	return err
+func (e *local) Flags() []cli.Flag {
+	return Flags
 }
 
-// Setup the pipeline environment.
-func (e *local) Setup(ctx context.Context, proc *types.Config) error {
-	return nil
+func (e *local) Load(ctx context.Context) (*types.BackendInfo, error) {
+	c, ok := ctx.Value(types.CliContext).(*cli.Context)
+	if ok {
+		e.tempDir = c.String("backend-local-temp-dir")
+	}
+
+	e.loadClone()
+
+	return &types.BackendInfo{
+		Platform: e.os + "/" + e.arch,
+	}, nil
 }
 
-// Exec the pipeline step.
-func (e *local) Exec(ctx context.Context, proc *types.Step) error {
-	// Get environment variables
-	Env := os.Environ()
-	for a, b := range proc.Environment {
-		if a != "HOME" && a != "SHELL" { // Don't override $HOME and $SHELL
-			Env = append(Env, a+"="+b)
-		}
-	}
+// SetupWorkflow the pipeline environment.
+func (e *local) SetupWorkflow(_ context.Context, _ *types.Config, taskUUID string) error {
+	log.Trace().Str("taskUUID", taskUUID).Msg("create workflow environment")
 
-	Command := []string{}
-	if proc.Image == constant.DefaultCloneImage {
-		// Default clone step
-		Env = append(Env, "CI_WORKSPACE="+e.workingdir+"/"+proc.Environment["CI_REPO"])
-		Command = append(Command, "plugin-git")
-	} else {
-		// Use "image name" as run command
-		Command = append(Command, proc.Image[18:len(proc.Image)-7])
-		Command = append(Command, "-c")
-
-		// Decode script and delete initial lines
-		// Deleting the initial lines removes netrc support but adds compatibility for more shells like fish
-		Script, _ := base64.RawStdEncoding.DecodeString(proc.Environment["CI_SCRIPT"])
-		Command = append(Command, string(Script)[strings.Index(string(Script), "\n\n")+2:])
-	}
-
-	// Prepare command
-	e.cmd = exec.CommandContext(ctx, Command[0], Command[1:]...)
-	e.cmd.Env = Env
-
-	// Prepare working directory
-	if proc.Image == constant.DefaultCloneImage {
-		e.cmd.Dir = e.workingdir + "/" + proc.Environment["CI_REPO_OWNER"]
-	} else {
-		e.cmd.Dir = e.workingdir + "/" + proc.Environment["CI_REPO"]
-	}
-	err := os.MkdirAll(e.cmd.Dir, 0o700)
+	baseDir, err := os.MkdirTemp(e.tempDir, "woodpecker-local-*")
 	if err != nil {
 		return err
 	}
-	// Get output and redirect Stderr to Stdout
-	e.output, _ = e.cmd.StdoutPipe()
-	e.cmd.Stderr = e.cmd.Stdout
 
-	return e.cmd.Start()
+	state := &workflowState{
+		stepCMDs:     make(map[string]*exec.Cmd),
+		baseDir:      baseDir,
+		workspaceDir: filepath.Join(baseDir, "workspace"),
+		homeDir:      filepath.Join(baseDir, "home"),
+	}
+
+	if err := os.Mkdir(state.homeDir, 0o700); err != nil {
+		return err
+	}
+
+	if err := os.Mkdir(state.workspaceDir, 0o700); err != nil {
+		return err
+	}
+
+	e.saveState(taskUUID, state)
+
+	return nil
 }
 
-// Wait for the pipeline step to complete and returns
+// StartStep the pipeline step.
+func (e *local) StartStep(ctx context.Context, step *types.Step, taskUUID string) error {
+	log.Trace().Str("taskUUID", taskUUID).Msgf("start step %s", step.Name)
+
+	state, err := e.getState(taskUUID)
+	if err != nil {
+		return err
+	}
+
+	// Get environment variables
+	env := os.Environ()
+	for a, b := range step.Environment {
+		// append allowed env vars to command env
+		if !slices.Contains(notAllowedEnvVarOverwrites, a) {
+			env = append(env, a+"="+b)
+		}
+	}
+
+	// Set HOME and CI_WORKSPACE
+	env = append(env, "HOME="+state.homeDir)
+	env = append(env, "USERPROFILE="+state.homeDir)
+	env = append(env, "CI_WORKSPACE="+state.workspaceDir)
+
+	switch step.Type {
+	case types.StepTypeClone:
+		return e.execClone(ctx, step, state, env)
+	case types.StepTypeCommands:
+		return e.execCommands(ctx, step, state, env)
+	case types.StepTypePlugin:
+		return e.execPlugin(ctx, step, state, env)
+	default:
+		return ErrUnsupportedStepType
+	}
+}
+
+// execCommands use step.Image as shell and run the commands in it
+func (e *local) execCommands(ctx context.Context, step *types.Step, state *workflowState, env []string) error {
+	// Prepare commands
+	// TODO support `entrypoint` from pipeline config
+	args, err := e.genCmdByShell(step.Image, step.Commands)
+	if err != nil {
+		return fmt.Errorf("could not convert commands into args: %w", err)
+	}
+
+	// Use "image name" as run command (indicate shell)
+	cmd := exec.CommandContext(ctx, step.Image, args...)
+	cmd.Env = env
+	cmd.Dir = state.workspaceDir
+
+	// Get output and redirect Stderr to Stdout
+	e.output, _ = cmd.StdoutPipe()
+	cmd.Stderr = cmd.Stdout
+
+	if e.os == "windows" {
+		// we get non utf8 output from windows so just sanitize it
+		// TODO: remove hack
+		e.output = io.NopCloser(transform.NewReader(e.output, unicode.UTF8.NewDecoder().Transformer))
+	}
+
+	state.stepCMDs[step.UUID] = cmd
+
+	return cmd.Start()
+}
+
+// execPlugin use step.Image as exec binary
+func (e *local) execPlugin(ctx context.Context, step *types.Step, state *workflowState, env []string) error {
+	binary, err := exec.LookPath(step.Image)
+	if err != nil {
+		return fmt.Errorf("lookup plugin binary: %w", err)
+	}
+
+	cmd := exec.CommandContext(ctx, binary)
+	cmd.Env = env
+	cmd.Dir = state.workspaceDir
+
+	// Get output and redirect Stderr to Stdout
+	e.output, _ = cmd.StdoutPipe()
+	cmd.Stderr = cmd.Stdout
+
+	state.stepCMDs[step.UUID] = cmd
+
+	return cmd.Start()
+}
+
+// WaitStep for the pipeline step to complete and returns
 // the completion results.
-func (e *local) Wait(context.Context, *types.Step) (*types.State, error) {
-	err := e.cmd.Wait()
+func (e *local) WaitStep(_ context.Context, step *types.Step, taskUUID string) (*types.State, error) {
+	log.Trace().Str("taskUUID", taskUUID).Msgf("wait for step %s", step.Name)
+
+	state, err := e.getState(taskUUID)
+	if err != nil {
+		return nil, err
+	}
+
+	cmd, ok := state.stepCMDs[step.UUID]
+	if !ok {
+		return nil, fmt.Errorf("step cmd for %s not found", step.UUID)
+	}
+
+	err = cmd.Wait()
 	ExitCode := 0
-	if eerr, ok := err.(*exec.ExitError); ok {
-		ExitCode = eerr.ExitCode()
-		// Non-zero exit code is a build failure, but not an agent error.
+
+	var execExitError *exec.ExitError
+	if errors.As(err, &execExitError) {
+		ExitCode = execExitError.ExitCode()
+		// Non-zero exit code is a pipeline failure, but not an agent error.
 		err = nil
 	}
+
 	return &types.State{
 		Exited:   true,
 		ExitCode: ExitCode,
 	}, err
 }
 
-// Tail the pipeline step logs.
-func (e *local) Tail(context.Context, *types.Step) (io.ReadCloser, error) {
+// TailStep the pipeline step logs.
+func (e *local) TailStep(_ context.Context, step *types.Step, taskUUID string) (io.ReadCloser, error) {
+	log.Trace().Str("taskUUID", taskUUID).Msgf("tail logs of step %s", step.Name)
 	return e.output, nil
 }
 
-// Destroy the pipeline environment.
-func (e *local) Destroy(context.Context, *types.Config) error {
-	return os.RemoveAll(e.cmd.Dir)
+func (e *local) DestroyStep(_ context.Context, _ *types.Step, _ string) error {
+	// WaitStep already waits for the command to finish, so there is nothing to do here.
+	return nil
+}
+
+// DestroyWorkflow the pipeline environment.
+func (e *local) DestroyWorkflow(_ context.Context, _ *types.Config, taskUUID string) error {
+	log.Trace().Str("taskUUID", taskUUID).Msg("delete workflow environment")
+
+	state, err := e.getState(taskUUID)
+	if err != nil {
+		return err
+	}
+
+	err = os.RemoveAll(state.baseDir)
+	if err != nil {
+		return err
+	}
+
+	e.deleteState(taskUUID)
+
+	return err
+}
+
+func (e *local) getState(taskUUID string) (*workflowState, error) {
+	state, ok := e.workflows.Load(taskUUID)
+	if !ok {
+		return nil, ErrWorkflowStateNotFound
+	}
+
+	s, ok := state.(*workflowState)
+	if !ok {
+		return nil, fmt.Errorf("could not parse state: %v", state)
+	}
+
+	return s, nil
+}
+
+func (e *local) saveState(taskUUID string, state *workflowState) {
+	e.workflows.Store(taskUUID, state)
+}
+
+func (e *local) deleteState(taskUUID string) {
+	e.workflows.Delete(taskUUID)
 }

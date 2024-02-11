@@ -19,27 +19,44 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
 )
 
-// GetRegistry gets the name registry from the database and writes
-// to the response in json format.
+// GetRegistry
+//
+//	@Summary	Get a named registry
+//	@Router		/repos/{repo_id}/registry/{registry} [get]
+//	@Produce	json
+//	@Success	200	{object}	Registry
+//	@Tags		Repository registries
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		registry		path	string	true	"the registry name"
 func GetRegistry(c *gin.Context) {
-	var (
-		repo = session.Repo(c)
-		name = c.Param("registry")
-	)
-	registry, err := server.Config.Extensions.RegistriesFromRepo(repo).RegistryFind(c, repo, name)
+	repo := session.Repo(c)
+	name := c.Param("registry")
+
+	registryService := server.Config.Services.Manager.RegistryServiceFromRepo(repo)
+	registry, err := registryService.RegistryFind(repo, name)
 	if err != nil {
-		c.String(404, "Error getting registry %q. %s", name, err)
+		handleDBError(c, err)
 		return
 	}
 	c.JSON(200, registry.Copy())
 }
 
-// PostRegistry persists the registry to the database.
+// PostRegistry
+//
+//	@Summary	Persist/create a registry
+//	@Router		/repos/{repo_id}/registry [post]
+//	@Produce	json
+//	@Success	200	{object}	Registry
+//	@Tags		Repository registries
+//	@Param		Authorization	header	string		true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id			path	int			true	"the repository id"
+//	@Param		registry		body	Registry	true	"the new registry data"
 func PostRegistry(c *gin.Context) {
 	repo := session.Repo(c)
 
@@ -53,21 +70,31 @@ func PostRegistry(c *gin.Context) {
 		Address:  in.Address,
 		Username: in.Username,
 		Password: in.Password,
-		Token:    in.Token,
-		Email:    in.Email,
 	}
 	if err := registry.Validate(); err != nil {
-		c.String(400, "Error inserting registry. %s", err)
+		c.String(http.StatusBadRequest, "Error inserting registry. %s", err)
 		return
 	}
-	if err := server.Config.Extensions.RegistriesFromRepo(repo).RegistryCreate(c, repo, registry); err != nil {
-		c.String(500, "Error inserting registry %q. %s", in.Address, err)
+
+	registryService := server.Config.Services.Manager.RegistryServiceFromRepo(repo)
+	if err := registryService.RegistryCreate(repo, registry); err != nil {
+		c.String(http.StatusInternalServerError, "Error inserting registry %q. %s", in.Address, err)
 		return
 	}
-	c.JSON(200, in.Copy())
+	c.JSON(http.StatusOK, in.Copy())
 }
 
-// PatchRegistry updates the registry in the database.
+// PatchRegistry
+//
+//	@Summary	Update a named registry
+//	@Router		/repos/{repo_id}/registry/{registry} [patch]
+//	@Produce	json
+//	@Success	200	{object}	Registry
+//	@Tags		Repository registries
+//	@Param		Authorization	header	string		true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id			path	int			true	"the repository id"
+//	@Param		registry		path	string		true	"the registry name"
+//	@Param		registryData	body	Registry	true	"the attributes for the registry"
 func PatchRegistry(c *gin.Context) {
 	var (
 		repo = session.Repo(c)
@@ -81,9 +108,10 @@ func PatchRegistry(c *gin.Context) {
 		return
 	}
 
-	registry, err := server.Config.Extensions.RegistriesFromRepo(repo).RegistryFind(c, repo, name)
+	registryService := server.Config.Services.Manager.RegistryServiceFromRepo(repo)
+	registry, err := registryService.RegistryFind(repo, name)
 	if err != nil {
-		c.String(404, "Error getting registry %q. %s", name, err)
+		handleDBError(c, err)
 		return
 	}
 	if in.Username != "" {
@@ -92,31 +120,35 @@ func PatchRegistry(c *gin.Context) {
 	if in.Password != "" {
 		registry.Password = in.Password
 	}
-	if in.Token != "" {
-		registry.Token = in.Token
-	}
-	if in.Email != "" {
-		registry.Email = in.Email
-	}
 
 	if err := registry.Validate(); err != nil {
-		c.String(400, "Error updating registry. %s", err)
+		c.String(http.StatusUnprocessableEntity, "Error updating registry. %s", err)
 		return
 	}
-	if err := server.Config.Extensions.RegistriesFromRepo(repo).RegistryUpdate(c, repo, registry); err != nil {
-		c.String(500, "Error updating registry %q. %s", in.Address, err)
+	if err := registryService.RegistryUpdate(repo, registry); err != nil {
+		c.String(http.StatusInternalServerError, "Error updating registry %q. %s", in.Address, err)
 		return
 	}
-	c.JSON(200, in.Copy())
+	c.JSON(http.StatusOK, in.Copy())
 }
 
-// GetRegistryList gets the registry list from the database and writes
-// to the response in json format.
+// GetRegistryList
+//
+//	@Summary	Get the registry list
+//	@Router		/repos/{repo_id}/registry [get]
+//	@Produce	json
+//	@Success	200	{array}	Registry
+//	@Tags		Repository registries
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		page			query	int		false	"for response pagination, page offset number"	default(1)
+//	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
 func GetRegistryList(c *gin.Context) {
 	repo := session.Repo(c)
-	list, err := server.Config.Extensions.RegistriesFromRepo(repo).RegistryList(c, repo)
+	registryService := server.Config.Services.Manager.RegistryServiceFromRepo(repo)
+	list, err := registryService.RegistryList(repo, session.Pagination(c))
 	if err != nil {
-		c.String(500, "Error getting registry list. %s", err)
+		c.String(http.StatusInternalServerError, "Error getting registry list. %s", err)
 		return
 	}
 	// copy the registry detail to remove the sensitive
@@ -124,18 +156,28 @@ func GetRegistryList(c *gin.Context) {
 	for i, registry := range list {
 		list[i] = registry.Copy()
 	}
-	c.JSON(200, list)
+	c.JSON(http.StatusOK, list)
 }
 
-// DeleteRegistry deletes the named registry from the database.
+// DeleteRegistry
+//
+//	@Summary	Delete a named registry
+//	@Router		/repos/{repo_id}/registry/{registry} [delete]
+//	@Produce	plain
+//	@Success	204
+//	@Tags		Repository registries
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		registry		path	string	true	"the registry name"
 func DeleteRegistry(c *gin.Context) {
-	var (
-		repo = session.Repo(c)
-		name = c.Param("registry")
-	)
-	if err := server.Config.Extensions.RegistriesFromRepo(repo).RegistryDelete(c, repo, name); err != nil {
-		c.String(500, "Error deleting registry %q. %s", name, err)
+	repo := session.Repo(c)
+	name := c.Param("registry")
+
+	registryService := server.Config.Services.Manager.RegistryServiceFromRepo(repo)
+	err := registryService.RegistryDelete(repo, name)
+	if err != nil {
+		handleDBError(c, err)
 		return
 	}
-	c.String(204, "")
+	c.Status(http.StatusNoContent)
 }

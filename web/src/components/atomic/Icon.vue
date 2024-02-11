@@ -1,26 +1,35 @@
+<!-- cSpell:ignore teenyicons radiobox vaadin twotone iconoir timelapse -->
 <template>
   <i-ic-sharp-timelapse v-if="name === 'duration'" class="h-6 w-6" />
   <i-mdi-clock-time-eight-outline v-else-if="name === 'since'" class="h-6 w-6" />
   <i-mdi-source-branch v-else-if="name === 'push'" class="h-6 w-6" />
-  <i-mdi-source-pull v-else-if="name === 'pull_request'" class="h-6 w-6" />
+  <i-mdi-source-pull v-else-if="name === 'pull-request'" class="h-6 w-6" />
+  <i-mdi-source-merge v-else-if="name === 'pull-request-closed'" class="h-6 w-6" />
+  <i-mdi-gesture-tap v-else-if="name === 'manual-pipeline'" class="h-6 w-6" />
   <i-mdi-tag-outline v-else-if="name === 'tag'" class="h-6 w-6" />
   <i-clarity-deploy-line v-else-if="name === 'deployment'" class="h-6 w-6" />
-  <i-mdisource-commit v-else-if="name === 'commit'" class="h-6 w-6" />
+  <i-mdi-source-commit v-else-if="name === 'commit'" class="h-6 w-6" />
   <i-iconoir-arrow-left v-else-if="name === 'back'" class="w-8 h-8" />
   <i-mdi-github v-else-if="name === 'github'" class="h-8 w-8" />
   <i-teenyicons-git-solid v-else-if="name === 'repo'" class="h-8 w-8" />
   <i-clarity-settings-solid v-else-if="name === 'settings'" class="w-8 h-8" />
   <i-gg-trash v-else-if="name === 'trash'" class="h-6 w-6" />
-  <i-ph-hand v-else-if="name === 'status-blocked'" class="h-6 w-6" />
-  <i-ph-hand v-else-if="name === 'status-declined'" class="h-6 w-6" />
-  <i-ph-warning v-else-if="name === 'status-error'" class="h-8 w-8" />
-  <i-ph-x-circle v-else-if="name === 'status-failure'" class="h-8 w-8" />
-  <i-octicon-skip-24 v-else-if="name === 'status-killed'" class="h-7 w-7" />
-  <i-ph-hourglass v-else-if="name === 'status-pending'" class="h-7 w-7" />
-  <i-entypo-dots-two-vertical v-else-if="name === 'status-running'" class="h-8 w-8" />
-  <i-ph-prohibit v-else-if="name === 'status-skipped'" class="h-8 w-8" />
-  <i-entypo-dots-two-vertical v-else-if="name === 'status-started'" class="h-8 w-8" />
-  <i-ph-check-circle v-else-if="name === 'status-success'" class="h-8 w-8" />
+  <i-mdi-play v-else-if="name === 'status-blocked'" class="h-6 w-6" />
+  <i-mdi-stop v-else-if="name === 'status-declined'" class="h-6 w-6" />
+  <i-mdi-close-thick
+    v-else-if="name === 'status-failure' || name === 'status-error' || name === 'status-killed'"
+    class="h-6 w-6"
+  />
+  <i-mdi-radiobox-blank v-else-if="name === 'status-pending'" class="h-6 w-6" />
+  <i-mdi-radiobox-indeterminate-variant
+    v-else-if="name === 'status-running' || name === 'status-started'"
+    class="h-6 w-6"
+  />
+  <i-bi-slash-circle-fill v-else-if="name === 'status-skipped'" class="h-6 w-6" />
+  <i-bi-check-circle-fill v-else-if="name === 'status-success'" class="h-6 w-6" />
+  <i-bi-exclamation-triangle-fill v-else-if="name === 'attention'" class="h-5 w-5" />
+  <i-bi-exclamation-triangle v-else-if="name === 'warning'" class="h-5 w-5" />
+  <i-mdi-error-outline v-else-if="name === 'error'" class="h-5 w-5" />
   <i-simple-icons-gitea v-else-if="name === 'gitea'" class="h-8 w-8" />
   <i-ph-gitlab-logo-simple-fill v-else-if="name === 'gitlab'" class="h-8 w-8" />
   <i-mdi-bitbucket v-else-if="name === 'bitbucket'" class="h-8 w-8" />
@@ -36,17 +45,25 @@
   <i-mdi-chevron-right v-else-if="name === 'chevron-right'" class="h-6 w-6" />
   <i-carbon-close-outline v-else-if="name === 'close'" class="h-6 w-6" />
   <i-ic-baseline-edit v-else-if="name === 'edit'" class="h-6 w-6" />
+  <i-ic-baseline-download-for-offline v-else-if="name === 'download'" class="h-6 w-6" />
+  <i-icon-park-outline-alarm-clock v-else-if="name === 'stopwatch'" class="h-6 w-6" />
+  <i-ic-baseline-file-download v-else-if="name === 'auto-scroll'" class="h-6 w-6" />
+  <i-ic-baseline-file-download-off v-else-if="name === 'auto-scroll-off'" class="h-6 w-6" />
+  <i-teenyicons-refresh-outline v-else-if="name === 'refresh'" class="h-6 w-6" />
+  <i-ic-baseline-play-arrow v-else-if="name === 'play'" class="h-6 w-6" />
+  <i-ic-baseline-pause v-else-if="name === 'pause'" class="h-6 w-6" />
+  <i-svg-spinners-180-ring-with-bg v-else-if="name === 'spinner'" class="h-6 w-6" />
   <div v-else-if="name === 'blank'" class="h-6 w-6" />
 </template>
 
-<script lang="ts">
-import { defineComponent, PropType } from 'vue';
-
+<script lang="ts" setup>
 export type IconNames =
   | 'duration'
   | 'since'
   | 'push'
-  | 'pull_request'
+  | 'pull-request'
+  | 'pull-request-closed'
+  | 'manual-pipeline'
   | 'tag'
   | 'deployment'
   | 'commit'
@@ -80,16 +97,20 @@ export type IconNames =
   | 'chevron-right'
   | 'turn-off'
   | 'close'
-  | 'edit';
+  | 'edit'
+  | 'stopwatch'
+  | 'download'
+  | 'auto-scroll'
+  | 'auto-scroll-off'
+  | 'refresh'
+  | 'play'
+  | 'pause'
+  | 'warning'
+  | 'attention'
+  | 'spinner'
+  | 'error';
 
-export default defineComponent({
-  name: 'Icon',
-
-  props: {
-    name: {
-      type: String as PropType<IconNames>,
-      required: true,
-    },
-  },
-});
+defineProps<{
+  name: IconNames;
+}>();
 </script>

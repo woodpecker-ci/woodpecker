@@ -14,10 +14,11 @@
 
 package store
 
-import (
-	"io"
+//go:generate go install github.com/vektra/mockery/v2@latest
+//go:generate mockery --name Store --output mocks --case underscore
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+import (
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 // TODO: CreateX func should return new object to not indirect let storage change an existing object (alter ID etc...)
@@ -26,11 +27,12 @@ type Store interface {
 	// Users
 	// GetUser gets a user by unique ID.
 	GetUser(int64) (*model.User, error)
+	// GetUserRemoteID gets a user by remote ID with fallback to login name.
+	GetUserRemoteID(model.ForgeRemoteID, string) (*model.User, error)
 	// GetUserLogin gets a user by unique Login name.
 	GetUserLogin(string) (*model.User, error)
 	// GetUserList gets a list of all users in the system.
-	// TODO: paginate
-	GetUserList() ([]*model.User, error)
+	GetUserList(p *model.ListOptions) ([]*model.User, error)
 	// GetUserCount gets a count of all users in the system.
 	GetUserCount() (int64, error)
 	// CreateUser creates a new user account.
@@ -43,6 +45,10 @@ type Store interface {
 	// Repos
 	// GetRepo gets a repo by unique ID.
 	GetRepo(int64) (*model.Repo, error)
+	// GetRepoForgeID gets a repo by its forge ID.
+	GetRepoForgeID(model.ForgeRemoteID) (*model.Repo, error)
+	// GetRepoNameFallback gets the repo by its forge ID and if this doesn't exist by its full name.
+	GetRepoNameFallback(remoteID model.ForgeRemoteID, fullName string) (*model.Repo, error)
 	// GetRepoName gets a repo by its full name.
 	GetRepoName(string) (*model.Repo, error)
 	// GetRepoCount gets a count of all repositories in the system.
@@ -54,42 +60,49 @@ type Store interface {
 	// DeleteRepo deletes a user repository.
 	DeleteRepo(*model.Repo) error
 
-	// Builds
-	// GetBuild gets a build by unique ID.
-	GetBuild(int64) (*model.Build, error)
-	// GetBuildNumber gets a build by number.
-	GetBuildNumber(*model.Repo, int64) (*model.Build, error)
-	// GetBuildRef gets a build by its ref.
-	GetBuildRef(*model.Repo, string) (*model.Build, error)
-	// GetBuildCommit gets a build by its commit sha.
-	GetBuildCommit(*model.Repo, string, string) (*model.Build, error)
-	// GetBuildLast gets the last build for the branch.
-	GetBuildLast(*model.Repo, string) (*model.Build, error)
-	// GetBuildLastBefore gets the last build before build number N.
-	GetBuildLastBefore(*model.Repo, string, int64) (*model.Build, error)
-	// GetBuildList gets a list of builds for the repository
-	// TODO: paginate
-	GetBuildList(*model.Repo, int) ([]*model.Build, error)
-	// GetBuildList gets a list of the active builds for the repository
-	GetActiveBuildList(repo *model.Repo, page int) ([]*model.Build, error)
-	// GetBuildQueue gets a list of build in queue.
-	GetBuildQueue() ([]*model.Feed, error)
-	// GetBuildCount gets a count of all builds in the system.
-	GetBuildCount() (int64, error)
-	// CreateBuild creates a new build and jobs.
-	CreateBuild(*model.Build, ...*model.Proc) error
-	// UpdateBuild updates a build.
-	UpdateBuild(*model.Build) error
+	// Redirections
+	// GetRedirection returns the redirection for the given full repo name
+	GetRedirection(string) (*model.Redirection, error)
+	// CreateRedirection creates a redirection
+	CreateRedirection(redirection *model.Redirection) error
+	// HasRedirectionForRepo checks if there's a redirection for the given repo and full name
+	HasRedirectionForRepo(int64, string) (bool, error)
+
+	// Pipelines
+	// GetPipeline gets a pipeline by unique ID.
+	GetPipeline(int64) (*model.Pipeline, error)
+	// GetPipelineNumber gets a pipeline by number.
+	GetPipelineNumber(*model.Repo, int64) (*model.Pipeline, error)
+	// GetPipelineRef gets a pipeline by its ref.
+	GetPipelineRef(*model.Repo, string) (*model.Pipeline, error)
+	// GetPipelineCommit gets a pipeline by its commit sha.
+	GetPipelineCommit(*model.Repo, string, string) (*model.Pipeline, error)
+	// GetPipelineLast gets the last pipeline for the branch.
+	GetPipelineLast(*model.Repo, string) (*model.Pipeline, error)
+	// GetPipelineLastBefore gets the last pipeline before pipeline number N.
+	GetPipelineLastBefore(*model.Repo, string, int64) (*model.Pipeline, error)
+	// GetPipelineList gets a list of pipelines for the repository
+	GetPipelineList(*model.Repo, *model.ListOptions) ([]*model.Pipeline, error)
+	// GetActivePipelineList gets a list of the active pipelines for the repository
+	GetActivePipelineList(repo *model.Repo) ([]*model.Pipeline, error)
+	// GetPipelineQueue gets a list of pipelines in queue.
+	GetPipelineQueue() ([]*model.Feed, error)
+	// GetPipelineCount gets a count of all pipelines in the system.
+	GetPipelineCount() (int64, error)
+	// CreatePipeline creates a new pipeline and steps.
+	CreatePipeline(*model.Pipeline, ...*model.Step) error
+	// UpdatePipeline updates a pipeline.
+	UpdatePipeline(*model.Pipeline) error
+	// DeletePipeline deletes a pipeline.
+	DeletePipeline(*model.Pipeline) error
 
 	// Feeds
 	UserFeed(*model.User) ([]*model.Feed, error)
 
-	// Repositorys
-	// RepoList TODO: paginate
-	RepoList(user *model.User, owned bool) ([]*model.Repo, error)
+	// Repositories
+	RepoList(user *model.User, owned, active bool) ([]*model.Repo, error)
 	RepoListLatest(*model.User) ([]*model.Feed, error)
-	// RepoBatch Sync batch of repos from SCM (with permissions) to store (create if not exist else update)
-	RepoBatch([]*model.Repo) error
+	RepoListAll(active bool, p *model.ListOptions) ([]*model.Repo, error)
 
 	// Permissions
 	PermFind(user *model.User, repo *model.Repo) (*model.Perm, error)
@@ -98,46 +111,45 @@ type Store interface {
 	PermFlush(user *model.User, before int64) error
 
 	// Configs
-	ConfigsForBuild(buildID int64) ([]*model.Config, error)
-	ConfigFindIdentical(repoID int64, hash string) (*model.Config, error)
+	ConfigsForPipeline(pipelineID int64) ([]*model.Config, error)
+	ConfigPersist(*model.Config) (*model.Config, error)
 	ConfigFindApproved(*model.Config) (bool, error)
 	ConfigCreate(*model.Config) error
-	BuildConfigCreate(*model.BuildConfig) error
+	PipelineConfigCreate(*model.PipelineConfig) error
 
 	// Secrets
 	SecretFind(*model.Repo, string) (*model.Secret, error)
-	SecretList(*model.Repo) ([]*model.Secret, error)
+	SecretList(*model.Repo, bool, *model.ListOptions) ([]*model.Secret, error)
+	SecretListAll() ([]*model.Secret, error)
 	SecretCreate(*model.Secret) error
 	SecretUpdate(*model.Secret) error
 	SecretDelete(*model.Secret) error
+	OrgSecretFind(int64, string) (*model.Secret, error)
+	OrgSecretList(int64, *model.ListOptions) ([]*model.Secret, error)
+	GlobalSecretFind(string) (*model.Secret, error)
+	GlobalSecretList(*model.ListOptions) ([]*model.Secret, error)
 
-	// Registrys
+	// Registries
 	RegistryFind(*model.Repo, string) (*model.Registry, error)
-	RegistryList(*model.Repo) ([]*model.Registry, error)
+	RegistryList(*model.Repo, *model.ListOptions) ([]*model.Registry, error)
 	RegistryCreate(*model.Registry) error
 	RegistryUpdate(*model.Registry) error
 	RegistryDelete(repo *model.Repo, addr string) error
 
-	// Procs
-	ProcLoad(int64) (*model.Proc, error)
-	ProcFind(*model.Build, int) (*model.Proc, error)
-	ProcChild(*model.Build, int, string) (*model.Proc, error)
-	ProcList(*model.Build) ([]*model.Proc, error)
-	ProcCreate([]*model.Proc) error
-	ProcUpdate(*model.Proc) error
-	ProcClear(*model.Build) error
+	// Steps
+	StepLoad(int64) (*model.Step, error)
+	StepFind(*model.Pipeline, int) (*model.Step, error)
+	StepByUUID(string) (*model.Step, error)
+	StepChild(*model.Pipeline, int, string) (*model.Step, error)
+	StepList(*model.Pipeline) ([]*model.Step, error)
+	StepUpdate(*model.Step) error
+	StepListFromWorkflowFind(*model.Workflow) ([]*model.Step, error)
 
 	// Logs
-	LogFind(*model.Proc) (io.ReadCloser, error)
-	// TODO: since we do ReadAll in any case a ioReader is not the best idear
-	// so either find a way to write log in chunks by xorm ...
-	LogSave(*model.Proc, io.Reader) error
-
-	// Files
-	FileList(*model.Build) ([]*model.File, error)
-	FileFind(*model.Proc, string) (*model.File, error)
-	FileRead(*model.Proc, string) (io.ReadCloser, error)
-	FileCreate(*model.File, io.Reader) error
+	LogFind(*model.Step) ([]*model.LogEntry, error)
+	LogSave(*model.Step, []*model.LogEntry) error
+	LogAppend(logEntry *model.LogEntry) error
+	LogDelete(*model.Step) error
 
 	// Tasks
 	// TaskList TODO: paginate & opt filter
@@ -148,9 +160,44 @@ type Store interface {
 	// ServerConfig
 	ServerConfigGet(string) (string, error)
 	ServerConfigSet(string, string) error
+	ServerConfigDelete(string) error
+
+	// Cron
+	CronCreate(*model.Cron) error
+	CronFind(*model.Repo, int64) (*model.Cron, error)
+	CronList(*model.Repo, *model.ListOptions) ([]*model.Cron, error)
+	CronUpdate(*model.Repo, *model.Cron) error
+	CronDelete(*model.Repo, int64) error
+	CronListNextExecute(int64, int64) ([]*model.Cron, error)
+	CronGetLock(*model.Cron, int64) (bool, error)
+
+	// Agent
+	AgentCreate(*model.Agent) error
+	AgentFind(int64) (*model.Agent, error)
+	AgentFindByToken(string) (*model.Agent, error)
+	AgentList(p *model.ListOptions) ([]*model.Agent, error)
+	AgentUpdate(*model.Agent) error
+	AgentDelete(*model.Agent) error
+
+	// Workflow
+	WorkflowGetTree(*model.Pipeline) ([]*model.Workflow, error)
+	WorkflowsCreate([]*model.Workflow) error
+	WorkflowLoad(int64) (*model.Workflow, error)
+	WorkflowUpdate(*model.Workflow) error
+
+	// Org
+	OrgCreate(*model.Org) error
+	OrgGet(int64) (*model.Org, error)
+	OrgFindByName(string) (*model.Org, error)
+	OrgUpdate(*model.Org) error
+	OrgDelete(int64) error
+	OrgList(*model.ListOptions) ([]*model.Org, error)
+
+	// Org repos
+	OrgRepoList(*model.Org, *model.ListOptions) ([]*model.Repo, error)
 
 	// Store operations
 	Ping() error
 	Close() error
-	Migrate() error
+	Migrate(bool) error
 }

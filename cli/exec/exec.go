@@ -1,10 +1,23 @@
+// Copyright 2022 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package exec
 
 import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -12,28 +25,30 @@ import (
 	"strings"
 
 	"github.com/drone/envsubst"
+	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/pipeline"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend"
-	backendTypes "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/compiler"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/linter"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/matrix"
-	"github.com/woodpecker-ci/woodpecker/pipeline/multipart"
-	"github.com/woodpecker-ci/woodpecker/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/docker"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/kubernetes"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/local"
+	backendTypes "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/compiler"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/matrix"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
 // Command exports the exec command.
 var Command = &cli.Command{
 	Name:      "exec",
-	Usage:     "execute a local build",
-	ArgsUsage: "[path/to/.woodpecker.yml]",
+	Usage:     "execute a local pipeline",
+	ArgsUsage: "[path/to/.woodpecker.yaml]",
 	Action:    run,
-	Flags:     append(common.GlobalFlags, flags...),
+	Flags:     utils.MergeSlices(flags, docker.Flags, kubernetes.Flags, local.Flags),
 }
 
 func run(c *cli.Context) error {
@@ -52,7 +67,7 @@ func execDir(c *cli.Context, dir string) error {
 		}
 
 		// check if it is a regular file (not dir)
-		if info.Mode().IsRegular() && strings.HasSuffix(info.Name(), ".yml") {
+		if info.Mode().IsRegular() && (strings.HasSuffix(info.Name(), ".yaml") || strings.HasSuffix(info.Name(), ".yml")) {
 			fmt.Println("#", info.Name())
 			_ = runExec(c, path, repoPath) // TODO: should we drop errors or store them and report back?
 			fmt.Println("")
@@ -72,14 +87,14 @@ func execFile(c *cli.Context, file string) error {
 }
 
 func runExec(c *cli.Context, file, repoPath string) error {
-	dat, err := ioutil.ReadFile(file)
+	dat, err := os.ReadFile(file)
 	if err != nil {
 		return err
 	}
 
 	axes, err := matrix.ParseString(string(dat))
 	if err != nil {
-		return fmt.Errorf("Parse matrix fail")
+		return fmt.Errorf("parse matrix fail")
 	}
 
 	if len(axes) == 0 {
@@ -98,7 +113,7 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 	metadata := metadataFromContext(c, axis)
 	environ := metadata.Environ()
 	var secrets []compiler.Secret
-	for key, val := range metadata.Job.Matrix {
+	for key, val := range metadata.Workflow.Matrix {
 		environ[key] = val
 		secrets = append(secrets, compiler.Secret{
 			Name:  key,
@@ -106,10 +121,15 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 		})
 	}
 
-	droneEnv := make(map[string]string)
+	pipelineEnv := make(map[string]string)
 	for _, env := range c.StringSlice("env") {
 		envs := strings.SplitN(env, "=", 2)
-		droneEnv[envs[0]] = envs[1]
+		pipelineEnv[envs[0]] = envs[1]
+		if oldVar, exists := environ[envs[0]]; exists {
+			// override existing values, but print a warning
+			log.Warn().Msgf("environment variable '%s' had value '%s', but got overwritten", envs[0], oldVar)
+		}
+		environ[envs[0]] = envs[1]
 	}
 
 	tmpl, err := envsubst.ParseFile(file)
@@ -147,12 +167,16 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 	}
 
 	// lint the yaml file
-	if lerr := linter.New(linter.WithTrusted(true)).Lint(conf); lerr != nil {
+	if lerr := linter.New(linter.WithTrusted(true)).Lint([]*linter.WorkflowConfig{{
+		File:      path.Base(file),
+		RawConfig: confstr,
+		Workflow:  conf,
+	}}); lerr != nil {
 		return lerr
 	}
 
 	// compiles the yaml file
-	compiled := compiler.New(
+	compiled, err := compiler.New(
 		compiler.WithEscalated(
 			c.StringSlice("privileged")...,
 		),
@@ -167,7 +191,11 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 		compiler.WithPrefix(
 			c.String("prefix"),
 		),
-		compiler.WithProxy(),
+		compiler.WithProxy(compiler.ProxyOptions{
+			NoProxy:    c.String("backend-no-proxy"),
+			HTTPProxy:  c.String("backend-http-proxy"),
+			HTTPSProxy: c.String("backend-https-proxy"),
+		}),
 		compiler.WithLocal(
 			c.Bool("local"),
 		),
@@ -178,103 +206,42 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 		),
 		compiler.WithMetadata(metadata),
 		compiler.WithSecret(secrets...),
-		compiler.WithEnviron(droneEnv),
+		compiler.WithEnviron(pipelineEnv),
 	).Compile(conf)
-
-	engine, err := backend.FindEngine(c.String("backend-engine"))
 	if err != nil {
 		return err
 	}
 
-	if err = engine.Load(); err != nil {
+	backendCtx := context.WithValue(c.Context, backendTypes.CliContext, c)
+	backends := []backendTypes.Backend{
+		kubernetes.New(),
+		docker.New(),
+		local.New(),
+	}
+	backendEngine, err := backend.FindBackend(backendCtx, backends, c.String("backend-engine"))
+	if err != nil {
+		return err
+	}
+
+	if _, err = backendEngine.Load(backendCtx); err != nil {
 		return err
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), c.Duration("timeout"))
 	defer cancel()
 	ctx = utils.WithContextSigtermCallback(ctx, func() {
-		println("ctrl+c received, terminating process")
+		fmt.Println("ctrl+c received, terminating process")
 	})
 
 	return pipeline.New(compiled,
 		pipeline.WithContext(ctx),
 		pipeline.WithTracer(pipeline.DefaultTracer),
 		pipeline.WithLogger(defaultLogger),
-		pipeline.WithEngine(engine),
+		pipeline.WithBackend(backendEngine),
 		pipeline.WithDescription(map[string]string{
 			"CLI": "exec",
 		}),
-	).Run()
-}
-
-// return the metadata from the cli context.
-func metadataFromContext(c *cli.Context, axis matrix.Axis) frontend.Metadata {
-	platform := c.String("system-platform")
-	if platform == "" {
-		platform = runtime.GOOS + "/" + runtime.GOARCH
-	}
-
-	return frontend.Metadata{
-		Repo: frontend.Repo{
-			Name:    c.String("repo-name"),
-			Link:    c.String("repo-link"),
-			Remote:  c.String("repo-remote-url"),
-			Private: c.Bool("repo-private"),
-		},
-		Curr: frontend.Build{
-			Number:   c.Int64("build-number"),
-			Parent:   c.Int64("parent-build-number"),
-			Created:  c.Int64("build-created"),
-			Started:  c.Int64("build-started"),
-			Finished: c.Int64("build-finished"),
-			Status:   c.String("build-status"),
-			Event:    c.String("build-event"),
-			Link:     c.String("build-link"),
-			Target:   c.String("build-target"),
-			Commit: frontend.Commit{
-				Sha:     c.String("commit-sha"),
-				Ref:     c.String("commit-ref"),
-				Refspec: c.String("commit-refspec"),
-				Branch:  c.String("commit-branch"),
-				Message: c.String("commit-message"),
-				Author: frontend.Author{
-					Name:   c.String("commit-author-name"),
-					Email:  c.String("commit-author-email"),
-					Avatar: c.String("commit-author-avatar"),
-				},
-			},
-		},
-		Prev: frontend.Build{
-			Number:   c.Int64("prev-build-number"),
-			Created:  c.Int64("prev-build-created"),
-			Started:  c.Int64("prev-build-started"),
-			Finished: c.Int64("prev-build-finished"),
-			Status:   c.String("prev-build-status"),
-			Event:    c.String("prev-build-event"),
-			Link:     c.String("prev-build-link"),
-			Commit: frontend.Commit{
-				Sha:     c.String("prev-commit-sha"),
-				Ref:     c.String("prev-commit-ref"),
-				Refspec: c.String("prev-commit-refspec"),
-				Branch:  c.String("prev-commit-branch"),
-				Message: c.String("prev-commit-message"),
-				Author: frontend.Author{
-					Name:   c.String("prev-commit-author-name"),
-					Email:  c.String("prev-commit-author-email"),
-					Avatar: c.String("prev-commit-author-avatar"),
-				},
-			},
-		},
-		Job: frontend.Job{
-			Number: c.Int("job-number"),
-			Matrix: axis,
-		},
-		Sys: frontend.System{
-			Name:     c.String("system-name"),
-			Link:     c.String("system-link"),
-			Platform: platform,
-		},
-	}
+	).Run(c.Context)
 }
 
 func convertPathForWindows(path string) string {
@@ -288,13 +255,8 @@ func convertPathForWindows(path string) string {
 	return filepath.ToSlash(path)
 }
 
-var defaultLogger = pipeline.LogFunc(func(proc *backendTypes.Step, rc multipart.Reader) error {
-	part, err := rc.NextPart()
-	if err != nil {
-		return err
-	}
-
-	logStream := NewLineWriter(proc.Alias)
-	_, err = io.Copy(logStream, part)
+var defaultLogger = pipeline.Logger(func(step *backendTypes.Step, rc io.Reader) error {
+	logStream := NewLineWriter(step.Name, step.UUID)
+	_, err := io.Copy(logStream, rc)
 	return err
 })

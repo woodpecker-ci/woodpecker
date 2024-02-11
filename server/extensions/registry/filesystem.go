@@ -1,3 +1,17 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package registry
 
 import (
@@ -11,14 +25,18 @@ import (
 	"github.com/docker/cli/cli/config/configfile"
 	"github.com/docker/cli/cli/config/types"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 type filesystem struct {
 	path string
 }
 
+<<<<<<<< HEAD:server/extensions/registry/filesystem.go
 func NewFilesystem(path string) ReadOnlyRegistryExtension {
+========
+func NewFilesystem(path string) ReadOnlyService {
+>>>>>>>> upstream/main:server/services/registry/filesystem.go
 	return &filesystem{path}
 }
 
@@ -39,6 +57,13 @@ func parseDockerConfig(path string) ([]*model.Registry, error) {
 
 	if err := json.NewDecoder(f).Decode(&configFile); err != nil {
 		return nil, err
+	}
+
+	for registryHostname := range configFile.CredentialHelpers {
+		newAuth, err := configFile.GetAuthConfig(registryHostname)
+		if err == nil {
+			configFile.AuthConfigs[registryHostname] = newAuth
+		}
 	}
 
 	for addr, ac := range configFile.AuthConfigs {
@@ -65,12 +90,25 @@ func parseDockerConfig(path string) ([]*model.Registry, error) {
 	return auths, nil
 }
 
+<<<<<<<< HEAD:server/extensions/registry/filesystem.go
 func (b *filesystem) RegistryFind(context.Context, *model.Repo, string) (*model.Registry, error) {
 	return nil, nil
 }
 
 func (b *filesystem) RegistryList(context.Context, *model.Repo) ([]*model.Registry, error) {
 	return parseDockerConfig(b.path)
+========
+func (f *filesystem) RegistryFind(*model.Repo, string) (*model.Registry, error) {
+	return nil, nil
+}
+
+func (f *filesystem) RegistryList(_ *model.Repo, p *model.ListOptions) ([]*model.Registry, error) {
+	regs, err := parseDockerConfig(f.path)
+	if err != nil {
+		return nil, err
+	}
+	return model.ApplyPagination(p, regs), nil
+>>>>>>>> upstream/main:server/services/registry/filesystem.go
 }
 
 // decodeAuth decodes a base64 encoded string and returns username and password
@@ -87,11 +125,11 @@ func decodeAuth(authStr string) (string, string, error) {
 		return "", "", err
 	}
 	if n > decLen {
-		return "", "", fmt.Errorf("Something went wrong decoding auth config")
+		return "", "", fmt.Errorf("something went wrong decoding auth config")
 	}
 	arr := strings.SplitN(string(decoded), ":", 2)
 	if len(arr) != 2 {
-		return "", "", fmt.Errorf("Invalid auth configuration file")
+		return "", "", fmt.Errorf("invalid auth configuration file")
 	}
 	password := strings.Trim(arr[1], "\x00")
 	return arr[0], password, nil

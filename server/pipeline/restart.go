@@ -16,99 +16,96 @@ package pipeline
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"time"
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/remote"
-	"github.com/woodpecker-ci/woodpecker/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
-// Restart a build by creating a new one out of the old and start it
-func Restart(ctx context.Context, store store.Store, lastBuild *model.Build, user *model.User, repo *model.Repo, envs map[string]string) (*model.Build, error) {
-	switch lastBuild.Status {
+// Restart a pipeline by creating a new one out of the old and start it
+func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipeline, user *model.User, repo *model.Repo, envs map[string]string) (*model.Pipeline, error) {
+	forge := server.Config.Services.Forge
+	switch lastPipeline.Status {
 	case model.StatusDeclined,
 		model.StatusBlocked:
-		return nil, ErrBadRequest{Msg: fmt.Sprintf("cannot restart a build with status %s", lastBuild.Status)}
+		return nil, &ErrBadRequest{Msg: fmt.Sprintf("cannot restart a pipeline with status %s", lastPipeline.Status)}
 	}
 
-	var pipelineFiles []*remote.FileMeta
-
-	// fetch the old pipeline config from database
-	configs, err := store.ConfigsForBuild(lastBuild.ID)
+	// fetch the old pipeline config from the database
+	configs, err := store.ConfigsForPipeline(lastPipeline.ID)
 	if err != nil {
-		msg := fmt.Sprintf("failure to get build config for %s. %s", repo.FullName, err)
-		log.Error().Msgf(msg)
-		return nil, ErrNotFound{Msg: msg}
+		log.Error().Err(err).Msgf("failure to get pipeline config for %s", repo.FullName)
+		return nil, &ErrNotFound{Msg: fmt.Sprintf("failure to get pipeline config for %s. %s", repo.FullName, err)}
 	}
 
+	var pipelineFiles []*forge_types.FileMeta
 	for _, y := range configs {
-		pipelineFiles = append(pipelineFiles, &remote.FileMeta{Data: y.Data, Name: y.Name})
+		pipelineFiles = append(pipelineFiles, &forge_types.FileMeta{Data: y.Data, Name: y.Name})
 	}
 
-	// If config extension is active we should refetch the config in case something changed
-	configExtension := server.Config.Extensions.ConfigExtensionsFromRepo(repo)
-	if configExtension != nil {
-		currentFileMeta := make([]*remote.FileMeta, len(configs))
-		for i, cfg := range configs {
-			currentFileMeta[i] = &remote.FileMeta{Name: cfg.Name, Data: cfg.Data}
-		}
-
-		newConfig, useOld, err := configExtension.FetchConfig(ctx, user, repo, lastBuild, currentFileMeta)
-		if err != nil {
-			return nil, ErrBadRequest{
-				Msg: fmt.Sprintf("On fetching external build config: %s", err),
-			}
-		}
-		if !useOld {
-			pipelineFiles = newConfig
+	// If the config service is active we should refetch the config in case something changed
+	configService := server.Config.Services.Manager.ConfigServiceFromRepo(repo)
+	pipelineFiles, err = configService.Fetch(ctx, forge, user, repo, lastPipeline, pipelineFiles, true)
+	if err != nil {
+		return nil, &ErrBadRequest{
+			Msg: fmt.Sprintf("On fetching external pipeline config: %s", err),
 		}
 	}
 
-	newBuild := createNewBuildOutOfOld(lastBuild)
-	newBuild.Parent = lastBuild.ID
+	newPipeline := createNewOutOfOld(lastPipeline)
+	newPipeline.Parent = lastPipeline.ID
 
-	err = store.CreateBuild(newBuild)
+	err = store.CreatePipeline(newPipeline)
 	if err != nil {
-		msg := fmt.Sprintf("failure to save build for %s", repo.FullName)
+		msg := fmt.Sprintf("failure to save pipeline for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
 		return nil, fmt.Errorf(msg)
 	}
 
-	if err := persistBuildConfigs(store, configs, newBuild.ID); err != nil {
-		msg := fmt.Sprintf("failure to persist build config for %s.", repo.FullName)
+	if len(configs) == 0 {
+		newPipeline, uerr := UpdateToStatusError(store, *newPipeline, errors.New("pipeline definition not found"))
+		if uerr != nil {
+			log.Debug().Err(uerr).Msg("failure to update pipeline status")
+		} else {
+			updatePipelineStatus(ctx, newPipeline, repo, user)
+		}
+		return newPipeline, nil
+	}
+	if err := linkPipelineConfigs(store, configs, newPipeline.ID); err != nil {
+		msg := fmt.Sprintf("failure to persist pipeline config for %s.", repo.FullName)
 		log.Error().Err(err).Msg(msg)
 		return nil, fmt.Errorf(msg)
 	}
 
-	newBuild, buildItems, err := createBuildItems(ctx, store, newBuild, user, repo, pipelineFiles, envs)
+	newPipeline, pipelineItems, err := createPipelineItems(ctx, store, newPipeline, user, repo, pipelineFiles, envs)
 	if err != nil {
-		msg := fmt.Sprintf("failure to createBuildItems for %s", repo.FullName)
+		msg := fmt.Sprintf("failure to createPipelineItems for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
 		return nil, fmt.Errorf(msg)
 	}
 
-	newBuild, err = start(ctx, store, newBuild, user, repo, buildItems)
+	newPipeline, err = start(ctx, store, newPipeline, user, repo, pipelineItems)
 	if err != nil {
-		msg := fmt.Sprintf("failure to start build for %s", repo.FullName)
+		msg := fmt.Sprintf("failure to start pipeline for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
 		return nil, fmt.Errorf(msg)
 	}
 
-	return newBuild, nil
+	return newPipeline, nil
 }
 
-// TODO: reuse at create.go too
-func persistBuildConfigs(store store.Store, configs []*model.Config, buildID int64) error {
+func linkPipelineConfigs(store store.Store, configs []*model.Config, pipelineID int64) error {
 	for _, conf := range configs {
-		buildConfig := &model.BuildConfig{
-			ConfigID: conf.ID,
-			BuildID:  buildID,
+		pipelineConfig := &model.PipelineConfig{
+			ConfigID:   conf.ID,
+			PipelineID: pipelineID,
 		}
-		err := store.BuildConfigCreate(buildConfig)
+		err := store.PipelineConfigCreate(pipelineConfig)
 		if err != nil {
 			return err
 		}
@@ -116,14 +113,13 @@ func persistBuildConfigs(store store.Store, configs []*model.Config, buildID int
 	return nil
 }
 
-func createNewBuildOutOfOld(old *model.Build) *model.Build {
-	new := *old
-	new.ID = 0
-	new.Number = 0
-	new.Status = model.StatusPending
-	new.Started = 0
-	new.Finished = 0
-	new.Enqueued = time.Now().UTC().Unix()
-	new.Error = ""
-	return &new
+func createNewOutOfOld(old *model.Pipeline) *model.Pipeline {
+	newPipeline := *old
+	newPipeline.ID = 0
+	newPipeline.Number = 0
+	newPipeline.Status = model.StatusPending
+	newPipeline.Started = 0
+	newPipeline.Finished = 0
+	newPipeline.Errors = nil
+	return &newPipeline
 }

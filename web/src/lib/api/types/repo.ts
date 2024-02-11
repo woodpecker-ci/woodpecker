@@ -6,9 +6,18 @@ export type Repo = {
   // The unique identifier for the repository.
   id: number;
 
+  // The id of the repository on the source control management system.
+  forge_remote_id: string;
+
   // The source control management being used.
-  // Currently this is either 'git' or 'hg' (Mercurial).
+  // Currently, this is either 'git' or 'hg' (Mercurial).
   scm: string;
+
+  // Whether the forge repo has PRs enabled.
+  pr_enabled: boolean;
+
+  // The id of the organization that owns the repository.
+  org_id: number;
 
   // The owner of the repository.
   owner: string;
@@ -23,8 +32,8 @@ export type Repo = {
   // The url for the avatar image.
   avatar_url: string;
 
-  // The link to view the repository.
-  link_url: string;
+  // The url to view the repository.
+  forge_url: string;
 
   // The url used to clone the repository.
   clone_url: string;
@@ -35,28 +44,30 @@ export type Repo = {
   // Whether the repository is publicly visible.
   private: boolean;
 
-  // Whether the repository has trusted access for builds.
+  // Whether the repository has trusted access for pipelines.
   // If the repository is trusted then the host network can be used and
   // volumes can be created.
   trusted: boolean;
 
   // x-dart-type: Duration
-  // The amount of time in minutes before the build is killed.
+  // The amount of time in minutes before the pipeline is killed.
   timeout: number;
 
-  // Whether pull requests should trigger a build.
+  // Whether pull requests should trigger a pipeline.
   allow_pr: boolean;
 
   config_file: string;
 
   visibility: RepoVisibility;
 
-  last_build: number;
+  last_pipeline: number;
 
   gated: boolean;
 
   // Events that will cancel running pipelines before starting a new one
   cancel_previous_pipeline_events: string[];
+
+  netrc_only_trusted: boolean;
 
   // Endpoint for secrets extensions
   secret_endpoint: string;
@@ -76,7 +87,14 @@ export enum RepoVisibility {
 
 export type RepoSettings = Pick<
   Repo,
-  'config_file' | 'timeout' | 'visibility' | 'trusted' | 'gated' | 'allow_pr' | 'cancel_previous_pipeline_events'
+  | 'config_file'
+  | 'timeout'
+  | 'visibility'
+  | 'trusted'
+  | 'gated'
+  | 'allow_pr'
+  | 'cancel_previous_pipeline_events'
+  | 'netrc_only_trusted'
 >;
 
 export type ExtensionSettings = Pick<Repo, 'config_endpoint' | 'secret_endpoint' | 'registry_endpoint'>;

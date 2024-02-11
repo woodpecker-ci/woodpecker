@@ -14,8 +14,14 @@
 
 package store
 
+type XORM struct {
+	Log     bool
+	ShowSQL bool
+}
+
 // Opts are options for a new database connection
 type Opts struct {
 	Driver string
 	Config string
+	XORM   XORM
 }

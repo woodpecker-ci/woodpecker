@@ -1,3 +1,4 @@
+// Copyright 2022 Woodpecker Authors
 // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,11 +20,11 @@ import (
 
 	"github.com/franela/goblin"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 func TestUsers(t *testing.T) {
-	store, closer := newTestStore(t, new(model.User), new(model.Repo), new(model.Build), new(model.Proc), new(model.Perm))
+	store, closer := newTestStore(t, new(model.User), new(model.Repo), new(model.Pipeline), new(model.Step), new(model.Perm), new(model.Org), new(model.Secret))
 	defer closer()
 
 	g := goblin.Goblin(t)
@@ -35,9 +36,11 @@ func TestUsers(t *testing.T) {
 			g.Assert(err).IsNil()
 			_, err = store.engine.Exec("DELETE FROM repos")
 			g.Assert(err).IsNil()
-			_, err = store.engine.Exec("DELETE FROM builds")
+			_, err = store.engine.Exec("DELETE FROM pipelines")
 			g.Assert(err).IsNil()
-			_, err = store.engine.Exec("DELETE FROM procs")
+			_, err = store.engine.Exec("DELETE FROM steps")
+			g.Assert(err).IsNil()
+			_, err = store.engine.Exec("DELETE FROM orgs")
 			g.Assert(err).IsNil()
 		})
 
@@ -49,11 +52,11 @@ func TestUsers(t *testing.T) {
 			}
 			err1 := store.CreateUser(&user)
 			err2 := store.UpdateUser(&user)
-			getuser, err3 := store.GetUser(user.ID)
+			getUser, err3 := store.GetUser(user.ID)
 			g.Assert(err1).IsNil()
 			g.Assert(err2).IsNil()
 			g.Assert(err3).IsNil()
-			g.Assert(user.ID).Equal(getuser.ID)
+			g.Assert(user.ID).Equal(getUser.ID)
 		})
 
 		g.It("Should Add a new User", func() {
@@ -74,19 +77,17 @@ func TestUsers(t *testing.T) {
 				Secret: "976f22a5eef7caacb7e678d6c52f49b1",
 				Email:  "foo@bar.com",
 				Avatar: "b9015b0857e16ac4d94a0ffd9a0b79c8",
-				Active: true,
 			}
 
 			g.Assert(store.CreateUser(user)).IsNil()
-			getuser, err := store.GetUser(user.ID)
+			getUser, err := store.GetUser(user.ID)
 			g.Assert(err).IsNil()
-			g.Assert(user.ID).Equal(getuser.ID)
-			g.Assert(user.Login).Equal(getuser.Login)
-			g.Assert(user.Token).Equal(getuser.Token)
-			g.Assert(user.Secret).Equal(getuser.Secret)
-			g.Assert(user.Email).Equal(getuser.Email)
-			g.Assert(user.Avatar).Equal(getuser.Avatar)
-			g.Assert(user.Active).Equal(getuser.Active)
+			g.Assert(user.ID).Equal(getUser.ID)
+			g.Assert(user.Login).Equal(getUser.Login)
+			g.Assert(user.Token).Equal(getUser.Token)
+			g.Assert(user.Secret).Equal(getUser.Secret)
+			g.Assert(user.Email).Equal(getUser.Email)
+			g.Assert(user.Avatar).Equal(getUser.Avatar)
 		})
 
 		g.It("Should Get a User By Login", func() {
@@ -96,10 +97,10 @@ func TestUsers(t *testing.T) {
 				Token: "e42080dddf012c718e476da161d21ad5",
 			}
 			g.Assert(store.CreateUser(user))
-			getuser, err := store.GetUserLogin(user.Login)
+			getUser, err := store.GetUserLogin(user.Login)
 			g.Assert(err).IsNil()
-			g.Assert(user.ID).Equal(getuser.ID)
-			g.Assert(user.Login).Equal(getuser.Login)
+			g.Assert(user.ID).Equal(getUser.ID)
+			g.Assert(user.Login).Equal(getUser.Login)
 		})
 
 		g.It("Should Enforce Unique User Login", func() {
@@ -133,7 +134,7 @@ func TestUsers(t *testing.T) {
 			}
 			g.Assert(store.CreateUser(&user1)).IsNil()
 			g.Assert(store.CreateUser(&user2)).IsNil()
-			users, err := store.GetUserList()
+			users, err := store.GetUserList(&model.ListOptions{Page: 1, PerPage: 50})
 			g.Assert(err).IsNil()
 			g.Assert(len(users)).Equal(2)
 			g.Assert(users[0].Login).Equal(user1.Login)
@@ -182,7 +183,7 @@ func TestUsers(t *testing.T) {
 			g.Assert(err3).IsNotNil()
 		})
 
-		g.It("Should get the Build feed for a User", func() {
+		g.It("Should get the Pipeline feed for a User", func() {
 			user := &model.User{
 				Login: "joe",
 				Email: "foo@bar.com",
@@ -191,61 +192,64 @@ func TestUsers(t *testing.T) {
 			g.Assert(store.CreateUser(user)).IsNil()
 
 			repo1 := &model.Repo{
-				Owner:    "bradrydzewski",
-				Name:     "test",
-				FullName: "bradrydzewski/test",
-				IsActive: true,
+				Owner:         "bradrydzewski",
+				Name:          "test",
+				FullName:      "bradrydzewski/test",
+				IsActive:      true,
+				ForgeRemoteID: "1",
 			}
 			repo2 := &model.Repo{
-				Owner:    "test",
-				Name:     "test",
-				FullName: "test/test",
-				IsActive: true,
+				Owner:         "test",
+				Name:          "test",
+				FullName:      "test/test",
+				IsActive:      true,
+				ForgeRemoteID: "2",
 			}
 			repo3 := &model.Repo{
-				Owner:    "octocat",
-				Name:     "hello-world",
-				FullName: "octocat/hello-world",
-				IsActive: true,
+				Owner:         "octocat",
+				Name:          "hello-world",
+				FullName:      "octocat/hello-world",
+				IsActive:      true,
+				ForgeRemoteID: "3",
 			}
 			g.Assert(store.CreateRepo(repo1)).IsNil()
 			g.Assert(store.CreateRepo(repo2)).IsNil()
 			g.Assert(store.CreateRepo(repo3)).IsNil()
 
 			for _, perm := range []*model.Perm{
-				{UserID: user.ID, Repo: repo1.FullName, Push: true, Admin: false},
-				{UserID: user.ID, Repo: repo2.FullName, Push: false, Admin: true},
+				{UserID: user.ID, Repo: repo1, Push: true, Admin: false},
+				{UserID: user.ID, Repo: repo2, Push: false, Admin: true},
 			} {
 				g.Assert(store.PermUpsert(perm)).IsNil()
 			}
 
-			build1 := &model.Build{
+			pipeline1 := &model.Pipeline{
 				RepoID: repo1.ID,
 				Status: model.StatusFailure,
 			}
-			build2 := &model.Build{
+			pipeline2 := &model.Pipeline{
 				RepoID: repo1.ID,
 				Status: model.StatusSuccess,
 			}
-			build3 := &model.Build{
+			pipeline3 := &model.Pipeline{
 				RepoID: repo2.ID,
 				Status: model.StatusSuccess,
 			}
-			build4 := &model.Build{
+			pipeline4 := &model.Pipeline{
 				RepoID: repo3.ID,
 				Status: model.StatusSuccess,
 			}
-			g.Assert(store.CreateBuild(build1)).IsNil()
-			g.Assert(store.CreateBuild(build2)).IsNil()
-			g.Assert(store.CreateBuild(build3)).IsNil()
-			g.Assert(store.CreateBuild(build4)).IsNil()
+			g.Assert(store.CreatePipeline(pipeline1)).IsNil()
+			g.Assert(store.CreatePipeline(pipeline2)).IsNil()
+			g.Assert(store.CreatePipeline(pipeline3)).IsNil()
+			g.Assert(store.CreatePipeline(pipeline4)).IsNil()
 
-			builds, err := store.UserFeed(user)
+			pipelines, err := store.UserFeed(user)
 			g.Assert(err).IsNil()
-			g.Assert(len(builds)).Equal(3)
-			g.Assert(builds[0].FullName).Equal(repo2.FullName)
-			g.Assert(builds[1].FullName).Equal(repo1.FullName)
-			g.Assert(builds[2].FullName).Equal(repo1.FullName)
+			g.Assert(len(pipelines)).Equal(3)
+			g.Assert(pipelines[0].RepoID).Equal(repo2.ID)
+			g.Assert(pipelines[1].RepoID).Equal(repo1.ID)
+			g.Assert(pipelines[2].RepoID).Equal(repo1.ID)
 		})
 	})
 }

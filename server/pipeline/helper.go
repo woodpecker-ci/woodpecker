@@ -19,23 +19,16 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
-func updateBuildStatus(ctx context.Context, build *model.Build, repo *model.Repo, user *model.User) error {
-	for _, proc := range build.Procs {
-		// skip child procs
-		if !proc.IsParent() {
-			continue
-		}
-
-		err := server.Config.Services.Remote.Status(ctx, user, repo, build, proc)
+func updatePipelineStatus(ctx context.Context, pipeline *model.Pipeline, repo *model.Repo, user *model.User) {
+	for _, workflow := range pipeline.Workflows {
+		err := server.Config.Services.Forge.Status(ctx, user, repo, pipeline, workflow)
 		if err != nil {
-			log.Error().Err(err).Msgf("error setting commit status for %s/%d", repo.FullName, build.Number)
-			return err
+			log.Error().Err(err).Msgf("error setting commit status for %s/%d", repo.FullName, pipeline.Number)
+			return
 		}
 	}
-
-	return nil
 }

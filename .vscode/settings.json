@@ -6,8 +6,8 @@
     "**/*.code-search": true,
     "vendor/": true
   },
-  "go.lintTool":"golangci-lint",
-  "go.lintFlags": [
-    "--fast"
-  ]
+  "go.lintTool": "golangci-lint",
+  "go.lintFlags": ["--fast"],
+  "eslint.workingDirectories": ["./web"],
+  "prettier.ignorePath": "./web/.prettierignore"
 }

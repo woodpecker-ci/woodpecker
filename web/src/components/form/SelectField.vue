@@ -1,63 +1,35 @@
 <template>
   <select
     v-model="innerValue"
-    class="w-full border border-gray-900 py-1 px-2 rounded-md bg-white focus:outline-none border-gray-900"
-    :class="{
-      'text-color': innerValue === '',
-      'text-gray-900': innerValue !== '',
-    }"
+    class="bg-wp-control-neutral-100 text-wp-text-100 border-wp-control-neutral-200 w-full border py-1 px-2 rounded-md"
   >
     <option v-if="placeholder" value="" class="hidden">{{ placeholder }}</option>
-    <option v-for="option in options" :key="option.value" :value="option.value" class="text-color">
+    <option v-for="option in options" :key="option.value" :value="option.value" class="text-wp-text-100">
       {{ option.text }}
     </option>
   </select>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, PropType, toRef } from 'vue';
+<script lang="ts" setup>
+import { computed, toRef } from 'vue';
 
 import { SelectOption } from './form.types';
 
-export default defineComponent({
-  name: 'SelectField',
+const props = defineProps<{
+  modelValue: string;
+  placeholder?: string;
+  options: SelectOption[];
+}>();
 
-  props: {
-    // used by toRef
-    // eslint-disable-next-line vue/no-unused-properties
-    modelValue: {
-      type: String,
-      default: null,
-    },
+const emit = defineEmits<{
+  (event: 'update:modelValue', value: string): void;
+}>();
 
-    placeholder: {
-      type: String,
-      default: null,
-    },
-
-    options: {
-      type: Array as PropType<SelectOption[]>,
-      required: true,
-    },
-  },
-
-  emits: {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    'update:modelValue': (_value: SelectOption['value'] | null): boolean => true,
-  },
-
-  setup: (props, ctx) => {
-    const modelValue = toRef(props, 'modelValue');
-    const innerValue = computed({
-      get: () => modelValue.value,
-      set: (selectedValue) => {
-        ctx.emit('update:modelValue', selectedValue);
-      },
-    });
-
-    return {
-      innerValue,
-    };
+const modelValue = toRef(props, 'modelValue');
+const innerValue = computed({
+  get: () => modelValue.value,
+  set: (selectedValue) => {
+    emit('update:modelValue', selectedValue);
   },
 });
 </script>

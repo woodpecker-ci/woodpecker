@@ -15,43 +15,46 @@
 package api
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/pipeline"
-	"github.com/woodpecker-ci/woodpecker/server/remote"
-	"github.com/woodpecker-ci/woodpecker/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
 )
 
 func handlePipelineErr(c *gin.Context, err error) {
-	if pipeline.IsErrNotFound(err) {
-		c.String(http.StatusNotFound, "%v", err)
-	} else if pipeline.IsErrBadRequest(err) {
-		c.String(http.StatusBadRequest, "%v", err)
-	} else if pipeline.IsErrFiltered(err) {
-		c.String(http.StatusNoContent, "%v", err)
-	} else {
+	switch {
+	case errors.Is(err, &pipeline.ErrNotFound{}):
+		c.String(http.StatusNotFound, "%s", err)
+	case errors.Is(err, &pipeline.ErrBadRequest{}):
+		c.String(http.StatusBadRequest, "%s", err)
+	case errors.Is(err, pipeline.ErrFiltered):
+		// for debugging purpose we add a header
+		c.Writer.Header().Add("Pipeline-Filtered", "true")
+		c.Status(http.StatusNoContent)
+	default:
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 	}
 }
 
-// if the remote has a refresh token, the current access token may be stale.
+func handleDBError(c *gin.Context, err error) {
+	if errors.Is(err, types.RecordNotExist) {
+		c.AbortWithStatus(http.StatusNotFound)
+		return
+	}
+	_ = c.AbortWithError(http.StatusInternalServerError, err)
+}
+
+// If the forge has a refresh token, the current access token may be stale.
 // Therefore, we should refresh prior to dispatching the job.
 func refreshUserToken(c *gin.Context, user *model.User) {
-	_remote := server.Config.Services.Remote
+	_forge := server.Config.Services.Forge
 	_store := store.FromContext(c)
-	if refresher, ok := _remote.(remote.Refresher); ok {
-		ok, err := refresher.Refresh(c, user)
-		if err != nil {
-			log.Error().Err(err).Msgf("refresh oauth token of user '%s' failed", user.Login)
-		} else if ok {
-			if err := _store.UpdateUser(user); err != nil {
-				log.Error().Err(err).Msg("fail to save user to store after refresh oauth token")
-			}
-		}
-	}
+	forge.Refresh(c, _forge, _store, user)
 }

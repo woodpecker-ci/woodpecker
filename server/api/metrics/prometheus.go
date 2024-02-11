@@ -17,15 +17,16 @@ package metrics
 import (
 	"errors"
 	"fmt"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
-	"github.com/woodpecker-ci/woodpecker/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
 )
 
 // errInvalidToken is returned when the api request token is invalid.
-var errInvalidToken = errors.New("Invalid or missing token")
+var errInvalidToken = errors.New("invalid or missing token")
 
 // PromHandler will pass the call from /api/metrics/prometheus to prometheus
 func PromHandler() gin.HandlerFunc {
@@ -35,21 +36,21 @@ func PromHandler() gin.HandlerFunc {
 		token := server.Config.Prometheus.AuthToken
 
 		if token == "" {
-			handler.ServeHTTP(c.Writer, c.Request)
+			c.AbortWithStatus(http.StatusNotFound)
 			return
 		}
 
 		header := c.Request.Header.Get("Authorization")
 
 		if header == "" {
-			c.String(401, errInvalidToken.Error())
+			c.String(http.StatusUnauthorized, errInvalidToken.Error())
 			return
 		}
 
 		bearer := fmt.Sprintf("Bearer %s", token)
 
 		if header != bearer {
-			c.String(401, errInvalidToken.Error())
+			c.String(http.StatusForbidden, errInvalidToken.Error())
 			return
 		}
 

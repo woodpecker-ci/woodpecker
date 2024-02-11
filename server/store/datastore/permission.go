@@ -17,17 +17,17 @@ package datastore
 import (
 	"fmt"
 
+	"xorm.io/builder"
 	"xorm.io/xorm"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 func (s storage) PermFind(user *model.User, repo *model.Repo) (*model.Perm, error) {
-	perm := &model.Perm{
-		UserID: user.ID,
-		RepoID: repo.ID,
-	}
-	return perm, wrapGet(s.engine.Get(perm))
+	perm := new(model.Perm)
+	return perm, wrapGet(s.engine.
+		Where(builder.Eq{"perm_user_id": user.ID, "perm_repo_id": repo.ID}).
+		Get(perm))
 }
 
 func (s storage) PermUpsert(perm *model.Perm) error {
@@ -45,28 +45,26 @@ func (s storage) PermUpsert(perm *model.Perm) error {
 }
 
 func (s storage) permUpsert(sess *xorm.Session, perm *model.Perm) error {
-	if perm.RepoID == 0 && len(perm.Repo) == 0 {
+	if perm.RepoID == 0 && perm.Repo == nil {
 		return fmt.Errorf("could not determine repo for permission: %v", perm)
 	}
 
-	// lookup repo based on name if possible
-	if perm.RepoID == 0 && len(perm.Repo) != 0 {
-		r, err := s.getRepoName(sess, perm.Repo)
+	// lookup repo based on name or forge ID if possible
+	if perm.RepoID == 0 && perm.Repo != nil {
+		r, err := s.getRepoNameFallback(sess, perm.Repo.ForgeRemoteID, perm.Repo.FullName)
 		if err != nil {
 			return err
 		}
 		perm.RepoID = r.ID
 	}
 
-	exist, err := sess.Where("perm_user_id = ? AND perm_repo_id = ?", perm.UserID, perm.RepoID).
-		Exist(new(model.Perm))
+	exist, err := sess.Where(userIDAndRepoIDCond(perm)).Exist(new(model.Perm))
 	if err != nil {
 		return err
 	}
 
 	if exist {
-		_, err = sess.Where("perm_user_id = ? AND perm_repo_id = ?", perm.UserID, perm.RepoID).
-			AllCols().Update(perm)
+		_, err = sess.Where(userIDAndRepoIDCond(perm)).AllCols().Update(perm)
 	} else {
 		// only Insert set auto created ID back to object
 		_, err = sess.Insert(perm)
@@ -75,10 +73,7 @@ func (s storage) permUpsert(sess *xorm.Session, perm *model.Perm) error {
 }
 
 func (s storage) PermDelete(perm *model.Perm) error {
-	_, err := s.engine.
-		Where("perm_user_id = ? AND perm_repo_id = ?", perm.UserID, perm.RepoID).
-		Delete(new(model.Perm))
-	return err
+	return wrapDelete(s.engine.Where(userIDAndRepoIDCond(perm)).Delete(new(model.Perm)))
 }
 
 func (s storage) PermFlush(user *model.User, before int64) error {
@@ -86,4 +81,16 @@ func (s storage) PermFlush(user *model.User, before int64) error {
 		Where("perm_user_id = ? AND perm_synced < ?", user.ID, before).
 		Delete(new(model.Perm))
 	return err
+}
+
+// userPushOrAdminCondition return condition where user must have push or admin rights
+// if used make sure to have permission table ("perms") joined
+func userPushOrAdminCondition(userID int64) builder.Cond {
+	return builder.Eq{"perms.perm_user_id": userID}.
+		And(builder.Eq{"perms.perm_push": true}.
+			Or(builder.Eq{"perms.perm_admin": true}))
+}
+
+func userIDAndRepoIDCond(perm *model.Perm) builder.Cond {
+	return builder.Eq{"perm_user_id": perm.UserID, "perm_repo_id": perm.RepoID}
 }

@@ -1,4 +1,8 @@
-yarn-lock.yaml
+pnpm-lock.yaml
 dist
 coverage/
 LICENSE
+components.d.ts
+src/assets/locales/*.json
+src/assets/dayjsLocales/
+!src/assets/locales/en.json

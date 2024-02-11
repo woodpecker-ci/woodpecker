@@ -1,58 +1,64 @@
 <template>
-  <div v-if="branches" class="space-y-4">
-    <router-link
-      v-for="branch in branches"
-      :key="branch"
-      :to="{ name: 'repo-branch', params: { branch } }"
-      class="flex"
-    >
-      <ListItem clickable class="text-color">
+  <div class="space-y-4">
+    <template v-if="branches.length > 0">
+      <ListItem
+        v-for="branch in branchesWithDefaultBranchFirst"
+        :key="branch"
+        class="text-wp-text-100"
+        :to="{ name: 'repo-branch', params: { branch } }"
+      >
         {{ branch }}
+        <Badge v-if="branch === repo?.default_branch" :label="$t('default')" class="ml-auto" />
       </ListItem>
-    </router-link>
+    </template>
+    <div v-else-if="loading" class="flex justify-center text-wp-text-100">
+      <Icon name="spinner" />
+    </div>
+    <Panel v-else class="flex justify-center">
+      {{ $t('empty_list', { entity: $t('repo.branches') }) }}
+    </Panel>
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, inject, onMounted, Ref, ref, watch } from 'vue';
+<script lang="ts" setup>
+import { computed, inject, Ref, watch } from 'vue';
 
+import Badge from '~/components/atomic/Badge.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import useApiClient from '~/compositions/useApiClient';
+import { usePagination } from '~/compositions/usePaginate';
 import { Repo } from '~/lib/api/types';
 
-export default defineComponent({
-  name: 'RepoBranches',
+const apiClient = useApiClient();
 
-  components: {
-    ListItem,
-  },
+const repo = inject<Ref<Repo>>('repo');
+if (!repo) {
+  throw new Error('Unexpected: "repo" should be provided at this place');
+}
 
-  setup() {
-    const apiClient = useApiClient();
+async function loadBranches(page: number): Promise<string[]> {
+  if (!repo) {
+    throw new Error('Unexpected: "repo" should be provided at this place');
+  }
 
-    const branches = ref<string[]>();
-    const repo = inject<Ref<Repo>>('repo');
-    if (!repo) {
-      throw new Error('Unexpected: "repo" should be provided at this place');
+  return apiClient.getRepoBranches(repo.value.id, page);
+}
+
+const { resetPage, data: branches, loading } = usePagination(loadBranches);
+
+const branchesWithDefaultBranchFirst = computed(() =>
+  branches.value.toSorted((a, b) => {
+    if (a === repo.value.default_branch) {
+      return -1;
     }
 
-    async function loadBranches() {
-      if (!repo) {
-        throw new Error('Unexpected: "repo" should be provided at this place');
-      }
-
-      branches.value = await apiClient.getRepoBranches(repo.value.owner, repo.value.name);
+    if (b === repo.value.default_branch) {
+      return 1;
     }
 
-    onMounted(() => {
-      loadBranches();
-    });
+    return 0;
+  }),
+);
 
-    watch(repo, () => {
-      loadBranches();
-    });
-
-    return { branches };
-  },
-});
+watch(repo, resetPage);
 </script>

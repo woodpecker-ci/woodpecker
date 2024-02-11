@@ -21,66 +21,137 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/remote"
-	"github.com/woodpecker-ci/woodpecker/server/shared"
-	"github.com/woodpecker-ci/woodpecker/server/store"
+	pipeline_errors "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/compiler"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/pipeline/stepbuilder"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
-func createBuildItems(ctx context.Context, store store.Store, build *model.Build, user *model.User, repo *model.Repo, yamls []*remote.FileMeta, envs map[string]string) (*model.Build, []*shared.BuildItem, error) {
-	netrc, err := server.Config.Services.Remote.Netrc(user, repo)
+func parsePipeline(store store.Store, currentPipeline *model.Pipeline, user *model.User, repo *model.Repo, yamls []*forge_types.FileMeta, envs map[string]string) ([]*stepbuilder.Item, error) {
+	netrc, err := server.Config.Services.Forge.Netrc(user, repo)
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to generate netrc file")
+		log.Error().Err(err).Msg("failed to generate netrc file")
 	}
 
-	// get the previous build so that we can send status change notifications
-	last, err := store.GetBuildLastBefore(repo, build.Branch, build.ID)
+	// get the previous pipeline so that we can send status change notifications
+	last, err := store.GetPipelineLastBefore(repo, currentPipeline.Branch, currentPipeline.ID)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		log.Error().Err(err).Str("repo", repo.FullName).Msgf("Error getting last build before build number '%d'", build.Number)
+		log.Error().Err(err).Str("repo", repo.FullName).Msgf("error getting last pipeline before pipeline number '%d'", currentPipeline.Number)
 	}
 
-	// TODO: only get secrets for build
-	secs, err := server.Config.Extensions.SecretsFromRepo(repo).SecretList(ctx, repo)
+	secretService := server.Config.Services.Manager.SecretServiceFromRepo(repo)
+	secs, err := secretService.SecretListPipeline(repo, currentPipeline, &model.ListOptions{All: true})
 	if err != nil {
-		log.Error().Err(err).Msgf("Error getting secrets for %s#%d", repo.FullName, build.Number)
+		log.Error().Err(err).Msgf("error getting secrets for %s#%d", repo.FullName, currentPipeline.Number)
 	}
 
-	regs, err := server.Config.Extensions.RegistriesFromRepo(repo).RegistryList(ctx, repo)
+	registryService := server.Config.Services.Manager.RegistryServiceFromRepo(repo)
+	regs, err := registryService.RegistryList(repo, &model.ListOptions{All: true})
 	if err != nil {
-		log.Error().Err(err).Msgf("Error getting registry credentials for %s#%d", repo.FullName, build.Number)
+		log.Error().Err(err).Msgf("error getting registry credentials for %s#%d", repo.FullName, currentPipeline.Number)
 	}
 
 	if envs == nil {
 		envs = map[string]string{}
 	}
-	if server.Config.Extensions.Environ() != nil {
-		globals, _ := server.Config.Extensions.Environ().EnvironList(repo)
+
+	environmentService := server.Config.Services.Manager.EnvironmentService()
+	if environmentService != nil {
+		globals, _ := environmentService.EnvironList(repo)
 		for _, global := range globals {
 			envs[global.Name] = global.Value
 		}
 	}
 
-	b := shared.ProcBuilder{
+	for k, v := range currentPipeline.AdditionalVariables {
+		envs[k] = v
+	}
+
+	b := stepbuilder.StepBuilder{
 		Repo:  repo,
-		Curr:  build,
+		Curr:  currentPipeline,
 		Last:  last,
 		Netrc: netrc,
 		Secs:  secs,
 		Regs:  regs,
 		Envs:  envs,
-		Link:  server.Config.Server.Host,
+		Host:  server.Config.Server.Host,
 		Yamls: yamls,
+		Forge: server.Config.Services.Forge,
+		ProxyOpts: compiler.ProxyOptions{
+			NoProxy:    server.Config.Pipeline.Proxy.No,
+			HTTPProxy:  server.Config.Pipeline.Proxy.HTTP,
+			HTTPSProxy: server.Config.Pipeline.Proxy.HTTPS,
+		},
 	}
-	buildItems, err := b.Build()
-	if err != nil {
-		if _, err := shared.UpdateToStatusError(store, *build, err); err != nil {
-			log.Error().Err(err).Msgf("Error setting error status of build for %s#%d", repo.FullName, build.Number)
+	return b.Build()
+}
+
+func createPipelineItems(c context.Context, store store.Store,
+	currentPipeline *model.Pipeline, user *model.User, repo *model.Repo,
+	yamls []*forge_types.FileMeta, envs map[string]string,
+) (*model.Pipeline, []*stepbuilder.Item, error) {
+	pipelineItems, err := parsePipeline(store, currentPipeline, user, repo, yamls, envs)
+	if pipeline_errors.HasBlockingErrors(err) {
+		currentPipeline, uerr := UpdateToStatusError(store, *currentPipeline, err)
+		if uerr != nil {
+			log.Error().Err(uerr).Msgf("error setting error status of pipeline for %s#%d", repo.FullName, currentPipeline.Number)
+		} else {
+			updatePipelineStatus(c, currentPipeline, repo, user)
 		}
-		return nil, nil, err
+
+		return currentPipeline, nil, err
+	} else if err != nil {
+		currentPipeline.Errors = pipeline_errors.GetPipelineErrors(err)
+		err = updatePipelinePending(c, store, currentPipeline, repo, user)
 	}
 
-	build = shared.SetBuildStepsOnBuild(b.Curr, buildItems)
+	currentPipeline = setPipelineStepsOnPipeline(currentPipeline, pipelineItems)
 
-	return build, buildItems, nil
+	return currentPipeline, pipelineItems, err
+}
+
+// setPipelineStepsOnPipeline is the link between pipeline representation in "pipeline package" and server
+// to be specific this func currently is used to convert the pipeline.Item list (crafted by StepBuilder.Build()) into
+// a pipeline that can be stored in the database by the server
+func setPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*stepbuilder.Item) *model.Pipeline {
+	var pidSequence int
+	for _, item := range pipelineItems {
+		if pidSequence < item.Workflow.PID {
+			pidSequence = item.Workflow.PID
+		}
+	}
+
+	for _, item := range pipelineItems {
+		for _, stage := range item.Config.Stages {
+			var gid int
+			for _, step := range stage.Steps {
+				pidSequence++
+				if gid == 0 {
+					gid = pidSequence
+				}
+				step := &model.Step{
+					Name:       step.Name,
+					UUID:       step.UUID,
+					PipelineID: pipeline.ID,
+					PID:        pidSequence,
+					PPID:       item.Workflow.PID,
+					State:      model.StatusPending,
+					Failure:    step.Failure,
+					Type:       model.StepType(step.Type),
+				}
+				if item.Workflow.State == model.StatusSkipped {
+					step.State = model.StatusSkipped
+				}
+				item.Workflow.Children = append(item.Workflow.Children, step)
+			}
+		}
+		item.Workflow.PipelineID = pipeline.ID
+		pipeline.Workflows = append(pipeline.Workflows, item.Workflow)
+	}
+
+	return pipeline
 }

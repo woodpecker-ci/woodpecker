@@ -1,3 +1,17 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package utils
 
 import (
@@ -7,7 +21,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 
@@ -16,7 +29,7 @@ import (
 
 // Send makes an http request to the given endpoint, writing the input
 // to the request body and un-marshaling the output from the response body.
-func Send(ctx context.Context, method, path string, privateKey crypto.PrivateKey, in, out interface{}) (int, error) {
+func Send(ctx context.Context, method, path string, privateKey crypto.PrivateKey, in, out any) (int, error) {
 	uri, err := url.Parse(path)
 	if err != nil {
 		return 0, err
@@ -26,9 +39,9 @@ func Send(ctx context.Context, method, path string, privateKey crypto.PrivateKey
 	var buf io.ReadWriter
 	if in != nil {
 		buf = new(bytes.Buffer)
-		jsonerr := json.NewEncoder(buf).Encode(in)
-		if jsonerr != nil {
-			return 0, jsonerr
+		jsonErr := json.NewEncoder(buf).Encode(in)
+		if jsonErr != nil {
+			return 0, jsonErr
 		}
 	}
 
@@ -52,13 +65,18 @@ func Send(ctx context.Context, method, path string, privateKey crypto.PrivateKey
 	}
 	defer resp.Body.Close()
 
+<<<<<<<< HEAD:server/extensions/utils/http.go
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		body, err := ioutil.ReadAll(resp.Body)
+========
+	if resp.StatusCode != 200 {
+		body, err := io.ReadAll(resp.Body)
+>>>>>>>> upstream/main:server/services/utils/http.go
 		if err != nil {
 			return resp.StatusCode, err
 		}
 
-		return resp.StatusCode, fmt.Errorf("Response: %s", string(body))
+		return resp.StatusCode, fmt.Errorf("response: %s", string(body))
 	}
 
 	// if no other errors parse and return the json response.

@@ -1,3 +1,17 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package secret
 
 import (
@@ -7,44 +21,59 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
 var secretListCmd = &cli.Command{
 	Name:      "ls",
 	Usage:     "list secrets",
-	ArgsUsage: "[repo/name]",
+	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    secretList,
-	Flags: append(common.GlobalFlags,
-		&cli.StringFlag{
-			Name:  "repository",
-			Usage: "repository name (e.g. octocat/hello-world)",
+	Flags: []cli.Flag{
+		&cli.BoolFlag{
+			Name:  "global",
+			Usage: "global secret",
 		},
+		common.OrgFlag,
+		common.RepoFlag,
 		common.FormatFlag(tmplSecretList, true),
-	),
+	},
 }
 
 func secretList(c *cli.Context) error {
-	var (
-		format   = c.String("format") + "\n"
-		reponame = c.String("repository")
-	)
-	if reponame == "" {
-		reponame = c.Args().First()
-	}
-	owner, name, err := internal.ParseRepo(reponame)
-	if err != nil {
-		return err
-	}
+	format := c.String("format") + "\n"
+
 	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
 	}
-	list, err := client.SecretList(owner, name)
+
+	global, orgID, repoID, err := parseTargetArgs(client, c)
 	if err != nil {
 		return err
 	}
+
+	var list []*woodpecker.Secret
+	switch {
+	case global:
+		list, err = client.GlobalSecretList()
+		if err != nil {
+			return err
+		}
+	case orgID != -1:
+		list, err = client.OrgSecretList(orgID)
+		if err != nil {
+			return err
+		}
+	default:
+		list, err = client.SecretList(repoID)
+		if err != nil {
+			return err
+		}
+	}
+
 	tmpl, err := template.New("_").Funcs(secretFuncMap).Parse(format)
 	if err != nil {
 		return err

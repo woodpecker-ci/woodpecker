@@ -1,22 +1,22 @@
 <template>
-  <Panel>
-    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-gray-600">
-      <h1 class="text-xl ml-2 text-color">{{ $t('repo.settings.general.general') }}</h1>
-    </div>
-
-    <div v-if="repoSettings" class="flex flex-col">
+  <Settings :title="$t('repo.settings.general.general')">
+    <form v-if="repoSettings" class="flex flex-col" @submit.prevent="saveRepoSettings">
       <InputField
         docs-url="docs/usage/project-settings#pipeline-path"
         :label="$t('repo.settings.general.pipeline_path.path')"
       >
-        <TextField
-          v-model="repoSettings.config_file"
-          class="max-w-124"
-          :placeholder="$t('repo.settings.general.pipeline_path.default')"
-        />
+        <template #default="{ id }">
+          <TextField
+            :id="id"
+            v-model="repoSettings.config_file"
+            :placeholder="$t('repo.settings.general.pipeline_path.default')"
+          />
+        </template>
         <template #description>
-          <!-- eslint-disable-next-line vue/no-v-html -->
-          <p class="text-sm text-color-alt" v-html="$t('repo.settings.general.pipeline_path.desc')" />
+          <i18n-t keypath="repo.settings.general.pipeline_path.desc" tag="p" class="text-sm text-wp-text-alt-100">
+            <span class="code-box-inline px-1">{{ $t('repo.settings.general.pipeline_path.desc_path_example') }}</span>
+            <span class="code-box-inline px-1">/</span>
+          </i18n-t>
         </template>
       </InputField>
 
@@ -35,6 +35,11 @@
           :description="$t('repo.settings.general.protected.desc')"
         />
         <Checkbox
+          v-model="repoSettings.netrc_only_trusted"
+          :label="$t('repo.settings.general.netrc_only_trusted.netrc_only_trusted')"
+          :description="$t('repo.settings.general.netrc_only_trusted.desc')"
+        />
+        <Checkbox
           v-if="user?.admin"
           v-model="repoSettings.trusted"
           :label="$t('repo.settings.general.trusted.trusted')"
@@ -49,10 +54,14 @@
         <RadioField v-model="repoSettings.visibility" :options="projectVisibilityOptions" />
       </InputField>
 
-      <InputField docs-url="docs/usage/project-settings#timeout" :label="$t('repo.settings.general.timeout.timeout')">
+      <InputField
+        v-slot="{ id }"
+        docs-url="docs/usage/project-settings#timeout"
+        :label="$t('repo.settings.general.timeout.timeout')"
+      >
         <div class="flex items-center">
-          <NumberField v-model="repoSettings.timeout" class="w-24" />
-          <span class="ml-4 text-gray-600">{{ $t('repo.settings.general.timeout.minutes') }}</span>
+          <NumberField :id="id" v-model="repoSettings.timeout" class="w-24" />
+          <span class="ml-4 text-wp-text-alt-100">{{ $t('repo.settings.general.timeout.minutes') }}</span>
         </div>
       </InputField>
 
@@ -62,7 +71,7 @@
       >
         <CheckboxesField
           v-model="repoSettings.cancel_previous_pipeline_events"
-          :options="cancelPreviousBuildEventsOptions"
+          :options="cancelPreviousPipelineEventsOptions"
         />
         <template #description>
           <p class="text-sm">
@@ -72,14 +81,14 @@
       </InputField>
 
       <Button
+        type="submit"
         class="mr-auto"
         color="green"
         :is-loading="isSaving"
         :text="$t('repo.settings.general.save')"
-        @click="saveRepoSettings"
       />
-    </div>
-  </Panel>
+    </form>
+  </Settings>
 </template>
 
 <script lang="ts" setup>
@@ -94,18 +103,18 @@ import InputField from '~/components/form/InputField.vue';
 import NumberField from '~/components/form/NumberField.vue';
 import RadioField from '~/components/form/RadioField.vue';
 import TextField from '~/components/form/TextField.vue';
-import Panel from '~/components/layout/Panel.vue';
+import Settings from '~/components/layout/Settings.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useAuthentication from '~/compositions/useAuthentication';
 import useNotifications from '~/compositions/useNotifications';
 import { Repo, RepoSettings, RepoVisibility, WebhookEvents } from '~/lib/api/types';
-import RepoStore from '~/store/repos';
+import { useRepoStore } from '~/store/repos';
 
 const apiClient = useApiClient();
 const notifications = useNotifications();
 const { user } = useAuthentication();
-const repoStore = RepoStore();
+const repoStore = useRepoStore();
 const i18n = useI18n();
 
 const repo = inject<Ref<Repo>>('repo');
@@ -124,6 +133,7 @@ function loadRepoSettings() {
     trusted: repo.value.trusted,
     allow_pr: repo.value.allow_pr,
     cancel_previous_pipeline_events: repo.value.cancel_previous_pipeline_events || [],
+    netrc_only_trusted: repo.value.netrc_only_trusted,
   };
 }
 
@@ -132,7 +142,7 @@ async function loadRepo() {
     throw new Error('Unexpected: Repo should be set');
   }
 
-  await repoStore.loadRepo(repo.value.owner, repo.value.name);
+  await repoStore.loadRepo(repo.value.id);
   loadRepoSettings();
 }
 
@@ -145,7 +155,7 @@ const { doSubmit: saveRepoSettings, isLoading: isSaving } = useAsyncAction(async
     throw new Error('Unexpected: Repo-Settings should be set');
   }
 
-  await apiClient.updateRepo(repo.value.owner, repo.value.name, repoSettings.value);
+  await apiClient.updateRepo(repo.value.id, repoSettings.value);
   await loadRepo();
   notifications.notify({ title: i18n.t('repo.settings.general.success'), type: 'success' });
 });
@@ -161,24 +171,24 @@ const projectVisibilityOptions: RadioOption[] = [
     description: i18n.t('repo.settings.general.visibility.public.desc'),
   },
   {
-    value: RepoVisibility.Private,
-    text: i18n.t('repo.settings.general.visibility.private.private'),
-    description: i18n.t('repo.settings.general.visibility.private.desc'),
-  },
-  {
     value: RepoVisibility.Internal,
     text: i18n.t('repo.settings.general.visibility.internal.internal'),
     description: i18n.t('repo.settings.general.visibility.internal.desc'),
   },
+  {
+    value: RepoVisibility.Private,
+    text: i18n.t('repo.settings.general.visibility.private.private'),
+    description: i18n.t('repo.settings.general.visibility.private.desc'),
+  },
 ];
 
-const cancelPreviousBuildEventsOptions: CheckboxOption[] = [
-  { value: WebhookEvents.Push, text: i18n.t('repo.build.event.push') },
-  { value: WebhookEvents.Tag, text: i18n.t('repo.build.event.tag') },
+const cancelPreviousPipelineEventsOptions: CheckboxOption[] = [
+  { value: WebhookEvents.Push, text: i18n.t('repo.pipeline.event.push') },
+  { value: WebhookEvents.Tag, text: i18n.t('repo.pipeline.event.tag') },
   {
     value: WebhookEvents.PullRequest,
-    text: i18n.t('repo.build.event.pr'),
+    text: i18n.t('repo.pipeline.event.pr'),
   },
-  { value: WebhookEvents.Deploy, text: i18n.t('repo.build.event.deploy') },
+  { value: WebhookEvents.Deploy, text: i18n.t('repo.pipeline.event.deploy') },
 ];
 </script>

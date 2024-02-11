@@ -1,4 +1,4 @@
 {
-  "extends": "@tsconfig/docusaurus/tsconfig.json",
-  "include": ["src/"]
+  "extends": "@docusaurus/tsconfig",
+  "include": ["src/"],
 }

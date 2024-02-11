@@ -1,3 +1,17 @@
+// Copyright 2022 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package repo
 
 import (
@@ -6,17 +20,16 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
-	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
 var repoUpdateCmd = &cli.Command{
 	Name:      "update",
 	Usage:     "update a repository",
-	ArgsUsage: "<repo/name>",
+	ArgsUsage: "<repo-id|repo-full-name>",
 	Action:    repoUpdate,
-	Flags: append(common.GlobalFlags,
+	Flags: []cli.Flag{
 		&cli.BoolFlag{
 			Name:  "trusted",
 			Usage: "repository is trusted",
@@ -38,36 +51,35 @@ var repoUpdateCmd = &cli.Command{
 			Usage: "repository configuration path (e.g. .woodpecker.yml)",
 		},
 		&cli.IntFlag{
-			Name:  "build-counter",
-			Usage: "repository starting build number",
+			Name:  "pipeline-counter",
+			Usage: "repository starting pipeline number",
 		},
 		&cli.BoolFlag{
 			Name:  "unsafe",
-			Usage: "validate updating the build-counter is unsafe",
+			Usage: "validate updating the pipeline-counter is unsafe",
 		},
-	),
+	},
 }
 
 func repoUpdate(c *cli.Context) error {
-	repo := c.Args().First()
-	owner, name, err := internal.ParseRepo(repo)
+	repoIDOrFullName := c.Args().First()
+	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
 	}
-
-	client, err := internal.NewClient(c)
+	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
 	if err != nil {
 		return err
 	}
 
 	var (
-		visibility   = c.String("visibility")
-		config       = c.String("config")
-		timeout      = c.Duration("timeout")
-		trusted      = c.Bool("trusted")
-		gated        = c.Bool("gated")
-		buildCounter = c.Int("build-counter")
-		unsafe       = c.Bool("unsafe")
+		visibility      = c.String("visibility")
+		config          = c.String("config")
+		timeout         = c.Duration("timeout")
+		trusted         = c.Bool("trusted")
+		gated           = c.Bool("gated")
+		pipelineCounter = c.Int("pipeline-counter")
+		unsafe          = c.Bool("unsafe")
 	)
 
 	patch := new(woodpecker.RepoPatch)
@@ -90,16 +102,18 @@ func repoUpdate(c *cli.Context) error {
 			patch.Visibility = &visibility
 		}
 	}
-	if c.IsSet("build-counter") && !unsafe {
-		fmt.Printf("Setting the build counter is an unsafe operation that could put your repository in an inconsistent state. Please use --unsafe to proceed")
+	if c.IsSet("pipeline-counter") && !unsafe {
+		fmt.Printf("Setting the pipeline counter is an unsafe operation that could put your repository in an inconsistent state. Please use --unsafe to proceed")
 	}
-	if c.IsSet("build-counter") && unsafe {
-		patch.BuildCounter = &buildCounter
+	if c.IsSet("pipeline-counter") && unsafe {
+		patch.PipelineCounter = &pipelineCounter
 	}
 
-	if _, err := client.RepoPatch(owner, name, patch); err != nil {
+	repo, err := client.RepoPatch(repoID, patch)
+	if err != nil {
 		return err
 	}
-	fmt.Printf("Successfully updated repository %s/%s\n", owner, name)
+
+	fmt.Printf("Successfully updated repository %s\n", repo.FullName)
 	return nil
 }

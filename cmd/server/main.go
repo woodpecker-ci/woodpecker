@@ -15,13 +15,14 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
 	_ "github.com/joho/godotenv/autoload"
+	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
 
-	"github.com/woodpecker-ci/woodpecker/version"
+	_ "go.woodpecker-ci.org/woodpecker/v2/cmd/server/docs"
+	"go.woodpecker-ci.org/woodpecker/v2/version"
 )
 
 func main() {
@@ -30,10 +31,18 @@ func main() {
 	app.Version = version.String()
 	app.Usage = "woodpecker server"
 	app.Action = run
+	app.Commands = []*cli.Command{
+		{
+			Name:   "ping",
+			Usage:  "ping the server",
+			Action: pinger,
+		},
+	}
 	app.Flags = flags
 
+	setupSwaggerStaticConfig()
+
 	if err := app.Run(os.Args); err != nil {
-		_, _ = fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		log.Fatal().Err(err).Msgf("error running server") //nolint:forbidigo
 	}
 }

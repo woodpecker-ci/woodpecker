@@ -1,9 +1,11 @@
 import { computed, ref, watch } from 'vue';
 
-import { useDarkMode } from '~/compositions/useDarkMode';
-import { BuildStatus } from '~/lib/api/types';
+import useConfig from '~/compositions/useConfig';
+import { useTheme } from '~/compositions/useTheme';
+import { PipelineStatus } from '~/lib/api/types';
 
-const darkMode = computed(() => (useDarkMode().darkMode.value ? 'dark' : 'light'));
+const { theme } = useTheme();
+const darkMode = computed(() => theme.value);
 
 type Status = 'default' | 'success' | 'pending' | 'error';
 const faviconStatus = ref<Status>('default');
@@ -13,18 +15,22 @@ watch(
   () => {
     const faviconPNG = document.getElementById('favicon-png');
     if (faviconPNG) {
-      (faviconPNG as HTMLLinkElement).href = `/favicons/favicon-${darkMode.value}-${faviconStatus.value}.png`;
+      (faviconPNG as HTMLLinkElement).href = `${useConfig().rootPath}/favicons/favicon-${darkMode.value}-${
+        faviconStatus.value
+      }.png`;
     }
 
     const faviconSVG = document.getElementById('favicon-svg');
     if (faviconSVG) {
-      (faviconSVG as HTMLLinkElement).href = `/favicons/favicon-${darkMode.value}-${faviconStatus.value}.svg`;
+      (faviconSVG as HTMLLinkElement).href = `${useConfig().rootPath}/favicons/favicon-${darkMode.value}-${
+        faviconStatus.value
+      }.svg`;
     }
   },
   { immediate: true },
 );
 
-function convertStatus(status: BuildStatus): Status {
+function convertStatus(status: PipelineStatus): Status {
   if (['blocked', 'declined', 'error', 'failure', 'killed'].includes(status)) {
     return 'error';
   }
@@ -43,7 +49,7 @@ function convertStatus(status: BuildStatus): Status {
 
 export function useFavicon() {
   return {
-    updateStatus(status?: BuildStatus | 'default') {
+    updateStatus(status?: PipelineStatus | 'default') {
       if (status === undefined || status === 'default') {
         faviconStatus.value = 'default';
       } else {

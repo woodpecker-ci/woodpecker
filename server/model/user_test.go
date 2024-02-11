@@ -14,7 +14,11 @@
 
 package model
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 func TestUserValidate(t *testing.T) {
 	tests := []struct {
@@ -57,8 +61,6 @@ func TestUserValidate(t *testing.T) {
 
 	for _, test := range tests {
 		err := test.user.Validate()
-		if want, got := test.err, err; want != got {
-			t.Errorf("Want user validation error %s, got %s", want, got)
-		}
+		assert.ErrorIs(t, err, test.err)
 	}
 }

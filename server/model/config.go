@@ -15,26 +15,17 @@
 
 package model
 
-// ConfigStore persists pipeline configuration to storage.
-type ConfigStore interface {
-	ConfigsForBuild(buildID int64) ([]*Config, error)
-	ConfigFindIdentical(repoID int64, hash string) (*Config, error)
-	ConfigFindApproved(*Config) (bool, error)
-	ConfigCreate(*Config) error
-	BuildConfigCreate(*BuildConfig) error
-}
-
 // Config represents a pipeline configuration.
 type Config struct {
 	ID     int64  `json:"-"    xorm:"pk autoincr 'config_id'"`
 	RepoID int64  `json:"-"    xorm:"UNIQUE(s) 'config_repo_id'"`
 	Hash   string `json:"hash" xorm:"UNIQUE(s) 'config_hash'"`
-	Name   string `json:"name" xorm:"config_name"`
-	Data   []byte `json:"data" xorm:"config_data"`
-}
+	Name   string `json:"name" xorm:"UNIQUE(s) 'config_name'"`
+	Data   []byte `json:"data" xorm:"LONGBLOB 'config_data'"`
+} //	@name Config
 
-// BuildConfig is the n:n relation between Build and Config
-type BuildConfig struct {
-	ConfigID int64 `json:"-"   xorm:"UNIQUE(s) NOT NULL 'config_id'"`
-	BuildID  int64 `json:"-"   xorm:"UNIQUE(s) NOT NULL 'build_id'"`
+// PipelineConfig is the n:n relation between Pipeline and Config
+type PipelineConfig struct {
+	ConfigID   int64 `json:"-"   xorm:"UNIQUE(s) NOT NULL 'config_id'"`
+	PipelineID int64 `json:"-"   xorm:"UNIQUE(s) NOT NULL 'pipeline_id'"`
 }

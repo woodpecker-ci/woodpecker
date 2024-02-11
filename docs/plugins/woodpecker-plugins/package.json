@@ -5,24 +5,30 @@
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "scripts": {
-    "start": "concurrently 'tsc -w' 'tsc -w -p tsconfig.jsx.json'",
-    "build": "tsc && tsc -p tsconfig.jsx.json"
+    "start": "pnpm run style && concurrently 'tsc -w' 'tsc -w -p tsconfig.jsx.json'",
+    "build": "pnpm run style && tsc && tsc -p tsconfig.jsx.json",
+    "style": "mkdir -p dist/theme/ && cp src/theme/style.css dist/theme/style.css"
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "^2.0.0-beta.18",
-    "@docusaurus/theme-classic": "^2.0.0-beta.18",
-    "@docusaurus/types": "^2.0.0-beta.18",
-    "@octokit/openapi-types": "^11.2.0",
-    "@octokit/rest": "^18.12.0",
-    "@tsconfig/docusaurus": "^1.0.5",
-    "@types/marked": "^4.0.3",
-    "clsx": "^1.1.1",
-    "concurrently": "^7.0.0",
-    "marked": "^4.0.12",
-    "typescript": "^4.6.3"
+    "@docusaurus/module-type-aliases": "^3.0.0",
+    "@docusaurus/theme-classic": "^3.0.0",
+    "@docusaurus/types": "^3.0.0",
+    "@tsconfig/docusaurus": "^2.0.0",
+    "@types/marked": "^5.0.0",
+    "@types/node": "^20.0.0",
+    "axios": "^1.6.0",
+    "concurrently": "^8.0.0",
+    "isomorphic-dompurify": "^2.0.0",
+    "marked": "^12.0.0",
+    "tslib": "^2.6.1",
+    "typescript": "^5.0.0"
   },
   "peerDependencies": {
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2"
+    "react": "^17.0.2 || ^18.0.0",
+    "react-dom": "^17.0.2 || ^18.0.0"
+  },
+  "dependencies": {
+    "fuse.js": "^7.0.0",
+    "yaml": "^2.3.1"
   }
 }

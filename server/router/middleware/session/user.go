@@ -16,12 +16,15 @@ package session
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/store"
-	"github.com/woodpecker-ci/woodpecker/shared/token"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/token"
 )
 
 func User(c *gin.Context) *model.User {
@@ -46,17 +49,13 @@ func SetUser() gin.HandlerFunc {
 			return user.Hash, err
 		})
 		if err == nil {
-			confv := c.MustGet("config")
-			if conf, ok := confv.(*model.Settings); ok {
-				user.Admin = conf.IsAdmin(user)
-			}
 			c.Set("user", user)
 
 			// if this is a session token (ie not the API token)
 			// this means the user is accessing with a web browser,
 			// so we should implement CSRF protection measures.
 			if t.Kind == token.SessToken {
-				err = token.CheckCsrf(c.Request, func(t *token.Token) (string, error) {
+				err = token.CheckCsrf(c.Request, func(_ *token.Token) (string, error) {
 					return user.Hash, nil
 				})
 				// if csrf token validation fails, exit immediately
@@ -114,5 +113,52 @@ func MustUser() gin.HandlerFunc {
 		default:
 			c.Next()
 		}
+	}
+}
+
+func MustOrgMember(admin bool) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		_store := store.FromContext(c)
+
+		user := User(c)
+		if user == nil {
+			c.String(http.StatusUnauthorized, "User not authorized")
+			c.Abort()
+			return
+		}
+
+		orgID, err := strconv.ParseInt(c.Param("org_id"), 10, 64)
+		if err != nil {
+			c.String(http.StatusBadRequest, "Error parsing org id. %s", err)
+			return
+		}
+
+		org, err := _store.OrgGet(orgID)
+		if err != nil {
+			c.String(http.StatusNotFound, "Organization not found")
+			return
+		}
+
+		// User can access his own, admin can access all
+		if (org.Name == user.Login) || user.Admin {
+			c.Next()
+			return
+		}
+
+		perm, err := server.Config.Services.Membership.Get(c, user, org.Name)
+		if err != nil {
+			log.Error().Err(err).Msg("failed to check membership")
+			c.String(http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			c.Abort()
+			return
+		}
+
+		if perm == nil || (!admin && !perm.Member) || (admin && !perm.Admin) {
+			c.String(http.StatusForbidden, "user not authorized")
+			c.Abort()
+			return
+		}
+
+		c.Next()
 	}
 }

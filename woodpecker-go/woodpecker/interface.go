@@ -1,10 +1,24 @@
+// Copyright 2022 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package woodpecker
 
 import (
 	"net/http"
 )
 
-// Client is used to communicate with a Drone server.
+// Client is used to communicate with a Woodpecker server.
 type Client interface {
 	// SetClient sets the http.Client.
 	SetClient(*http.Client)
@@ -31,7 +45,10 @@ type Client interface {
 	UserDel(string) error
 
 	// Repo returns a repository by name.
-	Repo(string, string) (*Repo, error)
+	Repo(repoID int64) (*Repo, error)
+
+	// RepoLookup returns a repository id by the owner and name.
+	RepoLookup(repoFullName string) (*Repo, error)
 
 	// RepoList returns a list of all repositories to which the user has explicit
 	// access in the host system.
@@ -39,91 +56,133 @@ type Client interface {
 
 	// RepoListOpts returns a list of all repositories to which the user has
 	// explicit access in the host system.
-	RepoListOpts(bool, bool) ([]*Repo, error)
+	RepoListOpts(bool) ([]*Repo, error)
 
 	// RepoPost activates a repository.
-	RepoPost(string, string) (*Repo, error)
+	RepoPost(forgeRemoteID int64) (*Repo, error)
 
 	// RepoPatch updates a repository.
-	RepoPatch(string, string, *RepoPatch) (*Repo, error)
+	RepoPatch(repoID int64, repo *RepoPatch) (*Repo, error)
 
 	// RepoMove moves the repository
-	RepoMove(string, string, string) error
+	RepoMove(repoID int64, dst string) error
 
 	// RepoChown updates a repository owner.
-	RepoChown(string, string) (*Repo, error)
+	RepoChown(repoID int64) (*Repo, error)
 
 	// RepoRepair repairs the repository hooks.
-	RepoRepair(string, string) error
+	RepoRepair(repoID int64) error
 
 	// RepoDel deletes a repository.
-	RepoDel(string, string) error
+	RepoDel(repoID int64) error
 
-	// Build returns a repository build by number.
-	Build(string, string, int) (*Build, error)
+	// Pipeline returns a repository pipeline by number.
+	Pipeline(repoID, pipeline int64) (*Pipeline, error)
 
-	// BuildLast returns the latest repository build by branch. An empty branch
+	// PipelineLast returns the latest repository pipeline by branch. An empty branch
 	// will result in the default branch.
-	BuildLast(string, string, string) (*Build, error)
+	PipelineLast(repoID int64, branch string) (*Pipeline, error)
 
-	// BuildList returns a list of recent builds for the
+	// PipelineList returns a list of recent pipelines for the
 	// the specified repository.
-	BuildList(string, string) ([]*Build, error)
+	PipelineList(repoID int64) ([]*Pipeline, error)
 
-	// BuildQueue returns a list of enqueued builds.
-	BuildQueue() ([]*Activity, error)
+	// PipelineQueue returns a list of enqueued pipelines.
+	PipelineQueue() ([]*Feed, error)
 
-	// BuildStart re-starts a stopped build.
-	BuildStart(string, string, int, map[string]string) (*Build, error)
+	// PipelineCreate returns creates a pipeline on specified branch.
+	PipelineCreate(repoID int64, opts *PipelineOptions) (*Pipeline, error)
 
-	// BuildStop stops the specified running job for given build.
-	BuildStop(string, string, int, int) error
+	// PipelineStart re-starts a stopped pipeline.
+	PipelineStart(repoID, num int64, params map[string]string) (*Pipeline, error)
 
-	// BuildApprove approves a blocked build.
-	BuildApprove(string, string, int) (*Build, error)
+	// PipelineStop stops the given pipeline.
+	PipelineStop(repoID, pipeline int64) error
 
-	// BuildDecline declines a blocked build.
-	BuildDecline(string, string, int) (*Build, error)
+	// PipelineApprove approves a blocked pipeline.
+	PipelineApprove(repoID, pipeline int64) (*Pipeline, error)
 
-	// BuildKill force kills the running build.
-	BuildKill(string, string, int) error
+	// PipelineDecline declines a blocked pipeline.
+	PipelineDecline(repoID, pipeline int64) (*Pipeline, error)
 
-	// Deploy triggers a deployment for an existing build using the specified
+	// PipelineKill force kills the running pipeline.
+	PipelineKill(repoID, pipeline int64) error
+
+	// StepLogEntries returns the LogEntries for the given pipeline step
+	StepLogEntries(repoID, pipeline, stepID int64) ([]*LogEntry, error)
+
+	// Deploy triggers a deployment for an existing pipeline using the specified
 	// target environment.
-	Deploy(string, string, int, string, map[string]string) (*Build, error)
+	Deploy(repoID, pipeline int64, env string, params map[string]string) (*Pipeline, error)
 
-	// LogsPurge purges the build logs for the specified build.
-	LogsPurge(string, string, int) error
+	// LogsPurge purges the pipeline logs for the specified pipeline.
+	LogsPurge(repoID, pipeline int64) error
 
 	// Registry returns a registry by hostname.
-	Registry(owner, name, hostname string) (*Registry, error)
+	Registry(repoID int64, hostname string) (*Registry, error)
 
 	// RegistryList returns a list of all repository registries.
-	RegistryList(owner, name string) ([]*Registry, error)
+	RegistryList(repoID int64) ([]*Registry, error)
 
 	// RegistryCreate creates a registry.
-	RegistryCreate(owner, name string, registry *Registry) (*Registry, error)
+	RegistryCreate(repoID int64, registry *Registry) (*Registry, error)
 
 	// RegistryUpdate updates a registry.
-	RegistryUpdate(owner, name string, registry *Registry) (*Registry, error)
+	RegistryUpdate(repoID int64, registry *Registry) (*Registry, error)
 
 	// RegistryDelete deletes a registry.
-	RegistryDelete(owner, name, hostname string) error
+	RegistryDelete(repoID int64, hostname string) error
 
 	// Secret returns a secret by name.
-	Secret(owner, name, secret string) (*Secret, error)
+	Secret(repoID int64, secret string) (*Secret, error)
 
 	// SecretList returns a list of all repository secrets.
-	SecretList(owner, name string) ([]*Secret, error)
+	SecretList(repoID int64) ([]*Secret, error)
 
-	// SecretCreate creates a registry.
-	SecretCreate(owner, name string, secret *Secret) (*Secret, error)
+	// SecretCreate creates a secret.
+	SecretCreate(repoID int64, secret *Secret) (*Secret, error)
 
-	// SecretUpdate updates a registry.
-	SecretUpdate(owner, name string, secret *Secret) (*Secret, error)
+	// SecretUpdate updates a secret.
+	SecretUpdate(repoID int64, secret *Secret) (*Secret, error)
 
 	// SecretDelete deletes a secret.
-	SecretDelete(owner, name, secret string) error
+	SecretDelete(repoID int64, secret string) error
+
+	// Org returns an organization by name.
+	Org(orgID int64) (*Org, error)
+
+	// OrgLookup returns an organization id by name.
+	OrgLookup(orgName string) (*Org, error)
+
+	// OrgSecret returns an organization secret by name.
+	OrgSecret(orgID int64, secret string) (*Secret, error)
+
+	// OrgSecretList returns a list of all organization secrets.
+	OrgSecretList(orgID int64) ([]*Secret, error)
+
+	// OrgSecretCreate creates an organization secret.
+	OrgSecretCreate(orgID int64, secret *Secret) (*Secret, error)
+
+	// OrgSecretUpdate updates an organization secret.
+	OrgSecretUpdate(orgID int64, secret *Secret) (*Secret, error)
+
+	// OrgSecretDelete deletes an organization secret.
+	OrgSecretDelete(orgID int64, secret string) error
+
+	// GlobalSecret returns an global secret by name.
+	GlobalSecret(secret string) (*Secret, error)
+
+	// GlobalSecretList returns a list of all global secrets.
+	GlobalSecretList() ([]*Secret, error)
+
+	// GlobalSecretCreate creates a global secret.
+	GlobalSecretCreate(secret *Secret) (*Secret, error)
+
+	// GlobalSecretUpdate updates a global secret.
+	GlobalSecretUpdate(secret *Secret) (*Secret, error)
+
+	// GlobalSecretDelete deletes a global secret.
+	GlobalSecretDelete(secret string) error
 
 	// QueueInfo returns the queue state.
 	QueueInfo() (*Info, error)
@@ -133,4 +192,37 @@ type Client interface {
 
 	// SetLogLevel sets the server's logging level
 	SetLogLevel(logLevel *LogLevel) (*LogLevel, error)
+
+	// CronList list all cron jobs of a repo
+	CronList(repoID int64) ([]*Cron, error)
+
+	// CronGet get a specific cron job of a repo by id
+	CronGet(repoID, cronID int64) (*Cron, error)
+
+	// CronDelete delete a specific cron job of a repo by id
+	CronDelete(repoID, cronID int64) error
+
+	// CronCreate create a new cron job in a repo
+	CronCreate(repoID int64, cron *Cron) (*Cron, error)
+
+	// CronUpdate update an existing cron job of a repo
+	CronUpdate(repoID int64, cron *Cron) (*Cron, error)
+
+	// AgentList returns a list of all registered agents
+	AgentList() ([]*Agent, error)
+
+	// Agent returns an agent by id
+	Agent(int64) (*Agent, error)
+
+	// AgentCreate creates a new agent
+	AgentCreate(*Agent) (*Agent, error)
+
+	// AgentUpdate updates an existing agent
+	AgentUpdate(*Agent) (*Agent, error)
+
+	// AgentDelete deletes an agent
+	AgentDelete(int64) error
+
+	// AgentTasksList returns a list of all tasks executed by an agent
+	AgentTasksList(int64) ([]*Task, error)
 }

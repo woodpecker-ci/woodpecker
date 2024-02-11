@@ -1,17 +1,36 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package pipeline
 
 import (
 	"context"
+	"errors"
 	"strings"
+	"sync"
 	"time"
 
+	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/sync/errgroup"
 
-	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
-	"github.com/woodpecker-ci/woodpecker/pipeline/multipart"
+	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
 )
+
+// TODO: move runtime into "runtime" subpackage
 
 type (
 	// State defines the pipeline and process state.
@@ -35,12 +54,14 @@ type (
 type Runtime struct {
 	err     error
 	spec    *backend.Config
-	engine  backend.Engine
+	engine  backend.Backend
 	started int64
 
 	ctx    context.Context
 	tracer Tracer
 	logger Logger
+
+	taskUUID string
 
 	Description map[string]string // The runtime descriptors.
 }
@@ -52,6 +73,7 @@ func New(spec *backend.Config, opts ...Option) *Runtime {
 	r.Description = map[string]string{}
 	r.spec = spec
 	r.ctx = context.Background()
+	r.taskUUID = ulid.Make().String()
 	for _, opts := range opts {
 		opts(r)
 	}
@@ -66,30 +88,30 @@ func (r *Runtime) MakeLogger() zerolog.Logger {
 	return logCtx.Logger()
 }
 
-// Starts the execution of the pipeline and waits for it to complete
-func (r *Runtime) Run() error {
+// Run starts the execution of a workflow and waits for it to complete
+func (r *Runtime) Run(runnerCtx context.Context) error {
 	logger := r.MakeLogger()
-	logger.Debug().Msgf("Executing %d stages, in order of:", len(r.spec.Stages))
-	for _, stage := range r.spec.Stages {
-		steps := []string{}
+	logger.Debug().Msgf("executing %d stages, in order of:", len(r.spec.Stages))
+	for stagePos, stage := range r.spec.Stages {
+		stepNames := []string{}
 		for _, step := range stage.Steps {
-			steps = append(steps, step.Name)
+			stepNames = append(stepNames, step.Name)
 		}
 
 		logger.Debug().
-			Str("Stage", stage.Name).
-			Str("Steps", strings.Join(steps, ",")).
+			Int("StagePos", stagePos).
+			Str("Steps", strings.Join(stepNames, ",")).
 			Msg("stage")
 	}
 
 	defer func() {
-		if err := r.engine.Destroy(r.ctx, r.spec); err != nil {
+		if err := r.engine.DestroyWorkflow(runnerCtx, r.spec, r.taskUUID); err != nil {
 			logger.Error().Err(err).Msg("could not destroy engine")
 		}
 	}()
 
 	r.started = time.Now().Unix()
-	if err := r.engine.Setup(r.ctx, r.spec); err != nil {
+	if err := r.engine.SetupWorkflow(runnerCtx, r.spec, r.taskUUID); err != nil {
 		return err
 	}
 
@@ -143,27 +165,27 @@ func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 	logger := r.MakeLogger()
 
 	for _, step := range steps {
-		// required since otherwise the loop variable
+		// Required since otherwise the loop variable
 		// will be captured by the function. This will
 		// recreate the step "variable"
 		step := step
 		g.Go(func() error {
 			// Case the pipeline was already complete.
 			logger.Debug().
-				Str("Step", step.Name).
-				Msg("Prepare")
+				Str("step", step.Name).
+				Msg("prepare")
 
 			switch {
 			case r.err != nil && !step.OnFailure:
 				logger.Debug().
-					Str("Step", step.Name).
+					Str("step", step.Name).
 					Err(r.err).
-					Msgf("Skipped due to OnFailure=%t", step.OnFailure)
+					Msgf("skipped due to OnFailure=%t", step.OnFailure)
 				return nil
 			case r.err == nil && !step.OnSuccess:
 				logger.Debug().
-					Str("Step", step.Name).
-					Msgf("Skipped due to OnSuccess=%t", step.OnSuccess)
+					Str("step", step.Name).
+					Msgf("skipped due to OnSuccess=%t", step.OnSuccess)
 				return nil
 			}
 
@@ -173,26 +195,25 @@ func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 				return err
 			}
 
+			// add compatibility for drone-ci plugins
+			metadata.SetDroneEnviron(step.Environment)
+
 			logger.Debug().
-				Str("Step", step.Name).
-				Msg("Executing")
+				Str("step", step.Name).
+				Msg("executing")
 
 			processState, err := r.exec(step)
 
 			logger.Debug().
-				Str("Step", step.Name).
-				Msg("Complete")
-
-			// if we got a nil process but an error state
-			// then we need to log the internal error to the step.
-			if r.logger != nil && err != nil && processState == nil {
-				_ = r.logger.Log(step, multipart.New(strings.NewReader(
-					"Backend engine error while running step: "+err.Error(),
-				)))
-			}
+				Str("step", step.Name).
+				Msg("complete")
 
 			// Return the error after tracing it.
-			return r.traceStep(processState, err, step)
+			err = r.traceStep(processState, err, step)
+			if err != nil && step.Failure == metadata.FailureIgnore {
+				return nil
+			}
+			return err
 		})
 	}
 
@@ -205,27 +226,23 @@ func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 
 // Executes the step and returns the state and error.
 func (r *Runtime) exec(step *backend.Step) (*backend.State, error) {
-	// TODO: using DRONE_ will be deprecated with 0.15.0. remove fallback with following release
-	for key, value := range step.Environment {
-		if strings.HasPrefix(key, "CI_") {
-			step.Environment[strings.Replace(key, "CI_", "DRONE_", 1)] = value
-		}
-	}
-
-	if err := r.engine.Exec(r.ctx, step); err != nil {
+	if err := r.engine.StartStep(r.ctx, step, r.taskUUID); err != nil {
 		return nil, err
 	}
 
+	var wg sync.WaitGroup
 	if r.logger != nil {
-		rc, err := r.engine.Tail(r.ctx, step)
+		rc, err := r.engine.TailStep(r.ctx, step, r.taskUUID)
 		if err != nil {
 			return nil, err
 		}
 
+		wg.Add(1)
 		go func() {
+			defer wg.Done()
 			logger := r.MakeLogger()
 
-			if err := r.logger.Log(step, multipart.New(rc)); err != nil {
+			if err := r.logger(step, rc); err != nil {
 				logger.Error().Err(err).Msg("process logging failed")
 			}
 			_ = rc.Close()
@@ -237,19 +254,29 @@ func (r *Runtime) exec(step *backend.Step) (*backend.State, error) {
 		return nil, nil
 	}
 
-	waitState, err := r.engine.Wait(r.ctx, step)
+	// Some pipeline backends, such as local, will close the pipe from Tail on Wait,
+	// so first make sure all reading has finished.
+	wg.Wait()
+	waitState, err := r.engine.WaitStep(r.ctx, step, r.taskUUID)
 	if err != nil {
+		if errors.Is(err, context.Canceled) {
+			return waitState, ErrCancel
+		}
+		return nil, err
+	}
+
+	if err := r.engine.DestroyStep(r.ctx, step, r.taskUUID); err != nil {
 		return nil, err
 	}
 
 	if waitState.OOMKilled {
 		return waitState, &OomError{
-			Name: step.Name,
+			UUID: step.UUID,
 			Code: waitState.ExitCode,
 		}
 	} else if waitState.ExitCode != 0 {
 		return waitState, &ExitError{
-			Name: step.Name,
+			UUID: step.UUID,
 			Code: waitState.ExitCode,
 		}
 	}

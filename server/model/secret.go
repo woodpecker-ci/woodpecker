@@ -18,88 +18,104 @@ package model
 import (
 	"errors"
 	"fmt"
-	"path/filepath"
 	"regexp"
+	"sort"
 )
 
 var (
-	errSecretNameInvalid  = errors.New("Invalid Secret Name")
-	errSecretValueInvalid = errors.New("Invalid Secret Value")
-	errSecretEventInvalid = errors.New("Invalid Secret Event")
+	ErrSecretNameInvalid  = errors.New("invalid secret name")
+	ErrSecretImageInvalid = errors.New("invalid secret image")
+	ErrSecretValueInvalid = errors.New("invalid secret value")
+	ErrSecretEventInvalid = errors.New("invalid secret event")
 )
 
 // SecretStore persists secret information to storage.
 type SecretStore interface {
 	SecretFind(*Repo, string) (*Secret, error)
-	SecretList(*Repo) ([]*Secret, error)
+	SecretList(*Repo, bool, *ListOptions) ([]*Secret, error)
 	SecretCreate(*Secret) error
 	SecretUpdate(*Secret) error
 	SecretDelete(*Secret) error
+	OrgSecretFind(int64, string) (*Secret, error)
+	OrgSecretList(int64, *ListOptions) ([]*Secret, error)
+	GlobalSecretFind(string) (*Secret, error)
+	GlobalSecretList(*ListOptions) ([]*Secret, error)
+	SecretListAll() ([]*Secret, error)
 }
 
 // TODO: rename to environment_variable and make it a secret by setting conceal=true
 // Secret represents a secret variable, such as a password or token.
 type Secret struct {
-	ID         int64          `json:"id"              xorm:"pk autoincr 'secret_id'"`
-	RepoID     int64          `json:"-"               xorm:"UNIQUE(s) INDEX 'secret_repo_id'"`
-	Name       string         `json:"name"            xorm:"UNIQUE(s) INDEX 'secret_name'"`
-	Value      string         `json:"value,omitempty" xorm:"TEXT 'secret_value'"`
-	Images     []string       `json:"image"           xorm:"json 'secret_images'"`
-	Events     []WebhookEvent `json:"event"           xorm:"json 'secret_events'"`
-	SkipVerify bool           `json:"-"               xorm:"secret_skip_verify"` // TODO: remove
-	Conceal    bool           `json:"-"               xorm:"secret_conceal"`
-}
+	ID     int64          `json:"id"              xorm:"pk autoincr 'secret_id'"`
+	OrgID  int64          `json:"org_id"          xorm:"NOT NULL DEFAULT 0 UNIQUE(s) INDEX 'secret_org_id'"`
+	RepoID int64          `json:"repo_id"         xorm:"NOT NULL DEFAULT 0 UNIQUE(s) INDEX 'secret_repo_id'"`
+	Name   string         `json:"name"            xorm:"NOT NULL UNIQUE(s) INDEX 'secret_name'"`
+	Value  string         `json:"value,omitempty" xorm:"TEXT 'secret_value'"`
+	Images []string       `json:"images"          xorm:"json 'secret_images'"`
+	Events []WebhookEvent `json:"events"          xorm:"json 'secret_events'"`
+} //	@name Secret
 
 // TableName return database table name for xorm
 func (Secret) TableName() string {
 	return "secrets"
 }
 
-// Match returns true if an image and event match the restricted list.
-func (s *Secret) Match(event WebhookEvent) bool {
-	if len(s.Events) == 0 {
-		return true
-	}
-	for _, pattern := range s.Events {
-		if match, _ := filepath.Match(string(pattern), string(event)); match {
-			return true
-		}
-	}
-	return false
+// BeforeInsert will sort events before inserted into database
+func (s *Secret) BeforeInsert() {
+	s.Events = sortEvents(s.Events)
+}
+
+// Global secret.
+func (s Secret) IsGlobal() bool {
+	return s.RepoID == 0 && s.OrgID == 0
+}
+
+// Organization secret.
+func (s Secret) IsOrganization() bool {
+	return s.RepoID == 0 && s.OrgID != 0
+}
+
+// Repository secret.
+func (s Secret) IsRepository() bool {
+	return s.RepoID != 0 && s.OrgID == 0
 }
 
 var validDockerImageString = regexp.MustCompile(
-	`^([\w\d\-_\.\/]*` + // optional url prefix
-		`[\w\d\-_]+` + // image name
-		`)+` +
-		`(:[\w\d\-_]+)?$`, // optional image tag
+	`^(` +
+		`[\w\d\-_\.]+` + // hostname
+		`(:\d+)?` + // optional port
+		`/)?` + // optional hostname + port
+		`([\w\d\-_\.][\w\d\-_\.\/]*/)?` + // optional url prefix
+		`([\w\d\-_]+)` + // image name
+		`(:[\w\d\-_]+)?` + // optional image tag
+		`$`,
 )
 
 // Validate validates the required fields and formats.
 func (s *Secret) Validate() error {
 	for _, event := range s.Events {
-		if !ValidateWebhookEvent(event) {
-			return fmt.Errorf("%s: '%s'", errSecretEventInvalid, event)
+		if err := event.Validate(); err != nil {
+			return errors.Join(err, ErrSecretEventInvalid)
 		}
 	}
 	if len(s.Events) == 0 {
-		return fmt.Errorf("%s: no event specified", errSecretEventInvalid)
+		return fmt.Errorf("%w: no event specified", ErrSecretEventInvalid)
 	}
 
 	for _, image := range s.Images {
 		if len(image) == 0 {
-			return fmt.Errorf("empty image in images")
+			return fmt.Errorf("%w: empty image in images", ErrSecretImageInvalid)
 		}
 		if !validDockerImageString.MatchString(image) {
-			return fmt.Errorf("image '%s' do not match regexp '%s'", image, validDockerImageString.String())
+			return fmt.Errorf("%w: image '%s' do not match regexp '%s'", ErrSecretImageInvalid, image, validDockerImageString.String())
 		}
 	}
 
 	switch {
 	case len(s.Name) == 0:
-		return errSecretNameInvalid
+		return fmt.Errorf("%w: empty name", ErrSecretNameInvalid)
 	case len(s.Value) == 0:
-		return errSecretValueInvalid
+		return fmt.Errorf("%w: empty value", ErrSecretValueInvalid)
 	default:
 		return nil
 	}
@@ -109,9 +125,15 @@ func (s *Secret) Validate() error {
 func (s *Secret) Copy() *Secret {
 	return &Secret{
 		ID:     s.ID,
+		OrgID:  s.OrgID,
 		RepoID: s.RepoID,
 		Name:   s.Name,
 		Images: s.Images,
-		Events: s.Events,
+		Events: sortEvents(s.Events),
 	}
+}
+
+func sortEvents(wel WebhookEventList) WebhookEventList {
+	sort.Sort(wel)
+	return wel
 }

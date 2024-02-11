@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/rs/zerolog/log"
 )
 
@@ -46,7 +46,7 @@ func parse(raw string, fn SecretFunc) (*Token, error) {
 	if err != nil {
 		return nil, err
 	} else if !parsed.Valid {
-		return nil, jwt.ValidationError{}
+		return nil, jwt.ErrTokenUnverifiable
 	}
 	return token, nil
 }
@@ -126,7 +126,7 @@ func (t *Token) SignExpires(secret string, exp int64) (string, error) {
 }
 
 func keyFunc(token *Token, fn SecretFunc) jwt.Keyfunc {
-	return func(t *jwt.Token) (interface{}, error) {
+	return func(t *jwt.Token) (any, error) {
 		claims, ok := t.Claims.(jwt.MapClaims)
 		if !ok {
 			return nil, fmt.Errorf("token claim is not a MapClaims")
@@ -141,7 +141,7 @@ func keyFunc(token *Token, fn SecretFunc) jwt.Keyfunc {
 		// the expected type.
 		kindv, ok := claims["type"]
 		if !ok {
-			return nil, jwt.ValidationError{}
+			return nil, jwt.ErrInvalidType
 		}
 		token.Kind, _ = kindv.(string)
 
@@ -149,7 +149,7 @@ func keyFunc(token *Token, fn SecretFunc) jwt.Keyfunc {
 		// expected type.
 		textv, ok := claims["text"]
 		if !ok {
-			return nil, jwt.ValidationError{}
+			return nil, jwt.ErrInvalidType
 		}
 		token.Text, _ = textv.(string)
 

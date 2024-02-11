@@ -15,51 +15,41 @@
 package datastore
 
 import (
-	"bytes"
-	"io"
-	"io/ioutil"
+	"fmt"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
-func (s storage) LogFind(proc *model.Proc) (io.ReadCloser, error) {
-	logs := &model.Logs{
-		ProcID: proc.ID,
-	}
-	if err := wrapGet(s.engine.Get(logs)); err != nil {
-		return nil, err
-	}
-	buf := bytes.NewBuffer(logs.Data)
-	return ioutil.NopCloser(buf), nil
+func (s storage) LogFind(step *model.Step) ([]*model.LogEntry, error) {
+	var logEntries []*model.LogEntry
+	return logEntries, s.engine.Asc("id").Where("step_id = ?", step.ID).Find(&logEntries)
 }
 
-func (s storage) LogSave(proc *model.Proc, reader io.Reader) error {
-	data, _ := ioutil.ReadAll(reader)
-
+func (s storage) LogSave(step *model.Step, logEntries []*model.LogEntry) error {
 	sess := s.engine.NewSession()
 	defer sess.Close()
 	if err := sess.Begin(); err != nil {
 		return err
 	}
 
-	logs := new(model.Logs)
-	exist, err := sess.Where("log_job_id = ?", proc.ID).Get(logs)
-	if err != nil {
-		return err
-	}
-
-	if exist {
-		if _, err := sess.ID(logs.ID).Cols("log_data").Update(&model.Logs{Data: data}); err != nil {
-			return err
+	for _, logEntry := range logEntries {
+		if logEntry.StepID != step.ID {
+			return fmt.Errorf("got a log-entry with step id '%d' but expected '%d'", logEntry.StepID, step.ID)
 		}
-	} else {
-		if _, err := sess.Insert(&model.Logs{
-			ProcID: proc.ID,
-			Data:   data,
-		}); err != nil {
+		if _, err := sess.Insert(logEntry); err != nil {
 			return err
 		}
 	}
 
 	return sess.Commit()
+}
+
+func (s storage) LogAppend(logEntry *model.LogEntry) error {
+	_, err := s.engine.Insert(logEntry)
+	return err
+}
+
+func (s storage) LogDelete(step *model.Step) error {
+	_, err := s.engine.Where("step_id = ?", step.ID).Delete(new(model.LogEntry))
+	return err
 }

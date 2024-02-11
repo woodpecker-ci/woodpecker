@@ -1,0 +1,40 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["github>woodpecker-ci/renovate-config"],
+  "packageRules": [
+    {
+      "matchManagers": ["docker-compose"],
+      "matchFileNames": ["docker-compose.gitpod.yml"],
+      "addLabels": ["devx"]
+    },
+    {
+      "groupName": "golang (lang)",
+      "matchPackagePatterns": ["^golang$", "xgo"],
+      "matchUpdateTypes": ["minor", "patch"]
+    },
+    {
+      "groupName": "golang (packages)",
+      "matchManagers": ["gomod"],
+      "matchUpdateTypes": ["minor", "patch"]
+    },
+    {
+      "groupName": "web npm deps non-major",
+      "matchManagers": ["npm"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "matchFileNames": ["web/package.json"],
+      "addLabels": ["ui"]
+    },
+    {
+      "groupName": "docs npm deps non-major",
+      "matchManagers": ["npm"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "matchFileNames": ["docs/**/package.json"],
+      "addLabels": ["documentation"]
+    },
+    {
+      "matchDatasources": ["docker"],
+      "matchPackagePatterns": ["xgo"],
+      "versioning": "regex:^go-(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))$"
+    }
+  ]
+}

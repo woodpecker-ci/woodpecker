@@ -1,3 +1,4 @@
+// cSpell:ignore TSES
 // @ts-check
 /** @type {import('@typescript-eslint/experimental-utils').TSESLint.Linter.Config} */
 
@@ -6,6 +7,7 @@ module.exports = {
   env: {
     browser: true,
   },
+  reportUnusedDisableDirectives: true,
 
   parser: 'vue-eslint-parser',
   parserOptions: {
@@ -48,6 +50,26 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': 'error',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     '@typescript-eslint/no-non-null-assertion': 'error',
+    // SOURCE: https://github.com/iamturns/eslint-config-airbnb-typescript/blob/4aec5702be5b4e74e0e2f40bc78b4bc961681de1/lib/shared.js#L41
+    '@typescript-eslint/naming-convention': [
+      'error',
+      // Allow camelCase variables (23.2), PascalCase variables (23.8), and UPPER_CASE variables (23.10)
+      {
+        selector: 'variable',
+        format: ['camelCase', 'PascalCase', 'UPPER_CASE'],
+        leadingUnderscore: 'allow',
+      },
+      // Allow camelCase functions (23.2), and PascalCase functions (23.8)
+      {
+        selector: 'function',
+        format: ['camelCase', 'PascalCase'],
+      },
+      // Airbnb recommends PascalCase for classes (23.3), and although Airbnb does not make TypeScript recommendations, we are assuming this rule would similarly apply to anything "type like", including interfaces, type aliases, and enums
+      {
+        selector: 'typeLike',
+        format: ['PascalCase'],
+      },
+    ],
 
     'import/no-unresolved': 'off', // disable as this is handled by tsc itself
     'import/first': 'error',
@@ -121,6 +143,8 @@ module.exports = {
     ],
     'vue/new-line-between-multi-line-property': 'error',
     'vue/padding-line-between-blocks': 'error',
+    'vue/multi-word-component-names': 'off',
+    'vue/no-reserved-component-names': 'off',
 
     // css rules
     'vue-scoped-css/no-unused-selector': 'error',

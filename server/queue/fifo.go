@@ -1,33 +1,41 @@
+// Copyright 2022 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package queue
 
 import (
 	"container/list"
 	"context"
-	"runtime"
 	"sync"
 	"time"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
-
 	"github.com/rs/zerolog/log"
-)
 
-const (
-	StatusSkipped = "skipped"
-	StatusSuccess = "success"
-	StatusFailure = "failure"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 type entry struct {
-	item     *Task
+	item     *model.Task
 	done     chan bool
 	error    error
 	deadline time.Time
 }
 
 type worker struct {
+	agentID int64
 	filter  FilterFn
-	channel chan *Task
+	channel chan *model.Task
 }
 
 type fifo struct {
@@ -42,7 +50,7 @@ type fifo struct {
 }
 
 // New returns a new fifo queue.
-func New(ctx context.Context) Queue {
+func New(_ context.Context) Queue {
 	return &fifo{
 		workers:       map[*worker]struct{}{},
 		running:       map[string]*entry{},
@@ -54,7 +62,7 @@ func New(ctx context.Context) Queue {
 }
 
 // Push pushes an item to the tail of this queue.
-func (q *fifo) Push(c context.Context, task *Task) error {
+func (q *fifo) Push(_ context.Context, task *model.Task) error {
 	q.Lock()
 	q.pending.PushBack(task)
 	q.Unlock()
@@ -63,7 +71,7 @@ func (q *fifo) Push(c context.Context, task *Task) error {
 }
 
 // Push pushes an item to the tail of this queue.
-func (q *fifo) PushAtOnce(c context.Context, tasks []*Task) error {
+func (q *fifo) PushAtOnce(_ context.Context, tasks []*model.Task) error {
 	q.Lock()
 	for _, task := range tasks {
 		q.pending.PushBack(task)
@@ -74,10 +82,11 @@ func (q *fifo) PushAtOnce(c context.Context, tasks []*Task) error {
 }
 
 // Poll retrieves and removes the head of this queue.
-func (q *fifo) Poll(c context.Context, f FilterFn) (*Task, error) {
+func (q *fifo) Poll(c context.Context, agentID int64, f FilterFn) (*model.Task, error) {
 	q.Lock()
 	w := &worker{
-		channel: make(chan *Task, 1),
+		agentID: agentID,
+		channel: make(chan *model.Task, 1),
 		filter:  f,
 	}
 	q.workers[w] = struct{}{}
@@ -98,21 +107,21 @@ func (q *fifo) Poll(c context.Context, f FilterFn) (*Task, error) {
 }
 
 // Done signals that the item is done executing.
-func (q *fifo) Done(c context.Context, id string, exitStatus model.StatusValue) error {
-	return q.finished([]string{id}, string(exitStatus), nil)
+func (q *fifo) Done(_ context.Context, id string, exitStatus model.StatusValue) error {
+	return q.finished([]string{id}, exitStatus, nil)
 }
 
 // Error signals that the item is done executing with error.
-func (q *fifo) Error(c context.Context, id string, err error) error {
-	return q.finished([]string{id}, StatusFailure, err)
+func (q *fifo) Error(_ context.Context, id string, err error) error {
+	return q.finished([]string{id}, model.StatusFailure, err)
 }
 
-// Error signals that the item is done executing with error.
-func (q *fifo) ErrorAtOnce(c context.Context, id []string, err error) error {
-	return q.finished(id, StatusFailure, err)
+// ErrorAtOnce signals that the item is done executing with error.
+func (q *fifo) ErrorAtOnce(_ context.Context, id []string, err error) error {
+	return q.finished(id, model.StatusFailure, err)
 }
 
-func (q *fifo) finished(ids []string, exitStatus string, err error) error {
+func (q *fifo) finished(ids []string, exitStatus model.StatusValue, err error) error {
 	q.Lock()
 
 	for _, id := range ids {
@@ -137,7 +146,7 @@ func (q *fifo) Evict(c context.Context, id string) error {
 }
 
 // Evict removes a pending task from the queue.
-func (q *fifo) EvictAtOnce(c context.Context, ids []string) error {
+func (q *fifo) EvictAtOnce(_ context.Context, ids []string) error {
 	q.Lock()
 	defer q.Unlock()
 
@@ -145,7 +154,7 @@ func (q *fifo) EvictAtOnce(c context.Context, ids []string) error {
 		var next *list.Element
 		for e := q.pending.Front(); e != nil; e = next {
 			next = e.Next()
-			task, ok := e.Value.(*Task)
+			task, ok := e.Value.(*model.Task)
 			if ok && task.ID == id {
 				q.pending.Remove(e)
 				return nil
@@ -171,7 +180,7 @@ func (q *fifo) Wait(c context.Context, id string) error {
 }
 
 // Extend extends the task execution deadline.
-func (q *fifo) Extend(c context.Context, id string) error {
+func (q *fifo) Extend(_ context.Context, id string) error {
 	q.Lock()
 	defer q.Unlock()
 
@@ -184,19 +193,22 @@ func (q *fifo) Extend(c context.Context, id string) error {
 }
 
 // Info returns internal queue information.
-func (q *fifo) Info(c context.Context) InfoT {
+func (q *fifo) Info(_ context.Context) InfoT {
 	q.Lock()
 	stats := InfoT{}
 	stats.Stats.Workers = len(q.workers)
 	stats.Stats.Pending = q.pending.Len()
 	stats.Stats.WaitingOnDeps = q.waitingOnDeps.Len()
 	stats.Stats.Running = len(q.running)
+	stats.Stats.Complete = 0 // TODO: implement this
 
 	for e := q.pending.Front(); e != nil; e = e.Next() {
-		stats.Pending = append(stats.Pending, e.Value.(*Task))
+		task, _ := e.Value.(*model.Task)
+		stats.Pending = append(stats.Pending, task)
 	}
 	for e := q.waitingOnDeps.Front(); e != nil; e = e.Next() {
-		stats.WaitingOnDeps = append(stats.WaitingOnDeps, e.Value.(*Task))
+		task, _ := e.Value.(*model.Task)
+		stats.WaitingOnDeps = append(stats.WaitingOnDeps, task)
 	}
 	for _, entry := range q.running {
 		stats.Running = append(stats.Running, entry.item)
@@ -230,21 +242,11 @@ func (q *fifo) process() {
 		return
 	}
 
-	defer func() {
-		// the risk of panic is low. This code can probably be removed
-		// once the code has been used in real world installs without issue.
-		if err := recover(); err != nil {
-			const size = 64 << 10
-			buf := make([]byte, size)
-			buf = buf[:runtime.Stack(buf, false)]
-			log.Error().Msgf("queue: unexpected panic: %v\n%s", err, buf)
-		}
-	}()
-
-	q.resubmitExpiredBuilds()
+	q.resubmitExpiredPipelines()
 	q.filterWaiting()
 	for pending, worker := q.assignToWorker(); pending != nil && worker != nil; pending, worker = q.assignToWorker() {
-		task := pending.Value.(*Task)
+		task, _ := pending.Value.(*model.Task)
+		task.AgentID = worker.agentID
 		delete(q.workers, worker)
 		q.pending.Remove(pending)
 		q.running[task.ID] = &entry{
@@ -261,7 +263,7 @@ func (q *fifo) filterWaiting() {
 	var nextWaiting *list.Element
 	for e := q.waitingOnDeps.Front(); e != nil; e = nextWaiting {
 		nextWaiting = e.Next()
-		task := e.Value.(*Task)
+		task, _ := e.Value.(*model.Task)
 		q.pending.PushBack(task)
 	}
 
@@ -271,7 +273,7 @@ func (q *fifo) filterWaiting() {
 	var nextPending *list.Element
 	for e := q.pending.Front(); e != nil; e = nextPending {
 		nextPending = e.Next()
-		task := e.Value.(*Task)
+		task, _ := e.Value.(*model.Task)
 		if q.depsInQueue(task) {
 			log.Debug().Msgf("queue: waiting due to unmet dependencies %v", task.ID)
 			q.waitingOnDeps.PushBack(task)
@@ -289,7 +291,7 @@ func (q *fifo) assignToWorker() (*list.Element, *worker) {
 	var next *list.Element
 	for e := q.pending.Front(); e != nil; e = next {
 		next = e.Next()
-		task := e.Value.(*Task)
+		task, _ := e.Value.(*model.Task)
 		log.Debug().Msgf("queue: trying to assign task: %v with deps %v", task.ID, task.Dependencies)
 
 		for w := range q.workers {
@@ -303,7 +305,7 @@ func (q *fifo) assignToWorker() (*list.Element, *worker) {
 	return nil, nil
 }
 
-func (q *fifo) resubmitExpiredBuilds() {
+func (q *fifo) resubmitExpiredPipelines() {
 	for id, state := range q.running {
 		if time.Now().After(state.deadline) {
 			q.pending.PushFront(state.item)
@@ -313,11 +315,11 @@ func (q *fifo) resubmitExpiredBuilds() {
 	}
 }
 
-func (q *fifo) depsInQueue(task *Task) bool {
+func (q *fifo) depsInQueue(task *model.Task) bool {
 	var next *list.Element
 	for e := q.pending.Front(); e != nil; e = next {
 		next = e.Next()
-		possibleDep, ok := e.Value.(*Task)
+		possibleDep, ok := e.Value.(*model.Task)
 		log.Debug().Msgf("queue: pending right now: %v", possibleDep.ID)
 		for _, dep := range task.Dependencies {
 			if ok && possibleDep.ID == dep {
@@ -336,11 +338,11 @@ func (q *fifo) depsInQueue(task *Task) bool {
 	return false
 }
 
-func (q *fifo) updateDepStatusInQueue(taskID, status string) {
+func (q *fifo) updateDepStatusInQueue(taskID string, status model.StatusValue) {
 	var next *list.Element
 	for e := q.pending.Front(); e != nil; e = next {
 		next = e.Next()
-		pending, ok := e.Value.(*Task)
+		pending, ok := e.Value.(*model.Task)
 		for _, dep := range pending.Dependencies {
 			if ok && taskID == dep {
 				pending.DepStatus[dep] = status
@@ -358,7 +360,7 @@ func (q *fifo) updateDepStatusInQueue(taskID, status string) {
 
 	for e := q.waitingOnDeps.Front(); e != nil; e = next {
 		next = e.Next()
-		waiting, ok := e.Value.(*Task)
+		waiting, ok := e.Value.(*model.Task)
 		for _, dep := range waiting.Dependencies {
 			if ok && taskID == dep {
 				waiting.DepStatus[dep] = status
@@ -372,7 +374,7 @@ func (q *fifo) removeFromPending(taskID string) {
 	var next *list.Element
 	for e := q.pending.Front(); e != nil; e = next {
 		next = e.Next()
-		task := e.Value.(*Task)
+		task, _ := e.Value.(*model.Task)
 		if task.ID == taskID {
 			log.Debug().Msgf("queue: %s is removed from pending", taskID)
 			q.pending.Remove(e)

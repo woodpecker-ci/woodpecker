@@ -15,25 +15,22 @@
 package main
 
 import (
-	"os"
-
-	"github.com/rs/zerolog"
-	zlog "github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
 
-	"github.com/woodpecker-ci/woodpecker/cli/build"
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/deploy"
-	"github.com/woodpecker-ci/woodpecker/cli/exec"
-	"github.com/woodpecker-ci/woodpecker/cli/info"
-	"github.com/woodpecker-ci/woodpecker/cli/lint"
-	"github.com/woodpecker-ci/woodpecker/cli/log"
-	"github.com/woodpecker-ci/woodpecker/cli/loglevel"
-	"github.com/woodpecker-ci/woodpecker/cli/registry"
-	"github.com/woodpecker-ci/woodpecker/cli/repo"
-	"github.com/woodpecker-ci/woodpecker/cli/secret"
-	"github.com/woodpecker-ci/woodpecker/cli/user"
-	"github.com/woodpecker-ci/woodpecker/version"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/cron"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/deploy"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/exec"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/info"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/lint"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/log"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/loglevel"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/registry"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/repo"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/secret"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/user"
+	"go.woodpecker-ci.org/woodpecker/v2/version"
 )
 
 //go:generate go run docs.go app.go
@@ -44,8 +41,9 @@ func newApp() *cli.App {
 	app.Usage = "command line utility"
 	app.EnableBashCompletion = true
 	app.Flags = common.GlobalFlags
+	app.Before = common.SetupGlobalLogger
 	app.Commands = []*cli.Command{
-		build.Command,
+		pipeline.Command,
 		log.Command,
 		deploy.Command,
 		exec.Command,
@@ -56,14 +54,8 @@ func newApp() *cli.App {
 		user.Command,
 		lint.Command,
 		loglevel.Command,
+		cron.Command,
 	}
-
-	zlog.Logger = zlog.Output(
-		zerolog.ConsoleWriter{
-			Out: os.Stderr,
-		},
-	)
-	app.Before = common.SetupConsoleLogger
 
 	return app
 }

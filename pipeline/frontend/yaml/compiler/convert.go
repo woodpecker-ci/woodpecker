@@ -1,41 +1,68 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package compiler
 
 import (
 	"fmt"
+	"maps"
 	"path"
+	"strconv"
 	"strings"
 
-	"github.com/rs/zerolog/log"
+	"github.com/oklog/ulid/v2"
 
-	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
+	backend_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/compiler/settings"
+	yaml_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/utils"
 )
 
-func (c *Compiler) createProcess(name string, container *yaml.Container, section string) *backend.Step {
+func (c *Compiler) createProcess(container *yaml_types.Container, stepType backend_types.StepType) (*backend_types.Step, error) {
 	var (
+		uuid = ulid.Make()
+
 		detached   bool
-		workingdir string
+		workingDir string
 
 		workspace   = fmt.Sprintf("%s_default:%s", c.prefix, c.base)
 		privileged  = container.Privileged
-		entrypoint  = container.Entrypoint
-		command     = container.Command
-		image       = expandImage(container.Image)
 		networkMode = container.NetworkMode
-		ipcMode     = container.IpcMode
 		// network    = container.Network
 	)
 
-	networks := []backend.Conn{
+	networks := []backend_types.Conn{
 		{
 			Name:    fmt.Sprintf("%s_default", c.prefix),
 			Aliases: []string{container.Name},
 		},
 	}
 	for _, network := range c.networks {
-		networks = append(networks, backend.Conn{
+		networks = append(networks, backend_types.Conn{
 			Name: network,
 		})
+	}
+
+	extraHosts := make([]backend_types.HostAlias, len(container.ExtraHosts))
+	for i, extraHost := range container.ExtraHosts {
+		name, ip, ok := strings.Cut(extraHost, ":")
+		if !ok {
+			return nil, &ErrExtraHostFormat{host: extraHost}
+		}
+		extraHosts[i].Name = name
+		extraHosts[i].IP = ip
 	}
 
 	var volumes []string
@@ -49,74 +76,61 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 
 	// append default environment variables
 	environment := map[string]string{}
-	for k, v := range container.Environment {
-		environment[k] = v
-	}
-	for k, v := range c.env {
-		switch v {
-		case "", "0", "false":
-			continue
-		default:
-			environment[k] = v
-		}
-	}
+	maps.Copy(environment, container.Environment)
+	maps.Copy(environment, c.env)
 
 	environment["CI_WORKSPACE"] = path.Join(c.base, c.path)
 
-	if section == "services" || container.Detached {
+	if stepType == backend_types.StepTypeService || container.Detached {
 		detached = true
 	}
 
 	if !detached || len(container.Commands) != 0 {
-		workingdir = path.Join(c.base, c.path)
+		workingDir = c.stepWorkingDir(container)
 	}
 
+	getSecretValue := func(name string) (string, error) {
+		name = strings.ToLower(name)
+		secret, ok := c.secrets[name]
+		if !ok {
+			return "", fmt.Errorf("secret %q not found", name)
+		}
+
+		event := c.metadata.Curr.Event
+		err := secret.Available(event, container)
+		if err != nil {
+			return "", err
+		}
+
+		return secret.Value, nil
+	}
+
+	// TODO: why don't we pass secrets to detached steps?
 	if !detached {
-		if err := paramsToEnv(container.Settings, environment, c.secrets); err != nil {
-			log.Error().Err(err).Msg("paramsToEnv")
-		}
-	}
-
-	if len(container.Commands) != 0 {
-		if c.metadata.Sys.Platform == "windows/amd64" {
-			entrypoint = []string{"powershell", "-noprofile", "-noninteractive", "-command"}
-			command = []string{"[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($Env:CI_SCRIPT)) | iex"}
-			environment["CI_SCRIPT"] = generateScriptWindows(container.Commands)
-			environment["HOME"] = "c:\\root"
-			environment["SHELL"] = "powershell.exe"
-		} else {
-			entrypoint = []string{"/bin/sh", "-c"}
-			command = []string{"echo $CI_SCRIPT | base64 -d | /bin/sh -e"}
-			environment["CI_SCRIPT"] = generateScriptPosix(container.Commands)
-			environment["HOME"] = "/root"
-			environment["SHELL"] = "/bin/sh"
-		}
-	}
-
-	if matchImage(container.Image, c.escalated...) {
-		privileged = true
-		entrypoint = []string{}
-		command = []string{}
-	}
-
-	authConfig := backend.Auth{
-		Username: container.AuthConfig.Username,
-		Password: container.AuthConfig.Password,
-		Email:    container.AuthConfig.Email,
-	}
-	for _, registry := range c.registries {
-		if matchHostname(image, registry.Hostname) {
-			authConfig.Username = registry.Username
-			authConfig.Password = registry.Password
-			authConfig.Email = registry.Email
-			break
+		if err := settings.ParamsToEnv(container.Settings, environment, getSecretValue); err != nil {
+			return nil, err
 		}
 	}
 
 	for _, requested := range container.Secrets.Secrets {
-		secret, ok := c.secrets[strings.ToLower(requested.Source)]
-		if ok && (len(secret.Match) == 0 || matchImage(image, secret.Match...)) {
-			environment[strings.ToUpper(requested.Target)] = secret.Value
+		secretValue, err := getSecretValue(requested.Source)
+		if err != nil {
+			return nil, err
+		}
+
+		environment[strings.ToUpper(requested.Target)] = secretValue
+	}
+
+	if utils.MatchImage(container.Image, c.escalated...) && container.IsPlugin() {
+		privileged = true
+	}
+
+	authConfig := backend_types.Auth{}
+	for _, registry := range c.registries {
+		if utils.MatchHostname(container.Image, registry.Hostname) {
+			authConfig.Username = registry.Username
+			authConfig.Password = registry.Password
+			break
 		}
 	}
 
@@ -145,38 +159,79 @@ func (c *Compiler) createProcess(name string, container *yaml.Container, section
 		cpuSet = c.reslimit.CPUSet
 	}
 
-	return &backend.Step{
-		Name:         name,
-		Alias:        container.Name,
-		Image:        image,
-		Pull:         container.Pull,
-		Detached:     detached,
-		Privileged:   privileged,
-		WorkingDir:   workingdir,
-		Environment:  environment,
-		Labels:       container.Labels,
-		Entrypoint:   entrypoint,
-		Command:      command,
-		ExtraHosts:   container.ExtraHosts,
-		Volumes:      volumes,
-		Tmpfs:        container.Tmpfs,
-		Devices:      container.Devices,
-		Networks:     networks,
-		DNS:          container.DNS,
-		DNSSearch:    container.DNSSearch,
-		MemSwapLimit: memSwapLimit,
-		MemLimit:     memLimit,
-		ShmSize:      shmSize,
-		Sysctls:      container.Sysctls,
-		CPUQuota:     cpuQuota,
-		CPUShares:    cpuShares,
-		CPUSet:       cpuSet,
-		AuthConfig:   authConfig,
-		OnSuccess:    container.Constraints.Status.Match("success"),
-		OnFailure: (len(container.Constraints.Status.Include)+
-			len(container.Constraints.Status.Exclude) != 0) &&
-			container.Constraints.Status.Match("failure"),
-		NetworkMode: networkMode,
-		IpcMode:     ipcMode,
+	var ports []backend_types.Port
+	for _, portDef := range container.Ports {
+		port, err := convertPort(portDef)
+		if err != nil {
+			return nil, err
+		}
+		ports = append(ports, port)
 	}
+
+	// at least one constraint contain status success, or all constraints have no status set
+	onSuccess := container.When.IncludesStatusSuccess()
+	// at least one constraint must include the status failure.
+	onFailure := container.When.IncludesStatusFailure()
+
+	failure := container.Failure
+	if container.Failure == "" {
+		failure = metadata.FailureFail
+	}
+
+	return &backend_types.Step{
+		Name:           container.Name,
+		UUID:           uuid.String(),
+		Type:           stepType,
+		Image:          container.Image,
+		Pull:           container.Pull,
+		Detached:       detached,
+		Privileged:     privileged,
+		WorkingDir:     workingDir,
+		Environment:    environment,
+		Commands:       container.Commands,
+		Entrypoint:     container.Entrypoint,
+		ExtraHosts:     extraHosts,
+		Volumes:        volumes,
+		Tmpfs:          container.Tmpfs,
+		Devices:        container.Devices,
+		Networks:       networks,
+		DNS:            container.DNS,
+		DNSSearch:      container.DNSSearch,
+		MemSwapLimit:   memSwapLimit,
+		MemLimit:       memLimit,
+		ShmSize:        shmSize,
+		CPUQuota:       cpuQuota,
+		CPUShares:      cpuShares,
+		CPUSet:         cpuSet,
+		AuthConfig:     authConfig,
+		OnSuccess:      onSuccess,
+		OnFailure:      onFailure,
+		Failure:        failure,
+		NetworkMode:    networkMode,
+		Ports:          ports,
+		BackendOptions: container.BackendOptions,
+	}, nil
+}
+
+func (c *Compiler) stepWorkingDir(container *yaml_types.Container) string {
+	if path.IsAbs(container.Directory) {
+		return container.Directory
+	}
+	return path.Join(c.base, c.path, container.Directory)
+}
+
+func convertPort(portDef string) (backend_types.Port, error) {
+	var err error
+	var port backend_types.Port
+
+	number, protocol, _ := strings.Cut(portDef, "/")
+	port.Protocol = protocol
+
+	portNumber, err := strconv.ParseUint(number, 10, 16)
+	if err != nil {
+		return port, err
+	}
+	port.Number = uint16(portNumber)
+
+	return port, nil
 }

@@ -20,49 +20,48 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/remote"
-	"github.com/woodpecker-ci/woodpecker/server/shared"
-	"github.com/woodpecker-ci/woodpecker/server/store"
+	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
-// Approve update the status to pending for blocked build because of a gated repo
-// and start them afterwards
-func Approve(ctx context.Context, store store.Store, build *model.Build, user *model.User, repo *model.Repo) (*model.Build, error) {
-	if build.Status != model.StatusBlocked {
-		return nil, ErrBadRequest{Msg: fmt.Sprintf("cannot decline a build with status %s", build.Status)}
+// Approve update the status to pending for a blocked pipeline because of a gated repo
+// and start them afterward
+func Approve(ctx context.Context, store store.Store, currentPipeline *model.Pipeline, user *model.User, repo *model.Repo) (*model.Pipeline, error) {
+	if currentPipeline.Status != model.StatusBlocked {
+		return nil, ErrBadRequest{Msg: fmt.Sprintf("cannot decline a pipeline with status %s", currentPipeline.Status)}
 	}
 
-	// fetch the build file from the database
-	configs, err := store.ConfigsForBuild(build.ID)
+	// fetch the pipeline file from the database
+	configs, err := store.ConfigsForPipeline(currentPipeline.ID)
 	if err != nil {
-		msg := fmt.Sprintf("failure to get build config for %s. %s", repo.FullName, err)
+		msg := fmt.Sprintf("failure to get pipeline config for %s. %s", repo.FullName, err)
 		log.Error().Msg(msg)
 		return nil, ErrNotFound{Msg: msg}
 	}
 
-	if build, err = shared.UpdateToStatusPending(store, *build, user.Login); err != nil {
-		return nil, fmt.Errorf("error updating build. %s", err)
+	if currentPipeline, err = UpdateToStatusPending(store, *currentPipeline, user.Login); err != nil {
+		return nil, fmt.Errorf("error updating pipeline. %w", err)
 	}
 
-	var yamls []*remote.FileMeta
+	var yamls []*forge_types.FileMeta
 	for _, y := range configs {
-		yamls = append(yamls, &remote.FileMeta{Data: y.Data, Name: y.Name})
+		yamls = append(yamls, &forge_types.FileMeta{Data: y.Data, Name: y.Name})
 	}
 
-	build, buildItems, err := createBuildItems(ctx, store, build, user, repo, yamls, nil)
+	currentPipeline, pipelineItems, err := createPipelineItems(ctx, store, currentPipeline, user, repo, yamls, nil)
 	if err != nil {
-		msg := fmt.Sprintf("failure to createBuildItems for %s", repo.FullName)
-		log.Error().Err(err).Msg(msg)
-		return nil, err
-	}
-
-	build, err = start(ctx, store, build, user, repo, buildItems)
-	if err != nil {
-		msg := fmt.Sprintf("failure to start build for %s: %v", repo.FullName, err)
+		msg := fmt.Sprintf("failure to createPipelineItems for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
 		return nil, fmt.Errorf(msg)
 	}
 
-	return build, nil
+	currentPipeline, err = start(ctx, store, currentPipeline, user, repo, pipelineItems)
+	if err != nil {
+		msg := fmt.Sprintf("failure to start pipeline for %s: %v", repo.FullName, err)
+		log.Error().Err(err).Msg(msg)
+		return nil, fmt.Errorf(msg)
+	}
+
+	return currentPipeline, nil
 }

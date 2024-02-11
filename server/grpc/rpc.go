@@ -1,5 +1,6 @@
-// Copyright 2018 Drone.IO Inc.
+// Copyright 2022 Woodpecker Authors
 // Copyright 2021 Informatyka Boguslawski sp. z o.o. sp.k., http://www.ib.pl/
+// Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,55 +19,53 @@
 package grpc
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strconv"
-
-	"github.com/rs/zerolog/log"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/rs/zerolog/log"
 	grpcMetadata "google.golang.org/grpc/metadata"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/logging"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/pubsub"
-	"github.com/woodpecker-ci/woodpecker/server/queue"
-	"github.com/woodpecker-ci/woodpecker/server/remote"
-	"github.com/woodpecker-ci/woodpecker/server/shared"
-	"github.com/woodpecker-ci/woodpecker/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v2/server/logging"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v2/server/pubsub"
+	"go.woodpecker-ci.org/woodpecker/v2/server/queue"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
 type RPC struct {
-	remote     remote.Remote
-	queue      queue.Queue
-	pubsub     pubsub.Publisher
-	logger     logging.Log
-	store      store.Store
-	host       string
-	buildTime  *prometheus.GaugeVec
-	buildCount *prometheus.CounterVec
+	forge         forge.Forge
+	queue         queue.Queue
+	pubsub        *pubsub.Publisher
+	logger        logging.Log
+	store         store.Store
+	pipelineTime  *prometheus.GaugeVec
+	pipelineCount *prometheus.CounterVec
 }
 
 // Next implements the rpc.Next function
-func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Pipeline, error) {
-	metadata, ok := grpcMetadata.FromIncomingContext(c)
-	if ok {
-		hostname, ok := metadata["hostname"]
-		if ok && len(hostname) != 0 {
-			log.Debug().Msgf("agent connected: %s: polling", hostname[0])
-		}
+func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, error) {
+	if hostname, err := s.getHostnameFromContext(c); err == nil {
+		log.Debug().Msgf("agent connected: %s: polling", hostname)
 	}
 
-	fn, err := createFilterFunc(agentFilter)
-	if err != nil {
-		return nil, err
-	}
+	fn := createFilterFunc(agentFilter)
 	for {
-		task, err := s.queue.Poll(c, fn)
+		agent, err := s.getAgentFromContext(c)
+		if err != nil {
+			return nil, err
+		} else if agent.NoSchedule {
+			return nil, nil
+		}
+
+		task, err := s.queue.Poll(c, agent.ID, fn)
 		if err != nil {
 			return nil, err
 		} else if task == nil {
@@ -74,10 +73,11 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Pipeline, er
 		}
 
 		if task.ShouldRun() {
-			pipeline := new(rpc.Pipeline)
-			err = json.Unmarshal(task.Data, pipeline)
-			return pipeline, err
+			workflow := new(rpc.Workflow)
+			err = json.Unmarshal(task.Data, workflow)
+			return workflow, err
 		}
+
 		if err := s.Done(c, task.ID, rpc.State{}); err != nil {
 			log.Error().Err(err).Msgf("mark task '%s' done failed", task.ID)
 		}
@@ -95,53 +95,51 @@ func (s *RPC) Extend(c context.Context, id string) error {
 }
 
 // Update implements the rpc.Update function
-func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
-	procID, err := strconv.ParseInt(id, 10, 64)
+func (s *RPC) Update(_ context.Context, id string, state rpc.State) error {
+	workflowID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		return err
 	}
 
-	pproc, err := s.store.ProcLoad(procID)
+	workflow, err := s.store.WorkflowLoad(workflowID)
 	if err != nil {
-		log.Error().Msgf("error: rpc.update: cannot find pproc with id %d: %s", procID, err)
+		log.Error().Err(err).Msgf("rpc.update: cannot find workflow with id %d", workflowID)
 		return err
 	}
 
-	build, err := s.store.GetBuild(pproc.BuildID)
+	currentPipeline, err := s.store.GetPipeline(workflow.PipelineID)
 	if err != nil {
-		log.Error().Msgf("error: cannot find build with id %d: %s", pproc.BuildID, err)
+		log.Error().Err(err).Msgf("cannot find pipeline with id %d", workflow.PipelineID)
 		return err
 	}
 
-	proc, err := s.store.ProcChild(build, pproc.PID, state.Proc)
+	step, err := s.store.StepByUUID(state.StepUUID)
 	if err != nil {
-		log.Error().Msgf("error: cannot find proc with name %s: %s", state.Proc, err)
+		log.Error().Err(err).Msgf("cannot find step with uuid %s", state.StepUUID)
 		return err
 	}
 
-	metadata, ok := grpcMetadata.FromIncomingContext(c)
-	if ok {
-		hostname, ok := metadata["hostname"]
-		if ok && len(hostname) != 0 {
-			proc.Machine = hostname[0]
-		}
+	if step.PipelineID != currentPipeline.ID {
+		msg := fmt.Sprintf("agent returned status with step uuid '%s' which does not belong to current pipeline", state.StepUUID)
+		log.Error().
+			Int64("stepPipelineID", step.PipelineID).
+			Int64("currentPipelineID", currentPipeline.ID).
+			Msg(msg)
+		return fmt.Errorf(msg)
 	}
 
-	repo, err := s.store.GetRepo(build.RepoID)
+	repo, err := s.store.GetRepo(currentPipeline.RepoID)
 	if err != nil {
-		log.Error().Msgf("error: cannot find repo with id %d: %s", build.RepoID, err)
+		log.Error().Err(err).Msgf("cannot find repo with id %d", currentPipeline.RepoID)
 		return err
 	}
 
-	if _, err = shared.UpdateProcStatus(s.store, *proc, state, build.Started); err != nil {
-		log.Error().Err(err).Msg("rpc.update: cannot update proc")
+	if err := pipeline.UpdateStepStatus(s.store, step, state); err != nil {
+		log.Error().Err(err).Msg("rpc.update: cannot update step")
 	}
 
-	if build.Procs, err = s.store.ProcList(build); err != nil {
-		log.Error().Err(err).Msg("can not get proc list from store")
-	}
-	if build.Procs, err = model.Tree(build.Procs); err != nil {
-		log.Error().Err(err).Msg("can not build tree from proc list")
+	if currentPipeline.Workflows, err = s.store.WorkflowGetTree(currentPipeline); err != nil {
+		log.Error().Err(err).Msg("cannot build tree from step list")
 		return err
 	}
 	message := pubsub.Message{
@@ -150,290 +148,328 @@ func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 			"private": strconv.FormatBool(repo.IsSCMPrivate),
 		},
 	}
-	message.Data, _ = json.Marshal(model.Event{
-		Repo:  *repo,
-		Build: *build,
+	message.Data, err = json.Marshal(model.Event{
+		Repo:     *repo,
+		Pipeline: *currentPipeline,
 	})
-	if err := s.pubsub.Publish(c, "topic/events", message); err != nil {
-		log.Error().Err(err).Msg("can not publish proc list to")
+	if err != nil {
+		return err
 	}
+	s.pubsub.Publish(message)
 
 	return nil
 }
 
-// Upload implements the rpc.Upload function
-func (s *RPC) Upload(c context.Context, id string, file *rpc.File) error {
-	procID, err := strconv.ParseInt(id, 10, 64)
-	if err != nil {
-		return err
-	}
-
-	pproc, err := s.store.ProcLoad(procID)
-	if err != nil {
-		log.Error().Msgf("error: cannot find parent proc with id %d: %s", procID, err)
-		return err
-	}
-
-	build, err := s.store.GetBuild(pproc.BuildID)
-	if err != nil {
-		log.Error().Msgf("error: cannot find build with id %d: %s", pproc.BuildID, err)
-		return err
-	}
-
-	proc, err := s.store.ProcChild(build, pproc.PID, file.Proc)
-	if err != nil {
-		log.Error().Msgf("error: cannot find child proc with name %s: %s", file.Proc, err)
-		return err
-	}
-
-	if file.Mime == "application/json+logs" {
-		return s.store.LogSave(
-			proc,
-			bytes.NewBuffer(file.Data),
-		)
-	}
-
-	report := &model.File{
-		BuildID: proc.BuildID,
-		ProcID:  proc.ID,
-		PID:     proc.PID,
-		Mime:    file.Mime,
-		Name:    file.Name,
-		Size:    file.Size,
-		Time:    file.Time,
-	}
-	if d, ok := file.Meta["X-Tests-Passed"]; ok {
-		report.Passed, _ = strconv.Atoi(d)
-	}
-	if d, ok := file.Meta["X-Tests-Failed"]; ok {
-		report.Failed, _ = strconv.Atoi(d)
-	}
-	if d, ok := file.Meta["X-Tests-Skipped"]; ok {
-		report.Skipped, _ = strconv.Atoi(d)
-	}
-
-	if d, ok := file.Meta["X-Checks-Passed"]; ok {
-		report.Passed, _ = strconv.Atoi(d)
-	}
-	if d, ok := file.Meta["X-Checks-Failed"]; ok {
-		report.Failed, _ = strconv.Atoi(d)
-	}
-
-	if d, ok := file.Meta["X-Coverage-Lines"]; ok {
-		report.Passed, _ = strconv.Atoi(d)
-	}
-	if d, ok := file.Meta["X-Coverage-Total"]; ok {
-		if total, _ := strconv.Atoi(d); total != 0 {
-			report.Failed = total - report.Passed
-		}
-	}
-
-	return server.Config.Storage.Files.FileCreate(
-		report,
-		bytes.NewBuffer(file.Data),
-	)
-}
-
 // Init implements the rpc.Init function
 func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
-	procID, err := strconv.ParseInt(id, 10, 64)
+	stepID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		return err
 	}
 
-	proc, err := s.store.ProcLoad(procID)
+	workflow, err := s.store.WorkflowLoad(stepID)
 	if err != nil {
-		log.Error().Msgf("error: cannot find proc with id %d: %s", procID, err)
+		log.Error().Err(err).Msgf("cannot find step with id %d", stepID)
 		return err
 	}
-	metadata, ok := grpcMetadata.FromIncomingContext(c)
-	if ok {
-		hostname, ok := metadata["hostname"]
-		if ok && len(hostname) != 0 {
-			proc.Machine = hostname[0]
+
+	agent, err := s.getAgentFromContext(c)
+	if err != nil {
+		return err
+	}
+	workflow.AgentID = agent.ID
+
+	currentPipeline, err := s.store.GetPipeline(workflow.PipelineID)
+	if err != nil {
+		log.Error().Err(err).Msgf("cannot find pipeline with id %d", workflow.PipelineID)
+		return err
+	}
+
+	repo, err := s.store.GetRepo(currentPipeline.RepoID)
+	if err != nil {
+		log.Error().Err(err).Msgf("cannot find repo with id %d", currentPipeline.RepoID)
+		return err
+	}
+
+	if currentPipeline.Status == model.StatusPending {
+		if currentPipeline, err = pipeline.UpdateToStatusRunning(s.store, *currentPipeline, state.Started); err != nil {
+			log.Error().Err(err).Msgf("init: cannot update build_id %d state", currentPipeline.ID)
 		}
 	}
 
-	build, err := s.store.GetBuild(proc.BuildID)
-	if err != nil {
-		log.Error().Msgf("error: cannot find build with id %d: %s", proc.BuildID, err)
-		return err
-	}
-
-	repo, err := s.store.GetRepo(build.RepoID)
-	if err != nil {
-		log.Error().Msgf("error: cannot find repo with id %d: %s", build.RepoID, err)
-		return err
-	}
-
-	if build.Status == model.StatusPending {
-		if build, err = shared.UpdateToStatusRunning(s.store, *build, state.Started); err != nil {
-			log.Error().Msgf("error: init: cannot update build_id %d state: %s", build.ID, err)
-		}
-	}
+	s.updateForgeStatus(c, repo, currentPipeline, workflow)
 
 	defer func() {
-		build.Procs, _ = s.store.ProcList(build)
+		currentPipeline.Workflows, _ = s.store.WorkflowGetTree(currentPipeline)
 		message := pubsub.Message{
 			Labels: map[string]string{
 				"repo":    repo.FullName,
 				"private": strconv.FormatBool(repo.IsSCMPrivate),
 			},
 		}
-		message.Data, _ = json.Marshal(model.Event{
-			Repo:  *repo,
-			Build: *build,
+		message.Data, err = json.Marshal(model.Event{
+			Repo:     *repo,
+			Pipeline: *currentPipeline,
 		})
-		if err := s.pubsub.Publish(c, "topic/events", message); err != nil {
-			log.Error().Err(err).Msg("can not publish proc list to")
+		if err != nil {
+			log.Error().Err(err).Msg("could not marshal JSON")
+			return
 		}
+		s.pubsub.Publish(message)
 	}()
 
-	_, err = shared.UpdateProcToStatusStarted(s.store, *proc, state)
-	return err
+	workflow, err = pipeline.UpdateWorkflowToStatusStarted(s.store, *workflow, state)
+	if err != nil {
+		return err
+	}
+	s.updateForgeStatus(c, repo, currentPipeline, workflow)
+	return nil
 }
 
 // Done implements the rpc.Done function
 func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
-	procID, err := strconv.ParseInt(id, 10, 64)
+	workflowID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		return err
 	}
 
-	proc, err := s.store.ProcLoad(procID)
+	workflow, err := s.store.WorkflowLoad(workflowID)
 	if err != nil {
-		log.Error().Msgf("error: cannot find proc with id %d: %s", procID, err)
+		log.Error().Err(err).Msgf("cannot find step with id %d", workflowID)
 		return err
 	}
 
-	build, err := s.store.GetBuild(proc.BuildID)
+	workflow.Children, err = s.store.StepListFromWorkflowFind(workflow)
 	if err != nil {
-		log.Error().Msgf("error: cannot find build with id %d: %s", proc.BuildID, err)
 		return err
 	}
 
-	repo, err := s.store.GetRepo(build.RepoID)
+	currentPipeline, err := s.store.GetPipeline(workflow.PipelineID)
 	if err != nil {
-		log.Error().Msgf("error: cannot find repo with id %d: %s", build.RepoID, err)
+		log.Error().Err(err).Msgf("cannot find pipeline with id %d", workflow.PipelineID)
 		return err
 	}
 
-	log.Trace().
+	repo, err := s.store.GetRepo(currentPipeline.RepoID)
+	if err != nil {
+		log.Error().Err(err).Msgf("cannot find repo with id %d", currentPipeline.RepoID)
+		return err
+	}
+
+	logger := log.With().
 		Str("repo_id", fmt.Sprint(repo.ID)).
-		Str("build_id", fmt.Sprint(build.ID)).
-		Str("proc_id", id).
-		Msgf("gRPC Done with state: %#v", state)
+		Str("pipeline_id", fmt.Sprint(currentPipeline.ID)).
+		Str("workflow_id", id).Logger()
 
-	if proc, err = shared.UpdateProcStatusToDone(s.store, *proc, state); err != nil {
-		log.Error().Msgf("error: done: cannot update proc_id %d state: %s", proc.ID, err)
+	logger.Trace().Msgf("gRPC Done with state: %#v", state)
+
+	if workflow, err = pipeline.UpdateWorkflowStatusToDone(s.store, *workflow, state); err != nil {
+		logger.Error().Err(err).Msgf("pipeline.UpdateStepStatusToDone: cannot update workflow state: %s", err)
 	}
 
 	var queueErr error
-	if proc.Failing() {
-		queueErr = s.queue.Error(c, id, fmt.Errorf("Proc finished with exitcode %d, %s", state.ExitCode, state.Error))
+	if workflow.Failing() {
+		queueErr = s.queue.Error(c, id, fmt.Errorf("step finished with exit code %d, %s", state.ExitCode, state.Error))
 	} else {
-		queueErr = s.queue.Done(c, id, proc.State)
+		queueErr = s.queue.Done(c, id, workflow.State)
 	}
 	if queueErr != nil {
-		log.Error().Msgf("error: done: cannot ack proc_id %d: %s", procID, err)
+		logger.Error().Err(queueErr).Msg("queue.Done: cannot ack workflow")
 	}
 
-	procs, err := s.store.ProcList(build)
+	currentPipeline.Workflows, err = s.store.WorkflowGetTree(currentPipeline)
 	if err != nil {
 		return err
 	}
-	s.completeChildrenIfParentCompleted(procs, proc)
+	s.completeChildrenIfParentCompleted(workflow)
 
-	if !model.IsThereRunningStage(procs) {
-		if build, err = shared.UpdateStatusToDone(s.store, *build, model.BuildStatus(procs), proc.Stopped); err != nil {
-			log.Error().Err(err).Msgf("error: done: cannot update build_id %d final state", build.ID)
+	if !model.IsThereRunningStage(currentPipeline.Workflows) {
+		if currentPipeline, err = pipeline.UpdateStatusToDone(s.store, *currentPipeline, model.PipelineStatus(currentPipeline.Workflows), workflow.Stopped); err != nil {
+			logger.Error().Err(err).Msgf("pipeline.UpdateStatusToDone: cannot update workflow final state")
 		}
 	}
 
-	s.updateRemoteStatus(c, repo, build, proc)
+	s.updateForgeStatus(c, repo, currentPipeline, workflow)
 
-	if err := s.logger.Close(c, id); err != nil {
-		log.Error().Err(err).Msgf("done: cannot close build_id %d logger", proc.ID)
-	}
+	// make sure writes to pubsub are non blocking (https://github.com/woodpecker-ci/woodpecker/blob/c919f32e0b6432a95e1a6d3d0ad662f591adf73f/server/logging/log.go#L9)
+	go func() {
+		for _, step := range workflow.Children {
+			if err := s.logger.Close(c, step.ID); err != nil {
+				logger.Error().Err(err).Msgf("done: cannot close log stream for step %d", step.ID)
+			}
+		}
+	}()
 
-	if err := s.notify(c, repo, build, procs); err != nil {
+	if err := s.notify(repo, currentPipeline); err != nil {
 		return err
 	}
 
-	if build.Status == model.StatusSuccess || build.Status == model.StatusFailure {
-		s.buildCount.WithLabelValues(repo.FullName, build.Branch, string(build.Status), "total").Inc()
-		s.buildTime.WithLabelValues(repo.FullName, build.Branch, string(build.Status), "total").Set(float64(build.Finished - build.Started))
+	if currentPipeline.Status == model.StatusSuccess || currentPipeline.Status == model.StatusFailure {
+		s.pipelineCount.WithLabelValues(repo.FullName, currentPipeline.Branch, string(currentPipeline.Status), "total").Inc()
+		s.pipelineTime.WithLabelValues(repo.FullName, currentPipeline.Branch, string(currentPipeline.Status), "total").Set(float64(currentPipeline.Finished - currentPipeline.Started))
 	}
-	if model.IsMultiPipeline(procs) {
-		s.buildTime.WithLabelValues(repo.FullName, build.Branch, string(proc.State), proc.Name).Set(float64(proc.Stopped - proc.Started))
+	if currentPipeline.IsMultiPipeline() {
+		s.pipelineTime.WithLabelValues(repo.FullName, currentPipeline.Branch, string(workflow.State), workflow.Name).Set(float64(workflow.Stopped - workflow.Started))
 	}
 
 	return nil
 }
 
 // Log implements the rpc.Log function
-func (s *RPC) Log(c context.Context, id string, line *rpc.Line) error {
-	entry := new(logging.Entry)
-	entry.Data, _ = json.Marshal(line)
-	if err := s.logger.Write(c, id, entry); err != nil {
-		log.Error().Err(err).Msgf("rpc server could not write to logger")
+func (s *RPC) Log(c context.Context, _logEntry *rpc.LogEntry) error {
+	// convert rpc log_entry to model.log_entry
+	step, err := s.store.StepByUUID(_logEntry.StepUUID)
+	if err != nil {
+		return fmt.Errorf("could not find step with uuid %s in store: %w", _logEntry.StepUUID, err)
 	}
-	return nil
+	logEntry := &model.LogEntry{
+		StepID: step.ID,
+		Time:   _logEntry.Time,
+		Line:   _logEntry.Line,
+		Data:   []byte(_logEntry.Data),
+		Type:   model.LogEntryType(_logEntry.Type),
+	}
+	// make sure writes to pubsub are non blocking (https://github.com/woodpecker-ci/woodpecker/blob/c919f32e0b6432a95e1a6d3d0ad662f591adf73f/server/logging/log.go#L9)
+	go func() {
+		// write line to listening web clients
+		if err := s.logger.Write(c, logEntry.StepID, logEntry); err != nil {
+			log.Error().Err(err).Msgf("rpc server could not write to logger")
+		}
+	}()
+	// make line persistent in database
+	return s.store.LogAppend(logEntry)
 }
 
-func (s *RPC) completeChildrenIfParentCompleted(procs []*model.Proc, completedProc *model.Proc) {
-	for _, p := range procs {
-		if p.Running() && p.PPID == completedProc.PID {
-			if _, err := shared.UpdateProcToStatusSkipped(s.store, *p, completedProc.Stopped); err != nil {
-				log.Error().Msgf("error: done: cannot update proc_id %d child state: %s", p.ID, err)
+func (s *RPC) RegisterAgent(ctx context.Context, platform, backend, version string, capacity int32) (int64, error) {
+	agent, err := s.getAgentFromContext(ctx)
+	if err != nil {
+		return -1, err
+	}
+
+	if agent.Name == "" {
+		if hostname, err := s.getHostnameFromContext(ctx); err == nil {
+			agent.Name = hostname
+		}
+	}
+
+	agent.Backend = backend
+	agent.Platform = platform
+	agent.Capacity = capacity
+	agent.Version = version
+
+	err = s.store.AgentUpdate(agent)
+	if err != nil {
+		return -1, err
+	}
+
+	return agent.ID, nil
+}
+
+func (s *RPC) UnregisterAgent(ctx context.Context) error {
+	agent, err := s.getAgentFromContext(ctx)
+	if !agent.IsSystemAgent() {
+		// registered with individual agent token -> do not unregister
+		return nil
+	}
+	log.Debug().Msgf("unregistering agent with ID %d", agent.ID)
+	if err != nil {
+		return err
+	}
+
+	err = s.store.AgentDelete(agent)
+
+	return err
+}
+
+func (s *RPC) ReportHealth(ctx context.Context, status string) error {
+	agent, err := s.getAgentFromContext(ctx)
+	if err != nil {
+		return err
+	}
+
+	if status != "I am alive!" {
+		//nolint:stylecheck
+		return errors.New("Are you alive?")
+	}
+
+	agent.LastContact = time.Now().Unix()
+
+	return s.store.AgentUpdate(agent)
+}
+
+func (s *RPC) completeChildrenIfParentCompleted(completedWorkflow *model.Workflow) {
+	for _, c := range completedWorkflow.Children {
+		if c.Running() {
+			if _, err := pipeline.UpdateStepToStatusSkipped(s.store, *c, completedWorkflow.Stopped); err != nil {
+				log.Error().Err(err).Msgf("done: cannot update step_id %d child state", c.ID)
 			}
 		}
 	}
 }
 
-func (s *RPC) updateRemoteStatus(ctx context.Context, repo *model.Repo, build *model.Build, proc *model.Proc) {
+func (s *RPC) updateForgeStatus(ctx context.Context, repo *model.Repo, pipeline *model.Pipeline, workflow *model.Workflow) {
 	user, err := s.store.GetUser(repo.UserID)
 	if err != nil {
-		log.Error().Err(err).Msgf("can not get user with id '%d'", repo.UserID)
+		log.Error().Err(err).Msgf("cannot get user with id '%d'", repo.UserID)
 		return
 	}
 
-	if refresher, ok := s.remote.(remote.Refresher); ok {
-		ok, err := refresher.Refresh(ctx, user)
-		if err != nil {
-			log.Error().Err(err).Msgf("grpc: refresh oauth token of user '%s' failed", user.Login)
-		} else if ok {
-			if err := s.store.UpdateUser(user); err != nil {
-				log.Error().Err(err).Msg("fail to save user to store after refresh oauth token")
-			}
-		}
-	}
+	forge.Refresh(ctx, s.forge, s.store, user)
 
-	// only do status updates for parent procs
-	if proc != nil && proc.IsParent() {
-		err = s.remote.Status(ctx, user, repo, build, proc)
+	// only do status updates for parent steps
+	if workflow != nil {
+		err = s.forge.Status(ctx, user, repo, pipeline, workflow)
 		if err != nil {
-			log.Error().Err(err).Msgf("error setting commit status for %s/%d", repo.FullName, build.Number)
+			log.Error().Err(err).Msgf("error setting commit status for %s/%d", repo.FullName, pipeline.Number)
 		}
 	}
 }
 
-func (s *RPC) notify(c context.Context, repo *model.Repo, build *model.Build, procs []*model.Proc) (err error) {
-	if build.Procs, err = model.Tree(procs); err != nil {
-		return err
-	}
+func (s *RPC) notify(repo *model.Repo, pipeline *model.Pipeline) (err error) {
 	message := pubsub.Message{
 		Labels: map[string]string{
 			"repo":    repo.FullName,
 			"private": strconv.FormatBool(repo.IsSCMPrivate),
 		},
 	}
-	message.Data, _ = json.Marshal(model.Event{
-		Repo:  *repo,
-		Build: *build,
+	message.Data, err = json.Marshal(model.Event{
+		Repo:     *repo,
+		Pipeline: *pipeline,
 	})
-	if err := s.pubsub.Publish(c, "topic/events", message); err != nil {
-		log.Error().Err(err).Msgf("grpc could not notify event: '%v'", message)
+	if err != nil {
+		return err
 	}
+	s.pubsub.Publish(message)
 	return nil
+}
+
+func (s *RPC) getAgentFromContext(ctx context.Context) (*model.Agent, error) {
+	md, ok := grpcMetadata.FromIncomingContext(ctx)
+	if !ok {
+		return nil, errors.New("metadata is not provided")
+	}
+
+	values := md["agent_id"]
+	if len(values) == 0 {
+		return nil, errors.New("agent_id is not provided")
+	}
+
+	_agentID := values[0]
+	agentID, err := strconv.ParseInt(_agentID, 10, 64)
+	if err != nil {
+		return nil, errors.New("agent_id is not a valid integer")
+	}
+
+	return s.store.AgentFind(agentID)
+}
+
+func (s *RPC) getHostnameFromContext(ctx context.Context) (string, error) {
+	metadata, ok := grpcMetadata.FromIncomingContext(ctx)
+	if ok {
+		hostname, ok := metadata["hostname"]
+		if ok && len(hostname) != 0 {
+			return hostname[0], nil
+		}
+	}
+	return "", errors.New("no hostname in metadata")
 }
