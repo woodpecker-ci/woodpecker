@@ -36,6 +36,6 @@ func Load(file string) (forge.Forge, error) {
 
 var HandshakeConfig = plugin.HandshakeConfig{
 	ProtocolVersion:  1,
-	MagicCookieKey:   "WOODPECKER_PLUGIN",
+	MagicCookieKey:   "WOODPECKER_FORGE_ADDON_PLUGIN",
 	MagicCookieValue: "woodpecker-plugin-magic-cookie-value",
 }

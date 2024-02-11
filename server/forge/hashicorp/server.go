@@ -1,6 +1,7 @@
 package hashicorp
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"net/http"
@@ -208,13 +209,18 @@ func (s *RPCServer) Org(args []byte, resp *[]byte) error {
 }
 
 func (s *RPCServer) Hook(args []byte, resp *[]byte) error {
-	// TODO http.request json
-	var a *http.Request
+	var a httpRequest
 	err := json.Unmarshal(args, &a)
 	if err != nil {
 		return err
 	}
-	repo, pipeline, err := s.Impl.Hook(mkCtx(), a)
+	req, err := http.NewRequest(a.Method, a.URL, bytes.NewBuffer(a.Body))
+	if err != nil {
+		return err
+	}
+	req.Header = a.Header
+	req.Form = a.Form
+	repo, pipeline, err := s.Impl.Hook(mkCtx(), req)
 	if err != nil {
 		return err
 	}

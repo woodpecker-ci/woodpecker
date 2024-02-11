@@ -62,3 +62,11 @@ type responseHook struct {
 	Repo     *model.Repo     `json:"repo"`
 	Pipeline *model.Pipeline `json:"pipeline"`
 }
+
+type httpRequest struct {
+	Method string              `json:"method"`
+	URL    string              `json:"url"`
+	Header map[string][]string `json:"header"`
+	Form   map[string][]string `json:"form"`
+	Body   []byte              `json:"body"`
+}

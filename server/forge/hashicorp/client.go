@@ -3,6 +3,7 @@ package hashicorp
 import (
 	"context"
 	"encoding/json"
+	"io"
 	"net/http"
 	"net/rpc"
 
@@ -13,7 +14,9 @@ import (
 // TODO issue: user models are not sent with token/secret (token/secret is json:"-")
 // possible solution: two-way-communication with two funcs: 1. token/secret for user 2. token/secret for repo
 // however, that's an issue in both directions: the addon can't return tokens/secrets
-type RPC struct{ client *rpc.Client }
+type RPC struct {
+	client *rpc.Client
+}
 
 func (g *RPC) Name() string {
 	var resp string
@@ -255,8 +258,17 @@ func (g *RPC) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p 
 }
 
 func (g *RPC) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error) {
-	// TODO marshalling http.request
-	args, err := json.Marshal(r)
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		return nil, nil, err
+	}
+	args, err := json.Marshal(&httpRequest{
+		Method: r.Method,
+		URL:    r.URL.String(),
+		Header: r.Header,
+		Form:   r.Form,
+		Body:   body,
+	})
 	if err != nil {
 		return nil, nil, err
 	}
