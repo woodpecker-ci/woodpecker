@@ -49,8 +49,8 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 		pipelineFiles = append(pipelineFiles, &forge_types.FileMeta{Data: y.Data, Name: y.Name})
 	}
 
-	// If the config extension is active we should refetch the config in case something changed
-	configService := server.Config.ExtensionsManager.ConfigExtensionFromRepo(repo)
+	// If the config service is active we should refetch the config in case something changed
+	configService := server.Config.Services.Manager.ConfigServiceFromRepo(repo)
 	pipelineFiles, err = configService.Fetch(ctx, forge, user, repo, lastPipeline)
 	if err != nil {
 		return nil, &ErrBadRequest{

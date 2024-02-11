@@ -38,8 +38,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc/proto"
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/cron"
-	"go.woodpecker-ci.org/woodpecker/v2/server/extensions"
-	"go.woodpecker-ci.org/woodpecker/v2/server/extensions/permissions"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
 	woodpeckerGrpcServer "go.woodpecker-ci.org/woodpecker/v2/server/grpc"
 	"go.woodpecker-ci.org/woodpecker/v2/server/logging"
@@ -47,6 +45,8 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/pubsub"
 	"go.woodpecker-ci.org/woodpecker/v2/server/router"
 	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware"
+	"go.woodpecker-ci.org/woodpecker/v2/server/services"
+	"go.woodpecker-ci.org/woodpecker/v2/server/services/permissions"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 	"go.woodpecker-ci.org/woodpecker/v2/server/web"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
@@ -280,11 +280,11 @@ func setupEvilGlobals(c *cli.Context, s store.Store, f forge.Forge) error {
 	server.Config.Services.Pubsub = pubsub.New()
 	server.Config.Services.Membership = setupMembershipService(c, f)
 
-	extensionsMangager, err := extensions.NewManager(c, s)
+	serviceMangager, err := services.NewManager(c, s)
 	if err != nil {
-		return fmt.Errorf("could not setup extensions manager: %w", err)
+		return fmt.Errorf("could not setup service manager: %w", err)
 	}
-	server.Config.ExtensionsManager = extensionsMangager
+	server.Config.Services.Manager = serviceMangager
 
 	// authentication
 	server.Config.Pipeline.AuthenticatePublicRepos = c.Bool("authenticate-public-repos")

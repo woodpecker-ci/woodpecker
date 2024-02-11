@@ -69,7 +69,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	}
 
 	// fetch the pipeline file from the forge
-	configService := server.Config.ExtensionsManager.ConfigExtensionFromRepo(repo)
+	configService := server.Config.Services.Manager.ConfigServiceFromRepo(repo)
 	forgeYamlConfigs, configFetchErr := configService.Fetch(ctx, _forge, repoUser, repo, pipeline)
 	if errors.Is(configFetchErr, &forge_types.ErrConfigNotFound{}) {
 		log.Debug().Str("repo", repo.FullName).Err(configFetchErr).Msgf("cannot find config '%s' in '%s' with user: '%s'", repo.Config, pipeline.Ref, repoUser.Login)

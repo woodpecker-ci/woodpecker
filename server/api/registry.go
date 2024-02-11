@@ -38,8 +38,8 @@ func GetRegistry(c *gin.Context) {
 	repo := session.Repo(c)
 	name := c.Param("registry")
 
-	registryExtension := server.Config.ExtensionsManager.RegistryExtensionFromRepo(repo)
-	registry, err := registryExtension.RegistryFind(repo, name)
+	registryService := server.Config.Services.Manager.RegistryServiceFromRepo(repo)
+	registry, err := registryService.RegistryFind(repo, name)
 	if err != nil {
 		handleDBError(c, err)
 		return
@@ -76,8 +76,8 @@ func PostRegistry(c *gin.Context) {
 		return
 	}
 
-	registryExtension := server.Config.ExtensionsManager.RegistryExtensionFromRepo(repo)
-	if err := registryExtension.RegistryCreate(repo, registry); err != nil {
+	registryService := server.Config.Services.Manager.RegistryServiceFromRepo(repo)
+	if err := registryService.RegistryCreate(repo, registry); err != nil {
 		c.String(http.StatusInternalServerError, "Error inserting registry %q. %s", in.Address, err)
 		return
 	}
@@ -108,8 +108,8 @@ func PatchRegistry(c *gin.Context) {
 		return
 	}
 
-	registryExtension := server.Config.ExtensionsManager.RegistryExtensionFromRepo(repo)
-	registry, err := registryExtension.RegistryFind(repo, name)
+	registryService := server.Config.Services.Manager.RegistryServiceFromRepo(repo)
+	registry, err := registryService.RegistryFind(repo, name)
 	if err != nil {
 		handleDBError(c, err)
 		return
@@ -125,7 +125,7 @@ func PatchRegistry(c *gin.Context) {
 		c.String(http.StatusUnprocessableEntity, "Error updating registry. %s", err)
 		return
 	}
-	if err := registryExtension.RegistryUpdate(repo, registry); err != nil {
+	if err := registryService.RegistryUpdate(repo, registry); err != nil {
 		c.String(http.StatusInternalServerError, "Error updating registry %q. %s", in.Address, err)
 		return
 	}
@@ -145,8 +145,8 @@ func PatchRegistry(c *gin.Context) {
 //	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
 func GetRegistryList(c *gin.Context) {
 	repo := session.Repo(c)
-	registryExtension := server.Config.ExtensionsManager.RegistryExtensionFromRepo(repo)
-	list, err := registryExtension.RegistryList(repo, session.Pagination(c))
+	registryService := server.Config.Services.Manager.RegistryServiceFromRepo(repo)
+	list, err := registryService.RegistryList(repo, session.Pagination(c))
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error getting registry list. %s", err)
 		return
@@ -173,8 +173,8 @@ func DeleteRegistry(c *gin.Context) {
 	repo := session.Repo(c)
 	name := c.Param("registry")
 
-	registryExtension := server.Config.ExtensionsManager.RegistryExtensionFromRepo(repo)
-	err := registryExtension.RegistryDelete(repo, name)
+	registryService := server.Config.Services.Manager.RegistryServiceFromRepo(repo)
+	err := registryService.RegistryDelete(repo, name)
 	if err != nil {
 		handleDBError(c, err)
 		return

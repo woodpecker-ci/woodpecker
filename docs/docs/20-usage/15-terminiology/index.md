@@ -31,7 +31,7 @@
 - **YAML File**: A file format used to define and configure [workflows][Workflow].
 - **Dependency**: [Workflows][Workflow] can depend on each other, and if possible, they are executed in parallel.
 - **Status**: Status refers to the outcome of a step or [workflow][Workflow] after it has been executed, determined by the internal command exit code. At the end of a [workflow][Workflow], its status is sent to the [forge][Forge].
-- **Extension**: Some parts of woodpecker like the secrets, registry storage or config fetcher / parser can be replaced through extensions.
+- **Service extension**: Some parts of woodpecker internal services like secrets storage or config fetcher can be replaced through service extensions.
 
 ## Pipeline events
 
