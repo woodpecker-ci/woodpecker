@@ -36,11 +36,11 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/gitea"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/github"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/gitlab"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/hashicorp"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/hashicorp/forge"
 	"go.woodpecker-ci.org/woodpecker/v2/server/queue"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store/datastore"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/addon/hashicorp"
-	forgeaddon "go.woodpecker-ci.org/woodpecker/v2/shared/addon/hashicorp/forge"
 )
 
 func setupStore(c *cli.Context) (store.Store, error) {
