@@ -20,15 +20,15 @@ type noEncryptionBuilder struct {
 	clients []types.EncryptionClient
 }
 
-func (b noEncryptionBuilder) WithClients(clients []types.EncryptionClient) types.EncryptionExtensionBuilder {
+func (b noEncryptionBuilder) WithClients(clients []types.EncryptionClient) types.EncryptionServiceBuilder {
 	b.clients = clients
 	return b
 }
 
-func (b noEncryptionBuilder) Build() (types.EncryptionExtension, error) {
+func (b noEncryptionBuilder) Build() (types.EncryptionService, error) {
 	svc := &noEncryption{}
 	for _, client := range b.clients {
-		err := client.SetEncryptionExtension(svc)
+		err := client.SetEncryptionService(svc)
 		if err != nil {
 			return nil, err
 		}

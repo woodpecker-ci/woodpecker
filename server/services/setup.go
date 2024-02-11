@@ -32,7 +32,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
 )
 
-func setupRegistryExtension(store store.Store, dockerConfig string) registry.Service {
+func setupRegistryService(store store.Store, dockerConfig string) registry.Service {
 	if dockerConfig != "" {
 		return registry.NewCombined(
 			registry.NewDB(store),
@@ -51,12 +51,11 @@ func setupSecretService(store store.Store) secret.Service {
 	// if err != nil {
 	// 	log.Fatal().Err(err).Msg("could not create encryption service")
 	// }
-	// server.Config.Extensions.Secrets = setupSecretService(c, encryptedSecretStore)
 
 	return secret.NewDB(store)
 }
 
-func setupConfigExtension(c *cli.Context, privateSignatureKey crypto.PrivateKey) config.Service {
+func setupConfigService(c *cli.Context, privateSignatureKey crypto.PrivateKey) config.Service {
 	timeout := c.Duration("forge-timeout")
 	configFetcher := config.NewForge(timeout)
 

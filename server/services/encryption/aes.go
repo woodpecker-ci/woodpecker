@@ -25,14 +25,14 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
-type aesEncryptionExtension struct {
+type aesEncryptionService struct {
 	cipher  cipher.AEAD
 	keyID   string
 	store   store.Store
 	clients []types.EncryptionClient
 }
 
-func (svc *aesEncryptionExtension) Encrypt(plaintext, associatedData string) (string, error) {
+func (svc *aesEncryptionService) Encrypt(plaintext, associatedData string) (string, error) {
 	msg := []byte(plaintext)
 	aad := []byte(associatedData)
 
@@ -46,7 +46,7 @@ func (svc *aesEncryptionExtension) Encrypt(plaintext, associatedData string) (st
 	return base64.StdEncoding.EncodeToString(result), nil
 }
 
-func (svc *aesEncryptionExtension) Decrypt(ciphertext, associatedData string) (string, error) {
+func (svc *aesEncryptionService) Decrypt(ciphertext, associatedData string) (string, error) {
 	bytes, err := base64.StdEncoding.DecodeString(ciphertext)
 	if err != nil {
 		return "", fmt.Errorf(errTemplateBase64DecryptionFailed, err)
@@ -62,6 +62,6 @@ func (svc *aesEncryptionExtension) Decrypt(ciphertext, associatedData string) (s
 	return string(plaintext), nil
 }
 
-func (svc *aesEncryptionExtension) Disable() error {
+func (svc *aesEncryptionService) Disable() error {
 	return svc.disable()
 }

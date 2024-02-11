@@ -57,7 +57,7 @@ func (b builder) Build() error {
 			return fmt.Errorf(errTemplateFailedInitializingUnencrypted, err)
 		}
 	}
-	svc, err := b.getExtension(keyType)
+	svc, err := b.getService(keyType)
 	if err != nil {
 		return fmt.Errorf(errTemplateFailedInitializing, err)
 	}

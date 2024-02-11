@@ -30,18 +30,18 @@ type tinkConfiguration struct {
 	clients        []types.EncryptionClient
 }
 
-func newTink(ctx *cli.Context, s store.Store) types.EncryptionExtensionBuilder {
+func newTink(ctx *cli.Context, s store.Store) types.EncryptionServiceBuilder {
 	filepath := ctx.String(tinkKeysetFilepathConfigFlag)
 	return &tinkConfiguration{filepath, s, nil}
 }
 
-func (c tinkConfiguration) WithClients(clients []types.EncryptionClient) types.EncryptionExtensionBuilder {
+func (c tinkConfiguration) WithClients(clients []types.EncryptionClient) types.EncryptionServiceBuilder {
 	c.clients = clients
 	return c
 }
 
-func (c tinkConfiguration) Build() (types.EncryptionExtension, error) {
-	svc := &tinkEncryptionExtension{
+func (c tinkConfiguration) Build() (types.EncryptionService, error) {
+	svc := &tinkEncryptionService{
 		keysetFilePath:    c.keysetFilePath,
 		primaryKeyID:      "",
 		encryption:        nil,

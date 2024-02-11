@@ -20,22 +20,22 @@ type EncryptionBuilder interface {
 	Build() error
 }
 
-type EncryptionExtensionBuilder interface {
-	WithClients(clients []EncryptionClient) EncryptionExtensionBuilder
-	Build() (EncryptionExtension, error)
+type EncryptionServiceBuilder interface {
+	WithClients(clients []EncryptionClient) EncryptionServiceBuilder
+	Build() (EncryptionService, error)
 }
 
-type EncryptionExtension interface {
+type EncryptionService interface {
 	Encrypt(plaintext, associatedData string) (string, error)
 	Decrypt(ciphertext, associatedData string) (string, error)
 	Disable() error
 }
 
 type EncryptionClient interface {
-	// SetEncryptionExtension should be used only by EncryptionExtensionBuilder
-	SetEncryptionExtension(encryption EncryptionExtension) error
+	// SetEncryptionService should be used only by EncryptionServiceBuilder
+	SetEncryptionService(encryption EncryptionService) error
 	// EnableEncryption should encrypt all service data
 	EnableEncryption() error
 	// MigrateEncryption should decrypt all existing data and encrypt it with new encryption service
-	MigrateEncryption(newEncryption EncryptionExtension) error
+	MigrateEncryption(newEncryption EncryptionService) error
 }

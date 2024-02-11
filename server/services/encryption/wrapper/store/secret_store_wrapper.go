@@ -27,7 +27,7 @@ import (
 
 type EncryptedSecretStore struct {
 	store      model.SecretStore
-	encryption types.EncryptionExtension
+	encryption types.EncryptionService
 }
 
 // ensure wrapper match interface
@@ -38,7 +38,7 @@ func NewSecretStore(secretStore model.SecretStore) *EncryptedSecretStore {
 	return &wrapper
 }
 
-func (wrapper *EncryptedSecretStore) SetEncryptionExtension(service types.EncryptionExtension) error {
+func (wrapper *EncryptedSecretStore) SetEncryptionService(service types.EncryptionService) error {
 	if wrapper.encryption != nil {
 		return errors.New(errMessageInitSeveralTimes)
 	}
@@ -64,7 +64,7 @@ func (wrapper *EncryptedSecretStore) EnableEncryption() error {
 	return nil
 }
 
-func (wrapper *EncryptedSecretStore) MigrateEncryption(newEncryptionExtension types.EncryptionExtension) error {
+func (wrapper *EncryptedSecretStore) MigrateEncryption(newEncryptionService types.EncryptionService) error {
 	log.Warn().Msg(logMessageMigratingSecretsEncryption)
 	secrets, err := wrapper.store.SecretListAll()
 	if err != nil {
@@ -73,7 +73,7 @@ func (wrapper *EncryptedSecretStore) MigrateEncryption(newEncryptionExtension ty
 	if err := wrapper.decryptList(secrets); err != nil {
 		return err
 	}
-	wrapper.encryption = newEncryptionExtension
+	wrapper.encryption = newEncryptionService
 	for _, secret := range secrets {
 		if err := wrapper.encrypt(secret); err != nil {
 			return err

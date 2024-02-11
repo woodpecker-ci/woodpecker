@@ -22,7 +22,7 @@ import (
 	storeTypes "go.woodpecker-ci.org/woodpecker/v2/server/store/types"
 )
 
-func (b builder) getExtension(keyType string) (types.EncryptionExtension, error) {
+func (b builder) getService(keyType string) (types.EncryptionService, error) {
 	if keyType == keyTypeNone {
 		return nil, errors.New(errMessageNoKeysProvided)
 	}
@@ -52,7 +52,7 @@ func (b builder) detectKeyType() (string, error) {
 	tinkKeysetPresent := b.ctx.IsSet(tinkKeysetFilepathConfigFlag)
 	switch {
 	case rawKeyPresent && tinkKeysetPresent:
-		return "", errors.New(errMessageCantUseBothExtensions)
+		return "", errors.New(errMessageCantUseBothServices)
 	case rawKeyPresent:
 		return keyTypeRaw, nil
 	case tinkKeysetPresent:
@@ -61,7 +61,7 @@ func (b builder) detectKeyType() (string, error) {
 	return keyTypeNone, nil
 }
 
-func (b builder) serviceBuilder(keyType string) (types.EncryptionExtensionBuilder, error) {
+func (b builder) serviceBuilder(keyType string) (types.EncryptionServiceBuilder, error) {
 	switch {
 	case keyType == keyTypeTink:
 		return newTink(b.ctx, b.store), nil

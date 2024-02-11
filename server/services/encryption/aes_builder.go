@@ -30,18 +30,18 @@ type aesConfiguration struct {
 	clients  []types.EncryptionClient
 }
 
-func newAES(ctx *cli.Context, s store.Store) types.EncryptionExtensionBuilder {
+func newAES(ctx *cli.Context, s store.Store) types.EncryptionServiceBuilder {
 	key := ctx.String(rawKeyConfigFlag)
 	return &aesConfiguration{key, s, nil}
 }
 
-func (c aesConfiguration) WithClients(clients []types.EncryptionClient) types.EncryptionExtensionBuilder {
+func (c aesConfiguration) WithClients(clients []types.EncryptionClient) types.EncryptionServiceBuilder {
 	c.clients = clients
 	return c
 }
 
-func (c aesConfiguration) Build() (types.EncryptionExtension, error) {
-	svc := &aesEncryptionExtension{
+func (c aesConfiguration) Build() (types.EncryptionService, error) {
+	svc := &aesEncryptionService{
 		cipher:  nil,
 		store:   c.store,
 		clients: c.clients,

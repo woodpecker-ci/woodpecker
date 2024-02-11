@@ -21,7 +21,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func (svc *tinkEncryptionExtension) enable() error {
+func (svc *tinkEncryptionService) enable() error {
 	if err := svc.callbackOnEnable(); err != nil {
 		return fmt.Errorf(errTemplateFailedEnablingEncryption, err)
 	}
@@ -34,7 +34,7 @@ func (svc *tinkEncryptionExtension) enable() error {
 	return nil
 }
 
-func (svc *tinkEncryptionExtension) disable() error {
+func (svc *tinkEncryptionService) disable() error {
 	if err := svc.callbackOnDisable(); err != nil {
 		return fmt.Errorf(errTemplateFailedDisablingEncryption, err)
 	}
@@ -47,8 +47,8 @@ func (svc *tinkEncryptionExtension) disable() error {
 	return nil
 }
 
-func (svc *tinkEncryptionExtension) rotate() error {
-	newSvc := &tinkEncryptionExtension{
+func (svc *tinkEncryptionService) rotate() error {
+	newSvc := &tinkEncryptionService{
 		keysetFilePath:    svc.keysetFilePath,
 		primaryKeyID:      "",
 		encryption:        nil,
@@ -79,7 +79,7 @@ func (svc *tinkEncryptionExtension) rotate() error {
 	return nil
 }
 
-func (svc *tinkEncryptionExtension) updateCiphertextSample() error {
+func (svc *tinkEncryptionService) updateCiphertextSample() error {
 	ciphertext, err := svc.Encrypt(svc.primaryKeyID, keyIDAssociatedData)
 	if err != nil {
 		return fmt.Errorf(errTemplateFailedUpdatingServerConfig, err)
@@ -93,16 +93,16 @@ func (svc *tinkEncryptionExtension) updateCiphertextSample() error {
 	return nil
 }
 
-func (svc *tinkEncryptionExtension) deleteCiphertextSample() error {
+func (svc *tinkEncryptionService) deleteCiphertextSample() error {
 	if err := svc.store.ServerConfigDelete(ciphertextSampleConfigKey); err != nil {
 		return fmt.Errorf(errTemplateFailedUpdatingServerConfig, err)
 	}
 	return nil
 }
 
-func (svc *tinkEncryptionExtension) initClients() error {
+func (svc *tinkEncryptionService) initClients() error {
 	for _, client := range svc.clients {
-		if err := client.SetEncryptionExtension(svc); err != nil {
+		if err := client.SetEncryptionService(svc); err != nil {
 			return err
 		}
 	}
@@ -110,7 +110,7 @@ func (svc *tinkEncryptionExtension) initClients() error {
 	return nil
 }
 
-func (svc *tinkEncryptionExtension) callbackOnEnable() error {
+func (svc *tinkEncryptionService) callbackOnEnable() error {
 	for _, client := range svc.clients {
 		if err := client.EnableEncryption(); err != nil {
 			return err
@@ -120,7 +120,7 @@ func (svc *tinkEncryptionExtension) callbackOnEnable() error {
 	return nil
 }
 
-func (svc *tinkEncryptionExtension) callbackOnRotation() error {
+func (svc *tinkEncryptionService) callbackOnRotation() error {
 	for _, client := range svc.clients {
 		if err := client.MigrateEncryption(svc); err != nil {
 			return err
@@ -130,7 +130,7 @@ func (svc *tinkEncryptionExtension) callbackOnRotation() error {
 	return nil
 }
 
-func (svc *tinkEncryptionExtension) callbackOnDisable() error {
+func (svc *tinkEncryptionService) callbackOnDisable() error {
 	for _, client := range svc.clients {
 		if err := client.MigrateEncryption(&noEncryption{}); err != nil {
 			return err

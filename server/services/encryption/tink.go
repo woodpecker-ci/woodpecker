@@ -25,7 +25,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
-type tinkEncryptionExtension struct {
+type tinkEncryptionService struct {
 	keysetFilePath    string
 	primaryKeyID      string
 	encryption        tink.AEAD
@@ -34,7 +34,7 @@ type tinkEncryptionExtension struct {
 	clients           []types.EncryptionClient
 }
 
-func (svc *tinkEncryptionExtension) Encrypt(plaintext, associatedData string) (string, error) {
+func (svc *tinkEncryptionService) Encrypt(plaintext, associatedData string) (string, error) {
 	msg := []byte(plaintext)
 	aad := []byte(associatedData)
 	ciphertext, err := svc.encryption.Encrypt(msg, aad)
@@ -44,7 +44,7 @@ func (svc *tinkEncryptionExtension) Encrypt(plaintext, associatedData string) (s
 	return base64.StdEncoding.EncodeToString(ciphertext), nil
 }
 
-func (svc *tinkEncryptionExtension) Decrypt(ciphertext, associatedData string) (string, error) {
+func (svc *tinkEncryptionService) Decrypt(ciphertext, associatedData string) (string, error) {
 	ct, err := base64.StdEncoding.DecodeString(ciphertext)
 	if err != nil {
 		return "", fmt.Errorf(errTemplateBase64DecryptionFailed, err)
@@ -57,6 +57,6 @@ func (svc *tinkEncryptionExtension) Decrypt(ciphertext, associatedData string) (
 	return string(plaintext), nil
 }
 
-func (svc *tinkEncryptionExtension) Disable() error {
+func (svc *tinkEncryptionService) Disable() error {
 	return svc.disable()
 }

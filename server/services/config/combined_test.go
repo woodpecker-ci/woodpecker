@@ -37,7 +37,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/services/config"
 )
 
-func TestFetchFromConfigExtension(t *testing.T) {
+func TestFetchFromConfigService(t *testing.T) {
 	t.Parallel()
 
 	type file struct {
