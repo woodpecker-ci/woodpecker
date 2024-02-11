@@ -87,7 +87,7 @@ func Approve(ctx context.Context, store store.Store, currentPipeline *model.Pipe
 				for _, stage := range item.Config.Stages {
 					for _, step := range stage.Steps {
 						for _, storeStep := range wf.Children {
-							if storeStep.Name == step.Alias {
+							if storeStep.Name == step.Name {
 								step.UUID = storeStep.UUID
 								break
 							}
