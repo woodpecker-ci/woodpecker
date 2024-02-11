@@ -30,5 +30,5 @@ steps:
     depends_on: []
     commands:
       - lychee pipeline/frontend/yaml/linter/schema/schema.json
-      - lychee docs/docs/
-      - lychee docs/src/pages/
+      - lychee --exclude localhost docs/docs/
+      - lychee --exclude localhost docs/src/pages/
