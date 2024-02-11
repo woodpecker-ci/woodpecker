@@ -2,11 +2,27 @@ package errors
 
 import (
 	"errors"
+	"fmt"
 
 	"go.uber.org/multierr"
-
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/errors/types"
 )
+
+type PipelineErrorType string
+
+const (
+	PipelineErrorTypeLinter      PipelineErrorType = "linter"      // some error with the config syntax
+	PipelineErrorTypeDeprecation PipelineErrorType = "deprecation" // using some deprecated feature
+	PipelineErrorTypeCompiler    PipelineErrorType = "compiler"    // some error with the config semantics
+	PipelineErrorTypeGeneric     PipelineErrorType = "generic"     // some generic error
+	PipelineErrorTypeBadHabit    PipelineErrorType = "bad_habit"   // some bad-habit error
+)
+
+type PipelineError struct {
+	Type      PipelineErrorType `json:"type"`
+	Message   string            `json:"message"`
+	IsWarning bool              `json:"is_warning"`
+	Data      any               `json:"data"`
+}
 
 type LinterErrorData struct {
 	File  string `json:"file"`
@@ -19,8 +35,12 @@ type DeprecationErrorData struct {
 	Docs  string `json:"docs"`
 }
 
-func GetLinterData(e *types.PipelineError) *LinterErrorData {
-	if e.Type != types.PipelineErrorTypeLinter {
+func (e *PipelineError) Error() string {
+	return fmt.Sprintf("[%s] %s", e.Type, e.Message)
+}
+
+func (e *PipelineError) GetLinterData() *LinterErrorData {
+	if e.Type != PipelineErrorTypeLinter {
 		return nil
 	}
 
@@ -31,16 +51,16 @@ func GetLinterData(e *types.PipelineError) *LinterErrorData {
 	return nil
 }
 
-func GetPipelineErrors(err error) []*types.PipelineError {
-	var pipelineErrors []*types.PipelineError
+func GetPipelineErrors(err error) []*PipelineError {
+	var pipelineErrors []*PipelineError
 	for _, _err := range multierr.Errors(err) {
-		var err *types.PipelineError
+		var err *PipelineError
 		if errors.As(_err, &err) {
 			pipelineErrors = append(pipelineErrors, err)
 		} else {
-			pipelineErrors = append(pipelineErrors, &types.PipelineError{
+			pipelineErrors = append(pipelineErrors, &PipelineError{
 				Message: _err.Error(),
-				Type:    types.PipelineErrorTypeGeneric,
+				Type:    PipelineErrorTypeGeneric,
 			})
 		}
 	}

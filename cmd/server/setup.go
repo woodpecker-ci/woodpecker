@@ -17,11 +17,6 @@ package main
 
 import (
 	"context"
-	"crypto"
-	"crypto/ed25519"
-	"crypto/rand"
-	"encoding/hex"
-	"errors"
 	"fmt"
 	"net/url"
 	"os"
@@ -41,21 +36,11 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/gitea"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/github"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/gitlab"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/config"
-	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/environments"
-	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/registry"
-	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/secrets"
 	"go.woodpecker-ci.org/woodpecker/v2/server/queue"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store/datastore"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/addon/hashicorp"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/addon/hashicorp/configservice"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/addon/hashicorp/environservice"
 	forgeaddon "go.woodpecker-ci.org/woodpecker/v2/shared/addon/hashicorp/forge"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/addon/hashicorp/registryservice"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/addon/hashicorp/secretservice"
 )
 
 func setupStore(c *cli.Context) (store.Store, error) {
@@ -113,54 +98,6 @@ func checkSqliteFileExist(path string) error {
 
 func setupQueue(c *cli.Context, s store.Store) queue.Queue {
 	return queue.WithTaskStore(queue.New(c.Context), s)
-}
-
-func setupSecretService(c *cli.Context, s model.SecretStore) (model.SecretService, error) {
-	if a := c.String("addons-secret-service"); a != "" {
-		addonExt, err := hashicorp.Load(a, secretservice.Addon)
-		if err != nil {
-			return nil, err
-		}
-		if addonExt != nil {
-			return addonExt.Value, nil
-		}
-	}
-
-	return secrets.New(c.Context, s), nil
-}
-
-func setupRegistryService(c *cli.Context, s store.Store) (model.RegistryService, error) {
-	if add := c.String("addons-registry-service"); add != "" {
-		addonExt, err := hashicorp.Load(add, registryservice.Addon)
-		if err != nil {
-			return nil, err
-		}
-		if addonExt != nil {
-			return addonExt.Value, nil
-		}
-	}
-
-	if c.String("docker-config") != "" {
-		return registry.Combined(
-			registry.New(s),
-			registry.Filesystem(c.String("docker-config")),
-		), nil
-	}
-	return registry.New(s), nil
-}
-
-func setupEnvironService(c *cli.Context, _ store.Store) (model.EnvironService, error) {
-	if a := c.String("addons-environ-service"); a != "" {
-		addonExt, err := hashicorp.Load(a, environservice.Addon)
-		if err != nil {
-			return nil, err
-		}
-		if addonExt != nil {
-			return addonExt.Value, nil
-		}
-	}
-
-	return environments.Parse(c.StringSlice("environment")), nil
 }
 
 func setupMembershipService(_ *cli.Context, r forge.Forge) cache.MembershipService {
@@ -303,49 +240,4 @@ func setupMetrics(g *errgroup.Group, _store store.Store) {
 			time.Sleep(10 * time.Second)
 		}
 	})
-}
-
-// setupSignatureKeys generate or load key pair to sign webhooks requests (i.e. used for extensions)
-func setupSignatureKeys(_store store.Store) (crypto.PrivateKey, crypto.PublicKey, error) {
-	privKeyID := "signature-private-key"
-
-	privKey, err := _store.ServerConfigGet(privKeyID)
-	if errors.Is(err, types.RecordNotExist) {
-		_, privKey, err := ed25519.GenerateKey(rand.Reader)
-		if err != nil {
-			return nil, nil, fmt.Errorf("failed to generate private key: %w", err)
-		}
-		err = _store.ServerConfigSet(privKeyID, hex.EncodeToString(privKey))
-		if err != nil {
-			return nil, nil, fmt.Errorf("failed to store private key: %w", err)
-		}
-		log.Debug().Msg("created private key")
-		return privKey, privKey.Public(), nil
-	} else if err != nil {
-		return nil, nil, fmt.Errorf("failed to load private key: %w", err)
-	}
-	privKeyStr, err := hex.DecodeString(privKey)
-	if err != nil {
-		return nil, nil, fmt.Errorf("failed to decode private key: %w", err)
-	}
-	privateKey := ed25519.PrivateKey(privKeyStr)
-	return privateKey, privateKey.Public(), nil
-}
-
-func setupConfigService(c *cli.Context) (config.Extension, error) {
-	if a := c.String("addons-config-service"); a != "" {
-		addonExt, err := hashicorp.Load(a, configservice.Addon)
-		if err != nil {
-			return nil, err
-		}
-		if addonExt != nil {
-			return addonExt.Value, nil
-		}
-	}
-
-	if endpoint := c.String("config-service-endpoint"); endpoint != "" {
-		return config.NewHTTP(endpoint, server.Config.Services.SignaturePrivateKey), nil
-	}
-
-	return nil, nil
 }

@@ -264,10 +264,86 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 		}
 	}
 
+	for i, c := range parsed.When.Constraints {
+		if len(c.Event.Exclude) != 0 {
+			err = multierr.Append(err, &errors.PipelineError{
+				Type:    errors.PipelineErrorTypeDeprecation,
+				Message: "Please only use allow lists for events",
+				Data: errors.DeprecationErrorData{
+					File:  config.File,
+					Field: fmt.Sprintf("when[%d].event", i),
+					Docs:  "https://woodpecker-ci.org/docs/usage/workflow-syntax#event-1",
+				},
+				IsWarning: true,
+			})
+		}
+	}
+
+	for _, step := range parsed.Steps.ContainerList {
+		for i, c := range step.When.Constraints {
+			if len(c.Event.Exclude) != 0 {
+				err = multierr.Append(err, &errors.PipelineError{
+					Type:    errors.PipelineErrorTypeDeprecation,
+					Message: "Please only use allow lists for events",
+					Data: errors.DeprecationErrorData{
+						File:  config.File,
+						Field: fmt.Sprintf("steps.%s.when[%d].event", step.Name, i),
+						Docs:  "https://woodpecker-ci.org/docs/usage/workflow-syntax#event",
+					},
+					IsWarning: true,
+				})
+			}
+		}
+	}
+
 	return err
 }
 
-func (l *Linter) lintBadHabits(_ *WorkflowConfig) error {
-	// TODO: add bad habit warnings
-	return nil
+func (l *Linter) lintBadHabits(config *WorkflowConfig) (err error) {
+	parsed := new(types.Workflow)
+	err = xyaml.Unmarshal([]byte(config.RawConfig), parsed)
+	if err != nil {
+		return err
+	}
+
+	rootEventFilters := len(parsed.When.Constraints) > 0
+	for _, c := range parsed.When.Constraints {
+		if len(c.Event.Include) == 0 {
+			rootEventFilters = false
+			break
+		}
+	}
+	if !rootEventFilters {
+		// root whens do not necessarily have an event filter, check steps
+		for _, step := range parsed.Steps.ContainerList {
+			var field string
+			if len(step.When.Constraints) == 0 {
+				field = fmt.Sprintf("steps.%s", step.Name)
+			} else {
+				stepEventIndex := -1
+				for i, c := range step.When.Constraints {
+					if len(c.Event.Include) == 0 {
+						stepEventIndex = i
+						break
+					}
+				}
+				if stepEventIndex > -1 {
+					field = fmt.Sprintf("steps.%s.when[%d]", step.Name, stepEventIndex)
+				}
+			}
+			if field != "" {
+				err = multierr.Append(err, &errors.PipelineError{
+					Type:    errors.PipelineErrorTypeBadHabit,
+					Message: "Please set an event filter on all when branches",
+					Data: errors.LinterErrorData{
+						File:  config.File,
+						Field: field,
+					},
+					IsWarning: true,
+				})
+			}
+		}
+	}
+
+	return
 }
