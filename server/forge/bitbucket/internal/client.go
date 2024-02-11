@@ -198,17 +198,17 @@ func (c *Client) ListBranches(owner, name string, opts *ListOpts) ([]*Branch, er
 	return out.Values, err
 }
 
-func (c *Client) GetBranchHead(owner, name, branch string) (string, error) {
+func (c *Client) GetBranchHead(owner, name, branch string) (*Commit, error) {
 	out := new(CommitsResp)
 	uri := fmt.Sprintf(pathBranchCommits, c.base, owner, name, branch)
 	_, err := c.do(uri, get, nil, out)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	if len(out.Values) == 0 {
-		return "", fmt.Errorf("no commits in branch %s", branch)
+		return nil, fmt.Errorf("no commits in branch %s", branch)
 	}
-	return out.Values[0].Hash, nil
+	return out.Values[0], nil
 }
 
 func (c *Client) GetUserWorkspaceMembership(workspace, user string) (string, error) {

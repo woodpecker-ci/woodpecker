@@ -363,8 +363,15 @@ func (c *config) Branches(ctx context.Context, u *model.User, r *model.Repo, p *
 }
 
 // BranchHead returns the sha of the head (latest commit) of the specified branch
-func (c *config) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
-	return c.newClient(ctx, u).GetBranchHead(r.Owner, r.Name, branch)
+func (c *config) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (*model.Commit, error) {
+	commit, err := c.newClient(ctx, u).GetBranchHead(r.Owner, r.Name, branch)
+	if err != nil {
+		return nil, err
+	}
+	return &model.Commit{
+		SHA:      commit.Hash,
+		ForgeURL: commit.Links.HTML.Href,
+	}, nil
 }
 
 // PullRequests returns the pull requests of the named repository.
