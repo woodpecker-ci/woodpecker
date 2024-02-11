@@ -1,13 +1,15 @@
 # Changelog
 
-## [2.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.4.0) - 2024-02-09
+## [2.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.4.0) - 2024-02-11
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@anbraten, @qwerty287, @sinlov, @lukashass, @renovate[bot], @pre-commit-ci[bot], @fernandrone
+@qwerty287, @kjuulh, @anbraten, @sinlov, @lukashass, @renovate[bot], @pre-commit-ci[bot], @fernandrone
 
 ### 🐛 Bug Fixes
 
+- Set correct link for commit [[#3368](https://github.com/woodpecker-ci/woodpecker/pull/3368)]
+- Fix schema links [[#3369](https://github.com/woodpecker-ci/woodpecker/pull/3369)]
 - Fix correctly handle gitlab pr closed events [[#3362](https://github.com/woodpecker-ci/woodpecker/pull/3362)]
 - fix: update schema event_enum to remove error warning when.event [[#3357](https://github.com/woodpecker-ci/woodpecker/pull/3357)]
 - Fix version check on next [[#3340](https://github.com/woodpecker-ci/woodpecker/pull/3340)]
@@ -16,18 +18,20 @@
 - Consider gitlab inherited permissions [[#3308](https://github.com/woodpecker-ci/woodpecker/pull/3308)]
 - fix: agent panic when node is terminated during step execution [[#3331](https://github.com/woodpecker-ci/woodpecker/pull/3331)]
 
-### 📚 Documentation
-
-- Update/fix some docs [[#3359](https://github.com/woodpecker-ci/woodpecker/pull/3359)]
-- chore(deps): update dependency marked to v12 [[#3325](https://github.com/woodpecker-ci/woodpecker/pull/3325)]
-
 ### 📈 Enhancement
 
+- Lint for event filter and deprecate `exclude` [[#3222](https://github.com/woodpecker-ci/woodpecker/pull/3222)]
 - Allow editing all environment variables in pipeline popups [[#3314](https://github.com/woodpecker-ci/woodpecker/pull/3314)]
 - Parse backend options in backend [[#3227](https://github.com/woodpecker-ci/woodpecker/pull/3227)]
 - Make agent usable for external backends [[#3270](https://github.com/woodpecker-ci/woodpecker/pull/3270)]
 - Add no branches text [[#3312](https://github.com/woodpecker-ci/woodpecker/pull/3312)]
 - Add loading spinner to repo list [[#3310](https://github.com/woodpecker-ci/woodpecker/pull/3310)]
+
+### 📚 Documentation
+
+- docs: fix contributions link [[#3363](https://github.com/woodpecker-ci/woodpecker/pull/3363)]
+- Update/fix some docs [[#3359](https://github.com/woodpecker-ci/woodpecker/pull/3359)]
+- chore(deps): update dependency marked to v12 [[#3325](https://github.com/woodpecker-ci/woodpecker/pull/3325)]
 
 ### Misc
 
