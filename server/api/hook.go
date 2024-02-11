@@ -27,6 +27,7 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server"
+	forge2 "go.woodpecker-ci.org/woodpecker/v2/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/pipeline"
@@ -159,6 +160,13 @@ func PostHook(c *gin.Context) {
 		c.Status(http.StatusNoContent)
 		return
 	}
+
+	user, err := _store.GetUser(repo.UserID)
+	if err != nil {
+		handleDBError(c, err)
+		return
+	}
+	forge2.Refresh(c, forge, _store, user)
 
 	//
 	// 3. Check if the webhook is a valid and authorized one
