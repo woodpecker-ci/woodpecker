@@ -1,4 +1,4 @@
-package forgeaddon
+package hashicorp
 
 import (
 	"net/rpc"
@@ -10,15 +10,6 @@ import (
 
 type Plugin struct {
 	Impl forge.Forge
-}
-
-func (p *Plugin) Key() string {
-	return "forge"
-}
-
-func (p *Plugin) WithImpl(t forge.Forge) plugin.Plugin {
-	p.Impl = t
-	return p
 }
 
 func (p *Plugin) Server(*plugin.MuxBroker) (any, error) {

@@ -2,13 +2,15 @@ package hashicorp
 
 import (
 	"github.com/hashicorp/go-plugin"
+
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
 )
 
-func Serve[T any](addon Plugin[T], impl T) {
+func Serve(impl forge.Forge) {
 	plugin.Serve(&plugin.ServeConfig{
 		HandshakeConfig: HandshakeConfig,
 		Plugins: map[string]plugin.Plugin{
-			addon.Key(): addon.WithImpl(impl),
+			pluginKey: &Plugin{Impl: impl},
 		},
 	})
 }

@@ -1,4 +1,4 @@
-package forgeaddon
+package hashicorp
 
 import (
 	"context"
@@ -218,17 +218,22 @@ func (g *RPC) Branches(ctx context.Context, u *model.User, r *model.Repo, p *mod
 	return resp, json.Unmarshal(jsonResp, &resp)
 }
 
-func (g *RPC) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
+func (g *RPC) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (*model.Commit, error) {
 	args, err := json.Marshal(&argumentsBranchHead{
 		U:      u,
 		R:      r,
 		Branch: branch,
 	})
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	var resp string
-	return resp, g.client.Call("Plugin.BranchHead", args, &resp)
+	var jsonResp []byte
+	err = g.client.Call("Plugin.BranchHead", args, &jsonResp)
+	if err != nil {
+		return nil, err
+	}
+	var resp *model.Commit
+	return resp, json.Unmarshal(jsonResp, &resp)
 }
 
 func (g *RPC) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error) {

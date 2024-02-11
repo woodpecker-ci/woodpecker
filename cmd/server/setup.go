@@ -37,7 +37,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/github"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/gitlab"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/hashicorp"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/hashicorp/forge"
 	"go.woodpecker-ci.org/woodpecker/v2/server/queue"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store/datastore"
@@ -106,17 +105,9 @@ func setupMembershipService(_ *cli.Context, r forge.Forge) cache.MembershipServi
 
 // setupForge helper function to set up the forge from the CLI arguments.
 func setupForge(c *cli.Context) (forge.Forge, error) {
-	if a := c.String("addons-forge"); a != "" {
-		addonExt, err := hashicorp.Load(a, forgeaddon.Addon)
-		if err != nil {
-			return nil, err
-		}
-		if addonExt != nil {
-			return addonExt.Value, nil
-		}
-	}
-
 	switch {
+	case c.String("addons-forge") != "":
+		return hashicorp.Load(c.String("addons-forge"))
 	case c.Bool("github"):
 		return setupGitHub(c)
 	case c.Bool("gitlab"):

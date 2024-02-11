@@ -1,4 +1,4 @@
-package forgeaddon
+package hashicorp
 
 import (
 	"context"
@@ -151,13 +151,17 @@ func (s *RPCServer) Branches(args []byte, resp *[]byte) error {
 	return err
 }
 
-func (s *RPCServer) BranchHead(args []byte, resp *string) error {
+func (s *RPCServer) BranchHead(args []byte, resp *[]byte) error {
 	var a argumentsBranchHead
 	err := json.Unmarshal(args, &a)
 	if err != nil {
 		return err
 	}
-	*resp, err = s.Impl.BranchHead(mkCtx(), a.U, a.R, a.Branch)
+	commit, err := s.Impl.BranchHead(mkCtx(), a.U, a.R, a.Branch)
+	if err != nil {
+		return err
+	}
+	*resp, err = json.Marshal(commit)
 	return err
 }
 

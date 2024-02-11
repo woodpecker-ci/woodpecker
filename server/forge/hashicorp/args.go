@@ -1,4 +1,4 @@
-package forgeaddon
+package hashicorp
 
 import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"

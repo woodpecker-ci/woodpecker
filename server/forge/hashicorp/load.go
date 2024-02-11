@@ -4,17 +4,17 @@ import (
 	"os/exec"
 
 	"github.com/hashicorp/go-plugin"
+
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
 )
 
-type Addon[T any] struct {
-	Value T
-}
+const pluginKey = "forge"
 
-func Load[T any](file string, a Plugin[T]) (*Addon[T], error) {
+func Load(file string) (forge.Forge, error) {
 	client := plugin.NewClient(&plugin.ClientConfig{
 		HandshakeConfig: HandshakeConfig,
 		Plugins: map[string]plugin.Plugin{
-			a.Key(): a,
+			pluginKey: &Plugin{},
 		},
 		Cmd: exec.Command(file),
 	})
@@ -25,13 +25,13 @@ func Load[T any](file string, a Plugin[T]) (*Addon[T], error) {
 		return nil, err
 	}
 
-	raw, err := rpcClient.Dispense(a.Key())
+	raw, err := rpcClient.Dispense(pluginKey)
 	if err != nil {
 		return nil, err
 	}
 
-	extension, _ := raw.(T)
-	return &Addon[T]{Value: extension}, nil
+	extension, _ := raw.(forge.Forge)
+	return extension, nil
 }
 
 var HandshakeConfig = plugin.HandshakeConfig{
