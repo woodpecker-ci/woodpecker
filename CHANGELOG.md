@@ -4,10 +4,11 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@qwerty287, @anbraten, @kjuulh, @sinlov, @lukashass, @renovate[bot], @pre-commit-ci[bot], @fernandrone
+@anbraten, @qwerty287, @kjuulh, @sinlov, @lukashass, @renovate[bot], @pre-commit-ci[bot], @fernandrone
 
 ### 📈 Enhancement
 
+- Prevent agent deletion when it's still running tasks [[#3377](https://github.com/woodpecker-ci/woodpecker/pull/3377)]
 - Refactor internal services [[#915](https://github.com/woodpecker-ci/woodpecker/pull/915)]
 - Lint for event filter and deprecate `exclude` [[#3222](https://github.com/woodpecker-ci/woodpecker/pull/3222)]
 - Allow editing all environment variables in pipeline popups [[#3314](https://github.com/woodpecker-ci/woodpecker/pull/3314)]
