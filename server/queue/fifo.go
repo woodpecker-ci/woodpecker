@@ -62,7 +62,7 @@ func New(_ context.Context) Queue {
 	}
 }
 
-// Push pushes an item to the tail of this queue.
+// Push pushes a task to the tail of this queue.
 func (q *fifo) Push(_ context.Context, task *model.Task) error {
 	q.Lock()
 	q.pending.PushBack(task)
@@ -71,7 +71,7 @@ func (q *fifo) Push(_ context.Context, task *model.Task) error {
 	return nil
 }
 
-// PushAtOnce pushes items to the tail of this queue.
+// PushAtOnce pushes multiple tasks to the tail of this queue.
 func (q *fifo) PushAtOnce(_ context.Context, tasks []*model.Task) error {
 	q.Lock()
 	for _, task := range tasks {
@@ -82,7 +82,7 @@ func (q *fifo) PushAtOnce(_ context.Context, tasks []*model.Task) error {
 	return nil
 }
 
-// Poll retrieves and removes the head of this queue.
+// Poll retrieves and removes a task head of this queue.
 func (q *fifo) Poll(c context.Context, agentID int64, f FilterFn) (*model.Task, error) {
 	q.Lock()
 	ctx, stop := context.WithCancel(c)
@@ -110,19 +110,19 @@ func (q *fifo) Poll(c context.Context, agentID int64, f FilterFn) (*model.Task, 
 	}
 }
 
-// Done signals that the item is done executing.
+// Done signals the task is complete.
 func (q *fifo) Done(_ context.Context, id string, exitStatus model.StatusValue) error {
 	return q.finished([]string{id}, exitStatus, nil)
 }
 
-// Error signals that the item is done executing with an error.
+// Error signals the task is done with an error.
 func (q *fifo) Error(_ context.Context, id string, err error) error {
 	return q.finished([]string{id}, model.StatusFailure, err)
 }
 
-// ErrorAtOnce signals that the items are done executing with an error.
-func (q *fifo) ErrorAtOnce(_ context.Context, id []string, err error) error {
-	return q.finished(id, model.StatusFailure, err)
+// ErrorAtOnce signals multiple done are complete with an error.
+func (q *fifo) ErrorAtOnce(_ context.Context, ids []string, err error) error {
+	return q.finished(ids, model.StatusFailure, err)
 }
 
 func (q *fifo) finished(ids []string, exitStatus model.StatusValue, err error) error {
@@ -222,12 +222,14 @@ func (q *fifo) Info(_ context.Context) InfoT {
 	return stats
 }
 
+// Pause stops the queue from handing out new work items in Poll
 func (q *fifo) Pause() {
 	q.Lock()
 	q.paused = true
 	q.Unlock()
 }
 
+// Resume starts the queue again.
 func (q *fifo) Resume() {
 	q.Lock()
 	q.paused = false
@@ -235,6 +237,7 @@ func (q *fifo) Resume() {
 	go q.process()
 }
 
+// KickAgentWorkers kicks all workers for a given agent.
 func (q *fifo) KickAgentWorkers(agentID int64) {
 	q.Lock()
 	defer q.Unlock()
