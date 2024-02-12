@@ -118,7 +118,7 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 			return nil, err
 		}
 
-		environment[strings.ToUpper(requested.Target)] = secretValue
+		environment[requested.Target] = secretValue
 	}
 
 	if utils.MatchImage(container.Image, c.escalated...) && container.IsPlugin() {
