@@ -70,7 +70,7 @@ func (q *fifo) Push(_ context.Context, task *model.Task) error {
 	return nil
 }
 
-// Push pushes an item to the tail of this queue.
+// PushAtOnce pushes items to the tail of this queue.
 func (q *fifo) PushAtOnce(_ context.Context, tasks []*model.Task) error {
 	q.Lock()
 	for _, task := range tasks {
@@ -111,12 +111,12 @@ func (q *fifo) Done(_ context.Context, id string, exitStatus model.StatusValue) 
 	return q.finished([]string{id}, exitStatus, nil)
 }
 
-// Error signals that the item is done executing with error.
+// Error signals that the item is done executing with an error.
 func (q *fifo) Error(_ context.Context, id string, err error) error {
 	return q.finished([]string{id}, model.StatusFailure, err)
 }
 
-// ErrorAtOnce signals that the item is done executing with error.
+// ErrorAtOnce signals that the items are done executing with an error.
 func (q *fifo) ErrorAtOnce(_ context.Context, id []string, err error) error {
 	return q.finished(id, model.StatusFailure, err)
 }
@@ -145,7 +145,7 @@ func (q *fifo) Evict(c context.Context, id string) error {
 	return q.EvictAtOnce(c, []string{id})
 }
 
-// Evict removes a pending task from the queue.
+// EvictAtOnce removes multiple pending tasks from the queue.
 func (q *fifo) EvictAtOnce(_ context.Context, ids []string) error {
 	q.Lock()
 	defer q.Unlock()
