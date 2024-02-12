@@ -24,11 +24,6 @@ var (
 	errEnvironValueInvalid = errors.New("invalid Environment Variable Value")
 )
 
-// EnvironService defines a service for managing environment variables.
-type EnvironService interface {
-	EnvironList(*Repo) ([]*Environ, error)
-}
-
 // EnvironStore persists environment information to storage.
 type EnvironStore interface {
 	EnvironList(*Repo) ([]*Environ, error)
