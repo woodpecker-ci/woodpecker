@@ -17,6 +17,7 @@ package queue
 import (
 	"container/list"
 	"context"
+	"fmt"
 	"sync"
 	"time"
 
@@ -36,7 +37,7 @@ type worker struct {
 	agentID int64
 	filter  FilterFn
 	channel chan *model.Task
-	stop    context.CancelFunc
+	stop    context.CancelCauseFunc
 }
 
 type fifo struct {
@@ -85,7 +86,7 @@ func (q *fifo) PushAtOnce(_ context.Context, tasks []*model.Task) error {
 // Poll retrieves and removes a task head of this queue.
 func (q *fifo) Poll(c context.Context, agentID int64, f FilterFn) (*model.Task, error) {
 	q.Lock()
-	ctx, stop := context.WithCancel(c)
+	ctx, stop := context.WithCancelCause(c)
 
 	w := &worker{
 		agentID: agentID,
@@ -103,7 +104,7 @@ func (q *fifo) Poll(c context.Context, agentID int64, f FilterFn) (*model.Task, 
 			q.Lock()
 			delete(q.workers, w)
 			q.Unlock()
-			return nil, nil
+			return nil, ctx.Err()
 		case t := <-w.channel:
 			return t, nil
 		}
@@ -244,7 +245,7 @@ func (q *fifo) KickAgentWorkers(agentID int64) {
 
 	for w := range q.workers {
 		if w.agentID == agentID {
-			w.stop()
+			w.stop(fmt.Errorf("worker was kicked"))
 			delete(q.workers, w)
 		}
 	}
