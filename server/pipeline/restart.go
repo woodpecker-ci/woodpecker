@@ -28,14 +28,13 @@ import (
 )
 
 // Restart a pipeline by creating a new one out of the old and start it
-func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipeline, user *model.User, repo *model.Repo, envs map[string]string, netrc *model.Netrc) (*model.Pipeline, error) {
+func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipeline, user *model.User, repo *model.Repo, envs map[string]string) (*model.Pipeline, error) {
+	forge := server.Config.Services.Forge
 	switch lastPipeline.Status {
 	case model.StatusDeclined,
 		model.StatusBlocked:
 		return nil, &ErrBadRequest{Msg: fmt.Sprintf("cannot restart a pipeline with status %s", lastPipeline.Status)}
 	}
-
-	var pipelineFiles []*forge_types.FileMeta
 
 	// fetch the old pipeline config from the database
 	configs, err := store.ConfigsForPipeline(lastPipeline.ID)
@@ -44,25 +43,17 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 		return nil, &ErrNotFound{Msg: fmt.Sprintf("failure to get pipeline config for %s. %s", repo.FullName, err)}
 	}
 
+	var pipelineFiles []*forge_types.FileMeta
 	for _, y := range configs {
 		pipelineFiles = append(pipelineFiles, &forge_types.FileMeta{Data: y.Data, Name: y.Name})
 	}
 
-	// If the config extension is active we should refetch the config in case something changed
-	if server.Config.Services.ConfigService != nil {
-		currentFileMeta := make([]*forge_types.FileMeta, len(configs))
-		for i, cfg := range configs {
-			currentFileMeta[i] = &forge_types.FileMeta{Name: cfg.Name, Data: cfg.Data}
-		}
-
-		newConfig, useOld, err := server.Config.Services.ConfigService.FetchConfig(ctx, repo, lastPipeline, currentFileMeta, netrc)
-		if err != nil {
-			return nil, &ErrBadRequest{
-				Msg: fmt.Sprintf("On fetching external pipeline config: %s", err),
-			}
-		}
-		if !useOld {
-			pipelineFiles = newConfig
+	// If the config service is active we should refetch the config in case something changed
+	configService := server.Config.Services.Manager.ConfigServiceFromRepo(repo)
+	pipelineFiles, err = configService.Fetch(ctx, forge, user, repo, lastPipeline, pipelineFiles, true)
+	if err != nil {
+		return nil, &ErrBadRequest{
+			Msg: fmt.Sprintf("On fetching external pipeline config: %s", err),
 		}
 	}
 
