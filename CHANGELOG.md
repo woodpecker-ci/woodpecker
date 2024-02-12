@@ -1,10 +1,20 @@
 # Changelog
 
-## [2.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.4.0) - 2024-02-11
+## [2.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.4.0) - 2024-02-12
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@qwerty287, @kjuulh, @anbraten, @sinlov, @lukashass, @renovate[bot], @pre-commit-ci[bot], @fernandrone
+@qwerty287, @anbraten, @kjuulh, @sinlov, @lukashass, @renovate[bot], @pre-commit-ci[bot], @fernandrone
+
+### 📈 Enhancement
+
+- Refactor internal services [[#915](https://github.com/woodpecker-ci/woodpecker/pull/915)]
+- Lint for event filter and deprecate `exclude` [[#3222](https://github.com/woodpecker-ci/woodpecker/pull/3222)]
+- Allow editing all environment variables in pipeline popups [[#3314](https://github.com/woodpecker-ci/woodpecker/pull/3314)]
+- Parse backend options in backend [[#3227](https://github.com/woodpecker-ci/woodpecker/pull/3227)]
+- Make agent usable for external backends [[#3270](https://github.com/woodpecker-ci/woodpecker/pull/3270)]
+- Add no branches text [[#3312](https://github.com/woodpecker-ci/woodpecker/pull/3312)]
+- Add loading spinner to repo list [[#3310](https://github.com/woodpecker-ci/woodpecker/pull/3310)]
 
 ### 🐛 Bug Fixes
 
@@ -18,15 +28,6 @@
 - Consider gitlab inherited permissions [[#3308](https://github.com/woodpecker-ci/woodpecker/pull/3308)]
 - fix: agent panic when node is terminated during step execution [[#3331](https://github.com/woodpecker-ci/woodpecker/pull/3331)]
 
-### 📈 Enhancement
-
-- Lint for event filter and deprecate `exclude` [[#3222](https://github.com/woodpecker-ci/woodpecker/pull/3222)]
-- Allow editing all environment variables in pipeline popups [[#3314](https://github.com/woodpecker-ci/woodpecker/pull/3314)]
-- Parse backend options in backend [[#3227](https://github.com/woodpecker-ci/woodpecker/pull/3227)]
-- Make agent usable for external backends [[#3270](https://github.com/woodpecker-ci/woodpecker/pull/3270)]
-- Add no branches text [[#3312](https://github.com/woodpecker-ci/woodpecker/pull/3312)]
-- Add loading spinner to repo list [[#3310](https://github.com/woodpecker-ci/woodpecker/pull/3310)]
-
 ### 📚 Documentation
 
 - docs: fix contributions link [[#3363](https://github.com/woodpecker-ci/woodpecker/pull/3363)]
@@ -35,6 +36,7 @@
 
 ### Misc
 
+- Add link checking [[#3371](https://github.com/woodpecker-ci/woodpecker/pull/3371)]
 - Apply `dependencies` label to all PRs [[#3358](https://github.com/woodpecker-ci/woodpecker/pull/3358)]
 - Fix linter [[#3354](https://github.com/woodpecker-ci/woodpecker/pull/3354)]
 - chore(deps): lock file maintenance [[#3350](https://github.com/woodpecker-ci/woodpecker/pull/3350)]
