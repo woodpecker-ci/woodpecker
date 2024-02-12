@@ -571,16 +571,16 @@ Disable version check in admin web UI.
 
 ### `WOODPECKER_GITHUB_...`
 
-See [GitHub configuration](forges/github/#configuration)
+See [GitHub configuration](./11-forges/20-github.md#configuration)
 
 ### `WOODPECKER_GITEA_...`
 
-See [Gitea configuration](forges/gitea/#configuration)
+See [Gitea configuration](./11-forges/30-gitea.md#configuration)
 
 ### `WOODPECKER_BITBUCKET_...`
 
-See [Bitbucket configuration](forges/bitbucket/#configuration)
+See [Bitbucket configuration](./11-forges/50-bitbucket.md#configuration)
 
 ### `WOODPECKER_GITLAB_...`
 
-See [Gitlab configuration](forges/gitlab/#configuration)
+See [Gitlab configuration](./11-forges/40-gitlab.md#configuration)
