@@ -69,13 +69,13 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 	}
 
 	for {
-		// poll blocks until a task is available
+		// poll blocks until a task is available or the context is canceled / worker is kicked
 		task, err := s.queue.Poll(c, agent.ID, filterFn)
 		if err != nil {
 			return nil, err
 		}
 
-		// poll returns nil if workers context was canceled
+		// poll returns nil task if context was canceled / worker was kicked
 		if task == nil {
 			return nil, nil
 		}
