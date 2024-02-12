@@ -36,6 +36,7 @@ type worker struct {
 	agentID int64
 	filter  FilterFn
 	channel chan *model.Task
+	stop    context.CancelFunc
 }
 
 type fifo struct {
@@ -84,10 +85,13 @@ func (q *fifo) PushAtOnce(_ context.Context, tasks []*model.Task) error {
 // Poll retrieves and removes the head of this queue.
 func (q *fifo) Poll(c context.Context, agentID int64, f FilterFn) (*model.Task, error) {
 	q.Lock()
+	ctx, stop := context.WithCancel(c)
+
 	w := &worker{
 		agentID: agentID,
 		channel: make(chan *model.Task, 1),
 		filter:  f,
+		stop:    stop,
 	}
 	q.workers[w] = struct{}{}
 	q.Unlock()
@@ -95,7 +99,7 @@ func (q *fifo) Poll(c context.Context, agentID int64, f FilterFn) (*model.Task, 
 
 	for {
 		select {
-		case <-c.Done():
+		case <-ctx.Done():
 			q.Lock()
 			delete(q.workers, w)
 			q.Unlock()
@@ -229,6 +233,18 @@ func (q *fifo) Resume() {
 	q.paused = false
 	q.Unlock()
 	go q.process()
+}
+
+func (q *fifo) KickAgentWorkers(agentID int64) {
+	q.Lock()
+	defer q.Unlock()
+
+	for w := range q.workers {
+		if w.agentID == agentID {
+			w.stop()
+			delete(q.workers, w)
+		}
+	}
 }
 
 // helper function that loops through the queue and attempts to

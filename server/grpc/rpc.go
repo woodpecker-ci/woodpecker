@@ -57,47 +57,27 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 	}
 
 	filterFn := createFilterFunc(agentFilter)
+
+	agent, err := s.getAgentFromContext(c)
+	if err != nil {
+		return nil, err
+	}
+
+	if agent.NoSchedule {
+		time.Sleep(1 * time.Second)
+		return nil, nil
+	}
+
 	for {
-		agent, err := s.getAgentFromContext(c)
-		if err != nil {
-			return nil, err
-		}
-
-		if agent.NoSchedule {
-			time.Sleep(1 * time.Second)
-			continue
-		}
-
 		// poll blocks until a task is available
 		task, err := s.queue.Poll(c, agent.ID, filterFn)
 		if err != nil {
 			return nil, err
 		}
 
+		// poll returns nil if workers context was canceled
 		if task == nil {
 			return nil, nil
-		}
-
-		agent, err = s.getAgentFromContext(c)
-		if err != nil {
-			return nil, err
-		}
-
-		// the agent is meanwhile marked as no-schedule, push the task back to the queue
-		if agent.NoSchedule {
-			// we need to mark the task as done, otherwise it will be stuck in the queue
-			if err := s.queue.Error(c, task.ID, errors.New("agent is marked as no-schedule")); err != nil {
-				log.Error().Err(err).Msgf("mark task '%s' error failed", task.ID)
-			}
-
-			task.AgentID = -1
-			task.ID += "1"
-			if err := s.queue.Push(c, task); err != nil {
-				log.Error().Err(err).Msgf("push task '%s' back to queue failed", task.ID)
-			}
-
-			time.Sleep(1 * time.Second)
-			continue
 		}
 
 		if task.ShouldRun() {
