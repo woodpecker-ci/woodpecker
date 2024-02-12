@@ -204,6 +204,16 @@ func DeleteAgent(c *gin.Context) {
 		handleDBError(c, err)
 		return
 	}
+
+	// prevent deletion of agents with running tasks
+	info := server.Config.Services.Queue.Info(c)
+	for _, task := range info.Running {
+		if task.AgentID == agent.ID {
+			c.String(http.StatusConflict, "Agent has running tasks")
+			return
+		}
+	}
+
 	if err = _store.AgentDelete(agent); err != nil {
 		c.String(http.StatusInternalServerError, "Error deleting user. %s", err)
 		return
