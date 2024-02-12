@@ -182,7 +182,6 @@ or restrict a container's access to resources by specifying [AppArmor](https://k
 
 Note, that AppArmor implementation follows [KEP-24](https://github.com/kubernetes/enhancements/blob/fddcbb9cbf3df39ded03bad71228265ac6e5215f/keps/sig-node/24-apparmor/README.md).
 
-
 ## Tips and tricks
 
 ### CRI-O
