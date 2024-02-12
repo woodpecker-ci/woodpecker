@@ -32,14 +32,16 @@ steps:
             cpu: 1000m
 ```
 
-### `serviceAccountName`
+You can use [Limit Ranges](https://kubernetes.io/docs/concepts/policy/limit-range/) if you want to set the limits by per-namespace basis.
 
-Specify the name of the ServiceAccount which the build pod will mount. This serviceAccount must be created externally.
-See the [kubernetes documentation](https://kubernetes.io/docs/concepts/security/service-accounts/) for more information on using serviceAccounts.
+### Service account
 
-### `nodeSelector`
+`serviceAccountName` specifies the name of the ServiceAccount which the pod will mount. This service account must be created externally.
+See the [kubernetes documentation](https://kubernetes.io/docs/concepts/security/service-accounts/) for more information on using service accounts.
 
-Specifies the label which is used to select the node on which the job will be executed.
+### Node selector
+
+`nodeSelector` specifies the labels which are used to select the node on which the job will be executed.
 
 Labels defined here will be appended to a list which already contains `"kubernetes.io/arch"`.
 By default `"kubernetes.io/arch"` is inferred from the agents' platform. One can override it by setting that label in the `nodeSelector` section of the `backend_options`.
@@ -66,9 +68,11 @@ And then overwrite the `nodeSelector` in the `backend_options` section of the st
           kubernetes.io/arch: "${ARCH}"
 ```
 
-### `tolerations`
+You can use [PodNodeSelector](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#podnodeselector) admission controller if you want to set the node selector by per-namespace basis.
 
-When you use nodeSelector and the node pool is configured with Taints, you need to specify the Tolerations. Tolerations allow the scheduler to schedule pods with matching taints.
+### Tolerations
+
+When you use `nodeSelector` and the node pool is configured with Taints, you need to specify the Tolerations. Tolerations allow the scheduler to schedule pods with matching taints.
 See the [kubernetes documentation](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/) for more information on using tolerations.
 
 Example pipeline configuration:
@@ -102,8 +106,8 @@ steps:
 
 ### Volumes
 
-To mount volumes a persistent volume (PV) and persistent volume claim (PVC) are needed on the cluster which can be referenced in steps via the `volume:` option.
-Assuming a PVC named "woodpecker-cache" exists, it can be referenced as follows in a step:
+To mount volumes a persistent volume (PV) and persistent volume claim (PVC) are needed on the cluster which can be referenced in steps via the `volumes` option.
+Assuming a PVC named `woodpecker-cache` exists, it can be referenced as follows in a step:
 
 ```yaml
 steps:
@@ -117,9 +121,9 @@ steps:
     [...]
 ```
 
-### `securityContext`
+### Security context
 
-Use the following configuration to set the `securityContext` for the pod/container running a given pipeline step:
+Use the following configuration to set the [Security Context](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/) for the pod/container running a given pipeline step:
 
 ```yaml
 steps:
@@ -154,7 +158,30 @@ spec:
   [...]
 ```
 
-See the [kubernetes documentation](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/) for more information on using `securityContext`.
+You can also restrict a container's syscalls with [seccomp](https://kubernetes.io/docs/tutorials/security/seccomp/) profile
+
+```yaml
+    backend_options:
+      kubernetes:
+        securityContext:
+          seccompProfile:
+            type: Localhost
+            localhostProfile: profiles/audit.json
+```
+
+or restrict a container's access to resources by specifying [AppArmor](https://kubernetes.io/docs/tutorials/security/apparmor/) profile
+
+```yaml
+    backend_options:
+      kubernetes:
+        securityContext:
+          apparmorProfile:
+            type: Localhost
+            localhostProfile: k8s-apparmor-example-deny-write
+```
+
+Note, that AppArmor implementation follows [KEP-24](https://github.com/kubernetes/enhancements/blob/fddcbb9cbf3df39ded03bad71228265ac6e5215f/keps/sig-node/24-apparmor/README.md).
+
 
 ## Tips and tricks
 
