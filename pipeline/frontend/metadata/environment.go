@@ -85,13 +85,6 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_WORKFLOW_NAME":   m.Workflow.Name,
 		"CI_WORKFLOW_NUMBER": strconv.Itoa(m.Workflow.Number),
 
-		"CI_STEP_NAME":     m.Step.Name,
-		"CI_STEP_NUMBER":   strconv.Itoa(m.Step.Number),
-		"CI_STEP_STATUS":   "", // will be set by agent
-		"CI_STEP_STARTED":  "", // will be set by agent
-		"CI_STEP_FINISHED": "", // will be set by agent
-		"CI_STEP_URL":      m.getPipelineWebURL(m.Curr, m.Step.Number),
-
 		"CI_PREV_COMMIT_SHA":           m.Prev.Commit.Sha,
 		"CI_PREV_COMMIT_REF":           m.Prev.Commit.Ref,
 		"CI_PREV_COMMIT_REFSPEC":       m.Prev.Commit.Refspec,
@@ -149,6 +142,16 @@ func (m *Metadata) Environ() map[string]string {
 	}
 
 	return params
+}
+
+func (m *Metadata) AddStepEnvironment(env map[string]string, step Step) map[string]string {
+	env["CI_STEP_NAME"] = step.Name
+	env["CI_STEP_NUMBER"] = strconv.Itoa(step.Number)
+	env["CI_STEP_STATUS"] = ""   // will be set by agent
+	env["CI_STEP_STARTED"] = ""  // will be set by agent
+	env["CI_STEP_FINISHED"] = "" // will be set by agent
+	env["CI_STEP_URL"] = m.getPipelineWebURL(m.Curr, step.Number)
+	return env
 }
 
 func (m *Metadata) getPipelineWebURL(pipeline Pipeline, stepNumber int) string {
