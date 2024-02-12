@@ -78,6 +78,28 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 			return nil, nil
 		}
 
+		agent, err = s.getAgentFromContext(c)
+		if err != nil {
+			return nil, err
+		}
+
+		// the agent is meanwhile marked as no-schedule, push the task back to the queue
+		if agent.NoSchedule {
+			// we need to mark the task as done, otherwise it will be stuck in the queue
+			if err := s.queue.Error(c, task.ID, errors.New("agent is marked as no-schedule")); err != nil {
+				log.Error().Err(err).Msgf("mark task '%s' error failed", task.ID)
+			}
+
+			task.AgentID = -1
+			task.ID += "1"
+			if err := s.queue.Push(c, task); err != nil {
+				log.Error().Err(err).Msgf("push task '%s' back to queue failed", task.ID)
+			}
+
+			time.Sleep(1 * time.Second)
+			continue
+		}
+
 		if task.ShouldRun() {
 			workflow := new(rpc.Workflow)
 			err = json.Unmarshal(task.Data, workflow)
