@@ -56,19 +56,25 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 		log.Debug().Msgf("agent connected: %s: polling", hostname)
 	}
 
-	fn := createFilterFunc(agentFilter)
+	filterFn := createFilterFunc(agentFilter)
 	for {
 		agent, err := s.getAgentFromContext(c)
 		if err != nil {
 			return nil, err
-		} else if agent.NoSchedule {
-			return nil, nil
 		}
 
-		task, err := s.queue.Poll(c, agent.ID, fn)
+		if agent.NoSchedule {
+			time.Sleep(5 * time.Second)
+			continue
+		}
+
+		// poll blocks until a task is available
+		task, err := s.queue.Poll(c, agent.ID, filterFn)
 		if err != nil {
 			return nil, err
-		} else if task == nil {
+		}
+
+		if task == nil {
 			return nil, nil
 		}
 
@@ -78,6 +84,7 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 			return workflow, err
 		}
 
+		// task should not run, so mark it as done
 		if err := s.Done(c, task.ID, rpc.State{}); err != nil {
 			log.Error().Err(err).Msgf("mark task '%s' done failed", task.ID)
 		}

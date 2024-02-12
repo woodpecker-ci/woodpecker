@@ -40,7 +40,6 @@ type InfoT struct {
 		Pending       int `json:"pending_count"`
 		WaitingOnDeps int `json:"waiting_on_deps_count"`
 		Running       int `json:"running_count"`
-		Complete      int `json:"completed_count"`
 	} `json:"stats"`
 	Paused bool `json:"paused"`
 } //	@name InfoT

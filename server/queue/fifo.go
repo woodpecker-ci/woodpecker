@@ -200,7 +200,6 @@ func (q *fifo) Info(_ context.Context) InfoT {
 	stats.Stats.Pending = q.pending.Len()
 	stats.Stats.WaitingOnDeps = q.waitingOnDeps.Len()
 	stats.Stats.Running = len(q.running)
-	stats.Stats.Complete = 0 // TODO: implement this
 
 	for e := q.pending.Front(); e != nil; e = e.Next() {
 		task, _ := e.Value.(*model.Task)
