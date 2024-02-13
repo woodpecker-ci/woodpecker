@@ -6,10 +6,41 @@ import (
 	"io"
 	"net/http"
 	"net/rpc"
+	"os/exec"
 
+	"github.com/hashicorp/go-plugin"
+
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
+
+// make sure RPC implements forge.Forge
+var _ forge.Forge = new(RPC)
+
+func Load(file string) (forge.Forge, error) {
+	client := plugin.NewClient(&plugin.ClientConfig{
+		HandshakeConfig: HandshakeConfig,
+		Plugins: map[string]plugin.Plugin{
+			pluginKey: &Plugin{},
+		},
+		Cmd: exec.Command(file),
+	})
+	// TODO defer client.Kill()
+
+	rpcClient, err := client.Client()
+	if err != nil {
+		return nil, err
+	}
+
+	raw, err := rpcClient.Dispense(pluginKey)
+	if err != nil {
+		return nil, err
+	}
+
+	extension, _ := raw.(forge.Forge)
+	return extension, nil
+}
 
 // TODO issue: user models are not sent with token/secret (token/secret is json:"-")
 // possible solution: two-way-communication with two funcs: 1. token/secret for user 2. token/secret for repo
@@ -30,25 +61,24 @@ func (g *RPC) URL() string {
 	return resp
 }
 
-func (g *RPC) Login(ctx context.Context, w http.ResponseWriter, r *http.Request) (*model.User, error) {
-	/* TODO args, err := json.Marshal(&arguments{
-		Repo:            repo,
-		Pipeline:        pipeline,
-		CurrentFileMeta: currentFileMeta,
-		Netrc:           netrc,
-		Timeout:         timeout,
-	})
+func (g *RPC) Login(ctx context.Context, r *types.OAuthRequest) (*model.User, string, error) {
+	args, err := json.Marshal(r)
 	if err != nil {
-		return nil, err
-	}*/
+		return nil, "", err
+	}
 	var jsonResp []byte
-	/*err = g.client.Call("Plugin.Login", args, &jsonResp)
+	err = g.client.Call("Plugin.Login", args, &jsonResp)
 	if err != nil {
-		return nil, err
-	}*/
+		return nil, "", err
+	}
 
-	var resp *model.User
-	return resp, json.Unmarshal(jsonResp, resp)
+	var resp responseLogin
+	err = json.Unmarshal(jsonResp, &resp)
+	if err != nil {
+		return nil, "", err
+	}
+
+	return resp.User, resp.RedirectURL, nil
 }
 
 func (g *RPC) Auth(ctx context.Context, token, secret string) (string, error) {

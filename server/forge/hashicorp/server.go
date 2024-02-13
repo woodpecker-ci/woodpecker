@@ -6,9 +6,21 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/hashicorp/go-plugin"
+
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
+
+func Serve(impl forge.Forge) {
+	plugin.Serve(&plugin.ServeConfig{
+		HandshakeConfig: HandshakeConfig,
+		Plugins: map[string]plugin.Plugin{
+			pluginKey: &Plugin{Impl: impl},
+		},
+	})
+}
 
 func mkCtx() context.Context {
 	return context.Background()
@@ -232,16 +244,18 @@ func (s *RPCServer) Hook(args []byte, resp *[]byte) error {
 }
 
 func (s *RPCServer) Login(args []byte, resp *[]byte) error {
-	// TODO http.request and iowriter json
-	var a *http.Request
-	err := json.Unmarshal(args, &a)
+	var a *types.OAuthRequest
+	err := json.Unmarshal(args, a)
 	if err != nil {
 		return err
 	}
-	user, err := s.Impl.Login(mkCtx(), nil, a)
+	user, red, err := s.Impl.Login(mkCtx(), a)
 	if err != nil {
 		return err
 	}
-	*resp, err = json.Marshal(user)
+	*resp, err = json.Marshal(&responseLogin{
+		User:        user,
+		RedirectURL: red,
+	})
 	return err
 }

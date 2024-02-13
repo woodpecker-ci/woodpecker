@@ -63,6 +63,11 @@ type responseHook struct {
 	Pipeline *model.Pipeline `json:"pipeline"`
 }
 
+type responseLogin struct {
+	User        *model.User `json:"user"`
+	RedirectURL string      `json:"redirect_url"`
+}
+
 type httpRequest struct {
 	Method string              `json:"method"`
 	URL    string              `json:"url"`

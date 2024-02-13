@@ -8,6 +8,14 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
 )
 
+const pluginKey = "forge"
+
+var HandshakeConfig = plugin.HandshakeConfig{
+	ProtocolVersion:  1,
+	MagicCookieKey:   "WOODPECKER_FORGE_ADDON_PLUGIN",
+	MagicCookieValue: "woodpecker-plugin-magic-cookie-value",
+}
+
 type Plugin struct {
 	Impl forge.Forge
 }
