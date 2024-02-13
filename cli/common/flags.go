@@ -22,6 +22,13 @@ import (
 
 var GlobalFlags = append([]cli.Flag{
 	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_CONFIG"},
+		Name:    "config",
+		Aliases: []string{"c"},
+		Usage:   "config file",
+		Value:   "~/.woodpecker/config.yml", // TODO: check if this works on all platforms
+	},
+	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_TOKEN"},
 		Name:    "token",
 		Aliases: []string{"t"},
