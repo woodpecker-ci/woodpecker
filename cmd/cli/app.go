@@ -44,6 +44,7 @@ func newApp() *cli.App {
 	app.EnableBashCompletion = true
 	app.Flags = common.GlobalFlags
 	app.Before = common.Before
+	app.After = common.After
 	app.Suggest = true
 	app.Commands = []*cli.Command{
 		pipeline.Command,
