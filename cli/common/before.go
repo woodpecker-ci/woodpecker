@@ -22,6 +22,11 @@ func Before(c *cli.Context) error {
 	}
 
 	go func() {
+		// Don't check for updates when the update command is executed
+		if firstArg := c.Args().First(); firstArg == "update" {
+			return
+		}
+
 		waitForUpdateCheck, cancelWaitForUpdate = context.WithCancelCause(context.Background())
 		defer cancelWaitForUpdate(errors.New("update check finished"))
 
