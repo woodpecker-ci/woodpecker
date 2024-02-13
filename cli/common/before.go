@@ -1,13 +1,20 @@
 package common
 
 import (
+	"context"
+	"errors"
+	"time"
+
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/update"
 )
 
-var waitForUpdateCheck chan struct{}
+var (
+	waitForUpdateCheck  context.Context
+	cancelWaitForUpdate context.CancelCauseFunc
+)
 
 func Before(c *cli.Context) error {
 	if err := SetupGlobalLogger(c); err != nil {
@@ -15,11 +22,12 @@ func Before(c *cli.Context) error {
 	}
 
 	go func() {
-		waitForUpdateCheck = make(chan struct{})
+		waitForUpdateCheck, cancelWaitForUpdate = context.WithCancelCause(context.Background())
+		defer cancelWaitForUpdate(errors.New("update check finished"))
 
 		log.Debug().Msg("Checking for updates ...")
 
-		newVersion, err := update.CheckForUpdate(c.Context, false)
+		newVersion, err := update.CheckForUpdate(waitForUpdateCheck, true)
 		if err != nil {
 			log.Error().Err(err).Msgf("Failed to check for updates")
 			return
@@ -30,8 +38,6 @@ func Before(c *cli.Context) error {
 		} else {
 			log.Debug().Msgf("No update required")
 		}
-
-		close(waitForUpdateCheck)
 	}()
 
 	return nil
@@ -39,7 +45,13 @@ func Before(c *cli.Context) error {
 
 func After(_ *cli.Context) error {
 	if waitForUpdateCheck != nil {
-		<-waitForUpdateCheck
+		select {
+		case <-waitForUpdateCheck.Done():
+		// When the actual command already finished, we still wait 250ms for the update check to finish
+		case <-time.After(time.Millisecond * 250):
+			log.Debug().Msg("Update check stopped due to timeout")
+			cancelWaitForUpdate(errors.New("update check timeout"))
+		}
 	}
 
 	return nil
