@@ -9,7 +9,7 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-// Command exports the info command.
+// Command exports the update command.
 var Command = &cli.Command{
 	Name:  "update",
 	Usage: "update the woodpecker-cli to the latest version",
@@ -25,7 +25,7 @@ var Command = &cli.Command{
 func update(c *cli.Context) error {
 	log.Info().Msg("Checking for updates ...")
 
-	newVersion, err := CheckForUpdate(c, c.Bool("force"))
+	newVersion, err := CheckForUpdate(c.Context, c.Bool("force"))
 	if err != nil {
 		return err
 	}
