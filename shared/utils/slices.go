@@ -72,7 +72,7 @@ func SliceToBoolMap(s []string) map[string]bool {
 
 // StringSliceDeleteEmpty removes empty strings from a string slice.
 func StringSliceDeleteEmpty(s []string) []string {
-	var r []string
+	r := make([]string, 0)
 	for _, str := range s {
 		if str != "" {
 			r = append(r, str)
