@@ -3,7 +3,6 @@ package update
 import (
 	"fmt"
 	"os"
-	"path"
 
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
@@ -52,19 +51,16 @@ func update(c *cli.Context) error {
 
 	log.Debug().Msgf("New version %s has been extracted to %s", newVersion.Version, binFile)
 
-	pwd, err := os.Getwd()
+	executablePath, err := os.Executable()
 	if err != nil {
 		return err
 	}
-	dst := path.Join(pwd, path.Base(c.App.Name))
 
-	log.Debug().Msgf("Moving %s to %s", binFile, dst)
+	if err := os.Rename(binFile, executablePath); err != nil {
+		return err
+	}
 
-	// if err := os.Rename(binFile, dst); err != nil {
-	// 	return err
-	// }
-
-	log.Info().Msgf("woodpecker-cli %s has been installed successfully! Please restart the CLI.", newVersion.Version)
+	log.Info().Msgf("woodpecker-cli %s has been updated successfully! Please restart the CLI.", newVersion.Version)
 
 	return nil
 }
