@@ -6,7 +6,7 @@
     </div>
 
     <div class="flex gap-4 justify-center">
-      <Button :text="$t('login_to_cli')" color="green" @click="sendToken" />
+      <Button :text="$t('login_to_cli')" color="green" @click="sendToken(false)" />
       <Button :text="$t('abort')" color="red" @click="abortLogin" />
     </div>
   </div>
