@@ -129,12 +129,12 @@ func modelUserFromModel(u *model.User) *modelUser {
 	}
 }
 
-// modelUser is an extension of model.User to marshal all fields to JSON
+// modelRepo is an extension of model.Repo to marshal all fields to JSON
 type modelRepo struct {
 	Repo   *model.Repo `json:"repo"`
-	UserID int64       `json:"-"`
-	Hash   string      `json:"-"`
-	Perm   *model.Perm `json:"-"`
+	UserID int64       `json:"user_id"`
+	Hash   string      `json:"hash"`
+	Perm   *model.Perm `json:"perm"`
 }
 
 func (m *modelRepo) asModel() *model.Repo {
