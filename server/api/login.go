@@ -25,6 +25,7 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server"
+	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
@@ -48,15 +49,20 @@ func HandleAuth(c *gin.Context) {
 	// cannot, however, remember why, so need to revisit this line.
 	c.Writer.Header().Del("Content-Type")
 
-	tmpuser, err := _forge.Login(c, c.Writer, c.Request)
+	tmpuser, redirectURL, err := _forge.Login(c, &forge_types.OAuthRequest{
+		Error:            c.Request.FormValue("error"),
+		ErrorURI:         c.Request.FormValue("error_uri"),
+		ErrorDescription: c.Request.FormValue("error_description"),
+		Code:             c.Request.FormValue("code"),
+	})
 	if err != nil {
 		log.Error().Err(err).Msg("cannot authenticate user")
 		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=oauth_error")
 		return
 	}
-	// this will happen when the forge redirects the user as
-	// part of the authorization workflow.
+	// The user is not authorized yet -> redirect
 	if tmpuser == nil {
+		http.Redirect(c.Writer, c.Request, redirectURL, http.StatusSeeOther)
 		return
 	}
 

@@ -92,46 +92,45 @@ func (c *client) URL() string {
 }
 
 // Login authenticates the session and returns the forge user details.
-func (c *client) Login(ctx context.Context, res http.ResponseWriter, req *http.Request) (*model.User, error) {
-	config := c.newConfig(req)
+func (c *client) Login(ctx context.Context, req *forge_types.OAuthRequest) (*model.User, string, error) {
+	config := c.newConfig()
+	redirectURL := config.AuthCodeURL("woodpecker")
 
-	// get the OAuth errors
-	if err := req.FormValue("error"); err != "" {
-		return nil, &forge_types.AuthError{
-			Err:         err,
-			Description: req.FormValue("error_description"),
-			URI:         req.FormValue("error_uri"),
+	// check the OAuth errors
+	if req.Error != "" {
+		return nil, redirectURL, &forge_types.AuthError{
+			Err:         req.Error,
+			Description: req.ErrorDescription,
+			URI:         req.ErrorURI,
 		}
 	}
 
-	// get the OAuth code
-	code := req.FormValue("code")
-	if len(code) == 0 {
+	// check the OAuth code
+	if len(req.Code) == 0 {
 		// TODO(bradrydzewski) we really should be using a random value here and
 		// storing in a cookie for verification in the next stage of the workflow.
 
-		http.Redirect(res, req, config.AuthCodeURL("woodpecker"), http.StatusSeeOther)
-		return nil, nil
+		return nil, redirectURL, nil
 	}
 
-	token, err := config.Exchange(c.newContext(ctx), code)
+	token, err := config.Exchange(c.newContext(ctx), req.Code)
 	if err != nil {
-		return nil, err
+		return nil, redirectURL, err
 	}
 
 	client := c.newClientToken(ctx, token.AccessToken)
 	user, _, err := client.Users.Get(ctx, "")
 	if err != nil {
-		return nil, err
+		return nil, redirectURL, err
 	}
 
 	emails, _, err := client.Users.ListEmails(ctx, nil)
 	if err != nil {
-		return nil, err
+		return nil, redirectURL, err
 	}
 	email := matchingEmail(emails, c.API)
 	if email == nil {
-		return nil, fmt.Errorf("no verified Email address for GitHub account")
+		return nil, redirectURL, fmt.Errorf("no verified Email address for GitHub account")
 	}
 
 	return &model.User{
@@ -140,7 +139,7 @@ func (c *client) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 		Token:         token.AccessToken,
 		Avatar:        user.GetAvatarURL(),
 		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(user.GetID())),
-	}, nil
+	}, redirectURL, nil
 }
 
 // Auth returns the GitHub user login for the given access token.
@@ -405,16 +404,7 @@ func (c *client) newContext(ctx context.Context) context.Context {
 }
 
 // helper function to return the GitHub oauth2 config
-func (c *client) newConfig(req *http.Request) *oauth2.Config {
-	var redirect string
-
-	intendedURL := req.URL.Query()["url"]
-	if len(intendedURL) > 0 {
-		redirect = fmt.Sprintf("%s/authorize?url=%s", server.Config.Server.OAuthHost, intendedURL[0])
-	} else {
-		redirect = fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost)
-	}
-
+func (c *client) newConfig() *oauth2.Config {
 	return &oauth2.Config{
 		ClientID:     c.Client,
 		ClientSecret: c.Secret,
@@ -423,7 +413,7 @@ func (c *client) newConfig(req *http.Request) *oauth2.Config {
 			AuthURL:  fmt.Sprintf("%s/login/oauth/authorize", c.url),
 			TokenURL: fmt.Sprintf("%s/login/oauth/access_token", c.url),
 		},
-		RedirectURL: redirect,
+		RedirectURL: fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost),
 	}
 }
 
