@@ -36,7 +36,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/gitea"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/github"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/gitlab"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/hashicorp"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/addon"
 	"go.woodpecker-ci.org/woodpecker/v2/server/queue"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store/datastore"
@@ -107,7 +107,7 @@ func setupMembershipService(_ *cli.Context, r forge.Forge) cache.MembershipServi
 func setupForge(c *cli.Context) (forge.Forge, error) {
 	switch {
 	case c.String("addons-forge") != "":
-		return hashicorp.Load(c.String("addons-forge"))
+		return addon.Load(c.String("addons-forge"))
 	case c.Bool("github"):
 		return setupGitHub(c)
 	case c.Bool("gitlab"):
