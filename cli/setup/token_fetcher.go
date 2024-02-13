@@ -32,7 +32,7 @@ func receiveTokenFromUI(c context.Context, serverURL string) (string, error) {
 		_ = srv.Shutdown(c)
 	}()
 
-	err := openBrowser(fmt.Sprintf("%s/cli/auth", serverURL))
+	err := openBrowser(fmt.Sprintf("%s/cli/auth?port=%d", serverURL, port))
 	if err != nil {
 		return "", err
 	}
@@ -54,21 +54,34 @@ func setupRouter(tokenReceived chan string) *gin.Engine {
 	e.Use(gin.Recovery())
 
 	e.Use(func(c *gin.Context) {
-		if c.Request.Method != "OPTIONS" {
-			c.Next()
-		} else {
-			c.Header("Access-Control-Allow-Origin", "*")
-			c.Header("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS")
-			c.Header("Access-Control-Allow-Headers", "authorization, origin, content-type, accept")
-			c.Header("Allow", "HEAD,GET,POST,PUT,PATCH,DELETE,OPTIONS")
-			c.Header("Content-Type", "application/json")
-			c.AbortWithStatus(200)
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*") // TODO: change to serverURL
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT")
+
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
 		}
+
+		c.Next()
 	})
 
 	e.POST("/token", func(c *gin.Context) {
-		token := c.PostForm("token")
-		tokenReceived <- token
+		data := struct {
+			Token string `json:"token"`
+		}{}
+
+		err := c.BindJSON(&data)
+		if err != nil {
+			log.Debug().Err(err).Msg("Failed to bind JSON")
+			c.JSON(400, gin.H{
+				"error": "invalid request",
+			})
+			return
+		}
+
+		tokenReceived <- data.Token
 
 		c.JSON(200, gin.H{
 			"ok": "true",

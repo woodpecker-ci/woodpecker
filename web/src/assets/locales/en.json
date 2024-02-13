@@ -508,5 +508,8 @@
   "running_version": "You are running Woodpecker {0}",
   "update_woodpecker": "Please update your Woodpecker instance to {0}",
   "global_level_secret": "global secret",
-  "org_level_secret": "organization secret"
+  "org_level_secret": "organization secret",
+  "login_to_cli": "Login to CLI",
+  "abort_cli_login": "Abort CLI login",
+  "cli_login_failed": "Login to CLI failed"
 }
