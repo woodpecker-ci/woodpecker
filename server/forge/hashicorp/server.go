@@ -74,7 +74,7 @@ func (s *RPCServer) Repo(args []byte, resp *[]byte) error {
 	if err != nil {
 		return err
 	}
-	repos, err := s.Impl.Repo(mkCtx(), a.U, a.RemoteID, a.Owner, a.Name)
+	repos, err := s.Impl.Repo(mkCtx(), a.U.asModel(), a.RemoteID, a.Owner, a.Name)
 	if err != nil {
 		return err
 	}
@@ -102,7 +102,7 @@ func (s *RPCServer) File(args []byte, resp *[]byte) error {
 	if err != nil {
 		return err
 	}
-	*resp, err = s.Impl.File(mkCtx(), a.U, a.R, a.B, a.F)
+	*resp, err = s.Impl.File(mkCtx(), a.U.asModel(), a.R, a.B, a.F)
 	return err
 }
 
@@ -112,7 +112,7 @@ func (s *RPCServer) Dir(args []byte, resp *[]byte) error {
 	if err != nil {
 		return err
 	}
-	meta, err := s.Impl.Dir(mkCtx(), a.U, a.R, a.B, a.F)
+	meta, err := s.Impl.Dir(mkCtx(), a.U.asModel(), a.R, a.B, a.F)
 	if err != nil {
 		return err
 	}
@@ -127,7 +127,7 @@ func (s *RPCServer) Status(args []byte, resp *[]byte) error {
 		return err
 	}
 	*resp = []byte{}
-	return s.Impl.Status(mkCtx(), a.U, a.R, a.B, a.P)
+	return s.Impl.Status(mkCtx(), a.U.asModel(), a.R, a.B, a.P)
 }
 
 func (s *RPCServer) Netrc(args []byte, resp *[]byte) error {
@@ -136,7 +136,7 @@ func (s *RPCServer) Netrc(args []byte, resp *[]byte) error {
 	if err != nil {
 		return err
 	}
-	netrc, err := s.Impl.Netrc(a.U, a.R)
+	netrc, err := s.Impl.Netrc(a.U.asModel(), a.R)
 	if err != nil {
 		return err
 	}
@@ -151,7 +151,7 @@ func (s *RPCServer) Activate(args []byte, resp *[]byte) error {
 		return err
 	}
 	*resp = []byte{}
-	return s.Impl.Activate(mkCtx(), a.U, a.R, a.Link)
+	return s.Impl.Activate(mkCtx(), a.U.asModel(), a.R, a.Link)
 }
 
 func (s *RPCServer) Deactivate(args []byte, resp *[]byte) error {
@@ -161,7 +161,7 @@ func (s *RPCServer) Deactivate(args []byte, resp *[]byte) error {
 		return err
 	}
 	*resp = []byte{}
-	return s.Impl.Deactivate(mkCtx(), a.U, a.R, a.Link)
+	return s.Impl.Deactivate(mkCtx(), a.U.asModel(), a.R, a.Link)
 }
 
 func (s *RPCServer) Branches(args []byte, resp *[]byte) error {
@@ -170,7 +170,7 @@ func (s *RPCServer) Branches(args []byte, resp *[]byte) error {
 	if err != nil {
 		return err
 	}
-	branches, err := s.Impl.Branches(mkCtx(), a.U, a.R, a.P)
+	branches, err := s.Impl.Branches(mkCtx(), a.U.asModel(), a.R, a.P)
 	if err != nil {
 		return err
 	}
@@ -184,7 +184,7 @@ func (s *RPCServer) BranchHead(args []byte, resp *[]byte) error {
 	if err != nil {
 		return err
 	}
-	commit, err := s.Impl.BranchHead(mkCtx(), a.U, a.R, a.Branch)
+	commit, err := s.Impl.BranchHead(mkCtx(), a.U.asModel(), a.R, a.Branch)
 	if err != nil {
 		return err
 	}
@@ -198,7 +198,7 @@ func (s *RPCServer) PullRequests(args []byte, resp *[]byte) error {
 	if err != nil {
 		return err
 	}
-	prs, err := s.Impl.PullRequests(mkCtx(), a.U, a.R, a.P)
+	prs, err := s.Impl.PullRequests(mkCtx(), a.U.asModel(), a.R, a.P)
 	if err != nil {
 		return err
 	}
@@ -212,7 +212,7 @@ func (s *RPCServer) OrgMembership(args []byte, resp *[]byte) error {
 	if err != nil {
 		return err
 	}
-	org, err := s.Impl.OrgMembership(mkCtx(), a.U, a.Org)
+	org, err := s.Impl.OrgMembership(mkCtx(), a.U.asModel(), a.Org)
 	if err != nil {
 		return err
 	}
@@ -226,7 +226,7 @@ func (s *RPCServer) Org(args []byte, resp *[]byte) error {
 	if err != nil {
 		return err
 	}
-	org, err := s.Impl.Org(mkCtx(), a.U, a.Org)
+	org, err := s.Impl.Org(mkCtx(), a.U.asModel(), a.Org)
 	if err != nil {
 		return err
 	}
@@ -268,7 +268,7 @@ func (s *RPCServer) Login(args []byte, resp *[]byte) error {
 		return err
 	}
 	*resp, err = json.Marshal(&responseLogin{
-		User:        user,
+		User:        modelUserFromModel(user),
 		RedirectURL: red,
 	})
 	return err

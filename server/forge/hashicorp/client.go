@@ -92,7 +92,7 @@ func (g *RPC) Login(ctx context.Context, r *types.OAuthRequest) (*model.User, st
 		return nil, "", err
 	}
 
-	return resp.User, resp.RedirectURL, nil
+	return resp.User.asModel(), resp.RedirectURL, nil
 }
 
 func (g *RPC) Auth(ctx context.Context, token, secret string) (string, error) {
@@ -124,7 +124,7 @@ func (g *RPC) Teams(ctx context.Context, u *model.User) ([]*model.Team, error) {
 
 func (g *RPC) Repo(ctx context.Context, u *model.User, remoteID model.ForgeRemoteID, owner, name string) (*model.Repo, error) {
 	args, err := json.Marshal(&argumentsRepo{
-		U:        u,
+		U:        modelUserFromModel(u),
 		RemoteID: remoteID,
 		Owner:    owner,
 		Name:     name,
@@ -159,7 +159,7 @@ func (g *RPC) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {
 
 func (g *RPC) File(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]byte, error) {
 	args, err := json.Marshal(&argumentsFileDir{
-		U: u,
+		U: modelUserFromModel(u),
 		R: r,
 		B: b,
 		F: f,
@@ -173,7 +173,7 @@ func (g *RPC) File(ctx context.Context, u *model.User, r *model.Repo, b *model.P
 
 func (g *RPC) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*types.FileMeta, error) {
 	args, err := json.Marshal(&argumentsFileDir{
-		U: u,
+		U: modelUserFromModel(u),
 		R: r,
 		B: b,
 		F: f,
@@ -192,7 +192,7 @@ func (g *RPC) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pi
 
 func (g *RPC) Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, p *model.Workflow) error {
 	args, err := json.Marshal(&argumentsStatus{
-		U: u,
+		U: modelUserFromModel(u),
 		R: r,
 		B: b,
 		P: p,
@@ -206,7 +206,7 @@ func (g *RPC) Status(ctx context.Context, u *model.User, r *model.Repo, b *model
 
 func (g *RPC) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 	args, err := json.Marshal(&argumentsNetrc{
-		U: u,
+		U: modelUserFromModel(u),
 		R: r,
 	})
 	if err != nil {
@@ -223,7 +223,7 @@ func (g *RPC) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 
 func (g *RPC) Activate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
 	args, err := json.Marshal(&argumentsActivateDeactivate{
-		U:    u,
+		U:    modelUserFromModel(u),
 		R:    r,
 		Link: link,
 	})
@@ -236,7 +236,7 @@ func (g *RPC) Activate(ctx context.Context, u *model.User, r *model.Repo, link s
 
 func (g *RPC) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
 	args, err := json.Marshal(&argumentsActivateDeactivate{
-		U:    u,
+		U:    modelUserFromModel(u),
 		R:    r,
 		Link: link,
 	})
@@ -249,7 +249,7 @@ func (g *RPC) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link
 
 func (g *RPC) Branches(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]string, error) {
 	args, err := json.Marshal(&argumentsBranchesPullRequests{
-		U: u,
+		U: modelUserFromModel(u),
 		R: r,
 		P: p,
 	})
@@ -267,7 +267,7 @@ func (g *RPC) Branches(ctx context.Context, u *model.User, r *model.Repo, p *mod
 
 func (g *RPC) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (*model.Commit, error) {
 	args, err := json.Marshal(&argumentsBranchHead{
-		U:      u,
+		U:      modelUserFromModel(u),
 		R:      r,
 		Branch: branch,
 	})
@@ -285,7 +285,7 @@ func (g *RPC) BranchHead(ctx context.Context, u *model.User, r *model.Repo, bran
 
 func (g *RPC) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error) {
 	args, err := json.Marshal(&argumentsBranchesPullRequests{
-		U: u,
+		U: modelUserFromModel(u),
 		R: r,
 		P: p,
 	})
@@ -331,7 +331,7 @@ func (g *RPC) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Pi
 
 func (g *RPC) OrgMembership(ctx context.Context, u *model.User, org string) (*model.OrgPerm, error) {
 	args, err := json.Marshal(&argumentsOrgMembershipOrg{
-		U:   u,
+		U:   modelUserFromModel(u),
 		Org: org,
 	})
 	if err != nil {
@@ -348,7 +348,7 @@ func (g *RPC) OrgMembership(ctx context.Context, u *model.User, org string) (*mo
 
 func (g *RPC) Org(ctx context.Context, u *model.User, org string) (*model.Org, error) {
 	args, err := json.Marshal(&argumentsOrgMembershipOrg{
-		U:   u,
+		U:   modelUserFromModel(u),
 		Org: org,
 	})
 	if err != nil {
