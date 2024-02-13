@@ -32,39 +32,39 @@ type argumentsRepo struct {
 
 type argumentsFileDir struct {
 	U *modelUser      `json:"u"`
-	R *model.Repo     `json:"r"`
+	R *modelRepo      `json:"r"`
 	B *model.Pipeline `json:"b"`
 	F string          `json:"f"`
 }
 
 type argumentsStatus struct {
 	U *modelUser      `json:"u"`
-	R *model.Repo     `json:"r"`
+	R *modelRepo      `json:"r"`
 	B *model.Pipeline `json:"b"`
 	P *model.Workflow `json:"p"`
 }
 
 type argumentsNetrc struct {
-	U *modelUser  `json:"u"`
-	R *model.Repo `json:"r"`
+	U *modelUser `json:"u"`
+	R *modelRepo `json:"r"`
 }
 
 type argumentsActivateDeactivate struct {
-	U    *modelUser  `json:"u"`
-	R    *model.Repo `json:"r"`
-	Link string      `json:"link"`
+	U    *modelUser `json:"u"`
+	R    *modelRepo `json:"r"`
+	Link string     `json:"link"`
 }
 
 type argumentsBranchesPullRequests struct {
 	U *modelUser         `json:"u"`
-	R *model.Repo        `json:"r"`
+	R *modelRepo         `json:"r"`
 	P *model.ListOptions `json:"p"`
 }
 
 type argumentsBranchHead struct {
-	U      *modelUser  `json:"u"`
-	R      *model.Repo `json:"r"`
-	Branch string      `json:"branch"`
+	U      *modelUser `json:"u"`
+	R      *modelRepo `json:"r"`
+	Branch string     `json:"branch"`
 }
 
 type argumentsOrgMembershipOrg struct {
@@ -73,7 +73,7 @@ type argumentsOrgMembershipOrg struct {
 }
 
 type responseHook struct {
-	Repo     *model.Repo     `json:"repo"`
+	Repo     *modelRepo      `json:"repo"`
 	Pipeline *model.Pipeline `json:"pipeline"`
 }
 
@@ -90,15 +90,11 @@ type httpRequest struct {
 	Body   []byte              `json:"body"`
 }
 
-// modelUser is a model.User, but all fields are marshaled to JSON
+// modelUser is an extension of model.User to marshal all fields to JSON
 type modelUser struct {
-	// the id for this user.
-	ID int64 `json:"id"`
+	User *model.User `json:"user"`
 
 	ForgeRemoteID model.ForgeRemoteID `json:"forge_remote_id"`
-
-	// Login is the username for this user.
-	Login string `json:"login"`
 
 	// Token is the oauth2 token.
 	Token string `json:"token"`
@@ -109,50 +105,50 @@ type modelUser struct {
 	// Expiry is the token and secret expiration timestamp.
 	Expiry int64 `json:"expiry"`
 
-	// Email is the email address for this user.
-	Email string `json:"email"`
-
-	// the avatar url for this user.
-	Avatar string `json:"avatar_url"`
-
-	// Admin indicates the user is a system administrator.
-	Admin bool `json:"admin"`
-
 	// Hash is a unique token used to sign tokens.
 	Hash string `json:"hash"`
-
-	// OrgID is the of the user as model.Org.
-	OrgID int64 `json:"org_id"`
 }
 
 func (m *modelUser) asModel() *model.User {
-	return &model.User{
-		ID:            m.ID,
-		ForgeRemoteID: m.ForgeRemoteID,
-		Login:         m.Login,
-		Token:         m.Token,
-		Secret:        m.Secret,
-		Expiry:        m.Expiry,
-		Email:         m.Email,
-		Avatar:        m.Avatar,
-		Admin:         m.Admin,
-		Hash:          m.Hash,
-		OrgID:         m.OrgID,
-	}
+	m.User.ForgeRemoteID = m.ForgeRemoteID
+	m.User.Token = m.Token
+	m.User.Secret = m.Secret
+	m.User.Expiry = m.Expiry
+	m.User.Hash = m.Hash
+	return m.User
 }
 
 func modelUserFromModel(u *model.User) *modelUser {
 	return &modelUser{
-		ID:            u.ID,
+		User:          u,
 		ForgeRemoteID: u.ForgeRemoteID,
-		Login:         u.Login,
 		Token:         u.Token,
 		Secret:        u.Secret,
 		Expiry:        u.Expiry,
-		Email:         u.Email,
-		Avatar:        u.Avatar,
-		Admin:         u.Admin,
 		Hash:          u.Hash,
-		OrgID:         u.OrgID,
+	}
+}
+
+// modelUser is an extension of model.User to marshal all fields to JSON
+type modelRepo struct {
+	Repo   *model.Repo `json:"repo"`
+	UserID int64       `json:"-"`
+	Hash   string      `json:"-"`
+	Perm   *model.Perm `json:"-"`
+}
+
+func (m *modelRepo) asModel() *model.Repo {
+	m.Repo.UserID = m.UserID
+	m.Repo.Hash = m.Hash
+	m.Repo.Perm = m.Perm
+	return m.Repo
+}
+
+func modelRepoFromModel(r *model.Repo) *modelRepo {
+	return &modelRepo{
+		Repo:   r,
+		UserID: r.UserID,
+		Hash:   r.Hash,
+		Perm:   r.Perm,
 	}
 }

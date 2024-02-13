@@ -24,7 +24,6 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 func Serve(impl forge.Forge) {
@@ -55,12 +54,12 @@ func (s *RPCServer) URL(_ []byte, resp *string) error {
 }
 
 func (s *RPCServer) Teams(args []byte, resp *[]byte) error {
-	var a *model.User
+	var a *modelUser
 	err := json.Unmarshal(args, a)
 	if err != nil {
 		return err
 	}
-	teams, err := s.Impl.Teams(mkCtx(), a)
+	teams, err := s.Impl.Teams(mkCtx(), a.asModel())
 	if err != nil {
 		return err
 	}
@@ -78,21 +77,25 @@ func (s *RPCServer) Repo(args []byte, resp *[]byte) error {
 	if err != nil {
 		return err
 	}
-	*resp, err = json.Marshal(repos)
+	*resp, err = json.Marshal(modelRepoFromModel(repos))
 	return err
 }
 
 func (s *RPCServer) Repos(args []byte, resp *[]byte) error {
-	var a *model.User
+	var a *modelUser
 	err := json.Unmarshal(args, a)
 	if err != nil {
 		return err
 	}
-	repos, err := s.Impl.Repos(mkCtx(), a)
+	repos, err := s.Impl.Repos(mkCtx(), a.asModel())
 	if err != nil {
 		return err
 	}
-	*resp, err = json.Marshal(repos)
+	var modelRepos []*modelRepo
+	for _, repo := range repos {
+		modelRepos = append(modelRepos, modelRepoFromModel(repo))
+	}
+	*resp, err = json.Marshal(modelRepos)
 	return err
 }
 
@@ -102,7 +105,7 @@ func (s *RPCServer) File(args []byte, resp *[]byte) error {
 	if err != nil {
 		return err
 	}
-	*resp, err = s.Impl.File(mkCtx(), a.U.asModel(), a.R, a.B, a.F)
+	*resp, err = s.Impl.File(mkCtx(), a.U.asModel(), a.R.asModel(), a.B, a.F)
 	return err
 }
 
@@ -112,7 +115,7 @@ func (s *RPCServer) Dir(args []byte, resp *[]byte) error {
 	if err != nil {
 		return err
 	}
-	meta, err := s.Impl.Dir(mkCtx(), a.U.asModel(), a.R, a.B, a.F)
+	meta, err := s.Impl.Dir(mkCtx(), a.U.asModel(), a.R.asModel(), a.B, a.F)
 	if err != nil {
 		return err
 	}
@@ -127,7 +130,7 @@ func (s *RPCServer) Status(args []byte, resp *[]byte) error {
 		return err
 	}
 	*resp = []byte{}
-	return s.Impl.Status(mkCtx(), a.U.asModel(), a.R, a.B, a.P)
+	return s.Impl.Status(mkCtx(), a.U.asModel(), a.R.asModel(), a.B, a.P)
 }
 
 func (s *RPCServer) Netrc(args []byte, resp *[]byte) error {
@@ -136,7 +139,7 @@ func (s *RPCServer) Netrc(args []byte, resp *[]byte) error {
 	if err != nil {
 		return err
 	}
-	netrc, err := s.Impl.Netrc(a.U.asModel(), a.R)
+	netrc, err := s.Impl.Netrc(a.U.asModel(), a.R.asModel())
 	if err != nil {
 		return err
 	}
@@ -151,7 +154,7 @@ func (s *RPCServer) Activate(args []byte, resp *[]byte) error {
 		return err
 	}
 	*resp = []byte{}
-	return s.Impl.Activate(mkCtx(), a.U.asModel(), a.R, a.Link)
+	return s.Impl.Activate(mkCtx(), a.U.asModel(), a.R.asModel(), a.Link)
 }
 
 func (s *RPCServer) Deactivate(args []byte, resp *[]byte) error {
@@ -161,7 +164,7 @@ func (s *RPCServer) Deactivate(args []byte, resp *[]byte) error {
 		return err
 	}
 	*resp = []byte{}
-	return s.Impl.Deactivate(mkCtx(), a.U.asModel(), a.R, a.Link)
+	return s.Impl.Deactivate(mkCtx(), a.U.asModel(), a.R.asModel(), a.Link)
 }
 
 func (s *RPCServer) Branches(args []byte, resp *[]byte) error {
@@ -170,7 +173,7 @@ func (s *RPCServer) Branches(args []byte, resp *[]byte) error {
 	if err != nil {
 		return err
 	}
-	branches, err := s.Impl.Branches(mkCtx(), a.U.asModel(), a.R, a.P)
+	branches, err := s.Impl.Branches(mkCtx(), a.U.asModel(), a.R.asModel(), a.P)
 	if err != nil {
 		return err
 	}
@@ -184,7 +187,7 @@ func (s *RPCServer) BranchHead(args []byte, resp *[]byte) error {
 	if err != nil {
 		return err
 	}
-	commit, err := s.Impl.BranchHead(mkCtx(), a.U.asModel(), a.R, a.Branch)
+	commit, err := s.Impl.BranchHead(mkCtx(), a.U.asModel(), a.R.asModel(), a.Branch)
 	if err != nil {
 		return err
 	}
@@ -198,7 +201,7 @@ func (s *RPCServer) PullRequests(args []byte, resp *[]byte) error {
 	if err != nil {
 		return err
 	}
-	prs, err := s.Impl.PullRequests(mkCtx(), a.U.asModel(), a.R, a.P)
+	prs, err := s.Impl.PullRequests(mkCtx(), a.U.asModel(), a.R.asModel(), a.P)
 	if err != nil {
 		return err
 	}
@@ -251,7 +254,7 @@ func (s *RPCServer) Hook(args []byte, resp *[]byte) error {
 		return err
 	}
 	*resp, err = json.Marshal(&responseHook{
-		Repo:     repo,
+		Repo:     modelRepoFromModel(repo),
 		Pipeline: pipeline,
 	})
 	return err

@@ -56,9 +56,6 @@ func Load(file string) (forge.Forge, error) {
 	return extension, nil
 }
 
-// TODO issue: user models are not sent with token/secret (token/secret is json:"-")
-// possible solution: two-way-communication with two funcs: 1. token/secret for user 2. token/secret for repo
-// however, that's an issue in both directions: the addon can't return tokens/secrets
 type RPC struct {
 	client *rpc.Client
 }
@@ -108,7 +105,7 @@ func (g *RPC) Auth(ctx context.Context, token, secret string) (string, error) {
 }
 
 func (g *RPC) Teams(ctx context.Context, u *model.User) ([]*model.Team, error) {
-	args, err := json.Marshal(u)
+	args, err := json.Marshal(modelUserFromModel(u))
 	if err != nil {
 		return nil, err
 	}
@@ -138,12 +135,16 @@ func (g *RPC) Repo(ctx context.Context, u *model.User, remoteID model.ForgeRemot
 		return nil, err
 	}
 
-	var resp *model.Repo
-	return resp, json.Unmarshal(jsonResp, resp)
+	var resp *modelRepo
+	err = json.Unmarshal(jsonResp, resp)
+	if err != nil {
+		return nil, err
+	}
+	return resp.asModel(), nil
 }
 
 func (g *RPC) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {
-	args, err := json.Marshal(u)
+	args, err := json.Marshal(modelUserFromModel(u))
 	if err != nil {
 		return nil, err
 	}
@@ -153,14 +154,22 @@ func (g *RPC) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {
 		return nil, err
 	}
 
-	var resp []*model.Repo
-	return resp, json.Unmarshal(jsonResp, &resp)
+	var resp []*modelRepo
+	err = json.Unmarshal(jsonResp, &resp)
+	if err != nil {
+		return nil, err
+	}
+	var modelRepos []*model.Repo
+	for _, repo := range resp {
+		modelRepos = append(modelRepos, repo.asModel())
+	}
+	return modelRepos, nil
 }
 
 func (g *RPC) File(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]byte, error) {
 	args, err := json.Marshal(&argumentsFileDir{
 		U: modelUserFromModel(u),
-		R: r,
+		R: modelRepoFromModel(r),
 		B: b,
 		F: f,
 	})
@@ -174,7 +183,7 @@ func (g *RPC) File(ctx context.Context, u *model.User, r *model.Repo, b *model.P
 func (g *RPC) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*types.FileMeta, error) {
 	args, err := json.Marshal(&argumentsFileDir{
 		U: modelUserFromModel(u),
-		R: r,
+		R: modelRepoFromModel(r),
 		B: b,
 		F: f,
 	})
@@ -193,7 +202,7 @@ func (g *RPC) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pi
 func (g *RPC) Status(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, p *model.Workflow) error {
 	args, err := json.Marshal(&argumentsStatus{
 		U: modelUserFromModel(u),
-		R: r,
+		R: modelRepoFromModel(r),
 		B: b,
 		P: p,
 	})
@@ -207,7 +216,7 @@ func (g *RPC) Status(ctx context.Context, u *model.User, r *model.Repo, b *model
 func (g *RPC) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 	args, err := json.Marshal(&argumentsNetrc{
 		U: modelUserFromModel(u),
-		R: r,
+		R: modelRepoFromModel(r),
 	})
 	if err != nil {
 		return nil, err
@@ -224,7 +233,7 @@ func (g *RPC) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 func (g *RPC) Activate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
 	args, err := json.Marshal(&argumentsActivateDeactivate{
 		U:    modelUserFromModel(u),
-		R:    r,
+		R:    modelRepoFromModel(r),
 		Link: link,
 	})
 	if err != nil {
@@ -237,7 +246,7 @@ func (g *RPC) Activate(ctx context.Context, u *model.User, r *model.Repo, link s
 func (g *RPC) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
 	args, err := json.Marshal(&argumentsActivateDeactivate{
 		U:    modelUserFromModel(u),
-		R:    r,
+		R:    modelRepoFromModel(r),
 		Link: link,
 	})
 	if err != nil {
@@ -250,7 +259,7 @@ func (g *RPC) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link
 func (g *RPC) Branches(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]string, error) {
 	args, err := json.Marshal(&argumentsBranchesPullRequests{
 		U: modelUserFromModel(u),
-		R: r,
+		R: modelRepoFromModel(r),
 		P: p,
 	})
 	if err != nil {
@@ -268,7 +277,7 @@ func (g *RPC) Branches(ctx context.Context, u *model.User, r *model.Repo, p *mod
 func (g *RPC) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (*model.Commit, error) {
 	args, err := json.Marshal(&argumentsBranchHead{
 		U:      modelUserFromModel(u),
-		R:      r,
+		R:      modelRepoFromModel(r),
 		Branch: branch,
 	})
 	if err != nil {
@@ -286,7 +295,7 @@ func (g *RPC) BranchHead(ctx context.Context, u *model.User, r *model.Repo, bran
 func (g *RPC) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error) {
 	args, err := json.Marshal(&argumentsBranchesPullRequests{
 		U: modelUserFromModel(u),
-		R: r,
+		R: modelRepoFromModel(r),
 		P: p,
 	})
 	if err != nil {
@@ -326,7 +335,7 @@ func (g *RPC) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Pi
 	if err != nil {
 		return nil, nil, err
 	}
-	return resp.Repo, resp.Pipeline, nil
+	return resp.Repo.asModel(), resp.Pipeline, nil
 }
 
 func (g *RPC) OrgMembership(ctx context.Context, u *model.User, org string) (*model.OrgPerm, error) {
