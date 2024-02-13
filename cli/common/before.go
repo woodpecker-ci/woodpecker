@@ -1,8 +1,6 @@
 package common
 
 import (
-	"context"
-
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
 
@@ -21,7 +19,7 @@ func Before(c *cli.Context) error {
 
 		log.Debug().Msg("Checking for updates ...")
 
-		newVersion, err := update.CheckForUpdate(context.Background(), true)
+		newVersion, err := update.CheckForUpdate(c.Context, false)
 		if err != nil {
 			log.Error().Err(err).Msgf("Failed to check for updates")
 			return
