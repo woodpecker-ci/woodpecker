@@ -13,20 +13,19 @@ import (
 	"runtime"
 
 	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v2"
 
 	"go.woodpecker-ci.org/woodpecker/v2/version"
 )
 
-func CheckForUpdate(c *cli.Context, force bool) (*NewVersion, error) {
-	log.Debug().Str("current-version", version.String()).Msg("Checking for updates ...")
+func CheckForUpdate(ctx context.Context, force bool) (*NewVersion, error) {
+	log.Debug().Msgf("Current version: %s", version.String())
 
 	if version.String() == "dev" && !force {
 		log.Debug().Msgf("Skipping update check for development version")
 		return nil, nil
 	}
 
-	req, err := http.NewRequestWithContext(c.Context, "GET", githubReleaseURL, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", githubReleaseURL, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +51,6 @@ func CheckForUpdate(c *cli.Context, force bool) (*NewVersion, error) {
 	}
 
 	log.Debug().Msgf("Latest version: %s", release.TagName)
-	log.Debug().Msgf("Current version: %s", version.String())
 
 	fileRegex, err := regexp.Compile(fmt.Sprintf("^woodpecker\\-cli\\_%s_%s\\.tar\\.gz$", runtime.GOOS, runtime.GOARCH))
 	if err != nil {
