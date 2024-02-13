@@ -17,13 +17,13 @@ type Config struct {
 }
 
 func Load(c *cli.Context) error {
-	// If the server URL and token are set, we don't need to load the config
-	if c.IsSet("server-url") && c.IsSet("token") {
+	// If the command is setup, we don't need to load the config
+	if firstArg := c.Args().First(); firstArg == "setup" {
 		return nil
 	}
 
-	// If the command is setup, we don't need to load the config
-	if c.Command.Name == "setup" {
+	// If the server URL and token are set, we don't need to load the config
+	if c.IsSet("server-url") && c.IsSet("token") {
 		return nil
 	}
 
@@ -37,19 +37,25 @@ func Load(c *cli.Context) error {
 		return errors.New("woodpecker-cli is not setup")
 	}
 
-	err = c.Set("server-url", config.ServerURL)
-	if err != nil {
-		return err
+	if !c.IsSet("server-url") {
+		err = c.Set("server-url", config.ServerURL)
+		if err != nil {
+			return err
+		}
 	}
 
-	err = c.Set("token", config.Token)
-	if err != nil {
-		return err
+	if !c.IsSet("token") {
+		err = c.Set("token", config.Token)
+		if err != nil {
+			return err
+		}
 	}
 
-	err = c.Set("log-level", config.LogLevel)
-	if err != nil {
-		return err
+	if !c.IsSet("log-level") {
+		err = c.Set("log-level", config.LogLevel)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

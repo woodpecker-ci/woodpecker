@@ -1,7 +1,14 @@
 <template>
-  <div class="flex gap-4 m-auto">
-    <Button :text="$t('login_to_cli')" @click="sendToken" />
-    <Button :text="$t('abort_cli_login')" @click="abortLogin" />
+  <div class="flex flex-col gap-4 m-auto">
+    <div class="text-center text-wp-text-100">
+      <h1 class="text-2xl font-bold">{{ $t('login_to_cli') }}</h1>
+      <p>{{ $t('login_to_cli_description') }}</p>
+    </div>
+
+    <div class="flex gap-4 justify-center">
+      <Button :text="$t('login_to_cli')" color="green" @click="sendToken" />
+      <Button :text="$t('abort')" color="red" @click="abortLogin" />
+    </div>
   </div>
 </template>
 
@@ -9,6 +16,7 @@
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 
+import Button from '~/components/atomic/Button.vue';
 import useApiClient from '~/compositions/useApiClient';
 
 const apiClient = useApiClient();
