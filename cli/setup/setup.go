@@ -28,7 +28,7 @@ var Command = &cli.Command{
 }
 
 func setup(c *cli.Context) error {
-	_config, err := config.Load(c.String("config"))
+	_config, err := config.Get(c.String("config"))
 	if err != nil {
 		return err
 	} else if _config != nil {
@@ -50,6 +50,8 @@ func setup(c *cli.Context) error {
 
 	token := c.String("token")
 	if token == "" {
+		// TODO: wait for enter before opening the browser
+
 		token, err = receiveTokenFromUI(c.Context, serverURL)
 		if err != nil {
 			return err

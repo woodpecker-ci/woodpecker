@@ -42,7 +42,7 @@ func newApp() *cli.App {
 	app.Usage = "command line utility"
 	app.EnableBashCompletion = true
 	app.Flags = common.GlobalFlags
-	app.Before = common.SetupGlobalLogger
+	app.Before = common.Before
 	app.Commands = []*cli.Command{
 		pipeline.Command,
 		log.Command,
