@@ -36,8 +36,8 @@ type Forge interface {
 	URL() string
 
 	// Login authenticates the session and returns the
-	// forge user details.
-	Login(ctx context.Context, w http.ResponseWriter, r *http.Request) (*model.User, error)
+	// forge user details and the URL to redirect to if not authorized yet.
+	Login(ctx context.Context, r *types.OAuthRequest) (*model.User, string, error)
 
 	// Auth authenticates the session and returns the forge user
 	// login for the given token and secret

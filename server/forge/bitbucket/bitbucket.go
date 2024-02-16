@@ -77,36 +77,35 @@ func (c *config) URL() string {
 
 // Login authenticates an account with Bitbucket using the oauth2 protocol. The
 // Bitbucket account details are returned when the user is successfully authenticated.
-func (c *config) Login(ctx context.Context, w http.ResponseWriter, req *http.Request) (*model.User, error) {
+func (c *config) Login(ctx context.Context, req *forge_types.OAuthRequest) (*model.User, string, error) {
 	config := c.newOAuth2Config()
+	redirectURL := config.AuthCodeURL("woodpecker")
 
 	// get the OAuth errors
-	if err := req.FormValue("error"); err != "" {
-		return nil, &forge_types.AuthError{
-			Err:         err,
-			Description: req.FormValue("error_description"),
-			URI:         req.FormValue("error_uri"),
+	if req.Error != "" {
+		return nil, redirectURL, &forge_types.AuthError{
+			Err:         req.Error,
+			Description: req.ErrorDescription,
+			URI:         req.ErrorURI,
 		}
 	}
 
-	// get the OAuth code
-	code := req.FormValue("code")
-	if len(code) == 0 {
-		http.Redirect(w, req, config.AuthCodeURL("woodpecker"), http.StatusSeeOther)
-		return nil, nil
+	// check the OAuth code
+	if len(req.Code) == 0 {
+		return nil, redirectURL, nil
 	}
 
-	token, err := config.Exchange(ctx, code)
+	token, err := config.Exchange(ctx, req.Code)
 	if err != nil {
-		return nil, err
+		return nil, redirectURL, err
 	}
 
 	client := internal.NewClient(ctx, c.API, config.Client(ctx, token))
 	curr, err := client.FindCurrent()
 	if err != nil {
-		return nil, err
+		return nil, redirectURL, err
 	}
-	return convertUser(curr, token), nil
+	return convertUser(curr, token), redirectURL, nil
 }
 
 // Auth uses the Bitbucket oauth2 access token and refresh token to authenticate

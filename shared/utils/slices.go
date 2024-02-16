@@ -69,3 +69,14 @@ func SliceToBoolMap(s []string) map[string]bool {
 	}
 	return v
 }
+
+// StringSliceDeleteEmpty removes empty strings from a string slice.
+func StringSliceDeleteEmpty(s []string) []string {
+	r := make([]string, 0)
+	for _, str := range s {
+		if str != "" {
+			r = append(r, str)
+		}
+	}
+	return r
+}
