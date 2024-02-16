@@ -1,24 +1,15 @@
 # Changelog
 
-## [2.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.4.0) - 2024-02-12
+## [2.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.4.0) - 2024-02-16
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@anbraten, @qwerty287, @kjuulh, @sinlov, @lukashass, @renovate[bot], @pre-commit-ci[bot], @fernandrone
-
-### 📈 Enhancement
-
-- Prevent agent deletion when it's still running tasks [[#3377](https://github.com/woodpecker-ci/woodpecker/pull/3377)]
-- Refactor internal services [[#915](https://github.com/woodpecker-ci/woodpecker/pull/915)]
-- Lint for event filter and deprecate `exclude` [[#3222](https://github.com/woodpecker-ci/woodpecker/pull/3222)]
-- Allow editing all environment variables in pipeline popups [[#3314](https://github.com/woodpecker-ci/woodpecker/pull/3314)]
-- Parse backend options in backend [[#3227](https://github.com/woodpecker-ci/woodpecker/pull/3227)]
-- Make agent usable for external backends [[#3270](https://github.com/woodpecker-ci/woodpecker/pull/3270)]
-- Add no branches text [[#3312](https://github.com/woodpecker-ci/woodpecker/pull/3312)]
-- Add loading spinner to repo list [[#3310](https://github.com/woodpecker-ci/woodpecker/pull/3310)]
+@renovate[bot], @anbraten, @xoxys, @qwerty287, @kjuulh, @sinlov, @lukashass, @pre-commit-ci[bot], @fernandrone
 
 ### 🐛 Bug Fixes
 
+- Fix agent polling [[#3378](https://github.com/woodpecker-ci/woodpecker/pull/3378)]
+- Remove empty strings from slice before parsing agent config [[#3387](https://github.com/woodpecker-ci/woodpecker/pull/3387)]
 - Set correct link for commit [[#3368](https://github.com/woodpecker-ci/woodpecker/pull/3368)]
 - Fix schema links [[#3369](https://github.com/woodpecker-ci/woodpecker/pull/3369)]
 - Fix correctly handle gitlab pr closed events [[#3362](https://github.com/woodpecker-ci/woodpecker/pull/3362)]
@@ -29,6 +20,18 @@
 - Consider gitlab inherited permissions [[#3308](https://github.com/woodpecker-ci/woodpecker/pull/3308)]
 - fix: agent panic when node is terminated during step execution [[#3331](https://github.com/woodpecker-ci/woodpecker/pull/3331)]
 
+### 📈 Enhancement
+
+- Replace http types on forge interface [[#3374](https://github.com/woodpecker-ci/woodpecker/pull/3374)]
+- Prevent agent deletion when it's still running tasks [[#3377](https://github.com/woodpecker-ci/woodpecker/pull/3377)]
+- Refactor internal services [[#915](https://github.com/woodpecker-ci/woodpecker/pull/915)]
+- Lint for event filter and deprecate `exclude` [[#3222](https://github.com/woodpecker-ci/woodpecker/pull/3222)]
+- Allow editing all environment variables in pipeline popups [[#3314](https://github.com/woodpecker-ci/woodpecker/pull/3314)]
+- Parse backend options in backend [[#3227](https://github.com/woodpecker-ci/woodpecker/pull/3227)]
+- Make agent usable for external backends [[#3270](https://github.com/woodpecker-ci/woodpecker/pull/3270)]
+- Add no branches text [[#3312](https://github.com/woodpecker-ci/woodpecker/pull/3312)]
+- Add loading spinner to repo list [[#3310](https://github.com/woodpecker-ci/woodpecker/pull/3310)]
+
 ### 📚 Documentation
 
 - docs: fix contributions link [[#3363](https://github.com/woodpecker-ci/woodpecker/pull/3363)]
@@ -37,6 +40,10 @@
 
 ### Misc
 
+- chore(deps): update docker.io/techknowlogick/xgo docker tag to go-1.22.0 [[#3392](https://github.com/woodpecker-ci/woodpecker/pull/3392)]
+- chore(deps): update docker.io/golang docker tag [[#3391](https://github.com/woodpecker-ci/woodpecker/pull/3391)]
+- fix(deps): update golang (packages) [[#3393](https://github.com/woodpecker-ci/woodpecker/pull/3393)]
+- chore(deps): update docker.io/woodpeckerci/plugin-docker-buildx docker tag to v3.1.0 [[#3394](https://github.com/woodpecker-ci/woodpecker/pull/3394)]
 - Add link checking [[#3371](https://github.com/woodpecker-ci/woodpecker/pull/3371)]
 - Apply `dependencies` label to all PRs [[#3358](https://github.com/woodpecker-ci/woodpecker/pull/3358)]
 - Fix linter [[#3354](https://github.com/woodpecker-ci/woodpecker/pull/3354)]
