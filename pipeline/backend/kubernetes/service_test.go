@@ -24,24 +24,24 @@ import (
 )
 
 func TestServiceName(t *testing.T) {
-	name, err := serviceName(&types.Step{Name: "database"})
+	name, err := serviceName(&types.Step{Name: "database", UUID: "01he8bebctabr3kgk0qj36d2me-0"})
 	assert.NoError(t, err)
-	assert.Equal(t, "database", name)
+	assert.Equal(t, "database-01he8bebctabr3kgk0qj36d2me-0", name)
 
-	name, err = serviceName(&types.Step{Name: "wp-01he8bebctabr3kgk0qj36d2me-0-services-0.woodpecker-runtime.svc.cluster.local"})
+	name, err = serviceName(&types.Step{Name: "wp-01he8bebctabr3kgk0qj36d2me-0-services-0.woodpecker-runtime.svc.cluster.local", UUID: "01he8bebctabr3kgk0qj36d2me-0"})
 	assert.NoError(t, err)
-	assert.Equal(t, "wp-01he8bebctabr3kgk0qj36d2me-0-services-0.woodpecker-runtime.svc.cluster.local", name)
+	assert.Equal(t, "wp-01he8bebctabr3kgk0qj36d2me-0-services-0.woodpecker-runtime.svc.cluster.local-01he8bebctabr3kgk0qj36d2me-0", name)
 
-	name, err = serviceName(&types.Step{Name: "awesome_service"})
+	name, err = serviceName(&types.Step{Name: "awesome_service", UUID: "01he8bebctabr3kgk0qj36d2me-0"})
 	assert.NoError(t, err)
-	assert.Equal(t, "awesome-service", name)
+	assert.Equal(t, "awesome-service-01he8bebctabr3kgk0qj36d2me-0", name)
 }
 
 func TestService(t *testing.T) {
 	expected := `
 	{
 	  "metadata": {
-	    "name": "bar",
+	    "name": "bar-01he8bebctabr3kgk0qj36d2me-0",
 	    "namespace": "foo",
 	    "creationTimestamp": null
 	  },
@@ -66,7 +66,7 @@ func TestService(t *testing.T) {
 	      }
 	    ],
 	    "selector": {
-	      "service": "bar"
+	      "service": "bar-01he8bebctabr3kgk0qj36d2me-0"
 	    },
 	    "type": "ClusterIP"
 	  },
@@ -81,6 +81,7 @@ func TestService(t *testing.T) {
 	}
 	s, err := mkService(&types.Step{
 		Name:  "bar",
+		UUID:  "01he8bebctabr3kgk0qj36d2me-0",
 		Ports: ports,
 	}, &config{Namespace: "foo"})
 	assert.NoError(t, err)
