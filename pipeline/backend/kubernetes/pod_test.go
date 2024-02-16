@@ -51,7 +51,7 @@ func TestStepToPodName(t *testing.T) {
 	assert.EqualValues(t, "wp-01he8bebctabr3kg", name)
 	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "postgres", Type: types.StepTypeService})
 	assert.NoError(t, err)
-	assert.EqualValues(t, "postgres-01he8bebctabr3kg", name)
+	assert.EqualValues(t, "wp-svc-01he8bebctabr3kg-postgres", name)
 }
 
 func TestStepLabel(t *testing.T) {
