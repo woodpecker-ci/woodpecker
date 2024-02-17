@@ -46,17 +46,19 @@ func convertLvl(level hclog.Level) zerolog.Level {
 	return zerolog.NoLevel
 }
 
-func (c clientLogger) applyArgs(args []any) *zerolog.Logger {
+func (c *clientLogger) applyArgs(args []any) *zerolog.Logger {
 	var key string
 	logger := c.logger.With()
 	args = append(args, c.withArgs)
 	for i, arg := range args {
-		if key != "" {
+		switch {
+		case key != "":
 			logger.Any(key, arg)
 			key = ""
-		} else if i == len(args)-1 {
+		case i == len(args)-1:
 			logger.Any(hclog.MissingKey, arg)
-		} else {
+		default:
+
 			key, _ = arg.(string)
 		}
 	}
@@ -64,55 +66,55 @@ func (c clientLogger) applyArgs(args []any) *zerolog.Logger {
 	return &l
 }
 
-func (c clientLogger) Log(level hclog.Level, msg string, args ...any) {
-	c.applyArgs(args).WithLevel(convertLvl(level)).Msgf(msg, args)
+func (c *clientLogger) Log(level hclog.Level, msg string, args ...any) {
+	c.applyArgs(args).WithLevel(convertLvl(level)).Msg(msg)
 }
 
-func (c clientLogger) Trace(msg string, args ...any) {
-	c.applyArgs(args).Trace().Msgf(msg, args)
+func (c *clientLogger) Trace(msg string, args ...any) {
+	c.applyArgs(args).Trace().Msg(msg)
 }
 
-func (c clientLogger) Debug(msg string, args ...any) {
-	c.applyArgs(args).Debug().Msgf(msg, args)
+func (c *clientLogger) Debug(msg string, args ...any) {
+	c.applyArgs(args).Debug().Msg(msg)
 }
 
-func (c clientLogger) Info(msg string, args ...any) {
-	c.applyArgs(args).Info().Msgf(msg, args)
+func (c *clientLogger) Info(msg string, args ...any) {
+	c.applyArgs(args).Info().Msg(msg)
 }
 
-func (c clientLogger) Warn(msg string, args ...any) {
-	c.applyArgs(args).Warn().Msgf(msg, args)
+func (c *clientLogger) Warn(msg string, args ...any) {
+	c.applyArgs(args).Warn().Msg(msg)
 }
 
-func (c clientLogger) Error(msg string, args ...any) {
-	c.applyArgs(args).Error().Msgf(msg, args)
+func (c *clientLogger) Error(msg string, args ...any) {
+	c.applyArgs(args).Error().Msg(msg)
 }
 
-func (c clientLogger) IsTrace() bool {
+func (c *clientLogger) IsTrace() bool {
 	return log.Logger.GetLevel() >= zerolog.TraceLevel
 }
 
-func (c clientLogger) IsDebug() bool {
+func (c *clientLogger) IsDebug() bool {
 	return log.Logger.GetLevel() >= zerolog.DebugLevel
 }
 
-func (c clientLogger) IsInfo() bool {
+func (c *clientLogger) IsInfo() bool {
 	return log.Logger.GetLevel() >= zerolog.InfoLevel
 }
 
-func (c clientLogger) IsWarn() bool {
+func (c *clientLogger) IsWarn() bool {
 	return log.Logger.GetLevel() >= zerolog.WarnLevel
 }
 
-func (c clientLogger) IsError() bool {
+func (c *clientLogger) IsError() bool {
 	return log.Logger.GetLevel() >= zerolog.ErrorLevel
 }
 
-func (c clientLogger) ImpliedArgs() []any {
+func (c *clientLogger) ImpliedArgs() []any {
 	return c.withArgs
 }
 
-func (c clientLogger) With(args ...any) hclog.Logger {
+func (c *clientLogger) With(args ...any) hclog.Logger {
 	return &clientLogger{
 		logger:   c.logger,
 		name:     c.name,
@@ -120,39 +122,35 @@ func (c clientLogger) With(args ...any) hclog.Logger {
 	}
 }
 
-func (c clientLogger) Name() string {
+func (c *clientLogger) Name() string {
 	return c.name
 }
 
-func (c clientLogger) Named(name string) hclog.Logger {
+func (c *clientLogger) Named(name string) hclog.Logger {
 	curr := c.name
 	if curr != "" {
 		curr = c.name + "."
 	}
-	return clientLogger{
-		logger:   c.logger,
-		name:     curr + name,
-		withArgs: c.withArgs,
-	}
+	return c.ResetNamed(curr + name)
 }
 
-func (c clientLogger) ResetNamed(name string) hclog.Logger {
-	return clientLogger{
+func (c *clientLogger) ResetNamed(name string) hclog.Logger {
+	return &clientLogger{
 		logger:   c.logger,
 		name:     name,
 		withArgs: c.withArgs,
 	}
 }
 
-func (c clientLogger) SetLevel(level hclog.Level) {
+func (c *clientLogger) SetLevel(level hclog.Level) {
 	c.logger = c.logger.Level(convertLvl(level))
 }
 
-func (c clientLogger) StandardLogger(opts *hclog.StandardLoggerOptions) *stdlog.Logger {
+func (c *clientLogger) StandardLogger(opts *hclog.StandardLoggerOptions) *stdlog.Logger {
 	return stdlog.New(c.StandardWriter(opts), "", 0)
 }
 
-func (c clientLogger) StandardWriter(*hclog.StandardLoggerOptions) io.Writer {
+func (c *clientLogger) StandardWriter(*hclog.StandardLoggerOptions) io.Writer {
 	return ioAdapter{logger: c.logger}
 }
 
