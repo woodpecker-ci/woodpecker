@@ -497,12 +497,6 @@ Supported variables:
 - `owner`: the repo's owner
 - `repo`: the repo's name
 
-### `WOODPECKER_ADDONS`
-
-> Default: empty
-
-List of addon files. See [addons](./75-addons/00-overview.md).
-
 ---
 
 ### `WOODPECKER_LIMIT_MEM_SWAP`
@@ -583,4 +577,8 @@ See [Bitbucket configuration](./11-forges/50-bitbucket.md#configuration)
 
 ### `WOODPECKER_GITLAB_...`
 
-See [Gitlab configuration](./11-forges/40-gitlab.md#configuration)
+See [GitLab configuration](./11-forges/40-gitlab.md#configuration)
+
+### `WOODPECKER_ADDON_FORGE`
+
+See [addon forges](./11-forges/100-addon.md).
