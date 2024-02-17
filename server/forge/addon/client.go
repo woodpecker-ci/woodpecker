@@ -24,6 +24,7 @@ import (
 	"os/exec"
 
 	"github.com/hashicorp/go-plugin"
+	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
@@ -40,6 +41,9 @@ func Load(file string) (forge.Forge, error) {
 			pluginKey: &Plugin{},
 		},
 		Cmd: exec.Command(file),
+		Logger: clientLogger{
+			logger: log.With().Str("addon", file).Logger(),
+		},
 	})
 	// TODO defer client.Kill()
 
