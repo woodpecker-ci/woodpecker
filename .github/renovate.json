@@ -18,18 +18,26 @@
       "matchUpdateTypes": ["minor", "patch"]
     },
     {
+      "matchManagers": ["npm"],
+      "matchFileNames": ["web/package.json"],
+      "addLabels": ["ui"]
+    },
+    {
+      "matchManagers": ["npm"],
+      "matchFileNames": ["docs/**/package.json"],
+      "addLabels": ["documentation"]
+    },
+    {
       "groupName": "web npm deps non-major",
       "matchManagers": ["npm"],
       "matchUpdateTypes": ["minor", "patch"],
-      "matchFileNames": ["web/package.json"],
-      "addLabels": ["ui"]
+      "matchFileNames": ["web/package.json"]
     },
     {
       "groupName": "docs npm deps non-major",
       "matchManagers": ["npm"],
       "matchUpdateTypes": ["minor", "patch"],
       "matchFileNames": ["docs/**/package.json"],
-      "addLabels": ["documentation"]
     },
     {
       "matchDatasources": ["docker"],
