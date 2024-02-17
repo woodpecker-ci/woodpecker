@@ -17,6 +17,7 @@ package addon
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/rpc"
@@ -52,7 +53,10 @@ func Load(file string) (forge.Forge, error) {
 		return nil, err
 	}
 
-	extension, _ := raw.(forge.Forge)
+	extension, ok := raw.(forge.Forge)
+	if !ok {
+		return nil, fmt.Errorf("addon forge does not implement forge interface")
+	}
 	return extension, nil
 }
 
