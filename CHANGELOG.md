@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.4.0) - 2024-02-16
+## [2.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.4.0) - 2024-02-17
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -40,6 +40,9 @@
 
 ### Misc
 
+- chore(deps): update dependency eslint-plugin-simple-import-sort to v12 [[#3396](https://github.com/woodpecker-ci/woodpecker/pull/3396)]
+- chore(deps): update typescript-eslint monorepo to v7 (major) [[#3397](https://github.com/woodpecker-ci/woodpecker/pull/3397)]
+- fix(deps): update module github.com/google/go-github/v58 to v59 [[#3398](https://github.com/woodpecker-ci/woodpecker/pull/3398)]
 - chore(deps): update docker.io/techknowlogick/xgo docker tag to go-1.22.0 [[#3392](https://github.com/woodpecker-ci/woodpecker/pull/3392)]
 - chore(deps): update docker.io/golang docker tag [[#3391](https://github.com/woodpecker-ci/woodpecker/pull/3391)]
 - fix(deps): update golang (packages) [[#3393](https://github.com/woodpecker-ci/woodpecker/pull/3393)]
