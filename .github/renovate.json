@@ -37,7 +37,7 @@
       "groupName": "docs npm deps non-major",
       "matchManagers": ["npm"],
       "matchUpdateTypes": ["minor", "patch"],
-      "matchFileNames": ["docs/**/package.json"],
+      "matchFileNames": ["docs/**/package.json"]
     },
     {
       "matchDatasources": ["docker"],
