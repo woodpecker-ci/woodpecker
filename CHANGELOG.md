@@ -4,10 +4,11 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@renovate[bot], @anbraten, @xoxys, @qwerty287, @kjuulh, @sinlov, @lukashass, @pre-commit-ci[bot], @fernandrone
+@eliasscosta, @qwerty287, @renovate[bot], @anbraten, @xoxys, @kjuulh, @sinlov, @lukashass, @pre-commit-ci[bot], @fernandrone
 
 ### 🐛 Bug Fixes
 
+- fix: can't run multiple services on k8s [[#3395](https://github.com/woodpecker-ci/woodpecker/pull/3395)]
 - Fix agent polling [[#3378](https://github.com/woodpecker-ci/woodpecker/pull/3378)]
 - Remove empty strings from slice before parsing agent config [[#3387](https://github.com/woodpecker-ci/woodpecker/pull/3387)]
 - Set correct link for commit [[#3368](https://github.com/woodpecker-ci/woodpecker/pull/3368)]
@@ -40,6 +41,7 @@
 
 ### Misc
 
+- Apply `documentation`/`ui` label to corresponding renovate updates [[#3400](https://github.com/woodpecker-ci/woodpecker/pull/3400)]
 - chore(deps): update dependency eslint-plugin-simple-import-sort to v12 [[#3396](https://github.com/woodpecker-ci/woodpecker/pull/3396)]
 - chore(deps): update typescript-eslint monorepo to v7 (major) [[#3397](https://github.com/woodpecker-ci/woodpecker/pull/3397)]
 - fix(deps): update module github.com/google/go-github/v58 to v59 [[#3398](https://github.com/woodpecker-ci/woodpecker/pull/3398)]
