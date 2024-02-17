@@ -1,5 +1,6 @@
 # Addon forges
 
+If the forge you're using does not comply with [Woodpecker's requirements](TODO) or your setup is too specific to be added to Woodpecker's core, you can write your own forge using an addon forge.
 
 :::warning
 Addon forges are still experimental. Their implementation can change and break at any time.
@@ -24,6 +25,12 @@ Using an addon forge always overwrites Woodpecker's internal forge configuration
 ### Bug reports
 
 If you experience bugs, please check which component has the issue. If it's the addon, **do not raise an issue in the main repository**, but rather use the separate addon repositories. To check which component is responsible for the bug, look at the logs. Logs from addons are marked with a special field `addon` containing their addon file name.
+
+## List of addon forges
+
+If you wrote or found an addon forge, please add it here so others can find it!
+
+- [Radicle](TODO)
 
 ## Creating addon forges
 
