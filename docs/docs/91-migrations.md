@@ -10,6 +10,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Deprecated `includes` and `excludes` support from **event** filter
 - Deprecated alternative names for secrets, use `environment` with `from_secret`
 - Deprecated slice definition for labels and env vars
+- Deprecated `detached` in favor of services
 
 ## 2.0.0
 

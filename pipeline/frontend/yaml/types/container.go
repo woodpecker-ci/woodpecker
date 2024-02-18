@@ -36,8 +36,9 @@ type (
 		BackendOptions map[string]any     `yaml:"backend_options,omitempty"`
 		Commands       base.StringOrSlice `yaml:"commands,omitempty"`
 		Entrypoint     base.StringOrSlice `yaml:"entrypoint,omitempty"`
-		Detached       bool               `yaml:"detach,omitempty"`
-		Directory      string             `yaml:"directory,omitempty"`
+		// Deprecated TODO remove in 3.x
+		Detached  bool   `yaml:"detach,omitempty"`
+		Directory string `yaml:"directory,omitempty"`
 		// TODO make map[string]string in 3.x
 		Environment base.SliceOrMap `yaml:"environment,omitempty"`
 		Failure     string          `yaml:"failure,omitempty"`

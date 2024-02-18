@@ -131,7 +131,6 @@ func TestToConfigFull(t *testing.T) {
 		Type:         backend.StepTypeCommands,
 		Image:        "golang:1.2.3",
 		Pull:         true,
-		Detached:     true,
 		Privileged:   true,
 		WorkingDir:   "/src/abc",
 		Environment:  map[string]string{"TAGS": "sqlite"},
