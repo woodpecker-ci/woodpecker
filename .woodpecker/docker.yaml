@@ -45,7 +45,7 @@ when:
       - renovate/*
   - event: push
     branch: ${CI_REPO_DEFAULT_BRANCH}
-    path: &when_path
+    path: *when_path
 
 steps:
   vendor:
