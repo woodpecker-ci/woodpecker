@@ -27,6 +27,7 @@ type (
 		Clone     ContainerList   `yaml:"clone,omitempty"`
 		Steps     ContainerList   `yaml:"steps,omitempty"`
 		Services  ContainerList   `yaml:"services,omitempty"`
+		// TODO convert to map[string]string in 3.x
 		Labels    base.SliceOrMap `yaml:"labels,omitempty"`
 		DependsOn []string        `yaml:"depends_on,omitempty"`
 		RunsOn    []string        `yaml:"runs_on,omitempty"`
