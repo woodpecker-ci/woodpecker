@@ -53,30 +53,6 @@ Service containers generally expose environment variables to customize service s
      image: redis
 ```
 
-## Detachment
-
-Service and long running containers can also be included in the pipeline section of the configuration using the detach parameter without blocking other steps. This should be used when explicit control over startup order is required.
-
-```diff
- steps:
-   - name: build
-     image: golang
-     commands:
-       - go build
-       - go test
-
-   - name: database
-     image: redis
-+    detach: true
-
-   - name: test
-     image: golang
-     commands:
-       - go test
-```
-
-Containers from detached steps will terminate when the pipeline ends.
-
 ## Initialization
 
 Service containers require time to initialize and begin to accept connections. If you are unable to connect to a service you may need to wait a few seconds or implement a backoff.

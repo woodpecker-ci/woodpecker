@@ -8,6 +8,12 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Removed `WOODPECKER_ROOT_PATH` and `WOODPECKER_ROOT_URL` config variables. Use `WOODPECKER_HOST` with a path instead
 - Pipelines without a config file will now be skipped instead of failing
 - Deprecated `includes` and `excludes` support from **event** filter
+<<<<<<< HEAD
+=======
+- Deprecated alternative names for secrets, use `environment` with `from_secret`
+- Deprecated slice definition for labels and env vars
+- Deprecated `detached` in favor of services
+>>>>>>> a146500e8 (Deprecate `detached`)
 
 ## 2.0.0
 
