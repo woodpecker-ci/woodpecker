@@ -21,6 +21,7 @@ type Step struct {
 	Type           StepType          `json:"type,omitempty"`
 	Image          string            `json:"image,omitempty"`
 	Pull           bool              `json:"pull,omitempty"`
+	Detached       bool              `json:"detach,omitempty"`
 	Privileged     bool              `json:"privileged,omitempty"`
 	WorkingDir     string            `json:"working_dir,omitempty"`
 	Environment    map[string]string `json:"environment,omitempty"`

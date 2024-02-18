@@ -304,26 +304,11 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 					Data: errors.DeprecationErrorData{
 						File:  config.File,
 						Field: fmt.Sprintf("steps.%s.secrets[%d]", step.Name, i),
-						Docs:  "https://woodpecker-ci.org/docs/usage/secrets#use-secrets-in-settings-and-environment",
+						Docs:  "https://woodpecker-ci.org/docs/usage/workflow-syntax#event",
 					},
 					IsWarning: true,
 				})
 			}
-		}
-	}
-
-	for _, step := range parsed.Steps.ContainerList {
-		if step.Detached {
-			err = multierr.Append(err, &errors.PipelineError{
-				Type:    errors.PipelineErrorTypeDeprecation,
-				Message: "Detached is deprecated, use services",
-				Data: errors.DeprecationErrorData{
-					File:  config.File,
-					Field: fmt.Sprintf("steps.%s.detached", step.Name),
-					Docs:  "https://woodpecker-ci.org/docs/usage/services",
-				},
-				IsWarning: true,
-			})
 		}
 	}
 

@@ -41,3 +41,4 @@ func TestStringOrIntYaml(t *testing.T) {
 		assert.Equal(t, StringOrInt(10), s2.Foo)
 	}
 }
+
