@@ -172,15 +172,10 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 		return nil, nil
 	}
 
-	labels := map[string]string{}
-	for k, v := range parsed.Labels {
-		labels[k], _ = v.(string)
-	}
-
 	item = &Item{
 		Workflow:  workflow,
 		Config:    ir,
-		Labels:    labels,
+		Labels:    parsed.Labels,
 		DependsOn: parsed.DependsOn,
 		RunsOn:    parsed.RunsOn,
 	}
