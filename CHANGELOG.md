@@ -1,10 +1,17 @@
 # Changelog
 
-## [2.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.4.0) - 2024-02-17
+## [2.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.4.0) - 2024-02-18
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@eliasscosta, @qwerty287, @renovate[bot], @anbraten, @xoxys, @kjuulh, @sinlov, @lukashass, @pre-commit-ci[bot], @fernandrone
+@qwerty287, @eliasscosta, @renovate[bot], @anbraten, @xoxys, @kjuulh, @sinlov, @lukashass, @pre-commit-ci[bot], @fernandrone
+
+### 📚 Documentation
+
+- Extend core ideas documentation [[#3405](https://github.com/woodpecker-ci/woodpecker/pull/3405)]
+- docs: fix contributions link [[#3363](https://github.com/woodpecker-ci/woodpecker/pull/3363)]
+- Update/fix some docs [[#3359](https://github.com/woodpecker-ci/woodpecker/pull/3359)]
+- chore(deps): update dependency marked to v12 [[#3325](https://github.com/woodpecker-ci/woodpecker/pull/3325)]
 
 ### 🐛 Bug Fixes
 
@@ -32,12 +39,6 @@
 - Make agent usable for external backends [[#3270](https://github.com/woodpecker-ci/woodpecker/pull/3270)]
 - Add no branches text [[#3312](https://github.com/woodpecker-ci/woodpecker/pull/3312)]
 - Add loading spinner to repo list [[#3310](https://github.com/woodpecker-ci/woodpecker/pull/3310)]
-
-### 📚 Documentation
-
-- docs: fix contributions link [[#3363](https://github.com/woodpecker-ci/woodpecker/pull/3363)]
-- Update/fix some docs [[#3359](https://github.com/woodpecker-ci/woodpecker/pull/3359)]
-- chore(deps): update dependency marked to v12 [[#3325](https://github.com/woodpecker-ci/woodpecker/pull/3325)]
 
 ### Misc
 
