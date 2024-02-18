@@ -119,6 +119,34 @@ func HandleAuth(c *gin.Context) {
 			if err := _store.OrgUpdate(org); err != nil {
 				log.Error().Err(err).Msgf("on user creation, could not mark org as user")
 			}
+		} else {
+			if err != nil && !errors.Is(err, types.RecordNotExist) {
+				_ = c.AbortWithError(http.StatusInternalServerError, err)
+				return
+			}
+			org = &model.Org{
+				Name:    u.Login,
+				IsUser:  true,
+				Private: false,
+			}
+			if err := _store.OrgCreate(org); err != nil {
+				log.Error().Err(err).Msgf("on user creation, could not mark org as user")
+			}
+			u.OrgID = org.ID
+		}
+	}
+
+	// update org name
+	if u.Login != tmpuser.Login {
+		org, err := _store.OrgGet(u.OrgID)
+		if err != nil {
+			log.Error().Err(err).Msgf("cannot get org %s", u.Login)
+			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
+			return
+		}
+		org.Name = u.Login
+		if err := _store.OrgUpdate(org); err != nil {
+			log.Error().Err(err).Msgf("on user creation, could not mark org as user")
 		}
 	}
 
