@@ -11,35 +11,29 @@
         <InputField v-slot="{ id }" :label="$t('repo.deploy_pipeline.variables.title')">
           <span class="text-sm text-wp-text-alt-100 mb-2">{{ $t('repo.deploy_pipeline.variables.desc') }}</span>
           <div class="flex flex-col gap-2">
-            <div v-for="(value, name) in payload.variables" :key="name" class="flex gap-4">
-              <TextField :id="id" :model-value="name" disabled />
-              <TextField :id="id" :model-value="value" disabled />
-              <div class="w-34 flex-shrink-0">
-                <Button color="red" class="ml-auto" @click="deleteVar(name)">
+            <div v-for="(_, i) in payload.variables" :key="i" class="flex gap-4">
+              <TextField
+                :id="id"
+                v-model="payload.variables[i].name"
+                :placeholder="$t('repo.deploy_pipeline.variables.name')"
+              />
+              <TextField
+                :id="id"
+                v-model="payload.variables[i].value"
+                :placeholder="$t('repo.deploy_pipeline.variables.value')"
+              />
+              <div class="w-10 flex-shrink-0">
+                <Button
+                  v-if="i !== payload.variables.length - 1"
+                  color="red"
+                  class="ml-auto"
+                  :title="$t('repo.deploy_pipeline.variables.delete')"
+                  @click="deleteVar(i)"
+                >
                   <i-la-times />
                 </Button>
               </div>
             </div>
-            <form class="flex gap-4" @submit.prevent="addPipelineVariable">
-              <TextField
-                :id="id"
-                v-model="newPipelineVariable.name"
-                :placeholder="$t('repo.deploy_pipeline.variables.name')"
-                required
-              />
-              <TextField
-                :id="id"
-                v-model="newPipelineVariable.value"
-                :placeholder="$t('repo.deploy_pipeline.variables.value')"
-                required
-              />
-              <Button
-                class="w-34 flex-shrink-0"
-                start-icon="plus"
-                type="submit"
-                :text="$t('repo.deploy_pipeline.variables.add')"
-              />
-            </form>
           </div>
         </InputField>
         <Button type="submit" :text="$t('repo.deploy_pipeline.trigger')" />
@@ -49,7 +43,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref, toRef } from 'vue';
+import { computed, onMounted, ref, toRef, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
@@ -75,35 +69,53 @@ const repo = inject('repo');
 
 const router = useRouter();
 
-const payload = ref<{ id: string; environment: string; variables: Record<string, string> }>({
+const payload = ref<{ id: string; environment: string; variables: { name: string; value: string }[] }>({
   id: '',
   environment: '',
-  variables: {},
+  variables: [
+    {
+      name: '',
+      value: '',
+    },
+  ],
 });
-const newPipelineVariable = ref<{ name: string; value: string }>({ name: '', value: '' });
+
+const pipelineOptions = computed(() => {
+  const variables = Object.fromEntries(
+    payload.value.variables.filter((e) => e.name !== '').map((item) => [item.name, item.value]),
+  );
+  return {
+    ...payload.value,
+    variables,
+  };
+});
 
 const loading = ref(true);
 onMounted(async () => {
   loading.value = false;
 });
 
-function addPipelineVariable() {
-  if (!newPipelineVariable.value.name || !newPipelineVariable.value.value) {
-    return;
-  }
-  payload.value.variables[newPipelineVariable.value.name] = newPipelineVariable.value.value;
-  newPipelineVariable.value.name = '';
-  newPipelineVariable.value.value = '';
-}
+watch(
+  payload,
+  () => {
+    if (payload.value.variables[payload.value.variables.length - 1].name !== '') {
+      payload.value.variables.push({
+        name: '',
+        value: '',
+      });
+    }
+  },
+  { deep: true },
+);
 
-function deleteVar(key: string) {
-  delete payload.value.variables[key];
+function deleteVar(index: number) {
+  payload.value.variables.splice(index, 1);
 }
 
 const pipelineNumber = toRef(props, 'pipelineNumber');
 async function triggerDeployPipeline() {
   loading.value = true;
-  const newPipeline = await apiClient.deployPipeline(repo.value.id, pipelineNumber.value, payload.value);
+  const newPipeline = await apiClient.deployPipeline(repo.value.id, pipelineNumber.value, pipelineOptions.value);
 
   emit('close');
 

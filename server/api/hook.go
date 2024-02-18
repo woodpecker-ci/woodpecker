@@ -27,6 +27,7 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/pipeline"
@@ -103,13 +104,13 @@ func BlockTilQueueHasRunningItem(c *gin.Context) {
 //	@Param		hook	body	object	true	"the webhook payload; forge is automatically detected"
 func PostHook(c *gin.Context) {
 	_store := store.FromContext(c)
-	forge := server.Config.Services.Forge
+	_forge := server.Config.Services.Forge
 
 	//
 	// 1. Parse webhook
 	//
 
-	tmpRepo, tmpPipeline, err := forge.Hook(c, c.Request)
+	tmpRepo, tmpPipeline, err := _forge.Hook(c, c.Request)
 	if err != nil {
 		if errors.Is(err, &types.ErrIgnoreEvent{}) {
 			msg := fmt.Sprintf("forge driver: %s", err)
@@ -159,6 +160,13 @@ func PostHook(c *gin.Context) {
 		c.Status(http.StatusNoContent)
 		return
 	}
+
+	user, err := _store.GetUser(repo.UserID)
+	if err != nil {
+		handleDBError(c, err)
+		return
+	}
+	forge.Refresh(c, _forge, _store, user)
 
 	//
 	// 3. Check if the webhook is a valid and authorized one

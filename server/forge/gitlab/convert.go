@@ -31,7 +31,7 @@ const (
 	mergeRefs = "refs/merge-requests/%d/head" // merge request merged with base
 )
 
-func (g *GitLab) convertGitLabRepo(_repo *gitlab.Project) (*model.Repo, error) {
+func (g *GitLab) convertGitLabRepo(_repo *gitlab.Project, projectMember *gitlab.ProjectMember) (*model.Repo, error) {
 	parts := strings.Split(_repo.PathWithNamespace, "/")
 	owner := strings.Join(parts[:len(parts)-1], "/")
 	name := parts[len(parts)-1]
@@ -48,9 +48,9 @@ func (g *GitLab) convertGitLabRepo(_repo *gitlab.Project) (*model.Repo, error) {
 		Visibility:    model.RepoVisibility(_repo.Visibility),
 		IsSCMPrivate:  !_repo.Public,
 		Perm: &model.Perm{
-			Pull:  isRead(_repo),
-			Push:  isWrite(_repo),
-			Admin: isAdmin(_repo),
+			Pull:  isRead(_repo, projectMember),
+			Push:  isWrite(projectMember),
+			Admin: isAdmin(projectMember),
 		},
 		PREnabled: _repo.MergeRequestsEnabled,
 	}
@@ -112,7 +112,7 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 	}
 
 	pipeline.Event = model.EventPull
-	if obj.State == "closed" {
+	if obj.State == "closed" || obj.State == "merged" {
 		pipeline.Event = model.EventPullClosed
 	}
 
