@@ -30,7 +30,7 @@ If you experience bugs, please check which component has the issue. If it's the 
 
 If you wrote or found an addon forge, please add it here so others can find it!
 
-- [Radicle](TODO)
+- Radicle
 
 ## Creating addon forges
 
