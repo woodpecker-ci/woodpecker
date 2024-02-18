@@ -53,7 +53,7 @@ package main
 import (
   "context"
   "net/http"
-  
+
   "go.woodpecker-ci.org/woodpecker/v2/server/forge/addon"
   forgeTypes "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
   "go.woodpecker-ci.org/woodpecker/v2/server/model"
