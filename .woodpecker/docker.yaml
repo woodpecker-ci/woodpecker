@@ -136,7 +136,7 @@ steps:
       - cross-compile-server-preview
     image: *buildx_plugin
     settings:
-      # cache_images: woodpeckerci/woodpecker-server:cache_${CI_COMMIT_PULL_REQUEST}
+      cache_images: woodpeckerci/woodpecker-server:cache_${CI_COMMIT_PULL_REQUEST}
       repo: woodpeckerci/woodpecker-server
       dockerfile: docker/Dockerfile.server.multiarch
       platforms: *platforms_preview
@@ -151,7 +151,7 @@ steps:
       - cross-compile-server-preview
     image: *buildx_plugin
     settings:
-      # cache_images: woodpeckerci/woodpecker-server:cache-alpine_${CI_COMMIT_PULL_REQUEST}
+      cache_images: woodpeckerci/woodpecker-server:cache-alpine_${CI_COMMIT_PULL_REQUEST}
       repo: woodpeckerci/woodpecker-server
       dockerfile: docker/Dockerfile.server.alpine.multiarch
       platforms: *platforms_preview
@@ -187,7 +187,7 @@ steps:
       - cross-compile-server
     image: *buildx_plugin
     settings:
-      # cache_images: woodpeckerci/woodpecker-server:cache_next
+      cache_images: woodpeckerci/woodpecker-server:cache_next
       repo: *publish_repos_server
       dockerfile: docker/Dockerfile.server.multiarch
       platforms: *platforms_server
@@ -203,7 +203,7 @@ steps:
       - cross-compile-server
     image: *buildx_plugin
     settings:
-      # cache_images: woodpeckerci/woodpecker-server:cache-alpine_next
+      cache_images: woodpeckerci/woodpecker-server:cache-alpine_next
       repo: *publish_repos_server
       dockerfile: docker/Dockerfile.server.alpine.multiarch
       platforms: *platforms_alpine
@@ -216,7 +216,7 @@ steps:
       - cross-compile-server
     image: *buildx_plugin
     settings:
-      # cache_images: woodpeckerci/woodpecker-server:cache
+      cache_images: woodpeckerci/woodpecker-server:cache
       repo: *publish_repos_server
       dockerfile: docker/Dockerfile.server.multiarch
       platforms: *platforms_server
@@ -231,7 +231,7 @@ steps:
       - cross-compile-server
     image: *buildx_plugin
     settings:
-      # cache_images: woodpeckerci/woodpecker-server:cache-alpine
+      cache_images: woodpeckerci/woodpecker-server:cache-alpine
       repo: *publish_repos_server
       dockerfile: docker/Dockerfile.server.alpine.multiarch
       platforms: *platforms_alpine
@@ -249,7 +249,7 @@ steps:
       - vendor
     image: *buildx_plugin
     settings:
-      # cache_images: woodpeckerci/woodpecker-agent:cache-alpine_${CI_COMMIT_PULL_REQUEST}
+      cache_images: woodpeckerci/woodpecker-agent:cache-alpine_${CI_COMMIT_PULL_REQUEST}
       repo: woodpeckerci/woodpecker-agent
       dockerfile: docker/Dockerfile.agent.multiarch
       platforms: *platforms_preview
@@ -263,7 +263,7 @@ steps:
       - vendor
     image: *buildx_plugin
     settings:
-      # cache_images: woodpeckerci/woodpecker-agent:cache_${CI_COMMIT_PULL_REQUEST}
+      cache_images: woodpeckerci/woodpecker-agent:cache_${CI_COMMIT_PULL_REQUEST}
       dry_run: true
       repo: woodpeckerci/woodpecker-agent
       dockerfile: docker/Dockerfile.agent.multiarch
@@ -280,7 +280,7 @@ steps:
       - cross-compile-server
     image: *buildx_plugin
     settings:
-      # cache_images: woodpeckerci/woodpecker-agent:cache_next
+      cache_images: woodpeckerci/woodpecker-agent:cache_next
       repo: *publish_repos_agent
       dockerfile: docker/Dockerfile.agent.multiarch
       platforms: *platforms_release
@@ -300,7 +300,7 @@ steps:
       - cross-compile-server
     image: *buildx_plugin
     settings:
-      # cache_images: woodpeckerci/woodpecker-agent:cache-alpine_next
+      cache_images: woodpeckerci/woodpecker-agent:cache-alpine_next
       repo: *publish_repos_agent
       dockerfile: docker/Dockerfile.agent.alpine.multiarch
       platforms: *platforms_alpine
@@ -317,7 +317,7 @@ steps:
       - cross-compile-server
     image: *buildx_plugin
     settings:
-      # cache_images: woodpeckerci/woodpecker-agent:cache
+      cache_images: woodpeckerci/woodpecker-agent:cache
       repo: *publish_repos_agent
       dockerfile: docker/Dockerfile.agent.multiarch
       platforms: *platforms_release
@@ -335,7 +335,7 @@ steps:
       - cross-compile-server
     image: *buildx_plugin
     settings:
-      # cache_images: woodpeckerci/woodpecker-agent:cache-alpine
+      cache_images: woodpeckerci/woodpecker-agent:cache-alpine
       repo: *publish_repos_agent
       dockerfile: docker/Dockerfile.agent.alpine.multiarch
       platforms: *platforms_alpine
@@ -354,7 +354,7 @@ steps:
       - vendor
     image: *buildx_plugin
     settings:
-      # cache_images: woodpeckerci/woodpecker-cli:cache_${CI_COMMIT_PULL_REQUEST}
+      cache_images: woodpeckerci/woodpecker-cli:cache_${CI_COMMIT_PULL_REQUEST}
       repo: woodpeckerci/woodpecker-cli
       dockerfile: docker/Dockerfile.cli.multiarch
       platforms: *platforms_preview
@@ -368,7 +368,7 @@ steps:
       - vendor
     image: *buildx_plugin
     settings:
-      # cache_images: woodpeckerci/woodpecker-cli:cache_${CI_COMMIT_PULL_REQUEST}
+      cache_images: woodpeckerci/woodpecker-cli:cache_${CI_COMMIT_PULL_REQUEST}
       dry_run: true
       repo: woodpeckerci/woodpecker-cli
       dockerfile: docker/Dockerfile.cli.multiarch
@@ -385,7 +385,7 @@ steps:
       - publish-next-agent
     image: *buildx_plugin
     settings:
-      # cache_images: woodpeckerci/woodpecker-cli:cache_next
+      cache_images: woodpeckerci/woodpecker-cli:cache_next
       repo: *publish_repos_cli
       dockerfile: docker/Dockerfile.cli.multiarch
       platforms: *platforms_release
@@ -402,7 +402,7 @@ steps:
       - publish-next-agent
     image: *buildx_plugin
     settings:
-      # cache_images: woodpeckerci/woodpecker-cli:cache-alpine_next
+      cache_images: woodpeckerci/woodpecker-cli:cache-alpine_next
       repo: *publish_repos_cli
       dockerfile: docker/Dockerfile.cli.alpine.multiarch
       platforms: *platforms_alpine
@@ -419,7 +419,7 @@ steps:
       - release-agent
     image: *buildx_plugin
     settings:
-      # cache_images: woodpeckerci/woodpecker-cli:cache
+      cache_images: woodpeckerci/woodpecker-cli:cache
       repo: *publish_repos_cli
       dockerfile: docker/Dockerfile.cli.multiarch
       platforms: *platforms_release
@@ -437,7 +437,7 @@ steps:
       - release-agent
     image: *buildx_plugin
     settings:
-      # cache_images: woodpeckerci/woodpecker-cli:cache-alpine
+      cache_images: woodpeckerci/woodpecker-cli:cache-alpine
       repo: *publish_repos_cli
       dockerfile: docker/Dockerfile.cli.alpine.multiarch
       platforms: *platforms_alpine
