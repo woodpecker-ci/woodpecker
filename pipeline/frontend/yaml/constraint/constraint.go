@@ -42,7 +42,6 @@ type (
 		Instance    List
 		Platform    List
 		Environment List
-		Event       List
 		Branch      List
 		Cron        List
 		Status      List
@@ -50,6 +49,8 @@ type (
 		Local       yamlBaseTypes.BoolTrue
 		Path        Path
 		Evaluate    string `yaml:"evaluate,omitempty"`
+		// TODO change to StringOrSlice in 3.x
+		Event List
 	}
 
 	// List defines a runtime constraint for exclude & include string slices.

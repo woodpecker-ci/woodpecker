@@ -40,7 +40,6 @@ type InfoT struct {
 		Pending       int `json:"pending_count"`
 		WaitingOnDeps int `json:"waiting_on_deps_count"`
 		Running       int `json:"running_count"`
-		Complete      int `json:"completed_count"`
 	} `json:"stats"`
 	Paused bool `json:"paused"`
 } //	@name InfoT
@@ -73,7 +72,7 @@ type Queue interface {
 	// Push pushes a task to the tail of this queue.
 	Push(c context.Context, task *model.Task) error
 
-	// PushAtOnce pushes a task to the tail of this queue.
+	// PushAtOnce pushes multiple tasks to the tail of this queue.
 	PushAtOnce(c context.Context, tasks []*model.Task) error
 
 	// Poll retrieves and removes a task head of this queue.
@@ -85,17 +84,17 @@ type Queue interface {
 	// Done signals the task is complete.
 	Done(c context.Context, id string, exitStatus model.StatusValue) error
 
-	// Error signals the task is complete with errors.
+	// Error signals the task is done with an error.
 	Error(c context.Context, id string, err error) error
 
-	// ErrorAtOnce signals the task is complete with errors.
-	ErrorAtOnce(c context.Context, id []string, err error) error
+	// ErrorAtOnce signals multiple done are complete with an error.
+	ErrorAtOnce(c context.Context, ids []string, err error) error
 
 	// Evict removes a pending task from the queue.
 	Evict(c context.Context, id string) error
 
-	// EvictAtOnce removes a pending task from the queue.
-	EvictAtOnce(c context.Context, id []string) error
+	// EvictAtOnce removes multiple pending tasks from the queue.
+	EvictAtOnce(c context.Context, ids []string) error
 
 	// Wait waits until the task is complete.
 	Wait(c context.Context, id string) error
@@ -106,6 +105,9 @@ type Queue interface {
 	// Pause stops the queue from handing out new work items in Poll
 	Pause()
 
-	// Resume starts the queue again, Poll returns new items
+	// Resume starts the queue again.
 	Resume()
+
+	// KickAgentWorkers kicks all workers for a given agent.
+	KickAgentWorkers(agentID int64)
 }

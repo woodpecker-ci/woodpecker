@@ -1,0 +1,34 @@
+when:
+  - event: pull_request
+  - event: push
+    branch: renovate/*
+
+steps:
+  - name: lint-editorconfig
+    image: docker.io/mstruebing/editorconfig-checker:2.7.2
+    depends_on: []
+    when:
+      - event: pull_request
+      - event: push
+        branch: renovate/*
+
+  - name: spellcheck
+    image: docker.io/node:21-alpine
+    depends_on: []
+    commands:
+      - corepack enable
+      - pnpx cspell lint --no-progress --gitignore '{**,.*}/{*,.*}'
+
+  - name: prettier
+    image: docker.io/woodpeckerci/plugin-prettier:0.1.0
+    depends_on: []
+    settings:
+      version: 3.2.4
+
+  - name: links
+    image: lycheeverse/lychee:0.14.0
+    depends_on: []
+    commands:
+      - lychee pipeline/frontend/yaml/linter/schema/schema.json
+      - lychee --exclude localhost docs/docs/
+      - lychee --exclude localhost docs/src/pages/

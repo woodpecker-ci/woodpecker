@@ -33,7 +33,7 @@ type (
 
 	// Container defines a container.
 	Container struct {
-		BackendOptions BackendOptions     `yaml:"backend_options,omitempty"`
+		BackendOptions map[string]any     `yaml:"backend_options,omitempty"`
 		Commands       base.StringOrSlice `yaml:"commands,omitempty"`
 		Entrypoint     base.StringOrSlice `yaml:"entrypoint,omitempty"`
 		Detached       bool               `yaml:"detach,omitempty"`
