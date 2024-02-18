@@ -15,7 +15,7 @@ You need to trust the author of the addon forge you use. It can access authentic
 To use an addon forge, download the correct addon version. Then, you can add the following to your configuration:
 
 ```ini
-WOODPECKER_ADDON_FORGE=/path/to/your/addon/forge/file.so
+WOODPECKER_ADDON_FORGE=/path/to/your/addon/forge/file
 ```
 
 In case you run Woodpecker as container, you probably want to mount the addon binary to `/opt/addons/`.
