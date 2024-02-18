@@ -67,7 +67,7 @@ They can be configured with `*_ADDR` variables:
 +      - WOODPECKER_SERVER_ADDR=${WOODPECKER_HTTP_ADDR}
 ```
 
-Reverse proxying can also be [configured for gRPC](../proxy#caddy). If the agents are connecting over the internet, it should also be SSL encrypted. The agent then needs to be configured to be secure:
+Reverse proxying can also be [configured for gRPC](../70-proxy.md#caddy). If the agents are connecting over the internet, it should also be SSL encrypted. The agent then needs to be configured to be secure:
 
 ```diff title="docker-compose.yaml"
  version: '3'
