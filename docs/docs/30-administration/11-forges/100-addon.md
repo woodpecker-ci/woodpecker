@@ -1,6 +1,6 @@
 # Addon forges
 
-If the forge you're using does not comply with [Woodpecker's requirements](TODO) or your setup is too specific to be added to Woodpecker's core, you can write your own forge using an addon forge.
+If the forge you're using does not comply with [Woodpecker's requirements](../../92-development/02-core-ideas.md#forge) or your setup is too specific to be added to Woodpecker's core, you can write your own forge using an addon forge.
 
 :::warning
 Addon forges are still experimental. Their implementation can change and break at any time.
