@@ -66,7 +66,7 @@ func update(c *cli.Context) error {
 		return err
 	}
 
-	log.Info().Msgf("woodpecker-cli %s has been updated successfully! Please restart the CLI.", newVersion.Version)
+	log.Info().Msgf("woodpecker-cli has been updated to version %s successfully!", newVersion.Version)
 
 	return nil
 }
