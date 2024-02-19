@@ -227,10 +227,9 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 	}
 
 	// add services steps
+	services := make([]*dagCompilerStep, 0, len(conf.Services.ContainerList))
 	if len(conf.Services.ContainerList) != 0 {
-		stage := new(backend_types.Stage)
-
-		for _, container := range conf.Services.ContainerList {
+		for pos, container := range conf.Services.ContainerList {
 			if match, err := container.When.Match(c.metadata, false, c.env); !match && err == nil {
 				continue
 			} else if err != nil {
@@ -242,9 +241,15 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 				return nil, err
 			}
 
-			stage.Steps = append(stage.Steps, step)
+			services = append(services, &dagCompilerStep{
+				step:      step,
+				position:  pos,
+				name:      container.Name,
+				group:     container.Group,
+				dependsOn: container.DependsOn,
+				uses:      container.Uses,
+			})
 		}
-		config.Stages = append(config.Stages, stage)
 	}
 
 	// add pipeline steps
@@ -283,11 +288,12 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			name:      container.Name,
 			group:     container.Group,
 			dependsOn: container.DependsOn,
+			uses:      container.Uses,
 		})
 	}
 
 	// generate stages out of steps
-	stepStages, err := newDAGCompiler(steps).compile()
+	stepStages, err := newDAGCompiler(steps, services).compile()
 	if err != nil {
 		return nil, err
 	}

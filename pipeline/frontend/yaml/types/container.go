@@ -50,6 +50,7 @@ type (
 		When           constraint.When    `yaml:"when,omitempty"`
 		Ports          []string           `yaml:"ports,omitempty"`
 		DependsOn      base.StringOrSlice `yaml:"depends_on,omitempty"`
+		Uses           base.StringOrSlice `yaml:"uses"`
 
 		// Docker and Kubernetes Specific
 		Privileged bool `yaml:"privileged,omitempty"`
