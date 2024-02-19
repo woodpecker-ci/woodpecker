@@ -106,8 +106,8 @@ func setupMembershipService(_ *cli.Context, r forge.Forge) cache.MembershipServi
 // setupForge helper function to set up the forge from the CLI arguments.
 func setupForge(c *cli.Context) (forge.Forge, error) {
 	switch {
-	case c.String("addons-forge") != "":
-		return addon.Load(c.String("addons-forge"))
+	case c.String("addon-forge") != "":
+		return addon.Load(c.String("addon-forge"))
 	case c.Bool("github"):
 		return setupGitHub(c)
 	case c.Bool("gitlab"):

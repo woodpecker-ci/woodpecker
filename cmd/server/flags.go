@@ -258,7 +258,7 @@ var flags = append([]cli.Flag{
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_ADDON_FORGE"},
-		Name:    "addons-forge",
+		Name:    "addon-forge",
 		Usage:   "forge addon",
 	},
 	//
