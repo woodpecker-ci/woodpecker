@@ -16,6 +16,7 @@ package compiler
 
 import (
 	"fmt"
+	"maps"
 	"path"
 
 	backend_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
@@ -178,16 +179,12 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 		if c.metadata.Curr.Event == metadata.EventTag {
 			cloneSettings["tags"] = "true"
 		}
-		env := map[string]any{}
-		for k, v := range c.cloneEnv {
-			env[k] = v
-		}
 		container := &yaml_types.Container{
-			Name:        defaultCloneName,
-			Image:       cloneImage,
-			Settings:    cloneSettings,
-			Environment: env,
+			Name:     defaultCloneName,
+			Image:    cloneImage,
+			Settings: cloneSettings,
 		}
+		maps.Copy(container.Environment, c.cloneEnv)
 		step, err := c.createProcess(container, backend_types.StepTypeClone)
 		if err != nil {
 			return nil, err
