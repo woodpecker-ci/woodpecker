@@ -3,6 +3,7 @@ package update
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
@@ -51,7 +52,12 @@ func update(c *cli.Context) error {
 
 	log.Debug().Msgf("New version %s has been extracted to %s", newVersion.Version, binFile)
 
-	executablePath, err := os.Executable()
+	executablePathOrSymlink, err := os.Executable()
+	if err != nil {
+		return err
+	}
+
+	executablePath, err := filepath.EvalSymlinks(executablePathOrSymlink)
 	if err != nil {
 		return err
 	}
