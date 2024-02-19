@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"os"
 	"path"
-	"regexp"
 	"runtime"
 
 	"github.com/rs/zerolog/log"
@@ -52,14 +51,10 @@ func CheckForUpdate(ctx context.Context, force bool) (*NewVersion, error) {
 
 	log.Debug().Msgf("Latest version: %s", release.TagName)
 
-	fileRegex, err := regexp.Compile(fmt.Sprintf("^woodpecker\\-cli\\_%s_%s\\.tar\\.gz$", runtime.GOOS, runtime.GOARCH))
-	if err != nil {
-		return nil, err
-	}
-
 	assetURL := ""
+	fileName := fmt.Sprintf("woodpecker-cli_%s_%s.tar.gz", runtime.GOOS, runtime.GOARCH)
 	for _, asset := range release.Assets {
-		if fileRegex.MatchString(asset.Name) {
+		if fileName == asset.Name {
 			assetURL = asset.BrowserDownloadURL
 			log.Debug().Msgf("Found asset for the current OS and arch: %s", assetURL)
 			break
