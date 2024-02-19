@@ -38,7 +38,7 @@
       "trigger": "Run pipeline",
       "select_branch": "Select branch",
       "variables": {
-        "add": "Add variable",
+        "delete": "Delete variable",
         "title": "Additional pipeline variables",
         "desc": "Specify additional variables to use in your pipeline. Variables with the same name will be overwritten.",
         "name": "Variable name",
@@ -50,7 +50,7 @@
       "enter_target": "Target deployment environment",
       "trigger": "Deploy",
       "variables": {
-        "add": "Add variable",
+        "delete": "Delete variable",
         "title": "Additional pipeline variables",
         "desc": "Specify additional variables to use in your pipeline. Variables with the same name will be overwritten.",
         "name": "Variable name",

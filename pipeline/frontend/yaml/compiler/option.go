@@ -36,7 +36,7 @@ func WithOption(option Option, b bool) Option {
 	case b:
 		return option
 	default:
-		return func(compiler *Compiler) {}
+		return func(_ *Compiler) {}
 	}
 }
 

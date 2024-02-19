@@ -29,7 +29,8 @@ import (
 )
 
 const (
-	ServiceLabel = "service"
+	ServiceLabel  = "service"
+	servicePrefix = "wp-svc-"
 )
 
 func mkService(step *types.Step, config *config) (*v1.Service, error) {
@@ -62,7 +63,7 @@ func mkService(step *types.Step, config *config) (*v1.Service, error) {
 }
 
 func serviceName(step *types.Step) (string, error) {
-	return dnsName(step.Name)
+	return dnsName(servicePrefix + step.UUID + "-" + step.Name)
 }
 
 func servicePort(port types.Port) v1.ServicePort {
