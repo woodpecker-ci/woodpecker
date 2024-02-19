@@ -194,7 +194,8 @@
                 "desc": "Spécifiez les variables additionnelles que votre pipeline va utiliser. Les variables portant le même nom seront écrasées.",
                 "name": "Nom de la variable",
                 "title": "Variables additionnelles du pipeline",
-                "value": "Valeur de la variable"
+                "value": "Valeur de la variable",
+                "delete": "Effacer la variable"
             }
         },
         "enable": {
@@ -214,7 +215,8 @@
                 "desc": "Ajoutez des variables pour le lancement du pipeline. Les variables existantes seront écrasés.",
                 "name": "Nom de la variable",
                 "title": "Variables de pipeline supplémentaire",
-                "value": "Valeur de la variable"
+                "value": "Valeur de la variable",
+                "delete": "Effacer la variable"
             }
         },
         "not_allowed": "Vous n'êtes pas autorisé à accéder à ce dépôt",

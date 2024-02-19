@@ -1,12 +1,5 @@
 # Getting started
 
-## Core ideas
-
-- A (e.g. pipeline) configuration should never be [turing complete](https://en.wikipedia.org/wiki/Turing_completeness) (We have agents to exec things 🙂).
-- If possible follow the [KISS principle](https://en.wikipedia.org/wiki/KISS_principle).
-- What is used most should be default.
-- Keep different topics separated, so you can write plugins, port new ideas ... more easily, see [Architecture](./05-architecture.md).
-
 You can develop on your local computer by following the [steps below](#preparation-for-local-development) or you can start with a fully prepared online setup using [Gitpod](https://github.com/gitpod-io/gitpod) and [Gitea](https://github.com/go-gitea/gitea).
 
 ## Gitpod

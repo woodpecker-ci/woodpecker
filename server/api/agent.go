@@ -137,6 +137,9 @@ func PatchAgent(c *gin.Context) {
 	}
 	agent.Name = in.Name
 	agent.NoSchedule = in.NoSchedule
+	if agent.NoSchedule {
+		server.Config.Services.Queue.KickAgentWorkers(agent.ID)
+	}
 
 	err = _store.AgentUpdate(agent)
 	if err != nil {
@@ -213,6 +216,9 @@ func DeleteAgent(c *gin.Context) {
 			return
 		}
 	}
+
+	// kick workers to remove the agent from the queue
+	server.Config.Services.Queue.KickAgentWorkers(agent.ID)
 
 	if err = _store.AgentDelete(agent); err != nil {
 		c.String(http.StatusInternalServerError, "Error deleting user. %s", err)
