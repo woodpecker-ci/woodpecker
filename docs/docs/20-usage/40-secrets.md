@@ -28,7 +28,7 @@ once their usage is declared in the `secrets` section:
 
 ### Use secrets in settings and environment
 
-Alternatively, you can get a setting or environment from secrets using the `from_secret` syntax. This also allows using a different name for the environment variable.
+You can set an setting or environment value from secrets using the `from_secret` syntax.
 
 In this example, the secret named `secret_token` would be passed to the setting named `token`,which will be available in the plugin as environment variable named `PLUGIN_TOKEN` (See [plugins](./51-plugins/20-creating-plugins.md#settings) for details), and to the environment variable `TOKEN_ENV`.
 
