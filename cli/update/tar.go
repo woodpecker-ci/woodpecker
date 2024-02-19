@@ -4,9 +4,12 @@ import (
 	"archive/tar"
 	"compress/gzip"
 	"io"
+	"io/fs"
 	"os"
 	"path/filepath"
 )
+
+const tarDirectoryMode fs.FileMode = 0x755
 
 func Untar(dst string, r io.Reader) error {
 	gzr, err := gzip.NewReader(r)
@@ -36,7 +39,7 @@ func Untar(dst string, r io.Reader) error {
 		switch header.Typeflag {
 		case tar.TypeDir:
 			if _, err := os.Stat(target); err != nil {
-				if err := os.MkdirAll(target, 0x755); err != nil {
+				if err := os.MkdirAll(target, tarDirectoryMode); err != nil {
 					return err
 				}
 			}
