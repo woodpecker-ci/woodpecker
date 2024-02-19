@@ -29,6 +29,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/cli/registry"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/repo"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/secret"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/update"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/user"
 	"go.woodpecker-ci.org/woodpecker/v2/version"
 )
@@ -37,11 +38,13 @@ import (
 func newApp() *cli.App {
 	app := cli.NewApp()
 	app.Name = "woodpecker-cli"
+	app.Description = "Woodpecker command line utility"
 	app.Version = version.String()
-	app.Usage = "command line utility"
 	app.EnableBashCompletion = true
 	app.Flags = common.GlobalFlags
-	app.Before = common.SetupGlobalLogger
+	app.Before = common.Before
+	app.After = common.After
+	app.Suggest = true
 	app.Commands = []*cli.Command{
 		pipeline.Command,
 		log.Command,
@@ -55,6 +58,7 @@ func newApp() *cli.App {
 		lint.Command,
 		loglevel.Command,
 		cron.Command,
+		update.Command,
 	}
 
 	return app
