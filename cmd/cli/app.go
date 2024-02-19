@@ -40,7 +40,6 @@ func newApp() *cli.App {
 	app.Name = "woodpecker-cli"
 	app.Description = "Woodpecker command line utility"
 	app.Version = version.String()
-	app.Usage = "woodpecker [global options] command [command options] [arguments...]"
 	app.EnableBashCompletion = true
 	app.Flags = common.GlobalFlags
 	app.Before = common.Before

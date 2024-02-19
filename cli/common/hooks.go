@@ -22,6 +22,10 @@ func Before(c *cli.Context) error {
 	}
 
 	go func() {
+		if c.Bool("disable-update-check") {
+			return
+		}
+
 		// Don't check for updates when the update command is executed
 		if firstArg := c.Args().First(); firstArg == "update" {
 			return
