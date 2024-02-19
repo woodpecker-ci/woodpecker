@@ -116,6 +116,7 @@ func HandleAuth(c *gin.Context) {
 		// the user was stored as org. now we adopt it to the user.
 		if org, err := _store.OrgFindByName(u.Login); err == nil && org != nil {
 			org.IsUser = true
+			u.OrgID = org.ID
 			if err := _store.OrgUpdate(org); err != nil {
 				log.Error().Err(err).Msgf("on user creation, could not mark org as user")
 			}
