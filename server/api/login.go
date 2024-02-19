@@ -130,7 +130,7 @@ func HandleAuth(c *gin.Context) {
 				Private: false,
 			}
 			if err := _store.OrgCreate(org); err != nil {
-				log.Error().Err(err).Msgf("on user creation, could not mark org as user")
+				log.Error().Err(err).Msgf("on user creation, could create org for user")
 			}
 			u.OrgID = org.ID
 		}
