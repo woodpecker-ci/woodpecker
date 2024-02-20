@@ -113,7 +113,7 @@ func (c *client) Login(ctx context.Context, req *forge_types.OAuthRequest) (*mod
 	}
 
 	client := internal.NewClientWithToken(ctx, config.TokenSource(ctx, token), c.url)
-	userID, err := client.FindCurrentUser(ctx)
+	userSlug, err := client.FindCurrentUser(ctx)
 	if err != nil {
 		return nil, "", err
 	}
@@ -123,7 +123,7 @@ func (c *client) Login(ctx context.Context, req *forge_types.OAuthRequest) (*mod
 		return nil, "", fmt.Errorf("unable to create bitbucket client: %w", err)
 	}
 
-	user, _, err := bc.Users.GetUser(ctx, userID)
+	user, _, err := bc.Users.GetUser(ctx, userSlug)
 	if err != nil {
 		return nil, "", fmt.Errorf("unable to query for user: %w", err)
 	}
