@@ -451,16 +451,16 @@ var flags = append([]cli.Flag{
 		Usage:   "Bitbucket DataCenter/Server server address",
 	},
 	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_BITBUCKET_DC_CONSUMER_KEY"},
-		Name:     "bitbucket-dc-consumer-key",
-		Usage:    "Bitbucket DataCenter/Server oauth1 consumer key",
-		FilePath: os.Getenv("WOODPECKER_BITBUCKET_DC_CONSUMER_KEY_FILE"),
+		EnvVars:  []string{"WOODPECKER_BITBUCKET_DC_CLIENT_ID"},
+		Name:     "bitbucket-dc-client-id",
+		Usage:    "Bitbucket DataCenter/Server OAuth 2.0 client id",
+		FilePath: os.Getenv("WOODPECKER_BITBUCKET_DC_CLIENT_ID_FILE"),
 	},
 	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_BITBUCKET_DC_CONSUMER_RSA"},
-		Name:     "bitbucket-dc-consumer-rsa",
-		Usage:    "Bitbucket DataCenter/Server oauth1 private key string",
-		FilePath: os.Getenv("WOODPECKER_BITBUCKET_DC_CONSUMER_RSA_FILE"),
+		EnvVars:  []string{"WOODPECKER_BITBUCKET_DC_CLIENT_SECRET"},
+		Name:     "bitbucket-dc-client-secret",
+		Usage:    "Bitbucket DataCenter/Server OAuth 2.0 client secret",
+		FilePath: os.Getenv("WOODPECKER_BITBUCKET_DC_CLIENT_SECRET_FILE"),
 	},
 	&cli.StringFlag{
 		EnvVars:  []string{"WOODPECKER_BITBUCKET_DC_GIT_USERNAME"},
@@ -473,11 +473,6 @@ var flags = append([]cli.Flag{
 		Name:     "bitbucket-dc-git-password",
 		Usage:    "Bitbucket DataCenter/Server service account password",
 		FilePath: os.Getenv("WOODPECKER_BITBUCKET_DC_GIT_PASSWORD_FILE"),
-	},
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_BITBUCKET_DC_SKIP_VERIFY"},
-		Name:    "bitbucket-dc-skip-verify",
-		Usage:   "Bitbucket DataCenter/Server skip ssl verification",
 	},
 	//
 	// development flags

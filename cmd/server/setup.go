@@ -163,12 +163,11 @@ func setupGitea(c *cli.Context) (forge.Forge, error) {
 // setupBitbucketDatacenter helper function to setup the Bitbucket DataCenter/Server forge from the CLI arguments.
 func setupBitbucketDatacenter(c *cli.Context) (forge.Forge, error) {
 	opts := bitbucketdatacenter.Opts{
-		URL:         c.String("bitbucket-dc-server"),
-		Username:    c.String("bitbucket-dc-git-username"),
-		Password:    c.String("bitbucket-dc-git-password"),
-		ConsumerKey: c.String("bitbucket-dc-consumer-key"),
-		ConsumerRSA: c.String("bitbucket-dc-consumer-rsa"),
-		SkipVerify:  c.Bool("bitbucket-dc-skip-verify"),
+		URL:          c.String("bitbucket-dc-server"),
+		Username:     c.String("bitbucket-dc-git-username"),
+		Password:     c.String("bitbucket-dc-git-password"),
+		ClientID:     c.String("bitbucket-dc-client-id"),
+		ClientSecret: c.String("bitbucket-dc-client-secret"),
 	}
 	log.Trace().Msgf("Forge (bitbucketdatacenter) opts: %#v", opts)
 	return bitbucketdatacenter.New(opts)

@@ -17,19 +17,16 @@ package bitbucketdatacenter
 
 import (
 	"context"
-	"crypto/rsa"
-	"crypto/tls"
-	"crypto/x509"
-	"encoding/pem"
 	"fmt"
 	"net/http"
 	"net/url"
-	"strings"
+	"time"
 
-	"github.com/mrjones/oauth"
 	bb "github.com/neticdk/go-bitbucket/bitbucket"
 	"github.com/rs/zerolog/log"
+	"golang.org/x/oauth2"
 
+	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/bitbucketdatacenter/internal"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/common"
@@ -38,40 +35,34 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
-const (
-	requestTokenURL   = "%s/plugins/servlet/oauth/request-token"
-	authorizeTokenURL = "%s/plugins/servlet/oauth/authorize"
-	accessTokenURL    = "%s/plugins/servlet/oauth/access-token"
-)
-
 // Opts defines configuration options.
 type Opts struct {
-	URL         string // Bitbucket server url for API access.
-	Username    string // Git machine account username.
-	Password    string // Git machine account password.
-	ConsumerKey string // Bitbucket consumer key.
-	ConsumerRSA string // Oauth1 RSA key.
-	SkipVerify  bool   // Skip ssl verification.
+	URL          string // Bitbucket server url for API access.
+	Username     string // Git machine account username.
+	Password     string // Git machine account password.
+	ClientID     string // OAuth 2.0 client id
+	ClientSecret string // OAuth 2.0 client secret
 }
 
 type client struct {
-	url        string
-	URLApi     string
-	Username   string
-	Password   string
-	SkipVerify bool
-	Consumer   *oauth.Consumer
+	url          string
+	urlAPI       string
+	clientID     string
+	clientSecret string
+	username     string
+	password     string
 }
 
 // New returns a Forge implementation that integrates with Bitbucket DataCenter/Server,
 // the on-premise edition of Bitbucket Cloud, formerly known as Stash.
 func New(opts Opts) (forge.Forge, error) {
 	config := &client{
-		url:        opts.URL,
-		URLApi:     fmt.Sprintf("%s/rest", opts.URL),
-		Username:   opts.Username,
-		Password:   opts.Password,
-		SkipVerify: opts.SkipVerify,
+		url:          opts.URL,
+		urlAPI:       fmt.Sprintf("%s/rest", opts.URL),
+		clientID:     opts.ClientID,
+		clientSecret: opts.ClientSecret,
+		username:     opts.Username,
+		password:     opts.Password,
 	}
 
 	switch {
@@ -79,20 +70,12 @@ func New(opts Opts) (forge.Forge, error) {
 		return nil, fmt.Errorf("must have a git machine account username")
 	case opts.Password == "":
 		return nil, fmt.Errorf("must have a git machine account password")
-	case opts.ConsumerKey == "":
-		return nil, fmt.Errorf("must have a oauth1 consumer key")
-	case opts.ConsumerRSA == "":
-		return nil, fmt.Errorf("must have CONSUMER_RSA_KEY set to the value of a oauth1 consumer key")
+	case opts.ClientID == "":
+		return nil, fmt.Errorf("must have an oauth 2.0 client id")
+	case opts.ClientSecret == "":
+		return nil, fmt.Errorf("must have an oauth 2.0 client secret")
 	}
 
-	keyFileBytes := []byte(opts.ConsumerRSA)
-	block, _ := pem.Decode(keyFileBytes)
-	privateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
-	if err != nil {
-		return nil, err
-	}
-
-	config.Consumer = createConsumer(opts.URL, opts.ConsumerKey, privateKey)
 	return config, nil
 }
 
@@ -106,49 +89,65 @@ func (c *client) URL() string {
 	return c.url
 }
 
-func (c *client) Login(ctx context.Context, res http.ResponseWriter, req *http.Request) (*model.User, error) {
-	requestToken, u, err := c.Consumer.GetRequestTokenAndUrl("oob")
-	if err != nil {
-		return nil, err
-	}
-	code := req.FormValue("oauth_verifier")
-	if len(code) == 0 {
-		http.Redirect(res, req, u, http.StatusSeeOther)
-		return nil, nil
-	}
-	requestToken.Token = req.FormValue("oauth_token")
-	accessToken, err := c.Consumer.AuthorizeToken(requestToken, code)
-	if err != nil {
-		return nil, err
+func (c *client) Login(ctx context.Context, req *forge_types.OAuthRequest) (*model.User, string, error) {
+	config := c.newOAuth2Config()
+
+	// TODO: Add proper state and pkce...
+	redirectURL := config.AuthCodeURL("woodpecker")
+
+	if req.Error != "" {
+		return nil, redirectURL, &forge_types.AuthError{
+			Err:         req.Error,
+			Description: req.ErrorDescription,
+			URI:         req.ErrorURI,
+		}
 	}
 
-	client := internal.NewClientWithToken(ctx, c.url, c.Consumer, accessToken.Token)
-	userID, err := client.FindCurrentUser()
-	if err != nil {
-		return nil, err
+	if len(req.Code) == 0 {
+		return nil, redirectURL, nil
 	}
-	userID = strings.ReplaceAll(userID, "@", "_") // Apparently the "whoami" endpoint may return the wrong username
 
-	bc, err := c.newClient(&model.User{Token: accessToken.Token})
+	token, err := config.Exchange(ctx, req.Code)
 	if err != nil {
-		return nil, fmt.Errorf("unable to create bitbucket client: %w", err)
+		return nil, redirectURL, err
+	}
+
+	client := internal.NewClientWithToken(ctx, config.TokenSource(ctx, token), c.url)
+	userID, err := client.FindCurrentUser(ctx)
+	if err != nil {
+		return nil, "", err
+	}
+
+	bc, err := c.newClient(ctx, &model.User{Token: token.AccessToken})
+	if err != nil {
+		return nil, "", fmt.Errorf("unable to create bitbucket client: %w", err)
 	}
 
 	user, _, err := bc.Users.GetUser(ctx, userID)
 	if err != nil {
-		return nil, fmt.Errorf("unable to query for user: %w", err)
+		return nil, "", fmt.Errorf("unable to query for user: %w", err)
 	}
 
-	return convertUser(user, accessToken.Token, c.url), nil
+	u := convertUser(user, c.url)
+	u.Token = token.AccessToken
+	u.Secret = token.RefreshToken
+	u.Expiry = token.Expiry.Unix()
+	return u, "", nil
 }
 
 // Auth is not supported.
-func (*client) Auth(_ context.Context, _, _ string) (string, error) {
-	return "", fmt.Errorf("not Implemented")
+func (c *client) Auth(ctx context.Context, accessToken, refreshToken string) (string, error) {
+	config := c.newOAuth2Config()
+	token := &oauth2.Token{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+	}
+	client := internal.NewClientWithToken(ctx, config.TokenSource(ctx, token), c.url)
+	return client.FindCurrentUser(ctx)
 }
 
 func (c *client) Repo(ctx context.Context, u *model.User, rID model.ForgeRemoteID, owner, name string) (*model.Repo, error) {
-	bc, err := c.newClient(u)
+	bc, err := c.newClient(ctx, u)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create bitbucket client: %w", err)
 	}
@@ -197,7 +196,7 @@ func (c *client) Repo(ctx context.Context, u *model.User, rID model.ForgeRemoteI
 }
 
 func (c *client) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {
-	bc, err := c.newClient(u)
+	bc, err := c.newClient(ctx, u)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create bitbucket client: %w", err)
 	}
@@ -244,7 +243,7 @@ func (c *client) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 }
 
 func (c *client) File(ctx context.Context, u *model.User, r *model.Repo, p *model.Pipeline, f string) ([]byte, error) {
-	bc, err := c.newClient(u)
+	bc, err := c.newClient(ctx, u)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create bitbucket client: %w", err)
 	}
@@ -257,7 +256,7 @@ func (c *client) File(ctx context.Context, u *model.User, r *model.Repo, p *mode
 }
 
 func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model.Pipeline, path string) ([]*forge_types.FileMeta, error) {
-	bc, err := c.newClient(u)
+	bc, err := c.newClient(ctx, u)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create bitbucket client: %w", err)
 	}
@@ -289,7 +288,7 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model
 }
 
 func (c *client) Status(ctx context.Context, u *model.User, repo *model.Repo, pipeline *model.Pipeline, workflow *model.Workflow) error {
-	bc, err := c.newClient(u)
+	bc, err := c.newClient(ctx, u)
 	if err != nil {
 		return fmt.Errorf("unable to create bitbucket client: %w", err)
 	}
@@ -310,15 +309,15 @@ func (c *client) Netrc(_ *model.User, r *model.Repo) (*model.Netrc, error) {
 	}
 
 	return &model.Netrc{
-		Login:    c.Username,
-		Password: c.Password,
+		Login:    c.username,
+		Password: c.password,
 		Machine:  host,
 	}, nil
 }
 
 // Branches returns the names of all branches for the named repository.
 func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]string, error) {
-	bc, err := c.newClient(u)
+	bc, err := c.newClient(ctx, u)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create bitbucket client: %w", err)
 	}
@@ -342,28 +341,31 @@ func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo, p *
 	return all, nil
 }
 
-func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b string) (string, error) {
-	bc, err := c.newClient(u)
+func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b string) (*model.Commit, error) {
+	bc, err := c.newClient(ctx, u)
 	if err != nil {
-		return "", fmt.Errorf("unable to create bitbucket client: %w", err)
+		return nil, fmt.Errorf("unable to create bitbucket client: %w", err)
 	}
 	branches, _, err := bc.Projects.SearchBranches(ctx, r.Owner, r.Name, &bb.BranchSearchOptions{Filter: b})
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	if len(branches) == 0 {
-		return "", fmt.Errorf("no matching branches returned")
+		return nil, fmt.Errorf("no matching branches returned")
 	}
 	for _, branch := range branches {
 		if branch.DisplayID == b {
-			return branch.LatestCommit, nil
+			return &model.Commit{
+				SHA:      branch.LatestCommit,
+				ForgeURL: fmt.Sprintf("%s/commits/%s", r.ForgeURL, branch.LatestCommit),
+			}, nil
 		}
 	}
-	return "", fmt.Errorf("no matching branches found")
+	return nil, fmt.Errorf("no matching branches found")
 }
 
 func (c *client) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error) {
-	bc, err := c.newClient(u)
+	bc, err := c.newClient(ctx, u)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create bitbucket client: %w", err)
 	}
@@ -388,7 +390,7 @@ func (c *client) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 }
 
 func (c *client) Activate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
-	bc, err := c.newClient(u)
+	bc, err := c.newClient(ctx, u)
 	if err != nil {
 		return fmt.Errorf("unable to create bitbucket client: %w", err)
 	}
@@ -401,7 +403,7 @@ func (c *client) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 	webhook := &bb.Webhook{
 		Name:   "Woodpecker",
 		URL:    link,
-		Events: []bb.EventKey{bb.EventKeyRepoRefsChanged, bb.EventKeyPullRequestFrom},
+		Events: []bb.EventKey{bb.EventKeyRepoRefsChanged, bb.EventKeyPullRequestFrom, bb.EventKeyPullRequestMerged, bb.EventKeyPullRequestDeclined, bb.EventKeyPullRequestDeleted},
 		Active: true,
 		Config: &bb.WebhookConfiguration{
 			Secret: r.Hash,
@@ -412,7 +414,7 @@ func (c *client) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 }
 
 func (c *client) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
-	bc, err := c.newClient(u)
+	bc, err := c.newClient(ctx, u)
 	if err != nil {
 		return fmt.Errorf("unable to create bitbucket client: %w", err)
 	}
@@ -519,7 +521,7 @@ func (c *client) updatePipelineFromCommit(ctx context.Context, u *model.User, r 
 		return nil, nil
 	}
 
-	bc, err := c.newClient(u)
+	bc, err := c.newClient(ctx, u)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create bitbucket client: %w", err)
 	}
@@ -572,52 +574,26 @@ func (c *client) Org(_ context.Context, _ *model.User, _ string) (*model.Org, er
 	return nil, nil
 }
 
-type httpLogger struct {
-	Transport http.RoundTripper
-}
-
-func (hl *httpLogger) RoundTrip(req *http.Request) (*http.Response, error) {
-	resp, err := hl.Transport.RoundTrip(req)
-	if resp != nil {
-		log.Trace().Str("method", req.Method).Str("status", resp.Status).Str("url", req.URL.String()).Msg("request completed to bitbucket")
-	}
-	if err != nil {
-		log.Trace().Err(err).Str("method", req.Method).Str("url", req.URL.String()).Msg("unexpected error from bitbucket")
-	}
-	return resp, err
-}
-
-func (c *client) newClient(u *model.User) (*bb.Client, error) {
-	token := &oauth.AccessToken{
-		Token: u.Token,
-	}
-	auth, err := c.Consumer.MakeRoundTripper(token)
-	if err != nil {
-		return nil, err
-	}
-	hl := &httpLogger{Transport: auth}
-	cl := &http.Client{
-		Transport: hl,
-	}
-
-	return bb.NewClient(c.URLApi, cl)
-}
-
-func createConsumer(url, consumerKey string, privateKey *rsa.PrivateKey) *oauth.Consumer {
-	consumer := oauth.NewRSAConsumer(
-		consumerKey,
-		privateKey,
-		oauth.ServiceProvider{
-			RequestTokenUrl:   fmt.Sprintf(requestTokenURL, url),
-			AuthorizeTokenUrl: fmt.Sprintf(authorizeTokenURL, url),
-			AccessTokenUrl:    fmt.Sprintf(accessTokenURL, url),
-			HttpMethod:        "POST",
-		})
-	consumer.HttpClient = &http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-			Proxy:           http.ProxyFromEnvironment,
+func (c *client) newOAuth2Config() *oauth2.Config {
+	return &oauth2.Config{
+		ClientID:     c.clientID,
+		ClientSecret: c.clientSecret,
+		Endpoint: oauth2.Endpoint{
+			AuthURL:  fmt.Sprintf("%s/oauth2/latest/authorize", c.urlAPI),
+			TokenURL: fmt.Sprintf("%s/oauth2/latest/token", c.urlAPI),
 		},
+		Scopes:      []string{string(bb.PermissionRepoRead), string(bb.PermissionRepoWrite), string(bb.PermissionRepoAdmin)},
+		RedirectURL: fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost),
 	}
-	return consumer
+}
+
+func (c *client) newClient(ctx context.Context, u *model.User) (*bb.Client, error) {
+	config := c.newOAuth2Config()
+	t := &oauth2.Token{
+		AccessToken:  u.Token,
+		RefreshToken: u.Secret,
+		Expiry:       time.Unix(u.Expiry, 0),
+	}
+	client := config.Client(ctx, t)
+	return bb.NewClient(c.urlAPI, client)
 }

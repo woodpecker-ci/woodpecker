@@ -20,9 +20,9 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 
-	"github.com/mrjones/oauth" // Bitbucket is based on OAuth 1.0 hence an OAuth 1.0 library is needed
-	"github.com/rs/zerolog/log"
+	"golang.org/x/oauth2"
 )
 
 const (
@@ -30,30 +30,26 @@ const (
 )
 
 type Client struct {
-	client      *http.Client
-	base        string
-	accessToken string
-	ctx         context.Context
+	client *http.Client
+	base   string
 }
 
-func NewClientWithToken(ctx context.Context, url string, consumer *oauth.Consumer, accessToken string) *Client {
-	var token oauth.AccessToken
-	token.Token = accessToken
-	client, err := consumer.MakeHttpClient(&token)
-	if err != nil {
-		log.Err(err).Msg("")
-	}
-
+func NewClientWithToken(ctx context.Context, ts oauth2.TokenSource, url string) *Client {
 	return &Client{
-		client:      client,
-		base:        url,
-		accessToken: accessToken,
-		ctx:         ctx,
+		client: oauth2.NewClient(ctx, ts),
+		base:   url,
 	}
 }
 
-func (c *Client) FindCurrentUser() (string, error) {
-	resp, err := c.doGet(fmt.Sprintf(currentUserID, c.base))
+// FindCurrentUser is returning the current user id - however it is not really part of the API so it is not part of the Bitbucket go client
+func (c *Client) FindCurrentUser(ctx context.Context) (string, error) {
+	url := fmt.Sprintf(currentUserID, c.base)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return "", fmt.Errorf("unable to create http request: %w", err)
+	}
+
+	resp, err := c.client.Do(req)
 	if resp != nil {
 		defer resp.Body.Close()
 	}
@@ -66,16 +62,6 @@ func (c *Client) FindCurrentUser() (string, error) {
 		return "", fmt.Errorf("unable to read data from user id query: %w", err)
 	}
 	login := string(buf)
+	login = strings.ReplaceAll(login, "@", "_") // Apparently the "whoami" endpoint may return the "wrong" username - converting to user slug
 	return login, nil
-}
-
-// Helper function to help create get
-func (c *Client) doGet(url string) (*http.Response, error) {
-	log.Trace().Msgf("do GET from %s", url)
-	request, err := http.NewRequestWithContext(c.ctx, "GET", url, nil)
-	if err != nil {
-		return nil, err
-	}
-	request.Header.Add("Content-Type", "application/json")
-	return c.client.Do(request)
 }

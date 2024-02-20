@@ -173,7 +173,8 @@ func TestHelper(t *testing.T) {
 			now := time.Now()
 			from := &bb.PullRequestEvent{
 				Event: bb.Event{
-					Date: bb.ISOTime(now),
+					Date:     bb.ISOTime(now),
+					EventKey: bb.EventKeyPullRequestFrom,
 					Actor: bb.User{
 						Name:  "John Doe",
 						Email: "john.doe@mail.com",
@@ -220,6 +221,58 @@ func TestHelper(t *testing.T) {
 			g.Assert(to.Refspec).Equal("branch:main")
 		})
 
+		g.It("should close pull request", func() {
+			now := time.Now()
+			from := &bb.PullRequestEvent{
+				Event: bb.Event{
+					Date:     bb.ISOTime(now),
+					EventKey: bb.EventKeyPullRequestMerged,
+					Actor: bb.User{
+						Name:  "John Doe",
+						Email: "john.doe@mail.com",
+						Slug:  "john.doe_mail.com",
+					},
+				},
+				PullRequest: bb.PullRequest{
+					ID:    123,
+					Title: "my title",
+					Source: bb.PullRequestRef{
+						ID:        "refs/head/branch",
+						DisplayID: "branch",
+						Latest:    "1234567890abcdef",
+						Repository: bb.Repository{
+							Slug: "REPO",
+							Project: &bb.Project{
+								Key: "PRJ",
+							},
+						},
+					},
+					Target: bb.PullRequestRef{
+						ID:        "refs/head/main",
+						DisplayID: "main",
+						Latest:    "abcdef1234567890",
+						Repository: bb.Repository{
+							Slug: "REPO",
+							Project: &bb.Project{
+								Key: "PRJ",
+							},
+						},
+					},
+				},
+			}
+			to := convertPullRequestEvent(from, "https://base.url")
+			g.Assert(to.Commit).Equal("1234567890abcdef")
+			g.Assert(to.Branch).Equal("branch")
+			g.Assert(to.Avatar).Equal("https://base.url/users/john.doe_mail.com/avatar.png")
+			g.Assert(to.Author).Equal("John Doe")
+			g.Assert(to.Email).Equal("john.doe@mail.com")
+			g.Assert(to.Timestamp).Equal(now.UTC().Unix())
+			g.Assert(to.Ref).Equal("refs/pull-requests/123/from")
+			g.Assert(to.ForgeURL).Equal("https://base.url/projects/PRJ/repos/REPO/commits/1234567890abcdef")
+			g.Assert(to.Event).Equal(model.EventPullClosed)
+			g.Assert(to.Refspec).Equal("branch:main")
+		})
+
 		g.It("should truncate author", func() {
 			tests := []struct {
 				from string
@@ -244,11 +297,10 @@ func TestHelper(t *testing.T) {
 				Slug:  "slug",
 				Email: "john.doe@mail.com",
 			}
-			to := convertUser(from, "token", "https://base.url")
+			to := convertUser(from, "https://base.url")
 			g.Assert(to.Login).Equal("slug")
 			g.Assert(to.Avatar).Equal("https://base.url/users/slug/avatar.png")
 			g.Assert(to.Email).Equal("john.doe@mail.com")
-			g.Assert(to.Token).Equal("token")
 		})
 	})
 }

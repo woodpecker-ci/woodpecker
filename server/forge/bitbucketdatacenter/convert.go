@@ -112,9 +112,15 @@ func convertPullRequestEvent(ev *bb.PullRequestEvent, baseURL string) *model.Pip
 		Timestamp: time.Time(ev.Date).UTC().Unix(),
 		Ref:       fmt.Sprintf("refs/pull-requests/%d/from", ev.PullRequest.ID),
 		ForgeURL:  fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", baseURL, ev.PullRequest.Source.Repository.Project.Key, ev.PullRequest.Source.Repository.Slug, ev.PullRequest.Source.Latest),
-		Event:     model.EventPull,
 		Refspec:   fmt.Sprintf("%s:%s", ev.PullRequest.Source.DisplayID, ev.PullRequest.Target.DisplayID),
 	}
+
+	if ev.EventKey == bb.EventKeyPullRequestMerged || ev.EventKey == bb.EventKeyPullRequestDeclined || ev.EventKey == bb.EventKeyPullRequestDeleted {
+		pipeline.Event = model.EventPullClosed
+	} else {
+		pipeline.Event = model.EventPull
+	}
+
 	return pipeline
 }
 
@@ -128,11 +134,10 @@ func authorLabel(name string) string {
 	return result
 }
 
-func convertUser(user *bb.User, token, baseURL string) *model.User {
+func convertUser(user *bb.User, baseURL string) *model.User {
 	return &model.User{
 		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprintf("%d", user.ID)),
 		Login:         user.Slug,
-		Token:         token,
 		Email:         user.Email,
 		Avatar:        bitbucketAvatarURL(baseURL, user.Slug),
 	}

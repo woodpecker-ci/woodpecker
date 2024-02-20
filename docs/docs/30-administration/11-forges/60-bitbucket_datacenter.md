@@ -18,73 +18,9 @@ services:
 +     - WOODPECKER_BITBUCKET_DC=true
 +     - WOODPECKER_BITBUCKET_DC_GIT_USERNAME=foo
 +     - WOODPECKER_BITBUCKET_DC_GIT_PASSWORD=bar
-+     - WOODPECKER_BITBUCKET_DC_CONSUMER_KEY=95c0282573633eb25e82
-+     - WOODPECKER_BITBUCKET_DC_CONSUMER_RSA_FILE=/etc/bitbucket/key.pem
++     - WOODPECKER_BITBUCKET_DC_CLIENT_ID=xxx
++     - WOODPECKER_BITBUCKET_DC_CLIENT_SECRET=yyy
 +     - WOODPECKER_BITBUCKET_DC_URL=http://stash.mycompany.com
-    volumes:
-+     - /path/to/key.pem:/path/to/key.pem
-
-  woodpecker-agent:
-    [...]
-```
-
-## Private Key File
-
-The OAuth process in Bitbucket server requires a private and a public RSA certificate. This is how you create the private RSA certificate.
-
-```nohighlight
-openssl genrsa -out /etc/bitbucket/key.pem 1024
-```
-
-This stores the private RSA certificate in `key.pem`. The next command generates the public RSA certificate and stores it in `key.pub`.
-
-```nohighlight
-openssl rsa -in /etc/bitbucket/key.pem -pubout >> /etc/bitbucket/key.pub
-```
-
-Please note that the private key file can be mounted into your Woodpecker container at runtime or as an environment variable
-
-### Private key file mounted into your Woodpecker container at runtime as a volume
-
-```diff
-# docker-compose.yml
-version: '3'
-
-services:
-  woodpecker-server:
-    [...]
-    environment:
-      - [...]
-      - WOODPECKER_BITBUCKET_DC=true
-      - WOODPECKER_BITBUCKET_DC_GIT_USERNAME=foo
-      - WOODPECKER_BITBUCKET_DC_GIT_PASSWORD=bar
-      - WOODPECKER_BITBUCKET_DC_CONSUMER_KEY=95c0282573633eb25e82
-+     - WOODPECKER_BITBUCKET_DC_CONSUMER_RSA_FILE=/etc/bitbucket/key.pem
-      - WOODPECKER_BITBUCKET_DC_URL=http://stash.mycompany.com
-+  volumes:
-+     - /etc/bitbucket/key.pem:/etc/bitbucket/key.pem
-
-  woodpecker-agent:
-    [...]
-```
-
-### Private key as environment variable
-
-```diff
-# docker-compose.yml
-version: '3'
-
-services:
-  woodpecker-server:
-    [...]
-    environment:
-      - [...]
-      - WOODPECKER_BITBUCKET_DC=true
-      - WOODPECKER_BITBUCKET_DC_GIT_USERNAME=foo
-      - WOODPECKER_BITBUCKET_DC_GIT_PASSWORD=bar
-      - WOODPECKER_BITBUCKET_DC_CONSUMER_KEY=95c0282573633eb25e82
-+     - WOODPECKER_BITBUCKET_DC_CONSUMER_RSA=contentOfPemKeyAsString
-      - WOODPECKER_BITBUCKET_DC_URL=http://stash.mycompany.com
 
   woodpecker-agent:
     [...]
@@ -96,13 +32,9 @@ Woodpecker uses `git+https` to clone repositories, however, Bitbucket Server doe
 
 ## Registration
 
-You must register your application with Bitbucket Datacenter / Server in order to generate a consumer key. Navigate to your account settings and choose Applications from the menu, and click Register new application. Now copy & paste the text value from `/etc/bitbucket/key.pub` into the `Public Key` in the incoming link part of the application registration.
+Woodpecker must be registered with Bitbucket Datacenter / Server. In the administration section of Bitbucket choose "Application Links" and then "Create link". Woodpecker should be listed as "External Application" and the direction should be set to "Incomming". Note the client id and client secret of the registration to be used in the configuration of Woodpecker.
 
-Please use the following as the Authorization callback URL:
-
-```nohighlight
-http://<your-woodpecker-address>/authorize
-```
+See also [Configure an incoming link](https://confluence.atlassian.com/bitbucketserver/configure-an-incoming-link-1108483657.html).
 
 ## Configuration
 
@@ -120,29 +52,17 @@ Enables the Bitbucket Server driver.
 
 Configures the Bitbucket Server address.
 
-### `WOODPECKER_BITBUCKET_DC_CONSUMER_KEY`
+### `WOODPECKER_BITBUCKET_DC_CLIENT_ID`
 
 > Default: empty
 
-Configures your Bitbucket Server consumer key.
+Configures your Bitbucket Server OAUth 2.0 client id.
 
-### `WOODPECKER_BITBUCKET_DC_CONSUMER_KEY_FILE`
-
-> Default: empty
-
-Read the value for `WOODPECKER_BITBUCKET_DC_CONSUMER_KEY` from the specified filepath
-
-### `WOODPECKER_BITBUCKET_DC_CONSUMER_RSA`
+### `WOODPECKER_BITBUCKET_DC_CLIENT_SECRET`
 
 > Default: empty
 
-Configures your Bitbucket Server private key.
-
-### `WOODPECKER_BITBUCKET_DC_CONSUMER_RSA_FILE`
-
-> Default: empty
-
-Configures the path to your Bitbucket Server private key file.
+Configures your Bitbucket Server OAUth 2.0 client secret.
 
 ### `WOODPECKER_BITBUCKET_DC_GIT_USERNAME`
 

@@ -16,11 +16,8 @@ package bitbucketdatacenter
 
 import (
 	"context"
-	"crypto/rand"
-	"crypto/rsa"
-	"crypto/x509"
-	"encoding/pem"
 	"testing"
+	"time"
 
 	"github.com/franela/goblin"
 	"github.com/gin-gonic/gin"
@@ -33,10 +30,8 @@ func TestBitbucketDC(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	s := fixtures.Server()
-	k, _ := rsa.GenerateKey(rand.Reader, 2048)
 	c := &client{
-		URLApi:   s.URL,
-		Consumer: createConsumer(s.URL, "somelongsecretkey", k),
+		urlAPI: s.URL,
 	}
 
 	ctx := context.Background()
@@ -49,21 +44,21 @@ func TestBitbucketDC(t *testing.T) {
 		g.Describe("Creating a forge", func() {
 			g.It("Should return client with specified options", func() {
 				forge, err := New(Opts{
-					URL:         "http://localhost:8080",
-					Username:    "0ZXh0IjoiI",
-					Password:    "I1NiIsInR5",
-					ConsumerKey: "somelongsecretkey",
-					ConsumerRSA: generatePrivateKey(),
-					SkipVerify:  true,
+					URL:          "http://localhost:8080",
+					Username:     "0ZXh0IjoiI",
+					Password:     "I1NiIsInR5",
+					ClientID:     "client-id",
+					ClientSecret: "client-secret",
 				})
 				g.Assert(err).IsNil()
 				g.Assert(forge).IsNotNil()
 				cl, ok := forge.(*client)
 				g.Assert(ok).IsTrue()
 				g.Assert(cl.url).Equal("http://localhost:8080")
-				g.Assert(cl.Username).Equal("0ZXh0IjoiI")
-				g.Assert(cl.Password).Equal("I1NiIsInR5")
-				g.Assert(cl.SkipVerify).Equal(true)
+				g.Assert(cl.username).Equal("0ZXh0IjoiI")
+				g.Assert(cl.password).Equal("I1NiIsInR5")
+				g.Assert(cl.clientID).Equal("client-id")
+				g.Assert(cl.clientSecret).Equal("client-secret")
 			})
 		})
 
@@ -80,18 +75,7 @@ func TestBitbucketDC(t *testing.T) {
 	})
 }
 
-func generatePrivateKey() string {
-	key, _ := rsa.GenerateKey(rand.Reader, 2048)
-	der := x509.MarshalPKCS1PrivateKey(key)
-	pemSpec := pem.Block{
-		Type:    "RSA PRIVATE KEY",
-		Headers: nil,
-		Bytes:   der,
-	}
-	privatePEM := pem.EncodeToMemory(&pemSpec)
-	return string(privatePEM)
-}
-
 var fakeUser = &model.User{
-	Token: "fake",
+	Token:  "fake",
+	Expiry: time.Now().Add(1 * time.Hour).Unix(),
 }
