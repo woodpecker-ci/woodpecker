@@ -35,7 +35,6 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/moby/moby v24.0.9+incompatible
 	github.com/moby/term v0.5.0
-	github.com/mrjones/oauth v0.0.0-20190623134757-126b35219450
 	github.com/muesli/termenv v0.15.2
 	github.com/neticdk/go-bitbucket v1.0.0
 	github.com/oklog/ulid/v2 v2.1.0
