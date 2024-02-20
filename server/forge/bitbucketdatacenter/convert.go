@@ -21,6 +21,7 @@ import (
 	"time"
 
 	bb "github.com/neticdk/go-bitbucket/bitbucket"
+	"golang.org/x/oauth2"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
@@ -152,4 +153,10 @@ func convertListOptions(p *model.ListOptions) bb.ListOptions {
 		return bb.ListOptions{}
 	}
 	return bb.ListOptions{Limit: uint(p.PerPage), Start: uint((p.Page - 1) * p.PerPage)}
+}
+
+func updateUserCredentials(u *model.User, t *oauth2.Token) {
+	u.Token = t.AccessToken
+	u.Secret = t.RefreshToken
+	u.Expiry = t.Expiry.UTC().Unix()
 }
