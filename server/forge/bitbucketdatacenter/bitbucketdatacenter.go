@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	bb "github.com/neticdk/go-bitbucket/bitbucket"
@@ -569,9 +570,17 @@ func (c *client) OrgMembership(_ context.Context, _ *model.User, _ string) (*mod
 }
 
 // Org fetches the organization from the forge by name. If the name is a user an org with type user is returned.
-func (c *client) Org(_ context.Context, _ *model.User, _ string) (*model.Org, error) {
-	// TODO: Not implemented currently
-	return nil, nil
+func (c *client) Org(_ context.Context, _ *model.User, owner string) (*model.Org, error) {
+	if strings.HasPrefix(owner, "~") {
+		return &model.Org{
+			Name:   owner,
+			IsUser: true,
+		}, nil
+	}
+	return &model.Org{
+		Name:   owner,
+		IsUser: false,
+	}, nil
 }
 
 func (c *client) newOAuth2Config() *oauth2.Config {

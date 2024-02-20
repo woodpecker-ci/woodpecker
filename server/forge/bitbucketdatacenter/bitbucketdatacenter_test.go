@@ -72,6 +72,21 @@ func TestBitbucketDC(t *testing.T) {
 				g.Assert(repo.Branch).Equal("main")
 			})
 		})
+
+		g.Describe("Getting organization", func() {
+			g.It("should map organization", func() {
+				org, err := c.Org(ctx, fakeUser, "ORG")
+				g.Assert(err).IsNil()
+				g.Assert(org.Name).Equal("ORG")
+				g.Assert(org.IsUser).IsFalse()
+			})
+			g.It("should map user organization", func() {
+				org, err := c.Org(ctx, fakeUser, "~ORG")
+				g.Assert(err).IsNil()
+				g.Assert(org.Name).Equal("~ORG")
+				g.Assert(org.IsUser).IsTrue()
+			})
+		})
 	})
 }
 
