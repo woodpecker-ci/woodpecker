@@ -343,8 +343,9 @@ func setupEvilGlobals(c *cli.Context, s store.Store, f forge.Forge) error {
 		rootPath = "/" + rootPath
 	}
 	server.Config.Server.RootPath = rootPath
-	server.Config.Server.CustomCSSFile = strings.TrimSpace(c.String("custom-css-file"))
-	server.Config.Server.CustomJsFile = strings.TrimSpace(c.String("custom-js-file"))
+	server.Config.WebUI.CustomCSSFile = strings.TrimSpace(c.String("custom-css-file"))
+	server.Config.WebUI.CustomJsFile = strings.TrimSpace(c.String("custom-js-file"))
+	server.Config.WebUI.CustomLogoFile = strings.TrimSpace(c.String("custom-logo-file"))
 	server.Config.Pipeline.Networks = c.StringSlice("network")
 	server.Config.Pipeline.Volumes = c.StringSlice("volume")
 	server.Config.Pipeline.Privileged = c.StringSlice("escalate")

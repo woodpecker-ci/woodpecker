@@ -52,12 +52,13 @@ var Config = struct {
 		StatusContextFormat string
 		SessionExpires      time.Duration
 		RootPath            string
-		CustomCSSFile       string
-		CustomJsFile        string
 	}
 	WebUI struct {
 		EnableSwagger    bool
 		SkipVersionCheck bool
+		CustomCSSFile    string
+		CustomJsFile     string
+		CustomLogoFile   string
 	}
 	Prometheus struct {
 		AuthToken string

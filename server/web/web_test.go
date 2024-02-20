@@ -70,8 +70,8 @@ func Test_custom_file_return_actual_content(t *testing.T) {
 	err = temp.Close()
 	assert.NoError(t, err)
 
-	server.Config.Server.CustomJsFile = temp.Name()
-	server.Config.Server.CustomCSSFile = temp.Name()
+	server.Config.WebUI.CustomJsFile = temp.Name()
+	server.Config.WebUI.CustomCSSFile = temp.Name()
 
 	customRequestedFilesToTest := []string{
 		"/assets/custom.js",

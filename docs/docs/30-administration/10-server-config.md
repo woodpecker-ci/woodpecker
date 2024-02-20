@@ -100,9 +100,9 @@ or generate a random one like this:
 openssl rand -hex 32 | docker secret create woodpecker-agent-secret -
 ```
 
-## Custom JavaScript and CSS
+## Custom JavaScript, CSS and Logo
 
-Woodpecker supports custom JS and CSS files.
+Woodpecker supports custom Logo, JS and CSS files.
 These files must be present in the server's filesystem.
 They can be backed in a Docker image or mounted from a ConfigMap inside a Kubernetes environment.
 The configuration variables are independent of each other, which means it can be just one file present, or both.
@@ -110,6 +110,7 @@ The configuration variables are independent of each other, which means it can be
 ```ini
 WOODPECKER_CUSTOM_CSS_FILE=/usr/local/www/woodpecker.css
 WOODPECKER_CUSTOM_JS_FILE=/usr/local/www/woodpecker.js
+WOODPECKER_CUSTOM_LOGO_FILE=/usr/local/www/logo.svg
 ```
 
 The examples below show how to place a banner message in the top navigation bar of Woodpecker.

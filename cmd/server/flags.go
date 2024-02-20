@@ -78,6 +78,11 @@ var flags = append([]cli.Flag{
 		Usage:   "file path for the server to serve a custom .JS file, used for customizing the UI",
 	},
 	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_CUSTOM_LOGO_FILE"},
+		Name:    "custom-logo-file",
+		Usage:   "file path for the server to serve a custom logo, used for customizing the UI",
+	},
+	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_LETS_ENCRYPT_EMAIL"},
 		Name:    "lets-encrypt-email",
 		Usage:   "let's encrypt email",
