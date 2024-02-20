@@ -11,7 +11,7 @@ import (
 )
 
 func TestCurrentUser(t *testing.T) {
-	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte(`tal@netic.dk`))
 	}))
@@ -30,7 +30,6 @@ func TestCurrentUser(t *testing.T) {
 			g.Assert(uid).Equal("tal_netic.dk")
 		})
 	})
-
 }
 
 type mockSource string
