@@ -224,7 +224,7 @@ var flags = append([]cli.Flag{
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_DATABASE_DATASOURCE_FILE"},
 		Name:    "datasource-file",
-		Usage:   "database driver configuration stored in a file, if set will always be prefered",
+		Usage:   "database driver configuration stored in a file, if set will always be preferred over simple configuration string",
 	},
 	&cli.StringFlag{
 		EnvVars:  []string{"WOODPECKER_PROMETHEUS_AUTH_TOKEN"},
