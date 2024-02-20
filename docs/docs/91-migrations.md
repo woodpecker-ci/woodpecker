@@ -21,7 +21,6 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Removed `WOODPECKER_DOCS` config variable
 - Renamed `link` to `url` (including all API fields)
 - Deprecated `CI_COMMIT_URL` env var, use `CI_PIPELINE_FORGE_URL`
-- Migrated from Bitbucket Stash support to Bitbucket Datacenter / server support, rename env `WOODPECKER_STASH` to `WOODPECKER_BITBUCKET_DC` and webhooks need to be re-installed (e.g., using "repair" on the project in Woodpecker)
 
 ## 1.0.0
 
