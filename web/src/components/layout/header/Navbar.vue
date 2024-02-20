@@ -4,11 +4,11 @@
   >
     <div class="flex items-center space-x-2">
       <router-link :to="{ name: 'home' }" class="flex flex-col -my-2 px-2">
-        <div v-if="customLogo">
+        <div v-if="!customLogo">
           <WoodpeckerLogo class="w-8 h-8" />
           <span class="text-xs" :title="version?.current">{{ version?.currentShort }}</span>
         </div>
-        <div v-else>
+        <div v-if="customLogo">
           CustomLogo!!!
           load /assets/custom.logo
         </div>
