@@ -46,6 +46,14 @@ import (
 
 func setupStore(c *cli.Context) (store.Store, error) {
 	datasource := c.String("datasource")
+	if datasourceFile := c.String("datasource-file"); datasourceFile != "" {
+		value, err := os.ReadFile(datasourceFile)
+		if err != nil {
+			return nil, fmt.Errorf("cant read datasource file '%s': %w", datasourceFile, err)
+		}
+		datasource = strings.TrimSpace(string(value))
+	}
+
 	driver := c.String("driver")
 	xorm := store.XORM{
 		Log:     c.Bool("log-xorm"),

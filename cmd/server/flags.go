@@ -216,11 +216,15 @@ var flags = append([]cli.Flag{
 		Value:   "sqlite3",
 	},
 	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_DATABASE_DATASOURCE"},
-		Name:     "datasource",
-		Usage:    "database driver configuration string",
-		Value:    "woodpecker.sqlite",
-		FilePath: os.Getenv("WOODPECKER_DATABASE_DATASOURCE_FILE"),
+		EnvVars: []string{"WOODPECKER_DATABASE_DATASOURCE"},
+		Name:    "datasource",
+		Usage:   "database driver configuration string",
+		Value:   "woodpecker.sqlite",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_DATABASE_DATASOURCE_FILE"},
+		Name:    "datasource-file",
+		Usage:   "database driver configuration stored in a file, if set will always be prefered",
 	},
 	&cli.StringFlag{
 		EnvVars:  []string{"WOODPECKER_PROMETHEUS_AUTH_TOKEN"},
