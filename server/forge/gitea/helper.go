@@ -138,6 +138,7 @@ func pipelineFromTag(hook *pushHook) *model.Pipeline {
 		Avatar:    avatar,
 		Author:    hook.Sender.UserName,
 		Sender:    hook.Sender.UserName,
+		Email:     hook.Sender.Email,
 		Timestamp: time.Now().UTC().Unix(),
 	}
 }
@@ -164,6 +165,7 @@ func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 		Author:   hook.PullRequest.Poster.UserName,
 		Avatar:   avatar,
 		Sender:   hook.Sender.UserName,
+		Email:    hook.Sender.Email,
 		Title:    hook.PullRequest.Title,
 		Refspec: fmt.Sprintf("%s:%s",
 			hook.PullRequest.Head.Ref,
