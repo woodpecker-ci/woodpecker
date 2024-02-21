@@ -29,7 +29,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
-func Test_parser(t *testing.T) {
+func TestGiteaParser(t *testing.T) {
 	g := goblin.Goblin(t)
 	g.Describe("Gitea parser", func() {
 		g.It("should ignore unsupported hook events", func() {
@@ -49,14 +49,42 @@ func Test_parser(t *testing.T) {
 				req, _ := http.NewRequest("POST", "/hook", buf)
 				req.Header = http.Header{}
 				req.Header.Set(hookEvent, hookPush)
-				r, b, err := parseHook(req)
-				g.Assert(err).IsNil()
-				g.Assert(r).IsNotNil()
-				g.Assert(b).IsNotNil()
-				g.Assert(b.Event).Equal(model.EventPush)
-				assert.EqualValues(t, "6543@obermui.de", b.Email)
-				g.Assert(b.Message).Equal("Delete '.woodpecker/.check.yml'\n")
-				g.Assert(b.ChangedFiles).Equal([]string{".woodpecker/.check.yml"})
+				r, p, err := parseHook(req)
+				if assert.NoError(t, err) {
+					assert.EqualValues(t, &model.Repo{
+						ForgeRemoteID: "50820",
+						Owner:         "meisam",
+						Name:          "woodpecktester",
+						FullName:      "meisam/woodpecktester",
+						Avatar:        "https://codeberg.org/avatars/96512da76a14cf44e0bb32d1640e878e",
+						ForgeURL:      "https://codeberg.org/meisam/woodpecktester",
+						Clone:         "https://codeberg.org/meisam/woodpecktester.git",
+						CloneSSH:      "git@codeberg.org:meisam/woodpecktester.git",
+						Branch:        "main",
+						SCMKind:       "git",
+						PREnabled:     true,
+						Perm: &model.Perm{
+							Pull:  true,
+							Push:  true,
+							Admin: true,
+						},
+					}, r)
+					p.Timestamp = 0
+					assert.EqualValues(t, &model.Pipeline{
+						Author:       "6543",
+						Event:        "push",
+						Commit:       "28c3613ae62640216bea5e7dc71aa65356e4298b",
+						Branch:       "fdsafdsa",
+						Ref:          "refs/heads/fdsafdsa",
+						Message:      "Delete '.woodpecker/.check.yml'\n",
+						Sender:       "6543",
+						Avatar:       "https://codeberg.org/avatars/09a234c768cb9bca78f6b2f82d6af173",
+						Email:        "6543@obermui.de",
+						ForgeURL:     "https://codeberg.org/meisam/woodpecktester/compare/main...28c3613ae62640216bea5e7dc71aa65356e4298b",
+						ChangedFiles: []string{".woodpecker/.check.yml"},
+						Title:        "", // TODO!
+					}, p)
+				}
 			})
 
 			g.It("should extract repository and pipeline details", func() {
