@@ -541,12 +541,11 @@ func (c *Gitea) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.
 		}
 	}
 
-	// get title and message via api (and not from parsed webhook)
-	if pipeline != nil && pipeline.Event == model.EventTag && pipeline.Title == "" {
+	// get tag message via api if empty
+	if pipeline != nil && pipeline.Event == model.EventTag && pipeline.Message == "" {
 		if err := loadTag(); err != nil {
 			return nil, nil, err
 		}
-		pipeline.Title = fmt.Sprintf("created tag %s", tag.Name)
 		pipeline.Message = tag.Message
 	}
 

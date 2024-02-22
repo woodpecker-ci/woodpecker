@@ -136,9 +136,9 @@ func pipelineFromTag(hook *pushHook) *model.Pipeline {
 		Commit:   hook.Sha,
 		Ref:      fmt.Sprintf("refs/tags/%s", hook.Ref),
 		ForgeURL: fmt.Sprintf("%s/src/tag/%s", hook.Repo.HTMLURL, hook.Ref),
+		Title:    fmt.Sprintf("created tag %s", hook.Ref),
 		// TODO: get tag message and title via webhook (gitea change needed)
-		Title:     "", // if empty api will be asked
-		Message:   fmt.Sprintf("created tag %s", hook.Ref),
+		Message:   "", // if empty api will be asked
 		Avatar:    avatar,
 		Author:    hook.Sender.UserName,
 		Sender:    hook.Sender.UserName,
@@ -192,7 +192,8 @@ func pipelineFromRelease(hook *releaseHook) *model.Pipeline {
 		Ref:          fmt.Sprintf("refs/tags/%s", hook.Release.TagName),
 		ForgeURL:     hook.Release.HTMLURL,
 		Branch:       hook.Release.Target,
-		Message:      fmt.Sprintf("created release %s", hook.Release.Title),
+		Title:        fmt.Sprintf("created release %s", hook.Release.Title),
+		Message:      hook.Release.Note,
 		Avatar:       avatar,
 		Author:       hook.Sender.UserName,
 		Sender:       hook.Sender.UserName,
