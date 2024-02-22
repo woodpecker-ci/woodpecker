@@ -8,6 +8,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Removed `WOODPECKER_ROOT_PATH` and `WOODPECKER_ROOT_URL` config variables. Use `WOODPECKER_HOST` with a path instead
 - Pipelines without a config file will now be skipped instead of failing
 - Deprecated `includes` and `excludes` support from **event** filter
+- Deprecated uppercasing all secret env vars, instead, the value of the `secrets` property is used. [Read more](./20-usage/40-secrets.md#use-secrets-in-commands)
 
 ## 2.0.0
 
