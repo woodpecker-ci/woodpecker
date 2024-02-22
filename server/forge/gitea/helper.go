@@ -133,7 +133,6 @@ func pipelineFromTag(hook *pushHook) *model.Pipeline {
 		Commit:    hook.Sha,
 		Ref:       fmt.Sprintf("refs/tags/%s", hook.Ref),
 		ForgeURL:  fmt.Sprintf("%s/src/tag/%s", hook.Repo.HTMLURL, hook.Ref),
-		Branch:    fmt.Sprintf("refs/tags/%s", hook.Ref),
 		Message:   fmt.Sprintf("created tag %s", hook.Ref),
 		Avatar:    avatar,
 		Author:    hook.Sender.UserName,

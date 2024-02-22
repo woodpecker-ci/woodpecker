@@ -175,7 +175,6 @@ func TestGiteaParser(t *testing.T) {
 				Author:   "gordon",
 				Event:    "tag",
 				Commit:   "ef98532add3b2feb7a137426bba1248724367df5",
-				Branch:   "refs/tags/v1.0.0",
 				Ref:      "refs/tags/v1.0.0",
 				Message:  "created tag v1.0.0",
 				Sender:   "gordon",
