@@ -27,7 +27,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
-func Test_parse(t *testing.T) {
+func TestGiteaHelper(t *testing.T) {
 	g := goblin.Goblin(t)
 	g.Describe("Gitea", func() {
 		g.It("Should parse push hook payload", func() {
@@ -126,7 +126,7 @@ func Test_parse(t *testing.T) {
 			g.Assert(pipeline.Ref).Equal("refs/tags/v1.0.0")
 			g.Assert(pipeline.Branch).Equal("")
 			g.Assert(pipeline.ForgeURL).Equal("http://gitea.golang.org/gordon/hello-world/src/tag/v1.0.0")
-			g.Assert(pipeline.Message).Equal("created tag v1.0.0")
+			g.Assert(pipeline.Title).Equal("created tag v1.0.0")
 		})
 
 		g.It("Should return a Pipeline struct from a pull_request hook", func() {
@@ -139,7 +139,8 @@ func Test_parse(t *testing.T) {
 			g.Assert(pipeline.ForgeURL).Equal("http://gitea.golang.org/gordon/hello-world/pull/1")
 			g.Assert(pipeline.Branch).Equal("main")
 			g.Assert(pipeline.Refspec).Equal("feature/changes:main")
-			g.Assert(pipeline.Message).Equal(hook.PullRequest.Title)
+			g.Assert(pipeline.Title).Equal("Update the README with new information")
+			g.Assert(pipeline.Message).Equal("please merge")
 			g.Assert(pipeline.Avatar).Equal("http://1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87")
 			g.Assert(pipeline.Author).Equal(hook.PullRequest.Poster.UserName)
 		})
