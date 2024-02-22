@@ -16,7 +16,6 @@ package compiler
 
 import (
 	"fmt"
-	"maps"
 	"path"
 
 	backend_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
@@ -184,7 +183,9 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			Image:    cloneImage,
 			Settings: cloneSettings,
 		}
-		maps.Copy(container.Environment, c.cloneEnv)
+		for k, v := range c.cloneEnv {
+			container.Environment[k] = v
+		}
 		step, err := c.createProcess(container, backend_types.StepTypeClone)
 		if err != nil {
 			return nil, err
