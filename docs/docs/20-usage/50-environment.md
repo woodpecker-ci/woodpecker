@@ -7,9 +7,9 @@ Woodpecker provides the ability to pass environment variables to individual pipe
    - name: build
      image: golang
 +    environment:
-+      - CGO=0
-+      - GOOS=linux
-+      - GOARCH=amd64
++      CGO: 0
++      GOOS: linux
++      GOARCH: amd64
      commands:
        - go build
        - go test

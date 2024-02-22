@@ -21,13 +21,13 @@ import (
 )
 
 // SliceOrMap represents a map of strings, string slice are converted into a map
-type SliceOrMap map[string]string
+type SliceOrMap map[string]any
 
 // UnmarshalYAML implements the Unmarshaler interface.
 func (s *SliceOrMap) UnmarshalYAML(unmarshal func(any) error) error {
 	var sliceType []any
 	if err := unmarshal(&sliceType); err == nil {
-		parts := map[string]string{}
+		parts := map[string]any{}
 		for _, s := range sliceType {
 			if str, ok := s.(string); ok {
 				str := strings.TrimSpace(str)
@@ -47,21 +47,9 @@ func (s *SliceOrMap) UnmarshalYAML(unmarshal func(any) error) error {
 		return nil
 	}
 
-	var mapType map[any]any
+	var mapType map[string]any
 	if err := unmarshal(&mapType); err == nil {
-		parts := map[string]string{}
-		for k, v := range mapType {
-			if sk, ok := k.(string); ok {
-				if sv, ok := v.(string); ok {
-					parts[sk] = sv
-				} else {
-					return fmt.Errorf("cannot unmarshal '%v' of type %T into a string value", v, v)
-				}
-			} else {
-				return fmt.Errorf("cannot unmarshal '%v' of type %T into a string value", k, k)
-			}
-		}
-		*s = parts
+		*s = mapType
 		return nil
 	}
 

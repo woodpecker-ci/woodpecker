@@ -21,7 +21,6 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/constraint"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types/base"
 )
 
 // ParseBytes parses the configuration from bytes b.
@@ -53,7 +52,7 @@ func ParseBytes(b []byte) (*types.Workflow, error) {
 	// support deprecated platform filter
 	if out.PlatformDoNotUseIt != "" {
 		if out.Labels == nil {
-			out.Labels = make(base.SliceOrMap)
+			out.Labels = make(map[string]string)
 		}
 		if _, set := out.Labels["platform"]; !set {
 			out.Labels["platform"] = out.PlatformDoNotUseIt

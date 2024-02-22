@@ -179,10 +179,12 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			cloneSettings["tags"] = "true"
 		}
 		container := &yaml_types.Container{
-			Name:        defaultCloneName,
-			Image:       cloneImage,
-			Settings:    cloneSettings,
-			Environment: c.cloneEnv,
+			Name:     defaultCloneName,
+			Image:    cloneImage,
+			Settings: cloneSettings,
+		}
+		for k, v := range c.cloneEnv {
+			container.Environment[k] = v
 		}
 		step, err := c.createProcess(container, backend_types.StepTypeClone)
 		if err != nil {

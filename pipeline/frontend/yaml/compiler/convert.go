@@ -76,7 +76,6 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 
 	// append default environment variables
 	environment := map[string]string{}
-	maps.Copy(environment, container.Environment)
 	maps.Copy(environment, c.env)
 
 	environment["CI_WORKSPACE"] = path.Join(c.base, c.path)
@@ -112,12 +111,18 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		}
 	}
 
+	if err := settings.ParamsToEnv(container.Environment, environment, getSecretValue); err != nil {
+		return nil, err
+	}
+
 	for _, requested := range container.Secrets.Secrets {
 		secretValue, err := getSecretValue(requested.Source)
 		if err != nil {
 			return nil, err
 		}
 
+		environment[requested.Target] = secretValue
+		// TODO deprecated, remove in 3.x
 		environment[strings.ToUpper(requested.Target)] = secretValue
 	}
 

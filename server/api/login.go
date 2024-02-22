@@ -116,9 +116,38 @@ func HandleAuth(c *gin.Context) {
 		// the user was stored as org. now we adopt it to the user.
 		if org, err := _store.OrgFindByName(u.Login); err == nil && org != nil {
 			org.IsUser = true
+			u.OrgID = org.ID
 			if err := _store.OrgUpdate(org); err != nil {
 				log.Error().Err(err).Msgf("on user creation, could not mark org as user")
 			}
+		} else {
+			if err != nil && !errors.Is(err, types.RecordNotExist) {
+				_ = c.AbortWithError(http.StatusInternalServerError, err)
+				return
+			}
+			org = &model.Org{
+				Name:    u.Login,
+				IsUser:  true,
+				Private: false,
+			}
+			if err := _store.OrgCreate(org); err != nil {
+				log.Error().Err(err).Msgf("on user creation, could create org for user")
+			}
+			u.OrgID = org.ID
+		}
+	}
+
+	// update org name
+	if u.Login != tmpuser.Login {
+		org, err := _store.OrgGet(u.OrgID)
+		if err != nil {
+			log.Error().Err(err).Msgf("cannot get org %s", u.Login)
+			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
+			return
+		}
+		org.Name = u.Login
+		if err := _store.OrgUpdate(org); err != nil {
+			log.Error().Err(err).Msgf("on user creation, could not mark org as user")
 		}
 	}
 

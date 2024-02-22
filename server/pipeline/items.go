@@ -127,12 +127,8 @@ func setPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*stepb
 
 	for _, item := range pipelineItems {
 		for _, stage := range item.Config.Stages {
-			var gid int
 			for _, step := range stage.Steps {
 				pidSequence++
-				if gid == 0 {
-					gid = pidSequence
-				}
 				step := &model.Step{
 					Name:       step.Name,
 					UUID:       step.UUID,
@@ -146,8 +142,14 @@ func setPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*stepb
 				if item.Workflow.State == model.StatusSkipped {
 					step.State = model.StatusSkipped
 				}
+				if pipeline.Status == model.StatusBlocked {
+					step.State = model.StatusBlocked
+				}
 				item.Workflow.Children = append(item.Workflow.Children, step)
 			}
+		}
+		if pipeline.Status == model.StatusBlocked {
+			item.Workflow.State = model.StatusBlocked
 		}
 		item.Workflow.PipelineID = pipeline.ID
 		pipeline.Workflows = append(pipeline.Workflows, item.Workflow)
