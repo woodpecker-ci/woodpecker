@@ -2,19 +2,20 @@ FROM --platform=$BUILDPLATFORM docker.io/golang:1.22 AS certs
 
 FROM docker.io/alpine:3.19 AS conf
 # create datasource config file
-RUN echo -n "/var/lib/woodpecker/woodpecker.sqlite" > /etc/woodpecker-datasource.conf
+RUN mkdir -p /etc/woodpecker && \
+    echo -n "/var/lib/woodpecker/woodpecker.sqlite" > /etc/woodpecker/datasource.conf
 
 FROM scratch
 ARG TARGETOS TARGETARCH
 ENV GODEBUG=netdns=go
-ENV WOODPECKER_DATABASE_DATASOURCE_FILE=/etc/woodpecker-datasource.conf
+ENV WOODPECKER_DATABASE_DATASOURCE_FILE=/etc/woodpecker/datasource.conf
 ENV WOODPECKER_DATABASE_DRIVER=sqlite3
 ENV XDG_CACHE_HOME=/var/lib/woodpecker
 ENV XDG_DATA_HOME=/var/lib/woodpecker
 EXPOSE 8000 9000 80 443
 
 # copy datasource config from conf image
-COPY --from=conf /etc/woodpecker-datasource.conf /etc/woodpecker-datasource.conf
+COPY --from=conf /etc/woodpecker/datasource.conf /etc/woodpecker/datasource.conf
 # copy certs from certs image
 COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 # copy server binary

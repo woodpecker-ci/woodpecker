@@ -7,8 +7,9 @@ ARG TARGETOS TARGETARCH
 RUN apk add -U --no-cache ca-certificates=${CA_CERTIFICATES_VERSION}
 ENV GODEBUG=netdns=go
 # create datasource config file
-RUN echo -n "/var/lib/woodpecker/woodpecker.sqlite" > /etc/woodpecker-datasource.conf
-ENV WOODPECKER_DATABASE_DATASOURCE_FILE=/etc/woodpecker-datasource.conf
+RUN mkdir -p /etc/woodpecker && \
+    echo -n "/var/lib/woodpecker/woodpecker.sqlite" > /etc/woodpecker/datasource.conf
+ENV WOODPECKER_DATABASE_DATASOURCE_FILE=/etc/woodpecker/datasource.conf
 ENV WOODPECKER_DATABASE_DRIVER=sqlite3
 ENV XDG_CACHE_HOME=/var/lib/woodpecker
 ENV XDG_DATA_HOME=/var/lib/woodpecker
