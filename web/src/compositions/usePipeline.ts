@@ -81,7 +81,15 @@ export default (pipeline: Ref<Pipeline | undefined>) => {
     return convertEmojis(pipeline.value.message);
   });
 
-  const title = computed(() => message.value.split('\n')[0]);
+  const title = computed(() => {
+    if (!pipeline.value) {
+      return '';
+    }
+    if (pipeline.value.title !== '') {
+      return convertEmojis(pipeline.value.title);
+    }
+    return message.value.split('\n')[0];
+  });
 
   const prettyRef = computed(() => {
     if (pipeline.value?.event === 'push' || pipeline.value?.event === 'deployment') {

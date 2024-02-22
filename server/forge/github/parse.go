@@ -84,12 +84,15 @@ func parsePushHook(hook *github.PushEvent) (*model.Repo, *model.Pipeline) {
 		return nil, nil
 	}
 
+	title, _, _ := strings.Cut(hook.GetHeadCommit().GetMessage(), "\n")
+
 	pipeline := &model.Pipeline{
 		Event:        model.EventPush,
 		Commit:       hook.GetHeadCommit().GetID(),
 		Ref:          hook.GetRef(),
 		ForgeURL:     hook.GetHeadCommit().GetURL(),
 		Branch:       strings.ReplaceAll(hook.GetRef(), "refs/heads/", ""),
+		Title:        title,
 		Message:      hook.GetHeadCommit().GetMessage(),
 		Email:        hook.GetHeadCommit().GetAuthor().GetEmail(),
 		Avatar:       hook.GetSender().GetAvatarURL(),
