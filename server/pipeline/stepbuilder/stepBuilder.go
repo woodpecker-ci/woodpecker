@@ -240,7 +240,7 @@ func (b *StepBuilder) environmentVariables(metadata metadata.Metadata, axis matr
 func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, environ map[string]string, metadata metadata.Metadata, stepID int64) (*backend_types.Config, error) {
 	var secrets []compiler.Secret
 	for _, sec := range b.Secs {
-		events := []string{}
+		var events []string
 		for _, event := range sec.Events {
 			events = append(events, string(event))
 		}
