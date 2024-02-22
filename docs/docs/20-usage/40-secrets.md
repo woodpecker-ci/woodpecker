@@ -21,10 +21,12 @@ once their usage is declared in the `secrets` section:
    - name: docker
      image: docker
      commands:
-+      - echo $DOCKER_USERNAME
++      - echo $docker_username
 +      - echo $DOCKER_PASSWORD
-+    secrets: [ docker_username, docker_password ]
++    secrets: [ docker_username, DOCKER_PASSWORD ]
 ```
+
+The case of the environment variables is not changed, but secret matching is done case-insensitively. In the example above, `DOCKER_PASSWORD` would also match if the secret is called `docker_password`.
 
 ### Use secrets in settings
 
@@ -53,11 +55,11 @@ Please note parameter expressions are subject to pre-processing. When using secr
    - name: docker
      image: docker
      commands:
--      - echo ${DOCKER_USERNAME}
+-      - echo ${docker_username}
 -      - echo ${DOCKER_PASSWORD}
-+      - echo $${DOCKER_USERNAME}
++      - echo $${docker_username}
 +      - echo $${DOCKER_PASSWORD}
-     secrets: [ docker_username, docker_password ]
+     secrets: [ docker_username, DOCKER_PASSWORD ]
 ```
 
 ### Alternate Names
