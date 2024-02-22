@@ -79,10 +79,19 @@ func convertRepositoryPushEvent(ev *bb.RepositoryPushEvent, baseURL string) *mod
 		return nil
 	}
 
+	message := ""
+	if ev.ToCommit != nil {
+		message = ev.ToCommit.Message
+	} else if len(ev.Commits) > 0 {
+		message = ev.Commits[0].Message
+	}
+	title, _, _ := strings.Cut(message, "\n")
+
 	pipeline := &model.Pipeline{
 		Commit:    change.ToHash,
 		Branch:    change.Ref.DisplayID,
-		Message:   "",
+		Title:     title,
+		Message:   message,
 		Avatar:    bitbucketAvatarURL(baseURL, ev.Actor.Slug),
 		Author:    authorLabel(ev.Actor.Name),
 		Email:     ev.Actor.Email,
@@ -105,7 +114,6 @@ func convertPullRequestEvent(ev *bb.PullRequestEvent, baseURL string) *model.Pip
 		Commit:    ev.PullRequest.Source.Latest,
 		Branch:    ev.PullRequest.Source.DisplayID,
 		Title:     ev.PullRequest.Title,
-		Message:   "",
 		Avatar:    bitbucketAvatarURL(baseURL, ev.Actor.Slug),
 		Author:    authorLabel(ev.Actor.Name),
 		Email:     ev.Actor.Email,
