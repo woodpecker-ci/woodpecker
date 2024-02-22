@@ -81,12 +81,12 @@ func pipelineFromPush(hook *pushHook) *model.Pipeline {
 	link := hook.Compare
 	if len(hook.Commits) > 0 {
 		message = hook.Commits[0].Message
+		if len(hook.Commits) == 1 {
+			link = hook.Commits[0].URL
+		}
 	} else {
 		message = hook.HeadCommit.Message
-	}
-
-	if len(hook.Commits) == 1 {
-		link = hook.Commits[0].URL
+		link = hook.HeadCommit.URL
 	}
 
 	return &model.Pipeline{
@@ -158,7 +158,7 @@ func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 	pipeline := &model.Pipeline{
 		Event:    event,
 		Commit:   hook.PullRequest.Head.Sha,
-		ForgeURL: hook.PullRequest.URL,
+		ForgeURL: hook.PullRequest.HTMLURL,
 		Ref:      fmt.Sprintf("refs/pull/%d/head", hook.Number),
 		Branch:   hook.PullRequest.Base.Ref,
 		Message:  hook.PullRequest.Title,
@@ -192,6 +192,7 @@ func pipelineFromRelease(hook *releaseHook) *model.Pipeline {
 		Avatar:       avatar,
 		Author:       hook.Sender.UserName,
 		Sender:       hook.Sender.UserName,
+		Email:        hook.Sender.Email,
 		IsPrerelease: hook.Release.IsPrerelease,
 	}
 }
