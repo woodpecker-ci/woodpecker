@@ -51,7 +51,7 @@ type (
 
 		// TODO make []string in 3.x
 		Secrets Secrets `yaml:"secrets,omitempty"`
-		// TODO make map[string]string in 3.x
+		// TODO make map[string]any in 3.x
 		Environment base.SliceOrMap `yaml:"environment,omitempty"`
 
 		// Docker and Kubernetes Specific
