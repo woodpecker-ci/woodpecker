@@ -32,7 +32,7 @@
   <i-mdi-error-outline v-else-if="name === 'error'" class="h-5 w-5" />
   <i-simple-icons-gitea v-else-if="name === 'gitea'" class="h-8 w-8" />
   <i-ph-gitlab-logo-simple-fill v-else-if="name === 'gitlab'" class="h-8 w-8" />
-  <i-mdi-bitbucket v-else-if="name === 'bitbucket'" class="h-8 w-8" />
+  <i-mdi-bitbucket v-else-if="name === 'bitbucket' || name === 'bitbucket_dc'" class="h-8 w-8" />
   <i-vaadin-question-circle-o v-else-if="name === 'question'" class="h-6 w-6" />
   <i-ic-twotone-add v-else-if="name === 'plus'" class="h-6 w-6" />
   <i-mdi-format-list-bulleted v-else-if="name === 'list'" class="h-6 w-6" />
@@ -85,6 +85,7 @@ export type IconNames =
   | 'gitea'
   | 'gitlab'
   | 'bitbucket'
+  | 'bitbucket_dc'
   | 'question'
   | 'list'
   | 'loading'
