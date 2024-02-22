@@ -1,3 +1,4 @@
+# cSpell:ignore checkmake hadolint autofix autoupdate
 repos:
   - repo: meta
     hooks:
@@ -13,10 +14,10 @@ repos:
     hooks:
       - id: golangci-lint
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.38.0
+    rev: v0.39.0
     hooks:
       - id: markdownlint
-        exclude: '^docs/versioned_docs/.*$'
+        exclude: '^(docs/versioned_docs/.*|CHANGELOG.md)$'
   - repo: https://github.com/mrtazz/checkmake
     rev: 0.2.2
     hooks:

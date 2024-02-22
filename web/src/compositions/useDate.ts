@@ -14,7 +14,7 @@ dayjs.extend(duration);
 
 export function useDate() {
   function toLocaleString(date: Date) {
-    return dayjs(date).format(useI18n().t('time.tmpl'));
+    return dayjs(date).format(useI18n().t('time.template'));
   }
 
   function timeAgo(date: Date | string | number) {

@@ -26,7 +26,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/google/go-github/v58/github"
+	"github.com/google/go-github/v59/github"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 
@@ -92,46 +92,45 @@ func (c *client) URL() string {
 }
 
 // Login authenticates the session and returns the forge user details.
-func (c *client) Login(ctx context.Context, res http.ResponseWriter, req *http.Request) (*model.User, error) {
-	config := c.newConfig(req)
+func (c *client) Login(ctx context.Context, req *forge_types.OAuthRequest) (*model.User, string, error) {
+	config := c.newConfig()
+	redirectURL := config.AuthCodeURL("woodpecker")
 
-	// get the OAuth errors
-	if err := req.FormValue("error"); err != "" {
-		return nil, &forge_types.AuthError{
-			Err:         err,
-			Description: req.FormValue("error_description"),
-			URI:         req.FormValue("error_uri"),
+	// check the OAuth errors
+	if req.Error != "" {
+		return nil, redirectURL, &forge_types.AuthError{
+			Err:         req.Error,
+			Description: req.ErrorDescription,
+			URI:         req.ErrorURI,
 		}
 	}
 
-	// get the OAuth code
-	code := req.FormValue("code")
-	if len(code) == 0 {
+	// check the OAuth code
+	if len(req.Code) == 0 {
 		// TODO(bradrydzewski) we really should be using a random value here and
 		// storing in a cookie for verification in the next stage of the workflow.
 
-		http.Redirect(res, req, config.AuthCodeURL("woodpecker"), http.StatusSeeOther)
-		return nil, nil
+		return nil, redirectURL, nil
 	}
 
-	token, err := config.Exchange(c.newContext(ctx), code)
+	token, err := config.Exchange(c.newContext(ctx), req.Code)
 	if err != nil {
-		return nil, err
+		return nil, redirectURL, err
 	}
 
 	client := c.newClientToken(ctx, token.AccessToken)
 	user, _, err := client.Users.Get(ctx, "")
 	if err != nil {
-		return nil, err
+		return nil, redirectURL, err
 	}
 
 	emails, _, err := client.Users.ListEmails(ctx, nil)
 	if err != nil {
-		return nil, err
+		return nil, redirectURL, err
 	}
 	email := matchingEmail(emails, c.API)
 	if email == nil {
-		return nil, fmt.Errorf("no verified Email address for GitHub account")
+		return nil, redirectURL, fmt.Errorf("no verified Email address for GitHub account")
 	}
 
 	return &model.User{
@@ -140,7 +139,7 @@ func (c *client) Login(ctx context.Context, res http.ResponseWriter, req *http.R
 		Token:         token.AccessToken,
 		Avatar:        user.GetAvatarURL(),
 		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(user.GetID())),
-	}, nil
+	}, redirectURL, nil
 }
 
 // Auth returns the GitHub user login for the given access token.
@@ -405,16 +404,7 @@ func (c *client) newContext(ctx context.Context) context.Context {
 }
 
 // helper function to return the GitHub oauth2 config
-func (c *client) newConfig(req *http.Request) *oauth2.Config {
-	var redirect string
-
-	intendedURL := req.URL.Query()["url"]
-	if len(intendedURL) > 0 {
-		redirect = fmt.Sprintf("%s/authorize?url=%s", server.Config.Server.OAuthHost, intendedURL[0])
-	} else {
-		redirect = fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost)
-	}
-
+func (c *client) newConfig() *oauth2.Config {
 	return &oauth2.Config{
 		ClientID:     c.Client,
 		ClientSecret: c.Secret,
@@ -423,7 +413,7 @@ func (c *client) newConfig(req *http.Request) *oauth2.Config {
 			AuthURL:  fmt.Sprintf("%s/login/oauth/authorize", c.url),
 			TokenURL: fmt.Sprintf("%s/login/oauth/access_token", c.url),
 		},
-		RedirectURL: redirect,
+		RedirectURL: fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost),
 	}
 }
 
@@ -565,13 +555,16 @@ func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo, p *
 }
 
 // BranchHead returns the sha of the head (latest commit) of the specified branch
-func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
+func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (*model.Commit, error) {
 	token := common.UserToken(ctx, r, u)
 	b, _, err := c.newClientToken(ctx, token).Repositories.GetBranch(ctx, r.Owner, r.Name, branch, 1)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return b.GetCommit().GetSHA(), nil
+	return &model.Commit{
+		SHA:      b.GetCommit().GetSHA(),
+		ForgeURL: b.GetCommit().GetHTMLURL(),
+	}, nil
 }
 
 // Hook parses the post-commit hook from the Request body
@@ -580,6 +573,15 @@ func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model
 	pull, repo, pipeline, err := parseHook(r, c.MergeRef)
 	if err != nil {
 		return nil, nil, err
+	}
+
+	if pipeline != nil && pipeline.Event == model.EventRelease && pipeline.Commit == "" {
+		tagName := strings.Split(pipeline.Ref, "/")[2]
+		sha, err := c.getTagCommitSHA(ctx, repo, tagName)
+		if err != nil {
+			return nil, nil, err
+		}
+		pipeline.Commit = sha
 	}
 
 	if pull != nil && len(pipeline.ChangedFiles) == 0 {
@@ -628,4 +630,50 @@ func (c *client) loadChangedFilesFromPullRequest(ctx context.Context, pull *gith
 	})
 
 	return pipeline, err
+}
+
+func (c *client) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName string) (string, error) {
+	_store, ok := store.TryFromContext(ctx)
+	if !ok {
+		log.Error().Msg("could not get store from context")
+		return "", nil
+	}
+
+	repo, err := _store.GetRepoNameFallback(repo.ForgeRemoteID, repo.FullName)
+	if err != nil {
+		return "", err
+	}
+
+	user, err := _store.GetUser(repo.UserID)
+	if err != nil {
+		return "", err
+	}
+
+	gh := c.newClientToken(ctx, user.Token)
+	if err != nil {
+		return "", err
+	}
+
+	page := 1
+	var tag *github.RepositoryTag
+	for {
+		tags, _, err := gh.Repositories.ListTags(ctx, repo.Owner, repo.Name, &github.ListOptions{Page: page})
+		if err != nil {
+			return "", err
+		}
+
+		for _, t := range tags {
+			if t.GetName() == tagName {
+				tag = t
+				break
+			}
+		}
+		if tag != nil {
+			break
+		}
+	}
+	if tag == nil {
+		return "", fmt.Errorf("could not find tag %s", tagName)
+	}
+	return tag.GetCommit().GetSHA(), nil
 }

@@ -2,9 +2,9 @@ when:
   event: tag
 
 variables:
-  - &golang_image 'docker.io/golang:1.21.6'
+  - &golang_image 'docker.io/golang:1.22.0'
   - &node_image 'docker.io/node:21-alpine'
-  - &xgo_image 'docker.io/techknowlogick/xgo:go-1.21.5'
+  - &xgo_image 'docker.io/techknowlogick/xgo:go-1.22.0'
   - &xgo_version 'go-1.21.2'
 
 steps:

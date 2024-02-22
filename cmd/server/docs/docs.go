@@ -3937,6 +3937,9 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
+                "is_prerelease": {
+                    "type": "boolean"
+                },
                 "message": {
                     "type": "string"
                 },
@@ -4383,6 +4386,7 @@ const docTemplate = `{
                 "pull_request",
                 "pull_request_closed",
                 "tag",
+                "release",
                 "deployment",
                 "cron",
                 "manual"
@@ -4392,6 +4396,7 @@ const docTemplate = `{
                 "EventPull",
                 "EventPullClosed",
                 "EventTag",
+                "EventRelease",
                 "EventDeploy",
                 "EventCron",
                 "EventManual"
@@ -4418,9 +4423,11 @@ const docTemplate = `{
                 "linter",
                 "deprecation",
                 "compiler",
-                "generic"
+                "generic",
+                "bad_habit"
             ],
             "x-enum-comments": {
+                "PipelineErrorTypeBadHabit": "some bad-habit error",
                 "PipelineErrorTypeCompiler": "some error with the config semantics",
                 "PipelineErrorTypeDeprecation": "using some deprecated feature",
                 "PipelineErrorTypeGeneric": "some generic error",
@@ -4430,7 +4437,8 @@ const docTemplate = `{
                 "PipelineErrorTypeLinter",
                 "PipelineErrorTypeDeprecation",
                 "PipelineErrorTypeCompiler",
-                "PipelineErrorTypeGeneric"
+                "PipelineErrorTypeGeneric",
+                "PipelineErrorTypeBadHabit"
             ]
         },
         "model.Workflow": {

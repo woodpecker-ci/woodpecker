@@ -29,7 +29,7 @@
         <span class="truncate">{{ prettyRef }}</span>
       </router-link>
       <div v-else class="flex space-x-1 items-center min-w-0">
-        <Icon v-if="pipeline.event === 'tag'" name="tag" />
+        <Icon v-if="pipeline.event === 'tag' || pipeline.event === 'release'" name="tag" />
 
         <span class="truncate">{{ prettyRef }}</span>
       </div>

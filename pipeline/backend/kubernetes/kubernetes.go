@@ -129,6 +129,10 @@ func (e *kube) IsAvailable(context.Context) bool {
 	return len(host) > 0
 }
 
+func (e *kube) Flags() []cli.Flag {
+	return Flags
+}
+
 func (e *kube) Load(ctx context.Context) (*types.BackendInfo, error) {
 	config, err := configFromCliContext(ctx)
 	if err != nil {
@@ -168,7 +172,7 @@ func (e *kube) getConfig() *config {
 	return &c
 }
 
-// Setup the pipeline environment.
+// SetupWorkflow sets up the pipeline environment.
 func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("Setting up Kubernetes primitives")
 
@@ -179,7 +183,7 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID s
 		}
 	}
 
-	extraHosts := []types.HostAlias{}
+	var extraHosts []types.HostAlias
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
 			if step.Type == types.StepTypeService {
@@ -202,14 +206,19 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID s
 	return nil
 }
 
-// Start the pipeline step.
+// StartStep starts the pipeline step.
 func (e *kube) StartStep(ctx context.Context, step *types.Step, taskUUID string) error {
+	options, err := parseBackendOptions(step)
+	if err != nil {
+		log.Error().Err(err).Msg("could not parse backend options")
+	}
+
 	log.Trace().Str("taskUUID", taskUUID).Msgf("starting step: %s", step.Name)
-	_, err := startPod(ctx, e, step)
+	_, err = startPod(ctx, e, step, options)
 	return err
 }
 
-// Wait for the pipeline step to complete and returns
+// WaitStep waits for the pipeline step to complete and returns
 // the completion results.
 func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) (*types.State, error) {
 	podName, err := stepToPodName(step)
@@ -221,7 +230,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 
 	finished := make(chan bool)
 
-	podUpdated := func(old, new any) {
+	podUpdated := func(_, new any) {
 		pod, ok := new.(*v1.Pod)
 		if !ok {
 			log.Error().Msgf("could not parse pod: %v", new)
@@ -263,11 +272,23 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 	}
 
 	if isImagePullBackOffState(pod) {
-		return nil, fmt.Errorf("could not pull image for pod %s", pod.Name)
+		return nil, fmt.Errorf("could not pull image for pod %s", podName)
+	}
+
+	if len(pod.Status.ContainerStatuses) == 0 {
+		return nil, fmt.Errorf("no container statuses found for pod %s", podName)
+	}
+
+	cs := pod.Status.ContainerStatuses[0]
+
+	if cs.State.Terminated == nil {
+		err := fmt.Errorf("no terminated state found for container %s/%s", podName, cs.Name)
+		log.Error().Str("taskUUID", taskUUID).Str("pod", podName).Str("container", cs.Name).Interface("state", cs.State).Msg(err.Error())
+		return nil, err
 	}
 
 	bs := &types.State{
-		ExitCode:  int(pod.Status.ContainerStatuses[0].State.Terminated.ExitCode),
+		ExitCode:  int(cs.State.Terminated.ExitCode),
 		Exited:    true,
 		OOMKilled: false,
 	}
@@ -275,7 +296,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 	return bs, nil
 }
 
-// Tail the pipeline step logs.
+// TailStep tails the pipeline step logs.
 func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) (io.ReadCloser, error) {
 	podName, err := stepToPodName(step)
 	if err != nil {
@@ -286,7 +307,7 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 
 	up := make(chan bool)
 
-	podUpdated := func(old, new any) {
+	podUpdated := func(_, new any) {
 		pod, ok := new.(*v1.Pod)
 		if !ok {
 			log.Error().Msgf("could not parse pod: %v", new)
@@ -353,7 +374,7 @@ func (e *kube) DestroyStep(ctx context.Context, step *types.Step, taskUUID strin
 	return err
 }
 
-// Destroy the pipeline environment.
+// DestroyWorkflow destroys the pipeline environment.
 func (e *kube) DestroyWorkflow(ctx context.Context, conf *types.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msg("deleting Kubernetes primitives")
 

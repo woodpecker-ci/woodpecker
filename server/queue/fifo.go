@@ -17,6 +17,7 @@ package queue
 import (
 	"container/list"
 	"context"
+	"fmt"
 	"sync"
 	"time"
 
@@ -36,6 +37,7 @@ type worker struct {
 	agentID int64
 	filter  FilterFn
 	channel chan *model.Task
+	stop    context.CancelCauseFunc
 }
 
 type fifo struct {
@@ -61,7 +63,7 @@ func New(_ context.Context) Queue {
 	}
 }
 
-// Push pushes an item to the tail of this queue.
+// Push pushes a task to the tail of this queue.
 func (q *fifo) Push(_ context.Context, task *model.Task) error {
 	q.Lock()
 	q.pending.PushBack(task)
@@ -70,7 +72,7 @@ func (q *fifo) Push(_ context.Context, task *model.Task) error {
 	return nil
 }
 
-// Push pushes an item to the tail of this queue.
+// PushAtOnce pushes multiple tasks to the tail of this queue.
 func (q *fifo) PushAtOnce(_ context.Context, tasks []*model.Task) error {
 	q.Lock()
 	for _, task := range tasks {
@@ -81,13 +83,16 @@ func (q *fifo) PushAtOnce(_ context.Context, tasks []*model.Task) error {
 	return nil
 }
 
-// Poll retrieves and removes the head of this queue.
+// Poll retrieves and removes a task head of this queue.
 func (q *fifo) Poll(c context.Context, agentID int64, f FilterFn) (*model.Task, error) {
 	q.Lock()
+	ctx, stop := context.WithCancelCause(c)
+
 	w := &worker{
 		agentID: agentID,
 		channel: make(chan *model.Task, 1),
 		filter:  f,
+		stop:    stop,
 	}
 	q.workers[w] = struct{}{}
 	q.Unlock()
@@ -95,30 +100,30 @@ func (q *fifo) Poll(c context.Context, agentID int64, f FilterFn) (*model.Task, 
 
 	for {
 		select {
-		case <-c.Done():
+		case <-ctx.Done():
 			q.Lock()
 			delete(q.workers, w)
 			q.Unlock()
-			return nil, nil
+			return nil, ctx.Err()
 		case t := <-w.channel:
 			return t, nil
 		}
 	}
 }
 
-// Done signals that the item is done executing.
+// Done signals the task is complete.
 func (q *fifo) Done(_ context.Context, id string, exitStatus model.StatusValue) error {
 	return q.finished([]string{id}, exitStatus, nil)
 }
 
-// Error signals that the item is done executing with error.
+// Error signals the task is done with an error.
 func (q *fifo) Error(_ context.Context, id string, err error) error {
 	return q.finished([]string{id}, model.StatusFailure, err)
 }
 
-// ErrorAtOnce signals that the item is done executing with error.
-func (q *fifo) ErrorAtOnce(_ context.Context, id []string, err error) error {
-	return q.finished(id, model.StatusFailure, err)
+// ErrorAtOnce signals multiple done are complete with an error.
+func (q *fifo) ErrorAtOnce(_ context.Context, ids []string, err error) error {
+	return q.finished(ids, model.StatusFailure, err)
 }
 
 func (q *fifo) finished(ids []string, exitStatus model.StatusValue, err error) error {
@@ -145,7 +150,7 @@ func (q *fifo) Evict(c context.Context, id string) error {
 	return q.EvictAtOnce(c, []string{id})
 }
 
-// Evict removes a pending task from the queue.
+// EvictAtOnce removes multiple pending tasks from the queue.
 func (q *fifo) EvictAtOnce(_ context.Context, ids []string) error {
 	q.Lock()
 	defer q.Unlock()
@@ -200,7 +205,6 @@ func (q *fifo) Info(_ context.Context) InfoT {
 	stats.Stats.Pending = q.pending.Len()
 	stats.Stats.WaitingOnDeps = q.waitingOnDeps.Len()
 	stats.Stats.Running = len(q.running)
-	stats.Stats.Complete = 0 // TODO: implement this
 
 	for e := q.pending.Front(); e != nil; e = e.Next() {
 		task, _ := e.Value.(*model.Task)
@@ -219,17 +223,32 @@ func (q *fifo) Info(_ context.Context) InfoT {
 	return stats
 }
 
+// Pause stops the queue from handing out new work items in Poll
 func (q *fifo) Pause() {
 	q.Lock()
 	q.paused = true
 	q.Unlock()
 }
 
+// Resume starts the queue again.
 func (q *fifo) Resume() {
 	q.Lock()
 	q.paused = false
 	q.Unlock()
 	go q.process()
+}
+
+// KickAgentWorkers kicks all workers for a given agent.
+func (q *fifo) KickAgentWorkers(agentID int64) {
+	q.Lock()
+	defer q.Unlock()
+
+	for w := range q.workers {
+		if w.agentID == agentID {
+			w.stop(fmt.Errorf("worker was kicked"))
+			delete(q.workers, w)
+		}
+	}
 }
 
 // helper function that loops through the queue and attempts to

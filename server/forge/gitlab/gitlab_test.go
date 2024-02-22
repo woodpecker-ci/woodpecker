@@ -27,6 +27,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/gitlab/testdata"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
@@ -58,8 +59,9 @@ func Test_GitLab(t *testing.T) {
 	client := load(env)
 
 	user := model.User{
-		Login: "test_user",
-		Token: "e3b0c44298fc1c149afbf4c8996fb",
+		Login:         "test_user",
+		Token:         "e3b0c44298fc1c149afbf4c8996fb",
+		ForgeRemoteID: "3",
 	}
 
 	repo := model.Repo{
@@ -101,6 +103,12 @@ func Test_GitLab(t *testing.T) {
 			g.It("Should return error, when repo not exist", func() {
 				_, err := client.Repo(ctx, &user, "0", "not-existed", "not-existed")
 				assert.Error(t, err)
+			})
+
+			g.It("Should return repo with push access, when user inherits membership from namespace", func() {
+				_repo, err := client.Repo(ctx, &user, "6", "brightbox", "puppet")
+				assert.NoError(t, err)
+				assert.True(t, _repo.Perm.Push)
 			})
 		})
 
@@ -148,6 +156,7 @@ func Test_GitLab(t *testing.T) {
 						assert.Equal(t, "develop", hookRepo.Branch)
 						assert.Equal(t, "refs/heads/main", pipeline.Ref)
 						assert.Equal(t, []string{"cmd/cli/main.go"}, pipeline.ChangedFiles)
+						assert.Equal(t, model.EventPush, pipeline.Event)
 					}
 				})
 			})
@@ -170,6 +179,7 @@ func Test_GitLab(t *testing.T) {
 						assert.Equal(t, "develop", hookRepo.Branch)
 						assert.Equal(t, "refs/tags/v22", pipeline.Ref)
 						assert.Len(t, pipeline.ChangedFiles, 0)
+						assert.Equal(t, model.EventTag, pipeline.Event)
 					}
 				})
 			})
@@ -193,7 +203,38 @@ func Test_GitLab(t *testing.T) {
 						assert.Equal(t, "woodpecker", hookRepo.Name)
 						assert.Equal(t, "Update client.go 🎉", pipeline.Title)
 						assert.Len(t, pipeline.ChangedFiles, 0) // see L217
+						assert.Equal(t, model.EventPull, pipeline.Event)
 					}
+				})
+
+				g.It("Should ignore merge request hook without changes", func() {
+					req, _ := http.NewRequest(
+						testdata.ServiceHookMethod,
+						testdata.ServiceHookURL.String(),
+						bytes.NewReader(testdata.HookPullRequestWithoutChanges),
+					)
+					req.Header = testdata.ServiceHookHeaders
+
+					// TODO: insert fake store into context to retrieve user & repo, this will activate fetching of ChangedFiles
+					hookRepo, pipeline, err := client.Hook(ctx, req)
+					assert.Nil(t, hookRepo)
+					assert.Nil(t, pipeline)
+					assert.ErrorIs(t, err, &types.ErrIgnoreEvent{})
+				})
+
+				g.It("Should ignore merge request approval", func() {
+					req, _ := http.NewRequest(
+						testdata.ServiceHookMethod,
+						testdata.ServiceHookURL.String(),
+						bytes.NewReader(testdata.HookPullRequestApproved),
+					)
+					req.Header = testdata.ServiceHookHeaders
+
+					// TODO: insert fake store into context to retrieve user & repo, this will activate fetching of ChangedFiles
+					hookRepo, pipeline, err := client.Hook(ctx, req)
+					assert.Nil(t, hookRepo)
+					assert.Nil(t, pipeline)
+					assert.ErrorIs(t, err, &types.ErrIgnoreEvent{})
 				})
 
 				g.It("Should parse merge request hook when MR closed", func() {
@@ -213,6 +254,7 @@ func Test_GitLab(t *testing.T) {
 						assert.Equal(t, "woodpecker-test", hookRepo.Name)
 						assert.Equal(t, "Add new file", pipeline.Title)
 						assert.Len(t, pipeline.ChangedFiles, 0) // see L217
+						assert.Equal(t, model.EventPullClosed, pipeline.Event)
 					}
 				})
 
@@ -233,6 +275,25 @@ func Test_GitLab(t *testing.T) {
 						assert.Equal(t, "woodpecker-test", hookRepo.Name)
 						assert.Equal(t, "Add new file", pipeline.Title)
 						assert.Len(t, pipeline.ChangedFiles, 0) // see L217
+						assert.Equal(t, model.EventPullClosed, pipeline.Event)
+					}
+				})
+
+				g.It("Should parse release request hook", func() {
+					req, _ := http.NewRequest(
+						testdata.ServiceHookMethod,
+						testdata.ServiceHookURL.String(),
+						bytes.NewReader(testdata.WebhookReleaseBody),
+					)
+					req.Header = testdata.ReleaseHookHeaders
+
+					hookRepo, pipeline, err := client.Hook(ctx, req)
+					assert.NoError(t, err)
+					if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
+						assert.Equal(t, "refs/tags/0.0.2", pipeline.Ref)
+						assert.Equal(t, "ci", hookRepo.Name)
+						assert.Equal(t, "created release Awesome version 0.0.2", pipeline.Message)
+						assert.Equal(t, model.EventRelease, pipeline.Event)
 					}
 				})
 			})

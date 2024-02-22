@@ -22,7 +22,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/google/go-github/v58/github"
+	"github.com/google/go-github/v59/github"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
@@ -32,9 +32,10 @@ import (
 const (
 	hookField = "payload"
 
-	actionOpen  = "opened"
-	actionClose = "closed"
-	actionSync  = "synchronize"
+	actionOpen     = "opened"
+	actionClose    = "closed"
+	actionSync     = "synchronize"
+	actionReleased = "released"
 
 	stateOpen  = "open"
 	stateClose = "closed"
@@ -68,6 +69,9 @@ func parseHook(r *http.Request, merge bool) (*github.PullRequest, *model.Repo, *
 		return nil, repo, pipeline, nil
 	case *github.PullRequestEvent:
 		return parsePullHook(hook, merge)
+	case *github.ReleaseEvent:
+		repo, pipeline := parseReleaseHook(hook)
+		return nil, repo, pipeline, nil
 	default:
 		return nil, nil, nil, &types.ErrIgnoreEvent{Event: github.Stringify(hook)}
 	}
@@ -174,6 +178,33 @@ func parsePullHook(hook *github.PullRequestEvent, merge bool) (*github.PullReque
 	}
 
 	return hook.GetPullRequest(), convertRepo(hook.GetRepo()), pipeline, nil
+}
+
+// parseReleaseHook parses a release hook and returns the Repo and Pipeline
+// details.
+func parseReleaseHook(hook *github.ReleaseEvent) (*model.Repo, *model.Pipeline) {
+	if hook.GetAction() != actionReleased {
+		return nil, nil
+	}
+
+	name := hook.GetRelease().GetName()
+	if name == "" {
+		name = hook.GetRelease().GetTagName()
+	}
+
+	pipeline := &model.Pipeline{
+		Event:        model.EventRelease,
+		ForgeURL:     hook.GetRelease().GetHTMLURL(),
+		Ref:          fmt.Sprintf("refs/tags/%s", hook.GetRelease().GetTagName()),
+		Branch:       hook.GetRelease().GetTargetCommitish(),
+		Message:      fmt.Sprintf("created release %s", name),
+		Author:       hook.GetRelease().GetAuthor().GetLogin(),
+		Avatar:       hook.GetRelease().GetAuthor().GetAvatarURL(),
+		Sender:       hook.GetSender().GetLogin(),
+		IsPrerelease: hook.GetRelease().GetPrerelease(),
+	}
+
+	return convertRepo(hook.GetRepo()), pipeline
 }
 
 func getChangedFilesFromCommits(commits []*github.HeadCommit) []string {

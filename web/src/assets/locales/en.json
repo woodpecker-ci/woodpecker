@@ -24,7 +24,7 @@
     "not_found": "Server could not find requested object"
   },
   "time": {
-    "tmpl": "MMM D, YYYY, HH:mm z",
+    "template": "MMM D, YYYY, HH:mm z",
     "weeks_short": "w",
     "days_short": "d",
     "hours_short": "h",
@@ -38,7 +38,7 @@
       "trigger": "Run pipeline",
       "select_branch": "Select branch",
       "variables": {
-        "add": "Add variable",
+        "delete": "Delete variable",
         "title": "Additional pipeline variables",
         "desc": "Specify additional variables to use in your pipeline. Variables with the same name will be overwritten.",
         "name": "Variable name",
@@ -50,7 +50,7 @@
       "enter_target": "Target deployment environment",
       "trigger": "Deploy",
       "variables": {
-        "add": "Add variable",
+        "delete": "Delete variable",
         "title": "Additional pipeline variables",
         "desc": "Specify additional variables to use in your pipeline. Variables with the same name will be overwritten.",
         "name": "Variable name",
@@ -153,7 +153,7 @@
       },
       "registries": {
         "registries": "Registries",
-        "creds": "Registry credentials",
+        "credentials": "Registry credentials",
         "desc": "Registries credentials can be added to use private images for your pipeline.",
         "show": "Show registries",
         "add": "Add registry",
@@ -267,7 +267,8 @@
         "pr": "Pull Request",
         "deploy": "Deploy",
         "cron": "Cron",
-        "manual": "Manual"
+        "manual": "Manual",
+        "release": "Release"
       },
       "status": {
         "status": "Status: {status}",

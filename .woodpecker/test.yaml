@@ -68,28 +68,12 @@ steps:
       - '[ -n "$DIFF" ] && { echo "swagger not up to date, exec `make generate-swagger` and commit"; exit 1; } || true'
     when: *when
 
-  lint-editorconfig:
-    image: docker.io/mstruebing/editorconfig-checker:2.7.2
-    when:
-      - event: pull_request
-      - event: push
-        branch: renovate/*
-
   lint-license-header:
     image: *golang_image
     commands:
       - go install github.com/google/addlicense@latest
       - 'addlicense -check -ignore "vendor/**" **/*.go'
     when: *when
-
-  prettier:
-    image: docker.io/woodpeckerci/plugin-prettier:0.1.0
-    settings:
-      version: 3.2.4
-    when:
-      - event: pull_request
-      - event: push
-        branch: renovate/*
 
   test:
     depends_on:

@@ -14,6 +14,9 @@
     <div v-else-if="loading" class="flex justify-center text-wp-text-100">
       <Icon name="spinner" />
     </div>
+    <Panel v-else class="flex justify-center">
+      {{ $t('empty_list', { entity: $t('repo.branches') }) }}
+    </Panel>
   </div>
 </template>
 

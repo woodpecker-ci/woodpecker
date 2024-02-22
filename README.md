@@ -38,7 +38,7 @@
     <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="License: Apache-2.0">
   </a>
   <a href="https://bestpractices.coreinfrastructure.org/projects/5309">
-    <img src="https://bestpractices.coreinfrastructure.org/projects/5309/badge" alt="openssf best practices">
+    <img src="https://bestpractices.coreinfrastructure.org/projects/5309/badge" alt="OpenSSF best practices">
   </a>
   <a href="https://results.pre-commit.ci/repo/github/179344069" title="pre-commit.ci">
     <img src="https://results.pre-commit.ci/badge/github/woodpecker-ci/woodpecker/main.svg" alt="pre-commit.ci">
@@ -62,7 +62,7 @@ Please consider donating and become a backer. 🙏 [[Become a backer](https://op
 
 ## ✨ Contribute
 
-See [Contributing Guide](CONTRIBUTING.md)
+See [Contributing Guide](https://github.com/woodpecker-ci/.github/blob/main/CONTRIBUTING.md)
 
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://woodpecker-ci.org/docs/next/development/getting-started#gitpod)
 

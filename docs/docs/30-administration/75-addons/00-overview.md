@@ -13,11 +13,6 @@ To adapt Woodpecker to your needs beyond the [configuration](../10-server-config
 Addons can be used for:
 
 - Forges
-- Agent backends
-- Config services
-- Secret services
-- Environment services
-- Registry services
 
 ## Restrictions
 

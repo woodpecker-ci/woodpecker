@@ -116,37 +116,36 @@ func (c *Gitea) oauth2Config(ctx context.Context) (*oauth2.Config, context.Conte
 
 // Login authenticates an account with Gitea using basic authentication. The
 // Gitea account details are returned when the user is successfully authenticated.
-func (c *Gitea) Login(ctx context.Context, w http.ResponseWriter, req *http.Request) (*model.User, error) {
+func (c *Gitea) Login(ctx context.Context, req *forge_types.OAuthRequest) (*model.User, string, error) {
 	config, oauth2Ctx := c.oauth2Config(ctx)
+	redirectURL := config.AuthCodeURL("woodpecker")
 
-	// get the OAuth errors
-	if err := req.FormValue("error"); err != "" {
-		return nil, &forge_types.AuthError{
-			Err:         err,
-			Description: req.FormValue("error_description"),
-			URI:         req.FormValue("error_uri"),
+	// check the OAuth errors
+	if req.Error != "" {
+		return nil, redirectURL, &forge_types.AuthError{
+			Err:         req.Error,
+			Description: req.ErrorDescription,
+			URI:         req.ErrorURI,
 		}
 	}
 
-	// get the OAuth code
-	code := req.FormValue("code")
-	if len(code) == 0 {
-		http.Redirect(w, req, config.AuthCodeURL("woodpecker"), http.StatusSeeOther)
-		return nil, nil
+	// check the OAuth code
+	if len(req.Code) == 0 {
+		return nil, redirectURL, nil
 	}
 
-	token, err := config.Exchange(oauth2Ctx, code)
+	token, err := config.Exchange(oauth2Ctx, req.Code)
 	if err != nil {
-		return nil, err
+		return nil, redirectURL, err
 	}
 
 	client, err := c.newClientToken(ctx, token.AccessToken)
 	if err != nil {
-		return nil, err
+		return nil, redirectURL, err
 	}
 	account, _, err := client.GetMyUserInfo()
 	if err != nil {
-		return nil, err
+		return nil, redirectURL, err
 	}
 
 	return &model.User{
@@ -157,7 +156,7 @@ func (c *Gitea) Login(ctx context.Context, w http.ResponseWriter, req *http.Requ
 		Email:         account.Email,
 		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(account.ID)),
 		Avatar:        expandAvatar(c.url, account.AvatarURL),
-	}, nil
+	}, redirectURL, nil
 }
 
 // Auth uses the Gitea oauth2 access token and refresh token to authenticate
@@ -463,18 +462,21 @@ func (c *Gitea) Branches(ctx context.Context, u *model.User, r *model.Repo, p *m
 }
 
 // BranchHead returns the sha of the head (latest commit) of the specified branch
-func (c *Gitea) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
+func (c *Gitea) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (*model.Commit, error) {
 	token := common.UserToken(ctx, r, u)
 	client, err := c.newClientToken(ctx, token)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	b, _, err := client.GetRepoBranch(r.Owner, r.Name, branch)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return b.Commit.ID, nil
+	return &model.Commit{
+		SHA:      b.Commit.ID,
+		ForgeURL: b.Commit.URL,
+	}, nil
 }
 
 func (c *Gitea) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error) {
@@ -508,6 +510,15 @@ func (c *Gitea) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.
 	repo, pipeline, err := parseHook(r)
 	if err != nil {
 		return nil, nil, err
+	}
+
+	if pipeline != nil && pipeline.Event == model.EventRelease && pipeline.Commit == "" {
+		tagName := strings.Split(pipeline.Ref, "/")[2]
+		sha, err := c.getTagCommitSHA(ctx, repo, tagName)
+		if err != nil {
+			return nil, nil, err
+		}
+		pipeline.Commit = sha
 	}
 
 	if pipeline != nil && (pipeline.Event == model.EventPull || pipeline.Event == model.EventPullClosed) && len(pipeline.ChangedFiles) == 0 {
@@ -653,6 +664,36 @@ func (c *Gitea) getChangedFilesForPR(ctx context.Context, repo *model.Repo, inde
 		}
 		return files, nil
 	})
+}
+
+func (c *Gitea) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName string) (string, error) {
+	_store, ok := store.TryFromContext(ctx)
+	if !ok {
+		log.Error().Msg("could not get store from context")
+		return "", nil
+	}
+
+	repo, err := _store.GetRepoNameFallback(repo.ForgeRemoteID, repo.FullName)
+	if err != nil {
+		return "", err
+	}
+
+	user, err := _store.GetUser(repo.UserID)
+	if err != nil {
+		return "", err
+	}
+
+	client, err := c.newClientToken(ctx, user.Token)
+	if err != nil {
+		return "", err
+	}
+
+	tag, _, err := client.GetTag(repo.Owner, repo.Name, tagName)
+	if err != nil {
+		return "", err
+	}
+
+	return tag.Commit.SHA, nil
 }
 
 func (c *Gitea) perPage(ctx context.Context) int {

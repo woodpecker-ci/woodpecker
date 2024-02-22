@@ -61,9 +61,9 @@ func CreatePipeline(c *gin.Context) {
 
 	lastCommit, _ := server.Config.Services.Forge.BranchHead(c, user, repo, opts.Branch)
 
-	tmpBuild := createTmpPipeline(model.EventManual, lastCommit, repo, user, &opts)
+	tmpPipeline := createTmpPipeline(model.EventManual, lastCommit, user, &opts)
 
-	pl, err := pipeline.Create(c, _store, repo, tmpBuild)
+	pl, err := pipeline.Create(c, _store, repo, tmpPipeline)
 	if err != nil {
 		handlePipelineErr(c, err)
 	} else {
@@ -71,10 +71,10 @@ func CreatePipeline(c *gin.Context) {
 	}
 }
 
-func createTmpPipeline(event model.WebhookEvent, commitSHA string, repo *model.Repo, user *model.User, opts *model.PipelineOptions) *model.Pipeline {
+func createTmpPipeline(event model.WebhookEvent, commit *model.Commit, user *model.User, opts *model.PipelineOptions) *model.Pipeline {
 	return &model.Pipeline{
 		Event:     event,
-		Commit:    commitSHA,
+		Commit:    commit.SHA,
 		Branch:    opts.Branch,
 		Timestamp: time.Now().UTC().Unix(),
 
@@ -87,8 +87,7 @@ func createTmpPipeline(event model.WebhookEvent, commitSHA string, repo *model.R
 		Author: user.Login,
 		Email:  user.Email,
 
-		// TODO: Generate proper URL to commit
-		ForgeURL: repo.ForgeURL,
+		ForgeURL: commit.ForgeURL,
 	}
 }
 
@@ -312,11 +311,11 @@ func PostApproval(c *gin.Context) {
 		return
 	}
 
-	newpipeline, err := pipeline.Approve(c, _store, pl, user, repo)
+	newPipeline, err := pipeline.Approve(c, _store, pl, user, repo)
 	if err != nil {
 		handlePipelineErr(c, err)
 	} else {
-		c.JSON(http.StatusOK, newpipeline)
+		c.JSON(http.StatusOK, newPipeline)
 	}
 }
 
@@ -414,7 +413,7 @@ func PostPipeline(c *gin.Context) {
 	if event, ok := c.GetQuery("event"); ok {
 		pl.Event = model.WebhookEvent(event)
 
-		if err := model.ValidateWebhookEvent(pl.Event); err != nil {
+		if err := pl.Event.Validate(); err != nil {
 			_ = c.AbortWithError(http.StatusBadRequest, err)
 			return
 		}
@@ -435,13 +434,7 @@ func PostPipeline(c *gin.Context) {
 		}
 	}
 
-	netrc, err := server.Config.Services.Forge.Netrc(user, repo)
-	if err != nil {
-		handlePipelineErr(c, err)
-		return
-	}
-
-	newpipeline, err := pipeline.Restart(c, _store, pl, user, repo, envs, netrc)
+	newpipeline, err := pipeline.Restart(c, _store, pl, user, repo, envs)
 	if err != nil {
 		handlePipelineErr(c, err)
 	} else {

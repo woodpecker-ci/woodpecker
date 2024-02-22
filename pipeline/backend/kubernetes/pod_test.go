@@ -40,18 +40,27 @@ func TestStepToPodName(t *testing.T) {
 	name, err := stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "clone", Type: types.StepTypeClone})
 	assert.NoError(t, err)
 	assert.EqualValues(t, "wp-01he8bebctabr3kg", name)
-	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "clone", Type: types.StepTypeCache})
+	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "cache", Type: types.StepTypeCache})
 	assert.NoError(t, err)
 	assert.EqualValues(t, "wp-01he8bebctabr3kg", name)
-	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "clone", Type: types.StepTypePlugin})
+	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "release", Type: types.StepTypePlugin})
 	assert.NoError(t, err)
 	assert.EqualValues(t, "wp-01he8bebctabr3kg", name)
-	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "clone", Type: types.StepTypeCommands})
+	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "prepare-env", Type: types.StepTypeCommands})
 	assert.NoError(t, err)
 	assert.EqualValues(t, "wp-01he8bebctabr3kg", name)
-	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "clone", Type: types.StepTypeService})
+	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "postgres", Type: types.StepTypeService})
 	assert.NoError(t, err)
-	assert.EqualValues(t, "clone", name)
+	assert.EqualValues(t, "wp-svc-01he8bebctabr3kg-postgres", name)
+}
+
+func TestStepLabel(t *testing.T) {
+	name, err := stepLabel(&types.Step{Name: "Build image"})
+	assert.NoError(t, err)
+	assert.EqualValues(t, "build-image", name)
+
+	_, err = stepLabel(&types.Step{Name: ".build.image"})
+	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
 }
 
 func TestTinyPod(t *testing.T) {
@@ -130,14 +139,14 @@ func TestTinyPod(t *testing.T) {
 		Environment: map[string]string{"CI": "woodpecker"},
 	}, &config{
 		Namespace: "woodpecker",
-	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64")
+	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{})
 	assert.NoError(t, err)
 
-	json, err := json.Marshal(pod)
+	podJSON, err := json.Marshal(pod)
 	assert.NoError(t, err)
 
 	ja := jsonassert.New(t)
-	ja.Assertf(string(json), expected)
+	ja.Assertf(string(podJSON), expected)
 }
 
 func TestFullPod(t *testing.T) {
@@ -288,17 +297,17 @@ func TestFullPod(t *testing.T) {
 		{Number: 2345, Protocol: "tcp"},
 		{Number: 3456, Protocol: "udp"},
 	}
-	secCtx := types.SecurityContext{
+	secCtx := SecurityContext{
 		Privileged:   newBool(true),
 		RunAsNonRoot: newBool(true),
 		RunAsUser:    newInt64(101),
 		RunAsGroup:   newInt64(101),
 		FSGroup:      newInt64(101),
-		SeccompProfile: &types.SecProfile{
+		SeccompProfile: &SecProfile{
 			Type:             "Localhost",
 			LocalhostProfile: "profiles/audit.json",
 		},
-		ApparmorProfile: &types.SecProfile{
+		ApparmorProfile: &SecProfile{
 			Type:             "Localhost",
 			LocalhostProfile: "k8s-apparmor-example-deny-write",
 		},
@@ -315,30 +324,27 @@ func TestFullPod(t *testing.T) {
 		Environment: map[string]string{"CGO": "0"},
 		ExtraHosts:  hostAliases,
 		Ports:       ports,
-		BackendOptions: types.BackendOptions{
-			Kubernetes: types.KubernetesBackendOptions{
-				NodeSelector:       map[string]string{"storage": "ssd"},
-				ServiceAccountName: "wp-svc-acc",
-				Tolerations:        []types.Toleration{{Key: "net-port", Value: "100Mbit", Effect: types.TaintEffectNoSchedule}},
-				Resources: types.Resources{
-					Requests: map[string]string{"memory": "128Mi", "cpu": "1000m"},
-					Limits:   map[string]string{"memory": "256Mi", "cpu": "2"},
-				},
-				SecurityContext: &secCtx,
-			},
-		},
 	}, &config{
 		Namespace:            "woodpecker",
 		ImagePullSecretNames: []string{"regcred", "another-pull-secret"},
 		PodLabels:            map[string]string{"app": "test"},
 		PodAnnotations:       map[string]string{"apps.kubernetes.io/pod-index": "0"},
 		SecurityContext:      SecurityContextConfig{RunAsNonRoot: false},
-	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64")
+	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
+		NodeSelector:       map[string]string{"storage": "ssd"},
+		ServiceAccountName: "wp-svc-acc",
+		Tolerations:        []Toleration{{Key: "net-port", Value: "100Mbit", Effect: TaintEffectNoSchedule}},
+		Resources: Resources{
+			Requests: map[string]string{"memory": "128Mi", "cpu": "1000m"},
+			Limits:   map[string]string{"memory": "256Mi", "cpu": "2"},
+		},
+		SecurityContext: &secCtx,
+	})
 	assert.NoError(t, err)
 
-	json, err := json.Marshal(pod)
+	podJSON, err := json.Marshal(pod)
 	assert.NoError(t, err)
 
 	ja := jsonassert.New(t)
-	ja.Assertf(string(json), expected)
+	ja.Assertf(string(podJSON), expected)
 }

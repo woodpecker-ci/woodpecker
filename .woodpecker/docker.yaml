@@ -7,11 +7,11 @@ when:
       - renovate/*
 
 variables:
-  - &golang_image 'docker.io/golang:1.21.6'
+  - &golang_image 'docker.io/golang:1.22.0'
   - &node_image 'docker.io/node:21-alpine'
-  - &xgo_image 'docker.io/techknowlogick/xgo:go-1.21.5'
+  - &xgo_image 'docker.io/techknowlogick/xgo:go-1.22.0'
   - &xgo_version 'go-1.21.2'
-  - &buildx_plugin 'docker.io/woodpeckerci/plugin-docker-buildx:3.0.0'
+  - &buildx_plugin 'docker.io/woodpeckerci/plugin-docker-buildx:3.1.0'
   - &platforms_release 'linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/386,linux/amd64,linux/ppc64le,linux/riscv64,linux/s390x,freebsd/arm64,freebsd/amd64,openbsd/arm64,openbsd/amd64'
   - &platforms_server 'linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le,linux/riscv64'
   - &platforms_preview 'linux/amd64'
