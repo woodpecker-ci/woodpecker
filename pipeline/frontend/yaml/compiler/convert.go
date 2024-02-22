@@ -121,6 +121,8 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 			return nil, err
 		}
 
+		environment[requested.Target] = secretValue
+		// TODO deprecated, remove in 3.x
 		environment[strings.ToUpper(requested.Target)] = secretValue
 	}
 
