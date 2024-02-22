@@ -177,6 +177,7 @@ func convertPushHook(hook *gitlab.PushEvent) (*model.Repo, *model.Pipeline, erro
 		if hook.After == cm.ID {
 			pipeline.Author = cm.Author.Name
 			pipeline.Email = cm.Author.Email
+			pipeline.Title = cm.Title
 			pipeline.Message = cm.Message
 			pipeline.Timestamp = cm.Timestamp.Unix()
 			if len(pipeline.Email) != 0 {
@@ -228,6 +229,7 @@ func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Pipeline, error)
 		if hook.After == cm.ID {
 			pipeline.Author = cm.Author.Name
 			pipeline.Email = cm.Author.Email
+			pipeline.Title = cm.Title
 			pipeline.Message = cm.Message
 			pipeline.Timestamp = cm.Timestamp.Unix()
 			if len(pipeline.Email) != 0 {
@@ -264,7 +266,8 @@ func convertReleaseHook(hook *gitlab.ReleaseEvent) (*model.Repo, *model.Pipeline
 		Event:    model.EventRelease,
 		Commit:   hook.Commit.ID,
 		ForgeURL: hook.URL,
-		Message:  fmt.Sprintf("created release %s", hook.Name),
+		Title:    fmt.Sprintf("created release %s", hook.Name),
+		Message:  hook.Description,
 		Sender:   hook.Commit.Author.Name,
 		Author:   hook.Commit.Author.Name,
 		Email:    hook.Commit.Author.Email,
