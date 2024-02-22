@@ -20,7 +20,6 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/franela/goblin"
 	"github.com/stretchr/testify/assert"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/gitea/fixtures"
@@ -183,6 +182,197 @@ func TestGiteaParser(t *testing.T) {
 				ForgeURL: "http://gitea.golang.org/gordon/hello-world/src/tag/v1.0.0",
 			},
 		},
+		{
+			name:  "pull-request events should handle a PR hook when PR got created",
+			data:  fixtures.HookPullRequest,
+			event: "pull_request",
+			repo: &model.Repo{
+				ForgeRemoteID: "35129377",
+				Owner:         "gordon",
+				Name:          "hello-world",
+				FullName:      "gordon/hello-world",
+				Avatar:        "https://secure.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87",
+				ForgeURL:      "http://gitea.golang.org/gordon/hello-world",
+				Clone:         "https://gitea.golang.org/gordon/hello-world.git",
+				CloneSSH:      "",
+				Branch:        "main",
+				SCMKind:       "git",
+				IsSCMPrivate:  true,
+				Perm: &model.Perm{
+					Pull:  true,
+					Push:  true,
+					Admin: true,
+				},
+			},
+			pipe: &model.Pipeline{
+				Author:            "gordon",
+				Event:             "pull_request",
+				Commit:            "0d1a26e67d8f5eaf1f6ba5c57fc3c7d91ac0fd1c",
+				Branch:            "main",
+				Ref:               "refs/pull/1/head",
+				Refspec:           "feature/changes:main",
+				Title:             "Update the README with new information",
+				Message:           "Update the README with new information",
+				Sender:            "gordon",
+				Avatar:            "http://1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87",
+				Email:             "gordon@golang.org",
+				ForgeURL:          "http://gitea.golang.org/gordon/hello-world/pull/1",
+				PullRequestLabels: []string{},
+			},
+		},
+		{
+			name:  "pull-request events should handle a PR hook when PR got updated",
+			data:  fixtures.HookPullRequestUpdated,
+			event: "pull_request",
+			repo: &model.Repo{
+				ForgeRemoteID: "6",
+				Owner:         "Test-CI",
+				Name:          "multi-line-secrets",
+				FullName:      "Test-CI/multi-line-secrets",
+				Avatar:        "http://127.0.0.1:3000/avatars/5b0a83c2185b3cb1ebceb11062d6c2eb",
+				ForgeURL:      "http://127.0.0.1:3000/Test-CI/multi-line-secrets",
+				Clone:         "http://127.0.0.1:3000/Test-CI/multi-line-secrets.git",
+				CloneSSH:      "ssh://git@127.0.0.1:2200/Test-CI/multi-line-secrets.git",
+				Branch:        "main",
+				SCMKind:       "git",
+				PREnabled:     true,
+				IsSCMPrivate:  false,
+				Perm: &model.Perm{
+					Pull:  true,
+					Push:  true,
+					Admin: true,
+				},
+			},
+			pipe: &model.Pipeline{
+				Author:   "test",
+				Event:    "pull_request",
+				Commit:   "788ed8d02d3b7fcfcf6386dbcbca696aa1d4dc25",
+				Branch:   "main",
+				Ref:      "refs/pull/2/head",
+				Refspec:  "test-patch-1:main",
+				Title:    "New Pull",
+				Message:  "New Pull",
+				Sender:   "test",
+				Avatar:   "http://127.0.0.1:3000/avatars/dd46a756faad4727fb679320751f6dea",
+				Email:    "test@noreply.localhost",
+				ForgeURL: "http://127.0.0.1:3000/Test-CI/multi-line-secrets/pulls/2",
+				PullRequestLabels: []string{
+					"Kind/Bug",
+					"Kind/Security",
+				},
+			},
+		},
+		{
+			name:  "pull-request events should handle a PR closed hook when PR got closed",
+			data:  fixtures.HookPullRequestClosed,
+			event: "pull_request",
+			repo: &model.Repo{
+				ForgeRemoteID: "46534",
+				Owner:         "anbraten",
+				Name:          "test-repo",
+				FullName:      "anbraten/test-repo",
+				Avatar:        "https://seccdn.libravatar.org/avatar/fc9b6fe77c6b732a02925a62a81f05a0?d=identicon",
+				ForgeURL:      "https://gitea.com/anbraten/test-repo",
+				Clone:         "https://gitea.com/anbraten/test-repo.git",
+				CloneSSH:      "git@gitea.com:anbraten/test-repo.git",
+				Branch:        "main",
+				SCMKind:       "git",
+				PREnabled:     true,
+				Perm: &model.Perm{
+					Pull:  true,
+					Push:  true,
+					Admin: true,
+				},
+			},
+			pipe: &model.Pipeline{
+				Author:            "anbraten",
+				Event:             "pull_request_closed",
+				Commit:            "d555a5dd07f4d0148a58d4686ec381502ae6a2d4",
+				Branch:            "main",
+				Ref:               "refs/pull/1/head",
+				Refspec:           "anbraten-patch-1:main",
+				Title:             "Adjust file",
+				Message:           "Adjust file",
+				Sender:            "anbraten",
+				Avatar:            "https://seccdn.libravatar.org/avatar/fc9b6fe77c6b732a02925a62a81f05a0?d=identicon",
+				Email:             "anbraten@sender.gitea.com",
+				ForgeURL:          "https://gitea.com/anbraten/test-repo/pulls/1",
+				PullRequestLabels: []string{},
+			},
+		},
+		{
+			name:  "pull-request events should handle a PR closed hook when PR was merged",
+			data:  fixtures.HookPullRequestMerged,
+			event: "pull_request",
+			repo: &model.Repo{
+				ForgeRemoteID: "46534",
+				Owner:         "anbraten",
+				Name:          "test-repo",
+				FullName:      "anbraten/test-repo",
+				Avatar:        "https://seccdn.libravatar.org/avatar/fc9b6fe77c6b732a02925a62a81f05a0?d=identicon",
+				ForgeURL:      "https://gitea.com/anbraten/test-repo",
+				Clone:         "https://gitea.com/anbraten/test-repo.git",
+				CloneSSH:      "git@gitea.com:anbraten/test-repo.git",
+				Branch:        "main",
+				SCMKind:       "git",
+				PREnabled:     true,
+				Perm: &model.Perm{
+					Pull:  true,
+					Push:  true,
+					Admin: true,
+				},
+			},
+			pipe: &model.Pipeline{
+				Author:            "anbraten",
+				Event:             "pull_request_closed",
+				Commit:            "d555a5dd07f4d0148a58d4686ec381502ae6a2d4",
+				Branch:            "main",
+				Ref:               "refs/pull/1/head",
+				Refspec:           "anbraten-patch-1:main",
+				Title:             "Adjust file",
+				Message:           "Adjust file",
+				Sender:            "anbraten",
+				Avatar:            "https://seccdn.libravatar.org/avatar/fc9b6fe77c6b732a02925a62a81f05a0?d=identicon",
+				Email:             "anbraten@noreply.gitea.com",
+				ForgeURL:          "https://gitea.com/anbraten/test-repo/pulls/1",
+				PullRequestLabels: []string{},
+			},
+		},
+		{
+			name:  "release events should handle release hook",
+			data:  fixtures.HookRelease,
+			event: "release",
+			repo: &model.Repo{
+				ForgeRemoteID: "77",
+				Owner:         "anbraten",
+				Name:          "demo",
+				FullName:      "anbraten/demo",
+				Avatar:        "https://git.xxx/user/avatar/anbraten/-1",
+				ForgeURL:      "https://git.xxx/anbraten/demo",
+				Clone:         "https://git.xxx/anbraten/demo.git",
+				CloneSSH:      "ssh://git@git.xxx:22/anbraten/demo.git",
+				Branch:        "main",
+				SCMKind:       "git",
+				PREnabled:     true,
+				IsSCMPrivate:  true,
+				Perm: &model.Perm{
+					Pull:  true,
+					Push:  true,
+					Admin: true,
+				},
+			},
+			pipe: &model.Pipeline{
+				Author:   "anbraten",
+				Event:    "release",
+				Branch:   "main",
+				Ref:      "refs/tags/0.0.5",
+				Message:  "created release Version 0.0.5",
+				Sender:   "anbraten",
+				Avatar:   "https://git.xxx/user/avatar/anbraten/-1",
+				Email:    "anbraten@noreply.xxx",
+				ForgeURL: "https://git.xxx/anbraten/demo/releases/tag/0.0.5",
+			},
+		},
 	}
 
 	for _, tc := range tests {
@@ -200,184 +390,4 @@ func TestGiteaParser(t *testing.T) {
 			}
 		})
 	}
-
-	g := goblin.Goblin(t)
-	g.Describe("Gitea parser", func() {
-		g.Describe("pull-request events", func() {
-			// g.It("should handle a PR hook when PR got created")
-
-			g.It("should handle a PR hook when PR got updated", func() {
-				buf := bytes.NewBufferString(fixtures.HookPullRequest)
-				req, _ := http.NewRequest("POST", "/hook", buf)
-				req.Header = http.Header{}
-				req.Header.Set(hookEvent, hookPullRequest)
-				r, p, err := parseHook(req)
-				if assert.NoError(t, err) {
-					assert.EqualValues(t, &model.Repo{
-						ForgeRemoteID: "35129377",
-						Owner:         "gordon",
-						Name:          "hello-world",
-						FullName:      "gordon/hello-world",
-						Avatar:        "https://secure.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87",
-						ForgeURL:      "http://gitea.golang.org/gordon/hello-world",
-						Clone:         "https://gitea.golang.org/gordon/hello-world.git",
-						CloneSSH:      "",
-						Branch:        "main",
-						SCMKind:       "git",
-						IsSCMPrivate:  true,
-						Perm: &model.Perm{
-							Pull:  true,
-							Push:  true,
-							Admin: true,
-						},
-					}, r)
-					p.Timestamp = 0
-					assert.EqualValues(t, &model.Pipeline{
-						Author:            "gordon",
-						Event:             "pull_request",
-						Commit:            "0d1a26e67d8f5eaf1f6ba5c57fc3c7d91ac0fd1c",
-						Branch:            "main",
-						Ref:               "refs/pull/1/head",
-						Refspec:           "feature/changes:main",
-						Title:             "Update the README with new information",
-						Message:           "Update the README with new information",
-						Sender:            "gordon",
-						Avatar:            "http://1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87",
-						Email:             "gordon@golang.org",
-						ForgeURL:          "http://gitea.golang.org/gordon/hello-world/pull/1",
-						PullRequestLabels: []string{},
-					}, p)
-				}
-			})
-
-			g.It("should handle a PR closed hook when PR got closed", func() {
-				buf := bytes.NewBufferString(fixtures.HookPullRequestClosed)
-				req, _ := http.NewRequest("POST", "/hook", buf)
-				req.Header = http.Header{}
-				req.Header.Set(hookEvent, hookPullRequest)
-				r, p, err := parseHook(req)
-				if assert.NoError(t, err) {
-					assert.EqualValues(t, &model.Repo{
-						ForgeRemoteID: "46534",
-						Owner:         "anbraten",
-						Name:          "test-repo",
-						FullName:      "anbraten/test-repo",
-						Avatar:        "https://seccdn.libravatar.org/avatar/fc9b6fe77c6b732a02925a62a81f05a0?d=identicon",
-						ForgeURL:      "https://gitea.com/anbraten/test-repo",
-						Clone:         "https://gitea.com/anbraten/test-repo.git",
-						CloneSSH:      "git@gitea.com:anbraten/test-repo.git",
-						Branch:        "main",
-						SCMKind:       "git",
-						PREnabled:     true,
-						Perm: &model.Perm{
-							Pull:  true,
-							Push:  true,
-							Admin: true,
-						},
-					}, r)
-					p.Timestamp = 0
-					assert.EqualValues(t, &model.Pipeline{
-						Author:            "anbraten",
-						Event:             "pull_request_closed",
-						Commit:            "d555a5dd07f4d0148a58d4686ec381502ae6a2d4",
-						Branch:            "main",
-						Ref:               "refs/pull/1/head",
-						Refspec:           "anbraten-patch-1:main",
-						Title:             "Adjust file",
-						Message:           "Adjust file",
-						Sender:            "anbraten",
-						Avatar:            "https://seccdn.libravatar.org/avatar/fc9b6fe77c6b732a02925a62a81f05a0?d=identicon",
-						Email:             "anbraten@sender.gitea.com",
-						ForgeURL:          "https://gitea.com/anbraten/test-repo/pulls/1",
-						PullRequestLabels: []string{},
-					}, p)
-				}
-			})
-
-			g.It("should handle a PR closed hook when PR was merged", func() {
-				buf := bytes.NewBufferString(fixtures.HookPullRequestMerged)
-				req, _ := http.NewRequest("POST", "/hook", buf)
-				req.Header = http.Header{}
-				req.Header.Set(hookEvent, hookPullRequest)
-				r, p, err := parseHook(req)
-				if assert.NoError(t, err) {
-					assert.EqualValues(t, &model.Repo{
-						ForgeRemoteID: "46534",
-						Owner:         "anbraten",
-						Name:          "test-repo",
-						FullName:      "anbraten/test-repo",
-						Avatar:        "https://seccdn.libravatar.org/avatar/fc9b6fe77c6b732a02925a62a81f05a0?d=identicon",
-						ForgeURL:      "https://gitea.com/anbraten/test-repo",
-						Clone:         "https://gitea.com/anbraten/test-repo.git",
-						CloneSSH:      "git@gitea.com:anbraten/test-repo.git",
-						Branch:        "main",
-						SCMKind:       "git",
-						PREnabled:     true,
-						Perm: &model.Perm{
-							Pull:  true,
-							Push:  true,
-							Admin: true,
-						},
-					}, r)
-					p.Timestamp = 0
-					assert.EqualValues(t, &model.Pipeline{
-						Author:            "anbraten",
-						Event:             "pull_request_closed",
-						Commit:            "d555a5dd07f4d0148a58d4686ec381502ae6a2d4",
-						Branch:            "main",
-						Ref:               "refs/pull/1/head",
-						Refspec:           "anbraten-patch-1:main",
-						Title:             "Adjust file",
-						Message:           "Adjust file",
-						Sender:            "anbraten",
-						Avatar:            "https://seccdn.libravatar.org/avatar/fc9b6fe77c6b732a02925a62a81f05a0?d=identicon",
-						Email:             "anbraten@noreply.gitea.com",
-						ForgeURL:          "https://gitea.com/anbraten/test-repo/pulls/1",
-						PullRequestLabels: []string{},
-					}, p)
-				}
-			})
-
-			g.It("should handle release hook", func() {
-				buf := bytes.NewBufferString(fixtures.HookRelease)
-				req, _ := http.NewRequest("POST", "/hook", buf)
-				req.Header = http.Header{}
-				req.Header.Set(hookEvent, hookRelease)
-				r, p, err := parseHook(req)
-				if assert.NoError(t, err) {
-					assert.EqualValues(t, &model.Repo{
-						ForgeRemoteID: "77",
-						Owner:         "anbraten",
-						Name:          "demo",
-						FullName:      "anbraten/demo",
-						Avatar:        "https://git.xxx/user/avatar/anbraten/-1",
-						ForgeURL:      "https://git.xxx/anbraten/demo",
-						Clone:         "https://git.xxx/anbraten/demo.git",
-						CloneSSH:      "ssh://git@git.xxx:22/anbraten/demo.git",
-						Branch:        "main",
-						SCMKind:       "git",
-						PREnabled:     true,
-						IsSCMPrivate:  true,
-						Perm: &model.Perm{
-							Pull:  true,
-							Push:  true,
-							Admin: true,
-						},
-					}, r)
-					p.Timestamp = 0
-					assert.EqualValues(t, &model.Pipeline{
-						Author:   "anbraten",
-						Event:    "release",
-						Branch:   "main",
-						Ref:      "refs/tags/0.0.5",
-						Message:  "created release Version 0.0.5",
-						Sender:   "anbraten",
-						Avatar:   "https://git.xxx/user/avatar/anbraten/-1",
-						Email:    "anbraten@noreply.xxx",
-						ForgeURL: "https://git.xxx/anbraten/demo/releases/tag/0.0.5",
-					}, p)
-				}
-			})
-		})
-	})
 }
