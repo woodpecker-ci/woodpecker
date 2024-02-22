@@ -39,6 +39,9 @@ const (
 
 	stateOpen  = "open"
 	stateClose = "closed"
+
+	branchRefPrefix = "refs/heads/"
+	tagRefPrefix    = "refs/tags/"
 )
 
 // parseHook parses a GitHub hook from an http.Request request and returns
@@ -91,7 +94,7 @@ func parsePushHook(hook *github.PushEvent) (*model.Repo, *model.Pipeline) {
 		Commit:       hook.GetHeadCommit().GetID(),
 		Ref:          hook.GetRef(),
 		ForgeURL:     hook.GetHeadCommit().GetURL(),
-		Branch:       strings.ReplaceAll(hook.GetRef(), "refs/heads/", ""),
+		Branch:       strings.ReplaceAll(hook.GetRef(), branchRefPrefix, ""),
 		Title:        title,
 		Message:      hook.GetHeadCommit().GetMessage(),
 		Email:        hook.GetHeadCommit().GetAuthor().GetEmail(),
@@ -104,15 +107,15 @@ func parsePushHook(hook *github.PushEvent) (*model.Repo, *model.Pipeline) {
 	if len(pipeline.Author) == 0 {
 		pipeline.Author = hook.GetHeadCommit().GetAuthor().GetLogin()
 	}
-	if strings.HasPrefix(pipeline.Ref, "refs/tags/") {
+	if strings.HasPrefix(pipeline.Ref, tagRefPrefix) {
 		// just kidding, this is actually a tag event. Why did this come as a push
 		// event we'll never know!
 		pipeline.Event = model.EventTag
 		pipeline.ChangedFiles = nil
 		// For tags, if the base_ref (tag's base branch) is set, we're using it
 		// as pipeline's branch so that we can filter events base on it
-		if strings.HasPrefix(hook.GetBaseRef(), "refs/heads/") {
-			pipeline.Branch = strings.ReplaceAll(hook.GetBaseRef(), "refs/heads/", "")
+		if strings.HasPrefix(hook.GetBaseRef(), branchRefPrefix) {
+			pipeline.Branch = strings.ReplaceAll(hook.GetBaseRef(), branchRefPrefix, "")
 		}
 	}
 
@@ -137,11 +140,11 @@ func parseDeployHook(hook *github.DeploymentEvent) (*model.Repo, *model.Pipeline
 	// if the ref is a sha or short sha we need to manually construct the ref.
 	if strings.HasPrefix(pipeline.Commit, pipeline.Ref) || pipeline.Commit == pipeline.Ref {
 		pipeline.Branch = hook.GetRepo().GetDefaultBranch()
-		pipeline.Ref = fmt.Sprintf("refs/heads/%s", pipeline.Branch)
+		pipeline.Ref = fmt.Sprintf("%s%s", branchRefPrefix, pipeline.Branch)
 	}
 	// if the ref is a branch we should make sure it has refs/heads prefix
 	if !strings.HasPrefix(pipeline.Ref, "refs/") { // branch or tag
-		pipeline.Ref = fmt.Sprintf("refs/heads/%s", pipeline.Branch)
+		pipeline.Ref = fmt.Sprintf("%s%s", branchRefPrefix, pipeline.Branch)
 	}
 
 	return convertRepo(hook.GetRepo()), pipeline
@@ -198,7 +201,7 @@ func parseReleaseHook(hook *github.ReleaseEvent) (*model.Repo, *model.Pipeline) 
 	pipeline := &model.Pipeline{
 		Event:        model.EventRelease,
 		ForgeURL:     hook.GetRelease().GetHTMLURL(),
-		Ref:          fmt.Sprintf("refs/tags/%s", hook.GetRelease().GetTagName()),
+		Ref:          fmt.Sprintf("%s%s", tagRefPrefix, hook.GetRelease().GetTagName()),
 		Branch:       hook.GetRelease().GetTargetCommitish(),
 		Message:      fmt.Sprintf("created release %s", name),
 		Author:       hook.GetRelease().GetAuthor().GetLogin(),

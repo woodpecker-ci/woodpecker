@@ -89,12 +89,15 @@ func pipelineFromPush(hook *pushHook) *model.Pipeline {
 		link = hook.HeadCommit.URL
 	}
 
+	title, _, _ := strings.Cut(message, "\n")
+
 	return &model.Pipeline{
 		Event:        model.EventPush,
 		Commit:       hook.After,
 		Ref:          hook.Ref,
 		ForgeURL:     link,
 		Branch:       strings.TrimPrefix(hook.Ref, "refs/heads/"),
+		Title:        title,
 		Message:      message,
 		Avatar:       avatar,
 		Author:       hook.Sender.UserName,
@@ -129,11 +132,13 @@ func pipelineFromTag(hook *pushHook) *model.Pipeline {
 	)
 
 	return &model.Pipeline{
-		Event:     model.EventTag,
-		Commit:    hook.Sha,
-		Ref:       fmt.Sprintf("refs/tags/%s", hook.Ref),
-		ForgeURL:  fmt.Sprintf("%s/src/tag/%s", hook.Repo.HTMLURL, hook.Ref),
-		Message:   fmt.Sprintf("created tag %s", hook.Ref), // TODO: let gitea report the actual tag message and title
+		Event:    model.EventTag,
+		Commit:   hook.Sha,
+		Ref:      fmt.Sprintf("refs/tags/%s", hook.Ref),
+		ForgeURL: fmt.Sprintf("%s/src/tag/%s", hook.Repo.HTMLURL, hook.Ref),
+		// TODO: get tag message and title via webhook (gitea change needed)
+		Title:     "", // if empty api will be asked
+		Message:   fmt.Sprintf("created tag %s", hook.Ref),
 		Avatar:    avatar,
 		Author:    hook.Sender.UserName,
 		Sender:    hook.Sender.UserName,

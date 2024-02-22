@@ -512,15 +512,24 @@ func (c *Gitea) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.
 		return nil, nil, err
 	}
 
-	if pipeline != nil && pipeline.Event == model.EventRelease && pipeline.Commit == "" {
-		tagName := strings.Split(pipeline.Ref, "/")[2]
-		sha, err := c.getTagCommitSHA(ctx, repo, tagName)
-		if err != nil {
-			return nil, nil, err
+	var tag *gitea.Tag
+	loadTag := func() error {
+		if tag == nil {
+			tagName := strings.Split(pipeline.Ref, "/")[2]
+			tag, err = c.getTag(ctx, repo, tagName)
+			return err
 		}
-		pipeline.Commit = sha
+		return nil
 	}
 
+	if pipeline != nil && pipeline.Event == model.EventRelease && pipeline.Commit == "" {
+		if err := loadTag(); err != nil {
+			return nil, nil, err
+		}
+		pipeline.Commit = tag.Commit.SHA
+	}
+
+	// get changed files via api (and not from parsed webhook)
 	if pipeline != nil && (pipeline.Event == model.EventPull || pipeline.Event == model.EventPullClosed) && len(pipeline.ChangedFiles) == 0 {
 		index, err := strconv.ParseInt(strings.Split(pipeline.Ref, "/")[2], 10, 64)
 		if err != nil {
@@ -530,6 +539,15 @@ func (c *Gitea) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.
 		if err != nil {
 			log.Error().Err(err).Msgf("could not get changed files for PR %s#%d", repo.FullName, index)
 		}
+	}
+
+	// get title and message via api (and not from parsed webhook)
+	if pipeline != nil && pipeline.Event == model.EventTag && pipeline.Title == "" {
+		if err := loadTag(); err != nil {
+			return nil, nil, err
+		}
+		pipeline.Title = fmt.Sprintf("created tag %s", tag.Name)
+		pipeline.Message = tag.Message
 	}
 
 	return repo, pipeline, nil
@@ -630,25 +648,9 @@ func getStatus(status model.StatusValue) gitea.StatusState {
 }
 
 func (c *Gitea) getChangedFilesForPR(ctx context.Context, repo *model.Repo, index int64) ([]string, error) {
-	_store, ok := store.TryFromContext(ctx)
-	if !ok {
-		log.Error().Msg("could not get store from context")
-		return []string{}, nil
-	}
-
-	repo, err := _store.GetRepoNameFallback(repo.ForgeRemoteID, repo.FullName)
-	if err != nil {
-		return nil, err
-	}
-
-	user, err := _store.GetUser(repo.UserID)
-	if err != nil {
-		return nil, err
-	}
-
-	client, err := c.newClientToken(ctx, user.Token)
-	if err != nil {
-		return nil, err
+	client, repo, err := c.prepareHookAPIClient(ctx, repo)
+	if err != nil || client == nil {
+		return []string{}, err
 	}
 
 	return shared_utils.Paginate(func(page int) ([]string, error) {
@@ -666,34 +668,39 @@ func (c *Gitea) getChangedFilesForPR(ctx context.Context, repo *model.Repo, inde
 	})
 }
 
-func (c *Gitea) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName string) (string, error) {
-	_store, ok := store.TryFromContext(ctx)
-	if !ok {
-		log.Error().Msg("could not get store from context")
-		return "", nil
-	}
-
-	repo, err := _store.GetRepoNameFallback(repo.ForgeRemoteID, repo.FullName)
-	if err != nil {
-		return "", err
-	}
-
-	user, err := _store.GetUser(repo.UserID)
-	if err != nil {
-		return "", err
-	}
-
-	client, err := c.newClientToken(ctx, user.Token)
-	if err != nil {
-		return "", err
+func (c *Gitea) getTag(ctx context.Context, repo *model.Repo, tagName string) (*gitea.Tag, error) {
+	client, repo, err := c.prepareHookAPIClient(ctx, repo)
+	if err != nil || client == nil {
+		return nil, err
 	}
 
 	tag, _, err := client.GetTag(repo.Owner, repo.Name, tagName)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return tag.Commit.SHA, nil
+	return tag, nil
+}
+
+func (c *Gitea) prepareHookAPIClient(ctx context.Context, repo *model.Repo) (*gitea.Client, *model.Repo, error) {
+	_store, ok := store.TryFromContext(ctx)
+	if !ok {
+		log.Error().Msg("could not get store from context")
+		return nil, nil, nil
+	}
+
+	repo, err := _store.GetRepoNameFallback(repo.ForgeRemoteID, repo.FullName)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	repoOwner, err := _store.GetUser(repo.UserID)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	client, err := c.newClientToken(ctx, repoOwner.Token)
+	return client, repo, err
 }
 
 func (c *Gitea) perPage(ctx context.Context) int {
