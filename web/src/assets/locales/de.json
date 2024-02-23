@@ -195,7 +195,8 @@
                 "desc": "Zusätzliche Variablen für diese Pipeline hinzufügen. Variablen mit dem gleichen Namen werden überschrieben.",
                 "name": "Variablenname",
                 "title": "Zusätzliche Pipeline-Variablen",
-                "value": "Variablenwert"
+                "value": "Variablenwert",
+                "delete": "Variable löschen"
             }
         },
         "enable": {
@@ -215,7 +216,8 @@
                 "desc": "Spezifiziere weitere Variablen für deine Pipeline. Vordefinierte Variablen mit dem selben Namen werden überschrieben.",
                 "name": "Variablenname",
                 "title": "Zusätzliche Pipeline-Variablen",
-                "value": "Variablenwert"
+                "value": "Variablenwert",
+                "delete": "Variable löschen"
             }
         },
         "not_allowed": "Zugriff auf dieses Repository nicht erlaubt",

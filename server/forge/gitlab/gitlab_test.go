@@ -156,6 +156,7 @@ func Test_GitLab(t *testing.T) {
 						assert.Equal(t, "develop", hookRepo.Branch)
 						assert.Equal(t, "refs/heads/main", pipeline.Ref)
 						assert.Equal(t, []string{"cmd/cli/main.go"}, pipeline.ChangedFiles)
+						assert.Equal(t, model.EventPush, pipeline.Event)
 					}
 				})
 			})
@@ -178,6 +179,7 @@ func Test_GitLab(t *testing.T) {
 						assert.Equal(t, "develop", hookRepo.Branch)
 						assert.Equal(t, "refs/tags/v22", pipeline.Ref)
 						assert.Len(t, pipeline.ChangedFiles, 0)
+						assert.Equal(t, model.EventTag, pipeline.Event)
 					}
 				})
 			})
@@ -201,6 +203,7 @@ func Test_GitLab(t *testing.T) {
 						assert.Equal(t, "woodpecker", hookRepo.Name)
 						assert.Equal(t, "Update client.go 🎉", pipeline.Title)
 						assert.Len(t, pipeline.ChangedFiles, 0) // see L217
+						assert.Equal(t, model.EventPull, pipeline.Event)
 					}
 				})
 
@@ -251,6 +254,7 @@ func Test_GitLab(t *testing.T) {
 						assert.Equal(t, "woodpecker-test", hookRepo.Name)
 						assert.Equal(t, "Add new file", pipeline.Title)
 						assert.Len(t, pipeline.ChangedFiles, 0) // see L217
+						assert.Equal(t, model.EventPullClosed, pipeline.Event)
 					}
 				})
 
@@ -271,6 +275,7 @@ func Test_GitLab(t *testing.T) {
 						assert.Equal(t, "woodpecker-test", hookRepo.Name)
 						assert.Equal(t, "Add new file", pipeline.Title)
 						assert.Len(t, pipeline.ChangedFiles, 0) // see L217
+						assert.Equal(t, model.EventPullClosed, pipeline.Event)
 					}
 				})
 
@@ -282,12 +287,13 @@ func Test_GitLab(t *testing.T) {
 					)
 					req.Header = testdata.ReleaseHookHeaders
 
-					hookRepo, build, err := client.Hook(ctx, req)
+					hookRepo, pipeline, err := client.Hook(ctx, req)
 					assert.NoError(t, err)
-					if assert.NotNil(t, hookRepo) && assert.NotNil(t, build) {
-						assert.Equal(t, "refs/tags/0.0.2", build.Ref)
+					if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
+						assert.Equal(t, "refs/tags/0.0.2", pipeline.Ref)
 						assert.Equal(t, "ci", hookRepo.Name)
-						assert.Equal(t, "created release Awesome version 0.0.2", build.Message)
+						assert.Equal(t, "created release Awesome version 0.0.2", pipeline.Message)
+						assert.Equal(t, model.EventRelease, pipeline.Event)
 					}
 				})
 			})

@@ -34,7 +34,7 @@ import (
 //	@Tags		System
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 func GetSignaturePublicKey(c *gin.Context) {
-	b, err := x509.MarshalPKIXPublicKey(server.Config.Services.SignaturePublicKey)
+	b, err := x509.MarshalPKIXPublicKey(server.Config.Services.Manager.SignaturePublicKey())
 	if err != nil {
 		log.Error().Err(err).Msg("can't marshal public key")
 		c.AbortWithStatus(http.StatusInternalServerError)

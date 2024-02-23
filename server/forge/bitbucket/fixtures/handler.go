@@ -268,7 +268,12 @@ const branchCommitsPayload = `
 {
     "values": [
         {
-            "hash": "branch_head_name"
+            "hash": "branch_head_name",
+						"links": {
+							"html": {
+								"href": "https://bitbucket.org/commitlink"
+							}
+						}
         },
         {
             "hash": "random1"

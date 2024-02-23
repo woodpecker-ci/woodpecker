@@ -34,7 +34,6 @@ type Registry struct {
 	Hostname string
 	Username string
 	Password string
-	Email    string
 	Token    string
 }
 
@@ -183,7 +182,10 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			Name:        defaultCloneName,
 			Image:       cloneImage,
 			Settings:    cloneSettings,
-			Environment: c.cloneEnv,
+			Environment: make(map[string]any),
+		}
+		for k, v := range c.cloneEnv {
+			container.Environment[k] = v
 		}
 		step, err := c.createProcess(container, backend_types.StepTypeClone)
 		if err != nil {
