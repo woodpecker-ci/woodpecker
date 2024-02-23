@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.4.0) - 2024-02-22
+## [2.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.4.0) - 2024-02-23
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -53,6 +53,7 @@
 
 ### Misc
 
+- More `when` filters [[#3407](https://github.com/woodpecker-ci/woodpecker/pull/3407)]
 - Apply `documentation`/`ui` label to corresponding renovate updates [[#3400](https://github.com/woodpecker-ci/woodpecker/pull/3400)]
 - chore(deps): update dependency eslint-plugin-simple-import-sort to v12 [[#3396](https://github.com/woodpecker-ci/woodpecker/pull/3396)]
 - chore(deps): update typescript-eslint monorepo to v7 (major) [[#3397](https://github.com/woodpecker-ci/woodpecker/pull/3397)]
