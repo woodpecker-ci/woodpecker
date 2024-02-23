@@ -179,9 +179,10 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			cloneSettings["tags"] = "true"
 		}
 		container := &yaml_types.Container{
-			Name:     defaultCloneName,
-			Image:    cloneImage,
-			Settings: cloneSettings,
+			Name:        defaultCloneName,
+			Image:       cloneImage,
+			Settings:    cloneSettings,
+			Environment: map[string]any{},
 		}
 		for k, v := range c.cloneEnv {
 			container.Environment[k] = v
