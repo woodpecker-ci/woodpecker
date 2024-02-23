@@ -28,20 +28,20 @@ once their usage is declared in the `secrets` section:
 
 The case of the environment variables is not changed, but secret matching is done case-insensitively. In the example above, `DOCKER_PASSWORD` would also match if the secret is called `docker_password`.
 
-### Use secrets in settings
+### Use secrets in settings and environment
 
-Alternatively, you can get a `setting` from secrets using the `from_secret` syntax.
-In this example, the secret named `secret_token` would be passed to the setting named `token`, which will be available in the plugin as environment variable named `PLUGIN_TOKEN`. See [Plugins](./51-plugins/20-creating-plugins.md#settings) for details.
+You can set an setting or environment value from secrets using the `from_secret` syntax.
 
-:::note
-The `from_secret` syntax only works with the newer `settings` block.
-:::
+In this example, the secret named `secret_token` would be passed to the setting named `token`,which will be available in the plugin as environment variable named `PLUGIN_TOKEN` (See [plugins](./51-plugins/20-creating-plugins.md#settings) for details), and to the environment variable `TOKEN_ENV`.
 
 ```diff
  steps:
    - name: docker
      image: my-plugin
-     settings:
++    environment:
++      TOKEN_ENV:
++        from_secret: secret_token
++    settings:
 +      token:
 +        from_secret: secret_token
 ```
@@ -60,21 +60,6 @@ Please note parameter expressions are subject to pre-processing. When using secr
 +      - echo $${docker_username}
 +      - echo $${DOCKER_PASSWORD}
      secrets: [ docker_username, DOCKER_PASSWORD ]
-```
-
-### Alternate Names
-
-There may be scenarios where you are required to store secrets using alternate names. You can map the alternate secret name to the expected name using the below syntax:
-
-```diff
- steps:
-   - name: docker
-     image: plugins/docker
-     repo: octocat/hello-world
-     tags: latest
-+    secrets:
-+      - source: docker_prod_password
-+        target: docker_password
 ```
 
 ### Use in Pull Requests events
