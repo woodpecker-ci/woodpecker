@@ -50,6 +50,7 @@ require (
 	github.com/urfave/cli/v2 v2.27.1
 	github.com/xanzy/go-gitlab v0.96.0
 	github.com/xeipuuv/gojsonschema v1.2.0
+	github.com/zalando/go-keyring v0.2.3
 	go.uber.org/multierr v1.11.0
 	golang.org/x/crypto v0.18.0
 	golang.org/x/net v0.20.0
@@ -79,6 +80,7 @@ require (
 	github.com/chenzhuoyu/base64x v0.0.0-20230717121745-296ad89f973d // indirect
 	github.com/chenzhuoyu/iasm v0.9.1 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.3 // indirect
+	github.com/danieljoos/wincred v1.2.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/davidmz/go-pageant v1.0.2 // indirect
 	github.com/docker/distribution v2.8.3+incompatible // indirect
@@ -97,6 +99,7 @@ require (
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.16.0 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
+	github.com/godbus/dbus/v5 v5.1.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/golang/snappy v0.0.4 // indirect

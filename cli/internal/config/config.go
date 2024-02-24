@@ -8,11 +8,12 @@ import (
 	"github.com/adrg/xdg"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
+	"github.com/zalando/go-keyring"
 )
 
 type Config struct {
 	ServerURL string `json:"server_url"`
-	Token     string `json:"token"`
+	Token     string
 	LogLevel  string `json:"log_level"`
 }
 
@@ -27,7 +28,7 @@ func Load(c *cli.Context) error {
 		return nil
 	}
 
-	config, err := Get(c.String("config"))
+	config, err := Get(c, c.String("config"))
 	if err != nil {
 		return err
 	}
@@ -74,7 +75,7 @@ func getConfigPath(configPath string) (string, error) {
 	return configPath, nil
 }
 
-func Get(_configPath string) (*Config, error) {
+func Get(ctx *cli.Context, _configPath string) (*Config, error) {
 	configPath, err := getConfigPath(_configPath)
 	if err != nil {
 		return nil, err
@@ -95,16 +96,33 @@ func Get(_configPath string) (*Config, error) {
 		return nil, err
 	}
 
+	// load token from keyring
+	service := ctx.App.Name
+	user := c.ServerURL
+	secret, err := keyring.Get(service, user)
+	if err != nil {
+		return nil, err
+	}
+	c.Token = secret
+
 	return c, nil
 }
 
-func Save(_configPath string, c *Config) error {
+func Save(ctx *cli.Context, _configPath string, c *Config) error {
 	config, err := json.Marshal(c)
 	if err != nil {
 		return err
 	}
 
 	configPath, err := getConfigPath(_configPath)
+	if err != nil {
+		return err
+	}
+
+	// save token to keyring
+	service := ctx.App.Name
+	user := c.ServerURL
+	err = keyring.Set(service, user, c.Token)
 	if err != nil {
 		return err
 	}

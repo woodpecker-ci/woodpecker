@@ -28,7 +28,7 @@ var Command = &cli.Command{
 }
 
 func setup(c *cli.Context) error {
-	_config, err := config.Get(c.String("config"))
+	_config, err := config.Get(c, c.String("config"))
 	if err != nil {
 		return err
 	} else if _config != nil {
@@ -62,7 +62,7 @@ func setup(c *cli.Context) error {
 		}
 	}
 
-	err = config.Save(c.String("config"), &config.Config{
+	err = config.Save(c, c.String("config"), &config.Config{
 		ServerURL: serverURL,
 		Token:     token,
 		LogLevel:  "info",
