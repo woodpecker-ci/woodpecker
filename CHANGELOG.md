@@ -1,10 +1,10 @@
 # Changelog
 
-## [2.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.4.0) - 2024-02-23
+## [2.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.4.0) - 2024-02-24
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@qwerty287, @6543, @langecode, @anbraten, @eliasscosta, @renovate[bot], @xoxys, @kjuulh, @sinlov, @lukashass, @pre-commit-ci[bot], @fernandrone
+@renovate[bot], @qwerty287, @6543, @langecode, @anbraten, @eliasscosta, @xoxys, @kjuulh, @sinlov, @lukashass, @pre-commit-ci[bot], @fernandrone
 
 ### ✨ Features
 
@@ -53,6 +53,8 @@
 
 ### Misc
 
+- chore(deps): update lycheeverse/lychee docker tag to v0.14.3 [[#3429](https://github.com/woodpecker-ci/woodpecker/pull/3429)]
+- fix(deps): update golang (packages) [[#3430](https://github.com/woodpecker-ci/woodpecker/pull/3430)]
 - More `when` filters [[#3407](https://github.com/woodpecker-ci/woodpecker/pull/3407)]
 - Apply `documentation`/`ui` label to corresponding renovate updates [[#3400](https://github.com/woodpecker-ci/woodpecker/pull/3400)]
 - chore(deps): update dependency eslint-plugin-simple-import-sort to v12 [[#3396](https://github.com/woodpecker-ci/woodpecker/pull/3396)]
