@@ -17,7 +17,7 @@ package stepbuilder
 
 import (
 	"fmt"
-	"html/template"
+	"text/template"
 	"path/filepath"
 	"strings"
 
