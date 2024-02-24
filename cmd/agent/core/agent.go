@@ -275,7 +275,7 @@ func stringSliceAddToMap(sl []string, m map[string]string) error {
 	if m == nil {
 		m = make(map[string]string)
 	}
-	for _, v := range sl {
+	for _, v := range utils.StringSliceDeleteEmpty(sl) {
 		parts := strings.SplitN(v, "=", 2)
 		switch len(parts) {
 		case 2:

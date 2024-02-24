@@ -26,7 +26,7 @@ steps:
       version: 3.2.4
 
   - name: links
-    image: lycheeverse/lychee:0.14.0
+    image: lycheeverse/lychee:0.14.3
     depends_on: []
     commands:
       - lychee pipeline/frontend/yaml/linter/schema/schema.json

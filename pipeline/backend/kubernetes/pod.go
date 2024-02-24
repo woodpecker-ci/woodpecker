@@ -90,7 +90,7 @@ func podMeta(step *types.Step, config *config, options BackendOptions, podName s
 	}
 
 	if step.Type == types.StepTypeService {
-		meta.Labels[ServiceLabel] = step.Name
+		meta.Labels[ServiceLabel], _ = serviceName(step)
 	}
 
 	meta.Annotations = config.PodAnnotations
