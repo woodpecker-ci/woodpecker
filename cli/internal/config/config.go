@@ -23,17 +23,12 @@ func Load(c *cli.Context) error {
 		return nil
 	}
 
-	// If the server URL and token are set, we don't need to load the config
-	if c.IsSet("server-url") && c.IsSet("token") {
-		return nil
-	}
-
 	config, err := Get(c, c.String("config"))
 	if err != nil {
 		return err
 	}
 
-	if config == nil {
+	if config == nil && !c.IsSet("server-url") && !c.IsSet("token") {
 		log.Info().Msg("The woodpecker-cli is not setup yet. Please run `woodpecker-cli setup`")
 		return errors.New("woodpecker-cli is not setup")
 	}
