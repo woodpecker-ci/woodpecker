@@ -49,6 +49,7 @@ func receiveTokenFromUI(c context.Context, serverURL string) (string, error) {
 }
 
 func setupRouter(tokenReceived chan string) *gin.Engine {
+	gin.SetMode(gin.ReleaseMode)
 	e := gin.New()
 	e.UseRawPath = true
 	e.Use(gin.Recovery())

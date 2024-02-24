@@ -8,6 +8,7 @@ import (
 	"github.com/urfave/cli/v2"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal/config"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/setup/ui"
 )
 
 // Command exports the setup command.
@@ -32,16 +33,28 @@ func setup(c *cli.Context) error {
 	if err != nil {
 		return err
 	} else if _config != nil {
-		log.Warn().Msg("The woodpecker-cli is already setup")
-		return nil
+		setupAgain, err := ui.Confirm("The woodpecker-cli was already configured. Do you want to configure it again?")
+		if err != nil {
+			return err
+		}
+
+		if !setupAgain {
+			log.Info().Msg("Configuration skipped")
+			return nil
+		}
 	}
 
-	// TODO: prompt for server URL
 	serverURL := c.String("server-url")
 
 	if serverURL == "" {
-		log.Info().Msg("Please enter the URL of the woodpecker server like https://ci.woodpecker-ci.org")
-		return errors.New("server URL is required")
+		serverURL, err = ui.Ask("Enter the URL of the woodpecker server", "https://woodpecker-ci.org", true)
+		if err != nil {
+			return err
+		}
+
+		if serverURL == "" {
+			return errors.New("server URL cannot be empty")
+		}
 	}
 
 	if !strings.Contains(serverURL, "://") {
@@ -50,8 +63,6 @@ func setup(c *cli.Context) error {
 
 	token := c.String("token")
 	if token == "" {
-		// TODO: wait for enter before opening the browser
-
 		token, err = receiveTokenFromUI(c.Context, serverURL)
 		if err != nil {
 			return err

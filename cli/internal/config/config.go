@@ -13,7 +13,7 @@ import (
 
 type Config struct {
 	ServerURL string `json:"server_url"`
-	Token     string
+	Token     string `json:"-"`
 	LogLevel  string `json:"log_level"`
 }
 
@@ -93,12 +93,13 @@ func Get(ctx *cli.Context, _configPath string) (*Config, error) {
 
 	// load token from keyring
 	service := ctx.App.Name
-	user := c.ServerURL
-	secret, err := keyring.Get(service, user)
-	if err != nil {
+	secret, err := keyring.Get(service, c.ServerURL)
+	if err != nil && !errors.Is(err, keyring.ErrNotFound) {
 		return nil, err
 	}
-	c.Token = secret
+	if err == nil {
+		c.Token = secret
+	}
 
 	return c, nil
 }
@@ -116,8 +117,7 @@ func Save(ctx *cli.Context, _configPath string, c *Config) error {
 
 	// save token to keyring
 	service := ctx.App.Name
-	user := c.ServerURL
-	err = keyring.Set(service, user, c.Token)
+	err = keyring.Set(service, c.ServerURL, c.Token)
 	if err != nil {
 		return err
 	}
