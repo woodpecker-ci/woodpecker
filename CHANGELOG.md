@@ -1,10 +1,10 @@
 # Changelog
 
-## [2.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.4.0) - 2024-02-24
+## [2.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.4.0) - 2024-02-25
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@renovate[bot], @qwerty287, @6543, @langecode, @anbraten, @eliasscosta, @xoxys, @kjuulh, @sinlov, @lukashass, @pre-commit-ci[bot], @fernandrone
+@kytta, @renovate[bot], @qwerty287, @6543, @langecode, @anbraten, @eliasscosta, @xoxys, @kjuulh, @sinlov, @lukashass, @pre-commit-ci[bot], @fernandrone
 
 ### ✨ Features
 
@@ -53,6 +53,7 @@
 
 ### Misc
 
+- Add "Gradle Wrapper Validation" plugin [[#3435](https://github.com/woodpecker-ci/woodpecker/pull/3435)]
 - chore(deps): update lycheeverse/lychee docker tag to v0.14.3 [[#3429](https://github.com/woodpecker-ci/woodpecker/pull/3429)]
 - fix(deps): update golang (packages) [[#3430](https://github.com/woodpecker-ci/woodpecker/pull/3430)]
 - More `when` filters [[#3407](https://github.com/woodpecker-ci/woodpecker/pull/3407)]
