@@ -68,6 +68,7 @@ func (s storage) ConfigPersist(conf *model.Config) (*model.Config, error) {
 
 	return conf, sess.Commit()
 }
+
 func (s storage) configCreate(sess *xorm.Session, config *model.Config) error {
 	// should never happen but just in case
 	if config.Name == "" {
