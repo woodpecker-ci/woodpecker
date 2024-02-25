@@ -35,20 +35,6 @@ func (s storage) GetPipelineNumber(repo *model.Repo, num int64) (*model.Pipeline
 	).Get(pipeline))
 }
 
-func (s storage) GetPipelineRef(repo *model.Repo, ref string) (*model.Pipeline, error) {
-	pipeline := new(model.Pipeline)
-	return pipeline, wrapGet(s.engine.Where(
-		builder.Eq{"pipeline_repo_id": repo.ID, "pipeline_ref": ref},
-	).Get(pipeline))
-}
-
-func (s storage) GetPipelineCommit(repo *model.Repo, sha, branch string) (*model.Pipeline, error) {
-	pipeline := new(model.Pipeline)
-	return pipeline, wrapGet(s.engine.Where(
-		builder.Eq{"pipeline_repo_id": repo.ID, "pipeline_branch": branch, "pipeline_commit": sha},
-	).Get(pipeline))
-}
-
 func (s storage) GetPipelineLast(repo *model.Repo, branch string) (*model.Pipeline, error) {
 	pipeline := new(model.Pipeline)
 	return pipeline, wrapGet(s.engine.
