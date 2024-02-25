@@ -14,12 +14,6 @@
 
 package model
 
-// ServerConfigStore persists key-value pairs for storing server configurations.
-type ServerConfigStore interface {
-	ServerConfigGet(key string) (string, error)
-	ServerConfigSet(key int64, value string) error
-}
-
 // ServerConfig represents a key-value pair for storing server configurations.
 type ServerConfig struct {
 	Key   string `json:"key"   xorm:"pk"`
