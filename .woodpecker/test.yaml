@@ -1,10 +1,3 @@
-when:
-  - event: pull_request
-  - event: push
-    branch:
-      - ${CI_REPO_DEFAULT_BRANCH}
-      - renovate/*
-
 variables:
   - &golang_image 'docker.io/golang:1.21.5'
   - &when
@@ -20,6 +13,14 @@ variables:
     - event: push
       branch: renovate/*
       path: *when_path
+
+when:
+  - event: pull_request
+  - event: push
+    branch: renovate/*
+  - event: push
+    branch: ${CI_REPO_DEFAULT_BRANCH}
+    path: *when_path
 
 steps:
   vendor:
@@ -68,34 +69,11 @@ steps:
       - '[ -n "$DIFF" ] && { echo "swagger not up to date, exec `make generate-swagger` and commit"; exit 1; } || true'
     when: *when
 
-  lint-editorconfig:
-    image: docker.io/mstruebing/editorconfig-checker:2.7.2
-    when:
-      - event: pull_request
-      - event: push
-        branch: renovate/*
-
   lint-license-header:
     image: *golang_image
     commands:
       - go install github.com/google/addlicense@latest
       - 'addlicense -check -ignore "vendor/**" **/*.go'
-    when: *when
-
-  prettier:
-    image: docker.io/woodpeckerci/plugin-prettier:0.1.0
-    settings:
-      version: 3.2.4
-    when:
-      - event: pull_request
-      - event: push
-        branch: renovate/*
-
-  spellcheck:
-    image: docker.io/node:21-alpine
-    commands:
-      - corepack enable
-      - pnpx cspell lint --no-progress --gitignore '{**,.*}/{*,.*}'
     when: *when
 
   test:

@@ -26,30 +26,6 @@ var (
 	errRegistryPasswordInvalid = errors.New("invalid registry password")
 )
 
-// RegistryService defines a service for managing registries.
-type RegistryService interface {
-	RegistryFind(*Repo, string) (*Registry, error)
-	RegistryList(*Repo, *ListOptions) ([]*Registry, error)
-	RegistryCreate(*Repo, *Registry) error
-	RegistryUpdate(*Repo, *Registry) error
-	RegistryDelete(*Repo, string) error
-}
-
-// ReadOnlyRegistryService defines a service for managing registries.
-type ReadOnlyRegistryService interface {
-	RegistryFind(*Repo, string) (*Registry, error)
-	RegistryList(*Repo, *ListOptions) ([]*Registry, error)
-}
-
-// RegistryStore persists registry information to storage.
-type RegistryStore interface {
-	RegistryFind(*Repo, string) (*Registry, error)
-	RegistryList(*Repo, *ListOptions) ([]*Registry, error)
-	RegistryCreate(*Registry) error
-	RegistryUpdate(*Registry) error
-	RegistryDelete(repo *Repo, addr string) error
-}
-
 // Registry represents a docker registry with credentials.
 type Registry struct {
 	ID       int64  `json:"id"       xorm:"pk autoincr 'registry_id'"`

@@ -7,6 +7,10 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Deprecated `steps.[name].group` in favor of `steps.[name].depends_on` (see [workflow syntax](./20-usage/20-workflow-syntax.md#depends_on) to learn how to set dependencies)
 - Removed `WOODPECKER_ROOT_PATH` and `WOODPECKER_ROOT_URL` config variables. Use `WOODPECKER_HOST` with a path instead
 - Pipelines without a config file will now be skipped instead of failing
+- Deprecated `includes` and `excludes` support from **event** filter
+- Deprecated uppercasing all secret env vars, instead, the value of the `secrets` property is used. [Read more](./20-usage/40-secrets.md#use-secrets-in-commands)
+- Deprecated alternative names for secrets, use `environment` with `from_secret`
+- Deprecated slice definition for env vars
 
 ## 2.0.0
 
