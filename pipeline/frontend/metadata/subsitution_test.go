@@ -61,6 +61,18 @@ func TestEnvVarSubst(t *testing.T) {
 			commands:
 				- echo $HELLO_IMAGE`,
 		},
+		{
+			name: "allow escaping",
+			yaml: `steps:
+		step1:
+			commands:
+				- echo ${HELLO_IMAGE}`,
+			environ: map[string]string{},
+			want: `steps:
+		step1:
+			commands:
+				- echo `, // this is expected to be empty (but annoying :/)
+		},
 	}
 
 	for _, testCase := range testCases {
