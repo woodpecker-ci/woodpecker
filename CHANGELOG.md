@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@kytta, @renovate[bot], @qwerty287, @6543, @langecode, @anbraten, @eliasscosta, @xoxys, @kjuulh, @sinlov, @lukashass, @pre-commit-ci[bot], @fernandrone
+@qwerty287, @kytta, @renovate[bot], @6543, @langecode, @anbraten, @eliasscosta, @xoxys, @kjuulh, @sinlov, @lukashass, @pre-commit-ci[bot], @fernandrone
 
 ### ✨ Features
 
@@ -13,6 +13,7 @@
 
 ### 📈 Enhancement
 
+- Simplify store interfaces [[#3437](https://github.com/woodpecker-ci/woodpecker/pull/3437)]
 - Deprecate alternative names on secrets [[#3406](https://github.com/woodpecker-ci/woodpecker/pull/3406)]
 - Store workflows/steps for blocked pipeline [[#2757](https://github.com/woodpecker-ci/woodpecker/pull/2757)]
 - Parse email from Gitea webhook [[#3420](https://github.com/woodpecker-ci/woodpecker/pull/3420)]
@@ -25,6 +26,15 @@
 - Make agent usable for external backends [[#3270](https://github.com/woodpecker-ci/woodpecker/pull/3270)]
 - Add no branches text [[#3312](https://github.com/woodpecker-ci/woodpecker/pull/3312)]
 - Add loading spinner to repo list [[#3310](https://github.com/woodpecker-ci/woodpecker/pull/3310)]
+
+### 📚 Documentation
+
+- Add "Gradle Wrapper Validation" plugin [[#3435](https://github.com/woodpecker-ci/woodpecker/pull/3435)]
+- Add blog post [[#3410](https://github.com/woodpecker-ci/woodpecker/pull/3410)]
+- Extend core ideas documentation [[#3405](https://github.com/woodpecker-ci/woodpecker/pull/3405)]
+- docs: fix contributions link [[#3363](https://github.com/woodpecker-ci/woodpecker/pull/3363)]
+- Update/fix some docs [[#3359](https://github.com/woodpecker-ci/woodpecker/pull/3359)]
+- chore(deps): update dependency marked to v12 [[#3325](https://github.com/woodpecker-ci/woodpecker/pull/3325)]
 
 ### 🐛 Bug Fixes
 
@@ -43,17 +53,8 @@
 - Consider gitlab inherited permissions [[#3308](https://github.com/woodpecker-ci/woodpecker/pull/3308)]
 - fix: agent panic when node is terminated during step execution [[#3331](https://github.com/woodpecker-ci/woodpecker/pull/3331)]
 
-### 📚 Documentation
-
-- Add blog post [[#3410](https://github.com/woodpecker-ci/woodpecker/pull/3410)]
-- Extend core ideas documentation [[#3405](https://github.com/woodpecker-ci/woodpecker/pull/3405)]
-- docs: fix contributions link [[#3363](https://github.com/woodpecker-ci/woodpecker/pull/3363)]
-- Update/fix some docs [[#3359](https://github.com/woodpecker-ci/woodpecker/pull/3359)]
-- chore(deps): update dependency marked to v12 [[#3325](https://github.com/woodpecker-ci/woodpecker/pull/3325)]
-
 ### Misc
 
-- Add "Gradle Wrapper Validation" plugin [[#3435](https://github.com/woodpecker-ci/woodpecker/pull/3435)]
 - chore(deps): update lycheeverse/lychee docker tag to v0.14.3 [[#3429](https://github.com/woodpecker-ci/woodpecker/pull/3429)]
 - fix(deps): update golang (packages) [[#3430](https://github.com/woodpecker-ci/woodpecker/pull/3430)]
 - More `when` filters [[#3407](https://github.com/woodpecker-ci/woodpecker/pull/3407)]
