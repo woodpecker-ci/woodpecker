@@ -140,7 +140,7 @@ install-tools: ## Install development tools
 	fi
 
 ui-dependencies: ## Install UI dependencies
-	(cd web/; pnpm install --frozen-lockfile)
+	(cd web/; bun install --frozen-lockfile)
 
 ##@ Test
 
@@ -150,7 +150,7 @@ lint: install-tools ## Lint code
 	golangci-lint run
 
 lint-ui: ui-dependencies ## Lint UI code
-	(cd web/; pnpm lint --quiet)
+	(cd web/; bun lint --quiet)
 
 test-agent: ## Test agent code
 	go test -race -cover -coverprofile agent-coverage.out -timeout 30s go.woodpecker-ci.org/woodpecker/v2/cmd/agent go.woodpecker-ci.org/woodpecker/v2/agent/...
@@ -169,10 +169,10 @@ test-server-datastore-coverage: ## Test server datastore with coverage report
 	go test -race -cover -coverprofile datastore-coverage.out -timeout 120s go.woodpecker-ci.org/woodpecker/v2/server/store/...
 
 test-ui: ui-dependencies ## Test UI code
-	(cd web/; pnpm run lint)
-	(cd web/; pnpm run format:check)
-	(cd web/; pnpm run typecheck)
-	(cd web/; pnpm run test)
+	(cd web/; bun lint)
+	(cd web/; bun format:check)
+	(cd web/; bun typecheck)
+	(cd web/; bun test)
 
 test-lib: ## Test lib code
 	go test -race -cover -coverprofile coverage.out -timeout 30s $(shell go list ./... | grep -v '/cmd\|/agent\|/cli\|/server')
@@ -183,7 +183,7 @@ test: test-agent test-server test-server-datastore test-cli test-lib ## Run all 
 ##@ Build
 
 build-ui: ## Build UI
-	(cd web/; pnpm install --frozen-lockfile; pnpm build)
+	(cd web/; bun install --frozen-lockfile; bun build)
 
 build-server: build-ui generate-swagger ## Build server
 	CGO_ENABLED=${CGO_ENABLED} GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -ldflags '${LDFLAGS}' -o dist/woodpecker-server${BIN_SUFFIX} go.woodpecker-ci.org/woodpecker/v2/cmd/server

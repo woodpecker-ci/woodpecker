@@ -73,17 +73,17 @@ tasks:
     before: |
       cd web/
     init: |
-      pnpm install
+      bun install
     command: |
-      pnpm start
+      bun start
   - name: Docs
     before: |
       cd docs/
     init: |
-      pnpm install
-      pnpm build:woodpecker-plugins
+      bun install
+      bun build:woodpecker-plugins
     command: |
-      pnpm start --port 4000
+      bun start --port 4000
 
 ports:
   - port: 3000

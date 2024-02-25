@@ -1,6 +1,6 @@
 variables:
   - &golang_image 'docker.io/golang:1.21.5'
-  - &node_image 'docker.io/node:21-alpine'
+  - &bun_image 'docker.io/oven/bun:1.0-alpine'
   - &alpine_image 'docker.io/alpine:3.19'
   - path: &when_path
       - 'docs/**'
@@ -48,12 +48,11 @@ steps:
       - event: manual
 
   build:
-    image: *node_image
+    image: *bun_image
     directory: docs/
     commands:
-      - corepack enable
-      - pnpm install --frozen-lockfile
-      - pnpm build
+      - bun install --frozen-lockfile
+      - bun build
     when:
       - path: *when_path
         event: [tag, pull_request, push]

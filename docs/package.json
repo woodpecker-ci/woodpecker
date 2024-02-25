@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "start": "cd ../ && make docs && cd docs && docusaurus start",
-    "build": "pnpm build:woodpecker-plugins && docusaurus build",
-    "build:woodpecker-plugins": "cd plugins/woodpecker-plugins && pnpm i && pnpm build",
+    "build": "bun build:woodpecker-plugins && docusaurus build",
+    "build:woodpecker-plugins": "cd plugins/woodpecker-plugins && bun i && bun build",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",
     "clear": "docusaurus clear",
@@ -51,11 +51,12 @@
     "@types/react-router-dom": "^5.3.3",
     "typescript": "^5.3.3"
   },
-  "pnpm": {
-    "overrides": {
-      "trim": "^0.0.3",
-      "got": "^11.8.5",
-      "follow-redirects@<1.15.4": ">=1.15.4"
-    }
+  "workspaces": [
+    "plugins/*"
+  ],
+  "overrides": {
+    "trim": "^0.0.3",
+    "got": "^11.8.5",
+    "follow-redirects@<1.15.4": ">=1.15.4"
   }
 }

@@ -6,7 +6,7 @@ when:
       - renovate/*
 
 variables:
-  - &node_image 'docker.io/node:21-alpine'
+  - &bun_image 'docker.io/oven/bun:1.0-alpine'
   - &when
     path:
       # related config files
@@ -18,49 +18,48 @@ variables:
 
 steps:
   install-dependencies:
-    image: *node_image
+    image: *bun_image
     directory: web/
     commands:
-      - corepack enable
-      - pnpm install --frozen-lockfile
+      - bun install --frozen-lockfile
     when: *when
 
   lint:
     depends_on:
       - install-dependencies
-    image: *node_image
+    image: *bun_image
     directory: web/
     commands:
       - corepack enable
-      - pnpm lint
+      - bun lint
     when: *when
 
   formatcheck:
     depends_on:
       - install-dependencies
-    image: *node_image
+    image: *bun_image
     directory: web/
     commands:
       - corepack enable
-      - pnpm format:check
+      - bun format:check
     when: *when
 
   typecheck:
     depends_on:
       - install-dependencies
-    image: *node_image
+    image: *bun_image
     directory: web/
     commands:
       - corepack enable
-      - pnpm typecheck
+      - bun typecheck
     when: *when
 
   test:
     depends_on:
       - install-dependencies
-    image: *node_image
+    image: *bun_image
     directory: web/
     commands:
       - corepack enable
-      - pnpm test
+      - bun test
     when: *when
