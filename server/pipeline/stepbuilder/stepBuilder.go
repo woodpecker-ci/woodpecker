@@ -17,9 +17,10 @@ package stepbuilder
 
 import (
 	"fmt"
-	"html/template"
+	"os"
 	"path/filepath"
 	"strings"
+	"text/template"
 
 	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog/log"
@@ -127,11 +128,9 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 		environ[k] = v
 	}
 
-	newPreprocessor := true
-
 	// substitute vars
 	var substituted string
-	if newPreprocessor {
+	if os.Getenv("WOODPECKER_EXPERIMENTAL_GO_PREPROCESSOR") == "true" {
 		var err error
 		tmpl, err := template.New("pipeline").Parse(data)
 		if err != nil {
@@ -146,7 +145,9 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 		if err != nil {
 			return nil, multierr.Append(errorsAndWarnings, err)
 		}
-	} else {
+	}
+
+	if os.Getenv("WOODPECKER_EXPERIMENTAL_DISABLE_LEAGAY_PREPROCESSOR") != "true" {
 		var err error
 		substituted, err = metadata.EnvVarSubst(data, environ)
 		if err != nil {
