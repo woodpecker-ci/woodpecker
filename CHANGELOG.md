@@ -11,6 +11,16 @@
 - Add bitbucket datacenter (server) support  [[#2503](https://github.com/woodpecker-ci/woodpecker/pull/2503)]
 - Cli updater [[#3382](https://github.com/woodpecker-ci/woodpecker/pull/3382)]
 
+### 📚 Documentation
+
+- Add blog post [[#3439](https://github.com/woodpecker-ci/woodpecker/pull/3439)]
+- Add "Gradle Wrapper Validation" plugin [[#3435](https://github.com/woodpecker-ci/woodpecker/pull/3435)]
+- Add blog post [[#3410](https://github.com/woodpecker-ci/woodpecker/pull/3410)]
+- Extend core ideas documentation [[#3405](https://github.com/woodpecker-ci/woodpecker/pull/3405)]
+- docs: fix contributions link [[#3363](https://github.com/woodpecker-ci/woodpecker/pull/3363)]
+- Update/fix some docs [[#3359](https://github.com/woodpecker-ci/woodpecker/pull/3359)]
+- chore(deps): update dependency marked to v12 [[#3325](https://github.com/woodpecker-ci/woodpecker/pull/3325)]
+
 ### 📈 Enhancement
 
 - Simplify store interfaces [[#3437](https://github.com/woodpecker-ci/woodpecker/pull/3437)]
@@ -26,15 +36,6 @@
 - Make agent usable for external backends [[#3270](https://github.com/woodpecker-ci/woodpecker/pull/3270)]
 - Add no branches text [[#3312](https://github.com/woodpecker-ci/woodpecker/pull/3312)]
 - Add loading spinner to repo list [[#3310](https://github.com/woodpecker-ci/woodpecker/pull/3310)]
-
-### 📚 Documentation
-
-- Add "Gradle Wrapper Validation" plugin [[#3435](https://github.com/woodpecker-ci/woodpecker/pull/3435)]
-- Add blog post [[#3410](https://github.com/woodpecker-ci/woodpecker/pull/3410)]
-- Extend core ideas documentation [[#3405](https://github.com/woodpecker-ci/woodpecker/pull/3405)]
-- docs: fix contributions link [[#3363](https://github.com/woodpecker-ci/woodpecker/pull/3363)]
-- Update/fix some docs [[#3359](https://github.com/woodpecker-ci/woodpecker/pull/3359)]
-- chore(deps): update dependency marked to v12 [[#3325](https://github.com/woodpecker-ci/woodpecker/pull/3325)]
 
 ### 🐛 Bug Fixes
 
