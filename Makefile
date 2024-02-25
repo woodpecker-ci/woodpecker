@@ -183,7 +183,7 @@ test: test-agent test-server test-server-datastore test-cli test-lib ## Run all 
 ##@ Build
 
 build-ui: ## Build UI
-	(cd web/; bun install --frozen-lockfile; bun build)
+	(cd web/; bun install --frozen-lockfile; bun run build)
 
 build-server: build-ui generate-swagger ## Build server
 	CGO_ENABLED=${CGO_ENABLED} GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -ldflags '${LDFLAGS}' -o dist/woodpecker-server${BIN_SUFFIX} go.woodpecker-ci.org/woodpecker/v2/cmd/server

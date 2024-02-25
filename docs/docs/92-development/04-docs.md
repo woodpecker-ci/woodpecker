@@ -16,5 +16,5 @@ bun build:woodpecker-plugins
 bun start
 
 # or build the docs to deploy it to some static page hosting
-bun build
+bun run build
 ```

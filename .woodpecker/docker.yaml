@@ -72,7 +72,7 @@ steps:
     directory: web/
     commands:
       - bun install --frozen-lockfile
-      - bun build
+      - bun run build
     when:
       - event: pull_request
         evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'

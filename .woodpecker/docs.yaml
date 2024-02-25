@@ -52,7 +52,7 @@ steps:
     directory: docs/
     commands:
       - bun install --frozen-lockfile
-      - bun build
+      - bun run build
     when:
       - path: *when_path
         event: [tag, pull_request, push]

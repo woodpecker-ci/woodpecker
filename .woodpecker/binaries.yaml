@@ -13,7 +13,7 @@ steps:
     directory: web/
     commands:
       - bun install --frozen-lockfile
-      - bun build
+      - bun run build
 
   vendor:
     image: *golang_image
