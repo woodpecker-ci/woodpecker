@@ -512,5 +512,8 @@
   "login_to_cli": "Login to CLI",
   "login_to_cli_description": "By continuing you will be logged in to the CLI.",
   "abort": "Abort",
-  "cli_login_failed": "Login to CLI failed"
+  "cli_login_success": "Login to CLI successful",
+  "cli_login_failed": "Login to CLI failed",
+  "cli_login_denied": "Login to CLI denied",
+  "return_to_cli": "You can now close this tab and return to the CLI."
 }
