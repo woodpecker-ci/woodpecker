@@ -86,7 +86,6 @@ type Store interface {
 	// CreatePipeline creates a new pipeline and steps.
 	CreatePipeline(*model.Pipeline, ...*model.Step) error
 	// UpdatePipeline updates a pipeline.
-	// TODO
 	UpdatePipeline(*model.Pipeline) error
 	// DeletePipeline deletes a pipeline.
 	DeletePipeline(*model.Pipeline) error
@@ -108,7 +107,7 @@ type Store interface {
 	ConfigPersist(*model.Config) (*model.Config, error)
 	PipelineConfigCreate(*model.PipelineConfig) error
 
-	// Secrets TODO
+	// Secrets
 	SecretFind(*model.Repo, string) (*model.Secret, error)
 	SecretList(*model.Repo, bool, *model.ListOptions) ([]*model.Secret, error)
 	SecretListAll() ([]*model.Secret, error)
@@ -120,14 +119,14 @@ type Store interface {
 	GlobalSecretFind(string) (*model.Secret, error)
 	GlobalSecretList(*model.ListOptions) ([]*model.Secret, error)
 
-	// Registries TODO
+	// Registries
 	RegistryFind(*model.Repo, string) (*model.Registry, error)
 	RegistryList(*model.Repo, *model.ListOptions) ([]*model.Registry, error)
 	RegistryCreate(*model.Registry) error
 	RegistryUpdate(*model.Registry) error
 	RegistryDelete(repo *model.Repo, addr string) error
 
-	// Steps TODO
+	// Steps
 	StepLoad(int64) (*model.Step, error)
 	StepFind(*model.Pipeline, int) (*model.Step, error)
 	StepByUUID(string) (*model.Step, error)
