@@ -1,15 +1,33 @@
 # Changelog
 
-## [2.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.4.0) - 2024-02-25
+## [2.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.4.0) - 2024-02-26
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@qwerty287, @kytta, @renovate[bot], @6543, @langecode, @anbraten, @eliasscosta, @xoxys, @kjuulh, @sinlov, @lukashass, @pre-commit-ci[bot], @fernandrone
+@anbraten, @qwerty287, @kytta, @renovate[bot], @6543, @langecode, @eliasscosta, @xoxys, @kjuulh, @sinlov, @lukashass, @pre-commit-ci[bot], @fernandrone
 
 ### ✨ Features
 
 - Add bitbucket datacenter (server) support  [[#2503](https://github.com/woodpecker-ci/woodpecker/pull/2503)]
 - Cli updater [[#3382](https://github.com/woodpecker-ci/woodpecker/pull/3382)]
+
+### 🐛 Bug Fixes
+
+- Set pull-request id and labels on pr-closed event [[#3442](https://github.com/woodpecker-ci/woodpecker/pull/3442)]
+- Update org name on login [[#3409](https://github.com/woodpecker-ci/woodpecker/pull/3409)]
+- Do not alter secret key upper-/lowercase [[#3375](https://github.com/woodpecker-ci/woodpecker/pull/3375)]
+- fix: can't run multiple services on k8s [[#3395](https://github.com/woodpecker-ci/woodpecker/pull/3395)]
+- Fix agent polling [[#3378](https://github.com/woodpecker-ci/woodpecker/pull/3378)]
+- Remove empty strings from slice before parsing agent config [[#3387](https://github.com/woodpecker-ci/woodpecker/pull/3387)]
+- Set correct link for commit [[#3368](https://github.com/woodpecker-ci/woodpecker/pull/3368)]
+- Fix schema links [[#3369](https://github.com/woodpecker-ci/woodpecker/pull/3369)]
+- Fix correctly handle gitlab pr closed events [[#3362](https://github.com/woodpecker-ci/woodpecker/pull/3362)]
+- fix: update schema event_enum to remove error warning when.event [[#3357](https://github.com/woodpecker-ci/woodpecker/pull/3357)]
+- Fix version check on next [[#3340](https://github.com/woodpecker-ci/woodpecker/pull/3340)]
+- Ignore gitlab merge request events without code changes [[#3338](https://github.com/woodpecker-ci/woodpecker/pull/3338)]
+- Ignore gitlab push events without commits [[#3339](https://github.com/woodpecker-ci/woodpecker/pull/3339)]
+- Consider gitlab inherited permissions [[#3308](https://github.com/woodpecker-ci/woodpecker/pull/3308)]
+- fix: agent panic when node is terminated during step execution [[#3331](https://github.com/woodpecker-ci/woodpecker/pull/3331)]
 
 ### 📚 Documentation
 
@@ -36,23 +54,6 @@
 - Make agent usable for external backends [[#3270](https://github.com/woodpecker-ci/woodpecker/pull/3270)]
 - Add no branches text [[#3312](https://github.com/woodpecker-ci/woodpecker/pull/3312)]
 - Add loading spinner to repo list [[#3310](https://github.com/woodpecker-ci/woodpecker/pull/3310)]
-
-### 🐛 Bug Fixes
-
-- Update org name on login [[#3409](https://github.com/woodpecker-ci/woodpecker/pull/3409)]
-- Do not alter secret key upper-/lowercase [[#3375](https://github.com/woodpecker-ci/woodpecker/pull/3375)]
-- fix: can't run multiple services on k8s [[#3395](https://github.com/woodpecker-ci/woodpecker/pull/3395)]
-- Fix agent polling [[#3378](https://github.com/woodpecker-ci/woodpecker/pull/3378)]
-- Remove empty strings from slice before parsing agent config [[#3387](https://github.com/woodpecker-ci/woodpecker/pull/3387)]
-- Set correct link for commit [[#3368](https://github.com/woodpecker-ci/woodpecker/pull/3368)]
-- Fix schema links [[#3369](https://github.com/woodpecker-ci/woodpecker/pull/3369)]
-- Fix correctly handle gitlab pr closed events [[#3362](https://github.com/woodpecker-ci/woodpecker/pull/3362)]
-- fix: update schema event_enum to remove error warning when.event [[#3357](https://github.com/woodpecker-ci/woodpecker/pull/3357)]
-- Fix version check on next [[#3340](https://github.com/woodpecker-ci/woodpecker/pull/3340)]
-- Ignore gitlab merge request events without code changes [[#3338](https://github.com/woodpecker-ci/woodpecker/pull/3338)]
-- Ignore gitlab push events without commits [[#3339](https://github.com/woodpecker-ci/woodpecker/pull/3339)]
-- Consider gitlab inherited permissions [[#3308](https://github.com/woodpecker-ci/woodpecker/pull/3308)]
-- fix: agent panic when node is terminated during step execution [[#3331](https://github.com/woodpecker-ci/woodpecker/pull/3331)]
 
 ### Misc
 
