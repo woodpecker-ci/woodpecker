@@ -3,7 +3,7 @@ FROM --platform=$BUILDPLATFORM docker.io/golang:1.22 AS certs
 FROM scratch
 ARG TARGETOS TARGETARCH
 ENV GODEBUG=netdns=go
-# Signal that woodpecker is running inside a container
+# Internal setting do NOT change! Signals that woodpecker is running inside a container
 ENV WOODPECKER_IN_CONTAINER=true
 ENV XDG_CACHE_HOME=/var/lib/woodpecker
 ENV XDG_DATA_HOME=/var/lib/woodpecker
