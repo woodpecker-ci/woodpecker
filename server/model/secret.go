@@ -29,29 +29,6 @@ var (
 	ErrSecretEventInvalid = errors.New("invalid secret event")
 )
 
-// SecretService defines a service for managing secrets.
-type SecretService interface {
-	SecretListPipeline(*Repo, *Pipeline, *ListOptions) ([]*Secret, error)
-	// Repository secrets
-	SecretFind(*Repo, string) (*Secret, error)
-	SecretList(*Repo, *ListOptions) ([]*Secret, error)
-	SecretCreate(*Repo, *Secret) error
-	SecretUpdate(*Repo, *Secret) error
-	SecretDelete(*Repo, string) error
-	// Organization secrets
-	OrgSecretFind(int64, string) (*Secret, error)
-	OrgSecretList(int64, *ListOptions) ([]*Secret, error)
-	OrgSecretCreate(int64, *Secret) error
-	OrgSecretUpdate(int64, *Secret) error
-	OrgSecretDelete(int64, string) error
-	// Global secrets
-	GlobalSecretFind(string) (*Secret, error)
-	GlobalSecretList(*ListOptions) ([]*Secret, error)
-	GlobalSecretCreate(*Secret) error
-	GlobalSecretUpdate(*Secret) error
-	GlobalSecretDelete(string) error
-}
-
 // SecretStore persists secret information to storage.
 type SecretStore interface {
 	SecretFind(*Repo, string) (*Secret, error)

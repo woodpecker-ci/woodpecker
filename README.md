@@ -62,7 +62,7 @@ Please consider donating and become a backer. 🙏 [[Become a backer](https://op
 
 ## ✨ Contribute
 
-See [Contributing Guide](CONTRIBUTING.md)
+See [Contributing Guide](https://github.com/woodpecker-ci/.github/blob/main/CONTRIBUTING.md)
 
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://woodpecker-ci.org/docs/next/development/getting-started#gitpod)
 

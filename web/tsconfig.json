@@ -12,9 +12,9 @@
     "skipLibCheck": true,
     "lib": ["esnext", "dom"],
     "paths": {
-      "~/*": ["./src/*"],
-    },
+      "~/*": ["./src/*"]
+    }
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"],
-  "exclude": ["node_modules", "**/__tests__/**/*", "**/dist/**/*"],
+  "exclude": ["node_modules", "**/__tests__/**/*", "**/dist/**/*"]
 }

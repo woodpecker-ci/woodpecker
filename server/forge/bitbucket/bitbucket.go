@@ -77,36 +77,35 @@ func (c *config) URL() string {
 
 // Login authenticates an account with Bitbucket using the oauth2 protocol. The
 // Bitbucket account details are returned when the user is successfully authenticated.
-func (c *config) Login(ctx context.Context, w http.ResponseWriter, req *http.Request) (*model.User, error) {
+func (c *config) Login(ctx context.Context, req *forge_types.OAuthRequest) (*model.User, string, error) {
 	config := c.newOAuth2Config()
+	redirectURL := config.AuthCodeURL("woodpecker")
 
 	// get the OAuth errors
-	if err := req.FormValue("error"); err != "" {
-		return nil, &forge_types.AuthError{
-			Err:         err,
-			Description: req.FormValue("error_description"),
-			URI:         req.FormValue("error_uri"),
+	if req.Error != "" {
+		return nil, redirectURL, &forge_types.AuthError{
+			Err:         req.Error,
+			Description: req.ErrorDescription,
+			URI:         req.ErrorURI,
 		}
 	}
 
-	// get the OAuth code
-	code := req.FormValue("code")
-	if len(code) == 0 {
-		http.Redirect(w, req, config.AuthCodeURL("woodpecker"), http.StatusSeeOther)
-		return nil, nil
+	// check the OAuth code
+	if len(req.Code) == 0 {
+		return nil, redirectURL, nil
 	}
 
-	token, err := config.Exchange(ctx, code)
+	token, err := config.Exchange(ctx, req.Code)
 	if err != nil {
-		return nil, err
+		return nil, redirectURL, err
 	}
 
 	client := internal.NewClient(ctx, c.API, config.Client(ctx, token))
 	curr, err := client.FindCurrent()
 	if err != nil {
-		return nil, err
+		return nil, redirectURL, err
 	}
-	return convertUser(curr, token), nil
+	return convertUser(curr, token), redirectURL, nil
 }
 
 // Auth uses the Bitbucket oauth2 access token and refresh token to authenticate
@@ -363,8 +362,15 @@ func (c *config) Branches(ctx context.Context, u *model.User, r *model.Repo, p *
 }
 
 // BranchHead returns the sha of the head (latest commit) of the specified branch
-func (c *config) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
-	return c.newClient(ctx, u).GetBranchHead(r.Owner, r.Name, branch)
+func (c *config) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (*model.Commit, error) {
+	commit, err := c.newClient(ctx, u).GetBranchHead(r.Owner, r.Name, branch)
+	if err != nil {
+		return nil, err
+	}
+	return &model.Commit{
+		SHA:      commit.Hash,
+		ForgeURL: commit.Links.HTML.Href,
+	}, nil
 }
 
 // PullRequests returns the pull requests of the named repository.

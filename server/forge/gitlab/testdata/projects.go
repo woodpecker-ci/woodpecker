@@ -304,3 +304,33 @@ var project4PayloadHooks = []byte(`
   }
 ]
 `)
+
+var project4PayloadMembers = []byte(`
+{
+  "id": 3,
+  "username": "some_user",
+  "name": "Diaspora",
+  "state": "active",
+  "locked": false,
+  "avatar_url": "https://example.com/uploads/-/system/user/avatar/3/avatar.png",
+  "web_url": "https://example.com/some_user",
+  "access_level": 50,
+  "created_at": "2024-01-16T12:39:58.912Z",
+  "expires_at": null
+}
+`)
+
+var project6PayloadMembers = []byte(`
+{
+  "id": 3,
+  "username": "some_user",
+  "name": "Diaspora",
+  "state": "active",
+  "locked": false,
+  "avatar_url": "https://example.com/uploads/-/system/user/avatar/3/avatar.png",
+  "web_url": "https://example.com/some_user",
+  "access_level": 30,
+  "created_at": "2024-01-16T12:39:58.912Z",
+  "expires_at": null
+}
+`)

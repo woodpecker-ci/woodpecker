@@ -63,10 +63,6 @@ func (p Pipeline) IsMultiPipeline() bool {
 	return len(p.Workflows) > 1
 }
 
-type UpdatePipelineStore interface {
-	UpdatePipeline(*Pipeline) error
-}
-
 type PipelineOptions struct {
 	Branch    string            `json:"branch"`
 	Variables map[string]string `json:"variables"`

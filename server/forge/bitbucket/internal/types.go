@@ -282,7 +282,12 @@ type CommitsResp struct {
 }
 
 type Commit struct {
-	Hash string `json:"hash"`
+	Hash  string `json:"hash"`
+	Links struct {
+		HTML struct {
+			Href string `json:"href"`
+		} `json:"html"`
+	} `json:"links"`
 }
 
 type DirResp struct {

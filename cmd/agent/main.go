@@ -15,36 +15,17 @@
 package main
 
 import (
-	"os"
-
-	_ "github.com/joho/godotenv/autoload"
-	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v2"
-
+	"go.woodpecker-ci.org/woodpecker/v2/cmd/agent/core"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/docker"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/kubernetes"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/local"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/logger"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
-	"go.woodpecker-ci.org/woodpecker/v2/version"
+	backendTypes "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
 
 func main() {
-	app := cli.NewApp()
-	app.Name = "woodpecker-agent"
-	app.Version = version.String()
-	app.Usage = "woodpecker agent"
-	app.Action = runWithRetry
-	app.Commands = []*cli.Command{
-		{
-			Name:   "ping",
-			Usage:  "ping the agent",
-			Action: pinger,
-		},
-	}
-	app.Flags = utils.MergeSlices(flags, logger.GlobalLoggerFlags, docker.Flags, kubernetes.Flags, local.Flags)
-
-	if err := app.Run(os.Args); err != nil {
-		log.Fatal().Err(err).Msg("error running agent") //nolint:forbidigo
-	}
+	core.RunAgent([]backendTypes.Backend{
+		kubernetes.New(),
+		docker.New(),
+		local.New(),
+	})
 }
