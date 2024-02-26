@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@anbraten, @qwerty287, @kytta, @renovate[bot], @6543, @langecode, @eliasscosta, @xoxys, @kjuulh, @sinlov, @lukashass, @pre-commit-ci[bot], @fernandrone
+@smainz, @anbraten, @qwerty287, @kytta, @renovate[bot], @6543, @langecode, @eliasscosta, @xoxys, @kjuulh, @sinlov, @lukashass, @pre-commit-ci[bot], @fernandrone
 
 ### ✨ Features
 
@@ -13,6 +13,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fix usage of WOODPECKER_DATABASE_DATASOURCE_FILE [[#3404](https://github.com/woodpecker-ci/woodpecker/pull/3404)]
 - Set pull-request id and labels on pr-closed event [[#3442](https://github.com/woodpecker-ci/woodpecker/pull/3442)]
 - Update org name on login [[#3409](https://github.com/woodpecker-ci/woodpecker/pull/3409)]
 - Do not alter secret key upper-/lowercase [[#3375](https://github.com/woodpecker-ci/woodpecker/pull/3375)]
