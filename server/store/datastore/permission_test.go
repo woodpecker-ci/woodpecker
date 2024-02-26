@@ -110,37 +110,3 @@ func TestPermUpsert(t *testing.T) {
 	assert.True(t, perm.Push)
 	assert.True(t, perm.Admin)
 }
-
-func TestPermDelete(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Repo), new(model.Perm), new(model.User))
-	defer closer()
-
-	user := &model.User{ID: 1}
-	repo := &model.Repo{
-		UserID:        1,
-		FullName:      "bradrydzewski/test",
-		Owner:         "bradrydzewski",
-		Name:          "test",
-		ForgeRemoteID: "1",
-	}
-	assert.NoError(t, store.CreateRepo(repo))
-
-	err := store.PermUpsert(
-		&model.Perm{
-			UserID: user.ID,
-			RepoID: repo.ID,
-			Repo:   repo,
-			Pull:   true,
-			Push:   false,
-			Admin:  false,
-		},
-	)
-	assert.NoError(t, err)
-
-	perm, err := store.PermFind(user, repo)
-	assert.NoError(t, err)
-	err = store.PermDelete(perm)
-	assert.NoError(t, err)
-	_, err = store.PermFind(user, repo)
-	assert.Error(t, err)
-}
