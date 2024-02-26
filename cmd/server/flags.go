@@ -517,7 +517,6 @@ func datasourceDefaultValue() string {
 	_, found := os.LookupEnv("WOODPECKER_IN_CONTAINER")
 	if found {
 		return "/var/lib/woodpecker/woodpecker.sqlite"
-	} else {
-		return "woodpecker.sqlite"
 	}
+	return "woodpecker.sqlite"
 }
