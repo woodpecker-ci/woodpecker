@@ -21,6 +21,13 @@
             @click="download"
           />
           <IconButton
+            v-if="step?.end_time !== undefined && user?.admin"
+            :title="$t('repo.pipeline.actions.log_delete')"
+            class="!hover:bg-white !hover:bg-opacity-10"
+            icon="trash"
+            @click="deleteLogs"
+          />
+          <IconButton
             v-if="step?.end_time === undefined"
             :title="
               autoScroll ? $t('repo.pipeline.actions.log_auto_scroll_off') : $t('repo.pipeline.actions.log_auto_scroll')
@@ -113,6 +120,7 @@ import useApiClient from '~/compositions/useApiClient';
 import useNotifications from '~/compositions/useNotifications';
 import { Pipeline, Repo } from '~/lib/api/types';
 import { findStep, isStepFinished, isStepRunning } from '~/utils/helpers';
+import useAuthentication from '~/compositions/useAuthentication';
 
 type LogLine = {
   index: number;
@@ -138,6 +146,7 @@ const stepId = toRef(props, 'stepId');
 const repo = inject<Ref<Repo>>('repo');
 const apiClient = useApiClient();
 const route = useRoute();
+const { user } = useAuthentication();
 
 const loadedStepSlug = ref<string>();
 const stepSlug = computed(() => `${repo?.value.owner} - ${repo?.value.name} - ${pipeline.value.id} - ${stepId.value}`);
@@ -294,6 +303,18 @@ async function loadLogs() {
       writeLog({ index: line.line, text: decode(line.data), time: line.time });
       flushLogs(true);
     });
+  }
+}
+
+async function deleteLogs() {
+  if (!repo?.value || !pipeline.value || !step.value) {
+    throw new Error('The repository, pipeline or step was undefined');
+  }
+
+  try {
+    await apiClient.deleteLogs(repo.value.id, pipeline.value.number, step.value.id);
+  } catch (e) {
+    notifications.notifyError(e, i18n.t('repo.pipeline.log_delete_error'));
   }
 }
 
