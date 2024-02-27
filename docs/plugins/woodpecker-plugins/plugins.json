@@ -184,6 +184,11 @@
       "name": "Gradle Wrapper Validation",
       "docs": "https://codeberg.org/beaks/gradle-wrapper-validation/raw/branch/main/docs.md",
       "verified": false
+    },
+    {
+      "name": "Sonatype Nexus",
+      "docs": "https://raw.githubusercontent.com/rockdrilla/woodpecker-sonatype-nexus/main/docs.md",
+      "verified": false
     }
   ]
 }
