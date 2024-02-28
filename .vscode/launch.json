@@ -38,7 +38,7 @@
       "name": "Woodpecker UI",
       "type": "node",
       "request": "launch",
-      "runtimeExecutable": "pnpm",
+      "runtimeExecutable": "bun",
       "runtimeArgs": ["start"],
       "cwd": "${workspaceFolder}/web",
       "resolveSourceMapLocations": ["${workspaceFolder}/web/**", "!**/node_modules/**"],

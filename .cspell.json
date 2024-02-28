@@ -84,6 +84,7 @@
   "ignorePaths": [
     "**/node_modules/**/*",
     "pnpm-lock.yaml",
+    "bun.lockb",
     ".gitignore",
     ".git/**/*",
     ".cspell.json",
