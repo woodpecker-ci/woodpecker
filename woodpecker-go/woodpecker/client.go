@@ -318,12 +318,16 @@ func (c *client) Deploy(repoID, pipeline int64, env string, params map[string]st
 	return out, err
 }
 
-// LogsPurge purges the pipeline logs for the specified pipeline and optional step.
-func (c *client) LogsPurge(repoID, pipeline int64, step int64) error {
+// LogsPurge purges the pipeline logs for the specified pipeline.
+func (c *client) LogsPurge(repoID, pipeline int64) error {
 	uri := fmt.Sprintf(pathLogPurge, c.addr, repoID, pipeline)
-	if step > 0 {
-		uri = fmt.Sprintf(pathStepLogPurge, c.addr, repoID, pipeline, step)
-	}
+	err := c.delete(uri)
+	return err
+}
+
+// StepLogsPurge purges the pipeline logs for the specified step.
+func (c *client) StepLogsPurge(repoID, pipelineNumber int64, stepID int64) error {
+	uri := fmt.Sprintf(pathStepLogPurge, c.addr, repoID, pipelineNumber, stepID)
 	err := c.delete(uri)
 	return err
 }

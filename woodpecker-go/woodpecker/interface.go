@@ -116,7 +116,10 @@ type Client interface {
 	Deploy(repoID, pipeline int64, env string, params map[string]string) (*Pipeline, error)
 
 	// LogsPurge purges the pipeline logs for the specified pipeline.
-	LogsPurge(repoID, pipeline int64, step ...int64) error
+	LogsPurge(repoID, pipeline int64) error
+
+	// StepLogsPurge purges the pipeline logs for the specified step.
+	StepLogsPurge(repoID, pipelineNumber int64, stepID int64) error
 
 	// Registry returns a registry by hostname.
 	Registry(repoID int64, hostname string) (*Registry, error)
