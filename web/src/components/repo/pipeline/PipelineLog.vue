@@ -21,7 +21,7 @@
             @click="download"
           />
           <IconButton
-            v-if="step?.end_time !== undefined && user?.admin"
+            v-if="step?.end_time !== undefined && hasLogs && isRepoAdmin"
             :title="$t('repo.pipeline.actions.log_delete')"
             class="!hover:bg-white !hover:bg-opacity-10"
             icon="trash"
@@ -118,9 +118,8 @@ import IconButton from '~/components/atomic/IconButton.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useNotifications from '~/compositions/useNotifications';
-import { Pipeline, Repo } from '~/lib/api/types';
+import { Pipeline, Repo, RepoPermissions } from '~/lib/api/types';
 import { findStep, isStepFinished, isStepRunning } from '~/utils/helpers';
-import useAuthentication from '~/compositions/useAuthentication';
 
 type LogLine = {
   index: number;
@@ -144,9 +143,9 @@ const i18n = useI18n();
 const pipeline = toRef(props, 'pipeline');
 const stepId = toRef(props, 'stepId');
 const repo = inject<Ref<Repo>>('repo');
+const repoPermissions = inject<Ref<RepoPermissions>>('repo-permissions');
 const apiClient = useApiClient();
 const route = useRoute();
-const { user } = useAuthentication();
 
 const loadedStepSlug = ref<string>();
 const stepSlug = computed(() => `${repo?.value.owner} - ${repo?.value.name} - ${pipeline.value.id} - ${stepId.value}`);
@@ -169,6 +168,7 @@ ansiUp.value.use_classes = true;
 const logBuffer = ref<LogLine[]>([]);
 
 const maxLineCount = 5000; // TODO(2653): set back to 500 and implement lazy-loading support
+const isRepoAdmin = computed(() => repoPermissions?.value?.admin);
 
 function isSelected(line: LogLine): boolean {
   return route.hash === `#L${line.number}`;
