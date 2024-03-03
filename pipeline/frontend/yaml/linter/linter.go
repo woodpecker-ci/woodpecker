@@ -299,8 +299,8 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 	for _, step := range parsed.Steps.ContainerList {
 		for i, c := range step.Secrets.Secrets {
 			if c.Source != c.Target {
-				err = multierr.Append(err, &errors.PipelineError{
-					Type:    errors.PipelineErrorTypeDeprecation,
+				err = multierr.Append(err, &errorTypes.PipelineError{
+					Type:    errorTypes.PipelineErrorTypeDeprecation,
 					Message: "Secrets alternative names are deprecated, use environment with from_secret",
 					Data: errors.DeprecationErrorData{
 						File:  config.File,
