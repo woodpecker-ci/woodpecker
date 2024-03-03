@@ -1,10 +1,10 @@
 # Changelog
 
-## [2.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.4.0) - 2024-02-28
+## [2.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.4.0) - 2024-03-03
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@rockdrilla, @smainz, @anbraten, @qwerty287, @kytta, @renovate[bot], @6543, @langecode, @eliasscosta, @xoxys, @kjuulh, @sinlov, @lukashass, @pre-commit-ci[bot], @fernandrone
+@renovate[bot], @rockdrilla, @smainz, @anbraten, @qwerty287, @kytta, @6543, @langecode, @eliasscosta, @xoxys, @kjuulh, @sinlov, @lukashass, @pre-commit-ci[bot], @fernandrone
 
 ### ✨ Features
 
@@ -13,6 +13,7 @@
 
 ### 📚 Documentation
 
+- fix(deps): update docs npm deps non-major [[#3455](https://github.com/woodpecker-ci/woodpecker/pull/3455)]
 - Add "Sonatype Nexus" plugin [[#3446](https://github.com/woodpecker-ci/woodpecker/pull/3446)]
 - Add blog post [[#3439](https://github.com/woodpecker-ci/woodpecker/pull/3439)]
 - Add "Gradle Wrapper Validation" plugin [[#3435](https://github.com/woodpecker-ci/woodpecker/pull/3435)]
@@ -21,6 +22,23 @@
 - docs: fix contributions link [[#3363](https://github.com/woodpecker-ci/woodpecker/pull/3363)]
 - Update/fix some docs [[#3359](https://github.com/woodpecker-ci/woodpecker/pull/3359)]
 - chore(deps): update dependency marked to v12 [[#3325](https://github.com/woodpecker-ci/woodpecker/pull/3325)]
+
+### 📈 Enhancement
+
+- Apply "grpcnotrace" go build tag [[#3448](https://github.com/woodpecker-ci/woodpecker/pull/3448)]
+- Simplify store interfaces [[#3437](https://github.com/woodpecker-ci/woodpecker/pull/3437)]
+- Deprecate alternative names on secrets [[#3406](https://github.com/woodpecker-ci/woodpecker/pull/3406)]
+- Store workflows/steps for blocked pipeline [[#2757](https://github.com/woodpecker-ci/woodpecker/pull/2757)]
+- Parse email from Gitea webhook [[#3420](https://github.com/woodpecker-ci/woodpecker/pull/3420)]
+- Replace http types on forge interface [[#3374](https://github.com/woodpecker-ci/woodpecker/pull/3374)]
+- Prevent agent deletion when it's still running tasks [[#3377](https://github.com/woodpecker-ci/woodpecker/pull/3377)]
+- Refactor internal services [[#915](https://github.com/woodpecker-ci/woodpecker/pull/915)]
+- Lint for event filter and deprecate `exclude` [[#3222](https://github.com/woodpecker-ci/woodpecker/pull/3222)]
+- Allow editing all environment variables in pipeline popups [[#3314](https://github.com/woodpecker-ci/woodpecker/pull/3314)]
+- Parse backend options in backend [[#3227](https://github.com/woodpecker-ci/woodpecker/pull/3227)]
+- Make agent usable for external backends [[#3270](https://github.com/woodpecker-ci/woodpecker/pull/3270)]
+- Add no branches text [[#3312](https://github.com/woodpecker-ci/woodpecker/pull/3312)]
+- Add loading spinner to repo list [[#3310](https://github.com/woodpecker-ci/woodpecker/pull/3310)]
 
 ### 🐛 Bug Fixes
 
@@ -41,24 +59,9 @@
 - Consider gitlab inherited permissions [[#3308](https://github.com/woodpecker-ci/woodpecker/pull/3308)]
 - fix: agent panic when node is terminated during step execution [[#3331](https://github.com/woodpecker-ci/woodpecker/pull/3331)]
 
-### 📈 Enhancement
-
-- Simplify store interfaces [[#3437](https://github.com/woodpecker-ci/woodpecker/pull/3437)]
-- Deprecate alternative names on secrets [[#3406](https://github.com/woodpecker-ci/woodpecker/pull/3406)]
-- Store workflows/steps for blocked pipeline [[#2757](https://github.com/woodpecker-ci/woodpecker/pull/2757)]
-- Parse email from Gitea webhook [[#3420](https://github.com/woodpecker-ci/woodpecker/pull/3420)]
-- Replace http types on forge interface [[#3374](https://github.com/woodpecker-ci/woodpecker/pull/3374)]
-- Prevent agent deletion when it's still running tasks [[#3377](https://github.com/woodpecker-ci/woodpecker/pull/3377)]
-- Refactor internal services [[#915](https://github.com/woodpecker-ci/woodpecker/pull/915)]
-- Lint for event filter and deprecate `exclude` [[#3222](https://github.com/woodpecker-ci/woodpecker/pull/3222)]
-- Allow editing all environment variables in pipeline popups [[#3314](https://github.com/woodpecker-ci/woodpecker/pull/3314)]
-- Parse backend options in backend [[#3227](https://github.com/woodpecker-ci/woodpecker/pull/3227)]
-- Make agent usable for external backends [[#3270](https://github.com/woodpecker-ci/woodpecker/pull/3270)]
-- Add no branches text [[#3312](https://github.com/woodpecker-ci/woodpecker/pull/3312)]
-- Add loading spinner to repo list [[#3310](https://github.com/woodpecker-ci/woodpecker/pull/3310)]
-
 ### Misc
 
+- chore(deps): update web npm deps non-major [[#3454](https://github.com/woodpecker-ci/woodpecker/pull/3454)]
 - chore(deps): update lycheeverse/lychee docker tag to v0.14.3 [[#3429](https://github.com/woodpecker-ci/woodpecker/pull/3429)]
 - fix(deps): update golang (packages) [[#3430](https://github.com/woodpecker-ci/woodpecker/pull/3430)]
 - More `when` filters [[#3407](https://github.com/woodpecker-ci/woodpecker/pull/3407)]
