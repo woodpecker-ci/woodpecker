@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.4.0) - 2024-03-03
+## [2.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.4.0) - 2024-03-04
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -61,6 +61,8 @@
 
 ### Misc
 
+- chore(deps): update postgres docker tag to v16.2 [[#3461](https://github.com/woodpecker-ci/woodpecker/pull/3461)]
+- chore(deps): update web npm deps non-major [[#3460](https://github.com/woodpecker-ci/woodpecker/pull/3460)]
 - chore(deps): update web npm deps non-major [[#3454](https://github.com/woodpecker-ci/woodpecker/pull/3454)]
 - chore(deps): update lycheeverse/lychee docker tag to v0.14.3 [[#3429](https://github.com/woodpecker-ci/woodpecker/pull/3429)]
 - fix(deps): update golang (packages) [[#3430](https://github.com/woodpecker-ci/woodpecker/pull/3430)]
