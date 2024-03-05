@@ -67,7 +67,7 @@ func TestHelper(t *testing.T) {
 					"clone": {
 						{
 							Name: "http",
-							Href: "https://git.domain/clone",
+							Href: "https://user@git.domain/clone",
 						},
 					},
 					"self": {
