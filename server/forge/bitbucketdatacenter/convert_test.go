@@ -86,6 +86,7 @@ func TestHelper(t *testing.T) {
 			g.Assert(to.SCMKind).Equal(model.RepoGit)
 			g.Assert(to.FullName).Equal("PRJ/REPO")
 			g.Assert(to.Perm).Equal(perm)
+			g.Assert(to.Clone).Equal("https://git.domain/clone")
 		})
 
 		g.It("should convert repository push event", func() {
