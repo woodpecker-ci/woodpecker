@@ -20,15 +20,16 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
-func UpdateToStatusRunning(store model.UpdatePipelineStore, pipeline model.Pipeline, started int64) (*model.Pipeline, error) {
+func UpdateToStatusRunning(store store.Store, pipeline model.Pipeline, started int64) (*model.Pipeline, error) {
 	pipeline.Status = model.StatusRunning
 	pipeline.Started = started
 	return &pipeline, store.UpdatePipeline(&pipeline)
 }
 
-func UpdateToStatusPending(store model.UpdatePipelineStore, pipeline model.Pipeline, reviewer string) (*model.Pipeline, error) {
+func UpdateToStatusPending(store store.Store, pipeline model.Pipeline, reviewer string) (*model.Pipeline, error) {
 	if reviewer != "" {
 		pipeline.Reviewer = reviewer
 		pipeline.Reviewed = time.Now().Unix()
@@ -37,20 +38,20 @@ func UpdateToStatusPending(store model.UpdatePipelineStore, pipeline model.Pipel
 	return &pipeline, store.UpdatePipeline(&pipeline)
 }
 
-func UpdateToStatusDeclined(store model.UpdatePipelineStore, pipeline model.Pipeline, reviewer string) (*model.Pipeline, error) {
+func UpdateToStatusDeclined(store store.Store, pipeline model.Pipeline, reviewer string) (*model.Pipeline, error) {
 	pipeline.Reviewer = reviewer
 	pipeline.Status = model.StatusDeclined
 	pipeline.Reviewed = time.Now().Unix()
 	return &pipeline, store.UpdatePipeline(&pipeline)
 }
 
-func UpdateStatusToDone(store model.UpdatePipelineStore, pipeline model.Pipeline, status model.StatusValue, stopped int64) (*model.Pipeline, error) {
+func UpdateStatusToDone(store store.Store, pipeline model.Pipeline, status model.StatusValue, stopped int64) (*model.Pipeline, error) {
 	pipeline.Status = status
 	pipeline.Finished = stopped
 	return &pipeline, store.UpdatePipeline(&pipeline)
 }
 
-func UpdateToStatusError(store model.UpdatePipelineStore, pipeline model.Pipeline, err error) (*model.Pipeline, error) {
+func UpdateToStatusError(store store.Store, pipeline model.Pipeline, err error) (*model.Pipeline, error) {
 	pipeline.Errors = errors.GetPipelineErrors(err)
 	pipeline.Status = model.StatusError
 	pipeline.Started = time.Now().Unix()
@@ -58,7 +59,7 @@ func UpdateToStatusError(store model.UpdatePipelineStore, pipeline model.Pipelin
 	return &pipeline, store.UpdatePipeline(&pipeline)
 }
 
-func UpdateToStatusKilled(store model.UpdatePipelineStore, pipeline model.Pipeline) (*model.Pipeline, error) {
+func UpdateToStatusKilled(store store.Store, pipeline model.Pipeline) (*model.Pipeline, error) {
 	pipeline.Status = model.StatusKilled
 	pipeline.Finished = time.Now().Unix()
 	return &pipeline, store.UpdatePipeline(&pipeline)

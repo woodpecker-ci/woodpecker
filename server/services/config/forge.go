@@ -46,7 +46,7 @@ func NewForge(timeout time.Duration) Service {
 func (f *forgeFetcher) Fetch(ctx context.Context, forge forge.Forge, user *model.User, repo *model.Repo, pipeline *model.Pipeline, oldConfigData []*types.FileMeta, restart bool) (files []*types.FileMeta, err error) {
 	// skip fetching if we are restarting and have the old config
 	if restart && len(oldConfigData) > 0 {
-		return
+		return oldConfigData, nil
 	}
 
 	ffc := &forgeFetcherContext{

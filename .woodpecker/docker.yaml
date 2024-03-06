@@ -1,17 +1,9 @@
-when:
-  - event: [pull_request, tag]
-  - event: push
-    branch:
-      - ${CI_REPO_DEFAULT_BRANCH}
-      - release/*
-      - renovate/*
-
 variables:
-  - &golang_image 'docker.io/golang:1.21.6'
+  - &golang_image 'docker.io/golang:1.22.0'
   - &node_image 'docker.io/node:21-alpine'
-  - &xgo_image 'docker.io/techknowlogick/xgo:go-1.21.6'
+  - &xgo_image 'docker.io/techknowlogick/xgo:go-1.22.0'
   - &xgo_version 'go-1.21.2'
-  - &buildx_plugin 'docker.io/woodpeckerci/plugin-docker-buildx:3.0.1'
+  - &buildx_plugin 'docker.io/woodpeckerci/plugin-docker-buildx:3.1.0'
   - &platforms_release 'linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/386,linux/amd64,linux/ppc64le,linux/riscv64,linux/s390x,freebsd/arm64,freebsd/amd64,openbsd/arm64,openbsd/amd64'
   - &platforms_server 'linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le,linux/riscv64'
   - &platforms_preview 'linux/amd64'
@@ -46,6 +38,15 @@ variables:
       # pipeline config changes
       - '.woodpecker/docker.yaml'
 
+when:
+  - event: [pull_request, tag]
+  - event: push
+    branch:
+      - renovate/*
+  - event: push
+    branch: ${CI_REPO_DEFAULT_BRANCH}
+    path: *when_path
+
 steps:
   vendor:
     image: *golang_image
@@ -59,7 +60,6 @@ steps:
         path: *when_path
       - branch:
           - ${CI_REPO_DEFAULT_BRANCH}
-          - release/*
           - renovate/*
         event: [push, tag]
         path: *when_path
@@ -81,7 +81,6 @@ steps:
         path: *when_path
       - branch:
           - ${CI_REPO_DEFAULT_BRANCH}
-          - release/*
           - renovate/*
         event: [push, tag]
         path: *when_path
@@ -107,9 +106,7 @@ steps:
         path: *when_path
       - event: push
         path: *when_path
-        branch:
-          - release/*
-          - renovate/*
+        branch: renovate/*
 
   cross-compile-server:
     depends_on:
@@ -175,9 +172,7 @@ steps:
         path: *when_path
       - event: push
         path: *when_path
-        branch:
-          - release/*
-          - renovate/*
+        branch: renovate/*
 
   publish-next-server:
     depends_on:

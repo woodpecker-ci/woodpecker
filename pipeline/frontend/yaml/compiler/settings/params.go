@@ -26,7 +26,7 @@ import (
 
 // ParamsToEnv uses reflection to convert a map[string]interface to a list
 // of environment variables.
-func ParamsToEnv(from map[string]any, to map[string]string, getSecretValue func(name string) (string, error)) (err error) {
+func ParamsToEnv(from map[string]any, to map[string]string, prefix string, getSecretValue func(name string) (string, error)) (err error) {
 	if to == nil {
 		return fmt.Errorf("no map to write to")
 	}
@@ -34,7 +34,7 @@ func ParamsToEnv(from map[string]any, to map[string]string, getSecretValue func(
 		if v == nil || len(k) == 0 {
 			continue
 		}
-		to[sanitizeParamKey(k)], err = sanitizeParamValue(v, getSecretValue)
+		to[sanitizeParamKey(prefix, k)], err = sanitizeParamValue(v, getSecretValue)
 		if err != nil {
 			return err
 		}
@@ -43,8 +43,8 @@ func ParamsToEnv(from map[string]any, to map[string]string, getSecretValue func(
 }
 
 // format the environment variable key
-func sanitizeParamKey(k string) string {
-	return "PLUGIN_" + strings.ToUpper(
+func sanitizeParamKey(prefix, k string) string {
+	return prefix + strings.ToUpper(
 		strings.ReplaceAll(strings.ReplaceAll(k, ".", "_"), "-", "_"))
 }
 

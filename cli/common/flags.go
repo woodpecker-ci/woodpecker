@@ -34,6 +34,11 @@ var GlobalFlags = append([]cli.Flag{
 		Usage:   "server address",
 	},
 	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_DISABLE_UPDATE_CHECK"},
+		Name:    "disable-update-check",
+		Usage:   "disable update check",
+	},
+	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_SKIP_VERIFY"},
 		Name:    "skip-verify",
 		Usage:   "skip ssl verification",
