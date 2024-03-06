@@ -241,3 +241,9 @@ Additional annotations to apply to worker pods. Must be a YAML object, e.g. `{"e
 > Default: `false`
 
 Determines if containers must be required to run as non-root users.
+
+### `WOODPECKER_BACKEND_K8S_PULL_SECRET_NAMES`
+
+> Default: empty
+
+Secret names to pull images from private repositories. See, how to [Pull an Image from a Private Registry](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/).
