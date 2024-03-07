@@ -1,10 +1,10 @@
 # Changelog
 
-## [2.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.4.0) - 2024-03-04
+## [2.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.4.0) - 2024-03-07
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@renovate[bot], @rockdrilla, @smainz, @anbraten, @qwerty287, @kytta, @6543, @langecode, @eliasscosta, @xoxys, @kjuulh, @sinlov, @lukashass, @pre-commit-ci[bot], @fernandrone
+@6543, @anbraten, @eliasscosta, @fernandrone, @kjuulh, @kytta, @langecode, @lukashass, @qwerty287, @rockdrilla, @sinlov, @smainz, @xoxys
 
 ### ✨ Features
 
@@ -61,6 +61,8 @@
 
 ### Misc
 
+- chore(deps): update woodpeckerci/plugin-ready-release-go docker tag to v1.1.0 [[#3464](https://github.com/woodpecker-ci/woodpecker/pull/3464)]
+- chore(deps): lock file maintenance [[#3465](https://github.com/woodpecker-ci/woodpecker/pull/3465)]
 - chore(deps): update postgres docker tag to v16.2 [[#3461](https://github.com/woodpecker-ci/woodpecker/pull/3461)]
 - chore(deps): update web npm deps non-major [[#3460](https://github.com/woodpecker-ci/woodpecker/pull/3460)]
 - chore(deps): update web npm deps non-major [[#3454](https://github.com/woodpecker-ci/woodpecker/pull/3454)]
