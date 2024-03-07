@@ -29,7 +29,7 @@ func Load(c *cli.Context) error {
 	}
 
 	if config == nil && !c.IsSet("server-url") && !c.IsSet("token") {
-		log.Info().Msg("The woodpecker-cli is not setup yet. Please run `woodpecker-cli setup`")
+		log.Info().Msg("The woodpecker-cli is not yet set up. Please run `woodpecker-cli setup`")
 		return errors.New("woodpecker-cli is not setup")
 	}
 

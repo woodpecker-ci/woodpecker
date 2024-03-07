@@ -47,7 +47,7 @@ func setup(c *cli.Context) error {
 	serverURL := c.String("server-url")
 
 	if serverURL == "" {
-		serverURL, err = ui.Ask("Enter the URL of the woodpecker server", "https://woodpecker-ci.org", true)
+		serverURL, err = ui.Ask("Enter the URL of the woodpecker server", "https://ci.woodpecker-ci.org", true)
 		if err != nil {
 			return err
 		}

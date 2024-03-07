@@ -19,7 +19,7 @@ func receiveTokenFromUI(c context.Context, serverURL string) (string, error) {
 
 	tokenReceived := make(chan string)
 
-	srv := &http.Server{Addr: fmt.Sprintf(":%d", port)}
+	srv := &http.Server{Addr: fmt.Sprintf("127.0.0.1:%d", port)}
 	srv.Handler = setupRouter(tokenReceived)
 
 	go func() {
@@ -55,7 +55,7 @@ func setupRouter(tokenReceived chan string) *gin.Engine {
 	e.Use(gin.Recovery())
 
 	e.Use(func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "*") // TODO: change to serverURL
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT")
