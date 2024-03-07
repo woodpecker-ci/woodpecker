@@ -419,7 +419,7 @@ The database driver name. Possible values are `sqlite3`, `mysql` or `postgres`.
 
 ### `WOODPECKER_DATABASE_DATASOURCE`
 
-> Default: `woodpecker.sqlite`
+> Default: `woodpecker.sqlite` if not running inside a container, `/var/lib/woodpecker/woodpecker.sqlite` if running inside a container
 
 The database connection string. The default value is the path of the embedded SQLite database file.
 
