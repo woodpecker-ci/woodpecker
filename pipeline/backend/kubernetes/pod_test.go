@@ -245,7 +245,7 @@ func TestFullPod(t *testing.T) {
 			"nodeSelector": {
 				"storage": "ssd"
 			},
-			"runtimeClass": "runc",
+			"runtimeClassName": "runc",
 			"serviceAccountName": "wp-svc-acc",
 			"securityContext": {
 				"runAsUser": 101,
