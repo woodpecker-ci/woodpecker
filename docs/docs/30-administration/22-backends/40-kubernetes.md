@@ -23,7 +23,7 @@ Here is an example definition with an arbitrary `resources` definition below the
 
 ```yaml
 steps:
-  - name: "My kubernetes step"
+  - name: 'My kubernetes step'
     image: alpine
     commands:
       - echo "Hello world"
@@ -93,7 +93,7 @@ steps:
       - go test
     backend_options:
       kubernetes:
-        serviceAccountName: "my-service-account"
+        serviceAccountName: 'my-service-account'
         resources:
           requests:
             memory: 128Mi
@@ -103,10 +103,10 @@ steps:
         nodeSelector:
           beta.kubernetes.io/instance-type: p3.8xlarge
         tolerations:
-          - key: "key1"
-            operator: "Equal"
-            value: "value1"
-            effect: "NoSchedule"
+          - key: 'key1'
+            operator: 'Equal'
+            value: 'value1'
+            effect: 'NoSchedule'
             tolerationSeconds: 3600
 ```
 
@@ -198,8 +198,8 @@ CRI-O users currently need to configure the workspace for all workflows in order
 
 ```yaml
 workspace:
-  base: "/woodpecker"
-  path: "/"
+  base: '/woodpecker'
+  path: '/'
 ```
 
 See [this issue](https://github.com/woodpecker-ci/woodpecker/issues/2510) for more details.
