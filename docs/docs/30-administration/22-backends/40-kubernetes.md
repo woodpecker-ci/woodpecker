@@ -23,19 +23,19 @@ Here is an example definition with an arbitrary `resources` definition below the
 
 ```yaml
 steps:
- - name: "My kubernetes step"
-   image: alpine
-   commands:
-    - echo "Hello world"
-   backend_options:
-    kubernetes:
-     resources:
-      requests:
-       memory: 200Mi
-       cpu: 100m
-      limits:
-       memory: 400Mi
-       cpu: 1000m
+  - name: "My kubernetes step"
+    image: alpine
+    commands:
+      - echo "Hello world"
+    backend_options:
+      kubernetes:
+        resources:
+          requests:
+            memory: 200Mi
+            cpu: 100m
+          limits:
+            memory: 400Mi
+            cpu: 1000m
 ```
 
 You can use [Limit Ranges](https://kubernetes.io/docs/concepts/policy/limit-range/) if you want to set the limits by per-namespace basis.
