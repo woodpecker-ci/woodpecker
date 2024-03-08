@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @anbraten, @eliasscosta, @fernandrone, @kjuulh, @kytta, @langecode, @lukashass, @qwerty287, @rockdrilla, @sinlov, @smainz, @xoxys
+@6543, @anbraten, @eliasscosta, @fernandrone, @kjuulh, @kytta, @langecode, @lukashass, @qwerty287, @rockdrilla, @sinlov, @smainz, @xoxys, @zc-devs
 
 ### ✨ Features
 
@@ -13,6 +13,7 @@
 
 ### 📚 Documentation
 
+- Documentation improvements [[#3376](https://github.com/woodpecker-ci/woodpecker/pull/3376)]
 - fix(deps): update docs npm deps non-major [[#3455](https://github.com/woodpecker-ci/woodpecker/pull/3455)]
 - Add "Sonatype Nexus" plugin [[#3446](https://github.com/woodpecker-ci/woodpecker/pull/3446)]
 - Add blog post [[#3439](https://github.com/woodpecker-ci/woodpecker/pull/3439)]
@@ -61,6 +62,7 @@
 
 ### Misc
 
+- Update prettier version [[#3471](https://github.com/woodpecker-ci/woodpecker/pull/3471)]
 - chore(deps): update woodpeckerci/plugin-ready-release-go docker tag to v1.1.0 [[#3464](https://github.com/woodpecker-ci/woodpecker/pull/3464)]
 - chore(deps): lock file maintenance [[#3465](https://github.com/woodpecker-ci/woodpecker/pull/3465)]
 - chore(deps): update postgres docker tag to v16.2 [[#3461](https://github.com/woodpecker-ci/woodpecker/pull/3461)]
