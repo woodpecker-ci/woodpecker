@@ -23,19 +23,19 @@ Here is an example definition with an arbitrary `resources` definition below the
 
 ```yaml
 steps:
-  - name: 'My kubernetes step'
-    image: alpine
-    commands:
-      - echo "Hello world"
-    backend_options:
-      kubernetes:
-        resources:
-          requests:
-            memory: 200Mi
-            cpu: 100m
-          limits:
-            memory: 400Mi
-            cpu: 1000m
+ - name: "My kubernetes step"
+   image: alpine
+   commands:
+    - echo "Hello world"
+   backend_options:
+    kubernetes:
+     resources:
+      requests:
+       memory: 200Mi
+       cpu: 100m
+      limits:
+       memory: 400Mi
+       cpu: 1000m
 ```
 
 You can use [Limit Ranges](https://kubernetes.io/docs/concepts/policy/limit-range/) if you want to set the limits by per-namespace basis.
@@ -93,7 +93,7 @@ steps:
       - go test
     backend_options:
       kubernetes:
-        serviceAccountName: 'my-service-account'
+        serviceAccountName: "my-service-account"
         resources:
           requests:
             memory: 128Mi
@@ -103,10 +103,10 @@ steps:
         nodeSelector:
           beta.kubernetes.io/instance-type: p3.8xlarge
         tolerations:
-          - key: 'key1'
-            operator: 'Equal'
-            value: 'value1'
-            effect: 'NoSchedule'
+          - key: "key1"
+            operator: "Equal"
+            value: "value1"
+            effect: "NoSchedule"
             tolerationSeconds: 3600
 ```
 
@@ -167,23 +167,23 @@ spec:
 You can also restrict a container's syscalls with [seccomp](https://kubernetes.io/docs/tutorials/security/seccomp/) profile
 
 ```yaml
-    backend_options:
-      kubernetes:
-        securityContext:
-          seccompProfile:
-            type: Localhost
-            localhostProfile: profiles/audit.json
+backend_options:
+  kubernetes:
+    securityContext:
+      seccompProfile:
+        type: Localhost
+        localhostProfile: profiles/audit.json
 ```
 
 or restrict a container's access to resources by specifying [AppArmor](https://kubernetes.io/docs/tutorials/security/apparmor/) profile
 
 ```yaml
-    backend_options:
-      kubernetes:
-        securityContext:
-          apparmorProfile:
-            type: Localhost
-            localhostProfile: k8s-apparmor-example-deny-write
+backend_options:
+  kubernetes:
+    securityContext:
+      apparmorProfile:
+        type: Localhost
+        localhostProfile: k8s-apparmor-example-deny-write
 ```
 
 :::note
@@ -198,8 +198,8 @@ CRI-O users currently need to configure the workspace for all workflows in order
 
 ```yaml
 workspace:
-  base: '/woodpecker'
-  path: '/'
+  base: "/woodpecker"
+  path: "/"
 ```
 
 See [this issue](https://github.com/woodpecker-ci/woodpecker/issues/2510) for more details.
