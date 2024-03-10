@@ -696,6 +696,10 @@
         },
         "securityContext": {
           "$ref": "#/definitions/step_backend_kubernetes_security_context"
+        },
+        "runtimeClassName": {
+          "description": "Read more: https://woodpecker-ci.org/docs/administration/backends/kubernetes#runtimeclassname",
+          "type": "string"
         }
       }
     },
@@ -756,11 +760,6 @@
       "additionalProperties": {
         "type": "string"
       }
-    },
-    "step_backend_kubernetes_runtime_class": {
-      "description": "runtimeClassName to run the job. Read more: https://woodpecker-ci.org/docs/administration/backends/kubernetes#runtimeclassname",
-      "type": "string",
-      "additionalProperties": false
     },
     "step_backend_kubernetes_service_account": {
       "description": "serviceAccountName to be use by job. Read more: https://woodpecker-ci.org/docs/administration/backends/kubernetes#serviceaccountname",
