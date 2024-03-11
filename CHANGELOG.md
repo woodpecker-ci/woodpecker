@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.4.0) - 2024-03-08
+## [2.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.4.0) - 2024-03-11
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -62,6 +62,8 @@
 
 ### Misc
 
+- chore(deps): update docker.io/techknowlogick/xgo docker tag to go-1.22.1 [[#3476](https://github.com/woodpecker-ci/woodpecker/pull/3476)]
+- chore(deps): update docker.io/golang docker tag to v1.22.1 [[#3475](https://github.com/woodpecker-ci/woodpecker/pull/3475)]
 - Update prettier version [[#3471](https://github.com/woodpecker-ci/woodpecker/pull/3471)]
 - chore(deps): update woodpeckerci/plugin-ready-release-go docker tag to v1.1.0 [[#3464](https://github.com/woodpecker-ci/woodpecker/pull/3464)]
 - chore(deps): lock file maintenance [[#3465](https://github.com/woodpecker-ci/woodpecker/pull/3465)]
