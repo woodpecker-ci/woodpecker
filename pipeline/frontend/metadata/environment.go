@@ -68,8 +68,8 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_COMMIT_AUTHOR_EMAIL":        m.Curr.Commit.Author.Email,
 		"CI_COMMIT_AUTHOR_AVATAR":       m.Curr.Commit.Author.Avatar,
 		"CI_COMMIT_TAG":                 "", // will be set if event is tag
-		"CI_COMMIT_PULL_REQUEST":        "", // will be set if event is pr
-		"CI_COMMIT_PULL_REQUEST_LABELS": "", // will be set if event is pr
+		"CI_COMMIT_PULL_REQUEST":        "", // will be set if event is pull_request or pull_request_closed
+		"CI_COMMIT_PULL_REQUEST_LABELS": "", // will be set if event is pull_request or pull_request_closed
 
 		"CI_PIPELINE_NUMBER":        strconv.FormatInt(m.Curr.Number, 10),
 		"CI_PIPELINE_PARENT":        strconv.FormatInt(m.Curr.Parent, 10),
@@ -131,7 +131,7 @@ func (m *Metadata) Environ() map[string]string {
 	if m.Curr.Event == EventRelease {
 		params["CI_COMMIT_PRERELEASE"] = strconv.FormatBool(m.Curr.Commit.IsPrerelease)
 	}
-	if m.Curr.Event == EventPull {
+	if m.Curr.Event == EventPull || m.Curr.Event == EventPullClosed {
 		params["CI_COMMIT_PULL_REQUEST"] = pullRegexp.FindString(m.Curr.Commit.Ref)
 		params["CI_COMMIT_PULL_REQUEST_LABELS"] = strings.Join(m.Curr.Commit.PullRequestLabels, ",")
 	}

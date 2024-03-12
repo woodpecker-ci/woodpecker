@@ -46,7 +46,9 @@ func TestConfig(t *testing.T) {
 		Hash:   hash,
 		Name:   name,
 	}
-	assert.NoError(t, store.ConfigCreate(config))
+
+	_, err := store.ConfigPersist(config)
+	assert.NoError(t, err)
 
 	pipeline := &model.Pipeline{
 		RepoID: repo.ID,
@@ -69,118 +71,6 @@ func TestConfig(t *testing.T) {
 	loaded, err := store.ConfigsForPipeline(pipeline.ID)
 	assert.NoError(t, err)
 	assert.Equal(t, config.ID, loaded[0].ID)
-}
-
-func TestConfigApproved(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Config), new(model.PipelineConfig), new(model.Pipeline), new(model.Repo))
-	defer closer()
-
-	repo := &model.Repo{
-		UserID:   1,
-		FullName: "bradrydzewski/test",
-		Owner:    "bradrydzewski",
-		Name:     "test",
-	}
-	assert.NoError(t, store.CreateRepo(repo))
-
-	var (
-		pipelineBlocked = &model.Pipeline{
-			RepoID: repo.ID,
-			Status: model.StatusBlocked,
-			Commit: "85f8c029b902ed9400bc600bac301a0aadb144ac",
-		}
-		pipelinePending = &model.Pipeline{
-			RepoID: repo.ID,
-			Status: model.StatusPending,
-			Commit: "85f8c029b902ed9400bc600bac301a0aadb144ac",
-		}
-		pipelineRunning = &model.Pipeline{
-			RepoID: repo.ID,
-			Status: model.StatusRunning,
-			Commit: "85f8c029b902ed9400bc600bac301a0aadb144ac",
-		}
-	)
-
-	assert.NoError(t, store.CreatePipeline(pipelineBlocked))
-	assert.NoError(t, store.CreatePipeline(pipelinePending))
-	conf := &model.Config{
-		RepoID: repo.ID,
-		Data:   data,
-		Hash:   hash,
-		Name:   name,
-	}
-	assert.NoError(t, store.ConfigCreate(conf))
-	pipelineConfig := &model.PipelineConfig{
-		ConfigID:   conf.ID,
-		PipelineID: pipelineBlocked.ID,
-	}
-	assert.NoError(t, store.PipelineConfigCreate(pipelineConfig))
-
-	approved, err := store.ConfigFindApproved(conf)
-	if !assert.NoError(t, err) {
-		return
-	}
-	assert.False(t, approved, "want config not approved when blocked or pending.")
-
-	assert.NoError(t, store.CreatePipeline(pipelineRunning))
-	conf2 := &model.Config{
-		RepoID: repo.ID,
-		Data:   data,
-		Hash:   "xxx",
-		Name:   "xxx",
-	}
-	assert.NoError(t, store.ConfigCreate(conf2))
-	pipelineConfig2 := &model.PipelineConfig{
-		ConfigID:   conf2.ID,
-		PipelineID: pipelineRunning.ID,
-	}
-	assert.NoError(t, store.PipelineConfigCreate(pipelineConfig2))
-
-	approved, err = store.ConfigFindApproved(conf2)
-	assert.NoError(t, err)
-	assert.True(t, approved)
-}
-
-func TestConfigCreate(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Config), new(model.Step), new(model.Pipeline), new(model.Repo))
-	defer closer()
-
-	// fail due to missing name
-	assert.Error(t, store.ConfigCreate(
-		&model.Config{
-			RepoID: 2,
-			Data:   data,
-			Hash:   hash,
-		},
-	))
-
-	// fail due to missing hash
-	assert.Error(t, store.ConfigCreate(
-		&model.Config{
-			RepoID: 2,
-			Data:   data,
-			Name:   name,
-		},
-	))
-
-	assert.NoError(t, store.ConfigCreate(
-		&model.Config{
-			RepoID: 2,
-			Data:   data,
-			Hash:   hash,
-			Name:   name,
-		},
-	))
-
-	// fail due to duplicate sha
-	assert.Error(t, store.ConfigCreate(
-		&model.Config{
-			RepoID: 2,
-			Data:   data,
-			Hash:   hash,
-			Name:   name,
-		},
-	))
 }
 
 func TestConfigPersist(t *testing.T) {

@@ -23,10 +23,10 @@ steps:
     image: docker.io/woodpeckerci/plugin-prettier:0.1.0
     depends_on: []
     settings:
-      version: 3.2.4
+      version: 3.2.5
 
   - name: links
-    image: lycheeverse/lychee:0.14.0
+    image: lycheeverse/lychee:0.14.3
     depends_on: []
     commands:
       - lychee pipeline/frontend/yaml/linter/schema/schema.json

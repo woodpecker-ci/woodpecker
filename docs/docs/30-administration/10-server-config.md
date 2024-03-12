@@ -419,7 +419,7 @@ The database driver name. Possible values are `sqlite3`, `mysql` or `postgres`.
 
 ### `WOODPECKER_DATABASE_DATASOURCE`
 
-> Default: `woodpecker.sqlite`
+> Default: `woodpecker.sqlite` if not running inside a container, `/var/lib/woodpecker/woodpecker.sqlite` if running inside a container
 
 The database connection string. The default value is the path of the embedded SQLite database file.
 
@@ -440,30 +440,6 @@ WOODPECKER_DATABASE_DATASOURCE=postgres://root:password@1.2.3.4:5432/woodpecker?
 > Default: empty
 
 Read the value for `WOODPECKER_DATABASE_DATASOURCE` from the specified filepath
-
-### `WOODPECKER_ENCRYPTION_KEY`
-
-> Default: empty
-
-Encryption key used to encrypt secrets in DB. See [secrets encryption](./40-encryption.md)
-
-### `WOODPECKER_ENCRYPTION_KEY_FILE`
-
-> Default: empty
-
-Read the value for `WOODPECKER_ENCRYPTION_KEY` from the specified filepath
-
-### `WOODPECKER_ENCRYPTION_TINK_KEYSET_FILE`
-
-> Default: empty
-
-Filepath to encryption keyset used to encrypt secrets in DB. See [secrets encryption](./40-encryption.md)
-
-### `WOODPECKER_ENCRYPTION_DISABLE`
-
-> Default: empty
-
-Boolean flag to decrypt secrets in DB and disable server encryption. See [secrets encryption](./40-encryption.md)
 
 ### `WOODPECKER_PROMETHEUS_AUTH_TOKEN`
 

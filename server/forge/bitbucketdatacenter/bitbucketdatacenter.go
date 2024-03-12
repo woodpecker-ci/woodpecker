@@ -525,6 +525,8 @@ func (c *client) getUserAndRepo(ctx context.Context, r *model.Repo) (*model.User
 	}
 	log.Trace().Any("user", user).Msg("got user")
 
+	forge.Refresh(ctx, c, _store, user)
+
 	return user, repo, nil
 }
 

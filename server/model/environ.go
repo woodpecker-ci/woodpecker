@@ -24,11 +24,6 @@ var (
 	errEnvironValueInvalid = errors.New("invalid Environment Variable Value")
 )
 
-// EnvironStore persists environment information to storage.
-type EnvironStore interface {
-	EnvironList(*Repo) ([]*Environ, error)
-}
-
 // Environ represents an environment variable.
 type Environ struct {
 	Name  string `json:"name"`

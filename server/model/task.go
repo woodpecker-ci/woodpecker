@@ -19,13 +19,6 @@ import (
 	"strings"
 )
 
-// TaskStore defines storage for scheduled Tasks.
-type TaskStore interface {
-	TaskList() ([]*Task, error)
-	TaskInsert(*Task) error
-	TaskDelete(string) error
-}
-
 // Task defines scheduled pipeline Task.
 type Task struct {
 	ID           string                 `json:"id"           xorm:"PK UNIQUE 'task_id'"`

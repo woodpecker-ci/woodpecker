@@ -21,12 +21,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
-func (s storage) GetRedirection(fullName string) (*model.Redirection, error) {
-	sess := s.engine.NewSession()
-	defer sess.Close()
-	return s.getRedirection(sess, fullName)
-}
-
 func (s storage) getRedirection(e *xorm.Session, fullName string) (*model.Redirection, error) {
 	repo := new(model.Redirection)
 	return repo, wrapGet(e.Where("repo_full_name = ?", fullName).Get(repo))

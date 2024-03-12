@@ -32,10 +32,6 @@ type Workflow struct {
 	Children   []*Step           `json:"children,omitempty"   xorm:"-"`
 }
 
-type UpdateWorkflowStore interface {
-	WorkflowUpdate(*Workflow) error
-}
-
 // TableName return database table name for xorm
 func (Workflow) TableName() string {
 	return "workflows"

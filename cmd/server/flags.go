@@ -219,7 +219,7 @@ var flags = append([]cli.Flag{
 		EnvVars:  []string{"WOODPECKER_DATABASE_DATASOURCE"},
 		Name:     "datasource",
 		Usage:    "database driver configuration string",
-		Value:    "woodpecker.sqlite",
+		Value:    datasourceDefaultValue(),
 		FilePath: os.Getenv("WOODPECKER_DATABASE_DATASOURCE_FILE"),
 	},
 	&cli.StringFlag{
@@ -510,3 +510,13 @@ var flags = append([]cli.Flag{
 		Usage:   "Flag to decrypt all encrypted data and disable encryption on server",
 	},
 }, logger.GlobalLoggerFlags...)
+
+// If woodpecker is running inside a container the default value for
+// the datasource is different from running outside a container.
+func datasourceDefaultValue() string {
+	_, found := os.LookupEnv("WOODPECKER_IN_CONTAINER")
+	if found {
+		return "/var/lib/woodpecker/woodpecker.sqlite"
+	}
+	return "woodpecker.sqlite"
+}

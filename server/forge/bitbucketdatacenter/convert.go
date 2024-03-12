@@ -16,6 +16,7 @@ package bitbucketdatacenter
 
 import (
 	"fmt"
+	"net/url"
 	"strings"
 	"time"
 
@@ -40,6 +41,15 @@ func convertID(id uint64) model.ForgeRemoteID {
 	return model.ForgeRemoteID(fmt.Sprintf("%d", id))
 }
 
+func anonymizeLink(link string) (href string) {
+	parsed, err := url.Parse(link)
+	if err != nil {
+		return link
+	}
+	parsed.User = nil
+	return parsed.String()
+}
+
 func convertRepo(from *bb.Repository, perm *model.Perm, branch string) *model.Repo {
 	r := &model.Repo{
 		ForgeRemoteID: convertID(from.ID),
@@ -55,7 +65,7 @@ func convertRepo(from *bb.Repository, perm *model.Perm, branch string) *model.Re
 
 	for _, l := range from.Links["clone"] {
 		if l.Name == "http" {
-			r.Clone = l.Href
+			r.Clone = anonymizeLink(l.Href)
 		}
 	}
 

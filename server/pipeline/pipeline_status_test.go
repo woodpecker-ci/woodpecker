@@ -21,20 +21,23 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store/mocks"
 )
 
-type mockUpdatePipelineStore struct{}
-
-func (m *mockUpdatePipelineStore) UpdatePipeline(_ *model.Pipeline) error {
-	return nil
+func mockStorePipeline(t *testing.T) store.Store {
+	s := mocks.NewStore(t)
+	s.On("UpdatePipeline", mock.Anything).Return(nil)
+	return s
 }
 
 func TestUpdateToStatusRunning(t *testing.T) {
 	t.Parallel()
 
-	pipeline, _ := UpdateToStatusRunning(&mockUpdatePipelineStore{}, model.Pipeline{}, int64(1))
+	pipeline, _ := UpdateToStatusRunning(mockStorePipeline(t), model.Pipeline{}, int64(1))
 	assert.Equal(t, model.StatusRunning, pipeline.Status)
 	assert.EqualValues(t, 1, pipeline.Started)
 }
@@ -44,7 +47,7 @@ func TestUpdateToStatusPending(t *testing.T) {
 
 	now := time.Now().Unix()
 
-	pipeline, _ := UpdateToStatusPending(&mockUpdatePipelineStore{}, model.Pipeline{}, "Reviewer")
+	pipeline, _ := UpdateToStatusPending(mockStorePipeline(t), model.Pipeline{}, "Reviewer")
 
 	assert.Equal(t, model.StatusPending, pipeline.Status)
 	assert.Equal(t, "Reviewer", pipeline.Reviewer)
@@ -56,7 +59,7 @@ func TestUpdateToStatusDeclined(t *testing.T) {
 
 	now := time.Now().Unix()
 
-	pipeline, _ := UpdateToStatusDeclined(&mockUpdatePipelineStore{}, model.Pipeline{}, "Reviewer")
+	pipeline, _ := UpdateToStatusDeclined(mockStorePipeline(t), model.Pipeline{}, "Reviewer")
 
 	assert.Equal(t, model.StatusDeclined, pipeline.Status)
 	assert.Equal(t, "Reviewer", pipeline.Reviewer)
@@ -66,7 +69,7 @@ func TestUpdateToStatusDeclined(t *testing.T) {
 func TestUpdateToStatusToDone(t *testing.T) {
 	t.Parallel()
 
-	pipeline, _ := UpdateStatusToDone(&mockUpdatePipelineStore{}, model.Pipeline{}, "status", int64(1))
+	pipeline, _ := UpdateStatusToDone(mockStorePipeline(t), model.Pipeline{}, "status", int64(1))
 
 	assert.Equal(t, model.StatusValue("status"), pipeline.Status)
 	assert.EqualValues(t, 1, pipeline.Finished)
@@ -77,7 +80,7 @@ func TestUpdateToStatusError(t *testing.T) {
 
 	now := time.Now().Unix()
 
-	pipeline, _ := UpdateToStatusError(&mockUpdatePipelineStore{}, model.Pipeline{}, errors.New("this is an error"))
+	pipeline, _ := UpdateToStatusError(mockStorePipeline(t), model.Pipeline{}, errors.New("this is an error"))
 
 	assert.Len(t, pipeline.Errors, 1)
 	assert.Equal(t, "[generic] this is an error", pipeline.Errors[0].Error())
@@ -92,7 +95,7 @@ func TestUpdateToStatusKilled(t *testing.T) {
 
 	now := time.Now().Unix()
 
-	pipeline, _ := UpdateToStatusKilled(&mockUpdatePipelineStore{}, model.Pipeline{})
+	pipeline, _ := UpdateToStatusKilled(mockStorePipeline(t), model.Pipeline{})
 
 	assert.Equal(t, model.StatusKilled, pipeline.Status)
 	assert.LessOrEqual(t, now, pipeline.Finished)

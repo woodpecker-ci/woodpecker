@@ -22,11 +22,12 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
 // WithTaskStore returns a queue that is backed by the TaskStore. This
 // ensures the task Queue can be restored when the system starts.
-func WithTaskStore(q Queue, s model.TaskStore) Queue {
+func WithTaskStore(q Queue, s store.Store) Queue {
 	tasks, _ := s.TaskList()
 	if err := q.PushAtOnce(context.Background(), tasks); err != nil {
 		log.Error().Err(err).Msg("PushAtOnce failed")
@@ -36,7 +37,7 @@ func WithTaskStore(q Queue, s model.TaskStore) Queue {
 
 type persistentQueue struct {
 	Queue
-	store model.TaskStore
+	store store.Store
 }
 
 // Push pushes a task to the tail of this queue.
