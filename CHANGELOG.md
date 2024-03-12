@@ -1,10 +1,10 @@
 # Changelog
 
-## [2.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.4.0) - 2024-03-11
+## [2.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.4.0) - 2024-03-12
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @anbraten, @eliasscosta, @fernandrone, @kjuulh, @kytta, @langecode, @lukashass, @qwerty287, @rockdrilla, @sinlov, @smainz, @xoxys, @zc-devs
+@6543, @Ray-D-Song, @anbraten, @eliasscosta, @fernandrone, @kjuulh, @kytta, @langecode, @lukashass, @qwerty287, @rockdrilla, @sinlov, @smainz, @xoxys, @zc-devs
 
 ### ✨ Features
 
@@ -13,6 +13,7 @@
 
 ### 📚 Documentation
 
+- fix: plugin doc page not found [[#3480](https://github.com/woodpecker-ci/woodpecker/pull/3480)]
 - Documentation improvements [[#3376](https://github.com/woodpecker-ci/woodpecker/pull/3376)]
 - fix(deps): update docs npm deps non-major [[#3455](https://github.com/woodpecker-ci/woodpecker/pull/3455)]
 - Add "Sonatype Nexus" plugin [[#3446](https://github.com/woodpecker-ci/woodpecker/pull/3446)]
