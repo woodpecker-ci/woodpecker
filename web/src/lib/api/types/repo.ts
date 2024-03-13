@@ -68,6 +68,15 @@ export type Repo = {
   cancel_previous_pipeline_events: string[];
 
   netrc_only_trusted: boolean;
+
+  // Endpoint for secrets extensions
+  secret_endpoint: string;
+
+  // Endpoint for registries extensions
+  registry_endpoint: string;
+
+  // Endpoint for config extensions
+  config_endpoint: string;
 };
 
 export enum RepoVisibility {
@@ -87,6 +96,8 @@ export type RepoSettings = Pick<
   | 'cancel_previous_pipeline_events'
   | 'netrc_only_trusted'
 >;
+
+export type ExtensionSettings = Pick<Repo, 'config_endpoint' | 'secret_endpoint' | 'registry_endpoint'>;
 
 export type RepoPermissions = {
   pull: boolean;
