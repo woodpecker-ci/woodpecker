@@ -62,7 +62,7 @@ func TestCreateFilterFunc(t *testing.T) {
 			task: model.Task{
 				Labels: map[string]string{"platform": "linux/amd64"},
 			},
-			exp: true,
+			exp: false,
 		},
 		{
 			name:        "agent with wildcard label",
@@ -73,12 +73,20 @@ func TestCreateFilterFunc(t *testing.T) {
 			exp: true,
 		},
 		{
+			name:        "agent with wildcard label and task without",
+			agentLabels: map[string]string{"platform": "linux/amd64", "location": "*"},
+			task: model.Task{
+				Labels: map[string]string{"platform": "linux/amd64"},
+			},
+			exp: true,
+		},
+		{
 			name:        "agent with platform label and task without",
 			agentLabels: map[string]string{"platform": "linux/amd64"},
 			task: model.Task{
 				Labels: map[string]string{"platform": ""},
 			},
-			exp: true,
+			exp: false,
 		},
 	}
 

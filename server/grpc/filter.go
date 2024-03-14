@@ -22,17 +22,21 @@ import (
 
 func createFilterFunc(agentFilter rpc.Filter) queue.FilterFn {
 	return func(task *model.Task) bool {
+		agentLabels := agentFilter.Labels
+
 		for taskLabel, taskLabelValue := range task.Labels {
 			// if a task label is empty it will be ignored
 			if taskLabelValue == "" {
 				continue
 			}
 
-			agentLabelValue, ok := agentFilter.Labels[taskLabel]
+			agentLabelValue, ok := agentLabels[taskLabel]
 
 			if !ok {
 				return false
 			}
+
+			delete(agentLabels, taskLabel)
 
 			// if agent label has a wildcard
 			if agentLabelValue == "*" {
@@ -43,6 +47,13 @@ func createFilterFunc(agentFilter rpc.Filter) queue.FilterFn {
 				return false
 			}
 		}
-		return true
+
+		for label, value := range agentLabels {
+			if value == "*" {
+				delete(agentLabels, label)
+			}
+		}
+
+		return len(agentLabels) == 0
 	}
 }
