@@ -1,10 +1,10 @@
 # Changelog
 
-## [2.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.4.0) - 2024-03-14
+## [2.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.4.0) - 2024-03-15
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @Ray-D-Song, @anbraten, @eliasscosta, @fernandrone, @kjuulh, @kytta, @langecode, @lukashass, @qwerty287, @rockdrilla, @sinlov, @smainz, @xoxys, @zc-devs
+@6543, @Ray-D-Song, @anbraten, @eliasscosta, @fernandrone, @kjuulh, @kytta, @langecode, @lukashass, @qwerty287, @rockdrilla, @sinlov, @smainz, @xoxys, @zc-devs, @zowhoey
 
 ### 🔒 Security
 
@@ -16,22 +16,9 @@
 - Add bitbucket datacenter (server) support  [[#2503](https://github.com/woodpecker-ci/woodpecker/pull/2503)]
 - Cli updater [[#3382](https://github.com/woodpecker-ci/woodpecker/pull/3382)]
 
-### 📚 Documentation
-
-- fix: plugin doc page not found [[#3480](https://github.com/woodpecker-ci/woodpecker/pull/3480)]
-- Documentation improvements [[#3376](https://github.com/woodpecker-ci/woodpecker/pull/3376)]
-- fix(deps): update docs npm deps non-major [[#3455](https://github.com/woodpecker-ci/woodpecker/pull/3455)]
-- Add "Sonatype Nexus" plugin [[#3446](https://github.com/woodpecker-ci/woodpecker/pull/3446)]
-- Add blog post [[#3439](https://github.com/woodpecker-ci/woodpecker/pull/3439)]
-- Add "Gradle Wrapper Validation" plugin [[#3435](https://github.com/woodpecker-ci/woodpecker/pull/3435)]
-- Add blog post [[#3410](https://github.com/woodpecker-ci/woodpecker/pull/3410)]
-- Extend core ideas documentation [[#3405](https://github.com/woodpecker-ci/woodpecker/pull/3405)]
-- docs: fix contributions link [[#3363](https://github.com/woodpecker-ci/woodpecker/pull/3363)]
-- Update/fix some docs [[#3359](https://github.com/woodpecker-ci/woodpecker/pull/3359)]
-- chore(deps): update dependency marked to v12 [[#3325](https://github.com/woodpecker-ci/woodpecker/pull/3325)]
-
 ### 📈 Enhancement
 
+- Enable golangci linter gomnd [[#3171](https://github.com/woodpecker-ci/woodpecker/pull/3171)]
 - Apply "grpcnotrace" go build tag [[#3448](https://github.com/woodpecker-ci/woodpecker/pull/3448)]
 - Simplify store interfaces [[#3437](https://github.com/woodpecker-ci/woodpecker/pull/3437)]
 - Deprecate alternative names on secrets [[#3406](https://github.com/woodpecker-ci/woodpecker/pull/3406)]
@@ -47,8 +34,24 @@
 - Add no branches text [[#3312](https://github.com/woodpecker-ci/woodpecker/pull/3312)]
 - Add loading spinner to repo list [[#3310](https://github.com/woodpecker-ci/woodpecker/pull/3310)]
 
+### 📚 Documentation
+
+- Bump follow-redirects and fix broken anchors [[#3488](https://github.com/woodpecker-ci/woodpecker/pull/3488)]
+- fix: plugin doc page not found [[#3480](https://github.com/woodpecker-ci/woodpecker/pull/3480)]
+- Documentation improvements [[#3376](https://github.com/woodpecker-ci/woodpecker/pull/3376)]
+- fix(deps): update docs npm deps non-major [[#3455](https://github.com/woodpecker-ci/woodpecker/pull/3455)]
+- Add "Sonatype Nexus" plugin [[#3446](https://github.com/woodpecker-ci/woodpecker/pull/3446)]
+- Add blog post [[#3439](https://github.com/woodpecker-ci/woodpecker/pull/3439)]
+- Add "Gradle Wrapper Validation" plugin [[#3435](https://github.com/woodpecker-ci/woodpecker/pull/3435)]
+- Add blog post [[#3410](https://github.com/woodpecker-ci/woodpecker/pull/3410)]
+- Extend core ideas documentation [[#3405](https://github.com/woodpecker-ci/woodpecker/pull/3405)]
+- docs: fix contributions link [[#3363](https://github.com/woodpecker-ci/woodpecker/pull/3363)]
+- Update/fix some docs [[#3359](https://github.com/woodpecker-ci/woodpecker/pull/3359)]
+- chore(deps): update dependency marked to v12 [[#3325](https://github.com/woodpecker-ci/woodpecker/pull/3325)]
+
 ### 🐛 Bug Fixes
 
+- Move generic agent flags to cmd/agent/core [[#3484](https://github.com/woodpecker-ci/woodpecker/pull/3484)]
 - Fix usage of WOODPECKER_DATABASE_DATASOURCE_FILE [[#3404](https://github.com/woodpecker-ci/woodpecker/pull/3404)]
 - Set pull-request id and labels on pr-closed event [[#3442](https://github.com/woodpecker-ci/woodpecker/pull/3442)]
 - Update org name on login [[#3409](https://github.com/woodpecker-ci/woodpecker/pull/3409)]
@@ -68,6 +71,9 @@
 
 ### Misc
 
+- chore(deps): update web npm deps non-major [[#3489](https://github.com/woodpecker-ci/woodpecker/pull/3489)]
+- fix(deps): update golang (packages) [[#3486](https://github.com/woodpecker-ci/woodpecker/pull/3486)]
+- fix(deps): update module google.golang.org/protobuf to v1.33.0 [security] [[#3487](https://github.com/woodpecker-ci/woodpecker/pull/3487)]
 - chore(deps): update docker.io/techknowlogick/xgo docker tag to go-1.22.1 [[#3476](https://github.com/woodpecker-ci/woodpecker/pull/3476)]
 - chore(deps): update docker.io/golang docker tag to v1.22.1 [[#3475](https://github.com/woodpecker-ci/woodpecker/pull/3475)]
 - Update prettier version [[#3471](https://github.com/woodpecker-ci/woodpecker/pull/3471)]
