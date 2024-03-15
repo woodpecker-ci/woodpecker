@@ -71,11 +71,6 @@
       "verified": false
     },
     {
-      "name": "Chart releaser",
-      "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-chart-releaser/master/docs.md",
-      "verified": true
-    },
-    {
       "name": "Aptly publish",
       "docs": "https://gitea.zionetrix.net/bn8/aptly-publish/raw/branch/master/docs.md",
       "verified": false
@@ -189,6 +184,11 @@
       "name": "Sonatype Nexus",
       "docs": "https://raw.githubusercontent.com/rockdrilla/woodpecker-sonatype-nexus/main/docs.md",
       "verified": false
+    },
+    {
+      "name": "Mastodon Post",
+      "docs": "https://codeberg.org/woodpecker-plugins/mastodon-post/raw/branch/main/docs.md",
+      "verified": true
     }
   ]
 }
