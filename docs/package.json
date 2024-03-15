@@ -54,8 +54,7 @@
   "pnpm": {
     "overrides": {
       "trim": "^0.0.3",
-      "got": "^11.8.5",
-      "follow-redirects@<1.15.4": ">=1.15.4"
+      "got": "^11.8.5"
     }
   }
 }
