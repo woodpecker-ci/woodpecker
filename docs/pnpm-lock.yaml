@@ -7,7 +7,6 @@ settings:
 overrides:
   trim: ^0.0.3
   got: ^11.8.5
-  follow-redirects@<1.15.6: '>=1.15.6'
 
 importers:
 
