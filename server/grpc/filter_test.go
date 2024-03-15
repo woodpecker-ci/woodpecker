@@ -78,7 +78,7 @@ func TestCreateFilterFunc(t *testing.T) {
 			task: model.Task{
 				Labels: map[string]string{"platform": "linux/amd64"},
 			},
-			exp: true,
+			exp: false,
 		},
 		{
 			name:        "agent with platform label and task without",

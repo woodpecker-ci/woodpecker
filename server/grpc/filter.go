@@ -48,12 +48,6 @@ func createFilterFunc(agentFilter rpc.Filter) queue.FilterFn {
 			}
 		}
 
-		for label, value := range agentLabels {
-			if value == "*" {
-				delete(agentLabels, label)
-			}
-		}
-
 		return len(agentLabels) == 0
 	}
 }
