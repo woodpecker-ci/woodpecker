@@ -489,7 +489,9 @@ func (c *client) Status(ctx context.Context, user *model.User, repo *model.Repo,
 	client := c.newClientToken(ctx, user.Token)
 
 	if pipeline.Event == model.EventDeploy {
+		// Get id from url. If not found, skip.
 		matches := reDeploy.FindStringSubmatch(pipeline.ForgeURL)
+		//nolint:gomnd
 		if len(matches) != 2 {
 			return nil
 		}
