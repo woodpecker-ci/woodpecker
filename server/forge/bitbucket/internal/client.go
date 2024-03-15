@@ -184,7 +184,7 @@ func (c *Client) ListPermissions(opts *ListOpts) (*RepoPermResp, error) {
 
 func (c *Client) ListPermissionsAll() ([]*RepoPerm, error) {
 	return shared_utils.Paginate(func(page int) ([]*RepoPerm, error) {
-		resp, err := c.ListPermissions(&ListOpts{Page: page, PageLen: 100})
+		resp, err := c.ListPermissions(&ListOpts{Page: page, PageLen: pageSize})
 		if err != nil {
 			return nil, err
 		}

@@ -244,8 +244,16 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 	).Run(c.Context)
 }
 
+// convertPathForWindows converts a path to use slash separators
+// for Windows. If the path is a Windows volume name like C:, it
+// converts it to an absolute root path starting with slash (e.g.
+// C: -> /c). Otherwise it just converts backslash separators to
+// slashes.
 func convertPathForWindows(path string) string {
 	base := filepath.VolumeName(path)
+
+	// Check if path is volume name like C:
+	//nolint: gomnd
 	if len(base) == 2 {
 		path = strings.TrimPrefix(path, base)
 		base = strings.ToLower(strings.TrimSuffix(base, ":"))

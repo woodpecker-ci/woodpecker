@@ -187,9 +187,9 @@ func getUserRepos(c *gin.Context) {
 
 func getPermissions(c *gin.Context) {
 	if c.Query("page") == "" || c.Query("page") == "1" {
-		c.String(200, permissionsPayLoad)
+		c.String(http.StatusOK, permissionsPayLoad)
 	} else {
-		c.String(200, "{\"values\":[]}")
+		c.String(http.StatusOK, "{\"values\":[]}")
 	}
 }
 

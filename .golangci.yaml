@@ -170,7 +170,7 @@ linters:
 
 issues:
   exclude-rules:
-    - path: 'cmd/agent/flags.go|cmd/server/flags.go|pipeline/backend/kubernetes/flags.go|_test.go'
+    - path: 'fixtures|cmd/agent/flags.go|cmd/server/flags.go|pipeline/backend/kubernetes/flags.go|_test.go'
       linters:
         - gomnd
 
